@@ -239,6 +239,11 @@ hypre_BoomerAMGDestroy( void *data )
    hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data)[num_levels-1]);
    hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data));
 
+   if (hypre_ParAMGDataRestriction(amg_data))
+   {
+      hypre_TFree(hypre_ParAMGDataRArray(amg_data));
+      hypre_ParAMGDataRArray(amg_data) = NULL;
+   }
    if (hypre_ParAMGDataDofPointArray(amg_data))
    {
       for (i=0; i < num_levels; i++)
