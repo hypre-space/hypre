@@ -316,7 +316,11 @@ int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   }
 #endif
 
-  hypre_free_multi(jr, jw, lr, w, -1);
+  /*hypre_free_multi(jr, jw, lr, w, -1);*/
+  hypre_TFree(jr);
+  hypre_TFree(jw);
+  hypre_TFree(lr);
+  hypre_TFree(w);
   jr = NULL;
   jw = NULL;
   lr = NULL;

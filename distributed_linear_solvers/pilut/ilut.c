@@ -126,8 +126,12 @@ int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatTyp
   }
 #endif
 
-  hypre_free_multi(rmat.rmat_rnz, rmat.rmat_rrowlen, 
-             rmat.rmat_rcolind, rmat.rmat_rvalues, -1);
+  /*hypre_free_multi(rmat.rmat_rnz, rmat.rmat_rrowlen, 
+             rmat.rmat_rcolind, rmat.rmat_rvalues, -1);*/
+  hypre_TFree(rmat.rmat_rnz);
+  hypre_TFree(rmat.rmat_rrowlen);
+  hypre_TFree(rmat.rmat_rcolind);
+  hypre_TFree(rmat.rmat_rvalues);
 
   return( ierr );
 }

@@ -129,13 +129,34 @@ void hypre_ParILUT(DataDistType *ddist, FactorMatType *ldu,
   }
   ldu->nlevels = nlevel;
 
-  hypre_free_multi(jr, jw, lr, w, map,
+  /*hypre_free_multi(jr, jw, lr, w, map,
 	     nrmat.rmat_rnz,        nrmat.rmat_rrowlen,  nrmat.rmat_rcolind,   
              nrmat.rmat_rvalues,
 	     cinfo.gatherbuf,  cinfo.rrowind,  cinfo.rnbrind,   cinfo.rnbrptr, 
 	     cinfo.snbrind, cinfo.srowind, cinfo.snbrptr,  
              cinfo.incolind,  cinfo.invalues, 
-             newperm, newiperm, vrowdist, -1);
+             newperm, newiperm, vrowdist, -1);*/
+  hypre_TFree(jr);
+  hypre_TFree(jw);
+  hypre_TFree(lr);
+  hypre_TFree(w);
+  hypre_TFree(map);
+  hypre_TFree(nrmat.rmat_rnz);
+  hypre_TFree(nrmat.rmat_rrowlen);
+  hypre_TFree(nrmat.rmat_rcolind);
+  hypre_TFree(nrmat.rmat_rvalues);
+  hypre_TFree(cinfo.gatherbuf);
+  hypre_TFree(cinfo.rrowind);
+  hypre_TFree(cinfo.rnbrind);
+  hypre_TFree(cinfo.rnbrptr);
+  hypre_TFree(cinfo.snbrind);
+  hypre_TFree(cinfo.srowind);
+  hypre_TFree(cinfo.snbrptr);
+  hypre_TFree(cinfo.incolind);
+  hypre_TFree(cinfo.invalues);
+  hypre_TFree(newperm);
+  hypre_TFree(newiperm);
+  hypre_TFree(vrowdist);
 
   jr = NULL;
   jw = NULL;
@@ -1133,7 +1154,9 @@ void hypre_FormNRmat(int rrow, int first, ReduceMatType *nrmat,
   out_rowlen = hypre_min( max_rowlen, lastjr-first+1 );
   if( out_rowlen > in_rowlen )
   {
-    hypre_free_multi( in_colind, in_values, -1 );
+    /*hypre_free_multi( in_colind, in_values, -1 );*/
+    hypre_TFree(in_colind);
+    hypre_TFree(in_values);
     in_colind = NULL; in_values = NULL;
     rcolind = hypre_idx_malloc( out_rowlen, "FornNRmat: rcolind");
     rvalues = hypre_fp_malloc( out_rowlen, "FornNRmat: rvalues");

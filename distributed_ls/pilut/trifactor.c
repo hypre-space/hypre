@@ -308,7 +308,10 @@ int hypre_SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   /* Allocate memory for the gather buffer. This is an overestimate */
   ldu->gatherbuf = hypre_fp_malloc(maxsend, "hypre_SetUpLUFactor: ldu->gatherbuf");
 
-  hypre_free_multi(petotal, rind, imap, -1);
+  /*hypre_free_multi(petotal, rind, imap, -1);*/
+  hypre_TFree(petotal);
+  hypre_TFree(rind);
+  hypre_TFree(imap);
 
   return(0);
 }
@@ -608,7 +611,11 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   /**** Store new L (DU) into LDU ****/
   if ( DoingL ) {
     /* Free memory that stored the L so far and relink the data structures */
-    hypre_free_multi(ldu->lsrowptr, ldu->lerowptr, ldu->lcolind, ldu->lvalues, -1);
+    /*hypre_free_multi(ldu->lsrowptr, ldu->lerowptr, ldu->lcolind, ldu->lvalues, -1);*/
+    hypre_TFree(ldu->lsrowptr);
+    hypre_TFree(ldu->lerowptr);
+    hypre_TFree(ldu->lcolind);
+    hypre_TFree(ldu->lvalues);
     ldu->lrowptr = newrowptr;
     ldu->lcolind = newcolind;
     ldu->lvalues = newvalues;
@@ -620,7 +627,11 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
     hypre_memcpy_fp(ldu->dvalues, values, lnrows);
 
     /* Free memory that stored the U so far and relink the data structures */
-    hypre_free_multi(ldu->usrowptr, ldu->uerowptr, ldu->ucolind, ldu->uvalues, -1);
+    /*hypre_free_multi(ldu->usrowptr, ldu->uerowptr, ldu->ucolind, ldu->uvalues, -1);*/
+    hypre_TFree(ldu->usrowptr);
+    hypre_TFree(ldu->uerowptr);
+    hypre_TFree(ldu->ucolind);
+    hypre_TFree(ldu->uvalues);
     ldu->urowptr = newrowptr;
     ldu->ucolind = newcolind;
     ldu->uvalues = newvalues;
