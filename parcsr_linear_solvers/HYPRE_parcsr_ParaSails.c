@@ -113,8 +113,7 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
    HYPRE_DistributedMatrix mat;
    Secret *secret = (Secret *) solver;
 
-   ierr = HYPRE_DistributedMatrixCreate(secret->comm, &mat);
-   if (ierr) return ierr;
+   /* The following call will also create the distributed matrix */
 
    ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix( A, &mat );
    if (ierr) return ierr;
