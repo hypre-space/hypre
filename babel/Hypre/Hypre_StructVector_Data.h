@@ -9,10 +9,13 @@
 
 #include "HYPRE_mv.h"
 #include "struct_matrix_vector.h"
+#include "Hypre_StructuredGrid.h"
 
 struct Hypre_StructVector_private_type
 {
    HYPRE_StructVector *hsvec;
+   /* We need to save constructor inputs to support a Clone function: */
+   Hypre_StructuredGrid grid;
 }
 ;
 #endif

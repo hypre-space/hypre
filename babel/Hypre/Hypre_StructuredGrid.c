@@ -107,6 +107,27 @@ int  impl_Hypre_StructuredGrid_SetIntParameter
 } /* end impl_Hypre_StructuredGridSetIntParameter */
 
 /* ********************************************************
+ * impl_Hypre_StructuredGridGetIntParameter
+ **********************************************************/
+int  impl_Hypre_StructuredGrid_GetIntParameter
+(Hypre_StructuredGrid this, char* name ) {
+   struct Hypre_StructuredGrid_private_type *Gp = this->d_table;
+   HYPRE_StructGrid *G = Gp->hsgrid;
+   hypre_StructGrid *grid = (hypre_StructGrid *) *G;
+
+   if ( !strcmp(name,"dim") || !strcmp(name,"dimension") ) {
+      return hypre_StructGridDim(grid);
+   }
+   else  {
+      printf( "Hypre_StructuredGrid_GetIntParameter does not recognize name ~s\n",
+              name );
+      return -1;
+   }
+
+   return -1;
+} /* end impl_Hypre_StructuredGridGetIntParameter */
+
+/* ********************************************************
  * impl_Hypre_StructuredGridSetIntArrayParameter
  **********************************************************/
 int  impl_Hypre_StructuredGrid_SetIntArrayParameter

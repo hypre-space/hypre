@@ -75,6 +75,24 @@ int  impl_Hypre_StructVectorBldr_SetValues
 } /* end impl_Hypre_StructVectorBldrSetValues */
 
 /* ********************************************************
+ * impl_Hypre_StructVectorBldrSetNumGhost
+ **********************************************************/
+int  impl_Hypre_StructVectorBldr_SetNumGhost
+( Hypre_StructVectorBldr this, array1int values )
+{
+   HYPRE_StructVector  vector;
+   int * num_ghost = &(values.data[*(values.lower)]);
+   HYPRE_StructVector * V;
+   Hypre_StructVector SV = this->d_table->newvec;
+   if ( SV == NULL ) return -1;
+   V = SV->d_table->hsvec;
+
+   return HYPRE_StructVectorSetNumGhost( *V, num_ghost );
+
+} /* end impl_Hypre_StructVectorBldrSetNumGhost */
+
+
+/* ********************************************************
  * impl_Hypre_StructVectorBldrGetConstructedObject
  **********************************************************/
 Hypre_Vector
@@ -82,14 +100,12 @@ impl_Hypre_StructVectorBldr_GetConstructedObject(Hypre_StructVectorBldr this) {
    Hypre_StructVector newvec = this->d_table->newvec;
    if ( newvec==NULL || this->d_table->vecgood==0 ) {
       return (Hypre_Vector) NULL;
-   }
-   ;
+   };
    return (Hypre_Vector) Hypre_StructVector_castTo( newvec, "HypreVector" );
 } /* end impl_Hypre_StructVectorBldrGetConstructedObject */
 
 /* ********************************************************
  * impl_Hypre_StructVectorBldrNew
- *       insert the library code below
  **********************************************************/
 int  impl_Hypre_StructVectorBldr_New
 (Hypre_StructVectorBldr this, Hypre_StructuredGrid grid) {
@@ -108,6 +124,7 @@ int  impl_Hypre_StructVectorBldr_New
    Hypre_StructVector_addReference( this->d_table->newvec );
 
    SVp = this->d_table->newvec->d_table;
+   SVp->grid = grid;
    V = SVp->hsvec;
 
 /*    HYPRE_StructVectorCreate( comm, *G, *SS, V );
@@ -129,7 +146,7 @@ int  impl_Hypre_StructVectorBldr_New
  * and it needs the argument for that call.
  **********************************************************/
 Hypre_StructVectorBldr
-   impl_Hypre_StructVectorBldr_Constructor(Hypre_StructuredGrid grid) {
+impl_Hypre_StructVectorBldr_Constructor(Hypre_StructuredGrid grid) {
    Hypre_StructVectorBldr_new();
 } /* end impl_Hypre_StructVectorBldrConstructor */
 
