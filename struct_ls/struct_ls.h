@@ -31,6 +31,15 @@ int hypre_CyclicReduction( void *cyc_red_vdata , hypre_StructMatrix *A , hypre_S
 int hypre_CyclicReductionSetBase( void *cyc_red_vdata , hypre_Index base_index , hypre_Index base_stride );
 int hypre_CyclicReductionDestroy( void *cyc_red_vdata );
 
+/* cyclic_reduction-pragma-disjoint.c */
+void *hypre_CyclicReductionCreate( MPI_Comm comm );
+hypre_StructMatrix *hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A , hypre_StructGrid *coarse_grid , int cdir );
+int hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A , hypre_StructMatrix *Ac , hypre_Index cindex , hypre_Index cstride );
+int hypre_CyclicReductionSetup( void *cyc_red_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
+int hypre_CyclicReduction( void *cyc_red_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
+int hypre_CyclicReductionSetBase( void *cyc_red_vdata , hypre_Index base_index , hypre_Index base_stride );
+int hypre_CyclicReductionDestroy( void *cyc_red_vdata );
+
 /* general.c */
 int hypre_Log2( int p );
 
@@ -143,6 +152,7 @@ int HYPRE_StructPFMGSetup( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HY
 int HYPRE_StructPFMGSolve( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x );
 int HYPRE_StructPFMGSetTol( HYPRE_StructSolver solver , double tol );
 int HYPRE_StructPFMGSetMaxIter( HYPRE_StructSolver solver , int max_iter );
+int HYPRE_StructPFMGSetMaxLevels( HYPRE_StructSolver solver , int max_levels );
 int HYPRE_StructPFMGSetRelChange( HYPRE_StructSolver solver , int rel_change );
 int HYPRE_StructPFMGSetZeroGuess( HYPRE_StructSolver solver );
 int HYPRE_StructPFMGSetNonZeroGuess( HYPRE_StructSolver solver );
@@ -238,6 +248,7 @@ void *hypre_PFMGCreate( MPI_Comm comm );
 int hypre_PFMGDestroy( void *pfmg_vdata );
 int hypre_PFMGSetTol( void *pfmg_vdata , double tol );
 int hypre_PFMGSetMaxIter( void *pfmg_vdata , int max_iter );
+int hypre_PFMGSetMaxLevels( void *pfmg_vdata , int max_levels );
 int hypre_PFMGSetRelChange( void *pfmg_vdata , int rel_change );
 int hypre_PFMGSetZeroGuess( void *pfmg_vdata , int zero_guess );
 int hypre_PFMGSetRelaxType( void *pfmg_vdata , int relax_type );
@@ -273,10 +284,6 @@ int hypre_PFMGComputeDxyz( hypre_StructMatrix *A , double *dxyz );
 hypre_StructMatrix *hypre_PFMGCreateInterpOp( hypre_StructMatrix *A , hypre_StructGrid *cgrid , int cdir );
 int hypre_PFMGSetupInterpOp( hypre_StructMatrix *A , int cdir , hypre_Index findex , hypre_Index stride , hypre_StructMatrix *P );
 
-/* pfmg_setup_rap.c */
-hypre_StructMatrix *hypre_PFMGCreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir , int rap_type );
-int hypre_PFMGSetupRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , int cdir , hypre_Index cindex , hypre_Index cstride , int rap_type , hypre_StructMatrix *Ac );
-
 /* pfmg_setup_rap5.c */
 hypre_StructMatrix *hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
 int hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
@@ -284,6 +291,10 @@ int hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A , hypre_StructMatrix *P , hy
 /* pfmg_setup_rap7.c */
 hypre_StructMatrix *hypre_PFMGCreateCoarseOp7( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
 int hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+
+/* pfmg_setup_rap.c */
+hypre_StructMatrix *hypre_PFMGCreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir , int rap_type );
+int hypre_PFMGSetupRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , int cdir , hypre_Index cindex , hypre_Index cstride , int rap_type , hypre_StructMatrix *Ac );
 
 /* pfmg_solve.c */
 int hypre_PFMGSolve( void *pfmg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
@@ -382,6 +393,13 @@ int hypre_SMGRelaxSetNewMatrixStencil( void *relax_vdata , hypre_StructStencil *
 int hypre_SMGRelaxSetupBaseBoxArray( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
 
 /* smg_residual.c */
+void *hypre_SMGResidualCreate( void );
+int hypre_SMGResidualSetup( void *residual_vdata , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *b , hypre_StructVector *r );
+int hypre_SMGResidual( void *residual_vdata , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *b , hypre_StructVector *r );
+int hypre_SMGResidualSetBase( void *residual_vdata , hypre_Index base_index , hypre_Index base_stride );
+int hypre_SMGResidualDestroy( void *residual_vdata );
+
+/* smg_residual-pragma-disjoint.c */
 void *hypre_SMGResidualCreate( void );
 int hypre_SMGResidualSetup( void *residual_vdata , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *b , hypre_StructVector *r );
 int hypre_SMGResidual( void *residual_vdata , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *b , hypre_StructVector *r );

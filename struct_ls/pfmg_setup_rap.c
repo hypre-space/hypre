@@ -71,12 +71,13 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
          break;
       } 
    }
-
    else if (rap_type == 2)
    {
       RAP = hypre_SemiCreateRAPOp(R ,A, P, coarse_grid, cdir,
                                         P_stored_as_transpose);
    }
+
+   hypre_StructMatrixSetConstantCoefficient( RAP, hypre_StructMatrixConstantCoefficient(A) );
 
    return RAP;
 }

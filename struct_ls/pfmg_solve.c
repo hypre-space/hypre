@@ -55,7 +55,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    double                e_dot_e, x_dot_x;
                     
    int                   i, l;
-                    
+
    int                   ierr = 0;
 #if DEBUG
    char                  filename[255];

@@ -155,7 +155,8 @@ hypre_SemiRestrict( void               *restrict_vdata,
    int                     Ri;
    int                     ri;
    int                     rci;
-                         
+   int              constant_coefficient;
+
    double                 *Rp0, *Rp1;
    double                 *rp, *rp0, *rp1;
    double                 *rcp;
@@ -184,6 +185,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
 
    stencil       = hypre_StructMatrixStencil(R);
    stencil_shape = hypre_StructStencilShape(stencil);
+   constant_coefficient = hypre_StructMatrixConstantCoefficient(R);
 
    hypre_SetIndex(stridec, 1, 1, 1);
 
@@ -255,18 +257,38 @@ hypre_SemiRestrict( void               *restrict_vdata,
                   hypre_StructMapFineToCoarse(start, cindex, stride, startc);
 
                   hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-                  hypre_BoxLoop3Begin(loop_size,
-                                      R_dbox,  startc, stridec, Ri,
-                                      r_dbox,  start,  stride,  ri,
-                                      rc_dbox, startc, stridec, rci);
+
+                  if ( constant_coefficient )
+                  {
+                     Ri = hypre_CCBoxIndexRank( R_dbox, startc );
+
+                     hypre_BoxLoop2Begin(loop_size,
+                                         r_dbox,  start,  stride,  ri,
+                                         rc_dbox, startc, stridec, rci);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ri,ri,rci
 #include "hypre_box_smp_forloop.h"
-                  hypre_BoxLoop3For(loopi, loopj, loopk, Ri, ri, rci)
-                     {
-                        rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
-                                             Rp1[Ri] * rp1[ri]);
-                     }
-                  hypre_BoxLoop3End(Ri, ri, rci);
+                     hypre_BoxLoop2For(loopi, loopj, loopk, ri, rci)
+                        {
+                           rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
+                                                Rp1[Ri] * rp1[ri]);
+                        }
+                     hypre_BoxLoop2End(ri, rci);
+                  }
+                  else
+                  {
+                     hypre_BoxLoop3Begin(loop_size,
+                                         R_dbox,  startc, stridec, Ri,
+                                         r_dbox,  start,  stride,  ri,
+                                         rc_dbox, startc, stridec, rci);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ri,ri,rci
+#include "hypre_box_smp_forloop.h"
+                     hypre_BoxLoop3For(loopi, loopj, loopk, Ri, ri, rci)
+                        {
+                           rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
+                                                Rp1[Ri] * rp1[ri]);
+                        }
+                     hypre_BoxLoop3End(Ri, ri, rci);
+                  }
                }
          }
    }

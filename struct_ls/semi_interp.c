@@ -157,6 +157,7 @@ hypre_SemiInterp( void               *interp_vdata,
    int                     Pi;
    int                     xci;
    int                     ei;
+   int              constant_coefficient;
                          
    double                 *Pp0, *Pp1;
    double                 *xcp;
@@ -187,6 +188,7 @@ hypre_SemiInterp( void               *interp_vdata,
 
    stencil       = hypre_StructMatrixStencil(P);
    stencil_shape = hypre_StructStencilShape(stencil);
+   constant_coefficient = hypre_StructMatrixConstantCoefficient(P);
 
    hypre_SetIndex(stridec, 1, 1, 1);
 
@@ -288,17 +290,34 @@ hypre_SemiInterp( void               *interp_vdata,
 
                   hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-                  hypre_BoxLoop2Begin(loop_size,
-                                      P_dbox, startc, stridec, Pi,
-                                      e_dbox, start, stride, ei);
+                  if ( constant_coefficient )
+                  {
+                     Pi = hypre_CCBoxIndexRank( P_dbox, startc );
+                     hypre_BoxLoop1Begin(loop_size,
+                                         e_dbox, start, stride, ei);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,ei
+#include "hypre_box_smp_forloop.h"
+                     hypre_BoxLoop1For(loopi, loopj, loopk, ei)
+                        {
+                           ep[ei] =  (Pp0[Pi] * ep0[ei] +
+                                      Pp1[Pi] * ep1[ei]);
+                        }
+                     hypre_BoxLoop1End(ei);
+                  }
+                  else
+                  {
+                     hypre_BoxLoop2Begin(loop_size,
+                                         P_dbox, startc, stridec, Pi,
+                                         e_dbox, start, stride, ei);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Pi,ei
 #include "hypre_box_smp_forloop.h"
-                  hypre_BoxLoop2For(loopi, loopj, loopk, Pi, ei)
-                     {
-                        ep[ei] =  (Pp0[Pi] * ep0[ei] +
-                                   Pp1[Pi] * ep1[ei]);
-                     }
-                  hypre_BoxLoop2End(Pi, ei);
+                     hypre_BoxLoop2For(loopi, loopj, loopk, Pi, ei)
+                        {
+                           ep[ei] =  (Pp0[Pi] * ep0[ei] +
+                                      Pp1[Pi] * ep1[ei]);
+                        }
+                     hypre_BoxLoop2End(Pi, ei);
+                  }
                }
          }
    }
