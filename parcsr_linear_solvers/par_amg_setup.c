@@ -83,11 +83,11 @@ hypre_ParAMGSetup( void               *amg_vdata,
    P_array = hypre_ParAMGDataPArray(amg_data);
    CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
 
-   if (A_array != NULL || P_array != NULL || CF_marker_array != NULL)
+   if (A_array || P_array || CF_marker_array)
    {
       for (j = 1; j < old_num_levels; j++)
       {
-        if (A_array[j] != NULL)
+        if (A_array[j])
         {
            hypre_ParCSRMatrixDestroy(A_array[j]);
            A_array[j] = NULL;
@@ -96,13 +96,13 @@ hypre_ParAMGSetup( void               *amg_vdata,
 
       for (j = 0; j < old_num_levels-1; j++)
       {
-         if (P_array[j] != NULL)
+         if (P_array[j])
          {
             hypre_ParCSRMatrixDestroy(P_array[j]);
             P_array[j] = NULL;
          }
 
-         if (CF_marker_array[j] != NULL)
+         if (CF_marker_array[j])
             hypre_TFree(CF_marker_array[j]);
       }
    }
@@ -415,14 +415,3 @@ hypre_ParAMGSetup( void               *amg_vdata,
    Setup_err_flag = 0;
    return(Setup_err_flag);
 }  
-
-int
-hypre_ParAMGReinit( void *amg_vdata )
-{
-   hypre_ParAMGData *amg_data = amg_vdata;
-   int ierr = 0;
-
-   hypre_ParAMGDataNumLevels(amg_data) = 1;
-
-   return(ierr);
-}

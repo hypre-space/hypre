@@ -39,7 +39,6 @@ typedef struct {int opaque;} *HYPRE_Solver;
 int HYPRE_ParAMGCreate P((HYPRE_Solver *solver ));
 int HYPRE_ParAMGDestroy P((HYPRE_Solver solver ));
 int HYPRE_ParAMGSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
-int HYPRE_ParAMGReinit P((HYPRE_Solver solver ));
 int HYPRE_ParAMGSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParAMGSolveT P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParAMGSetMaxLevels P((HYPRE_Solver solver , int max_levels ));
@@ -74,9 +73,7 @@ int HYPRE_ParCSRGMRESSetMaxIter P((HYPRE_Solver solver , int max_iter ));
 int HYPRE_ParCSRGMRESSetPrecond P((HYPRE_Solver solver , int (*precond )(
 HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix, HYPRE_ParVector b, HYPRE_ParVector
 x), int (*precond_setup )(HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix, 
-HYPRE_ParVector b, HYPRE_ParVector x), int (*precond_reinit )(HYPRE_Solver sol),
-void *precond_data ));
-int HYPRE_ParCSRGMRESReinitPrecond P((HYPRE_Solver solver ));
+HYPRE_ParVector b, HYPRE_ParVector x), void *precond_data ));
 int HYPRE_ParCSRGMRESSetLogging P((HYPRE_Solver solver , int logging ));
 int HYPRE_ParCSRGMRESGetNumIterations P((HYPRE_Solver solver , int *num_iterations));
 int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
