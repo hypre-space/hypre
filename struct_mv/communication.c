@@ -369,7 +369,7 @@ hypre_InitializeCommunication( hypre_CommPkg *comm_pkg,
     *--------------------------------------------------------------------*/
 
    num_requests = num_sends + num_recvs;
-   requests = hypre_CTAlloc(MPI_Request, num_requests);
+   requests = hypre_SharedCTAlloc(MPI_Request, num_requests);
 
    j = 0;
    for(i = 0; i < num_recvs; i++)
@@ -433,7 +433,7 @@ hypre_InitializeCommunication( hypre_CommPkg *comm_pkg,
     *--------------------------------------------------------------------*/
 
    num_requests = num_sends + num_recvs;
-   requests = hypre_CTAlloc(MPI_Request, num_requests);
+   requests = hypre_SharedCTAlloc(MPI_Request, num_requests);
 
 #if defined(HYPRE_COMM_VOLATILE)
    /* commit the communication package */
@@ -541,14 +541,14 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    if (hypre_CommHandleNumRequests(comm_handle))
    {
       status =
-         hypre_CTAlloc(MPI_Status,
+         hypre_SharedCTAlloc(MPI_Status,
                        hypre_CommHandleNumRequests(comm_handle));
 
       MPI_Waitall(hypre_CommHandleNumRequests(comm_handle),
                   hypre_CommHandleRequests(comm_handle),
                   status);
 
-      hypre_TFree(status);
+      hypre_SharedTFree(status);
    }
 
    /*--------------------------------------------------------------------
@@ -628,14 +628,14 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    if (hypre_CommHandleNumRequests(comm_handle))
    {
       status =
-         hypre_CTAlloc(MPI_Status,
+         hypre_SharedCTAlloc(MPI_Status,
                        hypre_CommHandleNumRequests(comm_handle));
 
       MPI_Waitall(hypre_CommHandleNumRequests(comm_handle),
                   hypre_CommHandleRequests(comm_handle),
                   status);
 
-      hypre_TFree(status);
+      hypre_SharedTFree(status);
    }
 
    /* free up comm_handle */
@@ -1416,7 +1416,6 @@ hypre_BuildCommMPITypes( int               num_comms,
 {
    hypre_CommType       *comm_type;
    hypre_CommTypeEntry  *comm_entry;
-
    int                   num_entries;
    int                  *comm_entry_blocklengths;
    MPI_Aint             *comm_entry_displacements;
