@@ -29,6 +29,11 @@ hypre_TimingWallCount += time_getWallclockSeconds();\
 hypre_TimingCPUCount += time_getCPUSeconds()
 
 #ifndef HYPRE_USE_PTHREADS
+#define hypre_global_timing_ref(index,field) hypre_global_timing->field
+#else
+#define hypre_global_timing_ref(index,field) \
+                                     hypre_global_timing[index].field
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_InitializeTiming
@@ -48,6 +53,9 @@ hypre_InitializeTiming( char *name )
 
    int      new_name;
    int      i;
+#ifdef HYPRE_USE_PTHREADS
+   int      threadid = hypre_GetThreadID();
+#endif
 
    /*-------------------------------------------------------
     * Allocate global TimingType structure if needed
@@ -55,7 +63,12 @@ hypre_InitializeTiming( char *name )
 
    if (hypre_global_timing == NULL)
    {
+#ifndef HYPRE_USE_PTHREADS
       hypre_global_timing = hypre_CTAlloc(hypre_TimingType, 1);
+#else
+      hypre_global_timing = hypre_CTAlloc(hypre_TimingType,
+                                          hypre_NumThreads + 1);
+#endif
    }
 
    /*-------------------------------------------------------
@@ -63,7 +76,7 @@ hypre_InitializeTiming( char *name )
     *-------------------------------------------------------*/
 
    new_name = 1;
-   for (i = 0; i < (hypre_global_timing -> size); i++)
+   for (i = 0; i < (hypre_global_timing_ref(threadid, size)); i++)
    {
       if (hypre_TimingNumRegs(i) > 0)
       {
@@ -79,7 +92,7 @@ hypre_InitializeTiming( char *name )
 
    if (new_name)
    {
-      for (i = 0; i < (hypre_global_timing -> size); i++)
+      for (i = 0; i < hypre_global_timing_ref(threadid ,size); i++)
       {
          if (hypre_TimingNumRegs(i) == 0)
          {
@@ -95,28 +108,28 @@ hypre_InitializeTiming( char *name )
 
    if (new_name)
    {
-      if (time_index == (hypre_global_timing -> size))
+      if (time_index == (hypre_global_timing_ref(threadid, size)))
       {
-         old_wall_time = (hypre_global_timing -> wall_time);
-         old_cpu_time  = (hypre_global_timing -> cpu_time);
-         old_flops     = (hypre_global_timing -> flops);
-         old_name      = (hypre_global_timing -> name);
-         old_state     = (hypre_global_timing -> state);
-         old_num_regs  = (hypre_global_timing -> num_regs);
-
-         (hypre_global_timing -> wall_time) =
+         old_wall_time = (hypre_global_timing_ref(threadid, wall_time));
+         old_cpu_time  = (hypre_global_timing_ref(threadid, cpu_time));
+         old_flops     = (hypre_global_timing_ref(threadid, flops));
+         old_name      = (hypre_global_timing_ref(threadid, name));
+         old_state     = (hypre_global_timing_ref(threadid, state));
+         old_num_regs  = (hypre_global_timing_ref(threadid, num_regs));
+    
+         (hypre_global_timing_ref(threadid, wall_time)) =
             hypre_CTAlloc(double, (time_index+1));
-         (hypre_global_timing -> cpu_time)  =
+         (hypre_global_timing_ref(threadid, cpu_time))  =
             hypre_CTAlloc(double, (time_index+1));
-         (hypre_global_timing -> flops)     =
+         (hypre_global_timing_ref(threadid, flops))     =
             hypre_CTAlloc(double, (time_index+1));
-         (hypre_global_timing -> name)      =
+         (hypre_global_timing_ref(threadid, name))      =
             hypre_CTAlloc(char *, (time_index+1));
-         (hypre_global_timing -> state)     =
+         (hypre_global_timing_ref(threadid, state))     =
             hypre_CTAlloc(int,    (time_index+1));
-         (hypre_global_timing -> num_regs)  =
+         (hypre_global_timing_ref(threadid, num_regs))  =
             hypre_CTAlloc(int,    (time_index+1));
-         (hypre_global_timing -> size) ++;
+         (hypre_global_timing_ref(threadid, size)) ++;
 
          for (i = 0; i < time_index; i++)
          {
@@ -140,7 +153,7 @@ hypre_InitializeTiming( char *name )
       strncpy(hypre_TimingName(time_index), name, 79);
       hypre_TimingState(time_index)   = 0;
       hypre_TimingNumRegs(time_index) = 1;
-      (hypre_global_timing -> num_names) ++;
+      (hypre_global_timing_ref(threadid, num_names)) ++;
    }
 
    return time_index;
@@ -155,11 +168,15 @@ hypre_FinalizeTiming( int time_index )
 {
    int  ierr = 0;
    int  i;
+#ifdef HYPRE_USE_PTHREADS
+   int  threadid = hypre_GetThreadID();
+   int  free_global_timing;
+#endif
 
    if (hypre_global_timing == NULL)
       return;
 
-   if (time_index < (hypre_global_timing -> size))
+   if (time_index < (hypre_global_timing_ref(threadid, size)))
    {
       if (hypre_TimingNumRegs(time_index) > 0)
       {
@@ -169,23 +186,47 @@ hypre_FinalizeTiming( int time_index )
       if (hypre_TimingNumRegs(time_index) == 0)
       {
          hypre_TFree(hypre_TimingName(time_index));
-         (hypre_global_timing -> num_names) --;
+         (hypre_global_timing_ref(threadid, num_names)) --;
       }
    }
 
+#ifdef HYPRE_USE_PTHREADS
+   free_global_timing = 1;
+   for (i = 0; i <= hypre_NumThreads; i++)
+   {  
+      if (hypre_global_timing_ref(i, num_names))
+      {
+         free_global_timing = 0;
+         break;
+      }  
+   }
+
+   if (free_global_timing)
+   {   
+      pthread_mutex_lock(&time_mtx);
+      for (i = 0; i <= hypre_NumThreads; i++)  
+#else
    if ((hypre_global_timing -> num_names) == 0)
    {
       for (i = 0; i < (hypre_global_timing -> size); i++)
-      {
-         hypre_TFree(hypre_global_timing -> wall_time);
-         hypre_TFree(hypre_global_timing -> cpu_time);
-         hypre_TFree(hypre_global_timing -> flops);
-         hypre_TFree(hypre_global_timing -> name);
-         hypre_TFree(hypre_global_timing -> state);
-         hypre_TFree(hypre_global_timing -> num_regs);
+#endif
+
+      {  
+         hypre_TFree(hypre_global_timing_ref(i, wall_time));
+         hypre_TFree(hypre_global_timing_ref(i, cpu_time));
+         hypre_TFree(hypre_global_timing_ref(i, flops));
+         hypre_TFree(hypre_global_timing_ref(i, name));
+         hypre_TFree(hypre_global_timing_ref(i, state));
+         hypre_TFree(hypre_global_timing_ref(i, num_regs));
       }
+      
       hypre_TFree(hypre_global_timing);
       hypre_global_timing = NULL;
+
+#ifdef HYPRE_USE_PTHREADS
+      pthread_mutex_unlock(&time_mtx);
+#endif
+
    }
 
    return ierr;
@@ -199,11 +240,23 @@ int
 hypre_IncFLOPCount( int inc )
 {
    int  ierr = 0;
+#ifdef HYPRE_USE_PTHREADS
+   int threadid = hypre_GetThreadID();
+#endif
 
    if (hypre_global_timing == NULL)
       return;
 
    hypre_TimingFLOPCount += (double) (inc);
+
+#ifdef HYPRE_USE_PTHREADS
+   if (threadid != hypre_NumThreads)
+   {
+      pthread_mutex_lock(&time_mtx);
+      hypre_TimingAllFLOPS += (double) (inc);
+      pthread_mutex_unlock(&time_mtx);
+   }
+#endif
 
    return ierr;
 }
@@ -216,6 +269,9 @@ int
 hypre_BeginTiming( int time_index )
 {
    int  ierr = 0;
+#ifdef HYPRE_USE_PTHREADS
+   int threadid = hypre_GetThreadID();
+#endif
 
    if (hypre_global_timing == NULL)
       return;
@@ -225,7 +281,15 @@ hypre_BeginTiming( int time_index )
       hypre_StopTiming();
       hypre_TimingWallTime(time_index) -= hypre_TimingWallCount;
       hypre_TimingCPUTime(time_index)  -= hypre_TimingCPUCount;
+#ifdef HYPRE_USE_PTHREADS
+      if (threadid != hypre_NumThreads)
+         hypre_TimingFLOPS(time_index)    -= hypre_TimingFLOPCount;
+      else
+         hypre_TimingFLOPS(time_index)    -= hypre_TimingAllFLOPS;
+#else
       hypre_TimingFLOPS(time_index)    -= hypre_TimingFLOPCount;
+#endif
+
       hypre_StartTiming();
    }
    hypre_TimingState(time_index) ++;
@@ -241,6 +305,9 @@ int
 hypre_EndTiming( int time_index )
 {
    int  ierr = 0;
+#ifdef HYPRE_USE_PTHREADS
+   int  threadid = hypre_GetThreadID();
+#endif
 
    if (hypre_global_timing == NULL)
       return;
@@ -251,7 +318,14 @@ hypre_EndTiming( int time_index )
       hypre_StopTiming();
       hypre_TimingWallTime(time_index) += hypre_TimingWallCount;
       hypre_TimingCPUTime(time_index)  += hypre_TimingCPUCount;
+#ifdef HYPRE_USE_PTHREADS
+      if (threadid != hypre_NumThreads)
+         hypre_TimingFLOPS(time_index)    += hypre_TimingFLOPCount;
+      else
+         hypre_TimingFLOPS(time_index)    += hypre_TimingAllFLOPS;
+#else
       hypre_TimingFLOPS(time_index)    += hypre_TimingFLOPCount;
+#endif
       hypre_StartTiming();
    }
 
@@ -267,11 +341,14 @@ hypre_ClearTiming( )
 {
    int  ierr = 0;
    int  i;
+#ifdef HYPRE_USE_PTHREADS
+   int  threadid = hypre_GetThreadID();
+#endif
 
    if (hypre_global_timing == NULL)
       return;
 
-   for (i = 0; i < (hypre_global_timing -> size); i++)
+   for (i = 0; i < (hypre_global_timing_ref(threadid,size)); i++)
    {
       hypre_TimingWallTime(i) = 0.0;
       hypre_TimingCPUTime(i)  = 0.0;
@@ -284,6 +361,8 @@ hypre_ClearTiming( )
 /*--------------------------------------------------------------------------
  * hypre_PrintTiming
  *--------------------------------------------------------------------------*/
+
+#ifndef HYPRE_USE_PTHREADS  /* non-threaded version of hypre_PrintTiming */
 
 int
 hypre_PrintTiming( char     *heading,
@@ -351,292 +430,7 @@ hypre_PrintTiming( char     *heading,
    return ierr;
 }
 
-#else   /* below are timing routines for threads */
-
-/*--------------------------------------------------------------------------
- * hypre_InitializeTiming
- *--------------------------------------------------------------------------*/
-
-int
-hypre_InitializeTiming( char *name )
-{
-   int      time_index=0;
-#if 0
-   double  *old_wall_time;
-   double  *old_cpu_time;
-   double  *old_flops;
-   char   **old_name;
-   int     *old_state;
-   int     *old_num_regs;
-
-   int      new_name;
-   int      i;
-   int      threadid = hypre_GetThreadID();
-
-   /*-------------------------------------------------------
-    * Allocate global TimingType structure if needed
-    *-------------------------------------------------------*/
-
-   if (hypre_global_timing == NULL)
-   {
-      hypre_global_timing = hypre_CTAlloc(hypre_TimingType, hypre_NumThreads + 1);
-   }
-
-   /*-------------------------------------------------------
-    * Check to see if name has already been registered
-    *-------------------------------------------------------*/
-
-   new_name = 1;
-   for (i = 0; i < (hypre_global_timing[threadid].size); i++)
-   {
-      if (hypre_TimingNumRegs(i) > 0)
-      {
-         if (strcmp(name, hypre_TimingName(i)) == 0)
-         {
-            new_name = 0;
-            time_index = i;
-            hypre_TimingNumRegs(time_index) ++;
-            break;
-         }
-      }
-   }
-
-   if (new_name)
-   {
-      for (i = 0; i < (hypre_global_timing[threadid].size); i++)
-      {
-         if (hypre_TimingNumRegs(i) == 0)
-         {
-            break;
-         }
-      }
-      time_index = i;
-   }
-
-   /*-------------------------------------------------------
-    * Register the new timing name
-    *-------------------------------------------------------*/
-
-   if (new_name)
-   {
-      if (time_index == (hypre_global_timing[threadid].size))
-      {
-         old_wall_time = (hypre_global_timing[threadid].wall_time);
-         old_cpu_time  = (hypre_global_timing[threadid].cpu_time);
-         old_flops     = (hypre_global_timing[threadid].flops);
-         old_name      = (hypre_global_timing[threadid].name);
-         old_state     = (hypre_global_timing[threadid].state);
-         old_num_regs  = (hypre_global_timing[threadid].num_regs);
-
-         (hypre_global_timing[threadid].wall_time) =
-            hypre_CTAlloc(double, (time_index+1));
-         (hypre_global_timing[threadid].cpu_time)  =
-            hypre_CTAlloc(double, (time_index+1));
-         (hypre_global_timing[threadid].flops)     =
-            hypre_CTAlloc(double, (time_index+1));
-         (hypre_global_timing[threadid].name)      =
-            hypre_CTAlloc(char *, (time_index+1));
-         (hypre_global_timing[threadid].state)     =
-            hypre_CTAlloc(int,    (time_index+1));
-         (hypre_global_timing[threadid].num_regs)  =
-            hypre_CTAlloc(int,    (time_index+1));
-         (hypre_global_timing[threadid].size) ++;
-
-         for (i = 0; i < time_index; i++)
-         {
-            hypre_TimingWallTime(i) = old_wall_time[i];
-            hypre_TimingCPUTime(i)  = old_cpu_time[i];
-            hypre_TimingFLOPS(i)    = old_flops[i];
-            hypre_TimingName(i)     = old_name[i];
-            hypre_TimingState(i)    = old_state[i];
-            hypre_TimingNumRegs(i)  = old_num_regs[i];
-         }
-
-         hypre_TFree(old_wall_time);
-         hypre_TFree(old_cpu_time);
-         hypre_TFree(old_flops);
-         hypre_TFree(old_name);
-         hypre_TFree(old_state);
-         hypre_TFree(old_num_regs);
-      }
-
-      hypre_TimingName(time_index) = hypre_CTAlloc(char, 80);
-      strncpy(hypre_TimingName(time_index), name, 79);
-      hypre_TimingState(time_index)   = 0;
-      hypre_TimingNumRegs(time_index) = 1;
-      (hypre_global_timing[threadid].num_names) ++;
-   }
-#endif
-   return time_index;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_FinalizeTiming
- *--------------------------------------------------------------------------*/
-
-int
-hypre_FinalizeTiming( int time_index )
-{
-   int  ierr = 0;
-#if 0
-   int  i;
-   int  threadid = hypre_GetThreadID();
-
-   if (hypre_global_timing == NULL)
-      return;
-
-   if (time_index < (hypre_global_timing[threadid].size))
-   {
-      if (hypre_TimingNumRegs(time_index) > 0)
-      {
-         hypre_TimingNumRegs(time_index) --;
-      }
-
-      if (hypre_TimingNumRegs(time_index) == 0)
-      {
-         hypre_TFree(hypre_TimingName(time_index));
-         (hypre_global_timing[threadid].num_names) --;
-      }
-   }
-
-   if ((hypre_global_timing[threadid].num_names) == 0 &&
-        threadid != hypre_NumThreads)
-   {
-      for (i = 0; i < (hypre_global_timing[threadid].size); i++)
-      {
-         hypre_TFree(hypre_global_timing[threadid].wall_time);
-         hypre_TFree(hypre_global_timing[threadid].cpu_time);
-         hypre_TFree(hypre_global_timing[threadid].flops);
-         hypre_TFree(hypre_global_timing[threadid].name);
-         hypre_TFree(hypre_global_timing[threadid].state);
-         hypre_TFree(hypre_global_timing[threadid].num_regs);
-      }
-
-      hypre_barrier(&time_mtx, threadid == hypre_NumThreads);
-      pthread_mutex_lock(&time_mtx);
-      hypre_TFree(hypre_global_timing);
-      hypre_global_timing = NULL;
-      pthread_mutex_unlock(&time_mtx);
-   }
-#endif
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_IncFLOPCount
- *--------------------------------------------------------------------------*/
-
-int
-hypre_IncFLOPCount( int inc )
-{
-   int  ierr = 0;
-#if 0
-   int threadid = hypre_GetThreadID();
-
-   if (hypre_global_timing == NULL)
-      return;
-
-   hypre_TimingFLOPCount += (double) (inc);
-
-   if (threadid != hypre_NumThreads)
-   {
-      pthread_mutex_lock(&time_mtx);
-      hypre_TimingAllFLOPS += (double) (inc);
-      pthread_mutex_unlock(&time_mtx);
-   }
-#endif
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_BeginTiming
- *--------------------------------------------------------------------------*/
-
-int
-hypre_BeginTiming( int time_index )
-{
-   int  ierr = 0;
-#if 0
-   int threadid = hypre_GetThreadID();
-
-   if (hypre_global_timing == NULL)
-      return;
-
-   if (hypre_TimingState(time_index) == 0)
-   {
-      hypre_StopTiming();
-      hypre_TimingWallTime(time_index) -= hypre_TimingWallCount;
-      hypre_TimingCPUTime(time_index)  -= hypre_TimingCPUCount;
-      if (threadid != hypre_NumThreads)
-         hypre_TimingFLOPS(time_index)    -= hypre_TimingFLOPCount;
-      else
-         hypre_TimingFLOPS(time_index)    -= hypre_TimingAllFLOPS;
-      hypre_StartTiming();
-   }
-   hypre_TimingState(time_index) ++;
-#endif
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_EndTiming
- *--------------------------------------------------------------------------*/
-
-int
-hypre_EndTiming( int time_index )
-{
-   int  ierr = 0;
-#if 0
-   int threadid = hypre_GetThreadID();
-
-   if (hypre_global_timing == NULL)
-      return;
-
-   hypre_TimingState(time_index) --;
-   if (hypre_TimingState(time_index) == 0)
-   {
-      hypre_StopTiming();
-      hypre_TimingWallTime(time_index) += hypre_TimingWallCount;
-      hypre_TimingCPUTime(time_index)  += hypre_TimingCPUCount;
-      if (threadid != hypre_NumThreads)
-         hypre_TimingFLOPS(time_index)    += hypre_TimingFLOPCount;
-      else
-         hypre_TimingFLOPS(time_index)    += hypre_TimingAllFLOPS;
-      hypre_StartTiming();
-   }
-#endif
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_ClearTiming
- *--------------------------------------------------------------------------*/
-
-int
-hypre_ClearTiming( )
-{
-   int  ierr = 0;
-#if 0
-   int threadid = hypre_GetThreadID();
-
-   int  i;
-
-   if (hypre_global_timing == NULL)
-      return;
-
-   for (i = 0; i < (hypre_global_timing[threadid].size); i++)
-   {
-      hypre_TimingWallTime(i) = 0.0;
-      hypre_TimingCPUTime(i)  = 0.0;
-      hypre_TimingFLOPS(i)    = 0.0;
-   }
-#endif
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_PrintTiming
- *--------------------------------------------------------------------------*/
+#else /* threaded version of hypre_PrintTiming */
 
 #ifdef MPI_Comm_rank
 #undef MPI_Comm_rank
@@ -651,7 +445,7 @@ hypre_PrintTiming( char     *heading,
                    MPI_Comm  comm  )
 {
    int  ierr = 0;
-#if 0
+
    double  local_wall_time;
    double  local_cpu_time;
    double  wall_time;
@@ -809,7 +603,7 @@ hypre_PrintTiming( char     *heading,
          }
       }
    }
-#endif
+
    return ierr;
 }
 

@@ -57,7 +57,7 @@ pthread_mutex_t worker_mtx;
 hypre_workqueue_t hypre_qptr;
 pthread_mutex_t mpi_mtx;
 pthread_mutex_t time_mtx;
-int hypre_thread_release;
+volatile int hypre_thread_release;
 
 #ifdef HYPRE_THREAD_GLOBALS
 int hypre_NumThreads = 4;

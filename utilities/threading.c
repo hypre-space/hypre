@@ -18,7 +18,7 @@
 #include "threading.h"
 
 int iteration_counter = 0;
-int hypre_thread_counter;
+volatile int hypre_thread_counter;
 
 int HYPRE_InitPthreads( int num_threads )
 {
@@ -162,8 +162,8 @@ ifetchadd( int *w, pthread_mutex_t *mutex_fetchadd )
    return n;
 }
 
-static int thb_count = 0;
-static int thb_release = 0;
+static volatile int thb_count = 0;
+static volatile int thb_release = 0;
 
 void hypre_barrier(pthread_mutex_t *mtx, int unthreaded)
 {

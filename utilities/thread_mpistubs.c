@@ -332,7 +332,6 @@ hypre_thread_MPI_Isend( void        *buf,
   {
     returnval=0;
   }
-  hypre_barrier(&mpi_mtx, unthreaded);
   return returnval;
 }
 
@@ -389,7 +388,6 @@ hypre_thread_MPI_Waitall( int          count,
   int unthreaded = pthread_equal(initial_thread,pthread_self());
   int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   if (I_call_mpi)
-  if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
     returnval=MPI_Waitall(count,array_of_requests,array_of_statuses);
   }

@@ -448,15 +448,8 @@ int hypre_thread_MPI_Type_commit P((MPI_Datatype *datatype ));
 #define MAX_QUEUE 256
 #endif
 
-
 #include<pthread.h>
 #include "mpi.h"
-
-
-#define hypre_BarrierThreadWrapper(body) \
-   body;\
-   hypre_barrier(&talloc_mtx, pthread_equal(pthread_self(), initial_thread))
-
 
 /* hypre_work_proc_t typedef'd to be a pointer to a function with a void*
    argument and a void return type */
@@ -485,7 +478,6 @@ int hypre_fetch_and_add( int *w );
 void hypre_barrier(pthread_mutex_t *mpi_mtx, int unthreaded);
 int hypre_GetThreadID( void );
 
-
 pthread_t initial_thread;
 pthread_t hypre_thread[hypre_MAX_THREADS];
 pthread_mutex_t hypre_mutex_boxloops;
@@ -494,7 +486,7 @@ pthread_mutex_t worker_mtx;
 hypre_workqueue_t hypre_qptr;
 pthread_mutex_t mpi_mtx;
 pthread_mutex_t time_mtx;
-int hypre_thread_release;
+volatile int hypre_thread_release;
 
 #ifdef HYPRE_THREAD_GLOBALS
 int hypre_NumThreads = 4;
@@ -541,9 +533,6 @@ extern "C" {
 # define P(s) ()
 #endif
 
-/* random.c */
-void  hypre_SeedRand P((int seed));
-double  hypre_Rand P(());
 
 /* timer.c */
 double time_getWallclockSeconds P((void ));
