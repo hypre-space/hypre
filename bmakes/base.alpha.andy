@@ -31,7 +31,8 @@ CFLAGS =\
  ${PETSC_CFLAGS}\
  ${ISIS_FLAGS}\
  -I/usr/local/include\
- -I${HYPRE_DIR}/includes\
+ -I${HYPRE_DIR}\
+ -I${HYPRE_DIR}/utilities\
  -DPETSC_AVAILABLE\
  -DISIS_AVAILABLE\
  -DHYPRE_MEMORY_CHECK\

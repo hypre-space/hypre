@@ -1,7 +1,7 @@
 #ifndef MACROS_H
 #define MACROS_H
 
-#include "../../includes/general.h"
+#include "../../utilities/general.h"
 
 /*
  * macros.h

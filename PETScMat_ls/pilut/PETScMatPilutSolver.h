@@ -15,7 +15,7 @@
 #ifndef hypre_PETSC_MAT_PILUT_SOLVER_HEADER
 #define hypre_PETSC_MAT_PILUT_SOLVER_HEADER
 
-#include "../../includes/general.h"
+#include "../../utilities/general.h"
 #include "../../utilities/memory.h"
 #ifdef HYPRE_DEBUG
 #include <gmalloc.h>
@@ -27,7 +27,7 @@
 #include "mat.h"
 #include "vec.h"
 
-#include "../../includes/HYPRE.h"
+#include "../../HYPRE.h"
 
 /*--------------------------------------------------------------------------
  * hypre_PETScMatPilutSolver

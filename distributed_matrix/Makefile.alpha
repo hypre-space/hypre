@@ -47,7 +47,8 @@ CFLAGS =\
  ${SEQ_SOLVER_FLAGS}\
  -I/usr/local/include\
  -I/home/casc/include\
- -I../includes\
+ -I..\
+ -I../utilities\
  -DHYPRE_MEMORY_CHECK\
  -DHYPRE_DEBUG\
  -I/g/g90/chow/ale3d/isis/include\

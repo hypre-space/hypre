@@ -3,7 +3,7 @@
 #define _DISTRIBUTED_MATRIX_PILUT_SOLVER_HEADER
 
 
-#include "../../includes/general.h"
+#include "../../utilities/general.h"
 #include "../../utilities/memory.h"
 #ifdef HYPRE_DEBUG
 #include <gmalloc.h>

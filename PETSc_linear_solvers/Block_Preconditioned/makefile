@@ -27,7 +27,7 @@
             -I/usr/local/include -I/home/casc/include
   ILU_INC = -I../../seq_linear_solvers/ilut
   IC_INC = -I../../seq_linear_solvers/ict
-  LIN_SOLVE_INC = -I../../includes
+  LIN_SOLVE_INC = -I../.. -I../../utilities
 
   INC = $(PETSC_INC) $(PETSC_PRIV_INC) $(MPI_INC) $($(LOCAL_SOLVER)_INC) \
         $(LIN_SOLVE_INC) -I/home/casc/include

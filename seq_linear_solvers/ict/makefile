@@ -3,7 +3,7 @@ OBJS=cg_driver.o ict_driver.o \
 
 HEADERS = ic_data.h ict_facsol_f.h
 
-INC = -I.. -I/home/casc/include -I../../includes
+INC = -I.. -I/home/casc/include -I../.. -I../../utilities
 
 SPARSKIT_DIR = ../dsparskit
 LIB = -L$(SPARSKIT_DIR) -ldsparskit

@@ -15,7 +15,7 @@
 #ifndef hypre_PETScSolverParILUT_HEADER
 #define hypre_PETScSolverParILUT_HEADER
 
-#include "../../includes/general.h"
+#include "../../utilities/general.h"
 #include "../../utilities/memory.h"
 #ifdef HYPRE_DEBUG
 #include <gmalloc.h>

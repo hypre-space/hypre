@@ -3,7 +3,7 @@ OBJS=gmres_driver.o ilut_driver.o ilu_setup.o ilu_Initialize.o \
 
 HEADERS = ilu_data.h ilut_facsol_f.h
 
-INC = -I.. -I/home/casc/include -I../../includes
+INC = -I.. -I/home/casc/include -I../.. -I../../utilities
 
 SPARSKIT_DIR = ../dsparskit
 LIB = -L$(SPARSKIT_DIR) -ldsparskit

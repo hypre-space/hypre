@@ -25,7 +25,7 @@ MPIRUN       = mpirun -np 4
 #PETSc; not used here, but used by objects called from here 
 PETSC_INCLUDES = -I${PETSC_DIR}/include
 # General
-HYPRE_INCLUDES = -I../../includes -I/home/casc/include
+HYPRE_INCLUDES = -I../.. -I../../utilities -I/home/casc/include
 INCLUDES = $(HYPRE_INCLUDES) $(MPI_INCLUDES) $(PETSC_INCLUDES)
 LIBDIR   = $(MPI_LIBDIR)
 LIBS     = -L. -lHYPREpilut -lm $(MPI_LIBS) $(OTHER_LIBS)

@@ -15,7 +15,7 @@
 #ifndef hypre_DISTRIBUTED_MATRIX_HEADER
 #define hypre_DISTRIBUTED_MATRIX_HEADER
 
-#include "../includes/general.h"
+#include "../utilities/general.h"
 #include "../utilities/memory.h"
 
 #include "mpi.h"
