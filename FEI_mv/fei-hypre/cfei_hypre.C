@@ -15,7 +15,10 @@
 #endif
 
 #include "cfei_hypre.h"
-
+#include "HYPRE.h"
+#include "../../IJ_matrix_vector/HYPRE_IJ_mv.h"
+#include "../../parcsr_matrix_vector/HYPRE_parcsr_mv.h"
+#include "../../parcsr_linear_solvers/HYPRE_parcsr_ls.h"
 #include "HYPRE_LinSysCore.h"
 
 /*============================================================================*/

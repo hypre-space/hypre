@@ -46,9 +46,9 @@
 #include "../../parcsr_matrix_vector/par_vector.h"
 
 #ifdef MLPACK
-
 #include "ml_struct.h"
 #include "ml_aggregate.h"
+#endif
 
 extern void qsort0(int *, int, int);
 
@@ -64,6 +64,9 @@ extern int  HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix, MH_Matrix *,
 int MH_Irecv(void* buf, unsigned int count, int *src, int *mid,
             MPI_Comm comm, MPI_Request *request )
 {
+#ifdef HYPRE_SEQUENTIAL
+   return 0;
+#else
    int my_id, lsrc, retcode;
 
    if ( *src < 0 ) lsrc = MPI_ANY_SOURCE; else lsrc = (*src); 
@@ -74,11 +77,15 @@ int MH_Irecv(void* buf, unsigned int count, int *src, int *mid,
       printf("%d : MH_Irecv warning : retcode = %d\n", my_id, retcode);
    }
    return 0;
+#endif
 }
 
 int MH_Wait(void* buf, unsigned int count, int *src, int *mid,
             MPI_Comm comm, MPI_Request *request )
 {
+#ifdef HYPRE_SEQUENTIAL
+   return count;
+#else
    MPI_Status status;
    int        my_id, incount, retcode;
 
@@ -91,10 +98,14 @@ int MH_Wait(void* buf, unsigned int count, int *src, int *mid,
    MPI_Get_count(&status, MPI_BYTE, &incount);
    if ( *src < 0 ) *src = status.MPI_SOURCE; 
    return incount;
+#endif
 }
 
 int MH_Send(void* buf, unsigned int count, int dest, int mid, MPI_Comm comm )
 {
+#ifdef HYPRE_SEQUENTIAL
+   return 0;
+#else
    int my_id;
    int retcode = MPI_Send( buf, (int) count, MPI_BYTE, dest, mid, comm);
    if ( retcode != 0 )
@@ -103,6 +114,7 @@ int MH_Send(void* buf, unsigned int count, int dest, int mid, MPI_Comm comm )
       printf("%d : MH_Send warning : retcode = %d\n", my_id, retcode);
    }
    return 0;
+#endif
 }
 
 /****************************************************************************/ 
@@ -111,6 +123,9 @@ int MH_Send(void* buf, unsigned int count, int dest, int mid, MPI_Comm comm )
 
 int MH_ExchBdry(double *vec, void *obj)
 {
+#ifdef HYPRE_SEQUENTIAL
+   return 0;
+#else
    int         i, j, msgid, leng, src, dest, offset, *tempList;
    double      *dbuf;
    MH_Context  *context;
@@ -168,6 +183,7 @@ int MH_ExchBdry(double *vec, void *obj)
    }
    free ( request );
    return 1;
+#endif
 }
 
 /****************************************************************************/ 
@@ -255,6 +271,7 @@ int MH_GetRow(void *obj, int N_requested_rows, int requested_rows[],
 
 int HYPRE_ParCSRMLCreate( MPI_Comm comm, HYPRE_Solver *solver)
 {
+#ifdef MLPACK
     /* create an internal ML data structure */
 
     MH_Link *link = (MH_Link *) malloc( sizeof( MH_Link ) );
@@ -281,6 +298,10 @@ int HYPRE_ParCSRMLCreate( MPI_Comm comm, HYPRE_Solver *solver)
     *solver = (HYPRE_Solver) link;
 
     return 0;
+#else
+    printf("ML not linked.\n");
+    return -1;
+#endif
 }
 
 /****************************************************************************/
@@ -289,6 +310,7 @@ int HYPRE_ParCSRMLCreate( MPI_Comm comm, HYPRE_Solver *solver)
 
 int HYPRE_ParCSRMLDestroy( HYPRE_Solver solver )
 {
+#ifdef MLPACK
     int       i;
     MH_Matrix *Amat;
     MH_Link   *link = (MH_Link *) solver;
@@ -316,6 +338,11 @@ int HYPRE_ParCSRMLDestroy( HYPRE_Solver solver )
     free( link );
 
     return 0;
+#else
+    printf("ML not linked.\n");
+    return -1;
+#endif
+
 }
 
 /****************************************************************************/
@@ -325,6 +352,7 @@ int HYPRE_ParCSRMLDestroy( HYPRE_Solver solver )
 int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,   HYPRE_ParVector x      )
 {
+#ifdef MLPACK
     int        i, my_id, nprocs, coarsest_level, level, sweeps, nlevels;
     int        *row_partition, localEqns, length;
     int        Nblocks, *blockList;
@@ -487,6 +515,10 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     ML_Gen_Solver(ml, ML_MGV, nlevels-1, coarsest_level);
    
     return 0;
+#else
+    printf("ML not linked.\n");
+    return -1;
+#endif
 }
 
 /****************************************************************************/
@@ -496,6 +528,7 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 int HYPRE_ParCSRMLSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,   HYPRE_ParVector x      )
 {
+#ifdef MLPACK
     double  *rhs, *sol;
     MH_Link *link = (MH_Link *) solver;
     ML      *ml = link->ml_ptr;
@@ -521,6 +554,10 @@ int HYPRE_ParCSRMLSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     /*ML_Iterate(ml, sol, rhs);*/
 
     return 0;
+#else
+    printf("ML not linked.\n");
+    return -1;
+#endif
 }
 
 /****************************************************************************/
@@ -685,8 +722,13 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
     /* get machine information and local matrix information     */
     /* -------------------------------------------------------- */
     
+#ifdef HYPRE_SEQUENTIAL
+    my_id = 0;
+    nprocs = 1;
+#else
     MPI_Comm_rank(comm, &my_id);
     MPI_Comm_size(comm, &nprocs);
+#endif
 
     startRow  = partition[my_id];
     endRow    = partition[my_id+1] - 1;
@@ -740,14 +782,14 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        }
        HYPRE_ParCSRMatrixRestoreRow(A, i, &rowLeng, &colInd, &colVal);
     }
-    qsort0( externList, 0, externLeng-1 );
+    if ( externLeng > 1 ) qsort0( externList, 0, externLeng-1 );
     ncnt = 0;
     for ( i = 1; i < externLeng; i++ )
     {
        if ( externList[i] != externList[ncnt] ) 
           externList[++ncnt] = externList[i];
     }
-    externLeng = ncnt + 1;
+    if ( externLeng > 0 ) externLeng = ncnt + 1;
 
     /* -------------------------------------------------------- */
     /* allocate the CSR matrix                                  */
@@ -820,6 +862,7 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
 
     if ( nprocs > 1 ) 
     {
+#ifndef HYPRE_SEQUENTIAL
        /* ----------------------------------------------------- */ 
        /* count number of elements to be received from each     */
        /* remote processor (assume sequential mapping)          */
@@ -975,9 +1018,8 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        /* ----------------------------------------------------- */ 
 
        free( tempCnt );
+#endif
     }
     return 0;
 }
-
-#endif
 
