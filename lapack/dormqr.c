@@ -242,7 +242,7 @@
 
 /*        Use blocked code */
 
-	if (left && ! notran || ! left && notran) {
+	if ((left && ! notran) || (! left && notran)) {
 	    i1 = 1;
 	    i2 = *k;
 	    i3 = nb;

@@ -249,7 +249,7 @@ static doublereal c_b438 = 1.;
 
     if (! (wntua || wntus || wntuo || wntun)) {
 	*info = -1;
-    } else if (! (wntva || wntvs || wntvo || wntvn) || wntvo && wntuo) {
+    } else if (! (wntva || wntvs || wntvo || wntvn) || (wntvo && wntuo)) {
 	*info = -2;
     } else if (*m < 0) {
 	*info = -3;
@@ -257,9 +257,9 @@ static doublereal c_b438 = 1.;
 	*info = -4;
     } else if (*lda < max(1,*m)) {
 	*info = -6;
-    } else if (*ldu < 1 || wntuas && *ldu < *m) {
+    } else if (*ldu < 1 || (wntuas && *ldu < *m)) {
 	*info = -9;
-    } else if (*ldvt < 1 || wntva && *ldvt < *n || wntvs && *ldvt < minmn) {
+    } else if (*ldvt < 1 || (wntva && *ldvt < *n) || (wntvs && *ldvt < minmn)) {
 	*info = -11;
     }
 
