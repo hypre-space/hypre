@@ -151,9 +151,20 @@ hypre_CSRMatrix   **S_ptr;
       for (j = A_i[i]+1; j < A_i[i+1]; j++)
       {
          ST_i[A_j[j]]++;
-         RowMaxAbs = max(RowMaxAbs, fabs(A_data[j])); 
+
+/*       RowMaxAbs = max(RowMaxAbs, fabs(A_data[j]));  */
                        /* assumes correct sign of off-diagonal. 
                           fix later */
+
+         if (A_data[A_i[i]] < 0 ) 
+         { 
+            RowMaxAbs = max(RowMaxAbs, A_data[j]);
+         }
+         else
+         {
+            RowMaxAbs = min(RowMaxAbs, A_data[j]);
+         }
+
          ++num_connections;
       }
       measure_array[i] = RowMaxAbs;
@@ -185,9 +196,20 @@ hypre_CSRMatrix   **S_ptr;
       for (j = A_i[i]+1; j < A_i[i+1]; ++j)
       {
          ST_j[ST_i[A_j[j]]] = i;
-         if (fabs(A_data[j]) > strong_threshold * measure_array[i])
+         
+         if (measure_array[i] >= 0)
          {
-            ST_data[ST_i[A_j[j]]] = 1;
+            if (A_data[j] > strong_threshold * measure_array[i])
+            {
+               ST_data[ST_i[A_j[j]]] = 1;
+            }
+         }
+         else
+         {
+            if (A_data[j] < strong_threshold * measure_array[i])
+            {
+               ST_data[ST_i[A_j[j]]] = 1;
+            }
          }
          ST_i[A_j[j]]++; 
       }
