@@ -476,9 +476,10 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                            cg_bdy_box = hypre_BoxArrayBox( cboundarys, cbi);
                            if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) && bdy==0 )
                            {  /* we're in a boundary (in the south direction) */
-                              rap_cc[iAc] += south;
-                              rap_cc[iAc] -= a_cs[iA_offd];
+                              rap_cc[iAc] -= south;
                               rap_cc[iAc] -= 0.5*diagm;
+                              /* rap_cc[iAc] -= a_cs[iA_offd] + 0.5*( a_cc[iAm1] +
+                                 a_cw[iA_offd] + a_ce[iA_offd] + a_cn[iA_offd] );*/
                               bdy = 1;
                               break;
                            }
@@ -489,9 +490,10 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                            cg_bdy_box = hypre_BoxArrayBox( cboundaryn, cbi);
                            if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) && bdy==0 )
                            {  /* we're in a boundary (in the north direction) */
-                              rap_cc[iAc] += north;
-                              rap_cc[iAc] -= a_cn[iA_offd];
+                              rap_cc[iAc] -= north;
                               rap_cc[iAc] -= 0.5*diagp;
+                              /*rap_cc[iAc] -= a_cn[iA_offd] + 0.5*( a_cc[iAp1] +
+                                a_cw[iA_offd] + a_ce[iA_offd] + a_cs[iA_offd] );*/
                               bdy = 1;
                               break;
                            }

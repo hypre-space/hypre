@@ -546,8 +546,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
                            cg_bdy_box = hypre_BoxArrayBox( cboundarya, cbi);
                            if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) && bdy==0 )
                            {  /* we're in a boundary (in the above direction) */
-                              rap_cc[iAc] += above;
-                              rap_cc[iAc] -= a_ac[iA_offd];
+                              rap_cc[iAc] -= above;
                               rap_cc[iAc] -= 0.5*diagp;
                               bdy = 1;
                               break;
@@ -559,8 +558,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
                            cg_bdy_box = hypre_BoxArrayBox( cboundarya, cbi);
                            if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) && bdy==0 )
                            {  /* we're in a boundary (in the below direction) */
-                              rap_cc[iAc] += below;
-                              rap_cc[iAc] -= a_bc[iA_offd];
+                              rap_cc[iAc] -= below;
                               rap_cc[iAc] -= 0.5*diagm;
                               bdy = 1;
                               break;
