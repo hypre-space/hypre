@@ -176,6 +176,26 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       {
 	printf(" Coarsening Type = Falgout-CLJP \n");
       }
+      else if (abs(coarsen_type) == 8) 
+      {
+	printf(" Coarsening Type = PMIS \n");
+      }
+      else if (abs(coarsen_type) == 10) 
+      {
+	printf(" Coarsening Type = HMIS \n");
+      }
+      else if (abs(coarsen_type) == 11) 
+      {
+	printf(" Coarsening Type = Ruge 1st pass only \n");
+      }
+      else if (abs(coarsen_type) == 9) 
+      {
+	printf(" Coarsening Type = PMIS fixed random \n");
+      }
+      else if (abs(coarsen_type) == 7) 
+      {
+	printf(" Coarsening Type = CLJP, fixed random \n");
+      }
       if (coarsen_type > 0) 
       {
 	printf(" Hybrid Coarsening (switch to CLJP when coarsening slows)\n");
