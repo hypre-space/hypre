@@ -396,7 +396,7 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
           HYPRE_LSI_PolyDestroy( HYPrecon_ );
 
        else if ( HYPreconID_ == HYEUCLID )
-          HYPRE_ParCSREuclidDestroy( HYPrecon_ );
+          HYPRE_EuclidDestroy( HYPrecon_ );
 
 #ifdef MLPACK
        else if ( HYPreconID_ == HYML )
@@ -2740,7 +2740,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
           HYPRE_LSI_PolyDestroy( HYPrecon_ );
 
        else if ( HYPreconID_ == HYEUCLID )
-          HYPRE_ParCSREuclidDestroy( HYPrecon_ );
+          HYPRE_EuclidDestroy( HYPrecon_ );
 
 #ifdef MLPACK
        else if ( HYPreconID_ == HYML )
@@ -2873,7 +2873,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
             break;
 
        case HYEUCLID :
-            ierr = HYPRE_ParCSREuclidCreate( comm_, &HYPrecon_ );
+            ierr = HYPRE_EuclidCreate( comm_, &HYPrecon_ );
             assert( !ierr );
             break;
 

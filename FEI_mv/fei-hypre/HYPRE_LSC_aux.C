@@ -1257,14 +1257,14 @@ void HYPRE_LinSysCore::setupPCGPrecon()
        case HYEUCLID :
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
-               HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParCSREuclidSolve,
+               HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_EuclidSolve,
                                          HYPRE_DummyFunction, HYPrecon_);
             }
             else
             {
-               HYPRE_ParCSREuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
-               HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParCSREuclidSolve,
-                                        HYPRE_ParCSREuclidSetup, HYPrecon_);
+               HYPRE_EuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
+               HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_EuclidSolve,
+                                        HYPRE_EuclidSetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
@@ -1527,14 +1527,14 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
        case HYEUCLID :
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
-               HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_ParCSREuclidSolve,
+               HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_EuclidSolve,
                                            HYPRE_DummyFunction, HYPrecon_);
             }
             else
             {
-               HYPRE_ParCSREuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
-               HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_ParCSREuclidSolve,
-                                           HYPRE_ParCSREuclidSetup, HYPrecon_);
+               HYPRE_EuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
+               HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_EuclidSolve,
+                                           HYPRE_EuclidSetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
@@ -1800,14 +1800,14 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
        case HYEUCLID :
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
-               HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_ParCSREuclidSolve,
+               HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_EuclidSolve,
                                               HYPRE_DummyFunction, HYPrecon_);
             }
             else
             {
-               HYPRE_ParCSREuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
-               HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_ParCSREuclidSolve,
-                                              HYPRE_ParCSREuclidSetup,HYPrecon_);
+               HYPRE_EuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
+               HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_EuclidSolve,
+                                              HYPRE_EuclidSetup,HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
@@ -2073,14 +2073,14 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
        case HYEUCLID :
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
-               HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_ParCSREuclidSolve,
+               HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_EuclidSolve,
                                                HYPRE_DummyFunction, HYPrecon_);
             }
             else
             {
-               HYPRE_ParCSREuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
-               HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_ParCSREuclidSolve,
-                                               HYPRE_ParCSREuclidSetup, 
+               HYPRE_EuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
+               HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_EuclidSolve,
+                                               HYPRE_EuclidSetup, 
                                                HYPrecon_);
                HYPreconSetup_ = 1;
             }
@@ -2344,14 +2344,14 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
        case HYEUCLID :
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
-               HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_ParCSREuclidSolve,
+               HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_EuclidSolve,
                                            HYPRE_DummyFunction, HYPrecon_);
             }
             else
             {
-               HYPRE_ParCSREuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
-               HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_ParCSREuclidSolve,
-                                           HYPRE_ParCSREuclidSetup, HYPrecon_);
+               HYPRE_EuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
+               HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_EuclidSolve,
+                                           HYPRE_EuclidSetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
@@ -2614,14 +2614,14 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
        case HYEUCLID :
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
-               HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_ParCSREuclidSolve,
+               HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_EuclidSolve,
                                            HYPRE_DummyFunction, HYPrecon_);
             }
             else
             {
-               HYPRE_ParCSREuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
-               HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_ParCSREuclidSolve,
-                                           HYPRE_ParCSREuclidSetup, HYPrecon_);
+               HYPRE_EuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
+               HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_EuclidSolve,
+                                           HYPRE_EuclidSetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
