@@ -365,6 +365,7 @@ apply_error_filters () {
       ;;
       riptide*)
         for ii in \
+          '\ is\ not\ used\ for\ resolving\ any\ symbol'\
           'ld64:\ WARNING\ 84\ :\ '
         do process_filter $ErrorFile "${ii}"
         done
@@ -798,7 +799,7 @@ if [ ${BuildOpt} -ne $Skip ] ; then
       ssh ${HYPRE_RUN_MACHINE} "\
       (\
         cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test;\
-        [ -r ./env.${HYPRE_ARCH} ] && . ./env.${HYPRE_ARCH};\
+        [ -r ./AUTOTEST/env.${HYPRE_ARCH} ] && . ./AUTOTEST/env.${HYPRE_ARCH};\
         if [ "$DEBUG_MODE" = "yes" ] ; then
           ./runtest.sh -debug $BatchOpt $MailOpt $STD_TEST_DIRS \
         else
