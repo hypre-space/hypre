@@ -1273,7 +1273,7 @@ main( int   argc,
       {
          HYPRE_ParCSRPilutDestroy(pcg_precond);
       }
-      else if (solver_id == 8)
+      else if (solver_id == 18)
       {
 	 HYPRE_ParCSRParaSailsDestroy(pcg_precond);
       }
