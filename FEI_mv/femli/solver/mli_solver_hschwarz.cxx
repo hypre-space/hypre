@@ -23,14 +23,13 @@
 
 MLI_Solver_HSchwarz::MLI_Solver_HSchwarz(char *name) : MLI_Solver(name)
 {
-   Amat_            = NULL;
-   nSweeps_         = 1;
-   relaxWeights_    = new double[1];
-   relaxWeights_[0] = 1.0;
-   mliVec_          = NULL;
-   blkSize_         = 6;
-   printRNorm_      = 0;
-   smoother_        = NULL;
+   Amat_         = NULL;
+   nSweeps_      = 1;
+   relaxWeight_  = 1.0;
+   mliVec_       = NULL;
+   blkSize_      = 3;
+   printRNorm_   = 0;
+   smoother_     = NULL;
 }
 
 /******************************************************************************
@@ -39,7 +38,6 @@ MLI_Solver_HSchwarz::MLI_Solver_HSchwarz(char *name) : MLI_Solver(name)
 
 MLI_Solver_HSchwarz::~MLI_Solver_HSchwarz()
 {
-   if ( relaxWeights_ != NULL ) delete [] relaxWeights_;
    if ( mliVec_       != NULL ) delete mliVec_;
    if ( smoother_     != NULL ) HYPRE_SchwarzDestroy( smoother_ );
 }
@@ -77,7 +75,6 @@ int MLI_Solver_HSchwarz::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 
 int MLI_Solver_HSchwarz::setParams( char *paramString, int argc, char **argv )
 {
-   int    i;
    double *weights;
    char   param1[100];
 
@@ -91,9 +88,7 @@ int MLI_Solver_HSchwarz::setParams( char *paramString, int argc, char **argv )
       }
       nSweeps_ = *(int*) argv[0];
       if ( nSweeps_ < 1 ) nSweeps_ = 1;
-      if ( relaxWeights_ != NULL ) delete [] relaxWeights_;
-      relaxWeights_ = new double[nSweeps_];
-      for ( i = 0; i < nSweeps_; i++ ) relaxWeights_[i] = 1.0;
+      relaxWeight_ = 1;
       return 0;
    }
    else if ( !strcmp(param1, "relaxWeight") )
@@ -106,13 +101,7 @@ int MLI_Solver_HSchwarz::setParams( char *paramString, int argc, char **argv )
       if ( argc >= 1 ) nSweeps_ = *(int*)  argv[0];
       if ( argc == 2 ) weights = (double*) argv[1];
       if ( nSweeps_ < 1 ) nSweeps_ = 1;
-      if ( relaxWeights_ != NULL ) delete [] relaxWeights_;
-      relaxWeights_ = NULL;
-      if ( weights != NULL )
-      {
-         relaxWeights_ = new double[nSweeps_];
-         for ( i = 0; i < nSweeps_; i++ ) relaxWeights_[i] = weights[i];
-      }
+      if ( weights != NULL ) relaxWeight_ = weights[0];
    }
    else if ( !strcmp(param1, "printRNorm") )
    {
@@ -140,7 +129,7 @@ int MLI_Solver_HSchwarz::calcOmega()
 {
    int                i, relaxType=6, relaxTypes[2], level=0, numCGSweeps=10;
    int                one=1, zero=0;
-   double             relaxWt, dOne=1.0;
+   double             dOne=1.0;
    hypre_ParCSRMatrix *A;
    hypre_ParVector    *vTemp;
    hypre_ParAMGData   *amgData;
@@ -167,20 +156,19 @@ int MLI_Solver_HSchwarz::calcOmega()
    HYPRE_SchwarzCreate(&smoother[0]);
    HYPRE_SchwarzSetNumFunctions(smoother[0], blkSize_);
    HYPRE_SchwarzSetVariant(smoother[0], zero);
-   HYPRE_SchwarzSetOverlap(smoother[0], one);
+   HYPRE_SchwarzSetOverlap(smoother[0], zero);
    HYPRE_SchwarzSetDomainType(smoother[0], one);
    HYPRE_SchwarzSetRelaxWeight(smoother[0], dOne);
+   if (relaxWeight_ >= 1.0)
+      hypre_BoomerAMGCGRelaxWt((void *)amgData,level,numCGSweeps,&relaxWeight_);
+   //printf("HSchwarz : relaxWt = %e (%d)\n", relaxWeight_, blkSize_);
+   HYPRE_SchwarzSetRelaxWeight(smoother[0], relaxWeight_);
    HYPRE_SchwarzSetup(smoother[0], (HYPRE_ParCSRMatrix) A, 
                       (HYPRE_ParVector) vTemp, (HYPRE_ParVector) vTemp);
-
-   hypre_BoomerAMGCGRelaxWt((void *) amgData, level, numCGSweeps, &relaxWt);
-   for ( i = 0; i < nSweeps_; i++ ) relaxWeights_[i] = relaxWt;
-   printf("HSchwarz : relaxWt = %e\n", relaxWt);
+   smoother_ = smoother[0];
+   hypre_TFree(amgData);
    delete [] amgData->A_array;
    delete [] amgData->CF_marker_array;
-   smoother_ = smoother[0];
-   HYPRE_SchwarzSetRelaxWeight(smoother[0], relaxWt);
-   hypre_TFree(amgData);
    return 0;
 }
 

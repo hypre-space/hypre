@@ -63,6 +63,9 @@ int MLI_Solver_HSGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    int                relaxType=6, relaxPts=0, iS;
    hypre_ParCSRMatrix *A;
    hypre_ParVector    *f, *u, *vTemp;
+   //int              mypid;
+   //double           rnorm;
+   //MPI_Comm         comm;
 
    /*-----------------------------------------------------------------
     * fetch machine and smoother parameters
@@ -72,9 +75,19 @@ int MLI_Solver_HSGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    u     = (hypre_ParVector *) uIn->getVector();
    f     = (hypre_ParVector *) fIn->getVector();
    vTemp = (hypre_ParVector *) mliVec_->getVector();
+   //comm  = hypre_ParCSRMatrixComm(A);
+   //MPI_Comm_rank(comm, &mypid);
    for (iS = 0; iS < nSweeps_; iS++)
+   {
       hypre_BoomerAMGRelax(A,f,NULL,relaxType,relaxPts,relaxWeights_,
                            relaxOmega_,u,vTemp);
+      //hypre_ParVectorCopy( f, vTemp );
+      //hypre_ParCSRMatrixMatvec( -1.0, A, u, 1.0, vTemp );
+      //rnorm = sqrt(hypre_ParVectorInnerProd( vTemp, vTemp ));
+      //if ( mypid == 0 )
+      //   printf("\tMLI_Solver_HSGS iter = %4d, rnorm = %e (omega=%e)\n", 
+      //             iS, rnorm, relaxWeights_);
+   }
    return 0;
 }
 
@@ -115,12 +128,7 @@ int MLI_Solver_HSGS::setParams(char *paramString, int argc, char **argv)
    {
       calcOmega_ = 1;
    }
-   else
-   {   
-      printf("MLI_Solver_HSGS::setParams - parameter not recognized.\n");
-      printf("                 Params = %s\n", paramString);
-      return 1;
-   }
+   else return 1;
    return 0;
 }
 
