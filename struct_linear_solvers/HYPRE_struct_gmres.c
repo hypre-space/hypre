@@ -97,10 +97,7 @@ HYPRE_StructGMRESSetup( HYPRE_StructSolver solver,
                       HYPRE_StructVector b,
                       HYPRE_StructVector x      )
 {
-   return( hypre_GMRESSetup( (void *) solver,
-                           (void *) A,
-                           (void *) b,
-                           (void *) x ) );
+   return( HYPRE_GMRESSetup( solver, A, b, x ) );
 }
 
 /*==========================================================================*/
@@ -130,10 +127,7 @@ HYPRE_StructGMRESSolve( HYPRE_StructSolver solver,
                       HYPRE_StructVector b,
                       HYPRE_StructVector x      )
 {
-   return( hypre_GMRESSolve( (void *) solver,
-                           (void *) A,
-                           (void *) b,
-                           (void *) x ) );
+   return( HYPRE_GMRESSolve( solver, A, b, x ) );
 }
 
 /*==========================================================================*/
@@ -157,7 +151,7 @@ int
 HYPRE_StructGMRESSetTol( HYPRE_StructSolver solver,
                        double             tol    )
 {
-   return( hypre_GMRESSetTol( (void *) solver, tol ) );
+   return( HYPRE_GMRESSetTol( solver, tol ) );
 }
 
 /*==========================================================================*/
@@ -181,7 +175,7 @@ int
 HYPRE_StructGMRESSetMaxIter( HYPRE_StructSolver solver,
                            int                max_iter )
 {
-   return( hypre_GMRESSetMaxIter( (void *) solver, max_iter ) );
+   return( HYPRE_GMRESSetMaxIter( solver, max_iter ) );
 }
 
 
@@ -213,9 +207,9 @@ HYPRE_StructGMRESSetPrecond( HYPRE_StructSolver         solver,
                            HYPRE_PtrToStructSolverFcn precond_setup,
                            HYPRE_StructSolver         precond_solver )
 {
-   return( hypre_GMRESSetPrecond( (void *) solver,
+   return( HYPRE_GMRESSetPrecond( solver,
                                 precond, precond_setup,
-                                (void *) precond_solver ) );
+                                precond_solver ) );
 }
 
 /*==========================================================================*/
@@ -241,7 +235,7 @@ int
 HYPRE_StructGMRESSetLogging( HYPRE_StructSolver solver,
                            int                logging )
 {
-   return( hypre_GMRESSetLogging( (void *) solver, logging ) );
+   return( HYPRE_GMRESSetLogging( solver, logging ) );
 }
 
 /*==========================================================================*/
@@ -265,7 +259,7 @@ int
 HYPRE_StructGMRESGetNumIterations( HYPRE_StructSolver  solver,
                                  int                *num_iterations )
 {
-   return( hypre_GMRESGetNumIterations( (void *) solver, num_iterations ) );
+   return( HYPRE_GMRESGetNumIterations( solver, num_iterations ) );
 }
 
 /*==========================================================================*/
@@ -289,7 +283,7 @@ int
 HYPRE_StructGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
                                              double             *norm   )
 {
-   return( hypre_GMRESGetFinalRelativeResidualNorm( (void *) solver, norm ) );
+   return( HYPRE_GMRESGetFinalRelativeResidualNorm( solver, norm ) );
 }
 
 

@@ -74,9 +74,9 @@ hypre_StructKrylovCreateVectorArray(int n, void *vvector )
    {
       HYPRE_StructVectorCreate(hypre_StructVectorComm(vector),
                                 hypre_StructVectorGrid(vector),
-                                &new_vector[i]);
-      HYPRE_StructVectorInitialize(new_vector[i]);
-      HYPRE_StructVectorAssemble(new_vector[i]);
+                                (HYPRE_StructVector *) &new_vector[i] );
+      HYPRE_StructVectorInitialize((HYPRE_StructVector) new_vector[i]);
+      HYPRE_StructVectorAssemble((HYPRE_StructVector) new_vector[i]);
    }
 
    return ( (void *) new_vector );

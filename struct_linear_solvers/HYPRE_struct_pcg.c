@@ -99,10 +99,7 @@ HYPRE_StructPCGSetup( HYPRE_StructSolver solver,
                       HYPRE_StructVector b,
                       HYPRE_StructVector x      )
 {
-   return( hypre_PCGSetup( (void *) solver,
-                           (void *) A,
-                           (void *) b,
-                           (void *) x ) );
+   return( HYPRE_PCGSetup( solver, A, b, x ) );
 }
 
 /*==========================================================================*/
@@ -132,10 +129,7 @@ HYPRE_StructPCGSolve( HYPRE_StructSolver solver,
                       HYPRE_StructVector b,
                       HYPRE_StructVector x      )
 {
-   return( hypre_PCGSolve( (void *) solver,
-                           (void *) A,
-                           (void *) b,
-                           (void *) x ) );
+   return( HYPRE_PCGSolve( solver, A, b, x ) );
 }
 
 /*==========================================================================*/
@@ -159,7 +153,7 @@ int
 HYPRE_StructPCGSetTol( HYPRE_StructSolver solver,
                        double             tol    )
 {
-   return( hypre_PCGSetTol( (void *) solver, tol ) );
+   return( HYPRE_PCGSetTol( solver, tol ) );
 }
 
 /*==========================================================================*/
@@ -183,7 +177,7 @@ int
 HYPRE_StructPCGSetMaxIter( HYPRE_StructSolver solver,
                            int                max_iter )
 {
-   return( hypre_PCGSetMaxIter( (void *) solver, max_iter ) );
+   return( HYPRE_PCGSetMaxIter( solver, max_iter ) );
 }
 
 /*==========================================================================*/
@@ -209,7 +203,7 @@ int
 HYPRE_StructPCGSetTwoNorm( HYPRE_StructSolver solver,
                            int                two_norm )
 {
-   return( hypre_PCGSetTwoNorm( (void *) solver, two_norm ) );
+   return( HYPRE_PCGSetTwoNorm( solver, two_norm ) );
 }
 
 /*==========================================================================*/
@@ -235,7 +229,7 @@ int
 HYPRE_StructPCGSetRelChange( HYPRE_StructSolver solver,
                              int                rel_change )
 {
-   return( hypre_PCGSetRelChange( (void *) solver, rel_change ) );
+   return( HYPRE_PCGSetRelChange( solver, rel_change ) );
 }
 
 /*==========================================================================*/
@@ -266,9 +260,9 @@ HYPRE_StructPCGSetPrecond( HYPRE_StructSolver         solver,
                            HYPRE_PtrToStructSolverFcn precond_setup,
                            HYPRE_StructSolver         precond_solver )
 {
-   return( hypre_PCGSetPrecond( (void *) solver,
+   return( HYPRE_PCGSetPrecond( solver,
                                 precond, precond_setup,
-                                (void *) precond_solver ) );
+                                precond_solver ) );
 }
 
 /*==========================================================================*/
@@ -294,7 +288,7 @@ int
 HYPRE_StructPCGSetLogging( HYPRE_StructSolver solver,
                            int                logging )
 {
-   return( hypre_PCGSetLogging( (void *) solver, logging ) );
+   return( HYPRE_PCGSetLogging( solver, logging ) );
 }
 
 /*==========================================================================*/
@@ -318,7 +312,7 @@ int
 HYPRE_StructPCGGetNumIterations( HYPRE_StructSolver  solver,
                                  int                *num_iterations )
 {
-   return( hypre_PCGGetNumIterations( (void *) solver, num_iterations ) );
+   return( HYPRE_PCGGetNumIterations( solver, num_iterations ) );
 }
 
 /*==========================================================================*/
@@ -342,7 +336,7 @@ int
 HYPRE_StructPCGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
                                              double             *norm   )
 {
-   return( hypre_PCGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
+   return( HYPRE_PCGGetFinalRelativeResidualNorm( solver, norm ) );
 }
 
 /*==========================================================================*/

@@ -44,11 +44,30 @@ extern "C" {
  **/
 /*@{*/
 
-struct hypre_StructSolver_struct;
+/*struct hypre_StructSolver_struct;*/
 /**
  * The solver object.
  **/
-typedef struct hypre_StructSolver_struct *HYPRE_StructSolver;
+
+/*typedef struct hypre_StructSolver_struct *HYPRE_StructSolver;*/
+
+#ifndef HYPRE_SOLVER_STRUCT
+#define HYPRE_SOLVER_STRUCT
+struct hypre_Solver_struct;
+typedef struct hypre_Solver_struct *HYPRE_Solver;
+#endif
+#ifndef HYPRE_MATRIX_STRUCT
+#define HYPRE_MATRIX_STRUCT
+struct hypre_Matrix_struct;
+typedef struct hypre_Matrix_struct *HYPRE_Matrix;
+#endif
+#ifndef HYPRE_VECTOR_STRUCT
+#define HYPRE_VECTOR_STRUCT
+struct hypre_Vector_struct;
+typedef struct hypre_Vector_struct *HYPRE_Vector;
+#endif
+
+typedef struct hypre_Solver_struct *HYPRE_StructSolver;
 
 typedef int (*HYPRE_PtrToStructSolverFcn)(HYPRE_StructSolver,
                                           HYPRE_StructMatrix,
