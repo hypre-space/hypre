@@ -135,7 +135,7 @@ int MLI_Method_AMGSA::setupUsingFEData( MLI *mli )
    /* --------------------------------------------------------------- */
 
    funcPtr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
    sprintf(paramString, "HYPRE_ParCSR" );
    mliEEMat = new MLI_Matrix( (void *) hypreEE, paramString, funcPtr );
    MLI_FEDataAgglomerateElemsLocalOld(mliEEMat, &macroNumbers);
