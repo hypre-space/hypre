@@ -208,4 +208,8 @@
 04/27/04    2.5.5R1
             - correct autotest complaints
             - add new fei implementation
+07/01/04    2.5.5R2
+            - separate superlu and blas and lapack from HYPRE_LSI
+            - better amgsa coarsening
+            - deal with lsame and xerbla multiply defined problems
 
