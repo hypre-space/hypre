@@ -63,6 +63,7 @@ initialize_variables ()
   then
     [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
     [ -x /usr/bin/mailx ] && HYPRE_MAIL=/usr/bin/mailx
+    [ -x /usr/sbin/mailx ] && HYPRE_MAIL=/usr/sbin/mailx
   fi
   if test ! "${HYPRE_DEFAULT_EMAIL}"
   then
