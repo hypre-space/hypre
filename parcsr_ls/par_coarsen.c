@@ -97,7 +97,6 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(A);
    hypre_CommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(A);
    hypre_CommHandle   *comm_handle;
-   hypre_CommHandle   *comm_handle2;
 
    hypre_CSRMatrix    *A_diag          = hypre_ParCSRMatrixDiag(A);
    int                *A_diag_i        = hypre_CSRMatrixI(A_diag);
@@ -142,11 +141,15 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    hypre_ParVector    *ones_vector;
    hypre_ParVector    *measure_vector;
    double             *measure_array;
+   double             *measure_tmp;
    int                *graph_array;
    int                 graph_size;
+   int                 global_graph_size;
+   int                 new_graph_size;
+   int                 shift;
                       
    double              diag, row_scale;
-   int                 i, j, k, ic, jc, kc, jj, kk, jA, jS, kS, ig;
+   int                 i, j, k, ic, jc, kc, jj, kk, jA, jS, kS, jjS, ig;
    int		       index, start, num_procs;
                       
    int                 ierr = 0;
@@ -348,6 +351,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    hypre_SetParVectorConstantValues(ones_vector,-1.0);
 
    measure_array = hypre_CTAlloc(double, num_variables+num_cols_offd);
+   measure_tmp = hypre_CTAlloc(double, num_cols_offd);
    measure_vector = hypre_CreateParVector(comm,global_num_vars,row_starts);
    hypre_SetParVectorPartitioningOwner(measure_vector,0);
    hypre_VectorData(hypre_ParVectorLocalVector(measure_vector))=measure_array;
@@ -369,11 +373,24 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 
    graph_array   = hypre_CTAlloc(int, num_variables+num_cols_offd);
 
-   /* intialize measure array and graph array */
-   for (i = 0; i < num_variables+num_cols_offd; i++)
+   /* initialize measure array and graph array */
+
+   i = 0;
+   if (num_procs > 1)
    {
-      graph_array[i] = i;
-   }
+      while (i < num_cols_offd && col_map_offd[i] < col_1)
+      {
+         graph_array[i] = i+num_variables;
+         i++;
+      }	
+   }	
+
+   for (ig = 0; ig < num_variables; ig++)
+      graph_array[ig+i] = ig;
+   
+   for (ig = i; ig < num_cols_offd; ig++)
+      graph_array[ig+num_variables] = ig+num_variables;
+ 
 
    /*---------------------------------------------------
     * Initialize the C/F marker array
@@ -430,7 +447,9 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
        * Test for convergence
        *------------------------------------------------*/
 
-      if (graph_size == 0)
+      MPI_Allreduce(&graph_size,&global_graph_size,1,MPI_INT,MPI_SUM,comm);
+
+      if (global_graph_size == 0)
          break;
 
       /*------------------------------------------------
@@ -447,10 +466,65 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
       }
  
       comm_handle = hypre_InitializeCommunication( 1, comm_pkg, buf_data, 
-        &measure_array[num_variables]);
+        measure_tmp);
  
       hypre_FinalizeCommunication(comm_handle);   
  
+      /* check boundary for missed fine points */
+      for (i=0; i < num_cols_offd; i++)
+      {
+         if (measure_array[num_variables+i] != measure_tmp[i] 
+		&& measure_tmp[i] == 0)
+         {
+            for (jS = S_ext_i[i]; jS < S_ext_i[i+1]; jS++)
+            {
+               if (S_ext_data[jS] < 0)
+               {
+                  j = S_ext_j[jS];
+              
+                  /* "remove" edge from S */
+                  S_ext_data[jS] = -S_ext_data[jS];
+
+	          if (j >= col_1 && j < col_n)
+	  	  {
+                     jc = j - col_1;
+		     /* decrement measures of neighbors */
+                     measure_array[jc]--;
+		     if (measure_array[jc] < 1)
+                     {
+			CF_marker[jc] = F_PT;
+               		for (jjS = S_diag_i[jc]; jjS < S_diag_i[jc+1]; jjS++)
+               		{
+                  	   if (S_diag_data[jjS] < 0)
+                  	   {
+                     	      jj = S_diag_j[jjS];
+               
+                     	      /* "remove" edge from S */
+                     	      S_diag_data[jjS] = -S_diag_data[jjS];
+               
+                              /* decrement measures of unmarked neighbors */
+                              if (!CF_marker[jj])
+                     	      {
+                        	 measure_array[jj]--;
+                     	      }
+                     	   }
+               		}
+               		for (jjS = S_offd_i[jc]; jjS < S_offd_i[jc+1]; jjS++)
+               		{
+                  	   if (S_offd_data[jjS] < 0)
+                  	   {
+                              /* "remove" edge from S */
+                     	      S_offd_data[jjS] = -S_offd_data[jjS];
+                  	   }
+                        }
+                     }
+                  }
+               }
+	    }
+	 }
+ 	 measure_array[i+num_variables] = measure_tmp[i];
+      }
+
       if (num_procs > 1)
       {
          S_ext      = hypre_ExtractBExt(S,A);
@@ -480,15 +554,16 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
                  = CF_marker[hypre_CommPkgSendMapElmt(comm_pkg,j)];
       }
  
-      comm_handle2 = hypre_InitializeCommunication(11, comm_pkg, int_buf_data, 
+      comm_handle = hypre_InitializeCommunication(11, comm_pkg, int_buf_data, 
         &CF_marker[num_variables]);
  
-      hypre_FinalizeCommunication(comm_handle2);   
+      hypre_FinalizeCommunication(comm_handle);   
  
       /*------------------------------------------------
        * Apply heuristics.
        *------------------------------------------------*/
 
+      new_graph_size = graph_size;
       for (ig = 0; ig < graph_size; ig++)
       {
          i = graph_array[ig];
@@ -943,12 +1018,21 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 	    }
 
             /* take point out of the subgraph */
-            graph_size--;
-            graph_array[ig] = graph_array[graph_size];
-            graph_array[graph_size] = i;
-            ig--;
+            graph_array[ig] = -1;
+            new_graph_size--;
          }
       }
+
+      /* shift graph_array */
+      shift = 0;
+      for (ig = 0; ig < new_graph_size; ig++)
+      {
+         while (graph_array[ig+shift] == -1)
+            shift++;
+         if (shift)
+            graph_array[ig] = graph_array[ig+shift];
+      }
+      graph_size = new_graph_size;
    }
 
    /*---------------------------------------------------
@@ -957,8 +1041,9 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 
    hypre_DestroyParVector(ones_vector);
    hypre_DestroyParVector(measure_vector);
-   hypre_DestroyCSRMatrix(S_ext);
+   if (num_procs > 1) hypre_DestroyCSRMatrix(S_ext);
    hypre_TFree(graph_array);
+   hypre_TFree(measure_tmp);
 
    *S_ptr        = S;
    *CF_marker_ptr   = CF_marker;
