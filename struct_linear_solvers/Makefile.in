@@ -25,6 +25,7 @@ CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I..\
  -I../utilities\
+ -I../krylov\
  -I../struct_matrix_vector\
  ${CINCLUDES}
 
@@ -44,7 +45,6 @@ FILES =\
  general.c\
  hybrid.c\
  jacobi.c\
- pcg.c\
  pcg_struct.c\
  pfmg.c\
  pfmg2_setup_rap.c\

@@ -16,22 +16,22 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_PCGCAlloc
+ * hypre_StructKrylovCAlloc
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_PCGCAlloc( int count,
+hypre_StructKrylovCAlloc( int count,
                  int elt_size )
 {
    return( hypre_CAlloc( count, elt_size ) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGFree
+ * hypre_StructKrylovFree
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGFree( char *ptr )
+hypre_StructKrylovFree( char *ptr )
 {
    int ierr = 0;
 
@@ -41,11 +41,11 @@ hypre_PCGFree( char *ptr )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGCreateVector
+ * hypre_StructKrylovCreateVector
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_PCGCreateVector( void *vvector )
+hypre_StructKrylovCreateVector( void *vvector )
 {
    hypre_StructVector *vector = vvector;
    hypre_StructVector *new_vector;
@@ -59,11 +59,11 @@ hypre_PCGCreateVector( void *vvector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGDestroyVector
+ * hypre_StructKrylovDestroyVector
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGDestroyVector( void *vvector )
+hypre_StructKrylovDestroyVector( void *vvector )
 {
    hypre_StructVector *vector = vvector;
 
@@ -71,11 +71,11 @@ hypre_PCGDestroyVector( void *vvector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGMatvecCreate
+ * hypre_StructKrylovMatvecCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_PCGMatvecCreate( void   *A,
+hypre_StructKrylovMatvecCreate( void   *A,
                        void   *x )
 {
    void *matvec_data;
@@ -87,11 +87,11 @@ hypre_PCGMatvecCreate( void   *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGMatvec
+ * hypre_StructKrylovMatvec
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGMatvec( void   *matvec_data,
+hypre_StructKrylovMatvec( void   *matvec_data,
                  double  alpha,
                  void   *A,
                  void   *x,
@@ -107,21 +107,21 @@ hypre_PCGMatvec( void   *matvec_data,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGMatvecDestroy
+ * hypre_StructKrylovMatvecDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGMatvecDestroy( void *matvec_data )
+hypre_StructKrylovMatvecDestroy( void *matvec_data )
 {
    return ( hypre_StructMatvecDestroy( matvec_data ) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGInnerProd
+ * hypre_StructKrylovInnerProd
  *--------------------------------------------------------------------------*/
 
 double
-hypre_PCGInnerProd( void *x, 
+hypre_StructKrylovInnerProd( void *x, 
                     void *y )
 {
    return ( hypre_StructInnerProd( (hypre_StructVector *) x,
@@ -130,11 +130,11 @@ hypre_PCGInnerProd( void *x,
 
 
 /*--------------------------------------------------------------------------
- * hypre_PCGCopyVector
+ * hypre_StructKrylovCopyVector
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGCopyVector( void *x, 
+hypre_StructKrylovCopyVector( void *x, 
                      void *y )
 {
    return ( hypre_StructCopy( (hypre_StructVector *) x,
@@ -142,37 +142,65 @@ hypre_PCGCopyVector( void *x,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGClearVector
+ * hypre_StructKrylovClearVector
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGClearVector( void *x )
+hypre_StructKrylovClearVector( void *x )
 {
    return ( hypre_StructVectorSetConstantValues( (hypre_StructVector *) x,
                                                  0.0 ) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGScaleVector
+ * hypre_StructKrylovScaleVector
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGScaleVector( double  alpha,
+hypre_StructKrylovScaleVector( double  alpha,
                       void   *x     )
 {
    return ( hypre_StructScale( alpha, (hypre_StructVector *) x ) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGAxpy
+ * hypre_StructKrylovAxpy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGAxpy( double alpha,
+hypre_StructKrylovAxpy( double alpha,
                void   *x,
                void   *y )
 {
    return ( hypre_StructAxpy( alpha, (hypre_StructVector *) x,
                               (hypre_StructVector *) y ) );
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructKrylovIdentitySetup (for a default preconditioner)
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_StructKrylovIdentitySetup( void *vdata,
+                        void *A,
+                        void *b,
+                        void *x     )
+
+{
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructKrylovIdentity (for a default preconditioner)
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_StructKrylovIdentity( void *vdata,
+                   void *A,
+                   void *b,
+                   void *x     )
+
+{
+   return( hypre_StructKrylovCopyVector( b, x ) );
 }
 

@@ -25,6 +25,7 @@ cat > $INTERNAL_HEADER <<@
 
 #include "utilities.h"
 #include "struct_matrix_vector.h"
+#include "krylov.h"
 
 #ifdef __cplusplus
 extern "C" {

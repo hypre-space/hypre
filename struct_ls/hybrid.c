@@ -343,6 +343,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
    void              *pcg_precond;
 
    void              *pcg_solver;
+   hypre_PCGFunctions * pcg_functions;
 
    int                dscg_num_its;
    int                pcg_num_its;
@@ -356,7 +357,17 @@ hypre_HybridSolve( void               *hybrid_vdata,
    /*-----------------------------------------------------------------------
     * Setup DSCG.
     *-----------------------------------------------------------------------*/
-   pcg_solver = hypre_PCGCreate();
+   pcg_functions =
+      hypre_PCGFunctionsCreate(
+         hypre_CAlloc, hypre_StructKrylovFree, hypre_StructKrylovCreateVector,
+         hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
+         hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
+         hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
+         hypre_StructKrylovClearVector,
+         hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
+         hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
+   pcg_solver = hypre_PCGCreate( pcg_functions );
+
    hypre_PCGSetMaxIter(pcg_solver, dscg_max_its);
    hypre_PCGSetTol(pcg_solver, tol);
    hypre_PCGSetConvergenceFactorTol(pcg_solver, cf_tol);
@@ -414,7 +425,8 @@ hypre_HybridSolve( void               *hybrid_vdata,
        *--------------------------------------------------------------------*/
       hypre_PCGDestroy(pcg_solver);
 
-      pcg_solver = hypre_PCGCreate();
+      pcg_solver = hypre_PCGCreate( pcg_functions );
+
       hypre_PCGSetMaxIter(pcg_solver, pcg_max_its);
       hypre_PCGSetTol(pcg_solver, tol);
       hypre_PCGSetTwoNorm(pcg_solver, two_norm);

@@ -8,6 +8,7 @@
 
 #include "utilities.h"
 #include "struct_matrix_vector.h"
+#include "krylov.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -230,37 +231,21 @@ int hypre_JacobiSetMaxIter( void *jacobi_vdata , int max_iter );
 int hypre_JacobiSetZeroGuess( void *jacobi_vdata , int zero_guess );
 int hypre_JacobiSetTempVec( void *jacobi_vdata , hypre_StructVector *t );
 
-/* pcg.c */
-int hypre_PCGIdentitySetup( void *vdata , void *A , void *b , void *x );
-int hypre_PCGIdentity( void *vdata , void *A , void *b , void *x );
-void *hypre_PCGCreate( void );
-int hypre_PCGDestroy( void *pcg_vdata );
-int hypre_PCGSetup( void *pcg_vdata , void *A , void *b , void *x );
-int hypre_PCGSolve( void *pcg_vdata , void *A , void *b , void *x );
-int hypre_PCGSetTol( void *pcg_vdata , double tol );
-int hypre_PCGSetConvergenceFactorTol( void *pcg_vdata , double cf_tol );
-int hypre_PCGSetMaxIter( void *pcg_vdata , int max_iter );
-int hypre_PCGSetTwoNorm( void *pcg_vdata , int two_norm );
-int hypre_PCGSetRelChange( void *pcg_vdata , int rel_change );
-int hypre_PCGSetPrecond( void *pcg_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data );
-int hypre_PCGSetLogging( void *pcg_vdata , int logging );
-int hypre_PCGGetNumIterations( void *pcg_vdata , int *num_iterations );
-int hypre_PCGPrintLogging( void *pcg_vdata , int myid );
-int hypre_PCGGetFinalRelativeResidualNorm( void *pcg_vdata , double *relative_residual_norm );
-
 /* pcg_struct.c */
-char *hypre_PCGCAlloc( int count , int elt_size );
-int hypre_PCGFree( char *ptr );
-void *hypre_PCGCreateVector( void *vvector );
-int hypre_PCGDestroyVector( void *vvector );
-void *hypre_PCGMatvecCreate( void *A , void *x );
-int hypre_PCGMatvec( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
-int hypre_PCGMatvecDestroy( void *matvec_data );
-double hypre_PCGInnerProd( void *x , void *y );
-int hypre_PCGCopyVector( void *x , void *y );
-int hypre_PCGClearVector( void *x );
-int hypre_PCGScaleVector( double alpha , void *x );
-int hypre_PCGAxpy( double alpha , void *x , void *y );
+char *hypre_StructKrylovCAlloc( int count , int elt_size );
+int hypre_StructKrylovFree( char *ptr );
+void *hypre_StructKrylovCreateVector( void *vvector );
+int hypre_StructKrylovDestroyVector( void *vvector );
+void *hypre_StructKrylovMatvecCreate( void *A , void *x );
+int hypre_StructKrylovMatvec( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
+int hypre_StructKrylovMatvecDestroy( void *matvec_data );
+double hypre_StructKrylovInnerProd( void *x , void *y );
+int hypre_StructKrylovCopyVector( void *x , void *y );
+int hypre_StructKrylovClearVector( void *x );
+int hypre_StructKrylovScaleVector( double alpha , void *x );
+int hypre_StructKrylovAxpy( double alpha , void *x , void *y );
+int hypre_StructKrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
+int hypre_StructKrylovIdentity( void *vdata , void *A , void *b , void *x );
 
 /* pfmg.c */
 void *hypre_PFMGCreate( MPI_Comm comm );

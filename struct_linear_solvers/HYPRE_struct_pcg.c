@@ -28,7 +28,22 @@ headers.h
 int
 HYPRE_StructPCGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
-   *solver = ( (HYPRE_StructSolver) hypre_PCGCreate( ) );
+   /* The function names with a PCG in them are in
+      struct_linear_solvers/pcg_struct.c .  These functions do rather little -
+      e.g., cast to the correct type - before calling something else.
+      These names should be called, e.g., hypre_struct_Free, to reduce the
+      chance of name conflicts. */
+   hypre_PCGFunctions * pcg_functions =
+      hypre_PCGFunctionsCreate(
+         hypre_CAlloc, hypre_StructKrylovFree, hypre_StructKrylovCreateVector,
+         hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
+         hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
+         hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
+         hypre_StructKrylovClearVector,
+         hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
+         hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
+
+   *solver = ( (HYPRE_StructSolver) hypre_PCGCreate( pcg_functions ) );
 
    return 0;
 }
