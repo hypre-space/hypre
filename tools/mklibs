@@ -214,5 +214,5 @@ then
    esac
 fi
 
-chmod -fR $HYPRE_INSTALL_PERMISSIONS $DIST_DIR
+chmod -R $HYPRE_INSTALL_PERMISSIONS $DIST_DIR
 chgrp -fR hypre $DIST_DIR
