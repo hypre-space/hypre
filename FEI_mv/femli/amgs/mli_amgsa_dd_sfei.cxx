@@ -307,13 +307,13 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
       assert((long) eigenV);
 
 #ifdef MLI_ARPACK
-      sigmaR = 1.0e-7;
+      sigmaR = 1.0e-6;
       sigmaI = 0.0e0;
       dnstev_(&csrNrows, &nullspaceDim_, which, &sigmaR, &sigmaI, 
            csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
       if ( mypid == 0 && outputLevel_ > 0 )
       {
-         printf("Subdomain %3d (%3d) : \n", iD, nSubdomains);
+         printf("Subdomain %3d (%3d) (size=%d) : \n",iD,nSubdomains,csrNrows);
          for ( k = 0; k < nullspaceDim_; k++ )
          printf("\tARPACK eigenvalues %2d = %16.8e %16.8e\n", k, eigenR[k],
                 eigenI[k]);
