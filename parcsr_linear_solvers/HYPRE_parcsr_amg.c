@@ -18,10 +18,11 @@
  * HYPRE_ParAMGCreate
  *--------------------------------------------------------------------------*/
 
-HYPRE_Solver
-HYPRE_ParAMGCreate( )
+int
+HYPRE_ParAMGCreate( HYPRE_Solver *solver)
 {
-   return ( (HYPRE_Solver) hypre_ParAMGCreate( ) );
+   *solver = (HYPRE_Solver) hypre_ParAMGCreate( ) ;
+   return 0;
 }
 
 /*--------------------------------------------------------------------------

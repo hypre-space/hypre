@@ -98,7 +98,7 @@ void hypre_F90_IFACE P((int hypre_parcsrpilutsetfacrowsize ));
 void hypre_F90_IFACE P((int generatelaplacian ));
 
 /* HYPRE_parcsr_amg.c */
-HYPRE_Solver HYPRE_ParAMGCreate P((void ));
+int HYPRE_ParAMGCreate P((HYPRE_Solver *solver ));
 int HYPRE_ParAMGDestroy P((HYPRE_Solver solver ));
 int HYPRE_ParAMGSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParAMGSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));

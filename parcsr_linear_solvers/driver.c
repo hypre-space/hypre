@@ -469,11 +469,11 @@ main( int   argc,
       printf("Rhs from file not yet implemented.  Defaults to b=0\n");
       HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
       HYPRE_ParCSRMatrixGetDims(A, &global_m, &global_n);
-      b = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_m, partitioning);
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_m, partitioning,&b);
       HYPRE_ParVectorInitialize(b);
       HYPRE_ParVectorSetConstantValues(b, 0.0);
 
-      x = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, partitioning);
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, partitioning,&x);
       HYPRE_ParVectorInitialize(x);
       HYPRE_ParVectorSetConstantValues(x, 1.0);
    }
@@ -483,7 +483,7 @@ main( int   argc,
 
       HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
       HYPRE_ParCSRMatrixGetDims(A, &global_m, &global_n);
-      x = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, partitioning);
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, partitioning,&x);
       HYPRE_ParVectorInitialize(x);
       HYPRE_ParVectorSetConstantValues(x, 0.0);      
    }
@@ -492,13 +492,14 @@ main( int   argc,
 
       HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
       HYPRE_ParCSRMatrixGetDims(A, &global_m, &global_n);
-      b = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_m, partitioning);
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_m, partitioning,&b);
       HYPRE_ParVectorInitialize(b);
       HYPRE_ParVectorSetRandomValues(b, 22775);
-      norm = 1.0/sqrt(HYPRE_ParVectorInnerProd(b,b));
+      HYPRE_ParVectorInnerProd(b,b,&norm);
+      norm = 1.0/sqrt(norm);
       ierr = HYPRE_ParVectorScale(norm, b);      
 
-      x = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, partitioning);
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, partitioning,&x);
       HYPRE_ParVectorInitialize(x);
       HYPRE_ParVectorSetConstantValues(x, 0.0);      
    }
@@ -507,11 +508,11 @@ main( int   argc,
 
       HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
       HYPRE_ParCSRMatrixGetDims(A, &global_m, &global_n);
-      x = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, partitioning);
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, partitioning,&x);
       HYPRE_ParVectorInitialize(x);
       HYPRE_ParVectorSetConstantValues(x, 1.0);      
 
-      b = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_m, partitioning);
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_m, partitioning,&b);
       HYPRE_ParVectorInitialize(b);
       HYPRE_ParCSRMatrixMatvec(1.0,A,x,0.0,b);
 
@@ -521,11 +522,11 @@ main( int   argc,
    {
       HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
       HYPRE_ParCSRMatrixGetDims(A, &global_m, &global_n);
-      b = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_m, partitioning);
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_m, partitioning,&b);
       HYPRE_ParVectorInitialize(b);
       HYPRE_ParVectorSetConstantValues(b, 0.0);
 
-      x = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, partitioning);
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, partitioning,&x);
       HYPRE_ParVectorInitialize(x);
       HYPRE_ParVectorSetConstantValues(x, 1.0);
    }
@@ -538,7 +539,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("BoomerAMG Setup");
       hypre_BeginTiming(time_index);
 
-      amg_solver = HYPRE_ParAMGCreate(); 
+      HYPRE_ParAMGCreate(&amg_solver); 
       HYPRE_ParAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
       HYPRE_ParAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_ParAMGSetTol(amg_solver, tol);
@@ -592,7 +593,7 @@ main( int   argc,
       if (solver_id == 1)
       {
          /* use BoomerAMG as preconditioner */
-         pcg_precond = HYPRE_ParAMGCreate(); 
+         HYPRE_ParAMGCreate(&pcg_precond); 
          HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -675,7 +676,7 @@ main( int   argc,
       {
          /* use BoomerAMG as preconditioner */
 
-         pcg_precond = HYPRE_ParAMGCreate(); 
+         HYPRE_ParAMGCreate(&pcg_precond); 
          HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -781,7 +782,7 @@ main( int   argc,
       if (solver_id == 5)
       {
          /* use BoomerAMG as preconditioner */
-         pcg_precond = HYPRE_ParAMGCreate(); 
+         HYPRE_ParAMGCreate(&pcg_precond); 
          HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);

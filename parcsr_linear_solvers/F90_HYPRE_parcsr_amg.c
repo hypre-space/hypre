@@ -24,9 +24,8 @@ hypre_F90_IFACE(hypre_paramgcreate)( long int *solver,
                                          int      *ierr    )
 
 {
-   *solver = (long int) ( HYPRE_ParAMGCreate( ) );
+   *ierr = (int) ( HYPRE_ParAMGCreate( (HYPRE_Solver *) solver) );
 
-   *ierr = 0;
 }
 
 /*--------------------------------------------------------------------------
