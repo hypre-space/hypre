@@ -8,5 +8,19 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-mpirun -machinefile mpirun.casc.machines $*
+MACHINES_FILE="mpirun.casc.machines"
+REMOVE_MACHINES_FILE="no"
+
+if [ ! -f $MACHINES_FILE ]
+then
+   hostname > $MACHINES_FILE
+   REMOVE_MACHINES_FILE="yes"
+fi
+
+mpirun -machinefile $MACHINES_FILE $*
+
+if [ $REMOVE_MACHINES_FILE = "yes" ]
+then
+   rm -f $MACHINES_FILE
+fi
 
