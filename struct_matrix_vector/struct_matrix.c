@@ -512,8 +512,9 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
       hypre_SetIndex(data_stride, 1, 1, 1);
 
       dval_box = hypre_BoxDuplicate(value_box);
-      hypre_BoxIMaxD(dval_box, 0) +=
-         (num_stencil_indices - 1)*hypre_BoxSizeD(dval_box, 0);
+      hypre_BoxIMinD(dval_box, 0) *= num_stencil_indices;
+      hypre_BoxIMaxD(dval_box, 0) *= num_stencil_indices;
+      hypre_BoxIMaxD(dval_box, 0) += num_stencil_indices - 1;
       hypre_SetIndex(dval_stride, num_stencil_indices, 1, 1);
 
       hypre_ForBoxI(i, box_array)
@@ -526,6 +527,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
             {
                data_start = hypre_BoxIMin(box);
                hypre_CopyIndex(data_start, dval_start);
+               hypre_IndexD(dval_start, 0) *= num_stencil_indices;
 
                for (s = 0; s < num_stencil_indices; s++)
                {
