@@ -18,20 +18,15 @@
 #include "IJ_matrix_vector.h"
 #include "HYPRE_parcsr_ls.h"
 
-#include "Hypre_LinearOperator.h"
-#include "Hypre_LinearOperator_Skel.h"
-#include "Hypre_ParCSRMatrixBuilder.h"
-#include "Hypre_ParCSRMatrix.h"
-#include "Hypre_ParCSRVectorBuilder.h"
-#include "Hypre_ParCSRVector.h"
-#include "Hypre_ParCSRVector_Skel.h"
-#include "Hypre_ParAMG_Skel.h"
-#include "Hypre_ParAMG_Data.h"
-#include "Hypre_MPI_Com.h"
-#include "Hypre_PCG_Skel.h"
-#include "Hypre_PCG_Data.h"
-#include "Hypre_GMRES_Skel.h"
-#include "Hypre_GMRES_Data.h"
+#include "Hypre_LinearOperator_Stub.h"
+#include "Hypre_ParCSRMatrixBuilder_Stub.h"
+#include "Hypre_ParCSRMatrix_Stub.h"
+#include "Hypre_ParCSRVectorBuilder_Stub.h"
+#include "Hypre_ParCSRVector_Stub.h"
+#include "Hypre_ParAMG_Stub.h"
+#include "Hypre_MPI_Com_Stub.h"
+#include "Hypre_PCG_Stub.h"
+#include "Hypre_GMRES_Stub.h"
 
 # define	P(s) s
 
@@ -763,7 +758,8 @@ main( int   argc,
     ierr += Hypre_ParCSRMatrixBuilder_New_fromHYPRE( MatBuilder, &ij_matrix );
     ierr += Hypre_ParCSRMatrixBuilder_GetConstructedObject
        ( MatBuilder, &linop );
-    ij_matrix_Hypre = Hypre_LinearOperator_castTo( linop, "Hypre_ParCSRMatrix" );
+    ij_matrix_Hypre = (Hypre_ParCSRMatrix)
+       Hypre_LinearOperator_castTo( linop, "Hypre.ParCSRMatrix" );
 
 #if 0
     /* compare the two matrices that should be the same */
@@ -900,11 +896,13 @@ main( int   argc,
    ierr += Hypre_ParCSRVectorBuilder_New_fromHYPRE( VecBuilder, Hcomm, &ij_x );
    ierr += Hypre_ParCSRVectorBuilder_GetConstructedObject
       ( VecBuilder, &x_HypreV );
-   x_Hypre = Hypre_Vector_castTo( x_HypreV, "Hypre_ParCSRVector" );
+   x_Hypre = (Hypre_ParCSRVector) Hypre_Vector_castTo
+      ( x_HypreV, "Hypre.ParCSRVector" );
    ierr += Hypre_ParCSRVectorBuilder_New_fromHYPRE( VecBuilder, Hcomm, &ij_b );
    ierr += Hypre_ParCSRVectorBuilder_GetConstructedObject
       ( VecBuilder, &b_HypreV );
-   b_Hypre = Hypre_Vector_castTo( b_HypreV, "Hypre_ParCSRVector" );
+   b_Hypre = (Hypre_ParCSRVector) Hypre_Vector_castTo
+      ( b_HypreV, "Hypre.ParCSRVector" );
 
    /*-----------------------------------------------------------
     * Solve the system using AMG
@@ -970,7 +968,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       linop = (Hypre_LinearOperator) Hypre_ParCSRMatrix_castTo(
-         ij_matrix_Hypre, "Hypre_LinearOperator" );
+         ij_matrix_Hypre, "Hypre.LinearOperator" );
       ierr += Hypre_ParAMG_Setup( AMG_Solver, linop, b_HypreV, x_HypreV );
       ierr += Hypre_ParAMG_Apply( AMG_Solver, b_HypreV, &x_HypreV );
 /*
@@ -1029,7 +1027,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: AMG-PCG\n");
          AMG_Solver = Hypre_ParAMG_Constructor( Hcomm );
          PCG_Precond = (Hypre_Solver) Hypre_ParAMG_castTo(
-            AMG_Solver, "Hypre_Solver" );
+            AMG_Solver, "Hypre.Solver" );
          Hypre_ParAMG_SetParameterInt( AMG_Solver, "coarsen type",
                                        (hybrid*coarsen_type) );
          Hypre_ParAMG_SetParameterInt( AMG_Solver, "measure type", measure_type );
@@ -1067,7 +1065,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
 */
          linop = (Hypre_LinearOperator) Hypre_ParCSRMatrix_castTo(
-            ij_matrix_Hypre, "Hypre_LinearOperator" );
+            ij_matrix_Hypre, "Hypre.LinearOperator" );
          Hypre_ParAMG_Setup( AMG_Solver, linop, b_HypreV, x_HypreV );
          Hypre_PCG_SetPreconditioner( PCG_Solver, PCG_Precond );
 /*
@@ -1104,7 +1102,7 @@ main( int   argc,
       }
  
       linop = (Hypre_LinearOperator) Hypre_ParCSRMatrix_castTo(
-         ij_matrix_Hypre, "Hypre_LinearOperator" );
+         ij_matrix_Hypre, "Hypre.LinearOperator" );
 
       ierr += Hypre_PCG_Setup( PCG_Solver, linop, b_HypreV, x_HypreV );
 /*      HYPRE_ParCSRPCGSetup(pcg_solver, A, b, x); */
@@ -1193,7 +1191,7 @@ main( int   argc,
 
          AMG_Solver = Hypre_ParAMG_Constructor( Hcomm );
          GMRES_Precond = (Hypre_Solver) Hypre_ParAMG_castTo(
-            AMG_Solver, "Hypre_Solver" );
+            AMG_Solver, "Hypre.Solver" );
          Hypre_ParAMG_SetParameterInt( AMG_Solver, "coarsen type",
                                        (hybrid*coarsen_type) );
          Hypre_ParAMG_SetParameterInt( AMG_Solver, "measure type", measure_type );
@@ -1230,7 +1228,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
 */
          linop = (Hypre_LinearOperator) Hypre_ParCSRMatrix_castTo(
-            ij_matrix_Hypre, "Hypre_LinearOperator" );
+            ij_matrix_Hypre, "Hypre.LinearOperator" );
          Hypre_ParAMG_Setup( AMG_Solver, linop, b_HypreV, x_HypreV );
          Hypre_GMRES_SetPreconditioner( GMRES_Solver, GMRES_Precond );
 /*
@@ -1276,7 +1274,7 @@ main( int   argc,
       }
  
       linop = (Hypre_LinearOperator) Hypre_ParCSRMatrix_castTo(
-         ij_matrix_Hypre, "Hypre_LinearOperator" );
+         ij_matrix_Hypre, "Hypre.LinearOperator" );
 
       ierr += Hypre_GMRES_Setup( GMRES_Solver, linop, b_HypreV, x_HypreV );
 /*      HYPRE_ParCSRGMRESSetup(pcg_solver, A, b, x); */
