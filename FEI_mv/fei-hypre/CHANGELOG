@@ -105,4 +105,8 @@
 05/30/02    2.0.1R17
             - add distribute SuperLU (not working yet)
             - problem probably in DSuperLU
+07/02/02    2.0.1R18
+            - add hybrid CG diag/AMG solver
+            - fix ddilut problems
+            - take out MLI compiler complaints
 

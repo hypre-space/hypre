@@ -236,6 +236,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          printf("    - pilutDropTol <f>\n");
          printf("    - ddilutFillin <f>\n");
          printf("    - ddilutDropTol <f> (f*sparsity(A))\n");
+         printf("    - ddilutOverlap\n");
          printf("    - ddilutReorder\n");
          printf("    - ddictFillin <f>\n");
          printf("    - ddictDropTol <f> (f*sparsity(A))\n");
@@ -600,6 +601,17 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters ddilutDropTol = %e\n",
                    ddilutDropTol_);
+      }
+
+      //----------------------------------------------------------------
+      // DDILUT preconditioner : turn on processor overlap
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "ddilutOverlap") )
+      {
+         ddilutOverlap_ = 1;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters ddilutOverlap = on\n");
       }
 
       //----------------------------------------------------------------
@@ -1518,7 +1530,9 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
            {
               if ( ddilutReorder_ ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
               HYPRE_LSI_DDIlutSetFillin(HYPrecon_,ddilutFillin_);
-              HYPRE_LSI_DDIlutSetDropTolerance(HYPrecon_,ddilutDropTol_);
+              HYPRE_LSI_DDIlutSetDropTolerance(HYPrecon_,ddilutDropTol_); 
+              if ( ddilutOverlap_ == 1 ) HYPRE_LSI_DDIlutSetOverlap(HYPrecon_);
+              if ( ddilutReorder_ == 1 ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
               HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_LSI_DDIlutSolve,
                                           HYPRE_LSI_DDIlutSetup, HYPrecon_);
               HYPreconSetup_ = 1;
@@ -1809,6 +1823,8 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
               if ( ddilutReorder_ ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
               HYPRE_LSI_DDIlutSetFillin(HYPrecon_,ddilutFillin_);
               HYPRE_LSI_DDIlutSetDropTolerance(HYPrecon_,ddilutDropTol_);
+              if ( ddilutOverlap_ == 1 ) HYPRE_LSI_DDIlutSetOverlap(HYPrecon_);
+              if ( ddilutReorder_ == 1 ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
               HYPRE_ParCSRFGMRESSetPrecond(HYSolver_, HYPRE_LSI_DDIlutSolve,
                                            HYPRE_LSI_DDIlutSetup, HYPrecon_);
               HYPreconSetup_ = 1;
@@ -2121,6 +2137,8 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
               if ( ddilutReorder_ ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
               HYPRE_LSI_DDIlutSetFillin(HYPrecon_,ddilutFillin_);
               HYPRE_LSI_DDIlutSetDropTolerance(HYPrecon_,ddilutDropTol_);
+              if ( ddilutOverlap_ == 1 ) HYPRE_LSI_DDIlutSetOverlap(HYPrecon_);
+              if ( ddilutReorder_ == 1 ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
               HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_LSI_DDIlutSolve,
                                              HYPRE_LSI_DDIlutSetup, HYPrecon_);
               HYPreconSetup_ = 1;
@@ -2411,6 +2429,8 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
               if ( ddilutReorder_ ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
               HYPRE_LSI_DDIlutSetFillin(HYPrecon_,ddilutFillin_);
               HYPRE_LSI_DDIlutSetDropTolerance(HYPrecon_,ddilutDropTol_);
+              if ( ddilutOverlap_ == 1 ) HYPRE_LSI_DDIlutSetOverlap(HYPrecon_);
+              if ( ddilutReorder_ == 1 ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
               HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, HYPRE_LSI_DDIlutSolve,
                                               HYPRE_LSI_DDIlutSetup,HYPrecon_);
               HYPreconSetup_ = 1;
@@ -2702,6 +2722,8 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
               if ( ddilutReorder_ ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
               HYPRE_LSI_DDIlutSetFillin(HYPrecon_,ddilutFillin_);
               HYPRE_LSI_DDIlutSetDropTolerance(HYPrecon_,ddilutDropTol_);
+              if ( ddilutOverlap_ == 1 ) HYPRE_LSI_DDIlutSetOverlap(HYPrecon_);
+              if ( ddilutReorder_ == 1 ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
               HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_LSI_DDIlutSolve,
                                           HYPRE_LSI_DDIlutSetup, HYPrecon_);
               HYPreconSetup_ = 1;
@@ -2989,6 +3011,8 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
               if ( ddilutReorder_ ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
               HYPRE_LSI_DDIlutSetFillin(HYPrecon_,ddilutFillin_);
               HYPRE_LSI_DDIlutSetDropTolerance(HYPrecon_,ddilutDropTol_);
+              if ( ddilutOverlap_ == 1 ) HYPRE_LSI_DDIlutSetOverlap(HYPrecon_);
+              if ( ddilutReorder_ == 1 ) HYPRE_LSI_DDIlutSetReorder(HYPrecon_);
               HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_LSI_DDIlutSolve,
                                           HYPRE_LSI_DDIlutSetup, HYPrecon_);
               HYPreconSetup_ = 1;

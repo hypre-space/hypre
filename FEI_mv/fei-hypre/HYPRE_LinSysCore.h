@@ -13,7 +13,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R17"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R18"
 
 // *************************************************************************
 // system libraries used
@@ -36,7 +36,8 @@
 // -------------------------------------------------------------------------
 
 enum HYsolverID {HYPCG,HYGMRES,HYFGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,HYBICGS,
-                 HYSYMQMR,HYAMG,HYSUPERLU,HYSUPERLUX,HYDSUPERLU,HYY12M,HYAMGE};
+                 HYSYMQMR,HYAMG,HYSUPERLU,HYSUPERLUX,HYDSUPERLU,HYY12M,HYAMGE,
+                 HYHYBRID};
 enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
                  HYDDILUT,HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID,HYBLOCK,HYMLI,
                  HYUZAWA};
@@ -594,6 +595,7 @@ class HYPRE_LinSysCore
    char            superluScale_[1];
    double          ddilutFillin_;
    double          ddilutDropTol_;
+   int             ddilutOverlap_;
    int             ddilutReorder_;
    double          ddictFillin_;
    double          ddictDropTol_;

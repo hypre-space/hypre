@@ -39,6 +39,7 @@ typedef struct HYPRE_LSI_DDIlut_Struct
    MH_Matrix *mh_mat;
    double    thresh;
    double    fillin;
+   int       overlap;
    int       Nrows;
    int       extNrows;
    int       *mat_ia;
@@ -55,11 +56,12 @@ extern HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix,MH_Matrix *,
                                      MPI_Comm, int *, MH_Context *);
 extern int HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *, int *, 
                  int **recv_lengths, int **int_buf, double **dble_buf, 
-                 int **sindex_array, int **sindex_array2, int *offset);
-extern int HYPRE_LSI_DDIlutGetRowLengths(MH_Matrix *Amat, int *leng, int **);
+                 int **sindex_array, int **sindex_array2, int *offset,
+                 MPI_Comm mpi_comm);
+extern int HYPRE_LSI_DDIlutGetRowLengths(MH_Matrix *,int *, int **,MPI_Comm);
 extern int HYPRE_LSI_DDIlutGetOffProcRows(MH_Matrix *Amat, int leng, int *,
                  int Noffset, int *map, int *map2, int **int_buf,
-                 double **dble_buf);
+                 double **dble_buf, MPI_Comm mpi_comm);
 extern int HYPRE_LSI_DDIlutDecompose(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
                  int total_recv_leng, int *recv_lengths, int *ext_ja, 
                  double *ext_aa, int *map, int *map2, int Noffset);
@@ -89,6 +91,7 @@ int HYPRE_LSI_DDIlutCreate( MPI_Comm comm, HYPRE_Solver *solver )
    ilut_ptr->mat_ja        = NULL;
    ilut_ptr->mat_aa        = NULL;
    ilut_ptr->outputLevel   = 0;
+   ilut_ptr->overlap       = 0;
    ilut_ptr->order_array   = NULL;
    ilut_ptr->reorder_array = NULL;
    ilut_ptr->reorder       = 0;
@@ -161,6 +164,19 @@ int HYPRE_LSI_DDIlutSetDropTolerance(HYPRE_Solver solver, double thresh)
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_LSI_DDIlutSetOverlap - turn on overlap 
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_LSI_DDIlutSetOverlap(HYPRE_Solver solver)
+{
+   HYPRE_LSI_DDIlut *ilut_ptr = (HYPRE_LSI_DDIlut *) solver;
+
+   ilut_ptr->overlap = 1;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_LSI_DDIlutSetReorder - turn on reordering 
  *--------------------------------------------------------------------------*/
 
@@ -193,11 +209,12 @@ int HYPRE_LSI_DDIlutSetOutputLevel(HYPRE_Solver solver, int level)
 int HYPRE_LSI_DDIlutSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                        HYPRE_ParVector b,   HYPRE_ParVector x )
 {
-   int               i, j, ierr = 0, *idiag, Nrows, extNrows, *mat_ia, *mat_ja;
-   int               column, *order_list, *reorder_list, order_flag;
-   double            *rhs, *soln, *dbuffer, ddata, *mat_aa;
+   int              i, j, ierr = 0, *idiag, Nrows, extNrows, *mat_ia, *mat_ja;
+   int              column, *order_list, *reorder_list, order_flag;
+   double           *rhs, *soln, *dbuffer, ddata, *mat_aa;
    HYPRE_LSI_DDIlut *ilut_ptr = (HYPRE_LSI_DDIlut *) solver;
-   MH_Context        *context;
+   MH_Context       *context;
+   MPI_Comm         mpi_comm;
 
    rhs  = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) b));
    soln = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) x));
@@ -215,9 +232,10 @@ int HYPRE_LSI_DDIlutSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    idiag   = (int *)    malloc(extNrows * sizeof(int));
    for ( i = 0; i < Nrows; i++ ) dbuffer[i] = rhs[i];
 
+   HYPRE_ParCSRMatrixGetComm(A, &mpi_comm);
    context = (MH_Context *) malloc(sizeof(MH_Context));
    context->Amat = ilut_ptr->mh_mat;
-   context->comm = MPI_COMM_WORLD;
+   context->comm = mpi_comm;
 
    if ( extNrows > Nrows ) MH_ExchBdry(dbuffer, context);
    if ( order_flag )
@@ -266,19 +284,21 @@ int HYPRE_LSI_DDIlutSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
                           HYPRE_ParVector b,   HYPRE_ParVector x )
 {
    int              i, j, offset, total_recv_leng, *recv_lengths=NULL;
-   int              *int_buf=NULL, mypid, nprocs, overlap_flag=1,*parray;
+   int              *int_buf=NULL, mypid, nprocs, *parray;
    int              *map=NULL, *map2=NULL, *row_partition=NULL,*parray2;
    double           *dble_buf=NULL;
    HYPRE_LSI_DDIlut *ilut_ptr = (HYPRE_LSI_DDIlut *) solver;
    MH_Context       *context=NULL;
    MH_Matrix        *mh_mat=NULL;
+   MPI_Comm         mpi_comm;
 
    /* ---------------------------------------------------------------- */
    /* get the row information in my processors                         */
    /* ---------------------------------------------------------------- */
 
-   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
-   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+   HYPRE_ParCSRMatrixGetComm(A_csr, &mpi_comm);
+   MPI_Comm_rank(mpi_comm, &mypid);
+   MPI_Comm_size(mpi_comm, &nprocs);
    HYPRE_ParCSRMatrixGetRowPartitioning(A_csr, &row_partition);
 
    /* ---------------------------------------------------------------- */
@@ -286,24 +306,25 @@ int HYPRE_LSI_DDIlutSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    /* ---------------------------------------------------------------- */
 
    context = (MH_Context *) malloc(sizeof(MH_Context));
-   context->comm = MPI_COMM_WORLD;
+   context->comm = mpi_comm;
    context->globalEqns = row_partition[nprocs];
    context->partition = (int *) malloc(sizeof(int)*(nprocs+1));
    for (i=0; i<=nprocs; i++) context->partition[i] = row_partition[i];
    hypre_TFree( row_partition );
    mh_mat = ( MH_Matrix * ) malloc( sizeof( MH_Matrix) );
    context->Amat = mh_mat;
-   HYPRE_LSI_MLConstructMHMatrix(A_csr,mh_mat,MPI_COMM_WORLD,
+   HYPRE_LSI_MLConstructMHMatrix(A_csr,mh_mat,mpi_comm,
                                  context->partition,context); 
 
    /* ---------------------------------------------------------------- */
    /* compose the enlarged overlapped local matrix                     */
    /* ---------------------------------------------------------------- */
    
-   if ( overlap_flag )
+   if ( ilut_ptr->overlap != 0 )
    {
       HYPRE_LSI_DDIlutComposeOverlappedMatrix(mh_mat, &total_recv_leng, 
-                 &recv_lengths, &int_buf, &dble_buf, &map, &map2,&offset);
+                 &recv_lengths, &int_buf, &dble_buf, &map, &map2,&offset,
+                 mpi_comm);
    }
    else
    {
@@ -317,7 +338,7 @@ int HYPRE_LSI_DDIlutSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
       parray2 = (int *) malloc(nprocs * sizeof(int) );
       for ( i = 0; i < nprocs; i++ ) parray2[i] = 0;
       parray2[mypid] = mh_mat->Nrows;
-      MPI_Allreduce(parray2,parray,nprocs,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
+      MPI_Allreduce(parray2,parray,nprocs,MPI_INT,MPI_SUM,mpi_comm);
       offset = 0;
       for (i = 0; i < mypid; i++) offset += parray[i];
       free(parray);
@@ -367,7 +388,8 @@ int HYPRE_LSI_DDIlutSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
 /* subroutines used for constructing overlapped matrix                       */
 /*****************************************************************************/
 
-int HYPRE_LSI_DDIlutGetRowLengths(MH_Matrix *Amat, int *leng, int **recv_leng)
+int HYPRE_LSI_DDIlutGetRowLengths(MH_Matrix *Amat, int *leng, int **recv_leng,
+                                  MPI_Comm mpi_comm)
 {
    int         i, j, m, mypid, index, *temp_list, allocated_space, length;
    int         nRecv, *recvProc, *recvLeng, *cols, total_recv, mtype, msgtype;
@@ -381,7 +403,7 @@ int HYPRE_LSI_DDIlutGetRowLengths(MH_Matrix *Amat, int *leng, int **recv_leng)
    /* fetch communication information                                  */
    /* ---------------------------------------------------------------- */
 
-   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+   MPI_Comm_rank(mpi_comm, &mypid);
    nRecv    = Amat->recvProcCnt;
    nSend    = Amat->sendProcCnt;
    recvProc = Amat->recvProc;
@@ -395,7 +417,7 @@ int HYPRE_LSI_DDIlutGetRowLengths(MH_Matrix *Amat, int *leng, int **recv_leng)
    (*leng) = total_recv;
    if ( nRecv <= 0 ) (*recv_leng) = NULL;
 
-   MPI_Barrier(MPI_COMM_WORLD);
+   MPI_Barrier(mpi_comm);
 
    /* ---------------------------------------------------------------- */
    /* post receives for all messages                                   */
@@ -411,7 +433,7 @@ int HYPRE_LSI_DDIlutGetRowLengths(MH_Matrix *Amat, int *leng, int **recv_leng)
       msgtype = mtype;
       length  = recvLeng[i];
       MPI_Irecv((void *) &((*recv_leng)[offset]), length, MPI_INT, proc_id,
-               msgtype, MPI_COMM_WORLD, &Request[i]);
+               msgtype, mpi_comm, &Request[i]);
       offset += length;
    }
 
@@ -442,7 +464,7 @@ int HYPRE_LSI_DDIlutGetRowLengths(MH_Matrix *Amat, int *leng, int **recv_leng)
          temp_list[j] = m;
       }
       msgtype = mtype;
-      MPI_Send((void*)temp_list,length,MPI_INT,proc_id,msgtype,MPI_COMM_WORLD);
+      MPI_Send((void*)temp_list,length,MPI_INT,proc_id,msgtype,mpi_comm);
       free( temp_list );
    }
    free(cols);
@@ -468,7 +490,7 @@ int HYPRE_LSI_DDIlutGetRowLengths(MH_Matrix *Amat, int *leng, int **recv_leng)
 
 int HYPRE_LSI_DDIlutGetOffProcRows(MH_Matrix *Amat, int leng, int *recv_leng,
                            int Noffset, int *map, int *map2, int **int_buf,
-                           double **dble_buf)
+                           double **dble_buf, MPI_Comm mpi_comm)
 {
    int         i, j, k, m, *temp_list, length, offset, allocated_space, proc_id;
    int         nRecv, nSend, *recvProc, *sendProc, total_recv, mtype, msgtype;
@@ -483,7 +505,7 @@ int HYPRE_LSI_DDIlutGetOffProcRows(MH_Matrix *Amat, int leng, int *recv_leng,
    /* fetch communication information                                  */
    /* ---------------------------------------------------------------- */
 
-   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+   MPI_Comm_rank(mpi_comm, &mypid);
    Nrows    = Amat->Nrows;
    nRecv    = Amat->recvProcCnt;
    nSend    = Amat->sendProcCnt;
@@ -526,7 +548,7 @@ int HYPRE_LSI_DDIlutGetOffProcRows(MH_Matrix *Amat, int leng, int *recv_leng,
       for (j = 0; j < length; j++)  nnz += recv_leng[offset+j];
 
       MPI_Irecv((void *) &((*dble_buf)[nnz_offset]), nnz, MPI_DOUBLE,
-               proc_id, msgtype, MPI_COMM_WORLD, request+i);
+               proc_id, msgtype, mpi_comm, request+i);
       offset += length;
       nnz_offset += nnz;
    }
@@ -569,7 +591,7 @@ int HYPRE_LSI_DDIlutGetOffProcRows(MH_Matrix *Amat, int leng, int *recv_leng,
       }
       msgtype = mtype;
       MPI_Send((void*) send_buf, nnz, MPI_DOUBLE, proc_id, msgtype,
-                       MPI_COMM_WORLD);
+                       mpi_comm);
       if ( nnz > 0 ) free( send_buf );
    }
    free(cols);
@@ -599,7 +621,7 @@ int HYPRE_LSI_DDIlutGetOffProcRows(MH_Matrix *Amat, int leng, int *recv_leng,
       nnz = 0;
       for (j = 0; j < length; j++)  nnz += recv_leng[offset+j];
       MPI_Irecv((void *) &((*int_buf)[nnz_offset]), nnz, MPI_INT,
-                   proc_id, msgtype, MPI_COMM_WORLD, request+i);
+                   proc_id, msgtype, mpi_comm, request+i);
       offset += length;
       nnz_offset += nnz;
    }
@@ -637,7 +659,7 @@ int HYPRE_LSI_DDIlutGetOffProcRows(MH_Matrix *Amat, int leng, int *recv_leng,
       }
       msgtype = mtype;
       MPI_Send((void*) isend_buf, nnz, MPI_INT, proc_id, msgtype,
-                       MPI_COMM_WORLD);
+                       mpi_comm);
       if ( nnz > 0 ) free( isend_buf );
    }
    free(cols);
@@ -664,7 +686,7 @@ int HYPRE_LSI_DDIlutGetOffProcRows(MH_Matrix *Amat, int leng, int *recv_leng,
 int HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *mh_mat, 
               int *total_recv_leng, int **recv_lengths, int **int_buf, 
               double **dble_buf, int **sindex_array, int **sindex_array2, 
-              int *offset)
+              int *offset, MPI_Comm mpi_comm)
 {
    int        i, j, nprocs, mypid, Nrows, *proc_array, *proc_array2;
    int        extNrows, NrowsOffset, *index_array, *index_array2;
@@ -676,8 +698,8 @@ int HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *mh_mat,
    /* fetch communication information                                  */
    /* ---------------------------------------------------------------- */
 
-   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
-   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+   MPI_Comm_rank(mpi_comm, &mypid);
+   MPI_Comm_size(mpi_comm, &nprocs);
 
    /* ---------------------------------------------------------------- */
    /* fetch matrix information                                         */
@@ -703,7 +725,7 @@ int HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *mh_mat,
    proc_array2 = (int *) malloc(nprocs * sizeof(int) );
    for ( i = 0; i < nprocs; i++ ) proc_array2[i] = 0;
    proc_array2[mypid] = Nrows;
-   MPI_Allreduce(proc_array2,proc_array,nprocs,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
+   MPI_Allreduce(proc_array2,proc_array,nprocs,MPI_INT,MPI_SUM,mpi_comm);
    NrowsOffset = 0;
    for (i = 0; i < mypid; i++) NrowsOffset += proc_array[i];
    for (i = 1; i < nprocs; i++) proc_array[i] += proc_array[i-1];
@@ -714,7 +736,7 @@ int HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *mh_mat,
    /* ---------------------------------------------------------------- */
 
    context = (MH_Context *) malloc(sizeof(MH_Context));
-   context->comm = MPI_COMM_WORLD;
+   context->comm = mpi_comm;
    context->Amat = mh_mat;
    dble_array  = (double *) malloc(extNrows *sizeof(double));
    for (i = Nrows; i < extNrows; i++) dble_array[i] = 0.0;
@@ -739,9 +761,9 @@ int HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *mh_mat,
    /* in total_recv_leng, recv_lengths, int_buf, dble_buf              */
    /* ---------------------------------------------------------------- */
 
-   HYPRE_LSI_DDIlutGetRowLengths(mh_mat, total_recv_leng, recv_lengths);
+   HYPRE_LSI_DDIlutGetRowLengths(mh_mat,total_recv_leng,recv_lengths,mpi_comm);
    HYPRE_LSI_DDIlutGetOffProcRows(mh_mat, *total_recv_leng, *recv_lengths, 
-              NrowsOffset,index_array,index_array2,int_buf, dble_buf);
+              NrowsOffset,index_array,index_array2,int_buf, dble_buf,mpi_comm);
 
    free(proc_array);
    HYPRE_LSI_qsort1a(index_array, index_array2, 0, extNrows-Nrows-1);

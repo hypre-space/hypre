@@ -225,6 +225,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
 
    ddilutFillin_       = 1.0;  // additional fillin other than A
    ddilutDropTol_      = 1.0e-8;
+   ddilutOverlap_      = 0;
    ddilutReorder_      = 0;
 
    ddictFillin_        = 1.0;  // additional fillin other than A
@@ -2773,6 +2774,7 @@ void HYPRE_LinSysCore::selectSolver(char* name)
    if ( HYSolver_ != NULL )
    {
       if ( HYSolverID_ == HYPCG )    HYPRE_ParCSRPCGDestroy(HYSolver_);
+      if ( HYSolverID_ == HYHYBRID ) HYPRE_ParCSRHybridDestroy(HYSolver_);
       if ( HYSolverID_ == HYGMRES )  HYPRE_ParCSRGMRESDestroy(HYSolver_);
       if ( HYSolverID_ == HYFGMRES)  HYPRE_ParCSRFGMRESDestroy(HYSolver_);
       if ( HYSolverID_ == HYCGSTAB)  HYPRE_ParCSRBiCGSTABDestroy(HYSolver_);
@@ -2791,6 +2793,11 @@ void HYPRE_LinSysCore::selectSolver(char* name)
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYPCG;
+   }
+   else if ( !strcmp(name, "hybrid") )
+   {
+      strcpy( HYSolverName_, name );
+      HYSolverID_ = HYHYBRID;
    }
    else if ( !strcmp(name, "gmres") )
    {
@@ -2879,6 +2886,9 @@ void HYPRE_LinSysCore::selectSolver(char* name)
    {
       case HYPCG :
            HYPRE_ParCSRPCGCreate(comm_, &HYSolver_);
+           break;
+      case HYHYBRID :
+           HYPRE_ParCSRHybridCreate(&HYSolver_);
            break;
       case HYGMRES :
            HYPRE_ParCSRGMRESCreate(comm_, &HYSolver_);
@@ -3465,6 +3475,43 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
               case 2 : addToMinResProjectionSpace(currX_,currB_); break;
            }
+           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
+           break;
+
+      //----------------------------------------------------------------
+      // choose hybrid method : CG with diagonal/BoomerAMG preconditioner 
+      //----------------------------------------------------------------
+
+      case HYHYBRID :
+           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+           {
+              printf("***************************************************\n");
+              printf("* PCG with hybrid diagonal/BoomerAMG preconditioner\n");
+              printf("* maximum no. of iterations = %d\n", maxIterations_);
+              printf("* convergence tolerance     = %e\n", tolerance_);
+              printf("*--------------------------------------------------\n");
+           }
+           HYPRE_ParCSRHybridSetPCGMaxIter(HYSolver_, maxIterations_);
+           HYPRE_ParCSRHybridSetTol(HYSolver_, tolerance_);
+           HYPRE_ParCSRHybridSetRelChange(HYSolver_, 0);
+           HYPRE_ParCSRHybridSetTwoNorm(HYSolver_, 1);
+           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+           {
+              if ( mypid_ == 0 )
+                printf("***************************************************\n");
+              HYPRE_ParCSRHybridSetLogging(HYSolver_, 1);
+              if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+                 HYPRE_ParCSRHybridSetLogging(HYSolver_, 2);
+           }
+           HYPRE_ParCSRHybridSetup(HYSolver_, A_csr, b_csr, x_csr);
+           MPI_Barrier( comm_ );
+           ptime  = LSC_Wtime();
+           HYPRE_ParCSRHybridSolve(HYSolver_, A_csr, b_csr, x_csr);
+           HYPRE_ParCSRHybridGetNumIterations(HYSolver_, &numIterations);
+           HYPRE_ParVectorCopy( b_csr, r_csr );
+           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+           rnorm = sqrt( rnorm );
            if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
            break;
 
