@@ -241,6 +241,23 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #endif
 # define	P(s) s
 
+/* F90_HYPRE_parcsr_matrix.c */
+void hypre_F90_IFACE P((int hypre_newparcsrmatrix ));
+void hypre_F90_IFACE P((int hypre_destroyparcsrmatrix ));
+void hypre_F90_IFACE P((int hypre_initializeparcsrmatrix ));
+void hypre_F90_IFACE P((int hypre_printparcsrmatrix ));
+void hypre_F90_IFACE P((int hypre_getcommparcsr ));
+void hypre_F90_IFACE P((int hypre_getdimsparcsr ));
+void hypre_F90_IFACE P((int hypre_getlocalrangeparcsr ));
+void hypre_F90_IFACE P((int hypre_getrowparcsrmatrix ));
+void hypre_F90_IFACE P((int hypre_restorerowparcsrmatrix ));
+
+/* F90_HYPRE_parcsr_vector.c */
+void hypre_F90_IFACE P((int hypre_newparvector ));
+void hypre_F90_IFACE P((int hypre_destroyparvector ));
+void hypre_F90_IFACE P((int hypre_initializeparvector ));
+void hypre_F90_IFACE P((int hypre_printparvector ));
+
 /* HYPRE_parcsr_matrix.c */
 HYPRE_ParCSRMatrix HYPRE_CreateParCSRMatrix P((MPI_Comm comm , int global_num_rows , int global_num_cols , int *row_starts , int *col_starts , int num_cols_offd , int num_nonzeros_diag , int num_nonzeros_offd ));
 int HYPRE_DestroyParCSRMatrix P((HYPRE_ParCSRMatrix matrix ));
