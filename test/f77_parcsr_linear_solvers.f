@@ -13,11 +13,12 @@ c-----------------------------------------------------------------------
 
       include 'mpif.h'
 
-      integer maxzons, maxblks, maxdim
+      integer MAXZONS, MAXBLKS, MAXDIM, MAXLEVELS
 
       parameter (MAXZONS=4194304)
       parameter (MAXBLKS=32)
       parameter (MAXDIM=3)
+      parameter (MAXLEVELS=25)
 
       integer             num_procs, myid
 
@@ -31,16 +32,14 @@ c-----------------------------------------------------------------------
       integer             precond_id
 
       integer             hybrid, coarsen_type, measure_type
-      integer             ioutdat, cycle_type, num_grid_sweeps
-      integer             grid_relax_type, max_levels
+      integer             ioutdat, cycle_type, k_dim
       integer             num_rows
 
-      integer             zero, one
-      integer             maxiter, dscgmaxiter, pcgmaxiter
-      double precision    tol, convtol
+      integer             i, zero, one, maxiter, num_iterations
+      integer             num_grid_sweeps(4),grid_relax_type(4)
 
-      integer             num_iterations
-      double precision    final_res_norm, relax_weight
+      double precision    tol, convtol
+      double precision    final_res_norm, relax_weight(MAXLEVELS)
       double precision    strong_threshold, trunc_factor, drop_tol
                      
 c     HYPRE_ParCSRMatrix  A
@@ -56,7 +55,7 @@ c     HYPRE_Solver        precond
 
       integer*8           solver
       integer*8           precond
-      integer*8           grid_relax_points
+      integer*8           grid_relax_points(4)
       integer*8           row_starts
 
       double precision    values(4)
@@ -102,7 +101,6 @@ c-----------------------------------------------------------------------
       n_post = 1
 
       solver_id = 3
-      max_levels = 25
 
 c-----------------------------------------------------------------------
 c     Read options
@@ -251,16 +249,18 @@ c-----------------------------------------------------------------------
 c     General solver parameters, passing hard coded constants
 c     will break the interface.
       maxiter = 50
-      dscgmaxiter = 100
-      pcgmaxiter = 50
       tol = 0.000001
       convtol = 0.9
 
       if (solver_id .eq. 0 .or. solver_id .eq. 3 .or.
      &    solver_id .eq. 4 .or. solver_id .eq. 7) then
+
+        k_dim = 5
+
 c       Solve the system using preconditioned GMRES
 
         call HYPRE_ParCSRGMRESInitialize(MPI_COMM_WORLD, solver, ierr)
+        call HYPRE_ParCSRGMRESSetKDim(solver, k_dim, ierr)
         call HYPRE_ParCSRGMRESSetMaxIter(solver, maxiter, ierr)
         call HYPRE_ParCSRGMRESSetTol(solver, tol, ierr)
         call HYPRE_ParCSRGMRESSetLogging(solver, solver, one, ierr)
@@ -271,6 +271,10 @@ c       Solve the system using preconditioned GMRES
 
         else if (solver_id .eq. 3) then
 
+          print *, 'AMG preconditioned GMRES'
+
+          precond_id = 2
+
 c Set defaults for BoomerAMG
           coarsen_type = 0
           hybrid = 1
@@ -279,9 +283,23 @@ c Set defaults for BoomerAMG
           trunc_factor = 0.0
           cycle_type = 1
 
-          print *, 'AMG preconditioned GMRES'
+          do i = 1, 4
+            num_grid_sweeps(1) = 2
+            num_grid_sweeps(2) = 2
+            num_grid_sweeps(3) = 2
+            num_grid_sweeps(4) = 1
+          enddo
 
-          precond_id = 2
+          do i = 1, 4
+            grid_relax_type(1) = 3
+            grid_relax_type(2) = 3
+            grid_relax_type(3) = 3
+            grid_relax_type(4) = 9
+          enddo
+
+          do i = 1, MAXLEVELS
+            relax_weight(i) = 0.0
+          enddo
 
           call HYPRE_ParAMGInitialize(precond, ierr)
 
@@ -293,7 +311,7 @@ c Set defaults for BoomerAMG
           call HYPRE_ParAMGSetStrongThreshold(precond,
      &                                        strong_threshold, ierr)
 
-          call HYPRE_ParAMGSetTruncFactor(precond, trunc_factor, ierr)
+c         call HYPRE_ParAMGSetTruncFactor(precond, trunc_factor, ierr)
 
           call HYPRE_ParAMGSetLogging(precond, ioutdat,
      &                                "test.out.log", ierr)
@@ -301,6 +319,11 @@ c Set defaults for BoomerAMG
           call HYPRE_ParAMGSetMaxIter(precond, 1, ierr)
 
           call HYPRE_ParAMGSetCycleType(precond, cycle_type, ierr)
+
+          call HYPRE_ParAMGInitGridRelaxation(num_grid_sweeps,
+     &                                        grid_relax_type,
+     &                                        grid_relax_points,
+     &                                        coarsen_type, ierr)
 
           call HYPRE_ParAMGSetNumGridSweeps(precond,
      &                                      num_grid_sweeps, ierr)
@@ -315,7 +338,7 @@ c Set defaults for BoomerAMG
      &                                        grid_relax_points, ierr)
 
           call HYPRE_ParAMGSetMaxLevels(precond,
-     &                                  max_levels, ierr)
+     &                                  MAXLEVELS, ierr)
 
           call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
      &                                     precond, ierr)
