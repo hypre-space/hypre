@@ -70,8 +70,7 @@ esac
 if [ $# -gt 0 ]
 then
   VersionId=$1
-  RtagVersionId="`echo ${VersionId} | tr '.' '-'`"
-  RtagVersionId="V$RtagVersionId"
+  RtagVersionId=${VersionId}
 else
   usage
   exit
@@ -155,6 +154,7 @@ tar cf $HYPRE_DIR.tar \
     $HYPRE_DIR/src/seq_matrix_vector \
     $HYPRE_DIR/src/parcsr_matrix_vector \
     $HYPRE_DIR/src/distributed_matrix \
+    $HYPRE_DIR/src/krylov \
     $HYPRE_DIR/src/matrix_matrix \
     $HYPRE_DIR/src/IJ_matrix_vector \
     $HYPRE_DIR/src/distributed_linear_solvers/pilut \
