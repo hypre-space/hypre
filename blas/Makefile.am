@@ -28,6 +28,5 @@ FILES = \
  dtrsv.c\
  idamax.c\
  blas_utils.c\
- xerbla.c\
  f2c.h\
  hypre_blas.h
