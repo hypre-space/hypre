@@ -19,10 +19,10 @@
 #include "HYPRE_parcsr_ls.h"
 #include "krylov.h"
 
-#include "Hypre.h"
-#include "Hypre_IJParCSRMatrix_Impl.h"
-#include "Hypre_IJParCSRVector_Impl.h"
-#include "Hypre_ParCSRDiagScale_Impl.h"
+#include "bHYPRE.h"
+#include "bHYPRE_IJParCSRMatrix_Impl.h"
+#include "bHYPRE_IJParCSRVector_Impl.h"
+#include "bHYPRE_ParCSRDiagScale_Impl.h"
 
 int BuildParFromFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
@@ -63,55 +63,55 @@ main( int   argc,
    double              norm, tmp;
    double              final_res_norm;
    void               *object;
-   SIDL_BaseInterface  Hypre_object;
+   SIDL_BaseInterface  bHYPRE_object;
 
    HYPRE_IJMatrix      ij_A; 
-   Hypre_IJBuildMatrix Hypre_ij_A ;
+   bHYPRE_IJBuildMatrix bHYPRE_ij_A ;
    HYPRE_IJVector      ij_b;
    HYPRE_IJVector      ij_x;
-   Hypre_IJBuildVector Hypre_ij_b;
-   Hypre_IJBuildVector Hypre_ij_x;
-   Hypre_IJBuildVector Hypre_ij_y;
-   Hypre_IJBuildVector Hypre_ij_y2;
+   bHYPRE_IJBuildVector bHYPRE_ij_b;
+   bHYPRE_IJBuildVector bHYPRE_ij_x;
+   bHYPRE_IJBuildVector bHYPRE_ij_y;
+   bHYPRE_IJBuildVector bHYPRE_ij_y2;
 
    HYPRE_ParCSRMatrix    parcsr_A;
-   Hypre_IJParCSRMatrix  Hypre_parcsr_A;
-   Hypre_Operator        Hypre_op_A;
+   bHYPRE_IJParCSRMatrix  bHYPRE_parcsr_A;
+   bHYPRE_Operator        bHYPRE_op_A;
    HYPRE_ParVector       b;
    HYPRE_ParVector       x;
-   Hypre_IJParCSRVector  Hypre_b;
-   Hypre_IJParCSRVector  Hypre_x;
-   Hypre_IJParCSRVector  Hypre_y;
-   Hypre_IJParCSRVector  Hypre_y2;
-   Hypre_Vector          y,Hypre_Vector_x, Hypre_Vector_b;
+   bHYPRE_IJParCSRVector  bHYPRE_b;
+   bHYPRE_IJParCSRVector  bHYPRE_x;
+   bHYPRE_IJParCSRVector  bHYPRE_y;
+   bHYPRE_IJParCSRVector  bHYPRE_y2;
+   bHYPRE_Vector          y,bHYPRE_Vector_x, bHYPRE_Vector_b;
 
 /* not used   HYPRE_Solver        amg_solver;*/
    HYPRE_Solver        pcg_solver;
    HYPRE_Solver        pcg_precond, pcg_precond_gotten;
-   Hypre_BoomerAMG        Hypre_AMG;
-   Hypre_PCG           Hypre_PCG;
-   Hypre_ParCSRDiagScale  Hypre_ParCSRDiagScale;
-   Hypre_Solver        Hypre_SolverPC;
+   bHYPRE_BoomerAMG        bHYPRE_AMG;
+   bHYPRE_PCG           bHYPRE_PCG;
+   bHYPRE_ParCSRDiagScale  bHYPRE_ParCSRDiagScale;
+   bHYPRE_Solver        bHYPRE_SolverPC;
 
    int                 num_procs, myid;
    int                 local_row;
 /* not used   int                *row_sizes;*/
-   struct SIDL_int__array* Hypre_row_sizes;
+   struct SIDL_int__array* bHYPRE_row_sizes;
    int                *diag_sizes;
-   struct SIDL_int__array* Hypre_diag_sizes;
+   struct SIDL_int__array* bHYPRE_diag_sizes;
    int                 lower[3], upper[3], stride[3]; /* Do not really need to be 3, but safe */
    int                *offdiag_sizes;
-   struct SIDL_int__array* Hypre_offdiag_sizes;
+   struct SIDL_int__array* bHYPRE_offdiag_sizes;
    int                *rows;
-   struct SIDL_int__array* Hypre_rows;
+   struct SIDL_int__array* bHYPRE_rows;
    int                 size;
    int                *ncols;
-   struct SIDL_int__array* Hypre_ncols;
+   struct SIDL_int__array* bHYPRE_ncols;
    int                *col_inds;
-   struct SIDL_int__array* Hypre_col_inds;
+   struct SIDL_int__array* bHYPRE_col_inds;
    int                *dof_func;
    int		       num_functions = 1;
-   struct Hypre_IJParCSRVector__data * temp_vecdata;
+   struct bHYPRE_IJParCSRVector__data * temp_vecdata;
 
    int		       time_index;
    MPI_Comm            comm = MPI_COMM_WORLD;
@@ -122,13 +122,13 @@ main( int   argc,
    int variant, overlap, domain_type;
    double schwarz_rlx_weight;
    double *values, val;
-   struct SIDL_double__array* Hypre_values;
-   struct SIDL_int__array* Hypre_indices;
-   struct SIDL_int__array* Hypre_num_grid_sweeps=NULL;
-   struct SIDL_int__array* Hypre_grid_relax_type=NULL;
-   struct SIDL_double__array* Hypre_relax_weight=NULL;
-   struct SIDL_int__array* Hypre_grid_relax_points=NULL;
-   struct SIDL_int__array* Hypre_dof_func=NULL;
+   struct SIDL_double__array* bHYPRE_values;
+   struct SIDL_int__array* bHYPRE_indices;
+   struct SIDL_int__array* bHYPRE_num_grid_sweeps=NULL;
+   struct SIDL_int__array* bHYPRE_grid_relax_type=NULL;
+   struct SIDL_double__array* bHYPRE_relax_weight=NULL;
+   struct SIDL_int__array* bHYPRE_grid_relax_points=NULL;
+   struct SIDL_int__array* bHYPRE_dof_func=NULL;
 
 
    int dimsl[2], dimsu[2];
@@ -850,23 +850,23 @@ main( int   argc,
 
      ierr += HYPRE_ParCSRMatrixGetDims( parcsr_A, &M, &N );
 
-     /* In Babel, must set the type before calling Hypre's create
+     /* In Babel, must set the type before calling bHYPRE's create
         (note that the default name for the "new-like" constructor automatically provided
         by Babel is also create, albeit with two underscores. This name
         confusion is merely coincidental). AJC 08/01. */
-     Hypre_parcsr_A = Hypre_IJParCSRMatrix__create();
+     bHYPRE_parcsr_A = bHYPRE_IJParCSRMatrix__create();
      printf("finished __create\n");
 
-     Hypre_ij_A = Hypre_IJBuildMatrix__cast( Hypre_parcsr_A );
+     bHYPRE_ij_A = bHYPRE_IJBuildMatrix__cast( bHYPRE_parcsr_A );
      printf("finished cast\n");
-     if ( Hypre_ij_A == NULL )
+     if ( bHYPRE_ij_A == NULL )
      {
         printf("Cast failed\n");
         return 1;
      }
 
-     ierr += Hypre_IJBuildMatrix_SetCommunicator( Hypre_ij_A, (void *)comm );
-     ierr += Hypre_IJBuildMatrix_SetLocalRange( Hypre_ij_A, 
+     ierr += bHYPRE_IJBuildMatrix_SetCommunicator( bHYPRE_ij_A, (void *)comm );
+     ierr += bHYPRE_IJBuildMatrix_SetLocalRange( bHYPRE_ij_A, 
                                                 first_local_row,
                                                 last_local_row,
                                                 first_local_col,
@@ -914,29 +914,29 @@ main( int   argc,
        printf("Creating SIDL_int_arrays\n");
 
        /* Create the arrays that are used as parameters to SetDiagOffdSizes */
-       Hypre_diag_sizes = SIDL_int__array_create1d( local_num_rows-1 );
+       bHYPRE_diag_sizes = SIDL_int__array_create1d( local_num_rows-1 );
 
-       Hypre_offdiag_sizes =  SIDL_int__array_create1d( local_num_rows-1 );
+       bHYPRE_offdiag_sizes =  SIDL_int__array_create1d( local_num_rows-1 );
 
        /* Fill the SIDL arrays from the C arrays. We do it this way to keep these
           test codes as similar as possible. It could also done as a single block
           using the "borrow" function */
        for ( i=0; i < local_num_rows; i++ )
        {
-          SIDL_int__array_set1( Hypre_diag_sizes, i, diag_sizes[ i ] );
-          SIDL_int__array_set1( Hypre_offdiag_sizes, i, offdiag_sizes[ i ] );
+          SIDL_int__array_set1( bHYPRE_diag_sizes, i, diag_sizes[ i ] );
+          SIDL_int__array_set1( bHYPRE_offdiag_sizes, i, offdiag_sizes[ i ] );
        }
 
-       ierr += Hypre_IJParCSRMatrix_SetDiagOffdSizes( Hypre_parcsr_A,
-                                                      Hypre_diag_sizes,
-                                                      Hypre_offdiag_sizes );
+       ierr += bHYPRE_IJParCSRMatrix_SetDiagOffdSizes( bHYPRE_parcsr_A,
+                                                      bHYPRE_diag_sizes,
+                                                      bHYPRE_offdiag_sizes );
        printf("Finished SetDiagOffdSizes \n");
 
        hypre_TFree(diag_sizes);
        hypre_TFree(offdiag_sizes);
 
-       SIDL_int__array_deleteRef( Hypre_diag_sizes );
-       SIDL_int__array_deleteRef( Hypre_offdiag_sizes );
+       SIDL_int__array_deleteRef( bHYPRE_diag_sizes );
+       SIDL_int__array_deleteRef( bHYPRE_offdiag_sizes );
 
      
        ierr = HYPRE_IJMatrixInitialize( ij_A );
@@ -964,7 +964,7 @@ main( int   argc,
        upper[0] = local_num_rows - 1;
        printf("about to create SIDL array\n");
 
-       Hypre_row_sizes = SIDL_int__array_create1d( local_num_rows-1 );
+       bHYPRE_row_sizes = SIDL_int__array_create1d( local_num_rows-1 );
        printf("finished to create SIDL array\n");
 
 
@@ -981,24 +981,24 @@ main( int   argc,
 
        for (i=0; i < local_num_rows; i++)
        {
-          SIDL_int__array_set1( Hypre_row_sizes, i, size );
+          SIDL_int__array_set1( bHYPRE_row_sizes, i, size );
        }
 
          printf("about to call SIDL set row sizes\n");
-       ierr = Hypre_IJBuildMatrix_SetRowSizes( Hypre_ij_A, Hypre_row_sizes );
+       ierr = bHYPRE_IJBuildMatrix_SetRowSizes( bHYPRE_ij_A, bHYPRE_row_sizes );
           printf("finishedij row sizes\n");
 
-       SIDL_int__array_deleteRef( Hypre_row_sizes );
+       SIDL_int__array_deleteRef( bHYPRE_row_sizes );
 
-       ierr = Hypre_IJBuildMatrix_Initialize( Hypre_ij_A );
+       ierr = bHYPRE_IJBuildMatrix_Initialize( bHYPRE_ij_A );
 
-       /* reuse Hypre_row_sizes */
+       /* reuse bHYPRE_row_sizes */
        lower[ 0 ] = 0;
        upper[ 0 ] = 0;
 
-       Hypre_row_sizes = SIDL_int__array_create1d( 1 );
+       bHYPRE_row_sizes = SIDL_int__array_create1d( 1 );
 
-       Hypre_ncols = SIDL_int__array_create1d( 1 );
+       bHYPRE_ncols = SIDL_int__array_create1d( 1 );
 
        stride[ 0 ] = 1;
 
@@ -1007,32 +1007,32 @@ main( int   argc,
        {
           ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
                                             &col_inds, &values );
-         SIDL_int__array_set1( Hypre_row_sizes, 0, size );
-         SIDL_int__array_set1( Hypre_ncols, 0, i );
+         SIDL_int__array_set1( bHYPRE_row_sizes, 0, size );
+         SIDL_int__array_set1( bHYPRE_ncols, 0, i );
 
          upper[ 0 ] = size - 1;
 
-         Hypre_col_inds = SIDL_int__array_borrow( col_inds, 1, 
+         bHYPRE_col_inds = SIDL_int__array_borrow( col_inds, 1, 
                           lower, upper, stride );
-         Hypre_values = SIDL_double__array_borrow( values, 1,
+         bHYPRE_values = SIDL_double__array_borrow( values, 1,
                           lower, upper, stride );
 
-         ierr += Hypre_IJBuildMatrix_SetValues( Hypre_ij_A, 1, Hypre_row_sizes,
-                                          Hypre_ncols,
-                                          Hypre_col_inds,
-                                          Hypre_values );
+         ierr += bHYPRE_IJBuildMatrix_SetValues( bHYPRE_ij_A, 1, bHYPRE_row_sizes,
+                                          bHYPRE_ncols,
+                                          bHYPRE_col_inds,
+                                          bHYPRE_values );
 
          ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, i, &size,
                                                &col_inds, &values );
-         SIDL_int__array_deleteRef( Hypre_col_inds );
-         SIDL_double__array_deleteRef( Hypre_values );
+         SIDL_int__array_deleteRef( bHYPRE_col_inds );
+         SIDL_double__array_deleteRef( bHYPRE_values );
 
        }
-       SIDL_int__array_deleteRef( Hypre_row_sizes );
-       SIDL_int__array_deleteRef( Hypre_ncols );
+       SIDL_int__array_deleteRef( bHYPRE_row_sizes );
+       SIDL_int__array_deleteRef( bHYPRE_ncols );
      }
 
-     ierr += Hypre_IJBuildMatrix_Assemble( Hypre_ij_A );
+     ierr += bHYPRE_IJBuildMatrix_Assemble( bHYPRE_ij_A );
 
    }
 
@@ -1060,13 +1060,13 @@ main( int   argc,
    
    upper[ 0 ] = last_local_row - first_local_row;
 
-   Hypre_ncols = SIDL_int__array_borrow( ncols, 1, 
+   bHYPRE_ncols = SIDL_int__array_borrow( ncols, 1, 
                           lower, upper, stride );
-   Hypre_rows = SIDL_int__array_borrow( rows, 1,
+   bHYPRE_rows = SIDL_int__array_borrow( rows, 1,
                           lower, upper, stride );
-   Hypre_col_inds = SIDL_int__array_borrow( col_inds, 1, 
+   bHYPRE_col_inds = SIDL_int__array_borrow( col_inds, 1, 
                           lower, upper, stride );
-   Hypre_values = SIDL_double__array_borrow( values, 1,
+   bHYPRE_values = SIDL_double__array_borrow( values, 1,
                           lower, upper, stride );
 
    if (dt < dt_inf)
@@ -1083,26 +1083,26 @@ main( int   argc,
      values[j] = val;
    }
       
-   ierr += Hypre_IJBuildMatrix_AddToValues( Hypre_ij_A,
+   ierr += bHYPRE_IJBuildMatrix_AddToValues( bHYPRE_ij_A,
                                       local_num_rows,
-                                      Hypre_ncols, Hypre_rows,
-                                      Hypre_col_inds,
-                                      Hypre_values );
+                                      bHYPRE_ncols, bHYPRE_rows,
+                                      bHYPRE_col_inds,
+                                      bHYPRE_values );
 
    hypre_TFree(values);
    hypre_TFree(col_inds);
    hypre_TFree(rows);
    hypre_TFree(ncols);
 
-   SIDL_int__array_deleteRef( Hypre_ncols );
-   SIDL_int__array_deleteRef( Hypre_rows );
-   SIDL_int__array_deleteRef( Hypre_col_inds );
-   SIDL_double__array_deleteRef( Hypre_values );
+   SIDL_int__array_deleteRef( bHYPRE_ncols );
+   SIDL_int__array_deleteRef( bHYPRE_rows );
+   SIDL_int__array_deleteRef( bHYPRE_col_inds );
+   SIDL_double__array_deleteRef( bHYPRE_values );
 
    /* If sparsity pattern is not changed since last IJMatrixAssemble call,
       this should be a no-op */
 
-   ierr += Hypre_IJBuildMatrix_Assemble( Hypre_ij_A );
+   ierr += bHYPRE_IJBuildMatrix_Assemble( bHYPRE_ij_A );
 
    /*-----------------------------------------------------------
     * Fetch the resulting underlying matrix out
@@ -1111,20 +1111,20 @@ main( int   argc,
    if (build_matrix_type > 1)
      ierr += HYPRE_ParCSRMatrixDestroy(parcsr_A);
 
-   ierr += Hypre_IJBuildMatrix_GetObject( Hypre_ij_A, &Hypre_object );
-   Hypre_parcsr_A = Hypre_IJParCSRMatrix__cast( Hypre_object );
-   if ( Hypre_parcsr_A == NULL )
+   ierr += bHYPRE_IJBuildMatrix_GetObject( bHYPRE_ij_A, &bHYPRE_object );
+   bHYPRE_parcsr_A = bHYPRE_IJParCSRMatrix__cast( bHYPRE_object );
+   if ( bHYPRE_parcsr_A == NULL )
    {
       printf("Cast/QI failed\n");
       return 1;
    }
-   SIDL_BaseInterface_deleteRef( Hypre_object );
+   SIDL_BaseInterface_deleteRef( bHYPRE_object );
 
 
    {
       /* Break encapsulation so that the rest of the driver stays the same */
-      struct Hypre_IJParCSRMatrix__data * temp_data;
-      temp_data = Hypre_IJParCSRMatrix__get_data( Hypre_parcsr_A );
+      struct bHYPRE_IJParCSRMatrix__data * temp_data;
+      temp_data = bHYPRE_IJParCSRMatrix__get_data( bHYPRE_parcsr_A );
       
       ij_A = temp_data ->ij_A ;
       
@@ -1190,77 +1190,77 @@ main( int   argc,
       }
 
 /* RHS */
-      Hypre_b = Hypre_IJParCSRVector__create();
-      Hypre_ij_b = Hypre_IJBuildVector__cast( Hypre_b );
-      ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_b, (void *)comm );
-      ierr += Hypre_IJBuildVector_SetLocalRange( Hypre_ij_b,
+      bHYPRE_b = bHYPRE_IJParCSRVector__create();
+      bHYPRE_ij_b = bHYPRE_IJBuildVector__cast( bHYPRE_b );
+      ierr += bHYPRE_IJBuildVector_SetCommunicator( bHYPRE_ij_b, (void *)comm );
+      ierr += bHYPRE_IJBuildVector_SetLocalRange( bHYPRE_ij_b,
                                                  first_local_row,
                                                  last_local_row );
-      ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_b );
+      ierr += bHYPRE_IJBuildVector_Initialize( bHYPRE_ij_b );
 
       dimsl[0] = 0;  dimsu[0] = local_num_rows;
-      Hypre_indices = SIDL_int__array_create1d( local_num_rows );
-      Hypre_values = SIDL_double__array_create1d( local_num_rows );
+      bHYPRE_indices = SIDL_int__array_create1d( local_num_rows );
+      bHYPRE_values = SIDL_double__array_create1d( local_num_rows );
       for ( i=0; i<local_num_rows; ++i )
       {
-         SIDL_int__array_set1( Hypre_indices, i, i+first_local_row );
-         SIDL_double__array_set1( Hypre_values, i, 1 );
+         SIDL_int__array_set1( bHYPRE_indices, i, i+first_local_row );
+         SIDL_double__array_set1( bHYPRE_values, i, 1 );
       }
-      Hypre_IJBuildVector_SetValues( Hypre_ij_b, local_num_rows,
-                                     Hypre_indices, Hypre_values );
-      SIDL_int__array_deleteRef( Hypre_indices );
-      SIDL_double__array_deleteRef( Hypre_values );
+      bHYPRE_IJBuildVector_SetValues( bHYPRE_ij_b, local_num_rows,
+                                     bHYPRE_indices, bHYPRE_values );
+      SIDL_int__array_deleteRef( bHYPRE_indices );
+      SIDL_double__array_deleteRef( bHYPRE_values );
 
-     ierr += Hypre_IJBuildVector_Assemble( Hypre_ij_b );
+     ierr += bHYPRE_IJBuildVector_Assemble( bHYPRE_ij_b );
 
-     ierr += Hypre_IJBuildVector_GetObject( Hypre_ij_b, &Hypre_object );
-     Hypre_b = Hypre_IJParCSRVector__cast( Hypre_object );
-     if ( Hypre_b == NULL ) {
+     ierr += bHYPRE_IJBuildVector_GetObject( bHYPRE_ij_b, &bHYPRE_object );
+     bHYPRE_b = bHYPRE_IJParCSRVector__cast( bHYPRE_object );
+     if ( bHYPRE_b == NULL ) {
         printf("Cast/QI failed\n");
         return 1;
      }
-     SIDL_BaseInterface_deleteRef( Hypre_object );
+     SIDL_BaseInterface_deleteRef( bHYPRE_object );
 
      /* Break encapsulation so that the rest of the driver stays the same */
-     temp_vecdata = Hypre_IJParCSRVector__get_data( Hypre_b );
+     temp_vecdata = bHYPRE_IJParCSRVector__get_data( bHYPRE_b );
      ij_b = temp_vecdata ->ij_b ;
      ierr = HYPRE_IJVectorGetObject( ij_b, &object );
      b = (HYPRE_ParVector) object;
 
 /* Initial guess */
-      Hypre_x = Hypre_IJParCSRVector__create();
-      Hypre_ij_x = Hypre_IJBuildVector__cast( Hypre_x );
-      ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_x, (void *)comm );
-      ierr += Hypre_IJBuildVector_SetLocalRange( Hypre_ij_x,
+      bHYPRE_x = bHYPRE_IJParCSRVector__create();
+      bHYPRE_ij_x = bHYPRE_IJBuildVector__cast( bHYPRE_x );
+      ierr += bHYPRE_IJBuildVector_SetCommunicator( bHYPRE_ij_x, (void *)comm );
+      ierr += bHYPRE_IJBuildVector_SetLocalRange( bHYPRE_ij_x,
                                                  first_local_col,
                                                  last_local_col );
-      ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_x );
+      ierr += bHYPRE_IJBuildVector_Initialize( bHYPRE_ij_x );
 
       dimsl[0] = 0;  dimsu[0] = local_num_cols;
-      Hypre_indices = SIDL_int__array_create1d( local_num_cols );
-      Hypre_values = SIDL_double__array_create1d( local_num_cols );
+      bHYPRE_indices = SIDL_int__array_create1d( local_num_cols );
+      bHYPRE_values = SIDL_double__array_create1d( local_num_cols );
       for ( i=0; i<local_num_cols; ++i )
       {
-         SIDL_int__array_set1( Hypre_indices, i, i+first_local_col );
-         SIDL_double__array_set1( Hypre_values, i, 0 );
+         SIDL_int__array_set1( bHYPRE_indices, i, i+first_local_col );
+         SIDL_double__array_set1( bHYPRE_values, i, 0 );
       }
-      Hypre_IJBuildVector_SetValues( Hypre_ij_x, local_num_cols,
-                                     Hypre_indices, Hypre_values );
-      SIDL_int__array_deleteRef( Hypre_indices );
-      SIDL_double__array_deleteRef( Hypre_values );
+      bHYPRE_IJBuildVector_SetValues( bHYPRE_ij_x, local_num_cols,
+                                     bHYPRE_indices, bHYPRE_values );
+      SIDL_int__array_deleteRef( bHYPRE_indices );
+      SIDL_double__array_deleteRef( bHYPRE_values );
 
-      ierr += Hypre_IJBuildVector_Assemble( Hypre_ij_x );
+      ierr += bHYPRE_IJBuildVector_Assemble( bHYPRE_ij_x );
 
-      ierr += Hypre_IJBuildVector_GetObject( Hypre_ij_x, &Hypre_object );
-      Hypre_x = Hypre_IJParCSRVector__cast( Hypre_object );
-      if ( Hypre_x == NULL ) {
+      ierr += bHYPRE_IJBuildVector_GetObject( bHYPRE_ij_x, &bHYPRE_object );
+      bHYPRE_x = bHYPRE_IJParCSRVector__cast( bHYPRE_object );
+      if ( bHYPRE_x == NULL ) {
          printf("Cast/QI failed\n");
          return 1;
       }
-      SIDL_BaseInterface_deleteRef( Hypre_object );
+      SIDL_BaseInterface_deleteRef( bHYPRE_object );
 
       /* Break encapsulation so that the rest of the driver stays the same */
-      temp_vecdata = Hypre_IJParCSRVector__get_data( Hypre_x );
+      temp_vecdata = bHYPRE_IJParCSRVector__get_data( bHYPRE_x );
       ij_x = temp_vecdata ->ij_b ;
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -1571,9 +1571,9 @@ main( int   argc,
    
    HYPRE_IJMatrixPrint(ij_A, "driver.out.A");
    HYPRE_IJVectorPrint(ij_x, "driver.out.x0");
-   Hypre_IJParCSRMatrix_Print( Hypre_parcsr_A, "driver.out.HA");
-   Hypre_IJParCSRVector_Print( Hypre_b, "driver.out.Hb0");
-   Hypre_IJParCSRVector_Print( Hypre_x, "driver.out.Hx0");
+   bHYPRE_IJParCSRMatrix_Print( bHYPRE_parcsr_A, "driver.out.HA");
+   bHYPRE_IJParCSRVector_Print( bHYPRE_b, "driver.out.Hb0");
+   bHYPRE_IJParCSRVector_Print( bHYPRE_x, "driver.out.Hx0");
 
    if (num_functions > 1)
    {
@@ -1628,94 +1628,94 @@ main( int   argc,
 /* not used      char  filename[255];*/
                        
       /*  Apply, y=A*b: result is 1's on the interior of the grid */
-      Hypre_y = Hypre_IJParCSRVector__create();
-      Hypre_ij_y = Hypre_IJBuildVector__cast( Hypre_y );
-      ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, (void *)comm );
-      ierr += Hypre_IJBuildVector_SetLocalRange( Hypre_ij_y,
+      bHYPRE_y = bHYPRE_IJParCSRVector__create();
+      bHYPRE_ij_y = bHYPRE_IJBuildVector__cast( bHYPRE_y );
+      ierr += bHYPRE_IJBuildVector_SetCommunicator( bHYPRE_ij_y, (void *)comm );
+      ierr += bHYPRE_IJBuildVector_SetLocalRange( bHYPRE_ij_y,
                                                  first_local_col,
                                                  last_local_col );
-      ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y );
-      y = Hypre_Vector__cast( Hypre_y );
+      ierr += bHYPRE_IJBuildVector_Initialize( bHYPRE_ij_y );
+      y = bHYPRE_Vector__cast( bHYPRE_y );
 
-      Hypre_IJParCSRMatrix_Apply( Hypre_parcsr_A,
-                                  Hypre_Vector__cast( Hypre_b ),
+      bHYPRE_IJParCSRMatrix_Apply( bHYPRE_parcsr_A,
+                                  bHYPRE_Vector__cast( bHYPRE_b ),
                                   &y );
 
-      Hypre_IJParCSRMatrix_Print( Hypre_parcsr_A, "test.A" );
-      Hypre_IJParCSRVector_Print( Hypre_y, "test.apply" );
-      Hypre_Vector_deleteRef( y );
+      bHYPRE_IJParCSRMatrix_Print( bHYPRE_parcsr_A, "test.A" );
+      bHYPRE_IJParCSRVector_Print( bHYPRE_y, "test.apply" );
+      bHYPRE_Vector_deleteRef( y );
 
       /* SetValues, x=1; result is all 1's */
       dimsl[0] = 0;   dimsu[0] = local_num_cols;
-      Hypre_indices = SIDL_int__array_create1d( local_num_cols );
-      Hypre_values = SIDL_double__array_create1d( local_num_cols );
+      bHYPRE_indices = SIDL_int__array_create1d( local_num_cols );
+      bHYPRE_values = SIDL_double__array_create1d( local_num_cols );
       for ( i=0; i<local_num_cols; ++i )
       {
-         SIDL_int__array_set1( Hypre_indices, i, i+first_local_col );
-         SIDL_double__array_set1( Hypre_values, i, 1.0 );
+         SIDL_int__array_set1( bHYPRE_indices, i, i+first_local_col );
+         SIDL_double__array_set1( bHYPRE_values, i, 1.0 );
       }
-      Hypre_IJBuildVector_SetValues( Hypre_ij_x, local_num_cols, Hypre_indices, Hypre_values );
-      SIDL_int__array_deleteRef( Hypre_indices );
-      SIDL_double__array_deleteRef( Hypre_values );
-      Hypre_IJParCSRVector_Print( Hypre_x, "test.setvalues" );
+      bHYPRE_IJBuildVector_SetValues( bHYPRE_ij_x, local_num_cols, bHYPRE_indices, bHYPRE_values );
+      SIDL_int__array_deleteRef( bHYPRE_indices );
+      SIDL_double__array_deleteRef( bHYPRE_values );
+      bHYPRE_IJParCSRVector_Print( bHYPRE_x, "test.setvalues" );
 
       /* Copy, b=x; result is all 1's */
-      Hypre_Vector_x = Hypre_Vector__cast( Hypre_x );
-      Hypre_IJParCSRVector_Copy( Hypre_b, Hypre_Vector_x );
-      Hypre_IJParCSRVector_Print( Hypre_b, "test.copy" );
+      bHYPRE_Vector_x = bHYPRE_Vector__cast( bHYPRE_x );
+      bHYPRE_IJParCSRVector_Copy( bHYPRE_b, bHYPRE_Vector_x );
+      bHYPRE_IJParCSRVector_Print( bHYPRE_b, "test.copy" );
 
       /* Clone y=b; result is all 1's */
-      Hypre_IJParCSRVector_Clone( Hypre_b, &y );
-      Hypre_y = Hypre_IJParCSRVector__cast( y );
-      Hypre_IJParCSRVector_Print( Hypre_y, "test.clone" );
-      Hypre_Vector_deleteRef( y );
+      bHYPRE_IJParCSRVector_Clone( bHYPRE_b, &y );
+      bHYPRE_y = bHYPRE_IJParCSRVector__cast( y );
+      bHYPRE_IJParCSRVector_Print( bHYPRE_y, "test.clone" );
+      bHYPRE_Vector_deleteRef( y );
 
       /* Read y2=y; result is all 1's */
-      Hypre_y2 = Hypre_IJParCSRVector__create();
-      Hypre_ij_y2 = Hypre_IJBuildVector__cast( Hypre_y2 );
-      ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y2, (void *)comm );
-      ierr += Hypre_IJBuildVector_SetLocalRange( Hypre_ij_y2,
+      bHYPRE_y2 = bHYPRE_IJParCSRVector__create();
+      bHYPRE_ij_y2 = bHYPRE_IJBuildVector__cast( bHYPRE_y2 );
+      ierr += bHYPRE_IJBuildVector_SetCommunicator( bHYPRE_ij_y2, (void *)comm );
+      ierr += bHYPRE_IJBuildVector_SetLocalRange( bHYPRE_ij_y2,
                                                  first_local_col,
                                                  last_local_col );
-      ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y2 );
-      Hypre_IJParCSRVector_Read( Hypre_y2, "test.clone", (void *)comm );
-      Hypre_IJParCSRVector_Print( Hypre_y2, "test.read" );
+      ierr += bHYPRE_IJBuildVector_Initialize( bHYPRE_ij_y2 );
+      bHYPRE_IJParCSRVector_Read( bHYPRE_y2, "test.clone", (void *)comm );
+      bHYPRE_IJParCSRVector_Print( bHYPRE_y2, "test.read" );
 /*del by Rob, probably because Gary told him the cast shouldn't create a reference:
-      Hypre_IJBuildVector_deleteRef( Hypre_ij_y2 );*/
-      Hypre_IJParCSRVector_deleteRef( Hypre_y2 );
+      bHYPRE_IJBuildVector_deleteRef( bHYPRE_ij_y2 );*/
+      bHYPRE_IJParCSRVector_deleteRef( bHYPRE_y2 );
 
       /* Scale, x=2*x; result is all 2's */
-      Hypre_IJParCSRVector_Scale( Hypre_x, 2.0 );
-      Hypre_IJParCSRVector_Print( Hypre_x, "test.scale" );
+      bHYPRE_IJParCSRVector_Scale( bHYPRE_x, 2.0 );
+      bHYPRE_IJParCSRVector_Print( bHYPRE_x, "test.scale" );
 
       /* Dot, tmp = b.x; at this point all b[i]==1, all x[i]==2 */
-      Hypre_IJParCSRVector_Dot( Hypre_b, Hypre_Vector_x, &tmp );
+      bHYPRE_IJParCSRVector_Dot( bHYPRE_b, bHYPRE_Vector_x, &tmp );
       assert( tmp==2*N );
 
       /* Axpy, b=b-0.5*x; result is all 0's */
-      Hypre_IJParCSRVector_Axpy( Hypre_b, -0.5, Hypre_Vector_x );
-      Hypre_IJParCSRVector_Print( Hypre_b, "test.axpy" );
+      bHYPRE_IJParCSRVector_Axpy( bHYPRE_b, -0.5, bHYPRE_Vector_x );
+      bHYPRE_IJParCSRVector_Print( bHYPRE_b, "test.axpy" );
 
       /* tested by other parts of this driver program: ParCSRVector_GetObject */
 
       /* Clear and AddToValues, b=1, which restores its initial value of 1 */
       dimsl[0] = 0;   dimsu[0] = local_num_cols;
-      Hypre_indices = SIDL_int__array_create1d( local_num_cols );
-      Hypre_values = SIDL_double__array_create1d( local_num_cols );
+      bHYPRE_indices = SIDL_int__array_create1d( local_num_cols );
+      bHYPRE_values = SIDL_double__array_create1d( local_num_cols );
       for ( i=0; i<local_num_cols; ++i )
       {
-         SIDL_int__array_set1( Hypre_indices, i, i+first_local_col );
-         SIDL_double__array_set1( Hypre_values, i, 1.0 );
+         SIDL_int__array_set1( bHYPRE_indices, i, i+first_local_col );
+         SIDL_double__array_set1( bHYPRE_values, i, 1.0 );
       }
-      Hypre_IJParCSRVector_Clear( Hypre_b );
-      Hypre_IJBuildVector_AddToValues( Hypre_ij_b, local_num_cols, Hypre_indices, Hypre_values );
-      SIDL_int__array_deleteRef( Hypre_indices );
-      SIDL_double__array_deleteRef( Hypre_values );
-      Hypre_IJParCSRVector_Print( Hypre_b, "test.addtovalues" );
+      bHYPRE_IJParCSRVector_Clear( bHYPRE_b );
+      bHYPRE_IJBuildVector_AddToValues( bHYPRE_ij_b, local_num_cols, bHYPRE_indices, bHYPRE_values );
+      SIDL_int__array_deleteRef( bHYPRE_indices );
+      SIDL_double__array_deleteRef( bHYPRE_values );
+      bHYPRE_IJParCSRVector_Print( bHYPRE_b, "test.addtovalues" );
 
       /* Clear,x=0, which restores its initial value of 0 */
-      Hypre_IJParCSRVector_Clear( Hypre_x );
-      Hypre_IJParCSRVector_Print( Hypre_x, "test.clear" );
+      bHYPRE_IJParCSRVector_Clear( bHYPRE_x );
+      bHYPRE_IJParCSRVector_Print( bHYPRE_x, "test.clear" );
    }
 #endif
 
@@ -1732,97 +1732,97 @@ main( int   argc,
 
 #define USE_BABEL_INTERFACE
 #ifdef USE_BABEL_INTERFACE
-      /* To call a Hypre solver:
+      /* To call a bHYPRE solver:
          create, set comm, set operator, set other parameters,
          Setup (noop in this case), Apply */
-      Hypre_AMG = Hypre_BoomerAMG__create();
-      Hypre_Vector_b = Hypre_Vector__cast( Hypre_b );
-      Hypre_Vector_x = Hypre_Vector__cast( Hypre_x );
-      Hypre_op_A = Hypre_Operator__cast( Hypre_parcsr_A );
+      bHYPRE_AMG = bHYPRE_BoomerAMG__create();
+      bHYPRE_Vector_b = bHYPRE_Vector__cast( bHYPRE_b );
+      bHYPRE_Vector_x = bHYPRE_Vector__cast( bHYPRE_x );
+      bHYPRE_op_A = bHYPRE_Operator__cast( bHYPRE_parcsr_A );
 
-      ierr += Hypre_BoomerAMG_SetCommunicator( Hypre_AMG, (void *)comm );
-      Hypre_BoomerAMG_SetOperator( Hypre_AMG, Hypre_op_A );
-      Hypre_BoomerAMG_SetTolerance( Hypre_AMG, tol);
-      Hypre_BoomerAMG_SetPrintLevel( Hypre_AMG, ioutdat ); 
+      ierr += bHYPRE_BoomerAMG_SetCommunicator( bHYPRE_AMG, (void *)comm );
+      bHYPRE_BoomerAMG_SetOperator( bHYPRE_AMG, bHYPRE_op_A );
+      bHYPRE_BoomerAMG_SetTolerance( bHYPRE_AMG, tol);
+      bHYPRE_BoomerAMG_SetPrintLevel( bHYPRE_AMG, ioutdat ); 
 
-      Hypre_BoomerAMG_SetIntParameter( Hypre_AMG, "Coarsen Type",
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "CoarsenType",
                                        (hybrid*coarsen_type));
-      Hypre_BoomerAMG_SetIntParameter( Hypre_AMG, "Measure Type",
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "MeasureType",
                                        measure_type);
-      Hypre_BoomerAMG_SetDoubleParameter( Hypre_AMG, "Strong Threshold",
+      bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "StrongThreshold",
                                           strong_threshold);
-      Hypre_BoomerAMG_SetDoubleParameter( Hypre_AMG, "Truncation Factor",
+      bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "TruncFactor",
                                           trunc_factor);
-      Hypre_BoomerAMG_SetIntParameter( Hypre_AMG, "Cycle Type", cycle_type);
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "CycleType", cycle_type);
       dimsl[0] = 0;   dimsu[0] = 4;
-      Hypre_num_grid_sweeps = SIDL_int__array_create1d( 4 );
+      bHYPRE_num_grid_sweeps = SIDL_int__array_create1d( 4 );
       for ( i=0; i<4; ++i )
       {
-         SIDL_int__array_set1( Hypre_num_grid_sweeps, i, num_grid_sweeps[i] );
+         SIDL_int__array_set1( bHYPRE_num_grid_sweeps, i, num_grid_sweeps[i] );
       }
-      Hypre_BoomerAMG_SetIntArrayParameter( Hypre_AMG, "Num Grid Sweeps",
-                                            Hypre_num_grid_sweeps );
+      bHYPRE_BoomerAMG_SetIntArrayParameter( bHYPRE_AMG, "NumGridSweeps",
+                                            bHYPRE_num_grid_sweeps );
       dimsl[0] = 0;   dimsu[0] = 4;
-      Hypre_grid_relax_type = SIDL_int__array_create1d( 4 );
+      bHYPRE_grid_relax_type = SIDL_int__array_create1d( 4 );
       for ( i=0; i<4; ++i )
       {
-         SIDL_int__array_set1( Hypre_grid_relax_type, i, grid_relax_type[i] );
+         SIDL_int__array_set1( bHYPRE_grid_relax_type, i, grid_relax_type[i] );
       }
-      Hypre_BoomerAMG_SetIntArrayParameter( Hypre_AMG, "Grid Relax Type",
-                                            Hypre_grid_relax_type );
+      bHYPRE_BoomerAMG_SetIntArrayParameter( bHYPRE_AMG, "GridRelaxType",
+                                            bHYPRE_grid_relax_type );
       dimsl[0] = 0;   dimsu[0] = max_levels;
-      Hypre_relax_weight = SIDL_double__array_create1d( max_levels );
+      bHYPRE_relax_weight = SIDL_double__array_create1d( max_levels );
       for ( i=0; i<max_levels; ++i )
       {
-         SIDL_double__array_set1( Hypre_relax_weight, i, relax_weight[i] );
+         SIDL_double__array_set1( bHYPRE_relax_weight, i, relax_weight[i] );
       }
-      Hypre_BoomerAMG_SetDoubleArrayParameter( Hypre_AMG, "Relax Weight",
-                                               Hypre_relax_weight );
-      Hypre_BoomerAMG_SetIntParameter( Hypre_AMG, "Smooth Type",
+      bHYPRE_BoomerAMG_SetDoubleArrayParameter( bHYPRE_AMG, "RelaxWeight",
+                                               bHYPRE_relax_weight );
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "SmoothType",
                                        smooth_type );
-      Hypre_BoomerAMG_SetIntParameter( Hypre_AMG, "Smooth Num Sweeps",
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "SmoothNumSweeps",
                                        smooth_num_sweep);
       dimsl[0] = 0;   dimsl[1] = 0;   dimsu[0] = 4;   dimsu[1] = 4;
-      Hypre_grid_relax_points = SIDL_int__array_createRow( 2, dimsl, dimsu );
+      bHYPRE_grid_relax_points = SIDL_int__array_createRow( 2, dimsl, dimsu );
       for ( i=0; i<4; ++i )
       {
          for ( j=0; j<num_grid_sweeps[i]; ++j )
          {
-            SIDL_int__array_set2( Hypre_grid_relax_points, i, j,
+            SIDL_int__array_set2( bHYPRE_grid_relax_points, i, j,
                                   grid_relax_points[i][j] );
          }
       }
-      Hypre_BoomerAMG_SetIntArrayParameter( Hypre_AMG, "Grid Relax Points",
-                                            Hypre_grid_relax_points );
+      bHYPRE_BoomerAMG_SetIntArrayParameter( bHYPRE_AMG, "GridRelaxPoints",
+                                            bHYPRE_grid_relax_points );
 
-      Hypre_BoomerAMG_SetIntParameter( Hypre_AMG, "Max Levels", max_levels);
-      Hypre_BoomerAMG_SetDoubleParameter( Hypre_AMG, "Max Row Sum",
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "MaxLevels", max_levels);
+      bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "MaxRowSum",
                                           max_row_sum);
-      Hypre_BoomerAMG_SetIntParameter( Hypre_AMG, "Debug Flag", debug_flag);
-      Hypre_BoomerAMG_SetIntParameter( Hypre_AMG, "Variant", variant);
-      Hypre_BoomerAMG_SetIntParameter( Hypre_AMG, "Overlap", overlap);
-      Hypre_BoomerAMG_SetIntParameter( Hypre_AMG, "Domain Type", domain_type);
-      Hypre_BoomerAMG_SetDoubleParameter( Hypre_AMG,
-                                          "Schwarz Relaxation Weight",
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "DebugFlag", debug_flag);
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Variant", variant);
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Overlap", overlap);
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "DomainType", domain_type);
+      bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG,
+                                          "SchwarzRlxWeight",
                                           schwarz_rlx_weight);
-      Hypre_BoomerAMG_SetIntParameter( Hypre_AMG, "Num Functions",
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "NumFunctions",
                                        num_functions);
       if (num_functions > 1)
       {
          dimsl[0] = 0;   dimsu[0] = num_functions;
-         Hypre_dof_func = SIDL_int__array_create1d( num_functions );
+         bHYPRE_dof_func = SIDL_int__array_create1d( num_functions );
          for ( i=0; i<num_functions; ++i )
          {
-            SIDL_int__array_set1( Hypre_dof_func, i, dof_func[i] );
+            SIDL_int__array_set1( bHYPRE_dof_func, i, dof_func[i] );
          }
-	 Hypre_BoomerAMG_SetIntArrayParameter( Hypre_AMG, "DOF Func",
-                                               Hypre_dof_func );
+	 bHYPRE_BoomerAMG_SetIntArrayParameter( bHYPRE_AMG, "DOFFunc",
+                                               bHYPRE_dof_func );
       }
       log_level = 3;
-      Hypre_BoomerAMG_SetLogging( Hypre_AMG, log_level );
+      bHYPRE_BoomerAMG_SetLogging( bHYPRE_AMG, log_level );
 
-      ierr += Hypre_BoomerAMG_Setup( Hypre_AMG, Hypre_Vector_b,
-                                     Hypre_Vector_x );
+      ierr += bHYPRE_BoomerAMG_Setup( bHYPRE_AMG, bHYPRE_Vector_b,
+                                     bHYPRE_Vector_x );
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -1831,7 +1831,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("BoomerAMG Solve");
       hypre_BeginTiming(time_index);
 
-      ierr += Hypre_BoomerAMG_Apply( Hypre_AMG, Hypre_Vector_b, &Hypre_Vector_x );
+      ierr += bHYPRE_BoomerAMG_Apply( bHYPRE_AMG, bHYPRE_Vector_b, &bHYPRE_Vector_x );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
@@ -1839,7 +1839,7 @@ main( int   argc,
       hypre_ClearTiming();
 
       /* Break encapsulation so that the rest of the driver stays the same */
-      temp_vecdata = Hypre_IJParCSRVector__get_data( Hypre_x );
+      temp_vecdata = bHYPRE_IJParCSRVector__get_data( bHYPRE_x );
       ij_x = temp_vecdata ->ij_b ;
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -1914,19 +1914,19 @@ main( int   argc,
       hypre_BeginTiming(time_index);
  
 #ifdef USE_BABEL_INTERFACE
-      Hypre_PCG = Hypre_PCG__create();
-      Hypre_Vector_b = Hypre_Vector__cast( Hypre_b );
-      Hypre_Vector_x = Hypre_Vector__cast( Hypre_x );
+      bHYPRE_PCG = bHYPRE_PCG__create();
+      bHYPRE_Vector_b = bHYPRE_Vector__cast( bHYPRE_b );
+      bHYPRE_Vector_x = bHYPRE_Vector__cast( bHYPRE_x );
 
-      Hypre_op_A = Hypre_Operator__cast( Hypre_parcsr_A );
-      ierr += Hypre_PCG_SetCommunicator( Hypre_PCG, (void *)comm );
-      Hypre_PCG_SetOperator( Hypre_PCG, Hypre_op_A );
-      Hypre_PCG_SetIntParameter( Hypre_PCG, "Max Iter", 500 );
-      Hypre_PCG_SetDoubleParameter( Hypre_PCG, "Tol", tol );
-      Hypre_PCG_SetIntParameter( Hypre_PCG, "Two Norm", 1 );
-      Hypre_PCG_SetIntParameter( Hypre_PCG, "Rel Change", 0 );
-      Hypre_PCG_SetPrintLevel( Hypre_PCG, 1 );
-      ierr += Hypre_PCG_Setup( Hypre_PCG, Hypre_Vector_b, Hypre_Vector_x );
+      bHYPRE_op_A = bHYPRE_Operator__cast( bHYPRE_parcsr_A );
+      ierr += bHYPRE_PCG_SetCommunicator( bHYPRE_PCG, (void *)comm );
+      bHYPRE_PCG_SetOperator( bHYPRE_PCG, bHYPRE_op_A );
+      bHYPRE_PCG_SetMaxIterations( bHYPRE_PCG, 500);
+      bHYPRE_PCG_SetTolerance( bHYPRE_PCG, tol);
+      bHYPRE_PCG_SetIntParameter( bHYPRE_PCG, "TwoNorm", 1 );
+      bHYPRE_PCG_SetIntParameter( bHYPRE_PCG, "RelChange", 0 );
+      bHYPRE_PCG_SetPrintLevel( bHYPRE_PCG, 1 );
+      ierr += bHYPRE_PCG_Setup( bHYPRE_PCG, bHYPRE_Vector_b, bHYPRE_Vector_x );
 
 #else
       HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
@@ -1977,17 +1977,17 @@ main( int   argc,
          /* use diagonal scaling as preconditioner */
 
 #ifdef USE_BABEL_INTERFACE
-      /* To call a Hypre solver:
+      /* To call a bHYPRE solver:
          create, set comm, set operator, set other parameters,
          Setup (noop in this case), Apply */
-      Hypre_ParCSRDiagScale = Hypre_ParCSRDiagScale__create();
-      ierr += Hypre_ParCSRDiagScale_SetCommunicator( Hypre_ParCSRDiagScale, (void *)comm );
-      Hypre_ParCSRDiagScale_SetOperator( Hypre_ParCSRDiagScale, Hypre_op_A );
-      ierr += Hypre_ParCSRDiagScale_Setup( Hypre_ParCSRDiagScale,
-                                        Hypre_Vector_b, Hypre_Vector_x );
-      Hypre_SolverPC =
-         Hypre_Solver__cast( Hypre_ParCSRDiagScale );
-      ierr += Hypre_PCG_SetPreconditioner( Hypre_PCG, Hypre_SolverPC );
+      bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale__create();
+      ierr += bHYPRE_ParCSRDiagScale_SetCommunicator( bHYPRE_ParCSRDiagScale, (void *)comm );
+      bHYPRE_ParCSRDiagScale_SetOperator( bHYPRE_ParCSRDiagScale, bHYPRE_op_A );
+      ierr += bHYPRE_ParCSRDiagScale_Setup( bHYPRE_ParCSRDiagScale,
+                                        bHYPRE_Vector_b, bHYPRE_Vector_x );
+      bHYPRE_SolverPC =
+         bHYPRE_Solver__cast( bHYPRE_ParCSRDiagScale );
+      ierr += bHYPRE_PCG_SetPreconditioner( bHYPRE_PCG, bHYPRE_SolverPC );
 #else
          if (myid == 0) printf("Solver: DS-PCG\n");
          pcg_precond = NULL;
@@ -2059,20 +2059,20 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Solve");
       hypre_BeginTiming(time_index);
 
-      ierr += Hypre_PCG_Apply( Hypre_PCG, Hypre_Vector_b, &Hypre_Vector_x );
+      ierr += bHYPRE_PCG_Apply( bHYPRE_PCG, bHYPRE_Vector_b, &bHYPRE_Vector_x );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      ierr += Hypre_PCG_GetIntValue( Hypre_PCG, "Number of Iterations",
+      ierr += bHYPRE_PCG_GetIntValue( bHYPRE_PCG, "Number of Iterations",
                                      &num_iterations );
-      ierr += Hypre_PCG_GetDoubleValue( Hypre_PCG, "Final Relative Residual Norm",
+      ierr += bHYPRE_PCG_GetDoubleValue( bHYPRE_PCG, "Final Relative Residual Norm",
                                 &final_res_norm );
 
       /* Break encapsulation so that the rest of the driver stays the same */
-      temp_vecdata = Hypre_IJParCSRVector__get_data( Hypre_x );
+      temp_vecdata = bHYPRE_IJParCSRVector__get_data( bHYPRE_x );
       ij_x = temp_vecdata ->ij_b ;
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -2611,24 +2611,24 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    /* Programming note: some or all of these SIDL array objects, e.g.
-    * Hypre_num_grid_sweeps, contain data which have been incorporated
-    * into Hypre_AMG (the SIDL objects themselves were just temporary
+    * bHYPRE_num_grid_sweeps, contain data which have been incorporated
+    * into bHYPRE_AMG (the SIDL objects themselves were just temporary
     * carriers for the data).  It is important that the objects be
-    * deleted before Hypre_AMG.  If not deleted, there are a few extra
+    * deleted before bHYPRE_AMG.  If not deleted, there are a few extra
     * bytes leaked.  If deleted afterwards, there will be a crash
     * because the data inside them is already gone.  */
 
-   SIDL_int__array_deleteRef( Hypre_grid_relax_type );
-   SIDL_double__array_deleteRef( Hypre_relax_weight );
-   SIDL_int__array_deleteRef( Hypre_grid_relax_points );
-   SIDL_int__array_deleteRef( Hypre_num_grid_sweeps );
-   SIDL_int__array_deleteRef( Hypre_dof_func );
+   SIDL_int__array_deleteRef( bHYPRE_grid_relax_type );
+   SIDL_double__array_deleteRef( bHYPRE_relax_weight );
+   SIDL_int__array_deleteRef( bHYPRE_grid_relax_points );
+   SIDL_int__array_deleteRef( bHYPRE_num_grid_sweeps );
+   SIDL_int__array_deleteRef( bHYPRE_dof_func );
 
-   Hypre_IJParCSRMatrix_deleteRef( Hypre_parcsr_A );
-   Hypre_IJParCSRVector_deleteRef( Hypre_b );
-   Hypre_IJParCSRVector_deleteRef( Hypre_x );
+   bHYPRE_IJParCSRMatrix_deleteRef( bHYPRE_parcsr_A );
+   bHYPRE_IJParCSRVector_deleteRef( bHYPRE_b );
+   bHYPRE_IJParCSRVector_deleteRef( bHYPRE_x );
 
-   Hypre_BoomerAMG_deleteRef( Hypre_AMG );
+   bHYPRE_BoomerAMG_deleteRef( bHYPRE_AMG );
 
    if (num_grid_sweeps)
       hypre_TFree(num_grid_sweeps);

@@ -93,33 +93,33 @@ c     parameters for ParaSails
 
 c     Babel-interface variables
       integer*8 A_parcsr
-      integer*8 Hypre_parcsr_A
-      integer*8 Hypre_ij_A
-      integer*8 Hypre_parcsr_x
-      integer*8 Hypre_ij_x
-      integer*8 Hypre_parcsr_b
-      integer*8 Hypre_ij_b
-      integer*8 Hypre_object
-      integer*8 Hypre_object_tmp
+      integer*8 bHYPRE_parcsr_A
+      integer*8 bHYPRE_ij_A
+      integer*8 bHYPRE_parcsr_x
+      integer*8 bHYPRE_ij_x
+      integer*8 bHYPRE_parcsr_b
+      integer*8 bHYPRE_ij_b
+      integer*8 bHYPRE_object
+      integer*8 bHYPRE_object_tmp
       integer ierrtmp
-      integer*8 Hypre_values
-      integer*8 Hypre_indices
+      integer*8 bHYPRE_values
+      integer*8 bHYPRE_indices
       integer local_num_rows, local_num_cols
       integer dimsl(2), dimsu(2)
       integer lower(1), upper(1)
-      integer*8 Hypre_row_sizes
+      integer*8 bHYPRE_row_sizes
       integer size
-      integer*8 Hypre_ncols
+      integer*8 bHYPRE_ncols
       integer stride(3)
       integer col_inds(1)
-      integer*8 Hypre_col_inds
-      integer*8 Hypre_AMG
-      integer*8 Hypre_Vector_x
-      integer*8 Hypre_Vector_b
-      integer*8 Hypre_op_A
-      integer*8 Hypre_num_grid_sweeps
-      integer*8 Hypre_grid_relax_type
-      integer*8 Hypre_relax_weight
+      integer*8 bHYPRE_col_inds
+      integer*8 bHYPRE_AMG
+      integer*8 bHYPRE_Vector_x
+      integer*8 bHYPRE_Vector_b
+      integer*8 bHYPRE_op_A
+      integer*8 bHYPRE_num_grid_sweeps
+      integer*8 bHYPRE_grid_relax_type
+      integer*8 bHYPRE_relax_weight
       integer max_levels
       data   max_levels /25/
       double precision relax_weight(25)
@@ -282,45 +282,45 @@ c     Generate a Dirichlet Laplacian
       call hypre_ParCSRMatrixRowStarts(A_storage, row_starts, ierr)
 
 
-      call Hypre_IJParCSRMatrix__create_f( Hypre_parcsr_A )
+      call bHYPRE_IJParCSRMatrix__create_f( bHYPRE_parcsr_A )
 
-      call Hypre_IJParCSRMatrix__cast_f
-     1     ( Hypre_parcsr_A, "Hypre.IJBuildMatrix", Hypre_ij_A )
-      if ( Hypre_ij_A .eq. 0 ) then
+      call bHYPRE_IJParCSRMatrix__cast_f
+     1     ( bHYPRE_parcsr_A, "bHYPRE.IJBuildMatrix", bHYPRE_ij_A )
+      if ( bHYPRE_ij_A .eq. 0 ) then
          write(6,*) 'Cast failed'
          stop
       endif
 
 c     The following will cancel each other out, but it is good practice
 c     to perform them.
-      call Hypre_IJBuildMatrix_addref_f( Hypre_ij_A )
-      call Hypre_IJParCSRMatrix_deleteref_f( Hypre_parcsr_A )
+      call bHYPRE_IJBuildMatrix_addref_f( bHYPRE_ij_A )
+      call bHYPRE_IJParCSRMatrix_deleteref_f( bHYPRE_parcsr_A )
 
-      call Hypre_IJBuildMatrix_SetCommunicator_f( Hypre_ij_A,
+      call bHYPRE_IJBuildMatrix_SetCommunicator_f( bHYPRE_ij_A,
      1     MPI_COMM_WORLD, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call Hypre_IJBuildMatrix_SetLocalRange_f( Hypre_ij_A,
+      call bHYPRE_IJBuildMatrix_SetLocalRange_f( bHYPRE_ij_A,
      1     first_local_row, last_local_row,
      1     first_local_col, last_local_col, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call SIDL_int__array_create1d_f( local_num_rows, Hypre_row_sizes )
+      call SIDL_int__array_create1d_f( local_num_rows, bHYPRE_row_sizes )
       size = 7
 
       do i = 1, local_num_rows
-         call SIDL_int__array_set1_f( Hypre_row_sizes, i, size )
+         call SIDL_int__array_set1_f( bHYPRE_row_sizes, i, size )
       enddo
-      call Hypre_IJBuildMatrix_SetRowSizes_f(
-     1     Hypre_ij_A, Hypre_row_sizes, ierrtmp )
+      call bHYPRE_IJBuildMatrix_SetRowSizes_f(
+     1     bHYPRE_ij_A, bHYPRE_row_sizes, ierrtmp )
       ierr = ierr + ierrtmp
-      call SIDL_int__array_deleteref_f( Hypre_row_sizes)
+      call SIDL_int__array_deleteref_f( bHYPRE_row_sizes)
 
-      call Hypre_IJBuildMatrix_Initialize_f( Hypre_ij_A, ierrtmp )
+      call bHYPRE_IJBuildMatrix_Initialize_f( bHYPRE_ij_A, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call SIDL_int__array_create1d_f( 1, Hypre_row_sizes )
-      call SIDL_int__array_create1d_f( 1, Hypre_ncols )
+      call SIDL_int__array_create1d_f( 1, bHYPRE_row_sizes )
+      call SIDL_int__array_create1d_f( 1, bHYPRE_ncols )
 
 c     Loop through all locally stored rows and insert them into ij_matrix
       call HYPRE_IJMatrixGetObject( A, A_parcsr, ierrtmp)
@@ -331,46 +331,46 @@ c     Loop through all locally stored rows and insert them into ij_matrix
      1        A_parcsr, i, size, col_inds, values, ierrtmp )
          ierr = ierr + ierrtmp
 
-         call SIDL_int__array_set1_f( Hypre_row_sizes, 0, size )
-         call SIDL_int__array_set1_f( Hypre_ncols, 0, i )
+         call SIDL_int__array_set1_f( bHYPRE_row_sizes, 0, size )
+         call SIDL_int__array_set1_f( bHYPRE_ncols, 0, i )
          upper(1) = size - 1
          call SIDL_int__array_borrow_deref_f(
-     1        col_inds, 1, lower, upper, stride, Hypre_col_inds )
+     1        col_inds, 1, lower, upper, stride, bHYPRE_col_inds )
          call SIDL_double__array_borrow_deref_f(
-     1        values, 1, lower, upper, stride, Hypre_values )
-         call Hypre_IJBuildMatrix_SetValues_f(
-     1        Hypre_ij_A, 1, Hypre_row_sizes, Hypre_ncols,
-     1        Hypre_col_inds, Hypre_values, ierrtmp )
+     1        values, 1, lower, upper, stride, bHYPRE_values )
+         call bHYPRE_IJBuildMatrix_SetValues_f(
+     1        bHYPRE_ij_A, 1, bHYPRE_row_sizes, bHYPRE_ncols,
+     1        bHYPRE_col_inds, bHYPRE_values, ierrtmp )
          ierr = ierr + ierrtmp
          call HYPRE_ParCSRMatrixRestoreRow(
      1        A_parcsr, i, size, col_inds, values, ierrtmp )
          ierr = ierr + ierrtmp
       enddo
-      call SIDL_int__array_deleteref_f( Hypre_row_sizes )
-      call SIDL_int__array_deleteref_f( Hypre_ncols )
+      call SIDL_int__array_deleteref_f( bHYPRE_row_sizes )
+      call SIDL_int__array_deleteref_f( bHYPRE_ncols )
 
-      call Hypre_IJBuildMatrix_Assemble_f( Hypre_ij_A, ierrtmp )
+      call bHYPRE_IJBuildMatrix_Assemble_f( bHYPRE_ij_A, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call SIDL_int__array_deleteref_f( Hypre_col_inds )
-      call SIDL_int__array_deleteref_f( Hypre_values )
+      call SIDL_int__array_deleteref_f( bHYPRE_col_inds )
+      call SIDL_int__array_deleteref_f( bHYPRE_values )
 
 c     
 c     Fetch the resulting underlying matrix out
 c     
-      call Hypre_IJBuildMatrix_GetObject_f(
-     1     Hypre_ij_A, Hypre_object, ierrtmp )
+      call bHYPRE_IJBuildMatrix_GetObject_f(
+     1     bHYPRE_ij_A, bHYPRE_object, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_IJBuildMatrix_deleteref_f( Hypre_ij_A )
+      call bHYPRE_IJBuildMatrix_deleteref_f( bHYPRE_ij_A )
 c     
 c     The Queryint below checks to see if the returned object can
-c     return a Hypre.IJParCSRMatrix. The "cast" is necessary because of the
+c     return a bHYPRE.IJParCSRMatrix. The "cast" is necessary because of the
 c     restrictions of the C language, and is merely to please the compiler.
 c     It is the Queryint that actually has semantic meaning.
 c     ( cast removed for Fortran )
       call SIDL_BaseInterface_queryint_f(
-     1     Hypre_object, "Hypre.IJParCSRMatrix", Hypre_parcsr_A )
-      if ( Hypre_parcsr_A .eq. 0 ) then
+     1     bHYPRE_object, "bHYPRE.IJParCSRMatrix", bHYPRE_parcsr_A )
+      if ( bHYPRE_parcsr_A .eq. 0 ) then
          write (6,*) 'Matrix cast/QI failed\n'
          stop
       endif
@@ -391,112 +391,112 @@ c-----------------------------------------------------------------------
       call HYPRE_IJVectorSetValues(x,
      &     last_local_col - first_local_col + 1, indices, vals, ierr)
 
-      call Hypre_IJParCSRVector__create_f( Hypre_parcsr_b )
-      call Hypre_IJParCSRVector__cast_f
-     1     ( Hypre_parcsr_b, "Hypre.IJBuildVector", Hypre_ij_b )
-      if ( Hypre_ij_b .eq. 0 ) then
+      call bHYPRE_IJParCSRVector__create_f( bHYPRE_parcsr_b )
+      call bHYPRE_IJParCSRVector__cast_f
+     1     ( bHYPRE_parcsr_b, "bHYPRE.IJBuildVector", bHYPRE_ij_b )
+      if ( bHYPRE_ij_b .eq. 0 ) then
          write(6,*) 'Cast failed'
          stop
       endif
-      call Hypre_IJBuildVector_addref_f( Hypre_ij_b )
-      call Hypre_IJParCSRVector_deleteref_f( Hypre_parcsr_b )
-      call Hypre_IJBuildVector_SetCommunicator_f( Hypre_ij_b,
+      call bHYPRE_IJBuildVector_addref_f( bHYPRE_ij_b )
+      call bHYPRE_IJParCSRVector_deleteref_f( bHYPRE_parcsr_b )
+      call bHYPRE_IJBuildVector_SetCommunicator_f( bHYPRE_ij_b,
      1     MPI_COMM_WORLD, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call Hypre_IJBuildVector_SetLocalRange_f( Hypre_ij_b,
+      call bHYPRE_IJBuildVector_SetLocalRange_f( bHYPRE_ij_b,
      1      first_local_row, last_local_row, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call Hypre_IJBuildVector_Initialize_f( Hypre_ij_b, ierrtmp )
+      call bHYPRE_IJBuildVector_Initialize_f( bHYPRE_ij_b, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call SIDL_int__array_create1d_f( local_num_cols, Hypre_indices )
-      call SIDL_double__array_create1d_f( local_num_cols, Hypre_values )
+      call SIDL_int__array_create1d_f( local_num_cols, bHYPRE_indices )
+      call SIDL_double__array_create1d_f( local_num_cols, bHYPRE_values )
       do i=0, local_num_cols-1
-         call SIDL_int__array_set1_f( Hypre_indices, i,
+         call SIDL_int__array_set1_f( bHYPRE_indices, i,
      1        first_local_col + i )
-         call SIDL_double__array_set1_f( Hypre_values, i, double_one )
+         call SIDL_double__array_set1_f( bHYPRE_values, i, double_one )
       enddo
-      call Hypre_IJBuildVector_SetValues_f( Hypre_ij_b,
-     1     local_num_cols, Hypre_indices, Hypre_values, ierrtmp )
+      call bHYPRE_IJBuildVector_SetValues_f( bHYPRE_ij_b,
+     1     local_num_cols, bHYPRE_indices, bHYPRE_values, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call SIDL_int__array_deleteref_f( Hypre_indices)
-      call SIDL_double__array_deleteref_f( Hypre_values )
+      call SIDL_int__array_deleteref_f( bHYPRE_indices)
+      call SIDL_double__array_deleteref_f( bHYPRE_values )
 
-      call Hypre_IJBuildVector_Assemble_f( Hypre_ij_b, ierrtmp )
+      call bHYPRE_IJBuildVector_Assemble_f( bHYPRE_ij_b, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_IJBuildVector_GetObject_f(
-     1     Hypre_ij_b, Hypre_object, ierrtmp )
+      call bHYPRE_IJBuildVector_GetObject_f(
+     1     bHYPRE_ij_b, bHYPRE_object, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call Hypre_IJBuildVector_deleteref_f( Hypre_ij_b )
+      call bHYPRE_IJBuildVector_deleteref_f( bHYPRE_ij_b )
       call SIDL_BaseInterface_queryint_f(
-     1     Hypre_object, "Hypre.IJParCSRVector", Hypre_object_tmp )
+     1     bHYPRE_object, "bHYPRE.IJParCSRVector", bHYPRE_object_tmp )
       call SIDL_BaseInterface__cast_f(
-     1     Hypre_object_tmp, "Hypre.IJParCSRVector", Hypre_parcsr_b )
-      if ( Hypre_parcsr_b .eq. 0 ) then
+     1     bHYPRE_object_tmp, "bHYPRE.IJParCSRVector", bHYPRE_parcsr_b )
+      if ( bHYPRE_parcsr_b .eq. 0 ) then
          write (6,*) 'Cast/QI failed\n'
          stop
       endif
 
 
-      call Hypre_IJParCSRVector_print_f(
-     1     Hypre_parcsr_b, "driver.out.b", ierrtmp )
+      call bHYPRE_IJParCSRVector_print_f(
+     1     bHYPRE_parcsr_b, "driver.out.b", ierrtmp )
       ierr = ierr + ierrtmp
 
-      call Hypre_IJParCSRVector__create_f( Hypre_parcsr_x )
-      call Hypre_IJParCSRVector__cast_f
-     1     ( Hypre_parcsr_x, "Hypre.IJBuildVector", Hypre_ij_x )
-      if ( Hypre_ij_x .eq. 0 ) then
+      call bHYPRE_IJParCSRVector__create_f( bHYPRE_parcsr_x )
+      call bHYPRE_IJParCSRVector__cast_f
+     1     ( bHYPRE_parcsr_x, "bHYPRE.IJBuildVector", bHYPRE_ij_x )
+      if ( bHYPRE_ij_x .eq. 0 ) then
          write(6,*) 'Cast failed'
          stop
       endif
-      call Hypre_IJBuildVector_addref_f( Hypre_ij_x )
-      call Hypre_IJBuildVector_SetCommunicator_f( Hypre_ij_x,
+      call bHYPRE_IJBuildVector_addref_f( bHYPRE_ij_x )
+      call bHYPRE_IJBuildVector_SetCommunicator_f( bHYPRE_ij_x,
      1     MPI_COMM_WORLD, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call Hypre_IJBuildVector_SetLocalRange_f( Hypre_ij_x,
+      call bHYPRE_IJBuildVector_SetLocalRange_f( bHYPRE_ij_x,
      1     first_local_row, last_local_row, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call Hypre_IJBuildVector_Initialize_f( Hypre_ij_x, ierrtmp )
+      call bHYPRE_IJBuildVector_Initialize_f( bHYPRE_ij_x, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call SIDL_int__array_create1d_f( local_num_cols, Hypre_indices )
-      call SIDL_double__array_create1d_f( local_num_cols, Hypre_values )
+      call SIDL_int__array_create1d_f( local_num_cols, bHYPRE_indices )
+      call SIDL_double__array_create1d_f( local_num_cols, bHYPRE_values )
       do i=0, local_num_cols-1
-         call SIDL_int__array_set1_f( Hypre_indices, i,
+         call SIDL_int__array_set1_f( bHYPRE_indices, i,
      1        first_local_col + i )
-         call SIDL_double__array_set1_f( Hypre_values, i, double_zero )
+         call SIDL_double__array_set1_f( bHYPRE_values, i, double_zero )
       enddo
-      call Hypre_IJBuildVector_SetValues_f( Hypre_ij_x,
-     1     local_num_cols, Hypre_indices, Hypre_values, ierrtmp )
+      call bHYPRE_IJBuildVector_SetValues_f( bHYPRE_ij_x,
+     1     local_num_cols, bHYPRE_indices, bHYPRE_values, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call SIDL_int__array_deleteref_f( Hypre_indices)
-      call SIDL_double__array_deleteref_f( Hypre_values )
+      call SIDL_int__array_deleteref_f( bHYPRE_indices)
+      call SIDL_double__array_deleteref_f( bHYPRE_values )
 
-      call Hypre_IJBuildVector_Assemble_f( Hypre_ij_x, ierrtmp )
+      call bHYPRE_IJBuildVector_Assemble_f( bHYPRE_ij_x, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_IJBuildVector_GetObject_f(
-     1     Hypre_ij_x, Hypre_object, ierrtmp )
+      call bHYPRE_IJBuildVector_GetObject_f(
+     1     bHYPRE_ij_x, bHYPRE_object, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call Hypre_IJBuildVector_deleteref_f( Hypre_ij_x )
+      call bHYPRE_IJBuildVector_deleteref_f( bHYPRE_ij_x )
       call SIDL_BaseInterface_queryint_f(
-     1     Hypre_object, "Hypre.IJParCSRVector", Hypre_object_tmp )
+     1     bHYPRE_object, "bHYPRE.IJParCSRVector", bHYPRE_object_tmp )
       call SIDL_BaseInterface__cast_f(
-     1     Hypre_object_tmp, "Hypre.IJParCSRVector", Hypre_parcsr_x )
-      if ( Hypre_parcsr_x .eq. 0 ) then
+     1     bHYPRE_object_tmp, "bHYPRE.IJParCSRVector", bHYPRE_parcsr_x )
+      if ( bHYPRE_parcsr_x .eq. 0 ) then
          write (6,*) 'Cast/QI failed\n'
          stop
       endif
 
-      call Hypre_IJParCSRVector_print_f(
-     1     Hypre_parcsr_x, "driver.out.x0", ierrtmp )
+      call bHYPRE_IJParCSRVector_print_f(
+     1     bHYPRE_parcsr_x, "driver.out.x0", ierrtmp )
       ierr = ierr + ierrtmp
 
 c-----------------------------------------------------------------------
@@ -532,96 +532,96 @@ c      print *, 'Solver: AMG'
      &     relax_weights,
      &     MAXLEVELS,ierr)
 
-      call Hypre_BoomerAMG__create_f( Hypre_AMG )
-      call Hypre_IJParCSRVector__cast_f
-     1     ( Hypre_parcsr_b, "Hypre.Vector", Hypre_Vector_b )
-      call Hypre_IJParCSRVector__cast_f
-     1     ( Hypre_parcsr_x, "Hypre.Vector", Hypre_Vector_x )
-      call Hypre_IJParCSRVector__cast_f
-     1     ( Hypre_parcsr_A, "Hypre.Operator", Hypre_op_A )
-      call Hypre_BoomerAMG_SetCommunicator_f(
-     1     Hypre_AMG, MPI_COMM_WORLD, ierrtmp )
+      call bHYPRE_BoomerAMG__create_f( bHYPRE_AMG )
+      call bHYPRE_IJParCSRVector__cast_f
+     1     ( bHYPRE_parcsr_b, "bHYPRE.Vector", bHYPRE_Vector_b )
+      call bHYPRE_IJParCSRVector__cast_f
+     1     ( bHYPRE_parcsr_x, "bHYPRE.Vector", bHYPRE_Vector_x )
+      call bHYPRE_IJParCSRVector__cast_f
+     1     ( bHYPRE_parcsr_A, "bHYPRE.Operator", bHYPRE_op_A )
+      call bHYPRE_BoomerAMG_SetCommunicator_f(
+     1     bHYPRE_AMG, MPI_COMM_WORLD, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_BoomerAMG_SetOperator_f( Hypre_AMG, Hypre_op_A )
-      call Hypre_BoomerAMG_SetIntParameter_f(
-     1     Hypre_AMG, "CoarsenType", hybrid*coarsen_type, ierrtmp )
+      call bHYPRE_BoomerAMG_SetOperator_f( bHYPRE_AMG, bHYPRE_op_A )
+      call bHYPRE_BoomerAMG_SetIntParameter_f(
+     1     bHYPRE_AMG, "CoarsenType", hybrid*coarsen_type, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_BoomerAMG_SetIntParameter_f(
-     1     Hypre_AMG, "MeasureType", measure_type, ierrtmp )
+      call bHYPRE_BoomerAMG_SetIntParameter_f(
+     1     bHYPRE_AMG, "MeasureType", measure_type, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_BoomerAMG_SetDoubleParameter_f(
-     1     Hypre_AMG, "StrongThreshold", strong_threshold, ierrtmp )
+      call bHYPRE_BoomerAMG_SetDoubleParameter_f(
+     1     bHYPRE_AMG, "StrongThreshold", strong_threshold, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_BoomerAMG_SetDoubleParameter_f(
-     1     Hypre_AMG, "TruncFactor", trunc_factor, ierrtmp )
+      call bHYPRE_BoomerAMG_SetDoubleParameter_f(
+     1     bHYPRE_AMG, "TruncFactor", trunc_factor, ierrtmp )
       ierr = ierr + ierrtmp
 c     /* note: log output not specified ... */
-      call Hypre_BoomerAMG_SetIntParameter_f(
-     1     Hypre_AMG, "PrintLevel", ioutdat, ierrtmp )
+      call bHYPRE_BoomerAMG_SetIntParameter_f(
+     1     bHYPRE_AMG, "PrintLevel", ioutdat, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_BoomerAMG_SetIntParameter_f(
-     1     Hypre_AMG, "CycleType", cycle_type, ierrtmp )
+      call bHYPRE_BoomerAMG_SetIntParameter_f(
+     1     bHYPRE_AMG, "CycleType", cycle_type, ierrtmp )
       ierr = ierr + ierrtmp
       dimsl(1) = 1
       dimsu(1) = 4
       call SIDL_int__array_create1d_f(
-     1     4, Hypre_num_grid_sweeps )
+     1     4, bHYPRE_num_grid_sweeps )
       do i = 1, 4
          call SIDL_int__array_set1_deref_f(
-     1        Hypre_num_grid_sweeps, i-1, num_grid_sweeps, i-1 )
+     1        bHYPRE_num_grid_sweeps, i-1, num_grid_sweeps, i-1 )
       enddo
-      call Hypre_BoomerAMG_SetIntArrayParameter_f( Hypre_AMG,
-     1     "NumGridSweeps", Hypre_num_grid_sweeps, ierrtmp )
+      call bHYPRE_BoomerAMG_SetIntArrayParameter_f( bHYPRE_AMG,
+     1     "NumGridSweeps", bHYPRE_num_grid_sweeps, ierrtmp )
       ierr = ierr + ierrtmp
       dimsl(1) = 1
       dimsu(1) = 4
       call SIDL_int__array_create1d_f(
-     1     4, Hypre_grid_relax_type )
+     1     4, bHYPRE_grid_relax_type )
       do i = 1, 4
         call SIDL_int__array_set1_deref_f(
-     1        Hypre_grid_relax_type, i-1, grid_relax_type, i-1 )
+     1        bHYPRE_grid_relax_type, i-1, grid_relax_type, i-1 )
       enddo
-      call Hypre_BoomerAMG_SetIntArrayParameter_f( Hypre_AMG,
-     1     "GridRelaxType", Hypre_grid_relax_type, ierrtmp )
+      call bHYPRE_BoomerAMG_SetIntArrayParameter_f( bHYPRE_AMG,
+     1     "GridRelaxType", bHYPRE_grid_relax_type, ierrtmp )
       ierr = ierr + ierrtmp
 
       dimsl(1) = 0
       dimsu(1) = max_levels
       call SIDL_double__array_create1d_f(
-     1     max_levels+1, Hypre_relax_weight )
+     1     max_levels+1, bHYPRE_relax_weight )
       do i=1, max_levels
 c        relax_weight(i)=1.0: simple to set, fine for testing:
          relax_weight(i) = 1.0
       enddo
       do i=1, max_levels
          call SIDL_double__array_set1_f(
-     1        Hypre_relax_weight, i-1, relax_weight(i) )
+     1        bHYPRE_relax_weight, i-1, relax_weight(i) )
       enddo
-      call Hypre_BoomerAMG_SetDoubleArrayParameter_f(
-     1     Hypre_AMG, "RelaxWeight", Hypre_relax_weight, ierrtmp )
+      call bHYPRE_BoomerAMG_SetDoubleArrayParameter_f(
+     1     bHYPRE_AMG, "RelaxWeight", bHYPRE_relax_weight, ierrtmp )
       ierr = ierr + ierrtmp
 
 c left at default: GridRelaxPoints
-      call Hypre_BoomerAMG_SetIntParameter_f(
-     1     Hypre_AMG, "MaxLevels", max_levels, ierrtmp )
+      call bHYPRE_BoomerAMG_SetIntParameter_f(
+     1     bHYPRE_AMG, "MaxLevels", max_levels, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_BoomerAMG_SetIntParameter_f(
-     1     Hypre_AMG, "DebugFlag", debug_flag, ierrtmp )
+      call bHYPRE_BoomerAMG_SetIntParameter_f(
+     1     bHYPRE_AMG, "DebugFlag", debug_flag, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_BoomerAMG_SetDoubleParameter_f(
-     1     Hypre_AMG, "MaxRowSum", max_row_sum, ierrtmp )
+      call bHYPRE_BoomerAMG_SetDoubleParameter_f(
+     1     bHYPRE_AMG, "MaxRowSum", max_row_sum, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call Hypre_IJParCSRMatrix__cast_f(
-     1     Hypre_ParCSR_A, "Hypre.LinearOperator", linop )
-      call Hypre_BoomerAMG_Setup_f(
-     1     Hypre_AMG, Hypre_Vector_b, Hypre_Vector_x, ierrtmp )
+      call bHYPRE_IJParCSRMatrix__cast_f(
+     1     bHYPRE_ParCSR_A, "bHYPRE.LinearOperator", linop )
+      call bHYPRE_BoomerAMG_Setup_f(
+     1     bHYPRE_AMG, bHYPRE_Vector_b, bHYPRE_Vector_x, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_IJParCSRVector_print_f(
-     1     Hypre_parcsr_x, "driver.out.x2", ierrtmp )
+      call bHYPRE_IJParCSRVector_print_f(
+     1     bHYPRE_parcsr_x, "driver.out.x2", ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_BoomerAMG_Apply_f(
-     1     Hypre_AMG, Hypre_Vector_b, Hypre_Vector_x, ierrtmp )
+      call bHYPRE_BoomerAMG_Apply_f(
+     1     bHYPRE_AMG, bHYPRE_Vector_b, bHYPRE_Vector_x, ierrtmp )
       ierr = ierr + ierrtmp
 
 
@@ -630,16 +630,16 @@ c-----------------------------------------------------------------------
 c     Print the solution and other info
 c-----------------------------------------------------------------------
 
-      call Hypre_IJParCSRVector_print_f(
-     1     Hypre_parcsr_x, "driver.out.x", ierrtmp )
+      call bHYPRE_IJParCSRVector_print_f(
+     1     bHYPRE_parcsr_x, "driver.out.x", ierrtmp )
       ierr = ierr + ierrtmp
 
       if (myid .eq. 0) then
-         call Hypre_BoomerAMG_GetIntValue_f(
-     1        Hypre_AMG, "Iterations", num_iterations, ierrtmp )
+         call bHYPRE_BoomerAMG_GetIntValue_f(
+     1        bHYPRE_AMG, "Iterations", num_iterations, ierrtmp )
          ierr = ierr + ierrtmp
-         call Hypre_BoomerAMG_GetDoubleValue_f(
-     1        Hypre_AMG, "Final Relative Residual Norm", final_res_norm,
+         call bHYPRE_BoomerAMG_GetDoubleValue_f(
+     1        bHYPRE_AMG, "Final Relative Residual Norm", final_res_norm,
      1        ierrtmp )
          ierr = ierr + ierrtmp
          print *, 'Iterations = ', num_iterations
@@ -651,7 +651,7 @@ c-----------------------------------------------------------------------
 c     Finalize things
 c-----------------------------------------------------------------------
 
-      call Hypre_IJParCSRVector_deleteref_f( Hypre_parcsr_x )
+      call bHYPRE_IJParCSRVector_deleteref_f( bHYPRE_parcsr_x )
       call HYPRE_ParCSRMatrixDestroy(A_storage, ierr)
 c      call HYPRE_IJVectorDestroy(b, ierr)
       call HYPRE_IJVectorDestroy(x, ierr)
