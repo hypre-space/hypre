@@ -556,6 +556,7 @@ class HYPRE_LinSysCore
    int             *selectedListAux_;
    int             nConstraints_;
    int             *constrList_;
+   int             matrixPartition_;
 
    // ----------------------------------------------------------------------
    // variables for the selected solver and preconditioner
