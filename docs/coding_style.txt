@@ -24,6 +24,10 @@ be made here:
 
   3. Guidelines for documentation are given below.
 
+  4. No function will return void.  Integer return values will be used
+  to indicate error codes.  This will primarily affect "New" functions.
+  
+
 --------------------------------------------------------------------------
 
 NAMING CONVENTIONS FOR HYPRE
