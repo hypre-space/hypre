@@ -11,6 +11,19 @@
 #define hypre_COMMUNICATION_HEADER
 
 /*--------------------------------------------------------------------------
+ * Making HYPRE_COMM_SIMPLE the default...
+ *
+ * To use the MPI derived datatypes, either HYPRE_COMM_DERIVED or
+ * HYPRE_COMM_VOLATILE must be defined.
+ *--------------------------------------------------------------------------*/
+
+#define HYPRE_COMM_SIMPLE 1
+
+#if defined(HYPRE_COMM_DERIVED) || defined(HYPRE_COMM_VOLATILE)
+#undef HYPRE_COMM_SIMPLE
+#endif
+
+/*--------------------------------------------------------------------------
  * hypre_CommTypeEntry:
  *--------------------------------------------------------------------------*/
 

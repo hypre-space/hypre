@@ -10,6 +10,9 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
+ *
+ * NOTE: HYPRE_COMM_SIMPLE is now the default.  See 'communication.h'.
+ *
  * Create a communication package.  A grid-based description of a
  * communication exchange is passed in.  This description is then
  * compiled into an intermediate processor-based description of the
