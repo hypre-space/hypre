@@ -156,20 +156,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    }
 
    /*-----------------------------------------------------------------------
-    *  Generate P_ext, i.e. portion of P that is stored on neighbor procs
-    *  and needed locally for triple matrix product 
-    *-----------------------------------------------------------------------*/
-
-   if (num_cols_offd_A) 
-   {
-	P_ext = hypre_GeneratePExt(P,A);
-   	P_ext_data = hypre_CSRMatrixData(P_ext);
-   	P_ext_i    = hypre_CSRMatrixI(P_ext);
-   	P_ext_j    = hypre_CSRMatrixJ(P_ext);
-   }
-
-   /*-----------------------------------------------------------------------
-    *  Access the CSR vectors for R and  P_ext. Also get sizes of fine and
+    *  Access the CSR vectors for R. Also get sizes of fine and
     *  coarse grids.
     *-----------------------------------------------------------------------*/
 
@@ -189,12 +176,18 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    A_marker = hypre_CTAlloc(int, num_nz_cols_A);
 
    /*-----------------------------------------------------------------------
+    *  Generate P_ext, i.e. portion of P that is stored on neighbor procs
+    *  and needed locally for triple matrix product 
     *  First Pass: Determine size of RAP_int and set up RAP_int_i if there 
     *  are more than one processor
     *-----------------------------------------------------------------------*/
 
   if (num_procs > 1)
   {
+   P_ext = hypre_GeneratePExt(P,A);
+   P_ext_data = hypre_CSRMatrixData(P_ext);
+   P_ext_i    = hypre_CSRMatrixI(P_ext);
+   P_ext_j    = hypre_CSRMatrixJ(P_ext);
    RAP_int_i = hypre_CTAlloc(int, num_cols_offd_RT+1);
    
    /*-----------------------------------------------------------------------
@@ -218,13 +211,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    for (ic = 0; ic < num_cols_offd_RT; ic++)
    {
       
-      /*--------------------------------------------------------------------
-       *  Set marker for diagonal entry, RAP_{ic,ic}.
-       *--------------------------------------------------------------------*/
-
-      P_marker[col_map_offd_RT[ic]] = jj_counter;
       jj_row_begining = jj_counter;
-      jj_counter++;
 
       /*--------------------------------------------------------------------
        *  Loop over entries in row ic of R_offd.
@@ -387,16 +374,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    for (ic = 0; ic < num_cols_offd_RT; ic++)
    {
       
-      /*--------------------------------------------------------------------
-       *  Create diagonal entry, RAP_int_{ic,ic}.
-       *--------------------------------------------------------------------*/
-
-      ip = col_map_offd_RT[ic];
-      P_marker[ip] = jj_counter;
       jj_row_begining = jj_counter;
-      RAP_int_data[jj_counter] = zero;
-      RAP_int_j[jj_counter] = ip;
-      jj_counter++;
 
       /*--------------------------------------------------------------------
        *  Loop over entries in row ic of R_offd.
@@ -580,6 +558,9 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    hypre_CSRMatrixData(RAP_int) = RAP_int_data;
 
    RAP_ext = hypre_ExchangeRAPData(RAP_int,comm_pkg_RT);
+   RAP_ext_i = hypre_CSRMatrixI(RAP_ext);
+   RAP_ext_j = hypre_CSRMatrixJ(RAP_ext);
+   RAP_ext_data = hypre_CSRMatrixData(RAP_ext);
 
    hypre_DestroyCSRMatrix(RAP_int);
   }
@@ -824,7 +805,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    {      
       P_marker[ic] = -1;
    }
-   for (i = 0; i < n_fine; i++)
+   for (i = 0; i < num_nz_cols_A ; i++)
    {      
       A_marker[i] = -1;
    }   
@@ -1133,9 +1114,9 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    	hypre_ParCSRMatrixColMapOffd(RAP) = col_map_offd_RAP;
    }
 
-   if (num_procs > 1)
+/*   if (num_procs > 1)
    	hypre_GenerateRAPCommPkg(RAP, A, coarse_partitioning);
-
+*/
    *RAP_ptr = RAP;
 
    /*-----------------------------------------------------------------------
@@ -1258,8 +1239,8 @@ hypre_GeneratePExt( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *A)
    MPI_Comm_rank(comm,&my_id);
 
    num_cols_p_int = num_cols_diag + num_cols_offd;
-   num_rows_p_ext = recv_vec_starts[num_recvs]-1;
-   p_int_i = hypre_CTAlloc(int, send_map_starts[num_sends]);
+   num_rows_p_ext = recv_vec_starts[num_recvs];
+   p_int_i = hypre_CTAlloc(int, send_map_starts[num_sends]+1);
    send_matrix_types = hypre_CTAlloc(MPI_Datatype, num_sends);
    p_ext_i = hypre_CTAlloc(int, num_rows_p_ext+1);
    recv_matrix_types = hypre_CTAlloc(MPI_Datatype, num_recvs);
@@ -1311,9 +1292,10 @@ hypre_GeneratePExt( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *A)
    p_int_j = hypre_CTAlloc(int, num_nonzeros);
    p_int_data = hypre_CTAlloc(double, num_nonzeros);
 
-   counter = 0;
+   start_index = p_int_i[0];
    for (i=0; i < num_sends; i++)
    {
+   	counter = 0;
 	for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
 	{
 	    jrow = send_map_elmts[j];
@@ -1329,21 +1311,18 @@ hypre_GeneratePExt( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *A)
 		p_int_data[counter] = offd_data[k];
 		counter++;
   	    }
+	   
 	}
-	start_index = p_int_i[send_map_starts[i]];
-	num_nonzeros = p_int_i[send_map_starts[i+1]]-start_index;
+	num_nonzeros = counter;
 	BuildCSRJDataType(num_nonzeros, 
 			  &p_int_data[start_index], 
 			  &p_int_j[start_index], 
 			  &send_matrix_types[i]);	
+	start_index += num_nonzeros;
    }
    hypre_CommPkgSendMPITypes(comm_pkg) = send_matrix_types;	
 
    hypre_FinalizeCommunication(comm_handle);
-
-   hypre_TFree(p_int_i);
-   hypre_TFree(p_int_j);
-   hypre_TFree(p_int_data);
 
 /*--------------------------------------------------------------------------
  * after communication exchange p_ext_i[j+1] contains the number of elements
@@ -1380,6 +1359,10 @@ hypre_GeneratePExt( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *A)
    hypre_CSRMatrixData(P_ext) = p_ext_data;
 
    hypre_FinalizeCommunication(comm_handle); 
+
+   hypre_TFree(p_int_i);
+   hypre_TFree(p_int_j);
+   hypre_TFree(p_int_data);
 
    return P_ext;
 }
@@ -1455,7 +1438,7 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
    recv_matrix_types = hypre_CTAlloc(MPI_Datatype, num_recvs);
    recv_vector_types = hypre_CTAlloc(MPI_Datatype, num_recvs);
  
-   RAP_ext_i = hypre_CTAlloc(int, send_map_starts[num_sends]);
+   RAP_ext_i = hypre_CTAlloc(int, send_map_starts[num_sends]+1);
  
 /*--------------------------------------------------------------------------
  * recompute RAP_int_i so that RAP_int_i[j+1] contains the number of
@@ -1518,8 +1501,8 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
 	for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
 		RAP_ext_i[j+1] += RAP_ext_i[j];
 
-   num_rows = send_map_starts[num_sends]-1;
-   num_nonzeros = RAP_ext_i[num_rows+1];
+   num_rows = send_map_starts[num_sends];
+   num_nonzeros = RAP_ext_i[num_rows];
    RAP_ext_j = hypre_CTAlloc(int, num_nonzeros);
    RAP_ext_data = hypre_CTAlloc(double, num_nonzeros);
 
