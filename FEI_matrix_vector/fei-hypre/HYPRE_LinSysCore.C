@@ -2919,13 +2919,13 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRGMRESSetTol(HYSolver_, tolerance_);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRGMRESSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRGMRESSetStopCrit(HYSolver_,1);
-          HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
-          ptime  = MPI_Wtime();
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
           {
              printf("***************************************************\n");
              HYPRE_ParCSRGMRESSetLogging(HYSolver_, 1);
           }
+          HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
+          ptime  = MPI_Wtime();
           HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
           HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &num_iterations);
           HYPRE_ParVectorCopy( b_csr, r_csr );
