@@ -427,17 +427,14 @@ case $HOSTNAME in
         AC_CHECK_PROGS(F77, cif77 f77)
      fi
 
-     if  test "$casc_user_chose_mpi" = "no" 
-     then       
-        if test "$casc_using_mpi" = "yes"
+     if  test "$casc_user_chose_mpi" = "no" && test "$casc_using_mpi" = "yes"
+     then
+        CASC_CHECK_HEADER(mpi.h, /opt/intel/tflop/TF99_2.6.1/tflops/cougar/include)
+        MPIINCLUDE="$MPIINCLUDE $INCLUDES"
+        CASC_ADD_LIB(mpi, main, /opt/intel/tflop/TF99_2.6.1/tflops/cougar/lib/puma, MPI)
+        if test -z "$MPILIBS"
         then
-           CASC_CHECK_HEADER(mpi.h, /opt/intel/tflop/TF99_2.6.1/tflops/cougar/include)
-           MPIINCLUDE="$MPIINCLUDE $INCLUDES"
-           CASC_ADD_LIB(mpi, main, /opt/intel/tflop/TF99_2.6.1/tflops/cougar/lib/puma, MPI)
-           if test -z "$MPILIBS"
-           then
-                AC_MSG_WARN([MPI not found--in sasn100 test-must set manually using --with-flags])
-           fi
+           AC_MSG_WARN([MPI not found--in sasn100 test-must set manually using --with-flags])
         fi
      fi
 
@@ -464,17 +461,14 @@ case $HOSTNAME in
         AC_CHECK_PROGS(F77, pgf77 f77)
      fi
 
-     if  test "$casc_user_chose_mpi" = "no" 
-     then       
-        if test "$casc_using_mpi" = "yes"
+     if  test "$casc_user_chose_mpi" = "no" && test "$casc_using_mpi" = "yes"
+     then
+        CASC_CHECK_HEADER(mpi.h, /cougar/include)
+        MPIINCLUDE="$MPIINCLUDE $INCLUDES"
+        CASC_ADD_LIB(mpi, main, /cougar/lib/puma, MPI)
+        if test -z "$MPILIBS"
         then
-           CASC_CHECK_HEADER(mpi.h, /cougar/include)
-           MPIINCLUDE="$MPIINCLUDE $INCLUDES"
-           CASC_ADD_LIB(mpi, main, /cougar/lib/puma, MPI)
-           if test -z "$MPILIBS"
-           then
-                AC_MSG_WARN([MPI not found--in janus test-must set manually using --with-flags])
-           fi
+           AC_MSG_WARN([MPI not found--in janus test-must set manually using --with-flags])
         fi
      fi
      
@@ -502,15 +496,12 @@ case $HOSTNAME in
         AC_CHECK_PROGS(F77, f77 g77)
      fi
 
-     if  test "$casc_user_chose_mpi" = "no" 
-     then       
-        if test "$casc_using_mpi" = "yes"
+     if  test "$casc_user_chose_mpi" = "no" && test "$casc_using_mpi" = "yes"
+     then
+        CASC_ADD_LIB(mpi, main, /usr/lib, MPI)
+        if test -z "$MPILIBS"
         then
-           CASC_ADD_LIB(mpi, main, /usr/lib, MPI)
-           if test -z "$MPILIBS"
-           then
-                AC_MSG_WARN([MPI not found--in nirvana test-must set manually using --with-flags])
-           fi
+           AC_MSG_WARN([MPI not found--in nirvana test-must set manually using --with-flags])
         fi
      fi
 
@@ -594,9 +585,6 @@ then
        CASC_CHECK_HEADER(mpi.h, /usr/include)
        MPIINCLUDE="$MPIINCLUDE $INCLUDES"
        CASC_ADD_LIB(rt, main, /usr/lib)
-dnl * there seem to be a problem here
-dnl *  HYPRE_ADD_LIB(mpi, main, /usr/opt/MPI170/lib, MPI, ,
-dnl *    CASC_ADD_LIB(mpi, main, /usr/lib, MPI) )
        CASC_ADD_LIB(mpi, main, /usr/lib, MPI)
        if test -z "$MPILIBS"
        then
