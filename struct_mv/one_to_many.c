@@ -25,6 +25,7 @@ int
 main( int   argc,
       char *argv[] )
 {
+   MPI_Comm           *comm;
    int                 matrix_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
 
    zzz_StructMatrix   *matrix_root, **sub_matrices;
@@ -34,9 +35,9 @@ main( int   argc,
    zzz_Box            *box;
    int                 dim;
 
-   zzz_StructStencil  *stencil;
-   zzz_Index         **stencil_shape;
-   zzz_Index           *ilower, *iupper;
+   zzz_StructStencil  *stencil, **stencils;
+   zzz_Index         **stencil_shape, ***stencil_shapes;
+   zzz_Index          *ilower, *iupper;
    int                 stencil_size;
 
    zzz_BoxArray       *data_space, *data_space_2;
@@ -45,7 +46,8 @@ main( int   argc,
    int                 sub_i, sub_j, sub_k; 
                             /* Number of subdivisions to use for i,j,k */
    int                 num_files; /* Total number of files to write out */
-   int                 i, j, k, i_file, idummy;
+   int                 i, j, k, ii, 
+i_file, idummy;
    int                 num_values, num_values_2;
    int                 imin, jmin, kmin, imax, jmax, kmax;
    int                 del_i, del_j, del_k;
@@ -65,6 +67,7 @@ main( int   argc,
 
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   MPI_Comm_dup(MPI_COMM_WORLD, comm);
 
    cegdb(&argc, &argv, myid);
 
@@ -116,7 +119,7 @@ main( int   argc,
 
    /* read grid info */
    fscanf(file_root, "\nGrid:\n");
-   grid_root = zzz_ReadStructGrid(file_root);
+   grid_root = zzz_ReadStructGrid(comm, file_root);
 
    /* read stencil info */
    fscanf(file_root, "\nStencil:\n");
@@ -137,7 +140,7 @@ main( int   argc,
     * Initialize the matrix
     *----------------------------------------*/
 
-   matrix_root = zzz_NewStructMatrix(&MPI_COMM_WORLD, grid_root, stencil);
+   matrix_root = zzz_NewStructMatrix(comm, grid_root, stencil);
    zzz_StructMatrixSymmetric(matrix_root) = symmetric;
    zzz_SetStructMatrixNumGhost(matrix_root, matrix_num_ghost);
    zzz_InitializeStructMatrix(matrix_root);
@@ -177,6 +180,9 @@ main( int   argc,
 
    sub_grids = zzz_CTAlloc(zzz_StructGrid *, num_files);
    sub_matrices = zzz_CTAlloc(zzz_StructMatrix *, num_files);
+   stencils = zzz_CTAlloc(zzz_StructStencil *, num_files);
+   stencil_shapes = zzz_CTAlloc(zzz_Index **, num_files);
+
    ilower = zzz_NewIndex();
    iupper = zzz_NewIndex();
 
@@ -206,7 +212,20 @@ main( int   argc,
 	   for (i = 0; i < sub_i; i++)
 	     {
 	       i_file += 1;
-	       sub_grids[i_file] = zzz_NewStructGrid(&MPI_COMM_WORLD, dim);
+	       sub_grids[i_file] = zzz_NewStructGrid(comm, dim);
+	       stencil_shapes[i_file] = zzz_CTAlloc(zzz_Index *, stencil_size);
+	       for (ii = 0; ii < stencil_size; ii++)
+		 {
+		   stencil_shapes[i_file][ii] = zzz_NewIndex();
+		   zzz_IndexX(stencil_shapes[i_file][ii]) = 
+		     zzz_IndexX(stencil_shape[ii]);
+		   zzz_IndexY(stencil_shapes[i_file][ii]) = 
+		     zzz_IndexY(stencil_shape[ii]);
+		   zzz_IndexZ(stencil_shapes[i_file][ii]) = 
+		     zzz_IndexZ(stencil_shape[ii]);
+		 }
+	       stencils[i_file] = zzz_NewStructStencil(dim, stencil_size,
+						       stencil_shapes[i_file]);
 
 	       zzz_IndexX(ilower) = imin + i*del_i;
 	       zzz_IndexY(ilower) = jmin + j*del_j;
@@ -241,8 +260,8 @@ main( int   argc,
 	       zzz_AssembleStructGrid(sub_grids[i_file]);
 
 	       sub_matrices[i_file] = 
-		 zzz_NewStructMatrix(&MPI_COMM_WORLD, 
-				     sub_grids[i_file], stencil); 
+		 zzz_NewStructMatrix(comm, sub_grids[i_file],
+				     stencils[i_file]); 
 	       zzz_StructMatrixSymmetric(sub_matrices[i_file]) = symmetric;
 	       zzz_SetStructMatrixNumGhost(sub_matrices[i_file], 
 					   matrix_num_ghost); 
@@ -315,8 +334,17 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    zzz_FreeStructGrid(zzz_StructMatrixGrid(matrix_root));
-   zzz_FreeStructStencil(zzz_StructMatrixUserStencil(matrix_root));
    zzz_FreeStructMatrix(matrix_root);
+   for (i_file = 0; i_file < num_files; i_file++)
+     {
+       zzz_FreeStructGrid(zzz_StructMatrixGrid(sub_matrices[i_file]));
+       zzz_FreeStructMatrix(sub_matrices[i_file]);
+     }
+
+   zzz_TFree(sub_grids);
+   zzz_TFree(sub_matrices);
+   zzz_TFree(stencils);
+   zzz_TFree(stencil_shapes);
 
    /* malloc debug stuff */
    malloc_verify(0);
