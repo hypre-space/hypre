@@ -28,4 +28,6 @@
             - fix a bug in buildRHS (multiply inv(M) instead of divide)
             - fix the printMat option (print HYb_ instead of currB_) in
               matrixLoadComplete
+02/28/01    version 2.0.0R6
+            - remove extra zeros in rows that at BC's
 

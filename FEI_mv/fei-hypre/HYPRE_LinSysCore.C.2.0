@@ -2583,6 +2583,9 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
                 }
              }
           }// end for(j<rowSize) loop
+          rowLengths_[localEqnNum] = 1;
+          colIndices_[localEqnNum][0] = globalEqn[i] + 1;
+          colValues_[localEqnNum][0] = 1.0;
 
           // Set rhs for boundary point
           rhs_term = gamma[i] / alpha[i];
