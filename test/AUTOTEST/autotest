@@ -100,14 +100,14 @@ help () {
   printf "%s\n" "     -tc2kmp   Compaq TC2K systum, executing OpenMP, DPCS."
   printf "%s\n" "     -tc       # obsolute"
   printf "%s\n" "     -tcmp     # obsolute"
-  printf "%s\n" "     -tux71    CASC Intel running RedHat Linux (pgi-3.3)."
+  printf "%s\n" "     -tux71    CASC Intel running RedHat Linux (pgi-4.1)."
   printf "%s\n" "     -tux83    CASC Intel running RedHat Linux."
   printf "%s\n" "     -tuxgcc2  Linux running gcc-2.95.3 compilers"
   printf "%s\n" "     -tuxgcc30 Linux running gcc-3.0.4 compilers"
   printf "%s\n" "     -tuxgcc31 Linux running gcc-3.1.1 compilers"
   printf "%s\n" "     -tuxgcc32 Linux running gcc-3.2.2 compilers"
   printf "%s\n" "     -tuxgcc33 Linux running gcc-3.3.x compilers"
-  printf "%s\n" "     -tuxpgi   Linux running PGI-3.3 compilers"
+  printf "%s\n" "     -tuxpgi   Linux running PGI-4.1 compilers"
   printf "%s\n" "     -tuxabsoftLinux running Absoft-Pro8.0 Fortran 90"
   printf "%s\n" "     -tuxlahey Linux running Lahey Frotran compiler"
   printf "%s\n" "     -tuxintel Linux running Intel-7.0 compilers"
@@ -605,10 +605,10 @@ do
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfl 1"
-          HYPRE_MESSAGE='TEST[automake-pgi-3.3]'
+          HYPRE_MESSAGE='TEST[automake-pgi-4.1]'
         else
 	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 2 -cf"
-          HYPRE_MESSAGE='SECONDARY[pgi-3.3]'
+          HYPRE_MESSAGE='SECONDARY[pgi-4.1]'
         fi
         COMPILERSELECT="pgi"
 	perform_test
@@ -682,13 +682,13 @@ do
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/tmp"
-        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi3.x/AUTOTEST"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi4.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfl 1"
-          HYPRE_MESSAGE='TEST[automake-pgi-3.3]'
+          HYPRE_MESSAGE='TEST[automake-pgi-4.1]'
         else
 	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 2 -cf"
-          HYPRE_MESSAGE='SECONDARY[pgi-3.3]'
+          HYPRE_MESSAGE='SECONDARY[pgi-4.1]'
         fi
 ##      ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
         COMPILERSELECT="pgi"
