@@ -24,12 +24,15 @@ HYPRE_EXTRA_DIRS =\
  seq_matrix_vector\
  parcsr_matrix_vector\
  parcsr_linear_solvers\
- seq_linear_solvers/pamg\
+ seq_linear_solvers/pamg
+
+#This is the documentation directory not yet offivially in HYPRE
+HYPRE_DOCS =\
  docs
 
 all:
 	@ \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_DOCS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -72,7 +75,7 @@ install:
 
 clean:
 	@ \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_DOCS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -83,7 +86,7 @@ clean:
 
 veryclean:
 	@ \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_DOCS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -93,5 +96,28 @@ veryclean:
 	done
 
 
+hypre:
+	@ \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make); \
+	    echo ""; \
+	  fi; \
+	done
+
+doc:
+	@ \
+	for i in ${HYPRE_DOCS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make); \
+	    echo ""; \
+	  fi; \
+	done
 
 
