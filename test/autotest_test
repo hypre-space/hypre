@@ -14,6 +14,7 @@
 #=============================================================================
 initialize_variables ()
 {
+  seconds; TOTAL=$SECS
   OldMask=`umask`
   umask 007
   MAKE="make -i"
@@ -193,7 +194,8 @@ mail_errors () {
 
 cleanup () { 
   umask $OldMask
-  echo "Autotest finished leaving $*"
+  seconds; TOTAL=`expr $SECS - $TOTAL`
+  echo "Autotest finished leaving $* after $TOTAL seconds"
 }
 #=============================================================================
 # General purpose make function /w strict_checking error output redirection
@@ -223,6 +225,7 @@ StructOpt=$4	 IJOpt=$5	 FeiOpt=$6
 MakeOpt=$7	 BetaOpt=$8	 NoFeiOpt=$9
 if [ ${BuildOpt} -ne $Skip ]
 then
+  seconds; TIME=$SECS
   echo "Autotest starting configure and make of $MessageStr"
   if [ ${BuildOpt} -eq $Build -o ${BuildOpt} -eq $Run ]
   then
@@ -280,7 +283,8 @@ then
     )"
     fi
   fi
-  echo "Autotest finished $MessageStr"
+  seconds; TIME=`expr $SECS - $TIME`
+  echo "Autotest finished $MessageStr taking $TIME seconds"
 fi
 }
 #=============================================================================
@@ -292,13 +296,30 @@ build ()
 BuildOpt=$1	 MakeOption=$2	 MessageStr=$3	MakeDir=$4
 if [ $BuildOpt -ne $Skip ]
 then
+  seconds; TIME=$SECS
   echo "Autotest starting make of $MessageStr"
   cd $StdBuildDir/$MakeDir
   $MAKE $MakeOption 1> ${Hdr}.${MessageStr}.log \
 	2> ${Hdr}.${MessageStr}.err
   echo "$HYPRE_ALL_EMAIL" > ${Hdr}.${MessageStr}.err.email
-  echo "Autotest finished $MessageStr"
+  seconds; TIME=`expr $SECS - $TIME`
+  echo "Autotest finished $MessageStr taking $TIME seconds"
 fi
+}
+
+#==============================================================================
+# return the seconds since midnight in the variable SECS
+#==============================================================================
+
+seconds ()
+{
+HOUR=`date '+%H'`
+HOUR=`expr $HOUR \* 3600`
+MINS=`date '+%M'`
+MINS=`expr $MINS \* 60`
+SECS=`date '+%S'`
+SECS=`expr $SECS + $MINS`
+SECS=`expr $SECS + $HOUR`
 }
 
 #==============================================================================
