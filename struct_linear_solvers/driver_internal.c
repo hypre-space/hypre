@@ -1,5 +1,6 @@
  
 #include "headers.h"
+#include "smg.h"
  
 #ifdef ZZZ_DEBUG
 #include <cegdb.h>
@@ -96,7 +97,9 @@ char *argv[];
     *-----------------------------------------------------------*/
 
    smg_data = zzz_SMGInitialize(comm);
-   zzz_SMGSetMaxIter(smg_data, 10);
+   zzz_SMGSetMaxIter(smg_data, 30);
+   zzz_SMGSetTol(smg_data, 1.e-12);
+   zzz_SMGSetLogging(smg_data, 1);
    zzz_SMGSetup(smg_data, A, b, x);
    zzz_SMGSolve(smg_data, b, x);
 
@@ -111,6 +114,8 @@ char *argv[];
    {
       printf("Iterations = %d\n", num_iterations);
    }
+   
+   zzz_SMGPrintLogging(smg_data, myid);
 
    /*-----------------------------------------------------------
     * Finalize things
@@ -133,4 +138,5 @@ char *argv[];
 
    return (0);
 }
+
 
