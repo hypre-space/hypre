@@ -45,6 +45,7 @@ int hypre_ParAMGCoarsen P((hypre_ParCSRMatrix *parA , double strength_threshold 
 int main P((int argc , char *argv []));
 int BuildParFromFile P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
 int BuildParLaplacian P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
+int BuildParFromOneFile P((int argc , char *argv [], int arg_index , hypre_ParCSRMatrix **A_ptr ));
 
 /* driver_interp.c */
 int main P((int argc , char *argv []));
