@@ -62,6 +62,7 @@ int  impl_Hypre_Box_Start
       B->imax[i] = upper.data[i];
    };
 
+   return 0;
 } /* end impl_Hypre_Box_Start */
 
 /* ********************************************************

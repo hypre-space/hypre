@@ -229,15 +229,15 @@ int  impl_Hypre_StructJacobi_SetParameterInt
 
    if ( !strcmp(name,"max_iter" )) {
       HYPRE_StructJacobiSetMaxIter( *S, value );
-      return;
+      return 0;
    };
    if ( !strcmp(name,"zero guess") ) {
       HYPRE_StructJacobiSetZeroGuess( *S );
-      return;
+      return 0;
    };
    if (  !strcmp(name,"nonzero guess") ) {
       HYPRE_StructJacobiSetNonZeroGuess( *S );
-      return;
+      return 0;
    };
    printf( "Hypre_StructJacobi_SetParameterInt does not recognize name %s\n", name );
    return 1;

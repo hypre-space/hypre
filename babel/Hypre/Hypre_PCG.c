@@ -370,7 +370,7 @@ int impl_Hypre_PCG_GetResidual( Hypre_PCG this, Hypre_Vector *resid ) {
  * impl_Hypre_PCGGetConvergenceInfo
  **********************************************************/
 int  impl_Hypre_PCG_GetConvergenceInfo(Hypre_PCG this, char* name, double* value) {
-   int ivalue;
+
    Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
 
    if ( !strcmp(name,"number of iterations") ) {
