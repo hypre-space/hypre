@@ -174,7 +174,8 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
         {
             if (ind[j] == row)
             {
-                p->local_diags[row] = 1.0 / sqrt(ABS(val[j]));
+                if (val[j] != 0.0)
+                    p->local_diags[row] = 1.0 / sqrt(ABS(val[j]));
                 break;
             }
         }
