@@ -830,7 +830,7 @@ int HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
       if ( rowLeng > 0 ) 
       {
          colIndices_[i] = new int[rowLeng];
-         assert( colIndices_[i] );
+         assert( colIndices_[i] != NULL );
       }
       else colIndices_[i] = NULL;
       indPtr  = colIndices_[i];
@@ -845,7 +845,7 @@ int HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
       if ( rowLeng > 0 ) 
       {
          colValues_[i] = new double[rowLeng];
-         assert( colValues_[i] );
+         assert( colValues_[i] != NULL );
       }
       vals = colValues_[i];
       for ( j = 0; j < rowLeng; j++ ) vals[j] = 0.0;
