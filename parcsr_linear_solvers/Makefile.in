@@ -92,6 +92,7 @@ FILES =\
  par_laplace_27pt.c\
  par_rap.c\
  par_rap_communication.c\
+ par_scaled_matnorm.c\
  pcg.c\
  pcg_par.c\
  transpose.c\
