@@ -857,7 +857,7 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
 
     int npat;
     /* int *patt; */
-    int patt[50000];
+    int patt[100000];
 
     int info;
 
@@ -1085,7 +1085,7 @@ void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
     if (ps->pruned_rows)
         PrunedRowsDestroy(ps->pruned_rows);
 
-    ps->pruned_rows = PrunedRowsCreate(ps->A, 50000,
+    ps->pruned_rows = PrunedRowsCreate(ps->A, 100000,
         ps->diag_scale, ps->thresh);
 
     ExchangePrunedRows(ps->A->comm, ps->A, ps->numb, ps->pruned_rows, 
@@ -1118,7 +1118,7 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A)
     if (ps->stored_rows)
         StoredRowsDestroy(ps->stored_rows);
 
-    ps->stored_rows = StoredRowsCreate(A, 50000);
+    ps->stored_rows = StoredRowsCreate(A, 100000);
 
     ExchangeStoredRows(ps->A->comm, A, ps->M, ps->numb,
         ps->stored_rows, ps->load_bal);

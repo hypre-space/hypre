@@ -22,23 +22,16 @@ void report_times(MPI_Comm comm, double setup_time, double solve_time)
 
     MPI_Reduce(&solve_time, &max_solve_time, 1, MPI_DOUBLE, MPI_MAX, 0, comm);
 
+    for (i=0; i<npes; i++)
+        m = MAX(m, setup_times[i]);
+
     if (mype != 0)
 	return;
 
-    printf("***********************\n");
-    for (i=0; i<npes; i++)
-    {
-	printf("*** %2d * %10.3f ***\n", i, setup_times[i]);
-	m = MAX(m, setup_times[i]);
-	tot += setup_times[i];
-    }
-    printf("***********************\n");
-    printf("*** ave: %10.3f ***\n", tot / (double) npes);
-    printf("*** bal: %10.3f ***\n", tot / (double) npes / m);
-    printf("***********************\n");
+    printf("**********************************************\n");
     printf("***      Setup      Solve      Total\n");
     printf("III %10.3f %10.3f %10.3f\n", m, max_solve_time, m+max_solve_time);
-    printf("***********************\n");
+    printf("**********************************************\n");
 }
 
 int main(int argc, char *argv[])
@@ -48,6 +41,7 @@ int main(int argc, char *argv[])
     ParaSails *ps;
     FILE *file;
     int n, beg_row, end_row;
+    int nnza, nnz0, nnz1;
     double time0, time1;
     double setup_time, solve_time;
 
@@ -156,32 +150,34 @@ int main(int argc, char *argv[])
             printf("thresh: %e\n", thresh);
         ParaSailsSetupPattern(ps, thresh, nlevels);
         ParaSailsSetupValues(ps, A);
-        time1 = MPI_Wtime();
-	setup_time = time1-time0;
-
-        i = MatrixNnz(ps->M);
-#ifdef NONSYM
-        j = MatrixNnz(A);
-#else
-        j = (MatrixNnz(A) - n) / 2 + n;
-#endif
-        if (mype == 0) 
-        {
-            printf("%s\n", argv[1]);
-            printf("Inumber of nonzeros: %d (%.2f)\n", i, i/(double)j);
-        }
-        /* MatrixPrint(ps->M, "M"); */
+        nnz0 = MatrixNnz(ps->M);
 
         /* filtration step */
         filter = ParaSailsSelectFilter(ps, filter);
         if (mype == 0) 
             printf("filter: %f\n", filter);
+
 	ParaSailsFilterValues(ps, filter);
-        i = MatrixNnz(ps->M);
-        if (mype == 0) 
-            printf("nonz after filter : %d (%.2f)\n", i, i/(double)j);
+        nnz1 = MatrixNnz(ps->M);
 
 	ParaSailsComplete(ps);
+        time1 = MPI_Wtime();
+	setup_time = time1-time0;
+        printf("SETUP %3d %10.3f\n", mype, setup_time);
+
+        /* MatrixPrint(ps->M, "M"); */
+
+#ifdef NONSYM
+        nnza = MatrixNnz(A);
+#else
+        nnza = (MatrixNnz(A) - n) / 2 + n;
+#endif
+        if (mype == 0) 
+        {
+            printf("%s\n", argv[1]);
+            printf("Inumber of nonzeros: %d (%.2f)\n", nnz0, nnz0/(double)nnza);
+            printf("Innz after filter  : %d (%.2f)\n", nnz1, nnz1/(double)nnza);
+        }
 
         time0 = MPI_Wtime();
 #ifdef NONSYM
