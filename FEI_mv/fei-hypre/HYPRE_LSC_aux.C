@@ -1263,6 +1263,12 @@ void HYPRE_LinSysCore::setupPCGPrecon()
             break;
 
        case HYEUCLID :
+            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+            {
+               for ( i = 0; i < euclidargc_; i++ )
+                  printf("Euclid parameter : %s %s\n", euclidargv_[2*i], 
+                                                       euclidargv_[2*i+1]);
+            }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_EuclidSolve,
@@ -1538,6 +1544,12 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
             break;
 
        case HYEUCLID :
+            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+            {
+               for ( i = 0; i < euclidargc_; i++ )
+                  printf("Euclid parameter : %s %s\n", euclidargv_[2*i], 
+                                                       euclidargv_[2*i+1]);
+            }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_EuclidSolve,
@@ -1838,6 +1850,12 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
             break;
 
        case HYEUCLID :
+            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+            {
+               for ( i = 0; i < euclidargc_; i++ )
+                  printf("Euclid parameter : %s %s\n", euclidargv_[2*i], 
+                                                       euclidargv_[2*i+1]);
+            }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_EuclidSolve,
@@ -2116,6 +2134,12 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
             break;
 
        case HYEUCLID :
+            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+            {
+               for ( i = 0; i < euclidargc_; i++ )
+                  printf("Euclid parameter : %s %s\n", euclidargv_[2*i], 
+                                                       euclidargv_[2*i+1]);
+            }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_EuclidSolve,
@@ -2392,6 +2416,12 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
             break;
 
        case HYEUCLID :
+            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+            {
+               for ( i = 0; i < euclidargc_; i++ )
+                  printf("Euclid parameter : %s %s\n", euclidargv_[2*i], 
+                                                       euclidargv_[2*i+1]);
+            }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_EuclidSolve,
@@ -2667,6 +2697,12 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
             break;
 
        case HYEUCLID :
+            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+            {
+               for ( i = 0; i < euclidargc_; i++ )
+                  printf("Euclid parameter : %s %s\n", euclidargv_[2*i], 
+                                                       euclidargv_[2*i+1]);
+            }
             if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
             {
                HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_EuclidSolve,
