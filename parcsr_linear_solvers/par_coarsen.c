@@ -95,12 +95,12 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
                      int                   *coarse_size_ptr     )
 {
    hypre_CSRMatrix    *A_diag          = hypre_ParCSRMatrixDiag(parA);
-   int                *A_i             = hypre_CSRMatrixI(A_diag);
-   int                *A_j             = hypre_CSRMatrixJ(A_diag);
-   double             *A_data          = hypre_CSRMatrixData(A_diag);
+   int                *A_diag_i        = hypre_CSRMatrixI(A_diag);
+   double             *A_diag_data     = hypre_CSRMatrixData(A_diag);
 
    hypre_CSRMatrix    *A_offd          = hypre_ParCSRMatrixOffd(parA);
-   int                *A_offd_i;
+   int                *A_offd_i        = hypre_CSRMatrixI(A_offd);
+   double             *A_offd_data;
 
    int                 num_variables   = hypre_CSRMatrixNumRows(A_diag);
    int                 global_num_vars = hypre_ParCSRMatrixGlobalNumRows(parA);
@@ -110,9 +110,13 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
                   
    hypre_ParCSRMatrix *parS;
    hypre_CSRMatrix    *S_diag;
-   int                *S_i;
-   int                *S_j;
-   double             *S_data;
+   int                *S_diag_i;
+   int                *S_diag_j;
+   double             *S_diag_data;
+   hypre_CSRMatrix    *S_offd;
+   int                *S_offd_i;
+   int                *S_offd_j;
+   double             *S_offd_data;
                  
    int                *CF_marker;
    int                 coarse_size;
@@ -133,7 +137,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
 #endif
 
    /*--------------------------------------------------------------
-    * Compute a CSR strength matrix, S.
+    * Compute a  ParCSR strength matrix, S.
     *
     * For now, the "strength" of dependence/influence is defined in
     * the following way: i depends on j if
@@ -146,14 +150,11 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
     * to "unaccounted-for" dependence.
     *----------------------------------------------------------------*/
 
-   num_nonzeros_diag = A_i[num_variables];
+   num_nonzeros_diag = A_diag_i[num_variables];
    num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
-   if (num_cols_offd) 
-   {
-	A_offd_i = hypre_CSRMatrixI(A_offd);
-	num_nonzeros_offd = A_offd_i[num_variables];
-   }
+   A_offd_i = hypre_CSRMatrixI(A_offd);
+   num_nonzeros_offd = A_offd_i[num_variables];
 
    parS = hypre_CreateParCSRMatrix(hypre_ParCSRMatrixComm(parA), 
 			global_num_vars, global_num_vars,
@@ -164,64 +165,82 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
    hypre_SetParCSRMatrixRowStartsOwner(parS,0);
    hypre_InitializeParCSRMatrix(parS);
 
-   S_diag = hypre_ParCSRMatrixDiag(parS);
-   S_i           = hypre_CSRMatrixI(S_diag);
-   S_j           = hypre_CSRMatrixJ(S_diag);
-   S_data        = hypre_CSRMatrixData(S_diag);
-
    /* give S same nonzero structure as A */
-   for (i = 0; i < num_variables; i++)
-   {
-      S_i[i] = A_i[i];
-      for (jA = A_i[i]; jA < A_i[i+1]; jA++)
-      {
-         S_j[jA] = A_j[jA];
-      }
-   }
-   S_i[num_variables] = A_i[num_variables];
+   hypre_CopyParCSRMatrix(parA,parS,0);
+
+   S_diag = hypre_ParCSRMatrixDiag(parS);
+   S_diag_i = hypre_CSRMatrixI(S_diag);
+   S_diag_j = hypre_CSRMatrixJ(S_diag);
+   S_diag_data = hypre_CSRMatrixData(S_diag);
+   S_offd = hypre_ParCSRMatrixOffd(parS);
+   S_offd_i = hypre_CSRMatrixI(S_offd);
 
    for (i = 0; i < num_variables; i++)
    {
-      diag = A_data[A_i[i]];
+      diag = A_diag_data[A_diag_i[i]];
 
       /* compute scaling factor */
       row_scale = 0.0;
       if (diag < 0)
       {
-         for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
+         for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
-            row_scale = max(row_scale, A_data[jA]);
+            row_scale = max(row_scale, A_diag_data[jA]);
+         }
+         for (jA = A_offd_i[i]+1; jA < A_offd_i[i+1]; jA++)
+         {
+            row_scale = max(row_scale, A_offd_data[jA]);
          }
       }
       else
       {
-         for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
+         for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
-            row_scale = min(row_scale, A_data[jA]);
+            row_scale = min(row_scale, A_diag_data[jA]);
+         }
+         for (jA = A_offd_i[i]+1; jA < A_offd_i[i+1]; jA++)
+         {
+            row_scale = min(row_scale, A_offd_data[jA]);
          }
       }
 
       /* compute row entries of S */
-      S_data[A_i[i]] = 0;
+      S_diag_data[A_diag_i[i]] = 0;
       if (diag < 0) 
       { 
-         for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
+         for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
-            S_data[jA] = 0;
-            if (A_data[jA] > strength_threshold * row_scale)
+            S_diag_data[jA] = 0;
+            if (A_diag_data[jA] > strength_threshold * row_scale)
             {
-               S_data[jA] = -1;
+               S_diag_data[jA] = -1;
+            }
+         }
+         for (jA = A_offd_i[i]+1; jA < A_offd_i[i+1]; jA++)
+         {
+            S_offd_data[jA] = 0;
+            if (A_offd_data[jA] > strength_threshold * row_scale)
+            {
+               S_offd_data[jA] = -1;
             }
          }
       }
       else
       {
-         for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
+         for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
-            S_data[jA] = 0;
-            if (A_data[jA] < strength_threshold * row_scale)
+            S_diag_data[jA] = 0;
+            if (A_diag_data[jA] < strength_threshold * row_scale)
             {
-               S_data[jA] = -1;
+               S_diag_data[jA] = -1;
+            }
+         }
+         for (jA = A_offd_i[i]+1; jA < A_offd_i[i+1]; jA++)
+         {
+            S_offd_data[jA] = 0;
+            if (A_offd_data[jA] < strength_threshold * row_scale)
+            {
+               S_offd_data[jA] = -1;
             }
          }
       }
@@ -240,19 +259,36 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
    jS = 0;
    for (i = 0; i < num_variables; i++)
    {
-      S_i[i] = jS;
-      for (jA = A_i[i]; jA < A_i[i+1]; jA++)
+      S_diag_i[i] = jS;
+      for (jA = A_diag_i[i]; jA < A_diag_i[i+1]; jA++)
       {
-         if (S_data[jA])
+         if (S_diag_data[jA])
          {
-            S_j[jS]    = S_j[jA];
-            S_data[jS] = S_data[jA];
+            S_diag_j[jS]    = S_diag_j[jA];
+            S_diag_data[jS] = S_diag_data[jA];
             jS++;
          }
       }
    }
-   S_i[num_variables] = jS;
+   S_diag_i[num_variables] = jS;
    hypre_CSRMatrixNumNonzeros(S_diag) = jS;
+
+   jS = 0;
+   for (i = 0; i < num_variables; i++)
+   {
+      S_offd_i[i] = jS;
+      for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+      {
+         if (S_offd_data[jA])
+         {
+            S_offd_j[jS]    = S_offd_j[jA];
+            S_offd_data[jS] = S_offd_data[jA];
+            jS++;
+         }
+      }
+   }
+   S_offd_i[num_variables] = jS;
+   hypre_CSRMatrixNumNonzeros(S_offd) = jS;
 
    /*----------------------------------------------------------
     * Compute the measures
@@ -269,10 +305,10 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
 
    for (i = 0; i < num_variables; i++)
    {
-      for (jS = S_i[i]; jS < S_i[i+1]; jS++)
+      for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++)
       {
-         j = S_j[jS];
-         measure_array[j] -= S_data[jS];
+         j = S_diag_j[jS];
+         measure_array[j] -= S_diag_data[jS];
       }
    }
 
@@ -393,20 +429,20 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
          else
          {
             /* marked dependences */
-            for (jS = S_i[i]; jS < S_i[i+1]; jS++)
+            for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++)
             {
-               j = S_j[jS];
+               j = S_diag_j[jS];
 
                if (CF_marker[j] > 0)
                {
-                  if (S_data[jS] < 0)
+                  if (S_diag_data[jS] < 0)
                   {
                      /* "remove" edge from S */
-                     S_data[jS] = -S_data[jS];
+                     S_diag_data[jS] = -S_diag_data[jS];
                   }
 
                   /* IMPORTANT: consider all dependencies */
-                  if (S_data[jS])
+                  if (S_diag_data[jS])
                   {
                      /* temporarily modify CF_marker */
                      CF_marker[j] = COMMON_C_PT;
@@ -415,24 +451,24 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
             }
 
             /* unmarked dependences */
-            for (jS = S_i[i]; jS < S_i[i+1]; jS++)
+            for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++)
             {
-               if (S_data[jS] < 0)
+               if (S_diag_data[jS] < 0)
                {
-                  j = S_j[jS];
+                  j = S_diag_j[jS];
 
                   /* check for common C-pt */
-                  for (kS = S_i[j]; kS < S_i[j+1]; kS++)
+                  for (kS = S_diag_i[j]; kS < S_diag_i[j+1]; kS++)
                   {
-                     k = S_j[kS];
+                     k = S_diag_j[kS];
 
                      /* IMPORTANT: consider all dependencies */
-                     if (S_data[kS])
+                     if (S_diag_data[kS])
                      {
                         if (CF_marker[k] == COMMON_C_PT)
                         {
                            /* "remove" edge from S and update measure*/
-                           S_data[jS] = -S_data[jS];
+                           S_diag_data[jS] = -S_diag_data[jS];
                            measure_array[j]--;
                            break;
                         }
@@ -442,9 +478,9 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
             }
 
             /* reset CF_marker */
-            for (jS = S_i[i]; jS < S_i[i+1]; jS++)
+            for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++)
             {
-               j = S_j[jS];
+               j = S_diag_j[jS];
 
                if (CF_marker[j] == COMMON_C_PT)
                {
@@ -463,14 +499,14 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
          {
             measure_array[i] = 0;
 
-            for (jS = S_i[i]; jS < S_i[i+1]; jS++)
+            for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++)
             {
-               if (S_data[jS] < 0)
+               if (S_diag_data[jS] < 0)
                {
-                  j = S_j[jS];
+                  j = S_diag_j[jS];
                
                   /* "remove" edge from S */
-                  S_data[jS] = -S_data[jS];
+                  S_diag_data[jS] = -S_diag_data[jS];
                
                   /* decrement measures of unmarked neighbors */
                   if (!CF_marker[j])
