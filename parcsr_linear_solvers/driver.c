@@ -212,7 +212,7 @@ main( int   argc,
    grid_relax_type = hypre_CTAlloc(int,4);
    grid_relax_points = hypre_CTAlloc(int *,4);
 
-   if (coarsen_type == -2)
+   if (coarsen_type == 4)
    {
       /* fine grid */
       num_grid_sweeps[0] = 3;
