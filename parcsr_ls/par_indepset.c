@@ -225,26 +225,23 @@ hypre_ParAMGIndepSet( hypre_ParCSRMatrix *S,
 	  }
 	  else
 	  {
-	    for (jc = 0; jc < num_cols_offd; jc++)
-	    {
-	      if (j == col_map_offd[jc])
-	      {
-		jjc = jc+local_num_vars;
+	     jc = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
+	     if (jc > -1)
+	     {
+		jc += local_num_vars;  
             /* only consider valid graph edges */
-                if ((measure_array[jjc] > 1) && (S_ext_data[jS]))
+                if ((measure_array[jc] > 1) && (S_ext_data[jS]))
                 {
-                   if (measure_array[i] > measure_array[jjc])
+                   if (measure_array[i] > measure_array[jc])
                    {
-                      IS_marker_offd[jc] = 0;
+                      IS_marker_offd[jc-local_num_vars] = 0;
                    }
-                   else if (measure_array[jjc] > measure_array[i])
+                   else if (measure_array[jc] > measure_array[i])
                    {
                       IS_marker_offd[ic] = 0;
                    }
                 }
-		break;
-              }
-            }
+            } 
 	  }
         }
       }
