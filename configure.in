@@ -28,6 +28,14 @@ AC_CONFIG_HEADER(HYPRE_config.h)
 dnl AC_CONFIG_AUX_DIR(config)
 AC_PREFIX_DEFAULT(`pwd`/hypre)
 
+# JNI_INCLUDES has a path needed for Java support on Frost by Babel runtime:
+JNI_INCLUDES="-I /usr/java130/include"; export JNI_INCLUDES
+# Default Fortran compilers differ for this configure file and the Babel runtime
+# configure file on Frost:
+F77= $ac_cv_prog_F77; export F77
+# Other language environment variables should also be set here, e.g. CC.
+dnl Babel runtime library, per Gary Kumfert Sept02:
+AC_CONFIG_SUBDIRS(babel-runtime)
 
 dnl *********************************************************************
 dnl * Set the variable ARCH, (CASC_GUESS_ARCH uses tarch).  ARCH will
@@ -1196,28 +1204,25 @@ then
 fi
 
 HYPRE_BABELLIBDIR=""
+BABEL_RUNTIME_DIR=""
 if test "$casc_using_babel" = "yes"
 then
-dnl jfp: temporary, until Babel has been installed somewhere:
-# jfp still unsatisfactory...
- BABEL_INSTALL_DIR="${HOME}"
- BABEL_DIR="${HOME}/babel-0.6.3/source/runtime/"
- BABEL_HYPRE_INCLUDES="\
+BABEL_INSTALL_DIR=$HYPRE_TOP_SRC_DIR/babel-runtime
+BABEL_HYPRE_INCLUDES="\
  -I$HYPRE_TOP_SRC_DIR/hypre/include\
- -I$HYPRE_TOP_SRC_DIR/babel/Hypre\
- -I$HYPRE_TOP_SRC_DIR/babel\
- -I$HYPRE_TOP_SRC_DIR/babel/babel\
- -I$HYPRE_TOP_SRC_DIR/babel/babel_stubs_c\
- -I${BABEL_DIR}\
- -I${BABEL_DIR}/babel\
- -I${HOME}/include"
-BABELLIBFLAGS="-L../babel/Hypre -lHypre_Babel -L${BABEL_INSTALL_DIR}/lib -lsidl"
+ -I$HYPRE_TOP_SRC_DIR/babel/Hypre"
+BABEL_LIB_DIR="$HYPRE_TOP_SRC_DIR/hypre/lib"
+BABELLIBFLAGS="\
+ -L${HYPRE_TOP_SRC_DIR}/babel/HypreClient-C -lHypreBabelClient-C\
+ -L${HYPRE_TOP_SRC_DIR}/babel/HypreClient-F -lHypreBabelClient-F\
+ -L${HYPRE_TOP_SRC_DIR}/babel/Hypre -lHypreBabel\
+ -L${BABEL_LIB_DIR} -lsidl"
 
  babeldir="${BABEL_INSTALL_DIR}"
  AC_SUBST(babeldir)
 
- HYPRE_BABELLIBDIR="$HYPRE_TOP_SRC_DIR/babel/Hypre"
-
+ HYPRE_BABELLIBDIR="$HYPRE_TOP_SRC_DIR/babel"
+ BABEL_RUNTIME_DIR="$HYPRE_TOP_SRC_DIR/babel-runtime"
 
 dnl   CASC_FIND_BABEL
 
@@ -1335,10 +1340,10 @@ AC_SUBST(PREPEND)
 
 dnl *BABEL-related header files, libraries and directories for those
 dnl * libraries
-AC_SUBST(BABEL_DIR)
 AC_SUBST(BABEL_HYPRE_INCLUDES)
 AC_SUBST(BABELLIBFLAGS)
 AC_SUBST(HYPRE_BABELLIBDIR)
+AC_SUBST(BABEL_RUNTIME_DIR)
 
 dnl *MLI-related header files, libraries and directories for those
 dnl * libraries
@@ -1369,6 +1374,8 @@ CASC_CONFIG_OUTPUT_LIST(\
  amge\
  babel\
  babel/Hypre\
+ babel/HypreClient-C\
+ babel/HypreClient-F\
  blas\
  distributed_ls\
  distributed_ls/Euclid\
