@@ -1,2 +1,2 @@
 
-typedef void *HYPRE_StructSolver;
+typedef void *HYPRE_StructInterfaceSolver;

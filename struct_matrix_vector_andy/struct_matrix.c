@@ -8,49 +8,49 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Member functions for hypre_StructMatrix class.
+ * Member functions for hypre_StructInterfaceMatrix class.
  *
  *****************************************************************************/
 
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_NewStructMatrix
+ * hypre_NewStructInterfaceMatrix
  *--------------------------------------------------------------------------*/
 
-hypre_StructMatrix *
-hypre_NewStructMatrix( MPI_Comm     context,
+hypre_StructInterfaceMatrix *
+hypre_NewStructInterfaceMatrix( MPI_Comm     context,
 		      hypre_StructGrid    *grid,
 		      hypre_StructStencil *stencil )
 {
-   hypre_StructMatrix    *matrix;
+   hypre_StructInterfaceMatrix    *matrix;
 
-   matrix = hypre_CTAlloc(hypre_StructMatrix, 1);
+   matrix = hypre_CTAlloc(hypre_StructInterfaceMatrix, 1);
 
-   hypre_StructMatrixContext(matrix) = context;
-   hypre_StructMatrixStructGrid(matrix)    = grid;
-   hypre_StructMatrixStructStencil(matrix) = stencil;
+   hypre_StructInterfaceMatrixContext(matrix) = context;
+   hypre_StructInterfaceMatrixStructGrid(matrix)    = grid;
+   hypre_StructInterfaceMatrixStructStencil(matrix) = stencil;
 
-   hypre_StructMatrixTranslator(matrix) = NULL;
-   hypre_StructMatrixStorageType(matrix) = 0;
-   hypre_StructMatrixData(matrix) = NULL;
+   hypre_StructInterfaceMatrixTranslator(matrix) = NULL;
+   hypre_StructInterfaceMatrixStorageType(matrix) = 0;
+   hypre_StructInterfaceMatrixData(matrix) = NULL;
 
    /* set defaults */
-   hypre_SetStructMatrixStorageType(matrix, HYPRE_PETSC_MATRIX);
+   hypre_SetStructInterfaceMatrixStorageType(matrix, HYPRE_PETSC_MATRIX);
 
    return matrix;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_FreeStructMatrix
+ * hypre_FreeStructInterfaceMatrix
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_FreeStructMatrix( hypre_StructMatrix *matrix )
+hypre_FreeStructInterfaceMatrix( hypre_StructInterfaceMatrix *matrix )
 {
 
-   if ( hypre_StructMatrixStorageType(matrix) == HYPRE_PETSC_MATRIX )
-      hypre_FreeStructMatrixPETSc( matrix );
+   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC_MATRIX )
+      hypre_FreeStructInterfaceMatrixPETSc( matrix );
    else
       return(-1);
 
@@ -60,7 +60,7 @@ hypre_FreeStructMatrix( hypre_StructMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetStructMatrixCoeffs
+ * hypre_SetStructInterfaceMatrixCoeffs
  *   
  *   Set elements in a Struct Matrix interface.
  *   Coefficients are referred to in stencil format; grid points are
@@ -69,55 +69,55 @@ hypre_FreeStructMatrix( hypre_StructMatrix *matrix )
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_SetStructMatrixCoeffs( hypre_StructMatrix *matrix,
+hypre_SetStructInterfaceMatrixCoeffs( hypre_StructInterfaceMatrix *matrix,
 			    hypre_Index         *grid_index,
 			    double            *coeffs     )
 {
    int    ierr;
 
-   if ( hypre_StructMatrixStorageType(matrix) == HYPRE_PETSC_MATRIX )
-      return( hypre_SetStructMatrixPETScCoeffs( matrix, grid_index, coeffs ) );
+   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC_MATRIX )
+      return( hypre_SetStructInterfaceMatrixPETScCoeffs( matrix, grid_index, coeffs ) );
    else
       return(-1);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_AssembleStructMatrix
- *   User-level routine for assembling hypre_StructMatrix.
+ * hypre_AssembleStructInterfaceMatrix
+ *   User-level routine for assembling hypre_StructInterfaceMatrix.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_AssembleStructMatrix( hypre_StructMatrix *matrix )
+hypre_AssembleStructInterfaceMatrix( hypre_StructInterfaceMatrix *matrix )
 {
-   if ( hypre_StructMatrixStorageType(matrix) == HYPRE_PETSC_MATRIX )
-      return( hypre_AssembleStructMatrixPETSc( matrix ) );
+   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC_MATRIX )
+      return( hypre_AssembleStructInterfaceMatrixPETSc( matrix ) );
    else
       return(-1);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PrintStructMatrix
+ * hypre_PrintStructInterfaceMatrix
  *   
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_PrintStructMatrix( hypre_StructMatrix *matrix )
+hypre_PrintStructInterfaceMatrix( hypre_StructInterfaceMatrix *matrix )
 {
-   if ( hypre_StructMatrixStorageType(matrix) == HYPRE_PETSC_MATRIX )
-      return( hypre_PrintStructMatrixPETSc( matrix ) );
+   if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC_MATRIX )
+      return( hypre_PrintStructInterfaceMatrixPETSc( matrix ) );
    else
       return(-1);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetStructMatrixStorageType
+ * hypre_SetStructInterfaceMatrixStorageType
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_SetStructMatrixStorageType( hypre_StructMatrix *matrix,
+hypre_SetStructInterfaceMatrixStorageType( hypre_StructInterfaceMatrix *matrix,
 				 int                type   )
 {
-   hypre_StructMatrixStorageType(matrix) = type;
+   hypre_StructInterfaceMatrixStorageType(matrix) = type;
 
    return(0);
 }

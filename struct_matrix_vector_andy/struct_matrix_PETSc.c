@@ -8,7 +8,7 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Member functions for hypre_StructMatrix class for PETSc storage scheme.
+ * Member functions for hypre_StructInterfaceMatrix class for PETSc storage scheme.
  *
  *****************************************************************************/
 
@@ -22,25 +22,26 @@ hypre_IndexD(new_index, 1) = hypre_IndexD(index, 1) + stencil_shape[1];\
 hypre_IndexD(new_index, 2) = hypre_IndexD(index, 2) + stencil_shape[2];
 
 /*--------------------------------------------------------------------------
- * hypre_FreeStructMatrixPETSc
+ * hypre_FreeStructInterfaceMatrixPETSc
  *   Internal routine for freeing a matrix stored in PETSc form.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_FreeStructMatrixPETSc( hypre_StructMatrix *struct_matrix )
+hypre_FreeStructInterfaceMatrixPETSc( hypre_StructInterfaceMatrix *struct_matrix )
 {
-   Mat PETSc_matrix = (Mat) hypre_StructMatrixData(struct_matrix);
-
-   hypre_FreeStructGridToCoordTable( (hypre_StructGridToCoordTable *)
-			     hypre_StructMatrixTranslator(struct_matrix) );
+#ifdef PETSC_AVAILABLE
+   Mat PETSc_matrix = (Mat) hypre_StructInterfaceMatrixData(struct_matrix);
 
    MatDestroy( PETSc_matrix );
+#endif
+   hypre_FreeStructGridToCoordTable( (hypre_StructGridToCoordTable *)
+			     hypre_StructInterfaceMatrixTranslator(struct_matrix) );
 
    return(0);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetStructMatrixPETScCoeffs
+ * hypre_SetStructInterfaceMatrixPETScCoeffs
  *   
  *   Set elements in a StructStencil Matrix interface into PETSc storage format. 
  *   Coefficients are referred to in stencil
@@ -49,10 +50,11 @@ hypre_FreeStructMatrixPETSc( hypre_StructMatrix *struct_matrix )
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_SetStructMatrixPETScCoeffs( hypre_StructMatrix *struct_matrix, 
+hypre_SetStructInterfaceMatrixPETScCoeffs( hypre_StructInterfaceMatrix *struct_matrix, 
 				 hypre_Index         *index,
 				 double            *coeffs )
 {
+#ifdef PETSC_AVAILABLE
    int                         ierr;
    int                         i;
 
@@ -70,16 +72,16 @@ hypre_SetStructMatrixPETScCoeffs( hypre_StructMatrix *struct_matrix,
 
    new_index = hypre_NewIndex();
 
-   grid    = hypre_StructMatrixStructGrid(struct_matrix);
-   stencil = hypre_StructMatrixStructStencil(struct_matrix);
+   grid    = hypre_StructInterfaceMatrixStructGrid(struct_matrix);
+   stencil = hypre_StructInterfaceMatrixStructStencil(struct_matrix);
 
    /* If first coefficient, allocate data and build translator */
-   if ( hypre_StructMatrixData(struct_matrix) == NULL )
+   if ( hypre_StructInterfaceMatrixData(struct_matrix) == NULL )
    {
       grid_to_coord_table = hypre_NewStructGridToCoordTable(grid, stencil);
 
       ierr = OptionsSetValue( "-mat_aij_oneindex", PETSC_NULL );
-      ierr = MatCreateMPIAIJ( hypre_StructMatrixContext(struct_matrix), 
+      ierr = MatCreateMPIAIJ( hypre_StructInterfaceMatrixContext(struct_matrix), 
 			      hypre_StructGridLocalSize(grid),
 			      hypre_StructGridLocalSize(grid), 
 			      hypre_StructGridGlobalSize(grid),
@@ -88,17 +90,17 @@ hypre_SetStructMatrixPETScCoeffs( hypre_StructMatrix *struct_matrix,
 			      hypre_StructStencilSize(stencil), PETSC_NULL,
 			      &PETSc_matrix );
 
-      hypre_StructMatrixTranslator(struct_matrix) =
+      hypre_StructInterfaceMatrixTranslator(struct_matrix) =
 	 (void *) grid_to_coord_table;
-      hypre_StructMatrixData(struct_matrix) =
+      hypre_StructInterfaceMatrixData(struct_matrix) =
 	 (void *) PETSc_matrix;
    }
    else
    {
       grid_to_coord_table =
-	 (hypre_StructGridToCoordTable *) hypre_StructMatrixTranslator(struct_matrix);
+	 (hypre_StructGridToCoordTable *) hypre_StructInterfaceMatrixTranslator(struct_matrix);
       PETSc_matrix =
-	 (Mat) hypre_StructMatrixData(struct_matrix);
+	 (Mat) hypre_StructInterfaceMatrixData(struct_matrix);
    }
 
    grid_to_coord_table_entry =
@@ -142,38 +144,45 @@ hypre_SetStructMatrixPETScCoeffs( hypre_StructMatrix *struct_matrix,
 
    hypre_FreeIndex(new_index);
 
+#endif
    return(0);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PrintStructMatrixPETSc
+ * hypre_PrintStructInterfaceMatrixPETSc
  *   Internal routine for printing a matrix stored in PETSc form.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_PrintStructMatrixPETSc( hypre_StructMatrix *struct_matrix )
+hypre_PrintStructInterfaceMatrixPETSc( hypre_StructInterfaceMatrix *struct_matrix )
 {
-   Mat PETSc_matrix = (Mat ) hypre_StructMatrixData(struct_matrix);
-   int  ierr;
+   int  ierr=0;
+#ifdef PETSC_AVAILABLE
+   Mat PETSc_matrix = (Mat ) hypre_StructInterfaceMatrixData(struct_matrix);
 
-   return( MatView( PETSc_matrix, VIEWER_STDOUT_WORLD ) );
+   ierr = MatView( PETSc_matrix, VIEWER_STDOUT_WORLD );
+#endif
+   return( ierr );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_AssembleStructMatrixPETSc
+ * hypre_AssembleStructInterfaceMatrixPETSc
  *   Internal routine for assembling a matrix stored in PETSc form.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_AssembleStructMatrixPETSc( hypre_StructMatrix *struct_matrix )
+hypre_AssembleStructInterfaceMatrixPETSc( hypre_StructInterfaceMatrix *struct_matrix )
 {
-   Mat PETSc_matrix = (Mat) hypre_StructMatrixData(struct_matrix);
-   int  ierr;
+   int  ierr=0;
+#ifdef PETSC_AVAILABLE
+   Mat PETSc_matrix = (Mat) hypre_StructInterfaceMatrixData(struct_matrix);
 
    ierr = MatAssemblyBegin( PETSc_matrix, MAT_FINAL_ASSEMBLY );
    if (ierr)
       return( ierr );
 
-   return( MatAssemblyEnd( PETSc_matrix, MAT_FINAL_ASSEMBLY ) );
+   ierr = MatAssemblyEnd( PETSc_matrix, MAT_FINAL_ASSEMBLY );
+#endif
+   return( ierr );
 }
 

@@ -12,12 +12,12 @@
  *
  *****************************************************************************/
 
-#ifndef hypre_STENCIL_VECTOR_HEADER
-#define hypre_STENCIL_VECTOR_HEADER
+#ifndef hypre_STENCIL_INTERFACE_VECTOR_HEADER
+#define hypre_STENCIL_INTERFACE_VECTOR_HEADER
 
 
 /*--------------------------------------------------------------------------
- * hypre_StructVector:
+ * hypre_StructInterfaceVector:
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -31,19 +31,19 @@ typedef struct
    void     	*translator;
    void     	*data;
 
-} hypre_StructVector;
+} hypre_StructInterfaceVector;
 
 /*--------------------------------------------------------------------------
- * Accessor macros: hypre_StructVector
+ * Accessor macros: hypre_StructInterfaceVector
  *--------------------------------------------------------------------------*/
 
-#define hypre_StructVectorContext(vector)      ((vector) -> context)
-#define hypre_StructVectorStructGrid(vector)         ((vector) -> grid)
-#define hypre_StructVectorStructStencil(vector)      ((vector) -> stencil)
+#define hypre_StructInterfaceVectorContext(vector)      ((vector) -> context)
+#define hypre_StructInterfaceVectorStructGrid(vector)         ((vector) -> grid)
+#define hypre_StructInterfaceVectorStructStencil(vector)      ((vector) -> stencil)
 
-#define hypre_StructVectorStorageType(vector)  ((vector) -> storage_type)
-#define hypre_StructVectorTranslator(vector)   ((vector) -> translator)
-#define hypre_StructVectorData(vector)         ((vector) -> data)
+#define hypre_StructInterfaceVectorStorageType(vector)  ((vector) -> storage_type)
+#define hypre_StructInterfaceVectorTranslator(vector)   ((vector) -> translator)
+#define hypre_StructInterfaceVectorData(vector)         ((vector) -> data)
 
 
 #endif

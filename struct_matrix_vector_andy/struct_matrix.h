@@ -12,12 +12,12 @@
  *
  *****************************************************************************/
 
-#ifndef hypre_STRUCT_MATRIX_HEADER
-#define hypre_STRUCT_MATRIX_HEADER
+#ifndef hypre_STRUCT_INTERFACE_MATRIX_HEADER
+#define hypre_STRUCT_INTERFACE_MATRIX_HEADER
 
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrix:
+ * hypre_StructInterfaceMatrix:
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -31,19 +31,19 @@ typedef struct
    void     	*translator;
    void     	*data;
 
-} hypre_StructMatrix;
+} hypre_StructInterfaceMatrix;
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_StructMatrix
  *--------------------------------------------------------------------------*/
 
-#define hypre_StructMatrixContext(matrix)      ((matrix) -> context)
-#define hypre_StructMatrixStructGrid(matrix)         ((matrix) -> grid)
-#define hypre_StructMatrixStructStencil(matrix)      ((matrix) -> stencil)
+#define hypre_StructInterfaceMatrixContext(matrix)      ((matrix) -> context)
+#define hypre_StructInterfaceMatrixStructGrid(matrix)         ((matrix) -> grid)
+#define hypre_StructInterfaceMatrixStructStencil(matrix)      ((matrix) -> stencil)
 
-#define hypre_StructMatrixStorageType(matrix)  ((matrix) -> storage_type)
-#define hypre_StructMatrixTranslator(matrix)   ((matrix) -> translator)
-#define hypre_StructMatrixData(matrix)         ((matrix) -> data)
+#define hypre_StructInterfaceMatrixStorageType(matrix)  ((matrix) -> storage_type)
+#define hypre_StructInterfaceMatrixTranslator(matrix)   ((matrix) -> translator)
+#define hypre_StructInterfaceMatrixData(matrix)         ((matrix) -> data)
 
 
 #endif

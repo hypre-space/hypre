@@ -12,13 +12,13 @@ void HYPRE_SetStructGridExtents P((HYPRE_StructGrid grid , int *ilower , int *iu
 void HYPRE_AssembleStructGrid P((HYPRE_StructGrid grid ));
 
 /* HYPRE_struct_matrix.c */
-HYPRE_StructMatrix HYPRE_NewStructMatrix P((MPI_Comm context , HYPRE_StructGrid grid , HYPRE_StructStencil stencil ));
-int HYPRE_FreeStructMatrix P((HYPRE_StructMatrix struct_matrix ));
-int HYPRE_SetStructMatrixCoeffs P((HYPRE_StructMatrix matrix , int *grid_index , double *coeffs ));
-int HYPRE_AssembleStructMatrix P((HYPRE_StructMatrix matrix ));
-void *HYPRE_StructMatrixGetData P((HYPRE_StructMatrix matrix ));
-int HYPRE_PrintStructMatrix P((HYPRE_StructMatrix matrix ));
-int HYPRE_SetStructMatrixStorageType P((HYPRE_StructMatrix struct_matrix , int type ));
+HYPRE_StructInterfaceMatrix HYPRE_NewStructInterfaceMatrix P((MPI_Comm context , HYPRE_StructGrid grid , HYPRE_StructStencil stencil ));
+int HYPRE_FreeStructInterfaceMatrix P((HYPRE_StructInterfaceMatrix struct_matrix ));
+int HYPRE_SetStructInterfaceMatrixCoeffs P((HYPRE_StructInterfaceMatrix matrix , int *grid_index , double *coeffs ));
+int HYPRE_AssembleStructInterfaceMatrix P((HYPRE_StructInterfaceMatrix matrix ));
+void *HYPRE_StructInterfaceMatrixGetData P((HYPRE_StructInterfaceMatrix matrix ));
+int HYPRE_PrintStructInterfaceMatrix P((HYPRE_StructInterfaceMatrix matrix ));
+int HYPRE_SetStructInterfaceMatrixStorageType P((HYPRE_StructInterfaceMatrix struct_matrix , int type ));
 
 /* HYPRE_struct_stencil.c */
 HYPRE_StructStencil HYPRE_NewStructStencil P((int dim , int size ));
@@ -26,14 +26,14 @@ void HYPRE_SetStructStencilElement P((HYPRE_StructStencil stencil , int element_
 void HYPRE_FreeStructStencil P((HYPRE_StructStencil stencil ));
 
 /* HYPRE_struct_vector.c */
-HYPRE_StructVector HYPRE_NewStructVector P((MPI_Comm context , HYPRE_StructGrid grid , HYPRE_StructStencil stencil ));
-int HYPRE_FreeStructVector P((HYPRE_StructVector struct_vector ));
-int HYPRE_SetStructVectorCoeffs P((HYPRE_StructVector vector , int *grid_index , double *coeffs ));
-int HYPRE_SetStructVector P((HYPRE_StructVector vector , double *val ));
-int HYPRE_AssembleStructVector P((HYPRE_StructVector vector ));
-int HYPRE_SetStructVectorStorageType P((HYPRE_StructVector struct_vector , int type ));
-void *HYPRE_StructVectorGetData P((HYPRE_StructVector vector ));
-int HYPRE_PrintStructVector P((HYPRE_StructVector vector ));
+HYPRE_StructInterfaceVector HYPRE_NewStructInterfaceVector P((MPI_Comm context , HYPRE_StructGrid grid , HYPRE_StructStencil stencil ));
+int HYPRE_FreeStructInterfaceVector P((HYPRE_StructInterfaceVector struct_vector ));
+int HYPRE_SetStructInterfaceVectorCoeffs P((HYPRE_StructInterfaceVector vector , int *grid_index , double *coeffs ));
+int HYPRE_SetStructInterfaceVector P((HYPRE_StructInterfaceVector vector , double *val ));
+int HYPRE_AssembleStructInterfaceVector P((HYPRE_StructInterfaceVector vector ));
+int HYPRE_SetStructInterfaceVectorStorageType P((HYPRE_StructInterfaceVector struct_vector , int type ));
+void *HYPRE_StructInterfaceVectorGetData P((HYPRE_StructInterfaceVector vector ));
+int HYPRE_PrintStructInterfaceVector P((HYPRE_StructInterfaceVector vector ));
 
 /* box.c */
 hypre_Box *hypre_NewBox P((hypre_Index *imin , hypre_Index *imax ));
@@ -50,9 +50,6 @@ hypre_BoxArray *hypre_IntersectBoxArrays P((hypre_BoxArray *box_array1 , hypre_B
 hypre_BoxArray *hypre_SubtractBoxes P((hypre_Box *box1 , hypre_Box *box2 ));
 hypre_BoxArray *hypre_UnionBoxArray P((hypre_BoxArray *boxes ));
 
-/* driver.c */
-int main P((int argc , char *argv []));
-
 /* grid_to_coord.c */
 hypre_StructGridToCoordTable *hypre_NewStructGridToCoordTable P((hypre_StructGrid *grid , hypre_StructStencil *stencil ));
 void hypre_FreeStructGridToCoordTable P((hypre_StructGridToCoordTable *table ));
@@ -67,20 +64,20 @@ void hypre_SetStructGridExtents P((hypre_StructGrid *grid , hypre_Index *ilower 
 void hypre_AssembleStructGrid P((hypre_StructGrid *grid ));
 
 /* struct_matrix.c */
-hypre_StructMatrix *hypre_NewStructMatrix P((MPI_Comm context , hypre_StructGrid *grid , hypre_StructStencil *stencil ));
-int hypre_FreeStructMatrix P((hypre_StructMatrix *matrix ));
-int hypre_SetStructMatrixCoeffs P((hypre_StructMatrix *matrix , hypre_Index *grid_index , double *coeffs ));
-int hypre_AssembleStructMatrix P((hypre_StructMatrix *matrix ));
-int hypre_PrintStructMatrix P((hypre_StructMatrix *matrix ));
-int hypre_SetStructMatrixStorageType P((hypre_StructMatrix *matrix , int type ));
+hypre_StructInterfaceMatrix *hypre_NewStructInterfaceMatrix P((MPI_Comm context , hypre_StructGrid *grid , hypre_StructStencil *stencil ));
+int hypre_FreeStructInterfaceMatrix P((hypre_StructInterfaceMatrix *matrix ));
+int hypre_SetStructInterfaceMatrixCoeffs P((hypre_StructInterfaceMatrix *matrix , hypre_Index *grid_index , double *coeffs ));
+int hypre_AssembleStructInterfaceMatrix P((hypre_StructInterfaceMatrix *matrix ));
+int hypre_PrintStructInterfaceMatrix P((hypre_StructInterfaceMatrix *matrix ));
+int hypre_SetStructInterfaceMatrixStorageType P((hypre_StructInterfaceMatrix *matrix , int type ));
 int *hypre_FindBoxNeighborhood P((hypre_BoxArray *boxes , hypre_BoxArray *all_boxes , hypre_StructStencil *stencil ));
 int *hypre_FindBoxApproxNeighborhood P((hypre_BoxArray *boxes , hypre_BoxArray *all_boxes , hypre_StructStencil *stencil ));
 
 /* struct_matrix_PETSc.c */
-int hypre_FreeStructMatrixPETSc P((hypre_StructMatrix *struct_matrix ));
-int hypre_SetStructMatrixPETScCoeffs P((hypre_StructMatrix *struct_matrix , hypre_Index *index , double *coeffs ));
-int hypre_PrintStructMatrixPETSc P((hypre_StructMatrix *struct_matrix ));
-int hypre_AssembleStructMatrixPETSc P((hypre_StructMatrix *struct_matrix ));
+int hypre_FreeStructInterfaceMatrixPETSc P((hypre_StructInterfaceMatrix *struct_matrix ));
+int hypre_SetStructInterfaceMatrixPETScCoeffs P((hypre_StructInterfaceMatrix *struct_matrix , hypre_Index *index , double *coeffs ));
+int hypre_PrintStructInterfaceMatrixPETSc P((hypre_StructInterfaceMatrix *struct_matrix ));
+int hypre_AssembleStructInterfaceMatrixPETSc P((hypre_StructInterfaceMatrix *struct_matrix ));
 
 /* struct_stencil.c */
 hypre_StructStencil *hypre_NewStructStencil P((int dim , int size ));
@@ -88,19 +85,19 @@ void hypre_FreeStructStencil P((hypre_StructStencil *stencil ));
 void hypre_SetStructStencilElement P((hypre_StructStencil *stencil , int element_index , int *offset ));
 
 /* struct_vector.c */
-hypre_StructVector *hypre_NewStructVector P((MPI_Comm context , hypre_StructGrid *grid , hypre_StructStencil *stencil ));
-int hypre_FreeStructVector P((hypre_StructVector *vector ));
-int hypre_SetStructVectorCoeffs P((hypre_StructVector *vector , hypre_Index *grid_index , double *coeffs ));
-int hypre_SetStructVector P((hypre_StructVector *vector , double *val ));
-int hypre_AssembleStructVector P((hypre_StructVector *vector ));
-int hypre_SetStructVectorStorageType P((hypre_StructVector *vector , int type ));
-int hypre_PrintStructVector P((hypre_StructVector *vector ));
+hypre_StructInterfaceVector *hypre_NewStructInterfaceVector P((MPI_Comm context , hypre_StructGrid *grid , hypre_StructStencil *stencil ));
+int hypre_FreeStructInterfaceVector P((hypre_StructInterfaceVector *vector ));
+int hypre_SetStructInterfaceVectorCoeffs P((hypre_StructInterfaceVector *vector , hypre_Index *grid_index , double *coeffs ));
+int hypre_SetStructInterfaceVector P((hypre_StructInterfaceVector *vector , double *val ));
+int hypre_AssembleStructInterfaceVector P((hypre_StructInterfaceVector *vector ));
+int hypre_SetStructInterfaceVectorStorageType P((hypre_StructInterfaceVector *vector , int type ));
+int hypre_PrintStructInterfaceVector P((hypre_StructInterfaceVector *vector ));
 
 /* struct_vector_PETSc.c */
-int hypre_FreeStructVectorPETSc P((hypre_StructVector *struct_vector ));
-int hypre_SetStructVectorPETScCoeffs P((hypre_StructVector *struct_vector , hypre_Index *index , double *coeffs ));
-int hypre_SetStructVectorPETSc P((hypre_StructVector *struct_vector , double *val ));
-int hypre_AssembleStructVectorPETSc P((hypre_StructVector *struct_vector ));
-int hypre_PrintStructVectorPETSc P((hypre_StructVector *struct_vector ));
+int hypre_FreeStructInterfaceVectorPETSc P((hypre_StructInterfaceVector *struct_vector ));
+int hypre_SetStructInterfaceVectorPETScCoeffs P((hypre_StructInterfaceVector *struct_vector , hypre_Index *index , double *coeffs ));
+int hypre_SetStructInterfaceVectorPETSc P((hypre_StructInterfaceVector *struct_vector , double *val ));
+int hypre_AssembleStructInterfaceVectorPETSc P((hypre_StructInterfaceVector *struct_vector ));
+int hypre_PrintStructInterfaceVectorPETSc P((hypre_StructInterfaceVector *struct_vector ));
 
 #undef P

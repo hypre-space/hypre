@@ -8,98 +8,98 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * HYPRE_StructSolver interface
+ * HYPRE_StructInterfaceSolver interface
  *
  *****************************************************************************/
 
 #include "./headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewStructSolver
+ * HYPRE_NewStructInterfaceSolver
  *--------------------------------------------------------------------------*/
 
-HYPRE_StructSolver 
-HYPRE_NewStructSolver( MPI_Comm     context,
+HYPRE_StructInterfaceSolver 
+HYPRE_NewStructInterfaceSolver( MPI_Comm     context,
 		      HYPRE_StructGrid    grid,
 		      HYPRE_StructStencil stencil )
 {
-   return ( (HYPRE_StructSolver)
-	    hypre_NewStructSolver( context,
+   return ( (HYPRE_StructInterfaceSolver)
+	    hypre_NewStructInterfaceSolver( context,
 				  grid,
 				  stencil ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_FreeStructSolver
+ * HYPRE_FreeStructInterfaceSolver
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_FreeStructSolver( HYPRE_StructSolver struct_solver )
+HYPRE_FreeStructInterfaceSolver( HYPRE_StructInterfaceSolver struct_solver )
 {
-   return( hypre_FreeStructSolver( (hypre_StructSolver *) struct_solver ) );
+   return( hypre_FreeStructInterfaceSolver( (hypre_StructInterfaceSolver *) struct_solver ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSolverSetType
+ * HYPRE_StructInterfaceSolverSetType
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_StructSolverSetType( HYPRE_StructSolver solver, int type )
+HYPRE_StructInterfaceSolverSetType( HYPRE_StructInterfaceSolver solver, int type )
 {
-   return( hypre_StructSolverSetType( (hypre_StructSolver *) solver, type ) );
+   return( hypre_StructInterfaceSolverSetType( (hypre_StructInterfaceSolver *) solver, type ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSolverInitialize
+ * HYPRE_StructInterfaceSolverInitialize
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_StructSolverInitialize( HYPRE_StructSolver solver )
+HYPRE_StructInterfaceSolverInitialize( HYPRE_StructInterfaceSolver solver )
 {
-   return( hypre_StructSolverInitialize( (hypre_StructSolver *) solver ) );
+   return( hypre_StructInterfaceSolverInitialize( (hypre_StructInterfaceSolver *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSolverSetup
+ * HYPRE_StructInterfaceSolverSetup
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_StructSolverSetup( HYPRE_StructSolver solver, HYPRE_StructMatrix matrix,
-                        HYPRE_StructVector soln, HYPRE_StructVector rhs )
+HYPRE_StructInterfaceSolverSetup( HYPRE_StructInterfaceSolver solver, HYPRE_StructInterfaceMatrix matrix,
+                        HYPRE_StructInterfaceVector soln, HYPRE_StructInterfaceVector rhs )
 {
-   return( hypre_StructSolverSetup( (hypre_StructSolver *) solver,
+   return( hypre_StructInterfaceSolverSetup( (hypre_StructInterfaceSolver *) solver,
                                   matrix,
                                   soln,
                                   rhs ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSolverSolve
+ * HYPRE_StructInterfaceSolverSolve
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_StructSolverSolve( HYPRE_StructSolver solver )
+HYPRE_StructInterfaceSolverSolve( HYPRE_StructInterfaceSolver solver )
 {
-   return( hypre_StructSolverSolve( (hypre_StructSolver *) solver ) );
+   return( hypre_StructInterfaceSolverSolve( (hypre_StructInterfaceSolver *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSolverSetDropTolerance
+ * HYPRE_StructInterfaceSolverSetDropTolerance
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_StructSolverSetDropTolerance( HYPRE_StructSolver solver, double tol )
+HYPRE_StructInterfaceSolverSetDropTolerance( HYPRE_StructInterfaceSolver solver, double tol )
 {
-   return( hypre_StructSolverSetDropTolerance( (hypre_StructSolver *) solver, tol ) );
+   return( hypre_StructInterfaceSolverSetDropTolerance( (hypre_StructInterfaceSolver *) solver, tol ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSolverSetFactorRowSize
+ * HYPRE_StructInterfaceSolverSetFactorRowSize
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_StructSolverSetFactorRowSize( HYPRE_StructSolver solver, int size )
+HYPRE_StructInterfaceSolverSetFactorRowSize( HYPRE_StructInterfaceSolver solver, int size )
 {
-   return( hypre_StructSolverSetFactorRowSize( (hypre_StructSolver *) solver, size) );
+   return( hypre_StructInterfaceSolverSetFactorRowSize( (hypre_StructInterfaceSolver *) solver, size) );
 }
 

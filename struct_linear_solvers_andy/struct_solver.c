@@ -8,51 +8,51 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Member functions for hypre_StructSolver class.
+ * Member functions for hypre_StructInterfaceSolver class.
  *
  *****************************************************************************/
 
 #include "./headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_NewStructSolver
+ * hypre_NewStructInterfaceSolver
  *--------------------------------------------------------------------------*/
 
-hypre_StructSolver *
-hypre_NewStructSolver( MPI_Comm     context,
+hypre_StructInterfaceSolver *
+hypre_NewStructInterfaceSolver( MPI_Comm     context,
 		      HYPRE_StructGrid    grid,
 		      HYPRE_StructStencil stencil )
 {
-   hypre_StructSolver    *struct_solver;
+   hypre_StructInterfaceSolver    *struct_solver;
 
 
-   struct_solver = (hypre_StructSolver *) hypre_CTAlloc(hypre_StructSolver,1);
+   struct_solver = (hypre_StructInterfaceSolver *) hypre_CTAlloc(hypre_StructInterfaceSolver,1);
 
-   hypre_StructSolverContext(struct_solver) = context;
-   hypre_StructSolverStructGrid(struct_solver)    = grid;
-   hypre_StructSolverStructStencil(struct_solver) = stencil;
+   hypre_StructInterfaceSolverContext(struct_solver) = context;
+   hypre_StructInterfaceSolverStructGrid(struct_solver)    = grid;
+   hypre_StructInterfaceSolverStructStencil(struct_solver) = stencil;
 
-   hypre_StructSolverMatrix(struct_solver) = NULL;
-   hypre_StructSolverSoln(struct_solver) = NULL;
-   hypre_StructSolverRhs(struct_solver) = NULL;
+   hypre_StructInterfaceSolverMatrix(struct_solver) = NULL;
+   hypre_StructInterfaceSolverSoln(struct_solver) = NULL;
+   hypre_StructInterfaceSolverRhs(struct_solver) = NULL;
 
-   hypre_StructSolverData(struct_solver) = NULL;
+   hypre_StructInterfaceSolverData(struct_solver) = NULL;
 
    /* set defaults */
-   hypre_StructSolverSolverType(struct_solver) = HYPRE_PETSC_MAT_PARILUT_SOLVER;
+   hypre_StructInterfaceSolverSolverType(struct_solver) = HYPRE_PETSC_MAT_PARILUT_SOLVER;
 
    return struct_solver;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_FreeStructSolver
+ * hypre_FreeStructInterfaceSolver
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_FreeStructSolver( hypre_StructSolver *struct_solver )
+hypre_FreeStructInterfaceSolver( hypre_StructInterfaceSolver *struct_solver )
 {
-   if ( hypre_StructSolverSolverType(struct_solver) == HYPRE_PETSC_MAT_PARILUT_SOLVER )
-      hypre_FreeStructSolverPETSc( struct_solver );
+   if ( hypre_StructInterfaceSolverSolverType(struct_solver) == HYPRE_PETSC_MAT_PARILUT_SOLVER )
+      hypre_FreeStructInterfaceSolverPETSc( struct_solver );
    else
       return(-1);
 
@@ -62,15 +62,15 @@ hypre_FreeStructSolver( hypre_StructSolver *struct_solver )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructSolverSetType
+ * hypre_StructInterfaceSolverSetType
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_StructSolverSetType( hypre_StructSolver *solver, int type )
+hypre_StructInterfaceSolverSetType( hypre_StructInterfaceSolver *solver, int type )
 {
    if( type == HYPRE_PETSC_MAT_PARILUT_SOLVER )
    {
-      hypre_StructSolverSolverType(solver) = type;
+      hypre_StructInterfaceSolverSolverType(solver) = type;
       return(0);
    }
    else
@@ -78,62 +78,62 @@ hypre_StructSolverSetType( hypre_StructSolver *solver, int type )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructSolverInitialize
+ * hypre_StructInterfaceSolverInitialize
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_StructSolverInitialize( hypre_StructSolver *solver )
+hypre_StructInterfaceSolverInitialize( hypre_StructInterfaceSolver *solver )
 {
 
-  if ( hypre_StructSolverSolverType(solver) == HYPRE_PETSC_MAT_PARILUT_SOLVER )
-     return( hypre_StructSolverInitializePETSc( solver ) );
+  if ( hypre_StructInterfaceSolverSolverType(solver) == HYPRE_PETSC_MAT_PARILUT_SOLVER )
+     return( hypre_StructInterfaceSolverInitializePETSc( solver ) );
   else
      return(-1);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructSolverSetup
+ * hypre_StructInterfaceSolverSetup
  *   Internal routine for setting up solver data like factorizations etc.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_StructSolverSetup( hypre_StructSolver *solver, HYPRE_StructMatrix matrix,
-                        HYPRE_StructVector soln, HYPRE_StructVector rhs )
+hypre_StructInterfaceSolverSetup( hypre_StructInterfaceSolver *solver, HYPRE_StructInterfaceMatrix matrix,
+                        HYPRE_StructInterfaceVector soln, HYPRE_StructInterfaceVector rhs )
 {
-  hypre_StructSolverMatrix( solver ) = matrix;
-  hypre_StructSolverSoln( solver ) = soln;
-  hypre_StructSolverRhs( solver ) = rhs;
+  hypre_StructInterfaceSolverMatrix( solver ) = matrix;
+  hypre_StructInterfaceSolverSoln( solver ) = soln;
+  hypre_StructInterfaceSolverRhs( solver ) = rhs;
 
-  if ( hypre_StructSolverSolverType(solver) == HYPRE_PETSC_MAT_PARILUT_SOLVER )
-     return( hypre_StructSolverSetupPETSc( solver ) );
+  if ( hypre_StructInterfaceSolverSolverType(solver) == HYPRE_PETSC_MAT_PARILUT_SOLVER )
+     return( hypre_StructInterfaceSolverSetupPETSc( solver ) );
   else
      return(-1);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructSolverSolve
+ * hypre_StructInterfaceSolverSolve
  *   Internal routine for solving
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_StructSolverSolve( hypre_StructSolver *solver )
+hypre_StructInterfaceSolverSolve( hypre_StructInterfaceSolver *solver )
 {
-  if ( hypre_StructSolverSolverType(solver) == HYPRE_PETSC_MAT_PARILUT_SOLVER )
-     return( hypre_StructSolverSolvePETSc( solver ) );
+  if ( hypre_StructInterfaceSolverSolverType(solver) == HYPRE_PETSC_MAT_PARILUT_SOLVER )
+     return( hypre_StructInterfaceSolverSolvePETSc( solver ) );
   else
      return(-1);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructSolverSetDropTolerance
+ * hypre_StructInterfaceSolverSetDropTolerance
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_StructSolverSetDropTolerance( hypre_StructSolver *solver, double tol )
+hypre_StructInterfaceSolverSetDropTolerance( hypre_StructInterfaceSolver *solver, double tol )
 {
-   if( hypre_StructSolverSolverType( solver ) == HYPRE_PETSC_MAT_PARILUT_SOLVER )
+   if( hypre_StructInterfaceSolverSolverType( solver ) == HYPRE_PETSC_MAT_PARILUT_SOLVER )
    {
-     return( hypre_StructSolverPETScSetDropTolerance( solver, tol ) );
+     return( hypre_StructInterfaceSolverPETScSetDropTolerance( solver, tol ) );
    }
    else
    {
@@ -145,15 +145,15 @@ hypre_StructSolverSetDropTolerance( hypre_StructSolver *solver, double tol )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructSolverSetFactorRowSize
+ * hypre_StructInterfaceSolverSetFactorRowSize
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_StructSolverSetFactorRowSize( hypre_StructSolver *solver, int size )
+hypre_StructInterfaceSolverSetFactorRowSize( hypre_StructInterfaceSolver *solver, int size )
 {
-   if( hypre_StructSolverSolverType( solver ) == HYPRE_PETSC_MAT_PARILUT_SOLVER )
+   if( hypre_StructInterfaceSolverSolverType( solver ) == HYPRE_PETSC_MAT_PARILUT_SOLVER )
    {
-     return( hypre_StructSolverPETScSetFactorRowSize( solver, size ) );
+     return( hypre_StructInterfaceSolverPETScSetFactorRowSize( solver, size ) );
    }
    else
    {

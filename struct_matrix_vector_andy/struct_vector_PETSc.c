@@ -8,7 +8,7 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Member functions for hypre_StructVector class for PETSc storage scheme.
+ * Member functions for hypre_StructInterfaceVector class for PETSc storage scheme.
  *
  *****************************************************************************/
 
@@ -17,28 +17,29 @@
 
 
 /*--------------------------------------------------------------------------
- * hypre_FreeStructVectorPETSc
+ * hypre_FreeStructInterfaceVectorPETSc
  *   Internal routine for freeing a vector stored in PETSc form.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_FreeStructVectorPETSc( hypre_StructVector *struct_vector )
+hypre_FreeStructInterfaceVectorPETSc( hypre_StructInterfaceVector *struct_vector )
 {
-   Vec PETSc_vector = (Vec) hypre_StructVectorData(struct_vector);
+   int  ierr=0;
+#ifdef PETSC_AVAILABLE
+   Vec PETSc_vector = (Vec) hypre_StructInterfaceVectorData(struct_vector);
 
-   int  ierr;
 
    hypre_FreeStructGridToCoordTable( (hypre_StructGridToCoordTable *)
-			     hypre_StructVectorTranslator(struct_vector) );
+			     hypre_StructInterfaceVectorTranslator(struct_vector) );
 
    VecDestroy(PETSc_vector );
-
+#endif
    return(0);
 }
 
 
 /*--------------------------------------------------------------------------
- * hypre_SetStructVectorPETScCoeffs
+ * hypre_SetStructInterfaceVectorPETScCoeffs
  *   
  *   Set elements in a Struct Vector interface into PETSc storage format. 
  *   StructGrid points are identified by their coordinates in the
@@ -46,11 +47,12 @@ hypre_FreeStructVectorPETSc( hypre_StructVector *struct_vector )
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_SetStructVectorPETScCoeffs( hypre_StructVector *struct_vector, 
+hypre_SetStructInterfaceVectorPETScCoeffs( hypre_StructInterfaceVector *struct_vector, 
 				 hypre_Index         *index,
 				 double            *coeffs )
 {
-   int                         ierr;
+   int                         ierr=0;
+#ifdef PETSC_AVAILABLE
 
    /* variables meaningful to the interface */
    hypre_StructGrid                   *grid;
@@ -67,31 +69,31 @@ hypre_SetStructVectorPETScCoeffs( hypre_StructVector *struct_vector,
 
    new_index = hypre_NewIndex();
 
-   grid    = hypre_StructVectorStructGrid(struct_vector);
-   stencil = hypre_StructVectorStructStencil(struct_vector);
+   grid    = hypre_StructInterfaceVectorStructGrid(struct_vector);
+   stencil = hypre_StructInterfaceVectorStructStencil(struct_vector);
 
    /* If first coefficient, allocate data and build translator */
-   if ( hypre_StructVectorData(struct_vector) == NULL )
+   if ( hypre_StructInterfaceVectorData(struct_vector) == NULL )
    {
       grid_to_coord_table = hypre_NewStructGridToCoordTable(grid, stencil);
 
-      ierr = VecCreateMPI( hypre_StructVectorContext(struct_vector), 
+      ierr = VecCreateMPI( hypre_StructInterfaceVectorContext(struct_vector), 
 			      hypre_StructGridLocalSize(grid),
 			      hypre_StructGridGlobalSize(grid), 
 			      &PETSc_vector );
       if (ierr) return(ierr);
 
-      hypre_StructVectorTranslator(struct_vector) =
+      hypre_StructInterfaceVectorTranslator(struct_vector) =
 	 (void *) grid_to_coord_table;
-      hypre_StructVectorData(struct_vector) =
+      hypre_StructInterfaceVectorData(struct_vector) =
 	 (void *) PETSc_vector;
    }
    else
    {
       grid_to_coord_table =
-	 (hypre_StructGridToCoordTable *) hypre_StructVectorTranslator(struct_vector);
+	 (hypre_StructGridToCoordTable *) hypre_StructInterfaceVectorTranslator(struct_vector);
       PETSc_vector =
-	 (Vec) hypre_StructVectorData(struct_vector);
+	 (Vec) hypre_StructInterfaceVectorData(struct_vector);
    }
 
    grid_to_coord_table_entry =
@@ -110,78 +112,85 @@ hypre_SetStructVectorPETScCoeffs( hypre_StructVector *struct_vector,
    ierr = VecSetValues ( PETSc_vector, 1, &row_coord, 
 				  &(coeffs[0]), INSERT_VALUES );         
 
+#endif
    return(ierr);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetStructVectorPETSc
+ * hypre_SetStructInterfaceVectorPETSc
  *   Internal routine for setting a vector stored in PETSc form to a value.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_SetStructVectorPETSc( hypre_StructVector *struct_vector, 
+hypre_SetStructInterfaceVectorPETSc( hypre_StructInterfaceVector *struct_vector, 
                            double            *val )
 {
+   int                         ierr=0;
+#ifdef PETSC_AVAILABLE
    Vec                        PETSc_vector;
    hypre_StructGridToCoordTable       *grid_to_coord_table;
-   int                         ierr;
 
    /* If first coefficient, allocate data and build translator */
-   if ( hypre_StructVectorData(struct_vector) == NULL )
+   if ( hypre_StructInterfaceVectorData(struct_vector) == NULL )
    {
       grid_to_coord_table = hypre_NewStructGridToCoordTable(
-                            hypre_StructVectorStructGrid(struct_vector), 
-                            hypre_StructVectorStructStencil(struct_vector));
+                            hypre_StructInterfaceVectorStructGrid(struct_vector), 
+                            hypre_StructInterfaceVectorStructStencil(struct_vector));
 
-      ierr = VecCreateMPI( hypre_StructVectorContext(struct_vector), 
-			      hypre_StructGridLocalSize(hypre_StructVectorStructGrid(struct_vector)),
-			      hypre_StructGridGlobalSize(hypre_StructVectorStructGrid(struct_vector)), 
+      ierr = VecCreateMPI( hypre_StructInterfaceVectorContext(struct_vector), 
+			      hypre_StructGridLocalSize(hypre_StructInterfaceVectorStructGrid(struct_vector)),
+			      hypre_StructGridGlobalSize(hypre_StructInterfaceVectorStructGrid(struct_vector)), 
 			      &PETSc_vector );
       if (ierr) return(ierr);
 
-      hypre_StructVectorTranslator(struct_vector) =
+      hypre_StructInterfaceVectorTranslator(struct_vector) =
 	 (void *) grid_to_coord_table;
-      hypre_StructVectorData(struct_vector) =
+      hypre_StructInterfaceVectorData(struct_vector) =
 	 (void *) PETSc_vector;
    }
 
-   return( VecSet( val, PETSc_vector ) );
+   ierr = VecSet( val, PETSc_vector );
+#endif
+   return( ierr );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_AssembleStructVectorPETSc
+ * hypre_AssembleStructInterfaceVectorPETSc
  *   Internal routine for assembling a vector stored in PETSc form.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_AssembleStructVectorPETSc( hypre_StructVector *struct_vector )
+hypre_AssembleStructInterfaceVectorPETSc( hypre_StructInterfaceVector *struct_vector )
 {
-   Vec PETSc_vector = (Vec) hypre_StructVectorData(struct_vector);
-
-   int  ierr;
+   int  ierr=0;
+#ifdef PETSC_AVAILABLE
+   Vec PETSc_vector = (Vec) hypre_StructInterfaceVectorData(struct_vector);
 
    ierr = VecAssemblyBegin( PETSc_vector );
    if (ierr)
       return( ierr );
 
-   return( VecAssemblyEnd( PETSc_vector ) );
-
+   ierr = VecAssemblyEnd( PETSc_vector );
+#endif
+   return( ierr );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PrintStructVectorPETSc
+ * hypre_PrintStructInterfaceVectorPETSc
  *   Internal routine for printing a vector stored in PETSc form.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_PrintStructVectorPETSc( hypre_StructVector *struct_vector )
+hypre_PrintStructInterfaceVectorPETSc( hypre_StructInterfaceVector *struct_vector )
 {
-   Vec PETSc_vector = (Vec) hypre_StructVectorData(struct_vector);
+   int  ierr=0;
+#ifdef PETSC_AVAILABLE
+   Vec PETSc_vector = (Vec) hypre_StructInterfaceVectorData(struct_vector);
 
-   int  ierr;
 
    ierr = VecView( PETSc_vector, VIEWER_STDOUT_WORLD );
 
+#endif
    return( ierr );
 
 }

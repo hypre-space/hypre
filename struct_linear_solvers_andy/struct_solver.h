@@ -8,15 +8,15 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Header info for the hypre_StructSolver structures
+ * Header info for the hypre_StructInterfaceSolver structures
  *
  *****************************************************************************/
 
-#ifndef hypre_STRUCT_SOLVER_HEADER
-#define hypre_STRUCT_SOLVER_HEADER
+#ifndef hypre_STRUCT_INTERFACE_SOLVER_HEADER
+#define hypre_STRUCT_INTERFACE_SOLVER_HEADER
 
 /*--------------------------------------------------------------------------
- * hypre_StructSolver:
+ * hypre_StructInterfaceSolver:
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -26,29 +26,29 @@ typedef struct
    HYPRE_StructGrid     grid;
    HYPRE_StructStencil  stencil;
 
-   HYPRE_StructMatrix matrix;
-   HYPRE_StructVector soln;
-   HYPRE_StructVector rhs;
+   HYPRE_StructInterfaceMatrix matrix;
+   HYPRE_StructInterfaceVector soln;
+   HYPRE_StructInterfaceVector rhs;
 
    int           solver_type;
    void     	*data; /* Must be cast to some available solver type */
 
-} hypre_StructSolver;
+} hypre_StructInterfaceSolver;
 
 /*--------------------------------------------------------------------------
- * Accessor macros: hypre_StructSolver
+ * Accessor macros: hypre_StructInterfaceSolver
  *--------------------------------------------------------------------------*/
 
-#define hypre_StructSolverContext(solver)      ((solver) -> context)
-#define hypre_StructSolverStructGrid(solver)         ((solver) -> grid)
-#define hypre_StructSolverStructStencil(solver)      ((solver) -> stencil)
+#define hypre_StructInterfaceSolverContext(solver)      ((solver) -> context)
+#define hypre_StructInterfaceSolverStructGrid(solver)         ((solver) -> grid)
+#define hypre_StructInterfaceSolverStructStencil(solver)      ((solver) -> stencil)
 
-#define hypre_StructSolverMatrix(solver)       ((solver) -> matrix)
-#define hypre_StructSolverSoln(solver)         ((solver) -> soln)
-#define hypre_StructSolverRhs(solver)          ((solver) -> rhs)
+#define hypre_StructInterfaceSolverMatrix(solver)       ((solver) -> matrix)
+#define hypre_StructInterfaceSolverSoln(solver)         ((solver) -> soln)
+#define hypre_StructInterfaceSolverRhs(solver)          ((solver) -> rhs)
 
-#define hypre_StructSolverSolverType(solver)   ((solver) -> solver_type)
-#define hypre_StructSolverData(solver)         ((solver) -> data)
+#define hypre_StructInterfaceSolverSolverType(solver)   ((solver) -> solver_type)
+#define hypre_StructInterfaceSolverData(solver)         ((solver) -> data)
 
 
 #endif

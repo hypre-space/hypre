@@ -8,49 +8,49 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Member functions for hypre_StructVector class.
+ * Member functions for hypre_StructInterfaceVector class.
  *
  *****************************************************************************/
 
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_NewStructVector
+ * hypre_NewStructInterfaceVector
  *--------------------------------------------------------------------------*/
 
-hypre_StructVector *
-hypre_NewStructVector( MPI_Comm     context,
+hypre_StructInterfaceVector *
+hypre_NewStructInterfaceVector( MPI_Comm     context,
 		      hypre_StructGrid    *grid,
 		      hypre_StructStencil *stencil )
 {
-   hypre_StructVector    *vector;
+   hypre_StructInterfaceVector    *vector;
 
-   vector = hypre_CTAlloc(hypre_StructVector, 1);
+   vector = hypre_CTAlloc(hypre_StructInterfaceVector, 1);
 
-   hypre_StructVectorContext(vector) = context;
-   hypre_StructVectorStructGrid(vector)    = grid;
-   hypre_StructVectorStructStencil(vector) = stencil;
+   hypre_StructInterfaceVectorContext(vector) = context;
+   hypre_StructInterfaceVectorStructGrid(vector)    = grid;
+   hypre_StructInterfaceVectorStructStencil(vector) = stencil;
 
-   hypre_StructVectorTranslator(vector) = NULL;
-   hypre_StructVectorStorageType(vector) = 0;
-   hypre_StructVectorData(vector) = NULL;
+   hypre_StructInterfaceVectorTranslator(vector) = NULL;
+   hypre_StructInterfaceVectorStorageType(vector) = 0;
+   hypre_StructInterfaceVectorData(vector) = NULL;
 
    /* set defaults */
-   hypre_SetStructVectorStorageType(vector, HYPRE_PETSC_VECTOR);
+   hypre_SetStructInterfaceVectorStorageType(vector, HYPRE_PETSC_VECTOR);
 
    return vector;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_FreeStructVector
+ * hypre_FreeStructInterfaceVector
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_FreeStructVector( hypre_StructVector *vector )
+hypre_FreeStructInterfaceVector( hypre_StructInterfaceVector *vector )
 {
 
-   if ( hypre_StructVectorStorageType(vector) == HYPRE_PETSC_VECTOR )
-      hypre_FreeStructVectorPETSc( vector );
+   if ( hypre_StructInterfaceVectorStorageType(vector) == HYPRE_PETSC_VECTOR )
+      hypre_FreeStructInterfaceVectorPETSc( vector );
    else
       return(-1);
 
@@ -60,7 +60,7 @@ hypre_FreeStructVector( hypre_StructVector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetStructVectorCoeffs
+ * hypre_SetStructInterfaceVectorCoeffs
  *   
  *   Set elements in a Struct Vector interface.
  *   Coefficients are referred to in stencil format; grid points are
@@ -69,70 +69,70 @@ hypre_FreeStructVector( hypre_StructVector *vector )
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_SetStructVectorCoeffs( hypre_StructVector *vector,
+hypre_SetStructInterfaceVectorCoeffs( hypre_StructInterfaceVector *vector,
 			    hypre_Index         *grid_index,
 			    double            *coeffs     )
 {
    int    ierr;
 
-   if ( hypre_StructVectorStorageType(vector) == HYPRE_PETSC_VECTOR )
-      return( hypre_SetStructVectorPETScCoeffs( vector, grid_index, coeffs ) );
+   if ( hypre_StructInterfaceVectorStorageType(vector) == HYPRE_PETSC_VECTOR )
+      return( hypre_SetStructInterfaceVectorPETScCoeffs( vector, grid_index, coeffs ) );
    else
       return(-1);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetStructVector
+ * hypre_SetStructInterfaceVector
  *   Storage independent routine for setting a vector to a value.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_SetStructVector( hypre_StructVector *vector, double *val )
+hypre_SetStructInterfaceVector( hypre_StructInterfaceVector *vector, double *val )
 {
-   if ( hypre_StructVectorStorageType(vector) == HYPRE_PETSC_VECTOR )
-      return( hypre_SetStructVectorPETSc( vector, val ) );
+   if ( hypre_StructInterfaceVectorStorageType(vector) == HYPRE_PETSC_VECTOR )
+      return( hypre_SetStructInterfaceVectorPETSc( vector, val ) );
    else
       return(-1);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_AssembleStructVector
- *   User-level routine for assembling hypre_StructVector.
+ * hypre_AssembleStructInterfaceVector
+ *   User-level routine for assembling hypre_StructInterfaceVector.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_AssembleStructVector( hypre_StructVector *vector )
+hypre_AssembleStructInterfaceVector( hypre_StructInterfaceVector *vector )
 {
-   if ( hypre_StructVectorStorageType(vector) == HYPRE_PETSC_VECTOR )
-      return( hypre_AssembleStructVectorPETSc( vector ) );
+   if ( hypre_StructInterfaceVectorStorageType(vector) == HYPRE_PETSC_VECTOR )
+      return( hypre_AssembleStructInterfaceVectorPETSc( vector ) );
    else
       return(-1);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetStructVectorStorageType
+ * hypre_SetStructInterfaceVectorStorageType
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_SetStructVectorStorageType( hypre_StructVector *vector,
+hypre_SetStructInterfaceVectorStorageType( hypre_StructInterfaceVector *vector,
 				 int                type   )
 {
-   hypre_StructVectorStorageType(vector) = type;
+   hypre_StructInterfaceVectorStorageType(vector) = type;
 
    return(0);
 }
 
 
 /*--------------------------------------------------------------------------
- * hypre_PrintStructVector
+ * hypre_PrintStructInterfaceVector
  *   Internal routine for printing a vector
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_PrintStructVector( hypre_StructVector *vector )
+hypre_PrintStructInterfaceVector( hypre_StructInterfaceVector *vector )
 {
-   if ( hypre_StructVectorStorageType(vector) == HYPRE_PETSC_VECTOR )
-      return( hypre_PrintStructVectorPETSc( vector ) );
+   if ( hypre_StructInterfaceVectorStorageType(vector) == HYPRE_PETSC_VECTOR )
+      return( hypre_PrintStructInterfaceVectorPETSc( vector ) );
    else
       return(-1);
 }

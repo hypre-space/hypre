@@ -1,3 +1,3 @@
 
-typedef void *HYPRE_StructMatrix;
-typedef void *HYPRE_StructVector;
+typedef void *HYPRE_StructInterfaceMatrix;
+typedef void *HYPRE_StructInterfaceVector;

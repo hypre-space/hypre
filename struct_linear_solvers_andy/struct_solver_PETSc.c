@@ -8,55 +8,57 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Member functions for hypre_StructSolver class for PETSc storage scheme.
+ * Member functions for hypre_StructInterfaceSolver class for PETSc storage scheme.
  *
  *****************************************************************************/
 #include "./headers.h"
 
+#ifdef PETSC_AVAILABLE
 /* include PETSc linear solver headers */
 #include "sles.h"
+#endif
 
 /*--------------------------------------------------------------------------
- * hypre_FreeStructSolverPETSc
+ * hypre_FreeStructInterfaceSolverPETSc
  *   Internal routine for freeing a solver stored in PETSc form.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_FreeStructSolverPETSc( hypre_StructSolver *struct_solver )
+hypre_FreeStructInterfaceSolverPETSc( hypre_StructInterfaceSolver *struct_solver )
 {
 
    HYPRE_FreePETScSolverParILUT
-      ( (HYPRE_PETScSolverParILUT) hypre_StructSolverData( struct_solver ) );
+      ( (HYPRE_PETScSolverParILUT) hypre_StructInterfaceSolverData( struct_solver ) );
 
    return(0);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructSolverInitializePETSc
+ * hypre_StructInterfaceSolverInitializePETSc
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_StructSolverInitializePETSc( hypre_StructSolver *struct_solver )
+hypre_StructInterfaceSolverInitializePETSc( hypre_StructInterfaceSolver *struct_solver )
 {
    int ierr = 0;
 
-   hypre_StructSolverData( struct_solver ) = HYPRE_NewPETScSolverParILUT
-      ( hypre_StructSolverContext( struct_solver ));
+   hypre_StructInterfaceSolverData( struct_solver ) = HYPRE_NewPETScSolverParILUT
+      ( hypre_StructInterfaceSolverContext( struct_solver ));
 
    return(ierr);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructSolverSetupPETSc
+ * hypre_StructInterfaceSolverSetupPETSc
  *   Internal routine for setting up a solver for a matrix stored in PETSc form.
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_StructSolverSetupPETSc( hypre_StructSolver *struct_solver )
+hypre_StructInterfaceSolverSetupPETSc( hypre_StructInterfaceSolver *struct_solver )
 {
-   HYPRE_StructMatrix matrix=hypre_StructSolverMatrix(struct_solver);
-   HYPRE_StructVector soln=hypre_StructSolverSoln(struct_solver);
-   HYPRE_StructVector rhs=hypre_StructSolverRhs(struct_solver);
+   HYPRE_StructInterfaceMatrix matrix=hypre_StructInterfaceSolverMatrix(struct_solver);
+   HYPRE_StructInterfaceVector soln=hypre_StructInterfaceSolverSoln(struct_solver);
+   HYPRE_StructInterfaceVector rhs=hypre_StructInterfaceSolverRhs(struct_solver);
    HYPRE_PETScSolverParILUT solver_data;
    Mat         Petsc_matrix;
    Vec         Petsc_soln, Petsc_rhs;
@@ -64,13 +66,13 @@ hypre_StructSolverSetupPETSc( hypre_StructSolver *struct_solver )
    int  ierr;
 
 
-   solver_data = hypre_StructSolverData( struct_solver );
+   solver_data = hypre_StructInterfaceSolverData( struct_solver );
 
-   Petsc_matrix = (Mat) HYPRE_StructMatrixGetData( matrix );
+   Petsc_matrix = (Mat) HYPRE_StructInterfaceMatrixGetData( matrix );
    HYPRE_PETScSolverParILUTSetSystemMatrix( solver_data, Petsc_matrix );
 
-   Petsc_soln = (Vec) HYPRE_StructVectorGetData( soln );
-   Petsc_rhs = (Vec) HYPRE_StructVectorGetData( rhs );
+   Petsc_soln = (Vec) HYPRE_StructInterfaceVectorGetData( soln );
+   Petsc_rhs = (Vec) HYPRE_StructInterfaceVectorGetData( rhs );
    
    ierr = HYPRE_PETScSolverParILUTSetup( 
       solver_data, Petsc_soln, Petsc_rhs );
@@ -79,23 +81,23 @@ hypre_StructSolverSetupPETSc( hypre_StructSolver *struct_solver )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructSolverSolvePETSc
+ * hypre_StructInterfaceSolverSolvePETSc
  *   Internal routine for solving
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_StructSolverSolvePETSc( hypre_StructSolver *struct_solver )
+hypre_StructInterfaceSolverSolvePETSc( hypre_StructInterfaceSolver *struct_solver )
 {
-   HYPRE_StructVector  soln=hypre_StructSolverSoln(struct_solver);
-   HYPRE_StructVector  rhs=hypre_StructSolverRhs(struct_solver);
-   HYPRE_PETScSolverParILUT solver_data=hypre_StructSolverData( struct_solver );
+   HYPRE_StructInterfaceVector  soln=hypre_StructInterfaceSolverSoln(struct_solver);
+   HYPRE_StructInterfaceVector  rhs=hypre_StructInterfaceSolverRhs(struct_solver);
+   HYPRE_PETScSolverParILUT solver_data=hypre_StructInterfaceSolverData( struct_solver );
    Vec        Petsc_soln, Petsc_rhs;
 
    int  ierr;
 
 
-   Petsc_soln = (Vec) HYPRE_StructVectorGetData( soln );
-   Petsc_rhs = (Vec) HYPRE_StructVectorGetData( rhs );
+   Petsc_soln = (Vec) HYPRE_StructInterfaceVectorGetData( soln );
+   Petsc_rhs = (Vec) HYPRE_StructInterfaceVectorGetData( rhs );
    
    ierr = HYPRE_PETScSolverParILUTSolve( 
       solver_data, Petsc_soln, Petsc_rhs );
@@ -104,33 +106,33 @@ hypre_StructSolverSolvePETSc( hypre_StructSolver *struct_solver )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructSolverPETScSetDropTolerance
+ * hypre_StructInterfaceSolverPETScSetDropTolerance
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_StructSolverPETScSetDropTolerance( hypre_StructSolver *struct_solver, 
+hypre_StructInterfaceSolverPETScSetDropTolerance( hypre_StructInterfaceSolver *struct_solver, 
                                        double tol )
 {
    int ierr=0;
 
    ierr = HYPRE_PETScSolverParILUTSetDropTolerance
-      ( (HYPRE_PETScSolverParILUT) hypre_StructSolverData( struct_solver ), tol );
+      ( (HYPRE_PETScSolverParILUT) hypre_StructInterfaceSolverData( struct_solver ), tol );
 
    return(ierr);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructSolverPETScSetFactorRowSize
+ * hypre_StructInterfaceSolverPETScSetFactorRowSize
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_StructSolverPETScSetFactorRowSize( hypre_StructSolver *struct_solver, 
+hypre_StructInterfaceSolverPETScSetFactorRowSize( hypre_StructInterfaceSolver *struct_solver, 
                                        int size )
 {
    int ierr=0;
 
    ierr = HYPRE_PETScSolverParILUTSetFactorRowSize
-      ( (HYPRE_PETScSolverParILUT) hypre_StructSolverData( struct_solver ), size );
+      ( (HYPRE_PETScSolverParILUT) hypre_StructInterfaceSolverData( struct_solver ), size );
 
    return(ierr);
 }
