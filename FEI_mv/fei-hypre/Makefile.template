@@ -9,7 +9,7 @@
 
 ### ************************************************************************
 ### This is the template file for FEI_mv/fei-hypre.  When configure determines
-### whether or not the internal files are needed, the   variable
+### whether or not the internal files are needed, the ${FEIINTERNAL} variable
 ### will be replaced with either a space to commetn symbol and the proper
 ### Makefile will be generated.
 ### ************************************************************************
@@ -17,7 +17,7 @@
 include ../../config/Makefile.config
 
 BASE_DIR = ${FEIINCLUDE}
- BASE_DIR = $(srcdir)/../fei-base
+${FEIINTERNAL}BASE_DIR = $(srcdir)/../fei-base
 
 SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU
 SUPERLU_LIB     = -L$(srcdir)/../SuperLU
