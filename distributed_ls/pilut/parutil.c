@@ -177,6 +177,25 @@ void free_multi(void *ptr1,...)
 
 }            
 
+/*************************************************************************
+* This function resets freed pointers to NULL   
+**************************************************************************/
+void null_multi(void **ptr1,...)
+{
+  va_list plist;
+  void **ptr;
+
+  *ptr1 = NULL;
+
+  va_start(plist, *ptr1);
+
+  while ((int)(*ptr = va_arg(plist, void **)) != -1) {
+    *ptr = NULL;
+  }
+
+  va_end(plist);
+
+} 
 
 /*************************************************************************
 * The following function copies an int (int) array

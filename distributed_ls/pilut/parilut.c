@@ -230,8 +230,8 @@ void ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, int *rowdist,
   /* If memory requirements change, allocate new memory.
    * The first iteration this always occurs -- see ParINIT */
   if (cinfo->maxnrecv < maxnrecv) {
-    if (cinfo->incolind) free(cinfo->incolind);
-    if (cinfo->invalues) free(cinfo->invalues);
+    if (cinfo->incolind) { free(cinfo->incolind); cinfo->incolind = NULL; }
+    if (cinfo->invalues) { free(cinfo->invalues); cinfo->invalues = NULL; }
     cinfo->incolind = idx_malloc(maxnrecv*(global_maxnz+2), "ComputeCommInfo: cinfo->incolind");
     cinfo->invalues =  fp_malloc(maxnrecv*(global_maxnz+2), "ComputeCommInfo: cinfo->invalues");
     cinfo->maxnrecv = maxnrecv;
@@ -270,7 +270,7 @@ void ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, int *rowdist,
   /* If memory requirements change, allocate new memory.
    * The first iteration this always occurs -- see ParINIT */
   if (cinfo->maxnsend < maxnsend) {
-    if(cinfo->srowind) free(cinfo->srowind);
+    if(cinfo->srowind) { free(cinfo->srowind); cinfo->srowind = NULL; }
     cinfo->srowind  = idx_malloc(maxnsend, "ComputeCommInfo: cinfo->srowind");
     cinfo->maxnsend = maxnsend;
   }
@@ -1132,6 +1132,7 @@ void FormNRmat(int rrow, int first, ReduceMatType *nrmat,
   if( out_rowlen > in_rowlen )
   {
     free_multi( in_colind, in_values, -1 );
+    in_colind = NULL; in_values = NULL;
     rcolind = idx_malloc( out_rowlen, "FornNRmat: rcolind");
     rvalues = fp_malloc( out_rowlen, "FornNRmat: rvalues");
   }else
@@ -1172,9 +1173,11 @@ void FormNRmat(int rrow, int first, ReduceMatType *nrmat,
   /* link the reused storage to the new reduced system */
   nrmat->rmat_rnz[rrow]     = nz;
   nrmat->rmat_rrowlen[rrow] = out_rowlen;
-  if (nrmat->rmat_rcolind[rrow]) free(nrmat->rmat_rcolind[rrow]);
+  if (nrmat->rmat_rcolind[rrow]) 
+     { free(nrmat->rmat_rcolind[rrow]); nrmat->rmat_rcolind[rrow] = NULL; }
   nrmat->rmat_rcolind[rrow] = rcolind;
-  if (nrmat->rmat_rvalues[rrow]) free(nrmat->rmat_rvalues[rrow]);
+  if (nrmat->rmat_rvalues[rrow]) 
+     { free(nrmat->rmat_rvalues[rrow]); nrmat->rmat_rvalues[rrow] = NULL; }
   nrmat->rmat_rvalues[rrow] = rvalues;
 
 #ifdef HYPRE_TIMING
@@ -1237,8 +1240,8 @@ void FormDU(int lrow, int first, FactorMatType *ldu,
   uerowptr[lrow] = end;
 
   /* free the row storage */
-  free( rcolind );
-  free( rvalues );
+  free( rcolind ); rcolind = NULL;
+  free( rvalues ); rvalues = NULL;
 }
 
 
@@ -1312,15 +1315,20 @@ void ParINIT( ReduceMatType *nrmat, CommInfoType *cinfo, int *rowdist,
   nrmat->rmat_rrowlen = idx_malloc(ntogo, "ParILUT: nrmat->rmat_rrowlen");
   nrmat->rmat_rcolind = (int **) mymalloc( sizeof(int*)*ntogo, "ParILUT: nrmat->rmat_rcolind");
   nrmat->rmat_rvalues = (double **)  mymalloc( sizeof(double*) *ntogo, "ParILUT: nrmat->rmat_rvalues");
+  for ( i=0; i < ntogo; i++ )
+  {
+     nrmat->rmat_rcolind[ i ] = NULL;
+     nrmat->rmat_rvalues[ i ] = NULL;
+  }
 
   /* Allocate work space */
-  if (jr) free(jr);
+  if (jr) { free(jr); jr = NULL; }
   jr = idx_malloc_init(nrows, -1, "ParILUT: jr");
-  if (lr) free(lr);
+  if (lr) { free(lr); lr = NULL; }
   lr = idx_malloc_init(nleft, -1, "ParILUT: lr");
-  if (jw) free(jw);
+  if (jw) { free(jw); jw = NULL; }
   jw = idx_malloc(nleft, "ParILUT: jw");
-  if (w) free(w);
+  if (w) { free(w); w = NULL; }
   w  =  fp_malloc(nleft, "ParILUT: w");
 
   /* ---- ComputeCommInfo ---- */

@@ -61,13 +61,13 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   iperm    = ldu->iperm;
 
   /* Allocate work space */
-  if (jr) free(jr);
+  if (jr) { free(jr); jr = NULL; }
   jr = idx_malloc_init(nrows, -1, "SerILUT: jr");
-  if (lr) free(lr);
+  if (lr) { free(lr); lr = NULL; }
   lr = idx_malloc_init(nrows, -1, "SerILUT: lr");
-  if (jw) free(jw);
+  if (jw) { free(jw); jw = NULL; }
   jw = idx_malloc(nrows, "SerILUT: jw");
-  if (w) free(w);
+  if (w) { free(w); w = NULL; }
   w  =  fp_malloc(nrows, "SerILUT: w" );
 
   /* Find structural union of local rows */
@@ -313,6 +313,10 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 #endif
 
   free_multi(jr, jw, lr, w, -1);
+  jr = NULL;
+  jw = NULL;
+  lr = NULL;
+  w = NULL;
 
   return(ierr);
 }
