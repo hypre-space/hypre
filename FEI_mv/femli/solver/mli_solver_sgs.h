@@ -30,6 +30,8 @@ class MLI_Solver_SGS : public MLI_Solver
    int         scheme_;
    int         printRNorm_;
    int         findOmega_;
+   int         omegaNumIncr_;
+   double      omegaIncrement_;
 
 public :
 
