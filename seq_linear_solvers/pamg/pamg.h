@@ -34,6 +34,8 @@ int HYPRE_AMGSetRelaxWeight P((HYPRE_Solver solver , double relax_weight ));
 int HYPRE_AMGSetIOutDat P((HYPRE_Solver solver , int ioutdat ));
 int HYPRE_AMGSetLogFileName P((HYPRE_Solver solver , char *log_file_name ));
 int HYPRE_AMGSetLogging P((HYPRE_Solver solver , int ioutdat , char *log_file_name ));
+int HYPRE_AMGSetNumFunctions P((HYPRE_Solver solver , int num_functions ));
+int HYPRE_AMGSetDofFunc P((HYPRE_Solver solver , int *dof_func ));
 
 /* SPamg-pcg.c */
 int main P((int argc , char *argv []));
@@ -55,11 +57,11 @@ int hypre_AMGSetRelaxWeight P((void *data , double relax_weight ));
 int hypre_AMGSetIOutDat P((void *data , int ioutdat ));
 int hypre_AMGSetLogFileName P((void *data , char *log_file_name ));
 int hypre_AMGSetLogging P((void *data , int ioutdat , char *log_file_name ));
-int hypre_AMGSetNumUnknowns P((void *data , int num_unknowns ));
+int hypre_AMGSetNumFunctions P((void *data , int num_functions ));
 int hypre_AMGSetNumPoints P((void *data , int num_points ));
-int hypre_AMGSetUnknownMap P((void *data , int *unknown_map ));
-int hypre_AMGSetPointMap P((void *data , int *point_map ));
-int hypre_AMGSetVatPoint P((void *data , int *v_at_point ));
+int hypre_AMGSetDofFunc P((void *data , int *dof_func ));
+int hypre_AMGSetDofPoint P((void *data , int *dof_point ));
+int hypre_AMGSetPointDofMap P((void *data , int *point_dof_map ));
 
 /* amg_setup.c */
 int hypre_AMGSetup P((void *amg_vdata , hypre_CSRMatrix *A , hypre_Vector *f , hypre_Vector *u ));
@@ -90,6 +92,7 @@ int BuildLaplacian9pt P((int argc , char *argv [], int arg_index , hypre_CSRMatr
 int BuildLaplacian27pt P((int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr ));
 int BuildDifConv P((int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr ));
 int BuildRhsFromFile P((int argc , char *argv [], int arg_index , hypre_CSRMatrix *A , hypre_Vector **b_ptr ));
+int BuildFuncsFromFile P((int argc , char *argv [], int arg_index , int **dof_func_ptr ));
 
 /* indepset.c */
 int hypre_InitAMGIndepSet P((hypre_CSRMatrix *S , double *measure_array ));
@@ -99,7 +102,7 @@ int hypre_AMGIndepSet P((hypre_CSRMatrix *S , double *measure_array , int *graph
 int hypre_AMGBuildInterp P((hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , hypre_CSRMatrix **P_ptr ));
 
 /* interpRBM.c */
-int hypre_AMGBuildRBMInterp P((hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , hypre_CSRMatrix **P_ptr ));
+int hypre_AMGBuildRBMInterp P((hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , int *dof_func , int num_functions , int **coarse_dof_func_ptr , hypre_CSRMatrix **P_ptr ));
 int row_mat_rectmat_prod P((double *a1 , double *a2 , double *a3 , int i_row , int m , int n ));
 int matinv P((double *x , double *a , int k ));
 
