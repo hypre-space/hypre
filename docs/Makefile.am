@@ -86,16 +86,16 @@ ONLINE_OPTS =\
 all: html ps pdf
 
 install: all
-	@cp -fr HYPRE_usr_manual     $$HYPRE_INSTALL_DIR/docs/.
-	@cp -f  HYPRE_usr_manual.ps  $$HYPRE_INSTALL_DIR/docs/.
-	@cp -f  HYPRE_usr_manual.pdf $$HYPRE_INSTALL_DIR/docs/.
-	@cp -fr HYPRE_ref_manual     $$HYPRE_INSTALL_DIR/docs/.
-	@cp -f  HYPRE_ref_manual.ps  $$HYPRE_INSTALL_DIR/docs/.
-	@cp -f  HYPRE_ref_manual.pdf $$HYPRE_INSTALL_DIR/docs/.
-	@cp -fr bHYPRE_ref_manual     $$HYPRE_INSTALL_DIR/docs/.
-	@cp -f  bHYPRE_ref_manual.ps  $$HYPRE_INSTALL_DIR/docs/.
-	@cp -f  bHYPRE_ref_manual.pdf $$HYPRE_INSTALL_DIR/docs/.
-	@cp -f  V[1-9]* $$HYPRE_INSTALL_DIR/docs/.
+	@cp -fr HYPRE_usr_manual     ${prefix}/docs/.
+	@cp -f  HYPRE_usr_manual.ps  ${prefix}/docs/.
+	@cp -f  HYPRE_usr_manual.pdf ${prefix}/docs/.
+	@cp -fr HYPRE_ref_manual     ${prefix}/docs/.
+	@cp -f  HYPRE_ref_manual.ps  ${prefix}/docs/.
+	@cp -f  HYPRE_ref_manual.pdf ${prefix}/docs/.
+	@cp -fr bHYPRE_ref_manual     ${prefix}/docs/.
+	@cp -f  bHYPRE_ref_manual.ps  ${prefix}/docs/.
+	@cp -f  bHYPRE_ref_manual.pdf ${prefix}/docs/.
+	@cp -f  V[1-9]* ${prefix}/docs/.
 
 clean:
 	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
@@ -243,7 +243,7 @@ vref_manual.dxx: ref_manual.dxx
 	@ \
 	VNUM=`$(srcdir)/../utilities/version -number`; \
 	VDATE=`$(srcdir)/../utilities/version -date`; \
-	sed "s/HYPREVersion/$$VNUM/g" ref_manual.dxx > vref_manual.dxx
+	sed "s/HYPREVersion/$$PACKAGE_VERSION/g" ref_manual.dxx > vref_manual.dxx
 
 ##########
 
@@ -269,7 +269,7 @@ vbref_manual.dxx: bref_manual.dxx
 	@ \
 	VNUM=`$(srcdir)/../utilities/version -number`; \
 	VDATE=`$(srcdir)/../utilities/version -date`; \
-	sed "s/HYPREVersion/$$VNUM/g" bref_manual.dxx > vbref_manual.dxx
+	sed "s/HYPREVersion/$$PACKAGE_VERSION/g" bref_manual.dxx > vbref_manual.dxx
 
 ##########
 
@@ -277,10 +277,24 @@ version.tex:
 	@ \
 	VNUM=`$(srcdir)/../utilities/version -number`; \
 	VDATE=`$(srcdir)/../utilities/version -date`; \
-	echo "\def\HYPREVersion{$$VNUM}" > version.tex; \
+	echo "\def\HYPREVersion{$$PACKAGE_VERSION}" > version.tex; \
 	echo "\def\HYPREVersionDate{$$VDATE}" >> version.tex
 
 ##################################################################
 # Generic rules
 ##################################################################
 
+dist-hook:
+	@ \
+	$(MAKE) $(AM_MAKEFLAGS); \
+	cp -fr HYPRE_usr_manual     ${distdir}/docs/.; \
+	cp -f  HYPRE_usr_manual.ps  ${distdir}/docs/.; \
+	cp -f  HYPRE_usr_manual.pdf ${distdir}/docs/.; \
+	cp -fr HYPRE_ref_manual     ${distdir}/docs/.; \
+	cp -f  HYPRE_ref_manual.ps  ${distdir}/docs/.; \
+	cp -f  HYPRE_ref_manual.pdf ${distdir}/docs/.; \
+	cp -fr bHYPRE_ref_manual     ${distdir}/docs/.; \
+	cp -f  bHYPRE_ref_manual.ps  ${distdir}/docs/.; \
+	cp -f  bHYPRE_ref_manual.pdf ${distdir}/docs/.; \
+	cp -f  V[1-9]* ${distdir}/docs/.
+	

@@ -50,7 +50,8 @@ DIST_SUBDIRS = . config\
  sstruct_mv sstruct_ls\
  seq_mv parcsr_mv distributed_matrix matrix_matrix\
  IJ_mv distributed_ls parcsr_ls parcsr_es\
- FEI_mv babel babel-runtime test lib docs
+ FEI_mv test lib docs
+#FEI_mv babel babel-runtime test lib docs
 
 docs: docs/HYPRE_usr_manual.ps
 	@ (cd docs && $(MAKE) $(AM_MAKEFLAGS) $@)
@@ -72,12 +73,12 @@ nofei:
 	(cd lib && $(MAKE) $(AM_MAKEFLAGS) libHYPRE_LSI.la)
 
 
-#dist-hook:
-#	@ \
-#	for i in $(PETSC) $(SEQLS) $(TOOLS); \
-#	do \
-#	  if [ -d $$i ]; \
-#	  then \
-#	    rm -Rf $$i; \
-#	  fi; \
-#	done
+dist-hook:
+	@ \
+	for i in $(BABELDIR); \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    cp -fr $$i $(distdir); \
+	  fi; \
+	done
