@@ -110,11 +110,13 @@ void    *data;
    /* set default variable/unknown/point mappings */
    if (!iu || !ip || !iv)
    {
+/*****************
       if ((num_unknowns*num_points) != num_variables)
       {
 	 printf("Incompatible number of unknowns and points\n");
 	 exit(1);
       }
+*****************/
 
       iu = hypre_CTAlloc(int, hypre_NDIMU(num_variables));
       ip = hypre_CTAlloc(int, hypre_NDIMU(num_variables));
@@ -245,6 +247,21 @@ void    *data;
       numv[j]  = imax[j] - imin[j] + 1;
       nump[j]  = ipmx[j] - ipmn[j] + 1;
    }
+
+/* fix for problem if iterative weights produces level with no
+   rows */
+
+   k = num_levels;
+   for (j = k-1; j > 0; j--)
+   {
+       if (imax[j] == imax[j-1]) 
+       {
+           num_levels = j;
+           hypre_AMGDataNumLevels(amg_data) = num_levels;
+       }
+   }
+
+/* end iterative weight fix */ 
 
    hypre_AMGDataAArray(amg_data) = A_array;
    hypre_AMGDataPArray(amg_data) = P_array;
@@ -435,9 +452,9 @@ void    *data;
    hypre_AMGDataIVArray(amg_data) = IV_array;
    hypre_AMGDataICGArray(amg_data) = ICG_array;
 
-   if (hypre_AMGDataIOutDat(amg_data) == -1)
+   if (hypre_AMGDataIOutDat(amg_data) <= -1)
    {
-      for (j = 1; j < num_levels; j++)
+      for (j = 0; j < num_levels; j++)
       {
          sprintf(fnam,"A_%d.ysmp",j);
          hypre_WriteYSMP(fnam, A_array[j]);
@@ -445,7 +462,7 @@ void    *data;
     }
 
 
-   if (hypre_AMGDataIOutDat(amg_data) == -2)
+   if (hypre_AMGDataIOutDat(amg_data) <= -2)
    {
       for (j=0; j < num_levels-1; j++)
       {
@@ -454,7 +471,7 @@ void    *data;
       }
    }
 
-   if (hypre_AMGDataIOutDat(amg_data) == -3)
+   if (hypre_AMGDataIOutDat(amg_data) <= -3)
    {
       for (j=0; j < num_levels-1; j++)
       {
@@ -463,6 +480,9 @@ void    *data;
       }
    }
    
+   if (hypre_AMGDataIOutDat(amg_data) == -3)
+            hypre_AMGDataIOutDat(amg_data) = 3;
+
    return(Setup_err_flag);
 }
 
