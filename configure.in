@@ -156,7 +156,15 @@ AC_ARG_WITH(purify, [\
     CXXFLAGS="$CXXFLAGS -g"
     casc_user_chose_compilers=yes
   fi
-  PREPEND="purify $withval"
+  if test "$withval" = "no"
+  then
+    PREPEND=""
+  elif test "$withval" = "yes"
+  then
+    PREPEND="purify"
+  else
+    PREPEND="purify $withval"
+  fi
 )
 
 AC_ARG_WITH(cegdb, [\
