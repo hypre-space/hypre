@@ -1040,7 +1040,7 @@ main( int   argc,
       assembly is unnecessary if the sparsity pattern of the matrix is
       not changed somehow.  If one has not used IJMatrixRead, one has
       the opportunity to IJMatrixAddTo before a IJMatrixAssemble. */
-/*
+
    ncols    = hypre_CTAlloc(int, last_local_row - first_local_row + 1);
    rows     = hypre_CTAlloc(int, last_local_row - first_local_row + 1);
    col_inds = hypre_CTAlloc(int, last_local_row - first_local_row + 1);
@@ -1049,8 +1049,8 @@ main( int   argc,
    if (dt < dt_inf)
      val = 1./dt;
    else 
-     val = 0.; */  /* Use zero to avoid unintentional loss of significance */
-/*
+     val = 0.;   /* Use zero to avoid unintentional loss of significance */
+
    for (i = first_local_row; i <= last_local_row; i++)
    {
      j = i - first_local_row;
@@ -1070,12 +1070,12 @@ main( int   argc,
    hypre_TFree(col_inds);
    hypre_TFree(rows);
    hypre_TFree(ncols);
-*/
+
    /* If sparsity pattern is not changed since last IJMatrixAssemble call,
       this should be a no-op */
-/*
+
    ierr += HYPRE_IJMatrixAssemble( ij_A );
-*/
+
    /*-----------------------------------------------------------
     * Fetch the resulting underlying matrix out
     *-----------------------------------------------------------*/
