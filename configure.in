@@ -1,0 +1,196 @@
+dnl *********************************************************************
+dnl configure.in
+dnl *********************************************************************
+
+dnl *********************************************************************
+dnl * The first macro called must be AC_INIT with a unique file from the
+dnl * package as its argument.  configure checks for the existence of this
+dnl * file to make sure it is located in the right place
+dnl *********************************************************************
+
+AC_INIT(utilities/memory.c)
+
+dnl *********************************************************************
+dnl * Find the compilers and preprocessors.  AC_SUBST is called for each.
+dnl *********************************************************************
+
+dnl *********************************************************************
+dnl * This is an example of how to set a command-line option to configure.
+dnl * This form can be used with many different macros.
+dnl *********************************************************************
+
+AC_ARG_WITH(CC,
+   [  --with-CC=ARG           manually set C compiler to ARG],
+   CC=$withval,
+   [AC_PROG_CC])
+
+AC_PROG_CPP          dnl * usually will give you $CC -E.  Should be called
+                     dnl * before calling AC_CHECK_HEADER or CASC_CHECK_HEADER
+
+AC_PROG_RANLIB
+
+dnl *********************************************************************
+dnl * set the variable ARCH
+dnl *********************************************************************
+
+CASC_GUESS_ARCH
+
+dnl *********************************************************************
+dnl * You can set debugging and optimization flags for various
+dnl * architectures and/or compilers.
+dnl *********************************************************************
+
+case $ARCH in
+
+   sun4 | solaris)
+      CASC_SET_COPT(-O)
+      if test "$CC" = "gcc"; then
+         CASC_SET_CDEBUG(-g -Wall)
+      else
+         CASC_SET_CDEBUG(-g)
+      fi
+   ;;
+
+   rs6000)
+      CASC_SET_COPT(-O3 -qstrict -qarch=ppcgr -qtune=604)
+      CASC_SET_CDEBUG(-g)
+   ;;
+
+   *)
+      CASC_SET_COPT(-O)
+      CASC_SET_CDEBUG(-g)
+   ;;
+esac
+
+
+dnl *********************************************************************
+dnl * checks flag '--enable-opt-debug' to decide which compiler flags
+dnl * to leave on.  Default is opt, if flag not invoked.
+dnl *********************************************************************
+
+CASC_CHOOSE_OPT_OR_DEBUG
+
+
+dnl *********************************************************************
+dnl * sets MPIINCLUDES, MPILIBDIRS, MPILIBS, MPIFLAGS
+dnl *********************************************************************
+
+AC_ARG_WITH(MPI,
+   [  --without-MPI           do not use MPI],
+   if test "$withval" = "no"; then
+      casc_using_mpi=no
+      MEMORYEXTRAFILES="$MEMORYEXTRAFILES mpistubs.c"
+      HYPREDEFS="$HYPREDEFS -DHYPRE_SEQUENTIAL"
+   else
+      casc_using_mpi=yes
+   fi ,
+   casc_using_mpi=yes )
+
+if test "$casc_using_mpi" = "yes"; then
+   CASC_FIND_MPI
+   if test -z "$MPIINCLUDE"; then
+      AC_MSG_WARN(configuring to not use MPI)
+      MEMORYEXTRAFILES="$MEMORYEXTRAFILES mpistubs.c"
+      HYPREDEFS="$HYPREDEFS -DHYPRE_SEQUENTIAL"
+   else
+      TIMERDEFS="$TIMERDEFS -DTIMER_USE_MPI"
+   fi
+fi
+
+
+
+
+dnl *********************************************************************
+dnl * when debugging was chosen, look for debugging libraries and headers,
+dnl * if they are available
+dnl * 
+dnl * adds -l flags to LDLIBS, adds -L flags to LDLIBDIRS, if necessary
+dnl *********************************************************************
+
+if test "$OPTCHOICE" = "g"; then
+
+   CASC_ADD_LIB(cegdb, cegdb, /home/casc/lib, LD)
+
+   if test "$ARCH" != "alpha"; then
+      CASC_CHECK_HEADER(dmalloc.h, /usr/include /usr/local/include \
+                                   /home/casc/include,
+         CASC_ADD_LIB(dmalloc, malloc, /home/casc/lib /usr/local/lib, LD,
+            HYPREDEFS="$HYPREDEFS -DHYPRE_MEMORY_DMALLOC"
+            MEMORYEXTRAFILES="$MEMORYEXTRAFILES memory_dmalloc.c"
+         )
+      )
+   fi
+fi
+
+dnl *********************************************************************
+dnl * add flags to LIBS and LIBDIRS
+dnl *********************************************************************
+
+CASC_ADD_LIB(m, main, /usr/lib /usr/ccs/lib)
+
+
+dnl *********************************************************************
+dnl * Note:  CASC_ADD_LIB calls should be placed in the order you want the
+dnl *        libraries to appear on the linking line.
+dnl *********************************************************************
+
+
+dnl *********************************************************************
+dnl * AC_SUBST performs the variable substitutions
+dnl * Some macros call AC_SUBST for some variables, but it does no damage
+dnl * to call it again.
+dnl *********************************************************************
+
+AC_SUBST(INCLUDES)
+AC_SUBST(LIBS)
+AC_SUBST(LIBDIRS)
+AC_SUBST(MPIINCLUDE)
+AC_SUBST(MPILIBS)
+AC_SUBST(MPILIBDIRS)
+AC_SUBST(MPIFLAGS)
+AC_SUBST(COPT)
+AC_SUBST(CDEBUG)
+AC_SUBST(HYPREDEFS)
+AC_SUBST(TIMERDEFS)
+AC_SUBST(LDLIBS)
+AC_SUBST(LDLIBDIRS)
+AC_SUBST(ARCH)
+AC_SUBST(MEMORYEXTRAFILES)
+
+
+dnl *********************************************************************
+dnl * DIRECTING THE OUTPUT
+dnl *********************************************************************
+
+dnl *********************************************************************
+dnl * The following is the usual format, to be used when you expect the
+dnl * full structure of the package to be present, and when you don't want
+dnl * non-standard names for your output files.
+dnl *********************************************************************
+
+dnl * AC_OUTPUT(utilities/Makefile struct_matrix_vector/Makefile \
+dnl *          struct_linear_solvers/Makefile)
+
+
+dnl *********************************************************************
+dnl * Use CASC_CONFIG_OUTPUT_LIST with AC_OUTPUT if you want to handle the
+dnl * possibility that certain parts of the package are not present.
+dnl *********************************************************************
+
+CASC_CONFIG_OUTPUT_LIST(utilities struct_matrix_vector \
+                        struct_linear_solvers)
+
+AC_OUTPUT($Makefile_list)
+
+dnl *********************************************************************
+dnl * Use the following format for AC_OUTPUT when you want your output
+dnl * files to have a name other than that which you get from dropping the
+dnl * '.in' from the input file name.  This example adds .$ARCH to the
+dnl * end of each Makefile, creating the possibility of keeping several
+dnl * Makefiles in each directory, each for a separate architecture
+dnl *********************************************************************
+
+dnl AC_OUTPUT(
+dnl utilities/Makefile.$ARCH:utilities/Makefile.in \
+dnl struct_matrix_vector/Makefile.$ARCH:struct_matrix_vector/Makefile.in \
+dnl struct_linear_solvers/Makefile.$ARCH:struct_linear_solvers/Makefile.in)
