@@ -7,7 +7,6 @@ default:
 clean:
 	cd $(FEI_ROOT); make clean.$(FEI_DIR) FEI_DIR=$(FEI_DIR)
 
-
 ##################################################################
 #### Newly added for testing the HYPRE_LinSysCore
 ##################################################################
@@ -24,7 +23,8 @@ CXXFLAGS = -w -DSUPERLU -DMLPACK \
  -I/g/g18/chtong/SuperLU/SRC\
  -I../../..
 
-MPILIBFLAGS =  -L/usr/local/mpich-1.1.2shm/build/alpha/ch_shmem/lib -lpmpich -lmpich -lrpc -lgs -lpthread
+MPILIBFLAGS =  -L/usr/local/mpich-1.1.2shm/build/alpha/ch_shmem/lib -lpmpich \
+               -lmpich -lrpc -lgs -lpthread
 LIBFLAGS =   -lm
 LDLIBFLAGS =
 
@@ -43,7 +43,7 @@ LFLAGS =\
  -L../../../matrix_matrix\
  -L/g/g18/chtong/SuperLU\
  -L/g/g18/chtong/ML/ml/src\
- -lfei_hypre\
+ -lfei_isis\
  -lHYPRE_parcsr_ls \
  -lHYPRE_ParaSails \
  -lHYPRE_FEI_isismv \
@@ -65,10 +65,11 @@ FILES = test.cc
 
 OBJS = ${FILES:.cc=.o}
 
-test: $(OBJS) ../lib/alpha/libfei_hypre.a
+test: $(OBJS) ../lib/alpha/libfei_isis.a
 	@echo  "Linking" $@ "... "
 	${CXX} -o $@ test.o ${LFLAGS}
 
 .cc.o:
 	${CXX} -o $@ -c ${CXXFLAGS} $<
+
 
