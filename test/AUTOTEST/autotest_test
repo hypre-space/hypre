@@ -455,7 +455,7 @@ mail_summary () {
   printf "Compile machine:    %s\n" $HYPRE_COMPILE_MACHINE >> $SUMFILE
   printf "Execute machine:    %s\n" $HYPRE_RUN_MACHINE >> $SUMFILE
   printf "Operating system:   `uname -a`\n" >> $SUMFILE
-  if test -z "$HYPRE_DST_DIR}" ; then
+  if [ -z "$HYPRE_DST_DIR}" ] ; then
     printf "Directory:          %s\n" ${HYPRE_AUTOTEST_DIR} >> $SUMFILE
   else
     printf "Directory:          %s\n" ${HYPRE_DST_DIR} >> $SUMFILE
