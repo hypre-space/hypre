@@ -71,3 +71,10 @@ libHYPRE_CI_mv.a: $(PROTOS) ${OBJS}
 
 ${OBJS}: ${HEADERS}
 
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} -I../seq_matrix_vector -I../parcsr_matrix_vector $<
+
