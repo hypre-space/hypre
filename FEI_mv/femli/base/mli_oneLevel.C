@@ -365,3 +365,31 @@ int MLI_OneLevel::resetAmat()
    return 0;
 }
 
+/*****************************************************************************
+ * wipe out solution vector for this level (but not destroy it)
+ *--------------------------------------------------------------------------*/
+
+int MLI_OneLevel::resetSolutionVector()
+{
+#ifdef MLI_DEBUG_DETAILED
+   cout << "MLI_OneLevel::resetSolutionVector" << endl;
+   cout.flush();
+#endif
+   vec_sol = NULL;
+   return 0;
+}
+
+/*****************************************************************************
+ * wipe out rhs vector for this level (but not destroy it)
+ *--------------------------------------------------------------------------*/
+
+int MLI_OneLevel::resetRHSVector()
+{
+#ifdef MLI_DEBUG_DETAILED
+   cout << "MLI_OneLevel::resetRHSVector" << endl;
+   cout.flush();
+#endif
+   vec_rhs = NULL;
+   return 0;
+}
+

@@ -270,9 +270,11 @@ int MLI::cycle( MLI_Vector *sol, MLI_Vector *rhs )
 int MLI::solve( MLI_Vector *sol, MLI_Vector *rhs )
 {
    int        iter=0, mypid;
-   double     norm2, rel_tol, old_norm2;
+   double     norm2, rel_tol, old_norm2, zero=0.0;
+   char       paramString[30];
    MLI_Matrix *Amat;
    MLI_Vector *res;
+   MLI_Solver *preSmoother;
 
    /*-------------------------------------------------------------------*/
    /* check for error                                                   */
@@ -299,15 +301,25 @@ int MLI::solve( MLI_Vector *sol, MLI_Vector *rhs )
    /*-------------------------------------------------------------------*/
 
    MPI_Comm_rank(mpi_comm, &mypid);
-   res   = one_levels[0]->getResidualVector();
-   Amat  = one_levels[0]->getAmat();
-   Amat->apply( -1.0, sol, 1.0, rhs, res );
-   norm2   = res->norm2();
-   rel_tol = tolerance * norm2;
+   res        = one_levels[0]->getResidualVector();
+   Amat       = one_levels[0]->getAmat();
    solve_time = MLI_Utils_WTime();
-   if ( output_level > 0 && curr_iter == 0 )
+   if ( max_iterations == 1 )
    {
-      printf("\tMLI Initial norm = %16.8e (%16.8e)\n", norm2, rel_tol);
+      norm2   = 1.0;
+      rel_tol = 0.1;
+      sol->setConstantValue(zero);
+      strcpy( paramString, "zeroInitialGuess" );
+      preSmoother = one_levels[0]->getPreSmoother();
+      preSmoother->setParams(paramString, 0, NULL);
+   }
+   else
+   {
+      Amat->apply( -1.0, sol, 1.0, rhs, res );
+      norm2   = res->norm2();
+      rel_tol = tolerance * norm2;
+      if ( output_level > 0 && curr_iter == 0 )
+         printf("\tMLI Initial norm = %16.8e (%16.8e)\n", norm2, rel_tol);
    }
 
    while ( norm2 > rel_tol && iter < max_iterations ) 
@@ -315,12 +327,20 @@ int MLI::solve( MLI_Vector *sol, MLI_Vector *rhs )
       iter++;
       curr_iter++;
       cycle( sol, rhs );
-      Amat->apply( -1.0, sol, 1.0, rhs, res );
-      old_norm2 = norm2;
-      norm2 = res->norm2();
-      if ( output_level > 0 && mypid == 0 && max_iterations > 1 )
-         printf("\tMLI iteration = %5d, rnorm = %14.6e (%14.6e)\n",curr_iter,
-                norm2, norm2/old_norm2);
+      if ( max_iterations > 1 )
+      {
+         Amat->apply( -1.0, sol, 1.0, rhs, res );
+         old_norm2 = norm2;
+         norm2 = res->norm2();
+         if ( output_level > 0 && mypid == 0 && max_iterations > 1 )
+            printf("\tMLI iteration = %5d, rnorm = %14.6e (%14.6e)\n",
+                   curr_iter, norm2, norm2/old_norm2);
+      }
+      if ( iter < max_iterations )
+      {
+         one_levels[0]->resetSolutionVector();
+         one_levels[0]->resetRHSVector();
+      }
    }
    solve_time = MLI_Utils_WTime() - solve_time;
    if ( norm2 > tolerance || iter >= max_iterations ) return 1;

@@ -22,7 +22,9 @@
  * include files 
  *--------------------------------------------------------------------------*/
 
+/*
 #include <mpi.h>
+*/
 #include "utilities/utilities.h"
 
 #include "base/mli_defs.h"

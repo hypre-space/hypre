@@ -63,6 +63,8 @@ public :
    int  setup();
    int  solve1Cycle();
    int  resetAmat();
+   int  resetSolutionVector();
+   int  resetRHSVector();
    MLI_Matrix *getAmat()                     { return Amat; }
    MLI_Matrix *getPmat()                     { return Pmat; }
    MLI_Matrix *getRmat()                     { return Rmat; }
