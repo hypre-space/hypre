@@ -72,6 +72,7 @@ void hypre_ParILUT(DataDistType *ddist, FactorMatType *ldu,
   iperm = ldu->iperm;
 
   ndone = rmat->rmat_ndone;
+  ntogo = rmat->rmat_ntogo;
   nleft = hypre_GlobalSESum(ntogo, pilut_comm);
 
   rmats[0] = rmat;
