@@ -330,16 +330,16 @@ babel: f77_ij_b ij_b # f77_struct_b struct_b
 
 # rule to compile C files with C++
 ij.C++.cxx:
-	cp -f ij.c ij.C++.cxx
+	cp -f $(srcdir)/ij.c ij.C++.cxx
 
 ij_mv.C++.cxx:
-	cp -f ij_mv.c ij_mv.C++.cxx
+	cp -f $(srcdir)/ij_mv.c ij_mv.C++.cxx
 
 sstruct.C++.cxx:
-	cp -f sstruct.c sstruct.C++.cxx
+	cp -f $(srcdir)/sstruct.c sstruct.C++.cxx
 
 struct.C++.cxx:
-	cp -f struct.c struct.C++.cxx
+	cp -f $(srcdir)/struct.c struct.C++.cxx
 
 ##.c.C++.o:
 ##	cp -f $< ${@:.o=.cxx}
