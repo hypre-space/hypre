@@ -101,8 +101,8 @@ FILES = HYPRE_LinSysCore.C HYPRE_LSC_aux.C cfei_hypre.C hypre_slide_reduce.C \
         HYPRE_LSI_poly.c HYPRE_LSI_ddict.c HYPRE_parcsr_TFQmr.c \
         TFQmr.c HYPRE_parcsr_bicgs.c bicgs.c HYPRE_LSI_schwarz.c \
         HYPRE_LSI_blkprec.C HYPRE_parcsr_symqmr.c SymQMR.c \
-        HYPRE_parcsr_fgmres.c fgmres.c HYPRE_LSI_mli.C HYPRE_SlideReduction.C \
-        HYPRE_LSI_UZAWA.C
+        HYPRE_parcsr_fgmres.c fgmres.c HYPRE_LSI_mli.C \
+        HYPRE_SlideReduction.C HYPRE_LSI_UZAWA.C 
 
 TEMP = ${FILES:.c=.o}
 OBJS = ${TEMP:.C=.o}
@@ -117,12 +117,10 @@ lib: all
 
 install: all
 	@cp -f $(srcdir)/HYPRE_LinSysCore.h $$HYPRE_INSTALL_DIR/include
-	@cp -f $(srcdir)/HYPRE_FEI_includes.h $$HYPRE_INSTALL_DIR/include
 	@cp -f $(srcdir)/../fei-base/Lookup.h $$HYPRE_INSTALL_DIR/include
 	@cp -f $(srcdir)/cfei_hypre.h $$HYPRE_INSTALL_DIR/include
 	@cp -f $(srcdir)/cfei-hypre.h $$HYPRE_INSTALL_DIR/include
-	@cp -f $(srcdir)/cfei-hypre.h $$HYPRE_FEI_INC_DIR/include
-	@cp -f $(srcdir)/cfei_hypre.h $$HYPRE_FEI_INC_DIR/include
+	@cp -f $(srcdir)/HYPRE_FEI_includes.h $$HYPRE_INSTALL_DIR/include
 	@cp -f libHYPRE_FEI.a $$HYPRE_INSTALL_DIR/lib
 
 driver: driver.o libHYPRE_FEI.a
