@@ -166,7 +166,7 @@ main( int   argc,
       else if ( strcmp(argv[arg_index], "-falgout") == 0 )
       {
          arg_index++;
-         coarsen_type      = -6;
+         coarsen_type      = 6;
       }    
       else if ( strcmp(argv[arg_index], "-nohybrid") == 0 )
       {
