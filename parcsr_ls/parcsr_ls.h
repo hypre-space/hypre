@@ -104,7 +104,7 @@ int HYPRE_BoomerAMGSetEuclidFile( HYPRE_Solver solver , char *euclidfile );
 int HYPRE_BoomerAMGSetNumFunctions( HYPRE_Solver solver , int num_functions );
 int HYPRE_BoomerAMGSetDofFunc( HYPRE_Solver solver , int *dof_func );
 int HYPRE_BoomerAMGSetGSMG( HYPRE_Solver solver , int gsmg );
-int HYPRE_BoomerAMGSetGSMGNumSamples( HYPRE_Solver solver , int gsmg );
+int HYPRE_BoomerAMGSetNumSamples( HYPRE_Solver solver , int num_samples );
 
 /* HYPRE_parcsr_bicgstab.c */
 int HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm , HYPRE_Solver *solver );
@@ -283,6 +283,8 @@ int hypre_BoomerAMGSetPrintLevel( void *data , int print_level );
 int hypre_BoomerAMGSetPrintFileName( void *data , const char *print_file_name );
 int hypre_BoomerAMGSetNumIterations( void *data , int num_iterations );
 int hypre_BoomerAMGSetDebugFlag( void *data , int debug_flag );
+int hypre_BoomerAMGSetGSMG(void *data , int par);
+int hypre_BoomerAMGSetNumSamples(void *data , int par);
 int hypre_BoomerAMGSetNumFunctions( void *data , int num_functions );
 int hypre_BoomerAMGSetNumPoints( void *data , int num_points );
 int hypre_BoomerAMGSetDofFunc( void *data , int *dof_func );
@@ -333,14 +335,14 @@ int hypre_BoomerAMGCycle( void *amg_vdata , hypre_ParVector **F_array , hypre_Pa
 HYPRE_ParCSRMatrix GenerateDifConv( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value );
 
 /* par_gsmg.c */
-int hypre_BoomerAMGSetGSMG( void *data , int par );
-int hypre_BoomerAMGSetGSMGNumSamples( void *data , int par );
-int hypre_ParCSRMatrixClone( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **Sp , int copy_data );
-int hypre_ParCSRMatrixFillSmooth( int nsamples , double *samples , hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int num_functions , int *dof_func );
-double hypre_ParCSRMatrixChooseThresh( hypre_ParCSRMatrix *S );
-int hypre_ParCSRMatrixThreshold( hypre_ParCSRMatrix *A , double thresh );
-int hypre_BoomerAMGCreateSmoothDirs( void *data , hypre_ParCSRMatrix *A , int num_sweeps , double thresh , int level , int num_functions , int *dof_func , hypre_ParCSRMatrix **S_ptr );
-int hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , hypre_ParCSRMatrix **P_ptr );
+int hypre_ParCSRMatrixClone(hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **Sp , int copy_data);
+int hypre_ParCSRMatrixFillSmooth(int nsamples , double *samples , hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int num_functions , int *dof_func);
+double hypre_ParCSRMatrixChooseThresh(hypre_ParCSRMatrix *S);
+int hypre_ParCSRMatrixThreshold(hypre_ParCSRMatrix *A , double thresh);
+int hypre_BoomerAMGCreateSmoothVecs(void *data , hypre_ParCSRMatrix *A , int num_sweeps , int level , double **SmoothVecs_p);
+int hypre_BoomerAMGCreateSmoothDirs(void *data , hypre_ParCSRMatrix *A , double *SmoothVecs , double thresh , int num_functions , int *dof_func , hypre_ParCSRMatrix **S_ptr);
+int hypre_BoomerAMGBuildInterpLS(hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int num_smooth , double *SmoothVecs , hypre_ParCSRMatrix **P_ptr);
+int hypre_BoomerAMGBuildInterpGSMG(hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , hypre_ParCSRMatrix **P_ptr);
 
 /* par_indepset.c */
 int hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S , double *measure_array );

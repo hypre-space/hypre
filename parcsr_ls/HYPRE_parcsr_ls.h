@@ -213,7 +213,8 @@ int HYPRE_BoomerAMGSetTruncFactor(HYPRE_Solver solver,
                                   double       trunc_factor);
 
 /*
- * (Optional)
+ * (Optional) Specifies the use of LS interpolation - least-squares
+ * fitting of smooth vectors.
  **/
 int HYPRE_BoomerAMGSetInterpType(HYPRE_Solver solver,
                                  int          interp_type);
@@ -354,10 +355,11 @@ int HYPRE_BoomerAMGSetGSMG(HYPRE_Solver solver,
                                 int    gsmg);
 
 /*
- * (Optional) Defines the number of sample vectors used in GSMG.
+ * (Optional) Defines the number of sample vectors used in GSMG
+ * or LS interpolation.
  **/
-int HYPRE_BoomerAMGSetGSMGNumSamples(HYPRE_Solver solver,
-                                int    gsmg);
+int HYPRE_BoomerAMGSetNumSamples(HYPRE_Solver solver,
+                                int    num_samples);
 
 /*@}*/
 

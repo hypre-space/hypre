@@ -61,6 +61,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParCSRMatrix  *S;
    hypre_ParCSRMatrix  *P;
    hypre_ParCSRMatrix  *A_H;
+   double              *SmoothVecs = NULL;
 
    int       old_num_levels, num_levels;
    int       level;
@@ -332,6 +333,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       if (max_levels > 1)
       {
+         if (hypre_ParAMGDataGSMG(amg_data) || 
+             hypre_ParAMGDataInterpType(amg_data) == 1)
+         {
+	    hypre_BoomerAMGCreateSmoothVecs(amg_data, A_array[level],
+	       hypre_ParAMGDataNumGridSweeps(amg_data)[1],
+               level, &SmoothVecs);
+         }
+
          if (hypre_ParAMGDataGSMG(amg_data) == 0)
 	 {
 	    hypre_BoomerAMGCreateS(A_array[level], 
@@ -341,8 +350,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	 else
 	 {
 	    hypre_BoomerAMGCreateSmoothDirs(amg_data, A_array[level],
-	       hypre_ParAMGDataNumGridSweeps(amg_data)[1], strong_threshold, 
-               level, num_functions, dof_func_array[level], &S);
+	       SmoothVecs, strong_threshold, 
+               num_functions, dof_func_array[level], &S);
 	 }
 
          if (coarsen_type == 6)
@@ -456,7 +465,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       if (debug_flag==1) wall_time = time_getWallclockSeconds();
 
-      if (hypre_ParAMGDataGSMG(amg_data) == 0)
+      if (hypre_ParAMGDataInterpType(amg_data) == 1)
+      {
+          hypre_BoomerAMGBuildInterpLS(NULL, CF_marker_array[level], S,
+                 coarse_pnts_global, num_functions, dof_func_array[level], 
+		 debug_flag, trunc_factor, 
+                 hypre_ParAMGDataNumSamples(amg_data), SmoothVecs, &P);
+      }
+      else if (hypre_ParAMGDataGSMG(amg_data) == 0)
       {
           hypre_BoomerAMGBuildInterp(A_array[level], CF_marker_array[level], S,
                  coarse_pnts_global, num_functions, dof_func_array[level], 
@@ -480,6 +496,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       P_array[level] = P; 
       hypre_ParCSRMatrixDestroy(S);
       S = NULL;
+
+      hypre_TFree(SmoothVecs);
+      SmoothVecs = NULL;
 
       /*-------------------------------------------------------------
        * Build coarse-grid operator, A_array[level+1] by R*A*P

@@ -190,6 +190,9 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetDebugFlag(amg_data, debug_flag);
 
    hypre_BoomerAMGSetRestriction(amg_data, 0);
+
+   hypre_BoomerAMGSetGSMG(amg_data, 0);
+   hypre_BoomerAMGSetNumSamples(amg_data, 0);
    
    hypre_ParAMGDataAArray(amg_data) = NULL;
    hypre_ParAMGDataPArray(amg_data) = NULL;
@@ -665,6 +668,37 @@ hypre_BoomerAMGSetDebugFlag( void     *data,
    return (ierr);
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGSetGSMG
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetGSMG( void *data,
+                        int   par )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   amg_data->gsmg = par;
+
+   return (ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGSetNumSamples
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetNumSamples( void *data,
+                        int   par )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   amg_data->num_samples = par;
+
+   return (ierr);
+}
 
 /*--------------------------------------------------------------------------
  * Routines to set the problem data parameters

@@ -640,12 +640,12 @@ HYPRE_BoomerAMGSetGSMG( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetGSMGNumSamples
+ * HYPRE_BoomerAMGSetNumSamples
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_BoomerAMGSetGSMGNumSamples( HYPRE_Solver  solver,
+HYPRE_BoomerAMGSetNumSamples( HYPRE_Solver  solver,
                               int        gsmg  )
 {
-   return( hypre_BoomerAMGSetGSMGNumSamples( (void *) solver, gsmg ) );
+   return( hypre_BoomerAMGSetNumSamples( (void *) solver, gsmg ) );
 }

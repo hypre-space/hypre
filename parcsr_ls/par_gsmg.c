@@ -46,38 +46,6 @@ static void dscal(int n, double a, double *x)
 }
 
 /*--------------------------------------------------------------------------
- * hypre_BoomerAMGSetGSMG
- *--------------------------------------------------------------------------*/
-
-int
-hypre_BoomerAMGSetGSMG( void *data,
-                        int   par )
-{
-   int ierr = 0;
-   hypre_ParAMGData  *amg_data = data;
-
-   amg_data->gsmg = par;
-
-   return (ierr);
-}
-
-/*--------------------------------------------------------------------------
- * hypre_BoomerAMGSetGSMGNumSamples
- *--------------------------------------------------------------------------*/
-
-int
-hypre_BoomerAMGSetGSMGNumSamples( void *data,
-                        int   par )
-{
-   int ierr = 0;
-   hypre_ParAMGData  *amg_data = data;
-
-   amg_data->gsmg_samples = par;
-
-   return (ierr);
-}
-
-/*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixClone
  *--------------------------------------------------------------------------*/
 
@@ -462,26 +430,22 @@ hypre_ParCSRMatrixThreshold(hypre_ParCSRMatrix *A, double thresh)
 }
 
 /*--------------------------------------------------------------------------
- * CreateSmoothDirs replaces CreateS in AMG
+ * CreateSmoothVecs
  * - smoother depends on the level being used
  *--------------------------------------------------------------------------*/
 
 int
-hypre_BoomerAMGCreateSmoothDirs(void         *data,
+hypre_BoomerAMGCreateSmoothVecs(void         *data,
                        hypre_ParCSRMatrix    *A,
                        int                    num_sweeps,
-                       double                 thresh,
                        int                    level,
-                       int                    num_functions, 
-                       int                   *dof_func,
-                       hypre_ParCSRMatrix   **S_ptr)
+                       double               **SmoothVecs_p)
 {
    hypre_ParAMGData  *amg_data = data;
 
    MPI_Comm             comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
 
-   hypre_ParCSRMatrix *S;
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
 
    hypre_ParVector *Zero;
@@ -494,10 +458,9 @@ hypre_BoomerAMGCreateSmoothDirs(void         *data,
    int   *starts = hypre_ParCSRMatrixRowStarts(A);
 
    int sample;
-   int nsamples = amg_data->gsmg_samples;
+   int nsamples = hypre_ParAMGDataNumSamples(amg_data);
    int ret;
    double *datax, *bp, *p;
-   double minimax;
    double rlx_wt, omega;
 
    int rlx_type;
@@ -585,17 +548,41 @@ hypre_BoomerAMGCreateSmoothDirs(void         *data,
    hypre_ParVectorDestroy(Temp);
    hypre_ParVectorDestroy(U);
 
+   *SmoothVecs_p = bp;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * CreateSmoothDirs replaces CreateS in AMG
+ * - smoother depends on the level being used
+ * - in this version, CreateSmoothVecs must be called prior to this function
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGCreateSmoothDirs(void         *data,
+                       hypre_ParCSRMatrix    *A,
+                       double                *SmoothVecs,
+                       double                 thresh,
+                       int                    num_functions, 
+                       int                   *dof_func,
+                       hypre_ParCSRMatrix   **S_ptr)
+{
+   hypre_ParAMGData  *amg_data = data;
+   hypre_ParCSRMatrix *S;
+   double minimax;
+   int debug_flag = hypre_ParAMGDataDebugFlag(amg_data);
+
    hypre_ParCSRMatrixClone(A, &S, 0);
 
    /* Traverse S and fill in differences */
-   hypre_ParCSRMatrixFillSmooth(nsamples, bp, S, A, num_functions,
-       dof_func);
+   hypre_ParCSRMatrixFillSmooth(
+       hypre_ParAMGDataNumSamples(amg_data), SmoothVecs,
+       S, A, num_functions, dof_func);
 
    minimax = hypre_ParCSRMatrixChooseThresh(S);
    if (debug_flag >= 1)
       printf("Minimax chosen: %f\n", minimax);
-
-   hypre_TFree(bp);
 
    /* Threshold and compress */
    hypre_ParCSRMatrixThreshold(S, thresh*minimax);
@@ -637,6 +624,14 @@ hypre_BoomerAMGFitVectors(int ip, int n, int num, const double *V,
    int    info;
    char trans = 'T';
    int  one   = 1;
+   int  temp;
+
+/*
+   printf("Fit: row %d, n %d num %d, nc = %d ", ip, n, num, nc);
+   for (i=0; i<nc; i++)
+      printf("%d ", ind[i]);
+   printf("\n");
+*/
 
    work_size = 2000*64;
    work = hypre_CTAlloc(double, work_size);
@@ -652,12 +647,13 @@ hypre_BoomerAMGFitVectors(int ip, int n, int num, const double *V,
       }
    }
 
-   b = hypre_CTAlloc(double, MAX(nc, num));
+   temp = MAX(nc, num);
+   b = hypre_CTAlloc(double, temp);
    for (i=0; i<num; i++)
       b[i] = V[i*n+ip];
 
    hypre_F90_NAME_BLAS(dgels, DGELS)(&trans, &nc, &num, &one, a, &nc,
-      val, &nc, work, &work_size, &info);
+      b, &temp, work, &work_size, &info);
 
    if (info != 0)
       printf("par_gsmg: dgels returned %d\n", info);
@@ -689,6 +685,8 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
                          int                  *dof_func,
                          int                   debug_flag,
                          double                trunc_factor,
+                         int                   num_smooth,
+                         double               *SmoothVecs,
                          hypre_ParCSRMatrix  **P_ptr)
 {
 
@@ -744,8 +742,6 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
    int              n_fine = hypre_CSRMatrixNumRows(S_diag);
 
-   int              strong_f_marker;
-
    int             *fine_to_coarse;
    int             *fine_to_coarse_offd;
    int             *coarse_counter;
@@ -753,13 +749,9 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
    int              total_global_cpts;
    int              num_cols_P_offd,my_first_cpt;
 
-   int              i,i1,i2;
-   int              j,jl,jj,jj1;
+   int              i,i1;
+   int              j,jl,jj;
    int              start;
-   int              c_num;
-   
-   double           sum;
-   double           distribute;          
    
    double           zero = 0.0;
    double           one  = 1.0;
@@ -776,10 +768,6 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
    double           row_sum, scale;
    int              next_open,now_checking,num_lost,start_j;
    int              next_open_offd,now_checking_offd,num_lost_offd;
-
-   int col_1 = hypre_ParCSRMatrixFirstRowIndex(S);
-   int local_numrows = hypre_CSRMatrixNumRows(S_diag);
-   int col_n = col_1 + local_numrows;
 
    double           wall_time;  /* for debugging instrumentation  */
 
@@ -924,6 +912,28 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
          fine_to_coarse[i] = coarse_counter[j];
          coarse_counter[j]++;
       }
+      
+      /*--------------------------------------------------------------------
+       *  If i is an F-point, interpolation is from the C-points that
+       *  strongly influence i.
+       *--------------------------------------------------------------------*/
+
+      else
+      {
+         for (jj = S_diag_i[i]; jj < S_diag_i[i+1]; jj++)
+         {
+            i1 = S_diag_j[jj];           
+            if (CF_marker[i1] >= 0)
+            {
+               jj_count[j]++;
+            }
+         }
+
+         if (num_procs > 1)
+         {
+            /* removed */
+         }
+      }
     }
    }
 
@@ -1032,7 +1042,7 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
     *  Loop over fine grid points.
     *-----------------------------------------------------------------------*/
     
-#define HYPRE_SMP_PRIVATE i,j,jl,i1,i2,jj,jj1,ns,ne,size,rest,sum,distribute,P_marker,P_marker_offd,strong_f_marker,jj_counter,jj_counter_offd,c_num,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd
+#define HYPRE_SMP_PRIVATE i,j,jl,i1,i2,jj,jj1,ns,ne,size,rest,sum,distribute,P_marker,P_marker_offd,jj_counter,jj_counter_offd,c_num,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd
 #include "../utilities/hypre_smp_forloop.h"
    for (jl = 0; jl < num_threads; jl++)
    {
@@ -1053,19 +1063,6 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
      jj_counter_offd = 0;
      if (jl > 0) jj_counter_offd = jj_count_offd[jl-1];
 
-     P_marker = hypre_CTAlloc(int, n_fine);
-     P_marker_offd = hypre_CTAlloc(int, num_cols_S_offd);
-
-     for (i = 0; i < n_fine; i++)
-     {      
-        P_marker[i] = -1;
-     }
-     for (i = 0; i < num_cols_S_offd; i++)
-     {      
-        P_marker_offd[i] = -1;
-     }
-     strong_f_marker = -2;
- 
      for (i = ns; i < ne; i++)
      {
              
@@ -1087,10 +1084,13 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
       else
       {         
+         int kk;
+         int indices[1000];
+
          /* Diagonal part of P */
          P_diag_i[i] = jj_counter;
-         jj_begin_row = jj_counter;
 
+         kk = 0;
          for (jj = S_diag_i[i]; jj < S_diag_i[i+1]; jj++)
          {
             i1 = S_diag_j[jj];   
@@ -1102,78 +1102,27 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
             if (CF_marker[i1] >= 0)
             {
-               P_marker[i1] = jj_counter;
                P_diag_j[jj_counter]    = fine_to_coarse[i1];
-               P_diag_data[jj_counter] = zero;
                jj_counter++;
+               indices[kk] = i1;
+               kk++;
             }
-
-            /*--------------------------------------------------------------
-             * If neighbor i1 is an F-point, mark it as a strong F-point
-             * whose connection needs to be distributed.
-             *--------------------------------------------------------------*/
-
-            else
-            {
-               P_marker[i1] = strong_f_marker;
-            }            
          }
-         jj_end_row = jj_counter;
 
-         /* edmond */ /* need to put in V here */
-         hypre_BoomerAMGFitVectors(i, n_fine, /*num_smooth*/ 0, /*V*/ NULL, 
-            jj_end_row-jj_begin_row+1, 
-            &P_diag_j[jj_begin_row], 
-            &P_diag_data[jj_begin_row]);
+         /* edmond */
+         hypre_BoomerAMGFitVectors(i, n_fine, num_smooth, SmoothVecs, 
+            kk,
+            /*jj_end_row-jj_begin_row,*/
+            indices,
+            /*&P_diag_j[jj_begin_row],*/
+            &P_diag_data[P_diag_i[i]]);
 
          /* Off-Diagonal part of P */
-         P_offd_i[i] = jj_counter_offd;
-         jj_begin_row_offd = jj_counter_offd;
-
-         if (num_procs > 1)
-         {
-            /* contents deleted */
-         }
-      
-         jj_end_row_offd = jj_counter_offd;
-         
-         /* Loop over ith row of S.  First, the diagonal part of S */
-
-         for (jj = S_diag_i[i]; jj < S_diag_i[i+1]; jj++)
-         {
-            i1 = S_diag_j[jj];
-
-            /*--------------------------------------------------------------
-             * Case 1: neighbor i1 is a C-point and strongly influences i,
-             * accumulate a_{i,i1} into the interpolation weight.
-             *--------------------------------------------------------------*/
-
-            if (P_marker[i1] >= jj_begin_row)
-            {
-               P_diag_data[P_marker[i1]] += S_diag_data[jj];
-            }
-
-         }    
-       
-
-          /*----------------------------------------------------------------
-           * Still looping over ith row of S. Next, loop over the 
-           * off-diagonal part of S 
-           *---------------------------------------------------------------*/
-
-         if (num_procs > 1)
-         {
-            /* contents deleted */
-         }
+         /* undone */
       }
-
-      strong_f_marker--; 
-
-      P_offd_i[i+1] = jj_counter_offd;
      }
-     hypre_TFree(P_marker);
-     hypre_TFree(P_marker_offd);
    }
+   P_diag_i[i] = jj_counter; /* check that this is in right place for threads */
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
 
