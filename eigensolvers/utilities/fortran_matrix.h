@@ -95,6 +95,9 @@ utilities_FortranMatrixSelectBlock( utilities_FortranMatrix* mtx,
 void 
 utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u );
 
+int
+utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, char fileName[] );
+
 #ifdef __cplusplus
 }
 #endif
