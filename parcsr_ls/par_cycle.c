@@ -340,7 +340,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    hypre_TFree(lev_counter);
    hypre_TFree(num_coeffs);
-   if (smooth_option[0] > 6)
+   if (smooth_option[0] > 0)
 	hypre_ParVectorDestroy(Utemp);
 
    return(Solve_err_flag);

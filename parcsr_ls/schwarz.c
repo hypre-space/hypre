@@ -508,7 +508,10 @@ int hypre_MPSchwarzSolve(hypre_ParCSRMatrix *par_A,
     }
 
   if (num_procs > 1)
+  {
+     hypre_TFree(rhs);
      hypre_parCorrRes(par_A,par_x,rhs_vector,&rhs);
+  }
   else 
      rhs = hypre_VectorData(rhs_vector);
 
@@ -1057,7 +1060,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   i_local_to_global = hypre_CTAlloc(int, max_local_dof_counter);
 
 
-  i_global_to_local = (int *) malloc(num_dofs * sizeof(int)); 
+  i_global_to_local = hypre_CTAlloc(int,num_dofs);
 
   for (i=0; i < num_dofs; i++)
     i_global_to_local[i] = -1;
@@ -1120,6 +1123,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
     }
 
   hypre_TFree(i_local_to_global);
+  hypre_TFree(i_global_to_local);
 
 
   
@@ -1935,7 +1939,8 @@ hypre_parCorrRes( hypre_ParCSRMatrix *A,
    }
 
    *tmp_ptr = hypre_VectorData(tmp_vector);
-   hypre_TFree(tmp_vector);
+   hypre_VectorOwnsData(tmp_vector) = 0;
+   hypre_SeqVectorDestroy(tmp_vector);
 
    return (ierr);
 }
@@ -2582,6 +2587,7 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
      free(i_dof_to_aggregate);
      hypre_TFree(i_dof_index);
      hypre_TFree(i_dof_index_offd);
+     hypre_TFree(i_proc);
   }
   else if (overlap == 2)
   {
@@ -2687,6 +2693,7 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
      hypre_TFree(i_dof_to_aggregate);
      hypre_TFree(i_dof_index);
      hypre_TFree(i_dof_index_offd);
+     hypre_TFree(i_proc);
   }
   else
   {
@@ -2819,6 +2826,8 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
     }
 
   hypre_TFree(i_local_to_global);
+  hypre_TFree(i_global_to_local);
+  hypre_CSRMatrixDestroy(A_ext);
 
   domain_structure = hypre_CSRMatrixCreate(num_domains, max_local_dof_counter,
 			i_domain_dof[num_domains]);
