@@ -398,3 +398,118 @@ use. It can also be passed as a parameter into various solvers such as
 
 \section{User-defined components (experts only)}
 
+%==========================================================================
+\section{A Glimpse at Future Directions (this needs work)}
+
+In the future, there will be an interface to \hypre{} based on
+a project at LLNL called ``Babel''. 
+Babel is based on the concept of a Scientific Interface
+Definition Language (SIDL).
+The new interface will offer two major features:
+automatic support for different language bindings, including
+C, Fortran, C++, and in the future, potentially Java, scripting
+languages, Corba/COM, etc.
+The second benefit is that the new interface will provide an
+object oriented model for \hypre{}, even though the bulk of
+the library is written in C.
+
+it is important to note that the new interface will not replace
+the current interface but rather will be an additional interface.
+Existing users should not be affected by the addition of the new
+interface.
+
+This chapter is for those users with OO experience, who are interested
+in the object model that will be present in this view of \hypre{}.
+
+{\bf Status:} As of February 29, 200, the interfaces to the structured
+grid matrices and solvers are completed and are in testing, and implementation
+of solver interfaces is underway. 
+
+As of January 31, 2000, this interface to \hypre{}
+is underway, with structured grids (matrices and solvers) under
+beta development.
+
+
+\subsection{Operators: Matrices, Solvers and Preconditioners}
+
+I'm going to rewrite this whole section someday... Andy, 3/1 2000.
+
+The defining characteristics of Operators are that they take a vector as input
+and return another vector as 
+output. Thus, this generalization also includes matrices, solvers, and preconditioners,
+as well as nonlinear
+operators, transpose matrices, 
+and other less common operators. 
+The fundamental use function of an Operator is the \code{Apply} function, which
+is the function that transforms an input vector to an output vector. 
+For traditional matrices, the \code{Apply} function corresponds to
+matrix-vector multiplication. For 
+solvers, \code{Apply} is the traditional solve function. 
+Preconditioners are traditionally
+referred to as being applied, 
+and the \code{Apply} function quite naturally corresponds to this functionality. 
+
+Operators also have auxiliary uses that are available for more
+expert users.
+Operators can be multiplied or composed to form a new operator.
+For example, given Operator A and Operator B, the result of composing
+them is an operator C whose action on a vector x is equivalent to
+applying B to x, and then applying A to the result, i.e. C(x)=A(B(x)).
+All Operators support the Compose function. 
+Most support it simply by chaining \code{Apply} functions together according
+to the definition, though it is possible that the equivalent of matrix 
+multiplication is implemented in certain cases.
+
+The converse of the composition function for Operators is the Split function.
+Only the Operators that also support the OperatorSplittable interface support
+this function.
+The Split function returns two Operators whose composition is equal to 
+the original Operator.
+Typically, Operators that are formed through a Compose function are Splittable.
+The other major use of Splittable Operators is for preconditioners that can be 
+used as split preconditioners, such as incomplete factorization methods and
+factorized sparse approximate inverse functions.
+
+\subsection{Preconditioners are Solvers}
+
+Users of \hypre{} will quickly notice that there is
+no class or interface called 
+preconditioner. Instead, we have chosen to interpret preconditioners as
+solvers, based on the fact that 
+both traditional solvers and preconditioners are in some senses approximations
+to the inverse of the linear 
+operator defining the system to be solved. The difference between them is one
+of degrees more than a fundamental distinction, in that 
+preconditioners generally are very crude and very easy to compute
+approximations to the inverse, while 
+solvers are more accurate, i.e. within the desired convergence tolerance. By
+treating solvers and 
+preconditioners uniformly within \hypre{}, we make their use uniform for users and
+reduce the complexity 
+of \hypre{}'s object model. We also enable novel algorithmic possibilities such as
+using what are 
+traditionally solvers as preconditioners. In fact, since Operators include
+solvers and matrices, it is 
+straightforward to use matrices as preconditioners, should a direct
+approximation to the inverse exist. 
+
+\subsection{Setup of Solvers}
+
+Most components that correspond to the traditional matrix, as well as
+some solvers in which the 
+construction of the underlying matrix is handled by the solver for the user,
+are set up through one or more 
+of the conceptual interfaces discussed in a later chapter. Here we will
+concentrate on other interfaces for
+constructing Operators.
+
+\subsubsection{The SolverBuilder interface}
+
+The main function in the SolverBuilder interface
+
+
+Various Krylov solvers are included in \hypre{}.
+Such methods are very flexible in that they can be used to attempt
+the solution of any system defined by any component that supports the
+Operator interface.
+

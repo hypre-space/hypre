@@ -1,7 +1,7 @@
 \chapter{Interoperability with Fortran}
 
 %==========================================================================
-\section{Calls to {\slshape hypre} from Fortran source code}
+\section{Calls to \hypre{} from Fortran source code}
 
 Fortran 77 subroutine arguments always pass copies of the argument addresses
 upon execution of the subroutine call.
@@ -29,34 +29,34 @@ is currently achieved with the specific Fortran-calling-C mapping:
 \underline{calling Fortran argument type} & &
 \underline{called C function parameter type} \\
                               &                   &   \\
-\hspace{0.1in} (addr of) \verb+integer*8+        & $\longrightarrow$ &
-\hspace{0.5in} \verb+long int*+ \\
-\hspace{0.1in} (addr of) \verb+integer+          & $\longrightarrow$ &
-\hspace{0.5in} \verb+int*+ \\
-\hspace{0.1in} (addr of) \verb+character+        & $\longrightarrow$ &
-\hspace{0.5in} \verb+char*+ \\
-\hspace{0.1in} (addr of) \verb+double precision+ & $\longrightarrow$ &
-\hspace{0.5in} \verb+double*+ \\
+\hspace{0.1in} (addr of) \code{integer*8}        & $\longrightarrow$ &
+\hspace{0.5in} \code{long int*} \\
+\hspace{0.1in} (addr of) \code{integer}          & $\longrightarrow$ &
+\hspace{0.5in} \code{int*} \\
+\hspace{0.1in} (addr of) \code{character}        & $\longrightarrow$ &
+\hspace{0.5in} \code{char*} \\
+\hspace{0.1in} (addr of) \code{double precision} & $\longrightarrow$ &
+\hspace{0.5in} \code{double*} \\
 
 \end{tabular}
 
 \vspace{0.2in}
 
 In particular, C-type
-\verb+long int*+ points to a space that can hold an address, a space
+\code{long int*} points to a space that can hold an address, a space
 which happens to be the size of that allocated by a Fortran
-\verb+integer*8+ declaration.
-In orther words, C can hold an address in a \verb+long int+ and
-assign that address to a Fortran \verb+integer*8+ memory space
-(using \verb+long int*+ call-by-value).
+\code{integer*8} declaration.
+In orther words, C can hold an address in a \code{long int} and
+assign that address to a Fortran \code{integer*8} memory space
+(using \code{long int*} call-by-value).
 
-Addresses in \verb+integer*8+ variables might not have originated
+Addresses in \code{integer*8} variables might not have originated
 in a Fortran call, and if they address inhomogeneously typed collections
 of data (e.g. C structures), Fortran might not have enough information to
 dereference them.  But Fortran can still pass around such addresses, and in
 particular hand them back and forth between various C functions.  The
-{\slshape hypre} Fortran interface makes extensive use of this technique,
-as with the \verb+addr+ variable in the following general example:
+\hypre{} Fortran interface makes extensive use of this technique,
+as with the \code{addr} variable in the following general example:
 
 \vspace{0.1in}
 
@@ -74,17 +74,16 @@ as with the \verb+addr+ variable in the following general example:
       call subroutine_name(addr, intg, charact, double_precis, ierr)
 \end{verbatim}
 
-The interface is designed so that the label \verb+subroutine_name+ is exactly
-the label of the {\slshape hypre} C-function\footnote{For C
-function names under 32 characters in length, the Fortran name is the same
-as the C name.  For C function names over 31 characters, the Fortran
-name is condensed to less than 32 characters (see reference manual for
-Fortran name in such a case).}.
-{\slshape Hypre} interlanguage C-wrappers currently
-account for interlanguage linking issues involving appended
-underscores.  The C-wrappers also accomodate Fortran subroutine name length
-limitations.  Fortran variable \verb+ierr+ allows error handling through
-the interface.
+The interface is designed so that the label \code{subroutine_name} is
+exactly the label of the \hypre{} C-function\footnote{For C function
+names under 32 characters in length, the Fortran name is the same as
+the C name.  For C function names over 31 characters, the Fortran name
+is condensed to less than 32 characters (see reference manual for
+Fortran name in such a case).}.  \hypre{} interlanguage C-wrappers
+currently account for interlanguage linking issues involving appended
+underscores.  The C-wrappers also accomodate Fortran subroutine name
+length limitations.  Fortran variable
+\code{ierr} allows error handling through the interface.
 
 \vspace{0.1in}
 
@@ -130,6 +129,6 @@ over a larger set of platforms.  The previous mapping might
 not be universal.  Furthermore,
 the implementation is hand-programmed, slow, and prone to human error.
 It will probably be replaced by a more automated implementation in accordance
-with the {\slshape Babel} project. 
+with the {\sl Babel} project. 
 
 %==========================================================================

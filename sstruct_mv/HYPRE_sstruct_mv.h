@@ -393,7 +393,13 @@ int HYPRE_SStructMatrixInitialize(HYPRE_SStructMatrix matrix);
  * variable type (there are no such restrictions for non-stencil
  * entries).
  *
+ * If the matrix is complex, then {\tt values} consists of pairs of
+ * doubles representing the real and imaginary parts of each complex
+ * value.
+ *
  * @param param [IN] ... 
+ *
+ * @see HYPRE_SStructMatrixSetComplex
  **/
 int HYPRE_SStructMatrixSetValues(HYPRE_SStructMatrix  matrix,
                                  int                  part,
@@ -416,7 +422,13 @@ int HYPRE_SStructMatrixSetValues(HYPRE_SStructMatrix  matrix,
  * variable type (there are no such restrictions for non-stencil
  * entries).
  *
+ * If the matrix is complex, then {\tt values} consists of pairs of
+ * doubles representing the real and imaginary parts of each complex
+ * value.
+ *
  * @param param [IN] ...
+ *
+ * @see HYPRE_SStructMatrixSetComplex
  **/
 int HYPRE_SStructMatrixSetBoxValues(HYPRE_SStructMatrix  matrix,
                                     int                  part,
@@ -438,7 +450,13 @@ int HYPRE_SStructMatrixSetBoxValues(HYPRE_SStructMatrix  matrix,
  * stencil entries, they must all represent couplings to the same
  * variable type.
  *
+ * If the matrix is complex, then {\tt values} consists of pairs of
+ * doubles representing the real and imaginary parts of each complex
+ * value.
+ *
  * @param param [IN] ...
+ *
+ * @see HYPRE_SStructMatrixSetComplex
  **/
 int HYPRE_SStructMatrixAddToValues(HYPRE_SStructMatrix  matrix,
                                    int                  part,
@@ -458,7 +476,13 @@ int HYPRE_SStructMatrixAddToValues(HYPRE_SStructMatrix  matrix,
  * NOTE: The entries in this routine must all be of stencil type.
  * Also, they must all represent couplings to the same variable type.
  *
+ * If the matrix is complex, then {\tt values} consists of pairs of
+ * doubles representing the real and imaginary parts of each complex
+ * value.
+ *
  * @param param [IN] ...
+ *
+ * @see HYPRE_SStructMatrixSetComplex
  **/
 int HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
                                       int                  part,
@@ -506,75 +530,6 @@ int HYPRE_SStructMatrixGetObject(HYPRE_SStructMatrix   matrix,
  * @param param [IN] ...
  **/
 int HYPRE_SStructMatrixSetComplex(HYPRE_SStructMatrix matrix);
-
-/**
- * Set complex matrix coefficients index by index.
- *
- * See {\tt HYPRE\_SStructMatrixSetValues} for general description.
- * Here, {\tt cvalues} consists of pairs of doubles representing the
- * real and imaginary parts of each complex value.
- *
- * @param param [IN] ... 
- **/
-int HYPRE_SStructMatrixSetCValues(HYPRE_SStructMatrix  matrix,
-                                  int                  part,
-                                  int                 *index,
-                                  int                  var,
-                                  int                  nentries,
-                                  int                 *entries,
-                                  double              *cvalues);
-
-/**
- * Set complex matrix coefficients a box at a time.
- *
- * See {\tt HYPRE\_SStructMatrixSetBoxValues} for general description.
- * Here, {\tt cvalues} consists of pairs of doubles representing the
- * real and imaginary parts of each complex value.
- *
- * @param param [IN] ...
- **/
-int HYPRE_SStructMatrixSetBoxCValues(HYPRE_SStructMatrix  matrix,
-                                     int                  part,
-                                     int                 *ilower,
-                                     int                 *iupper,
-                                     int                  var,
-                                     int                  nentries,
-                                     int                 *entries,
-                                     double              *cvalues);
-/**
- * Add to complex matrix coefficients index by index.
- *
- * See {\tt HYPRE\_SStructMatrixAddToValues} for general description.
- * Here, {\tt cvalues} consists of pairs of doubles representing the
- * real and imaginary parts of each complex value.
- *
- * @param param [IN] ...
- **/
-int HYPRE_SStructMatrixAddToCValues(HYPRE_SStructMatrix  matrix,
-                                    int                  part,
-                                    int                 *index,
-                                    int                  var,
-                                    int                  nentries,
-                                    int                 *entries,
-                                    double              *cvalues);
-
-/**
- * Add to complex matrix coefficients a box at a time.
- *
- * See {\tt HYPRE\_SStructMatrixAddToBoxValues} for general
- * description.  Here, {\tt cvalues} consists of pairs of doubles
- * representing the real and imaginary parts of each complex value.
- *
- * @param param [IN] ...
- **/
-int HYPRE_SStructMatrixAddToBoxCValues(HYPRE_SStructMatrix  matrix,
-                                       int                  part,
-                                       int                 *ilower,
-                                       int                 *iupper,
-                                       int                  var,
-                                       int                  nentries,
-                                       int                 *entries,
-                                       double              *cvalues);
 
 /**
  * Description...
@@ -633,7 +588,14 @@ int HYPRE_SStructVectorInitialize(HYPRE_SStructVector vector);
  * the associated variables.  This means that some data will be
  * multiply defined.
  *
+ * If the vector is complex, then {\tt value} consists of a pair of
+ * doubles representing the real and imaginary parts of the complex
+ * value.  NOTE: To implement this, the type of {\tt value} will have
+ * to be changed.
+ *
  * @param param [IN] ...
+ *
+ * @see HYPRE_SStructVectorSetComplex
  **/
 int HYPRE_SStructVectorSetValues(HYPRE_SStructVector  vector,
                                  int                  part,
@@ -648,7 +610,13 @@ int HYPRE_SStructVectorSetValues(HYPRE_SStructVector  vector,
  * the associated variables.  This means that some data will be
  * multiply defined.
  *
+ * If the vector is complex, then {\tt values} consists of pairs of
+ * doubles representing the real and imaginary parts of each complex
+ * value.
+ *
  * @param param [IN] ...
+ *
+ * @see HYPRE_SStructVectorSetComplex
  **/
 int HYPRE_SStructVectorSetBoxValues(HYPRE_SStructVector  vector,
                                     int                  part,
@@ -663,7 +631,14 @@ int HYPRE_SStructVectorSetBoxValues(HYPRE_SStructVector  vector,
  * the associated variables.  This means that some data will be
  * multiply defined.
  *
+ * If the vector is complex, then {\tt value} consists of a pair of
+ * doubles representing the real and imaginary parts of the complex
+ * value.  NOTE: To implement this, the type of {\tt value} will have
+ * to be changed.
+ *
  * @param param [IN] ...
+ *
+ * @see HYPRE_SStructVectorSetComplex
  **/
 int HYPRE_SStructVectorAddToValues(HYPRE_SStructVector  vector,
                                    int                  part,
@@ -678,7 +653,13 @@ int HYPRE_SStructVectorAddToValues(HYPRE_SStructVector  vector,
  * the associated variables.  This means that some data will be
  * multiply defined.
  *
+ * If the vector is complex, then {\tt values} consists of pairs of
+ * doubles representing the real and imaginary parts of each complex
+ * value.
+ *
  * @param param [IN] ...
+ *
+ * @see HYPRE_SStructVectorSetComplex
  **/
 int HYPRE_SStructVectorAddToBoxValues(HYPRE_SStructVector  vector,
                                       int                  part,
@@ -709,7 +690,13 @@ int HYPRE_SStructVectorGather(HYPRE_SStructVector vector);
  * NOTE: Users may only get values on processes that own the
  * associated variables.
  *
+ * If the vector is complex, then {\tt value} consists of a pair of
+ * doubles representing the real and imaginary parts of the complex
+ * value.
+ *
  * @param param [IN] ... 
+ *
+ * @see HYPRE_SStructVectorSetComplex
  **/
 int HYPRE_SStructVectorGetValues(HYPRE_SStructVector  vector,
                                  int                  part,
@@ -723,7 +710,13 @@ int HYPRE_SStructVectorGetValues(HYPRE_SStructVector  vector,
  * NOTE: Users may only get values on processes that own the
  * associated variables.
  *
+ * If the vector is complex, then {\tt values} consists of pairs of
+ * doubles representing the real and imaginary parts of each complex
+ * value.
+ *
  * @param param [IN] ...
+ *
+ * @see HYPRE_SStructVectorSetComplex
  **/
 int HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
                                     int                  part,
@@ -754,98 +747,6 @@ int HYPRE_SStructVectorGetObject(HYPRE_SStructVector   vector,
  * @param param [IN] ...
  **/
 int HYPRE_SStructVectorSetComplex(HYPRE_SStructVector vector);
-
-/**
- * Set vector coefficients index by index.
- *
- * See {\tt HYPRE\_SStructVectorSetValues} for general description.
- * Here, {\tt cvalue} consists of a pair of doubles representing the
- * real and imaginary parts of the complex value.
- *
- * @param param [IN] ...
- **/
-int HYPRE_SStructVectorSetCValues(HYPRE_SStructVector  vector,
-                                  int                  part,
-                                  int                 *index,
-                                  int                  var,
-                                  double              *cvalue);
-
-/**
- * Set vector coefficients a box at a time.
- *
- * See {\tt HYPRE\_SStructVectorSetBoxValues} for general description.
- * Here, {\tt cvalues} consists of pairs of doubles representing the
- * real and imaginary parts of each complex value.
- *
- * @param param [IN] ...
- **/
-int HYPRE_SStructVectorSetBoxCValues(HYPRE_SStructVector  vector,
-                                     int                  part,
-                                     int                 *ilower,
-                                     int                 *iupper,
-                                     int                  var,
-                                     double              *cvalues);
-/**
- * Set vector coefficients index by index.
- *
- * See {\tt HYPRE\_SStructVectorAddToValues} for general description.
- * Here, {\tt cvalue} consists of a pair of doubles representing the
- * real and imaginary parts of the complex value.
- *
- * @param param [IN] ...
- **/
-int HYPRE_SStructVectorAddToCValues(HYPRE_SStructVector  vector,
-                                    int                  part,
-                                    int                 *index,
-                                    int                  var,
-                                    double              *cvalue);
-
-/**
- * Set vector coefficients a box at a time.
- *
- * See {\tt HYPRE\_SStructVectorAddToBoxValues} for general
- * description.  Here, {\tt cvalues} consists of pairs of doubles
- * representing the real and imaginary parts of each complex value.
- *
- * @param param [IN] ...
- **/
-int HYPRE_SStructVectorAddToBoxCValues(HYPRE_SStructVector  vector,
-                                       int                  part,
-                                       int                 *ilower,
-                                       int                 *iupper,
-                                       int                  var,
-                                       double              *cvalues);
-
-/**
- * Description...
- *
- * See {\tt HYPRE\_SStructVectorGetValues} for general description.
- * Here, {\tt cvalue} consists of a pair of doubles representing the
- * real and imaginary parts of the complex value.
- *
- * @param param [IN] ... 
- **/
-int HYPRE_SStructVectorGetCValues(HYPRE_SStructVector  vector,
-                                  int                  part,
-                                  int                 *index,
-                                  int                  var,
-                                  double              *cvalue);
-
-/**
- * Description...
- *
- * See {\tt HYPRE\_SStructVectorGetBoxValues} for general description.
- * Here, {\tt cvalues} consists of pairs of doubles representing the
- * real and imaginary parts of each complex value.
- *
- * @param param [IN] ...
- **/
-int HYPRE_SStructVectorGetBoxCValues(HYPRE_SStructVector  vector,
-                                     int                  part,
-                                     int                 *ilower,
-                                     int                 *iupper,
-                                     int                  var,
-                                     double              *cvalues);
 
 /**
  * Description...

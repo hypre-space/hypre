@@ -2,18 +2,16 @@
 \chapter{The IJ Linear System Interface}
 \label{IJ}
 
-The IJ linear system (IJ) interface is the lowest common
-denominator for specification of an 
-unaugmented\footnote{An example of an augmented
-linear system of equations would be a 
-a linear system plus the stiffness matrices from which the matrix
-coefficients are assembled in a finite element discretization.
-More than the linear system of equations is provided.}
-linear system of equations to be solved by {\slshape hypre}.
-No {\itshape a priori} assumptions are made about the sparsity
-pattern of a linear system passed through the IJ interface.
-Like all {\slshape hypre} interfaces, it is designed
-to insulate the user from underlying implementation details.
+The IJ linear system (IJ) interface is the lowest common denominator
+for specification of an unaugmented\footnote{An example of an
+augmented linear system of equations would be a a linear system plus
+the stiffness matrices from which the matrix coefficients are
+assembled in a finite element discretization.  More than the linear
+system of equations is provided.}  linear system of equations to be
+solved by \hypre{}.  No {\it a priori} assumptions are made about
+the sparsity pattern of a linear system passed through the IJ
+interface.  Like all \hypre{} interfaces, it is designed to insulate
+the user from underlying implementation details.
 
 One would typically use the IJ interface to specify the linear
 system originating from an unstructured grid PDE discretization.
@@ -25,25 +23,24 @@ IJ matrix interface calls facilitate creation and destruction of
 matrix interface objects; specification, manipulation and retrieval
 of rows and blocks of linear system coefficients; and determination
 and querying of underlying linear system data structure formats.
-{\slshape Hypre} supports multiple underlying data structure formats
-in order to cooperate
-with packages such as {\slshape PETSc} and {\slshape ISIS},
-as well as for convenience to the {\slshape hypre} solver developer.
-One format is abbreviated {\itshape ParCSR}, meaning {\itshape Par}allel
-{\itshape C}ompressed {\itshape S}parse {\itshape R}ow.
+\hypre{} supports multiple underlying data structure formats
+in order to cooperate with packages such as {\sl PETSc} and
+{\sl ISIS}, as well as for convenience to the \hypre{} solver
+developer.  One format is abbreviated {\it ParCSR}, meaning
+{\it Par}allel {\it C}ompressed {\it S}parse {\it
+R}ow.
 
 IJ vector interface calls facilitate creation and destruction of
 vector interface objects, as well as specification, manipulation,
 and retrieval of right-hand side and initial guess vector components.
 
-Currently, {\slshape hypre} solvers which operate directly on linear
-systems passing through the IJ interface have either
-{\itshape ParCSR} implementations, {\slshape ISIS} implementations,
-or {\slshape PETSc} implementations.
+Currently, \hypre{} solvers which operate directly on linear systems
+passing through the IJ interface have either {\it ParCSR}
+implementations, {\sl ISIS} implementations, or {\sl PETSc}
+implementations.
 
-A full listing of IJ linear system C-functions and Fortran
-interface names should be located in the {\slshape hypre} reference
-manual.
+A full listing of IJ linear system C-functions and Fortran interface
+names should be located in the \hypre{} reference manual.
 
 \section{IJ Matrix Interface}
 
@@ -58,9 +55,9 @@ the following functions;
 
   int HYPRE_IJMatrixDestroy(HYPRE_IJMatrix *ij_matrix);
 \end{verbatim}
-\noindent The \verb+MPI_Comm+ pointer \verb+communicator+
+\noindent The \code{MPI_Comm} pointer \code{communicator}
 points to interprocessor communication information needed by MPI.
-Integers \verb+global_m+ and \verb+global_n+ specify the global
+Integers \code{global_m} and \code{global_n} specify the global
 number of rows and columns in the coefficient matrix, over all processors.
 
 \subsection{Typical implementation}
@@ -78,9 +75,9 @@ function calls would be associated with the following declarations:
   int ierr;
 \end{verbatim}
 
-\noindent In reference to a row, variable \verb+num_cols+ specifies
+\noindent In reference to a row, variable \code{num_cols} specifies
 the number of columns with nonzero entries.
-Integer \verb+ierr+ carries program error state information. 
+Integer \code{ierr} carries program error state information. 
 
 \begin{verbatim}
   ierr = HYPRE_IJMatrixCreate(communicator, &ij_matrix_ptr,
@@ -89,9 +86,9 @@ Integer \verb+ierr+ carries program error state information.
   ierr = HYPRE_IJMatrixSetLocalStorageType(ij_matrix, type);
 \end{verbatim}
 
-\noindent Allowed storage types will be \verb+HYPRE_PARCSR+,
-\verb+HYPRE_ISIS+, and \verb+HYPRE_PETSC+.  Currently, only
-\verb+HYPRE_PARCSR+ has been tested. 
+\noindent Allowed storage types will be \code{HYPRE_PARCSR},
+\code{HYPRE_ISIS}, and \code{HYPRE_PETSC}.  Currently, only
+\code{HYPRE_PARCSR} has been tested. 
 
 \begin{figure}
 \begin{center}
@@ -147,7 +144,7 @@ Integer \verb+ierr+ carries program error state information.
 \caption{Single row of a distributed system of equations.
 Interprocessor boundaries are marked by horizontal lines.
 Nonzero matrix coefficients are here indistinguishably
-expressed as {\itshape a}'s.  Unknown and right-hand side
+expressed as {\it a}'s.  Unknown and right-hand side
 vectors are similarly expressed.}
 \end{center}
 \end{figure}
@@ -166,7 +163,7 @@ vectors are similarly expressed.}
 \end{figure}
 
 Once the matrix is initialized, repeated calls to
-\verb+HYPRE_IJMatrixInsertRow+ can be used to pass in
+\code{HYPRE_IJMatrixInsertRow} can be used to pass in
 the matrix coefficients.  Then a matrix assembly call stows
 the coefficients in objects which the solvers can process. 
 
@@ -179,16 +176,16 @@ the coefficients in objects which the solvers can process.
   ierr = HYPRE_IJMatrixAssemble(ij_matrix);
 \end{verbatim}
 
-\noindent Integer \verb+row_index+ is used to specify the global
+\noindent Integer \code{row_index} is used to specify the global
 number of the row being inserted.
-\noindent Pointer \verb+coeffs+ would typically address an array of
-\verb+num_cols+ doubles.
-Pointer \verb+col_indices+ would typically
-address an array of \verb+num_cols+ integers which specify the
-matrix column in which each \verb+coeffs+ double belongs.  
-Typically, linear systems involving the \verb+ij_matrix+
+\noindent Pointer \code{coeffs} would typically address an array of
+\code{num_cols} doubles.
+Pointer \code{col_indices} would typically
+address an array of \code{num_cols} integers which specify the
+matrix column in which each \code{coeffs} double belongs.  
+Typically, linear systems involving the \code{ij_matrix}
 object are solved after this point.  After solution, the
-\verb+ij_matrix+ should be deallocated if it is not to be reused:
+\code{ij_matrix} should be deallocated if it is not to be reused:
 
 \begin{verbatim}
    ierr = HYPRE_IJMatrixDestroy(ij_matrix);
@@ -210,7 +207,7 @@ the following functions;
 
 \noindent As expected, the global number of components of the
 vector is the same as the global number of rows in the matrix,
-\verb+global_m+.
+\code{global_m}.
 Similarly for the right-hand side IJ vector object to a linear
 system.
 
@@ -229,7 +226,7 @@ function calls would be associated with the following declarations:
    double *b, *b_plus, *x;
 \end{verbatim}
 
-\noindent Integers \verb+domain_pt_start+ and \verb+next_domain_pt_start+
+\noindent Integers \code{domain_pt_start} and \code{next_domain_pt_start}
 specify the global indices of the first unknown on the local processor
 and on the next processor in the domain decomposition, respectively.
 
@@ -239,9 +236,9 @@ and on the next processor in the domain decomposition, respectively.
    ierr = HYPRE_IJVectorSetLocalStorageType(ij_b, HYPRE_PARCSR);
 \end{verbatim}
 
-\noindent Allowed storage types will be \verb+HYPRE_PARCSR+,
-\verb+HYPRE_ISIS+, and \verb+HYPRE_PETSC+.  Currently, only
-\verb+HYPRE_PARCSR+ has been tested.  Processors can be informed
+\noindent Allowed storage types will be \code{HYPRE_PARCSR},
+\code{HYPRE_ISIS}, and \code{HYPRE_PETSC}.  Currently, only
+\code{HYPRE_PARCSR} has been tested.  Processors can be informed
 about distribution of unknowns over processors,
 
 \begin{verbatim}
@@ -312,10 +309,10 @@ that must be handled on the processor, ...
 \end{figure}
 
 \noindent Vector components can be placed into
-underlying {\slshape hypre} formats either in 
-contiguous subsets (Figure \ref{loc_comps_blk}) or in
-indexed subsets (Figure \ref{loc_comps}). For \verb+ij_b+
-only, one can use either of the following:
+underlying \hypre{} formats either in contiguous subsets (Figure
+\ref{loc_comps_blk}) or in indexed subsets (Figure
+\ref{loc_comps}). For \code{ij_b} only, one can use either of the
+following:
 
 \begin{verbatim}
    ierr = HYPRE_IJVectorSetLocalComponentsInBlock(ij_b,
@@ -330,14 +327,14 @@ only, one can use either of the following:
 \end{verbatim}
 
 \noindent To assign values to all components in a domain, one would
-choose \verb+glob_vec_index_start+ \verb+=+ \verb+domain_pt_start+,
-and \verb+glob_vec_index_stop+ \verb+=+\verb+next_domain_pt_start-1+.
+choose \code{glob_vec_index_start} \code{=} \code{domain_pt_start},
+and \code{glob_vec_index_stop} \code{=}\code{next_domain_pt_start-1}.
 
 One can also add to vector components that are already set, in
 contiguous or indexed subsets of components.
 In the following example,
-assume that array \verb+b_plus+
-contains values to be added to components of \verb+ij_b+:
+assume that array \code{b_plus}
+contains values to be added to components of \code{ij_b}:
 
 \begin{verbatim}
    ierr = HYPRE_IJVectorAddToLocalComponentsInBlock(ij_b,

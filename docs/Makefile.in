@@ -71,21 +71,17 @@ ref_ps: HYPRE_ref_manual.ps
 
 USR_FILES =\
  usr_intro.tex\
- usr_conceptual_interface_intro.tex\
+ usr_starting.tex\
  usr_struct.tex\
  usr_sstruct.tex\
  usr_fei.tex\
  usr_ij.tex\
- usr_solver_general.tex\
- usr_specific_solvers.tex\
+ usr_solvers.tex\
  usr_parasails.tex\
  usr_pilut.tex\
  usr_boomeramg.tex\
  usr_interlang.tex\
- usr_advanced.tex\
- usr_operators.tex\
  usr_building_code.tex\
- usr_appendix.tex\
  usr_manual.tex
 
 HYPRE_usr_manual/usr_manual.html: usr_manual.dvi

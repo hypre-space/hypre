@@ -1,0 +1,82 @@
+\chapter{Solvers and Preconditioners}
+\label{solvers}
+
+There are several solvers available in \hypre{}.  Some of them are
+listed below.
+
+The procedure for setup and use of solvers and preconditioners is largely
+the same. We will refer to them both as solvers in the sequel except when noted. 
+In normal usage, 
+the preconditioner is chosen and constructed before the solver,
+and then handed to the solver as part of the solver's setup.
+In the following, we assume the most common usage pattern in which
+a single linear system is set up and then solved with a single righthand
+side. We comment later on considerations for other usage patterns.
+
+{\bf Setup:}
+
+\begin{enumerate}
+
+\item
+{\bf Pass to the solver the information defining the problem.} In the
+typical user cycle, the user has passed this information into a matrix
+through one of the conceptual interfaces prior to setting up the
+solver. In this situation, the problem definition information is then
+passed to the solver by passing the constructed matrix into the
+solver. As described before, the matrix and solver must be compatible,
+in that the matrix must provide the services needed by the
+solver. Krylov solvers, for example, need only a matrix-vector
+multiplication.  Most preconditioners, on the other hand, have
+additional requirements such as access to the coefficients of the
+matrix, e.g. the GetRow function in the
+\code{HYPRE\_DistributedMatrix} class.
+
+\item
+{\bf Choose parameters that control construction of the
+preconditioner/solver.}  Parameters are chosen through the \code{Set}
+calls provided by the solver.  As is true throughout \hypre{}, all
+parameters have reasonable defaults if not chosen.  Note that in
+\hypre{}, convergence criteria can be chosen after the
+preconditioner/solver has been setup.
+
+\item
+{\bf Pass the preconditioner to the solver.} For solvers that are not
+preconditioned, this step is omitted. The preconditioner is passed
+through the \code{SetPreconditioner} call. The object passed in as the
+preconditioner must be a fully constructed \code{Solver}.
+
+\item
+{\bf Set up the solver.} In the procedural C interface for \hypre{},
+this is the \code{Setup} call.  In the ESI-compliant interface for
+\hypre{}, this is the \code{GetConstructedObject} from the solver
+builder interface.
+
+\end{enumerate}
+
+At this point, the solver/preconditioner is fully constructed and
+ready for use.
+
+{\bf Use:}
+
+\begin{enumerate}
+
+\item
+{\bf Set convergence criteria.} Convergence can be controlled by the
+number of iterations, as well as various tolerances such as relative
+residual, preconditioned residual, etc.  Like all parameters,
+reasonable defaults are used. Generally speaking, Krylov solvers
+default to a tolerance-based convergence criteria, while solvers used
+traditionally as preconditioners default to convergence based on the
+number of iterations (usually a single iteration). Users are free to
+change these, though care must be taken. Some Krylov solvers, for
+example, are not guaranteed to converge unless the preconditioner is a
+constant operator, which is only satisfied for iterative methods if a
+fixed number of iterations (typically one) is taken.  For these
+solvers, a preconditioner with a tolerance-based convergence criteria
+will not usually work.
+
+\item
+{\bf Apply the solver to the right hand side.} For the procedural C
+interface, this is the \code{Solve} function. 
+
+\end{enumerate}

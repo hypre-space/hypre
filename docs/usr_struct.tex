@@ -1,39 +1,37 @@
 %==========================================================================
-\chapter{Structured-Grid Interface}
-\label{Structured-Grid Interface}
+\chapter{Structured Grid Interface}
+\label{Structured Grid Interface}
 
 In order to get access to the most efficient and scalable solvers for
-structured-grid applications, users should use the \code{Struct}
-interface described in this chapter.  This interface will also provide
-access (this is not yet supported) to solvers in \hypre{} that were
-designed for unstructured-grid applications and sparse linear systems
-in general.  These additional solvers are usually provided via the
-unstructured-grid interface (\code{FEI}) or the linear-algebraic
-interface (\code{IJ}) described in Chapters \ref{chapter-FEI} and
-\ref{chapter-IJ}.
+scalar structured-grid applications, users should use the
+\code{Struct} interface described in this chapter.  This interface
+will also provide access (this is not yet supported) to solvers in
+\hypre{} that were designed for unstructured-grid applications and
+sparse linear systems in general.  These additional solvers are
+usually provided via the unstructured-grid interface (\code{FEI}) or
+the linear-algebraic interface (\code{IJ}) described in Chapters
+\ref{chapter-FEI} and \ref{IJ}.
 
 Figure \ref{fig-fv-grid} gives an example of the type of grid
 currently supported by the \code{Struct} interface.  The interface
 uses a finite-difference or finite-volume style, and currently
-supports only scalar PDEs (i.e., one unknown per gridpoint).  There is
-an effort to extend it to use a finite-element style (similar to the
-\code{FEI}, but on structured grids), and to support PDE systems.
+supports only scalar PDEs (i.e., one unknown per gridpoint).
 \begin{figure}
 \centering
 \includegraphics[width=4in]{fv_grid.eps}
 \caption{%
-An example 2D finite-volume grid, distributed accross two processors.}
+An example 2D structured grid, distributed accross two processors.}
 \label{fig-fv-grid}
 \end{figure}
 
 There are four basic steps involved in setting up the linear system
 to be solved:
-\begin{itemize}
+\begin{enumerate}
 \item set up the grid,
 \item set up the stencil,
 \item set up the matrix,
 \item set up the right-hand-side vector.
-\end{itemize}
+\end{enumerate}
 To describe each of these steps in more detail, consider solving the
 2D Laplacian problem
 \begin{equation}\label{eqn-laplacian}
@@ -122,7 +120,8 @@ The $(0,-1)$ entry represents the ``south'' coefficient, and is the
 3rd entry in the array ($S_3$).  And so on.
 
 On process 0 or 1, the following code will set up the stencil in
-(\ref{eqn-stencil-description}).
+(\ref{eqn-stencil-description}).  The stencil must be the same on all
+processes.
 \begin{display}
 \begin{verbatim}
 
@@ -141,7 +140,7 @@ for (s = 0; s < 5; s++)
 \end{display}
 The \code{HYPRE_StructStencilCreate()} routine creates an empty 2D,
 5-pt stencil object.  The \code{HYPRE_StructStencilSetElement()}
-routine defines the geometry of the stencil, and assigns the array
+routine defines the geometry of the stencil and assigns the array
 numbers for each of the stencil entries.  None of the calls are
 collective calls.
 
@@ -152,7 +151,7 @@ collective calls.
 
 The matrix is set up in terms of the grid and stencil objects
 described in Sections
-\ref{Setting Up the Grid} and \ref{Setting Up the Stencil} above.
+\ref{Setting Up the Grid} and \ref{Setting Up the Stencil}.
 The coefficients associated with each stencil entry will typically
 vary from gridpoint to gridpoint, but in the example problem being
 considered, they are as follows over the entire grid (except at
@@ -175,14 +174,14 @@ with the center ($S_0$) and south ($S_3$) stencil entries in
 \begin{verbatim}
 
 HYPRE_StructMatrix  A;
-double              values[24];
+double              values[36];
 int                 stencil_indices[2] = {0,3};
 int                 i;
 
 HYPRE_StructMatrixCreate(MPI_COMM_WORLD, grid, stencil, &A);
 HYPRE_StructMatrixInitialize(A);
 
-for (i = 0; i < 24; i += 2)
+for (i = 0; i < 36; i += 2)
 {
    values[i]   =  4.0;
    values[i+1] = -1.0;
@@ -266,13 +265,13 @@ vector values.
 \begin{verbatim}
 
 HYPRE_StructVector  b;
-double              values[12];
+double              values[18];
 int                 i;
 
-HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil, &b);
+HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, &b);
 HYPRE_StructVectorInitialize(b);
 
-for (i = 0; i < 12; i++)
+for (i = 0; i < 18; i++)
 {
    values[i]   =  0.0;
 }
@@ -328,9 +327,9 @@ on the underlying storage scheme.  Currently in \hypre{}, symmetric
 storage is always used when indicated.
 
 To most efficiently utilize the \code{Struct} interface for symmetric
-matrices, notice also that only half of the off-diagonal coefficients
-need to be set.  To do this for the example being considered, we
-simply need to redefine the 5-pt stencil of Section
+matrices, notice that only half of the off-diagonal coefficients need
+to be set.  To do this for the example being considered, we simply
+need to redefine the 5-pt stencil of Section
 \ref{Setting Up the Stencil} to an ``appropriate'' 3-pt stencil, then
 set matrix coefficients (as in Section \ref{Setting Up the Matrix})
 for these three stencil elements {\em only}.  For example, we could

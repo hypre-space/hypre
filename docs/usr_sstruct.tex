@@ -17,13 +17,13 @@ An example 2D block-structured grid, distributed accross three processes.}
 
 There are five basic steps involved in setting up the linear system to
 be solved:
-\begin{itemize}
+\begin{enumerate}
 \item set up the grid,
 \item set up the stencils,
 \item set up the graph,
 \item set up the matrix,
 \item set up the right-hand-side vector.
-\end{itemize}
+\end{enumerate}
 To describe each of these steps in more detail, consider solving the
 2D Laplacian problem
 \begin{equation}\label{sstruct:eqn-laplacian}
@@ -127,7 +127,7 @@ HYPRE_SStructStencil stencil;
 int                  s;
 int                  offsets[9][2] = {{0,0},
                                       {-1, 0}, { 1, 0}, { 0,-1}, { 0, 1}};
-                                      {-1,-1}, {-1, 1}, { 1,-1}, { 1, 1}};
+                                      {-1,-1}, { 1,-1}, {-1, 1}, { 1, 1}};
 
 HYPRE_SStructStencilCreate(2, 9, &stencil);
 
@@ -159,8 +159,8 @@ example problem.
 \begin{verbatim}
 
 HYPRE_SStructGraph graph;
-int                addindex[8][2]   = {{ 2,0},{2,1},{2,2},{2,3},
-                                       {-1,3},{0,3},{1,3},
+int                addindex[9][2]   = {{ 2,0},{2,1},{2,2},{2,3},
+                                       {-1,3},{0,3},{1,3},{2,3},
                                        { 1,2}};
 int                addentries[9][2] = {{-1,0},{-1,1},{-1,2},{-1,3},
                                        { 9,9},{10,9},{11,9},{12,9},
@@ -177,8 +177,8 @@ HYPRE_SStructGraphAddEntries(graph, 0, addindex[2], 0, 3, 2, &addentries[1], 0);
 ...
 
 /* Add graph edge entries at index (1,2) */
-HYPRE_SStructGraphAddEntries(graph, 0, addindex[7], 0, 1, 0, &addentries[8], 1);
-HYPRE_SStructGraphAddEntries(graph, 0, addindex[7], 1, 1, 0, &addentries[8], 0);
+HYPRE_SStructGraphAddEntries(graph, 0, addindex[8], 0, 1, 0, &addentries[8], 1);
+HYPRE_SStructGraphAddEntries(graph, 0, addindex[8], 1, 1, 0, &addentries[8], 0);
 
 \end{verbatim}
 \end{display}
@@ -214,7 +214,7 @@ set up.
 HYPRE_SStructMatrix  A;
 double               values[32];
 int                  sindices[2] = {0,3};
-int                  gindices[2] = {9,10,11,0};
+int                  gindices[4] = {9,10,11,0};
 int                  i;
 
 HYPRE_SStructMatrixCreate(MPI_COMM_WORLD, graph, &A);
