@@ -698,14 +698,14 @@ then
       AC_MSG_WARN([Cannot find BLAS library])
       AC_MSG_WARN([  configuring --without-blas])
       AC_MSG_WARN([***************************************])
-      BLAS_DIR="HYPRE_TOP_SRC_DIR/lib"
+      BLAS_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
       BLASLIBDIRS="-L $BLAS_DIR"
       BLASLIBS="-lHYPRE_utilities"
       BLASNEEDED=
       AC_DEFINE(HYPRE_USING_HYPRE_BLAS, 1, [Using internal HYPRE routines.])
    elif test "$BLASLIBS" = "internal"
    then
-      BLAS_DIR="HYPRE_TOP_SRC_DIR/lib"
+      BLAS_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
       BLASLIBDIRS="-L $BLAS_DIR"
       BLASLIBS="-lHYPRE_utilities"
       BLASNEEDED=
@@ -728,14 +728,14 @@ then
       AC_MSG_WARN([Cannot find LAPACK library])
       AC_MSG_WARN([  configuring --without-lapack])
       AC_MSG_WARN([***************************************])
-      LAPACK_DIR="HYPRE_TOP_SRC_DIR/lib"
+      LAPACK_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
       LAPACKLIBDIRS="-L $LAPACK_DIR"
       LAPACKLIBS="-lHYPRE_utilities"
       LAPACKNEEDED=
       AC_DEFINE(HYPRE_USING_HYPRE_LAPACK, 1, [Using internal HYPRE routines.])
    elif test "$LAPACKLIBS" = "internal"
    then
-      LAPACK_DIR="HYPRE_TOP_SRC_DIR/lib"
+      LAPACK_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
       LAPACKLIBDIRS="-L $LAPACK_DIR"
       LAPACKLIBS="-lHYPRE_utilities"
       LAPACKNEEDED=
