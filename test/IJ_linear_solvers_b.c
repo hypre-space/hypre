@@ -345,10 +345,19 @@ main( int   argc,
    trunc_factor = 0.0;
    cycle_type = 1;
 
+   /* TO DO: release all this space ... */
    num_grid_sweeps   = hypre_CTAlloc(int,4);
    grid_relax_type   = hypre_CTAlloc(int,4);
    grid_relax_points = hypre_CTAlloc(int *,4);
    relax_weight      = hypre_CTAlloc(double, max_levels);
+   Num_Grid_Sweeps.lower = hypre_CTAlloc(int,1);
+   Num_Grid_Sweeps.upper = hypre_CTAlloc(int,1);
+   Grid_Relax_Type.lower = hypre_CTAlloc(int,1);
+   Grid_Relax_Type.upper = hypre_CTAlloc(int,1);
+   Grid_Relax_Points.lower = hypre_CTAlloc(int,2);
+   Grid_Relax_Points.upper = hypre_CTAlloc(int,2);
+   Relax_Weight.lower = hypre_CTAlloc(int,1);
+   Relax_Weight.upper = hypre_CTAlloc(int,1);
 
    Num_Grid_Sweeps.lower[0] = 0;
    Num_Grid_Sweeps.upper[0] = 4;
