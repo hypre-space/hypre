@@ -533,7 +533,9 @@ int slulsame_(char *ca, char *cb)
 #define max(a,b) ((a) >= (b) ? (a) : (b))
 #endif
 
-double dlamch_(char *cmach)
+#endif /*HYPRE_USING_HYPRE_WRAPPERS*/
+
+double sludlamch_(char *cmach)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -593,14 +595,14 @@ double dlamch_(char *cmach)
     static double rmin, rmax, t, rmach;
 /*    extern int lsame_(char *, char *);*/
     static double small, sfmin;
-    extern /* Subroutine */ int dlamc2_(int *, int *, int *, 
+    extern /* Subroutine */ int sludlamc2_(int *, int *, int *, 
 	    double *, int *, double *, int *, double *);
     static int it;
     static double rnd, eps;
 
     if (first) {
 	first = FALSE_;
-	dlamc2_(&beta, &it, &lrnd, &eps, &imin, &rmin, &imax, &rmax);
+	sludlamc2_(&beta, &it, &lrnd, &eps, &imin, &rmin, &imax, &rmax);
 	base = (double) beta;
 	t = (double) it;
 	if (lrnd) {
@@ -652,10 +654,10 @@ double dlamch_(char *cmach)
 
 /*     End of DLAMCH */
 
-} /* dlamch_ */
+} /* sludlamch_ */
 
 
-/* Subroutine */ int dlamc1_(int *beta, int *t, int *rnd, int 
+/* Subroutine */ int sludlamc1_(int *beta, int *t, int *rnd, int 
 	*ieee1)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
@@ -715,7 +717,7 @@ double dlamch_(char *cmach)
     static double a, b, c, f;
     static int lbeta;
     static double savec;
-    extern double dlamc3_(double *, double *);
+    extern double sludlamc3_(double *, double *);
     static int lieee1;
     static double t1, t2;
     static int lt;
@@ -748,9 +750,9 @@ uch
 L10:
 	if (c == one) {
 	    a *= 2;
-	    c = dlamc3_(&a, &one);
+	    c = sludlamc3_(&a, &one);
 	    d__1 = -a;
-	    c = dlamc3_(&c, &d__1);
+	    c = sludlamc3_(&c, &d__1);
 	    goto L10;
 	}
 /* +       END WHILE   
@@ -762,13 +764,13 @@ m
              fl( a + b ) .gt. a. */
 
 	b = 1.;
-	c = dlamc3_(&a, &b);
+	c = sludlamc3_(&a, &b);
 
 /* +       WHILE( C.EQ.A )LOOP */
 L20:
 	if (c == a) {
 	    b *= 2;
-	    c = dlamc3_(&a, &b);
+	    c = sludlamc3_(&a, &b);
 	    goto L20;
 	}
 /* +       END WHILE   
@@ -784,7 +786,7 @@ int
 	qtr = one / 4;
 	savec = c;
 	d__1 = -a;
-	c = dlamc3_(&c, &d__1);
+	c = sludlamc3_(&c, &d__1);
 	lbeta = (int) (c + qtr);
 
 /*        Now determine whether rounding or chopping occurs,  by addin
@@ -795,8 +797,8 @@ g a
 	b = (double) lbeta;
 	d__1 = b / 2;
 	d__2 = -b / 100;
-	f = dlamc3_(&d__1, &d__2);
-	c = dlamc3_(&f, &a);
+	f = sludlamc3_(&d__1, &d__2);
+	c = sludlamc3_(&f, &a);
 	if (c == a) {
 	    lrnd = TRUE_;
 	} else {
@@ -804,8 +806,8 @@ g a
 	}
 	d__1 = b / 2;
 	d__2 = b / 100;
-	f = dlamc3_(&d__1, &d__2);
-	c = dlamc3_(&f, &a);
+	f = sludlamc3_(&d__1, &d__2);
+	c = sludlamc3_(&f, &a);
 	if (lrnd && c == a) {
 	    lrnd = FALSE_;
 	}
@@ -821,9 +823,9 @@ nge
           A, but adding B/2 to SAVEC should change SAVEC. */
 
 	d__1 = b / 2;
-	t1 = dlamc3_(&d__1, &a);
+	t1 = sludlamc3_(&d__1, &a);
 	d__1 = b / 2;
-	t2 = dlamc3_(&d__1, &savec);
+	t2 = sludlamc3_(&d__1, &savec);
 	lieee1 = t1 == a && t2 > savec && lrnd;
 
 /*        Now find  the  mantissa, t.  It should  be the  integer part
@@ -845,9 +847,9 @@ L30:
 	if (c == one) {
 	    ++lt;
 	    a *= lbeta;
-	    c = dlamc3_(&a, &one);
+	    c = sludlamc3_(&a, &one);
 	    d__1 = -a;
-	    c = dlamc3_(&c, &d__1);
+	    c = sludlamc3_(&c, &d__1);
 	    goto L30;
 	}
 /* +       END WHILE */
@@ -862,10 +864,10 @@ L30:
 
 /*     End of DLAMC1 */
 
-} /* dlamc1_ */
+} /* sludlamc1_ */
 
 
-/* Subroutine */ int dlamc2_(int *beta, int *t, int *rnd, 
+/* Subroutine */ int sludlamc2_(int *beta, int *t, int *rnd, 
 	double *eps, int *emin, double *rmin, int *emax, 
 	double *rmax)
 {
@@ -952,12 +954,12 @@ L30:
     static double small;
     static int gpmin;
     static double third, lrmin, lrmax, sixth;
-    extern /* Subroutine */ int dlamc1_(int *, int *, int *, 
+    extern /* Subroutine */ int sludlamc1_(int *, int *, int *, 
 	    int *);
-    extern double dlamc3_(double *, double *);
+    extern double sludlamc3_(double *, double *);
     static int lieee1;
-    extern /* Subroutine */ int dlamc4_(int *, double *, int *), 
-	    dlamc5_(int *, int *, int *, int *, int *, 
+    extern /* Subroutine */ int sludlamc4_(int *, double *, int *), 
+	    sludlamc5_(int *, int *, int *, int *, int *, 
 	    double *);
     static int lt, ngnmin, ngpmin;
     static double one, two;
@@ -981,7 +983,7 @@ ure
           DLAMC1 returns the parameters  LBETA, LT, LRND and LIEEE1. 
 */
 
-	dlamc1_(&lbeta, &lt, &lrnd, &lieee1);
+	sludlamc1_(&lbeta, &lt, &lrnd, &lieee1);
 
 /*        Start to find EPS. */
 
@@ -996,11 +998,11 @@ PS. */
 	b = two / 3;
 	half = one / 2;
 	d__1 = -half;
-	sixth = dlamc3_(&b, &d__1);
-	third = dlamc3_(&sixth, &sixth);
+	sixth = sludlamc3_(&b, &d__1);
+	third = sludlamc3_(&sixth, &sixth);
 	d__1 = -half;
-	b = dlamc3_(&third, &d__1);
-	b = dlamc3_(&b, &sixth);
+	b = sludlamc3_(&third, &d__1);
+	b = sludlamc3_(&b, &sixth);
 	b = abs(b);
 	if (b < leps) {
 	    b = leps;
@@ -1018,13 +1020,13 @@ L10:
 /* Computing 2nd power */
 	    d__5 = leps;
 	    d__2 = d__4 * (d__3 * d__3) * (d__5 * d__5);
-	    c = dlamc3_(&d__1, &d__2);
+	    c = sludlamc3_(&d__1, &d__2);
 	    d__1 = -c;
-	    c = dlamc3_(&half, &d__1);
-	    b = dlamc3_(&half, &c);
+	    c = sludlamc3_(&half, &d__1);
+	    b = sludlamc3_(&half, &c);
 	    d__1 = -b;
-	    c = dlamc3_(&half, &d__1);
-	    b = dlamc3_(&half, &c);
+	    c = sludlamc3_(&half, &d__1);
+	    b = sludlamc3_(&half, &c);
 	    goto L10;
 	}
 /* +       END WHILE */
@@ -1045,16 +1047,16 @@ his
 	small = one;
 	for (i = 1; i <= 3; ++i) {
 	    d__1 = small * rbase;
-	    small = dlamc3_(&d__1, &zero);
+	    small = sludlamc3_(&d__1, &zero);
 /* L20: */
 	}
-	a = dlamc3_(&one, &small);
-	dlamc4_(&ngpmin, &one, &lbeta);
+	a = sludlamc3_(&one, &small);
+	sludlamc4_(&ngpmin, &one, &lbeta);
 	d__1 = -one;
-	dlamc4_(&ngnmin, &d__1, &lbeta);
-	dlamc4_(&gpmin, &a, &lbeta);
+	sludlamc4_(&ngnmin, &d__1, &lbeta);
+	sludlamc4_(&gpmin, &a, &lbeta);
 	d__1 = -a;
-	dlamc4_(&gnmin, &d__1, &lbeta);
+	sludlamc4_(&gnmin, &d__1, &lbeta);
 	ieee = FALSE_;
 
 	if (ngpmin == ngnmin && gpmin == gnmin) {
@@ -1140,13 +1142,13 @@ ing
 	i__1 = 1 - lemin;
 	for (i = 1; i <= 1-lemin; ++i) {
 	    d__1 = lrmin * rbase;
-	    lrmin = dlamc3_(&d__1, &zero);
+	    lrmin = sludlamc3_(&d__1, &zero);
 /* L30: */
 	}
 
 /*        Finally, call DLAMC5 to compute EMAX and RMAX. */
 
-	dlamc5_(&lbeta, &lt, &lemin, &ieee, &lemax, &lrmax);
+	sludlamc5_(&lbeta, &lt, &lemin, &ieee, &lemax, &lrmax);
     }
 
     *beta = lbeta;
@@ -1163,10 +1165,10 @@ ing
 
 /*     End of DLAMC2 */
 
-} /* dlamc2_ */
+} /* sludlamc2_ */
 
 
-double dlamc3_(double *a, double *b)
+double sludlamc3_(double *a, double *b)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -1201,10 +1203,10 @@ double dlamc3_(double *a, double *b)
 
 /*     End of DLAMC3 */
 
-} /* dlamc3_ */
+} /* sludlamc3_ */
 
 
-/* Subroutine */ int dlamc4_(int *emin, double *start, int *base)
+/* Subroutine */ int sludlamc4_(int *emin, double *start, int *base)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -1240,7 +1242,7 @@ double dlamc3_(double *a, double *b)
     static double zero, a;
     static int i;
     static double rbase, b1, b2, c1, c2, d1, d2;
-    extern double dlamc3_(double *, double *);
+    extern double sludlamc3_(double *, double *);
     static double one;
 
     a = *start;
@@ -1249,7 +1251,7 @@ double dlamc3_(double *a, double *b)
     zero = 0.;
     *emin = 1;
     d__1 = a * rbase;
-    b1 = dlamc3_(&d__1, &zero);
+    b1 = sludlamc3_(&d__1, &zero);
     c1 = a;
     c2 = a;
     d1 = a;
@@ -1261,18 +1263,18 @@ L10:
 	--(*emin);
 	a = b1;
 	d__1 = a / *base;
-	b1 = dlamc3_(&d__1, &zero);
+	b1 = sludlamc3_(&d__1, &zero);
 	d__1 = b1 * *base;
-	c1 = dlamc3_(&d__1, &zero);
+	c1 = sludlamc3_(&d__1, &zero);
 	d1 = zero;
 	for (i = 1; i <= *base; ++i) {
 	    d1 += b1;
 /* L20: */
 	}
 	d__1 = a * rbase;
-	b2 = dlamc3_(&d__1, &zero);
+	b2 = sludlamc3_(&d__1, &zero);
 	d__1 = b2 / rbase;
-	c2 = dlamc3_(&d__1, &zero);
+	c2 = sludlamc3_(&d__1, &zero);
 	d2 = zero;
 	for (i = 1; i <= *base; ++i) {
 	    d2 += b2;
@@ -1286,10 +1288,10 @@ L10:
 
 /*     End of DLAMC4 */
 
-} /* dlamc4_ */
+} /* sludlamc4_ */
 
 
-/* Subroutine */ int dlamc5_(int *beta, int *p, int *emin, 
+/* Subroutine */ int sludlamc5_(int *beta, int *p, int *emin, 
 	int *ieee, int *emax, double *rmax)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
@@ -1351,7 +1353,7 @@ L10:
     static int uexp, i;
     static double y, z;
     static int nbits;
-    extern double dlamc3_(double *, double *);
+    extern double sludlamc3_(double *, double *);
     static double recbas;
     static int exbits, expsum, try__;
 
@@ -1437,7 +1439,7 @@ it
 	if (y < 1.) {
 	    oldy = y;
 	}
-	y = dlamc3_(&y, &z);
+	y = sludlamc3_(&y, &z);
 /* L20: */
     }
     if (y >= 1.) {
@@ -1448,7 +1450,7 @@ it
 
     for (i = 1; i <= *emax; ++i) {
 	d__1 = y * *beta;
-	y = dlamc3_(&d__1, &c_b5);
+	y = sludlamc3_(&d__1, &c_b5);
 /* L30: */
     }
 
@@ -1457,7 +1459,7 @@ it
 
 /*     End of DLAMC5 */
 
-} /* dlamc5_ */
+} /* sludlamc5_ */
 
 double pow_di(double *ap, int *bp)
 {
@@ -1481,4 +1483,3 @@ double pow_di(double *ap, int *bp)
     }
     return(pow);
 }
-#endif /*HYPRE_USING_HYPRE_BLAS*/
