@@ -69,7 +69,7 @@ hypre_ParAMGInitialize()
    for (j = 0; j < 3; j++)
    {
       num_grid_sweeps[j] = 2;
-      grid_relax_type[j] = 1; 
+      grid_relax_type[j] = 0; 
       grid_relax_points[j] = hypre_CTAlloc(int,2); 
       grid_relax_points[j][0] = 1;
       grid_relax_points[j][1] = -1;
