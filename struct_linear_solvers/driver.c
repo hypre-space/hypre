@@ -49,6 +49,7 @@ main( int   argc,
    int                 p, q, r;
    int                 ilower[50][3];
    int                 iupper[50][3];
+   int                 istart[3] = {17, 0, 32};
    int                 nblocks, volume;
 
    int                 dim = 3;
@@ -224,12 +225,12 @@ main( int   argc,
       for (iy = 0; iy < by; iy++)
          for (ix = 0; ix < bx; ix++)
          {
-            ilower[ib][0] = nx*(bx*p+ix);
-            iupper[ib][0] = nx*(bx*p+ix+1) - 1;
-            ilower[ib][1] = ny*(by*q+iy);
-            iupper[ib][1] = ny*(by*q+iy+1) - 1;
-            ilower[ib][2] = nz*(bz*r+iz);
-            iupper[ib][2] = nz*(bz*r+iz+1) - 1;
+            ilower[ib][0] = istart[0]+ nx*(bx*p+ix);
+            iupper[ib][0] = istart[0]+ nx*(bx*p+ix+1) - 1;
+            ilower[ib][1] = istart[1]+ ny*(by*q+iy);
+            iupper[ib][1] = istart[1]+ ny*(by*q+iy+1) - 1;
+            ilower[ib][2] = istart[2]+ nz*(bz*r+iz);
+            iupper[ib][2] = istart[2]+ nz*(bz*r+iz+1) - 1;
             ib++;
          }
 
@@ -292,10 +293,10 @@ main( int   argc,
    {
       for (ib = 0; ib < nblocks; ib++)
       {
-         if( ilower[ib][d] == 0 )
+         if( ilower[ib][d] == istart[d] )
          {
             i = iupper[ib][d];
-            iupper[ib][d] = 0;
+            iupper[ib][d] = istart[d];
             stencil_indices[0] = d;
             HYPRE_SetStructMatrixBoxValues(A, ilower[ib], iupper[ib],
                                            1, stencil_indices, values);
@@ -305,7 +306,7 @@ main( int   argc,
    }
 
    HYPRE_AssembleStructMatrix(A);
-#if 0
+#if 1
    HYPRE_PrintStructMatrix("driver.out.A", A, 0);
 #endif
 
@@ -328,7 +329,7 @@ main( int   argc,
       HYPRE_SetStructVectorBoxValues(b, ilower[ib], iupper[ib], values);
    }
    HYPRE_AssembleStructVector(b);
-#if 0
+#if 1
    HYPRE_PrintStructVector("driver.out.b", b, 0);
 #endif
 
@@ -343,7 +344,7 @@ main( int   argc,
       HYPRE_SetStructVectorBoxValues(x, ilower[ib], iupper[ib], values);
    }
    HYPRE_AssembleStructVector(x);
-#if 0
+#if 1
    HYPRE_PrintStructVector("driver.out.x0", x, 0);
 #endif
  
@@ -458,7 +459,7 @@ main( int   argc,
     * Print the solution and other info
     *-----------------------------------------------------------*/
 
-#if 0
+#if 1
    HYPRE_PrintStructVector("driver.out.x", x, 0);
 #endif
 
