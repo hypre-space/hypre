@@ -224,9 +224,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       if (max_levels > 1)
       {
-	 hypre_BoomerAMGCreateS(A_array[level], 
-				strong_threshold, max_row_sum, 
-				num_functions, dof_func_array[level],&S);
+         if (hypre_ParAMGDataGSMG(amg_data) == 0)
+	 {
+	    hypre_BoomerAMGCreateS(A_array[level], 
+				   strong_threshold, max_row_sum, 
+				   num_functions, dof_func_array[level],&S);
+	 }
+	 else
+	 {
+	    hypre_BoomerAMGCreateSmoothDirs(amg_vdata, A_array[level],
+	       hypre_ParAMGDataNumGridSweeps(amg_data)[1], 
+	       strong_threshold, &S);
+	 }
+
          if (coarsen_type == 6)
          {
 	    hypre_BoomerAMGCoarsenFalgout(S, A_array[level], measure_type,
@@ -333,6 +343,26 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_BoomerAMGBuildInterp(A_array[level], CF_marker_array[level], S,
                  coarse_pnts_global, num_functions, dof_func_array[level], 
 		 debug_flag, trunc_factor, &P);
+
+      if (hypre_ParAMGDataGSMG(amg_data) == 1)
+      {
+          hypre_BoomerAMGBuildInterpLinear(amg_vdata, P, 
+              CF_marker_array[level]);
+      } 
+      else if (hypre_ParAMGDataGSMG(amg_data) == 2) 
+      {
+          hypre_BoomerAMGBuildInterpLinearIndirect(amg_vdata, 
+              A_array[level], CF_marker_array[level], S, P);
+      } 
+      else if (hypre_ParAMGDataGSMG(amg_data) == 3) 
+      {
+          ; /* do nothing - standard interpolation */
+      } 
+      else if (hypre_ParAMGDataGSMG(amg_data) == 4) 
+      {
+          hypre_BoomerAMGBuildInterpWithSmoothnessFactor(amg_vdata, 
+              A_array[level], CF_marker_array[level], S, P);
+      }
 
       if (debug_flag==1)
       {

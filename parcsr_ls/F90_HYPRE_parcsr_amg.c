@@ -445,3 +445,17 @@ hypre_F90_IFACE(hypre_boomeramggetfinalreltvres, HYPRE_BOOMERAMGGETFINALRELTVRES
                                 (HYPRE_Solver) *solver,
                                 (double *)      rel_resid_norm ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParAMGGetFinalRelativeRes
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetgsmg, HYPRE_BOOMERAMGSETGSMG)( long int *solver,
+                                                  int      *gsmg,
+                                                  int      *ierr            )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetGSMG(
+                                (HYPRE_Solver) *solver,
+                                (int *)         gsmg ) );
+}

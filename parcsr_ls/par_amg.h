@@ -72,6 +72,18 @@ typedef struct
    hypre_Vector      *Vtemp_local;
    double            *Vtemp_local_data;
    int                cycle_op_count;                                                   
+   /* fields used by GSMG */
+   int                 gsmg;         /* gsmg=4 indicates algebraic GSMG */
+   double             *gsi_x;
+   double             *gsi_y;
+   double             *gsi_z;
+   int                *gsi_map1;
+   int                *gsi_map2;
+   int                *p_index;
+   int                *gsi_f2c;
+   hypre_ParCSRMatrix *Sfactors;
+   char               *tgofilename;
+
    /* log info */
    int      num_iterations;
    double   rel_resid_norm;
@@ -147,6 +159,10 @@ typedef struct
 #define hypre_ParAMGDataVtempLocal(amg_data) ((amg_data)->Vtemp_local)
 #define hypre_ParAMGDataVtemplocalData(amg_data) ((amg_data)->Vtemp_local_data)
 #define hypre_ParAMGDataCycleOpCount(amg_data) ((amg_data)->cycle_op_count)
+
+/* fields used by GSMG */
+#define hypre_ParAMGDataGSMG(amg_data) ((amg_data)->gsmg)
+/* the others do not have macros yet - these fields may be removed later */
 
 /* log info data */
 #define hypre_ParAMGDataNumIterations(amg_data) ((amg_data)->num_iterations)

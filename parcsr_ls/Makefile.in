@@ -103,6 +103,7 @@ FILES =\
  par_rap.c\
  par_rap_communication.c\
  par_scaled_matnorm.c\
+ par_gsmg.c\
  pcg_par.c\
  par_schwarz.c\
  schwarz.c\

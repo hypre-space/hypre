@@ -523,3 +523,13 @@ HYPRE_BoomerAMGSetDofFunc( HYPRE_Solver  solver,
    return( hypre_BoomerAMGSetDofFunc( (void *) solver, dof_func ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetGSMG
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetGSMG( HYPRE_Solver  solver,
+                              int        gsmg  )
+{
+   return( hypre_BoomerAMGSetGSMG( (void *) solver, gsmg ) );
+}

@@ -294,6 +294,12 @@ int HYPRE_BoomerAMGSetDomainType(HYPRE_Solver solver,
 int HYPRE_BoomerAMGSetSchwarzRlxWeight(HYPRE_Solver solver,
                                 double    schwarz_rlx_weight);
 
+/*
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetGSMG(HYPRE_Solver solver,
+                                int    gsmg);
+
 /*@}*/
 
 /*--------------------------------------------------------------------------
