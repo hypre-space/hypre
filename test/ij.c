@@ -331,6 +331,11 @@ main( int   argc,
          arg_index++;
          coarsen_type      = 0;
       }    
+      else if ( strcmp(argv[arg_index], "-cljp1") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 7;
+      }    
       else if ( strcmp(argv[arg_index], "-ruge") == 0 )
       {
          arg_index++;

@@ -14,7 +14,7 @@
 
 mpirun -np 1 ./ij -cljp -rlx 0 -xisone > default.out.0
 
-mpirun -np 2 ./ij -P 1 1 2 -cljp -rlx 0 -xisone > default.out.1
+mpirun -np 2 ./ij -P 1 1 2 -cljp1 -rlx 0 -xisone > default.out.1
 
-mpirun -np 3 ./ij -P 1 1 3 -cljp -rlx 0 -xisone > default.out.2
+mpirun -np 3 ./ij -P 1 1 3 -cljp1 -rlx 0 -xisone > default.out.2
 
