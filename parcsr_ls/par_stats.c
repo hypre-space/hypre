@@ -249,7 +249,9 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
        global_nonzeros = hypre_ParCSRMatrixNumNonzeros(P_array[level]);
 
        min_weight = P_diag_data[0];
-       max_weight = P_diag_data[0];
+       max_weight = 0.0;
+       max_rowsum = 0.0;
+       min_rowsum = 0.0; 
 
        for (j = P_diag_i[0]; j < P_diag_i[1]; j++)
        {
@@ -282,17 +284,17 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
            rowsum = 0.0;
            for (i = P_diag_i[j]; i < P_diag_i[j+1]; i++)
            {
-               min_weight = min(min_weight, P_diag_data[j]);
-               if (P_diag_data[j] != 1.0)
-                     max_weight = max(max_weight, P_diag_data[j]);
+               min_weight = min(min_weight, P_diag_data[i]);
+               if (P_diag_data[i] != 1.0)
+                     max_weight = max(max_weight, P_diag_data[i]);
                rowsum += P_diag_data[i];
            }
 
            for (i = P_offd_i[j]; i < P_offd_i[j+1]; i++)
            {
-               min_weight = min(min_weight, P_offd_data[j]);
-               /* if (P_offd_data[j] != 1.0) */
-                     max_weight = max(max_weight, P_offd_data[j]);
+               min_weight = min(min_weight, P_offd_data[i]);
+               if (P_offd_data[i] != 1.0) 
+                     max_weight = max(max_weight, P_offd_data[i]);
                rowsum += P_offd_data[i];
            }
            min_rowsum = min(rowsum, min_rowsum);
@@ -321,12 +323,12 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
           
           for (j = 0; j < num_procs; j++)
           {
-              global_min_e = min(global_min_e, (int) gather_buff[my_id*4]);
-              global_max_e = max(global_max_e, (int) gather_buff[my_id*4 +1]);
-              global_min_rsum = min(global_min_rsum, gather_buff[my_id*4 +2]);
-              global_max_rsum = max(global_max_rsum, gather_buff[my_id*4 +3]);
-              global_min_wt = min(global_min_wt, gather_buff[my_id*4 +4]);
-              global_max_wt = max(global_max_wt, gather_buff[my_id*4 +3]);
+              global_min_e = min(global_min_e, (int) gather_buff[my_id*6]);
+              global_max_e = max(global_max_e, (int) gather_buff[my_id*6+1]);
+              global_min_rsum = min(global_min_rsum, gather_buff[my_id*6+2]);
+              global_max_rsum = max(global_max_rsum, gather_buff[my_id*6+3]);
+              global_min_wt = min(global_min_wt, gather_buff[my_id*6+4]);
+              global_max_wt = max(global_max_wt, gather_buff[my_id*6+5]);
           }
 
           fprintf(fp, "%2d %5d x %-5d %3d %3d",
