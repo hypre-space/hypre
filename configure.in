@@ -94,36 +94,12 @@ AC_ARG_WITH(mpi-flags,
 		to link with mpi libraries],
             MPIFLAGS=$withval)
 
-AC_ARG_WITH(MPICC,
-[  --with-MPICC=ARG        ARG is mpicc or similar MPI C compiling tool],
-	   CC=$withval
-	   if test "$CC" = "yes"
-	   then	      
-              echo "why does not this work cc=$CC"   
-           dnl *   AC_CHECK_PROGS(CC, mpicc)
-           fi)
-
-AC_ARG_WITH(MPICXX,
-[  --with-MPICXX=ARG        ARG is mpiCC or similar MPI C++ compiling tool],
-	   CC=$withval
-	   if test "$CXX" = "yes"
-	   then	      
-           echo "why does this not work"   
-           dnl *   AC_CHECK_PROGS(CXX, mpiCC)
-           fi)
-
-AC_ARG_WITH(MPIF77,
-[  --with-MPIF77=ARG        ARG mpif77 or similar MPI fortran compiling tool],
-	   CC=$withval
-	   if test "$F77" = "yes"
-	   then	       
-           echo "why dopes this not work"
-           dnl *   AC_CHECK_PROGS(F77, mpif77)
-           fi)
 
 AC_ARG_WITH(purify,
    [  --with-purify          use purify-- finds mpi for use with non MPICH compiler],
 	casc_using_purify=yes
+        casc_user_chose_compilers=yes
+	casc_user_chose_mpi=yes
 	CC=gcc
 	MPIINCLUDE="$MPIINCLUDE -I/usr/local/mpi/mpich/lib/solaris/ch_p4 -I/usr/local/mpi/mpich/include"
 	MPILIBS="$MPILIBS -lpmpich -lmpich -lsocket -lnsl -lpthread"
