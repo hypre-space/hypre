@@ -63,10 +63,11 @@ hypre_ParAMGCycle( void              *amg_vdata,
    int       num_sweep;
    int       relax_type;
    int       relax_points;
-   double    relax_weight;
+   double   *relax_weight;
 
    double    alpha;
    double    beta;
+
 #if 0
    double   *D_mat;
    double   *S_vec;
@@ -173,13 +174,12 @@ hypre_ParAMGCycle( void              *amg_vdata,
             cycle_op_count += num_coeffs[level]; 
          }
 
-
          Solve_err_flag = hypre_ParAMGRelax(A_array[level], 
                                             F_array[level],
                                             CF_marker_array[level],
                                             relax_type,
                                             relax_points,
-                                            relax_weight,
+                                            relax_weight[level],
                                             U_array[level],
                                             Vtemp);
 
