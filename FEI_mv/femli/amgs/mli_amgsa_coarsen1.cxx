@@ -26,6 +26,7 @@
 #include "amgs/mli_method_amgsa.h"
 #include "util/mli_utils.h"
 #include "solver/mli_solver.h"
+#include "solver/mli_solver_sgs.h"
  
 // *********************************************************************
 // local defines
@@ -278,27 +279,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
     *-----------------------------------------------------------------*/
 
    if (currLevel_ == 0 && numSmoothVec_ != 0)
-   {
-       printf("Setting up smooth vectors\n");
-
-       /* warn if nullspaceVec_ is not NULL */
-       if (nullspaceVec_ != NULL)
-       {
-           printf("Setting up smooth vectors; zeroing nullspaceVec_\n");
-           delete [] nullspaceVec_;
-           nullspaceVec_ = NULL;
-       }
-
-       /* generate smooth vectors */
-
-       /* extract data and put in nullspaceVec_ */
-       nullspaceVec_ = new double[PLocalNRows*numSmoothVec_];
-       for (i=0; i<PLocalNRows*numSmoothVec_; i++)
-           nullspaceVec_[i] = 2.0*((double) random() / RAND_MAX) - 1.0;
-
-       /* do not later retrieve from P_vecs structure */
-       /* it will not contain all the vectors */
-   }
+      formSmoothVec(mli_Amat);
 
    /*-----------------------------------------------------------------
     * create a compact form for the null space vectors 
@@ -523,6 +504,14 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
       workArray = new double[5*(maxAggSize + numSmoothVec_)];
       newNull = new double[naggr*nullspaceDim_*numSmoothVec_]; 
 
+      for (i=0; i<naggr; i++)
+      {
+          printf("aggregate %d\n", i);
+          aggSize = aggCntArray[i];
+          for (k=0; k<aggSize; k++)
+              printf("%d\n", aggIndArray[i][k]+1);
+      }
+
       /* ------ perform SVD on each aggregate ------ */
 
       for ( i = 0; i < naggr; i++ ) 
@@ -547,6 +536,11 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
                    nullspaceVec_[PLocalNRows*k+aggIndArray[i][j]];
          }
 
+         // look at uArray
+         //for (k=0; k<numSmoothVec_; k++)
+         //    for (j=0; j<aggSize; j++ )
+         //        printf("a(%d,%d) = %e\n", j+1, k+1, uArray[aggSize*k+j]);
+
          /* ------ call SVD function ------ */
 
          info = MLI_Utils_SVD(uArray, sArray, vtArray, workArray, 
@@ -558,6 +552,11 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
                    mypid);
             printf("  aggregate %d, size = %d, info = %d\n",i,aggSize,info);
          }
+
+         // look at uArray
+         //for (k=0; k<3; k++)
+         //    for (j=0; j<aggSize; j++ )
+         //        printf("u(%d,%d) = %e\n", j+1, k+1, uArray[aggSize*k+j]);
 
          /* ------ after SVD, save the next null space ------ */
 
@@ -625,6 +624,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
                {
                   colInd[nzcnt] = P_cols[irow] + j;
                   colVal[nzcnt++] = P_vecs[j][irow];
+                  printf("p(%d,%d) = %e\n", irow+1, P_cols[irow] + j+1, P_vecs[j][irow]);
                }
             }
             rowNum = PStartRow + irow;
@@ -672,6 +672,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
                {
                   colInd[nzcnt] = P_cols[irow] + j;
                   colVal[nzcnt++] = P_vecs[j][irow];
+                  printf("p(%d,%d) = %e\n", irow+1, P_cols[irow] + j+1, P_vecs[j][irow]);
                }
             }
             rowNum = PStartRow + irow;
@@ -1585,3 +1586,93 @@ int MLI_Method_AMGSA::formGlobalGraph( hypre_ParCSRMatrix *Amat,
 #undef MLI_METHOD_AMGSA_PENDING
 #undef MLI_METHOD_AMGSA_NOTSELECTED
 
+int MLI_Method_AMGSA::formSmoothVec(MLI_Matrix *mli_Amat)
+{
+   hypre_ParCSRMatrix     *Amat;
+   MPI_Comm  comm;
+   int mypid, nprocs;
+   int *partition;
+   hypre_ParVector    *trial_sol, *zero_rhs;
+   MLI_Vector *mli_rhs, *mli_sol;
+   hypre_Vector       *sol_local;
+   double *sol_data;
+   int local_nrows;
+
+   MLI_Solver_SGS *smoother;
+   double *nsptr;
+   int i, j;
+
+   printf("Setting up smooth vectors\n");
+   /* warn if nullspaceVec_ is not NULL */
+   if (nullspaceVec_ != NULL)
+   {
+       printf("formSmoothVec: zeroing nullspaceVec_\n");
+       delete [] nullspaceVec_;
+       nullspaceVec_ = NULL;
+   }
+
+   Amat = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
+   comm = hypre_ParCSRMatrixComm(Amat);
+   MPI_Comm_rank(comm,&mypid);
+   MPI_Comm_size(comm,&nprocs);
+
+   /*-----------------------------------------------------------------
+    * create MLI_Vectors
+    *-----------------------------------------------------------------*/
+
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) Amat,
+                                        &partition);
+   zero_rhs = hypre_ParVectorCreate(comm, partition[nprocs], partition);
+   hypre_ParVectorInitialize( zero_rhs );
+   hypre_ParVectorSetConstantValues( zero_rhs, 0.0 );
+   mli_rhs = new MLI_Vector( (void*) zero_rhs,  "HYPRE_ParVector", NULL );
+
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) Amat,
+                                        &partition);
+   trial_sol = hypre_ParVectorCreate(comm, partition[nprocs], partition);
+   hypre_ParVectorInitialize( trial_sol );
+   mli_sol = new MLI_Vector( (void*) trial_sol, "HYPRE_ParVector", NULL );
+
+   local_nrows = partition[mypid+1] - partition[mypid];
+   sol_local = hypre_ParVectorLocalVector(trial_sol);
+   sol_data  = hypre_VectorData(sol_local);
+
+   /* allocate space for smooth vectors */
+   nullspaceVec_ = new double[local_nrows*numSmoothVec_];
+   nsptr = nullspaceVec_;
+
+   smoother = new MLI_Solver_SGS("SGS");
+   smoother->setParams(numSmoothVecSteps_, NULL);
+   smoother->setup(mli_Amat);
+
+   for (i=0; i<numSmoothVec_; i++)
+   {
+       /* put in random numbers */
+       // hypre_ParVectorSetRandomValues( trial_sol, /*seed*/ i );
+       // 0 is a lousy seed
+
+       for (j=0; j<local_nrows; j++)
+           sol_data[j] = 2.*((double)rand() / (double)RAND_MAX)-1.;
+
+#if 0
+       printf("in = [\n");
+       for (j=0; j<local_nrows; j++)
+           printf("%f\n", sol_data[j]);
+       printf("];\n");
+#endif
+
+       /* call smoother */
+       smoother->solve(mli_rhs, mli_sol);
+
+       /* extract solution */
+       for (j=0; j<local_nrows; j++)
+           *nsptr++ = sol_data[j];
+
+       for (j=0; j<local_nrows; j++)
+           printf("S(%d,%d)=%f\n", j+1,i+1,sol_data[j]);
+   }
+
+   delete smoother;
+
+   return 0;
+}

@@ -56,7 +56,8 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    nullspaceDim_  = 1;
    nullspaceVec_  = NULL;
    nullspaceLen_  = 0;
-   numSmoothVec_  = 0;              /* added by Edmond */
+   numSmoothVec_  = 0;              /* smooth vectors instead of null vectors */
+   numSmoothVecSteps_ = 0;
    Pweight_       = 0.0;
    dropTolForP_   = 0.0;            /* tolerance to sparsify P*/
    saCounts_      = new int[40];    /* number of aggregates   */
@@ -233,6 +234,11 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
    {
       sscanf(in_name,"%s %d", param1, &size);
       return ( setSmoothVec( size ) );
+   }
+   else if ( !strcmp(param1, "setSmoothVecSteps" ))
+   {
+      sscanf(in_name,"%s %d", param1, &size);
+      return ( setSmoothVecSteps( size ) );
    }
    else if ( !strcmp(param1, "setPweight" ))
    {
@@ -1011,6 +1017,16 @@ int MLI_Method_AMGSA::setSmoothVec( int num )
 }
 
 /* ********************************************************************* *
+ * set number of steps for generating smooth vectors
+ * --------------------------------------------------------------------- */
+
+int MLI_Method_AMGSA::setSmoothVecSteps( int num )
+{
+   if ( num >= 0 ) numSmoothVecSteps_ = num;
+   return 0;
+}
+
+/* ********************************************************************* *
  * set damping factor for smoother prolongator
  * --------------------------------------------------------------------- */
 
@@ -1333,6 +1349,7 @@ int MLI_Method_AMGSA::print()
       printf("\t*** nodal degree of freedom = %d\n", nodeDofs_);
       printf("\t*** null space dimension    = %d\n", nullspaceDim_);
       printf("\t*** Smooth vectors          = %d\n", numSmoothVec_);
+      printf("\t*** Smooth vector steps     = %d\n", numSmoothVecSteps_);
       printf("\t*** strength threshold      = %e\n", threshold_);
       printf("\t*** Prolongator factor      = %e\n", Pweight_);
       printf("\t*** drop tolerance for P    = %e\n", dropTolForP_);
@@ -1505,6 +1522,7 @@ int MLI_Method_AMGSA::copy( MLI_Method *new_obj )
       new_amgsa->setNullSpace(nodeDofs_,nullspaceDim_,nullspaceVec_,
                               nullspaceLen_);
       new_amgsa->setSmoothVec( numSmoothVec_ );
+      new_amgsa->setSmoothVecSteps( numSmoothVecSteps_ );
       new_amgsa->setStrengthThreshold( threshold_ );
    }
    else
