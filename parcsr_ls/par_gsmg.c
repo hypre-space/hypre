@@ -208,6 +208,7 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
    double temp;
    double *p;
    double *p_offd;
+   double *p_ptr;
    double *buf_data;
    double nm;
    double mx = 0., my = 1.e+10;
@@ -231,6 +232,7 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
    buf_data = hypre_CTAlloc(double,hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                 num_sends));
    p_offd = hypre_CTAlloc(double, nsamples*num_cols_offd);
+   p_ptr = p_offd;
 
    p = samples;
    for (k = 0; k < nsamples; k++)
@@ -341,6 +343,7 @@ mx = hypre_max(mx,temp);
 
            temp = 0.;
            p = samples;
+           p_offd = p_ptr;
            for (k=0; k<nsamples; k++)
            {
                temp = temp + ABS(p[i] - p_offd[ii]);
@@ -363,7 +366,7 @@ mx = hypre_max(mx,temp);
    }
 printf("MIN, MAX: %f %f\n", my, mx);
 
-   hypre_TFree(p_offd);
+   hypre_TFree(p_ptr);
 
    return 0;
 }
@@ -671,8 +674,10 @@ hypre_BoomerAMGCreateSmoothDirs(void *datay,
    hypre_ParAMGData   *amg_data = datay;
 
    MPI_Comm            comm            = hypre_ParCSRMatrixComm(A);
+   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
 
    hypre_ParCSRMatrix *S;
+   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
 
    hypre_ParVector *Zero;
    hypre_ParVector *Temp;
@@ -680,6 +685,7 @@ hypre_BoomerAMGCreateSmoothDirs(void *datay,
 
    int    i;
    int    n = hypre_ParCSRMatrixGlobalNumRows(A);
+   int    n_local = hypre_CSRMatrixNumRows(A_diag);
    int   *starts = hypre_ParCSRMatrixRowStarts(A);
 
    int sample;
@@ -705,6 +711,12 @@ hypre_BoomerAMGCreateSmoothDirs(void *datay,
             printf("%d %d %f\n", i+1, A_diag_j[j]+1, A_diag_data[j]);
 #endif
 
+   if (!comm_pkg)
+   {
+        hypre_MatvecCommPkgCreate(A);
+        comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   }
+
 printf("Creating smooth dirs, %d sweeps, %d samples\n", num_sweeps, nsamples);
 
 /**** change ****/
@@ -718,7 +730,7 @@ printf("Creating smooth dirs, %d sweeps, %d samples\n", num_sweeps, nsamples);
    rlx_type = hypre_ParAMGDataGridRelaxType(amg_data)[0];
 /**** change ****/
 
-   if (amg_data->gsi_x == NULL)
+/*   if (amg_data->gsi_x == NULL)
    {
        amg_data->gsi_f2c = hypre_CTAlloc(int, n);
 
@@ -737,7 +749,7 @@ printf("Creating smooth dirs, %d sweeps, %d samples\n", num_sweeps, nsamples);
 
        if (amg_data->gsmg == 1 || amg_data->gsmg == 2)
            read_tgo(datay, amg_data->gsi_x, amg_data->gsi_y, amg_data->gsi_z);
-   }
+   } */
 
    /* generate par vectors */
 
@@ -745,14 +757,14 @@ printf("Creating smooth dirs, %d sweeps, %d samples\n", num_sweeps, nsamples);
    hypre_ParVectorSetPartitioningOwner(Zero,0);
    hypre_ParVectorInitialize(Zero);
    datax = hypre_VectorData(hypre_ParVectorLocalVector(Zero));
-   for (i=0; i<n; i++)
+   for (i=0; i<n_local; i++)
        datax[i] = 0.;
 
    Temp = hypre_ParVectorCreate(comm, n, starts);
    hypre_ParVectorSetPartitioningOwner(Temp,0);
    hypre_ParVectorInitialize(Temp);
    datax = hypre_VectorData(hypre_ParVectorLocalVector(Temp));
-   for (i=0; i<n; i++)
+   for (i=0; i<n_local; i++)
        datax[i] = 0.;
 
    U = hypre_ParVectorCreate(comm, n, starts);
@@ -761,13 +773,13 @@ printf("Creating smooth dirs, %d sweeps, %d samples\n", num_sweeps, nsamples);
    datax = hypre_VectorData(hypre_ParVectorLocalVector(U));
 
    /* allocate space for the vectors */
-   bp = hypre_CTAlloc(double, nsamples*n);
+   bp = hypre_CTAlloc(double, nsamples*n_local);
    p = bp;
 
    /* generate random vectors */
    for (sample=0; sample<nsamples; sample++)
    {
-       for (i=0; i<n; i++)
+       for (i=0; i<n_local; i++)
            /*datax[i] = hypre_Rand() -.5;*//* or no sub */
            datax[i] = (rand()/(double)RAND_MAX) - .5;
            /*datax[i] = 2.*(rand()/(double)RAND_MAX) - 1.;*/
@@ -795,7 +807,7 @@ printf("Creating smooth dirs, %d sweeps, %d samples\n", num_sweeps, nsamples);
        }
 
        /* copy out the solution */
-       for (i=0; i<n; i++)
+       for (i=0; i<n_local; i++)
            *p++ = datax[i];
    }
 
