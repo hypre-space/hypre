@@ -6,68 +6,110 @@
  *
  * $Revision$
  *********************************************************************EHEADER*/
+
+#include "headers.h"
+
 /******************************************************************************
  *
  * Routine for driving the setup phase of AMG
  *
  ******************************************************************************/
 
-int hypre_AMGSetup(hypre_AMGData *amg_data)
+
+int hypre_AMGSetup(hypre_AMGData *amg_data,
+                   hypre_CSRMatrix *A)
 
 {
 
-   /*--------------------------------------------------------------------------
-    * do some callocs, declare some variables, get some stuff out of the 
-    * amg_data data structure, etc.
-    *--------------------------------------------------------------------------/
+   /* Data Structure variables */
 
-   return(0);
-#if 0
+   hypre_CSRMatrix **A_array;
+   hypre_CSRMatrix **P_array;
+   int             **CF_marker_array;   
+   double            strong_threshold;
 
+   int      num_variables;
+   int      max_levels; 
+   int      amg_ioutdat;
+ 
+   /* Local variables */
+   int              *CF_marker;
+   hypre_CSRMatrix  *S;
+   hypre_CSRMatrix  *P;
+   hypre_CSRMatrix  *A_H;
+
+
+   int       level;
+   int       coarse_size;
+   int       fine_size;
+   int       not_finished_coarsening = 1;
+
+   int       Setup_err_flag;
+
+   int       coarse_threshold = 9;
+
+   max_levels = hypre_AMGDataMaxLevels(amg_data);
+   amg_ioutdat = hypre_AMGDataIOutDat(amg_data);
+   
+   A_array = hypre_CTAlloc(hypre_CSRMatrix*, max_levels);
+   P_array = hypre_CTAlloc(hypre_CSRMatrix*, max_levels-1);
+   CF_marker_array = hypre_CTAlloc(int*, max_levels-1);
+
+   A_array[0] = A;
+
+   /*----------------------------------------------------------
+    * Initialize hypre_AMGData
+    *----------------------------------------------------------*/
+
+   num_variables = hypre_CSRMatrixNumRows(A);
+
+
+   hypre_AMGDataNumVariables(amg_data) = num_variables;
+
+   not_finished_coarsening = 1;
    level = 0;
-   A[level] = hypre_AMGDataMatrixA(amg_data);
-   strong_threshold = hypre_AMGDataThreshold(amg_data);
+  
+   strong_threshold = hypre_AMGDataStrongThreshold(amg_data);
+
+   /*-----------------------------------------------------
+    *  Enter Coarsening Loop
+    *-----------------------------------------------------*/
 
    while (not_finished_coarsening)
    {
-         CF_marker = hypre_CTAlloc(int, hypre_CSRMatrixSize(A[level]));
+         fine_size = hypre_CSRMatrixNumRows(A_array[level]);
 
-         hypre_AMGCoarsen(A[level], CF_marker[level], strong_threshold);
+         /*-------------------------------------------------------------
+          * Select coarse-grid points on 'level' : returns CF_marker
+          * for the level.  Returns strength matrix, S  
+          *--------------------------------------------------------------*/
+
+         hypre_AMGCoarsen(A_array[level], strong_threshold, &CF_marker, &S); 
+         CF_marker_array[level] = CF_marker;
       
-              /*-------------------------------------------------------------
-               *  here we feed in the matrix A of the current level, probably
-               *  A[level] where *A is a pointer to an array of hypre_CSRMatrx,
-               *  and we get back CF_pointer.  This routine calls
-               *  
-               *  hypre_AMGIndepSet(ST_data, ST_i, ST_j, num_variables,
-               *                    measure_array, IS_array, IS_size) 
-               *          
-               *    I am working on hypre_AMGCoarsen and the routines it calls
-               *--------------------------------------------------------------*/
-           
-         hypre_AMGBuildInterp(amg_data, A[level], CF_marker[level], P[level]);
-            
-              /*-------------------------------------------------------------
-               * this routine builds the prolongation operator.  It will
-               * return a hypre_CSRMatrix, P[level].
-               *
-               * Jim has volunteered to construct this next week
-               *-------------------------------------------------------------*/
-      
+         /*-------------------------------------------------------------
+          * Build prolongation matrix, P, and place in P_array[level] 
+          *--------------------------------------------------------------*/
 
-         hypre_AMGRap(amg_data, A[level], P[level], A[level+1]);
 
-              /*-------------------------------------------------------------
-               * this routine builds the  coarse_grid operator, A[level+1]
-               * Jim has this essentially coded
-               *-------------------------------------------------------------*/
-      
-         not_finished_coarsening = hypre_AMGShould_We_Stop_Coarsening(amg_data);
+         hypre_AMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
+         P_array[level] = P; 
+   
+         /*-------------------------------------------------------------
+          * Build coarse-grid operator, A_array[level+1] by R*A*P
+          *--------------------------------------------------------------*/
 
-              /*-------------------------------------------------------------
-               * the purpose of this routine (or test) is obvious, but we 
-               * haven't yet discussed what the test should be
-               *-------------------------------------------------------------*/
+         hypre_AMGBuildCoarseOperator(P_array[level], A_array[level] , 
+                                     P_array[level], &A_H);
+
+         ++level;
+         A_array[level] = A_H;
+         coarse_size = hypre_CSRMatrixNumRows(A_array[level]); 
+
+         if (level >= max_levels || 
+                     coarse_size == fine_size || 
+                              coarse_size <= coarse_threshold)
+                                     not_finished_coarsening = 0;
    } 
    
    /*-----------------------------------------------------------------------
@@ -75,8 +117,16 @@ int hypre_AMGSetup(hypre_AMGData *amg_data)
     * for levels 1 through coarsest, into amg_data data structure
     *-----------------------------------------------------------------------*/
 
-#endif
+   hypre_AMGDataNumLevels(amg_data) = level+1;
+   hypre_AMGDataCFMarkerArray(amg_data) = CF_marker_array;
+   hypre_AMGDataAArray(amg_data) = A_array;
+   hypre_AMGDataPArray(amg_data) = P_array;
 
+   if (amg_ioutdat == 1 || amg_ioutdat == 3)
+                     hypre_AMGSetupStats(amg_data);
+
+   Setup_err_flag = 0;
+   return(Setup_err_flag);
 }  
 
 
