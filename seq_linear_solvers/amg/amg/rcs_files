@@ -36,6 +36,7 @@ opdfn.f
 protos
 protos.h
 random.c
+relaxC.c
 relax.f
 resint.f
 rstdf0.f
