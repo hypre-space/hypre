@@ -918,8 +918,9 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 #ifdef ESSL
 #else
   char uplo = 'L';
-  int cnt;
 #endif
+
+  int cnt;
 
   /* --------------------------------------------------------------------- */
 
