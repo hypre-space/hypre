@@ -18,11 +18,14 @@ main( int   argc,
    int		local_size;
    int		first_index, last_index;	
    int 		i;
+   int 		*partning;
    double	prod;
    double 	*data, *data2;
+   hypre_Vector *vector; 
    hypre_Vector *local_vector; 
    hypre_Vector *local_vector2;
    char		*filename;
+   char		file_name[80];
  
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
@@ -52,10 +55,22 @@ main( int   argc,
    for (i=0; i < global_size; i++)
 	data2[i] = i+1;
 
-   vector2 = hypre_VectorToParVector(MPI_COMM_WORLD,local_vector2,NULL);
+/*   partning = hypre_CTAlloc(int,4);
+   partning[0] = 0;
+   partning[1] = 10;
+   partning[2] = 10;
+   partning[3] = 20;
+*/
+   partning = NULL;
+   vector2 = hypre_VectorToParVector(MPI_COMM_WORLD,local_vector2,&partning);
 
    hypre_PrintParVector(vector2, "Convert");
 
+   vector = hypre_ParVectorToVectorAll(MPI_COMM_WORLD,vector2,partning);
+
+   sprintf(file_name,"vector.%d",my_id);
+   if (vector) hypre_PrintVector(vector, file_name);
+   
    /*-----------------------------------------------------------
     * Copy the vector into tmp_vector
     *-----------------------------------------------------------*/
@@ -101,6 +116,7 @@ main( int   argc,
    hypre_DestroyParVector(vector2); 
    hypre_DestroyParVector(tmp_vector);
    hypre_DestroyVector(local_vector2); 
+   if (vector) hypre_DestroyVector(vector); 
 
    /* Finalize MPI */
    MPI_Finalize();
