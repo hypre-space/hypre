@@ -1017,8 +1017,6 @@ int HYPRE_LSI_MLIFEDataInit( void *object, Lookup *lookup )
 
    if ( lookup == NULL ) return 1;
    if ( hypre_fedata == NULL ) return 1;
-   fedata = (MLI_FEData *) hypre_fedata->fedata_;
-   if ( fedata == NULL ) return 1;
    MPI_Comm_rank( hypre_fedata->comm_, &mypid);
    if ( mypid == 0 )
       printf("%4d : HYPRE_LSI_MLIFEDataInit called.\n", mypid);
@@ -1031,6 +1029,7 @@ int HYPRE_LSI_MLIFEDataInit( void *object, Lookup *lookup )
       delete hypre_fedata->fedata_;
    hypre_fedata->fedata_    = new MLI_FEData(hypre_fedata->comm_);
    hypre_fedata->fedataOwn_ = 1;
+   fedata = (MLI_FEData *) hypre_fedata->fedata_;
 
    /* -------------------------------------------------------- */ 
    /* get and load field and element block information         */
