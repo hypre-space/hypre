@@ -71,7 +71,7 @@ typedef struct
 		  		      
 #define hypre_AMGDataMaxLevels(amg_data) ((amg_data)->max_levels)
 #define hypre_AMGDataStrongThreshold(amg_data) ((amg_data)->strong_threshold)
-#define hypre_AMGDataCoarsenType(amg_data) ((amg_data)->interp_type)
+#define hypre_AMGDataCoarsenType(amg_data) ((amg_data)->coarsen_type)
 #define hypre_AMGDataInterpType(amg_data) ((amg_data)->interp_type)
 
 /* solve params */
