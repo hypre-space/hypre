@@ -184,9 +184,10 @@ usage () {
 
 mail_summary () {
   echo "Autotest mailing error summary"
-  CTOTCNT=0; ETOTCNT=0
-  CLOGCNT=0; ELOGCNT=0
-  CERRCNT=0; EERRCNT=0; TOTCNT=0
+  CTOTCNT=0
+  CLOGCNT=0
+  CERRCNT=0
+  AutotestFailureCount=0
   CLIST=""; ELIST=""
   DWRNCNT=0; DERRCNT=0
   cd $HYPRE_AUTOTEST_DIR
@@ -211,7 +212,7 @@ mail_summary () {
            docs all++ all77 beta++ beta77
   do
     printf "%-15s: " $ConfOpt >> $SUMFILE
-    COLFLG=0; COLCNT=0;
+    TestCaseSuccessCount=0; TestCaseFailedCount=0;
     DWRNCNT=0; DERRCNT=0;
     for MakeOpt in ""  all beta configure IJ fei++ \
            fei nofei sstruct struct
@@ -225,9 +226,9 @@ mail_summary () {
           CTOTCNT=`expr $CTOTCNT + 1`
           EFILE=`echo $i|sed -e 's/log$//'`err
           if [ -s "${EFILE}" ] ; then
-            TOTCNT=`expr $TOTCNT + 1`
+            AutotestFailureCount=`expr $AutotestFailureCount + 1`
             CERRCNT=`expr $CERRCNT + 1`
-            COLCNT=`expr $COLCNT + 1`
+            TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
             CLIST="${CLIST}${EFILE}\n"
             DWRNNUM=0; DERRNUM=0;
             DWRNNUM=`grep -i warning ${EFILE}|wc -l`
@@ -236,14 +237,14 @@ mail_summary () {
             DERRCNT=`expr $DERRCNT + $DERRNUM`
           else
             CLOGCNT=`expr $CLOGCNT + 1`
-            COLFLG=`expr $COLFLG + 1`
+            TestCaseSuccessCount=`expr $TestCaseSuccessCount + 1`
           fi
         fi
       done
     done
-    if [ "$COLCNT" != "0" ] ; then
+    if [ "$TestCaseFailedCount" != "0" ] ; then
       printf "Failed:    %2d   :   %2d\n" $DWRNCNT $DERRCNT >> $SUMFILE
-    elif [ "$COLFLG" != "0" ] ; then
+    elif [ "$TestCaseSuccessCount" != "0" ] ; then
       printf "Passed\n" >> $SUMFILE
     else
       printf "N/A\n" >> $SUMFILE
@@ -264,44 +265,81 @@ mail_summary () {
   if [ "$HYPRE_BATCH_MODE" = "yes" ] ; then
     printf "Jobs Scheduling via DPCS\n" >> $SUMFILE
   fi
+    TotalTestCount=0
+    TotalSuccessCount=0
+    TotalFailureCount=0
     for i in TEST_fei TEST_ij TEST_sstruct TEST_struct ; do
       printf "%-15s: " ${i#*TEST_} >> $SUMFILE
-      COLFLG=0; COLCNT=0;
+      TestCaseSuccessCount=0; TestCaseFailedCount=0; TestCaseFailedFlag=0
       for j in ${SRC}/test/${i}/*.sh ; do
-        ETOTCNT=`expr $ETOTCNT + 1`
-        EFILE=${j%%.sh}.err
-        if [ -s "${EFILE}" ] ; then
-          TOTCNT=`expr $TOTCNT + 1`
-          EERRCNT=`expr $EERRCNT + 1`
-          COLCNT=`expr $COLCNT + 1`
-          ELIST="${ELIST}${EFILE}\n"
-        else
-          ELOGCNT=`expr $ELOGCNT + 1`
-          COLFLG=`expr $COLFLG + 1`
+        TotalTestCount=`expr $TotalTestCount + 1`
+        TestCaseFailedFlag=0
+        ErrFile=`echo $j | sed -e 's/\.sh$/.err/'`
+        BatchFile=`echo $j | sed -e 's/\.sh$/.batch/'`
+# look for non-zero length subtest, TEST_*/test.err.* files
+        for k in ${ErrFile}.*; do
+          if [ -s "${k}" ] ; then
+            AutotestFailureCount=`expr $AutotestFailureCount + 1`
+            TotalFailureCount=`expr $TotalFailureCount + 1`
+            TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
+            ELIST="${ELIST}${k}\n"
+            TestCaseFailedFlag=1
+            break
+          fi
+        done
+        if [ "TestCaseFailedFlag" = "0" ] ; then
+# look for all of the TEST_*/test.batch.* files
+          for k in ${BatchFile}.*; do
+            OutFile=`echo $k | sed -e 's/\.batch\./.out./'`
+# look for non-zero length subtest, TEST_*/test.out.* files
+            if [ ! -e "${OutFile}" ] ; then
+              AutotestFailureCount=`expr $AutotestFailureCount + 1`
+              TotalFailureCount=`expr $TotalFailureCount + 1`
+              TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
+              ELIST="${ELIST}${k}\n"
+              TestCaseFailedFlag=1
+              break
+            fi
+          done
+        fi
+        if [ "TestCaseFailedFlag" = "0" ] ; then
+# look for a TEST_*/test.err files
+          if [ -s "${ErrFile}" ] ; then
+            AutotestFailureCount=`expr $AutotestFailureCount + 1`
+            TotalFailureCount=`expr $TotalFailureCount + 1`
+            TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
+            ELIST="${ELIST}${ErrFile}\n"
+            TestCaseFailedFlag=1
+          fi
+        fi
+        if [ "TestCaseFailedFlag" = "0" ] ; then
+          TotalSuccessCount=`expr $TotalSuccessCount + 1`
+          TestCaseSuccessCount=`expr $TestCaseSuccessCount + 1`
         fi
       done
-      if [ "$COLCNT" != "0" ] ; then
+      if [ "$TestCaseFailedCount" != "0" ] ; then
         printf "Failed\n" >> $SUMFILE
-      elif [ "$COLFLG" != "0" ] ; then
-        printf "Passed\n" >> $SUMFILE
+        printf "Failed:    %2d   :   %2d\n" $TestCaseSuccessCount $TestCaseFailedCount >> $SUMFILE
+      elif [ "$TestCaseSuccessCount" != "0" ] ; then
+        printf "Passed:    %2d\n" $TestCaseSuccessCount >> $SUMFILE
       else
         printf "N/A\n" >> $SUMFILE
       fi
     done
     printf "\n" >> $SUMFILE
-    printf "%2d test failed\n" $EERRCNT >> $SUMFILE
-    printf "%2d test succeeded\n" $ELOGCNT >> $SUMFILE
-    printf "%2d test total\n" $ETOTCNT >> $SUMFILE
+    printf "%2d test failed\n" $TotalFailureCount >> $SUMFILE
+    printf "%2d test succeeded\n" $TotalSuccessCount >> $SUMFILE
+    printf "%2d test total\n" $TotalTestCount >> $SUMFILE
     if [ "$ELIST" != "" ] ; then
       printf "non zero error log file(s):\n" >> $SUMFILE
       printf "${ELIST}" >> $SUMFILE
     fi
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
   MAIL_HEADER="`uname -n` `uname -s`:`uname -r`.`uname -v`"
-  if [ "$TOTCNT" = "0" ] ; then
+  if [ "$AutotestFailureCount" = "0" ] ; then
     SUBJECT="Autotest NO Errors ($MAIL_HEADER)"
   else
-    SUBJECT="Autotest $TOTCNT Errors ($MAIL_HEADER)"
+    SUBJECT="Autotest $AutotestFailureCount Errors ($MAIL_HEADER)"
   fi
   if [ "$DEBUG_MODE" = "yes" ] ; then
     ${HYPRE_MAIL} -s "$SUBJECT" $USER < $SUMFILE 
