@@ -180,30 +180,30 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
    sscanf(in_name, "%s", param1);
    if ( outputLevel_ >= 1 && mypid == 0 ) 
       printf("\tMLI_Method_AMGSA::setParam = %s\n", in_name);
-   if ( !strcasecmp(param1, "setOutputLevel" ))
+   if ( !strcmp(param1, "setOutputLevel" ))
    {
       sscanf(in_name,"%s %d", param1, &level);
       return ( setOutputLevel( level ) );
    }
-   else if ( !strcasecmp(param1, "setNumLevels" ))
+   else if ( !strcmp(param1, "setNumLevels" ))
    {
       sscanf(in_name,"%s %d", param1, &level);
       return ( setNumLevels( level ) );
    }
-   else if ( !strcasecmp(param1, "useSAMGe" ))
+   else if ( !strcmp(param1, "useSAMGe" ))
    {
       useSAMGeFlag_ = 1;
       return 0;
    }
-   else if ( !strcasecmp(param1, "useSAMGDD" ))
+   else if ( !strcmp(param1, "useSAMGDD" ))
    {
       useSAMGDDFlag_ = 1;
       return 0;
    }
-   else if ( !strcasecmp(param1, "setCoarsenScheme" ))
+   else if ( !strcmp(param1, "setCoarsenScheme" ))
    {
       sscanf(in_name,"%s %s", param1, param2);
-      if ( !strcasecmp(param2, "local" ) )
+      if ( !strcmp(param2, "local" ) )
          return ( setCoarsenScheme( MLI_METHOD_AMGSA_LOCAL ) );
       else      
       {
@@ -212,36 +212,36 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
          return 1;
       }
    }
-   else if ( !strcasecmp(param1, "setMinCoarseSize" ))
+   else if ( !strcmp(param1, "setMinCoarseSize" ))
    {
       sscanf(in_name,"%s %d", param1, &size);
       return ( setMinCoarseSize( size ) );
    }
-   else if ( !strcasecmp(param1, "setMinAggrSize" ))
+   else if ( !strcmp(param1, "setMinAggrSize" ))
    {
       sscanf(in_name,"%s %d", param1, &size);
       return ( setMinAggregateSize( size ) );
    }
-   else if ( !strcasecmp(param1, "setStrengthThreshold" ))
+   else if ( !strcmp(param1, "setStrengthThreshold" ))
    {
       sscanf(in_name,"%s %lg", param1, &thresh);
       return ( setStrengthThreshold( thresh ) );
    }
-   else if ( !strcasecmp(param1, "setPweight" ))
+   else if ( !strcmp(param1, "setPweight" ))
    {
       sscanf(in_name,"%s %lg", param1, &pweight);
       return ( setPweight( pweight ) );
    }
-   else if ( !strcasecmp(param1, "setCalcSpectralNorm" ))
+   else if ( !strcmp(param1, "setCalcSpectralNorm" ))
    {
       return ( setCalcSpectralNorm() );
    }
-   else if ( !strcasecmp(param1, "useNonsymmetric" ))
+   else if ( !strcmp(param1, "useNonsymmetric" ))
    {
       symmetric_ = 0;
       return ( 0 );
    }
-   else if ( !strcasecmp(param1, "setAggregateInfo" ))
+   else if ( !strcmp(param1, "setAggregateInfo" ))
    {
       if ( argc != 4 )
       {
@@ -259,12 +259,12 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       aggrInfo = (int *)  argv[3];
       return ( setAggregateInfo(level,nAggr,length,aggrInfo) );
    }
-   else if ( !strcasecmp(param1, "setCalibrationSize" ))
+   else if ( !strcmp(param1, "setCalibrationSize" ))
    {
       sscanf(in_name,"%s %d", param1, &size);
       return ( setCalibrationSize( size ) );
    }
-   else if ( !strcasecmp(param1, "setPreSmoother" ))
+   else if ( !strcmp(param1, "setPreSmoother" ))
    {
       sscanf(in_name,"%s %s", param1, param2);
       if ( argc != 2 )
@@ -280,7 +280,7 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       weights = (double *) argv[1];
       return ( setSmoother(prePost, param2, nSweeps, weights) );
    }
-   else if ( !strcasecmp(param1, "setPostSmoother" ))
+   else if ( !strcmp(param1, "setPostSmoother" ))
    {
       sscanf(in_name,"%s %s", param1, param2);
       if ( argc != 2 )
@@ -296,17 +296,17 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       weights = (double *) argv[1];
       return ( setSmoother(prePost, param2, nSweeps, weights) );
    }
-   else if ( !strcasecmp(param1, "setSmootherPrintRNorm" ))
+   else if ( !strcmp(param1, "setSmootherPrintRNorm" ))
    {
       smootherPrintRNorm_ = 1;
       return 0;
    }
-   else if ( !strcasecmp(param1, "setSmootherFindOmega" ))
+   else if ( !strcmp(param1, "setSmootherFindOmega" ))
    {
       smootherFindOmega_ = 1;
       return 0;
    }
-   else if ( !strcasecmp(param1, "setCoarseSolver" ))
+   else if ( !strcmp(param1, "setCoarseSolver" ))
    {
       sscanf(in_name,"%s %s", param1, param2);
       if ( strcmp(param2, "SuperLU") && argc != 2 )
@@ -329,7 +329,7 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       }
       return ( setCoarseSolver(param2, nSweeps, weights) );
    }
-   else if ( !strcasecmp(param1, "setNullSpace" ))
+   else if ( !strcmp(param1, "setNullSpace" ))
    {
       if ( argc != 4 )
       {
@@ -347,7 +347,7 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       length    = *(int *)   argv[3];
       return ( setNullSpace(nDOF,numNS,nullspace,length) );
    }
-   else if ( !strcasecmp(param1, "adjustNullSpace" ))
+   else if ( !strcmp(param1, "adjustNullSpace" ))
    {
       if ( argc != 1 )
       {
@@ -359,7 +359,7 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       nsAdjust = (double *) argv[0];
       return ( adjustNullSpace( nsAdjust ) );
    }
-   else if ( !strcasecmp(param1, "resetNullSpaceComponents" ))
+   else if ( !strcmp(param1, "resetNullSpaceComponents" ))
    {
       if ( argc != 3 )
       {
@@ -375,7 +375,7 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       indices =  (int *) argv[2];
       return ( resetNullSpaceComponents(length, offset, indices) );
    }
-   else if ( !strcasecmp(param1, "setNodalCoord" ))
+   else if ( !strcmp(param1, "setNodalCoord" ))
    {
       if ( argc != 5 && argc != 6 )
       {
@@ -397,7 +397,7 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       if ( argc == 6 ) scales = (double *) argv[5]; else scales = NULL;
       return ( setNodalCoordinates(nnodes,nDOF,nsDim,coords,numNS,scales) );
    }
-   else if ( !strcasecmp(param1, "setLabels" ))
+   else if ( !strcmp(param1, "setLabels" ))
    {
       if ( argc != 3 )
       {
@@ -427,22 +427,22 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       for ( is = 0; is < length; is++ ) saLabels_[level][is] = labels[is];
       return 0;
    }
-   else if ( !strcasecmp(param1, "scalar" ))
+   else if ( !strcmp(param1, "scalar" ))
    {
       scalar_ = 1;
    }
-   else if ( !strcasecmp(param1, "setParamFile" ))
+   else if ( !strcmp(param1, "setParamFile" ))
    {
       param3 = (char *) argv[0];
       strcpy( paramFile_, param3 ); 
       return 0;
    }
-   else if ( !strcasecmp(param1, "printNullSpace" ))
+   else if ( !strcmp(param1, "printNullSpace" ))
    {
       printNullSpace_ = 1;
       return 0;
    }
-   else if ( !strcasecmp(param1, "print" ))
+   else if ( !strcmp(param1, "print" ))
    {
       return ( print() );
    }
@@ -458,7 +458,7 @@ int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
    int    nDOF, numNS, length;
    double *nullspace;
 
-   if ( !strcasecmp(in_name, "getNullSpace" ))
+   if ( !strcmp(in_name, "getNullSpace" ))
    {
       if ( (*argc) < 4 )
       {
@@ -1411,7 +1411,7 @@ int MLI_Method_AMGSA::copy( MLI_Method *new_obj )
 {
    MLI_Method_AMGSA *new_amgsa;
 
-   if ( ! strcasecmp(new_obj->getName(), "AMGSA" ) )
+   if ( ! strcmp(new_obj->getName(), "AMGSA" ) )
    {
       new_amgsa = (MLI_Method_AMGSA *) new_obj;
       new_amgsa->maxLevels_ = maxLevels_;
