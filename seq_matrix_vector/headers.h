@@ -11,16 +11,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "../utilities/hypre_utilities.h"
-#include "HYPRE_mv.h"
-
-/* #include "general.h" */
-
-#include "csr_matrix.h"
-#include "mapped_matrix.h"
-#include "multiblock_matrix.h"
-#include "vector.h"
-
-#include "protos.h"
+#include "hypre_mv.h"
 
 

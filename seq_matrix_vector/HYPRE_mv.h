@@ -15,6 +15,12 @@
 #ifndef HYPRE_MV_HEADER
 #define HYPRE_MV_HEADER
 
+#include "HYPRE_utilities.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*--------------------------------------------------------------------------
  * Structures
  *--------------------------------------------------------------------------*/
@@ -71,5 +77,9 @@ int HYPRE_InitializeVector P((HYPRE_Vector vector ));
 int HYPRE_PrintVector P((HYPRE_Vector vector , char *file_name ));
  
 #undef P
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

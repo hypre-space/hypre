@@ -40,7 +40,7 @@ CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I/usr/local/mpi/mpich/include\
- -I..\
+ -I../utilities\
  -g -Wall -DHYPRE_MEMORY_DMALLOC
 
 FFLAGS = -g
