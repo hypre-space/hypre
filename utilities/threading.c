@@ -16,6 +16,8 @@
 #include "mpi.h"
 #include "threading.h"
 
+int iteration_counter[3] = {0,0,0};
+int hypre_thread_counter;
 
 int HYPRE_InitPthreads( MPI_Comm comm )
 {
@@ -25,6 +27,8 @@ int HYPRE_InitPthreads( MPI_Comm comm )
           (hypre_workqueue_t) malloc(sizeof(struct hypre_workqueue_struct) +
                                       (MAX_QUEUE * sizeof(void *)));
 
+
+   initial_thread = pthread_self();
 
    if (hypre_qptr != NULL) {
       pthread_mutex_init(&hypre_qptr->lock, NULL);
@@ -44,6 +48,7 @@ int HYPRE_InitPthreads( MPI_Comm comm )
    pthread_mutex_init(&mpi_mtx, NULL);
    pthread_cond_init(&hypre_cond_boxloops, NULL);
    pthread_cond_init(&mpi_cnd, NULL);
+   hypre_thread_counter = 0;
    hypre_thread_release = 0;
 
    return (err);

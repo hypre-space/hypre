@@ -50,6 +50,7 @@ int ifetchadd( int *w, pthread_mutex_t *mutex_fetchadd );
 int hypre_fetch_and_add( int *w );
 void hypre_barrier(pthread_mutex_t *mpi_mtx);
 
+pthread_t initial_thread;
 pthread_t hypre_thread[NUM_THREADS];
 pthread_cond_t hypre_cond_boxloops;
 pthread_mutex_t hypre_mutex_boxloops;
