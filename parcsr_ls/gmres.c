@@ -353,7 +353,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 	hypre_KrylovAxpy(1.0,r,x);
 
 /* check for convergence, evaluate actual residual */
-	if (r_norm <= epsilon) 
+	if (r_norm <= epsilon && iter >= min_iter) 
         {
 		hypre_KrylovCopyVector(b,r);
           	hypre_KrylovMatvec(matvec_data,-1.0,A,x,1.0,r);
