@@ -10,5 +10,5 @@
 
 mkproto $* \
  | awk '(NR > 6) && ($1 !~ /#undef/)' \
- | sed -e 's/ P((/( /g; s/);/;/g'
+ | sed -e 's/ P((/( /g; s/);/;/g'|grep -v " main[ (]"
 
