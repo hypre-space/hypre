@@ -333,6 +333,14 @@ package Hypre {
       int GetDims( out int m, out int n );
       int GetLocalRange( out int row_start, out int row_end,
                          out int col_start, out int col_end );
+      int GetRow (in  int row,
+                  out int size,
+                  out array<int,1> col_ind,
+                  out array<double,1> values);
+      int RestoreRow (in int row,
+                      in int size,
+                      in array<int,1> col_ind,
+                      in array<double,1> values);
    };
 
    class StructGrid implements StructuredGridBuilder, StructuredGrid
@@ -411,6 +419,14 @@ package Hypre {
       int GetDims( out int m, out int n );
       int GetLocalRange( out int row_start, out int row_end,
                          out int col_start, out int col_end );
+      int GetRow (in  int row,
+                  out int size,
+                  out array<int,1> col_ind,
+                  out array<double,1> values);
+      int RestoreRow (in int row,
+                      in int size,
+                      in array<int,1> col_ind,
+                      in array<double,1> values);
    };
 
    class ParCSRVector implements Vector { 
