@@ -60,7 +60,7 @@
 #define MLI_SOLVER_GS_ID        1 
 #define MLI_SOLVER_SGS_ID       2 
 #define MLI_SOLVER_PARASAILS_ID 3 
-#define MLI_SOLVER_SCHWARZ_ID   4 
+#define MLI_SOLVER_BSGS_ID      4 
 #define MLI_SOLVER_MLS_ID       5 
 #define MLI_SOLVER_SUPERLU_ID   6 
 #define MLI_METHOD_AMGSA_ID     7
@@ -265,8 +265,8 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
            sprintf(paramString, "setPreSmoother SGS" ); break;
       case MLI_SOLVER_PARASAILS_ID : 
            sprintf(paramString, "setPreSmoother ParaSails" ); break;
-      case MLI_SOLVER_SCHWARZ_ID   : 
-           sprintf(paramString, "setPreSmoother Schwarz" ); break;
+      case MLI_SOLVER_BSGS_ID   : 
+           sprintf(paramString, "setPreSmoother BSGS" ); break;
       case MLI_SOLVER_MLS_ID       : 
            sprintf(paramString, "setPreSmoother MLS" ); break;
    }
@@ -289,8 +289,8 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
            sprintf(paramString, "setPostSmoother SGS" ); break;
       case MLI_SOLVER_PARASAILS_ID : 
            sprintf(paramString, "setPostSmoother ParaSails" ); break;
-      case MLI_SOLVER_SCHWARZ_ID   : 
-           sprintf(paramString, "setPostSmoother Schwarz" ); break;
+      case MLI_SOLVER_BSGS_ID   : 
+           sprintf(paramString, "setPostSmoother BSGS" ); break;
       case MLI_SOLVER_MLS_ID       : 
            sprintf(paramString, "setPostSmoother MLS" ); break;
    }
@@ -313,8 +313,8 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
            sprintf(paramString, "setCoarseSolver SGS" ); break;
       case MLI_SOLVER_PARASAILS_ID : 
            sprintf(paramString, "setCoarseSolver ParaSails" ); break;
-      case MLI_SOLVER_SCHWARZ_ID   : 
-           sprintf(paramString, "setCoarseSolver Schwarz" ); break;
+      case MLI_SOLVER_BSGS_ID   : 
+           sprintf(paramString, "setCoarseSolver BSGS" ); break;
       case MLI_SOLVER_MLS_ID       : 
            sprintf(paramString, "setCoarseSolver MLS" ); break;
       case MLI_SOLVER_SUPERLU_ID       : 
@@ -531,10 +531,10 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          mli_object->preSmoother_  = MLI_SOLVER_PARASAILS_ID;
          mli_object->postSmoother_ = MLI_SOLVER_PARASAILS_ID;
       }
-      else if ( ! strcasecmp( param3, "Schwarz" ) )
+      else if ( ! strcasecmp( param3, "BSGS" ) )
       {
-         mli_object->preSmoother_  = MLI_SOLVER_SCHWARZ_ID;
-         mli_object->postSmoother_ = MLI_SOLVER_SCHWARZ_ID;
+         mli_object->preSmoother_  = MLI_SOLVER_BSGS_ID;
+         mli_object->postSmoother_ = MLI_SOLVER_BSGS_ID;
       }
       else if ( ! strcasecmp( param3, "MLS" ) )
       {
@@ -558,8 +558,8 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          mli_object->coarseSolver_ = MLI_SOLVER_SGS_ID;
       else if ( ! strcasecmp( param3, "ParaSails" ) )
          mli_object->coarseSolver_ = MLI_SOLVER_PARASAILS_ID;
-      else if ( ! strcasecmp( param3, "Schwarz" ) )
-         mli_object->coarseSolver_ = MLI_SOLVER_SCHWARZ_ID;
+      else if ( ! strcasecmp( param3, "BSGS" ) )
+         mli_object->coarseSolver_ = MLI_SOLVER_BSGS_ID;
       else if ( ! strcasecmp( param3, "MLS" ) )
          mli_object->coarseSolver_ = MLI_SOLVER_MLS_ID;
       else 
@@ -925,7 +925,7 @@ int HYPRE_LSI_MLI_SetMethod( HYPRE_Solver solver, char *paramString )
 /*                 1 (GS)                                                   */
 /*                 2 (SGS)                                                  */
 /*                 3 (ParaSails)                                            */
-/*                 4 (Schwarz)                                              */
+/*                 4 (BSGS)                                                 */
 /*                 5 (MLS)                                                  */
 /*--------------------------------------------------------------------------*/
 

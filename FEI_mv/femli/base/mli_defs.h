@@ -28,7 +28,7 @@
 #define   MLI_SOLVER_GS_ID              302
 #define   MLI_SOLVER_SGS_ID             303
 #define   MLI_SOLVER_PARASAILS_ID       304
-#define   MLI_SOLVER_SCHWARZ_ID         305
+#define   MLI_SOLVER_BSGS_ID            305
 #define   MLI_SOLVER_MLS_ID             306
 #define   MLI_SOLVER_SUPERLU_ID         307
 #define   MLI_SOLVER_ARPACKSUPERLU_ID   308
