@@ -29,3 +29,15 @@
 #ifndef HYPRE_USE_PTHREADS
 #undef HYPRE_USE_PTHREADS
 #endif
+
+#ifndef HYPRE_SOLARIS
+#undef HYPRE_SOLARIS
+#endif
+
+#ifndef HYPRE_ALPHA
+#undef HYPRE_ALPHA
+#endif
+
+#ifndef HYPRE_RS6000
+#undef HYPRE_RS6000
+#endif

@@ -393,32 +393,36 @@ if test -z "$CC"
 then
 
   case $ARCH in
-     sun4 | solaris )
+    sun4 | solaris )
 
-        if test "$casc_user_chose_compilers" = "no"
+      AC_DEFINE(HYPRE_SOLARIS)
+
+      if test "$casc_user_chose_compilers" = "no"
+      then
+        if test "$casc_using_mpi" = "no"
         then
-          if test "$casc_using_mpi" = "no"
-          then
-            AC_CHECK_PROGS(CC, cc gcc kcc)
-            AC_CHECK_PROGS(CXX, CC g++)
-            AC_CHECK_PROGS(F77, f77 g77)
-          else
-            AC_CHECK_PROGS(CC, mpicc)
-            AC_CHECK_PROGS(CXX, mpiCC)
-            AC_CHECK_PROGS(F77, mpif77)
-          fi
+          AC_CHECK_PROGS(CC, cc gcc kcc)
+          AC_CHECK_PROGS(CXX, CC g++)
+          AC_CHECK_PROGS(F77, f77 g77)
+        else
+          AC_CHECK_PROGS(CC, mpicc)
+          AC_CHECK_PROGS(CXX, mpiCC)
+          AC_CHECK_PROGS(F77, mpif77)
         fi
- 
-        CASC_SET_COPT(-O)
-        CASC_SET_CDEBUG(-g)
-        CASC_SET_CXXOPT(-O)
-        CASC_SET_CXXDEBUG(-g)
-        CASC_SET_FOPT(-O -silent)
-        CASC_SET_FDEBUG(-g -silent)
+      fi
+
+      CASC_SET_COPT(-O)
+      CASC_SET_CDEBUG(-g)
+      CASC_SET_CXXOPT(-O)
+      CASC_SET_CXXDEBUG(-g)
+      CASC_SET_FOPT(-O -silent)
+      CASC_SET_FDEBUG(-g -silent)
 
    ;;
 
    alpha)
+
+     AC_DEFINE(HYPRE_ALPHA)
 
      casc_using_blas=yes
      if test "$casc_user_chose_compilers" = "no"
@@ -485,6 +489,7 @@ then
 
    rs6000)
 
+   AC_DEFINE(HYPRE_RS6000)
 
    AC_ARG_WITH(COMM_SIMPLE, [\
    --without-COMM_SIMPLE           use MPI derived data types],
