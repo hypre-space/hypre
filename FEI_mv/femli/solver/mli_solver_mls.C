@@ -331,7 +331,6 @@ int MLI_Solver_MLS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
 int MLI_Solver_MLS::setParams( char *param_string, int argc, char **argv )
 {
-   int    nsweeps;
    double *weights;
 
    if ( !strcmp(param_string, "relaxWeight") )
@@ -341,7 +340,6 @@ int MLI_Solver_MLS::setParams( char *param_string, int argc, char **argv )
          cout << "Solver_MLS::setParams ERROR : needs 1 or 2 args.\n";
          return 1;
       }
-      if ( argc >= 1 ) nsweeps = *(int*)   argv[0];
       if ( argc == 2 ) weights = (double*) argv[1];
       max_eigen = weights[0];
       if ( max_eigen < 0.0 ) 

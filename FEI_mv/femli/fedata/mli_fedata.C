@@ -3628,7 +3628,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
       int         numSharedNodes = currBlock->numSharedNodes_;
       int         *sharedNodeNProcs = currBlock->sharedNodeNProcs_;
       int         **sharedNodeProc = currBlock->sharedNodeProc_;
-      int         i, j, k, index, pnum, pSrc, *iBuf, msgID, nodeGID, ncnt;
+      int         i, j, index, pnum, pSrc, *iBuf, msgID, nodeGID, ncnt;
       int         *columns, *procList, *procTemp, nSends, *sendLengs;
       int         *sendProcs, **sendBufs, nRecvs, *recvProcs, *recvLengs;
       int         **recvBufs, *owner, length;
@@ -3649,8 +3649,8 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
          {
             pnum  = mypid;
             for ( j = 0; j < sharedNodeNProcs[i]; j++ )
-               if ( currBlock->sharedNodeProc_[i][j] < pnum )
-                  pnum = currBlock->sharedNodeProc_[i][j];
+               if ( sharedNodeProc[i][j] < pnum )
+                  pnum = sharedNodeProc_[i][j];
             owner[index] = pnum;
          }
       }
@@ -3816,7 +3816,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
       int i, j, index, n, pnum, Buf[100];
       int *ncols = (int *) argv[0], **cols = (int **) argv[1];
       int *ind = new int[currBlock->numSharedFaces_];
-      int *columns, l, k, *p;
+      int *columns, l, k;
       MPI_Request request;
       MPI_Status  Status;
       
