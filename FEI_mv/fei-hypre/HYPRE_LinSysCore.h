@@ -243,6 +243,8 @@ class HYPRE_LinSysCore
    void  buildSlideReducedSoln2();
    void  buildSchurReducedSystem();
    void  buildSchurReducedSoln();
+   void  getVersion(char**);
+   void  createMapFromSoln();
 
  private:        //functions
 
@@ -384,7 +386,12 @@ class HYPRE_LinSysCore
    char            superluScale_[1];
    double          ddilutFillin_;
    double          ddilutDropTol_;
-   char            version_[20];
+
+   // ----------------------------------------------------------------------
+   // map 
+   // ----------------------------------------------------------------------
+
+   int             *node2EqnMap;
 
    // ----------------------------------------------------------------------
    // temporary functions for testing purposes

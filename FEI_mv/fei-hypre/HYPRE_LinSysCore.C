@@ -124,6 +124,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   colValues_(NULL),
                   selectedList_(NULL),
                   selectedListAux_(NULL),
+                  node2EqnMap(NULL),
                   HYOutputLevel_(0)
 {
     //-------------------------------------------------------------------
@@ -196,8 +197,6 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     rhsIDs_             = new int[1];
     rhsIDs_[0]          = 0;
 
-    strcpy(version_,"HYPRE FEI 1.3.1");
-
 #ifdef DEBUG
     printf("%4d : HYPRE_LinSysCore::leaving  constructor.\n",mypid_);
 #endif
@@ -238,6 +237,8 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
 
     matrixVectorsCreated_ = 0;
     systemAssembled_ = 0;
+
+    if ( node2EqnMap != NULL ) delete [] node2EqnMap;
 
     if ( colIndices_ != NULL )
     {
@@ -356,15 +357,6 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
 
     if ( numParams <= 0 ) return;
     nParamsFound = 0;
-
-    //-------------------------------------------------------------------
-    // output version 
-    //-------------------------------------------------------------------
-
-    if ( Utils::getParam("version",numParams,params,param) == 1)
-    {
-       printf("HYPRE_LinSysCore::current version = %s\n", version_);
-    }
 
     //-------------------------------------------------------------------
     // output level
@@ -1989,7 +1981,7 @@ void HYPRE_LinSysCore::getSolution(int* eqnNumbers, double* answers,int leng)
     for ( i = 0; i < leng; i++ )
     {
        equations[i] = eqnNumbers[i] - 1; // construct 0-based index
-       if ( equations[i] < localStartRow_ || equations[i] > localEndRow_ )
+       if ( equations[i] < localStartRow_-1 || equations[i] > localEndRow_ )
        {
           printf("%d : getSolution - index out of range = %d.\n", mypid_, 
                        eqnNumbers[i]);
@@ -2021,7 +2013,7 @@ void HYPRE_LinSysCore::getSolnEntry(int eqnNumber, double& answer)
     }
 
     equation = eqnNumber - 1; // construct 0-based index
-    if ( equation < localStartRow_ && equation > localEndRow_ )
+    if ( equation < localStartRow_-1 && equation > localEndRow_ )
     {
        printf("%d : getSolnEntry - index out of range = %d.\n", mypid_, 
                     eqnNumber);
@@ -3545,246 +3537,51 @@ void HYPRE_LinSysCore::writeSystem(char *name)
 }
 
 //***************************************************************************
-//***************************************************************************
-//***************************************************************************
-// The following is a test function for the above routines
-//***************************************************************************
-//***************************************************************************
-//***************************************************************************
+// this function extracts the the version number from HYPRE
+//---------------------------------------------------------------------------
 
-void fei_hypre_test(int argc, char *argv[])
+void HYPRE_LinSysCore::getVersion(char **name)
 {
-    int    i, j, k, my_rank, num_procs, nrows, nnz, mybegin, myend, status;
-    int    *ia, *ja, ncnt, index, chunksize, iterations, local_nrows;
-    int    *rowLengths, **colIndices, blksize=1, *list, prec;
-    double *val, *rhs, ddata, ddata_max;
-
-    //------------------------------------------------------------------
-    // initialize parallel platform
-    //------------------------------------------------------------------
-
-    MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-
-    HYPRE_LinSysCore H(MPI_COMM_WORLD);
-
-    //------------------------------------------------------------------
-    // read the matrix and rhs and broadcast
-    //------------------------------------------------------------------
-
-    if ( my_rank == 0 ) {
-       HYPRE_LSI_Get_IJAMatrixFromFile(&val, &ia, &ja, &nrows,
-                                &rhs, "matrix.data", "rhs.data");
-       nnz = ia[nrows];
-       MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
-       MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
-
-       MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
-       MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
-       MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
-       MPI_Bcast(rhs, nrows,   MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-    } else {
-       MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
-       MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
-       ia  = new int[nrows+1];
-       ja  = new int[nnz];
-       val = new double[nnz];
-       rhs = new double[nrows];
-
-       MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
-       MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
-       MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
-       MPI_Bcast(rhs, nrows,   MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    }
-
-    chunksize = nrows / blksize;
-    if ( chunksize * blksize != nrows )
-    {
-       printf("Cannot put into matrix blocks with block size 3\n");
-       exit(1);
-    }
-    chunksize = chunksize / num_procs;
-    mybegin = chunksize * my_rank * blksize;
-    myend   = chunksize * (my_rank + 1) * blksize - 1;
-    if ( my_rank == num_procs-1 ) myend = nrows - 1;
-    printf("Processor %d : begin/end = %d %d\n", my_rank, mybegin, myend);
-    fflush(stdout);
-
-    //------------------------------------------------------------------
-    // create matrix in the HYPRE context
-    //------------------------------------------------------------------
-
-    local_nrows = myend - mybegin + 1;
-    H.createMatricesAndVectors(nrows, mybegin+1, local_nrows);
-
-    rowLengths = new int[local_nrows];
-    colIndices = new int*[local_nrows];
-    for ( i = mybegin; i < myend+1; i++ ) 
-    {
-       ncnt = ia[i+1] - ia[i];
-       rowLengths[i-mybegin] = ncnt;
-       colIndices[i-mybegin] = new int[ncnt];
-       k = 0;
-       for (j = ia[i]; j < ia[i+1]; j++) colIndices[i-mybegin][k++] = ja[j];
-    }
-
-    H.allocateMatrix(colIndices, rowLengths);
-
-    for ( i = mybegin; i < myend+1; i++ ) delete [] colIndices[i-mybegin];
-    delete [] colIndices;
-    delete [] rowLengths;
-
-    //------------------------------------------------------------------
-    // load the matrix 
-    //------------------------------------------------------------------
-
-    for ( i = mybegin; i <= myend; i++ ) {
-       ncnt = ia[i+1] - ia[i];
-       index = i + 1;
-       H.sumIntoSystemMatrix(index, ncnt, &val[ia[i]], &ja[ia[i]]);
-    }
-    H.matrixLoadComplete();
-    free( ia );
-    free( ja );
-    free( val );
-    
-    //------------------------------------------------------------------
-    // load the right hand side 
-    //------------------------------------------------------------------
-
-    for ( i = mybegin; i <= myend; i++ ) 
-    {
-       index = i + 1;
-       H.sumIntoRHSVector(1, &rhs[i], &index);
-    }
-    free( rhs );
-
-    //------------------------------------------------------------------
-    // set other parameters
-    //------------------------------------------------------------------
-
-    char *paramString = new char[100];
-
-    strcpy(paramString, "version");
-    H.parameters(1, &paramString);
-    strcpy(paramString, "solver gmres");
-    H.parameters(1, &paramString);
-    strcpy(paramString, "relativeNorm");
-    H.parameters(1, &paramString);
-    strcpy(paramString, "tolerance 1.0e-6");
-    H.parameters(1, &paramString);
-    if ( my_rank == 0 )
-    {
-       printf("preconditioner (diagonal,parasails,boomeramg,ml,pilut,ddilut) : ");
-       scanf("%d", &prec);
-    }
-    MPI_Bcast(&prec,  1, MPI_INT, 0, MPI_COMM_WORLD);
-    switch (prec)
-    {
-       case 0 : strcpy(paramString, "preconditioner diagonal");
-                break;
-       case 1 : strcpy(paramString, "preconditioner parasails");
-                break;
-       case 2 : strcpy(paramString, "preconditioner boomeramg");
-                break;
-       case 3 : strcpy(paramString, "preconditioner ml");
-                break;
-       case 4 : strcpy(paramString, "preconditioner pilut");
-                break;
-       case 5 : strcpy(paramString, "preconditioner ddilut");
-                break;
-       default : strcpy(paramString, "preconditioner parasails");
-                break;
-    }
-
-    H.parameters(1, &paramString);
-    strcpy(paramString, "gmresDim 300");
-    H.parameters(1, &paramString);
-
-    strcpy(paramString, "ddilutFillin 0.0");
-    H.parameters(1, &paramString);
-
-    strcpy(paramString, "amgRelaxType hybrid");
-    H.parameters(1, &paramString);
-    strcpy(paramString, "amgRelaxWeight 0.5");
-    H.parameters(1, &paramString);
-    strcpy(paramString, "amgStrongThreshold 0.08");
-    H.parameters(1, &paramString);
-    strcpy(paramString, "amgNumSweeps 2");
-    H.parameters(1, &paramString);
-
-    strcpy(paramString, "mlNumPresweeps 2");
-    H.parameters(1, &paramString);
-    strcpy(paramString, "mlNumPostsweeps 2");
-    H.parameters(1, &paramString);
-    strcpy(paramString, "mlPresmootherType bgs");
-    H.parameters(1, &paramString);
-    strcpy(paramString, "mlPostsmootherType bgs");
-    H.parameters(1, &paramString);
-    strcpy(paramString, "mlRelaxWeight 0.5");
-    H.parameters(1, &paramString);
-    strcpy(paramString, "mlStrongThreshold 0.08");
-    H.parameters(1, &paramString);
-
-    strcpy(paramString, "parasailsNlevels 1");
-    H.parameters(1, &paramString);
-    strcpy(paramString, "parasailsThreshold 0.1");
-    H.parameters(1, &paramString);
-
-    //------------------------------------------------------------------
-    // solve the system
-    //------------------------------------------------------------------
-
-    strcpy(paramString, "outputLevel 1");
-    H.parameters(1, &paramString);
-/*
-    strcpy(paramString, "schurReduction");
-    H.parameters(1, &paramString);
-*/
-    H.launchSolver(status, iterations);
-/*
-    strcpy(paramString, "preconditioner reuse");
-    H.parameters(1, &paramString);
-    ddata = 0.0;
-    for ( i = H.localStartRow_; i <= H.localEndRow_; i++ )
-    {
-       H.putInitialGuess(&i, &ddata, 1);
-    } 
-    H.launchSolver(status, iterations);
-    ddata = 0.0;
-    for ( i = H.localStartRow_; i <= H.localEndRow_; i++ )
-    {
-       H.putInitialGuess(&i, &ddata, 1);
-    } 
-    H.launchSolver(status, iterations);
-*/
-
-    if ( status != 1 )
-    {
-       printf("%4d : HYPRE_LinSysCore : solve unsuccessful.\n", my_rank);
-    } 
-    else if ( my_rank == 0 )
-    {
-       printf("HYPRE_LinSysCore : solve successful.\n", my_rank);
-       printf("              iteration count = %4d\n", iterations);
-    }
-
-    if ( my_rank == 0 )
-    {
-       //for ( i = H.localStartRow_-1; i < H.localEndRow_; i++ )
-       //{
-       //   HYPRE_IJVectorGetLocalComponents(H.currX_,1,&i, NULL, &ddata);
-       //   //H.getSolnEntry(i, ddata);
-       //   printf("sol(%d): %e\n", i, ddata);
-       //}
-    }
-
-    //------------------------------------------------------------------
-    // clean up 
-    //------------------------------------------------------------------
-
-    MPI_Finalize();
+    printf("HYPRE_LinsysCore : this function hasn't been implemented yet.\n");
+    return;
 }
+
+//***************************************************************************
+// create a node to equation map from the solution vector
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::createMapFromSoln()
+{
+    int    i, ierr, *equations, local_nrows;
+    double *answers;
+
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+    {
+       printf("%4d : HYPRE_LinSysCore::entering createMapSoln.\n",mypid_);
+    }
+
+    local_nrows = localEndRow_ - localStartRow_ + 1;
+    equations   = new int[local_nrows];
+    answers     = new double[local_nrows];
+    node2EqnMap = new int[local_nrows];
+
+    for (i = 0; i < local_nrows; i++) equations[i] = localStartRow_ + i - 1; 
+    ierr = HYPRE_IJVectorGetLocalComponents(HYx_,local_nrows,equations,NULL,
+                                            answers);
+    assert(!ierr);
+    delete [] equations;
+    for (i = 0; i < local_nrows; i++) 
+    {
+       node2EqnMap[i] = (int) answers[i];
+       if ( node2EqnMap[i] < localStartRow_-1 || node2EqnMap[i] > localEndRow_ )
+          printf("%4d : createMapFromSoln WARNING : map index out of range\n",
+                 mypid_);
+    }
+
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+    {
+       printf("%4d : HYPRE_LinSysCore::leaving  createMapFromSoln.\n",mypid_);
+    }
+}
+
 
