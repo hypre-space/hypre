@@ -121,5 +121,4 @@ FILES = \
  cfei_hypre.h
 
 install-data-local:
-	@ \
-	cp $(BASE_DIR)/LinearSystemCore.h $(includedir)/snl_LinearSystemCore.h
+	test -f $(BASE_DIR)/LinearSystemCore.h && cp -f $(BASE_DIR)/LinearSystemCore.h $(includedir)/snl_LinearSystemCore.h

@@ -610,8 +610,7 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
 
 
 install-data-local:
-	@ \
-	cp $(BASE_DIR)/LinearSystemCore.h $(includedir)/snl_LinearSystemCore.h
+	test -f $(BASE_DIR)/LinearSystemCore.h && cp -f $(BASE_DIR)/LinearSystemCore.h $(includedir)/snl_LinearSystemCore.h
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
