@@ -38,7 +38,7 @@ then
 	    HYPRE_ARCH="dec";;
 	AIX)
 	    HYPRE_ARCH="blue";;
-	"Paragon OSF/1")
+	"TFLOPS O/S")
 	    HYPRE_ARCH="red";;
     esac
 fi
