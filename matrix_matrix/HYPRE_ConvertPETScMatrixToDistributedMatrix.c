@@ -31,16 +31,12 @@ HYPRE_ConvertPETScMatrixToDistributedMatrix(
                  HYPRE_DistributedMatrix *DistributedMatrix )
 {
    int ierr;
-   MatType MatType;
    MPI_Comm MPI_Comm;
    int M, N;
 
-   /* routine only works if Mat is of type MATMPIAIJ */
+
+
    if (!PETSc_matrix) return(-1);
-
-   ierr = MatGetType( PETSc_matrix, &MatType, NULL ); CHKERRA(ierr);
-
-   if (MatType != MATMPIAIJ) return(-1);
 
    ierr = PetscObjectGetComm( (PetscObject) PETSc_matrix, &MPI_Comm); CHKERRA(ierr);
 
