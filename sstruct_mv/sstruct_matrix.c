@@ -405,11 +405,10 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    int                    *row_sizes;
    int                     max_row_size;
 
-   ierr = HYPRE_IJMatrixSetLocalStorageType(ijmatrix, HYPRE_PARCSR);
+   ierr = HYPRE_IJMatrixSetObjectType(ijmatrix, HYPRE_PARCSR);
 
    nrows = hypre_SStructGridLocalSize(grid); 
    ncols = hypre_SStructGridLocalSize(grid); 
-   ierr += HYPRE_IJMatrixSetLocalSize(ijmatrix, nrows, ncols);
 
    /* set row sizes */
    i = 0;
@@ -451,6 +450,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
       max_row_size = hypre_max(max_row_size, row_sizes[i]);
    }
    ierr += HYPRE_IJMatrixSetRowSizes (ijmatrix, (const int *) row_sizes);
+
    hypre_TFree(row_sizes);
    hypre_SStructMatrixTmpColCoords(matrix) =
       hypre_CTAlloc(int, max_row_size);
@@ -547,13 +547,13 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
 
    if (add_to)
    {
-      ierr = HYPRE_IJMatrixAddToValues(ijmatrix, ncoeffs, row_coord,
+      ierr = HYPRE_IJMatrixAddToValues(ijmatrix, 1, &ncoeffs, &row_coord,
                                        (const int *) col_coords,
                                        (const double *) coeffs);
    }
    else
    {
-      ierr = HYPRE_IJMatrixSetValues(ijmatrix, ncoeffs, row_coord,
+      ierr = HYPRE_IJMatrixSetValues(ijmatrix, 1, &ncoeffs, &row_coord,
                                      (const int *) col_coords,
                                      (const double *) coeffs);
    }
@@ -617,8 +617,8 @@ hypre_SStructUMatrixAssemble( hypre_SStructMatrix *matrix )
    HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
 
    ierr = HYPRE_IJMatrixAssemble(ijmatrix);
-   hypre_SStructMatrixParCSRMatrix(matrix) =
-      (hypre_ParCSRMatrix *) HYPRE_IJMatrixGetLocalStorage(ijmatrix);
+   HYPRE_IJMatrixGetObject(ijmatrix,
+                           (void **) &hypre_SStructMatrixParCSRMatrix(matrix));
 
    return ierr;
 }

@@ -48,8 +48,9 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
    }
    hypre_SStructVectorPVectors(vector)   = pvectors;
    hypre_SStructVectorIJVector(vector)   = NULL;
-   HYPRE_IJVectorCreate(comm, &hypre_SStructVectorIJVector(vector),
-                        hypre_SStructGridGlobalSize(grid));
+   /* ZIJ: need local extents */
+   HYPRE_IJVectorCreate(comm, 0, (hypre_SStructGridGlobalSize(grid) - 1),
+                        &hypre_SStructVectorIJVector(vector));
    hypre_SStructVectorParVector(vector)  = NULL;
    hypre_SStructVectorGlobalSize(vector) = 0;
    hypre_SStructVectorRefCount(vector)   = 1;
@@ -102,9 +103,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    MPI_Comm        comm     = hypre_SStructVectorComm(vector);
    int             nparts   = hypre_SStructVectorNParts(vector);
    HYPRE_IJVector  ijvector = hypre_SStructVectorIJVector(vector);
-   int            *partitioning;
-   int             local_size, num_procs;
-   int             part, i;
+   int             part;
 
    for (part = 0; part < nparts; part++)
    {
@@ -112,8 +111,9 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    }
 
    /* u-vector */
-   ierr = HYPRE_IJVectorSetLocalStorageType(ijvector, HYPRE_PARCSR);
+   ierr = HYPRE_IJVectorSetObjectType(ijvector, HYPRE_PARCSR);
 
+#if 0 /* ZIJ: don't need */
    MPI_Comm_size(comm, &num_procs);
    partitioning = hypre_TAlloc(int, num_procs + 1);
    partitioning[0] = 0;
@@ -124,6 +124,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
       partitioning[i] += partitioning[i-1];
    }
    ierr = HYPRE_IJVectorSetPartitioning(ijvector, partitioning);
+#endif
 
    ierr += HYPRE_IJVectorInitialize(ijvector);
 
@@ -258,8 +259,8 @@ HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector )
 
    /* u-vector */
    ierr = HYPRE_IJVectorAssemble(ijvector);
-   hypre_SStructVectorParVector(vector) =
-      (hypre_ParVector *) HYPRE_IJVectorGetLocalStorage(ijvector);
+   HYPRE_IJVectorGetObject(ijvector, 
+                           (void **) &hypre_SStructVectorParVector(vector));
 
    return ierr;
 }

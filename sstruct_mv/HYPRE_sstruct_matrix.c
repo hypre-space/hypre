@@ -85,9 +85,11 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
       }
    }
 
-   HYPRE_IJMatrixCreate(comm, &hypre_SStructMatrixIJMatrix(matrix),
-                        hypre_SStructGridGlobalSize(grid),
-                        hypre_SStructGridGlobalSize(grid));
+   /* ZIJ: need local extents */
+   HYPRE_IJMatrixCreate(comm,
+                        0, (hypre_SStructGridGlobalSize(grid) - 1),
+                        0, (hypre_SStructGridGlobalSize(grid) - 1),
+                        &hypre_SStructMatrixIJMatrix(matrix));
    hypre_SStructMatrixParCSRMatrix(matrix) = NULL;
 
    size = 0;
@@ -498,7 +500,7 @@ HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix   matrix,
    int ierr = 0;
    HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
 
-   *object = HYPRE_IJMatrixGetLocalStorage(ijmatrix);
+   HYPRE_IJMatrixGetObject(ijmatrix, object);
 
    return ierr;
 }
@@ -526,8 +528,7 @@ HYPRE_SStructMatrixPrint( char                *filename,
 
    /* U-matrix */
    sprintf(new_filename, "%s.UMatrix", filename);
-   hypre_ParCSRMatrixPrintIJ(hypre_SStructMatrixParCSRMatrix(matrix),
-                             new_filename);
+   HYPRE_IJMatrixPrint(hypre_SStructMatrixIJMatrix(matrix), new_filename);
 
    return ierr;
 }
