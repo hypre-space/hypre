@@ -1110,6 +1110,7 @@ void HYPRE_LinSysCore::setLookup(Lookup& lookup)
    {
       //let's test the shared-node lookup functions.
 
+#ifndef NOFEI
 #if (!defined(FEI_V14)) && (!defined(FEI_V13))
       int numSharedNodes = lookup_->getNumSharedNodes();
       printf("setLookup: numSharedNodes: %d\n", numSharedNodes);
@@ -1136,6 +1137,7 @@ void HYPRE_LinSysCore::setLookup(Lookup& lookup)
       fflush(stdout);
 #else
       printf("HYPRE_LSC::setLookup : function not implemented.\n");
+#endif
 #endif
    }
 }
@@ -3395,7 +3397,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
                   {
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 1);
                   }
@@ -3606,7 +3608,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 1);
 
                   if ( HYPreconReuse_ == 1 )
@@ -3816,7 +3818,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 1);
 
                   if ( HYPreconReuse_ == 1 )
@@ -4025,7 +4027,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 1);
 
                   if ( HYPreconReuse_ == 1 )
@@ -4130,8 +4132,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
              printf("%4d : launchSolver(SuperLU)\n",mypid_);
           solveUsingSuperLU(status);
+#ifndef NOFEI
 #if (!defined(FEI_V13)) || (!defined(FEI_V14))
           if ( status == 1 ) status = 0; 
+#endif      
 #endif      
           num_iterations = 1;
           ptime  = stime;
@@ -4147,8 +4151,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
              printf("%4d : launchSolver(SuperLUX)\n",mypid_);
           solveUsingSuperLUX(status);
+#ifndef NOFEI
 #if (!defined(FEI_V13)) || (!defined(FEI_V14))
           if ( status == 1 ) status = 0; 
+#endif      
 #endif      
           num_iterations = 1;
           //printf("SuperLUX solver - return status = %d\n",status);
@@ -4164,8 +4170,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
              printf("%4d : launchSolver(Y12M)\n",mypid_);
           solveUsingY12M(status);
+#ifndef NOFEI
 #if (!defined(FEI_V13)) || (!defined(FEI_V14))
           if ( status == 1 ) status = 0; 
+#endif      
 #endif      
           num_iterations = 1;
           ptime  = stime;
@@ -4308,7 +4316,7 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
        printf("Boomeramg relax type   = %d\n", amgRelaxType_[0]);
        printf("Boomeramg relax weight = %e\n", amgRelaxWeight_[0]);
     }
-    if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0)
+    if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
        HYPRE_BoomerAMGSetIOutDat(HYSolver_, 1);
 
     HYPRE_BoomerAMGSetMaxIter(HYSolver_, maxIterations_);
