@@ -362,12 +362,18 @@ AC_CONFIG_FILES([
   distributed_ls/ParaSails/Makefile
   distributed_ls/pilut/Makefile
   distributed_matrix/Makefile
+  eigensolvers/Makefile
+  eigensolvers/krylov/Makefile
+  eigensolvers/lib/Makefile
+  eigensolvers/multivector/Makefile
+  eigensolvers/parcsr_ls/Makefile
+  eigensolvers/sstruct_ls/Makefile
+  eigensolvers/struct_ls/Makefile
+  eigensolvers/utilities/Makefile
   krylov/Makefile
   lapack/Makefile
   lib/Makefile
   matrix_matrix/Makefile
-  parcsr_es/Makefile
-  parcsr_es/LOBPCG/Makefile
   parcsr_ls/Makefile
   parcsr_mv/Makefile
   seq_mv/Makefile
