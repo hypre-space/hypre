@@ -26,18 +26,18 @@ void     *A_data_arg;
 N_Vector  v_arg;
 N_Vector  z_arg;
 {
-   Matrix  *A = A_data_arg;
-   Vector  *x;
-   Vector  *y;
+   hypre_Matrix  *A = A_data_arg;
+   hypre_Vector  *x;
+   hypre_Vector  *y;
 
 
-   x = NewVector(N_VDATA(v_arg), N_VLENGTH(v_arg));
-   y = NewVector(N_VDATA(z_arg), N_VLENGTH(z_arg));
+   x = hypre_NewVector(N_VDATA(v_arg), N_VLENGTH(v_arg));
+   y = hypre_NewVector(N_VDATA(z_arg), N_VLENGTH(z_arg));
 
-   Matvec(1.0, A, x, 0.0, y);
+   hypre_Matvec(1.0, A, x, 0.0, y);
 
-   tfree(x);
-   tfree(y);
+   hypre_TFree(x);
+   hypre_TFree(y);
 
    return 0;
 }
@@ -55,26 +55,26 @@ int       lr_arg;
    SPGMRPData  *P_data = P_data_arg;
    int        (*precond)()   = (P_data -> precond);
    void        *precond_data = (P_data -> precond_data);
-   Vector  *s                = (P_data -> s);
-   Vector  *r                = (P_data -> r);
+   hypre_Vector  *s                = (P_data -> s);
+   hypre_Vector  *r                = (P_data -> r);
 
-   Vector  *s_temp;
-   Vector  *r_temp;
+   hypre_Vector  *s_temp;
+   hypre_Vector  *r_temp;
 
 
-   s_temp = NewVector(N_VDATA(z_arg), N_VLENGTH(z_arg));
-   r_temp = NewVector(N_VDATA(r_arg), N_VLENGTH(r_arg));
-   CopyVector(s_temp, s);
-   CopyVector(r_temp, r);
+   s_temp = hypre_NewVector(N_VDATA(z_arg), N_VLENGTH(z_arg));
+   r_temp = hypre_NewVector(N_VDATA(r_arg), N_VLENGTH(r_arg));
+   hypre_CopyVector(s_temp, s);
+   hypre_CopyVector(r_temp, r);
 
    /* s = C*r */
-   InitVector(s, 0.0);
+   hypre_InitVector(s, 0.0);
    precond(s, r, 0.0, precond_data);
 
-   CopyVector(r, r_temp);
-   CopyVector(s, s_temp);
-   tfree(r_temp);
-   tfree(s_temp);
+   hypre_CopyVector(r, r_temp);
+   hypre_CopyVector(s, s_temp);
+   hypre_TFree(r_temp);
+   hypre_TFree(s_temp);
 
    return 0;
 }
@@ -84,8 +84,8 @@ int       lr_arg;
  *--------------------------------------------------------------------------*/
 
 void     GMRES(x_arg, b_arg, tol_arg, data_arg)
-Vector  *x_arg;
-Vector  *b_arg;
+hypre_Vector  *x_arg;
+hypre_Vector  *b_arg;
 double   tol_arg;
 void    *data_arg;
 {
@@ -114,18 +114,18 @@ void    *data_arg;
     * Start gmres solve
     *-----------------------------------------------------------------------*/
 
-   b_norm = sqrt(InnerProd(b_arg, b_arg));
+   b_norm = sqrt(hypre_InnerProd(b_arg, b_arg));
    delta  = tol_arg*b_norm;
 
-   N_VMAKE(x, VectorData(x_arg), VectorSize(x_arg));
-   N_VMAKE(b, VectorData(b_arg), VectorSize(b_arg));
+   N_VMAKE(x, hypre_VectorData(x_arg), hypre_VectorSize(x_arg));
+   N_VMAKE(b, hypre_VectorData(b_arg), hypre_VectorSize(b_arg));
 
    SpgmrSolve(spgmr_mem, A_data, x, b, RIGHT, MODIFIED_GS, delta,
 	      max_restarts, P_data, NULL, NULL, SPGMRATimes, SPGMRPSolve,
 	      &norm, &nli, &nps);
 
-   tfree(x);
-   tfree(b);
+   hypre_TFree(x);
+   hypre_TFree(b);
 
    rel_norm = b_norm ? (norm / b_norm) : 0;
 
@@ -155,7 +155,7 @@ void    *data_arg;
  *--------------------------------------------------------------------------*/
 
 void      GMRESSetup(A, precond, precond_data, data)
-Matrix   *A;
+hypre_Matrix   *A;
 int     (*precond)();
 void     *precond_data;
 void     *data;
@@ -170,15 +170,15 @@ void     *data;
 
    GMRESDataAData(gmres_data)    = (void *) A;
 
-   size = MatrixSize(A);
+   size = hypre_MatrixSize(A);
 
-   P_data = ctalloc(SPGMRPData, 1);
+   P_data = hypre_CTAlloc(SPGMRPData, 1);
    (P_data -> precond)        = precond;
    (P_data -> precond_data)   = precond_data;
-   darray = ctalloc(double, NDIMU(size));
-   (P_data -> s) = NewVector(darray, size);
-   darray = ctalloc(double, NDIMU(size));
-   (P_data -> r) = NewVector(darray, size);
+   darray = hypre_CTAlloc(double, hypre_NDIMU(size));
+   (P_data -> s) = hypre_NewVector(darray, size);
+   darray = hypre_CTAlloc(double, hypre_NDIMU(size));
+   (P_data -> r) = hypre_NewVector(darray, size);
    GMRESDataPData(gmres_data) = (void *) P_data;
 
    GMRESDataSpgmrMem(gmres_data) = 
@@ -196,7 +196,7 @@ char     *log_file_name;
 {
    GMRESData  *gmres_data;
 
-   gmres_data = ctalloc(GMRESData, 1);
+   gmres_data = hypre_CTAlloc(GMRESData, 1);
 
    GMRESDataMaxKrylov(gmres_data)   = SolverGMRESMaxKrylov(solver);
    GMRESDataMaxRestarts(gmres_data) = SolverGMRESMaxRestarts(solver);
@@ -220,11 +220,11 @@ void  *data;
 
    if (gmres_data)
    {
-      FreeVector(P_data -> s);
-      FreeVector(P_data -> r);
-      tfree(P_data);
+      hypre_FreeVector(P_data -> s);
+      hypre_FreeVector(P_data -> r);
+      hypre_TFree(P_data);
       SpgmrFree(GMRESDataSpgmrMem(gmres_data));
-      tfree(gmres_data);
+      hypre_TFree(gmres_data);
    }
 }
 

@@ -25,7 +25,7 @@
 void   NewGlobals(run_name)
 char  *run_name;
 {
-   globals = ctalloc(Globals, 1);
+   globals = hypre_CTAlloc(Globals, 1);
 
    sprintf(GlobalsRunName,     "%s",     run_name);
    sprintf(GlobalsInFileName,  "%s.in",  run_name);
@@ -40,7 +40,7 @@ char  *run_name;
 
 void  FreeGlobals()
 {
-   tfree(globals);
+   hypre_TFree(globals);
 }
 
 

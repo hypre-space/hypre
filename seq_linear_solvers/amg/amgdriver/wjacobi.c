@@ -22,8 +22,8 @@
  *--------------------------------------------------------------------------*/
 
 int    	 WJacobi(x, b, tol, data)
-Vector 	*x;
-Vector 	*b;
+hypre_Vector 	*x;
+hypre_Vector 	*b;
 double 	 tol;
 void    *data;
 {
@@ -32,17 +32,17 @@ void    *data;
    double          weight   = WJacobiDataWeight(wjacobi_data);
    int         	   max_iter = WJacobiDataMaxIter(wjacobi_data);
 
-   Matrix         *A        = WJacobiDataA(wjacobi_data);
-   Vector      	  *t        = WJacobiDataT(wjacobi_data);
+   hypre_Matrix         *A        = WJacobiDataA(wjacobi_data);
+   hypre_Vector      	  *t        = WJacobiDataT(wjacobi_data);
 
-   double         *a  = MatrixData(A);
-   int            *ia = MatrixIA(A);
-   int            *ja = MatrixJA(A);
-   int             n  = MatrixSize(A);
+   double         *a  = hypre_MatrixData(A);
+   int            *ia = hypre_MatrixIA(A);
+   int            *ja = hypre_MatrixJA(A);
+   int             n  = hypre_MatrixSize(A);
 	          
-   double         *xp = VectorData(x);
-   double         *bp = VectorData(b);
-   double         *tp = VectorData(t);
+   double         *xp = hypre_VectorData(x);
+   double         *bp = hypre_VectorData(b);
+   double         *tp = hypre_VectorData(t);
 	          
    int             i, j, jj;
    int             iter = 0;
@@ -56,7 +56,7 @@ void    *data;
    {
       iter++;
 
-      CopyVector(b, t);
+      hypre_CopyVector(b, t);
 
       for (i = 0; i < n; i++)
       {
@@ -70,12 +70,12 @@ void    *data;
 
       if (weight != 1.0)
       {
-	 ScaleVector((1.0 - weight), x);
-	 Axpy(weight, t, x);
+	 hypre_ScaleVector((1.0 - weight), x);
+	 hypre_Axpy(weight, t, x);
       }
       else
       {
-	 CopyVector(t, x);
+	 hypre_CopyVector(t, x);
       }
    }
 }
@@ -85,7 +85,7 @@ void    *data;
  *--------------------------------------------------------------------------*/
 
 void      WJacobiSetup(A, data)
-Matrix   *A;
+hypre_Matrix   *A;
 void     *data;
 {
    WJacobiData  *wjacobi_data = data;
@@ -96,9 +96,9 @@ void     *data;
 
    WJacobiDataA(wjacobi_data) = A;
 
-   size = MatrixSize(A);
-   darray = ctalloc(double, NDIMU(size));
-   WJacobiDataT(wjacobi_data) = NewVector(darray, size);
+   size = hypre_MatrixSize(A);
+   darray = hypre_CTAlloc(double, hypre_NDIMU(size));
+   WJacobiDataT(wjacobi_data) = hypre_NewVector(darray, size);
 }
 
 /*--------------------------------------------------------------------------
@@ -112,7 +112,7 @@ char     *log_file_name;
 {
    WJacobiData  *wjacobi_data;
 
-   wjacobi_data = ctalloc(WJacobiData, 1);
+   wjacobi_data = hypre_CTAlloc(WJacobiData, 1);
 
    WJacobiDataWeight(wjacobi_data)      = SolverWJacobiWeight(solver);
    WJacobiDataMaxIter(wjacobi_data)     = SolverWJacobiMaxIter(solver);
@@ -134,8 +134,8 @@ void  *data;
 
    if (wjacobi_data)
    {
-      FreeVector(WJacobiDataT(wjacobi_data));
-      tfree(wjacobi_data);
+      hypre_FreeVector(WJacobiDataT(wjacobi_data));
+      hypre_TFree(wjacobi_data);
    }
 }
 

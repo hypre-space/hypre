@@ -29,9 +29,9 @@ char     *file_name;
 
    int      num_variables;
 
-   Matrix  *A;
-   Vector  *f;
-   Vector  *u;
+   hypre_Matrix  *A;
+   hypre_Vector  *f;
+   hypre_Vector  *u;
 
    int      num_unknowns;
    int      num_points;
@@ -57,7 +57,7 @@ char     *file_name;
     * Allocate the problem structure
     *----------------------------------------------------------*/
 
-   problem = ctalloc(Problem, 1);
+   problem = hypre_CTAlloc(Problem, 1);
 
    /*----------------------------------------------------------
     * Open the problem file
@@ -78,9 +78,9 @@ char     *file_name;
    fscanf(fp, "%s", temp_file_name);
    A = ReadYSMP(temp_file_name);
 
-   if (MatrixSize(A) != num_variables)
+   if (hypre_MatrixSize(A) != num_variables)
    {
-      printf("Matrix is of incompatible size\n");
+      printf("hypre_Matrix is of incompatible size\n");
       exit(1);
    }
 
@@ -98,7 +98,7 @@ char     *file_name;
       fscanf(fp, "%s", temp_file_name);
       f = ReadVec(temp_file_name);
 
-      if (VectorSize(f) != num_variables)
+      if (hypre_VectorSize(f) != num_variables)
       {
 	 printf("Right hand side is of incompatible\n");
 	 exit(1);
@@ -108,7 +108,7 @@ char     *file_name;
    }
    else
    {
-      data = ctalloc(double, NDIMU(num_variables));
+      data = hypre_CTAlloc(double, hypre_NDIMU(num_variables));
 
       if (flag == 1)
       {
@@ -121,10 +121,10 @@ char     *file_name;
       else if (flag == 2)
       {
 	 for (i = 0; i < num_variables; i++)
-	    data[i] = Rand();
+	    data[i] = hypre_Rand();
       }
 
-      f = NewVector(data, num_variables);
+      f = hypre_NewVector(data, num_variables);
    }
 
    /*----------------------------------------------------------
@@ -139,7 +139,7 @@ char     *file_name;
       fscanf(fp, "%s", temp_file_name);
       u = ReadVec(temp_file_name);
 
-      if (VectorSize(u) != num_variables)
+      if (hypre_VectorSize(u) != num_variables)
       {
 	 printf("Initial guess is of incompatible size\n");
 	 exit(1);
@@ -149,7 +149,7 @@ char     *file_name;
    }
    else
    {
-      data = ctalloc(double, NDIMU(num_variables));
+      data = hypre_CTAlloc(double, hypre_NDIMU(num_variables));
 
       if (flag == 1)
       {
@@ -162,10 +162,10 @@ char     *file_name;
       else if (flag == 2)
       {
 	 for (i = 0; i < num_variables; i++)
-	    data[i] = Rand();
+	    data[i] = hypre_Rand();
       }
 
-      u = NewVector(data, num_variables);
+      u = hypre_NewVector(data, num_variables);
    }
 
    /*----------------------------------------------------------
@@ -183,9 +183,9 @@ char     *file_name;
 
    if (flag == 0)
    {
-      iu = ctalloc(int, NDIMU(num_variables));
-      ip = ctalloc(int, NDIMU(num_variables));
-      iv = ctalloc(int, NDIMP(num_points+1));
+      iu = hypre_CTAlloc(int, hypre_NDIMU(num_variables));
+      ip = hypre_CTAlloc(int, hypre_NDIMU(num_variables));
+      iv = hypre_CTAlloc(int, hypre_NDIMP(num_points+1));
 
       fscanf(fp, "%s", temp_file_name);
       temp_fp = fopen(temp_file_name, "r");
@@ -217,9 +217,9 @@ char     *file_name;
 
    if (flag == 0)
    {
-      xp = ctalloc(double, NDIMP(num_points));
-      yp = ctalloc(double, NDIMP(num_points));
-      zp = ctalloc(double, NDIMP(num_points));
+      xp = hypre_CTAlloc(double, hypre_NDIMP(num_points));
+      yp = hypre_CTAlloc(double, hypre_NDIMP(num_points));
+      zp = hypre_CTAlloc(double, hypre_NDIMP(num_points));
 
       fscanf(fp, "%s", temp_file_name);
       temp_fp = fopen(temp_file_name, "r");
@@ -281,13 +281,13 @@ Problem  *problem;
 {
    if (problem)
    {
-      tfree(ProblemIU(problem));
-      tfree(ProblemIP(problem));
-      tfree(ProblemIV(problem));
-      tfree(ProblemXP(problem));
-      tfree(ProblemYP(problem));
-      tfree(ProblemZP(problem));
-      tfree(problem);
+      hypre_TFree(ProblemIU(problem));
+      hypre_TFree(ProblemIP(problem));
+      hypre_TFree(ProblemIV(problem));
+      hypre_TFree(ProblemXP(problem));
+      hypre_TFree(ProblemYP(problem));
+      hypre_TFree(ProblemZP(problem));
+      hypre_TFree(problem);
    }
 }
 

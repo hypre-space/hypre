@@ -36,8 +36,8 @@
  *--------------------------------------------------------------------------*/
 
 void     PCG(x, b, tol, data)
-Vector  *x;
-Vector  *b;
+hypre_Vector  *x;
+hypre_Vector  *b;
 double   tol;
 void    *data;
 {
@@ -46,10 +46,10 @@ void    *data;
    int        max_iter     = PCGDataMaxIter(pcg_data);
    int        two_norm     = PCGDataTwoNorm(pcg_data);
 
-   Matrix    *A            = PCGDataA(pcg_data);
-   Vector    *p            = PCGDataP(pcg_data);
-   Vector    *s            = PCGDataS(pcg_data);
-   Vector    *r            = PCGDataR(pcg_data);
+   hypre_Matrix    *A            = PCGDataA(pcg_data);
+   hypre_Vector    *p            = PCGDataP(pcg_data);
+   hypre_Vector    *s            = PCGDataS(pcg_data);
+   hypre_Vector    *r            = PCGDataR(pcg_data);
 
    int      (*precond)()   = PCGDataPrecond(pcg_data);
    void      *precond_data = PCGDataPrecondData(pcg_data);
@@ -72,9 +72,9 @@ void    *data;
     * Initialize some logging variables
     *-----------------------------------------------------------------------*/
 
-   norm_log     = ctalloc(double, max_iter);
-   rel_norm_log = ctalloc(double, max_iter);
-   conv_rate    = ctalloc(double, max_iter+1);
+   norm_log     = hypre_CTAlloc(double, max_iter);
+   rel_norm_log = hypre_CTAlloc(double, max_iter);
+   conv_rate    = hypre_CTAlloc(double, max_iter+1);
 
  
    /*-----------------------------------------------------------------------
@@ -93,62 +93,62 @@ void    *data;
    if (two_norm)
    {
       /* eps = (tol^2)*<b,b> */
-      bi_prod = InnerProd(b, b);
+      bi_prod = hypre_InnerProd(b, b);
       eps = (tol*tol)*bi_prod;
    }
    else
    {
       /* eps = (tol^2)*<C*b,b> */
-      InitVector(p, 0.0);
+      hypre_InitVector(p, 0.0);
       precond(p, b, 0.0, precond_data);
-      bi_prod = InnerProd(p, b);
+      bi_prod = hypre_InnerProd(p, b);
       eps = (tol*tol)*bi_prod;
    }
 
    /* r = b - Ax */
-   CopyVector(b, r);
-   Matvec(-1.0, A, x, 1.0, r);
+   hypre_CopyVector(b, r);
+   hypre_Matvec(-1.0, A, x, 1.0, r);
  
    /* Set initial residual norm, print to log */
-   norm_log[0] = sqrt(InnerProd(r,r));
+   norm_log[0] = sqrt(hypre_InnerProd(r,r));
    fprintf(log_fp, "\nInitial residual norm:    %e\n\n", norm_log[0]);
 
 
    /* p = C*r */
-   InitVector(p, 0.0);
+   hypre_InitVector(p, 0.0);
    precond(p, r, 0.0, precond_data);
 
    /* gamma = <r,p> */
-   gamma = InnerProd(r,p);
+   gamma = hypre_InnerProd(r,p);
 
    while ((i+1) <= max_iter)
    {
       i++;
 
       /* s = A*p */
-      Matvec(1.0, A, p, 0.0, s);
+      hypre_Matvec(1.0, A, p, 0.0, s);
 
       /* alpha = gamma / <s,p> */
-      alpha = gamma / InnerProd(s, p);
+      alpha = gamma / hypre_InnerProd(s, p);
 
       gamma_old = gamma;
 
       /* x = x + alpha*p */
-      Axpy(alpha, p, x);
+      hypre_Axpy(alpha, p, x);
 
       /* r = r - alpha*s */
-      Axpy(-alpha, s, r);
+      hypre_Axpy(-alpha, s, r);
 	 
       /* s = C*r */
-      InitVector(s, 0.0);
+      hypre_InitVector(s, 0.0);
       precond(s, r, 0.0, precond_data);
 
       /* gamma = <r,s> */
-      gamma = InnerProd(r, s);
+      gamma = hypre_InnerProd(r, s);
 
       /* set i_prod for convergence test */
       if (two_norm)
-	 i_prod = InnerProd(r,r);
+	 i_prod = hypre_InnerProd(r,r);
       else
 	 i_prod = gamma;
 
@@ -173,8 +173,8 @@ void    *data;
       beta = gamma / gamma_old;
 
       /* p = s + beta p */
-      ScaleVector(beta, p);   
-      Axpy(1.0, s, p);
+      hypre_ScaleVector(beta, p);   
+      hypre_Axpy(1.0, s, p);
    }
 
 #if 1
@@ -213,8 +213,8 @@ void    *data;
    
    fclose(log_fp);
    
-   tfree(norm_log);
-   tfree(rel_norm_log);
+   hypre_TFree(norm_log);
+   hypre_TFree(rel_norm_log);
 }
 
 /*--------------------------------------------------------------------------
@@ -222,7 +222,7 @@ void    *data;
  *--------------------------------------------------------------------------*/
 
 void      PCGSetup(A, precond, precond_data, data)
-Matrix   *A;
+hypre_Matrix   *A;
 int     (*precond)();
 void     *precond_data;
 void     *data;
@@ -235,13 +235,13 @@ void     *data;
 
    PCGDataA(pcg_data) = A;
 
-   size = MatrixSize(A);
-   darray = ctalloc(double, NDIMU(size));
-   PCGDataP(pcg_data) = NewVector(darray, size);
-   darray = ctalloc(double, NDIMU(size));
-   PCGDataS(pcg_data) = NewVector(darray, size);
-   darray = ctalloc(double, NDIMU(size));
-   PCGDataR(pcg_data) = NewVector(darray, size);
+   size = hypre_MatrixSize(A);
+   darray = hypre_CTAlloc(double, hypre_NDIMU(size));
+   PCGDataP(pcg_data) = hypre_NewVector(darray, size);
+   darray = hypre_CTAlloc(double, hypre_NDIMU(size));
+   PCGDataS(pcg_data) = hypre_NewVector(darray, size);
+   darray = hypre_CTAlloc(double, hypre_NDIMU(size));
+   PCGDataR(pcg_data) = hypre_NewVector(darray, size);
 
    PCGDataPrecond(pcg_data)     = precond;
    PCGDataPrecondData(pcg_data) = precond_data;
@@ -258,7 +258,7 @@ char     *log_file_name;
 {
    PCGData  *pcg_data;
 
-   pcg_data = ctalloc(PCGData, 1);
+   pcg_data = hypre_CTAlloc(PCGData, 1);
 
    PCGDataMaxIter(pcg_data)     = SolverPCGMaxIter(solver);
    PCGDataTwoNorm(pcg_data)     = SolverPCGTwoNorm(solver);
@@ -280,10 +280,10 @@ void  *data;
 
    if (pcg_data)
    {
-      FreeVector(PCGDataP(pcg_data));
-      FreeVector(PCGDataS(pcg_data));
-      FreeVector(PCGDataR(pcg_data));
-      tfree(pcg_data);
+      hypre_FreeVector(PCGDataP(pcg_data));
+      hypre_FreeVector(PCGDataS(pcg_data));
+      hypre_FreeVector(PCGDataR(pcg_data));
+      hypre_TFree(pcg_data);
    }
 }
 

@@ -26,8 +26,8 @@ typedef struct
    double   weight;
    int      max_iter;
 
-   Matrix  *A;
-   Vector  *t;
+   hypre_Matrix  *A;
+   hypre_Vector  *t;
 
    char    *log_file_name;
 

@@ -20,10 +20,10 @@
  * ReadYSMP
  *--------------------------------------------------------------------------*/
 
-Matrix   *ReadYSMP(file_name)
+hypre_Matrix   *ReadYSMP(file_name)
 char     *file_name;
 {
-   Matrix  *matrix;
+   hypre_Matrix  *matrix;
 
    FILE    *fp;
 
@@ -43,15 +43,15 @@ char     *file_name;
 
    fscanf(fp, "%d", &size);
 
-   ia = ctalloc(int, NDIMU(size+1));
+   ia = hypre_CTAlloc(int, hypre_NDIMU(size+1));
    for (j = 0; j < size+1; j++)
       fscanf(fp, "%d", &ia[j]);
 
-   ja = ctalloc(int, NDIMA(ia[size]-1));
+   ja = hypre_CTAlloc(int, hypre_NDIMA(ia[size]-1));
    for (j = 0; j < ia[size]-1; j++)
       fscanf(fp, "%d", &ja[j]);
 
-   data = ctalloc(double, NDIMA(ia[size]-1));
+   data = hypre_CTAlloc(double, hypre_NDIMA(ia[size]-1));
    for (j = 0; j < ia[size]-1; j++)
       fscanf(fp, "%le", &data[j]);
 
@@ -61,7 +61,7 @@ char     *file_name;
     * Create the matrix structure
     *----------------------------------------------------------*/
 
-   matrix = NewMatrix(data, ia, ja, size);
+   matrix = hypre_NewMatrix(data, ia, ja, size);
 
    return matrix;
 }
@@ -70,10 +70,10 @@ char     *file_name;
  * ReadVec
  *--------------------------------------------------------------------------*/
 
-Vector   *ReadVec(file_name)
+hypre_Vector   *ReadVec(file_name)
 char     *file_name;
 {
-   Vector  *vector;
+   hypre_Vector  *vector;
 
    FILE    *fp;
 
@@ -91,7 +91,7 @@ char     *file_name;
 
    fscanf(fp, "%d", &size);
 
-   data = ctalloc(double, NDIMU(size));
+   data = hypre_CTAlloc(double, hypre_NDIMU(size));
    for (j = 0; j < size; j++)
       fscanf(fp, "%le", &data[j]);
 
@@ -101,7 +101,7 @@ char     *file_name;
     * Create the vector structure
     *----------------------------------------------------------*/
 
-   vector = NewVector(data, size);
+   vector = hypre_NewVector(data, size);
 
    return vector;
 }

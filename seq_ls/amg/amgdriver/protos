@@ -22,8 +22,8 @@ PROTOS="protos.h"
  
 cat > $PROTOS <<@
  
-#ifndef _PROTOS_HEADER
-#define _PROTOS_HEADER
+#ifndef HYPRE_PROTOS_HEADER
+#define HYPRE_PROTOS_HEADER
  
 @
  

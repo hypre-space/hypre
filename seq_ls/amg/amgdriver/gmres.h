@@ -26,8 +26,8 @@ typedef struct
    int    (*precond)();
    void    *precond_data;
 
-   Vector  *s;
-   Vector  *r;
+   hypre_Vector  *s;
+   hypre_Vector  *r;
 
 } SPGMRPData;
 

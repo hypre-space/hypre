@@ -13,8 +13,8 @@
  *
  *****************************************************************************/
 
-#ifndef _GENERAL_HEADER
-#define _GENERAL_HEADER
+#ifndef HYPRE_GENERAL_HEADER
+#define HYPRE_GENERAL_HEADER
 
 
 /*--------------------------------------------------------------------------
@@ -46,14 +46,14 @@
  * Define memory allocation routines
  *--------------------------------------------------------------------------*/
 
-#define talloc(type, count) \
+#define hypre_TAlloc(type, count) \
 ((count) ? (type *) malloc((unsigned int)(sizeof(type) * (count))) : NULL)
 
-#define ctalloc(type, count) \
+#define hypre_CTAlloc(type, count) \
 ((count) ? (type *) calloc((unsigned int)(count), (unsigned int)sizeof(type)) : NULL)
 
 /* note: the `else' is required to guarantee termination of the `if' */
-#define tfree(ptr) if (ptr) free(ptr); else
+#define hypre_TFree(ptr) if (ptr) free(ptr); else
 
 
 #endif

@@ -24,24 +24,24 @@ static int Seed = 13579;
 #define L 1027
 
 /*--------------------------------------------------------------------------
- * SeedRand:
+ * hypre_SeedRand:
  *   The seed must always be positive.
  *
  *   Note: the internal seed must be positive and odd, so it is set
  *   to (2*input_seed - 1);
  *--------------------------------------------------------------------------*/
 
-void  SeedRand(seed)
+void  hypre_SeedRand(seed)
 int   seed;
 {
    Seed = (2*seed - 1) % M;
 }
 
 /*--------------------------------------------------------------------------
- * Rand
+ * hypre_Rand
  *--------------------------------------------------------------------------*/
 
-double  Rand()
+double  hypre_Rand()
 {
    Seed = (L * Seed) % M;
 

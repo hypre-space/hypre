@@ -63,7 +63,7 @@ char     *file_name;
     * Allocate the solver structure
     *----------------------------------------------------------*/
 
-   solver = ctalloc(Solver, 1);
+   solver = hypre_CTAlloc(Solver, 1);
 
    /*----------------------------------------------------------
     * Open the solver file
@@ -120,13 +120,13 @@ char     *file_name;
    fscanf(fp, "%d",  &amg_nstr);
    
    fscanf(fp, "%d", &amg_ncyc);
-   amg_mu = ctalloc(int, amg_levmax);
+   amg_mu = hypre_CTAlloc(int, amg_levmax);
    for (i = 0; i < amg_levmax; i++)
       fscanf(fp, "%d", &amg_mu[i]);
-   amg_ntrlx = ctalloc(int, 4);
+   amg_ntrlx = hypre_CTAlloc(int, 4);
    for (i = 0; i < 4; i++)
       fscanf(fp, "%d", &amg_ntrlx[i]);
-   amg_iprlx = ctalloc(int, 4);
+   amg_iprlx = hypre_CTAlloc(int, 4);
    for (i = 0; i < 4; i++)
       fscanf(fp, "%d", &amg_iprlx[i]);
    fscanf(fp, "%d", &amg_ioutdat);
@@ -167,11 +167,11 @@ Solver  *solver;
 {
    if (solver)
    {
-      tfree(SolverAMGMU(solver));
-      tfree(SolverAMGNTRLX(solver));
-      tfree(SolverAMGIPRLX(solver));
+      hypre_TFree(SolverAMGMU(solver));
+      hypre_TFree(SolverAMGNTRLX(solver));
+      hypre_TFree(SolverAMGIPRLX(solver));
 
-      tfree(solver);
+      hypre_TFree(solver);
    }
 }
 

@@ -32,9 +32,9 @@ char *argv[];
    Problem *problem;
    Solver  *solver;
 
-   Matrix  *A;
-   Vector  *u;
-   Vector  *f;
+   hypre_Matrix  *A;
+   hypre_Vector  *u;
+   hypre_Vector  *f;
    double   stop_tolerance;
    void    *amg_data;
    void    *wjacobi_data;
@@ -125,16 +125,16 @@ char *argv[];
 
    /* call AMG */
 
-   amg_Clock_init();
-   start_ticks = amg_Clock(); 
-   start_cpu = amg_CPUClock();
+   HYPRE_AMGClock_init();
+   start_ticks = HYPRE_AMGClock(); 
+   start_cpu = HYPRE_AMGCPUClock();
 
    if (SolverType(solver) == SOLVER_AMG)
    {
       int setup_err_flag;
       int solve_err_flag;
 
-      setup_err_flag = amg_Setup(A, amg_data);
+      setup_err_flag = HYPRE_AMGSetup(A, amg_data);
       if (setup_err_flag != 0) 
       {
          printf("setup error = %d\n",setup_err_flag);
@@ -145,16 +145,16 @@ char *argv[];
          printf("Setup Error Warning. Execution Continues.\n");
       }
 
-      setup_ticks = amg_Clock() - start_ticks;
-      setup_cpu =   amg_CPUClock() - start_cpu;
+      setup_ticks = HYPRE_AMGClock() - start_ticks;
+      setup_cpu =   HYPRE_AMGCPUClock() - start_cpu;
 
-      solve_err_flag = amg_Solve(u, f, stop_tolerance, amg_data);
+      solve_err_flag = HYPRE_AMGSolve(u, f, stop_tolerance, amg_data);
       if (solve_err_flag != 0) printf("solve error = %d\n",solve_err_flag);
 
-      solve_ticks = amg_Clock() - (start_ticks + setup_ticks);
-      solve_cpu =   amg_CPUClock() - (start_cpu + setup_cpu);
-      time_ticks =  amg_Clock() - start_ticks;
-      cpu_ticks =   amg_CPUClock() - start_cpu;
+      solve_ticks = HYPRE_AMGClock() - (start_ticks + setup_ticks);
+      solve_cpu =   HYPRE_AMGCPUClock() - (start_cpu + setup_cpu);
+      time_ticks =  HYPRE_AMGClock() - start_ticks;
+      cpu_ticks =   HYPRE_AMGCPUClock() - start_cpu;
    }
 
    /* call Jacobi */
@@ -168,8 +168,8 @@ char *argv[];
    /* call AMG PCG */
    else if (SolverType(solver) == SOLVER_AMG_PCG)
    {
-      amg_Setup(A, amg_data);
-      PCGSetup(A, amg_Solve, amg_data, pcg_data);
+      HYPRE_AMGSetup(A, amg_data);
+      PCGSetup(A, HYPRE_AMGSolve, amg_data, pcg_data);
 
       PCG(u, f, stop_tolerance, pcg_data);
    }
@@ -186,8 +186,8 @@ char *argv[];
    /* call AMG GMRES */
    else if (SolverType(solver) == SOLVER_AMG_GMRES)
    {
-      amg_Setup(A, amg_data);
-      GMRESSetup(A, amg_Solve, amg_data, gmres_data);
+      HYPRE_AMGSetup(A, amg_data);
+      GMRESSetup(A, HYPRE_AMGSolve, amg_data, gmres_data);
 
       GMRES(u, f, stop_tolerance, gmres_data);
    }
@@ -251,24 +251,24 @@ char *argv[];
 
 #if 0
    sprintf(file_name, "%s.lastu", GlobalsOutFileName);
-   WriteVec(file_name, u);
+   hypre_WriteVec(file_name, u);
 #endif
 #if 0
-   printf("soln norm = %e\n", sqrt(InnerProd(u,u)));
+   printf("soln norm = %e\n", sqrt(hypre_InnerProd(u,u)));
 
-   printf("rhs norm = %e\n", sqrt(InnerProd(f,f)));
-   Matvec(-1.0, A, u, 1.0, f);
+   printf("rhs norm = %e\n", sqrt(hypre_InnerProd(f,f)));
+   hypre_Matvec(-1.0, A, u, 1.0, f);
    sprintf(file_name, "%s.res", GlobalsOutFileName);
-   WriteVec(file_name, f);
+   hypre_WriteVec(file_name, f);
 
-   printf("res_norm = %e\n", sqrt(InnerProd(f,f)));
+   printf("res_norm = %e\n", sqrt(hypre_InnerProd(f,f)));
 
    sprintf(file_name, "%s.A", GlobalsOutFileName);
-   WriteYSMP(file_name, A);
+   hypre_WriteYSMP(file_name, A);
 
-   Matvec(1.0, A, u, 0.0, f);
+   hypre_Matvec(1.0, A, u, 0.0, f);
    sprintf(file_name, "%s.Au", GlobalsOutFileName);
-   WriteVec(file_name, f);
+   hypre_WriteVec(file_name, f);
 #endif
 
    return 0;

@@ -28,30 +28,30 @@ char     *log_file_name;
    void  *amg_data;
 
 
-   amg_data = amg_Initialize(NULL);
+   amg_data = HYPRE_AMGInitialize(NULL);
 
-   amg_SetLevMax(SolverAMGLevMax(solver), amg_data);
-   amg_SetNCG(SolverAMGNCG(solver), amg_data);
-   amg_SetECG(SolverAMGECG(solver), amg_data);
-   amg_SetNWT(SolverAMGNWT(solver), amg_data);
-   amg_SetEWT(SolverAMGEWT(solver), amg_data);
-   amg_SetNSTR(SolverAMGNSTR(solver), amg_data);
+   HYPRE_AMGSetLevMax(SolverAMGLevMax(solver), amg_data);
+   HYPRE_AMGSetNCG(SolverAMGNCG(solver), amg_data);
+   HYPRE_AMGSetECG(SolverAMGECG(solver), amg_data);
+   HYPRE_AMGSetNWT(SolverAMGNWT(solver), amg_data);
+   HYPRE_AMGSetEWT(SolverAMGEWT(solver), amg_data);
+   HYPRE_AMGSetNSTR(SolverAMGNSTR(solver), amg_data);
    				    
-   amg_SetNCyc(SolverAMGNCyc(solver), amg_data);
-   amg_SetMU(SolverAMGMU(solver), amg_data);
-   amg_SetNTRLX(SolverAMGNTRLX(solver), amg_data);
-   amg_SetIPRLX(SolverAMGIPRLX(solver), amg_data);
+   HYPRE_AMGSetNCyc(SolverAMGNCyc(solver), amg_data);
+   HYPRE_AMGSetMU(SolverAMGMU(solver), amg_data);
+   HYPRE_AMGSetNTRLX(SolverAMGNTRLX(solver), amg_data);
+   HYPRE_AMGSetIPRLX(SolverAMGIPRLX(solver), amg_data);
    				    
-   amg_SetLogging(SolverAMGIOutDat(solver), log_file_name, amg_data);
+   HYPRE_AMGSetLogging(SolverAMGIOutDat(solver), log_file_name, amg_data);
 
-   amg_SetNumUnknowns(ProblemNumUnknowns(problem), amg_data);
-   amg_SetNumPoints(ProblemNumPoints(problem), amg_data);
-   amg_SetIU(ProblemIU(problem), amg_data);
-   amg_SetIP(ProblemIP(problem), amg_data);
-   amg_SetIV(ProblemIV(problem), amg_data);
-   amg_SetXP(ProblemXP(problem), amg_data);
-   amg_SetYP(ProblemYP(problem), amg_data);
-   amg_SetZP(ProblemZP(problem), amg_data);
+   HYPRE_AMGSetNumUnknowns(ProblemNumUnknowns(problem), amg_data);
+   HYPRE_AMGSetNumPoints(ProblemNumPoints(problem), amg_data);
+   HYPRE_AMGSetIU(ProblemIU(problem), amg_data);
+   HYPRE_AMGSetIP(ProblemIP(problem), amg_data);
+   HYPRE_AMGSetIV(ProblemIV(problem), amg_data);
+   HYPRE_AMGSetXP(ProblemXP(problem), amg_data);
+   HYPRE_AMGSetYP(ProblemYP(problem), amg_data);
+   HYPRE_AMGSetZP(ProblemZP(problem), amg_data);
    
    return amg_data;
 }

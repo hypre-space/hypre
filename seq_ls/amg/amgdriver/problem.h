@@ -25,14 +25,14 @@ typedef struct
 {
    int      num_variables;
 
-   Matrix  *A;
+   hypre_Matrix  *A;
    char     A_input[256];
 
-   Vector  *f;
+   hypre_Vector  *f;
    int      f_flag;
    char     f_input[256];
 
-   Vector  *u;
+   hypre_Vector  *u;
    int      u_flag;
    char     u_input[256];
 

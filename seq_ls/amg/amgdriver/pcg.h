@@ -26,10 +26,10 @@ typedef struct
    int      max_iter;
    int      two_norm;
 
-   Matrix  *A;
-   Vector  *p;
-   Vector  *s;
-   Vector  *r;
+   hypre_Matrix  *A;
+   hypre_Vector  *p;
+   hypre_Vector  *s;
+   hypre_Vector  *r;
 
    int    (*precond)();
    void    *precond_data;
