@@ -541,6 +541,9 @@ extern "C" {
 # define P(s) ()
 #endif
 
+/* random.c */
+void  hypre_SeedRand P((int seed));
+double  hypre_Rand P(());
 
 /* timer.c */
 double time_getWallclockSeconds P((void ));
