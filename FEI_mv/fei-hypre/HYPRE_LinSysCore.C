@@ -222,7 +222,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amgUseGSMG_         = 0;
    amgGSMGNSamples_    = 0;
    for (int i = 0; i < 25; i++) amgRelaxWeight_[i] = 1.0; 
-   for (int i = 0; i < 25; i++) amgRelaxOmega_[i] = 1.0; 
+   for (int j = 0; j < 25; j++) amgRelaxOmega_[j] = 1.0; 
 
    pilutFillin_        = 0;    // how many nonzeros to keep in L and U
    pilutDropTol_       = 0.0;
@@ -251,7 +251,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
 
    euclidargc_         = 2;    // parameters information for Euclid
    euclidargv_         = new char*[euclidargc_*2];
-   for (int j = 0; j < euclidargc_*2; j++) euclidargv_[j] = new char[50];
+   for (int k = 0; k < euclidargc_*2; k++) euclidargv_[k] = new char[50];
    strcpy(euclidargv_[0], "-level");   
    strcpy(euclidargv_[1], "0");   
    strcpy(euclidargv_[2], "-sparseA");   
