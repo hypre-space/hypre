@@ -69,6 +69,24 @@ HYPRE_ParAMGSolve( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParAMGSolveT
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_ParAMGSolveT( HYPRE_Solver solver,
+                   HYPRE_ParCSRMatrix A,
+                   HYPRE_ParVector b,
+                   HYPRE_ParVector x      )
+{
+
+
+   return( hypre_ParAMGSolveT( (void *) solver,
+                              (hypre_ParCSRMatrix *) A,
+                              (hypre_ParVector *) b,
+                              (hypre_ParVector *) x ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParAMGSetMaxLevels
  *--------------------------------------------------------------------------*/
 
