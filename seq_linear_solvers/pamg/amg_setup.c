@@ -80,12 +80,12 @@ hypre_AMGSetup( void            *amg_vdata,
    schwarz_option = hypre_AMGDataSchwarzOption(amg_data);
  
    dof_func = hypre_AMGDataDofFunc(amg_data);
-   coarse_dof_func = NULL;
 
    A_array = hypre_CTAlloc(hypre_CSRMatrix*, max_levels);
    P_array = hypre_CTAlloc(hypre_CSRMatrix*, max_levels-1);
    CF_marker_array = hypre_CTAlloc(int*, max_levels-1);
    dof_func_array = hypre_CTAlloc(int*, max_levels);
+   coarse_dof_func = NULL;
 
    if (schwarz_option[0] > -1)
    {

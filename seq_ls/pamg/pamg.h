@@ -231,10 +231,15 @@ int gselim( double *A , double *x , int n );
 int hypre_CSRMatrixScaledNorm( hypre_CSRMatrix *A , double *scnorm );
 
 /* schwarz.c */
-int matrix_matrix_product( int **i_element_edge_pointer , int **j_element_edge_pointer , int *i_element_face , int *j_element_face , int *i_face_edge , int *j_face_edge , int num_elements , int num_faces , int num_edges );
 int hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix *A , int *dof_func , int num_functions , int option , int **i_domain_dof_pointer , int **j_domain_dof_pointer , double **domain_matrixinverse_pointer , int *num_domains_pointer );
 int hypre_SchwarzSolve( hypre_CSRMatrix *A , hypre_Vector *rhs_vector , int num_domains , int *i_domain_dof , int *j_domain_dof , double *domain_matrixinverse , hypre_Vector *x_vector , hypre_Vector *aux_vector );
 int transpose_matrix_create( int **i_face_element_pointer , int **j_face_element_pointer , int *i_element_face , int *j_element_face , int num_elements , int num_faces );
+int matrix_matrix_product( int **i_element_edge_pointer , int **j_element_edge_pointer , int *i_element_face , int *j_element_face , int *i_face_edge , int *j_face_edge , int num_elements , int num_faces , int num_edges );
+int hypre_AMGCreateDomainDof( hypre_CSRMatrix *A , int **i_domain_dof_pointer , int **j_domain_dof_pointer , double **domain_matrixinverse_pointer , int *num_domains_pointer );
+int hypre_AMGeAgglomerate( int *i_AE_element , int *j_AE_element , int *i_face_face , int *j_face_face , int *w_face_face , int *i_face_element , int *j_face_element , int *i_element_face , int *j_element_face , int *i_face_to_prefer_weight , int *i_face_weight , int num_faces , int num_elements , int *num_AEs_pointer );
+int update_entry( int weight , int *weight_max , int *previous , int *next , int *first , int *last , int head , int tail , int i );
+int remove_entry( int weight , int *weight_max , int *previous , int *next , int *first , int *last , int head , int tail , int i );
+int move_entry( int weight , int *weight_max , int *previous , int *next , int *first , int *last , int head , int tail , int i );
 
 /* transpose.c */
 int hypre_CSRMatrixTranspose( hypre_CSRMatrix *A , hypre_CSRMatrix **AT );

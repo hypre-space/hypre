@@ -145,6 +145,8 @@ hypre_AMGCycle( void           *amg_vdata,
        * Do the relaxation num_sweep times
        *-----------------------------------------------------------------*/
 
+      if (hypre_AMGDataSchwarzOption(amg_data)[level] > -1) 
+	 num_sweep = hypre_AMGDataSchwarzOption(amg_data)[level];
       for (j = 0; j < num_sweep; j++)
       {
          relax_points =   grid_relax_points[cycle_param][j];
@@ -171,7 +173,7 @@ hypre_AMGCycle( void           *amg_vdata,
             cycle_op_count += num_coeffs[level]; 
          }
 
-	 if (hypre_AMGDataSchwarzOption(amg_data)[level] >= 0)
+	 if (hypre_AMGDataSchwarzOption(amg_data)[level] > -1)
 	 {
             Solve_err_flag = hypre_SchwarzSolve(A_array[level],
                               F_array[level],
