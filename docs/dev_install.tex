@@ -4,80 +4,70 @@
 
 The supported installation platforms (read pre-built \hypre{} releases)
 is a dynamic, evolving list of LC/ASCI machines, reflecting a cross
-section of the \hypre{} user community.
+section of the \hypre{} user community.  The list of platforms below are
+current as of January 2005.
 There are three types of \hypre{} installations that are updated and
 maintained by members of the Scalable Linear Solvers project:
 \begin{enumerate}
 
 \item The "alpha" installation (designated by an "a" in the version number):
    \begin{itemize}
-   \item intended to give users access to relatively recent changes.
-   \item updated somewhat frequently.
-   \item may be relatively unstable.
-   \item three old installations are retained.
-   \item installed on:
+   \item - intended to give users access to relatively recent changes.
+   \item - updated somewhat frequently.
+   \item - may be relatively unstable.
+   \item - three old installations are retained.
+   \item - installed on:
       \begin{itemize}
-      \item CASC Sun workstation cluster
       \item CASC Linux workstation cluster
       \end{itemize}
    \end{itemize}
 
 \item The "beta" installation (designated by an "b" in the version number):
    \begin{itemize}
-   \item intended to give users access to relatively recent changes.
-   \item intended to give users consistent access across several platforms.
-   \item may be relatively unstable.
-   \item three old installations are retained.
-   \item installed on:
+   \item - intended to give users access to relatively recent changes.
+   \item - intended to give users consistent access across several platforms.
+   \item - may be relatively unstable.
+   \item - three old installations are retained.
+   \item - installed on:
       \begin{itemize}
-       \item CASC Sun workstation cluster
        \item CASC Linux workstation cluster
-       \item MCR Linux cluster
-       \item GPS Compaq cluster
-       \item Linux TeraCluster Compaq cluster
-       \item Blue-Pacific
-       \item Frost
-       \item SC cluster          (classified)
-       \item Blue(Sky)-Pacific   (classified)
-       \item White               (classified)
-       \item Adelie              (classified)
-       \item Q                   (classified)
+       \item Linux clusters - MCR, ALC, ILX, Pengra, Thunder
+       \item IBM Platforms - Frost, UV
+       \item Compaq cluster - GPS
+       \item Classified Linux clusters - Adelie, Emperor, Lilac, ACE
+       \item Classified IBM Platforms - White, UM
+       \item Classified Compaq cluster - SC
       \end{itemize}
    \end{itemize}
 
 \item The general release installation:
    \begin{itemize}
-   \item intended to give users consistent access across several platforms.
-   \item updated less frequently than internal installation.
-   \item should be relatively stable.
-   \item three old installations are retained.
-   \item installed on:
+   \item - intended to give users consistent access across several platforms.
+   \item - updated less frequently than internal installation.
+   \item - should be relatively stable.
+   \item - three old installations are retained.
+   \item - installed on:
       \begin{itemize}
-       \item CASC Sun workstation cluster
        \item CASC Linux workstation cluster
-       \item MCR Linux cluster
-       \item GPS Compaq cluster
-       \item Linux TeraCluster Compaq cluster
-       \item Blue-Pacific
-       \item Frost
-       \item SC cluster          (classified)
-       \item Blue(Sky)-Pacific   (classified)
-       \item White               (classified)
-       \item Adelie              (classified)
-       \item Q                   (classified)
+       \item Linux clusters - MCR, ALC, ILX, Pengra, Thunder
+       \item IBM Platforms - Frost, UV
+       \item Compaq cluster - GPS
+       \item Classified Linux clusters - Adelie, Emperor, Lilac, ACE
+       \item Classified IBM Platforms - White, UM
+       \item Classified Compaq cluster - SC
       \end{itemize}
    \end{itemize}
 
 \end{enumerate}
 
-Two mailing list are available to inform users of the hypre
+Two mailing list are available to inform users of the HYPRE
 linear solver library when new releases become available.
 Announcements about general releases made on the `hypre-announce'
 mailing list, and announcements about beta releases are made on the
 `hypre-beta-announce' list. 
 
-Subscriptions to either mailing list is handled throught the LLNL
-Majordomo list server, Majordomo@lists.llnl.gov.i To add yourself
+Subscriptions to either mailing list is handled through the LLNL
+Majordomo list server, Majordomo@lists.llnl.gov. To add yourself
 to a mailing list, send mail to <Majordomo@list.llnl.gov> with
 the following command in the body of the email message:
 
@@ -93,166 +83,170 @@ or
 
 The installation is broken down into 2 parts: 
   \begin{itemize}
-  \item building the distribution (tar file)
-  \item installation
+  \item building the distribution tar file
+  \item installing the tar file on appropriate platforms
   \end{itemize}
 
-Build the \hypre{} distribution:
+Build the \hypre{} distribution tar file:
 
 \begin{enumerate}
 
-   \item Set the version number in \file{configure.ac} by editing
-   the \kbd{m4\_define(HYPRE\_VERSION, 1.8.3b)} line, additionally the
-   \kbd{m4\_define(HYPRE\_DATE, 2004/02/14)} and,
+   \item Set the version number in \file{configure.in}, which is in the
+   \file{config} sub-directory, by editing the \kbd{m4\_define(HYPRE\_VERSION, 1.8.3b)}
+   line, additionally the \kbd{m4\_define(HYPRE\_DATE, 2004/02/14)} and,
    \kbd{m4\_define(HYPRE\_TIME, 10:35:00)} lines can be updated as well.
    The version number, by convention, use the following syntax `M.mm.rr'.
    Where the `M' is the major release number, `mm' is the minor
-   relases number, and the `rr' an update number. Alpha, and Beta 
-   releases are denoted by the following sytanx `M.nn.rra' for 
-   alpha releases, and `M.nn.rrb' for appending beta releases. The version 
-   number is used for the name of the release creation and is used
-   in the tar file name and root directory for the distribution. The
-   \file{configure} file mst then be created by running the 
-   \kbd{config/boostrap} script, followed by a \kbd{cvs commit}.
+   release number, and the `rr' an update number. Alpha releases are denoted 
+   `M.nn.rra' and beta releases are `M.nn.rrb'. The version number is used 
+   for the name of the release creation and is used in the tar file name and
+   root directory for the distribution. 
 
-   \item Create a symbolic tag for the current version
-   of the cvs repository. To create a general release enter:
-   \kbd{cvs rtag -b VM-nn-rr linear\_solvers}. Note that a
-   general release requires that a cvs rtag with branch option,
-   the alpha, and beta releases just use an rtag.
-   Version numbers are mapped into a valid rtag branch name by the
-   following conversion, `VM-nn-rr', note: the leading (capital)
-   `V' and the version number separated with `-' replacing
-   the `.'s. This convention will over come the strict cvs
-   tag name restrictions (e.g., begin with a letter, and no `.'s).
-   Alpha, and Beta releases are denoted by the following sytanx 
-   `VM-nn-rra' for alpha releases, and `VM-nn-rrb' for beta 
-   releases. An alpha or beta release do not make branches in 
-   the repository. For a beta release the command would be similar to: 
-   \kbd{cvs rtag VM-nn-rrb linear\_solvers}. Optionally, an rtag
-   can be made relative to a date or time. For example set the
-   rtag relative to last midnight enter:
+   The \file{configure} file must be created and commited to the code repository by
+   running the \kbd{config/boostrap} script followed by \kbd{cvs commit}.
+
+   \item Create a symbolic tag for the current version of the CVS code 
+   repository. The convention used for tag numbers is to prepend a `V' to the
+   version number and change all `.' to `-'; thus overcoming the CVS strict 
+   naming restrictions for tags.  Optionally, an rtag can be made relative to
+   a date or time. 
+
+   NOTE: A cvs rtag with branch option is required for general but not alpha or
+   beta releases.
+
+   Enter the following to create the needed tag:
+   \kbd{cvs rtag -b VM-nn-rr linear\_solvers} -- for a general release. 
+   \kbd{cvs rtag VM-nn-rrb linear\_solvers} -- for a beta release. 
+   \kbd{cvs rtag VM-nn-rra linear\_solvers} -- for an alpha release. 
+
+   To set the rtag relative to last midnight (for a beta release) enter:
    \kbd{cvs rtag -D 0:0 VM-nn-rrb linear\_solvers}.
 
-   \item The distribution is created with the \kbd{mkdist} 
-   Bourne-shell script located in the tools directory of the 
-   \hypre{} repository.  Typing \kbd{mkdist -help} will give 
-   general usage info. Enter: \kbd{mkdist VM-nn-rr}. This checks 
-   out the rtag version (step 2 above) from the repository,
-   reorganizes the file structure, build the documentation,
-   and creates the distribution tar file \file{hypre-M.nn.rr.tar.gz}.
+   \item The distribution tar file is created with the \kbd{mkdist} Bourne-shell
+   script located in the tools directory of the \hypre{} repository.  Typing 
+   \kbd{mkdist -help} will give general usage information. 
+   Enter: \kbd{mkdist VM-nn-rr}. This checks out the rtag version (step 2 above)
+   from the repository, reorganizes the file structure, builds the documentation,
+   and creates \file{hypre-M.nn.rr.tar.gz}.
 
 \end{enumerate}
 
-Installing the \hypre{} distribution:
+Installing the \hypre{} distribution tar file:
 
 \begin{enumerate}
 
-   \item Copy the tar file \file{hypre-M.nn.rr.tar.gz} to 
-   \file{/usr/gapps/hypre/} and, \file{/usr/casc/hypre/}.
-   Run the script \kbd{mkdistlinks} to create symbolic-links
-   between the tar file and the 
-   appropriate systems, and locations for the build. For non-CASC 
-   machines there are two install locations:
+   \item Copy the tar file \file{hypre-M.nn.rr.tar.gz} to \file{/usr/gapps/hypre/}
+   on the LC platforms and to \file{/usr/casc/hypre/} on the CASC platforms.
+   Run the script \kbd{mkdistlinks} to create symbolic links between the tar 
+   file and the appropriate systems and locations for the build. For the LC
+   platforms, there are two install locations:
       \begin{itemize}
        \item \file{/usr/gapps/hypre/}\textit{canonical system name}
        \item \file{/usr/casc/hypre/}\textit{canonical system name}
       \end{itemize}
-   The \textit{canonical system name} is determined by 
-   \kbd{config.guess}. The appropriate directory is found using
-   the command:
+
+   The \textit{canonical system name} is determined by \kbd{config.guess}. 
+   The appropriate directory is found using the command:
       \begin{itemize}
        \item \file{/usr/gapps/hypre/`/usr/gapps/hypre/config.guess`}
        \item \file{/usr/casc/hypre/`/usr/gapps/hypre/config.guess`}
       \end{itemize}
-   However if the above name is insufficient to distinguish between
-   similar systems (e.g., AIX 5.1 runs on both Blue, and Frost. Both
-   are IBM SP, but Blue is 604e processor and Frost is Power3, capable
-   of running in 64-bit mode) then all bets are off. 
+
+   However the name returned by \kbd{config.guess} may be insufficient to
+   distinguish between similar systems (e.g. the LINUX systems all return
+   i686-pc-linux-gnu but each has differning systems). In this case the name of
+   the platform (i.e. mcr or ilx) may be appended to the returned name.
    
-   The user's of \hypre{} needn't deal with these details for the 
-   Non-CASC systems, because the \file{/usr/apps/hypre} directory
-   will automatically be linked to the appropate hypre system 
-   installation. Through a \kbd{SYS\_TYPE} environment variable
-   Some mappings between the \file{/usr/gapps/hypre/} 
-   \textit{canonical system name} directory names, the
-   \kbd{SYS\_TYPE}, and the system  follow:
+   The user's of \hypre{} needn't deal with these details for the non-CASC systems,
+   because the \file{/usr/apps/hypre} directory will automatically be linked to the
+   appropate hypre system installation through a \kbd{SYS\_TYPE} environment 
+   variable.
+
+   Some mappings between the \file{/usr/gapps/hypre/} \textit{canonical system name}
+   directory names, the \kbd{SYS\_TYPE} and the system are:
 \begin{enumerate}
-   \item \textit{canonical system name}  \kbd{SYS\_TYPE}   \kbd{System}
+   \item \textit{canonical system name}  \kbd{SYS\_TYPE}       \kbd{System}
    \begin{itemize}
-   \item  \file{alphaev67-dec-osf5.1}        tru64\_5sc           tc2k
-   \item  \file{alphaev68-dec-osf5.1}        tru64\_5             gps
-   \item  \file{i686-pc-linux-gnu}           redhat\_7a\_ia32      vivid,ilx
-   \item  \file{i686-pc-linux-gnu-pengra}    redhat\_7a\_ia32\_qsw  pengra
-   \item  \file{mips-sgi-irix6.5}            irix64              riptide
-   \item  \file{powerpc-ibm-aix5.1.0.0}      aix\_5               blue
-   \item  \file{powerpcll-ibm-aix5.1.0.0}    aix\_5\_ll            frost
+   \item  \file{alphaev68-dec-osf5.1}        tru64\_5               gps
+   \item  \file{i686-pc-linux-gnu-ilx}       chaos\_2\_ia32         ilx
+   \item  \file{i686-pc-linux-gnu-pengra}    chaos\_2\_ia32\_elan3  mcr, pengra
+   \item  \file{ia64-unknown-linux}          chaos\_2\_ia32\_elan4  thunder
+   \item  \file{powerpcll-ibm-aix5.1.0.0}    aix\_5\_ll             frost
    \end{itemize}
 \end{enumerate}
    see: 
 \htmladdnormallink{https://lc.llnl.gov/computing/techbulletins/bulletin258l.html}
 {https://lc.llnl.gov/computing/techbulletins/bulletin258l.html}
 
-   Copying the tar file on to an SCF machine requires going through
-   File Interchange System (FIS) see: 
+   In order to copy the tar file from the open LC platforms to the classified 
+   ones, the person doing the transfer must have an active account on the File
+   Interchange System (FIS) see: 
 \htmladdnormallink{http://www-lc.llnl.gov:6336/dynaweb/LCdocs/fis/}
 {http://www-lc.llnl.gov:6336/dynaweb/LCdocs/fis/}
 
-   \item Run the Bourne-shell install script \kbd{mklibs} located in 
-   the tools directory of the \hypre{} repository, a copy also
-   exist at the root level of the hypre install directory. There are
-   a couple specialized versions of \kbd{mklibs}, including:
-   \kbd{mklibs.aix}, which creates combined 32, and 64 bit
-   libraries, and \kbd{mklibs.babel} which adds --with-babel to
-   each of the installations. Typing
-   \kbd{mklibs -help} will provide usage information. Executing
-   \kbd{mklibs} will untar the distribution, and build the hypre 
-   libraries. The untaring of the distribution, creates a directory
-   \file{hypre-M.nn.rr} which contains the following subdirectories:
+   \item Run the Bourne-shell install script \kbd{mklibs}, which is located in 
+   the tools directory of the \hypre{} repository or the top-level installation 
+   directory, to untar the distribution and build the \hypre{} libraries. 
+   There are a couple specialized versions of \kbd{mklibs}, including:
+   \kbd{mklibs.aix}, which creates combined 32, and 64 bit libraries
+   \kbd{mklibs.babel} which adds --with-babel to each of the installations. 
+
+   Typing \kbd{mklibs -help} will provide usage information. 
+  
+   Untarring the distribution tar file will create a directory named \file{hypre-M.nn.rr}
+   which contains the following subdirectories:
       \begin{itemize}
        \item \file{bin}     contains hypre utilities
        \item \file{docs}    PostScript, PDF, and HTML documentation
        \item \file{src}     source code
       \end{itemize}
-   The build process will create these directories:
+
+   The build process creates these directories:
       \begin{itemize}
-       \item \file{debug}   debug compiled lib, and include subdirectories
+       \item \file{debug}   compiled with debugging information
        \item \file{include} include files
-       \item \file{lib}     optimized compiled libraries
-       \item \file{serial}  no parallel/serial compiled libraries
+       \item \file{lib}     optimized parallel compiled libraries
+       \item \file{serial}  serially compiled libraries
        \item \file{share}   the Babel SIDL file
        \item \file{threads} OpenMP compiled libraries
       \end{itemize}
-   At a minimum an optimized and a debugged version of the library will
-   be generated. Optionally, OpenMP versions of the libraries will
-   be built and installed in a \file{threads}, and \file{threads/debug}
-   directory, assuming the target system supports OpenMP. The
-   user's will see this located at: \file{/usr/apps/hypre/hypre-M.nn.rr}.
-   \kbd{mklibs} script has an optional third argument \kbd{install} which 
-   will symbolically link the distribution to the `common' user
-   accessable directories, depending on the installion type
-   specified. Typical command to build a general distribution:\linebreak
+
+   At a minimum an optimized and a debugged version of the library will be 
+   generated. Optionally, OpenMP versions of the libraries will be built and
+   installed in a \file{threads} and \file{threads/debug} directory, assuming
+   the target system supports OpenMP. The users will see this located at: 
+   \file{/usr/apps/hypre/hypre-M.nn.rr}.
+
+   \kbd{mklibs} script has an optional third argument \kbd{install} which will
+   symbolically link the distribution to the `common' user accessible directories,
+   depending on the installion type specified. Typical command to build a general
+   distribution is:\linebreak
    \kbd{mklibs -g hypre-M.nn.rr.tar.gz install}\linebreak
-   The results of this build would create the following links:\linebreak
-   \file{/usr/apps/hypre/bin -> /usr/gapps/hypre/.../hypre-M.nn.rr/bin}\linebreak
-   \file{/usr/apps/hypre/debug -> /usr/gapps/hypre/.../hypre-M.nn.rr/debug}\linebreak
-   \file{/usr/apps/hypre/docs -> /usr/gapps/hypre/.../hypre-M.nn.rr/docs}\linebreak
+
+   This would create the following links:\linebreak
+   \file{/usr/apps/hypre/bin     -> /usr/gapps/hypre/.../hypre-M.nn.rr/bin}\linebreak
+   \file{/usr/apps/hypre/debug   -> /usr/gapps/hypre/.../hypre-M.nn.rr/debug}\linebreak
+   \file{/usr/apps/hypre/docs    -> /usr/gapps/hypre/.../hypre-M.nn.rr/docs}\linebreak
    \file{/usr/apps/hypre/include -> /usr/gapps/hypre/.../hypre-M.nn.rr/include}\linebreak
-   \file{/usr/apps/hypre/lib -> /usr/gapps/hypre/.../hypre-M.nn.rr/lib}\linebreak
-   \file{/usr/apps/hypre/src -> /usr/gapps/hypre/.../hypre-M.nn.rr/src}\linebreak
+   \file{/usr/apps/hypre/lib     -> /usr/gapps/hypre/.../hypre-M.nn.rr/lib}\linebreak
+   \file{/usr/apps/hypre/src     -> /usr/gapps/hypre/.../hypre-M.nn.rr/src}\linebreak
    \file{/usr/apps/hypre/threads -> /usr/gapps/hypre/.../hypre-M.nn.rr/threads}\linebreak
-   \file{/usr/apps/hypre/alpha -> /usr/gapps/hypre/.../hypre-M.nn.rr}\linebreak
-   \file{/usr/apps/hypre/beta -> /usr/gapps/hypre/.../hypre-M.nn.rr}\linebreak
+   \file{/usr/apps/hypre/alpha   -> /usr/gapps/hypre/.../hypre-M.nn.rr}\linebreak
+   \file{/usr/apps/hypre/beta    -> /usr/gapps/hypre/.../hypre-M.nn.rr}\linebreak
+
    A beta install command of:\linebreak
    \kbd{mklibs -b hypre-M.nn.rrb.tar.gz install}\linebreak
+
    Would create the following links:\linebreak
    \file{/usr/apps/hypre/alpha -> /usr/gapps/hypre/.../hypre-M.nn.rrb}\linebreak
-   \file{/usr/apps/hypre/beta -> /usr/gapps/hypre/.../hypre-M.nn.rrb}\linebreak
-   An alpha type install command of:\linebreak
+   \file{/usr/apps/hypre/beta  -> /usr/gapps/hypre/.../hypre-M.nn.rrb}\linebreak
+
+   An alpha install command of:\linebreak
    \kbd{mklibs -a hypre-M.nn.rra.tar.gz install}\linebreak
+
    Would create the following links:\linebreak
    \file{/usr/apps/hypre/alpha -> /usr/gapps/hypre/.../hypre-M.nn.rra}\linebreak
-   Note: in general, alpha releases are only released on CASC systems.
+   NOTE: in general, alpha releases are only done on CASC systems.
 
 \end{enumerate}
 
@@ -260,7 +254,9 @@ Installing the \hypre{} distribution:
 \section{Installation Example}
 \label{Installation Example}
 
-The following is an example session creating a beta distribution:
+The following example show the creation of a beta distribution being executed on 
+a CASC System (tux cluster).
+
 \begin{ttfamily}
 \begin{mdseries}
 \linebreak
@@ -274,16 +270,8 @@ U linear_solvers/COPYRIGHT_and_DISCLAIMER
 U linear_solvers/utilities/utilities.h
 U linear_solvers/utilities/version
 \end{verbatim}
-\$ \textbf{cvs history -T}\linebreak
-\begin{verbatim}
-T 2000-10-12 20:27 +0000 treadway linear_solvers [V1-3-1b:A]
-T 2001-01-11 20:58 +0000 treadway linear_solvers [V1-4-0b:A]
- . . .
-T 2001-07-27 16:57 +0000 treadway linear_solvers [V1-6-0:A]
-T 2001-08-24 20:26 +0000 treadway linear_solvers [V1-7-0a:A]
-\end{verbatim}
-\$ \textbf{cd linear\_solvers}\linebreak
-\$ \textbf{vi configure.ac}\linebreak
+\$ \textbf{cd linear\_solvers/config}\linebreak
+\$ \textbf{vi configure.in}\linebreak
 \begin{verbatim}
  . . .
 m4_define(HYPRE_VERSION, 1.7.0a)
@@ -293,20 +281,18 @@ m4_define(HYPRE_TIME, 20:26:53)
 \end{verbatim}
 \begin{bfseries}
 \begin{verbatim}
-m4_define(HYPRE_VERSION, 1.7.0b)
-m4_define(HYPRE_DATE, 2001/11/13)
+m4_define(HYPRE_VERSION, 1.8.3b)
+m4_define(HYPRE_DATE, 2003/11/13)
 m4_define(HYPRE_TIME, 07:25:23)
 \end{verbatim}
 \end{bfseries}
-"configure.ac" 423 lines, 13216 characters\linebreak
-\$ \textbf{config/bootstrap}
+"configure.in" 423 lines, 13216 characters\linebreak
+\$ \textbf{cd ..}
+\$ \textbf{./config/bootstrap}
+\$ \textbf{cvs commit config/configure.in configure}\linebreak
+\textbf{beta release 1.8.3b}\linebreak
 \begin{verbatim}
-Putting files in AC_CONFIG_AUX_DIR, `config'.
-\end{verbatim}
-\$ \textbf{cvs commit configure.ac configure}\linebreak
-\textbf{beta release 1.7.0b}\linebreak
-\begin{verbatim}
-Release 1.7.0b
+Release 1.8.3b
 CVS: ----------------------------------------------------------------------
 CVS: Enter Log.  Lines beginning with `CVS:' are removed automatically
 CVS:
@@ -325,35 +311,35 @@ new revision: 2.107; previous revision: 2.106
 done
 \end{verbatim}
 :q
-\$ \textbf{cvs rtag V1-7-0b linear\_solvers}\linebreak
-\$ \textbf{./mkdist V1-7-0b}\linebreak
+\$ \textbf{cvs rtag V1-8-3b linear\_solvers}\linebreak
+\$ \textbf{./mkdist V1-8-3b}\linebreak
 \begin{verbatim}
 U linear_solvers/CHANGELOG
 U linear_solvers/COPYRIGHT_and_DISCLAIMER
  . . .
 U linear_solvers/utilities/utilities.h
 U linear_solvers/utilities/version
-checking the hostname... perrin
-checking the architecture... solaris
+checking the hostname... tux149
+checking the architecture... linux
  . . .
-creating hypre-1.7.0b.tar file ...
+creating hypre-1.8.3b.tar file ...
 \end{verbatim}
-\$ \textbf{ls -l hypre-1.7*}\linebreak
+\$ \textbf{ls -l hypre-1.8*}\linebreak
 \begin{verbatim}
--rw-rw-r--   1 treadway treadway 1532225 Nov 13 07:32 hypre-1.7.0b.tar.gz
+-rw-rw-r--   1 hill66 hill66 1532225 Nov 13 07:32 hypre-1.8.3b.tar.gz
 
 hypre-1.7.0b:
 total 20
--rw-rw----   1 treadway treadway    4384 Nov 13 07:32 CHANGELOG
--rw-rw----   1 treadway treadway    1645 Nov 13 07:32 COPYRIGHT_and_DISCLAIMER
-drwxrwxr-x   2 treadway treadway     512 Nov 13 07:32 bin
-drwxrwxr-x   4 treadway treadway     512 Nov 13 07:32 docs
-drwxrwxr-x  27 treadway treadway    1024 Nov 13 07:32 src
+-rw-rw----   1 hill66 hill66    4384 Nov 13 07:32 CHANGELOG
+-rw-rw----   1 hill66 hill66    1645 Nov 13 07:32 COPYRIGHT_and_DISCLAIMER
+drwxrwxr-x   2 hill66 hill66     512 Nov 13 07:32 bin
+drwxrwxr-x   4 hill66 hill66     512 Nov 13 07:32 docs
+drwxrwxr-x  27 hill66 hill66    1024 Nov 13 07:32 src
 \end{verbatim}
-\$ \textbf{hypre-1.7.0b/src/utilities/version -number}\linebreak
-1.7.0b\linebreak
-\$ \textbf{scp hypre-1.7.0b.tar.gz blue:/usr/gapps/hypre}\linebreak
-\$ \textbf{scp hypre-1.7.0b.tar.gz blue:/usr/casc/hypre}\linebreak
+\$ \textbf{hypre-1.8.3b/src/utilities/version -number}\linebreak
+1.8.3b\linebreak
+\$ \textbf{scp hypre-1.8.3b.tar.gz frost:/usr/gapps/hypre}\linebreak
+\$ \textbf{scp hypre-1.8.3b.tar.gz frost:/usr/casc/hypre}\linebreak
 \$ \textbf{ftp fis}\linebreak
 \begin{verbatim}
 Connected to fis.llnl.gov.
@@ -361,29 +347,29 @@ Connected to fis.llnl.gov.
 220-This is a Federal computer system and is the property of the
  . . .
 220 reebok.llnl.gov FTP server (Version LLNL-22 built 08/13/01 07:32:54) ready.
-Name (fis:treadway):
-331 Password required for treadway.
+Name (fis:hill66):
+331 Password required for hill66.
 Password:
-230 User treadway logged in.
+230 User hill66 logged in.
 \end{verbatim}
 ftp> \textbf{cd TO}\linebreak
 250 CWD command successful.\linebreak
 ftp> \textbf{binary}\linebreak
 200 Type set to I.\linebreak
-ftp> \textbf{put hypre-1.7.0b.tar.gz}\linebreak
+ftp> \textbf{put hypre-1.8.3b.tar.gz}\linebreak
 200 PORT command successful.\linebreak
-150 Opening BINARY mode data connection for hypre-1.7.0b.tar.gz.\linebreak
+150 Opening BINARY mode data connection for hypre-1.8.3b.tar.gz.\linebreak
 226 Transfer complete.\linebreak
-local: hypre-1.7.0b.tar.gz remote: hypre-1.7.0b.tar.gz\linebreak
+local: hypre-1.8.3b.tar.gz remote: hypre-1.8.3b.tar.gz\linebreak
 1663281 bytes sent in 0.49 seconds (3342.89 Kbytes/s)\linebreak
 ftp> \textbf{quit}\linebreak
 221 Goodbye.\linebreak
-\$ \textbf{ssh blue}\linebreak
+\$ \textbf{ssh frost}\linebreak
  . . .\linebreak
 \$ \textbf{cd /usr/gapps/hypre}\linebreak
 \$ \textbf{ls}\linebreak
 \begin{verbatim}
-aix_4                        hypre-1.7.0a.tar.gz
+aix_4                        hypre-1.8.3a.tar.gz
 aix_4ll                      i686-pc-linux-gnu
 aix_5                        i686-pc-linux-gnu-chaos
 aix_5_ll                     i686-pc-linux-gnu-pengra
@@ -404,32 +390,32 @@ hypre-1.4.0b.tar.gz          powerpcll-ibm-aix5.1.0.0
 hypre-1.5.0b.tar.gz          redhat_7_ia32
 hypre-1.6.0.tar.gz           tru64_5sc
 \end{verbatim}
-\$ \textbf{./mkdistlinks hypre-1.7.0b.tar.gz}\linebreak
+\$ \textbf{./mkdistlinks hypre-1.8.3b.tar.gz}\linebreak
 \begin{verbatim}
-lrwxrwxrwx   1 treadway hypre  22 Nov 13 07:32 alphaev67-dec-osf5.1/hypre-1.7.0b.tar.gz -> ../hypre-1.7.0b.tar.gz
-lrwxrwxrwx   1 treadway hypre  22 Nov 13 07:32 alphaev67-unknown-linux-gnu/hypre-1.7.0b.tar.gz -> ../hypre-1.7.0b.tar.gz
-lrwxrwxrwx   1 treadway hypre  22 Nov 13 07:32 alphaev68-dec-osf5.1/hypre-1.7.0b.tar.gz -> ../hypre-1.7.0b.tar.gz
-lrwxrwxrwx   1 treadway hypre  22 Nov 13 07:32 i686-pc-linux-gnu/hypre-1.7.0b.tar.gz -> ../hypre-1.7.0b.tar.gz
-lrwxrwxrwx   1 treadway hypre  22 Nov 13 07:32 i686-pc-linux-gnu-pengra/hypre-1.7.0b.tar.gz -> ../hypre-1.7.0b.tar.gz
-lrwxrwxrwx   1 treadway hypre  22 Nov 13 07:32 mips-sgi-irix6.5/hypre-1.7.0b.tar.gz -> ../hypre-1.7.0b.tar.gz
-lrwxrwxrwx   1 treadway hypre  22 Nov 13 07:32 powerpc-ibm-aix5.1.0.0/hypre-1.7.0b.tar.gz -> ../hypre-1.7.0b.tar.gz
-lrwxrwxrwx   1 treadway hypre  22 Nov 13 07:32 powerpcll-ibm-aix5.1.0.0/hypre-1.7.0b.tar.gz -> ../hypre-1.7.0b.tar.gz
+lrwxrwxrwx   1 hill66 hypre  22 Nov 13 07:32 alphaev67-dec-osf5.1/hypre-1.8.3b.tar.gz -> ../hypre-1.8.3b.tar.gz
+lrwxrwxrwx   1 hill66 hypre  22 Nov 13 07:32 alphaev67-unknown-linux-gnu/hypre-1.8.3b.tar.gz -> ../hypre-1.8.3b.tar.gz
+lrwxrwxrwx   1 hill66 hypre  22 Nov 13 07:32 alphaev68-dec-osf5.1/hypre-1.8.3b.tar.gz -> ../hypre-1.8.3b.tar.gz
+lrwxrwxrwx   1 hill66 hypre  22 Nov 13 07:32 i686-pc-linux-gnu/hypre-1.8.3b.tar.gz -> ../hypre-1.8.3b.tar.gz
+lrwxrwxrwx   1 hill66 hypre  22 Nov 13 07:32 i686-pc-linux-gnu-pengra/hypre-1.8.3b.tar.gz -> ../hypre-1.8.3b.tar.gz
+lrwxrwxrwx   1 hill66 hypre  22 Nov 13 07:32 mips-sgi-irix6.5/hypre-1.8.3b.tar.gz -> ../hypre-1.8.3b.tar.gz
+lrwxrwxrwx   1 hill66 hypre  22 Nov 13 07:32 powerpc-ibm-aix5.1.0.0/hypre-1.8.3b.tar.gz -> ../hypre-1.8.3b.tar.gz
+lrwxrwxrwx   1 hill66 hypre  22 Nov 13 07:32 powerpcll-ibm-aix5.1.0.0/hypre-1.8.3b.tar.gz -> ../hypre-1.8.3b.tar.gz
 \end{verbatim}
 \$ \textbf{cd `/usr/gapps/hypre/config.guess`}\linebreak
 \$ \textbf{ls}\linebreak
 \begin{verbatim}
-AUTOTEST             hypre-1.2.0.tar.gz   hypre-1.7.0a
-STLport-4.0          hypre-1.3.1b         hypre-1.7.0a.tar.gz
-alpha                hypre-1.4.0b         hypre-1.7.0b.tar.gz
+AUTOTEST             hypre-1.2.0.tar.gz   hypre-1.8.3a
+STLport-4.0          hypre-1.3.1b         hypre-1.8.3a.tar.gz
+alpha                hypre-1.4.0b         hypre-1.8.3b.tar.gz
 beta                 hypre-1.4.0b.tar.gz  include
 bin                  hypre-1.5.0b         lib
 debug                hypre-1.5.0b.tar.gz  src
 docs                 hypre-1.6.0          threads
 hypre-1.2.0          hypre-1.6.0.tar.gz
 \end{verbatim}
-\$ \textbf{../mklibs -b hypre-1.7.0b.tar.gz}\linebreak
+\$ \textbf{../mklibs -b hypre-1.8.3b.tar.gz}\linebreak
 \begin{verbatim}
-checking the hostname... blue
+checking the hostname... frost
 checking the architecture... aix
  . . .
 Very-cleaning FEI_mv ...
@@ -437,16 +423,16 @@ Very-cleaning test ...
 \end{verbatim}
 \$ \textbf{ls}\linebreak
 \begin{verbatim}
-AUTOTEST             hypre-1.2.0.tar.gz   hypre-1.7.0a
-STLport-4.0          hypre-1.3.1b         hypre-1.7.0a.tar.gz
-alpha                hypre-1.4.0b         hypre-1.7.0b
-beta                 hypre-1.4.0b.tar.gz  hypre-1.7.0b.tar.gz
+AUTOTEST             hypre-1.2.0.tar.gz   hypre-1.8.3a
+STLport-4.0          hypre-1.3.1b         hypre-1.8.3a.tar.gz
+alpha                hypre-1.4.0b         hypre-1.8.3b
+beta                 hypre-1.4.0b.tar.gz  hypre-1.8.3b.tar.gz
 bin                  hypre-1.5.0b         include
 debug                hypre-1.5.0b.tar.gz  lib
 docs                 hypre-1.6.0          src
 hypre-1.2.0          hypre-1.6.0.tar.gz   threads
 \end{verbatim}
-\$ \textbf{ls hypre-1.7.0b}\linebreak
+\$ \textbf{ls hypre-1.8.3b}\linebreak
 \begin{verbatim}
 CHANGELOG                 debug                     src
 COPYRIGHT_and_DISCLAIMER  docs                      threads
@@ -462,7 +448,6 @@ libHYPRE\_IJ\_mv.a\linebreak
 libHYPRE\_LSI.a\linebreak
 libHYPRE\_MatrixMatrix.a\linebreak
 libHYPRE\_ParaSails.a\linebreak
-libHYPRE\_blas.a\linebreak
 libHYPRE\_parcsr\_ls.a\linebreak
 libHYPRE\_parcsr\_mv.a\linebreak
 libHYPRE\_seq\_mv.a\linebreak
@@ -484,12 +469,10 @@ Name          Purpose
 mklibs        does default, debug, serial, and opt. threaded
 mklibs.aix    build 32 and 64 bit libraries on white & frost
 mklibs.babel  does the default plus builds babel libraries
-mklibs.tc2k   build for tc2k
 
 Name          Supported host
-mklibs        riptide, gps, sc, Q
+mklibs        gps, sc
 mklibs.aix    frost and white
-mklibs.babel  Solaris, Linux, blue, SKY (AIX<Power 3)
-mklibs.tc2k   tc2k
+mklibs.babel  Solaris, Linux
 \end{verbatim}
 \end{bfseries}
