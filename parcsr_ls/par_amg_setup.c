@@ -116,7 +116,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
 
          if (dof_func_array[j])
+         {
             hypre_TFree(dof_func_array[j]);
+            dof_func_array[j] = NULL;
+         }
       }
 
       for (j = 0; j < old_num_levels-1; j++)
@@ -126,9 +129,23 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRMatrixDestroy(P_array[j]);
             P_array[j] = NULL;
          }
+      }
 
+/* Special case use of CF_marker_array when old_num_levels == 1
+   requires us to attempt this deallocation every time */
+      if (CF_marker_array[0])
+      {
+        hypre_TFree(CF_marker_array[0]);
+        CF_marker_array[0] = NULL;
+      }
+
+      for (j = 1; j < old_num_levels-1; j++)
+      {
          if (CF_marker_array[j])
+         {
             hypre_TFree(CF_marker_array[j]);
+            CF_marker_array[j] = NULL;
+         }
       }
    }
 
