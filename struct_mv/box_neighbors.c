@@ -97,14 +97,28 @@ hypre_BoxNeighborsCreate( hypre_BoxArray      *boxes,
 /*--------------------------------------------------------------------------
  * hypre_BoxNeighborsAssemble:
  *
- * Finds boxes that are "near" the local boxes,
- * where near is defined by `max_distance'.
+ * Add "periodic boxes" to the 'boxes' BoxArray, then find boxes that
+ * are "near" (defined by 'max_distance') the local boxes.  The ranks
+ * (in the 'boxes' array) of the nearby boxes of each local box are
+ * stored in a linked list (called 'rank_links') for fast access in
+ * other algorithms.
  *
- * Note: A box is not a neighbor of itself, but it will appear
- * in the `boxes' BoxArray.
+ * If 'prune' is turned on, then only the folowing boxes are kept in
+ * the 'boxes' array: the local boxes, the nearby boxes, and all other
+ * boxes on the same processor as the nearby ones.
  *
- * Note: The box ids remain in increasing order, and the box procs
- * remain in non-decreasing order for the non-periodic boxes.
+ * NOTE: A box is not a neighbor of itself.
+ *
+ * NOTE: Periodic boxes are assigned unique ids based on the
+ * non-periodic boxes, and have the form: id + p*id_period.
+ *
+ * NOTE: The box ids for the boxes in the 'boxes' array remain in
+ * increasing order, and the box procs remain in non-decreasing order
+ * for the non-periodic boxes.  For example, with id_period = 100:
+ *
+ *   proc:     0 0 1 2 2 ...   0   0   1   2   2 ...   0   0   1   2   2 ...
+ *   ID:       0 1 2 3 4 ... 100 101 102 103 104 ... 200 201 202 203 204 ...
+ *   periodic:                 *   *   *   *   *       *   *   *   *   *
  *
  *--------------------------------------------------------------------------*/
 

@@ -18,13 +18,90 @@
  * intersecting the data dependencies of each box (including data
  * dependencies within the box) with its neighbor boxes.
  *
- * Note It is assumed that the grids neighbor information is
+ * A consistent ordering of the boxes in the send/recv data regions is
+ * returned (given by the send_order and recv_order arrays).  That is,
+ * the ordering of the boxes on process p for receives from process q
+ * is guaranteed to be the same as the ordering of the boxes on
+ * process q for sends to process p.
+ *
+ * The routine uses a grow-the-box-and-intersect-with-neighbors style
+ * algorithm, which helps in generating pre-sorted information and
+ * eliminates the need for the UnionBoxes routine which was used in
+ * previous implementations.
+ *
+ * 1. The basic algorithm:
+ *
+ * The algorithm relies on the assumption that the nearby neighbors of
+ * each local box are accessed as a single pre-sorted (by ID) list.
+ * The basic algorithm is as follows, with one additional optimization
+ * discussed below that helps to minimize the number of communications
+ * that are done with neighbors (e.g., consider a 7-pt stencil and the
+ * difference between doing 26 communications versus 6):
+ *
+ * To compute send/recv regions, do
+ * 
+ *   for i = local box
+ *   {
+ *      // receives
+ *      for j = neighbor box of i
+ *      {
+ *         gbox = grow box i according to stencil
+ *         intersect gbox with box j and add to recv region
+ *      }
+ * 
+ *      // sends
+ *      for j = neighbor box of i
+ *      {
+ *         gbox = grow box j according to stencil
+ *         intersect gbox with box i and add to send region
+ *      }
+ *   }
+ * 
+ *   sort the send boxes by j index first (this can be done cheaply)
+ * 
+ * 2. Optimization on basic algorithm:
+ * 
+ * Before looping over the neighbors in the above algorithm, do a
+ * preliminary sweep through the neighbors to select a subset of
+ * neighbors to do the intersections with.  To select the subset,
+ * compute a so-called "distance index" and check the corresponding
+ * entry in the so-called "stencil grid" to decide whether or not to
+ * use the box.
+ * 
+ * The "stencil grid" is a 3x3x3 grid in 3D that is built from the
+ * stencil as follows:
+ * 
+ *   // assume for simplicity that i,j,k are -1, 0, or 1
+ *   for each stencil entry (i,j,k)
+ *   {
+ *      mark all stencil grid entries in (1,1,1) x (1+i,1+j,1+k)
+ *      // here (1,1,1) is the "center" entry in the stencil grid
+ *   }
+ * 
+ * 3. Complications with periodicity:
+ * 
+ * When periodicity is on, it is possible to have a box-pair region
+ * (the description of a communication pattern between two boxes) that
+ * consists of more than one box.  To produce a consistent ordering on
+ * these lists of boxes, the algorithm runs through the periodic part
+ * of the recv boxes in one direction and the periodic part of the
+ * send boxes in the opposite direction.  For example, consider a
+ * box-pair region of size 3 for boxes i and j.  The following are
+ * equivalent (here, each box is tagged according to the
+ * (i,period),(j,period) pair that produced it):
+ * 
+ *   from i's point of view              from j's point of view
+ *       (i,0),(j,0)                          (i,0),(j,0)
+ *       (i,0),(j,1)                          (i,2),(j,0)
+ *       (i,0),(j,2)                          (i,1),(j,0)
+ * 
+ * NOTE: It is assumed that the grids neighbor information is
  * sufficiently large.
  *
- * Note: No concept of data ownership is assumed.  As a result,
- * problematic communications patterns can be produced when the grid
- * boxes overlap.  For example, it is likely that some boxes will have
- * send and receive patterns that overlap.
+ * NOTE: No concept of data ownership is assumed.  As a result,
+ * redundant communication patterns can be produced when the grid
+ * boxes overlap.
+ *
  *--------------------------------------------------------------------------*/
 
 int

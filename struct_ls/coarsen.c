@@ -66,60 +66,41 @@ hypre_StructMapCoarseToFine( hypre_Index cindex,
 #if 1
 
 /*--------------------------------------------------------------------------
- * hypre_StructCoarsen    - NEW
+ * hypre_StructCoarsen
  *
  * This routine coarsens the grid, 'fgrid', by the coarsening factor,
  * 'stride', using the index mapping in 'hypre_StructMapFineToCoarse'.
  * The basic algorithm is as follows:
  *
- * 1. Coarsen the neighborhood boxes.
+ * 1. Coarsen the neighborhood boxes (hood boxes).
  *
- * 2. Loop through neighborhood boxes, and compute the minimum
- * positive outside xyz distances from local boxes to neighbor boxes.
- * If some xyz distance is less than desired, receive neighborhood
- * information from the neighbor box processor.
+ * 2. Exchange coarsened hood boxes with all neighbor processes.
  *
- * 3. Loop through neighborhood boxes, and compute the minimum
- * positive outside xyz distances from neighbor boxes to local boxes.
- * If some xyz distance is less than desired, send neighborhood
- * information to the neighbor box processor.
+ * 3. Merge the coarsened hood boxes from my neighbor processes with
+ * my local coarsened hood boxes.  The result is a list of coarse grid
+ * hood boxes that is sorted and unique.
  *
  * 4. If the boolean variable, 'prune', is nonzero, eliminate boxes of
- * size zero from the coarse grid.
+ * size zero from the coarse grid hood boxes.
  *
- * Notes:
+ * 5. Use the coarse grid hood boxes to construct the coarse grid.
  *
- * 1. All neighborhood info is sent.
+ * NOTES:
  *
- * 2. Positive outside difference, d, is defined as follows:
+ * 1. All non-periodic neighborhood info is sent.
  *
- *               |<---- d ---->|
- *         ------        ------
- *        |      |      |      |
- *        | box1 |      | box2 | 
- *        |      |      |      |
- *         ------        ------
+ * 2. Neighborhoods must contain all (non-periodic) boxes associated
+ * with the process where it lives.  The neighbor class routines
+ * insure this.
  *
- * 3. Neighborhoods must contain all boxes associated with the
- * processor where it lives.  In particular, "periodic boxes", (i.e.,
- * those boxes that were shifted to handle periodicity) associated
- * with local boxes should remain in the neighborhood.  The neighbor
- * class routines insure this.
- *
- * 4. Processor numbers must appear in non-decreasing order in the
- * neighborhood box array, and IDs must be unique and appear in
+ * 3. Process numbers for non-periodic boxes must appear in the hood
+ * in non-decreasing order, and box IDs must be unique and appear in
  * increasing order.
  *
- * 5. Neighborhood information only needs to be exchanged the first
- * time a box boundary moves within the max_distance perimeter.
- *
- * 6. Boxes of size zero must also be considered when determining
- * neighborhood information exchanges.
- *
- * 7. This routine will work only if the coarsening factor is <= 2.
+ * 4. This routine will work only if the coarsening factor is <= 2.
  * To extend this algorithm to work with larger coarsening factors,
  * more than one exchange of neighbor information will be needed after
- * each processor coarsens its own neighborhood.
+ * each process coarsens its own neighborhood.
  *
  *--------------------------------------------------------------------------*/
 
@@ -278,12 +259,9 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
     * processes, hence comm_procs is used for
     * both sends and receives.
     *
-    * NOTE: This relies on the fact that for
-    * each box in the hood, all of its periodic
-    * boxes are also in the hood.  It also
-    * relies on the fact that within each box
-    * set period the process numbers are in
-    * non-decreasing order.
+    * NOTE: This relies on the fact that the
+    * process numbers for the non-periodic
+    * boxes are in non-decreasing order.
     *-----------------------------------------*/
 
    comm_procs = NULL;
@@ -567,7 +545,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 #else
 
 /*--------------------------------------------------------------------------
- * hypre_StructCoarsen    - TEMPORARY
+ * hypre_StructCoarsen    - OLD
  *--------------------------------------------------------------------------*/
 
 int
@@ -625,7 +603,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
  * (array, array_index) pairs for each entry in the merged list.  The
  * end of the pairs is indicated by the first '-1' entry in 'mergei'.
  *
- * Note: The routine assumes that each of the arrays has nonzero size.
  *--------------------------------------------------------------------------*/
 
 int

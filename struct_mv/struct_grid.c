@@ -208,17 +208,12 @@ hypre_StructGridSetHood( hypre_StructGrid *grid,
 /*--------------------------------------------------------------------------
  * hypre_StructGridAssemble
  *
- * NOTE: Box ids are set here.  They are globally unique, and appear
- * in increasing order.
+ * NOTE: Box ids are set here for the non-periodic boxes.  They are
+ * globally unique, and appear in increasing order.  The periodic
+ * boxes are defined and ids are assigned in BoxNeighborsAssemble.
  *
  * NOTE: Box procs are set here.  They appear in non-decreasing order
  * for the non-periodic boxes.
- *
- * NOTE: The boxes in 'all_boxes' appear as follows, for example:
- *
- *   proc:     0 0 1 2 2 ...   0   0   1   2   2 ...   0   0   1   2   2 ...
- *   ID:       0 1 2 3 4 ... 100 101 102 103 104 ... 200 201 202 203 204 ...
- *   periodic:                 *   *   *   *   *       *   *   *   *   *
  *
  *--------------------------------------------------------------------------*/
 
