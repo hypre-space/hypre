@@ -232,7 +232,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
 /* I repeat! DO NOT hard-wire the zero-vector answer for the
    zero-vector right-hand side!  I need to test this algorithm, so let
-   the thing converge to it, please!   - MAL */
+   the thing converge to it, please!   - MAL 
            hypre_PCGCopyVector(b,x);
 	   ierr = 0;
 	   return ierr; */
