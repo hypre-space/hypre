@@ -51,6 +51,11 @@ hypre_AMGSetup( void            *amg_vdata,
    hypre_CSRMatrix  *P;
    hypre_CSRMatrix  *A_H;
 
+   int      *A_i = hypre_CSRMatrixI(A);
+   int      *A_j = hypre_CSRMatrixJ(A);
+   double   *A_data =  hypre_CSRMatrixData(A);
+   int       num_dofsA =  hypre_CSRMatrixNumRows(A);
+
    int       num_levels;
    int       level;
    int       coarse_size;
@@ -81,7 +86,8 @@ hypre_AMGSetup( void            *amg_vdata,
    CF_marker_array = hypre_CTAlloc(int*, max_levels-1);
    dof_func_array = hypre_CTAlloc(int*, max_levels);
 
-   if (num_functions > 1) dof_func_array[0] = dof_func;
+   if (num_functions > 0) dof_func_array[0] = dof_func;
+
    A_array[0] = A;
 
    /*----------------------------------------------------------
@@ -189,11 +195,13 @@ hypre_AMGSetup( void            *amg_vdata,
       else if (coarsen_type == 3)
       {
           hypre_AMGBuildInterp(A_array[level], CF_marker_array[level], 
-					A_array[level], &P);
+					A_array[level], dof_func_array[level],
+                                        &coarse_dof_func, &P);
       }
       else 
       {
-	hypre_AMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
+	hypre_AMGBuildInterp(A_array[level], CF_marker_array[level], S,
+                             dof_func_array[level], &coarse_dof_func, &P);
       }
 
       printf("END computing level %d interpolation matrix; =======\n", level);
@@ -234,6 +242,8 @@ hypre_AMGSetup( void            *amg_vdata,
    hypre_AMGDataAArray(amg_data) = A_array;
    hypre_AMGDataPArray(amg_data) = P_array;
 
+   hypre_AMGDataDofFuncArray(amg_data) = dof_func_array;
+   hypre_AMGDataNumFunctions(amg_data) = num_functions;	
    /*-----------------------------------------------------------------------
     * Setup F and U arrays
     *-----------------------------------------------------------------------*/
@@ -283,8 +293,6 @@ hypre_AMGSetup( void            *amg_vdata,
       }   
    } 
 
-   hypre_TFree(dof_func_array);
-                     
    Setup_err_flag = 0;
    return(Setup_err_flag);
 }  

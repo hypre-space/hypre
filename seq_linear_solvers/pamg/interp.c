@@ -17,6 +17,8 @@ int
 hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
                    int                 *CF_marker,
                    hypre_CSRMatrix     *S,
+                   int                 *dof_func,
+                   int                 **coarse_dof_func_ptr,
                    hypre_CSRMatrix     **P_ptr )
 {
    
@@ -37,6 +39,8 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
    int              P_size;
    
    int             *P_marker;
+
+   int             *coarse_dof_func;
 
    int              jj_counter;
    int              jj_begin_row;
@@ -276,12 +280,14 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
    
             /*--------------------------------------------------------------
              * Case 3: nieghbor i1 weakly influences i, accumulate a_{i,i1}
-             * into the diagonal.
+             * into the diagonal. This is done only if i and i1 are of the
+             * same function type.
              *--------------------------------------------------------------*/
 
             else
             {
-               diagonal += A_data[jj];
+               if( dof_func[i] == dof_func[i1])
+                  diagonal += A_data[jj];
             }            
          }
 
@@ -311,6 +317,25 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
    hypre_CSRMatrixJ(P) = P_j; 
 
    *P_ptr = P; 
+
+   /*-----------------------------------------------------------------------
+    *  Build and return dof_func array for coarse grid.
+    *-----------------------------------------------------------------------*/
+    coarse_dof_func = hypre_CTAlloc(int, n_coarse);
+
+    coarse_counter=0;
+
+    for (i=0; i < n_fine; i++)
+      if (CF_marker[i] >=0)
+        {
+          coarse_dof_func[coarse_counter] = dof_func[i];
+          coarse_counter++;
+        }
+
+    /* return coarse_dof_func array: ---------------------------------------*/
+
+    *coarse_dof_func_ptr = coarse_dof_func;
+
 
    /*-----------------------------------------------------------------------
     *  Free mapping vector and marker array.

@@ -77,7 +77,7 @@ void hypre_WriteSolverParams( void *data );
 /* coarsen.c */
 int hypre_AMGCoarsen( hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
 int hypre_AMGCoarsenRuge( hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
-int hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
+int hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix *A , double strength_threshold , int *dof_func , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
 
 /* coarsenCR.c */
 int hypre_AMGCoarsenCR( hypre_CSRMatrix *A , double strength_threshold , double relax_weight , int relax_type , int num_relax_steps , int **CF_marker_ptr , int *coarse_size_ptr );
@@ -103,7 +103,7 @@ int hypre_InitAMGIndepSet( hypre_CSRMatrix *S , double *measure_array , double c
 int hypre_AMGIndepSet( hypre_CSRMatrix *S , double *measure_array , double cconst , int *graph_array , int graph_array_size , int *IS_marker );
 
 /* interp.c */
-int hypre_AMGBuildInterp( hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , hypre_CSRMatrix **P_ptr );
+int hypre_AMGBuildInterp( hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , int *dof_func , int **coarse_dof_func_ptr , hypre_CSRMatrix **P_ptr );
 
 /* interpCR.c */
 int hypre_AMGBuildCRInterp( hypre_CSRMatrix *A , int *CF_marker , int n_coarse , int num_relax_steps , int relax_type , double relax_weight , hypre_CSRMatrix **P_ptr );
@@ -124,9 +124,6 @@ int map3( int ix , int iy , int iz , int p , int q , int r , int P , int Q , int
 /* laplace_9pt.c */
 hypre_CSRMatrix *hypre_GenerateLaplacian9pt( int nx , int ny , int P , int Q , double *value );
 int map2( int ix , int iy , int p , int q , int P , int Q , int *nx_part , int *ny_part , int *global_part );
-
-/* minterp.c */
-int hypre_AMGBuildInterp( hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , hypre_CSRMatrix **P_ptr );
 
 /* pcg.c */
 void PCG( hypre_Vector *x , hypre_Vector *b , double tol , void *data );
