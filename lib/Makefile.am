@@ -6,12 +6,41 @@ libHYPRE_la_LDFLAGS = -avoid-version
 libHYPRE_LSI_la_SOURCES = $(FILES)
 libHYPRE_LSI_la_LDFLAGS = -avoid-version
 
+if BLASNEEDED
+BLASDIR = blas
+BLASFILES = \
+ $(top_srcdir)/blas/dasum.c\
+ $(top_srcdir)/blas/daxpy.c\
+ $(top_srcdir)/blas/dcopy.c\
+ $(top_srcdir)/blas/ddot.c\
+ $(top_srcdir)/blas/dgels_all.c\
+ $(top_srcdir)/blas/dgemm.c\
+ $(top_srcdir)/blas/dgemv.c\
+ $(top_srcdir)/blas/dmyblas2.c\
+ $(top_srcdir)/blas/dnrm2.c\
+ $(top_srcdir)/blas/dpotrf.c\
+ $(top_srcdir)/blas/dpotrs.c\
+ $(top_srcdir)/blas/drot.c\
+ $(top_srcdir)/blas/dscal.c\
+ $(top_srcdir)/blas/dsymv.c\
+ $(top_srcdir)/blas/dsyr2.c\
+ $(top_srcdir)/blas/dsyrk.c\
+ $(top_srcdir)/blas/dtrsm.c\
+ $(top_srcdir)/blas/dtrsv.c\
+ $(top_srcdir)/blas/idamax.c\
+ $(top_srcdir)/blas/s_cmp.c\
+ $(top_srcdir)/blas/s_copy.c
+else !BLASNEEDED
+BLASDIR = 
+BLASFILES = 
+endif !BLASNEEDED
+
 HYPRE_SRC_DIRS = \
+ $(BLASDIR)\
  FEI_mv/SuperLU\
  FEI_mv/fei-hypre\
  FEI_mv/femli/lib\
  IJ_mv\
- blas\
  distributed_ls/Euclid\
  distributed_ls/ParaSails\
  distributed_ls/pilut\
@@ -29,6 +58,7 @@ HYPRE_SRC_DIRS = \
  utilities
 
 FILES = \
+ $(BLASFILES)\
  $(top_srcdir)/FEI_mv/SuperLU/colamd.c\
  $(top_srcdir)/FEI_mv/SuperLU/dcolumn_bmod.c\
  $(top_srcdir)/FEI_mv/SuperLU/dcolumn_dfs.c\
@@ -139,27 +169,6 @@ FILES = \
  $(top_srcdir)/IJ_mv/IJVector.c\
  $(top_srcdir)/IJ_mv/IJVector_parcsr.c\
  $(top_srcdir)/IJ_mv/aux_parcsr_matrix.c\
- $(top_srcdir)/blas/dasum.c\
- $(top_srcdir)/blas/daxpy.c\
- $(top_srcdir)/blas/dcopy.c\
- $(top_srcdir)/blas/ddot.c\
- $(top_srcdir)/blas/dgels_all.c\
- $(top_srcdir)/blas/dgemm.c\
- $(top_srcdir)/blas/dgemv.c\
- $(top_srcdir)/blas/dmyblas2.c\
- $(top_srcdir)/blas/dnrm2.c\
- $(top_srcdir)/blas/dpotrf.c\
- $(top_srcdir)/blas/dpotrs.c\
- $(top_srcdir)/blas/drot.c\
- $(top_srcdir)/blas/dscal.c\
- $(top_srcdir)/blas/dsymv.c\
- $(top_srcdir)/blas/dsyr2.c\
- $(top_srcdir)/blas/dsyrk.c\
- $(top_srcdir)/blas/dtrsm.c\
- $(top_srcdir)/blas/dtrsv.c\
- $(top_srcdir)/blas/idamax.c\
- $(top_srcdir)/blas/s_cmp.c\
- $(top_srcdir)/blas/s_copy.c\
  $(top_srcdir)/distributed_ls/Euclid/Euclid_apply.c\
  $(top_srcdir)/distributed_ls/Euclid/Euclid_dh.c\
  $(top_srcdir)/distributed_ls/Euclid/ExternalRows_dh.c\
