@@ -731,6 +731,13 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
       sscanf(paramString,"%s %s %s", param1, param2, param3);
       strcpy( mli_object->coarseSolver_, param3 );
    }
+   else if ( !strcmp(param2, "coarseSolverNumSweeps") )
+   {
+      sscanf(paramString,"%s %s %d", param1, param2, 
+             &(mli_object->coarseSolverNSweeps_));
+      if ( mli_object->coarseSolverNSweeps_ < 1 )
+         mli_object->coarseSolverNSweeps_ = 1;
+   }
    else if ( !strcmp(param2, "numSweeps") )
    {
       sscanf(paramString,"%s %s %d",param1,param2,&(mli_object->preNSweeps_));
