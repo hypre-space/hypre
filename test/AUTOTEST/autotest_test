@@ -79,6 +79,14 @@ initialize_variables ()
     . ./env.${HYPRE_ARCH}
   fi
 #
+# Architecure specific configurations
+#
+  if [ "$HYPRE_ARCH" = "blue" ] ; then
+    CONFIGURE="./nopoe ./configure"
+  else
+    CONFIGURE="./configure"
+  fi
+#
 # If NOT started by autotest (hence no HYPRE_*_EMAIL variable
 # defined) default mail to UID only.
 #
@@ -307,9 +315,13 @@ apply_error_filters () {
           '^\ Guide\ \ \ '\
           ':\ 0\ errors\ in\ file'\
           '1500-030:\ \(I\)\ INFORMATION:'\
+          '1500-010:\ \(W\)\ WARNING\ in'\
+          ':\ 1506-068\ \(W\)\ Operation\ between\ types'\
           '^No\ begin\ line'\
-          'configure:\ WARNING:\ Configuration\ for'\
-          'configure:\ WARNING:\ I\ have\ to\ compile'
+          'autoconf has been disabled'\
+          'automake has been disabled'\
+          'autoheader has been disabled'\
+          'configure:\ WARNING:\ '
         do process_filter $ErrorFile "${ii}"
         done
 ###   fi   # blue
@@ -710,7 +722,7 @@ if [ ${BuildOpt} -ne $Skip ] ; then
       fi
     fi
     [ -f config.cache ] && rm config.cache
-    ./configure "$ConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
+    $CONFIGURE "$ConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
 	2> ${Hdr}.${MessageStr}.configure.err
     echo "$HYPRE_CONFIGURE_EMAIL" > ${Hdr}.${MessageStr}.configure.err.email
 
