@@ -633,11 +633,22 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    {
       cxyz_max = hypre_max(cxyz_max, cxyz[d]);
    }
+   if (cxyz_max == 0.0)
+   {
+      cxyz_max = 1.0;
+   }
 
    for (d = 0; d < 3; d++)
    {
-      cxyz[d] /= cxyz_max;
-      dxyz[d] = sqrt(1.0 / cxyz[d]);
+      if (cxyz[d] > 0)
+      {
+         cxyz[d] /= cxyz_max;
+         dxyz[d] = sqrt(1.0 / cxyz[d]);
+      }
+      else
+      {
+         dxyz[d] = 1.0e+123;
+      }
    }
 
    /*-----------------------------------------------------------------------
