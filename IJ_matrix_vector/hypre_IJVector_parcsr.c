@@ -106,7 +106,7 @@ hypre_IJVectorSetLocalPartitioningPar(hypre_IJVector *vector,
    MPI_Comm_size(comm, &num_procs);
    MPI_Comm_rank(comm, &my_id);
 
-   if (vec_start_this_proc >= vec_start_next_proc) ++ierr;
+   if (vec_start_this_proc > vec_start_next_proc) ++ierr;
 
    if (!ierr)
    {
