@@ -1,3 +1,12 @@
+/*BHEADER**********************************************************************
+ * (c) 1999   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+
 #include <iostream.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,8 +23,7 @@
 #include "mpi.h"
 #endif
 
-// need something to include all the isis mv package
-// serial version
+// include matrix-vector files from ISIS++
 
 #include "other/basicTypes.h"
 #include "RealArray.h"
@@ -29,11 +37,11 @@
 
 // include the Hypre package header here
 
+#include "HYPRE_IJ_mv.h"
+#include "HYPRE.h" // needed for HYPRE_PARCSR_MATRIX
 
 
-// to get these isis and fei includes, search from isis root and fei root
-// we'll search from fei root and isis-includes
-// need these objects to link to later
+// includes needed for FEI
 
 #include "other/basicTypes.h"
 #include "fei.h"
@@ -60,6 +68,7 @@
 HYPRE_SLE::HYPRE_SLE(MPI_Comm PASSED_COMM_WORLD, int masterRank) : 
     BASE_SLE(PASSED_COMM_WORLD, masterRank) {
 
+    comm = PASSED_COMM_WORLD;
 }
 
 //------------------------------------------------------------------------------
@@ -112,6 +121,11 @@ void HYPRE_SLE::deleteLinearAlgebraCore(){
 //This is a destructor-type function.
 //
 
+    HYPRE_FreeIJMatrix(A);
+
+    HYPRE_FreeIJVector(x);
+    HYPRE_FreeIJVector(b);
+
 }
 
 //------------------------------------------------------------------------------
@@ -125,24 +139,51 @@ void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
 //with the linear algebra library. i.e., do initial allocations, etc.
 //
 
+    int ierr;
+
+    ierr = HYPRE_NewIJMatrix(comm, &A, globalNumEqns, globalNumEqns);
+    assert(!ierr);
+    ierr = HYPRE_SetIJMatrixLocalStorageType(A, HYPRE_PARCSR_MATRIX);
+    assert(!ierr);
+    ierr = HYPRE_SetIJMatrixLocalSize(A, localEndRow-localStartRow+1, 
+      globalNumEqns);
+    assert(!ierr);
+    ierr = HYPRE_InitializeIJMatrix(A);
+    assert(!ierr);
+
+    ierr = HYPRE_NewIJVector(comm, &b, globalNumEqns);
+    assert(!ierr);
+    ierr = HYPRE_SetIJVectorLocalStorageType(b, /*UNDONE*/ 0);
+    assert(!ierr);
+    ierr = HYPRE_SetIJVectorLocalSize(b, localEndRow-localStartRow+1);
+    assert(!ierr);
+    ierr = HYPRE_InitializeIJVector(b);
+    assert(!ierr);
+
+    ierr = HYPRE_NewIJVector(comm, &x, globalNumEqns);
+    assert(!ierr);
+    ierr = HYPRE_SetIJVectorLocalStorageType(x, /*UNDONE*/ 0);
+    assert(!ierr);
+    ierr = HYPRE_SetIJVectorLocalSize(x, localEndRow-localStartRow+1);
+    assert(!ierr);
+    ierr = HYPRE_InitializeIJVector(x);
+    assert(!ierr);
 }
 
 //------------------------------------------------------------------------------
 void HYPRE_SLE::matrixConfigure(IntArray* sysRowLengths){
 
+#if 0
     //first, store the system row-lengths in an ISIS++ Dist_IntVector,
     //to be used in the 'configure' function on the matrix A_.
-#if 0
     for (int i = 0; i < storeNumProcEqns; i++) {
         (*rowLengths_)[localStartRow_ + i] = sysRowLengths[i].size();
     }
-#endif
 
     // so now we know all the row lengths, and have them in an IntVector,
     // so we can configure our matrix (not necessary if it is a resizable
     // matrix).
 
-#if 0
     A_ptr_->configure(*rowLengths_);
 #endif
 }

@@ -18,10 +18,11 @@ CXX = @CXX@
 
 CXXFLAGS = \
  -I../fei-isis\
- -I../isis-mv
+ -I../isis-mv\
+ -I../../IJ_matrix_vector\
+ -I../../utilities\
+ -I../..
 
-
-#Headers
 HEADERS =\
  HYPRE_SLE.h
  
@@ -46,8 +47,20 @@ ${OBJS}: ${HEADERS}
 lib: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
 	@echo  "Building ${OBJS} ... "
-	@ar -rcu lib_HYPRE_FEI.a ${OBJS}
-	@ranlib lib_HYPRE_FEI.a 
+	@ar -rcu libHYPRE_FEI.a ${OBJS}
+	@ranlib libHYPRE_FEI.a 
+
+##################################################################
+# Targets
+##################################################################
+
+clean:
+	@rm -f *.o *.dxx
+
+veryclean: clean
+	@rm -f libHYPRE_*.a
+
+
 
 ##################################################################
 # Generic rules

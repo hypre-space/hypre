@@ -1,3 +1,15 @@
+/*BHEADER**********************************************************************
+ * (c) 1999   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+
+#include "mpi.h"
+#include "HYPRE_IJ_mv.h"
+
 #ifndef __HYPRE_SLE_H
 #define __HYPRE_SLE_H
 
@@ -48,24 +60,13 @@ class HYPRE_SLE : public BASE_SLE {
     void launchSolver(int* solveStatus);
 
 
-#if 0 // original ISIS internals
-    Map *map_;
-    CommInfo *commInfo_;
-    DCRS_Matrix *A_;
-    DCRS_Matrix *A_ptr_;
-    Dist_Vector *x_, **b_;
-    Vector *b_ptr_;
-    int* rhsIDs_;
+private:
 
-    Dist_IntVector *rowLengths_;
+    HYPRE_IJMatrix  A;
+    HYPRE_IJVector  b;
+    HYPRE_IJVector  x;
 
-    IterativeSolver *pSolver_;
-    bool solverAllocated_;
-    Preconditioner *pPrecond_;
-    bool precondAllocated_;
-
-    int internalFei_;
-#endif
+    MPI_Comm        comm;
 
 };
 
