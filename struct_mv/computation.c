@@ -293,7 +293,7 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
    compute_pkg = hypre_CTAlloc(hypre_ComputePkg, 1);
 
    hypre_CommPkgCreate(hypre_ComputeInfoCommInfo(compute_info),
-                       data_space, data_space, num_values, 0,
+                       data_space, data_space, num_values, 0, 0,
                        hypre_StructGridComm(grid), &comm_pkg);
    hypre_ComputePkgCommPkg(compute_pkg) = comm_pkg;
 

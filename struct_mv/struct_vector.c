@@ -854,7 +854,7 @@ hypre_StructVectorGetMigrateCommPkg( hypre_StructVector *from_vector,
                                  &comm_info);
    hypre_CommPkgCreate(comm_info,
                        hypre_StructVectorDataSpace(from_vector),
-                       hypre_StructVectorDataSpace(to_vector), 1, 0,
+                       hypre_StructVectorDataSpace(to_vector), 1, 0, 0,
                        hypre_StructVectorComm(from_vector), &comm_pkg);
    /* is this correct for periodic? */
 

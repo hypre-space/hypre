@@ -35,7 +35,8 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
                      hypre_BoxArray   *send_data_space,
                      hypre_BoxArray   *recv_data_space,
                      int               num_values,
-                     int               data_offset_offset,
+                     int               data_initial_offset,
+                     int               data_skip,
                      MPI_Comm          comm,
                      hypre_CommPkg   **comm_pkg_ptr )
 {
@@ -108,13 +109,13 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
 
    /* set send_data_offsets and send_data_space */
    data_offsets = hypre_TAlloc(int, hypre_BoxArraySize(send_data_space));
-   data_offset = data_offset_offset;
+   data_offset = data_initial_offset;
    hypre_ForBoxI(i, send_data_space)
       {
          data_offsets[i] = data_offset;
          data_box = hypre_BoxArrayBox(send_data_space, i);
-            data_offset += hypre_BoxVolume(data_box) * num_values;
-            data_offset += data_offset_offset;
+         data_offset += hypre_BoxVolume(data_box) * num_values;
+         data_offset += data_skip;
       }
 
    /* compute num_comms and use -p_comm_types to compute num_entries */
@@ -261,13 +262,13 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
 
    /* set data_offsets and recv_data_space */
    data_offsets = hypre_TAlloc(int, hypre_BoxArraySize(recv_data_space));
-   data_offset = data_offset_offset;
+   data_offset = data_initial_offset;
    hypre_ForBoxI(i, recv_data_space)
       {
          data_offsets[i] = data_offset;
          data_box = hypre_BoxArrayBox(recv_data_space, i);
          data_offset += hypre_BoxVolume(data_box) * num_values;
-         data_offset += data_offset_offset;
+         data_offset += data_skip;
       }
    hypre_CommPkgRecvDataOffsets(comm_pkg) = data_offsets;
    hypre_CommPkgRecvDataSpace(comm_pkg) =

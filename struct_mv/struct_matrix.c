@@ -1004,8 +1004,8 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    int    ierr = 0;
 
    int                   *num_ghost = hypre_StructMatrixNumGhost(matrix);
-   int                    num_values, constant_coefficient;
-   int    diag_rank = 0;
+   int                    comm_num_values, mat_num_values, constant_coefficient;
+   int    i, diag_rank = 0;
    hypre_StructStencil   *stencil;
    hypre_Index            diag_index;
 
@@ -1020,9 +1020,11 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient( matrix );
 
-   if ( constant_coefficient==0 ) num_values = hypre_StructMatrixNumValues(matrix);
-   else if ( constant_coefficient==1 ) num_values = 0;
-   else /* constant_coefficient==2 */ num_values = 1;
+   mat_num_values = hypre_StructMatrixNumValues(matrix);
+
+   if ( constant_coefficient==0 ) comm_num_values = mat_num_values;
+   else if ( constant_coefficient==1 ) comm_num_values = 0;
+   else /* constant_coefficient==2 */ comm_num_values = 1;
    if ( constant_coefficient==2 )
    {
       stencil = hypre_StructMatrixStencil(matrix);
@@ -1039,7 +1041,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
       hypre_CommPkgCreate(comm_info,
                           hypre_StructMatrixDataSpace(matrix),
                           hypre_StructMatrixDataSpace(matrix),
-                          num_values, diag_rank,
+                          comm_num_values, diag_rank, mat_num_values-1,
                           hypre_StructMatrixComm(matrix), &comm_pkg);
 
       hypre_StructMatrixCommPkg(matrix) = comm_pkg;
@@ -1306,7 +1308,7 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
 
    int                    ierr = 0;
    int                    diag_rank = 0;
-   int                    constant_coefficient, diag_rank1, num_values;
+   int                    constant_coefficient, diag_rank1, comm_num_values, mat_num_values;
    hypre_StructStencil   *stencil;
    hypre_Index            diag_index;
 
@@ -1317,9 +1319,11 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
    constant_coefficient = hypre_StructMatrixConstantCoefficient( from_matrix );
    assert( constant_coefficient == hypre_StructMatrixConstantCoefficient( to_matrix ) );
 
-   if ( constant_coefficient==0 ) num_values = hypre_StructMatrixNumValues(from_matrix);
-   else if ( constant_coefficient==1 ) num_values = 0;
-   else /* constant_coefficient==2 */ num_values = 1;
+   mat_num_values = hypre_StructMatrixNumValues(from_matrix);
+
+   if ( constant_coefficient==0 ) comm_num_values = mat_num_values;
+   else if ( constant_coefficient==1 ) comm_num_values = 0;
+   else /* constant_coefficient==2 */ comm_num_values = 1;
    if ( constant_coefficient==2 )
    {
       stencil = hypre_StructMatrixStencil(from_matrix);
@@ -1339,7 +1343,7 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
    hypre_CommPkgCreate(comm_info,
                        hypre_StructMatrixDataSpace(from_matrix),
                        hypre_StructMatrixDataSpace(to_matrix),
-                       num_values, diag_rank,
+                       comm_num_values, diag_rank, mat_num_values-1,
                        hypre_StructMatrixComm(from_matrix), &comm_pkg);
    /* is this correct for periodic? */
 
