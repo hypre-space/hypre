@@ -15,6 +15,10 @@
 #=============================================================================
 
 
+Version 1.7.7b released, 2002/07/01.
+
+- limited release SStruct optimizations testing
+
 Version 1.7.6b released, 2002/01/27.
 
 - SStruct: Changed SetNeighborBox function to allow the case where the
