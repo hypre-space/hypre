@@ -817,10 +817,6 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
 
 /*--------------------------------------------------------------------------
  * ComputeValuesNonsym
- *--------------------------------------------------------------------------*/
-/* Numbering may need additional indices .... */
-/* all stored rows have been converted to local indexing by the time get here */
-/* num_loc is the highest local index number */
 /*--------------------------------------------------------------------------*/
 
 static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
@@ -850,6 +846,8 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
 #endif
 
     /* Allocate and initialize marker array */
+    /* Since numb already knows about the indices of the external rows that 
+       will be needed, numb_ind is the maximum size of the marker array */
     marker = (int *) malloc(numb->num_ind * sizeof(int));
     for (i=0; i<numb->num_ind; i++)
 	marker[i] = -1;
