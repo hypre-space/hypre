@@ -117,6 +117,7 @@ void RowsWithColumn
   >>>>> the non-Boolean CommPkgCreate function, which is a bug.
 */
 
+void
 hypre_MatTCommPkgCreate_core (
 
 /* input args: */
@@ -145,7 +146,6 @@ hypre_MatTCommPkgCreate_core (
    int	*tmp, *recv_buf, *displs, *info, *send_buf, *all_num_sends2;
    int	num_procs, my_id, num_elmts;
    int	local_info, index, index2;
-   int	ierr = 0;
    int pmatch, col, kc, p;
    int * recv_sz_buf;
    int * row_marker;
@@ -446,7 +446,7 @@ hypre_MatTCommPkgCreate_core (
    *p_send_map_starts = send_map_starts;
    *p_send_map_elmts = send_map_elmts;
 
-};
+}
 
 /* ----------------------------------------------------------------------
  * hypre_MatTCommPkgCreate
@@ -477,13 +477,7 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
    int  first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
    int  *col_starts = hypre_ParCSRMatrixColStarts(A);
 
-   int	i, j, j2, k, ir, rowmin, rowmax;
-   int	num_procs, my_id, num_elmts;
-   int	local_info, index, index2;
    int	ierr = 0;
-   int pmatch, col, kc, p;
-   int * recv_sz_buf;
-   int * row_marker;
    int	num_rows_diag = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    int	num_cols_diag = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
    int	num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
