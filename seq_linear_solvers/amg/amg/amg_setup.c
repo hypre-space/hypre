@@ -434,7 +434,7 @@ void    *data;
    {
       IU_array[j] = NewVectorInt(&iu[levv[j]-1], numv[j]);
       IP_array[j] = NewVectorInt(&ip[levv[j]-1], numv[j]);
-      IV_array[j] = NewVectorInt(&iv[levp[j]-1],nump[j]);
+      IV_array[j] = NewVectorInt(&iv[levpi[j]-1],nump[j]+1);
       ICG_array[j] = NewVectorInt(&icg[levv[j]-1], numv[j]);
    }
    
