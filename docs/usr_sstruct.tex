@@ -57,8 +57,8 @@ variables at neighboring indices.
 
 %==========================================================================
 
-\section{Setting Up the Grid}
-\label{sstruct:Setting Up the Grid}
+\section{Setting Up the SStruct Grid}
+\label{Setting Up the SStruct Grid}
 
 On process 0, the following code will set up the grid shown in the
 figure (the code for processes 1 and 2 is similar).
@@ -97,8 +97,8 @@ on all processes), and finalizes the grid assembly, making the grid
 
 %==========================================================================
 
-\section{Setting Up the Stencil}
-\label{sstruct:Setting Up the Stencil}
+\section{Setting Up the SStruct Stencil}
+\label{Setting Up the SStruct Stencil}
 
 The geometry of the discretization stencil is described by an array of
 integer tuples in 2D (triples in 3D), each representing a relative
@@ -152,13 +152,13 @@ the calls are collective calls.
 
 %==========================================================================
 
-\section{Setting Up the Graph}
-\label{sstruct:Setting Up the Graph}
+\section{Setting Up the SStruct Graph}
+\label{Setting Up the SStruct Graph}
 
 The graph will represent the nonzero structure of the matrix in
-Section \ref{sstruct:Setting Up the Matrix} below.  It is defined in
+Section \ref{Setting Up the SStruct Matrix} below.  It is defined in
 terms of the grid and stencil objects described in Sections
-\ref{sstruct:Setting Up the Grid} and \ref{sstruct:Setting Up the
+\ref{Setting Up the SStruct Grid} and \ref{Setting Up the SStruct
 Stencil} above.
 
 On process 0, the following code will set up the graph for the
@@ -179,25 +179,25 @@ HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
 HYPRE_SStructGraphSetStencil(graph, 0, 0, stencil);
 
 /* Add graph edge entries at grid part boundaries */
-HYPRE_SStructGraphAddEntries(graph, 0, addindex[0], 0, 2, 2, &addentries[0], 0);
-HYPRE_SStructGraphAddEntries(graph, 0, addindex[1], 0, 3, 2, &addentries[0], 0);
-HYPRE_SStructGraphAddEntries(graph, 0, addindex[2], 0, 3, 2, &addentries[1], 0);
+HYPRE_SStructGraphAddEntries(graph, 0, addindex[0], 0, 2, addentries[0], 0);
+HYPRE_SStructGraphAddEntries(graph, 0, addindex[0], 0, 2, addentries[1], 0);
+HYPRE_SStructGraphAddEntries(graph, 0, addindex[1], 0, 2, addentries[0], 0);
 ...
 
 /* Add graph edge entries at index (1,2) */
-HYPRE_SStructGraphAddEntries(graph, 0, addindex[8], 0, 1, 0, &addentries[8], 1);
-HYPRE_SStructGraphAddEntries(graph, 0, addindex[8], 1, 1, 0, &addentries[8], 0);
+HYPRE_SStructGraphAddEntries(graph, 0, addindex[8], 0, 0, addentries[8], 1);
+HYPRE_SStructGraphAddEntries(graph, 0, addindex[8], 1, 0, addentries[8], 0);
 
 \end{verbatim}
 \end{display}
 
 %==========================================================================
 
-\section{Setting Up the Matrix}
-\label{sstruct:Setting Up the Matrix}
+\section{Setting Up the SStruct Matrix}
+\label{Setting Up the SStruct Matrix}
 
 The matrix is set up in terms of the graph object described in Section
-\ref{sstruct:Setting Up the Graph} above.  The coefficients associated
+\ref{Setting Up the SStruct Graph} above.  The coefficients associated
 with each graph entry will typically vary from gridpoint to gridpoint,
 but in the example problem being considered, they are as follows over
 the entire grid (except at boundaries; see below):
@@ -261,11 +261,11 @@ HYPRE_SStructMatrixAssemble(A);
 
 %==========================================================================
 
-\section{Setting Up the Right-Hand-Side Vector}
-\label{sstruct:Setting Up the Right-Hand-Side Vector}
+\section{Setting Up the SStruct Right-Hand-Side Vector}
+\label{Setting Up the SStruct Right-Hand-Side Vector}
 
 The right-hand-side vector is set up similarly to the matrix set up
-described in Section \ref{sstruct:Setting Up the Matrix} above.  The
+described in Section \ref{Setting Up the SStruct Matrix} above.  The
 main difference is that there is no graph.
 
 %==========================================================================

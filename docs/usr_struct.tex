@@ -48,8 +48,8 @@ depicted.
 
 %==========================================================================
 
-\section{Setting Up the Grid}
-\label{Setting Up the Grid}
+\section{Setting Up the Struct Grid}
+\label{Setting Up the Struct Grid}
 
 The grid is described via a global {\em index space}, i.e., via
 integer tuples (triples in 3D).  The integers may have any value,
@@ -87,8 +87,8 @@ finalizes the grid assembly, making the grid ``ready to use''.
 
 %==========================================================================
 
-\section{Setting Up the Stencil}
-\label{Setting Up the Stencil}
+\section{Setting Up the Struct Stencil}
+\label{Setting Up the Struct Stencil}
 
 The geometry of the discretization stencil is described by an array of
 integer tuples in 2D (triples in 3D), each representing a relative
@@ -143,12 +143,12 @@ of the calls are collective calls.
 
 %==========================================================================
 
-\section{Setting Up the Matrix}
-\label{Setting Up the Matrix}
+\section{Setting Up the Struct Matrix}
+\label{Setting Up the Struct Matrix}
 
 The matrix is set up in terms of the grid and stencil objects
 described in Sections
-\ref{Setting Up the Grid} and \ref{Setting Up the Stencil}.
+\ref{Setting Up the Struct Grid} and \ref{Setting Up the Struct Stencil}.
 The coefficients associated with each stencil entry will typically
 vary from gridpoint to gridpoint, but in the example problem being
 considered, they are as follows over the entire grid (except at
@@ -247,11 +247,11 @@ HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1, &i, values);
 
 %==========================================================================
 
-\section{Setting Up the Right-Hand-Side Vector}
-\label{Setting Up the Right-Hand-Side Vector}
+\section{Setting Up the Struct Right-Hand-Side Vector}
+\label{Setting Up the Struct Right-Hand-Side Vector}
 
 The right-hand-side vector is set up similarly to the matrix set up
-described in Section \ref{Setting Up the Matrix} above.  The main
+described in Section \ref{Setting Up the Struct Matrix} above.  The main
 difference is that there is no stencil (note that a stencil currently
 does appear in the interface, but this will eventually be removed).
 
@@ -324,8 +324,8 @@ To most efficiently utilize the \code{Struct} interface for symmetric
 matrices, notice that only half of the off-diagonal coefficients need
 to be set.  To do this for the example being considered, we simply
 need to redefine the 5-pt stencil of Section
-\ref{Setting Up the Stencil} to an ``appropriate'' 3-pt stencil, then
-set matrix coefficients (as in Section \ref{Setting Up the Matrix})
+\ref{Setting Up the Struct Stencil} to an ``appropriate'' 3-pt stencil, then
+set matrix coefficients (as in Section \ref{Setting Up the Struct Matrix})
 for these three stencil elements {\em only}.  For example, we could
 use the following stencil
 \begin{equation}\label{eqn-symmetric-stencil}
