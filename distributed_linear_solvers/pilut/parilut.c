@@ -1349,6 +1349,9 @@ void hypre_ParINIT( ReduceMatType *nrmat, CommInfoType *cinfo, int *rowdist,
   cinfo->maxnsend = 0;
 
   /* ---- ComputeMIS ---- */
-  cinfo->gatherbuf = hypre_fp_malloc(ntogo*(global_maxnz+2), "ComputeMIS: gatherbuf");
+  /*cinfo->gatherbuf = hypre_fp_malloc(ntogo*(global_maxnz+2), "ComputeMIS: gatherbuf");*/
+  /* RDF: There is a purify UMR problem that a calloc gets rid of.
+   * Don't know if this is actually an indication of a bug */
+  cinfo->gatherbuf = hypre_CTAlloc(double, ntogo*(global_maxnz+2));
 
 }
