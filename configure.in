@@ -474,7 +474,7 @@ then
        CASC_SET_FOPT(-o5)
        CASC_SET_FDEBUG()
      else 
-       CASC_SET_FOPT(-o5)
+       CASC_SET_FOPT(-O)
        CASC_SET_FDEBUG()
      fi
       
@@ -671,7 +671,7 @@ then
     CASC_SET_FOPT(-o5)
     CASC_SET_FDEBUG()
   else 
-    CASC_SET_FOPT(-o5)
+    CASC_SET_FOPT(-O)
     CASC_SET_FDEBUG()
   fi
 
