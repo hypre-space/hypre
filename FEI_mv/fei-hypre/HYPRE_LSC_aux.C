@@ -111,7 +111,7 @@ extern "C" {
 int HYPRE_LinSysCore::parameters(int numParams, char **params)
 {
     int    i, k, nsweeps, rtype, olevel, reuse=0, precon_override=0;
-    int    solver_override=0, blockP_leng, *blockP_ind;
+    int    solver_override=0, blockP_leng, *blockP_ind, MLI_leng, *MLI_ind;
     double weight, dtemp;
     char   param[256], param1[256], param2[80];
 
@@ -134,8 +134,10 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
     // parse all parameters
     //-------------------------------------------------------------------
 
-    blockP_ind  = (int *) malloc( sizeof(int) * numParams ); 
+    blockP_ind  = new int[numParams];
     blockP_leng = 0;
+    MLI_ind     = new int[numParams];
+    MLI_leng    = 0;
     for ( i = 0; i < numParams; i++ )
     {
 
@@ -886,7 +888,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
        }
 
        //---------------------------------------------------------------
-       // Euclid preconditoner : threshold 
+       // block preconditoner 
        //---------------------------------------------------------------
 
        else if ( !strcmp(param1, "blockP") )
@@ -898,6 +900,21 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
                 printf("       HYPRE_LSC::set blockP parameter.\n");
           }
           else if (HYPreconID_ != HYBLOCK ) blockP_ind[blockP_leng++] = i;
+       }
+
+       //---------------------------------------------------------------
+       // MLI preconditoners 
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "MLI") )
+       {
+          if (HYPreconID_ == HYMLI && HYPrecon_ != NULL )
+          {
+//HYPRE_LSI_MLIPrecondSetParams(HYPrecon_, params[i]); 
+             if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+                printf("       HYPRE_LSC::set MLI parameter.\n");
+          }
+          else if (HYPreconID_ != HYMLI ) MLI_ind[MLI_leng++] = i;
        }
 
        //---------------------------------------------------------------
@@ -1108,6 +1125,14 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
        for ( i = 0; i < blockP_leng; i++ )
           HYPRE_LSI_BlockPrecondSetParams(HYPrecon_, params[blockP_ind[i]]); 
     }
+    if (HYPreconID_ == HYMLI && MLI_leng > 0 )
+    {
+       for ( i = 0; i < MLI_leng; i++ ) 
+MLI_ind[i] = 0;
+//HYPRE_LSI_MLIPrecondSetParams(HYPrecon_, params[MLI_ind[i]]); 
+    }
+    delete [] blockP_ind;
+    delete [] MLI_ind;
 
     if ( reuse == 1 ) HYPreconReuse_ = 1; 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
