@@ -43,7 +43,7 @@ HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm, HYPRE_Solver *solver )
 int 
 HYPRE_ParCSRBiCGSTABDestroy( HYPRE_Solver solver )
 {
-   return( hypre_BiCGSTABDestroy( (void *) solver ) );
+   return( HYPRE_BiCGSTABDestroy( solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -56,10 +56,7 @@ HYPRE_ParCSRBiCGSTABSetup( HYPRE_Solver solver,
                         HYPRE_ParVector b,
                         HYPRE_ParVector x      )
 {
-   return( hypre_BiCGSTABSetup( (void *) solver,
-                             (void *) A,
-                             (void *) b,
-                             (void *) x ) );
+   return( HYPRE_BiCGSTABSetup( solver, A, b, x ));
 }
 
 /*--------------------------------------------------------------------------
@@ -72,10 +69,7 @@ HYPRE_ParCSRBiCGSTABSolve( HYPRE_Solver solver,
                         HYPRE_ParVector b,
                         HYPRE_ParVector x      )
 {
-   return( hypre_BiCGSTABSolve( (void *) solver,
-                             (void *) A,
-                             (void *) b,
-                             (void *) x ) );
+   return( HYPRE_BiCGSTABSolve( solver, A, b, x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -86,7 +80,7 @@ int
 HYPRE_ParCSRBiCGSTABSetTol( HYPRE_Solver solver,
                          double             tol    )
 {
-   return( hypre_BiCGSTABSetTol( (void *) solver, tol ) );
+   return( HYPRE_BiCGSTABSetTol( solver, tol ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -97,7 +91,7 @@ int
 HYPRE_ParCSRBiCGSTABSetMinIter( HYPRE_Solver solver,
                              int          min_iter )
 {
-   return( hypre_BiCGSTABSetMinIter( (void *) solver, min_iter ) );
+   return( HYPRE_BiCGSTABSetMinIter( solver, min_iter ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -108,7 +102,7 @@ int
 HYPRE_ParCSRBiCGSTABSetMaxIter( HYPRE_Solver solver,
                              int          max_iter )
 {
-   return( hypre_BiCGSTABSetMaxIter( (void *) solver, max_iter ) );
+   return( HYPRE_BiCGSTABSetMaxIter( solver, max_iter ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -119,7 +113,7 @@ int
 HYPRE_ParCSRBiCGSTABSetStopCrit( HYPRE_Solver solver,
                               int          stop_crit )
 {
-   return( hypre_BiCGSTABSetStopCrit( (void *) solver, stop_crit ) );
+   return( HYPRE_BiCGSTABSetStopCrit( solver, stop_crit ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -132,9 +126,9 @@ HYPRE_ParCSRBiCGSTABSetPrecond( HYPRE_Solver         solver,
                                 HYPRE_PtrToParSolverFcn precond_setup,
                                 HYPRE_Solver         precond_solver )
 {
-   return( hypre_BiCGSTABSetPrecond( (void *) solver,
+   return( HYPRE_BiCGSTABSetPrecond( solver,
                                      precond, precond_setup,
-                                     (void *) precond_solver ) );
+                                     precond_solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -145,8 +139,8 @@ int
 HYPRE_ParCSRBiCGSTABGetPrecond( HYPRE_Solver  solver,
                              HYPRE_Solver *precond_data_ptr )
 {
-   return( hypre_BiCGSTABGetPrecond( (void *)     solver,
-                                  (HYPRE_Solver *) precond_data_ptr ) );
+   return( HYPRE_BiCGSTABGetPrecond(   solver,
+                                    precond_data_ptr ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -157,7 +151,7 @@ int
 HYPRE_ParCSRBiCGSTABSetLogging( HYPRE_Solver solver,
                              int logging)
 {
-   return( hypre_BiCGSTABSetLogging( (void *) solver, logging ) );
+   return( HYPRE_BiCGSTABSetLogging( solver, logging ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -168,7 +162,7 @@ int
 HYPRE_ParCSRBiCGSTABGetNumIterations( HYPRE_Solver  solver,
                                    int                *num_iterations )
 {
-   return( hypre_BiCGSTABGetNumIterations( (void *) solver, num_iterations ) );
+   return( HYPRE_BiCGSTABGetNumIterations( solver, num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -179,5 +173,5 @@ int
 HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                                double             *norm   )
 {
-   return( hypre_BiCGSTABGetFinalRelativeResidualNorm( (void *) solver, norm ) );
+   return( HYPRE_BiCGSTABGetFinalRelativeResidualNorm( solver, norm ) );
 }
