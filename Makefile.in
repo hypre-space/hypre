@@ -51,7 +51,30 @@ HYPRE_PARCSR_DIRS =\
 
 all:
 	@ \
+	rm -Rf hypre; \
+	mkdir hypre; \
+	for i in bin docs include lib; \
+	do \
+	   mkdir hypre/$$i; \
+	done; \
+	HYPRE_INSTALL_DIR=`pwd`/hypre; \
+	export HYPRE_INSTALL_DIR; \
 	for i in ${HYPRE_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make install); \
+	    echo ""; \
+	  fi; \
+	done; \
+	echo "Making test drivers ..."; \
+	(cd test; make); \
+	echo ""
+
+beta: all
+	@ \
+	for i in ${HYPRE_EXTRA_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -59,9 +82,12 @@ all:
 	    (cd $$i; make); \
 	    echo ""; \
 	  fi; \
-	done
+	done; \
+	echo "Making beta test drivers ..."; \
+	(cd test; make beta); \
+	echo ""
 
-install:
+install: all
 	@ \
 	if [ ! "$$HYPRE_INSTALL_DIR" ]; \
 	then \
@@ -73,24 +99,8 @@ install:
 	   echo "Error: no directory HYPRE_INSTALL_DIR=$$HYPRE_INSTALL_DIR"; \
 	   exit 1; \
 	fi; \
-	( \
-	   cd $$HYPRE_INSTALL_DIR; \
-	   DIRS="bin include lib"; \
-	   for i in $$DIRS; \
-	   do \
-	      rm -fr $$i; \
-	      mkdir $$i; \
-	   done \
-	); \
-	for i in ${HYPRE_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Installing $$i ..."; \
-	    (cd $$i; make install); \
-	    echo ""; \
-	  fi; \
-	done
+	echo "Installing hypre ..."; \
+	mv hypre/* $$HYPRE_INSTALL_DIR
 
 clean:
 	@ \
@@ -101,10 +111,13 @@ clean:
 	    echo "Cleaning $$i ..."; \
 	    (cd $$i; make clean); \
 	  fi; \
-	done
+	done; \
+	echo "Cleaning test ..."; \
+	(cd test; make clean)
 
 veryclean:
 	@ \
+	rm -Rf hypre; \
 	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -112,19 +125,9 @@ veryclean:
 	    echo "Very-cleaning $$i ..."; \
 	    (cd $$i; make veryclean); \
 	  fi; \
-	done
-
-beta:
-	@ \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; make); \
-	    echo ""; \
-	  fi; \
-	done
+	done; \
+	echo "Very-cleaning test ..."; \
+	(cd test; make veryclean)
 
 struct:
 	@ \
