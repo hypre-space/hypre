@@ -1,0 +1,81 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#==============================================================================
+# Define permission for autotest access
+#  -- give everyone read and execute permission
+#  -- give group write permissions
+#==============================================================================
+
+HYPRE_AUTOTEST_PERMISSIONS="a+rX,ug+w"
+
+#==============================================================================
+# Set autotest directories
+#==============================================================================
+
+HYPRE_CASC_AUTOTEST_DIR="/home/casc/software/hypre"
+
+HYPRE_AUTOTEST_LOG_FILE="autotest.log"
+
+HYPRE_ARCH=""
+
+#=============================================================================
+# if on the CASC Cluster
+#=============================================================================
+
+if [ "$HYPRE_ARCH" = "" ]
+then
+	HYPRE_ARCH="opt"
+	HYPRE_AUTOTEST_DIR=$HYPRE_CASC_AUTOTEST_DIR/autotest
+else
+	echo "Error: must be on CASC cluster"
+	exit
+fi
+
+#=============================================================================
+#removes old autotest and creates new directory
+#=============================================================================
+
+if [ -d $HYPRE_AUTOTEST_DIR ]
+then
+	rm -fR $HYPRE_AUTOTEST_DIR
+fi
+
+mkdir $HYPRE_AUTOTEST_DIR
+cd $HYPRE_AUTOTEST_DIR
+
+	
+if [ ! -d "$CVSROOT" ]
+then
+	echo "Error: no CVS repository, CVSROOT = $CVSROOT"
+	exit
+fi
+
+#=============================================================================
+# checks out repository, builds and installs in the AUTOTEST directory
+#=============================================================================
+
+cvs checkout -P linear_solvers
+cd $HYPRE_AUTOTEST_DIR
+
+echo "setting permissions...."
+chmod -fR $HYPRE_AUTOTEST_PERMISSIONS *
+cd linear_solvers
+./build -$HYPRE_ARCH
+
+#=============================================================================
+# run test drivers and log results
+#=============================================================================
+
+cd test
+rm -f $HYPRE_AUTOTEST_LOG.FILE
+struct_linear_solvers.sh >> $HYPRE_AUTOTEST_LOG_FILE
+
+
