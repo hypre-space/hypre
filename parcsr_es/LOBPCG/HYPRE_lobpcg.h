@@ -54,7 +54,7 @@ typedef struct {
   int Vrand;          /* vrand - use vrand random vectors for initial eigenvectors */
   int Veye;           /* veye - use identity vectors for initial eigenvectors */
   int flag_orth_check; /* chk - check orthogonality of eigenvectors */
-  int flag_v;         /* v - verbose output */
+  int verbose;        /* =0 (no output), =1 (standard output), =2 (detailed output) */
   int flag_feig;      /* f - print eigenvectors to matrix market file */
   int flag_itr;       /* itr - iterationoverride flag */
   int max_iter_count; /* itr - maximum iteration count */
@@ -77,7 +77,7 @@ int HYPRE_LobpcgSolve(HYPRE_LobpcgData lobpcgdata,
 int HYPRE_LobpcgCreate(HYPRE_LobpcgData *lobpcg);
 int HYPRE_LobpcgSetup(HYPRE_LobpcgData lobpcg);
 int HYPRE_LobpcgDestroy(HYPRE_LobpcgData lobpcg);
-int HYPRE_LobpcgSetVerbose(HYPRE_LobpcgData lobpcg);
+int HYPRE_LobpcgSetVerbose(HYPRE_LobpcgData lobpcg,int verbose);
 int HYPRE_LobpcgSetRandom(HYPRE_LobpcgData lobpcg);
 int HYPRE_LobpcgSetEye(HYPRE_LobpcgData lobpcg);
 int HYPRE_LobpcgSetOrthCheck(HYPRE_LobpcgData lobpcg);

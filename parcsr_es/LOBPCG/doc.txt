@@ -16,7 +16,8 @@ Setup Lobpcg solver.
 
 int 
 HYPRE_LobpcgSetVerbose(HYPRE_LobpcgData lobpcg);
-(Optional) Set verbose mode. Displays more detail.
+(Optional) Set verbose mode. Displays different levels of detail.
+=0 (no output), =1 (standard output) default, =2 (detailed output).
 
 int
 HYPRE_LobpcgSetRandom(HYPRE_LobpcgData lobpcg);

@@ -331,7 +331,7 @@ void Get_IJAMatrixFromFileMtx(double **val, int **ia,
      int **ja, int *m, int *n, char *matfile)
 {
     int    i,j,k,kk,Nrows, nnz, icount, rowindex, colindex, curr_row;
-    int    ret_code,m1,n1,off_diag_count=0;
+    int    m1,n1,off_diag_count=0;
     int    *mat_ia, *mat_ja;
     double *mat_a, value;
     MM_typecode matcode; /* Matrix Market type code */
@@ -358,7 +358,7 @@ void Get_IJAMatrixFromFileMtx(double **val, int **ia,
     if (mm_is_sparse(matcode) && mm_is_general(matcode)){
 
        /* read array parameters for sparse matrix */
-       if ((ret_code = mm_read_mtx_crd_size(fp,&m1,&n1,&nnz)) !=0){
+       if ((mm_read_mtx_crd_size(fp,&m1,&n1,&nnz)) !=0){
           printf("Could not process Matrix Market parameters (filename=%s).\n",matfile);
           exit(1);
        }
@@ -387,7 +387,7 @@ void Get_IJAMatrixFromFileMtx(double **val, int **ia,
     else if (mm_is_sparse(matcode) && mm_is_symmetric(matcode)){
 
        /* read array parameters for sparse matrix */
-       if ((ret_code = mm_read_mtx_crd_size(fp,&m1,&n1,&nnz)) !=0){
+       if ((mm_read_mtx_crd_size(fp,&m1,&n1,&nnz)) !=0){
           printf("Could not process Matrix Market parameters (filename=%s).\n",matfile);
           exit(1);
        }
@@ -436,7 +436,7 @@ void Get_IJAMatrixFromFileMtx(double **val, int **ia,
     else if (mm_is_dense(matcode) && mm_is_general(matcode)){
 
        /* read array parameters for dense matrix */
-       if ((ret_code = mm_read_mtx_array_size(fp,&m1,&n1)) !=0){
+       if ((mm_read_mtx_array_size(fp,&m1,&n1)) !=0){
           exit(1);
        }
        nnz=m1*n1;
@@ -463,7 +463,7 @@ void Get_IJAMatrixFromFileMtx(double **val, int **ia,
     else if (mm_is_dense(matcode) && mm_is_symmetric(matcode)){
 
        /* read array parameters for dense matrix */
-       if ((ret_code = mm_read_mtx_array_size(fp,&m1,&n1)) !=0){
+       if ((mm_read_mtx_array_size(fp,&m1,&n1)) !=0){
           if (Get_Rank()==0) printf("Could not process Matrix Market parameters.\n");
           exit(1);
        }
@@ -965,6 +965,7 @@ int Print_Par_Matrix_To_Mtx(HYPRE_ParCSRMatrix A,char *filename)
   ierr=HYPRE_ParCSRMatrixGetDims(A,&M,&N);
   
   part2=CopyPartition(partitioning);
+  if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCreate_Data,0);
   ierr=HYPRE_ParVectorCreate(MPI_COMM_WORLD,M,part2,&b);
   ierr=HYPRE_ParVectorInitialize(b);
 
@@ -997,6 +998,7 @@ int Print_Par_Matrix_To_Mtx(HYPRE_ParCSRMatrix A,char *filename)
        ierr=HYPRE_ParCSRMatrixMatvec(1.0,A,b,0.0,X->vsPar[i]);assert2(ierr);
     }
     ierr=hypre_SeqVectorDestroy(v_temp);
+    if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorDestroy_Data,0);
     ierr=HYPRE_ParVectorDestroy(b);
     ierr=PrintArray(X,filename);
 
@@ -1117,7 +1119,7 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
   /* Read matrix in Matrix Market Format and assemble into A */ 
 
   int         mA,nA,nzA;
-  int         i,j,k,kk,ii,ret_code;
+  int         i,j,k,kk,ii;
   FILE        *Afile;
   MM_typecode matcode; /* Matrix Market type code */
   mt mat_type;
@@ -1170,7 +1172,7 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
   if (mm_is_sparse(matcode) && mm_is_general(matcode)){
 
     /* read array parameters for sparse matrix */
-    if ((ret_code = mm_read_mtx_crd_size(Afile,&mA,&nA,&nzA)) !=0){
+    if ((mm_read_mtx_crd_size(Afile,&mA,&nA,&nzA)) !=0){
       if (Get_Rank()==0) printf("Could not process Matrix Market parameters.\n");
       exit(1);
     }
@@ -1199,7 +1201,7 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
   else if (mm_is_sparse(matcode) && mm_is_symmetric(matcode)){
 
     /* read array parameters for sparse matrix */
-    if ((ret_code = mm_read_mtx_crd_size(Afile,&mA,&nA,&nzA)) !=0){
+    if ((mm_read_mtx_crd_size(Afile,&mA,&nA,&nzA)) !=0){
       if (Get_Rank()==0) printf("Could not process Matrix Market parameters.\n");
       exit(1);
     }
@@ -1228,7 +1230,7 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
   else if (mm_is_dense(matcode) && mm_is_general(matcode)){
 
     /* read array parameters for dense matrix */
-    if ((ret_code = mm_read_mtx_array_size(Afile,&mA,&nA)) !=0){
+    if ((mm_read_mtx_array_size(Afile,&mA,&nA)) !=0){
       if (Get_Rank()==0) printf("Could not process Matrix Market parameters.\n");
       exit(1);
     }
@@ -1258,7 +1260,7 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
   else if (mm_is_dense(matcode) && mm_is_symmetric(matcode)){
 
     /* read array parameters for dense matrix */
-    if ((ret_code = mm_read_mtx_array_size(Afile,&mA,&nA)) !=0){
+    if ((mm_read_mtx_array_size(Afile,&mA,&nA)) !=0){
       if (Get_Rank()==0) printf("Could not process Matrix Market parameters.\n");
       exit(1);
     }
@@ -1344,7 +1346,7 @@ int Mat_Size_Mtx(char *file_name,int rc)
 {
   /* get size of matrix market matrix from a file */
 
-  int         mA,nA,nzA,ret_code;
+  int         mA,nA,nzA;
   FILE        *Afile;
   MM_typecode matcode; /* Matrix Market type code */
 
@@ -1361,14 +1363,14 @@ int Mat_Size_Mtx(char *file_name,int rc)
 
   if (mm_is_sparse(matcode)){
     /* read array parameters for sparse matrix */
-    if ((ret_code = mm_read_mtx_crd_size(Afile,&mA,&nA,&nzA)) !=0){
+    if ((mm_read_mtx_crd_size(Afile,&mA,&nA,&nzA)) !=0){
       if (Get_Rank()==0) printf("Could not process Matrix Market parameters.\n");
       exit(1);
     }
   }
   else if (mm_is_dense(matcode)){
     /* read array parameters for dense matrix */
-    if ((ret_code = mm_read_mtx_array_size(Afile,&mA,&nA)) !=0){
+    if ((mm_read_mtx_array_size(Afile,&mA,&nA)) !=0){
       if (Get_Rank()==0) printf("Could not process Matrix Market parameters.\n");
       exit(1);
     }
@@ -1411,7 +1413,7 @@ int Get_Lobpcg_Options(int argc,char **argv,lobpcg_options *opts)
   /* read in all command line options */
    int arg_index=1;
 
-   opts->flag_v=FALSE;
+   opts->verbose=1; /* default is standard amount of output */
    opts->flag_f=FALSE;
    opts->flag_A=FALSE;
    opts->flag_B=FALSE;
@@ -1432,12 +1434,7 @@ int Get_Lobpcg_Options(int argc,char **argv,lobpcg_options *opts)
       if ( strcmp(argv[arg_index], "-v") == 0 )
       {
          arg_index++;
-         opts->flag_v=TRUE;
-      }
-      else if ( strcmp(argv[arg_index], "-v2") == 0 )
-      {
-         arg_index++;
-         verbose2(0); /* set debugging verbose mode */
+         opts->verbose = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-f") == 0 )
       {
@@ -1543,6 +1540,114 @@ int Get_Lobpcg_Options(int argc,char **argv,lobpcg_options *opts)
   return 0;
 }
 
+/*****************************************************************************/
+void Display_Execution_Statistics()
+{
+    /* Display execution statistics */
+    int j,sum,temp,total[4];
+
+    for (j=0;j<4;++j) total[j]=0;
+
+    printf("\n");
+    printf("=============================================\n");
+    printf("Lobpcg Execution Statistics:\n");
+    printf("=============================================\n");
+    printf("HYPRE Function/Phase\t\t\tSetup\tItr=1\tItr>1\tFinal\tTotal");
+
+    printf("\nHYPRE_ParVectorCreate:\t\t");
+    sum=0;
+    for (j=0;j<4;++j){
+      temp=collect_data(2,HYPRE_ParVectorCreate_Data,j);
+      printf("\t%d",temp);
+      sum=sum+temp;
+      total[j]=total[j]+temp;
+    }
+    printf("\t%d",sum);
+
+    printf("\nHYPRE_ParVectorDestroy:\t\t");
+    sum=0;
+    for (j=0;j<4;++j){
+      temp=collect_data(2,HYPRE_ParVectorDestroy_Data,j);
+      printf("\t%d",temp);
+      sum=sum+temp;
+      total[j]=total[j]+temp;
+    }
+    printf("\t%d",sum);
+
+    printf("\nHYPRE_ParVectorInnerProd:\t");
+    sum=0;
+    for (j=0;j<4;++j){
+      temp=collect_data(2,HYPRE_ParVectorInnerProd_Data,j);
+      printf("\t%d",temp);
+      sum=sum+temp;
+      total[j]=total[j]+temp;
+    }
+    printf("\t%d",sum);
+
+    printf("\nHYPRE_ParVectorCopy:\t\t");
+    sum=0;
+    for (j=0;j<4;++j){
+      temp=collect_data(2,HYPRE_ParVectorCopy_Data,j);
+      printf("\t%d",temp);
+      sum=sum+temp;
+      total[j]=total[j]+temp;
+    }
+    printf("\t%d",sum);
+
+    printf("\nhypre_ParVectorAxpy:\t\t");
+    sum=0;
+    for (j=0;j<4;++j){
+      temp=collect_data(2,hypre_ParVectorAxpy_Data,j);
+      printf("\t%d",temp);
+      sum=sum+temp;
+      total[j]=total[j]+temp;
+    }
+    printf("\t%d",sum);
+
+    printf("\nHYPRE_ParVectorSetConstantValues:");
+    sum=0;
+    for (j=0;j<4;++j){
+      temp=collect_data(2,HYPRE_ParVectorSetConstantValues_Data,j);
+      printf("\t%d",temp);
+      sum=sum+temp;
+      total[j]=total[j]+temp;
+    }
+    printf("\t%d",sum);
+
+    printf("\n\t\t\t\t");
+    for (j=0;j<5;++j){
+      printf("\t------");
+    }
+    printf("\nTotal Number of Vector Operations:");
+    temp=0;
+    for (j=0;j<4;++j){
+      printf("\t%d",total[j]);
+      temp=temp+total[j];
+    }
+    printf("\t%d",temp);
+
+    printf("\n");
+    printf("\nNumber A-Multiplies:\t\t");
+    sum=0;
+    for (j=0;j<4;++j){
+      temp=collect_data(2,NUMBER_A_MULTIPLIES,j);
+      printf("\t%d",temp);
+      sum=sum+temp;
+    }
+    printf("\t%d",sum);
+
+    printf("\nNumber Solves:\t\t\t");
+    sum=0;
+    for (j=0;j<4;++j){
+      temp=collect_data(2,NUMBER_SOLVES,j);
+      printf("\t%d",temp);
+      sum=sum+temp;
+    }
+    printf("\t%d",sum);
+}
+
+
+
 /*--------------------------------------------------------------------------
  * The following routines have been downloaded from the Matrix Market
  * home page (http://math.nist.gov/MatrixMarket/)
@@ -1636,7 +1741,7 @@ int mm_read_banner(FILE *f, MM_typecode *matcode)
     char data_type[MM_MAX_TOKEN_LENGTH];
     char storage_scheme[MM_MAX_TOKEN_LENGTH];
     char *p;
-
+    char cnull;
 
     mm_clear_typecode(matcode);  
 
@@ -1647,10 +1752,11 @@ int mm_read_banner(FILE *f, MM_typecode *matcode)
         storage_scheme) != 5)
         return MM_PREMATURE_EOF;
 
-    for (p=mtx; *p!='\0'; *p=tolower(*p),p++);  /* convert to lower case */
-    for (p=crd; *p!='\0'; *p=tolower(*p),p++);  
-    for (p=data_type; *p!='\0'; *p=tolower(*p),p++);
-    for (p=storage_scheme; *p!='\0'; *p=tolower(*p),p++);
+    cnull = '\0';
+    for (p=mtx; *p!=cnull; *p=tolower(*p),p++);  /* convert to lower case */
+    for (p=crd; *p!=cnull; *p=tolower(*p),p++);  
+    for (p=data_type; *p!=cnull; *p=tolower(*p),p++);
+    for (p=storage_scheme; *p!=cnull; *p=tolower(*p),p++);
 
     /* check for banner */
     if (strncmp(banner, MatrixMarketBanner, strlen(MatrixMarketBanner)) != 0)
@@ -1869,7 +1975,7 @@ int mm_read_mtx_crd_entry(FILE *f, int *I, int *J,
 int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, int **I, int **J, 
         double **val, MM_typecode *matcode)
 {
-    int ret_code;
+    int  ret_code;
     FILE *f;
 
     if (strcmp(fname, "stdin") == 0) f=stdin;
@@ -1980,13 +2086,13 @@ char  *mm_typecode_to_str(MM_typecode matcode)
 {
     char buffer[MM_MAX_LINE_LENGTH];
     char *types[4];
-    int error =0;
+    /*int error =0;*/
 
     /* check for MTX type */
     if (mm_is_matrix(matcode)) 
         types[0] = MM_MTX_STR;
-    else
-        error=1;
+    /*else
+        error=1;*/
 
     /* check for CRD or ARR matrix */
     if (mm_is_sparse(matcode))
@@ -2029,5 +2135,5 @@ char  *mm_typecode_to_str(MM_typecode matcode)
         return NULL;
 
     sprintf(buffer,"%s %s %s %s", types[0], types[1], types[2], types[3]);
-    return strdup(buffer);
+    return (char *) strdup(buffer);
 }

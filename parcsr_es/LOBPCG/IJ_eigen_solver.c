@@ -149,6 +149,7 @@ main( int   argc,
    int    **grid_relax_points=NULL;
    int	    smooth_lev;
    int	    smooth_rlx = 8;
+   int	   *smooth_option;
    int      relax_default;
    int      smooth_num_sweep = 1;
    int      num_sweep = 1;
@@ -236,6 +237,11 @@ main( int   argc,
 
    print_usage = 0;
    arg_index = 1;
+   smooth_option = hypre_CTAlloc(int, max_levels);
+   for (i=0; i < max_levels; i++)
+   {
+        smooth_option[i] = -1;
+   }
 
    while ( (arg_index < argc) && (!print_usage) )
    {
@@ -434,15 +440,13 @@ main( int   argc,
          arg_index++;
          relax_default = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-smtype") == 0 )
-      {
-         arg_index++;
-         smooth_rlx = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-smlv") == 0 )
+      else if ( strcmp(argv[arg_index], "-smooth") == 0 )
       {
          arg_index++;
          smooth_lev = atoi(argv[arg_index++]);
+         smooth_rlx = atoi(argv[arg_index++]);
+         for (i=0; i < smooth_lev; i++)
+            smooth_option[i] = smooth_rlx;
       }
       else if ( strcmp(argv[arg_index], "-mxl") == 0 )
       {
@@ -640,7 +644,7 @@ main( int   argc,
          printf("  -chk   <int>     : check orthogonality of final eigenvectors \n");
          printf("  -itr  <int>      : override default max iteration count\n");
          printf("  -tol  <scalar>   : tolerance override\n");
-         printf("  -v    <int>      : verbose - display a lot of output\n");
+         printf("  -v    <int>      : 0 (no output), 1 (standard output), 2 (detailed output)\n");
          printf("  -pcgitr <int>    : maximum iterations for pcg solve (default=1)\n");
          printf("                   : Note: set this to 0 for no precondioner\n");
          printf("  -pcgtol <scalar> : tol for pcg solve\n");
@@ -1211,7 +1215,7 @@ main( int   argc,
          HYPRE_LobpcgCreate(&lobpcgdata);
          if (opts.flag_tol) HYPRE_LobpcgSetTolerance(lobpcgdata,opts.tol);
          if (opts.flag_itr) HYPRE_LobpcgSetMaxIterations(lobpcgdata,opts.max_iter_count);
-         if (opts.flag_v) HYPRE_LobpcgSetVerbose(lobpcgdata);
+         HYPRE_LobpcgSetVerbose(lobpcgdata,opts.verbose);
          if (opts.flag_orth_check==TRUE) HYPRE_LobpcgSetOrthCheck(lobpcgdata);
 
          if (opts.Vrand>0) HYPRE_LobpcgSetRandom(lobpcgdata);
@@ -1241,16 +1245,14 @@ main( int   argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat);
-         HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
+         HYPRE_BoomerAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
          HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
-         HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_rlx);
-         HYPRE_BoomerAMGSetSmoothNumLevels(pcg_solver, smooth_lev);
-         HYPRE_BoomerAMGSetSmoothNumSweeps(pcg_precond, smooth_num_sweep);
+         HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
+         HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
@@ -1277,6 +1279,7 @@ main( int   argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                              pcg_precond);
+         hypre_TFree(smooth_option);
       }
       else if (solver_id == 8)
       {
@@ -1292,6 +1295,7 @@ main( int   argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSolve,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSetup,
                              pcg_precond);
+         hypre_TFree(smooth_option);
       }
       else if (solver_id == 12)
       {
@@ -1308,6 +1312,7 @@ main( int   argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSolve,
                              (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSetup,
                              pcg_precond);
+         hypre_TFree(smooth_option);
       }
       else if (solver_id == 43)
       {
@@ -1327,6 +1332,7 @@ main( int   argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
                              (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
                              pcg_precond);
+         hypre_TFree(smooth_option);
       }
  
       HYPRE_PCGGetPrecond(pcg_solver, &pcg_precond_gotten);
@@ -1527,7 +1533,10 @@ int Funct_Solve_A(HYPRE_ParVector b,HYPRE_ParVector x)
    int ierr=0;
 
    ierr=HYPRE_ParCSRPCGSolve(pcg_solver,parcsr_A,b,x);assert2(ierr);
-
+/*
+HYPRE_PCGGetNumIterations(pcg_solver, &num_itr);
+printf("Number of iterations: %d\n",num_itr);
+*/
    return 0;
 }
 

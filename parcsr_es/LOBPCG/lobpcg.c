@@ -70,14 +70,25 @@ int HYPRE_LobpcgSolve(HYPRE_LobpcgData lobpcgdata,
   ierr=HYPRE_LobpcgGetEye(lobpcgdata,&eye_vec);
   ierr=HYPRE_LobpcgGetBlocksize(lobpcgdata,&bsize);
 
+  /* initialize detailed verbose status for data collection */
+  if (verbose==2)
+  {
+    verbose2(0);    /* turn off */
+    collect_data(3,0,0);
+  }
+  else verbose2(2); /* turn off */
+
   /* derive partitioning from v */
   partitioning=hypre_ParVectorPartitioning((hypre_ParVector *)  v[0]);
   ierr=hypre_LobpcgSetGetPartition(0,&partitioning);
   rowcount_global=partitioning[nprocs];
 
+  /* check time test */
+  time_functions(1,0,rowcount_global,0,FunctA);
+
   /* create global temp vector to use in solve function */
-  if (verbose2(1)==TRUE) total_numb_vectors_alloc(1);
   part2=CopyPartition(partitioning);
+  if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCreate_Data,0);
   ierr=HYPRE_ParVectorCreate(MPI_COMM_WORLD,rowcount_global,
     part2,&temp_global_vector);assert2(ierr);
   ierr=HYPRE_ParVectorInitialize(temp_global_vector);assert2(ierr);
@@ -102,6 +113,7 @@ int HYPRE_LobpcgSolve(HYPRE_LobpcgData lobpcgdata,
   X=Mat_Alloc1();
   ierr=Mat_Init(X,rowcount_global,bsize,rowcount_global*bsize,HYPRE_VECTORS,GENERAL);
   for (i=0; i<bsize; i++){
+     if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCopy_Data,0);
      ierr =HYPRE_ParVectorCopy(v[i],X->vsPar[i]);assert2(ierr);
      assert2(ierr);
   }
@@ -118,7 +130,7 @@ int HYPRE_LobpcgSolve(HYPRE_LobpcgData lobpcgdata,
   if (FunctPrec_ptr!=NULL) FuncT=Func_TPrec;
 
   /* call main lobpcg solver */
-  ierr=lobpcg(X,Func_AMult,7,FuncT,tol,&max_iter,verbose,eigval,eigvalhistory,resvec);
+  ierr=lobpcg(X,Func_AMult,FuncT,tol,&max_iter,verbose,eigval,eigvalhistory,resvec);
 
   /* check orthogonality of eigenvectors */
   if (hypre_LobpcgOrthCheck((hypre_LobpcgData *) lobpcgdata)==TRUE)
@@ -131,6 +143,7 @@ int HYPRE_LobpcgSolve(HYPRE_LobpcgData lobpcgdata,
 
   /* get v vectors back */
   for (i=0; i<bsize; i++){
+     if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCopy_Data,0);
      ierr =HYPRE_ParVectorCopy(X->vsPar[i],v[i]);assert2(ierr);
      assert2(ierr);
   }
@@ -154,8 +167,9 @@ int HYPRE_LobpcgSolve(HYPRE_LobpcgData lobpcgdata,
   ierr=HYPRE_LobpcgGetEigval(lobpcgdata,eigval1);
 
   /* free all memory associated with these pointers */
-  if (verbose2(1)==TRUE) total_numb_vectors_alloc(-1);
+  if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorDestroy_Data,0);
   ierr=HYPRE_ParVectorDestroy(temp_global_vector);assert2(ierr);
+
   ierr=Mat_Free(temp_global_data);free(temp_global_data); 
   ierr=Mat_Free(X);free(X); 
   ierr=Mat_Free(resvec);free(resvec);
@@ -167,6 +181,10 @@ int HYPRE_LobpcgSolve(HYPRE_LobpcgData lobpcgdata,
   ierr=Mat_Free(TMP_Global1);free(TMP_Global1);
   ierr=Mat_Free(TMP_Global2);free(TMP_Global2);
 
+  /* print out execution statistics */
+  if (verbose==2 && Get_Rank()==0)
+    Display_Execution_Statistics();
+
   return 0;
 }
 
@@ -176,7 +194,10 @@ int Func_AMult(Matx *B,Matx *C,int *idx)
   /* return C=A*B according to index */
   int i;
   for (i=0; i<B->n; i++) {
-    if (idx[i]>0) ierr=FunctA_ptr(B->vsPar[i],C->vsPar[i]);
+    if (idx[i]>0){
+      ierr=FunctA_ptr(B->vsPar[i],C->vsPar[i]);
+      if (verbose2(1)==TRUE) collect_data(0,NUMBER_A_MULTIPLIES,0);
+    }
   }
   return 0;
 }
@@ -192,9 +213,12 @@ int Func_TPrec(Matx *R,int *idx)
     if (idx[i]>0)
     {
       /* this next copy is not required, but improves performance substantially */
+      if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCopy_Data,0);
       ierr=HYPRE_ParVectorCopy(R->vsPar[i],temp_global_vector);assert2(ierr);
       ierr=FunctPrec_ptr(R->vsPar[i],temp_global_vector);
+      if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCopy_Data,0);
       ierr=HYPRE_ParVectorCopy(temp_global_vector,R->vsPar[i]);assert2(ierr);
+      if (verbose2(1)==TRUE) collect_data(0,NUMBER_SOLVES,0);
     }
   }
   
@@ -277,9 +301,9 @@ HYPRE_LobpcgDestroy(HYPRE_LobpcgData lobpcg)
  * HYPRE_LobpcgSetVerbose 
  *--------------------------------------------------------------------------*/
 int
-HYPRE_LobpcgSetVerbose(HYPRE_LobpcgData lobpcg)
+HYPRE_LobpcgSetVerbose(HYPRE_LobpcgData lobpcg,int verbose)
 {
-   hypre_LobpcgVerbose((hypre_LobpcgData *) lobpcg)=TRUE;
+   hypre_LobpcgVerbose((hypre_LobpcgData *) lobpcg)=verbose;
    return 0;
 }
 
@@ -534,54 +558,39 @@ static int *partitioning;
 *   FuncA - name of function that multiplies a matrix A times a vector
 *           FuncA(Matx *B, Matx *C, int *idx) for C=A*B using index idx.
 *   nargs - the number of optional parameters (0-7)
+*   mytol - tolerance, by default, mytol=n*sqrt(eps)
+*   maxit - max number of iterations, by default, maxit = min(n,20)
+*   verbose - =0 (no output), =1 (standard output) default, =2 (detailed output)
+*   lambda - Matrix (vector) of eigenvalues (bsize)
+*   lambdahistory - history of eigenvalues iterates (bsize x maxit)
+*   resvec - history of residuals (bsize x maxit)
 *
 *Optional function input:
 *   FuncT - preconditioner, is the name of a function, default T=I
 *           Funct(Matx *R,int *idx), usually solve T*X=R, return R=X
 *           using index idx.
 *
-*Optional scalar input parameters:
-*   mytol - tolerance, by default, mytol=n*sqrt(eps)
-*   maxit - max number of iterations, by default, maxit = min(n,20)
-*   verbose - either 0 (no info), 1 more output listed; by default, verbose = 0.
-*
-*Optional matrix parameters used for output:
-*   lambda - Matrix (vector) of eigenvalues (bsize)
-*   lambdahistory - history of eigenvalues iterates (bsize x maxit)
-*   resvec - history of residuals (bsize x maxit)
-*
 * Examples:
-* Starting vectors and A:
-* lobpcg(X,FuncA,0);
-*
-* Basic parameters, but no preconditioner:
-* lobpcg(X,FuncA,4,NULL,mytol,maxit,verbose);
-*
-* All optional parameters:
+* All parameters:
 * lobpcg(X,FuncA,7,FuncT,mytol,maxit,verbose,lambda,lambdahistory,resvec);
 *
-* All optional parameters, but no preconditioner:
-* lobpcg(X,FuncA,7,NULL,mytol,maxit,verbose,lambda,lambdahistory,resvec);
+* All parameters, but no preconditioner:
+* lobpcg(X,FuncA,NULL,mytol,maxit,verbose,lambda,lambdahistory,resvec);
 ******************************************************************************/
 
-int lobpcg(Matx *X,int (*FuncA)(Matx *B,Matx *C,int *idx),int nargs,...){
-
+int
+lobpcg(X, FuncA, FuncT, mytol, maxit_ptr, verbose, lambda_out, lambdahistory, 
+       resvec)
+Matx *X, *lambda_out, *lambdahistory, *resvec;
+int (*FuncA)(Matx *B, Matx *c, int *idx);
+int (*FuncT)(Matx *B,int *idx), *maxit_ptr, verbose;
+double mytol;
+{
+  /* initialize variables */
   double minus_one=-1;
-  double mytol=minus_one;
-    
-  /* Optional parameters are listed below:
-  int (*FuncT)(Matx *B,int *idx),double mytol,int *maxit,int verbose,
-  Matx *lambda_out,Matx *lambdahistory,Matx *resvec */
-
-  /* initialize optional parameters */
-  int (*FuncT)(Matx *B,int *idx)=NULL;
-  int maxit=0,*maxit_ptr=NULL,verbose=0;
+  int maxit=0;
   /* storage for the following matrices must be allocated
      before the call to lobpcg */
-  Matx *lambda_out=NULL,*lambdahistory=NULL,*resvec=NULL;
-
-  va_list ap;  /* variable list for optional paramters */
-
   Matx    *AX,*R,*AR,*P,*AP;                    /* Matrix pointers */
   Matx    *RR1,*D,*TMP,*TMP1,*TMP2;
   Matx    *Temp_Dense;
@@ -593,7 +602,7 @@ int lobpcg(Matx *X,int (*FuncA)(Matx *B,Matx *C,int *idx),int nargs,...){
   int    Tmult_solve_count=0; /* count T matrix multiplies of prec. solves */
   int    *idx;       /* index to keep track of kept vectors */
 
-  double *lambda,*y,*normR;
+  double *lambda, *y,*normR;
 
   /* allocate storage */
   AX=   Mat_Alloc1();
@@ -608,17 +617,6 @@ int lobpcg(Matx *X,int (*FuncA)(Matx *B,Matx *C,int *idx),int nargs,...){
   D=    Mat_Alloc1();
   Temp_Dense=Mat_Alloc1();
 
-  /* process optional parameters and do some processing */
-  va_start(ap,nargs);
-  /* Below the correct form va_arg(ap, int (*)()) does not seem
-     to work on all platforms */
-  if (nargs>0) FuncT=(int (*)()) va_arg(ap, int *);
-
-  if (nargs>1) mytol=va_arg(ap,double);
-  if (nargs>2) maxit_ptr=(va_arg(ap,int *));
-  if (maxit_ptr != NULL) maxit=*maxit_ptr;
-  if (nargs>3) verbose=va_arg(ap,int);
-
   /* get size of A from X */
   n=Mat_Size(X,1);
   bsize=Mat_Size(X,2);
@@ -631,21 +629,12 @@ int lobpcg(Matx *X,int (*FuncA)(Matx *B,Matx *C,int *idx),int nargs,...){
 
   /* set defaults */
   if (mytol<DBL_EPSILON) mytol=sqrt(DBL_EPSILON)*n;
+  if (maxit_ptr != NULL) maxit=*maxit_ptr;
   if (maxit==0) maxit=n<20 ? n:20;
 
-  if (nargs>4){
-    lambda_out=va_arg(ap,Matx *);
-    ierr = Mat_Init_Dense(lambda_out,bsize,1,GENERAL);
-  }
-  if (nargs>5){
-    lambdahistory=va_arg(ap,Matx *);
-    ierr = Mat_Init_Dense(lambdahistory,bsize,maxit+1,GENERAL);
-  }
-  if (nargs>6){
-    resvec=va_arg(ap,Matx *);
-    ierr = Mat_Init_Dense(resvec,bsize,maxit+1,GENERAL);
-  }
-  va_end(ap);
+  ierr = Mat_Init_Dense(lambda_out,bsize,1,GENERAL);
+  ierr = Mat_Init_Dense(lambdahistory,bsize,maxit+1,GENERAL);
+  ierr = Mat_Init_Dense(resvec,bsize,maxit+1,GENERAL);
 
   if (bsize > 0) {
     /* allocate lambda */
@@ -710,15 +699,21 @@ int lobpcg(Matx *X,int (*FuncA)(Matx *B,Matx *C,int *idx),int nargs,...){
   }
 
   printf("\n");
-  if (verbose!=0 && Get_Rank()==0){
+  if (verbose==2 && Get_Rank()==0){
     for (i=0; i<bsize; i++) printf("Initial eigenvalues lambda %22.16e\n",lambda[i]);
     for (i=0; i<bsize; i++) printf("Initial residuals %12.6e\n",normR[i]);
   }
-  else if (Get_Rank()==0) printf("Initial Max. Residual %12.6e\n",Max_Vec(normR,bsize));
+  else if (verbose==1 && Get_Rank()==0)
+    printf("Initial Max. Residual %12.6e\n",Max_Vec(normR,bsize));
+
+  /* increment data collection mode */
+  if (verbose2(1)==TRUE) collect_data(1,0,0);
 
   /* main loop of CG method */
   while (Max_Vec(normR,bsize) - mytol >  DBL_EPSILON && k<maxit+1)
   {
+    /* increment data collection mode */
+    if ((verbose2(1)==TRUE) && (k==2)) collect_data(1,0,0);
   
     /* generate index of vectors to keep */
     bsizeiaf=0;
@@ -797,16 +792,22 @@ int lobpcg(Matx *X,int (*FuncA)(Matx *B,Matx *C,int *idx),int nargs,...){
       for (i=0; i<bsize; i++) lambdahistory->val[i][k]=lambda[i];
     }
 
-    if (verbose!=0 && Get_Rank()==0){
+    if (verbose==2 && Get_Rank()==0){
       printf("Iteration %d \tbsize %d\n",k,bsizeiaf);
       for (i=0; i<bsize; i++) printf("Eigenvalue lambda %22.16e\n",lambda[i]);
       for (i=0; i<bsize; i++) printf("Residual %12.6e\n",normR[i]);
     }
-    else if (Get_Rank()==0) printf("Iteration %d \tbsize %d \tmaxres %12.6e\n",
+    else if (verbose==1 && Get_Rank()==0) printf("Iteration %d \tbsize %d \tmaxres %12.6e\n",
       k,bsizeiaf,Max_Vec(normR,bsize));
 
     ++k;
   }
+
+  /* increment data collection mode if only one iteration */
+  if ((verbose2(1)==TRUE) && (k==2)) collect_data(1,0,0);
+
+  /* increment data collection mode */
+  if (verbose2(1)==TRUE) collect_data(1,0,0);
   
   /* call rr once more to release memory */
   ierr = rr(X,AX,R,AR,P,AP,lambda,idx,bsize,k,1);
@@ -817,17 +818,11 @@ int lobpcg(Matx *X,int (*FuncA)(Matx *B,Matx *C,int *idx),int nargs,...){
     printf("The number of iterations is empty.\n");
     exit(EXIT_FAILURE);
   }
-
 	
-  if (verbose==0 && Get_Rank()==0){
+  if (verbose==1 && Get_Rank()==0){
     printf("\n");
     for (i=0; i<bsize; i++) printf("Eigenvalue lambda %22.16e\n",lambda[i]);
     for (i=0; i<bsize; i++) printf("Residual %12.6e\n",normR[i]);
-  }
-
-  /* store eigenvalues */
-  if (lambda_out != NULL){
-    for (i=0; i<bsize; i++) lambda_out->val[i][0]=lambda[i];
   }
 
   /* free all memory associated with these pointers */
@@ -870,7 +865,7 @@ int rr(Matx *U,Matx *LU,Matx *R,Matx *LR,Matx *P,Matx *LP,
   static Matx *D;
   static Matx *Temp_Dense;
 
-  int i,n,ierr;
+  int i,n;
   int bsizeU,bsizeR,bsizeP;
   int restart;
   
@@ -1063,7 +1058,7 @@ int myeig1(Matx *A, Matx *B, Matx *X,double *lambda)
  * The include file fortran.h is needed.
  *--------------------------------------------------------------------------*/
 
-  int i,j,n,lda,lwork,info,itype,ldb,ierr;
+  int i,j,n,lda,lwork,info,itype,ldb;
   char jobz,uplo;
   double *a,*b,*work,temp;
 

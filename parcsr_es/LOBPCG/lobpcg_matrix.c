@@ -90,12 +90,14 @@ int Mat_Mult(Matx *A,Matx *B,Matx *C)
 
     for (j=0; j<C->n; j++) {
       /*ierr=VecSet(&zero,C->X[j]);CHKERRQ(ierr);*/
+      if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorSetConstantValues_Data,0);
       ierr +=HYPRE_ParVectorSetConstantValues(C->vsPar[j],zero);
       assert2(ierr);
 
       for (i=0; i<B->m; i++){
         temp2 = B->val[i][j];
         /*ierr=VecAXPY(&temp2,A->X[i],C->X[j]);CHKERRQ(ierr);*/
+        if (verbose2(1)==TRUE) collect_data(0,hypre_ParVectorAxpy_Data,0);
         ierr=hypre_ParVectorAxpy(temp2,(hypre_ParVector *) A->vsPar[i],
          (hypre_ParVector *) C->vsPar[j]);
         assert2(ierr);
@@ -146,14 +148,17 @@ int Mat_Mult2(Matx *A,Matx *B,int *idx)
     assert(n == B->m);
 
     for (j=0; j<n; j++) {
+      if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorSetConstantValues_Data,0);
       ierr=HYPRE_ParVectorSetConstantValues(temp_global_data->vsPar[j],zero);assert2(ierr);
       for (i=0; i<n; i++){
         temp2 = B->val[i][j];
+        if (verbose2(1)==TRUE) collect_data(0,hypre_ParVectorAxpy_Data,0);
         ierr=hypre_ParVectorAxpy(temp2,(hypre_ParVector *) A->vsPar[idx2[i]],
          (hypre_ParVector *) temp_global_data->vsPar[j]);assert2(ierr);
       }
     }
     for (j=0; j<n; j++) {
+      if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCopy_Data,0);
       ierr=HYPRE_ParVectorCopy(temp_global_data->vsPar[j],A->vsPar[idx2[j]]);assert2(ierr);
     }
     free(idx2);
@@ -193,6 +198,7 @@ int Mat_Add(Matx *A,Matx *B,double alpha,Matx *C)
     ierr=Mat_Copy(B,C);
     temp=alpha;
     for (i=0; i<C->n; i++) {
+      if (verbose2(1)==TRUE) collect_data(0,hypre_ParVectorAxpy_Data,0);
       ierr=hypre_ParVectorAxpy(temp,(hypre_ParVector *) A->vsPar[i],
          (hypre_ParVector *) C->vsPar[i]);
       assert2(ierr);
@@ -225,8 +231,8 @@ int Mat_Copy(Matx *A,Matx *B)
   else if (A->mat_storage_type==HYPRE_VECTORS){
     /* copy a hypre set of vectors to a hypre set of vectors */
     ierr=Mat_Init(B,A->m,A->n,A->nz,HYPRE_VECTORS,GENERAL);
-    if (verbose2(1)==TRUE) printf("Copying %d HYPRE parallel vectors\n",B->n);
     for (i=0; i<B->n; i++){
+       if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCopy_Data,0);
        ierr +=HYPRE_ParVectorCopy(A->vsPar[i],B->vsPar[i]);
        assert2(ierr);
     }
@@ -393,10 +399,10 @@ int Mat_Get_Col(Matx *A,Matx *B,int *idxA)
     ierr=Mat_Init(B,A->m,count,A->m*count,HYPRE_VECTORS,GENERAL);
 
     j=0;
-    if (verbose2(1)==TRUE) printf("Copying %d HYPRE parallel vectors\n",count);
     for (k=0;k<A->n;++k){
       if (idxA[k]>0){
         /*ierr=VecCopy(A->X[k],B->X[j]);CHKERRQ(ierr);*/
+        if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCopy_Data,0);
         ierr=HYPRE_ParVectorCopy(A->vsPar[k],B->vsPar[j]);
         assert2(ierr);
         j++;
@@ -425,9 +431,9 @@ int Mat_Get_Col2(Matx *A,int *idxA)
     ierr=Mat_Init(A,A->m,count,A->m*count,HYPRE_VECTORS,GENERAL);
 
     j=0;
-    if (verbose2(1)==TRUE) printf("Copying %d HYPRE parallel vectors pointers\n",count);
     for (k=0;k<A->n;++k){
       if (idxA[k]>0){
+        if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCopy_Data,0);
         ierr=HYPRE_ParVectorCopy(A->vsPar[k],A->vsPar[j]);assert2(ierr);
         j++;
       }
@@ -477,10 +483,10 @@ int Mat_Put_Col(Matx *A,Matx *B,int *idxB)
     assert(A->n==count);
     assert(B->n>=count);
     k=0;
-    if (verbose2(1)==TRUE) printf("Copying %d HYPRE parallel vectors\n",count);
     for (j=0;j<B->n;++j){
       if (idxB[j]>0){
         /*ierr=VecCopy(A->X[k],B->X[j]);CHKERRQ(ierr);*/
+        if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCopy_Data,0);
         ierr=HYPRE_ParVectorCopy(A->vsPar[k],B->vsPar[j]);
         assert2(ierr);
         k++;
@@ -629,6 +635,7 @@ int Mat_Trans_Mult(Matx *A,Matx *B,Matx *C)
 
     for (i=0;i<A->n;++i){
       for (j=0;j<B->n;++j){
+        if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorInnerProd_Data,0);
         ierr=HYPRE_ParVectorInnerProd(A->vsPar[i],B->vsPar[j],&temp);
         assert2(ierr);
         C->val[i][j]=temp;
@@ -700,6 +707,7 @@ int Mat_Trans_Mult2(Matx *A,int *idxA,Matx *B,int *idxB,Matx *C)
 
     for (i=0;i<nA;++i){
       for (j=0;j<nB;++j){
+        if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorInnerProd_Data,0);
         ierr=HYPRE_ParVectorInnerProd(A->vsPar[idxA2[i]],B->vsPar[idxB2[j]],&temp);
         assert2(ierr);
         C->val[i][j]=temp;
@@ -766,7 +774,7 @@ int Mat_Norm2_Col(Matx *A,double *y)
     /* check for non-zero dimensions */
     assert(A->m>0 && A->n>0);
     for (j=0;j<A->n;++j){
-      /*ierr=VecNorm(A->X[j],NORM_2,&temp);CHKERRQ(ierr);*/
+      if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorInnerProd_Data,0);
       ierr=HYPRE_ParVectorInnerProd(A->vsPar[j],A->vsPar[j],&temp);
       assert2(ierr);
       y[j]=sqrt(temp);
@@ -896,10 +904,9 @@ int Mat_Init(Matx *A,int m,int n,int nz,mst mat_storage_type,mt mat_type)
 
      ierr=MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
      ierr=hypre_LobpcgSetGetPartition(1,&partitioning);
-     if (verbose2(1)==TRUE) printf("Creating %d HYPRE parallel vectors\n",A->n);
-     if (verbose2(1)==TRUE) total_numb_vectors_alloc(A->n);
      for (i=0; i<A->n; i++){
         part2=CopyPartition(partitioning);
+        if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCreate_Data,0);
         ierr +=HYPRE_ParVectorCreate(MPI_COMM_WORLD,A->m,part2,&A->vsPar[i]);
         ierr +=HYPRE_ParVectorInitialize(A->vsPar[i]);
         assert2(ierr);
@@ -918,10 +925,10 @@ int Init_Rand_Vectors(HYPRE_ParVector *v_ptr,int *partitioning, int m,int n)
   int i,j;
   double temp;
   hypre_Vector  *v_temp;
-  HYPRE_ParVector vpar;
   double  *vector_data;
   int   size,mypid;
   int *part2;
+  extern HYPRE_ParVector temp_global_vector;
 
   /* initialize random number generator */
   srand((unsigned int) time(0));
@@ -941,11 +948,11 @@ int Init_Rand_Vectors(HYPRE_ParVector *v_ptr,int *partitioning, int m,int n)
     }
     part2=CopyPartition(partitioning);
     ierr=HYPRE_VectorToParVector(MPI_COMM_WORLD,(HYPRE_Vector) v_temp,
-      part2,&vpar);assert2(ierr);
-    ierr=HYPRE_ParVectorCopy(vpar,v_ptr[i]);assert2(ierr);
+      part2,&temp_global_vector);assert2(ierr);
+    if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCopy_Data,0);
+    ierr=HYPRE_ParVectorCopy(temp_global_vector,v_ptr[i]);assert2(ierr);
   }
   ierr=hypre_SeqVectorDestroy(v_temp);assert2(ierr);
-  ierr=HYPRE_ParVectorDestroy(vpar);assert2(ierr);
   return 0;
 }
 
@@ -1017,7 +1024,6 @@ int Init_Eye_Vectors(HYPRE_ParVector *v_ptr,int *partitioning, int m,int n)
   ierr=hypre_SeqVectorInitialize(v_temp);
   vector_data = hypre_VectorData(v_temp);
   size=hypre_VectorSize(v_temp);
-  if (verbose2(1)==TRUE) printf("Copying %d HYPRE parallel vectors\n",n);
   for (i=0; i<n; i++) {
     if (mypid == 0){
       for (j = 0; j < size; j++){
@@ -1028,10 +1034,11 @@ int Init_Eye_Vectors(HYPRE_ParVector *v_ptr,int *partitioning, int m,int n)
     part2=CopyPartition(partitioning);
     ierr=HYPRE_VectorToParVector(MPI_COMM_WORLD,(HYPRE_Vector) v_temp,
       part2,&vpar);assert2(ierr);
+    if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCopy_Data,0);
     ierr=HYPRE_ParVectorCopy(vpar,v_ptr[i]);assert2(ierr);
   }
   ierr=hypre_SeqVectorDestroy(v_temp);assert2(ierr);
-  if (verbose2(1)==TRUE) printf("Destroying %d HYPRE parallel vectors\n",1);
+  if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorDestroy_Data,0);
   ierr=HYPRE_ParVectorDestroy(vpar);assert2(ierr);
   return 0;
 }
@@ -1139,10 +1146,8 @@ int Mat_Free(Matx *A)
   }
   else if (A->mat_storage_type==HYPRE_VECTORS){
     if (A->vsPar != NULL){
-      if (verbose2(1)==TRUE) printf("Destroying %d HYPRE parallel vectors\n",
-        A->numb_par_vectors_alloc);
-      if (verbose2(1)==TRUE) total_numb_vectors_alloc(-A->numb_par_vectors_alloc);
       for (i=0;i<A->numb_par_vectors_alloc;++i){
+        if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorDestroy_Data,0);
         ierr=HYPRE_ParVectorDestroy(A->vsPar[i]);assert2(ierr);
       }
       free(A->vsPar);
@@ -1162,17 +1167,20 @@ int Qr1(Matx *U,Matx *V,double **rrq, int n)
   int i,j;
   double rr,temp;
 
-  if (verbose2(1)==TRUE) printf("Copying %d HYPRE parallel vectors\n",n);
   for (i=0;i<n;i++){
+    if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCopy_Data,0);
     ierr=HYPRE_ParVectorCopy(U->vsPar[i],V->vsPar[i]);assert2(ierr);
     for (j=0;j<i;j++){
+      if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorInnerProd_Data,0);
       ierr=HYPRE_ParVectorInnerProd( V->vsPar[j],V->vsPar[i],&rr);assert2(ierr);
       rrq[j][i]=rr;
       rr=-rr;
+      if (verbose2(1)==TRUE) collect_data(0,hypre_ParVectorAxpy_Data,0);
       ierr=hypre_ParVectorAxpy(rr,(hypre_ParVector *) V->vsPar[j],
          (hypre_ParVector *) V->vsPar[i]);assert2(ierr);
     }
     /* compute 2-norm */
+    if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorInnerProd_Data,0);
     ierr=HYPRE_ParVectorInnerProd(V->vsPar[i],V->vsPar[i],&rr);assert2(ierr);
 
     rr=sqrt(rr);
@@ -1227,13 +1235,16 @@ int Qr2(Matx *V,Matx *R,int *idx)
 
   for (i=0;i<n;i++){
     for (j=0;j<i;j++){
+      if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorInnerProd_Data,0);
       ierr=HYPRE_ParVectorInnerProd( V->vsPar[idx2[j]],V->vsPar[idx2[i]],&rr);assert2(ierr);
       rrq[j][i]=rr;
       rr=-rr;
+      if (verbose2(1)==TRUE) collect_data(0,hypre_ParVectorAxpy_Data,0);
       ierr=hypre_ParVectorAxpy(rr,(hypre_ParVector *) V->vsPar[idx2[j]],
          (hypre_ParVector *) V->vsPar[idx2[i]]);assert2(ierr);
     }
     /* compute 2-norm */
+    if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorInnerProd_Data,0);
     ierr=HYPRE_ParVectorInnerProd(V->vsPar[idx2[i]],V->vsPar[idx2[i]],&rr);assert2(ierr);
     rr=sqrt(rr);
     if (fabs(rr)<DBL_EPSILON) printf("Qr2: rr is small, vectors almost linearly dependent\n");
@@ -1265,6 +1276,7 @@ double Mat_Norm_Inf(Matx *A)
     return sum1;
   }
   assert(0);
+  return sum1;
 }
 
 /*****************************************************************************/
@@ -1284,6 +1296,7 @@ double Mat_Norm_Frob(Matx *A)
     return sqrt(sum1);
   }
   assert(0);
+  return sum1;
 }
 
 /*****************************************************************************/
@@ -1340,6 +1353,10 @@ int verbose2(int action)
      if (flag==TRUE) return TRUE;
      else return FALSE; 
    }
+   else if (action==2)
+   {
+     flag=FALSE;
+   }
    return(0);
 }
 
@@ -1364,7 +1381,7 @@ int total_numb_vectors_alloc(int count)
 int *CopyPartition(int *partition)
 {
   /* declare storage and copy partition into an exact copy */
-  int i,*part_temp,nprocs,ierr;
+  int i,*part_temp,nprocs;
 
   ierr=MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
@@ -1395,3 +1412,55 @@ int misc_flags(int setget,int flag)
    return(flag_value[flag]);
 }
 
+/*****************************************************************************/
+int collect_data(int state,int counter_type,int phase)
+{
+   /* This function collects data on execution related counts
+      for various function calls */
+
+   int i,j;
+   static int first=0;
+   static int phase_in=0;
+   static int counts[MAX_NUMBER_COUNTS][4];
+
+   /* phase_in  = 0 lobpcg setup
+      phase_in  = 1 iteration 1 (k=1)
+      phase_in  = 2 k>1 and k<<last iteration
+      phase_in  = 3 cleanup */
+
+   /* initialize */
+   if (first==0)
+   {
+     for (i=0;i<MAX_NUMBER_COUNTS;++i){
+       for (j=0;j<4;++j) counts[i][j]=0;
+     }
+     first=1;
+   }  
+
+   switch (state)
+   {
+     /* increment counter */
+     case 0:
+       if (state==0) ++counts[counter_type][phase_in];
+       break;
+     /* check phase */
+     case 1:
+       if (state==1) ++phase_in;
+       break;
+     /* return data */
+     case 2:
+       return counts[counter_type][phase];
+     /* intialize data */
+     case 3:
+       for (i=0;i<MAX_NUMBER_COUNTS;++i){
+         for (j=0;j<4;++j) counts[i][j]=0;
+       }
+       phase_in=0;
+       break;
+     /* error leg */
+     default:
+       assert(0);
+   }
+
+   return 0;
+}
