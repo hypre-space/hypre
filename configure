@@ -24994,7 +24994,7 @@ if test x"$acx_blas_ok" = xyes; then
         casc_user_chose_blas=yes;BLASLIBFLAGS=$BLAS_LIBS
         :
 else
-    if test x"$acx_blas_ok" = xdisabled; then
+    if test x"$acx_blas_ok" = xdisable; then
         :
     else
         acx_blas_ok=no
