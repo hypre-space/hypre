@@ -27,6 +27,9 @@
 
 /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix._includes) */
 /* Put additional includes or other arbitrary code here... */
+#include <assert.h>
+#include "Hypre_ParCSRVector_Impl.h"
+#include "parcsr_mv.h"
 /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix._includes) */
 
 /*
@@ -151,15 +154,43 @@ impl_Hypre_ParCSRMatrix_Apply(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.Apply) */
   /* Insert the implementation of the Apply method here... */
    int ierr=0;
+   void * object;
    struct Hypre_ParCSRMatrix__data * data;
+   struct Hypre_ParCSRVector__data * data_y, * data_x;
+   Hypre_ParCSRVector HypreP_x, HypreP_y;
    HYPRE_IJMatrix ij_A;
+   HYPRE_IJVector ij_y, ij_x;
+   HYPRE_ParVector yy, xx;
+   HYPRE_ParCSRMatrix A;
 
    data = Hypre_ParCSRMatrix__get_data( self );
-
    ij_A = data -> ij_A;
+   ierr += HYPRE_IJMatrixGetObject( ij_A, &object );
+   A = (HYPRE_ParCSRMatrix) object;
+
+   /*  A Hypre_Vector is just an interface, we have no knowledge of its contents.
+       Check whether it's something we know how to handle.  If not, die. */
+   HypreP_x = Hypre_Vector__cast2( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
+                                  "Hypre.ParCSRVector" );
+   assert( HypreP_x!=NULL );
+   HypreP_y = Hypre_Vector__cast2( Hypre_Vector_queryInterface( *y, "Hypre.ParCSRVector"),
+                                  "Hypre.ParCSRVector" );
+   assert( HypreP_y!=NULL );
+
+   data_y = Hypre_ParCSRVector__get_data( HypreP_y );
+   ij_y = data_y -> ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_y, &object );
+   yy = (HYPRE_ParVector) object;
+   data_x = Hypre_ParCSRVector__get_data( HypreP_x );
+   ij_x = data_x -> ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
+   xx = (HYPRE_ParVector) object;
+
+   ierr += HYPRE_ParCSRMatrixMatvec( 1.0, A, xx, 1.0, yy );
 
    printf("impl_Hypre_ParCSRMatrix_Apply\n");
-   printf( "Stub\n");
+
+   return( ierr );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.Apply) */
 }
 
@@ -612,7 +643,7 @@ impl_Hypre_ParCSRMatrix_SetValues(
 
    ij_A = data -> ij_A;
 
-   printf("impl_Hypre_ParCSRMatrix_SetValues\n");
+/*   printf("impl_Hypre_ParCSRMatrix_SetValues\n"); annoying (jfp) */
 
    ierr = HYPRE_IJMatrixSetValues( ij_A,
                             nrows,

@@ -30,6 +30,9 @@
 /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector._includes) */
 /* Put additional include files here... */
 /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector._includes) */
+#include "HYPRE_IJ_mv.h"
+#include "HYPRE.h"
+#include "utilities.h"
 
 /*
  * Private data for class Hypre.ParCSRVector
@@ -38,7 +41,8 @@
 struct Hypre_ParCSRVector__data {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector._data) */
   /* Put private data members here... */
-  int ignore; /* dummy to force non-empty struct; remove if you add data */
+  HYPRE_IJVector ij_b;
+  MPI_Comm *comm;
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector._data) */
 };
 

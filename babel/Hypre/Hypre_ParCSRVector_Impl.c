@@ -18,12 +18,20 @@
 
 /*
  * Symbol "Hypre.ParCSRVector" (version 0.1.5)
+ *
+ * This class implements build and operator interfaces for vectors.
+ * Thus its <code>GetConstructedObject</code> method returns itself.
  */
 
 #include "Hypre_ParCSRVector_Impl.h"
 
 /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector._includes) */
 /* Put additional includes or other arbitrary code here... */
+/*  >>> TO DO: anything to do with components */
+/*  >>> TO DO: vector operations */
+/*  >>> TO DO: GetRow */
+#include <assert.h>
+#include "parcsr_mv.h"
 /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector._includes) */
 
 /*
@@ -39,6 +47,11 @@ impl_Hypre_ParCSRVector__ctor(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector._ctor) */
   /* Insert the implementation of the constructor method here... */
+   struct Hypre_ParCSRVector__data * data;
+   data = hypre_CTAlloc( struct Hypre_ParCSRVector__data, 1 );
+   data -> comm = NULL;
+   data -> ij_b = NULL;
+   Hypre_ParCSRVector__set_data( self, data );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector._ctor) */
 }
 
@@ -55,6 +68,14 @@ impl_Hypre_ParCSRVector__dtor(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector._dtor) */
   /* Insert the implementation of the destructor method here... */
+   int ierr = 0;
+   struct Hypre_ParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+   ierr = HYPRE_IJVectorDestroy( ij_b );
+   assert( ierr==0 );
+   hypre_TFree( data );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector._dtor) */
 }
 
@@ -102,6 +123,16 @@ impl_Hypre_ParCSRVector_AddToValues(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.AddToValues) */
   /* Insert the implementation of the AddToValues method here... */
+   int ierr = 0;
+   struct Hypre_ParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_b = data->ij_b;
+
+   ierr = HYPRE_IJVectorAddToValues( ij_b, nvalues,
+                                     SIDLArrayAddr1( indices, 0 ),
+                                     SIDLArrayAddr1( values, 0 ) );
+   return( ierr );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.AddToValues) */
 }
 
@@ -143,6 +174,15 @@ impl_Hypre_ParCSRVector_Assemble(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Assemble) */
   /* Insert the implementation of the Assemble method here... */
+   int ierr = 0;
+   struct Hypre_ParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+
+   printf( "impl_Hypre_ParCSRVectorAssemble ij_b=%i\n", ij_b );
+   ierr = HYPRE_IJVectorAssemble( ij_b );
+   return( ierr );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Assemble) */
 }
 
@@ -161,6 +201,43 @@ impl_Hypre_ParCSRVector_Axpy(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Axpy) */
   /* Insert the implementation of the Axpy method here... */
+   int ierr = 0;
+   int * type;
+   void * object;
+   struct Hypre_ParCSRVector__data * data, * data_x;
+   Hypre_ParCSRVector Hypre_x;
+   HYPRE_IJVector ij_y, ij_x;
+   HYPRE_ParVector yy, xx;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_y = data -> ij_b;
+
+   ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
+   assert( *type == HYPRE_PARCSR );  /* ... don't know how to deal with other types */
+   ierr += HYPRE_IJVectorGetObject( ij_y, &object );
+   yy = (HYPRE_ParVector) object;
+
+   /*  A Hypre_Vector is just an interface, we have no knowledge of its contents.
+       Check whether it's something we know how to handle.  If not, die. */
+   Hypre_x = Hypre_Vector__cast2
+      ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
+        "Hypre.ParCSRVector" );
+   assert( Hypre_x!=NULL );
+   /* ... Without the cast, we could also have done (I think)
+      assert( Hypre_Vector_isInstanceOf( x, "ParCSRVector" ) );
+   */
+   data_x = Hypre_ParCSRVector__get_data( Hypre_x );
+   ij_x = data_x->ij_b;
+   ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
+   assert( *type == HYPRE_PARCSR );  /* ... don't know how to deal with other types */
+   /* ... don't know how to deal with other types */
+   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
+   xx = (HYPRE_ParVector) object;
+
+   printf( "impl_Hypre_ParCSRVector_Axpy\n" );
+
+   ierr += hypre_ParVectorAxpy( a, (hypre_ParVector *) xx, (hypre_ParVector *) yy );
+
+   return( ierr );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Axpy) */
 }
 
@@ -240,6 +317,19 @@ impl_Hypre_ParCSRVector_Create(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Create) */
   /* Insert the implementation of the Create method here... */
+   int ierr = 0;
+   struct Hypre_ParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+   assert( data->comm != NULL ); /* SetCommunicator should be called before Create */
+
+   ierr = HYPRE_IJVectorCreate( *(data->comm), jlower, jupper, &ij_b );
+   ierr += HYPRE_IJVectorSetObjectType( ij_b, HYPRE_PARCSR );
+   data -> ij_b = ij_b;
+
+   return( ierr );
+
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Create) */
 }
 
@@ -283,6 +373,9 @@ impl_Hypre_ParCSRVector_GetObject(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.GetObject) */
   /* Insert the implementation of the GetObject method here... */
+   Hypre_ParCSRMatrix_addReference( self );
+   *A = (SIDL_BaseInterface) SIDL_BaseInterface__cast( self );
+   return( 0 );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.GetObject) */
 }
 
@@ -303,6 +396,13 @@ impl_Hypre_ParCSRVector_GetRow(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.GetRow) */
   /* Insert the implementation of the GetRow method here... */
+   int ierr = 0;
+   struct Hypre_ParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+   assert(ierr==1); /* >>> not done yet,just a stub <<<< */
+   return( ierr );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.GetRow) */
 }
 
@@ -322,6 +422,13 @@ impl_Hypre_ParCSRVector_Initialize(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Initialize) */
   /* Insert the implementation of the Initialize method here... */
+   int ierr = 0;
+   struct Hypre_ParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+   ierr = HYPRE_IJVectorInitialize( ij_b );
+   return( ierr );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Initialize) */
 }
 
@@ -340,6 +447,13 @@ impl_Hypre_ParCSRVector_Print(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Print) */
   /* Insert the implementation of the Print method here... */
+   int ierr = 0;
+   struct Hypre_ParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_b = data->ij_b;
+
+   ierr = HYPRE_IJVectorPrint( ij_b, filename );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Print) */
 }
 
@@ -360,6 +474,15 @@ impl_Hypre_ParCSRVector_Read(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Read) */
   /* Insert the implementation of the Read method here... */
+   int ierr = 0;
+   struct Hypre_ParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_b = data->ij_b;
+
+   ierr = HYPRE_IJVectorRead( filename, *(data->comm),
+                              HYPRE_PARCSR, &ij_b );
+   return( ierr );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Read) */
 }
 
@@ -394,6 +517,12 @@ impl_Hypre_ParCSRVector_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+   int ierr = 0;
+   struct Hypre_ParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+   data -> comm = (MPI_Comm *) mpi_comm;
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.SetCommunicator) */
 }
 
@@ -497,5 +626,15 @@ impl_Hypre_ParCSRVector_SetValues(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.SetValues) */
   /* Insert the implementation of the SetValues method here... */
+   int ierr = 0;
+   struct Hypre_ParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+
+   ierr = HYPRE_IJVectorSetValues( ij_b, nvalues,
+                                   SIDLArrayAddr1( indices, 0 ),
+                                   SIDLArrayAddr1( values, 0 ) );
+   return( ierr );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.SetValues) */
 }
