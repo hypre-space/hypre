@@ -196,6 +196,7 @@ mail_summary () {
   printf "Target architecure: %s\n" $HYPRE_ARCH >> $SUMFILE
   printf "Compile machine:    %s\n" $HYPRE_COMPILE_MACHINE >> $SUMFILE
   printf "Execute machine:    %s\n" $HYPRE_RUN_MACHINE >> $SUMFILE
+  printf "Operating system:   `uname -a`\n" >> $SUMFILE
   printf "Directory:          %s\n" ${HYPRE_AUTOTEST_DIR} >> $SUMFILE
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
   printf "Compile summary: Status: Warnings: Errors\n" >> $SUMFILE
@@ -293,10 +294,11 @@ mail_summary () {
     fi
   fi
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
+  MAIL_HEADER="`uname -n` `uname -s`:`uname -r`.`uname -v`"
   if [ "$TOTCNT" = "0" ] ; then
-    SUBJECT="Autotest NO Errors ($HYPRE_ARCH)"
+    SUBJECT="Autotest NO Errors ($MAIL_HEADER)"
   else
-    SUBJECT="Autotest $TOTCNT Errors ($HYPRE_ARCH)"
+    SUBJECT="Autotest $TOTCNT Errors ($MAIL_HEADER)"
   fi
   if [ "$DEBUG_MODE" = "yes" ] ; then
     ${HYPRE_MAIL} -s "$SUBJECT" $USER < $SUMFILE 
