@@ -29,6 +29,8 @@
 #include <essl.h>
 #endif
 
+double beta = 1.e-9; /* load balance factor */
+
 /******************************************************************************
  *
  * ParaSails private functions
@@ -932,7 +934,7 @@ void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
     printf("%d: Time cons patt each for each row: %f\n", mype, time1-time0);
 #endif
 
-    ps->load_bal = LoadBalDonate(ps->A->comm, ps->M, cost, 0.9);
+    ps->load_bal = LoadBalDonate(ps->A->comm, ps->M, cost, beta);
 }
 
 /*--------------------------------------------------------------------------
