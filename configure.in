@@ -1426,6 +1426,7 @@ CASC_CONFIG_OUTPUT_LIST(\
  krylov\
  matrix_matrix\
  parcsr_ls\
+ parcsr_es/LOBPCG\
  parcsr_mv\
  PETSc_ls\
  PETSc_ls/ParILUT\
