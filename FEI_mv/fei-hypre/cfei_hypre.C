@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <iostream.h>
 #include <stdlib.h>
 
 #include "utilities/utilities.h"

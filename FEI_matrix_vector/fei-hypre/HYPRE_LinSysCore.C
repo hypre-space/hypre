@@ -164,10 +164,12 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     pilutDropTol_       = 0.0;
     pilutMaxNnzPerRow_  = 0;    // register the max NNZ/per in matrix A
 
+    parasailsSym_       = 1;
+    parasailsThreshold_ = 0.1;
     parasailsNlevels_   = 1;
-    parasailsThreshold_ = 0.0;
-    parasailsFilter_    = 0.01;
-    parasailsSym_       = 0;
+    parasailsFilter_    = 0.1;
+    parasailsLoadbal_   = 0.0;
+    parasailsReuse_     = 0;    // reuse pattern if nonzero
 
     superluOrdering_    = 0;    // natural ordering in SuperLU
     superluScale_[0]    = 'N';  // no scaling in SuperLUX
@@ -656,18 +658,34 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     }
 
     //-------------------------------------------------------------------
-    // parasails preconditoner : filter (0.004-0.05)
+    // parasails preconditoner : filter
     //-------------------------------------------------------------------
 
     if (Utils::getParam("parasailsFilter",numParams,params,param) == 1)
     {
        sscanf(param,"%lg", &parasailsFilter_);
-       if ( parasailsFilter_ < 0.0 ) parasailsFilter_ = 0.0;
+
        nParamsFound++;
        if ( HYOutputLevel_ > 2 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters parasailsFilter = %e\n",
                  parasailsFilter_);
+       }
+    }
+
+    //-------------------------------------------------------------------
+    // parasails preconditoner : loadbal
+    //-------------------------------------------------------------------
+
+    if (Utils::getParam("parasailsLoadbal",numParams,params,param) == 1)
+    {
+       sscanf(param,"%lg", &parasailsLoadbal_);
+
+       nParamsFound++;
+       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       {
+          printf("HYPRE_LinSysCore::parameters parasailsLoadbal = %e\n",
+                 parasailsLoadbal_);
        }
     }
 
@@ -693,6 +711,21 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        {
           printf("HYPRE_LinSysCore::parameters parasailsSym = %d\n",
                  parasailsSym_);
+       }
+    }
+
+    //-------------------------------------------------------------------
+    // parasails preconditoner : reuse flag
+    //-------------------------------------------------------------------
+
+    if (Utils::getParam("parasailsReuse",numParams,params,param) == 1)
+    {
+       sscanf(param,"%d", &parasailsReuse_);
+       nParamsFound++;
+       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       {
+          printf("HYPRE_LinSysCore::parameters parasailsReuse = %d\n",
+                 parasailsReuse_);
        }
     }
 
@@ -2350,20 +2383,15 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   break;
 
              case HYPARASAILS :
-                  if ( HYOutputLevel_ > 0 && mypid_ == 0 )
-                  {
-                     printf("ParaSails - nlevels   = %d\n", parasailsNlevels_);
-                     printf("ParaSails - threshold = %e\n", parasailsThreshold_);
-                     printf("ParaSails - filter    = %e\n", parasailsFilter_);
-                  }
                   HYPRE_ParCSRParaSailsSetSym(HYPrecon_,parasailsSym_);
                   HYPRE_ParCSRParaSailsSetParams(HYPrecon_,
                                                  parasailsThreshold_,
                                                  parasailsNlevels_);
-                  if ( parasailsFilter_ > 0.0 ) 
-                  {
-                     HYPRE_ParCSRParaSailsSetFilter(HYPrecon_,parasailsFilter_);
-                  }
+
+                  HYPRE_ParCSRParaSailsSetFilter(HYPrecon_,parasailsFilter_);
+                  HYPRE_ParCSRParaSailsSetLoadbal(HYPrecon_,parasailsLoadbal_);
+                  HYPRE_ParCSRParaSailsSetReuse(HYPrecon_,parasailsReuse_);
+
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,
@@ -2543,20 +2571,15 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   break;
 
              case HYPARASAILS :
-                  if ( HYOutputLevel_ > 0 && mypid_ == 0 )
-                  {
-                     printf("ParaSails - nlevels   = %d\n", parasailsNlevels_);
-                     printf("ParaSails - threshold = %e\n", parasailsThreshold_);
-                     printf("ParaSails - filter    = %e\n", parasailsFilter_);
-                  }
                   HYPRE_ParCSRParaSailsSetSym(HYPrecon_,parasailsSym_);
                   HYPRE_ParCSRParaSailsSetParams(HYPrecon_,
                                                  parasailsThreshold_,
                                                  parasailsNlevels_);
-                  if ( parasailsFilter_ > 0.0 ) 
-                  {
-                     HYPRE_ParCSRParaSailsSetFilter(HYPrecon_,parasailsFilter_);
-                  }
+
+                  HYPRE_ParCSRParaSailsSetFilter(HYPrecon_,parasailsFilter_);
+                  HYPRE_ParCSRParaSailsSetLoadbal(HYPrecon_,parasailsLoadbal_);
+                  HYPRE_ParCSRParaSailsSetReuse(HYPrecon_,parasailsReuse_);
+
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,

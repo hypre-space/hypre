@@ -256,10 +256,12 @@ class HYPRE_LinSysCore: public LinearSystemCore {
    int             pilutRowSize_;
    double          pilutDropTol_;
    int             pilutMaxNnzPerRow_;
-   int             parasailsNlevels_;
-   double          parasailsThreshold_;
-   double          parasailsFilter_;
    int             parasailsSym_;
+   double          parasailsThreshold_;
+   int             parasailsNlevels_;
+   double          parasailsFilter_;
+   double          parasailsLoadbal_;
+   int             parasailsReuse_;
    int             mlNumPreSweeps_;
    int             mlNumPostSweeps_;
    int             mlPresmootherType_;
