@@ -155,6 +155,11 @@ main( int   argc,
          arg_index++;
          coarsen_type      = 3;
       }    
+      else if ( strcmp(argv[arg_index], "-rugerlx") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = -2;
+      }    
       else if ( strcmp(argv[arg_index], "-gm") == 0 )
       {
          arg_index++;
@@ -199,27 +204,55 @@ main( int   argc,
    grid_relax_type = hypre_CTAlloc(int,4);
    grid_relax_points = hypre_CTAlloc(int *,4);
 
-   /* fine grid */
-   num_grid_sweeps[0] = 2;
-   grid_relax_type[0] = relax_default; 
-   grid_relax_points[0] = hypre_CTAlloc(int, 2); 
-   grid_relax_points[0][0] = -1;
-   grid_relax_points[0][1] = 1;
-
-   /* down cycle */
-   num_grid_sweeps[1] = 2;
-   grid_relax_type[1] = relax_default; 
-   grid_relax_points[1] = hypre_CTAlloc(int, 2); 
-   grid_relax_points[1][0] = 1;
-   grid_relax_points[1][1] = -1;
-
-   /* up cycle */
-   num_grid_sweeps[2] = 2;
-   grid_relax_type[2] = relax_default; 
-   grid_relax_points[2] = hypre_CTAlloc(int, 2); 
-   grid_relax_points[2][0] = -1;
-   grid_relax_points[2][1] = 1;
-
+   if (coarsen_type == -2)
+   {
+      /* fine grid */
+      num_grid_sweeps[0] = 3;
+      grid_relax_type[0] = relax_default; 
+      grid_relax_points[0] = hypre_CTAlloc(int, 4); 
+      grid_relax_points[0][0] = -2;
+      grid_relax_points[0][1] = -1;
+      grid_relax_points[0][2] = 1;
+   
+      /* down cycle */
+      num_grid_sweeps[1] = 3;
+      grid_relax_type[1] = relax_default; 
+      grid_relax_points[1] = hypre_CTAlloc(int, 4); 
+      grid_relax_points[1][0] = -2;
+      grid_relax_points[1][1] = 1;
+      grid_relax_points[1][2] = -1;
+   
+      /* up cycle */
+      num_grid_sweeps[2] = 3;
+      grid_relax_type[2] = relax_default; 
+      grid_relax_points[2] = hypre_CTAlloc(int, 4); 
+      grid_relax_points[2][1] = -1;
+      grid_relax_points[2][2] = 1;
+      grid_relax_points[2][0] = -2;
+   }
+   else
+   {   
+      /* fine grid */
+      num_grid_sweeps[0] = 2;
+      grid_relax_type[0] = relax_default; 
+      grid_relax_points[0] = hypre_CTAlloc(int, 2); 
+      grid_relax_points[0][0] = -1;
+      grid_relax_points[0][1] = 1;
+   
+      /* down cycle */
+      num_grid_sweeps[1] = 2;
+      grid_relax_type[1] = relax_default; 
+      grid_relax_points[1] = hypre_CTAlloc(int, 2); 
+      grid_relax_points[1][0] = 1;
+      grid_relax_points[1][1] = -1;
+   
+      /* up cycle */
+      num_grid_sweeps[2] = 2;
+      grid_relax_type[2] = relax_default; 
+      grid_relax_points[2] = hypre_CTAlloc(int, 2); 
+      grid_relax_points[2][0] = -1;
+      grid_relax_points[2][1] = 1;
+   }
    /* coarsest grid */
    num_grid_sweeps[3] = 1;
    grid_relax_type[3] = 9;
