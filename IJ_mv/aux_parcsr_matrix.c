@@ -39,6 +39,8 @@ hypre_CreateAuxParCSRMatrix( int local_num_rows,
    /* set defaults */
    hypre_AuxParCSRMatrixIndxDiag(matrix) = 0;
    hypre_AuxParCSRMatrixIndxOffd(matrix) = 0;
+   hypre_AuxParCSRMatrixNnzDiag(matrix) = 0;
+   hypre_AuxParCSRMatrixNnzOffd(matrix) = 0;
    hypre_AuxParCSRMatrixRowStartDiag(matrix) = NULL;
    hypre_AuxParCSRMatrixRowEndDiag(matrix) = NULL;
    hypre_AuxParCSRMatrixRowStartOffd(matrix) = NULL;
