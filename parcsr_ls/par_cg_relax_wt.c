@@ -273,7 +273,7 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
          rlx_wt = 2.0/(lambda_min+lambda_max); */
 	 if (fabs(rlx_wt-rlx_wt_old) < 1.e-3 )
 	 {
-	    if (my_id == 0) printf (" cg sweeps : %d\n", (jj+1));
+	    /* if (my_id == 0) printf (" cg sweeps : %d\n", (jj+1)); */
 	    break;
 	 } 
       }

@@ -429,7 +429,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	    num_cg_sweeps = (int) (-schwarz_relax_wt);
  	    hypre_BoomerAMGCGRelaxWt(amg_data, level, num_cg_sweeps,
 			&schwarz_relax_wt);
-	    printf (" schwarz weight %f \n", schwarz_relax_wt);
+	    /* printf (" schwarz weight %f \n", schwarz_relax_wt); */
 	    HYPRE_SchwarzSetRelaxWeight(smoother[level], schwarz_relax_wt);
  	    if (hypre_ParAMGDataVariant(amg_data) > 0)
             local_size = hypre_CSRMatrixNumRows
