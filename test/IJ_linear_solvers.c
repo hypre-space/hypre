@@ -541,7 +541,8 @@ main( int   argc,
       {
          arg_index++;
         if (solver_id == 0 || solver_id == 1 || solver_id == 3 
-		|| solver_id == 5 || solver_id == 13 || solver_id == 14)
+		|| solver_id == 5 || solver_id == 13 || solver_id == 14
+		|| solver_id == 9 || solver_id == 20)
         {
          relax_weight[0] = atof(argv[arg_index++]);
          for (i=1; i < max_levels; i++)
