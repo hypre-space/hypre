@@ -199,8 +199,6 @@ int HYPRE_IJMatrixRead(const char     *filename,
 		       int             type,
 		       HYPRE_IJMatrix *matrix);
 
-/*@}*/
-
 /**
  * Print the matrix to file.  This is mainly for debugging purposes.
  **/
