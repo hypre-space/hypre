@@ -96,14 +96,26 @@ hypre_SMGSolve( void               *smg_vdata,
    b_l[0] = b;
    x_l[0] = x;
 
+   (smg_data -> num_iterations) = 0;
+
    if (tol > 0.0)
    {
       /* eps = (tol^2)*<b,b> */
       b_dot_b = hypre_StructInnerProd(b_l[0], b_l[0]);
       eps = (tol*tol)*b_dot_b;
-   }
 
-   (smg_data -> num_iterations) = 0;
+      /* if rhs is zero, return a zero solution */
+      if (b_dot_b == 0.0)
+      {
+         hypre_SetStructVectorConstantValues(x, 0.0);
+         if (logging > 0)
+         {
+            norms[0]     = 0.0;
+            rel_norms[0] = 0.0;
+         }
+         return ierr;
+      }
+   }
 
    for (i = 0; i < max_iter; i++)
    {
