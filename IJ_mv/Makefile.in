@@ -60,7 +60,7 @@ HEADERS =\
  HYPRE_IJMatrix.h
 
 FILES =\
- aux_parcsr.c\
+ aux_parcsr_matrix.c\
  hypre_IJMatrix_parcsr.c\
  hypre_IJMatrix_petsc.c\
  hypre_IJMatrix_isis.c\
