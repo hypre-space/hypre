@@ -625,6 +625,8 @@ hypre_ClearStructVectorAllValues( hypre_StructVector *vector )
    double           *data;
 
    int               i;
+   int               loopi, loopj, loopk;
+   hypre_Index       loop_size;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -633,11 +635,21 @@ hypre_ClearStructVectorAllValues( hypre_StructVector *vector )
    data_size = hypre_StructVectorDataSize(vector);
    data      = hypre_StructVectorData(vector);
 
+   hypre_SetIndex(loop_size, data_size, 1, 1);
+
+   hypre_BoxLoop0(loopi, loopk, loopj, loop_size,
+                  {
+                     data[loopi] = 0.0;
+                  });
+
+#if 0
    for ( i=0; i < data_size; i++)
       data[i] = 0.0;
 
 #ifdef HYPRE_USE_PTHREADS
    hypre_barrier(&hypre_mutex_boxloops, 0);
+#endif
+
 #endif
 
    return ierr;
