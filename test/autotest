@@ -157,10 +157,10 @@ do
         shift;;
     -tux)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux22"
-        HYPRE_RUN_MACHINE="tux22"
+        HYPRE_COMPILE_MACHINE="tux03"
+        HYPRE_RUN_MACHINE="tux03"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -t 1 -ns -a 2 -dcxfy"
+	HYPRE_MACHINE_COMMANDS="-m -t 1 -o 1 -ns -a 2 -dcxfy"
 	perform_test
         shift;;
     -vivid)
