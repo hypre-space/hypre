@@ -179,10 +179,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    if (A_array == NULL)
       A_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_levels);
-   if (P_array == NULL)
+   if (P_array == NULL && max_levels > 1)
       P_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_levels-1);
    if (CF_marker_array == NULL)
-      CF_marker_array = hypre_CTAlloc(int*, max_levels-1);
+      CF_marker_array = hypre_CTAlloc(int*, max_levels);
    if (dof_func_array == NULL)
       dof_func_array = hypre_CTAlloc(int*, max_levels);
    if (dof_func == NULL)
@@ -455,6 +455,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             /* note special case treatment of CF_marker is necessary
              * to do CF relaxation correctly when num_levels = 1 */
             hypre_TFree(CF_marker_array[level]);
+            hypre_ParVectorDestroy(F_array[level]);
+            hypre_ParVectorDestroy(U_array[level]);
          }
 
          break; 
@@ -532,7 +534,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	coarsen_type = 0;      
       }
 
-      if ( (level+1 >= max_levels) || 
+      if ( (level == max_levels-1) || 
            (coarse_size <= coarse_threshold) )
       {
          not_finished_coarsening = 0;
