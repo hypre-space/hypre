@@ -42,12 +42,12 @@ LFLAGS =\
  -L/home/casc/g77/lib\
  -L/usr/local/mpi/mpich/lib/solaris/ch_p4\
  -L.\
- -L../utilities\
- -L../seq_matrix_vector\
  -L../parcsr_matrix_vector\
- -lHYPRE_memory\
- -lHYPRE_mv\
+ -L../seq_matrix_vector\
+ -L../utilities\
  -lHYPRE_parmv\
+ -lHYPRE_mv\
+ -lHYPRE_utilities\
  -lnsl -lsocket -lmpi -lmpe\
  -lf2c\
  -lcegdb\
