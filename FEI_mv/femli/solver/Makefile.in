@@ -59,7 +59,9 @@ HEADERS =\
  mli_solver_bsgs.h \
  mli_solver_mls.h \
  mli_solver_superlu.h \
- mli_solver_arpacksuperlu.h
+ mli_solver_arpacksuperlu.h \
+ mli_solver_chebyshev.h \
+ mli_solver_cg.h
 
 FILES =\
  mli_solver.C \
@@ -70,7 +72,9 @@ FILES =\
  mli_solver_bsgs.C \
  mli_solver_mls.C \
  mli_solver_superlu.C \
- mli_solver_arpacksuperlu.C
+ mli_solver_arpacksuperlu.C \
+ mli_solver_chebyshev.C \
+ mli_solver_cg.C
 
 OBJS = ${FILES:.C=.o}
 

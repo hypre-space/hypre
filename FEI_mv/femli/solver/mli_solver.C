@@ -12,6 +12,8 @@
  *
  *****************************************************************************/
 
+#define habs(x) ((x > 0) ? x : -(x))
+
 /*--------------------------------------------------------------------------
  * include files 
  *--------------------------------------------------------------------------*/
@@ -19,6 +21,8 @@
 #include <string.h>
 #include <strings.h>
 #include "base/mli_defs.h"
+#include "parcsr_mv/parcsr_mv.h"
+#include "seq_mv/seq_mv.h"
 #include "solver/mli_solver.h"
 #include "solver/mli_solver_jacobi.h"
 #include "solver/mli_solver_gs.h"
@@ -28,6 +32,8 @@
 #include "solver/mli_solver_mls.h"
 #include "solver/mli_solver_superlu.h"
 #include "solver/mli_solver_arpacksuperlu.h"
+#include "solver/mli_solver_chebyshev.h"
+#include "solver/mli_solver_cg.h"
 
 /*****************************************************************************
  * constructor 
@@ -88,10 +94,18 @@ MLI_Solver::MLI_Solver( int sid )
            exit(1);
 #endif
            break;
+      case MLI_SOLVER_CHEBYSHEV_ID :
+           strcpy( solver_name, "Chebyshev" );
+           solver_id  = MLI_SOLVER_CHEBYSHEV_ID;
+           break;
+      case MLI_SOLVER_CG_ID :
+           strcpy( solver_name, "CG" );
+           solver_id  = MLI_SOLVER_CG_ID;
+           break;
       default :
            printf("MLI_Solver::constructor ERROR - invalid solver.\n");
            printf("Valid ones are : Jacobi, GS, SGS, ParaSails, \n");
-           printf("BSGS, MLS, SuperLU, ARPACKSuperLU.\n");
+           printf("BSGS, MLS, SuperLU, ARPACKSuperLU, Chebyshev, CG.\n");
            fflush(stdout);
            exit(1);
    }
@@ -163,6 +177,16 @@ MLI_Solver::MLI_Solver( char *str )
       exit(1);
 #endif
    }
+   else if ( !strcasecmp(str, "Chebyshev" ) )
+   {
+      strcpy( solver_name, str );
+      solver_id  = MLI_SOLVER_CHEBYSHEV_ID;
+   }
+   else if ( !strcasecmp(str, "CG" ) )
+   {
+      strcpy( solver_name, str );
+      solver_id  = MLI_SOLVER_CG_ID;
+   }
    else
    {
       printf("MLI_Solver::constructor ERROR - solver %s undefined\n",str);
@@ -216,6 +240,10 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
       printf("MLI_Solver_Create ERROR : SuperLU not available\n");
       exit(1);
 #endif
+   }
+   else if ( !strcasecmp(str, "Chebyshev" ) )
+   {
+      solver_ptr = new MLI_Solver_Chebyshev();
    }
    else
    {
@@ -281,6 +309,12 @@ MLI_Solver *MLI_Solver_CreateFromID( int solver_id )
            exit(1);
 #endif
            break;
+      case MLI_SOLVER_CHEBYSHEV_ID :
+           solver_ptr = new MLI_Solver_Chebyshev();
+           break;
+      case MLI_SOLVER_CG_ID :
+           solver_ptr = new MLI_Solver_CG();
+           break;
       default :
            printf("MLI_Solver_Create ERROR : invalid solver.\n");
            printf("Valid ones are : \n");
@@ -293,6 +327,8 @@ MLI_Solver *MLI_Solver_CreateFromID( int solver_id )
            printf("\t %5d (MLS)          \n", MLI_SOLVER_MLS_ID);
            printf("\t %5d (SuperLU)      \n", MLI_SOLVER_SUPERLU_ID);
            printf("\t %5d (ARPACKSuperLU)\n", MLI_SOLVER_ARPACKSUPERLU_ID); 
+           printf("\t %5d (Chebyshev)    \n", MLI_SOLVER_CHEBYSHEV_ID); 
+           printf("\t %5d (CG)           \n", MLI_SOLVER_CG_ID); 
            fflush(stdout);
            exit(1);
    }
