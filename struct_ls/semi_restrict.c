@@ -253,7 +253,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
                      hypre_BoxLoop2Begin(loop_size,
                                          r_dbox,  start,  stride,  ri,
                                          rc_dbox, startc, stridec, rci);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ri,ri,rci
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,ri,rci
 #include "hypre_box_smp_forloop.h"
                      hypre_BoxLoop2For(loopi, loopj, loopk, ri, rci)
                         {
