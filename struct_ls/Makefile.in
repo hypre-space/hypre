@@ -20,15 +20,13 @@ C_COMPILE_FLAGS=@CFLAGS@
 CXX_COMPILE_FLAGS=@CXXFLAGS@
 F77_COMPILE_FLAGS=@F77FLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
-CDEFS = -DHYPRE_NO_PTHREAD_MANGLING
  
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I..\
  -I../utilities\
  -I../struct_matrix_vector\
- ${CINCLUDES}\
- ${CDEFS}
+ ${CINCLUDES}
 
 RANLIB = @RANLIB@
 
@@ -38,7 +36,7 @@ HEADERS =\
  sparse_msg.h\
  smg.h\
  struct_linear_solvers.h\
- HYPRE_ls.h
+ HYPRE_struct_ls.h
 
 FILES =\
  coarsen.c\
@@ -79,7 +77,6 @@ FILES =\
  smg_setup_rap.c\
  smg_setup_restrict.c\
  smg_solve.c\
- thread_wrappers.c\
  HYPRE_struct_hybrid.c\
  HYPRE_struct_jacobi.c\
  HYPRE_struct_pfmg.c\
@@ -97,7 +94,7 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_ls.a 
+all: libHYPRE_struct_ls.a 
 
 install: all
 	@cp -f HYPRE_*.h struct_linear_solvers.h $$HYPRE_INSTALL_DIR/include/.
@@ -115,7 +112,7 @@ veryclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_ls.a: ${OBJS}
+libHYPRE_struct_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -rcu $@ ${OBJS}
 	${RANLIB} $@

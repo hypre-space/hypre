@@ -22,14 +22,12 @@
 void
 hypre_F90_IFACE(hypre_structvectorcreate)( int      *comm,
                                            long int *grid,
-                                           long int *stencil,
                                            long int *vector,
                                            int      *ierr    )
 {
    *ierr = (int)
       ( HYPRE_StructVectorCreate( (MPI_Comm)             *comm,
                                   (HYPRE_StructGrid)     *grid,
-                                  (HYPRE_StructStencil)  *stencil,
                                   (HYPRE_StructVector *) vector   ) );
 }
 

@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "utilities.h"
-#include "HYPRE_ls.h"
+#include "HYPRE_struct_ls.h"
  
 #ifdef HYPRE_DEBUG
 #include <cegdb.h>
@@ -548,7 +548,7 @@ main( int   argc,
 
    values = hypre_CTAlloc(double, volume);
 
-   HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil, &b);
+   HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, &b);
    HYPRE_StructVectorInitialize(b);
 
    /*-----------------------------------------------------------
@@ -584,7 +584,7 @@ main( int   argc,
    HYPRE_StructVectorPrint("driver.out.b", b, 0);
 #endif
 
-   HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil, &x);
+   HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, &x);
    HYPRE_StructVectorInitialize(x);
    for (i = 0; i < volume; i++)
    {

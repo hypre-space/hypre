@@ -6,7 +6,7 @@ CC = @CC@
 
 C_COMPILE_FLAGS=@CFLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
-CDEFS = -DHYPRE_NO_PTHREAD_MANGLING
+CDEFS = 
 
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
@@ -17,8 +17,7 @@ CFLAGS =\
  -I../parcsr_matrix_vector\
  -I../parcsr_linear_solvers\
  -I../CI_struct_matrix_vector\
- ${CINCLUDES}\
- ${CDEFS}
+ ${CINCLUDES} ${CDEFS}
 
 RANLIB= @RANLIB@
 

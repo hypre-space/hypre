@@ -12,7 +12,7 @@
 
 #include "HYPRE_config.h"
 #include "HYPRE_utilities.h"
-#include "HYPRE_mv.h"
+#include "HYPRE_struct_mv.h"
 #include "HYPRE_IJ_mv.h"
 
 #ifdef __cplusplus

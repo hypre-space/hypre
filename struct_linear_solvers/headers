@@ -18,10 +18,10 @@ cat > $INTERNAL_HEADER <<@
 
 #include <HYPRE_config.h>
 
-#include "HYPRE_ls.h"
+#include "HYPRE_struct_ls.h"
 
-#ifndef hypre_LS_HEADER
-#define hypre_LS_HEADER
+#ifndef hypre_STRUCT_LS_HEADER
+#define hypre_STRUCT_LS_HEADER
 
 #include "utilities.h"
 #include "struct_matrix_vector.h"

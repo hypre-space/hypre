@@ -374,8 +374,7 @@ c-----------------------------------------------------------------------
 c     Set up the rhs and initial guess
 c-----------------------------------------------------------------------
 
-      call HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil,
-     & b, ierr)
+      call HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, b, ierr)
       call HYPRE_StructVectorInitialize(b, ierr)
       do i=1,volume
          values(i) = 1.0
@@ -387,8 +386,7 @@ c-----------------------------------------------------------------------
       call HYPRE_StructVectorAssemble(b, ierr)
 c     call HYPRE_StructVectorPrint("driver.out.b", b, zero, ierr)
 
-      call HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil,
-     & x, ierr)
+      call HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, x, ierr)
       call HYPRE_StructVectorInitialize(x, ierr)
       do i=1,volume
          values(i) = 0.0

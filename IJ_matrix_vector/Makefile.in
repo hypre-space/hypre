@@ -19,7 +19,6 @@ CC = @CC@
 C_COMPILE_FLAGS=@CFLAGS@
 CXX_COMPILE_FLAGS=@CXXFLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
-CDEFS = -DHYPRE_NO_PTHREAD_MANGLING
 
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
@@ -29,8 +28,7 @@ CFLAGS =\
  -I../seq_matrix_vector\
  -I../parcsr_matrix_vector\
  -I../parcsr_linear_solvers\
- ${CINCLUDES}\
- ${CDEFS}
+ ${CINCLUDES} ${CDEFS}
 
 RANLIB= @RANLIB@
 

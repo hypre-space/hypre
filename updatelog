@@ -65,9 +65,23 @@ New internal installation: V2000-05-31
   may be used to retrieve version information.
 
 
-New internal installation that hasn't been done yet:
+New internal installation: V1.00.00
 
 Not sure if this "counts"
 - Setup time for PILUT have been dramatically reduced in the case of
   very small drop tolerances, and memory problems that were causing
   coredumps on >2 processors have been fixed.
+
+- Changed Struct interface include file names to be consistent with
+  the rest of the library.  They are now:
+
+    HYPRE_struct_mv.h
+    HYPRE_struct_ls.h
+
+- Removed the `stencil' argument from `HYPRE_StructVectorCreate'.
+
+- Added a new interface for semi-structured grids.  This is still very
+  much a beta implementation, and should be used with extreme caution
+  until further notice.
+
+

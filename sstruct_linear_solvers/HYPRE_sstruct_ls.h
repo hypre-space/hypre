@@ -53,6 +53,18 @@ typedef int (*HYPRE_PtrToStructSolverFcn)(HYPRE_SStructSolver,
                                           HYPRE_SStructVector,
                                           HYPRE_SStructVector);
 
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name SStruct GMRES Solver
+ *
+ * Description...
+ **/
+/*@{*/
+
 /**
  * Description...
  *

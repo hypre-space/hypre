@@ -1,10 +1,10 @@
 
 #include <HYPRE_config.h>
 
-#include "HYPRE_ls.h"
+#include "HYPRE_struct_ls.h"
 
-#ifndef hypre_LS_HEADER
-#define hypre_LS_HEADER
+#ifndef hypre_STRUCT_LS_HEADER
+#define hypre_STRUCT_LS_HEADER
 
 #include "utilities.h"
 #include "struct_matrix_vector.h"
@@ -94,7 +94,7 @@ int HYPRE_StructHybridSetDSCGMaxIter( HYPRE_StructSolver solver , int dscg_max_i
 int HYPRE_StructHybridSetPCGMaxIter( HYPRE_StructSolver solver , int pcg_max_its );
 int HYPRE_StructHybridSetTwoNorm( HYPRE_StructSolver solver , int two_norm );
 int HYPRE_StructHybridSetRelChange( HYPRE_StructSolver solver , int rel_change );
-int HYPRE_StructHybridSetPrecond( HYPRE_StructSolver solver , hypre_PtrToStructSolverFcn precond , hypre_PtrToStructSolverFcn precond_setup , HYPRE_StructSolver precond_solver );
+int HYPRE_StructHybridSetPrecond( HYPRE_StructSolver solver , HYPRE_PtrToStructSolverFcn precond , HYPRE_PtrToStructSolverFcn precond_setup , HYPRE_StructSolver precond_solver );
 int HYPRE_StructHybridSetLogging( HYPRE_StructSolver solver , int logging );
 int HYPRE_StructHybridGetNumIterations( HYPRE_StructSolver solver , int *num_its );
 int HYPRE_StructHybridGetDSCGNumIterations( HYPRE_StructSolver solver , int *dscg_num_its );
@@ -122,7 +122,7 @@ int HYPRE_StructPCGSetTol( HYPRE_StructSolver solver , double tol );
 int HYPRE_StructPCGSetMaxIter( HYPRE_StructSolver solver , int max_iter );
 int HYPRE_StructPCGSetTwoNorm( HYPRE_StructSolver solver , int two_norm );
 int HYPRE_StructPCGSetRelChange( HYPRE_StructSolver solver , int rel_change );
-int HYPRE_StructPCGSetPrecond( HYPRE_StructSolver solver , hypre_PtrToStructSolverFcn precond , hypre_PtrToStructSolverFcn precond_setup , HYPRE_StructSolver precond_solver );
+int HYPRE_StructPCGSetPrecond( HYPRE_StructSolver solver , HYPRE_PtrToStructSolverFcn precond , HYPRE_PtrToStructSolverFcn precond_setup , HYPRE_StructSolver precond_solver );
 int HYPRE_StructPCGSetLogging( HYPRE_StructSolver solver , int logging );
 int HYPRE_StructPCGGetNumIterations( HYPRE_StructSolver solver , int *num_iterations );
 int HYPRE_StructPCGGetFinalRelativeResidualNorm( HYPRE_StructSolver solver , double *norm );
@@ -491,184 +491,6 @@ int hypre_SparseMSGSetupRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , h
 
 /* sparse_msg_solve.c */
 int hypre_SparseMSGSolve( void *smsg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-
-/* thread_wrappers.c */
-void HYPRE_StructHybridCreateVoidPtr( void *argptr );
-int HYPRE_StructHybridCreatePush( MPI_Comm comm , HYPRE_StructSolverArray *solver );
-void HYPRE_StructHybridDestroyVoidPtr( void *argptr );
-int HYPRE_StructHybridDestroyPush( HYPRE_StructSolverArray solver );
-void HYPRE_StructHybridSetupVoidPtr( void *argptr );
-int HYPRE_StructHybridSetupPush( HYPRE_StructSolverArray solver , HYPRE_StructMatrixArray A , HYPRE_StructVectorArray b , HYPRE_StructVectorArray x );
-void HYPRE_StructHybridSolveVoidPtr( void *argptr );
-int HYPRE_StructHybridSolvePush( HYPRE_StructSolverArray solver , HYPRE_StructMatrixArray A , HYPRE_StructVectorArray b , HYPRE_StructVectorArray x );
-void HYPRE_StructHybridSetTolVoidPtr( void *argptr );
-int HYPRE_StructHybridSetTolPush( HYPRE_StructSolverArray solver , double tol );
-void HYPRE_StructHybridSetConvergenceTolVoidPtr( void *argptr );
-int HYPRE_StructHybridSetConvergenceTolPush( HYPRE_StructSolverArray solver , double cf_tol );
-void HYPRE_StructHybridSetDSCGMaxIterVoidPtr( void *argptr );
-int HYPRE_StructHybridSetDSCGMaxIterPush( HYPRE_StructSolverArray solver , int dscg_max_its );
-void HYPRE_StructHybridSetPCGMaxIterVoidPtr( void *argptr );
-int HYPRE_StructHybridSetPCGMaxIterPush( HYPRE_StructSolverArray solver , int pcg_max_its );
-void HYPRE_StructHybridSetTwoNormVoidPtr( void *argptr );
-int HYPRE_StructHybridSetTwoNormPush( HYPRE_StructSolverArray solver , int two_norm );
-void HYPRE_StructHybridSetRelChangeVoidPtr( void *argptr );
-int HYPRE_StructHybridSetRelChangePush( HYPRE_StructSolverArray solver , int rel_change );
-void HYPRE_StructHybridSetPrecondVoidPtr( void *argptr );
-int HYPRE_StructHybridSetPrecondPush( HYPRE_StructSolverArray solver , hypre_PtrToStructSolverFcn precond , hypre_PtrToStructSolverFcn precond_setup , HYPRE_StructSolverArray precond_solver );
-void HYPRE_StructHybridSetLoggingVoidPtr( void *argptr );
-int HYPRE_StructHybridSetLoggingPush( HYPRE_StructSolverArray solver , int logging );
-void HYPRE_StructHybridGetNumIterationsVoidPtr( void *argptr );
-int HYPRE_StructHybridGetNumIterationsPush( HYPRE_StructSolverArray solver , int *num_its );
-void HYPRE_StructHybridGetDSCGNumIterationsVoidPtr( void *argptr );
-int HYPRE_StructHybridGetDSCGNumIterationsPush( HYPRE_StructSolverArray solver , int *dscg_num_its );
-void HYPRE_StructHybridGetPCGNumIterationsVoidPtr( void *argptr );
-int HYPRE_StructHybridGetPCGNumIterationsPush( HYPRE_StructSolverArray solver , int *pcg_num_its );
-void HYPRE_StructHybridGetFinalRelativeResidualNormVoidPtr( void *argptr );
-int HYPRE_StructHybridGetFinalRelativeResidualNormPush( HYPRE_StructSolverArray solver , double *norm );
-void HYPRE_StructJacobiCreateVoidPtr( void *argptr );
-int HYPRE_StructJacobiCreatePush( MPI_Comm comm , HYPRE_StructSolverArray *solver );
-void HYPRE_StructJacobiDestroyVoidPtr( void *argptr );
-int HYPRE_StructJacobiDestroyPush( HYPRE_StructSolverArray solver );
-void HYPRE_StructJacobiSetupVoidPtr( void *argptr );
-int HYPRE_StructJacobiSetupPush( HYPRE_StructSolverArray solver , HYPRE_StructMatrixArray A , HYPRE_StructVectorArray b , HYPRE_StructVectorArray x );
-void HYPRE_StructJacobiSolveVoidPtr( void *argptr );
-int HYPRE_StructJacobiSolvePush( HYPRE_StructSolverArray solver , HYPRE_StructMatrixArray A , HYPRE_StructVectorArray b , HYPRE_StructVectorArray x );
-void HYPRE_StructJacobiSetTolVoidPtr( void *argptr );
-int HYPRE_StructJacobiSetTolPush( HYPRE_StructSolverArray solver , double tol );
-void HYPRE_StructJacobiSetMaxIterVoidPtr( void *argptr );
-int HYPRE_StructJacobiSetMaxIterPush( HYPRE_StructSolverArray solver , int max_iter );
-void HYPRE_StructJacobiSetZeroGuessVoidPtr( void *argptr );
-int HYPRE_StructJacobiSetZeroGuessPush( HYPRE_StructSolverArray solver );
-void HYPRE_StructJacobiSetNonZeroGuessVoidPtr( void *argptr );
-int HYPRE_StructJacobiSetNonZeroGuessPush( HYPRE_StructSolverArray solver );
-void HYPRE_StructJacobiGetNumIterationsVoidPtr( void *argptr );
-int HYPRE_StructJacobiGetNumIterationsPush( HYPRE_StructSolverArray solver , int *num_iterations );
-void HYPRE_StructJacobiGetFinalRelativeResidualNormVoidPtr( void *argptr );
-int HYPRE_StructJacobiGetFinalRelativeResidualNormPush( HYPRE_StructSolverArray solver , double *norm );
-void HYPRE_StructPCGCreateVoidPtr( void *argptr );
-int HYPRE_StructPCGCreatePush( MPI_Comm comm , HYPRE_StructSolverArray *solver );
-void HYPRE_StructPCGDestroyVoidPtr( void *argptr );
-int HYPRE_StructPCGDestroyPush( HYPRE_StructSolverArray solver );
-void HYPRE_StructPCGSetupVoidPtr( void *argptr );
-int HYPRE_StructPCGSetupPush( HYPRE_StructSolverArray solver , HYPRE_StructMatrixArray A , HYPRE_StructVectorArray b , HYPRE_StructVectorArray x );
-void HYPRE_StructPCGSolveVoidPtr( void *argptr );
-int HYPRE_StructPCGSolvePush( HYPRE_StructSolverArray solver , HYPRE_StructMatrixArray A , HYPRE_StructVectorArray b , HYPRE_StructVectorArray x );
-void HYPRE_StructPCGSetTolVoidPtr( void *argptr );
-int HYPRE_StructPCGSetTolPush( HYPRE_StructSolverArray solver , double tol );
-void HYPRE_StructPCGSetMaxIterVoidPtr( void *argptr );
-int HYPRE_StructPCGSetMaxIterPush( HYPRE_StructSolverArray solver , int max_iter );
-void HYPRE_StructPCGSetTwoNormVoidPtr( void *argptr );
-int HYPRE_StructPCGSetTwoNormPush( HYPRE_StructSolverArray solver , int two_norm );
-void HYPRE_StructPCGSetRelChangeVoidPtr( void *argptr );
-int HYPRE_StructPCGSetRelChangePush( HYPRE_StructSolverArray solver , int rel_change );
-void HYPRE_StructPCGSetPrecondVoidPtr( void *argptr );
-int HYPRE_StructPCGSetPrecondPush( HYPRE_StructSolverArray solver , hypre_PtrToStructSolverFcn precond , hypre_PtrToStructSolverFcn precond_setup , HYPRE_StructSolverArray precond_solver );
-void HYPRE_StructPCGSetLoggingVoidPtr( void *argptr );
-int HYPRE_StructPCGSetLoggingPush( HYPRE_StructSolverArray solver , int logging );
-void HYPRE_StructPCGGetNumIterationsVoidPtr( void *argptr );
-int HYPRE_StructPCGGetNumIterationsPush( HYPRE_StructSolverArray solver , int *num_iterations );
-void HYPRE_StructPCGGetFinalRelativeResidualNormVoidPtr( void *argptr );
-int HYPRE_StructPCGGetFinalRelativeResidualNormPush( HYPRE_StructSolverArray solver , double *norm );
-void HYPRE_StructDiagScaleSetupVoidPtr( void *argptr );
-int HYPRE_StructDiagScaleSetupPush( HYPRE_StructSolverArray solver , HYPRE_StructMatrixArray A , HYPRE_StructVectorArray y , HYPRE_StructVectorArray x );
-void HYPRE_StructDiagScaleVoidPtr( void *argptr );
-int HYPRE_StructDiagScalePush( HYPRE_StructSolverArray solver , HYPRE_StructMatrixArray HA , HYPRE_StructVectorArray Hy , HYPRE_StructVectorArray Hx );
-void HYPRE_StructPFMGCreateVoidPtr( void *argptr );
-int HYPRE_StructPFMGCreatePush( MPI_Comm comm , HYPRE_StructSolverArray *solver );
-void HYPRE_StructPFMGDestroyVoidPtr( void *argptr );
-int HYPRE_StructPFMGDestroyPush( HYPRE_StructSolverArray solver );
-void HYPRE_StructPFMGSetupVoidPtr( void *argptr );
-int HYPRE_StructPFMGSetupPush( HYPRE_StructSolverArray solver , HYPRE_StructMatrixArray A , HYPRE_StructVectorArray b , HYPRE_StructVectorArray x );
-void HYPRE_StructPFMGSolveVoidPtr( void *argptr );
-int HYPRE_StructPFMGSolvePush( HYPRE_StructSolverArray solver , HYPRE_StructMatrixArray A , HYPRE_StructVectorArray b , HYPRE_StructVectorArray x );
-void HYPRE_StructPFMGSetTolVoidPtr( void *argptr );
-int HYPRE_StructPFMGSetTolPush( HYPRE_StructSolverArray solver , double tol );
-void HYPRE_StructPFMGSetMaxIterVoidPtr( void *argptr );
-int HYPRE_StructPFMGSetMaxIterPush( HYPRE_StructSolverArray solver , int max_iter );
-void HYPRE_StructPFMGSetRelChangeVoidPtr( void *argptr );
-int HYPRE_StructPFMGSetRelChangePush( HYPRE_StructSolverArray solver , int rel_change );
-void HYPRE_StructPFMGSetZeroGuessVoidPtr( void *argptr );
-int HYPRE_StructPFMGSetZeroGuessPush( HYPRE_StructSolverArray solver );
-void HYPRE_StructPFMGSetNonZeroGuessVoidPtr( void *argptr );
-int HYPRE_StructPFMGSetNonZeroGuessPush( HYPRE_StructSolverArray solver );
-void HYPRE_StructPFMGSetRelaxTypeVoidPtr( void *argptr );
-int HYPRE_StructPFMGSetRelaxTypePush( HYPRE_StructSolverArray solver , int relax_type );
-void HYPRE_StructPFMGSetNumPreRelaxVoidPtr( void *argptr );
-int HYPRE_StructPFMGSetNumPreRelaxPush( HYPRE_StructSolverArray solver , int num_pre_relax );
-void HYPRE_StructPFMGSetNumPostRelaxVoidPtr( void *argptr );
-int HYPRE_StructPFMGSetNumPostRelaxPush( HYPRE_StructSolverArray solver , int num_post_relax );
-void HYPRE_StructPFMGSetSkipRelaxVoidPtr( void *argptr );
-int HYPRE_StructPFMGSetSkipRelaxPush( HYPRE_StructSolverArray solver , int skip_relax );
-void HYPRE_StructPFMGSetDxyzVoidPtr( void *argptr );
-int HYPRE_StructPFMGSetDxyzPush( HYPRE_StructSolverArray solver , double *dxyz );
-void HYPRE_StructPFMGSetLoggingVoidPtr( void *argptr );
-int HYPRE_StructPFMGSetLoggingPush( HYPRE_StructSolverArray solver , int logging );
-void HYPRE_StructPFMGGetNumIterationsVoidPtr( void *argptr );
-int HYPRE_StructPFMGGetNumIterationsPush( HYPRE_StructSolverArray solver , int *num_iterations );
-void HYPRE_StructPFMGGetFinalRelativeResidualNormVoidPtr( void *argptr );
-int HYPRE_StructPFMGGetFinalRelativeResidualNormPush( HYPRE_StructSolverArray solver , double *norm );
-void HYPRE_StructSMGCreateVoidPtr( void *argptr );
-int HYPRE_StructSMGCreatePush( MPI_Comm comm , HYPRE_StructSolverArray *solver );
-void HYPRE_StructSMGDestroyVoidPtr( void *argptr );
-int HYPRE_StructSMGDestroyPush( HYPRE_StructSolverArray solver );
-void HYPRE_StructSMGSetupVoidPtr( void *argptr );
-int HYPRE_StructSMGSetupPush( HYPRE_StructSolverArray solver , HYPRE_StructMatrixArray A , HYPRE_StructVectorArray b , HYPRE_StructVectorArray x );
-void HYPRE_StructSMGSolveVoidPtr( void *argptr );
-int HYPRE_StructSMGSolvePush( HYPRE_StructSolverArray solver , HYPRE_StructMatrixArray A , HYPRE_StructVectorArray b , HYPRE_StructVectorArray x );
-void HYPRE_StructSMGSetMemoryUseVoidPtr( void *argptr );
-int HYPRE_StructSMGSetMemoryUsePush( HYPRE_StructSolverArray solver , int memory_use );
-void HYPRE_StructSMGSetTolVoidPtr( void *argptr );
-int HYPRE_StructSMGSetTolPush( HYPRE_StructSolverArray solver , double tol );
-void HYPRE_StructSMGSetMaxIterVoidPtr( void *argptr );
-int HYPRE_StructSMGSetMaxIterPush( HYPRE_StructSolverArray solver , int max_iter );
-void HYPRE_StructSMGSetRelChangeVoidPtr( void *argptr );
-int HYPRE_StructSMGSetRelChangePush( HYPRE_StructSolverArray solver , int rel_change );
-void HYPRE_StructSMGSetZeroGuessVoidPtr( void *argptr );
-int HYPRE_StructSMGSetZeroGuessPush( HYPRE_StructSolverArray solver );
-void HYPRE_StructSMGSetNonZeroGuessVoidPtr( void *argptr );
-int HYPRE_StructSMGSetNonZeroGuessPush( HYPRE_StructSolverArray solver );
-void HYPRE_StructSMGSetNumPreRelaxVoidPtr( void *argptr );
-int HYPRE_StructSMGSetNumPreRelaxPush( HYPRE_StructSolverArray solver , int num_pre_relax );
-void HYPRE_StructSMGSetNumPostRelaxVoidPtr( void *argptr );
-int HYPRE_StructSMGSetNumPostRelaxPush( HYPRE_StructSolverArray solver , int num_post_relax );
-void HYPRE_StructSMGSetLoggingVoidPtr( void *argptr );
-int HYPRE_StructSMGSetLoggingPush( HYPRE_StructSolverArray solver , int logging );
-void HYPRE_StructSMGGetNumIterationsVoidPtr( void *argptr );
-int HYPRE_StructSMGGetNumIterationsPush( HYPRE_StructSolverArray solver , int *num_iterations );
-void HYPRE_StructSMGGetFinalRelativeResidualNormVoidPtr( void *argptr );
-int HYPRE_StructSMGGetFinalRelativeResidualNormPush( HYPRE_StructSolverArray solver , double *norm );
-void HYPRE_StructSparseMSGCreateVoidPtr( void *argptr );
-int HYPRE_StructSparseMSGCreatePush( MPI_Comm comm , HYPRE_StructSolverArray *solver );
-void HYPRE_StructSparseMSGDestroyVoidPtr( void *argptr );
-int HYPRE_StructSparseMSGDestroyPush( HYPRE_StructSolverArray solver );
-void HYPRE_StructSparseMSGSetupVoidPtr( void *argptr );
-int HYPRE_StructSparseMSGSetupPush( HYPRE_StructSolverArray solver , HYPRE_StructMatrixArray A , HYPRE_StructVectorArray b , HYPRE_StructVectorArray x );
-void HYPRE_StructSparseMSGSolveVoidPtr( void *argptr );
-int HYPRE_StructSparseMSGSolvePush( HYPRE_StructSolverArray solver , HYPRE_StructMatrixArray A , HYPRE_StructVectorArray b , HYPRE_StructVectorArray x );
-void HYPRE_StructSparseMSGSetTolVoidPtr( void *argptr );
-int HYPRE_StructSparseMSGSetTolPush( HYPRE_StructSolverArray solver , double tol );
-void HYPRE_StructSparseMSGSetMaxIterVoidPtr( void *argptr );
-int HYPRE_StructSparseMSGSetMaxIterPush( HYPRE_StructSolverArray solver , int max_iter );
-void HYPRE_StructSparseMSGSetJumpVoidPtr( void *argptr );
-int HYPRE_StructSparseMSGSetJumpPush( HYPRE_StructSolverArray solver , int jump );
-void HYPRE_StructSparseMSGSetRelChangeVoidPtr( void *argptr );
-int HYPRE_StructSparseMSGSetRelChangePush( HYPRE_StructSolverArray solver , int rel_change );
-void HYPRE_StructSparseMSGSetZeroGuessVoidPtr( void *argptr );
-int HYPRE_StructSparseMSGSetZeroGuessPush( HYPRE_StructSolverArray solver );
-void HYPRE_StructSparseMSGSetNonZeroGuessVoidPtr( void *argptr );
-int HYPRE_StructSparseMSGSetNonZeroGuessPush( HYPRE_StructSolverArray solver );
-void HYPRE_StructSparseMSGSetRelaxTypeVoidPtr( void *argptr );
-int HYPRE_StructSparseMSGSetRelaxTypePush( HYPRE_StructSolverArray solver , int relax_type );
-void HYPRE_StructSparseMSGSetNumPreRelaxVoidPtr( void *argptr );
-int HYPRE_StructSparseMSGSetNumPreRelaxPush( HYPRE_StructSolverArray solver , int num_pre_relax );
-void HYPRE_StructSparseMSGSetNumPostRelaxVoidPtr( void *argptr );
-int HYPRE_StructSparseMSGSetNumPostRelaxPush( HYPRE_StructSolverArray solver , int num_post_relax );
-void HYPRE_StructSparseMSGSetLoggingVoidPtr( void *argptr );
-int HYPRE_StructSparseMSGSetLoggingPush( HYPRE_StructSolverArray solver , int logging );
-void HYPRE_StructSparseMSGGetNumIterationsVoidPtr( void *argptr );
-int HYPRE_StructSparseMSGGetNumIterationsPush( HYPRE_StructSolverArray solver , int *num_iterations );
-void HYPRE_StructSparseMSGGetFinalRelativeResidualNormVoidPtr( void *argptr );
-int HYPRE_StructSparseMSGGetFinalRelativeResidualNormPush( HYPRE_StructSolverArray solver , double *norm );
 
 
 #ifdef __cplusplus

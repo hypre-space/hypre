@@ -247,8 +247,8 @@ headers.h
 
 int
 HYPRE_StructPCGSetPrecond( HYPRE_StructSolver         solver,
-                           hypre_PtrToStructSolverFcn precond,
-                           hypre_PtrToStructSolverFcn precond_setup,
+                           HYPRE_PtrToStructSolverFcn precond,
+                           HYPRE_PtrToStructSolverFcn precond_setup,
                            HYPRE_StructSolver         precond_solver )
 {
    return( hypre_PCGSetPrecond( (void *) solver,

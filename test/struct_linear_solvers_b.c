@@ -3,9 +3,8 @@
 #include <math.h>
 
 #include "utilities.h"
-#include "HYPRE_ls.h"
+#include "HYPRE_struct_ls.h"
  
-#include "HYPRE_ls.h"
 #include "Hypre_Box_Stub.h"
 #include "Hypre_StructStencil_Stub.h"
 #include "Hypre_StructGrid_Stub.h"
