@@ -6,24 +6,12 @@
  * that matrix row-by-row into the IJMatrix interface. AJC 7/99.
  *--------------------------------------------------------------------------*/
 
-#include "../utilities/utilities.h"
-#include "../HYPRE.h"
-#include "../distributed_matrix/HYPRE_distributed_matrix_types.h"
-#include "../distributed_matrix/HYPRE_distributed_matrix_protos.h"
+#include "utilities.h"
+#include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
-/* Users and test drivers shouldn't do the following; fix later. AJC */
-#include "csr_matrix.h"
-#include "vector.h"
-#include "seq_matrix_vector.h"
-#include "parcsr_matrix_vector.h"
 
-#include "../IJ_matrix_vector/HYPRE_IJ_mv.h"
-#include "../parcsr_linear_solvers/HYPRE_parcsr_ls.h"
-/* Another Bad Thing (TM): this is included to get prototypes for the matrix
-building routines. These should be moved to the test directory and the prototypes
-should come from the test directory. AJC 8-9-99 */
-#include "../parcsr_linear_solvers/parcsr_linear_solvers.h"
-
+#include "HYPRE_IJ_mv.h"
+#include "HYPRE_parcsr_ls.h"
 
  
 int
@@ -48,7 +36,6 @@ main( int   argc,
    HYPRE_IJMatrix      ij_matrix;
    HYPRE_IJVector      ij_b;
    HYPRE_IJVector      ij_x;
-   HYPRE_DistributedMatrix distributed_matrix;
    /* concrete underlying type for ij_matrix defaults to parcsr. AJC. */
    int                 ij_matrix_storage_type=HYPRE_PARCSR_MATRIX;
    int                 ij_vector_storage_type=HYPRE_PARCSR;
@@ -67,6 +54,12 @@ main( int   argc,
    int                *partitioning;
 
    int		       time_index;
+   MPI_Comm comm;
+   int M, N;
+   int first_local_row, last_local_row;
+   int first_local_col, last_local_col;
+   int size, *col_ind;
+   double *values;
 
    /* parameters for BoomerAMG */
    double   strong_threshold;
@@ -499,26 +492,45 @@ main( int   argc,
 
     
    /*-----------------------------------------------------------
-    * Wrap the parcsr matrix up as a distributed_matrix
+    * Copy the parcsr matrix into the IJMatrix through interface calls
     *-----------------------------------------------------------*/
 
-    ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix( parcsr_A, 
-				&distributed_matrix );
-    if (ierr)
-      {
-       printf("Error in driver converting parcsr to distributed matrix. \n");
-       return(-1);
-      }
+   ierr += HYPRE_GetCommParCSR( parcsr_A, &comm );
+   ierr += HYPRE_GetDimsParCSR( parcsr_A, &M, &N );
 
-   /*-----------------------------------------------------------
-    * Copy the distributed matrix into the IJMatrix through interface calls
-    *-----------------------------------------------------------*/
+   ierr += HYPRE_NewIJMatrix( comm, &ij_matrix, M, N );
 
-    ierr = HYPRE_BuildIJMatrixFromDistributedMatrix( distributed_matrix, 
-		&ij_matrix, HYPRE_PARCSR_MATRIX );
+   ierr += HYPRE_SetIJMatrixLocalStorageType(
+                 ij_matrix, HYPRE_PARCSR_MATRIX );
+
+   ierr = HYPRE_GetLocalRangeParcsr( parcsr_A,
+             &first_local_row, &last_local_row ,
+             &first_local_col, &last_local_col );
+
+   ierr = HYPRE_SetIJMatrixLocalSize( ij_matrix,
+                last_local_row-first_local_row+1,
+                last_local_col-first_local_col+1 );
+
+   ierr = HYPRE_InitializeIJMatrix( ij_matrix );
+
+   /* Loop through all locally stored rows and insert them into ij_matrix */
+   for (i=first_local_row; i<= last_local_row; i++)
+   {
+      ierr += HYPRE_GetRowParCSRMatrix( parcsr_A, i, &size, 
+		&col_ind, &values );
+
+      ierr += HYPRE_InsertIJMatrixRow( ij_matrix, size, i, col_ind, values );
+      if( ierr ) return(ierr);
+
+      ierr += HYPRE_RestoreRowParCSRMatrix( parcsr_A, i, &size, 
+		&col_ind, &values );
+
+    }
+    ierr += HYPRE_AssembleIJMatrix( ij_matrix );
+
     if (ierr)
     {
-       printf("Error in driver building IJMatrix from distributed matrix. \n");
+       printf("Error in driver building IJMatrix from parcsr matrix. \n");
        return(-1);
     }
 
