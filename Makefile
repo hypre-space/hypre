@@ -40,8 +40,8 @@ HYPRE_IJ_DIRS =\
  distributed_ls\
  parcsr_ls
 
-#These are the directories for eigensolvers
-HYPRE_EIGEN_DIRS = eigensolvers
+#These are the directories for multivector
+HYPRE_MULTIVEC_DIRS = multivector
 
 #These are the directories for the FEI
 HYPRE_FEI_DIRS = FEI_mv
@@ -62,7 +62,7 @@ HYPRE_DIRS =\
  ${HYPRE_STRUCT_DIRS}\
  ${HYPRE_SSTRUCT_DIRS}\
  ${HYPRE_IJ_DIRS}\
- ${HYPRE_EIGEN_DIRS}\
+ ${HYPRE_MULTIVEC_DIRS}\
  ${HYPRE_FEI_DIRS}\
  ${HYPRE_LIBS_DIRS}
 
