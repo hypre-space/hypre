@@ -42,6 +42,7 @@ main( int   argc,
    double   trunc_factor;
    int      cycle_type;
    int      coarsen_type = 0;
+   int      hybrid = 1;
    int      measure_type = 0;
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
@@ -156,25 +157,15 @@ main( int   argc,
          arg_index++;
          coarsen_type      = 3;
       }    
-      else if ( strcmp(argv[arg_index], "-rugeL") == 0 )
+      else if ( strcmp(argv[arg_index], "-rugerlx") == 0 )
       {
          arg_index++;
          coarsen_type      = 4;
       }    
-      else if ( strcmp(argv[arg_index], "-rugeL2b") == 0 )
+      else if ( strcmp(argv[arg_index], "-nohybrid") == 0 )
       {
          arg_index++;
-         coarsen_type      = 5;
-      }    
-      else if ( strcmp(argv[arg_index], "-rugeL3") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 6;
-      }          
-      else if ( strcmp(argv[arg_index], "-rugerlx") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = -2;
+         hybrid      = -1;
       }    
       else if ( strcmp(argv[arg_index], "-gm") == 0 )
       {
@@ -224,22 +215,21 @@ main( int   argc,
    if (coarsen_type == -2)
    {
       /* fine grid */
-      num_grid_sweeps[0] = 4;
+      num_grid_sweeps[0] = 3;
       grid_relax_type[0] = relax_default; 
       grid_relax_points[0] = hypre_CTAlloc(int, 4); 
       grid_relax_points[0][0] = -2;
-      grid_relax_points[0][1] = -2;
-      grid_relax_points[0][2] = -1;
-      grid_relax_points[0][3] = 1;
+      grid_relax_points[0][1] = -1;
+      grid_relax_points[0][2] = 1;
    
       /* down cycle */
       num_grid_sweeps[1] = 4;
       grid_relax_type[1] = relax_default; 
       grid_relax_points[1] = hypre_CTAlloc(int, 4); 
-      grid_relax_points[1][0] = -2;
       grid_relax_points[1][1] = 1;
-      grid_relax_points[1][2] = -2;
       grid_relax_points[1][3] = -1;
+      grid_relax_points[1][2] = -2;
+      grid_relax_points[1][0] = -2;
    
       /* up cycle */
       num_grid_sweeps[2] = 4;
@@ -349,9 +339,8 @@ main( int   argc,
       printf("   -ruge                 : Ruge coarsening (local)\n");
       printf("   -ruge3                : third pass on boundary\n");
       printf("   -ruge2b               : 2nd pass is global\n");
-      printf("   -rugeL                : Ruge List based (local)\n");
-      printf("   -rugeL3               : (list) third pass on boundary\n");
-      printf("   -rugeL2b              : (list) 2nd pass is global\n");
+      printf("   -rugerlx              : relaxes special points\n");
+      printf("   -nohybrid             : no switch in coarsening\n");
       printf("   -gm                   : use global measures\n");
       printf("\n");
       printf("  -rlx <val>             : relaxation type\n");
@@ -512,7 +501,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       amg_solver = HYPRE_ParAMGInitialize(); 
-      HYPRE_ParAMGSetCoarsenType(amg_solver, coarsen_type);
+      HYPRE_ParAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
       HYPRE_ParAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_ParAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_ParAMGSetTruncFactor(amg_solver, trunc_factor);
