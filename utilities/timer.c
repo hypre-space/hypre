@@ -19,6 +19,7 @@
  */
 
 #include <time.h>
+#include <unistd.h>
 #ifndef WIN32
 #include <sys/times.h>
 #endif
@@ -37,7 +38,7 @@ double time_getWallclockSeconds(void)
 #else
    struct tms usage;
    long wallclock = times(&usage);
-   return(((double) wallclock)/((double) CLOCKS_PER_SEC));
+   return(((double) wallclock)/((double) sysconf(_SC_CLK_TCK)));
 #endif
 #endif
 }
