@@ -62,6 +62,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    coarse_solver_wgt   = new double[20];
    for ( int j = 0; j < 20; j++ ) coarse_solver_wgt[j] = 1.0;
    calibration_size  = 0;
+   useSAMGeFlag_     = 0;
    RAP_time          = 0.0;
    total_time        = 0.0;
 }
@@ -136,6 +137,11 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
    {
       sscanf(in_name,"%s %d", param1, &level);
       return ( setNumLevels( level ) );
+   }
+   else if ( !strcmp(param1, "useSAMGe" ))
+   {
+      useSAMGeFlag_ = 1;
+      return 0;
    }
    else if ( !strcmp(param1, "setCoarsenScheme" ))
    {
@@ -383,6 +389,12 @@ int MLI_Method_AMGSA::setup( MLI *mli )
          sa_data[level] = NULL;
       }
    }
+
+   /* --------------------------------------------------------------- */
+   /* call SAe if flag is set                                         */
+   /* --------------------------------------------------------------- */
+
+   if ( useSAMGeFlag_ ) setupUsingFEData(mli);
 
    /* --------------------------------------------------------------- */
    /* call calibration if calibration size > 0                        */

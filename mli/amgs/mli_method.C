@@ -29,15 +29,24 @@
 MLI_Method *MLI_Method_CreateFromName( char *str, MPI_Comm mpi_comm )
 {
    MLI_Method *method_ptr;
+   char       paramString[80];
 
    if ( !strcmp(str, "AMGSA" ) )
    {
       method_ptr  = new MLI_Method_AMGSA(mpi_comm);
    }
+   else if ( !strcmp(str, "AMGSAe" ) )
+   {
+      method_ptr  = new MLI_Method_AMGSA(mpi_comm);
+      strcpy( paramString, "useSAMGe" );
+      method_ptr->setParams( paramString, 0, NULL );
+   }
    else
    {
       cout << "MLI_Method_Create ERROR : method " << str << " not defined\n";
-      cout << "    valid ones are : AMGSA\n";
+      cout << "    valid ones are : \n";
+      cout << "            AMGSA\n";
+      cout << "            AMGSAe\n";
       cout.flush();
       exit(1);
    }
@@ -51,17 +60,24 @@ MLI_Method *MLI_Method_CreateFromName( char *str, MPI_Comm mpi_comm )
 MLI_Method *MLI_Method_CreateFromID( int method_id, MPI_Comm mpi_comm )
 {
    MLI_Method *method_ptr;
+   char       paramString[80];
 
    switch ( method_id )
    {
       case MLI_METHOD_AMGSA_ID :
            method_ptr  = new MLI_Method_AMGSA(mpi_comm);
            break;
+      case MLI_METHOD_AMGSAE_ID :
+           method_ptr  = new MLI_Method_AMGSA(mpi_comm);
+           strcpy( paramString, "useSAMGe" );
+           method_ptr->setParams(paramString, 0, NULL);
+           break;
       default :
            cout << "MLI_Method_Create ERROR : method " << method_id 
                 << " not defined\n";
-           cout << "    valid ones are : " << MLI_METHOD_AMGSA_ID 
-                << " (AMGSA)\n";
+           cout << "    valid ones are : " << endl;
+           cout << "                " << MLI_METHOD_AMGSA_ID  << " (AMGSA)\n"; 
+           cout << "                " << MLI_METHOD_AMGSAE_ID << " (AMGSAe)\n"; 
            cout.flush();
            exit(1);
    }

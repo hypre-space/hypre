@@ -59,6 +59,7 @@ class MLI_Method_AMGSA : public MLI_Method
    int      coarse_solver_num;       /* number of coarse solver sweeps   */
    double   *coarse_solver_wgt;      /* weight used in coarse solver     */
    int      calibration_size;        /* for calibration AMG method       */
+   int      useSAMGeFlag_;           /* element based method             */
    double   RAP_time;
    double   total_time;
 
@@ -84,6 +85,7 @@ public :
    int    setNodalCoordinates(int nNodes,int nDOF,double *coor,double *scale);
    int    setCalibrationSize(int size);
    int    setupCalibration( MLI *mli );
+   int    setupUsingFEData( MLI *mli );
    int    print();
    int    printStatistics(MLI *mli);
    int    getNullSpace(int &nodeDOF,int &numNS,double *&nullVec, int &leng);
