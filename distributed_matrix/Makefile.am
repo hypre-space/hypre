@@ -10,6 +10,7 @@ include_HEADERS = distributed_matrix.h \
  HYPRE_distributed_matrix_types.h
 
 AM_CPPFLAGS = \
+ -I$(top_srcdir)\
  -I$(top_srcdir)/utilities\
  -I$(top_srcdir)/seq_mv\
  -I$(top_srcdir)/parcsr_mv
