@@ -63,7 +63,7 @@ main( int   argc,
 
    HYPRE_Solver        amg_solver;
    HYPRE_Solver        pcg_solver;
-   HYPRE_Solver        pcg_precond;
+   HYPRE_Solver        pcg_precond, pcg_precond_gotten;
 
    int                 num_procs, myid;
    int                 global_n;
@@ -892,6 +892,14 @@ main( int   argc,
                                    pcg_precond);
       }
  
+      HYPRE_ParCSRPCGGetPrecond(pcg_solver, &pcg_precond_gotten);
+      if (pcg_precond_gotten !=  pcg_precond)
+      {
+        printf("HYPRE_ParCSRPCGGetPrecond got bad precond\n");
+        return(-1);
+      }
+      else 
+        printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
       HYPRE_ParCSRPCGSetup(pcg_solver, A, b, x);
  
       hypre_EndTiming(time_index);
@@ -1012,6 +1020,14 @@ main( int   argc,
                nonzeros_to_keep );
       }
  
+      HYPRE_ParCSRGMRESGetPrecond(pcg_solver, &pcg_precond_gotten);
+      if (pcg_precond_gotten != pcg_precond)
+      {
+        printf("HYPRE_ParCSRGMRESGetPrecond got bad precond\n");
+        return(-1);
+      }
+      else
+        printf("HYPRE_ParCSRGMRESGetPrecond got good precond\n");
       HYPRE_ParCSRGMRESSetup(pcg_solver, A, b, x);
  
       hypre_EndTiming(time_index);
@@ -1108,6 +1124,14 @@ main( int   argc,
                                    pcg_precond);
       }
  
+      HYPRE_ParCSRCGNRGetPrecond(pcg_solver, &pcg_precond_gotten);
+      if (pcg_precond_gotten != pcg_precond)
+      {
+        printf("HYPRE_ParCSRCGNRGetPrecond got bad precond\n");
+        return(-1);
+      }
+      else
+        printf("HYPRE_ParCSRCGNRGetPrecond got good precond\n");
       HYPRE_ParCSRCGNRSetup(pcg_solver, A, b, x);
  
       hypre_EndTiming(time_index);

@@ -428,14 +428,6 @@ c         call HYPRE_BoomerAMGSetTruncFactor(precond, trunc_factor, ierr)
           call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
      &                                     precond, ierr)
 
-          call HYPRE_ParCSRGMRESGetPrecond(solver,precond_gotten,ierr)
-
-          if (precond_gotten .ne. precond) then
-            print *, 'HYPRE_ParCSRGMRESGetPrecond got bad precond'
-          else
-            print *, 'HYPRE_ParCSRGMRESGetPrecond got good precond'
-          endif
-
           call HYPRE_BoomerAMGSetSetupType(precond,setup_type,ierr)
           
         else if (solver_id .eq. 4) then
@@ -482,6 +474,15 @@ c         call HYPRE_BoomerAMGSetTruncFactor(precond, trunc_factor, ierr)
            call HYPRE_ParCSRParaSailsSetParams(precond, threshold,
      &                                         nlevels, ierr)
 
+        endif
+
+        call HYPRE_ParCSRGMRESGetPrecond(solver,precond_gotten,ierr)
+
+        if (precond_gotten .ne. precond) then
+          print *, 'HYPRE_ParCSRGMRESGetPrecond got bad precond'
+          stop
+        else
+          print *, 'HYPRE_ParCSRGMRESGetPrecond got good precond'
         endif
 
         call HYPRE_ParCSRGMRESSetup(solver, A_storage, b_storage,
