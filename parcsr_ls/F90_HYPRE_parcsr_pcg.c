@@ -139,7 +139,8 @@ hypre_F90_IFACE(hypre_parcsrpcgsetprecond)( long int *solver,
 
    /*------------------------------------------------------------
     * The precond_id flags mean :
-    * 2 - set up an AMG preconditioner
+    * 2 - set up an amg preconditioner
+    * 7 - set up a pilut preconditioner
     * 8 - set up a ds preconditioner
     * 9 - do not set up a preconditioner
     *------------------------------------------------------------*/
@@ -150,7 +151,15 @@ hypre_F90_IFACE(hypre_parcsrpcgsetprecond)( long int *solver,
                                (HYPRE_Solver) *solver,
                                HYPRE_ParAMGSolve,
                                HYPRE_ParAMGSetup,
-                               (HYPRE_Solver) *precond_solver) );
+                               (void *)        precond_solver) );
+   }
+   else if (*precond_id == 7)
+   {
+      *ierr = (int) ( HYPRE_ParCSRPCGSetPrecond(
+                               (HYPRE_Solver) *solver,
+                               HYPRE_ParCSRPilutSolve,
+                               HYPRE_ParCSRPilutSetup,
+                               (void *)        precond_solver) );
    }
    else if (*precond_id == 8)
    {
@@ -158,7 +167,7 @@ hypre_F90_IFACE(hypre_parcsrpcgsetprecond)( long int *solver,
                                (HYPRE_Solver) *solver,
                                HYPRE_ParCSRDiagScale,
                                HYPRE_ParCSRDiagScaleSetup,
-                               (HYPRE_Solver) *precond_solver) );
+                               (void *)        precond_solver) );
    }
    else if (*precond_id == 9)
    {

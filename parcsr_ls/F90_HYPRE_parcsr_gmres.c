@@ -120,12 +120,13 @@ hypre_F90_IFACE(hypre_parcsrgmressetmaxiter)( long int *solver,
 void
 hypre_F90_IFACE(hypre_parcsrgmressetprecond)( long int *solver,
                                               int      *precond_id,
-                                              long int *precond_data,
+                                              long int *precond_solver,
                                               int      *ierr          )
 {
    /*------------------------------------------------------------
     * The precond_id flags mean :
     * 2 - set up an amg preconditioner
+    * 7 - set up a pilut preconditioner
     * 8 - set up a ds preconditioner
     * 9 - do not set up a preconditioner
     *------------------------------------------------------------*/
@@ -136,7 +137,15 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond)( long int *solver,
    *ierr = (int) ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
                                                 HYPRE_ParAMGSolve,
                                                 HYPRE_ParAMGSetup,
-                                                (void *)        precond_data ) );
+                                                (void *)        precond_solver ) );
+   }
+   else if (*precond_id == 7)
+   {
+      *ierr = (int)
+              ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
+                                             HYPRE_ParCSRPilutSolve,
+                                             HYPRE_ParCSRPilutSetup,
+                                             (void *)        precond_solver ) );
    }
    else if (*precond_id == 8)
    {
@@ -144,7 +153,7 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond)( long int *solver,
               ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
                                              HYPRE_ParCSRDiagScale,
                                              HYPRE_ParCSRDiagScaleSetup,
-                                             (void *)        precond_data ) );
+                                             (void *)        precond_solver ) );
    }
    else if (*precond_id == 9)
    {
