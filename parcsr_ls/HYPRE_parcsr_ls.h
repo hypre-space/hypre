@@ -96,14 +96,6 @@ int HYPRE_BoomerAMGSolve(HYPRE_Solver       solver,
                          HYPRE_ParVector    x);
 
 /**
- * Solve the transpose system.
- **/
-int HYPRE_BoomerAMGSolveT(HYPRE_Solver       solver,
-                          HYPRE_ParCSRMatrix A,
-                          HYPRE_ParVector    b,
-                          HYPRE_ParVector    x);
-
-/**
  * (Optional) Set the convergence tolerance.
  **/
 int HYPRE_BoomerAMGSetTol(HYPRE_Solver solver,
@@ -114,12 +106,6 @@ int HYPRE_BoomerAMGSetTol(HYPRE_Solver solver,
  **/
 int HYPRE_BoomerAMGSetMaxIter(HYPRE_Solver solver,
                               int          max_iter);
-
-/**
- * (Optional)
- **/
-int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
-                                  int          restr_par);
 
 /**
  * (Optional) Set maximum number of multigrid levels.
@@ -138,24 +124,6 @@ int HYPRE_BoomerAMGSetStrongThreshold(HYPRE_Solver solver,
  **/
 int HYPRE_BoomerAMGSetMaxRowSum(HYPRE_Solver solver,
                                 double        max_row_sum);
-
-/**
- * (Optional)
- **/
-int HYPRE_BoomerAMGSetTruncFactor(HYPRE_Solver solver,
-                                  double       trunc_factor);
-
-/**
- * (Optional)
- **/
-int HYPRE_BoomerAMGSetInterpType(HYPRE_Solver solver,
-                                 int          interp_type);
-
-/**
- * (Optional)
- **/
-int HYPRE_BoomerAMGSetMinIter(HYPRE_Solver solver,
-                              int          min_iter);
 
 /**
  * (Optional)
@@ -184,16 +152,6 @@ int HYPRE_BoomerAMGSetNumGridSweeps(HYPRE_Solver  solver,
 /**
  * (Optional)
  **/
-int HYPRE_BoomerAMGInitGridRelaxation(int    **num_grid_sweeps_ptr,
-                                      int    **grid_relax_type_ptr,
-                                      int   ***grid_relax_points_ptr,
-                                      int      coarsen_type,
-                                      double **relax_weights_ptr,
-                                      int      max_levels);
-
-/**
- * (Optional)
- **/
 int HYPRE_BoomerAMGSetGridRelaxType(HYPRE_Solver  solver,
                                     int          *grid_relax_type);
 
@@ -212,75 +170,14 @@ int HYPRE_BoomerAMGSetRelaxWeight(HYPRE_Solver  solver,
 /**
  * (Optional)
  **/
-int HYPRE_BoomerAMGSetSmoothOption(HYPRE_Solver  solver,
-                                  int       *smooth_option);
-
-/**
- * (Optional)
- **/
-int HYPRE_BoomerAMGSetSmoothNumSweep(HYPRE_Solver  solver,
-                                  int       smooth_num_sweep);
-
-/**
- * (Optional)
- **/
 int HYPRE_BoomerAMGSetIOutDat(HYPRE_Solver solver,
                               int          ioutdat);
 
 /**
  * (Optional)
  **/
-int HYPRE_BoomerAMGSetLogFileName(HYPRE_Solver  solver,
-                                  const char   *log_file_name);
-
-/**
- * (Optional)
- **/
-int HYPRE_BoomerAMGSetLogging(HYPRE_Solver  solver,
-                              int           ioutdat,
-                              const char   *log_file_name);
-
-/**
- * (Optional)
- **/
 int HYPRE_BoomerAMGSetDebugFlag(HYPRE_Solver solver,
                                 int          debug_flag);
-
-/**
- * (Optional)
- **/
-int HYPRE_BoomerAMGSetNumFunctions(HYPRE_Solver solver,
-                                int          num_functions);
-
-/**
- * (Optional)
- **/
-int HYPRE_BoomerAMGSetDofFunc(HYPRE_Solver solver,
-                              int         *dof_func);
-
-/**
- * (Optional)
- **/
-int HYPRE_BoomerAMGSetVariant(HYPRE_Solver solver,
-                                int          variant);
-
-/**
- * (Optional)
- **/
-int HYPRE_BoomerAMGSetOverlap(HYPRE_Solver solver,
-                                int          overlap);
-
-/**
- * (Optional)
- **/
-int HYPRE_BoomerAMGSetDomainType(HYPRE_Solver solver,
-                                int          domain_type);
-
-/**
- * (Optional)
- **/
-int HYPRE_BoomerAMGSetSchwarzRlxWeight(HYPRE_Solver solver,
-                                double    schwarz_rlx_weight);
 
 /**
  * Return the number of iterations taken.
@@ -293,6 +190,109 @@ int HYPRE_BoomerAMGGetNumIterations(HYPRE_Solver  solver,
  **/
 int HYPRE_BoomerAMGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                 double       *rel_resid_norm);
+
+/*
+ * Solve the transpose system.
+ **/
+int HYPRE_BoomerAMGSolveT(HYPRE_Solver       solver,
+                          HYPRE_ParCSRMatrix A,
+                          HYPRE_ParVector    b,
+                          HYPRE_ParVector    x);
+
+/*
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
+                                  int          restr_par);
+
+/*
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetTruncFactor(HYPRE_Solver solver,
+                                  double       trunc_factor);
+
+/*
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetInterpType(HYPRE_Solver solver,
+                                 int          interp_type);
+
+/*
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetMinIter(HYPRE_Solver solver,
+                              int          min_iter);
+
+/*
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGInitGridRelaxation(int    **num_grid_sweeps_ptr,
+                                      int    **grid_relax_type_ptr,
+                                      int   ***grid_relax_points_ptr,
+                                      int      coarsen_type,
+                                      double **relax_weights_ptr,
+                                      int      max_levels);
+
+/*
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetSmoothOption(HYPRE_Solver  solver,
+                                  int       *smooth_option);
+
+/*
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetSmoothNumSweep(HYPRE_Solver  solver,
+                                  int       smooth_num_sweep);
+
+/*
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetLogFileName(HYPRE_Solver  solver,
+                                  const char   *log_file_name);
+
+/*
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetLogging(HYPRE_Solver  solver,
+                              int           ioutdat,
+                              const char   *log_file_name);
+
+/*
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetNumFunctions(HYPRE_Solver solver,
+                                int          num_functions);
+
+/*
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetDofFunc(HYPRE_Solver solver,
+                              int         *dof_func);
+
+/*
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetVariant(HYPRE_Solver solver,
+                                int          variant);
+
+/*
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetOverlap(HYPRE_Solver solver,
+                                int          overlap);
+
+/*
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetDomainType(HYPRE_Solver solver,
+                                int          domain_type);
+
+/*
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetSchwarzRlxWeight(HYPRE_Solver solver,
+                                double    schwarz_rlx_weight);
 
 /*@}*/
 
