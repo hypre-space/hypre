@@ -4128,7 +4128,7 @@ int MLI_FEData::readFromFile(char *infile)
          fscanf(fp, "%d", &(nodeIDs[i]));
          for ( j = 0; j < nodeDOF; j++ ) 
          {
-            fscanf(fp, "%d %lg", &k);
+            fscanf(fp, "%d", &k);
             if ( k > 0 )
             {
                nodeBCFlags[i][j] = 'Y';
