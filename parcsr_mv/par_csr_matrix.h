@@ -25,11 +25,22 @@ typedef struct
 
    int     		global_num_rows;
    int     		global_num_cols;
-   int     		first_row_index;
-   int     		first_col_diag;
+   int			first_row_index;
+   int			first_col_diag;
    hypre_CSRMatrix	*diag;
    hypre_CSRMatrix	*offd;
-   int			*col_map_offd;
+   int			*col_map_offd; 
+	/* maps columns of offd to global columns */
+   int 			*row_starts; 
+	/* array of length num_procs+1, row_starts[i] contains the 
+	   global number of the first row on proc i,  
+	   first_row_index = row_starts[my_id],
+	   row_starts[num_procs] = global_num_rows */
+   int 			*col_starts;
+	/* array of length num_procs+1, col_starts[i] contains the 
+	   global number of the first column of diag on proc i,  
+	   first_col_diag = col_starts[my_id],
+	   col_starts[num_procs] = global_num_cols */
 
    hypre_CommPkg	*comm_pkg;
    
@@ -50,6 +61,8 @@ typedef struct
 #define hypre_ParCSRMatrixDiag(matrix)  	((matrix) -> diag)
 #define hypre_ParCSRMatrixOffd(matrix)  	((matrix) -> offd)
 #define hypre_ParCSRMatrixColMapOffd(matrix)  	((matrix) -> col_map_offd)
+#define hypre_ParCSRMatrixRowStarts(matrix)     ((matrix) -> row_starts)
+#define hypre_ParCSRMatrixColStarts(matrix)     ((matrix) -> col_starts)
 #define hypre_ParCSRMatrixCommPkg(matrix)	((matrix) -> comm_pkg)
 #define hypre_ParCSRMatrixOwnsData(matrix)      ((matrix) -> owns_data)
 
