@@ -260,6 +260,7 @@ scp -r linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
 ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
 	cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
+	rm config.cache;\
 	./configure;\
 	make beta;\
     )"
