@@ -11,9 +11,7 @@
 
 #===========================================================================
 #
-# To do: - test symmetric/non-symmetric in driver.
-#        - add "true" 1d capability. Driver has this - breaks solver.
-#        - answer why 2d results differ (see: NOTE below).
+# To do: - test a few runs
 #===========================================================================
 
 #===========================================================================
