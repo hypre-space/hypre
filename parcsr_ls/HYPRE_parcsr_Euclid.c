@@ -68,13 +68,13 @@
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSREuclidCreate - Return a Euclid "solver".  
+ * HYPRE_EuclidCreate - Return a Euclid "solver".  
  *--------------------------------------------------------------------------*/
 
 #undef __FUNC__
-#define __FUNC__ "HYPRE_ParCSREuclidCreate"
+#define __FUNC__ "HYPRE_EuclidCreate"
 int 
-HYPRE_ParCSREuclidCreate( MPI_Comm comm, HYPRE_Solver *solver )
+HYPRE_EuclidCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
   START_FUNC_DH
   Euclid_dh eu; 
@@ -82,7 +82,7 @@ HYPRE_ParCSREuclidCreate( MPI_Comm comm, HYPRE_Solver *solver )
   /*----------------------------------------------------------- 
    * create a few global objects (yuck!) for Euclid's use;
    * these  are all pointers, are initially NULL, and are be set 
-   * back to NULL in HYPRE_ParCSREuclidDestroy()
+   * back to NULL in HYPRE_EuclidDestroy()
    * Global objects are defined in 
    * src/distributed_ls/Euclid/src/globalObjects.c
    *-----------------------------------------------------------*/
@@ -118,13 +118,13 @@ HYPRE_ParCSREuclidCreate( MPI_Comm comm, HYPRE_Solver *solver )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSREuclidDestroy - Destroy a Euclid object.
+ * HYPRE_EuclidDestroy - Destroy a Euclid object.
  *--------------------------------------------------------------------------*/
 
 #undef __FUNC__
-#define __FUNC__ "HYPRE_ParCSREuclidDestroy"
+#define __FUNC__ "HYPRE_EuclidDestroy"
 int 
-HYPRE_ParCSREuclidDestroy( HYPRE_Solver solver )
+HYPRE_EuclidDestroy( HYPRE_Solver solver )
 {
   START_FUNC_DH
   Euclid_dh eu = (Euclid_dh)solver;
@@ -214,13 +214,13 @@ HYPRE_ParCSREuclidDestroy( HYPRE_Solver solver )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSREuclidSetup - Set up function for Euclid.
+ * HYPRE_EuclidSetup - Set up function for Euclid.
  *--------------------------------------------------------------------------*/
 
 #undef __FUNC__
-#define __FUNC__ "HYPRE_ParCSREuclidSetup"
+#define __FUNC__ "HYPRE_EuclidSetup"
 int 
-HYPRE_ParCSREuclidSetup( HYPRE_Solver solver,
+HYPRE_EuclidSetup( HYPRE_Solver solver,
                          HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,
                          HYPRE_ParVector x   )
@@ -235,13 +235,13 @@ HYPRE_ParCSREuclidSetup( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSREuclidSolve - Solve function for Euclid.
+ * HYPRE_EuclidSolve - Solve function for Euclid.
  *--------------------------------------------------------------------------*/
 
 #undef __FUNC__
-#define __FUNC__ "HYPRE_ParCSREuclidSolve"
+#define __FUNC__ "HYPRE_EuclidSolve"
 int 
-HYPRE_ParCSREuclidSolve( HYPRE_Solver solver,
+HYPRE_EuclidSolve( HYPRE_Solver solver,
                          HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector bb,
                          HYPRE_ParVector xx  )
@@ -262,9 +262,9 @@ HYPRE_ParCSREuclidSolve( HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 #undef __FUNC__
-#define __FUNC__ "HYPRE_ParCSREuclidSetParams"
+#define __FUNC__ "HYPRE_EuclidSetParams"
 int
-HYPRE_ParCSREuclidSetParams(HYPRE_Solver solver, 
+HYPRE_EuclidSetParams(HYPRE_Solver solver, 
                             int argc,
                             char *argv[] )
 {
@@ -272,7 +272,7 @@ HYPRE_ParCSREuclidSetParams(HYPRE_Solver solver,
   Parser_dhInit(parser_dh, argc, argv); HYPRE_EUCLID_ERRCHKA;
 
   /* maintainers note: even though Parser_dhInit() was called in
-     HYPRE_ParCSREuclidCreate(), it's O.K. to call it again.
+     HYPRE_EuclidCreate(), it's O.K. to call it again.
    */
   END_FUNC_VAL(0)
 }
@@ -282,9 +282,9 @@ HYPRE_ParCSREuclidSetParams(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 #undef __FUNC__
-#define __FUNC__ "HYPRE_ParCSREuclidSetParamsFromFile"
+#define __FUNC__ "HYPRE_EuclidSetParamsFromFile"
 int
-HYPRE_ParCSREuclidSetParamsFromFile(HYPRE_Solver solver, 
+HYPRE_EuclidSetParamsFromFile(HYPRE_Solver solver, 
                                     char *filename )
 {
   START_FUNC_DH
@@ -293,15 +293,15 @@ HYPRE_ParCSREuclidSetParamsFromFile(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSREuclidPrintParams - prints summary of current settings and
- * other info.  Call this after HYPRE_ParCSREuclidSetup() completes
+ * HYPRE_EuclidPrintParams - prints summary of current settings and
+ * other info.  Call this after HYPRE_EuclidSetup() completes
  * (you can call it before, but info won't be accurate).
  *--------------------------------------------------------------------------*/
 
 #undef __FUNC__
-#define __FUNC__ "HYPRE_ParCSREuclidPrintParams"
+#define __FUNC__ "HYPRE_EuclidPrintParams"
 int
-HYPRE_ParCSREuclidPrintParams(HYPRE_Solver solver)
+HYPRE_EuclidPrintParams(HYPRE_Solver solver)
 {
   START_FUNC_DH
   Euclid_dh eu = (Euclid_dh)solver;
@@ -309,13 +309,17 @@ HYPRE_ParCSREuclidPrintParams(HYPRE_Solver solver)
   END_FUNC_VAL(0)
 }
 
+
+#if 0
+
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSREuclidSetLogging 
+ * HYPRE_EuclidReadRho
  *--------------------------------------------------------------------------*/
+
 #undef __FUNC__
-#define __FUNC__ "HYPRE_ParCSREuclidReadRho"
+#define __FUNC__ "HYPRE_EuclidReadRho"
 int
-HYPRE_ParCSREuclidReadRho(HYPRE_Solver solver, double *rho)
+HYPRE_EuclidReadRho(HYPRE_Solver solver, double *rho)
 {
   START_FUNC_DH
   Euclid_dh eu = (Euclid_dh)solver;
@@ -325,13 +329,13 @@ HYPRE_ParCSREuclidReadRho(HYPRE_Solver solver, double *rho)
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSREuclidSetLogging 
+ * HYPRE_EuclidSetLogging 
  *--------------------------------------------------------------------------*/
 
 #undef __FUNC__
-#define __FUNC__ "HYPRE_ParCSREuclidSetLogging"
+#define __FUNC__ "HYPRE_EuclidSetLogging"
 int
-HYPRE_ParCSREuclidSetLogging(HYPRE_Solver solver, 
+HYPRE_EuclidSetLogging(HYPRE_Solver solver, 
                              int logging)
 {
   START_FUNC_DH
@@ -339,3 +343,5 @@ HYPRE_ParCSREuclidSetLogging(HYPRE_Solver solver,
   eu->logging = logging;
   END_FUNC_VAL(0)
 }
+
+#endif

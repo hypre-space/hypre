@@ -18,7 +18,7 @@
 #include "HYPRE_utilities.h"
 #include "HYPRE_seq_mv.h"
 #include "HYPRE_parcsr_mv.h"
-#include <stdio.h>  /* D.Hysom Nov/2K needed for HYPRE_ParCSREuclidPrintParams */
+#include <stdio.h>  /* D.Hysom Nov/2K needed for HYPRE_EuclidPrintParams */
 
 #ifdef __cplusplus
 extern "C" {
@@ -597,22 +597,22 @@ int HYPRE_ParaSailsSetLogging(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 /**
- * @name ParCSR Euclid Preconditioner 
+ * @name Euclid Preconditioner 
  *
- * MPI Parallel ILU preconditioner for the ParCSR matrix format.
+ * MPI Parallel ILU preconditioner 
  **/
 /*@{*/
 
 /**
  * Create a Euclid object.
  **/
-int HYPRE_ParCSREuclidCreate(MPI_Comm      comm,
+int HYPRE_EuclidCreate(MPI_Comm      comm,
                              HYPRE_Solver *solver);
 
 /**
  * Destroy a Euclid object.
  **/
-int HYPRE_ParCSREuclidDestroy(HYPRE_Solver solver);
+int HYPRE_EuclidDestroy(HYPRE_Solver solver);
 
 /**
  * Set up the Euclid preconditioner.  This function should be passed
@@ -623,10 +623,10 @@ int HYPRE_ParCSREuclidDestroy(HYPRE_Solver solver);
  * @param b Ignored by this function.
  * @param x Ignored by this function.
  **/
-int HYPRE_ParCSREuclidSetup(HYPRE_Solver       solver,
-                            HYPRE_ParCSRMatrix A,
-                            HYPRE_ParVector    b,
-                            HYPRE_ParVector    x);
+int HYPRE_EuclidSetup(HYPRE_Solver       solver,
+                      HYPRE_ParCSRMatrix A,
+                      HYPRE_ParVector    b,
+                      HYPRE_ParVector    x);
 
 /**
  * Apply the Euclid preconditioner. This function should be passed
@@ -637,10 +637,10 @@ int HYPRE_ParCSREuclidSetup(HYPRE_Solver       solver,
  * @param b [IN] Vector to precondition.
  * @param x [OUT] Preconditioned vector.
  **/
-int HYPRE_ParCSREuclidSolve(HYPRE_Solver       solver,
-                            HYPRE_ParCSRMatrix A,
-                            HYPRE_ParVector    b,
-                            HYPRE_ParVector    x);
+int HYPRE_EuclidSolve(HYPRE_Solver       solver,
+                      HYPRE_ParCSRMatrix A,
+                      HYPRE_ParVector    b,
+                      HYPRE_ParVector    x);
 
 /**
  * Insert (name, value) pairs in Euclid's options database
@@ -650,7 +650,7 @@ int HYPRE_ParCSREuclidSolve(HYPRE_Solver       solver,
  * If a (name, value) pair already exists, this call updates the value.
  *
  * To insert (name, value) pairs from a file instead
- * of the command line, use HYPRE\_ParCSREuclidSetParamsFromFile().
+ * of the command line, use HYPRE\_EuclidSetParamsFromFile().
  *
  * See Euclid documentation for comprehensive listing
  * of settable parameters.
@@ -658,9 +658,9 @@ int HYPRE_ParCSREuclidSolve(HYPRE_Solver       solver,
  * @param argc [IN] Length of argv array
  * @param argv [IN] Array of strings
  **/
-int HYPRE_ParCSREuclidSetParams(HYPRE_Solver solver,
-                                int argc,
-                                char *argv[]);
+int HYPRE_EuclidSetParams(HYPRE_Solver solver,
+                          int argc,
+                          char *argv[]);
 
 /**
  * Insert (name, value) pairs in Euclid's options database.
@@ -680,8 +680,7 @@ int HYPRE_ParCSREuclidSetParams(HYPRE_Solver solver,
  *
  * @param filename[IN] Pathname/filename to read
  **/
-int HYPRE_ParCSREuclidSetParamsFromFile(HYPRE_Solver solver,
-                                        char *filename);
+int HYPRE_EuclidSetParamsFromFile(HYPRE_Solver solver, char *filename);
 
 #if 0
 /*
@@ -697,7 +696,7 @@ int HYPRE_ParCSREuclidSetParamsFromFile(HYPRE_Solver solver,
  *
  * @param rho[OUT] rho, also called preconditioner density
  **/
-int HYPRE_ParCSREuclidReadRho(HYPRE_Solver solver, double *rho);
+int HYPRE_EuclidReadRho(HYPRE_Solver solver, double *rho);
 #endif
 
 
@@ -706,9 +705,12 @@ int HYPRE_ParCSREuclidReadRho(HYPRE_Solver solver, double *rho);
  * prints information on preconditioner size, etc.  
  * Euclid's reports can also be printed by including the
  * appropriate option on the command line; see the user
- * manual for details.
+ * manual for details.  This function should be called
+ * after the solve phase has completed.
  **/
-int HYPRE_ParCSREuclidPrintParams(HYPRE_Solver solver);
+int HYPRE_EuclidPrintParams(HYPRE_Solver solver);
+
+#if 0
 
 /**
  * Set the logging parameter for the Euclid object.
@@ -719,8 +721,9 @@ int HYPRE_ParCSREuclidPrintParams(HYPRE_Solver solver);
  *                     sends statistics of the setup procedure to stdout.
  *                     The default value is 0.
  **/
-int HYPRE_ParCSREuclidSetLogging(HYPRE_Solver solver,
+int HYPRE_EuclidSetLogging(HYPRE_Solver solver,
                                  int          logging);
+#endif
 
 /*@}*/
 /*--------------------------------------------------------------------------
