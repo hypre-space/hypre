@@ -60,6 +60,11 @@ void hypre_MatvecT P((double alpha , hypre_Matrix *A , hypre_Vector *x , double 
 void hypre_SeedRand P((int seed ));
 double hypre_Rand P((void ));
 
+/* timing.c */
+void HYPRE_AMGClock_init P((void ));
+amg_Clock_t HYPRE_AMGClock P((void ));
+amg_CPUClock_t HYPRE_AMGCPUClock P((void ));
+void HYPRE_AMGPrintTiming P((double time_ticks , double cpu_ticks ));
 
 /* vector.c */
 hypre_Vector *hypre_NewVector P((double *data , int size ));
@@ -72,12 +77,6 @@ void hypre_CopyVector P((hypre_Vector *x , hypre_Vector *y ));
 void hypre_ScaleVector P((double alpha , hypre_Vector *y ));
 void hypre_Axpy P((double alpha , hypre_Vector *x , hypre_Vector *y ));
 double hypre_InnerProd P((hypre_Vector *x , hypre_Vector *y ));
-
-/* timing.c */
-void HYPRE_AMGClock_init P((void ));
-amg_Clock_t HYPRE_AMGClock P((void ));
-amg_CPUClock_t HYPRE_AMGCPUClock P((void ));
-void HYPRE_AMGPrintTiming P((double time_ticks , double cpu_ticks ));
 
 /* write.c */
 void hypre_WriteYSMP P((char *file_name , hypre_Matrix *matrix ));

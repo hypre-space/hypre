@@ -32,7 +32,7 @@ FILES="
 mkproto -s $FILES
 
 ################################################################################
-# Use `rcs_files' to create the `protos.h' file
+# Create the `protos.h' file
 ################################################################################
 
 PROTOS="protos.h"
@@ -44,7 +44,7 @@ cat > $PROTOS <<@
 
 @
 
-mkproto -s `cat rcs_files | \
+mkproto -s `echo * | \
 awk '
    BEGIN {STR = " "}
    {

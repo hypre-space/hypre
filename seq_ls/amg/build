@@ -16,6 +16,16 @@ AMG_SRC="."
 
 . $AMG_SRC/config/build_generic
 
+#=======================================================
+# Untar `cvode'
+#=======================================================
+ 
+if [ ! -d "$AMG_SRC/cvode" ]; then
+  echo "Untarring cvode ..."
+  (cd $AMG_SRC; gtar xzf cvode.tar.Z; mv CVODE cvode)
+  (cd $AMG_SRC; cp cvode.build cvode/build)
+fi
+
 #=============================================================================
 # Build
 #=============================================================================

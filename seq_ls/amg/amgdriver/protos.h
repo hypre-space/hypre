@@ -12,6 +12,8 @@
 /* amg.c */
 void *NewAMGData P((Problem *problem , Solver *solver , char *log_file_name ));
 
+/* config.cygwin32 */
+
 /* globals.c */
 void NewGlobals P((char *run_name ));
 void FreeGlobals P((void ));
