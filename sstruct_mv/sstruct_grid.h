@@ -29,7 +29,6 @@ typedef struct
 {
    HYPRE_SStructVariable  type;
    int                    rank;     /* local rank */
-   int                     ghrank;  /* GEC0902 ghostrank */
    int                    proc;
 
 } hypre_SStructUVar;
@@ -247,7 +246,6 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructUCVarUVars(uc)    ((uc) -> uvars)
 #define hypre_SStructUCVarType(uc, i)  ((uc) -> uvars[i].type)
 #define hypre_SStructUCVarRank(uc, i)  ((uc) -> uvars[i].rank)
-#define hypre_SStructUCVarGhrank(uc, i) ((uc) -> uvars[i].ghrank)
 #define hypre_SStructUCVarProc(uc, i)  ((uc) -> uvars[i].proc)
 
 #endif
