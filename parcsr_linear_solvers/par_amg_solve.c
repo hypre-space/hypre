@@ -91,6 +91,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
                                  hypre_ParCSRMatrixNumRows(A_array[0]),
                                  hypre_ParCSRMatrixRowStarts(A_array[0]));
    hypre_InitializeParVector(Vtemp);
+   hypre_SetParVectorPartitioningOwner(Vtemp,0);
    hypre_ParAMGDataVtemp(amg_data) = Vtemp;
 
    for (j = 1; j < num_levels; j++)
@@ -240,6 +241,9 @@ hypre_ParAMGSolve( void               *amg_vdata,
    { 
       fclose(fp); 
    }
+
+   hypre_TFree(num_coeffs);
+   hypre_TFree(num_variables);
 
    return(Solve_err_flag);
 }
