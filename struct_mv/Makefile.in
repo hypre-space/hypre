@@ -85,14 +85,27 @@ FILES =\
 OBJS = ${FILES:.c=.o}
 
 ##################################################################
-# Main rules
+# Targets
 ##################################################################
 
-default: libHYPRE_mv.a
+all: libHYPRE_mv.a
 
-driver_internal: driver_internal.o libHYPRE_mv.a
-	@echo  "Linking" $@ "... "
-	${CC} -o driver_internal driver_internal.o ${LFLAGS}
+install: all
+	@cp -f HYPRE_*.h hypre_*.h $$HYPRE_INSTALL_DIR/include
+	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib
+
+clean:
+	@rm -f *.o
+
+veryclean: clean
+	@rm -f libHYPRE_mv.a
+	@rm -fr Docs
+	@rm -f DevManual.tex DevManual.ps
+	@rm -f DevManual.dvi DevManual.aux DevManual.log
+
+##################################################################
+# Rules
+##################################################################
 
 one_to_many: one_to_many.o libHYPRE_mv.a
 	@echo  "Linking" $@ "... "
@@ -139,18 +152,4 @@ docs_tex:
 .f.${AMG_ARCH}.o:
 	@echo "Making (f) " $@
 	@${F77} -o $@ -c ${FFLAGS} $<
-
-##################################################################
-# Miscellaneous rules
-##################################################################
-
-veryclean: clean
-	@rm -f libHYPRE_mv.a
-	@rm -f driver driver_internal
-	@rm -fr Docs
-	@rm -f DevManual.tex DevManual.ps
-	@rm -f DevManual.dvi DevManual.aux DevManual.log
-
-clean:
-	@rm -f *.o
 

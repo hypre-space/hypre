@@ -32,10 +32,22 @@ MEMORY_EXTRA_FILES = @MEMORYEXTRAFILES@
 
 
 ##################################################################
-# Default targets
+# Targets
 ##################################################################
 
-default: libHYPRE_utilities.a libHYPRE_memory.a libHYPRE_timing.a
+all: libHYPRE_utilities.a libHYPRE_memory.a libHYPRE_timing.a
+
+install: all
+	@cp -f hypre_*.h $$HYPRE_INSTALL_DIR/include
+	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib
+
+clean:
+	@rm -f *.o
+
+veryclean: clean
+	@rm -f libHYPRE_utilities.a
+	@rm -f libHYPRE_timing.a
+	@rm -f libHYPRE_memory.a
 
 ##################################################################
 # Memory rules
@@ -99,15 +111,4 @@ libHYPRE_utilities.a: ${UTILITIES_OBJS}
 .f.${AMG_ARCH}.o:
 	@echo "Making (f) " $@
 	@${F77} -o $@ -c ${FFLAGS} $<
-
-##################################################################
-# Miscellaneous rules
-##################################################################
-
-veryclean: clean
-	@rm -f libHYPRE_timing.a
-	@rm -f libHYPRE_memory.a
-
-clean:
-	@rm -f *.o
 
