@@ -42,6 +42,8 @@ int AddValuesVector( hypre_StructGrid  *gridvector,
                      int                *period, 
                      double             value  )  ;
 
+int HYPRE_StructSetupInterpreter( HYPRE_InterfaceInterpreter *i );
+
 /*--------------------------------------------------------------------------
  * Test driver for structured matrix interface (structured storage)
  *--------------------------------------------------------------------------*/
@@ -1718,7 +1720,7 @@ main( int   argc,
        if ( lobpcgSeed )
 	 hypre_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
        else
-	 hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
+	 hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time_index );
 
        time_index = hypre_InitializeTiming("LOBPCG Solve");
        hypre_BeginTiming(time_index);
