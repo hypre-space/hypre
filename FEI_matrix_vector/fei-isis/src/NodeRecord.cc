@@ -182,6 +182,9 @@ void NodeRecord::allocateBCRecords(int numBCRecords) {
     if (numBCRecords==0) return;
 
     numBCRecords_ = numBCRecords;
+
+    if (BCRecordList_ != NULL) delete [] BCRecordList_;
+
     BCRecordList_ = new BCRecord [numBCRecords];
     
     return;

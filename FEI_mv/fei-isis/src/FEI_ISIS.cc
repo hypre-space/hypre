@@ -4,7 +4,7 @@
 #include <string.h>
 #include <assert.h>
 
-#ifdef SER
+#ifdef FEI_SER
 #include "mpiuni/mpi.h"
 #else
 #include <mpi.h>
@@ -65,11 +65,10 @@ FEI_ISIS::FEI_ISIS(MPI_Comm PASSED_COMM_WORLD, int masterRank) :
     solveType_ = -1;
 
     aggregateSystemFormed_ = false;
+    soln_fei_matrix_ptr_ = NULL;
+    soln_fei_vector_ptr_ = NULL;
     A_solve_ = NULL;
     b_solve_ = NULL;
-
-    A_op_ = NULL;
-    b_op_ = NULL;
 
 //  and the time spent in the constructor is...
 
@@ -216,7 +215,8 @@ int FEI_ISIS::initSolveStep(int numElemBlocks, int solveType) {
 
     for(int i=0; i<numFeiInternal_; i++){
         if (debugOutput_) {
-            fprintf(debugFile_,"-- fei[%d]->setNumRHSVectors\n",i);
+            fprintf(debugFile_,"-- fei[%d]->setNumRHSVectors %d\n",
+                    i, numRHSIDs_[i]);
             fprintf(debugFile_,"-- fei[%d]->initSolveStep\n",i);
             fflush(debugFile_);
         }
@@ -263,7 +263,7 @@ int FEI_ISIS::initFields(int numFields,
     baseTime_ = MPI_Wtime();
 
     if (debugOutput_) {
-        fprintf(debugFile_,"trace: initFields\n");
+        fprintf(debugFile_,"initFields\n");
         fflush(debugFile_);
     }
 
@@ -344,7 +344,7 @@ int FEI_ISIS::initElemSet(int numElems,
     baseTime_ = MPI_Wtime();
 
     if (debugOutput_) {
-        fprintf(debugFile_,"trace: initElemSet, numElems: %d\n", numElems);
+        fprintf(debugFile_,"initElemSet, numElems: %d\n", numElems);
         fflush(debugFile_);
     }
 
@@ -371,7 +371,7 @@ int FEI_ISIS::endInitElemBlock() {
     baseTime_ = MPI_Wtime();
 
     if (debugOutput_) {
-        fprintf(debugFile_,"trace: endInitElemBlock\n");
+        fprintf(debugFile_,"endInitElemBlock\n");
         fflush(debugFile_);
     }
 
@@ -439,7 +439,7 @@ int FEI_ISIS::initSharedNodeSet(const GlobalID *sharedNodeIDs,
     baseTime_ = MPI_Wtime();
 
     if (debugOutput_) {
-        fprintf(debugFile_,"trace: initSharedNodeSet\n");
+        fprintf(debugFile_,"initSharedNodeSet\n");
         fflush(debugFile_);
     }
 
@@ -471,7 +471,7 @@ int FEI_ISIS::initExtNodeSet(const GlobalID *extNodeIDs,
     baseTime_ = MPI_Wtime();
 
     if (debugOutput_) {
-        fprintf(debugFile_,"trace: initExtNodeSet\n");
+        fprintf(debugFile_,"initExtNodeSet\n");
         fprintf(debugFile_,"--- getting %d nodes.\n",lenExtNodeIDs);
         fflush(debugFile_);
     }
@@ -501,7 +501,7 @@ int FEI_ISIS::endInitNodeSets() {
     baseTime_ = MPI_Wtime();
 
     if (debugOutput_) {
-        fprintf(debugFile_,"trace: endInitNodeSets\n");
+        fprintf(debugFile_,"endInitNodeSets\n");
         fflush(debugFile_);
     }
 
@@ -527,7 +527,7 @@ int FEI_ISIS::beginInitCREqns(int numCRMultRecords,
     baseTime_ = MPI_Wtime();
 
     if (debugOutput_) {
-        fprintf(debugFile_,"trace: beginInitCREqns\n");
+        fprintf(debugFile_,"beginInitCREqns\n");
         fflush(debugFile_);
     }
 
@@ -557,7 +557,7 @@ int FEI_ISIS::initCRMult(const GlobalID *const *CRMultNodeTable,
     baseTime_ = MPI_Wtime();
 
     if (debugOutput_) {
-        fprintf(debugFile_,"trace: initCRMult\n");
+        fprintf(debugFile_,"initCRMult\n");
         fflush(debugFile_);
     }
 
@@ -590,7 +590,7 @@ int FEI_ISIS::initCRPen(const GlobalID *const *CRPenNodeTable,
     baseTime_ = MPI_Wtime();
 
     if (debugOutput_) {
-        fprintf(debugFile_,"trace: initCRPen\n");
+        fprintf(debugFile_,"initCRPen\n");
         fflush(debugFile_);
     }
 
@@ -617,7 +617,7 @@ int FEI_ISIS::endInitCREqns() {
 //
 
     if (debugOutput_) {
-        fprintf(debugFile_,"trace: endInitCREqns\n");
+        fprintf(debugFile_,"endInitCREqns\n");
         fflush(debugFile_);
     }
 
@@ -644,7 +644,7 @@ int FEI_ISIS::initComplete() {
     baseTime_ = MPI_Wtime();
 
     if (debugOutput_) {
-        fprintf(debugFile_,"trace: initComplete\n");
+        fprintf(debugFile_,"initComplete\n");
         fflush(debugFile_);
     }
 
@@ -700,7 +700,10 @@ int FEI_ISIS::beginLoadNodeSets(int numBCNodeSets) {
     }
 
     if (feiInternalAllocated_){
-        feiInternal_[index_current_fei_]->beginLoadNodeSets(numBCNodeSets);
+        int index = index_current_fei_;
+        if (solveType_ == 2) index = index_soln_fei_;
+
+        feiInternal_[index]->beginLoadNodeSets(numBCNodeSets);
     }
     else {
         notAllocatedAbort("FEI_ISIS::beginLoadNodeSets");
@@ -728,7 +731,10 @@ int FEI_ISIS::loadBCSet(const GlobalID *BCNodeSet,
     }
 
     if (feiInternalAllocated_){
-        feiInternal_[index_current_fei_]->loadBCSet(BCNodeSet,
+        int index = index_current_fei_;
+        if (solveType_ == 2) index = index_soln_fei_;
+
+        feiInternal_[index]->loadBCSet(BCNodeSet,
                                       lenBCNodeSet,
                                       BCFieldID,
                                       alphaBCDataTable,
@@ -756,7 +762,10 @@ int FEI_ISIS::endLoadNodeSets() {
     }
 
     if (feiInternalAllocated_){
-        feiInternal_[index_current_fei_]->endLoadNodeSets();
+        int index = index_current_fei_;
+        if (solveType_ == 2) index = index_soln_fei_;
+
+        feiInternal_[index]->endLoadNodeSets();
     }
     else {
         notAllocatedAbort("FEI_ISIS::endLoadNodeSets");
@@ -1112,7 +1121,7 @@ int FEI_ISIS::loadComplete() {
     baseTime_ = MPI_Wtime();
 
     if (debugOutput_) {
-        fprintf(debugFile_,"loadComplete\n");
+        fprintf(debugFile_,"loadComplete, fei[%d]\n", index_current_fei_);
         fflush(debugFile_);
     }
     
@@ -1225,8 +1234,10 @@ int FEI_ISIS::setMatScalars(int* IDs, double* scalars, int numScalars){
 
     matScalarsSet_ = true;
     if (rhsScalarsSet_) {
-        cout << "aggregating system." << endl;
         aggregateSystem();
+
+        matScalarsSet_ = false;
+        rhsScalarsSet_ = false;
     }
 
     return(0);
@@ -1259,8 +1270,10 @@ int FEI_ISIS::setRHSScalars(int* IDs, double* scalars, int numScalars){
 
     rhsScalarsSet_ = true;
     if (matScalarsSet_) {
-        cout << "aggregating system." << endl;
         aggregateSystem();
+
+        matScalarsSet_ = false;
+        rhsScalarsSet_ = false;
     }
 
     return(0);
@@ -1382,6 +1395,8 @@ int FEI_ISIS::iterateToSolve() {
 
     int solveStatus = feiInternal_[index_soln_fei_]->iterateToSolve();
 
+    sTime_ = MPI_Wtime() - sTime_;
+
     if (debugOutput_) {
         char name[64];
         Vector* x_tmp = NULL;
@@ -1389,8 +1404,6 @@ int FEI_ISIS::iterateToSolve() {
         sprintf(name,"x_FEI_ISIS.txt.slv%d.np%d",solveCounter_, numProcs_);
         x_tmp->writeToFile(name);
     }
-
-    sTime_ = MPI_Wtime() - sTime_;
 
     if (solveType_ == 2) {
         delete A_solve_;
@@ -1438,7 +1451,7 @@ int FEI_ISIS::getBlockFieldNodeSolution(GlobalID elemBlockID,
                                         double *results) {
         
     if (debugOutput_) {
-        fprintf(debugFile_,"trace: getBlockFieldNodeSolution\n");
+        fprintf(debugFile_,"getBlockFieldNodeSolution\n");
         fflush(debugFile_);
     }
 
@@ -1459,7 +1472,7 @@ int FEI_ISIS::putBlockNodeSolution(GlobalID elemBlockID,
                                    const double *estimates) {
         
     if (debugOutput_) {
-        fprintf(debugFile_,"trace: putBlockNodeSolution\n");
+        fprintf(debugFile_,"putBlockNodeSolution\n");
     }
 
     feiInternal_[index_soln_fei_]->putBlockNodeSolution(elemBlockID,
@@ -1479,7 +1492,7 @@ int FEI_ISIS::putBlockFieldNodeSolution(GlobalID elemBlockID,
                                         const double *estimates) {
         
     if (debugOutput_) {
-        fprintf(debugFile_,"trace: putBlockFieldNodeSolution\n");
+        fprintf(debugFile_,"putBlockFieldNodeSolution\n");
         fflush(debugFile_);
     }
 
@@ -1777,7 +1790,7 @@ void FEI_ISIS::buildLinearSystem(){
                     solveCounter_, numProcs_);
 
             feiInternal_[index_soln_fei_]->getISISMatrixPtr(&A_solve_);
-            A_solve_->writeToFile(name);
+//            A_solve_->writeToFile(name);
 
             sprintf(name,"b_FEI_ISIS.txt.slv%d.np%d",
                     solveCounter_, numProcs_);
@@ -1793,7 +1806,7 @@ void FEI_ISIS::buildLinearSystem(){
         //several individual matrices and rhs's.
 
         if (!aggregateSystemFormed_) {
-            cout << "FEI_ISIS: WARNING: solveType_==2, but aggregate system"
+            cerr << "FEI_ISIS: WARNING: solveType_==2, but aggregate system"
                   << " hasn't been formed before solve requested." << endl;
             aggregateSystem();
         }
@@ -1806,9 +1819,15 @@ void FEI_ISIS::aggregateSystem() {
     Vector* tmpv = NULL;
     feiInternal_[index_soln_fei_]->getSolnVectorPtr(&tmpv);
 
-    DCRS_Matrix* tmp = NULL;
-    feiInternal_[index_soln_fei_]->getISISMatrixPtr(&tmp);
-    const Map& map = tmp->getMap();
+    if (soln_fei_matrix_ptr_ == NULL) {
+        feiInternal_[index_soln_fei_]->getISISMatrixPtr(&soln_fei_matrix_ptr_);
+    }
+    const Map& map = soln_fei_matrix_ptr_->getMap();
+
+    if (soln_fei_vector_ptr_ == NULL) {
+        feiInternal_[index_soln_fei_]->setRHSID(rhsIDs_[index_soln_fei_][0]);
+        feiInternal_[index_soln_fei_]->getRHSVectorPtr(&soln_fei_vector_ptr_);
+    }
 
     if (A_solve_) delete A_solve_;
     A_solve_ = new DCRS_Matrix(map);
@@ -1817,14 +1836,20 @@ void FEI_ISIS::aggregateSystem() {
     b_solve_ = tmpv->newVector();
     b_solve_->put(0.0);
 
+    DCRS_Matrix* tmp = NULL;
+
     for(int i=0; i<numFeiInternal_; i++){
-        feiInternal_[i]->getISISMatrixPtr(&tmp);
+
+        if (i != index_soln_fei_)
+            feiInternal_[i]->getISISMatrixPtr(&tmp);
+        else
+            tmp = soln_fei_matrix_ptr_;
 
         if (debugOutput_) {
             char name[64];
             sprintf(name,"A_FEI_ISIS.mtx.slv%d.np%d.mat%d",
                     solveCounter_, numProcs_, i);
-            tmp->writeToFile(name);
+//            tmp->writeToFile(name);
         }
 
         if (i==0) {
@@ -1835,8 +1860,13 @@ void FEI_ISIS::aggregateSystem() {
         }
 
         for(int j=0; j<numRHSIDs_[i]; j++){
-            feiInternal_[i]->setRHSID(rhsIDs_[i][j]);
-            feiInternal_[i]->getRHSVectorPtr(&tmpv);
+            if ((i == index_soln_fei_) && (j == 0)) {
+                tmpv = soln_fei_vector_ptr_;
+            }
+            else {
+                feiInternal_[i]->setRHSID(rhsIDs_[i][j]);
+                feiInternal_[i]->getRHSVectorPtr(&tmpv);
+            }
 
             if (debugOutput_) {
                 char name[64];
@@ -1855,7 +1885,7 @@ void FEI_ISIS::aggregateSystem() {
         char name[64];
         sprintf(name,"A_FEI_ISIS.mtx.slv%d.np%d.agg",
                 solveCounter_, numProcs_);
-        A_solve_->writeToFile(name);
+//        A_solve_->writeToFile(name);
     }
 
     feiInternal_[index_soln_fei_]->setMatrixPtr(A_solve_);

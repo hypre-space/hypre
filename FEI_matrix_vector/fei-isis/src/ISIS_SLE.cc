@@ -4,9 +4,11 @@
 #include <string.h>
 #include <assert.h>
 
-#ifdef SER
+#ifdef FEI_SER
+#include <mpiuni/mpi.h>
 #include <isis-ser.h>
 #else
+#include <mpi.h>
 #include <isis-mpi.h>
 #endif
 
@@ -48,11 +50,9 @@ ISIS_SLE::ISIS_SLE(MPI_Comm PASSED_COMM_WORLD, int masterRank) :
 
 // currently, not much happens in the constructor....
 
-    strcpy(solverName_,"cg");
     pSolver_ = NULL;
     solverAllocated_ = false;
 
-    strcpy(precondName_,"identity");
     pPrecond_ = NULL;
     precondAllocated_ = false;
 
@@ -109,11 +109,6 @@ void ISIS_SLE::parameters(int numParams, char **paramStrings) {
         appendParamStrings(numParams, paramStrings);
 
         char param[256];
-        if ( getParam("solver",numParams,paramStrings,param) == 1)
-            sscanf(param,"%s",solverName_);
-
-        if ( getParam("preconditioner",numParams,paramStrings,param) == 1)
-            sscanf(param,"%s",precondName_);
 
         if ( getParam("outputLevel",numParams,paramStrings,param) == 1){
             sscanf(param,"%d", &outputLevel_);
@@ -383,9 +378,6 @@ void ISIS_SLE::initLinearAlgebraCore(){
 
     iterations_ = 0;
 
-    strcpy(solverName_,"qmr"); 
-    strcpy(precondName_,"identity"); 
-
 }
 
 //------------------------------------------------------------------------------
@@ -462,6 +454,7 @@ void ISIS_SLE::matrixConfigure(IntArray* sysRowLengths){
     // matrix).
 
     A_ptr_->configure(*rowLengths_);
+    
 }
 
 //------------------------------------------------------------------------------
@@ -734,6 +727,5 @@ void ISIS_SLE::launchSolver(int* solveStatus){
     *solveStatus = lse.solve();
 
     iterations_ = pSolver_->iterations();
-
 }
 

@@ -1,3 +1,4 @@
+#include <iostream.h>
 #include <assert.h>
 #include <stdlib.h>
 
@@ -250,7 +251,6 @@ void MultConstRecord::allocateMultipliers(int multLength) {
 }
 
 
-#include <iostream.h>
 //======================================================================
 void MultConstRecord::dumpToScreen() {
     cout << " CRMultID_           = " << CRMultID_ << "\n";

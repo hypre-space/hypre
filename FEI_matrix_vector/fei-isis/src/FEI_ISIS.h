@@ -400,11 +400,8 @@ class FEI_ISIS : public FEI {
     void aggregateSystem();
     bool aggregateSystemFormed_;
 
-    DCRS_Matrix* A_solve_;
-    Vector* b_solve_;
-
-    Op_Matrix* A_op_;
-    Vector* b_op_;
+    DCRS_Matrix *A_solve_, *soln_fei_matrix_ptr_;
+    Vector *b_solve_, *soln_fei_vector_ptr_;
 
     MPI_Comm FEI_COMM_WORLD;
     int masterRank_;

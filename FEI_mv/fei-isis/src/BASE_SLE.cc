@@ -4,11 +4,12 @@
 #include <string.h>
 #include <assert.h>
 
-#ifdef SER
-#include <mpiuni/mpi.h>
-#else
-#include <mpi.h>
-#endif
+#include "utilities.h"
+//#ifdef SER
+//#include <mpiuni/mpi.h>
+//#else
+//#include <mpi.h>
+//#endif
 
 #include "other/basicTypes.h"
 
@@ -335,6 +336,10 @@ int BASE_SLE::initSolveStep(int numElemBlocks, int solveType) {
     storeNumElemBlocks = numElemBlocks;
     storeSolvType = solveType;
 
+    //initialize the linear algebra stuff -- matrix pointers
+    //to null, etc.
+    initLinearAlgebraCore();
+
 //  next, allocate the requisite initial data structures
 
     storeNumWorksets = new int[numElemBlocks];
@@ -543,6 +548,8 @@ int BASE_SLE::initElemSet(int numElems,
     int bIndex = search_ID_index(currentElemBlockID,&GID_blockIDList[0],
                                GID_blockIDList.size());
     assert(bIndex >= 0);
+    storeNumWorksets[bIndex]++;
+    if ( numElems <= 0 ) return 0;
     
     int myRows, myCols;
     int myNumNodes = blockRoster[bIndex].getNumNodesPerElement();
@@ -571,8 +578,6 @@ int BASE_SLE::initElemSet(int numElems,
 //  now cache the current element index for use by the next element set
 
     blockRoster[bIndex].setNextElemIndex(myElemIndex+1);
-
-    storeNumWorksets[bIndex]++;
 
     wTime_ += MPI_Wtime() - baseTime_;
 
@@ -639,7 +644,7 @@ int BASE_SLE::beginInitNodeSets(int numSharedNodeSets,
     if (debugOutput_) {
         fprintf(debugFile_,"beginInitNodeSets, numSharedNodeSets: %d",
                 numSharedNodeSets);
-        fprintf(debugFile_,", numExtNodeSets: %d",
+        fprintf(debugFile_,", numExtNodeSets: %d\n",
                 numExtNodeSets);
         fflush(debugFile_);
     }
@@ -1006,7 +1011,8 @@ int BASE_SLE::initComplete() {
             int *myElemDOFPtr = blockRoster[i].pointerToLocalEqnElemDOF(numElems);
             for (j = 0; j < numElems; j++) {
                 myElemDOFPtr[j] = storeNumProcEqns;
-                storeNumProcEqns += j*numElementDOF;
+                // Tong : should This be changed to storeNumProcEqns += j*numElementDOF;
+                storeNumProcEqns += numElementDOF;
             }
         }
     }
@@ -1040,8 +1046,13 @@ int BASE_SLE::initComplete() {
 
     int* globalNumProcEqns = new int[numProcs_];
 
-    MPI_Gather(&storeNumProcEqns, 1, MPI_INT, globalNumProcEqns, 1, MPI_INT,
-               masterRank_, FEI_COMM_WORLD);
+    if (numProcs_ > 1) {
+        MPI_Gather(&storeNumProcEqns, 1, MPI_INT, globalNumProcEqns, 1, MPI_INT,
+                   masterRank_, FEI_COMM_WORLD);
+    }
+    else {
+        globalNumProcEqns[0] = storeNumProcEqns;
+    }
 
 //  compute offsets for all processors (starting index for local equations)
 
@@ -1084,7 +1095,9 @@ int BASE_SLE::initComplete() {
 
     delete [] globalNumProcEqns;
 
-    MPI_Bcast(&globalNumEqns, 1, MPI_INT, masterRank_, FEI_COMM_WORLD);
+    if (numProcs_ > 1) {
+        MPI_Bcast(&globalNumEqns, 1, MPI_INT, masterRank_, FEI_COMM_WORLD);
+    }
 
 //  use block-row decomposition.
 
@@ -1181,23 +1194,22 @@ int BASE_SLE::initComplete() {
             }
 
             //now the elementDOF equations for this element...
-            //Kim, check me on this logic.
 
-//            int numElementDOF = blockRoster[bIndex].getNumElemDOF();
-//            int numElems;
-//            int *elemDOFEqns = blockRoster[bIndex].
-//                     pointerToLocalEqnElemDOF(numElems);
-//
-//            int thisEqn = elemDOFEqns[elemIndex];
-//
-//            if (numElementDOF > 0) {
-//
-//                for (i = 0; i < numElementDOF; i++) {
-//                    scatterIndices[indexCounter++] = thisEqn + i +
-//                                                          localStartRow_;
-//                }
-//            }
+            int numElementDOF = blockRoster[bIndex].getNumElemDOF();
+            int numElems;
 
+            if (numElementDOF > 0) {
+                int *elemDOFEqns = blockRoster[bIndex].
+                                   pointerToLocalEqnElemDOF(numElems);
+
+                int thisEqn = elemDOFEqns[elemIndex];
+
+                for (i = 0; i < numElementDOF; i++) {
+                    scatterIndices[indexCounter++] = thisEqn + i +
+                                                     localStartRow_;
+                }
+            }
+            
             int mLimit = indexCounter;
 
             //now, for the nodes that are shared and remotely owned,
@@ -1702,6 +1714,7 @@ int BASE_SLE::initComplete() {
  
     int numSendProcs;
     int* sendProcs = externalNodes_->sendProcListPtr(numSendProcs);
+    (void)sendProcs;
     int* lenLocalNodeIDs;
     GlobalID** localNodeIDsPtr = externalNodes_->
                                          localNodeIDsPtr(&lenLocalNodeIDs);
@@ -2116,6 +2129,21 @@ int BASE_SLE::loadElemSet(int elemSetID,
         fflush(debugFile_);
     }
 
+    if (debugOutput_) {
+        fprintf(debugFile_,"loadElemSet, numElems: %d\n", numElems);
+        for(int i=0; i<numElems; i++) {
+           fprintf(debugFile_,"coeffs for elemID %d\n",(int)elemIDs[i]);
+           for(int j=0; j<numElemRows; j++) {
+              fprintf(debugFile_,"   ");
+              for(int k=0; k<numElemRows; k++) {
+                 fprintf(debugFile_, "%e ",elemStiffness[i][j][k]);
+              }
+              fprintf(debugFile_, "\n");
+           }
+        }
+        fflush(debugFile_);
+    }
+
     int* numNodalDOFPtr = blockRoster[currentElemBlockIndex].
                              pointerToNumNodalDOF(numNodesPerElem);
 
@@ -2139,12 +2167,6 @@ int BASE_SLE::loadElemSet(int elemSetID,
     ek = new double* [numElemRows];
     for (i = 0; i < numElemRows; i++) {
         ek[i] = new double[numElemRows];
-    }
-
-    if (debugOutput_) {
-        fprintf(debugFile_,"loadElemSet starting numElems %d loop...\n",
-            numElems);
-        fflush(debugFile_);
     }
 
     //now we'll loop through the elements in this workset, assembling
@@ -2185,7 +2207,8 @@ int BASE_SLE::loadElemSet(int elemSetID,
         //  into their appropriate places in the system stiffness and load
         //  structures...
 
-        int numIndices = formElemScatterList(currentElemBlockIndex, elemConn[k],
+        int numIndices = formElemScatterList(currentElemBlockIndex, k, 
+                                             elemConn[k],
                                              &localNodeIndices[0],
                                              &scatterIndices[0]);
 //  these scatter indices are coming out of formElemScatterList as global
@@ -2357,7 +2380,8 @@ int BASE_SLE::loadElemSetMatrix(int elemSetID,
         //  into their appropriate places in the system stiffness
         //  structure...
 
-        int numIndices = formElemScatterList(currentElemBlockIndex, elemConn[k],
+        int numIndices = formElemScatterList(currentElemBlockIndex, k,
+                                             elemConn[k],
                                              &localNodeIndices[0],
                                              &scatterIndices[0]);
 //  these scatter indices are coming out of formElemScatterList as global
@@ -2520,7 +2544,8 @@ int BASE_SLE::loadElemSetRHS(int elemSetID,
         //  now let's obtain the scatter indices for assembling the equations
         //  into their appropriate places in the system rhs vector...
 
-        int numIndices = formElemScatterList(currentElemBlockIndex, elemConn[k],
+        int numIndices = formElemScatterList(currentElemBlockIndex, k, 
+                                             elemConn[k],
                                              &localNodeIndices[0],
                                              &scatterIndices[0]);
 //  these scatter indices are coming out of formElemScatterList as global
@@ -4248,6 +4273,7 @@ int BASE_SLE::endLoadCREqns() {
 
     int numSendProcs;
     int*sendProcs = externalNodes_->sendProcListPtr(numSendProcs);
+    (void)sendProcs;
 
     int* lenLocalNodeIDs;
     GlobalID** localNodeIDsPtr = externalNodes_->
@@ -4450,25 +4476,32 @@ int BASE_SLE::loadComplete() {
 //  all blocks have been loaded, so let's
 //  have all processors exchange data associated with shared nodes.
 
-    if (debugOutput_) {
-        fprintf(debugFile_,"loadComplete, calling exchangeSharedMatrixData\n");
-        fflush(debugFile_);
-    }
-
-    exchangeSharedMatrixData();
-    MPI_Barrier(FEI_COMM_WORLD);
-    for(int i=0; i<numRHSs_; i++) {
+    if (shBuffLoadAllocated_) {
         if (debugOutput_) {
-            fprintf(debugFile_,"   calling exchangeSharedRHSData(%d)\n",i);
+            fprintf(debugFile_,
+                    "loadComplete, calling exchangeSharedMatrixData\n");
             fflush(debugFile_);
         }
 
-        setRHSIndex(i);
-        exchangeSharedRHSData(i);
+        exchangeSharedMatrixData();
     }
 
-    delete [] shBuffRHSLoadD_;
-    shBuffRHSAllocated_ = false;
+    if (shBuffRHSAllocated_) {
+
+        MPI_Barrier(FEI_COMM_WORLD);
+        for(int i=0; i<numRHSs_; i++) {
+            if (debugOutput_) {
+                fprintf(debugFile_,"   calling exchangeSharedRHSData(%d)\n",i);
+                fflush(debugFile_);
+            }
+
+            setRHSIndex(i);
+            exchangeSharedRHSData(i);
+        }
+
+        delete [] shBuffRHSLoadD_;
+        shBuffRHSAllocated_ = false;
+    }
 
     if (debugOutput_) {
         fprintf(debugFile_,"leaving loadComplete\n");
@@ -4593,6 +4626,12 @@ void BASE_SLE::parameters(int numParams, char **paramStrings) {
 
         char param[256];
 
+        if ( getParam("solver",numParams,paramStrings,param) == 1)
+            sscanf(param,"%s",solverName_);
+
+        if ( getParam("preconditioner",numParams,paramStrings,param) == 1)
+            sscanf(param,"%s",precondName_);
+
         if ( getParam("outputLevel",numParams,paramStrings,param) == 1){
             sscanf(param,"%d", &outputLevel_);
         }
@@ -4674,7 +4713,6 @@ int BASE_SLE::iterateToSolve() {
 
     baseTime_ = MPI_Wtime();
 
- 
     if (debugOutput_) {
         fprintf(debugFile_,"iterateToSolve\n");
         fflush(debugFile_);
@@ -4687,14 +4725,16 @@ int BASE_SLE::iterateToSolve() {
         fprintf(debugFile_,"   calling matrixLoadComplete\n");
         fflush(debugFile_);
     }
-    
-    matrixLoadComplete();
+
+    // Tong : put this after implementAllBCs matrixLoadComplete();
 
 // now we will implement the boundary conditions. This can be done after
 // the matrix's 'loadComplete' because we're not altering the structure,
 // only the coefficient values.
 //
+
     implementAllBCs();
+    matrixLoadComplete();
 
     selectSolver(solverName_);
     selectPreconditioner(precondName_);
@@ -4999,7 +5039,9 @@ void BASE_SLE::unpackSolution() {
                 elemOffset = myElemDOFPtr[j];
                 for (m = 0; m < numElementDOF; m++) {
                     myOffset = elemOffset + m + localStartRow_;
-                    assert (myOffset < storeNumProcEqns);
+//                    cout << "myOffset, storeNumProcEqns : "    //kdm-eldof
+//                         << myOffset << "  " << storeNumProcEqns << endl;
+                    assert (myOffset <= storeNumProcEqns);
                     elemSolnPtr[j][m] = accessSolnVector(myOffset);
                 }
             }
@@ -7150,20 +7192,14 @@ int BASE_SLE::getNodeEqnNumber(GlobalID nodeID) {
 
     int index = GlobalToLocalNode(nodeID);
     if (index >= 0) {
-//$kdm dbg cout << "A - node, eqnum : " << (int) nodeID << "   "
-//$kdm dbg      << gnod_LocalNodes[index].getLocalEqnID()+localStartRow_ << endl;
         return(gnod_LocalNodes[index].getLocalEqnID()+localStartRow_);
     }
 
     if (sharedNodes_->isShared(nodeID) >= 0) {
-//$kdm dbg cout << "B - node, eqnum : " << (int) nodeID << "   "
-//$kdm dbg      << sharedNodes_->equationNumber(nodeID) << endl;
         return(sharedNodes_->equationNumber(nodeID));
     }
 
     if (externalNodes_->isExternNode(nodeID) == true) {
-//$kdm dbg cout << "C - node, eqnum : " << (int) nodeID << "   " 
-//$kdm dbg      << externalNodes_->globalEqn(nodeID) << endl;
         return(externalNodes_->globalEqn(nodeID));
     }
 
@@ -7287,7 +7323,8 @@ void BASE_SLE::packSharedStiffnessAndLoad(const int* conn, int numNodes,
 }
 
 //------------------------------------------------------------------------------
-int BASE_SLE::formElemScatterList(int blockIndex, const GlobalID* elemConn,
+int BASE_SLE::formElemScatterList(int blockIndex, int elemIndex,
+                                  const GlobalID* elemConn,
                                   int* localNodeIndices, 
                                   int *scatterIndices) {
 //
@@ -7295,11 +7332,12 @@ int BASE_SLE::formElemScatterList(int blockIndex, const GlobalID* elemConn,
 //  of element scatter indices.  it is (of course) assumed that the list
 //  of scatter indices was allocated elsewhere, and has the right length,
 //  namely the sum of all the appropriate nodal solution cardinalities
+//  plus the number of elemental DOF
 //
 
 //  first, get the terms arising from nodal contributions
 
-    int numNodes, *nodalDOFPtr;
+    int numNodes, *nodalDOFPtr, *elemDOFPtr;
     nodalDOFPtr = blockRoster[blockIndex].pointerToNumNodalDOF(numNodes);
     int localCount = 0;
     for (int i = 0; i < numNodes; i++) {
@@ -7313,13 +7351,29 @@ int BASE_SLE::formElemScatterList(int blockIndex, const GlobalID* elemConn,
     }
 
 //  then, add any contributions arising from elemental DOF
-//
-//  temporarily removed for testing purposes, as the new blockRoster 
-//  storage format for v1.0 necessitates rethinking the strict rules 
-//  about how the elemental DOF need to be stored in the sparse matrix
 
     int numElementDOF = blockRoster[blockIndex].getNumElemDOF();
-    assert (numElementDOF == 0);  //$kdm remove & fix when elemDOF added...
+    int nElems;
+    if (numElementDOF > 0) {
+        elemDOFPtr = blockRoster[blockIndex].pointerToLocalEqnElemDOF(nElems);
+        assert (elemIndex < nElems);
+        int elemOffset = elemDOFPtr[elemIndex];
+
+//  elemDOF are always local equations, so the offsets are easy
+
+        for (int j = 0; j < numElementDOF; j++) {
+            scatterIndices[localCount] = elemOffset + j + localStartRow_;
+            localCount++;
+        }
+    }
+            
+//    cout << "localCount, blockIndex, elemIndex : " 
+//         << localCount << "  " << blockIndex << "  "
+//                 << elemIndex << endl;   //kdm debug
+//    for (int debugCount = 0; debugCount < localCount; debugCount++) {
+//         cout << scatterIndices[debugCount] << "  ";
+//    } 
+//    cout << endl << endl;   //kdm debug
 
     return(localCount);
 }

@@ -1,3 +1,4 @@
+#include <iostream.h>
 #include <stdio.h>
 #include <assert.h>
 
@@ -234,7 +235,6 @@ void PenConstRecord::allocateCRFieldList(int length) {
  
 
 
-#include <iostream.h>
 //======================================================================
 void PenConstRecord::dumpToScreen() {
     cout << " CRPenID_           = " << CRPenID_ << "\n";

@@ -4,9 +4,57 @@
 #include <assert.h>
 #include <iostream.h>
 
-#include <fei-isis.h>
+/* #### added by Charles to ensure HYPRE compatibility ### */
+#include "utilities.h"
+/*#include <fei-isis.h>*/
+/* ########################################################### */
 
-static ISIS_SLE **linearSystems;
+// include matrix-vector files from ISIS++
+
+#include "other/basicTypes.h"
+#include "RealArray.h"
+#include "IntArray.h"
+#include "GlobalIDArray.h"
+#include "CommInfo.h"
+#include "Map.h"
+#include "Vector.h"
+#include "Matrix.h"
+
+// include the Hypre package header here
+
+#include "HYPRE_IJ_mv.h"
+//#include "parcsr_matrix_vector.h"
+//#include "csr_matrix.h"
+//#include "par_csr_matrix.h"
+
+#include "HYPRE.h"
+#include "HYPRE_parcsr_mv.h"
+#include "HYPRE_parcsr_ls.h"
+
+// includes needed in order to be able to include BASE_SLE.h
+
+#include "other/basicTypes.h"
+#include "fei.h"
+#include "src/CommBufferDouble.h"
+#include "src/CommBufferInt.h"
+#include "src/NodePackets.h"
+#include "src/BCRecord.h"
+#include "src/FieldRecord.h"
+#include "src/BlockRecord.h"
+#include "src/MultConstRecord.h"
+#include "src/PenConstRecord.h"
+#include "src/SimpleList.h"
+#include "src/NodeRecord.h"
+#include "src/SharedNodeRecord.h"
+#include "src/SharedNodeBuffer.h"
+#include "src/ExternNodeRecord.h"
+#include "src/SLE_utils.h"
+#include "BASE_SLE.h"
+
+#include "HYPRE_SLE.h"
+
+static HYPRE_SLE **linearSystems;
+
 static int number_of_systems;
 
 /*============================================================================*/
@@ -16,9 +64,9 @@ extern "C" void numLinearSystems(int numSystems,
                                  MPI_Comm FEI_COMM_WORLD, 
                                  int masterRank){
 
-    linearSystems = new ISIS_SLE*[numSystems];
+    linearSystems = new HYPRE_SLE*[numSystems];
     for (int i = 0; i < numSystems; i++) {
-        linearSystems[i] = new ISIS_SLE(FEI_COMM_WORLD, masterRank);
+        linearSystems[i] = new HYPRE_SLE(FEI_COMM_WORLD, masterRank);
     }
     number_of_systems = numSystems;
 

@@ -424,7 +424,7 @@ class BASE_SLE : public FEI {
                                     const double* const* stiffness,
                                     const double* load);
 
-    int formElemScatterList(int blockIndex, 
+    int formElemScatterList(int blockIndex, int elemIndex,
                             const GlobalID *elemConn, 
                             int* localNodeIndices,
                             int *scatterIndices);
