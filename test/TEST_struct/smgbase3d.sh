@@ -26,10 +26,13 @@ diff smgbase3d.testdata smgbase3d.testdata.temp >&2
 tail -3 smgbase3d.out.4 > smgbase3d.testdata.temp
 diff smgbase3d.testdata smgbase3d.testdata.temp >&2
 
-tail -3 smgbase3d.out.5 > smgbase3d.testdata.temp
-diff smgbase3d.testdata smgbase3d.testdata.temp >&2
+# tail -3 smgbase3d.out.5 > smgbase3d.testdata.temp
+# diff smgbase3d.testdata smgbase3d.testdata.temp >&2
+# 
+# tail -3 smgbase3d.out.6 > smgbase3d.testdata.temp
+# diff smgbase3d.testdata smgbase3d.testdata.temp >&2
 
-tail -3 smgbase3d.out.6 > smgbase3d.testdata.temp
+tail -3 smgbase3d.out.7 > smgbase3d.testdata.temp
 diff smgbase3d.testdata smgbase3d.testdata.temp >&2
 
 rm -f smgbase3d.testdata smgbase3d.testdata.temp

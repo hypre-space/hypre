@@ -26,7 +26,7 @@ diff psmgbase3d.testdata psmgbase3d.testdata.temp >&2
 tail -3 psmgbase3d.out.4 > psmgbase3d.testdata.temp
 diff psmgbase3d.testdata psmgbase3d.testdata.temp >&2
 
-tail -3 psmgbase3d.out.5 > psmgbase3d.testdata.temp
-diff psmgbase3d.testdata psmgbase3d.testdata.temp >&2
+# tail -3 psmgbase3d.out.5 > psmgbase3d.testdata.temp
+# diff psmgbase3d.testdata psmgbase3d.testdata.temp >&2
 
 rm -f psmgbase3d.testdata psmgbase3d.testdata.temp

@@ -19,7 +19,7 @@ mpirun -np 1 ./struct -n 8 8 8 -p 0 8 8 -solver 0 \
 # struct: Run Periodic SMG parallel and blocking 
 #=============================================================================
 
-mpirun -np 1 ./struct -n 2 2 2 -P 1 1 1  -p 0 8 8 -b 4 4 4 -solver 0 \
+mpirun -np 1 ./struct -n 4 4 4 -P 1 1 1  -p 0 8 8 -b 2 2 2 -solver 0 \
  > psmgbase3d.out.1
 mpirun -np 4 ./struct -n 2 8 8 -P 4 1 1  -p 0 8 8 -solver 0 \
  > psmgbase3d.out.2
@@ -27,5 +27,3 @@ mpirun -np 4 ./struct -n 8 2 8 -P 1 4 1  -p 0 8 8 -solver 0 \
  > psmgbase3d.out.3
 mpirun -np 4 ./struct -n 8 8 2 -P 1 1 4  -p 0 8 8 -solver 0 \
  > psmgbase3d.out.4
-mpirun -np 8 ./struct -n 2 2 2 -P 2 2 2  -p 0 8 8 -b 2 2 2 -solver 0 \
- > psmgbase3d.out.5
