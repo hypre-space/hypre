@@ -48,35 +48,17 @@ extern "C" {
 #endif
 
 
-/* HYPRE_pcg.c */
+  /* HYPRE_lobpcg.c */
+
+  /* LOBPCG Constructor */
 void
 HYPRE_LOBPCGCreate( HYPRE_InterfaceInterpreter*, HYPRE_Solver* );
 
+  /* LOBPCG Destructor */
 int 
 HYPRE_LOBPCGDestroy( HYPRE_Solver solver );
 
-int 
-HYPRE_LOBPCGSetup( HYPRE_Solver solver, 
-		   HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
-int 
-HYPRE_LOBPCGSetupB( HYPRE_Solver solver, 
-		   HYPRE_Matrix A, HYPRE_Vector x );
-int 
-HYPRE_LOBPCGSetupT( HYPRE_Solver solver, 
-		   HYPRE_Matrix A, HYPRE_Vector x );
-int 
-HYPRE_LOBPCGSolve( HYPRE_Solver, hypre_MultiVectorPtr, 
-		   hypre_MultiVectorPtr, double* );
-
-int 
-HYPRE_LOBPCGSetTol( HYPRE_Solver solver, double tol );
-
-int 
-HYPRE_LOBPCGSetMaxIter( HYPRE_Solver solver, int max_iter );
-
-int 
-HYPRE_LOBPCGSetPrecondUsageMode( HYPRE_Solver solver, int mode );
-
+  /* Sets the preconditioner; if not called, preconditioning is not used */
 int 
 HYPRE_LOBPCGSetPrecond( HYPRE_Solver solver, 
 			HYPRE_PtrToSolverFcn precond, 
@@ -85,20 +67,60 @@ HYPRE_LOBPCGSetPrecond( HYPRE_Solver solver,
 int 
 HYPRE_LOBPCGGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
 
+  /* Sets up A and the preconditioner, if there is one (see above) */
+int 
+HYPRE_LOBPCGSetup( HYPRE_Solver solver, 
+		   HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
+
+  /* Sets up B; if not called, B = I */
+int 
+HYPRE_LOBPCGSetupB( HYPRE_Solver solver, 
+		   HYPRE_Matrix B, HYPRE_Vector x );
+
+  /* If called, makes the preconditionig to be applyed to Tx = b, not Ax = b */
+int 
+HYPRE_LOBPCGSetupT( HYPRE_Solver solver, 
+		   HYPRE_Matrix T, HYPRE_Vector x );
+
+  /* The solver */
+int 
+HYPRE_LOBPCGSolve( HYPRE_Solver data, hypre_MultiVectorPtr constraints, 
+		   hypre_MultiVectorPtr eigenvectors, double* eigenvalues );
+
+  /* Sets the absolute tolerance */
+int 
+HYPRE_LOBPCGSetTol( HYPRE_Solver solver, double tol );
+
+  /* Sets the maximal number of iterations */
+int 
+HYPRE_LOBPCGSetMaxIter( HYPRE_Solver solver, int maxIter );
+
+  /* Defines which initial guess for inner PCG iterations to use:
+     mode = 0: use zero initial guess, otherwise use RHS */
+int 
+HYPRE_LOBPCGSetPrecondUsageMode( HYPRE_Solver solver, int mode );
+
+  /* Sets the level of printout */
 int 
 HYPRE_LOBPCGSetPrintLevel( HYPRE_Solver solver , int level );
 
+  /* Returns the pointer to residual norms matrix (blockSize x 1)*/
 utilities_FortranMatrix*
 HYPRE_LOBPCGResidualNorms( HYPRE_Solver solver );
 
+  /* Returns the pointer to residual norms history matrix (blockSize x maxIter)*/
 utilities_FortranMatrix*
 HYPRE_LOBPCGResidualNormsHistory( HYPRE_Solver solver );
 
+  /* Returns the pointer to eigenvalue history matrix (blockSize x maxIter)*/
 utilities_FortranMatrix*
 HYPRE_LOBPCGEigenvaluesHistory( HYPRE_Solver solver );
 
+  /* Returns the number of iterations performed by LOBPCG */
 int
 HYPRE_LOBPCGIterations( HYPRE_Solver solver );
+
+  /* The implementation of the above */
 
 int 
 hypre_LOBPCGDestroy( void *pcg_vdata );
@@ -168,6 +190,9 @@ void hypre_F90_NAME_BLAS(dsygv, DSYGV)
   double *a, int *lda, double *b, int *ldb, double *w, 
   double *work, int *lwork, /*@out@*/ int *info
 );
+
+void hypre_F90_NAME_BLAS( dpotrf, DPOTRF )
+( char* uplo, int* n, double* aval, int* lda, int* ierr );
 
 #endif
 

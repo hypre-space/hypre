@@ -49,12 +49,12 @@ lobpcg_clean( lobpcg_Data* data ) {
 int
 lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
 	      void* operatorAData, /* data for A */
-	      void (*operatorA)( void*, void*, void* ), /* A */
+	      void (*operatorA)( void*, hypre_MultiVectorPtr, hypre_MultiVectorPtr ),
 	      void* operatorBData, /* data for B */
-	      void (*operatorB)( void*, void*, void* ), /* B */
+	      void (*operatorB)( void*, hypre_MultiVectorPtr, hypre_MultiVectorPtr ),
 	      void* operatorTData, /* data for T */
-	      void (*operatorT)( void*, void*, void* ), /* T */
-	      hypre_MultiVectorPtr blockVectorY, /* constrains */
+	      void (*operatorT)( void*, hypre_MultiVectorPtr, hypre_MultiVectorPtr ),
+	      hypre_MultiVectorPtr blockVectorY, /* constraints */
 	      lobpcg_Tolerance tolerance, /* tolerance */
 	      int maxIterations, /* max # of iterations */
 	      int verbosityLevel, /* 0: no print, 1: print initial
@@ -73,6 +73,7 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
 ){
 
   int				sizeX; /* number of eigenvectors */
+  int				sizeY; /* number of constraints */
   int				sizeR; /* number of residuals used */
   int				sizeP; /* number of conj. directions used */
   int				sizeA; /* size of the Gram matrix for A */
@@ -86,8 +87,11 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
 
   int				noTFlag; /* nonzero: no preconditioner */
   int				noBFlag; /* nonzero: no operator B */
+  int				noYFlag; /* nonzero: no constaints */
+
   int				exitFlag; /* 1: problem size is too small,
-					     2: problem size < 1,
+					     2: block size < 1,
+					     3: linearly dependent constraints,
 					     -1: requested accuracy not 
 					     achieved */
 
@@ -104,6 +108,12 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
   hypre_MultiVectorPtr		blockVectorAX; /* A*X */
   hypre_MultiVectorPtr		blockVectorAR; /* A*R */
   hypre_MultiVectorPtr		blockVectorAP; /* A*P */
+
+  hypre_MultiVectorPtr		blockVectorBX; /* B*X */
+  hypre_MultiVectorPtr		blockVectorBR; /* B*R */
+  hypre_MultiVectorPtr		blockVectorBP; /* B*P */
+
+  hypre_MultiVectorPtr		blockVectorBY; /* B*Y */
 
   utilities_FortranMatrix*	gramA; /* Gram matrix for A */
   utilities_FortranMatrix*	gramB; /* Gram matrix for B */
@@ -130,6 +140,12 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
 	
   utilities_FortranMatrix*	gramPBP; /* PP block of gramB (ref) */
 	
+  utilities_FortranMatrix*	gramYBY; /* Matrices for constraints */
+  utilities_FortranMatrix*	gramYBX; 
+  utilities_FortranMatrix*	tempYBX; 
+  utilities_FortranMatrix*	gramYBR; /* ref. */
+  utilities_FortranMatrix*	tempYBR; /* ref. */ 
+
   utilities_FortranMatrix*	coordX; /* coordinates of the first sizeX
 					   Ritz vectors in the XRP basis */
   utilities_FortranMatrix*	coordXX; /* coordinates of the above in X */
@@ -147,17 +163,22 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
   noTFlag = operatorT == NULL;
   noBFlag = operatorB == NULL;
 
+  sizeY = hypre_MultiVectorWidth( blockVectorY );
+  noYFlag = sizeY == 0;
+
   sizeX = hypre_MultiVectorWidth( blockVectorX );
   n = hypre_MultiVectorHeight( blockVectorX );
 
-  /* had to remove because n is not available in some interfaces */ /*
-								      if ( n < 5*sizeX ) {
-								      exitFlag = PROBLEM_SIZE_TOO_SMALL;
-								      lobpcg_errorMessage( verbosityLevel,
-								      "The problem size is too small compared to the block size for LOBPCG.\n" );
-								      return exitFlag;
-								      }
-								    */
+  /* had to remove because n is not available in some interfaces */ 
+  /*
+    if ( n < 5*sizeX ) {
+    exitFlag = PROBLEM_SIZE_TOO_SMALL;
+    lobpcg_errorMessage( verbosityLevel,
+    "The problem size is too small compared to the block size for LOBPCG.\n" );
+    return exitFlag;
+    }
+  */
+  
   if ( sizeX < 1 ) {
     exitFlag = WRONG_BLOCK_SIZE;
     lobpcg_errorMessage( verbosityLevel,
@@ -165,7 +186,73 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
     return exitFlag;
   }
 
-  /* creating empty fortran matrices */
+  gramYBY = utilities_FortranMatrixCreate();
+  gramYBX = utilities_FortranMatrixCreate();
+  tempYBX = utilities_FortranMatrixCreate();
+  gramYBR = utilities_FortranMatrixCreate();
+  tempYBR = utilities_FortranMatrixCreate();
+
+  blockVectorW = hypre_MultiVectorCreateCopy( blockVectorX, 0 );
+
+  if ( !noYFlag ) {
+    utilities_FortranMatrixAllocateData( sizeY, sizeY, gramYBY );
+    utilities_FortranMatrixAllocateData( sizeY, sizeX, gramYBX );
+    utilities_FortranMatrixAllocateData( sizeY, sizeX, tempYBX );
+    if ( !noBFlag ) {
+      operatorB( operatorBData, blockVectorY, blockVectorBY );
+      blockVectorBY = hypre_MultiVectorCreateCopy( blockVectorY, 0 );
+    }
+    else
+      blockVectorBY = blockVectorY;
+
+    lobpcg_MultiVectorByMultiVector( blockVectorBY, blockVectorY, gramYBY );
+    exitFlag = lobpcg_chol( gramYBY );
+    if ( exitFlag != 0 ) {
+      if ( verbosityLevel )
+	printf("Cannot handle linear dependent constraints\n");
+      utilities_FortranMatrixDestroy( gramYBY );
+      utilities_FortranMatrixDestroy( gramYBX );
+      utilities_FortranMatrixDestroy( tempYBX );
+      utilities_FortranMatrixDestroy( gramYBR );
+      utilities_FortranMatrixDestroy( tempYBR );
+      if ( !noBFlag )
+	hypre_MultiVectorDestroy( blockVectorBY );
+      hypre_MultiVectorDestroy( blockVectorW );
+      return WRONG_CONSTRAINTS;
+    }      
+    utilities_FortranMatrixUpperInv( gramYBY );
+    utilities_FortranMatrixClearL( gramYBY );
+
+    /* apply the constraints to the initial X */
+    lobpcg_MultiVectorByMultiVector( blockVectorBY, blockVectorX, gramYBX );
+    utilities_FortranMatrixMultiply( gramYBY, 1, gramYBX, 0, tempYBX );
+    utilities_FortranMatrixMultiply( gramYBY, 0, tempYBX, 0, gramYBX );
+    lobpcg_MultiVectorByMatrix( blockVectorY, gramYBX, blockVectorW );
+    hypre_MultiVectorAxpy( -1.0, blockVectorW, blockVectorX );
+  }
+
+  if ( verbosityLevel ) {
+    printf("\nSolving ");
+    if ( noBFlag )
+      printf("standard");
+    else
+      printf("generalized");
+    printf(" eigenvalue problem with");
+    if ( noTFlag )
+      printf("out");
+    printf(" preconditioning\n\n");
+    printf("block size %d\n\n", sizeX );
+    if ( noYFlag )
+      printf("No constraints\n\n");
+    else {
+      if ( sizeY > 1 )
+	printf("%d constraints\n\n", sizeY);
+      else
+	printf("%d constraint\n\n", sizeY);
+    }
+  }
+
+  /* creating fortran matrix shells */
 
   gramA = utilities_FortranMatrixCreate();
   gramB = utilities_FortranMatrixCreate();
@@ -204,97 +291,138 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
   for ( i = 0; i < sizeX; i++ )
     activeMask[i] = 1;
 
-  /* allocate memory for Gram matrices and the eigenvalues
-     of gramA u = lambda gramB u */
+  /* allocate memory for Gram matrices and the Ritz values */
   sizeX3 = 3*sizeX;
   utilities_FortranMatrixAllocateData( sizeX3, sizeX3, gramA );
   utilities_FortranMatrixAllocateData( sizeX3, sizeX3, gramB );
   utilities_FortranMatrixAllocateData( sizeX3, 1, lambdaAB );
 
-  /* creating block vectors R, P, AX, AR, AP and W */
+  /* creating block vectors R, P, AX, AR, AP, BX, BR, BP and W */
   blockVectorR = hypre_MultiVectorCreateCopy( blockVectorX, 0 );
   blockVectorP = hypre_MultiVectorCreateCopy( blockVectorX, 0 );
   blockVectorAX = hypre_MultiVectorCreateCopy( blockVectorX, 0 );
   blockVectorAR = hypre_MultiVectorCreateCopy( blockVectorX, 0 );
   blockVectorAP = hypre_MultiVectorCreateCopy( blockVectorX, 0 );
-  blockVectorW = hypre_MultiVectorCreateCopy( blockVectorX, 0 );
 
-  /* selecting a block in gramB for upperR */
-  utilities_FortranMatrixSelectBlock( gramB, 1, sizeX, 1, sizeX, upperR );
-  utilities_FortranMatrixClear( upperR ); /* upperR = 0 */
-  /* QR-factorization of X, upperR is R-factor  */
-  hypre_MultiVectorExplicitQR( NULL, blockVectorX, sizeX3, sizeX, sizeX,
-			       utilities_FortranMatrixValues( upperR ) );
-
-  hypre_MultiVectorEval( operatorA, operatorAData, 
-			 NULL, blockVectorX,
-			 NULL, blockVectorAX ); /* AX = A*X */
-
-  /* gramXAX = X'*AX */
-  utilities_FortranMatrixSelectBlock( gramA, 1, sizeX, 1, sizeX, gramXAX );
-  lobpcg_MultiVectorByMultiVector( NULL, blockVectorX, 
-				   NULL, blockVectorAX, gramXAX );
-  utilities_FortranMatrixSymmetrize( gramXAX );
-
-  /* gramXBX = X'*X */ 
-  utilities_FortranMatrixSelectBlock( gramB, 1, sizeX, 1, sizeX, gramXBX );
-  lobpcg_MultiVectorByMultiVector( NULL, blockVectorX, 
-				   NULL, blockVectorX, gramXBX );
-  utilities_FortranMatrixSymmetrize( gramXBX );
-  /*  utilities_FortranMatrixSetToIdentity( gramXBX );*/ /* X may be bad! */
-
-  if ( (exitFlag = lobpcg_solveGEVP( gramXAX, gramXBX, lambda )) != 0 ) {
-    lobpcg_errorMessage( verbosityLevel, "GEVP solver failure\n" );
-    if ( verbosityLevel )
-      printf("INFO = %d\n", exitFlag);
+  if ( !noBFlag ) {
+    blockVectorBX = hypre_MultiVectorCreateCopy( blockVectorX, 0 );
+    blockVectorBR = hypre_MultiVectorCreateCopy( blockVectorX, 0 );
+    blockVectorBP = hypre_MultiVectorCreateCopy( blockVectorX, 0 );
   }
   else {
-    utilities_FortranMatrixSelectBlock( gramXAX, 1, sizeX, 1, sizeX, coordX );
+    blockVectorBX = blockVectorX;
+    blockVectorBR = blockVectorR;
+    blockVectorBP = blockVectorP;
+  }
 
-    lobpcg_MultiVectorByMatrix( NULL, blockVectorX, coordX, NULL, blockVectorW );
-    hypre_MultiVectorCopy( NULL, blockVectorW, NULL, blockVectorX );
+  hypre_MultiVectorSetMask( blockVectorR, activeMask );
+  hypre_MultiVectorSetMask( blockVectorP, activeMask );
+  hypre_MultiVectorSetMask( blockVectorAR, activeMask );
+  hypre_MultiVectorSetMask( blockVectorAP, activeMask );
+  if ( !noBFlag ) {
+    hypre_MultiVectorSetMask( blockVectorBR, activeMask );
+    hypre_MultiVectorSetMask( blockVectorBP, activeMask );
+  }
+  hypre_MultiVectorSetMask( blockVectorW, activeMask );
 
-    lobpcg_MultiVectorByMatrix( NULL, blockVectorAX, coordX, 
-				NULL, blockVectorW );
-    hypre_MultiVectorCopy( NULL, blockVectorW, NULL, blockVectorAX );
+  /* B-orthonormaliization of X */
+  /* selecting a block in gramB for R factor upperR */
+  utilities_FortranMatrixSelectBlock( gramB, 1, sizeX, 1, sizeX, upperR );
+  if ( !noBFlag ) {
+    operatorB( operatorBData, blockVectorX, blockVectorBX );
+  }
+  exitFlag = lobpcg_MultiVectorImplicitQR( blockVectorX, blockVectorBX, 
+					   upperR, blockVectorW );
+  if ( exitFlag ) {
+    lobpcg_errorMessage( verbosityLevel, "Bad initial vectors: orthonormalization failed\n" );
+    if ( verbosityLevel )
+      printf("DPOTRF INFO = %d\n", exitFlag);
+  }
+  else {
 
-    hypre_MultiVectorByDiagonal( NULL, blockVectorX, 
-				 NULL, sizeX, 
-				 utilities_FortranMatrixValues( lambda ),
-				 NULL, blockVectorR );
-
-    hypre_MultiVectorAxpy( -1.0, NULL, blockVectorAX, NULL, blockVectorR );
-
-    hypre_MultiVectorByMultiVectorDiag( NULL, blockVectorR, NULL, blockVectorR, 
-					NULL, sizeX, 
-					utilities_FortranMatrixValues( residualNorms ) ); 
-    lobpcg_sqrtVector( sizeX, activeMask, 
-		       utilities_FortranMatrixValues( residualNorms ) );
-
-    if ( lambdaHistory != NULL ) {
-      utilities_FortranMatrixSelectBlock( lambdaHistory, 1, sizeX, 1, 1, 
-					  historyColumn );
-      utilities_FortranMatrixCopy( lambda, 0, historyColumn );
+    if ( !noBFlag ) { /* update BX */
+      lobpcg_MultiVectorByMatrix( blockVectorBX, upperR, blockVectorW );
+      hypre_MultiVectorCopy( blockVectorW, blockVectorBX );
     }
+
+    operatorA( operatorAData, blockVectorX, blockVectorAX );
+
+    /* gramXAX = X'*AX */
+    utilities_FortranMatrixSelectBlock( gramA, 1, sizeX, 1, sizeX, gramXAX );
+    lobpcg_MultiVectorByMultiVector( blockVectorX, blockVectorAX, gramXAX );
+    utilities_FortranMatrixSymmetrize( gramXAX );
+
+    /* gramXBX = X'*X */ 
+    utilities_FortranMatrixSelectBlock( gramB, 1, sizeX, 1, sizeX, gramXBX );
+    lobpcg_MultiVectorByMultiVector( blockVectorX, blockVectorBX, gramXBX );
+    utilities_FortranMatrixSymmetrize( gramXBX );
+    /*  utilities_FortranMatrixSetToIdentity( gramXBX );*/ /* X may be bad! */
+    
+    if ( (exitFlag = lobpcg_solveGEVP( gramXAX, gramXBX, lambda )) != 0 ) {
+      lobpcg_errorMessage( verbosityLevel, 
+			   "Bad problem: Rayleigh-Ritz in the initial subspace failed\n" );
+      if ( verbosityLevel )
+	printf("DSYGV INFO = %d\n", exitFlag);
+    }
+    else {
+      utilities_FortranMatrixSelectBlock( gramXAX, 1, sizeX, 1, sizeX, coordX );
+
+      lobpcg_MultiVectorByMatrix( blockVectorX, coordX, blockVectorW );
+      hypre_MultiVectorCopy( blockVectorW, blockVectorX );
+
+      lobpcg_MultiVectorByMatrix( blockVectorAX, coordX, blockVectorW );
+      hypre_MultiVectorCopy( blockVectorW, blockVectorAX );
+
+      if ( !noBFlag ) {
+	lobpcg_MultiVectorByMatrix( blockVectorBX, coordX, blockVectorW );
+	hypre_MultiVectorCopy( blockVectorW, blockVectorBX );
+      }
+
+      /*
+      lobpcg_MultiVectorByMultiVector( blockVectorBX, blockVectorX, upperR );
+      utilities_FortranMatrixPrint( upperR, "xbx.dat" );
+      utilities_FortranMatrixPrint( lambda, "lmd.dat" );
+      */
+
+      hypre_MultiVectorByDiagonal( blockVectorBX, 
+				   NULL, sizeX, 
+				   utilities_FortranMatrixValues( lambda ),
+				   blockVectorR );
+
+      hypre_MultiVectorAxpy( -1.0, blockVectorAX, blockVectorR );
+
+      hypre_MultiVectorByMultiVectorDiag( blockVectorR, blockVectorR, 
+					  NULL, sizeX, 
+					  utilities_FortranMatrixValues( residualNorms ) ); 
+
+      lobpcg_sqrtVector( sizeX, NULL, 
+			 utilities_FortranMatrixValues( residualNorms ) );
+
+      if ( lambdaHistory != NULL ) {
+	utilities_FortranMatrixSelectBlock( lambdaHistory, 1, sizeX, 1, 1, 
+					    historyColumn );
+	utilities_FortranMatrixCopy( lambda, 0, historyColumn );
+      }
 	
-    if ( residualNormsHistory != NULL ) {
-      utilities_FortranMatrixSelectBlock( residualNormsHistory, 1, sizeX, 1, 1, 
-					  historyColumn );
-      utilities_FortranMatrixCopy( residualNorms, 0, historyColumn );
-    }
+      if ( residualNormsHistory != NULL ) {
+	utilities_FortranMatrixSelectBlock( residualNormsHistory, 1, sizeX, 1, 1, 
+					    historyColumn );
+	utilities_FortranMatrixCopy( residualNorms, 0, historyColumn );
+      }
 	
-    if ( verbosityLevel == 2 ) {
-      printf("\n");
-      for (i = 1; i <= sizeX; i++ ) 
-	printf("Initial eigenvalues lambda %22.16e\n",
-	       utilities_FortranMatrixValue( lambda, i, 1) );
-      for (i = 1; i <= sizeX; i++) 
-	printf("Initial residuals %12.6e\n",
-	       utilities_FortranMatrixValue( residualNorms, i, 1) );
+      if ( verbosityLevel == 2 ) {
+	printf("\n");
+	for (i = 1; i <= sizeX; i++ ) 
+	  printf("Initial eigenvalues lambda %22.16e\n",
+		 utilities_FortranMatrixValue( lambda, i, 1) );
+	for (i = 1; i <= sizeX; i++) 
+	  printf("Initial residuals %12.6e\n",
+		 utilities_FortranMatrixValue( residualNorms, i, 1) );
+      }
+      else if ( verbosityLevel == 1 )
+	printf("\nInitial Max. Residual %22.16e\n",
+	       utilities_FortranMatrixMaxValue( residualNorms ) );
     }
-    else if ( verbosityLevel == 1 )
-      printf("\nInitial Max. Residual %22.16e\n",
-	     utilities_FortranMatrixMaxValue( residualNorms ) );
   }
 
   for ( *iterationNumber = 1; exitFlag == 0 && *iterationNumber <= maxIterations; 
@@ -306,45 +434,75 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
       break;
 
     if ( !noTFlag ) {
-      hypre_MultiVectorEval( operatorT, operatorTData, 
-			     activeMask, blockVectorR,
-			     activeMask, blockVectorW );
-      hypre_MultiVectorCopy( activeMask, blockVectorW, 
-			     activeMask, blockVectorR );
+      operatorT( operatorTData, blockVectorR, blockVectorW );
+      hypre_MultiVectorCopy( blockVectorW, blockVectorR );
+    }
+
+    if ( !noYFlag ) { /* apply the constraints to R  */
+      utilities_FortranMatrixSelectBlock( gramYBX, 1, sizeY, 1, sizeR, gramYBR );
+      utilities_FortranMatrixSelectBlock( tempYBX, 1, sizeY, 1, sizeR, tempYBR );
+
+      lobpcg_MultiVectorByMultiVector( blockVectorBY, blockVectorR, gramYBR );
+      utilities_FortranMatrixMultiply( gramYBY, 1, gramYBR, 0, tempYBR );
+      utilities_FortranMatrixMultiply( gramYBY, 0, tempYBR, 0, gramYBR );
+      lobpcg_MultiVectorByMatrix( blockVectorY, gramYBR, blockVectorW );
+      hypre_MultiVectorAxpy( -1.0, blockVectorW, blockVectorR );
     }
 
     firstR = sizeX + 1;
     lastR = sizeX + sizeR;
     firstP = lastR + 1;
 
-    utilities_FortranMatrixSelectBlock( gramB, firstR, lastR, firstR, lastR, 
-					upperR );
+    utilities_FortranMatrixSelectBlock( gramB, firstR, lastR, firstR, lastR, upperR );
 
-    utilities_FortranMatrixClear( upperR );
-    hypre_MultiVectorExplicitQR( activeMask, blockVectorR, 
-				 sizeX3, sizeR, sizeR,
-				 utilities_FortranMatrixValues( upperR ) );
-    hypre_MultiVectorEval( operatorA, operatorAData, 
-			   activeMask, blockVectorR,
-			   activeMask, blockVectorAR );
+    if ( !noBFlag ) {
+      operatorB( operatorBData, blockVectorR, blockVectorBR );
+    }
+    exitFlag = lobpcg_MultiVectorImplicitQR( blockVectorR, blockVectorBR, 
+					     upperR, blockVectorW );
+    if ( exitFlag ) {
+      lobpcg_errorMessage( verbosityLevel, "Orthonormalization of residuals failed\n" );
+      if ( verbosityLevel )
+	printf("DPOTRF INFO = %d\n", exitFlag);
+      break;
+    }
+
+    if ( !noBFlag ) { /* update BR */
+      lobpcg_MultiVectorByMatrix( blockVectorBR, upperR, blockVectorW );
+      hypre_MultiVectorCopy( blockVectorW, blockVectorBR );
+    }
+
+    /* AR = A*R */
+    operatorA( operatorAData, blockVectorR, blockVectorAR );
 
     if ( *iterationNumber > 1 ) {
 
       sizeP = sizeR;
       lastP = lastR + sizeP;
 
-      utilities_FortranMatrixSelectBlock( gramB, firstP, lastP, firstP, lastP, 
-					  upperR );
-      utilities_FortranMatrixClear( upperR );
-      hypre_MultiVectorExplicitQR( activeMask, blockVectorP, 
-				   sizeX3, sizeP, sizeP,
-				   utilities_FortranMatrixValues( upperR ) );
-      utilities_FortranMatrixUpperInv( upperR );
+      utilities_FortranMatrixSelectBlock( gramB, firstP, lastP, firstP, lastP, upperR );
+
+      exitFlag = lobpcg_MultiVectorImplicitQR( blockVectorP, blockVectorBP, 
+					       upperR, blockVectorW );
+      if ( exitFlag ) {
+	/*
+	lobpcg_errorMessage( verbosityLevel, "Orthonormalization of P failed\n" );
+	if ( verbosityLevel )
+	  printf("DPOTRF INFO = %d\n", exitFlag);
+	*/
+	sizeP = 0;
+      }
+      else {
 			
-      lobpcg_MultiVectorByMatrix( activeMask, blockVectorAP, upperR, 
-				  activeMask, blockVectorW );
-      hypre_MultiVectorCopy( activeMask, blockVectorW, 
-			     activeMask, blockVectorAP );
+	if ( !noBFlag ) { /* update BP */
+	  lobpcg_MultiVectorByMatrix( blockVectorBP, upperR, blockVectorW );
+	  hypre_MultiVectorCopy( blockVectorW, blockVectorBP );
+	}
+
+	/* update AP */
+	lobpcg_MultiVectorByMatrix( blockVectorAP, upperR, blockVectorW );
+	hypre_MultiVectorCopy( blockVectorW, blockVectorAP );
+      }
     }
     else {
       
@@ -369,65 +527,37 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
     utilities_FortranMatrixClear( gramXAX );
     utilities_FortranMatrixSetDiagonal( gramXAX, lambda );
 		
-    lobpcg_MultiVectorByMultiVector( 
-				    activeMask, blockVectorR,
-				    NULL, blockVectorAX, 
-				    gramRAX );
+    lobpcg_MultiVectorByMultiVector( blockVectorR, blockVectorAX, gramRAX );
 		
-    lobpcg_MultiVectorByMultiVector( activeMask, blockVectorR, 
-				     activeMask, blockVectorAR, 
-				     gramRAR );
+    lobpcg_MultiVectorByMultiVector( blockVectorR, blockVectorAR, gramRAR );
     utilities_FortranMatrixSymmetrize( gramRAR );
 
     utilities_FortranMatrixSetToIdentity( gramXBX );
 
-    lobpcg_MultiVectorByMultiVector( 
-				    activeMask, blockVectorR, 
-				    NULL, blockVectorX, 
-				    gramRBX );
+    lobpcg_MultiVectorByMultiVector( blockVectorR, blockVectorBX, gramRBX );
 		
     utilities_FortranMatrixSetToIdentity( gramRBR );
 
     if ( *iterationNumber > 1 ) {
       
-      utilities_FortranMatrixSelectBlock( gramA, firstP, lastP, 1, sizeX, 
-					  gramPAX );
-      utilities_FortranMatrixSelectBlock( gramA, firstP, lastP, firstR, lastR, 
-					  gramPAR );
-      utilities_FortranMatrixSelectBlock( gramA, firstP, lastP, firstP, lastP, 
-					  gramPAP );
+      utilities_FortranMatrixSelectBlock( gramA, firstP, lastP, 1, sizeX, gramPAX );
+      utilities_FortranMatrixSelectBlock( gramA, firstP, lastP, firstR, lastR, gramPAR );
+      utilities_FortranMatrixSelectBlock( gramA, firstP, lastP, firstP, lastP, gramPAP );
 			
-      utilities_FortranMatrixSelectBlock( gramB, firstP, lastP, 1, sizeX, 
-					  gramPBX );
-      utilities_FortranMatrixSelectBlock( gramB, firstP, lastP, firstR, lastR, 
-					  gramPBR );
-      utilities_FortranMatrixSelectBlock( gramB, firstP, lastP, firstP, lastP, 
-					  gramPBP );
+      utilities_FortranMatrixSelectBlock( gramB, firstP, lastP, 1, sizeX, gramPBX );
+      utilities_FortranMatrixSelectBlock( gramB, firstP, lastP, firstR, lastR, gramPBR );
+      utilities_FortranMatrixSelectBlock( gramB, firstP, lastP, firstP, lastP, gramPBP );
 
-      lobpcg_MultiVectorByMultiVector( 
-				      activeMask, blockVectorP, 
-				      NULL, blockVectorAX, 
-				      gramPAX );
+      lobpcg_MultiVectorByMultiVector( blockVectorP, blockVectorAX, gramPAX );
 			
-      lobpcg_MultiVectorByMultiVector( 
-				      activeMask, blockVectorP, 
-				      activeMask, blockVectorAR, 
-				      gramPAR );
+      lobpcg_MultiVectorByMultiVector( blockVectorP, blockVectorAR, gramPAR );
 			
-      lobpcg_MultiVectorByMultiVector( activeMask, blockVectorP, 
-				       activeMask, blockVectorAP, 
-				       gramPAP );
+      lobpcg_MultiVectorByMultiVector( blockVectorP, blockVectorAP, gramPAP );
       utilities_FortranMatrixSymmetrize( gramPAP );
 
-      lobpcg_MultiVectorByMultiVector( 
-				      activeMask, blockVectorP, 
-				      NULL, blockVectorX, 
-				      gramPBX );
+      lobpcg_MultiVectorByMultiVector( blockVectorP, blockVectorBX, gramPBX );
 			
-      lobpcg_MultiVectorByMultiVector( 
-				      activeMask, blockVectorP, 
-				      activeMask, blockVectorR, 
-				      gramPBR );
+      lobpcg_MultiVectorByMultiVector( blockVectorP, blockVectorBR, gramPBR );
 		
       utilities_FortranMatrixSetToIdentity( gramPBP );
     }
@@ -449,61 +579,79 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
     utilities_FortranMatrixSelectBlock( gramA, 1, sizeA, 1, sizeX, coordX );
 
     utilities_FortranMatrixSelectBlock( coordX, 1, sizeX, 1, sizeX, coordXX );
-    utilities_FortranMatrixSelectBlock( coordX, firstR, lastR, 1, sizeX, 
-					coordRX );
+    utilities_FortranMatrixSelectBlock( coordX, firstR, lastR, 1, sizeX, coordRX );
 
     if ( *iterationNumber > 1 ) {
 	
-      utilities_FortranMatrixSelectBlock( coordX, firstP, lastP, 1, sizeX, 
-					  coordPX );
+      utilities_FortranMatrixSelectBlock( coordX, firstP, lastP, 1, sizeX, coordPX );
 
-      lobpcg_MultiVectorByMatrix( activeMask, blockVectorP, coordPX, 
-				  NULL, blockVectorW );
-      hypre_MultiVectorCopy( NULL, blockVectorW, NULL, blockVectorP );
+      hypre_MultiVectorSetMask( blockVectorW, NULL );
+      lobpcg_MultiVectorByMatrix( blockVectorP, coordPX, blockVectorW );
+      hypre_MultiVectorSetMask( blockVectorP, NULL );
+      hypre_MultiVectorCopy( blockVectorW, blockVectorP );
 
-      lobpcg_MultiVectorByMatrix( activeMask, blockVectorAP, coordPX, 
-				  NULL, blockVectorW );
-      hypre_MultiVectorCopy( NULL, blockVectorW, NULL, blockVectorAP );
+      lobpcg_MultiVectorByMatrix( blockVectorAP, coordPX, blockVectorW );
+      hypre_MultiVectorSetMask( blockVectorAP, NULL );
+      hypre_MultiVectorCopy( blockVectorW, blockVectorAP );
 
-      lobpcg_MultiVectorByMatrix( activeMask, blockVectorR, coordRX, 
-				  NULL, blockVectorW );
-      hypre_MultiVectorAxpy( 1.0, NULL, blockVectorW, NULL, blockVectorP );
+      if ( !noBFlag ) {
+	lobpcg_MultiVectorByMatrix( blockVectorBP, coordPX, blockVectorW );
+	hypre_MultiVectorSetMask( blockVectorBP, NULL );
+	hypre_MultiVectorCopy( blockVectorW, blockVectorBP );
+      }
+
+      lobpcg_MultiVectorByMatrix( blockVectorR, coordRX, blockVectorW );
+      hypre_MultiVectorAxpy( 1.0, blockVectorW, blockVectorP );
 			
-      lobpcg_MultiVectorByMatrix( activeMask, blockVectorAR, coordRX, 
-				  NULL, blockVectorW );
-      hypre_MultiVectorAxpy( 1.0, NULL, blockVectorW, NULL, blockVectorAP );
-		
+      lobpcg_MultiVectorByMatrix( blockVectorAR, coordRX, blockVectorW );
+      hypre_MultiVectorAxpy( 1.0, blockVectorW, blockVectorAP );
+
+      if ( !noBFlag ) {
+	lobpcg_MultiVectorByMatrix( blockVectorBR, coordRX, blockVectorW );
+	hypre_MultiVectorAxpy( 1.0, blockVectorW, blockVectorBP );
+      }
+
     }
     else {
       
-      lobpcg_MultiVectorByMatrix( activeMask, blockVectorR, coordRX, 
-				  NULL, blockVectorP );
+      hypre_MultiVectorSetMask( blockVectorP, NULL );
+      lobpcg_MultiVectorByMatrix( blockVectorR, coordRX, blockVectorP );
 			
-      lobpcg_MultiVectorByMatrix( activeMask, blockVectorAR, coordRX, 
-				  NULL, blockVectorAP );
+      hypre_MultiVectorSetMask( blockVectorAP, NULL );
+      lobpcg_MultiVectorByMatrix( blockVectorAR, coordRX, blockVectorAP );
+
+      if ( !noBFlag ) {
+	hypre_MultiVectorSetMask( blockVectorBP, NULL );
+	lobpcg_MultiVectorByMatrix( blockVectorBR, coordRX, blockVectorBP );
+      }
 		
     }
 		
-    hypre_MultiVectorCopy( NULL, blockVectorX, NULL, blockVectorW );
-    lobpcg_MultiVectorByMatrix( NULL, blockVectorW, coordXX, 
-				NULL, blockVectorX );
-    hypre_MultiVectorAxpy( 1.0, NULL, blockVectorP, NULL, blockVectorX );
+    hypre_MultiVectorCopy( blockVectorX, blockVectorW );
+    lobpcg_MultiVectorByMatrix( blockVectorW, coordXX, blockVectorX );
+    hypre_MultiVectorAxpy( 1.0, blockVectorP, blockVectorX );
 
-    hypre_MultiVectorCopy( NULL, blockVectorAX, NULL, blockVectorW );
-    lobpcg_MultiVectorByMatrix( NULL, blockVectorW, coordXX, 
-				NULL, blockVectorAX );
-    hypre_MultiVectorAxpy( 1.0, NULL, blockVectorAP, NULL, blockVectorAX );
+    hypre_MultiVectorCopy( blockVectorAX, blockVectorW );
+    lobpcg_MultiVectorByMatrix( blockVectorW, coordXX, blockVectorAX );
+    hypre_MultiVectorAxpy( 1.0, blockVectorAP, blockVectorAX );
 
-    hypre_MultiVectorByDiagonal( activeMask, blockVectorX, 
+    if ( !noBFlag ) {
+      hypre_MultiVectorCopy( blockVectorBX, blockVectorW );
+      lobpcg_MultiVectorByMatrix( blockVectorW, coordXX, blockVectorBX );
+      hypre_MultiVectorAxpy( 1.0, blockVectorBP, blockVectorBX );
+    }
+
+    hypre_MultiVectorSetMask( blockVectorAX, activeMask );
+    hypre_MultiVectorSetMask( blockVectorBX, activeMask );
+
+    hypre_MultiVectorByDiagonal( blockVectorBX, 
 				 activeMask, sizeX, 
 				 utilities_FortranMatrixValues( lambda ),
-				 activeMask, blockVectorR );
+				 blockVectorR );
 
-    hypre_MultiVectorAxpy( -1.0, activeMask, blockVectorAX, 
-			   activeMask, blockVectorR );
+    hypre_MultiVectorAxpy( -1.0, blockVectorAX, blockVectorR );
 
-    hypre_MultiVectorByMultiVectorDiag(	activeMask, blockVectorR, 
-					activeMask, blockVectorR, 
+    hypre_MultiVectorByMultiVectorDiag(	blockVectorR, blockVectorR, 
 					activeMask, sizeX, 
 					utilities_FortranMatrixValues( residualNorms ) );
     lobpcg_sqrtVector( 	sizeX, activeMask, 
@@ -535,6 +683,14 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
       printf("Iteration %d \tbsize %d \tmaxres %22.16e\n",
 	     *iterationNumber, sizeR, 
 	     utilities_FortranMatrixMaxValue( residualNorms ) );
+
+    hypre_MultiVectorSetMask( blockVectorAX, NULL );
+    hypre_MultiVectorSetMask( blockVectorBX, NULL );
+    hypre_MultiVectorSetMask( blockVectorAP, activeMask );
+    hypre_MultiVectorSetMask( blockVectorBP, activeMask );
+    hypre_MultiVectorSetMask( blockVectorP, activeMask );
+    hypre_MultiVectorSetMask( blockVectorW, activeMask );
+
   }
 
   if ( exitFlag != 0 || *iterationNumber > maxIterations )
@@ -558,6 +714,13 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
   hypre_MultiVectorDestroy( blockVectorAX );
   hypre_MultiVectorDestroy( blockVectorAR );
   hypre_MultiVectorDestroy( blockVectorAP );
+  if ( !noBFlag ) {
+    hypre_MultiVectorDestroy( blockVectorBX );
+    hypre_MultiVectorDestroy( blockVectorBR );
+    hypre_MultiVectorDestroy( blockVectorBP );
+    if ( !noYFlag )
+      hypre_MultiVectorDestroy( blockVectorBY );
+  }
   hypre_MultiVectorDestroy( blockVectorW );
 
   utilities_FortranMatrixDestroy( gramA );
@@ -579,6 +742,12 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
   utilities_FortranMatrixDestroy( gramPBR );
   utilities_FortranMatrixDestroy( gramPBP );
 
+  utilities_FortranMatrixDestroy( gramYBY );
+  utilities_FortranMatrixDestroy( gramYBX );
+  utilities_FortranMatrixDestroy( tempYBX );
+  utilities_FortranMatrixDestroy( gramYBR );
+  utilities_FortranMatrixDestroy( tempYBR );
+
   utilities_FortranMatrixDestroy( coordX );
   utilities_FortranMatrixDestroy( coordXX );
   utilities_FortranMatrixDestroy( coordRX );
@@ -594,11 +763,11 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
 
 void
 lobpcg_MultiVectorByMultiVector(
-int* xMask, hypre_MultiVectorPtr x,
-int* yMask, hypre_MultiVectorPtr y,
+hypre_MultiVectorPtr x,
+hypre_MultiVectorPtr y,
 utilities_FortranMatrix* xy
 ){
-  hypre_MultiVectorByMultiVector( xMask, x, yMask, y,
+  hypre_MultiVectorByMultiVector( x, y,
 				  utilities_FortranMatrixGlobalHeight( xy ),
 				  utilities_FortranMatrixHeight( xy ),
 				  utilities_FortranMatrixWidth( xy ),
@@ -607,16 +776,43 @@ utilities_FortranMatrix* xy
 
 void
 lobpcg_MultiVectorByMatrix(
-int* xMask, hypre_MultiVectorPtr x,
+hypre_MultiVectorPtr x,
 utilities_FortranMatrix* r,
-int* yMask, hypre_MultiVectorPtr y
+hypre_MultiVectorPtr y
 ){
-  hypre_MultiVectorByMatrix( xMask, x, 
+  hypre_MultiVectorByMatrix( x, 
 			     utilities_FortranMatrixGlobalHeight( r ),
 			     utilities_FortranMatrixHeight( r ),
 			     utilities_FortranMatrixWidth( r ),
 			     utilities_FortranMatrixValues( r ),
-			     yMask, y );
+			     y );
+}
+
+int
+lobpcg_MultiVectorImplicitQR( 
+hypre_MultiVectorPtr x, hypre_MultiVectorPtr y,
+utilities_FortranMatrix* r,
+hypre_MultiVectorPtr z
+){
+
+  /* B-orthonormalizes x using y = B x */
+
+  int ierr;
+
+  lobpcg_MultiVectorByMultiVector( x, y, r );
+
+  ierr = lobpcg_chol( r );
+
+  if ( ierr != 0 )
+    return ierr;
+
+  utilities_FortranMatrixUpperInv( r );
+  utilities_FortranMatrixClearL( r );
+
+  hypre_MultiVectorCopy( x, z );
+  lobpcg_MultiVectorByMatrix( z, r, x );
+
+  return 0;
 }
 
 void
@@ -625,7 +821,7 @@ lobpcg_sqrtVector( int n, int* mask, double* v ) {
   int i;
 
   for ( i = 0; i < n; i++ )
-    if ( mask[i] )
+    if ( mask == NULL || mask[i] )
       v[i] = sqrt(v[i]);
 }
 

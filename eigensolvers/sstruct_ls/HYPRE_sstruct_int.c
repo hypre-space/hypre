@@ -1,5 +1,7 @@
 #include "HYPRE_sstruct_int.h"
 
+#include "temp_multivector.h"
+
 int 
 hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
                                    int seed )
@@ -106,6 +108,7 @@ HYPRE_SStructSetupInterpreter( HYPRE_InterfaceInterpreter *i )
   i->CAlloc = hypre_CAlloc;
   i->Free = hypre_SStructKrylovFree;
   i->CommInfo = hypre_SStructKrylovCommInfo;
+
   i->CreateVector = hypre_SStructKrylovCreateVector;
   i->DestroyVector = hypre_SStructKrylovDestroyVector; 
   i->MatvecCreate = hypre_SStructKrylovMatvecCreate;
@@ -119,6 +122,30 @@ HYPRE_SStructSetupInterpreter( HYPRE_InterfaceInterpreter *i )
   i->Axpy = hypre_SStructKrylovAxpy;
   i->PrintVector = NULL;
   i->ReadVector = NULL;
+
+  i->CreateMultiVector = hypre_TempMultiVectorCreateFromSampleVector;
+  i->CopyCreateMultiVector = hypre_TempMultiVectorCreateCopy;
+  i->DestroyMultiVector = hypre_TempMultiVectorDestroy;
+
+  i->MatMultiVecCreate = NULL;
+  i->MatMultiVec = NULL;
+  i->MatMultiVecDestroy = NULL;
+
+  i->Width = hypre_TempMultiVectorWidth;
+  i->Height = hypre_TempMultiVectorHeight;
+  i->SetMask = hypre_TempMultiVectorSetMask;
+  i->CopyMultiVector = hypre_TempMultiVectorCopy;
+  i->ClearMultiVector = hypre_TempMultiVectorClear;
+  i->SetRandomVectors = hypre_TempMultiVectorSetRandom;
+  i->MultiInnerProd = hypre_TempMultiVectorByMultiVector;
+  i->MultiInnerProdDiag = hypre_TempMultiVectorByMultiVectorDiag;
+  i->MultiVecMat = hypre_TempMultiVectorByMatrix;
+  i->MultiVecMatDiag = hypre_TempMultiVectorByDiagonal;
+  i->MultiAxpy = hypre_TempMultiVectorAxpy;
+  i->MultiXapy = hypre_TempMultiVectorXapy;
+  i->Eval = hypre_TempMultiVectorEval;
+  i->PrintMultiVector = hypre_TempMultiVectorPrint;
+  i->ReadMultiVector = hypre_TempMultiVectorRead;
 
   return 0;
 }

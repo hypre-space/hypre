@@ -62,14 +62,15 @@ am__libHYPRE_lobpcg_a_SOURCES_DIST =  \
 	$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c \
 	$(top_srcdir)/eigensolvers/krylov/lobpcg.c \
 	$(top_srcdir)/eigensolvers/multivector/multivector.c \
+	$(top_srcdir)/eigensolvers/multivector/temp_multivector.c \
 	$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c \
 	$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c \
 	$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c \
 	$(top_srcdir)/eigensolvers/utilities/fortran_matrix.c
 am__objects_1 = HYPRE_lobpcg.$(OBJEXT) lobpcg.$(OBJEXT) \
-	multivector.$(OBJEXT) HYPRE_parcsr_int.$(OBJEXT) \
-	HYPRE_sstruct_int.$(OBJEXT) HYPRE_struct_int.$(OBJEXT) \
-	fortran_matrix.$(OBJEXT)
+	multivector.$(OBJEXT) temp_multivector.$(OBJEXT) \
+	HYPRE_parcsr_int.$(OBJEXT) HYPRE_sstruct_int.$(OBJEXT) \
+	HYPRE_struct_int.$(OBJEXT) fortran_matrix.$(OBJEXT)
 @STATICONLY_TRUE@am_libHYPRE_lobpcg_a_OBJECTS = $(am__objects_1)
 libHYPRE_lobpcg_a_OBJECTS = $(am_libHYPRE_lobpcg_a_OBJECTS)
 libLTLIBRARIES_INSTALL = $(INSTALL)
@@ -79,13 +80,14 @@ am__libHYPRE_lobpcg_la_SOURCES_DIST =  \
 	$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c \
 	$(top_srcdir)/eigensolvers/krylov/lobpcg.c \
 	$(top_srcdir)/eigensolvers/multivector/multivector.c \
+	$(top_srcdir)/eigensolvers/multivector/temp_multivector.c \
 	$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c \
 	$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c \
 	$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c \
 	$(top_srcdir)/eigensolvers/utilities/fortran_matrix.c
 am__objects_2 = HYPRE_lobpcg.lo lobpcg.lo multivector.lo \
-	HYPRE_parcsr_int.lo HYPRE_sstruct_int.lo HYPRE_struct_int.lo \
-	fortran_matrix.lo
+	temp_multivector.lo HYPRE_parcsr_int.lo HYPRE_sstruct_int.lo \
+	HYPRE_struct_int.lo fortran_matrix.lo
 @STATICONLY_FALSE@am_libHYPRE_lobpcg_la_OBJECTS = $(am__objects_2)
 libHYPRE_lobpcg_la_OBJECTS = $(am_libHYPRE_lobpcg_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -245,7 +247,7 @@ target_alias = @target_alias@
 @STATICONLY_FALSE@libHYPRE_lobpcg_la_SOURCES = $(FILES)
 @STATICONLY_FALSE@libHYPRE_lobpcg_la_LDFLAGS = -avoid-version
 include_HEADERS = \
- $(top_srcdir)/eigensolvers/krylov/HYPRE_interpreter.h\
+ $(top_srcdir)/eigensolvers/multivector/HYPRE_interpreter.h\
  $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.h\
  $(top_srcdir)/eigensolvers/krylov/lobpcg.h\
  $(top_srcdir)/eigensolvers/multivector/multivector.h\
@@ -288,6 +290,7 @@ FILES = \
  $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c\
  $(top_srcdir)/eigensolvers/krylov/lobpcg.c\
  $(top_srcdir)/eigensolvers/multivector/multivector.c\
+ $(top_srcdir)/eigensolvers/multivector/temp_multivector.c\
  $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c\
  $(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c\
  $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c\
@@ -430,6 +433,15 @@ multivector.obj: $(top_srcdir)/eigensolvers/multivector/multivector.c
 
 multivector.lo: $(top_srcdir)/eigensolvers/multivector/multivector.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o multivector.lo `test -f '$(top_srcdir)/eigensolvers/multivector/multivector.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/multivector/multivector.c
+
+temp_multivector.o: $(top_srcdir)/eigensolvers/multivector/temp_multivector.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o temp_multivector.o `test -f '$(top_srcdir)/eigensolvers/multivector/temp_multivector.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/multivector/temp_multivector.c
+
+temp_multivector.obj: $(top_srcdir)/eigensolvers/multivector/temp_multivector.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o temp_multivector.obj `if test -f '$(top_srcdir)/eigensolvers/multivector/temp_multivector.c'; then $(CYGPATH_W) '$(top_srcdir)/eigensolvers/multivector/temp_multivector.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/eigensolvers/multivector/temp_multivector.c'; fi`
+
+temp_multivector.lo: $(top_srcdir)/eigensolvers/multivector/temp_multivector.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o temp_multivector.lo `test -f '$(top_srcdir)/eigensolvers/multivector/temp_multivector.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/multivector/temp_multivector.c
 
 HYPRE_parcsr_int.o: $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o HYPRE_parcsr_int.o `test -f '$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c

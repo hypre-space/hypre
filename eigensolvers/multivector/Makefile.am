@@ -4,6 +4,9 @@ EXTRA_DIST = $(FILES)
 
 #
 FILES = \
+ HYPRE_interpreter.h \
+ temp_multivector.h \
+ temp_multivector.c \
  multivector.h \
  multivector.c
 

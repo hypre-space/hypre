@@ -9,7 +9,7 @@ if ( $1 == "without-MPI" ) then
 #
 set compiler = cc
 set compiler_options1 = "-DHAVE_CONFIG_H"
-set compiler_options2 = "-O2"
+set compiler_options2 = "-O2 -g"
 set compiler_options3 = "-DHYPRE_MODE -DOPTIMIZED_DH"
 set install = "/usr/bin/install -c"
 if ( $2 != $wl ) then
@@ -142,11 +142,17 @@ mkdir -p -- . ../hypre/lib
 mkdir -p -- . ../hypre/include
  $install -m 644 fortran_matrix.h ../hypre/include/fortran_matrix.h
 
-echo building multivector...
 cd ../multivector
-$compiler $compiler_options1 -I. -I.. -I../krylov -I../.. -I../../utilities $compiler_options2 -c multivector.c
+
+echo building interpreter...
+mkdir -p -- . ../hypre/include
+ $install -m 644 HYPRE_interpreter.h ../hypre/include/HYPRE_interpreter.h
+
+echo building multivector...
+$compiler $compiler_options1 -I. -I.. -I../.. -I../../utilities $compiler_options2 -c temp_multivector.c
+$compiler $compiler_options1 -I. -I.. -I../.. -I../../utilities $compiler_options2 -c multivector.c
 rm -f libHYPRE_multivector.a
-ar cru libHYPRE_multivector.a multivector.o
+ar cru libHYPRE_multivector.a multivector.o temp_multivector.o
 ranlib libHYPRE_multivector.a
 mkdir -p -- . ../hypre/lib
  $install -m 644 libHYPRE_multivector.a ../hypre/lib/libHYPRE_multivector.a
@@ -155,10 +161,6 @@ mkdir -p -- . ../hypre/include
  $install -m 644 multivector.h ../hypre/include/multivector.h
 
 cd ../krylov
-
-echo building interpreter...
-mkdir -p -- . ../hypre/include
- $install -m 644 HYPRE_interpreter.h ../hypre/include/HYPRE_interpreter.h
 
 echo bulding lobpcg...
 $compiler $compiler_options1 -I. -I../multivector -I../utilities -I../.. -I../../utilities $compiler_options2 -c lobpcg.c
@@ -175,7 +177,7 @@ mkdir -p -- . ../hypre/include
 
 echo building parcsr_int...
 cd ../parcsr_ls
-$compiler $compiler_options1 $compiler_options3 -I. -I../krylov -I../.. -I../../utilities -I../../krylov -I../../parcsr_ls -I../../parcsr_mv -I../../IJ_mv -I../../seq_mv $compiler_options2 -c HYPRE_parcsr_int.c
+$compiler $compiler_options1 $compiler_options3 -I. -I../multivector -I../.. -I../../utilities -I../../krylov -I../../parcsr_ls -I../../parcsr_mv -I../../IJ_mv -I../../seq_mv $compiler_options2 -c HYPRE_parcsr_int.c
 rm -f libHYPRE_parcsr_int.a
 ar cru libHYPRE_parcsr_int.a HYPRE_parcsr_int.o
 ranlib libHYPRE_parcsr_int.a
@@ -187,7 +189,7 @@ mkdir -p -- . ../hypre/include
 
 echo building struct_int...
 cd ../struct_ls
-$compiler $compiler_options1 $compiler_options3 -I. -I../krylov -I../.. -I../../utilities -I../../krylov -I../../struct_ls -I../../struct_mv -I../../IJ_mv -I../../seq_mv $compiler_options2 -c HYPRE_struct_int.c
+$compiler $compiler_options1 $compiler_options3 -I. -I../multivector -I../.. -I../../utilities -I../../krylov -I../../struct_ls -I../../struct_mv -I../../IJ_mv -I../../seq_mv $compiler_options2 -c HYPRE_struct_int.c
 rm -f libHYPRE_struct_int.a
 ar cru libHYPRE_struct_int.a HYPRE_struct_int.o
 ranlib libHYPRE_struct_int.a
@@ -199,7 +201,7 @@ mkdir -p -- . ../hypre/include
 
 echo building sstruct_int...
 cd ../sstruct_ls
-$compiler $compiler_options1 $compiler_options3 -I. -I../krylov -I../.. -I../../utilities -I../../krylov -I../../sstruct_ls -I../../sstruct_mv -I../../struct_ls -I../../struct_mv -I../../parcsr_ls -I../../parcsr_mv -I../../IJ_mv -I../../seq_mv $compiler_options2 -c HYPRE_sstruct_int.c
+$compiler $compiler_options1 $compiler_options3 -I. -I../multivector -I../.. -I../../utilities -I../../krylov -I../../sstruct_ls -I../../sstruct_mv -I../../struct_ls -I../../struct_mv -I../../parcsr_ls -I../../parcsr_mv -I../../IJ_mv -I../../seq_mv $compiler_options2 -c HYPRE_sstruct_int.c
 rm -f libHYPRE_sstruct_int.a
 ar cru libHYPRE_sstruct_int.a HYPRE_sstruct_int.o
 ranlib libHYPRE_sstruct_int.a
@@ -213,19 +215,19 @@ cd ../test
 
 echo building ij_es$ext...
 $compiler $compiler_options1 -DHYPRE_TIMING -I. -I../.. -I../hypre/include -I../../utilities -I../../krylov -I../../parcsr_ls -I../../parcsr_mv -I../../IJ_mv -I../../seq_mv $compiler_options2 -c ij_es.c 
-/bin/sh ../../libtool --mode=link --tag=CC $builder $compiler_options2 -o ij_es ij_es.o -L../hypre/lib -lHYPRE_multivector -lHYPRE_fortran_matrix -lHYPRE_lobpcg -lHYPRE_parcsr_int -L../../hypre/lib -lHYPRE_parcsr_ls -lHYPRE_DistributedMatrixPilutSolver -lHYPRE_ParaSails -lHYPRE_Euclid -lHYPRE_IJ_mv -lHYPRE_MatrixMatrix -lHYPRE_DistributedMatrix -lHYPRE_parcsr_mv -lHYPRE_seq_mv -lHYPRE_krylov -lHYPRE_utilities $lapack_libraries
+/bin/sh ../../libtool --mode=link --tag=CC $builder $compiler_options2 -o ij_es ij_es.o -L../hypre/lib -lHYPRE_lobpcg -lHYPRE_parcsr_int -lHYPRE_multivector -lHYPRE_fortran_matrix -L../../hypre/lib -lHYPRE_parcsr_ls -lHYPRE_DistributedMatrixPilutSolver -lHYPRE_ParaSails -lHYPRE_Euclid -lHYPRE_IJ_mv -lHYPRE_MatrixMatrix -lHYPRE_DistributedMatrix -lHYPRE_parcsr_mv -lHYPRE_seq_mv -lHYPRE_krylov -lHYPRE_utilities $lapack_libraries
 
 echo building struct_es$ext... 
 $compiler $compiler_options1 -DHYPRE_TIMING -I. -I../.. -I../hypre/include -I../../utilities  -I../../krylov -I../../struct_ls -I../../struct_mv -I../../seq_mv $compiler_options2 -c -o struct-struct_es.o `test -f 'struct_es.c' || echo './'`struct_es.c
-/bin/sh ../../libtool --mode=link --tag=CC $builder  $compiler_options2 -o struct_es struct-struct_es.o -L../hypre/lib -lHYPRE_multivector -lHYPRE_fortran_matrix -lHYPRE_lobpcg -lHYPRE_struct_int -L../../hypre/lib -lHYPRE_struct_ls -lHYPRE_struct_mv -lHYPRE_krylov -lHYPRE_utilities $lapack_libraries
+/bin/sh ../../libtool --mode=link --tag=CC $builder  $compiler_options2 -o struct_es struct-struct_es.o -L../hypre/lib -lHYPRE_lobpcg -lHYPRE_struct_int -lHYPRE_multivector -lHYPRE_fortran_matrix -L../../hypre/lib -lHYPRE_struct_ls -lHYPRE_struct_mv -lHYPRE_krylov -lHYPRE_utilities $lapack_libraries
 
 echo building sstruct_es$ext...
 $compiler $compiler_options1 -DHYPRE_TIMING -I. -I../.. -I../hypre/include -I../../utilities -I../../krylov -I../../sstruct_ls -I../../sstruct_mv -I../../struct_ls -I../../struct_mv -I../../parcsr_ls -I../../parcsr_mv -I../../IJ_mv -I../../seq_mv $compiler_options2 -c -o sstruct-sstruct_es.o `test -f 'sstruct.c' || echo './'`sstruct_es.c
-/bin/sh ../../libtool --mode=link --tag=CC $builder  $compiler_options2  -o sstruct_es sstruct-sstruct_es.o -L../hypre/lib -lHYPRE_multivector -lHYPRE_fortran_matrix -lHYPRE_lobpcg -lHYPRE_sstruct_int -L../../hypre/lib -lHYPRE_sstruct_ls -lHYPRE_sstruct_mv -lHYPRE_struct_ls -lHYPRE_struct_mv -lHYPRE_parcsr_ls -lHYPRE_DistributedMatrixPilutSolver -lHYPRE_ParaSails -lHYPRE_Euclid -lHYPRE_MatrixMatrix -lHYPRE_DistributedMatrix -lHYPRE_IJ_mv -lHYPRE_parcsr_mv -lHYPRE_seq_mv -lHYPRE_krylov -lHYPRE_utilities $lapack_libraries
+/bin/sh ../../libtool --mode=link --tag=CC $builder  $compiler_options2  -o sstruct_es sstruct-sstruct_es.o -L../hypre/lib -lHYPRE_lobpcg -lHYPRE_sstruct_int -lHYPRE_multivector -lHYPRE_fortran_matrix -L../../hypre/lib -lHYPRE_sstruct_ls -lHYPRE_sstruct_mv -lHYPRE_struct_ls -lHYPRE_struct_mv -lHYPRE_parcsr_ls -lHYPRE_DistributedMatrixPilutSolver -lHYPRE_ParaSails -lHYPRE_Euclid -lHYPRE_MatrixMatrix -lHYPRE_DistributedMatrix -lHYPRE_IJ_mv -lHYPRE_parcsr_mv -lHYPRE_seq_mv -lHYPRE_krylov -lHYPRE_utilities $lapack_libraries
 
-if ( $? != 0 ) then
-exit 1
-endif
+#if ( $? != 0 ) then
+#exit 1
+#endif
 
 echo building test scripts...
 cd ./TEST_ij_es

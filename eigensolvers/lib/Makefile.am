@@ -12,7 +12,7 @@ else !STATICONLY
 endif !STATICONLY
 
 include_HEADERS = \
- $(top_srcdir)/eigensolvers/krylov/HYPRE_interpreter.h\
+ $(top_srcdir)/eigensolvers/multivector/HYPRE_interpreter.h\
  $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.h\
  $(top_srcdir)/eigensolvers/krylov/lobpcg.h\
  $(top_srcdir)/eigensolvers/multivector/multivector.h\
@@ -55,6 +55,7 @@ FILES = \
  $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c\
  $(top_srcdir)/eigensolvers/krylov/lobpcg.c\
  $(top_srcdir)/eigensolvers/multivector/multivector.c\
+ $(top_srcdir)/eigensolvers/multivector/temp_multivector.c\
  $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c\
  $(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c\
  $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c\

@@ -132,6 +132,32 @@ utilities_FortranMatrixClear( utilities_FortranMatrix* mtx ) {
   }
 }
 
+void
+utilities_FortranMatrixClearL( utilities_FortranMatrix* mtx ) {
+
+  long i, j, k, h, w, jump;
+  double* p;
+
+  assert( mtx != NULL );
+
+  h = mtx->height;
+  w = mtx->width;
+
+  if ( w > h )
+    w = h;
+
+  jump = mtx->globalHeight - h;
+	
+  for ( j = 0, p = mtx->value; j < w - 1; j++ ) {
+    k = j + 1;
+    p += k;
+    for ( i = k; i < h; i++, p++ )
+      *p = 0.0;
+    p += jump;
+  }
+}
+
+
 void 
 utilities_FortranMatrixSetToIdentity( utilities_FortranMatrix* mtx ) {
 
@@ -444,7 +470,7 @@ void
 utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, int tA, 
 				      utilities_FortranMatrix* mtxB, int tB,
 				      utilities_FortranMatrix* mtxC ) {
-#ifdef HYPRE_USING_ESSL
+  /*#ifdef HYPRE_USING_ESSL*/
 
   long h, w;
   long i, j, k, l;
@@ -505,7 +531,9 @@ utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, int tA,
       *pCij = s;
     }
 
-#else
+  /*#else*/
+
+#if 0
 
   char trA, trB;
   int m, n, k;

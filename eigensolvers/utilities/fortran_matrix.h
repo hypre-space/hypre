@@ -37,6 +37,8 @@ utilities_FortranMatrixValues( utilities_FortranMatrix* mtx );
 void 
 utilities_FortranMatrixClear( utilities_FortranMatrix* mtx );
 void 
+utilities_FortranMatrixClearL( utilities_FortranMatrix* mtx );
+void 
 utilities_FortranMatrixSetToIdentity( utilities_FortranMatrix* mtx );
 
 void 

@@ -12,6 +12,9 @@ extern "C" {
 #endif
 
 int
+HYPRE_TempParCSRSetupInterpreter( HYPRE_InterfaceInterpreter *i );
+
+int
 HYPRE_ParCSRSetupInterpreter( HYPRE_InterfaceInterpreter *i );
 
 #ifdef __cplusplus

@@ -4,7 +4,6 @@ EXTRA_DIST = $(FILES)
 
 #
 FILES = \
- HYPRE_interpreter.h \
  HYPRE_lobpcg.c \
  HYPRE_lobpcg.h \
  lobpcg.c \

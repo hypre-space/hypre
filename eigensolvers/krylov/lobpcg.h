@@ -15,6 +15,7 @@
 
 #define PROBLEM_SIZE_TOO_SMALL			       	1
 #define WRONG_BLOCK_SIZE			       	2
+#define WRONG_CONSTRAINTS                               3
 #define REQUESTED_ACCURACY_NOT_ACHIEVED			-1
 
 typedef struct {
@@ -58,11 +59,11 @@ extern "C" {
 int
 lobpcg_solve( hypre_MultiVectorPtr blockVectorX,
 	      void* operatorAData,
-	      void (*operatorA)( void*, void*, void* ),
+	      void (*operatorA)( void*, hypre_MultiVectorPtr, hypre_MultiVectorPtr ),
 	      void* operatorBData,
-	      void (*operatorB)( void*, void*, void* ),
+	      void (*operatorB)( void*, hypre_MultiVectorPtr, hypre_MultiVectorPtr ),
 	      void* operatorTData,
-	      void (*operatorT)( void*, void*, void* ),
+	      void (*operatorT)( void*, hypre_MultiVectorPtr, hypre_MultiVectorPtr ),
 	      hypre_MultiVectorPtr blockVectorY,
 	      lobpcg_Tolerance tolerance,
 	      int maxIterations,
@@ -76,16 +77,23 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX,
 
 void
 lobpcg_MultiVectorByMultiVector(
-int* xMask, hypre_MultiVectorPtr x,
-int* yMask, hypre_MultiVectorPtr y,
+hypre_MultiVectorPtr x,
+hypre_MultiVectorPtr y,
 utilities_FortranMatrix* xy
 );
 
 void
 lobpcg_MultiVectorByMatrix(
-int* xMask, hypre_MultiVectorPtr x,
+hypre_MultiVectorPtr x,
 utilities_FortranMatrix* r,
-int* yMask, hypre_MultiVectorPtr y
+hypre_MultiVectorPtr y
+);
+
+int
+lobpcg_MultiVectorImplicitQR( 
+hypre_MultiVectorPtr x,  hypre_MultiVectorPtr y, 
+utilities_FortranMatrix* r,
+hypre_MultiVectorPtr z
 );
 
 void

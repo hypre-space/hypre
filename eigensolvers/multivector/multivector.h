@@ -5,81 +5,48 @@
 
 #include "HYPRE_interpreter.h"
 
+/* abstract multivector */
 typedef struct
 {
-  long		numVectors;
-  void**	vector;
-  int		ownsVectors;
-  
-  HYPRE_InterfaceInterpreter* interpreter;
+  void*	data;      /* the pointer to the actual multivector */
+  int	ownsData;
+
+  HYPRE_InterfaceInterpreter* interpreter; /* a structure that defines
+					      multivector operations */
   
 } hypre_MultiVector;
 
 typedef struct hypre_MultiVector* hypre_MultiVectorPtr;
 
-/*******************************************************************/
-/*
-The above is a temporary implementation of the hypre_MultiVector
-data type, just to get things going with LOBPCG eigensolver.
-
-A more proper implementation would be to define hypre_MultiParVector,
-hypre_MultiStructVector and hypre_MultiSStructVector by adding a new 
-record
-
-int numVectors;
-
-in hypre_ParVector, hypre_StructVector and hypre_SStructVector,
-and increasing the size of data numVectors times. Respective
-modifications of most vector operations are straightforward
-(it is strongly suggested that BLAS routines are used wherever
-possible), efficient implementation of matrix-by-multivector 
-multiplication may be more difficult.
-
-With the above implementation of hypre vectors, the definition
-of hypre_MultiVector becomes simply
-
-typedef struct
-{
-  void*	multiVector;
-  HYPRE_InterfaceInterpreter* interpreter;  
-} hypre_MultiVector;
-
-with pointers to abstract multivector functions added to the structure
-HYPRE_InterfaceInterpreter (cf. HYPRE_interpreter.h; particular values
-are assigned to these pointers by functions 
-HYPRE_ParCSRSetupInterpreter, HYPRE_StructSetupInterpreter and
-int HYPRE_SStructSetupInterpreter),
-and the multivector functions below become simply interfaces
-of the form
-
-void 
-hypre_MultiVectorCopy( int* ms, hypre_MultiVectorPtr src,
-int* md, hypre_MultiVectorPtr dest ) 
-{
-  (src->interpreter->MultiVectorCopy)( ms, src->multiVector, 
-				       md, dest->multiVector );
-}
-*/
-/*********************************************************************/
+/* The functions below simply call the respective functions pointed to
+   in the HYPRE_InterfaceInterpreter structure */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+  /* creates a multivector of width n using sample vector */
 hypre_MultiVectorPtr 
-hypre_MultiVectorCreateFromSampleVector( HYPRE_InterfaceInterpreter*, int n, void* sample );
+hypre_MultiVectorCreateFromSampleVector( void*, int n, void* sample );
 
+  /* creates a multivector of the same shape as x; copies values
+     if copyValues is non-zero */
 hypre_MultiVectorPtr 
-hypre_MultiVectorCreateCopy( hypre_MultiVectorPtr, int copyValues );
+hypre_MultiVectorCreateCopy( hypre_MultiVectorPtr x, int copyValues );
 
 void 
 hypre_MultiVectorDestroy( hypre_MultiVectorPtr );
 
-long
+int
 hypre_MultiVectorWidth( hypre_MultiVectorPtr v );
 
-long
+int
 hypre_MultiVectorHeight( hypre_MultiVectorPtr v );
+
+  /* sets mask for v; all the subsequent operations exept Print 
+     apply only to masked vectors */
+void
+hypre_MultiVectorSetMask( hypre_MultiVectorPtr v, int* mask );
 
 void 
 hypre_MultiVectorClear( hypre_MultiVectorPtr );
@@ -88,70 +55,52 @@ void
 hypre_MultiVectorSetRandom( hypre_MultiVectorPtr v, int seed );
 
 void 
-hypre_MultiVectorSetVector( hypre_MultiVectorPtr mv, int i, void* v );
+hypre_MultiVectorCopy( hypre_MultiVectorPtr src, hypre_MultiVectorPtr dest );
 
+  /* computes y = a*x + y */
 void 
-hypre_MultiVectorGetVector( hypre_MultiVectorPtr mv, int i, void* v );
+hypre_MultiVectorAxpy( double a, hypre_MultiVectorPtr x, hypre_MultiVectorPtr y ); 
 
+  /* computes the matrix v = x'*y stored in fortran style: gh is the leading dimension,
+     h the number of rows and w the number of columns (cf. blas or lapack) */
 void 
-hypre_MultiVectorCopy( int* ms, hypre_MultiVectorPtr src,
-		       int* md, hypre_MultiVectorPtr dest );
-
-void 
-hypre_MultiVectorAxpy( double, 
-		       int* mx, hypre_MultiVectorPtr,
-		       int* my, hypre_MultiVectorPtr ); 
-
-void 
-hypre_MultiVectorByMultiVector(  
-				int* mx, hypre_MultiVectorPtr,
-				int* my, hypre_MultiVectorPtr,
+hypre_MultiVectorByMultiVector( hypre_MultiVectorPtr x, hypre_MultiVectorPtr y,
 				int gh, int h, int w, double* v );
 
+  /*computes the diagonal of x'*y stored in diag(mask) */
 void 
-hypre_MultiVectorByMultiVectorDiag(  
-				   int* xMask, hypre_MultiVectorPtr x,
-				   int* yMask, hypre_MultiVectorPtr y,
-				   int* dMask, int n, double* diag );
+hypre_MultiVectorByMultiVectorDiag( hypre_MultiVectorPtr, hypre_MultiVectorPtr,
+				   int* mask, int n, double* diag );
 
+  /* computes y = x*v, where v is stored in fortran style */
 void 
-hypre_MultiVectorByMatrix(  
-			  int* ms, hypre_MultiVectorPtr, 
-			  int gh, int h, int w, double* v,
-			  int* md, hypre_MultiVectorPtr );
+hypre_MultiVectorByMatrix( hypre_MultiVectorPtr x, 
+			   int gh, int h, int w, double* v,
+			   hypre_MultiVectorPtr y );
 
+  /* computes y = x*v + y, where v is stored in fortran style */
 void 
-hypre_MultiVectorXapy(  
-		      int* ms, hypre_MultiVectorPtr, 
-		      int gh, int h, int w, double* v,
-		      int* md, hypre_MultiVectorPtr );
+hypre_MultiVectorXapy( hypre_MultiVectorPtr x, 
+		       int gh, int h, int w, double* v,
+		       hypre_MultiVectorPtr y );
 
-void hypre_MultiVectorByDiagonal(  
-				 int* srcMask, hypre_MultiVectorPtr src, 
-				 int* diagMask, int n, double* diag,
-				 int* destMask, hypre_MultiVectorPtr dest );
+  /* computes y = x*diag(mask) */
+void hypre_MultiVectorByDiagonal( hypre_MultiVectorPtr x, 
+				  int* mask, int n, double* diag,
+				  hypre_MultiVectorPtr y );
 
-void hypre_MultiVectorExplicitQR(  
-				 int* xMask, hypre_MultiVectorPtr x, 
-				 int rGHeight, int rHeight, 
-				 int rWidth, double* rVal );
+  /* computes y = f(x) vector-by-vector */
 void 
 hypre_MultiVectorEval( void (*f)( void*, void*, void* ), 
 		       void* par,
-		       int* xMask, hypre_MultiVectorPtr x, 
-		       int* yMask, hypre_MultiVectorPtr y );
+		       hypre_MultiVectorPtr x, 
+		       hypre_MultiVectorPtr y );
 
 int
-hypre_MultiVectorPrint( hypre_MultiVectorPtr x_, const char* fileName );
+hypre_MultiVectorPrint( hypre_MultiVectorPtr x, const char* fileName );
 
 hypre_MultiVectorPtr 
-hypre_MultiVectorRead( MPI_Comm comm, HYPRE_InterfaceInterpreter*, const char* fileName );
-
-long 
-aux_indexOrMaskCount( int n, int* indexOrMask, int* isMask );
-
-void
-aux_indexFromMask( int n, int* mask, int* index );
+hypre_MultiVectorRead( MPI_Comm comm, void*, const char* fileName );
 
 #ifdef __cplusplus
 }

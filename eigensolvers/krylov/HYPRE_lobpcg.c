@@ -355,11 +355,35 @@ hypre_LOBPCGOperatorB( void *pcg_vdata, void* x, void* y ) {
   void*                       matvec_data = (pcg_data -> matvecDataB);
 
   if ( pcg_data->B == NULL ) {
-    (*(ii->CopyVector))(x,y);
-	return;
+    (*(ii->CopyVector))(x, y);
+
+    /* a test */
+    /*
+    (*(ii->ScaleVector))(2.0, y);
+    */
+ 
+    return;
   }
 
   (*(ii->Matvec))(matvec_data, 1.0, pcg_data->B, x, 0.0, y);
+}
+
+void
+hypre_LOBPCGMultiPreconditioner( void *data, hypre_MultiVectorPtr x, hypre_MultiVectorPtr y ) {
+
+  hypre_MultiVectorEval( hypre_LOBPCGPreconditioner, data, x, y );
+}
+
+void
+hypre_LOBPCGMultiOperatorA( void *data, hypre_MultiVectorPtr x, hypre_MultiVectorPtr y ) {
+
+  hypre_MultiVectorEval( hypre_LOBPCGOperatorA, data, x, y );
+}
+
+void
+hypre_LOBPCGMultiOperatorB( void *data, hypre_MultiVectorPtr x, hypre_MultiVectorPtr y ) {
+
+  hypre_MultiVectorEval( hypre_LOBPCGOperatorB, data, x, y );
 }
 
 int
@@ -368,15 +392,15 @@ hypre_LOBPCGSolve( void *vdata,
 		   hypre_MultiVectorPtr vec, 
 		   double* val ) {
 
+  int ierr;
   hypre_LOBPCGData* data = vdata;
-
   int (*precond)() = (data->precondFunctions).Precond;
-  void (*prec)(void*,void*,void*);
-
-  void (*operatorA)(void*,void*,void*);
   void* opB = data->B;
-  void (*operatorB)(void*,void*,void*);
   
+  void (*prec)( void*, hypre_MultiVectorPtr, hypre_MultiVectorPtr );
+  void (*operatorA)( void*, hypre_MultiVectorPtr, hypre_MultiVectorPtr );
+  void (*operatorB)( void*, hypre_MultiVectorPtr, hypre_MultiVectorPtr );
+
   int maxit = lobpcg_maxIterations(data->lobpcgData);
   int verb  = lobpcg_verbosityLevel(data->lobpcgData);
 
@@ -400,18 +424,18 @@ hypre_LOBPCGSolve( void *vdata,
   utilities_FortranMatrixAllocateData( n, maxit + 1,	residualsHistory );
 
   if ( precond != NULL )
-    prec = hypre_LOBPCGPreconditioner;
+    prec = hypre_LOBPCGMultiPreconditioner;
   else
     prec = NULL;
 
-  operatorA = hypre_LOBPCGOperatorA;
+  operatorA = hypre_LOBPCGMultiOperatorA;
 
   if ( opB != NULL )
-    operatorB = hypre_LOBPCGOperatorB;
+    operatorB = hypre_LOBPCGMultiOperatorB;
   else
     operatorB = NULL;
 
-  return lobpcg_solve( vec, 
+  ierr = lobpcg_solve( vec, 
 		       vdata, operatorA, 
 		       vdata, operatorB,
 		       vdata, prec,
@@ -423,6 +447,7 @@ hypre_LOBPCGSolve( void *vdata,
 
   utilities_FortranMatrixDestroy(lambda);
 
+  return ierr;
 }
 
 utilities_FortranMatrix*
@@ -479,10 +504,7 @@ utilities_FortranMatrix* eigVal
   work = (double*)calloc( lwork, sizeof(double) );
 
 #ifdef HYPRE_USING_ESSL
-  /*	
-  utilities_FortranMatrixTransposeSquare( mtxA );
-  utilities_FortranMatrixTransposeSquare( mtxB );
-  */
+
   info = 0;
   dsygv( 1, a, lda, b, ldb, lmd, a, lda, n, work, lwork );
 
@@ -503,4 +525,28 @@ utilities_FortranMatrix* eigVal
 
 }
 
+int
+lobpcg_chol( utilities_FortranMatrix* a ) {
 
+  int lda, n;
+  double* aval;
+  char uplo;
+  int ierr;
+
+  lda = utilities_FortranMatrixGlobalHeight( a );
+  n = utilities_FortranMatrixHeight( a );
+  aval = utilities_FortranMatrixValues( a );
+  uplo = 'U';
+
+#ifdef HYPRE_USING_ESSL
+
+  dpotrf( &uplo, n, aval, lda, &ierr );
+
+#else
+
+  hypre_F90_NAME_BLAS( dpotrf, DPOTRF )( &uplo, &n, aval, &lda, &ierr );
+
+#endif
+
+  return ierr;
+}
