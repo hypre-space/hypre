@@ -248,5 +248,7 @@ extern void    check_tempv(int, double *);
   }
 #endif
 
+#define __SUPERLU_REV_2_5_1
+
 #endif /* __SUPERLU_dSP_DEFS */
 
