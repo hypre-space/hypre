@@ -1299,8 +1299,6 @@ int HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(HYPRE_Solver  solver,        
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/ 
-/*@}*/
-
 #ifdef __cplusplus
 }
 #endif
