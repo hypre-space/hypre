@@ -469,7 +469,7 @@ int  impl_Hypre_PCG_SetIntParameter(Hypre_PCG this, char* name, int value)
 {
    Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
 
-   if ( !strcmp( name, "max_iter" ) ) {
+   if ( !strcmp( name, "max_iter" ) || !strcmp( name, "max iter" ) ) {
       pcg_data->max_iter = value;
       return 0;
    }
@@ -477,7 +477,8 @@ int  impl_Hypre_PCG_SetIntParameter(Hypre_PCG this, char* name, int value)
       pcg_data->two_norm = value;
       return 0;
    }
-   else if ( !strcmp( name, "rel_change" ) || !strcmp( name, "relative change test" ) ) {
+   else if ( !strcmp( name, "rel_change" ) ||
+             !strcmp( name, "relative change test" ) ) {
       pcg_data->rel_change = value;;
       return 0;
    }
@@ -533,7 +534,8 @@ impl_Hypre_PCG_Setup(Hypre_PCG this,
 {
 
    Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
-   Hypre_Vector *vp;
+   Hypre_Vector dummy_vector;
+   Hypre_Vector *vp = &dummy_vector;
    int ierr = 0;
    int max_iter = (pcg_data -> max_iter);
 
