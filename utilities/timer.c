@@ -29,26 +29,19 @@ double time_getWallclockSeconds(void)
 #ifdef TIMER_USE_MPI
    return(MPI_Wtime());
 #else
-
-#ifdef TIMER_NO_SYS
-   return(0.0);
-#else
    struct tms usage;
    long wallclock = times(&usage);
    return(((double) wallclock)/((double) CLK_TCK));
-#endif
-
 #endif
 }
 
 double time_getCPUSeconds(void)
 {
-#ifdef TIMER_NO_SYS
-   return(0.0);
+#ifndef TIMER_NO_SYS
+   clock_t cpuclock = clock();
+   return(((double) (cpuclock))/((double) CLOCKS_PER_SEC));
 #else
-   struct tms usage;
-   (void) times(&usage);
-   return(((double) (usage.tms_utime+usage.tms_stime))/((double) CLK_TCK));
+   return(0.0);
 #endif
 }
 
