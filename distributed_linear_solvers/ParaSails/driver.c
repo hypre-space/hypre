@@ -29,8 +29,8 @@ void report_times(MPI_Comm comm, double setup_time, double solve_time)
 	return;
 
     printf("**********************************************\n");
-    printf("***      Setup      Solve      Total\n");
-    printf("III %10.3f %10.3f %10.3f\n", m, max_solve_time, m+max_solve_time);
+    printf("***    Setup    Solve    Total\n");
+    printf("III %8.1f %8.1f %8.1f\n", m, max_solve_time, m+max_solve_time);
     printf("**********************************************\n");
 }
 
@@ -142,7 +142,8 @@ int main(int argc, char *argv[])
         ParaSailsSetSym(ps, 1);
 #endif
 
-        thresh = ParaSailsSelectThresh(ps, selparam);
+        /* thresh = ParaSailsSelectThresh(ps, selparam); */
+        thresh=selparam;
 #ifdef DIAG_PRECON
         thresh=10.0;
 #endif
@@ -152,18 +153,26 @@ int main(int argc, char *argv[])
         ParaSailsSetupValues(ps, A);
         nnz0 = MatrixNnz(ps->M);
 
+#if 0
         /* filtration step */
         filter = ParaSailsSelectFilter(ps, filter);
         if (mype == 0) 
             printf("filter: %f\n", filter);
+#endif
 
 	ParaSailsFilterValues(ps, filter);
         nnz1 = MatrixNnz(ps->M);
 
+#if 0
+        if (mype == 0) 
+            printf("SETTING UP VALUES AGAIN WITH FILTERED PATTERN\n");
+        ParaSailsSetupValues(ps, A);
+#endif
+
 	ParaSailsComplete(ps);
         time1 = MPI_Wtime();
 	setup_time = time1-time0;
-        printf("SETUP %3d %10.3f\n", mype, setup_time);
+        printf("SETUP %3d %8.1f\n", mype, setup_time);
 
         /* MatrixPrint(ps->M, "M"); */
 
@@ -183,7 +192,7 @@ int main(int argc, char *argv[])
 #ifdef NONSYM
         FGMRES_ParaSails(A, ps, b, x, 50, 1.e-8, 1500);
 #else
-        PCG_ParaSails(A, ps, b, x, 1.e-8, 1500);
+        PCG_ParaSails(A, ps, b, x, 1.e-8, 1700);
 #endif
         time1 = MPI_Wtime();
 	solve_time = time1-time0;
