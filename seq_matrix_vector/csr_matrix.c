@@ -115,6 +115,8 @@ hypre_ReadCSRMatrix( char *file_name )
    int     *matrix_i;
    int     *matrix_j;
    int      num_rows;
+   int      num_nonzeros;
+   int      max_col = 0;
 
    int      file_base = 1;
    
@@ -135,15 +137,22 @@ hypre_ReadCSRMatrix( char *file_name )
       matrix_i[j] -= file_base;
    }
 
+   num_nonzeros = matrix_i[num_rows];
+
    matrix = hypre_CreateCSRMatrix(num_rows, num_rows, matrix_i[num_rows]);
    hypre_CSRMatrixI(matrix) = matrix_i;
    hypre_InitializeCSRMatrix(matrix);
 
    matrix_j = hypre_CSRMatrixJ(matrix);
-   for (j = 0; j < matrix_i[num_rows]; j++)
+   for (j = 0; j < num_nonzeros; j++)
    {
       fscanf(fp, "%d", &matrix_j[j]);
       matrix_j[j] -= file_base;
+
+      if (matrix_j[j] > max_col)
+      {
+         max_col = matrix_j[j];
+      }
    }
 
    matrix_data = hypre_CSRMatrixData(matrix);
@@ -153,6 +162,9 @@ hypre_ReadCSRMatrix( char *file_name )
    }
 
    fclose(fp);
+
+   hypre_CSRMatrixNumNonzeros(matrix) = num_nonzeros;
+   hypre_CSRMatrixNumCols(matrix) = ++max_col;
 
    return matrix;
 }
