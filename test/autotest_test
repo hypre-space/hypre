@@ -14,7 +14,6 @@
 #=============================================================================
 initialize_variables ()
 {
-# newgrp hypre
   OldMask=`umask`
   umask 007
   MAKE="make -k"
@@ -51,7 +50,7 @@ initialize_variables ()
     HYPRE_MAIL=mailx
   fi
 #
-# If NOT started by autotest (hence no HYPRE_*_EMAIL variabled
+# If NOT started by autotest (hence no HYPRE_*_EMAIL variable
 # defined) default mail to UID only.
 #
   if test ! "$HYPRE_DEFAULT_EMAIL"
@@ -94,10 +93,10 @@ parse_arguments () {
      +m) HYPRE_SEND_MAIL="no"; MailOpt="";;
       n) confbuildtest $Build   "--without-MPI" "no_mip"    1 1 0 1 1 0;;
       o) confbuildtest $OPTARG  "--with-openmp" "openmp"    0 0 0 0 1 0;;
-      p) confbuildtest $OPTARG  "--with-petac"  "petac"	    0 0 0 1 0 0;;
+      p) confbuildtest $OPTARG  "--with-petac"  "petac"     0 0 0 1 0 0;;
       r) HYPRE_RUN_MACHINE=$OPTARG;;
       s) confbuildtest $Build   "--with-strict-checking" \
-					 "strict_checking"  1 1 0 1 1 0;;
+                                         "strict_checking"  1 1 0 1 1 0;;
       t) confbuildtest $OPTARG "--with-pthreads" "pthreads" 1 0 0 0 0 0;;
       x) build $Build   "beta++" "beta++" "test";;
       y) build $Build   "beta77" "beta77" "test";;
@@ -120,9 +119,9 @@ usage () {
   printf "i.e., options are sequentially executed in left-to-right order).\n"
   printf "\n"
   printf "Options for the "opt" argument are "0", "1", or "2" where:\n"
-  printf "  1=skip (ignore this test),\n"
-  printf "  2=configure and make, and\n"
-  printf "  3=configure, make and run.\n"
+  printf "  0=skip (ignore this test),\n"
+  printf "  1=configure and make, and\n"
+  printf "  2=configure, make and run.\n"
   printf "\n"
   printf "-a opt   All; the (default) configure, make, and execute. Also\n"
   printf "         performs make struct, IJ, fei, all, beta, nofei, and\n"
@@ -139,7 +138,7 @@ usage () {
   printf "         all, and beta (no execute option).\n"
   printf "-o opt   openMP; configure --with-openmp, make beta.\n"
   printf "-p opt   PETSc; perform configure --with-petsc, make all.\n"
-  printf "-r host  Remote; remote exection on "host".\n"
+  printf "-r host  Remote; remote exection is performed on "host".\n"
   printf "-s       Strict; configure --with-strict-checking,\n"
   printf "         followed by make struct, IJ, all, beta(no execute option).\n"
   printf "-t opt   Thread; perform configure --with-pthreads, make struct.\n"
@@ -154,6 +153,7 @@ usage () {
 mail_errors () { 
   if [ "$HYPRE_SEND_MAIL" = "yes" ]
   then
+    echo "Autotest mailing error messages"
     cd $HYPRE_AUTOTEST_DIR
     for i in *.err linear_solvers/*.err linear_solvers/test/*.err
     do 
@@ -169,12 +169,12 @@ mail_errors () {
         ${HYPRE_MAIL} -s "$SUBJECT" $RECIPIENTS < $i 
       fi 
     done 
+    echo "Autotest mail sent"
   fi
 }
 
 cleanup () { 
   umask $OldMask
-# newgrp
   echo "Autotest finished leaving $0"
 }
 #=============================================================================
