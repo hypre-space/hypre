@@ -646,12 +646,11 @@ hypre_GetMigrateStructVectorCommPkg( hypre_StructVector *from_vector,
 {
    hypre_BoxArrayArray   *send_boxes;
    hypre_BoxArrayArray   *recv_boxes;
-
-   hypre_SBoxArrayArray  *send_sboxes;
-   hypre_SBoxArrayArray  *recv_sboxes;
    int                  **send_processes;
    int                  **recv_processes;
    int                    num_values;
+
+   hypre_Index            unit_stride;
 
    hypre_CommPkg         *comm_pkg;
 
@@ -660,16 +659,15 @@ hypre_GetMigrateStructVectorCommPkg( hypre_StructVector *from_vector,
     *------------------------------------------------------*/
  
    num_values = 1;
+   hypre_SetIndex(unit_stride, 1, 1, 1);
 
    hypre_NewCommInfoFromGrids(&send_boxes, &recv_boxes,
                               &send_processes, &recv_processes,
                               hypre_StructVectorGrid(from_vector),
                               hypre_StructVectorGrid(to_vector)   );
 
-   send_sboxes = hypre_ConvertToSBoxArrayArray(send_boxes);
-   recv_sboxes = hypre_ConvertToSBoxArrayArray(recv_boxes);
-
-   comm_pkg = hypre_NewCommPkg(send_sboxes, recv_sboxes,
+   comm_pkg = hypre_NewCommPkg(send_boxes, recv_boxes,
+                               unit_stride, unit_stride,
                                hypre_StructVectorDataSpace(from_vector),
                                hypre_StructVectorDataSpace(to_vector),
                                send_processes, recv_processes,

@@ -186,12 +186,15 @@ hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
  *--------------------------------------------------------------------------*/
 
 hypre_ComputePkg *
-hypre_NewComputePkg( hypre_SBoxArrayArray  *send_sboxes,
-                     hypre_SBoxArrayArray  *recv_sboxes,
+hypre_NewComputePkg( hypre_BoxArrayArray   *send_boxes,
+                     hypre_BoxArrayArray   *recv_boxes,
+                     hypre_Index            send_stride,
+                     hypre_Index            recv_stride,
                      int                  **send_processes,
                      int                  **recv_processes,
-                     hypre_SBoxArrayArray  *indt_sboxes,
-                     hypre_SBoxArrayArray  *dept_sboxes,
+                     hypre_BoxArrayArray   *indt_boxes,
+                     hypre_BoxArrayArray   *dept_boxes,
+                     hypre_Index            stride,
                      hypre_StructGrid      *grid,
                      hypre_BoxArray        *data_space,
                      int                    num_values     )
@@ -201,13 +204,15 @@ hypre_NewComputePkg( hypre_SBoxArrayArray  *send_sboxes,
    compute_pkg = hypre_CTAlloc(hypre_ComputePkg, 1);
 
    hypre_ComputePkgCommPkg(compute_pkg)     =
-      hypre_NewCommPkg(send_sboxes, recv_sboxes,
+      hypre_NewCommPkg(send_boxes, recv_boxes,
+                       send_stride, recv_stride,
                        data_space, data_space,
                        send_processes, recv_processes,
                        num_values, hypre_StructGridComm(grid));
 
-   hypre_ComputePkgIndtSBoxes(compute_pkg)   = indt_sboxes;
-   hypre_ComputePkgDeptSBoxes(compute_pkg)   = dept_sboxes;
+   hypre_ComputePkgIndtBoxes(compute_pkg)   = indt_boxes;
+   hypre_ComputePkgDeptBoxes(compute_pkg)   = dept_boxes;
+   hypre_CopyIndex(stride, hypre_ComputePkgStride(compute_pkg));
 
    hypre_ComputePkgGrid(compute_pkg)        = grid;
    hypre_ComputePkgDataSpace(compute_pkg)   = data_space;
@@ -227,8 +232,8 @@ hypre_FreeComputePkg( hypre_ComputePkg *compute_pkg )
    {
       hypre_FreeCommPkg(hypre_ComputePkgCommPkg(compute_pkg));
 
-      hypre_FreeSBoxArrayArray(hypre_ComputePkgIndtSBoxes(compute_pkg));
-      hypre_FreeSBoxArrayArray(hypre_ComputePkgDeptSBoxes(compute_pkg));
+      hypre_FreeBoxArrayArray(hypre_ComputePkgIndtBoxes(compute_pkg));
+      hypre_FreeBoxArrayArray(hypre_ComputePkgDeptBoxes(compute_pkg));
 
       hypre_TFree(compute_pkg);
    }

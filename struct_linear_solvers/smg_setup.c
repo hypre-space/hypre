@@ -72,12 +72,10 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_BoxArray       *boxes;
    hypre_BoxArray       *all_boxes;
    int                  *processes;
-   hypre_SBoxArray      *coarse_points;
    int                  *box_ranks;
    int                   num_boxes;
    int                   num_all_boxes;
 
-   hypre_SBox           *sbox;
    hypre_Box            *box;
 
    int                   idmin, idmax;
@@ -144,21 +142,15 @@ hypre_SMGSetup( void               *smg_vdata,
       }
 
       /* coarsen the grid by coarsening all_boxes (reduces communication) */
-      coarse_points =
-         hypre_ProjectBoxArray(all_boxes, cindex, stride);
-      hypre_FreeBoxArray(all_boxes);
-      all_boxes = hypre_NewBoxArray(num_all_boxes);
+      hypre_ProjectBoxArray(all_boxes, cindex, stride);
       for (i = 0; i < num_all_boxes; i++)
       {
-         sbox = hypre_SBoxArraySBox(coarse_points, i);
-         box = hypre_DuplicateBox(hypre_SBoxBox(sbox));
+         box = hypre_BoxArrayBox(all_boxes, i);
          hypre_SMGMapFineToCoarse(hypre_BoxIMin(box), hypre_BoxIMin(box),
                                   cindex, stride);
          hypre_SMGMapFineToCoarse(hypre_BoxIMax(box), hypre_BoxIMax(box),
                                   cindex, stride);
-         hypre_AppendBox(box, all_boxes);
       }
-      hypre_FreeSBoxArray(coarse_points);
 
       /* compute local boxes */
       boxes = hypre_NewBoxArray(num_boxes);
@@ -406,7 +398,7 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_SMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
       hypre_SMGSetupInterpOp(relax_data_l[l], A_l[l], b_l[l], x_l[l],
-                             PT_l[l], cdir, cindex, stride, findex, stride);
+                             PT_l[l], cdir, cindex, findex, stride);
 
       /* (re)set relaxation parameters */
       hypre_SMGRelaxSetNumPreSpaces(relax_data_l[l], 0);
@@ -422,7 +414,7 @@ hypre_SMGSetup( void               *smg_vdata,
       /* set up the interpolation routine */
       intadd_data_l[l] = hypre_SMGIntAddInitialize();
       hypre_SMGIntAddSetup(intadd_data_l[l], PT_l[l], x_l[l+1], e_l[l], x_l[l],
-                           cindex, stride, findex, stride);
+                           cindex, findex, stride);
 
       /* set up the restriction operator */
 #if 0
@@ -435,7 +427,7 @@ hypre_SMGSetup( void               *smg_vdata,
       /* set up the restriction routine */
       restrict_data_l[l] = hypre_SMGRestrictInitialize();
       hypre_SMGRestrictSetup(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1],
-                             cindex, stride, findex, stride);
+                             cindex, findex, stride);
 
       /* set up the coarse grid operator */
       hypre_SMGSetupRAPOp(R_l[l], A_l[l], PT_l[l], A_l[l+1],

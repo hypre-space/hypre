@@ -35,7 +35,6 @@ extern "C" {
 
 cat box.h                 >> $INTERNAL_HEADER	
 cat box_neighbors.h       >> $INTERNAL_HEADER	
-cat sbox.h	          >> $INTERNAL_HEADER	
 		          
 cat struct_stencil.h      >> $INTERNAL_HEADER	
 cat struct_grid.h         >> $INTERNAL_HEADER	

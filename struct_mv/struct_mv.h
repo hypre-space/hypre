@@ -66,7 +66,7 @@ typedef struct
 
 } hypre_BoxArray;
 
-#define hypre_BoxArrayBlocksize 5
+#define hypre_BoxArrayBlocksize 10
 
 /*--------------------------------------------------------------------------
  * hypre_BoxArrayArray:
@@ -117,7 +117,7 @@ typedef struct
 #define hypre_BoxIMinD(box, d) (hypre_IndexD(hypre_BoxIMin(box), d))
 #define hypre_BoxIMaxD(box, d) (hypre_IndexD(hypre_BoxIMax(box), d))
 #define hypre_BoxSizeD(box, d) \
-(hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1)
+max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 
 #define hypre_BoxIMinX(box)    hypre_BoxIMinD(box, 0)
 #define hypre_BoxIMinY(box)    hypre_BoxIMinD(box, 1)
@@ -491,130 +491,6 @@ typedef struct
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Header info for the hypre_SBox ("Stride Box") structures
- *
- *****************************************************************************/
-
-#ifndef hypre_SBOX_HEADER
-#define hypre_SBOX_HEADER
-
-/*--------------------------------------------------------------------------
- * hypre_SBox:
- *   Structure describing a strided cartesian region of some index space.
- *--------------------------------------------------------------------------*/
-
-typedef struct
-{
-   hypre_Box    *box;
-   hypre_Index   stride;       /* Striding factors */
-
-} hypre_SBox;
-
-/*--------------------------------------------------------------------------
- * hypre_SBoxArray:
- *   An array of sboxes.
- *--------------------------------------------------------------------------*/
-
-typedef struct
-{
-   hypre_SBox  **sboxes;       /* Array of pointers to sboxes */
-   int           size;         /* Size of sbox array */
-   int           alloc_size;
-
-} hypre_SBoxArray;
-
-#define hypre_SBoxArrayBlocksize hypre_BoxArrayBlocksize
-
-/*--------------------------------------------------------------------------
- * hypre_SBoxArrayArray:
- *   An array of sbox arrays.
- *--------------------------------------------------------------------------*/
-
-typedef struct
-{
-   hypre_SBoxArray  **sbox_arrays;   /* Array of pointers to sbox arrays */
-   int                size;          /* Size of sbox array array */
-
-} hypre_SBoxArrayArray;
-
-
-/*--------------------------------------------------------------------------
- * Accessor macros: hypre_SBox
- *--------------------------------------------------------------------------*/
-
-#define hypre_SBoxBox(sbox)         ((sbox) -> box)
-#define hypre_SBoxStride(sbox)      ((sbox) -> stride)
-				        
-#define hypre_SBoxIMin(sbox)        hypre_BoxIMin(hypre_SBoxBox(sbox))
-#define hypre_SBoxIMax(sbox)        hypre_BoxIMax(hypre_SBoxBox(sbox))
-				        
-#define hypre_SBoxIMinD(sbox, d)    hypre_BoxIMinD(hypre_SBoxBox(sbox), d)
-#define hypre_SBoxIMaxD(sbox, d)    hypre_BoxIMaxD(hypre_SBoxBox(sbox), d)
-#define hypre_SBoxStrideD(sbox, d)  hypre_IndexD(hypre_SBoxStride(sbox), d)
-#define hypre_SBoxSizeD(sbox, d) \
-((hypre_BoxSizeD(hypre_SBoxBox(sbox), d) - 1) / hypre_SBoxStrideD(sbox, d) + 1)
-				        
-#define hypre_SBoxIMinX(sbox)       hypre_SBoxIMinD(sbox, 0)
-#define hypre_SBoxIMinY(sbox)       hypre_SBoxIMinD(sbox, 1)
-#define hypre_SBoxIMinZ(sbox)       hypre_SBoxIMinD(sbox, 2)
-
-#define hypre_SBoxIMaxX(sbox)       hypre_SBoxIMaxD(sbox, 0)
-#define hypre_SBoxIMaxY(sbox)       hypre_SBoxIMaxD(sbox, 1)
-#define hypre_SBoxIMaxZ(sbox)       hypre_SBoxIMaxD(sbox, 2)
-
-#define hypre_SBoxStrideX(sbox)     hypre_SBoxStrideD(sbox, 0)
-#define hypre_SBoxStrideY(sbox)     hypre_SBoxStrideD(sbox, 1)
-#define hypre_SBoxStrideZ(sbox)     hypre_SBoxStrideD(sbox, 2)
-
-#define hypre_SBoxSizeX(sbox)       hypre_SBoxSizeD(sbox, 0)
-#define hypre_SBoxSizeY(sbox)       hypre_SBoxSizeD(sbox, 1)
-#define hypre_SBoxSizeZ(sbox)       hypre_SBoxSizeD(sbox, 2)
-
-#define hypre_SBoxVolume(sbox) \
-(hypre_SBoxSizeX(sbox) * hypre_SBoxSizeY(sbox) * hypre_SBoxSizeZ(sbox))
-
-/*--------------------------------------------------------------------------
- * Accessor macros: hypre_SBoxArray
- *--------------------------------------------------------------------------*/
-
-#define hypre_SBoxArraySBoxes(sbox_array)    ((sbox_array) -> sboxes)
-#define hypre_SBoxArraySBox(sbox_array, i)   ((sbox_array) -> sboxes[(i)])
-#define hypre_SBoxArraySize(sbox_array)      ((sbox_array) -> size)
-#define hypre_SBoxArrayAllocSize(sbox_array) ((sbox_array) -> alloc_size)
-
-/*--------------------------------------------------------------------------
- * Accessor macros: hypre_SBoxArrayArray
- *--------------------------------------------------------------------------*/
-
-#define hypre_SBoxArrayArraySBoxArrays(sbox_array_array) \
-((sbox_array_array) -> sbox_arrays)
-#define hypre_SBoxArrayArraySBoxArray(sbox_array_array, i) \
-((sbox_array_array) -> sbox_arrays[(i)])
-#define hypre_SBoxArrayArraySize(sbox_array_array) \
-((sbox_array_array) -> size)
-
-/*--------------------------------------------------------------------------
- * Looping macros:
- *--------------------------------------------------------------------------*/
-
-#define hypre_ForSBoxI(i, sbox_array) \
-for (i = 0; i < hypre_SBoxArraySize(sbox_array); i++)
-
-#define hypre_ForSBoxArrayI(i, sbox_array_array) \
-for (i = 0; i < hypre_SBoxArrayArraySize(sbox_array_array); i++)
-
-
-#endif
-/*BHEADER**********************************************************************
- * (c) 1997   The Regents of the University of California
- *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
- *
- * $Revision$
- *********************************************************************EHEADER*/
-/******************************************************************************
- *
  * Header info for hypre_StructStencil data structures
  *
  *****************************************************************************/
@@ -885,8 +761,9 @@ typedef struct
 {
    hypre_CommPkg         *comm_pkg;
 
-   hypre_SBoxArrayArray  *indt_sboxes;
-   hypre_SBoxArrayArray  *dept_sboxes;
+   hypre_BoxArrayArray   *indt_boxes;
+   hypre_BoxArrayArray   *dept_boxes;
+   hypre_Index            stride;
 
    hypre_StructGrid      *grid;
    hypre_BoxArray        *data_space;
@@ -900,8 +777,9 @@ typedef struct
  
 #define hypre_ComputePkgCommPkg(compute_pkg)      (compute_pkg -> comm_pkg)
 
-#define hypre_ComputePkgIndtSBoxes(compute_pkg)   (compute_pkg -> indt_sboxes)
-#define hypre_ComputePkgDeptSBoxes(compute_pkg)   (compute_pkg -> dept_sboxes)
+#define hypre_ComputePkgIndtBoxes(compute_pkg)    (compute_pkg -> indt_boxes)
+#define hypre_ComputePkgDeptBoxes(compute_pkg)    (compute_pkg -> dept_boxes)
+#define hypre_ComputePkgStride(compute_pkg)       (compute_pkg -> stride)
 
 #define hypre_ComputePkgGrid(compute_pkg)         (compute_pkg -> grid)
 #define hypre_ComputePkgDataSpace(compute_pkg)    (compute_pkg -> data_space)
@@ -1129,6 +1007,7 @@ void hypre_DeleteBox P((hypre_BoxArray *box_array , int index ));
 void hypre_AppendBoxArray P((hypre_BoxArray *box_array_0 , hypre_BoxArray *box_array_1 ));
 void hypre_AppendBoxArrayArray P((hypre_BoxArrayArray *box_array_array_0 , hypre_BoxArrayArray *box_array_array_1 ));
 int hypre_GetBoxSize P((hypre_Box *box , hypre_Index size ));
+int hypre_GetStrideBoxSize P((hypre_Box *box , hypre_Index stride , hypre_Index size ));
 void hypre_CopyBoxArrayData P((hypre_BoxArray *box_array_in , hypre_BoxArray *data_space_in , int num_values_in , double *data_in , hypre_BoxArray *box_array_out , hypre_BoxArray *data_space_out , int num_values_out , double *data_out ));
 
 /* box_algebra.c */
@@ -1150,7 +1029,7 @@ hypre_BoxNeighbors *hypre_NewBoxNeighbors P((int *local_ranks , int num_local , 
 int hypre_FreeBoxNeighbors P((hypre_BoxNeighbors *neighbors ));
 
 /* communication.c */
-hypre_CommPkg *hypre_NewCommPkg P((hypre_SBoxArrayArray *send_sboxes , hypre_SBoxArrayArray *recv_sboxes , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , int **send_processes , int **recv_processes , int num_values , MPI_Comm comm ));
+hypre_CommPkg *hypre_NewCommPkg P((hypre_BoxArrayArray *send_boxes , hypre_BoxArrayArray *recv_boxes , hypre_Index send_stride , hypre_Index recv_stride , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , int **send_processes , int **recv_processes , int num_values , MPI_Comm comm ));
 void hypre_FreeCommPkg P((hypre_CommPkg *comm_pkg ));
 hypre_CommHandle *hypre_InitializeCommunication P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
 hypre_CommHandle *hypre_InitializeCommunication P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
@@ -1159,9 +1038,9 @@ int hypre_FinalizeCommunication P((hypre_CommHandle *comm_handle ));
 int hypre_ExchangeLocalData P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
 hypre_CommType *hypre_NewCommType P((hypre_CommTypeEntry **comm_entries , int num_entries ));
 void hypre_FreeCommType P((hypre_CommType *comm_type ));
-hypre_CommTypeEntry *hypre_NewCommTypeEntry P((hypre_SBox *sbox , hypre_Box *data_box , int num_values , int data_box_offset ));
+hypre_CommTypeEntry *hypre_NewCommTypeEntry P((hypre_Box *box , hypre_Index stride , hypre_Box *data_box , int num_values , int data_box_offset ));
 void hypre_FreeCommTypeEntry P((hypre_CommTypeEntry *comm_entry ));
-int hypre_NewCommPkgInfo P((hypre_SBoxArrayArray *sboxes , hypre_BoxArray *data_space , int **processes , int num_values , MPI_Comm comm , int *num_comms_ptr , int **comm_processes_ptr , hypre_CommType ***comm_types_ptr , hypre_CommType **copy_type_ptr ));
+int hypre_NewCommPkgInfo P((hypre_BoxArrayArray *boxes , hypre_Index stride , hypre_BoxArray *data_space , int **processes , int num_values , MPI_Comm comm , int *num_comms_ptr , int **comm_processes_ptr , hypre_CommType ***comm_types_ptr , hypre_CommType **copy_type_ptr ));
 int hypre_SortCommType P((hypre_CommType *comm_type ));
 int hypre_CommitCommPkg P((hypre_CommPkg *comm_pkg ));
 int hypre_UnCommitCommPkg P((hypre_CommPkg *comm_pkg ));
@@ -1174,7 +1053,7 @@ void hypre_NewCommInfoFromGrids P((hypre_BoxArrayArray **send_boxes_ptr , hypre_
 
 /* computation.c */
 void hypre_GetComputeInfo P((hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr , hypre_BoxArrayArray **indt_boxes_ptr , hypre_BoxArrayArray **dept_boxes_ptr , hypre_StructGrid *grid , hypre_StructStencil *stencil ));
-hypre_ComputePkg *hypre_NewComputePkg P((hypre_SBoxArrayArray *send_sboxes , hypre_SBoxArrayArray *recv_sboxes , int **send_processes , int **recv_processes , hypre_SBoxArrayArray *indt_sboxes , hypre_SBoxArrayArray *dept_sboxes , hypre_StructGrid *grid , hypre_BoxArray *data_space , int num_values ));
+hypre_ComputePkg *hypre_NewComputePkg P((hypre_BoxArrayArray *send_boxes , hypre_BoxArrayArray *recv_boxes , hypre_Index send_stride , hypre_Index recv_stride , int **send_processes , int **recv_processes , hypre_BoxArrayArray *indt_boxes , hypre_BoxArrayArray *dept_boxes , hypre_Index stride , hypre_StructGrid *grid , hypre_BoxArray *data_space , int num_values ));
 void hypre_FreeComputePkg P((hypre_ComputePkg *compute_pkg ));
 hypre_CommHandle *hypre_InitializeIndtComputations P((hypre_ComputePkg *compute_pkg , double *data ));
 void hypre_FinalizeIndtComputations P((hypre_CommHandle *comm_handle ));
@@ -1199,31 +1078,9 @@ int main P((int argc , char *argv []));
 int main P((int argc , char *argv []));
 
 /* project.c */
-hypre_SBox *hypre_ProjectBox P((hypre_Box *box , hypre_Index index , hypre_Index stride ));
-hypre_SBoxArray *hypre_ProjectBoxArray P((hypre_BoxArray *box_array , hypre_Index index , hypre_Index stride ));
-hypre_SBoxArrayArray *hypre_ProjectBoxArrayArray P((hypre_BoxArrayArray *box_array_array , hypre_Index index , hypre_Index stride ));
-hypre_SBoxArrayArray *hypre_ProjectRBPoint P((hypre_BoxArrayArray *box_array_array , hypre_Index rb [4 ]));
-
-/* sbox.c */
-hypre_SBox *hypre_NewSBox P((hypre_Box *box , hypre_Index stride ));
-hypre_SBoxArray *hypre_NewSBoxArray P((int alloc_size ));
-hypre_SBoxArrayArray *hypre_NewSBoxArrayArray P((int size ));
-void hypre_FreeSBox P((hypre_SBox *sbox ));
-void hypre_FreeSBoxArrayShell P((hypre_SBoxArray *sbox_array ));
-void hypre_FreeSBoxArray P((hypre_SBoxArray *sbox_array ));
-void hypre_FreeSBoxArrayArrayShell P((hypre_SBoxArrayArray *sbox_array_array ));
-void hypre_FreeSBoxArrayArray P((hypre_SBoxArrayArray *sbox_array_array ));
-hypre_SBox *hypre_DuplicateSBox P((hypre_SBox *sbox ));
-hypre_SBoxArray *hypre_DuplicateSBoxArray P((hypre_SBoxArray *sbox_array ));
-hypre_SBoxArrayArray *hypre_DuplicateSBoxArrayArray P((hypre_SBoxArrayArray *sbox_array_array ));
-hypre_SBox *hypre_ConvertToSBox P((hypre_Box *box ));
-hypre_SBoxArray *hypre_ConvertToSBoxArray P((hypre_BoxArray *box_array ));
-hypre_SBoxArrayArray *hypre_ConvertToSBoxArrayArray P((hypre_BoxArrayArray *box_array_array ));
-void hypre_AppendSBox P((hypre_SBox *sbox , hypre_SBoxArray *sbox_array ));
-void hypre_DeleteSBox P((hypre_SBoxArray *sbox_array , int index ));
-void hypre_AppendSBoxArray P((hypre_SBoxArray *sbox_array_0 , hypre_SBoxArray *sbox_array_1 ));
-void hypre_AppendSBoxArrayArray P((hypre_SBoxArrayArray *sbox_array_array_0 , hypre_SBoxArrayArray *sbox_array_array_1 ));
-int hypre_GetSBoxSize P((hypre_SBox *sbox , hypre_Index size ));
+int hypre_ProjectBox P((hypre_Box *box , hypre_Index index , hypre_Index stride ));
+int hypre_ProjectBoxArray P((hypre_BoxArray *box_array , hypre_Index index , hypre_Index stride ));
+int hypre_ProjectBoxArrayArray P((hypre_BoxArrayArray *box_array_array , hypre_Index index , hypre_Index stride ));
 
 /* struct_axpy.c */
 int hypre_StructAxpy P((double alpha , hypre_StructVector *x , hypre_StructVector *y ));

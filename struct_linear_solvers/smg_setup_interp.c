@@ -84,9 +84,8 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                         hypre_StructMatrix *PT,
                         int                 cdir,
                         hypre_Index         cindex,
-                        hypre_Index         cstride,
                         hypre_Index         findex,
-                        hypre_Index         fstride    )
+                        hypre_Index         stride    )
 {
    hypre_StructMatrix   *A_mask;
 
@@ -115,16 +114,11 @@ hypre_SMGSetupInterpOp( void               *relax_data,
    hypre_BoxArrayArray  *indt_boxes;
    hypre_BoxArrayArray  *dept_boxes;
                      
-   hypre_SBoxArrayArray *send_sboxes;
-   hypre_SBoxArrayArray *recv_sboxes;
-   hypre_SBoxArrayArray *indt_sboxes;
-   hypre_SBoxArrayArray *dept_sboxes;
-
    hypre_CommHandle     *comm_handle;
                      
-   hypre_SBoxArrayArray *compute_sbox_aa;
-   hypre_SBoxArray      *compute_sbox_a;
-   hypre_SBox           *compute_sbox;
+   hypre_BoxArrayArray  *compute_box_aa;
+   hypre_BoxArray       *compute_box_a;
+   hypre_Box            *compute_box;
                      
    hypre_Box            *PT_data_box;
    hypre_Box            *x_data_box;
@@ -136,7 +130,6 @@ hypre_SMGSetupInterpOp( void               *relax_data,
    hypre_Index           loop_size;
    hypre_Index           start;
    hypre_Index           startc;
-   hypre_IndexRef        stride;
    hypre_Index           stridec;
                       
    int                   si, sj, d;
@@ -225,20 +218,17 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                            &indt_boxes, &dept_boxes,
                            fgrid, compute_pkg_stencil);
  
-      send_sboxes = hypre_ProjectBoxArrayArray(send_boxes, findex, fstride);
-      recv_sboxes = hypre_ProjectBoxArrayArray(recv_boxes, findex, fstride);
-      indt_sboxes = hypre_ProjectBoxArrayArray(indt_boxes, cindex, cstride);
-      dept_sboxes = hypre_ProjectBoxArrayArray(dept_boxes, cindex, cstride);
+      hypre_ProjectBoxArrayArray(send_boxes, findex, stride);
+      hypre_ProjectBoxArrayArray(recv_boxes, findex, stride);
+      hypre_ProjectBoxArrayArray(indt_boxes, cindex, stride);
+      hypre_ProjectBoxArrayArray(dept_boxes, cindex, stride);
       compute_pkg =
-         hypre_NewComputePkg(send_sboxes, recv_sboxes,
+         hypre_NewComputePkg(send_boxes, recv_boxes,
+                             stride, stride,
                              send_processes, recv_processes,
-                             indt_sboxes, dept_sboxes,
-                             fgrid, hypre_StructVectorDataSpace(x), 1);
-
-      hypre_FreeBoxArrayArray(send_boxes);
-      hypre_FreeBoxArrayArray(recv_boxes);
-      hypre_FreeBoxArrayArray(indt_boxes);
-      hypre_FreeBoxArrayArray(dept_boxes);
+                             indt_boxes, dept_boxes,
+                             stride, fgrid,
+                             hypre_StructVectorDataSpace(x), 1);
 
       /*-----------------------------------------------------
        * Copy coefficients from x into P^T
@@ -252,22 +242,22 @@ hypre_SMGSetupInterpOp( void               *relax_data,
             {
                xp = hypre_StructVectorData(x);
                comm_handle = hypre_InitializeIndtComputations(compute_pkg, xp);
-               compute_sbox_aa = hypre_ComputePkgIndtSBoxes(compute_pkg);
+               compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
             }
             break;
 
             case 1:
             {
                hypre_FinalizeIndtComputations(comm_handle);
-               compute_sbox_aa = hypre_ComputePkgDeptSBoxes(compute_pkg);
+               compute_box_aa = hypre_ComputePkgDeptBoxes(compute_pkg);
             }
             break;
          }
 
-         hypre_ForSBoxArrayI(i, compute_sbox_aa)
+         hypre_ForBoxArrayI(i, compute_box_aa)
             {
-               compute_sbox_a =
-                  hypre_SBoxArrayArraySBoxArray(compute_sbox_aa, i);
+               compute_box_a =
+                  hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
                x_data_box  =
                   hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
@@ -277,12 +267,12 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                xp  = hypre_StructVectorBoxData(x, i);
                PTp = hypre_StructMatrixBoxData(PT, i, si);
 
-               hypre_ForSBoxI(j, compute_sbox_a)
+               hypre_ForBoxI(j, compute_box_a)
                   {
-                     compute_sbox = hypre_SBoxArraySBox(compute_sbox_a, j);
+                     compute_box = hypre_BoxArrayBox(compute_box_a, j);
 
-                     hypre_CopyIndex(hypre_SBoxIMin(compute_sbox), start);
-                     hypre_SMGMapFineToCoarse(start, startc, cindex, cstride);
+                     hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
+                     hypre_SMGMapFineToCoarse(start, startc, cindex, stride);
 
                      /* shift start index to appropriate F-point */
                      for (d = 0; d < 3; d++)
@@ -291,9 +281,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                            hypre_IndexD(PT_stencil_shape[si], d);
                      }
 
-                     stride = hypre_SBoxStride(compute_sbox);
- 
-                     hypre_GetSBoxSize(compute_sbox, loop_size);
+                     hypre_GetStrideBoxSize(compute_box, stride, loop_size);
                      hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
                                     x_data_box,  start,  stride,  xi,
                                     PT_data_box, startc, stridec, PTi,

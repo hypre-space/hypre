@@ -65,11 +65,8 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    int                    **recv_processes;
    hypre_BoxArrayArray     *indt_boxes;
    hypre_BoxArrayArray     *dept_boxes;
-                       
-   hypre_SBoxArrayArray    *send_sboxes;
-   hypre_SBoxArrayArray    *recv_sboxes;
-   hypre_SBoxArrayArray    *indt_sboxes;
-   hypre_SBoxArrayArray    *dept_sboxes;
+
+   hypre_Index              unit_stride;
                        
    hypre_ComputePkg        *compute_pkg;
 
@@ -85,14 +82,12 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
                         &indt_boxes, &dept_boxes,
                         grid, stencil);
 
-   send_sboxes = hypre_ConvertToSBoxArrayArray(send_boxes);
-   recv_sboxes = hypre_ConvertToSBoxArrayArray(recv_boxes);
-   indt_sboxes = hypre_ConvertToSBoxArrayArray(indt_boxes);
-   dept_sboxes = hypre_ConvertToSBoxArrayArray(dept_boxes);
-
-   compute_pkg = hypre_NewComputePkg(send_sboxes, recv_sboxes,
+   hypre_SetIndex(unit_stride, 1, 1, 1);
+   compute_pkg = hypre_NewComputePkg(send_boxes, recv_boxes,
+                                     unit_stride, unit_stride,
                                      send_processes, recv_processes,
-                                     indt_sboxes, dept_sboxes,
+                                     indt_boxes, dept_boxes,
+                                     unit_stride,
                                      grid, hypre_StructVectorDataSpace(x), 1);
 
    /*----------------------------------------------------------
@@ -126,9 +121,9 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                           
    hypre_CommHandle        *comm_handle;
                           
-   hypre_SBoxArrayArray    *compute_sbox_aa;
-   hypre_SBoxArray         *compute_sbox_a;
-   hypre_SBox              *compute_sbox;
+   hypre_BoxArrayArray     *compute_box_aa;
+   hypre_BoxArray          *compute_box_a;
+   hypre_Box               *compute_box;
                           
    hypre_Box               *A_data_box;
    hypre_Box               *x_data_box;
@@ -147,7 +142,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_Index              loop_size;
    hypre_IndexRef           start;
    hypre_IndexRef           stride;
-   hypre_Index              unit_stride;
                           
    hypre_StructStencil     *stencil;
    hypre_Index             *stencil_shape;
@@ -163,7 +157,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
    compute_pkg = (matvec_data -> compute_pkg);
 
-   hypre_SetIndex(unit_stride, 1, 1, 1);
+   stride = hypre_ComputePkgStride(compute_pkg);
 
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation
@@ -182,7 +176,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
             hypre_GetBoxSize(box, loop_size);
             hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                           y_data_box, start, unit_stride, yi,
+                           y_data_box, start, stride, yi,
                            {
                               yp[yi] *= beta;
                            });
@@ -207,7 +201,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
          {
             xp = hypre_StructVectorData(x);
             comm_handle = hypre_InitializeIndtComputations(compute_pkg, xp);
-            compute_sbox_aa = hypre_ComputePkgIndtSBoxes(compute_pkg);
+            compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
 
             /*--------------------------------------------------------------
              * initialize y= (beta/alpha)*y
@@ -230,7 +224,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                      {
                         hypre_GetBoxSize(box, loop_size);
                         hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                                       y_data_box, start, unit_stride, yi,
+                                       y_data_box, start, stride, yi,
                                        {
                                           yp[yi] = 0.0;
                                        });
@@ -239,7 +233,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                      {
                         hypre_GetBoxSize(box, loop_size);
                         hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                                       y_data_box, start, unit_stride, yi,
+                                       y_data_box, start, stride, yi,
                                        {
                                           yp[yi] *= temp;
                                        });
@@ -252,7 +246,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
          case 1:
          {
             hypre_FinalizeIndtComputations(comm_handle);
-            compute_sbox_aa = hypre_ComputePkgDeptSBoxes(compute_pkg);
+            compute_box_aa = hypre_ComputePkgDeptBoxes(compute_pkg);
          }
          break;
       }
@@ -261,9 +255,9 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
        * y += A*x
        *--------------------------------------------------------------------*/
 
-      hypre_ForSBoxArrayI(i, compute_sbox_aa)
+      hypre_ForBoxArrayI(i, compute_box_aa)
          {
-            compute_sbox_a = hypre_SBoxArrayArraySBoxArray(compute_sbox_aa, i);
+            compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
             A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
             x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
@@ -272,13 +266,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             xp = hypre_StructVectorBoxData(x, i);
             yp = hypre_StructVectorBoxData(y, i);
 
-            hypre_ForSBoxI(j, compute_sbox_a)
+            hypre_ForBoxI(j, compute_box_a)
                {
-                  compute_sbox = hypre_SBoxArraySBox(compute_sbox_a, j);
+                  compute_box = hypre_BoxArrayBox(compute_box_a, j);
 
-                  hypre_GetSBoxSize(compute_sbox, loop_size);
-                  start  = hypre_SBoxIMin(compute_sbox);
-                  stride = hypre_SBoxStride(compute_sbox);
+                  hypre_GetBoxSize(compute_box, loop_size);
+                  start  = hypre_BoxIMin(compute_box);
 
                   for (si = 0; si < stencil_size; si++)
                   {

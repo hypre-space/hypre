@@ -34,16 +34,16 @@ processor-based description is freed up.
 \end{itemize}
 
 {\bf Note:}
-The input sboxes and processes are destroyed.
+The input boxes and processes are destroyed.
 
 {\bf Input files:}
 headers.h
 
 @return Communication package.
 
-@param send_sboxes [IN]
+@param send_boxes [IN]
   description of the grid data to be sent to other processors.
-@param recv_sboxes [IN]
+@param recv_boxes [IN]
   description of the grid data to be received from other processors.
 @param send_data_space [IN]
   description of the stored grid data associated with the sends.
@@ -63,8 +63,10 @@ headers.h
 /*--------------------------------------------------------------------------*/
 
 hypre_CommPkg *
-hypre_NewCommPkg( hypre_SBoxArrayArray  *send_sboxes,
-                  hypre_SBoxArrayArray  *recv_sboxes,
+hypre_NewCommPkg( hypre_BoxArrayArray   *send_boxes,
+                  hypre_BoxArrayArray   *recv_boxes,
+                  hypre_Index            send_stride,
+                  hypre_Index            recv_stride,
                   hypre_BoxArray        *send_data_space,
                   hypre_BoxArray        *recv_data_space,
                   int                  **send_processes,
@@ -99,7 +101,8 @@ hypre_NewCommPkg( hypre_SBoxArrayArray  *send_sboxes,
     * Set up communication information
     *------------------------------------------------------*/
 
-   hypre_NewCommPkgInfo(send_sboxes, send_data_space, send_processes,
+   hypre_NewCommPkgInfo(send_boxes, send_stride,
+                        send_data_space, send_processes,
                         num_values, comm,
                         &num_sends, &send_procs,
                         &send_types, &copy_from_type);
@@ -109,7 +112,8 @@ hypre_NewCommPkg( hypre_SBoxArrayArray  *send_sboxes,
    hypre_CommPkgSendTypes(comm_pkg)    = send_types;
    hypre_CommPkgCopyFromType(comm_pkg) = copy_from_type;
 
-   hypre_NewCommPkgInfo(recv_sboxes, recv_data_space, recv_processes,
+   hypre_NewCommPkgInfo(recv_boxes, recv_stride,
+                        recv_data_space, recv_processes,
                         num_values, comm,
                         &num_recvs, &recv_procs,
                         &recv_types, &copy_to_type);
@@ -120,17 +124,17 @@ hypre_NewCommPkg( hypre_SBoxArrayArray  *send_sboxes,
    hypre_CommPkgCopyToType(comm_pkg) = copy_to_type;
 
    /*------------------------------------------------------
-    * Destroy the input sboxes and processes
+    * Destroy the input boxes and processes
     *------------------------------------------------------*/
 
-   hypre_ForSBoxArrayI(i, send_sboxes)
+   hypre_ForBoxArrayI(i, send_boxes)
       hypre_TFree(send_processes[i]);
-   hypre_FreeSBoxArrayArray(send_sboxes);
+   hypre_FreeBoxArrayArray(send_boxes);
    hypre_TFree(send_processes);
 
-   hypre_ForSBoxArrayI(i, recv_sboxes)
+   hypre_ForBoxArrayI(i, recv_boxes)
       hypre_TFree(recv_processes[i]);
-   hypre_FreeSBoxArrayArray(recv_sboxes);
+   hypre_FreeBoxArrayArray(recv_boxes);
    hypre_TFree(recv_processes);
 
 #if defined(HYPRE_COMM_SIMPLE) || defined(HYPRE_COMM_VOLATILE)
@@ -820,7 +824,7 @@ headers.h
 
 @return Communication type entry.
 
-@param sbox [IN]
+@param box [IN]
   description of the grid data to be communicated.
 @param data_box [IN]
   description of the stored grid data.
@@ -835,7 +839,8 @@ headers.h
 /*--------------------------------------------------------------------------*/
 
 hypre_CommTypeEntry *
-hypre_NewCommTypeEntry( hypre_SBox  *sbox,
+hypre_NewCommTypeEntry( hypre_Box   *box,
+                        hypre_Index  stride,
                         hypre_Box   *data_box,
                         int          num_values,
                         int          data_box_offset )
@@ -845,6 +850,7 @@ hypre_NewCommTypeEntry( hypre_SBox  *sbox,
    int                  *length_array;
    int                  *stride_array;
                        
+   hypre_Index           size;
    int                   i, j, dim;
 
    comm_entry = hypre_TAlloc(hypre_CommTypeEntry, 1);
@@ -853,13 +859,13 @@ hypre_NewCommTypeEntry( hypre_SBox  *sbox,
     * Set imin, imax, and offset
     *------------------------------------------------------*/
 
-   hypre_CopyIndex(hypre_SBoxIMin(sbox),
+   hypre_CopyIndex(hypre_BoxIMin(box),
                    hypre_CommTypeEntryIMin(comm_entry));
-   hypre_CopyIndex(hypre_SBoxIMax(sbox),
+   hypre_CopyIndex(hypre_BoxIMax(box),
                    hypre_CommTypeEntryIMax(comm_entry));
 
    hypre_CommTypeEntryOffset(comm_entry) =
-      data_box_offset + hypre_BoxIndexRank(data_box, hypre_SBoxIMin(sbox));
+      data_box_offset + hypre_BoxIndexRank(data_box, hypre_BoxIMin(box));
 
    /*------------------------------------------------------
     * Set length_array, stride_array, and dim
@@ -869,14 +875,15 @@ hypre_NewCommTypeEntry( hypre_SBox  *sbox,
    stride_array = hypre_CommTypeEntryStrideArray(comm_entry);
  
    /* initialize length_array */
+   hypre_GetStrideBoxSize(box, stride, size);
    for (i = 0; i < 3; i++)
-      length_array[i] = hypre_SBoxSizeD(sbox, i);
+      length_array[i] = hypre_IndexD(size, i);
    length_array[3] = num_values;
 
    /* initialize stride_array */
    for (i = 0; i < 3; i++)
    {
-      stride_array[i] = hypre_SBoxStrideD(sbox, i);
+      stride_array[i] = hypre_IndexD(stride, i);
       for (j = 0; j < i; j++)
          stride_array[i] *= hypre_BoxSizeD(data_box, j);
    }
@@ -966,7 +973,7 @@ headers.h
 
 @return Error code.
 
-@param sboxes [IN]
+@param boxes [IN]
   description of the grid data to be communicated to other processors.
 @param data_space [IN]
   description of the stored grid data associated with the communications.
@@ -992,7 +999,8 @@ headers.h
 /*--------------------------------------------------------------------------*/
 
 int
-hypre_NewCommPkgInfo( hypre_SBoxArrayArray  *sboxes,
+hypre_NewCommPkgInfo( hypre_BoxArrayArray   *boxes,
+                      hypre_Index            stride,
                       hypre_BoxArray        *data_space,
                       int                  **processes,
                       int                    num_values,
@@ -1010,8 +1018,8 @@ hypre_NewCommPkgInfo( hypre_SBoxArrayArray  *sboxes,
    hypre_CommTypeEntry ***comm_entries;
    int                   *num_entries;
                     
-   hypre_SBoxArray       *sbox_array;
-   hypre_SBox            *sbox;
+   hypre_BoxArray        *box_array;
+   hypre_Box             *box;
    hypre_Box             *data_box;
    int                    data_box_offset;
                         
@@ -1028,22 +1036,22 @@ hypre_NewCommPkgInfo( hypre_SBoxArrayArray  *sboxes,
    MPI_Comm_rank(comm, &my_proc );
 
    /*------------------------------------------------------
-    * Loop over sboxes and compute num_entries.
+    * Loop over boxes and compute num_entries.
     *------------------------------------------------------*/
 
    num_entries = hypre_CTAlloc(int, num_procs);
 
    num_comms = 0;
-   hypre_ForSBoxArrayI(i, sboxes)
+   hypre_ForBoxArrayI(i, boxes)
       {
-         sbox_array = hypre_SBoxArrayArraySBoxArray(sboxes, i);
+         box_array = hypre_BoxArrayArrayBoxArray(boxes, i);
 
-         hypre_ForSBoxI(j, sbox_array)
+         hypre_ForBoxI(j, box_array)
             {
-               sbox = hypre_SBoxArraySBox(sbox_array, j);
+               box = hypre_BoxArrayBox(box_array, j);
                p = processes[i][j];
 
-               if (hypre_SBoxVolume(sbox) != 0)
+               if (hypre_BoxVolume(box) != 0)
                {
                   num_entries[p]++;
                   if ((num_entries[p] == 1) && (p != my_proc))
@@ -1055,7 +1063,7 @@ hypre_NewCommPkgInfo( hypre_SBoxArrayArray  *sboxes,
       }
 
    /*------------------------------------------------------
-    * Loop over sboxes and compute comm_entries
+    * Loop over boxes and compute comm_entries
     * and comm_processes.
     *------------------------------------------------------*/
 
@@ -1064,17 +1072,17 @@ hypre_NewCommPkgInfo( hypre_SBoxArrayArray  *sboxes,
 
    m = 0;
    data_box_offset = 0;
-   hypre_ForSBoxArrayI(i, sboxes)
+   hypre_ForBoxArrayI(i, boxes)
       {
-         sbox_array = hypre_SBoxArrayArraySBoxArray(sboxes, i);
+         box_array = hypre_BoxArrayArrayBoxArray(boxes, i);
          data_box = hypre_BoxArrayBox(data_space, i);
 
-         hypre_ForSBoxI(j, sbox_array)
+         hypre_ForBoxI(j, box_array)
             {
-               sbox = hypre_SBoxArraySBox(sbox_array, j);
+               box = hypre_BoxArrayBox(box_array, j);
                p = processes[i][j];
 
-               if (hypre_SBoxVolume(sbox) != 0)
+               if (hypre_BoxVolume(box) != 0)
                {
                   /* allocate comm_entries pointer */
                   if (comm_entries[p] == NULL)
@@ -1091,8 +1099,8 @@ hypre_NewCommPkgInfo( hypre_SBoxArrayArray  *sboxes,
                   }
 
                   comm_entries[p][num_entries[p]] =
-                     hypre_NewCommTypeEntry(sbox, data_box, num_values,
-                                            data_box_offset);
+                     hypre_NewCommTypeEntry(box, stride, data_box,
+                                            num_values, data_box_offset);
 
                   num_entries[p]++;
                }

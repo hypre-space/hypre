@@ -24,8 +24,9 @@ typedef struct
 {
    hypre_CommPkg         *comm_pkg;
 
-   hypre_SBoxArrayArray  *indt_sboxes;
-   hypre_SBoxArrayArray  *dept_sboxes;
+   hypre_BoxArrayArray   *indt_boxes;
+   hypre_BoxArrayArray   *dept_boxes;
+   hypre_Index            stride;
 
    hypre_StructGrid      *grid;
    hypre_BoxArray        *data_space;
@@ -39,8 +40,9 @@ typedef struct
  
 #define hypre_ComputePkgCommPkg(compute_pkg)      (compute_pkg -> comm_pkg)
 
-#define hypre_ComputePkgIndtSBoxes(compute_pkg)   (compute_pkg -> indt_sboxes)
-#define hypre_ComputePkgDeptSBoxes(compute_pkg)   (compute_pkg -> dept_sboxes)
+#define hypre_ComputePkgIndtBoxes(compute_pkg)    (compute_pkg -> indt_boxes)
+#define hypre_ComputePkgDeptBoxes(compute_pkg)    (compute_pkg -> dept_boxes)
+#define hypre_ComputePkgStride(compute_pkg)       (compute_pkg -> stride)
 
 #define hypre_ComputePkgGrid(compute_pkg)         (compute_pkg -> grid)
 #define hypre_ComputePkgDataSpace(compute_pkg)    (compute_pkg -> data_space)

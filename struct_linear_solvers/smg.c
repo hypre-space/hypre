@@ -82,6 +82,10 @@ hypre_SMGFinalize( void *smg_vdata )
          hypre_SMGIntAddFinalize(smg_data -> intadd_data_l[l]);
       }
       hypre_SMGRelaxFinalize(smg_data -> relax_data_l[l]);
+      if (l == 0)
+      {
+         hypre_SMGResidualFinalize(smg_data -> residual_data_l[l]);
+      }
       hypre_TFree(smg_data -> relax_data_l);
       hypre_TFree(smg_data -> residual_data_l);
       hypre_TFree(smg_data -> restrict_data_l);
@@ -376,7 +380,8 @@ hypre_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
 int
 hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
                                         double              values,
-                                        hypre_SBoxArray    *sbox_array )
+                                        hypre_BoxArray     *box_array,
+                                        hypre_Index         stride    )
 {
    int    ierr = 0;
 
@@ -385,10 +390,9 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
    int                 vi;
    double             *vp;
 
-   hypre_SBox         *sbox;
+   hypre_Box          *box;
    hypre_Index         loop_size;
    hypre_IndexRef      start;
-   hypre_IndexRef      stride;
 
    int                 loopi, loopj, loopk;
    int                 i;
@@ -397,17 +401,16 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
 
-   hypre_ForSBoxI(i, sbox_array)
+   hypre_ForBoxI(i, box_array)
       {
-         sbox  = hypre_SBoxArraySBox(sbox_array, i);
-         start = hypre_SBoxIMin(sbox);
-         stride = hypre_SBoxStride(sbox);
+         box   = hypre_BoxArrayBox(box_array, i);
+         start = hypre_BoxIMin(box);
 
          v_data_box =
             hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
          vp = hypre_StructVectorBoxData(vector, i);
 
-         hypre_GetSBoxSize(sbox, loop_size);
+         hypre_GetStrideBoxSize(box, stride, loop_size);
          hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
                         v_data_box, start, stride, vi,
                         {

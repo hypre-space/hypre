@@ -118,7 +118,7 @@ int hypre_SMGSetLogging P((void *smg_vdata , int logging ));
 int hypre_SMGGetNumIterations P((void *smg_vdata , int *num_iterations ));
 int hypre_SMGPrintLogging P((void *smg_vdata , int myid ));
 int hypre_SMGGetFinalRelativeResidualNorm P((void *smg_vdata , double *relative_residual_norm ));
-int hypre_SMGSetStructVectorConstantValues P((hypre_StructVector *vector , double values , hypre_SBoxArray *sbox_array ));
+int hypre_SMGSetStructVectorConstantValues P((hypre_StructVector *vector , double values , hypre_BoxArray *box_array , hypre_Index stride ));
 
 /* smg2_setup_rap.c */
 hypre_StructMatrix *hypre_SMG2NewRAPOp P((hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *PT ));
@@ -132,10 +132,10 @@ int hypre_SMG3BuildRAPNoSym P((hypre_StructMatrix *A , hypre_StructMatrix *PT , 
 
 /* smg_intadd.c */
 void *hypre_SMGIntAddInitialize P((void ));
-int hypre_SMGIntAddSetup P((void *intadd_vdata , hypre_StructMatrix *PT , hypre_StructVector *xc , hypre_StructVector *e , hypre_StructVector *x , hypre_Index cindex , hypre_Index cstride , hypre_Index findex , hypre_Index fstride ));
+int hypre_SMGIntAddSetup P((void *intadd_vdata , hypre_StructMatrix *PT , hypre_StructVector *xc , hypre_StructVector *e , hypre_StructVector *x , hypre_Index cindex , hypre_Index findex , hypre_Index stride ));
 int hypre_SMGIntAdd P((void *intadd_vdata , hypre_StructMatrix *PT , hypre_StructVector *xc , hypre_StructVector *e , hypre_StructVector *x ));
 int hypre_SMGIntAddFinalize P((void *intadd_vdata ));
-void hypre_AppendSBoxArrayArrayAndProcs P((int **processes_0 , int **processes_1 , hypre_SBoxArrayArray *sbox_array_array_0 , hypre_SBoxArrayArray *sbox_array_array_1 , int ***processes_ptr ));
+void hypre_AppendBoxArrayArrayAndProcs P((int **processes_0 , int **processes_1 , hypre_BoxArrayArray *box_array_array_0 , hypre_BoxArrayArray *box_array_array_1 , int ***processes_ptr ));
 
 /* smg_relax.c */
 void *hypre_SMGRelaxInitialize P((MPI_Comm comm ));
@@ -164,7 +164,7 @@ int hypre_SMGRelaxSetBase P((void *relax_vdata , hypre_Index base_index , hypre_
 int hypre_SMGRelaxSetNumPreRelax P((void *relax_vdata , int num_pre_relax ));
 int hypre_SMGRelaxSetNumPostRelax P((void *relax_vdata , int num_post_relax ));
 int hypre_SMGRelaxSetNewMatrixStencil P((void *relax_vdata , hypre_StructStencil *diff_stencil ));
-int hypre_SMGRelaxSetupBaseSBoxArray P((void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x ));
+int hypre_SMGRelaxSetupBaseBoxArray P((void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x ));
 
 /* smg_residual.c */
 void *hypre_SMGResidualInitialize P((void ));
@@ -182,7 +182,7 @@ int hypre_SMGResidualFinalize P((void *residual_vdata ));
 
 /* smg_restrict.c */
 void *hypre_SMGRestrictInitialize P((void ));
-int hypre_SMGRestrictSetup P((void *restrict_vdata , hypre_StructMatrix *R , hypre_StructVector *r , hypre_StructVector *rc , hypre_Index cindex , hypre_Index cstride , hypre_Index findex , hypre_Index fstride ));
+int hypre_SMGRestrictSetup P((void *restrict_vdata , hypre_StructMatrix *R , hypre_StructVector *r , hypre_StructVector *rc , hypre_Index cindex , hypre_Index findex , hypre_Index stride ));
 int hypre_SMGRestrict P((void *restrict_vdata , hypre_StructMatrix *R , hypre_StructVector *r , hypre_StructVector *rc ));
 int hypre_SMGRestrictFinalize P((void *restrict_vdata ));
 
@@ -191,7 +191,7 @@ int hypre_SMGSetup P((void *smg_vdata , hypre_StructMatrix *A , hypre_StructVect
 
 /* smg_setup_interp.c */
 hypre_StructMatrix *hypre_SMGNewInterpOp P((hypre_StructMatrix *A , hypre_StructGrid *cgrid , int cdir ));
-int hypre_SMGSetupInterpOp P((void *relax_data , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x , hypre_StructMatrix *PT , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index findex , hypre_Index fstride ));
+int hypre_SMGSetupInterpOp P((void *relax_data , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x , hypre_StructMatrix *PT , int cdir , hypre_Index cindex , hypre_Index findex , hypre_Index stride ));
 
 /* smg_setup_rap.c */
 hypre_StructMatrix *hypre_SMGNewRAPOp P((hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *PT ));

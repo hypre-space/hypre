@@ -54,7 +54,7 @@ typedef struct
 
 } hypre_BoxArray;
 
-#define hypre_BoxArrayBlocksize 5
+#define hypre_BoxArrayBlocksize 10
 
 /*--------------------------------------------------------------------------
  * hypre_BoxArrayArray:
@@ -105,7 +105,7 @@ typedef struct
 #define hypre_BoxIMinD(box, d) (hypre_IndexD(hypre_BoxIMin(box), d))
 #define hypre_BoxIMaxD(box, d) (hypre_IndexD(hypre_BoxIMax(box), d))
 #define hypre_BoxSizeD(box, d) \
-(hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1)
+max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 
 #define hypre_BoxIMinX(box)    hypre_BoxIMinD(box, 0)
 #define hypre_BoxIMinY(box)    hypre_BoxIMinD(box, 1)

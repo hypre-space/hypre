@@ -535,11 +535,10 @@ hypre_AssembleStructMatrix( hypre_StructMatrix *matrix )
 
    hypre_BoxArrayArray   *send_boxes;
    hypre_BoxArrayArray   *recv_boxes;
-
-   hypre_SBoxArrayArray  *send_sboxes;
-   hypre_SBoxArrayArray  *recv_sboxes;
    int                  **send_processes;
    int                  **recv_processes;
+
+   hypre_Index            unit_stride;
 
    hypre_CommPkg         *comm_pkg;
 
@@ -555,6 +554,8 @@ hypre_AssembleStructMatrix( hypre_StructMatrix *matrix )
 
    if (!comm_pkg)
    {
+      hypre_SetIndex(unit_stride, 1, 1, 1);
+
       /* Set up the stencil describing communications, `comm_stencil' */
       comm_stencil_size =
          (num_ghost[0] + num_ghost[1] + 1) *
@@ -579,10 +580,8 @@ hypre_AssembleStructMatrix( hypre_StructMatrix *matrix )
                                    hypre_StructMatrixGrid(matrix),
                                    comm_stencil);
 
-      send_sboxes = hypre_ConvertToSBoxArrayArray(send_boxes);
-      recv_sboxes = hypre_ConvertToSBoxArrayArray(recv_boxes);
-
-      comm_pkg = hypre_NewCommPkg(send_sboxes, recv_sboxes,
+      comm_pkg = hypre_NewCommPkg(send_boxes, recv_boxes,
+                                  unit_stride, unit_stride,
                                   hypre_StructMatrixDataSpace(matrix),
                                   hypre_StructMatrixDataSpace(matrix),
                                   send_processes, recv_processes,
@@ -728,11 +727,10 @@ hypre_MigrateStructMatrix( hypre_StructMatrix *from_matrix,
 {
    hypre_BoxArrayArray   *send_boxes;
    hypre_BoxArrayArray   *recv_boxes;
-
-   hypre_SBoxArrayArray  *send_sboxes;
-   hypre_SBoxArrayArray  *recv_sboxes;
    int                  **send_processes;
    int                  **recv_processes;
+
+   hypre_Index            unit_stride;
 
    hypre_CommPkg         *comm_pkg;
    hypre_CommHandle      *comm_handle;
@@ -743,15 +741,15 @@ hypre_MigrateStructMatrix( hypre_StructMatrix *from_matrix,
     * Set up hypre_CommPkg
     *------------------------------------------------------*/
  
+   hypre_SetIndex(unit_stride, 1, 1, 1);
+
    hypre_NewCommInfoFromGrids(&send_boxes, &recv_boxes,
                               &send_processes, &recv_processes,
                               hypre_StructMatrixGrid(from_matrix),
                               hypre_StructMatrixGrid(to_matrix)   );
 
-   send_sboxes = hypre_ConvertToSBoxArrayArray(send_boxes);
-   recv_sboxes = hypre_ConvertToSBoxArrayArray(recv_boxes);
-
-   comm_pkg = hypre_NewCommPkg(send_sboxes, recv_sboxes,
+   comm_pkg = hypre_NewCommPkg(send_boxes, recv_boxes,
+                               unit_stride, unit_stride,
                                hypre_StructMatrixDataSpace(from_matrix),
                                hypre_StructMatrixDataSpace(to_matrix),
                                send_processes, recv_processes,
