@@ -150,7 +150,8 @@ int MH_ExchBdry(double *vec, void *obj)
    sendList    = Amat->sendList;
    nRows       = Amat->Nrows;
 
-   request = (MPI_Request *) malloc( recvProcCnt * sizeof( MPI_Request ));
+   if ( recvProcCnt > 0 )
+      request = (MPI_Request *) malloc( recvProcCnt * sizeof( MPI_Request ));
    msgid = 234;
    offset = nRows;
    for ( i = 0; i < recvProcCnt; i++ )
@@ -181,7 +182,7 @@ int MH_ExchBdry(double *vec, void *obj)
       MH_Wait((void*) &(vec[offset]), leng, &src, &msgid, comm, &request[i]);
       offset += recvLeng[i];
    }
-   free ( request );
+   if ( recvProcCnt > 0 ) free ( request );
    return 1;
 #endif
 }
