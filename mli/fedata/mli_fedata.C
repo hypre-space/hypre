@@ -74,16 +74,12 @@ int MLI_FEData::setOutputLevel(int level)
 
 int MLI_FEData::setSpaceDimension(int dimension)
 {
-   int  mypid;
-
    if ( dimension <= 0 || dimension > 4 )
    {
       cout << "setSpaceDimension ERROR : dimension should be > 0 and <= 4.\n";
       exit(1);
    }
-   MPI_Comm_rank(mpiComm_, &mypid);
-   if ( outputLevel_ >= 1 && mypid == 0 ) 
-      cout << "\tsetSpaceDimension = " << dimension << endl;
+   if (outputLevel_ >= 1) cout << "setSpaceDimension = " << dimension << endl;
    spaceDimension_ = dimension;
    return 1;
 }
@@ -94,16 +90,12 @@ int MLI_FEData::setSpaceDimension(int dimension)
 
 int MLI_FEData::setOrderOfPDE(int pdeOrder)
 {
-   int  mypid;
-
    if ( pdeOrder <= 0 || pdeOrder > 4 )
    {
       cout << "setOrderOfPDE ERROR : PDE order should be > 0 and <= 4.\n";
       exit(1);
    }
-   MPI_Comm_rank(mpiComm_, &mypid);
-   if ( outputLevel_ >= 1 && mypid == 0 ) 
-      cout << "\tsetOrderOfPDE = " << pdeOrder << endl;
+   if ( outputLevel_ >= 1 ) cout << "setOrderOfPDE = " << pdeOrder << endl;
    orderOfPDE_ = pdeOrder;
    return 1;
 }
@@ -114,16 +106,12 @@ int MLI_FEData::setOrderOfPDE(int pdeOrder)
 
 int MLI_FEData::setOrderOfFE(int feOrder)
 {
-   int  mypid;
-
    if ( feOrder <= 0 || feOrder > 4 )
    {
       cout << "setOrderOfFE ERROR : order should be > 0 and <= 4.\n";
       exit(1);
    }
-   MPI_Comm_rank(mpiComm_, &mypid);
-   if ( outputLevel_ >= 1 && mypid == 0 ) 
-      cout << "\tsetOrderOfFE = " << feOrder << endl;
+   if ( outputLevel_ >= 1 ) cout << "setOrderOfFE = " << feOrder << endl;
    orderOfFE_ = feOrder;
    return 1;
 }
@@ -134,16 +122,13 @@ int MLI_FEData::setOrderOfFE(int feOrder)
 
 int MLI_FEData::setCurrentElemBlockID(int blockID)
 {
-   int  mypid;
-
    if ( blockID != 0 )
    {
       cout << "setCurrentElemBlockID ERROR : blockID other than 0 invalid.\n";
       exit(1);
    }
-   MPI_Comm_rank(mpiComm_, &mypid);
-   if ( outputLevel_ >= 1 && mypid == 0 ) 
-      cout << "\tsetCurrentElemBlockID = " << blockID << endl;
+   if ( outputLevel_ >= 1 ) 
+      cout << "setCurrentElemBlockID = " << blockID << endl;
    currentElemBlock_ = blockID;
    return 1;
 }
@@ -163,7 +148,7 @@ int MLI_FEData::initFields(int nFields, const int *fieldSizes,
       exit(1);
    }
    MPI_Comm_rank(mpiComm_, &mypid);
-   if ( outputLevel_ >= 1 && mypid == 0 ) 
+   if ( outputLevel_ >= 1 && mypid == 0 )
    {
       cout << "\tinitFields : number of fields = " << nFields << endl;
       for ( int i = 0; i < nFields; i++ )
@@ -188,7 +173,7 @@ int MLI_FEData::initElemBlock(int nElems, int nNodesPerElem,
                      int nodeNumFields, const int *nodeFieldIDs,
                      int elemNumFields, const int *elemFieldIDs)
 {
-   int           i, mypid;
+   int           i;
    MLI_ElemBlock *currBlock;
 
    // -------------------------------------------------------------
@@ -210,8 +195,7 @@ int MLI_FEData::initElemBlock(int nElems, int nNodesPerElem,
       cout << "initElemBlock ERROR : nodeNumFields < 0." << endl;
       exit(1);
    }
-   MPI_Comm_rank(mpiComm_, &mypid);
-   if ( outputLevel_ >= 1 && mypid == 0 ) 
+   if (outputLevel_ >= 1) 
    {
       cout << "initElemBlock : nElems = " << nElems << endl;
       cout << "initElemBlock : node nFields = " << nodeNumFields << endl;
@@ -978,7 +962,8 @@ int MLI_FEData::initComplete()
       if ( sndrcvReg[i] == 0 ) 
       {
          for ( j = 0; j < sharedNodeNProcs[i]; j++ ) 
-            iauxArray[counter++] = sharedNodeProc[i][j];
+            if ( sharedNodeProc[i][j] != mypid )
+               iauxArray[counter++] = sharedNodeProc[i][j];
       }
    }
    nSend     = 0;
@@ -4493,8 +4478,11 @@ int MLI_FEData::searchNode(int key)
 
    index = search(key, currBlock->nodeGlobalIDs_, currBlock->numLocalNodes_);
    if ( index < 0 )
+   {
       index = search(key,&(currBlock->nodeGlobalIDs_[currBlock->numLocalNodes_]),
                      currBlock->numExternalNodes_);
+      if ( index >= 0 ) index += currBlock->numLocalNodes_;
+   }
    return index;
 }
 
@@ -4509,8 +4497,11 @@ int MLI_FEData::searchFace(int key)
 
    index = search(key, currBlock->faceGlobalIDs_, currBlock->numLocalFaces_);
    if ( index < 0 )
+   {
       index = search(key,&(currBlock->faceGlobalIDs_[currBlock->numLocalFaces_]),
                      currBlock->numExternalFaces_);
+      if ( index >= 0 ) index += currBlock->numLocalFaces_;
+   }
    return index;
 }
 
