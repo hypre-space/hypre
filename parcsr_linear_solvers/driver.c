@@ -38,9 +38,9 @@ main( int   argc,
 
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
-
+/*
    hypre_InitMemoryDebug(myid);
-
+*/
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
@@ -63,6 +63,12 @@ main( int   argc,
       {
          arg_index++;
          build_matrix_type      = 0;
+         build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-fromonefile") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = 2;
          build_matrix_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-laplacian") == 0 )
@@ -133,6 +139,10 @@ main( int   argc,
    else if ( build_matrix_type == 1 )
    {
       BuildParLaplacian(argc, argv, build_matrix_arg_index, &A);
+   }
+   else if ( build_matrix_type == 2 )
+   {
+      BuildParFromOneFile(argc, argv, build_matrix_arg_index, &A);
    }
 
    /*-----------------------------------------------------------
@@ -233,9 +243,9 @@ main( int   argc,
    hypre_DestroyParCSRMatrix(A);
    hypre_DestroyParVector(b);
    hypre_DestroyParVector(x);
-
+/*
    hypre_FinalizeMemoryDebug();
-
+*/
    /* Finalize MPI */
    MPI_Finalize();
 
@@ -243,7 +253,11 @@ main( int   argc,
 }
 
 /*----------------------------------------------------------------------
- * Build matrix from file.
+ * Build matrix from file. Expects three files on each processor.
+ * filename.D.n contains the diagonal part, filename.O.n contains
+ * the offdiagonal part and filename.INFO.n contains global row
+ * and column numbers, number of columns of offdiagonal matrix
+ * and the mapping of offdiagonal column numbers to global column numbers.
  * Parameters given in command line.
  *----------------------------------------------------------------------*/
 
@@ -441,3 +455,65 @@ BuildParLaplacian( int                  argc,
    return (0);
 }
 
+/*----------------------------------------------------------------------
+ * Build matrix from one file on Proc. 0. Expects matrix to be in
+ * CSR format. Distributes matrix across processors giving each about
+ * the same number of rows.
+ * Parameters given in command line.
+ *----------------------------------------------------------------------*/
+
+int
+BuildParFromOneFile( int                  argc,
+                     char                *argv[],
+                     int                  arg_index,
+                     hypre_ParCSRMatrix **A_ptr     )
+{
+   char               *filename;
+
+   hypre_ParCSRMatrix *A;
+   hypre_CSRMatrix *A_CSR;
+
+   int                 myid;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+
+   if (arg_index < argc)
+   {
+      filename = argv[arg_index];
+   }
+   else
+   {
+      printf("Error: No filename specified \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("  FromFile: %s\n", filename);
+
+      /*-----------------------------------------------------------
+       * Generate the matrix 
+       *-----------------------------------------------------------*/
+ 
+      A_CSR = hypre_ReadCSRMatrix(filename);
+   }
+   A = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, A_CSR, NULL, NULL);
+
+   *A_ptr = A;
+
+   hypre_DestroyCSRMatrix(A_CSR);
+
+   return (0);
+}
