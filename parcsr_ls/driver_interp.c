@@ -27,16 +27,11 @@ main( int   argc,
    hypre_Vector        *CF_local;
    double              *CF_local_data;
 
+   int                  num_procs, my_id;
+   int 	         	ierr=0;
+   int                  fine_size;
 
-   int                 *interp_partitioning; 
-
-   int          num_procs, my_id;
-   int 		ierr=0;
-   int          fine_size, CF_size;
-
-   int                  *vec_starts;
-   int                   local_size; 
-   int			 i, j;
+   int		        j;
 
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
@@ -55,6 +50,14 @@ main( int   argc,
 
         fine_size =  hypre_CSRMatrixNumRows(A_in);
 
+/*        CF_marker_in = hypre_ReadVector("CF_marker_0"); 
+        printf(" read CF_marker\n");  */
+   }
+   else
+   {
+        S_in = NULL;
+        A_in = NULL;
+        CF_marker_in = NULL;
    }
 
    /* Why does it run with the next two lines outside the if (my_id==0) 
@@ -87,8 +90,6 @@ main( int   argc,
    CF_marker = hypre_VectorToParVector(MPI_COMM_WORLD, CF_marker_in,
                                        &CF_marker_starts);
 
-/* for array */
-
    CF_local = hypre_ParVectorLocalVector(CF_marker);
    CF_local_data = hypre_VectorData(CF_local);
 
@@ -99,19 +100,17 @@ main( int   argc,
      CF_marker_int[j] = (int) CF_local_data[j];
    }
    
-/* end of array test */
  
    printf(" CF_marker converted\n");
 
-   hypre_ParAMGBuildInterp(A,CF_marker_int,S,&P,&interp_partitioning); 
-/*   hypre_ParAMGBuildInterp(A,CF_marker_int,S,&P); */
+   hypre_ParAMGBuildInterp(A,CF_marker_int,S,&P); 
    printf(" built interp\n");
 
 /*   hypre_PrintParCSRMatrix(P, "Pmatrix_0.ysmp"); */
 
    hypre_DestroyParCSRMatrix(A);
    hypre_DestroyParCSRMatrix(S);
-/*   hypre_DestroyParCSRMatrix(P); */
+   hypre_DestroyParCSRMatrix(P); 
    if (my_id == 0)
    {
    	hypre_DestroyCSRMatrix(A_in);
