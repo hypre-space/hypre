@@ -203,7 +203,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
    double          gamma, gamma_old;
    double          bi_prod, i_prod, eps;
                 
-   int             i = 0, j;
+   int             i = 0;
    int             ierr = 0;
    int             my_id, num_procs;
    int             x_not_set = 1;
@@ -215,7 +215,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
    (*(cgnr_functions->CommInfo))(A,&my_id,&num_procs);
    if (logging > 1 && my_id == 0)
    {
-      log_file_name = (cgnr_data -> log_file_name);
+/* not used yet      log_file_name = (cgnr_data -> log_file_name); */
       printf("Iters       ||r||_2      conv.rate  ||r||_2/||b||_2\n");
       printf("-----    ------------    ---------  ------------ \n");
    }

@@ -243,7 +243,6 @@ hypre_PCGSolve( void *pcg_vdata,
    double          guard_zero_residual; 
 
    int             i = 0;
-   int             j = 0;
    int             ierr = 0;
    int              my_id, num_procs;
 
