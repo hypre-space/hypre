@@ -42,6 +42,10 @@ then
          AMG_ARCH="irix";;
       OSF1)
          AMG_ARCH="dec";;
+      CYGWIN32/95)
+         AMG_ARCH="cygwin32";;
+      CYGWIN32/NT)
+         AMG_ARCH="cygwin32";;
    esac
 fi
 
