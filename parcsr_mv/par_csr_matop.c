@@ -331,13 +331,9 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    {
        /*---------------------------------------------------------------------
     	* If there exists no CommPkg for A, a CommPkg is generated using
-    	* equally load balanced partitionings
+    	* equally load balanced partitionings within 
+	* hypre_ParCSRMatrixExtractBExt
     	*--------------------------------------------------------------------*/
-   	if (!hypre_ParCSRMatrixCommPkg(A))
-   	{
-        	hypre_MatvecCommPkgCreate(A);
-   	}
-
    	Bs_ext = hypre_ParCSRMatrixExtractBExt(B,A,1);
    	Bs_ext_data = hypre_CSRMatrixData(Bs_ext);
    	Bs_ext_i    = hypre_CSRMatrixI(Bs_ext);
@@ -961,8 +957,8 @@ void hypre_ParCSRMatrixExtractBExt_Arrays
 
 
 /*--------------------------------------------------------------------------
- * hypre_ParCSRMatrixExtractBExt : extracts rows from B which are located on other
- * processors and needed for multiplication with A locally. The rows
+ * hypre_ParCSRMatrixExtractBExt : extracts rows from B which are located on 
+ * other processors and needed for multiplication with A locally. The rows
  * are returned as CSRMatrix.
  *--------------------------------------------------------------------------*/
 
@@ -975,11 +971,11 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int
    int *col_map_offd = hypre_ParCSRMatrixColMapOffd(B);
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   int num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
-   int *recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
-   int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   int *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
-   int *send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+   int num_recvs;
+   int *recv_vec_starts;
+   int num_sends;
+   int *send_map_starts;
+   int *send_map_elmts;
  
    hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(B);
 
@@ -1002,6 +998,22 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int
    int *B_ext_j;
    double *B_ext_data;
    int *idummy;
+
+   /*---------------------------------------------------------------------
+    * If there exists no CommPkg for A, a CommPkg is generated using
+    * equally load balanced partitionings 
+    *--------------------------------------------------------------------*/
+   if (!hypre_ParCSRMatrixCommPkg(A))
+   {
+       	hypre_MatvecCommPkgCreate(A);
+   }
+    
+   comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+   recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+   num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+   send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
  
    num_cols_B = hypre_ParCSRMatrixGlobalNumCols(B);
    num_rows_B_ext = recv_vec_starts[num_recvs];
