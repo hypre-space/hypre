@@ -194,7 +194,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
          {
             row_scale = max(row_scale, A_diag_data[jA]);
          }
-         for (jA = A_offd_i[i]+1; jA < A_offd_i[i+1]; jA++)
+         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
             row_scale = max(row_scale, A_offd_data[jA]);
          }
@@ -205,7 +205,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
          {
             row_scale = min(row_scale, A_diag_data[jA]);
          }
-         for (jA = A_offd_i[i]+1; jA < A_offd_i[i+1]; jA++)
+         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
             row_scale = min(row_scale, A_offd_data[jA]);
          }
@@ -223,7 +223,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
                S_diag_data[jA] = -1;
             }
          }
-         for (jA = A_offd_i[i]+1; jA < A_offd_i[i+1]; jA++)
+         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
             S_offd_data[jA] = 0;
             if (A_offd_data[jA] > strength_threshold * row_scale)
@@ -242,7 +242,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
                S_diag_data[jA] = -1;
             }
          }
-         for (jA = A_offd_i[i]+1; jA < A_offd_i[i+1]; jA++)
+         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
             S_offd_data[jA] = 0;
             if (A_offd_data[jA] < strength_threshold * row_scale)
