@@ -3,6 +3,8 @@ amg.c
 amgdriver.c
 amgrun
 build
+config.cygwin32
+config.dec
 config.defaults
 config.irix
 config.solaris

@@ -3,6 +3,7 @@ amgcpio
 amgmvio
 amgstrip
 build
+config.cygwin32
 config.dec
 config.defaults
 config.irix

@@ -9,6 +9,7 @@ bsetup.f
 build
 cforce.f
 color.f
+config.cygwin32
 config.dec
 config.defaults
 config.irix
