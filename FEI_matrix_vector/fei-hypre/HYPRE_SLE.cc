@@ -192,6 +192,8 @@ void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
     assert(!ierr);
     ierr = HYPRE_IJVectorSetLocalPartitioning(b, localStartRow-1, localEndRow);
     assert(!ierr);
+    ierr = HYPRE_IJVectorAssemble(b);
+    assert(!ierr);
     ierr = HYPRE_IJVectorInitialize(b);
     assert(!ierr);
     ierr = HYPRE_IJVectorZeroLocalComponents(b);
@@ -202,6 +204,8 @@ void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
     ierr = HYPRE_IJVectorSetLocalStorageType(x, HYPRE_PARCSR);
     assert(!ierr);
     ierr = HYPRE_IJVectorSetLocalPartitioning(x, localStartRow-1, localEndRow);
+    assert(!ierr);
+    ierr = HYPRE_IJVectorAssemble(x);
     assert(!ierr);
     ierr = HYPRE_IJVectorInitialize(x);
     assert(!ierr);
@@ -482,6 +486,8 @@ void fei_hypre_test(int argc, char *argv[])
     assert(num_procs == 2);
 
     HYPRE_SLE H(MPI_COMM_WORLD, 0);
+
+    H.sysMatIndices = rows;
 
     if (my_rank == 0)
         H.createLinearAlgebraCore(6, 1, 3, 1, 6);
