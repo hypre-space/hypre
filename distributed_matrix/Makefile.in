@@ -92,7 +92,7 @@ driver: driver.o lib_HYPRE.a
 
 link:
 	rm driver
-	$(MAKE) $(MAKEFLAGS) driver
+	$(MAKE) driver
 
 lib: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "

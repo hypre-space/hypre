@@ -70,7 +70,7 @@ HYPRE_EXTRA_DIRS =\
 all: krylov struct sstruct IJ fei
 	@ \
 	echo "Making test drivers ..."; \
-	(cd test; $(MAKE) $(MAKEFLAGS) veryclean; $(MAKE) $(MAKEFLAGS)); \
+	(cd test; $(MAKE) veryclean; $(MAKE)); \
 	echo ""
 
 beta: all
@@ -82,12 +82,12 @@ beta: all
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) $(MAKEFLAGS) install); \
+	    (cd $$i; $(MAKE) install); \
 	    echo ""; \
 	  fi; \
 	done; \
 	echo "Making beta test drivers ..."; \
-	(cd test; $(MAKE) $(MAKEFLAGS) beta); \
+	(cd test; $(MAKE) beta); \
 	echo ""
 
 krylov: base
@@ -99,7 +99,7 @@ krylov: base
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) $(MAKEFLAGS) install); \
+	    (cd $$i; $(MAKE) install); \
 	    echo ""; \
 	  fi; \
 	done
@@ -113,7 +113,7 @@ struct: base
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) $(MAKEFLAGS) install); \
+	    (cd $$i; $(MAKE) install); \
 	    echo ""; \
 	  fi; \
 	done
@@ -127,7 +127,7 @@ sstruct: struct IJ
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) $(MAKEFLAGS) install); \
+	    (cd $$i; $(MAKE) install); \
 	    echo ""; \
 	  fi; \
 	done
@@ -141,7 +141,7 @@ IJ: base
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) $(MAKEFLAGS) install); \
+	    (cd $$i; $(MAKE) install); \
 	    echo ""; \
 	  fi; \
 	done
@@ -155,7 +155,7 @@ fei: IJ krylov
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) $(MAKEFLAGS) install); \
+	    (cd $$i; $(MAKE) install); \
 	    echo ""; \
 	  fi; \
 	done; \
@@ -181,8 +181,8 @@ nofei: IJ krylov
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) $(MAKEFLAGS) veryclean); \
-	    (cd $$i; $(MAKE) $(MAKEFLAGS) DEFINES=-DNOFEI install); \
+	    (cd $$i; $(MAKE) veryclean); \
+	    (cd $$i; $(MAKE) DEFINES=-DNOFEI install); \
 	    echo ""; \
 	  fi; \
 	done; \
@@ -211,7 +211,7 @@ base:
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) $(MAKEFLAGS) install); \
+	    (cd $$i; $(MAKE) install); \
 	    echo ""; \
 	  fi; \
 	done
@@ -239,11 +239,11 @@ clean:
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Cleaning $$i ..."; \
-	    (cd $$i; $(MAKE) $(MAKEFLAGS) clean); \
+	    (cd $$i; $(MAKE) clean); \
 	  fi; \
 	done; \
 	echo "Cleaning test ..."; \
-	(cd test; $(MAKE) $(MAKEFLAGS) clean)
+	(cd test; $(MAKE) clean)
 
 veryclean:
 	@ \
@@ -253,9 +253,9 @@ veryclean:
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Very-cleaning $$i ..."; \
-	    (cd $$i; $(MAKE) $(MAKEFLAGS) veryclean); \
+	    (cd $$i; $(MAKE) veryclean); \
 	  fi; \
 	done; \
 	echo "Very-cleaning test ..."; \
-	(cd test; $(MAKE) $(MAKEFLAGS) veryclean)
+	(cd test; $(MAKE) veryclean)
 

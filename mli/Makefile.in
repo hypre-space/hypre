@@ -28,7 +28,7 @@ all:
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) $(MAKEFLAGS) install); \
+	    (cd $$i; $(MAKE) install); \
 	  fi; \
 	done;
 
@@ -40,7 +40,7 @@ clean:
 	do \
 	  if [ -d $$i ]; \
 	  then \
-	    (cd $$i; $(MAKE) $(MAKEFLAGS) clean); \
+	    (cd $$i; $(MAKE) clean); \
 	  fi; \
 	done
 
@@ -50,7 +50,7 @@ veryclean:
 	do \
 	  if [ -d $$i ]; \
 	  then \
-	    (cd $$i; $(MAKE) $(MAKEFLAGS) veryclean); \
+	    (cd $$i; $(MAKE) veryclean); \
 	  fi; \
 	done
 
