@@ -123,6 +123,8 @@ casc_user_chose_fei=no
 
 casc_using_babel=no
 casc_using_openmp=no
+casc_using_insure=no
+casc_using_purify=no
 
 
 AC_ARG_WITH(CC,
@@ -226,47 +228,56 @@ AC_ARG_WITH(insure,
                  [ FLAGS are options to pass to insure, e.g.
 		   -log-file=struct_ls.insure -append-logfile=yes
                    will send output to the specified file.  Defines gcc
-                   and g++ as the C and C++ compilers if not already set
-                   by the user and prepends "insure" to compile/link
-                   line-- no checking is done to ensure insure is present
-                   on the machine]),
+                   and g++ as the C and C++ compilers unless already set
+                   by the user. Nothing is done to verify that insure 
+                   is available on the machine]),
 [if test "$casc_user_chose_compilers" = "no"
  then
-   CC=gcc
-   CXX=g++
-   CFLAGS="$CFLAGS -g"
-   CXXFLAGS="$CXXFLAGS -g"
+   CC="gcc"
+   CXX="g++"
+   F77="g77"
    casc_user_chose_compilers=yes
  fi
  case "${withval}" in
-   yes) PREPEND="insure"
+   yes) casc_using_insure=yes
         casc_using_debug=yes
+        casc_using_mpi=no
+        casc_insure_flags=""
         ;;
-   no)  PREPEND="" ;;
-   *)   PREPEND="insure $withval" 
+   no)  ;;
+    *)  casc_using_insure=yes
         casc_using_debug=yes
+        casc_using_mpi=no
+        casc_insure_flags="$withval"
         ;;
- esac],
-[PREPEND=""]
+ esac]
 )
 
 AC_ARG_WITH(insure-to-file,
   AS_HELP_STRING([  --with-insure-to-file],
                  [ Direct insure output to the file named insure.log. Defines
                    gcc and g++ as the C and C++ compilers, unless already set
-                   by the user.]),
+                   by the user. Nothing is done to verify that insure is
+                   available on the machine]),
 [if test "$casc_user_chose_compilers" = "no"
  then
-   CC=gcc
-   CXX=g++
-   CFLAGS="$CFLAGS -g"
-   CXXFLAGS="$CXXFLAGS -g"
+   CC="gcc"
+   CXX="g++"
+   F77="g77"
    casc_user_chose_compilers=yes
  fi
  case "${withval}" in
-   yes) PREPEND="insure -log-file=insure.log -append-logfile=yes -best-effort";;
-   no)  PREPEND="" ;;
-   *)   PREPEND="insure $withval" ;;
+   yes) casc_using_insure=yes
+        casc_using_debug=yes
+        casc_using_mpi=no
+        casc_insure_flags="-log-file=insure.log -append-logfile=yes"
+        ;;
+    no) ;;
+     *) casc_using_insure=yes
+        casc_using_debug=yes
+        casc_using_mpi=no
+        casc_insure_flags="$withval"
+        ;;
  esac]
 )
 
@@ -276,27 +287,28 @@ AC_ARG_WITH(purify,
 		   -log-file=struct_ls.purify -append-logfile=yes will
                    send output to the specified file.  Defines gcc and 
                    g++ as the C and C++ compilers if not already set by
-                   the user and prepends "purify" to compile/link line--
-                   no checking is done to ensure purify is present on
-                   the machine]),
+                   the user. Nothing is done to verify that purify is 
+                   available on the machine]),
 [if test "$casc_user_chose_compilers" = "no"
  then
-   CC=gcc
-   CXX=g++
-   CFLAGS="$CFLAGS -g"
-   CXXFLAGS="$CXXFLAGS -g"
+   CC="gcc"
+   CXX="g++"
+   F77="g77"
    casc_user_chose_compilers=yes
  fi
  case "${withval}" in
-   yes) PREPEND="purify"
+   yes) casc_using_purify=yes
         casc_using_debug=yes
-        casc_using_mpi=no ;;
-   no)  PREPEND="" ;;
-   *)   PREPEND="purify $withval" 
+        casc_using_mpi=no 
+        casc_purify_flags=""
+        ;;
+    no) ;;
+     *) casc_using_purify=yes
         casc_using_debug=yes
-        casc_using_mpi=no ;;
- esac],
-[PREPEND=""]
+        casc_using_mpi=no
+        casc_purify_flags="$withval"
+        ;;
+ esac]
 )
 
 AC_ARG_WITH(purify-to-file,
@@ -306,16 +318,23 @@ AC_ARG_WITH(purify-to-file,
                    by the user.]),
 [if test "$casc_user_chose_compilers" = "no"
  then
-   CC=gcc
-   CXX=g++
-   CFLAGS="$CFLAGS -g"
-   CXXFLAGS="$CXXFLAGS -g"
+   CC="gcc"
+   CXX="g++"
+   F77="g77"
    casc_user_chose_compilers=yes
  fi
  case "${withval}" in
-   yes) PREPEND="purify -log-file=purify.log -append-logfile=yes -best-effort";;
-   no)  PREPEND="" ;;
-   *)   PREPEND="purify $withval" ;;
+   yes) casc_using_purify=yes
+        casc_using_debug=yes
+        casc_using_mpi=no 
+        casc_purify_flags="-log-file=purify.log -append-logfile=yes"
+        ;;
+    no) ;;
+     *) casc_using_purify=yes
+        casc_using_debug=yes
+        casc_using_mpi=no
+        casc_purify_flags="$withval"
+        ;;
  esac]
 )
 
@@ -854,6 +873,26 @@ else
 fi
 
 dnl *********************************************************************
+dnl * Set INSURE options if needed
+dnl *********************************************************************
+if test "$casc_using_insure" = "yes"
+then
+   HYPRE_INSURE_PATH="/usr/apps/ParaSoft/default/bin.linux2"
+   CC="${HYPRE_INSURE_PATH}/insure ${casc_insure_flags} $CC"
+   CXX="${HYPRE_INSURE_PATH}/insure ${casc_insure_flags} $CXX"
+fi
+
+dnl *********************************************************************
+dnl * Set Purify options if needed
+dnl *********************************************************************
+if test "$casc_using_purify" = "yes"
+then
+   HYPRE_PURIFY_PATH="/usr/apps/Rational"
+   CC="${HYPRE_PURIFY_PATH}/purify $CC ${casc_purify_flags}"
+   CXX="${HYPRE_PURIFY_PATH}/purify $CXX ${casc_purify_flags}"
+fi
+
+dnl *********************************************************************
 dnl * Set installation directories
 dnl *********************************************************************
 HYPRE_INSTALLDIR="${prefix}"
@@ -897,9 +936,6 @@ dnl *********************************************************************
 dnl ********************************************************************
 dnl * The following macros are exported and may be used in Makefile.in's
 dnl ********************************************************************
-
-CC="$PREPEND $CC"
-CXX="$PREPEND $CXX"
 
 AC_SUBST(CC)
 AC_SUBST(CXX)

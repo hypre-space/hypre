@@ -912,20 +912,19 @@ Optional Packages:
     --with-insure=FLAGS   FLAGS are options to pass to insure, e.g.
                           -log-file=struct_ls.insure -append-logfile=yes will
                           send output to the specified file. Defines gcc and
-                          g++ as the C and C++ compilers if not already set by
-                          the user and prepends "insure" to compile/link
-                          line-- no checking is done to ensure insure is
-                          present on the machine
+                          g++ as the C and C++ compilers unless already set by
+                          the user. Nothing is done to verify that insure is
+                          available on the machine
     --with-insure-to-file Direct insure output to the file named insure.log.
                           Defines gcc and g++ as the C and C++ compilers,
-                          unless already set by the user.
+                          unless already set by the user. Nothing is done to
+                          verify that insure is available on the machine
     --with-purify=FLAGS   FLAGS are options to pass to purify, e.g.
                           -log-file=struct_ls.purify -append-logfile=yes will
                           send output to the specified file. Defines gcc and
                           g++ as the C and C++ compilers if not already set by
-                          the user and prepends "purify" to compile/link
-                          line-- no checking is done to ensure purify is
-                          present on the machine
+                          the user. Nothing is done to verify that purify is
+                          available on the machine
     --with-purify-to-file Direct purify output to the file named purify.log.
                           Defines gcc and g++ as the C and C++ compilers,
                           unless already set by the user.
@@ -1636,6 +1635,8 @@ casc_user_chose_fei=no
 
 casc_using_babel=no
 casc_using_openmp=no
+casc_using_insure=no
+casc_using_purify=no
 
 
 
@@ -1749,23 +1750,24 @@ if test "${with_insure+set}" = set; then
   withval="$with_insure"
   if test "$casc_user_chose_compilers" = "no"
  then
-   CC=gcc
-   CXX=g++
-   CFLAGS="$CFLAGS -g"
-   CXXFLAGS="$CXXFLAGS -g"
+   CC="gcc"
+   CXX="g++"
+   F77="g77"
    casc_user_chose_compilers=yes
  fi
  case "${withval}" in
-   yes) PREPEND="insure"
+   yes) casc_using_insure=yes
         casc_using_debug=yes
+        casc_using_mpi=no
+        casc_insure_flags=""
         ;;
-   no)  PREPEND="" ;;
-   *)   PREPEND="insure $withval"
+   no)  ;;
+    *)  casc_using_insure=yes
         casc_using_debug=yes
+        casc_using_mpi=no
+        casc_insure_flags="$withval"
         ;;
  esac
-else
-  PREPEND=""
 
 fi;
 
@@ -1775,16 +1777,23 @@ if test "${with_insure_to_file+set}" = set; then
   withval="$with_insure_to_file"
   if test "$casc_user_chose_compilers" = "no"
  then
-   CC=gcc
-   CXX=g++
-   CFLAGS="$CFLAGS -g"
-   CXXFLAGS="$CXXFLAGS -g"
+   CC="gcc"
+   CXX="g++"
+   F77="g77"
    casc_user_chose_compilers=yes
  fi
  case "${withval}" in
-   yes) PREPEND="insure -log-file=insure.log -append-logfile=yes -best-effort";;
-   no)  PREPEND="" ;;
-   *)   PREPEND="insure $withval" ;;
+   yes) casc_using_insure=yes
+        casc_using_debug=yes
+        casc_using_mpi=no
+        casc_insure_flags="-log-file=insure.log -append-logfile=yes"
+        ;;
+    no) ;;
+     *) casc_using_insure=yes
+        casc_using_debug=yes
+        casc_using_mpi=no
+        casc_insure_flags="$withval"
+        ;;
  esac
 
 fi;
@@ -1795,23 +1804,24 @@ if test "${with_purify+set}" = set; then
   withval="$with_purify"
   if test "$casc_user_chose_compilers" = "no"
  then
-   CC=gcc
-   CXX=g++
-   CFLAGS="$CFLAGS -g"
-   CXXFLAGS="$CXXFLAGS -g"
+   CC="gcc"
+   CXX="g++"
+   F77="g77"
    casc_user_chose_compilers=yes
  fi
  case "${withval}" in
-   yes) PREPEND="purify"
+   yes) casc_using_purify=yes
         casc_using_debug=yes
-        casc_using_mpi=no ;;
-   no)  PREPEND="" ;;
-   *)   PREPEND="purify $withval"
+        casc_using_mpi=no
+        casc_purify_flags=""
+        ;;
+    no) ;;
+     *) casc_using_purify=yes
         casc_using_debug=yes
-        casc_using_mpi=no ;;
+        casc_using_mpi=no
+        casc_purify_flags="$withval"
+        ;;
  esac
-else
-  PREPEND=""
 
 fi;
 
@@ -1821,16 +1831,23 @@ if test "${with_purify_to_file+set}" = set; then
   withval="$with_purify_to_file"
   if test "$casc_user_chose_compilers" = "no"
  then
-   CC=gcc
-   CXX=g++
-   CFLAGS="$CFLAGS -g"
-   CXXFLAGS="$CXXFLAGS -g"
+   CC="gcc"
+   CXX="g++"
+   F77="g77"
    casc_user_chose_compilers=yes
  fi
  case "${withval}" in
-   yes) PREPEND="purify -log-file=purify.log -append-logfile=yes -best-effort";;
-   no)  PREPEND="" ;;
-   *)   PREPEND="purify $withval" ;;
+   yes) casc_using_purify=yes
+        casc_using_debug=yes
+        casc_using_mpi=no
+        casc_purify_flags="-log-file=purify.log -append-logfile=yes"
+        ;;
+    no) ;;
+     *) casc_using_purify=yes
+        casc_using_debug=yes
+        casc_using_mpi=no
+        casc_purify_flags="$withval"
+        ;;
  esac
 
 fi;
@@ -5191,7 +5208,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5194:" \
+echo "$as_me:5211:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -5387,7 +5404,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:5390: \"$ac_link\") >&5
+(eval echo $as_me:5407: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -5465,7 +5482,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:5468: \"$ac_link\") >&5
+(eval echo $as_me:5485: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -9187,6 +9204,20 @@ then
 fi
 fi
 
+if test "$casc_using_insure" = "yes"
+then
+   HYPRE_INSURE_PATH="/usr/apps/ParaSoft/default/bin.linux2"
+   CC="${HYPRE_INSURE_PATH}/insure ${casc_insure_flags} $CC"
+   CXX="${HYPRE_INSURE_PATH}/insure ${casc_insure_flags} $CXX"
+fi
+
+if test "$casc_using_purify" = "yes"
+then
+   HYPRE_PURIFY_PATH="/usr/apps/Rational"
+   CC="${HYPRE_PURIFY_PATH}/purify $CC ${casc_purify_flags}"
+   CXX="${HYPRE_PURIFY_PATH}/purify $CXX ${casc_purify_flags}"
+fi
+
 HYPRE_INSTALLDIR="${prefix}"
 HYPRE_LIBINSTALL="${libdir}"
 HYPRE_INCINSTALL="${includedir}"
@@ -9295,9 +9326,6 @@ _ACEOF
        ;;
 esac
 
-
-CC="$PREPEND $CC"
-CXX="$PREPEND $CXX"
 
 
 
