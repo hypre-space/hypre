@@ -115,6 +115,32 @@ int HashLookup(Hash *h, int key)
 }
 
 /*--------------------------------------------------------------------------
+ * HashLookup2 - Look up the "key" in hash table "h" and return the index
+ * of its location in the hash table, or return HASH_NOTFOUND.
+ * Also return the number of comparisons.
+ *--------------------------------------------------------------------------*/
+
+int HashLookup2(Hash *h, int key, int *nhops)
+{
+    int loc;
+
+    *nhops = 1;
+    loc = key % h->size;
+
+    while (h->keys[loc] != key)
+    {
+        if (h->keys[loc] == HASH_EMPTY)
+            return HASH_NOTFOUND;
+
+        loc = (loc + 1) % h->size;
+
+        (*nhops)++;
+    }
+
+    return loc;
+}
+
+/*--------------------------------------------------------------------------
  * HashReset - Empty the contents of the hash table "h" by reseting the 
  * "len" locations in the array "ind".  This is useful if the location
  * indices have been saved by the user and a hash table needs to be reused.

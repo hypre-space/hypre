@@ -32,6 +32,7 @@ Hash *HashCreate(int size);
 void  HashDestroy(Hash *h);
 int   HashInsert(Hash *h, int key, int *inserted);
 int   HashLookup(Hash *h, int key);
+int   HashLookup2(Hash *h, int key, int *nhops);
 void  HashReset(Hash *h, int len, int *ind);
 
 #endif /* _HASH_H */
