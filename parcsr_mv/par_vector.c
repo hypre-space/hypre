@@ -31,10 +31,10 @@ hypre_ParVectorCreate(  MPI_Comm comm,
 
    if (!partitioning)
    {
-	MPI_Comm_size(comm,&num_procs);
-	hypre_GeneratePartitioning(global_size, num_procs, &partitioning);
+     MPI_Comm_size(comm,&num_procs);
+     hypre_GeneratePartitioning(global_size, num_procs, &partitioning);
    }
-	
+
    hypre_ParVectorComm(vector) = comm;
    hypre_ParVectorGlobalSize(vector) = global_size;
    hypre_ParVectorFirstIndex(vector) = partitioning[my_id];
