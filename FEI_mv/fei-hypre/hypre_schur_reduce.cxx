@@ -48,7 +48,7 @@ extern "C" {
 
 void HYPRE_LinSysCore::buildSchurReducedSystem()
 {
-    int    i, j, k, ierr, ncnt, ncnt2, diag_found;
+    int    i, j, ierr, ncnt, ncnt2;
     int    nRows, globalNRows, StartRow, EndRow, colIndex;
     int    nSchur, *schurList, globalNSchur, *globalSchurList;
     int    CStartRow, CNRows, CNCols, CGlobalNRows, CGlobalNCols;
@@ -60,10 +60,10 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     int    procIndex, *ProcNRows, *ProcNSchur, searchIndex, CStartCol;
     double *colVal, *colVal2, *newColVal, *diagonal, ddata, maxdiag, mindiag;
 
-    HYPRE_IJMatrix     Cmat, CTmat, Mmat, Smat;
+    HYPRE_IJMatrix     Cmat, CTmat, Mmat;
     HYPRE_ParCSRMatrix A_csr, C_csr, CT_csr, M_csr, S_csr;
     HYPRE_IJVector     f1, f2, f2hat;
-    HYPRE_ParVector    f1_csr, f2_csr, f2hat_csr;
+    HYPRE_ParVector    f1_csr, f2hat_csr;
 
     //******************************************************************
     // initial clean up and set up 
@@ -965,7 +965,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
 
 double HYPRE_LinSysCore::buildSchurReducedSoln()
 {
-    int                i, j, *int_array, *gint_array, x2NRows, x2GlobalNRows;
+    int                i, *int_array, *gint_array, x2NRows, x2GlobalNRows;
     int                ierr, rowNum, startRow, startRow2, index, localNRows;
     double             ddata, rnorm;
     HYPRE_ParCSRMatrix A_csr, A21_csr, A22_csr;
@@ -1128,7 +1128,7 @@ double HYPRE_LinSysCore::buildSchurReducedSoln()
 
 void HYPRE_LinSysCore::buildSchurInitialGuess()
 {
-    int    i, ierr, StartRow, EndRow, nSchur, *partition, CStartRow;
+    int    i, ierr, EndRow, nSchur, *partition, CStartRow;
     int    *getIndices, *putIndices;
     double *dArray;
     HYPRE_ParVector hypre_x;
@@ -1138,7 +1138,6 @@ void HYPRE_LinSysCore::buildSchurInitialGuess()
     //------------------------------------------------------------------
 
     if (reducedX_ == HYx_ || reducedX_ == NULL || reducedA_ == NULL) return;
-    StartRow  = localStartRow_ - 1;
     EndRow    = localEndRow_ - 1;
     nSchur    = A21NCols_;
     if ( nSchur == 0 ) return;
@@ -1175,15 +1174,15 @@ void HYPRE_LinSysCore::buildSchurInitialGuess()
 void HYPRE_LinSysCore::buildSchurReducedRHS()
 {
 
-    int    i, j, ncnt, ncnt2, ierr, *colInd, CTStartRow, CStartRow, rowIndex;
-    int    StartRow, EndRow, nRows;
+    int    i, ncnt, ncnt2, ierr, *colInd, CTStartRow, CStartRow, rowIndex;
+    int    StartRow, EndRow;
     int    nSchur, *schurList, *ProcNRows, *ProcNSchur;
     int    globalNSchur, CTNRows, CTNCols, CTGlobalNRows, CTGlobalNCols;
-    int    CNRows, CGlobalNRows, *tempList, searchIndex, rowCount, rowSize;
+    int    CNRows, *tempList, searchIndex, rowCount, rowSize;
     double ddata, ddata2, *colVal;
     HYPRE_IJMatrix     Cmat, Mmat;
     HYPRE_IJVector     f1, f2, f2hat;
-    HYPRE_ParVector    f1_csr, f2_csr, f2hat_csr;
+    HYPRE_ParVector    f1_csr, f2hat_csr;
     HYPRE_ParCSRMatrix M_csr, C_csr;
 
     //******************************************************************
@@ -1243,10 +1242,8 @@ void HYPRE_LinSysCore::buildSchurReducedRHS()
     Cmat         = HYA12_; 
     Mmat         = HYinvA22_; 
     CNRows       = CTNCols;
-    CGlobalNRows = CTGlobalNCols;
     nSchur       = A21NCols_;
     schurList    = selectedList_;
-    CGlobalNRows = globalNSchur;
     HYPRE_IJMatrixGetObject(Mmat, (void **) &M_csr);
     HYPRE_IJMatrixGetObject(Cmat, (void **) &C_csr);
 
@@ -1357,23 +1354,23 @@ void HYPRE_LinSysCore::buildSchurReducedRHS()
 
 void HYPRE_LinSysCore::buildSchurReducedSystem2()
 {
-    int    i, j, k, ierr, ncnt, ncnt2, diag_found, one=1;
+    int    i, j, ierr, ncnt, one=1;
     int    nRows, globalNRows, StartRow, EndRow, colIndex;
-    int    nSchur, *schurList, globalNSchur, *globalSchurList;
+    int    nSchur, globalNSchur;
     int    CStartRow, CNRows, CNCols, CGlobalNRows, CGlobalNCols;
-    int    CTStartRow, CTNRows, CTNCols, CTGlobalNRows, CTGlobalNCols;
+    int    CTStartRow, CTNRows, CTNCols;
     int    MStartRow, MNRows, MNCols, MGlobalNRows, MGlobalNCols;
     int    rowSize, rowCount, rowIndex, maxRowSize, newRowSize;
     int    *CMatSize, *CTMatSize, *MMatSize, *colInd, *newColInd, *colInd2;
-    int    *tempList, *recvCntArray, *displArray, rowSize2;
-    int    procIndex, *ProcNRows, *ProcNSchur, searchIndex, CStartCol;
+    int    *tempList, rowSize2;
+    int    *ProcNRows, *ProcNSchur, searchIndex, CStartCol;
     double *colVal, *newColVal, *diagonal, ddata, maxdiag, mindiag, darray[2];
     double darray2[2], *colVal2, rowmax;
 
-    HYPRE_IJMatrix     Cmat, CTmat, Mmat, Smat;
+    HYPRE_IJMatrix     Cmat, CTmat, Mmat;
     HYPRE_ParCSRMatrix A_csr, C_csr, CT_csr, M_csr, S_csr;
     HYPRE_IJVector     f1, f2, f2hat;
-    HYPRE_ParVector    f1_csr, f2_csr, f2hat_csr;
+    HYPRE_ParVector    f1_csr, f2hat_csr;
 
     //******************************************************************
     // output initial message and clean up
@@ -1644,8 +1641,6 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
 
     CTNRows = nRows - nSchur;
     CTNCols = nSchur;
-    CTGlobalNRows = globalNRows - globalNSchur;
-    CTGlobalNCols = globalNSchur;
     CTStartRow    = ProcNRows[mypid_] - ProcNSchur[mypid_];
 
     if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
