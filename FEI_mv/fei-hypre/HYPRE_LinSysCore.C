@@ -2432,7 +2432,7 @@ int HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
 {
     int i, ierr, *local_ind, *iarray, *iarray2;
 
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LSC::entering putInitalGuess.\n",mypid_);
     }
@@ -2483,7 +2483,7 @@ int HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
 
     delete [] local_ind;
 
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LSC::leaving  putInitalGuess.\n",mypid_);
     }
