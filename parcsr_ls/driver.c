@@ -179,13 +179,13 @@ main( int   argc,
     * Set up the linear system
     *-----------------------------------------------------------*/
 
-   b = hypre_CreateParVector(MPI_COMM_WORLD, volume, global_part[myid],
-	global_part[myid+1]-global_part[myid]);
+   b = hypre_CreateParVector(MPI_COMM_WORLD, volume, global_part);
+   hypre_SetParVectorPartitioningOwner(b,0);
    hypre_InitializeParVector(b);
    hypre_SetParVectorConstantValues(b,1.0);
 
-   x = hypre_CreateParVector(MPI_COMM_WORLD, volume, global_part[myid],
-	global_part[myid+1]-global_part[myid]);
+   x = hypre_CreateParVector(MPI_COMM_WORLD, volume, global_part);
+   hypre_SetParVectorPartitioningOwner(x,0);
    hypre_InitializeParVector(x);
    hypre_SetParVectorConstantValues(x,0.0);
 
