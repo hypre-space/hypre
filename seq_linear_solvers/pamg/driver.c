@@ -17,6 +17,7 @@ main( int   argc,
    int                 build_matrix_arg_index;
    int                 build_rhs_type;
    int                 build_rhs_arg_index;
+   int                 interp_type;
    int                 solver_id;
    int                 relax_default;
    int                 coarsen_type;
@@ -68,6 +69,7 @@ main( int   argc,
    build_rhs_arg_index = argc;
    coarsen_type      = 0;
    relax_default = 0;
+   interp_type = 0;
 
    solver_id = 0;
    max_levels = 25;
@@ -153,6 +155,11 @@ main( int   argc,
       {
          arg_index++;
          max_levels = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-rbm") == 0 )
+      {
+         arg_index++;
+         interp_type      = 1;
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
@@ -382,6 +389,8 @@ main( int   argc,
       HYPRE_AMGSetGridRelaxPoints(amg_solver, grid_relax_points);
       HYPRE_AMGSetRelaxWeight(amg_solver, relax_weight);
       HYPRE_AMGSetMaxLevels(amg_solver, max_levels);
+      HYPRE_AMGSetInterpType(amg_solver, interp_type);
+
       HYPRE_AMGSetup(amg_solver, (HYPRE_CSRMatrix) A, (HYPRE_Vector) b, 
 			(HYPRE_Vector) x);
       hypre_EndTiming(time_index);
