@@ -326,7 +326,9 @@ AC_SUBST(FEI_BASE_DIR)
 AC_SUBST(FEI_LIB_DIR)
 AC_SUBST(FEI_INC_DIR)
 
-AC_CONFIG_FILES([Makefile
+AC_CONFIG_FILES([
+  utilities/HYPRE_utilities.h
+  Makefile
   FEI_mv/Makefile
   FEI_mv/SuperLU/Makefile
   FEI_mv/fei-base/Makefile
