@@ -15,14 +15,10 @@
 #ifndef hypre_DISTRIBUTED_MATRIX_HEADER
 #define hypre_DISTRIBUTED_MATRIX_HEADER
 
-#include <../HYPRE_config.h>
 
-#include "../utilities/general.h"
-#include "../utilities/utilities.h"
+#include "utilities.h"
 
-#include "../HYPRE.h"
-
-#include "./HYPRE_distributed_matrix_types.h"
+#include "HYPRE_distributed_matrix_types.h"
 
 /*--------------------------------------------------------------------------
  * hypre_DistributedMatrix:
@@ -60,7 +56,7 @@ typedef struct
 /*--------------------------------------------------------------------------
  * prototypes for operations on local objects
  *--------------------------------------------------------------------------*/
-#include "./hypre_protos.h"
-#include "./internal_protos.h"
+#include "hypre_protos.h"
+#include "internal_protos.h"
 
 #endif
