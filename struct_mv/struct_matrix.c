@@ -893,7 +893,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
 /*--------------------------------------------------------------------------
  * (action > 0): add-to values
  * (action = 0): set values
- * (action =-1): get values and zero out
+ * (action =-1): get values and zero out (not implemented, just gets values)
  * (action <-1): get values
  * should be called to set a constant-coefficient part of the matrix
  *--------------------------------------------------------------------------*/
@@ -920,12 +920,11 @@ hypre_StructMatrixSetConstantValues( hypre_StructMatrix *matrix,
    boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(matrix));
    constant_coefficient = hypre_StructMatrixConstantCoefficient(matrix);
 
-   hypre_ForBoxI(i, boxes)
-      {
-         box = hypre_BoxArrayBox(boxes, i);
-
-         if ( constant_coefficient==1 )
+   if ( constant_coefficient==1 )
+   {
+      hypre_ForBoxI(i, boxes)
          {
+            box = hypre_BoxArrayBox(boxes, i);
             if (action > 0)
             {
                for (s = 0; s < num_stencil_indices; s++)
@@ -954,86 +953,101 @@ hypre_StructMatrixSetConstantValues( hypre_StructMatrix *matrix,
                }
             }
          }
-         else if ( constant_coefficient==2 )
+   }
+   else if ( constant_coefficient==2 )
+   {
+      hypre_SetIndex(center_index, 0, 0, 0);
+      stencil = hypre_StructMatrixStencil(matrix);
+      center_rank = hypre_StructStencilElementRank( stencil, center_index );
+      if ( action > 0 )
+      {
+         for (s = 0; s < num_stencil_indices; s++)
          {
-            hypre_SetIndex(center_index, 0, 0, 0);
-            stencil = hypre_StructMatrixStencil(matrix);
-            center_rank = hypre_StructStencilElementRank( stencil, center_index );
-            if ( action > 0 )
-            {
-               for (s = 0; s < num_stencil_indices; s++)
-               {
-                  if ( stencil_indices[s] == center_rank )
-                  {  /* center (diagonal), like constant_coefficient==0
-                      We consider it an error, but do the best we can. */
-                     ++ierr;
+            if ( stencil_indices[s] == center_rank )
+            {  /* center (diagonal), like constant_coefficient==0
+                  We consider it an error, but do the best we can. */
+               ++ierr;
+               hypre_ForBoxI(i, boxes)
+                  {
+                     box = hypre_BoxArrayBox(boxes, i);
                      ierr += hypre_StructMatrixSetBoxValues(
-                                matrix, box,
-                                num_stencil_indices, stencil_indices,
-                                values, action );
+                        matrix, box,
+                        num_stencil_indices, stencil_indices,
+                        values, action );
                   }
-                  else
-                  {  /* non-center, like constant_coefficient==1 */
-                     matp = hypre_StructMatrixBoxData(matrix, i,
-                                                      stencil_indices[s]);
-                     *matp += values[s];
-                  }
-               }
             }
-            else if ( action > -1 )
-            {
-               for (s = 0; s < num_stencil_indices; s++)
-               {
-                  if ( stencil_indices[s] == center_rank )
-                  {  /* center (diagonal), like constant_coefficient==0
-                      We consider it an error, but do the best we can. */
-                     ++ierr;
-                     ierr += hypre_StructMatrixSetBoxValues(
-                                matrix, box,
-                                num_stencil_indices, stencil_indices,
-                                values, action );
-                  }
-                  else
-                  {  /* non-center, like constant_coefficient==1 */
-                     matp = hypre_StructMatrixBoxData(matrix, i,
-                                                      stencil_indices[s]);
-                     *matp += values[s];
-                  }
-               }
-            }
-            else  /* action<0 */
-            {
-               for (s = 0; s < num_stencil_indices; s++)
-               {
-                  if ( stencil_indices[s] == center_rank )
-                  {  /* center (diagonal), like constant_coefficient==0
-                      We consider it an error, but do the best we can. */
-                     ++ierr;
-                     ierr += hypre_StructMatrixSetBoxValues(
-                                matrix, box,
-                                num_stencil_indices, stencil_indices,
-                                values, -1);
-                  }
-                  else
-                  {  /* non-center, like constant_coefficient==1 */
-                     matp = hypre_StructMatrixBoxData(matrix, i,
-                                                      stencil_indices[s]);
-                     values[s] = *matp;
-                  }
-               }
+            else
+            {  /* non-center, like constant_coefficient==1 */
+               matp = hypre_StructMatrixBoxData(matrix, 0,
+                                                stencil_indices[s]);
+               *matp += values[s];
             }
          }
-         else /* constant_coefficient==0 */
+      }
+      else if ( action > -1 )
+      {
+         for (s = 0; s < num_stencil_indices; s++)
          {
-            /* We consider this an error, but do the best we can. */
-            ++ierr;
+            if ( stencil_indices[s] == center_rank )
+            {  /* center (diagonal), like constant_coefficient==0
+                  We consider it an error, but do the best we can. */
+               ++ierr;
+               hypre_ForBoxI(i, boxes)
+                  {
+                     box = hypre_BoxArrayBox(boxes, i);
+                     ierr += hypre_StructMatrixSetBoxValues(
+                        matrix, box,
+                        num_stencil_indices, stencil_indices,
+                        values, action );
+                  }
+            }
+            else
+            {  /* non-center, like constant_coefficient==1 */
+               matp = hypre_StructMatrixBoxData(matrix, 0,
+                                                stencil_indices[s]);
+               *matp += values[s];
+            }
+         }
+      }
+      else  /* action<0 */
+      {
+         for (s = 0; s < num_stencil_indices; s++)
+         {
+            if ( stencil_indices[s] == center_rank )
+            {  /* center (diagonal), like constant_coefficient==0
+                  We consider it an error, but do the best we can. */
+               ++ierr;
+               hypre_ForBoxI(i, boxes)
+                  {
+                     box = hypre_BoxArrayBox(boxes, i);
+                     ierr += hypre_StructMatrixSetBoxValues(
+                        matrix, box,
+                        num_stencil_indices, stencil_indices,
+                        values, -1);
+                  }
+            }
+            else
+            {  /* non-center, like constant_coefficient==1 */
+               matp = hypre_StructMatrixBoxData(matrix, 0,
+                                                stencil_indices[s]);
+               values[s] = *matp;
+            }
+         }
+      }
+   }
+   else /* constant_coefficient==0 */
+   {
+      /* We consider this an error, but do the best we can. */
+      ++ierr;
+      hypre_ForBoxI(i, boxes)
+         {
+            box = hypre_BoxArrayBox(boxes, i);
             ierr += hypre_StructMatrixSetBoxValues(
                matrix, box,
                num_stencil_indices, stencil_indices,
                values, action );
          }
-
-      }
+   }
    return ierr;
 }
 
