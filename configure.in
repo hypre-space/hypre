@@ -568,6 +568,10 @@ then
   CASC_OPT_DEBUG_CHOICES
 fi
 
+CFLAGS="$CFLAGS $COPT $CDEBUG"
+CXXFLAGS="$CXXFLAGS $CXXOPT $CXXDEBUG"
+F77FLAGS="$FFLAGS $FOPT $FDEBUG"
+
 dnl *********************************************************************
 dnl * Add flags to LIBS and LIBDIRS
 dnl * Note:  CASC_ADD_LIB calls should be placed in the order you want the
@@ -581,32 +585,57 @@ dnl * AC_SUBST performs the variable substitutions
 dnl * Some macros call AC_SUBST for some variables, but it does no damage
 dnl * to call it again.
 dnl *********************************************************************
+dnl ********************************************************************
+dnl * The following macros are exported and may be used in Makefile.in's
+dnl ********************************************************************
 
+
+
+dnl * General purpose header files and libraries and directories for
+dnl * those libraries.  
 AC_SUBST(INCLUDES)
 AC_SUBST(LIBS)
 AC_SUBST(LIBDIRS)
+
+dnl * MPI-related header files and libraries and directories for
+dnl * those libraries
 AC_SUBST(MPIINCLUDE)
 AC_SUBST(MPILIBS)
 AC_SUBST(MPILIBDIRS)
 AC_SUBST(MPIFLAGS)
-AC_SUBST(COPT)
-AC_SUBST(CDEBUG)
+
+dnl * macro definitions that should be included on compile line
 AC_SUBST(HYPREDEFS)
 AC_SUBST(TIMERDEFS)
+AC_SUBST(HYPRE_PETSCDEFS)
+
+dnl *Libraries and their directories that must be used at compile time 
 AC_SUBST(LDLIBS)
 AC_SUBST(LDLIBDIRS)
-AC_SUBST(ARCH)
+
+dnl *AC_SUBST(ARCH)
 AC_SUBST(RANLIB)
+
+dnl * contains compiler flags such as optimization or debugging flags
 AC_SUBST(CFLAGS)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(F77FLAGS)
+
+dnl *needed when compiling with another command prior to the compiler command
+dnl * for example: purify cc ....
 AC_SUBST(PREPEND)
-AC_SUBST(HAVE_PETSC)
-AC_SUBST(LACKS_PETSC)
+
+
+dnl *AC_SUBST(HAVE_PETSC)
+dnl *AC_SUBST(LACKS_PETSC)
+
+dnl *PETSC-related header files, libraries and directories for those
+dnl * libraries
 AC_SUBST(PETSCLIBS)
 AC_SUBST(PETSCLIBDIRS)
 AC_SUBST(PETSCINCLUDE)
-AC_SUBST(HYPRE_PETSCDEFS)
+
+
 AC_SUBST(HYPRE_TOP_SRC_DIR)
 
 dnl *********************************************************************

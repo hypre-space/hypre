@@ -5910,6 +5910,10 @@ fi
 
 fi
 
+CFLAGS="$CFLAGS $COPT $CDEBUG"
+CXXFLAGS="$CXXFLAGS $CXXOPT $CXXDEBUG"
+F77FLAGS="$FFLAGS $FOPT $FDEBUG"
+
 
 
    # define some macros to hopefully improve readability
@@ -5919,7 +5923,7 @@ fi
    # check for the library from first argument.  If linking is successful
    # the first time, the job is done, otherwise loop through DIRECTORY-LIST
    echo $ac_n "checking for main in -lm""... $ac_c" 1>&6
-echo "configure:5923: checking for main in -lm" >&5
+echo "configure:5927: checking for main in -lm" >&5
 ac_lib_var=`echo m'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -5927,14 +5931,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$LIBDIRS $LIBS $LIBS -lm"
 cat > conftest.$ac_ext <<EOF
-#line 5931 "configure"
+#line 5935 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:5938: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:5942: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -5959,7 +5963,7 @@ unset ac_cv_lib_$ac_lib_var
       for casc_lib_dir in /usr/lib /usr/ccs/lib; do
 
          echo $ac_n "checking for main in -lm""... $ac_c" 1>&6
-echo "configure:5963: checking for main in -lm" >&5
+echo "configure:5967: checking for main in -lm" >&5
 ac_lib_var=`echo m'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -5967,14 +5971,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-L$casc_lib_dir $LIBDIRS $LIBS -lm $LIBS -lm"
 cat > conftest.$ac_ext <<EOF
-#line 5971 "configure"
+#line 5975 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:5978: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:5982: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -6012,6 +6016,14 @@ unset ac_cv_lib_$ac_lib_var
 
    
    
+
+
+
+
+
+
+
+
 
 
 
@@ -6207,16 +6219,14 @@ s%@INCLUDES@%$INCLUDES%g
 s%@LIBDIRS@%$LIBDIRS%g
 s%@HYPREDEFS@%$HYPREDEFS%g
 s%@TIMERDEFS@%$TIMERDEFS%g
+s%@HYPRE_PETSCDEFS@%$HYPRE_PETSCDEFS%g
 s%@LDLIBS@%$LDLIBS%g
 s%@LDLIBDIRS@%$LDLIBDIRS%g
 s%@F77FLAGS@%$F77FLAGS%g
 s%@PREPEND@%$PREPEND%g
-s%@HAVE_PETSC@%$HAVE_PETSC%g
-s%@LACKS_PETSC@%$LACKS_PETSC%g
 s%@PETSCLIBS@%$PETSCLIBS%g
 s%@PETSCLIBDIRS@%$PETSCLIBDIRS%g
 s%@PETSCINCLUDE@%$PETSCINCLUDE%g
-s%@HYPRE_PETSCDEFS@%$HYPRE_PETSCDEFS%g
 s%@HYPRE_TOP_SRC_DIR@%$HYPRE_TOP_SRC_DIR%g
 
 CEOF
