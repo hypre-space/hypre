@@ -60,7 +60,8 @@ extern int  HYPRE_LSI_MLIFEDataSetElemNodeList( void *, int, int, const int*,
                                                 const int* const* );
 extern int  HYPRE_LSI_MLIFEDataInitComplete( void * );
 extern int  HYPRE_LSI_MLIFEDataAccumulateElemMatrix( void *, int, int, 
-                                                     const double * const * );
+                                 const int *, const double * const * );
+extern int  HYPRE_LSI_MLIFEDataConstructKernel( void * );
 extern int  HYPRE_LSI_MLIFEDataWriteToFile( void *, char * );
 
 #ifdef __cplusplus

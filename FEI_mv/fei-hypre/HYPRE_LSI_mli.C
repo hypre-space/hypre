@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
+#include <mpi.h>
 
 /****************************************************************************/ 
 /* MLI include files                                                        */
@@ -108,6 +109,10 @@ typedef struct HYPRE_MLI_FEData_Struct
    int        fedataRowCnt_;
    int        fedataMatDim_;
    double     *fedataValues_;
+   int        nullLeng_;
+   int        nullDim_;
+   int        *nullCnts_;
+   double     *nullSpaces_;
    Lookup     *lookup_;
 #endif
 }
@@ -775,6 +780,10 @@ void *HYPRE_LSI_MLIFEDataCreate( MPI_Comm mpi_comm )
    hypre_fedata->comm           = mpi_comm;
    hypre_fedata->fedata_        = new MLI_FEData(mpi_comm);
    hypre_fedata->lookup_        = NULL;
+   hypre_fedata->nullLeng_      = 0;
+   hypre_fedata->nullCnts_      = NULL;
+   hypre_fedata->nullDim_       = 0;
+   hypre_fedata->nullSpaces_    = NULL;
    return ((void *) hypre_fedata);
 #else
    return NULL;
@@ -795,9 +804,15 @@ int HYPRE_LSI_MLIFEDataDestroy( void *object )
       delete [] hypre_fedata->fedataElemIDs_;
    if ( hypre_fedata->fedataValues_ != NULL ) 
       delete [] hypre_fedata->fedataValues_;
+   if ( hypre_fedata->nullSpaces_ != NULL )
+      delete [] hypre_fedata->nullSpaces_;
+   if ( hypre_fedata->nullCnts_ != NULL )
+      delete [] hypre_fedata->nullCnts_;
    hypre_fedata->fedata_        = NULL;
    hypre_fedata->fedataElemIDs_ = NULL;
    hypre_fedata->fedataValues_  = NULL;
+   hypre_fedata->nullSpaces_    = NULL;
+   hypre_fedata->nullCnts_      = NULL;
    free( hypre_fedata );
    return 0;
 #else
@@ -847,16 +862,6 @@ int HYPRE_LSI_MLIFEDataInit( void *object, Lookup *lookup )
       delete [] nodeFieldIDs;
       hypre_fedata->fedataElemIDs_ = new int[numElements];
       hypre_fedata->fedataElemCnt_ = 0;
-printf("nFields = %d\n", nFields);
-printf("FieldID = %d\n", fieldIDs[0]);
-printf("FieldSize = %d\n", fieldSizes[0]);
-printf("blockID = %d\n", blockID);
-printf("interleave = %d\n", interleaveStrategy);
-printf("lumpingStrategy = %d\n", lumpingStrategy);
-printf("numElemDOF = %d\n", numElemDOF);
-printf("numElements = %d\n", numElements);
-printf("numNodesPerElem = %d\n", numNodesPerElem);
-printf("numEqnsPerElem = %d\n", numEqnsPerElem);
    }
    return 0;
 #else
@@ -948,11 +953,14 @@ int HYPRE_LSI_MLIFEDataInitComplete( void *object )
 
 extern "C"
 int HYPRE_LSI_MLIFEDataAccumulateElemMatrix(void *object, int nrows, int ncols,
+                                            const int * cols,
                                             const double * const *inValues)
 {
 #ifdef HAVE_MLI
-   int              nElems, elemID, i, j, rowCnt, matz=0, ierr;
-   double           *elemMat, *evalues, *evectors, *dAux1, *dAux2;
+   int              nElems, elemID, i, j, rowCnt, matz=0, ierr, nNodes, itmp;
+   int              index, nDim, length, *nCnts;
+   double           *elemMat, *evalues, *evectors, *dAux1, *dAux2, *nSpace;
+   char             paramString[100], *targv[1];
    HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
    MLI_FEData       *fedata = (MLI_FEData *) hypre_fedata->fedata_;
 
@@ -994,6 +1002,34 @@ int HYPRE_LSI_MLIFEDataAccumulateElemMatrix(void *object, int nrows, int ncols,
       dAux2    = new double[ncols];
       mli_computespectrum_(&ncols, &ncols, elemMat, evalues, &matz, evectors,
                            dAux1, dAux2, &ierr);
+      if ( hypre_fedata->nullSpaces_ == NULL ) 
+      {
+         fedata->getNumNodes(nNodes);
+         strcpy( paramString, "getNumExtNodes" );
+         targv[0] = (char *) &itmp;
+         fedata->impSpecificRequests( paramString, 1, targv );
+         nNodes -= itmp;
+         hypre_fedata->nullSpaces_ = new double[nNodes*3*6];
+         hypre_fedata->nullCnts_   = new int[nNodes*3*6];
+         hypre_fedata->nullDim_    = 6;
+         hypre_fedata->nullLeng_   = nNodes * 3;
+         for ( i = 0; i < nNodes*3*6; i++ ) hypre_fedata->nullSpaces_[i] = 0.0;
+         for ( i = 0; i < nNodes*3*6; i++ ) hypre_fedata->nullCnts_[i] = 0;
+      }
+      nSpace = hypre_fedata->nullSpaces_;
+      length = hypre_fedata->nullLeng_;
+      nDim   = hypre_fedata->nullDim_;
+      nCnts  = hypre_fedata->nullCnts_;
+   
+      for ( i = 0; i < ncols; i++ ) 
+      {
+         index = cols[i];
+         for ( j = 0; j < nDim; j++ ) 
+         {
+            nSpace[index+length*j] += evectors[j*ncols+i];
+            nCnts[index+length*j]++;
+         }
+      }
       for ( i = 0; i < ncols; i++ )
          printf("Element %5d : eigenvalue = %e\n", elemID, evalues[i]);
       delete [] evalues;
@@ -1001,6 +1037,48 @@ int HYPRE_LSI_MLIFEDataAccumulateElemMatrix(void *object, int nrows, int ncols,
       delete [] dAux1;
       delete [] dAux2;
    }
+   return 0;
+#else
+   return 1;
+#endif
+}
+
+/****************************************************************************/
+/* HYPRE_LSI_MLIFEDataConstructKernel                                       */
+/*--------------------------------------------------------------------------*/
+
+extern "C"
+int HYPRE_LSI_MLIFEDataConstructKernel( void *object )
+{
+#ifdef HAVE_MLI
+   int    i, j, length, nDim, *nCnts;
+   double *nSpace;
+   HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
+
+   nSpace = hypre_fedata->nullSpaces_;
+   length = hypre_fedata->nullLeng_;
+   nDim   = hypre_fedata->nullDim_;
+   nCnts  = hypre_fedata->nullCnts_;
+   if ( nSpace == NULL || nCnts == NULL )
+   {
+      printf("HYPRE_LSI_MLIFEDataConstructKernel ERROR : no kernel.\n");
+      exit(1);
+   }
+   for ( i = 0; i < nDim; i++ ) 
+   {
+      for ( j = 0; j < length; j++ ) 
+      {
+         if ( nCnts[j+length*i] != 0.0 ) 
+            nSpace[j+length*i] /= nCnts[j+length*i];
+         else
+         {
+            printf("HYPRE_LSI_MLIFEDataConstructKernel ERROR : nCnts = 0.\n");
+            exit(1);
+         }
+      }
+   }
+   delete [] hypre_fedata->nullCnts_;
+   hypre_fedata->nullCnts_ = NULL;
    return 0;
 #else
    return 1;

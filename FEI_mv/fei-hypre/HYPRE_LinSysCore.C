@@ -1422,7 +1422,7 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
 #ifdef HAVE_MLI
    if ( haveFEGrid_ )
       HYPRE_LSI_MLIFEDataAccumulateElemMatrix(feGrid_,numPtRows,numPtCols, 
-                                              values );
+                                              ptCols, values );
 #endif
 
    //-------------------------------------------------------------------
@@ -1820,6 +1820,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
       {
          char       filename[100];
          sprintf( filename, "fedata.%d", mypid_);
+         HYPRE_LSI_MLIFEDataConstructKernel( feGrid_ );
          HYPRE_LSI_MLIFEDataWriteToFile( feGrid_, filename );
       }
    }
@@ -4117,7 +4118,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
 int HYPRE_LinSysCore::writeSystem(const char *name)
 {
-   printf("HYPRE_LSC : writeSystem not implemented.\n");
+   printf("HYPRE_LinsysCore : writeSystem not implemented.\n");
    return (0);
 }
 
