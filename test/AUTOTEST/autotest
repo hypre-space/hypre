@@ -92,7 +92,7 @@ help () {
   printf "%s\n" "     -casc     CASC Solaris 8"
   printf "%s\n" "     -compass  # obsolute"
   printf "%s\n" "     -compassmp# obsolute"
-  printf "%s\n" "     -dwbug    Turn on debug mode."
+  printf "%s\n" "     -debug    Turn on debug mode."
   printf "%s\n" "     -frost    ASCI Frost, DPCS."
   printf "%s\n" "     -frostmp  ASCI Frost executing OpenMP, DPCS."
   printf "%s\n" "     -gps      Compaq gps320 system, DPCS."
@@ -382,9 +382,9 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="pengra"
         HYPRE_RUN_MACHINE="pengra"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pengra/AUTOTEST"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-chaos2/AUTOTEST"
 	  HYPRE_MACHINE_COMMANDS="-mnse 1 -l 1 -a 2 -cf"
-          HYPRE_MESSAGE='OTHER[icc-6.0]'
+          HYPRE_MESSAGE='OTHER[icc-8.0]'
 	perform_test
         shift;;
     -perrin)
