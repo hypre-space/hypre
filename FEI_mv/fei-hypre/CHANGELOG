@@ -7,4 +7,6 @@
             - modify the matrixLoadComplete function to output matrix
               to a file even when it has been previously assembled
               (per Tim Dunn's request)
+02/14/01    version 1.5.0R3 
+            - correct an error in MPI_Allreduce in buildSchurRHS.
 
