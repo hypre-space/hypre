@@ -273,7 +273,7 @@ hypre_PFMGBuildCoarseOp5_onebox_CC0(
                       
    int                   ierr = 0;
 
-   printf("2d 0\n");
+   /*printf("2d 0\n");*/
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
 
@@ -485,7 +485,7 @@ hypre_PFMGBuildCoarseOp5_onebox_CC1(
                       
    int                   ierr = 0;
 
-   printf("2d 1\n");
+   /*printf("2d 1\n");*/
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
 
@@ -700,7 +700,7 @@ hypre_PFMGBuildCoarseOp5_onebox_CC2(
    int                   ierr = 0;
    int                   bdy;
 
-   printf("2d 2\n");
+   /*printf("2d 2\n");*/
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
 
