@@ -108,7 +108,13 @@ FILES =\
  F90_HYPRE_parcsr_pcg.c\
  F90_HYPRE_parcsr_pilut.c
 
+DRIVER_FILES =\
+ driver.c\
+ driver_interp.c\
+ driver_rap.c
+
 OBJS = ${FILES:.c=.o}
+DRIVER_OBJS = ${FILES:.c=.o}
 
 ##################################################################
 # Targets
@@ -125,6 +131,7 @@ clean:
 
 veryclean: clean
 	@rm -f libHYPRE_parcsr_ls.a
+	@rm -f driver driver_interp driver_rap
 
 ##################################################################
 # Temporary Targets
@@ -149,10 +156,22 @@ amge: all ${AMGE_OBJS}
 	${CC} -o amge ${AMGE_OBJS} ${LFLAGS} 
 
 ${AMGE_OBJS}: ${AMGE_HEADERS}
- 
+
 ##################################################################
 # Rules
 ##################################################################
+
+driver: driver.o libHYPRE_parcsr_ls.a
+	@echo  "Linking" $@ "... "
+	${CC} -o $@ driver.o ${LFLAGS} 
+
+driver_interp: driver_interp.o libHYPRE_parcsr_ls.a
+	@echo  "Linking" $@ "... "
+	${CC} -o $@ driver_interp.o ${LFLAGS} 
+
+driver_rap: driver_rap.o libHYPRE_parcsr_ls.a
+	@echo  "Linking" $@ "... "
+	${CC} -o $@ driver_rap.o ${LFLAGS} 
 
 libHYPRE_parcsr_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
@@ -160,6 +179,8 @@ libHYPRE_parcsr_ls.a: ${OBJS}
 	@RANLIB@ $@
  
 ${OBJS}: ${HEADERS}
+ 
+${DRIVER_OBJS}: ${HEADERS}
  
 ##################################################################
 # Generic rules
