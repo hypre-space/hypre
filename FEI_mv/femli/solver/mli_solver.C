@@ -27,6 +27,7 @@
 #include "solver/mli_solver_schwarz.h"
 #include "solver/mli_solver_mls.h"
 #include "solver/mli_solver_superlu.h"
+#include "solver/mli_solver_arpacksuperlu.h"
 
 /*****************************************************************************
  * constructor 
@@ -73,11 +74,19 @@ MLI_Solver::MLI_Solver( int sid )
            cout << "MLI_Solver constructor ERROR : SuperLU not available\n";
            exit(1);
 #endif
+      case MLI_SOLVER_ARPACKSUPERLU_ID :
+#ifdef MLI_SUPERLU
+           strcpy( solver_name, "ARPACKSuperLU" );
+           solver_id  = MLI_SOLVER_ARPACKSUPERLU_ID;
+#else
+           cout << "MLI_Solver constructor ERROR : SuperLU not available\n";
+           exit(1);
+#endif
            break;
       default :
            cout << "MLI_Solver constructor ERROR : invalid solver\n";
            cout << "    valid ones are : Jacobi, GS, SGS, ParaSails, \n";
-           cout << "                     Schwarz, MLS, SuperLU. \n";
+           cout << "               Schwarz, MLS, SuperLU, ARPACKSuperLU.\n";
            cout.flush();
            exit(1);
    }
@@ -134,9 +143,19 @@ MLI_Solver::MLI_Solver( char *str )
       exit(1);
 #endif
    }
+   else if ( !strcmp(str, "ARPACKSuperLU" ) )
+   {
+#ifdef MLI_SUPERLU
+      strcpy( solver_name, str );
+      solver_id  = MLI_SOLVER_ARPACKSUPERLU_ID;
+#else
+      cout << "MLI_Solver constructor ERROR : SuperLU not available\n";
+      exit(1);
+#endif
+   }
    else
    {
-      cout << "MLI_Solver constructor ERROR : solver " << str << " undefined\n";
+      cout << "MLI_Solver constructor ERROR : solver " <<str<< " undefined\n";
       cout.flush();
       exit(1);
    }
@@ -168,6 +187,16 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
    else if (!strcmp(str, "SuperLU"))   solver_ptr = new MLI_Solver_SuperLU();
 #else
    else if (!strcmp(str, "SuperLU"))   
+   {
+      cout << "MLI_Solver_Create ERROR : SuperLU not available\n";
+      exit(1);
+   }
+#endif
+#ifdef MLI_SUPERLU
+   else if (!strcmp(str, "ARPACKSuperLU"))   
+      solver_ptr = new MLI_Solver_ARPACKSuperLU();
+#else
+   else if (!strcmp(str, "ARPACKSuperLU"))   
    {
       cout << "MLI_Solver_Create ERROR : SuperLU not available\n";
       exit(1);
@@ -223,6 +252,14 @@ MLI_Solver *MLI_Solver_CreateFromID( int solver_id )
            exit(1);
 #endif
            break;
+      case MLI_SOLVER_ARPACKSUPERLU_ID :
+#ifdef MLI_SUPERLU
+           solver_ptr = new MLI_Solver_ARPACKSuperLU();
+#else
+           cout << "MLI_Solver_Create ERROR : SuperLU not available\n";
+           exit(1);
+#endif
+           break;
       default :
            cout << "MLI_Solver_Create ERROR : invalid solver\n";
            cout << "  valid ones are : \n";
@@ -233,6 +270,8 @@ MLI_Solver *MLI_Solver_CreateFromID( int solver_id )
            cout << "         " << MLI_SOLVER_SCHWARZ_ID   << " (Schwarz)\n";
            cout << "         " << MLI_SOLVER_MLS_ID       << " (MLS)\n";
            cout << "         " << MLI_SOLVER_SUPERLU_ID   << " (SuperLU)\n";
+           cout << "         " << MLI_SOLVER_ARPACKSUPERLU_ID 
+                               << " (ARPACKSuperLU)\n";
            cout.flush();
            exit(1);
    }
