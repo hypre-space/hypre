@@ -487,6 +487,7 @@ void RhsRead(double *rhs, Matrix *mat, char *filename)
     double *buffer = NULL;
     int buflen = 0;
     char line[100];
+    int dummy;
 
     MPI_Comm_size(mat->comm, &npes);
     MPI_Comm_rank(mat->comm, &mype);
@@ -503,7 +504,7 @@ void RhsRead(double *rhs, Matrix *mat, char *filename)
     assert(file != NULL);
 
     fgets(line, 100, file);
-    converted = sscanf(line, "%d %*d", &num_rows);
+    converted = sscanf(line, "%d %d", &num_rows, &dummy);
     assert(num_rows == mat->end_rows[npes-1]);
 
     /* Read own rows first */
