@@ -1,0 +1,31 @@
+#ifndef HYPRE_SEQUENTIAL
+#undef HYPRE_SEQUENTIAL
+#endif
+
+#ifndef HYPRE_MEMORY_DMALLOC
+#undef HYPRE_MEMORY_DMALLOC
+#endif
+
+#ifndef HYPRE_TIMING
+#undef HYPRE_TIMING
+#endif
+
+#ifndef HYPRE_USING_OPENMP
+#undef HYPRE_USING_OPENMP
+#endif
+
+#ifndef HYPRE_USING_IBM_SMP
+#undef HYPRE_USING_IBM_SMP
+#endif
+
+#ifndef HYPRE_USING_SGI_SMP
+#undef HYPRE_USING_SGI_SMP
+#endif
+
+#ifndef HYPRE_USING_PGCC_SMP
+#undef HYPRE_USING_PGCC_SMP
+#endif
+
+#ifndef HYPRE_USE_PTHREADS
+#undef HYPRE_USE_PTHREADS
+#endif
