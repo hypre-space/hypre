@@ -1,0 +1,339 @@
+ ARPACK provides a means to trace the progress of the computation
+ as it proceeds.  Various levels of output may be specified
+ from no output, level = 0, to voluminous, level = 3.
+ The following statements may be used within the calling program to 
+ initiate and request this output.
+
+      include 'debug.h'
+      ndigit = -3
+      logfil = 6
+      msgets = 0
+      msaitr = 0
+      msapps = 0
+      msaupd = 1
+      msaup2 = 0
+      mseigt = 0
+      mseupd = 0
+
+ The parameter "logfil" specifies the logical unit number of the output 
+ file.  The parameter "ndigit" specifies the number of decimal digits 
+ and the width of the output lines. A positive value of "ndigit"
+ specifies that 132 columns are used during output and a negative 
+ value specifies eighty columns are to be used. The values of the remaining 
+ parameters indicate the output levels from the indicated routines.  
+
+ For the above example, "msaitr" indicates the level of output requested 
+ for the subroutine ssaitr or dsaitr.  The above configuration will
+ give a breakdown of the number of matrix vector products required,
+ the total number of iterations, the number of re-orthogonalization
+ steps and an estimate of the time spent in each routine and phase of the 
+ computation.  The following output is produced:   
+
+---------------------------------------------------------------------
+     ==========================================
+     = Symmetric implicit Arnoldi update code =
+     = Version Number: 2.1                    =
+     = Version Date:   11/15/95               =
+     ==========================================
+     = Summary of timing statistics           =
+     ==========================================
+
+
+     Total number update iterations             =     8
+     Total number of OP*x operations            =   125
+     Total number of B*x operations             =     0
+     Total number of reorthogonalization steps  =   125
+     Total number of iterative refinement steps =     0
+     Total number of restart steps              =     0
+     Total time in user OP*x operation          =     0.020002
+     Total time in user B*x operation           =     0.000000
+     Total time in Arnoldi update routine       =     0.210021
+     Total time in ssaup2 routine               =     0.190019
+     Total time in basic Arnoldi iteration loop =     0.110011
+     Total time in reorthogonalization phase    =     0.070007
+     Total time in (re)start vector generation  =     0.000000
+     Total time in trid eigenvalue subproblem   =     0.040004
+     Total time in getting the shifts           =     0.000000
+     Total time in applying the shifts          =     0.040004
+     Total time in convergence testing          =     0.000000
+
+---------------------------------------------------------------------
+
+ The user is encouraged to experiment with the other settings 
+ once some familiarity has been gained with the routines. 
+
+ The include statement sets up the storage declarations that are
+ solely associated with this trace debugging feature. "debug.h"
+ has the following structure:
+
+---------------------------------------------------------------------
+c
+c\SCCS Information: @(#) 
+c FILE: debug.h   SID: 2.3   DATE OF SID: 11/16/95   RELEASE: 2 
+c
+c     %---------------------------------%
+c     | See debug.doc for documentation |
+c     %---------------------------------%
+      integer  logfil, ndigit, mgetv0,
+     &         msaupd, msaup2, msaitr, mseigt, msapps, msgets, mseupd,
+     &         mnaupd, mnaup2, mnaitr, mneigh, mnapps, mngets, mneupd,
+     &         mcaupd, mcaup2, mcaitr, mceigh, mcapps, mcgets, mceupd
+      common /debug/ 
+     &         logfil, ndigit, mgetv0,
+     &         msaupd, msaup2, msaitr, mseigt, msapps, msgets, mseupd,
+     &         mnaupd, mnaup2, mnaitr, mneigh, mnapps, mngets, mneupd,
+     &         mcaupd, mcaup2, mcaitr, mceigh, mcapps, mcgets, mceupd
+---------------------------------------------------------------------
+
+
+ The parameters "msaupd, msaup2, msaitr, mseigt, msapps, msgets, mseupd"
+ are for the symmetric codes, while 
+ "mnaupd, mnaup2, mnaitr, mneigh, mnapps, mngets, mneupd" are for the 
+ nonsymmetric codes and, finally, 
+ "mcaupd, mcaup2, mcaitr, mceigh, mcapps, mcgets, mceupd" are for the complex
+ arithmetic codes. A comprehensive break down of each parameter is given
+ below.
+
+ ==========================================================
+ === Common to symmetric, nonsymmetric and complex code ===
+ ==========================================================
+
+
+ logfil:     unit number where the logfile (debug) is written
+
+ ndigit:     number of digits used in the debug output
+ ndigit < 0: printing is done with  72 columns.
+ ndigit > 0: printing is done with 132 columns.
+
+ mgetv0 > 0: print residual vector generated.
+
+             ======================================
+             === Specific to the symmetric code ===
+             ======================================
+
+ msaupd > 0: *Print the number of iterations taken, 
+              number of "converged" eigenvalues,
+              final Ritz values and corresponding Ritz estimates.
+             *Print various timing statistics.
+
+ msaup2 > 0: *Print major iteration number, 
+             number of "converged" Ritz values on exit,
+             B-norm of the residual vector of length NCV factorization,
+             B-norm of the residual vector of length NEV factorization,
+             residual norm before exit,
+             Ritz values and corresponding Ritz estimates before exit.
+ msaup2 > 1: print number of unreduced submatrices,
+             Ritz values and corresponding Ritz estimates of the current 
+             T matrix, actual values for NEV and NP,
+             wanted Ritz values and corresponding Ritz estimates,
+             shifts selected.
+ msaup2 > 2: print "unwanted" Ritz values and corresponding Ritz
+             estimates, order NCV matrix T (diagonal and off-diagonal),
+             unwanted Ritz values and error bounds.
+
+ msaitr > 0: print iteration number, residual norm, restart info
+             print if an off diagonal element of T became negative.
+ msaitr > 1: print the final matrix T.
+ msaitr > 2: print Arnoldi vector no. generate at iteration j,
+             b-norm of residual vector at each iteration,
+             print rnorm and rnorm1 for iterative refinement,
+             print wnorm and rnorm used for Re-orthogonalization,
+             V^T * B * (resid/B-norm(resid)),
+             print the results of whether the current residual vector is 
+             orthogonal to the current Lanczos basis.
+ msaitr > 3: print the matrix T at each iteration.
+             print the residual vector and arnoldi vectors.
+
+ mseigt > 0: print the current matrix T.
+
+ msgets > 0: print NEV and NP,
+             eigenvalues of and corresponding Ritz estimates of the 
+             current T matrix.
+
+ msapps > 0: print information about deflation at row/column no.
+ msapps > 1: print initial matrix T
+             print sigmak, betak and matrix T after all shifts
+ msapps > 2: print the matrix T after the application of each shift.
+ msapps > 3: updated residual for next iteration.
+
+ mseupd > 1: print eigenvalues of the final T matrix,
+             the last row of the eigenvector matrix for T,
+             if reordered, reordered last row of the eigenvector matrix,
+             reordered NCV Ritz values of the final T matrix,
+             if type = 'REGULAR', untransformed "converged" Ritz values 
+             and corresponding Ritz estimates,
+             NCV Ritz values of the final T matrix,
+             last row of the eigenvector matrix for T,
+             if reordered, reordered last row of the eigenvector matrix,
+             reordered NCV Ritz values of the final T.
+
+ mseupd > 2: print the matrix T.
+
+              =========================================
+              === Specific to the nonsymmetric code ===
+              =========================================
+
+ mnaupd > 0: *Print the number of iterations taken, 
+              number of "converged" eigenvalues,
+              real and imaginary parts of the converged Ritz values
+              and their corresponding Ritz estimates,
+             *Print various timing statistics.
+
+ mnaup2 > 0: *Print major iteration number.
+             *Print the number of "converged" Ritz values on exit,
+              and the real and imaginary parts of the "converged" Ritz
+              values and corresponding Ritz estimates.
+ mnaup2 > 1: *Print the length of the Arnoldi Factorization,
+              and the B-norm of its residual vector.
+             *Print NEV and NP, real and imaginary parts of the "wanted"
+              Ritz values and associated Ritz estimates at each
+              iteration.
+             *Print the B-norm of the residual of the compressed
+              factorization and the compressed upper Hessenberg matrix H.
+ mnaup2 > 2: *Print the real and imaginary parts of all the Ritz values
+              and associated Ritz estimates, NEV, NP, NUMCNV, NCONV.
+             *Print the real and imaginary parts of the shifts. If the
+              exact shift strategy is used, print the associated Ritz
+              estimates of the shifts.
+             *Print the real and imaginary parts of the Ritz values
+              and the corresponding Ritz estimates obtained from _neigh.
+
+ mnaitr > 0: *Print if a restart is needed.
+ mnaitr > 1: *Print the number of Arnoldi vector being generated and
+              the B-norm of the current residual.
+ mnaitr > 2: *Print j-th column of the Hessenberg matrix H.
+             *Print reorthogonalization and iterative refinement information,
+             *Print the final upper Hessenberg matrix of order K+NEV.
+ mnaitr > 3: *Print V^T*B*resid/(B-norm(resid)).
+ mnaitr > 4: *Print current upper Hessenberg matrix.
+ mnaitr > 5: *Print updated arnoldi vectors and the residual vector.
+
+ mneigh > 1: *Print the last row of the Schur matrix for H, and
+             the last row of the eigenvector matrix for H.
+ mneigh > 2: *Print the entering upper Hessenberg matrix.
+             *Print the real and imaginary part of eigenvalues
+              of the current Hessenberg matrix, and associated 
+              Ritz estimates. 
+
+ mngets > 0: *Print the real and imaginary parts of the Ritz values
+              of the Hessenberg matrix and their the corresponding 
+              error bounds, KEV, NP.
+
+ mnapps > 0: *Print information about where deflation occured.
+ mnapps > 1: *Print sigmak, betak, order of the final Hessenberg matrix,
+              and the final compressed upper Hessenberg matrix.
+ mnapps > 2: *Print implicit application of shift number, real and imaginary 
+              part of the shift.
+             *Print the indices of the submatrix that the shift is applied.
+ mnapps > 3: *Print the matrix H before and after the application of 
+              each shift, updated residual for next iteration.
+ mnapps > 4: *Print the accumulated orthogonal Hessenberg matrix Q,
+              updated matrix of Arnoldi vectors.
+ 
+ mneupd > 0: *Print the number of converged Ritz values, B-norm of the 
+              residual, all NCV Ritz values and error bounds.
+ mneupd > 1: *Print the final upper Hessenberg matrix computed by _naupd.
+             *If Ritz vectors are requested, print real and imaginary parts 
+              of the eigenvalues and the last row of the Schur vectors as 
+              computed by _neupd. 
+ mneupd > 2: *If Ritz vectors are requested, print the threshold eigenvalue 
+              used for re-ordering.
+             *If Ritz vectors are requested, print the number of eigenvalues
+              to reorder and the number of converged Ritz values.
+             *If Ritz vectors are requested, print the upper quasi-matrix
+              computed by _neupd.
+             *If Ritz vectors are requested, print the real and imaginary
+              part of the Ritz values.
+             *If Ritz vectors are requested, print the last row of the 
+              eigenvector matrix.
+             *Print the NCV Ritz estimates in the original system.
+ mneupd > 3: *Print the integer array of pointers.
+             *If Ritz vectors are requested, print the eigenvector matrix.
+             *If Ritz vectors are requested, print the reordered upper 
+              quasi-triangular matrix.
+ mneupd > 4: *If Ritz vectors are requested, print the Q matrix of the QR 
+              factorization of the matrix representing the wanted invariant 
+              subspace. 
+             *If Ritz vectors are requested, print the Schur vectors.
+             *If Ritz vectors are requested, print the reordered Schur vectors.
+
+              
+             ====================================
+             === Specific to the complex code ===
+             ====================================
+
+ mcaupd > 0: *Print the number of iterations taken, 
+              number of "converged" eigenvalues, the converged Ritz values
+              and their corresponding Ritz estimates,
+             *Print various timing statistics.
+
+ mcaup2 > 0: *Print major iteration number.
+             *Print the number of "converged" Ritz values on exit, and the 
+              "converged" Ritz values and corresponding Ritz estimates.
+ mcaup2 > 1: *Print the length of the Arnoldi Factorization,
+              and the B-norm of its residual vector.
+             *Print NEV and NP, the "wanted" Ritz values and associated Ritz 
+              estimates at each iteration.
+             *Print the B-norm of the residual of the compressed
+              factorization and the compressed upper Hessenberg matrix H.
+ mcaup2 > 2: *Print the all the Ritz values and associated Ritz estimates, 
+              NEV, NP, NUMCNV, NCONV.
+             *Print the shifts. If the exact shift strategy is used, print the 
+              associated Ritz estimates of the shifts.
+             *Print the Ritz values and the corresponding Ritz estimates obtained 
+              from _neigh.
+
+ mcaitr > 0: *Print if a restart is needed.
+ mcaitr > 1: *Print the number of Arnoldi vector being generated and
+              the B-norm of the current residual.
+ mcaitr > 2: *Print j-th column of the Hessenberg matrix H.
+             *Print reorthogonalization and iterative refinement information,
+             *Print the final upper Hessenberg matrix of order K+NEV.
+ mcaitr > 3: *Print V^T*B*resid/(B-norm(resid)).
+ mcaitr > 4: *Print current upper Hessenberg matrix.
+ mcaitr > 5: *Print updated Arnoldi vectors and the residual vector.
+
+ mceigh > 1: *Print the last row of the Schur matrix for H, and
+             the last row of the eigenvector matrix for H.
+ mceigh > 2: *Print the entering upper Hessenberg matrix.
+             *Print the eigenvalues of the current Hessenberg matrix, and 
+              associated Ritz estimates. 
+
+ mcgets > 0: *Print the real and imaginary parts of the Ritz values
+              of the Hessenberg matrix and their the corresponding 
+              error bounds, KEV, NP.
+
+ mcapps > 0: *Print information about where deflation occured.
+ mcapps > 1: *Print sigmak, betak, order of the final Hessenberg matrix,
+              and the final compressed upper Hessenberg matrix.
+ mcapps > 2: *Print implicit application of shift number, the shift.
+             *Print the indices of the submatrix that the shift is applied.
+ mcapps > 3: *Print the matrix H before and after the application of 
+              each shift, updated residual for next iteration.
+ mcapps > 4: *Print the accumulated unitary Hessenberg matrix Q, and the
+              updated matrix of Arnoldi vectors.
+ 
+ mceupd > 0: *Print the number of converged Ritz values, B-norm of the 
+              residual, all NCV Ritz values and error bounds.
+ mceupd > 1: *Print the final upper Hessenberg matrix computed by _naupd.
+             *If Ritz vectors are requested, print the eigenvalues and the 
+              last row of the Schur vectors as computed by _neupd. 
+ mceupd > 2: *If Ritz vectors are requested, print the threshold eigenvalue 
+              used for re-ordering.
+             *If Ritz vectors are requested, print the number of eigenvalues
+              to reorder and the number of converged Ritz values.
+             *If Ritz vectors are requested, print the upper quasi-matrix
+              computed by _neupd.
+             *If Ritz vectors are requested, print the Ritz values.
+             *If Ritz vectors are requested, print the last row of the 
+              eigenvector matrix.
+             *Print the NCV Ritz estimates in the original system.
+ mceupd > 3: *Print the integer array of pointers.
+             *If Ritz vectors are requested, print the eigenvector matrix.
+ mceupd > 4: *If Ritz vectors are requested, print the Q matrix of the QR 
+              factorization of the matrix representing the wanted invariant 
+              subspace. 
+             *If Ritz vectors are requested, print the Schur vectors.
+
+
+
