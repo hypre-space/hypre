@@ -446,7 +446,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
       hypre_TFree(work);
    }
 
-   A = hypre_CreateParCSRMatrix(comm, grid_size, grid_size,
+   A = hypre_ParCSRMatrixCreate(comm, grid_size, grid_size,
                                 global_part, global_part, num_cols_offd,
                                 diag_i[local_num_rows],
                                 offd_i[local_num_rows]);

@@ -203,7 +203,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 
    if (num_procs > 1) 
    {
-   	Ps_ext = hypre_ExtractBExt(P,A,1);
+   	Ps_ext = hypre_ParCSRMatrixExtractBExt(P,A,1);
    	Ps_ext_data = hypre_CSRMatrixData(Ps_ext);
    	Ps_ext_i    = hypre_CSRMatrixI(Ps_ext);
    	Ps_ext_j    = hypre_CSRMatrixJ(Ps_ext);
@@ -254,7 +254,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 	    P_ext_diag_data[cnt_diag++] = Ps_ext_data[j];
          }
    }
-   if (num_procs > 1) hypre_DestroyCSRMatrix(Ps_ext);
+   if (num_procs > 1) hypre_CSRMatrixDestroy(Ps_ext);
 
    if (P_ext_offd_size || num_cols_offd_P)
    {
@@ -734,7 +734,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
       }
    }
 
-   RAP_int = hypre_CreateCSRMatrix(num_cols_offd_RT,num_rows_offd_RT,RAP_size);
+   RAP_int = hypre_CSRMatrixCreate(num_cols_offd_RT,num_rows_offd_RT,RAP_size);
    hypre_CSRMatrixI(RAP_int) = RAP_int_i;
    hypre_CSRMatrixJ(RAP_int) = RAP_int_j;
    hypre_CSRMatrixData(RAP_int) = RAP_int_data;
@@ -750,7 +750,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
         RAP_ext_size = RAP_ext_i[hypre_CSRMatrixNumRows(RAP_ext)];
    }
    if (num_cols_offd_RT)
-   	hypre_DestroyCSRMatrix(RAP_int);
+   	hypre_CSRMatrixDestroy(RAP_int);
  
    RAP_diag_i = hypre_CTAlloc(int, num_cols_diag_P+1);
    RAP_offd_i = hypre_CTAlloc(int, num_cols_diag_P+1);
@@ -1352,12 +1352,12 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
       }
    }
 
-   RAP = hypre_CreateParCSRMatrix(comm, n_coarse, n_coarse, 
+   RAP = hypre_ParCSRMatrixCreate(comm, n_coarse, n_coarse, 
 	coarse_partitioning, coarse_partitioning,
 	num_cols_offd_RAP, RAP_diag_size, RAP_offd_size);
 
 /* Have RAP own coarse_partitioning instead of P */
-   hypre_SetParCSRMatrixColStartsOwner(P,0);
+   hypre_ParCSRMatrixSetColStartsOwner(P,0);
 
    RAP_diag = hypre_ParCSRMatrixDiag(RAP);
    hypre_CSRMatrixData(RAP_diag) = RAP_diag_data; 
@@ -1375,7 +1375,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    if (num_procs > 1)
    {
    	/* hypre_GenerateRAPCommPkg(RAP, A); */
-   	hypre_GenerateMatvecCommunicationInfo(RAP); 
+   	hypre_MatvecCommPkgCreate(RAP); 
    }
 
    *RAP_ptr = RAP;
@@ -1384,12 +1384,12 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
     *  Free R, P_ext and marker arrays.
     *-----------------------------------------------------------------------*/
 
-   hypre_DestroyCSRMatrix(R_diag);
+   hypre_CSRMatrixDestroy(R_diag);
    if (num_cols_offd_RT) 
-	hypre_DestroyCSRMatrix(R_offd);
+	hypre_CSRMatrixDestroy(R_offd);
 
    if (num_sends_RT || num_recvs_RT) 
-	hypre_DestroyCSRMatrix(RAP_ext);
+	hypre_CSRMatrixDestroy(RAP_ext);
 
    hypre_TFree(P_marker);   
    hypre_TFree(A_marker);
@@ -1581,7 +1581,7 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
 
    comm_handle = hypre_InitializeCommunication(0,tmp_comm_pkg,NULL,NULL);
 
-   RAP_ext = hypre_CreateCSRMatrix(num_rows,num_cols,num_nonzeros);
+   RAP_ext = hypre_CSRMatrixCreate(num_rows,num_cols,num_nonzeros);
 
    hypre_CSRMatrixI(RAP_ext) = RAP_ext_i;
    if (num_nonzeros)

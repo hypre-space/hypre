@@ -91,13 +91,14 @@ hypre_ParAMGSolve( void               *amg_vdata,
    F_array[0] = f;
    U_array[0] = u;
 
-   Vtemp = hypre_CreateParVector(hypre_ParCSRMatrixComm(A_array[0]),
+/*   Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                                  hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
                                  hypre_ParCSRMatrixRowStarts(A_array[0]));
-   hypre_InitializeParVector(Vtemp);
-   hypre_SetParVectorPartitioningOwner(Vtemp,0);
+   hypre_ParVectorInitialize(Vtemp);
+   hypre_ParVectorSetPartitioningOwner(Vtemp,0);
    hypre_ParAMGDataVtemp(amg_data) = Vtemp;
-
+*/
+   Vtemp = hypre_ParAMGDataVtemp(amg_data);
    for (j = 1; j < num_levels; j++)
    {
       num_coeffs[j]    = hypre_ParCSRMatrixNumNonzeros(A_array[j]);
@@ -136,12 +137,12 @@ hypre_ParAMGSolve( void               *amg_vdata,
     *    Compute initial fine-grid residual and print 
     *-----------------------------------------------------------------------*/
 
-   hypre_CopyParVector(F_array[0], Vtemp);
-   hypre_ParMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
-   resid_nrm = sqrt(hypre_ParInnerProd(Vtemp, Vtemp));
+   hypre_ParVectorCopy(F_array[0], Vtemp);
+   hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
+   resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
 
    resid_nrm_init = resid_nrm;
-   rhs_norm = sqrt(hypre_ParInnerProd(f, f));
+   rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
    if (rhs_norm)
    {
       relative_resid = resid_nrm_init / rhs_norm;
@@ -178,9 +179,9 @@ hypre_ParAMGSolve( void               *amg_vdata,
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
 
-      hypre_CopyParVector(F_array[0], Vtemp);
-      hypre_ParMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
-      resid_nrm = sqrt(hypre_ParInnerProd(Vtemp, Vtemp));
+      hypre_ParVectorCopy(F_array[0], Vtemp);
+      hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
+      resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
 
       conv_factor = resid_nrm / old_resid;
       if (rhs_norm)

@@ -31,6 +31,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    hypre_ParCSRMatrix **A_array;
    hypre_ParVector    **F_array;
    hypre_ParVector    **U_array;
+   hypre_ParVector     *Vtemp;
    hypre_ParCSRMatrix **P_array;
    int                **CF_marker_array;   
    double              *relax_weight;
@@ -76,7 +77,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    P_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_levels-1);
    CF_marker_array = hypre_CTAlloc(int*, max_levels-1);
 
-   hypre_SetParCSRMatrixNumNonzeros(A);
+   hypre_ParCSRMatrixSetNumNonzeros(A);
    A_array[0] = A;
    /*----------------------------------------------------------
     * Initialize hypre_ParAMGData
@@ -164,7 +165,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
       }
 
       P_array[level] = P; 
-      hypre_DestroyParCSRMatrix(S);
+      hypre_ParCSRMatrixDestroy(S);
       coarse_size = hypre_ParCSRMatrixGlobalNumCols(P);
 
       /* if no coarse-grid, stop coarsening */
@@ -189,7 +190,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
       }
 
       ++level;
-      hypre_SetParCSRMatrixNumNonzeros(A_H);
+      hypre_ParCSRMatrixSetNumNonzeros(A_H);
       A_array[level] = A_H;
 
       if (coarsen_type > 0 && coarse_size >= (fine_size*75)/100)
@@ -217,8 +218,15 @@ hypre_ParAMGSetup( void               *amg_vdata,
    hypre_ParAMGDataRArray(amg_data) = P_array;
 
    /*-----------------------------------------------------------------------
-    * Setup F and U arrays
+    * Setup Vtemp, F and U arrays
     *-----------------------------------------------------------------------*/
+
+   Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
+                                 hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
+                                 hypre_ParCSRMatrixRowStarts(A_array[0]));
+   hypre_ParVectorInitialize(Vtemp);
+   hypre_ParVectorSetPartitioningOwner(Vtemp,0);
+   hypre_ParAMGDataVtemp(amg_data) = Vtemp;
 
    F_array = hypre_CTAlloc(hypre_ParVector*, num_levels);
    U_array = hypre_CTAlloc(hypre_ParVector*, num_levels);
@@ -229,18 +237,18 @@ hypre_ParAMGSetup( void               *amg_vdata,
    for (j = 1; j < num_levels; j++)
    {
       F_array[j] =
-         hypre_CreateParVector(hypre_ParCSRMatrixComm(A_array[j]),
+         hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[j]),
                                hypre_ParCSRMatrixGlobalNumRows(A_array[j]),
                                hypre_ParCSRMatrixRowStarts(A_array[j]));
-      hypre_InitializeParVector(F_array[j]);
-      hypre_SetParVectorPartitioningOwner(F_array[j],0);
+      hypre_ParVectorInitialize(F_array[j]);
+      hypre_ParVectorSetPartitioningOwner(F_array[j],0);
 
       U_array[j] =
-         hypre_CreateParVector(hypre_ParCSRMatrixComm(A_array[j]),
+         hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[j]),
                                hypre_ParCSRMatrixGlobalNumRows(A_array[j]),
                                hypre_ParCSRMatrixRowStarts(A_array[j]));
-      hypre_InitializeParVector(U_array[j]);
-      hypre_SetParVectorPartitioningOwner(U_array[j],0);
+      hypre_ParVectorInitialize(U_array[j]);
+      hypre_ParVectorSetPartitioningOwner(U_array[j],0);
    }
 
    hypre_ParAMGDataFArray(amg_data) = F_array;
@@ -263,13 +271,13 @@ hypre_ParAMGSetup( void               *amg_vdata,
       for (j = 1; j < level+1; j++)
       {
          sprintf(fnam,"SP_A_%d.ysmp",j);
-         hypre_PrintParCSRMatrix(A_array[j],fnam);
+         hypre_ParCSRMatrixPrint(A_array[j],fnam);
       }                         
 
       for (j = 0; j < level; j++)
       { 
          sprintf(fnam,"SP_P_%d.ysmp",j);
-         hypre_PrintParCSRMatrix(P_array[j],fnam);
+         hypre_ParCSRMatrixPrint(P_array[j],fnam);
       }   
    } 
 #endif

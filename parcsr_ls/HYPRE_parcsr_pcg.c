@@ -232,7 +232,7 @@ HYPRE_ParCSRSymPrecondSetup( HYPRE_Solver solver,
    int num_nonzeros_diag;
    int num_nonzeros_offd;
 
-   Asym = hypre_CreateParCSRMatrix(comm, global_num_rows, global_num_cols,
+   Asym = hypre_ParCSRMatrixCreate(comm, global_num_rows, global_num_cols,
                                    row_starts, col_starts, num_cols_offd,
                                    num_nonzeros_diag, num_nonzeros_offd);
 

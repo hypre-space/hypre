@@ -50,10 +50,11 @@ hypre_PCGCreateVector( void *vvector )
    hypre_ParVector *vector = vvector;
    hypre_ParVector *new_vector;
 
-   new_vector = hypre_CreateParVector( hypre_ParVectorComm(vector),
+   new_vector = hypre_ParVectorCreate( hypre_ParVectorComm(vector),
 				       hypre_ParVectorGlobalSize(vector),	
                                        hypre_ParVectorPartitioning(vector) );
-   hypre_InitializeParVector(new_vector);
+   hypre_ParVectorSetPartitioningOwner(new_vector,0);
+   hypre_ParVectorInitialize(new_vector);
 
    return ( (void *) new_vector );
 }
@@ -72,10 +73,11 @@ hypre_PCGCreateVectorArray(int n, void *vvector )
    new_vector = hypre_CTAlloc(hypre_ParVector*,n);
    for (i=0; i < n; i++)
    {
-      new_vector[i] = hypre_CreateParVector( hypre_ParVectorComm(vector),
+      new_vector[i] = hypre_ParVectorCreate( hypre_ParVectorComm(vector),
 				       hypre_ParVectorGlobalSize(vector),	
                                        hypre_ParVectorPartitioning(vector) );
-      hypre_InitializeParVector(new_vector[i]);
+      hypre_ParVectorSetPartitioningOwner(new_vector[i],0);
+      hypre_ParVectorInitialize(new_vector[i]);
    }
 
    return ( (void *) new_vector );
@@ -90,7 +92,7 @@ hypre_PCGDestroyVector( void *vvector )
 {
    hypre_ParVector *vector = vvector;
 
-   return( hypre_DestroyParVector( vector ) );
+   return( hypre_ParVectorDestroy( vector ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -120,7 +122,7 @@ hypre_PCGMatvec( void   *matvec_data,
                  double  beta,
                  void   *y           )
 {
-   return ( hypre_ParMatvec ( alpha,
+   return ( hypre_ParCSRMatrixMatvec ( alpha,
                               (hypre_ParCSRMatrix *) A,
                               (hypre_ParVector *) x,
                                beta,
@@ -139,7 +141,7 @@ hypre_PCGMatvecT(void   *matvec_data,
                  double  beta,
                  void   *y           )
 {
-   return ( hypre_ParMatvecT( alpha,
+   return ( hypre_ParCSRMatrixMatvecT( alpha,
                               (hypre_ParCSRMatrix *) A,
                               (hypre_ParVector *) x,
                                beta,
@@ -164,7 +166,7 @@ double
 hypre_PCGInnerProd( void *x, 
                     void *y )
 {
-   return ( hypre_ParInnerProd( (hypre_ParVector *) x,
+   return ( hypre_ParVectorInnerProd( (hypre_ParVector *) x,
                                 (hypre_ParVector *) y ) );
 }
 
@@ -177,7 +179,7 @@ int
 hypre_PCGCopyVector( void *x, 
                      void *y )
 {
-   return ( hypre_CopyParVector( (hypre_ParVector *) x,
+   return ( hypre_ParVectorCopy( (hypre_ParVector *) x,
                                  (hypre_ParVector *) y ) );
 }
 
@@ -188,7 +190,7 @@ hypre_PCGCopyVector( void *x,
 int
 hypre_PCGClearVector( void *x )
 {
-   return ( hypre_SetParVectorConstantValues( (hypre_ParVector *) x, 0.0 ) );
+   return ( hypre_ParVectorSetConstantValues( (hypre_ParVector *) x, 0.0 ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -199,7 +201,7 @@ int
 hypre_PCGScaleVector( double  alpha,
                       void   *x     )
 {
-   return ( hypre_ScaleParVector( alpha, (hypre_ParVector *) x ) );
+   return ( hypre_ParVectorScale( alpha, (hypre_ParVector *) x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -211,7 +213,7 @@ hypre_PCGAxpy( double alpha,
                void   *x,
                void   *y )
 {
-   return ( hypre_ParAxpy( alpha, (hypre_ParVector *) x,
+   return ( hypre_ParVectorAxpy( alpha, (hypre_ParVector *) x,
                               (hypre_ParVector *) y ) );
 }
 

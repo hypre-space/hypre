@@ -203,7 +203,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 
    if (!comm_pkg)
    {
-        hypre_GenerateMatvecCommunicationInfo(A);
+        hypre_MatvecCommPkgCreate(A);
         comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -231,15 +231,15 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    A_offd_i = hypre_CSRMatrixI(A_offd);
    num_nonzeros_offd = A_offd_i[num_variables];
 
-   S = hypre_CreateParCSRMatrix(comm, global_num_vars, global_num_vars,
+   S = hypre_ParCSRMatrixCreate(comm, global_num_vars, global_num_vars,
 			row_starts, row_starts,
 			num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);
 /* row_starts is owned by A, col_starts = row_starts */
-   hypre_SetParCSRMatrixRowStartsOwner(S,0);
-   hypre_InitializeParCSRMatrix(S);
+   hypre_ParCSRMatrixSetRowStartsOwner(S,0);
+   hypre_ParCSRMatrixInitialize(S);
 
    /* give S same nonzero structure as A */
-   hypre_CopyParCSRMatrix(A,S,0);
+   hypre_ParCSRMatrixCopy(A,S,0);
 
    S_diag = hypre_ParCSRMatrixDiag(S);
    S_diag_i = hypre_CSRMatrixI(S_diag);
@@ -381,19 +381,19 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
     * between 0 and 1.
     *----------------------------------------------------------*/
 
-   ones_vector = hypre_CreateParVector(comm,global_num_vars,row_starts);
-   hypre_SetParVectorPartitioningOwner(ones_vector,0);
-   hypre_InitializeParVector(ones_vector);
-   hypre_SetParVectorConstantValues(ones_vector,-1.0);
+   ones_vector = hypre_ParVectorCreate(comm,global_num_vars,row_starts);
+   hypre_ParVectorSetPartitioningOwner(ones_vector,0);
+   hypre_ParVectorInitialize(ones_vector);
+   hypre_ParVectorSetConstantValues(ones_vector,-1.0);
 
    measure_array = hypre_CTAlloc(double, num_variables+num_cols_offd);
-   measure_vector = hypre_CreateParVector(comm,global_num_vars,row_starts);
-   hypre_SetParVectorPartitioningOwner(measure_vector,0);
+   measure_vector = hypre_ParVectorCreate(comm,global_num_vars,row_starts);
+   hypre_ParVectorSetPartitioningOwner(measure_vector,0);
    hypre_VectorData(hypre_ParVectorLocalVector(measure_vector))=measure_array;
 
    hypre_ParCSRMatrixCommPkg(S) = hypre_ParCSRMatrixCommPkg(A);
 
-   hypre_ParMatvecT(1.0, S, ones_vector, 0.0, measure_vector);
+   hypre_ParCSRMatrixMatvecT(1.0, S, ones_vector, 0.0, measure_vector);
 
    hypre_ParCSRMatrixCommPkg(S) = NULL;
 
@@ -453,7 +453,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    graph_size = num_variables+num_cols_offd;
    if (num_procs > 1)
    {
-      S_ext      = hypre_ExtractBExt(S,A,1);
+      S_ext      = hypre_ParCSRMatrixExtractBExt(S,A,1);
       S_ext_i    = hypre_CSRMatrixI(S_ext);
       S_ext_j    = hypre_CSRMatrixJ(S_ext);
       S_ext_data = hypre_CSRMatrixData(S_ext);
@@ -643,7 +643,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 
       /* print out strength matrix */
       sprintf(filename, "coarsen.out.strength.%04d", iter);
-      hypre_PrintCSRMatrix(S, filename);
+      hypre_CSRMatrixPrint(S, filename);
 
       /* print out C/F marker */
       sprintf(filename, "coarsen.out.CF.%04d", iter);
@@ -1160,8 +1160,8 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
     * Clean up and return
     *---------------------------------------------------*/
 
-   hypre_DestroyParVector(ones_vector);
-   hypre_DestroyParVector(measure_vector);
+   hypre_ParVectorDestroy(ones_vector);
+   hypre_ParVectorDestroy(measure_vector);
    hypre_TFree(graph_array);
    hypre_TFree(buf_data);
    hypre_TFree(int_buf_data);
@@ -1174,7 +1174,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    	MPI_Type_free(&recv_datatype[i]);
    hypre_TFree(recv_datatype);
    hypre_TFree(comm_pkg_mS);
-   if (num_procs > 1) hypre_DestroyCSRMatrix(S_ext);
+   if (num_procs > 1) hypre_CSRMatrixDestroy(S_ext);
 
 
    *S_ptr        = S;
@@ -1325,18 +1325,18 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 
    if (!comm_pkg)
    {
-        hypre_GenerateMatvecCommunicationInfo(A);
+        hypre_MatvecCommPkgCreate(A);
         comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
    num_sends = hypre_CommPkgNumSends(comm_pkg);
    num_strong = A_i[num_variables] - num_variables;
 
-   S = hypre_CreateParCSRMatrix(comm, global_num_vars, global_num_vars,
+   S = hypre_ParCSRMatrixCreate(comm, global_num_vars, global_num_vars,
 			row_starts, row_starts,
 			num_cols_offd, 0, 0);
 /* row_starts is owned by A, col_starts = row_starts */
-   hypre_SetParCSRMatrixRowStartsOwner(S,0);
+   hypre_ParCSRMatrixSetRowStartsOwner(S,0);
    col_map_offd_S = hypre_CTAlloc(int,num_cols_offd);
    for (i=0; i < num_cols_offd; i++)
 	col_map_offd_S[i] = col_map_offd[i];
@@ -1346,7 +1346,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    S_diag = hypre_ParCSRMatrixDiag(S);
    S_offd = hypre_ParCSRMatrixOffd(S);
 
-   ST = hypre_CreateCSRMatrix(num_variables, num_variables, num_strong);
+   ST = hypre_CSRMatrixCreate(num_variables, num_variables, num_strong);
 
    S_i = hypre_CTAlloc(int,num_variables+1);
    hypre_CSRMatrixI(S_diag) = S_i;
@@ -1539,7 +1539,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 
    if ((measure_type || coarsen_type != 1) && num_procs > 1)
    {
-      S_ext      = hypre_ExtractBExt(S,A,0);
+      S_ext      = hypre_ParCSRMatrixExtractBExt(S,A,0);
       S_ext_i    = hypre_CSRMatrixI(S_ext);
       S_ext_j    = hypre_CSRMatrixJ(S_ext);
       num_nonzeros = S_ext_i[num_cols_offd];
@@ -1654,7 +1654,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    }
 
    hypre_TFree(measure_array);
-   hypre_DestroyCSRMatrix(ST);
+   hypre_CSRMatrixDestroy(ST);
 
    if (debug_flag == 3)
    {
@@ -2307,7 +2307,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    hypre_TFree(graph_array);
    hypre_TFree(graph_ptr);
    if ((measure_type || coarsen_type != 1) && num_procs > 1)
-   	hypre_DestroyCSRMatrix(S_ext); 
+   	hypre_CSRMatrixDestroy(S_ext); 
    
    *S_ptr           = S;
    *CF_marker_ptr   = CF_marker;
@@ -2485,7 +2485,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 
    if (!comm_pkg)
    {
-        hypre_GenerateMatvecCommunicationInfo(A);
+        hypre_MatvecCommPkgCreate(A);
         comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -2494,15 +2494,15 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 
    num_nonzeros_offd = A_offd_i[num_variables];
    num_nonzeros_diag = A_diag_i[num_variables];
-   S = hypre_CreateParCSRMatrix(comm, global_num_vars, global_num_vars,
+   S = hypre_ParCSRMatrixCreate(comm, global_num_vars, global_num_vars,
 			row_starts, row_starts,
 			num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);
 /* row_starts is owned by A, col_starts = row_starts */
-   hypre_SetParCSRMatrixRowStartsOwner(S,0);
-   hypre_InitializeParCSRMatrix(S);
+   hypre_ParCSRMatrixSetRowStartsOwner(S,0);
+   hypre_ParCSRMatrixInitialize(S);
 
    /* give S same nonzero structure as A */
-   hypre_CopyParCSRMatrix(A,S,0);
+   hypre_ParCSRMatrixCopy(A,S,0);
 
    S_diag = hypre_ParCSRMatrixDiag(S);
    S_diag_i = hypre_CSRMatrixI(S_diag);
@@ -2637,7 +2637,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
     * generate transpose of S, ST
     *----------------------------------------------------------*/
 
-   ST = hypre_CreateCSRMatrix(num_variables, num_variables, jS);
+   ST = hypre_CSRMatrixCreate(num_variables, num_variables, jS);
 
    ST_i = hypre_CTAlloc(int,num_variables+1);
    hypre_CSRMatrixI(ST) = ST_i;
@@ -2788,7 +2788,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    }
 
    hypre_TFree(i_measure_array);
-   hypre_DestroyCSRMatrix(ST);
+   hypre_CSRMatrixDestroy(ST);
 
    if (debug_flag == 3)
    {
@@ -2924,19 +2924,19 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
     * between 0 and 1.
     *----------------------------------------------------------*/
 
-   ones_vector = hypre_CreateParVector(comm,global_num_vars,row_starts);
-   hypre_SetParVectorPartitioningOwner(ones_vector,0);
-   hypre_InitializeParVector(ones_vector);
-   hypre_SetParVectorConstantValues(ones_vector,-1.0);
+   ones_vector = hypre_ParVectorCreate(comm,global_num_vars,row_starts);
+   hypre_ParVectorSetPartitioningOwner(ones_vector,0);
+   hypre_ParVectorInitialize(ones_vector);
+   hypre_ParVectorSetConstantValues(ones_vector,-1.0);
 
    measure_array = hypre_CTAlloc(double, num_variables+num_cols_offd);
-   measure_vector = hypre_CreateParVector(comm,global_num_vars,row_starts);
-   hypre_SetParVectorPartitioningOwner(measure_vector,0);
+   measure_vector = hypre_ParVectorCreate(comm,global_num_vars,row_starts);
+   hypre_ParVectorSetPartitioningOwner(measure_vector,0);
    hypre_VectorData(hypre_ParVectorLocalVector(measure_vector))=measure_array;
 
    hypre_ParCSRMatrixCommPkg(S) = hypre_ParCSRMatrixCommPkg(A);
 
-   hypre_ParMatvecT(1.0, S, ones_vector, 0.0, measure_vector);
+   hypre_ParCSRMatrixMatvecT(1.0, S, ones_vector, 0.0, measure_vector);
 
    hypre_ParCSRMatrixCommPkg(S) = NULL;
 
@@ -2995,7 +2995,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    graph_size = num_variables+num_cols_offd;
    if (num_procs > 1)
    {
-      S_ext      = hypre_ExtractBExt(S,A,1);
+      S_ext      = hypre_ParCSRMatrixExtractBExt(S,A,1);
       S_ext_i    = hypre_CSRMatrixI(S_ext);
       S_ext_j    = hypre_CSRMatrixJ(S_ext);
       S_ext_data = hypre_CSRMatrixData(S_ext);
@@ -3187,7 +3187,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 
       /* print out strength matrix */
       sprintf(filename, "coarsen.out.strength.%04d", iter);
-      hypre_PrintCSRMatrix(S, filename);
+      hypre_CSRMatrixPrint(S, filename);
 
       /* print out C/F marker */
       sprintf(filename, "coarsen.out.CF.%04d", iter);
@@ -3715,8 +3715,8 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
     * Clean up and return
     *---------------------------------------------------*/
 
-   hypre_DestroyParVector(ones_vector);
-   hypre_DestroyParVector(measure_vector);
+   hypre_ParVectorDestroy(ones_vector);
+   hypre_ParVectorDestroy(measure_vector);
    hypre_TFree(graph_array);
    hypre_TFree(buf_data);
    hypre_TFree(int_buf_data);
@@ -3729,7 +3729,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    	MPI_Type_free(&recv_datatype[i]);
    hypre_TFree(recv_datatype);
    hypre_TFree(comm_pkg_mS);
-   if (num_procs > 1) hypre_DestroyCSRMatrix(S_ext);
+   if (num_procs > 1) hypre_CSRMatrixDestroy(S_ext);
 
 
    *S_ptr        = S;

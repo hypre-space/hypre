@@ -94,13 +94,14 @@ hypre_ParAMGSolveT( void               *amg_vdata,
    F_array[0] = f;
    U_array[0] = u;
 
-   Vtemp = hypre_CreateParVector(hypre_ParCSRMatrixComm(A_array[0]),
+/*   Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                                  hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
                                  hypre_ParCSRMatrixRowStarts(A_array[0]));
-   hypre_InitializeParVector(Vtemp);
-   hypre_SetParVectorPartitioningOwner(Vtemp,0);
+   hypre_ParVectorInitialize(Vtemp);
+   hypre_ParVectorSetPartitioningOwner(Vtemp,0);
    hypre_ParAMGDataVtemp(amg_data) = Vtemp;
-
+*/
+   Vtemp = hypre_ParAMGDataVtemp(amg_data);
    for (j = 1; j < num_levels; j++)
    {
       num_coeffs[j]    = hypre_ParCSRMatrixNumNonzeros(A_array[j]);
@@ -145,12 +146,12 @@ hypre_ParAMGSolveT( void               *amg_vdata,
     *    Compute initial fine-grid residual and print to logfile
     *-----------------------------------------------------------------------*/
 
-   hypre_CopyParVector(F_array[0], Vtemp);
-   hypre_ParMatvecT(alpha, A_array[0], U_array[0], beta, Vtemp);
-   resid_nrm = sqrt(hypre_ParInnerProd(Vtemp, Vtemp));
+   hypre_ParVectorCopy(F_array[0], Vtemp);
+   hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Vtemp);
+   resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
 
    resid_nrm_init = resid_nrm;
-   rhs_norm = sqrt(hypre_ParInnerProd(f, f));
+   rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
    relative_resid = 9999;
    if (rhs_norm)
    {
@@ -184,9 +185,9 @@ hypre_ParAMGSolveT( void               *amg_vdata,
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
 
-      hypre_CopyParVector(F_array[0], Vtemp);
-      hypre_ParMatvecT(alpha, A_array[0], U_array[0], beta, Vtemp);
-      resid_nrm = sqrt(hypre_ParInnerProd(Vtemp, Vtemp));
+      hypre_ParVectorCopy(F_array[0], Vtemp);
+      hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Vtemp);
+      resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
 
       conv_factor = resid_nrm / old_resid;
       relative_resid = 9999;
@@ -448,27 +449,27 @@ hypre_ParAMGCycleT( void              *amg_vdata,
       {
                                
          /*---------------------------------------------------------------
-          * Visit coarser level next.  Compute residual using hypre_ParMatvec.
+          * Visit coarser level next.  Compute residual using hypre_ParCSRMatrixMatvec.
           * Use interpolation (since transpose i.e. P^TATR instead of
-          * RAP) using hypre_ParMatvecT.
+          * RAP) using hypre_ParCSRMatrixMatvecT.
           * Reset counters and cycling parameters for coarse level
           *--------------------------------------------------------------*/
 
          fine_grid = level;
          coarse_grid = level + 1;
 
-         hypre_SetParVectorConstantValues(U_array[coarse_grid], 0.0);
+         hypre_ParVectorSetConstantValues(U_array[coarse_grid], 0.0);
           
-         hypre_CopyParVector(F_array[fine_grid],Vtemp);
+         hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
          alpha = -1.0;
          beta = 1.0;
-         hypre_ParMatvecT(alpha, A_array[fine_grid], U_array[fine_grid],
+         hypre_ParCSRMatrixMatvecT(alpha, A_array[fine_grid], U_array[fine_grid],
                          beta, Vtemp);
 
          alpha = 1.0;
          beta = 0.0;
 
-         hypre_ParMatvecT(alpha,P_array[fine_grid],Vtemp,
+         hypre_ParCSRMatrixMatvecT(alpha,P_array[fine_grid],Vtemp,
                           beta,F_array[coarse_grid]);
 
          ++level;
@@ -483,7 +484,7 @@ hypre_ParAMGCycleT( void              *amg_vdata,
          /*---------------------------------------------------------------
           * Visit finer level next.
           * Use restriction (since transpose i.e. P^TA^TR instead of RAP)
-          * and add correction using hypre_ParMatvec.
+          * and add correction using hypre_ParCSRMatrixMatvec.
           * Reset counters and cycling parameters for finer level.
           *--------------------------------------------------------------*/
 
@@ -492,7 +493,7 @@ hypre_ParAMGCycleT( void              *amg_vdata,
          alpha = 1.0;
          beta = 1.0;
 
-         hypre_ParMatvec(alpha, R_array[fine_grid], U_array[coarse_grid],
+         hypre_ParCSRMatrixMatvec(alpha, R_array[fine_grid], U_array[coarse_grid],
                          beta, U_array[fine_grid]);            
  
          --level;
@@ -599,13 +600,13 @@ int  hypre_ParAMGRelaxT( hypre_ParCSRMatrix *A,
           * Copy f into temporary vector.
           *-----------------------------------------------------------------*/
         
-         hypre_CopyParVector(f,Vtemp); 
+         hypre_ParVectorCopy(f,Vtemp); 
  
          /*-----------------------------------------------------------------
           * Perform MatvecT Vtemp=f-A^Tu
           *-----------------------------------------------------------------*/
  
-            hypre_ParMatvecT(-1.0,A, u, 1.0, Vtemp);
+            hypre_ParCSRMatrixMatvecT(-1.0,A, u, 1.0, Vtemp);
             for (i = 0; i < n; i++)
             {
  
@@ -665,8 +666,8 @@ int  hypre_ParAMGRelaxT( hypre_ParCSRMatrix *A,
 
 	    hypre_TFree(A_mat); 
             hypre_TFree(b_vec);
-            hypre_DestroyCSRMatrix(A_CSR);
-            hypre_DestroyVector(f_vector);
+            hypre_CSRMatrixDestroy(A_CSR);
+            hypre_VectorDestroy(f_vector);
          
          }
       }

@@ -460,74 +460,74 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
 #if 0
-   HYPRE_PrintParCSRMatrix(A, "driver.out.A");
+   HYPRE_ParCSRMatrixPrint(A, "driver.out.A");
 #endif
 
    if (build_rhs_type == 1)
    {
       /* BuildRHSParFromFile(argc, argv, build_rhs_arg_index, &b); */
       printf("Rhs from file not yet implemented.  Defaults to b=0\n");
-      HYPRE_GetRowPartitioningParCSR(A, &partitioning);
-      HYPRE_GetDimsParCSR(A, &global_m, &global_n);
-      b = HYPRE_CreateParVector(MPI_COMM_WORLD, global_m, partitioning);
-      HYPRE_InitializeParVector(b);
-      HYPRE_SetParVectorConstantValues(b, 0.0);
+      HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
+      HYPRE_ParCSRMatrixGetDims(A, &global_m, &global_n);
+      b = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_m, partitioning);
+      HYPRE_ParVectorInitialize(b);
+      HYPRE_ParVectorSetConstantValues(b, 0.0);
 
-      x = HYPRE_CreateParVector(MPI_COMM_WORLD, global_n, partitioning);
-      HYPRE_InitializeParVector(x);
-      HYPRE_SetParVectorConstantValues(x, 1.0);
+      x = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, partitioning);
+      HYPRE_ParVectorInitialize(x);
+      HYPRE_ParVectorSetConstantValues(x, 1.0);
    }
    else if ( build_rhs_type == 2 )
    {
       BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, A, &b);
 
-      HYPRE_GetRowPartitioningParCSR(A, &partitioning);
-      HYPRE_GetDimsParCSR(A, &global_m, &global_n);
-      x = HYPRE_CreateParVector(MPI_COMM_WORLD, global_n, partitioning);
-      HYPRE_InitializeParVector(x);
-      HYPRE_SetParVectorConstantValues(x, 0.0);      
+      HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
+      HYPRE_ParCSRMatrixGetDims(A, &global_m, &global_n);
+      x = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, partitioning);
+      HYPRE_ParVectorInitialize(x);
+      HYPRE_ParVectorSetConstantValues(x, 0.0);      
    }
    else if ( build_rhs_type == 3 )
    {
 
-      HYPRE_GetRowPartitioningParCSR(A, &partitioning);
-      HYPRE_GetDimsParCSR(A, &global_m, &global_n);
-      b = HYPRE_CreateParVector(MPI_COMM_WORLD, global_m, partitioning);
-      HYPRE_InitializeParVector(b);
-      HYPRE_SetParVectorRandomValues(b, 22775);
-      norm = 1.0/sqrt(HYPRE_ParInnerProd(b,b));
-      ierr = HYPRE_ScaleParVector(norm, b);      
+      HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
+      HYPRE_ParCSRMatrixGetDims(A, &global_m, &global_n);
+      b = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_m, partitioning);
+      HYPRE_ParVectorInitialize(b);
+      HYPRE_ParVectorSetRandomValues(b, 22775);
+      norm = 1.0/sqrt(HYPRE_ParVectorInnerProd(b,b));
+      ierr = HYPRE_ParVectorScale(norm, b);      
 
-      x = HYPRE_CreateParVector(MPI_COMM_WORLD, global_n, partitioning);
-      HYPRE_InitializeParVector(x);
-      HYPRE_SetParVectorConstantValues(x, 0.0);      
+      x = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, partitioning);
+      HYPRE_ParVectorInitialize(x);
+      HYPRE_ParVectorSetConstantValues(x, 0.0);      
    }
    else if ( build_rhs_type == 4 )
    {
 
-      HYPRE_GetRowPartitioningParCSR(A, &partitioning);
-      HYPRE_GetDimsParCSR(A, &global_m, &global_n);
-      x = HYPRE_CreateParVector(MPI_COMM_WORLD, global_n, partitioning);
-      HYPRE_InitializeParVector(x);
-      HYPRE_SetParVectorConstantValues(x, 1.0);      
+      HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
+      HYPRE_ParCSRMatrixGetDims(A, &global_m, &global_n);
+      x = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, partitioning);
+      HYPRE_ParVectorInitialize(x);
+      HYPRE_ParVectorSetConstantValues(x, 1.0);      
 
-      b = HYPRE_CreateParVector(MPI_COMM_WORLD, global_m, partitioning);
-      HYPRE_InitializeParVector(b);
-      HYPRE_ParMatvec(1.0,A,x,0.0,b);
+      b = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_m, partitioning);
+      HYPRE_ParVectorInitialize(b);
+      HYPRE_ParCSRMatrixMatvec(1.0,A,x,0.0,b);
 
-      HYPRE_SetParVectorConstantValues(x, 0.0);      
+      HYPRE_ParVectorSetConstantValues(x, 0.0);      
    }
    else /* if ( build_rhs_type == 0 ) */
    {
-      HYPRE_GetRowPartitioningParCSR(A, &partitioning);
-      HYPRE_GetDimsParCSR(A, &global_m, &global_n);
-      b = HYPRE_CreateParVector(MPI_COMM_WORLD, global_m, partitioning);
-      HYPRE_InitializeParVector(b);
-      HYPRE_SetParVectorConstantValues(b, 0.0);
+      HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
+      HYPRE_ParCSRMatrixGetDims(A, &global_m, &global_n);
+      b = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_m, partitioning);
+      HYPRE_ParVectorInitialize(b);
+      HYPRE_ParVectorSetConstantValues(b, 0.0);
 
-      x = HYPRE_CreateParVector(MPI_COMM_WORLD, global_n, partitioning);
-      HYPRE_InitializeParVector(x);
-      HYPRE_SetParVectorConstantValues(x, 1.0);
+      x = HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, partitioning);
+      HYPRE_ParVectorInitialize(x);
+      HYPRE_ParVectorSetConstantValues(x, 1.0);
    }
    /*-----------------------------------------------------------
     * Solve the system using AMG
@@ -858,9 +858,9 @@ main( int   argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
-   HYPRE_DestroyParCSRMatrix(A);
-   HYPRE_DestroyParVector(b);
-   HYPRE_DestroyParVector(x);
+   HYPRE_ParCSRMatrixDestroy(A);
+   HYPRE_ParVectorDestroy(b);
+   HYPRE_ParVectorDestroy(x);
 /*
    hypre_FinalizeMemoryDebug();
 */
@@ -924,7 +924,7 @@ BuildParFromFile( int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   A = HYPRE_ReadParCSRMatrix(MPI_COMM_WORLD, filename);
+   A = HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, filename);
 
    *A_ptr = A;
 
@@ -1293,13 +1293,13 @@ BuildParFromOneFile( int                  argc,
        * Generate the matrix 
        *-----------------------------------------------------------*/
  
-      A_CSR = HYPRE_ReadCSRMatrix(filename);
+      A_CSR = HYPRE_CSRMatrixRead(filename);
    }
    A = HYPRE_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, A_CSR, NULL, NULL);
 
    *A_ptr = A;
 
-   HYPRE_DestroyCSRMatrix(A_CSR);
+   HYPRE_CSRMatrixDestroy(A_CSR);
 
    return (0);
 }
@@ -1356,14 +1356,14 @@ BuildRhsParFromOneFile( int                  argc,
        * Generate the matrix 
        *-----------------------------------------------------------*/
  
-      b_CSR = HYPRE_ReadVector(filename);
+      b_CSR = HYPRE_VectorRead(filename);
    }
-   HYPRE_GetRowPartitioningParCSR(A, &partitioning);
+   HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
    b = HYPRE_VectorToParVector(MPI_COMM_WORLD, b_CSR, partitioning);
 
    *b_ptr = b;
 
-   HYPRE_DestroyVector(b_CSR);
+   HYPRE_VectorDestroy(b_CSR);
 
    return (0);
 }

@@ -199,26 +199,26 @@ hypre_ParAMGCycle( void              *amg_vdata,
       {
                                
          /*---------------------------------------------------------------
-          * Visit coarser level next.  Compute residual using hypre_ParMatvec.
-          * Perform restriction using hypre_ParMatvecT.
+          * Visit coarser level next.  Compute residual using hypre_ParCSRMatrixMatvec.
+          * Perform restriction using hypre_ParCSRMatrixMatvecT.
           * Reset counters and cycling parameters for coarse level
           *--------------------------------------------------------------*/
 
          fine_grid = level;
          coarse_grid = level + 1;
 
-         hypre_SetParVectorConstantValues(U_array[coarse_grid], 0.0);
+         hypre_ParVectorSetConstantValues(U_array[coarse_grid], 0.0);
           
-         hypre_CopyParVector(F_array[fine_grid],Vtemp);
+         hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
          alpha = -1.0;
          beta = 1.0;
-         hypre_ParMatvec(alpha, A_array[fine_grid], U_array[fine_grid],
+         hypre_ParCSRMatrixMatvec(alpha, A_array[fine_grid], U_array[fine_grid],
                          beta, Vtemp);
 
          alpha = 1.0;
          beta = 0.0;
 
-         hypre_ParMatvecT(alpha,R_array[fine_grid],Vtemp,
+         hypre_ParCSRMatrixMatvecT(alpha,R_array[fine_grid],Vtemp,
                           beta,F_array[coarse_grid]);
 
          ++level;
@@ -232,7 +232,7 @@ hypre_ParAMGCycle( void              *amg_vdata,
                             
          /*---------------------------------------------------------------
           * Visit finer level next.
-          * Interpolate and add correction using hypre_ParMatvec.
+          * Interpolate and add correction using hypre_ParCSRMatrixMatvec.
           * Reset counters and cycling parameters for finer level.
           *--------------------------------------------------------------*/
 
@@ -241,7 +241,7 @@ hypre_ParAMGCycle( void              *amg_vdata,
          alpha = 1.0;
          beta = 1.0;
 
-         hypre_ParMatvec(alpha, P_array[fine_grid], U_array[coarse_grid],
+         hypre_ParCSRMatrixMatvec(alpha, P_array[fine_grid], U_array[coarse_grid],
                          beta, U_array[fine_grid]);            
  
          --level;

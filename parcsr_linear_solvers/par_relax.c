@@ -217,13 +217,13 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
           * Copy f into temporary vector.
           *-----------------------------------------------------------------*/
         
-         hypre_CopyParVector(f,Vtemp); 
+         hypre_ParVectorCopy(f,Vtemp); 
  
          /*-----------------------------------------------------------------
           * Perform Matvec Vtemp=f-Au
           *-----------------------------------------------------------------*/
  
-            hypre_ParMatvec(-1.0,A, u, 1.0, Vtemp);
+            hypre_ParCSRMatrixMatvec(-1.0,A, u, 1.0, Vtemp);
             for (i = 0; i < n; i++)
             {
  
@@ -697,8 +697,8 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
 
 	    hypre_TFree(A_mat); 
             hypre_TFree(b_vec);
-            hypre_DestroyCSRMatrix(A_CSR);
-            hypre_DestroyVector(f_vector);
+            hypre_CSRMatrixDestroy(A_CSR);
+            hypre_VectorDestroy(f_vector);
          
          }
       }

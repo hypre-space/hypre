@@ -91,7 +91,8 @@ hypre_GMRESDestroy( void *gmres_vdata )
       hypre_PCGMatvecDestroy(gmres_data -> matvec_data);
  
       hypre_PCGDestroyVector(gmres_data -> r);
-      for (i = 0; i < (gmres_data -> k_dim); i++)
+      hypre_PCGDestroyVector(gmres_data -> w);
+      for (i = 0; i < (gmres_data -> k_dim+1); i++)
       {
 	 hypre_PCGDestroyVector( (gmres_data -> p) [i]);
       }
@@ -229,9 +230,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
            printf("Norm of b is zero. Exiting on residual norm.\n");
            b_norm = 1;
 
-/*         hypre_PCGCopyVector(b,x);
+           hypre_PCGCopyVector(b,x);
 	   ierr = 0;
-	   return ierr; */
+	   return ierr; 
 
 	}
       	t = 1.0 / r_norm;

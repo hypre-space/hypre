@@ -133,7 +133,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    if (!comm_pkg)
    {
-	hypre_GenerateMatvecCommunicationInfo(A);
+	hypre_MatvecCommPkgCreate(A);
 	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -171,7 +171,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    if (num_procs > 1)
    {
-      A_ext      = hypre_ExtractBExt(A,A,1);
+      A_ext      = hypre_ParCSRMatrixExtractBExt(A,A,1);
       A_ext_i    = hypre_CSRMatrixI(A_ext);
       A_ext_j    = hypre_CSRMatrixJ(A_ext);
       A_ext_data = hypre_CSRMatrixData(A_ext);
@@ -862,7 +862,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 					 num_cols_P_offd);
    }
 
-   P = hypre_CreateParCSRMatrix(comm, 
+   P = hypre_ParCSRMatrixCreate(comm, 
                                 hypre_ParCSRMatrixGlobalNumRows(A), 
                                 total_global_cpts,
                                 hypre_ParCSRMatrixColStarts(A),
@@ -907,7 +907,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    hypre_TFree(P_marker);  
    hypre_TFree(P_marker_offd);
 
-   if (num_procs > 1) hypre_DestroyCSRMatrix(A_ext);
+   if (num_procs > 1) hypre_CSRMatrixDestroy(A_ext);
 
 
    return(0);  
