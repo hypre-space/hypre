@@ -246,6 +246,11 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_TFree (hypre_ParAMGDataOmega(amg_data));
       hypre_ParAMGDataOmega(amg_data) = NULL; 
    }
+   if (hypre_ParAMGDataDofFunc(amg_data))
+   {
+      hypre_TFree (hypre_ParAMGDataDofFunc(amg_data));
+      hypre_ParAMGDataDofFunc(amg_data) = NULL; 
+   }
    if (hypre_ParAMGDataGridRelaxPoints(amg_data))
    {
       for (i=0; i < 4; i++)
@@ -275,7 +280,7 @@ hypre_BoomerAMGDestroy( void *data )
 
    if (hypre_ParAMGDataDofFuncArray(amg_data))
    {
-      for (i=0; i < num_levels; i++)
+      for (i=1; i < num_levels; i++)
 	 hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data)[i]);
       hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data));
       hypre_ParAMGDataDofFuncArray(amg_data) = NULL;
