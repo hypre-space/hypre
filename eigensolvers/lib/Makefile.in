@@ -246,15 +246,16 @@ target_alias = @target_alias@
 @STATICONLY_FALSE@libHYPRE_lobpcg_la_LDFLAGS = -avoid-version
 include_HEADERS = \
  $(top_srcdir)/eigensolvers/krylov/HYPRE_interpreter.h\
- $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.h
-
-noinst_HEADERS = \
+ $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.h\
  $(top_srcdir)/eigensolvers/krylov/lobpcg.h\
  $(top_srcdir)/eigensolvers/multivector/multivector.h\
+ $(top_srcdir)/eigensolvers/utilities/fortran_matrix.h\
+ $(top_srcdir)/utilities/fortran.h
+
+noinst_HEADERS = \
  $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.h\
  $(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.h\
- $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.h\
- $(top_srcdir)/eigensolvers/utilities/fortran_matrix.h
+ $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.h
 
 dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 AM_CPPFLAGS = \
@@ -540,7 +541,7 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
-	$(mkdir_p) $(distdir)/../../eigensolvers/krylov $(distdir)/../../eigensolvers/multivector $(distdir)/../../eigensolvers/parcsr_ls $(distdir)/../../eigensolvers/sstruct_ls $(distdir)/../../eigensolvers/struct_ls $(distdir)/../../eigensolvers/utilities
+	$(mkdir_p) $(distdir)/../../eigensolvers/krylov $(distdir)/../../eigensolvers/multivector $(distdir)/../../eigensolvers/parcsr_ls $(distdir)/../../eigensolvers/sstruct_ls $(distdir)/../../eigensolvers/struct_ls $(distdir)/../../eigensolvers/utilities $(distdir)/../../utilities
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
