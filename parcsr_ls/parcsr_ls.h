@@ -163,7 +163,7 @@ int hypre_ParAMGRelaxT P((hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_m
 
 /* par_coarsen.c */
 int hypre_ParAMGCoarsen P((hypre_ParCSRMatrix *A , double strength_threshold , hypre_ParCSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
-int hypre_ParAMGCoarsenRuge P((hypre_ParCSRMatrix *A , double strength_threshold , int measure_type , int coarsen_type , hypre_ParCSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
+int hypre_ParAMGCoarsenRuge P((hypre_ParCSRMatrix *A , double strength_threshold , int measure_type , int coarsen_type , int debug_type, hypre_ParCSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
 
 /* par_cycle.c */
 int hypre_ParAMGCycle P((void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array ));

@@ -105,7 +105,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
       if (coarsen_type)
       {
 	 hypre_ParAMGCoarsenRuge(A_array[level], strong_threshold,
-                          measure_type, coarsen_type,
+                          measure_type, coarsen_type, debug_flag,
 			  &S, &CF_marker, &coarse_size); 
       }
       else
