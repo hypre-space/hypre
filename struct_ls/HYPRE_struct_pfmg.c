@@ -91,6 +91,17 @@ HYPRE_StructPFMGSetMaxIter( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructPFMGSetMaxLevels
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructPFMGSetMaxLevels( HYPRE_StructSolver solver,
+                              int                max_levels  )
+{
+   return( hypre_PFMGSetMaxLevels( (void *) solver, max_levels ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructPFMGSetRelChange
  *--------------------------------------------------------------------------*/
 

@@ -156,6 +156,22 @@ hypre_PFMGSetMaxIter( void *pfmg_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PFMGSetMaxLevels
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PFMGSetMaxLevels( void *pfmg_vdata,
+                        int   max_levels  )
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   (pfmg_data -> max_levels) = max_levels;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_PFMGSetRelChange
  *--------------------------------------------------------------------------*/
 
