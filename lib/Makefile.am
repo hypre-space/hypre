@@ -333,6 +333,7 @@ MOSTFILES = \
  $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c\
  $(top_srcdir)/eigensolvers/krylov/lobpcg.c\
  $(top_srcdir)/eigensolvers/multivector/multivector.c\
+ $(top_srcdir)/eigensolvers/multivector/temp_multivector.c\
  $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c\
  $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c\
  $(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c\

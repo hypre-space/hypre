@@ -291,6 +291,7 @@ am__libHYPRE_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c \
 	$(top_srcdir)/eigensolvers/krylov/lobpcg.c \
 	$(top_srcdir)/eigensolvers/multivector/multivector.c \
+	$(top_srcdir)/eigensolvers/multivector/temp_multivector.c \
 	$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c \
 	$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c \
 	$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c \
@@ -621,9 +622,9 @@ am__objects_4 = bicgs.$(OBJEXT) bicgstabl.$(OBJEXT) \
 	HYPRE_ConvertPETScMatrixToDistributedMatrix.$(OBJEXT) \
 	HYPRE_ConvertParCSRMatrixToDistributedMatrix.$(OBJEXT) \
 	HYPRE_lobpcg.$(OBJEXT) lobpcg.$(OBJEXT) multivector.$(OBJEXT) \
-	HYPRE_parcsr_int.$(OBJEXT) HYPRE_struct_int.$(OBJEXT) \
-	HYPRE_sstruct_int.$(OBJEXT) fortran_matrix.$(OBJEXT) \
-	F90_HYPRE_parcsr_ParaSails.$(OBJEXT) \
+	temp_multivector.$(OBJEXT) HYPRE_parcsr_int.$(OBJEXT) \
+	HYPRE_struct_int.$(OBJEXT) HYPRE_sstruct_int.$(OBJEXT) \
+	fortran_matrix.$(OBJEXT) F90_HYPRE_parcsr_ParaSails.$(OBJEXT) \
 	F90_HYPRE_parcsr_amg.$(OBJEXT) \
 	F90_HYPRE_parcsr_bicgstab.$(OBJEXT) \
 	F90_HYPRE_parcsr_cgnr.$(OBJEXT) \
@@ -884,6 +885,7 @@ am__libHYPRE_LSI_a_SOURCES_DIST =  \
 	$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c \
 	$(top_srcdir)/eigensolvers/krylov/lobpcg.c \
 	$(top_srcdir)/eigensolvers/multivector/multivector.c \
+	$(top_srcdir)/eigensolvers/multivector/temp_multivector.c \
 	$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c \
 	$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c \
 	$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c \
@@ -1327,6 +1329,7 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c \
 	$(top_srcdir)/eigensolvers/krylov/lobpcg.c \
 	$(top_srcdir)/eigensolvers/multivector/multivector.c \
+	$(top_srcdir)/eigensolvers/multivector/temp_multivector.c \
 	$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c \
 	$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c \
 	$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c \
@@ -1609,18 +1612,19 @@ am__objects_10 = bicgs.lo bicgstabl.lo FEI_HYPRE_Impl.lo \
 	HYPRE_gmres.lo HYPRE_pcg.lo bicgstab.lo cgnr.lo gmres.lo \
 	pcg.lo HYPRE_ConvertPETScMatrixToDistributedMatrix.lo \
 	HYPRE_ConvertParCSRMatrixToDistributedMatrix.lo \
-	HYPRE_lobpcg.lo lobpcg.lo multivector.lo HYPRE_parcsr_int.lo \
-	HYPRE_struct_int.lo HYPRE_sstruct_int.lo fortran_matrix.lo \
-	F90_HYPRE_parcsr_ParaSails.lo F90_HYPRE_parcsr_amg.lo \
-	F90_HYPRE_parcsr_bicgstab.lo F90_HYPRE_parcsr_cgnr.lo \
-	F90_HYPRE_parcsr_gmres.lo F90_HYPRE_parcsr_pcg.lo \
-	F90_HYPRE_parcsr_pilut.lo F90_hypre_laplace.lo \
-	HYPRE_parcsr_Euclid.lo HYPRE_parcsr_ParaSails.lo \
-	HYPRE_parcsr_amg.lo HYPRE_parcsr_bicgstab.lo \
-	HYPRE_parcsr_cgnr.lo HYPRE_parcsr_gmres.lo \
-	HYPRE_parcsr_hybrid.lo HYPRE_parcsr_pcg.lo \
-	HYPRE_parcsr_pilut.lo HYPRE_parcsr_schwarz.lo amg_hybrid.lo \
-	par_amg.lo par_amg_setup.lo par_amg_solve.lo par_amg_solveT.lo \
+	HYPRE_lobpcg.lo lobpcg.lo multivector.lo temp_multivector.lo \
+	HYPRE_parcsr_int.lo HYPRE_struct_int.lo HYPRE_sstruct_int.lo \
+	fortran_matrix.lo F90_HYPRE_parcsr_ParaSails.lo \
+	F90_HYPRE_parcsr_amg.lo F90_HYPRE_parcsr_bicgstab.lo \
+	F90_HYPRE_parcsr_cgnr.lo F90_HYPRE_parcsr_gmres.lo \
+	F90_HYPRE_parcsr_pcg.lo F90_HYPRE_parcsr_pilut.lo \
+	F90_hypre_laplace.lo HYPRE_parcsr_Euclid.lo \
+	HYPRE_parcsr_ParaSails.lo HYPRE_parcsr_amg.lo \
+	HYPRE_parcsr_bicgstab.lo HYPRE_parcsr_cgnr.lo \
+	HYPRE_parcsr_gmres.lo HYPRE_parcsr_hybrid.lo \
+	HYPRE_parcsr_pcg.lo HYPRE_parcsr_pilut.lo \
+	HYPRE_parcsr_schwarz.lo amg_hybrid.lo par_amg.lo \
+	par_amg_setup.lo par_amg_solve.lo par_amg_solveT.lo \
 	par_cg_relax_wt.lo par_coarse_parms.lo par_coarsen.lo \
 	par_cycle.lo par_difconv.lo par_gsmg.lo par_indepset.lo \
 	par_interp.lo par_laplace.lo par_laplace_27pt.lo \
@@ -1842,6 +1846,7 @@ am__libHYPRE_LSI_la_SOURCES_DIST =  \
 	$(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c \
 	$(top_srcdir)/eigensolvers/krylov/lobpcg.c \
 	$(top_srcdir)/eigensolvers/multivector/multivector.c \
+	$(top_srcdir)/eigensolvers/multivector/temp_multivector.c \
 	$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c \
 	$(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c \
 	$(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c \
@@ -2532,6 +2537,7 @@ MOSTFILES = \
  $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c\
  $(top_srcdir)/eigensolvers/krylov/lobpcg.c\
  $(top_srcdir)/eigensolvers/multivector/multivector.c\
+ $(top_srcdir)/eigensolvers/multivector/temp_multivector.c\
  $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c\
  $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c\
  $(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c\
@@ -4894,6 +4900,15 @@ multivector.obj: $(top_srcdir)/eigensolvers/multivector/multivector.c
 
 multivector.lo: $(top_srcdir)/eigensolvers/multivector/multivector.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o multivector.lo `test -f '$(top_srcdir)/eigensolvers/multivector/multivector.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/multivector/multivector.c
+
+temp_multivector.o: $(top_srcdir)/eigensolvers/multivector/temp_multivector.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o temp_multivector.o `test -f '$(top_srcdir)/eigensolvers/multivector/temp_multivector.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/multivector/temp_multivector.c
+
+temp_multivector.obj: $(top_srcdir)/eigensolvers/multivector/temp_multivector.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o temp_multivector.obj `if test -f '$(top_srcdir)/eigensolvers/multivector/temp_multivector.c'; then $(CYGPATH_W) '$(top_srcdir)/eigensolvers/multivector/temp_multivector.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/eigensolvers/multivector/temp_multivector.c'; fi`
+
+temp_multivector.lo: $(top_srcdir)/eigensolvers/multivector/temp_multivector.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o temp_multivector.lo `test -f '$(top_srcdir)/eigensolvers/multivector/temp_multivector.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/multivector/temp_multivector.c
 
 HYPRE_parcsr_int.o: $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o HYPRE_parcsr_int.o `test -f '$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c' || echo '$(srcdir)/'`$(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c
