@@ -243,10 +243,10 @@ main( int   argc,
       num_grid_sweeps[1] = 4;
       grid_relax_type[1] = relax_default; 
       grid_relax_points[1] = hypre_CTAlloc(int, 4); 
-      grid_relax_points[1][1] = 1;
-      grid_relax_points[1][3] = -1;
+      grid_relax_points[1][0] = 1;
+      grid_relax_points[1][1] = -1;
       grid_relax_points[1][2] = -2;
-      grid_relax_points[1][0] = -2;
+      grid_relax_points[1][3] = -2;
    
       /* up cycle */
       num_grid_sweeps[2] = 4;
