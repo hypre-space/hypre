@@ -253,11 +253,11 @@ double MLI_AMGSA::genPLocal(MLI_Matrix *mli_Amat, MLI_Matrix **Pmat_out)
             for ( k = 0; k < nullspace_dim; k++ ) 
                q_array[agg_size*k+j] = P_vecs[k][agg_ind_array[i][j]]; 
          }
-if (i == 0)
+if (i == -1)
 {
 for ( j = 0; j < agg_size; j++ ) 
 {
-printf("%d : ", mypid);
+printf("%d, %d : ", mypid, agg_ind_array[i][j]);
 for ( k = 0; k < nullspace_dim; k++ ) 
 printf(" %10.3e", q_array[agg_size*k+j]);
 printf("\n");
