@@ -52,12 +52,6 @@ initialize_variables ()
 # Define HYPRE_ARCH
 #
   . $StdTestDir/hypre_arch.sh
-  if [ -z "$HYPRE_COMPILE_MACHINE" -o "$HYPRE_COMPILE_MACHINE" = "" ] ; then
-    HYPRE_COMPILE_MACHINE=`hostname`
-  fi
-  if [ -z "$HYPRE_RUN_MACHINE" -o "$HYPRE_RUN_MACHINE" = "" ] ; then
-    HYPRE_RUN_MACHINE=`hostname`
-  fi
 #
 # If NOT started by autotest (hence no HYPRE_*_EMAIL variable
 # defined) default mail to UID only.
@@ -179,6 +173,12 @@ mail_summary () {
   CLIST=""; ELIST=""
   cd $HYPRE_AUTOTEST_DIR
   SUMFILE="autotest.$HYPRE_ARCH.`date '+%Y%m%d'`"
+  if [ -z "$HYPRE_COMPILE_MACHINE" -o "$HYPRE_COMPILE_MACHINE" = "" ] ; then
+    HYPRE_COMPILE_MACHINE=`hostname`
+  fi
+  if [ -z "$HYPRE_RUN_MACHINE" -o "$HYPRE_RUN_MACHINE" = "" ] ; then
+    HYPRE_RUN_MACHINE=`hostname`
+  fi
   printf "%s\n" "--------------------------------------------" > $SUMFILE
   printf "Autotest error summary for %s\n" `date` >> $SUMFILE
   printf "Target architecure: %s\n" $HYPRE_ARCH >> $SUMFILE
@@ -390,7 +390,7 @@ if [ ${BuildOpt} -ne $Skip ] ; then
       ssh ${HYPRE_RUN_MACHINE} "\
       (\
         cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test;\
-        [ -f ./env.${HYPRE_ARCH} ] &&. ./env.${HYPRE_ARCH};\
+        [ -f ./env.${HYPRE_ARCH} ] && . ./env.${HYPRE_ARCH};\
         ./test_drivers.sh $MailOpt\
     )"
     fi
