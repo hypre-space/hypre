@@ -94,16 +94,19 @@ shift
 HYPRE_ARCH="casc"
 HYPRE_INSTALL_DIR=$HYPRE_CASC_INSTALL_DIR/$HYPRE_INSTALL_TYPE
 HYPRE_INSTALL=""
+HYPRE_INSTALL_THREADS=""
 while [ "$*" != "" ]
 do
 case $1 in
     -dec)
         HYPRE_ARCH="dec"
         HYPRE_INSTALL_DIR=$HYPRE_DEC_INSTALL_DIR
+	HYPRE_INSTALL_THREADS="--with-openmp"
         shift;;
     -blue)
         HYPRE_ARCH="blue"
         HYPRE_INSTALL_DIR=$HYPRE_BLUE_INSTALL_DIR
+	HYPRE_INSTALL_THREADS="--with-openmp"
         shift;;
     -red)
         HYPRE_ARCH="red"
@@ -226,7 +229,7 @@ fi
 
 cd $HYPRE_INSTALL_DIR
 
-# Do this only once
+# MPI version. (Do this only once)
 if [ ! -d UPDATE/lib ]
 then
     (
@@ -240,6 +243,25 @@ then
         
         echo "setting permissions ..."
         chmod -fR $HYPRE_INSTALL_PERMISSIONS $HYPRE_INSTALL_DIR/*
+    )
+fi
+
+# MPI + threads version. (Do this only once)
+if [ "$HYPRE_INSTALL_THREADS" != "" ] &&
+   [ ! -d UPDATE/threads/lib ]
+then
+    (
+        HYPRE_INSTALL_DIR=$HYPRE_INSTALL_DIR/UPDATE/threads
+        export HYPRE_INSTALL_DIR
+	mkdir -p $HYPRE_INSTALL_DIR
+        
+        cd UPDATE/src/linear_solvers
+        ./configure $HYPRE_INSTALL_THREADS
+        make install
+        make veryclean
+        
+        echo "setting permissions ..."
+        chmod -fR $HYPRE_INSTALL_PERMISSIONS $HYPRE_INSTALL_DIR
     )
 fi
 
