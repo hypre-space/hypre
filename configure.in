@@ -142,7 +142,7 @@ if test "$OPTCHOICE" = "g"
 then
    CASC_ADD_LIB(cegdb, cegdb, /home/casc/lib, LD)
 
-   if test "$ARCH" != "alpha"
+   if test "$ARCH" != "alpha" && test "$CC" != "cc";
    then
       CASC_CHECK_HEADER(dmalloc.h, /usr/include /usr/local/include \
                                    /home/casc/include,

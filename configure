@@ -2102,7 +2102,7 @@ unset ac_cv_lib_$ac_lib_var
 
 
 
-   if test "$ARCH" != "alpha"
+   if test "$ARCH" != "alpha" && test "$CC" != "cc";
    then
       
             for casc_dir in '' /usr/include /usr/local/include \
