@@ -1070,8 +1070,23 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 
    hypre_CommHandle      *comm_handle;
    int                    data_initial_offset = 0;
+   double                *matrix_data = hypre_StructMatrixData(matrix);
+   double                *matrix_data_comm = matrix_data;
+   /* If matrix_data has an initial segment which is not mesh-based,
+      it will not need to be communicated between processors, so
+      matrix_data_comm will be set to point to the mesh-based part
+      of the data     */
+
    /*-----------------------------------------------------------------------
     * If the CommPkg has not been set up, set it up
+    *
+    * The matrix data array is assumed to have two segments - an initial
+    * segment of data constant over all space, followed by a segment with
+    * comm_num_values matrix entries for each mesh element.  The mesh-dependent
+    * data is, of course, the only part relevent to communications.
+    * For constant_coefficient==0, all the data is mesh-dependent.
+    * For constant_coefficient==1, all  data is constant.
+    * For constant_coefficient==2, both segments are non-null.
     *-----------------------------------------------------------------------*/
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient( matrix );
@@ -1092,6 +1107,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
       stencil = hypre_StructMatrixStencil(matrix);
       stencil_size  = hypre_StructStencilSize(stencil);
       data_initial_offset = stencil_size;
+      matrix_data_comm = &( matrix_data[data_initial_offset] );
    }
 
    comm_pkg = hypre_StructMatrixCommPkg(matrix);
@@ -1103,7 +1119,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
       hypre_CommPkgCreate(comm_info,
                           hypre_StructMatrixDataSpace(matrix),
                           hypre_StructMatrixDataSpace(matrix),
-                          comm_num_values, data_initial_offset,
+                          comm_num_values,
                           hypre_StructMatrixComm(matrix), &comm_pkg);
 
       hypre_StructMatrixCommPkg(matrix) = comm_pkg;
@@ -1111,13 +1127,20 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 
    /*-----------------------------------------------------------------------
     * Update the ghost data
+    * This takes care of the communication needs of all known functions
+    * referencing the matrix.
+    *
+    * At present this is the only place where matrix data gets communicated.
+    * However, comm_pkg is kept as long as the matrix is, in case some
+    * future version hypre has a use for it - e.g. if the user replaces
+    * a matrix with a very similar one, we may not want to recompute comm_pkg.
     *-----------------------------------------------------------------------*/
 
    if ( constant_coefficient!=1 )
    {
       hypre_InitializeCommunication( comm_pkg,
-                                     hypre_StructMatrixData(matrix),
-                                     hypre_StructMatrixData(matrix),
+                                     matrix_data_comm,
+                                     matrix_data_comm,
                                      &comm_handle );
       hypre_FinalizeCommunication( comm_handle );
    }
@@ -1379,6 +1402,10 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
    hypre_StructStencil   *stencil;
    hypre_Index            diag_index;
    int                    data_initial_offset = 0;
+   double                *matrix_data_from = hypre_StructMatrixData(from_matrix);
+   double                *matrix_data_to = hypre_StructMatrixData(to_matrix);
+   double                *matrix_data_comm_from = matrix_data_from;
+   double                *matrix_data_comm_to = matrix_data_to;
 
    /*------------------------------------------------------
     * Set up hypre_CommPkg
@@ -1406,6 +1433,8 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
       assert(stencil_size ==
              hypre_StructStencilSize( hypre_StructMatrixStencil(to_matrix) ) );
       data_initial_offset = stencil_size;
+      matrix_data_comm_from = &( matrix_data_from[data_initial_offset] );
+      matrix_data_comm_to = &( matrix_data_to[data_initial_offset] );
    }
 
    hypre_CreateCommInfoFromGrids(hypre_StructMatrixGrid(from_matrix),
@@ -1414,7 +1443,7 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
    hypre_CommPkgCreate(comm_info,
                        hypre_StructMatrixDataSpace(from_matrix),
                        hypre_StructMatrixDataSpace(to_matrix),
-                       comm_num_values, data_initial_offset,
+                       comm_num_values,
                        hypre_StructMatrixComm(from_matrix), &comm_pkg);
    /* is this correct for periodic? */
 
@@ -1425,8 +1454,8 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
    if ( constant_coefficient!=1 )
    {
       hypre_InitializeCommunication( comm_pkg,
-                                     hypre_StructMatrixData(from_matrix),
-                                     hypre_StructMatrixData(to_matrix),
+                                     matrix_data_comm_from,
+                                     matrix_data_comm_to,
                                      &comm_handle );
       hypre_FinalizeCommunication( comm_handle );
    }
