@@ -769,6 +769,13 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
 
             }
          }
+         else
+	 {
+	    printf("Warning!!! Row %d is not inside proc. %d's partitioning!\n",
+			row, my_id);
+	    printf("Input data have been ignored!!\n");
+	    indx += n;
+	 }
       }
    }
    return ierr;
