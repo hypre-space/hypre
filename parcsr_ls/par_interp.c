@@ -158,7 +158,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    if (num_procs > 1)
    {
-      A_ext      = hypre_ExtractBExt(A,A);
+      A_ext      = hypre_ExtractBExt(A,A,1);
       A_ext_i    = hypre_CSRMatrixI(A_ext);
       A_ext_j    = hypre_CSRMatrixJ(A_ext);
       A_ext_data = hypre_CSRMatrixData(A_ext);

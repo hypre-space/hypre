@@ -433,7 +433,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    graph_size = num_variables+num_cols_offd;
    if (num_procs > 1)
    {
-      S_ext      = hypre_ExtractBExt(S,A);
+      S_ext      = hypre_ExtractBExt(S,A,1);
       S_ext_i    = hypre_CSRMatrixI(S_ext);
       S_ext_j    = hypre_CSRMatrixJ(S_ext);
       S_ext_data = hypre_CSRMatrixData(S_ext);
@@ -1452,7 +1452,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 
    if (num_procs > 1)
    {
-      S_ext      = hypre_ExtractBExt(S,A);
+      S_ext      = hypre_ExtractBExt(S,A,0);
       S_ext_i    = hypre_CSRMatrixI(S_ext);
       S_ext_j    = hypre_CSRMatrixJ(S_ext);
       num_nonzeros = S_ext_i[num_cols_offd];
@@ -1463,8 +1463,8 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 	 if (index > -1 && index < num_variables)
 		measure_array[index]++;
       }
-
    }
+
    /*---------------------------------------------------
     * Initialize the graph array
     *---------------------------------------------------*/
@@ -1692,7 +1692,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    hypre_TFree(graph_array);
    hypre_TFree(graph_ptr);
    hypre_DestroyCSRMatrix(ST);
-   if (num_procs > 1) hypre_DestroyCSRMatrix(S_ext);
+   if (num_procs > 1) hypre_DestroyCSRMatrix(S_ext); 
 
    *S_ptr           = S;
    *CF_marker_ptr   = CF_marker;

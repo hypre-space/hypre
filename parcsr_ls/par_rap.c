@@ -183,7 +183,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 
    if (num_cols_diag_A != n_fine) 
    {
-   	P_ext = hypre_ExtractBExt(P,A);
+   	P_ext = hypre_ExtractBExt(P,A,1);
    	P_ext_data = hypre_CSRMatrixData(P_ext);
    	P_ext_i    = hypre_CSRMatrixI(P_ext);
    	P_ext_j    = hypre_CSRMatrixJ(P_ext);

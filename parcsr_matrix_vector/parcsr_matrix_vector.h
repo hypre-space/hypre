@@ -269,7 +269,7 @@ int main P((int argc , char *argv []));
 
 /* par_csr_matop.c */
 hypre_ParCSRMatrix *hypre_ParMatmul P((hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B ));
-hypre_CSRMatrix *hypre_ExtractBExt P((hypre_ParCSRMatrix *B , hypre_ParCSRMatrix *A ));
+hypre_CSRMatrix *hypre_ExtractBExt P((hypre_ParCSRMatrix *B , hypre_ParCSRMatrix *A , int data ));
 
 /* par_csr_matrix.c */
 hypre_ParCSRMatrix *hypre_CreateParCSRMatrix P((MPI_Comm comm , int global_num_rows , int global_num_cols , int *row_starts , int *col_starts , int num_cols_offd , int num_nonzeros_diag , int num_nonzeros_offd ));

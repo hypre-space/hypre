@@ -125,7 +125,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
         	hypre_GenerateMatvecCommunicationInfo(A);
    	}
 
-   	B_ext = hypre_ExtractBExt(B,A);
+   	B_ext = hypre_ExtractBExt(B,A,1);
    	B_ext_data = hypre_CSRMatrixData(B_ext);
    	B_ext_i    = hypre_CSRMatrixI(B_ext);
    	B_ext_j    = hypre_CSRMatrixJ(B_ext);
@@ -525,7 +525,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix * 
-hypre_ExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A)
+hypre_ExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int data)
 {
    MPI_Comm comm = hypre_ParCSRMatrixComm(B);
    int first_col_diag = hypre_ParCSRMatrixFirstColDiag(B);
@@ -576,7 +576,6 @@ hypre_ExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A)
    int i, j, k, counter;
    int start_index;
    int j_cnt, jrow;
-   int data = 0;
 
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
@@ -587,7 +586,6 @@ hypre_ExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A)
    send_matrix_types = hypre_CTAlloc(MPI_Datatype, num_sends);
    B_ext_i = hypre_CTAlloc(int, num_rows_B_ext+1);
    recv_matrix_types = hypre_CTAlloc(MPI_Datatype, num_recvs);
-   if (diag_data) data = 1;
   
 /*--------------------------------------------------------------------------
  * generate B_int_i through adding number of row-elements of offd and diag
