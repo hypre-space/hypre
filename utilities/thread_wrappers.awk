@@ -57,7 +57,23 @@ BEGIN {
   print "typedef struct {";
   for (i = 1; i <= num_args; i++)
     {
-      print "   "arg_type[i] arg[i]";";
+      m = match(arg_type[i], "[^A-Za-z_0-9]");
+      if (arg_type[i] ~ prefix)
+	{
+	  base_pointer = substr(arg_type[i], m);
+	  if (base_pointer ~ "\*")
+	    {
+	      print "   "arg_type[i] arg[i]";";
+	    }
+	  else
+	    {
+	      print "   "arg_type[i] "*"arg[i]";";
+	    }
+	}
+      else
+	{
+	  print "   "arg_type[i] arg[i]";";
+	}
     }
   print "   "routine_type" returnvalue[hypre_MAX_THREADS];";
   print "} "routine_args";";
@@ -82,15 +98,7 @@ BEGIN {
       m = match(arg_type[i], "[^A-Za-z_0-9]");
       if (arg_type[i] ~ prefix)
 	{
-	  base_pointer = substr(arg_type[i], m);
-	  if (base_pointer ~ "\*")
-	    {
-	      print "         &(*(localargs -> "arg[i]"))[threadid]"endline;
-	    }
-	  else
-	    {
-	      print "         (localargs -> "arg[i]")[threadid]"endline;
-	    }
+	  print "         &(*(localargs -> "arg[i]"))[threadid]"endline;
 	}
       else
 	{
@@ -113,9 +121,25 @@ BEGIN {
   print "";
   for (i = 1; i <= num_args; i++)
     {
-      print "   pushargs."arg[i]" = "arg[i]";";
+      m = match(arg_type[i], "[^A-Za-z_0-9]");
+      if (arg_type[i] ~ prefix)
+	{
+	  base_pointer = substr(arg_type[i], m);
+	  if (base_pointer ~ "\*")
+	    {
+	      print "   pushargs."arg[i]" = "arg[i]";";
+	    }
+	  else
+	    {
+	      print "   pushargs."arg[i]" = &"arg[i]";";
+	    }
+	}
+      else
+	{
+	  print "   pushargs."arg[i]" = "arg[i]";";
+	}
     }
-  print "   for (i = 0; i < NUM_THREADS; i++)";
+  print "   for (i = 0; i < hypre_NumThreads; i++)";
   print "      hypre_work_put( "routine_vptr", (void *)&pushargs );";
   print "";
   print "   hypre_work_wait();";
