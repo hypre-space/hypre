@@ -429,7 +429,20 @@ hypre_MPI_Allreduce( void              *sendbuf,
       break;
    }
 
-   return(0);
+   return 0;
+}
+
+int
+hypre_MPI_Reduce( void              *sendbuf,
+                  void              *recvbuf,
+                  int                count,
+                  hypre_MPI_Datatype datatype,
+                  hypre_MPI_Op       op,
+                  int                root,
+                  hypre_MPI_Comm     comm )
+{ 
+   hypre_MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
+   return 0;
 }
 
 int
