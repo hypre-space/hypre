@@ -16,7 +16,7 @@
  * Data structures
  *--------------------------------------------------------------------------*/
 
-char infile_default[50] = "sstruct_default.in";
+char infile_default[50] = "sstruct.in.default";
 
 typedef int Index[3];
 typedef int ProblemIndex[6];  /* last 3 digits are shifts */
@@ -92,6 +92,14 @@ typedef struct
    Index          **stencil_offsets;
    int            **stencil_vars;
    double         **stencil_values;
+
+   int              symmetric_nentries;
+   int             *symmetric_parts;
+   int             *symmetric_vars;
+   int             *symmetric_to_vars;
+   int             *symmetric_booleans;
+
+   int              ns_symmetric;
 
    int              npools;
    int             *pools;   /* array of size nparts */
@@ -236,6 +244,14 @@ ReadData( char         *filename,
    /*-----------------------------------------------------------
     * Parse the data and fill ProblemData structure
     *-----------------------------------------------------------*/
+
+   data.max_boxsize = 0;
+   data.symmetric_nentries = 0;
+   data.symmetric_parts    = NULL;
+   data.symmetric_vars     = NULL;
+   data.symmetric_to_vars  = NULL;
+   data.symmetric_booleans = NULL;
+   data.ns_symmetric = 0;
 
    sdata_line = sdata;
    while (sdata_line < (sdata + sdata_size))
@@ -494,6 +510,34 @@ ReadData( char         *filename,
             pdata.graph_nentries++;
             data.pdata[part] = pdata;
          }
+         else if ( strcmp(key, "MatrixSetSymmetric:") == 0 )
+         {
+            if ((data.symmetric_nentries % 10) == 0)
+            {
+               size = data.symmetric_nentries + 10;
+               data.symmetric_parts =
+                  hypre_TReAlloc(data.symmetric_parts, int, size);
+               data.symmetric_vars =
+                  hypre_TReAlloc(data.symmetric_vars, int, size);
+               data.symmetric_to_vars =
+                  hypre_TReAlloc(data.symmetric_to_vars, int, size);
+               data.symmetric_booleans =
+                  hypre_TReAlloc(data.symmetric_booleans, int, size);
+            }
+            data.symmetric_parts[data.symmetric_nentries] =
+               strtol(sdata_ptr, &sdata_ptr, 10);
+            data.symmetric_vars[data.symmetric_nentries] =
+               strtol(sdata_ptr, &sdata_ptr, 10);
+            data.symmetric_to_vars[data.symmetric_nentries] =
+               strtol(sdata_ptr, &sdata_ptr, 10);
+            data.symmetric_booleans[data.symmetric_nentries] =
+               strtol(sdata_ptr, &sdata_ptr, 10);
+            data.symmetric_nentries++;
+         }
+         else if ( strcmp(key, "MatrixSetNSSymmetric:") == 0 )
+         {
+            data.ns_symmetric = strtol(sdata_ptr, &sdata_ptr, 10);
+         }
          else if ( strcmp(key, "MatrixSetValues:") == 0 )
          {
             part = strtol(sdata_ptr, &sdata_ptr, 10);
@@ -533,7 +577,6 @@ ReadData( char         *filename,
             pdata.matrix_nentries++;
             data.pdata[part] = pdata;
          }
-
          else if ( strcmp(key, "ProcessPoolCreate:") == 0 )
          {
             data.npools = strtol(sdata_ptr, &sdata_ptr, 10);
@@ -1055,6 +1098,14 @@ DestroyData( ProblemData   data )
    hypre_TFree(data.stencil_vars);
    hypre_TFree(data.stencil_values);
 
+   if (data.symmetric_nentries > 0)
+   {
+      hypre_TFree(data.symmetric_parts);
+      hypre_TFree(data.symmetric_vars);
+      hypre_TFree(data.symmetric_to_vars);
+      hypre_TFree(data.symmetric_booleans);
+   }
+
    hypre_TFree(data.pools);
 
    return 0;
@@ -1494,7 +1545,18 @@ main( int   argc,
    values = hypre_TAlloc(double, data.max_boxsize);
 
    HYPRE_SStructMatrixCreate(MPI_COMM_WORLD, graph, &A);
+
    /* TODO HYPRE_SStructMatrixSetSymmetric(A, 1); */
+   for (entry = 0; entry < data.symmetric_nentries; entry++)
+   {
+      HYPRE_SStructMatrixSetSymmetric(A,
+                                      data.symmetric_parts[entry],
+                                      data.symmetric_vars[entry],
+                                      data.symmetric_to_vars[entry],
+                                      data.symmetric_booleans[entry]);
+   }
+   HYPRE_SStructMatrixSetNSSymmetric(A, data.ns_symmetric);
+
    if ( ((solver_id >= 20) && (solver_id < 30)) ||
         ((solver_id >= 40) && (solver_id < 50)) ||
         (solver_id == 120))
