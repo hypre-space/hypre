@@ -560,6 +560,38 @@ case $HOSTNAME in
      fi
       
    ;;
+
+   n02 )
+
+     if  test "$casc_user_chose_compilers" = "no"
+     then
+        AC_CHECK_PROGS(CC, cc kcc gcc)
+        AC_CHECK_PROGS(CXX, CC KCC g++) 
+        AC_CHECK_PROGS(F77, f77 g77)
+     fi
+
+     if  test "$casc_user_chose_mpi" = "no" && test "$casc_using_mpi" = "yes"
+     then
+        CASC_ADD_LIB(mpi, main, /usr/lib, MPI)
+        if test -z "$MPILIBS"
+        then
+           AC_MSG_WARN([MPI not found--in n02 test-must set manually using --with-flags])
+        fi
+     fi
+
+     CASC_SET_COPT(-O -64)
+     CASC_SET_CDEBUG(-g)
+     CASC_SET_CXXOPT(-64)
+     CASC_SET_CXXDEBUG(-g)
+     CASC_SET_FOPT(-O -64)
+     CASC_SET_FDEBUG(-g)
+     [LDFLAGS="-O -64 ${LDFLAGS}"]
+     if test -z "$casc_using_blas"
+     then
+       casc_using_blas=yes
+     fi
+      
+   ;;
         
 esac
 fi   
@@ -761,28 +793,9 @@ then
   
      if test "$casc_user_chose_compilers" = "no"
      then
-       if test "$casc_using_mpi" = "no"
-       then
          AC_CHECK_PROGS(CC, cc gcc c89)
          AC_CHECK_PROGS(CXX, cxx CC g++) 
          AC_CHECK_PROGS(F77, f77 g77)
-       else 
-         AC_CHECK_PROGS(CC, mpicc mpcc tmcc hcc)
-         AC_CHECK_PROGS(CXX, mpiCC)
-         AC_CHECK_PROGS(F77, mpif77)
-         if test -z "$CC"
-         then
-           AC_CHECK_PROGS(CC, cc gcc)
-         fi
-         if test -z "$CXX"
-         then
-           AC_CHECK_PROGS(CXX, cxx CC g++)
-         fi
-         if test -z "$F77"
-         then
-           AC_CHECK_PROGS(F77, f77 g77)
-         fi
-       fi
      fi
 
      if test "$CC" = "cc" ||
@@ -790,21 +803,23 @@ then
         test "$casc_user_chose_mpi" = "no" &&
         test "$casc_using_mpi" = "yes"
      then
-       CASC_CHECK_HEADER(mpi.h, /usr/local/mpi/include)
+       CASC_CHECK_HEADER(mpi.h, /usr/include)
        MPIINCLUDE="$MPIINCLUDE $INCLUDES"
-       CASC_ADD_LIB(mpi, main, /usr/local/mpi/lib, MPI)
+       CASC_ADD_LIB(mpi, main, /usr/lib, MPI)
        if test -z "$MPILIBS"
        then
          AC_MSG_WARN([MPI not found--in IRIX64 test-must set manually using --with-flags])
        fi
      fi
 
-     CASC_SET_COPT(-O)
+     CFLAGS="$CFLAGS -OPT:Olimit=4096"
+     CASC_SET_COPT(-O -64)
      CASC_SET_CDEBUG(-g)
-     CASC_SET_CXXOPT(-O)
+     CASC_SET_CXXOPT(-64)
      CASC_SET_CXXDEBUG(-g)
-     CASC_SET_FOPT(-O)
+     CASC_SET_FOPT(-O -64)
      CASC_SET_FDEBUG(-g)
+     LDFLAGS="$LDFLAGS -O -64"
    ;;
    
   esac
