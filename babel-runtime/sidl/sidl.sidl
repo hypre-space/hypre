@@ -3,7 +3,7 @@
 // Release:     $Name$
 // Revision:    @(#) $Revision$
 // Date:        $Date$
-// Description: SIDL interface description for the basic SIDL run-time library
+// Description: sidl interface description for the basic sidl run-time library
 // 
 // Copyright (c) 2001, The Regents of the University of Calfornia.
 // Produced at the Lawrence Livermore National Laboratory.
@@ -30,17 +30,17 @@
 // Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 /**
- * The <code>SIDL</code> package contains the fundamental type and interface
- * definitions for the <code>SIDL</code> interface definition language.  It
+ * The <code>sidl</code> package contains the fundamental type and interface
+ * definitions for the <code>sidl</code> interface definition language.  It
  * defines common run-time libraries and common base classes and interfaces.
- * Every interface implicitly inherits from <code>SIDL.BaseInterface</code>
- * and every class implicitly inherits from <code>SIDL.BaseClass</code>.
+ * Every interface implicitly inherits from <code>sidl.BaseInterface</code>
+ * and every class implicitly inherits from <code>sidl.BaseClass</code>.
  * 
  */
-package SIDL version 0.8.2 {
+package sidl version 0.9.0 {
 
   /**
-   * Every interface in <code>SIDL</code> implicitly inherits
+   * Every interface in <code>sidl</code> implicitly inherits
    * from <code>BaseInterface</code>, and it is implemented
    * by <code>BaseClass</code> below.
    */
@@ -49,7 +49,7 @@ package SIDL version 0.8.2 {
     /**
      * <p>
      * Add one to the intrinsic reference count in the underlying object.
-     * Object in <code>SIDL</code> have an intrinsic reference count.
+     * Object in <code>sidl</code> have an intrinsic reference count.
      * Objects continue to exist as long as the reference count is
      * positive. Clients should call this method whenever they
      * create another ongoing reference to an object or interface.
@@ -65,7 +65,7 @@ package SIDL version 0.8.2 {
     /**
      * Decrease by one the intrinsic reference count in the underlying
      * object, and delete the object if the reference is non-positive.
-     * Objects in <code>SIDL</code> have an intrinsic reference count.
+     * Objects in <code>sidl</code> have an intrinsic reference count.
      * Clients should call this method whenever they remove a
      * reference to an object or interface.
      */
@@ -79,7 +79,7 @@ package SIDL version 0.8.2 {
 
     /**
      * Check whether the object can support the specified interface or
-     * class.  If the <code>SIDL</code> type name in <code>name</code>
+     * class.  If the <code>sidl</code> type name in <code>name</code>
      * is supported, then a reference to that object is returned with the
      * reference count incremented.  The callee will be responsible for
      * calling <code>deleteRef</code> on the returned object.  If
@@ -90,7 +90,7 @@ package SIDL version 0.8.2 {
 
     /**
      * Return whether this object is an instance of the specified type.
-     * The string name must be the <code>SIDL</code> type name.  This
+     * The string name must be the <code>sidl</code> type name.  This
      * routine will return <code>true</code> if and only if a cast to
      * the string type name would succeed.
      */
@@ -110,7 +110,7 @@ package SIDL version 0.8.2 {
     /**
      * <p>
      * Add one to the intrinsic reference count in the underlying object.
-     * Object in <code>SIDL</code> have an intrinsic reference count.
+     * Object in <code>sidl</code> have an intrinsic reference count.
      * Objects continue to exist as long as the reference count is
      * positive. Clients should call this method whenever they
      * create another ongoing reference to an object or interface.
@@ -126,7 +126,7 @@ package SIDL version 0.8.2 {
     /**
      * Decrease by one the intrinsic reference count in the underlying
      * object, and delete the object if the reference is non-positive.
-     * Objects in <code>SIDL</code> have an intrinsic reference count.
+     * Objects in <code>sidl</code> have an intrinsic reference count.
      * Clients should call this method whenever they remove a
      * reference to an object or interface.
      */
@@ -140,7 +140,7 @@ package SIDL version 0.8.2 {
 
     /**
      * Check whether the object can support the specified interface or
-     * class.  If the <code>SIDL</code> type name in <code>name</code>
+     * class.  If the <code>sidl</code> type name in <code>name</code>
      * is supported, then a reference to that object is returned with the
      * reference count incremented.  The callee will be responsible for
      * calling <code>deleteRef</code> on the returned object.  If
@@ -151,7 +151,7 @@ package SIDL version 0.8.2 {
 
     /**
      * Return whether this object is an instance of the specified type.
-     * The string name must be the <code>SIDL</code> type name.  This
+     * The string name must be the <code>sidl</code> type name.  This
      * routine will return <code>true</code> if and only if a cast to
      * the string type name would succeed.
      */
@@ -164,11 +164,11 @@ package SIDL version 0.8.2 {
   }
 
   /**
-   * Every exception inherits from <code>BaseException</code>.  This class
-   * provides basic functionality to get and set error messages and stack
+   * Every exception implements <code>BaseException</code>. This interface
+   * declares the basic functionality to get and set error messages and stack
    * traces.
    */
-  class BaseException {
+  interface BaseException {
 
     /**
      * Return the message associated with the exception.
@@ -199,6 +199,40 @@ package SIDL version 0.8.2 {
   }
 
   /**
+   * <code>SIDLException</code> provides the basic functionality of the
+   * <code>BaseException</code> interface for getting and setting error
+   * messages and stack traces.
+   */
+  class SIDLException implements-all BaseException {
+  }
+
+  /**
+   * When loading a dynamically linked library, there are three 
+   * settings: LOCAL, GLOBAL and SCLSCOPE.
+   */
+  enum Scope {
+     /** Attempt to load the symbols into a local namespace. */
+     LOCAL,
+     /** Attempt to load the symbols into the global namespace. */
+     GLOBAL,
+     /** Use the scope setting from the SCL file. */
+     SCLSCOPE
+  }
+
+  /**
+   * When loading a dynmaically linked library, there are three
+   * settings: LAZY, NOW, SCLRESOLVE
+   */
+   enum Resolve {
+     /** Resolve symbols on an as needed basis. */
+     LAZY,
+     /** Resolve all symbols at load time. */
+     NOW,
+     /** Use the resolve setting from the SCL file. */
+     SCLRESOLVE
+   }
+
+  /**
    * The <code>DLL</code> class encapsulates access to a single
    * dynamically linked library.  DLLs are loaded at run-time using
    * the <code>loadLibrary</code> method and later unloaded using
@@ -223,8 +257,27 @@ package SIDL version 0.8.2 {
      * DLL was loaded successfully and false otherwise.  Note that
      * the "ftp:" and "http:" protocols are valid only if the W3C
      * WWW library is available.
+     *
+     * @param uri          the URI to load. This can be a .la file
+     *                     (a metadata file produced by libtool) or
+     *                     a shared library binary (i.e., .so,
+     *                     .dll or whatever is appropriate for your
+     *                     OS)
+     * @param loadGlobally <code>true</code> means that the shared
+     *                     library symbols will be loaded into the
+     *                     global namespace; <code>false</code> 
+     *                     means they will be loaded into a 
+     *                     private namespace. Some operating systems
+     *                     may not be able to honor the value presented
+     *                     here.
+     * @param loadLazy     <code>true</code> instructs the loader to
+     *                     that symbols can be resolved as needed (lazy)
+     *                     instead of requiring everything to be resolved
+     *                     now (at load time).
      */
-    bool loadLibrary(in string uri);
+    bool loadLibrary(in string uri,
+                     in bool loadGlobally,
+                     in bool loadLazy);
 
     /**
      * Get the library name.  This is the name used to load the
@@ -248,7 +301,7 @@ package SIDL version 0.8.2 {
     opaque lookupSymbol(in string linker_name);
 
     /**
-     * Create an instance of the SIDL class.  If the class constructor
+     * Create an instance of the sidl class.  If the class constructor
      * is not defined in this DLL, then return null.
      */
     BaseClass createClass(in string sidl_name);
@@ -256,7 +309,7 @@ package SIDL version 0.8.2 {
 
   /**
    * Class <code>Loader</code> manages dyanamic loading and symbol name
-   * resolution for the SIDL runtime system.  The <code>Loader</code> class
+   * resolution for the sidl runtime system.  The <code>Loader</code> class
    * manages a library search path and keeps a record of all libraries
    * loaded through this interface, including the initial "global" symbols
    * in the main program.  Unless explicitly set, the search path is taken
@@ -291,8 +344,28 @@ package SIDL version 0.8.2 {
      * Load the specified library if it has not already been loaded.
      * The URI format is defined in class <code>DLL</code>.  The search
      * path is not searched to resolve the library name.
+     *
+     * @param uri          the URI to load. This can be a .la file
+     *                     (a metadata file produced by libtool) or
+     *                     a shared library binary (i.e., .so,
+     *                     .dll or whatever is appropriate for your
+     *                     OS)
+     * @param loadGlobally <code>true</code> means that the shared
+     *                     library symbols will be loaded into the
+     *                     global namespace; <code>false</code> 
+     *                     means they will be loaded into a 
+     *                     private namespace. Some operating systems
+     *                     may not be able to honor the value presented
+     *                     here.
+     * @param loadLazy     <code>true</code> instructs the loader to
+     *                     that symbols can be resolved as needed (lazy)
+     *                     instead of requiring everything to be resolved
+     *                     now.
+     * @return if the load was successful, a non-NULL DLL object is returned.
      */
-    static bool loadLibrary(in string uri);
+    static DLL loadLibrary(in string uri,
+                           in bool loadGlobally,
+                           in bool loadLazy);
 
     /**
      * Append the specified DLL to the beginning of the list of already
@@ -309,20 +382,34 @@ package SIDL version 0.8.2 {
     static void unloadLibraries();
 
     /**
-     * Look up the secified symbol name.  If the symbol name cannot be
-     * found in one of the already loaded libraries, then the method will
-     * search through the library search path.  A null is returned if the
-     * symbol could not be resolved.
+     * Find a DLL containing the specified information for a sidl
+     * class. This method searches SCL files in the search path looking
+     * for a shared library that contains the client-side or IOR
+     * for a particular sidl class.
+     *
+     * @param sidl_name  the fully qualified (long) name of the
+     *                   class/interface to be found. Package names
+     *                   are separated by period characters from each
+     *                   other and the class/interface name.
+     * @param target     to find a client-side binding, this is
+     *                   normally the name of the language.
+     *                   To find the implementation of a class
+     *                   in order to make one, you should pass
+     *                   the string "ior/impl" here.
+     * @param lScope     this specifies whether the symbols should
+     *                   be loaded into the global scope, a local
+     *                   scope, or use the setting in the SCL file.
+     * @param lResolve   this specifies whether symbols should be
+     *                   resolved as needed (LAZY), completely
+     *                   resolved at load time (NOW), or use the
+     *                   setting from the SCL file.
+     * @return a non-NULL object means the search was successful.
+     *         The DLL has already been added.
      */
-    static opaque lookupSymbol(in string linker_name);
-
-    /**
-     * Create an instance of the specified SIDL class.  If the class
-     * constructor cannot be found in one of the already loaded libraries,
-     * then the method will search through the library search path.  A null
-     * object is returned if the symbol could not be resolved.
-     */
-    static BaseClass createClass(in string sidl_name);
+    static DLL findLibrary(in string  sidl_name,
+                           in string  target,
+                           in Scope   lScope,
+                           in Resolve lResolve);
   }
 
   /**

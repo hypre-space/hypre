@@ -43,16 +43,17 @@ msgs="
 #
 # Basic startup stuff
 #
-AC_INIT(babel-runtime, 0.8.4, components@llnl.gov)
-AC_CONFIG_SRCDIR([sidl/SIDLArray.h])
+AC_INIT(babel-runtime, 0.9.8, components@llnl.gov)
+AC_CONFIG_SRCDIR([sidl/sidlArray.h])
 AC_CONFIG_AUX_DIR([config])
+AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_TARGET
 
-AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER([sidl/babel_config.h])
+AM_INIT_AUTOMAKE([foreign no-dependencies no-installinfo no-installman no-texinfo.tex 1.8])
+AC_CONFIG_HEADERS([sidl/babel_config.h])
 
-LLNL_CHECK_AUTOMAKE(1.7.1)
-LLNL_CHECK_AUTOCONF(2.54)
+LLNL_CHECK_AUTOMAKE(1.8.3)
+LLNL_CHECK_AUTOCONF(2.59)
 
 
 ############################################################
@@ -80,6 +81,8 @@ AC_PROG_AWK
 AC_PROG_CPP
 AC_PROG_LD
 AC_PROG_LN_S
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
 AC_CHECK_PROGS(PERL, perl /bin/perl /usr/bin/perl /usr/local/bin/perl)
 
 ############################################################
@@ -87,6 +90,8 @@ AC_CHECK_PROGS(PERL, perl /bin/perl /usr/bin/perl /usr/local/bin/perl)
 # C Compiler
 #
 LLNL_CONFIRM_BABEL_C_SUPPORT
+
+ACX_PTHREAD([],[])
 
 ############################################################
 #
@@ -107,6 +112,9 @@ LLNL_CONFIRM_BABEL_CXX_SUPPORT2
 #
 LLNL_CONFIRM_BABEL_JAVA_SUPPORT
 
+# XML
+LLNL_LIBXML_CONFIG
+
 ############################################################
 #
 # Python Support.
@@ -118,13 +126,18 @@ LLNL_CONFIRM_BABEL_PYTHON_SUPPORT
 # F90 Compiler
 #
 LLNL_CONFIRM_BABEL_F90_SUPPORT
+if test "X$enable_fortran90" = "Xyes"; then #begin real F90 checking
+LLNL_CONFIRM_BABEL_F90_SUPPORT2 
+fi #end real F90 checking
+LLNL_CONFIRM_BABEL_F90_SUPPORT3
+
 ############################################################
 #
 # Libtool Options
 #
 AC_LIBTOOL_WIN32_DLL
 AC_LIBTOOL_DLOPEN
-AM_PROG_LIBTOOL
+AC_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
 AC_LIB_LTDL
 
@@ -143,13 +156,12 @@ AM_CONDITIONAL(SUPPORT_CYGWIN, test "X$CYGWIN" = "Xyes")
 # Shared/Dynamic Library Details.
 #
 
-AM_CONDITIONAL(SUPPORT_STATIC, test "X$enable_static" != "Xno")
-if test "X$enable_shared" = "Xno"; then
+AM_CONDITIONAL(SUPPORT_STATIC, test "X$enable_static" = "Xyes")
+AM_CONDITIONAL(SUPPORT_SHARED, test "X$enable_shared" = "Xyes" -a "X$XML2_CONFIG" != "Xno")
+if test "X$enable_shared" != "Xyes" -o "X$XML2_CONFIG" = "Xno"; then
   AC_DEFINE(SIDL_STATIC_LIBRARY, 1, [Define SIDL_STATIC_LIBRARY to force static loading of libraries])
 fi
-
-AM_CONDITIONAL(SUPPORT_SHARED, test "X$enable_shared" != "Xno")
-if test "X$enable_static" = "Xno"; then
+if test "X$enable_static" != "Xyes" -a "X$XML2_CONFIG" != "Xno"; then
   AC_DEFINE(SIDL_DYNAMIC_LIBRARY, 1, [Define SIDL_DYNAMIC_LIBRARY to force dynamic loading of libraries])
 fi
 
@@ -212,10 +224,12 @@ AH_BOTTOM([
 # File Generation
 #
 AC_CONFIG_FILES([Makefile
+                 m4/Makefile
 		 bin/Makefile
 		 config/Makefile
                  java/Makefile
-                 sidl/Makefile])
+                 sidl/Makefile
+		 sidlx/Makefile])
 AC_OUTPUT
 echo "$msgs
 "

@@ -4,7 +4,7 @@
 // Release:	$Name$
 // Revision:	$Revision$
 // Modified:	$Date$
-// Description:	base array for the SIDL Java runtime system
+// Description:	base array for the sidl Java runtime system
 //
 // Copyright (c) 2000-2001, The Regents of the University of Calfornia.
 // Produced at the Lawrence Livermore National Laboratory.
@@ -33,7 +33,7 @@
 package gov.llnl.sidl;
 
 /**
- * Class <code>BaseArray</code> is the base array for all SIDL Java arrays
+ * Class <code>BaseArray</code> is the base array for all sidl Java arrays
  * in the run-time system.  This class provides basic support for bounds
  * checking and management of the IOR array pointer object.
  */
@@ -102,6 +102,40 @@ public abstract class BaseArray {
   public abstract int _upper(int dim);
 
   /**
+   * Abstract method to fetch the stride of the specified dimen of the array.
+   * This method will be implemented in subclasses as a native method.
+   * The specified array dimension must be between zero and the array
+   * dimension minus one.  Invalid values will have unpredictable (but
+   * almost certainly bad) results.
+   */
+  public abstract int _stride(int dim);
+
+  /**
+   * Abstract method returns true if array is ColumnOrder.
+   * This method will be implemented in subclasses as a native method.
+   */
+  public abstract boolean _isColumnOrder();
+
+  /**
+   * Abstract method returns true if array if RowOrder.
+   * This method will be implemented in subclasses as a native method.
+   */
+  public abstract boolean _isRowOrder();
+
+  /** 
+   * Abstract method adds 1 to array's reference count.  Not for users   
+   * but for internal babel stuff.
+   */
+  public abstract void _addRef();
+
+
+  /** Deallocate deletes java's reference to the array (calls deleteRef)
+   *  But does not (nessecarily) case the array to be GCed.
+   */
+  public abstract void _deallocate();
+
+    
+  /**
    * Abstract method to destroy the array.  This will be called by the
    * object finalizer if the array is owned by this object.
    */
@@ -112,7 +146,7 @@ public abstract class BaseArray {
    * lower bounds, and upper bounds.  This routine assumes that the dimension
    * and indices are valid.
    */
-  protected abstract void _reallocate(int dim, int[] lower, int[] upper);
+  protected abstract void _reallocate(int dim, int[] lower, int[] upper, boolean isRow);
  
   /**
    * Destroy the existing array and make it null.  This method deallocates
@@ -126,6 +160,39 @@ public abstract class BaseArray {
     d_array = 0;
     d_owner = true;
   }
+  
+  /**
+   *  Return the pointer to the implementation of the Array (A special 
+   *  function for Object arrays, No touchie!
+   *
+   */
+  public long get_ior_pointer() {
+    return d_array;
+  }
+  
+  /**
+   *  Set the pointer to the implementation of the Array (A special 
+   *  function for Object arrays, No touchie!
+   *
+   */
+  public void set_ior_pointer(long p) {
+    d_array = p;
+  }
+  
+  /**
+   *  Return the array owner flag (A special  function for Object arrays, No touchie!
+   */
+  public boolean get_owner() {
+    return d_owner;
+  }
+
+  /**
+   *  Return the array owner flag (A special  function for Object arrays, No touchie!
+   */
+  public void set_owner(boolean p) {
+    d_owner = p;
+  }
+
 
   /**
    * The finalizer of this object deallocates the IOR array reference if
@@ -142,20 +209,20 @@ public abstract class BaseArray {
    * bounds are inclusive.  An array index out of bounds exception is thrown
    * if any of the indices are invalid.
    */
-  public void reallocate(int dim, int[] lower, int[] upper) {
-    destroy();
+  public void reallocate(int dim, int[] lower, int[] upper, boolean isRow) {
+      destroy();
     if ((lower == null) || (upper == null)) {
       throw new ArrayIndexOutOfBoundsException("Null array index argument");
     }
-    if ((dim != lower.length) || (dim != upper.length)) {
+    if ((dim > lower.length) || (dim > upper.length)) {
       throw new ArrayIndexOutOfBoundsException("Array dimension mismatch");
     }
     for (int d = 0; d < dim; d++) {
-      if (upper[d] < lower[d]) {
+      if (upper[d]+1 < lower[d]) { //An array with 0, -1 as bounds is an empty array.
         throw new ArrayIndexOutOfBoundsException("Upper bound less than lower");
       }
     }
-    _reallocate(dim, lower, upper);
+    _reallocate(dim, lower, upper, isRow);
   }
 
   /**
@@ -248,6 +315,55 @@ public abstract class BaseArray {
     checkIndexBounds(l, 3);
   }
 
+
+/**
+   * Check that the indices are valid for the array.  A null pointer
+   * exception is thrown if the arry is null.  An array index out of
+   * bounds exception is thrown if the index is out of bounds.
+   */
+  protected void checkBounds(int i, int j, int k, int l, int m) {
+    checkNullArray();
+    checkDimension(5);
+    checkIndexBounds(i, 0);
+    checkIndexBounds(j, 1);
+    checkIndexBounds(k, 2);
+    checkIndexBounds(l, 3);
+    checkIndexBounds(m, 4);
+  }
+
+/**
+   * Check that the indices are valid for the array.  A null pointer
+   * exception is thrown if the arry is null.  An array index out of
+   * bounds exception is thrown if the index is out of bounds.
+   */
+  protected void checkBounds(int i, int j, int k, int l, int m, int n) {
+    checkNullArray();
+    checkDimension(6);
+    checkIndexBounds(i, 0);
+    checkIndexBounds(j, 1);
+    checkIndexBounds(k, 2);
+    checkIndexBounds(l, 3);
+    checkIndexBounds(m, 4);
+    checkIndexBounds(n, 5);
+  }
+
+/**
+   * Check that the indices are valid for the array.  A null pointer
+   * exception is thrown if the arry is null.  An array index out of
+   * bounds exception is thrown if the index is out of bounds.
+   */
+  protected void checkBounds(int i, int j, int k, int l, int m, int n, int o) {
+    checkNullArray();
+    checkDimension(7);
+    checkIndexBounds(i, 0);
+    checkIndexBounds(j, 1);
+    checkIndexBounds(k, 2);
+    checkIndexBounds(l, 3);
+    checkIndexBounds(m, 4);
+    checkIndexBounds(n, 5);
+    checkIndexBounds(o, 6);
+  }
+
   /**
    * Return the lower index of the array corresponding to the specified
    * array dimension.  This routine will throw a null pointer exception
@@ -256,7 +372,6 @@ public abstract class BaseArray {
    */
   public int lower(int dim) {
     checkNullArray();
-    checkDimension(dim);
     return _lower(dim);
   }
 
@@ -269,7 +384,18 @@ public abstract class BaseArray {
    */
   public int upper(int dim) {
     checkNullArray();
-    checkDimension(dim);
     return _upper(dim);
   }
+
+  /**
+   * Return the stride of the array corresponding to the specified
+   * array dimension.  This routine will throw a null pointer exception
+   * if the object is null or an array index out of bounds exception if
+   * the specified array dimension is not valid.
+   */
+  public int stride(int dim) {
+    checkNullArray();
+    return _stride(dim);
+  }
+
 } 

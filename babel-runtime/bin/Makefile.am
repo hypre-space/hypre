@@ -30,8 +30,8 @@
 ## along with this program; if not, write to the Free Software Foundation,
 ## Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-AUTOMAKE_OPTIONS = foreign no-dependencies no-installinfo	\
-                   no-installman no-texinfo.tex 1.7
+
+
 
 noinst_SCRIPTS = copy.sh remove.sh
 

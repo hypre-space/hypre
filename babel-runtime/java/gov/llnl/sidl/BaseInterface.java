@@ -4,7 +4,7 @@
 // Release:	$Name$
 // Revision:	$Revision$
 // Modified:	$Date$
-// Description:	base interface for the SIDL Java runtime system
+// Description:	base interface for the sidl Java runtime system
 //
 // Copyright (c) 2000-2001, The Regents of the University of Calfornia.
 // Produced at the Lawrence Livermore National Laboratory.
@@ -33,25 +33,25 @@
 package gov.llnl.sidl;
 
 /**
- * Interface <code>BaseInterface</code> is the base interface for all SIDL
+ * Interface <code>BaseInterface</code> is the base interface for all sidl
  * Java classes in the run-time system.  This class provides support for
  * obtaining the IOR pointer using the <code>_get_ior</code> method.
  */
 public interface BaseInterface {
   /**
-   * Return a long reference to the SIDL IOR object.
+   * Return a long reference to the sidl IOR object.
    */
   abstract public long _get_ior();
 
   /**
-   * Cast this object to the specified SIDL name.  If the cast is invalid,
+   * Cast this object to the specified sidl name.  If the cast is invalid,
    * then return null.  If the cast is successful, then the returned object
    * can be cast to the proper Java type using a standard Java cast.
    */
-  abstract public BaseInterface _cast(String name);
+  abstract public BaseInterface _cast2(String name);
 
   /**
-   * The <code>addRef</code> method will be implemented by the SIDL
+   * The <code>addRef</code> method will be implemented by the sidl
    * base object class.
    */
   public abstract void addRef();

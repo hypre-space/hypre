@@ -4,7 +4,7 @@
 // Release:	$Name$
 // Revision:	$Revision$
 // Modified:	$Date$
-// Description:	base class for the SIDL Java runtime system
+// Description:	base class for the sidl Java runtime system
 //
 // Copyright (c) 2000-2001, The Regents of the University of Calfornia.
 // Produced at the Lawrence Livermore National Laboratory.
@@ -37,7 +37,7 @@ import java.lang.Exception;
 import java.lang.reflect.Constructor;
 
 /**
- * Class <code>BaseClass</code> is the base class for all SIDL Java classes
+ * Class <code>BaseClass</code> is the base class for all sidl Java classes
  * in the run-time system.  This class provides support for dymaic loading,
  * Java JNI name registration, and reference counting.
  */
@@ -47,42 +47,42 @@ abstract public class BaseClass extends Exception implements BaseInterface {
    * the necessary JNI dynamic symbols for this base class.
    */
   static {
-    System.loadLibrary(System.getProperty("sidl.library.name", "sidl"));
-  }
+      System.loadLibrary(System.getProperty("sidl.library.name", "sidl"));
+   }
 
   /*
-   * This data member is a reference to the SIDL internal IOR structure.
+   * This data member is a reference to the sidl internal IOR structure.
    */
   protected long d_ior;
 
   /**
-   * Register native functions for the SIDL interface or class specified in
+   * Register native functions for the sidl interface or class specified in
    * the argument.  This method must be called before any native method is
-   * called on the Java object representing the SIDL symbol.
+   * called on the Java object representing the sidl symbol.
    */
   public static native void _registerNatives(String sidl_symbol);
 
   /**
    * Construct a <code>BaseClass</code> object and initialize the IOR
-   * reference to point to a valid SIDL IOR structure.
+   * reference to point to a valid sidl IOR structure.
    */
   protected BaseClass(long ior) {
     d_ior = ior;
   }
 
   /**
-   * Retrieve a reference to the SIDL IOR structure.
+   * Retrieve a reference to the sidl IOR structure.
    */
   public final long _get_ior() {
     return d_ior;
   }
 
   /**
-   * Cast this object to the specified SIDL name.  If the cast is invalid,
+   * Cast this object to the specified sidl name.  If the cast is invalid,
    * then return null.  If the cast is successful, then the returned object
    * can be cast to the proper Java type using a standard Java cast.
    */
-  public final BaseInterface _cast(String name) {
+  public final BaseInterface _cast2(String name) {
     BaseInterface cast = null;
 
     /*
@@ -93,29 +93,29 @@ abstract public class BaseClass extends Exception implements BaseInterface {
     if (ior != 0) {
       /*
        * Try to load either the Java interface wrapper or the class for this
-       * SIDL object.
+       * sidl object.
        */
       Class java_class = null;
       try {
         java_class = Class.forName(name + "$Wrapper");
       } catch (Exception ex) {
-ex.printStackTrace(System.err);
+	  //ignore this exception
         try {
           java_class = Class.forName(name);
         } catch (Exception ex2) {
-          // ignore exception
+	    ex.printStackTrace(System.err);     
         }
       }
 
       /*
-       * If we found the class, then create a new instance using the SIDL IOR.         */
+       * If we found the class, then create a new instance using the sidl IOR.         */
       if (java_class != null) {
         Class[]  sigs = new Class[]  { Long.TYPE     };
         Object[] args = new Object[] { new Long(ior) };
         try {
           Constructor ctor = java_class.getConstructor(sigs);
           cast = (BaseInterface) ctor.newInstance(args);
-          cast.addRef();
+          addRef();
         } catch (Exception ex) {
 ex.printStackTrace(System.err);
           // ignore exception
@@ -129,7 +129,7 @@ ex.printStackTrace(System.err);
   /**
    * Cast this object to the specified type and return the IOR pointer.
    */
-  private final native long _cast_ior(String name);
+  public final native long _cast_ior(String name);
 
   /**
    * On object destruction, call the native finalize method to reduce

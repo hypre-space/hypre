@@ -30,10 +30,13 @@
 ## along with this program; if not, write to the Free Software Foundation,
 ## Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-AUTOMAKE_OPTIONS = foreign no-dependencies no-installinfo	\
-                   no-installman no-texinfo.tex 1.7
+if WITH_SIDLX
+SIDLX_SUBDIR=sidlx
+else
+SIDLX_SUBDIR=
+endif
 
-SUBDIRS = bin config sidl java
+SUBDIRS = m4 bin config sidl java $(SIDLX_SUBDIR)
 
 #
 # Unfortuntately, Python uses its own makefile system so we have to 
@@ -49,32 +52,37 @@ endif
 
 pydir = $(exec_prefix)/python
 PYTHONLIB = @PYTHONLIB@
-PYTHONISHFILES = python/SIDLObjA.h python/SIDLObjA.c			\
-		 python/SIDLPyArrays.h python/SIDLPyArrays.c		\
+PYTHONISHFILES = python/sidlObjA.h python/sidlObjA.c			\
+		 python/sidlPyArrays.h python/sidlPyArrays.c		\
 		 python/sidlsetup.py python/__init__.py
 
-RUNTIME_ONLY_FILES=python/SIDL/__init__.py \
-		python/SIDL/BaseClass_Module.c \
-		python/SIDL/BaseException_Module.c \
-		python/SIDL/BaseInterface_Module.c \
-		python/SIDL/DLL_Module.c \
-		python/SIDL/Loader_Module.c \
-		python/SIDL_BaseClass_Module.h \
-		python/SIDL_BaseException_Module.h \
-		python/SIDL_BaseInterface_Module.h \
-		python/SIDL_DLL_Module.h \
-		python/SIDL_Loader_Module.h \
-		python/SIDL_BaseClass_IOR.h python/SIDL_BaseClass_IOR.c \
-		python/SIDL_BaseException_IOR.h python/SIDL_BaseException_IOR.c \
-		python/SIDL_BaseInterface_IOR.h python/SIDL_BaseInterface_IOR.c \
-		python/SIDL_DLL_IOR.h python/SIDL_DLL_IOR.c \
-		python/SIDL_Loader_IOR.h python/SIDL_Module_IOR.c \
+RUNTIME_ONLY_FILES=python/sidl/__init__.py \
+		python/sidl/BaseClass_Module.c \
+		python/sidl/BaseException_Module.c \
+		python/sidl/BaseInterface_Module.c \
+		python/sidl/DLL_Module.c \
+		python/sidl/Loader_Module.c \
+		python/sidl/sidlException_Module.c \
+		python/sidl_BaseClass_Module.h \
+		python/sidl_BaseException_Module.h \
+		python/sidl_BaseInterface_Module.h \
+		python/sidl_DLL_Module.h \
+		python/sidl_Loader_Module.h \
+		python/sidl_SIDLException_Module.h \
+		python/sidl_BaseClass_IOR.h python/sidl_BaseClass_IOR.c \
+		python/sidl_BaseException_IOR.h python/sidl_BaseException_IOR.c \
+		python/sidl_BaseInterface_IOR.h python/sidl_BaseInterface_IOR.c \
+		python/sidl_DLL_IOR.h python/sidl_DLL_IOR.c \
+		python/sidl_SIDLException_IOR.h python/sidl_SIDLException_IOR.c \
+		python/sidl_Loader_IOR.h python/sidl_Module_IOR.c \
 		python/setup.py
 
 if BABEL_RUNTIME_ONLY
+babelpythonsrc=$(srcdir)
 all-local-python: all-local-python2
 clean-local-python: clean-local-python2
 else
+babelpythonsrc=.
 all-local-python: all-local-python1
 clean-local-python: clean-local-python1
 endif
@@ -97,7 +105,7 @@ sidl/libsidl.la:
 all-local-python1: python/babel-stamp
 python/babel-stamp: $(PYTHONISHFILES)
 	@-if ! test -d python; then mkdir -p python || exit 1; fi
-	@-if ! test -d python/SIDL; then mkdir -p python/SIDL || exit 1; fi
+	@-if ! test -d python/sidl; then mkdir -p python/sidl || exit 1; fi
 	@-if test "X$(srcdir)" != "X."; then				\
 	  for file in $(PYTHONISHFILES); do				\
 	    d=`dirname $$file`;						\
@@ -117,19 +125,19 @@ python/babel-stamp: $(PYTHONISHFILES)
 	  $(SHELL) ../../bin/babel --suppress-timestamp	 -!		\
 	    --generate-sidl-stdlib -cpython  				\
 	    $$abspath/sidl/sidl.sidl;					\
-	  $(PYTHON) sidlsetup.py --library-dirs=../sidl/.libs		\
-	   --include-dirs=../sidl --include-dirs=../config  build_ext   \
-	   --inplace;							\
-	  $(PYTHON) setup.py --library-dirs=../sidl/.libs		\
-	   --include-dirs=../sidl --include-dirs=../config build_ext 	\
-	   --inplace;							\
+	  $(PYTHON) sidlsetup.py --library-dirs=../sidl/.libs \
+	   --include-dirs=../sidl --include-dirs=../config  $(PYTHON_SETUP_ARGS) build_ext   \
+	   --inplace --rpath=$(libdir);					\
+	  $(PYTHON) setup.py --library-dirs=../sidl/.libs \
+	   --include-dirs=../sidl --include-dirs=../config $(PYTHON_SETUP_ARGS) build_ext 	\
+	   --inplace --rpath=$(libdir);							\
 	fi
 	touch python/babel-stamp
 
 all-local-python2: python/babel-stamp2
 python/babel-stamp2:
 	@-if ! test -d python; then mkdir -p python || exit 1; fi
-	@-if ! test -d python/SIDL; then mkdir -p python/SIDL || exit 1; fi
+	@-if ! test -d python/sidl; then mkdir -p python/sidl || exit 1; fi
 	@-if test "X$(srcdir)" != "X."; then				\
 	  for file in $(PYTHONISHFILES) $(RUNTIME_ONLY_FILES); do	\
 	    d=`dirname $$file`;						\
@@ -142,12 +150,12 @@ python/babel-stamp2:
 	fi
 	@if test -d python; then					\
 	  cd python;							\
-	  $(PYTHON) sidlsetup.py --library-dirs=../sidl/.libs		\
-	   --include-dirs=$(srcdir)/../sidl --include-dirs=../config  build_ext   \
-	   --inplace;							\
-	  $(PYTHON) setup.py --library-dirs=../sidl/.libs		\
-	   --include-dirs=$(srcdir)/../sidl --include-dirs=../config build_ext 	\
-	   --inplace;							\
+	  $(PYTHON) sidlsetup.py --library-dirs=../sidl/.libs \
+	   --include-dirs=$(srcdir)/../sidl --include-dirs=../config $(PYTHON_SETUP_ARGS)  build_ext   \
+	   --inplace --rpath=$(libdir);					\
+	  $(PYTHON) setup.py --library-dirs=../sidl/.libs \
+	   --include-dirs=$(srcdir)/../sidl --include-dirs=../config $(PYTHON_SETUP_ARGS)  build_ext 	\
+	   --inplace --rpath=$(libdir);					\
 	fi
 	touch python/babel-stamp2
 
@@ -160,10 +168,14 @@ clean-local-python1:
              config.c *setup.installed;         			\
           echo rm -f babel-stamp *.so *.dll *.a *.o *~;                 \
 	  rm -f babel-stamp *.so *.dll *.a *.o *~;			\
-	  if test -d SIDL; then						\
-	    cd SIDL;							\
+	  echo rm -f sidl_*IOR.* sidl_*_Module.h setup.py babel.make ;	\
+	  rm -f sidl_*IOR.* sidl_*_Module.h setup.py babel.make ;	\
+	  if test -d sidl; then						\
+	    cd sidl;							\
 	    echo rm -f config.c *.so *.dll *.a *.o *~ *.c *.h __init__.*;\
 	    rm -f config.c *.so *.dll *.a *.o *~ *.c *.h __init__.*;	\
+	    echo rm -f babel.make ; 					\
+	    rm -f babel.make ; 						\
 	  fi;								\
 	fi
 	@-if test "X$(srcdir)" != "X."; then				\
@@ -183,10 +195,12 @@ clean-local-python2:
              config.c *setup.installed;         			\
           echo rm -f babel-stamp *.so *.dll *.a *.o *~;                 \
 	  rm -f babel-stamp *.so *.dll *.a *.o *~;			\
-	  if test -d SIDL; then						\
-	    cd SIDL;							\
-	    echo rm -f config.c *.so *.dll *.a *.o *~  ;		\
-	    rm -f config.c *.so *.dll *.a *.o *~;			\
+	  echo rm -f sidl_*IOR.* sidl_*_Module.h setup.py babel.make ;	\
+	  rm -f sidl*IOR.* sidl_*_Module.h setup.py babel.make ;	\
+	  if test -d sidl; then						\
+	    cd sidl;							\
+	    echo rm -f config.c *.so *.dll *.a *.o *~ babel.make ;	\
+	    rm -f config.c *.so *.dll *.a *.o *~ babel.make ;		\
 	  fi;								\
 	fi
 	@-if test "X$(srcdir)" != "X."; then				\
@@ -219,13 +233,21 @@ install-data-am-python:
 	@$(NORMAL_INSTALL)
 	test -d python || exit 1
 	cd python ;							\
-	$(PYTHON) sidlsetup.py --library-dirs=../sidl/.libs 		\
+	$(PYTHON) sidlsetup.py --library-dirs=../sidl/.libs \
+	 --include-dirs=$(babelpythonsrc)/../sidl --include-dirs=../config      \
+	 $(PYTHON_SETUP_ARGS) build_ext --rpath=$(libdir);		\
+	$(PYTHON) setup.py --library-dirs=../sidl/.libs \
+	 --include-dirs=$(babelpythonsrc)/../sidl --include-dirs=../config 	\
+	 $(PYTHON_SETUP_ARGS) build_ext --rpath=$(libdir);		\
+	$(PYTHON) sidlsetup.py --library-dirs=../sidl/.libs \
 	   --include-dirs=../sidl --include-dirs=../config install 	\
+	   $(PYTHON_SETUP_ARGS) 					\
 	   --prefix=$(DESTDIR)$(prefix) 				\
 	   --exec-prefix=$(DESTDIR)$(exec_prefix)			\
-	   --record=sidlsetup.installed;				\
-	$(PYTHON) setup.py --library-dirs=../sidl/.libs 		\
+	   --record=sidlsetup.installed;		\
+	$(PYTHON) setup.py --library-dirs=../sidl/.libs \
 	   --include-dirs=../sidl  --include-dirs=../config install  	\
+	   $(PYTHON_SETUP_ARGS) 					\
 	   --prefix=$(DESTDIR)$(prefix) 				\
 	   --exec-prefix=$(DESTDIR)$(exec_prefix)			\
 	   --record=setup.installed
