@@ -27,10 +27,6 @@ void amg_SetIPRLX P((int *iprlx , void *data ));
 void amg_SetIERLX P((int *ierlx , void *data ));
 void amg_SetIURLX P((int *iurlx , void *data ));
 void amg_SetIOutDat P((int ioutdat , void *data ));
-void amg_SetIOutGrd P((int ioutgrd , void *data ));
-void amg_SetIOutMat P((int ioutmat , void *data ));
-void amg_SetIOutRes P((int ioutres , void *data ));
-void amg_SetIOutSol P((int ioutsol , void *data ));
 void amg_SetLogFileName P((char *log_file_name , void *data ));
 void amg_SetNumUnknowns P((int num_unknowns , void *data ));
 void amg_SetNumPoints P((int num_points , void *data ));
@@ -48,7 +44,7 @@ void amg_Setup P((Matrix *A , void *data ));
 void amg_Solve P((Vector *u , Vector *f , double tol , void *data ));
 
 /* data.c */
-AMGData *amg_NewData P((int levmax , int ncg , double ecg , int nwt , double ewt , int nstr , int ncyc , int *mu , int *ntrlx , int *iprlx , int *ierlx , int *iurlx , int ioutdat , int ioutgrd , int ioutmat , int ioutres , int ioutsol , char *log_file_name ));
+AMGData *amg_NewData P((int levmax , int ncg , double ecg , int nwt , double ewt , int nstr , int ncyc , int *mu , int *ntrlx , int *iprlx , int *ierlx , int *iurlx , int ioutdat , char *log_file_name ));
 void amg_FreeData P((AMGData *amg_data ));
 
 /* fortran.c */

@@ -45,10 +45,6 @@ char     *log_file_name;
    amg_SetIURLX(SolverAMGIURLX(solver), amg_data);
    				    
    amg_SetIOutDat(SolverAMGIOutDat(solver), amg_data);
-   amg_SetIOutGrd(SolverAMGIOutGrd(solver), amg_data);
-   amg_SetIOutMat(SolverAMGIOutMat(solver), amg_data);
-   amg_SetIOutRes(SolverAMGIOutRes(solver), amg_data);
-   amg_SetIOutSol(SolverAMGIOutSol(solver), amg_data);
 
    amg_SetLogFileName(log_file_name, amg_data);
 

@@ -152,41 +152,6 @@ void     *data;
    AMGDataIOutDat(amg_data) = ioutdat;
 }
 
-void      amg_SetIOutGrd(ioutgrd, data)
-int       ioutgrd;
-void     *data;
-{
-   AMGData  *amg_data = data;
- 
-   AMGDataIOutGrd(amg_data) = ioutgrd;
-}
-
-void      amg_SetIOutMat(ioutmat, data)
-int       ioutmat;
-void     *data;
-{
-   AMGData  *amg_data = data;
- 
-   AMGDataIOutMat(amg_data) = ioutmat;
-}
-
-void      amg_SetIOutRes(ioutres, data)
-int       ioutres;
-void     *data;
-{
-   AMGData  *amg_data = data;
- 
-   AMGDataIOutRes(amg_data) = ioutres;
-}
-
-void      amg_SetIOutSol(ioutsol, data)
-int       ioutsol;
-void     *data;
-{
-   AMGData  *amg_data = data;
- 
-   AMGDataIOutSol(amg_data) = ioutsol;
-}
 
 				      
 /*--------------------------------------------------------------------------

@@ -55,10 +55,6 @@ char     *file_name;
 
    /* amg output params */
    int      amg_ioutdat;
-   int      amg_ioutgrd;
-   int      amg_ioutmat;
-   int      amg_ioutres;
-   int      amg_ioutsol;
 
    FILE    *fp;
    int      i;
@@ -142,10 +138,6 @@ char     *file_name;
       fscanf(fp, "%d", &amg_iurlx[i]);
    
    fscanf(fp, "%d", &amg_ioutdat);
-   fscanf(fp, "%d", &amg_ioutgrd);
-   fscanf(fp, "%d", &amg_ioutmat);
-   fscanf(fp, "%d", &amg_ioutres);
-   fscanf(fp, "%d", &amg_ioutsol);
 
    /*----------------------------------------------------------
     * Set the solver structure
@@ -166,10 +158,6 @@ char     *file_name;
    SolverAMGIURLX(solver)   = amg_iurlx;
 
    SolverAMGIOutDat(solver) = amg_ioutdat;
-   SolverAMGIOutGrd(solver) = amg_ioutgrd;
-   SolverAMGIOutMat(solver) = amg_ioutmat;
-   SolverAMGIOutRes(solver) = amg_ioutres;
-   SolverAMGIOutSol(solver) = amg_ioutsol;
 
    /*----------------------------------------------------------
     * Close the solver file and return
@@ -244,10 +232,6 @@ Solver  *solver;
 
    /* amg output params */
    int      amg_ioutdat;
-   int      amg_ioutgrd;
-   int      amg_ioutmat;
-   int      amg_ioutres;
-   int      amg_ioutsol;
 
    int      j;
 
@@ -283,10 +267,6 @@ Solver  *solver;
    amg_iurlx   = SolverAMGIURLX(solver);
 
    amg_ioutdat = SolverAMGIOutDat(solver);
-   amg_ioutgrd = SolverAMGIOutGrd(solver);
-   amg_ioutmat = SolverAMGIOutMat(solver);
-   amg_ioutres = SolverAMGIOutRes(solver);
-   amg_ioutsol = SolverAMGIOutSol(solver);
 
    /*----------------------------------------------------------
     * Open the output file
@@ -379,7 +359,9 @@ Solver  *solver;
       fprintf(fp, "    Interpolation controls (nwt, ewt):   %d   %f \n",
 	      amg_nwt, amg_ewt);
       fprintf(fp, "    Strong connection definition (nstr): %d \n", amg_nstr);
-      fprintf(fp, "    Number and type of cycles (ncyc):    %d \n", amg_ncyc); 
+      fprintf(fp, "    Number and type of cycles (ncyc):    %d \n", amg_ncyc);
+      fprintf(fp, "    Stopping Tolerance                   %d \n",
+                   stop_tolerance); 
       fprintf(fp, "    W-cycling parameter (mu): ");
       for (j = 0; j < 10; j++)
 	 fprintf(fp, "%d ", amg_mu[j]);
@@ -395,10 +377,7 @@ Solver  *solver;
 	      amg_iurlx[0], amg_iurlx[1], amg_iurlx[2], amg_iurlx[3]);
  
       fprintf(fp, "    Output flag (ioutdat): %d \n", amg_ioutdat);
-      fprintf(fp, "    ioutgrd: (unused) %d \n", amg_ioutgrd);
-      fprintf(fp, "    Matrix output flag (ioutmat): %d \n", amg_ioutmat); 
-      fprintf(fp, "    Residual report (ioutres): %d \n", amg_ioutres); 
-      fprintf(fp, "    Graphical solution flag (ioutsol): %d \n", amg_ioutsol);
+
    }
 
    /*----------------------------------------------------------

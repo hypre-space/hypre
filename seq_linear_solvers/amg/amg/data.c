@@ -22,7 +22,7 @@
 
 AMGData   *amg_NewData(levmax, ncg, ecg, nwt, ewt, nstr,
 		       ncyc, mu, ntrlx, iprlx, ierlx, iurlx,
-		       ioutdat, ioutgrd, ioutmat, ioutres, ioutsol,
+		       ioutdat, 
 		       log_file_name)
 int     levmax;
 int     ncg;
@@ -37,10 +37,6 @@ int    *iprlx;
 int    *ierlx;
 int    *iurlx;
 int     ioutdat;
-int     ioutgrd;
-int     ioutmat;
-int     ioutres;
-int     ioutsol;
 char   *log_file_name;
 {
    AMGData  *amg_data;
@@ -62,10 +58,6 @@ char   *log_file_name;
    AMGDataIURLX(amg_data)   = iurlx;
    				    
    AMGDataIOutDat(amg_data) = ioutdat;
-   AMGDataIOutGrd(amg_data) = ioutgrd;
-   AMGDataIOutMat(amg_data) = ioutmat;
-   AMGDataIOutRes(amg_data) = ioutres;
-   AMGDataIOutSol(amg_data) = ioutsol;
 
    sprintf(AMGDataLogFileName(amg_data), "%s", log_file_name);
    

@@ -70,10 +70,6 @@ typedef struct
 
    /* amg output params */
    int      amg_ioutdat;
-   int      amg_ioutgrd;
-   int      amg_ioutmat;
-   int      amg_ioutres;
-   int      amg_ioutsol;
 
 } Solver;
 
@@ -115,10 +111,6 @@ typedef struct
 		  
 /* amg output params */
 #define SolverAMGIOutDat(solver)     ((solver) -> amg_ioutdat)
-#define SolverAMGIOutGrd(solver)     ((solver) -> amg_ioutgrd)
-#define SolverAMGIOutMat(solver)     ((solver) -> amg_ioutmat)
-#define SolverAMGIOutRes(solver)     ((solver) -> amg_ioutres)
-#define SolverAMGIOutSol(solver)     ((solver) -> amg_ioutsol)
 
 
 #endif

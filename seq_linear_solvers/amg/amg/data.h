@@ -35,10 +35,6 @@ typedef struct
 
    /* output params */
    int      ioutdat;
-   int      ioutgrd;
-   int      ioutmat;
-   int      ioutres;
-   int      ioutsol;
 
    /* log file name */
    char     log_file_name[256];
@@ -109,10 +105,6 @@ typedef struct
 		  		      
 /* output params */
 #define AMGDataIOutDat(amg_data)      ((amg_data) -> ioutdat)
-#define AMGDataIOutGrd(amg_data)      ((amg_data) -> ioutgrd)
-#define AMGDataIOutMat(amg_data)      ((amg_data) -> ioutmat)
-#define AMGDataIOutRes(amg_data)      ((amg_data) -> ioutres)
-#define AMGDataIOutSol(amg_data)      ((amg_data) -> ioutsol)
 				      
 /* log file name */
 #define AMGDataLogFileName(amg_data)  ((amg_data) -> log_file_name)

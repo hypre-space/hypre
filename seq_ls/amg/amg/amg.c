@@ -43,10 +43,6 @@ void  *port_data;
 
    /* output params */
    int      ioutdat;
-   int      ioutgrd;
-   int      ioutmat;
-   int      ioutres;
-   int      ioutsol;
 
    /* log file name */
    char    *log_file_name;
@@ -93,11 +89,7 @@ void  *port_data;
    iurlx[3] = 9;
 
    /* output params */
-   ioutdat = 1;
-   ioutgrd = 0;
-   ioutmat = 1;
-   ioutres = 0;
-   ioutsol = 0;
+   ioutdat = 3;
 
 
    /*-----------------------------------------------------------------------
@@ -106,7 +98,7 @@ void  *port_data;
 
    amg_data = amg_NewData(levmax, ncg, ecg, nwt, ewt, nstr,
 			  ncyc, mu, ntrlx, iprlx, ierlx, iurlx,
-			  ioutdat, ioutgrd, ioutmat, ioutres, ioutsol,
+			  ioutdat, 
 			  "amg.out.log");
    
    return (void *)amg_data;

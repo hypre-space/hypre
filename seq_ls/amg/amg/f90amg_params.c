@@ -121,33 +121,6 @@ int      *data;
    amg_SetIOutDat(*ioutdat, (void *) *data);
 }
 
-void      amg_SetIOutGrd_(ioutgrd, data)
-int      *ioutgrd;
-int      *data;
-{
-   amg_SetIOutGrd(*ioutgrd, (void *) *data);
-}
-
-void      amg_SetIOutMat_(ioutmat, data)
-int      *ioutmat;
-int      *data;
-{
-   amg_SetIOutMat(*ioutmat, (void *) *data);
-}
-
-void      amg_SetIOutRes_(ioutres, data)
-int      *ioutres;
-int      *data;
-{
-   amg_SetIOutRes(*ioutres, (void *) *data);
-}
-
-void      amg_SetIOutSol_(ioutsol, data)
-int      *ioutsol;
-int      *data;
-{
-   amg_SetIOutSol(*ioutsol, (void *) *data);
-}
 
 				      
 /*--------------------------------------------------------------------------
