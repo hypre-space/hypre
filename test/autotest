@@ -135,6 +135,9 @@ echo "$HYPRE_BETA_EMAIL" > $0.beta77.err.email
 
 #=============================================================================
 # Make libraries and test drivers (using configure--with-pthreads)
+#
+# Pthreads is not officially being supported, but want to keep the
+# struct solvers compiling with this on for now.
 #=============================================================================
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
@@ -145,21 +148,6 @@ $MAKE veryclean
 
 $MAKE struct 1> $0.struct_threads.log 2> $0.struct_threads.err
 echo "$HYPRE_STRUCT_EMAIL" > $0.struct_threads.err.email 
-
-$MAKE IJ 1> $0.IJ_threads.log 2> $0.IJ_threads.err
-echo "$HYPRE_IJ_EMAIL" > $0.IJ_threads.err.email 
-
-$MAKE
-
-$MAKE beta 1> $0.beta_threads.log 2> $0.beta_threads.err
-echo "$HYPRE_BETA_EMAIL" > $0.beta_threads.err.email 
-
-#==============================
-# Run test suites
-#==============================
-
-#cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-#./test_drivers.sh -mail
 
 #=============================================================================
 # Make libraries and test drivers (using configure --without_MPI)
