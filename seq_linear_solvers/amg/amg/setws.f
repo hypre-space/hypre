@@ -304,27 +304,24 @@ c
 c
 c---------------------------------------------------------------------
 c
-      subroutine setw3(k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb,
-     *                 ndimu,ndimp,ndima,ndimb)
+      subroutine setw3(k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb)
 c
 c---------------------------------------------------------------------
 c
 c     define iterative mg interpolation (no tests are performed)
 c
-c     1. The REAL part of the operator is used.
+c     1. Interpolation is only within unknowns.
 c
-c     2. Interpolation is only within unknowns.
-c
-c     3. nwt - 2 digits (this is now the full nwt as defined)
+c     2. nwt - 2 digits (this is now the full nwt as defined)
 c
 c          1st - iwts  (calls this routine)
 c          2nd - nswp  = Number of sweeps to perform
 c
-c     4. No form for b is assumed.
+c     3. No form for b is assumed.
 c        C-rows get a diagonal entry.
 c        F-rows in standard form with the computed weights.
 c
-c     5. Special points get empty rows here.
+c     4. Special points get empty rows here.
 c
 c---------------------------------------------------------------------
 c
@@ -354,9 +351,11 @@ c
 c     decompose the parameters
 c
 c     print *,'  nnwt=',nwt
-      call idec(nwt,4,ndig,iarr)
+      call idec(nwt,7,ndig,iarr)
       nswp=iarr(2)
       nout=iarr(3)
+      ipos=iarr(4)
+      icpt=iarr(5)
       if(nswp.lt.1) nswp=1
       ishift=imax(k)-imin(k)+2
 c
@@ -383,14 +382,21 @@ c
           i1 = i+ishift
           jlo=ia(i1)+1
           jhi=ia(i1+1)-1
+          sum = 0.0
           do 10 j=jlo,jhi
             ii=ja(j)
             if(icg(ii).gt.0) then
               b(kb)=a(j)
+              sum = sum+a(j)
               jb(kb)=ii
               kb=kb+1
             endif
 10        continue
+          if(sum.eq.0.0) then
+            print *,'  sum=0 - i=',i
+          endif
+          do 15 j=ib(i),kb-1
+15        b(j) = b(j)/sum
         endif
 20    continue
       ib(imax(k)+1)=kb
@@ -433,13 +439,15 @@ c
             if(ifg(ii).gt.0) then
               b(ifg(ii))=b(ifg(ii))+a(j)
 c
-c           F or weak connection - perform distribution
+c           F connection - perform distribution (using b)
 c
-            elseif(icg(i).ne.0) then
+ccjwr 11/1/96  elseif(icg(i).ne.0) then
+            elseif(icg(ii).lt.0) then
               sum = 0.0
               jjlo=ib(ii)
               jjhi=ib(ii+1)-1
               do 120 jj=jjlo,jjhi
+                if(ipos.gt.0.and.b(jj).le.0.0) go to 120
                 if(ifg(jb(jj)).gt.0) sum=sum+b(jj)
 120           continue
 c
@@ -448,15 +456,57 @@ c
               else
                 w=a(j)/sum
                 do 130 jj=jjlo,jjhi
+                  if(ipos.gt.0.and.b(jj).le.0.0) go to 130
                   if(ifg(jb(jj)).gt.0)
      *              b(ifg(jb(jj)))=b(ifg(jb(jj)))+b(jj)*w
 130             continue
+              endif
+c
+c           C connection - perform distribution (using a)
+c
+            elseif(icg(ii).gt.0) then
+              if(icpt.eq.0) then
+                bdiag=bdiag+a(j)
+              else
+                sum = 0.0
+                jjlo=ia(ii)+1
+                jjhi=ia(ii+1)-1
+                do 140 jj=jjlo,jjhi
+                  if(a(ia(ii)).eq.0.0) then
+                    print *,'  a(ia(i))=0.0 - i=',i
+                  endif
+                  if(ipos.gt.0.and.a(jj)/a(ia(ii)).ge.0.0) go to 140
+                  if(ifg(ja(jj)).gt.0) sum=sum+a(jj)
+                  if(icpt.eq.2) then
+                    if(ja(jj).eq.i) sum=sum+a(jj)
+                  endif
+140             continue
+c
+                if(sum.eq.0.0) then
+                  bdiag=bdiag+a(j)
+                else
+                  w=a(j)/sum
+                  do 150 jj=jjlo,jjhi
+                    if(a(ia(ii)).eq.0.0) then
+                      print *,'  a(ia(i))=0.0 - i=',i
+                    endif
+                    if(ipos.gt.0.and.a(jj)/a(ia(ii)).ge.0.0) go to 150
+                    if(ifg(ja(jj)).gt.0)
+     *                b(ifg(ja(jj)))=b(ifg(ja(jj)))+a(jj)*w
+                    if(icpt.eq.2) then
+                      if(ja(jj).eq.i) bdiag=bdiag+a(jj)*w
+                    endif
+150               continue
+                endif
               endif
             endif
 200       continue
 c
 c         Compute weights for point i (and zero out ifg)
 c
+          if(bdiag.eq.0.0) then
+            print *,' bdiag=0 - i=',i
+          endif
           bdiag=-1.d0/bdiag
           do 210 j=jblo,jbhi
             b(j)=b(j)*bdiag
@@ -489,12 +539,14 @@ c
               kb=kb+1
             endif
 410       continue
+          if(kb.eq.ib(i)) then
+            print *,' empty row - i=',i
+          endif
         endif
 420   continue
       ib(imax(k)+1)=kb
       go to 100
       end
-c
 c---------------------------------------------------------------------
 c
       subroutine setw4(k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb,
