@@ -65,6 +65,9 @@ extern int HYPRE_LSI_DDIlutGetOffProcRows(MH_Matrix *Amat, int leng, int *,
 extern int HYPRE_LSI_DDIlutDecompose(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
                  int total_recv_leng, int *recv_lengths, int *ext_ja, 
                  double *ext_aa, int *map, int *map2, int Noffset);
+extern int HYPRE_LSI_DDIlutDecompose2(HYPRE_LSI_DDIlut *ilut_ptr,
+                 MH_Matrix *Amat,int total_recv_leng, int *recv_lengths, 
+                 int *ext_ja, double *ext_aa, int *map, int *map2, int Noffset);
 extern void HYPRE_LSI_qsort1a(int *, int *, int, int);
 extern void qsort0(int *, int, int);
 extern int  HYPRE_LSI_SplitDSort(double*,int,int*,int);
