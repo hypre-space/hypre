@@ -38,7 +38,9 @@ int HYPRE_InitPthreads( MPI_Comm comm )
    }
 
    pthread_mutex_init(&hypre_mutex_boxloops, NULL);
+   pthread_mutex_init(&mpi_mtx, NULL);
    pthread_cond_init(&hypre_cond_boxloops, NULL);
+   pthread_cond_init(&mpi_cnd, NULL);
 
    return (err);
 }   
@@ -53,9 +55,11 @@ void HYPRE_DestroyPthreads( void )
 
    pthread_mutex_destroy(&hypre_qptr->lock);
    pthread_mutex_destroy(&hypre_mutex_boxloops);
+   pthread_mutex_destroy(&mpi_mtx);
    pthread_cond_destroy(&hypre_qptr->work_wait);
    pthread_cond_destroy(&hypre_qptr->finish_wait);
    pthread_cond_destroy(&hypre_cond_boxloops);
+   pthread_cond_destroy(&mpi_cnd); 
 
    free (hypre_qptr);
 }
@@ -146,18 +150,21 @@ ifetchadd( int *w, pthread_mutex_t *mutex_fetchadd )
 }
 
 
-void hypre_barrier(mutex *mpi_mtx, cond *mpi_cnd,int *th_sem)
+void hypre_barrier(pthread_mutex_t *mpi_mtx, 
+                   pthread_cond_t *mpi_cnd,
+                   int *th_sem)
 {
-  ifetchadd(&th_sem,&mpi_mtx);
-  pthread_mutex_lock(&_mpimtx);
+  ifetchadd(th_sem, mpi_mtx);
+  pthread_mutex_lock(mpi_mtx);
 
-  if (th_sem < NUMTHREADS)
-    pthread_cond_wait(&mpi_cnd,&mpi_mtx);
-  else if (th_sem == NUMTHREADS)
+  if (*th_sem < NUM_THREADS)
+    pthread_cond_wait(mpi_cnd,mpi_mtx);
+  else if (*th_sem == NUM_THREADS)
     {
-      pthread_cond_broadcast(&mpi_cnd);
-      th_sem=0;
+      pthread_cond_broadcast(mpi_cnd);
+      *th_sem=0;
     }
+  pthread_mutex_unlock(mpi_mtx);
 }
 
 
