@@ -6,8 +6,10 @@ EXTRA_DIST = \
 #
 FILES = \
  mli_fedata.cxx\
+ mli_sfei.cxx\
  mli_fedata_utils.cxx\
- mli_fedata_utils.h\
- mli_festruct.h\
- mli_fedata.h
+ mli_febase.h\
+ mli_fedata.h\
+ mli_sfei.h\
+ mli_fedata_utils.h
 
