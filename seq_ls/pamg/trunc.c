@@ -19,7 +19,7 @@ hypre_AMGTruncation(hypre_CSRMatrix *A, double trunc_factor, int max_elmts)
    int *A_j = hypre_CSRMatrixJ(A);
    double *A_data = hypre_CSRMatrixData(A);
    double max_coef, row_sum, scale;
-   int i, j, cnt, start;
+   int i, j, start;
    int num_variables = hypre_CSRMatrixNumRows(A);
    int now_checking, num_lost, next_open;
 

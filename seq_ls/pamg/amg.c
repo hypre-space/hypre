@@ -73,7 +73,7 @@ hypre_AMGInitialize()
    num_relax_steps = 1;
 
    /* solve params */
-   max_iter  = 20;
+   max_iter  = 100;
    cycle_type = 1;
    tol = 1.0e-7;
    relax_weight = hypre_CTAlloc(double, max_levels);
@@ -117,6 +117,10 @@ hypre_AMGInitialize()
    hypre_AMGSetInterpType(amg_data, interp_type);
    hypre_AMGSetNumFunctions(amg_data, num_functions);
    hypre_AMGSetNumRelaxSteps(amg_data, num_relax_steps);
+   hypre_AMGSetATruncFactor(amg_data, A_trunc_factor);
+   hypre_AMGSetPTruncFactor(amg_data, P_trunc_factor);
+   hypre_AMGSetAMaxElmts(amg_data, A_max_elmts);
+   hypre_AMGSetPMaxElmts(amg_data, P_max_elmts);
 
    hypre_AMGSetMaxIter(amg_data, max_iter);
    hypre_AMGSetCycleType(amg_data, cycle_type);
