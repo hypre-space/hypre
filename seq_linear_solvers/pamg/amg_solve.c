@@ -147,7 +147,11 @@ int  hypre_AMGSolve(hypre_AMGData  *amg_data,
 
    resid_nrm_init = resid_nrm;
    rhs_norm = sqrt(hypre_InnerProd(f,f));
-   relative_resid = resid_nrm_init / rhs_norm;
+   relative_resid = 9999;
+   if (rhs_norm)
+   {
+     relative_resid = resid_nrm_init / rhs_norm;
+   }
 
    if (amg_ioutdat == 1 || amg_ioutdat == 3)
    {     
@@ -181,7 +185,11 @@ int  hypre_AMGSolve(hypre_AMGData  *amg_data,
          resid_nrm = sqrt(hypre_InnerProd(Vtemp,Vtemp));
 
          conv_factor = resid_nrm / old_resid;
-         relative_resid = resid_nrm / rhs_norm;
+         relative_resid = 9999;
+         if (rhs_norm)
+         {
+            relative_resid = resid_nrm_init / rhs_norm;
+         }
 
          ++cycle_count;
 

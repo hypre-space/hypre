@@ -281,51 +281,6 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
    while (1)
    {
       /*------------------------------------------------
-       * Compute the subgraph used to pick the
-       * next independent set.
-       *
-       * Take marked points out of the subgraph,
-       * and set to be C-pts.
-       *
-       * Take points with measure less than 1 out of the
-       * subgraph, and set to be F-pts.
-       *
-       * To take points out of the subgraph, they are
-       * simply moved to the end of the graph array.
-       *------------------------------------------------*/
-
-      for (ig = 0; ig < graph_size; ig++)
-      {
-         i = graph_array[ig];
-
-         /* marked */
-         if (CF_marker[i])
-         {
-            /* set to be a C-pt */
-            CF_marker[i] = C_PT;
-            measure_array[i] = 0;
-            coarse_size++;
-         }
-
-         /* not marked */
-         else if (measure_array[i] < 1)
-         {
-            /* set to be an F-pt */
-            CF_marker[i] = F_PT;
-            measure_array[i] = 0;
-         }
-
-         /* take point out of the subgraph */
-         if ( (CF_marker[i] == C_PT) || (CF_marker[i] == F_PT) )
-         {
-            graph_size--;
-            graph_array[ig] = graph_array[graph_size];
-            graph_array[graph_size] = i;
-            ig--;
-         }
-      }
-
-      /*------------------------------------------------
        * Debugging:
        *
        * Uncomment the sections of code labeled
@@ -384,32 +339,26 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
          i = graph_array[ig];
 
          /*---------------------------------------------
-          * Heuristic 1: C-pts don't interpolate from
-          * neighbors they depend on.
+          * Set to be a C-pt
           *---------------------------------------------*/
 
-         if (CF_marker[i])
+         if (CF_marker[i] > 0)
          {
-            for (jS = S_i[i]; jS < S_i[i+1]; jS++)
-            {
-               if (S_data[jS] < 0)
-               {
-                  j = S_j[jS];
-               
-                  /* "remove" edge from S */
-                  S_data[jS] = -S_data[jS];
-               
-                  /* decrement measures of unmarked neighbors */
-                  if (!CF_marker[j])
-                  {
-                     measure_array[j]--;
-                  }
-               }
-            }
+            CF_marker[i] = C_PT;
+            coarse_size++;
          }
 
          /*---------------------------------------------
-          * Heuristic 2: points that interpolate from a
+          * Set to be an F-pt
+          *---------------------------------------------*/
+
+         else if (measure_array[i] < 1)
+         {
+            CF_marker[i] = F_PT;
+         }
+
+         /*---------------------------------------------
+          * Heuristic: points that interpolate from a
           * common C-pt are less dependent on each other.
           *
           * NOTE: CF_marker is used to help check for
@@ -423,7 +372,7 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
             {
                j = S_j[jS];
 
-               if (CF_marker[j])
+               if (CF_marker[j] > 0)
                {
                   if (S_data[jS] < 0)
                   {
@@ -477,6 +426,40 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
                   CF_marker[j] = C_PT;
                }
             }
+         }
+
+         /*---------------------------------------------
+          * Heuristic: C-pts don't interpolate from
+          * neighbors that influence them, and F-pts
+          * don't interpolate to neighbors they influence.
+          *---------------------------------------------*/
+
+         if ( (CF_marker[i] == C_PT) || (CF_marker[i] == F_PT) )
+         {
+            measure_array[i] = 0;
+
+            for (jS = S_i[i]; jS < S_i[i+1]; jS++)
+            {
+               if (S_data[jS] < 0)
+               {
+                  j = S_j[jS];
+               
+                  /* "remove" edge from S */
+                  S_data[jS] = -S_data[jS];
+               
+                  /* decrement measures of unmarked neighbors */
+                  if (!CF_marker[j])
+                  {
+                     measure_array[j]--;
+                  }
+               }
+            }
+
+            /* take point out of the subgraph */
+            graph_size--;
+            graph_array[ig] = graph_array[graph_size];
+            graph_array[graph_size] = i;
+            ig--;
          }
       }
    }
