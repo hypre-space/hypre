@@ -304,10 +304,21 @@ hypre_PCGSolve( void *pcg_vdata,
    (*(pcg_functions->CopyVector))(b, r);
    (*(pcg_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
  
+   /* p = C*r */
+   (*(pcg_functions->ClearVector))(p);
+   precond(precond_data, A, r, p);
+
+   /* gamma = <r,p> */
+   gamma = (*(pcg_functions->InnerProd))(r,p);
+
    /* Set initial residual norm */
    if (logging > 0 || cf_tol > 0.0)
    {
-      i_prod_0   = (*(pcg_functions->InnerProd))(r,r);
+      if (two_norm)
+         i_prod_0 = (*(pcg_functions->InnerProd))(r,r);
+      else
+         i_prod_0 = gamma;
+
       if (logging > 0) norms[0] = sqrt(i_prod_0);
    }
    if ( logging > 1 && my_id==0 )  /* formerly for par_csr only */
@@ -330,14 +341,6 @@ hypre_PCGSolve( void *pcg_vdata,
          printf("-----    ------------    ------------ \n");
       }
    }
-
-
-   /* p = C*r */
-   (*(pcg_functions->ClearVector))(p);
-   precond(precond_data, A, r, p);
-
-   /* gamma = <r,p> */
-   gamma = (*(pcg_functions->InnerProd))(r,p);
 
    while ((i+1) <= max_iter)
    {
