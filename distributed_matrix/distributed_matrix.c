@@ -280,12 +280,20 @@ hypre_GetDistributedMatrixRow( hypre_DistributedMatrix *matrix,
                              int **col_ind,
                              double **values )
 {
-   if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PETSC_MATRIX )
-      return( hypre_GetDistributedMatrixRowPETSc( matrix, row, size, col_ind, values ) );
-   else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
-      return( hypre_GetDistributedMatrixRowISIS( matrix, row, size, col_ind, values ) );
-   else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
-      return( hypre_GetDistributedMatrixRowParcsr( matrix, row, size, col_ind, values ) );
+   int ierr = 0;
+
+   if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PETSC_MATRIX ) {
+      ierr = hypre_GetDistributedMatrixRowPETSc( matrix, row, size, col_ind, values );
+      return( ierr );
+   }
+   else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX ) {
+      ierr = hypre_GetDistributedMatrixRowISIS( matrix, row, size, col_ind, values );
+      return( ierr );
+   }
+   else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX ) {
+      ierr = hypre_GetDistributedMatrixRowParcsr( matrix, row, size, col_ind, values );
+      return( ierr );
+   }
    else
       return(-1);
 }

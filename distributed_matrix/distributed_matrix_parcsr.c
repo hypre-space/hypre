@@ -49,7 +49,7 @@ int
 hypre_InitializeDistributedMatrixParcsr(hypre_DistributedMatrix *matrix)
 {
    
-   hypre_DistributedMatrixAuxiliaryData( distributed_matrix ) = 
+   hypre_DistributedMatrixAuxiliaryData( matrix ) = 
       hypre_CTAlloc( hypre_DistributedMatrixParcsrAuxiliaryData, 1 );
 
    return 0;
@@ -70,7 +70,7 @@ hypre_PrintDistributedMatrixParcsr( hypre_DistributedMatrix *matrix )
    int  ierr=0;
    HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(matrix);
 
-   ierr = HYPRE_PrintParCSRMatrix( Parcsr_matrix, "STDOUT" );
+   HYPRE_PrintParCSRMatrix( Parcsr_matrix, "STDOUT" );
    return(ierr);
 }
 
@@ -89,7 +89,7 @@ hypre_GetDistributedMatrixLocalRangeParcsr( hypre_DistributedMatrix *matrix,
    if (!Parcsr_matrix) return(-1);
 
 
-   ierr = HYPRE_ParCSRMatrixGetOwnershipRange( Parcsr_matrix, start, end ); CHKERRA(ierr);
+   ierr = HYPRE_GetLocalRangeParcsr( Parcsr_matrix, start, end );
 
    return(ierr);
 }
@@ -105,12 +105,12 @@ hypre_GetDistributedMatrixRowParcsr( hypre_DistributedMatrix *matrix,
                              int **col_ind,
                              double **values )
 {
-   int ierr;
+   int ierr = 0;
    HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(matrix);
 
    if (!Parcsr_matrix) return(-1);
 
-   ierr = HYPRE_ParCSRMatrixGetRow( Parcsr_matrix, row, size, col_ind, values); CHKERRA(ierr);
+   ierr = HYPRE_GetRowParCSRMatrix( Parcsr_matrix, row, size, col_ind, values);
 
    return(ierr);
 }
@@ -131,7 +131,7 @@ hypre_RestoreDistributedMatrixRowParcsr( hypre_DistributedMatrix *matrix,
 
    if (Parcsr_matrix == NULL) return(-1);
 
-   ierr = HYPRE_ParCSRMatrixRestoreRow( Parcsr_matrix, row, size, col_ind, values); CHKERRA(ierr);
+   ierr = HYPRE_RestoreRowParCSRMatrix( Parcsr_matrix, row, size, col_ind, values); 
 
    return(ierr);
 }

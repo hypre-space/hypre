@@ -47,6 +47,8 @@ int HYPRE_InitializeParCSRMatrix P((HYPRE_ParCSRMatrix matrix ));
 void HYPRE_PrintParCSRMatrix P((HYPRE_ParCSRMatrix matrix , char *file_name ));
 int HYPRE_GetRowParCSRMatrix P((HYPRE_ParCSRMatrix matrix, int row, int *size, int ** col_ind, double **values ));
 int HYPRE_RestoreRowParCSRMatrix P((HYPRE_ParCSRMatrix matrix, int row, int *size, int ** col_ind, double **values ));
+int HYPRE_GetCommParCSR P(( HYPRE_ParCSRMatrix  matrix, MPI_Comm *comm ));
+int HYPRE_GetDimsParCSR P(( HYPRE_ParCSRMatrix  matrix, int *M, int *N ));
 
 /* HYPRE_parcsr_vector.c */
 HYPRE_ParVector HYPRE_CreateParVector P((MPI_Comm comm , int global_size , int *partitioning ));

@@ -24,6 +24,7 @@ HYPREFILES =\
 LOCALFILES =\
  distributed_matrix.c\
  distributed_matrix_PETSc.c\
+ distributed_matrix_parcsr.c\
  distributed_matrix_ISIS.c
 
 #distributed_matrix_ISIS.cc
@@ -34,6 +35,7 @@ FILES = $(HYPREFILES) $(LOCALFILES)
 OBJS = HYPRE_distributed_matrix.o \
  distributed_matrix.o\
  distributed_matrix_PETSc.o\
+ distributed_matrix_parcsr.o\
  distributed_matrix_ISIS.o
 
 ${OBJS}: ${HEADERS}

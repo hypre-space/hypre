@@ -70,6 +70,38 @@ HYPRE_PrintParCSRMatrix( HYPRE_ParCSRMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_GetCommParCSR
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_GetCommParCSR( HYPRE_ParCSRMatrix  matrix,
+                         MPI_Comm *comm )
+{  
+   int ierr = 0;
+
+   *comm = hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) matrix);
+
+   return( ierr );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_GetDimsParCSR
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_GetDimsParCSR( HYPRE_ParCSRMatrix  matrix,
+                         int *M, int *N )
+{  
+   int ierr = 0;
+
+   *M = hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix *) matrix);
+   *N = hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix *) matrix);
+
+   return( ierr );
+}
+
+
+
+/*--------------------------------------------------------------------------
  * HYPRE_GetLocalRangeParcsr
  *--------------------------------------------------------------------------*/
 
@@ -78,9 +110,9 @@ HYPRE_GetLocalRangeParcsr( HYPRE_ParCSRMatrix  matrix,
                          int               *start,
                          int               *end )
 {  
-   int ierr;
+   int ierr = 0;
 
-   ierr = hypre_GetLocalRangeParcsr( (hypre_ParCSRMatrix *) matrix,
+   ierr = hypre_GetLocalRangeParCSRMatrix( (hypre_ParCSRMatrix *) matrix,
                             start, end );
    return( ierr );
 }
@@ -114,7 +146,7 @@ HYPRE_RestoreRowParCSRMatrix( HYPRE_ParCSRMatrix  matrix,
                          int               **col_ind,
                          double            **values )
 {  
-   int ierr;
+   int ierr = 0;
 
    ierr = hypre_RestoreRowParCSRMatrix( (hypre_ParCSRMatrix *) matrix,
                             row, size, col_ind, values );

@@ -407,7 +407,7 @@ hypre_GetRowParCSRMatrix( hypre_ParCSRMatrix  *mat,
                          int               **col_ind,
                          double            **values )
 {  
-   int ierr;
+   int ierr=0;
    int my_id;
    int row_start, row_end;
    hypre_CSRMatrix *Aa = (hypre_CSRMatrix *) hypre_ParCSRMatrixDiag(mat);
@@ -443,30 +443,26 @@ hypre_GetRowParCSRMatrix( hypre_ParCSRMatrix  *mat,
      }
 
      hypre_ParCSRMatrixRowvalues(mat) = (double *) hypre_CTAlloc
-                             ( double, mat ); 
+                             ( double, max ); 
      hypre_ParCSRMatrixRowindices(mat) = (int *) hypre_CTAlloc
-                             ( int, mat ); 
+                             ( int, max ); 
    }
 
    /* Copy from dual sequential matrices into buffer */
    {
-   double     *vworkA, *vworkB, **pvA, **pvB,*v_p;
-   int        i, ierr, *cworkA, *cworkB, **pcA, **pcB, 
+   double     *vworkA, *vworkB, *v_p;
+   int        i, ierr, *cworkA, *cworkB, 
               cstart = hypre_ParCSRMatrixFirstColDiag(mat);
    int        nztot, nzA, nzB, lrow=row-row_start;
    int        *cmap, *idx_p;
 
-   pvA = &vworkA; pcA = &cworkA; pvB = &vworkB; pcB = &cworkB;
-   if (!values)   {pvA = 0; pvB = 0;}
-   if (!col_ind) {pcA = 0; if (!values) pcB = 0;}
-
    nzA = hypre_CSRMatrixI(Aa)[lrow+1]-hypre_CSRMatrixI(Aa)[lrow];
-   pcA = &( hypre_CSRMatrixJ(Aa) );
-   pvA = &( hypre_CSRMatrixData(Aa) );
+   cworkA = &( hypre_CSRMatrixJ(Aa)[ hypre_CSRMatrixI(Aa)[lrow] ] );
+   vworkA = &( hypre_CSRMatrixData(Aa)[ hypre_CSRMatrixI(Aa)[lrow] ] );
 
    nzB = hypre_CSRMatrixI(Ba)[lrow+1]-hypre_CSRMatrixI(Ba)[lrow];
-   pcB = &( hypre_CSRMatrixJ(Ba) );
-   pvB = &( hypre_CSRMatrixData(Ba) );
+   cworkB = &( hypre_CSRMatrixJ(Ba)[ hypre_CSRMatrixI(Ba)[lrow] ] );
+   vworkB = &( hypre_CSRMatrixData(Ba)[ hypre_CSRMatrixI(Ba)[lrow] ] );
 
    nztot = nzA + nzB;
 
@@ -533,7 +529,7 @@ hypre_RestoreRowParCSRMatrix( hypre_ParCSRMatrix *matrix,
     return( -1 );
   }
 
-  hypre_ParCSRMatrixGetrowactive(matrix)=1;
+  hypre_ParCSRMatrixGetrowactive(matrix)=0;
 
    return( ierr );
 }
