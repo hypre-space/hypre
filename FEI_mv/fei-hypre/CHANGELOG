@@ -109,4 +109,8 @@
             - add hybrid CG diag/AMG solver
             - fix ddilut problems
             - take out MLI compiler complaints
+07/26/02    2.0.1R19
+            - improve on MLI's SGS and BSGS smoothers 
+            - add LSICG 
+            - consolidate setupPrecon and correct a few include problems
 
