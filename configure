@@ -8274,7 +8274,7 @@ CC="$PREPEND $CC"
  CI_struct_matrix_vector\
  structIJ_matrix_vector\
  FEI_matrix_vector/fei-hypre\
- FEI_matrix_vector/fei-isis/src\
+ FEI_matrix_vector/fei-base\
  FEI_matrix_vector/isis-mv\
  PETScMat_linear_solvers/pilut\
  PETSc_linear_solvers/ParILUT\

@@ -35,8 +35,8 @@ HYPRE_IJ_DIRS =\
 #These are the directories for FEI interface
 HYPRE_FEI_DIRS =\
  FEI_matrix_vector/fei-hypre\
- FEI_matrix_vector/fei-isis/src\
- FEI_matrix_vector/isis-mv
+ FEI_matrix_vector/fei-base\
+ FEI_matrix_vector/isis-mv ${HYPRE_IJ_DIRS}
 
 # These are directories that are officially in HYPRE
 HYPRE_DIRS =\
@@ -89,8 +89,14 @@ beta: all
 	(cd test; make beta); \
 	echo ""
 
-fei: all
+fei: 
 	@ \
+	mkdir -p hypre/include; \
+	mkdir -p hypre/lib; \
+	HYPRE_INSTALL_DIR=`pwd`/hypre; \
+	export HYPRE_INSTALL_DIR; \
+	cp -f HYPRE_config.h $$HYPRE_INSTALL_DIR/include/.;\
+	cp -f HYPRE.h $$HYPRE_INSTALL_DIR/include/.;\
 	for i in ${HYPRE_FEI_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
