@@ -30,19 +30,17 @@ package Hypre {
    };
 
    interface StructuredGridVectorBuilder {
-      int SetGrid( in StructuredGrid grid );
       int SetValues( in Box box, in array<double,1> values );
       // ... this is basically how the HYPRE functions work, except that
       // ilower, iupper, and dim are combined into a Box object.  Probably
       // it would be better to encode the "values" data structure in a more
       // natural form.
       void New( in StructuredGrid grid );
-      int Setup( in StructuredGrid grid );
+      int Setup();
       StructVector GetConstructedObject();
    };
 
    interface StructuredGridMatrixBuilder {
-      int SetGrid( in StructuredGrid grid );
       int SetStencil( in StructStencil stencil );
       int SetValues( in Box box, in array<int,1> stencil_indices,
                      in array<double,1> values );
@@ -52,8 +50,7 @@ package Hypre {
       // natural form.
       void New( in StructuredGrid grid, in StructStencil stencil,
                 in int symmetric, in array<int,1> num_ghost );
-      int Setup( in StructuredGrid grid, in StructStencil stencil,
-                 in int symmetric );
+      int Setup();
       StructMatrix GetConstructedObject();
    };
 
@@ -88,7 +85,6 @@ package Hypre {
    };
 
    interface SolverBuilder {
-      void SetSystemOperator( in StructMatrix op );
       double GetDoubleParameter( in string name );
       int GetIntParameter( in string name );
       void SetDoubleParameter( in string name, in double value );
@@ -99,7 +95,6 @@ package Hypre {
    };
 
    interface PreconditionedSolverBuilder extends SolverBuilder {
-      void SetSystemOperator( in StructMatrix op );
       double GetDoubleParameter( in string name );
       int GetIntParameter( in string name );
       void SetDoubleParameter( in string name, in double value );
@@ -115,9 +110,14 @@ package Hypre {
 // ---------------- Classes ----------------
 
 // Note re "New" and "Constructor" functions:
-// If you use a builder, the way things work is:
-//  builder's Babel constructor() makes a builder (This is worth doing only
-//      if it will have state, or you will make several objects at once).
+// There are two ways to design a class structure for the above interfaces.
+// In one, for every class Foo there is a class FooBuilder.  A builder
+// object makes the object you want.
+// In the other design, you construct objects the "normal" way, which
+// begins by calling a constructor.
+//
+// If you use a separate builder, the way things work is:
+//  builder's Babel constructor() makes a builder
 //  builder's New(...) makes an object and does basic initialization
 //  builder's Set functions put data into the new object
 //  builder's Setup(...) finishes building the object
@@ -125,13 +125,15 @@ package Hypre {
 //
 // If you use an object which implements its own builder interface, the
 // way things work is simply:
-//  object's static Constructor(...) makes the object and does basic initialization
+//  object's Constructor(...) makes the object and does basic initialization
 //  object's Set functions put data into the new object
 //  object's Setup(...) finishes building the object
 //
-// The Constructor() combines the Babel constructor() and New(...), but there is no
-// reason to call them separately.  Nevertheless, the New() function must be
-// implemented because it is declared in the builder interface.
+// Internally, the Constructor() combines the Babel constructor() and New(...).
+// But there is no reason for a user to call them separately or even know that
+// they exist.  Nevertheless, the New() function must be implemented even when
+// an object is its own builder.  This is because it is needed by any separate
+// builder, hence it must be declared in the builder interface.
 
    class MPI_Com 
    {
@@ -172,17 +174,15 @@ package Hypre {
    
    class StructVector implements StructuredGridVectorBuilder {
       void print();
-      int SetGrid( in StructuredGrid grid );
       int SetValues( in Box box, in array<double,1> values );
       StructVector GetConstructedObject();
       void New( in StructuredGrid grid );
       static StructVector Constructor( in StructuredGrid grid );
-      int Setup( in StructuredGrid grid );
+      int Setup();
    };
 
    class StructMatrix implements StructuredGridMatrixBuilder, LinearOperator {
       void print();
-      int SetGrid( in StructuredGrid grid );
       int SetStencil( in StructStencil stencil );
       int SetValues( in Box box, in array<int,1> stencil_indices,
                      in array<double,1> values );
@@ -193,8 +193,7 @@ package Hypre {
       static StructMatrix Constructor
       ( in StructuredGrid grid, in StructStencil stencil, in int symmetric,
         in array<int,1> num_ghost );
-      int Setup( in StructuredGrid grid, in StructStencil stencil,
-                 in int symmetric );
+      int Setup();
    };
 
    class StructuredGrid implements StructuredGridBuilder
@@ -213,10 +212,11 @@ package Hypre {
    // ---------------- Solver and related classes
 
    class StructSolver
-      // an experiment: maybe I can put a pointer to the HYPRE_StructSolver
-      // object in here; everything else inherits from this; then I can
-      // get at the HYPRE_StructSolver when this is passed into a
-      // SetPreconditioner function
+      // This is the data type of the argument of the PCG SetPreconditioner
+      // function.  The function needs to get a class, not an interface -
+      // because it needs actual data to pass on to HYPRE_StructPCGSetPrecond.
+      // The data type of the argument must be shared by all the solvers
+      // which might be used as preconditioners.
    { };
    
 
@@ -231,7 +231,6 @@ package Hypre {
       StructVector GetResidual();
       void GetConvergenceInfo( in string name, out double value );
 
-      void SetSystemOperator( in StructMatrix op );
       double GetDoubleParameter( in string name );
       int GetIntParameter( in string name );
       void SetDoubleParameter( in string name, in double value );
@@ -248,7 +247,6 @@ package Hypre {
       StructVector GetResidual();
       void GetConvergenceInfo( in string name, out double value );
 
-      void SetSystemOperator( in StructMatrix op );
       double GetDoubleParameter( in string name );
       int GetIntParameter( in string name );
       void SetDoubleParameter( in string name, in double value );
@@ -268,7 +266,6 @@ package Hypre {
 
       Solver GetPreconditioner();
 
-      void SetSystemOperator( in StructMatrix op );
       double GetDoubleParameter( in string name );
       int GetIntParameter( in string name );
       void SetDoubleParameter( in string name, in double value );
