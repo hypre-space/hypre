@@ -19,6 +19,7 @@ HEADERS =\
 FILES =\
 general.c\
 smg3_setup_rap.c\
+smg2_setup_rap.c\
 smg.c\
 smg_intadd.c\
 smg_relax.c\

@@ -31,6 +31,7 @@ zzz_SMG3NewRAPOp( zzz_StructMatrix *R,
    zzz_Index          **RAP_stencil_shape;
    zzz_StructStencil   *RAP_stencil;
    int                  RAP_stencil_size;
+   int                  RAP_stencil_dim;
    int                  RAP_num_ghost[6];
 
    zzz_StructStencil   *A_stencil;
@@ -38,6 +39,8 @@ zzz_SMG3NewRAPOp( zzz_StructMatrix *R,
 
    int                  k, j, i;
    int                  stencil_rank;
+
+   RAP_stencil_dim = 3;
  
    coarse_grid = zzz_StructMatrixGrid(R);
 
@@ -184,6 +187,8 @@ zzz_SMG3NewRAPOp( zzz_StructMatrix *R,
       }
    }
 
+   RAP_stencil = zzz_NewStructStencil(RAP_stencil_dim, RAP_stencil_size,
+                                     RAP_stencil_shape);
    RAP = zzz_NewStructMatrix(zzz_StructMatrixComm(A),
                              coarse_grid, RAP_stencil);
 
@@ -195,7 +200,7 @@ zzz_SMG3NewRAPOp( zzz_StructMatrix *R,
 /*--------------------------------------------------------------------------
  * Set number of ghost points - one one each boundary
  *--------------------------------------------------------------------------*/
-   for (i = 0; i <= 6; i++ )
+   for (i = 0; i < 6; i++ )
        RAP_num_ghost[i] = 1;
    zzz_SetStructMatrixNumGhost(RAP, RAP_num_ghost);
 
