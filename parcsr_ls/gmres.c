@@ -269,7 +269,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 	   return ierr;
 	}
 
-	if (r_norm <= epsilon) 
+	if (r_norm <= epsilon && iter >= min_iter) 
         {
 		hypre_KrylovCopyVector(b,r);
           	hypre_KrylovMatvec(matvec_data,-1.0,A,x,1.0,r);
@@ -285,7 +285,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
       	t = 1.0 / r_norm;
 	hypre_KrylovScaleVector(t,p[0]);
 	i = 0;
-	while (i < k_dim && (r_norm > epsilon || i < min_iter)
+	while (i < k_dim && (r_norm > epsilon || iter < min_iter)
                          && iter < max_iter)
 	{
 		i++;
