@@ -49,6 +49,9 @@ Version 1.9.0a released, 2005/01/18.
  as well as the option of using one pass of Ruge-Stueben only
 
 -added capability to set values from any processor for IJ matrices and vectors
+
+- PFMG solver supports matrices with constant coefficients
+
 ************************
 
 Version 1.8.3a released, 2004/01/21.
