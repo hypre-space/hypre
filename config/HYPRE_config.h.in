@@ -1,8 +1,5 @@
 /* config/HYPRE_config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Define to 1 if the `closedir' function returns void instead of `int'. */
-#undef CLOSEDIR_VOID
-
 /* Define to dummy `main' function (if any) required to link to the Fortran
    libraries. */
 #undef F77_DUMMY_MAIN
@@ -17,33 +14,20 @@
 /* Define if F77 and FC dummy `main' functions are identical. */
 #undef FC_DUMMY_MAIN_EQ_F77
 
-/* Define to 1 if you have the `atexit' function. */
-#undef HAVE_ATEXIT
-
 /* Define if you have a BLAS library. */
 #undef HAVE_BLAS
 
 /* Define to 1 if you have the `bzero' function. */
 #undef HAVE_BZERO
 
-/* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
-   */
-#undef HAVE_DIRENT_H
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
-
-/* Define to 1 if you don't have `vprintf' but do have `_doprnt.' */
-#undef HAVE_DOPRNT
 
 /* Define to 1 if you have the <float.h> header file. */
 #undef HAVE_FLOAT_H
 
 /* Define to 1 if you have the `floor' function. */
 #undef HAVE_FLOOR
-
-/* Define to 1 if you have the `getcwd' function. */
-#undef HAVE_GETCWD
 
 /* Define to 1 if you have the `gethrtime' function. */
 #undef HAVE_GETHRTIME
@@ -69,27 +53,18 @@
 /* Define to 1 if you have the `memset' function. */
 #undef HAVE_MEMSET
 
-/* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
-#undef HAVE_NDIR_H
-
 /* Define to 1 if you have the `pow' function. */
 #undef HAVE_POW
 
 /* Define to 1 if the system has the type `ptrdiff_t'. */
 #undef HAVE_PTRDIFF_T
 
-/* Define to 1 if you have the `rint' function. */
-#undef HAVE_RINT
+/* Define to 1 if your system has a GNU libc compatible `realloc' function,
+   and to 0 otherwise. */
+#undef HAVE_REALLOC
 
 /* Define to 1 if you have the `sqrt' function. */
 #undef HAVE_SQRT
-
-/* Define to 1 if `stat' has the bug that it succeeds when given the
-   zero-length file name argument. */
-#undef HAVE_STAT_EMPTY_STRING_BUG
-
-/* Define to 1 if stdbool.h conforms to C99. */
-#undef HAVE_STDBOOL_H
 
 /* Define to 1 if you have the <stddef.h> header file. */
 #undef HAVE_STDDEF_H
@@ -99,12 +74,6 @@
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
-
-/* Define to 1 if you have the `strcasecmp' function. */
-#undef HAVE_STRCASECMP
-
-/* Define to 1 if you have the `strchr' function. */
-#undef HAVE_STRCHR
 
 /* Define to 1 if you have the `strcspn' function. */
 #undef HAVE_STRCSPN
@@ -118,22 +87,11 @@
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
-/* Define to 1 if you have the `strrchr' function. */
-#undef HAVE_STRRCHR
-
 /* Define to 1 if you have the `strspn' function. */
 #undef HAVE_STRSPN
 
 /* Define to 1 if you have the `strtol' function. */
 #undef HAVE_STRTOL
-
-/* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
-   */
-#undef HAVE_SYS_DIR_H
-
-/* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
-   */
-#undef HAVE_SYS_NDIR_H
 
 /* Define to 1 if you have the <sys/param.h> header file. */
 #undef HAVE_SYS_PARAM_H
@@ -147,17 +105,8 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
-/* Define to 1 if you have <sys/wait.h> that is POSIX.1 compatible. */
-#undef HAVE_SYS_WAIT_H
-
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
-
-/* Define to 1 if you have the `vprintf' function. */
-#undef HAVE_VPRINTF
-
-/* Define to 1 if the system has the type `_Bool'. */
-#undef HAVE__BOOL
 
 /* Configured for Compacq */
 #undef HYPRE_ALPHA
@@ -194,10 +143,6 @@
 
 /* Enable OpenMP support */
 #undef HYPRE_USING_OPENMP
-
-/* Define to 1 if `lstat' dereferences a symlink specified with a trailing
-   slash. */
-#undef LSTAT_FOLLOWS_SLASHED_SYMLINK
 
 /* Name of package */
 #undef PACKAGE
@@ -240,6 +185,9 @@
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
+
+/* Define to rpl_realloc if the replacement function should be used. */
+#undef realloc
 
 /* Define to `unsigned' if <sys/types.h> does not define. */
 #undef size_t
