@@ -69,7 +69,7 @@ typedef struct
 #define zzz_SBoxIMaxD(sbox, d)    zzz_BoxIMaxD(zzz_SBoxBox(sbox), d)
 #define zzz_SBoxStrideD(sbox, d)  zzz_IndexD(zzz_SBoxStride(sbox), d)
 #define zzz_SBoxSizeD(sbox, d) \
-(zzz_BoxSizeD(zzz_SBoxBox(sbox), d) / zzz_SBoxStrideD(sbox, d))
+((zzz_BoxSizeD(zzz_SBoxBox(sbox), d) - 1) / zzz_SBoxStrideD(sbox, d) + 1)
 				        
 #define zzz_SBoxIMinX(sbox)       zzz_SBoxIMinD(sbox, 0)
 #define zzz_SBoxIMinY(sbox)       zzz_SBoxIMinD(sbox, 1)
