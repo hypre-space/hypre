@@ -821,6 +821,9 @@ if [ ${BuildOpt} -ne $Skip ] ; then
   fi
   if [ ${BuildOpt} -eq $Run ] ; then
     echo "Autotest starting execution of $MessageStr"
+    make install
+    cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test
+    make
     if [ $NoFeiOpt -ne $Skip ] ; then
       makeit "nofei" $MessageStr "$HYPRE_FEI_EMAIL"
       make install
