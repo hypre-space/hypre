@@ -34,9 +34,13 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
    hypre_StructMatrix    *RAP;
    hypre_StructStencil   *stencil;
 
-   int                    P_stored_as_transpose;
+#if NEWRAP
+   int                    P_stored_as_transpose  = 0;
 
-   P_stored_as_transpose = 0;
+   RAP = hypre_SemiCreateRAPOp(R ,A, P, coarse_grid, cdir,
+                                     P_stored_as_transpose);
+#endif
+
 
 #if OLDRAP
    stencil = hypre_StructMatrixStencil(A);
@@ -51,12 +55,6 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
       RAP = hypre_PFMG3CreateRAPOp(R ,A, P, coarse_grid, cdir);
       break;
    } 
-#endif
-
-#if NEWRAP
-   RAP = hypre_SemiCreateRAPOp(R ,A, P, coarse_grid, cdir,
-                                     P_stored_as_transpose);
-
 #endif
 
 
@@ -83,10 +81,11 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
  
    hypre_StructStencil   *stencil;
 
-   int                    P_stored_as_transpose;
-
-   P_stored_as_transpose = 0;
-
+#if NEWRAP
+   int                    P_stored_as_transpose = 0;
+   ierr = hypre_SemiBuildRAP(A, P, R, cdir, cindex, cstride,
+                                    P_stored_as_transpose, Ac);
+#endif
 
 #if OLDRAP
    stencil = hypre_StructMatrixStencil(A);
@@ -126,12 +125,6 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
 
    }
 #endif
-
-#if NEWRAP
-   ierr = hypre_SemiBuildRAP(A, P, R, cdir, cindex, cstride,
-                                    P_stored_as_transpose, Ac);
-#endif
-
 
    hypre_StructMatrixAssemble(Ac);
 
