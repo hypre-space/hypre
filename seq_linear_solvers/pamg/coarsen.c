@@ -489,3 +489,339 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
    return (ierr);
 }
 
+/*==========================================================================*/
+/* Ruge's coarsening algorithm 						    */
+/*==========================================================================*/
+
+int
+hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
+                      double              strength_threshold,
+                      hypre_CSRMatrix   **S_ptr,
+                      int               **CF_marker_ptr,
+                      int                *coarse_size_ptr     )
+{
+   int             *A_i           = hypre_CSRMatrixI(A);
+   int             *A_j           = hypre_CSRMatrixJ(A);
+   double          *A_data        = hypre_CSRMatrixData(A);
+   int              num_variables = hypre_CSRMatrixNumRows(A);
+                  
+   hypre_CSRMatrix *S;
+   int             *S_i;
+   int             *S_j;
+   double          *S_data;
+                 
+   int             *CF_marker;
+   int              coarse_size;
+
+   double          *measure_array;
+   int             *graph_array;
+   int              graph_size;
+
+   double           diag, row_scale, max_measure;
+   int              i, j, k, jA, jS, kS, ig;
+   int		    ic, ji, jj, jl, index;
+   int		    max_ci_size, ci_size, ci_tilde_size;
+   int		    set_empty = 1;
+   int		    C_i_nonempty = 0;
+
+   int              ierr = 0;
+
+#if 0 /* debugging */
+   char  filename[256];
+   FILE *fp;
+   int   iter = 0;
+#endif
+
+   /*--------------------------------------------------------------
+    * Compute a CSR strength matrix, S.
+    *
+    * For now, the "strength" of dependence/influence is defined in
+    * the following way: i depends on j if
+    *     aij > max (k != i) aik,    aii < 0
+    * or
+    *     aij < min (k != i) aik,    aii >= 0
+    * Then S_ij = 1, else S_ij = 0.
+    *
+    * NOTE: the entries are negative initially, corresponding
+    * to "unaccounted-for" dependence.
+    *----------------------------------------------------------------*/
+
+   S = hypre_CreateCSRMatrix(num_variables, num_variables,
+                             A_i[num_variables]);
+   hypre_InitializeCSRMatrix(S);
+
+   S_i           = hypre_CSRMatrixI(S);
+   S_j           = hypre_CSRMatrixJ(S);
+   S_data        = hypre_CSRMatrixData(S);
+
+   /* give S same nonzero structure as A */
+   for (i = 0; i < num_variables; i++)
+   {
+      S_i[i] = A_i[i];
+      for (jA = A_i[i]; jA < A_i[i+1]; jA++)
+      {
+         S_j[jA] = A_j[jA];
+      }
+   }
+   S_i[num_variables] = A_i[num_variables];
+
+   for (i = 0; i < num_variables; i++)
+   {
+      diag = A_data[A_i[i]];
+
+      /* compute scaling factor */
+      row_scale = 0.0;
+      if (diag < 0)
+      {
+         for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
+         {
+            row_scale = max(row_scale, A_data[jA]);
+         }
+      }
+      else
+      {
+         for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
+         {
+            row_scale = min(row_scale, A_data[jA]);
+         }
+      }
+
+      /* compute row entries of S */
+      S_data[A_i[i]] = 0;
+      if (diag < 0) 
+      { 
+         for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
+         {
+            S_data[jA] = 0;
+            if (A_data[jA] > strength_threshold * row_scale)
+            {
+               S_data[jA] = -1;
+            }
+         }
+      }
+      else
+      {
+         for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
+         {
+            S_data[jA] = 0;
+            if (A_data[jA] < strength_threshold * row_scale)
+            {
+               S_data[jA] = -1;
+            }
+         }
+      }
+   }
+
+   /*--------------------------------------------------------------
+    * "Compress" the strength matrix.
+    *
+    * NOTE: S has *NO DIAGONAL ELEMENT* on any row.  Caveat Emptor!
+    *
+    * NOTE: This "compression" section of code may be removed, and
+    * coarsening will still be done correctly.  However, the routine
+    * that builds interpolation would have to be modified first.
+    *----------------------------------------------------------------*/
+
+   jS = 0;
+   for (i = 0; i < num_variables; i++)
+   {
+      S_i[i] = jS;
+      for (jA = A_i[i]; jA < A_i[i+1]; jA++)
+      {
+         if (S_data[jA])
+         {
+            S_j[jS]    = S_j[jA];
+            S_data[jS] = S_data[jA];
+            jS++;
+         }
+      }
+   }
+   S_i[num_variables] = jS;
+   hypre_CSRMatrixNumNonzeros(S) = jS;
+
+   /*----------------------------------------------------------
+    * Compute the measures
+    *
+    * The measures are currently given by the column sums of S.
+    * Hence, measure_array[i] is the number of influences
+    * of variable i.
+    *
+    *----------------------------------------------------------*/
+
+   measure_array = hypre_CTAlloc(double, num_variables);
+
+   for (i = 0; i < num_variables; i++)
+   {
+      for (jS = S_i[i]; jS < S_i[i+1]; jS++)
+      {
+         j = S_j[jS];
+         measure_array[j] -= S_data[jS];
+      }
+   }
+
+
+   /*---------------------------------------------------
+    * Initialize the graph array
+    *---------------------------------------------------*/
+
+   graph_array   = hypre_CTAlloc(int, num_variables);
+
+   for (i = 0; i < num_variables; i++)
+   {
+      graph_array[i] = 1;
+   }
+
+   /*---------------------------------------------------
+    * Initialize the C/F marker array
+    *---------------------------------------------------*/
+
+   CF_marker = hypre_CTAlloc(int, num_variables);
+   for (i = 0; i < num_variables; i++)
+   {
+      CF_marker[i] = 0;
+   }
+
+   /*---------------------------------------------------
+    * Loop until all points are either fine or coarse.
+    *---------------------------------------------------*/
+
+   coarse_size = 0;
+   graph_size = num_variables;
+
+   /* first coarsening phase */
+
+   while (graph_size > 0)
+   {
+      /*------------------------------------------------
+       * pick an i with maximal measure
+       *------------------------------------------------*/
+
+      max_measure = 0;
+      for (ic=0; ic < num_variables; ic++)
+      {
+	 if (measure_array[ic] > max_measure)
+	 {
+	    i = ic;
+	    max_measure = measure_array[ic];
+	 }
+      }
+
+      /* make i a coarse point */
+
+      CF_marker[i] = 1;
+      coarse_size++;
+      graph_size--;
+      graph_array[i] = 0;
+      measure_array[i] = 0;
+
+      /* examine its connections, S_i^T */
+
+      for (ji = 0; ji < num_variables; ji++)
+      {
+	 if (graph_array[ji])
+	 {
+	    for (jj = S_i[ji]; jj < S_i[ji+1]; jj++)
+	    {
+	       index = S_j[jj];
+	       if (index == i)
+	       {
+		  CF_marker[ji] = -1;
+		  graph_size--;
+		  graph_array[ji] = 0;
+		  measure_array[ji] = 0;
+		  for (jl = S_i[ji]; jl < S_i[ji+1]; jl++)
+		  {
+		     index = S_j[jl];
+	 	     if (graph_array[index])
+	        	measure_array[index]++;
+		  }
+		  break;
+	       }
+	    }
+	 }
+      }
+      
+      for (ji = S_i[i]; ji < S_i[i+1]; ji++)
+      {
+	 index = S_j[ji];
+	 if (graph_array[index])
+	    measure_array[index]--;
+      }
+   } 
+
+   /* second pass, check fine points for coarse neighbors */
+
+   for (i=0; i < num_variables; i++)
+   {
+      if (CF_marker[i] == -1)
+      {
+	 max_ci_size = S_i[i+1]-S_i[i];
+	 ci_tilde_size = max_ci_size;
+	 ci_size = 0;
+	 for (ji = S_i[i]; ji < S_i[i+1]; ji++)
+	 {
+	    j = S_j[ji];
+	    if (CF_marker[j] > 0)
+	       graph_array[ci_size++] = j;
+ 	 }
+	 for (ji = S_i[i]; ji < S_i[i+1]; ji++)
+	 {
+	    j = S_j[ji];
+	    if (CF_marker[j] == -1)
+	    {
+	       set_empty = 1;
+	       for (jj = S_i[j]; jj < S_i[j+1]; jj++)
+	       {
+		  index = S_j[jj];
+		  for (jl=0; jl < ci_size; jl++)
+		  {
+		     if (graph_array[jl] == index)
+		     {
+		        set_empty = 0;
+		        break;
+		     }
+	          }
+	          if (!set_empty) break;
+	       }
+	       if (set_empty)
+	       {
+		  if (C_i_nonempty)
+		  {
+		     CF_marker[i] = 1;
+		     for (jj=max_ci_size ; jj < ci_tilde_size; jj++)
+		     {
+			CF_marker[graph_array[jj]] = -1;
+		     }
+		     ci_tilde_size = max_ci_size;
+		  }
+		  else
+		  {
+		     graph_array[ci_tilde_size++] = index;
+		     CF_marker[index] = 2;
+		     C_i_nonempty = 1;
+		     i--;
+		     break;
+		  }
+	       }
+	    }
+	 }
+      }
+   }
+
+		  	       
+
+
+   /*---------------------------------------------------
+    * Clean up and return
+    *---------------------------------------------------*/
+
+   hypre_TFree(measure_array);
+   hypre_TFree(graph_array);
+
+   *S_ptr           = S;
+   *CF_marker_ptr   = CF_marker;
+   *coarse_size_ptr = coarse_size;
+
+   return (ierr);
+}
+
