@@ -1705,8 +1705,8 @@ void HYPRE_LinSysCore::buildSlideReducedSystem()
           }
           ierr = HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
           assert(!ierr);
-          if ( j < rowSize ) nConstraints_++;
-          else               break;
+          if ( j == rowSize ) nConstraints_++;
+          else                break;
        }
     }
     if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE1 )
