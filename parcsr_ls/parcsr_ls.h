@@ -25,10 +25,12 @@ int HYPRE_ParAMGFinalize P((HYPRE_Solver solver ));
 int HYPRE_ParAMGSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParAMGSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParAMGSolveT P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParAMGSetRestriction P((HYPRE_Solver solver , int restr_par ));
 int HYPRE_ParAMGSetMaxLevels P((HYPRE_Solver solver , int max_levels ));
 int HYPRE_ParAMGSetStrongThreshold P((HYPRE_Solver solver , double strong_threshold ));
 int HYPRE_ParAMGSetInterpType P((HYPRE_Solver solver , int interp_type ));
 int HYPRE_ParAMGSetMaxIter P((HYPRE_Solver solver , int max_iter ));
+int HYPRE_ParAMGSetCoarsenType P((HYPRE_Solver solver , int coarsen_type ));
 int HYPRE_ParAMGSetCycleType P((HYPRE_Solver solver , int cycle_type ));
 int HYPRE_ParAMGSetTol P((HYPRE_Solver solver , double tol ));
 int HYPRE_ParAMGSetNumGridSweeps P((HYPRE_Solver solver , int *num_grid_sweeps ));
@@ -122,10 +124,12 @@ int hypre_GMRESGetFinalRelativeResidualNorm P((void *gmres_vdata , double *relat
 /* par_amg.c */
 void *hypre_ParAMGInitialize P((void ));
 int hypre_ParAMGFinalize P((void *data ));
+int hypre_ParAMGSetRestriction P((void *data , int restr_par ));
 int hypre_ParAMGSetMaxLevels P((void *data , int max_levels ));
 int hypre_ParAMGSetStrongThreshold P((void *data , double strong_threshold ));
 int hypre_ParAMGSetInterpType P((void *data , int interp_type ));
 int hypre_ParAMGSetMaxIter P((void *data , int max_iter ));
+int hypre_ParAMGSetCoarsenType P((void *data , int coarsen_type ));
 int hypre_ParAMGSetCycleType P((void *data , int cycle_type ));
 int hypre_ParAMGSetTol P((void *data , double tol ));
 int hypre_ParAMGSetNumGridSweeps P((void *data , int *num_grid_sweeps ));
@@ -227,6 +231,10 @@ int hypre_PCGAxpy P((double alpha , void *x , void *y ));
 
 /* transpose.c */
 int hypre_CSRMatrixTranspose P((hypre_CSRMatrix *A , hypre_CSRMatrix **AT ));
+
+/* coarsen.c */
+int hypre_AMGCoarsen P((hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
+int hypre_AMGCoarsenRuge P((hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
 
 #undef P
 
