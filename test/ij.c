@@ -96,7 +96,7 @@ main( int   argc,
    int local_num_vars;
    int variant, overlap, domain_type;
    double schwarz_rlx_weight;
-   double *values, val;
+   double *values;
 
    const double dt_inf = 1.e40;
    double dt = dt_inf;
@@ -1052,30 +1052,21 @@ main( int   argc,
    col_inds = hypre_CTAlloc(int, last_local_row - first_local_row + 1);
    values   = hypre_CTAlloc(double, last_local_row - first_local_row + 1);
 
-   if (dt < dt_inf)
-     val = 1./dt;
-   else 
-     val = 0.;   /* Use zero to avoid unintentional loss of significance */
+       ierr = HYPRE_IJMatrixInitialize( ij_A );
 
-   for (i = first_local_row; i <= last_local_row; i++)
-   {
-     j = i - first_local_row;
-     rows[j] = i;
-     ncols[j] = 1;
-     col_inds[j] = i;
-     values[j] = val;
-   }
-      
-   ierr += HYPRE_IJMatrixAddToValues( ij_A,
-                                      local_num_rows,
-                                      ncols, rows,
-                                      (const int *) col_inds,
-                                      (const double *) values );
+       /* Loop through all locally stored rows and insert them into ij_matrix */
+       for (i=first_local_row; i<= last_local_row; i++)
+       {
+         ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
+                                           &col_inds, &values );
 
-   hypre_TFree(values);
-   hypre_TFree(col_inds);
-   hypre_TFree(rows);
-   hypre_TFree(ncols);
+         ierr += HYPRE_IJMatrixSetValues( ij_A, 1, &size, &i,
+                                          (const int *) col_inds,
+                                          (const double *) values );
+
+         ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, i, &size,
+                                               &col_inds, &values );
+       }
 
    /* If sparsity pattern is not changed since last IJMatrixAssemble call,
       this should be a no-op */
