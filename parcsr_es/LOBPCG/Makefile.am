@@ -1,8 +1,13 @@
 ## Process this file with automake to create Makefile.in
 
-lib_LTLIBRARIES = libHYPRE_lobpcg.la
-libHYPRE_lobpcg_la_SOURCES = $(FILES)
-libHYPRE_lobpcg_la_LDFLAGS = -avoid-version
+if STATICONLY
+ lib_LIBRARIES = libHYPRE_lobpcg.a
+ libHYPRE_lobpcg_a_SOURCES = $(FILES)
+else !STATICONLY
+ lib_LTLIBRARIES = libHYPRE_lobpcg.la
+ libHYPRE_lobpcg_la_SOURCES = $(FILES)
+ libHYPRE_lobpcg_la_LDFLAGS = -avoid-version
+endif !STATICONLY
 
 include_HEADERS = HYPRE_lobpcg.h lobpcg.h
 

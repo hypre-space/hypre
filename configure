@@ -475,7 +475,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE am__leading_dot CC CXX F77 babeldir USE_FEI_BASE_DIR_DEFAULT_TRUE USE_FEI_BASE_DIR_DEFAULT_FALSE USE_FEI_LIB_DIR_DEFAULT_TRUE USE_FEI_LIB_DIR_DEFAULT_FALSE USE_FEI_INC_DIR_DEFAULT_TRUE USE_FEI_INC_DIR_DEFAULT_FALSE CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CPP LN_S CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE FFLAGS ac_ct_F77 FLIBS EGREP ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB DLLTOOL ac_ct_DLLTOOL AS ac_ct_AS OBJDUMP ac_ct_OBJDUMP CXXCPP LIBTOOL LIBTOOL_DEPS LIBOBJS POW_LIB MPILIBS CSUPERLUFLAGS BLAS_LIBS BLASNEEDED_TRUE BLASNEEDED_FALSE BLASLIBFLAGS LAPACK_LIBS LAPACKNEEDED_TRUE LAPACKNEEDED_FALSE LAPACKLIBFLAGS LIBM CCLD CXXLD BABEL_DIR BABEL_HYPRE_INCLUDES BABELLIBFLAGS HYPRE_BABELLIBDIR MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE FEI_BASE_DIR FEI_LIB_DIR FEI_INC_DIR subdirs BABELDIR LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os STATICONLY_TRUE STATICONLY_FALSE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE am__leading_dot DATETIME CC CXX F77 babeldir USE_FEI_BASE_DIR_DEFAULT_TRUE USE_FEI_BASE_DIR_DEFAULT_FALSE USE_FEI_LIB_DIR_DEFAULT_TRUE USE_FEI_LIB_DIR_DEFAULT_FALSE USE_FEI_INC_DIR_DEFAULT_TRUE USE_FEI_INC_DIR_DEFAULT_FALSE CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CPP LN_S CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE FFLAGS ac_ct_F77 FLIBS EGREP ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB DLLTOOL ac_ct_DLLTOOL AS ac_ct_AS OBJDUMP ac_ct_OBJDUMP CXXCPP LIBTOOL LIBTOOL_DEPS LIBOBJS POW_LIB MPILIBS CSUPERLUFLAGS BLAS_LIBS BLASNEEDED_TRUE BLASNEEDED_FALSE BLASLIBFLAGS LAPACK_LIBS LAPACKNEEDED_TRUE LAPACKNEEDED_FALSE LAPACKLIBFLAGS LIBM CCLD CXXLD BABEL_DIR BABEL_HYPRE_INCLUDES BABELLIBFLAGS HYPRE_BABELLIBDIR MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE FEI_BASE_DIR FEI_LIB_DIR FEI_INC_DIR subdirs BABELDIR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1641,6 +1641,16 @@ else
 fi;
 
 
+
+
+if test "$enable_shared" = no; then
+  STATICONLY_TRUE=
+  STATICONLY_FALSE='#'
+else
+  STATICONLY_TRUE='#'
+  STATICONLY_FALSE=
+fi
+
 echo "$as_me:$LINENO: checking whether to enable maintainer-specific portions of Makefiles" >&5
 echo $ECHO_N "checking whether to enable maintainer-specific portions of Makefiles... $ECHO_C" >&6
     # Check whether --enable-maintainer-mode or --disable-maintainer-mode was given.
@@ -2042,6 +2052,18 @@ INSTALL_STRIP_PROGRAM="\${SHELL} \$(install_sh) -c -s"
 
 
 
+DATETIME="2003/10/22 23:46:36"
+
+
+if test "x$CFLAGS" != "x" ; then
+  casc_user_chose_cflags=yes
+fi
+if test "x$CXXFLAGS" != "x" ; then
+  casc_user_chose_cxxflags=yes
+fi
+if test "x$FFLAGS" != "x" ; then
+  casc_user_chose_fflags=yes
+fi
 
 # Check whether --enable-debug or --disable-debug was given.
 if test "${enable_debug+set}" = set; then
@@ -6376,7 +6398,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:6379:" \
+echo "$as_me:6401:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -6546,7 +6568,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:6549: \"$ac_link\") >&5
+(eval echo $as_me:6571: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -6626,7 +6648,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:6629: \"$ac_link\") >&5
+(eval echo $as_me:6651: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -7757,7 +7779,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7760 "configure"' > conftest.$ac_ext
+  echo '#line 7782 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9642,11 +9664,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9645: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9667: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9649: \$? = $ac_status" >&5
+   echo "$as_me:9671: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -9874,11 +9896,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9877: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9899: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9881: \$? = $ac_status" >&5
+   echo "$as_me:9903: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -9941,11 +9963,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9944: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9966: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9948: \$? = $ac_status" >&5
+   echo "$as_me:9970: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12007,7 +12029,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12010 "configure"
+#line 12032 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12105,7 +12127,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12108 "configure"
+#line 12130 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14249,11 +14271,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14252: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14274: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14256: \$? = $ac_status" >&5
+   echo "$as_me:14278: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -14316,11 +14338,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14319: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14341: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14323: \$? = $ac_status" >&5
+   echo "$as_me:14345: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15601,7 +15623,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 15604 "configure"
+#line 15626 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15699,7 +15721,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 15702 "configure"
+#line 15724 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16521,11 +16543,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16524: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16546: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16528: \$? = $ac_status" >&5
+   echo "$as_me:16550: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -16588,11 +16610,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16591: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16613: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16595: \$? = $ac_status" >&5
+   echo "$as_me:16617: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18528,11 +18550,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18531: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18553: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18535: \$? = $ac_status" >&5
+   echo "$as_me:18557: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -18760,11 +18782,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18763: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18785: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18767: \$? = $ac_status" >&5
+   echo "$as_me:18789: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -18827,11 +18849,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18830: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18852: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18834: \$? = $ac_status" >&5
+   echo "$as_me:18856: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20893,7 +20915,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 20896 "configure"
+#line 20918 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -20991,7 +21013,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 20994 "configure"
+#line 21016 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -25860,29 +25882,29 @@ if test "$casc_using_debug" = "yes" ; then
     CXXLD="--tag=CXX $PREPEND $XCXXFLAGS $CXX"
   fi
 else
-  if test "x${CFLAGS}" = "x"
+  if test "x${casc_user_chose_cflags}" = "xno"
 then
   if test "x${GCC}" = "xyes"
   then
-        CFLAGS="-O2"
+        CFLAGS="$CFLAGS -O2"
 
 
   else
     case "${CC}" in
       kcc|mpikcc)
-        CFLAGS="-fast +K3"
+        CFLAGS="$CFLAGS -fast +K3"
         ;;
       KCC|mpiKCC)
-        CFLAGS="--c -fast +K3"
+        CFLAGS="$CFLAGS --c -fast +K3"
         ;;
       icc)
-        CFLAGS="-O3 -xW -tpp7"
+        CFLAGS="$CFLAGS -O3 -xW -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -openmp"
         fi
         ;;
       pgcc|mpipgcc)
-        CFLAGS="-fast"
+        CFLAGS="$CFLAGS -fast"
         if test "$casc_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -mp"
         fi
@@ -25890,64 +25912,64 @@ then
       cc|c89|mpcc|mpiicc|xlc|ccc)
         case "${host}" in
           alpha*-dec-osf4.*)
-            CFLAGS="-std1 -w0 -O2"
+            CFLAGS="$CFLAGS -std1 -w0 -O2"
             ;;
           alpha*-dec-osf5.*)
-            CFLAGS="-fast"
+            CFLAGS="$CFLAGS -fast"
             if test "$casc_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -omp"
             fi
             ;;
           hppa*-hp-hpux*)
-            CFLAGS="-Aa -D_HPUX_SOURCE -O"
+            CFLAGS="$CFLAGS -Aa -D_HPUX_SOURCE -O"
             ;;
           mips-sgi-irix6.[4-9]*)
-            CFLAGS="-O -64 -OPT:Olimit=0"
+            CFLAGS="$CFLAGS -O -64 -OPT:Olimit=0"
             if test "$casc_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -mp"
             fi
             ;;
           mips-sgi-irix*)
-            CFLAGS="-fullwarn -woff 835 -O2 -Olimit 3500"
+            CFLAGS="$CFLAGS -fullwarn -woff 835 -O2 -Olimit 3500"
             ;;
           rs6000-ibm-aix*)
-            CFLAGS="-D_ALL_SOURCE -O2"
+            CFLAGS="$CFLAGS -D_ALL_SOURCE -O2"
             ;;
           powerpc-ibm-aix*)
-            CFLAGS="-O3 -qstrict -qmaxmem=8192"
+            CFLAGS="$CFLAGS -O3 -qstrict -qmaxmem=8192"
             if test "$casc_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -qsmp=omp"
             fi
             ;;
           *)
-            CFLAGS="-O"
+            CFLAGS="$CFLAGS -O"
             ;;
         esac
         ;;
       *)
-        CFLAGS="-O"
+        CFLAGS="$CFLAGS -O"
         ;;
     esac
   fi
 fi
-if test "x${CXXFLAGS}" = "x"
+if test "x${casc_user_chose_cxxflags}" = "xno"
 then
   if test "x${GXX}" = "xyes"
   then
-        CXXFLAGS="-O2"
+        CXXFLAGS="$CXXFLAGS -O2"
   else
     case "${CXX}" in
       KCC|mpiKCC)
-        CXXFLAGS="-fast +K3"
+        CXXFLAGS="$CXXFLAGS -fast +K3"
         ;;
       icc)
-        CXXFLAGS="-O3 -xW -tpp7"
+        CXXFLAGS="$CXXFLAGS -O3 -xW -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -openmp"
         fi
         ;;
       pgCC|mpipgCC)
-        CXXFLAGS="-fast"
+        CXXFLAGS="$CXXFLAGS -fast"
         if test "$casc_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
@@ -25955,10 +25977,10 @@ then
       CC|aCC|mpCC|mpiicc|xlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
-            CXXFLAGS="-std1 -w0 -O2"
+            CXXFLAGS="$CXXFLAGS -std1 -w0 -O2"
             ;;
           alpha*-dec-osf5.*)
-            CXXFLAGS="-fast"
+            CXXFLAGS="$CXXFLAGS -fast"
             if test "$casc_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -omp"
             fi
@@ -25967,52 +25989,52 @@ then
             CXXFLAGS="-D_HPUX_SOURCE -O"
             ;;
           mips-sgi-irix6.[4-9]*)
-            CXXFLAGS="-O -64"
+            CXXFLAGS="$CXXFLAGS -O -64"
             if test "$casc_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -mp"
             fi
             ;;
           mips-sgi-irix*)
-            CXXFLAGS="-fullwarn -woff 835 -O2 -Olimit 3500"
+            CXXFLAGS="$CXXFLAGS -fullwarn -woff 835 -O2 -Olimit 3500"
             ;;
           rs6000-ibm-aix*)
-            CXXFLAGS="-D_ALL_SOURCE -O2"
+            CXXFLAGS="$CXXFLAGS -D_ALL_SOURCE -O2"
             ;;
           powerpc-ibm-aix*)
-            CXXFLAGS="-O3 -qstrict -qmaxmem=8192"
+            CXXFLAGS="$CXXFLAGS -O3 -qstrict -qmaxmem=8192"
             if test "$casc_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -qsmp=omp"
             fi
             ;;
           *)
-            CXXFLAGS="-O"
+            CXXFLAGS="$CXXFLAGS -O"
             ;;
         esac
         ;;
       *)
-        CXXFLAGS="-O"
+        CXXFLAGS="$CXXFLAGS -O"
         ;;
     esac
   fi
 fi
-if test "x${FFLAGS}" = "x"
+if test "x${casc_user_chose_fflags}" = "xno"
 then
   if test "x${G77}" = "xyes"
   then
-    FFLAGS="-O"
+    FFLAGS="$FFLAGS -O"
   else
     case "${CXX}" in
       kf77|mpikf77)
-        FFLAGS="-fast +K3"
+        FFLAGS="$FFLAGS -fast +K3"
         ;;
       ifc)
-        FFLAGS="-O3 -xW -tpp7"
+        FFLAGS="$FFLAGS -O3 -xW -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
         fi
         ;;
       pgf77|mpipgf77)
-        FFLAGS="-fast"
+        FFLAGS="$FFLAGS -fast"
         if test "$casc_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -mp"
         fi
@@ -26020,42 +26042,42 @@ then
       f77|f90|mpxlf|mpif77|mpiifc|xlf|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
-            FFLAGS="-std1 -w0 -O2"
+            FFLAGS="$FFLAGS -std1 -w0 -O2"
             ;;
           alpha*-dec-osf5.*)
-            FFLAGS="-fast"
+            FFLAGS="$FFLAGS -fast"
             if test "$casc_using_openmp" = "yes" ; then
               FFLAGS="$FFLAGS -omp"
             fi
             ;;
           mips-sgi-irix6.[4-9]*)
-            FFLAGS="-O -64"
+            FFLAGS="$FFLAGS -O -64"
             if test "$casc_using_openmp" = "yes" ; then
               FFLAGS="$FFLAGS -mp"
             fi
             ;;
           mips-sgi-irix*)
-            FFLAGS="-fullwarn -woff 835 -O2 -Olimit 3500"
+            FFLAGS="$FFLAGS -fullwarn -woff 835 -O2 -Olimit 3500"
             ;;
           rs6000-ibm-aix*)
-            FFLAGS="-D_ALL_SOURCE -O2"
+            FFLAGS="$FFLAGS -D_ALL_SOURCE -O2"
             ;;
           powerpc-ibm-aix*)
-            FFLAGS="-O3 -qstrict"
+            FFLAGS="$FFLAGS -O3 -qstrict"
             if test "$casc_using_openmp" = "yes" ; then
               FFLAGS="$FFLAGS -qsmp=omp"
             fi
             ;;
           sparc-sun-solaris2*)
-            FFLAGS="-silent -O"
+            FFLAGS="$FFLAGS -silent -O"
             ;;
           *)
-            FFLAGS="-O"
+            FFLAGS="$FFLAGS -O"
             ;;
         esac
         ;;
       *)
-        FFLAGS="-O"
+        FFLAGS="$FFLAGS -O"
         ;;
     esac
   fi
@@ -26210,6 +26232,13 @@ LIBOBJS=$ac_libobjs
 LTLIBOBJS=$ac_ltlibobjs
 
 
+if test -z "${STATICONLY_TRUE}" && test -z "${STATICONLY_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"STATICONLY\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"STATICONLY\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"MAINTAINER_MODE\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -26871,6 +26900,8 @@ s,@host@,$host,;t t
 s,@host_cpu@,$host_cpu,;t t
 s,@host_vendor@,$host_vendor,;t t
 s,@host_os@,$host_os,;t t
+s,@STATICONLY_TRUE@,$STATICONLY_TRUE,;t t
+s,@STATICONLY_FALSE@,$STATICONLY_FALSE,;t t
 s,@MAINTAINER_MODE_TRUE@,$MAINTAINER_MODE_TRUE,;t t
 s,@MAINTAINER_MODE_FALSE@,$MAINTAINER_MODE_FALSE,;t t
 s,@MAINT@,$MAINT,;t t
@@ -26893,6 +26924,7 @@ s,@INSTALL_STRIP_PROGRAM@,$INSTALL_STRIP_PROGRAM,;t t
 s,@AWK@,$AWK,;t t
 s,@SET_MAKE@,$SET_MAKE,;t t
 s,@am__leading_dot@,$am__leading_dot,;t t
+s,@DATETIME@,$DATETIME,;t t
 s,@CC@,$CC,;t t
 s,@CXX@,$CXX,;t t
 s,@F77@,$F77,;t t

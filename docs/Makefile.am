@@ -85,7 +85,7 @@ ONLINE_OPTS =\
 
 all: html ps pdf
 
-install: all
+install-data-local: all
 	@cp -fr HYPRE_usr_manual     ${prefix}/docs/.
 	@cp -f  HYPRE_usr_manual.ps  ${prefix}/docs/.
 	@cp -f  HYPRE_usr_manual.pdf ${prefix}/docs/.
@@ -97,12 +97,10 @@ install: all
 	@cp -f  bHYPRE_ref_manual.pdf ${prefix}/docs/.
 	@cp -f  V[1-9]* ${prefix}/docs/.
 
-clean:
+clean-local:
 	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
 	@/bin/rm -f *.idx *.ilg *.ind 
 	@/bin/rm -f vref_manual.* vbref_manual.* version.tex
-
-veryclean: clean
 	@/bin/rm -fr HYPRE_usr_manual
 	@/bin/rm -f  HYPRE_usr_manual.ps
 	@/bin/rm -f  HYPRE_usr_manual.pdf
@@ -163,15 +161,15 @@ USR_FILES =\
  usr_manual.tex
 
 HYPRE_usr_manual/usr_manual.html: usr_manual.dvi
-	mkdir -p HYPRE_usr_manual
-	latex2html ${ONLINE_OPTS} -dir HYPRE_usr_manual usr_manual.tex 2>&1
-	@cp -f hypre_wiw.gif HYPRE_usr_manual/.
+	mkdir -p $(top_builddir)/docs//HYPRE_usr_manual
+	latex2html ${ONLINE_OPTS} -dir $(top_builddir)/docs//HYPRE_usr_manual usr_manual.tex 2>&1
+	@cp -f hypre_wiw.gif $(top_builddir)/docs//HYPRE_usr_manual/.
 
 HYPRE_usr_manual.ps: usr_manual.dvi
-	${DVIPS} -o HYPRE_usr_manual.ps usr_manual
+	${DVIPS} -o $(top_builddir)/docs//HYPRE_usr_manual.ps usr_manual
 
 HYPRE_usr_manual.pdf: HYPRE_usr_manual.ps
-	${PSPDF} HYPRE_usr_manual.ps
+	${PSPDF} $(top_builddir)/docs//HYPRE_usr_manual.ps
 
 usr_manual.dvi: version.tex usr_manual.idx
 	${LATEX} usr_manual
@@ -200,15 +198,15 @@ DEV_FILES =\
  dev_manual.tex
 
 HYPRE_dev_manual/dev_manual.html: dev_manual.dvi
-	mkdir -p HYPRE_dev_manual
-	latex2html ${ONLINE_OPTS} -dir HYPRE_dev_manual dev_manual.tex 2>&1
-	@cp -f hypre_wiw.gif HYPRE_dev_manual/.
+	mkdir -p $(top_builddir)/docs//HYPRE_dev_manual
+	latex2html ${ONLINE_OPTS} -dir $(top_builddir)/docs//HYPRE_dev_manual dev_manual.tex 2>&1
+	@cp -f hypre_wiw.gif $(top_builddir)/docs//HYPRE_dev_manual/.
 
 HYPRE_dev_manual.ps: dev_manual.dvi
-	${DVIPS} -o HYPRE_dev_manual.ps dev_manual
+	${DVIPS} -o $(top_builddir)/docs//HYPRE_dev_manual.ps dev_manual
 
 HYPRE_dev_manual.pdf: HYPRE_dev_manual.ps
-	${PSPDF} HYPRE_dev_manual.ps
+	${PSPDF} $(top_builddir)/docs//HYPRE_dev_manual.ps
 
 dev_manual.dvi: version.tex dev_manual.idx
 	${LATEX} dev_manual
@@ -222,15 +220,15 @@ dev_manual.idx: ${DEV_FILES}
 ##########
 
 HYPRE_ref_manual/index.html: vref_manual.dxx 
-	mkdir -p HYPRE_ref_manual
-	doc++ -d HYPRE_ref_manual -B hypre_wiw.html vref_manual.dxx 2>&1
-	cp -f hypre_wiw.gif HYPRE_ref_manual
+	mkdir -p $(top_builddir)/docs//HYPRE_ref_manual
+	doc++ -d $(top_builddir)/docs//HYPRE_ref_manual -B hypre_wiw.html vref_manual.dxx 2>&1
+	cp -f hypre_wiw.gif $(top_builddir)/docs//HYPRE_ref_manual
 
 HYPRE_ref_manual.ps: vref_manual.dvi
-	${DVIPS} -o HYPRE_ref_manual.ps vref_manual.dvi 		
+	${DVIPS} -o $(top_builddir)/docs//HYPRE_ref_manual.ps vref_manual.dvi 		
 
 HYPRE_ref_manual.pdf: HYPRE_ref_manual.ps
-	${PSPDF} HYPRE_ref_manual.ps
+	${PSPDF} $(top_builddir)/docs//HYPRE_ref_manual.ps
 
 vref_manual.dvi: version.tex vref_manual.tex
 	${LATEX} vref_manual
@@ -241,22 +239,20 @@ vref_manual.tex: vref_manual.dxx
 
 vref_manual.dxx: ref_manual.dxx
 	@ \
-	VNUM=`$(srcdir)/../utilities/version -number`; \
-	VDATE=`$(srcdir)/../utilities/version -date`; \
 	sed "s/HYPREVersion/$$PACKAGE_VERSION/g" ref_manual.dxx > vref_manual.dxx
 
 ##########
 
 bHYPRE_ref_manual/index.html: vbref_manual.dxx 
-	mkdir -p bHYPRE_ref_manual
-	doc++ -d bHYPRE_ref_manual -B hypre_wiw.html vbref_manual.dxx 2>&1
-	cp -f hypre_wiw.gif bHYPRE_ref_manual
+	mkdir -p $(top_builddir)/docs//bHYPRE_ref_manual
+	doc++ -d $(top_builddir)/docs//bHYPRE_ref_manual -B hypre_wiw.html vbref_manual.dxx 2>&1
+	cp -f hypre_wiw.gif $(top_builddir)/docs//bHYPRE_ref_manual
 
 bHYPRE_ref_manual.ps: vbref_manual.dvi
-	${DVIPS} -o bHYPRE_ref_manual.ps vbref_manual.dvi 		
+	${DVIPS} -o $(top_builddir)/docs//bHYPRE_ref_manual.ps vbref_manual.dvi 		
 
 bHYPRE_ref_manual.pdf: bHYPRE_ref_manual.ps
-	${PSPDF} bHYPRE_ref_manual.ps
+	${PSPDF} $(top_builddir)/docs//bHYPRE_ref_manual.ps
 
 vbref_manual.dvi: version.tex vbref_manual.tex
 	${LATEX} vbref_manual
@@ -267,18 +263,14 @@ vbref_manual.tex: vbref_manual.dxx
 
 vbref_manual.dxx: bref_manual.dxx
 	@ \
-	VNUM=`$(srcdir)/../utilities/version -number`; \
-	VDATE=`$(srcdir)/../utilities/version -date`; \
 	sed "s/HYPREVersion/$$PACKAGE_VERSION/g" bref_manual.dxx > vbref_manual.dxx
 
 ##########
 
 version.tex:
 	@ \
-	VNUM=`$(srcdir)/../utilities/version -number`; \
-	VDATE=`$(srcdir)/../utilities/version -date`; \
 	echo "\def\HYPREVersion{$$PACKAGE_VERSION}" > version.tex; \
-	echo "\def\HYPREVersionDate{$$VDATE}" >> version.tex
+	echo "\def\HYPREVersionDate{$$DATETIME}" >> version.tex
 
 ##################################################################
 # Generic rules
@@ -287,14 +279,14 @@ version.tex:
 dist-hook:
 	@ \
 	$(MAKE) $(AM_MAKEFLAGS); \
-	cp -fr HYPRE_usr_manual     ${distdir}/.; \
-	cp -f  HYPRE_usr_manual.ps  ${distdir}/.; \
-	cp -f  HYPRE_usr_manual.pdf ${distdir}/.; \
-	cp -fr HYPRE_ref_manual     ${distdir}/.; \
-	cp -f  HYPRE_ref_manual.ps  ${distdir}/.; \
-	cp -f  HYPRE_ref_manual.pdf ${distdir}/.; \
-	cp -fr bHYPRE_ref_manual     ${distdir}/.; \
-	cp -f  bHYPRE_ref_manual.ps  ${distdir}/.; \
-	cp -f  bHYPRE_ref_manual.pdf ${distdir}/.; \
-	cp -f  V[1-9]* ${distdir}/.
+	cp -fr $(top_builddir)/docs//HYPRE_usr_manual     ${distdir}/.; \
+	cp -f  $(top_builddir)/docs//HYPRE_usr_manual.ps  ${distdir}/.; \
+	cp -f  $(top_builddir)/docs//HYPRE_usr_manual.pdf ${distdir}/.; \
+	cp -fr $(top_builddir)/docs//HYPRE_ref_manual     ${distdir}/.; \
+	cp -f  $(top_builddir)/docs//HYPRE_ref_manual.ps  ${distdir}/.; \
+	cp -f  $(top_builddir)/docs//HYPRE_ref_manual.pdf ${distdir}/.; \
+	cp -fr $(top_builddir)/docs//bHYPRE_ref_manual     ${distdir}/.; \
+	cp -f  $(top_builddir)/docs//bHYPRE_ref_manual.ps  ${distdir}/.; \
+	cp -f  $(top_builddir)/docs//bHYPRE_ref_manual.pdf ${distdir}/.; \
+	cp -f  $(top_builddir)/docs//V[1-9]* ${distdir}/.
 	

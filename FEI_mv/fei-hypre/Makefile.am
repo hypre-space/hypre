@@ -6,15 +6,21 @@ else !USE_FEI_BASE_DIR_DEFAULT
   BASE_DIR = @FEI_BASE_DIR@
 endif !USE_FEI_BASE_DIR_DEFAULT
 
-lib_LTLIBRARIES = libHYPRE_FEI.la
-libHYPRE_FEI_la_SOURCES = $(FILES)
-libHYPRE_FEI_la_LDFLAGS = -avoid-version
+if STATICONLY
+ lib_LIBRARIES = libHYPRE_FEI.a
+ libHYPRE_FEI_a_SOURCES = $(FILES)
+else !STATICONLY
+ lib_LTLIBRARIES = libHYPRE_FEI.la
+ libHYPRE_FEI_la_SOURCES = $(FILES)
+ libHYPRE_FEI_la_LDFLAGS = -avoid-version
+endif !STATICONLY
 
 include_HEADERS = cfei-hypre.h cfei_hypre.h \
  HYPRE_LinSysCore.h HYPRE_FEI_includes.h \
  $(BASE_DIR)/Lookup.h  \
  $(BASE_DIR)/LinearSystemCore.h \
- $(BASE_DIR)/fei_defs.h
+ $(BASE_DIR)/fei_defs.h\
+ snl_LinearSystemCore.h
 
 AM_CPPFLAGS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED\
  $(CSUPERLUFLAGS)\
@@ -56,6 +62,7 @@ driver_LDADD = \
  -lHYPRE_DistributedMatrixPilutSolver \
  -lHYPRE_superlu \
  -lHYPRE_seq_mv \
+ $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
 
@@ -120,5 +127,5 @@ FILES = \
  cfei-hypre.h\
  cfei_hypre.h
 
-install-data-local:
-	test -f $(BASE_DIR)/LinearSystemCore.h && $(INSTALL_DATA) $(BASE_DIR)/LinearSystemCore.h $(includedir)/snl_LinearSystemCore.h
+snl_LinearSystemCore.h:
+	test -f $(BASE_DIR)/LinearSystemCore.h && $(INSTALL_DATA) $(BASE_DIR)/LinearSystemCore.h snl_LinearSystemCore.h

@@ -1,8 +1,13 @@
 ## Process this file with automake to create Makefile.in
 
-lib_LTLIBRARIES = libHYPRE_seq_mv.la
-libHYPRE_seq_mv_la_SOURCES = $(FILES)
-libHYPRE_seq_mv_la_LDFLAGS = -avoid-version
+if STATICONLY
+ lib_LIBRARIES = libHYPRE_seq_mv.a
+ libHYPRE_seq_mv_a_SOURCES = $(FILES)
+else !STATICONLY
+ lib_LTLIBRARIES = libHYPRE_seq_mv.la
+ libHYPRE_seq_mv_la_SOURCES = $(FILES)
+ libHYPRE_seq_mv_la_LDFLAGS = -avoid-version
+endif !STATICONLY
 
 include_HEADERS = HYPRE_seq_mv.h seq_mv.h
 

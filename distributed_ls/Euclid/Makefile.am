@@ -1,8 +1,13 @@
 ## Process this file with automake to create Makefile.in
 
-lib_LTLIBRARIES = libHYPRE_Euclid.la
-libHYPRE_Euclid_la_SOURCES = $(FILES)
-libHYPRE_Euclid_la_LDFLAGS = -avoid-version
+if STATICONLY
+ lib_LIBRARIES = libHYPRE_Euclid.a
+ libHYPRE_Euclid_a_SOURCES = $(FILES)
+else !STATICONLY
+ lib_LTLIBRARIES = libHYPRE_Euclid.la
+ libHYPRE_Euclid_la_SOURCES = $(FILES)
+ libHYPRE_Euclid_la_LDFLAGS = -avoid-version
+endif !STATICONLY
 
 EUCLID_CFLAGS =  -DMPI_MODE -DMPI_TIMING -DUSING_MPI -DHYPRE_GET_ROW \
                  -DHYPRE_MODE -DOPTIMIZED_DH

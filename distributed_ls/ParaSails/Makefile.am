@@ -1,8 +1,13 @@
 ## Process this file with automake to create Makefile.in
 
-lib_LTLIBRARIES = libHYPRE_ParaSails.la
-libHYPRE_ParaSails_la_SOURCES = $(FILES)
-libHYPRE_ParaSails_la_LDFLAGS = -avoid-version
+if STATICONLY
+ lib_LIBRARIES = libHYPRE_ParaSails.a
+ libHYPRE_ParaSails_a_SOURCES = $(FILES)
+else !STATICONLY
+ lib_LTLIBRARIES = libHYPRE_ParaSails.la
+ libHYPRE_ParaSails_la_SOURCES = $(FILES)
+ libHYPRE_ParaSails_la_LDFLAGS = -avoid-version
+endif !STATICONLY
 
 AM_CPPFLAGS = \
  -I$(top_builddir)/utilities\

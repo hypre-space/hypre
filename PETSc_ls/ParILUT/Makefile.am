@@ -1,10 +1,14 @@
 ## Process this file with automake to create Makefile.in
 
-AUTOMAKE_OPTIONS = foreign no-dependencies no-installinfo no-installman no-texinfo.tex
+if STATICONLY
+ lib_LIBRARIES = libHYPRE_PETScSolverParILUT.a
+ libHYPRE_PETScSolverParILUT_a_SOURCES = $(FILES)
+else !STATICONLY
+ lib_LTLIBRARIES = libHYPRE_PETScSolverParILUT.la
+ libHYPRE_PETScSolverParILUT_la_SOURCES = $(FILES)
+ libHYPRE_PETScSolverParILUT_la_LDFLAGS = -avoid-version
+endif !STATICONLY
 
-lib_LTLIBRARIES = libHYPRE_PETScSolverParILUT.la
-libHYPRE_PETScSolverParILUT_la_SOURCES = $(FILES)
-libHYPRE_PETScSolverParILUT_la_LDFLAGS = -avoid-version
 #include_HEADERS = PETScSolverParILUT.h
 
 CPPFLAGS = -I..\

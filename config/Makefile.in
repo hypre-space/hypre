@@ -71,6 +71,7 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
+DATETIME = @DATETIME@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
@@ -125,6 +126,8 @@ POW_LIB = @POW_LIB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+STATICONLY_FALSE = @STATICONLY_FALSE@
+STATICONLY_TRUE = @STATICONLY_TRUE@
 STRIP = @STRIP@
 USE_FEI_BASE_DIR_DEFAULT_FALSE = @USE_FEI_BASE_DIR_DEFAULT_FALSE@
 USE_FEI_BASE_DIR_DEFAULT_TRUE = @USE_FEI_BASE_DIR_DEFAULT_TRUE@
@@ -179,18 +182,28 @@ subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 
-AUX_DIST = config.guess\
+AUX_DIST = \
+ compile\
+ config.guess\
  config.sub\
+ depcomp\
  install-sh\
- ltconfig\
  ltmain.sh\
  missing\
  mkinstalldirs
 
 
-EXTRA_DIST = bootstrap acx_blas.m4 acx_misc.m4
+EXTRA_DIST = \
+ bootstrap\
+ acx_blas.m4\
+ acx_lapack.m4\
+ acx_misc.m4
 
-MAINTAINERCLEANFILES = Makefile.in\
+
+MAINTAINERCLEANFILES = \
+ HYPRE_config.h.in\
+ Makefile.in\
+ acinclude.m4\
  stamp.h.in\
  $(AUX_DIST)
 
@@ -200,8 +213,9 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
 DIST_SOURCES =
-DIST_COMMON = $(srcdir)/Makefile.in Makefile.am config.guess config.sub \
-	depcomp install-sh ltmain.sh missing mkinstalldirs
+DIST_COMMON = $(srcdir)/Makefile.in Makefile.am acinclude.m4 \
+	config.guess config.sub depcomp install-sh ltmain.sh missing \
+	mkinstalldirs
 all: all-am
 
 .SUFFIXES:

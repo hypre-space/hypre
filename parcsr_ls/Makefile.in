@@ -67,6 +67,7 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
+DATETIME = @DATETIME@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
@@ -121,6 +122,8 @@ POW_LIB = @POW_LIB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+STATICONLY_FALSE = @STATICONLY_FALSE@
+STATICONLY_TRUE = @STATICONLY_TRUE@
 STRIP = @STRIP@
 USE_FEI_BASE_DIR_DEFAULT_FALSE = @USE_FEI_BASE_DIR_DEFAULT_FALSE@
 USE_FEI_BASE_DIR_DEFAULT_TRUE = @USE_FEI_BASE_DIR_DEFAULT_TRUE@
@@ -175,9 +178,11 @@ subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 
-lib_LTLIBRARIES = libHYPRE_parcsr_ls.la
-libHYPRE_parcsr_ls_la_SOURCES = $(FILES)
-libHYPRE_parcsr_ls_la_LDFLAGS = -avoid-version
+@STATICONLY_TRUE@lib_LIBRARIES = libHYPRE_parcsr_ls.a
+@STATICONLY_TRUE@libHYPRE_parcsr_ls_a_SOURCES = $(FILES)
+@STATICONLY_FALSE@lib_LTLIBRARIES = libHYPRE_parcsr_ls.la
+@STATICONLY_FALSE@libHYPRE_parcsr_ls_la_SOURCES = $(FILES)
+@STATICONLY_FALSE@libHYPRE_parcsr_ls_la_LDFLAGS = -avoid-version
 
 include_HEADERS = parcsr_ls.h HYPRE_parcsr_ls.h
 
@@ -255,10 +260,72 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
+LIBRARIES = $(lib_LIBRARIES)
+
+libHYPRE_parcsr_ls_a_AR = $(AR) cru
+libHYPRE_parcsr_ls_a_LIBADD =
+am__libHYPRE_parcsr_ls_a_SOURCES_DIST = F90_HYPRE_parcsr_ParaSails.c \
+	F90_HYPRE_parcsr_amg.c F90_HYPRE_parcsr_bicgstab.c \
+	F90_HYPRE_parcsr_cgnr.c F90_HYPRE_parcsr_gmres.c \
+	F90_HYPRE_parcsr_pcg.c F90_HYPRE_parcsr_pilut.c \
+	F90_hypre_laplace.c HYPRE_parcsr_Euclid.c \
+	HYPRE_parcsr_ParaSails.c HYPRE_parcsr_amg.c \
+	HYPRE_parcsr_bicgstab.c HYPRE_parcsr_cgnr.c \
+	HYPRE_parcsr_gmres.c HYPRE_parcsr_hybrid.c HYPRE_parcsr_pcg.c \
+	HYPRE_parcsr_pilut.c HYPRE_parcsr_schwarz.c amg_hybrid.c \
+	par_amg.c par_amg_setup.c par_amg_solve.c par_amg_solveT.c \
+	par_cg_relax_wt.c par_coarse_parms.c par_coarsen.c par_cycle.c \
+	par_difconv.c par_gsmg.c par_indepset.c par_interp.c \
+	par_laplace.c par_laplace_27pt.c par_laplace_9pt.c par_rap.c \
+	par_rap_communication.c par_relax.c par_relax_interface.c \
+	par_scaled_matnorm.c par_schwarz.c par_stats.c par_strength.c \
+	pcg_par.c schwarz.c Common.h HYPRE_parcsr_ls.h headers.h \
+	par_amg.h parcsr_ls.h schwarz.h
+am__objects_1 = F90_HYPRE_parcsr_ParaSails.$(OBJEXT) \
+	F90_HYPRE_parcsr_amg.$(OBJEXT) \
+	F90_HYPRE_parcsr_bicgstab.$(OBJEXT) \
+	F90_HYPRE_parcsr_cgnr.$(OBJEXT) \
+	F90_HYPRE_parcsr_gmres.$(OBJEXT) F90_HYPRE_parcsr_pcg.$(OBJEXT) \
+	F90_HYPRE_parcsr_pilut.$(OBJEXT) F90_hypre_laplace.$(OBJEXT) \
+	HYPRE_parcsr_Euclid.$(OBJEXT) HYPRE_parcsr_ParaSails.$(OBJEXT) \
+	HYPRE_parcsr_amg.$(OBJEXT) HYPRE_parcsr_bicgstab.$(OBJEXT) \
+	HYPRE_parcsr_cgnr.$(OBJEXT) HYPRE_parcsr_gmres.$(OBJEXT) \
+	HYPRE_parcsr_hybrid.$(OBJEXT) HYPRE_parcsr_pcg.$(OBJEXT) \
+	HYPRE_parcsr_pilut.$(OBJEXT) HYPRE_parcsr_schwarz.$(OBJEXT) \
+	amg_hybrid.$(OBJEXT) par_amg.$(OBJEXT) par_amg_setup.$(OBJEXT) \
+	par_amg_solve.$(OBJEXT) par_amg_solveT.$(OBJEXT) \
+	par_cg_relax_wt.$(OBJEXT) par_coarse_parms.$(OBJEXT) \
+	par_coarsen.$(OBJEXT) par_cycle.$(OBJEXT) par_difconv.$(OBJEXT) \
+	par_gsmg.$(OBJEXT) par_indepset.$(OBJEXT) par_interp.$(OBJEXT) \
+	par_laplace.$(OBJEXT) par_laplace_27pt.$(OBJEXT) \
+	par_laplace_9pt.$(OBJEXT) par_rap.$(OBJEXT) \
+	par_rap_communication.$(OBJEXT) par_relax.$(OBJEXT) \
+	par_relax_interface.$(OBJEXT) par_scaled_matnorm.$(OBJEXT) \
+	par_schwarz.$(OBJEXT) par_stats.$(OBJEXT) \
+	par_strength.$(OBJEXT) pcg_par.$(OBJEXT) schwarz.$(OBJEXT)
+@STATICONLY_TRUE@am_libHYPRE_parcsr_ls_a_OBJECTS = $(am__objects_1)
+libHYPRE_parcsr_ls_a_OBJECTS = $(am_libHYPRE_parcsr_ls_a_OBJECTS)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libHYPRE_parcsr_ls_la_LIBADD =
-am__objects_1 = F90_HYPRE_parcsr_ParaSails.lo F90_HYPRE_parcsr_amg.lo \
+am__libHYPRE_parcsr_ls_la_SOURCES_DIST = F90_HYPRE_parcsr_ParaSails.c \
+	F90_HYPRE_parcsr_amg.c F90_HYPRE_parcsr_bicgstab.c \
+	F90_HYPRE_parcsr_cgnr.c F90_HYPRE_parcsr_gmres.c \
+	F90_HYPRE_parcsr_pcg.c F90_HYPRE_parcsr_pilut.c \
+	F90_hypre_laplace.c HYPRE_parcsr_Euclid.c \
+	HYPRE_parcsr_ParaSails.c HYPRE_parcsr_amg.c \
+	HYPRE_parcsr_bicgstab.c HYPRE_parcsr_cgnr.c \
+	HYPRE_parcsr_gmres.c HYPRE_parcsr_hybrid.c HYPRE_parcsr_pcg.c \
+	HYPRE_parcsr_pilut.c HYPRE_parcsr_schwarz.c amg_hybrid.c \
+	par_amg.c par_amg_setup.c par_amg_solve.c par_amg_solveT.c \
+	par_cg_relax_wt.c par_coarse_parms.c par_coarsen.c par_cycle.c \
+	par_difconv.c par_gsmg.c par_indepset.c par_interp.c \
+	par_laplace.c par_laplace_27pt.c par_laplace_9pt.c par_rap.c \
+	par_rap_communication.c par_relax.c par_relax_interface.c \
+	par_scaled_matnorm.c par_schwarz.c par_stats.c par_strength.c \
+	pcg_par.c schwarz.c Common.h HYPRE_parcsr_ls.h headers.h \
+	par_amg.h parcsr_ls.h schwarz.h
+am__objects_2 = F90_HYPRE_parcsr_ParaSails.lo F90_HYPRE_parcsr_amg.lo \
 	F90_HYPRE_parcsr_bicgstab.lo F90_HYPRE_parcsr_cgnr.lo \
 	F90_HYPRE_parcsr_gmres.lo F90_HYPRE_parcsr_pcg.lo \
 	F90_HYPRE_parcsr_pilut.lo F90_hypre_laplace.lo \
@@ -275,65 +342,104 @@ am__objects_1 = F90_HYPRE_parcsr_ParaSails.lo F90_HYPRE_parcsr_amg.lo \
 	par_relax.lo par_relax_interface.lo par_scaled_matnorm.lo \
 	par_schwarz.lo par_stats.lo par_strength.lo pcg_par.lo \
 	schwarz.lo
-am_libHYPRE_parcsr_ls_la_OBJECTS = $(am__objects_1)
+@STATICONLY_FALSE@am_libHYPRE_parcsr_ls_la_OBJECTS = $(am__objects_2)
 libHYPRE_parcsr_ls_la_OBJECTS = $(am_libHYPRE_parcsr_ls_la_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/F90_HYPRE_parcsr_ParaSails.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_ParaSails.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_amg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_amg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_bicgstab.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_bicgstab.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_cgnr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_cgnr.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_gmres.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_gmres.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_pcg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_pcg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_pilut.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_pilut.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_hypre_laplace.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_hypre_laplace.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_Euclid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_Euclid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_ParaSails.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_ParaSails.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_amg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_amg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_bicgstab.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_bicgstab.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_cgnr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_cgnr.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_gmres.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_gmres.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_hybrid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_hybrid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_pcg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_pcg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_pilut.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_pilut.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_schwarz.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/amg_hybrid.Plo ./$(DEPDIR)/par_amg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_schwarz.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/amg_hybrid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/amg_hybrid.Po ./$(DEPDIR)/par_amg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_amg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_amg_setup.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_amg_setup.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_amg_solve.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_amg_solve.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_amg_solveT.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_amg_solveT.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_cg_relax_wt.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_cg_relax_wt.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_coarse_parms.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_coarse_parms.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_coarsen.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_cycle.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_coarsen.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/par_cycle.Plo ./$(DEPDIR)/par_cycle.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_difconv.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_gsmg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_difconv.Po ./$(DEPDIR)/par_gsmg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_gsmg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_indepset.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_indepset.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_interp.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_interp.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_laplace.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_laplace.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_laplace_27pt.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_laplace_27pt.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_laplace_9pt.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_rap.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_laplace_9pt.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/par_rap.Plo ./$(DEPDIR)/par_rap.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_rap_communication.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_relax.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_rap_communication.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/par_relax.Plo ./$(DEPDIR)/par_relax.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_relax_interface.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_relax_interface.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_scaled_matnorm.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_scaled_matnorm.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_schwarz.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_stats.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_schwarz.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/par_stats.Plo ./$(DEPDIR)/par_stats.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_strength.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/pcg_par.Plo ./$(DEPDIR)/schwarz.Plo
+@AMDEP_TRUE@	./$(DEPDIR)/par_strength.Po ./$(DEPDIR)/pcg_par.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pcg_par.Po ./$(DEPDIR)/schwarz.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/schwarz.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
 	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libHYPRE_parcsr_ls_la_SOURCES)
+DIST_SOURCES = $(am__libHYPRE_parcsr_ls_a_SOURCES_DIST) \
+	$(am__libHYPRE_parcsr_ls_la_SOURCES_DIST)
 HEADERS = $(include_HEADERS)
 
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.in Makefile.am
-SOURCES = $(libHYPRE_parcsr_ls_la_SOURCES)
+SOURCES = $(libHYPRE_parcsr_ls_a_SOURCES) $(libHYPRE_parcsr_ls_la_SOURCES)
 
 all: all-am
 
@@ -344,6 +450,40 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configu
 	  $(AUTOMAKE) --foreign  parcsr_ls/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
+libLIBRARIES_INSTALL = $(INSTALL_DATA)
+install-libLIBRARIES: $(lib_LIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f"; \
+	    $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f; \
+	  else :; fi; \
+	done
+	@$(POST_INSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    p="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(RANLIB) $(DESTDIR)$(libdir)/$$p"; \
+	    $(RANLIB) $(DESTDIR)$(libdir)/$$p; \
+	  else :; fi; \
+	done
+
+uninstall-libLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  p="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " rm -f $(DESTDIR)$(libdir)/$$p"; \
+	  rm -f $(DESTDIR)$(libdir)/$$p; \
+	done
+
+clean-libLIBRARIES:
+	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
+libHYPRE_parcsr_ls.a: $(libHYPRE_parcsr_ls_a_OBJECTS) $(libHYPRE_parcsr_ls_a_DEPENDENCIES) 
+	-rm -f libHYPRE_parcsr_ls.a
+	$(libHYPRE_parcsr_ls_a_AR) libHYPRE_parcsr_ls.a $(libHYPRE_parcsr_ls_a_OBJECTS) $(libHYPRE_parcsr_ls_a_LIBADD)
+	$(RANLIB) libHYPRE_parcsr_ls.a
 libLTLIBRARIES_INSTALL = $(INSTALL)
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -382,49 +522,93 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_ParaSails.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_ParaSails.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_amg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_amg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_bicgstab.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_bicgstab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_cgnr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_cgnr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_gmres.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_gmres.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_pcg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_pcg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_pilut.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_pilut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_hypre_laplace.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_hypre_laplace.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_Euclid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_Euclid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_ParaSails.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_ParaSails.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_amg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_amg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_bicgstab.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_bicgstab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_cgnr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_cgnr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_gmres.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_gmres.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_hybrid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_hybrid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_pcg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_pcg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_pilut.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_pilut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_schwarz.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_schwarz.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/amg_hybrid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/amg_hybrid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_amg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_amg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_amg_setup.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_amg_setup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_amg_solve.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_amg_solve.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_amg_solveT.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_amg_solveT.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_cg_relax_wt.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_cg_relax_wt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_coarse_parms.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_coarse_parms.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_coarsen.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_coarsen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_cycle.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_cycle.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_difconv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_difconv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_gsmg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_gsmg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_indepset.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_indepset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_interp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_interp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_laplace.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_laplace.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_laplace_27pt.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_laplace_27pt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_laplace_9pt.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_laplace_9pt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_rap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_rap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_rap_communication.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_rap_communication.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_relax.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_relax.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_relax_interface.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_relax_interface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_scaled_matnorm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_scaled_matnorm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_schwarz.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_schwarz.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_stats.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_stats.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_strength.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_strength.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcg_par.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcg_par.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/schwarz.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/schwarz.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
@@ -574,10 +758,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(HEADERS)
+all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) $(HEADERS)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
+	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -604,8 +788,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
-	mostlyclean-am
+clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -624,7 +808,7 @@ info-am:
 
 install-data-am: install-includeHEADERS
 
-install-exec-am: install-libLTLIBRARIES
+install-exec-am: install-libLIBRARIES install-libLTLIBRARIES
 
 install-info:
 
@@ -651,21 +835,22 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
+uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
+	uninstall-libLTLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLTLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
+	clean-libLIBRARIES clean-libLTLIBRARIES clean-libtool ctags \
+	distclean distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am info info-am install \
 	install-am install-data install-data-am install-exec \
 	install-exec-am install-includeHEADERS install-info \
-	install-info-am install-libLTLIBRARIES install-man \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool pdf \
-	pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-includeHEADERS uninstall-info-am \
-	uninstall-libLTLIBRARIES
+	install-info-am install-libLIBRARIES install-libLTLIBRARIES \
+	install-man install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-includeHEADERS uninstall-info-am \
+	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

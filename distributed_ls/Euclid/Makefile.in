@@ -67,6 +67,7 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
+DATETIME = @DATETIME@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
@@ -121,6 +122,8 @@ POW_LIB = @POW_LIB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+STATICONLY_FALSE = @STATICONLY_FALSE@
+STATICONLY_TRUE = @STATICONLY_TRUE@
 STRIP = @STRIP@
 USE_FEI_BASE_DIR_DEFAULT_FALSE = @USE_FEI_BASE_DIR_DEFAULT_FALSE@
 USE_FEI_BASE_DIR_DEFAULT_TRUE = @USE_FEI_BASE_DIR_DEFAULT_TRUE@
@@ -175,9 +178,11 @@ subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 
-lib_LTLIBRARIES = libHYPRE_Euclid.la
-libHYPRE_Euclid_la_SOURCES = $(FILES)
-libHYPRE_Euclid_la_LDFLAGS = -avoid-version
+@STATICONLY_TRUE@lib_LIBRARIES = libHYPRE_Euclid.a
+@STATICONLY_TRUE@libHYPRE_Euclid_a_SOURCES = $(FILES)
+@STATICONLY_FALSE@lib_LTLIBRARIES = libHYPRE_Euclid.la
+@STATICONLY_FALSE@libHYPRE_Euclid_la_SOURCES = $(FILES)
+@STATICONLY_FALSE@libHYPRE_Euclid_la_LDFLAGS = -avoid-version
 
 EUCLID_CFLAGS = -DMPI_MODE -DMPI_TIMING -DUSING_MPI -DHYPRE_GET_ROW \
                  -DHYPRE_MODE -DOPTIMIZED_DH
@@ -258,52 +263,115 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
+LIBRARIES = $(lib_LIBRARIES)
+
+libHYPRE_Euclid_a_AR = $(AR) cru
+libHYPRE_Euclid_a_LIBADD =
+am__libHYPRE_Euclid_a_SOURCES_DIST = Euclid_apply.c Euclid_dh.c \
+	ExternalRows_dh.c Factor_dh.c Hash_dh.c Hash_i_dh.c MatGenFD.c \
+	Mat_dh.c Mem_dh.c Numbering_dh.c Parser_dh.c SortedList_dh.c \
+	SortedSet_dh.c SubdomainGraph_dh.c TimeLog_dh.c Timer_dh.c \
+	Vec_dh.c blas_dh.c getRow_dh.c globalObjects.c ilu_mpi_bj.c \
+	ilu_mpi_pilu.c ilu_seq.c io_dh.c krylov_dh.c mat_dh_private.c \
+	shellSort_dh.c sig_dh.c Euclid_dh.h ExternalRows_dh.h \
+	Factor_dh.h Hash_dh.h Hash_i_dh.h MatGenFD.h Mat_dh.h Mem_dh.h \
+	Numbering_dh.h Parser_dh.h SortedList_dh.h SortedSet_dh.h \
+	SubdomainGraph_dh.h TimeLog_dh.h Timer_dh.h Vec_dh.h blas_dh.h \
+	euclid.h euclid_common.h euclid_config.h getRow_dh.h \
+	guards_dh.h ilu_dh.h io_dh.h krylov_dh.h macros_dh.h \
+	mat_dh_private.h shellSort_dh.h sig_dh.h
+am__objects_1 = Euclid_apply.$(OBJEXT) Euclid_dh.$(OBJEXT) \
+	ExternalRows_dh.$(OBJEXT) Factor_dh.$(OBJEXT) Hash_dh.$(OBJEXT) \
+	Hash_i_dh.$(OBJEXT) MatGenFD.$(OBJEXT) Mat_dh.$(OBJEXT) \
+	Mem_dh.$(OBJEXT) Numbering_dh.$(OBJEXT) Parser_dh.$(OBJEXT) \
+	SortedList_dh.$(OBJEXT) SortedSet_dh.$(OBJEXT) \
+	SubdomainGraph_dh.$(OBJEXT) TimeLog_dh.$(OBJEXT) \
+	Timer_dh.$(OBJEXT) Vec_dh.$(OBJEXT) blas_dh.$(OBJEXT) \
+	getRow_dh.$(OBJEXT) globalObjects.$(OBJEXT) \
+	ilu_mpi_bj.$(OBJEXT) ilu_mpi_pilu.$(OBJEXT) ilu_seq.$(OBJEXT) \
+	io_dh.$(OBJEXT) krylov_dh.$(OBJEXT) mat_dh_private.$(OBJEXT) \
+	shellSort_dh.$(OBJEXT) sig_dh.$(OBJEXT)
+@STATICONLY_TRUE@am_libHYPRE_Euclid_a_OBJECTS = $(am__objects_1)
+libHYPRE_Euclid_a_OBJECTS = $(am_libHYPRE_Euclid_a_OBJECTS)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libHYPRE_Euclid_la_LIBADD =
-am__objects_1 = Euclid_apply.lo Euclid_dh.lo ExternalRows_dh.lo \
+am__libHYPRE_Euclid_la_SOURCES_DIST = Euclid_apply.c Euclid_dh.c \
+	ExternalRows_dh.c Factor_dh.c Hash_dh.c Hash_i_dh.c MatGenFD.c \
+	Mat_dh.c Mem_dh.c Numbering_dh.c Parser_dh.c SortedList_dh.c \
+	SortedSet_dh.c SubdomainGraph_dh.c TimeLog_dh.c Timer_dh.c \
+	Vec_dh.c blas_dh.c getRow_dh.c globalObjects.c ilu_mpi_bj.c \
+	ilu_mpi_pilu.c ilu_seq.c io_dh.c krylov_dh.c mat_dh_private.c \
+	shellSort_dh.c sig_dh.c Euclid_dh.h ExternalRows_dh.h \
+	Factor_dh.h Hash_dh.h Hash_i_dh.h MatGenFD.h Mat_dh.h Mem_dh.h \
+	Numbering_dh.h Parser_dh.h SortedList_dh.h SortedSet_dh.h \
+	SubdomainGraph_dh.h TimeLog_dh.h Timer_dh.h Vec_dh.h blas_dh.h \
+	euclid.h euclid_common.h euclid_config.h getRow_dh.h \
+	guards_dh.h ilu_dh.h io_dh.h krylov_dh.h macros_dh.h \
+	mat_dh_private.h shellSort_dh.h sig_dh.h
+am__objects_2 = Euclid_apply.lo Euclid_dh.lo ExternalRows_dh.lo \
 	Factor_dh.lo Hash_dh.lo Hash_i_dh.lo MatGenFD.lo Mat_dh.lo \
 	Mem_dh.lo Numbering_dh.lo Parser_dh.lo SortedList_dh.lo \
 	SortedSet_dh.lo SubdomainGraph_dh.lo TimeLog_dh.lo Timer_dh.lo \
 	Vec_dh.lo blas_dh.lo getRow_dh.lo globalObjects.lo \
 	ilu_mpi_bj.lo ilu_mpi_pilu.lo ilu_seq.lo io_dh.lo krylov_dh.lo \
 	mat_dh_private.lo shellSort_dh.lo sig_dh.lo
-am_libHYPRE_Euclid_la_OBJECTS = $(am__objects_1)
+@STATICONLY_FALSE@am_libHYPRE_Euclid_la_OBJECTS = $(am__objects_2)
 libHYPRE_Euclid_la_OBJECTS = $(am_libHYPRE_Euclid_la_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/Euclid_apply.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/Euclid_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/Euclid_apply.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Euclid_dh.Plo ./$(DEPDIR)/Euclid_dh.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/ExternalRows_dh.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/Factor_dh.Plo ./$(DEPDIR)/Hash_dh.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/Hash_i_dh.Plo ./$(DEPDIR)/MatGenFD.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/Mat_dh.Plo ./$(DEPDIR)/Mem_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/ExternalRows_dh.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Factor_dh.Plo ./$(DEPDIR)/Factor_dh.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Hash_dh.Plo ./$(DEPDIR)/Hash_dh.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Hash_i_dh.Plo ./$(DEPDIR)/Hash_i_dh.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/MatGenFD.Plo ./$(DEPDIR)/MatGenFD.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Mat_dh.Plo ./$(DEPDIR)/Mat_dh.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Mem_dh.Plo ./$(DEPDIR)/Mem_dh.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/Numbering_dh.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/Parser_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/Numbering_dh.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Parser_dh.Plo ./$(DEPDIR)/Parser_dh.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/SortedList_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/SortedList_dh.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/SortedSet_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/SortedSet_dh.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/SubdomainGraph_dh.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/TimeLog_dh.Plo ./$(DEPDIR)/Timer_dh.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/Vec_dh.Plo ./$(DEPDIR)/blas_dh.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/getRow_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/SubdomainGraph_dh.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/TimeLog_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/TimeLog_dh.Po ./$(DEPDIR)/Timer_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/Timer_dh.Po ./$(DEPDIR)/Vec_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/Vec_dh.Po ./$(DEPDIR)/blas_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/blas_dh.Po ./$(DEPDIR)/getRow_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/getRow_dh.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/globalObjects.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/globalObjects.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/ilu_mpi_bj.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/ilu_mpi_bj.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/ilu_mpi_pilu.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/ilu_seq.Plo ./$(DEPDIR)/io_dh.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/krylov_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/ilu_mpi_pilu.Po ./$(DEPDIR)/ilu_seq.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/ilu_seq.Po ./$(DEPDIR)/io_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/io_dh.Po ./$(DEPDIR)/krylov_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/krylov_dh.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mat_dh_private.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/shellSort_dh.Plo ./$(DEPDIR)/sig_dh.Plo
+@AMDEP_TRUE@	./$(DEPDIR)/mat_dh_private.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/shellSort_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/shellSort_dh.Po ./$(DEPDIR)/sig_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sig_dh.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
 	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libHYPRE_Euclid_la_SOURCES)
+DIST_SOURCES = $(am__libHYPRE_Euclid_a_SOURCES_DIST) \
+	$(am__libHYPRE_Euclid_la_SOURCES_DIST)
 DIST_COMMON = $(srcdir)/Makefile.in Makefile.am
-SOURCES = $(libHYPRE_Euclid_la_SOURCES)
+SOURCES = $(libHYPRE_Euclid_a_SOURCES) $(libHYPRE_Euclid_la_SOURCES)
 
 all: all-am
 
@@ -314,6 +382,40 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configu
 	  $(AUTOMAKE) --foreign  distributed_ls/Euclid/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
+libLIBRARIES_INSTALL = $(INSTALL_DATA)
+install-libLIBRARIES: $(lib_LIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f"; \
+	    $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f; \
+	  else :; fi; \
+	done
+	@$(POST_INSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    p="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(RANLIB) $(DESTDIR)$(libdir)/$$p"; \
+	    $(RANLIB) $(DESTDIR)$(libdir)/$$p; \
+	  else :; fi; \
+	done
+
+uninstall-libLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  p="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " rm -f $(DESTDIR)$(libdir)/$$p"; \
+	  rm -f $(DESTDIR)$(libdir)/$$p; \
+	done
+
+clean-libLIBRARIES:
+	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
+libHYPRE_Euclid.a: $(libHYPRE_Euclid_a_OBJECTS) $(libHYPRE_Euclid_a_DEPENDENCIES) 
+	-rm -f libHYPRE_Euclid.a
+	$(libHYPRE_Euclid_a_AR) libHYPRE_Euclid.a $(libHYPRE_Euclid_a_OBJECTS) $(libHYPRE_Euclid_a_LIBADD)
+	$(RANLIB) libHYPRE_Euclid.a
 libLTLIBRARIES_INSTALL = $(INSTALL)
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -352,33 +454,61 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Euclid_apply.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Euclid_apply.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Euclid_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Euclid_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ExternalRows_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ExternalRows_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Factor_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Factor_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Hash_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Hash_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Hash_i_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Hash_i_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MatGenFD.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MatGenFD.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mat_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mat_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mem_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mem_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Numbering_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Numbering_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Parser_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Parser_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SortedList_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SortedList_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SortedSet_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SortedSet_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SubdomainGraph_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SubdomainGraph_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeLog_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeLog_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Timer_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Timer_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Vec_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Vec_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blas_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blas_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getRow_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getRow_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/globalObjects.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/globalObjects.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilu_mpi_bj.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilu_mpi_bj.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilu_mpi_pilu.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilu_mpi_pilu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilu_seq.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilu_seq.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/krylov_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/krylov_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mat_dh_private.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mat_dh_private.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shellSort_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shellSort_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sig_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sig_dh.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
@@ -510,10 +640,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LIBRARIES) $(LTLIBRARIES)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(libdir)
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -540,8 +670,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
-	mostlyclean-am
+clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -560,7 +690,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-libLTLIBRARIES
+install-exec-am: install-libLIBRARIES install-libLTLIBRARIES
 
 install-info:
 
@@ -587,20 +717,20 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLTLIBRARIES
+uninstall-am: uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLTLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
+	clean-libLIBRARIES clean-libLTLIBRARIES clean-libtool ctags \
+	distclean distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am info info-am install \
 	install-am install-data install-data-am install-exec \
 	install-exec-am install-info install-info-am \
-	install-libLTLIBRARIES install-man install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-info-am \
-	uninstall-libLTLIBRARIES
+	install-libLIBRARIES install-libLTLIBRARIES install-man \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool pdf \
+	pdf-am ps ps-am tags uninstall uninstall-am uninstall-info-am \
+	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

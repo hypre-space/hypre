@@ -1,9 +1,9 @@
 #!/bin/sh
 #set -x
-rm -Rf aclocal.m4 configure autom4te.cache
-cp /usr/apps/libtool/1.5/share/aclocal/libtool.m4 aclocal.m4
-libtoolize --force --copy
+rm -Rf aclocal.m4 configure autom4te.cache config/acinclude.m4
+cp /usr/apps/libtool/1.5/share/aclocal/libtool.m4 config/acinclude.m4
 aclocal -I config
+libtoolize --force --copy
 autoheader --force --include=config
 automake --add-missing --copy --force-missing --foreign
 autoconf --include=config

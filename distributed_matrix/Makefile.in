@@ -67,6 +67,7 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
+DATETIME = @DATETIME@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
@@ -121,6 +122,8 @@ POW_LIB = @POW_LIB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+STATICONLY_FALSE = @STATICONLY_FALSE@
+STATICONLY_TRUE = @STATICONLY_TRUE@
 STRIP = @STRIP@
 USE_FEI_BASE_DIR_DEFAULT_FALSE = @USE_FEI_BASE_DIR_DEFAULT_FALSE@
 USE_FEI_BASE_DIR_DEFAULT_TRUE = @USE_FEI_BASE_DIR_DEFAULT_TRUE@
@@ -175,9 +178,11 @@ subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 
-lib_LTLIBRARIES = libHYPRE_DistributedMatrix.la
-libHYPRE_DistributedMatrix_la_SOURCES = $(FILES)
-libHYPRE_DistributedMatrix_la_LDFLAGS = -avoid-version
+@STATICONLY_TRUE@lib_LIBRARIES = libHYPRE_DistributedMatrix.a
+@STATICONLY_TRUE@libHYPRE_DistributedMatrix_a_SOURCES = $(FILES)
+@STATICONLY_FALSE@lib_LTLIBRARIES = libHYPRE_DistributedMatrix.la
+@STATICONLY_FALSE@libHYPRE_DistributedMatrix_la_SOURCES = $(FILES)
+@STATICONLY_FALSE@libHYPRE_DistributedMatrix_la_LDFLAGS = -avoid-version
 
 include_HEADERS = distributed_matrix.h \
  HYPRE_distributed_matrix_mv.h\
@@ -211,13 +216,40 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
+LIBRARIES = $(lib_LIBRARIES)
+
+libHYPRE_DistributedMatrix_a_AR = $(AR) cru
+libHYPRE_DistributedMatrix_a_LIBADD =
+am__libHYPRE_DistributedMatrix_a_SOURCES_DIST = \
+	HYPRE_distributed_matrix.c distributed_matrix.c \
+	distributed_matrix_ISIS.c distributed_matrix_PETSc.c \
+	distributed_matrix_parcsr.c HYPRE_distributed_matrix_mv.h \
+	HYPRE_distributed_matrix_protos.h \
+	HYPRE_distributed_matrix_types.h distributed_matrix.h \
+	internal_protos.h
+am__objects_1 = HYPRE_distributed_matrix.$(OBJEXT) \
+	distributed_matrix.$(OBJEXT) distributed_matrix_ISIS.$(OBJEXT) \
+	distributed_matrix_PETSc.$(OBJEXT) \
+	distributed_matrix_parcsr.$(OBJEXT)
+@STATICONLY_TRUE@am_libHYPRE_DistributedMatrix_a_OBJECTS = \
+@STATICONLY_TRUE@	$(am__objects_1)
+libHYPRE_DistributedMatrix_a_OBJECTS = \
+	$(am_libHYPRE_DistributedMatrix_a_OBJECTS)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libHYPRE_DistributedMatrix_la_LIBADD =
-am__objects_1 = HYPRE_distributed_matrix.lo distributed_matrix.lo \
+am__libHYPRE_DistributedMatrix_la_SOURCES_DIST = \
+	HYPRE_distributed_matrix.c distributed_matrix.c \
+	distributed_matrix_ISIS.c distributed_matrix_PETSc.c \
+	distributed_matrix_parcsr.c HYPRE_distributed_matrix_mv.h \
+	HYPRE_distributed_matrix_protos.h \
+	HYPRE_distributed_matrix_types.h distributed_matrix.h \
+	internal_protos.h
+am__objects_2 = HYPRE_distributed_matrix.lo distributed_matrix.lo \
 	distributed_matrix_ISIS.lo distributed_matrix_PETSc.lo \
 	distributed_matrix_parcsr.lo
-am_libHYPRE_DistributedMatrix_la_OBJECTS = $(am__objects_1)
+@STATICONLY_FALSE@am_libHYPRE_DistributedMatrix_la_OBJECTS = \
+@STATICONLY_FALSE@	$(am__objects_2)
 libHYPRE_DistributedMatrix_la_OBJECTS = \
 	$(am_libHYPRE_DistributedMatrix_la_OBJECTS)
 
@@ -225,21 +257,27 @@ DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/HYPRE_distributed_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_distributed_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_ISIS.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_ISIS.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_PETSc.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_parcsr.Plo
+@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_PETSc.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_parcsr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_parcsr.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
 	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libHYPRE_DistributedMatrix_la_SOURCES)
+DIST_SOURCES = $(am__libHYPRE_DistributedMatrix_a_SOURCES_DIST) \
+	$(am__libHYPRE_DistributedMatrix_la_SOURCES_DIST)
 HEADERS = $(include_HEADERS)
 
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.in Makefile.am
-SOURCES = $(libHYPRE_DistributedMatrix_la_SOURCES)
+SOURCES = $(libHYPRE_DistributedMatrix_a_SOURCES) $(libHYPRE_DistributedMatrix_la_SOURCES)
 
 all: all-am
 
@@ -250,6 +288,40 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configu
 	  $(AUTOMAKE) --foreign  distributed_matrix/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
+libLIBRARIES_INSTALL = $(INSTALL_DATA)
+install-libLIBRARIES: $(lib_LIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f"; \
+	    $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f; \
+	  else :; fi; \
+	done
+	@$(POST_INSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    p="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(RANLIB) $(DESTDIR)$(libdir)/$$p"; \
+	    $(RANLIB) $(DESTDIR)$(libdir)/$$p; \
+	  else :; fi; \
+	done
+
+uninstall-libLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  p="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " rm -f $(DESTDIR)$(libdir)/$$p"; \
+	  rm -f $(DESTDIR)$(libdir)/$$p; \
+	done
+
+clean-libLIBRARIES:
+	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
+libHYPRE_DistributedMatrix.a: $(libHYPRE_DistributedMatrix_a_OBJECTS) $(libHYPRE_DistributedMatrix_a_DEPENDENCIES) 
+	-rm -f libHYPRE_DistributedMatrix.a
+	$(libHYPRE_DistributedMatrix_a_AR) libHYPRE_DistributedMatrix.a $(libHYPRE_DistributedMatrix_a_OBJECTS) $(libHYPRE_DistributedMatrix_a_LIBADD)
+	$(RANLIB) libHYPRE_DistributedMatrix.a
 libLTLIBRARIES_INSTALL = $(INSTALL)
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -288,10 +360,15 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_distributed_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_distributed_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_ISIS.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_ISIS.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_PETSc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_PETSc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_parcsr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_parcsr.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
@@ -441,10 +518,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(HEADERS)
+all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) $(HEADERS)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
+	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -471,8 +548,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
-	mostlyclean-am
+clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -491,7 +568,7 @@ info-am:
 
 install-data-am: install-includeHEADERS
 
-install-exec-am: install-libLTLIBRARIES
+install-exec-am: install-libLIBRARIES install-libLTLIBRARIES
 
 install-info:
 
@@ -518,21 +595,22 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
+uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
+	uninstall-libLTLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLTLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
+	clean-libLIBRARIES clean-libLTLIBRARIES clean-libtool ctags \
+	distclean distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am info info-am install \
 	install-am install-data install-data-am install-exec \
 	install-exec-am install-includeHEADERS install-info \
-	install-info-am install-libLTLIBRARIES install-man \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool pdf \
-	pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-includeHEADERS uninstall-info-am \
-	uninstall-libLTLIBRARIES
+	install-info-am install-libLIBRARIES install-libLTLIBRARIES \
+	install-man install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-includeHEADERS uninstall-info-am \
+	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

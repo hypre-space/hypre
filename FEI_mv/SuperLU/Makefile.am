@@ -1,8 +1,14 @@
 ## Process this file with automake to create Makefile.in
 
-lib_LTLIBRARIES = libHYPRE_superlu.la
-libHYPRE_superlu_la_SOURCES = $(FILES)
-libHYPRE_superlu_la_LDFLAGS = -avoid-version
+if STATICONLY
+ lib_LIBRARIES = libHYPRE_superlu.a
+ libHYPRE_superlu_a_SOURCES = $(FILES)
+else !STATICONLY
+ lib_LTLIBRARIES = libHYPRE_superlu.la
+ libHYPRE_superlu_la_SOURCES = $(FILES)
+ libHYPRE_superlu_la_LDFLAGS = -avoid-version
+endif !STATICONLY
+
 AM_CPPFLAGS = \
  -I$(top_srcdir)/utilities
 

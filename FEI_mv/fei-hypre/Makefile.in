@@ -67,6 +67,7 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
+DATETIME = @DATETIME@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
@@ -121,6 +122,8 @@ POW_LIB = @POW_LIB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+STATICONLY_FALSE = @STATICONLY_FALSE@
+STATICONLY_TRUE = @STATICONLY_TRUE@
 STRIP = @STRIP@
 USE_FEI_BASE_DIR_DEFAULT_FALSE = @USE_FEI_BASE_DIR_DEFAULT_FALSE@
 USE_FEI_BASE_DIR_DEFAULT_TRUE = @USE_FEI_BASE_DIR_DEFAULT_TRUE@
@@ -178,15 +181,18 @@ target_alias = @target_alias@
 @USE_FEI_BASE_DIR_DEFAULT_TRUE@BASE_DIR = $(top_srcdir)/FEI_mv/fei-base
 @USE_FEI_BASE_DIR_DEFAULT_FALSE@BASE_DIR = @FEI_BASE_DIR@
 
-lib_LTLIBRARIES = libHYPRE_FEI.la
-libHYPRE_FEI_la_SOURCES = $(FILES)
-libHYPRE_FEI_la_LDFLAGS = -avoid-version
+@STATICONLY_TRUE@lib_LIBRARIES = libHYPRE_FEI.a
+@STATICONLY_TRUE@libHYPRE_FEI_a_SOURCES = $(FILES)
+@STATICONLY_FALSE@lib_LTLIBRARIES = libHYPRE_FEI.la
+@STATICONLY_FALSE@libHYPRE_FEI_la_SOURCES = $(FILES)
+@STATICONLY_FALSE@libHYPRE_FEI_la_LDFLAGS = -avoid-version
 
 include_HEADERS = cfei-hypre.h cfei_hypre.h \
  HYPRE_LinSysCore.h HYPRE_FEI_includes.h \
  $(BASE_DIR)/Lookup.h  \
  $(BASE_DIR)/LinearSystemCore.h \
- $(BASE_DIR)/fei_defs.h
+ $(BASE_DIR)/fei_defs.h\
+ snl_LinearSystemCore.h
 
 
 AM_CPPFLAGS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED\
@@ -231,6 +237,7 @@ driver_LDADD = \
  -lHYPRE_DistributedMatrixPilutSolver \
  -lHYPRE_superlu \
  -lHYPRE_seq_mv \
+ $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
  $(LIBM)
 
@@ -301,10 +308,73 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
+LIBRARIES = $(lib_LIBRARIES)
+
+libHYPRE_FEI_a_AR = $(AR) cru
+libHYPRE_FEI_a_LIBADD =
+am__libHYPRE_FEI_a_SOURCES_DIST = FEI_HYPRE_Impl.cxx HYPRE_LSC_aux.cxx \
+	HYPRE_LSI_Dsuperlu.c HYPRE_LSI_UZAWA.cxx HYPRE_LSI_blkprec.cxx \
+	HYPRE_LSI_ddict.c HYPRE_LSI_ddilut.c HYPRE_LSI_ml.c \
+	HYPRE_LSI_mli.cxx HYPRE_LSI_poly.c HYPRE_LSI_schwarz.c \
+	HYPRE_LinSysCore.cxx HYPRE_SlideReduction.cxx \
+	HYPRE_parcsr_TFQmr.c HYPRE_parcsr_bicgs.c \
+	HYPRE_parcsr_bicgstabl.c HYPRE_parcsr_fgmres.c \
+	HYPRE_parcsr_lsicg.c HYPRE_parcsr_symqmr.c SymQMR.c TFQmr.c \
+	bicgs.c bicgstabl.c cfei_hypre.cxx fgmres.c hypre_lsi_amge.c \
+	hypre_lsi_ddamg.c hypre_lsi_misc.c hypre_schur_reduce.cxx \
+	hypre_slide_reduce.cxx lsicg.c FEI_HYPRE_Impl.h \
+	FEI_HYPRE_include.h HYPRE_Builder.h HYPRE_FEI_includes.h \
+	HYPRE_FEI_mv.h HYPRE_LSI_Dsuperlu.h HYPRE_LSI_UZAWA.h \
+	HYPRE_LSI_Uzawa_c.h HYPRE_LSI_blkprec.h HYPRE_LSI_block.h \
+	HYPRE_LSI_ddict.h HYPRE_LSI_ddilut.h HYPRE_LSI_mli.h \
+	HYPRE_LSI_poly.h HYPRE_LSI_schur.h HYPRE_LSI_schwarz.h \
+	HYPRE_LinSysCore.h HYPRE_MHMatrix.h HYPRE_SlideReduction.h \
+	HYPRE_parcsr_TFQmr.h HYPRE_parcsr_bicgs.h \
+	HYPRE_parcsr_bicgstabl.h HYPRE_parcsr_fgmres.h \
+	HYPRE_parcsr_lsicg.h HYPRE_parcsr_symqmr.h cfei-hypre.h \
+	cfei_hypre.h
+am__objects_1 = FEI_HYPRE_Impl.$(OBJEXT) HYPRE_LSC_aux.$(OBJEXT) \
+	HYPRE_LSI_Dsuperlu.$(OBJEXT) HYPRE_LSI_UZAWA.$(OBJEXT) \
+	HYPRE_LSI_blkprec.$(OBJEXT) HYPRE_LSI_ddict.$(OBJEXT) \
+	HYPRE_LSI_ddilut.$(OBJEXT) HYPRE_LSI_ml.$(OBJEXT) \
+	HYPRE_LSI_mli.$(OBJEXT) HYPRE_LSI_poly.$(OBJEXT) \
+	HYPRE_LSI_schwarz.$(OBJEXT) HYPRE_LinSysCore.$(OBJEXT) \
+	HYPRE_SlideReduction.$(OBJEXT) HYPRE_parcsr_TFQmr.$(OBJEXT) \
+	HYPRE_parcsr_bicgs.$(OBJEXT) HYPRE_parcsr_bicgstabl.$(OBJEXT) \
+	HYPRE_parcsr_fgmres.$(OBJEXT) HYPRE_parcsr_lsicg.$(OBJEXT) \
+	HYPRE_parcsr_symqmr.$(OBJEXT) SymQMR.$(OBJEXT) TFQmr.$(OBJEXT) \
+	bicgs.$(OBJEXT) bicgstabl.$(OBJEXT) cfei_hypre.$(OBJEXT) \
+	fgmres.$(OBJEXT) hypre_lsi_amge.$(OBJEXT) \
+	hypre_lsi_ddamg.$(OBJEXT) hypre_lsi_misc.$(OBJEXT) \
+	hypre_schur_reduce.$(OBJEXT) hypre_slide_reduce.$(OBJEXT) \
+	lsicg.$(OBJEXT)
+@STATICONLY_TRUE@am_libHYPRE_FEI_a_OBJECTS = $(am__objects_1)
+libHYPRE_FEI_a_OBJECTS = $(am_libHYPRE_FEI_a_OBJECTS)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libHYPRE_FEI_la_LIBADD =
-am__objects_1 = FEI_HYPRE_Impl.lo HYPRE_LSC_aux.lo HYPRE_LSI_Dsuperlu.lo \
+am__libHYPRE_FEI_la_SOURCES_DIST = FEI_HYPRE_Impl.cxx HYPRE_LSC_aux.cxx \
+	HYPRE_LSI_Dsuperlu.c HYPRE_LSI_UZAWA.cxx HYPRE_LSI_blkprec.cxx \
+	HYPRE_LSI_ddict.c HYPRE_LSI_ddilut.c HYPRE_LSI_ml.c \
+	HYPRE_LSI_mli.cxx HYPRE_LSI_poly.c HYPRE_LSI_schwarz.c \
+	HYPRE_LinSysCore.cxx HYPRE_SlideReduction.cxx \
+	HYPRE_parcsr_TFQmr.c HYPRE_parcsr_bicgs.c \
+	HYPRE_parcsr_bicgstabl.c HYPRE_parcsr_fgmres.c \
+	HYPRE_parcsr_lsicg.c HYPRE_parcsr_symqmr.c SymQMR.c TFQmr.c \
+	bicgs.c bicgstabl.c cfei_hypre.cxx fgmres.c hypre_lsi_amge.c \
+	hypre_lsi_ddamg.c hypre_lsi_misc.c hypre_schur_reduce.cxx \
+	hypre_slide_reduce.cxx lsicg.c FEI_HYPRE_Impl.h \
+	FEI_HYPRE_include.h HYPRE_Builder.h HYPRE_FEI_includes.h \
+	HYPRE_FEI_mv.h HYPRE_LSI_Dsuperlu.h HYPRE_LSI_UZAWA.h \
+	HYPRE_LSI_Uzawa_c.h HYPRE_LSI_blkprec.h HYPRE_LSI_block.h \
+	HYPRE_LSI_ddict.h HYPRE_LSI_ddilut.h HYPRE_LSI_mli.h \
+	HYPRE_LSI_poly.h HYPRE_LSI_schur.h HYPRE_LSI_schwarz.h \
+	HYPRE_LinSysCore.h HYPRE_MHMatrix.h HYPRE_SlideReduction.h \
+	HYPRE_parcsr_TFQmr.h HYPRE_parcsr_bicgs.h \
+	HYPRE_parcsr_bicgstabl.h HYPRE_parcsr_fgmres.h \
+	HYPRE_parcsr_lsicg.h HYPRE_parcsr_symqmr.h cfei-hypre.h \
+	cfei_hypre.h
+am__objects_2 = FEI_HYPRE_Impl.lo HYPRE_LSC_aux.lo HYPRE_LSI_Dsuperlu.lo \
 	HYPRE_LSI_UZAWA.lo HYPRE_LSI_blkprec.lo HYPRE_LSI_ddict.lo \
 	HYPRE_LSI_ddilut.lo HYPRE_LSI_ml.lo HYPRE_LSI_mli.lo \
 	HYPRE_LSI_poly.lo HYPRE_LSI_schwarz.lo HYPRE_LinSysCore.lo \
@@ -315,7 +385,7 @@ am__objects_1 = FEI_HYPRE_Impl.lo HYPRE_LSC_aux.lo HYPRE_LSI_Dsuperlu.lo \
 	cfei_hypre.lo fgmres.lo hypre_lsi_amge.lo hypre_lsi_ddamg.lo \
 	hypre_lsi_misc.lo hypre_schur_reduce.lo hypre_slide_reduce.lo \
 	lsicg.lo
-am_libHYPRE_FEI_la_OBJECTS = $(am__objects_1)
+@STATICONLY_FALSE@am_libHYPRE_FEI_la_OBJECTS = $(am__objects_2)
 libHYPRE_FEI_la_OBJECTS = $(am_libHYPRE_FEI_la_OBJECTS)
 EXTRA_PROGRAMS = driver$(EXEEXT)
 am_driver_OBJECTS = driver.$(OBJEXT)
@@ -327,34 +397,61 @@ DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/FEI_HYPRE_Impl.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/FEI_HYPRE_Impl.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSC_aux.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSC_aux.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_Dsuperlu.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_Dsuperlu.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_UZAWA.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_UZAWA.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_blkprec.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_blkprec.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_ddict.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_ddict.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_ddilut.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_ddilut.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_ml.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_ml.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_mli.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_mli.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_poly.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_poly.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_schwarz.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_schwarz.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LinSysCore.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LinSysCore.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_SlideReduction.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_SlideReduction.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_TFQmr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_TFQmr.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_bicgs.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_bicgs.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_bicgstabl.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_bicgstabl.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_fgmres.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_fgmres.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_lsicg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_lsicg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_symqmr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/SymQMR.Plo ./$(DEPDIR)/TFQmr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/bicgs.Plo ./$(DEPDIR)/bicgstabl.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/cfei_hypre.Plo ./$(DEPDIR)/driver.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/fgmres.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_symqmr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/SymQMR.Plo ./$(DEPDIR)/SymQMR.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/TFQmr.Plo ./$(DEPDIR)/TFQmr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/bicgs.Plo ./$(DEPDIR)/bicgs.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/bicgstabl.Plo ./$(DEPDIR)/bicgstabl.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/cfei_hypre.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/cfei_hypre.Po ./$(DEPDIR)/driver.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/fgmres.Plo ./$(DEPDIR)/fgmres.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/hypre_lsi_amge.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/hypre_lsi_amge.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/hypre_lsi_ddamg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/hypre_lsi_ddamg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/hypre_lsi_misc.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/hypre_lsi_misc.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/hypre_schur_reduce.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/hypre_schur_reduce.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/hypre_slide_reduce.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/lsicg.Plo
+@AMDEP_TRUE@	./$(DEPDIR)/hypre_slide_reduce.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/lsicg.Plo ./$(DEPDIR)/lsicg.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
@@ -368,11 +465,12 @@ LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
 	$(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libHYPRE_FEI_la_SOURCES) $(driver_SOURCES)
+DIST_SOURCES = $(am__libHYPRE_FEI_a_SOURCES_DIST) \
+	$(am__libHYPRE_FEI_la_SOURCES_DIST) $(driver_SOURCES)
 HEADERS = $(include_HEADERS)
 
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.in Makefile.am
-SOURCES = $(libHYPRE_FEI_la_SOURCES) $(driver_SOURCES)
+SOURCES = $(libHYPRE_FEI_a_SOURCES) $(libHYPRE_FEI_la_SOURCES) $(driver_SOURCES)
 
 all: all-am
 
@@ -383,6 +481,40 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configu
 	  $(AUTOMAKE) --foreign  FEI_mv/fei-hypre/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
+libLIBRARIES_INSTALL = $(INSTALL_DATA)
+install-libLIBRARIES: $(lib_LIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f"; \
+	    $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f; \
+	  else :; fi; \
+	done
+	@$(POST_INSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    p="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(RANLIB) $(DESTDIR)$(libdir)/$$p"; \
+	    $(RANLIB) $(DESTDIR)$(libdir)/$$p; \
+	  else :; fi; \
+	done
+
+uninstall-libLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  p="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " rm -f $(DESTDIR)$(libdir)/$$p"; \
+	  rm -f $(DESTDIR)$(libdir)/$$p; \
+	done
+
+clean-libLIBRARIES:
+	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
+libHYPRE_FEI.a: $(libHYPRE_FEI_a_OBJECTS) $(libHYPRE_FEI_a_DEPENDENCIES) 
+	-rm -f libHYPRE_FEI.a
+	$(libHYPRE_FEI_a_AR) libHYPRE_FEI.a $(libHYPRE_FEI_a_OBJECTS) $(libHYPRE_FEI_a_LIBADD)
+	$(RANLIB) libHYPRE_FEI.a
 libLTLIBRARIES_INSTALL = $(INSTALL)
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -424,37 +556,68 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FEI_HYPRE_Impl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FEI_HYPRE_Impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSC_aux.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSC_aux.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_Dsuperlu.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_Dsuperlu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_UZAWA.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_UZAWA.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_blkprec.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_blkprec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_ddict.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_ddict.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_ddilut.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_ddilut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_ml.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_ml.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_mli.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_mli.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_poly.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_poly.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_schwarz.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_schwarz.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LinSysCore.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LinSysCore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_SlideReduction.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_SlideReduction.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_TFQmr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_TFQmr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_bicgs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_bicgs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_bicgstabl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_bicgstabl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_fgmres.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_fgmres.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_lsicg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_lsicg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_symqmr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_symqmr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SymQMR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SymQMR.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TFQmr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TFQmr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bicgs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bicgs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bicgstabl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bicgstabl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cfei_hypre.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cfei_hypre.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/driver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fgmres.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fgmres.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_lsi_amge.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_lsi_amge.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_lsi_ddamg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_lsi_ddamg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_lsi_misc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_lsi_misc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_schur_reduce.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_schur_reduce.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_slide_reduce.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_slide_reduce.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lsicg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lsicg.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
@@ -638,10 +801,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(HEADERS)
+all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) $(HEADERS)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
+	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -668,8 +831,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
-	mostlyclean-am
+clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -686,9 +849,9 @@ info: info-am
 
 info-am:
 
-install-data-am: install-data-local install-includeHEADERS
+install-data-am: install-includeHEADERS
 
-install-exec-am: install-libLTLIBRARIES
+install-exec-am: install-libLIBRARIES install-libLTLIBRARIES
 
 install-info:
 
@@ -715,25 +878,26 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
-
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLTLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am info info-am install \
-	install-am install-data install-data-am install-data-local \
-	install-exec install-exec-am install-includeHEADERS \
-	install-info install-info-am install-libLTLIBRARIES install-man \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool pdf \
-	pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-includeHEADERS uninstall-info-am \
+uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
 	uninstall-libLTLIBRARIES
 
+.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
+	clean-libLIBRARIES clean-libLTLIBRARIES clean-libtool ctags \
+	distclean distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am info info-am install \
+	install-am install-data install-data-am install-exec \
+	install-exec-am install-includeHEADERS install-info \
+	install-info-am install-libLIBRARIES install-libLTLIBRARIES \
+	install-man install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-includeHEADERS uninstall-info-am \
+	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
-install-data-local:
-	test -f $(BASE_DIR)/LinearSystemCore.h && $(INSTALL_DATA) $(BASE_DIR)/LinearSystemCore.h $(includedir)/snl_LinearSystemCore.h
+
+snl_LinearSystemCore.h:
+	test -f $(BASE_DIR)/LinearSystemCore.h && $(INSTALL_DATA) $(BASE_DIR)/LinearSystemCore.h snl_LinearSystemCore.h
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

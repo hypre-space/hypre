@@ -1,10 +1,16 @@
 ## Process this file with automake to create Makefile.in
 
-lib_LTLIBRARIES = libHYPRE.la libHYPRE_LSI.la
-libHYPRE_la_SOURCES = $(FILES)
-libHYPRE_la_LDFLAGS = -avoid-version
-libHYPRE_LSI_la_SOURCES = $(FILES)
-libHYPRE_LSI_la_LDFLAGS = -avoid-version
+if STATICONLY
+ lib_LIBRARIES = libHYPRE.a libHYPRE_LSI.a
+ libHYPRE_a_SOURCES = $(FILES)
+ libHYPRE_LSI_a_SOURCES = $(FILES)
+else !STATICONLY
+ lib_LTLIBRARIES = libHYPRE.la libHYPRE_LSI.la
+ libHYPRE_la_SOURCES = $(FILES)
+ libHYPRE_la_LDFLAGS = -avoid-version
+ libHYPRE_LSI_la_SOURCES = $(FILES)
+ libHYPRE_LSI_la_LDFLAGS = -avoid-version
+endif !STATICONLY
 
 if BLASNEEDED
 BLASDIR = blas

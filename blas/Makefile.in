@@ -67,6 +67,7 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
+DATETIME = @DATETIME@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
@@ -121,6 +122,8 @@ POW_LIB = @POW_LIB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+STATICONLY_FALSE = @STATICONLY_FALSE@
+STATICONLY_TRUE = @STATICONLY_TRUE@
 STRIP = @STRIP@
 USE_FEI_BASE_DIR_DEFAULT_FALSE = @USE_FEI_BASE_DIR_DEFAULT_FALSE@
 USE_FEI_BASE_DIR_DEFAULT_TRUE = @USE_FEI_BASE_DIR_DEFAULT_TRUE@
@@ -175,9 +178,11 @@ subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 
-lib_LTLIBRARIES = libHYPRE_blas.la
-libHYPRE_blas_la_SOURCES = $(FILES)
-libHYPRE_blas_la_LDFLAGS = -avoid-version
+@STATICONLY_TRUE@lib_LIBRARIES = libHYPRE_blas.a
+@STATICONLY_TRUE@libHYPRE_blas_a_SOURCES = $(FILES)
+@STATICONLY_FALSE@lib_LTLIBRARIES = libHYPRE_blas.la
+@STATICONLY_FALSE@libHYPRE_blas_la_SOURCES = $(FILES)
+@STATICONLY_FALSE@libHYPRE_blas_la_LDFLAGS = -avoid-version
 
 #
 FILES = \
@@ -211,39 +216,73 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
+LIBRARIES = $(lib_LIBRARIES)
+
+libHYPRE_blas_a_AR = $(AR) cru
+libHYPRE_blas_a_LIBADD =
+am__libHYPRE_blas_a_SOURCES_DIST = dasum.c daxpy.c dcopy.c ddot.c \
+	dgemm.c dgemv.c dger.c dnrm2.c drot.c dscal.c dswap.c dsymm.c \
+	dsymv.c dsyr2.c dsyr2k.c dsyrk.c dtrmm.c dtrmv.c dtrsm.c \
+	dtrsv.c idamax.c blas_utils.c f2c.h hypre_blas.h
+am__objects_1 = dasum.$(OBJEXT) daxpy.$(OBJEXT) dcopy.$(OBJEXT) \
+	ddot.$(OBJEXT) dgemm.$(OBJEXT) dgemv.$(OBJEXT) dger.$(OBJEXT) \
+	dnrm2.$(OBJEXT) drot.$(OBJEXT) dscal.$(OBJEXT) dswap.$(OBJEXT) \
+	dsymm.$(OBJEXT) dsymv.$(OBJEXT) dsyr2.$(OBJEXT) \
+	dsyr2k.$(OBJEXT) dsyrk.$(OBJEXT) dtrmm.$(OBJEXT) \
+	dtrmv.$(OBJEXT) dtrsm.$(OBJEXT) dtrsv.$(OBJEXT) \
+	idamax.$(OBJEXT) blas_utils.$(OBJEXT)
+@STATICONLY_TRUE@am_libHYPRE_blas_a_OBJECTS = $(am__objects_1)
+libHYPRE_blas_a_OBJECTS = $(am_libHYPRE_blas_a_OBJECTS)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libHYPRE_blas_la_LIBADD =
-am__objects_1 = dasum.lo daxpy.lo dcopy.lo ddot.lo dgemm.lo dgemv.lo \
+am__libHYPRE_blas_la_SOURCES_DIST = dasum.c daxpy.c dcopy.c ddot.c \
+	dgemm.c dgemv.c dger.c dnrm2.c drot.c dscal.c dswap.c dsymm.c \
+	dsymv.c dsyr2.c dsyr2k.c dsyrk.c dtrmm.c dtrmv.c dtrsm.c \
+	dtrsv.c idamax.c blas_utils.c f2c.h hypre_blas.h
+am__objects_2 = dasum.lo daxpy.lo dcopy.lo ddot.lo dgemm.lo dgemv.lo \
 	dger.lo dnrm2.lo drot.lo dscal.lo dswap.lo dsymm.lo dsymv.lo \
 	dsyr2.lo dsyr2k.lo dsyrk.lo dtrmm.lo dtrmv.lo dtrsm.lo dtrsv.lo \
 	idamax.lo blas_utils.lo
-am_libHYPRE_blas_la_OBJECTS = $(am__objects_1)
+@STATICONLY_FALSE@am_libHYPRE_blas_la_OBJECTS = $(am__objects_2)
 libHYPRE_blas_la_OBJECTS = $(am_libHYPRE_blas_la_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/blas_utils.Plo ./$(DEPDIR)/dasum.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/daxpy.Plo ./$(DEPDIR)/dcopy.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/ddot.Plo ./$(DEPDIR)/dgemm.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgemv.Plo ./$(DEPDIR)/dger.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dnrm2.Plo ./$(DEPDIR)/drot.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dscal.Plo ./$(DEPDIR)/dswap.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsymm.Plo ./$(DEPDIR)/dsymv.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsyr2.Plo ./$(DEPDIR)/dsyr2k.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsyrk.Plo ./$(DEPDIR)/dtrmm.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dtrmv.Plo ./$(DEPDIR)/dtrsm.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dtrsv.Plo ./$(DEPDIR)/idamax.Plo
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/blas_utils.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/blas_utils.Po ./$(DEPDIR)/dasum.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dasum.Po ./$(DEPDIR)/daxpy.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/daxpy.Po ./$(DEPDIR)/dcopy.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dcopy.Po ./$(DEPDIR)/ddot.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/ddot.Po ./$(DEPDIR)/dgemm.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgemm.Po ./$(DEPDIR)/dgemv.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgemv.Po ./$(DEPDIR)/dger.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dger.Po ./$(DEPDIR)/dnrm2.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dnrm2.Po ./$(DEPDIR)/drot.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/drot.Po ./$(DEPDIR)/dscal.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dscal.Po ./$(DEPDIR)/dswap.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dswap.Po ./$(DEPDIR)/dsymm.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsymm.Po ./$(DEPDIR)/dsymv.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsymv.Po ./$(DEPDIR)/dsyr2.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsyr2.Po ./$(DEPDIR)/dsyr2k.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsyr2k.Po ./$(DEPDIR)/dsyrk.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsyrk.Po ./$(DEPDIR)/dtrmm.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dtrmm.Po ./$(DEPDIR)/dtrmv.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dtrmv.Po ./$(DEPDIR)/dtrsm.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dtrsm.Po ./$(DEPDIR)/dtrsv.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dtrsv.Po ./$(DEPDIR)/idamax.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/idamax.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
 	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libHYPRE_blas_la_SOURCES)
+DIST_SOURCES = $(am__libHYPRE_blas_a_SOURCES_DIST) \
+	$(am__libHYPRE_blas_la_SOURCES_DIST)
 DIST_COMMON = README $(srcdir)/Makefile.in Makefile.am
-SOURCES = $(libHYPRE_blas_la_SOURCES)
+SOURCES = $(libHYPRE_blas_a_SOURCES) $(libHYPRE_blas_la_SOURCES)
 
 all: all-am
 
@@ -254,6 +293,40 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configu
 	  $(AUTOMAKE) --foreign  blas/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
+libLIBRARIES_INSTALL = $(INSTALL_DATA)
+install-libLIBRARIES: $(lib_LIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f"; \
+	    $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f; \
+	  else :; fi; \
+	done
+	@$(POST_INSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    p="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(RANLIB) $(DESTDIR)$(libdir)/$$p"; \
+	    $(RANLIB) $(DESTDIR)$(libdir)/$$p; \
+	  else :; fi; \
+	done
+
+uninstall-libLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  p="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " rm -f $(DESTDIR)$(libdir)/$$p"; \
+	  rm -f $(DESTDIR)$(libdir)/$$p; \
+	done
+
+clean-libLIBRARIES:
+	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
+libHYPRE_blas.a: $(libHYPRE_blas_a_OBJECTS) $(libHYPRE_blas_a_DEPENDENCIES) 
+	-rm -f libHYPRE_blas.a
+	$(libHYPRE_blas_a_AR) libHYPRE_blas.a $(libHYPRE_blas_a_OBJECTS) $(libHYPRE_blas_a_LIBADD)
+	$(RANLIB) libHYPRE_blas.a
 libLTLIBRARIES_INSTALL = $(INSTALL)
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -292,27 +365,49 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blas_utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blas_utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dasum.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dasum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/daxpy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/daxpy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dcopy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dcopy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ddot.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ddot.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgemm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgemm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgemv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgemv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dger.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dger.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnrm2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnrm2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drot.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drot.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dscal.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dscal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dswap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dswap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsymm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsymm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsymv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsymv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyr2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyr2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyr2k.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyr2k.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyrk.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyrk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrmm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrmm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrmv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrmv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrsm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrsm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrsv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrsv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/idamax.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/idamax.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
@@ -444,10 +539,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LIBRARIES) $(LTLIBRARIES)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(libdir)
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -474,8 +569,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
-	mostlyclean-am
+clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -494,7 +589,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-libLTLIBRARIES
+install-exec-am: install-libLIBRARIES install-libLTLIBRARIES
 
 install-info:
 
@@ -521,20 +616,20 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLTLIBRARIES
+uninstall-am: uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLTLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
+	clean-libLIBRARIES clean-libLTLIBRARIES clean-libtool ctags \
+	distclean distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am info info-am install \
 	install-am install-data install-data-am install-exec \
 	install-exec-am install-info install-info-am \
-	install-libLTLIBRARIES install-man install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-info-am \
-	uninstall-libLTLIBRARIES
+	install-libLIBRARIES install-libLTLIBRARIES install-man \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool pdf \
+	pdf-am ps ps-am tags uninstall uninstall-am uninstall-info-am \
+	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -1,8 +1,13 @@
 ## Process this file with automake to create Makefile.in
 
-lib_LTLIBRARIES = libHYPRE_parcsr_ls.la
-libHYPRE_parcsr_ls_la_SOURCES = $(FILES)
-libHYPRE_parcsr_ls_la_LDFLAGS = -avoid-version
+if STATICONLY
+ lib_LIBRARIES = libHYPRE_parcsr_ls.a
+ libHYPRE_parcsr_ls_a_SOURCES = $(FILES)
+else !STATICONLY
+ lib_LTLIBRARIES = libHYPRE_parcsr_ls.la
+ libHYPRE_parcsr_ls_la_SOURCES = $(FILES)
+ libHYPRE_parcsr_ls_la_LDFLAGS = -avoid-version
+endif !STATICONLY
 
 include_HEADERS = parcsr_ls.h HYPRE_parcsr_ls.h
 

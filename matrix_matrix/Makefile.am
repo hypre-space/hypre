@@ -1,8 +1,13 @@
 ## Process this file with automake to create Makefile.in
 
-lib_LTLIBRARIES = libHYPRE_MatrixMatrix.la
-libHYPRE_MatrixMatrix_la_SOURCES = $(FILES)
-libHYPRE_MatrixMatrix_la_LDFLAGS = -avoid-version
+if STATICONLY
+ lib_LIBRARIES = libHYPRE_MatrixMatrix.a
+ libHYPRE_MatrixMatrix_a_SOURCES = $(FILES)
+else !STATICONLY
+ lib_LTLIBRARIES = libHYPRE_MatrixMatrix.la
+ libHYPRE_MatrixMatrix_la_SOURCES = $(FILES)
+ libHYPRE_MatrixMatrix_la_LDFLAGS = -avoid-version
+endif !STATICONLY
 
 include_HEADERS = HYPRE_matrix_matrix_protos.h
 

@@ -1,8 +1,13 @@
 ## Process this file with automake to create Makefile.in
 
-lib_LTLIBRARIES = libHYPRE_DistributedMatrixPilutSolver.la
-libHYPRE_DistributedMatrixPilutSolver_la_SOURCES = $(FILES)
-libHYPRE_DistributedMatrixPilutSolver_la_LDFLAGS = -avoid-version
+if STATICONLY
+ lib_LIBRARIES = libHYPRE_DistributedMatrixPilutSolver.a
+ libHYPRE_DistributedMatrixPilutSolver_a_SOURCES = $(FILES)
+else !STATICONLY
+ lib_LTLIBRARIES = libHYPRE_DistributedMatrixPilutSolver.la
+ libHYPRE_DistributedMatrixPilutSolver_la_SOURCES = $(FILES)
+ libHYPRE_DistributedMatrixPilutSolver_la_LDFLAGS = -avoid-version
+endif !STATICONLY
 
 include_HEADERS = HYPRE_DistributedMatrixPilutSolver_protos.h\
  HYPRE_DistributedMatrixPilutSolver_types.h

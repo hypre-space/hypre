@@ -2,12 +2,16 @@
 # Process this file with autoconf to produce a configure script.
 # Set VERSION so we only need to edit in one place (i.e., here)
 m4_define(HYPRE_VERSION, 1.8.3b)
+m4_define(HYPRE_DATE, 2003/10/22 23:46:36)
 m4_define(HYPRE_TOP_SRC_DIR, `pwd`)
 
 # Variable Initialization
 casc_user_chose_compilers=no
 casc_user_chose_blas=no
 casc_user_chose_lapack=no
+casc_user_chose_cflags=no
+casc_user_chose_cxxflags=no
+casc_user_chose_fflags=no
 casc_using_mpi=yes
 casc_using_debug=no
 casc_using_openmp=no   
@@ -34,12 +38,25 @@ dnl Determine the host type
 AC_CANONICAL_HOST
 # Turn off shared libraries by default, since build process takes longer.
 AC_DISABLE_SHARED
+AM_CONDITIONAL([STATICONLY],[test "$enable_shared" = no])
 AM_MAINTAINER_MODE
 
 AM_INIT_AUTOMAKE([1.7.5 foreign no-installinfo no-installman no-texinfo.tex])
 dnl Change the default prefix (/usr/local) to ./hypre
 AC_PREFIX_DEFAULT("HYPRE_TOP_SRC_DIR/hypre")
 m4_pattern_allow([HYPRE_[A-Z_]+])
+DATETIME="HYPRE_DATE"
+AC_SUBST(DATETIME)
+
+if test "x$CFLAGS" != "x" ; then
+  casc_user_chose_cflags=yes
+fi
+if test "x$CXXFLAGS" != "x" ; then
+  casc_user_chose_cxxflags=yes
+fi
+if test "x$FFLAGS" != "x" ; then
+  casc_user_chose_fflags=yes
+fi
 
 ACX_DEBUG
 
@@ -287,11 +304,11 @@ AC_SUBST(CSUPERLUFLAGS)
 dnl * set generic default for blas usage
 ACX_BLAS([casc_user_chose_blas=yes;BLASLIBFLAGS=$BLAS_LIBS], 
   [casc_user_chose_blas=no;BLASLIBFLAGS="-lHYPRE_blas"]) 
-AM_CONDITIONAL(BLASNEEDED, test "$casc_user_chose_blas" = no)
+AM_CONDITIONAL([BLASNEEDED],[test "$casc_user_chose_blas" = no])
 AC_SUBST(BLASLIBFLAGS)
 ACX_LAPACK([casc_user_chose_lapack=yes;LAPACKLIBFLAGS=$LAPACK_LIBS], 
   [casc_user_chose_lapack=no;LAPACKLIBFLAGS="-lHYPRE_lapack"]) 
-AM_CONDITIONAL(LAPACKNEEDED, test "$casc_user_chose_lapack" = no)
+AM_CONDITIONAL([LAPACKNEEDED],[test "$casc_user_chose_lapack" = no])
 AC_SUBST(LAPACKLIBFLAGS)
 AC_CHECK_LIBM
 AC_SUBST(LIBM)

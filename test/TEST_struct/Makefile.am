@@ -8,6 +8,8 @@ FILES = \
  hybrid.sh\
  hybridswitch.jobs\
  hybridswitch.sh\
+ parflow.jobs\
+ parflow.sh\
  pfmgbase1d.jobs\
  pfmgbase1d.sh\
  pfmgbase2d.jobs\

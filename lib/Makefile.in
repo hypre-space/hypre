@@ -67,6 +67,7 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
+DATETIME = @DATETIME@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
@@ -121,6 +122,8 @@ POW_LIB = @POW_LIB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+STATICONLY_FALSE = @STATICONLY_FALSE@
+STATICONLY_TRUE = @STATICONLY_TRUE@
 STRIP = @STRIP@
 USE_FEI_BASE_DIR_DEFAULT_FALSE = @USE_FEI_BASE_DIR_DEFAULT_FALSE@
 USE_FEI_BASE_DIR_DEFAULT_TRUE = @USE_FEI_BASE_DIR_DEFAULT_TRUE@
@@ -175,11 +178,14 @@ subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 
-lib_LTLIBRARIES = libHYPRE.la libHYPRE_LSI.la
-libHYPRE_la_SOURCES = $(FILES)
-libHYPRE_la_LDFLAGS = -avoid-version
-libHYPRE_LSI_la_SOURCES = $(FILES)
-libHYPRE_LSI_la_LDFLAGS = -avoid-version
+@STATICONLY_TRUE@lib_LIBRARIES = libHYPRE.a libHYPRE_LSI.a
+@STATICONLY_TRUE@libHYPRE_a_SOURCES = $(FILES)
+@STATICONLY_TRUE@libHYPRE_LSI_a_SOURCES = $(FILES)
+@STATICONLY_FALSE@lib_LTLIBRARIES = libHYPRE.la libHYPRE_LSI.la
+@STATICONLY_FALSE@libHYPRE_la_SOURCES = $(FILES)
+@STATICONLY_FALSE@libHYPRE_la_LDFLAGS = -avoid-version
+@STATICONLY_FALSE@libHYPRE_LSI_la_SOURCES = $(FILES)
+@STATICONLY_FALSE@libHYPRE_LSI_la_LDFLAGS = -avoid-version
 @BLASNEEDED_FALSE@BLASDIR = 
 
 @BLASNEEDED_TRUE@BLASDIR = blas
@@ -696,6 +702,1083 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
+LIBRARIES = $(lib_LIBRARIES)
+
+libHYPRE_a_AR = $(AR) cru
+libHYPRE_a_LIBADD =
+am__libHYPRE_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
+	$(top_srcdir)/blas/daxpy.c $(top_srcdir)/blas/dcopy.c \
+	$(top_srcdir)/blas/ddot.c $(top_srcdir)/blas/dgemm.c \
+	$(top_srcdir)/blas/dgemv.c $(top_srcdir)/blas/dger.c \
+	$(top_srcdir)/blas/dnrm2.c $(top_srcdir)/blas/drot.c \
+	$(top_srcdir)/blas/dscal.c $(top_srcdir)/blas/dsymv.c \
+	$(top_srcdir)/blas/dsyr2.c $(top_srcdir)/blas/dsyr2k.c \
+	$(top_srcdir)/blas/dsyrk.c $(top_srcdir)/blas/dtrmm.c \
+	$(top_srcdir)/blas/dtrmv.c $(top_srcdir)/blas/dtrsm.c \
+	$(top_srcdir)/blas/dtrsv.c $(top_srcdir)/blas/idamax.c \
+	$(top_srcdir)/blas/blas_utils.c $(top_srcdir)/lapack/dbdsqr.c \
+	$(top_srcdir)/lapack/dgebd2.c $(top_srcdir)/lapack/dgebrd.c \
+	$(top_srcdir)/lapack/dgelq2.c $(top_srcdir)/lapack/dgelqf.c \
+	$(top_srcdir)/lapack/dgels.c $(top_srcdir)/lapack/dgeqr2.c \
+	$(top_srcdir)/lapack/dgeqrf.c $(top_srcdir)/lapack/dgesvd.c \
+	$(top_srcdir)/lapack/dlabad.c $(top_srcdir)/lapack/dlabrd.c \
+	$(top_srcdir)/lapack/dlacpy.c $(top_srcdir)/lapack/dlae2.c \
+	$(top_srcdir)/lapack/dlaev2.c $(top_srcdir)/lapack/dlamch.c \
+	$(top_srcdir)/lapack/dlange.c $(top_srcdir)/lapack/dlanst.c \
+	$(top_srcdir)/lapack/dlansy.c $(top_srcdir)/lapack/dlapy2.c \
+	$(top_srcdir)/lapack/dlarf.c $(top_srcdir)/lapack/dlarfb.c \
+	$(top_srcdir)/lapack/dlarfg.c $(top_srcdir)/lapack/dlarft.c \
+	$(top_srcdir)/lapack/dlartg.c $(top_srcdir)/lapack/dlas2.c \
+	$(top_srcdir)/lapack/dlascl.c $(top_srcdir)/lapack/dlaset.c \
+	$(top_srcdir)/lapack/dlasq1.c $(top_srcdir)/lapack/dlasq2.c \
+	$(top_srcdir)/lapack/dlasq3.c $(top_srcdir)/lapack/dlasq4.c \
+	$(top_srcdir)/lapack/dlasq5.c $(top_srcdir)/lapack/dlasq6.c \
+	$(top_srcdir)/lapack/dlasr.c $(top_srcdir)/lapack/dlasrt.c \
+	$(top_srcdir)/lapack/dlassq.c $(top_srcdir)/lapack/dlasv2.c \
+	$(top_srcdir)/lapack/dlatrd.c $(top_srcdir)/lapack/dorg2l.c \
+	$(top_srcdir)/lapack/dorg2r.c $(top_srcdir)/lapack/dorgbr.c \
+	$(top_srcdir)/lapack/dorgl2.c $(top_srcdir)/lapack/dorglq.c \
+	$(top_srcdir)/lapack/dorgql.c $(top_srcdir)/lapack/dorgqr.c \
+	$(top_srcdir)/lapack/dorgtr.c $(top_srcdir)/lapack/dorm2r.c \
+	$(top_srcdir)/lapack/dormbr.c $(top_srcdir)/lapack/dorml2.c \
+	$(top_srcdir)/lapack/dormlq.c $(top_srcdir)/lapack/dormqr.c \
+	$(top_srcdir)/lapack/dpotf2.c $(top_srcdir)/lapack/dpotrf.c \
+	$(top_srcdir)/lapack/dpotrs.c $(top_srcdir)/lapack/dsteqr.c \
+	$(top_srcdir)/lapack/dsterf.c $(top_srcdir)/lapack/dsyev.c \
+	$(top_srcdir)/lapack/dsygs2.c $(top_srcdir)/lapack/dsygst.c \
+	$(top_srcdir)/lapack/dsygv.c $(top_srcdir)/lapack/dsytd2.c \
+	$(top_srcdir)/lapack/dsytrd.c $(top_srcdir)/lapack/ieeeck.c \
+	$(top_srcdir)/lapack/ilaenv.c \
+	$(top_srcdir)/lapack/lapack_utils.c \
+	$(top_srcdir)/lapack/lsame.c $(top_srcdir)/lapack/xerbla.c \
+	$(top_srcdir)/FEI_mv/SuperLU/colamd.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dcolumn_bmod.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dcolumn_dfs.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dcopy_to_ucol.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dgscon.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dgsequ.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dgsrfs.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dgssv.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dgssvx.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dgstrf.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dgstrs.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dlacon.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dlangs.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dlaqgs.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dmemory.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dpanel_bmod.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dpanel_dfs.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dpivotL.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dpivotgrowth.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dpruneL.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dreadhb.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dsnode_bmod.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dsnode_dfs.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dsp_blas2.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dsp_blas3.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dutil.c \
+	$(top_srcdir)/FEI_mv/SuperLU/get_perm_c.c \
+	$(top_srcdir)/FEI_mv/SuperLU/mmd.c \
+	$(top_srcdir)/FEI_mv/SuperLU/relax_snode.c \
+	$(top_srcdir)/FEI_mv/SuperLU/sp_coletree.c \
+	$(top_srcdir)/FEI_mv/SuperLU/sp_ienv.c \
+	$(top_srcdir)/FEI_mv/SuperLU/sp_preorder.c \
+	$(top_srcdir)/FEI_mv/SuperLU/superlu_memory.c \
+	$(top_srcdir)/FEI_mv/SuperLU/superlu_timer.c \
+	$(top_srcdir)/FEI_mv/SuperLU/superlu_util.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/bicgs.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/bicgstabl.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/FEI_HYPRE_Impl.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSC_aux.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_Dsuperlu.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_UZAWA.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_blkprec.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_ddict.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_ddilut.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_ml.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_mli.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_poly.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_schwarz.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LinSysCore.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_SlideReduction.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_TFQmr.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_bicgs.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_bicgstabl.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_fgmres.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_lsicg.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_symqmr.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/SymQMR.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/TFQmr.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/cfei_hypre.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/fgmres.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/hypre_lsi_amge.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/hypre_lsi_ddamg.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/hypre_lsi_misc.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/hypre_schur_reduce.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/hypre_slide_reduce.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/lsicg.c \
+	$(top_srcdir)/FEI_mv/femli/util/mli_utils.c \
+	$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_calib.cxx \
+	$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_coarsen1.cxx \
+	$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_dd_fedata.cxx \
+	$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_dd_sfei.cxx \
+	$(top_srcdir)/FEI_mv/femli/amgs/mli_method.cxx \
+	$(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgcr.cxx \
+	$(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgrs.cxx \
+	$(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgsa.cxx \
+	$(top_srcdir)/FEI_mv/femli/base/mli.cxx \
+	$(top_srcdir)/FEI_mv/femli/base/mli_oneLevel.cxx \
+	$(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx \
+	$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx \
+	$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata_utils.cxx \
+	$(top_srcdir)/FEI_mv/femli/fedata/mli_sfei.cxx \
+	$(top_srcdir)/FEI_mv/femli/mapper/mli_mapper.cxx \
+	$(top_srcdir)/FEI_mv/femli/matrix/mli_matrix.cxx \
+	$(top_srcdir)/FEI_mv/femli/matrix/mli_matrix_mult.cxx \
+	$(top_srcdir)/FEI_mv/femli/matrix/mli_matrix_utils.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_arpacksuperlu.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_bjacobi.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_bsgs.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_cg.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gs.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_hschwarz.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_hsgs.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_jacobi.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_kaczmarz.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_seqsuperlu.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_sgs.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_superlu.cxx \
+	$(top_srcdir)/FEI_mv/femli/vector/mli_vector.cxx \
+	$(top_srcdir)/FEI_mv/femli/util/mli_utils_fortran.f \
+	$(top_srcdir)/IJ_mv/F90_HYPRE_IJMatrix.c \
+	$(top_srcdir)/IJ_mv/F90_HYPRE_IJVector.c \
+	$(top_srcdir)/IJ_mv/F90_IJMatrix.c \
+	$(top_srcdir)/IJ_mv/HYPRE_IJMatrix.c \
+	$(top_srcdir)/IJ_mv/HYPRE_IJVector.c \
+	$(top_srcdir)/IJ_mv/IJMatrix.c \
+	$(top_srcdir)/IJ_mv/IJMatrix_parcsr.c \
+	$(top_srcdir)/IJ_mv/IJVector.c \
+	$(top_srcdir)/IJ_mv/IJVector_parcsr.c \
+	$(top_srcdir)/IJ_mv/aux_parcsr_matrix.c \
+	$(top_srcdir)/distributed_ls/Euclid/Euclid_apply.c \
+	$(top_srcdir)/distributed_ls/Euclid/Euclid_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/ExternalRows_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/Factor_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/Hash_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/Hash_i_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/MatGenFD.c \
+	$(top_srcdir)/distributed_ls/Euclid/Mat_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/Mem_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/Numbering_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/Parser_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/SortedList_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/SortedSet_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/SubdomainGraph_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/TimeLog_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/Timer_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/Vec_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/blas_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/getRow_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/globalObjects.c \
+	$(top_srcdir)/distributed_ls/Euclid/ilu_mpi_bj.c \
+	$(top_srcdir)/distributed_ls/Euclid/ilu_mpi_pilu.c \
+	$(top_srcdir)/distributed_ls/Euclid/ilu_seq.c \
+	$(top_srcdir)/distributed_ls/Euclid/io_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/krylov_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/mat_dh_private.c \
+	$(top_srcdir)/distributed_ls/Euclid/shellSort_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/sig_dh.c \
+	$(top_srcdir)/distributed_ls/ParaSails/ConjGrad.c \
+	$(top_srcdir)/distributed_ls/ParaSails/DiagScale.c \
+	$(top_srcdir)/distributed_ls/ParaSails/FlexGmres.c \
+	$(top_srcdir)/distributed_ls/ParaSails/Hash.c \
+	$(top_srcdir)/distributed_ls/ParaSails/LoadBal.c \
+	$(top_srcdir)/distributed_ls/ParaSails/Matrix.c \
+	$(top_srcdir)/distributed_ls/ParaSails/Mem.c \
+	$(top_srcdir)/distributed_ls/ParaSails/Numbering.c \
+	$(top_srcdir)/distributed_ls/ParaSails/OrderStat.c \
+	$(top_srcdir)/distributed_ls/ParaSails/ParaSails.c \
+	$(top_srcdir)/distributed_ls/ParaSails/PrunedRows.c \
+	$(top_srcdir)/distributed_ls/ParaSails/RowPatt.c \
+	$(top_srcdir)/distributed_ls/ParaSails/StoredRows.c \
+	$(top_srcdir)/distributed_ls/ParaSails/hypre_ParaSails.c \
+	$(top_srcdir)/distributed_ls/pilut/comm.c \
+	$(top_srcdir)/distributed_ls/pilut/HYPRE_DistributedMatrixPilutSolver.c \
+	$(top_srcdir)/distributed_ls/pilut/debug.c \
+	$(top_srcdir)/distributed_ls/pilut/distributed_qsort.c \
+	$(top_srcdir)/distributed_ls/pilut/distributed_qsort_si.c \
+	$(top_srcdir)/distributed_ls/pilut/ilut.c \
+	$(top_srcdir)/distributed_ls/pilut/parilut.c \
+	$(top_srcdir)/distributed_ls/pilut/parutil.c \
+	$(top_srcdir)/distributed_ls/pilut/pblas1.c \
+	$(top_srcdir)/distributed_ls/pilut/serilut.c \
+	$(top_srcdir)/distributed_ls/pilut/trifactor.c \
+	$(top_srcdir)/distributed_ls/pilut/util.c \
+	$(top_srcdir)/distributed_matrix/HYPRE_distributed_matrix.c \
+	$(top_srcdir)/distributed_matrix/distributed_matrix.c \
+	$(top_srcdir)/distributed_matrix/distributed_matrix_ISIS.c \
+	$(top_srcdir)/distributed_matrix/distributed_matrix_PETSc.c \
+	$(top_srcdir)/distributed_matrix/distributed_matrix_parcsr.c \
+	$(top_srcdir)/krylov/HYPRE_bicgstab.c \
+	$(top_srcdir)/krylov/HYPRE_cgnr.c \
+	$(top_srcdir)/krylov/HYPRE_gmres.c \
+	$(top_srcdir)/krylov/HYPRE_pcg.c \
+	$(top_srcdir)/krylov/bicgstab.c $(top_srcdir)/krylov/cgnr.c \
+	$(top_srcdir)/krylov/gmres.c $(top_srcdir)/krylov/pcg.c \
+	$(top_srcdir)/matrix_matrix/HYPRE_ConvertPETScMatrixToDistributedMatrix.c \
+	$(top_srcdir)/matrix_matrix/HYPRE_ConvertParCSRMatrixToDistributedMatrix.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c \
+	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_ParaSails.c \
+	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_amg.c \
+	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_bicgstab.c \
+	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_cgnr.c \
+	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_gmres.c \
+	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_pcg.c \
+	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_pilut.c \
+	$(top_srcdir)/parcsr_ls/F90_hypre_laplace.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_Euclid.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_ParaSails.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_amg.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_bicgstab.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_cgnr.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_gmres.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_hybrid.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_pcg.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_pilut.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_schwarz.c \
+	$(top_srcdir)/parcsr_ls/amg_hybrid.c \
+	$(top_srcdir)/parcsr_ls/par_amg.c \
+	$(top_srcdir)/parcsr_ls/par_amg_setup.c \
+	$(top_srcdir)/parcsr_ls/par_amg_solve.c \
+	$(top_srcdir)/parcsr_ls/par_amg_solveT.c \
+	$(top_srcdir)/parcsr_ls/par_cg_relax_wt.c \
+	$(top_srcdir)/parcsr_ls/par_coarse_parms.c \
+	$(top_srcdir)/parcsr_ls/par_coarsen.c \
+	$(top_srcdir)/parcsr_ls/par_cycle.c \
+	$(top_srcdir)/parcsr_ls/par_difconv.c \
+	$(top_srcdir)/parcsr_ls/par_gsmg.c \
+	$(top_srcdir)/parcsr_ls/par_indepset.c \
+	$(top_srcdir)/parcsr_ls/par_interp.c \
+	$(top_srcdir)/parcsr_ls/par_laplace.c \
+	$(top_srcdir)/parcsr_ls/par_laplace_27pt.c \
+	$(top_srcdir)/parcsr_ls/par_laplace_9pt.c \
+	$(top_srcdir)/parcsr_ls/par_rap.c \
+	$(top_srcdir)/parcsr_ls/par_rap_communication.c \
+	$(top_srcdir)/parcsr_ls/par_relax.c \
+	$(top_srcdir)/parcsr_ls/par_relax_interface.c \
+	$(top_srcdir)/parcsr_ls/par_scaled_matnorm.c \
+	$(top_srcdir)/parcsr_ls/par_schwarz.c \
+	$(top_srcdir)/parcsr_ls/par_stats.c \
+	$(top_srcdir)/parcsr_ls/par_strength.c \
+	$(top_srcdir)/parcsr_ls/pcg_par.c \
+	$(top_srcdir)/parcsr_ls/schwarz.c \
+	$(top_srcdir)/parcsr_mv/F90_HYPRE_parcsr_matrix.c \
+	$(top_srcdir)/parcsr_mv/F90_HYPRE_parcsr_vector.c \
+	$(top_srcdir)/parcsr_mv/F90_par_vector.c \
+	$(top_srcdir)/parcsr_mv/F90_parcsr_matrix.c \
+	$(top_srcdir)/parcsr_mv/HYPRE_parcsr_matrix.c \
+	$(top_srcdir)/parcsr_mv/HYPRE_parcsr_vector.c \
+	$(top_srcdir)/parcsr_mv/communicationT.c \
+	$(top_srcdir)/parcsr_mv/numbers.c \
+	$(top_srcdir)/parcsr_mv/par_csr_aat.c \
+	$(top_srcdir)/parcsr_mv/par_csr_bool_matop.c \
+	$(top_srcdir)/parcsr_mv/par_csr_bool_matrix.c \
+	$(top_srcdir)/parcsr_mv/par_csr_communication.c \
+	$(top_srcdir)/parcsr_mv/par_csr_matop.c \
+	$(top_srcdir)/parcsr_mv/par_csr_matrix.c \
+	$(top_srcdir)/parcsr_mv/par_csr_matvec.c \
+	$(top_srcdir)/parcsr_mv/par_vector.c \
+	$(top_srcdir)/seq_mv/HYPRE_csr_matrix.c \
+	$(top_srcdir)/seq_mv/HYPRE_mapped_matrix.c \
+	$(top_srcdir)/seq_mv/HYPRE_vector.c \
+	$(top_srcdir)/seq_mv/HYPRE_multiblock_matrix.c \
+	$(top_srcdir)/seq_mv/csr_matop.c \
+	$(top_srcdir)/seq_mv/csr_matrix.c \
+	$(top_srcdir)/seq_mv/csr_matvec.c \
+	$(top_srcdir)/seq_mv/genpart.c \
+	$(top_srcdir)/seq_mv/mapped_matrix.c \
+	$(top_srcdir)/seq_mv/multiblock_matrix.c \
+	$(top_srcdir)/seq_mv/vector.c \
+	$(top_srcdir)/sstruct_ls/HYPRE_sstruct_bicgstab.c \
+	$(top_srcdir)/sstruct_ls/HYPRE_sstruct_gmres.c \
+	$(top_srcdir)/sstruct_ls/HYPRE_sstruct_pcg.c \
+	$(top_srcdir)/sstruct_ls/HYPRE_sstruct_split.c \
+	$(top_srcdir)/sstruct_ls/HYPRE_sstruct_sys_pfmg.c \
+	$(top_srcdir)/sstruct_ls/krylov.c \
+	$(top_srcdir)/sstruct_ls/krylov_sstruct.c \
+	$(top_srcdir)/sstruct_ls/node_relax.c \
+	$(top_srcdir)/sstruct_ls/sys_pfmg.c \
+	$(top_srcdir)/sstruct_ls/sys_pfmg_relax.c \
+	$(top_srcdir)/sstruct_ls/sys_pfmg_setup.c \
+	$(top_srcdir)/sstruct_ls/sys_pfmg_setup_interp.c \
+	$(top_srcdir)/sstruct_ls/sys_pfmg_setup_rap.c \
+	$(top_srcdir)/sstruct_ls/sys_pfmg_solve.c \
+	$(top_srcdir)/sstruct_ls/sys_semi_interp.c \
+	$(top_srcdir)/sstruct_ls/sys_semi_restrict.c \
+	$(top_srcdir)/sstruct_mv/HYPRE_sstruct_graph.c \
+	$(top_srcdir)/sstruct_mv/HYPRE_sstruct_grid.c \
+	$(top_srcdir)/sstruct_mv/HYPRE_sstruct_matrix.c \
+	$(top_srcdir)/sstruct_mv/HYPRE_sstruct_stencil.c \
+	$(top_srcdir)/sstruct_mv/HYPRE_sstruct_vector.c \
+	$(top_srcdir)/sstruct_mv/box_map.c \
+	$(top_srcdir)/sstruct_mv/sstruct_axpy.c \
+	$(top_srcdir)/sstruct_mv/sstruct_copy.c \
+	$(top_srcdir)/sstruct_mv/sstruct_graph.c \
+	$(top_srcdir)/sstruct_mv/sstruct_grid.c \
+	$(top_srcdir)/sstruct_mv/sstruct_innerprod.c \
+	$(top_srcdir)/sstruct_mv/sstruct_matrix.c \
+	$(top_srcdir)/sstruct_mv/sstruct_matvec.c \
+	$(top_srcdir)/sstruct_mv/sstruct_scale.c \
+	$(top_srcdir)/sstruct_mv/sstruct_stencil.c \
+	$(top_srcdir)/sstruct_mv/sstruct_vector.c \
+	$(top_srcdir)/struct_ls/F90_HYPRE_struct_hybrid.c \
+	$(top_srcdir)/struct_ls/F90_HYPRE_struct_pcg.c \
+	$(top_srcdir)/struct_ls/F90_HYPRE_struct_pfmg.c \
+	$(top_srcdir)/struct_ls/F90_HYPRE_struct_smg.c \
+	$(top_srcdir)/struct_ls/HYPRE_struct_bicgstab.c \
+	$(top_srcdir)/struct_ls/HYPRE_struct_gmres.c \
+	$(top_srcdir)/struct_ls/HYPRE_struct_hybrid.c \
+	$(top_srcdir)/struct_ls/HYPRE_struct_jacobi.c \
+	$(top_srcdir)/struct_ls/HYPRE_struct_pcg.c \
+	$(top_srcdir)/struct_ls/HYPRE_struct_pfmg.c \
+	$(top_srcdir)/struct_ls/HYPRE_struct_smg.c \
+	$(top_srcdir)/struct_ls/HYPRE_struct_sparse_msg.c \
+	$(top_srcdir)/struct_ls/coarsen.c \
+	$(top_srcdir)/struct_ls/cyclic_reduction.c \
+	$(top_srcdir)/struct_ls/general.c \
+	$(top_srcdir)/struct_ls/hybrid.c \
+	$(top_srcdir)/struct_ls/jacobi.c \
+	$(top_srcdir)/struct_ls/pcg_struct.c \
+	$(top_srcdir)/struct_ls/pfmg.c \
+	$(top_srcdir)/struct_ls/pfmg2_setup_rap.c \
+	$(top_srcdir)/struct_ls/pfmg3_setup_rap.c \
+	$(top_srcdir)/struct_ls/pfmg_relax.c \
+	$(top_srcdir)/struct_ls/pfmg_setup.c \
+	$(top_srcdir)/struct_ls/pfmg_setup_interp.c \
+	$(top_srcdir)/struct_ls/pfmg_setup_rap.c \
+	$(top_srcdir)/struct_ls/pfmg_setup_rap5.c \
+	$(top_srcdir)/struct_ls/pfmg_setup_rap7.c \
+	$(top_srcdir)/struct_ls/pfmg_solve.c \
+	$(top_srcdir)/struct_ls/point_relax.c \
+	$(top_srcdir)/struct_ls/semi_interp.c \
+	$(top_srcdir)/struct_ls/semi_restrict.c \
+	$(top_srcdir)/struct_ls/semi_setup_rap.c \
+	$(top_srcdir)/struct_ls/smg.c \
+	$(top_srcdir)/struct_ls/smg2_setup_rap.c \
+	$(top_srcdir)/struct_ls/smg3_setup_rap.c \
+	$(top_srcdir)/struct_ls/smg_axpy.c \
+	$(top_srcdir)/struct_ls/smg_relax.c \
+	$(top_srcdir)/struct_ls/smg_residual.c \
+	$(top_srcdir)/struct_ls/smg_setup.c \
+	$(top_srcdir)/struct_ls/smg_setup_interp.c \
+	$(top_srcdir)/struct_ls/smg_setup_rap.c \
+	$(top_srcdir)/struct_ls/smg_setup_restrict.c \
+	$(top_srcdir)/struct_ls/smg_solve.c \
+	$(top_srcdir)/struct_ls/sparse_msg.c \
+	$(top_srcdir)/struct_ls/sparse_msg2_setup_rap.c \
+	$(top_srcdir)/struct_ls/sparse_msg3_setup_rap.c \
+	$(top_srcdir)/struct_ls/sparse_msg_filter.c \
+	$(top_srcdir)/struct_ls/sparse_msg_interp.c \
+	$(top_srcdir)/struct_ls/sparse_msg_restrict.c \
+	$(top_srcdir)/struct_ls/sparse_msg_setup.c \
+	$(top_srcdir)/struct_ls/sparse_msg_setup_rap.c \
+	$(top_srcdir)/struct_ls/sparse_msg_solve.c \
+	$(top_srcdir)/struct_mv/F90_HYPRE_struct_grid.c \
+	$(top_srcdir)/struct_mv/F90_HYPRE_struct_matrix.c \
+	$(top_srcdir)/struct_mv/F90_HYPRE_struct_stencil.c \
+	$(top_srcdir)/struct_mv/F90_HYPRE_struct_vector.c \
+	$(top_srcdir)/struct_mv/HYPRE_struct_grid.c \
+	$(top_srcdir)/struct_mv/HYPRE_struct_matrix.c \
+	$(top_srcdir)/struct_mv/HYPRE_struct_stencil.c \
+	$(top_srcdir)/struct_mv/HYPRE_struct_vector.c \
+	$(top_srcdir)/struct_mv/box.c \
+	$(top_srcdir)/struct_mv/box_algebra.c \
+	$(top_srcdir)/struct_mv/box_alloc.c \
+	$(top_srcdir)/struct_mv/box_neighbors.c \
+	$(top_srcdir)/struct_mv/grow.c \
+	$(top_srcdir)/struct_mv/communication_info.c \
+	$(top_srcdir)/struct_mv/computation.c \
+	$(top_srcdir)/struct_mv/project.c \
+	$(top_srcdir)/struct_mv/struct_axpy.c \
+	$(top_srcdir)/struct_mv/struct_communication.c \
+	$(top_srcdir)/struct_mv/struct_copy.c \
+	$(top_srcdir)/struct_mv/struct_grid.c \
+	$(top_srcdir)/struct_mv/struct_io.c \
+	$(top_srcdir)/struct_mv/struct_innerprod.c \
+	$(top_srcdir)/struct_mv/struct_matrix.c \
+	$(top_srcdir)/struct_mv/struct_matrix_mask.c \
+	$(top_srcdir)/struct_mv/struct_matvec.c \
+	$(top_srcdir)/struct_mv/struct_scale.c \
+	$(top_srcdir)/struct_mv/struct_stencil.c \
+	$(top_srcdir)/struct_mv/struct_vector.c \
+	$(top_srcdir)/utilities/amg_linklist.c \
+	$(top_srcdir)/utilities/binsearch.c \
+	$(top_srcdir)/utilities/hypre_memory.c \
+	$(top_srcdir)/utilities/hypre_qsort.c \
+	$(top_srcdir)/utilities/memory_dmalloc.c \
+	$(top_srcdir)/utilities/mpistubs.c \
+	$(top_srcdir)/utilities/qsplit.c \
+	$(top_srcdir)/utilities/random.c \
+	$(top_srcdir)/utilities/thread_mpistubs.c \
+	$(top_srcdir)/utilities/threading.c \
+	$(top_srcdir)/utilities/timer.c \
+	$(top_srcdir)/utilities/timing.c \
+	$(top_srcdir)/utilities/umalloc_local.c
+@BLASNEEDED_TRUE@am__objects_1 = dasum.$(OBJEXT) daxpy.$(OBJEXT) \
+@BLASNEEDED_TRUE@	dcopy.$(OBJEXT) ddot.$(OBJEXT) dgemm.$(OBJEXT) \
+@BLASNEEDED_TRUE@	dgemv.$(OBJEXT) dger.$(OBJEXT) dnrm2.$(OBJEXT) \
+@BLASNEEDED_TRUE@	drot.$(OBJEXT) dscal.$(OBJEXT) dsymv.$(OBJEXT) \
+@BLASNEEDED_TRUE@	dsyr2.$(OBJEXT) dsyr2k.$(OBJEXT) \
+@BLASNEEDED_TRUE@	dsyrk.$(OBJEXT) dtrmm.$(OBJEXT) \
+@BLASNEEDED_TRUE@	dtrmv.$(OBJEXT) dtrsm.$(OBJEXT) \
+@BLASNEEDED_TRUE@	dtrsv.$(OBJEXT) idamax.$(OBJEXT) \
+@BLASNEEDED_TRUE@	blas_utils.$(OBJEXT)
+@BLASNEEDED_FALSE@am__objects_1 =
+@LAPACKNEEDED_TRUE@am__objects_2 = dbdsqr.$(OBJEXT) dgebd2.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dgebrd.$(OBJEXT) dgelq2.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dgelqf.$(OBJEXT) dgels.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dgeqr2.$(OBJEXT) dgeqrf.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dgesvd.$(OBJEXT) dlabad.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dlabrd.$(OBJEXT) dlacpy.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dlae2.$(OBJEXT) dlaev2.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dlamch.$(OBJEXT) dlange.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dlanst.$(OBJEXT) dlansy.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dlapy2.$(OBJEXT) dlarf.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dlarfb.$(OBJEXT) dlarfg.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dlarft.$(OBJEXT) dlartg.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dlas2.$(OBJEXT) dlascl.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dlaset.$(OBJEXT) dlasq1.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dlasq2.$(OBJEXT) dlasq3.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dlasq4.$(OBJEXT) dlasq5.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dlasq6.$(OBJEXT) dlasr.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dlasrt.$(OBJEXT) dlassq.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dlasv2.$(OBJEXT) dlatrd.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dorg2l.$(OBJEXT) dorg2r.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dorgbr.$(OBJEXT) dorgl2.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dorglq.$(OBJEXT) dorgql.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dorgqr.$(OBJEXT) dorgtr.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dorm2r.$(OBJEXT) dormbr.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dorml2.$(OBJEXT) dormlq.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dormqr.$(OBJEXT) dpotf2.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dpotrf.$(OBJEXT) dpotrs.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dsteqr.$(OBJEXT) dsterf.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dsyev.$(OBJEXT) dsygs2.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dsygst.$(OBJEXT) dsygv.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	dsytd2.$(OBJEXT) dsytrd.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	ieeeck.$(OBJEXT) ilaenv.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	lapack_utils.$(OBJEXT) lsame.$(OBJEXT) \
+@LAPACKNEEDED_TRUE@	xerbla.$(OBJEXT)
+@LAPACKNEEDED_FALSE@am__objects_2 =
+am__objects_3 = $(am__objects_1) $(am__objects_2) colamd.$(OBJEXT) \
+	dcolumn_bmod.$(OBJEXT) dcolumn_dfs.$(OBJEXT) \
+	dcopy_to_ucol.$(OBJEXT) dgscon.$(OBJEXT) dgsequ.$(OBJEXT) \
+	dgsrfs.$(OBJEXT) dgssv.$(OBJEXT) dgssvx.$(OBJEXT) \
+	dgstrf.$(OBJEXT) dgstrs.$(OBJEXT) dlacon.$(OBJEXT) \
+	dlangs.$(OBJEXT) dlaqgs.$(OBJEXT) dmemory.$(OBJEXT) \
+	dpanel_bmod.$(OBJEXT) dpanel_dfs.$(OBJEXT) dpivotL.$(OBJEXT) \
+	dpivotgrowth.$(OBJEXT) dpruneL.$(OBJEXT) dreadhb.$(OBJEXT) \
+	dsnode_bmod.$(OBJEXT) dsnode_dfs.$(OBJEXT) dsp_blas2.$(OBJEXT) \
+	dsp_blas3.$(OBJEXT) dutil.$(OBJEXT) get_perm_c.$(OBJEXT) \
+	mmd.$(OBJEXT) relax_snode.$(OBJEXT) sp_coletree.$(OBJEXT) \
+	sp_ienv.$(OBJEXT) sp_preorder.$(OBJEXT) \
+	superlu_memory.$(OBJEXT) superlu_timer.$(OBJEXT) \
+	superlu_util.$(OBJEXT) bicgs.$(OBJEXT) bicgstabl.$(OBJEXT) \
+	FEI_HYPRE_Impl.$(OBJEXT) HYPRE_LSC_aux.$(OBJEXT) \
+	HYPRE_LSI_Dsuperlu.$(OBJEXT) HYPRE_LSI_UZAWA.$(OBJEXT) \
+	HYPRE_LSI_blkprec.$(OBJEXT) HYPRE_LSI_ddict.$(OBJEXT) \
+	HYPRE_LSI_ddilut.$(OBJEXT) HYPRE_LSI_ml.$(OBJEXT) \
+	HYPRE_LSI_mli.$(OBJEXT) HYPRE_LSI_poly.$(OBJEXT) \
+	HYPRE_LSI_schwarz.$(OBJEXT) HYPRE_LinSysCore.$(OBJEXT) \
+	HYPRE_SlideReduction.$(OBJEXT) HYPRE_parcsr_TFQmr.$(OBJEXT) \
+	HYPRE_parcsr_bicgs.$(OBJEXT) HYPRE_parcsr_bicgstabl.$(OBJEXT) \
+	HYPRE_parcsr_fgmres.$(OBJEXT) HYPRE_parcsr_lsicg.$(OBJEXT) \
+	HYPRE_parcsr_symqmr.$(OBJEXT) SymQMR.$(OBJEXT) TFQmr.$(OBJEXT) \
+	cfei_hypre.$(OBJEXT) fgmres.$(OBJEXT) hypre_lsi_amge.$(OBJEXT) \
+	hypre_lsi_ddamg.$(OBJEXT) hypre_lsi_misc.$(OBJEXT) \
+	hypre_schur_reduce.$(OBJEXT) hypre_slide_reduce.$(OBJEXT) \
+	lsicg.$(OBJEXT) mli_utils.$(OBJEXT) mli_amgsa_calib.$(OBJEXT) \
+	mli_amgsa_coarsen1.$(OBJEXT) mli_amgsa_dd_fedata.$(OBJEXT) \
+	mli_amgsa_dd_sfei.$(OBJEXT) mli_method.$(OBJEXT) \
+	mli_method_amgcr.$(OBJEXT) mli_method_amgrs.$(OBJEXT) \
+	mli_method_amgsa.$(OBJEXT) mli.$(OBJEXT) mli_oneLevel.$(OBJEXT) \
+	cmli.$(OBJEXT) mli_fedata.$(OBJEXT) mli_fedata_utils.$(OBJEXT) \
+	mli_sfei.$(OBJEXT) mli_mapper.$(OBJEXT) mli_matrix.$(OBJEXT) \
+	mli_matrix_mult.$(OBJEXT) mli_matrix_utils.$(OBJEXT) \
+	mli_solver.$(OBJEXT) mli_solver_arpacksuperlu.$(OBJEXT) \
+	mli_solver_bjacobi.$(OBJEXT) mli_solver_bsgs.$(OBJEXT) \
+	mli_solver_cg.$(OBJEXT) mli_solver_chebyshev.$(OBJEXT) \
+	mli_solver_gs.$(OBJEXT) mli_solver_hschwarz.$(OBJEXT) \
+	mli_solver_hsgs.$(OBJEXT) mli_solver_jacobi.$(OBJEXT) \
+	mli_solver_kaczmarz.$(OBJEXT) mli_solver_mls.$(OBJEXT) \
+	mli_solver_parasails.$(OBJEXT) mli_solver_seqsuperlu.$(OBJEXT) \
+	mli_solver_sgs.$(OBJEXT) mli_solver_superlu.$(OBJEXT) \
+	mli_vector.$(OBJEXT) mli_utils_fortran.$(OBJEXT) \
+	F90_HYPRE_IJMatrix.$(OBJEXT) F90_HYPRE_IJVector.$(OBJEXT) \
+	F90_IJMatrix.$(OBJEXT) HYPRE_IJMatrix.$(OBJEXT) \
+	HYPRE_IJVector.$(OBJEXT) IJMatrix.$(OBJEXT) \
+	IJMatrix_parcsr.$(OBJEXT) IJVector.$(OBJEXT) \
+	IJVector_parcsr.$(OBJEXT) aux_parcsr_matrix.$(OBJEXT) \
+	Euclid_apply.$(OBJEXT) Euclid_dh.$(OBJEXT) \
+	ExternalRows_dh.$(OBJEXT) Factor_dh.$(OBJEXT) Hash_dh.$(OBJEXT) \
+	Hash_i_dh.$(OBJEXT) MatGenFD.$(OBJEXT) Mat_dh.$(OBJEXT) \
+	Mem_dh.$(OBJEXT) Numbering_dh.$(OBJEXT) Parser_dh.$(OBJEXT) \
+	SortedList_dh.$(OBJEXT) SortedSet_dh.$(OBJEXT) \
+	SubdomainGraph_dh.$(OBJEXT) TimeLog_dh.$(OBJEXT) \
+	Timer_dh.$(OBJEXT) Vec_dh.$(OBJEXT) blas_dh.$(OBJEXT) \
+	getRow_dh.$(OBJEXT) globalObjects.$(OBJEXT) \
+	ilu_mpi_bj.$(OBJEXT) ilu_mpi_pilu.$(OBJEXT) ilu_seq.$(OBJEXT) \
+	io_dh.$(OBJEXT) krylov_dh.$(OBJEXT) mat_dh_private.$(OBJEXT) \
+	shellSort_dh.$(OBJEXT) sig_dh.$(OBJEXT) ConjGrad.$(OBJEXT) \
+	DiagScale.$(OBJEXT) FlexGmres.$(OBJEXT) Hash.$(OBJEXT) \
+	LoadBal.$(OBJEXT) Matrix.$(OBJEXT) Mem.$(OBJEXT) \
+	Numbering.$(OBJEXT) OrderStat.$(OBJEXT) ParaSails.$(OBJEXT) \
+	PrunedRows.$(OBJEXT) RowPatt.$(OBJEXT) StoredRows.$(OBJEXT) \
+	hypre_ParaSails.$(OBJEXT) comm.$(OBJEXT) \
+	HYPRE_DistributedMatrixPilutSolver.$(OBJEXT) debug.$(OBJEXT) \
+	distributed_qsort.$(OBJEXT) distributed_qsort_si.$(OBJEXT) \
+	ilut.$(OBJEXT) parilut.$(OBJEXT) parutil.$(OBJEXT) \
+	pblas1.$(OBJEXT) serilut.$(OBJEXT) trifactor.$(OBJEXT) \
+	util.$(OBJEXT) HYPRE_distributed_matrix.$(OBJEXT) \
+	distributed_matrix.$(OBJEXT) distributed_matrix_ISIS.$(OBJEXT) \
+	distributed_matrix_PETSc.$(OBJEXT) \
+	distributed_matrix_parcsr.$(OBJEXT) HYPRE_bicgstab.$(OBJEXT) \
+	HYPRE_cgnr.$(OBJEXT) HYPRE_gmres.$(OBJEXT) HYPRE_pcg.$(OBJEXT) \
+	bicgstab.$(OBJEXT) cgnr.$(OBJEXT) gmres.$(OBJEXT) pcg.$(OBJEXT) \
+	HYPRE_ConvertPETScMatrixToDistributedMatrix.$(OBJEXT) \
+	HYPRE_ConvertParCSRMatrixToDistributedMatrix.$(OBJEXT) \
+	lobpcg.$(OBJEXT) lobpcg_matrix.$(OBJEXT) \
+	lobpcg_utilities.$(OBJEXT) F90_HYPRE_parcsr_ParaSails.$(OBJEXT) \
+	F90_HYPRE_parcsr_amg.$(OBJEXT) \
+	F90_HYPRE_parcsr_bicgstab.$(OBJEXT) \
+	F90_HYPRE_parcsr_cgnr.$(OBJEXT) \
+	F90_HYPRE_parcsr_gmres.$(OBJEXT) F90_HYPRE_parcsr_pcg.$(OBJEXT) \
+	F90_HYPRE_parcsr_pilut.$(OBJEXT) F90_hypre_laplace.$(OBJEXT) \
+	HYPRE_parcsr_Euclid.$(OBJEXT) HYPRE_parcsr_ParaSails.$(OBJEXT) \
+	HYPRE_parcsr_amg.$(OBJEXT) HYPRE_parcsr_bicgstab.$(OBJEXT) \
+	HYPRE_parcsr_cgnr.$(OBJEXT) HYPRE_parcsr_gmres.$(OBJEXT) \
+	HYPRE_parcsr_hybrid.$(OBJEXT) HYPRE_parcsr_pcg.$(OBJEXT) \
+	HYPRE_parcsr_pilut.$(OBJEXT) HYPRE_parcsr_schwarz.$(OBJEXT) \
+	amg_hybrid.$(OBJEXT) par_amg.$(OBJEXT) par_amg_setup.$(OBJEXT) \
+	par_amg_solve.$(OBJEXT) par_amg_solveT.$(OBJEXT) \
+	par_cg_relax_wt.$(OBJEXT) par_coarse_parms.$(OBJEXT) \
+	par_coarsen.$(OBJEXT) par_cycle.$(OBJEXT) par_difconv.$(OBJEXT) \
+	par_gsmg.$(OBJEXT) par_indepset.$(OBJEXT) par_interp.$(OBJEXT) \
+	par_laplace.$(OBJEXT) par_laplace_27pt.$(OBJEXT) \
+	par_laplace_9pt.$(OBJEXT) par_rap.$(OBJEXT) \
+	par_rap_communication.$(OBJEXT) par_relax.$(OBJEXT) \
+	par_relax_interface.$(OBJEXT) par_scaled_matnorm.$(OBJEXT) \
+	par_schwarz.$(OBJEXT) par_stats.$(OBJEXT) \
+	par_strength.$(OBJEXT) pcg_par.$(OBJEXT) schwarz.$(OBJEXT) \
+	F90_HYPRE_parcsr_matrix.$(OBJEXT) \
+	F90_HYPRE_parcsr_vector.$(OBJEXT) F90_par_vector.$(OBJEXT) \
+	F90_parcsr_matrix.$(OBJEXT) HYPRE_parcsr_matrix.$(OBJEXT) \
+	HYPRE_parcsr_vector.$(OBJEXT) communicationT.$(OBJEXT) \
+	numbers.$(OBJEXT) par_csr_aat.$(OBJEXT) \
+	par_csr_bool_matop.$(OBJEXT) par_csr_bool_matrix.$(OBJEXT) \
+	par_csr_communication.$(OBJEXT) par_csr_matop.$(OBJEXT) \
+	par_csr_matrix.$(OBJEXT) par_csr_matvec.$(OBJEXT) \
+	par_vector.$(OBJEXT) HYPRE_csr_matrix.$(OBJEXT) \
+	HYPRE_mapped_matrix.$(OBJEXT) HYPRE_vector.$(OBJEXT) \
+	HYPRE_multiblock_matrix.$(OBJEXT) csr_matop.$(OBJEXT) \
+	csr_matrix.$(OBJEXT) csr_matvec.$(OBJEXT) genpart.$(OBJEXT) \
+	mapped_matrix.$(OBJEXT) multiblock_matrix.$(OBJEXT) \
+	vector.$(OBJEXT) HYPRE_sstruct_bicgstab.$(OBJEXT) \
+	HYPRE_sstruct_gmres.$(OBJEXT) HYPRE_sstruct_pcg.$(OBJEXT) \
+	HYPRE_sstruct_split.$(OBJEXT) HYPRE_sstruct_sys_pfmg.$(OBJEXT) \
+	krylov.$(OBJEXT) krylov_sstruct.$(OBJEXT) node_relax.$(OBJEXT) \
+	sys_pfmg.$(OBJEXT) sys_pfmg_relax.$(OBJEXT) \
+	sys_pfmg_setup.$(OBJEXT) sys_pfmg_setup_interp.$(OBJEXT) \
+	sys_pfmg_setup_rap.$(OBJEXT) sys_pfmg_solve.$(OBJEXT) \
+	sys_semi_interp.$(OBJEXT) sys_semi_restrict.$(OBJEXT) \
+	HYPRE_sstruct_graph.$(OBJEXT) HYPRE_sstruct_grid.$(OBJEXT) \
+	HYPRE_sstruct_matrix.$(OBJEXT) HYPRE_sstruct_stencil.$(OBJEXT) \
+	HYPRE_sstruct_vector.$(OBJEXT) box_map.$(OBJEXT) \
+	sstruct_axpy.$(OBJEXT) sstruct_copy.$(OBJEXT) \
+	sstruct_graph.$(OBJEXT) sstruct_grid.$(OBJEXT) \
+	sstruct_innerprod.$(OBJEXT) sstruct_matrix.$(OBJEXT) \
+	sstruct_matvec.$(OBJEXT) sstruct_scale.$(OBJEXT) \
+	sstruct_stencil.$(OBJEXT) sstruct_vector.$(OBJEXT) \
+	F90_HYPRE_struct_hybrid.$(OBJEXT) \
+	F90_HYPRE_struct_pcg.$(OBJEXT) F90_HYPRE_struct_pfmg.$(OBJEXT) \
+	F90_HYPRE_struct_smg.$(OBJEXT) HYPRE_struct_bicgstab.$(OBJEXT) \
+	HYPRE_struct_gmres.$(OBJEXT) HYPRE_struct_hybrid.$(OBJEXT) \
+	HYPRE_struct_jacobi.$(OBJEXT) HYPRE_struct_pcg.$(OBJEXT) \
+	HYPRE_struct_pfmg.$(OBJEXT) HYPRE_struct_smg.$(OBJEXT) \
+	HYPRE_struct_sparse_msg.$(OBJEXT) coarsen.$(OBJEXT) \
+	cyclic_reduction.$(OBJEXT) general.$(OBJEXT) hybrid.$(OBJEXT) \
+	jacobi.$(OBJEXT) pcg_struct.$(OBJEXT) pfmg.$(OBJEXT) \
+	pfmg2_setup_rap.$(OBJEXT) pfmg3_setup_rap.$(OBJEXT) \
+	pfmg_relax.$(OBJEXT) pfmg_setup.$(OBJEXT) \
+	pfmg_setup_interp.$(OBJEXT) pfmg_setup_rap.$(OBJEXT) \
+	pfmg_setup_rap5.$(OBJEXT) pfmg_setup_rap7.$(OBJEXT) \
+	pfmg_solve.$(OBJEXT) point_relax.$(OBJEXT) \
+	semi_interp.$(OBJEXT) semi_restrict.$(OBJEXT) \
+	semi_setup_rap.$(OBJEXT) smg.$(OBJEXT) smg2_setup_rap.$(OBJEXT) \
+	smg3_setup_rap.$(OBJEXT) smg_axpy.$(OBJEXT) smg_relax.$(OBJEXT) \
+	smg_residual.$(OBJEXT) smg_setup.$(OBJEXT) \
+	smg_setup_interp.$(OBJEXT) smg_setup_rap.$(OBJEXT) \
+	smg_setup_restrict.$(OBJEXT) smg_solve.$(OBJEXT) \
+	sparse_msg.$(OBJEXT) sparse_msg2_setup_rap.$(OBJEXT) \
+	sparse_msg3_setup_rap.$(OBJEXT) sparse_msg_filter.$(OBJEXT) \
+	sparse_msg_interp.$(OBJEXT) sparse_msg_restrict.$(OBJEXT) \
+	sparse_msg_setup.$(OBJEXT) sparse_msg_setup_rap.$(OBJEXT) \
+	sparse_msg_solve.$(OBJEXT) F90_HYPRE_struct_grid.$(OBJEXT) \
+	F90_HYPRE_struct_matrix.$(OBJEXT) \
+	F90_HYPRE_struct_stencil.$(OBJEXT) \
+	F90_HYPRE_struct_vector.$(OBJEXT) HYPRE_struct_grid.$(OBJEXT) \
+	HYPRE_struct_matrix.$(OBJEXT) HYPRE_struct_stencil.$(OBJEXT) \
+	HYPRE_struct_vector.$(OBJEXT) box.$(OBJEXT) \
+	box_algebra.$(OBJEXT) box_alloc.$(OBJEXT) \
+	box_neighbors.$(OBJEXT) grow.$(OBJEXT) \
+	communication_info.$(OBJEXT) computation.$(OBJEXT) \
+	project.$(OBJEXT) struct_axpy.$(OBJEXT) \
+	struct_communication.$(OBJEXT) struct_copy.$(OBJEXT) \
+	struct_grid.$(OBJEXT) struct_io.$(OBJEXT) \
+	struct_innerprod.$(OBJEXT) struct_matrix.$(OBJEXT) \
+	struct_matrix_mask.$(OBJEXT) struct_matvec.$(OBJEXT) \
+	struct_scale.$(OBJEXT) struct_stencil.$(OBJEXT) \
+	struct_vector.$(OBJEXT) amg_linklist.$(OBJEXT) \
+	binsearch.$(OBJEXT) hypre_memory.$(OBJEXT) \
+	hypre_qsort.$(OBJEXT) memory_dmalloc.$(OBJEXT) \
+	mpistubs.$(OBJEXT) qsplit.$(OBJEXT) random.$(OBJEXT) \
+	thread_mpistubs.$(OBJEXT) threading.$(OBJEXT) timer.$(OBJEXT) \
+	timing.$(OBJEXT) umalloc_local.$(OBJEXT)
+@STATICONLY_TRUE@am_libHYPRE_a_OBJECTS = $(am__objects_3)
+libHYPRE_a_OBJECTS = $(am_libHYPRE_a_OBJECTS)
+libHYPRE_LSI_a_AR = $(AR) cru
+libHYPRE_LSI_a_LIBADD =
+am__libHYPRE_LSI_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
+	$(top_srcdir)/blas/daxpy.c $(top_srcdir)/blas/dcopy.c \
+	$(top_srcdir)/blas/ddot.c $(top_srcdir)/blas/dgemm.c \
+	$(top_srcdir)/blas/dgemv.c $(top_srcdir)/blas/dger.c \
+	$(top_srcdir)/blas/dnrm2.c $(top_srcdir)/blas/drot.c \
+	$(top_srcdir)/blas/dscal.c $(top_srcdir)/blas/dsymv.c \
+	$(top_srcdir)/blas/dsyr2.c $(top_srcdir)/blas/dsyr2k.c \
+	$(top_srcdir)/blas/dsyrk.c $(top_srcdir)/blas/dtrmm.c \
+	$(top_srcdir)/blas/dtrmv.c $(top_srcdir)/blas/dtrsm.c \
+	$(top_srcdir)/blas/dtrsv.c $(top_srcdir)/blas/idamax.c \
+	$(top_srcdir)/blas/blas_utils.c $(top_srcdir)/lapack/dbdsqr.c \
+	$(top_srcdir)/lapack/dgebd2.c $(top_srcdir)/lapack/dgebrd.c \
+	$(top_srcdir)/lapack/dgelq2.c $(top_srcdir)/lapack/dgelqf.c \
+	$(top_srcdir)/lapack/dgels.c $(top_srcdir)/lapack/dgeqr2.c \
+	$(top_srcdir)/lapack/dgeqrf.c $(top_srcdir)/lapack/dgesvd.c \
+	$(top_srcdir)/lapack/dlabad.c $(top_srcdir)/lapack/dlabrd.c \
+	$(top_srcdir)/lapack/dlacpy.c $(top_srcdir)/lapack/dlae2.c \
+	$(top_srcdir)/lapack/dlaev2.c $(top_srcdir)/lapack/dlamch.c \
+	$(top_srcdir)/lapack/dlange.c $(top_srcdir)/lapack/dlanst.c \
+	$(top_srcdir)/lapack/dlansy.c $(top_srcdir)/lapack/dlapy2.c \
+	$(top_srcdir)/lapack/dlarf.c $(top_srcdir)/lapack/dlarfb.c \
+	$(top_srcdir)/lapack/dlarfg.c $(top_srcdir)/lapack/dlarft.c \
+	$(top_srcdir)/lapack/dlartg.c $(top_srcdir)/lapack/dlas2.c \
+	$(top_srcdir)/lapack/dlascl.c $(top_srcdir)/lapack/dlaset.c \
+	$(top_srcdir)/lapack/dlasq1.c $(top_srcdir)/lapack/dlasq2.c \
+	$(top_srcdir)/lapack/dlasq3.c $(top_srcdir)/lapack/dlasq4.c \
+	$(top_srcdir)/lapack/dlasq5.c $(top_srcdir)/lapack/dlasq6.c \
+	$(top_srcdir)/lapack/dlasr.c $(top_srcdir)/lapack/dlasrt.c \
+	$(top_srcdir)/lapack/dlassq.c $(top_srcdir)/lapack/dlasv2.c \
+	$(top_srcdir)/lapack/dlatrd.c $(top_srcdir)/lapack/dorg2l.c \
+	$(top_srcdir)/lapack/dorg2r.c $(top_srcdir)/lapack/dorgbr.c \
+	$(top_srcdir)/lapack/dorgl2.c $(top_srcdir)/lapack/dorglq.c \
+	$(top_srcdir)/lapack/dorgql.c $(top_srcdir)/lapack/dorgqr.c \
+	$(top_srcdir)/lapack/dorgtr.c $(top_srcdir)/lapack/dorm2r.c \
+	$(top_srcdir)/lapack/dormbr.c $(top_srcdir)/lapack/dorml2.c \
+	$(top_srcdir)/lapack/dormlq.c $(top_srcdir)/lapack/dormqr.c \
+	$(top_srcdir)/lapack/dpotf2.c $(top_srcdir)/lapack/dpotrf.c \
+	$(top_srcdir)/lapack/dpotrs.c $(top_srcdir)/lapack/dsteqr.c \
+	$(top_srcdir)/lapack/dsterf.c $(top_srcdir)/lapack/dsyev.c \
+	$(top_srcdir)/lapack/dsygs2.c $(top_srcdir)/lapack/dsygst.c \
+	$(top_srcdir)/lapack/dsygv.c $(top_srcdir)/lapack/dsytd2.c \
+	$(top_srcdir)/lapack/dsytrd.c $(top_srcdir)/lapack/ieeeck.c \
+	$(top_srcdir)/lapack/ilaenv.c \
+	$(top_srcdir)/lapack/lapack_utils.c \
+	$(top_srcdir)/lapack/lsame.c $(top_srcdir)/lapack/xerbla.c \
+	$(top_srcdir)/FEI_mv/SuperLU/colamd.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dcolumn_bmod.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dcolumn_dfs.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dcopy_to_ucol.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dgscon.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dgsequ.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dgsrfs.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dgssv.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dgssvx.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dgstrf.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dgstrs.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dlacon.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dlangs.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dlaqgs.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dmemory.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dpanel_bmod.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dpanel_dfs.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dpivotL.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dpivotgrowth.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dpruneL.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dreadhb.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dsnode_bmod.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dsnode_dfs.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dsp_blas2.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dsp_blas3.c \
+	$(top_srcdir)/FEI_mv/SuperLU/dutil.c \
+	$(top_srcdir)/FEI_mv/SuperLU/get_perm_c.c \
+	$(top_srcdir)/FEI_mv/SuperLU/mmd.c \
+	$(top_srcdir)/FEI_mv/SuperLU/relax_snode.c \
+	$(top_srcdir)/FEI_mv/SuperLU/sp_coletree.c \
+	$(top_srcdir)/FEI_mv/SuperLU/sp_ienv.c \
+	$(top_srcdir)/FEI_mv/SuperLU/sp_preorder.c \
+	$(top_srcdir)/FEI_mv/SuperLU/superlu_memory.c \
+	$(top_srcdir)/FEI_mv/SuperLU/superlu_timer.c \
+	$(top_srcdir)/FEI_mv/SuperLU/superlu_util.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/bicgs.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/bicgstabl.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/FEI_HYPRE_Impl.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSC_aux.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_Dsuperlu.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_UZAWA.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_blkprec.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_ddict.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_ddilut.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_ml.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_mli.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_poly.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_schwarz.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LinSysCore.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_SlideReduction.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_TFQmr.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_bicgs.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_bicgstabl.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_fgmres.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_lsicg.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_symqmr.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/SymQMR.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/TFQmr.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/cfei_hypre.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/fgmres.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/hypre_lsi_amge.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/hypre_lsi_ddamg.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/hypre_lsi_misc.c \
+	$(top_srcdir)/FEI_mv/fei-hypre/hypre_schur_reduce.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/hypre_slide_reduce.cxx \
+	$(top_srcdir)/FEI_mv/fei-hypre/lsicg.c \
+	$(top_srcdir)/FEI_mv/femli/util/mli_utils.c \
+	$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_calib.cxx \
+	$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_coarsen1.cxx \
+	$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_dd_fedata.cxx \
+	$(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_dd_sfei.cxx \
+	$(top_srcdir)/FEI_mv/femli/amgs/mli_method.cxx \
+	$(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgcr.cxx \
+	$(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgrs.cxx \
+	$(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgsa.cxx \
+	$(top_srcdir)/FEI_mv/femli/base/mli.cxx \
+	$(top_srcdir)/FEI_mv/femli/base/mli_oneLevel.cxx \
+	$(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx \
+	$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx \
+	$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata_utils.cxx \
+	$(top_srcdir)/FEI_mv/femli/fedata/mli_sfei.cxx \
+	$(top_srcdir)/FEI_mv/femli/mapper/mli_mapper.cxx \
+	$(top_srcdir)/FEI_mv/femli/matrix/mli_matrix.cxx \
+	$(top_srcdir)/FEI_mv/femli/matrix/mli_matrix_mult.cxx \
+	$(top_srcdir)/FEI_mv/femli/matrix/mli_matrix_utils.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_arpacksuperlu.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_bjacobi.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_bsgs.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_cg.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gs.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_hschwarz.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_hsgs.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_jacobi.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_kaczmarz.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mls.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_parasails.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_seqsuperlu.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_sgs.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_superlu.cxx \
+	$(top_srcdir)/FEI_mv/femli/vector/mli_vector.cxx \
+	$(top_srcdir)/FEI_mv/femli/util/mli_utils_fortran.f \
+	$(top_srcdir)/IJ_mv/F90_HYPRE_IJMatrix.c \
+	$(top_srcdir)/IJ_mv/F90_HYPRE_IJVector.c \
+	$(top_srcdir)/IJ_mv/F90_IJMatrix.c \
+	$(top_srcdir)/IJ_mv/HYPRE_IJMatrix.c \
+	$(top_srcdir)/IJ_mv/HYPRE_IJVector.c \
+	$(top_srcdir)/IJ_mv/IJMatrix.c \
+	$(top_srcdir)/IJ_mv/IJMatrix_parcsr.c \
+	$(top_srcdir)/IJ_mv/IJVector.c \
+	$(top_srcdir)/IJ_mv/IJVector_parcsr.c \
+	$(top_srcdir)/IJ_mv/aux_parcsr_matrix.c \
+	$(top_srcdir)/distributed_ls/Euclid/Euclid_apply.c \
+	$(top_srcdir)/distributed_ls/Euclid/Euclid_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/ExternalRows_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/Factor_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/Hash_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/Hash_i_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/MatGenFD.c \
+	$(top_srcdir)/distributed_ls/Euclid/Mat_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/Mem_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/Numbering_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/Parser_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/SortedList_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/SortedSet_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/SubdomainGraph_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/TimeLog_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/Timer_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/Vec_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/blas_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/getRow_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/globalObjects.c \
+	$(top_srcdir)/distributed_ls/Euclid/ilu_mpi_bj.c \
+	$(top_srcdir)/distributed_ls/Euclid/ilu_mpi_pilu.c \
+	$(top_srcdir)/distributed_ls/Euclid/ilu_seq.c \
+	$(top_srcdir)/distributed_ls/Euclid/io_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/krylov_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/mat_dh_private.c \
+	$(top_srcdir)/distributed_ls/Euclid/shellSort_dh.c \
+	$(top_srcdir)/distributed_ls/Euclid/sig_dh.c \
+	$(top_srcdir)/distributed_ls/ParaSails/ConjGrad.c \
+	$(top_srcdir)/distributed_ls/ParaSails/DiagScale.c \
+	$(top_srcdir)/distributed_ls/ParaSails/FlexGmres.c \
+	$(top_srcdir)/distributed_ls/ParaSails/Hash.c \
+	$(top_srcdir)/distributed_ls/ParaSails/LoadBal.c \
+	$(top_srcdir)/distributed_ls/ParaSails/Matrix.c \
+	$(top_srcdir)/distributed_ls/ParaSails/Mem.c \
+	$(top_srcdir)/distributed_ls/ParaSails/Numbering.c \
+	$(top_srcdir)/distributed_ls/ParaSails/OrderStat.c \
+	$(top_srcdir)/distributed_ls/ParaSails/ParaSails.c \
+	$(top_srcdir)/distributed_ls/ParaSails/PrunedRows.c \
+	$(top_srcdir)/distributed_ls/ParaSails/RowPatt.c \
+	$(top_srcdir)/distributed_ls/ParaSails/StoredRows.c \
+	$(top_srcdir)/distributed_ls/ParaSails/hypre_ParaSails.c \
+	$(top_srcdir)/distributed_ls/pilut/comm.c \
+	$(top_srcdir)/distributed_ls/pilut/HYPRE_DistributedMatrixPilutSolver.c \
+	$(top_srcdir)/distributed_ls/pilut/debug.c \
+	$(top_srcdir)/distributed_ls/pilut/distributed_qsort.c \
+	$(top_srcdir)/distributed_ls/pilut/distributed_qsort_si.c \
+	$(top_srcdir)/distributed_ls/pilut/ilut.c \
+	$(top_srcdir)/distributed_ls/pilut/parilut.c \
+	$(top_srcdir)/distributed_ls/pilut/parutil.c \
+	$(top_srcdir)/distributed_ls/pilut/pblas1.c \
+	$(top_srcdir)/distributed_ls/pilut/serilut.c \
+	$(top_srcdir)/distributed_ls/pilut/trifactor.c \
+	$(top_srcdir)/distributed_ls/pilut/util.c \
+	$(top_srcdir)/distributed_matrix/HYPRE_distributed_matrix.c \
+	$(top_srcdir)/distributed_matrix/distributed_matrix.c \
+	$(top_srcdir)/distributed_matrix/distributed_matrix_ISIS.c \
+	$(top_srcdir)/distributed_matrix/distributed_matrix_PETSc.c \
+	$(top_srcdir)/distributed_matrix/distributed_matrix_parcsr.c \
+	$(top_srcdir)/krylov/HYPRE_bicgstab.c \
+	$(top_srcdir)/krylov/HYPRE_cgnr.c \
+	$(top_srcdir)/krylov/HYPRE_gmres.c \
+	$(top_srcdir)/krylov/HYPRE_pcg.c \
+	$(top_srcdir)/krylov/bicgstab.c $(top_srcdir)/krylov/cgnr.c \
+	$(top_srcdir)/krylov/gmres.c $(top_srcdir)/krylov/pcg.c \
+	$(top_srcdir)/matrix_matrix/HYPRE_ConvertPETScMatrixToDistributedMatrix.c \
+	$(top_srcdir)/matrix_matrix/HYPRE_ConvertParCSRMatrixToDistributedMatrix.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c \
+	$(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c \
+	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_ParaSails.c \
+	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_amg.c \
+	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_bicgstab.c \
+	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_cgnr.c \
+	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_gmres.c \
+	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_pcg.c \
+	$(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_pilut.c \
+	$(top_srcdir)/parcsr_ls/F90_hypre_laplace.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_Euclid.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_ParaSails.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_amg.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_bicgstab.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_cgnr.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_gmres.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_hybrid.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_pcg.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_pilut.c \
+	$(top_srcdir)/parcsr_ls/HYPRE_parcsr_schwarz.c \
+	$(top_srcdir)/parcsr_ls/amg_hybrid.c \
+	$(top_srcdir)/parcsr_ls/par_amg.c \
+	$(top_srcdir)/parcsr_ls/par_amg_setup.c \
+	$(top_srcdir)/parcsr_ls/par_amg_solve.c \
+	$(top_srcdir)/parcsr_ls/par_amg_solveT.c \
+	$(top_srcdir)/parcsr_ls/par_cg_relax_wt.c \
+	$(top_srcdir)/parcsr_ls/par_coarse_parms.c \
+	$(top_srcdir)/parcsr_ls/par_coarsen.c \
+	$(top_srcdir)/parcsr_ls/par_cycle.c \
+	$(top_srcdir)/parcsr_ls/par_difconv.c \
+	$(top_srcdir)/parcsr_ls/par_gsmg.c \
+	$(top_srcdir)/parcsr_ls/par_indepset.c \
+	$(top_srcdir)/parcsr_ls/par_interp.c \
+	$(top_srcdir)/parcsr_ls/par_laplace.c \
+	$(top_srcdir)/parcsr_ls/par_laplace_27pt.c \
+	$(top_srcdir)/parcsr_ls/par_laplace_9pt.c \
+	$(top_srcdir)/parcsr_ls/par_rap.c \
+	$(top_srcdir)/parcsr_ls/par_rap_communication.c \
+	$(top_srcdir)/parcsr_ls/par_relax.c \
+	$(top_srcdir)/parcsr_ls/par_relax_interface.c \
+	$(top_srcdir)/parcsr_ls/par_scaled_matnorm.c \
+	$(top_srcdir)/parcsr_ls/par_schwarz.c \
+	$(top_srcdir)/parcsr_ls/par_stats.c \
+	$(top_srcdir)/parcsr_ls/par_strength.c \
+	$(top_srcdir)/parcsr_ls/pcg_par.c \
+	$(top_srcdir)/parcsr_ls/schwarz.c \
+	$(top_srcdir)/parcsr_mv/F90_HYPRE_parcsr_matrix.c \
+	$(top_srcdir)/parcsr_mv/F90_HYPRE_parcsr_vector.c \
+	$(top_srcdir)/parcsr_mv/F90_par_vector.c \
+	$(top_srcdir)/parcsr_mv/F90_parcsr_matrix.c \
+	$(top_srcdir)/parcsr_mv/HYPRE_parcsr_matrix.c \
+	$(top_srcdir)/parcsr_mv/HYPRE_parcsr_vector.c \
+	$(top_srcdir)/parcsr_mv/communicationT.c \
+	$(top_srcdir)/parcsr_mv/numbers.c \
+	$(top_srcdir)/parcsr_mv/par_csr_aat.c \
+	$(top_srcdir)/parcsr_mv/par_csr_bool_matop.c \
+	$(top_srcdir)/parcsr_mv/par_csr_bool_matrix.c \
+	$(top_srcdir)/parcsr_mv/par_csr_communication.c \
+	$(top_srcdir)/parcsr_mv/par_csr_matop.c \
+	$(top_srcdir)/parcsr_mv/par_csr_matrix.c \
+	$(top_srcdir)/parcsr_mv/par_csr_matvec.c \
+	$(top_srcdir)/parcsr_mv/par_vector.c \
+	$(top_srcdir)/seq_mv/HYPRE_csr_matrix.c \
+	$(top_srcdir)/seq_mv/HYPRE_mapped_matrix.c \
+	$(top_srcdir)/seq_mv/HYPRE_vector.c \
+	$(top_srcdir)/seq_mv/HYPRE_multiblock_matrix.c \
+	$(top_srcdir)/seq_mv/csr_matop.c \
+	$(top_srcdir)/seq_mv/csr_matrix.c \
+	$(top_srcdir)/seq_mv/csr_matvec.c \
+	$(top_srcdir)/seq_mv/genpart.c \
+	$(top_srcdir)/seq_mv/mapped_matrix.c \
+	$(top_srcdir)/seq_mv/multiblock_matrix.c \
+	$(top_srcdir)/seq_mv/vector.c \
+	$(top_srcdir)/sstruct_ls/HYPRE_sstruct_bicgstab.c \
+	$(top_srcdir)/sstruct_ls/HYPRE_sstruct_gmres.c \
+	$(top_srcdir)/sstruct_ls/HYPRE_sstruct_pcg.c \
+	$(top_srcdir)/sstruct_ls/HYPRE_sstruct_split.c \
+	$(top_srcdir)/sstruct_ls/HYPRE_sstruct_sys_pfmg.c \
+	$(top_srcdir)/sstruct_ls/krylov.c \
+	$(top_srcdir)/sstruct_ls/krylov_sstruct.c \
+	$(top_srcdir)/sstruct_ls/node_relax.c \
+	$(top_srcdir)/sstruct_ls/sys_pfmg.c \
+	$(top_srcdir)/sstruct_ls/sys_pfmg_relax.c \
+	$(top_srcdir)/sstruct_ls/sys_pfmg_setup.c \
+	$(top_srcdir)/sstruct_ls/sys_pfmg_setup_interp.c \
+	$(top_srcdir)/sstruct_ls/sys_pfmg_setup_rap.c \
+	$(top_srcdir)/sstruct_ls/sys_pfmg_solve.c \
+	$(top_srcdir)/sstruct_ls/sys_semi_interp.c \
+	$(top_srcdir)/sstruct_ls/sys_semi_restrict.c \
+	$(top_srcdir)/sstruct_mv/HYPRE_sstruct_graph.c \
+	$(top_srcdir)/sstruct_mv/HYPRE_sstruct_grid.c \
+	$(top_srcdir)/sstruct_mv/HYPRE_sstruct_matrix.c \
+	$(top_srcdir)/sstruct_mv/HYPRE_sstruct_stencil.c \
+	$(top_srcdir)/sstruct_mv/HYPRE_sstruct_vector.c \
+	$(top_srcdir)/sstruct_mv/box_map.c \
+	$(top_srcdir)/sstruct_mv/sstruct_axpy.c \
+	$(top_srcdir)/sstruct_mv/sstruct_copy.c \
+	$(top_srcdir)/sstruct_mv/sstruct_graph.c \
+	$(top_srcdir)/sstruct_mv/sstruct_grid.c \
+	$(top_srcdir)/sstruct_mv/sstruct_innerprod.c \
+	$(top_srcdir)/sstruct_mv/sstruct_matrix.c \
+	$(top_srcdir)/sstruct_mv/sstruct_matvec.c \
+	$(top_srcdir)/sstruct_mv/sstruct_scale.c \
+	$(top_srcdir)/sstruct_mv/sstruct_stencil.c \
+	$(top_srcdir)/sstruct_mv/sstruct_vector.c \
+	$(top_srcdir)/struct_ls/F90_HYPRE_struct_hybrid.c \
+	$(top_srcdir)/struct_ls/F90_HYPRE_struct_pcg.c \
+	$(top_srcdir)/struct_ls/F90_HYPRE_struct_pfmg.c \
+	$(top_srcdir)/struct_ls/F90_HYPRE_struct_smg.c \
+	$(top_srcdir)/struct_ls/HYPRE_struct_bicgstab.c \
+	$(top_srcdir)/struct_ls/HYPRE_struct_gmres.c \
+	$(top_srcdir)/struct_ls/HYPRE_struct_hybrid.c \
+	$(top_srcdir)/struct_ls/HYPRE_struct_jacobi.c \
+	$(top_srcdir)/struct_ls/HYPRE_struct_pcg.c \
+	$(top_srcdir)/struct_ls/HYPRE_struct_pfmg.c \
+	$(top_srcdir)/struct_ls/HYPRE_struct_smg.c \
+	$(top_srcdir)/struct_ls/HYPRE_struct_sparse_msg.c \
+	$(top_srcdir)/struct_ls/coarsen.c \
+	$(top_srcdir)/struct_ls/cyclic_reduction.c \
+	$(top_srcdir)/struct_ls/general.c \
+	$(top_srcdir)/struct_ls/hybrid.c \
+	$(top_srcdir)/struct_ls/jacobi.c \
+	$(top_srcdir)/struct_ls/pcg_struct.c \
+	$(top_srcdir)/struct_ls/pfmg.c \
+	$(top_srcdir)/struct_ls/pfmg2_setup_rap.c \
+	$(top_srcdir)/struct_ls/pfmg3_setup_rap.c \
+	$(top_srcdir)/struct_ls/pfmg_relax.c \
+	$(top_srcdir)/struct_ls/pfmg_setup.c \
+	$(top_srcdir)/struct_ls/pfmg_setup_interp.c \
+	$(top_srcdir)/struct_ls/pfmg_setup_rap.c \
+	$(top_srcdir)/struct_ls/pfmg_setup_rap5.c \
+	$(top_srcdir)/struct_ls/pfmg_setup_rap7.c \
+	$(top_srcdir)/struct_ls/pfmg_solve.c \
+	$(top_srcdir)/struct_ls/point_relax.c \
+	$(top_srcdir)/struct_ls/semi_interp.c \
+	$(top_srcdir)/struct_ls/semi_restrict.c \
+	$(top_srcdir)/struct_ls/semi_setup_rap.c \
+	$(top_srcdir)/struct_ls/smg.c \
+	$(top_srcdir)/struct_ls/smg2_setup_rap.c \
+	$(top_srcdir)/struct_ls/smg3_setup_rap.c \
+	$(top_srcdir)/struct_ls/smg_axpy.c \
+	$(top_srcdir)/struct_ls/smg_relax.c \
+	$(top_srcdir)/struct_ls/smg_residual.c \
+	$(top_srcdir)/struct_ls/smg_setup.c \
+	$(top_srcdir)/struct_ls/smg_setup_interp.c \
+	$(top_srcdir)/struct_ls/smg_setup_rap.c \
+	$(top_srcdir)/struct_ls/smg_setup_restrict.c \
+	$(top_srcdir)/struct_ls/smg_solve.c \
+	$(top_srcdir)/struct_ls/sparse_msg.c \
+	$(top_srcdir)/struct_ls/sparse_msg2_setup_rap.c \
+	$(top_srcdir)/struct_ls/sparse_msg3_setup_rap.c \
+	$(top_srcdir)/struct_ls/sparse_msg_filter.c \
+	$(top_srcdir)/struct_ls/sparse_msg_interp.c \
+	$(top_srcdir)/struct_ls/sparse_msg_restrict.c \
+	$(top_srcdir)/struct_ls/sparse_msg_setup.c \
+	$(top_srcdir)/struct_ls/sparse_msg_setup_rap.c \
+	$(top_srcdir)/struct_ls/sparse_msg_solve.c \
+	$(top_srcdir)/struct_mv/F90_HYPRE_struct_grid.c \
+	$(top_srcdir)/struct_mv/F90_HYPRE_struct_matrix.c \
+	$(top_srcdir)/struct_mv/F90_HYPRE_struct_stencil.c \
+	$(top_srcdir)/struct_mv/F90_HYPRE_struct_vector.c \
+	$(top_srcdir)/struct_mv/HYPRE_struct_grid.c \
+	$(top_srcdir)/struct_mv/HYPRE_struct_matrix.c \
+	$(top_srcdir)/struct_mv/HYPRE_struct_stencil.c \
+	$(top_srcdir)/struct_mv/HYPRE_struct_vector.c \
+	$(top_srcdir)/struct_mv/box.c \
+	$(top_srcdir)/struct_mv/box_algebra.c \
+	$(top_srcdir)/struct_mv/box_alloc.c \
+	$(top_srcdir)/struct_mv/box_neighbors.c \
+	$(top_srcdir)/struct_mv/grow.c \
+	$(top_srcdir)/struct_mv/communication_info.c \
+	$(top_srcdir)/struct_mv/computation.c \
+	$(top_srcdir)/struct_mv/project.c \
+	$(top_srcdir)/struct_mv/struct_axpy.c \
+	$(top_srcdir)/struct_mv/struct_communication.c \
+	$(top_srcdir)/struct_mv/struct_copy.c \
+	$(top_srcdir)/struct_mv/struct_grid.c \
+	$(top_srcdir)/struct_mv/struct_io.c \
+	$(top_srcdir)/struct_mv/struct_innerprod.c \
+	$(top_srcdir)/struct_mv/struct_matrix.c \
+	$(top_srcdir)/struct_mv/struct_matrix_mask.c \
+	$(top_srcdir)/struct_mv/struct_matvec.c \
+	$(top_srcdir)/struct_mv/struct_scale.c \
+	$(top_srcdir)/struct_mv/struct_stencil.c \
+	$(top_srcdir)/struct_mv/struct_vector.c \
+	$(top_srcdir)/utilities/amg_linklist.c \
+	$(top_srcdir)/utilities/binsearch.c \
+	$(top_srcdir)/utilities/hypre_memory.c \
+	$(top_srcdir)/utilities/hypre_qsort.c \
+	$(top_srcdir)/utilities/memory_dmalloc.c \
+	$(top_srcdir)/utilities/mpistubs.c \
+	$(top_srcdir)/utilities/qsplit.c \
+	$(top_srcdir)/utilities/random.c \
+	$(top_srcdir)/utilities/thread_mpistubs.c \
+	$(top_srcdir)/utilities/threading.c \
+	$(top_srcdir)/utilities/timer.c \
+	$(top_srcdir)/utilities/timing.c \
+	$(top_srcdir)/utilities/umalloc_local.c
+@STATICONLY_TRUE@am_libHYPRE_LSI_a_OBJECTS = $(am__objects_3)
+libHYPRE_LSI_a_OBJECTS = $(am_libHYPRE_LSI_a_OBJECTS)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libHYPRE_la_LIBADD =
@@ -1123,13 +2206,13 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/utilities/timer.c \
 	$(top_srcdir)/utilities/timing.c \
 	$(top_srcdir)/utilities/umalloc_local.c
-@BLASNEEDED_TRUE@am__objects_1 = dasum.lo daxpy.lo dcopy.lo ddot.lo \
+@BLASNEEDED_TRUE@am__objects_4 = dasum.lo daxpy.lo dcopy.lo ddot.lo \
 @BLASNEEDED_TRUE@	dgemm.lo dgemv.lo dger.lo dnrm2.lo drot.lo \
 @BLASNEEDED_TRUE@	dscal.lo dsymv.lo dsyr2.lo dsyr2k.lo dsyrk.lo \
 @BLASNEEDED_TRUE@	dtrmm.lo dtrmv.lo dtrsm.lo dtrsv.lo idamax.lo \
 @BLASNEEDED_TRUE@	blas_utils.lo
-@BLASNEEDED_FALSE@am__objects_1 =
-@LAPACKNEEDED_TRUE@am__objects_2 = dbdsqr.lo dgebd2.lo dgebrd.lo \
+@BLASNEEDED_FALSE@am__objects_4 =
+@LAPACKNEEDED_TRUE@am__objects_5 = dbdsqr.lo dgebd2.lo dgebrd.lo \
 @LAPACKNEEDED_TRUE@	dgelq2.lo dgelqf.lo dgels.lo dgeqr2.lo \
 @LAPACKNEEDED_TRUE@	dgeqrf.lo dgesvd.lo dlabad.lo dlabrd.lo \
 @LAPACKNEEDED_TRUE@	dlacpy.lo dlae2.lo dlaev2.lo dlamch.lo \
@@ -1146,8 +2229,8 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 @LAPACKNEEDED_TRUE@	dsterf.lo dsyev.lo dsygs2.lo dsygst.lo \
 @LAPACKNEEDED_TRUE@	dsygv.lo dsytd2.lo dsytrd.lo ieeeck.lo \
 @LAPACKNEEDED_TRUE@	ilaenv.lo lapack_utils.lo lsame.lo xerbla.lo
-@LAPACKNEEDED_FALSE@am__objects_2 =
-am__objects_3 = $(am__objects_1) $(am__objects_2) colamd.lo \
+@LAPACKNEEDED_FALSE@am__objects_5 =
+am__objects_6 = $(am__objects_4) $(am__objects_5) colamd.lo \
 	dcolumn_bmod.lo dcolumn_dfs.lo dcopy_to_ucol.lo dgscon.lo \
 	dgsequ.lo dgsrfs.lo dgssv.lo dgssvx.lo dgstrf.lo dgstrs.lo \
 	dlacon.lo dlangs.lo dlaqgs.lo dmemory.lo dpanel_bmod.lo \
@@ -1271,7 +2354,7 @@ am__objects_3 = $(am__objects_1) $(am__objects_2) colamd.lo \
 	hypre_memory.lo hypre_qsort.lo memory_dmalloc.lo mpistubs.lo \
 	qsplit.lo random.lo thread_mpistubs.lo threading.lo timer.lo \
 	timing.lo umalloc_local.lo
-am_libHYPRE_la_OBJECTS = $(am__objects_3)
+@STATICONLY_FALSE@am_libHYPRE_la_OBJECTS = $(am__objects_6)
 libHYPRE_la_OBJECTS = $(am_libHYPRE_la_OBJECTS)
 libHYPRE_LSI_la_LIBADD =
 am__libHYPRE_LSI_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
@@ -1698,379 +2781,735 @@ am__libHYPRE_LSI_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/utilities/timer.c \
 	$(top_srcdir)/utilities/timing.c \
 	$(top_srcdir)/utilities/umalloc_local.c
-am_libHYPRE_LSI_la_OBJECTS = $(am__objects_3)
+@STATICONLY_FALSE@am_libHYPRE_LSI_la_OBJECTS = $(am__objects_6)
 libHYPRE_LSI_la_OBJECTS = $(am_libHYPRE_LSI_la_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/ConjGrad.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/DiagScale.Plo \
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/ConjGrad.Plo ./$(DEPDIR)/ConjGrad.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/DiagScale.Plo ./$(DEPDIR)/DiagScale.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/Euclid_apply.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/Euclid_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/Euclid_apply.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Euclid_dh.Plo ./$(DEPDIR)/Euclid_dh.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/ExternalRows_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/ExternalRows_dh.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_IJMatrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_IJMatrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_IJVector.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_IJVector.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_ParaSails.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_ParaSails.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_amg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_amg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_bicgstab.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_bicgstab.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_cgnr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_cgnr.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_gmres.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_gmres.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_pcg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_pcg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_pilut.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_pilut.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_vector.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_vector.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_grid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_grid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_hybrid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_hybrid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_pcg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_pcg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_pfmg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_pfmg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_smg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_smg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_stencil.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_stencil.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_vector.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_vector.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_IJMatrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_IJMatrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_hypre_laplace.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_hypre_laplace.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_par_vector.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_par_vector.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_parcsr_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_parcsr_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/FEI_HYPRE_Impl.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/Factor_dh.Plo ./$(DEPDIR)/FlexGmres.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/FEI_HYPRE_Impl.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Factor_dh.Plo ./$(DEPDIR)/Factor_dh.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/FlexGmres.Plo ./$(DEPDIR)/FlexGmres.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_ConvertPETScMatrixToDistributedMatrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_ConvertPETScMatrixToDistributedMatrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_ConvertParCSRMatrixToDistributedMatrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_ConvertParCSRMatrixToDistributedMatrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_DistributedMatrixPilutSolver.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_DistributedMatrixPilutSolver.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_IJMatrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_IJMatrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_IJVector.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_IJVector.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSC_aux.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSC_aux.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_Dsuperlu.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_Dsuperlu.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_UZAWA.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_UZAWA.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_blkprec.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_blkprec.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_ddict.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_ddict.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_ddilut.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_ddilut.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_ml.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_ml.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_mli.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_mli.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_poly.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_poly.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_schwarz.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LSI_schwarz.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LinSysCore.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_LinSysCore.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_SlideReduction.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_SlideReduction.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_bicgstab.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_bicgstab.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_cgnr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_cgnr.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_csr_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_csr_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_distributed_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_distributed_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_gmres.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_gmres.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_mapped_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_mapped_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_multiblock_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_multiblock_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_Euclid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_Euclid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_ParaSails.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_ParaSails.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_TFQmr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_TFQmr.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_amg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_amg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_bicgs.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_bicgs.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_bicgstab.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_bicgstab.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_bicgstabl.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_bicgstabl.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_cgnr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_cgnr.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_fgmres.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_fgmres.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_gmres.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_gmres.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_hybrid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_hybrid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_lsicg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_lsicg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_pcg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_pcg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_pilut.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_pilut.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_schwarz.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_schwarz.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_symqmr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_symqmr.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_vector.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_pcg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_vector.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_pcg.Plo ./$(DEPDIR)/HYPRE_pcg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_bicgstab.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_bicgstab.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_gmres.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_gmres.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_graph.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_graph.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_grid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_grid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_pcg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_pcg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_split.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_split.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_stencil.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_stencil.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_sys_pfmg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_sys_pfmg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_vector.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_vector.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_bicgstab.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_bicgstab.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_gmres.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_gmres.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_grid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_grid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_hybrid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_hybrid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_jacobi.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_jacobi.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_pcg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_pcg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_pfmg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_pfmg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_smg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_smg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_sparse_msg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_sparse_msg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_stencil.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_stencil.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_vector.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_vector.Plo ./$(DEPDIR)/Hash.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/Hash_dh.Plo ./$(DEPDIR)/Hash_i_dh.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/IJMatrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_vector.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_vector.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_vector.Po ./$(DEPDIR)/Hash.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/Hash.Po ./$(DEPDIR)/Hash_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/Hash_dh.Po ./$(DEPDIR)/Hash_i_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/Hash_i_dh.Po ./$(DEPDIR)/IJMatrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/IJMatrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/IJMatrix_parcsr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/IJVector.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/IJMatrix_parcsr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/IJVector.Plo ./$(DEPDIR)/IJVector.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/IJVector_parcsr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/LoadBal.Plo ./$(DEPDIR)/MatGenFD.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/Mat_dh.Plo ./$(DEPDIR)/Matrix.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/Mem.Plo ./$(DEPDIR)/Mem_dh.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/Numbering.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/IJVector_parcsr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/LoadBal.Plo ./$(DEPDIR)/LoadBal.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/MatGenFD.Plo ./$(DEPDIR)/MatGenFD.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Mat_dh.Plo ./$(DEPDIR)/Mat_dh.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Matrix.Plo ./$(DEPDIR)/Matrix.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Mem.Plo ./$(DEPDIR)/Mem.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Mem_dh.Plo ./$(DEPDIR)/Mem_dh.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Numbering.Plo ./$(DEPDIR)/Numbering.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/Numbering_dh.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/OrderStat.Plo ./$(DEPDIR)/ParaSails.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/Parser_dh.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/PrunedRows.Plo ./$(DEPDIR)/RowPatt.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/Numbering_dh.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/OrderStat.Plo ./$(DEPDIR)/OrderStat.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ParaSails.Plo ./$(DEPDIR)/ParaSails.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Parser_dh.Plo ./$(DEPDIR)/Parser_dh.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/PrunedRows.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/PrunedRows.Po ./$(DEPDIR)/RowPatt.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/RowPatt.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/SortedList_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/SortedList_dh.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/SortedSet_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/SortedSet_dh.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/StoredRows.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/StoredRows.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/SubdomainGraph_dh.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/SymQMR.Plo ./$(DEPDIR)/TFQmr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/TimeLog_dh.Plo ./$(DEPDIR)/Timer_dh.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/Vec_dh.Plo ./$(DEPDIR)/amg_hybrid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/SubdomainGraph_dh.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/SymQMR.Plo ./$(DEPDIR)/SymQMR.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/TFQmr.Plo ./$(DEPDIR)/TFQmr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/TimeLog_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/TimeLog_dh.Po ./$(DEPDIR)/Timer_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/Timer_dh.Po ./$(DEPDIR)/Vec_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/Vec_dh.Po ./$(DEPDIR)/amg_hybrid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/amg_hybrid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/amg_linklist.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/amg_linklist.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/aux_parcsr_matrix.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/bicgs.Plo ./$(DEPDIR)/bicgstab.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/bicgstabl.Plo ./$(DEPDIR)/binsearch.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/blas_dh.Plo ./$(DEPDIR)/blas_utils.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/box.Plo ./$(DEPDIR)/box_algebra.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/box_alloc.Plo ./$(DEPDIR)/box_map.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/aux_parcsr_matrix.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/bicgs.Plo ./$(DEPDIR)/bicgs.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/bicgstab.Plo ./$(DEPDIR)/bicgstab.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/bicgstabl.Plo ./$(DEPDIR)/bicgstabl.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/binsearch.Plo ./$(DEPDIR)/binsearch.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/blas_dh.Plo ./$(DEPDIR)/blas_dh.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/blas_utils.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/blas_utils.Po ./$(DEPDIR)/box.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/box.Po ./$(DEPDIR)/box_algebra.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/box_algebra.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/box_alloc.Plo ./$(DEPDIR)/box_alloc.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/box_map.Plo ./$(DEPDIR)/box_map.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/box_neighbors.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/cfei_hypre.Plo ./$(DEPDIR)/cgnr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/cmli.Plo ./$(DEPDIR)/coarsen.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/colamd.Plo ./$(DEPDIR)/comm.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/communicationT.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/box_neighbors.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/cfei_hypre.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/cfei_hypre.Po ./$(DEPDIR)/cgnr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/cgnr.Po ./$(DEPDIR)/cmli.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/cmli.Po ./$(DEPDIR)/coarsen.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/coarsen.Po ./$(DEPDIR)/colamd.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/colamd.Po ./$(DEPDIR)/comm.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/comm.Po ./$(DEPDIR)/communicationT.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/communicationT.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/communication_info.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/communication_info.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/computation.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/csr_matop.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/computation.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/csr_matop.Plo ./$(DEPDIR)/csr_matop.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/csr_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/csr_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/csr_matvec.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/csr_matvec.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/cyclic_reduction.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dasum.Plo ./$(DEPDIR)/daxpy.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dbdsqr.Plo ./$(DEPDIR)/dcolumn_bmod.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dcolumn_dfs.Plo ./$(DEPDIR)/dcopy.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dcopy_to_ucol.Plo ./$(DEPDIR)/ddot.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/debug.Plo ./$(DEPDIR)/dgebd2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgebrd.Plo ./$(DEPDIR)/dgelq2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgelqf.Plo ./$(DEPDIR)/dgels.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgemm.Plo ./$(DEPDIR)/dgemv.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgeqr2.Plo ./$(DEPDIR)/dgeqrf.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dger.Plo ./$(DEPDIR)/dgesvd.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgscon.Plo ./$(DEPDIR)/dgsequ.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgsrfs.Plo ./$(DEPDIR)/dgssv.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgssvx.Plo ./$(DEPDIR)/dgstrf.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgstrs.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/cyclic_reduction.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dasum.Plo ./$(DEPDIR)/dasum.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/daxpy.Plo ./$(DEPDIR)/daxpy.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dbdsqr.Plo ./$(DEPDIR)/dbdsqr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dcolumn_bmod.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dcolumn_bmod.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dcolumn_dfs.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dcolumn_dfs.Po ./$(DEPDIR)/dcopy.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dcopy.Po ./$(DEPDIR)/dcopy_to_ucol.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dcopy_to_ucol.Po ./$(DEPDIR)/ddot.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/ddot.Po ./$(DEPDIR)/debug.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/debug.Po ./$(DEPDIR)/dgebd2.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgebd2.Po ./$(DEPDIR)/dgebrd.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgebrd.Po ./$(DEPDIR)/dgelq2.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgelq2.Po ./$(DEPDIR)/dgelqf.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgelqf.Po ./$(DEPDIR)/dgels.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgels.Po ./$(DEPDIR)/dgemm.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgemm.Po ./$(DEPDIR)/dgemv.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgemv.Po ./$(DEPDIR)/dgeqr2.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgeqr2.Po ./$(DEPDIR)/dgeqrf.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgeqrf.Po ./$(DEPDIR)/dger.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dger.Po ./$(DEPDIR)/dgesvd.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgesvd.Po ./$(DEPDIR)/dgscon.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgscon.Po ./$(DEPDIR)/dgsequ.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgsequ.Po ./$(DEPDIR)/dgsrfs.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgsrfs.Po ./$(DEPDIR)/dgssv.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgssv.Po ./$(DEPDIR)/dgssvx.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgssvx.Po ./$(DEPDIR)/dgstrf.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgstrf.Po ./$(DEPDIR)/dgstrs.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dgstrs.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_ISIS.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_ISIS.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_PETSc.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_PETSc.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_parcsr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_parcsr.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/distributed_qsort.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/distributed_qsort.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/distributed_qsort_si.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlabad.Plo ./$(DEPDIR)/dlabrd.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlacon.Plo ./$(DEPDIR)/dlacpy.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlae2.Plo ./$(DEPDIR)/dlaev2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlamch.Plo ./$(DEPDIR)/dlange.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlangs.Plo ./$(DEPDIR)/dlanst.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlansy.Plo ./$(DEPDIR)/dlapy2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlaqgs.Plo ./$(DEPDIR)/dlarf.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlarfb.Plo ./$(DEPDIR)/dlarfg.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlarft.Plo ./$(DEPDIR)/dlartg.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlas2.Plo ./$(DEPDIR)/dlascl.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlaset.Plo ./$(DEPDIR)/dlasq1.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlasq2.Plo ./$(DEPDIR)/dlasq3.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlasq4.Plo ./$(DEPDIR)/dlasq5.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlasq6.Plo ./$(DEPDIR)/dlasr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlasrt.Plo ./$(DEPDIR)/dlassq.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlasv2.Plo ./$(DEPDIR)/dlatrd.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dmemory.Plo ./$(DEPDIR)/dnrm2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorg2l.Plo ./$(DEPDIR)/dorg2r.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorgbr.Plo ./$(DEPDIR)/dorgl2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorglq.Plo ./$(DEPDIR)/dorgql.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorgqr.Plo ./$(DEPDIR)/dorgtr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorm2r.Plo ./$(DEPDIR)/dormbr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorml2.Plo ./$(DEPDIR)/dormlq.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dormqr.Plo ./$(DEPDIR)/dpanel_bmod.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dpanel_dfs.Plo ./$(DEPDIR)/dpivotL.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dpivotgrowth.Plo ./$(DEPDIR)/dpotf2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dpotrf.Plo ./$(DEPDIR)/dpotrs.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dpruneL.Plo ./$(DEPDIR)/dreadhb.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/drot.Plo ./$(DEPDIR)/dscal.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsnode_bmod.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/distributed_qsort_si.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlabad.Plo ./$(DEPDIR)/dlabad.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlabrd.Plo ./$(DEPDIR)/dlabrd.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlacon.Plo ./$(DEPDIR)/dlacon.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlacpy.Plo ./$(DEPDIR)/dlacpy.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlae2.Plo ./$(DEPDIR)/dlae2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlaev2.Plo ./$(DEPDIR)/dlaev2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlamch.Plo ./$(DEPDIR)/dlamch.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlange.Plo ./$(DEPDIR)/dlange.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlangs.Plo ./$(DEPDIR)/dlangs.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlanst.Plo ./$(DEPDIR)/dlanst.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlansy.Plo ./$(DEPDIR)/dlansy.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlapy2.Plo ./$(DEPDIR)/dlapy2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlaqgs.Plo ./$(DEPDIR)/dlaqgs.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlarf.Plo ./$(DEPDIR)/dlarf.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlarfb.Plo ./$(DEPDIR)/dlarfb.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlarfg.Plo ./$(DEPDIR)/dlarfg.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlarft.Plo ./$(DEPDIR)/dlarft.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlartg.Plo ./$(DEPDIR)/dlartg.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlas2.Plo ./$(DEPDIR)/dlas2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlascl.Plo ./$(DEPDIR)/dlascl.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlaset.Plo ./$(DEPDIR)/dlaset.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasq1.Plo ./$(DEPDIR)/dlasq1.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasq2.Plo ./$(DEPDIR)/dlasq2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasq3.Plo ./$(DEPDIR)/dlasq3.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasq4.Plo ./$(DEPDIR)/dlasq4.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasq5.Plo ./$(DEPDIR)/dlasq5.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasq6.Plo ./$(DEPDIR)/dlasq6.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasr.Plo ./$(DEPDIR)/dlasr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasrt.Plo ./$(DEPDIR)/dlasrt.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlassq.Plo ./$(DEPDIR)/dlassq.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasv2.Plo ./$(DEPDIR)/dlasv2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlatrd.Plo ./$(DEPDIR)/dlatrd.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dmemory.Plo ./$(DEPDIR)/dmemory.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dnrm2.Plo ./$(DEPDIR)/dnrm2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorg2l.Plo ./$(DEPDIR)/dorg2l.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorg2r.Plo ./$(DEPDIR)/dorg2r.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorgbr.Plo ./$(DEPDIR)/dorgbr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorgl2.Plo ./$(DEPDIR)/dorgl2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorglq.Plo ./$(DEPDIR)/dorglq.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorgql.Plo ./$(DEPDIR)/dorgql.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorgqr.Plo ./$(DEPDIR)/dorgqr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorgtr.Plo ./$(DEPDIR)/dorgtr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorm2r.Plo ./$(DEPDIR)/dorm2r.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dormbr.Plo ./$(DEPDIR)/dormbr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorml2.Plo ./$(DEPDIR)/dorml2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dormlq.Plo ./$(DEPDIR)/dormlq.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dormqr.Plo ./$(DEPDIR)/dormqr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dpanel_bmod.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dpanel_bmod.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dpanel_dfs.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dpanel_dfs.Po ./$(DEPDIR)/dpivotL.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dpivotL.Po ./$(DEPDIR)/dpivotgrowth.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dpivotgrowth.Po ./$(DEPDIR)/dpotf2.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dpotf2.Po ./$(DEPDIR)/dpotrf.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dpotrf.Po ./$(DEPDIR)/dpotrs.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dpotrs.Po ./$(DEPDIR)/dpruneL.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dpruneL.Po ./$(DEPDIR)/dreadhb.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dreadhb.Po ./$(DEPDIR)/drot.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/drot.Po ./$(DEPDIR)/dscal.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dscal.Po ./$(DEPDIR)/dsnode_bmod.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsnode_bmod.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/dsnode_dfs.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsp_blas2.Plo ./$(DEPDIR)/dsp_blas3.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsteqr.Plo ./$(DEPDIR)/dsterf.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsyev.Plo ./$(DEPDIR)/dsygs2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsygst.Plo ./$(DEPDIR)/dsygv.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsymv.Plo ./$(DEPDIR)/dsyr2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsyr2k.Plo ./$(DEPDIR)/dsyrk.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsytd2.Plo ./$(DEPDIR)/dsytrd.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dtrmm.Plo ./$(DEPDIR)/dtrmv.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dtrsm.Plo ./$(DEPDIR)/dtrsv.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dutil.Plo ./$(DEPDIR)/fgmres.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/general.Plo ./$(DEPDIR)/genpart.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/getRow_dh.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/get_perm_c.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/globalObjects.Plo ./$(DEPDIR)/gmres.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/grow.Plo ./$(DEPDIR)/hybrid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsnode_dfs.Po ./$(DEPDIR)/dsp_blas2.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsp_blas2.Po ./$(DEPDIR)/dsp_blas3.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsp_blas3.Po ./$(DEPDIR)/dsteqr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsteqr.Po ./$(DEPDIR)/dsterf.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsterf.Po ./$(DEPDIR)/dsyev.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsyev.Po ./$(DEPDIR)/dsygs2.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsygs2.Po ./$(DEPDIR)/dsygst.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsygst.Po ./$(DEPDIR)/dsygv.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsygv.Po ./$(DEPDIR)/dsymv.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsymv.Po ./$(DEPDIR)/dsyr2.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsyr2.Po ./$(DEPDIR)/dsyr2k.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsyr2k.Po ./$(DEPDIR)/dsyrk.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsyrk.Po ./$(DEPDIR)/dsytd2.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsytd2.Po ./$(DEPDIR)/dsytrd.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dsytrd.Po ./$(DEPDIR)/dtrmm.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dtrmm.Po ./$(DEPDIR)/dtrmv.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dtrmv.Po ./$(DEPDIR)/dtrsm.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dtrsm.Po ./$(DEPDIR)/dtrsv.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dtrsv.Po ./$(DEPDIR)/dutil.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dutil.Po ./$(DEPDIR)/fgmres.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/fgmres.Po ./$(DEPDIR)/general.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/general.Po ./$(DEPDIR)/genpart.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/genpart.Po ./$(DEPDIR)/getRow_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/getRow_dh.Po ./$(DEPDIR)/get_perm_c.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/get_perm_c.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/globalObjects.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/globalObjects.Po ./$(DEPDIR)/gmres.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/gmres.Po ./$(DEPDIR)/grow.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/grow.Po ./$(DEPDIR)/hybrid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/hybrid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/hypre_ParaSails.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/hypre_ParaSails.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/hypre_lsi_amge.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/hypre_lsi_amge.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/hypre_lsi_ddamg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/hypre_lsi_ddamg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/hypre_lsi_misc.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/hypre_lsi_misc.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/hypre_memory.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/hypre_memory.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/hypre_qsort.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/hypre_qsort.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/hypre_schur_reduce.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/hypre_schur_reduce.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/hypre_slide_reduce.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/idamax.Plo ./$(DEPDIR)/ieeeck.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/ilaenv.Plo ./$(DEPDIR)/ilu_mpi_bj.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/hypre_slide_reduce.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/idamax.Plo ./$(DEPDIR)/idamax.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ieeeck.Plo ./$(DEPDIR)/ieeeck.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ilaenv.Plo ./$(DEPDIR)/ilaenv.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ilu_mpi_bj.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/ilu_mpi_bj.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/ilu_mpi_pilu.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/ilu_seq.Plo ./$(DEPDIR)/ilut.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/io_dh.Plo ./$(DEPDIR)/jacobi.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/krylov.Plo ./$(DEPDIR)/krylov_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/ilu_mpi_pilu.Po ./$(DEPDIR)/ilu_seq.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/ilu_seq.Po ./$(DEPDIR)/ilut.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/ilut.Po ./$(DEPDIR)/io_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/io_dh.Po ./$(DEPDIR)/jacobi.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/jacobi.Po ./$(DEPDIR)/krylov.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/krylov.Po ./$(DEPDIR)/krylov_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/krylov_dh.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/krylov_sstruct.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/lapack_utils.Plo ./$(DEPDIR)/lobpcg.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/lobpcg_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/krylov_sstruct.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/lapack_utils.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/lapack_utils.Po ./$(DEPDIR)/lobpcg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/lobpcg.Po ./$(DEPDIR)/lobpcg_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/lobpcg_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/lobpcg_utilities.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/lsame.Plo ./$(DEPDIR)/lsicg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/lobpcg_utilities.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/lsame.Plo ./$(DEPDIR)/lsame.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/lsicg.Plo ./$(DEPDIR)/lsicg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mapped_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mapped_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mat_dh_private.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/memory_dmalloc.Plo ./$(DEPDIR)/mli.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/mli_amgsa_calib.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mat_dh_private.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/memory_dmalloc.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/memory_dmalloc.Po ./$(DEPDIR)/mli.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli.Po ./$(DEPDIR)/mli_amgsa_calib.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_amgsa_calib.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_amgsa_coarsen1.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_amgsa_coarsen1.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_amgsa_dd_fedata.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_amgsa_dd_fedata.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_amgsa_dd_sfei.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_amgsa_dd_sfei.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_fedata.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_fedata.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_fedata_utils.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_fedata_utils.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_mapper.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_mapper.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_matrix_mult.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_matrix_mult.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_matrix_utils.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_matrix_utils.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_method.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_method.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_method_amgcr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_method_amgcr.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_method_amgrs.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_method_amgrs.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_method_amgsa.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_method_amgsa.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_oneLevel.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/mli_sfei.Plo ./$(DEPDIR)/mli_solver.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_oneLevel.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_sfei.Plo ./$(DEPDIR)/mli_sfei.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_solver_arpacksuperlu.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver_arpacksuperlu.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_solver_bjacobi.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver_bjacobi.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_solver_bsgs.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver_bsgs.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_solver_cg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver_cg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_solver_chebyshev.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver_chebyshev.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_solver_gs.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver_gs.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_solver_hschwarz.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver_hschwarz.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_solver_hsgs.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver_hsgs.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_solver_jacobi.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver_jacobi.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_solver_kaczmarz.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver_kaczmarz.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_solver_mls.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver_mls.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_solver_parasails.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver_parasails.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_solver_seqsuperlu.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver_seqsuperlu.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_solver_sgs.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver_sgs.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mli_solver_superlu.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/mli_utils.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/mli_vector.Plo ./$(DEPDIR)/mmd.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/mpistubs.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_solver_superlu.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_utils.Plo ./$(DEPDIR)/mli_utils.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_vector.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mli_vector.Po ./$(DEPDIR)/mmd.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mmd.Po ./$(DEPDIR)/mpistubs.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mpistubs.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/multiblock_matrix.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/node_relax.Plo ./$(DEPDIR)/numbers.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_amg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/multiblock_matrix.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/node_relax.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/node_relax.Po ./$(DEPDIR)/numbers.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/numbers.Po ./$(DEPDIR)/par_amg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_amg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_amg_setup.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_amg_setup.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_amg_solve.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_amg_solve.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_amg_solveT.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_amg_solveT.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_cg_relax_wt.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_cg_relax_wt.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_coarse_parms.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_coarse_parms.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_coarsen.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_coarsen.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_csr_aat.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_csr_aat.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_csr_bool_matop.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_csr_bool_matop.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_csr_bool_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_csr_bool_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_csr_communication.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_csr_communication.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_csr_matop.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_csr_matop.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_csr_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_csr_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_csr_matvec.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_cycle.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_csr_matvec.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/par_cycle.Plo ./$(DEPDIR)/par_cycle.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_difconv.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_gsmg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_difconv.Po ./$(DEPDIR)/par_gsmg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_gsmg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_indepset.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_indepset.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_interp.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_interp.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_laplace.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_laplace.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_laplace_27pt.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_laplace_27pt.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_laplace_9pt.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_rap.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_laplace_9pt.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/par_rap.Plo ./$(DEPDIR)/par_rap.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_rap_communication.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_relax.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_rap_communication.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/par_relax.Plo ./$(DEPDIR)/par_relax.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_relax_interface.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_relax_interface.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_scaled_matnorm.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_scaled_matnorm.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_schwarz.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_stats.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_schwarz.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/par_stats.Plo ./$(DEPDIR)/par_stats.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/par_strength.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_vector.Plo ./$(DEPDIR)/parilut.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/parutil.Plo ./$(DEPDIR)/pblas1.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/pcg.Plo ./$(DEPDIR)/pcg_par.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/pcg_struct.Plo ./$(DEPDIR)/pfmg.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/pfmg2_setup_rap.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_strength.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/par_vector.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/par_vector.Po ./$(DEPDIR)/parilut.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/parilut.Po ./$(DEPDIR)/parutil.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/parutil.Po ./$(DEPDIR)/pblas1.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pblas1.Po ./$(DEPDIR)/pcg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pcg.Po ./$(DEPDIR)/pcg_par.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pcg_par.Po ./$(DEPDIR)/pcg_struct.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pcg_struct.Po ./$(DEPDIR)/pfmg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pfmg.Po ./$(DEPDIR)/pfmg2_setup_rap.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pfmg2_setup_rap.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/pfmg3_setup_rap.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pfmg3_setup_rap.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/pfmg_relax.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pfmg_relax.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/pfmg_setup.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pfmg_setup.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/pfmg_setup_interp.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pfmg_setup_interp.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/pfmg_setup_rap.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pfmg_setup_rap.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/pfmg_setup_rap5.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pfmg_setup_rap5.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/pfmg_setup_rap7.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pfmg_setup_rap7.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/pfmg_solve.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/point_relax.Plo ./$(DEPDIR)/project.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/qsplit.Plo ./$(DEPDIR)/random.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/relax_snode.Plo ./$(DEPDIR)/schwarz.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/semi_interp.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/pfmg_solve.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/point_relax.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/point_relax.Po ./$(DEPDIR)/project.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/project.Po ./$(DEPDIR)/qsplit.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/qsplit.Po ./$(DEPDIR)/random.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/random.Po ./$(DEPDIR)/relax_snode.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/relax_snode.Po ./$(DEPDIR)/schwarz.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/schwarz.Po ./$(DEPDIR)/semi_interp.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/semi_interp.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/semi_restrict.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/semi_restrict.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/semi_setup_rap.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/serilut.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/shellSort_dh.Plo ./$(DEPDIR)/sig_dh.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/smg.Plo ./$(DEPDIR)/smg2_setup_rap.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/semi_setup_rap.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/serilut.Plo ./$(DEPDIR)/serilut.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/shellSort_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/shellSort_dh.Po ./$(DEPDIR)/sig_dh.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sig_dh.Po ./$(DEPDIR)/smg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/smg.Po ./$(DEPDIR)/smg2_setup_rap.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/smg2_setup_rap.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/smg3_setup_rap.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/smg_axpy.Plo ./$(DEPDIR)/smg_relax.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/smg3_setup_rap.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/smg_axpy.Plo ./$(DEPDIR)/smg_axpy.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/smg_relax.Plo ./$(DEPDIR)/smg_relax.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/smg_residual.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/smg_setup.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/smg_residual.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/smg_setup.Plo ./$(DEPDIR)/smg_setup.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/smg_setup_interp.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/smg_setup_interp.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/smg_setup_rap.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/smg_setup_rap.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/smg_setup_restrict.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/smg_solve.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/sp_coletree.Plo ./$(DEPDIR)/sp_ienv.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/sp_preorder.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/smg_setup_restrict.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/smg_solve.Plo ./$(DEPDIR)/smg_solve.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sp_coletree.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sp_coletree.Po ./$(DEPDIR)/sp_ienv.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sp_ienv.Po ./$(DEPDIR)/sp_preorder.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sp_preorder.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sparse_msg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sparse_msg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sparse_msg2_setup_rap.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sparse_msg2_setup_rap.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sparse_msg3_setup_rap.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sparse_msg3_setup_rap.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sparse_msg_filter.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sparse_msg_filter.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sparse_msg_interp.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sparse_msg_interp.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sparse_msg_restrict.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sparse_msg_restrict.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sparse_msg_setup.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sparse_msg_setup.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sparse_msg_setup_rap.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sparse_msg_setup_rap.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sparse_msg_solve.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sparse_msg_solve.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sstruct_axpy.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sstruct_axpy.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sstruct_copy.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sstruct_copy.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sstruct_graph.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sstruct_graph.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sstruct_grid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sstruct_grid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sstruct_innerprod.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sstruct_innerprod.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sstruct_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sstruct_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sstruct_matvec.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sstruct_matvec.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sstruct_scale.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sstruct_scale.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sstruct_stencil.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sstruct_stencil.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sstruct_vector.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sstruct_vector.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_axpy.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_axpy.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_communication.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_communication.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_copy.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_copy.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_grid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_grid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_innerprod.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/struct_io.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_innerprod.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_io.Plo ./$(DEPDIR)/struct_io.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_matrix_mask.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_matrix_mask.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_matvec.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_matvec.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_scale.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_scale.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_stencil.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_stencil.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_vector.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_vector.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/superlu_memory.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/superlu_memory.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/superlu_timer.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/superlu_timer.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/superlu_util.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/superlu_util.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg.Plo ./$(DEPDIR)/sys_pfmg.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_relax.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_relax.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_setup.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_setup.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_setup_interp.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_setup_interp.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_setup_rap.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_setup_rap.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_solve.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_solve.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sys_semi_interp.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sys_semi_interp.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sys_semi_restrict.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/sys_semi_restrict.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/thread_mpistubs.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/threading.Plo ./$(DEPDIR)/timer.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/timing.Plo ./$(DEPDIR)/trifactor.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/umalloc_local.Plo ./$(DEPDIR)/util.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/vector.Plo ./$(DEPDIR)/xerbla.Plo
+@AMDEP_TRUE@	./$(DEPDIR)/thread_mpistubs.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/threading.Plo ./$(DEPDIR)/threading.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/timer.Plo ./$(DEPDIR)/timer.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/timing.Plo ./$(DEPDIR)/timing.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/trifactor.Plo ./$(DEPDIR)/trifactor.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/umalloc_local.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/umalloc_local.Po ./$(DEPDIR)/util.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/util.Po ./$(DEPDIR)/vector.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/vector.Po ./$(DEPDIR)/xerbla.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/xerbla.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
@@ -2089,10 +3528,12 @@ LTF77COMPILE = $(LIBTOOL) --mode=compile $(F77) $(AM_FFLAGS) $(FFLAGS)
 F77LD = $(F77)
 F77LINK = $(LIBTOOL) --mode=link $(F77LD) $(AM_FFLAGS) $(FFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(am__libHYPRE_la_SOURCES_DIST) \
+DIST_SOURCES = $(am__libHYPRE_a_SOURCES_DIST) \
+	$(am__libHYPRE_LSI_a_SOURCES_DIST) \
+	$(am__libHYPRE_la_SOURCES_DIST) \
 	$(am__libHYPRE_LSI_la_SOURCES_DIST)
 DIST_COMMON = $(srcdir)/Makefile.in Makefile.am
-SOURCES = $(libHYPRE_la_SOURCES) $(libHYPRE_LSI_la_SOURCES)
+SOURCES = $(libHYPRE_a_SOURCES) $(libHYPRE_LSI_a_SOURCES) $(libHYPRE_la_SOURCES) $(libHYPRE_LSI_la_SOURCES)
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -2104,6 +3545,44 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configu
 	  $(AUTOMAKE) --foreign  lib/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
+libLIBRARIES_INSTALL = $(INSTALL_DATA)
+install-libLIBRARIES: $(lib_LIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f"; \
+	    $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f; \
+	  else :; fi; \
+	done
+	@$(POST_INSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    p="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(RANLIB) $(DESTDIR)$(libdir)/$$p"; \
+	    $(RANLIB) $(DESTDIR)$(libdir)/$$p; \
+	  else :; fi; \
+	done
+
+uninstall-libLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  p="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " rm -f $(DESTDIR)$(libdir)/$$p"; \
+	  rm -f $(DESTDIR)$(libdir)/$$p; \
+	done
+
+clean-libLIBRARIES:
+	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
+libHYPRE.a: $(libHYPRE_a_OBJECTS) $(libHYPRE_a_DEPENDENCIES) 
+	-rm -f libHYPRE.a
+	$(libHYPRE_a_AR) libHYPRE.a $(libHYPRE_a_OBJECTS) $(libHYPRE_a_LIBADD)
+	$(RANLIB) libHYPRE.a
+libHYPRE_LSI.a: $(libHYPRE_LSI_a_OBJECTS) $(libHYPRE_LSI_a_DEPENDENCIES) 
+	-rm -f libHYPRE_LSI.a
+	$(libHYPRE_LSI_a_AR) libHYPRE_LSI.a $(libHYPRE_LSI_a_OBJECTS) $(libHYPRE_LSI_a_LIBADD)
+	$(RANLIB) libHYPRE_LSI.a
 libLTLIBRARIES_INSTALL = $(INSTALL)
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -2144,472 +3623,939 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ConjGrad.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ConjGrad.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DiagScale.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DiagScale.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Euclid_apply.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Euclid_apply.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Euclid_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Euclid_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ExternalRows_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ExternalRows_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_IJMatrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_IJMatrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_IJVector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_IJVector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_ParaSails.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_ParaSails.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_amg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_amg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_bicgstab.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_bicgstab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_cgnr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_cgnr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_gmres.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_gmres.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_pcg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_pcg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_pilut.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_pilut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_grid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_grid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_hybrid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_hybrid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_pcg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_pcg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_pfmg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_pfmg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_smg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_smg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_stencil.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_stencil.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_IJMatrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_IJMatrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_hypre_laplace.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_hypre_laplace.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_par_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_par_vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_parcsr_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_parcsr_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FEI_HYPRE_Impl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FEI_HYPRE_Impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Factor_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Factor_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FlexGmres.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FlexGmres.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_ConvertPETScMatrixToDistributedMatrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_ConvertPETScMatrixToDistributedMatrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_ConvertParCSRMatrixToDistributedMatrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_ConvertParCSRMatrixToDistributedMatrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_DistributedMatrixPilutSolver.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_DistributedMatrixPilutSolver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_IJMatrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_IJMatrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_IJVector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_IJVector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSC_aux.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSC_aux.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_Dsuperlu.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_Dsuperlu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_UZAWA.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_UZAWA.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_blkprec.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_blkprec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_ddict.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_ddict.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_ddilut.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_ddilut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_ml.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_ml.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_mli.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_mli.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_poly.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_poly.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_schwarz.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LSI_schwarz.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LinSysCore.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_LinSysCore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_SlideReduction.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_SlideReduction.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_bicgstab.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_bicgstab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_cgnr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_cgnr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_csr_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_csr_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_distributed_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_distributed_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_gmres.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_gmres.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_mapped_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_mapped_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_multiblock_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_multiblock_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_Euclid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_Euclid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_ParaSails.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_ParaSails.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_TFQmr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_TFQmr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_amg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_amg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_bicgs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_bicgs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_bicgstab.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_bicgstab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_bicgstabl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_bicgstabl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_cgnr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_cgnr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_fgmres.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_fgmres.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_gmres.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_gmres.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_hybrid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_hybrid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_lsicg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_lsicg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_pcg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_pcg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_pilut.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_pilut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_schwarz.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_schwarz.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_symqmr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_symqmr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_pcg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_pcg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_bicgstab.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_bicgstab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_gmres.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_gmres.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_graph.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_graph.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_grid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_grid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_pcg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_pcg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_split.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_split.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_stencil.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_stencil.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_sys_pfmg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_sys_pfmg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_bicgstab.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_bicgstab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_gmres.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_gmres.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_grid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_grid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_hybrid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_hybrid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_jacobi.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_jacobi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_pcg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_pcg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_pfmg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_pfmg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_smg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_smg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_sparse_msg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_sparse_msg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_stencil.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_stencil.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Hash.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Hash.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Hash_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Hash_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Hash_i_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Hash_i_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IJMatrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IJMatrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IJMatrix_parcsr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IJMatrix_parcsr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IJVector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IJVector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IJVector_parcsr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IJVector_parcsr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LoadBal.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LoadBal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MatGenFD.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MatGenFD.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mat_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mat_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mem.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mem_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mem_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Numbering.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Numbering.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Numbering_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Numbering_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OrderStat.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OrderStat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ParaSails.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ParaSails.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Parser_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Parser_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PrunedRows.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PrunedRows.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/RowPatt.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/RowPatt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SortedList_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SortedList_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SortedSet_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SortedSet_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StoredRows.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StoredRows.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SubdomainGraph_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SubdomainGraph_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SymQMR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SymQMR.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TFQmr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TFQmr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeLog_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeLog_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Timer_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Timer_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Vec_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Vec_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/amg_hybrid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/amg_hybrid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/amg_linklist.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/amg_linklist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aux_parcsr_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aux_parcsr_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bicgs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bicgs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bicgstab.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bicgstab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bicgstabl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bicgstabl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binsearch.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binsearch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blas_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blas_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blas_utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blas_utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box_algebra.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box_algebra.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box_alloc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box_alloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box_map.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box_map.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box_neighbors.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box_neighbors.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cfei_hypre.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cfei_hypre.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cgnr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cgnr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cmli.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cmli.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coarsen.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coarsen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/colamd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/colamd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/communicationT.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/communicationT.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/communication_info.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/communication_info.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/computation.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/computation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csr_matop.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csr_matop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csr_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csr_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csr_matvec.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csr_matvec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cyclic_reduction.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cyclic_reduction.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dasum.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dasum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/daxpy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/daxpy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbdsqr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbdsqr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dcolumn_bmod.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dcolumn_bmod.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dcolumn_dfs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dcolumn_dfs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dcopy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dcopy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dcopy_to_ucol.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dcopy_to_ucol.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ddot.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ddot.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgebd2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgebd2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgebrd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgebrd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgelq2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgelq2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgelqf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgelqf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgels.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgels.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgemm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgemm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgemv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgemv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgeqr2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgeqr2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgeqrf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgeqrf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dger.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dger.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgesvd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgesvd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgscon.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgscon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgsequ.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgsequ.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgsrfs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgsrfs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgssv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgssv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgssvx.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgssvx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgstrf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgstrf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgstrs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgstrs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_ISIS.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_ISIS.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_PETSc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_PETSc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_parcsr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_parcsr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_qsort.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_qsort.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_qsort_si.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_qsort_si.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlabad.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlabad.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlabrd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlabrd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlacon.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlacon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlacpy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlacpy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlae2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlae2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlaev2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlaev2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlamch.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlamch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlange.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlange.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlangs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlangs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlanst.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlanst.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlansy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlansy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlapy2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlapy2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlaqgs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlaqgs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlarf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlarf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlarfb.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlarfb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlarfg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlarfg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlarft.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlarft.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlartg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlartg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlas2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlas2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlascl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlascl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlaset.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlaset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq1.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq3.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq4.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq5.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq6.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq6.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasrt.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasrt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlassq.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlassq.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasv2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasv2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlatrd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlatrd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmemory.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmemory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnrm2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnrm2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorg2l.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorg2l.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorg2r.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorg2r.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgbr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgbr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgl2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgl2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorglq.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorglq.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgql.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgql.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgqr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgqr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgtr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgtr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorm2r.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorm2r.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dormbr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dormbr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorml2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorml2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dormlq.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dormlq.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dormqr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dormqr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpanel_bmod.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpanel_bmod.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpanel_dfs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpanel_dfs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpivotL.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpivotL.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpivotgrowth.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpivotgrowth.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpotf2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpotf2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpotrf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpotrf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpotrs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpotrs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpruneL.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpruneL.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dreadhb.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dreadhb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drot.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drot.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dscal.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dscal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsnode_bmod.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsnode_bmod.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsnode_dfs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsnode_dfs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsp_blas2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsp_blas2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsp_blas3.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsp_blas3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsteqr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsteqr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsterf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsterf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyev.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyev.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsygs2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsygs2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsygst.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsygst.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsygv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsygv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsymv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsymv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyr2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyr2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyr2k.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyr2k.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyrk.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyrk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsytd2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsytd2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsytrd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsytrd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrmm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrmm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrmv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrmv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrsm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrsm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrsv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrsv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dutil.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dutil.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fgmres.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fgmres.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/general.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/general.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/genpart.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/genpart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getRow_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getRow_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_perm_c.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/get_perm_c.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/globalObjects.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/globalObjects.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gmres.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gmres.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grow.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grow.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hybrid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hybrid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_ParaSails.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_ParaSails.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_lsi_amge.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_lsi_amge.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_lsi_ddamg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_lsi_ddamg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_lsi_misc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_lsi_misc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_memory.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_memory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_qsort.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_qsort.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_schur_reduce.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_schur_reduce.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_slide_reduce.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_slide_reduce.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/idamax.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/idamax.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ieeeck.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ieeeck.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilaenv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilaenv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilu_mpi_bj.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilu_mpi_bj.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilu_mpi_pilu.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilu_mpi_pilu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilu_seq.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilu_seq.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilut.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jacobi.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jacobi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/krylov.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/krylov.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/krylov_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/krylov_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/krylov_sstruct.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/krylov_sstruct.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lapack_utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lapack_utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lobpcg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lobpcg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lobpcg_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lobpcg_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lobpcg_utilities.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lobpcg_utilities.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lsame.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lsame.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lsicg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lsicg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mapped_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mapped_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mat_dh_private.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mat_dh_private.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory_dmalloc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory_dmalloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_amgsa_calib.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_amgsa_calib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_amgsa_coarsen1.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_amgsa_coarsen1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_amgsa_dd_fedata.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_amgsa_dd_fedata.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_amgsa_dd_sfei.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_amgsa_dd_sfei.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_fedata.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_fedata.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_fedata_utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_fedata_utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_mapper.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_mapper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_matrix_mult.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_matrix_mult.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_matrix_utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_matrix_utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_method.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_method.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_method_amgcr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_method_amgcr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_method_amgrs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_method_amgrs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_method_amgsa.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_method_amgsa.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_oneLevel.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_oneLevel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_sfei.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_sfei.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_arpacksuperlu.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_arpacksuperlu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_bjacobi.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_bjacobi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_bsgs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_bsgs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_cg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_cg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_chebyshev.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_chebyshev.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_gs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_gs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_hschwarz.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_hschwarz.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_hsgs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_hsgs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_jacobi.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_jacobi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_kaczmarz.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_kaczmarz.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_mls.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_mls.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_parasails.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_parasails.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_seqsuperlu.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_seqsuperlu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_sgs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_sgs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_superlu.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_solver_superlu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mli_vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mmd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mmd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpistubs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpistubs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/multiblock_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/multiblock_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/node_relax.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/node_relax.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numbers.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numbers.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_amg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_amg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_amg_setup.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_amg_setup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_amg_solve.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_amg_solve.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_amg_solveT.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_amg_solveT.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_cg_relax_wt.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_cg_relax_wt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_coarse_parms.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_coarse_parms.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_coarsen.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_coarsen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_aat.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_aat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_bool_matop.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_bool_matop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_bool_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_bool_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_communication.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_communication.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_matop.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_matop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_matvec.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_matvec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_cycle.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_cycle.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_difconv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_difconv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_gsmg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_gsmg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_indepset.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_indepset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_interp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_interp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_laplace.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_laplace.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_laplace_27pt.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_laplace_27pt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_laplace_9pt.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_laplace_9pt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_rap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_rap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_rap_communication.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_rap_communication.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_relax.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_relax.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_relax_interface.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_relax_interface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_scaled_matnorm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_scaled_matnorm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_schwarz.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_schwarz.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_stats.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_stats.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_strength.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_strength.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parilut.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parilut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parutil.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parutil.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pblas1.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pblas1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcg_par.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcg_par.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcg_struct.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pcg_struct.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg2_setup_rap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg2_setup_rap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg3_setup_rap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg3_setup_rap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg_relax.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg_relax.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg_setup.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg_setup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg_setup_interp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg_setup_interp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg_setup_rap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg_setup_rap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg_setup_rap5.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg_setup_rap5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg_setup_rap7.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg_setup_rap7.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg_solve.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pfmg_solve.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/point_relax.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/point_relax.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/project.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/project.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/qsplit.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/qsplit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/random.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/random.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/relax_snode.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/relax_snode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/schwarz.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/schwarz.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/semi_interp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/semi_interp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/semi_restrict.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/semi_restrict.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/semi_setup_rap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/semi_setup_rap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/serilut.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/serilut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shellSort_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shellSort_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sig_dh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sig_dh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg2_setup_rap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg2_setup_rap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg3_setup_rap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg3_setup_rap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg_axpy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg_axpy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg_relax.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg_relax.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg_residual.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg_residual.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg_setup.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg_setup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg_setup_interp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg_setup_interp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg_setup_rap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg_setup_rap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg_setup_restrict.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg_setup_restrict.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg_solve.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smg_solve.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sp_coletree.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sp_coletree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sp_ienv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sp_ienv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sp_preorder.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sp_preorder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg2_setup_rap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg2_setup_rap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg3_setup_rap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg3_setup_rap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg_filter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg_filter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg_interp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg_interp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg_restrict.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg_restrict.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg_setup.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg_setup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg_setup_rap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg_setup_rap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg_solve.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparse_msg_solve.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_axpy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_axpy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_copy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_copy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_graph.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_graph.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_grid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_grid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_innerprod.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_innerprod.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_matvec.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_matvec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_scale.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_scale.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_stencil.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_stencil.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sstruct_vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_axpy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_axpy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_communication.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_communication.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_copy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_copy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_grid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_grid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_innerprod.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_innerprod.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_io.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_matrix_mask.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_matrix_mask.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_matvec.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_matvec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_scale.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_scale.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_stencil.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_stencil.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/superlu_memory.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/superlu_memory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/superlu_timer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/superlu_timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/superlu_util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/superlu_util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_relax.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_relax.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_setup.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_setup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_setup_interp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_setup_interp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_setup_rap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_setup_rap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_solve.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_solve.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_semi_interp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_semi_interp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_semi_restrict.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_semi_restrict.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread_mpistubs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread_mpistubs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/threading.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/threading.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timing.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trifactor.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trifactor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umalloc_local.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umalloc_local.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xerbla.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xerbla.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
@@ -18204,10 +20150,10 @@ distdir: $(DISTFILES)
 check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LIBRARIES) $(LTLIBRARIES)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(libdir)
 install: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
@@ -18236,8 +20182,8 @@ maintainer-clean-generic:
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
-	mostlyclean-am
+clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -18256,7 +20202,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-libLTLIBRARIES
+install-exec-am: install-libLIBRARIES install-libLTLIBRARIES
 
 install-info:
 
@@ -18283,20 +20229,20 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLTLIBRARIES
+uninstall-am: uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLTLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
+	clean-libLIBRARIES clean-libLTLIBRARIES clean-libtool ctags \
+	distclean distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am info info-am install \
 	install-am install-data install-data-am install-exec \
 	install-exec-am install-info install-info-am \
-	install-libLTLIBRARIES install-man install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-info-am \
-	uninstall-libLTLIBRARIES
+	install-libLIBRARIES install-libLTLIBRARIES install-man \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool pdf \
+	pdf-am ps ps-am tags uninstall uninstall-am uninstall-info-am \
+	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 
 copy-objects:

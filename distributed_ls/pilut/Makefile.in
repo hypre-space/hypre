@@ -67,6 +67,7 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
+DATETIME = @DATETIME@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
@@ -121,6 +122,8 @@ POW_LIB = @POW_LIB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+STATICONLY_FALSE = @STATICONLY_FALSE@
+STATICONLY_TRUE = @STATICONLY_TRUE@
 STRIP = @STRIP@
 USE_FEI_BASE_DIR_DEFAULT_FALSE = @USE_FEI_BASE_DIR_DEFAULT_FALSE@
 USE_FEI_BASE_DIR_DEFAULT_TRUE = @USE_FEI_BASE_DIR_DEFAULT_TRUE@
@@ -175,9 +178,11 @@ subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 
-lib_LTLIBRARIES = libHYPRE_DistributedMatrixPilutSolver.la
-libHYPRE_DistributedMatrixPilutSolver_la_SOURCES = $(FILES)
-libHYPRE_DistributedMatrixPilutSolver_la_LDFLAGS = -avoid-version
+@STATICONLY_TRUE@lib_LIBRARIES = libHYPRE_DistributedMatrixPilutSolver.a
+@STATICONLY_TRUE@libHYPRE_DistributedMatrixPilutSolver_a_SOURCES = $(FILES)
+@STATICONLY_FALSE@lib_LTLIBRARIES = libHYPRE_DistributedMatrixPilutSolver.la
+@STATICONLY_FALSE@libHYPRE_DistributedMatrixPilutSolver_la_SOURCES = $(FILES)
+@STATICONLY_FALSE@libHYPRE_DistributedMatrixPilutSolver_la_LDFLAGS = -avoid-version
 
 include_HEADERS = HYPRE_DistributedMatrixPilutSolver_protos.h\
  HYPRE_DistributedMatrixPilutSolver_types.h
@@ -221,13 +226,43 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
+LIBRARIES = $(lib_LIBRARIES)
+
+libHYPRE_DistributedMatrixPilutSolver_a_AR = $(AR) cru
+libHYPRE_DistributedMatrixPilutSolver_a_LIBADD =
+am__libHYPRE_DistributedMatrixPilutSolver_a_SOURCES_DIST = \
+	HYPRE_DistributedMatrixPilutSolver.c comm.c debug.c \
+	distributed_qsort.c distributed_qsort_si.c ilut.c parilut.c \
+	parutil.c pblas1.c serilut.c trifactor.c util.c \
+	DistributedMatrixPilutSolver.h \
+	HYPRE_DistributedMatrixPilutSolver_protos.h \
+	HYPRE_DistributedMatrixPilutSolver_types.h const.h ilu.h \
+	internal_protos.h macros.h struct.h
+am__objects_1 = HYPRE_DistributedMatrixPilutSolver.$(OBJEXT) \
+	comm.$(OBJEXT) debug.$(OBJEXT) distributed_qsort.$(OBJEXT) \
+	distributed_qsort_si.$(OBJEXT) ilut.$(OBJEXT) parilut.$(OBJEXT) \
+	parutil.$(OBJEXT) pblas1.$(OBJEXT) serilut.$(OBJEXT) \
+	trifactor.$(OBJEXT) util.$(OBJEXT)
+@STATICONLY_TRUE@am_libHYPRE_DistributedMatrixPilutSolver_a_OBJECTS = \
+@STATICONLY_TRUE@	$(am__objects_1)
+libHYPRE_DistributedMatrixPilutSolver_a_OBJECTS = \
+	$(am_libHYPRE_DistributedMatrixPilutSolver_a_OBJECTS)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libHYPRE_DistributedMatrixPilutSolver_la_LIBADD =
-am__objects_1 = HYPRE_DistributedMatrixPilutSolver.lo comm.lo debug.lo \
+am__libHYPRE_DistributedMatrixPilutSolver_la_SOURCES_DIST = \
+	HYPRE_DistributedMatrixPilutSolver.c comm.c debug.c \
+	distributed_qsort.c distributed_qsort_si.c ilut.c parilut.c \
+	parutil.c pblas1.c serilut.c trifactor.c util.c \
+	DistributedMatrixPilutSolver.h \
+	HYPRE_DistributedMatrixPilutSolver_protos.h \
+	HYPRE_DistributedMatrixPilutSolver_types.h const.h ilu.h \
+	internal_protos.h macros.h struct.h
+am__objects_2 = HYPRE_DistributedMatrixPilutSolver.lo comm.lo debug.lo \
 	distributed_qsort.lo distributed_qsort_si.lo ilut.lo parilut.lo \
 	parutil.lo pblas1.lo serilut.lo trifactor.lo util.lo
-am_libHYPRE_DistributedMatrixPilutSolver_la_OBJECTS = $(am__objects_1)
+@STATICONLY_FALSE@am_libHYPRE_DistributedMatrixPilutSolver_la_OBJECTS = \
+@STATICONLY_FALSE@	$(am__objects_2)
 libHYPRE_DistributedMatrixPilutSolver_la_OBJECTS = \
 	$(am_libHYPRE_DistributedMatrixPilutSolver_la_OBJECTS)
 
@@ -236,24 +271,33 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_DistributedMatrixPilutSolver.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/comm.Plo ./$(DEPDIR)/debug.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_DistributedMatrixPilutSolver.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/comm.Plo ./$(DEPDIR)/comm.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/debug.Plo ./$(DEPDIR)/debug.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/distributed_qsort.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/distributed_qsort.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/distributed_qsort_si.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/ilut.Plo ./$(DEPDIR)/parilut.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/parutil.Plo ./$(DEPDIR)/pblas1.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/serilut.Plo ./$(DEPDIR)/trifactor.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/util.Plo
+@AMDEP_TRUE@	./$(DEPDIR)/distributed_qsort_si.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ilut.Plo ./$(DEPDIR)/ilut.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/parilut.Plo ./$(DEPDIR)/parilut.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/parutil.Plo ./$(DEPDIR)/parutil.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/pblas1.Plo ./$(DEPDIR)/pblas1.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/serilut.Plo ./$(DEPDIR)/serilut.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/trifactor.Plo ./$(DEPDIR)/trifactor.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/util.Plo ./$(DEPDIR)/util.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
 	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libHYPRE_DistributedMatrixPilutSolver_la_SOURCES)
+DIST_SOURCES = \
+	$(am__libHYPRE_DistributedMatrixPilutSolver_a_SOURCES_DIST) \
+	$(am__libHYPRE_DistributedMatrixPilutSolver_la_SOURCES_DIST)
 HEADERS = $(include_HEADERS)
 
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.in Makefile.am
-SOURCES = $(libHYPRE_DistributedMatrixPilutSolver_la_SOURCES)
+SOURCES = $(libHYPRE_DistributedMatrixPilutSolver_a_SOURCES) $(libHYPRE_DistributedMatrixPilutSolver_la_SOURCES)
 
 all: all-am
 
@@ -264,6 +308,40 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configu
 	  $(AUTOMAKE) --foreign  distributed_ls/pilut/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
+libLIBRARIES_INSTALL = $(INSTALL_DATA)
+install-libLIBRARIES: $(lib_LIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f"; \
+	    $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f; \
+	  else :; fi; \
+	done
+	@$(POST_INSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    p="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(RANLIB) $(DESTDIR)$(libdir)/$$p"; \
+	    $(RANLIB) $(DESTDIR)$(libdir)/$$p; \
+	  else :; fi; \
+	done
+
+uninstall-libLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  p="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " rm -f $(DESTDIR)$(libdir)/$$p"; \
+	  rm -f $(DESTDIR)$(libdir)/$$p; \
+	done
+
+clean-libLIBRARIES:
+	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
+libHYPRE_DistributedMatrixPilutSolver.a: $(libHYPRE_DistributedMatrixPilutSolver_a_OBJECTS) $(libHYPRE_DistributedMatrixPilutSolver_a_DEPENDENCIES) 
+	-rm -f libHYPRE_DistributedMatrixPilutSolver.a
+	$(libHYPRE_DistributedMatrixPilutSolver_a_AR) libHYPRE_DistributedMatrixPilutSolver.a $(libHYPRE_DistributedMatrixPilutSolver_a_OBJECTS) $(libHYPRE_DistributedMatrixPilutSolver_a_LIBADD)
+	$(RANLIB) libHYPRE_DistributedMatrixPilutSolver.a
 libLTLIBRARIES_INSTALL = $(INSTALL)
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -302,17 +380,29 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_DistributedMatrixPilutSolver.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_DistributedMatrixPilutSolver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_qsort.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_qsort.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_qsort_si.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_qsort_si.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilut.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parilut.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parilut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parutil.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parutil.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pblas1.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pblas1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/serilut.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/serilut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trifactor.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trifactor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
@@ -462,10 +552,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(HEADERS)
+all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) $(HEADERS)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
+	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -492,8 +582,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
-	mostlyclean-am
+clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -512,7 +602,7 @@ info-am:
 
 install-data-am: install-includeHEADERS
 
-install-exec-am: install-libLTLIBRARIES
+install-exec-am: install-libLIBRARIES install-libLTLIBRARIES
 
 install-info:
 
@@ -539,21 +629,22 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
+uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
+	uninstall-libLTLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLTLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
+	clean-libLIBRARIES clean-libLTLIBRARIES clean-libtool ctags \
+	distclean distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am info info-am install \
 	install-am install-data install-data-am install-exec \
 	install-exec-am install-includeHEADERS install-info \
-	install-info-am install-libLTLIBRARIES install-man \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool pdf \
-	pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-includeHEADERS uninstall-info-am \
-	uninstall-libLTLIBRARIES
+	install-info-am install-libLIBRARIES install-libLTLIBRARIES \
+	install-man install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-includeHEADERS uninstall-info-am \
+	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

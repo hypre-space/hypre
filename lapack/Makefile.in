@@ -67,6 +67,7 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
+DATETIME = @DATETIME@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
@@ -121,6 +122,8 @@ POW_LIB = @POW_LIB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+STATICONLY_FALSE = @STATICONLY_FALSE@
+STATICONLY_TRUE = @STATICONLY_TRUE@
 STRIP = @STRIP@
 USE_FEI_BASE_DIR_DEFAULT_FALSE = @USE_FEI_BASE_DIR_DEFAULT_FALSE@
 USE_FEI_BASE_DIR_DEFAULT_TRUE = @USE_FEI_BASE_DIR_DEFAULT_TRUE@
@@ -175,9 +178,11 @@ subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 
-lib_LTLIBRARIES = libHYPRE_lapack.la
-libHYPRE_lapack_la_SOURCES = $(FILES)
-libHYPRE_lapack_la_LDFLAGS = -avoid-version
+@STATICONLY_TRUE@lib_LIBRARIES = libHYPRE_lapack.a
+@STATICONLY_TRUE@libHYPRE_lapack_a_SOURCES = $(FILES)
+@STATICONLY_FALSE@lib_LTLIBRARIES = libHYPRE_lapack.la
+@STATICONLY_FALSE@libHYPRE_lapack_la_SOURCES = $(FILES)
+@STATICONLY_FALSE@libHYPRE_lapack_la_LDFLAGS = -avoid-version
 
 #
 FILES = \
@@ -256,10 +261,61 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
+LIBRARIES = $(lib_LIBRARIES)
+
+libHYPRE_lapack_a_AR = $(AR) cru
+libHYPRE_lapack_a_LIBADD =
+am__libHYPRE_lapack_a_SOURCES_DIST = dbdsqr.c dgebd2.c dgebrd.c dgelq2.c \
+	dgelqf.c dgels.c dgeqr2.c dgeqrf.c dgesvd.c dlabad.c dlabrd.c \
+	dlacpy.c dlae2.c dlaev2.c dlamch.c dlange.c dlanst.c dlansy.c \
+	dlapy2.c dlarf.c dlarfb.c dlarfg.c dlarft.c dlartg.c dlascl.c \
+	dlaset.c dlas2.c dlasq1.c dlasq2.c dlasq3.c dlasq4.c dlasq5.c \
+	dlasq6.c dlasr.c dlasrt.c dlassq.c dlasv2.c dlatrd.c dorg2l.c \
+	dorg2r.c dorgbr.c dorgl2.c dorglq.c dorgql.c dorgqr.c dorgtr.c \
+	dorm2r.c dormbr.c dorml2.c dormlq.c dormqr.c dpotf2.c dpotrf.c \
+	dpotrs.c dsteqr.c dsterf.c dsyev.c dsygs2.c dsygst.c dsygv.c \
+	dsytd2.c dsytrd.c ieeeck.c ilaenv.c lapack_utils.c lsame.c \
+	xerbla.c f2c.h hypre_lapack.h
+am__objects_1 = dbdsqr.$(OBJEXT) dgebd2.$(OBJEXT) dgebrd.$(OBJEXT) \
+	dgelq2.$(OBJEXT) dgelqf.$(OBJEXT) dgels.$(OBJEXT) \
+	dgeqr2.$(OBJEXT) dgeqrf.$(OBJEXT) dgesvd.$(OBJEXT) \
+	dlabad.$(OBJEXT) dlabrd.$(OBJEXT) dlacpy.$(OBJEXT) \
+	dlae2.$(OBJEXT) dlaev2.$(OBJEXT) dlamch.$(OBJEXT) \
+	dlange.$(OBJEXT) dlanst.$(OBJEXT) dlansy.$(OBJEXT) \
+	dlapy2.$(OBJEXT) dlarf.$(OBJEXT) dlarfb.$(OBJEXT) \
+	dlarfg.$(OBJEXT) dlarft.$(OBJEXT) dlartg.$(OBJEXT) \
+	dlascl.$(OBJEXT) dlaset.$(OBJEXT) dlas2.$(OBJEXT) \
+	dlasq1.$(OBJEXT) dlasq2.$(OBJEXT) dlasq3.$(OBJEXT) \
+	dlasq4.$(OBJEXT) dlasq5.$(OBJEXT) dlasq6.$(OBJEXT) \
+	dlasr.$(OBJEXT) dlasrt.$(OBJEXT) dlassq.$(OBJEXT) \
+	dlasv2.$(OBJEXT) dlatrd.$(OBJEXT) dorg2l.$(OBJEXT) \
+	dorg2r.$(OBJEXT) dorgbr.$(OBJEXT) dorgl2.$(OBJEXT) \
+	dorglq.$(OBJEXT) dorgql.$(OBJEXT) dorgqr.$(OBJEXT) \
+	dorgtr.$(OBJEXT) dorm2r.$(OBJEXT) dormbr.$(OBJEXT) \
+	dorml2.$(OBJEXT) dormlq.$(OBJEXT) dormqr.$(OBJEXT) \
+	dpotf2.$(OBJEXT) dpotrf.$(OBJEXT) dpotrs.$(OBJEXT) \
+	dsteqr.$(OBJEXT) dsterf.$(OBJEXT) dsyev.$(OBJEXT) \
+	dsygs2.$(OBJEXT) dsygst.$(OBJEXT) dsygv.$(OBJEXT) \
+	dsytd2.$(OBJEXT) dsytrd.$(OBJEXT) ieeeck.$(OBJEXT) \
+	ilaenv.$(OBJEXT) lapack_utils.$(OBJEXT) lsame.$(OBJEXT) \
+	xerbla.$(OBJEXT)
+@STATICONLY_TRUE@am_libHYPRE_lapack_a_OBJECTS = $(am__objects_1)
+libHYPRE_lapack_a_OBJECTS = $(am_libHYPRE_lapack_a_OBJECTS)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libHYPRE_lapack_la_LIBADD =
-am__objects_1 = dbdsqr.lo dgebd2.lo dgebrd.lo dgelq2.lo dgelqf.lo \
+am__libHYPRE_lapack_la_SOURCES_DIST = dbdsqr.c dgebd2.c dgebrd.c \
+	dgelq2.c dgelqf.c dgels.c dgeqr2.c dgeqrf.c dgesvd.c dlabad.c \
+	dlabrd.c dlacpy.c dlae2.c dlaev2.c dlamch.c dlange.c dlanst.c \
+	dlansy.c dlapy2.c dlarf.c dlarfb.c dlarfg.c dlarft.c dlartg.c \
+	dlascl.c dlaset.c dlas2.c dlasq1.c dlasq2.c dlasq3.c dlasq4.c \
+	dlasq5.c dlasq6.c dlasr.c dlasrt.c dlassq.c dlasv2.c dlatrd.c \
+	dorg2l.c dorg2r.c dorgbr.c dorgl2.c dorglq.c dorgql.c dorgqr.c \
+	dorgtr.c dorm2r.c dormbr.c dorml2.c dormlq.c dormqr.c dpotf2.c \
+	dpotrf.c dpotrs.c dsteqr.c dsterf.c dsyev.c dsygs2.c dsygst.c \
+	dsygv.c dsytd2.c dsytrd.c ieeeck.c ilaenv.c lapack_utils.c \
+	lsame.c xerbla.c f2c.h hypre_lapack.h
+am__objects_2 = dbdsqr.lo dgebd2.lo dgebrd.lo dgelq2.lo dgelqf.lo \
 	dgels.lo dgeqr2.lo dgeqrf.lo dgesvd.lo dlabad.lo dlabrd.lo \
 	dlacpy.lo dlae2.lo dlaev2.lo dlamch.lo dlange.lo dlanst.lo \
 	dlansy.lo dlapy2.lo dlarf.lo dlarfb.lo dlarfg.lo dlarft.lo \
@@ -271,55 +327,90 @@ am__objects_1 = dbdsqr.lo dgebd2.lo dgebrd.lo dgelq2.lo dgelqf.lo \
 	dpotrs.lo dsteqr.lo dsterf.lo dsyev.lo dsygs2.lo dsygst.lo \
 	dsygv.lo dsytd2.lo dsytrd.lo ieeeck.lo ilaenv.lo \
 	lapack_utils.lo lsame.lo xerbla.lo
-am_libHYPRE_lapack_la_OBJECTS = $(am__objects_1)
+@STATICONLY_FALSE@am_libHYPRE_lapack_la_OBJECTS = $(am__objects_2)
 libHYPRE_lapack_la_OBJECTS = $(am_libHYPRE_lapack_la_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/dbdsqr.Plo ./$(DEPDIR)/dgebd2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgebrd.Plo ./$(DEPDIR)/dgelq2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgelqf.Plo ./$(DEPDIR)/dgels.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgeqr2.Plo ./$(DEPDIR)/dgeqrf.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgesvd.Plo ./$(DEPDIR)/dlabad.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlabrd.Plo ./$(DEPDIR)/dlacpy.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlae2.Plo ./$(DEPDIR)/dlaev2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlamch.Plo ./$(DEPDIR)/dlange.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlanst.Plo ./$(DEPDIR)/dlansy.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlapy2.Plo ./$(DEPDIR)/dlarf.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlarfb.Plo ./$(DEPDIR)/dlarfg.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlarft.Plo ./$(DEPDIR)/dlartg.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlas2.Plo ./$(DEPDIR)/dlascl.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlaset.Plo ./$(DEPDIR)/dlasq1.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlasq2.Plo ./$(DEPDIR)/dlasq3.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlasq4.Plo ./$(DEPDIR)/dlasq5.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlasq6.Plo ./$(DEPDIR)/dlasr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlasrt.Plo ./$(DEPDIR)/dlassq.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlasv2.Plo ./$(DEPDIR)/dlatrd.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorg2l.Plo ./$(DEPDIR)/dorg2r.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorgbr.Plo ./$(DEPDIR)/dorgl2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorglq.Plo ./$(DEPDIR)/dorgql.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorgqr.Plo ./$(DEPDIR)/dorgtr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorm2r.Plo ./$(DEPDIR)/dormbr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorml2.Plo ./$(DEPDIR)/dormlq.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dormqr.Plo ./$(DEPDIR)/dpotf2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dpotrf.Plo ./$(DEPDIR)/dpotrs.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsteqr.Plo ./$(DEPDIR)/dsterf.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsyev.Plo ./$(DEPDIR)/dsygs2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsygst.Plo ./$(DEPDIR)/dsygv.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsytd2.Plo ./$(DEPDIR)/dsytrd.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/ieeeck.Plo ./$(DEPDIR)/ilaenv.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/lapack_utils.Plo ./$(DEPDIR)/lsame.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/xerbla.Plo
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/dbdsqr.Plo ./$(DEPDIR)/dbdsqr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dgebd2.Plo ./$(DEPDIR)/dgebd2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dgebrd.Plo ./$(DEPDIR)/dgebrd.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dgelq2.Plo ./$(DEPDIR)/dgelq2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dgelqf.Plo ./$(DEPDIR)/dgelqf.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dgels.Plo ./$(DEPDIR)/dgels.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dgeqr2.Plo ./$(DEPDIR)/dgeqr2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dgeqrf.Plo ./$(DEPDIR)/dgeqrf.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dgesvd.Plo ./$(DEPDIR)/dgesvd.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlabad.Plo ./$(DEPDIR)/dlabad.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlabrd.Plo ./$(DEPDIR)/dlabrd.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlacpy.Plo ./$(DEPDIR)/dlacpy.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlae2.Plo ./$(DEPDIR)/dlae2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlaev2.Plo ./$(DEPDIR)/dlaev2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlamch.Plo ./$(DEPDIR)/dlamch.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlange.Plo ./$(DEPDIR)/dlange.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlanst.Plo ./$(DEPDIR)/dlanst.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlansy.Plo ./$(DEPDIR)/dlansy.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlapy2.Plo ./$(DEPDIR)/dlapy2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlarf.Plo ./$(DEPDIR)/dlarf.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlarfb.Plo ./$(DEPDIR)/dlarfb.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlarfg.Plo ./$(DEPDIR)/dlarfg.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlarft.Plo ./$(DEPDIR)/dlarft.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlartg.Plo ./$(DEPDIR)/dlartg.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlas2.Plo ./$(DEPDIR)/dlas2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlascl.Plo ./$(DEPDIR)/dlascl.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlaset.Plo ./$(DEPDIR)/dlaset.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasq1.Plo ./$(DEPDIR)/dlasq1.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasq2.Plo ./$(DEPDIR)/dlasq2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasq3.Plo ./$(DEPDIR)/dlasq3.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasq4.Plo ./$(DEPDIR)/dlasq4.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasq5.Plo ./$(DEPDIR)/dlasq5.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasq6.Plo ./$(DEPDIR)/dlasq6.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasr.Plo ./$(DEPDIR)/dlasr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasrt.Plo ./$(DEPDIR)/dlasrt.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlassq.Plo ./$(DEPDIR)/dlassq.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasv2.Plo ./$(DEPDIR)/dlasv2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dlatrd.Plo ./$(DEPDIR)/dlatrd.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorg2l.Plo ./$(DEPDIR)/dorg2l.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorg2r.Plo ./$(DEPDIR)/dorg2r.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorgbr.Plo ./$(DEPDIR)/dorgbr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorgl2.Plo ./$(DEPDIR)/dorgl2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorglq.Plo ./$(DEPDIR)/dorglq.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorgql.Plo ./$(DEPDIR)/dorgql.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorgqr.Plo ./$(DEPDIR)/dorgqr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorgtr.Plo ./$(DEPDIR)/dorgtr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorm2r.Plo ./$(DEPDIR)/dorm2r.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dormbr.Plo ./$(DEPDIR)/dormbr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dorml2.Plo ./$(DEPDIR)/dorml2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dormlq.Plo ./$(DEPDIR)/dormlq.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dormqr.Plo ./$(DEPDIR)/dormqr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dpotf2.Plo ./$(DEPDIR)/dpotf2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dpotrf.Plo ./$(DEPDIR)/dpotrf.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dpotrs.Plo ./$(DEPDIR)/dpotrs.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dsteqr.Plo ./$(DEPDIR)/dsteqr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dsterf.Plo ./$(DEPDIR)/dsterf.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dsyev.Plo ./$(DEPDIR)/dsyev.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dsygs2.Plo ./$(DEPDIR)/dsygs2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dsygst.Plo ./$(DEPDIR)/dsygst.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dsygv.Plo ./$(DEPDIR)/dsygv.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dsytd2.Plo ./$(DEPDIR)/dsytd2.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dsytrd.Plo ./$(DEPDIR)/dsytrd.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ieeeck.Plo ./$(DEPDIR)/ieeeck.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ilaenv.Plo ./$(DEPDIR)/ilaenv.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/lapack_utils.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/lapack_utils.Po ./$(DEPDIR)/lsame.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/lsame.Po ./$(DEPDIR)/xerbla.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/xerbla.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
 	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libHYPRE_lapack_la_SOURCES)
+DIST_SOURCES = $(am__libHYPRE_lapack_a_SOURCES_DIST) \
+	$(am__libHYPRE_lapack_la_SOURCES_DIST)
 DIST_COMMON = $(srcdir)/Makefile.in Makefile.am
-SOURCES = $(libHYPRE_lapack_la_SOURCES)
+SOURCES = $(libHYPRE_lapack_a_SOURCES) $(libHYPRE_lapack_la_SOURCES)
 
 all: all-am
 
@@ -330,6 +421,40 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configu
 	  $(AUTOMAKE) --foreign  lapack/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
+libLIBRARIES_INSTALL = $(INSTALL_DATA)
+install-libLIBRARIES: $(lib_LIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f"; \
+	    $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f; \
+	  else :; fi; \
+	done
+	@$(POST_INSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    p="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(RANLIB) $(DESTDIR)$(libdir)/$$p"; \
+	    $(RANLIB) $(DESTDIR)$(libdir)/$$p; \
+	  else :; fi; \
+	done
+
+uninstall-libLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  p="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " rm -f $(DESTDIR)$(libdir)/$$p"; \
+	  rm -f $(DESTDIR)$(libdir)/$$p; \
+	done
+
+clean-libLIBRARIES:
+	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
+libHYPRE_lapack.a: $(libHYPRE_lapack_a_OBJECTS) $(libHYPRE_lapack_a_DEPENDENCIES) 
+	-rm -f libHYPRE_lapack.a
+	$(libHYPRE_lapack_a_AR) libHYPRE_lapack.a $(libHYPRE_lapack_a_OBJECTS) $(libHYPRE_lapack_a_LIBADD)
+	$(RANLIB) libHYPRE_lapack.a
 libLTLIBRARIES_INSTALL = $(INSTALL)
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -368,72 +493,139 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbdsqr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbdsqr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgebd2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgebd2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgebrd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgebrd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgelq2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgelq2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgelqf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgelqf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgels.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgels.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgeqr2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgeqr2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgeqrf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgeqrf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgesvd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgesvd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlabad.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlabad.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlabrd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlabrd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlacpy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlacpy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlae2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlae2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlaev2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlaev2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlamch.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlamch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlange.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlange.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlanst.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlanst.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlansy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlansy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlapy2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlapy2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlarf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlarf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlarfb.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlarfb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlarfg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlarfg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlarft.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlarft.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlartg.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlartg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlas2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlas2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlascl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlascl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlaset.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlaset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq1.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq3.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq4.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq5.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq6.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq6.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasrt.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasrt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlassq.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlassq.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasv2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasv2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlatrd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlatrd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorg2l.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorg2l.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorg2r.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorg2r.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgbr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgbr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgl2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgl2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorglq.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorglq.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgql.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgql.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgqr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgqr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgtr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorgtr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorm2r.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorm2r.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dormbr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dormbr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorml2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dorml2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dormlq.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dormlq.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dormqr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dormqr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpotf2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpotf2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpotrf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpotrf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpotrs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dpotrs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsteqr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsteqr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsterf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsterf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyev.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyev.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsygs2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsygs2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsygst.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsygst.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsygv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsygv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsytd2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsytd2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsytrd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsytrd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ieeeck.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ieeeck.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilaenv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ilaenv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lapack_utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lapack_utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lsame.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lsame.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xerbla.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xerbla.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
@@ -565,10 +757,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LIBRARIES) $(LTLIBRARIES)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(libdir)
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -595,8 +787,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
-	mostlyclean-am
+clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -615,7 +807,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-libLTLIBRARIES
+install-exec-am: install-libLIBRARIES install-libLTLIBRARIES
 
 install-info:
 
@@ -642,20 +834,20 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLTLIBRARIES
+uninstall-am: uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLTLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
+	clean-libLIBRARIES clean-libLTLIBRARIES clean-libtool ctags \
+	distclean distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am info info-am install \
 	install-am install-data install-data-am install-exec \
 	install-exec-am install-info install-info-am \
-	install-libLTLIBRARIES install-man install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-info-am \
-	uninstall-libLTLIBRARIES
+	install-libLIBRARIES install-libLTLIBRARIES install-man \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool pdf \
+	pdf-am ps ps-am tags uninstall uninstall-am uninstall-info-am \
+	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -1,5 +1,5 @@
 #
-# Makefile.am --- automake input file for Hypre
+# Makefile.am --- automake input file for Hypre test drivers
 #
 ## Process this file with automake to create Makefile.in
 

@@ -424,12 +424,12 @@ dnl *
 dnl try and determine what the optimized compile FLAGS
 dnl
 AC_DEFUN([ACX_OPTIMIZATION_FLAGS],
-[if test "x${CFLAGS}" = "x"
+[if test "x${casc_user_chose_cflags}" = "xno"
 then
   if test "x${GCC}" = "xyes"
   then
     dnl **** default settings for gcc
-    CFLAGS="-O2"
+    CFLAGS="$CFLAGS -O2"
 ##  CFLAGS="$CFLAGS -fno-common -Wall -pedantic -Wpointer-arith -Wnested-externs"
 ##  dnl **** check for strength-reduce bug
 ##  ACX_GCC_STRENGTH_REDUCE(CFLAGS="$CFLAGS -fno-strength-reduce")
@@ -453,19 +453,19 @@ then
   else
     case "${CC}" in
       kcc|mpikcc)
-        CFLAGS="-fast +K3"
+        CFLAGS="$CFLAGS -fast +K3"
         ;;
       KCC|mpiKCC)
-        CFLAGS="--c -fast +K3"
+        CFLAGS="$CFLAGS --c -fast +K3"
         ;;
       icc)
-        CFLAGS="-O3 -xW -tpp7"
+        CFLAGS="$CFLAGS -O3 -xW -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -openmp"
         fi
         ;;
       pgcc|mpipgcc)
-        CFLAGS="-fast"
+        CFLAGS="$CFLAGS -fast"
         if test "$casc_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -mp"
         fi
@@ -473,65 +473,65 @@ then
       cc|c89|mpcc|mpiicc|xlc|ccc)
         case "${host}" in
           alpha*-dec-osf4.*)
-            CFLAGS="-std1 -w0 -O2"
+            CFLAGS="$CFLAGS -std1 -w0 -O2"
             ;;
           alpha*-dec-osf5.*)
-            CFLAGS="-fast"
+            CFLAGS="$CFLAGS -fast"
             if test "$casc_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -omp"
             fi
             ;;
           hppa*-hp-hpux*)
-            CFLAGS="-Aa -D_HPUX_SOURCE -O"
+            CFLAGS="$CFLAGS -Aa -D_HPUX_SOURCE -O"
             ;;
           mips-sgi-irix6.[[4-9]]*)
-            CFLAGS="-O -64 -OPT:Olimit=0"
+            CFLAGS="$CFLAGS -O -64 -OPT:Olimit=0"
             if test "$casc_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -mp"
             fi
             ;;
           mips-sgi-irix*)
-            CFLAGS="-fullwarn -woff 835 -O2 -Olimit 3500"
+            CFLAGS="$CFLAGS -fullwarn -woff 835 -O2 -Olimit 3500"
             ;;
           rs6000-ibm-aix*)
-            CFLAGS="-D_ALL_SOURCE -O2"
+            CFLAGS="$CFLAGS -D_ALL_SOURCE -O2"
             ;;
           powerpc-ibm-aix*)
-            CFLAGS="-O3 -qstrict -qmaxmem=8192"
+            CFLAGS="$CFLAGS -O3 -qstrict -qmaxmem=8192"
             if test "$casc_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -qsmp=omp"
             fi
             ;;
           *)
-            CFLAGS="-O"
+            CFLAGS="$CFLAGS -O"
             ;;
         esac
         ;;
       *)
-        CFLAGS="-O"
+        CFLAGS="$CFLAGS -O"
         ;;
     esac
   fi
 fi
-if test "x${CXXFLAGS}" = "x"
+if test "x${casc_user_chose_cxxflags}" = "xno"
 then
   if test "x${GXX}" = "xyes"
   then
     dnl **** default settings for gcc
-    CXXFLAGS="-O2"
+    CXXFLAGS="$CXXFLAGS -O2"
   else
     case "${CXX}" in
       KCC|mpiKCC)
-        CXXFLAGS="-fast +K3"
+        CXXFLAGS="$CXXFLAGS -fast +K3"
         ;;
       icc)
-        CXXFLAGS="-O3 -xW -tpp7"
+        CXXFLAGS="$CXXFLAGS -O3 -xW -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -openmp"
         fi
         ;;
       pgCC|mpipgCC)
-        CXXFLAGS="-fast"
+        CXXFLAGS="$CXXFLAGS -fast"
         if test "$casc_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
@@ -539,10 +539,10 @@ then
       CC|aCC|mpCC|mpiicc|xlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
-            CXXFLAGS="-std1 -w0 -O2"
+            CXXFLAGS="$CXXFLAGS -std1 -w0 -O2"
             ;;
           alpha*-dec-osf5.*)
-            CXXFLAGS="-fast"
+            CXXFLAGS="$CXXFLAGS -fast"
             if test "$casc_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -omp"
             fi
@@ -551,52 +551,52 @@ then
             CXXFLAGS="-D_HPUX_SOURCE -O"
             ;;
           mips-sgi-irix6.[[4-9]]*)
-            CXXFLAGS="-O -64"
+            CXXFLAGS="$CXXFLAGS -O -64"
             if test "$casc_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -mp"
             fi
             ;;
           mips-sgi-irix*)
-            CXXFLAGS="-fullwarn -woff 835 -O2 -Olimit 3500"
+            CXXFLAGS="$CXXFLAGS -fullwarn -woff 835 -O2 -Olimit 3500"
             ;;
           rs6000-ibm-aix*)
-            CXXFLAGS="-D_ALL_SOURCE -O2"
+            CXXFLAGS="$CXXFLAGS -D_ALL_SOURCE -O2"
             ;;
           powerpc-ibm-aix*)
-            CXXFLAGS="-O3 -qstrict -qmaxmem=8192"
+            CXXFLAGS="$CXXFLAGS -O3 -qstrict -qmaxmem=8192"
             if test "$casc_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -qsmp=omp"
             fi
             ;;
           *)
-            CXXFLAGS="-O"
+            CXXFLAGS="$CXXFLAGS -O"
             ;;
         esac
         ;;
       *)
-        CXXFLAGS="-O"
+        CXXFLAGS="$CXXFLAGS -O"
         ;;
     esac
   fi
 fi
-if test "x${FFLAGS}" = "x"
+if test "x${casc_user_chose_fflags}" = "xno"
 then
   if test "x${G77}" = "xyes"
   then
-    FFLAGS="-O"
+    FFLAGS="$FFLAGS -O"
   else
     case "${CXX}" in
       kf77|mpikf77)
-        FFLAGS="-fast +K3"
+        FFLAGS="$FFLAGS -fast +K3"
         ;;
       ifc)
-        FFLAGS="-O3 -xW -tpp7"
+        FFLAGS="$FFLAGS -O3 -xW -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
         fi
         ;;
       pgf77|mpipgf77)
-        FFLAGS="-fast"
+        FFLAGS="$FFLAGS -fast"
         if test "$casc_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -mp"
         fi
@@ -604,42 +604,42 @@ then
       f77|f90|mpxlf|mpif77|mpiifc|xlf|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
-            FFLAGS="-std1 -w0 -O2"
+            FFLAGS="$FFLAGS -std1 -w0 -O2"
             ;;
           alpha*-dec-osf5.*)
-            FFLAGS="-fast"
+            FFLAGS="$FFLAGS -fast"
             if test "$casc_using_openmp" = "yes" ; then
               FFLAGS="$FFLAGS -omp"
             fi
             ;;
           mips-sgi-irix6.[[4-9]]*)
-            FFLAGS="-O -64"
+            FFLAGS="$FFLAGS -O -64"
             if test "$casc_using_openmp" = "yes" ; then
               FFLAGS="$FFLAGS -mp"
             fi
             ;;
           mips-sgi-irix*)
-            FFLAGS="-fullwarn -woff 835 -O2 -Olimit 3500"
+            FFLAGS="$FFLAGS -fullwarn -woff 835 -O2 -Olimit 3500"
             ;;
           rs6000-ibm-aix*)
-            FFLAGS="-D_ALL_SOURCE -O2"
+            FFLAGS="$FFLAGS -D_ALL_SOURCE -O2"
             ;;
           powerpc-ibm-aix*)
-            FFLAGS="-O3 -qstrict"
+            FFLAGS="$FFLAGS -O3 -qstrict"
             if test "$casc_using_openmp" = "yes" ; then
               FFLAGS="$FFLAGS -qsmp=omp"
             fi
             ;;
           sparc-sun-solaris2*)
-            FFLAGS="-silent -O"
+            FFLAGS="$FFLAGS -silent -O"
             ;;
           *)
-            FFLAGS="-O"
+            FFLAGS="$FFLAGS -O"
             ;;
         esac
         ;;
       *)
-        FFLAGS="-O"
+        FFLAGS="$FFLAGS -O"
         ;;
     esac
   fi

@@ -67,6 +67,7 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
+DATETIME = @DATETIME@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
@@ -121,6 +122,8 @@ POW_LIB = @POW_LIB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+STATICONLY_FALSE = @STATICONLY_FALSE@
+STATICONLY_TRUE = @STATICONLY_TRUE@
 STRIP = @STRIP@
 USE_FEI_BASE_DIR_DEFAULT_FALSE = @USE_FEI_BASE_DIR_DEFAULT_FALSE@
 USE_FEI_BASE_DIR_DEFAULT_TRUE = @USE_FEI_BASE_DIR_DEFAULT_TRUE@
@@ -175,9 +178,11 @@ subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 
-lib_LTLIBRARIES = libHYPRE_struct_mv.la
-libHYPRE_struct_mv_la_SOURCES = $(FILES)
-libHYPRE_struct_mv_la_LDFLAGS = -avoid-version
+@STATICONLY_TRUE@lib_LIBRARIES = libHYPRE_struct_mv.a
+@STATICONLY_TRUE@libHYPRE_struct_mv_a_SOURCES = $(FILES)
+@STATICONLY_FALSE@lib_LTLIBRARIES = libHYPRE_struct_mv.la
+@STATICONLY_FALSE@libHYPRE_struct_mv_la_SOURCES = $(FILES)
+@STATICONLY_FALSE@libHYPRE_struct_mv_la_LDFLAGS = -avoid-version
 
 include_HEADERS = struct_mv.h HYPRE_struct_mv.h
 
@@ -235,10 +240,57 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
+LIBRARIES = $(lib_LIBRARIES)
+
+libHYPRE_struct_mv_a_AR = $(AR) cru
+libHYPRE_struct_mv_a_LIBADD =
+am__libHYPRE_struct_mv_a_SOURCES_DIST = F90_HYPRE_struct_grid.c \
+	F90_HYPRE_struct_matrix.c F90_HYPRE_struct_stencil.c \
+	F90_HYPRE_struct_vector.c HYPRE_struct_grid.c \
+	HYPRE_struct_matrix.c HYPRE_struct_stencil.c \
+	HYPRE_struct_vector.c box.c box_algebra.c box_alloc.c \
+	box_neighbors.c communication_info.c computation.c grow.c \
+	project.c struct_axpy.c struct_communication.c struct_copy.c \
+	struct_grid.c struct_innerprod.c struct_io.c struct_matrix.c \
+	struct_matrix_mask.c struct_matvec.c struct_scale.c \
+	struct_stencil.c struct_vector.c HYPRE_struct_mv.h box.h \
+	box_neighbors.h box_pthreads.h computation.h headers.h \
+	hypre_box_smp_forloop.h struct_communication.h struct_grid.h \
+	struct_matrix.h struct_mv.h struct_stencil.h struct_vector.h
+am__objects_1 = F90_HYPRE_struct_grid.$(OBJEXT) \
+	F90_HYPRE_struct_matrix.$(OBJEXT) \
+	F90_HYPRE_struct_stencil.$(OBJEXT) \
+	F90_HYPRE_struct_vector.$(OBJEXT) HYPRE_struct_grid.$(OBJEXT) \
+	HYPRE_struct_matrix.$(OBJEXT) HYPRE_struct_stencil.$(OBJEXT) \
+	HYPRE_struct_vector.$(OBJEXT) box.$(OBJEXT) \
+	box_algebra.$(OBJEXT) box_alloc.$(OBJEXT) \
+	box_neighbors.$(OBJEXT) communication_info.$(OBJEXT) \
+	computation.$(OBJEXT) grow.$(OBJEXT) project.$(OBJEXT) \
+	struct_axpy.$(OBJEXT) struct_communication.$(OBJEXT) \
+	struct_copy.$(OBJEXT) struct_grid.$(OBJEXT) \
+	struct_innerprod.$(OBJEXT) struct_io.$(OBJEXT) \
+	struct_matrix.$(OBJEXT) struct_matrix_mask.$(OBJEXT) \
+	struct_matvec.$(OBJEXT) struct_scale.$(OBJEXT) \
+	struct_stencil.$(OBJEXT) struct_vector.$(OBJEXT)
+@STATICONLY_TRUE@am_libHYPRE_struct_mv_a_OBJECTS = $(am__objects_1)
+libHYPRE_struct_mv_a_OBJECTS = $(am_libHYPRE_struct_mv_a_OBJECTS)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libHYPRE_struct_mv_la_LIBADD =
-am__objects_1 = F90_HYPRE_struct_grid.lo F90_HYPRE_struct_matrix.lo \
+am__libHYPRE_struct_mv_la_SOURCES_DIST = F90_HYPRE_struct_grid.c \
+	F90_HYPRE_struct_matrix.c F90_HYPRE_struct_stencil.c \
+	F90_HYPRE_struct_vector.c HYPRE_struct_grid.c \
+	HYPRE_struct_matrix.c HYPRE_struct_stencil.c \
+	HYPRE_struct_vector.c box.c box_algebra.c box_alloc.c \
+	box_neighbors.c communication_info.c computation.c grow.c \
+	project.c struct_axpy.c struct_communication.c struct_copy.c \
+	struct_grid.c struct_innerprod.c struct_io.c struct_matrix.c \
+	struct_matrix_mask.c struct_matvec.c struct_scale.c \
+	struct_stencil.c struct_vector.c HYPRE_struct_mv.h box.h \
+	box_neighbors.h box_pthreads.h computation.h headers.h \
+	hypre_box_smp_forloop.h struct_communication.h struct_grid.h \
+	struct_matrix.h struct_mv.h struct_stencil.h struct_vector.h
+am__objects_2 = F90_HYPRE_struct_grid.lo F90_HYPRE_struct_matrix.lo \
 	F90_HYPRE_struct_stencil.lo F90_HYPRE_struct_vector.lo \
 	HYPRE_struct_grid.lo HYPRE_struct_matrix.lo \
 	HYPRE_struct_stencil.lo HYPRE_struct_vector.lo box.lo \
@@ -248,48 +300,74 @@ am__objects_1 = F90_HYPRE_struct_grid.lo F90_HYPRE_struct_matrix.lo \
 	struct_grid.lo struct_innerprod.lo struct_io.lo \
 	struct_matrix.lo struct_matrix_mask.lo struct_matvec.lo \
 	struct_scale.lo struct_stencil.lo struct_vector.lo
-am_libHYPRE_struct_mv_la_OBJECTS = $(am__objects_1)
+@STATICONLY_FALSE@am_libHYPRE_struct_mv_la_OBJECTS = $(am__objects_2)
 libHYPRE_struct_mv_la_OBJECTS = $(am_libHYPRE_struct_mv_la_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/F90_HYPRE_struct_grid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_grid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_stencil.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_stencil.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_vector.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_struct_vector.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_grid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_grid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_stencil.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_stencil.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_vector.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/box.Plo ./$(DEPDIR)/box_algebra.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/box_alloc.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_struct_vector.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/box.Plo ./$(DEPDIR)/box.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/box_algebra.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/box_algebra.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/box_alloc.Plo ./$(DEPDIR)/box_alloc.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/box_neighbors.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/box_neighbors.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/communication_info.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/computation.Plo ./$(DEPDIR)/grow.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/project.Plo ./$(DEPDIR)/struct_axpy.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/communication_info.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/computation.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/computation.Po ./$(DEPDIR)/grow.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/grow.Po ./$(DEPDIR)/project.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/project.Po ./$(DEPDIR)/struct_axpy.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_axpy.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_communication.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_communication.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_copy.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_copy.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_grid.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_grid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_innerprod.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/struct_io.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_innerprod.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_io.Plo ./$(DEPDIR)/struct_io.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_matrix.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_matrix.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_matrix_mask.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_matrix_mask.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_matvec.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_matvec.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_scale.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_scale.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct_stencil.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/struct_vector.Plo
+@AMDEP_TRUE@	./$(DEPDIR)/struct_stencil.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_vector.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/struct_vector.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
 	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libHYPRE_struct_mv_la_SOURCES)
+DIST_SOURCES = $(am__libHYPRE_struct_mv_a_SOURCES_DIST) \
+	$(am__libHYPRE_struct_mv_la_SOURCES_DIST)
 HEADERS = $(include_HEADERS)
 
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.in Makefile.am
-SOURCES = $(libHYPRE_struct_mv_la_SOURCES)
+SOURCES = $(libHYPRE_struct_mv_a_SOURCES) $(libHYPRE_struct_mv_la_SOURCES)
 
 all: all-am
 
@@ -300,6 +378,40 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configu
 	  $(AUTOMAKE) --foreign  struct_mv/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
+libLIBRARIES_INSTALL = $(INSTALL_DATA)
+install-libLIBRARIES: $(lib_LIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f"; \
+	    $(libLIBRARIES_INSTALL) $$p $(DESTDIR)$(libdir)/$$f; \
+	  else :; fi; \
+	done
+	@$(POST_INSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    p="`echo $$p | sed -e 's|^.*/||'`"; \
+	    echo " $(RANLIB) $(DESTDIR)$(libdir)/$$p"; \
+	    $(RANLIB) $(DESTDIR)$(libdir)/$$p; \
+	  else :; fi; \
+	done
+
+uninstall-libLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  p="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " rm -f $(DESTDIR)$(libdir)/$$p"; \
+	  rm -f $(DESTDIR)$(libdir)/$$p; \
+	done
+
+clean-libLIBRARIES:
+	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
+libHYPRE_struct_mv.a: $(libHYPRE_struct_mv_a_OBJECTS) $(libHYPRE_struct_mv_a_DEPENDENCIES) 
+	-rm -f libHYPRE_struct_mv.a
+	$(libHYPRE_struct_mv_a_AR) libHYPRE_struct_mv.a $(libHYPRE_struct_mv_a_OBJECTS) $(libHYPRE_struct_mv_a_LIBADD)
+	$(RANLIB) libHYPRE_struct_mv.a
 libLTLIBRARIES_INSTALL = $(INSTALL)
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -338,33 +450,61 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_grid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_grid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_stencil.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_stencil.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_struct_vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_grid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_grid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_stencil.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_stencil.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_struct_vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box_algebra.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box_algebra.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box_alloc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box_alloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box_neighbors.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/box_neighbors.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/communication_info.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/communication_info.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/computation.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/computation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grow.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grow.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/project.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/project.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_axpy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_axpy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_communication.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_communication.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_copy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_copy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_grid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_grid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_innerprod.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_innerprod.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_io.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_matrix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_matrix_mask.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_matrix_mask.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_matvec.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_matvec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_scale.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_scale.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_stencil.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_stencil.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct_vector.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" \
@@ -514,10 +654,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(HEADERS)
+all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) $(HEADERS)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
+	$(mkinstalldirs) $(DESTDIR)$(libdir) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -544,8 +684,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
-	mostlyclean-am
+clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -564,7 +704,7 @@ info-am:
 
 install-data-am: install-includeHEADERS
 
-install-exec-am: install-libLTLIBRARIES
+install-exec-am: install-libLIBRARIES install-libLTLIBRARIES
 
 install-info:
 
@@ -591,21 +731,22 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
+uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
+	uninstall-libLTLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLTLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
+	clean-libLIBRARIES clean-libLTLIBRARIES clean-libtool ctags \
+	distclean distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am info info-am install \
 	install-am install-data install-data-am install-exec \
 	install-exec-am install-includeHEADERS install-info \
-	install-info-am install-libLTLIBRARIES install-man \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool pdf \
-	pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-includeHEADERS uninstall-info-am \
-	uninstall-libLTLIBRARIES
+	install-info-am install-libLIBRARIES install-libLTLIBRARIES \
+	install-man install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-includeHEADERS uninstall-info-am \
+	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
