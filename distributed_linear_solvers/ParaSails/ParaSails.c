@@ -800,7 +800,7 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         {
             printf("Matrix may not be symmetric positive definite.\n");
             printf("ParaSails: row %d, dpotrf returned %d.\n", row, info);
-            printf("ParaSails: len %d, ahat: %f %f %f %f\n", row,
+            printf("ParaSails: len %d, ahat: %f %f %f %f\n", len,
                 ahat[0], ahat[1], ahat[2], ahat[3]);
             PARASAILS_EXIT;
         }
@@ -810,7 +810,7 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         if (info != 0)
         {
             printf("ParaSails: row %d, dpotrs returned %d.\n", row, info);
-            printf("ParaSails: len %d, ahat: %f %f %f %f\n", row,
+            printf("ParaSails: len %d, ahat: %f %f %f %f\n", len,
                 ahat[0], ahat[1], ahat[2], ahat[3]);
             PARASAILS_EXIT;
         }
@@ -978,7 +978,7 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
         if (info != 0)
         {
             printf("ParaSails: row %d, dgels returned %d.\n", row, info);
-            printf("ParaSails: len %d, ahat: %f %f %f %f\n", row,
+            printf("ParaSails: len %d, ahat: %f %f %f %f\n", len,
                 ahat[0], ahat[1], ahat[2], ahat[3]);
             PARASAILS_EXIT;
         }
