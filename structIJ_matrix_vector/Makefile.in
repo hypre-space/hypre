@@ -28,6 +28,7 @@ CFLAGS =\
  -I$(srcdir)/../parcsr_matrix_vector\
  -I$(srcdir)/../parcsr_linear_solvers\
  -I$(srcdir)/../CI_struct_matrix_vector\
+ -I$(srcdir)/../IJ_matrix_vector\
  ${CINCLUDES} ${CDEFS}
 
 RANLIB= @RANLIB@
