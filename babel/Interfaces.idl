@@ -68,6 +68,7 @@ package Hypre {
       int SetDoubleParameter( in string name, in double value );
       int SetIntParameter( in string name, in int value );
       int SetIntArrayParameter( in string name, in array<int,1> value );
+      int GetIntParameter( in string name );
       StructuredGrid GetConstructedObject();
       int New( in MPI_Com com, in int dimension );
       int Setup();
@@ -184,6 +185,7 @@ package Hypre {
    class StructVectorBldr implements StructuredGridVectorBuilder {
       void print();
       int SetValues( in Box box, in array<double,1> values );
+      int SetNumGhost( in array<int,1> values );
       Vector GetConstructedObject();
       int New( in StructuredGrid grid );
       static StructVectorBldr Constructor( in StructuredGrid grid );
@@ -191,12 +193,13 @@ package Hypre {
    };
 
    class StructVector implements Vector {
-     int Clear ();                    
-     int Copy (in Vector x);         
-     int Clone (out Vector x);       
-     int Scale (in double a);        
-     int Dot (in Vector x, out double d);
-     int Axpy (in double a, in Vector x);
+      int GetNumGhost( in array<int,1> values );
+      int Clear ();                    
+      int Copy (in Vector x);         
+      int Clone (out Vector x);       
+      int Scale (in double a);        
+      int Dot (in Vector x, out double d);
+      int Axpy (in double a, in Vector x);
    };
 
    class StructMatrixBldr implements StructuredGridMatrixBuilder {
@@ -225,6 +228,7 @@ package Hypre {
       int SetDoubleParameter( in string name, in double value );
       int SetIntParameter( in string name, in int value );
       int SetIntArrayParameter( in string name, in array<int,1> value );
+      int GetIntParameter( in string name );
       StructuredGrid GetConstructedObject();
       int New( in MPI_Com com, in int dimension );
       static StructuredGrid Constructor( in MPI_Com com, in int dimension );
