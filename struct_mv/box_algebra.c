@@ -492,7 +492,7 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
    hypre_Box               *box, *rotated_box;
    hypre_Index              lower, upper;
 
-   int                      i, j, k, size, min_size, array;
+   int                      i, j, size, min_size, array;
 
    size= hypre_BoxArraySize(boxes);
    rotated_box= hypre_CTAlloc(hypre_Box, 1);
