@@ -89,7 +89,7 @@ hypre_F90_IFACE(hypre_getcomparcsr)( long int *matrix,
                                      int      *ierr    )
 {
    *ierr = (int) ( HYPRE_GetCommParCSR( (HYPRE_ParCSRMatrix) *matrix,
-                                        (MPI_comm *)         comm     ) );
+                                        (MPI_Comm *)         comm     ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -155,8 +155,8 @@ void
 hypre_F90_IFACE(hypre_restorerowparcsrmatrix)( long int *matrix,
                                                int      *row,
                                                int      *size,
-                                               long_int *col_ind_ptr,
-                                               long_int *values_ptr,
+                                               long int *col_ind_ptr,
+                                               long int *values_ptr,
                                                int      *ierr         )
 {
    int    **col_ind;  
