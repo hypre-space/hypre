@@ -1,10 +1,39 @@
 #!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
 #===========================================================================
-#   runs test drivers and logs results to file
+# Define test driver names
 #===========================================================================
 
-HYPRE_AUTOTEST_LOG_FILE="autotest.log"
+TEST_DRIVERS=\
+struct_linear_solvers \
 
-rm -f $HYPRE_AUTOTEST_LOG.FILE
-./struct_linear_solvers.sh >> $HYPRE_AUTOTEST_LOG_FILE
+#===========================================================================
+# Runs test drivers and log results and errors to file
+#===========================================================================
+
+for i in $TEST_DRIVERS
+do
+  ./${i}.sh 1> ${i}.log 2> ${i}.err
+done
+
+#===========================================================================
+# Check for errors and send appropriate email
+#===========================================================================
+
+for i in $TEST_DRIVERS
+do
+  if [ -s "${i}.err" ]
+  then
+    RECIPIENTS=`cat ${i}.email`
+    /usr/ucb/Mail -s "Error(s) in ${i} test suite" $RECIPIENTS < ${i}.err
+  fi
+done
 
