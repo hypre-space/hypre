@@ -76,7 +76,7 @@ function MpirunString
     peng*) shift
       RunString="prun -n$*"
       ;;
-    perr*|achi*|poin*|esak*|ares*|hypn*|weyl*|juve*) MACHINES_FILE="hostname"
+    perr*|achi*|sun*|poin*|esak*|ares*|hypn*|weyl*|juve*) MACHINES_FILE="hostname"
       if [ ! -f $MACHINES_FILE ]
       then
         hostname > $MACHINES_FILE
@@ -93,7 +93,7 @@ function MpirunString
     tc*) MPIRUN=`type mpirun|sed -e 's/^.* //'`
       RunString="$MPIRUN $*"
       ;;
-    tux*|perr*|achi*) MACHINES_FILE="hostname"
+    tux*) MACHINES_FILE="hostname"
       if [ ! -f $MACHINES_FILE ]
       then
         hostname > $MACHINES_FILE
@@ -373,7 +373,7 @@ function ExecuteJobs
           fi                            # BatchFlag set
         fi                              # BatchMode set
         ;;
-     ""|"\n") :
+     ""|"\n"|"\r"|"\v"|" ") :
        if [ "$DebugMode" -gt 0 ] ; then echo "Blank line" ; fi
        ;;
      *#*) :
@@ -381,7 +381,8 @@ function ExecuteJobs
        ;; 
      *)
        echo "Found something unexpected in $WorkingDir/$InputFile.jobs"
-       echo "In line: $InputLine"
+       echo "`echo $InputLine|wc`"
+       printf "In line:%x" $InputLine
        exit 1
        ;;
     esac
