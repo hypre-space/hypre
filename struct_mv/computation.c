@@ -170,7 +170,7 @@ hypre_GetComputeInfo( hypre_StructGrid      *grid,
       {
          cbox_array = hypre_BoxArrayArrayBoxArray(indt_boxes, i);
          hypre_SetBoxArraySize(cbox_array, 1);
-         cbox = hypre_BoxArrayBox(cbox_array, 0)
+         cbox = hypre_BoxArrayBox(cbox_array, 0);
          hypre_CopyBox(hypre_BoxArrayBox(boxes, i), cbox);
 
          for (d = 0; d < 3; d++)
