@@ -629,7 +629,10 @@ void MLI_Matrix_GetExtRows( MLI_Matrix *Amat, MLI_Matrix *Bmat, int *extNRowsP,
    int                 curNnz, sendIndex, proc;
    int                 ir, offset, upper, requestCnt, *recvCols, *iSendBuf;
    int                 *BDiagIA, *BOffdIA, *BDiagJA, *BOffdJA, *colMapOffd;
-   int                 *BRowStarts, *BColStarts;
+#if 0
+   int                 *BRowStarts;
+#endif
+   int                 *BColStarts;
    int                 *recvRowLengs, BStartCol;
    double              *BDiagAA, *BOffdAA, *recvVals, *dSendBuf;
    MPI_Request         *requests;
@@ -649,7 +652,9 @@ void MLI_Matrix_GetExtRows( MLI_Matrix *Amat, MLI_Matrix *Bmat, int *extNRowsP,
    mpiComm    = hypre_ParCSRMatrixComm(hypreA);
    MPI_Comm_size(mpiComm, &nprocs);
    MPI_Comm_rank(mpiComm, &mypid);
+#if 0
    BRowStarts = hypre_ParCSRMatrixRowStarts(hypreB);
+#endif
    BColStarts = hypre_ParCSRMatrixColStarts(hypreB);
    BStartCol  = BColStarts[mypid];
    if ( nprocs == 1 ) 
