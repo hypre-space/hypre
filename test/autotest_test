@@ -212,7 +212,7 @@ then
     then
       $MAKE struct 1> ${Hdr}.${MessageStr}.struct.log \
 	2> ${Hdr}.${MessageStr}.struct.err
-      if [ ${MessageStr -eq "strict_checking" ]
+      if [ $MessageStr -eq "strict_checking" ]
       then
         echo "$HYPRE_ALL_EMAIL" > ${Hdr}.${MessageStr}.struct.err.email
       else
@@ -224,7 +224,7 @@ then
     then
       $MAKE IJ 1> ${Hdr}.${MessageStr}.IJ.log \
 	2> ${Hdr}.${MessageStr}.IJ.err
-      if [ ${MessageStr -eq "strict_checking" ]
+      if [ $MessageStr -eq "strict_checking" ]
       then
         echo "$HYPRE_ALL_EMAIL" > ${Hdr}.${MessageStr}.IJ.err.email
       else
@@ -248,7 +248,7 @@ then
     then
       $MAKE beta 1> ${Hdr}.${MessageStr}.beta.log \
 	2> ${Hdr}.${MessageStr}.beta.err
-      if [ ${MessageStr -eq "strict_checking" ]
+      if [ $MessageStr -eq "strict_checking" ]
       then
         echo "$HYPRE_ALL_EMAIL" > ${Hdr}.${MessageStr}.beta.err.email
       else
