@@ -2790,7 +2790,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
        else if ( HYPreconID_ == HYML )
           HYPRE_LSI_MLDestroy( HYPrecon_ );
 #endif
-#ifdef HAVE_ML
+#ifdef HAVE_MLI
        else if ( HYPreconID_ == HYMLI )
           HYPRE_LSI_MLIDestroy( HYPrecon_ );
 #endif
