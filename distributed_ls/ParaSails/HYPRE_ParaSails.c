@@ -48,6 +48,81 @@ static void balance_info(MPI_Comm comm, Matrix *mat)
     printf("%4d: nrows %d, nnz %d, send %d (%d), recv %d (%d)\n", mype, 
     num_local, total, mat->num_send, mat->sendlen, mat->num_recv, mat->recvlen);
 }
+
+static void matvec_timing(MPI_Comm comm, Matrix *mat)
+{
+    double time0, time1;
+    double trial1, trial2, trial3, trial4, trial5, trial6;
+    double *temp1, *temp2;
+    int i, mype;
+    int n = mat->end_row - mat->beg_row + 1;
+
+    temp1 = (double *) calloc(n, sizeof(double));
+    temp2 = (double *) calloc(n, sizeof(double));
+
+    /* warm-up */
+    MPI_Barrier(comm);
+    for (i=0; i<100; i++)
+       MatrixMatvec(mat, temp1, temp2);
+
+    MPI_Barrier(comm);
+    time0 = MPI_Wtime();
+    for (i=0; i<100; i++)
+       MatrixMatvec(mat, temp1, temp2);
+    MPI_Barrier(comm);
+    time1 = MPI_Wtime();
+    trial1 = time1-time0;
+
+    MPI_Barrier(comm);
+    time0 = MPI_Wtime();
+    for (i=0; i<100; i++)
+       MatrixMatvec(mat, temp1, temp2);
+    MPI_Barrier(comm);
+    time1 = MPI_Wtime();
+    trial2 = time1-time0;
+
+    MPI_Barrier(comm);
+    time0 = MPI_Wtime();
+    for (i=0; i<100; i++)
+       MatrixMatvec(mat, temp1, temp2);
+    MPI_Barrier(comm);
+    time1 = MPI_Wtime();
+    trial3 = time1-time0;
+
+    MPI_Barrier(comm);
+    time0 = MPI_Wtime();
+    for (i=0; i<100; i++)
+       MatrixMatvecSerial(mat, temp1, temp2);
+    MPI_Barrier(comm);
+    time1 = MPI_Wtime();
+    trial4 = time1-time0;
+
+    MPI_Barrier(comm);
+    time0 = MPI_Wtime();
+    for (i=0; i<100; i++)
+       MatrixMatvecSerial(mat, temp1, temp2);
+    MPI_Barrier(comm);
+    time1 = MPI_Wtime();
+    trial5 = time1-time0;
+
+    MPI_Barrier(comm);
+    time0 = MPI_Wtime();
+    for (i=0; i<100; i++)
+       MatrixMatvecSerial(mat, temp1, temp2);
+    MPI_Barrier(comm);
+    time1 = MPI_Wtime();
+    trial6 = time1-time0;
+
+    MPI_Comm_rank(comm, &mype);
+    if (mype == 0)
+        printf("Timings: %f %f %f Serial: %f %f %f\n", 
+	   trial1, trial2, trial3, trial4, trial5, trial6);
+
+    fflush(stdout);
+
+    /* this is all we wanted, so don't waste any more cycles */
+    exit(0);
+}
 #endif
 
 /*--------------------------------------------------------------------------
@@ -77,6 +152,7 @@ static Matrix *convert_matrix(MPI_Comm comm, HYPRE_DistributedMatrix *distmat)
     MatrixComplete(mat);
 
 #ifdef BALANCE_INFO
+    matvec_timing(comm, mat);
     balance_info(comm, mat);
 #endif
 
@@ -235,3 +311,4 @@ int HYPRE_ParaSailsApplyTrans(HYPRE_ParaSails obj, double *u, double *v)
 
     return 0;
 }
+

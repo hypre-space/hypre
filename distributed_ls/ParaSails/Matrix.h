@@ -67,6 +67,7 @@ int  MatrixNnz(Matrix *mat);
 
 void MatrixComplete(Matrix *mat);
 void MatrixMatvec(Matrix *mat, double *x, double *y);
+void MatrixMatvecSerial(Matrix *mat, double *x, double *y);
 void MatrixMatvecTrans(Matrix *mat, double *x, double *y);
 
 #endif /* _MATRIX_H */

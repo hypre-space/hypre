@@ -743,6 +743,48 @@ void MatrixMatvec(Matrix *mat, double *x, double *y)
     MPI_Waitall(mat->num_recv, mat->recv_req, mat->statuses);
 
     /* do the multiply */
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(row,len,ind,val,temp,i) schedule(static)
+#endif
+    for (row=0; row<=mat->end_row - mat->beg_row; row++)
+    {
+        MatrixGetRow(mat, row, &len, &ind, &val);
+
+	temp = 0.0;
+	for (i=0; i<len; i++)
+	{
+	    temp = temp + val[i] * mat->recvbuf[ind[i]];
+	}
+	y[row] = temp;
+    } 
+
+    MPI_Waitall(mat->num_send, mat->send_req, mat->statuses);
+}
+
+void MatrixMatvecSerial(Matrix *mat, double *x, double *y)
+{
+    int row, i, len, *ind;
+    double *val, temp;
+    int num_local = mat->end_row - mat->beg_row + 1;
+
+    /* Set up persistent communications */
+
+    /* Assumes MatrixComplete has been called */
+
+    /* Put components of x into the right outgoing buffers */
+    for (i=0; i<mat->sendlen; i++)
+        mat->sendbuf[i] = x[mat->sendind[i]];
+
+    MPI_Startall(mat->num_recv, mat->recv_req);
+    MPI_Startall(mat->num_send, mat->send_req);
+
+    /* Copy local part of x into top part of recvbuf */
+    for (i=0; i<num_local; i++)
+	mat->recvbuf[i] = x[i];
+
+    MPI_Waitall(mat->num_recv, mat->recv_req, mat->statuses);
+
+    /* do the multiply */
     for (row=0; row<=mat->end_row - mat->beg_row; row++)
     {
         MatrixGetRow(mat, row, &len, &ind, &val);
