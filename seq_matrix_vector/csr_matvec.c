@@ -156,9 +156,9 @@ hypre_CSRMatrixMatvecT( double           alpha,
    int         x_size = hypre_VectorSize(x);
    int         y_size = hypre_VectorSize(y);
 
-   double      temp, size, rest;
+   double      temp;
 
-   int         i, i1, j, jj, ns, ne;
+   int         i, i1, j, jj, ns, ne, size, rest;
 
    int         ierr  = 0;
 

@@ -68,7 +68,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
    int             i, j, jr;
    int             ii, jj;
-   int             ns, ne;
+   int             ns, ne, size, rest;
    int             column;
    int             relax_error = 0;
    int		   num_sends;
@@ -86,7 +86,6 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
    double          zero = 0.0;
    double	   res;
-   double	   size, rest;
    double          one_minus_weight;
 
    one_minus_weight = 1.0 - relax_weight;
