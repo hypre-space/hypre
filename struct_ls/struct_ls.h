@@ -298,6 +298,9 @@ int hypre_PFMGSetupInterpOp( hypre_StructMatrix *A , int cdir , hypre_Index find
 /* pfmg_setup_rap5.c */
 hypre_StructMatrix *hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
 int hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMGBuildCoarseOp5_onebox_CC0( int fi , int ci , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMGBuildCoarseOp5_onebox_CC1( int fi , int ci , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+int hypre_PFMGBuildCoarseOp5_onebox_CC2( int fi , int ci , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
 
 /* pfmg_setup_rap7.c */
 hypre_StructMatrix *hypre_PFMGCreateCoarseOp7( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
