@@ -1,84 +1,437 @@
+
 %==========================================================================
-\chapter{Makefile Standards}
-\label{Makefile Standards}
+\chapter{The HYPRE Build System}
+\label{The HYPRE Build System}
 
-\hypre{} uses GNU Autotools, which includes: Autoconf,Automake, libtool, 
-and a few other GNU tools for installation.  The use of these tools 
-has been simplified by using a shell script, kbd{config/bootstrap}  to 
-handle all of the Autotool's dependencies and order of execution.
-See the User's Manual for details on building \hypre{}.
 
-To move new code into the Autoconf system, a \file{Makefile.am} must be
-created for each subdirectory, and the names of the
-subdirectories must be added to the list in the
+The \hypre{} build system uses GNU Autotools (Autoconf, Automake, libtool and a
+few related scripts) to configure, make and install the library.  These tools
+are very inter-dependent and need to be executed in a specific order. A shell 
+script named \file{bootstrap}, is provided in the \file{config} subdirectory to
+relieve developers of needing to know the Autotools constraints.  It is run 
+whenever changes are made to the M4 files or the \file{configure.ac} script.
+
+Developers are responsible for:
+\begin{enumerate}
+\item Creating a file named \file{Makefile.am} in each new subdirectory for which 
+      they are responsible.  Usually an existing \file{Makefile.am} can be 
+      copied and edited. An existing \file{Makefile.am} must be edited when 
+      new source files are added to an existing directory.
+
+\item Adding the name of new source code files to the \file{configure.ac} script 
+      (located in the \file{config} subdirectory) and the top-level \file{Makefile.am}.
+
+\item Adding the names of any new files to the \file{Makefile.am} in the \file{lib} subdirectory.
+
+\item Ensuring all changes are made in the appropriate scripts.
+
+\item Running the \file{bootstrap} script to generate a new \file{configure} script.
+
+\item Testing the changes.
+
+\item Committing the changes to the repository.
+
+\end{enumerate}
+
+%==========================================================================
+\section{Makefile Requirements}
+\label{Makefile Requirements}
+
+
+Autotools expect a file named \file{Makefile.am} to be in every direcotry, whether
+or not there are source code files.  \file{Makefile.am} is used by automake as a
+template which contains the names of the source and include files that need to 
+be built as well as include file paths and macro flags.  The source file names 
+are added to the \file{FILES} list; include files to be installed are in the 
+\file{include_HEADERS} list; and include paths and macro flags (i.e. -Dxxx) are 
+in the AM_CPPFLAGS list for C and C++ compilers or the AM_FFLAGS list for Fortran
+compilers.  These preprocessor flags are global to the build system.  The 
+EXTRA_DIST list is for those files not needed for building \hypre{} but desired 
+for its distribution, such as a README file. 
+
+The top level \file{Makefile.am}, i.e. \file{linear_solvers/Makefile.am}, is 
+edited to add the name of the new (highest_level) subdirectory, excluding all of
+its child-subdirectories, to the SUBDIRS, HYPRE_SUBDIR_LIST and possibly 
+DIST_SUBDIRS lists.  The rest of this file is not likely to need changing.
+
+Whenever changes to a \file{Makefile} are needed, they MUST be made to the \file{Makefile.am}
+files -- NOT to any other \file{Makefile}.
+\linebreak{\file{Makefile.in} and \file{Makefile} are regenerated everytime \file{bootstrap}
+or \file{configure} are run.}
+
+%==========================================================================
+\subsection{Sample Makefile.am with Source Code}
+\label{Sample Makefile.am with Source Code}
+
 \begin{verbatim}
-   AC_CONFIG_FILES
+## Process this file with automake to create Makefile.in
+
+include_HEADERS = krylov.h
+noinst_HEADERS = \
+   all_krylov.h \
+   pcg.h
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
+
+AM_CPPFLAGS = \
+   -I$(top_builddir)/utilities \
+   -I$(top_srcdir)/utilities 
+
+FILES = \
+   HYPRE_pcg.c \
+   cgnr.c \
+   gmres.c \
+   pcg.c
+
+$(OBJECTS): $(dependent_includes)
+
 \end{verbatim}
-macro of the \file{linear_solvers/configure.in} file.
-Additionally, the 
+
+%==========================================================================
+\subsection{Sample Makefile.am without Source Code}
+\label{Sample Makefile.am without Source Code}
+
 \begin{verbatim}
-   SUBDIRS =
-   DIST_SUBDIRS =
+## Process this file with automake to create Makefile.in
+
+SUBDIRS = . LOBPCG
+
 \end{verbatim}
-variables need to contain the subdirectories, in the appropriate
-\file{Makefile.am}.
+
+%==========================================================================
+\section{Configure Script Requirements}
+\label{Configure Script Requirements}
+
+
+The GNU tool Autoconf is used to generate the \file{configure} script for automatically
+configuring \hypre{} on UNIX-based systems.  It requires GNU M4 to generate the
+scripts.  There are several M4 scripts in the \file{linear_solvers/config} directory
+that are customized for \hypre{}.
+
+\file{configure.ac} is the template file, located in the \file{config} subdirectory, used 
+by Autoconf to create the \file{configure} script.  It is the file that gets changed
+when new subdirectories are added.  The names of new subdirectories are added to
+the AC_CONFIG_FILES list (near the end of the file).
+
+For example, a developer creates subdirectory \file{new_solve} with its own 
+subdirectories of \file{solve_setup} and \file{solve_exec}.  The additions to 
+AC_CONFIG_FILES would be (back slashes indicate continuation lines):
+
 \begin{verbatim}
-New Makefile.in's may use the following macros from configure:
-
-General purpose header files and libraries and directories for
-those libraries 
-INCLUDES  	produces a -I
-LIBS		produces a -l
-LIBDIRS		produces a -L
-
-MPI-related header files and libraries and directories for those libraries
-MPIINCLUDE	produces a -I
-MPILIBS		produces a -l
-MPILIBDIRS	produces a -L
-MPIFLAGS	produces a -l
-
-Macro definitions that should be included on compile line
-HYPREDEFS	produces a -D
-TIMERDEFS	produces a -D
-HYPRE_PETSCDEFS produces a -D
-HYPRE_PETSC_DIRS 
-
-Libraries and their directories that must be used at compile time 
-LDLIBS
-LDLIBDIRS
-
-Ranlib found by configure
-RANLIB		will assign ranlib or maybe empty
-
-Contain compiler flags such as optimization or debugging flags
-CFLAGS		usually assigns -O or -g
-CXXFLAGS	usually assigns -O or -g
-F77FLAGS	usually assigns -O or -g
-
-Needed when compiling with another command prior to the compiler command
-for example: purify cc ....
-PREPEND 	currently only used for purify
-
-
-PETSC-related header files, libraries and directories for those libraries
-PETSCLIBS	produces a -l
-PETSCLIBDIRS	produces a -L
-PETSCINCLUDE 	produces a -I
-
-Needed for Petsc to locate hypre
-HYPRE_TOP_SRC_DIR 
-
-These may be referenced in a Makefile.in as follows:
-  
-	 CC=@CC@
-
-This will replace ${CC} in your Makefile.in with whatever is assigned
-to CC in configure-- perhaps gcc, mpicc, etc.
+    new_solve/Makefile \
+    new_solve/solve_setup/Makefile \
+    new_solve/solve_exec/Makefile \
 
 \end{verbatim}
 
-Anytime changes are made to either the \file{configure.in} or
-\file{aclocal.m4} files, it is necessary to run \kbd{autoconf} to
-generate a new \file{configure} script, and this new script must also
-be checked into the repository.
+%==========================================================================
+\section{Bootstrap Script}
+\label{Bootstrap Script}
 
+
+The GNU Autotools are very inter-dependent, needing to be run in a specified 
+order.  The \file{bootstrap} script is a wrapper for executing them properly, 
+thus relieving developers of needing to know the details.
+
+\file{bootstrap} must be run anytime there are changes to any of the M4 routines
+or \file{configure.ac} to generate a new \file{configure} script.  The new configure
+script must be checked into the \hypre{} repository along with any other new or
+modified files.
+
+To run \file{bootstrap} you must be in the top-level directory, which is usually the
+\file{linear_solvers} directory.  The execute line is: \file{./config/bootstrap} 
+
+%==========================================================================
+\section{Build & Install}
+\label{Build & Install}
+
+
+Now that all of the files are created/edited, \hypre{} is ready to be configured
+and made for the host platform.  The simplest method is to configure, compile and
+install the libraries in \file{hypre/lib} and \file{hypre/include} directories, which is
+accomplished by:
+\begin{verbatim}
+   ./configure
+   make install
+\end{verbatim}
+
+Of course there are many options to \file{configure} and \file{make} targets to 
+customize such things as installation directories, compilers used, compile and
+load flags, etc.  
+
+%==========================================================================
+\subsection{Configure}
+\label{Configure}
+
+
+The best way to find out what options are available is to display the help package.
+The results of \file{./configure --help} when run on a local Linux platform are:
+\begin{verbatim}
+'configure' configures hypre 1.8.xx to adapt to many kinds of systems.
+
+Usage: ./configure [OPTION] ... [VAR=VALUE]...
+
+To assign environment variables (e.g. CC, CFLAGS ...), specify them as
+VAR=VALUE.  See below for descriptions of some of the useful variables.
+
+Defaults for the options are specified in brackets.
+
+Configuration:
+   -h, --help		   display this help and exit
+       --help=short	   display options specific to this package
+       --help=recursive	   display the short help of all the included packages
+   -V, --version	   display version information and exit
+   -q, --quiet, --silent   do not print 'checking ...' messages
+       --cache-file=FILE   cache test results in FILE [disabled]
+   -C, --config-cache      alias for '--cache-file=config.cache'
+   -n  --no-create         do not create output files
+       --srcdir=DIR        find the sources in DIR [configure dir or '..']
+
+Installation Directories:
+   --prefix=PREFIX         install architecture-independent files in PREFIX
+                           [/home/hill66/linear_solvers/hypre]
+   --exec-prefix=EPREFIX   install architecture-dependent files in EPREFIX 
+                           [PREFIX]
+
+
+By default, 'make install' will install all files in
+/home/hill66/linear_solvers/hypre/lib, /home/hill66/linear_solvers/hypre/bin, etc.
+
+You can specify an installation prefix other than /home/hill/linear_solvers/hypre by using 
+the --prefix option; for instance --prefix=$HOME.
+
+
+For fine tuning of the installation directories:
+   --bindir=DIR          user executables [EPREFIX/bin]
+   --sbindir=DIR         system admin executables [EPREFIX/sbin]
+   --libexecdir=DIR      program executables [EPREFIX/libexec]
+   --datadir=DIR         read-only architecture independent data [PREFIX/share]
+   --sysconfdir=DIR      read-only single machine data [PREFIX/etc]
+   --sharedstatedir=DIR  modifiable architecture independent data [PREFIX/com]
+   --localstatedir=DIR   modifiable architecture dependent data [PREFIX/var]
+   --libdir=DIR          object code libraries [EPREFIX/lib]
+   --includedir=DIR      C header files [PREFIX/include]
+   --oldincludedir=DIR   C header files for non GCC [/usr/include]
+   --infodir=DIR         info documentation [PREFIX/info]
+   --mandir=DIR          man documentation [PREFIX/man]
+
+
+Program Names:
+  --program-prefix=PREFIX           prepend PREFIX to installed program names
+  --program-suffix=SUFFIX           append SUFFIX to installed program names
+  --program-transform-name=PROGRAM  run sed PROGRAM on installed program names
+
+
+System Types:
+   --build=BUILD  configure for building on BUILD [guessed]
+   --host=HOST    cross-compile to build programs to run on HOST [BUILD]
+
+
+Optional Features:
+   --disable-FEATURE             do not include FEATURE (same as --enable-FEATURE=no)
+   --enable-FEATURE[=ARGS]       include FEATURE [ARG=yes]
+   --enable-shared[=PKGS]        build shared libraries [default=no]
+   --enable-maintainer-mode      enable make rules and dependencies not useful
+                                 (sometimes confusing) to the casual installer
+   --enable-debug                compile for debugging
+   --enable-static[=PKGS]        build static libraries [default=yes]
+   --enable-fast-install[=PKGS]  optimize for fast installation [default=yes]
+   --disable-libtool-lock        avoid locking (might break parallel builds)
+
+
+Optional Packages:
+   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+   --with-MPI=DIR          compiles with MPI default; DIR is top-level MPI directory
+   --without-MPI           use may affect compiler choice
+   --with-timing           use HYPRE timing routines
+   --with-openmp           use OpenMP; may affect compiler choice; supported 
+                           using guidec on IBM and Compaq
+   --with-strict-checking  compiles without MPI and assigns KCC as the C and C++
+                           compilers, unless CC and CXX are already set to gcc 
+                           and g++.
+   --with-insure=FLAGS     FLAGS are optional to pass to insure
+   --with-purify=FLAGS     FLAGS are optional to pass to purify
+   --with-purify-to-file   direct purify output to file 'purify.log'
+   --with-babel            use babel
+   --with-libdir           build libHYPRE and libHYPRE_LSI in lib directory
+   --with-FEI_BASE_DIR     specify the directory where the fei header files live
+   --with-FEI_LIB_DIR      specify an additional directory for fei library installs
+   --with-FEI_INC_DIR      specify an additional directory for fei include installs
+   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
+   --with-pic              try to use only PIC/non-PIC objects [default=use both]
+   --with-tags[=TAGS]      include additional configurations [automatic]
+   --with-COMM_SIMPLE      do not use MPI derived data types.  This option is 
+                           automatically chosen for IBM, may be selected for other
+                           platforms as well.
+   --with-blas=<lib>       uses BLAS library <lib>
+   --with-lapack=<lib>     uses LAPACK library <lib>
+
+
+Some influential environment variables:
+   CC        C compiler command
+   CFLAGS    C compiler flags
+   LDFLAGS   linker flags, e.g. -L<lib dir> for libraries in non-standard directory 
+             <lib dir>
+   CPPFLAGS  C/C++ preprocessor flags, e.g. -I<include dir> for header files in
+             non-standard directory <include dir>
+   CPP       C preprocessor
+   CXX       C++ compiler command
+   CXXFLAGS  C++ compiler flags
+   F77       Fortran 77 compiler command
+   FFLAGS    Fortran 77 compiler flags
+   CXXCPP    C++ preprocessor
+
+Use these variables to override the choices made by 'configure' or to help
+it find libraries and program swith non-standard names/locations.
+
+Report bugs to <http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE>.
+\end{verbatim}
+
+
+As an example, to configure \hypre{} on an AIX platform to build 64-bit libraries
+the command line would be:
+\begin{verbatim}
+./nopoe ./configure \
+CC=mpcc  CXX=mpCC  F77=mpxlf \
+CFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict" \
+CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE_COMM_SIMPLE -O3 -qstrict" \
+FFLAGS="-q64 -O3 -qstrict" \
+LDFLAGS="-q64" \
+AR="ar -X64"
+\end{verbatim}
+
+%==========================================================================
+\subsubsection{Sample Output from configure}
+\label{Sample Output from configure}
+
+The output of the configure script is several pages long.  It reports on the 
+system type being used for building and executing, compilers being used, libraries
+being searched and option flags being set.  When all of the searching is done a 
+file named \file{config.status} is created which then proceeds to create all of 
+the Makefiles.  The following is a very short sample of \file{configure} output.
+\begin{verbatim}
+./configure
+checking build system type. . . i686-pc-linux-gnu
+checking host system type. . . i686-pc-linux-gnu
+checking for mpcc. . . no
+checking for mpikcc. . . no
+checking for mpicc. . . mpicc
+checking for mpCC. . . no
+checking for mpiKCC. . . no
+checking for mpiCC. . . mpiCC
+checking for mpxlf. . . no
+checking for mpikf77. . . no
+checking for mpif77. . . mpif77
+checking whether the C compiler works. . . yes
+checking for egrep. . . grep -E
+checking for sys/types.h. . . yes
+checking for float.h. . . yes
+checking for _Bool. . . no
+checking whether closedir returns void. . .  no
+checking for sgemm_ in -lessl. . .  no
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: creating parcsr_es/Makefile
+config.status: creating parcsr_es/LOBPCG/Makefile
+config.status: creating HYPRE_config.h
+config.status: HYPRE_config.h is unchanged
+
+\end{verbatim}
+
+%==========================================================================
+\subsection{Make}
+\label{Make}
+
+The make step in building \hypre{} is where the compiling, loading and creation 
+of libraries occurs.  As with \file{configure}, make has options which are called
+targets.  These include:
+\begin{verbatim}
+   all                  default action; makes all top-level targets
+   clean                undo whatever make does
+   mostlyclean          like clean, but leaves libraries
+   maintainer-clean     delete everything that can be rebuilt
+   distclean            undo wahtever configure does
+   install              copy (install) executables/libraries in appropriate directories
+   install-strip        strip the installed files
+   uninstall            undo whatever install does
+   dist                 create a distribution file(tar file) of the source files
+   test                 perform a self-test on what make created
+\end{verbatim}
+
+Refer to the \file{Make} documentation or man pages for more detailed information. 
+Typically, \file{make} and \file{make install} are the only options needed for building \hypre{}.
+
+%==========================================================================
+\subsubsection{Sample Output from Make}
+\label{Sample Output from Make}
+
+The execution of \file{make} and its targets creates several pages of output.  
+For every file in every (sub)directory, the compile or isntall line is printed.
+The following is a brief sample of compile and install.
+\begin{verbatim}
+
+Output from make:
+Making all in LOBPCG
+make[3]: Entering directory '/home/hill66/linear_solvers/parcsr_es/LOBPCG
+mpicc -DHAVE_CONFIG_H -I. -I. -I../.. -I../../utilities -I../../utilities 
+-I../../IJ_mv -I../../parcsr_mv -I../../parcsr_ls -I../../seq_mv -I../../krylov
+-O2 -c lobpcg.c
+
+mpicc -DHAVE_CONFIG_H -I. -I. -I../.. -I../../utilities -I../../utilities 
+-I../../IJ_mv -I../../parcsr_mv -I../../parcsr_ls -I../../seq_mv -I../../krylov
+-O2 -c lobpcg_matrix.c
+
+mpicc -DHAVE_CONFIG_H -I. -I. -I../.. -I../../utilities -I../../utilities 
+-I../../IJ_mv -I../../parcsr_mv -I../../parcsr_ls -I../../seq_mv -I../../krylov
+-O2 -c lobpcg_utlities.c
+rm -f libHYPRE_lobpcg.a
+ar cru libHYPRE_lobpcg.a lobpcg.o lobpcg_matrix.o lobpcg_utilities.o
+ranlib libHYPRE_lobpcg.a
+make[3]: Leaving directory '/home/hill66/linear_solvers/parcsr_es/LOBPCG
+ 
+
+
+Output from make install:
+make[1]: Entering directory '/home/hill66/linear_solvers/parcsr_es
+Making install in LOBPCG
+make[2]: Entering directory '/home/hill66/linear_solvers/parcsr_es/LOBPCG
+make[3]: Entering directory '/home/hill66/linear_solvers/parcsr_es/LOBPCG
+mkdir -p -- . /home/hill66/linear_solvers/hypre/lib
+  /usr/bin/install -c -m 644 libHYPRE_lobpcg.a /home/hill66/linear_solvers/hypre/lib/libHYPRE_lobpcg.a
+  ranlib /home/hill66/linear_solvers/hypre/lib/libHYPRE_lobpcg.a
+  /usr/bin/install -c -m 644 HYPRE_lobpcg.h /home/hill66/linear_solvers/hypre/include/HYPRE_lobpcg.h
+  /usr/bin/install -c -m 644 lobpcg.h /home/hill66/linear_solvers/hypre/include/lobpcg.h
+make[3]: Leaving directory '/home/hill66/linear_solvers/parcsr_es/LOBPCG
+make[2]: Leaving directory '/home/hill66/linear_solvers/parcsr_es/LOBPCG
+make[1]: Leaving directory '/home/hill66/linear_solvers/parcsr_es
+
+\end{verbatim}
+
+%==========================================================================
+\section{Testing the Changes}
+\label{Testing the Changes}
+
+After having run \file{./configure}, the following sequence of commands will create 
+the \hypre{} libraries, install them in the proper directories and build the test codes.
+\begin{verbatim}
+make test                             ## compiles, builds and installs the libraries
+cd test                               ## go to the test subdirectory
+./runtest.sh TEST_xx.sh/*.sh          ## execute the runtest script to test all 
+                                         scripts in subdirectory TEST_xx; where 
+                                         xx can be ij, ij_es, fei, sstruct, struct.
+\end{verbatim}
+
+%==========================================================================
+\section{Committing Changes to the Repository}
+\label{Committing Changes to the Repository}
+
+After verifying all of the changes, the files must be committed to the CVS repository.
+This is usually done from the top-level (i.e. \file{linear_solvers}) directory with 
+the CVS command:
+\begin{verbatim} cvs commit * 
+\end{verbatim}
+
+If there are only a few files to be committed the command can be executed from 
+any subdirectory with the file names listed on the command line, such as:
+\begin{verbatim} cvs commit src1.c src2.c src.h
+\end{verbatim}
