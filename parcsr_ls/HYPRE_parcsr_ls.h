@@ -242,7 +242,7 @@ int HYPRE_BoomerAMGSetSmoothNumSweep(HYPRE_Solver  solver,
 
 /*
  * (Optional) Name of file to which BoomerAMG will print;
- * cf HYPRE_BoomerAMGSetPrintLevel
+ * cf HYPRE_BoomerAMGSetPrintLevel.  (Presently this is ignored).
  **/
 int HYPRE_BoomerAMGSetPrintFileName(HYPRE_Solver  solver,
                                   const char   *print_file_name);
@@ -253,6 +253,14 @@ int HYPRE_BoomerAMGSetPrintFileName(HYPRE_Solver  solver,
  **/
 int HYPRE_BoomerAMGSetPrintLevel(HYPRE_Solver  solver,
                               int           print_level);
+
+/*
+ * (Optional) Requests additional computations for diagnostic and similar
+ * data to be logged by the user. Default to 0 for do nothing.  The latest
+ * residual will be available if log_level>2.
+ **/
+int HYPRE_BoomerAMGSetLogLevel(HYPRE_Solver  solver,
+                              int           log_level);
 
 /*
  * (Optional) Sets the size of the system of PDEs, if using the systems version.
