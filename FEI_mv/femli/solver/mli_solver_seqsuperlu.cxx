@@ -655,7 +655,7 @@ int MLI_Solver_SeqSuperLU::setParams(char *paramString, int argc, char **argv)
          iArray =  (int *) argv[5];
          for ( i = 0; i < nSends_; i++ ) sendLengs_[i] = iArray[i];
       }
-      AComm_ = *(int *) argv[6];
+      AComm_ = *(MPI_Comm *) argv[6];
    }
    else
    {   
