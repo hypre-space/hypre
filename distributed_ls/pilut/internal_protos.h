@@ -75,7 +75,7 @@ void hypre_p_daxbyz( DataDistType *ddist , double alpha , double *x , double bet
 int hypre_p_vprintf( DataDistType *ddist , double *x , hypre_PilutSolverGlobals *globals );
 
 /* distributed_qsort.c */
-
+void tex_qsort(char *base, int n, int size, int (*compar) ());
 /* distributed_qsort_si.c */
 void hypre_sincsort_fast( int n , int *base );
 void hypre_sdecsort_fast( int n , int *base );
