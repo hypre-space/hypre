@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #BHEADER***********************************************************************
 # (c) 2000   The Regents of the University of California
 #
@@ -51,10 +51,10 @@ initialize_variables ()
 #
   . $StdTestDir/hypre_arch.sh
   if [ -z "$HYPRE_COMPILE_MACHINE" -o "$HYPRE_COMPILE_MACHINE" = "" ] ; then
-    HYPRE_COMPILE_MACHINE=$(hostname)
+    HYPRE_COMPILE_MACHINE=`hostname`
   fi
   if [ -z "$HYPRE_RUN_MACHINE" -o "$HYPRE_RUN_MACHINE" = "" ] ; then
-    HYPRE_RUN_MACHINE=$(hostname)
+    HYPRE_RUN_MACHINE=`hostname`
   fi
 #
 # If NOT started by autotest (hence no HYPRE_*_EMAIL variable
@@ -91,13 +91,14 @@ parse_arguments () {
 # probably implement the obsolute getopt) then
 # getopts(1) will be used.
 #
-  while getopts :a:b:cdfhmno:p:q:r:st:xy arg
+  while getopts :a:b:cDdfhmno:p:q:r:st:xy arg
   do
     argcur=$arg
     case $arg in
       a) confbuildtest $OPTARG  " "             "default"   1 1 1 1 1 1 1;;
       b) confbuildtest $OPTARG  " "             "beta"      0 0 0 0 0 1 1;;
       c) build $Build "all++"   "all++"         "test";;
+      D) DEBUG_MODE="yes";;
       d) build $Build " "       "docs"          "docs";;
       f) build $Build "all77"   "all77"         "test";;
       h) usage; exit 2;;
@@ -175,7 +176,7 @@ mail_summary () {
   CERRCNT=0; EERRCNT=0; TOTCNT=0
   CLIST=""; ELIST=""
   cd $HYPRE_AUTOTEST_DIR
-  SUMFILE="autotest.$HYPRE_ARCH.$(date '+%Y%m%d')"
+  SUMFILE="autotest.$HYPRE_ARCH.`date '+%Y%m%d'`"
   printf "--------------------------------------------\n" > $SUMFILE
   printf "Autotest error summary for `date`\n" >> $SUMFILE
   printf "Target architecure: $HYPRE_ARCH\n" >> $SUMFILE
@@ -190,19 +191,18 @@ mail_summary () {
   do
     printf "%-15s: " $ConfOpt >> $SUMFILE
     COLFLG=0; COLCNT=0;
-    for MakeOpt in ""  all beta configure IJ fei++ fei nofei sstruct struct
+    for MakeOpt in ""  all beta configure IJ fei++ \
+           fei nofei sstruct struct
     do
       FILE=autotest.$ConfOpt.$MakeOpt
-      LFILE=${FILE%%.}.log
+      LFILE=`echo $FILE|sed -e 's/\.$//'`.log
       for i in $LFILE ${SRC}/${LFILE} \
                ${SRC}/test/${LFILE} ${SRC}/docs/${LFILE} 
       do
-        if test -r "${i}"
-        then
+        if [ -r "${i}" ] ; then
           CTOTCNT=`expr $CTOTCNT + 1`
-          EFILE=${i%%log}err
-          if test -s "${EFILE}"
-          then
+          EFILE=`echo $i|sed -e 's/log$//'`err
+          if [ -s "${EFILE}" ] ; then
             TOTCNT=`expr $TOTCNT + 1`
             CERRCNT=`expr $CERRCNT + 1`
             COLCNT=`expr $COLCNT + 1`
@@ -226,24 +226,20 @@ mail_summary () {
   printf "%2d %s\n" $CERRCNT "test failed" >> $SUMFILE
   printf "%2d %s\n" $CLOGCNT "test succeeded" >> $SUMFILE
   printf "%2d %s\n" $CTOTCNT "test total" >> $SUMFILE
-  if [ "$CLIST" != "" ]
-  then
+  if [ "$CLIST" != "" ] ; then
     printf "non zero error log file(s):\n" >> $SUMFILE
     printf "${CLIST}" >> $SUMFILE
   fi
   printf "--------------------------------------------\n" >> $SUMFILE
   printf "Execute summary:\n" >> $SUMFILE
-  for i in IJ fei sstruct struct
-  do
+  for i in IJ fei sstruct struct ; do
     LFILE=${SRC}/test/${i}_linear_solvers.log
-    if test -r "${LFILE}"
-    then
+    if [ -r "${LFILE}" ] ; then
       printf "%-15s: " $i >> $SUMFILE
       COLFLG=0; COLCNT=0;
       ETOTCNT=`expr $ETOTCNT + 1`
       EFILE=${SRC}/test/${i}_linear_solvers.err
-      if test -s "${EFILE}"
-      then
+      if [ -s "${EFILE}" ] ; then
         TOTCNT=`expr $TOTCNT + 1`
         EERRCNT=`expr $EERRCNT + 1`
         COLCNT=`expr $COLCNT + 1`
@@ -265,25 +261,26 @@ mail_summary () {
   printf "%2d %s\n" $EERRCNT "test failed" >> $SUMFILE
   printf "%2d %s\n" $ELOGCNT "test succeeded" >> $SUMFILE
   printf "%2d %s\n" $ETOTCNT "test total" >> $SUMFILE
-  if [ "$ELIST" != "" ]
-  then
+  if [ "$ELIST" != "" ] ; then
     printf "non zero error log file(s):\n" >> $SUMFILE
     printf "${ELIST}" >> $SUMFILE
   fi
   printf "--------------------------------------------\n" >> $SUMFILE
-  if [ "$TOTCNT" = "0" ]
-  then
+  if [ "$TOTCNT" = "0" ] ; then
     SUBJECT="Autotest NO Errors ($HYPRE_ARCH)"
   else
     SUBJECT="Autotest $TOTCNT Errors ($HYPRE_ARCH)"
   fi
-  ${HYPRE_MAIL} -s "$SUBJECT" $HYPRE_ALL_EMAIL < $SUMFILE 
+  if [ "$DEBUG_MODE" = "yes" ] ; then
+    ${HYPRE_MAIL} -s "$SUBJECT" $USER < $SUMFILE 
+  else
+    ${HYPRE_MAIL} -s "$SUBJECT" $HYPRE_ALL_EMAIL < $SUMFILE 
+  fi
   echo "Autotest mail sent"
 }
 
 mail_errors () { 
-  if [ "$HYPRE_SEND_MAIL" = "yes" ]
-  then
+  if [ "$HYPRE_SEND_MAIL" = "yes" ] ; then
     echo "Autotest mailing error messages"
     cd $HYPRE_AUTOTEST_DIR
     for i in *.err \
@@ -291,13 +288,15 @@ mail_errors () {
         ${SRC}/test/*.err \
         ${SRC}/docs/*.err
     do 
-      if test -s "$i"
-      then 
-        if test -r "${i}.email"
-        then
+      if [ -s "$i" ] ; then 
+        if [ -r "${i}.email" ] ; then
           RECIPIENTS=`cat ${i}.email` 
           SUBJECT="Autotest error: ${i} ($HYPRE_ARCH)"
-          ${HYPRE_MAIL} -s "$SUBJECT" $RECIPIENTS < $i 
+          if [ "$DEBUG_MODE" = "yes" ] ; then
+            ${HYPRE_MAIL} -s "$SUBJECT" $USER < $i 
+          else
+            ${HYPRE_MAIL} -s "$SUBJECT" $RECIPIENTS < $i 
+          fi
         fi
       fi 
     done 
@@ -340,12 +339,10 @@ IJOpt=$4	 FeiOpt=$5	  StructOpt=$6
 SstructOpt=$7	 MakeOpt=$8	  BetaOpt=$9
 shift
 NoFeiOpt=$9
-if [ ${BuildOpt} -ne $Skip ]
-then
+if [ ${BuildOpt} -ne $Skip ] ; then
   seconds; TIME=$SECS
   echo "Autotest starting configure and make of $MessageStr"
-  if [ ${BuildOpt} -eq $Build -o ${BuildOpt} -eq $Run ]
-  then
+  if [ ${BuildOpt} -eq $Build -o ${BuildOpt} -eq $Run ] ; then
     cd $StdBuildDir
     ./configure "$ConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
 	2> ${Hdr}.${MessageStr}.configure.err
@@ -353,47 +350,38 @@ then
 
     $MAKE veryclean
 
-    if [ $IJOpt -ne $Skip ]
-    then
+    if [ $IJOpt -ne $Skip ] ; then
       makeit "IJ" $MessageStr "$HYPRE_IJ_EMAIL"
     fi
 
-    if [ $FeiOpt -ne $Skip ]
-    then
+    if [ $FeiOpt -ne $Skip ] ; then
       makeit "fei" $MessageStr "$HYPRE_FEI_EMAIL"
     fi
 
-    if [ $StructOpt -ne $Skip ]
-    then
+    if [ $StructOpt -ne $Skip ] ; then
       makeit "struct" $MessageStr "$HYPRE_STRUCT_EMAIL"
     fi
 
-    if [ $SstructOpt -ne $Skip ]
-    then
+    if [ $SstructOpt -ne $Skip ] ; then
       makeit "sstruct" $MessageStr "$HYPRE_STRUCT_EMAIL"
     fi
 
-    if [ $MakeOpt -ne $Skip ]
-    then
+    if [ $MakeOpt -ne $Skip ] ; then
       makeit "all" $MessageStr "$HYPRE_DEFAULT_EMAIL"
     fi
 
-    if [ $BetaOpt -ne $Skip ]
-    then
+    if [ $BetaOpt -ne $Skip ] ; then
       makeit "beta" $MessageStr "$HYPRE_DEFAULT_EMAIL"
     fi
   fi
-  if [ ${BuildOpt} -eq $Run ]
-  then
+  if [ ${BuildOpt} -eq $Run ] ; then
     echo "Autotest starting execution of $MessageStr"
-    if [ $NoFeiOpt -ne $Skip ]
-    then
+    if [ $NoFeiOpt -ne $Skip ] ; then
       makeit "nofei" $MessageStr "$HYPRE_FEI_EMAIL"
       cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test
       makeit "fei++" $MessageStr "$HYPRE_FEI_EMAIL"
     fi
-    if test ! "${HYPRE_RUN_MACHINE}"
-    then
+    if test ! "${HYPRE_RUN_MACHINE}" ; then
       cd $HYPRE_AUTOTEST_DIR/${SRC}/test
       ./test_drivers.sh $MailOpt
     else
@@ -421,6 +409,12 @@ then
   seconds; TIME=$SECS
   echo "Autotest starting make of $MessageStr"
   cd $StdBuildDir/$MakeDir
+  if [ -f ./Makefile ] ; then
+    cd $StdBuildDir
+    ./configure 1> ${Hdr}.${MessageStr}.configure.log \
+	2> ${Hdr}.${MessageStr}.configure.err
+    cd $StdBuildDir/$MakeDir
+  fi
   $MAKE $MakeOption 1> ${Hdr}.${MessageStr}.log \
 	2> ${Hdr}.${MessageStr}.err
   echo "$HYPRE_ALL_EMAIL" > ${Hdr}.${MessageStr}.err.email
