@@ -89,6 +89,47 @@ extern int num_procs; /* HH_INIT 1 */
 /* define return value for failure to find MPI */
 #define NO_MPI 		     -999    /* can't be valid return value in mpi.h */
 
+/*--------------------------------------------------------------------------
+ * Prototypes
+ *--------------------------------------------------------------------------*/
+
+#ifdef __STDC__
+# define        P(s) s
+#else
+# define P(s) ()
+#endif
+
+
+/* mpistubs.c */
+int MPI_Init P((int *argc , char ***argv ));
+double MPI_Wtime P((void ));
+double MPI_Wtick P((void ));
+int MPI_Barrier P((MPI_Comm comm ));
+int MPI_Finalize P((void ));
+int MPI_Comm_group P((MPI_Comm comm , MPI_Group *group ));
+int MPI_Comm_dup P((MPI_Comm comm , MPI_Comm *newcomm ));
+int MPI_Group_incl P((MPI_Group group , int n , int *ranks , MPI_Group *newgroup ));
+int MPI_Comm_create P((MPI_Comm comm , MPI_Group group , MPI_Comm *newcomm ));
+int MPI_Allgather P((void *sendbuf , int sendcount , MPI_Datatype sendtype , void *recvbuf , int recvcount , MPI_Datatype recvtype , MPI_Comm comm ));
+int MPI_Allgatherv P((void *sendbuf , int sendcount , MPI_Datatype sendtype , void *recvbuf , int *recvcounts , int *displs , MPI_Datatype recvtype , MPI_Comm comm ));
+int MPI_Bcast P((void *buffer , int count , MPI_Datatype datatype , int root , MPI_Comm comm ));
+int MPI_Send P((void *buf , int count , MPI_Datatype datatype , int dest , int tag , MPI_Comm comm ));
+int MPI_Recv P((void *buf , int count , MPI_Datatype datatype , int source , int tag , MPI_Comm comm , MPI_Status *status ));
+int MPI_Isend P((void *buf , int count , MPI_Datatype datatype , int dest , int tag , MPI_Comm comm , MPI_Request *request ));
+int MPI_Irecv P((void *buf , int count , MPI_Datatype datatype , int source , int tag , MPI_Comm comm , MPI_Request *request ));
+int MPI_Wait P((MPI_Request *request , MPI_Status *status ));
+int MPI_Waitall P((int count , MPI_Request *array_of_requests , MPI_Status *array_of_statuses ));
+int MPI_Waitany P((int count , MPI_Request *array_of_requests , int *index , MPI_Status *status ));
+int MPI_Comm_size P((MPI_Comm comm , int *size ));
+int MPI_Comm_rank P((MPI_Comm comm , int *rank ));
+int MPI_Allreduce P((void *sendbuf , void *recvbuf , int count , MPI_Datatype datatype , MPI_Op op , MPI_Comm comm ));
+int MPI_Type_hvector P((int count , int blocklength , MPI_Aint stride , MPI_Datatype oldtype , MPI_Datatype *newtype ));
+int MPI_Type_struct P((int count , int *array_of_blocklengths , MPI_Aint *array_of_displacements , MPI_Datatype *array_of_types , MPI_Datatype *newtype ));
+int MPI_Type_free P((MPI_Datatype *datatype ));
+int MPI_Type_commit P((MPI_Datatype *datatype ));
+
+#undef P
+
 #ifdef __cplusplus
 }
 #endif
