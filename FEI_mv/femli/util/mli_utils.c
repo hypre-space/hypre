@@ -1130,7 +1130,7 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
 #endif
 
 #ifdef HYPRE_USING_ESSL
-    // undone
+    /* undone */
     int info;
     info = -1;
 #else
