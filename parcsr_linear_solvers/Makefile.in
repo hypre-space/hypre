@@ -84,6 +84,7 @@ FILES =\
  par_amg_solve.c\
  par_amg_solveT.c\
  par_stats.c\
+ par_strength.c\
  par_cycle.c\
  par_difconv.c\
  par_interp.c\

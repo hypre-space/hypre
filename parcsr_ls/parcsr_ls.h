@@ -347,6 +347,9 @@ int hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A , double *scnorm );
 int hypre_BoomerAMGSetupStats( void *amg_vdata , hypre_ParCSRMatrix *A );
 int hypre_BoomerAMGWriteSolverParams( void *data );
 
+/* par_strength.c */
+int hypre_BoomerAMGCreateS( hypre_ParCSRMatrix *A , double strength_threshold , double max_row_sum , hypre_ParCSRMatrix **S_ptr );
+
 /* pcg.c */
 int hypre_KrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
 int hypre_KrylovIdentity( void *vdata , void *A , void *b , void *x );
