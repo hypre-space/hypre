@@ -7,6 +7,8 @@
  * $Revision$
  *********************************************************************EHEADER*/
 
+#include <HYPRE_config.h>
+
 #include "mpi.h"
 #include "HYPRE_IJ_mv.h"
 

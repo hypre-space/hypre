@@ -17,6 +17,7 @@ install:all
 CXX = @CXX@
 
 CXXFLAGS = \
+ -I../..\
  -I../fei-isis\
  -I../isis-mv\
  -I../../IJ_matrix_vector\
