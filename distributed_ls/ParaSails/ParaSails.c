@@ -1595,6 +1595,9 @@ ParaSails *ParaSailsCreate(MPI_Comm comm, int beg_row, int end_row, int sym)
 
 void ParaSailsDestroy(ParaSails *ps)
 {
+    if (ps == NULL)
+        return;
+
     if (ps->numb)
         NumberingDestroy(ps->numb);
 
