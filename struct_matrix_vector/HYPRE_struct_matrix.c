@@ -128,6 +128,17 @@ HYPRE_SetStructMatrixValues( HYPRE_StructMatrix  matrix,
  * HYPRE_SetStructMatrixBoxValues
  *--------------------------------------------------------------------------*/
 
+typedef struct {
+   HYPRE_StructMatrix  matrix;
+   int                *ilower;
+   int                *iupper;
+   int                 num_stencil_indices;
+   int                *stencil_indices;
+   double             *values;
+   int                *returnvalue;
+} HYPRE_SetStructMatrixBoxValuesArgs;
+
+
 int 
 HYPRE_SetStructMatrixBoxValues( HYPRE_StructMatrix  matrix,
                                 int                *ilower,
@@ -164,6 +175,53 @@ HYPRE_SetStructMatrixBoxValues( HYPRE_StructMatrix  matrix,
 
    return (ierr);
 }
+
+void
+HYPRE_SetStructMatrixBoxValuesVoidPtr( void *argptr)
+{
+   HYPRE_SetStructMatrixBoxValuesArgs *localargs =
+                                (HYPRE_SetStructMatrixBoxValuesArgs *) argptr;
+
+   *(localargs->returnvalue) = 
+                 HYPRE_SetStructMatrixBoxValues( localargs->matrix,
+                                                 localargs->ilower,
+                                                 localargs->iupper,
+                                                 localargs->num_stencil_indices,
+                                                 localargs->stencil_indices,
+                                                 localargs->values);
+}
+
+int
+HYPRE_SetStructMatrixBoxValuesPush( HYPRE_StructMatrix matrix,
+                                    int               *ilower,
+                                    int               *iupper,
+                                    int                num_stencil_indices,
+                                    int               *stencil_indices,
+                                    double            *values)
+{
+   HYPRE_SetStructMatrixBoxValuesArgs  pushargs;
+   int                                 i;
+   int                                 returnvalue;
+
+   pushargs.matrix              = matrix;
+   pushargs.ilower              = ilower;
+   pushargs.iupper              = iupper;
+   pushargs.num_stencil_indices = num_stencil_indices;
+   pushargs.stencil_indices     = stencil_indices;
+   pushargs.returnvalue = (int *) malloc(sizeof(int));
+   for (i=0; i<NUM_THREADS; i++)
+      hypre_work_put( HYPRE_SetStructMatrixBoxValuesVoidPtr, (void *)&pushargs);
+
+   hypre_work_wait();
+
+   returnvalue = *(pushargs.returnvalue);
+
+   free( pushargs.returnvalue );
+
+   return returnvalue;
+}
+
+
 
 /*--------------------------------------------------------------------------
  * HYPRE_AssembleStructMatrix
