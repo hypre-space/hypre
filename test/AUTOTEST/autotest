@@ -334,7 +334,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux71"
         HYPRE_RUN_MACHINE="tux71"
-        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-mnsde 1 -a 1 -cf -i 2"
         HYPRE_MESSAGE='PRIMARY[insure++]'
@@ -485,7 +485,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux71"
         HYPRE_RUN_MACHINE="tux71"
-        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnsde 1 -a 1 -cfl 2"
@@ -502,7 +502,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
-        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
@@ -518,7 +518,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
-        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
@@ -534,7 +534,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
-        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
@@ -550,7 +550,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
-        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
@@ -566,7 +566,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
-        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
@@ -582,7 +582,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
-        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfl 2"
@@ -598,7 +598,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
-        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
@@ -614,7 +614,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
-        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
@@ -630,7 +630,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
-        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
@@ -646,7 +646,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
-        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
@@ -662,7 +662,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
-        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfl 2"
