@@ -153,7 +153,7 @@ HYPRE_SStructGridAddVariables( HYPRE_SStructGrid      grid,
    hypre_SStructUCVar  *ucvar;
 
    int                  memchunk = 1000;
-   int                  i, d;
+   int                  i;
 
    /* allocate more space if necessary */
    if ((nucvars % memchunk) == 0)
@@ -205,7 +205,6 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
 {
    int                   ierr = 0;
 
-   int                   ndim    = hypre_SStructGridNDim(grid);
    int                   nparts  = hypre_SStructGridNParts(grid);
    hypre_SStructPGrid  **pgrids  = hypre_SStructGridPGrids(grid);
    int                  *offsets = hypre_SStructGridOffsets(grid);
@@ -213,7 +212,7 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
    int                   start_rank;
 
    hypre_SStructPGrid   *pgrid;
-   int                   part, p, offset;
+   int                   part, offset;
 
    /*-------------------------------------------------------------
     * assemble the pgrids

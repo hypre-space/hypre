@@ -150,7 +150,6 @@ double
 hypre_KrylovInnerProd( void *x, 
                        void *y )
 {
-   int ierr = 0;
    double result;
 
    hypre_SStructInnerProd( (hypre_SStructVector *) x,

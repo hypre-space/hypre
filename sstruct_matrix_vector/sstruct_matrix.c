@@ -35,7 +35,6 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
    int                  **smaps;
    hypre_StructStencil ***sstencils;
    hypre_StructMatrix  ***smatrices;
-   int                   *sentries;
    int                    num_ghost[6] = {1, 1, 1, 1, 1, 1};
 
    hypre_StructStencil   *sstencil;
@@ -159,7 +158,6 @@ hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
    int                   **smaps;
    hypre_StructStencil  ***sstencils;
    hypre_StructMatrix   ***smatrices;
-   int                    *sentries;
    int                     vi, vj;
 
    if (pmatrix)
@@ -237,7 +235,7 @@ hypre_SStructPMatrixSetValues( hypre_SStructPMatrix *pmatrix,
    int                  *vars    = hypre_SStructStencilVars(stencil);
    hypre_StructMatrix   *smatrix;
    int                  *sentries;
-   int                   d, i;
+   int                   i;
 
    smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, vars[entries[0]]);
 
@@ -275,7 +273,7 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
    hypre_StructMatrix   *smatrix;
    hypre_Box            *box;
    int                  *sentries;
-   int                   d, i;
+   int                   i;
 
    smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, vars[entries[0]]);
 
@@ -536,14 +534,9 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 {
    int ierr = 0;
 
-   hypre_SStructGraph   *graph = hypre_SStructMatrixGraph(matrix);
-   hypre_SStructGrid    *grid = hypre_SStructGraphGrid(graph);
-   int                   ndim = hypre_SStructGridNDim(grid);
    hypre_Box            *box;
    hypre_Index           index;
-   int                   d, i, j, k;
-
-   hypre_StructStencil *stencil;
+   int                   i, j, k;
 
    box = hypre_BoxCreate();
    hypre_CopyIndex(ilower, hypre_BoxIMin(box));

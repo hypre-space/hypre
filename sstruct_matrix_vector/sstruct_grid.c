@@ -252,7 +252,8 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
       {
          HYPRE_StructGridCreate(comm, ndim, &sgrid);
          boxes = hypre_BoxArrayCreate(0);
-         hypre_SStructVariableGetOffset(t, ndim, varoffset);
+         hypre_SStructVariableGetOffset((hypre_SStructVariable) t,
+                                        ndim, varoffset);
 
          for (i = hood_first_local;
               i < (hood_first_local + hood_num_local); i++)
@@ -314,7 +315,8 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
       {
          iboxarray = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(sgrid));
 
-         hypre_SStructVariableGetOffset(t, ndim, varoffset);
+         hypre_SStructVariableGetOffset((hypre_SStructVariable) t,
+                                        ndim, varoffset);
          hypre_ForBoxI(i, iboxarray)
             {
                /* grow the boxes */

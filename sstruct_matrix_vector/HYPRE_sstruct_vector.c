@@ -265,7 +265,6 @@ HYPRE_SStructVectorGather( HYPRE_SStructVector vector )
 {
    int ierr = 0;
    int            nparts   = hypre_SStructVectorNParts(vector);
-   HYPRE_IJVector ijvector = hypre_SStructVectorIJVector(vector);
    int            part;
 
    for (part = 0; part < nparts; part++)

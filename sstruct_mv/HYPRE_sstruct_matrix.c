@@ -37,9 +37,6 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    hypre_SStructPGrid     *pgrid;
    hypre_SStructStencil  **pstencils;
    int                     nvars;
-   int                   **smaps;
-   hypre_StructStencil  ***sstencils;
-   hypre_StructMatrix   ***smatrices;
 
    int                     stencil_size;
    hypre_Index            *stencil_shape;

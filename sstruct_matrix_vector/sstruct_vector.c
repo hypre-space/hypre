@@ -125,7 +125,6 @@ hypre_SStructPVectorSetValues( hypre_SStructPVector *pvector,
 {
    int ierr = 0;
    hypre_StructVector *svector = hypre_SStructPVectorSVector(pvector, var);
-   int                 d;
 
    ierr = hypre_StructVectorSetValues(svector, index, value, add_to);
 
@@ -147,7 +146,6 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
    int ierr = 0;
    hypre_StructVector *svector = hypre_SStructPVectorSVector(pvector, var);
    hypre_Box          *box;
-   int                 d;
 
    box = hypre_BoxCreate();
    hypre_CopyIndex(ilower, hypre_BoxIMin(box));
@@ -293,7 +291,6 @@ hypre_SStructPVectorGetBoxValues( hypre_SStructPVector *pvector,
    hypre_BoxArray     *iboxarray = hypre_SStructPGridIBoxArray(pgrid, var);
    hypre_BoxArray     *tboxarray;
    hypre_Box          *box;
-   int                 d;
 
    box = hypre_BoxCreate();
    hypre_CopyIndex(ilower, hypre_BoxIMin(box));
