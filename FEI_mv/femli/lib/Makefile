@@ -24,6 +24,7 @@ MLI_INCLUDES = \
  -I$(srcdir)/../../../seq_mv\
  -I$(srcdir)/../../../distributed_matrix\
  -I$(srcdir)/../../../distributed_ls\
+ -I$(srcdir)/../../../FEI_mv/fei-hypre\
  -I$(srcdir)/../../../FEI_mv/femli\
  -I$(srcdir)/../../../FEI_mv/SuperLU
 

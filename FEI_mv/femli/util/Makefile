@@ -22,6 +22,7 @@ CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I..\
  -I$(srcdir)/..\
+ -I../../fei-hypre\
  -I../../../\
  -I../../../utilities\
  -I../../../parcsr_mv\
@@ -38,6 +39,7 @@ FFLAGS =\
  ${F_COMPILE_FLAGS}\
  -I..\
  -I$(srcdir)/..\
+ -I../../fei-hypre\
  -I../../../\
  -I../../../utilities\
  -I../../../parcsr_mv\
