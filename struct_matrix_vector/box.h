@@ -192,18 +192,6 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 
 #ifndef HYPRE_USE_PTHREADS
 
-#if defined(HYPRE_USING_OPENMP)
-#define hypre_BoxLoopNumBlocks hypre_NumThreads
-#elif defined(HYPRE_USING_IBM_SMP)
-#define hypre_BoxLoopNumBlocks hypre_NumThreads
-#elif defined(HYPRE_USING_PGCC_SMP)
-#define hypre_BoxLoopNumBlocks hypre_NumThreads
-#elif defined(HYPRE_USING_SGI_SMP)
-#define hypre_BoxLoopNumBlocks hypre_NumThreads
-#else
-#define hypre_BoxLoopNumBlocks 1
-#endif
-
 #define hypre_BoxLoopDeclareS(dbox, stride, sx, sy, sz) \
 int  sx = (hypre_IndexX(stride));\
 int  sy = (hypre_IndexY(stride)*hypre_BoxSizeX(dbox));\
@@ -232,7 +220,7 @@ if (hypre__nz > hypre__max)\
    hypre__dir = 2;\
    hypre__max = hypre__nz;\
 }\
-hypre__num_blocks = hypre_BoxLoopNumBlocks;\
+hypre__num_blocks = hypre_NumThreads();\
 if (hypre__max < hypre__num_blocks)\
 {\
    hypre__num_blocks = hypre__max;\

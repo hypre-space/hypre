@@ -5,13 +5,34 @@
  * $Revision$
 *********************************************************************EHEADER*/
 
-#define HYPRE_THREAD_GLOBALS
-
-#include <malloc.h>
-#include <assert.h>
+#include <stdlib.h>
 #include <stdio.h>
-#include <signal.h>
 #include "utilities.h"
+
+#if defined(HYPRE_USING_OPENMP) || defined (HYPRE_USING_PGCC_SMP)
+
+int
+hypre_NumThreads( )
+{
+   int num_threads;
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel
+   num_threads = omp_get_num_threads();
+#endif
+#ifdef HYPRE_USING_PGCC_SMP
+   num_threads = 2;
+#endif
+
+   return num_threads;
+}
+
+#endif
+
+/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+/* The pthreads stuff needs to be reworked */
+
+#define HYPRE_THREAD_GLOBALS
 
 #ifdef HYPRE_USE_PTHREADS
 
@@ -238,9 +259,5 @@ hypre_GetThreadID( void )
    return -1;
 }
 
-#else
-
-/* this is used only to eliminate compiler warnings */
-int hypre_empty;
-
 #endif
+/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/

@@ -159,6 +159,7 @@ hypre_CSRMatrixMatvecT( double           alpha,
    double      temp;
 
    int         i, i1, j, jj, ns, ne, size, rest;
+   int         num_threads;
 
    int         ierr  = 0;
 
@@ -222,15 +223,16 @@ hypre_CSRMatrixMatvecT( double           alpha,
    /*-----------------------------------------------------------------
     * y += A^T*x
     *-----------------------------------------------------------------*/
-   if (hypre_NumThreads > 1)
+   num_threads = hypre_NumThreads();
+   if (num_threads > 1)
    {
 
 #define HYPRE_SMP_PRIVATE i, i1,jj,j,ns,ne,size,rest
 #include "../utilities/hypre_smp_forloop.h"
-      for (i1 = 0; i1 < hypre_NumThreads; i1++)
+      for (i1 = 0; i1 < num_threads; i1++)
       {
-         size = num_cols/hypre_NumThreads;
-         rest = num_cols - size*hypre_NumThreads;
+         size = num_cols/num_threads;
+         rest = num_cols - size*num_threads;
          if (i1 < rest)
          {
             ns = i1*size+i1-1;

@@ -482,13 +482,19 @@ int MPI_Irsend( void *buf , int count , MPI_Datatype datatype , int dest , int t
 #ifndef hypre_THREADING_HEADER
 #define hypre_THREADING_HEADER
 
-#if defined(HYPRE_USING_OPENMP)
-#define hypre_NumThreads 4
-#elif defined(HYPRE_USING_PGCC_SMP)
-#define hypre_NumThreads 2
-#elif !defined(HYPRE_USE_PTHREADS)
-#define hypre_NumThreads 1
+#if defined(HYPRE_USING_OPENMP) || defined (HYPRE_USING_PGCC_SMP)
+
+int hypre_NumThreads( void );
+
+#else
+
+#define hypre_NumThreads() 1
+
 #endif
+
+
+/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+/* The pthreads stuff needs to be reworked */
 
 #ifdef HYPRE_USE_PTHREADS
 
@@ -542,6 +548,7 @@ extern int hypre_NumThreads;
 #endif
 
 #endif
+/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
 #endif
 /*BHEADER**********************************************************************

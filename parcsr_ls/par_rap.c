@@ -153,6 +153,7 @@ int hypre_BoomerAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    int              start_indexing = 0; /* start indexing for RAP_data at 0 */
    int		    num_nz_cols_A;
    int		    num_procs;
+   int		    num_threads;
 
    double           r_entry;
    double           r_a_product;
@@ -166,6 +167,7 @@ int hypre_BoomerAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
     *-----------------------------------------------------------------------*/
 
    MPI_Comm_size(comm,&num_procs);
+   num_threads = hypre_NumThreads();
 
    if (comm_pkg_RT)
    {
@@ -316,19 +318,19 @@ int hypre_BoomerAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
     *  are more than one processor and nonzero elements in R_offd
     *-----------------------------------------------------------------------*/
 
-  P_mark_array = hypre_CTAlloc(int *, hypre_NumThreads);
-  A_mark_array = hypre_CTAlloc(int *, hypre_NumThreads);
+  P_mark_array = hypre_CTAlloc(int *, num_threads);
+  A_mark_array = hypre_CTAlloc(int *, num_threads);
 
   if (num_cols_offd_RT)
   {
-   jj_count = hypre_CTAlloc(int, hypre_NumThreads);
+   jj_count = hypre_CTAlloc(int, num_threads);
 
 #define HYPRE_SMP_PRIVATE i,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_counter,jj_row_begining,A_marker,P_marker
 #include "../utilities/hypre_smp_forloop.h"
-   for (ii = 0; ii < hypre_NumThreads; ii++)
+   for (ii = 0; ii < num_threads; ii++)
    {
-     size = num_cols_offd_RT/hypre_NumThreads;
-     rest = num_cols_offd_RT - size*hypre_NumThreads;
+     size = num_cols_offd_RT/num_threads;
+     rest = num_cols_offd_RT - size*num_threads;
      if (ii < rest)
      {
         ns = ii*size+ii;
@@ -516,10 +518,10 @@ int hypre_BoomerAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    /*-----------------------------------------------------------------------
     *  Allocate RAP_int_data and RAP_int_j arrays.
     *-----------------------------------------------------------------------*/
-   for (i = 0; i < hypre_NumThreads-1; i++)
+   for (i = 0; i < num_threads-1; i++)
       jj_count[i+1] += jj_count[i];
     
-   RAP_size = jj_count[hypre_NumThreads-1];
+   RAP_size = jj_count[num_threads-1];
    RAP_int_i = hypre_CTAlloc(int, num_cols_offd_RT+1);
    RAP_int_data = hypre_CTAlloc(double, RAP_size);
    RAP_int_j    = hypre_CTAlloc(int, RAP_size);
@@ -532,10 +534,10 @@ int hypre_BoomerAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 
 #define HYPRE_SMP_PRIVATE i,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_counter,jj_row_begining,A_marker,P_marker,r_entry,r_a_product,r_a_p_product
 #include "../utilities/hypre_smp_forloop.h"
-   for (ii = 0; ii < hypre_NumThreads; ii++)
+   for (ii = 0; ii < num_threads; ii++)
    {
-     size = num_cols_offd_RT/hypre_NumThreads;
-     rest = num_cols_offd_RT - size*hypre_NumThreads;
+     size = num_cols_offd_RT/num_threads;
+     rest = num_cols_offd_RT - size*num_threads;
      if (ii < rest)
      {
         ns = ii*size+ii;
@@ -887,15 +889,15 @@ int hypre_BoomerAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    /*-----------------------------------------------------------------------
     *  Initialize some stuff.
     *-----------------------------------------------------------------------*/
-   jj_cnt_diag = hypre_CTAlloc(int, hypre_NumThreads);
-   jj_cnt_offd = hypre_CTAlloc(int, hypre_NumThreads);
+   jj_cnt_diag = hypre_CTAlloc(int, num_threads);
+   jj_cnt_offd = hypre_CTAlloc(int, num_threads);
 
 #define HYPRE_SMP_PRIVATE i,j,k,jcol,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_count_diag,jj_count_offd,jj_row_begin_diag,jj_row_begin_offd,A_marker,P_marker
 #include "../utilities/hypre_smp_forloop.h"
-   for (ii = 0; ii < hypre_NumThreads; ii++)
+   for (ii = 0; ii < num_threads; ii++)
    {
-     size = num_cols_diag_P/hypre_NumThreads;
-     rest = num_cols_diag_P - size*hypre_NumThreads;
+     size = num_cols_diag_P/num_threads;
+     rest = num_cols_diag_P - size*num_threads;
      if (ii < rest)
      {
         ns = ii*size+ii;
@@ -1123,14 +1125,14 @@ int hypre_BoomerAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
     jj_cnt_offd[ii] = jj_count_offd;
    }
 
-   for (i=0; i < hypre_NumThreads-1; i++)
+   for (i=0; i < num_threads-1; i++)
    {
       jj_cnt_diag[i+1] += jj_cnt_diag[i];
       jj_cnt_offd[i+1] += jj_cnt_offd[i];
    }
 
-   jj_count_diag = jj_cnt_diag[hypre_NumThreads-1];
-   jj_count_offd = jj_cnt_offd[hypre_NumThreads-1];
+   jj_count_diag = jj_cnt_diag[num_threads-1];
+   jj_count_offd = jj_cnt_offd[num_threads-1];
 
    RAP_diag_i[num_cols_diag_P] = jj_count_diag;
    RAP_offd_i[num_cols_diag_P] = jj_count_offd;
@@ -1166,10 +1168,10 @@ int hypre_BoomerAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 
 #define HYPRE_SMP_PRIVATE i,j,k,jcol,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_count_diag,jj_count_offd,jj_row_begin_diag,jj_row_begin_offd,A_marker,P_marker,r_entry,r_a_product,r_a_p_product
 #include "../utilities/hypre_smp_forloop.h"
-   for (ii = 0; ii < hypre_NumThreads; ii++)
+   for (ii = 0; ii < num_threads; ii++)
    {
-     size = num_cols_diag_P/hypre_NumThreads;
-     rest = num_cols_diag_P - size*hypre_NumThreads;
+     size = num_cols_diag_P/num_threads;
+     rest = num_cols_diag_P - size*num_threads;
      if (ii < rest)
      {
         ns = ii*size+ii;

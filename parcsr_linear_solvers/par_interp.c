@@ -105,6 +105,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    
    int              my_id;
    int              num_procs;
+   int              num_threads;
    int              num_sends;
    int              index;
    int              ns, ne, size, rest;
@@ -123,6 +124,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
+   num_threads = hypre_NumThreads();
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -240,9 +242,9 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
 
-   coarse_counter = hypre_CTAlloc(int, hypre_NumThreads);
-   jj_count = hypre_CTAlloc(int, hypre_NumThreads);
-   jj_count_offd = hypre_CTAlloc(int, hypre_NumThreads);
+   coarse_counter = hypre_CTAlloc(int, num_threads);
+   jj_count = hypre_CTAlloc(int, num_threads);
+   jj_count_offd = hypre_CTAlloc(int, num_threads);
 
    fine_to_coarse = hypre_CTAlloc(int, n_fine);
 #define HYPRE_SMP_PRIVATE i
@@ -259,10 +261,10 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 /* RDF: this looks a little tricky, but doable */
 #define HYPRE_SMP_PRIVATE i,j,i1,jj,ns,ne,size,rest
 #include "../utilities/hypre_smp_forloop.h"
-   for (j = 0; j < hypre_NumThreads; j++)
+   for (j = 0; j < num_threads; j++)
    {
-     size = n_fine/hypre_NumThreads;
-     rest = n_fine - size*hypre_NumThreads;
+     size = n_fine/num_threads;
+     rest = n_fine - size*num_threads;
      if (j < rest)
      {
         ns = j*size+j;
@@ -323,13 +325,13 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
     *  Allocate  arrays.
     *-----------------------------------------------------------------------*/
 
-   for (i=0; i < hypre_NumThreads-1; i++)
+   for (i=0; i < num_threads-1; i++)
    {
       coarse_counter[i+1] += coarse_counter[i];
       jj_count[i+1] += jj_count[i];
       jj_count_offd[i+1] += jj_count_offd[i];
    }
-   i = hypre_NumThreads-1;
+   i = num_threads-1;
    jj_counter = jj_count[i];
    jj_counter_offd = jj_count_offd[i];
 
@@ -373,12 +375,12 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
 #define HYPRE_SMP_PRIVATE i,j,ns,ne,size,rest,coarse_shift
 #include "../utilities/hypre_smp_forloop.h"
-   for (j = 0; j < hypre_NumThreads; j++)
+   for (j = 0; j < num_threads; j++)
    {
      coarse_shift = 0;
      if (j > 0) coarse_shift = coarse_counter[j-1];
-     size = n_fine/hypre_NumThreads;
-     rest = n_fine - size*hypre_NumThreads;
+     size = n_fine/num_threads;
+     rest = n_fine - size*num_threads;
      if (j < rest)
      {
         ns = j*size+j;
@@ -426,10 +428,10 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
     
 #define HYPRE_SMP_PRIVATE i,j,jl,i1,i2,jj,jj1,ns,ne,size,rest,sum,diagonal,distribute,P_marker,P_marker_offd,strong_f_marker,jj_counter,jj_counter_offd,sgn,c_num,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd
 #include "../utilities/hypre_smp_forloop.h"
-   for (jl = 0; jl < hypre_NumThreads; jl++)
+   for (jl = 0; jl < num_threads; jl++)
    {
-     size = n_fine/hypre_NumThreads;
-     rest = n_fine - size*hypre_NumThreads;
+     size = n_fine/num_threads;
+     rest = n_fine - size*num_threads;
      if (jl < rest)
      {
         ns = jl*size+jl;

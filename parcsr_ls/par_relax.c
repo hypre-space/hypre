@@ -74,7 +74,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
    int		   num_sends;
    int		   num_recvs;
    int		   index, start;
-   int		   num_procs, my_id, ip, p;
+   int		   num_procs, num_threads, my_id, ip, p;
    int		   vec_start, vec_len;
    MPI_Status     *status;
    MPI_Request    *requests;
@@ -89,6 +89,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
    one_minus_weight = 1.0 - relax_weight;
    MPI_Comm_size(comm,&num_procs);  
    MPI_Comm_rank(comm,&my_id);  
+   num_threads = hypre_NumThreads();
    /*-----------------------------------------------------------------------
     * Switch statement to direct control based on relax_type:
     *     relax_type = 0 -> Jacobi or CF-Jacobi
@@ -413,7 +414,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
          if (relax_points == 0)
          {
-	  if (hypre_NumThreads > 1)
+	  if (num_threads > 1)
           {
 	   tmp_data = hypre_CTAlloc(double,n);
 #define HYPRE_SMP_PRIVATE i
@@ -422,10 +423,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	      tmp_data[i] = u_data[i];
 #define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
 #include "../utilities/hypre_smp_forloop.h"
-           for (j = 0; j < hypre_NumThreads; j++)
+           for (j = 0; j < num_threads; j++)
 	   {
-	    size = n/hypre_NumThreads;
-	    rest = n - size*hypre_NumThreads;
+	    size = n/num_threads;
+	    rest = n - size*num_threads;
 	    if (j < rest)
 	    {
 	       ns = j*size+j;
@@ -499,7 +500,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
          else
          {
-	  if (hypre_NumThreads > 1)
+	  if (num_threads > 1)
 	  {
 	   tmp_data = hypre_CTAlloc(double,n);
 #define HYPRE_SMP_PRIVATE i
@@ -508,10 +509,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	      tmp_data[i] = u_data[i];
 #define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
 #include "../utilities/hypre_smp_forloop.h"
-           for (j = 0; j < hypre_NumThreads; j++)
+           for (j = 0; j < num_threads; j++)
 	   {
-	    size = n/hypre_NumThreads;
-	    rest = n - size*hypre_NumThreads;
+	    size = n/num_threads;
+	    rest = n - size*num_threads;
 	    if (j < rest)
 	    {
 	       ns = j*size+j;
