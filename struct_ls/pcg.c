@@ -17,6 +17,10 @@
 #include <stdio.h>
 #include <math.h>
 
+#ifndef max
+#define max(a,b)  (((a)<(b)) ? (b) : (a))
+#endif
+
 /*--------------------------------------------------------------------------
  * Prototypes:
  *   These functions must be defined somewhere else.
@@ -43,6 +47,7 @@ int    hypre_PCGAxpy( double alpha, void *x, void *y );
 typedef struct
 {
    double   tol;
+   double   cf_tol;
    int      max_iter;
    int      two_norm;
    int      rel_change;
@@ -115,6 +120,7 @@ hypre_PCGInitialize( )
 
    /* set defaults */
    (pcg_data -> tol)          = 1.0e-06;
+   (pcg_data -> cf_tol)      = 0.0;
    (pcg_data -> max_iter)     = 1000;
    (pcg_data -> two_norm)     = 0;
    (pcg_data -> rel_change)   = 0;
@@ -231,6 +237,7 @@ hypre_PCGSolve( void *pcg_vdata,
    hypre_PCGData  *pcg_data     = pcg_vdata;
 
    double          tol          = (pcg_data -> tol);
+   double          cf_tol       = (pcg_data -> cf_tol);
    int             max_iter     = (pcg_data -> max_iter);
    int             two_norm     = (pcg_data -> two_norm);
    int             rel_change   = (pcg_data -> rel_change);
@@ -249,6 +256,11 @@ hypre_PCGSolve( void *pcg_vdata,
    double          bi_prod, i_prod, eps;
    double          pi_prod, xi_prod;
                 
+   double          i_prod_0;
+   double          cf_ave_0 = 0.0;
+   double          cf_ave_1 = 0.0;
+   double          weight;
+
    int             i = 0;
    int             ierr = 0;
 
@@ -290,9 +302,10 @@ hypre_PCGSolve( void *pcg_vdata,
    hypre_PCGMatvec(matvec_data, -1.0, A, x, 1.0, r);
  
    /* Set initial residual norm */
-   if (logging > 0)
+   if (logging > 0 || cf_tol > 0.0)
    {
-      norms[0] = sqrt(hypre_PCGInnerProd(r,r));
+      i_prod_0   = hypre_PCGInnerProd(r,r);
+      if (logging > 0) norms[0] = sqrt(i_prod_0);
    }
 
    /* p = C*r */
@@ -365,6 +378,29 @@ hypre_PCGSolve( void *pcg_vdata,
          }
       }
 
+      /*--------------------------------------------------------------------
+       * Optional test to see if adequate progress is being made.
+       * The average convergence factor is recorded and compared
+       * against the tolerance 'cf_tol'. The weighting factor is  
+       * intended to pay more attention to the test when an accurate
+       * estimate for average convergence factor is available.  
+       *--------------------------------------------------------------------*/
+
+      if (cf_tol > 0.0)
+      {
+         cf_ave_0 = cf_ave_1;
+         cf_ave_1 = pow( i_prod / i_prod_0, 1.0/(2.0*i)); 
+
+         weight   = fabs(cf_ave_1 - cf_ave_0);
+         weight   = weight / max(cf_ave_1, cf_ave_0);
+         weight   = 1.0 - weight;
+#if 0
+      printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
+              i, cf_ave_1, cf_ave_0, weight );
+#endif
+         if (weight * cf_ave_1 > cf_tol) break;
+      }
+
       /* beta = gamma / gamma_old */
       beta = gamma / gamma_old;
 
@@ -423,6 +459,22 @@ hypre_PCGSetTol( void   *pcg_vdata,
    int            ierr = 0;
  
    (pcg_data -> tol) = tol;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PCGSetConvergenceTol
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PCGSetConvergenceFactorTol( void   *pcg_vdata,
+                                 double  cf_tol   )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+ 
+   (pcg_data -> cf_tol) = cf_tol;
  
    return ierr;
 }
