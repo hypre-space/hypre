@@ -130,8 +130,7 @@ int MLI_Solver_HSGS::setParams(char *paramString, int argc, char **argv)
 
 int MLI_Solver_HSGS::calcOmega()
 {
-   int                i, relaxType=6, relaxTypes[2], level=0, numCGSweeps=10;
-   double             relaxOmega;
+   int                relaxType=6, relaxTypes[2], level=0, numCGSweeps=10;
    hypre_ParCSRMatrix *A;
    hypre_ParVector    *vTemp;
    hypre_ParAMGData   *amgData;
