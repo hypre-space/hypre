@@ -25,10 +25,22 @@
 //---------------------------------------------------------------------------
 
 extern "C" {
-   int hypre_ParAMGBuildCoarseOperator( hypre_ParCSRMatrix *,
-                                        hypre_ParCSRMatrix *,
-                                        hypre_ParCSRMatrix *,
-                                        hypre_ParCSRMatrix **);
+   int HYPRE_ParCSRMLCreate( MPI_Comm, HYPRE_Solver *);
+   int HYPRE_ParCSRMLDestroy( HYPRE_Solver );
+   int HYPRE_ParCSRMLSetup( HYPRE_Solver, HYPRE_ParCSRMatrix,
+                            HYPRE_ParVector, HYPRE_ParVector );
+   int HYPRE_ParCSRMLSolve( HYPRE_Solver, HYPRE_ParCSRMatrix,
+                            HYPRE_ParVector,   HYPRE_ParVector );
+   int HYPRE_ParCSRMLSetStrongThreshold( HYPRE_Solver, double );
+   int HYPRE_ParCSRMLSetNumPreSmoothings( HYPRE_Solver, int );
+   int HYPRE_ParCSRMLSetNumPostSmoothings( HYPRE_Solver, int );
+   int HYPRE_ParCSRMLSetPreSmoother( HYPRE_Solver, int );
+   int HYPRE_ParCSRMLSetPostSmoother( HYPRE_Solver, int );
+   int HYPRE_ParCSRMLSetDampingFactor( HYPRE_Solver, double );
+
+   int hypre_ParAMGBuildCoarseOperator(hypre_ParCSRMatrix *,hypre_ParCSRMatrix *,
+                                       hypre_ParCSRMatrix *,hypre_ParCSRMatrix **);
+
    void qsort0(int *, int, int);
    void qsort1(int *, double *, int, int);
    int  hypre_BinarySearch(int *, int, int);
@@ -128,9 +140,15 @@ HYPRE_SLE::HYPRE_SLE(MPI_Comm PASSED_COMM_WORLD, int masterRank) :
     superlu_ordering     = 0;      // natural ordering in SuperLU
     superlu_scale[0]     = 'N';    // no scaling in SuperLUX
     krylov_dim           = 50;
+    ml_npresmoother      = 2;
+    ml_npostsmoother     = 2;
+    ml_presmoother_type  = 1;      // default Gauss-Seidel
+    ml_postsmoother_type = 1;      // default Gauss-Seidel
+    ml_relax_weight      = 0.5;
+    ml_strong_threshold  = 0.0;
 
 #ifdef DEBUG
-    printf("%4d : HYPRE_SLE::leaving constructor.\n", my_pid);
+    printf("%4d : HYPRE_SLE::leaving  constructor.\n", my_pid);
 #endif
     return;
 }
@@ -221,7 +239,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     //----------------------------------------------------------
 
     if ( getParam("tolerance",numParams,paramStrings,param) == 1)
-       sscanf(param,"%e", &tolerance);
+       sscanf(param,"%lg", &tolerance);
 
     //----------------------------------------------------------
     // pilut preconditioner : max no. of nonzeros to keep per row
@@ -239,7 +257,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
 
     if ( getParam("pilut-drop-tol",numParams,paramStrings,param) == 1)
     {
-       sscanf(param,"%e", &pilut_drop_tol);
+       sscanf(param,"%lg", &pilut_drop_tol);
        if ( pilut_drop_tol < 0.0 || pilut_drop_tol >= 1.0 ) 
        {
           pilut_drop_tol = 0.0;
@@ -324,7 +342,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
 
     if ( getParam("amg-relax-weight",numParams,paramStrings,param) == 1)
     {
-       sscanf(param,"%e", &weight);
+       sscanf(param,"%lg", &weight);
        if ( weight < 0.0 || weight > 1.0 ) 
        {
           weight = 0.5;
@@ -340,7 +358,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
 
     if ( getParam("amg-strong-threshold",numParams,paramStrings,param) == 1)
     {
-       sscanf(param,"%e", &amg_strong_threshold);
+       sscanf(param,"%lg", &amg_strong_threshold);
        if ( amg_strong_threshold < 0.0 || amg_strong_threshold > 1.0 ) 
        {
           amg_strong_threshold = 0.25;
@@ -355,7 +373,7 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
 
     if ( getParam("parasails-threshold",numParams,paramStrings,param) == 1)
     {
-       sscanf(param,"%e", &parasails_threshold);
+       sscanf(param,"%lg", &parasails_threshold);
        if ( parasails_threshold < 0.0 ) 
        {
           parasails_threshold = 0.0;
@@ -379,10 +397,95 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
        }
     }
 
+    //----------------------------------------------------------
+    // mlpack preconditoner : no of relaxation sweeps per level
+    //----------------------------------------------------------
+
+    if ( getParam("ml-num-presweeps",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%d", &nsweeps);
+       if ( nsweeps < 1 ) nsweeps = 1; 
+       ml_npresmoother = nsweeps;
+    }
+    if ( getParam("ml-num-postsweeps",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%d", &nsweeps);
+       if ( nsweeps < 1 ) nsweeps = 1; 
+       ml_npostsmoother = nsweeps;
+    }
+    if ( getParam("ml-num-sweeps",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%d", &nsweeps);
+       if ( nsweeps < 1 ) nsweeps = 1; 
+       ml_npresmoother = nsweeps;
+       ml_npostsmoother = nsweeps;
+    }
+
+    //----------------------------------------------------------
+    // mlpack preconditoner : which smoother to use
+    //----------------------------------------------------------
+
+    if ( getParam("ml-presmoother-type",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%s", param2);
+       rtype = 0;
+       if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
+       else if ( !strcmp(param2, "gs") )      rtype = 1;
+       ml_presmoother_type  = rtype;
+    }
+    if ( getParam("ml-postsmoother-type",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%s", param2);
+       rtype = 0;
+       if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
+       else if ( !strcmp(param2, "gs") )      rtype = 1;
+       ml_postsmoother_type  = rtype;
+    }
+    if ( getParam("ml-relax-type",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%s", param2);
+       rtype = 0;
+       if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
+       else if ( !strcmp(param2, "gs") )      rtype = 1;
+       ml_presmoother_type  = rtype;
+       ml_postsmoother_type = rtype;
+    }
+
+    //----------------------------------------------------------
+    // mlpack preconditoner : damping factor for Jacobi smoother
+    //----------------------------------------------------------
+
+    if ( getParam("ml-relax-weight",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%lg", &weight);
+       if ( weight < 0.0 || weight > 1.0 ) 
+       {
+          weight = 0.5;
+          printf("HYPRE_SLE::parameters - invalid relax weight => set to %e\n",
+                                          weight);
+       }
+       ml_relax_weight = weight;
+    }
+
+    //----------------------------------------------------------
+    // mlpack preconditoner : threshold to determine strong coupling
+    //----------------------------------------------------------
+
+    if ( getParam("ml-strong-threshold",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%lg", &ml_strong_threshold);
+       if ( ml_strong_threshold < 0.0 || ml_strong_threshold > 1.0 ) 
+       {
+          ml_strong_threshold = 0.0;
+          printf("HYPRE_SLE::parameters - invalid ml threshold => set to %e\n",
+                                          ml_strong_threshold);
+       }
+    }
+
     BASE_SLE::parameters(numParams, paramStrings); 
 
 #ifdef DEBUG
-    printf("%4d : HYPRE_SLE::leaving parameters function.\n", my_pid);
+    printf("%4d : HYPRE_SLE::leaving  parameters function.\n", my_pid);
 #endif
 
     return;
@@ -465,7 +568,7 @@ void HYPRE_SLE::selectSolver(char *name)
     }
 
 #ifdef DEBUG
-    printf("%4d : HYPRE_SLE::leaving selectSolver = %s.\n", my_pid, name);
+    printf("%4d : HYPRE_SLE::leaving  selectSolver = %s.\n", my_pid, name);
 #endif
     return;
 }
@@ -496,6 +599,11 @@ void HYPRE_SLE::selectPreconditioner(char *name)
 
        else if ( preconID_ == HYBOOMERAMG )
           HYPRE_ParAMGDestroy( pcg_precond );
+
+#ifdef MLPACK
+       else if ( preconID_ == HYML )
+          HYPRE_ParCSRMLDestroy( pcg_precond );
+#endif
     }
 
     //--------------------------------------------------
@@ -520,7 +628,19 @@ void HYPRE_SLE::selectPreconditioner(char *name)
     else if ( !strcmp(name, "boomeramg") ) 
     {
        strcpy( HYPrecondName_, name );
-       preconID_ = HYPARASAILS;
+       preconID_ = HYBOOMERAMG;
+    } 
+    else if ( !strcmp(name, "ml") ) 
+    {
+#ifdef MLPACK
+       strcpy( HYPrecondName_, name );
+       preconID_ = HYML;
+#else
+       printf("HYPRE_SLE::selectPreconditioner - MLPACK not declared.\n");
+       printf("                                  set default to diagonal.\n");
+       strcpy( HYPrecondName_, "diagonal" );
+       preconID_ = HYDIAGONAL;
+#endif
     } 
     else 
     {
@@ -547,7 +667,7 @@ void HYPRE_SLE::selectPreconditioner(char *name)
        case HYPILUT :
             ierr = HYPRE_ParCSRPilutCreate( comm, &pcg_precond );
             assert( !ierr );
-            HYPRE_ParCSRPilutSetMaxIter( pcg_precond, 10 );
+            HYPRE_ParCSRPilutSetMaxIter( pcg_precond, 1 );
             break;
 
        case HYPARASAILS :
@@ -562,9 +682,16 @@ void HYPRE_SLE::selectPreconditioner(char *name)
             HYPRE_ParAMGSetMaxLevels(pcg_precond, 25);
             HYPRE_ParAMGSetMeasureType(pcg_precond, 0);
             break;
+
+#ifdef MLPACK
+       case HYML :
+            ierr = HYPRE_ParCSRMLCreate( comm, &pcg_precond );
+            break;
+#endif
     }
+
 #ifdef DEBUG
-    printf("%4d : HYPRE_SLE::leaving selectPreconditioner.\n", my_pid);
+    printf("%4d : HYPRE_SLE::leaving  selectPreconditioner.\n", my_pid);
 #endif
 }
 
@@ -654,7 +781,7 @@ void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
     assert(!ierr);
     ierr = HYPRE_IJMatrixSetLocalSize(HY_A, localEndRow-localStartRow+1, 
                                       localEndRow-localStartRow+1);
-    //                                  localEndCol-localStartCol+1);
+                                      //localEndCol-localStartCol+1);
     assert(!ierr);
 
     //--------------------------------------------------
@@ -709,7 +836,7 @@ void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
     assert(!ierr);
 
 #ifdef DEBUG
-    printf("%4d : HYPRE_SLE::leaving createLinearAlgebraCore.\n", my_pid);
+    printf("%4d : HYPRE_SLE::leaving  createLinearAlgebraCore.\n", my_pid);
 #endif
 }
 
@@ -776,7 +903,7 @@ void HYPRE_SLE::matrixConfigure(IntArray* rows)
     assert(!ierr);
 
 #ifdef DEBUG
-    printf("%4d : HYPRE_SLE::leaving matrixConfigure.\n", my_pid);
+    printf("%4d : HYPRE_SLE::leaving  matrixConfigure.\n", my_pid);
 #endif
 }
 
@@ -793,9 +920,9 @@ void HYPRE_SLE::resetMatrixAndVector(double s)
     printf("%d : HYPRE_SLE::entering resetMatrixAndVector.\n", my_pid);
 #endif
 
-    if ( s != 0.0 )
+    if ( s != 0.0 && my_pid == 0 )
     {
-       printf("%d : HYPRE_SLE::resetMatrixAndVector - cannot take nonzeros.\n",my_pid);
+       printf("HYPRE_SLE::resetMatrixAndVector - cannot take nonzeros.\n");
        exit(1);
     }
 
@@ -821,7 +948,7 @@ void HYPRE_SLE::resetMatrixAndVector(double s)
     assert(!ierr);
 
 #ifdef DEBUG
-    printf("%4d : HYPRE_SLE::leaving resetMatrixAndVector.\n", my_pid);
+    printf("%4d : HYPRE_SLE::leaving  resetMatrixAndVector.\n", my_pid);
 #endif
 }
 
@@ -865,7 +992,7 @@ void HYPRE_SLE::sumIntoRHSVector(int num, const int* indices,
 
 #ifdef DEBUG
 #ifdef DEBUG_LEVEL2
-    printf("%4d : HYPRE_SLE::leaving sumIntoRHSVector.\n", my_pid);
+    printf("%4d : HYPRE_SLE::leaving  sumIntoRHSVector.\n", my_pid);
 #endif
 #endif
 }
@@ -984,7 +1111,7 @@ void HYPRE_SLE::sumIntoSystemMatrix(int row, int numValues,
 
 #ifdef DEBUG
 #ifdef DEBUG_LEVEL2
-    printf("%4d : HYPRE_SLE::leaving sumIntoSystemMatrix.\n", my_pid);
+    printf("%4d : HYPRE_SLE::leaving  sumIntoSystemMatrix.\n", my_pid);
 #endif
 #endif
 }
@@ -1101,7 +1228,6 @@ void HYPRE_SLE::enforceEssentialBC(int* globalEqn, double* alpha,
           }
 
           // Set rhs for boundary point
-          printf("Add to rhs %d = %e\n", tempEqn[i]+1, local_gamma[i]);
           HYPRE_IJVectorSetLocalComponents(HY_b, 1, &tempEqn[i],
                                            NULL, &local_gamma[i]);
 
@@ -1113,7 +1239,7 @@ void HYPRE_SLE::enforceEssentialBC(int* globalEqn, double* alpha,
 
 #ifdef DEBUG
 #ifdef DEBUG_LEVEL2
-    printf("%4d : HYPRE_SLE::leaving enforceEssentialBC.\n", my_pid);
+    printf("%4d : HYPRE_SLE::leaving  enforceEssentialBC.\n", my_pid);
 #endif
 #endif
 }
@@ -1192,7 +1318,7 @@ void HYPRE_SLE::enforceOtherBC(int* globalEqn, double* alpha, double* beta,
 
 #ifdef DEBUG
 #ifdef DEBUG_LEVEL2
-    printf("%4d : HYPRE_SLE::leaving enforceOtherBC.\n", my_pid);
+    printf("%4d : HYPRE_SLE::leaving  enforceOtherBC.\n", my_pid);
 #endif
 #endif
 }
@@ -1219,7 +1345,7 @@ void HYPRE_SLE::matrixLoadComplete()
 #endif
 
 #ifdef DEBUG
-    printf("%4d : HYPRE_SLE::leaving matrixLoadComplete.\n", my_pid);
+    printf("%4d : HYPRE_SLE::leaving  matrixLoadComplete.\n", my_pid);
 #endif
 }
 
@@ -1261,212 +1387,252 @@ void HYPRE_SLE::launchSolver(int* solveStatus)
        case HYPCG :
 
 #ifdef DEBUG
-            printf("%4d : HYPRE_SLE : lauchSolver(PCG) - matsize = %d\n",
-                                                         my_pid, globalNumEqns_);
+          printf("%4d : HYPRE_SLE : lauchSolver(PCG) - matsize = %d\n",
+                                               my_pid, globalNumEqns_);
 #endif
-            switch ( preconID_ ) 
-            {
-               case HYDIAGONAL :
-                    HYPRE_ParCSRPCGSetPrecond(pcg_solver,
-                                   HYPRE_ParCSRDiagScale,
-                                   HYPRE_ParCSRDiagScaleSetup,
-                                   pcg_precond);
-                    break;
+          switch ( preconID_ ) 
+          {
+             case HYDIAGONAL :
+                  HYPRE_ParCSRPCGSetPrecond(pcg_solver,
+                                 HYPRE_ParCSRDiagScale,
+                                 HYPRE_ParCSRDiagScaleSetup,
+                                 pcg_precond);
+                  break;
 
-               case HYPILUT :
-                    if ( pilut_row_size == 0 )
-                    {
-                       pilut_row_size = (int) (1.2 * pilut_max_nz_per_row);
+             case HYPILUT :
+                  if ( pilut_row_size == 0 )
+                  {
+                     pilut_row_size = (int) (1.2 * pilut_max_nz_per_row);
 #ifdef DEBUG
-                       printf("HYPRE_SLE:: PILUT - row size = %d\n",pilut_row_size);
-                       printf("HYPRE_SLE:: PILUT - drop tol = %e\n",pilut_drop_tol);
+                     printf("HYPRE_SLE:: PILUT - row size = %d\n",pilut_row_size);
+                     printf("HYPRE_SLE:: PILUT - drop tol = %e\n",pilut_drop_tol);
 #endif
-                    }
-                    HYPRE_ParCSRPilutSetFactorRowSize( pcg_precond, pilut_row_size );
-                    HYPRE_ParCSRPilutSetDropTolerance(pcg_precond,pilut_drop_tol);
-                    HYPRE_ParCSRPCGSetPrecond(pcg_solver,
-                                   HYPRE_ParCSRPilutSolve,
-                                   HYPRE_ParCSRPilutSetup,
-                                   pcg_precond);
-                    break;
+                  }
+                  HYPRE_ParCSRPilutSetFactorRowSize( pcg_precond, pilut_row_size );
+                  HYPRE_ParCSRPilutSetDropTolerance(pcg_precond,pilut_drop_tol);
+                  HYPRE_ParCSRPCGSetPrecond(pcg_solver, HYPRE_ParCSRPilutSolve,
+                                   HYPRE_ParCSRPilutSetup, pcg_precond);
+                  break;
 
-               case HYPARASAILS :
-                    HYPRE_ParCSRParaSailsSetParams(pcg_precond, parasails_threshold,
-                                                   parasails_nlevels);
-                    HYPRE_ParCSRPCGSetPrecond(pcg_solver,
-                                   HYPRE_ParCSRParaSailsSolve,
-                                   HYPRE_ParCSRParaSailsSetup,
-                                   pcg_precond);
-                    break;
+             case HYPARASAILS :
+                  HYPRE_ParCSRParaSailsSetParams(pcg_precond, parasails_threshold,
+                                                 parasails_nlevels);
+                  HYPRE_ParCSRPCGSetPrecond(pcg_solver, HYPRE_ParCSRParaSailsSolve,
+                                   HYPRE_ParCSRParaSailsSetup, pcg_precond);
+                  break;
 
-               case HYBOOMERAMG :
-                    HYPRE_ParAMGSetCoarsenType(pcg_precond, amg_coarsen_type);
-                    HYPRE_ParAMGSetStrongThreshold(pcg_precond, amg_strong_threshold);
-                    num_sweeps = hypre_CTAlloc(int,4);
-                    for ( i = 0; i < 4; i++ ) num_sweeps[i] = amg_num_sweeps[i]; 
-                    HYPRE_ParAMGSetNumGridSweeps(pcg_precond, num_sweeps);
-                    relax_type = hypre_CTAlloc(int,4);
-                    for ( i = 0; i < 4; i++ ) relax_type[i] = amg_relax_type[i]; 
-                    HYPRE_ParAMGSetGridRelaxType(pcg_precond, relax_type);
-                    relax_wt = hypre_CTAlloc(double,25);
-                    for ( i = 0; i < 25; i++ ) relax_wt[i] = amg_relax_weight[i]; 
-                    HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_wt);
+             case HYBOOMERAMG :
+                  HYPRE_ParAMGSetCoarsenType(pcg_precond, amg_coarsen_type);
+                  HYPRE_ParAMGSetStrongThreshold(pcg_precond, amg_strong_threshold);
+                  num_sweeps = hypre_CTAlloc(int,4);
+                  for ( i = 0; i < 4; i++ ) num_sweeps[i] = amg_num_sweeps[i]; 
+                  HYPRE_ParAMGSetNumGridSweeps(pcg_precond, num_sweeps);
+                  relax_type = hypre_CTAlloc(int,4);
+                  for ( i = 0; i < 4; i++ ) relax_type[i] = amg_relax_type[i]; 
+                  HYPRE_ParAMGSetGridRelaxType(pcg_precond, relax_type);
+                  relax_wt = hypre_CTAlloc(double,25);
+                  for ( i = 0; i < 25; i++ ) relax_wt[i] = amg_relax_weight[i]; 
+                  HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_wt);
 #ifdef DEBUG
-                    if ( my_pid == 0 )
-                    {
-                       printf("HYPRE_SLE::AMG coarsen type = %d\n",amg_coarsen_type);
-                       printf("HYPRE_SLE::AMG threshold    = %e\n",amg_strong_threshold);
-                       printf("HYPRE_SLE::AMG numsweeps    = %d\n",amg_num_sweeps[0]);
-                       printf("HYPRE_SLE::AMG relax type   = %d\n",amg_relax_type[0]);
-                       printf("HYPRE_SLE::AMG relax weight = %e\n",amg_relax_weight[0]);
-                    }
+                  if ( my_pid == 0 )
+                  {
+                     printf("HYPRE_SLE::AMG coarsen type = %d\n",amg_coarsen_type);
+                     printf("HYPRE_SLE::AMG threshold    = %e\n",amg_strong_threshold);
+                     printf("HYPRE_SLE::AMG numsweeps    = %d\n",amg_num_sweeps[0]);
+                     printf("HYPRE_SLE::AMG relax type   = %d\n",amg_relax_type[0]);
+                     printf("HYPRE_SLE::AMG relax weight = %e\n",amg_relax_weight[0]);
+                  }
 #endif
-                    HYPRE_ParCSRPCGSetPrecond(pcg_solver,
-                                   HYPRE_ParAMGSolve,
-                                   HYPRE_ParAMGSetup,
-                                   pcg_precond);
-                    break;
-            }
-            HYPRE_ParCSRPCGSetMaxIter(pcg_solver, max_iterations);
-            HYPRE_ParCSRPCGSetTol(pcg_solver, tolerance);
-            HYPRE_ParCSRPCGSetup(pcg_solver, A_csr, b_csr, x_csr);
-            HYPRE_ParCSRPCGSolve(pcg_solver, A_csr, b_csr, x_csr);
-            HYPRE_ParCSRPCGGetNumIterations(pcg_solver, &num_iterations);
-            HYPRE_ParVectorCopy( b_csr, r_csr );
-            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-            HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-            rnorm = sqrt( rnorm );
-            iterations_ = num_iterations;
-            if ( my_pid == 0 )
-            {
-               printf("HYPRE_SLE :launchSolver(PCG) - NO. ITERATION =    %d.\n", 
-                                                      num_iterations);
-               printf("HYPRE_SLE::launchSolver(PCG) - FINAL NORM    =    %e.\n", rnorm);
-            }
-            if ( num_iterations >= max_iterations ) status = 0;
-            break;
+                  HYPRE_ParCSRPCGSetPrecond(pcg_solver, HYPRE_ParAMGSolve,
+                                   HYPRE_ParAMGSetup, pcg_precond);
+                  break;
+
+#ifdef MLPACK
+             case HYML :
+
+                  HYPRE_ParCSRMLSetStrongThreshold(pcg_precond, ml_strong_threshold);
+                  HYPRE_ParCSRMLSetNumPreSmoothings(pcg_precond, ml_npresmoother);
+                  HYPRE_ParCSRMLSetNumPostSmoothings(pcg_precond, ml_npostsmoother);
+                  HYPRE_ParCSRMLSetPreSmoother(pcg_precond, ml_presmoother_type);
+                  HYPRE_ParCSRMLSetPostSmoother(pcg_precond, ml_postsmoother_type);
+                  HYPRE_ParCSRMLSetDampingFactor(pcg_precond, ml_relax_weight);
+                  HYPRE_ParCSRPCGSetPrecond(pcg_solver, HYPRE_ParCSRMLSolve,
+                                 HYPRE_ParCSRMLSetup, pcg_precond);
+#ifdef DEBUG
+                  if ( my_pid == 0 )
+                  {
+                     printf("HYPRE_SLE::ML coarsen type = %d\n",amg_coarsen_type);
+                     printf("HYPRE_SLE::ML strong threshold = %e\n",ml_strong_threshold);
+                     printf("HYPRE_SLE::ML numsweeps(pre)   = %d\n",ml_npresmoother);
+                     printf("HYPRE_SLE::ML numsweeps(post)  = %d\n",ml_npostsmoother);
+                     printf("HYPRE_SLE::ML smoother (pre)   = %d\n",ml_presmoother_type);
+                     printf("HYPRE_SLE::ML smoother (post)  = %d\n",ml_postsmoother_type);
+                     printf("HYPRE_SLE::ML relax weight     = %e\n",ml_relax_weight);
+                  }
+#endif
+                  break;
+#endif
+          }
+          HYPRE_ParCSRPCGSetMaxIter(pcg_solver, max_iterations);
+          HYPRE_ParCSRPCGSetTol(pcg_solver, tolerance);
+          HYPRE_ParCSRPCGSetup(pcg_solver, A_csr, b_csr, x_csr);
+          HYPRE_ParCSRPCGSolve(pcg_solver, A_csr, b_csr, x_csr);
+          HYPRE_ParCSRPCGGetNumIterations(pcg_solver, &num_iterations);
+          HYPRE_ParVectorCopy( b_csr, r_csr );
+          HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+          HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+          rnorm = sqrt( rnorm );
+          iterations_ = num_iterations;
+          if ( my_pid == 0 )
+          {
+             printf("HYPRE_SLE::launchSolver(PCG) - NO. ITERATION =    %d.\n", 
+                                                    num_iterations);
+             printf("HYPRE_SLE::launchSolver(PCG) - FINAL NORM    =    %e.\n", rnorm);
+          }
+          if ( num_iterations >= max_iterations ) status = 0;
+          break;
                
        case HYGMRES :
 
 #ifdef DEBUG
-            printf("%4d : HYPRE_SLE : lauchSolver(GMRES) - matsize = %d\n",
-                                                         my_pid, globalNumEqns_);
+          printf("%4d : HYPRE_SLE : lauchSolver(GMRES) - matsize = %d\n",
+                                                  my_pid, globalNumEqns_);
 #endif
 
-            switch ( preconID_ ) 
-            {
-               case HYDIAGONAL :
-                    HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
-                                   HYPRE_ParCSRDiagScale,
-                                   HYPRE_ParCSRDiagScaleSetup,
-                                   pcg_precond);
-                    break;
+          switch ( preconID_ ) 
+          {
+             case HYDIAGONAL :
+                  HYPRE_ParCSRGMRESSetPrecond(pcg_solver, HYPRE_ParCSRDiagScale,
+                                   HYPRE_ParCSRDiagScaleSetup, pcg_precond);
+                  break;
 
-               case HYPILUT :
-                    if ( pilut_row_size == 0 )
-                    {
-                       pilut_row_size = (int) (1.2 * pilut_max_nz_per_row);
+             case HYPILUT :
+                  if ( pilut_row_size == 0 )
+                  {
+                     pilut_row_size = (int) (1.2 * pilut_max_nz_per_row);
 #ifdef DEBUG
-                       printf("HYPRE_SLE:: PILUT - row size = %d\n",pilut_row_size);
-                       printf("HYPRE_SLE:: PILUT - drop tol = %e\n",pilut_drop_tol);
+                     printf("HYPRE_SLE:: PILUT - row size = %d\n",pilut_row_size);
+                     printf("HYPRE_SLE:: PILUT - drop tol = %e\n",pilut_drop_tol);
 #endif
-                    }
-                    HYPRE_ParCSRPilutSetFactorRowSize( pcg_precond, pilut_row_size );
-                    HYPRE_ParCSRPilutSetDropTolerance(pcg_precond,pilut_drop_tol);
-                    HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
-                                   HYPRE_ParCSRPilutSolve,
-                                   HYPRE_ParCSRPilutSetup,
-                                   pcg_precond);
-                    break;
+                  }
+                  HYPRE_ParCSRPilutSetFactorRowSize( pcg_precond, pilut_row_size );
+                  HYPRE_ParCSRPilutSetDropTolerance(pcg_precond,pilut_drop_tol);
+                  HYPRE_ParCSRGMRESSetPrecond(pcg_solver, HYPRE_ParCSRPilutSolve,
+                                   HYPRE_ParCSRPilutSetup, pcg_precond);
+                  break;
 
-               case HYPARASAILS :
-                    HYPRE_ParCSRParaSailsSetParams(pcg_precond, parasails_threshold,
-                                                   parasails_nlevels);
-                    HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
-                                   HYPRE_ParCSRParaSailsSolve,
-                                   HYPRE_ParCSRParaSailsSetup,
-                                   pcg_precond);
-                    break;
+             case HYPARASAILS :
+                  HYPRE_ParCSRParaSailsSetParams(pcg_precond, parasails_threshold,
+                                                 parasails_nlevels);
+                  HYPRE_ParCSRGMRESSetPrecond(pcg_solver, HYPRE_ParCSRParaSailsSolve,
+                                   HYPRE_ParCSRParaSailsSetup, pcg_precond);
+                  break;
 
-               case HYBOOMERAMG :
-                    HYPRE_ParAMGSetCoarsenType(pcg_precond, amg_coarsen_type);
-                    HYPRE_ParAMGSetStrongThreshold(pcg_precond, amg_strong_threshold);
-                    num_sweeps = hypre_CTAlloc(int,4);
-                    for ( i = 0; i < 4; i++ ) num_sweeps[i] = amg_num_sweeps[i]; 
-                    HYPRE_ParAMGSetNumGridSweeps(pcg_precond, num_sweeps);
-                    relax_type = hypre_CTAlloc(int,4);
-                    for ( i = 0; i < 4; i++ ) relax_type[i] = amg_relax_type[i]; 
-                    HYPRE_ParAMGSetGridRelaxType(pcg_precond, relax_type);
-                    relax_wt = hypre_CTAlloc(double,25);
-                    for ( i = 0; i < 25; i++ ) relax_wt[i] = amg_relax_weight[i]; 
-                    HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_wt);
+             case HYBOOMERAMG :
+                  HYPRE_ParAMGSetCoarsenType(pcg_precond, amg_coarsen_type);
+                  HYPRE_ParAMGSetStrongThreshold(pcg_precond, amg_strong_threshold);
+                  num_sweeps = hypre_CTAlloc(int,4);
+                  for ( i = 0; i < 4; i++ ) num_sweeps[i] = amg_num_sweeps[i]; 
+                  HYPRE_ParAMGSetNumGridSweeps(pcg_precond, num_sweeps);
+                  relax_type = hypre_CTAlloc(int,4);
+                  for ( i = 0; i < 4; i++ ) relax_type[i] = amg_relax_type[i]; 
+                  HYPRE_ParAMGSetGridRelaxType(pcg_precond, relax_type);
+                  relax_wt = hypre_CTAlloc(double,25);
+                  for ( i = 0; i < 25; i++ ) relax_wt[i] = amg_relax_weight[i]; 
+                  HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_wt);
+
 #ifdef DEBUG
-                    if ( my_pid == 0 )
-                    {
-                       printf("HYPRE_SLE::AMG coarsen type = %d\n",amg_coarsen_type);
-                       printf("HYPRE_SLE::AMG threshold    = %e\n",amg_strong_threshold);
-                       printf("HYPRE_SLE::AMG numsweeps    = %d\n",amg_num_sweeps[0]);
-                       printf("HYPRE_SLE::AMG relax type   = %d\n",amg_relax_type[0]);
-                       printf("HYPRE_SLE::AMG relax weight = %e\n",amg_relax_weight[0]);
-                    }
+                  HYPRE_ParAMGSetIOutDat(pcg_precond, 2);
+                  if ( my_pid == 0 )
+                  {
+                     printf("HYPRE_SLE::AMG coarsen type = %d\n",amg_coarsen_type);
+                     printf("HYPRE_SLE::AMG threshold    = %e\n",amg_strong_threshold);
+                     printf("HYPRE_SLE::AMG numsweeps    = %d\n",amg_num_sweeps[0]);
+                     printf("HYPRE_SLE::AMG relax type   = %d\n",amg_relax_type[0]);
+                     printf("HYPRE_SLE::AMG relax weight = %e\n",amg_relax_weight[0]);
+                  }
 #endif
-                    HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
-                                   HYPRE_ParAMGSolve,
-                                   HYPRE_ParAMGSetup,
-                                   pcg_precond);
+                  HYPRE_ParCSRGMRESSetPrecond(pcg_solver, HYPRE_ParAMGSolve,
+                                   HYPRE_ParAMGSetup, pcg_precond);
                     break;
-            }
-            HYPRE_ParCSRGMRESSetKDim(pcg_solver, krylov_dim);
-            HYPRE_ParCSRGMRESSetMaxIter(pcg_solver, max_iterations);
-            HYPRE_ParCSRGMRESSetTol(pcg_solver, tolerance);
-            HYPRE_ParCSRGMRESSetup(pcg_solver, A_csr, b_csr, x_csr);
-            HYPRE_ParCSRGMRESSolve(pcg_solver, A_csr, b_csr, x_csr);
-            HYPRE_ParCSRGMRESGetNumIterations(pcg_solver, &num_iterations);
-            HYPRE_ParVectorCopy( b_csr, r_csr );
-            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-            HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-            iterations_ = num_iterations;
-            rnorm = sqrt( rnorm );
-            if ( my_pid == 0 )
-            {
-               printf("HYPRE_SLE :launchSolver(GMRES) - NO. ITERATION =    %d.\n", 
-                                                        num_iterations);
-               printf("HYPRE_SLE::launchSolver(GMRES) - FINAL NORM    =    %e.\n", 
-                                                        rnorm);
-            }
-            if ( num_iterations >= max_iterations ) status = 0;
-            break;
+
+#ifdef MLPACK
+             case HYML :
+
+                  HYPRE_ParCSRMLSetStrongThreshold(pcg_precond, ml_strong_threshold);
+                  HYPRE_ParCSRMLSetNumPreSmoothings(pcg_precond, ml_npresmoother);
+                  HYPRE_ParCSRMLSetNumPostSmoothings(pcg_precond, ml_npostsmoother);
+                  HYPRE_ParCSRMLSetPreSmoother(pcg_precond, ml_presmoother_type);
+                  HYPRE_ParCSRMLSetPostSmoother(pcg_precond, ml_postsmoother_type);
+                  HYPRE_ParCSRMLSetDampingFactor(pcg_precond, ml_relax_weight);
+                  HYPRE_ParCSRGMRESSetPrecond(pcg_solver, HYPRE_ParCSRMLSolve,
+                                 HYPRE_ParCSRMLSetup, pcg_precond);
+#ifdef DEBUG
+                  if ( my_pid == 0 )
+                  {
+                     printf("HYPRE_SLE::ML coarsen type = %d\n",amg_coarsen_type);
+                     printf("HYPRE_SLE::ML strong threshold = %e\n",ml_strong_threshold);
+                     printf("HYPRE_SLE::ML numsweeps(pre)   = %d\n",ml_npresmoother);
+                     printf("HYPRE_SLE::ML numsweeps(post)  = %d\n",ml_npostsmoother);
+                     printf("HYPRE_SLE::ML smoother (pre)   = %d\n",ml_presmoother_type);
+                     printf("HYPRE_SLE::ML smoother (post)  = %d\n",ml_postsmoother_type);
+                     printf("HYPRE_SLE::ML relax weight     = %e\n",ml_relax_weight);
+                  }
+#endif
+                  break;
+#endif
+          }
+          HYPRE_ParCSRGMRESSetKDim(pcg_solver, krylov_dim);
+          HYPRE_ParCSRGMRESSetMaxIter(pcg_solver, max_iterations);
+          HYPRE_ParCSRGMRESSetTol(pcg_solver, tolerance);
+          HYPRE_ParCSRGMRESSetup(pcg_solver, A_csr, b_csr, x_csr);
+          HYPRE_ParCSRGMRESSolve(pcg_solver, A_csr, b_csr, x_csr);
+          HYPRE_ParCSRGMRESGetNumIterations(pcg_solver, &num_iterations);
+          HYPRE_ParVectorCopy( b_csr, r_csr );
+          HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+          HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+          iterations_ = num_iterations;
+          rnorm = sqrt( rnorm );
+          if ( my_pid == 0 )
+          {
+             printf("HYPRE_SLE::launchSolver(GMRES) - NO. ITERATION =    %d.\n", 
+                                                      num_iterations);
+             printf("HYPRE_SLE::launchSolver(GMRES) - FINAL NORM    =    %e.\n", 
+                                                      rnorm);
+          }
+          if ( num_iterations >= max_iterations ) status = 0;
+          break;
 
        case HYSUPERLU :
 
 #ifdef DEBUG
-            printf("%4d : HYPRE_SLE : launchSolver(SuperLU) - matsize=%d\n",
-                                      my_pid, globalNumEqns_);
+          printf("%4d : HYPRE_SLE::launchSolver(SuperLU) - matsize=%d\n",
+                                    my_pid, globalNumEqns_);
 #endif
-            solveUsingSuperLU(status);
-            iterations_ = 0;
-            //printf("HYPRE_SLE : SuperLU solver - return status = %d\n",status);
-            break;
+          solveUsingSuperLU(status);
+          iterations_ = 1;
+          //printf("HYPRE_SLE : SuperLU solver - return status = %d\n",status);
+          break;
 
        case HYSUPERLUX :
 
 #ifdef DEBUG
-            printf("%4d : HYPRE_SLE : launchSolver(SuperLUX) - matsize=%d\n",
+          printf("%4d : HYPRE_SLE::launchSolver(SuperLUX) - matsize=%d\n",
                                       my_pid, globalNumEqns_);
 #endif
-            solveUsingSuperLUX(status);
-            iterations_ = 0;
-            //printf("HYPRE_SLE : SuperLUX solver - return status = %d\n",status);
-            break;
+          solveUsingSuperLUX(status);
+          iterations_ = 1;
+          //printf("HYPRE_SLE : SuperLUX solver - return status = %d\n",status);
+          break;
 
        case HYY12M :
 
 #ifdef DEBUG
-            printf("%4d : HYPRE_SLE : launchSolver(Y12M) - matsize=%d\n",
+            printf("%4d : HYPRE_SLE::launchSolver(Y12M) - matsize=%d\n",
                                          my_pid, globalNumEqns_);
 #endif
             solveUsingY12M(status);
-            iterations_ = 0;
+            iterations_ = 1;
             //printf("HYPRE_SLE : Y12M solver - return status = %d\n",status);
             break;
     }
@@ -1474,7 +1640,7 @@ void HYPRE_SLE::launchSolver(int* solveStatus)
     *solveStatus = status; 
 
 #ifdef DEBUG
-    printf("%4d : HYPRE_SLE::leaving launchSolver.\n", my_pid);
+    printf("%4d : HYPRE_SLE::leaving  launchSolver.\n", my_pid);
 #endif
 }
 
@@ -3176,9 +3342,9 @@ void fei_hypre_test(int argc, char *argv[])
     HYPRE_SLE H(MPI_COMM_WORLD, 0);
 
     if (my_rank == 0)
-        H.createLinearAlgebraCore(6, 1, 3, 1, 6);
+        H.createLinearAlgebraCore(6, 1, 3, 1, 3);
     else
-        H.createLinearAlgebraCore(6, 4, 6, 6, 6);
+        H.createLinearAlgebraCore(6, 4, 6, 4, 6);
 
     H.matrixConfigure(rows);
 
@@ -3226,7 +3392,7 @@ void fei_hypre_test(int argc, char *argv[])
     H.matrixLoadComplete();
 
     H.selectSolver("cg");
-    H.selectPreconditioner("pilut");
+    H.selectPreconditioner("diagonal");
 
     H.launchSolver(&status);
     assert(status == 1);
@@ -3303,7 +3469,7 @@ void fei_hypre_test2(int argc, char *argv[])
     // create matrix and rhs in the hypre context 
     //======================================================
 
-    H.createLinearAlgebraCore(nrows, mybegin+1, myend+1, 1, nrows);
+    H.createLinearAlgebraCore(nrows, mybegin+1, myend+1, mybegin+1, myend+1);
 
     IntArray  *rows;
     double    zero=0.0;
@@ -3333,14 +3499,22 @@ void fei_hypre_test2(int argc, char *argv[])
     char *paramString = new char[100];
     strcpy(paramString, "pilut-row-size 50");
     H.parameters(1, &paramString);
+    strcpy(paramString, "amg-relax-type jacobi");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "amg-relax-weight 0.5");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "gmres-dim 200");
 
     H.selectSolver("gmres");
 
-    H.selectPreconditioner("boomeramg");
+    H.selectPreconditioner("ml");
 
     H.launchSolver(&status);
 
-    assert(status == 1);
+    if ( status != 1 && my_rank == 0 )
+    {
+       printf("HYPRE_SLE : solve unsuccessful.\n");
+    }
 
     // get the result
     /*

@@ -60,8 +60,8 @@
 
 // local enumerations
 
-enum HYsolverID { HYPCG, HYGMRES, HYSUPERLU, HYSUPERLUX, HYY12M };
-enum HYpreconID { HYDIAGONAL, HYPILUT, HYPARASAILS, HYBOOMERAMG, HYNONE };
+enum HYsolverID {HYPCG,HYGMRES,HYSUPERLU,HYSUPERLUX,HYY12M};
+enum HYpreconID {HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYNONE,HYML};
 
 // class definition
 
@@ -166,6 +166,12 @@ private:
     int             superlu_ordering;
     char            superlu_scale[1];
     int             krylov_dim;
+    int             ml_npresmoother;
+    int             ml_npostsmoother;
+    int             ml_presmoother_type;
+    int             ml_postsmoother_type;
+    double          ml_relax_weight;
+    double          ml_strong_threshold;
 
 friend void fei_hypre_test(int argc, char *argv[]);
 friend void fei_hypre_test2(int argc, char *argv[]);
