@@ -910,8 +910,6 @@ HOSTNAME="`hostname`"
           AC_CHECK_PROGS(CC,guidec) 
           AC_CHECK_PROGS(CXX,guidec++)
           AC_CHECK_PROGS(F77,guidef77)
-          CFLAGS="$CFLAGS -omp"
-          CXXFLAGS="$CXXFLAGS -omp"
         fi
         if  test "$casc_using_debug" = "yes"
         then
