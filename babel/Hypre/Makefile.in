@@ -334,7 +334,7 @@ mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
 mostlyclean: mostlyclean-am
 
 clean-am:  clean-noinstLIBRARIES clean-compile clean-tags clean-generic \
-		mostlyclean-am clean-local
+		mostlyclean-am
 
 clean: clean-am
 
@@ -363,7 +363,12 @@ distclean-generic clean-generic maintainer-clean-generic clean \
 mostlyclean distclean maintainer-clean
 
 
-clean-local: 
+clean:  mostlyclean-am
+# ... doesn't work; the Automake clean overrides this with clean-am
+
+veryclean:  clean-am
+
+squeeky-clean: clean-am
 	rm -f $(GENERATED_HDRS) $(GENERATED_SRCS)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

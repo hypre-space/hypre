@@ -201,5 +201,10 @@ GENERATED_HDRS = Hypre.h\
 	Hypre_MapStructuredVectorBuilder_Skel.h\
 	Hypre_Map_Stub.h
 
-clean-local: 
+clean:  mostlyclean-am
+# ... doesn't work; the Automake clean overrides this with clean-am
+
+veryclean:  clean-am
+
+squeeky-clean: clean-am
 	rm -f $(GENERATED_HDRS) $(GENERATED_SRCS)
