@@ -31,7 +31,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixcreate)( int      *comm,
                                         long int *matrix,
                                         int      *ierr               )
 {
-   *matrix = (long int)
+   *ierr = (int)
              ( HYPRE_ParCSRMatrixCreate( (MPI_Comm) *comm,
                                          (int)      *global_num_rows,
                                          (int)      *global_num_cols,
@@ -39,9 +39,9 @@ hypre_F90_IFACE(hypre_parcsrmatrixcreate)( int      *comm,
                                          (int *)     col_starts,
                                          (int)      *num_cols_offd,
                                          (int)      *num_nonzeros_diag,
-                                         (int)      *num_nonzeros_offd  ) );
+                                         (int)      *num_nonzeros_offd,
+                                         (HYPRE_ParCSRMatrix *) matrix  ) );
 
-   *ierr = 0;
 }
 
 /*--------------------------------------------------------------------------
@@ -72,15 +72,14 @@ hypre_F90_IFACE(hypre_parcsrmatrixinitialize)( long int *matrix,
 
 void 
 hypre_F90_IFACE(hypre_parcsrmatrixread)( int      *comm,
-                                         long int *matrix,
                                          char     *file_name,
+                                         long int *matrix,
                                          int      *ierr       )
 {
-   *matrix = (long int) ( HYPRE_ParCSRMatrixRead(
-                                (MPI_Comm) *comm,
-                                (char *)    file_name ) );
+   *ierr = (int) ( HYPRE_ParCSRMatrixRead( (MPI_Comm) *comm,
+                                (char *)    file_name,
+				(HYPRE_ParCSRMatrix *) matrix ) );
 
-   *ierr = !(*matrix);
 }
 
 /*--------------------------------------------------------------------------
@@ -92,10 +91,9 @@ hypre_F90_IFACE(hypre_parcsrmatrixprint)( long int *matrix,
                                           char     *file_name,
                                           int      *ierr       )
 {
-   HYPRE_ParCSRMatrixPrint ( (HYPRE_ParCSRMatrix) *matrix,
-                             (char *)              file_name );
+   *ierr = (int) ( HYPRE_ParCSRMatrixPrint ( (HYPRE_ParCSRMatrix) *matrix,
+                             (char *)              file_name ) );
 
-   *ierr = 0;
 }
 
 /*--------------------------------------------------------------------------

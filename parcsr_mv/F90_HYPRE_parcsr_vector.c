@@ -26,12 +26,12 @@ hypre_F90_IFACE(hypre_parvectorcreate)( int      *comm,
                                      long int *vector,
                                      int      *ierr          )
 {
-   *vector = (long int)
+   *ierr = (long int)
              ( HYPRE_ParVectorCreate( (MPI_Comm) *comm,
                                       (int)      *global_size,
-                                      (int *)    *partitioning ) );
+                                      (int *)    *partitioning,
+                                      (HYPRE_ParVector *)  vector ) );
 
-   *ierr = 0;
 }
 
 /*--------------------------------------------------------------------------
@@ -66,10 +66,10 @@ hypre_F90_IFACE(hypre_parvectorread)( int      *comm,
                                       char     *file_name,
                                       int      *ierr       )
 {
-   *vector = (long int) ( HYPRE_ParVectorRead( (MPI_Comm) *comm,
-                                               (char *)    file_name ) );
+   *ierr = (int) ( HYPRE_ParVectorRead( (MPI_Comm) *comm,
+                                        (char *)    file_name,
+                                        (HYPRE_ParVector *) vector ) );
 
-   *ierr = !(*vector);
 }
 
 /*--------------------------------------------------------------------------

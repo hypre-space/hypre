@@ -18,13 +18,15 @@
  * HYPRE_ParVectorCreate
  *--------------------------------------------------------------------------*/
 
-HYPRE_ParVector
+int
 HYPRE_ParVectorCreate( MPI_Comm comm,
                        int      global_size, 
-                       int     *partitioning )
+                       int     *partitioning,
+		       HYPRE_ParVector *vector )
 {
-   return ( (HYPRE_ParVector) hypre_ParVectorCreate(comm, global_size,
-                                                    partitioning) );
+   *vector = (HYPRE_ParVector) hypre_ParVectorCreate(comm, global_size,
+                                                    partitioning) ;
+   return 0;
 }
 
 /*--------------------------------------------------------------------------
@@ -51,11 +53,13 @@ HYPRE_ParVectorInitialize( HYPRE_ParVector vector )
  * HYPRE_ParVectorRead
  *--------------------------------------------------------------------------*/
 
-HYPRE_ParVector
+int
 HYPRE_ParVectorRead( MPI_Comm  comm,
-                     char     *file_name )
+                     char     *file_name, 
+		     HYPRE_ParVector *vector)
 {
-   return ( (HYPRE_ParVector) hypre_ParVectorRead( comm, file_name ) );
+   *vector = (HYPRE_ParVector) hypre_ParVectorRead( comm, file_name ) ;
+   return 0;
 }
 
 /*--------------------------------------------------------------------------
@@ -119,20 +123,23 @@ HYPRE_ParVectorScale( double value, HYPRE_ParVector x)
  * HYPRE_ParVectorInnerProd
  *--------------------------------------------------------------------------*/
 
-double
-HYPRE_ParVectorInnerProd( HYPRE_ParVector x, HYPRE_ParVector y)
+int
+HYPRE_ParVectorInnerProd( HYPRE_ParVector x, HYPRE_ParVector y, double *prod)
 {
-   return ( hypre_ParVectorInnerProd( (hypre_ParVector *) x, 
-				(hypre_ParVector *) y) );
+   *prod = hypre_ParVectorInnerProd( (hypre_ParVector *) x, 
+			(hypre_ParVector *) y) ;
+   return 0;
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_VectorToParVector
  *--------------------------------------------------------------------------*/
 
-HYPRE_ParVector
-HYPRE_VectorToParVector( MPI_Comm comm, HYPRE_Vector b, int *partitioning)
+int
+HYPRE_VectorToParVector( MPI_Comm comm, HYPRE_Vector b, int *partitioning,
+			 HYPRE_ParVector *vector)
 {
-   return ( (HYPRE_ParVector) hypre_VectorToParVector (comm, 
-		(hypre_Vector *) b, partitioning ));
+   *vector = (HYPRE_ParVector) hypre_VectorToParVector (comm, 
+		(hypre_Vector *) b, partitioning );
+   return 0;
 }

@@ -18,7 +18,7 @@
  * HYPRE_ParCSRMatrixCreate
  *--------------------------------------------------------------------------*/
 
-HYPRE_ParCSRMatrix 
+int
 HYPRE_ParCSRMatrixCreate( MPI_Comm  comm,
                           int       global_num_rows,
                           int       global_num_cols,
@@ -26,15 +26,15 @@ HYPRE_ParCSRMatrixCreate( MPI_Comm  comm,
                           int      *col_starts,
                           int       num_cols_offd,
                           int       num_nonzeros_diag,
-                          int       num_nonzeros_offd )
+                          int       num_nonzeros_offd,
+			  HYPRE_ParCSRMatrix *matrix )
 {
-   hypre_ParCSRMatrix *matrix;
-
-   matrix = hypre_ParCSRMatrixCreate(comm, global_num_rows, global_num_cols,
+   *matrix = (HYPRE_ParCSRMatrix)
+	hypre_ParCSRMatrixCreate(comm, global_num_rows, global_num_cols,
                                      row_starts, col_starts, num_cols_offd,
                                      num_nonzeros_diag, num_nonzeros_offd);
 
-   return ( (HYPRE_ParCSRMatrix) matrix );
+   return 0;
 }
 
 /*--------------------------------------------------------------------------
@@ -61,23 +61,26 @@ HYPRE_ParCSRMatrixInitialize( HYPRE_ParCSRMatrix matrix )
  * HYPRE_ParCSRMatrixRead
  *--------------------------------------------------------------------------*/
 
-HYPRE_ParCSRMatrix 
+int
 HYPRE_ParCSRMatrixRead( MPI_Comm comm,
-                        char    *file_name )
+                        char    *file_name, 
+			HYPRE_ParCSRMatrix *matrix)
 {
-   return ( (HYPRE_ParCSRMatrix) hypre_ParCSRMatrixRead( comm, file_name ));
+   *matrix = (HYPRE_ParCSRMatrix) hypre_ParCSRMatrixRead( comm, file_name );
+   return 0;
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRMatrixPrint
  *--------------------------------------------------------------------------*/
 
-void 
+int
 HYPRE_ParCSRMatrixPrint( HYPRE_ParCSRMatrix  matrix,
                          char               *file_name )
 {
    hypre_ParCSRMatrixPrint( (hypre_ParCSRMatrix *) matrix,
                             file_name );
+   return 0;
 }
 
 /*--------------------------------------------------------------------------
@@ -234,15 +237,17 @@ HYPRE_ParCSRMatrixRestoreRow( HYPRE_ParCSRMatrix  matrix,
  * HYPRE_CSRMatrixToParCSRMatrix
  *--------------------------------------------------------------------------*/
 
-HYPRE_ParCSRMatrix 
+int
 HYPRE_CSRMatrixToParCSRMatrix( MPI_Comm comm,
 			       HYPRE_CSRMatrix A_CSR,
 			       int *row_partitioning,
-                               int *col_partitioning)
+                               int *col_partitioning,
+			       HYPRE_ParCSRMatrix *matrix)
 {
-   return ( (HYPRE_ParCSRMatrix) hypre_CSRMatrixToParCSRMatrix( comm, 	
+   *matrix = (HYPRE_ParCSRMatrix) hypre_CSRMatrixToParCSRMatrix( comm, 	
 		(hypre_CSRMatrix *) A_CSR, row_partitioning, 
-		col_partitioning) );
+		col_partitioning) ;
+   return 0;
 }
 
 /*--------------------------------------------------------------------------
