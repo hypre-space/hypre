@@ -57,7 +57,7 @@ void  impl_Hypre_MPI_Com_New(Hypre_MPI_Com this, int comm) {
    should really be the appropriate pointer to a dummy struct
    (or, maybe, comm=0) */
    MPI_Comm * MCp = this->d_table->hcom;
-   MCp = (MPI_Comm) comm;
+   *MCp = (MPI_Comm) comm;
 } /* end impl_Hypre_MPI_ComNew */
 
 /* ********************************************************
