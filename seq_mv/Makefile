@@ -36,7 +36,8 @@ F77 = /home/casc/g77/bin/g77
 CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
- -g -Wall -DHYPRE_DEBUG
+ -I..\
+ -g -Wall -DHYPRE_MEMORY_DMALLOC
 
 FFLAGS = -g
 
@@ -49,7 +50,7 @@ LFLAGS =\
  -lHYPRE_memory\
  -lf2c\
  -lcegdb\
- -lmalloc\
+ -ldmalloc\
  -lm
 
 
