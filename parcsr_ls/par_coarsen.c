@@ -288,7 +288,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
             row_scale = hypre_min(row_scale, A_offd_data[jA]);
-            row_sum += A_diag_data[jA];
+            row_sum += A_offd_data[jA];
          }
       }
       row_sum = fabs( row_sum / diag );
@@ -302,7 +302,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
          {
             S_diag_j[jA] = -1;
          }
-         for (jA = A_offd_i[i]+1; jA < A_offd_i[i+1]; jA++)
+         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
             S_offd_j[jA] = -1;
          }
@@ -1438,7 +1438,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
             ST_j[jA] = -1;
             num_strong--;
          }
-         for (jA = A_offd_i[i]+1; jA < A_offd_i[i+1]; jA++)
+         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
             S_offd_j[jA] = -1;
          }
@@ -2586,7 +2586,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
             row_scale = hypre_min(row_scale, A_offd_data[jA]);
-            row_sum += A_diag_data[jA];
+            row_sum += A_offd_data[jA];
          }
       }
       row_sum = fabs( row_sum / diag );
@@ -2600,7 +2600,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
          {
             S_diag_j[jA] = -1;
          }
-         for (jA = A_offd_i[i]+1; jA < A_offd_i[i+1]; jA++)
+         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
             S_offd_j[jA] = -1;
          }

@@ -10,6 +10,8 @@
 #include "headers.h"
 #include "par_amg.h"
 
+#define DEBUG 0
+
 /*****************************************************************************
  *
  * Routine for driving the setup phase of AMG
@@ -186,6 +188,29 @@ hypre_ParAMGSetup( void               *amg_vdata,
 
       CF_marker_array[level] = CF_marker;
       
+#if DEBUG
+   if (amg_ioutdat == -3)
+   {  
+      char  filename[255];
+      FILE *fp;
+      int   i;
+
+      /* print out strength matrix */
+      sprintf(filename, "zout_S_%02d.ysmp", level);
+      hypre_ParCSRMatrixPrint(S, filename);
+
+      /* print out C/F marker */
+      sprintf(filename, "zout_CF_%02d.%d", level, my_id);
+      fp = fopen(filename, "w");
+      num_variables = hypre_ParCSRMatrixNumRows(A_array[level]);
+      for (i = 0; i < num_variables; i++)
+      {
+         fprintf(fp, "%d\n", CF_marker[i]);
+      }
+      fclose(fp);
+   } 
+#endif
+
       /*-------------------------------------------------------------
        * Build prolongation matrix, P, and place in P_array[level] 
        *--------------------------------------------------------------*/
@@ -355,24 +380,20 @@ hypre_ParAMGSetup( void               *amg_vdata,
    if (amg_ioutdat == 1 || amg_ioutdat == 3)
       hypre_ParAMGSetupStats(amg_data,A);
 
-#if 0 /* add later */
+#if DEBUG
    if (amg_ioutdat == -3)
    {  
-      char     fnam[255];
+      char  filename[255];
 
-      int j;
-
-      for (j = 1; j < level+1; j++)
+      for (j = 0; j < (num_levels - 1); j++)
       {
-         sprintf(fnam,"SP_A_%d.ysmp",j);
-         hypre_ParCSRMatrixPrint(A_array[j],fnam);
+         sprintf(filename, "zout_A_%02d.ysmp", j);
+         hypre_ParCSRMatrixPrint(A_array[j], filename);
+         sprintf(filename, "zout_P_%02d.ysmp", j);
+         hypre_ParCSRMatrixPrint(P_array[j], filename);
       }                         
-
-      for (j = 0; j < level; j++)
-      { 
-         sprintf(fnam,"SP_P_%d.ysmp",j);
-         hypre_ParCSRMatrixPrint(P_array[j],fnam);
-      }   
+      sprintf(filename, "zout_A_%02d.ysmp", j);
+      hypre_ParCSRMatrixPrint(A_array[j], filename);
    } 
 #endif
 
