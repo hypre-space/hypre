@@ -325,6 +325,8 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
     delete [] HYPreconName_;
     HYPreconName_ = NULL;
 
+    if ( rhsIDs_ != NULL ) delete [] rhsIDs_;
+
     //-------------------------------------------------------------------
     // deallocate the local store for the constraint indices
     //-------------------------------------------------------------------
