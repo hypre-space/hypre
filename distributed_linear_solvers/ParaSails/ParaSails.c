@@ -1125,14 +1125,17 @@ static double SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
  * FilterValues - Filter the values in a preconditioner matrix.
  * M - original matrix, in local ordering
  * F - new matrix, that has been created already
+ * Also, return the cost estimate, in case SetupValues is called again
+ * with load balancing - the old cost estimate would be incorrect.
  *--------------------------------------------------------------------------*/
 
 static void FilterValues(Matrix *M, Matrix *F, DiagScale *diag_scale, 
-  double filter, int symmetric)
+  double filter, int symmetric, double *newcostp)
 {
     int i, j;
     int row, len, *ind;
     double *val, temp = 1.0;
+    double cost = 0.0;
 
     for (row=0; row<=M->end_row - M->beg_row; row++)
     {
@@ -1154,7 +1157,11 @@ static void FilterValues(Matrix *M, Matrix *F, DiagScale *diag_scale,
         }
 
         MatrixSetRow(F, row+F->beg_row, j, ind, val);
+
+	cost += (double) j*j*j;
     }
+
+    *newcostp = cost;
 }
 
 /*--------------------------------------------------------------------------
@@ -1405,7 +1412,7 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
 	        ps->symmetric);
 
 	FilterValues(ps->M, filtered_matrix, diag_scale, ps->filter,
-	    ps->symmetric);
+	    ps->symmetric, &ps->cost);
 
         DiagScaleDestroy(diag_scale);
         MatrixDestroy(ps->M);
