@@ -688,6 +688,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                             { 
                                P_offd_data[P_marker_offd[j]]
                                      += distribute * A_ext_data[jj1];
+                               break;
                             }
                         }
                      }
