@@ -15,6 +15,7 @@
 
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
+#include "krylov.h"
 
 # define	P(s) s
 
@@ -1003,8 +1004,8 @@ main( int   argc,
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_PCGSetPrecond(pcg_solver,
-                                   HYPRE_BoomerAMGSolve,
-                                   HYPRE_BoomerAMGSetup,
+                             (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
+                             (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
                                    pcg_precond);
       }
       else if (solver_id == 2)
@@ -1015,8 +1016,8 @@ main( int   argc,
          pcg_precond = NULL;
 
          HYPRE_PCGSetPrecond(pcg_solver,
-                                   HYPRE_ParCSRDiagScale,
-                                   HYPRE_ParCSRDiagScaleSetup,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                                    pcg_precond);
       }
       else if (solver_id == 8)
@@ -1028,8 +1029,8 @@ main( int   argc,
 	 HYPRE_ParCSRParaSailsSetParams(pcg_precond, 0.1, 1);
 
          HYPRE_PCGSetPrecond(pcg_solver,
-                                   HYPRE_ParCSRParaSailsSolve,
-                                   HYPRE_ParCSRParaSailsSetup,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSolve,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSetup,
                                    pcg_precond);
       }
       else if (solver_id == 43)
@@ -1047,8 +1048,8 @@ main( int   argc,
          HYPRE_ParCSREuclidSetParams(pcg_precond, argc, argv);
 
          HYPRE_PCGSetPrecond(pcg_solver,
-                                   HYPRE_ParCSREuclidSolve,
-                                   HYPRE_ParCSREuclidSetup,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSolve,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSetup,
                                    pcg_precond);
       }
  
@@ -1061,7 +1062,7 @@ main( int   argc,
       else 
         if (myid == 0)
           printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
-      HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Matrix)b, (HYPRE_Matrix)x);
+      HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -1155,8 +1156,8 @@ main( int   argc,
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_GMRESSetPrecond(pcg_solver,
-                               HYPRE_BoomerAMGSolve,
-                               HYPRE_BoomerAMGSetup,
+                               (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
+                               (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
                                pcg_precond);
       }
       else if (solver_id == 4)
@@ -1166,8 +1167,8 @@ main( int   argc,
          pcg_precond = NULL;
 
          HYPRE_GMRESSetPrecond(pcg_solver,
-                               HYPRE_ParCSRDiagScale,
-                               HYPRE_ParCSRDiagScaleSetup,
+                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
+                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                                pcg_precond);
       }
       else if (solver_id == 7)
@@ -1181,8 +1182,8 @@ main( int   argc,
          }
 
          HYPRE_GMRESSetPrecond(pcg_solver,
-                               HYPRE_ParCSRPilutSolve,
-                               HYPRE_ParCSRPilutSetup,
+                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSolve,
+                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSetup,
                                pcg_precond);
 
          if (drop_tol >= 0 )
@@ -1203,8 +1204,8 @@ main( int   argc,
 	 HYPRE_ParCSRParaSailsSetSym(pcg_precond, 0);
 
          HYPRE_GMRESSetPrecond(pcg_solver,
-                               HYPRE_ParCSRParaSailsSolve,
-                               HYPRE_ParCSRParaSailsSetup,
+                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSolve,
+                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSetup,
                                pcg_precond);
       }
       else if (solver_id == 44)
@@ -1222,8 +1223,8 @@ main( int   argc,
          HYPRE_ParCSREuclidSetParams(pcg_precond, argc, argv);
 
          HYPRE_GMRESSetPrecond (pcg_solver,
-                                HYPRE_ParCSREuclidSolve,
-                                HYPRE_ParCSREuclidSetup,
+                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSetup,
                                 pcg_precond);
       }
  
@@ -1332,8 +1333,8 @@ main( int   argc,
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_BiCGSTABSetPrecond(pcg_solver,
-                                  HYPRE_BoomerAMGSolve,
-                                  HYPRE_BoomerAMGSetup,
+                                  (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
+                                  (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
                                   pcg_precond);
       }
       else if (solver_id == 10)
@@ -1343,8 +1344,8 @@ main( int   argc,
          pcg_precond = NULL;
 
          HYPRE_BiCGSTABSetPrecond(pcg_solver,
-                                  HYPRE_ParCSRDiagScale,
-                                  HYPRE_ParCSRDiagScaleSetup,
+                                  (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
+                                  (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                                   pcg_precond);
       }
       else if (solver_id == 11)
@@ -1358,8 +1359,8 @@ main( int   argc,
          }
 
          HYPRE_BiCGSTABSetPrecond(pcg_solver,
-                                  HYPRE_ParCSRPilutSolve,
-                                  HYPRE_ParCSRPilutSetup,
+                                  (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSolve,
+                                  (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSetup,
                                   pcg_precond);
 
          if (drop_tol >= 0 )
@@ -1384,10 +1385,10 @@ main( int   argc,
          */   
          HYPRE_ParCSREuclidSetParams(pcg_precond, argc, argv);
 
-         HYPRE_ParCSRBiCGSTABSetPrecond(pcg_solver,
-                                   HYPRE_ParCSREuclidSolve,
-                                   HYPRE_ParCSREuclidSetup,
-                                   pcg_precond);
+         HYPRE_BiCGSTABSetPrecond(pcg_solver,
+                                  (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSolve,
+                                  (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSetup,
+                                  pcg_precond);
       }
  
       HYPRE_BiCGSTABSetup(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
@@ -1480,9 +1481,9 @@ main( int   argc,
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_CGNRSetPrecond(pcg_solver,
-                              HYPRE_BoomerAMGSolve,
-                              HYPRE_BoomerAMGSolveT,
-                              HYPRE_BoomerAMGSetup,
+                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
+                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolveT,
+                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
                               pcg_precond);
       }
       else if (solver_id == 6)
@@ -1492,9 +1493,9 @@ main( int   argc,
          pcg_precond = NULL;
 
          HYPRE_CGNRSetPrecond(pcg_solver,
-                              HYPRE_ParCSRDiagScale,
-                              HYPRE_ParCSRDiagScale,
-                              HYPRE_ParCSRDiagScaleSetup,
+                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
+                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
+                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                               pcg_precond);
       }
  
