@@ -114,7 +114,11 @@ char *argv[];
       int solve_err_flag;
 
       setup_err_flag = amg_Setup(A, amg_data);
-      if (setup_err_flag != 0) printf("setup error = %d\n",setup_err_flag);
+      if (setup_err_flag != 0) 
+      {
+         printf("setup error = %d\n",setup_err_flag);
+         return 1;
+      }
 
       solve_err_flag = amg_Solve(u, f, stop_tolerance, amg_data);
       if (solve_err_flag != 0) printf("solve error = %d\n",solve_err_flag);
