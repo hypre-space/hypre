@@ -290,6 +290,9 @@ hypre_CSRMatrix *hypre_Matadd P((hypre_CSRMatrix *A, hypre_CSRMatrix *B));
 hypre_CSRMatrix *hypre_Matmul P((hypre_CSRMatrix *A, hypre_CSRMatrix *B));
 hypre_CSRMatrix *hypre_DeleteZerosInMatrix P((hypre_CSRMatrix *A, double tol));
 
+/* genpart.c */
+int hypre_GeneratePartitioning P((int length, int num_procs, int **part_ptr));
+
 #undef P
 
 #ifdef __cplusplus

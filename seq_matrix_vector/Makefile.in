@@ -58,6 +58,7 @@ FILES =\
  csr_matop.c\
  csr_matrix.c\
  csr_matvec.c\
+ genpart.c\
  mapped_matrix.c\
  multiblock_matrix.c\
  vector.c
