@@ -1,6 +1,6 @@
 PETSC_ARCH = alpha
 PETSC_DIR = /usr/local/petsc-2.0.21
-HYPRE_DIR = /usr/local/apps/hypre
+HYPRE_DIR = /usr/local/apps/hypre/linear_solvers
 ISIS_DIR = 
 
 include ${PETSC_DIR}/bmake/${PETSC_ARCH}/base.site
@@ -26,6 +26,8 @@ ISIS_LFLAGS =\
 
 #Following line is left in if you want to skip ISIS links
 ISIS_LFLAGS = 
+
+HYPRE_CFLAGS = -I$(PETSC_DIR)/include
  
 HYPRE_LFLAGS =\
  -L/usr/local/lib\
