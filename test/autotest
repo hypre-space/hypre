@@ -31,7 +31,7 @@ perform_test()
     (\
         cd ${HYPRE_REMOTE_DIR};\
 	. linear_solvers/test/autotest_env;\
-	. linear_solvers/test/env.${HYPRE_ARCH};\
+	[ -f linear_solvers/test/env.${HYPRE_ARCH} ] && . linear_solvers/test/env.${HYPRE_ARCH};\
         . linear_solvers/test/autotest_test ${HYPRE_MACHINE_COMMANDS}\
     )"
 
