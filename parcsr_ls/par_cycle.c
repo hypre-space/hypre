@@ -227,14 +227,13 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 	 }
          else if (smooth_option[level] > 4)
          {
-            Solve_err_flag = hypre_SchwarzSolve(
-			hypre_ParCSRMatrixDiag(A_array[level]),
+            Solve_err_flag = hypre_SchwarzSolve( A_array[level],
                         hypre_ParVectorLocalVector(F_array[level]),
                         hypre_ParAMGDataNumDomains(amg_data)[level],
                         hypre_ParAMGDataIDomainDof(amg_data)[level],
                         hypre_ParAMGDataJDomainDof(amg_data)[level],
                         hypre_ParAMGDataDomainMatrixInverse(amg_data)[level],
-                        hypre_ParVectorLocalVector(U_array[level]),
+                        U_array[level],
                         hypre_ParVectorLocalVector(Vtemp));
 	 }
 	 else

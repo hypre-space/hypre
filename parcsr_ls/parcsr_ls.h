@@ -278,7 +278,7 @@ int hypre_ParKrylovIdentity( void *vdata , void *A , void *b , void *x );
 
 /* schwarz.c */
 void hypre_F90_NAME_BLAS( int dpotrf , int DPOTRF );
-int hypre_SchwarzSolve( hypre_CSRMatrix *A , hypre_Vector *rhs_vector , int num_domains , int *i_domain_dof , int *j_domain_dof , double *domain_matrixinverse , hypre_Vector *x_vector , hypre_Vector *aux_vector );
+int hypre_SchwarzSolve( hypre_ParCSRMatrix *par_A , hypre_Vector *rhs_vector , int num_domains , int *i_domain_dof , int *j_domain_dof , double *domain_matrixinverse , hypre_ParVector *par_x , hypre_Vector *aux_vector );
 int transpose_matrix_create( int **i_face_element_pointer , int **j_face_element_pointer , int *i_element_face , int *j_element_face , int num_elements , int num_faces );
 int matrix_matrix_product( int **i_element_edge_pointer , int **j_element_edge_pointer , int *i_element_face , int *j_element_face , int *i_face_edge , int *j_face_edge , int num_elements , int num_faces , int num_edges );
 int hypre_AMGCreateDomainDof( hypre_CSRMatrix *A , int **i_domain_dof_pointer , int **j_domain_dof_pointer , double **domain_matrixinverse_pointer , int *num_domains_pointer );
@@ -287,6 +287,7 @@ int update_entry( int weight , int *weight_max , int *previous , int *next , int
 int remove_entry( int weight , int *weight_max , int *previous , int *next , int *first , int *last , int head , int tail , int i );
 int move_entry( int weight , int *weight_max , int *previous , int *next , int *first , int *last , int head , int tail , int i );
 int matinv( double *x , double *a , int k );
+int hypre_parCorrRes( hypre_ParCSRMatrix *A , hypre_ParVector *x , hypre_Vector *rhs , double **tmp_ptr );
 
 /* transpose.c */
 int hypre_CSRMatrixTranspose( hypre_CSRMatrix *A , hypre_CSRMatrix **AT );
