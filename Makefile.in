@@ -42,7 +42,9 @@ HYPRE_IJ_DIRS =\
  matrix_matrix\
  IJ_mv\
  distributed_ls\
- parcsr_ls\
+ parcsr_ls
+
+HYPRE_ES_DIRS =\
  parcsr_es/LOBPCG
 
 #These are the directories for the FEI
@@ -66,6 +68,7 @@ HYPRE_DIRS =\
  ${HYPRE_STRUCT_DIRS}\
  ${HYPRE_SSTRUCT_DIRS}\
  ${HYPRE_IJ_DIRS}\
+ ${HYPRE_ES_DIRS}\
  ${HYPRE_FEI_DIRS}
 
 # RDF: This needs to be reorganized...
@@ -76,7 +79,7 @@ HYPRE_SEQ_DIRS =\
  seq_mv\
  seq_ls
 
-all: krylov struct sstruct IJ fei
+all: krylov struct sstruct IJ ES fei
 	@ \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
 	export HYPRE_INSTALL_DIR; \
@@ -149,7 +152,21 @@ IJ: base
 	  fi; \
 	done
 
-fei: IJ krylov
+ES: base
+	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre; \
+	export HYPRE_INSTALL_DIR; \
+	for i in ${HYPRE_ES_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; $(MAKE) install); \
+	    echo ""; \
+	  fi; \
+	done
+
+fei: IJ krylov ES
 	@ \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
 	HYPRE_FEI_BASE_DIR=$$FEI_BASE_DIR; \
@@ -190,7 +207,7 @@ fei: IJ krylov
 	rm -rf hypre/tmp
 
 # special autotest target
-nofei: IJ krylov
+nofei: IJ krylov ES
 	@ \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
 	HYPRE_FEI_BASE_DIR=$$FEI_BASE_DIR; \
