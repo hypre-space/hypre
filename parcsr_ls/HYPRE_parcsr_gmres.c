@@ -137,10 +137,22 @@ HYPRE_ParCSRGMRESSetPrecond( HYPRE_Solver  solver,
 					 	  HYPRE_ParCSRMatrix matrix,
 						  HYPRE_ParVector b,
 						  HYPRE_ParVector x),
+                             int (*precond_reinit)(HYPRE_Solver sol), 
                              void               *precond_data )
 {
    return( hypre_GMRESSetPrecond( (void *) solver,
-                                precond, precond_setup, precond_data ) );
+                                precond, precond_setup, 
+                                precond_reinit, precond_data ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRGMRESReinitPrecond
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRGMRESReinitPrecond( HYPRE_Solver  solver )
+{
+   return( hypre_GMRESReinitPrecond( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
