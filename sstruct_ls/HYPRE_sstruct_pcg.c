@@ -161,3 +161,65 @@ HYPRE_SStructPCGGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
 {
    return( HYPRE_PCGGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_SStructDiagScaleSetup( HYPRE_SStructSolver solver,
+                             HYPRE_SStructMatrix A,
+                             HYPRE_SStructVector y,
+                             HYPRE_SStructVector x      )
+{
+  
+   return( HYPRE_StructDiagScaleSetup( (HYPRE_StructSolver) solver,
+                                       (HYPRE_StructMatrix) A,
+                                       (HYPRE_StructVector) y,
+                                       (HYPRE_StructVector) x ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_SStructDiagScale( HYPRE_SStructSolver solver,
+                        HYPRE_SStructMatrix A,
+                        HYPRE_SStructVector y,
+                        HYPRE_SStructVector x      )
+{
+   int ierr = 0;
+
+   int                      nparts= hypre_SStructMatrixNParts(A);
+
+   hypre_SStructPMatrix    *pA;
+   hypre_SStructPVector    *px;
+   hypre_SStructPVector    *py;
+   hypre_StructMatrix      *sA;
+   hypre_StructVector      *sx;
+   hypre_StructVector      *sy;
+
+   int part, vi;
+   int nvars;
+
+   for (part = 0; part < nparts; part++)
+   {
+      pA = hypre_SStructMatrixPMatrix(A, part);
+      px = hypre_SStructVectorPVector(x, part);
+      py = hypre_SStructVectorPVector(y, part);
+      nvars= hypre_SStructPMatrixNVars(pA);
+      for (vi = 0; vi < nvars; vi++)
+      {
+         sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
+         sx = hypre_SStructPVectorSVector(px, vi);
+         sy = hypre_SStructPVectorSVector(py, vi);
+         
+         HYPRE_StructDiagScale( (HYPRE_StructSolver) solver,
+                                (HYPRE_StructMatrix) sA,
+                                (HYPRE_StructVector) sy,
+                                (HYPRE_StructVector) sx );
+      }
+   }
+
+   return ierr;
+}
+
+
+
