@@ -28,7 +28,6 @@ CFLAGS =\
 
 RANLIB = @RANLIB@
 
-UTILITIES_EXTRA_FILES = @UTILITIESEXTRAFILES@
 
 ##################################################################
 # Targets
@@ -58,10 +57,11 @@ UTILITIES_HEADERS =\
  timing.h
 
 UTILITIES_FILES =\
- @UTILITIESEXTRAFILES@\
  memory.c\
  memory_dmalloc.c\
  mpistubs.c\
+ thread_mpistubs.c\
+ threading.c\
  timer.c\
  timing.c
 
