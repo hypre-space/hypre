@@ -102,7 +102,7 @@ parse_arguments () {
 # probably implement the obsolute getopt) then
 # getopts(1) will be used.
 #
-  while getopts :a:b:cDdfhi:lmno:p:q:r:st:xy arg
+  while getopts :a:b:cDdfhi:lmno:p:q:r:st:v:xy arg
   do
     argcur=$arg
     case $arg in
@@ -132,6 +132,7 @@ parse_arguments () {
       s) confbuildtest $Build   "--with-strict-checking" \
                                          "strict_checking"  1 1 1 1 1 1 0;;
       t) confbuildtest $OPTARG "--with-pthreads" "pthreads" 0 0 1 0 0 0 0;;
+      v) HYPRE_MESSAGE=$OPTARG;;
       x) build $Build   "beta++" "beta++" "test";;
       y) build $Build   "beta77" "beta77" "test";;
       :) echo "$0: \"$argcur\" requires a value"; exit 2;;
@@ -183,6 +184,7 @@ usage () {
   printf "%s\n" "-s       Strict; configure --with-strict-checking,"
   printf "         followed by make struct, IJ, all, beta(no execute option).\n"
   printf "%s\n" "-t opt   Thread; perform configure --with-pthreads, make struct."
+  printf "%s\n" "-v text  Additional test to prefix to email subject line."
   printf "%s\n" "-x       BetaC++; make beta++ (no configure, or execute)."
   printf "%s\n" "-y       BetaF77; make beta77 (no configure, or execute)."
 }
