@@ -28,7 +28,8 @@ HYPRE_CSRPCGCreate( HYPRE_Solver *solver )
    */
    hypre_PCGFunctions * pcg_functions =
       hypre_PCGFunctionsCreate(
-         hypre_CAlloc, hypre_CGFree, hypre_CGCreateVector,
+         hypre_CAlloc, hypre_CGFree, hypre_CGCommInfo,
+         hypre_CGCreateVector,
          hypre_CGDestroyVector, hypre_CGMatvecCreate,
          hypre_CGMatvec, hypre_CGMatvecDestroy,
          hypre_CGInnerProd, hypre_CGCopyVector,
