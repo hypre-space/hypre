@@ -609,7 +609,7 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int
 /*--------------------------------------------------------------------------
  * initialize communication 
  *--------------------------------------------------------------------------*/
-   comm_handle = hypre_InitializeCommunication(11,comm_pkg,
+   comm_handle = hypre_ParCSRCommHandleCreate(11,comm_pkg,
 		&B_int_i[1],&B_ext_i[1]);
 
    B_int_j = hypre_CTAlloc(int, num_nonzeros);
@@ -666,7 +666,7 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int
    hypre_ParCSRCommPkgRecvProcs(tmp_comm_pkg) = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
    hypre_ParCSRCommPkgSendMPITypes(tmp_comm_pkg) = send_matrix_types;	
 
-   hypre_FinalizeCommunication(comm_handle);
+   hypre_ParCSRCommHandleDestroy(comm_handle);
 
 /*--------------------------------------------------------------------------
  * after communication exchange B_ext_i[j+1] contains the number of elements
@@ -709,13 +709,13 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int
 
    hypre_ParCSRCommPkgRecvMPITypes(tmp_comm_pkg) = recv_matrix_types;	
 
-   comm_handle = hypre_InitializeCommunication(0,tmp_comm_pkg,NULL,NULL);
+   comm_handle = hypre_ParCSRCommHandleCreate(0,tmp_comm_pkg,NULL,NULL);
 
    hypre_CSRMatrixI(B_ext) = B_ext_i;
    hypre_CSRMatrixJ(B_ext) = B_ext_j;
    if (data) hypre_CSRMatrixData(B_ext) = B_ext_data;
 
-   hypre_FinalizeCommunication(comm_handle); 
+   hypre_ParCSRCommHandleDestroy(comm_handle); 
 
    hypre_TFree(B_int_i);
    hypre_TFree(B_int_j);

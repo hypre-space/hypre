@@ -546,9 +546,9 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
          }
       }
  
-      comm_handle = hypre_InitializeCommunication( 0, comm_pkg_mS, NULL, NULL); 
+      comm_handle = hypre_ParCSRCommHandleCreate( 0, comm_pkg_mS, NULL, NULL); 
  
-      hypre_FinalizeCommunication(comm_handle);   
+      hypre_ParCSRCommHandleDestroy(comm_handle);   
  
       /*------------------------------------------------
        * Set F-pts and update subgraph
@@ -688,10 +688,10 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
                  = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
  
-      comm_handle = hypre_InitializeCommunication(11, comm_pkg, int_buf_data, 
+      comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, 
         CF_marker_offd);
  
-      hypre_FinalizeCommunication(comm_handle);   
+      hypre_ParCSRCommHandleDestroy(comm_handle);   
  
       if (debug_flag == 3)
       {
@@ -1706,10 +1706,10 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                  = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
     
-      comm_handle = hypre_InitializeCommunication(11, comm_pkg, int_buf_data,
+      comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data,
         CF_marker_offd);
     
-      hypre_FinalizeCommunication(comm_handle);
+      hypre_ParCSRCommHandleDestroy(comm_handle);
     
       ci_array = hypre_CTAlloc(int,num_cols_offd);
       citilde_array = hypre_CTAlloc(int,num_cols_offd);
@@ -1949,10 +1949,10 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
               = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
  
-      comm_handle = hypre_InitializeCommunication(11, comm_pkg, int_buf_data, 
+      comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, 
      		CF_marker_offd);
  
-      hypre_FinalizeCommunication(comm_handle);   
+      hypre_ParCSRCommHandleDestroy(comm_handle);   
 
       ci_array = hypre_CTAlloc(int,num_cols_offd);
       citilde_array = hypre_CTAlloc(int,num_cols_offd);
@@ -2120,10 +2120,10 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
        * Send boundary data for CF_marker back
        *------------------------------------------------*/
 
-      comm_handle = hypre_InitializeCommunication(12, comm_pkg, CF_marker_offd, 
+      comm_handle = hypre_ParCSRCommHandleCreate(12, comm_pkg, CF_marker_offd, 
    			int_buf_data);
     
-      hypre_FinalizeCommunication(comm_handle);   
+      hypre_ParCSRCommHandleDestroy(comm_handle);   
    
       /* only CF_marker entries from larger procs are accepted  
 	if coarsen_type = 4 coarse points are not overwritten  */
@@ -2202,10 +2202,10 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                  = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
     
-      comm_handle = hypre_InitializeCommunication(11, comm_pkg, int_buf_data,
+      comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data,
         CF_marker_offd);
     
-      hypre_FinalizeCommunication(comm_handle);
+      hypre_ParCSRCommHandleDestroy(comm_handle);
     
       ci_array = hypre_CTAlloc(int,num_cols_offd);
       citilde_array = hypre_CTAlloc(int,num_cols_offd);
@@ -3088,9 +3088,9 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
          }
       }
  
-      comm_handle = hypre_InitializeCommunication( 0, comm_pkg_mS, NULL, NULL); 
+      comm_handle = hypre_ParCSRCommHandleCreate( 0, comm_pkg_mS, NULL, NULL); 
  
-      hypre_FinalizeCommunication(comm_handle);   
+      hypre_ParCSRCommHandleDestroy(comm_handle);   
  
       /*------------------------------------------------
        * Set F-pts and update subgraph
@@ -3232,10 +3232,10 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                  = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
  
-      comm_handle = hypre_InitializeCommunication(11, comm_pkg, int_buf_data, 
+      comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, 
         CF_marker_offd);
  
-      hypre_FinalizeCommunication(comm_handle);   
+      hypre_ParCSRCommHandleDestroy(comm_handle);   
  
    if (debug_flag == 3)
    {

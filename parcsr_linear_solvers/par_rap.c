@@ -1538,7 +1538,7 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
 /*--------------------------------------------------------------------------
  * initialize communication 
  *--------------------------------------------------------------------------*/
-   comm_handle = hypre_InitializeCommunication(12,comm_pkg_RT,
+   comm_handle = hypre_ParCSRCommHandleCreate(12,comm_pkg_RT,
 		&RAP_int_i[1], &RAP_ext_i[1]);
 
    tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
@@ -1549,7 +1549,7 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
    hypre_ParCSRCommPkgRecvProcs(tmp_comm_pkg) = send_procs;
    hypre_ParCSRCommPkgSendMPITypes(tmp_comm_pkg) = recv_matrix_types;	
 
-   hypre_FinalizeCommunication(comm_handle);
+   hypre_ParCSRCommHandleDestroy(comm_handle);
 
 /*--------------------------------------------------------------------------
  * compute num_nonzeros for RAP_ext
@@ -1579,7 +1579,7 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
 
    hypre_ParCSRCommPkgRecvMPITypes(tmp_comm_pkg) = send_matrix_types;	
 
-   comm_handle = hypre_InitializeCommunication(0,tmp_comm_pkg,NULL,NULL);
+   comm_handle = hypre_ParCSRCommHandleCreate(0,tmp_comm_pkg,NULL,NULL);
 
    RAP_ext = hypre_CSRMatrixCreate(num_rows,num_cols,num_nonzeros);
 
@@ -1590,7 +1590,7 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
       hypre_CSRMatrixData(RAP_ext) = RAP_ext_data;
    }
 
-   hypre_FinalizeCommunication(comm_handle); 
+   hypre_ParCSRCommHandleDestroy(comm_handle); 
 
    for (i=0; i < num_sends; i++)
    {

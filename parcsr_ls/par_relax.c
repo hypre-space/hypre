@@ -126,7 +126,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                  	= u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
    	}
  
-   	comm_handle = hypre_InitializeCommunication( 1, comm_pkg, v_buf_data, 
+   	comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data, 
         	Vext_data);
 
          /*-----------------------------------------------------------------
@@ -138,7 +138,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
             Vtemp_data[i] = u_data[i];
          }
  
-   	 hypre_FinalizeCommunication(comm_handle);
+   	 hypre_ParCSRCommHandleDestroy(comm_handle);
 
          /*-----------------------------------------------------------------
           * Relax all points.
@@ -266,13 +266,13 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                  	= u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
    	}
  
-   	comm_handle = hypre_InitializeCommunication( 1, comm_pkg, v_buf_data, 
+   	comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data, 
         	Vext_data);
 
          /*-----------------------------------------------------------------
           * Copy current approximation into temporary vector.
           *-----------------------------------------------------------------*/
-   	 hypre_FinalizeCommunication(comm_handle);
+   	 hypre_ParCSRCommHandleDestroy(comm_handle);
 
          /*-----------------------------------------------------------------
           * Relax all points.

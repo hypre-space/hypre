@@ -90,12 +90,12 @@ hypre_ParCSRMatrixMatvec( double           alpha,
 		 = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
    }
 	
-   comm_handle = hypre_InitializeCommunication( 1, comm_pkg, x_buf_data, 
+   comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, x_buf_data, 
 	x_tmp_data);
 
    hypre_CSRMatrixMatvec( alpha, diag, x_local, beta, y_local);
    
-   hypre_FinalizeCommunication(comm_handle);
+   hypre_ParCSRCommHandleDestroy(comm_handle);
 	
    if (num_cols_offd) hypre_CSRMatrixMatvec( alpha, offd, x_tmp, 1.0, y_local);    
 
@@ -182,12 +182,12 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
 
    if (num_cols_offd) hypre_CSRMatrixMatvecT(alpha, offd, x_local, 0.0, y_tmp);
 
-   comm_handle = hypre_InitializeCommunication( 2, comm_pkg, y_tmp_data, 
+   comm_handle = hypre_ParCSRCommHandleCreate( 2, comm_pkg, y_tmp_data, 
 	y_buf_data);
 
    hypre_CSRMatrixMatvecT(alpha, diag, x_local, beta, y_local);
 
-   hypre_FinalizeCommunication(comm_handle);   
+   hypre_ParCSRCommHandleDestroy(comm_handle);   
 
    index = 0;
    for (i = 0; i < num_sends; i++)

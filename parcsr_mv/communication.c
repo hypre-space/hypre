@@ -3,7 +3,7 @@
 /*==========================================================================*/
 
 hypre_ParCSRCommHandle *
-hypre_InitializeCommunication( int 	      job,
+hypre_ParCSRCommHandleCreate ( int 	      job,
 			       hypre_ParCSRCommPkg *comm_pkg,
                                void          *send_data, 
                                void          *recv_data )
@@ -177,7 +177,7 @@ hypre_InitializeCommunication( int 	      job,
 }
 
 int
-hypre_FinalizeCommunication( hypre_ParCSRCommHandle *comm_handle )
+hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
 {
    MPI_Status          *status0;
    int			ierr = 0;

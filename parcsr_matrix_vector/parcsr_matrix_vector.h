@@ -53,16 +53,6 @@ typedef struct
 } hypre_ParCSRCommHandle;
 
 /*--------------------------------------------------------------------------
- * Accessor macros: hypre_VectorCommPkg
- *--------------------------------------------------------------------------*/
- 
-#define hypre_VectorCommPkgComm(comm_pkg)           (comm_pkg -> comm)
-#define hypre_VectorCommPkgVecStarts(comm_pkg)      (comm_pkg -> vec_starts)
-#define hypre_VectorCommPkgVecStart(comm_pkg,i)     (comm_pkg -> vec_starts[i])
-#define hypre_VectorCommPkgVectorMPITypes(comm_pkg) (comm_pkg -> vector_mpi_types)
-#define hypre_VectorCommPkgVectorMPIType(comm_pkg,i)(comm_pkg -> vector_mpi_types[i])
-                                               
-/*--------------------------------------------------------------------------
  * Accessor macros: hypre_ParCSRCommPkg
  *--------------------------------------------------------------------------*/
  
@@ -338,8 +328,8 @@ double HYPRE_ParVectorInnerProd P((HYPRE_ParVector x , HYPRE_ParVector y ));
 HYPRE_ParVector HYPRE_VectorToParVector P((MPI_Comm comm , HYPRE_Vector b , int *partitioning ));
 
 /* communication.c */
-hypre_ParCSRCommHandle *hypre_InitializeCommunication P((int job , hypre_ParCSRCommPkg *comm_pkg , void *send_data , void *recv_data ));
-int hypre_FinalizeCommunication P((hypre_ParCSRCommHandle *comm_handle ));
+hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate P((int job , hypre_ParCSRCommPkg *comm_pkg , void *send_data , void *recv_data ));
+int hypre_ParCSRCommHandleDestroy P((hypre_ParCSRCommHandle *comm_handle ));
 int hypre_MatvecCommPkgCreate P((hypre_ParCSRMatrix *A ));
 int hypre_MatvecCommPkgDestroy P((hypre_ParCSRCommPkg *comm_pkg ));
 int hypre_BuildCSRMatrixMPIDataType P((int num_nonzeros , int num_rows , double *a_data , int *a_i , int *a_j , MPI_Datatype *csr_matrix_datatype ));

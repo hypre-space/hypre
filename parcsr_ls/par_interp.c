@@ -150,10 +150,10 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 		 = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
    }
 	
-   comm_handle = hypre_InitializeCommunication( 11, comm_pkg, int_buf_data, 
+   comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
 	CF_marker_offd);
 
-   hypre_FinalizeCommunication(comm_handle);   
+   hypre_ParCSRCommHandleDestroy(comm_handle);   
 
    if (debug_flag==4)
    {
@@ -359,10 +359,10 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 		 = fine_to_coarse[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
    }
 	
-   comm_handle = hypre_InitializeCommunication( 11, comm_pkg, int_buf_data, 
+   comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
 	fine_to_coarse_offd);  
 
-   hypre_FinalizeCommunication(comm_handle);   
+   hypre_ParCSRCommHandleDestroy(comm_handle);   
 
    if (debug_flag==4)
    {

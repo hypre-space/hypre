@@ -91,7 +91,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, double *scnorm)
 		 = dis_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
    }
 	
-   comm_handle = hypre_InitializeCommunication( 1, comm_pkg, d_buf_data, 
+   comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, d_buf_data, 
 	dis_ext_data);
 
    for (i=0; i < num_rows; i++)
@@ -101,7 +101,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, double *scnorm)
 	 sum_data[i] += fabs(diag_data[j])*dis_data[i]*dis_data[diag_j[j]];
       }
    }   
-   hypre_FinalizeCommunication(comm_handle);
+   hypre_ParCSRCommHandleDestroy(comm_handle);
 
    for (i=0; i < num_rows; i++)
    {
