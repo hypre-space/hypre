@@ -85,7 +85,6 @@ AC_ARG_WITH(pthreads,
          test "$ac_cv_lib_pthreads_pthread_create" = "yes"
       then
          HYPREDEFS="$HYPREDEFS -DHYPRE_USE_PTHREADS"
-         UTILITIESEXTRAFILES="$UTILITIESEXTRAFILES threading.c thread_mpistubs.c"
           
          AC_CHECK_PROGS(CC_R, cc_r xlc_r)
          AC_CHECK_PROG(MPICC_R, mpcc_r, mpcc_r)
@@ -180,7 +179,6 @@ AC_SUBST(TIMERDEFS)
 AC_SUBST(LDLIBS)
 AC_SUBST(LDLIBDIRS)
 AC_SUBST(ARCH)
-AC_SUBST(UTILITIESEXTRAFILES)
 
 dnl *********************************************************************
 dnl * DIRECTING THE OUTPUT
