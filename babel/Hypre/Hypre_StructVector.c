@@ -72,19 +72,6 @@ void  impl_Hypre_StructVector_print(Hypre_StructVector this) {
 } /* end impl_Hypre_StructVectorprint */
 
 /* ********************************************************
- * impl_Hypre_StructVectorSetGrid
- **********************************************************/
-int  impl_Hypre_StructVector_SetGrid
-(Hypre_StructVector this, Hypre_StructuredGrid grid) {
-
-/* not implemented; this functionality isn't in Hypre (though doesn't
-   look too hard to put in)
-   */
-   printf( "unimplemented function, Hypre_StructVector_SetGrid, was called" );
-
-} /* end impl_Hypre_StructVectorSetGrid */
-
-/* ********************************************************
  * impl_Hypre_StructVectorSetValues
  *    Note that Setup needs to be called afterwards.
  **********************************************************/
@@ -154,7 +141,7 @@ Hypre_StructVector  impl_Hypre_StructVector_Constructor(Hypre_StructuredGrid gri
 /* ********************************************************
  * impl_Hypre_StructVectorSetup
  **********************************************************/
-int  impl_Hypre_StructVector_Setup(Hypre_StructVector this, Hypre_StructuredGrid grid) {
+int  impl_Hypre_StructVector_Setup(Hypre_StructVector this) {
    struct Hypre_StructVector_private_type *SVp = this->d_table;
    HYPRE_StructVector *V = SVp->hsvec;
    HYPRE_StructVectorAssemble( *V );

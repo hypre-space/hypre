@@ -77,18 +77,6 @@ void  impl_Hypre_StructMatrix_print(Hypre_StructMatrix this) {
 } /* end impl_Hypre_StructMatrixprint */
 
 /* ********************************************************
- * impl_Hypre_StructMatrixSetGrid
- **********************************************************/
-int  impl_Hypre_StructMatrix_SetGrid(Hypre_StructMatrix this, Hypre_StructuredGrid grid) {
-
-/* not implemented; this functionality isn't in Hypre (though doesn't
-   look too hard to put in)
-   */
-   printf( "unimplemented function, Hypre_StructMatrix_SetGrid, was called" );
-
-} /* end impl_Hypre_StructMatrixSetGrid */
-
-/* ********************************************************
  * impl_Hypre_StructMatrixSetStencil
  **********************************************************/
 int  impl_Hypre_StructMatrix_SetStencil
@@ -216,8 +204,7 @@ Hypre_StructMatrix  impl_Hypre_StructMatrix_Constructor
  * impl_Hypre_StructMatrixSetup
  **********************************************************/
 int  impl_Hypre_StructMatrix_Setup
-(Hypre_StructMatrix this, Hypre_StructuredGrid grid,
- Hypre_StructStencil stencil, int symmetric) {
+(Hypre_StructMatrix this) {
 
    struct Hypre_StructMatrix_private_type *SMp = this->d_table;
    HYPRE_StructMatrix *M = SMp->hsmat;
