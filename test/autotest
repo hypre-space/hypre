@@ -78,8 +78,8 @@ make beta
 # Run test suites
 #==============================
 
-#cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-#./test_drivers.sh -mail
+cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+./test_drivers.sh -mail
 
 #==============================
 # Make C++ test drivers
