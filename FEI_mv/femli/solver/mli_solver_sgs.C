@@ -29,6 +29,7 @@ MLI_Solver_SGS::MLI_Solver_SGS(char *name) : MLI_Solver(name)
    myColor_          = 0;
    numColors_        = 1;
    scheme_           = 1;
+   printRNorm_       = 0;
 }
 
 /******************************************************************************
@@ -79,7 +80,7 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    int                 i, j, is, localNRows, extNRows, *tmpJ, relaxError=0;
    int                 iC, index, nprocs, mypid, nSends, start;
    register double     res;
-   double              zero = 0.0, relaxWeight;
+   double              zero = 0.0, relaxWeight, rnorm;
    double              *vBufData, *tmpData, *vExtData;
    MPI_Comm            comm;
    hypre_ParCSRMatrix     *A;
@@ -87,6 +88,8 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    hypre_ParVector        *f, *u;
    hypre_ParCSRCommPkg    *commPkg;
    hypre_ParCSRCommHandle *commHandle;
+   MLI_Vector             *mliRvec;
+   hypre_ParVector        *hypreR;
 
    /*-----------------------------------------------------------------
     * fetch machine and smoother parameters
@@ -112,6 +115,12 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    MPI_Comm_size(comm,&nprocs);  
    MPI_Comm_rank(comm,&mypid);  
 
+   if ( printRNorm_ == 1 )
+   {
+      mliRvec = Amat_->createVector();
+      hypreR  = (hypre_ParVector *) mliRvec->getVector();
+   }
+
    /*-----------------------------------------------------------------
     * setting up for interprocessor communication
     *-----------------------------------------------------------------*/
@@ -127,7 +136,7 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
     * perform SGS sweeps
     *-----------------------------------------------------------------*/
  
-#if 1
+#if 0
    if ( relaxWeights_ != NULL && relaxWeights_[0] != 0.0 && 
         relaxWeights_[0] != 1.0 ) 
       printf("\t SGS smoother : relax weight != 1.0 (%e).\n",relaxWeights_[0]);
@@ -172,7 +181,7 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
                if ( ADiagA[ADiagI[i]] != zero)
                {
                   res      = fData[i];
-                  iStart   = ADiagI[i] + 1;
+                  iStart   = ADiagI[i];
                   iEnd     = ADiagI[i+1];
                   tmpJ    = &(ADiagJ[iStart]);
                   tmpData = &(ADiagA[iStart]);
@@ -187,7 +196,7 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
                      for (jj = iStart; jj < iEnd; jj++)
                         res -= (*tmpData++) * vExtData[*tmpJ++];
                   }
-                  uData[i] = relaxWeight * res / ADiagA[ADiagI[i]];
+                  uData[i] += relaxWeight * res / ADiagA[ADiagI[i]];
                }
                else printf("MLI_Solver_SGS error : diag = 0.\n");
             }
@@ -228,7 +237,7 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
                if ( ADiagA[ADiagI[i]] != zero)
                {
                   res     = fData[i];
-                  iStart  = ADiagI[i] + 1;
+                  iStart  = ADiagI[i];
                   iEnd    = ADiagI[i+1];
                   tmpJ    = &(ADiagJ[iStart]);
                   tmpData = &(ADiagA[iStart]);
@@ -243,12 +252,21 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
                      for (jj = iStart; jj < iEnd; jj++)
                         res -= (*tmpData++) * vExtData[*tmpJ++];
                   }
-                  uData[i] = relaxWeight * res / ADiagA[ADiagI[i]];
+                  uData[i] += relaxWeight * res / ADiagA[ADiagI[i]];
                }
             }
          }
       }
+      if ( printRNorm_ == 1 )
+      {
+         hypre_ParVectorCopy( f, hypreR );
+         hypre_ParCSRMatrixMatvec( -1.0, A, u, 1.0, hypreR );
+         rnorm = hypre_ParVectorInnerProd( hypreR, hypreR );
+         if ( mypid == 0 )
+            printf("\tMLI_Solver_SGS iter = %4d, rnorm = %e\n", is, rnorm);
+      }
    }
+   if ( printRNorm_ == 1 ) delete mliRvec;
 
    /*-----------------------------------------------------------------
     * clean up and return
@@ -317,6 +335,10 @@ int MLI_Solver_SGS::setParams( char *paramString, int argc, char **argv )
       else if ( !strcmp(param2, "parallel") )   scheme_ = 1;
       else if ( !strcmp(param2, "sequential") ) scheme_ = 2;
       return 0;
+   }
+   else if ( !strcmp(param1, "printRNorm") )
+   {
+      printRNorm_ = 1;
    }
    else
    {   
