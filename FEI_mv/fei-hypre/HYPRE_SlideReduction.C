@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 #include <assert.h>
 
 #define HYPRE_SLIDEMAX 100
@@ -1153,7 +1154,7 @@ int HYPRE_SlideReduction::buildReducedMatrix()
    int    rowSize, *colInd, *reducedAMatSize, rowCount, maxRowSize;
    int    rowSize2, *colInd2, newRowSize, rowIndex, searchIndex, uBound;
    int    procIndex, colIndex, ierr, *newColInd, totalNNZ;
-   double *colVal, *colVal2, *newColVal, diag;
+   double *colVal, *colVal2, *newColVal;
    HYPRE_ParCSRMatrix A_csr, A21_csr, invA22_csr, RAP_csr, reducedA_csr;
 
    //------------------------------------------------------------------
@@ -1366,7 +1367,6 @@ int HYPRE_SlideReduction::buildReducedMatrix()
          newRowSize = ncnt + rowSize2;
          qsort1(newColInd, newColVal, 0, newRowSize-1);
          ncnt = 0;
-         diag = 1.0;
          for ( jcol = 0; jcol < newRowSize; jcol++ ) 
          {
             if ( jcol != ncnt && newColInd[jcol] == newColInd[ncnt] ) 
@@ -1377,13 +1377,12 @@ int HYPRE_SlideReduction::buildReducedMatrix()
                newColVal[ncnt] = newColVal[jcol];
                newColInd[ncnt] = newColInd[jcol];
             }  
-            if ( newColInd[ncnt] == rowIndex ) diag = newColVal[ncnt]; 
          } 
          newRowSize = ncnt + 1;
          ncnt = 0;
          for ( jcol = 0; jcol < newRowSize; jcol++ ) 
          {
-            if ( habs(newColVal[jcol]/diag) >= truncTol_ )
+            if ( habs(newColVal[jcol]) >= truncTol_ )
             { 
                newColInd[ncnt] = newColInd[jcol];
                newColVal[ncnt++] = newColVal[jcol];
@@ -4394,8 +4393,8 @@ int HYPRE_SlideReduction::scaleMatrixVector()
 
    MPI_Comm_rank( mpiComm_, &mypid );
    MPI_Comm_size( mpiComm_, &nprocs );
-printf("%d : scaleMatrixVector (1)\n", mypid);
    HYPRE_IJMatrixGetObject(reducedAmat_, (void **) &A_csr);
+   hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) A_csr);
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A_csr,&partition);
    startRow    = partition[mypid];
    localNRows  = partition[mypid+1] - startRow;
@@ -4423,11 +4422,10 @@ printf("%d : scaleMatrixVector (1)\n", mypid);
    // fetch diagonal of A
    //-----------------------------------------------------------------------
 
-printf("%d : scaleMatrixVector (2)\n", mypid);
    scaleVec  = new double[localNRows];
    rowLengs  = new int[localNRows];
    extScaleVec = NULL;
-   if ( nRecvs > 0 ) extScaleVec = new double[recvStarts[nprocs]];
+   if ( nRecvs > 0 ) extScaleVec = new double[recvStarts[nRecvs]];
 
    maxRowLeng = 0;
    for ( irow = 0; irow < localNRows; irow++ )
@@ -4439,10 +4437,9 @@ printf("%d : scaleMatrixVector (2)\n", mypid);
       for ( jcol = ADiagI[irow]; jcol < ADiagI[irow+1];  jcol++ )
          if ( ADiagJ[jcol] == irow ) scaleVec[irow] = ADiagA[jcol];
    }
-printf("%d : scaleMatrixVector (3)\n", mypid);
    for ( irow = 0; irow < localNRows; irow++ )
    {
-      if ( scaleVec[irow] <= 0.0 )
+      if ( habs( scaleVec[irow] ) == 0.0 )
       {
          printf("%d : scaleMatrixVector - diag %d = %e <= 0 \n",mypid,irow,
                 scaleVec[irow]);
@@ -4455,10 +4452,9 @@ printf("%d : scaleMatrixVector (3)\n", mypid);
    // exchange diagonal of A
    //-----------------------------------------------------------------------
 
-printf("%d : scaleMatrixVector (4)\n", mypid);
    if ( nSends > 0 )
    {
-      sBuffer = new double[sendStarts[nprocs]];
+      sBuffer = new double[sendStarts[nSends]];
       offset = 0;
       for ( iP = 0; iP < nSends; iP++ )
       {
@@ -4473,15 +4469,15 @@ printf("%d : scaleMatrixVector (4)\n", mypid);
    }
    else sBuffer = NULL;
 
-   commHandle = hypre_ParCSRCommHandleCreate(1, commPkg, sBuffer, 
-                                             &extScaleVec[localNRows]);
+   commHandle = hypre_ParCSRCommHandleCreate(1,commPkg,sBuffer,extScaleVec);
+   hypre_ParCSRCommHandleDestroy(commHandle);
+
    if ( nSends > 0 ) delete [] sBuffer;
 
    //-----------------------------------------------------------------------
    // construct new matrix
    //-----------------------------------------------------------------------
 
-printf("%d : scaleMatrixVector (5)\n", mypid);
    HYPRE_IJMatrixCreate(mpiComm_, startRow, startRow+localNRows-1,
                         startRow, startRow+localNRows-1, &newA);
    HYPRE_IJMatrixSetObjectType(newA, HYPRE_PARCSR);
@@ -4510,7 +4506,6 @@ printf("%d : scaleMatrixVector (5)\n", mypid);
                   (const int *) colInd, (const double *) colVal);
    }
    HYPRE_IJMatrixAssemble(newA);
-printf("%d : scaleMatrixVector (6)\n", mypid);
    delete [] colInd;
    delete [] colVal;
    delete [] extScaleVec;
@@ -4529,7 +4524,6 @@ printf("%d : scaleMatrixVector (6)\n", mypid);
    for ( irow = 0; irow < localNRows; irow++ )
       b2Data[irow] = bData[irow] * scaleVec[irow];
 
-printf("%d : scaleMatrixVector (7)\n", mypid);
    ADiagISqrts_ = scaleVec;
    reducedAmat_ = newA;
    reducedBvec_ = newB;

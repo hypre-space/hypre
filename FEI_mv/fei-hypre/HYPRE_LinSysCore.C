@@ -1734,7 +1734,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
 {
    int    i, j, ierr, numLocalEqns, leng, eqnNum, nnz, *newColInd=NULL;
    int    maxRowLeng, newLeng, rowSize, *colInd, nrows;
-   double *newColVal=NULL, *colVal, value, diag;
+   double *newColVal=NULL, *colVal, value;
    char   fname[40];
    FILE   *fp;
    HYPRE_ParCSRMatrix A_csr;
@@ -1806,13 +1806,9 @@ int HYPRE_LinSysCore::matrixLoadComplete()
          eqnNum  = localStartRow_ - 1 + i;
          leng    = rowLengths_[i];
          newLeng = 0;
-         diag    = 1.0;
-         for ( j = 0; j < leng; j++ ) 
-            if ( (colIndices_[i][j]-1) == eqnNum ) 
-               if ( habs(colValues_[i][j]) > 1.0E-16 ) diag = colValues_[i][j];
          for ( j = 0; j < leng; j++ ) 
          {
-            if ( habs(colValues_[i][j]/diag) >= truncThresh_ )
+            if ( habs(colValues_[i][j]) >= truncThresh_ )
             {
                newColInd[newLeng]   = colIndices_[i][j] - 1;
                newColVal[newLeng++] = colValues_[i][j];

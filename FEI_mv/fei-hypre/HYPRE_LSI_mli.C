@@ -655,7 +655,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
    else if ( !strcasecmp(param2, "smootherWeight") )
    {
       sscanf(paramString,"%s %s %lg",param1,param2,&weight);
-      if ( weight <= 0.0 || weight > 2.0 ) weight = 1.0;
+      if ( weight < 0.0 || weight > 2.0 ) weight = 1.0;
       if ( mli_object->preNSweeps_ > 0 )
       {
          if ( mli_object->preSmootherWts_ != NULL )
