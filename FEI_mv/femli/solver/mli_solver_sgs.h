@@ -25,6 +25,8 @@ class MLI_Solver_SGS : public MLI_Solver
    int         zeroInitialGuess;
    int         nsweeps;
    double      *relax_weights;
+   int         useCG_;
+   int         useOffProcData_;
 
 public :
 

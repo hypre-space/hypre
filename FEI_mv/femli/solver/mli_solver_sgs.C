@@ -27,6 +27,8 @@ MLI_Solver_SGS::MLI_Solver_SGS() : MLI_Solver(MLI_SOLVER_SGS_ID)
    nsweeps          = 1;
    relax_weights    = new double[1];
    relax_weights[0] = 0.5;
+   useCG_           = 0;
+   useOffProcData_  = 1;
 }
 
 /******************************************************************************
@@ -55,27 +57,22 @@ int MLI_Solver_SGS::setup(MLI_Matrix *mat)
 
 int MLI_Solver_SGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 {
+   register int        i, j, is, i_start, i_end, jj, *tmp_j;
+   int                 relax_error=0, index, num_procs, num_sends;
+   int                 num_cols_offd, start, local_nrows;
+   int                 *A_diag_i, *A_diag_j, *A_offd_i, *A_offd_j;
+   register double     res;
+   double              *u_data, *f_data, *v_buf_data, *tmp_data;
+   double              zero = 0.0, relax_weight, dtemp;
+   double              *A_diag_data, *A_offd_data, *Vext_data;
+   double              *r_vec, *z_vec, *p_vec, *ap_vec, alpha, sigma, rho;
    hypre_ParCSRMatrix  *A;
    hypre_CSRMatrix     *A_diag, *A_offd;
-   int                 *A_diag_i, *A_diag_j, *A_offd_i, *A_offd_j;
-   double              *A_diag_data, *A_offd_data;
-   hypre_Vector        *u_local;
-   double              *u_data;
-   hypre_Vector        *f_local;
-   double              *f_data;
-   register int        iStart, iEnd, jj;
-   int                 *tmp_j;
-   int                 i, j, n, is, relax_error = 0;
-   int                 index, num_procs, num_sends, num_cols_offd;
-   int                 start;
-   double              zero = 0.0, relax_weight;
-   register double     res;
-   double              *v_buf_data, *tmp_data;
-   double              *Vext_data;
+   hypre_Vector        *u_local, *f_local;
    hypre_ParCSRCommPkg *comm_pkg;
+   hypre_ParVector     *f, *u;
    MPI_Comm            comm;
    hypre_ParCSRCommHandle *comm_handle;
-   hypre_ParVector     *f, *u;
 
    /*-----------------------------------------------------------------
     * fetch machine and smoother parameters
@@ -85,7 +82,7 @@ int MLI_Solver_SGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    comm          = hypre_ParCSRMatrixComm(A);
    comm_pkg      = hypre_ParCSRMatrixCommPkg(A);
    A_diag        = hypre_ParCSRMatrixDiag(A);
-   n             = hypre_CSRMatrixNumRows(A_diag);
+   local_nrows   = hypre_CSRMatrixNumRows(A_diag);
    A_diag_i      = hypre_CSRMatrixI(A_diag);
    A_diag_j      = hypre_CSRMatrixJ(A_diag);
    A_diag_data   = hypre_CSRMatrixData(A_diag);
@@ -121,6 +118,59 @@ int MLI_Solver_SGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    }
 
    /*-----------------------------------------------------------------
+    * outer CG
+    *-----------------------------------------------------------------*/
+
+   if ( useCG_ == 1 )
+   {
+      r_vec  = new double[local_nrows];
+      p_vec  = new double[local_nrows];
+      z_vec  = new double[local_nrows];
+      ap_vec = new double[local_nrows];
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j=start;j<hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1);j++)
+         {
+            jj = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
+            v_buf_data[index++] = u_data[jj];
+         }
+      }
+      comm_handle = hypre_ParCSRCommHandleCreate(1,comm_pkg,v_buf_data,
+                          Vext_data);
+      hypre_ParCSRCommHandleDestroy(comm_handle);
+      comm_handle = NULL;
+      for ( i = 0; i < local_nrows; i++ ) 
+      {
+         i_start  = A_diag_i[i];
+         i_end    = A_diag_i[i+1];
+         tmp_j    = &(A_diag_j[i_start]);
+         tmp_data = &(A_diag_data[i_start]);
+         res      = 0.0;
+         for (j = i_start; j < i_end; j++)
+            res += (*tmp_data++) * u_data[*tmp_j++];
+         if ( num_procs > 1 )
+         {
+            i_start  = A_offd_i[i];
+            i_end    = A_offd_i[i+1];
+            tmp_j    = &(A_offd_j[i_start]);
+            tmp_data = &(A_offd_data[i_start]);
+            for (j = i_start; j < i_end; j++)
+               res += (*tmp_data++) * Vext_data[*tmp_j++];
+         }
+         r_vec[i] = f_data[i] - res;
+      }
+      for ( i = 0; i < local_nrows; i++ ) z_vec[i] = 0.0;
+      zeroInitialGuess = 1;
+   }
+   else 
+   {
+      z_vec = u_data;
+      r_vec = f_data;
+   }
+
+   /*-----------------------------------------------------------------
     * perform GS sweeps
     *-----------------------------------------------------------------*/
  
@@ -135,7 +185,7 @@ int MLI_Solver_SGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
       if (num_procs > 1)
       {
-         if ( ! zeroInitialGuess )
+         if ( ! zeroInitialGuess && useOffProcData_ == 1 )
          {
             index = 0;
             for (i = 0; i < num_sends; i++)
@@ -143,11 +193,13 @@ int MLI_Solver_SGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
                for (j=start;j<hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1);
                     j++)
-                  v_buf_data[index++]
-                      = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+               {
+                  jj = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
+                  v_buf_data[index++] = z_vec[jj];
+               }
             }
             comm_handle = hypre_ParCSRCommHandleCreate(1,comm_pkg,v_buf_data,
-                                                    Vext_data);
+                                                       Vext_data);
             hypre_ParCSRCommHandleDestroy(comm_handle);
             comm_handle = NULL;
          }
@@ -157,7 +209,7 @@ int MLI_Solver_SGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
        * forward sweep
        *-----------------------------------------------------------------*/
 
-      for (i = 0; i < n; i++)     /* interior points first */
+      for (i = 0; i < local_nrows; i++)     /* interior points first */
       {
          /*-----------------------------------------------------------
           * If diagonal is nonzero, relax point i; otherwise, skip it.
@@ -165,23 +217,23 @@ int MLI_Solver_SGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
          if ( A_diag_data[A_diag_i[i]] != zero)
          {
-            res      = f_data[i];
-            iStart   = A_diag_i[i];
-            iEnd     = A_diag_i[i+1];
-            tmp_j    = &(A_diag_j[iStart]);
-            tmp_data = &(A_diag_data[iStart]);
-            for (jj = iStart; jj < iEnd; jj++)
-               res -= (*tmp_data++) * u_data[*tmp_j++];
-            if ( ! zeroInitialGuess && num_procs > 1 )
+            res      = r_vec[i];
+            i_start  = A_diag_i[i];
+            i_end    = A_diag_i[i+1];
+            tmp_j    = &(A_diag_j[i_start]);
+            tmp_data = &(A_diag_data[i_start]);
+            for (j = i_start; j < i_end; j++)
+               res -= (*tmp_data++) * z_vec[*tmp_j++];
+            if ( ! zeroInitialGuess && num_procs > 1 && useOffProcData_ == 1)
             {
-               iStart   = A_offd_i[i];
-               iEnd     = A_offd_i[i+1];
-               tmp_j    = &(A_offd_j[iStart]);
-               tmp_data = &(A_offd_data[iStart]);
-               for (jj = iStart; jj < iEnd; jj++)
+               i_start  = A_offd_i[i];
+               i_end    = A_offd_i[i+1];
+               tmp_j    = &(A_offd_j[i_start]);
+               tmp_data = &(A_offd_data[i_start]);
+               for (j = i_start; j < i_end; j++)
                   res -= (*tmp_data++) * Vext_data[*tmp_j++];
             }
-            u_data[i] += relax_weight * res / A_diag_data[A_diag_i[i]];
+            z_vec[i] += relax_weight * res / A_diag_data[A_diag_i[i]];
          }
       }
 
@@ -189,7 +241,7 @@ int MLI_Solver_SGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
        * backward sweep
        *-----------------------------------------------------------------*/
 
-      for (i = n-1; i > -1; i--)  /* interior points first */
+      for (i = local_nrows-1; i > -1; i--)  /* interior points first */
       {
          /*-----------------------------------------------------------
           * If diagonal is nonzero, relax point i; otherwise, skip it.
@@ -197,26 +249,81 @@ int MLI_Solver_SGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
          if ( A_diag_data[A_diag_i[i]] != zero)
          {
-            res      = f_data[i];
-            iStart   = A_diag_i[i];
-            iEnd     = A_diag_i[i+1];
-            tmp_j    = &(A_diag_j[iStart]);
-            tmp_data = &(A_diag_data[iStart]);
-            for (jj = iStart; jj < iEnd; jj++)
-               res -= (*tmp_data++) * u_data[*tmp_j++];
-            if ( ! zeroInitialGuess && num_procs > 1 )
+            res      = r_vec[i];
+            i_start  = A_diag_i[i];
+            i_end    = A_diag_i[i+1];
+            tmp_j    = &(A_diag_j[i_start]);
+            tmp_data = &(A_diag_data[i_start]);
+            for (j = i_start; j < i_end; j++)
+               res -= (*tmp_data++) * z_vec[*tmp_j++];
+            if ( ! zeroInitialGuess && num_procs > 1 && useOffProcData_ == 1)
             {
-               iStart   = A_offd_i[i];
-               iEnd     = A_offd_i[i+1];
-               tmp_j    = &(A_offd_j[iStart]);
-               tmp_data = &(A_offd_data[iStart]);
-               for (jj = iStart; jj < iEnd; jj++)
+               i_start  = A_offd_i[i];
+               i_end    = A_offd_i[i+1];
+               tmp_j    = &(A_offd_j[i_start]);
+               tmp_data = &(A_offd_data[i_start]);
+               for (j = i_start; j < i_end; j++)
                   res -= (*tmp_data++) * Vext_data[*tmp_j++];
             }
-            u_data[i] += relax_weight * res / A_diag_data[A_diag_i[i]];
+            z_vec[i] += relax_weight * res / A_diag_data[A_diag_i[i]];
          }
       }
       zeroInitialGuess = 0;
+   }
+
+   /*-----------------------------------------------------------------
+    * continue outer CG
+    *-----------------------------------------------------------------*/
+
+   if ( useCG_ == 1 )
+   {
+      dtemp = 0.0;
+      for ( i = 0; i < local_nrows; i++ ) dtemp += (r_vec[i] * z_vec[i]);
+      MPI_Allreduce(&dtemp, &rho, 1, MPI_DOUBLE, MPI_SUM, comm);
+      for ( i = 0; i < local_nrows; i++ ) p_vec[i] = z_vec[i];
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j=start;j<hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1);j++)
+         {
+            jj = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
+            v_buf_data[index++] = p_vec[jj];
+         }
+      }
+      comm_handle = hypre_ParCSRCommHandleCreate(1,comm_pkg,v_buf_data,
+                                                 Vext_data);
+      hypre_ParCSRCommHandleDestroy(comm_handle);
+      comm_handle = NULL;
+      for ( i = 0; i < local_nrows; i++ ) 
+      {
+         i_start   = A_diag_i[i];
+         i_end     = A_diag_i[i+1];
+         tmp_j    = &(A_diag_j[i_start]);
+         tmp_data = &(A_diag_data[i_start]);
+         res      = 0.0;
+         for (j = i_start; j < i_end; j++)
+            res += (*tmp_data++) * p_vec[*tmp_j++];
+         if ( num_procs > 1 )
+         {
+            i_start   = A_offd_i[i];
+            i_end     = A_offd_i[i+1];
+            tmp_j    = &(A_offd_j[i_start]);
+            tmp_data = &(A_offd_data[i_start]);
+            for (j = i_start; j < i_end; j++)
+               res += (*tmp_data++) * Vext_data[*tmp_j++];
+         }
+         ap_vec[i] = res;
+      }
+      dtemp = 0.0;
+      for ( i = 0; i < local_nrows; i++ ) dtemp += (p_vec[i] * ap_vec[i]);
+      MPI_Allreduce(&dtemp, &sigma, 1, MPI_DOUBLE, MPI_SUM, comm);
+      alpha = rho /sigma;
+      for ( i = 0; i < local_nrows; i++ ) u_data[i] += alpha * p_vec[i];
+      delete [] r_vec;
+      delete [] p_vec;
+      delete [] ap_vec;
+      delete [] z_vec;
    }
 
    /*-----------------------------------------------------------------
@@ -241,7 +348,17 @@ int MLI_Solver_SGS::setParams( char *param_string, int argc, char **argv )
    double *weights;
    char   param1[200];
 
-   if ( !strcasecmp(param_string, "numSweeps") )
+   if ( !strcasecmp(param_string, "useCG") )
+   {
+      useCG_ = 1; 
+      return 0;
+   }
+   else if ( !strcasecmp(param_string, "useOffProcData") )
+   {
+      useOffProcData_  = 1;
+      return 0;
+   }
+   else if ( !strcasecmp(param_string, "numSweeps") )
    {
       sscanf(param_string, "%s %d", param1, &nsweeps);
       if ( nsweeps < 1 ) nsweeps = 1;
