@@ -24,18 +24,22 @@
 #include "parcsr_linear_solvers/HYPRE_parcsr_ls.h"
 #include "parcsr_matrix_vector/parcsr_matrix_vector.h"
 
+#ifdef __cplusplus
 extern "C"
 {
-   int HYPRE_LSI_DDICTCreate( MPI_Comm comm, HYPRE_Solver *solver );
-   int HYPRE_LSI_DDICTDestroy( HYPRE_Solver solver );
-   int HYPRE_LSI_DDICTSetFillin( HYPRE_Solver solver, double fillin);
-   int HYPRE_LSI_DDICTSetOutputLevel( HYPRE_Solver solver, int level);
-   int HYPRE_LSI_DDICTSetDropTolerance( HYPRE_Solver solver, double thresh);
-   int HYPRE_LSI_DDICTSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
-                             HYPRE_ParVector b,   HYPRE_ParVector x );
-   int HYPRE_LSI_DDICTSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
-                             HYPRE_ParVector b,   HYPRE_ParVector x );
+#endif
+extern int HYPRE_LSI_DDICTCreate( MPI_Comm comm, HYPRE_Solver *solver );
+extern int HYPRE_LSI_DDICTDestroy( HYPRE_Solver solver );
+extern int HYPRE_LSI_DDICTSetFillin( HYPRE_Solver solver, double fillin);
+extern int HYPRE_LSI_DDICTSetOutputLevel( HYPRE_Solver solver, int level);
+extern int HYPRE_LSI_DDICTSetDropTolerance( HYPRE_Solver solver, double thresh);
+extern int HYPRE_LSI_DDICTSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+                                 HYPRE_ParVector b,   HYPRE_ParVector x );
+extern int HYPRE_LSI_DDICTSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+                                 HYPRE_ParVector b,   HYPRE_ParVector x );
+#ifdef __cplusplus
 }
+#endif
 
 #endif
 
