@@ -443,7 +443,7 @@ then
    rs6000)
 
    AC_ARG_WITH(COMM_SIMPLE, [\
-   --without-COMM_SIMPLE           use MPI derived data types],
+   --without-COMM_SIMPLE           use MPI derived data types (for IBM only)],
    if test "$withval" = "no"
    then
      CFLAGS="$CFLAGS"

@@ -86,7 +86,7 @@ ac_help="$ac_help
   --with-petsc            use petsc"
 ac_help="$ac_help
 \
-   --without-COMM_SIMPLE           use MPI derived data types"
+   --without-COMM_SIMPLE           use MPI derived data types (for IBM only)"
 ac_help="$ac_help
   --with-mpi-include=DIR  mpi.h is in DIR"
 ac_help="$ac_help
