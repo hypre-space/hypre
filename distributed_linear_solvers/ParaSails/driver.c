@@ -144,7 +144,8 @@ int main(int argc, char *argv[])
 	fflush(NULL);
         MPI_Barrier(MPI_COMM_WORLD);
 
-        /* MatrixPrint(ps->M, "M"); */
+	if (!strncmp(argv[3], "testpsmat", 8))
+            MatrixPrint(ps->M, "M");
 
 #if 0
         if (mype == 0) 
