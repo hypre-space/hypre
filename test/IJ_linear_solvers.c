@@ -2134,8 +2134,12 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    HYPRE_IJVectorDestroy(ij_v);
-   hypre_TFree(part_x);
-   hypre_TFree(part_b);
+
+/*--------------------------------------------------------------
+ * Partitionings are destroyed by previous Destroy calls (not good?)
+ * hypre_TFree(part_x);
+ * hypre_TFree(part_b);
+ *--------------------------------------------------------------*/
 
    HYPRE_IJMatrixDestroy(ij_matrix);
    if (build_rhs_type == 1)
