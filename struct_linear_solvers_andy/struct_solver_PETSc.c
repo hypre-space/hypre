@@ -38,8 +38,12 @@ hypre_FreeStructSolverPETSc( hypre_StructSolver *struct_solver )
 int 
 hypre_StructSolverInitializePETSc( hypre_StructSolver *struct_solver )
 {
+   int ierr = 0;
 
-   return(0);
+   hypre_StructSolverData( struct_solver ) = HYPRE_NewPETScSolverParILUT
+      ( hypre_StructSolverContext( struct_solver ));
+
+   return(ierr);
 }
 
 /*--------------------------------------------------------------------------
@@ -60,9 +64,7 @@ hypre_StructSolverSetupPETSc( hypre_StructSolver *struct_solver )
    int  ierr;
 
 
-   solver_data = HYPRE_NewPETScSolverParILUT
-      ( hypre_StructSolverContext( struct_solver ));
-   hypre_StructSolverData( struct_solver ) = solver_data;
+   solver_data = hypre_StructSolverData( struct_solver );
 
    Petsc_matrix = (Mat) HYPRE_StructMatrixGetData( matrix );
    HYPRE_PETScSolverParILUTSetSystemMatrix( solver_data, Petsc_matrix );
