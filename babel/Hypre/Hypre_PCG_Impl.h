@@ -53,10 +53,13 @@ struct Hypre_PCG__data {
 
    /* parameter cache, to save in Set*Parameter functions and copy in Apply: */
    double tol;
+   double atolf;
+   double cf_tol;
    int maxiter;
    int relchange;
    int twonorm;
    int printlevel;
+   int stop_crit;
 
    /* preconditioner cache, to save in SetPreconditioner and apply in Apply:*/
    HYPRE_Solver * solverprecond;

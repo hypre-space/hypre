@@ -46,12 +46,20 @@ int impl_Hypre_PCG_Copy_Parameters_to_HYPRE_struct( Hypre_PCG self )
 
    /* double parameters: */
    ierr += HYPRE_PCGSetTol( solver, data->tol );
+   ierr += HYPRE_PCGSetAbsoluteTolFactor( solver,
+                                          data->atolf );
+   ierr += HYPRE_PCGSetConvergenceFactorTol( solver,
+                                             data->cf_tol );
+
    /* int parameters: */
    ierr += HYPRE_PCGSetMaxIter( solver, data->maxiter );
    ierr += HYPRE_PCGSetRelChange( solver, data->relchange );
    ierr += HYPRE_PCGSetTwoNorm( solver, data->twonorm );
+   ierr += HYPRE_PCGSetStopCrit( solver, data->stop_crit );
+
    ierr += HYPRE_PCGSetLogging( solver, data->printlevel );
-   /* >>> ...this will have to be changed when PCG logging is brought up to the new standard */
+   /* <<<< ...this will have to be changed to SetPrintLevel when PCG logging<<<>>>
+      <<<< is brought up to the new standard <<<>>>*/
 
    return ierr;
 }
@@ -232,6 +240,13 @@ impl_Hypre_PCG_GetDoubleValue(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
+   /* >>> We should add a Get for everything in SetParameter.
+      There are two values for each parameter: the Hypre cache, and the HYPRE value.
+      The cache gets copied to HYPRE when Apply is called.  What we want to return
+      is the cache value if the corresponding Set had been called, otherwise the
+      real (HYPRE) value.  Assuming the HYPRE interface is not used simultaneously
+      with the Babel interface, it is sufficient to initialize the cache with
+      whatever HYPRE is using. */
    int ierr = 0;
    HYPRE_Solver solver;
    struct Hypre_PCG__data * data;
@@ -266,6 +281,13 @@ impl_Hypre_PCG_GetIntValue(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
+   /* >>> We should add a Get for everything in SetParameter.
+      There are two values for each parameter: the Hypre cache, and the HYPRE value.
+      The cache gets copied to HYPRE when Apply is called.  What we want to return
+      is the cache value if the corresponding Set had been called, otherwise the
+      real (HYPRE) value.  Assuming the HYPRE interface is not used simultaneously
+      with the Babel interface, it is sufficient to initialize the cache with
+      whatever HYPRE is using. */
    int ierr = 0;
    HYPRE_Solver solver;
    struct Hypre_PCG__data * data;
@@ -362,7 +384,8 @@ impl_Hypre_PCG_SetDoubleArrayParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetDoubleArrayParameter) */
   /* Insert the implementation of the SetDoubleArrayParameter method here... */
-   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
+   /* no such parameters, return error if called */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetDoubleArrayParameter) */
 }
 
@@ -395,8 +418,18 @@ impl_Hypre_PCG_SetDoubleParameter(
    if ( strcmp(name,"Tol")==0 || strcmp(name,"Tolerance")==0 ) {
       data -> tol = value;
    }
+   else if ( strcmp(name,"AbsoluteTolFactor")==0 ||
+             strcmp(name,"Absolute Tol Factor")==0 ||
+             strcmp(name,"Absolute Tolerance Factor")==0 ) {
+      data -> atolf = value;
+   }
+   else if (strcmp(name,"ConvergenceFactorTol")==0 ||
+            strcmp(name,"Convergence Factor Tol")==0 ||
+            strcmp(name,"Convergence Factor Tolerance")==0 ) {
+      /* tolerance for special test for slow convergence */
+      data -> cf_tol = value;
+   }
    /* Set other parameters here. */
-   /* >>>>>>>>>>>> check whether more belong here <<<<<<<<<<<<<<<<< */
    else ierr=1;
 
    return ierr;
@@ -418,7 +451,8 @@ impl_Hypre_PCG_SetIntArrayParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetIntArrayParameter) */
   /* Insert the implementation of the SetIntArrayParameter method here... */
-   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
+   /* no such parameters, return error if called */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetIntArrayParameter) */
 }
 
@@ -460,8 +494,12 @@ impl_Hypre_PCG_SetIntParameter(
             strcmp(name,"Relative Change Test")==0 ) {
       data -> relchange = value;
    }
+   else if ( strcmp(name,"StopCrit")==0 || strcmp(name,"Stop Crit")==0 ||
+             strcmp(name,"Pure Absolute Error Stopping Criterion")==0 ) {
+      /* this parameter is obsolete but still supported */
+      data -> stop_crit = value;
+   }
    /* Set other parameters here. */
-   /* >>>>>>>>>>>> check whether more belong here <<<<<<<<<<<<<<<<< */
    else ierr=1;
 
    return ierr;
@@ -482,7 +520,10 @@ impl_Hypre_PCG_SetLogging(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
-   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
+   /* So far there is no logging, so just return (withoug an error).
+      >>> This will need to be changed once GetResidual is implemented <<<
+   */
+   return 0;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetLogging) */
 }
 
@@ -627,7 +668,8 @@ impl_Hypre_PCG_SetStringParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
-   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
+   /* There are no string parameters, so return an error. */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetStringParameter) */
 }
 

@@ -202,7 +202,9 @@ impl_Hypre_ParDiagScale_GetResidual(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.GetResidual) */
   /* Insert the implementation of the GetResidual method here... */
    /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< 
-      but shouldn't be much needed */
+      but shouldn't be needed.  And it requires setting a log level flag,
+      allocating an array, etc. Much better for the user to do his own
+      computation. */
    printf("***** Diagonal Scaling does not support GetResidual *****\n" );
    return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.GetResidual) */
