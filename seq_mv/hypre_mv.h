@@ -284,6 +284,11 @@ int hypre_ScaleVector P((double alpha , hypre_Vector *y ));
 int hypre_Axpy P((double alpha , hypre_Vector *x , hypre_Vector *y ));
 double hypre_InnerProd P((hypre_Vector *x , hypre_Vector *y ));
 
+/* csr_matop.c */
+hypre_CSRMatrix *hypre_Matadd P((hypre_CSRMatrix *A, hypre_CSRMatrix *B));
+hypre_CSRMatrix *hypre_Matmul P((hypre_CSRMatrix *A, hypre_CSRMatrix *B));
+hypre_CSRMatrix *hypre_DeleteZerosInMatrix P((hypre_CSRMatrix *A, double tol));
+
 #undef P
 
 #ifdef __cplusplus
