@@ -1424,7 +1424,7 @@ if test "${with_strict_checking+set}" = set; then
  CFLAGS="$CFLAGS,1018,1021,1022,1023,1024,1030,1041"
  CXXFLAGS="$CXXFLAGS --c++ --strict --lint --display_error_number"
  CXXFLAGS="$CXXFLAGS --diag_suppress 236,381,450,826"
- CXXFLAGS="$CXXFLAGS,1018,1022,1023,1024,1025,1030"
+ CXXFLAGS="$CXXFLAGS,1018,1022,1023,1024,1025,1029,1030"
  casc_users_chose_compilers=yes
  casc_using_mpi=no
  cat >> confdefs.h <<\EOF
