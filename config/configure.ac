@@ -269,6 +269,10 @@ AC_SUBST(BLASLIBFLAGS)
 ACX_LAPACK([casc_user_chose_lapack=yes;LAPACKLIBFLAGS=$LAPACK_LIBS], 
   [casc_user_chose_lapack=no;LAPACKLIBFLAGS="-lHYPRE_lapack"]) 
 AM_CONDITIONAL([LAPACKNEEDED],[test "$casc_user_chose_lapack" = no])
+if test "$casc_user_chose_blas" = no && test "$casc_user_chose_lapack" = yes
+then
+  LAPACKLIBFLAGS="$LAPACKLIBFLAGS $FLIBS"
+fi
 AC_SUBST(LAPACKLIBFLAGS)
 AC_CHECK_LIBM
 AC_SUBST(LIBM)
