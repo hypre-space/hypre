@@ -789,6 +789,19 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
 	 diag_i[i+1] = i_diag;
 	 offd_i[i+1] = i_offd;
       }
+
+      if (hypre_CSRMatrixJ(diag) != NULL || hypre_CSRMatrixData(diag) != NULL)
+      {
+         hypre_TFree(hypre_CSRMatrixJ(diag));
+         hypre_TFree(hypre_CSRMatrixData(diag));
+      }
+
+      if (hypre_CSRMatrixJ(offd) != NULL || hypre_CSRMatrixData(offd) != NULL)
+      {
+         hypre_TFree(hypre_CSRMatrixJ(offd));
+         hypre_TFree(hypre_CSRMatrixData(offd));
+      }
+
       diag_j = hypre_CTAlloc(int,i_diag);
       diag_data = hypre_CTAlloc(double,i_diag);
       offd_j = hypre_CTAlloc(int,i_offd);
