@@ -112,6 +112,17 @@ HYPRE_StructHybridSetPCGMaxIter( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetPCGAbsoluteTolFactor
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructHybridSetPCGAbsoluteTolFactor( HYPRE_StructSolver solver,
+                                           double      pcg_atolf )
+{
+   return( hypre_HybridSetPCGAbsoluteTolFactor( (void *) solver, pcg_atolf ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructHybridSetTwoNorm
  *--------------------------------------------------------------------------*/
 

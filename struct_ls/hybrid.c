@@ -23,6 +23,7 @@ typedef struct
 
    double                tol;
    double                cf_tol;
+   double                pcg_atolf;
    int                   dscg_max_its;
    int                   pcg_max_its;
    int                   two_norm;
@@ -65,6 +66,7 @@ hypre_HybridCreate( MPI_Comm  comm )
    /* set defaults */
    (hybrid_data -> tol)               = 1.0e-06;
    (hybrid_data -> cf_tol)            = 0.90;
+   (hybrid_data -> pcg_atolf)         = 0.0;
    (hybrid_data -> dscg_max_its)      = 1000;
    (hybrid_data -> pcg_max_its)       = 200;
    (hybrid_data -> two_norm)          = 0;
@@ -164,6 +166,22 @@ hypre_HybridSetPCGMaxIter( void   *hybrid_vdata,
    int               ierr = 0;
 
    (hybrid_data -> pcg_max_its) = pcg_max_its;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_HybridSetPCGAbsoluteTolFactor
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_HybridSetPCGAbsoluteTolFactor( void   *hybrid_vdata,
+                                     double  pcg_atolf  )
+{
+   hypre_HybridData *hybrid_data = hybrid_vdata;
+   int               ierr = 0;
+
+   (hybrid_data -> pcg_atolf) = pcg_atolf;
 
    return ierr;
 }
@@ -403,6 +421,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
 
    double             tol            = (hybrid_data -> tol);
    double             cf_tol         = (hybrid_data -> cf_tol);
+   double             pcg_atolf      = (hybrid_data -> pcg_atolf);
    int                dscg_max_its   = (hybrid_data -> dscg_max_its);
    int                pcg_max_its    = (hybrid_data -> pcg_max_its);
    int                two_norm       = (hybrid_data -> two_norm);
@@ -453,6 +472,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
 
       hypre_PCGSetMaxIter(pcg_solver, dscg_max_its);
       hypre_PCGSetTol(pcg_solver, tol);
+      hypre_PCGSetAbsoluteTolFactor(pcg_solver, pcg_atolf);
       hypre_PCGSetConvergenceFactorTol(pcg_solver, cf_tol);
       hypre_PCGSetTwoNorm(pcg_solver, two_norm);
       hypre_PCGSetStopCrit(pcg_solver, stop_crit);
@@ -644,6 +664,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
 
          hypre_PCGSetMaxIter(pcg_solver, pcg_max_its);
          hypre_PCGSetTol(pcg_solver, tol);
+         hypre_PCGSetAbsoluteTolFactor(pcg_solver, pcg_atolf);
          hypre_PCGSetTwoNorm(pcg_solver, two_norm);
          hypre_PCGSetStopCrit(pcg_solver, stop_crit);
          hypre_PCGSetRelChange(pcg_solver, rel_change);
