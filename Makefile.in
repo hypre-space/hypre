@@ -38,6 +38,13 @@ HYPRE_FEI_DIRS =\
  FEI_matrix_vector/fei-base\
  FEI_matrix_vector/isis-mv ${HYPRE_IJ_DIRS}
 
+HYPRE_FEI_LIBFILES =\
+ libFEI_BASE.a         libHYPRE_ls.a           libHYPRE_DistributedMatrix.a \
+ libHYPRE_mv.a         libHYPRE_parcsr_ls.a    libHYPRE_FEI.a \
+ libHYPRE_parcsr_mv.a  libHYPRE_seq_mv.a       libHYPRE_IJ_mv.a \
+ libHYPRE_utilities.a  libHYPRE_MatrixMatrix.a libHYPRE_ParaSails.a \
+ libHYPRE_DistributedMatrixPilutSolver.a  
+
 # These are directories that are officially in HYPRE
 HYPRE_DIRS =\
  ${HYPRE_STRUCT_DIRS}\
@@ -106,6 +113,13 @@ fei:
 	    echo ""; \
 	  fi; \
 	done; \
+	mkdir -p hypre/tmp; \
+	mv -f hypre/lib/*.a hypre/tmp; \
+	for i in ${HYPRE_FEI_LIBFILES}; \
+	do \
+	   ar x hypre/tmp/$$i \
+	done; \
+	ar ruv /hypre/lib/libHYPRE_FEI.a 
 	echo ""
 
 install: all
