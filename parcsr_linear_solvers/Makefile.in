@@ -78,6 +78,7 @@ HEADERS =\
  headers.h\
  par_amg.h\
  parcsr_linear_solvers.h\
+ Common.h\
  HYPRE_parcsr_ls.h
 
 FILES =\
