@@ -150,8 +150,113 @@ yet, etc.
 \section{General Structure of Usage}
 
 Give example code here, maybe Rob's structured example is clearest. Use it to
-demonstrate basic 
-structure of usage:
+demonstrate basic structure of usage:  This be temporarily yucky -MAL
+
+\begin{display}
+\begin{verbatim}
+
+/*-----------------------------------------------------------
+ * Set up the matrix
+ *-----------------------------------------------------------*/
+
+   HYPRE_StructGridCreate(MPI_COMM_WORLD, dim, &grid);
+
+   /* Use HYPRE_StructGridSetExtents to define size in index space of
+      each grid block making up the grid */
+
+   HYPRE_StructGridSetPeriodic(grid, periodic);
+   HYPRE_StructGridAssemble(grid);
+	
+   HYPRE_StructStencilCreate(dim, dim + 1, &stencil);
+
+   /* Use HYPRE_StructStencilSetElement to impart structure to stencil */
+
+   HYPRE_StructMatrixCreate(MPI_COMM_WORLD, grid, stencil, &A);
+
+   /* Use grid and stencil to set matrix structure on matrix creation */
+
+   HYPRE_StructMatrixSetSymmetric(A, 1);
+   HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
+   HYPRE_StructMatrixInitialize(A);
+
+   /* Use HYPRE_StructMatrixSetBoxValues to set coefficients
+      of matrix A */
+
+   HYPRE_StructMatrixAssemble(A);
+
+/*-----------------------------------------------------------
+ * Set up the right-hand side and initial guess
+ *-----------------------------------------------------------*/
+
+   HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil, &b);
+   HYPRE_StructVectorInitialize(b);
+
+   /* Use HYPRE_StructVectorSetBoxValues to set values of
+      right-hand side b */
+
+   HYPRE_StructVectorAssemble(b);
+
+   HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil, &x);
+   HYPRE_StructVectorInitialize(x);
+
+   /* Use HYPRE_StructVectorSetBoxValues to set values of
+      initial guess x */
+
+   HYPRE_StructVectorAssemble(x);
+
+/*-----------------------------------------------------------
+ * Set up solver
+ *-----------------------------------------------------------*/
+
+   HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &solver);
+
+/* Set solver parameters */
+   HYPRE_StructPFMGSetMaxIter(solver, 50);
+   HYPRE_StructPFMGSetTol(solver, 1.0e-06);
+   HYPRE_StructPFMGSetRelChange(solver, 0);
+   HYPRE_StructPFMGSetRelaxType(solver, 1);
+   HYPRE_StructPFMGSetNumPreRelax(solver, n_pre);
+   HYPRE_StructPFMGSetNumPostRelax(solver, n_post);
+   HYPRE_StructPFMGSetSkipRelax(solver, skip);
+   HYPRE_StructPFMGSetLogging(solver, 1);
+
+   HYPRE_StructPFMGSetup(solver, A, b, x);
+
+/*-----------------------------------------------------------
+ * Solve the linear system
+ *-----------------------------------------------------------*/
+
+   HYPRE_StructPFMGSolve(solver, A, b, x);
+
+/*-----------------------------------------------------------
+ * Get solver results
+ *-----------------------------------------------------------*/
+
+/* Get solver statistics */
+   HYPRE_StructPFMGGetNumIterations(solver, &num_iterations);
+   HYPRE_StructPFMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
+
+/* Get solution */
+  /* Use HYPRE_StructVectorGetBoxValues to get solution into simple
+     arrays */
+
+/*-----------------------------------------------------------
+ * Deallocate solver memory space 
+ *-----------------------------------------------------------*/
+   HYPRE_StructPFMGDestroy(solver);
+
+/*-----------------------------------------------------------
+ * Deallocate linear system memory space 
+ *-----------------------------------------------------------*/
+   HYPRE_StructGridDestroy(grid);
+   HYPRE_StructStencilDestroy(stencil);
+   HYPRE_StructMatrixDestroy(A);
+   HYPRE_StructVectorDestroy(b);
+   HYPRE_StructVectorDestroy(x);
+
+\end{verbatim}
+\end{display}
+
 
 {\bf \it Before coding:}
 
