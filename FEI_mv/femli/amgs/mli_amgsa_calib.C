@@ -7,6 +7,13 @@
  *********************************************************************EHEADER*/
 
 // *********************************************************************
+// This function is a first experiment to study calibrated smoothed
+// aggregation methods.  Users first load the first set of null space
+// vectors, and subsequent generation of addition approximate null space
+// vectors are based on the previous set.
+// *********************************************************************
+
+// *********************************************************************
 // This file is customized to use HYPRE matrix format
 // *********************************************************************
 
@@ -28,7 +35,7 @@
 #include "util/mli_utils.h"
  
 /***********************************************************************
- * generate multilevel structure
+ * generate multilevel structure using an adaptive method
  * --------------------------------------------------------------------- */
 
 int MLI_Method_AMGSA::setupCalibration( MLI *mli ) 
@@ -133,6 +140,10 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
 
    for ( i = 0; i < calibration_size; i++ )
    {
+      /* ------------------------------------------------------------ */
+      /* set the current set of null space vectors                    */
+      /* ------------------------------------------------------------ */
+
       sprintf( param_string, "setNullSpace" );
       targc = 4;
       targv[0] = (char *) &ndofs;  
@@ -142,14 +153,27 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
       new_amgsa->setParams( param_string, targc, targv );
 
       dtime = time_getWallclockSeconds();
+
+      /* ------------------------------------------------------------ */
+      /* use random initial vectors for now and then call setup       */
+      /* ------------------------------------------------------------ */
+
       hypre_ParVectorSetRandomValues( trial_sol, (int) dtime );
 
       new_mli->setup();
+
+      /* ------------------------------------------------------------ */
+      /* solve using a random initial vector and a zero rhs           */
+      /* ------------------------------------------------------------ */
 
       sprintf(param_string, "HYPRE_ParVector");
       mli_sol = new MLI_Vector( (void*) trial_sol, param_string, NULL );
       mli_rhs = new MLI_Vector( (void*) zero_rhs, param_string, NULL );
       new_mli->cycle( mli_sol, mli_rhs );
+
+      /* ------------------------------------------------------------ */
+      /* add the new approximate null space vector to the current set */
+      /* ------------------------------------------------------------ */
 
       for ( j = nrows*n_null; j < nrows*(n_null+1); j++ )
          nullspace_store[j] = sol_data[j-nrows*n_null];
@@ -161,19 +185,30 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
          printf("P%d : Norm of Null %d = %e\n", mypid,j,R_array[j*n_null+j]);
 */
    }
-   new_mli->resetSystemMatrix(0);
-   delete new_mli;
+
    total_time += ( MLI_Utils_WTime() - start_time );
-   delete [] Q_array;
-   delete [] R_array;
-   delete [] relax_wts;
-   delete [] targv;
+
+   /* --------------------------------------------------------------- */
+   /* store the new set of null space vectors, and call mli setup     */
+   /* --------------------------------------------------------------- */
+
    setNullSpace(ndofs, n_null, nullspace_store, nrows);
-   delete [] nullspace_store;
    calib_size_tmp = calibration_size;
    calibration_size = 0;
    level = setup( mli );
    calibration_size = calib_size_tmp;
+
+   /* --------------------------------------------------------------- */
+   /* clean up                                                        */
+   /* --------------------------------------------------------------- */
+
+   new_mli->resetSystemMatrix(0);
+   delete new_mli;
+   delete [] Q_array;
+   delete [] R_array;
+   delete [] relax_wts;
+   delete [] targv;
+   delete [] nullspace_store;
    hypre_ParVectorDestroy( trial_sol );
    hypre_ParVectorDestroy( zero_rhs );
    return level;

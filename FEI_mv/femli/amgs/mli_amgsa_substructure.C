@@ -57,7 +57,7 @@ extern "C"
  * compute initial null spaces (for the subdomain only) using FEData
  * --------------------------------------------------------------------- */
 
-int MLI_Method_AMGSA::setupNullSpaceUsingFEData( MLI *mli ) 
+int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli ) 
 {
    int          i, j, k, j1, k1, ierr, level, mypid, nElems, nodeNumFields;
    int          nodeFieldID, elemNNodes, **elemNodeLists, *elemNodeList1D;
@@ -78,7 +78,7 @@ int MLI_Method_AMGSA::setupNullSpaceUsingFEData( MLI *mli )
    hypre_ParCSRMatrix *hypreA;
 
 #ifdef MLI_DEBUG_DETAILED
-   cout << " MLI_Method_AMGSA::setupNullSpaceUsingFEData begins..." << endl;
+   cout << " MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData begins.\n";
    cout.flush();
 #endif
 
@@ -88,14 +88,16 @@ int MLI_Method_AMGSA::setupNullSpaceUsingFEData( MLI *mli )
 
    if ( mli == NULL )
    {
-      cout << "MLI::AMGSA:setupNullSpaceUsingFEData ERROR - no mli\n";
+      cout << "MLI::AMGSA:setupSubdomainNullSpaceUsingFEData ERROR "
+           << "- no mli\n";
       exit(1);
    }
    level = 0;
    fedata = mli->getFEData(level);
    if ( fedata == NULL )
    {
-      cout << "MLI::AMGSA:setupNullSpaceUsingFEData ERROR - no fedata\n";
+      cout << "MLI::AMGSA:setupSubdomainNullSpaceUsingFEData ERROR "
+           << "- no fedata\n";
       exit(1);
    }
 
@@ -121,7 +123,8 @@ int MLI_Method_AMGSA::setupNullSpaceUsingFEData( MLI *mli )
    fedata->getNodeNumFields(nodeNumFields);
    if ( nodeNumFields != 1 ) 
    {
-      cout << "MLI::AMGSA:setupNullSpaceUsingFEData - nodeNumFields != 1.\n";
+      cout << "MLI::AMGSA:setupSubdomainNullSpaceUsingFEData - "
+           << "nodeNumFields != 1.\n";
       return 1;
    }
    fedata->getNumElements( nElems );
@@ -227,7 +230,8 @@ int MLI_Method_AMGSA::setupNullSpaceUsingFEData( MLI *mli )
    {
       if ( csrIA[i] > rowSize * (i+1) )
       {
-         cout << "MLI::AMGSA:setupNullSpaceUsingFEData ERROR : rowSize too";
+         cout << "MLI::AMGSA:setupSubdomainNullSpaceUsingFEData ERROR : "
+              << "rowSize too";
          cout << " large (increase it). \n";
          cout << "   => allowed = " << rowSize << " actual = " 
               << csrIA[i]-rowSize*i << endl;
@@ -270,7 +274,7 @@ int MLI_Method_AMGSA::setupNullSpaceUsingFEData( MLI *mli )
       j1 += k1;
    }
 
-#if 1
+#if 0
    FILE *fp;
    fp = fopen("SMat", "w");
    for ( i = 0; i < csrNrows; i++ )
@@ -390,7 +394,7 @@ int MLI_Method_AMGSA::setupNullSpaceUsingFEData( MLI *mli )
    delete [] nodeEqnList;
 
 #ifdef MLI_DEBUG_DETAILED
-   cout << " MLI_Method_AMGSA::setupNullSpaceUsingFEData ends." << endl;
+   cout << " MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData ends.\n";
    cout.flush();
 #endif
 
@@ -444,6 +448,7 @@ int MLI_Method_AMGSA::setupDDFormSubdomainAggregate( MLI *mli )
 
 /***********************************************************************
  * set up domain decomposition on each subdomain as smoother
+ * using the SuperLU factors already generated here.
  * --------------------------------------------------------------------- */
 
 int MLI_Method_AMGSA::setupDDSuperLUSmoother( MLI *mli, int level ) 
