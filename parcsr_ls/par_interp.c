@@ -824,10 +824,13 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    /* End of Compression Test */
 
+
+#if 0
    /*----------------------------------------------------------------------
     *  Determine the col_map_offd_P
     *----------------------------------------------------------------------*/
-
+if (debug_flag==5)
+{
    if (debug_flag==4)
    {
       wall_time = time_getWallclockSeconds() - wall_time;
@@ -869,6 +872,8 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                     my_id, wall_time);
       fflush(NULL);
    }
+} /*end of if debug_flag==5 */
+#endif
 
 /* Test begins here */
 
