@@ -19,15 +19,8 @@
 #define MAX_QUEUE 256
 #endif
 
-
 #include<pthread.h>
 #include "mpi.h"
-
-
-#define hypre_BarrierThreadWrapper(body) \
-   body;\
-   hypre_barrier(&talloc_mtx, pthread_equal(pthread_self(), initial_thread))
-
 
 /* hypre_work_proc_t typedef'd to be a pointer to a function with a void*
    argument and a void return type */
@@ -55,7 +48,6 @@ int ifetchadd( int *w, pthread_mutex_t *mutex_fetchadd );
 int hypre_fetch_and_add( int *w );
 void hypre_barrier(pthread_mutex_t *mpi_mtx, int unthreaded);
 int hypre_GetThreadID( void );
-
 
 pthread_t initial_thread;
 pthread_t hypre_thread[hypre_MAX_THREADS];
