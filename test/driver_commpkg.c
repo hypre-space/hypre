@@ -108,6 +108,15 @@ main( int   argc,
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
 
 
+
+   /*-----------------------------------------------------------
+    * default - is 27pt laplace
+    *-----------------------------------------------------------*/
+
+    
+    build_matrix_type = 2;
+    matrix_arg_index = argc;
+
    /*-----------------------------------------------------------
     * Parse command line
     *-----------------------------------------------------------*/
@@ -154,6 +163,9 @@ main( int   argc,
       {
          index++;  
          loop = atoi(argv[index++]);
+         if (loop < 1) loop = 1;
+         
+
       }
 
       else  
@@ -322,17 +334,18 @@ main( int   argc,
             
       }
       
-         if (!myid && i ) printf("....loop[%d] (%d total) =  %f seconds\n", i, loop2, loop_times[i]);  
+         if (!myid ) printf("....loop[%d] (%d total) =  %f seconds\n", i, loop2, loop_times[i]);  
 
       }
       
 
       /* calculate the avg and std. */
       stats_mo(loop_times, loop, &T_avg, &T_std);
-    
+          
       if (!myid) printf(" NewCommPkgCreate:  AVG. wall clock time =  %f seconds\n", T_avg);  
       if (!myid) printf("                    STD. for %d  runs     =  %f\n", loop-1, T_std);  
-      if (!myid) printf("********************************************************\n" );  
+      if (!myid) printf("                    (Note: avg./std. timings exclude run 0.)\n");
+       if (!myid) printf("********************************************************\n" );  
       /*-----------------------------------------------------------
        *  Verbose printing
        *-----------------------------------------------------------*/
@@ -482,7 +495,7 @@ main( int   argc,
         }
          
         
-         if (!myid && i) printf("....loop[%d] (%d total)=  %f seconds\n", i, loop2, loop_times[i]);  
+         if (!myid) printf("....loop[%d] (%d total)=  %f seconds\n", i, loop2, loop_times[i]);  
        
          
             
@@ -491,6 +504,7 @@ main( int   argc,
       stats_mo(loop_times, loop, &T_avg, &T_std);      
       if (!myid) printf("Current CommPkgCreate:  AVG. wall clock time =  %f seconds\n", T_avg);  
       if (!myid) printf("                        STD. for %d  runs     =  %f\n", loop-1, T_std);  
+      if (!myid) printf("                        (Note: avg./std. timings exclude run 0.)\n");
       if (!myid) printf("********************************************************\n" );  
 
       /*-----------------------------------------------------------
