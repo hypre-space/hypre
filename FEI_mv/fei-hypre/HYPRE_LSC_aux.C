@@ -2877,7 +2877,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
        //ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,
        //                                        NULL,soln);
        //---new_IJ------------------------------------------------------
-       ierr = HYPRE_IJVectorSetValues(currX_, nrows, (const int *) &ind_array,
+       ierr = HYPRE_IJVectorSetValues(currX_, nrows, (const int *) ind_array,
                     	       (const double *) soln);
        //---------------------------------------------------------------
        assert(!ierr);
@@ -3112,7 +3112,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
        //ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,
        //                                        NULL,soln);
        //---new_IJ------------------------------------------------------
-       ierr = HYPRE_IJVectorSetValues(currX_, nrows, (const int *) &ind_array,
+       ierr = HYPRE_IJVectorSetValues(currX_, nrows, (const int *) ind_array,
                     	       (const double *) soln);
        //---------------------------------------------------------------
        assert(!ierr);
