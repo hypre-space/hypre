@@ -95,6 +95,8 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
                       double             *measure_array,
                       int                *graph_array,
                       int                 graph_array_size,
+                      int                *graph_array_offd,
+                      int                 graph_array_offd_size,
                       int                *IS_marker,
                       int                *IS_marker_offd     )
 {
@@ -139,14 +141,15 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
       i = graph_array[ig];
       if (measure_array[i] > 1)
       {
-	 if (i < local_num_vars)
-	 {
-            IS_marker[i] = 1;
-	 }
-	 else
-	 {
-            IS_marker_offd[i-local_num_vars] = 1;
-	 }
+         IS_marker[i] = 1;
+      }
+   }
+   for (ig = 0; ig < graph_array_offd_size; ig++)
+   {
+      i = graph_array_offd[ig];
+      if (measure_array[i+local_num_vars] > 1)
+      {
+         IS_marker_offd[i] = 1;
       }
    }
 
@@ -156,10 +159,7 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
 
    for (ig = 0; ig < graph_array_size; ig++)
    {
-    i = graph_array[ig];
-
-    if (i < local_num_vars)
-    {
+      i = graph_array[ig];
       if (measure_array[i] > 1)
       {
          for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++)
@@ -202,57 +202,50 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
             }
          }
       }
-    }
-    else
-    {
-      if (measure_array[i] > 1)
+   }
+   for (ig = 0; ig < graph_array_offd_size; ig++)
+   {
+      i = graph_array_offd[ig];
+      if (measure_array[local_num_vars+i] > 1)
       {
-	 ic = i - local_num_vars;
-         for (jS = S_ext_i[ic]; jS < S_ext_i[ic+1]; jS++)
+         for (jS = S_ext_i[i]; jS < S_ext_i[i+1]; jS++)
          {
           j = S_ext_j[jS];
-          if (j < 0) j = -j-1;
-          if (j >= col_1 && j < col_n)
+          /* if (j < 0) j = -j-1; */
+          if (j >= 0)
 	  {
-	    jc = j - col_1; 
             /* only consider valid graph edges */
-            /* if ( (measure_array[jc] > 1) && (S_ext_data[jS]) ) */
-            if (measure_array[jc] > 1) 
+            /* if ( (measure_array[j] > 1) && (S_ext_data[jS]) ) */
+            if (measure_array[j] > 1) 
             {
-               if (measure_array[i] > measure_array[jc])
+               if (measure_array[i+local_num_vars] > measure_array[j])
                {
-                  IS_marker[jc] = 0;
+                  IS_marker[j] = 0;
                }
-               else if (measure_array[jc] > measure_array[i])
+               else if (measure_array[j] > measure_array[i+local_num_vars])
                {
-                  IS_marker_offd[ic] = 0;
+                  IS_marker_offd[i] = 0;
                }
             }
 	  }
 	  else
 	  {
-	     jc = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
-	     if (jc > -1)
-	     {
-		jc += local_num_vars;  
+	     jc = -j-1+local_num_vars;
             /* only consider valid graph edges */
-                /* if ((measure_array[jc] > 1) && (S_ext_data[jS])) */
-                if (measure_array[jc] > 1)
+             if (measure_array[jc] > 1)
+             {
+                if (measure_array[i+local_num_vars] > measure_array[jc])
                 {
-                   if (measure_array[i] > measure_array[jc])
-                   {
-                      IS_marker_offd[jc-local_num_vars] = 0;
-                   }
-                   else if (measure_array[jc] > measure_array[i])
-                   {
-                      IS_marker_offd[ic] = 0;
-                   }
+                   IS_marker_offd[-j-1] = 0;
                 }
-            } 
+                else if (measure_array[jc] > measure_array[i+local_num_vars])
+                {
+                   IS_marker_offd[i] = 0;
+                }
+             }
 	  }
         }
       }
-    }
    }
             
    return (ierr);
