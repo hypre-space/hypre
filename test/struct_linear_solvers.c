@@ -305,21 +305,16 @@ main( int   argc,
 
    MPI_Barrier(MPI_COMM_WORLD);
 
-   /*-----------------------------------------------------------
-    * Set up periodic flags and set istart = 0 for periodic dims
-    *-----------------------------------------------------------*/
-
    time_index = hypre_InitializeTiming("Struct Interface");
    hypre_BeginTiming(time_index);
+
+   /*-----------------------------------------------------------
+    * Set up periodic
+    *-----------------------------------------------------------*/
 
    periodic[0] = px;
    periodic[1] = py;
    periodic[2] = pz;
-   for (i = 0; i < dim; i++)
-   {
-      if (periodic[i] != 0)
-         istart[i] = 0;
-   }
 
    /*-----------------------------------------------------------
     * Set up dxyz for PFMG solver

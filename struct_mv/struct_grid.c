@@ -216,35 +216,31 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
 {
    int                  ierr = 0;
 
-   hypre_BoxArray      *boxes;
+   MPI_Comm             comm         = hypre_StructGridComm(grid);
+   int                  dim          = hypre_StructGridDim(grid);
+   hypre_BoxArray      *boxes        = hypre_StructGridBoxes(grid);
+   int                 *ids;
+   hypre_BoxNeighbors  *neighbors    = hypre_StructGridNeighbors(grid);
+   int                  max_distance = hypre_StructGridMaxDistance(grid);
+   hypre_Box           *bounding_box = hypre_StructGridBoundingBox(grid);
+
    hypre_Box           *box;
+   hypre_BoxArray      *all_boxes;
+   int                 *all_procs;
+   int                 *all_ids;
+   int                  first_local;
+   int                  num_local;
+   int                  num_periodic;
    int                  size;
    int                  prune;
-   int                  i;
+   int                  i, d, idmin, idmax;
 
-   boxes = hypre_StructGridBoxes(grid);
    prune = 1;
 
-   if (hypre_StructGridNeighbors(grid) == NULL)
+   if (neighbors == NULL)
    {
-      MPI_Comm            comm = hypre_StructGridComm(grid);
-      int                 dim  = hypre_StructGridDim(grid);
-      int                *ids;
-      hypre_BoxNeighbors *neighbors;
-      hypre_Box          *bounding_box;
-                         
-      hypre_BoxArray     *all_boxes;
-      int                *all_procs;
-      int                *all_ids;
-      int                 first_local;
-      int                 num_local;
-      int                 num_periodic;
-                         
-      int                 d, idmin, idmax;
-
       /* gather grid box info */
       hypre_GatherAllBoxes(comm, boxes, &all_boxes, &all_procs, &first_local);
-      num_local = hypre_BoxArraySize(boxes);
 
       /* set bounding box */
       bounding_box = hypre_BoxCreate();
@@ -276,7 +272,20 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
             size += hypre_BoxVolume(box);
          }
       hypre_StructGridGlobalSize(grid) = size;
+   }
 
+   /* adjust periodicity values based on the bounding box */
+   for (d = 0; d < 3; d++)
+   {
+      if (hypre_IndexD(hypre_StructGridPeriodic(grid), d))
+      {
+         hypre_IndexD(hypre_StructGridPeriodic(grid), d) =
+            hypre_BoxSizeD(bounding_box, d);
+      }
+   }
+
+   if (neighbors == NULL)
+   {
       /* modify all_boxes as required for periodicity */
       hypre_StructGridPeriodicAllBoxes(grid, &all_boxes, &all_procs,
                                        &first_local, &num_periodic);
@@ -289,6 +298,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
          }
 
       /* set neighbors */
+      num_local = hypre_BoxArraySize(boxes);
       hypre_BoxNeighborsCreate(all_boxes, all_procs, all_ids,
                                first_local, num_local, num_periodic,
                                &neighbors);
@@ -305,8 +315,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       prune = 1;
    }
 
-   hypre_BoxNeighborsAssemble(hypre_StructGridNeighbors(grid),
-                              hypre_StructGridMaxDistance(grid), prune);
+   hypre_BoxNeighborsAssemble(neighbors, max_distance, prune);
 
    /* compute local size */
    size = 0;

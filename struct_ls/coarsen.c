@@ -747,15 +747,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
    hypre_StructGridSetHoodInfo(cgrid, max_distance);
 
-   /* set periodicity */
-   for (d = 0; d < dim; d++)
-   {
-      if (hypre_IndexD(periodic, d) > 0)
-      {
-         hypre_IndexD(periodic, d) =
-            hypre_IndexD(periodic, d) / hypre_IndexD(stride, d);
-      }
-   }
    hypre_StructGridSetPeriodic(cgrid, periodic);
 
    hypre_StructGridAssemble(cgrid);
@@ -810,16 +801,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    /* set boxes */
    hypre_StructGridSetBoxes(cgrid, boxes);
 
-   /* set periodicity */
-   hypre_CopyIndex(hypre_StructGridPeriodic(fgrid), periodic);
-   for (d = 0; d < dim; d++)
-   {
-      if (hypre_IndexD(periodic, d) > 0)
-      {
-         hypre_IndexD(periodic, d) =
-            hypre_IndexD(periodic, d) / hypre_IndexD(stride, d);
-      }
-   }
    hypre_StructGridSetPeriodic(cgrid, periodic);
 
    hypre_StructGridAssemble(cgrid);

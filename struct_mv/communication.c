@@ -44,7 +44,7 @@ hypre_CommPkgCreate( hypre_BoxArrayArray   *send_boxes,
                      int                  **recv_processes,
                      int                    num_values,
                      MPI_Comm               comm,
-                     hypre_Index            periodic            )
+                     hypre_Index            periodic )
 {
    hypre_CommPkg    *comm_pkg;
                   
@@ -876,7 +876,7 @@ hypre_CommPkgCreateInfo( hypre_BoxArrayArray   *boxes,
                          int                   *num_comms_ptr,
                          int                  **comm_processes_ptr,
                          hypre_CommType      ***comm_types_ptr,
-                         hypre_CommType       **copy_type_ptr)
+                         hypre_CommType       **copy_type_ptr )
 {
    int                    num_comms;
    int                   *comm_processes;
@@ -1023,6 +1023,11 @@ hypre_CommPkgCreateInfo( hypre_BoxArrayArray   *boxes,
 /*--------------------------------------------------------------------------
  * Sort the entries of a communication type.  This routine is used to
  * maintain consistency in communications.
+ *
+ * NOTE: The IModPeriod routines map the box indices onto an index
+ * space that is periodic with indicated period, starting at 0.  The
+ * fact that the periodicity here starts at 0 does not introduce any
+ * zero-based index dependencies elsewhere in the code.
  *--------------------------------------------------------------------------*/
 
 int
@@ -1342,28 +1347,17 @@ hypre_IModPeriod( int   i,
                   int   period )
                         
 {
-   int  i_mod_p;
-   int  shift;
+   if (period)
+   {
+      i %= period;
 
-   if (period == 0)
-   {
-      i_mod_p = i;
-   }
-   else if (i >= period)
-   {
-      i_mod_p = i % period;
-   }
-   else if (i < 0)
-   {
-      shift = ( -i / period + 1 ) * period;
-      i_mod_p = ( i + shift ) % period;
-   }
-   else
-   {
-      i_mod_p = i;
+      if (i < 0)
+      {
+         i += period;
+      }
    }
 
-   return i_mod_p;
+   return i;
 }
 
 /*--------------------------------------------------------------------------
