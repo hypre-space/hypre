@@ -197,7 +197,6 @@ main( int   argc,
    hypre_DestroyParVector(b);
    hypre_DestroyParVector(x);
 
-   hypre_TFree(global_part);
    hypre_TFree(values);
    /* Finalize MPI */
    MPI_Finalize();
