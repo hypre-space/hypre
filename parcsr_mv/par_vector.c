@@ -477,7 +477,7 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
    part0 = partitioning[myid];
    for (j = part0; j < partitioning[myid+1]; j++)
    {
-      fprintf(file, "%d %le\n", j + base_j, local_data[j-part0]);
+      fprintf(file, "%d %e\n", j + base_j, local_data[j-part0]);
    }
 
    fclose(file);

@@ -506,7 +506,7 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
    {
       HYPRE_IJVectorGetValues(vector, 1, &j, &value);
 
-      fprintf(file, "%d %le\n", j, value);
+      fprintf(file, "%d %e\n", j, value);
    }
 
    fclose(file);

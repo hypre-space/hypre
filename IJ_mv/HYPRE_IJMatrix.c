@@ -76,7 +76,7 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
       else
 	 row_partitioning[i+1] = recv_buf[i4+4];
 	 
-      if (square && (recv_buf[i4]   != recv_buf[i4+2]) ||
+      if ((square && (recv_buf[i4]   != recv_buf[i4+2])) ||
                     (recv_buf[i4+1] != recv_buf[i4+3])  )
       {
          square = 0;
@@ -670,7 +670,7 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
 
       for (j = 0; j < ncols; j++)
       {
-         fprintf(file, "%d %d %le\n", i, cols[j], values[j]);
+         fprintf(file, "%d %d %e\n", i, cols[j], values[j]);
       }
 
       if ( hypre_IJMatrixObjectType(matrix) == HYPRE_PARCSR )

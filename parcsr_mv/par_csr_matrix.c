@@ -440,7 +440,7 @@ hypre_ParCSRMatrixPrintIJ( hypre_ParCSRMatrix *matrix,
       for (j = diag_i[i]; j < diag_i[i+1]; j++)
       {
          J = first_col_diag + diag_j[j] + base_j;
-         fprintf(file, "%d %d %le\n", I, J, diag_data[j]);
+         fprintf(file, "%d %d %e\n", I, J, diag_data[j]);
       }
 
       /* print offd columns */
