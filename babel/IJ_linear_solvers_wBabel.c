@@ -1,5 +1,4 @@
 /* >>> to do: think about ref counting - may not be set up foolproofly */
-
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface (IJ_matrix interface).
  * Do `driver -help' for usage info.
@@ -53,6 +52,7 @@ main( int   argc,
    int                 build_funcs_arg_index;
    int                 solver_id;
    int                 ioutdat;
+   int                 log_level;
    int                 debug_flag;
    int                 ierr = 0;
    int                 i,j,k; 
@@ -120,6 +120,14 @@ main( int   argc,
    double *values, val;
    struct SIDL_double__array* Hypre_values;
    struct SIDL_int__array* Hypre_indices;
+   struct SIDL_int__array* Hypre_num_grid_sweeps=NULL;
+   struct SIDL_int__array* Hypre_grid_relax_type=NULL;
+   struct SIDL_double__array* Hypre_relax_weight=NULL;
+   struct SIDL_int__array* Hypre_smooth_option=NULL;
+   struct SIDL_int__array* Hypre_grid_relax_points=NULL;
+   struct SIDL_int__array* Hypre_dof_func=NULL;
+
+
    int dimsl[2], dimsu[2];
 
    const double dt_inf = 1.e40;
@@ -1722,7 +1730,8 @@ main( int   argc,
       time_index = hypre_InitializeTiming("BoomerAMG Setup");
       hypre_BeginTiming(time_index);
 
-#if 1
+#define USE_BABEL_INTERFACE
+#ifdef USE_BABEL_INTERFACE
       /* To call a Hypre solver:
          create, set comm, set operator, set other parameters,
          Setup (noop in this case), Apply */
@@ -1739,41 +1748,34 @@ main( int   argc,
       Hypre_ParAMG_SetDoubleParameter( Hypre_AMG, "StrongThreshold", strong_threshold);
       Hypre_ParAMG_SetDoubleParameter( Hypre_AMG, "TruncFactor", trunc_factor);
       /* note: log output not specified ... */
-      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "Logging", ioutdat ); 
+      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "PrintLevel", ioutdat ); 
       Hypre_ParAMG_SetIntParameter( Hypre_AMG, "CycleType", cycle_type);
         dimsl[0] = 0;   dimsu[0] = 4;
-        Hypre_indices = SIDL_int__array_create( 1, dimsl, dimsu );
+        Hypre_num_grid_sweeps = SIDL_int__array_create( 1, dimsl, dimsu );
           for ( i=0; i<4; ++i )
-             SIDL_int__array_set1( Hypre_indices, i, num_grid_sweeps[i] );
-      Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "NumGridSweeps", Hypre_indices );
-        SIDL_int__array_destroy( Hypre_indices );
+             SIDL_int__array_set1( Hypre_num_grid_sweeps, i, num_grid_sweeps[i] );
+      Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "NumGridSweeps", Hypre_num_grid_sweeps );
         dimsl[0] = 0;   dimsu[0] = 4;
-        Hypre_indices = SIDL_int__array_create( 1, dimsl, dimsu );
+        Hypre_grid_relax_type = SIDL_int__array_create( 1, dimsl, dimsu );
         for ( i=0; i<4; ++i )
-           SIDL_int__array_set1( Hypre_indices, i, grid_relax_type[i] );
-      Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "GridRelaxType", Hypre_indices );
-        SIDL_int__array_destroy( Hypre_indices );
+           SIDL_int__array_set1( Hypre_grid_relax_type, i, grid_relax_type[i] );
+      Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "GridRelaxType", Hypre_grid_relax_type );
         dimsl[0] = 0;   dimsu[0] = max_levels;
-        Hypre_values = SIDL_double__array_create( 1, dimsl, dimsu );
+        Hypre_relax_weight = SIDL_double__array_create( 1, dimsl, dimsu );
         for ( i=0; i<max_levels; ++i )
-           SIDL_double__array_set1( Hypre_values, i, relax_weight[i] );
-      Hypre_ParAMG_SetDoubleArrayParameter( Hypre_AMG, "RelaxWeight", Hypre_values );
-        SIDL_double__array_destroy( Hypre_values );
+           SIDL_double__array_set1( Hypre_relax_weight, i, relax_weight[i] );
+      Hypre_ParAMG_SetDoubleArrayParameter( Hypre_AMG, "RelaxWeight", Hypre_relax_weight );
         dimsl[0] = 0;   dimsu[0] = max_levels;
-        Hypre_indices = SIDL_int__array_create( 1, dimsl, dimsu );
+        Hypre_smooth_option = SIDL_int__array_create( 1, dimsl, dimsu );
         for ( i=0; i<max_levels; ++i )
-           SIDL_int__array_set1( Hypre_indices, i, smooth_option[i] );
-      Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "SmoothOption", Hypre_indices );
-        SIDL_int__array_destroy ( Hypre_indices );
+           SIDL_int__array_set1( Hypre_smooth_option, i, smooth_option[i] );
+      Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "SmoothOption", Hypre_smooth_option );
       Hypre_ParAMG_SetIntParameter( Hypre_AMG, "SmoothNumSweep", smooth_num_sweep);
         dimsl[0] = 0;   dimsl[1] = 0;   dimsu[0] = 4;   dimsu[1] = 4;
-        Hypre_indices = SIDL_int__array_create( 2, dimsl, dimsu );
+        Hypre_grid_relax_points = SIDL_int__array_create( 2, dimsl, dimsu );
         for ( i=0; i<4; ++i ) for ( j=0; j<4; ++j )
-           SIDL_int__array_set2( Hypre_indices, i, j, 0 ); /* sdb meaningless. 0 is safer than garbage */
-        for ( i=0; i<4; ++i ) for ( j=0; j<num_grid_sweeps[i]; ++j )
-           SIDL_int__array_set2( Hypre_indices, i, j, grid_relax_points[i][j] );
-      Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "GridRelaxPoints", Hypre_indices );
-        SIDL_int__array_destroy ( Hypre_indices );
+           SIDL_int__array_set2( Hypre_grid_relax_points, i, j, grid_relax_points[i][j] );
+      Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "GridRelaxPoints", Hypre_grid_relax_points );
       Hypre_ParAMG_SetIntParameter( Hypre_AMG, "MaxLevels", max_levels);
       Hypre_ParAMG_SetDoubleParameter( Hypre_AMG, "MaxRowSum", max_row_sum);
       Hypre_ParAMG_SetIntParameter( Hypre_AMG, "DebugFlag", debug_flag);
@@ -1784,12 +1786,13 @@ main( int   argc,
       Hypre_ParAMG_SetIntParameter( Hypre_AMG, "NumFunctions", num_functions);
       if (num_functions > 1) {
           dimsl[0] = 0;   dimsu[0] = num_functions;
-           Hypre_indices = SIDL_int__array_create( 1, dimsl, dimsu );
+           Hypre_dof_func = SIDL_int__array_create( 1, dimsl, dimsu );
            for ( i=0; i<num_functions; ++i )
-              SIDL_int__array_set1( Hypre_indices, i, dof_func[i] );
-	 Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "DofFunc", Hypre_indices );
-           SIDL_int__array_destroy( Hypre_indices );
+              SIDL_int__array_set1( Hypre_dof_func, i, dof_func[i] );
+	 Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "DofFunc", Hypre_dof_func );
       }
+      log_level = 0;
+/*      Hypre_ParAMG_SetLogging( Hypre_AMG, log_level );*/
 
       ierr += Hypre_ParAMG_Setup( Hypre_AMG );
       hypre_EndTiming(time_index);
@@ -1807,6 +1810,23 @@ main( int   argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
+      if ( log_level > 2 ) {
+         /* print residual... */
+           Hypre_y = Hypre_ParCSRVector__create();
+           Hypre_ij_y = (Hypre_IJBuildVector) Hypre_ParCSRVector__cast2
+              ( Hypre_y, "Hypre.IJBuildVector" );
+           /* adjust reference counting system for new data type: */
+           Hypre_IJBuildVector_addReference( Hypre_ij_y );
+           Hypre_ParCSRVector_deleteReference( Hypre_y );
+           ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, &comm );
+           ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, comm, first_local_col,last_local_col );
+           ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y );
+         y = Hypre_ParCSRVector__cast2( Hypre_y, "Hypre.Vector" );
+           ierr += Hypre_ParAMG_GetResidual( Hypre_AMG, &y );
+           Hypre_ParCSRVector_Print( Hypre_y, "test.residual" );
+           Hypre_IJBuildVector_deleteReference( Hypre_ij_y ); /* delete y */
+      }
+
       /* Break encapsulation so that the rest of the driver stays the same */
       temp_vecdata = Hypre_ParCSRVector__get_data( Hypre_x );
       ij_x = temp_vecdata ->ij_b ;
@@ -1821,7 +1841,7 @@ main( int   argc,
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
 /* note: log is written to standard output, not to file */
-      HYPRE_BoomerAMGSetLogging(amg_solver, ioutdat, "driver.out.log"); 
+      HYPRE_BoomerAMGSetPrintLevel(amg_solver, ioutdat, "driver.out.log"); 
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
       HYPRE_BoomerAMGSetGridRelaxType(amg_solver, grid_relax_type);
@@ -1896,7 +1916,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
@@ -2079,7 +2099,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
@@ -2266,7 +2286,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
@@ -2421,7 +2441,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
@@ -2524,6 +2544,21 @@ main( int   argc,
    HYPRE_IJMatrixDestroy(ij_A);
    HYPRE_IJVectorDestroy(ij_b);
    HYPRE_IJVectorDestroy(ij_x);
+
+
+   if( Hypre_num_grid_sweeps )
+      SIDL_int__array_destroy( Hypre_num_grid_sweeps );
+   if( Hypre_grid_relax_type )
+      SIDL_int__array_destroy( Hypre_grid_relax_type );
+   if( Hypre_relax_weight )
+      SIDL_double__array_destroy( Hypre_relax_weight );
+   if( Hypre_smooth_option )
+      SIDL_int__array_destroy( Hypre_smooth_option );
+   if( Hypre_grid_relax_points )
+      SIDL_int__array_destroy( Hypre_grid_relax_points );
+   if( Hypre_dof_func )
+      SIDL_int__array_destroy( Hypre_dof_func );
+
 
 /*
    hypre_FinalizeMemoryDebug();
