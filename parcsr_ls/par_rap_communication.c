@@ -329,40 +329,39 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
    change = 0;
    j = 0;
 
-   if (!num_recvs_A)
-   {
-	change = num_recvs_RAP;
-	for (i=0; i < num_recvs_RAP; i++)
-		work[i] = recv_procs_RAP[i]+1;
-   }
-	
    if (!num_recvs_RAP)
    {
 	change = num_recvs_A;
 	for (i=0; i < num_recvs_A; i++)
 		work[i] = -recv_procs_A[i]-1;
    }
-	
-   for (i=0; i < num_recvs_RAP && num_recvs_A ; i++)
+   else if (!num_recvs_A)
    {
-	if (recv_procs_A[j] == recv_procs_RAP[i])
-		j++;
-	else
-	{
-	   if (recv_procs_A[j] > recv_procs_RAP[i])
+	change = num_recvs_RAP;
+	for (i=0; i < num_recvs_RAP; i++)
+		work[i] = recv_procs_RAP[i]+1;
+   }
+   else	
+   {
+      for (i=0; i < num_recvs_RAP ; i++)
+      {
+	 if (recv_procs_A[j] == recv_procs_RAP[i])
+	    j++;
+	 else
+	 {
+	    if (recv_procs_A[j] > recv_procs_RAP[i])
 		work[change++] = recv_procs_RAP[i]+1;
-	   else
-	   {
+	    else
+	    {
 		work[change++] = -recv_procs_A[j]-1;
 		j++;
 		i--;
-	   }
-	}
+	    }
+	 }
+      }
+      for (i=j; i < num_recvs_A; i++)
+	 work[change++] = -recv_procs_A[i]-1;
    }
-
-   for (i=j; i < num_recvs_A; i++)
-	work[change++] = -recv_procs_A[i]-1;
-
 /*--------------------------------------------------------------------------
  * send num_changes to recv_procs_A and receive change_array from send_procs_A
  *--------------------------------------------------------------------------*/
