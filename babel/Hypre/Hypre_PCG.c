@@ -9,11 +9,11 @@
 #include "Hypre_PCG_Data.h" 
 
 #include "math.h"
+#include "utilities.h"
 
-/* this is in utilities/memory.h .  TO DO: #include the file ... */
-#define hypre_CTAlloc(type, count) \
-( (type *)hypre_CAllocDML((unsigned int)(count), (unsigned int)sizeof(type),\
-                          __FILE__, __LINE__) )
+#ifndef max
+#define max(a,b)  (((a)<(b)) ? (b) : (a))
+#endif
 
 /* *************************************************
  * Constructor
@@ -50,9 +50,9 @@ void Hypre_PCG_destructor(Hypre_PCG this) {
 
    Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate(this);
 
-   Hypre_Vector_destructor( pcg_data->p );
-   Hypre_Vector_destructor( pcg_data->s );
-   Hypre_Vector_destructor( pcg_data->r );
+   Hypre_Vector_Delete( pcg_data->p );
+   Hypre_Vector_Delete( pcg_data->s );
+   Hypre_Vector_Delete( pcg_data->r );
 
    if ((pcg_data -> logging) > 0)
    {
@@ -285,6 +285,7 @@ impl_Hypre_PCG_Apply(Hypre_PCG this, Hypre_Vector b, Hypre_Vector* xp)
       ierr += Hypre_Vector_Axpy (p, 1.0, s);
    }
 
+
 #if 0
    if (two_norm)
       printf("Iterations = %d: ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
@@ -413,16 +414,17 @@ int  impl_Hypre_PCG_GetIntParameter(Hypre_PCG this, char* name) {
    if ( !strcmp( name, "max_iter" ) ) {
       return pcg_data->max_iter;
    }
-   else if ( !strcmp( name, "two_norm" ) ) {
+   else if ( !strcmp( name, "two_norm" ) || !strcmp( name, "2-norm" ) ) {
       return pcg_data->two_norm;
    }
-   else if ( !strcmp( name, "rel_change" ) ) {
+   else if ( !strcmp( name, "rel_change" ) ||
+             !strcmp( name, "relative change test" ) ) {
       return pcg_data->rel_change;
    }
    else if ( !strcmp( name, "num_iterations" ) ) {
       return pcg_data->num_iterations;
    }
-   else if ( !strcmp( name, "logging" ) ) {
+   else if ( !strcmp( name, "logging" ) || !strcmp( name, "log" ) ) {
       return pcg_data->logging;
    }
    else {
@@ -463,20 +465,20 @@ int  impl_Hypre_PCG_SetIntParameter(Hypre_PCG this, char* name, int value)
       pcg_data->max_iter = value;
       return 0;
    }
-   else if ( !strcmp( name, "two_norm" ) ) {
+   else if ( !strcmp( name, "two_norm" ) || !strcmp( name, "2-norm" ) ) {
       pcg_data->two_norm = value;
       return 0;
    }
-   else if ( !strcmp( name, "rel_change" ) ) {
+   else if ( !strcmp( name, "rel_change" ) || !strcmp( name, "relative change test" ) ) {
       pcg_data->rel_change = value;;
       return 0;
    }
-   else if ( !strcmp( name, "logging" ) ) {
+   else if ( !strcmp( name, "logging" ) || !strcmp( name, "log" ) ) {
       pcg_data->logging = value;
       return 0;
    }
    else {
-      printf( "Don't understand keyword %s to Hypre_PCG_GetIntParameter\n",
+      printf( "Don't understand keyword %s to Hypre_PCG_SetIntParameter\n",
               name );
       return -1;
    }
