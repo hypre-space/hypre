@@ -201,6 +201,9 @@ int  sz = (hypre_IndexZ(stride)*\
 int  hypre__nx = hypre_IndexX(loop_size);\
 int  hypre__ny = hypre_IndexY(loop_size);\
 int  hypre__nz = hypre_IndexZ(loop_size);\
+int  hypre__mx = hypre__nx;\
+int  hypre__my = hypre__ny;\
+int  hypre__mz = hypre__nz;\
 int  hypre__dir, hypre__max;\
 int  hypre__div, hypre__mod;\
 int  hypre__block, hypre__num_blocks;\
@@ -231,6 +234,9 @@ if (hypre__num_blocks > 0)\
 i = 0;\
 j = 0;\
 k = 0;\
+hypre__nx = hypre__mx;\
+hypre__ny = hypre__my;\
+hypre__nz = hypre__mz;\
 if (hypre__num_blocks > 1)\
 {\
    if (hypre__dir == 0)\
