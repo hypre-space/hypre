@@ -924,7 +924,7 @@ PrintUsage( char *progname,
       printf("\n");
       printf("Usage: %s [<options>]\n", progname);
       printf("\n");
-      printf("  -in <filename> : input file (default is `%s'\n",
+      printf("  -in <filename> : input file (default is `%s')\n",
              infile_default);
       printf("\n");
       printf("  -pt <pt1> <pt2> ... : set part(s) for subsequent options\n");
@@ -941,6 +941,7 @@ PrintUsage( char *progname,
       printf("                        40 - GMRES with BoomerAMG precond\n");
       printf("                        41 - GMRES with PILUT precond\n");
       printf("                        42 - GMRES with ParaSails precond\n");
+      printf("  -print              : print out the system\n");
       printf("\n");
    }
 
@@ -965,6 +966,7 @@ main( int   argc,
    Index                *distribute;
    Index                *block;
    int                   solver_id;
+   int                   print_system;
                         
    HYPRE_SStructGrid     grid;
    HYPRE_SStructStencil *stencils;
@@ -1047,6 +1049,7 @@ main( int   argc,
    }
 
    solver_id = 39;
+   print_system = 0;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -1109,6 +1112,11 @@ main( int   argc,
       {
          arg_index++;
          solver_id = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-print") == 0 )
+      {
+         arg_index++;
+         print_system = 1;
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
@@ -1369,6 +1377,17 @@ main( int   argc,
    hypre_ClearTiming();
 
    /*-----------------------------------------------------------
+    * Print out the system and initial guess
+    *-----------------------------------------------------------*/
+
+   if (print_system)
+   {
+      HYPRE_SStructMatrixPrint("sstruct.out.A",  A, 0);
+      HYPRE_SStructVectorPrint("sstruct.out.b",  b, 0);
+      HYPRE_SStructVectorPrint("sstruct.out.x0", x, 0);
+   }
+
+   /*-----------------------------------------------------------
     * Debugging code
     *-----------------------------------------------------------*/
 
@@ -1377,29 +1396,25 @@ main( int   argc,
       FILE *file;
       char  filename[255];
                        
-      HYPRE_SStructMatrixPrint("driver.out.A", A, 0);
-      HYPRE_SStructVectorPrint("driver.out.b", b, 0);
-      HYPRE_SStructVectorPrint("driver.out.x", x, 0);
-
       /* result is 1's on the interior of the grid */
       hypre_SStructMatvec(1.0, A, b, 0.0, x);
-      HYPRE_SStructVectorPrint("driver.out.matvec", x, 0);
+      HYPRE_SStructVectorPrint("sstruct.out.matvec", x, 0);
 
       /* result is all 1's */
       hypre_SStructCopy(b, x);
-      HYPRE_SStructVectorPrint("driver.out.copy", x, 0);
+      HYPRE_SStructVectorPrint("sstruct.out.copy", x, 0);
 
       /* result is all 2's */
       hypre_SStructScale(2.0, x);
-      HYPRE_SStructVectorPrint("driver.out.scale", x, 0);
+      HYPRE_SStructVectorPrint("sstruct.out.scale", x, 0);
 
       /* result is all 0's */
       hypre_SStructAxpy(-2.0, b, x);
-      HYPRE_SStructVectorPrint("driver.out.axpy", x, 0);
+      HYPRE_SStructVectorPrint("sstruct.out.axpy", x, 0);
 
       /* result is 1's with 0's on some boundaries */
       hypre_SStructCopy(b, x);
-      sprintf(filename, "driver.out.gatherpre.%05d", myid);
+      sprintf(filename, "sstruct.out.gatherpre.%05d", myid);
       file = fopen(filename, "w");
       for (part = 0; part < data.nparts; part++)
       {
@@ -1424,7 +1439,7 @@ main( int   argc,
 
       /* result is all 1's */
       HYPRE_SStructVectorGather(x);
-      sprintf(filename, "driver.out.gatherpost.%05d", myid);
+      sprintf(filename, "sstruct.out.gatherpost.%05d", myid);
       file = fopen(filename, "w");
       for (part = 0; part < data.nparts; part++)
       {
@@ -1598,7 +1613,7 @@ main( int   argc,
          HYPRE_BoomerAMGCreate(&par_precond); 
          HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
-         HYPRE_BoomerAMGSetLogging(par_precond, 3, "driver.out.log");
+         HYPRE_BoomerAMGSetLogging(par_precond, 3, "sstruct.out.log");
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
          HYPRE_ParCSRGMRESSetPrecond(par_solver,
                                      HYPRE_BoomerAMGSolve,
@@ -1675,9 +1690,10 @@ main( int   argc,
     * Print the solution and other info
     *-----------------------------------------------------------*/
 
-#if DEBUG
-   HYPRE_SStructVectorPrint("driver.out.x", x, 0);
-#endif
+   if (print_system)
+   {
+      HYPRE_SStructVectorPrint("sstruct.out.x", x, 0);
+   }
 
    if (myid == 0)
    {
