@@ -254,7 +254,6 @@ int hypre_BiCGSTABLSolve(void  *bicgstab_vdata, void  *A, void  *b, void  *x)
    if (logging > 0)
    {
       norms          = (bicgstab_data -> norms);
-      log_file_name  = (bicgstab_data -> log_file_name);
    }
 
    /* initialize work arrays */
@@ -325,7 +324,6 @@ hypre_ParKrylovClearVector(x);
 
       if ( iter % 2 == 1 )
       {
-         m = ( iter - 1 ) / 2;
          precond(precond_data, A, wt, t);
          hypre_ParKrylovMatvec(matvec_data,1.0,A,t,0.0,awt);
          dtmp = hypre_ParKrylovInnerProd(wt,awt);
