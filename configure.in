@@ -655,7 +655,7 @@ case $ARCH in
         if test "$casc_using_openmp" = "no" ; then
           AC_CHECK_PROGS(CXX, mpiCC)
         else
-          AC_CHECK_PROGS(CXX,pgcc) 
+          AC_CHECK_PROGS(CXX,pgCC) 
         fi
       fi
     fi
@@ -685,10 +685,10 @@ case $ARCH in
       fi
     else
       if test -z "$CFLAGS"; then
-        CASC_SET_COPT(-mp)
+        CASC_SET_COPT(-mp -I/usr/include -I/usr/apps/pgi/3.2/linux86/include)
       fi
       if test -z "$CXXFLAGS"; then
-        CASC_SET_CXXOPT(-mp)
+        CASC_SET_CXXOPT(-mp -I/usr/include -I/usr/apps/pgi/3.2/linux86/include -I/usr/apps/pgi/3.2/linux86/include/CC)
       fi
       if test -z "$F77FLAGS"; then
         CASC_SET_FOPT(-mp)

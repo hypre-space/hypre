@@ -3469,7 +3469,7 @@ test -n "$CXX" && break
 done
 
         else
-          for ac_prog in pgcc
+          for ac_prog in pgCC
 do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3648,7 +3648,7 @@ done
       if test -z "$CFLAGS"; then
         
    if test -z "$COPT"; then
-      COPT="-mp"
+      COPT="-mp -I/usr/include -I/usr/apps/pgi/3.2/linux86/include"
    fi
    
 
@@ -3656,7 +3656,7 @@ done
       if test -z "$CXXFLAGS"; then
         
    if test -z "$CXXOPT"; then
-      CXXOPT="-mp"
+      CXXOPT="-mp -I/usr/include -I/usr/apps/pgi/3.2/linux86/include -I/usr/apps/pgi/3.2/linux86/include/CC"
    fi
    
 
