@@ -148,12 +148,18 @@ hypre_ParAMGFinalize( void *data )
    int i;
 
 /*   hypre_ParAMGFreeData(amg_data);*/
-   hypre_TFree (hypre_ParAMGDataNumGridSweeps(amg_data));
-   hypre_TFree (hypre_ParAMGDataGridRelaxType(amg_data));
-   hypre_TFree (hypre_ParAMGDataRelaxWeight(amg_data));
-   for (i=0; i < 4; i++)
+   if (hypre_ParAMGDataNumGridSweeps(amg_data))
+      hypre_TFree (hypre_ParAMGDataNumGridSweeps(amg_data));
+   if (hypre_ParAMGDataGridRelaxType(amg_data))
+      hypre_TFree (hypre_ParAMGDataGridRelaxType(amg_data));
+   if (hypre_ParAMGDataRelaxWeight(amg_data))
+      hypre_TFree (hypre_ParAMGDataRelaxWeight(amg_data));
+   if (hypre_ParAMGDataGridRelaxPoints(amg_data))
+   {
+      for (i=0; i < 4; i++)
    	hypre_TFree (hypre_ParAMGDataGridRelaxPoints(amg_data)[i]);
-   hypre_TFree (hypre_ParAMGDataGridRelaxPoints(amg_data));
+      hypre_TFree (hypre_ParAMGDataGridRelaxPoints(amg_data));
+   }
    for (i=1; i < num_levels; i++)
    {
 	hypre_DestroyParVector(hypre_ParAMGDataFArray(amg_data)[i]);
@@ -305,7 +311,8 @@ hypre_ParAMGSetNumGridSweeps( void     *data,
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
 
-   hypre_TFree(hypre_ParAMGDataNumGridSweeps(amg_data));
+   if (hypre_ParAMGDataNumGridSweeps(amg_data))
+      hypre_TFree(hypre_ParAMGDataNumGridSweeps(amg_data));
    hypre_ParAMGDataNumGridSweeps(amg_data) = num_grid_sweeps;
 
    return (ierr);
@@ -318,7 +325,8 @@ hypre_ParAMGSetGridRelaxType( void     *data,
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
 
-   hypre_TFree(hypre_ParAMGDataGridRelaxType(amg_data));
+   if (hypre_ParAMGDataGridRelaxType(amg_data))
+      hypre_TFree(hypre_ParAMGDataGridRelaxType(amg_data));
    hypre_ParAMGDataGridRelaxType(amg_data) = grid_relax_type;
 
    return (ierr);
@@ -328,9 +336,15 @@ int
 hypre_ParAMGSetGridRelaxPoints( void     *data,
                                 int      **grid_relax_points )
 {
-   int ierr = 0;
+   int i, ierr = 0;
    hypre_ParAMGData  *amg_data = data;
 
+   if (hypre_ParAMGDataGridRelaxPoints(amg_data))
+   {
+      for (i=0; i < 4; i++)
+   	hypre_TFree (hypre_ParAMGDataGridRelaxPoints(amg_data)[i]);
+      hypre_TFree(hypre_ParAMGDataGridRelaxPoints(amg_data));
+   }
    hypre_ParAMGDataGridRelaxPoints(amg_data) = grid_relax_points; 
 
    return (ierr);
@@ -343,6 +357,8 @@ hypre_ParAMGSetRelaxWeight( void     *data,
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
                
+   if (hypre_ParAMGDataRelaxWeight(amg_data))
+      hypre_TFree(hypre_ParAMGDataRelaxWeight(amg_data));
    hypre_ParAMGDataRelaxWeight(amg_data) = relax_weight;
    
    return (ierr);

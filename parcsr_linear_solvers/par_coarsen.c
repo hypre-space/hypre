@@ -196,6 +196,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
     * to "unaccounted-for" dependence.
     *----------------------------------------------------------------*/
 
+   S_ext = NULL;
    if (debug_flag == 3) wall_time = time_getWallclockSeconds();
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
@@ -435,7 +436,10 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
     *---------------------------------------------------*/
 
    CF_marker = hypre_CTAlloc(int, num_variables);
-   CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+   if (num_cols_offd)
+      CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+   else
+      CF_marker_offd = NULL;
    for (i=0; i < num_variables; i++)
 	CF_marker[i] = 0;
    for (i=0; i < num_cols_offd; i++)

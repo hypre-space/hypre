@@ -301,7 +301,10 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
       cnt = 0;
       for (i=0; i < num_cols_offd_Pext; i++)
          if (col_map_offd_Pext[i] == col_map_offd_P[cnt])
+         {
 	    map_P_to_Pext[cnt++] = i;
+	    if (cnt == num_cols_offd_P) break;
+         }
    }
 
    /*-----------------------------------------------------------------------
@@ -803,7 +806,10 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
       cnt = 0;
       for (i=0; i < num_cols_offd_RAP; i++)
          if (col_map_offd_RAP[i] == col_map_offd_P[cnt])
+         {
 	    map_P_to_RAP[cnt++] = i;
+	    if (cnt == num_cols_offd_P) break;
+         }
    }
 
    if (num_cols_offd_Pext)
@@ -813,7 +819,10 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
       cnt = 0;
       for (i=0; i < num_cols_offd_RAP; i++)
          if (col_map_offd_RAP[i] == col_map_offd_Pext[cnt])
+         {
 	    map_Pext_to_RAP[cnt++] = i;
+	    if (cnt == num_cols_offd_Pext) break;
+         }
    }
 
 /*   need to allocate new P_marker etc. and make further changes */
