@@ -122,12 +122,15 @@ c     Babel-interface variables
       integer*8 Hypre_grid_relax_type
       integer*8 Hypre_relax_weight
       integer max_levels
-      data   max_levels /25/
+c original:      data   max_levels /25/
+      data   max_levels /1/
       double precision relax_weight(25)
       double precision double_zero
       data   double_zero /0.0/
       integer num_grid_sweeps_f(1)
       integer grid_relax_type_f(1)
+      integer*8 linop;
+
 c     equivalence ( num_grid_sweeps_f(1), num_grid_sweeps )
 c     equivalence ( grid_relax_type_f(1), grid_relax_type )
 
@@ -612,51 +615,51 @@ c     The direct HYPRE interfaces and the Babel interface will have to live toge
 c     until the Babel one is completely working.  (jfp)  Here are the
 c     HYPRE interface calls.
 
-      call HYPRE_BoomerAMGCreate(solver, ierr)
-      call HYPRE_BoomerAMGSetCoarsenType(solver,
-     &     (hybrid*coarsen_type), ierr)
-      call HYPRE_BoomerAMGSetMeasureType(solver, measure_type, ierr)
-      call HYPRE_BoomerAMGSetTol(solver, tol, ierr)
-      call HYPRE_BoomerAMGSetStrongThrshld(solver,
-     &     strong_threshold, ierr)
-      call HYPRE_BoomerAMGSetTruncFactor(solver, trunc_factor, ierr)
-      call HYPRE_BoomerAMGSetPrintLevel(solver, ioutdat,ierr)
-c     the old Fortran interface isn't handling the string right:
-c     call HYPRE_BoomerAMGSetPrintFileName(solver,"test.out.log",ierr)
-      call HYPRE_BoomerAMGSetMaxIter(solver, maxiter, ierr)
-      call HYPRE_BoomerAMGSetCycleType(solver, cycle_type, ierr)
-      call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
-     &     grid_relax_type,
-     &     grid_relax_points,
-     &     coarsen_type,
-     &     relax_weights,
-     &     MAXLEVELS,ierr)
-      call HYPRE_BoomerAMGSetNumGridSweeps(solver,
-     &     num_grid_sweeps, ierr)
-      call HYPRE_BoomerAMGSetGridRelaxType(solver,
-     &     grid_relax_type, ierr)
-      call HYPRE_BoomerAMGSetRelaxWeight(solver,
-     &     relax_weights, ierr)
-c     call HYPRE_BoomerAMGSetSmoothOption(solver, smooth_option,
-c     &                                      ierr)
-c     call HYPRE_BoomerAMGSetSmoothNumSwp(solver, smooth_num_sweep,
-c     &                                      ierr)
-      call HYPRE_BoomerAMGSetGridRelaxPnts(solver,
-     &     grid_relax_points,
-     &     ierr)
-      call HYPRE_BoomerAMGSetMaxLevels(solver, MAXLEVELS, ierr)
-      call HYPRE_BoomerAMGSetMaxRowSum(solver, max_row_sum,
-     &     ierr)
-      call HYPRE_BoomerAMGSetDebugFlag(solver, debug_flag, ierr)
-      call HYPRE_BoomerAMGSetup(solver, A_storage, b_storage,
-     &     x_storage, ierr)
-      call HYPRE_BoomerAMGSolve(solver, A_storage, b_storage,
-     &     x_storage, ierr)
-      call HYPRE_BoomerAMGGetNumIterations(solver, num_iterations, 
-     &     ierr)
-      call HYPRE_BoomerAMGGetFinalReltvRes(solver, final_res_norm,
-     &     ierr)
-      call HYPRE_BoomerAMGDestroy(solver, ierr)
+cold      call HYPRE_BoomerAMGCreate(solver, ierr)
+cold      call HYPRE_BoomerAMGSetCoarsenType(solver,
+cold     &     (hybrid*coarsen_type), ierr)
+cold      call HYPRE_BoomerAMGSetMeasureType(solver, measure_type, ierr)
+cold      call HYPRE_BoomerAMGSetTol(solver, tol, ierr)
+cold      call HYPRE_BoomerAMGSetStrongThrshld(solver,
+cold     &     strong_threshold, ierr)
+cold      call HYPRE_BoomerAMGSetTruncFactor(solver, trunc_factor, ierr)
+cold      call HYPRE_BoomerAMGSetPrintLevel(solver, ioutdat,ierr)
+coldc     the old Fortran interface isn't handling the string right:
+coldc     call HYPRE_BoomerAMGSetPrintFileName(solver,"test.out.log",ierr)
+cold      call HYPRE_BoomerAMGSetMaxIter(solver, maxiter, ierr)
+cold      call HYPRE_BoomerAMGSetCycleType(solver, cycle_type, ierr)
+cold      call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
+cold     &     grid_relax_type,
+cold     &     grid_relax_points,
+cold     &     coarsen_type,
+cold     &     relax_weights,
+cold     &     MAXLEVELS,ierr)
+cold      call HYPRE_BoomerAMGSetNumGridSweeps(solver,
+cold     &     num_grid_sweeps, ierr)
+cold      call HYPRE_BoomerAMGSetGridRelaxType(solver,
+cold     &     grid_relax_type, ierr)
+cold      call HYPRE_BoomerAMGSetRelaxWeight(solver,
+cold     &     relax_weights, ierr)
+coldc     call HYPRE_BoomerAMGSetSmoothOption(solver, smooth_option,
+coldc     &                                      ierr)
+coldc     call HYPRE_BoomerAMGSetSmoothNumSwp(solver, smooth_num_sweep,
+coldc     &                                      ierr)
+cold      call HYPRE_BoomerAMGSetGridRelaxPnts(solver,
+cold     &     grid_relax_points,
+cold     &     ierr)
+cold      call HYPRE_BoomerAMGSetMaxLevels(solver, MAXLEVELS, ierr)
+cold      call HYPRE_BoomerAMGSetMaxRowSum(solver, max_row_sum,
+cold     &     ierr)
+cold      call HYPRE_BoomerAMGSetDebugFlag(solver, debug_flag, ierr)
+cold      call HYPRE_BoomerAMGSetup(solver, A_storage, b_storage,
+cold     &     x_storage, ierr)
+cold      call HYPRE_BoomerAMGSolve(solver, A_storage, b_storage,
+cold     &     x_storage, ierr)
+cold      call HYPRE_BoomerAMGGetNumIterations(solver, num_iterations, 
+cold     &     ierr)
+cold      call HYPRE_BoomerAMGGetFinalReltvRes(solver, final_res_norm,
+cold     &     ierr)
+cold      call HYPRE_BoomerAMGDestroy(solver, ierr)
 
 
 c     and here are of the Babel interface calls, adapted from the C/Babel code:
@@ -701,28 +704,28 @@ c     Hypre_grid_relax_type = SIDL_int__array_create( 1, dimsl, dimsu );
 c     for ( i=0; i<4; ++i )
 c     SIDL_int__array_set1( Hypre_grid_relax_type, i, grid_relax_type[i] );
 c     Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "GridRelaxType", Hypre_grid_relax_type );
-      dimsl(1) = 1
-      dimsu(1) = 4
-      call SIDL_int__array_create1d_f(
-     1     4, Hypre_num_grid_sweeps )
-      do i = 1, 4
-         call SIDL_int__array_set1_f(
-     1        Hypre_num_grid_sweeps, i-1, num_grid_sweeps_f(i) )
-      enddo
-      call Hypre_ParAMG_SetIntArrayParameter_f( Hypre_AMG,
-     1     "NumGridSweeps", Hypre_num_grid_sweeps, ierrtmp )
-      ierr = ierr + ierrtmp
-      dimsl(1) = 1
-      dimsu(1) = 4
-      call SIDL_int__array_create1d_f(
-     1     4, Hypre_grid_relax_type )
-      do i = 1, 4
-         call SIDL_int__array_set1_f(
-     1        Hypre_grid_relax_type, i-1, grid_relax_type_f(i) )
-      enddo
-      call Hypre_ParAMG_SetIntArrayParameter_f( Hypre_AMG,
-     1     "GridRelaxType", Hypre_grid_relax_type, ierrtmp )
-      ierr = ierr + ierrtmp
+cdbug      dimsl(1) = 1
+cdbug      dimsu(1) = 4
+cdbug      call SIDL_int__array_create1d_f(
+cdbug     1     4, Hypre_num_grid_sweeps )
+cdbug      do i = 1, 4
+cdbug         call SIDL_int__array_set1_f(
+cdbug     1        Hypre_num_grid_sweeps, i-1, num_grid_sweeps_f(i) )
+cdbug      enddo
+cdbug      call Hypre_ParAMG_SetIntArrayParameter_f( Hypre_AMG,
+cdbug     1     "NumGridSweeps", Hypre_num_grid_sweeps, ierrtmp )
+cdbug      ierr = ierr + ierrtmp
+cdbug      dimsl(1) = 1
+cdbug      dimsu(1) = 4
+cdbug      call SIDL_int__array_create1d_f(
+cdbug     1     4, Hypre_grid_relax_type )
+cdbug      do i = 1, 4
+cdbug         call SIDL_int__array_set1_f(
+cdbug     1        Hypre_grid_relax_type, i-1, grid_relax_type_f(i) )
+cdbug      enddo
+cdbug      call Hypre_ParAMG_SetIntArrayParameter_f( Hypre_AMG,
+cdbug     1     "GridRelaxType", Hypre_grid_relax_type, ierrtmp )
+cdbug      ierr = ierr + ierrtmp
 
 c     dimsl[0] = 0;   dimsu[0] = max_levels;
 c     Hypre_relax_weight = SIDL_double__array_create( 1, dimsl, dimsu );
@@ -743,6 +746,30 @@ c     relax_weight(i)=1.0: simple to set, fine for testing:
       enddo
       call Hypre_ParAMG_SetDoubleArrayParameter_f(
      1     Hypre_AMG, "RelaxWeight", Hypre_relax_weight, ierrtmp )
+      ierr = ierr + ierrtmp
+
+c left at default: GridRelaxPoints
+      call Hypre_ParAMG_SetIntParameter_f(
+     1     Hypre_AMG, "MaxLevels", max_levels, ierrtmp )
+      ierr = ierr + ierrtmp
+      call Hypre_ParAMG_SetIntParameter_f(
+     1     Hypre_AMG, "DebugFlag", debug_flag, ierrtmp )
+      ierr = ierr + ierrtmp
+      call Hypre_ParAMG_SetDoubleParameter_f(
+     1     Hypre_AMG, "MaxRowSum", max_row_sum, ierrtmp )
+      ierr = ierr + ierrtmp
+
+c      linop = (Hypre_LinearOperator) Hypre_ParCSRMatrix_castTo(
+c         ij_matrix_Hypre, "Hypre.LinearOperator" );
+c      ierr += Hypre_ParAMG_Setup( AMG_Solver, linop, b_HypreV, x_HypreV );
+c      ierr += Hypre_ParAMG_Apply( AMG_Solver, b_HypreV, &x_HypreV );
+      call Hypre_ParCSRMatrix__cast_f(
+     1     Hypre_ParCSR_A, "Hypre.LinearOperator", linop )
+      call Hypre_ParAMG_Setup_f(
+     1     Hypre_AMG, linop, Hypre_Vector_b, Hypre_Vector_x, ierrtmp )
+      ierr = ierr + ierrtmp
+      call Hypre_ParAMG_Apply_f(
+     1     Hypre_AMG, Hypre_Vector_b, Hypre_Vector_x, ierrtmp )
       ierr = ierr + ierrtmp
 
 
