@@ -24,15 +24,39 @@ HYPRE_EXTRA_DIRS =\
  seq_matrix_vector\
  parcsr_matrix_vector\
  parcsr_linear_solvers\
- seq_linear_solvers/pamg
+ seq_linear_solvers/pamg\
+ bmakes
 
 #This is the documentation directory not yet offivially in HYPRE
 HYPRE_DOCS =\
  docs
 
+#These are the directories that can be run without MPI
+HYPRE_SEQ_DIRS =\
+ utilities\
+ struct_matrix_vector\
+ struct_linear_solvers\
+ test\
+ seq_matrix_vector\
+ docs\
+ seq_linear_solvers/pamg\
+ bmakes
+
 all:
 	@ \
 	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_DOCS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make); \
+	    echo ""; \
+	  fi; \
+	done
+
+seq:
+	@ \
+	for i in ${HYPRE_SEQ_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
