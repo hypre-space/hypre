@@ -4,7 +4,7 @@ c     interpolation routine (with V* option)
 c=====================================================================
 
       subroutine intad(
-     *     u, icg, b, ib, jb, n, vtmp,
+     *     u, b, ib, jb, n, vtmp,
      *     uc, fc, ac, iac, jac, iuc, nc,
      *     ivstar, nun)
 
@@ -12,7 +12,6 @@ c=====================================================================
 
       dimension vtmp (*)
       dimension u    (*)
-      dimension icg  (*)
 
       dimension b  (*)
       dimension ib (*)
@@ -88,7 +87,7 @@ c=====================================================================
 
       subroutine rscali(
      *     fc, nc,
-     *     u, f, vtmp, a, ia, ja, icg, b, ib, jb, n)
+     *     u, f, vtmp, a, ia, ja, b, ib, jb, n)
 
       implicit real*8 (a-h,o-z)
 
@@ -100,7 +99,6 @@ c=====================================================================
       dimension a  (*)
       dimension ia (*)
       dimension ja (*)
-      dimension icg(*)
 
       dimension b  (*)
       dimension ib (*)
