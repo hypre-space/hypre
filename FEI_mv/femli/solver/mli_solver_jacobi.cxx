@@ -116,7 +116,10 @@ int MLI_Solver_Jacobi::setup(MLI_Matrix *Amat)
       delete [] ritzValues;
    }
    if ( relaxWeights_ == NULL ) relaxWeights_ = new double[nSweeps_];
-   for (i = 0; i < nSweeps_; i++) relaxWeights_[i] = 1.0 / maxEigen_;
+   if (maxEigen_ != 0.0)
+   {
+      for (i = 0; i < nSweeps_; i++) relaxWeights_[i] = 1.0 / maxEigen_;
+   }
    return 0;
 }
 
@@ -152,7 +155,6 @@ int MLI_Solver_Jacobi::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    for ( is = 0; is < nSweeps_; is++ )
    {
       weight = relaxWeights_[is];
-
       hypre_ParVectorCopy(f, r); 
       if ( zeroInitialGuess_ == 0 )
          hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, r);
