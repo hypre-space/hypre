@@ -473,12 +473,12 @@ int HYPRE_BoomerAMGInitGridRelaxation(int    **num_grid_sweeps_ptr,
  *
  * \begin{tabular}{|c|l|l|} \hline
  * value & smoother & routines needed to set smoother parameters \\
- * 6 &	Schwarz smoothers & HYPRE_BoomerAMGSetDomainType, HYPRE_BoomerAMGSetOverlap, \\
- *  &  & HYPRE_BoomerAMGSetVariant, HYPRE_BoomerAMGSetSchwarzRlxWeight \\
- * 7 &	Pilut & HYPRE_BoomerAMGSetDropTol, HYPRE_BoomerAMGSetMaxNzPerRow \\
- * 8 &	ParaSails & HYPRE_BoomerAMGSetSym, HYPRE_BoomerAMGSetLevel, \\
- * &  &  HYPRE_BoomerAMGSetFilter, HYPRE_BoomerAMGSetThreshold \\
- * 9 &	Euclid & HYPRE_BoomerAMGSetEuclidFile \\
+ * 6 &	Schwarz smoothers & HYPRE\_BoomerAMGSetDomainType, HYPRE\_BoomerAMGSetOverlap, \\
+ *  &  & HYPRE\_BoomerAMGSetVariant, HYPRE\_BoomerAMGSetSchwarzRlxWeight \\
+ * 7 &	Pilut & HYPRE\_BoomerAMGSetDropTol, HYPRE\_BoomerAMGSetMaxNzPerRow \\
+ * 8 &	ParaSails & HYPRE\_BoomerAMGSetSym, HYPRE\_BoomerAMGSetLevel, \\
+ * &  &  HYPRE\_BoomerAMGSetFilter, HYPRE\_BoomerAMGSetThreshold \\
+ * 9 &	Euclid & HYPRE\_BoomerAMGSetEuclidFile \\
  * 16 &	CG preconditioned with Schwarz & see routines under 6\\
  * 17 &	CG preconditioned with Pilut & see routines under 7\\
  * 18 &	CG preconditioned with ParaSails & see routines under 8\\
@@ -496,7 +496,7 @@ int HYPRE_BoomerAMGSetSmoothType(HYPRE_Solver  solver,
  * (Optional) Sets the number of levels for more complex smoothers.
  * The smoothers, 
  * as defined by HYPRE\_BoomerAMGSetSmoothType, will be used
- * on level 0 (the finest level) through level smooth\_num_levels-1. 
+ * on level 0 (the finest level) through level smooth\_num\_levels-1. 
  * The default is 0, i.e. no complex smoothers are used.
  **/
 int HYPRE_BoomerAMGSetSmoothNumLevels(HYPRE_Solver  solver,
