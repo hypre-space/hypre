@@ -11,11 +11,23 @@ ARCH = alpha
 
 .SUFFIXES: .cc .c .f .o
 
+srcdir = @srcdir@
+
 all: lib
 
 CXX = @CXX@
 
-CXXFLAGS = -w -DSUPERLU -DMLPACK \
+SUPERLU_INCLUDE = -I/g/g2/chtong/SUPERLU/WEST/SuperLU/SRC
+SUPERLU_LIB     = -L/g/g2/chtong/SUPERLU/WEST/SuperLU
+MLPACK_LIB      = -L/g/g2/chtong/ML/WEST/ml/src
+
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CXXDEFS = -DHYPRE_NO_PTHREAD_MANGLING -DSUPERLU -DMLPACK
+
+CXXFLAGS = -w ${CXX_COMPILE_FLAGS} \
+ ${CXXDEFS}\
+ -I../..\
  -I../isis-mv\
  -I../../IJ_matrix_vector\
  -I../../utilities\
@@ -23,13 +35,14 @@ CXXFLAGS = -w -DSUPERLU -DMLPACK \
  -I../../parcsr_linear_solvers\
  -I../../seq_matrix_vector\
  -I../fei-base\
- -I/g/g2/chtong/SUPERLU/WEST/SuperLU/SRC\
- -I../..\
- -I$(MPI_INCLUDE)
+ ${SUPERLU_INCLUDE}\
+ ${CXXINCLUDES}\
 
 MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
 LIBFLAGS = @LIBDIRS@ @LIBS@
 LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
+
+RANLIB = @RANLIB@
 
 LFLAGS =\
  -L.\
@@ -44,8 +57,7 @@ LFLAGS =\
  -L../../distributed_linear_solvers/ParaSails\
  -L../../matrix_matrix\
  -L../fei-base/lib/$(ARCH)\
- -L/g/g2/chtong/SUPERLU/WEST/SuperLU\
- -L/g/g2/chtong/ML/WEST/ml/src\
+ ${SUPERLU_LIB} ${MLPACK_LIB}\
  -lfei_isis\
  -lHYPRE_parcsr_ls \
  -lHYPRE_ParaSails \
@@ -71,15 +83,22 @@ OBJS = ${FILES:.cc=.o}
 # Main rules
 ##################################################################
 
+all: libHYPRE_FEI.a
+
+lib: all
+
+install: all
+	@cp -f HYPRE_LinSysCore.h cfei.h fei-hypre.h $$HYPRE_INSTALL_DIR/include
+	@cp -f libHYPRE_FEI.a $$HYPRE_INSTALL_DIR/lib
+
 driver: driver.o libHYPRE_FEI.a
 	@echo  "Linking" $@ "... "
 	${CXX} -o $@ driver.o ${LFLAGS}
 
-lib: ${OBJS}
+libHYPRE_FEI.a: ${OBJS}
 	@echo  "Building $@ ... "
-	@echo  "Building ${OBJS} ... "
 	@ar -rcu libHYPRE_FEI.a ${OBJS}
-	@ranlib libfei_hypre.a
+	${RANLIB} $@
 
 ##################################################################
 # Targets
@@ -100,5 +119,4 @@ veryclean: clean
 
 .cc.o:
 	${CXX} -o $@ -c ${CXXFLAGS} $<
-
 

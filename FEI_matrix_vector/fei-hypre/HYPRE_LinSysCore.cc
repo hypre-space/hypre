@@ -2371,10 +2371,6 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_ParCSRParaSailsSetParams(HYPrecon_,
                                                  parasailsThreshold_,
                                                  parasailsNlevels_);
-                  if ( parasailsThreshold_ == 0.0 ) 
-                  {
-                     HYPRE_ParCSRParaSailsSelectThresh(HYPrecon_, 0.9);
-                  }
                   if ( parasailsFilter_ > 0.0 ) 
                   {
                      HYPRE_ParCSRParaSailsSetFilter(HYPrecon_,parasailsFilter_);
@@ -2563,10 +2559,6 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_ParCSRParaSailsSetParams(HYPrecon_,
                                                  parasailsThreshold_,
                                                  parasailsNlevels_);
-                  if ( parasailsThreshold_ == 0.0 ) 
-                  {
-                     HYPRE_ParCSRParaSailsSelectThresh(HYPrecon_, 0.9);
-                  }
                   if ( parasailsFilter_ > 0.0 ) 
                   {
                      HYPRE_ParCSRParaSailsSetFilter(HYPrecon_,parasailsFilter_);
