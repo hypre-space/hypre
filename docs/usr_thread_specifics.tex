@@ -1,16 +1,16 @@
 \section{Thread Specifics}
 
 \begin{description}
-\item{Overview}
-Hypre supports both pthreads and compiler directives.  Either of these may be
+\item[Overview]
+Hypre supports compiler directives and has pthreads available for use.  Either of these may be
 used alone or with MPI.  When compiled with threads the default model is for 
 hypre to use 1 thread per processor.  Currently threading is only supported
-in the ??? code.  
+in the SMG code.  To use compiler directives, no code modifications are necessary-- simply use the configure option --with-openmp.  
 Other platform specific information 
 is available below.
 
-\item{Platform Specific}
-Pthreads are supported on IBM Blue Pacific and DECS.  OpenMP compiler 
+\item[Platform Specific]
+Pthreads are available but not supported on IBM Blue Pacific and DECS.  OpenMP compiler 
 directives are supported on IBM Blue Pacific and DECS.  The default number of
 threads per MPI process is 4. 
 \end{description}    
