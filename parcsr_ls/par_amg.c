@@ -15,6 +15,7 @@
 
 #include "headers.h"
 #include "par_amg.h"
+#include <assert.h>
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCreate
@@ -649,6 +650,7 @@ hypre_BoomerAMGSetPrintFileName( void       *data,
 {
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
+   assert( strlen(print_file_name)<=256 );
 
    sprintf(hypre_ParAMGDataLogFileName(amg_data), "%s", print_file_name);
 
