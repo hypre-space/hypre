@@ -38,7 +38,8 @@ main( int   argc,
    col_starts = hypre_ParCSRMatrixColStarts(A);
    B = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, Bs, col_starts,
 	row_starts);
-   hypre_SetParCSRMatrixPartitioningOwner(B,0);
+   hypre_SetParCSRMatrixRowStartsOwner(B,0);
+   hypre_SetParCSRMatrixColStartsOwner(B,0);
    C = hypre_ParMatmul(B,A);
    hypre_PrintParCSRMatrix(C, "result");
 
