@@ -56,7 +56,10 @@ HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
    if (secret == NULL)
        ierr = 1;
 
-   secret->comm = comm;
+   secret->comm    = comm;
+   secret->obj     = (HYPRE_ParaSails) NULL;
+   secret->thresh  = 0.75; /* defaults */
+   secret->nlevels = 1;
 
    *solver = (HYPRE_Solver) secret;
 
