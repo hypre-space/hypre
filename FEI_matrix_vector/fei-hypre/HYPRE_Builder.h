@@ -1,22 +1,22 @@
 #ifndef _HYPRE_Builder_h_
-#define _IHYPREBuilder_h_
+#define _HYPRE_Builder_h_
 
-#include "src/Data.h"
+#include "base/Data.h"
 
 #include "utilities/utilities.h"
 
-#include "src/LinearSystemCore.h"
+#include "base/LinearSystemCore.h"
 #include "HYPRE_LinSysCore.h"
 
-#include "src/FEI_Implementation.h"
+#include "base/FEI_Implementation.h"
 
 class HYPRE_Builder {
  public:
-   static FEI* FEIBuilder(HYPRE_LinSysCore *lsCore, MPI_Comm comm, 
-                          int masterProc) 
-   {
-      return(new FEI_Implementation(lsCore, comm, masterProc));
-   };
+   static FEI* FEIBuilder(MPI_Comm comm, int masterProc) {
+      HYPRE_LinSysCore* linSysCore = new HYPRE_LinSysCore(comm);
+
+      return(new FEI_Implementation(linSysCore, comm, masterProc));
+   }
 };
 
 #endif

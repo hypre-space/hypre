@@ -203,6 +203,7 @@ class HYPRE_LinSysCore: public LinearSystemCore {
    HYPRE_IJVector  reducedX_;
    HYPRE_IJVector  reducedR_;
    HYPRE_IJMatrix  HYA21_;
+   int             A21NRows_;
    int             reducedAStartRow_;
    HYPRE_IJMatrix  HYinvA22_;
 
@@ -214,6 +215,7 @@ class HYPRE_LinSysCore: public LinearSystemCore {
    int             matrixVectorsCreated_;
    int             systemAssembled_;
    int             systemReduced_;
+   int             schurReduction_;
    int             *selectedList_;
    int             *selectedListAux_;
 
