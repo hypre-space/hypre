@@ -72,6 +72,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int             *P_marker, *P_marker_offd;
 
    int              jj_counter,jj_counter_offd;
+   int             *jj_count, *jj_count_offd;
    int              jj_begin_row,jj_begin_row_offd;
    int              jj_end_row,jj_end_row_offd;
    
@@ -84,7 +85,8 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    int             *fine_to_coarse;
    int             *fine_to_coarse_offd;
-   int              coarse_counter;
+   int             *coarse_counter;
+   int              coarse_shift;
    int              num_cpts_local,total_global_cpts;
    int              num_cols_P_offd,my_first_cpt;
    int             *num_cpts_global;
@@ -92,7 +94,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int              count;
    
    int              i,i1,i2;
-   int              j,jj,jj1;
+   int              j,jl,jj,jj1;
    int              start;
    int              sgn;
    int              c_num;
@@ -100,6 +102,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    double           diagonal;
    double           sum;
    double           distribute;          
+   double           size, rest;
    
    double           zero = 0.0;
    double           one  = 1.0;
@@ -108,6 +111,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int              num_procs;
    int              num_sends;
    int              index;
+   int              ns, ne;
    int             *int_buf_data;
 
    double           max_coef;
@@ -240,7 +244,9 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
 
-   coarse_counter = 0;
+   coarse_counter = hypre_CTAlloc(int, hypre_NumThreads);
+   jj_count = hypre_CTAlloc(int, hypre_NumThreads);
+   jj_count_offd = hypre_CTAlloc(int, hypre_NumThreads);
 
    fine_to_coarse = hypre_CTAlloc(int, n_fine);
 #define HYPRE_SMP_PRIVATE i
@@ -255,8 +261,24 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
     *-----------------------------------------------------------------------*/
 
 /* RDF: this looks a little tricky, but doable */
-   for (i = 0; i < n_fine; i++)
+#define HYPRE_SMP_PRIVATE i,j,i1,jj,ns,ne,size,rest
+#include "../utilities/hypre_smp_forloop.h"
+   for (j = 0; j < hypre_NumThreads; j++)
    {
+     size = n_fine/hypre_NumThreads;
+     rest = n_fine - size*hypre_NumThreads;
+     if (j < rest)
+     {
+        ns = j*size+j;
+        ne = (j+1)*size+j+1;
+     }
+     else
+     {
+        ns = j*size+rest;
+        ne = (j+1)*size+rest;
+     }
+     for (i = ns; i < ne; i++)
+     {
       
       /*--------------------------------------------------------------------
        *  If i is a C-point, interpolation is the identity. Also set up
@@ -265,9 +287,9 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
       if (CF_marker[i] >= 0)
       {
-         jj_counter++;
-         fine_to_coarse[i] = coarse_counter;
-         coarse_counter++;
+         jj_count[j]++;
+         fine_to_coarse[i] = coarse_counter[j];
+         coarse_counter[j]++;
       }
       
       /*--------------------------------------------------------------------
@@ -282,7 +304,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
             i1 = S_diag_j[jj];           
             if (CF_marker[i1] >= 0)
             {
-               jj_counter++;
+               jj_count[j]++;
             }
          }
 
@@ -293,18 +315,28 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                i1 = S_offd_j[jj];           
                if (CF_marker_offd[i1] >= 0)
                {
-                  jj_counter_offd++;
+                  jj_count_offd[j]++;
                }
             }
          }
       }
+    }
    }
 
    /*-----------------------------------------------------------------------
     *  Allocate  arrays.
     *-----------------------------------------------------------------------*/
 
-   n_coarse = coarse_counter;
+   for (i=0; i < hypre_NumThreads-1; i++)
+   {
+      coarse_counter[i+1] += coarse_counter[i];
+      jj_count[i+1] += jj_count[i];
+      jj_count_offd[i+1] += jj_count_offd[i];
+   }
+   i = hypre_NumThreads-1;
+   n_coarse = coarse_counter[i];
+   jj_counter = jj_count[i];
+   jj_counter_offd = jj_count_offd[i];
 
    P_diag_size = jj_counter;
 
@@ -312,8 +344,8 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    P_diag_j    = hypre_CTAlloc(int, P_diag_size);
    P_diag_data = hypre_CTAlloc(double, P_diag_size);
 
-   P_marker = hypre_CTAlloc(int, n_fine);
-   P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+   P_diag_i[n_fine] = jj_counter; 
+
 
    P_offd_size = jj_counter_offd;
 
@@ -327,22 +359,6 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
-
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
-   for (i = 0; i < n_fine; i++)
-   {      
-      P_marker[i] = -1;
-   }
- 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
-   for (i = 0; i < num_cols_A_offd; i++)
-   {      
-      P_marker_offd[i] = -1;
-   }
-  
-   strong_f_marker = -2;
 
    if (debug_flag==4)
    {
@@ -360,9 +376,27 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    fine_to_coarse_offd = hypre_CTAlloc(int, num_cols_A_offd); 
 
-#define HYPRE_SMP_PRIVATE i
+#define HYPRE_SMP_PRIVATE i,j,ns,ne,size,rest,coarse_shift
 #include "../utilities/hypre_smp_forloop.h"
-   for (i = 0; i < n_fine; i++) fine_to_coarse[i] += my_first_cpt;
+   for (j = 0; j < hypre_NumThreads; j++)
+   {
+     coarse_shift = 0;
+     if (j > 0) coarse_shift = coarse_counter[j-1];
+     size = n_fine/hypre_NumThreads;
+     rest = n_fine - size*hypre_NumThreads;
+     if (j < rest)
+     {
+        ns = j*size+j;
+        ne = (j+1)*size+j+1;
+     }
+     else
+     {
+        ns = j*size+rest;
+        ne = (j+1)*size+rest;
+     }
+     for (i = ns; i < ne; i++)
+	fine_to_coarse[i] += my_first_cpt+coarse_shift;
+   }
    index = 0;
    for (i = 0; i < num_sends; i++)
    {
@@ -387,14 +421,50 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;
 
    /*-----------------------------------------------------------------------
     *  Loop over fine grid points.
     *-----------------------------------------------------------------------*/
     
-   for (i = 0; i  < n_fine  ; i ++)
+#define HYPRE_SMP_PRIVATE i,j,jl,i1,i2,jj,jj1,ns,ne,size,rest,sum,diagonal,distribute,P_marker,P_marker_offd,strong_f_marker,jj_counter,jj_counter_offd,sgn,c_num,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd
+#include "../utilities/hypre_smp_forloop.h"
+   for (jl = 0; jl < hypre_NumThreads; jl++)
    {
+     size = n_fine/hypre_NumThreads;
+     rest = n_fine - size*hypre_NumThreads;
+     if (jl < rest)
+     {
+        ns = jl*size+jl;
+        ne = (jl+1)*size+jl+1;
+     }
+     else
+     {
+        ns = jl*size+rest;
+        ne = (jl+1)*size+rest;
+     }
+     jj_counter = 0;
+     if (jl > 0) jj_counter = jj_count[jl-1];
+     jj_counter_offd = 0;
+     if (jl > 0) jj_counter_offd = jj_count_offd[jl-1];
+
+     P_marker = hypre_CTAlloc(int, n_fine);
+     P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+
+     for (i = 0; i < n_fine; i++)
+     {      
+        P_marker[i] = -1;
+     }
+     for (i = 0; i < num_cols_A_offd; i++)
+     {      
+        P_marker_offd[i] = -1;
+     }
+     strong_f_marker = -2;
+ 
+     for (i = ns; i < ne; i++)
+     {
              
       /*--------------------------------------------------------------------
        *  If i is a c-point, interpolation is the identity.
@@ -739,16 +809,16 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
          {
             P_offd_data[jj] /= -diagonal;
          }
-
            
       }
 
-/*   change !!!!! */
       strong_f_marker--; 
 
       P_offd_i[i+1] = jj_counter_offd;
+     }
+     hypre_TFree(P_marker);
+     hypre_TFree(P_marker_offd);
    }
-   P_diag_i[i] = jj_counter; 
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
 
@@ -835,9 +905,10 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    num_cols_P_offd = 0;
    if (P_offd_size)
    {
-      hypre_TFree(P_marker); 
       P_marker = hypre_CTAlloc(int, P_offd_size);
 
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
       for (i=0; i < P_offd_size; i++)
 	 P_marker[i] = P_offd_j[i];
 
@@ -859,10 +930,13 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
       for (i=0; i < num_cols_P_offd; i++)
          col_map_offd_P[i] = P_marker[i];
 
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
       for (i=0; i < P_offd_size; i++)
 	P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
 					 P_offd_j[i],
 					 num_cols_P_offd);
+      hypre_TFree(P_marker); 
    }
 
    P = hypre_ParCSRMatrixCreate(comm, 
@@ -907,8 +981,9 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    hypre_TFree(int_buf_data);
    hypre_TFree(fine_to_coarse);
    hypre_TFree(fine_to_coarse_offd);
-   hypre_TFree(P_marker);  
-   hypre_TFree(P_marker_offd);
+   hypre_TFree(coarse_counter);
+   hypre_TFree(jj_count);
+   hypre_TFree(jj_count_offd);
 
    if (num_procs > 1) hypre_CSRMatrixDestroy(A_ext);
 
