@@ -237,6 +237,12 @@ class HYPRE_LinSysCore
    void getSolnEntry(int eqnNumber, double& answer);
 
    // ----------------------------------------------------------------------
+   // fetch the residual vector (FEI 1.4.x compatible)
+   // ----------------------------------------------------------------------
+
+   void formResidual(int* eqnNumbers, double* values, int len);
+
+   // ----------------------------------------------------------------------
    //function for launching the linear solver
    // ----------------------------------------------------------------------
 

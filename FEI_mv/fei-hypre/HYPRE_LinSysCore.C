@@ -2319,6 +2319,66 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 // solve the linear system
 //---------------------------------------------------------------------------
 
+void HYPRE_LinSysCore::formResidual(int* eqnNumbers, double* values, int leng)
+{
+    int                i, index;
+    HYPRE_ParCSRMatrix A_csr;
+    HYPRE_ParVector    x_csr;
+    HYPRE_ParVector    b_csr;
+    HYPRE_ParVector    r_csr;
+
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+    {
+       printf("%4d : HYPRE_LinSysCore::entering formResidual.\n", mypid_);
+    }
+
+    //*******************************************************************
+    // error checking
+    //-------------------------------------------------------------------
+
+    if (leng != (localEndRow_-localStartRow_+1)) 
+    {
+       printf("%4d : HYPRE_LinSysCore::formResidual - leng != numLocalRows.");
+       exit(1);
+    }
+    if ( ! systemAssembled_ )
+    {
+       printf("formResidual ERROR : system not yet assembled.\n");
+       exit(1);
+    }
+
+    //*******************************************************************
+    // fetch matrix and vector pointers
+    //-------------------------------------------------------------------
+
+    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
+    x_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(currX_);
+    b_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(currB_);
+    r_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(currR_);
+
+    //*******************************************************************
+    // form residual vector
+    //-------------------------------------------------------------------
+
+    HYPRE_ParVectorCopy( b_csr, r_csr );
+    HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+
+    //*******************************************************************
+    // fetch residual vector
+    //-------------------------------------------------------------------
+
+    for ( i = localStartRow_-1; i = localEndRow_; i++ )
+    {
+       index = i - localStartRow_ + 1;
+       HYPRE_IJVectorGetLocalComponents(currR_, 1, &i, NULL, &values[index]);
+       eqnNumbers[index] = i + 1;
+    }
+}
+
+//***************************************************************************
+// solve the linear system
+//---------------------------------------------------------------------------
+
 void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 {
     int                i, j, num_iterations, status, *num_sweeps, *relax_type;
