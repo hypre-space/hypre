@@ -65,7 +65,8 @@ UTILITIES_FILES =\
  thread_mpistubs.c\
  threading.c\
  timer.c\
- timing.c
+ timing.c\
+ random.c
 
 UTILITIES_OBJS = ${UTILITIES_FILES:.c=.o}
  
