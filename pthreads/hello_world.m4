@@ -24,6 +24,6 @@ void *hello_world (void *threadid)
    int i;
 
    printf("hello world %d\n", (int)threadid);
-   PLOOP(i,0,8,NUM_THREADS,indx,0,<<printf("%d\n",i);>>)
+   PLOOP(i,0,8,indx,0,<<printf("%d\n",i);>>)
    PLOOPEND(indx,0)
 }
