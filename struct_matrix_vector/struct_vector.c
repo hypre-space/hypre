@@ -441,6 +441,7 @@ zzz_ClearStructVectorGhostValues( zzz_StructVector *vector )
                          vp[vi] = 0.0;
                       });
       }
+      zzz_FreeBoxArray(diff_boxes);
    }
 
    zzz_FreeIndex(loop_index);
