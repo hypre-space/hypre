@@ -74,7 +74,6 @@ hypre_SMGSolve( void               *smg_vdata,
    hypre_StructVector  **x_l             = (smg_data -> x_l);
    hypre_StructVector  **r_l             = (smg_data -> r_l);
    hypre_StructVector  **e_l             = (smg_data -> e_l);
-   hypre_StructVector  **tb_l            = (smg_data -> tb_l);
    void                **relax_data_l    = (smg_data -> relax_data_l);
    void                **residual_data_l = (smg_data -> residual_data_l);
    void                **restrict_data_l = (smg_data -> restrict_data_l);

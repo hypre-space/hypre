@@ -303,12 +303,7 @@ hypre_HybridSetup( void               *hybrid_vdata,
                    hypre_StructVector *b,
                    hypre_StructVector *x            )
 {
-   hypre_HybridData  *hybrid_data  = hybrid_vdata;
-   int                logging      = (hybrid_data -> logging);
-   int                dscg_max_its = (hybrid_data -> dscg_max_its);
-   int                pcg_max_its  = (hybrid_data -> pcg_max_its);
-
-   int                ierr = 0;
+   int ierr = 0;
     
    return ierr;
 }
@@ -349,7 +344,6 @@ hypre_HybridSolve( void               *hybrid_vdata,
 
    void              *pcg_solver;
 
-   int                num_its;
    int                dscg_num_its;
    int                pcg_num_its;
 

@@ -217,10 +217,10 @@ hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A,
    double               *ra, *rb;
 
    double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   double               *a_ac, *a_aw, *a_ae, *a_as, *a_an;
+   double               *a_ac, *a_aw, *a_as;
    double               *a_bc, *a_bw, *a_be, *a_bs, *a_bn;
    double               *a_csw, *a_cse, *a_cnw, *a_cne;
-   double               *a_asw, *a_ase, *a_anw, *a_ane;
+   double               *a_asw, *a_ase;
    double               *a_bsw, *a_bse, *a_bnw, *a_bne;
 
    double               *rap_cc, *rap_cw, *rap_cs;
@@ -364,17 +364,9 @@ hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A,
             MapIndex(index_temp, cdir, index);
             a_aw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-            hypre_SetIndex(index_temp,1,0,1);
-            MapIndex(index_temp, cdir, index);
-            a_ae = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
             hypre_SetIndex(index_temp,0,-1,1);
             MapIndex(index_temp, cdir, index);
             a_as = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
-            hypre_SetIndex(index_temp,0,1,1);
-            MapIndex(index_temp, cdir, index);
-            a_an = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
             hypre_SetIndex(index_temp,-1,0,-1);
             MapIndex(index_temp, cdir, index);
@@ -431,14 +423,6 @@ hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A,
             hypre_SetIndex(index_temp,1,-1,1);
             MapIndex(index_temp, cdir, index);
             a_ase = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
-            hypre_SetIndex(index_temp,-1,1,1);
-            MapIndex(index_temp, cdir, index);
-            a_anw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
-            hypre_SetIndex(index_temp,1,1,1);
-            MapIndex(index_temp, cdir, index);
-            a_ane = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
             hypre_SetIndex(index_temp,-1,-1,-1);
             MapIndex(index_temp, cdir, index);
@@ -902,10 +886,10 @@ hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A,
 
    double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
    double               *a_ac, *a_aw, *a_ae, *a_as, *a_an;
-   double               *a_bc, *a_bw, *a_be, *a_bs, *a_bn;
+   double               *a_be, *a_bn;
    double               *a_csw, *a_cse, *a_cnw, *a_cne;
    double               *a_asw, *a_ase, *a_anw, *a_ane;
-   double               *a_bsw, *a_bse, *a_bnw, *a_bne;
+   double               *a_bnw, *a_bne;
 
    double               *rap_ce, *rap_cn;
    double               *rap_ac, *rap_aw, *rap_ae, *rap_as, *rap_an;
@@ -1021,11 +1005,6 @@ hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A,
          MapIndex(index_temp, cdir, index);
          a_ac = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-         hypre_SetIndex(index_temp,0,0,-1);
-         MapIndex(index_temp, cdir, index);
-         a_bc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
-
          /*-----------------------------------------------------------------
           * Extract additional pointers for 19-point fine grid operator:
           *
@@ -1061,17 +1040,9 @@ hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A,
             MapIndex(index_temp, cdir, index);
             a_an = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-            hypre_SetIndex(index_temp,-1,0,-1);
-            MapIndex(index_temp, cdir, index);
-            a_bw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
             hypre_SetIndex(index_temp,1,0,-1);
             MapIndex(index_temp, cdir, index);
             a_be = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
-            hypre_SetIndex(index_temp,0,-1,-1);
-            MapIndex(index_temp, cdir, index);
-            a_bs = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
             hypre_SetIndex(index_temp,0,1,-1);
             MapIndex(index_temp, cdir, index);
@@ -1124,14 +1095,6 @@ hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A,
             hypre_SetIndex(index_temp,1,1,1);
             MapIndex(index_temp, cdir, index);
             a_ane = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
-            hypre_SetIndex(index_temp,-1,-1,-1);
-            MapIndex(index_temp, cdir, index);
-            a_bsw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
-            hypre_SetIndex(index_temp,1,-1,-1);
-            MapIndex(index_temp, cdir, index);
-            a_bse = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
             hypre_SetIndex(index_temp,-1,1,-1);
             MapIndex(index_temp, cdir, index);

@@ -135,10 +135,8 @@ hypre_PointRelaxSetup( void               *relax_vdata,
 {
    hypre_PointRelaxData  *relax_data = relax_vdata;
 
-   MPI_Comm               comm             = (relax_data -> comm);
    int                    num_pointsets    = (relax_data -> num_pointsets);
    int                   *pointset_sizes   = (relax_data -> pointset_sizes);
-   int                   *pointset_ranks   = (relax_data -> pointset_ranks);
    hypre_Index           *pointset_strides = (relax_data -> pointset_strides);
    hypre_Index          **pointset_indices = (relax_data -> pointset_indices);
    hypre_StructVector    *t;
@@ -323,16 +321,12 @@ hypre_PointRelax( void               *relax_vdata,
 {
    hypre_PointRelaxData  *relax_data = relax_vdata;
 
-   double                 tol              = (relax_data -> tol);
    int                    max_iter         = (relax_data -> max_iter);
-   int                    rel_change       = (relax_data -> rel_change);
    int                    zero_guess       = (relax_data -> zero_guess);
    double                 weight           = (relax_data -> weight);
    int                    num_pointsets    = (relax_data -> num_pointsets);
-   int                   *pointset_sizes   = (relax_data -> pointset_sizes);
    int                   *pointset_ranks   = (relax_data -> pointset_ranks);
    hypre_Index           *pointset_strides = (relax_data -> pointset_strides);
-   hypre_Index          **pointset_indices = (relax_data -> pointset_indices);
    hypre_StructVector    *t                = (relax_data -> t);
    int                    diag_rank        = (relax_data -> diag_rank);
    hypre_ComputePkg     **compute_pkgs     = (relax_data -> compute_pkgs);
@@ -355,13 +349,11 @@ hypre_PointRelax( void               *relax_vdata,
    int                    ti;
                         
    double                *Ap;
-   double                *Dp;
    double                *bp;
    double                *xp;
    double                *tp;
                         
    hypre_IndexRef         stride;
-   hypre_IndexRef         index;
    hypre_IndexRef         start;
    hypre_Index            loop_size;
                         

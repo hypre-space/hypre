@@ -332,7 +332,6 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    double                 lambdax;
    double                 lambday;
    double                 lambdaz;
-   double                 lambda_max;
                         
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
@@ -347,7 +346,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_Index            stride;
    hypre_Index            stridev;
                         
-   int                    i, si, dir, k, l;
+   int                    i, si;
    int                    loopi, loopj, loopk;
 
    /*----------------------------------------------------------
@@ -390,7 +389,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
          hypre_BoxLoop2Begin(loop_size,
                              A_dbox, start,  stride,  Ai,
                              v_dbox, startv, stridev, vi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,vi,lambdax,lambday,lambdaz,si,Ap,Astenc,lambda_max,dir
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,vi,lambdax,lambday,lambdaz,si,Ap,Astenc
 #include "hypre_box_smp_forloop.h"
          hypre_BoxLoop2For(loopi, loopj, loopk, Ai, vi)
             {
@@ -483,7 +482,7 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
    hypre_Index            stride;
    hypre_Index            stridev;
                         
-   int                    i, k, l;
+   int                    i;
    int                    loopi, loopj, loopk;
 
    /*-----------------------------------------------------

@@ -103,7 +103,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    int                   dim;
    hypre_Box            *cbox;   
 
-   int                   i, d, l, lx, ly, lz;
+   int                   d, l, lx, ly, lz;
    int                   fi, ci;
                        
    int                   b_num_ghost[]  = {0, 0, 0, 0, 0, 0};

@@ -148,12 +148,10 @@ hypre_SparseMSGInterp( void               *interp_vdata,
                        
    hypre_Box              *P_dbox;
    hypre_Box              *xc_dbox;
-   hypre_Box              *x_dbox;
    hypre_Box              *e_dbox;
                        
    int                     Pi;
    int                     xci;
-   int                     xi;
    int                     ei;
                          
    double                 *Pp0, *Pp1;

@@ -33,17 +33,11 @@ hypre_SMG2CreateRAPOp( hypre_StructMatrix *R,
    int                    RAP_stencil_dim;
    int                    RAP_num_ghost[] = {1, 1, 1, 1, 0, 0};
 
-   hypre_StructStencil   *A_stencil;
-   int                    A_stencil_size;
-
    int                    j, i;
    int                    stencil_rank;
  
    RAP_stencil_dim = 2;
 
-   A_stencil = hypre_StructMatrixStencil(A);
-   A_stencil_size = hypre_StructStencilSize(A_stencil);
- 
    /*-----------------------------------------------------------------------
     * Define RAP_stencil
     *-----------------------------------------------------------------------*/
@@ -190,7 +184,7 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
    double               *ra, *rb;
 
    double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   double               *a_csw, *a_cse, *a_cnw, *a_cne;
+   double               *a_csw, *a_cse, *a_cnw;
 
    double               *rap_cc, *rap_cw, *rap_cs;
    double               *rap_csw, *rap_cse;
@@ -305,10 +299,6 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
 
             hypre_SetIndex(index,-1,1,0);
             a_cnw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
-            hypre_SetIndex(index,1,1,0);
-            a_cne = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
          }
 
          /*-----------------------------------------------------------------
@@ -514,8 +504,8 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
    double               *pa, *pb;
    double               *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   double               *a_csw, *a_cse, *a_cnw, *a_cne;
+   double               *a_cc, *a_cw, *a_ce, *a_cn;
+   double               *a_cse, *a_cnw, *a_cne;
 
    double               *rap_ce, *rap_cn;
    double               *rap_cnw, *rap_cne;
@@ -605,9 +595,6 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
          hypre_SetIndex(index,1,0,0);
          a_ce = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-         hypre_SetIndex(index,0,-1,0);
-         a_cs = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
          hypre_SetIndex(index,0,1,0);
          a_cn = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -622,9 +609,6 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
 
          if(fine_stencil_size > 5)
          {
-            hypre_SetIndex(index,-1,-1,0);
-            a_csw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
             hypre_SetIndex(index,1,-1,0);
             a_cse = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -806,8 +790,6 @@ hypre_SMG2RAPPeriodicSym( hypre_StructMatrix *RAP,
 
    double               *rap_cc, *rap_cw, *rap_cs;
    double               *rap_csw, *rap_cse;
-   double               *rap_ce, *rap_cn;
-   double               *rap_cnw, *rap_cne;
 
    int                  iAc;
    int                  iAcm1;

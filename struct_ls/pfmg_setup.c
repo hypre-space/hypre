@@ -49,8 +49,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    MPI_Comm              comm = (pfmg_data -> comm);
                      
    int                   relax_type = (pfmg_data -> relax_type);
-   int                   n_pre      = (pfmg_data -> num_pre_relax);
-   int                   n_post     = (pfmg_data -> num_post_relax);
    int                   skip_relax = (pfmg_data -> skip_relax);
    double               *dxyz       = (pfmg_data -> dxyz);
                      
@@ -59,8 +57,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
                       
    int                   num_levels;
                      
-   int                  *cdirs;
-
    hypre_Index           cindex;
    hypre_Index           findex;
    hypre_Index           stride;
@@ -84,8 +80,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_StructVector  **tx_l;
    hypre_StructVector  **r_l;
    hypre_StructVector  **e_l;
-   double               *b_data;
-   double               *x_data;
 
    void                **relax_data_l;
    void                **matvec_data_l;
@@ -94,15 +88,12 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    hypre_StructGrid     *grid;
    int                   dim;
-   hypre_BoxArray       *boxes;
 
-
-   hypre_Box            *box;
    hypre_Box            *cbox;
 
    double                min_dxyz;
    int                   cdir;
-   int                   i, d, l;
+   int                   d, l;
                        
    int                   b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    int                   x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
@@ -118,7 +109,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    grid  = hypre_StructMatrixGrid(A);
    dim   = hypre_StructGridDim(grid);
-   boxes = hypre_StructGridBoxes(grid);
 
    /* Compute a new max_levels value based on the grid */
    cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(grid));

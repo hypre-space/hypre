@@ -503,12 +503,10 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    hypre_BoxArrayArray    *dept_boxes;
                        
    hypre_StructGrid       *grid;
-   hypre_BoxArray         *boxes;
 
-   hypre_Box              *box;
    hypre_Box              *cbox;
                     
-   int                     i, d, l;
+   int                     l;
    int                     flop_divisor;
                          
    int                     x_num_ghost[] = {0, 0, 0, 0, 0, 0};
@@ -519,8 +517,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
     * Set up coarse grids
     *-----------------------------------------------------*/
 
-   grid           = hypre_StructMatrixGrid(A);
-   boxes          = hypre_StructGridBoxes(grid);
+   grid = hypre_StructMatrixGrid(A);
 
    /* Compute a preliminary num_levels value based on the grid */
    cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(grid));

@@ -261,10 +261,10 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
    double               *ra, *rb;
 
    double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   double               *a_ac, *a_aw, *a_ae, *a_as, *a_an;
+   double               *a_ac, *a_aw, *a_as;
    double               *a_bc, *a_bw, *a_be, *a_bs, *a_bn;
    double               *a_csw, *a_cse, *a_cnw, *a_cne;
-   double               *a_asw, *a_ase, *a_anw, *a_ane;
+   double               *a_asw, *a_ase;
    double               *a_bsw, *a_bse, *a_bnw, *a_bne;
 
    double               *rap_cc, *rap_cw, *rap_cs;
@@ -390,14 +390,8 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
             hypre_SetIndex(index,-1,0,1);
             a_aw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-            hypre_SetIndex(index,1,0,1);
-            a_ae = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
             hypre_SetIndex(index,0,-1,1);
             a_as = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
-            hypre_SetIndex(index,0,1,1);
-            a_an = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
             hypre_SetIndex(index,-1,0,-1);
             a_bw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
@@ -458,12 +452,6 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
 
             hypre_SetIndex(index,1,-1,1);
             a_ase = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
-            hypre_SetIndex(index,-1,1,1);
-            a_anw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
-            hypre_SetIndex(index,1,1,1);
-            a_ane = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
             hypre_SetIndex(index,-1,-1,-1);
             a_bsw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
@@ -986,10 +974,10 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
 
    double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
    double               *a_ac, *a_aw, *a_ae, *a_as, *a_an;
-   double               *a_bc, *a_bw, *a_be, *a_bs, *a_bn;
+   double               *a_be, *a_bn;
    double               *a_csw, *a_cse, *a_cnw, *a_cne;
    double               *a_asw, *a_ase, *a_anw, *a_ane;
-   double               *a_bsw, *a_bse, *a_bnw, *a_bne;
+   double               *a_bnw, *a_bne;
 
    double               *rap_ce, *rap_cn;
    double               *rap_ac, *rap_aw, *rap_ae, *rap_as, *rap_an;
@@ -1095,10 +1083,6 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
          hypre_SetIndex(index,0,0,1);
          a_ac = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-         hypre_SetIndex(index,0,0,-1);
-         a_bc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
-
          /*-----------------------------------------------------------------
           * Extract additional pointers for 15-point fine grid operator:
           *
@@ -1126,14 +1110,8 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
             hypre_SetIndex(index,0,1,1);
             a_an = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-            hypre_SetIndex(index,-1,0,-1);
-            a_bw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
             hypre_SetIndex(index,1,0,-1);
             a_be = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
-            hypre_SetIndex(index,0,-1,-1);
-            a_bs = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
             hypre_SetIndex(index,0,1,-1);
             a_bn = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
@@ -1191,12 +1169,6 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
 
             hypre_SetIndex(index,1,1,1);
             a_ane = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
-            hypre_SetIndex(index,-1,-1,-1);
-            a_bsw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
-            hypre_SetIndex(index,1,-1,-1);
-            a_bse = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
             hypre_SetIndex(index,-1,1,-1);
             a_bnw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
@@ -1671,9 +1643,7 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
    int                  iAcmx;
    int                  iAcmy;
    int                  iAcmxmy;
-   int                  iAcmxpy;
    int                  iAcpxmy;
-   int                  iAcpxpy;
 
    int                  xOffset;
    int                  yOffset;
@@ -1809,14 +1779,12 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
 
                hypre_BoxLoop1Begin(loop_size,
                                    RAP_dbox,  cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc,iAcmxmy,iAcmxpy,iAcpxmy,iAcpxpy
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc,iAcmxmy,iAcpxmy
 #include "hypre_box_smp_forloop.h"
                hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
                   {
                      iAcmxmy = iAc - xOffset - yOffset;
-                     iAcmxpy = iAc - xOffset + yOffset;
                      iAcpxmy = iAc + xOffset - yOffset;
-                     iAcpxpy = iAc + xOffset + yOffset;
                   
                      rap_csw[iAc] += (rap_bsw[iAc] + rap_bne[iAcmxmy]);
                   

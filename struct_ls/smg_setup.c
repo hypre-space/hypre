@@ -75,12 +75,10 @@ hypre_SMGSetup( void               *smg_vdata,
    void                **interp_data_l;
 
    hypre_StructGrid     *grid;
-   hypre_BoxArray       *boxes;
 
-   hypre_Box            *box;
    hypre_Box            *cbox;
 
-   int                   i, d, l;
+   int                   i, l;
                        
    int                   b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    int                   x_num_ghost[]  = {0, 0, 0, 0, 0, 0};
@@ -101,8 +99,7 @@ hypre_SMGSetup( void               *smg_vdata,
     * Set up coarse grids
     *-----------------------------------------------------*/
 
-   grid  = hypre_StructMatrixGrid(A);
-   boxes = hypre_StructGridBoxes(grid);
+   grid = hypre_StructMatrixGrid(A);
 
    /* Compute a new max_levels value based on the grid */
    cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(grid));

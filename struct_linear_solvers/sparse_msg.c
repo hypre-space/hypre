@@ -55,13 +55,14 @@ hypre_SparseMSGCreate( MPI_Comm  comm )
 int
 hypre_SparseMSGDestroy( void *smsg_vdata )
 {
-   hypre_SparseMSGData *smsg_data = smsg_vdata;
-
-   int fi, l;
    int ierr = 0;
 
 /* RDF */
 #if 0
+   hypre_SparseMSGData *smsg_data = smsg_vdata;
+
+   int fi, l;
+
    if (smsg_data)
    {
       if ((smsg_data -> logging) > 0)
