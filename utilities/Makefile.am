@@ -11,6 +11,8 @@ endif !STATICONLY
 
 include_HEADERS = utilities.h HYPRE_utilities.h
 
+EXTRA_DIST = HYPRE_utilities.h.in
+
 AM_CPPFLAGS = -DHYPRE_TIMING
 
 #

@@ -3,7 +3,7 @@
 /* Define to 1 if the `closedir' function returns void instead of `int'. */
 #undef CLOSEDIR_VOID
 
-/* Define to dummy `main' function (if any) required to link to the Fortran 77
+/* Define to dummy `main' function (if any) required to link to the Fortran
    libraries. */
 #undef F77_DUMMY_MAIN
 
@@ -13,6 +13,9 @@
 
 /* As F77_FUNC, but for C identifiers containing underscores. */
 #undef F77_FUNC_
+
+/* Define if F77 and FC dummy `main' functions are identical. */
+#undef FC_DUMMY_MAIN_EQ_F77
 
 /* Define to 1 if you have the `atexit' function. */
 #undef HAVE_ATEXIT

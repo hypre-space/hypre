@@ -5,5 +5,5 @@ cp /usr/apps/libtool/1.5/share/aclocal/libtool.m4 config/acinclude.m4
 aclocal -I config
 libtoolize --force --copy
 autoheader --force --include=config
-automake --add-missing --copy --force-missing --foreign
+automake --add-missing --copy --force-missing --foreign 2>&1|grep -v "created both with libtool and without"
 autoconf --include=config

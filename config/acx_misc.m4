@@ -1,74 +1,3 @@
-
-dnl **********************************************************************
-dnl * ACX_CONFIG_OUTPUT_LIST(DIR-LIST[, OUTPUT-FILE])
-dnl *
-dnl * The intent of this macro is to make configure handle the possibility
-dnl * that a portion of the directory tree of a project may not be
-dnl * present.  This will modify the argument list of AC_OUTPUT to contain
-dnl * only output file names for which corresponding input files exist.
-dnl * If you are not concerned about the possible absence of the necessary
-dnl * input (.in) files, it is better to not use this macro and to
-dnl * explicitly list all of the output files in a call to AC_OUTPUT.
-dnl * Also, If you wish to create a file Foo from a file with a name
-dnl * other than Foo.in, this macro will not work, and you must use
-dnl * AC_OUTPUT.
-dnl *
-dnl * This macro checks for the existence of the file OUTPUT-FILE.in in
-dnl * each directory specified in the whitespace-separated DIR-LIST.  
-dnl * (Directories should be specified by relative path from the directory 
-dnl * containing configure.in.) If OUTPUT-FILE is not specified, the
-dnl * default is 'Makefile'.  For each directory that contains 
-dnl * OUTPUT-FILE.in, the relative path of OUTPUT-FILE is added to the 
-dnl * shell variable OUTPUT-FILE_list.  When AC_OUTPUT is called,
-dnl * '$OUTPUT-FILE_list' should be included in the argument list.  So if
-dnl * you have a directory tree and each subdirectory contains a 
-dnl * Makefile.in, DIR-LIST should be a list of every subdirectory and
-dnl * OUTPUT-FILE can be omitted, because 'Makefile' is the default.  When
-dnl * configure runs, it will check for the existence of a Makefile.in in
-dnl * each directory in DIR-LIST, and if so, the relative path of each
-dnl * intended Makefile will be added to the variable Makefile_list.
-dnl *
-dnl * This macro can be called multiple times, if there are files other
-dnl * than Makefile.in with a .in suffix other that are intended to be 
-dnl * processed by configure. 
-dnl *
-dnl * Example
-dnl *     If directories dir1 and dir2 both contain a file named Foo.in, 
-dnl *     and you wish to use configure to create a file named Foo in each
-dnl *     directory, then call 
-dnl *     ACX_CONFIG_OUTPUT_LIST(dir1 dir2, Foo)
-dnl *     If you also called this macro for Makefile as described above,
-dnl *     you should call
-dnl *     AC_OUTPUT($Makefile_list $Foo_list)
-dnl *     at the end of configure.in .
-dnl *********************************************************************
-
-
-AC_DEFUN(ACX_CONFIG_OUTPUT_LIST,
-[
-   dnl * m_OUTPUT_LIST is a macro to store the name of the variable
-   dnl * which will contain the list of output files
-   define([m_OUTPUT_LIST], ifelse([$2], , Makefile_list, [$2_list]))
-
-   if test -z "$srcdir"; then
-      srcdir=.
-   fi
-
-   dnl * use "Makefile" if second argument not given
-   if test -n "$2"; then
-      casc_output_file=$2
-   else   
-      casc_output_file=Makefile
-   fi   
-      
-   dnl * Add a file to the output list if its ".in" file exists.
-   for casc_dir in $1; do
-      if test -f $srcdir/$casc_dir/$casc_output_file.in; then
-         m_OUTPUT_LIST="$m_OUTPUT_LIST $casc_dir/$casc_output_file"
-      fi
-   done
-])dnl
-
 dnl **********************************************************************
 dnl * ACX_INSURE
 dnl *
@@ -84,7 +13,8 @@ dnl because of the configure testing of the compiler (and CFLAGS)
 dnl the FLAGS needs to be set late in the configure process.
 dnl
 AC_DEFUN([ACX_INSURE],
-[AC_ARG_WITH([insure],
+[AC_PREREQ(2.57)dnl
+AC_ARG_WITH([insure],
 AC_HELP_STRING(
 [--with-insure=FLAGS],
 [FLAGS are optionals to pass to insure. To redirect output to a
@@ -155,7 +85,8 @@ dnl libtool has problems with purify (and the log-file), needing
 dnl a --tag=CC option, still have a problem with the ld phase
 dnl
 AC_DEFUN([ACX_PURIFY],
-[AC_ARG_WITH([purify],
+[AC_PREREQ(2.57)dnl
+AC_ARG_WITH([purify],
 AC_HELP_STRING(
 [--with-purify=FLAGS],
 [FLAGS are optionals to pass to insure. To appends output to a file
@@ -219,7 +150,8 @@ dnl can be suppressed using --diag_suppress and the error numbers
 dnl provided by --display_error_number
 dnl
 AC_DEFUN([ACX_STRICT_CHECKING],
-[AC_ARG_WITH([strict-checking],
+[AC_PREREQ(2.57)dnl
+AC_ARG_WITH([strict-checking],
 AC_HELP_STRING(
 [--with-strict-checking],
 [Try to find a compiler option that warns when a function prototype
@@ -280,7 +212,8 @@ dnl   if it is not found. If ACTION-IF-FOUND is not specified,
 dnl   the default action will define HAVE_MPI. 
 
 dnl
-AC_DEFUN([ACX_CHECK_MPI],[
+AC_DEFUN([ACX_CHECK_MPI],
+[AC_PREREQ(2.57)dnl
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 
 if test x = x"$MPILIBS"; then
@@ -329,7 +262,8 @@ dnl *
 dnl Compiles with MPI [default].
 dnl
 AC_DEFUN([ACX_MPI],
-[AC_ARG_WITH(MPI,
+[AC_PREREQ(2.57)dnl
+AC_ARG_WITH(MPI,
 AC_HELP_STRING([--with-MPI=DIR],
 [Compiles with MPI [default]. DIR is the top-level install directory
 for MPI.  Selecting --without-MPI may affect which compiler is chosen]),
@@ -376,7 +310,8 @@ dnl *
 dnl compile for debugging
 dnl
 AC_DEFUN([ACX_DEBUG],
-[AC_ARG_ENABLE(debug,
+[AC_PREREQ(2.57)dnl
+AC_ARG_ENABLE(debug,
 AC_HELP_STRING([--enable-debug], [compile for debugging.]),
 [case "${enableval}" in
   yes) casc_using_debug=yes
@@ -393,7 +328,8 @@ dnl *
 dnl determine timing routines to use
 dnl
 AC_DEFUN([ACX_TIMING],
-[AC_ARG_WITH(timing,
+[AC_PREREQ(2.57)dnl
+AC_ARG_WITH(timing,
 AC_HELP_STRING([--with-timing],[use HYPRE timing routines]),
 [if test "$withval" = "yes"; then
   AC_DEFINE(HYPRE_TIMING,1,[HYPRE timing routines are being used])
@@ -406,7 +342,8 @@ dnl *
 dnl compile with OpenMP
 dnl
 AC_DEFUN([ACX_OPENMP],
-[AC_ARG_WITH(openmp,
+[AC_PREREQ(2.57)dnl
+AC_ARG_WITH(openmp,
 AC_HELP_STRING([--with-openmp],
 [use openMP--this may affect which compiler is chosen.
 Supported using guidec on IBM and Compaq.]),
@@ -424,7 +361,8 @@ dnl *
 dnl try and determine what the optimized compile FLAGS
 dnl
 AC_DEFUN([ACX_OPTIMIZATION_FLAGS],
-[if test "x${casc_user_chose_cflags}" = "xno"
+[AC_PREREQ(2.57)dnl
+if test "x${casc_user_chose_cflags}" = "xno"
 then
   if test "x${GCC}" = "xyes"
   then
@@ -652,7 +590,8 @@ dnl *
 dnl determine certain compiler options for a few ASCI customers
 dnl
 AC_DEFUN([ACX_ASCI_HOST],
-[HOSTNAME="`hostname`"
+[AC_PREREQ(2.57)dnl
+HOSTNAME="`hostname`"
   if test -z "$HOSTNAME"
   then
     HOSTNAME=unknown
