@@ -3420,14 +3420,8 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
                  HYPRE_ParCSRGMRESSetLogging(HYSolver_, 2);
            }
-HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
-HYPRE_ParVectorInnerProd( b_csr, b_csr, &rnorm);
-printf("(3) rnorm = %e\n", sqrt(rnorm));
            HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
            MPI_Barrier( comm_ );
-HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
-HYPRE_ParVectorInnerProd( b_csr, b_csr, &rnorm);
-printf("(4) rnorm = %e\n", sqrt(rnorm));
            ptime  = LSC_Wtime();
            HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
            HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &numIterations);
