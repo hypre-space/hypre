@@ -482,7 +482,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	 {
 	    grid_relax_type[3] = grid_relax_type[0];
 	    num_grid_sweeps[3] = 1;
-	    grid_relax_points[3][0] = 0; 
+	    if (grid_relax_points) grid_relax_points[3][0] = 0; 
 	 }
 	 if (S)
             hypre_ParCSRMatrixDestroy(S);
