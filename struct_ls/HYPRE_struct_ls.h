@@ -641,6 +641,12 @@ int HYPRE_StructHybridSetStopCrit(HYPRE_StructSolver solver,
 int HYPRE_StructHybridSetRelChange(HYPRE_StructSolver solver,
                                    int                rel_change);
 
+int HYPRE_StructHybridSetSolverType(HYPRE_StructSolver solver,
+                                    int                solver_type);
+
+int HYPRE_StructHybridSetKDim(HYPRE_StructSolver solver,
+                              int k_dim);
+
 int HYPRE_StructHybridSetPrecond(HYPRE_StructSolver         solver,
                                  HYPRE_PtrToStructSolverFcn precond,
                                  HYPRE_PtrToStructSolverFcn precond_setup,
