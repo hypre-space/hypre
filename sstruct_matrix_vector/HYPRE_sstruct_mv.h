@@ -572,6 +572,14 @@ int HYPRE_SStructVectorAssemble(HYPRE_SStructVector vector);
 
 
 /**
+ * Gather vector data so that efficient GetValues can be done.
+ *
+ * @param param [IN] ...
+ **/
+int HYPRE_SStructVectorGather(HYPRE_SStructVector vector);
+
+
+/**
  * Description...
  *
  * NOTE: Users may only get values on processes that own the

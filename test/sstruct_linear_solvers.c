@@ -104,6 +104,11 @@ main( int   argc,
    int                  i, j, k, s, d, part;
    int                  ib, jb, kb, block;
    int                  ix, iy, iz;
+
+#if DEBUG
+   FILE                *file;
+   char                 filename[255];
+#endif
                        
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -722,17 +727,80 @@ main( int   argc,
 #endif
 
 #if DEBUG
+   /* result is 1's on the interior of the grid */
    hypre_SStructMatvec(1.0, A, b, 0.0, x);
    HYPRE_SStructVectorPrint("driver.out.matvec", x, 0);
 
+   /* result is all 1's */
    hypre_SStructCopy(b, x);
    HYPRE_SStructVectorPrint("driver.out.copy", x, 0);
 
+   /* result is all 2's */
    hypre_SStructScale(2.0, x);
    HYPRE_SStructVectorPrint("driver.out.scale", x, 0);
 
+   /* result is all 0's */
    hypre_SStructAxpy(-2.0, b, x);
    HYPRE_SStructVectorPrint("driver.out.axpy", x, 0);
+
+   /* result is 1's with 0's on some boundaries */
+   hypre_SStructCopy(b, x);
+   sprintf(filename, "driver.out.gatherpre.%05d", myid);
+   file = fopen(filename, "w");
+   for (part = 0; part < 2; part++)
+   {
+      for (block = 0; block < nblocks; block++)
+      {
+         HYPRE_SStructVectorGetBoxValues(x, part,
+                                         Cilower[block], Ciupper[block], 0,
+                                         CCvalues);
+         fprintf(file, "\nPart %d, block %d, cell variables:\n", part, block);
+         for (i = 0; i < Cvolume; i++)
+         {
+            fprintf(file, "%e\n", CCvalues[i]);
+         }
+         HYPRE_SStructVectorGetBoxValues(x, part,
+                                         Nilower[block], Niupper[block], 1,
+                                         NNvalues);
+         fprintf(file, "\nPart %d, block %d, node variables:\n", part, block);
+         for (i = 0; i < Nvolume; i++)
+         {
+            fprintf(file, "%e\n", NNvalues[i]);
+         }
+      }
+   }
+   fclose(file);
+
+   /* result is all 1's */
+   HYPRE_SStructVectorGather(x);
+   sprintf(filename, "driver.out.gatherpost.%05d", myid);
+   file = fopen(filename, "w");
+   for (part = 0; part < 2; part++)
+   {
+      for (block = 0; block < nblocks; block++)
+      {
+         HYPRE_SStructVectorGetBoxValues(x, part,
+                                         Cilower[block], Ciupper[block], 0,
+                                         CCvalues);
+         fprintf(file, "\nPart %d, block %d, cell variables:\n", part, block);
+         for (i = 0; i < Cvolume; i++)
+         {
+            fprintf(file, "%e\n", CCvalues[i]);
+         }
+         HYPRE_SStructVectorGetBoxValues(x, part,
+                                         Nilower[block], Niupper[block], 1,
+                                         NNvalues);
+         fprintf(file, "\nPart %d, block %d, node variables:\n", part, block);
+         for (i = 0; i < Nvolume; i++)
+         {
+            fprintf(file, "%e\n", NNvalues[i]);
+         }
+      }
+   }
+   fclose(file);
+
+   /* re-initializes x to 0 */
+   hypre_SStructAxpy(-1.0, b, x);
 #endif
  
    hypre_TFree(CCvalues);

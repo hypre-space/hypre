@@ -32,6 +32,9 @@ hypre_SStructVariableGetOffset( HYPRE_SStructVariable  vartype,
 
    switch(vartype)
    {
+      case HYPRE_SSTRUCT_VARIABLE_CELL:
+      hypre_SetIndex(varoffset, 0, 0, 0);
+      break;
       case HYPRE_SSTRUCT_VARIABLE_NODE:
       hypre_SetIndex(varoffset, 1, 1, 1);
       break;
@@ -90,12 +93,11 @@ hypre_SStructPGridCreate( MPI_Comm             comm,
    
    for (t = 0; t < 8; t++)
    {
-      hypre_SStructPGridVTSGrid(pgrid, t) = NULL;
-      hypre_SStructPGridVTIGrid(pgrid, t) = NULL;
+      hypre_SStructPGridVTSGrid(pgrid, t)     = NULL;
+      hypre_SStructPGridVTIBoxArray(pgrid, t) = NULL;
    }
    HYPRE_StructGridCreate(comm, ndim, &sgrid);
    hypre_SStructPGridCellSGrid(pgrid) = sgrid;
-   /* hypre_StructGridRef(sgrid, &hypre_SStructPGridCellIGrid(pgrid)); */
    
    for (t = 0; t < 8; t++)
    {
@@ -121,20 +123,20 @@ hypre_SStructPGridDestroy( hypre_SStructPGrid *pgrid )
    int ierr = 0;
 
    hypre_StructGrid **sgrids;
-   /* hypre_StructGrid **igrids; */
+   hypre_BoxArray   **iboxarrays;
    hypre_StructMap  **maps;
    int                t;
 
    if (pgrid)
    {
-      sgrids   = hypre_SStructPGridSGrids(pgrid);
-      /* igrids   = hypre_SStructPGridIGrids(pgrid); */
-      maps     = hypre_SStructPGridMaps(pgrid);
+      sgrids     = hypre_SStructPGridSGrids(pgrid);
+      iboxarrays = hypre_SStructPGridIBoxArrays(pgrid);
+      maps       = hypre_SStructPGridMaps(pgrid);
       hypre_TFree(hypre_SStructPGridVarTypes(pgrid));
       for (t = 0; t < 8; t++)
       {
          HYPRE_StructGridDestroy(sgrids[t]);
-         /* HYPRE_StructGridDestroy(igrids[t]); */
+         hypre_BoxArrayDestroy(iboxarrays[t]);
          hypre_StructMapDestroy(maps[t]);
       }
       hypre_TFree(hypre_SStructPGridOffsets(pgrid));
@@ -194,19 +196,19 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
 {
    int                  ierr = 0;
 
-   MPI_Comm               comm     = hypre_SStructPGridComm(pgrid);
-   int                    ndim     = hypre_SStructPGridNDim(pgrid);
-   int                    nvars    = hypre_SStructPGridNVars(pgrid);
-   HYPRE_SStructVariable *vartypes = hypre_SStructPGridVarTypes(pgrid);
-   hypre_StructGrid     **sgrids   = hypre_SStructPGridSGrids(pgrid);
-   /* hypre_StructGrid     **igrids   = hypre_SStructPGridIGrids(pgrid); */
-   hypre_StructMap      **maps     = hypre_SStructPGridMaps(pgrid);
+   MPI_Comm               comm       = hypre_SStructPGridComm(pgrid);
+   int                    ndim       = hypre_SStructPGridNDim(pgrid);
+   int                    nvars      = hypre_SStructPGridNVars(pgrid);
+   HYPRE_SStructVariable *vartypes   = hypre_SStructPGridVarTypes(pgrid);
+   hypre_StructGrid     **sgrids     = hypre_SStructPGridSGrids(pgrid);
+   hypre_BoxArray       **iboxarrays = hypre_SStructPGridIBoxArrays(pgrid);
+   hypre_StructMap      **maps       = hypre_SStructPGridMaps(pgrid);
    int                   *offsets;
    int                    start_rank;
 
    hypre_StructGrid      *cell_sgrid;
    hypre_StructGrid      *sgrid;
-   /* hypre_StructGrid      *igrid; */
+   hypre_BoxArray        *iboxarray;
    hypre_BoxNeighbors    *hood;
    hypre_BoxArray        *hood_boxes;
    int                    hood_first_local;
@@ -302,25 +304,21 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
    hypre_BoxDestroy(nbox);
 
    /*-------------------------------------------------------------
-    * compute igrids with the same number of boxes as the sgrids
+    * compute iboxarrays
     *-------------------------------------------------------------*/
 
-#if 0 /* TODO */
-   for (t = 1; t < 8; t++)
+   for (t = 0; t < 8; t++)
    {
-      if (sgrids[t] != NULL)
+      sgrid = sgrids[t];
+      if (sgrid != NULL)
       {
-         hypre_StructGridCreate(comm, ndim, &igrid);
-         sgrid = hypre_SStructPGridVTSGrid(pgrid, t);
-         hypre_SStructVariableGetOffset(t, ndim, varoffset);
+         iboxarray = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(sgrid));
 
-         /* compute hood_boxes */
-         hood = hypre_StructGridNeighbors(sgrid);
-         hood_boxes = hypre_BoxArrayDuplicate(hypre_BoxNeighborsBoxes(hood));
-         hypre_ForBoxI(i, hood_boxes)
+         hypre_SStructVariableGetOffset(t, ndim, varoffset);
+         hypre_ForBoxI(i, iboxarray)
             {
                /* grow the boxes */
-               box = hypre_BoxArrayBox(hood_boxes, i);
+               box = hypre_BoxArrayBox(iboxarray, i);
                hypre_BoxIMinX(box) -= hypre_IndexX(varoffset);
                hypre_BoxIMinY(box) -= hypre_IndexY(varoffset);
                hypre_BoxIMinZ(box) -= hypre_IndexZ(varoffset);
@@ -329,26 +327,9 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
                hypre_BoxIMaxZ(box) += hypre_IndexZ(varoffset);
             }
 
-         /* set neighborhood */
-         hypre_StructGridSetHood(igrid, hood_boxes,
-                                 hypre_BoxNeighborsProcs(hood),
-                                 hypre_BoxNeighborsIDs(hood),
-                                 hypre_BoxNeighborsFirstLocal(hood),
-                                 hypre_BoxNeighborsNumLocal(hood),
-                                 hypre_BoxNeighborsNumPeriodic(hood),
-                                 hypre_StructGridBoundingBox(sgrid));
-
-         hypre_StructGridSetHoodInfo(igrid,
-                                     hypre_StructGridMaxDistance(sgrid));
-         hypre_StructGridSetPeriodic(igrid,
-                                     hypre_StructGridPeriodic(sgrid));
-
-         hypre_StructGridAssemble(igrid);
-
-         igrids[t] = igrid;
+         iboxarrays[t] = iboxarray;
       }
    }
-#endif
 
    /*-------------------------------------------------------------
     * Set up the struct maps

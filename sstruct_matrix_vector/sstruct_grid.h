@@ -44,20 +44,20 @@ typedef struct
 
 typedef struct
 {
-   MPI_Comm                comm;       /* TODO: use different comms */
+   MPI_Comm                comm;          /* TODO: use different comms */
    int                     ndim;
-   int                     nvars;      /* number of variables */
-   HYPRE_SStructVariable  *vartypes;   /* types of variables */
-   hypre_StructGrid       *sgrids[8];  /* struct grids for each vartype */
-   hypre_StructGrid       *igrids[8];  /* interface grids for each vartype */
+   int                     nvars;         /* number of variables */
+   HYPRE_SStructVariable  *vartypes;      /* types of variables */
+   hypre_StructGrid       *sgrids[8];     /* struct grids for each vartype */
+   hypre_BoxArray         *iboxarrays[8]; /* interface boxes */
                                        
    /* info for mapping (index, var) --> rank */
-   hypre_StructMap        *maps[8];     /* map for each vartype */
-   int                    *offsets;     /* offset for each var */
+   hypre_StructMap        *maps[8];       /* map for each vartype */
+   int                    *offsets;       /* offset for each var */
    int                     start_rank;
 
-   int                     local_size;  /* Number of variables locally */
-   int                     global_size; /* Total number of variables */
+   int                     local_size;    /* Number of variables locally */
+   int                     global_size;   /* Total number of variables */
                            
 } hypre_SStructPGrid;
 
@@ -124,12 +124,13 @@ typedef struct hypre_SStructGrid_struct
 ((pgrid) -> sgrids[HYPRE_SSTRUCT_VARIABLE_CELL])
 #define hypre_SStructPGridVTSGrid(pgrid, vartype) ((pgrid) -> sgrids[vartype])
 
-#define hypre_SStructPGridIGrids(pgrid)           ((pgrid) -> igrids)
-#define hypre_SStructPGridIGrid(pgrid, var) \
-((pgrid) -> igrids[hypre_SStructPGridVarType(pgrid, var)])
-#define hypre_SStructPGridCellIGrid(pgrid) \
-((pgrid) -> igrids[HYPRE_SSTRUCT_VARIABLE_CELL])
-#define hypre_SStructPGridVTIGrid(pgrid, vartype) ((pgrid) -> igrids[vartype])
+#define hypre_SStructPGridIBoxArrays(pgrid)       ((pgrid) -> iboxarrays)
+#define hypre_SStructPGridIBoxArray(pgrid, var) \
+((pgrid) -> iboxarrays[hypre_SStructPGridVarType(pgrid, var)])
+#define hypre_SStructPGridCellIBoxArray(pgrid) \
+((pgrid) -> iboxarrays[HYPRE_SSTRUCT_VARIABLE_CELL])
+#define hypre_SStructPGridVTIBoxArray(pgrid, vartype) \
+((pgrid) -> iboxarrays[vartype])
 
 #define hypre_SStructPGridMaps(pgrid)             ((pgrid) -> maps)
 #define hypre_SStructPGridMap(pgrid, var) \

@@ -32,6 +32,7 @@ hypre_SStructPVectorCreate( MPI_Comm               comm,
    hypre_SStructPVector  *pvector;
    int                    nvars;
    hypre_StructVector   **svectors;
+   hypre_CommPkg        **comm_pkgs;
    hypre_StructGrid      *sgrid;
    int                    var;
 
@@ -48,6 +49,12 @@ hypre_SStructPVectorCreate( MPI_Comm               comm,
       svectors[var] = hypre_StructVectorCreate(comm, sgrid);
    }
    hypre_SStructPVectorSVectors(pvector) = svectors;
+   comm_pkgs = hypre_TAlloc(hypre_CommPkg *, nvars);
+   for (var = 0; var < nvars; var++)
+   {
+      comm_pkgs[var] = NULL;
+   }
+   hypre_SStructPVectorCommPkgs(pvector) = comm_pkgs;
 
    *pvector_ptr = pvector;
 
@@ -65,17 +72,21 @@ hypre_SStructPVectorDestroy( hypre_SStructPVector *pvector )
 
    int                  nvars;
    hypre_StructVector **svectors;
+   hypre_CommPkg      **comm_pkgs;
    int                  var;
 
    if (pvector)
    {
       nvars     = hypre_SStructPVectorNVars(pvector);
       svectors = hypre_SStructPVectorSVectors(pvector);
+      comm_pkgs = hypre_SStructPVectorCommPkgs(pvector);
       for (var = 0; var < nvars; var++)
       {
          hypre_StructVectorDestroy(svectors[var]);
+         hypre_CommPkgDestroy(comm_pkgs[var]);
       }
       hypre_TFree(svectors);
+      hypre_TFree(comm_pkgs);
       hypre_TFree(pvector);
    }
 
@@ -155,12 +166,84 @@ int
 hypre_SStructPVectorAssemble( hypre_SStructPVector *pvector )
 {
    int ierr = 0;
-   int nvars = hypre_SStructPVectorNVars(pvector);
-   int var;
+
+   hypre_SStructPGrid    *pgrid     = hypre_SStructPVectorPGrid(pvector);
+   int                    nvars     = hypre_SStructPVectorNVars(pvector);
+   hypre_StructVector   **svectors  = hypre_SStructPVectorSVectors(pvector);
+   hypre_CommPkg        **comm_pkgs = hypre_SStructPVectorCommPkgs(pvector);
+
+   int                    ndim      = hypre_SStructPGridNDim(pgrid);
+   HYPRE_SStructVariable *vartypes  = hypre_SStructPGridVarTypes(pgrid);
+
+   hypre_Index            varoffset;
+   int                    num_ghost[6];
+   hypre_StructGrid      *sgrid;
+   hypre_BoxArrayArray   *send_boxes;
+   hypre_BoxArrayArray   *recv_boxes;
+   int                  **send_processes;
+   int                  **recv_processes;
+   hypre_Index            unit_stride;
+   int                    var, d;
+
+   hypre_SetIndex(unit_stride, 1, 1, 1);
 
    for (var = 0; var < nvars; var++)
    {
-      hypre_StructVectorAssemble(hypre_SStructPVectorSVector(pvector, var));
+      hypre_StructVectorAssemble(svectors[var]);
+
+      if (vartypes[var] > 0)
+      {
+         sgrid = hypre_StructVectorGrid(svectors[var]);
+         hypre_SStructVariableGetOffset(vartypes[var], ndim, varoffset);
+         for (d = 0; d < 3; d++)
+         {
+            num_ghost[2*d]   = hypre_IndexD(varoffset, d);
+            num_ghost[2*d+1] = hypre_IndexD(varoffset, d);
+         }
+         
+         hypre_CreateCommInfoFromNumGhost(sgrid, num_ghost,
+                                          &send_boxes, &recv_boxes,
+                                          &send_processes, &recv_processes);
+         
+         hypre_CommPkgDestroy(comm_pkgs[var]);
+         comm_pkgs[var] =
+            hypre_CommPkgCreate(send_boxes, recv_boxes,
+                                unit_stride, unit_stride,
+                                hypre_StructVectorDataSpace(svectors[var]),
+                                hypre_StructVectorDataSpace(svectors[var]),
+                                send_processes, recv_processes, 1,
+                                hypre_StructVectorComm(svectors[var]),
+                                hypre_StructGridPeriodic(sgrid));
+      }
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructPVectorGather
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_SStructPVectorGather( hypre_SStructPVector *pvector )
+{
+   int ierr = 0;
+   int                    nvars     = hypre_SStructPVectorNVars(pvector);
+   hypre_StructVector   **svectors  = hypre_SStructPVectorSVectors(pvector);
+   hypre_CommPkg        **comm_pkgs = hypre_SStructPVectorCommPkgs(pvector);
+   hypre_CommHandle      *comm_handle;
+   int                    var;
+
+   for (var = 0; var < nvars; var++)
+   {
+      if (comm_pkgs[var] != NULL)
+      {
+         hypre_InitializeCommunication(comm_pkgs[var],
+                                       hypre_StructVectorData(svectors[var]),
+                                       hypre_StructVectorData(svectors[var]),
+                                       &comm_handle);
+         hypre_FinalizeCommunication(comm_handle);
+      }
    }
 
    return ierr;
@@ -177,10 +260,17 @@ hypre_SStructPVectorGetValues( hypre_SStructPVector *pvector,
                                double               *value )
 {
    int ierr = 0;
-   hypre_StructVector *svector = hypre_SStructPVectorSVector(pvector, var);
-   int                 d;
+   hypre_SStructPGrid *pgrid     = hypre_SStructPVectorPGrid(pvector);
+   hypre_StructVector *svector   = hypre_SStructPVectorSVector(pvector, var);
+   hypre_StructGrid   *sgrid     = hypre_StructVectorGrid(svector);
+   hypre_BoxArray     *iboxarray = hypre_SStructPGridIBoxArray(pgrid, var);
+   hypre_BoxArray     *tboxarray;
 
+   /* temporarily swap out sgrid boxes in order to get boundary data */
+   tboxarray = hypre_StructGridBoxes(sgrid);
+   hypre_StructGridBoxes(sgrid) = iboxarray;
    ierr = hypre_StructVectorGetValues(svector, index, value);
+   hypre_StructGridBoxes(sgrid) = tboxarray;
 
    return ierr;
 }
@@ -197,14 +287,22 @@ hypre_SStructPVectorGetBoxValues( hypre_SStructPVector *pvector,
                                   double               *values )
 {
    int ierr = 0;
-   hypre_StructVector *svector = hypre_SStructPVectorSVector(pvector, var);
+   hypre_SStructPGrid *pgrid     = hypre_SStructPVectorPGrid(pvector);
+   hypre_StructVector *svector   = hypre_SStructPVectorSVector(pvector, var);
+   hypre_StructGrid   *sgrid     = hypre_StructVectorGrid(svector);
+   hypre_BoxArray     *iboxarray = hypre_SStructPGridIBoxArray(pgrid, var);
+   hypre_BoxArray     *tboxarray;
    hypre_Box          *box;
    int                 d;
 
    box = hypre_BoxCreate();
    hypre_CopyIndex(ilower, hypre_BoxIMin(box));
    hypre_CopyIndex(iupper, hypre_BoxIMax(box));
+   /* temporarily swap out sgrid boxes in order to get boundary data */
+   tboxarray = hypre_StructGridBoxes(sgrid);
+   hypre_StructGridBoxes(sgrid) = iboxarray;
    ierr = hypre_StructVectorGetBoxValues(svector, box, values);
+   hypre_StructGridBoxes(sgrid) = tboxarray;
    hypre_BoxDestroy(box);
 
    return ierr;

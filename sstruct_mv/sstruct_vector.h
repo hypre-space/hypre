@@ -26,6 +26,7 @@ typedef struct
 
    int                     nvars;
    hypre_StructVector    **svectors;     /* nvar array of svectors */
+   hypre_CommPkg         **comm_pkgs;    /* nvar array of comm pkgs */
 
 } hypre_SStructPVector;
 
@@ -73,5 +74,7 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructPVectorNVars(pvec)       ((pvec) -> nvars)
 #define hypre_SStructPVectorSVectors(pvec)    ((pvec) -> svectors)
 #define hypre_SStructPVectorSVector(pvec, v)  ((pvec) -> svectors[v])
+#define hypre_SStructPVectorCommPkgs(pvec)    ((pvec) -> comm_pkgs)
+#define hypre_SStructPVectorCommPkg(pvec, v)  ((pvec) -> comm_pkgs[v])
 
 #endif

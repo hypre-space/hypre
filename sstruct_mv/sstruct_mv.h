@@ -135,20 +135,20 @@ typedef struct
 
 typedef struct
 {
-   MPI_Comm                comm;       /* TODO: use different comms */
+   MPI_Comm                comm;          /* TODO: use different comms */
    int                     ndim;
-   int                     nvars;      /* number of variables */
-   HYPRE_SStructVariable  *vartypes;   /* types of variables */
-   hypre_StructGrid       *sgrids[8];  /* struct grids for each vartype */
-   hypre_StructGrid       *igrids[8];  /* interface grids for each vartype */
+   int                     nvars;         /* number of variables */
+   HYPRE_SStructVariable  *vartypes;      /* types of variables */
+   hypre_StructGrid       *sgrids[8];     /* struct grids for each vartype */
+   hypre_BoxArray         *iboxarrays[8]; /* interface boxes */
                                        
    /* info for mapping (index, var) --> rank */
-   hypre_StructMap        *maps[8];     /* map for each vartype */
-   int                    *offsets;     /* offset for each var */
+   hypre_StructMap        *maps[8];       /* map for each vartype */
+   int                    *offsets;       /* offset for each var */
    int                     start_rank;
 
-   int                     local_size;  /* Number of variables locally */
-   int                     global_size; /* Total number of variables */
+   int                     local_size;    /* Number of variables locally */
+   int                     global_size;   /* Total number of variables */
                            
 } hypre_SStructPGrid;
 
@@ -215,12 +215,13 @@ typedef struct hypre_SStructGrid_struct
 ((pgrid) -> sgrids[HYPRE_SSTRUCT_VARIABLE_CELL])
 #define hypre_SStructPGridVTSGrid(pgrid, vartype) ((pgrid) -> sgrids[vartype])
 
-#define hypre_SStructPGridIGrids(pgrid)           ((pgrid) -> igrids)
-#define hypre_SStructPGridIGrid(pgrid, var) \
-((pgrid) -> igrids[hypre_SStructPGridVarType(pgrid, var)])
-#define hypre_SStructPGridCellIGrid(pgrid) \
-((pgrid) -> igrids[HYPRE_SSTRUCT_VARIABLE_CELL])
-#define hypre_SStructPGridVTIGrid(pgrid, vartype) ((pgrid) -> igrids[vartype])
+#define hypre_SStructPGridIBoxArrays(pgrid)       ((pgrid) -> iboxarrays)
+#define hypre_SStructPGridIBoxArray(pgrid, var) \
+((pgrid) -> iboxarrays[hypre_SStructPGridVarType(pgrid, var)])
+#define hypre_SStructPGridCellIBoxArray(pgrid) \
+((pgrid) -> iboxarrays[HYPRE_SSTRUCT_VARIABLE_CELL])
+#define hypre_SStructPGridVTIBoxArray(pgrid, vartype) \
+((pgrid) -> iboxarrays[vartype])
 
 #define hypre_SStructPGridMaps(pgrid)             ((pgrid) -> maps)
 #define hypre_SStructPGridMap(pgrid, var) \
@@ -525,6 +526,7 @@ typedef struct
 
    int                     nvars;
    hypre_StructVector    **svectors;     /* nvar array of svectors */
+   hypre_CommPkg         **comm_pkgs;    /* nvar array of comm pkgs */
 
 } hypre_SStructPVector;
 
@@ -572,6 +574,8 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructPVectorNVars(pvec)       ((pvec) -> nvars)
 #define hypre_SStructPVectorSVectors(pvec)    ((pvec) -> svectors)
 #define hypre_SStructPVectorSVector(pvec, v)  ((pvec) -> svectors[v])
+#define hypre_SStructPVectorCommPkgs(pvec)    ((pvec) -> comm_pkgs)
+#define hypre_SStructPVectorCommPkg(pvec, v)  ((pvec) -> comm_pkgs[v])
 
 #endif
 
@@ -617,6 +621,7 @@ int HYPRE_SStructVectorSetBoxValues( HYPRE_SStructVector vector , int part , int
 int HYPRE_SStructVectorAddToValues( HYPRE_SStructVector vector , int part , int *index , int var , double value );
 int HYPRE_SStructVectorAddToBoxValues( HYPRE_SStructVector vector , int part , int *ilower , int *iupper , int var , double *values );
 int HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector );
+int HYPRE_SStructVectorGather( HYPRE_SStructVector vector );
 int HYPRE_SStructVectorGetValues( HYPRE_SStructVector vector , int part , int *index , int var , double *value );
 int HYPRE_SStructVectorGetBoxValues( HYPRE_SStructVector vector , int part , int *ilower , int *iupper , int var , double *values );
 int HYPRE_SStructVectorPrint( char *filename , HYPRE_SStructVector vector , int all );
@@ -661,7 +666,7 @@ int hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix , int part , hypr
 int hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix , int part , hypre_Index ilower , hypre_Index iupper , int var , int nentries , int *entries , double *values , int add_to );
 int hypre_SStructUMatrixAssemble( hypre_SStructMatrix *matrix );
 int hypre_SStructMatrixRef( hypre_SStructMatrix *matrix , hypre_SStructMatrix **matrix_ref );
-int hypre_SStructMatrixSplitEntries( hypre_SStructMatrix *matrix , int part , int var , int nentries , int *entries , int *nSentries , int **Sentries , int *nUentries , int **Uentries );
+int hypre_SStructMatrixSplitEntries( hypre_SStructMatrix *matrix , int part , int var , int nentries , int *entries , int *nSentries_ptr , int **Sentries_ptr , int *nUentries_ptr , int **Uentries_ptr );
 
 /* sstruct_matvec.c */
 int hypre_SStructPMatvecCreate( void **pmatvec_vdata_ptr );
@@ -689,6 +694,7 @@ int hypre_SStructPVectorInitialize( hypre_SStructPVector *pvector );
 int hypre_SStructPVectorSetValues( hypre_SStructPVector *pvector , hypre_Index index , int var , double value , int add_to );
 int hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector , hypre_Index ilower , hypre_Index iupper , int var , double *values , int add_to );
 int hypre_SStructPVectorAssemble( hypre_SStructPVector *pvector );
+int hypre_SStructPVectorGather( hypre_SStructPVector *pvector );
 int hypre_SStructPVectorGetValues( hypre_SStructPVector *pvector , hypre_Index index , int var , double *value );
 int hypre_SStructPVectorGetBoxValues( hypre_SStructPVector *pvector , hypre_Index ilower , hypre_Index iupper , int var , double *values );
 int hypre_SStructPVectorSetConstantValues( hypre_SStructPVector *pvector , double value );

@@ -257,6 +257,28 @@ HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SStructVectorGather
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_SStructVectorGather( HYPRE_SStructVector vector )
+{
+   int ierr = 0;
+   int            nparts   = hypre_SStructVectorNParts(vector);
+   HYPRE_IJVector ijvector = hypre_SStructVectorIJVector(vector);
+   int            part;
+
+   for (part = 0; part < nparts; part++)
+   {
+      hypre_SStructPVectorGather(hypre_SStructVectorPVector(vector, part));
+   }
+
+   /* gather data from other parts - TODO*/
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_SStructVectorGetValues
  *--------------------------------------------------------------------------*/
 
