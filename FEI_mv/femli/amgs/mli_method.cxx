@@ -24,6 +24,7 @@
 #include "amgs/mli_method.h"
 #include "amgs/mli_method_amgsa.h"
 #include "amgs/mli_method_amgrs.h"
+#include "amgs/mli_method_amgcr.h"
 
 /*****************************************************************************
  * create a method from method name
@@ -34,17 +35,17 @@ MLI_Method *MLI_Method_CreateFromName( char *str, MPI_Comm mpi_comm )
    MLI_Method *method_ptr;
    char       paramString[80];
 
-   if ( !strcasecmp(str, "AMGSA" ) )
+   if ( !strcmp(str, "AMGSA" ) )
    {
       method_ptr  = new MLI_Method_AMGSA(mpi_comm);
    }
-   else if ( !strcasecmp(str, "AMGSAe" ) )
+   else if ( !strcmp(str, "AMGSAe" ) )
    {
       method_ptr  = new MLI_Method_AMGSA(mpi_comm);
       strcpy( paramString, "useSAMGe" );
       method_ptr->setParams( paramString, 0, NULL );
    }
-   else if ( !strcasecmp(str, "AMGSADD" ) )
+   else if ( !strcmp(str, "AMGSADD" ) )
    {
       method_ptr  = new MLI_Method_AMGSA(mpi_comm);
       strcpy( paramString, "useSAMGDD" );
@@ -52,7 +53,7 @@ MLI_Method *MLI_Method_CreateFromName( char *str, MPI_Comm mpi_comm )
       strcpy( paramString, "setNumLevels 2" );
       method_ptr->setParams( paramString, 0, NULL );
    }
-   else if ( !strcasecmp(str, "AMGSADDe" ) )
+   else if ( !strcmp(str, "AMGSADDe" ) )
    {
       method_ptr  = new MLI_Method_AMGSA(mpi_comm);
       strcpy( paramString, "useSAMGe" );
@@ -62,9 +63,13 @@ MLI_Method *MLI_Method_CreateFromName( char *str, MPI_Comm mpi_comm )
       strcpy( paramString, "setNumLevels 2" );
       method_ptr->setParams( paramString, 0, NULL );
    }
-   else if ( !strcasecmp(str, "AMGRS" ) )
+   else if ( !strcmp(str, "AMGRS" ) )
    {
       method_ptr  = new MLI_Method_AMGRS(mpi_comm);
+   }
+   else if ( !strcmp(str, "AMGCR" ) )
+   {
+      method_ptr  = new MLI_Method_AMGCR(mpi_comm);
    }
    else
    {
@@ -75,6 +80,7 @@ MLI_Method *MLI_Method_CreateFromName( char *str, MPI_Comm mpi_comm )
       printf("    (3) AMGSADD (%d)\n", MLI_METHOD_AMGSADD_ID); 
       printf("    (4) AMGSADDe (%d)\n", MLI_METHOD_AMGSADDE_ID); 
       printf("    (5) AMGRS (%d)\n", MLI_METHOD_AMGRS_ID); 
+      printf("    (6) AMGCR (%d)\n", MLI_METHOD_AMGCR_ID); 
       exit(1);
    }
    return method_ptr;
@@ -118,6 +124,9 @@ MLI_Method *MLI_Method_CreateFromID( int method_id, MPI_Comm mpi_comm )
       case MLI_METHOD_AMGRS_ID :
            method_ptr  = new MLI_Method_AMGRS(mpi_comm);
            break;
+      case MLI_METHOD_AMGCR_ID :
+           method_ptr  = new MLI_Method_AMGCR(mpi_comm);
+           break;
       default :
            printf("MLI_Method_Create ERROR : method %d not defined\n",
                   method_id);
@@ -127,6 +136,7 @@ MLI_Method *MLI_Method_CreateFromID( int method_id, MPI_Comm mpi_comm )
            printf("    (3) AMGSADD (%d)\n", MLI_METHOD_AMGSADD_ID); 
            printf("    (4) AMGSADDe (%d)\n", MLI_METHOD_AMGSADDE_ID); 
            printf("    (5) AMGRS (%d)\n", MLI_METHOD_AMGRS_ID); 
+           printf("    (6) AMGCR (%d)\n", MLI_METHOD_AMGCR_ID); 
            exit(1);
    }
    return method_ptr;

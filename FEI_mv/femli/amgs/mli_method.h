@@ -24,6 +24,7 @@
 #define MLI_METHOD_AMGSADD_ID   703
 #define MLI_METHOD_AMGSADDE_ID  704
 #define MLI_METHOD_AMGRS_ID     705
+#define MLI_METHOD_AMGCR_ID     706
 
 #include "utilities/utilities.h"
 #include "base/mli.h"
