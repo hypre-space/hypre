@@ -73,6 +73,7 @@ done
 # Run test drivers and log results and errors to file
 #===========================================================================
 
+SUBMSG="test suite"
 for i in $HYPRE_TEST_DRIVERS
 do
     echo "running ${i} test suite..."
@@ -83,6 +84,7 @@ do
       mv purify.log ${i}.purify.log
       mv ${i}.err ${i}.err.log
       grep -i hypre_ ${i}.purify.log > ${i}.err
+      SUBMSG="from purify"
     fi
 done
 
@@ -104,7 +106,7 @@ then
        if test -r "${i}.email"
         then
 	    RECIPIENTS=`cat ${i}.email`
-            SUBJECT="Error(s) in ${i} test suite ($HYPRE_ARCH)"
+            SUBJECT="Error(s) in ${i} ${SUBMSG} ($HYPRE_ARCH)"
 	    $HYPRE_MAIL -s "$SUBJECT" $RECIPIENTS < ${i}.err
         fi
     fi
