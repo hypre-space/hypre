@@ -640,7 +640,7 @@ static void ConstructPatternForEachRow(PrunedRows *pruned_rows,
         MatrixSetRow(M, row, j, ind, NULL);
 
         nnz += j;
-        (*costp) += (double) j*j*j; /* long may be only 4 bytes on blue */
+        (*costp) += (double) j*j*j;
     }
 
 #ifdef PARASAILS_TIME
@@ -684,6 +684,9 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat,
     int *local;
     double time0, time1, timet = 0.0, timea = 0.0;
 
+    double nhops, ncalls;
+    int hops;
+
     /* Determine the length of the longest row of M on this processor */
     maxlen = 0;
     for (row=local_beg_row; row<=mat->end_row; row++)
@@ -693,9 +696,10 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat,
     }
 
     /* Create hash table and array of local indices */
-    hash = HashCreate(4*maxlen+1);
-    index = (int *) malloc((4*maxlen+1) * sizeof(int));
-    local = (int *) malloc((4*maxlen+1) * sizeof(int));
+    i = MAX(4*maxlen+1, 50021);
+    hash = HashCreate(i);
+    index = (int *) malloc(i * sizeof(int));
+    local = (int *) malloc(i * sizeof(int));
 
 #ifdef ESSL
     ahat = (double *) malloc(maxlen*(maxlen+1)/2 * sizeof(double));
@@ -725,6 +729,9 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat,
 
         time0 = MPI_Wtime();
 
+	nhops = 0.0;
+	ncalls = 0.0;
+
 	/* Form ahat matrix, entries correspond to indices in "ind" only */
         ahatp = ahat;
         for (i=0; i<len; i++)
@@ -744,7 +751,13 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat,
 #else
             for (j=0; j<len2; j++)
             {
+#ifdef DEBUG
+                loc = HashLookup2(hash, ind2[j], &hops);
+		nhops += (double) hops;
+		ncalls++;
+#else
                 loc = HashLookup(hash, ind2[j]);
+#endif
 
                 if (loc != HASH_NOTFOUND)
                     ahatp[local[loc]] = val2[j];
@@ -820,10 +833,11 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat,
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
 
-    printf("%d: rows (%d %d), local beg: %d\n", mype, mat->beg_row, 
-      mat->end_row, local_beg_row);fflush(stdout);
-
     printf("%d: Time for ahat: %f, for local solves: %f\n", mype, timea, timet);
+    printf("%d: stored rows: %d, maxlen: %d\n", mype, stored_rows->count, maxlen);
+#ifdef DEBUG
+    printf("%d: hops/calls: %f\n", mype, nhops/ncalls);
+#endif
     fflush(NULL);
     }
 #endif
@@ -855,7 +869,8 @@ ParaSails *ParaSailsCreate(Matrix *A)
 
     ps->M = NULL;
 
-    ps->max_num_external_rows = 2*MAX(A->end_row - A->beg_row, 10000) + 1;
+    ps->max_num_external_rows = 4*(A->end_row - A->beg_row) + 1;
+    ps->max_num_external_rows = MAX(ps->max_num_external_rows, 50021);
 
     ps->pruned_rows = NULL;
 
@@ -895,7 +910,6 @@ void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
 {
     int mype;
     double cost;
-    double time0, time1;
 
     MPI_Comm_rank(ps->A->comm, &mype);
 
@@ -910,29 +924,14 @@ void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
     if (ps->pruned_rows)
         PrunedRowsDestroy(ps->pruned_rows);
 
-    time0 = MPI_Wtime();
     ps->pruned_rows = PrunedRowsCreate(ps->A, ps->max_num_external_rows, 
         ps->diag_scale, ps->thresh);
-    time1 = MPI_Wtime();
-#ifdef PARASAILS_TIME
-    printf("%d: Time for creating pruned rows: %f\n", mype, time1-time0);
-#endif
 
-    time0 = MPI_Wtime();
     ExchangePrunedRows(ps->A->comm, ps->A, ps->pruned_rows, ps->num_levels);
-    time1 = MPI_Wtime();
-#ifdef PARASAILS_TIME
-    printf("%d: Time for exchanging pruned rows: %f\n", mype, time1-time0);
-#endif
 
     /* set structure in approx inverse */
-    time0 = MPI_Wtime();
     ConstructPatternForEachRow(ps->pruned_rows, ps->num_levels, ps->M,
 	&ps->num_replies, &cost); /* returned num_replies is no longer used */
-    time1 = MPI_Wtime();
-#ifdef PARASAILS_TIME
-    printf("%d: Time cons patt each for each row: %f\n", mype, time1-time0);
-#endif
 
     ps->load_bal = LoadBalDonate(ps->A->comm, ps->M, cost, beta);
 }
@@ -956,19 +955,9 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A)
     if (ps->stored_rows)
         StoredRowsDestroy(ps->stored_rows);
 
-    time0 = MPI_Wtime();
     ps->stored_rows = StoredRowsCreate(A, ps->max_num_external_rows);
-    time1 = MPI_Wtime();
-#ifdef PARASAILS_TIME
-    printf("%d: Time for creating stored rows: %f\n", mype, time1-time0);
-#endif
 
-    time0 = MPI_Wtime();
     ExchangeStoredRows(ps->A->comm, A, ps->M, ps->stored_rows, ps->load_bal);
-    time1 = MPI_Wtime();
-#ifdef PARASAILS_TIME
-    printf("%d: Time for exchanging rows: %f\n", mype, time1-time0);
-#endif
 
     time0 = MPI_Wtime();
     ComputeValues(ps->stored_rows, ps->M, ps->load_bal->beg_row);
@@ -984,6 +973,7 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A)
 #endif
 
 /* load bal affects code in ExchangeStoredRows and ComputeValues */
+/* note that this will effectively synchronize the processors */
     LoadBalReturn(ps->load_bal, ps->A->comm, ps->M);
 }
 
