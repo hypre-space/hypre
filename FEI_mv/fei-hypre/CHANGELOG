@@ -30,4 +30,6 @@
               matrixLoadComplete
 02/28/01    version 2.0.0R6
             - remove extra zeros in rows that at BC's
+03/06/01    version 1.5.0R6 and 2.0.0R6
+            - fix a bug in buildReducedRHS (ProcNRows)
 

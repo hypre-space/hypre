@@ -20,17 +20,14 @@
 #include "LinearSystemCore.1.3.h"
 #elseif defined(FEI_V14)
 #include "LinearSystemCore.1.4.h"
-#else
+#elseif defined(FEI_V15)
 #include "LinearSystemCore.h"
 #include "LSC.h"
-#endif
-//---------------------------------------------------------------------------
-// FEI 2.0 will have the following
-//---------------------------------------------------------------------------
+#else
 #ifndef NOFEI 
 #include "LinearSystemCore.h"
 #endif
-//---------------------------------------------------------------------------
+#endif
 
 #include "HYPRE.h"
 #include "../../IJ_mv/HYPRE_IJ_mv.h"
@@ -1167,7 +1164,7 @@ void HYPRE_LinSysCore::buildSchurReducedRHS()
     ProcNRows  = new int[numProcs_];
     tempList   = new int[numProcs_];
     for ( i = 0; i < numProcs_; i++ ) tempList[i] = 0;
-    tempList[mypid_] = StartRow;
+    tempList[mypid_] = EndRow - StartRow + 1;
     MPI_Allreduce(tempList, ProcNRows, numProcs_, MPI_INT, MPI_SUM, comm_);
     ncnt = 0;
     for ( i = 0; i < numProcs_; i++ ) 
