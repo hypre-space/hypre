@@ -185,22 +185,6 @@ int hypre_CGNRSetLogging P((void *cgnr_vdata , int logging ));
 int hypre_CGNRGetNumIterations P((void *cgnr_vdata , int *num_iterations ));
 int hypre_CGNRGetFinalRelativeResidualNorm P((void *cgnr_vdata , double *relative_residual_norm ));
 
-/* driver.c */
-int main P((int argc , char *argv []));
-int BuildParFromFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
-int BuildParLaplacian P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
-int BuildParDifConv P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
-int BuildParFromOneFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
-int BuildRhsParFromOneFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , HYPRE_ParVector *b_ptr ));
-int BuildParLaplacian9pt P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
-int BuildParLaplacian27pt P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
-
-/* driver_interp.c */
-int main P((int argc , char *argv []));
-
-/* driver_rap.c */
-int main P((int argc , char *argv []));
-
 /* gmres.c */
 void *hypre_GMRESInitialize P((void ));
 int hypre_GMRESFinalize P((void *gmres_vdata ));
