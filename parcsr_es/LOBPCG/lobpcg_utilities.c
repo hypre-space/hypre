@@ -2142,5 +2142,5 @@ char  *mm_typecode_to_str(MM_typecode matcode)
         return NULL;
 
     sprintf(buffer,"%s %s %s %s", types[0], types[1], types[2], types[3]);
-    return (char *) strdup(buffer);
+    return strdup(buffer);
 }
