@@ -1,3 +1,15 @@
+
+#include <HYPRE_config.h>
+
+#ifndef MLI_MATRIX_AUTO_HEADER
+#define MLI_MATRIX_AUTO_HEADER
+
+#include "utilities.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*BHEADER**********************************************************************
  * (c) 1996   The Regents of the University of California
  *
@@ -95,3 +107,42 @@ typedef struct
 #define MLI_ParCSRBooleanMatrix_Get_Getrowactive(matrix)  ((matrix)->getrowactive)
 
 #endif
+
+/* driver_matmul.c */
+int main( int argc , char *argv []);
+
+/* mli_pcsr_bool_mat.c */
+MLI_CSRBooleanMatrix *MLI_CSRBooleanMatrixCreate( int num_rows , int num_cols , int num_nonzeros );
+int MLI_CSRBooleanMatrixDestroy( MLI_CSRBooleanMatrix *matrix );
+int MLI_CSRBooleanMatrixInitialize( MLI_CSRBooleanMatrix *matrix );
+int MLI_CSRBooleanMatrixSetDataOwner( MLI_CSRBooleanMatrix *matrix , int owns_data );
+MLI_CSRBooleanMatrix *MLI_CSRBooleanMatrixRead( char *file_name );
+int MLI_CSRBooleanMatrixPrint( MLI_CSRBooleanMatrix *matrix , char *file_name );
+MLI_ParCSRBooleanMatrix *MLI_ParCSRBooleanMatrixCreate( MPI_Comm comm , int global_num_rows , int global_num_cols , int *row_starts , int *col_starts , int num_cols_offd , int num_nonzeros_diag , int num_nonzeros_offd );
+int MLI_ParCSRBooleanMatrixDestroy( MLI_ParCSRBooleanMatrix *matrix );
+int MLI_ParCSRBooleanMatrixInitialize( MLI_ParCSRBooleanMatrix *matrix );
+int MLI_ParCSRBooleanMatrixSetNNZ( MLI_ParCSRBooleanMatrix *matrix );
+int MLI_ParCSRBooleanMatrixSetDataOwner( MLI_ParCSRBooleanMatrix *matrix , int owns_data );
+int MLI_ParCSRBooleanMatrixSetRowStartsOwner( MLI_ParCSRBooleanMatrix *matrix , int owns_row_starts );
+int MLI_ParCSRBooleanMatrixSetColStartsOwner( MLI_ParCSRBooleanMatrix *matrix , int owns_col_starts );
+MLI_ParCSRBooleanMatrix *MLI_ParCSRBooleanMatrixRead( MPI_Comm comm , char *file_name );
+int MLI_ParCSRBooleanMatrixPrint( MLI_ParCSRBooleanMatrix *matrix , char *file_name );
+int MLI_ParCSRBooleanMatrixPrintIJ( MLI_ParCSRBooleanMatrix *matrix , char *filename );
+int MLI_ParCSRBooleanMatrixGetLocalRange( MLI_ParCSRBooleanMatrix *matrix , int *row_start , int *row_end , int *col_start , int *col_end );
+int MLI_ParCSRBooleanMatrixGetRow( MLI_ParCSRBooleanMatrix *mat , int row , int *size , int **col_ind );
+int MLI_ParCSRBooleanMatrixRestoreRow( MLI_ParCSRBooleanMatrix *matrix , int row , int *size , int **col_ind );
+int MLI_BuildCSRBooleanMatrixMPIDataType( int num_nonzeros , int num_rows , int *a_i , int *a_j , MPI_Datatype *csr_matrix_datatype );
+MLI_ParCSRBooleanMatrix *MLI_CSRBooleanMatrixToParCSRBooleanMatrix( MPI_Comm comm , MLI_CSRBooleanMatrix *A , int *row_starts , int *col_starts );
+int BooleanGenerateDiagAndOffd( MLI_CSRBooleanMatrix *A , MLI_ParCSRBooleanMatrix *matrix , int first_col_diag , int last_col_diag );
+
+/* mli_pcsr_bool_matop.c */
+MLI_ParCSRBooleanMatrix *MLI_ParBooleanMatmul( MLI_ParCSRBooleanMatrix *A , MLI_ParCSRBooleanMatrix *B );
+MLI_CSRBooleanMatrix *MLI_ParCSRBooleanMatrixExtractBExt( MLI_ParCSRBooleanMatrix *B , MLI_ParCSRBooleanMatrix *A );
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+

@@ -15,7 +15,7 @@
 #include "mli_pcsr_bool_mat.h"
 #include "utilities.h"
 */
-#include "mli_matrix.h"
+#include "headers.h"
 
 /*--------------------------------------------------------------------------
  * MLI_CSRBooleanMatrixCreate

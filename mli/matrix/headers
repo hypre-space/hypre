@@ -8,7 +8,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-INTERNAL_HEADER=mli_matrix.h
+INTERNAL_HEADER=mli_matrix_auto.h
 
 #===========================================================================
 # Include guards and other includes
@@ -18,8 +18,8 @@ cat > $INTERNAL_HEADER <<@
 
 #include <HYPRE_config.h>
 
-#ifndef MLI_MATRIX_HEADER
-#define MLI_MATRIX_HEADER
+#ifndef MLI_MATRIX_AUTO_HEADER
+#define MLI_MATRIX_AUTO_HEADER
 
 #include "utilities.h"
 

@@ -11,5 +11,5 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "mli_matrix.h"
+#include "mli_matrix_auto.h"
 
