@@ -167,4 +167,8 @@
             - add a few more diagnostics messages (per Kull's problem)
 06/09/03    2.5.1R2
             - correct an error with gmres (convergence check)
+08/21/03    2.5.1R3
+            - put in an additional fe class for multiple domain per proc
+            - take out compiler warnings
+            - take out a few memory leaks
 
