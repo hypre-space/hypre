@@ -4,26 +4,68 @@
 # Variables to be used in the Makefile.
 #############################################################
 
-FEI_ROOT=/home/william/fei-isis
-ISIS_ARCH=LINUX
-ISIS_TARGET=PLL
-ISIS_ROOT=/home/william/fei-isis/../isis
+FEI_ROOT=../fei-isis
+ISIS_ARCH=alpha
+FEI_TARGET=FEI_SER
+ISIS_ROOT=../isis-mv
 HYPRE=disabled
 #HAVE_PILUT=pilut
 HAVE_PILUT=
-HYPRE_INCLUDE_PATH=-I.
-libraries_mpi=-lfei_isis -lisis_mpi       -llapack -lblas -lf2c -lm -lmpi
-ISIS_BOOL=-DBOOL_SUPPORTED
-C=gcc
-CPP=g++
+HYPRE_INCLUDE_PATH=\
+                -I..\
+                -I../fei-hypre \
+                -I../fei-isis/src \
+                -I../isis-mv \
+                -I../..\
+                -I../../IJ_matrix_vector \
+                -I../../utilities \
+                -I../../parcsr_matrix_vector \
+                -I../../seq_matrix_vector \
+                -I../../matrix_matrix \
+                -I../../distributed_matrix \
+                -I../../distributed_linear_solvers/pilut \
+                -I../../blas \
+                -I../../parcsr_linear_solvers
+
+#libraries_mpi=-lfei_isis -lisis_ser -llapack -lblas -lUfor -lfor -lm_4sqrt -lm -lots
+
+libraries_mpi= \
+        -L..\
+        -L../fei-hypre \
+        -L../fei-isis/lib/$(ISIS_ARCH)\
+        -L../isis-mv \
+        -L../../utilities \
+        -L../../parcsr_matrix_vector \
+        -L../../seq_matrix_vector \
+        -L../../matrix_matrix \
+        -L../../distributed_matrix \
+        -L../../distributed_linear_solvers/pilut \
+        -L../../blas \
+        -L../../parcsr_linear_solvers\
+        -lHYPRE_FEI_base \
+        -lHYPRE_FEI \
+        -lHYPRE_FEI_base \
+        -lHYPRE_FEI \
+        -lHYPRE_FEI_base \
+        -lHYPRE_FEI_isismv \
+        -lHYPRE_IJ_mv \
+        -lHYPRE_parcsr_ls \
+        -lHYPRE_utilities \
+        -lHYPRE_parcsr_mv \
+        -lHYPRE_MatrixMatrix \
+        -lHYPRE_DistributedMatrix \
+        -lHYPRE_DistributedMatrixPilutSolver \
+        -lHYPRE_seq_mv -llapack -lblas -lUfor -lfor -lm -lots
+
+#C=mpicc
+#CPP=mpiCC
 OPT=-g
 LD_OPT=-g
 CFLAGS=-g
-MPI_INCLUDE=/usr/local/mpi/include
-MPI_LIB=/usr/local/mpi/lib/LINUX/ch_p4
-LDFLAGS= -L/home/william/fei-isis/lib/LINUX -L/home/william/fei-isis/../isis/lib/LINUX -L/usr/local/lib -L/usr/local/mpi/lib/LINUX/ch_p4    -L.
-INSTALL_ROOT=/usr/local
-C++INCLUDES=-I$(FEI_ROOT) -I$(ISIS_ROOT)
+MPI_INCLUDE=$(FEI_ROOT)/mpiuni
+LDFLAGS= -L$(FEI_ROOT)/lib/$(ISIS_ARCH) -L$(ISIS_ROOT)/lib/$(ISIS_ARCH) -L/usr/local/lib
+INSTALL_ROOT=./lib/alpha
+C++INCLUDES=-I$(FEI_ROOT) -I$(ISIS_ROOT) $(HYPRE_INCLUDE_PATH)
 
 # std unixisms, we hope, that still need fixing sometimes
 CP=/bin/cp

@@ -31,13 +31,14 @@ include make.options
 #
 
 # other flags of convenience
-IT_DEFINES	= -D$(ISIS_TARGET)
+IT_DEFINES	= -D$(FEI_TARGET)
 C++DEFINES      = $(ISIS_BOOL) $(IT_DEFINES)
 C++INCLUDES_MPI = -I$(MPI_INCLUDE) $(C++INCLUDES)
 
 # our primary targets defined
-SLIB = $(FEI_ROOT)/lib/$(ISIS_ARCH)/libfei_isis.a
-PLIB = $(FEI_ROOT)/lib/$(ISIS_ARCH)/libfei_isis.a
+SLIB = $(FEI_ROOT)/lib/$(ISIS_ARCH)/libHYPRE_FEI_base.a
+#PLIB = $(FEI_ROOT)/lib/$(ISIS_ARCH)/libHYPRE_FEI_base.a
+PLIB = libHYPRE_FEI_base.a
 
 #######################################################################
 #
@@ -62,10 +63,12 @@ FEI_OBJS = \
 	src/SharedNodeBuffer.o \
 	src/SharedNodeRecord.o \
 	src/BASE_SLE.mp.o \
-	src/ISIS_SLE.mp.o \
-	src/FEI_ISIS.mp.o \
 	src/fei_proc.mp.o \
 	src/SimpleList.o
+
+# take out
+# src/ISIS_SLE.mp.o \
+# src/FEI_ISIS.mp.o \
 
 FEI_SRCS        = $(FEI_OBJS:.o=.cc)
 
@@ -117,7 +120,7 @@ all:
 	make fe;
 
 src fe: $(FEI_OBJS)
-	ar rs $(PLIB) $(FEI_OBJS)
+	ar -rcu $(PLIB) $(FEI_OBJS)
 
 other: $(OTHER_OBJ)
 	ar rs $(PLIB) $(OTHER_OBJ)
@@ -263,7 +266,13 @@ clean.$(ISIS_DIR):
 	@cd $(ISIS_DIR); touch erase.ii
 	@cd $(ISIS_DIR); $(RM) -fr *~ *.o *.mp.o \
 		./ptrepository erase.* *.ii core ii_files/*.ii emake.log
-	@echo "=============> Make $(ISIS_DIR) clean complete"
+
+veryclean.$(ISIS_DIR):
+	@cd $(ISIS_DIR); touch erase.ii
+	@cd $(ISIS_DIR); $(RM) -fr *~ *.o *.mp.o \
+		./ptrepository erase.* *.ii core ii_files/*.ii emake.log
+	@touch erase.this
+	@rm -f erase.* *.a
 
 distclean:	clean
 	$(RM) -rf */ii_files make.options
