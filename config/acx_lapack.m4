@@ -44,7 +44,9 @@ case $with_lapack in
 esac
 
 # Get fortran linker name of LAPACK function to check for.
-AC_F77_FUNC(cheev)
+AC_F77_FUNC(dsyev)
+
+acx_lapack_save_LIBS="$LIBS"
 
 # We cannot use LAPACK if BLAS is not found
 if test "x$acx_blas_ok" != xyes; then
@@ -54,8 +56,8 @@ fi
 # First, check LAPACK_LIBS environment variable
 if test "x$LAPACK_LIBS" != x; then
         save_LIBS="$LIBS"; LIBS="$LAPACK_LIBS $BLAS_LIBS $LIBS $FLIBS"
-        AC_MSG_CHECKING([for $cheev in $LAPACK_LIBS])
-        AC_TRY_LINK_FUNC($cheev, [acx_lapack_ok=yes], [LAPACK_LIBS=""])
+        AC_MSG_CHECKING([for $dsyev in $LAPACK_LIBS])
+        AC_TRY_LINK_FUNC($dsyev, [acx_lapack_ok=yes], [LAPACK_LIBS=""])
         AC_MSG_RESULT($acx_lapack_ok)
         LIBS="$save_LIBS"
         if test acx_lapack_ok = no; then
@@ -66,7 +68,7 @@ fi
 # LAPACK linked to by default?  (is sometimes included in BLAS lib)
 if test $acx_lapack_ok = no; then
         save_LIBS="$LIBS"; LIBS="$LIBS $BLAS_LIBS $FLIBS"
-        AC_CHECK_FUNC($cheev, [acx_lapack_ok=yes])
+        AC_CHECK_FUNC($dsyev, [acx_lapack_ok=yes])
         LIBS="$save_LIBS"
 fi
 
@@ -74,7 +76,7 @@ fi
 for lapack in lapack lapack_rs6k; do
         if test $acx_lapack_ok = no; then
                 save_LIBS="$LIBS"; LIBS="$BLAS_LIBS $LIBS"
-                AC_CHECK_LIB($lapack, $cheev,
+                AC_CHECK_LIB($lapack, $dsyev,
                     [acx_lapack_ok=yes; LAPACK_LIBS="-l$lapack"], [], [$FLIBS])
                 LIBS="$save_LIBS"
         fi
@@ -88,6 +90,7 @@ if test x"$acx_lapack_ok" = xyes; then
         :
 else
         acx_lapack_ok=no
+        AC_DEFINE(HYPRE_USING_HYPRE_LAPACK,1,[Using Hypre LAPACK Library])
         $2
 fi
 ])dnl ACX_LAPACK

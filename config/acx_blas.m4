@@ -48,8 +48,6 @@ esac
 
 # Get fortran linker names of BLAS functions to check for.
 AC_F77_FUNC(dgemm)
-AC_F77_FUNC(xerbla)
-AC_F77_FUNC(dlamch)
 
 acx_blas_save_LIBS="$LIBS"
 LIBS="$LIBS $FLIBS"
@@ -136,12 +134,6 @@ fi
 ##if test $acx_blas_ok = no; then
 ##	AC_CHECK_LIB(blas, $dgemm, [acx_blas_ok=yes; BLAS_LIBS="-lblas"])
 ##fi
-
-# Check for Blas Wrappers needed
-if test x"$acx_blas_ok" = xyes; then
-        AC_CHECK_LIB($BLAS_LIBS, $xerbla, ,
-        [AC_DEFINE(HYPRE_USING_BLAS_WRAPPERS,1,[Using Hypre Blas Wrappers])])
-fi
 
 AC_SUBST(BLAS_LIBS)
 
