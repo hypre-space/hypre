@@ -14,6 +14,7 @@
 
 #include "headers.h"
 
+
 /*--------------------------------------------------------------------------
  * hypre_StructMatrixExtractPointerByIndex
  *    Returns pointer to data for stencil entry coresponding to
@@ -355,12 +356,20 @@ hypre_InitializeStructMatrixData( hypre_StructMatrix *matrix,
             start = hypre_BoxIMin(data_box);
 
             hypre_GetBoxSize(data_box, loop_size);
-            hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                           data_box, start, stride, datai,
-                           {
-                              datap[datai] = 1.0;
-                           });
 
+	    hypre_BoxLoop1Begin(loop_size,
+                           data_box, start, stride, datai);
+
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,datai
+#include "hypre_smp_forloop.h"
+       
+	    hypre_BoxLoop1For(loopi, loopj, loopk, datai)
+	      {
+		 datap[datai] = 1.0;	     
+	      }
+
+	    hypre_BoxLoopEnd;
          }
       }
 
@@ -512,13 +521,22 @@ hypre_SetStructMatrixBoxValues( hypre_StructMatrix *matrix,
                                                     stencil_indices[s]);
 
                   hypre_GetBoxSize(box, loop_size);
-                  hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                                 data_box, data_start, data_stride, datai,
-                                 dval_box, dval_start, dval_stride, dvali,
-                                 {
-                                    datap[datai] = values[dvali];
-                                 });
-                  hypre_IndexD(dval_start, 0) ++;
+
+                  hypre_BoxLoop2Begin(loop_size,
+                             data_box, data_start, data_stride, datai,
+                             dval_box, dval_start, dval_stride, dvali);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,datai,dvali
+#include "hypre_smp_forloop.h"
+		     
+	         hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
+	           {
+	             datap[datai] = values[dvali];
+	           }
+
+                 hypre_BoxLoopEnd;
+
+                 hypre_IndexD(dval_start, 0) ++;
                }
             }
          }

@@ -14,6 +14,7 @@
 
 #include "headers.h"
 
+
 /*--------------------------------------------------------------------------
  * hypre_StructCopy
  *--------------------------------------------------------------------------*/
@@ -57,12 +58,20 @@ hypre_StructCopy( hypre_StructVector *x,
          yp = hypre_StructVectorBoxData(y, i);
 
          hypre_GetBoxSize(box, loop_size);
-         hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                        x_data_box, start, unit_stride, xi,
-                        y_data_box, start, unit_stride, yi,
-                        {
-                           yp[yi] = xp[xi];
-                        });
+
+         hypre_BoxLoop2Begin(loop_size,
+                             x_data_box, start, unit_stride, xi,
+                             y_data_box, start, unit_stride, yi);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,xi,yi
+#include "hypre_smp_forloop.h"
+		     
+	 hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+	   {
+	     yp[yi] = xp[xi];
+	   }
+
+         hypre_BoxLoopEnd;
       }
 
    return ierr;

@@ -18,6 +18,7 @@
 
 #include "headers.h"
 
+
 /*--------------------------------------------------------------------------
  * hypre_PrintBoxArrayData
  *--------------------------------------------------------------------------*/
@@ -59,20 +60,30 @@ hypre_PrintBoxArrayData( FILE            *file,
          data_box_volume = hypre_BoxVolume(data_box);
 
          hypre_GetBoxSize(box, loop_size);
-         hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                        data_box, start, stride, datai,
-                        {
-                           for (j = 0; j < num_values; j++)
-                           {
-                              fprintf(file, "%d: (%d, %d, %d; %d) %e\n",
+
+	 hypre_BoxLoop1Begin(loop_size,
+                           data_box, start, stride, datai);
+
+
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,datai
+#include "hypre_smp_forloop.h"
+       
+	 hypre_BoxLoop1For(loopi, loopj, loopk, datai)
+	   {
+	      for (j = 0; j < num_values; j++)
+		{
+		  fprintf(file, "%d: (%d, %d, %d; %d) %e\n",
                                       i,
                                       hypre_IndexX(start) + loopi,
                                       hypre_IndexY(start) + loopj,
                                       hypre_IndexZ(start) + loopk,
                                       j,
                                       data[datai + j*data_box_volume]);
-                           }
-                        });
+		}
+	   }
+
+         hypre_BoxLoopEnd;
 
          data += num_values*data_box_volume;
       }
@@ -121,20 +132,31 @@ hypre_ReadBoxArrayData( FILE            *file,
          data_box_volume = hypre_BoxVolume(data_box);
 
          hypre_GetBoxSize(box, loop_size);
-         hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                        data_box, start, stride, datai,
-                        {
-                           for (j = 0; j < num_values; j++)
-                           {
-                              fscanf(file, "%d: (%d, %d, %d; %d) %le\n",
+
+	 hypre_BoxLoop1Begin(loop_size,
+                           data_box, start, stride, datai);
+
+
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,datai
+#include "hypre_smp_forloop.h"
+       
+	 hypre_BoxLoop1For(loopi, loopj, loopk, datai)
+	   {
+	     for (j = 0; j < num_values; j++)
+               {
+		 fscanf(file, "%d: (%d, %d, %d; %d) %le\n",
                                      &idummy,
                                      &idummy,
                                      &idummy,
                                      &idummy,
                                      &idummy,
                                      &data[datai + j*data_box_volume]);
-                           }
-                        });
+	       }
+
+	   }
+
+         hypre_BoxLoopEnd;
 
          data += num_values*data_box_volume;
       }

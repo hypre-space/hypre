@@ -193,11 +193,22 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             yp = hypre_StructVectorBoxData(y, i);
 
             hypre_GetBoxSize(box, loop_size);
-            hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                           y_data_box, start, stride, yi,
-                           {
-                              yp[yi] *= beta;
-                           });
+
+	    hypre_BoxLoop1Begin(loop_size,
+                           y_data_box, start, stride, yi);
+
+
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,yi
+#include "hypre_smp_forloop.h"
+       
+	    hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+	      {
+		yp[yi] *= beta;
+	      }
+
+	    hypre_BoxLoopEnd;
+
          }
 
       return ierr;
@@ -241,20 +252,43 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                      if (temp == 0.0)
                      {
                         hypre_GetBoxSize(box, loop_size);
-                        hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                                       y_data_box, start, stride, yi,
-                                       {
-                                          yp[yi] = 0.0;
-                                       });
+
+			hypre_BoxLoop1Begin(loop_size,
+                           y_data_box, start, stride, yi);
+
+
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,yi
+#include "hypre_smp_forloop.h"
+       
+			hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+			  {
+			    yp[yi] = 0.0;
+			  }
+
+			hypre_BoxLoopEnd;
+
+
                      }
                      else
                      {
                         hypre_GetBoxSize(box, loop_size);
-                        hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                                       y_data_box, start, stride, yi,
-                                       {
-                                          yp[yi] *= temp;
-                                       });
+
+			hypre_BoxLoop1Begin(loop_size,
+                           y_data_box, start, stride, yi);
+
+
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,yi
+#include "hypre_smp_forloop.h"
+       
+			hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+			  {
+			    yp[yi] *= temp;
+			  }
+
+			hypre_BoxLoopEnd;
+
                      }
                   }
             }
@@ -321,11 +355,16 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                         xoff6 = hypre_BoxOffsetDistance(x_data_box,
                                                         stencil_shape[si+6]);
 
-                        hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                       A_data_box, start, stride, Ai,
-                                       x_data_box, start, stride, xi,
-                                       y_data_box, start, stride, yi,
-                                       {
+                        hypre_BoxLoop3Begin(loop_size,
+                                    A_data_box, start, stride, Ai,
+                                    x_data_box, start, stride, xi,
+                                    y_data_box, start, stride, yi);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,yi,xi,Ai
+#include "hypre_smp_forloop.h"
+		     
+			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+			  {
                                           yp[yi] +=
                                              Ap0[Ai] * xp[xi + xoff0] +
                                              Ap1[Ai] * xp[xi + xoff1] +
@@ -334,7 +373,11 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                              Ap4[Ai] * xp[xi + xoff4] +
                                              Ap5[Ai] * xp[xi + xoff5] +
                                              Ap6[Ai] * xp[xi + xoff6];
-                                       });
+			  
+			  }
+
+			hypre_BoxLoopEnd;
+
                         break;
 
                         case 6:
@@ -358,11 +401,16 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                         xoff5 = hypre_BoxOffsetDistance(x_data_box,
                                                         stencil_shape[si+5]);
 
-                        hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                       A_data_box, start, stride, Ai,
-                                       x_data_box, start, stride, xi,
-                                       y_data_box, start, stride, yi,
-                                       {
+                        hypre_BoxLoop3Begin(loop_size,
+                                    A_data_box, start, stride, Ai,
+                                    x_data_box, start, stride, xi,
+                                    y_data_box, start, stride, yi);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,yi,xi,Ai
+#include "hypre_smp_forloop.h"
+		     
+			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+			  {
                                           yp[yi] +=
                                              Ap0[Ai] * xp[xi + xoff0] +
                                              Ap1[Ai] * xp[xi + xoff1] +
@@ -370,7 +418,10 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                              Ap3[Ai] * xp[xi + xoff3] +
                                              Ap4[Ai] * xp[xi + xoff4] +
                                              Ap5[Ai] * xp[xi + xoff5];
-                                       });
+			  }
+
+			hypre_BoxLoopEnd;
+                        
                         break;
 
                         case 5:
@@ -391,18 +442,26 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                         xoff4 = hypre_BoxOffsetDistance(x_data_box,
                                                         stencil_shape[si+4]);
 
-                        hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                       A_data_box, start, stride, Ai,
-                                       x_data_box, start, stride, xi,
-                                       y_data_box, start, stride, yi,
-                                       {
-                                          yp[yi] +=
-                                             Ap0[Ai] * xp[xi + xoff0] +
-                                             Ap1[Ai] * xp[xi + xoff1] +
-                                             Ap2[Ai] * xp[xi + xoff2] +
-                                             Ap3[Ai] * xp[xi + xoff3] +
-                                             Ap4[Ai] * xp[xi + xoff4];
-                                       });
+                        hypre_BoxLoop3Begin(loop_size,
+                                    A_data_box, start, stride, Ai,
+                                    x_data_box, start, stride, xi,
+                                    y_data_box, start, stride, yi);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,yi,xi,Ai
+#include "hypre_smp_forloop.h"
+		     
+			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+			  {
+			    yp[yi] +=
+                                   Ap0[Ai] * xp[xi + xoff0] +
+                                   Ap1[Ai] * xp[xi + xoff1] +
+                                   Ap2[Ai] * xp[xi + xoff2] +
+                                   Ap3[Ai] * xp[xi + xoff3] +
+                                   Ap4[Ai] * xp[xi + xoff4]; 
+
+			  }
+			hypre_BoxLoopEnd;
+
                         break;
 
                         case 4:
@@ -420,17 +479,25 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                         xoff3 = hypre_BoxOffsetDistance(x_data_box,
                                                         stencil_shape[si+3]);
 
-                        hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                       A_data_box, start, stride, Ai,
-                                       x_data_box, start, stride, xi,
-                                       y_data_box, start, stride, yi,
-                                       {
-                                          yp[yi] +=
+                        hypre_BoxLoop3Begin(loop_size,
+                                    A_data_box, start, stride, Ai,
+                                    x_data_box, start, stride, xi,
+                                    y_data_box, start, stride, yi);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,yi,xi,Ai
+#include "hypre_smp_forloop.h"
+		     
+			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+			  {
+                                       yp[yi] +=
                                              Ap0[Ai] * xp[xi + xoff0] +
                                              Ap1[Ai] * xp[xi + xoff1] +
                                              Ap2[Ai] * xp[xi + xoff2] +
                                              Ap3[Ai] * xp[xi + xoff3];
-                                       });
+			  }
+
+			hypre_BoxLoopEnd;
+
                         break;
 
                         case 3:
@@ -445,16 +512,24 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                         xoff2 = hypre_BoxOffsetDistance(x_data_box,
                                                         stencil_shape[si+2]);
 
-                        hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                       A_data_box, start, stride, Ai,
-                                       x_data_box, start, stride, xi,
-                                       y_data_box, start, stride, yi,
-                                       {
-                                          yp[yi] +=
+                        hypre_BoxLoop3Begin(loop_size,
+                                    A_data_box, start, stride, Ai,
+                                    x_data_box, start, stride, xi,
+                                    y_data_box, start, stride, yi);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,yi,xi,Ai
+#include "hypre_smp_forloop.h"
+		     
+			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+			  {
+                                        yp[yi] +=
                                              Ap0[Ai] * xp[xi + xoff0] +
                                              Ap1[Ai] * xp[xi + xoff1] +
-                                             Ap2[Ai] * xp[xi + xoff2];
-                                       });
+                                             Ap2[Ai] * xp[xi + xoff2]; 
+			  }
+
+			hypre_BoxLoopEnd;
+
                         break;
 
                         case 2:
@@ -466,15 +541,23 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                         xoff1 = hypre_BoxOffsetDistance(x_data_box,
                                                         stencil_shape[si+1]);
 
-                        hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                       A_data_box, start, stride, Ai,
-                                       x_data_box, start, stride, xi,
-                                       y_data_box, start, stride, yi,
-                                       {
-                                          yp[yi] +=
+                        hypre_BoxLoop3Begin(loop_size,
+                                    A_data_box, start, stride, Ai,
+                                    x_data_box, start, stride, xi,
+                                    y_data_box, start, stride, yi);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,yi,xi,Ai
+#include "hypre_smp_forloop.h"
+		     
+			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+			  {
+                                        yp[yi] +=
                                              Ap0[Ai] * xp[xi + xoff0] +
                                              Ap1[Ai] * xp[xi + xoff1];
-                                       });
+			  }
+
+			hypre_BoxLoopEnd;
+
                         break;
 
                         case 1:
@@ -483,25 +566,45 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                         xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                         stencil_shape[si+0]);
 
-                        hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                       A_data_box, start, stride, Ai,
-                                       x_data_box, start, stride, xi,
-                                       y_data_box, start, stride, yi,
-                                       {
-                                          yp[yi] +=
-                                             Ap0[Ai] * xp[xi + xoff0];
-                                       });
+                        hypre_BoxLoop3Begin(loop_size,
+                                    A_data_box, start, stride, Ai,
+                                    x_data_box, start, stride, xi,
+                                    y_data_box, start, stride, yi);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,yi,xi,Ai
+#include "hypre_smp_forloop.h"
+		     
+			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+			  {
+			    yp[yi] +=
+			      Ap0[Ai] * xp[xi + xoff0];
+			  }
+
+			hypre_BoxLoopEnd;
+
                         break;
                      }
                   }
 
                   if (alpha != 1.0)
                   {
-                     hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                                    y_data_box, start, stride, yi,
-                                    {
-                                       yp[yi] *= alpha;
-                                    });
+
+
+		     hypre_BoxLoop1Begin(loop_size,
+                           y_data_box, start, stride, yi);
+
+
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,yi
+#include "hypre_smp_forloop.h"
+       
+		     hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+		       {
+			 yp[yi] *= alpha;
+			}
+
+		     hypre_BoxLoopEnd;
+
                   }
                }
          }

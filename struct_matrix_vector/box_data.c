@@ -12,6 +12,7 @@
 
 #include "headers.h"
 
+
 /*--------------------------------------------------------------------------
  * hypre_CopyBoxArrayData
  *  This function assumes only one box in box_array_in and
@@ -59,13 +60,25 @@ hypre_CopyBoxArrayData( hypre_BoxArray *box_array_in,
    data_box_volume_out = hypre_BoxVolume(data_box_out);
 
    hypre_GetBoxSize(box_out, loop_size);
-   hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                  data_box_in, hypre_BoxIMin(box_out), stride, datai_in,
-                  data_box_out, hypre_BoxIMin(box_out), stride, datai_out,
-                  for (j = 0; j < num_values_out; j++)
-                  {
-                     data_out[datai_out + j*data_box_volume_out] =
-                        data_in[datai_in + j*data_box_volume_in];
-                  });
+
+   hypre_BoxLoop2Begin(loop_size,
+                     data_box_in, hypre_BoxIMin(box_out), stride, datai_in,
+                     data_box_out, hypre_BoxIMin(box_out), stride, datai_out);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,datai_in,datai_out
+#include "hypre_smp_forloop.h"
+		     
+   hypre_BoxLoop2For(loopi, loopj, loopk, datai_in, datai_out)
+     {
+	for (j = 0; j < num_values_out; j++)
+          {
+             data_out[datai_out + j*data_box_volume_out] =
+             data_in[datai_in + j*data_box_volume_in];
+          };
+     }
+
+   hypre_BoxLoop2End;
+
+
 }
 

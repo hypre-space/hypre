@@ -27,7 +27,7 @@ hypre_StructAxpy( double              alpha,
 
    hypre_Box        *x_data_box;
    hypre_Box        *y_data_box;
-                    
+                 
    int               xi;
    int               yi;
                     
@@ -58,12 +58,21 @@ hypre_StructAxpy( double              alpha,
          yp = hypre_StructVectorBoxData(y, i);
 
          hypre_GetBoxSize(box, loop_size);
-         hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                        x_data_box, start, unit_stride, xi,
-                        y_data_box, start, unit_stride, yi,
-                        {
-                           yp[yi] += alpha * xp[xi];
-                        });
+
+         hypre_BoxLoop2Begin(loop_size,
+                             x_data_box, start, unit_stride, xi,
+                             y_data_box, start, unit_stride, yi);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,xi,yi
+#include "hypre_smp_forloop.h"
+		     
+	 hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+	   {
+	     yp[yi] += alpha * xp[xi];
+	   }
+
+         hypre_BoxLoopEnd;
+
       }
 
    return ierr;

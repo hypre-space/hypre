@@ -50,11 +50,22 @@ hypre_StructScale( double              alpha,
          yp = hypre_StructVectorBoxData(y, i);
 
          hypre_GetBoxSize(box, loop_size);
-         hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                        y_data_box, start, unit_stride, yi,
-                        {
-                           yp[yi] *= alpha;
-                        });
+
+	 hypre_BoxLoop1Begin(loop_size,
+                           y_data_box, start, unit_stride, yi);
+
+
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,yi
+#include "hypre_smp_forloop.h"
+       
+	 hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+	   {
+	      yp[yi] *= alpha;
+	   }
+
+	 hypre_BoxLoopEnd;
+
       }
 
    return ierr;
