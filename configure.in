@@ -127,6 +127,7 @@ then
    if test -z "$with_CC"
    then
       CC=$MPICC
+      CFLAGS="$COPT $CDEBUG"
    fi
 fi
 
@@ -159,7 +160,7 @@ dnl *********************************************************************
 dnl * Add flags to LIBS and LIBDIRS
 dnl *********************************************************************
 
-CASC_ADD_LIB(m, main, /usr/lib /usr/ccs/lib)
+CASC_ADD_LIB(m, sqrt, /usr/lib /lib)
 
 dnl *********************************************************************
 dnl * Note:  CASC_ADD_LIB calls should be placed in the order you want the
