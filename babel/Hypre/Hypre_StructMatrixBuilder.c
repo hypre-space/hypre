@@ -15,7 +15,7 @@
    count drops to zero.
 */
 
-#include "HYPRE_mv.h"
+#include "HYPRE_struct_mv.h"
 #include "struct_matrix_vector.h"
 #include "Hypre_Box_Skel.h"
 #include "Hypre_StructGrid_Skel.h"

@@ -7,7 +7,7 @@
 #ifndef Hypre_MPI_Com_DataMembers_
 #define Hypre_MPI_Com_DataMembers_
 
-#include "HYPRE_mv.h"
+#include "HYPRE_struct_mv.h"
 
 struct Hypre_MPI_Com_private_type
 {
