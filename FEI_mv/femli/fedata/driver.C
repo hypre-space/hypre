@@ -46,7 +46,7 @@ main(int argc, char **argv)
                 break;
       case 4 :  test4P();
                 break;
-      default : cout << "nprocs other than 1, 2, or 4 not available.\n";
+      default : printf("nprocs other than 1, 2, or 4 not available.\n");
                 break;
    }
    MPI_Finalize();
@@ -168,23 +168,23 @@ void test1P()
          "diff test.elemConn.%d test2.elemConn.%d > /dev/null",mypid,mypid);
    status = system(param_string);
    if ( status == 0 )
-      cout << "test passed : " << param_string << endl;
+      printf("test passed : %s\n", param_string);
    else
-      cout << "test failed : " << param_string << endl;
+      printf("test failed : %s\n", param_string);
    sprintf(param_string, 
          "diff test.elemMatrix.%d test2.elemMatrix.%d > /dev/null",mypid,mypid);
    status = system(param_string);
    if ( status == 0 )
-      cout << "test passed : " << param_string << endl;
+      printf("test passed : %s\n", param_string);
    else
-      cout << "test failed : " << param_string << endl;
+      printf("test failed : %s\n", param_string);
    sprintf(param_string, 
          "diff test.nodeCoord.%d test2.nodeCoord.%d > /dev/null",mypid,mypid);
    status = system(param_string);
    if ( status == 0 )
-      cout << "test passed : " << param_string << endl;
+      printf("test passed : %s\n", param_string);
    else
-      cout << "test failed : " << param_string << endl;
+      printf("test failed : %s\n", param_string);
 }
 
 /**************************************************************************
@@ -387,30 +387,30 @@ void test2P()
                  "diff test.elemConn.%d test2.elemConn.%d > /dev/null",i,i);
          status = system(param_string);
          if ( status == 0 )
-            cout << "test passed : " << param_string << endl;
+            printf("test passed : %s\n", param_string);
          else
-            cout << "test failed : " << param_string << endl;
+            printf("test failed : %s\n", param_string);
          sprintf(param_string, 
                  "diff test.elemMatrix.%d test2.elemMatrix.%d > /dev/null",i,i);
          status = system(param_string);
          if ( status == 0 )
-            cout << "test passed : " << param_string << endl;
+            printf("test passed : %s\n", param_string);
          else
-            cout << "test failed : " << param_string << endl;
+            printf("test failed : %s\n", param_string);
          sprintf(param_string, 
                  "diff test.nodeCoord.%d test2.nodeCoord.%d > /dev/null",i,i);
          status = system(param_string);
          if ( status == 0 )
-            cout << "test passed : " << param_string << endl;
+            printf("test passed : %s\n", param_string);
          else
-            cout << "test failed : " << param_string << endl;
+            printf("test failed : %s\n", param_string);
          sprintf(param_string, 
                  "diff test.nodeShared.%d test2.nodeShared.%d > /dev/null",i,i);
          status = system(param_string);
          if ( status == 0 )
-            cout << "test passed : " << param_string << endl;
+            printf("test passed : %s\n", param_string);
          else
-            cout << "test failed : " << param_string << endl;
+            printf("test failed : %s\n", param_string);
       }
    }
 }
@@ -802,30 +802,30 @@ void test4P()
                  "diff test.elemConn.%d test2.elemConn.%d > /dev/null",i,i);
          status = system(param_string);
          if ( status == 0 )
-            cout << "test passed : " << param_string << endl;
+            printf("test passed : %s\n", param_string);
          else
-            cout << "test failed : " << param_string << endl;
+            printf("test failed : %s\n", param_string);
          sprintf(param_string, 
                  "diff test.elemMatrix.%d test2.elemMatrix.%d > /dev/null",i,i);
          status = system(param_string);
          if ( status == 0 )
-            cout << "test passed : " << param_string << endl;
+            printf("test passed : %s\n", param_string);
          else
-            cout << "test failed : " << param_string << endl;
+            printf("test failed : %s\n", param_string);
          sprintf(param_string, 
                  "diff test.nodeCoord.%d test2.nodeCoord.%d > /dev/null",i,i);
          status = system(param_string);
          if ( status == 0 )
-            cout << "test passed : " << param_string << endl;
+            printf("test passed : %s\n", param_string);
          else
-            cout << "test failed : " << param_string << endl;
+            printf("test failed : %s\n", param_string);
          sprintf(param_string, 
                  "diff test.nodeShared.%d test2.nodeShared.%d > /dev/null",i,i);
          status = system(param_string);
          if ( status == 0 )
-            cout << "test passed : " << param_string << endl;
+            printf("test passed : %s\n", param_string);
          else
-            cout << "test failed : " << param_string << endl;
+            printf("test failed : %s\n", param_string);
       }
    }
 }
