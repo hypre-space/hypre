@@ -149,6 +149,7 @@ HYPRE_DIR = @HYPRE_TOP_SRC_DIR@
 ##################################################################
 
 HYPRE_STANDARD_DRIVERS =\
+ new_ij.c\
  ij.c\
  ij_mv.c\
  struct.c\
@@ -243,6 +244,11 @@ struct: struct.o
 sstruct: sstruct.o
 	@echo  "Building" $@ "... "
 	${CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
+	@if test -d  "TEST_$@"; then cp $@ TEST_$@/.; fi
+
+new_ij: new_ij.o
+	@echo  "Building" $@ "... "
+	${CC} -o $@ $@.o ${IJ_LS_LFLAGS}
 	@if test -d  "TEST_$@"; then cp $@ TEST_$@/.; fi
 
 ij: ij.o
