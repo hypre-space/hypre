@@ -80,6 +80,8 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
     * -------------------------------------------------------------*/
  
    mpiComm     = hypre_ParCSRMatrixComm( hypreA );
+   MPI_Comm_rank( mpiComm, &mypid );
+   MPI_Comm_size( mpiComm, &nprocs );
    globalNRows = hypre_ParCSRMatrixGlobalNumRows( hypreA );
    localNRows  = hypre_ParCSRMatrixNumRows( hypreA );
    startRow    = hypre_ParCSRMatrixFirstRowIndex( hypreA );
@@ -93,8 +95,10 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
    }
    MPI_Allreduce(&localNnz, &globalNnz, 1, MPI_INT, MPI_SUM, mpiComm );
    csrIA    = new int[localNRows+1];
-   csrJA    = new int[localNnz];
-   csrAA    = new double[localNnz];
+   if ( localNnz > 0 ) csrJA = new int[localNnz];
+   else                csrJA = NULL;
+   if ( localNnz > 0 ) csrAA = new double[localNnz];
+   else                csrAA = NULL;
    nnz      = 0;
    csrIA[0] = nnz;
    for ( irow = 0; irow < localNRows; irow++ )
@@ -114,8 +118,6 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
     * collect the whole matrix
     * -------------------------------------------------------------*/
 
-   MPI_Comm_rank( mpiComm, &mypid );
-   MPI_Comm_size( mpiComm, &nprocs );
    gcsrIA = new int[globalNRows+1];
    gcsrJA = new int[globalNnz];
    gcsrAA = new double[globalNnz];
@@ -156,8 +158,8 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
    delete [] recvCntArray;
    delete [] dispArray;
    delete [] csrIA;
-   delete [] csrJA;
-   delete [] csrAA;
+   if ( csrJA != NULL ) delete [] csrJA;
+   if ( csrJA != NULL ) delete [] csrAA;
 
    /* ---------------------------------------------------------------
     * conversion from CSR to CSC 
