@@ -39,8 +39,8 @@ hypre_F90_IFACE(hypre_parcsrmatrixrowstarts)( long int *matrix,
                                               long int *row_starts,
                                               int      *ierr      )
 {
-   *row_starts = (long int *) ( hypre_ParCSRMatrixRowStarts
-                                  ( (hypre_ParCSRMatrix *) *matrix ) );
+   *row_starts = (long int) ( hypre_ParCSRMatrixRowStarts
+                                 ( (hypre_ParCSRMatrix *) *matrix ) );
 
    *ierr = 0;
 }
