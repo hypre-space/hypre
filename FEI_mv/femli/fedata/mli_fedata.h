@@ -200,8 +200,8 @@ public :
 
    int loadElemSolution(int eGlobalID, int sMatDim, const double *elemSol);
 
-   int loadFunc_getElemMatrix(void *object, int (*func)( void *, int eGlobalID,
-                   int sMatDim,double *stiffMat));
+   //int loadFunc_getElemMatrix(void *object,int (*func)(void *,int eGlobalID,
+   //                int sMatDim,double *stiffMat));
 
    // =========================================================================
    // load node boundary conditions
