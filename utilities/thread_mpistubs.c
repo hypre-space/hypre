@@ -366,7 +366,6 @@ hypre_thread_MPI_Wait( MPI_Request *request,
   int returnval;
   int unthreaded = pthread_equal(initial_thread,pthread_self());
   int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
-  hypre_barrier(&mpi_mtx, unthreaded);
   if (I_call_mpi)
   {
     returnval=MPI_Wait(request,status);
@@ -408,7 +407,6 @@ hypre_thread_MPI_Waitany( int          count,
   int returnval;
   int unthreaded = pthread_equal(initial_thread,pthread_self());
   int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
-  hypre_barrier(&mpi_mtx, unthreaded);
   if (I_call_mpi)
   {
     returnval=MPI_Waitany(count,array_of_requests,index,status);
