@@ -199,13 +199,16 @@ double   hypre_ParInnerProd( MPI_Comm comm,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_VectorToParVector
+ * hypre_VectorToParVector:
+ * generates a ParVector from a Vector on proc 0 and distributes the pieces
+ * to the other procs in comm
  *--------------------------------------------------------------------------*/
 
 hypre_ParVector *
 hypre_VectorToParVector (MPI_Comm comm, hypre_Vector *v,
-			 int *vec_starts)
+			 int **vec_starts_ptr)
 {
+   int			*vec_starts;
    int 			global_size = hypre_VectorSize(v);
    int 			local_size;
    int  		num_procs, my_id;
@@ -219,6 +222,8 @@ hypre_VectorToParVector (MPI_Comm comm, hypre_Vector *v,
    int			i, j;
    hypre_VectorCommPkg  *vector_comm_pkg;
 
+   vec_starts = *vec_starts_ptr;
+
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
 
@@ -226,7 +231,8 @@ hypre_VectorToParVector (MPI_Comm comm, hypre_Vector *v,
 		vec_starts);
 
    vector_mpi_types = hypre_VectorCommPkgVectorMPITypes(vector_comm_pkg);
-   vec_starts = hypre_VectorCommPkgVecStarts(vector_comm_pkg);
+   if (!vec_starts)
+	   vec_starts = hypre_VectorCommPkgVecStarts(vector_comm_pkg);
 	
    local_size = vec_starts[my_id+1] - vec_starts[my_id];
    par_vector = hypre_CreateParVector(comm, global_size, vec_starts[my_id], 
@@ -255,9 +261,98 @@ hypre_VectorToParVector (MPI_Comm comm, hypre_Vector *v,
    }
    hypre_ParVectorCommPkg(par_vector) = vector_comm_pkg;
 
+   *vec_starts_ptr = vec_starts;
+
    return par_vector;
 }
    
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorToVectorAll:
+ * generates a Vector on every proc which has a piece of the data
+ * from a ParVector on several procs in comm,
+ * vec_starts needs to contain the partitioning across all procs in comm 
+ *--------------------------------------------------------------------------*/
+
+hypre_Vector *
+hypre_ParVectorToVectorAll (MPI_Comm comm, hypre_ParVector *par_v,
+			 int *vec_starts)
+{
+   int 			global_size = hypre_ParVectorGlobalSize(par_v);
+   hypre_Vector     	*local_vector = hypre_ParVectorLocalVector(par_v);
+   int  		num_procs, my_id;
+   hypre_Vector  	*vector;
+   double		*vector_data;
+   double		*local_data;
+   int 			local_size;
+   MPI_Request		*requests;
+   MPI_Status		*status;
+   int			i, j;
+   int			*used_procs;
+   int			num_types, num_requests;
+   int			vec_len, proc_id;
+
+   MPI_Comm_size(comm, &num_procs);
+   MPI_Comm_rank(comm, &my_id);
+
+   local_size = vec_starts[my_id+1] - vec_starts[my_id];
+
+/* if my_id contains no data, return NULL  */
+
+   if (!local_size)
+	return NULL;
+ 
+   local_data = hypre_VectorData(local_vector);
+   vector = hypre_CreateVector(global_size);
+   hypre_InitializeVector(vector);
+   vector_data = hypre_VectorData(vector);
+
+/* determine procs which hold data of par_v and store ids in used_procs */
+
+   num_types = -1;
+   for (i=0; i < num_procs; i++)
+        if (vec_starts[i+1]-vec_starts[i])
+                num_types++;
+   num_requests = 2*num_types;
+ 
+   used_procs = hypre_CTAlloc(int, num_types);
+   j = 0;
+   for (i=0; i < num_procs; i++)
+        if (vec_starts[i+1]-vec_starts[i] && i-my_id)
+                used_procs[j++] = i;
+ 
+   requests = hypre_CTAlloc(MPI_Request, num_requests);
+   status = hypre_CTAlloc(MPI_Status, num_requests);
+
+/* initialize data exchange among used_procs and generate vector */
+ 
+   j = 0;
+   for (i = 0; i < num_types; i++)
+   {
+        proc_id = used_procs[i];
+        vec_len = vec_starts[proc_id+1] - vec_starts[proc_id];
+        MPI_Irecv(&vector_data[vec_starts[proc_id]], vec_len, MPI_DOUBLE,
+                                proc_id, 0, comm, &requests[j++]);
+   }
+   for (i = 0; i < num_types; i++)
+   {
+        MPI_Isend(local_data, local_size, MPI_DOUBLE, used_procs[i],
+                          0, comm, &requests[j++]);
+   }
+ 
+   for (i=0; i < local_size; i++)
+        vector_data[vec_starts[my_id]+i] = local_data[i];
+ 
+   MPI_Waitall(num_requests, requests, status);
+
+   if (num_requests)
+   {
+   	hypre_TFree(used_procs);
+   	hypre_TFree(requests);
+   	hypre_TFree(status); 
+   }
+
+   return vector;
+}
 
 int
 hypre_BuildParVectorMPITypes (MPI_Comm  comm,
@@ -278,7 +373,7 @@ hypre_BuildParVectorMPITypes (MPI_Comm  comm,
 	MPE_Decomp1d(vec_len, num_procs, i, &vec_starts[i], &len[i]);
         vec_starts[i] = vec_starts[i]-1;
 	len[i] = len[i]-vec_starts[i];
-	MPI_Type_vector(len[i],1,1,MPI_DOUBLE, &vector_mpi_types[i]);
+	MPI_Type_contiguous(len[i],MPI_DOUBLE, &vector_mpi_types[i]);
 	MPI_Type_commit(&vector_mpi_types[i]);
    }
    hypre_TFree(len);
