@@ -46,8 +46,8 @@ typedef struct
 typedef struct
 {
    hypre_CommPkg  *comm_pkg;
-   double         *send_data;
-   double         *recv_data;
+   void 	  *send_data;
+   void 	  *recv_data;
 
    int             num_requests;
    MPI_Request    *requests;
