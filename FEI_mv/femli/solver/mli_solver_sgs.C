@@ -6,6 +6,7 @@
  *
  *********************************************************************EHEADER*/
 
+#include <math.h>
 #include <string.h>
 #include "parcsr_mv/parcsr_mv.h"
 #include "solver/mli_solver_sgs.h"
@@ -260,9 +261,10 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
       {
          hypre_ParVectorCopy( f, hypreR );
          hypre_ParCSRMatrixMatvec( -1.0, A, u, 1.0, hypreR );
-         rnorm = hypre_ParVectorInnerProd( hypreR, hypreR );
+         rnorm = sqrt(hypre_ParVectorInnerProd( hypreR, hypreR ));
          if ( mypid == 0 )
-            printf("\tMLI_Solver_SGS iter = %4d, rnorm = %e\n", is, rnorm);
+            printf("\tMLI_Solver_SGS iter = %4d, rnorm = %e (omega=%e)\n", 
+                   is, rnorm, relaxWeight);
       }
    }
    if ( printRNorm_ == 1 ) delete mliRvec;
