@@ -313,7 +313,7 @@ HYPRE_ParAMGInitGridRelaxation( int     **num_grid_sweeps_ptr,
    }
    /* coarsest grid */
    num_grid_sweeps[3] = 1;
-   grid_relax_type[3] = 9;
+   grid_relax_type[3] = 3;
    grid_relax_points[3] = hypre_CTAlloc(int, 1);
    grid_relax_points[3][0] = 0;
 
