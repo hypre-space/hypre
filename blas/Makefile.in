@@ -43,7 +43,11 @@ FILES =\
  dscal.c \
  daxpy.c \
  dpotrf.c \
- dpotrs.c
+ dpotrs.c \
+ dtrsm.c \
+ dgemm.c \
+ dgemv.c \
+ dsyrk.c
 
 OBJS = ${FILES:.c=.o}
 
