@@ -256,7 +256,7 @@ c
       jjhi=ia(ii+1)-1
       do 110 jj=jjlo,jjhi
       if(ifg(ja(jj)).le.0) go to 110
-      if(a(jj)/a(jjlo).le.0.e0) go to 110
+c      if(a(jj)/a(jjlo).le.0.e0) go to 110
       s=s+a(jj)
 110   continue
 c
@@ -271,7 +271,7 @@ c
         w=a(j)/s
         do 150 jj=jjlo,jjhi
         if(ifg(ja(jj)).le.0) go to 150
-        if(a(jj)/a(jjlo).le.0.e0) go to 150
+c        if(a(jj)/a(jjlo).le.0.e0) go to 150
         b(ifg(ja(jj)))=b(ifg(ja(jj)))+a(jj)*w
 150     continue
       endif
