@@ -356,7 +356,7 @@ then
     echo "removing old installations ..."
     NUM_COPIES=3
     # note: `*' will expand alphabetically in the Bourne shell
-    set - V[0-8]*
+    set - V[1-9][^.]*
     COUNT=`expr $# - $NUM_COPIES`
     while [ $COUNT -gt 0 ]
     do
