@@ -21,7 +21,7 @@
 int BuildParFromFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParDifConv (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-int BuildParFromOneFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
+int BuildParFromOneFile (int argc , char *argv [], int arg_index , int num_functions , HYPRE_ParCSRMatrix *A_ptr );
 int BuildFuncsFromFiles (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , int **dof_func_ptr );
 int BuildFuncsFromOneFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , int **dof_func_ptr );
 int BuildRhsParFromOneFile (int argc , char *argv [], int arg_index , int *partitioning , HYPRE_ParVector *b_ptr );
@@ -830,7 +830,8 @@ main( int   argc,
    }
    else if ( build_matrix_type == 1 )
    {
-      BuildParFromOneFile(argc, argv, build_matrix_arg_index, &parcsr_A);
+      BuildParFromOneFile(argc, argv, build_matrix_arg_index, num_functions,
+	&parcsr_A);
    }
    else if ( build_matrix_type == 2 )
    {
@@ -883,7 +884,6 @@ main( int   argc,
 
      local_num_rows = last_local_row - first_local_row + 1;
      local_num_cols = last_local_col - first_local_col + 1;
-
      ierr += HYPRE_ParCSRMatrixGetDims( parcsr_A, &M, &N );
 
      ierr += HYPRE_IJMatrixCreate( comm, first_local_row, last_local_row,
@@ -2910,6 +2910,7 @@ int
 BuildParFromOneFile( int                  argc,
                      char                *argv[],
                      int                  arg_index,
+                     int                  num_functions,
                      HYPRE_ParCSRMatrix  *A_ptr     )
 {
    char               *filename;
@@ -2917,13 +2918,17 @@ BuildParFromOneFile( int                  argc,
    HYPRE_ParCSRMatrix  A;
    HYPRE_CSRMatrix  A_CSR = NULL;
 
-   int                 myid;
+   int                 myid, numprocs;
+   int                 i, rest, size, num_nodes, num_dofs;
+   int		      *row_part;
+   int		      *col_part;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
 
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   MPI_Comm_size(MPI_COMM_WORLD, &numprocs );
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -2953,7 +2958,33 @@ BuildParFromOneFile( int                  argc,
  
       A_CSR = HYPRE_CSRMatrixRead(filename);
    }
-   HYPRE_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, A_CSR, NULL, NULL, &A);
+   row_part = NULL;
+   col_part = NULL;
+   if (myid == 0 && num_functions > 1)
+   {
+      HYPRE_CSRMatrixGetNumRows(A_CSR, &num_dofs);
+      num_nodes = num_dofs/num_functions;
+      if (num_dofs != num_functions*num_nodes)
+      {
+	 row_part = NULL;
+	 col_part = NULL;
+      }
+      else
+      {
+         row_part = hypre_CTAlloc(int, numprocs+1);
+	 row_part[0] = 0;
+	 size = num_nodes/numprocs;
+	 rest = num_nodes-size*numprocs;
+	 for (i=0; i < numprocs; i++)
+	 {
+	    row_part[i+1] = row_part[i]+size*num_functions;
+	    if (i < rest) row_part[i+1] += num_functions;
+         }
+         col_part = row_part;
+      }
+   }
+
+   HYPRE_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, A_CSR, row_part, col_part, &A);
 
    *A_ptr = A;
 
