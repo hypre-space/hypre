@@ -1,0 +1,98 @@
+%==========================================================================
+\chapter{The Repository}
+\label{The Repository}
+
+CVS is used as the resource control mechanism for \hypre{}.  This
+allows developers to more easily coordinate their efforts, keep
+previous revisions of software, and track changes and releases.
+
+Some CVS commands you will use most often are:
+\begin{itemize}
+\item '\code{cvs checkout linear_solvers}' - checks out the most
+recent version of the repository source into the current directory.
+\item '\code{cvs update}' - updates your working version, merging
+(or attempting to merge) your file changes with changes made (and
+checked in) by other developers.  This will also give information on
+current status of your changes, such as which files have been modified
+(\code{M}), which files have been added (\code{A}), which files have
+been removed (\code{R}), and which files cannot be accounted for
+(\code{?}).
+\item '\code{cvs commit}' - commits changes to all files in current
+directory and all subdirectories.
+\item '\code{cvs log <file>}' - prints revision history for a file.
+\end{itemize}
+
+The main trunk of the repository must always pass the autotest
+procedures outlined in \ref{Autotest Procedures}.  So, developers must
+take extra care that checked-in code does not break autotest.  One
+thing that should almost always be done is to do a clean checkout into
+a temporary subdirectory (e.g., \code{~/tmp}), then do a
+'\code{configure}' and a '\code{make beta}'.  This will at least
+verify that the compile is not broken.  Extra measures should be taken
+when necessary to insure that the autotest runs also do not fail.
+
+%==========================================================================
+\section{Using CVS Branches}
+\label{Using CVS Branches}
+
+NOTE: THIS HAS NOT BEEN TESTED, SO DO NOT USE QUITE YET!
+
+Sometimes a large change needs to be made to the repository that
+involves several developers coordinating their efforts.  Here, it
+would be useful to use CVS to share code during the development
+process, but this may temporarily break code that previously worked.
+To avoid this, developers can use the branch mechanism in CVS.
+
+WARNING: The use of branches can easily screw up the repository if
+care is not taken.  Developers should follow the guidelines below to
+reduce the risk of this.  Do not stray from these guidelines without
+first consulting the software technical lead for \hypre{}.
+
+SECOND WARNING: Branches should not be created and kept around for
+long periods of time.  They should only be used *temporarily*.
+
+\begin{itemize}
+
+\item First, coordinate with the other developers involved to decide
+on a branch name, and to insure that it is okay to start development
+from the latest revision of the repository's main trunk.
+
+\item Create a new branch (we will use the name '\code{foo}' here).
+\begin{verbatim}
+cvs rtag -b foo linear_solvers
+\end{verbatim}
+
+\item Create a working copy of the branch.
+\begin{verbatim}
+cd ~
+mkdir foo
+cd foo
+cvs checkout -r foo linear_solvers
+\end{verbatim}
+
+\item Make modifications to files in '\code{~/foo/linear_solvers}'.
+Code can be checked in/out without doing damage to the main
+development trunk.
+
+\item When the code is working, merge changes into the main trunk.
+\begin{verbatim}
+cd ~
+cvs checkout linear_solvers
+cvs update -j foo
+\end{verbatim}
+
+\item Verify that the merged files are okay, i.e. that the code compiles,
+runs, etc.
+
+\item Commit the changes to the main trunk.
+\begin{verbatim}
+cd ~/linear_solvers
+cvs commit .
+\end{verbatim}
+
+\item Verify that the commit worked okay by doing a clean checkout, etc.
+
+\item Remove the temporary tag, '\code{foo}', so that this branch is
+not accidentally used to make additional changes to the repository.
+
+\end{itemize}
