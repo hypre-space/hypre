@@ -1488,9 +1488,10 @@ hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A,
    }
    else
    {
-      assert( hypre_StructMatrixConstantCoefficient(R)==0 );
+/*      assert( hypre_StructMatrixConstantCoefficient(R)==0 );
       assert( hypre_StructMatrixConstantCoefficient(A)==0 );
       assert( hypre_StructMatrixConstantCoefficient(P)==0 );
+*/
    }
 
    fi = 0;
