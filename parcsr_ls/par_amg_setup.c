@@ -79,7 +79,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
 
    if (A_array != NULL || P_array != NULL || CF_marker_array != NULL)
    {
-      for (j = 0; j < max_levels; j++)
+      for (j = 1; j < max_levels; j++)
          hypre_ParCSRMatrixDestroy(A_array[j]);
 
       for (j = 0; j < max_levels-1; j++)
@@ -260,7 +260,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
 
    if (F_array != NULL || U_array != NULL)
    {
-      for (j = 0; j < num_levels; j++)
+      for (j = 1; j < num_levels; j++)
       {
          hypre_ParVectorDestroy(F_array[j]);
          hypre_ParVectorDestroy(U_array[j]);
