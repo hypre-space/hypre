@@ -18,7 +18,7 @@ cd $currentdir
 
 # Copy the example files
 foreach file (`ls ex*.htm`)
-    cp "$file" "$file"l
+    cp -fp "$file" "$file"l
 end
 
 # Replace the server side includes
@@ -27,10 +27,10 @@ foreach file (`ls *.htm`)
 end
 
 # Copy images
-cp *.gif *.jpg $examplesdir/README_files
+cp -fp *.gif *.jpg $examplesdir/README_files
 
 # Remove the html example files
-rm ex*.html
+rm -f ex*.html
 
 # Rename index.html
 mv $examplesdir/README_files/index.html $examplesdir/README.html
