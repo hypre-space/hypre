@@ -143,7 +143,7 @@ c=====================================================================
       dimension ja (*)
       dimension iu (*)
 
-      dimension imin(25),imax(25)
+      dimension imin(*),imax(*)
 
       dimension resv(10)
 

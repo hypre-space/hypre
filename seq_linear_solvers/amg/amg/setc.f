@@ -18,13 +18,13 @@ c
 c     
 c     include 'params.amg'
 c     
-      dimension imin(25),imax(25)
+      dimension imin(*),imax(*)
       dimension iu (*)
       dimension ip (*)
       dimension icg(*)
       dimension ifg(*)
 
-      dimension ipmn(25),ipmx(25)
+      dimension ipmn(*),ipmx(*)
       dimension iv (*)
       real*8 xp (*)
       real*8 yp (*)

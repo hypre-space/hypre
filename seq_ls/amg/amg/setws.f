@@ -17,7 +17,7 @@ c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
 c
-      dimension imin(25),imax(25)
+      dimension imin(*),imax(*)
       dimension ia (*)
       dimension a  (*)
       dimension ja (*)
@@ -29,7 +29,7 @@ c
       dimension b  (*)
       dimension jb (*)
 c
-      dimension ipmn(25),ipmx(25)
+      dimension ipmn(*),ipmx(*)
       dimension ip (*)
       dimension iv (*)
       dimension xp (*)
@@ -75,7 +75,7 @@ c
 c
 c     include 'params.amg'
 c
-      dimension imin(25),imax(25)
+      dimension imin(*),imax(*)
       dimension icg(*)
 
       dimension ib (*)
@@ -155,7 +155,7 @@ c
 c
 c     include 'params.amg'
 c
-      dimension imin(25),imax(25)
+      dimension imin(*),imax(*)
       dimension ia (*)
       dimension a  (*)
       dimension ja (*)
@@ -329,7 +329,7 @@ c
 c
 c     include 'params.amg'
 c
-      dimension imin(25),imax(25)
+      dimension imin(*),imax(*)
       dimension ia (*)
       dimension a  (*)
       dimension ja (*)
@@ -588,7 +588,7 @@ c
 c
 c     include 'params.amg'
 c
-      dimension imin(25),imax(25)
+      dimension imin(*),imax(*)
       dimension ia (*)
       dimension a  (*)
       dimension ja (*)
@@ -600,7 +600,7 @@ c
       dimension b  (*)
       dimension jb (*)
 c
-      dimension ipmn(25),ipmx(25)
+      dimension ipmn(*),ipmx(*)
       dimension ip (*)
       dimension iv (*)
       dimension xp (*)

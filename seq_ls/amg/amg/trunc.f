@@ -9,7 +9,7 @@ c---------------------------------------------------------------------
 c     
       implicit real*8 (a-h,o-z)
 c     
-      dimension imin(25),imax(25)
+      dimension imin(*),imax(*)
       dimension ia (*)
       dimension a  (*)
       dimension ja (*)
@@ -51,7 +51,7 @@ c---------------------------------------------------------------------
 c     
       implicit real*8 (a-h,o-z)
 c     
-      dimension imin(25),imax(25)
+      dimension imin(*),imax(*)
       dimension ia (*)
       dimension a  (*)
       dimension ja (*)

@@ -103,7 +103,7 @@ c
 c     
 c     include 'params.amg'
 c     
-      dimension imin(25),imax(25)
+      dimension imin(*),imax(*)
       dimension ia (*)
       dimension iu (*)
       dimension icg(*)

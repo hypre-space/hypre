@@ -38,7 +38,7 @@ c---------------------------------------------------------------------
 c     
       implicit real*8 (a-h,o-z)
 c     
-      dimension imin(25),imax(25)
+      dimension imin(*),imax(*)
       dimension f  (*)
 c     
 c---------------------------------------------------------------------
@@ -68,7 +68,7 @@ c---------------------------------------------------------------------
 c     
       implicit real*8 (a-h,o-z)
 c     
-      dimension imin(25),imax(25)
+      dimension imin(*),imax(*)
       dimension ia (*)
       dimension a  (*)
       dimension ja (*)
@@ -77,7 +77,7 @@ c
       dimension icg(*)
       dimension ifg(*)
 
-      dimension ipmn(25),ipmx(25)
+      dimension ipmn(*),ipmx(*)
       dimension iv (*)
       real*8 xp (*)
       real*8 yp (*)
@@ -621,7 +621,7 @@ c---------------------------------------------------------------------
 c     
       implicit real*8 (a-h,o-z)
 c     
-      dimension imin(25),imax(25)
+      dimension imin(*),imax(*)
 c     
       dimension icg(*)
       dimension ib (*)

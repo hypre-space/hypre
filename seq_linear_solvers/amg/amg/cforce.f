@@ -15,7 +15,7 @@ c---------------------------------------------------------------------
 c     
       implicit real*8 (a-h,o-z)
 c     
-      dimension imin(25),imax(25)
+      dimension imin(*),imax(*)
       dimension ip (*)
       dimension icg(*)
       dimension ifg(*)

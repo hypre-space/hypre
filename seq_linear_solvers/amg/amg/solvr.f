@@ -15,7 +15,7 @@ c=====================================================================
 
       integer told,tnew,ttot
 
-      dimension imin(25),imax(25)
+      dimension imin(*),imax(*)
       dimension u  (*)
       dimension f  (*)
       dimension ia (*)
@@ -29,7 +29,7 @@ c=====================================================================
       dimension xp (*)
       dimension yp (*)
 
-      dimension ipmn(25),ipmx(25)
+      dimension ipmn(*),ipmx(*)
 
       dimension ib (*)
       dimension b  (*)
@@ -223,7 +223,7 @@ c=====================================================================
 
       implicit real*8 (a-h,o-z)
 
-      dimension imin(25),imax(25)
+      dimension imin(*),imax(*)
       dimension u  (*)
       dimension f  (*)
       dimension ia (*)
@@ -236,7 +236,7 @@ c=====================================================================
       dimension xp (*)
       dimension yp (*)
 
-      dimension ipmn(25),ipmx(25)
+      dimension ipmn(*),ipmx(*)
       dimension iv (*)
 
       dimension ib (*)
