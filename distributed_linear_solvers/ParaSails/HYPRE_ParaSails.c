@@ -107,6 +107,10 @@ int HYPRE_ParaSailsSetup(HYPRE_ParaSails ps, double thresh, int nlevels)
 
     ParaSailsSetupValues(internal->ps, internal->A);
 
+    /* ParaSailsFilterValues(internal->ps, filter); */
+
+    ParaSailsComplete(internal->ps);
+
     return 0;
 }
 
