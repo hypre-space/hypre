@@ -194,6 +194,12 @@ int hypre_DataExchangeList(int num_contacts,
    MPI_Comm_size(comm, &num_procs );
    MPI_Comm_rank(comm, &myid );
 
+
+   /*if the response_obj_size or contact_obj_size is 0, set to sizeof(int) */
+   if (!response_obj_size) response_obj_size = sizeof(int);
+   if (!contact_obj_size) contact_obj_size = sizeof(int);
+
+
                     
    /* pre-allocate the max space for responding to contacts */
    overhead = ceil((double) sizeof(int)/response_obj_size); /*for appending an integer*/
