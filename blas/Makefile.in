@@ -49,7 +49,8 @@ FILES =\
  dgemv.c \
  dsyrk.c \
  s_cmp.c \
- s_copy.c
+ s_copy.c \
+ dgels_all.c
 
 OBJS = ${FILES:.c=.o}
 
