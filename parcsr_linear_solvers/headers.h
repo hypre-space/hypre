@@ -12,6 +12,7 @@
 #include <math.h>
 
 #include "mpi.h"
+#include "mpe.h"
 #include "../utilities/hypre_utilities.h"
 
 #include "../parcsr_matrix_vector/communication.h"

@@ -12,6 +12,7 @@
 #include <math.h>
 
 #include "mpi.h"
+#include "mpe.h"
 
 #include "communication.h"
 #include "../utilities/memory.h"
