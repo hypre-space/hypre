@@ -12,7 +12,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
@@ -40,7 +39,7 @@
 #include "HYPRE_LSI_ddict.h"
 #include "HYPRE_LSI_poly.h"
 #include "HYPRE_LSI_block.h"
-#include "HYPRE_LSI_Uzawa.h"
+#include "HYPRE_LSI_Uzawa_c.h"
 #include "HYPRE_SlideReduction.h"
 
 //***************************************************************************
