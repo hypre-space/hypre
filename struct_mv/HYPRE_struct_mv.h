@@ -237,6 +237,13 @@ int HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix matrix,
                                           int               *entries );
 
 /**
+ * (Optional) Set the ghost layer in the matrix 
+ **/
+int HYPRE_StructMatrixSetNumGhost(HYPRE_StructMatrix  matrix,
+                                  int                *num_ghost);
+
+
+/**
  * Print the matrix to file.  This is mainly for debugging purposes.
  **/
 int HYPRE_StructMatrixPrint(const char         *filename,
@@ -338,9 +345,6 @@ int HYPRE_StructVectorPrint(const char         *filename,
 /*--------------------------------------------------------------------------
  * Miscellaneous: These probably do not belong in the interface.
  *--------------------------------------------------------------------------*/
-
-int HYPRE_StructMatrixSetNumGhost(HYPRE_StructMatrix  matrix,
-                                  int                *num_ghost);
 
 int HYPRE_StructMatrixGetGrid(HYPRE_StructMatrix  matrix,
                               HYPRE_StructGrid   *grid);
