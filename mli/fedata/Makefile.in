@@ -42,17 +42,26 @@ CXXFLAGS =\
  ${CXXDEFS}
  
 HEADERS =\
+ mli_festruct.h\
  mli_fedata.h
 
 FILES =\
  mli_fedata.C\
  mli_fedata_utils.C
 
+DRIVER_FILES = driver.C
+
 OBJS = ${FILES:.C=.o}
+
+DRIVER_OBJS = ${DRIVER_FILES:.C=.o}
 
 ##################################################################
 # Targets
 ##################################################################
+
+driver: ${DRIVER_OBJS} mli_fedata.o
+	@echo  "Building" $@ "... "
+	${CXX} -o driver $@.o mli_fedata.o ${LFLAGS}
 
 all: ${OBJS} 
  
