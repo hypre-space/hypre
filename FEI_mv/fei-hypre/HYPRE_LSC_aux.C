@@ -4629,6 +4629,21 @@ void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
 }
 
 //***************************************************************************
+// add extra nonzero entries into the matrix data structure
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::loadElemMatrix(int elemID, int nNodes, 
+                         int *elemNodeList, int matDim, double **elemMat)
+{
+   (void) elemID;
+   (void) nNodes;
+   (void) elemNodeList;
+   (void) matDim;
+   (void) elemMat;
+   return;
+}
+
+//***************************************************************************
 // project the initial guess into the previous solutions (x + X inv(R) Q^T b)
 // Given r and B (a collection of right hand vectors such that A X = B)
 //

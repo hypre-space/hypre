@@ -392,6 +392,8 @@ class HYPRE_LinSysCore
    void   putIntoMappedMatrix(int row, int numValues, const double* values,
                               const int* scatterIndices);
    void   getFEGridObject(void **object) { (*object) = feGrid_; }
+   void   loadElemMatrix(int elemID, int nNodes, int * elemNodeList,
+                         int matDim, double **elemMat);
 
  private:        //functions
 
