@@ -108,6 +108,15 @@ int  impl_Hypre_ParCSRVectorBuilder_SetPartitioning
 } /* end impl_Hypre_ParCSRVectorBuilderSetPartitioning */
 
 /* ********************************************************
+ * impl_Hypre_ParCSRVectorBuilderGetPartitioning
+ **********************************************************/
+int  impl_Hypre_ParCSRVectorBuilder_GetPartitioning
+(Hypre_ParCSRVectorBuilder this, array1int* partitioning) {
+   Hypre_ParCSRVector vec = this->d_table->newvec;
+   return Hypre_ParCSRVector_GetPartitioning( vec, partitioning );
+} /* end impl_Hypre_ParCSRVectorBuilderGetPartitioning */
+
+/* ********************************************************
  * impl_Hypre_ParCSRVectorBuilderSetLocalComponents
  **********************************************************/
 int  impl_Hypre_ParCSRVectorBuilder_SetLocalComponents

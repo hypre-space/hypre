@@ -299,6 +299,24 @@ hypre_IJVectorScalePar( hypre_IJVector *vector, double ascale )
 }
 
 /* ********************************************************
+ * impl_Hypre_ParCSRVectorGetPartitioning
+ **********************************************************/
+int  impl_Hypre_ParCSRVector_GetPartitioning
+(Hypre_ParCSRVector this, array1int* partitioning) {
+   int i, p;
+   HYPRE_IJVector * Hvec = this->d_table->Hvec;
+   int * new_data_p;
+   int ** new_data = &new_data_p;
+
+   HYPRE_IJVectorGetPartitioning( *Hvec, new_data );
+
+/* >>>> TO DO: Is this right with nonzero lower index ?? >>>> */
+   (*partitioning).data = *new_data;
+   return 0;
+} /* end impl_Hypre_ParCSRVectorGetPartitioning */
+
+
+/* ********************************************************
  * ********************************************************
  *
  * The following functions are not declared in the SIDL file.
@@ -426,19 +444,3 @@ HYPRE_IJVectorGetPartitioning( HYPRE_IJVector  IJvector,
 
    return(ierr);
 }
-
-int  Hypre_ParCSRVector_GetPartitioning
-( Hypre_ParCSRVector this, array1int * partitioning )
-{
-   int i, p;
-   HYPRE_IJVector * Hvec = this->d_table->Hvec;
-   int * new_data_p;
-   int ** new_data = &new_data_p;
-
-   HYPRE_IJVectorGetPartitioning( *Hvec, new_data );
-
-/* >>>> TO DO: Is this right with nonzero lower index ?? >>>> */
-   (*partitioning).data = *new_data;
-   return 0;
-
-} /* end impl_Hypre_ParCSRVectorBuilderSetPartitioning */
