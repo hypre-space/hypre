@@ -1764,10 +1764,10 @@ int mm_read_banner(FILE *f, MM_typecode *matcode)
         storage_scheme) != 5)
         return MM_PREMATURE_EOF;
 
-    for (p=mtx; *p; *p=tolower(*p),p++);  /* convert to lower case */
-    for (p=crd; *p; *p=tolower(*p),p++);  
-    for (p=data_type; *p; *p=tolower(*p),p++);
-    for (p=storage_scheme; *p; *p=tolower(*p),p++);
+    for (p=mtx; *p; *p=tolower((int)*p),p++);  /* convert to lower case */
+    for (p=crd; *p; *p=tolower((int)*p),p++);  
+    for (p=data_type; *p; *p=tolower((int)*p),p++);
+    for (p=storage_scheme; *p; *p=tolower((int)*p),p++);
 
     /* check for banner */
     if (strncmp(banner, MatrixMarketBanner, strlen(MatrixMarketBanner)) != 0)
