@@ -377,15 +377,6 @@ else
 fi
 ])
 
-dnl **********************************************************************
-dnl * ACX_LIBG2C
-dnl *
-dnl *       Set variable for library g2c 
-AC_DEFUN([ACX_LIBG2C],
-[AC_PREREQ(2.57)dnl
-LIBG2C="-lg2c"
-])# ACX_LIBG2C
-
 
 dnl **********************************************************************
 dnl * ACX_OPTIMIZATION_FLAGS
