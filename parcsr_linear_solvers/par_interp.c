@@ -17,6 +17,7 @@ int
 hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                          int                  *CF_marker,
                          hypre_ParCSRMatrix   *S,
+                         int                   debug_flag,
                          hypre_ParCSRMatrix  **P_ptr)
 {
 
@@ -106,6 +107,9 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int              num_sends;
    int              index;
    int             *int_buf_data;
+
+   double           max_coef;
+   int              next_open,now_checking,num_lost,start_j;
 
    int col_1 = hypre_ParCSRMatrixFirstRowIndex(A);
    int local_numrows = hypre_CSRMatrixNumRows(A_diag);
@@ -679,6 +683,47 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    }
    P_diag_i[i] = jj_counter; 
 
+   /* Test: Compress S, removing coefficients smaller than 10% of Max */
+
+   if (debug_flag == 2)
+   {
+      next_open = 0;
+      now_checking = 0;
+      num_lost = 0;
+
+      for (i = 0; i < n_fine; i++)
+      {
+/*         if (CF_marker[i] < 0) */
+         {
+            max_coef = P_diag_data[P_diag_i[i]];
+            for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
+              max_coef = (max_coef<P_diag_data[j]) ? P_diag_data[j] : max_coef;
+            max_coef *= 0.25;
+
+            start_j = P_diag_i[i];
+            P_diag_i[i] -= num_lost;
+
+            for (j = start_j; j < P_diag_i[i+1]; j++)
+            {
+               if (P_diag_data[now_checking] < max_coef)
+               {
+                  num_lost++;
+                  now_checking++;
+               }
+               else
+               {
+                  P_diag_data[next_open] = P_diag_data[now_checking];
+                  P_diag_j[next_open] = P_diag_j[now_checking];
+                  now_checking++;
+                  next_open++;
+               }
+            }
+         }
+      }
+      P_diag_i[n_fine] -= num_lost;
+   }
+
+   /* End of Compression Test */
 
    /*----------------------------------------------------------------------
     *  Determine the col_map_offd_P
