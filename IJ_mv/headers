@@ -37,6 +37,7 @@ extern "C" {
 cat fortran.h            >> $INTERNAL_HEADER
 cat aux_parcsr_matrix.h  >> $INTERNAL_HEADER
 cat IJ_matrix.h          >> $INTERNAL_HEADER
+cat IJ_vector.h          >> $INTERNAL_HEADER
 
 ../utilities/protos *.c               >> $INTERNAL_HEADER
 
