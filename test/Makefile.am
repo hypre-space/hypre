@@ -100,11 +100,11 @@ struct_LDADD = \
  -lHYPRE_utilities\
  $(LIBM)
 
-ij_LDFLAGS = -no-undefined -rpath $(libdir)
-ij_mv_LDFLAGS = -no-undefined -rpath $(libdir)
-new_ij_LDFLAGS = -no-undefined -rpath $(libdir)
-sstruct_LDFLAGS = -no-undefined -rpath $(libdir)
-struct_LDFLAGS = -no-undefined -rpath $(libdir)
+#ij_LDFLAGS = -no-undefined -rpath $(libdir)
+#ij_mv_LDFLAGS = -no-undefined -rpath $(libdir)
+#new_ij_LDFLAGS = -no-undefined -rpath $(libdir)
+#sstruct_LDFLAGS = -no-undefined -rpath $(libdir)
+#struct_LDFLAGS = -no-undefined -rpath $(libdir)
 
 EXTRA_bindir = $(bindir)
 
@@ -342,3 +342,14 @@ struct.C++.cxx:
 ##	cp -f $< ${@:.o=.cxx}
 ##	${CXX} -o $@ -c ${CXXFLAGS} ${@:.o=.cxx}
 ##	rm -f ${@:.o=.cxx}
+
+clean-local:
+	@ \
+	for i in fei f77_ij f77_ij_mv f77_struct \
+		f77_ij_b ij_b *.C++* driver.out.* ; \
+	do \
+	  if [ -e $$i ]; \
+	  then \
+	    rm -f $$i; \
+	  fi; \
+	done
