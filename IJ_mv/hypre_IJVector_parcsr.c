@@ -539,8 +539,8 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
    if (!par_vector) ++ierr;
    if (!partitioning) ++ierr;
 
-   ierr = MPI_Allgather(&partitioning[my_id], 1, MPI_INT,
-                        partitioning, 1, MPI_INT, comm);
+   ierr += MPI_Allgather(&partitioning[my_id], 1, MPI_INT,
+                         partitioning, 1, MPI_INT, comm);
 
    return ierr;
 }
