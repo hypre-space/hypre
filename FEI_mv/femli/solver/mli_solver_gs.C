@@ -62,10 +62,8 @@ int MLI_Solver_GS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    double              *u_data;
    hypre_Vector        *f_local;
    double              *f_data;
-   hypre_ParVector     *Vtemp;
-   hypre_Vector        *Vtemp_local;
-   int                 i, j, n, is, relax_error=0, global_size, *partitioning1;
-   int                 ii, jj, num_procs, num_threads, *partitioning2;
+   int                 i, j, n, is, relax_error=0;
+   int                 ii, jj, num_procs, num_threads;
    int                 num_sends, num_cols_offd, index, size, ns, ne, rest;
    int                 start;
    double              zero = 0.0, relax_weight, res;
@@ -102,24 +100,6 @@ int MLI_Solver_GS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    f_data        = hypre_VectorData(f_local);
    MPI_Comm_size(comm,&num_procs);  
 
-   /*-----------------------------------------------------------------
-    * create temporary vector
-    *-----------------------------------------------------------------*/
-
-   global_size   = hypre_ParVectorGlobalSize(f);
-   partitioning1 = hypre_ParVectorPartitioning(f);
-   partitioning2 = hypre_CTAlloc( int, num_procs+1 );
-   for ( i = 0; i <= num_procs; i++ ) partitioning2[i] = partitioning1[i];
-   Vtemp = hypre_ParVectorCreate(comm, global_size, partitioning2);
-   hypre_ParVectorInitialize(Vtemp);
-   Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
-
-   /*-----------------------------------------------------------------
-    * Copy f into temporary vector.
-    *-----------------------------------------------------------------*/
-        
-   hypre_ParVectorCopy(f,Vtemp); 
- 
    /*-----------------------------------------------------------------
     * setting up for interprocessor communication
     *-----------------------------------------------------------------*/
@@ -244,7 +224,6 @@ int MLI_Solver_GS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
     * clean up and return
     *-----------------------------------------------------------------*/
 
-   hypre_ParVectorDestroy( Vtemp ); 
    if (num_procs > 1)
    {
       hypre_TFree(Vext_data);

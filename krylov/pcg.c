@@ -223,7 +223,9 @@ hypre_PCGSolve( void *pcg_vdata,
    int             two_norm     = (pcg_data -> two_norm);
    int             rel_change   = (pcg_data -> rel_change);
    int             stop_crit    = (pcg_data -> stop_crit);
+/*
    int             converged    = (pcg_data -> converged);
+*/
    void           *p            = (pcg_data -> p);
    void           *s            = (pcg_data -> s);
    void           *r            = (pcg_data -> r);
