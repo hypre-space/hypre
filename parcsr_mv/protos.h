@@ -33,8 +33,10 @@ hypre_VectorCommPkg *hypre_InitializeVectorCommPkg P((MPI_Comm comm,
 	int vec_len, int *vec_starts));
 int hypre_DestroyVectorCommPkg P(( hypre_VectorCommPkg *vector_comm_pkg));
 int hypre_DestroyMatvecCommPkg P(( hypre_CommPkg *comm_pkg));
-int BuildCSRMatrixMPIDataType P((int num_nonzeros, int num_rows,
+int hypre_BuildCSRMatrixMPIDataType P((int num_nonzeros, int num_rows,
 	double *a_data, int *a_i, int *a_j, MPI_Datatype *csr_matrix_datatype));
+int hypre_BuildCSRJDataType P((int num_nonzeros, double *a_data, int *a_j,
+	MPI_Datatype *csr_matrix_datatype));
 
 /* par_csr_matrix.c */
 hypre_ParCSRMatrix *hypre_CreateParCSRMatrix P((MPI_Comm comm,
@@ -50,7 +52,10 @@ hypre_ParCSRMatrix *hypre_CSRMatrixToParCSRMatrix P((MPI_Comm comm,
 	hypre_CSRMatrix *A, int **row_starts_ptr, int **col_starts_ptr));
 int GenerateDiagAndOffd P((hypre_CSRMatrix *A, hypre_ParCSRMatrix *matrix,
 	int first_col_diag, int last_col_diag));
-
+hypre_CSRMatrix *hypre_MergeDiagAndOffd P((hypre_ParCSRMatrix *par_matrix));
+hypre_CSRMatrix *hypre_ParCSRMatrixToCSRMatrixAll P((MPI_Comm,
+	hypre_ParCSRMatrix *par_matrix, int *partitioning));
+ 
 /* par_csr_matvec.c */
 int hypre_ParMatvec P((double alpha, hypre_ParCSRMatrix *A, 
 	hypre_ParVector *x, double beta, hypre_ParVector *y));
