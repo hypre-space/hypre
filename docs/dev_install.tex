@@ -111,7 +111,9 @@ Build the \hypre{} distribution:
    releases are denoted by the following sytanx `M.nn.rra' for 
    alpha releases, and `M.nn.rrb' for appending beta releases. The version 
    number is used for the name of the release creation and is used
-   in the tar file name and root directory for the distribution.
+   in the tar file name and root directory for the distribution. The
+   \file{configure} file mst then be created by running the 
+   \kbd{config/boostrap} script, followed by a \kbd{cvs commit}.
 
    \item Create a symbolic tag for the current version
    of the cvs repository. To create a general release enter:
@@ -277,7 +279,8 @@ T 2001-01-11 20:58 +0000 treadway linear_solvers [V1-4-0b:A]
 T 2001-07-27 16:57 +0000 treadway linear_solvers [V1-6-0:A]
 T 2001-08-24 20:26 +0000 treadway linear_solvers [V1-7-0a:A]
 \end{verbatim}
-\$ \textbf{vi linear\_solvers/configure.ac}\linebreak
+\$ \textbf{cd linear\_solvers}\linebreak
+\$ \textbf{vi configure.ac}\linebreak
 \begin{verbatim}
  . . .
 m4_define(HYPRE_VERSION, 1.7.0a)
@@ -292,23 +295,30 @@ m4_define(HYPRE_DATE, 2001/11/13)
 m4_define(HYPRE_TIME, 07:25:23)
 \end{verbatim}
 \end{bfseries}
-"linear\_solvers/configure.ac" 423 lines, 13216 characters\linebreak
-\$ \textbf{cvs commit linear\_solvers/configure.ac}\linebreak
+"configure.ac" 423 lines, 13216 characters\linebreak
+\$ \textbf{config/bootstrap}
+\begin{verbatim}
+Putting files in AC_CONFIG_AUX_DIR, `config'.
+\end{verbatim}
+\$ \textbf{cvs commit configure.ac configure}\linebreak
 \textbf{beta release 1.7.0b}\linebreak
 \begin{verbatim}
+Release 1.7.0b
 CVS: ----------------------------------------------------------------------
 CVS: Enter Log.	 Lines beginning with `CVS:' are removed automatically
 CVS:
-CVS: Committing in linear_solvers
-CVS:
 CVS: Modified Files:
-CVS:	configure.ac
+CVS:	configure.ac configure
 CVS: ----------------------------------------------------------------------
 ~
 ""/tmp/cvsAAABga42v" 9 lines, 345 characters
 Checking in linear_solvers/configure.ac;
 /home/casc/repository/linear_solvers/configure.ac,v  <--  configure.ac
-new revision: 2.32; previous revision: 2.31
+new revision: 2.34; previous revision: 2.33
+done
+Checking in configure;
+/home/casc/repository/linear_solvers/configure,v  <--  configure
+new revision: 2.107; previous revision: 2.106
 done
 \end{verbatim}
 :q
