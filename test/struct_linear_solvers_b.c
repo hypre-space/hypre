@@ -124,6 +124,8 @@ main( int   argc,
     * Initialize some stuff
     *-----------------------------------------------------------*/
  
+   ierr = 0;
+
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
