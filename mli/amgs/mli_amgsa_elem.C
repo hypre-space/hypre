@@ -89,6 +89,7 @@ int MLI_Method_AMGSA::setupUsingFEData( MLI *mli )
    /* fetch communicator matrix information                           */
    /* --------------------------------------------------------------- */
 
+nullspace_dim = 6;
    comm = getComm();
    MPI_Comm_rank( comm, &mypid );
    MPI_Comm_size( comm, &nprocs );
@@ -98,7 +99,6 @@ int MLI_Method_AMGSA::setupUsingFEData( MLI *mli )
                                         &partition);
    localStartRow = partition[mypid];
    localNRows    = partition[mypid+1] - localStartRow;
-printf("localNRows = %d\n", localNRows);
 
    /* --------------------------------------------------------------- */
    /* fetch FEData information                                        */
@@ -117,25 +117,19 @@ printf("localNRows = %d\n", localNRows);
    fedata->getElemBlockNodeLists(nElems, elemNNodes, elemNodeLists);
    fedata->getNodeFieldIDs(nodeNumFields, &nodeFieldID);
    fedata->getFieldSize(nodeFieldID, blockSize);
-printf("blockSize = %d\n", blockSize);
    fedata->getNumNodes(nNodes);
-printf("nNodes = %d\n", nNodes);
 
    /* --------------------------------------------------------------- */
    /* construct element-element matrix                                */
    /* --------------------------------------------------------------- */
 
-printf("get EN \n");
    MLI_FEDataConstructElemNodeMatrix(comm, fedata, &mliENMat);
    hypreEN = (hypre_ParCSRMatrix *) mliENMat->getMatrix();
-printf("get NE \n");
    MLI_FEDataConstructNodeElemMatrix(comm, fedata, &mliNEMat);
    hypreNE = (hypre_ParCSRMatrix *) mliNEMat->getMatrix();
-printf("get EE \n");
    hypreEE = (hypre_ParCSRMatrix *) 
               hypre_ParMatmul( (hypre_ParCSRMatrix *) hypreEN,
                                (hypre_ParCSRMatrix *) hypreNE);
-printf("get EE done\n");
 
    /* --------------------------------------------------------------- */
    /* perform element agglomeration                                   */
@@ -145,9 +139,7 @@ printf("get EE done\n");
    MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
    sprintf(paramString, "HYPRE_ParCSR" );
    mliEEMat = new MLI_Matrix( (void *) hypreEE, paramString, funcPtr );
-printf("agglomerate \n");
    MLI_FEDataAgglomerateElemsLocal(mliEEMat, &macroNumbers);
-printf("agglomerate done\n");
    delete mliENMat;
    delete mliNEMat;
    delete mliEEMat;
@@ -212,14 +204,14 @@ printf("agglomerate done\n");
    dAux1    = new double[macroMax];
    dAux2    = new double[macroMax];
    eMatDim  = elemNNodes * blockSize;
-   elemMat  = new double[eMatDim];
+   elemMat  = new double[eMatDim*eMatDim];
    evectors = NULL;
    elemMats = NULL;
 
-   currMacroNumber = macroNumbers[0];
    elemStart = 0;
    while ( elemStart < nElems )
    {
+      currMacroNumber = macroNumbers[elemStart];
       elemCount = elemStart + 1;
       while (macroNumbers[elemCount] == currMacroNumber && elemCount < nElems) 
          elemCount++;
@@ -273,6 +265,7 @@ printf("agglomerate done\n");
       }
       mli_computespectrum_(&macroMatDim, &macroMatDim, elemMats, evalues, 
                            &matz, evectors, dAux1, dAux2, &ierr);
+
       macroNodeEqnList = new int[macroNumNodes];
       nodeEqnMap->getMap(macroNumNodes, macroNodeList, macroNodeEqnList);
       for ( i = 0; i < nullspace_dim; i++ )
@@ -280,19 +273,22 @@ printf("agglomerate done\n");
          for ( j = 0; j < macroNumNodes; j++ )
          {
             eqnNumber = macroNodeEqnList[j];
-            for ( k = 0; k < blockSize; k++ )
-               nullspace_vec[eqnNumber+k+i*nullspace_len] =
-                  evectors[j*blockSize+k+i*macroMatDim];
+            if ( aggrMap[eqnNumber] == macroNumbers[elemStart] )
+            {
+               for ( k = 0; k < blockSize; k++ )
+                  nullspace_vec[eqnNumber+k+i*nullspace_len] =
+                     evectors[j*blockSize+k+i*macroMatDim];
+            }
          }
       } 
       delete [] macroNodeEqnList;
-      delete [] evectors;
-      delete [] elemMats;
       delete [] nodeNodeMap;
       delete [] macroNodeList;
+      delete [] evectors;
+      delete [] elemMats;
       elemStart = elemCount;
    }
-
+ 
    /* --------------------------------------------------------------- */
    /* clean up                                                        */
    /* --------------------------------------------------------------- */
@@ -305,6 +301,7 @@ printf("agglomerate done\n");
    delete [] elemNodeLists;
    delete [] elemIDs;
    delete [] sortArray;
+   delete [] macroSizes;
    if ( nodeEqnList != NULL ) delete [] nodeEqnList;
    return 0;
 }

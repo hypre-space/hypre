@@ -123,7 +123,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
    if ( init_aggr == NULL ) coarsenLocal(Gmat, &naggr, &node2aggr);
    else 
    {
-      blk_size = 1;
+      blk_size = curr_node_dofs;
       naggr = init_count;
       node2aggr = new int[A_local_nrows];
       for ( i = 0; i < A_local_nrows; i++ ) node2aggr[i] = init_aggr[i];
@@ -168,7 +168,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
     * expand the aggregation information if block size > 1 ==> eqn2aggr
     *-----------------------------------------------------------------*/
 
-   if ( blk_size > 1 )
+   if ( blk_size > 1 && init_aggr == NULL )
    {
       eqn2aggr = new int[A_local_nrows];
       for ( i = 0; i < A_local_nrows; i++ )

@@ -4,7 +4,6 @@
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision$
 #EHEADER***********************************************************************
 
 .SUFFIXES:
@@ -53,8 +52,7 @@ FILES =\
  mli_method.C\
  mli_method_amgsa.C\
  mli_amgsa_coarsen1.C\
- mli_amgsa_calib.C\
- mli_amgsa_elem.C
+ mli_amgsa_calib.C
 
 TEMP = ${FILES:.c=.o}
 OBJS = ${TEMP:.C=.o}
