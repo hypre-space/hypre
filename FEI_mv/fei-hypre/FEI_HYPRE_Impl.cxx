@@ -1583,7 +1583,7 @@ int FEI_HYPRE_Impl::solve(int *status)
       case 0 : TimerSolveStart_ = MPI_Wtime();
                if ( outputLevel_ >= 1 && mypid_ == 0 )
                {
-                  printf("\tALE3D CG with diagonal preconditioning\n");
+                  printf("\tFEI_HYPRE CG with diagonal preconditioning\n");
                   printf("\tmaxIterations     = %d\n",krylovMaxIterations_);
                   printf("\ttolerance         = %e\n",krylovTolerance_);
                }
@@ -1592,7 +1592,7 @@ int FEI_HYPRE_Impl::solve(int *status)
       case 1 : TimerSolveStart_ = MPI_Wtime();
                if ( outputLevel_ >= 1 && mypid_ == 0 )
                {
-                  printf("\tALE3D GMRES with diagonal preconditioning\n");
+                  printf("\tFEI_HYPRE GMRES with diagonal preconditioning\n");
                   printf("\t\tGMRES dimension = %d\n", gmresDim_);
                   printf("\tmaxIterations     = %d\n",krylovMaxIterations_);
                   printf("\ttolerance         = %e\n",krylovTolerance_);
@@ -1602,7 +1602,7 @@ int FEI_HYPRE_Impl::solve(int *status)
       case 2 : TimerSolveStart_ = MPI_Wtime();
                if ( outputLevel_ >= 1 && mypid_ == 0 )
                {
-                  printf("\tALE3D CGS with diagonal preconditioning\n");
+                  printf("\tFEI_HYPRE CGS with diagonal preconditioning\n");
                   printf("\tmaxIterations     = %d\n",krylovMaxIterations_);
                   printf("\ttolerance         = %e\n",krylovTolerance_);
                }
@@ -1611,7 +1611,7 @@ int FEI_HYPRE_Impl::solve(int *status)
       case 3 : TimerSolveStart_ = MPI_Wtime();
                if ( outputLevel_ >= 1 && mypid_ == 0 )
                {
-                  printf("\tALE3D Bicgstab with diagonal preconditioning\n");
+                  printf("\tFEI_HYPRE Bicgstab with diagonal preconditioning\n");
                   printf("\tmaxIterations     = %d\n",krylovMaxIterations_);
                   printf("\ttolerance         = %e\n",krylovTolerance_);
                }
@@ -1620,7 +1620,7 @@ int FEI_HYPRE_Impl::solve(int *status)
       case 4 : TimerSolveStart_ = MPI_Wtime();
                if ( outputLevel_ >= 1 && mypid_ == 0 )
                {
-                  printf("\tALE3D direct link to SuperLU \n");
+                  printf("\tFEI_HYPRE direct link to SuperLU \n");
                }
                (*status) = solveUsingSuperLU();
                break;
@@ -1631,13 +1631,13 @@ int FEI_HYPRE_Impl::solve(int *status)
    MPI_Allreduce(dArray,dArray2,2,MPI_DOUBLE,MPI_SUM,mpiComm_);
    if ( outputLevel_ >= 1 && mypid_ == 0 )
    {
-      printf("\tALE3D local solver : number of iterations = %d\n",
+      printf("\tFEI_HYPRE local solver : number of iterations = %d\n",
              krylovIterations_);
-      printf("\tALE3D local solver : final residual norm  = %e\n",
+      printf("\tFEI_HYPRE local solver : final residual norm  = %e\n",
              krylovResidualNorm_);
-      printf("\tALE3D local FEI    : average load  time   = %e\n",
+      printf("\tFEI_HYPRE local FEI    : average load  time   = %e\n",
              dArray2[0]/(double) nprocs);
-      printf("\tALE3D local FEI    : average solve time   = %e\n",
+      printf("\tFEI_HYPRE local FEI    : average solve time   = %e\n",
              dArray2[1]/(double) nprocs);
       printf("\t**************************************************\n");
    }
