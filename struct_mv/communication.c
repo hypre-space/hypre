@@ -69,10 +69,10 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
    processes = zzz_StructGridProcesses(grid);
 
    /*------------------------------------------------------
-    * Determine neighbors
+    * Determine neighbors (use transpose of stencil)
     *------------------------------------------------------*/
 
-   zzz_FindBoxNeighbors(boxes, all_boxes, stencil,
+   zzz_FindBoxNeighbors(boxes, all_boxes, stencil, 1,
                         &neighbors, &neighbor_ranks);
 
    /*------------------------------------------------------

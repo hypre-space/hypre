@@ -68,8 +68,8 @@ zzz_BoxArrayArray *zzz_GrowBoxArrayByStencil P((zzz_BoxArray *box_array , zzz_St
 /* matrix_interface_struct.c */
 
 /* neighbors.c */
-void zzz_FindBoxNeighbors P((zzz_BoxArray *boxes , zzz_BoxArray *all_boxes , zzz_StructStencil *stencil , zzz_BoxArray **neighbors_ptr , int **neighbor_ranks_ptr ));
-void zzz_FindBoxApproxNeighbors P((zzz_BoxArray *boxes , zzz_BoxArray *all_boxes , zzz_StructStencil *stencil , zzz_BoxArray **neighbors_ptr , int **neighbor_ranks_ptr ));
+void zzz_FindBoxNeighbors P((zzz_BoxArray *boxes , zzz_BoxArray *all_boxes , zzz_StructStencil *stencil , int transpose , zzz_BoxArray **neighbors_ptr , int **neighbor_ranks_ptr ));
+void zzz_FindBoxApproxNeighbors P((zzz_BoxArray *boxes , zzz_BoxArray *all_boxes , zzz_StructStencil *stencil , int transpose , zzz_BoxArray **neighbors_ptr , int **neighbor_ranks_ptr ));
 
 /* one_to_many.c */
 int main P((int argc , char *argv []));
