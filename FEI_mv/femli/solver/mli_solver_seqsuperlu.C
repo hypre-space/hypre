@@ -58,7 +58,6 @@ int MLI_Solver_SeqSuperLU::setup( MLI_Matrix *Amat )
    int      *etree, permcSpec, lwork, panelSize, relax, info;
    double   *csrAA, *cscAA, diagPivotThresh, dropTol;
    char     refact[1];
-   MPI_Comm mpi_comm;
    hypre_CSRMatrix      *hypreA;
    SuperMatrix          AC;
    extern SuperLUStat_t SuperLUStat;
