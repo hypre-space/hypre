@@ -55,8 +55,7 @@ HYPRE_SLE::HYPRE_SLE(MPI_Comm PASSED_COMM_WORLD, int masterRank) :
     MPI_Comm_rank(comm, &my_pid);
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-       printf("HYPRE_SLE::entering constructor.\n");
+    printf("%4d : HYPRE_SLE::entering constructor.\n", my_pid);
 #endif
 
     //--------------------------------------------------
@@ -131,8 +130,7 @@ HYPRE_SLE::HYPRE_SLE(MPI_Comm PASSED_COMM_WORLD, int masterRank) :
     krylov_dim           = 50;
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-       printf("HYPRE_SLE::leaving constructor.\n");
+    printf("%4d : HYPRE_SLE::leaving constructor.\n", my_pid);
 #endif
     return;
 }
@@ -167,9 +165,9 @@ HYPRE_SLE::~HYPRE_SLE()
 void HYPRE_SLE::parameters(int numParams, char **paramStrings) 
 {
 #ifdef DEBUG
+    printf("%4d : HYPRE_SLE::entering parameters function.\n",my_pid);
     if ( my_pid == 0 )
     {
-       printf("HYPRE_SLE::entering parameters function.\n");
        printf("HYPRE_SLE::parameters - numParams = %d\n", numParams);
        for ( int i = 0; i < numParams; i++ )
        {
@@ -178,235 +176,213 @@ void HYPRE_SLE::parameters(int numParams, char **paramStrings)
     }
 #endif
 
-    if (numParams == 0 || paramStrings == NULL) 
+    appendParamStrings(numParams, paramStrings);
+
+    int    i, nsweeps, rtype;
+    double weight;
+    char   param[256], param2[80];
+
+    //----------------------------------------------------------
+    // which solver to pick : cg, gmres, superlu, superlux, y12m 
+    //----------------------------------------------------------
+
+    if ( getParam("solver",numParams,paramStrings,param) == 1)
+       sscanf(param,"%s",HYSolverName_);
+
+    //----------------------------------------------------------
+    // for GMRES, the restart size
+    //----------------------------------------------------------
+
+    if ( getParam("gmres-dim",numParams,paramStrings,param) == 1)
     {
-        if (debugOutput_) fprintf(debugFile_, "--- no parameters.\n");
+       sscanf(param,"%d", &krylov_dim);
+       if ( krylov_dim < 1 ) krylov_dim = 50;
     }
-    else 
+
+    //----------------------------------------------------------
+    // which preconditioner : diagonal, pilut, boomeramg, parasails
+    //----------------------------------------------------------
+
+    if ( getParam("preconditioner",numParams,paramStrings,param) == 1)
     {
-        appendParamStrings(numParams, paramStrings);
+       sscanf(param,"%s",HYPrecondName_);
+       //selectPreconditioner(HYPrecondName_);
+    }
 
-        int    i, nsweeps, rtype;
-        double weight;
-        char   param[256], param2[80];
+    //----------------------------------------------------------
+    // maximum number of iterations for pcg or gmres
+    //----------------------------------------------------------
 
-        //----------------------------------------------------------
-        // which solver to pick : cg, gmres, superlu, superlux, y12m 
-        //----------------------------------------------------------
+    if ( getParam("maxIterations",numParams,paramStrings,param) == 1)
+       sscanf(param,"%d", &max_iterations);
 
-        if ( getParam("solver",numParams,paramStrings,param) == 1)
-            sscanf(param,"%s",HYSolverName_);
+    //----------------------------------------------------------
+    // tolerance as termination criterion
+    //----------------------------------------------------------
 
-        //----------------------------------------------------------
-        // for GMRES, the restart size
-        //----------------------------------------------------------
+    if ( getParam("tolerance",numParams,paramStrings,param) == 1)
+       sscanf(param,"%e", &tolerance);
 
-        if ( getParam("gmres-dim",numParams,paramStrings,param) == 1)
-        {
-            sscanf(param,"%d", &krylov_dim);
-            if ( krylov_dim < 1 ) krylov_dim = 50;
-        }
+    //----------------------------------------------------------
+    // pilut preconditioner : max no. of nonzeros to keep per row
+    //----------------------------------------------------------
 
-        //----------------------------------------------------------
-        // which preconditioner : diagonal, pilut, boomeramg, parasails
-        //----------------------------------------------------------
+    if ( getParam("pilut-row-size",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%d", &pilut_row_size);
+       if ( pilut_row_size < 1 ) pilut_row_size = 50;
+    }
 
-        if ( getParam("preconditioner",numParams,paramStrings,param) == 1)
-        {
-            sscanf(param,"%s",HYPrecondName_);
-            //selectPreconditioner(HYPrecondName_);
-        }
+    //----------------------------------------------------------
+    // pilut preconditioner : threshold to drop small nonzeros
+    //----------------------------------------------------------
 
-        //----------------------------------------------------------
-        // maximum number of iterations for pcg or gmres
-        //----------------------------------------------------------
+    if ( getParam("pilut-drop-tol",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%e", &pilut_drop_tol);
+       if ( pilut_drop_tol < 0.0 || pilut_drop_tol >= 1.0 ) 
+       {
+          pilut_drop_tol = 0.0;
+          printf("HYPRE_SLE::parameters - invalid pilut drop tol => set to %e\n",
+                                          pilut_drop_tol);
+       }
+    }
 
-        if ( getParam("maxIterations",numParams,paramStrings,param) == 1)
-            sscanf(param,"%d", &max_iterations);
+    //----------------------------------------------------------
+    // superlu : ordering to use (natural, mmd)
+    //----------------------------------------------------------
 
-        //----------------------------------------------------------
-        // tolerance as termination criterion
-        //----------------------------------------------------------
+    if ( getParam("superlu-ordering",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%s", &param2);
+       if      ( !strcmp(param2, "natural" ) ) superlu_ordering = 0;
+       else if ( !strcmp(param2, "mmd") )      superlu_ordering = 2;
+       else 
+       {
+          superlu_ordering = 0;
+          printf("HYPRE_SLE::parameters - superlu ordering set to natural.\n");
+       }
+    }
 
-        if ( getParam("tolerance",numParams,paramStrings,param) == 1)
-            sscanf(param,"%e", &tolerance);
+    //----------------------------------------------------------
+    // superlu : scaling none ('N') or both col/row ('B')
+    //----------------------------------------------------------
 
-        //----------------------------------------------------------
-        // pilut preconditioner : max no. of nonzeros to keep per row
-        //----------------------------------------------------------
+    if ( getParam("superlu-scale",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%s", &param2);
+       if      ( !strcmp(param2, "y" ) ) superlu_scale[0] = 'B';
+       else                              superlu_scale[0] = 'N';
+    }
 
-        if ( getParam("pilut-row-size",numParams,paramStrings,param) == 1)
-        {
-            sscanf(param,"%d", &pilut_row_size);
-            if ( pilut_row_size < 1 ) pilut_row_size = 50;
-        }
+    //----------------------------------------------------------
+    // amg preconditoner : coarsen type (falgout, ruge, default)
+    //----------------------------------------------------------
 
-        //----------------------------------------------------------
-        // pilut preconditioner : threshold to drop small nonzeros
-        //----------------------------------------------------------
+    if ( getParam("amg-coarsen-type",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%s", param2);
+       if      ( !strcmp(param2, "falgout") ) amg_coarsen_type = 6;
+       else if ( !strcmp(param2, "ruge")    ) amg_coarsen_type = 1;
+       else                                   amg_coarsen_type = 0;
+    }
 
-        if ( getParam("pilut-drop-tol",numParams,paramStrings,param) == 1)
-        {
-            sscanf(param,"%e", &pilut_drop_tol);
-            if ( pilut_drop_tol < 0.0 || pilut_drop_tol >= 1.0 ) 
-            {
-               pilut_drop_tol = 0.0;
-               printf("HYPRE_SLE::parameters - invalid pilut drop tol => set to %e\n",
-                                            pilut_drop_tol);
-            }
-        }
+    //----------------------------------------------------------
+    // amg preconditoner : no of relaxation sweeps per level
+    //----------------------------------------------------------
 
-        //----------------------------------------------------------
-        // superlu : ordering to use (natural, mmd)
-        //----------------------------------------------------------
+    if ( getParam("amg-num-sweeps",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%d", &nsweeps);
+       if ( nsweeps < 1 ) nsweeps = 1; 
+       for ( i = 0; i < 3; i++ ) amg_num_sweeps[i] = nsweeps;
+    }
 
-        if ( getParam("superlu-ordering",numParams,paramStrings,param) == 1)
-        {
-            sscanf(param,"%s", &param2);
-            if      ( !strcmp(param2, "natural" ) ) superlu_ordering = 0;
-            else if ( !strcmp(param2, "mmd") )      superlu_ordering = 2;
-            else 
-            {
-               superlu_ordering = 0;
-               printf("HYPRE_SLE::parameters - superlu ordering set to natural.\n");
-            }
-        }
+    //----------------------------------------------------------
+    // amg preconditoner : which smoother to use
+    //----------------------------------------------------------
 
-        //----------------------------------------------------------
-        // superlu : scaling none ('N') or both col/row ('B')
-        //----------------------------------------------------------
+    if ( getParam("amg-relax-type",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%s", param2);
+       if      ( !strcmp(param2, "jacobi" ) ) rtype = 2;
+       else if ( !strcmp(param2, "gs-slow") ) rtype = 1;
+       else if ( !strcmp(param2, "gs-fast") ) rtype = 4;
+       else if ( !strcmp(param2, "hybrid" ) ) rtype = 3;
+       else if ( !strcmp(param2, "direct" ) ) rtype = 9;
+       else 
+       {
+          rtype = 3;
+          printf("HYPRE_SLE::parameters - invalid relax type => set to hybrid.\n");
+       }
+       for ( i = 0; i < 3; i++ ) amg_relax_type[i] = rtype;
+    }
 
-        if ( getParam("superlu-scale",numParams,paramStrings,param) == 1)
-        {
-            sscanf(param,"%s", &param2);
-            if      ( !strcmp(param2, "y" ) ) superlu_scale[0] = 'B';
-            else                              superlu_scale[0] = 'N';
-        }
+    //----------------------------------------------------------
+    // amg preconditoner : damping factor for Jacobi smoother
+    //----------------------------------------------------------
 
-        //----------------------------------------------------------
-        // amg preconditoner : coarsen type (falgout, ruge, default)
-        //----------------------------------------------------------
+    if ( getParam("amg-relax-weight",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%e", &weight);
+       if ( weight < 0.0 || weight > 1.0 ) 
+       {
+          weight = 0.5;
+          printf("HYPRE_SLE::parameters - invalid relax weight => set to %e\n",
+                                          amg_relax_weight);
+       }
+       for ( i = 0; i < 25; i++ ) amg_relax_weight[i] = weight;
+    }
 
-        if ( getParam("amg-coarsen-type",numParams,paramStrings,param) == 1)
-        {
-            sscanf(param,"%s", param2);
-            if      ( !strcmp(param2, "falgout") ) amg_coarsen_type = 6;
-            else if ( !strcmp(param2, "ruge")    ) amg_coarsen_type = 1;
-            else                                   amg_coarsen_type = 0;
-        }
+    //----------------------------------------------------------
+    // amg preconditoner : threshold to determine strong coupling
+    //----------------------------------------------------------
 
-        //----------------------------------------------------------
-        // amg preconditoner : no of relaxation sweeps per level
-        //----------------------------------------------------------
+    if ( getParam("amg-strong-threshold",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%e", &amg_strong_threshold);
+       if ( amg_strong_threshold < 0.0 || amg_strong_threshold > 1.0 ) 
+       {
+          amg_strong_threshold = 0.25;
+          printf("HYPRE_SLE::parameters - invalid amg threshold => set to %e\n",
+                                          amg_strong_threshold);
+       }
+    }
 
-        if ( getParam("amg-num-sweeps",numParams,paramStrings,param) == 1)
-        {
-            sscanf(param,"%d", &nsweeps);
-            if ( nsweeps < 1 ) nsweeps = 1; 
-            for ( i = 0; i < 3; i++ ) amg_num_sweeps[i] = nsweeps;
-        }
+    //----------------------------------------------------------
+    // parasails preconditoner : threshold ( >= 0.0 )
+    //----------------------------------------------------------
 
-        //----------------------------------------------------------
-        // amg preconditoner : which smoother to use
-        //----------------------------------------------------------
+    if ( getParam("parasails-threshold",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%e", &parasails_threshold);
+       if ( parasails_threshold < 0.0 ) 
+       {
+          parasails_threshold = 0.0;
+          printf("HYPRE_SLE::parameters - parasails threshold set to %e\n",
+                                          parasails_threshold);
+       }
+    }
 
-        if ( getParam("amg-relax-type",numParams,paramStrings,param) == 1)
-        {
-            sscanf(param,"%s", param2);
-            if      ( !strcmp(param2, "jacobi" ) ) rtype = 2;
-            else if ( !strcmp(param2, "gs-slow") ) rtype = 1;
-            else if ( !strcmp(param2, "gs-fast") ) rtype = 4;
-            else if ( !strcmp(param2, "hybrid" ) ) rtype = 3;
-            else if ( !strcmp(param2, "direct" ) ) rtype = 9;
-            else 
-            {
-               rtype = 3;
-               printf("HYPRE_SLE::parameters - invalid relax type => set to hybrid.\n");
-            }
-            for ( i = 0; i < 3; i++ ) amg_relax_type[i] = rtype;
-        }
+    //----------------------------------------------------------
+    // parasails preconditoner : nlevels ( >= 1) 
+    //----------------------------------------------------------
 
-        //----------------------------------------------------------
-        // amg preconditoner : damping factor for Jacobi smoother
-        //----------------------------------------------------------
-
-        if ( getParam("amg-relax-weight",numParams,paramStrings,param) == 1)
-        {
-            sscanf(param,"%e", &weight);
-            if ( weight < 0.0 || weight > 1.0 ) 
-            {
-               weight = 0.5;
-               printf("HYPRE_SLE::parameters - invalid relax weight => set to %e\n",
-                                            amg_relax_weight);
-            }
-            for ( i = 0; i < 25; i++ ) amg_relax_weight[i] = weight;
-        }
-
-        //----------------------------------------------------------
-        // amg preconditoner : threshold to determine strong coupling
-        //----------------------------------------------------------
-
-        if ( getParam("amg-strong-threshold",numParams,paramStrings,param) == 1)
-        {
-            sscanf(param,"%e", &amg_strong_threshold);
-            if ( amg_strong_threshold < 0.0 || amg_strong_threshold > 1.0 ) 
-            {
-               amg_strong_threshold = 0.25;
-               printf("HYPRE_SLE::parameters - invalid amg threshold => set to %e\n",
-                                            amg_strong_threshold);
-            }
-        }
-
-        //----------------------------------------------------------
-        // parasails preconditoner : threshold ( >= 0.0 )
-        //----------------------------------------------------------
-
-        if ( getParam("parasails-threshold",numParams,paramStrings,param) == 1)
-        {
-            sscanf(param,"%e", &parasails_threshold);
-            if ( parasails_threshold < 0.0 ) 
-            {
-               parasails_threshold = 0.0;
-               printf("HYPRE_SLE::parameters - parasails threshold set to %e\n",
-                                            parasails_threshold);
-            }
-        }
-
-        //----------------------------------------------------------
-        // parasails preconditoner : nlevels ( >= 1) 
-        //----------------------------------------------------------
-
-        if ( getParam("parasails-nlevels",numParams,paramStrings,param) == 1)
-        {
-            sscanf(param,"%d", &parasails_nlevels);
-            if ( parasails_nlevels < 1 ) 
-            {
-               parasails_nlevels = 1;
-               printf("HYPRE_SLE::parameters - parasails nlevels set to %d\n",
-                                            parasails_nlevels);
-            }
-        }
-
-        if (debugOutput_) 
-        {
-           fprintf(debugFile_,"--- numParams %d\n",numParams);
-           for(int i=0; i<numParams; i++)
-               fprintf(debugFile_,"---- paramStrings[%d]: %s\n",i,paramStrings[i]);
-        }
+    if ( getParam("parasails-nlevels",numParams,paramStrings,param) == 1)
+    {
+       sscanf(param,"%d", &parasails_nlevels);
+       if ( parasails_nlevels < 1 ) 
+       {
+          parasails_nlevels = 1;
+          printf("HYPRE_SLE::parameters - parasails nlevels set to %d\n",
+                                          parasails_nlevels);
+       }
     }
 
     BASE_SLE::parameters(numParams, paramStrings); 
 
-    if (debugOutput_) 
-    {
-        fprintf(debugFile_,"leaving parameters function\n");
-        fflush(debugFile_);
-    }
 #ifdef DEBUG
-    if ( my_pid == 0 )
-    {
-       printf("HYPRE_SLE::leaving parameters function.\n");
-    }
+    printf("%4d : HYPRE_SLE::leaving parameters function.\n", my_pid);
 #endif
 
     return;
@@ -420,10 +396,7 @@ void HYPRE_SLE::selectSolver(char *name)
 {
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-    {
-       printf("HYPRE_SLE::entering selectSolver = %s\n", name);
-    }
+    printf("%4d : HYPRE_SLE::entering selectSolver = %s.\n", my_pid, name);
 #endif
 
     //--------------------------------------------------
@@ -492,10 +465,7 @@ void HYPRE_SLE::selectSolver(char *name)
     }
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-    {
-       printf("HYPRE_SLE::leaving selectSolver.\n");
-    }
+    printf("%4d : HYPRE_SLE::leaving selectSolver = %s.\n", my_pid, name);
 #endif
     return;
 }
@@ -509,10 +479,7 @@ void HYPRE_SLE::selectPreconditioner(char *name)
     int ierr;
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-    {
-       printf("HYPRE_SLE::entering selectPreconditioner = %s\n", name);
-    }
+    printf("%4d : HYPRE_SLE::entering selectPreconditioner = %s.\n", my_pid, name);
 #endif
 
     //--------------------------------------------------
@@ -575,7 +542,6 @@ void HYPRE_SLE::selectPreconditioner(char *name)
     {
        case HYDIAGONAL :
             pcg_precond = NULL;
-            printf("HYPRE_SLE selectPreconditioner : precond = diag\n");
             break;
 
        case HYPILUT :
@@ -598,10 +564,7 @@ void HYPRE_SLE::selectPreconditioner(char *name)
             break;
     }
 #ifdef DEBUG
-    if ( my_pid == 0 )
-    {
-       printf("HYPRE_SLE::leaving selectPreconditioner.\n");
-    }
+    printf("%4d : HYPRE_SLE::leaving selectPreconditioner.\n", my_pid);
 #endif
 }
 
@@ -651,10 +614,11 @@ void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
     int ierr;
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-    {
-       printf("HYPRE_SLE::entering createLinearAlgebraCore.\n");
-    }
+    printf("%4d : HYPRE_SLE::entering createLinearAlgebraCore.\n", my_pid);
+    printf("%4d : HYPRE_SLE::startrow, endrow = %d %d\n",my_pid,
+                                      localStartRow,localEndRow);
+    printf("%4d : HYPRE_SLE::startcol, endcol = %d %d\n",my_pid,
+                                      localStartCol,localEndCol);
 #endif
 
     //--------------------------------------------------
@@ -666,6 +630,13 @@ void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
        printf("HYPRE_SLE createLinearAlgebraCore : invalid row indices.\n");
        printf("          startrow, endrow        = %d %d\n",localStartRow,
                          localEndRow);
+       exit(1);
+    }
+    if ( localEndCol < localStartCol ) 
+    {
+       printf("HYPRE_SLE createLinearAlgebraCore : invalid column indices.\n");
+       printf("          startcol, endcol        = %d %d\n",localStartCol,
+                         localEndCol);
        exit(1);
     }
 
@@ -737,10 +708,7 @@ void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
     assert(!ierr);
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-    {
-       printf("HYPRE_SLE::leaving createLinearAlgebraCore.\n");
-    }
+    printf("%4d : HYPRE_SLE::leaving createLinearAlgebraCore.\n", my_pid);
 #endif
 }
 
@@ -756,10 +724,7 @@ void HYPRE_SLE::matrixConfigure(IntArray* rows)
     int i, j, ierr, nsize, *indices, maxSize, minSize;
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-    {
-       printf("HYPRE_SLE::entering matrixConfigure.\n");
-    }
+    printf("%4d : HYPRE_SLE::entering matrixConfigure.\n", my_pid);
 #endif
 
     //--------------------------------------------------
@@ -784,8 +749,8 @@ void HYPRE_SLE::matrixConfigure(IntArray* rows)
     minSize = 1000000;
     for ( i = 0; i < nsize; i++ ) 
     {
-       rowLengths[i] = rows[StartRow_+i-1].size();
-       indices = &((rows[StartRow_+i-1])[0]);
+       rowLengths[i] = rows[i].size();
+       indices = &((rows[i])[0]);
 
        if ( rowLengths[i] > 0 ) colIndices[i] = new int[rowLengths[i]];
        else                     colIndices[i] = NULL;
@@ -798,12 +763,10 @@ void HYPRE_SLE::matrixConfigure(IntArray* rows)
     }
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-    {
-       printf("HYPRE_SLE matrixConfigure : max/min nnz/row = %d %d\n",maxSize,minSize);
-    }
+    printf("%4d : HYPRE_SLE matrixConfigure : max/min nnz/row = %d %d\n",
+                                              my_pid, maxSize, minSize);
 #endif
-    pilut_max_nz_per_row = maxSize;
+    MPI_Allreduce(&maxSize, &pilut_max_nz_per_row, 1, MPI_INT, MPI_MAX, comm);
 
     ierr = HYPRE_IJMatrixSetRowSizes(HY_A, rowLengths);
     assert(!ierr);
@@ -812,10 +775,7 @@ void HYPRE_SLE::matrixConfigure(IntArray* rows)
     assert(!ierr);
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-    {
-       printf("HYPRE_SLE::leaving matrixConfigure.\n");
-    }
+    printf("%4d : HYPRE_SLE::leaving matrixConfigure.\n", my_pid);
 #endif
 }
 
@@ -828,7 +788,15 @@ void HYPRE_SLE::resetMatrixAndVector(double s)
 {
     int  ierr, size;
 
-    assert(s == 0.0);
+#ifdef DEBUG
+    printf("%d : HYPRE_SLE::entering resetMatrixAndVector.\n", my_pid);
+#endif
+
+    if ( s != 0.0 )
+    {
+       printf("%d : HYPRE_SLE::resetMatrixAndVector - cannot take nonzeros.\n",my_pid);
+       exit(1);
+    }
 
     HYPRE_IJVectorZeroLocalComponents(HY_b);
     assemble_flag = 0;
@@ -850,6 +818,10 @@ void HYPRE_SLE::resetMatrixAndVector(double s)
     assert(!ierr);
     ierr = HYPRE_IJMatrixInitialize(HY_A);
     assert(!ierr);
+
+#ifdef DEBUG
+    printf("%4d : HYPRE_SLE::leaving resetMatrixAndVector.\n", my_pid);
+#endif
 }
 
 //***************************************************************************
@@ -862,20 +834,38 @@ void HYPRE_SLE::sumIntoRHSVector(int num, const int* indices,
     int    i, ierr, *local_ind;
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-       printf("HYPRE_SLE::entering sumIntoRHSVector.\n");
+#ifdef DEBUG_LEVEL2
+    printf("%d : HYPRE_SLE::entering sumIntoRHSVector.\n", my_pid);
+    for ( i = 0; i < num; i++ )
+    {
+       printf("%d : HYPRE_SLE::sumIntoRHSVector - %d = %e.\n", 
+                               my_pid, indices[i], values[i]);
+    }
+#endif
 #endif
 
     local_ind = new int[num];
-    for (i=0; i<num; i++) local_ind[i] = indices[i] - 1; // change to 0-based
+    for ( i = 0; i < num; i++ ) // change to 0-based
+    {
+       if ( indices[i] > 0 && indices[i] <= globalNumEqns_ )
+          local_ind[i] = indices[i] - 1; 
+       else
+       {
+          printf("%d : HYPRE_SLE::sumIntoRHSVector - index out of range = %d.\n", 
+                                  my_pid, indices[i]);
+          exit(1);
+       }
+    }
 
     ierr = HYPRE_IJVectorAddToLocalComponents(HY_b,num,local_ind,NULL,values);
     assert(!ierr);
 
     delete [] local_ind;
+
 #ifdef DEBUG
-    if ( my_pid == 0 )
-       printf("HYPRE_SLE::leaving sumIntoRHSVector.\n");
+#ifdef DEBUG_LEVEL2
+    printf("%4d : HYPRE_SLE::leaving sumIntoRHSVector.\n", my_pid);
+#endif
 #endif
 }
 
@@ -889,7 +879,17 @@ void HYPRE_SLE::putIntoSolnVector(int num, const int* indices,
     int i, ierr, *local_ind;
 
     local_ind = new int[num];
-    for (i=0; i<num; i++) local_ind[i] = indices[i] - 1; // change to 0-based
+    for ( i = 0; i < num; i++ ) // change to 0-based
+    {
+       if ( indices[i] > 0 && indices[i] <= globalNumEqns_ )
+          local_ind[i] = indices[i] - 1; 
+       else
+       {
+          printf("%d : HYPRE_SLE::putIntoSolnVector - index out of range = %d.\n", 
+                                  my_pid, indices[i]);
+          exit(1);
+       }
+    }
 
     ierr = HYPRE_IJVectorSetLocalComponents(HY_x,num,local_ind,NULL,values);
     assert(!ierr);
@@ -906,7 +906,13 @@ double HYPRE_SLE::accessSolnVector(int equation)
     double val;
     int eqnNumber, ierr;
 
-    eqnNumber = equation-1; // construct 0-based index
+    eqnNumber = equation - 1; // construct 0-based index
+    if ( equation <= 0 || equation > globalNumEqns_ )
+    {
+       printf("%d : HYPRE_SLE::accessSolnVector - index out of range = %d.\n", 
+                               my_pid, equation);
+       exit(1);
+    }
 
     ierr = HYPRE_IJVectorGetLocalComponents(HY_x, 1, &eqnNumber, NULL, &val);
     assert(!ierr);
@@ -924,8 +930,12 @@ void HYPRE_SLE::sumIntoSystemMatrix(int row, int numValues,
     int i, ierr, *local_ind;
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-       printf("HYPRE_SLE::entering sumIntoSystemMatrix.\n");
+#ifdef DEBUG_LEVEL2
+    printf("%4d : HYPRE_SLE::entering sumIntoSystemMatrix.\n", my_pid);
+    printf("%4d : HYPRE_SLE::row number = %d.\n", my_pid, row);
+    for ( i = 0; i < numValues; i++ ) 
+       printf("%4d : col = %d, data = %e\n", scatterIndices[i], values[i]);
+#endif
 #endif
 
     //--------------------------------------------------
@@ -952,13 +962,19 @@ void HYPRE_SLE::sumIntoSystemMatrix(int row, int numValues,
     // load the matrix
     //--------------------------------------------------
 
-    //for (i=0; i<numValues; i++) 
-    //   printf("HYPRE_SLE : mat %d = %e\n", scatterIndices[i]-1, values[i]);
-
     local_ind = new int[numValues];
 
-    for ( i = 0; i < numValues; i++ )
-        local_ind[i] = scatterIndices[i] - 1;   // change indices to 0-based
+    for ( i = 0; i < numValues; i++ ) // change indices to 0-based
+    {
+       if ( scatterIndices[i] > 0 && scatterIndices[i] <= globalNumEqns_ )
+          local_ind[i] = scatterIndices[i] - 1;
+       else
+       {
+          printf("%d : HYPRE_SLE::sumIntoSystemMatrix - index out of range = %d.\n", 
+                                  my_pid, scatterIndices[i]);
+          exit(1);
+       }
+    }
 
     ierr = HYPRE_IJMatrixAddToRow(HY_A, numValues, row-1, local_ind, values);
     assert(!ierr);
@@ -966,8 +982,9 @@ void HYPRE_SLE::sumIntoSystemMatrix(int row, int numValues,
     delete [] local_ind;
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-       printf("HYPRE_SLE::leaving sumIntoSystemMatrix.\n");
+#ifdef DEBUG_LEVEL2
+    printf("%4d : HYPRE_SLE::leaving sumIntoSystemMatrix.\n", my_pid);
+#endif
 #endif
 }
 
@@ -991,8 +1008,9 @@ void HYPRE_SLE::enforceEssentialBC(int* globalEqn, double* alpha,
     double    values[100], *values_temp, *local_gamma;
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-       printf("HYPRE_SLE::entering enforceEssentialBC.\n");
+#ifdef DEBUG_LEVEL2
+    printf("%4d : HYPRE_SLE::entering enforceEssentialBC.\n", my_pid);
+#endif
 #endif
 
     //--------------------------------------------------
@@ -1013,8 +1031,15 @@ void HYPRE_SLE::enforceEssentialBC(int* globalEqn, double* alpha,
     local_gamma = new double[leng];
     for ( i = 0; i < leng; i++ )
     {
-        tempEqn[i] = globalEqn[i] - 1;
-        local_gamma[i] = gamma[i] / alpha[i];
+       if ( globalEqn[i] > 0 && globalEqn[i] <= globalNumEqns_ )
+          tempEqn[i] = globalEqn[i] - 1;
+       else
+       {
+          printf("%d : HYPRE_SLE::enforceEssentialBC - index out of range = %d.\n", 
+                                  my_pid, globalEqn[i]);
+          exit(1);
+       }
+       local_gamma[i] = gamma[i] / alpha[i];
     }
 
     //--------------------------------------------------
@@ -1075,6 +1100,7 @@ void HYPRE_SLE::enforceEssentialBC(int* globalEqn, double* alpha,
           }
 
           // Set rhs for boundary point
+          printf("Add to rhs %d = %e\n", tempEqn[i]+1, local_gamma[i]);
           HYPRE_IJVectorSetLocalComponents(HY_b, 1, &tempEqn[i],
                                            NULL, &local_gamma[i]);
 
@@ -1085,8 +1111,9 @@ void HYPRE_SLE::enforceEssentialBC(int* globalEqn, double* alpha,
     delete [] tempEqn;
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-       printf("HYPRE_SLE::leaving enforceEssentialBC.\n");
+#ifdef DEBUG_LEVEL2
+    printf("%4d : HYPRE_SLE::leaving enforceEssentialBC.\n", my_pid);
+#endif
 #endif
 }
 
@@ -1110,8 +1137,9 @@ void HYPRE_SLE::enforceOtherBC(int* globalEqn, double* alpha, double* beta,
     double value, *local_gamma;
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-       printf("HYPRE_SLE::entering enforceOtherBC.\n");
+#ifdef DEBUG_LEVEL2
+    printf("%4d : HYPRE_SLE::entering enforceOtherBC.\n", my_pid);
+#endif
 #endif
 
     //--------------------------------------------------
@@ -1133,8 +1161,15 @@ void HYPRE_SLE::enforceOtherBC(int* globalEqn, double* alpha, double* beta,
 
     for ( i = 0; i < leng; i++ )
     {
-	tempEqn[i] = globalEqn[i] - 1;
-        local_gamma[i] = gamma[i] / beta[i];
+       if ( globalEqn[i] > 0 && globalEqn[i] <= globalNumEqns_ )
+          tempEqn[i] = globalEqn[i] - 1;
+       else
+       {
+          printf("%d : HYPRE_SLE::enforceOtherBC - index out of range = %d.\n", 
+                                  my_pid, globalEqn[i]);
+          exit(1);
+       }
+       local_gamma[i] = gamma[i] / beta[i];
     }
 
     //--------------------------------------------------
@@ -1147,7 +1182,7 @@ void HYPRE_SLE::enforceOtherBC(int* globalEqn, double* alpha, double* beta,
        {
           value = alpha[i]/beta[i];
           HYPRE_IJMatrixAddToRow(HY_A, 1, tempEqn[i], &tempEqn[i], &value);
-          HYPRE_IJVectorAddToLocalComponents(HY_b,1,&globalEqn[i],NULL,&local_gamma[i]);
+          HYPRE_IJVectorAddToLocalComponents(HY_b,1,&tempEqn[i],NULL,&local_gamma[i]);
        }
     }
 
@@ -1155,8 +1190,9 @@ void HYPRE_SLE::enforceOtherBC(int* globalEqn, double* alpha, double* beta,
     delete [] local_gamma;
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-       printf("HYPRE_SLE::leaving enforceOtherBC.\n");
+#ifdef DEBUG_LEVEL2
+    printf("%4d : HYPRE_SLE::leaving enforceOtherBC.\n", my_pid);
+#endif
 #endif
 }
 
@@ -1167,8 +1203,7 @@ void HYPRE_SLE::enforceOtherBC(int* globalEqn, double* alpha, double* beta,
 void HYPRE_SLE::matrixLoadComplete()
 {
 #ifdef DEBUG
-    if ( my_pid == 0 )
-       printf("HYPRE_SLE::entering matrixLoadComplete.\n");
+    printf("%4d : HYPRE_SLE::entering matrixLoadComplete.\n", my_pid);
 #endif
 
     HYPRE_IJMatrixAssemble(HY_A);
@@ -1183,10 +1218,8 @@ void HYPRE_SLE::matrixLoadComplete()
 #endif
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-       printf("HYPRE_SLE::leaving matrixLoadComplete.\n");
+    printf("%4d : HYPRE_SLE::leaving matrixLoadComplete.\n", my_pid);
 #endif
-
 }
 
 //***************************************************************************
@@ -1203,8 +1236,7 @@ void HYPRE_SLE::launchSolver(int* solveStatus)
     HYPRE_ParVector    r_csr;
 
 #ifdef DEBUG
-    if ( my_pid == 0 )
-       printf("HYPRE_SLE::entering launchSolver.\n");
+    printf("%4d : HYPRE_SLE::entering launchSolver.\n", my_pid);
 #endif
 
     //--------------------------------------------------
@@ -1227,12 +1259,10 @@ void HYPRE_SLE::launchSolver(int* solveStatus)
 
        case HYPCG :
 
-//#ifdef DEBUG
-            if ( my_pid == 0 )
-            {
-               printf("HYPRE_SLE : lauchSolver(PCG) - matsize = %d\n",globalNumEqns_);
-            }
-//#endif
+#ifdef DEBUG
+            printf("%4d : HYPRE_SLE : lauchSolver(PCG) - matsize = %d\n",
+                                                         my_pid, globalNumEqns_);
+#endif
             switch ( preconID_ ) 
             {
                case HYDIAGONAL :
@@ -1246,12 +1276,11 @@ void HYPRE_SLE::launchSolver(int* solveStatus)
                     if ( pilut_row_size == 0 )
                     {
                        pilut_row_size = (int) (1.2 * pilut_max_nz_per_row);
-                       printf("HYPRE_SLE: PILUT - rowsize set to = %d\n",pilut_row_size);
-                    }
 #ifdef DEBUG
-                    printf("HYPRE_SLE:: PILUT - row size = %d\n",pilut_row_size);
-                    printf("HYPRE_SLE:: PILUT - drop tol = %e\n",pilut_drop_tol);
+                       printf("HYPRE_SLE:: PILUT - row size = %d\n",pilut_row_size);
+                       printf("HYPRE_SLE:: PILUT - drop tol = %e\n",pilut_drop_tol);
 #endif
+                    }
                     HYPRE_ParCSRPilutSetFactorRowSize( pcg_precond, pilut_row_size );
                     HYPRE_ParCSRPilutSetDropTolerance(pcg_precond,pilut_drop_tol);
                     HYPRE_ParCSRPCGSetPrecond(pcg_solver,
@@ -1282,11 +1311,14 @@ void HYPRE_SLE::launchSolver(int* solveStatus)
                     for ( i = 0; i < 25; i++ ) relax_wt[i] = amg_relax_weight[i]; 
                     HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_wt);
 #ifdef DEBUG
-                    printf("HYPRE_SLE:: AMG - coarsen type = %d\n",amg_coarsen_type);
-                    printf("HYPRE_SLE:: AMG - threshold    = %e\n",amg_strong_threshold);
-                    printf("HYPRE_SLE:: AMG - numsweeps    = %d\n",amg_num_sweeps[0]);
-                    printf("HYPRE_SLE:: AMG - relax type   = %d\n",amg_relax_type[0]);
-                    printf("HYPRE_SLE:: AMG - relax weight = %e\n",amg_relax_weight[0]);
+                    if ( my_pid == 0 )
+                    {
+                       printf("HYPRE_SLE::AMG coarsen type = %d\n",amg_coarsen_type);
+                       printf("HYPRE_SLE::AMG threshold    = %e\n",amg_strong_threshold);
+                       printf("HYPRE_SLE::AMG numsweeps    = %d\n",amg_num_sweeps[0]);
+                       printf("HYPRE_SLE::AMG relax type   = %d\n",amg_relax_type[0]);
+                       printf("HYPRE_SLE::AMG relax weight = %e\n",amg_relax_weight[0]);
+                    }
 #endif
                     HYPRE_ParCSRPCGSetPrecond(pcg_solver,
                                    HYPRE_ParAMGSolve,
@@ -1304,20 +1336,22 @@ void HYPRE_SLE::launchSolver(int* solveStatus)
             HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
             rnorm = sqrt( rnorm );
             iterations_ = num_iterations;
-            printf("HYPRE_SLE :launchSolver(PCG) - NO. ITERATION =    %d.\n", 
-                                                   num_iterations);
-            printf("HYPRE_SLE::launchSolver(PCG) - FINAL NORM    =    %e.\n", rnorm);
+            if ( my_pid == 0 )
+            {
+               printf("HYPRE_SLE :launchSolver(PCG) - NO. ITERATION =    %d.\n", 
+                                                      num_iterations);
+               printf("HYPRE_SLE::launchSolver(PCG) - FINAL NORM    =    %e.\n", rnorm);
+            }
             if ( num_iterations >= max_iterations ) status = 0;
             break;
                
        case HYGMRES :
 
-//#ifdef DEBUG
-            if ( my_pid == 0 )
-            {
-               printf("HYPRE_SLE : lauchSolver(GMRES) - matsize = %d\n",globalNumEqns_);
-            }
-//#endif
+#ifdef DEBUG
+            printf("%4d : HYPRE_SLE : lauchSolver(GMRES) - matsize = %d\n",
+                                                         my_pid, globalNumEqns_);
+#endif
+
             switch ( preconID_ ) 
             {
                case HYDIAGONAL :
@@ -1331,12 +1365,11 @@ void HYPRE_SLE::launchSolver(int* solveStatus)
                     if ( pilut_row_size == 0 )
                     {
                        pilut_row_size = (int) (1.2 * pilut_max_nz_per_row);
-                       printf("HYPRE_SLE: PILUT - rowsize set to = %d\n",pilut_row_size);
-                    }
 #ifdef DEBUG
-                    printf("HYPRE_SLE:: PILUT - row size = %d\n",pilut_row_size);
-                    printf("HYPRE_SLE:: PILUT - drop tol = %e\n",pilut_drop_tol);
+                       printf("HYPRE_SLE:: PILUT - row size = %d\n",pilut_row_size);
+                       printf("HYPRE_SLE:: PILUT - drop tol = %e\n",pilut_drop_tol);
 #endif
+                    }
                     HYPRE_ParCSRPilutSetFactorRowSize( pcg_precond, pilut_row_size );
                     HYPRE_ParCSRPilutSetDropTolerance(pcg_precond,pilut_drop_tol);
                     HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
@@ -1367,11 +1400,14 @@ void HYPRE_SLE::launchSolver(int* solveStatus)
                     for ( i = 0; i < 25; i++ ) relax_wt[i] = amg_relax_weight[i]; 
                     HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_wt);
 #ifdef DEBUG
-                    printf("HYPRE_SLE:: AMG - coarsen type = %d\n",amg_coarsen_type);
-                    printf("HYPRE_SLE:: AMG - threshold    = %e\n",amg_strong_threshold);
-                    printf("HYPRE_SLE:: AMG - numsweeps    = %d\n",amg_num_sweeps[0]);
-                    printf("HYPRE_SLE:: AMG - relax type   = %d\n",amg_relax_type[0]);
-                    printf("HYPRE_SLE:: AMG - relax weight = %e\n",amg_relax_weight[0]);
+                    if ( my_pid == 0 )
+                    {
+                       printf("HYPRE_SLE::AMG coarsen type = %d\n",amg_coarsen_type);
+                       printf("HYPRE_SLE::AMG threshold    = %e\n",amg_strong_threshold);
+                       printf("HYPRE_SLE::AMG numsweeps    = %d\n",amg_num_sweeps[0]);
+                       printf("HYPRE_SLE::AMG relax type   = %d\n",amg_relax_type[0]);
+                       printf("HYPRE_SLE::AMG relax weight = %e\n",amg_relax_weight[0]);
+                    }
 #endif
                     HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
                                    HYPRE_ParAMGSolve,
@@ -1390,19 +1426,21 @@ void HYPRE_SLE::launchSolver(int* solveStatus)
             HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
             iterations_ = num_iterations;
             rnorm = sqrt( rnorm );
-            printf("HYPRE_SLE :launchSolver(GMRES) - NO. ITERATION =    %d.\n", 
-                                                   num_iterations);
-            printf("HYPRE_SLE::launchSolver(GMRES) - FINAL NORM    =    %e.\n", rnorm);
+            if ( my_pid == 0 )
+            {
+               printf("HYPRE_SLE :launchSolver(GMRES) - NO. ITERATION =    %d.\n", 
+                                                        num_iterations);
+               printf("HYPRE_SLE::launchSolver(GMRES) - FINAL NORM    =    %e.\n", 
+                                                        rnorm);
+            }
             if ( num_iterations >= max_iterations ) status = 0;
             break;
 
        case HYSUPERLU :
 
 #ifdef DEBUG
-            if ( my_pid == 0 )
-            {
-               printf("HYPRE_SLE : launchSolver(SuperLU) - matsize=%d\n",globalNumEqns_);
-            }
+            printf("%4d : HYPRE_SLE : launchSolver(SuperLU) - matsize=%d\n",
+                                      my_pid, globalNumEqns_);
 #endif
             solveUsingSuperLU(status);
             iterations_ = 0;
@@ -1412,10 +1450,8 @@ void HYPRE_SLE::launchSolver(int* solveStatus)
        case HYSUPERLUX :
 
 #ifdef DEBUG
-            if ( my_pid == 0 )
-            {
-              printf("HYPRE_SLE : launchSolver(SuperLUX) - matsize=%d\n",globalNumEqns_);
-            }
+            printf("%4d : HYPRE_SLE : launchSolver(SuperLUX) - matsize=%d\n",
+                                      my_pid, globalNumEqns_);
 #endif
             solveUsingSuperLUX(status);
             iterations_ = 0;
@@ -1425,10 +1461,8 @@ void HYPRE_SLE::launchSolver(int* solveStatus)
        case HYY12M :
 
 #ifdef DEBUG
-            if ( my_pid == 0 )
-            {
-               printf("HYPRE_SLE : launchSolver(Y12M) - matsize = %d\n",globalNumEqns_);
-            }
+            printf("%4d : HYPRE_SLE : launchSolver(Y12M) - matsize=%d\n",
+                                         my_pid, globalNumEqns_);
 #endif
             solveUsingY12M(status);
             iterations_ = 0;
@@ -1437,10 +1471,15 @@ void HYPRE_SLE::launchSolver(int* solveStatus)
     }
 
     *solveStatus = status; 
+
+#ifdef DEBUG
+    printf("%4d : HYPRE_SLE::leaving launchSolver.\n", my_pid);
+#endif
 }
 
 //***************************************************************************
 // reading a matrix from a file in ija format (first row : nrows, nnz)
+// (read by a single processor)
 //---------------------------------------------------------------------------
 
 void ML_Get_IJAMatrixFromFile(double **val, int **ia, int **ja, int *N, 
@@ -1455,7 +1494,7 @@ void ML_Get_IJAMatrixFromFile(double **val, int **ia, int **ja, int *N,
    /* read matrix file                          */
    /* ========================================= */
 
-   printf("reading matrix file = %s \n", matfile );
+   printf("Reading matrix file = %s \n", matfile );
    fp = fopen( matfile, "r" );
    if ( fp == NULL ) {
       printf("Error : file open error (filename=%s).\n", matfile);
@@ -3078,23 +3117,38 @@ void fei_hypre_test(int argc, char *argv[])
     int i;
     int status;
 
-    IntArray rows[6];
-    rows[0].append(1);
-    rows[0].append(2);
-    rows[1].append(1);
-    rows[1].append(2);
-    rows[1].append(3);
-    rows[2].append(2);
-    rows[2].append(3);
-    rows[2].append(4);
-    rows[3].append(3);
-    rows[3].append(4);
-    rows[3].append(5);
-    rows[4].append(4);
-    rows[4].append(5);
-    rows[4].append(6);
-    rows[5].append(5);
-    rows[5].append(6);
+    IntArray *rows;
+    rows = new IntArray[3];
+
+    MPI_Init(&argc, &argv);
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+    assert(num_procs == 2);
+
+    switch (my_rank)
+    {
+        case 0:
+           rows[0].append(1);
+           rows[0].append(2);
+           rows[1].append(1);
+           rows[1].append(2);
+           rows[1].append(3);
+           rows[2].append(2);
+           rows[2].append(3);
+           rows[2].append(4);
+           break;
+        case 1 :
+           rows[0].append(3);
+           rows[0].append(4);
+           rows[0].append(5);
+           rows[1].append(4);
+           rows[1].append(5);
+           rows[1].append(6);
+           rows[2].append(5);
+           rows[2].append(6);
+           break;
+    }
 
     const int ind1[] = {1, 2};
     const int ind2[] = {2, 3};
@@ -3118,19 +3172,12 @@ void fei_hypre_test(int argc, char *argv[])
     double mix_beta[] = {5.0};
     double mix_gamma[] = {10.0};
 
-    MPI_Init(&argc, &argv);
-
-    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-
-    assert(num_procs == 2);
-
     HYPRE_SLE H(MPI_COMM_WORLD, 0);
 
     if (my_rank == 0)
-        H.createLinearAlgebraCore(6, 1, 3, 1, 6);
+        H.createLinearAlgebraCore(6, 1, 3, 1, 3);
     else
-        H.createLinearAlgebraCore(6, 4, 6, 1, 6);
+        H.createLinearAlgebraCore(6, 4, 6, 4, 6);
 
     H.matrixConfigure(rows);
 
@@ -3181,7 +3228,7 @@ void fei_hypre_test(int argc, char *argv[])
     H.selectPreconditioner("pilut");
 
     H.launchSolver(&status);
-    assert(status == 0);
+    assert(status == 1);
 
     // get the result
     for (i=1; i<=3; i++)
@@ -3190,8 +3237,6 @@ void fei_hypre_test(int argc, char *argv[])
       else
 	printf("sol(%d): %f\n", i+3, H.accessSolnVector(i+3));
 
-    H.resetMatrixAndVector(0.0);
-    
     MPI_Finalize();
 
     // note implicit call to destructor at end of scope
@@ -3257,20 +3302,16 @@ void fei_hypre_test2(int argc, char *argv[])
     // create matrix and rhs in the hypre context 
     //======================================================
 
-    H.createLinearAlgebraCore(nrows, mybegin+1, myend+1, 1, nrows);
+    H.createLinearAlgebraCore(nrows, mybegin+1, myend+1, mybegin+1, myend+1);
 
     IntArray  *rows;
-    int       *zdiagArray = new int[nrows];
     double    zero=0.0;
 
     rows = new IntArray[nrows]();
-    for ( i = 0; i < nrows; i++ ) {
-       zdiagArray[i] = 1;
+    for ( i = mybegin; i < myend+1; i++ ) {
        for ( j = ia[i]; j < ia[i+1]; j++ ) {
-          rows[i].append(ja[j]);
-          if ( ja[j] == i+1 ) zdiagArray[i] = 0;
+          rows[i-mybegin].append(ja[j]);
        }
-       //if (zdiagArray[i]) rows[i].append(i+1);
     }
 
     H.matrixConfigure(rows);
@@ -3279,9 +3320,7 @@ void fei_hypre_test2(int argc, char *argv[])
        ncnt = ia[i+1] - ia[i];
        index = i + 1;
        H.sumIntoSystemMatrix(index, ncnt, &val[ia[i]], &ja[ia[i]]);
-       //if (zdiagArray[i]) H.sumIntoSystemMatrix(index, 1, &zero, &index);
     }
-    delete zdiagArray;
 
     H.matrixLoadComplete();
 
@@ -3290,13 +3329,17 @@ void fei_hypre_test2(int argc, char *argv[])
        H.sumIntoRHSVector(1, &index, &rhs[i]);
     }
 
+    char *paramString = new char[100];
+    strcpy(paramString, "pilut-row-size 50");
+    H.parameters(1, &paramString);
+
     H.selectSolver("gmres");
 
-    H.selectPreconditioner("pilut");
+    H.selectPreconditioner("boomeramg");
 
     H.launchSolver(&status);
 
-    assert(status == 0);
+    assert(status == 1);
 
     // get the result
     /*

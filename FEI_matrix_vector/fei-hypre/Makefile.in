@@ -33,19 +33,18 @@ LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
 LFLAGS =\
  -L.\
  -L../fei-isis\
- -L../fei-isis/src\
  -L../isis-mv\
  -L../../IJ_matrix_vector\
  -L../../utilities\
  -L../../parcsr_matrix_vector\
  -L../../parcsr_linear_solvers\
+ -L../../seq_matrix_vector\
  -L../../distributed_matrix\
  -L../../distributed_linear_solvers/pilut\
  -L../../distributed_linear_solvers/ParaSails\
- -L../../seq_matrix_vector\
  -L../../matrix_matrix\
- -lHYPRE_FEI \
- -lHYPRE_FEI_base \
+ -lHYPRE_FEI\
+ -lHYPRE_FEI_base\
  -lHYPRE_parcsr_ls \
  -lHYPRE_ParaSails \
  -lHYPRE_FEI_isismv \
@@ -55,9 +54,11 @@ LFLAGS =\
  -lHYPRE_MatrixMatrix \
  -lHYPRE_DistributedMatrix \
  -lHYPRE_DistributedMatrixPilutSolver \
+ -lsuperlu_alpha \
  -lHYPRE_seq_mv \
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}\
- -ldxml -lm
+ -lm
+
 
 HEADERS =\
  HYPRE_SLE.h
