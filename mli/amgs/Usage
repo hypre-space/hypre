@@ -2,10 +2,11 @@ To create the smoothed aggregation multigrid method,
 
 1. instantiate the method (create smoothed aggregation AMG context)
 
-   method = new MLI_Method( name, comm );
+   method = new MLI_MethodAgent( comm );
+   method->createMethod( name );
   
    where
-      name = MLI_AMGSA or MLI_AMGSA_CALIB
+      name = MLI_METHOD_AMGSA 
       comm = a MPI communicator
 
 2. set the desired SA AMG parameters 
@@ -43,7 +44,6 @@ To create the smoothed aggregation multigrid method,
          argv[1] = node degree of freedom
          argv[2] = coordinates
          argv[3] = scalings 
-      reinitialize
       print
 
 3. set up the grid hierarchy
