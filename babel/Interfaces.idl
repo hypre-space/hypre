@@ -14,6 +14,9 @@ package Hypre {
    // Start was formerly called New, but that is now a Babel reserved word.
    // For a builder, Start() or Reset() and Finish() are alternatives.
    // For a self-building class, Initialize() makes sense.
+   // Maybe to do: operator returns domain and range as a Map
+   // Maybe to do: SolverBuilder and derived classes have a Setup function
+   // which takes Vector arguments; maybe a Map would be better.
 
    // To do in future, as needed:
    // add SetDefault functions to builders
@@ -83,7 +86,26 @@ package Hypre {
                       in array<double,1> values);
    };
 
-   interface Map {};
+   interface StructuredGrid {
+   };
+
+   interface StructuredGridBuilder 
+   {
+      int SetGridExtents( in Box box );
+      int SetParameterDouble( in string name, in double value );
+      int SetParameterInt( in string name, in int value );
+      int SetParameterIntArray( in string name, in array<int,1> value );
+      int GetParameterInt( in string name, out int value );
+      int GetConstructedObject(out StructuredGrid obj);
+      int Start( in MPI_Com com, in int dimension );
+      int Setup();
+   };
+   
+   interface Stencil {
+      int SetElement( in int element_index, in array<int,1> element_offset );
+   };
+
+   interface Map {}; // describes a data distribution, e.g. of a vector
 
    interface MapPartitionedBuilder {
       int Start( in array<int,1> partitioning );
@@ -110,6 +132,20 @@ package Hypre {
       //   out array<int,1> globalOwnedGlobalOffsets );
       // int getLocalOwnership( out int localOwnedSize,
       //   out int localOwnedGlobalOffset );
+   };
+
+// TO DO: MapStructMatrix will be the same, except that map information also includes a stencil
+
+   interface MapStructuredVector extends Map {
+      int GetNumGhost( out array<int,1> values );
+      int GetGrid( out StructuredGrid grid );
+   };
+
+   interface MapStructuredVectorBuilder {
+      int Start( in array<int,1> num_ghost, in StructuredGrid grid );
+      int SetNumGhost( in array<int,1> values );
+      int Setup();
+      int GetConstructedObject( out MapStructuredVector obj );
    };
  
    interface StructuredGridVectorBuilder {
@@ -200,25 +236,6 @@ package Hypre {
                                        in array<double,1> values );
       int Setup();
       int GetConstructedObject(out Vector obj);
-   };
-
-   interface StructuredGrid {
-   };
-
-   interface StructuredGridBuilder 
-   {
-      int SetGridExtents( in Box box );
-      int SetParameterDouble( in string name, in double value );
-      int SetParameterInt( in string name, in int value );
-      int SetParameterIntArray( in string name, in array<int,1> value );
-      int GetParameterInt( in string name, out int value );
-      int GetConstructedObject(out StructuredGrid obj);
-      int Start( in MPI_Com com, in int dimension );
-      int Setup();
-   };
-   
-   interface Stencil {
-      int SetElement( in int element_index, in array<int,1> element_offset );
    };
 
    interface Solver extends LinearOperator {
@@ -317,6 +334,18 @@ package Hypre {
       int Setup();
    };
    
+   class MapStructVector implements MapStructuredVector {
+      int GetNumGhost( out array<int,1> values );
+      int GetGrid( out StructuredGrid grid );
+   };
+
+   class MapStructVectorBuilder implements MapStructuredVectorBuilder {
+      int Start( in array<int,1> num_ghost, in StructuredGrid grid );
+      int SetNumGhost( in array<int,1> values );
+      int Setup();
+      int GetConstructedObject( out MapStructuredVector obj );
+   };
+ 
    class StructVectorBuilder implements StructuredGridVectorBuilder {
       void print();
       int SetValue( in array<int,1> where, in double value );
@@ -331,7 +360,7 @@ package Hypre {
    };
 
    class StructVector implements Vector {
-      int GetNumGhost( in array<int,1> values );
+      int GetNumGhost( out array<int,1> values );
       int Clear ();                    
       int Copy (in Vector x);         
       int Clone (out Vector x);       
