@@ -64,7 +64,7 @@ then
      $AMG_MKDIR $AMG_BIN
    fi
 
-   UTILITIES="amgstrip amgmvio convert_icf3d readysmp.m readvec.m \
+   UTILITIES="amgrun amgstrip amgmvio convert_icf3d readysmp.m readvec.m \
               writevec.m writeysmp.m manalyze.m lapmake.m lapmake9.m"
 
    for i in $UTILITIES
