@@ -54,6 +54,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
 
    int       old_num_levels, num_levels;
    int       level;
+   int       local_size, i;
    int       coarse_size;
    int       coarsen_type;
    int       measure_type;
@@ -158,35 +159,37 @@ hypre_ParAMGSetup( void               *amg_vdata,
 	 else
 	   printf (" Warning ! Matrix norm is zero !!!");
       }
-      if (coarsen_type == 6)
+      if (max_levels > 1)
       {
-	 hypre_ParAMGCoarsenFalgout(A_array[level],
+         if (coarsen_type == 6)
+         {
+	    hypre_ParAMGCoarsenFalgout(A_array[level],
                                     strong_threshold, max_row_sum,
                                     debug_flag, &S, &CF_marker, &coarse_size); 
-      }
-      else if (coarsen_type)
-      {
-	 hypre_ParAMGCoarsenRuge(A_array[level],
+         }
+         else if (coarsen_type)
+         {
+	    hypre_ParAMGCoarsenRuge(A_array[level],
                                  strong_threshold, max_row_sum,
                                  measure_type, coarsen_type, debug_flag,
                                  &S, &CF_marker, &coarse_size); 
-      }
-      else
-      {
-	 hypre_ParAMGCoarsen(A_array[level],
+         }
+         else
+         {
+	    hypre_ParAMGCoarsen(A_array[level],
                              strong_threshold, max_row_sum,
                              debug_flag, &S, &CF_marker, &coarse_size); 
-      }
+         }
  
-      if (debug_flag==1)
-      {
-         wall_time = time_getWallclockSeconds() - wall_time;
-         printf("Proc = %d    Level = %d    Coarsen Time = %f\n",
+         if (debug_flag==1)
+         {
+            wall_time = time_getWallclockSeconds() - wall_time;
+            printf("Proc = %d    Level = %d    Coarsen Time = %f\n",
                        my_id,level, wall_time); 
-	 fflush(NULL);
-      }
+	    fflush(NULL);
+         }
 
-      CF_marker_array[level] = CF_marker;
+         CF_marker_array[level] = CF_marker;
       
 #if DEBUG
    if (amg_ioutdat == -3)
@@ -211,26 +214,37 @@ hypre_ParAMGSetup( void               *amg_vdata,
    } 
 #endif
 
-      /*-------------------------------------------------------------
-       * Build prolongation matrix, P, and place in P_array[level] 
-       *--------------------------------------------------------------*/
-      if (debug_flag==1) wall_time = time_getWallclockSeconds();
+         /*-------------------------------------------------------------
+          * Build prolongation matrix, P, and place in P_array[level] 
+          *--------------------------------------------------------------*/
+         if (debug_flag==1) wall_time = time_getWallclockSeconds();
 
-      hypre_ParAMGBuildInterp(A_array[level], CF_marker_array[level], S,
+         hypre_ParAMGBuildInterp(A_array[level], CF_marker_array[level], S,
                               debug_flag, trunc_factor, &P);
 
-      if (debug_flag==1)
-      {
-         wall_time = time_getWallclockSeconds() - wall_time;
-         printf("Proc = %d    Level = %d    Build Interp Time = %f\n",
+         if (debug_flag==1)
+         {
+            wall_time = time_getWallclockSeconds() - wall_time;
+            printf("Proc = %d    Level = %d    Build Interp Time = %f\n",
                        my_id,level, wall_time);
-	 fflush(NULL);
-      }
+	    fflush(NULL);
+         }
 
-      P_array[level] = P; 
-      hypre_ParCSRMatrixDestroy(S);
-      S = NULL;
-      coarse_size = hypre_ParCSRMatrixGlobalNumCols(P);
+         P_array[level] = P; 
+         hypre_ParCSRMatrixDestroy(S);
+         S = NULL;
+         coarse_size = hypre_ParCSRMatrixGlobalNumCols(P);
+      }
+      else
+      {
+	 local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+         CF_marker = hypre_CTAlloc(int, local_size );
+	 for (i=0; i < local_size ; i++)
+	    CF_marker[i] = 1;
+         CF_marker_array = hypre_CTAlloc(int*, 1);
+	 CF_marker_array[level] = CF_marker;
+	 coarse_size = fine_size;
+      }
 
       /* if no coarse-grid, stop coarsening, and set the
        * coarsest solve to be a single sweep of Jacobi */
@@ -249,7 +263,8 @@ hypre_ParAMGSetup( void               *amg_vdata,
          grid_relax_type[3] = 0;
          grid_relax_points[3][0] = 0;
 
-         hypre_ParCSRMatrixDestroy(P_array[level]);
+	 if (P_array)
+            hypre_ParCSRMatrixDestroy(P_array[level]);
          if (level > 0)
          {
             /* note special case treatment of CF_marker is necessary
