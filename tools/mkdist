@@ -108,7 +108,7 @@ mkdir $HYPRE_INSTALL_DIR/src
   fi
 )
 
-Version=`$HYPRE_INSTALL_DIR/src/linear_solvers/utilities/version -number`
+Version=`echo ${RtagVersionId}|cut -c2- |sed 's/-/\./g'`
 if [  $? -ne 0 ]
 then
   echo "Error: CVS repository defective"
@@ -143,7 +143,6 @@ tar cf $HYPRE_DIR.tar \
     $HYPRE_DIR/COPYRIGHT_and_DISCLAIMER \
     $HYPRE_DIR/README \
     $HYPRE_DIR/docs \
-    $HYPRE_DIR/bin \
     $HYPRE_DIR/src/FEI_mv \
     $HYPRE_DIR/src/HYPRE.h \
     $HYPRE_DIR/src/IJ_mv \
