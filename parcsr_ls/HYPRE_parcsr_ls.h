@@ -439,7 +439,7 @@ int HYPRE_BoomerAMGSetTruncFactor(HYPRE_Solver solver,
  * a communication package is generated for S. This can save
  * memory and decrease the amount of data that needs to be communicated,
  * if S is substantially sparser than A.
- * The default is 0.05.
+ * The default is 1.0.
  **/
 int HYPRE_BoomerAMGSetSCommPkgSwitch(HYPRE_Solver solver,
                                   double       S_commpkg_switch);
