@@ -2221,9 +2221,12 @@ void HYPRE_LinSysCore::buildSlideReducedSystem()
           globalSelectedListAux[globalNSelected++] = globalSelectedListAux[i];
        }
     }
-    for (i = 0; i < globalNSelected; i++) 
-       printf("%d : Globallist %d = %d %d\n",mypid_,i,globalSelectedList[i],
-              globalSelectedListAux[i]);
+    if ( (HYOutputLevel_ & HYFEI_SLIDEREDUCE2) && mypid == 0 )
+    {
+       for (i = 0; i < globalNSelected; i++) 
+          printf("%d : Globallist %d = %d %d\n",mypid_,i,globalSelectedList[i],
+                 globalSelectedListAux[i]);
+    }
     
     //******************************************************************
     // construct A21
@@ -2703,10 +2706,10 @@ void HYPRE_LinSysCore::buildSlideReducedSystem()
           {
              if ( colIndex >= StartRow && colIndex <= newEndRow ) 
              {
-	        searchIndex = hypre_BinarySearch(selectedList, colIndex, 
+                searchIndex = hypre_BinarySearch(selectedList, colIndex, 
                                                  nSelected); 
                 if ( searchIndex >= 0 ) 
-                   searchIndex=selectedListAux[searchIndex]+ProcNConstr[mypid_];
+                   searchIndex = selectedListAux[searchIndex];
              }
              else if ( colIndex < StartRow || colIndex > EndRow ) 
              {
@@ -2715,6 +2718,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem()
                 if ( searchIndex >= 0 ) 
                    searchIndex = globalSelectedListAux[searchIndex];
              }
+             else searchIndex = -1;
 
              if ( searchIndex >= 0 ) 
              {
