@@ -417,6 +417,7 @@ int hypre_map2( int ix , int iy , int p , int q , int P , int Q , int *nx_part ,
 /* par_laplace.c */
 HYPRE_ParCSRMatrix GenerateLaplacian( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value );
 int hypre_map( int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part );
+HYPRE_ParCSRMatrix GenerateSysLaplacian( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , int num_fun , double *mtrx , double *value );
 
 /* par_nodal_systems.c */
 int hypre_BoomerAMGCreateNodalA( hypre_ParCSRMatrix *A , int num_functions , int *dof_func , int option , hypre_ParCSRMatrix **AN_ptr );
