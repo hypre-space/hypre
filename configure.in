@@ -178,7 +178,7 @@ dnl * possibility that certain parts of the package are not present.
 dnl *********************************************************************
 
 CASC_CONFIG_OUTPUT_LIST(utilities struct_matrix_vector \
-                        struct_linear_solvers)
+                        struct_linear_solvers test)
 
 AC_OUTPUT($Makefile_list)
 
