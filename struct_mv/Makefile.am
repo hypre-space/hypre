@@ -58,6 +58,7 @@ FILES = \
  struct_matrix.c\
  struct_matrix_mask.c\
  struct_matvec.c\
+ struct_overlap_innerprod.c\
  struct_scale.c\
  struct_stencil.c\
  struct_vector.c
