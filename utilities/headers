@@ -45,7 +45,9 @@ cat threading.h                >> $INTERNAL_HEADER
 
 cat timing.h                   >> $INTERNAL_HEADER
 
-cat umalloc_local.h            >> $INTERNAL_HEADER
+cat amg_linklist.h             >> $INTERNAL_HEADER
+
+mkproto amg_linklist.c         >> $INTERNAL_HEADER
 		          
 #===========================================================================
 # Include guards
