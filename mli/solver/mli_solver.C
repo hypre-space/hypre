@@ -62,7 +62,7 @@ MLI_Solver::MLI_Solver( int solver_id )
            strcpy( solver_name, "MLS" );
            solver_id  = MLI_SOLVER_MLS_ID;
            break;
-#ifdef SUPERLU
+#ifdef MLI_SUPERLU
       case MLI_SOLVER_SUPERLU_ID :
            strcpy( solver_name, "SuperLU" );
            solver_id  = MLI_SOLVER_SUPERLU_ID;
@@ -188,7 +188,7 @@ MLI_Solver *MLI_Solver_CreateFromID( int solver_id )
       case MLI_SOLVER_MLS_ID :
            solver_ptr = new MLI_Solver_MLS();
            break;
-#ifdef SUPERLU
+#ifdef MLI_SUPERLU
       case MLI_SOLVER_SUPERLU_ID :
            solver_ptr = new MLI_Solver_SuperLU();
            break;

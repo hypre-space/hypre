@@ -6,7 +6,7 @@
  *
  *********************************************************************EHEADER*/
 
-#ifdef SUPERLU
+#ifdef MLI_SUPERLU
 
 #ifndef __MLI_SOLVER_SUPERLUH__
 #define __MLI_SOLVER_SUPERLUH__

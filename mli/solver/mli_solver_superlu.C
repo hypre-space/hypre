@@ -12,7 +12,7 @@
  * and Lawrence Berkeley National Lab.
  * ************************************************************************* */
 
-#ifdef SUPERLU
+#ifdef MLI_SUPERLU
 
 #include <string.h>
 #include <iostream.h>
