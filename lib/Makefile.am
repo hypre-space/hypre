@@ -138,6 +138,7 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx\
  $(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx\
  $(top_srcdir)/FEI_mv/femli/fedata/mli_fedata_utils.cxx\
+ $(top_srcdir)/FEI_mv/femli/fedata/mli_sfei.cxx\
  $(top_srcdir)/FEI_mv/femli/mapper/mli_mapper.cxx\
  $(top_srcdir)/FEI_mv/femli/matrix/mli_matrix.cxx\
  $(top_srcdir)/FEI_mv/femli/matrix/mli_matrix_mult.cxx\
