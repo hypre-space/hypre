@@ -37,7 +37,7 @@ cat general.h                  >> $INTERNAL_HEADER
 
 cat mpistubs.h                 >> $INTERNAL_HEADER
 
-cat memory.h                   >> $INTERNAL_HEADER
+cat hypre_memory.h             >> $INTERNAL_HEADER
 
 ./protos random.c              >> $INTERNAL_HEADER
 

@@ -54,7 +54,7 @@ veryclean: clean
 ##################################################################
  
 UTILITIES_HEADERS =\
- memory.h\
+ hypre_memory.h\
  mpistubs.h\
  thread_mpistubs.h\
  threading.h\
@@ -66,7 +66,7 @@ UTILITIES_HEADERS =\
  fortran.h
 
 UTILITIES_FILES =\
- memory.c\
+ hypre_memory.c\
  memory_dmalloc.c\
  mpistubs.c\
  thread_mpistubs.c\
@@ -77,7 +77,7 @@ UTILITIES_FILES =\
  binsearch.c\
  qsplit.c\
  umalloc_local.c\
- qsort.c\
+ hypre_qsort.c\
  random.c
 
 UTILITIES_OBJS = ${UTILITIES_FILES:.c=.o}

@@ -98,7 +98,7 @@ extern "C" {
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-/* memory.c */
+/* hypre_memory.c */
 int hypre_OutOfMemory( int size );
 char *hypre_MAlloc( int size );
 char *hypre_CAlloc( int count , int elt_size );
