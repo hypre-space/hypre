@@ -49,7 +49,7 @@ main( int   argc,
    int                 p, q, r;
    int                 ilower[50][3];
    int                 iupper[50][3];
-   int                 istart[3] = {17, 0, 32};
+   int                 istart[3] = {-17, 0, 32};
    int                 nblocks, volume;
 
    int                 dim = 3;
