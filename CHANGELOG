@@ -14,6 +14,8 @@
 #
 #=============================================================================
 
+- PFMG: bug fix for red/black relaxation.
+
 Version 1.7.11a released, 2003/03/14.
 
 - BiCGSTAB has been added to struct and sstruct interface
