@@ -12,7 +12,7 @@
 #include <math.h>
 #include <assert.h>
 
-#define dabs(x) ((x > 0 ) ? x : -(x))
+#define habs(x) ((x > 0 ) ? x : -(x))
 
 /*-------------------------------------------------------------------------*/
 /* parcsr_mv.h is put here instead of in HYPRE_LinSysCore.h     */
@@ -756,7 +756,7 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
          RS[icnt]  = C[icnt] * RS[icnt];
          HH[icnt][icnt] = C[icnt] * HH[icnt][icnt] +
                           S[icnt] * HH[icnt2][icnt];
-         rnorm2 = dabs(RS[icnt2]);
+         rnorm2 = habs(RS[icnt2]);
          if ( myRank == 0 && its % 20 == 0 )
             printf("   Interface GMRES : iter %4d - res. norm = %e (%e)\n",its,
                        rnorm2, eps1);

@@ -36,7 +36,6 @@
 // local defines and local and external functions
 //---------------------------------------------------------------------------
 
-#define dabs(x) ((x > 0 ) ? x : -(x))
 void fei_hypre_domaindecomposition(int, char **);
 void fei_hypre_test(int, char **);
 
