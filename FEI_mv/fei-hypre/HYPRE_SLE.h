@@ -78,6 +78,9 @@ private:
 
     int num_iterations;
     double final_res_norm;
+
+friend void fei_hypre_test(int argc, char *argv[]);
+
 };
 
 #endif
