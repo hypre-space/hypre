@@ -372,6 +372,7 @@ AC_CONFIG_FILES([
   test/AUTOTEST/Makefile
   test/TEST_fei/Makefile
   test/TEST_ij/Makefile
+  test/TEST_ij_es/Makefile
   test/TEST_sstruct/Makefile
   test/TEST_struct/Makefile
   test/TEST_timing/Makefile
