@@ -70,7 +70,7 @@ class HYPRE_SlideReduction
    int    getSlaveEqnList(int **slist) 
                        { (*slist) = slaveEqnList_; return 0; }
    int    getPerturbationMatrix(HYPRE_ParCSRMatrix *matrix) 
-                       { (*matrix) = hypreRAP_; return 0; }
+                       { (*matrix) = hypreRAP_; hypreRAP_ = NULL; return 0; }
 
  private:
    int    findConstraints();
