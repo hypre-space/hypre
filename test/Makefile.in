@@ -47,6 +47,7 @@ EXTRA_PROGRAMS = ij$(EXEEXT) ij_es$(EXEEXT) ij_mv$(EXEEXT) \
 	new_ij.C++$(EXEEXT) ij_mv.C++$(EXEEXT) struct.C++$(EXEEXT) \
 	sstruct.C++$(EXEEXT)
 subdir = test
+SUBDIRS =
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/acinclude.m4 \
@@ -157,7 +158,6 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	uninstall-recursive
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -297,7 +297,7 @@ abs_srcdir = @abs_srcdir@
 abs_builddir = @abs_builddir@
 EXTRA_bindir = $(bindir)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-SUBDIRS = \
+DIST_SUBDIRS = \
  .\
  AUTOTEST\
  TEST_fei\
@@ -362,8 +362,7 @@ ij_es_libraries = \
  $(ij_libraries) 
 
 ij_es_LDADD = \
- $(ij_es_libraries) \
- @FLIBS@
+ $(ij_es_libraries) 
 
 #ij_es_LDFLAGS = -static
 # ij, dependencies rules needed because automatic dependency checking is off
@@ -1001,7 +1000,7 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
-	list='$(SUBDIRS)'; for subdir in $$list; do \
+	list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
 	  if test "$$subdir" = .; then :; else \
 	    test -d "$(distdir)/$$subdir" \
 	    || mkdir "$(distdir)/$$subdir" \

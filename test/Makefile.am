@@ -10,7 +10,7 @@ abs_builddir = @abs_builddir@
 EXTRA_bindir = $(bindir)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 
-SUBDIRS = \
+DIST_SUBDIRS = \
  .\
  AUTOTEST\
  TEST_fei\
@@ -91,8 +91,7 @@ ij_es_libraries = \
  -lHYPRE_lobpcg\
  $(ij_libraries) 
 ij_es_LDADD = \
- $(ij_es_libraries) \
- @FLIBS@
+ $(ij_es_libraries) 
 #ij_es_LDFLAGS = -static
 # ij, dependencies rules needed because automatic dependency checking is off
 ij_es_dependencies = \
