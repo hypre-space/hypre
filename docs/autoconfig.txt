@@ -47,9 +47,9 @@ line that reads "--enable and --with options recognized:"
 			is optimization
 
 --without-MPI		
-			This flag suppresses the use of MPI.  It produces
-			makefiles that serve the same purpose as the
-			files `Makefile.seq'
+			This flag suppresses the use of MPI, creating
+                        Makefiles that will compile a sequential version
+                        of the library.
 
 --with-mpi-include=DIR
 --with-mpi-libs=LIBS
