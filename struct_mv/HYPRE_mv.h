@@ -75,8 +75,8 @@ int HYPRE_SetStructVectorBoxValues P((HYPRE_StructVector vector , int *ilower , 
 int HYPRE_GetStructVectorBoxValues P((HYPRE_StructVector vector , int *ilower , int *iupper , double **values_ptr ));
 int HYPRE_AssembleStructVector P((HYPRE_StructVector vector ));
 void HYPRE_PrintStructVector P((char *filename , HYPRE_StructVector vector , int all ));
-void HYPRE_SetStructVectorNumGhost P((HYPRE_StructMatrix vector , int *num_ghost ));
-int HYPRE_SetStructVectorConstantValues P((HYPRE_StructMatrix vector , double values ));
+void HYPRE_SetStructVectorNumGhost P((HYPRE_StructVector vector , int *num_ghost ));
+int HYPRE_SetStructVectorConstantValues P((HYPRE_StructVector vector , double values ));
 HYPRE_CommPkg HYPRE_GetMigrateStructVectorCommPkg P((HYPRE_StructVector from_vector , HYPRE_StructVector to_vector ));
 int HYPRE_MigrateStructVector P((HYPRE_CommPkg comm_pkg , HYPRE_StructVector from_vector , HYPRE_StructVector to_vector ));
 void HYPRE_FreeCommPkg P((HYPRE_CommPkg comm_pkg ));

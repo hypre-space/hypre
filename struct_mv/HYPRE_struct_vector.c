@@ -205,7 +205,7 @@ HYPRE_PrintStructVector( char               *filename,
  *--------------------------------------------------------------------------*/
  
 void
-HYPRE_SetStructVectorNumGhost( HYPRE_StructMatrix  vector,
+HYPRE_SetStructVectorNumGhost( HYPRE_StructVector  vector,
                                int                *num_ghost )
 {
    hypre_SetStructVectorNumGhost( (hypre_StructVector *) vector, num_ghost);
@@ -216,7 +216,7 @@ HYPRE_SetStructVectorNumGhost( HYPRE_StructMatrix  vector,
  *--------------------------------------------------------------------------*/
  
 int
-HYPRE_SetStructVectorConstantValues( HYPRE_StructMatrix  vector,
+HYPRE_SetStructVectorConstantValues( HYPRE_StructVector  vector,
                                      double              values )
 {
    return( hypre_SetStructVectorConstantValues( (hypre_StructVector *) vector,
