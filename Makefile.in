@@ -56,7 +56,7 @@ HYPRE_FEI_LIBFILES =\
  libHYPRE_seq_mv.a     libHYPRE_IJ_mv.a libkrylov.a \
  libHYPRE_DistributedMatrixPilutSolver.a \
  libHYPRE_utilities.a  libHYPRE_MatrixMatrix.a libHYPRE_ParaSails.a\
- libHYPRE_Euclid.a
+ libHYPRE_Euclid.a     libHYPRE_mli.a
 
 # These are directories that are officially in HYPRE
 HYPRE_DIRS =\
