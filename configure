@@ -1053,24 +1053,24 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-MPI=DIR          Compiles with MPI default. DIR is the top-level
-                          install directory for MPI. Selecting --without-MPI
+                          install directory for MPI. Selecting --without-MPI
                           may affect which compiler is chosen
   --with-timing           use HYPRE timing routines
   --with-openmp           use openMP--this may affect which compiler is
-                          chosen. Supported using guidec on IBM and Compaq.
+                          chosen. Supported using guidec on IBM and Compaq.
   --with-strict-checking  Try to find a compiler option that warns when a
-                          function prototype is not fully defined, as many
-                          other non-ANSI features as possible. Currently this
+                          function prototype is not fully defined, as many
+                          other non-ANSI features as possible. Currently this
                           macro knows about GCC, and KCC.
   --with-insure=FLAGS     FLAGS are optionals to pass to insure. To redirect
-                          output to a file; FLAG="-Zoi "report_file
-                          insure.log". Its probably best to supply options to
-                          insure through the .psrc file. -- no checking is
+                          output to a file; FLAG="-Zoi "report_file
+                          insure.log". Its probably best to supply options to
+                          insure through the .psrc file. -- no checking is
                           done to ensure insure is present on the machine
   --with-purify=FLAGS     FLAGS are optionals to pass to insure. To appends
-                          output to a file use FLAG="-log-file=purify.log
-                          -append-logfile=yes -best-effort". To redirect
-                          output to the Viewer, use FLAGS="-windows=yes". --
+                          output to a file use FLAG="-log-file=purify.log
+                          -append-logfile=yes -best-effort". To redirect
+                          output to the Viewer, use FLAGS="-windows=yes".  --
                           no checking is done to ensure purify is present on
                           the machine
   --with-purify-to-file   direct purify output to the file "purify.log"
@@ -1676,7 +1676,7 @@ fi;
 
 
 
-if test "$enable_shared" = no; then
+if  test "$enable_shared" = no; then
   STATICONLY_TRUE=
   STATICONLY_FALSE='#'
 else
@@ -2194,12 +2194,12 @@ echo "$as_me: error: DIR=${withval}\/include does not exist for --with-MPI" >&2;
           MPILIBS=mpi
           MPILIBDIRS=${withval}/lib
           LIBS="$LIBS -lmpi"
-          LIBDIRS="$LIBDIRS -L${withval}/lib"
+          LDFLAGS="$LDFLAGS -L${withval}/lib"
         elif test -r "${withval}/lib/libmpich.a" ; then
           MPILIBS=mpich
           MPILIBDIRS=${withval}/lib
           LIBS="$LIBS -lmpich"
-          LIBDIRS="$LIBDIRS -L${withval}/lib"
+          LDFLAGS="$LDFLAGS -L${withval}/lib"
         else
           { { echo "$as_me:$LINENO: error: DIR=${withval}\/lib/libmpi.a or libmpich.a does not exist for --with-MPI" >&5
 echo "$as_me: error: DIR=${withval}\/lib/libmpi.a or libmpich.a does not exist for --with-MPI" >&2;}
