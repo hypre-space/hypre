@@ -10,18 +10,14 @@
 include ../../config/Makefile.config
 include babel.make
 
-C_COMPILE_FLAGS=@CFLAGS@
-CXX_COMPILE_FLAGS=@CXXFLAGS@
-F77_COMPILE_FLAGS=@F77FLAGS@ 
-CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CINCLUDES=${INCLUDES} ${MPIINCLUDE}
 CDEFS = 
  
 BABEL_RUNTIME_INCLUDES=\
   -I$(HYPRE_SRC_TOP_DIR)/babel-runtime/sidl\
   -I$(HYPRE_SRC_TOP_DIR)/babel-runtime/sidl
 
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
+C_COMPILE_FLAGS=\
  -I..\
  -I$(HYPRE_SRC_TOP_DIR)\
  -I$(HYPRE_SRC_TOP_DIR)/utilities\
@@ -34,8 +30,8 @@ CFLAGS =\
  ${CINCLUDES}\
  ${CDEFS}
  
-LIBFLAGS = @LIBDIRS@ @LIBS@
-LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
+LIBFLAGS = ${LIBDIRS} ${LIBS}
+LDLIBFLAGS = ${LDLIBDIRS} ${LDLIBS}
  
 LFLAGS =\
  -L.\
@@ -114,23 +110,24 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libbHYPREClient-C.a
+all: libbHYPREClient-C${HYPRE_LIB_SUFFIX}
+	cp -fp $(srcdir)/*.h ${HYPRE_BUILD_DIR}/include/.
+	cp -fp libbHYPRE* ${HYPRE_BUILD_DIR}/lib/.
  
 install: all
-	@cp -f $(srcdir)/bHYPRE*.h ${HYPRE_BUILD_DIR}/include/.
-	@cp -f libbHYPRE*.a ${HYPRE_BUILD_DIR}/lib/.
+	cp -fp $(srcdir)/*.h ${HYPRE_INC_INSTALL}/.
+	cp -fp libbHYPRE* ${HYPRE_LIB_INSTALL}/.
  
 clean:
-	@rm -f *.o
+	rm -f *.o libbHYPRE*
 
-veryclean: clean
-	@rm -f libbHYPRE*.a
+distclean: clean
 
 ##################################################################
 # Rules
 ##################################################################
 
-libbHYPREClient-C.a: ${OBJS}
+libbHYPREClient-C${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
