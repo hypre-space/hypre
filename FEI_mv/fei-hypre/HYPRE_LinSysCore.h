@@ -391,7 +391,7 @@ class HYPRE_LinSysCore
    void   endCreateMapFromSoln();
    void   putIntoMappedMatrix(int row, int numValues, const double* values,
                               const int* scatterIndices);
-   void   getFEGridObject(void **object) { (*object) = fegrid; }
+   void   getFEGridObject(void **object) { (*object) = feGrid_; }
 
  private:        //functions
 
@@ -581,7 +581,7 @@ class HYPRE_LinSysCore
    // map and others
    // ----------------------------------------------------------------------
 
-   void            *fegrid;
+   void            *feGrid_;
    Lookup          *lookup_;
    int             haveLookup_;
    double          **projectionMatrix_; 

@@ -258,7 +258,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     rhsIDs_[0]          = 0;
 
     FEGridInfo *gridinfo = new FEGridInfo(mypid_);
-    fegrid               = (void *) gridinfo;
+    feGrid_              = (void *) gridinfo;
 }
 
 //***************************************************************************
@@ -432,9 +432,9 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
     delete [] euclidargv_;
     euclidargv_ = NULL;
     
-    FEGridInfo *gridinfo = (FEGridInfo *) fegrid;
+    FEGridInfo *gridinfo = (FEGridInfo *) feGrid_;
     delete gridinfo;
-    fegrid = NULL;
+    feGrid_ = NULL;
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LSC::leaving  destructor.\n",mypid_);
