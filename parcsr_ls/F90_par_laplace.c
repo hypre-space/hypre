@@ -16,36 +16,36 @@
 #include "fortran.h"
 
 /*--------------------------------------------------------------------------
- * hypre_GenerateLaplacian
+ * GenerateLaplacian
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_generatelaplacian)( int      *comm,
-                                          int      *nx,
-                                          int      *ny,
-                                          int      *nz,
-                                          int      *P,
-                                          int      *Q,
-                                          int      *R,
-                                          int      *p,
-                                          int      *q,
-                                          int      *r,
-                                          double   *value,
-                                          long int *matrix,
-                                          int      *ierr   )
+hypre_F90_IFACE(generatelaplacian)( int      *comm,
+                                    int      *nx,
+                                    int      *ny,
+                                    int      *nz,
+                                    int      *P,
+                                    int      *Q,
+                                    int      *R,
+                                    int      *p,
+                                    int      *q,
+                                    int      *r,
+                                    double   *value,
+                                    long int *matrix,
+                                    int      *ierr   )
 
 {
-   *matrix = (long int) ( hypre_GenerateLaplacian( (MPI_Comm) *comm,
-                                                   (int)      *nx,
-                                                   (int)      *ny,
-                                                   (int)      *nz,
-                                                   (int)      *P,
-                                                   (int)      *Q,
-                                                   (int)      *R,
-                                                   (int)      *p,
-                                                   (int)      *q,
-                                                   (int)      *r,
-                                                   (double *)  value ) );
+   *matrix = (long int) ( GenerateLaplacian( (MPI_Comm) *comm,
+                                             (int)      *nx,
+                                             (int)      *ny,
+                                             (int)      *nz,
+                                             (int)      *P,
+                                             (int)      *Q,
+                                             (int)      *R,
+                                             (int)      *p,
+                                             (int)      *q,
+                                             (int)      *r,
+                                             (double *)  value ) );
 
    *ierr = 0;
 }
