@@ -11,13 +11,9 @@ build
 cforce.f
 color.f
 crsgd.f
-crushb.f
-ctest.f
 default.in.problem
 default.in.solver
 dirslv.f
-fftests.f
-form.f
 fortran.c
 fortran.h
 general.h
