@@ -9,7 +9,6 @@
 #include "basicTypes.h"
 #include "LinearSystemCore.h"
 #include "LSC.h"
-#include "cfei.h"
 #endif
 //##############################################
 
@@ -19,10 +18,10 @@
 //#include "Data.h"
 //#include "basicTypes.h"
 //#include "LinearSystemCore.h"
-//#include "cfei.h"
 //#endif
 //##############################################
 
+#include "cfei.h"
 #include "cfei_hypre.h"
 #include "HYPRE.h"
 #include "../../IJ_mv/HYPRE_IJ_mv.h"
