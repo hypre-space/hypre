@@ -8,7 +8,12 @@
 #include "base/Data.h"
 #include "base/LinearSystemCore.h"
 
+#ifdef FEI_V12
+#include "src/cfei.h"
+#else
 #include "base/cfei.h"
+#endif
+
 #include "cfei_hypre.h"
 
 #include "HYPRE_LinSysCore.h"
