@@ -86,11 +86,13 @@
 #define C_PT  1
 #define F_PT -1
 #define COMMON_C_PT  2
+
 #define LIST_HEAD -1
 #define LIST_TAIL -2
 #define CPOINT 1
 #define FPOINT -1
 #define UNDECIDED 0
+#define REMOVED -3
 
 /*****************************************************************
  * 
@@ -107,8 +109,8 @@ remove_point(int   measure,
 {
     if (LoL_head[measure] == LoL_tail[measure]) 
     {
-        LoL_head[measure] = LIST_TAIL;
-        LoL_tail[measure] = LIST_TAIL;
+       LoL_head[measure] = LIST_TAIL;
+       LoL_tail[measure] = LIST_HEAD;
     }
     else if (LoL_head[measure] == index)
     {
@@ -142,22 +144,21 @@ enter_on_lists(int   measure,
                int   *lists, 
                int   *where)
 {
-      if (LoL_head[measure]==LIST_TAIL)
-      {
-         LoL_head[measure] = index;
-         LoL_tail[measure] = index;
-         lists[index] = LIST_TAIL;
-         where[index] = LIST_HEAD;
-      }
-      else
-      {
-         lists[LoL_tail[measure]] = index;
-         where[index] = LoL_tail[measure];
-         lists[index] = LIST_TAIL;
-         LoL_tail[measure] = index;
-      }
-
-      return;
+   if (LoL_head[measure]==LIST_TAIL)
+   {
+      LoL_head[measure] = index;
+      LoL_tail[measure] = index;
+      lists[index] = LIST_TAIL;
+      where[index] = LIST_HEAD;
+   }
+   else
+   {
+      lists[LoL_tail[measure]] = index;
+      where[index] = LoL_tail[measure];
+      lists[index] = LIST_TAIL;
+      LoL_tail[measure] = index;
+   }
+   return;
 }
 
    
@@ -1027,24 +1028,29 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
 
    int *lists, *where, *LoL_head, *LoL_tail;
    int  points_left, new_C;
-   int  new_meas;
+   int  new_meas,bumps, top_max;
    int  num_left, start;
    int  nabor, nabor_two;
 
+   /*-------------------------------------------------------
+    * Initialize the C/F marker, LoL_head, LoL_tail  arrays
+    *-------------------------------------------------------*/
+
    lists = hypre_CTAlloc(int, num_variables);
    where = hypre_CTAlloc(int, num_variables);
-   LoL_head = hypre_CTAlloc(int, num_variables);
-   LoL_tail = hypre_CTAlloc(int, num_variables);
+   LoL_head = hypre_CTAlloc(int, 2*num_variables);
+   LoL_tail = hypre_CTAlloc(int, 2*num_variables);
 
-   /*---------------------------------------------------
-    * Initialize the C/F marker array
-    *---------------------------------------------------*/
+   for (i = 0; i < 2*num_variables; i++)
+   {
+      LoL_head[i] = LIST_TAIL;
+      LoL_tail[i] = LIST_HEAD;
+   }
 
    CF_marker = hypre_CTAlloc(int, num_variables);
    for (j = 0; j < num_variables; j++)
    {
       CF_marker[j] = UNDECIDED;
-      LoL_head[j] = LIST_TAIL;
    }
 
    /*--------------------------------------------------------------
@@ -1192,7 +1198,7 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
    ST_i[0] = 0;
 
    /*----------------------------------------------------------
-    * Compute the measures
+    * Compute the measures and initialize the lists
     *
     * The measures are given by the row sums of ST.
     * Hence, measure_array[i] is the number of influences
@@ -1201,25 +1207,26 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
     *----------------------------------------------------------*/
 
    measure_array = hypre_CTAlloc(int, num_variables);
-
-   for (i = 0; i < num_variables; i++)
-   {
-      measure_array[i] = ST_i[i+1]-ST_i[i];
-   }
-
-  /*************************************************************
-    *
-    *   Initialize the LoL
-    *
-    *************************************************************/
-
-   max_measure = measure_array[0];
-   for (j = 0; j < num_variables; j++)
-   {
-      
+   num_left = num_variables;
+   coarse_size = 0;
+   max_measure = 0;
+ 
+   for (j = 0; j < num_variables; j++) 
+   {    
+      measure_array[j] = ST_i[j+1]-ST_i[j];
       measure = measure_array[j];
-      max_measure = (max_measure < measure) ? measure : max_measure;
-      enter_on_lists(measure, j, LoL_head, LoL_tail, lists, where);
+      if (measure > 0) 
+      {
+         max_measure = (max_measure < measure) ? measure : max_measure;
+         enter_on_lists(measure, j, LoL_head, LoL_tail, lists, where);
+      }
+      else
+      {
+         if (measure < 0) printf("negative measure!\n");
+         CF_marker[j] = CPOINT;
+         ++coarse_size;
+         --num_left;
+      }
    }
 
 
@@ -1238,55 +1245,70 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
     *                  entry if necessary)
     *
     ****************************************************************/
-   coarse_size = 0;
-   num_left = num_variables;
-   
+
+   top_max = max_measure;
+   bumps = 0;
+
    while (num_left > 0)
    {
       index = LoL_head[max_measure];
-      if(LoL_head[max_measure] == LIST_TAIL)
+
+      if (index == LIST_TAIL)
       {
-         start = max_measure;
-         max_measure = 0;
-         for (j = num_variables-1; j > 0; j--)
+         if(LoL_head[max_measure] == LIST_TAIL &&
+            LoL_tail[max_measure] == LIST_HEAD)
          {
-            if (LoL_head[j] != LIST_TAIL)
+            start = num_variables-1;
+            max_measure = 0;
+            for (j = top_max+bumps; j >= 0; j--)
             {
-               max_measure = (max_measure > j) ? max_measure : j;
-               index = LoL_head[max_measure];
+               if (LoL_head[j] != LIST_TAIL)
+               {
+                  max_measure = (max_measure > j) ? max_measure : j;
+                  break;
+               }
             }
-         }
+            top_max = (max_measure > top_max)? max_measure : top_max;
+         }   
+         index = LoL_head[max_measure];
       }
+      if (index < 0 || index > num_variables-1) 
+                 printf("index %d, N= %d, max= %d\n",
+                         index, num_variables,max_measure);
 
       CF_marker[index] = CPOINT;
       ++coarse_size;
       measure_array[index] = 0;
       --num_left;
-      measure = max_measure;
       
-      remove_point(measure, index, LoL_head, LoL_tail, lists, where);
+      remove_point(max_measure, index, LoL_head, LoL_tail, lists, where);
 
-      if(LoL_head[max_measure] == LIST_TAIL)
+      if(LoL_head[max_measure] == LIST_TAIL &&
+         LoL_tail[max_measure] == LIST_HEAD)
       {
-         start = max_measure;
+         start = num_variables-1;
          max_measure = 0;
-         for (j = start; j > 0; j--)
+         for (j = top_max+bumps; j >= 0; j--)
          {
             if (LoL_head[j] != LIST_TAIL)
             {
                max_measure = (max_measure > j) ? max_measure : j;
+               break;
             }
          }
-
-      }         
+         top_max = (max_measure > top_max)? max_measure : top_max;
+      }      
+   
       for (j = ST_i[index]; j < ST_i[index+1]; j++)
       {
+         bumps = 0;
          nabor = ST_j[j];
          if (CF_marker[nabor] == UNDECIDED)
          {
             CF_marker[nabor] = FPOINT;
             measure = measure_array[nabor];
-            measure_array[nabor] = 0;
+            measure_array[nabor] = REMOVED;
+
             remove_point(measure, nabor, LoL_head, LoL_tail, lists, where);
             --num_left;
 
@@ -1298,10 +1320,15 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
                   measure = measure_array[nabor_two];
                   remove_point(measure, nabor_two, LoL_head, 
                                LoL_tail, lists, where);
+
                   new_meas = ++(measure_array[nabor_two]);
+                  ++bumps;
                   enter_on_lists(new_meas,nabor_two,LoL_head,
                               LoL_tail, lists, where);
-                  max_measure = (max_measure < new_meas) ? new_meas : max_measure;
+
+                  max_measure = (max_measure < new_meas) ? 
+                                                new_meas : max_measure;
+                  top_max = (max_measure > top_max) ? max_measure : top_max;
                }
             }
          }
@@ -1315,7 +1342,10 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
    int   iter = 0;
 #endif
 
-
+   hypre_TFree(lists);
+   hypre_TFree(where);
+   hypre_TFree(LoL_head);
+   hypre_TFree(LoL_tail);
 
 
    /*---------------------------------------------------
