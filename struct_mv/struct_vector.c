@@ -650,6 +650,90 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_StructVectorClearBoundGhostValues
+ * clears vector values on the ghost zones next to the limits of the grid's
+ * bounding box, which are normally the physical boundaries
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector )
+{
+   int    ierr = 0;
+
+   hypre_Box          *v_data_box;
+                    
+   int                 vi;
+   double             *vp;
+
+   hypre_BoxArray     *boxes;
+   hypre_Box          *box;
+   hypre_BoxArray     *diff_boxes;
+   hypre_Box          *diff_box;
+   hypre_Index         loop_size;
+   hypre_IndexRef      start;
+   hypre_Index         unit_stride;
+   hypre_Box          *bounding_ghost_box;
+
+   int                 i, j, d, v1, v2;
+   int                 loopi, loopj, loopk;
+   int                *num_ghost;
+
+   /*-----------------------------------------------------------------------
+    * Set the vector coefficients
+    *-----------------------------------------------------------------------*/
+
+   hypre_SetIndex(unit_stride, 1, 1, 1);
+ 
+   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
+   num_ghost = hypre_StructGridNumGhost(hypre_StructVectorGrid(vector));
+   bounding_ghost_box = hypre_BoxDuplicate(
+      hypre_StructGridBoundingBox(hypre_StructVectorGrid(vector)) );
+   for (d = 0; d < 3; d++)
+   {
+      hypre_BoxIMinD(bounding_ghost_box, d) -= num_ghost[2*d];
+      hypre_BoxIMaxD(bounding_ghost_box, d) += num_ghost[2*d + 1];
+   }
+   diff_boxes = hypre_BoxArrayCreate(0);
+   hypre_ForBoxI(i, boxes)
+      {
+         box        = hypre_BoxArrayBox(boxes, i);
+
+         v_data_box =
+            hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
+         vp = hypre_StructVectorBoxData(vector, i);
+
+         hypre_BoxArraySetSize(diff_boxes, 0);
+         hypre_SubtractBoxes(v_data_box, box, diff_boxes);
+         hypre_ForBoxI(j, diff_boxes)
+            {
+               diff_box = hypre_BoxArrayBox(diff_boxes, j);
+               v1 = hypre_BoxVolume( diff_box );
+               hypre_IntersectBoxes( bounding_ghost_box, diff_box, diff_box );
+               v2 = hypre_BoxVolume( diff_box );
+               if ( hypre_BoxVolume( diff_box ) > 0 )
+               {
+                  start = hypre_BoxIMin(diff_box);
+
+                  hypre_BoxGetSize(diff_box, loop_size);
+
+                  hypre_BoxLoop1Begin(loop_size,
+                                      v_data_box, start, unit_stride, vi);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi 
+#include "hypre_box_smp_forloop.h"
+                  hypre_BoxLoop1For(loopi, loopj, loopk, vi)
+                     {
+                        vp[vi] = 0.0;
+                     }
+                  hypre_BoxLoop1End(vi);
+               }
+            }
+      }
+   hypre_BoxArrayDestroy(diff_boxes);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_StructVectorClearAllValues
  *--------------------------------------------------------------------------*/
 
@@ -901,5 +985,84 @@ hypre_StructVectorRead( MPI_Comm    comm,
    fclose(file);
 
    return vector;
+}
+
+/*--------------------------------------------------------------------------
+ * The following is used only as a debugging aid.
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_StructVectorMaxValue( hypre_StructVector *vector,
+                            double *max_value, int *max_index,
+                            hypre_Index max_xyz_index )
+/* Input: vector, and pointers to where to put returned data.
+   Return value: error flag, 0 means ok.
+   Finds the maximum value in a vector, puts it in max_value.
+   The corresponding index is put in max_index.
+   A hypre_Index corresponding to max_index is put in max_xyz_index.
+   We assume that there is only one box to deal with. */
+{
+   int               ierr = 0;
+
+   int               datai;
+   double           *data;
+
+   hypre_Index       imin;
+   hypre_Index       imax;
+   hypre_BoxArray   *boxes;
+   hypre_Box        *box;
+   hypre_Index       loop_size;
+   hypre_Index       unit_stride;
+
+   int               loopi, loopj, loopk, i;
+   double maxvalue;
+   int maxindex;
+
+   boxes = hypre_StructVectorDataSpace(vector);
+   if ( hypre_BoxArraySize(boxes)!=1 ) {
+      /* if more than one box, the return system max_xyz_index is too simple
+         if needed, fix later */
+      ierr = 1;
+      return;
+   }
+   hypre_SetIndex(unit_stride, 1, 1, 1);
+   hypre_ForBoxI(i, boxes)
+      {
+         box  = hypre_BoxArrayBox(boxes, i);
+         /*v_data_box =
+           hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);*/
+         data = hypre_StructVectorBoxData(vector, i);
+         hypre_BoxGetSize(box, loop_size);
+         hypre_CopyIndex( hypre_BoxIMin(box), imin );
+         hypre_CopyIndex( hypre_BoxIMax(box), imax );
+         /* The above will do the job, but I don't understand why these don't work...
+         imin = hypre_BoxIMin( box );
+         imax = hypre_BoxIMax( box );*/
+
+         hypre_BoxLoop1Begin(loop_size,
+                             box, imin, unit_stride, datai);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
+#include "hypre_box_smp_forloop.h"
+         maxindex = hypre_BoxIndexRank( box, imin );
+         maxvalue = data[maxindex];
+         hypre_CopyIndex( imin, max_xyz_index );
+         hypre_BoxLoop1For(loopi, loopj, loopk, datai)
+            {
+               if ( data[datai] > maxvalue )
+               {
+                  maxvalue = data[datai];
+                  maxindex = datai;
+                  hypre_SetIndex(max_xyz_index, loopi+hypre_IndexX(imin),
+                                 loopj+hypre_IndexY(imin),
+                                 loopk+hypre_IndexZ(imin) );
+               }
+            }
+         hypre_BoxLoop1End(datai);
+      }
+
+   *max_value = maxvalue;
+   *max_index = maxindex;
+
+   return ierr;
 }
 

@@ -1839,11 +1839,13 @@ int hypre_StructVectorSetNumGhost( hypre_StructVector *vector , int *num_ghost )
 int hypre_StructVectorAssemble( hypre_StructVector *vector );
 int hypre_StructVectorSetConstantValues( hypre_StructVector *vector , double values );
 int hypre_StructVectorClearGhostValues( hypre_StructVector *vector );
+int hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector );
 int hypre_StructVectorClearAllValues( hypre_StructVector *vector );
 hypre_CommPkg *hypre_StructVectorGetMigrateCommPkg( hypre_StructVector *from_vector , hypre_StructVector *to_vector );
 int hypre_StructVectorMigrate( hypre_CommPkg *comm_pkg , hypre_StructVector *from_vector , hypre_StructVector *to_vector );
 int hypre_StructVectorPrint( const char *filename , hypre_StructVector *vector , int all );
 hypre_StructVector *hypre_StructVectorRead( MPI_Comm comm , const char *filename , int *num_ghost );
+int hypre_StructVectorMaxValue( hypre_StructVector *vector , double *max_value , int *max_index , hypre_Index max_xyz_index );
 
 
 #ifdef __cplusplus
