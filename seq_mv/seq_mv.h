@@ -261,6 +261,7 @@ HYPRE_Vector HYPRE_VectorRead( char *file_name );
 hypre_CSRMatrix *hypre_CSRMatrixAdd( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixMultiply( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A , double tol );
+int hypre_CSRMatrixTranspose( hypre_CSRMatrix *A , hypre_CSRMatrix **AT , int data);
 
 /* csr_matrix.c */
 hypre_CSRMatrix *hypre_CSRMatrixCreate( int num_rows , int num_cols , int num_nonzeros );
