@@ -277,6 +277,15 @@ ssh ${HYPRE_RUN_MACHINE} "\
         ./test_drivers.sh -mail\
     )"
 
+ssh ${HYPRE_COMPILE_MACHINE} "\
+    (\
+        cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
+        ./configure --with-openmp;\
+	make veryclean;\
+        make beta;\
+    )"
+
+
 echo "cleaning up...."
 ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
