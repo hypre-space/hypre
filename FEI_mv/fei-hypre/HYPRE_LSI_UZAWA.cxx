@@ -18,7 +18,7 @@
 #include <assert.h>
 
 #ifdef WIN32
-#define strcasecmp _stricmp
+#define strcmp _stricmp
 #endif
 
 //***************************************************************************
@@ -283,13 +283,13 @@ int HYPRE_LSI_Uzawa::setParams(char *params)
    char   param1[256], param2[256], param3[256];
 
    sscanf(params,"%s", param1);
-   if ( strcasecmp(param1, "Uzawa") )
+   if ( strcmp(param1, "Uzawa") )
    {
       printf("HYPRE_LSI_Uzawa::parameters not for me.\n");
       return 1;
    }
    sscanf(params,"%s %s", param1, param2);
-   if ( !strcasecmp(param2, "help") )
+   if ( !strcmp(param2, "help") )
    {
       printf("Available options for Uzawa are : \n");
       printf("      outputLevel <d> \n");
@@ -323,61 +323,61 @@ int HYPRE_LSI_Uzawa::setParams(char *params)
       printf("      S22PreconPilutFillin <d> \n");
       printf("      S22PreconPilutDropTol <f> \n");
    }
-   else if ( !strcasecmp(param2, "outputLevel") )
+   else if ( !strcmp(param2, "outputLevel") )
    {
       sscanf(params,"%s %s %d", param1, param2, &outputLevel_);
       if ( outputLevel_ > 0 ) 
          printf("HYPRE_LSI_Uzawa::outputLevel = %d.\n", outputLevel_);
    }
-   else if ( !strcasecmp(param2, "modified") )
+   else if ( !strcmp(param2, "modified") )
    {
       modifiedScheme_ = 1;
       if ( outputLevel_ > 0 ) printf("HYPRE_LSI_Uzawa::3 level scheme.\n");
    }
-   else if ( !strcasecmp(param2, "A11Solver") )
+   else if ( !strcmp(param2, "A11Solver") )
    {
       sscanf(params,"%s %s %s", param1, param2, param3);
-      if ( !strcasecmp(param3, "none") ) 
+      if ( !strcmp(param3, "none") ) 
       {
          A11Params_.SolverID_ = 0;
          if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11 solver = cg\n");
       }
-      else if ( !strcasecmp(param3, "cg") ) 
+      else if ( !strcmp(param3, "cg") ) 
       {
          A11Params_.SolverID_ = 1;
          if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11 solver = cg\n");
       }
-      else if ( !strcasecmp(param3, "gmres") ) 
+      else if ( !strcmp(param3, "gmres") ) 
       {
          A11Params_.SolverID_ = 2;
          if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11 solver = gmres\n");
       }
    }
-   else if ( !strcasecmp(param2, "S22Solver") )
+   else if ( !strcmp(param2, "S22Solver") )
    {
       sscanf(params,"%s %s %s", param1, param2, param3);
-      if ( !strcasecmp(param3, "none") ) 
+      if ( !strcmp(param3, "none") ) 
       {
          S22Params_.SolverID_ = 0;
          if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22 solver = cg\n");
       }
-      else if ( !strcasecmp(param3, "cg") ) 
+      else if ( !strcmp(param3, "cg") ) 
       {
          S22Params_.SolverID_ = 1;
          if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22 solver = cg\n");
       }
-      else if ( !strcasecmp(param3, "gmres") ) 
+      else if ( !strcmp(param3, "gmres") ) 
       {
          S22Params_.SolverID_ = 2;
          if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22 solver = gmres\n");
       }
    }
-   else if ( !strcasecmp(param2, "S22SolverDampingFactor") )
+   else if ( !strcmp(param2, "S22SolverDampingFactor") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &S22SolverDampFactor_);
       if ( S22SolverDampFactor_ < 0.0 ) S22SolverDampFactor_ = 1.0;
    }
-   else if ( !strcasecmp(param2, "A11Tolerance") )
+   else if ( !strcmp(param2, "A11Tolerance") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.Tol_));
       if ( A11Params_.Tol_ >= 1.0 || A11Params_.Tol_ <= 0.0 ) 
@@ -385,7 +385,7 @@ int HYPRE_LSI_Uzawa::setParams(char *params)
       if (outputLevel_ > 0) 
          printf("HYPRE_LSI_Uzawa::A11 tol = %e\n", A11Params_.Tol_);
    }
-   else if ( !strcasecmp(param2, "S22Tolerance") )
+   else if ( !strcmp(param2, "S22Tolerance") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(S22Params_.Tol_));
       if ( S22Params_.Tol_ >= 1.0 || S22Params_.Tol_ <= 0.0 ) 
@@ -393,275 +393,275 @@ int HYPRE_LSI_Uzawa::setParams(char *params)
       if (outputLevel_ > 0) 
          printf("HYPRE_LSI_Uzawa::S22 tol = %e\n", S22Params_.Tol_);
    }
-   else if ( !strcasecmp(param2, "A11MaxIterations") )
+   else if ( !strcmp(param2, "A11MaxIterations") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.MaxIter_));
       if ( A11Params_.MaxIter_ <= 0 ) A11Params_.MaxIter_ = 10;
       if (outputLevel_ > 0) 
          printf("HYPRE_LSI_Uzawa::A11 maxiter = %d\n", A11Params_.MaxIter_);
    }
-   else if ( !strcasecmp(param2, "S22MaxIterations") )
+   else if ( !strcmp(param2, "S22MaxIterations") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(S22Params_.MaxIter_));
       if ( S22Params_.MaxIter_ <= 0 ) S22Params_.MaxIter_ = 10;
       if (outputLevel_ > 0) 
          printf("HYPRE_LSI_Uzawa::S22 maxiter = %d\n", S22Params_.MaxIter_);
    }
-   else if ( !strcasecmp(param2, "A11Precon") )
+   else if ( !strcmp(param2, "A11Precon") )
    {
       sscanf(params,"%s %s %s", param1, param2, param3);
-      if ( !strcasecmp(param3, "diagonal") ) 
+      if ( !strcmp(param3, "diagonal") ) 
       {
          A11Params_.PrecondID_ = 1;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_Uzawa::A11 precon = diagonal\n");
       }
-      else if ( !strcasecmp(param3, "parasails") ) 
+      else if ( !strcmp(param3, "parasails") ) 
       {
          A11Params_.PrecondID_ = 2;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_Uzawa::A11 precon = parasails\n");
       }
-      else if ( !strcasecmp(param3, "boomeramg") ) 
+      else if ( !strcmp(param3, "boomeramg") ) 
       {
          A11Params_.PrecondID_ = 3;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_Uzawa::A11 precon = boomeramg\n");
       }
-      else if ( !strcasecmp(param3, "pilut") ) 
+      else if ( !strcmp(param3, "pilut") ) 
       {
          A11Params_.PrecondID_ = 4;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_Uzawa::A11 precon = pilut\n");
       }
-      else if ( !strcasecmp(param3, "euclid") ) 
+      else if ( !strcmp(param3, "euclid") ) 
       {
          A11Params_.PrecondID_ = 5;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_Uzawa::A11 precon = euclid\n");
       }
-      else if ( !strcasecmp(param3, "mli") ) 
+      else if ( !strcmp(param3, "mli") ) 
       {
          A11Params_.PrecondID_ = 6;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_Uzawa::A11 precon = MLISA\n");
       }
    }
-   else if ( !strcasecmp(param2, "S22Precon") )
+   else if ( !strcmp(param2, "S22Precon") )
    {
       sscanf(params,"%s %s %s", param1, param2, param3);
-      if ( !strcasecmp(param3, "diagonal") ) 
+      if ( !strcmp(param3, "diagonal") ) 
       {
          S22Params_.PrecondID_ = 1;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_Uzawa::S22 precon = diagonal\n");
       }
-      else if ( !strcasecmp(param3, "parasails") ) 
+      else if ( !strcmp(param3, "parasails") ) 
       {
          S22Params_.PrecondID_ = 2;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_Uzawa::S22 precon = parasails\n");
       }
-      else if ( !strcasecmp(param3, "boomeramg") ) 
+      else if ( !strcmp(param3, "boomeramg") ) 
       {
          S22Params_.PrecondID_ = 3;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_Uzawa::S22 precon = boomeramg\n");
       }
-      else if ( !strcasecmp(param3, "pilut") ) 
+      else if ( !strcmp(param3, "pilut") ) 
       {
          S22Params_.PrecondID_ = 4;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_Uzawa::S22 precon = pilut\n");
       }
-      else if ( !strcasecmp(param3, "euclid") ) 
+      else if ( !strcmp(param3, "euclid") ) 
       {
          S22Params_.PrecondID_ = 5;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_Uzawa::S22 precon = euclid\n");
       }
-      else if ( !strcasecmp(param3, "mli") ) 
+      else if ( !strcmp(param3, "mli") ) 
       {
          S22Params_.PrecondID_ = 6;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_Uzawa::S22 precon = MLISA\n");
       }
    }
-   else if ( !strcasecmp(param2, "A11PreconPSNlevels") )
+   else if ( !strcmp(param2, "A11PreconPSNlevels") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.PSNLevels_));
       if ( A11Params_.PSNLevels_ < 0 ) A11Params_.PSNLevels_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11PreconPSNLevels\n");
    }
-   else if ( !strcasecmp(param2, "S22PreconPSNlevels") )
+   else if ( !strcmp(param2, "S22PreconPSNlevels") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(S22Params_.PSNLevels_));
       if ( S22Params_.PSNLevels_ < 0 ) S22Params_.PSNLevels_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22PreconPSNLevels\n");
    }
-   else if ( !strcasecmp(param2, "A11PreconPSThresh") )
+   else if ( !strcmp(param2, "A11PreconPSThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.PSThresh_));
       if ( A11Params_.PSThresh_ < 0 ) A11Params_.PSThresh_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11PreconPSThresh\n");
    }
-   else if ( !strcasecmp(param2, "S22PreconPSThresh") )
+   else if ( !strcmp(param2, "S22PreconPSThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(S22Params_.PSThresh_));
       if ( S22Params_.PSThresh_ < 0 ) S22Params_.PSThresh_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22PreconPSThresh\n");
    }
-   else if ( !strcasecmp(param2, "A11PreconPSFilter") )
+   else if ( !strcmp(param2, "A11PreconPSFilter") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.PSFilter_));
       if ( A11Params_.PSFilter_ < 0 ) A11Params_.PSFilter_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11PreconPSFilter\n");
    }
-   else if ( !strcasecmp(param2, "S22PreconPSFilter") )
+   else if ( !strcmp(param2, "S22PreconPSFilter") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(S22Params_.PSFilter_));
       if ( S22Params_.PSFilter_ < 0 ) S22Params_.PSFilter_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22PreconPSFilter\n");
    }
-   else if ( !strcasecmp(param2, "A11PreconAMGThresh") )
+   else if ( !strcmp(param2, "A11PreconAMGThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.AMGThresh_));
       if ( A11Params_.AMGThresh_ < 0.0 ) A11Params_.AMGThresh_ = 0.0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11PreconAMGThresh\n");
    }
-   else if ( !strcasecmp(param2, "S22PreconAMGThresh") )
+   else if ( !strcmp(param2, "S22PreconAMGThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(S22Params_.AMGThresh_));
       if ( S22Params_.AMGThresh_ < 0.0 ) S22Params_.AMGThresh_ = 0.0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22PreconAMGThresh\n");
    }
-   else if ( !strcasecmp(param2, "A11PreconAMGNumSweeps") )
+   else if ( !strcmp(param2, "A11PreconAMGNumSweeps") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.AMGNSweeps_));
       if ( A11Params_.AMGNSweeps_ < 0 ) A11Params_.AMGNSweeps_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11PreconAMGNSweeps\n");
    }
-   else if ( !strcasecmp(param2, "S22PreconAMGNumSweeps") )
+   else if ( !strcmp(param2, "S22PreconAMGNumSweeps") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(S22Params_.AMGNSweeps_));
       if ( S22Params_.AMGNSweeps_ < 0 ) S22Params_.AMGNSweeps_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22PreconAMGNSweeps\n");
    }
-   else if ( !strcasecmp(param2, "A11PreconAMGSystemSize") )
+   else if ( !strcmp(param2, "A11PreconAMGSystemSize") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.AMGSystemSize_));
       if ( A11Params_.AMGSystemSize_ < 1 ) A11Params_.AMGSystemSize_ = 1;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11PreconAMGSystemSize\n");
    }
-   else if ( !strcasecmp(param2, "S22PreconAMGSystemSize") )
+   else if ( !strcmp(param2, "S22PreconAMGSystemSize") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(S22Params_.AMGSystemSize_));
       if ( S22Params_.AMGSystemSize_ < 1 ) S22Params_.AMGSystemSize_ = 1;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22PreconAMGSystemSize\n");
    }
-   else if ( !strcasecmp(param2, "A11PreconEuclidNLevels") )
+   else if ( !strcmp(param2, "A11PreconEuclidNLevels") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.EuclidNLevels_));
       if ( A11Params_.EuclidNLevels_ < 0 ) A11Params_.EuclidNLevels_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11PreconEuclidNLevels\n");
    }
-   else if ( !strcasecmp(param2, "S22PreconEuclidNLevels") )
+   else if ( !strcmp(param2, "S22PreconEuclidNLevels") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(S22Params_.EuclidNLevels_));
       if ( S22Params_.EuclidNLevels_ < 0 ) S22Params_.EuclidNLevels_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22PreconEuclidNLevels\n");
    }
-   else if ( !strcasecmp(param2, "A11PreconEuclidThresh") )
+   else if ( !strcmp(param2, "A11PreconEuclidThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.EuclidThresh_));
       if ( A11Params_.EuclidThresh_ < 0 ) A11Params_.EuclidThresh_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11PreconEuclidThresh\n");
    }
-   else if ( !strcasecmp(param2, "S22PreconEuclidThresh") )
+   else if ( !strcmp(param2, "S22PreconEuclidThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(S22Params_.EuclidThresh_));
       if ( S22Params_.EuclidThresh_ < 0 ) S22Params_.EuclidThresh_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22PreconEuclidThresh\n");
    }
-   else if ( !strcasecmp(param2, "A11PreconPilutFillin") )
+   else if ( !strcmp(param2, "A11PreconPilutFillin") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.PilutFillin_));
       if ( A11Params_.PilutFillin_ < 0 ) A11Params_.PilutFillin_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11PreconPilutFillin\n");
    }
-   else if ( !strcasecmp(param2, "S22PreconPilutFillin") )
+   else if ( !strcmp(param2, "S22PreconPilutFillin") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(S22Params_.PilutFillin_));
       if ( S22Params_.PilutFillin_ < 0 ) S22Params_.PilutFillin_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22PreconPilutFillin\n");
    }
-   else if ( !strcasecmp(param2, "A11PreconPilutDropTol") )
+   else if ( !strcmp(param2, "A11PreconPilutDropTol") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.PilutDropTol_));
       if ( A11Params_.PilutDropTol_ < 0 ) A11Params_.PilutDropTol_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11PreconPilutDropTol\n");
    }
-   else if ( !strcasecmp(param2, "S22PreconPilutDropTol") )
+   else if ( !strcmp(param2, "S22PreconPilutDropTol") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(S22Params_.PilutDropTol_));
       if ( S22Params_.PilutDropTol_ < 0 ) S22Params_.PilutDropTol_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22PreconPilutDropTol\n");
    }
-   else if ( !strcasecmp(param2, "A11PreconMLIThresh") )
+   else if ( !strcmp(param2, "A11PreconMLIThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.MLIThresh_));
       if ( A11Params_.MLIThresh_ < 0.0 ) A11Params_.MLIThresh_ = 0.0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11PreconMLIThresh\n");
    }
-   else if ( !strcasecmp(param2, "S22PreconMLIThresh") )
+   else if ( !strcmp(param2, "S22PreconMLIThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(S22Params_.MLIThresh_));
       if ( S22Params_.MLIThresh_ < 0.0 ) S22Params_.MLIThresh_ = 0.0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22PreconMLIThresh\n");
    }
-   else if ( !strcasecmp(param2, "A11PreconMLINumSweeps") )
+   else if ( !strcmp(param2, "A11PreconMLINumSweeps") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.MLINSweeps_));
       if ( A11Params_.MLINSweeps_ < 0 ) A11Params_.MLINSweeps_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11PreconMLINSweeps\n");
    }
-   else if ( !strcasecmp(param2, "S22PreconMLINumSweeps") )
+   else if ( !strcmp(param2, "S22PreconMLINumSweeps") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(S22Params_.MLINSweeps_));
       if ( S22Params_.MLINSweeps_ < 0 ) S22Params_.MLINSweeps_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22PreconMLINSweeps\n");
    }
-   else if ( !strcasecmp(param2, "A11PreconMLIPweight") )
+   else if ( !strcmp(param2, "A11PreconMLIPweight") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.MLIPweight_));
       if ( A11Params_.MLIPweight_ < 0.0 ) A11Params_.MLIPweight_ = 0.0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11PreconMLIPweight\n");
    }
-   else if ( !strcasecmp(param2, "S22PreconMLIPweight") )
+   else if ( !strcmp(param2, "S22PreconMLIPweight") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(S22Params_.MLIPweight_));
       if ( S22Params_.MLIPweight_ < 0.0 ) S22Params_.MLIPweight_ = 0.0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22PreconMLIPweight\n");
    }
-   else if ( !strcasecmp(param2, "A11PreconMLINodeDOF") )
+   else if ( !strcmp(param2, "A11PreconMLINodeDOF") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.MLINodeDOF_));
       if ( A11Params_.MLINodeDOF_ < 1 ) A11Params_.MLINodeDOF_ = 1;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11PreconMLINodeDOF\n");
    }
-   else if ( !strcasecmp(param2, "S22PreconMLINodeDOF") )
+   else if ( !strcmp(param2, "S22PreconMLINodeDOF") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(S22Params_.MLINodeDOF_));
       if ( S22Params_.MLINodeDOF_ < 1 ) S22Params_.MLINodeDOF_ = 1;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::S22PreconMLINodeDOF\n");
    }
-   else if ( !strcasecmp(param2, "A11PreconMLINullDim") )
+   else if ( !strcmp(param2, "A11PreconMLINullDim") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.MLINullDim_));
       if ( A11Params_.MLINullDim_ < 1 ) A11Params_.MLINullDim_ = 1;
       if (outputLevel_ > 0) printf("HYPRE_LSI_Uzawa::A11PreconMLINullDim\n");
    }
-   else if ( !strcasecmp(param2, "S22PreconMLINullDim") )
+   else if ( !strcmp(param2, "S22PreconMLINullDim") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(S22Params_.MLINullDim_));
       if ( S22Params_.MLINullDim_ < 1 ) S22Params_.MLINullDim_ = 1;

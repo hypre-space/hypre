@@ -51,6 +51,10 @@
 #include <assert.h>
 #include <math.h>
 
+#ifdef WIN32
+#define strcmp _stricmp
+#endif
+
 /****************************************************************************/ 
 /* MLI include files                                                        */
 /*--------------------------------------------------------------------------*/
@@ -588,14 +592,14 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
 
    mli_object = (HYPRE_LSI_MLI *) solver;
    sscanf(paramString,"%s", param1);
-   if ( strcasecmp(param1, "MLI") )
+   if ( strcmp(param1, "MLI") )
    {
       printf("HYPRE_LSI_MLI::parameters not for me.\n");
       return 1;
    }
    MPI_Comm_rank( mli_object->mpiComm_, &mypid );
    sscanf(paramString,"%s %s", param1, param2);
-   if ( !strcasecmp(param2, "help") )
+   if ( !strcmp(param2, "help") )
    {
       if ( mypid == 0 )
       {
@@ -625,51 +629,51 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      paramFile <s> \n");
       }
    }
-   else if ( !strcasecmp(param2, "outputLevel") )
+   else if ( !strcmp(param2, "outputLevel") )
    {
       sscanf(paramString,"%s %s %d",param1,param2,&(mli_object->outputLevel_));
    }
-   else if ( !strcasecmp(param2, "numLevels") )
+   else if ( !strcmp(param2, "numLevels") )
    {
       sscanf(paramString,"%s %s %d", param1, param2, &(mli_object->nLevels_));
       if ( mli_object->nLevels_ <= 0 ) mli_object->nLevels_ = 1;
    }
-   else if ( !strcasecmp(param2, "maxIterations") )
+   else if ( !strcmp(param2, "maxIterations") )
    {
       sscanf(paramString,"%s %s %d", param1, param2,
              &(mli_object->maxIterations_));
       if ( mli_object->maxIterations_ <= 0 ) mli_object->maxIterations_ = 1;
    }
-   else if ( !strcasecmp(param2, "cycleType") )
+   else if ( !strcmp(param2, "cycleType") )
    {
       sscanf(paramString,"%s %s %s", param1, param2, param3);
-      if ( ! strcasecmp( param3, "V" ) )      mli_object->cycleType_ = 1;
-      else if ( ! strcasecmp( param3, "W" ) ) mli_object->cycleType_ = 2;
+      if ( ! strcmp( param3, "V" ) )      mli_object->cycleType_ = 1;
+      else if ( ! strcmp( param3, "W" ) ) mli_object->cycleType_ = 2;
    }
-   else if ( !strcasecmp(param2, "strengthThreshold") )
+   else if ( !strcmp(param2, "strengthThreshold") )
    {
       sscanf(paramString,"%s %s %lg", param1, param2,
              &(mli_object->strengthThreshold_));
       if ( mli_object->strengthThreshold_ < 0.0 )
          mli_object->strengthThreshold_ = 0.0;
    }
-   else if ( !strcasecmp(param2, "method") )
+   else if ( !strcmp(param2, "method") )
    {
       sscanf(paramString,"%s %s %s", param1, param2, param3);
       strcpy( mli_object->method_, param3 );
    }
-   else if ( !strcasecmp(param2, "smoother") )
+   else if ( !strcmp(param2, "smoother") )
    {
       sscanf(paramString,"%s %s %s", param1, param2, param3);
       strcpy( mli_object->preSmoother_, param3 );
       strcpy( mli_object->postSmoother_, param3 );
    }
-   else if ( !strcasecmp(param2, "coarseSolver") )
+   else if ( !strcmp(param2, "coarseSolver") )
    {
       sscanf(paramString,"%s %s %s", param1, param2, param3);
       strcpy( mli_object->coarseSolver_, param3 );
    }
-   else if ( !strcasecmp(param2, "numSweeps") )
+   else if ( !strcmp(param2, "numSweeps") )
    {
       sscanf(paramString,"%s %s %d",param1,param2,&(mli_object->preNSweeps_));
       if ( mli_object->preNSweeps_ <= 0 ) mli_object->preNSweeps_ = 1;
@@ -691,7 +695,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
             mli_object->postSmootherWts_[i] = weight;
       }
    }
-   else if ( !strcasecmp(param2, "smootherWeight") )
+   else if ( !strcmp(param2, "smootherWeight") )
    {
       sscanf(paramString,"%s %s %lg",param1,param2,&weight);
       if ( weight < 0.0 || weight > 2.0 ) weight = 1.0;
@@ -710,66 +714,66 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
             mli_object->postSmootherWts_[i] = weight;
       }
    }
-   else if ( !strcasecmp(param2, "smootherPrintRNorm") )
+   else if ( !strcmp(param2, "smootherPrintRNorm") )
    {
       mli_object->smootherPrintRNorm_ = 1;
    }
-   else if ( !strcasecmp(param2, "smootherFindOmega") )
+   else if ( !strcmp(param2, "smootherFindOmega") )
    {
       mli_object->smootherFindOmega_ = 1;
    }
-   else if ( !strcasecmp(param2, "minCoarseSize") )
+   else if ( !strcmp(param2, "minCoarseSize") )
    {
       sscanf(paramString,"%s %s %d",param1,param2,
              &(mli_object->minCoarseSize_));
       if ( mli_object->minCoarseSize_ <= 0 ) mli_object->minCoarseSize_ = 20;
    }
-   else if ( !strcasecmp(param2, "Pweight") )
+   else if ( !strcmp(param2, "Pweight") )
    {
       sscanf(paramString,"%s %s %lg",param1,param2, &(mli_object->Pweight_));
       if ( mli_object->Pweight_ < 0. ) mli_object->Pweight_ = 1.333;
    }
-   else if ( !strcasecmp(param2, "scalar") )
+   else if ( !strcmp(param2, "scalar") )
    {
       mli_object->scalar_ = 1;
    }
-   else if ( !strcasecmp(param2, "nodeDOF") )
+   else if ( !strcmp(param2, "nodeDOF") )
    {
       sscanf(paramString,"%s %s %d",param1,param2, &(mli_object->nodeDOF_));
       if ( mli_object->nodeDOF_ <= 0 ) mli_object->nodeDOF_ = 1;
    }
-   else if ( !strcasecmp(param2, "nullSpaceDim") )
+   else if ( !strcmp(param2, "nullSpaceDim") )
    {
       sscanf(paramString,"%s %s %d",param1,param2, &(mli_object->nSpaceDim_));
       if ( mli_object->nSpaceDim_ <= 0 ) mli_object->nSpaceDim_ = 1;
    }
-   else if ( !strcasecmp(param2, "useNodalCoord") )
+   else if ( !strcmp(param2, "useNodalCoord") )
    {
       sscanf(paramString,"%s %s %s",param1,param2,param3);
-      if ( !strcasecmp(param3, "on") ) mli_object->nCoordAccept_ = 1;
+      if ( !strcmp(param3, "on") ) mli_object->nCoordAccept_ = 1;
       else                             mli_object->nCoordAccept_ = 0;
    }
-   else if ( !strcasecmp(param2, "saAMGCalibrationSize") )
+   else if ( !strcmp(param2, "saAMGCalibrationSize") )
    {
       sscanf(paramString,"%s %s %d",param1,param2,
              &(mli_object->calibrationSize_));
       if (mli_object->calibrationSize_ < 0) mli_object->calibrationSize_ = 0; 
    }
-   else if ( !strcasecmp(param2, "rsAMGSymmetric") )
+   else if ( !strcmp(param2, "rsAMGSymmetric") )
    {
       sscanf(paramString,"%s %s %d",param1,param2, &(mli_object->symmetric_));
       if ( mli_object->symmetric_ < 0 ) mli_object->symmetric_ = 0; 
       if ( mli_object->symmetric_ > 1 ) mli_object->symmetric_ = 1; 
    }
-   else if ( !strcasecmp(param2, "rsAMGInjectionForR") )
+   else if ( !strcmp(param2, "rsAMGInjectionForR") )
    {
       mli_object->injectionForR_ = 1;
    }
-   else if ( !strcasecmp(param2, "printNullSpace") )
+   else if ( !strcmp(param2, "printNullSpace") )
    {
       mli_object->printNullSpace_ = 1;
    }
-   else if ( !strcasecmp(param2, "paramFile") )
+   else if ( !strcmp(param2, "paramFile") )
    {
       sscanf(paramString,"%s %s %s",param1,param2,mli_object->paramFile_);
    }

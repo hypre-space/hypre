@@ -12,7 +12,7 @@
 #include <math.h>
 
 #ifdef WIN32
-#define strcasecmp _stricmp
+#define strcmp _stricmp
 #endif
 
 #include "solver/mli_solver_jacobi.h"

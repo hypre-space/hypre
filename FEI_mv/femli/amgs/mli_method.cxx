@@ -17,7 +17,7 @@
  *--------------------------------------------------------------------------*/
 
 #ifdef WIN32
-#define strcasecmp _stricmp
+#define strcmp _stricmp
 #endif
 
 #include <string.h>

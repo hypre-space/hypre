@@ -11,7 +11,7 @@
 #define pruneFactor 0.1
 
 #ifdef WIN32
-#define strcasecmp _stricmp
+#define strcmp _stricmp
 #endif
 
 /* #define MLI_USE_HYPRE_MATMATMULT */

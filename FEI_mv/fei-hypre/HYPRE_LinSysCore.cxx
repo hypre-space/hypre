@@ -17,7 +17,7 @@
 #include <math.h>
 
 #ifdef WIN32
-#define strcasecmp _stricmp
+#define strcmp _stricmp
 #endif
 
 //***************************************************************************
@@ -2659,7 +2659,7 @@ int HYPRE_LinSysCore::copyInRHSVector(double scalar, const Data& data)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
       printf("%4d : HYPRE_LSC::entering copyInRHSVector.\n",mypid_);
-   if (strcasecmp("IJ_Vector", data.getTypeName()))
+   if (strcmp("IJ_Vector", data.getTypeName()))
    {
       printf("copyInRHSVector: data's type string not 'IJ_Vector'.\n");
       exit(1);
@@ -2752,7 +2752,7 @@ int HYPRE_LinSysCore::sumInRHSVector(double scalar, const Data& data)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
       printf("%4d : HYPRE_LSC::entering sumInRHSVector.\n",mypid_);
-   if (strcasecmp("IJ_Vector", data.getTypeName()))
+   if (strcmp("IJ_Vector", data.getTypeName()))
    {
       printf("sumInRHSVector ERROR : data's type string not 'IJ_Vector'.\n");
       exit(1);
@@ -2792,7 +2792,7 @@ int HYPRE_LinSysCore::destroyMatrixData(Data& data)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
       printf("%4d : HYPRE_LSC::entering destroyMatrixData.\n",mypid_);
-   if (strcasecmp("IJ_Matrix", data.getTypeName()))
+   if (strcmp("IJ_Matrix", data.getTypeName()))
    {
       printf("destroyMatrixData ERROR : data doesn't contain a IJ_Matrix.\n");
       exit(1);
@@ -2828,7 +2828,7 @@ int HYPRE_LinSysCore::destroyVectorData(Data& data)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
       printf("%4d : HYPRE_LSC::entering destroyVectorData.\n",mypid_);
-   if (strcasecmp("IJ_Vector", data.getTypeName()))
+   if (strcmp("IJ_Vector", data.getTypeName()))
    {
       printf("destroyVectorData ERROR : data doesn't contain a IJ_Vector.");
       exit(1);
@@ -3141,72 +3141,72 @@ void HYPRE_LinSysCore::selectSolver(char* name)
    // check for the validity of the solver name
    //-------------------------------------------------------------------
 
-   if ( !strcasecmp(name, "cg" ) )
+   if ( !strcmp(name, "cg" ) )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYPCG;
    }
-   else if ( !strcasecmp(name, "lsicg" ) )
+   else if ( !strcmp(name, "lsicg" ) )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYLSICG;
    }
-   else if ( !strcasecmp(name, "hybrid") )
+   else if ( !strcmp(name, "hybrid") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYHYBRID;
    }
-   else if ( !strcasecmp(name, "gmres") )
+   else if ( !strcmp(name, "gmres") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYGMRES;
    }
-   else if ( !strcasecmp(name, "fgmres") )
+   else if ( !strcmp(name, "fgmres") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYFGMRES;
    }
-   else if ( !strcasecmp(name, "bicgstab") )
+   else if ( !strcmp(name, "bicgstab") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYCGSTAB;
    }
-   else if ( !strcasecmp(name, "bicgstabl") )
+   else if ( !strcmp(name, "bicgstabl") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYCGSTABL;
    }
-   else if ( !strcasecmp(name, "tfqmr") )
+   else if ( !strcmp(name, "tfqmr") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYTFQMR;
    }
-   else if ( !strcasecmp(name, "bicgs") )
+   else if ( !strcmp(name, "bicgs") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYBICGS;
    }
-   else if ( !strcasecmp(name, "symqmr") )
+   else if ( !strcmp(name, "symqmr") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYSYMQMR;
    }
-   else if ( !strcasecmp(name, "boomeramg") )
+   else if ( !strcmp(name, "boomeramg") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYAMG;
    }
-   else if ( !strcasecmp(name, "superlu") )
+   else if ( !strcmp(name, "superlu") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYSUPERLU;
    }
-   else if ( !strcasecmp(name, "superlux") )
+   else if ( !strcmp(name, "superlux") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYSUPERLUX;
    }
-   else if ( !strcasecmp(name, "dsuperlu") )
+   else if ( !strcmp(name, "dsuperlu") )
    {
       strcpy( HYSolverName_, name );
 #ifdef HAVE_DSUPERLU
@@ -3217,12 +3217,12 @@ void HYPRE_LinSysCore::selectSolver(char* name)
       HYSolverID_ = HYGMRES;
 #endif
    }
-   else if ( !strcasecmp(name, "y12m") )
+   else if ( !strcmp(name, "y12m") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYY12M;
    }
-   else if ( !strcasecmp(name, "amge") )
+   else if ( !strcmp(name, "amge") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYAMGE;
@@ -3354,62 +3354,62 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    // check for the validity of the preconditioner name
    //-------------------------------------------------------------------
 
-   if ( !strcasecmp(name, "identity"  ) )
+   if ( !strcmp(name, "identity"  ) )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYIDENTITY;
    }
-   else if ( !strcasecmp(name, "diagonal"  ) )
+   else if ( !strcmp(name, "diagonal"  ) )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYDIAGONAL;
    }
-   else if ( !strcasecmp(name, "pilut") )
+   else if ( !strcmp(name, "pilut") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYPILUT;
    }
-   else if ( !strcasecmp(name, "parasails") )
+   else if ( !strcmp(name, "parasails") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYPARASAILS;
    }
-   else if ( !strcasecmp(name, "boomeramg") )
+   else if ( !strcmp(name, "boomeramg") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYBOOMERAMG;
    }
-   else if ( !strcasecmp(name, "ddilut") )
+   else if ( !strcmp(name, "ddilut") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYDDILUT;
    }
-   else if ( !strcasecmp(name, "schwarz") )
+   else if ( !strcmp(name, "schwarz") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYSCHWARZ;
    }
-   else if ( !strcasecmp(name, "ddict") )
+   else if ( !strcmp(name, "ddict") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYDDICT;
    }
-   else if ( !strcasecmp(name, "poly") )
+   else if ( !strcmp(name, "poly") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYPOLY;
    }
-   else if ( !strcasecmp(name, "euclid") )
+   else if ( !strcmp(name, "euclid") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYEUCLID;
    }
-   else if ( !strcasecmp(name, "blockP") )
+   else if ( !strcmp(name, "blockP") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYBLOCK;
    }
-   else if ( !strcasecmp(name, "ml") )
+   else if ( !strcmp(name, "ml") )
    {
 #ifdef HAVE_ML
       strcpy( HYPreconName_, name );
@@ -3424,7 +3424,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       HYPreconID_ = HYDIAGONAL;
 #endif
    }
-   else if ( !strcasecmp(name, "mli") )
+   else if ( !strcmp(name, "mli") )
    {
 #ifdef HAVE_MLI
       strcpy( HYPreconName_, name );
@@ -3439,7 +3439,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       HYPreconID_ = HYDIAGONAL;
 #endif
    }
-   else if ( !strcasecmp(name, "uzawa") )
+   else if ( !strcmp(name, "uzawa") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYUZAWA;
