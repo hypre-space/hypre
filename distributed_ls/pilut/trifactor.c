@@ -24,8 +24,8 @@
  * $Id$
  */
 
-#include "./DistributedMatrixPilutSolver.h"
 #include "ilu.h"
+#include "DistributedMatrixPilutSolver.h"
 
 
 /*************************************************************************

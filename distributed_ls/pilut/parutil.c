@@ -11,7 +11,7 @@
  */
 
 #include "ilu.h"
-#include "./DistributedMatrixPilutSolver.h"
+#include "DistributedMatrixPilutSolver.h"
 
 
 /*************************************************************************

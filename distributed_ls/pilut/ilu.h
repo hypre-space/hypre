@@ -22,9 +22,9 @@
 #include <assert.h>
 #include <signal.h>
 
-#include "./macros.h"
-#include "./struct.h"
-#include "./const.h"
+#include "macros.h"
+#include "struct.h"
+#include "const.h"
 
 
 #endif

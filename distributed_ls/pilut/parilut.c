@@ -42,8 +42,8 @@
  *    improvement, since it increases the number of levels. See par_split.c for that code.
  */
 
-#include "./DistributedMatrixPilutSolver.h"
 #include "ilu.h"
+#include "DistributedMatrixPilutSolver.h"
 
 /*************************************************************************
 * This function performs hypre_ILUT on the boundary nodes via MIS computation

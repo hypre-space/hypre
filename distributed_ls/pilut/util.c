@@ -10,7 +10,7 @@
  */
 
 #include "ilu.h"
-#include "./DistributedMatrixPilutSolver.h"
+#include "DistributedMatrixPilutSolver.h"
 
 /*************************************************************************
 * This function finds the minimum value in the array removes it and
