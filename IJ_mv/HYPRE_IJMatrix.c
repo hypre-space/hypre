@@ -230,7 +230,7 @@ HYPRE_IJMatrixSetLocalSize( HYPRE_IJMatrix IJmatrix, int local_m, int local_n )
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
 
    /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-      ierr = hypre_SetIJMatrixLocalSizePETSC (matrix, local_m, local_n);
+      ierr = hypre_IJMatrixSetLocalSizePETSc (matrix, local_m, local_n);
    if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
       ierr = hypre_IJMatrixSetLocalSizeISIS (matrix, local_m, local_n);
       */
@@ -454,7 +454,7 @@ HYPRE_IJMatrixInsertBlock( HYPRE_IJMatrix IJmatrix, int m, int n,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJMatrixAddBlock
+ * HYPRE_IJMatrixAddToBlock
  *--------------------------------------------------------------------------*/
 
 /** 
@@ -482,7 +482,7 @@ block of size m X n.
 */
 
 int 
-HYPRE_IJMatrixAddBlock( HYPRE_IJMatrix IJmatrix, int m, int n,
+HYPRE_IJMatrixAddToBlock( HYPRE_IJMatrix IJmatrix, int m, int n,
                           const int *rows, const int *cols, 
 			  const double *values)
 {
@@ -490,11 +490,11 @@ HYPRE_IJMatrixAddBlock( HYPRE_IJMatrix IJmatrix, int m, int n,
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
 
    /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-      ierr = hypre_IJMatrixAddBlockPETSc( matrix, m, n, rows, cols, values );
+      ierr = hypre_IJMatrixAddToBlockPETSc( matrix, m, n, rows, cols, values );
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-      ierr = hypre_IJMatrixAddBlockISIS( matrix, m, n, rows, cols, values );
+      ierr = hypre_IJMatrixAddToBlockISIS( matrix, m, n, rows, cols, values );
    else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixAddBlockParCSR( matrix, m, n, rows, cols, values );
+      ierr = hypre_IJMatrixAddToBlockParCSR( matrix, m, n, rows, cols, values );
    else
       ierr = -1;
 
@@ -547,7 +547,7 @@ HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix IJmatrix, int n,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJMatrixAddRow
+ * HYPRE_IJMatrixAddToRow
  *--------------------------------------------------------------------------*/
 
 /** 
@@ -570,19 +570,19 @@ The values to be added to the matrix.
 */
 
 int 
-HYPRE_IJMatrixAddRow( HYPRE_IJMatrix IJmatrix, int n,
+HYPRE_IJMatrixAddToRow( HYPRE_IJMatrix IJmatrix, int n,
                            int row, const int *cols, const double *values)
 {
    int ierr = 0;
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
 
    /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-      ierr = hypre_IJMatrixAddRowPETSc( matrix, n, row, cols, values );
+      ierr = hypre_IJMatrixAddToRowPETSc( matrix, n, row, cols, values );
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-      ierr = hypre_IJMatrixAddRowISIS( matrix, n, row, cols, values );
+      ierr = hypre_IJMatrixAddToRowISIS( matrix, n, row, cols, values );
    else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
      /* Currently a slight mismatch between "Insert" and "Set" */
-      ierr = hypre_IJMatrixAddRowParCSR( matrix, n, row, cols, values );
+      ierr = hypre_IJMatrixAddToRowParCSR( matrix, n, row, cols, values );
    else
       ierr = -1;
 

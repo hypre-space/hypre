@@ -188,11 +188,11 @@ hypre_F90_IFACE(hypre_ijmatrixinsertblock)( long int *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJMatrixAddBlock
+ * HYPRE_IJMatrixAddToBlock
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijmatrixaddblock)( long int *matrix,
+hypre_F90_IFACE(hypre_ijmatrixaddtoblock)( long int *matrix,
                                            int      *m,
                                            int      *n,
                                            int      *rows,
@@ -200,7 +200,7 @@ hypre_F90_IFACE(hypre_ijmatrixaddblock)( long int *matrix,
                                            double   *values,
                                            int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_IJMatrixAddBlock( (HYPRE_IJMatrix) *matrix,
+   *ierr = (int) ( HYPRE_IJMatrixAddToBlock( (HYPRE_IJMatrix) *matrix,
                                              (int)            *m,
                                              (int)            *n,
                                              (int *)           rows,

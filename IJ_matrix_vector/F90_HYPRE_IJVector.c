@@ -159,18 +159,18 @@ hypre_F90_IFACE(hypre_ijvectorsetlocalcompsinbl)( long int *vector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorAddLocalComponents
+ * HYPRE_IJVectorAddToLocalComps
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectoraddlocalcomps)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectoraddtolocalcomps)( long int *vector,
                                              int      *num_values,
                                              int      *glob_vec_indices,
                                              int      *value_indices,
                                              double   *values,
                                              int      *ierr              )
 {
-   *ierr = (int) ( HYPRE_IJVectorAddLocalComponents(
+   *ierr = (int) ( HYPRE_IJVectorAddToLocalComponents(
                          (HYPRE_IJVector) *vector,
                          (int)            *num_values,
                          (int *)           glob_vec_indices,
@@ -179,18 +179,18 @@ hypre_F90_IFACE(hypre_ijvectoraddlocalcomps)( long int *vector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorAddLocalComponentsInBlock
+ * HYPRE_IJVectorAddToLocalCompsBl
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectoraddlocalcompsinbl)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectoraddtolocalcompsbl)( long int *vector,
                                                   int      *glob_vec_start,
                                                   int      *glob_vec_stop,
                                                   int      *value_indices,
                                                   double   *values,
                                                   int      *ierr            )
 {
-   *ierr = (int) ( HYPRE_IJVectorAddLocalComponentsInBlock(
+   *ierr = (int) ( HYPRE_IJVectorAddToLocalComponentsInBlock(
                          (HYPRE_IJVector) *vector,
                          (int)            *glob_vec_start,
                          (int)            *glob_vec_stop,

@@ -20,8 +20,9 @@
  * hypre_AuxParCSRMatrixCreate
  *--------------------------------------------------------------------------*/
 
-hypre_AuxParCSRMatrix *
-hypre_AuxParCSRMatrixCreate( int  local_num_rows,
+int
+hypre_AuxParCSRMatrixCreate( hypre_AuxParCSRMatrix **aux_matrix,
+			     int  local_num_rows,
                        	     int  local_num_cols,
 			     int *sizes)
 {
@@ -56,7 +57,8 @@ hypre_AuxParCSRMatrixCreate( int  local_num_rows,
    hypre_AuxParCSRMatrixIndxDiag(matrix) = NULL;
    hypre_AuxParCSRMatrixIndxOffd(matrix) = NULL;
 
-   return matrix;
+   *aux_matrix = matrix;
+   return 0;
 }
 
 /*--------------------------------------------------------------------------

@@ -87,9 +87,9 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector IJvector )
       {
 	/*
          if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-            ierr = hypre_DestroyIJVectorPETSc(vector);
+            ierr = hypre_IJVectorDestroyPETSc(vector);
          else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-            ierr = hypre_DestroyIJVectorISIS(vector);
+            ierr = hypre_IJVectorDestroyISIS(vector);
          else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
             ierr = hypre_IJVectorDestroyPar(vector);
          else
@@ -229,9 +229,9 @@ HYPRE_IJVectorInitialize( HYPRE_IJVector IJvector )
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
    /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-      ierr += hypre_InitializeIJVectorPETSc(vector);
+      ierr += hypre_IJVectorInitializePETSc(vector);
    else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-      ierr += hypre_InitializeIJVectorISIS(vector);
+      ierr += hypre_IJVectorInitializeISIS(vector);
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
    {
       if (!hypre_IJVectorLocalStorage(vector))
@@ -463,7 +463,7 @@ HYPRE_IJVectorSetLocalComponentsInBlock( HYPRE_IJVector  IJvector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorAddLocalComponents
+ * HYPRE_IJVectorAddToLocalComponents
  *--------------------------------------------------------------------------*/
 
 /** 
@@ -486,7 +486,7 @@ pointer to array from which values are taken for summing
 */
 
 int 
-HYPRE_IJVectorAddLocalComponents( HYPRE_IJVector  IJvector,
+HYPRE_IJVectorAddToLocalComponents( HYPRE_IJVector  IJvector,
                                     int             num_values,
                                     const int      *glob_vec_indices,
                                     const int      *value_indices,
@@ -508,7 +508,7 @@ HYPRE_IJVectorAddLocalComponents( HYPRE_IJVector  IJvector,
                                                     value_indices,
                                                     values);
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_IJVectorAddLocalComponentsPar(vector,
+      ierr = hypre_IJVectorAddToLocalComponentsPar(vector,
                                                    num_values,
                                                    glob_vec_indices,
                                                    value_indices,
@@ -520,7 +520,7 @@ HYPRE_IJVectorAddLocalComponents( HYPRE_IJVector  IJvector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorAddLocalComponentsInBlock
+ * HYPRE_IJVectorAddToLocalComponentsInBlock
  *--------------------------------------------------------------------------*/
 
 /** 
@@ -545,7 +545,7 @@ pointer to array from which values are taken for summing
 */
 
 int 
-HYPRE_IJVectorAddLocalComponentsInBlock( HYPRE_IJVector  IJvector,
+HYPRE_IJVectorAddToLocalComponentsInBlock( HYPRE_IJVector  IJvector,
                                            int             glob_vec_index_start, 
                                            int             glob_vec_index_stop,
                                            const int      *value_indices,
@@ -567,7 +567,7 @@ HYPRE_IJVectorAddLocalComponentsInBlock( HYPRE_IJVector  IJvector,
                                                            value_indices,
                                                            values);
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_IJVectorAddLocalComponentsInBlockPar(vector,
+      ierr = hypre_IJVectorAddToLocalComponentsInBlockPar(vector,
                                                           glob_vec_index_start,
                                                           glob_vec_index_stop,
                                                           value_indices,

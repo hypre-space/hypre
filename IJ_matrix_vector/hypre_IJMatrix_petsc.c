@@ -306,15 +306,15 @@ hypre_IJMatrixInsertBlockPETSc(hypre_IJMatrix *matrix,
 }
 /******************************************************************************
  *
- * hypre_IJMatrixAddBlockPETSc
+ * hypre_IJMatrixAddToBlockPETSc
  *
  * adds a block of values to an IJMatrix, currently it just uses
- * AddIJMatrixRowPETSc
+ * IJMatrixAddToRowPETSc
  *
  *****************************************************************************/
 
 int
-hypre_IJMatrixAddBlockPETSc(hypre_IJMatrix *matrix,
+hypre_IJMatrixAddToBlockPETSc(hypre_IJMatrix *matrix,
 		       	       int	       m,
 		               int	       n,
 		               int	      *rows,
@@ -326,7 +326,7 @@ hypre_IJMatrixAddBlockPETSc(hypre_IJMatrix *matrix,
    for (i=0; i < m; i++)
    {
       in = i*n;
-      hypre_IJMatrixAddRowPETSc(matrix,n,rows[i],&cols[in],&coeffs[in]);
+      hypre_IJMatrixAddToRowPETSc(matrix,n,rows[i],&cols[in],&coeffs[in]);
    }
    return ierr;
 }
@@ -485,13 +485,13 @@ hypre_IJMatrixInsertRowPETSc(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
- * hypre_IJMatrixAddRowPETSc
+ * hypre_IJMatrixAddToRowPETSc
  *
  * adds a row to an IJMatrix before assembly, 
  * 
  *****************************************************************************/
 int
-hypre_IJMatrixAddRowPETSc(hypre_IJMatrix *matrix,
+hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
 	                  int	           n,
 		          int	           row,
 		          int	          *indices,

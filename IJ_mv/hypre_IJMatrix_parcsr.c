@@ -29,17 +29,17 @@ hypre_IJMatrixSetLocalSizeParCSR(hypre_IJMatrix *matrix,
 			   	 int     	 local_n)
 {
    int ierr = 0;
-   hypre_AuxParCSRMatrix *aux_data;
-   aux_data = hypre_IJMatrixTranslator(matrix);
-   if (aux_data)
+   hypre_AuxParCSRMatrix *aux_matrix;
+   aux_matrix = hypre_IJMatrixTranslator(matrix);
+   if (aux_matrix)
    {
-      hypre_AuxParCSRMatrixLocalNumRows(aux_data) = local_m;
-      hypre_AuxParCSRMatrixLocalNumCols(aux_data) = local_n;
+      hypre_AuxParCSRMatrixLocalNumRows(aux_matrix) = local_m;
+      hypre_AuxParCSRMatrixLocalNumCols(aux_matrix) = local_n;
    }
    else
    {
-      hypre_IJMatrixTranslator(matrix) = 
-			hypre_AuxParCSRMatrixCreate(local_m,local_n,NULL);
+      hypre_AuxParCSRMatrixCreate(&aux_matrix,local_m,local_n,NULL);
+      hypre_IJMatrixTranslator(matrix) = aux_matrix;
    }
    return ierr;
 }
@@ -84,7 +84,7 @@ hypre_IJMatrixCreateParCSR(hypre_IJMatrix *matrix)
    }
    else
    {
-      aux_matrix = hypre_AuxParCSRMatrixCreate(-1,-1,NULL);
+      hypre_AuxParCSRMatrixCreate(&aux_matrix,-1,-1,NULL);
       local_m = -1;
       local_n = -1;
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
@@ -301,15 +301,15 @@ hypre_IJMatrixInsertBlockParCSR(hypre_IJMatrix *matrix,
 }
 /******************************************************************************
  *
- * hypre_IJMatrixAddBlockParCSR
+ * hypre_IJMatrixAddToBlockParCSR
  *
  * adds a block of values to an IJMatrix, currently it just uses
- * AddIJMatrixRowParCSR
+ * IJMatrixAddToRowParCSR
  *
  *****************************************************************************/
 
 int
-hypre_IJMatrixAddBlockParCSR(hypre_IJMatrix *matrix,
+hypre_IJMatrixAddToBlockParCSR(hypre_IJMatrix *matrix,
 		       	       int	       m,
 		               int	       n,
 		               const int      *rows,
@@ -321,7 +321,7 @@ hypre_IJMatrixAddBlockParCSR(hypre_IJMatrix *matrix,
    for (i=0; i < m; i++)
    {
       in = i*n;
-      hypre_IJMatrixAddRowParCSR(matrix,n,rows[i],&cols[in],&coeffs[in]);
+      hypre_IJMatrixAddToRowParCSR(matrix,n,rows[i],&cols[in],&coeffs[in]);
    }
    return ierr;
 }
@@ -478,13 +478,13 @@ hypre_IJMatrixInsertRowParCSR(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
- * hypre_IJMatrixAddRowParCSR
+ * hypre_IJMatrixAddToRowParCSR
  *
  * adds a row to an IJMatrix before assembly, 
  * 
  *****************************************************************************/
 int
-hypre_IJMatrixAddRowParCSR(hypre_IJMatrix *matrix,
+hypre_IJMatrixAddToRowParCSR(hypre_IJMatrix *matrix,
 	                   int	           n,
 		           int	           row,
 		           const int      *indices,

@@ -376,13 +376,13 @@ hypre_IJVectorSetLocalComponentsInBlockPar(hypre_IJVector *vector,
 
 /******************************************************************************
  *
- * hypre_IJVectorAddLocalComponentsPar
+ * hypre_IJVectorAddToLocalComponentsPar
  *
  * adds to a potentially noncontiguous set of IJVectorPar components
  *
  *****************************************************************************/
 int
-hypre_IJVectorAddLocalComponentsPar(hypre_IJVector *vector,
+hypre_IJVectorAddToLocalComponentsPar(hypre_IJVector *vector,
                                       int             num_values,
                                       const int      *glob_vec_indices,
                                       const int      *value_indices,
@@ -456,14 +456,14 @@ hypre_IJVectorAddLocalComponentsPar(hypre_IJVector *vector,
 
 /******************************************************************************
  *
- * hypre_IJVectorAddLocalComponentsInBlockPar
+ * hypre_IJVectorAddToLocalComponentsInBlockPar
  *
  * adds to a contiguous set of components in an IJVectorPar
  *
  *****************************************************************************/
 
 int
-hypre_IJVectorAddLocalComponentsInBlockPar(hypre_IJVector *vector,
+hypre_IJVectorAddToLocalComponentsInBlockPar(hypre_IJVector *vector,
                                              int             glob_vec_index_start,
                                              int             glob_vec_index_stop,
                                              const int      *value_indices,

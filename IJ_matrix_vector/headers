@@ -43,7 +43,6 @@ cat IJ_vector.h          >> $INTERNAL_HEADER
 
 ../utilities/protos aux_*.c               >> $INTERNAL_HEADER
 ../utilities/protos hypre_IJ*.c               >> $INTERNAL_HEADER
-../utilities/protos IJ_*.c               >> $INTERNAL_HEADER
 ../utilities/protos HYPRE_IJ*.c               >> $INTERNAL_HEADER
 ../utilities/protos F90_HYPRE*.c               >> $INTERNAL_HEADER
 

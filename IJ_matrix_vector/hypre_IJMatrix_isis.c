@@ -306,7 +306,7 @@ hypre_IJMatrixInsertBlockISIS(hypre_IJMatrix *matrix,
 }
 /******************************************************************************
  *
- * hypre_IJMatrixAddBlockISIS
+ * hypre_IJMatrixAddToBlockISIS
  *
  * adds a block of values to an IJMatrix, currently it just uses
  * AddIJMatrixRowISIS
@@ -314,7 +314,7 @@ hypre_IJMatrixInsertBlockISIS(hypre_IJMatrix *matrix,
  *****************************************************************************/
 
 int
-hypre_IJMatrixAddBlockISIS(hypre_IJMatrix *matrix,
+hypre_IJMatrixAddToBlockISIS(hypre_IJMatrix *matrix,
 		       	       int	       m,
 		               int	       n,
 		               int	      *rows,
@@ -326,7 +326,7 @@ hypre_IJMatrixAddBlockISIS(hypre_IJMatrix *matrix,
    for (i=0; i < m; i++)
    {
       in = i*n;
-      hypre_IJMatrixAddRowISIS(matrix,n,rows[i],&cols[in],&coeffs[in]);
+      hypre_IJMatrixAddToRowISIS(matrix,n,rows[i],&cols[in],&coeffs[in]);
    }
    return ierr;
 }
@@ -485,13 +485,13 @@ hypre_IJMatrixInsertRowISIS(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
- * hypre_IJMatrixAddRowISIS
+ * hypre_IJMatrixAddToRowISIS
  *
  * adds a row to an IJMatrix before assembly, 
  * 
  *****************************************************************************/
 int
-hypre_IJMatrixAddRowISIS(hypre_IJMatrix *matrix,
+hypre_IJMatrixAddToRowISIS(hypre_IJMatrix *matrix,
 	                 int	           n,
 		         int	           row,
 		         int	          *indices,
