@@ -13,6 +13,7 @@
 #include "Hypre_StructVector.h"
 #include "Hypre_MPI_Com.h"
 #include "Hypre_StructJacobi.h"
+#include "Hypre_PCG.h"
 #include "Hypre_Solver.h"
 
 #ifdef HYPRE_DEBUG
@@ -45,6 +46,7 @@ main( int   argc,
    double              dxyz[3];
 
    int                 A_num_ghost[6] = {0, 0, 0, 0, 0, 0};
+   double              doubtemp;
                      
    Hypre_StructMatrix mat_test;
    Hypre_StructMatrix  A;
@@ -53,10 +55,13 @@ main( int   argc,
 
    Hypre_Solver  solver;
    Hypre_Solver  precond;
+   Hypre_StructSolver precond_S;
    Hypre_StructJacobi  solver_SJ;
+   Hypre_PCG  solver_PCG;
 
    Hypre_MPI_Com comm;
    Hypre_Box * box;
+   Hypre_Box bbox;
    int symmetric;
    array1int arroffsets;
    array1int intvals;
@@ -99,7 +104,7 @@ main( int   argc,
    int                *stencil_indices;
    double             *values;
 
-   int                 i, s, d;
+   int                 i, isave, s, d;
    int                 ix, iy, iz, ib;
 
    int                 periodic_error = 0;
@@ -435,9 +440,9 @@ main( int   argc,
    /* compute ilower and iupper from (p,q,r), (bx,by,bz), and (nx,ny,nz) */
    ib = 0;
    intvals_lo.lower[0] = 0;
-   intvals_lo.upper[0] = dim+1;
+   intvals_lo.upper[0] = dim;
    intvals_hi.lower[0] = 0;
-   intvals_hi.upper[0] = dim+1;
+   intvals_hi.upper[0] = dim;
    switch (dim)
    {
       case 1:
@@ -497,6 +502,7 @@ main( int   argc,
    Hypre_StructuredGrid_SetParameter( grid, "periodic", periodic );
    **** */
    Hypre_StructuredGrid_Setup( grid );
+
 /*    HYPRE_StructGridCreate(MPI_COMM_WORLD, dim, &grid); */
 /*    for (ib = 0; ib < nblocks; ib++) */
 /*    { */
@@ -513,7 +519,7 @@ main( int   argc,
    for (s = 0; s < dim + 1; s++)
    {
       arroffsets.data = offsets[s];
-      Hypre_StructStencil_SetElement( stencil, i, &arroffsets );
+      Hypre_StructStencil_SetElement( stencil, s, &arroffsets );
    };
    Hypre_StructStencil_Setup( stencil );
 
@@ -531,11 +537,11 @@ main( int   argc,
 /*    HYPRE_StructMatrixSetSymmetric(A, 1); */
 /*    HYPRE_StructMatrixSetNumGhost(A, A_num_ghost); */
 /*    HYPRE_StructMatrixInitialize(A); */
-   symmetric = 1;
-   A = Hypre_StructMatrix_Constructor( grid, stencil, symmetric );
+/*  jfp: it is important to set numGhost before Initialize.
+    Note that HYPRE has an Assemble function too. */
 
-/*  *** not implemented ....
-    Hypre_StructMatrix_SetParameter( A, "NumGhost", A_num_ghost );   *** */
+   symmetric = 1;
+   A = Hypre_StructMatrix_Constructor( grid, stencil, symmetric, A_num_ghost );
 
    /*-----------------------------------------------------------
     * Fill in the matrix elements
@@ -592,24 +598,43 @@ main( int   argc,
       for (ib = 0; ib < nblocks; ib++)
       {
          if( ilower[ib][d] == istart[d] && periodic[d] == 0 )
-         {
-            i = iupper[ib][d];
+         {  /* at boundary */
+
+            /* Make boundary box by flattening out box[ib] for direction d. */
+            isave = iupper[ib][d];
             iupper[ib][d] = istart[d];
+            intvals_lo.lower[0] = 0;
+            intvals_lo.upper[0] = dim;
+            intvals_hi.lower[0] = 0;
+            intvals_hi.upper[0] = dim;
+            intvals_lo.data = ilower[ib];
+            intvals_hi.data = iupper[ib];
+            bbox = Hypre_Box_Constructor( intvals_lo, intvals_hi, dim );
+            Hypre_Box_Setup( bbox );
+   
+            /* Put stencil point d (the one in direction d from the "middle"),
+               into stencil_indices, so the corresponding matrix entry will
+               get zeroed. */
             stencil_indices[0] = d;
-/* This changes the content of existing box and intvals, as they contain
-   pointers to iupper and stencil_indices respec.  Coding this way is normally
-   very bad, but at least it's a quick way to get started. */
-            Hypre_StructMatrix_SetValues( A, box[ib], intvals, doubvals );
+            intvals.lower[0] = 0;
+            intvals.upper[0] = 1;
+            intvals.data = stencil_indices;
+            doubvals.lower[0] = 0;
+            doubvals.upper[0] = volume;
+            doubvals.data = values;
+
+            Hypre_StructMatrix_SetValues( A, bbox, intvals, doubvals );
 /*             HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib], */
 /*                                            1, stencil_indices, values); */
-            iupper[ib][d] = i;
+            iupper[ib][d] = isave;
+            Hypre_Box_destructor( bbox );
          }
       }
    }
 
    Hypre_StructMatrix_Setup(  A, grid, stencil, symmetric );
-#if 0
-   Hypre_StructMatrix_Print( A );
+#if 1
+   Hypre_StructMatrix_print( A );
 /*   HYPRE_StructMatrixPrint("driver.out.A", A, 0); */
 #endif
 
@@ -676,8 +701,8 @@ main( int   argc,
 /*       HYPRE_StructVectorSetBoxValues(x, ilower[ib], iupper[ib], values); */
    }
 /*   HYPRE_StructVectorAssemble(x); */
-#if 0
    Hypre_StructVector_Setup( x, grid );
+#if 0
    Hypre_StructVector_Print( x );
 /*   HYPRE_StructVectorPrint("driver.out.x0", x, 0); */
 #endif
@@ -693,6 +718,7 @@ main( int   argc,
 /* JfP: temporarily, call Jacobi iteration, using as a model the
    code which calls multigrid ... */
 
+   if ( solver_id==201 )
    {
       time_index = hypre_InitializeTiming("Jacobi Setup");
       hypre_BeginTiming(time_index);
@@ -729,9 +755,84 @@ main( int   argc,
       solver = (Hypre_Solver) Hypre_StructJacobi_castTo( solver_SJ,
                                                          "Hypre_Solver" ); 
       mat_test = Hypre_Solver_GetSystemOperator(solver);
-      Hypre_StructMatrix_print(mat_test);
 
       Hypre_StructJacobi_destructor( solver_SJ );
+   }
+
+
+/* Conjugate Gradient */
+   if ((solver_id > 9) && (solver_id < 20))
+   {
+      time_index = hypre_InitializeTiming("PCG Setup");
+      hypre_BeginTiming(time_index);
+
+      solver_PCG = Hypre_PCG_Constructor( comm );
+
+      Hypre_PCG_SetParameter( solver_PCG, "max_iter", 50 );
+      Hypre_PCG_SetParameter( solver_PCG, "tol", 1.0e-06);
+      Hypre_PCG_SetParameter( solver_PCG, "2-norm", 1);
+      Hypre_PCG_SetParameter( solver_PCG, "relative change test", 0);
+      Hypre_PCG_SetParameter( solver_PCG, "log", 1);
+
+      /*      else if (solver_id == 17) */
+      solver_id = 17;  /* the only value presently supported */
+      /* use two-step Jacobi as preconditioner */
+      solver_SJ = Hypre_StructJacobi_Constructor( comm );
+      precond_S = (Hypre_StructSolver) Hypre_StructJacobi_castTo
+         ( solver_SJ, "Hypre_StructSolver" ); 
+      Hypre_StructJacobi_SetParameter( solver_SJ, "tol", 0.0 );
+      Hypre_StructJacobi_SetParameter( solver_SJ, "max_iter", 2 );
+      Hypre_StructJacobi_SetParameter( solver_SJ, "zero guess", 0 );
+      
+      Hypre_StructJacobi_Setup( solver_SJ, A, b, x );
+
+      Hypre_PCG_SetPreconditioner( solver_PCG, precond_S );
+
+      Hypre_PCG_Setup( solver_PCG, A, b, x );
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("PCG Solve");
+      hypre_BeginTiming(time_index);
+
+      Hypre_PCG_Apply( solver_PCG, b, &x );
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      Hypre_PCG_GetConvergenceInfo( solver_PCG, "number of iterations",
+                                    &doubtemp );
+      num_iterations = floor(doubtemp*1.001); /* round(doubtemp) */
+      Hypre_PCG_GetConvergenceInfo( solver_PCG, "residual norm",
+                                    &final_res_norm);
+
+      Hypre_PCG_PrintLogging( solver_PCG );
+
+      Hypre_PCG_destructor( solver_PCG );
+
+/*
+      if (solver_id == 10)
+      {
+         HYPRE_StructSMGDestroy(precond);
+      }
+      else if (solver_id == 11)
+      {
+         HYPRE_StructPFMGDestroy(precond);
+      }
+      else if (solver_id == 12)
+      {
+         HYPRE_StructSparseMSGDestroy(precond);
+      }
+      else if (solver_id == 17)
+*/
+      {
+         Hypre_StructJacobi_destructor( solver_SJ );
+      }
    }
 
    /*-----------------------------------------------------------
