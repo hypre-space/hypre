@@ -1,6 +1,17 @@
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
 
 .SUFFIXES:
 .SUFFIXES: .c .f .o
+
+srcdir = @srcdir@
+VPATH = @srcdir@
 
 CC = @CC@
 
@@ -10,13 +21,13 @@ CDEFS =
 
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
- -I..\
- -I../utilities\
- -I../IJ_matrix_vector\
- -I../seq_matrix_vector\
- -I../parcsr_matrix_vector\
- -I../parcsr_linear_solvers\
- -I../CI_struct_matrix_vector\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../utilities\
+ -I$(srcdir)/../seq_matrix_vector\
+ -I$(srcdir)/../parcsr_matrix_vector\
+ -I$(srcdir)/../parcsr_linear_solvers\
+ -I$(srcdir)/../CI_struct_matrix_vector\
  ${CINCLUDES} ${CDEFS}
 
 RANLIB= @RANLIB@

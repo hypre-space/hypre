@@ -23,8 +23,9 @@ CDEFS =
  
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
- -I..\
- -I../utilities\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../utilities\
  ${CINCLUDES}\
  ${CDEFS}
  
@@ -72,7 +73,8 @@ OBJS = ${FILES:.c=.o}
 all: libHYPRE_seq_mv.a
  
 install: all
-	@cp -f HYPRE_*.h seq_matrix_vector.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/seq_matrix_vector.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 
 clean:

@@ -25,6 +25,7 @@ define([AC_CACHE_SAVE], )dnl
 
 AC_INIT(utilities/memory.c)
 AM_CONFIG_HEADER(./HYPRE_config.h)
+AC_PREFIX_DEFAULT("..")
 
 
 dnl *********************************************************************
@@ -45,10 +46,6 @@ dnl * to use with the chosen compiler those options are identified
 dnl * and the appropriate macros are assigned values.
 dnl *********************************************************************dnl * 
 
-unset CC
-unset CXX
-unset F77
-
 casc_user_chose_compilers=no
 casc_user_chose_mpi=no
 casc_using_pthreads=no
@@ -61,7 +58,9 @@ casc_using_pgcc_smp=no
 
 
 AC_ARG_WITH(CC,
-[  --with-CC=ARG           User can manually set C compiler to ARG],
+[  --with-CC=ARG           User can manually set C compiler to ARG.  The
+                          environment variables 'CC' will be overridden by 
+                          the configure script.],
 [case "${withval}" in
    yes) casc_user_chose_compilers=no ;;
    no)  casc_user_chose_compilers=no ;;
@@ -72,7 +71,9 @@ AC_ARG_WITH(CC,
 )
 
 AC_ARG_WITH(CXX,
-[  --with-CXX=ARG          User can manually set C++ compiler to ARG],
+[  --with-CXX=ARG          User can manually set C++ compiler to ARG.  The
+                          environment variables 'CXX' will be overridden by 
+                          the configure script.],
 [case "${withval}" in
    yes) casc_user_chose_compilers=no ;;
    no)  casc_user_chose_compilers=no ;;
@@ -82,7 +83,9 @@ AC_ARG_WITH(CXX,
 )
 
 AC_ARG_WITH(F77,
-[  --with-f77=ARG          User can manually set f77 compiler to ARG],
+[  --with-F77=ARG          User can manually set f77 compiler to ARG.  The
+                          environment variables 'F77' will be overridden by 
+                          the configure script.],
 [case "${withval}" in
    yes) casc_user_chose_compilers=no ;;
    no)  casc_user_chose_compilers=no ;;
@@ -91,26 +94,56 @@ AC_ARG_WITH(F77,
  esac]
 )
 
+AC_ARG_WITH(LD,
+[  --with-LD=ARG           User can manually set linker to ARG.  The
+                          environment variables 'LD' will be overridden by 
+                          the configure script.],
+[case "${withval}" in
+   yes) casc_user_chose_compilers=no ;;
+   no)  casc_user_chose_compilers=no ;;
+   *)   casc_user_chose_compilers=yes
+        LD=$withval ;;
+ esac]
+)
+
 AC_ARG_WITH(CFLAGS,
 [  --with-CFLAGS=ARG       User can manually set c compiler flags.  This option
 		          is not necessary to turn on optimization or debug
 			  flags unless you want to use an opt or debug flag
 		          that is not the default.  To choose the default
-			  use --enable-opt or --enable-debug],
-[CFLAGS=$withval],
-[CFLAGS=""]
+			  use --enable-opt or --enable-debug. The 'CFLAGS'
+                          environment variable will be overridden.],
+[CFLAGS=$withval]
 )
 
 AC_ARG_WITH(CXXFLAGS,
-[  --with-CXXFLAGS=ARG     User can manually set c++ compiler flags.],
-[CXXFLAGS=$withval],
-[CXXFLAGS=""]
+[  --with-CXXFLAGS=ARG     User can manually set c++ compiler flags. The 
+                          'CXXFLAGS' environment variable will be overridden.],
+[CXXFLAGS=$withval]
 )
 
 AC_ARG_WITH(F77FLAGS,
-[  --with-F77FLAGS=ARG     User can manually set f77 compiler flags],
-[F77FLAGS=$withval],
-[F77FLAGS=""]
+[  --with-F77FLAGS=ARG     User can manually set f77 compiler flags. The 
+                          'F77FLAGS' environment variable will be overridden.],
+[F77FLAGS=$withval]
+)
+
+AC_ARG_WITH(LDFLAGS,
+[  --with-LDFLAGS=ARG      User can manually set linker flags. The 'LDFLAGS'
+                          environment variable will be overridden.],
+[LDFLAGS=$withval]
+)
+
+AC_ARG_WITH(extra-incpath,
+[  --with-extra-incpath=PATH    define extra include path, where PATH is a
+                          space-separated list of directories.],
+[CCFLAGS="${CCFLAGS} -I`echo ${withval}|sed 's/ /\ -I/g'`"]
+)
+
+AC_ARG_WITH(extra-ldpath,
+[  --with-extra-ldpath=PATH     define extra ld path, where PATH is a
+                          space-separated list of directories.],
+[LDFLAGS="-L`echo ${withval}|sed 's/ /\ -L/g'` ${LDFLAGS}"]
 )
 
 AC_ARG_WITH(purify,
@@ -958,6 +991,7 @@ dnl * contains compiler flags such as optimization or debugging flags
 AC_SUBST(CFLAGS)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(F77FLAGS)
+AC_SUBST(LDFLAGS)
 
 dnl *needed when compiling with another command prior to the compiler command
 dnl * for example: purify cc ....
@@ -993,37 +1027,44 @@ dnl *********************************************************************
 
 CASC_CONFIG_OUTPUT_LIST(\
  .\
+ babel\
  babel/Hypre\
  blas\
- utilities\
- struct_matrix_vector\
- struct_linear_solvers\
- sstruct_matrix_vector\
- sstruct_linear_solvers\
- seq_matrix_vector\
- parcsr_matrix_vector\
- distributed_matrix\
- matrix_matrix\
- IJ_matrix_vector\
- distributed_linear_solvers/pilut\
- parcsr_linear_solvers\
- seq_linear_solvers/pamg\
- seq_linear_solvers/amge\
- seq_linear_solvers/amge_ag\
  CI_struct_linear_solvers\
  CI_struct_matrix_vector\
- structIJ_matrix_vector\
+ distributed_linear_solvers\
+ distributed_linear_solvers/Euclid\
+ distributed_linear_solvers/pilut\
+ distributed_linear_solvers/ParaSails\
+ distributed_matrix\
+ docs\
+ FEI_matrix_vector\
  FEI_matrix_vector/fei-hypre\
+ FEI_matrix_vector/fei-isis\
  FEI_matrix_vector/fei-isis/src\
  FEI_matrix_vector/isis-mv\
- PETScMat_linear_solvers/pilut\
- PETSc_linear_solvers/ParILUT\
- distributed_linear_solvers/ParaSails\
- distributed_linear_solvers/Euclid\
+ IJ_matrix_vector\
  krylov\
+ matrix_matrix\
+ parcsr_linear_solvers\
+ parcsr_matrix_vector\
+ PETSc_linear_solvers\
+ PETSc_linear_solvers/ParILUT\
+ PETScMat_linear_solvers\
+ PETScMat_linear_solvers/pilut\
+ seq_matrix_vector\
+ seq_linear_solvers\
+ seq_linear_solvers/amge\
+ seq_linear_solvers/amge_ag\
+ seq_linear_solvers/pamg\
+ sstruct_matrix_vector\
+ sstruct_linear_solvers\
+ structIJ_matrix_vector\
+ struct_matrix_vector\
+ struct_linear_solvers\
  test\
  tools\
- docs)
+ utilities)
 
 AC_OUTPUT($Makefile_list)
 

@@ -23,10 +23,11 @@ CINCLUDES=@INCLUDES@ @MPIINCLUDE@
  
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
- -I..\
- -I../utilities\
- -I../krylov\
- -I../struct_matrix_vector\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../utilities\
+ -I$(srcdir)/../krylov\
+ -I$(srcdir)/../struct_matrix_vector\
  ${CINCLUDES}
 
 RANLIB = @RANLIB@
@@ -98,7 +99,8 @@ OBJS = ${FILES:.c=.o}
 all: libHYPRE_struct_ls.a 
 
 install: all
-	@cp -f HYPRE_*.h struct_linear_solvers.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/struct_linear_solvers.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 clean:
 	@rm -f *.o *.dxx 

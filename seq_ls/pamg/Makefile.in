@@ -23,10 +23,11 @@ CDEFS =
 
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
- -I../..\
- -I../../utilities\
- -I../../krylov\
- -I../../seq_matrix_vector\
+ -I$(srcdir)\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../krylov\
+ -I$(srcdir)/../../seq_matrix_vector\
  ${CINCLUDES}\
  ${CDEFS}
  

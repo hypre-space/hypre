@@ -12,7 +12,6 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-
 CC = @CC@
 
 C_COMPILE_FLAGS=@CFLAGS@
@@ -21,7 +20,8 @@ CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS = @TIMERDEFS@ -DHYPRE_TIMING
 
 CFLAGS =\
-   -I..\
+   -I$(srcdir)/..\
+   -I$(srcdir)\
    ${C_COMPILE_FLAGS}\
    ${CINCLUDES}\
    ${CDEFS}
@@ -36,7 +36,8 @@ RANLIB = @RANLIB@
 all: libHYPRE_utilities.a
 
 install: all
-	@cp -f HYPRE_*.h utilities.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/utilities.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 
 clean:
