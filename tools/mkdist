@@ -125,6 +125,7 @@ HYPRE_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
   ./configure
   (cd docs;  make -i install; make veryclean)
   (cd tools; make install; make veryclean)
+  find . -name Makefile -exec rm {} \;
 )
     
 (       # store version info
