@@ -43,6 +43,7 @@ int BuildFuncsFromOneFile (int argc , char *argv [], int arg_index , HYPRE_ParCS
 int BuildRhsParFromOneFile2(int argc , char *argv [], int arg_index , int *partitioning , HYPRE_ParVector *b_ptr );
 int BuildParLaplacian9pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian27pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
+void hypre_LOBPCGMultiOperatorB(void *data, hypre_MultiVectorPtr x, hypre_MultiVectorPtr y );
 
 #define SECOND_TIME 0
  
@@ -2584,7 +2585,7 @@ main( int   argc,
 	 if ( lobpcgSeed )
 	   hypre_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
 	 else
-	   hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
+	   hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time_index );
        }
 
        if ( constrained ) {
