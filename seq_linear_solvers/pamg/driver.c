@@ -941,7 +941,7 @@ BuildDifConv(   int               argc,
    int                 P, Q, R;
    double              cx, cy, cz;
    double              ax, ay, az;
-   double              hx,hy,hz;
+   double              hinx,hiny,hinz;
 
 #if 0
    hypre_ParCSRMatrix *A;
@@ -973,9 +973,9 @@ BuildDifConv(   int               argc,
    ny = 10;
    nz = 10;
 
-   hx = 1.0/(nx+1);
-   hy = 1.0/(ny+1);
-   hz = 1.0/(nz+1);
+   hinx = 1.0/(nx+1);
+   hiny = 1.0/(ny+1);
+   hinz = 1.0/(nz+1);
 
    P  = 1;
    Q  = num_procs;
@@ -1070,25 +1070,25 @@ BuildDifConv(   int               argc,
  
    values = hypre_CTAlloc(double, 7);
 
-   values[1] = -cx/(hx*hx);
-   values[2] = -cy/(hy*hy);
-   values[3] = -cz/(hz*hz);
-   values[4] = -cx/(hx*hx) + ax/hx;
-   values[5] = -cy/(hy*hy) + ay/hy;
-   values[6] = -cz/(hz*hz) + az/hz;
+   values[1] = -cx/(hinx*hinx);
+   values[2] = -cy/(hiny*hiny);
+   values[3] = -cz/(hinz*hinz);
+   values[4] = -cx/(hinx*hinx) + ax/hinx;
+   values[5] = -cy/(hiny*hiny) + ay/hiny;
+   values[6] = -cz/(hinz*hinz) + az/hinz;
 
    values[0] = 0.0;
    if (nx > 1)
    {
-      values[0] += 2.0*cx/(hx*hx) - 1.0*ax/hx;
+      values[0] += 2.0*cx/(hinx*hinx) - 1.0*ax/hinx;
    }
    if (ny > 1)
    {
-      values[0] += 2.0*cy/(hy*hy) - 1.0*ay/hy;
+      values[0] += 2.0*cy/(hiny*hiny) - 1.0*ay/hiny;
    }
    if (nz > 1)
    {
-      values[0] += 2.0*cz/(hz*hz) - 1.0*az/hz;
+      values[0] += 2.0*cz/(hinz*hinz) - 1.0*az/hinz;
    }
 
    A = hypre_GenerateDifConv(nx, ny, nz, P, Q, R, values);
