@@ -52,50 +52,7 @@
 
 extern void qsort0(int *, int, int);
 
-/****************************************************************************/ 
-/* local data structures                                                    */
-/*--------------------------------------------------------------------------*/
-
-typedef struct
-{
-    int      Nrows;
-    int      *rowptr;
-    int      *colnum;
-    int      *map;
-    double   *values;
-    int      sendProcCnt;
-    int      *sendProc;
-    int      *sendLeng;
-    int      **sendList;
-    int      recvProcCnt;
-    int      *recvProc;
-    int      *recvLeng;
-}
-MH_Matrix;
-
-typedef struct
-{
-    MH_Matrix   *Amat;
-    MPI_Comm    comm;
-    int         globalEqns;
-    int         *partition;
-}
-MH_Context;
-    
-typedef struct
-{
-    MPI_Comm     comm;
-    ML           *ml_ptr;
-    int          nlevels;
-    int          pre, post;
-    int          pre_sweeps, post_sweeps;
-    int          BGS_blocksize;
-    double       jacobi_wt;
-    double       ag_threshold;
-    ML_Aggregate *ml_ag;
-    MH_Context   *contxt;
-} 
-MH_Link;
+#include "HYPRE_MHMatrix.h"
 
 extern int  HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix, MH_Matrix *,
                                             MPI_Comm, int *,MH_Context*); 
@@ -469,7 +426,7 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
           case 3 :
              Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
              ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
-             ML_Gen_SmootherVBlockGaussSeidel(ml,level,ML_PRESMOOTHER,
+             ML_Gen_SmootherVBlockSymGaussSeidel(ml,level,ML_PRESMOOTHER,
                                               sweeps, Nblocks, blockList);
              break;
           case 4 :
@@ -495,7 +452,7 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
           case 3 :
              Nblocks = ML_Aggregate_Get_AggrCount( link->ml_ag, level );
              ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
-             ML_Gen_SmootherVBlockGaussSeidel(ml,level,ML_POSTSMOOTHER,
+             ML_Gen_SmootherVBlockSymGaussSeidel(ml,level,ML_POSTSMOOTHER,
                                               sweeps, Nblocks, blockList);
              break;
           case 4 :
@@ -733,7 +690,7 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        for (j = 0; j < rowLeng; j++)
           if ( colInd[j] < startRow || colInd[j] > endRow )
           {
-             /*/if ( colVal[j] != 0.0 ) offdiagSize[i-startRow]++;*/
+             /*if ( colVal[j] != 0.0 ) offdiagSize[i-startRow]++;*/
              offdiagSize[i-startRow]++;
           }
           else
