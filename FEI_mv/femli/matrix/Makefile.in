@@ -69,6 +69,7 @@ HEADERS =\
 
 FILES =\
  mli_matrix.C \
+ mli_matrix_mult.C \
  mli_matrix_utils.C
 
 DRIVER_FILES = driver.C
