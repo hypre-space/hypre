@@ -123,14 +123,15 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
       {
    	num_sends = hypre_CommPkgNumSends(comm_pkg);
 
-	if (num_sends)
-   		v_buf_data = hypre_CTAlloc(double, 
+   	v_buf_data = hypre_CTAlloc(double, 
 			hypre_CommPkgSendMapStart(comm_pkg, num_sends));
-        if (num_cols_offd)
+
+	Vext_data = hypre_CTAlloc(double,num_cols_offd);
+        
+	if (num_cols_offd)
 	{
 		A_offd_j = hypre_CSRMatrixJ(A_offd);
 		A_offd_data = hypre_CSRMatrixData(A_offd);
-		Vext_data = hypre_CTAlloc(double,num_cols_offd);
 	}
  
    	index = 0;
@@ -219,6 +220,8 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                }
             }     
          }
+	 hypre_TFree(Vext_data);
+	 hypre_TFree(v_buf_data);
       }
       break;
 
