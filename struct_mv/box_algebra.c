@@ -198,6 +198,8 @@ zzz_SubtractBoxes( zzz_Box *box1,
  * box in the union with extents defined by factoring the entry, then
  * indexing into the block_index array.
  *
+ * Note: Special care has to be taken for boxes of size 0.
+ *
  *--------------------------------------------------------------------------*/
 
 zzz_BoxArray *
@@ -317,6 +319,7 @@ zzz_UnionBoxArray( zzz_BoxArray *boxes )
 	 zzz_IndexD(imax, d) = j;
       }
 
+      /* note: boxes of size zero will not be added to block */
       for (k = zzz_IndexD(imin, 2); k < zzz_IndexD(imax, 2); k++)
       {
 	 for (j = zzz_IndexD(imin, 1); j < zzz_IndexD(imax, 1); j++)
