@@ -16,7 +16,7 @@
 
 LinearSystemCore *HYPRE_base_create( MPI_Comm comm ) 
 {
-   HYPRE_LinSysCore* linSys = new HYPRE_LinSysCore(comm);
+   LinearSystemCore* linSys = new HYPRE_LinSysCore(comm);
    return (linSys);
 }
 
