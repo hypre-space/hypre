@@ -61,8 +61,9 @@ LFLAGS =\
  ${BLASLIBFLAGS} \
  ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
 
-BABELIBFLAGS =\
+BABELLIBFLAGS =\
  -L${HYPRE_BUILD_DIR}/lib\
+ -L${HYPRE_BUILD_DIR}/../babel-runtime/sidl/.libs\
  -lbHYPRE\
  -lbHYPREClient-C\
  -lbHYPREClient-F\
