@@ -4,7 +4,7 @@
 abs_top_srcdir = @abs_top_srcdir@
 abs_srcdir = @abs_srcdir@
 
-EXTRA_DIST = \
+noinst_EXTRA_DIST = \
  $(srcdir)/V1.5.0b.IJ_transition_info\
  $(srcdir)/autoconfig.txt\
  $(srcdir)/babel_transition_info.txt\
@@ -113,51 +113,6 @@ DEV_FILES = \
  dev_manual.tex
 
 ##################################################################
-# Targets
-##################################################################
-
-install-data-local: all
-	@ \
-	$(MAKE) $(AM_MAKEFLAGS); \
-	test ! -d ${prefix}/docs && mkdir -m 755 ${prefix}/docs; \
-	for file in HYPRE_usr_manual.ps HYPRE_usr_manual.pdf \
-		HYPRE_ref_manual.ps HYPRE_ref_manual.pdf \
-		bHYPRE_ref_manual.ps bHYPRE_ref_manual.pdf; do \
-	  test -f $$file && $(INSTALL_DATA) $$file ${prefix}/docs/$$file; \
-	done; \
-	test -f $(srcdir)/V1.5.0b.IJ_transition_info && \
-		test -f ${prefix}/docs/V1.5.0b.IJ_transition_info || \
-		$(INSTALL_DATA) $(srcdir)/V1.5.0b.IJ_transition_info \
-		${prefix}/docs/V1.5.0b.IJ_transition_info; \
-	for dir in HYPRE_usr_manual HYPRE_ref_manual bHYPRE_ref_manual; do \
-	  if test -d $$dir; then \
-	    test ! -d ${prefix}/docs/$$dir && \
-		mkdir -m 755 -p ${prefix}/docs/$$dir; \
-	    for file in $$dir/*; do \
-	      $(INSTALL_DATA) $$file ${prefix}/docs/$$file; \
-	    done; \
-	  fi; \
-	done
-
-clean-local:
-	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
-	@/bin/rm -f *.idx *.ilg *.ind 
-	@/bin/rm -f *.h
-	@/bin/rm -f vref_manual.* vbref_manual.* version.tex
-	@/bin/rm -fr HYPRE_usr_manual
-	@/bin/rm -f  HYPRE_usr_manual.ps
-	@/bin/rm -f  HYPRE_usr_manual.pdf
-	@/bin/rm -fr HYPRE_dev_manual
-	@/bin/rm -f  HYPRE_dev_manual.ps
-	@/bin/rm -f  HYPRE_dev_manual.pdf
-	@/bin/rm -fr HYPRE_ref_manual
-	@/bin/rm -f  HYPRE_ref_manual.tex HYPRE_ref_manual.ps
-	@/bin/rm -f  HYPRE_ref_manual.pdf
-	@/bin/rm -fr bHYPRE_ref_manual
-	@/bin/rm -f  bHYPRE_ref_manual.tex bHYPRE_ref_manual.ps
-	@/bin/rm -f  bHYPRE_ref_manual.pdf
-
-##################################################################
 # Rules
 ##################################################################
 
@@ -191,7 +146,9 @@ bref_html: bHYPRE_ref_manual/index.html
 bref_ps: bHYPRE_ref_manual.ps
 bref_pdf: bHYPRE_ref_manual.pdf
 
-##########
+##################################################################
+# Generic rules
+##################################################################
 
 HYPRE_usr_manual/usr_manual.html: usr_manual.dvi
 	@ \
@@ -407,8 +364,48 @@ version.tex:
 	echo "\def\HYPREVersionDate{$$PACKAGE_DATETIME}" >> version.tex
 
 ##################################################################
-# Generic rules
+# Extended Targets
 ##################################################################
+
+install-data-local:
+	@ \
+	test ! -d ${prefix}/docs && mkdir -m 755 ${prefix}/docs; \
+	for file in HYPRE_usr_manual.ps HYPRE_usr_manual.pdf \
+		HYPRE_ref_manual.ps HYPRE_ref_manual.pdf \
+		bHYPRE_ref_manual.ps bHYPRE_ref_manual.pdf; do \
+	  test -f $$file && $(INSTALL_DATA) $$file ${prefix}/docs/$$file; \
+	done; \
+	test -f $(srcdir)/V1.5.0b.IJ_transition_info && \
+		test -f ${prefix}/docs/V1.5.0b.IJ_transition_info || \
+		$(INSTALL_DATA) $(srcdir)/V1.5.0b.IJ_transition_info \
+		${prefix}/docs/V1.5.0b.IJ_transition_info; \
+	for dir in HYPRE_usr_manual HYPRE_ref_manual bHYPRE_ref_manual; do \
+	  if test -d $$dir; then \
+	    test ! -d ${prefix}/docs/$$dir && \
+		mkdir -m 755 -p ${prefix}/docs/$$dir; \
+	    for file in $$dir/*; do \
+	      $(INSTALL_DATA) $$file ${prefix}/docs/$$file; \
+	    done; \
+	  fi; \
+	done
+
+clean-local:
+	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
+	@/bin/rm -f *.idx *.ilg *.ind 
+	@/bin/rm -f *.h
+	@/bin/rm -f vref_manual.* vbref_manual.* version.tex
+	@/bin/rm -fr HYPRE_usr_manual
+	@/bin/rm -f  HYPRE_usr_manual.ps
+	@/bin/rm -f  HYPRE_usr_manual.pdf
+	@/bin/rm -fr HYPRE_dev_manual
+	@/bin/rm -f  HYPRE_dev_manual.ps
+	@/bin/rm -f  HYPRE_dev_manual.pdf
+	@/bin/rm -fr HYPRE_ref_manual
+	@/bin/rm -f  HYPRE_ref_manual.tex HYPRE_ref_manual.ps
+	@/bin/rm -f  HYPRE_ref_manual.pdf
+	@/bin/rm -fr bHYPRE_ref_manual
+	@/bin/rm -f  bHYPRE_ref_manual.tex bHYPRE_ref_manual.ps
+	@/bin/rm -f  bHYPRE_ref_manual.pdf
 
 #dist-hook:
 #	@ \
