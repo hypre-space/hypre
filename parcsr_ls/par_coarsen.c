@@ -1243,7 +1243,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    int             *lists, *where;
    int              points_left, new_C;
    int              new_meas, bumps, top_max;
-   int              num_left;
+   int              num_left, elmt;
    int              nabor, nabor_two;
 
    int              ierr = 0;
@@ -1900,7 +1900,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 
    /* third pass, check boundary fine points for coarse neighbors */
 
-   if (coarsen_type == 3)
+   if (coarsen_type == 3 || coarsen_type == 4)
    {
       if (debug_flag == 3) wall_time = time_getWallclockSeconds();
 
@@ -1930,7 +1930,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       citilde_array = hypre_CTAlloc(int,num_cols_offd);
    }
 
-   if (coarsen_type > 1 && coarsen_type < 4)
+   if (coarsen_type > 1 && coarsen_type < 5)
    { 
       for (i=0; i < num_cols_offd; i++)
       {
@@ -2103,18 +2103,55 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    			int_buf_data);
     
       hypre_FinalizeCommunication(comm_handle);   
-    
+   
+      /* only CF_marker entries from larger procs are accepted  
+	if coarsen_type = 4 coarse points are not overwritten  */
+ 
       index = 0;
-      for (i = 0; i < num_sends; i++)
+      if (coarsen_type != 4)
       {
-        start = hypre_CommPkgSendMapStart(comm_pkg, i);
-        for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
-                CF_marker[hypre_CommPkgSendMapElmt(comm_pkg,j)] =
+         for (i = 0; i < num_sends; i++)
+         {
+	    start = hypre_CommPkgSendMapStart(comm_pkg, i);
+            if (hypre_CommPkgSendProc(comm_pkg,i) > my_id)
+	    {
+              for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
+                   CF_marker[hypre_CommPkgSendMapElmt(comm_pkg,j)] =
                    int_buf_data[index++]; 
+            }
+	    else
+	    {
+	       index += hypre_CommPkgSendMapStart(comm_pkg, i+1) - start;
+	    }
+         }
+      }
+      else
+      {
+         for (i = 0; i < num_sends; i++)
+         {
+	    start = hypre_CommPkgSendMapStart(comm_pkg, i);
+            if (hypre_CommPkgSendProc(comm_pkg,i) > my_id)
+	    {
+              for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
+              {
+                 elmt = hypre_CommPkgSendMapElmt(comm_pkg,j);
+                 if (CF_marker[elmt] != 1)
+                   CF_marker[elmt] = int_buf_data[index];
+		 index++; 
+              }
+            }
+	    else
+	    {
+	       index += hypre_CommPkgSendMapStart(comm_pkg, i+1) - start;
+	    }
+         }
       }
       if (debug_flag == 3)
       {
          wall_time = time_getWallclockSeconds() - wall_time;
+         if (coarsen_type == 4)
+		printf("Proc = %d    Coarsen 3rd pass = %f\n",
+                my_id, wall_time); 
          if (coarsen_type == 3)
 		printf("Proc = %d    Coarsen 3rd pass = %f\n",
                 my_id, wall_time); 
@@ -2123,7 +2160,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                 my_id, wall_time); 
       }
    }
-   if (coarsen_type == 4)
+   if (coarsen_type == 5)
    {
       /*------------------------------------------------
        * Exchange boundary data for CF_marker
