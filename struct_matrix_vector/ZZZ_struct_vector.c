@@ -155,3 +155,25 @@ ZZZ_PrintStructVector( char            *filename,
 			  (zzz_StructVector *) vector, 
 			  all );
 }
+
+/*--------------------------------------------------------------------------
+ * ZZZ_SetStructVectorNumGhost
+ *--------------------------------------------------------------------------*/
+ 
+void
+ZZZ_SetStructVectorNumGhost( ZZZ_StructMatrix  vector,
+                             int              *num_ghost )
+{
+   zzz_SetStructVectorNumGhost( (zzz_StructVector *) vector, num_ghost);
+}
+
+/*--------------------------------------------------------------------------
+ * ZZZ_SetStructVectorConstantValues
+ *--------------------------------------------------------------------------*/
+ 
+int
+ZZZ_SetStructVectorConstantValues( ZZZ_StructMatrix  vector,
+				   double            values )
+{
+   return( zzz_SetStructVectorConstantValues( (zzz_StructVector *) vector, values) );
+}
