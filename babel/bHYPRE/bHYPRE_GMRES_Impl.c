@@ -142,7 +142,7 @@ impl_bHYPRE_GMRES__dtor(
 
    if ( data->vector_type == "ParVector" )
    {
-      ierr += HYPRE_ParGMRESDestroy( data->solver );
+      ierr += HYPRE_ParCSRGMRESDestroy( data->solver );
    }
    /* To Do: support more vector types */
    else
