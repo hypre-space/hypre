@@ -1190,7 +1190,6 @@ void HYPRE_LinSysCore::buildSchurReducedRHS()
        assert( !ierr );
        rowCount++;
     } 
-    HYPRE_IJVectorDestroy(f1);
     HYPRE_IJVectorDestroy(f2hat);
 
     if ( mypid_ == 0 && (HYOutputLevel_ & HYFEI_SCHURREDUCE1) )

@@ -2197,7 +2197,7 @@ void HYPRE_LinSysCore::matrixLoadComplete()
        HYPRE_ParCSRMatrix A_csr;
 
        printf("%4d : HYPRE_LSC::print matrix and rhs to files.\n",mypid_);
-       A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
+       A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(HYA_);
        sprintf(fname, "hypre_mat.out.%d",mypid_);
        fp = fopen(fname,"w");
        nrows = localEndRow_ - localStartRow_ + 1;

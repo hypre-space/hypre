@@ -9,4 +9,6 @@
               (per Tim Dunn's request)
 02/14/01    version 1.5.0R3 
             - correct an error in MPI_Allreduce in buildSchurRHS.
+            - take out a duplicate destroy(f1) in buildSchurRHS
+            - in matrixLoadComplete, change to print original matrix
 
