@@ -82,7 +82,7 @@ HYPRE_FreeIJMatrix( HYPRE_IJMatrix IJmatrix )
          else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
             ierr = hypre_FreeIJMatrixISIS( matrix );
          else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
-            ierr = hypre_FreeIJMatrixParcsr( matrix );
+            ierr = hypre_FreeIJMatrixParCSR( matrix );
          else
             ierr = -1;
 
@@ -112,7 +112,7 @@ HYPRE_InitializeIJMatrix( HYPRE_IJMatrix IJmatrix )
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       ierr = hypre_InitializeIJMatrixISIS( matrix );
    else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
-      ierr = hypre_InitializeIJMatrixParcsr( matrix );
+      ierr = hypre_InitializeIJMatrixParCSR( matrix );
    else
       ierr = -1;
 
@@ -138,7 +138,7 @@ HYPRE_AssembleIJMatrix( HYPRE_IJMatrix IJmatrix )
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       ierr = hypre_AssembleIJMatrixISIS( matrix );
    else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
-      ierr = hypre_AssembleIJMatrixParcsr( matrix );
+      ierr = hypre_AssembleIJMatrixParCSR( matrix );
    else
       ierr = -1;
 
@@ -266,7 +266,7 @@ HYPRE_SetIJMatrixRowSizes( HYPRE_IJMatrix IJmatrix, int *sizes )
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       ierr = hypre_SetIJMatrixRowSizesISIS( matrix , sizes );
    else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
-      ierr = hypre_SetIJMatrixRowSizesParcsr( matrix , sizes );
+      ierr = hypre_SetIJMatrixRowSizesParCSR( matrix , sizes );
    else
       ierr = -1;
 
@@ -306,7 +306,7 @@ HYPRE_SetIJMatrixDiagRowSizes( HYPRE_IJMatrix IJmatrix, int *sizes )
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       ierr = hypre_SetIJMatrixDiagRowSizesISIS( matrix , sizes );
    else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
-      ierr = hypre_SetIJMatrixDiagRowSizesParcsr( matrix , sizes );
+      ierr = hypre_SetIJMatrixDiagRowSizesParCSR( matrix , sizes );
    else
       ierr = -1;
 
@@ -347,7 +347,7 @@ HYPRE_SetIJMatrixOffDiagRowSizes( HYPRE_IJMatrix IJmatrix, int *sizes )
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       ierr = hypre_SetIJMatrixOffDiagRowSizesISIS( matrix , sizes );
    else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
-      ierr = hypre_SetIJMatrixOffDiagRowSizesParcsr( matrix , sizes );
+      ierr = hypre_SetIJMatrixOffDiagRowSizesParCSR( matrix , sizes );
    else
       ierr = -1;
 
@@ -385,7 +385,7 @@ HYPRE_SetIJMatrixTotalSize( HYPRE_IJMatrix IJmatrix, int size )
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       ierr = hypre_SetIJMatrixTotalSizeISIS( matrix , size );
    else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
-      ierr = hypre_SetIJMatrixTotalSizeParcsr( matrix , size );
+      ierr = hypre_SetIJMatrixTotalSizeParCSR( matrix , size );
    else
       ierr = -1;
 
@@ -476,7 +476,7 @@ HYPRE_InsertIJMatrixBlock( HYPRE_IJMatrix IJmatrix, int m, int n,
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       ierr = hypre_InsertIJMatrixBlockISIS( matrix, m, n, rows, cols, values );
    else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
-      ierr = hypre_InsertIJMatrixBlockParcsr( matrix, m, n, rows, cols, values );
+      ierr = hypre_InsertIJMatrixBlockParCSR( matrix, m, n, rows, cols, values );
    else
       ierr = -1;
 
@@ -523,7 +523,7 @@ HYPRE_AddBlockToIJMatrix( HYPRE_IJMatrix IJmatrix, int m, int n,
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
       ierr = hypre_AddBlockToIJMatrixISIS( matrix, m, n, rows, cols, values );
    else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
-      ierr = hypre_AddBlockToIJMatrixParcsr( matrix, m, n, rows, cols, values );
+      ierr = hypre_AddBlockToIJMatrixParCSR( matrix, m, n, rows, cols, values );
    else
       ierr = -1;
 
