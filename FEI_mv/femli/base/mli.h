@@ -90,6 +90,7 @@ public :
    MLI_FEData   *getFEData( int level );
    MLI_Mapper   *getNodeEqnMap( int level );
    int          resetSystemMatrix( int level );
+   int          getNumLevels()         { return num_levels; }
    MLI_Method   *getMethod()           { return method_ptr; }
 };
 
