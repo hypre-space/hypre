@@ -1,9 +1,9 @@
 
-all: lib
+all: lib_HYPRE_DistributedMatrixPilutSolver.a
 
 install:all
-
-
+	@cp -f HYPRE_*.h DistributedMatrixPilutSolver.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f lib_HYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 
 MPI_INCLUDES = -I/usr/local/mpi/mpich/include
 MPI_LIBDIR   = -L/usr/local/mpi/mpich/lib/solaris/ch_p4/
@@ -45,6 +45,8 @@ include ../../bmakes/Makefile
 # Main rules
 ##################################################################
 
-lib:    $(PROTOS) $(OBJS)
-	ar -rcu lib_HYPRE_DistributedMatrixPilutSolver.a $(OBJS)
+lib_HYPRE_DistributedMatrixPilutSolver.a: ${PROTOS} ${OBJS}
+	@echo "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	@RANLIB@ $@
 
