@@ -84,6 +84,9 @@ char *argv[];
     *-------------------------------------------------------*/
 
    fp = fopen(GlobalsLogFileName, "w");
+   sprintf(file_name, "%s.problem.strp", GlobalsInFileName);
+   WriteProblem(file_name,GlobalsLogFileName);
+   WriteSolver(GlobalsLogFileName, solver);
 
    fclose(fp);
 
