@@ -282,8 +282,8 @@ int hypre_PFMGComputeDxyz( hypre_StructMatrix *A , double *dxyz );
 int hypre_ZeroDiagonal( hypre_StructMatrix *A );
 
 /* pfmg_setup_interp.c */
-hypre_StructMatrix *hypre_PFMGCreateInterpOp( hypre_StructMatrix *A , hypre_StructGrid *cgrid , int cdir );
-int hypre_PFMGSetupInterpOp( hypre_StructMatrix *A , int cdir , hypre_Index findex , hypre_Index stride , hypre_StructMatrix *P );
+hypre_StructMatrix *hypre_PFMGCreateInterpOp( hypre_StructMatrix *A , hypre_StructGrid *cgrid , int cdir , int rap_type );
+int hypre_PFMGSetupInterpOp( hypre_StructMatrix *A , int cdir , hypre_Index findex , hypre_Index stride , hypre_StructMatrix *P , int rap_type );
 
 /* pfmg_setup_rap5.c */
 hypre_StructMatrix *hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );

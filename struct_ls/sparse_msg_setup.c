@@ -351,10 +351,10 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
                if ((lz == 0) && (ly == 0))
                {
                   Px_a[lx] = hypre_PFMGCreateInterpOp(A_a[fi],
-                                                      Px_grid_a[lx+1], 0);
+                                                      Px_grid_a[lx+1], 0, 0);
                   hypre_StructMatrixInitialize(Px_a[lx]);
                   hypre_PFMGSetupInterpOp(A_a[fi], 0, findex, stride,
-                                          Px_a[lx]);
+                                          Px_a[lx], 0);
                   RTx_a[lx] = Px_a[lx];
                }
 
@@ -398,10 +398,10 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
             if (lz == 0)
             {
                Py_a[ly] = hypre_PFMGCreateInterpOp(A_a[fi],
-                                                   Py_grid_a[ly+1], 1);
+                                                   Py_grid_a[ly+1], 1, 0);
                hypre_StructMatrixInitialize(Py_a[ly]);
                hypre_PFMGSetupInterpOp(A_a[fi], 1, findex, stride,
-                                       Py_a[ly]);
+                                       Py_a[ly], 0);
                RTy_a[ly] = Py_a[ly];
             }
 
@@ -441,9 +441,9 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
          hypre_SparseMSGSetStride(2, stride);
 
          /* compute z-transfer operators */
-         Pz_a[lz] = hypre_PFMGCreateInterpOp(A_a[fi], Pz_grid_a[lz+1], 2);
+         Pz_a[lz] = hypre_PFMGCreateInterpOp(A_a[fi], Pz_grid_a[lz+1], 2, 0);
          hypre_StructMatrixInitialize(Pz_a[lz]);
-         hypre_PFMGSetupInterpOp(A_a[fi], 2, findex, stride, Pz_a[lz]);
+         hypre_PFMGSetupInterpOp(A_a[fi], 2, findex, stride, Pz_a[lz], 0);
          RTz_a[lz] = Pz_a[lz];
 
          /* compute coarse-operator with Pz */

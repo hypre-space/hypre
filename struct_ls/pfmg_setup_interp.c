@@ -21,7 +21,8 @@
 hypre_StructMatrix *
 hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
                           hypre_StructGrid   *cgrid,
-                          int                 cdir  )
+                          int                 cdir,
+                          int                 rap_type )
 {
    hypre_StructMatrix   *P;
 
@@ -55,8 +56,14 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
    if ( constant_coefficient==2 )
    {
-      /* A has variable diagonal, so all P coefficients will be variable */
-      hypre_StructMatrixSetConstantCoefficient(P, 0 );
+      if ( rap_type==0 )
+      /* A has variable diagonal, which will force all P coefficients to be variable */
+         hypre_StructMatrixSetConstantCoefficient(P, 0 );
+      else
+      {
+      /* We will force P to be 0.5's everywhere, ignoring A. */
+         hypre_StructMatrixSetConstantCoefficient(P, 1);
+      }
    }
    else
    {
@@ -79,7 +86,8 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
                          int                 cdir,
                          hypre_Index         findex,
                          hypre_Index         stride,
-                         hypre_StructMatrix *P      )
+                         hypre_StructMatrix *P,
+                         int                 rap_type )
 {
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
@@ -244,101 +252,111 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
          else if ( constant_coefficient==2 )
             /* all coefficients are constant except the diagonal is variable */
          {
-            /* Most coeffients of A go into P like for constant_coefficient=1.
-               But P is entirely variable coefficient, because the diagonal of A is
-               variable, and hence "center" below is variable. So we use the constant
-               coefficient calculation to initialize the diagonal's variable
-               coefficient calculation (which is like constant_coefficient=0). */
-            Ai = hypre_CCBoxIndexRank(A_dbox,start );
-
-            center_offd  = 0.0;
-            P0 = 0.0;
-            P1 = 0.0;
-            mrk0_offd = 0;
-            mrk1_offd = 0;
-
-            for (si = 0; si < stencil_size; si++)
+            if ( rap_type!=0 )
             {
-               if ( si != diag_rank )
-               {
-                  Ap = hypre_StructMatrixBoxData(A, i, si);
-                  Astenc = hypre_IndexD(stencil_shape[si], cdir);
-
-                  if (Astenc == 0)
-                  {
-                     center_offd += Ap[Ai];
-                  }
-                  else if (Astenc == Pstenc0)
-                  {
-                     P0 -= Ap[Ai];
-                  }
-                  else if (Astenc == Pstenc1)
-                  {
-                     P1 -= Ap[Ai];
-                  }
-
-                  if (si == si0 && Ap[Ai] == 0.0)
-                     mrk0_offd++;
-                  if (si == si1 && Ap[Ai] == 0.0)
-                     mrk1_offd++;
-               }
+               /* simply force P to be constant coefficient, all 0.5's */
+               Pi = hypre_CCBoxIndexRank(P_dbox,startc);
+               center  = 0.0;
+               Pp0[Pi] = 0.5;
+               Pp1[Pi] = 0.5;
             }
+            else
+            {
+               /* Most coeffients of A go into P like for constant_coefficient=1.
+                  But P is entirely variable coefficient, because the diagonal of A is
+                  variable, and hence "center" below is variable. So we use the constant
+                  coefficient calculation to initialize the diagonal's variable
+                  coefficient calculation (which is like constant_coefficient=0). */
+               Ai = hypre_CCBoxIndexRank(A_dbox,start );
 
-            si = diag_rank;
-            hypre_BoxLoop2Begin(loop_size,
-                                A_dbox, start, stride, Ai,
-                                P_dbox, startc, stridec, Pi);
+               center_offd  = 0.0;
+               P0 = 0.0;
+               P1 = 0.0;
+               mrk0_offd = 0;
+               mrk1_offd = 0;
+
+               for (si = 0; si < stencil_size; si++)
+               {
+                  if ( si != diag_rank )
+                  {
+                     Ap = hypre_StructMatrixBoxData(A, i, si);
+                     Astenc = hypre_IndexD(stencil_shape[si], cdir);
+
+                     if (Astenc == 0)
+                     {
+                        center_offd += Ap[Ai];
+                     }
+                     else if (Astenc == Pstenc0)
+                     {
+                        P0 -= Ap[Ai];
+                     }
+                     else if (Astenc == Pstenc1)
+                     {
+                        P1 -= Ap[Ai];
+                     }
+
+                     if (si == si0 && Ap[Ai] == 0.0)
+                        mrk0_offd++;
+                     if (si == si1 && Ap[Ai] == 0.0)
+                        mrk1_offd++;
+                  }
+               }
+
+               si = diag_rank;
+               hypre_BoxLoop2Begin(loop_size,
+                                   A_dbox, start, stride, Ai,
+                                   P_dbox, startc, stridec, Pi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,center,si,Ap,Astenc,mrk0,mrk1
 #include "hypre_box_smp_forloop.h"
-            hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)
-               {
-                  Pp0[Pi] = P0;
-                  Pp1[Pi] = P1;
-                  center = center_offd;
-                  mrk0 = mrk0_offd;
-                  mrk1 = mrk1_offd;
-
-                  Ap = hypre_StructMatrixBoxData(A, i, si);
-                  Astenc = hypre_IndexD(stencil_shape[si], cdir);
-
-                  if (Astenc == 0)
+               hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)
                   {
-                     /* expected to be the only case, this loop needs some
-                        more thought & cleanup.  Also, I think center_offd=0
-                        and mrk?==0 always.  */
-                     center += Ap[Ai];
+                     Pp0[Pi] = P0;
+                     Pp1[Pi] = P1;
+                     center = center_offd;
+                     mrk0 = mrk0_offd;
+                     mrk1 = mrk1_offd;
+
+                     Ap = hypre_StructMatrixBoxData(A, i, si);
+                     Astenc = hypre_IndexD(stencil_shape[si], cdir);
+
+                     if (Astenc == 0)
+                     {
+                        /* expected to be the only case, this loop needs some
+                           more thought & cleanup.  Also, I think center_offd=0
+                           and mrk?==0 always.  */
+                        center += Ap[Ai];
+                     }
+                     else if (Astenc == Pstenc0)
+                     {
+                        Pp0[Pi] -= Ap[Ai];
+                     }
+                     else if (Astenc == Pstenc1)
+                     {
+                        Pp1[Pi] -= Ap[Ai];
+                     }
+
+                     if (si == si0 && Ap[Ai] == 0.0)
+                        mrk0++;
+                     if (si == si1 && Ap[Ai] == 0.0)
+                        mrk1++;
+
+                     Pp0[Pi] /= center;
+                     Pp1[Pi] /= center;  
+
+                     /*----------------------------------------------
+                      * Set interpolation weight to zero, if stencil
+                      * entry in same direction is zero. Prevents
+                      * interpolation and operator stencils reaching
+                      * outside domain.
+                      *----------------------------------------------*/
+                     if (mrk0 != 0)
+                        Pp0[Pi] = 0.0;
+                     if (mrk1 != 0)
+                        Pp1[Pi] = 0.0;
+
                   }
-                  else if (Astenc == Pstenc0)
-                  {
-                     Pp0[Pi] -= Ap[Ai];
-                  }
-                  else if (Astenc == Pstenc1)
-                  {
-                     Pp1[Pi] -= Ap[Ai];
-                  }
-
-                  if (si == si0 && Ap[Ai] == 0.0)
-                     mrk0++;
-                  if (si == si1 && Ap[Ai] == 0.0)
-                     mrk1++;
-
-                  Pp0[Pi] /= center;
-                  Pp1[Pi] /= center;  
-
-                  /*----------------------------------------------
-                   * Set interpolation weight to zero, if stencil
-                   * entry in same direction is zero. Prevents
-                   * interpolation and operator stencils reaching
-                   * outside domain.
-                   *----------------------------------------------*/
-                  if (mrk0 != 0)
-                     Pp0[Pi] = 0.0;
-                  if (mrk1 != 0)
-                     Pp1[Pi] = 0.0;
-
-               }
-            hypre_BoxLoop2End(Ai, Pi);
-
+               hypre_BoxLoop2End(Ai, Pi);
+            }
          }
          else
             /* constant_coefficient == 0 , all coefficients in A vary */

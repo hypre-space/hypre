@@ -242,7 +242,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    {
       cdir = cdir_l[l];
 
-      P_l[l]  = hypre_PFMGCreateInterpOp(A_l[l], P_grid_l[l+1], cdir);
+      P_l[l]  = hypre_PFMGCreateInterpOp(A_l[l], P_grid_l[l+1], cdir, rap_type);
       hypre_StructMatrixInitializeShell(P_l[l]);
       data_size += hypre_StructMatrixDataSize(P_l[l]);
 
@@ -346,7 +346,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_PFMGSetStride(cdir, stride);
 
       /* set up interpolation operator */
-      hypre_PFMGSetupInterpOp(A_l[l], cdir, findex, stride, P_l[l]);
+      hypre_PFMGSetupInterpOp(A_l[l], cdir, findex, stride, P_l[l], rap_type);
 
       /* set up the restriction operator */
 #if 0

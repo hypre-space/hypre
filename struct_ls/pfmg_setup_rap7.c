@@ -146,6 +146,8 @@ hypre_PFMGCreateCoarseOp7( hypre_StructMatrix *R,
  *
  *    Uses the non-Galerkin strategy from Ashby & Falgout's
  *    original ParFlow algorithm (See LLNL Tech. Rep. UCRL-JC-122359).
+ *    For constant_coefficient==2, also c.f. Jim Jones' email note of
+ *    2003 December 18.
  *--------------------------------------------------------------------------*/
 
 int
@@ -175,12 +177,18 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
 
    int                   constant_coefficient;
 
-   int                   fi, ci;
+   int                   fi, ci, cbi;
    int                   loopi, loopj, loopk;
 
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
    hypre_Box            *RAP_dbox;
+
+   hypre_BoxArray       *cboundarya;
+   hypre_BoxArray       *cboundaryb;
+   hypre_Box            *cg_bdy_box;
+   hypre_Index          base_index;
+   hypre_Index          box_index;
 
    double               *pa, *pb;
 
@@ -193,6 +201,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
    double               *rap_ac, *rap_bc;
    double                west, east;
    double                south, north;
+   double                diag, deltadiag, diagb, diagcorr, diagm, diagp, above, below;
 
    int                   iA, iAm1, iAp1, iA_offd, iA_offd_m1, iA_offd_p1;
    int                   iAc;
@@ -215,8 +224,21 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(RAP);
    assert( hypre_StructMatrixConstantCoefficient(A) == constant_coefficient );
-   assert( hypre_StructMatrixConstantCoefficient(R) == constant_coefficient );
-   assert( hypre_StructMatrixConstantCoefficient(P) == constant_coefficient );
+   if ( constant_coefficient==0 )
+   {
+      assert( hypre_StructMatrixConstantCoefficient(R) == 0 );
+      assert( hypre_StructMatrixConstantCoefficient(P) == 0 );
+   }
+   else if (constant_coefficient==2 )
+   {
+      assert( hypre_StructMatrixConstantCoefficient(R) == 1 );
+      assert( hypre_StructMatrixConstantCoefficient(P) == 1 );
+   }
+   else
+   {
+      assert( hypre_StructMatrixConstantCoefficient(R) == 1 );
+      assert( hypre_StructMatrixConstantCoefficient(P) == 1 );
+   }
 
    fi = 0;
    hypre_ForBoxI(ci, cgrid_boxes)
@@ -254,8 +276,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
          }
          else if ( constant_coefficient==2 )
          {
-            /* >>> to do <<< */
-            assert("foo"=="bar");
+            /* pb is not referenced */
          }
          else /* constant_coefficient==0 */
          {
@@ -346,22 +367,15 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
 
          hypre_SetIndex(index_temp,0,0,1);
          MapIndex(index_temp, cdir, index);
-         if ( constant_coefficient )
+         if ( constant_coefficient==1 )
          {
             zOffsetA = hypre_CCBoxOffsetDistance(A_dbox,index); 
             zOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
          }
-         else
+         else  /* 0 or 2 */
          {
             zOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
-            if ( constant_coefficient == 0 )
-            {
-               zOffsetA = hypre_BoxOffsetDistance(A_dbox,index);
-            }
-            else
-            {
-               zOffsetA = hypre_CCBoxOffsetDistance(A_dbox,index);
-            }
+            zOffsetA = hypre_BoxOffsetDistance(A_dbox,index);
          }
 
          /*--------------------------------------------------------------
@@ -460,54 +474,106 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
             }
             else /* constant_coefficient==2 */
             {
-               /* First, deal with the purely off-diagonal parts of A,
-                  which are constant coefficient */
-               iA_offd = hypre_CCBoxIndexRank_noargs();
-               iA_offd_m1 = iA_offd - zOffsetA;
-               iA_offd_p1 = iA_offd + zOffsetA;
-               west = a_cw[iA_offd] + 0.5 * a_cw[iA_offd_m1] + 0.5 * a_cw[iA_offd_p1];
-               east = a_ce[iA_offd] + 0.5 * a_ce[iA_offd_m1] + 0.5 * a_ce[iA_offd_p1];
-               south = a_cs[iA_offd] + 0.5 * a_cs[iA_offd_m1] + 0.5 * a_cs[iA_offd_p1];
-               north = a_cn[iA_offd] + 0.5 * a_cn[iA_offd_m1] + 0.5 * a_cn[iA_offd_p1];
-               /* Prevent non-zero entries reaching off grid */
-               if(a_cw[iA_offd] == 0.0) west = 0.0;
-               if(a_ce[iA_offd] == 0.0) east = 0.0;
-               if(a_cs[iA_offd] == 0.0) south = 0.0;
-               if(a_cn[iA_offd] == 0.0) north = 0.0;
-               /* store array elements in scalars to deal with dumb compilers */
-               a_ce_cc = a_ce[iA_offd];
-               a_cw_cc = a_cw[iA_offd];
-               a_cn_cc = a_cn[iA_offd];
-               a_cs_cc = a_cs[iA_offd];
-               a_ac_cc = a_ac[iA_offd];
-               a_bc_cc = a_bc[iA_offd];
+               /* We're not doing a true RAP computation in this case.
+                  The new (coarsened) A is designed to keep it
+                  constant-coefficient in its offdiagonal elements. */
 
-               hypre_BoxLoop3Begin(loop_size,
-                                   P_dbox, cstart, stridec, iP,
+               /* new offdiagonal (constant) elements in the uncoarsened directions ... */
+               iA_offd = hypre_CCBoxIndexRank_noargs();  /* really, 0 */
+               west = 2*a_cw[iA_offd];
+               east = 2*a_ce[iA_offd];
+               north = 2*a_cn[iA_offd];
+               south = 2*a_cs[iA_offd];
+               /* ...This is the same as you would get in the variable coefficient case
+                  if the coefficients were really constant, e.g. a_cw[iA]=a_cw[iAm1] */
+
+               /* new offidiagonal (constant) elements in the coarsened direction ... */
+               above = 0.5*a_ac[iA_offd];
+               below = 0.5*a_bc[iA_offd];
+               /* ... This would be the same as in the variable coefficient case if
+                  the interpolation matrix P were just 1/2 everywhere, i.e.
+                  pa[*]=pb[*]=0.5   Forcing pa=pb=0.5 is a crucial algorithmic
+                  difference, necessary to keep the offdiagonal coefficients constant
+                  (in 'space'). */
+
+               rap_cw[iA_offd] = west;
+               rap_ce[iA_offd] = east;
+               rap_cs[iA_offd] = south;
+               rap_cn[iA_offd] = north;
+               rap_bc[iA_offd] = below;
+               rap_ac[iA_offd] = above;
+               diag = -west - east - south - north -above -below;
+
+               diagcorr = a_cw[iA_offd] + a_ce[iA_offd] + a_cs[iA_offd] + a_cn[iA_offd]
+                  + a_ac[iA_offd] + a_bc[iA_offd];
+
+               hypre_SetIndex( base_index, hypre_BoxIMinX(cgrid_box),
+                               hypre_BoxIMinY(cgrid_box),
+                               hypre_BoxIMinZ(cgrid_box) );
+               cboundarya = hypre_BoxArrayCreate(0);
+               cboundaryb = hypre_BoxArrayCreate(0);
+               hypre_BoxBoundaryDG( cgrid_box, cgrid, cboundaryb, cboundarya, cdir );
+               /* ... cgrid_box comes from the grid, so there are no ghost zones
+                  involved here */
+
+               hypre_ForBoxI(cbi, cboundarya)
+                  {
+                     cg_bdy_box = hypre_BoxArrayBox( cboundarya, cbi);
+                  }
+               hypre_ForBoxI(cbi, cboundaryb)
+                  {
+                     cg_bdy_box = hypre_BoxArrayBox( cboundaryb, cbi);
+                  }
+
+               /* new diagonal (variable) elements...*/
+               hypre_BoxLoop2Begin(loop_size,
                                    A_dbox, fstart, stridef, iA,
                                    RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iA,iAc,iAm1,iAp1,iPm1,iPp1,\
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iA,iAc,iAm1,iAp1,\
                               west,east,south,north
 #include "hypre_box_smp_forloop.h"
-               hypre_BoxLoop3For(loopi, loopj, loopk, iP, iA, iAc)
+               hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
                   {
-                     iPm1 = iP - zOffsetP;
-                     iPp1 = iP + zOffsetP;
-
-                     rap_bc[iAc] = a_bc_cc * pa[iPm1];
-                     rap_ac[iAc] = a_ac_cc * pb[iPp1];
-
-                     rap_cw[iAc] = west;
-                     rap_ce[iAc] = east;
-                     rap_cs[iAc] = south;
-                     rap_cn[iAc] = north;
-
-                     rap_cc[iAc] = a_cc[iA] + a_cw_cc + a_ce_cc + a_cs_cc + a_cn_cc
-                        + a_bc_cc * pb[iP] + a_ac_cc * pa[iP]
-                        - west - east - south - north;
+                     iAm1 = iA - zOffsetA;
+                     iAp1 = iA + zOffsetA;
+                     diagm = a_cc[iAm1] + diagcorr;
+                     diagp = a_cc[iAp1] + diagcorr;
+                     rap_cc[iAc] = a_cc[iA] + diagcorr + diag + 0.5*( diagm+diagp );
+                     /* ... On a boundary, one of these terms, as well as a_ac or a_bc,
+                        should be made 0.  We'll have a different formula, and also
+                        we need to make it look like certain constant coefficients
+                        (above and below) have different values.. */
+                     /* Check whether the current index in cgrid_box is really at a
+                        physical boundary, in the above or below (cdir) directions. */
+                     /* The boundary is not done in a separate loop because we
+                        don't have a better way to get the parts of A_dbox and
+                        RAP_dbox which correspond to the boundary parts of cgrid_box */
+                     hypre_BoxLoopGetIndex( box_index, base_index, loopi, loopj, loopk );
+                     hypre_ForBoxI(cbi, cboundarya)
+                        {
+                           cg_bdy_box = hypre_BoxArrayBox( cboundarya, cbi);
+                           if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) )
+                           {  /* we're in a boundary (in the above direction) */
+                              rap_cc[iAc] += above;
+                              rap_cc[iAc] -= a_ac[iA_offd];
+                              rap_cc[iAc] -= 0.5*diagp;
+                           }
+                        }
+                     hypre_ForBoxI(cbi, cboundaryb)
+                        {
+                           cg_bdy_box = hypre_BoxArrayBox( cboundarya, cbi);
+                           if ( hypre_IndexInBoxP( box_index, cg_bdy_box ) )
+                           {  /* we're in a boundary (in the below direction) */
+                              rap_cc[iAc] += below;
+                              rap_cc[iAc] -= a_bc[iA_offd];
+                              rap_cc[iAc] -= 0.5*diagm;
+                           }
+                        }
                   }
-               hypre_BoxLoop3End(iP, iA, iAc);
+               hypre_BoxLoop2End(iA, iAc);
+
             }
+
          }
 
 
