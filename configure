@@ -1882,7 +1882,7 @@ if test "${with_FEI_BASE_DIR+set}" = set; then
   case "${withval}" in
    yes) FEI_BASE_DIR="" ;;
    no)  FEI_BASE_DIR="" ;;
-   *)   FEI_BASE_DIR=$wddithval ;;
+   *)   FEI_BASE_DIR=$withval ;;
  esac
 else
   FEI_BASE_DIR=""
