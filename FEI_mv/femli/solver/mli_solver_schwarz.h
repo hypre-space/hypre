@@ -28,6 +28,7 @@ class MLI_Solver_Schwarz : public MLI_Solver
    int        zeroInitialGuess_;
    int        nSweeps_;
    double     *relaxWeights_;
+   int        useOverlap_;
 
 public :
 
