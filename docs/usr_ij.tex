@@ -93,8 +93,80 @@ Integer \verb+ierr+ carries program error state information.
 \verb+HYPRE_ISIS+, and \verb+HYPRE_PETSC+.  Currently, only
 \verb+HYPRE_PARCSR+ has been tested. 
 
+\begin{figure}
+\begin{center}
+\newcommand{\qq}{\scriptstyle}
+\renewcommand{\arraycolsep}{4 pt}
+\renewcommand{\arraystretch}{0.5}
+\begin{equation}
+\left(
+\begin{array}{ c|c c c c c|c c c c c|c c c c c|c }
+ & & & & & & & &\qq \; & & & & & & & & \\
+ & & & & & & & &\qq \vdots & & & & & & & & \\
+\hline
+ & & & & & & & &\qq \vdots & & & & & & & & \\
+\qq .\,.\,.\; &\qq \; &\qq \; &\qq a &\qq \; &\qq \; &
+\qq \! & \qq a &\qq a &\qq a &\qq \; &
+\qq \; &\qq a &\qq \; &\qq \; &\qq \; &\qq \; .\,.\,.\\
+ & & & & & & & &\qq \vdots & & & & & & & & \\
+ & & & & & & & &\qq \; & & & & & & & & \\
+\hline
+ & & & & & & & &\qq \vdots & & & & & & & \\
+ & & & & & & & &\qq \; & & & & & & & & \\
+\end{array}
+\right)
+\left(
+\begin{array}{c}
+\qq x \\
+\qq \vdots \\
+\\
+\\
+\\
+\\
+\qq \vdots \\
+\\
+\qq x \\
+\end{array}
+\right)
+=
+\left(
+\begin{array}{c}
+\qq \;\\
+\qq \vdots \\
+\hline
+\qq \vdots \\
+\qq b \\
+\qq \vdots \\
+\qq \;\\
+\hline
+\qq \vdots \\
+\qq \; \\
+\end{array}
+\right)
+\end{equation}
+\caption{Single row of a distributed system of equations.
+Interprocessor boundaries are marked by horizontal lines.
+Nonzero matrix coefficients are here indistinguishably
+expressed as {\itshape a}'s.  Unknown and right-hand side
+vectors are similarly expressed.}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\label{insert_row}
+\centerline{\epsfig{figure=insert_row.eps,height=2.2in}}
+\vspace{0.15in}
+\parbox{6.5in}{\hspace{0.5in}
+  {\tt int HYPRE\_IJMatrixInsertRow(HYPRE\_IJMatrix *ij\_matrix,
+   int num\_cols, }}
+\parbox{6.5in}{\hspace{1.5in}
+  {\tt int row\_index, int *col\_indices, double *coeffs);}}
+\vspace{0.in}
+\caption{Array layout for {\tt HYPRE\_IJMatrixInsertRow}.}
+\end{figure}
+
 Once the matrix is initialized, repeated calls to
-\verb+HYPRE_IJMatrixInsertRow+ can be used to communicate
+\verb+HYPRE_IJMatrixInsertRow+ can be used to pass in
 the matrix coefficients.  Then a matrix assembly call stows
 the coefficients in objects which the solvers can process. 
 
@@ -205,11 +277,45 @@ that must be handled on the processor, ...
    ierr = HYPRE_IJVectorInitialize(ij_x);
 \end{verbatim}
 
-\noindent As in Figure \ref{loc_comps_blk} vector components
-can be placed into underlying {\slshape hypre} formats either
-in contiguous subsets Figure \ref{loc_comps_blk}) or in
-indexed subsets (Figure \ref{loc_comps}). For \verb+ij_b+ only,
-one can use either of the following:
+\begin{figure}
+\label{loc_comps_blk}
+\centerline{\epsfig{figure=loc_cmps_blk.eps,height=2.5in}}
+\vspace{0.15in}
+\parbox{6.5in}{\hspace{1in}
+  {\tt int HYPRE\_IJVectorXXXLocalComponentsInBlock(HYPRE\_IJVector *ij\_vec,}}
+\parbox{6.5in}{\hspace{2in}
+  {\tt int glob\_vec\_index\_start, int glob\_vec\_index\_stop,}}
+\parbox{6.5in}{\hspace{2in}
+  {\tt int *value\_indices, double *values);}}
+\caption{Mapping between external array values and
+  internal vector data for functions
+  {\tt HYPRE\_IJVectorXXX}{\tt LocalComponentsInBlock}.
+  Use rightward arrows for {\tt XXX = Set} or {\tt AddTo}.
+  Use leftward arrows for {\tt XXX = Get}.}
+\end{figure}
+
+\begin{figure}
+\label{loc_comps}
+\centerline{\epsfig{figure=loc_cmps.eps,height=2.4in}}
+\vspace{0.15in}
+\parbox{6.5in}{\hspace{1in}
+   {\tt int HYPRE\_IJVectorXXXLocalComponents(HYPRE\_IJVector *ij\_vec,}}
+\parbox{6.5in}{\hspace{2in}
+   {\tt int num\_values, int *glob\_vec\_indices,}}
+\parbox{6.5in}{\hspace{2in}
+   {\tt int *value\_indices, double *values);}}
+\caption{Mapping between external array values and
+   internal vector data for functions
+   {\tt HYPRE\_IJVectorXXX}{\tt LocalComponents}.
+   Use rightward arrows for {\tt XXX = Set} or {\tt AddTo}.
+   Use leftward arrows for {\tt XXX = Get}.}
+\end{figure}
+
+\noindent Vector components can be placed into
+underlying {\slshape hypre} formats either in 
+contiguous subsets (Figure \ref{loc_comps_blk}) or in
+indexed subsets (Figure \ref{loc_comps}). For \verb+ij_b+
+only, one can use either of the following:
 
 \begin{verbatim}
    ierr = HYPRE_IJVectorSetLocalComponentsInBlock(ij_b,
@@ -226,38 +332,6 @@ one can use either of the following:
 \noindent To assign values to all components in a domain, one would
 choose \verb+glob_vec_index_start+ \verb+=+ \verb+domain_pt_start+,
 and \verb+glob_vec_index_stop+ \verb+=+\verb+next_domain_pt_start-1+.
-
-\begin{figure}
-\label{loc_comps_blk}
-\centerline{\epsfig{figure=loc_cmps_blk.eps,height=2.5in}}
-\parbox{6.5in}{\hspace{1in}
-  {\tt int HYPRE\_IJVectorXXXLocalComponentsInBlock(HYPRE\_IJVector *ij\_vec,}}
-\parbox{6.5in}{\hspace{2in}
-  {\tt int glob\_vec\_index\_start, int glob\_vec\_index\_stop,}}
-\parbox{6.5in}{\hspace{2in}
-  {\tt int *value\_indices, double *values);}}
-\caption{Mapping between external array values and
-  internal vector data for functions
-  {\tt HYPRE\_IJVectorXXX}{\tt LocalComponentsInBlock}.
-   Use rightward arrows for {\tt XXX = Set} or {\tt AddTo}.
-   Use leftward arrows for {\tt XXX = Get}.}
-\end{figure}
-
-\begin{figure}
-\label{loc_comps}
-\centerline{\epsfig{figure=loc_cmps.eps,height=2.4in}}
-\parbox{6.5in}{\hspace{1in}
-   {\tt int HYPRE\_IJVectorXXXLocalComponents(HYPRE\_IJVector *ij\_vec,}}
-\parbox{6.5in}{\hspace{2in}
-   {\tt int num\_values, int *glob\_vec\_indices,}}
-\parbox{6.5in}{\hspace{2in}
-   {\tt int *value\_indices, double *values);}}
-\caption{Mapping between external array values and
-   internal vector data for functions
-   {\tt HYPRE\_IJVectorXXX}{\tt LocalComponents}.
-   Use rightward arrows for {\tt XXX = Set} or {\tt AddTo}.
-   Use leftward arrows for {\tt XXX = Get}.}
-\end{figure}
 
 One can also add to vector components that are already set, in
 contiguous or indexed subsets of components.
