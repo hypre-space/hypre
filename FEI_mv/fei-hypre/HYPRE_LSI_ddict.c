@@ -59,7 +59,7 @@ extern int  HYPRE_LSI_DDICTDecompose(HYPRE_LSI_DDICT *ict_ptr,MH_Matrix *Amat,
                  double *ext_aa, int *map, int *map2, int Noffset);
 extern void HYPRE_LSI_qsort1a(int *, int *, int, int);
 extern int  HYPRE_LSI_SplitDSort(double *,int,int*,int);
-extern int  HYPRE_LSI_Search(int *, int, inte);
+extern int  HYPRE_LSI_Search(int *, int, int);
 
 extern int  HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa, 
                  int *mat_ja, int *mat_ia, double *rowNorms);
