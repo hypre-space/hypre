@@ -102,7 +102,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
 
       hypre_ParAMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
       P_array[level] = P; 
-
+      hypre_DestroyParCSRMatrix(S);
       /*-------------------------------------------------------------
        * Build coarse-grid operator, A_array[level+1] by R*A*P
        *--------------------------------------------------------------*/
@@ -149,12 +149,14 @@ hypre_ParAMGSetup( void               *amg_vdata,
                                hypre_ParCSRMatrixNumRows(A_array[j]),
                                hypre_ParCSRMatrixRowStarts(A_array[j]));
       hypre_InitializeParVector(F_array[j]);
+      hypre_SetParVectorPartitioningOwner(F_array[j],0);
 
       U_array[j] =
          hypre_CreateParVector(hypre_ParCSRMatrixComm(A_array[j]),
                                hypre_ParCSRMatrixNumRows(A_array[j]),
                                hypre_ParCSRMatrixRowStarts(A_array[j]));
       hypre_InitializeParVector(U_array[j]);
+      hypre_SetParVectorPartitioningOwner(U_array[j],0);
    }
 
    hypre_ParAMGDataFArray(amg_data) = F_array;
@@ -187,7 +189,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
       }   
    } 
 #endif
-                     
+
    Setup_err_flag = 0;
    return(Setup_err_flag);
 }  
