@@ -22,6 +22,7 @@ SUBDIRS = \
 # list of possible build objects, (no automake install rule generation) 
 EXTRA_PROGRAMS = \
  ij\
+ ij_es\
  ij_mv\
  new_ij\
  sstruct\
@@ -80,6 +81,40 @@ ij_dependencies = \
  $(includedir)/HYPRE_IJ_mv.h\
  $(includedir)/HYPRE_parcsr_mv.h\
  $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+
+# ij, build 
+ij_es_SOURCES = ij.c
+ij_es_libraries = \
+ -L$(libdir)\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_DistributedMatrixPilutSolver\
+ -lHYPRE_ParaSails\
+ -lHYPRE_Euclid\
+ -lHYPRE_IJ_mv\
+ -lHYPRE_MatrixMatrix\
+ -lHYPRE_DistributedMatrix\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_krylov\
+ -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
+ $(BLASLIBFLAGS)\
+ $(LIBM)
+ij_es_LDADD = \
+ $(ij_libraries) \
+ @FLIBS@
+#ij_es_LDFLAGS = -static
+# ij, dependencies rules needed because automatic dependency checking is off
+ij_es_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/HYPRE_lobpcg.h\
+ $(includedir)/lobpcg.h\
  $(includedir)/parcsr_mv.h\
  $(includedir)/krylov.h
 
