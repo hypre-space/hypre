@@ -83,7 +83,7 @@ int hypre_CSRBooleanMatrixSetDataOwner( hypre_CSRBooleanMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 hypre_CSRBooleanMatrix *
-hypre_CSRBooleanMatrixRead( char *file_name )
+hypre_CSRBooleanMatrixRead( const char *file_name )
 {
    hypre_CSRBooleanMatrix  *matrix;
 
@@ -146,7 +146,7 @@ hypre_CSRBooleanMatrixRead( char *file_name )
 
 int
 hypre_CSRBooleanMatrixPrint( hypre_CSRBooleanMatrix *matrix,
-                           char            *file_name )
+                             const char             *file_name )
 {
    FILE    *fp;
 
@@ -365,7 +365,7 @@ int hypre_ParCSRBooleanMatrixSetColStartsOwner(hypre_ParCSRBooleanMatrix *matrix
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRBooleanMatrix *
-hypre_ParCSRBooleanMatrixRead( MPI_Comm comm, char *file_name )
+hypre_ParCSRBooleanMatrixRead( MPI_Comm comm, const char *file_name )
 {
    hypre_ParCSRBooleanMatrix  *matrix;
    hypre_CSRBooleanMatrix  *diag;
@@ -458,7 +458,7 @@ hypre_ParCSRBooleanMatrixRead( MPI_Comm comm, char *file_name )
  *--------------------------------------------------------------------------*/
 
 int hypre_ParCSRBooleanMatrixPrint( hypre_ParCSRBooleanMatrix *matrix, 
-                                  char *file_name )
+                                    const char                *file_name )
 {
    MPI_Comm comm = hypre_ParCSRBooleanMatrix_Get_Comm(matrix);
    int global_num_rows = hypre_ParCSRBooleanMatrix_Get_GlobalNRows(matrix);
@@ -504,7 +504,7 @@ int hypre_ParCSRBooleanMatrixPrint( hypre_ParCSRBooleanMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 int hypre_ParCSRBooleanMatrixPrintIJ( hypre_ParCSRBooleanMatrix *matrix, 
-                                    char *filename )
+                                      const char                *filename )
 {
    MPI_Comm comm = hypre_ParCSRBooleanMatrix_Get_Comm(matrix);
    int      global_num_rows = hypre_ParCSRBooleanMatrix_Get_GlobalNRows(matrix);

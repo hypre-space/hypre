@@ -123,7 +123,8 @@ hypre_ParVectorSetPartitioningOwner( hypre_ParVector *vector,
  *--------------------------------------------------------------------------*/
 
 hypre_ParVector
-*hypre_ParVectorRead( MPI_Comm comm, char *file_name )
+*hypre_ParVectorRead( MPI_Comm    comm,
+                      const char *file_name )
 {
    char 	new_file_name[80];
    hypre_ParVector *par_vector;
@@ -167,7 +168,7 @@ hypre_ParVector
 
 int
 hypre_ParVectorPrint( hypre_ParVector  *vector, 
-                      char             *file_name )
+                      const char       *file_name )
 {
    char 	new_file_name[80];
    hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector); 
@@ -442,7 +443,7 @@ hypre_ParVectorToVectorAll (hypre_ParVector *par_v)
 int
 hypre_ParVectorPrintIJ( hypre_ParVector *vector,
                         int              base_j,
-                        char            *filename )
+                        const char      *filename )
 {
    int ierr = 0;
    MPI_Comm          comm         = hypre_ParVectorComm(vector);
@@ -490,7 +491,7 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
 
 int
 hypre_ParVectorReadIJ( MPI_Comm             comm,
-                       char                *filename,
+                       const char          *filename,
                        int                 *base_j_ptr,
                        hypre_ParVector    **vector_ptr)
 {

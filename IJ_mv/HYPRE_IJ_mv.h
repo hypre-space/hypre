@@ -231,7 +231,7 @@ int HYPRE_IJMatrixSetDiagOffdSizes(HYPRE_IJMatrix  matrix,
  *
  * DEVELOPER NOTES: New routine.
  **/
-int HYPRE_IJMatrixRead(char           *filename,
+int HYPRE_IJMatrixRead(const char     *filename,
 		       MPI_Comm        comm,
 		       int             type,
 		       HYPRE_IJMatrix *matrix);
@@ -244,7 +244,7 @@ int HYPRE_IJMatrixRead(char           *filename,
  * DEVELOPER NOTES: New routine.
  **/
 int HYPRE_IJMatrixPrint(HYPRE_IJMatrix  matrix,
-                        char           *filename);
+                        const char     *filename);
 
 /*@}*/
 
@@ -391,7 +391,7 @@ int HYPRE_IJVectorGetObject(HYPRE_IJVector   vector,
  *
  * DEVELOPER NOTES: New routine.
  **/
-int HYPRE_IJVectorRead(char           *filename,
+int HYPRE_IJVectorRead(const char     *filename,
 		       MPI_Comm        comm,
 		       int             type,
                        HYPRE_IJVector *vector);
@@ -402,7 +402,7 @@ int HYPRE_IJVectorRead(char           *filename,
  * DEVELOPER NOTES: New routine.
  **/
 int HYPRE_IJVectorPrint(HYPRE_IJVector  vector,
-                        char           *filename);
+                        const char     *filename);
 
 /*@}*/
 /*@}*/

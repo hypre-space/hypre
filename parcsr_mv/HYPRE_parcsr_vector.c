@@ -54,8 +54,8 @@ HYPRE_ParVectorInitialize( HYPRE_ParVector vector )
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_ParVectorRead( MPI_Comm  comm,
-                     char     *file_name, 
+HYPRE_ParVectorRead( MPI_Comm         comm,
+                     const char      *file_name, 
 		     HYPRE_ParVector *vector)
 {
    *vector = (HYPRE_ParVector) hypre_ParVectorRead( comm, file_name ) ;
@@ -68,7 +68,7 @@ HYPRE_ParVectorRead( MPI_Comm  comm,
 
 int
 HYPRE_ParVectorPrint( HYPRE_ParVector  vector,
-                      char         *file_name )
+                      const char      *file_name )
 {
    return ( hypre_ParVectorPrint( (hypre_ParVector *) vector,
                                   file_name ) );

@@ -41,7 +41,7 @@ cat IJ_matrix.h          >> $INTERNAL_HEADER
 cat IJ_vector.h          >> $INTERNAL_HEADER
 
 ../utilities/protos aux_*.c                   >> $INTERNAL_HEADER
-../utilities/protos hypre_IJ*.c               >> $INTERNAL_HEADER
+../utilities/protos IJ*.c                     >> $INTERNAL_HEADER
 ../utilities/protos HYPRE_IJ*.c               >> $INTERNAL_HEADER
 
 

@@ -572,7 +572,8 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
  *
  *****************************************************************************/
 int
-hypre_IJVectorPrintPar(hypre_IJVector *vec, char *filename)
+hypre_IJVectorPrintPar(hypre_IJVector *vec,
+                       const char     *filename)
 {
    int *partitioning = hypre_IJVectorPartitioning(vec);
 
@@ -589,7 +590,9 @@ hypre_IJVectorPrintPar(hypre_IJVector *vec, char *filename)
  *
  *****************************************************************************/
 int
-hypre_IJVectorReadPar(MPI_Comm comm, char *filename, hypre_IJVector **vec)
+hypre_IJVectorReadPar(MPI_Comm         comm,
+                      const char      *filename,
+                      hypre_IJVector **vec)
 {
    int ierr = 0;
    hypre_ParVector *par_vector;

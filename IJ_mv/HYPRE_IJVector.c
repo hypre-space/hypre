@@ -392,7 +392,7 @@ HYPRE_IJVectorGetObject( HYPRE_IJVector vector, void **object )
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_IJVectorRead( char           *filename,
+HYPRE_IJVectorRead( const char     *filename,
                     MPI_Comm        comm,
                     int             object_type,
                     HYPRE_IJVector *vector )
@@ -426,7 +426,7 @@ HYPRE_IJVectorRead( char           *filename,
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_IJVectorPrint( HYPRE_IJVector vector, char *filename )
+HYPRE_IJVectorPrint( HYPRE_IJVector vector, const char *filename )
 {
    int ierr = 0;
    hypre_IJVector *vec = (hypre_IJVector *) vector;

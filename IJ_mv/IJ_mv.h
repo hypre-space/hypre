@@ -204,12 +204,12 @@ int hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix );
 int hypre_AuxParCSRMatrixInitialize( hypre_AuxParCSRMatrix *matrix );
 
 
-/* hypre_IJMatrix.c */
+/* IJMatrix.c */
 int hypre_IJMatrixGetRowPartitioning( HYPRE_IJMatrix matrix , int **row_partitioning );
 int hypre_IJMatrixGetColPartitioning( HYPRE_IJMatrix matrix , int **col_partitioning );
 int hypre_IJMatrixSetObject( HYPRE_IJMatrix matrix , void *object );
 
-/* hypre_IJMatrix_isis.c */
+/* IJMatrix_isis.c */
 int hypre_IJMatrixSetLocalSizeISIS( hypre_IJMatrix *matrix , int local_m , int local_n );
 int hypre_IJMatrixCreateISIS( hypre_IJMatrix *matrix );
 int hypre_IJMatrixSetRowSizesISIS( hypre_IJMatrix *matrix , int *sizes );
@@ -226,7 +226,7 @@ int hypre_IJMatrixApplyISIS( hypre_IJMatrix *matrix , hypre_ParVector *x , hypre
 int hypre_IJMatrixDestroyISIS( hypre_IJMatrix *matrix );
 int hypre_IJMatrixSetTotalSizeISIS( hypre_IJMatrix *matrix , int size );
 
-/* hypre_IJMatrix_parcsr.c */
+/* IJMatrix_parcsr.c */
 int hypre_IJMatrixCreateParCSR( hypre_IJMatrix *matrix );
 int hypre_IJMatrixSetRowSizesParCSR( hypre_IJMatrix *matrix , const int *sizes );
 int hypre_IJMatrixSetDiagOffdSizesParCSR( hypre_IJMatrix *matrix , const int *diag_sizes , const int *offdiag_sizes );
@@ -236,10 +236,10 @@ int hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix , int nrows , int *nco
 int hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
 int hypre_IJMatrixAssembleParCSR( hypre_IJMatrix *matrix );
 int hypre_IJMatrixDestroyParCSR( hypre_IJMatrix *matrix );
-int hypre_IJMatrixPrintParCSR( hypre_IJMatrix *matrix , char *filename );
-int hypre_IJMatrixReadParCSR( MPI_Comm comm , char *filename , hypre_IJMatrix **matrix );
+int hypre_IJMatrixPrintParCSR( hypre_IJMatrix *matrix , const char *filename );
+int hypre_IJMatrixReadParCSR( MPI_Comm comm , const char *filename , hypre_IJMatrix **matrix );
 
-/* hypre_IJMatrix_petsc.c */
+/* IJMatrix_petsc.c */
 int hypre_IJMatrixSetLocalSizePETSc( hypre_IJMatrix *matrix , int local_m , int local_n );
 int hypre_IJMatrixCreatePETSc( hypre_IJMatrix *matrix );
 int hypre_IJMatrixSetRowSizesPETSc( hypre_IJMatrix *matrix , int *sizes );
@@ -256,11 +256,11 @@ int hypre_IJMatrixApplyPETSc( hypre_IJMatrix *matrix , hypre_ParVector *x , hypr
 int hypre_IJMatrixDestroyPETSc( hypre_IJMatrix *matrix );
 int hypre_IJMatrixSetTotalSizePETSc( hypre_IJMatrix *matrix , int size );
 
-/* hypre_IJVector.c */
+/* IJVector.c */
 int hypre_IJVectorDistribute( HYPRE_IJVector vector , const int *vec_starts );
 int hypre_IJVectorZeroValues( HYPRE_IJVector vector );
 
-/* hypre_IJVector_parcsr.c */
+/* IJVector_parcsr.c */
 int hypre_IJVectorCreatePar( hypre_IJVector *vector , int *IJpartitioning );
 int hypre_IJVectorDestroyPar( hypre_IJVector *vector );
 int hypre_IJVectorInitializePar( hypre_IJVector *vector );
@@ -270,8 +270,8 @@ int hypre_IJVectorSetValuesPar( hypre_IJVector *vector , int num_values , const 
 int hypre_IJVectorAddToValuesPar( hypre_IJVector *vector , int num_values , const int *indices , const double *values );
 int hypre_IJVectorAssemblePar( hypre_IJVector *vector );
 int hypre_IJVectorGetValuesPar( hypre_IJVector *vector , int num_values , const int *indices , double *values );
-int hypre_IJVectorPrintPar( hypre_IJVector *vec , char *filename );
-int hypre_IJVectorReadParCSR( MPI_Comm comm , char *filename , hypre_IJVector **vec );
+int hypre_IJVectorPrintPar( hypre_IJVector *vec , const char *filename );
+int hypre_IJVectorReadPar( MPI_Comm comm , const char *filename , hypre_IJVector **vec );
 
 
 /* HYPRE_IJMatrix.c */
@@ -287,8 +287,8 @@ int HYPRE_IJMatrixGetObjectType( HYPRE_IJMatrix matrix , int *type );
 int HYPRE_IJMatrixGetObject( HYPRE_IJMatrix matrix , void **object );
 int HYPRE_IJMatrixSetRowSizes( HYPRE_IJMatrix matrix , const int *sizes );
 int HYPRE_IJMatrixSetDiagOffdSizes( HYPRE_IJMatrix matrix , const int *diag_sizes , const int *offdiag_sizes );
-int HYPRE_IJMatrixRead( char *filename , MPI_Comm comm , int type , HYPRE_IJMatrix *matrix );
-int HYPRE_IJMatrixPrint( HYPRE_IJMatrix matrix , char *filename );
+int HYPRE_IJMatrixRead( const char *filename , MPI_Comm comm , int type , HYPRE_IJMatrix *matrix );
+int HYPRE_IJMatrixPrint( HYPRE_IJMatrix matrix , const char *filename );
 
 /* HYPRE_IJVector.c */
 int HYPRE_IJVectorCreate( MPI_Comm comm , int jlower , int jupper , HYPRE_IJVector *vector );
@@ -301,8 +301,8 @@ int HYPRE_IJVectorGetValues( HYPRE_IJVector vector , int nvalues , const int *in
 int HYPRE_IJVectorSetObjectType( HYPRE_IJVector vector , int type );
 int HYPRE_IJVectorGetObjectType( HYPRE_IJVector vector , int *type );
 int HYPRE_IJVectorGetObject( HYPRE_IJVector vector , void **object );
-int HYPRE_IJVectorRead( char *filename , MPI_Comm comm , int object_type , HYPRE_IJVector *vector );
-int HYPRE_IJVectorPrint( HYPRE_IJVector vector , char *filename );
+int HYPRE_IJVectorRead( const char *filename , MPI_Comm comm , int object_type , HYPRE_IJVector *vector );
+int HYPRE_IJVectorPrint( HYPRE_IJVector vector , const char *filename );
 
 
 #ifdef __cplusplus

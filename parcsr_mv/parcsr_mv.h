@@ -297,8 +297,8 @@ typedef struct
 int HYPRE_ParCSRMatrixCreate( MPI_Comm comm , int global_num_rows , int global_num_cols , int *row_starts , int *col_starts , int num_cols_offd , int num_nonzeros_diag , int num_nonzeros_offd , HYPRE_ParCSRMatrix *matrix );
 int HYPRE_ParCSRMatrixDestroy( HYPRE_ParCSRMatrix matrix );
 int HYPRE_ParCSRMatrixInitialize( HYPRE_ParCSRMatrix matrix );
-int HYPRE_ParCSRMatrixRead( MPI_Comm comm , char *file_name , HYPRE_ParCSRMatrix *matrix );
-int HYPRE_ParCSRMatrixPrint( HYPRE_ParCSRMatrix matrix , char *file_name );
+int HYPRE_ParCSRMatrixRead( MPI_Comm comm , const char *file_name , HYPRE_ParCSRMatrix *matrix );
+int HYPRE_ParCSRMatrixPrint( HYPRE_ParCSRMatrix matrix , const char *file_name );
 int HYPRE_ParCSRMatrixGetComm( HYPRE_ParCSRMatrix matrix , MPI_Comm *comm );
 int HYPRE_ParCSRMatrixGetDims( HYPRE_ParCSRMatrix matrix , int *M , int *N );
 int HYPRE_ParCSRMatrixGetRowPartitioning( HYPRE_ParCSRMatrix matrix , int **row_partitioning_ptr );
@@ -314,8 +314,8 @@ int HYPRE_ParCSRMatrixMatvecT( double alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVe
 int HYPRE_ParVectorCreate( MPI_Comm comm , int global_size , int *partitioning , HYPRE_ParVector *vector );
 int HYPRE_ParVectorDestroy( HYPRE_ParVector vector );
 int HYPRE_ParVectorInitialize( HYPRE_ParVector vector );
-int HYPRE_ParVectorRead( MPI_Comm comm , char *file_name , HYPRE_ParVector *vector );
-int HYPRE_ParVectorPrint( HYPRE_ParVector vector , char *file_name );
+int HYPRE_ParVectorRead( MPI_Comm comm , const char *file_name , HYPRE_ParVector *vector );
+int HYPRE_ParVectorPrint( HYPRE_ParVector vector , const char *file_name );
 int HYPRE_ParVectorSetConstantValues( HYPRE_ParVector vector , double value );
 int HYPRE_ParVectorSetRandomValues( HYPRE_ParVector vector , int seed );
 int HYPRE_ParVectorCopy( HYPRE_ParVector x , HYPRE_ParVector y );
@@ -374,8 +374,8 @@ hypre_CSRBooleanMatrix *hypre_CSRBooleanMatrixCreate( int num_rows , int num_col
 int hypre_CSRBooleanMatrixDestroy( hypre_CSRBooleanMatrix *matrix );
 int hypre_CSRBooleanMatrixInitialize( hypre_CSRBooleanMatrix *matrix );
 int hypre_CSRBooleanMatrixSetDataOwner( hypre_CSRBooleanMatrix *matrix , int owns_data );
-hypre_CSRBooleanMatrix *hypre_CSRBooleanMatrixRead( char *file_name );
-int hypre_CSRBooleanMatrixPrint( hypre_CSRBooleanMatrix *matrix , char *file_name );
+hypre_CSRBooleanMatrix *hypre_CSRBooleanMatrixRead( const char *file_name );
+int hypre_CSRBooleanMatrixPrint( hypre_CSRBooleanMatrix *matrix , const char *file_name );
 hypre_ParCSRBooleanMatrix *hypre_ParCSRBooleanMatrixCreate( MPI_Comm comm , int global_num_rows , int global_num_cols , int *row_starts , int *col_starts , int num_cols_offd , int num_nonzeros_diag , int num_nonzeros_offd );
 int hypre_ParCSRBooleanMatrixDestroy( hypre_ParCSRBooleanMatrix *matrix );
 int hypre_ParCSRBooleanMatrixInitialize( hypre_ParCSRBooleanMatrix *matrix );
@@ -383,9 +383,9 @@ int hypre_ParCSRBooleanMatrixSetNNZ( hypre_ParCSRBooleanMatrix *matrix );
 int hypre_ParCSRBooleanMatrixSetDataOwner( hypre_ParCSRBooleanMatrix *matrix , int owns_data );
 int hypre_ParCSRBooleanMatrixSetRowStartsOwner( hypre_ParCSRBooleanMatrix *matrix , int owns_row_starts );
 int hypre_ParCSRBooleanMatrixSetColStartsOwner( hypre_ParCSRBooleanMatrix *matrix , int owns_col_starts );
-hypre_ParCSRBooleanMatrix *hypre_ParCSRBooleanMatrixRead( MPI_Comm comm , char *file_name );
-int hypre_ParCSRBooleanMatrixPrint( hypre_ParCSRBooleanMatrix *matrix , char *file_name );
-int hypre_ParCSRBooleanMatrixPrintIJ( hypre_ParCSRBooleanMatrix *matrix , char *filename );
+hypre_ParCSRBooleanMatrix *hypre_ParCSRBooleanMatrixRead( MPI_Comm comm , const char *file_name );
+int hypre_ParCSRBooleanMatrixPrint( hypre_ParCSRBooleanMatrix *matrix , const char *file_name );
+int hypre_ParCSRBooleanMatrixPrintIJ( hypre_ParCSRBooleanMatrix *matrix , const char *filename );
 int hypre_ParCSRBooleanMatrixGetLocalRange( hypre_ParCSRBooleanMatrix *matrix , int *row_start , int *row_end , int *col_start , int *col_end );
 int hypre_ParCSRBooleanMatrixGetRow( hypre_ParCSRBooleanMatrix *mat , int row , int *size , int **col_ind );
 int hypre_ParCSRBooleanMatrixRestoreRow( hypre_ParCSRBooleanMatrix *matrix , int row , int *size , int **col_ind );
@@ -471,14 +471,15 @@ int owns_col_starts );
 
 
 hypre_ParCSRMatrix *
-hypre_ParCSRMatrixRead( MPI_Comm comm , char *file_name );
+hypre_ParCSRMatrixRead( MPI_Comm comm , 
+const char *file_name );
 
 
 
 
 int 
 hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix , 
-char *file_name );
+const char *file_name );
 
 
 
@@ -487,14 +488,14 @@ int
 hypre_ParCSRMatrixPrintIJ( hypre_ParCSRMatrix *matrix , 
 int		 base_i , 
 int		 base_j , 
-char *filename );
+const char *filename );
 
 
 
 
 int 
 hypre_ParCSRMatrixReadIJ( MPI_Comm 	 comm , 
-			 char *filename , 
+			 const char *filename , 
 			 int		 *base_i_ptr , 
 			 int		 *base_j_ptr , 
 			 hypre_ParCSRMatrix **matrix_ptr );
@@ -629,14 +630,15 @@ hypre_ParVectorSetPartitioningOwner( hypre_ParVector *vector ,
 
 
 hypre_ParVector 
-*hypre_ParVectorRead( MPI_Comm comm , char *file_name );
+*hypre_ParVectorRead( MPI_Comm comm , 
+const char *file_name );
 
 
 
 
 int 
 hypre_ParVectorPrint( hypre_ParVector *vector , 
-char *file_name );
+const char *file_name );
 
 
 
@@ -699,14 +701,14 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v );
 int 
 hypre_ParVectorPrintIJ( hypre_ParVector *vector , 
 int base_j , 
-char *filename );
+const char *filename );
 
 
 
 
 int 
 hypre_ParVectorReadIJ( MPI_Comm comm , 
-char *filename , 
+const char *filename , 
 int *base_j_ptr , 
 hypre_ParVector **vector_ptr );
 

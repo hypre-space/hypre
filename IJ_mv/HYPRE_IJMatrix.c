@@ -484,7 +484,7 @@ HYPRE_IJMatrixSetDiagOffdSizes( HYPRE_IJMatrix matrix,
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_IJMatrixRead( char *filename, MPI_Comm comm, int type,
+HYPRE_IJMatrixRead( const char *filename, MPI_Comm comm, int type,
 		    HYPRE_IJMatrix *matrix)
 {
    int ierr = 0;
@@ -513,7 +513,7 @@ HYPRE_IJMatrixRead( char *filename, MPI_Comm comm, int type,
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_IJMatrixPrint( HYPRE_IJMatrix matrix, char *filename)
+HYPRE_IJMatrixPrint( HYPRE_IJMatrix matrix, const char *filename)
 {
    int ierr = 0;
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;

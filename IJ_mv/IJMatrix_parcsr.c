@@ -1341,7 +1341,8 @@ hypre_IJMatrixDestroyParCSR(hypre_IJMatrix *matrix)
  *
  *****************************************************************************/
 int
-hypre_IJMatrixPrintParCSR(hypre_IJMatrix *matrix, char *filename)
+hypre_IJMatrixPrintParCSR(hypre_IJMatrix *matrix,
+                          const char     *filename)
 {
    int ierr = 0;
    int *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
@@ -1361,7 +1362,9 @@ hypre_IJMatrixPrintParCSR(hypre_IJMatrix *matrix, char *filename)
  *
  *****************************************************************************/
 int
-hypre_IJMatrixReadParCSR(MPI_Comm comm, char *filename, hypre_IJMatrix **matrix)
+hypre_IJMatrixReadParCSR(MPI_Comm         comm,
+                         const char      *filename,
+                         hypre_IJMatrix **matrix)
 {
    int ierr = 0;
    hypre_ParCSRMatrix *par_matrix;

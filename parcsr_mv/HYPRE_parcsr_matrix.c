@@ -62,8 +62,8 @@ HYPRE_ParCSRMatrixInitialize( HYPRE_ParCSRMatrix matrix )
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_ParCSRMatrixRead( MPI_Comm comm,
-                        char    *file_name, 
+HYPRE_ParCSRMatrixRead( MPI_Comm            comm,
+                        const char         *file_name, 
 			HYPRE_ParCSRMatrix *matrix)
 {
    *matrix = (HYPRE_ParCSRMatrix) hypre_ParCSRMatrixRead( comm, file_name );
@@ -76,7 +76,7 @@ HYPRE_ParCSRMatrixRead( MPI_Comm comm,
 
 int
 HYPRE_ParCSRMatrixPrint( HYPRE_ParCSRMatrix  matrix,
-                         char               *file_name )
+                         const char         *file_name )
 {
    hypre_ParCSRMatrixPrint( (hypre_ParCSRMatrix *) matrix,
                             file_name );

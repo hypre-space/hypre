@@ -223,7 +223,8 @@ hypre_ParCSRMatrixSetColStartsOwner( hypre_ParCSRMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix *
-hypre_ParCSRMatrixRead( MPI_Comm comm, char *file_name )
+hypre_ParCSRMatrixRead( MPI_Comm    comm,
+                        const char *file_name )
 {
    hypre_ParCSRMatrix  *matrix;
    hypre_CSRMatrix  *diag;
@@ -317,7 +318,7 @@ hypre_ParCSRMatrixRead( MPI_Comm comm, char *file_name )
 
 int
 hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix, 
-                         char            *file_name )
+                         const char         *file_name )
 {
    MPI_Comm comm = hypre_ParCSRMatrixComm(matrix);
    int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(matrix);
@@ -365,7 +366,7 @@ int
 hypre_ParCSRMatrixPrintIJ( hypre_ParCSRMatrix *matrix, 
                            int		       base_i,
                            int		       base_j,
-                           char               *filename )
+                           const char         *filename )
 {
    int ierr = 0;
    MPI_Comm          comm = hypre_ParCSRMatrixComm(matrix);
@@ -461,7 +462,7 @@ hypre_ParCSRMatrixPrintIJ( hypre_ParCSRMatrix *matrix,
 
 int
 hypre_ParCSRMatrixReadIJ( MPI_Comm 	       comm,
-			  char                *filename,
+			  const char          *filename,
 			  int		      *base_i_ptr,
 			  int		      *base_j_ptr,
 			  hypre_ParCSRMatrix **matrix_ptr) 
