@@ -21,44 +21,52 @@
 
 typedef struct
 {
+    MPI_Comm   comm;
     ParaSails *ps;
-    Matrix    *A;
 }
 hypre_ParaSails;
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParaSailsCreate - Return a ParaSails preconditioner object "obj"
- * for the matrix "distmat".
+ * convert_matrix -  Create and convert distributed matrix to native 
+ * data structure of ParaSails
  *--------------------------------------------------------------------------*/
 
-int HYPRE_ParaSailsCreate(MPI_Comm comm, HYPRE_DistributedMatrix *distmat, 
-  HYPRE_ParaSails *obj, int symmetric)
+static Matrix *convert_matrix(MPI_Comm comm, HYPRE_DistributedMatrix *distmat)
 {
     int beg_row, end_row, row, dummy;
     int len, *ind;
     double *val;
-    hypre_ParaSails *internal;
-
-    internal = (hypre_ParaSails *) hypre_CTAlloc(hypre_ParaSails, 1);
-
-    /* Convert distributed matrix to native data structure of ParaSails */
+    Matrix *mat;
 
     HYPRE_DistributedMatrixGetLocalRange(distmat, &beg_row, &end_row,
         &dummy, &dummy);
-    internal->A = MatrixCreate(comm, beg_row, end_row);
+
+    mat = MatrixCreate(comm, beg_row, end_row);
 
     for (row=beg_row; row<=end_row; row++)
     {
 	HYPRE_DistributedMatrixGetRow(distmat, row, &len, &ind, &val);
-	MatrixSetRow(internal->A, row, len, ind, val);
+	MatrixSetRow(mat, row, len, ind, val);
 	HYPRE_DistributedMatrixRestoreRow(distmat, row, &len, &ind, &val);
     }
 
-    MatrixComplete(internal->A);
+    MatrixComplete(mat);
 
-    /* Call the native code */
+    return mat;
+}
 
-    internal->ps = ParaSailsCreate(comm, beg_row, end_row, symmetric);
+/*--------------------------------------------------------------------------
+ * HYPRE_ParaSailsCreate - Return a ParaSails preconditioner object "obj"
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_ParaSailsCreate(MPI_Comm comm, HYPRE_ParaSails *obj)
+{
+    hypre_ParaSails *internal;
+
+    internal = (hypre_ParaSails *) hypre_CTAlloc(hypre_ParaSails, 1);
+
+    internal->comm = comm;
+    internal->ps   = NULL;
 
     *obj = (HYPRE_ParaSails) internal;
 
@@ -69,11 +77,10 @@ int HYPRE_ParaSailsCreate(MPI_Comm comm, HYPRE_DistributedMatrix *distmat,
  * HYPRE_ParaSailsDestroy - Destroy a ParaSails object "ps".
  *--------------------------------------------------------------------------*/
 
-int HYPRE_ParaSailsDestroy(HYPRE_ParaSails ps)
+int HYPRE_ParaSailsDestroy(HYPRE_ParaSails obj)
 {
-    hypre_ParaSails *internal = (hypre_ParaSails *) ps;
+    hypre_ParaSails *internal = (hypre_ParaSails *) obj;
 
-    MatrixDestroy(internal->A);
     ParaSailsDestroy(internal->ps);
 
     hypre_TFree(internal);
@@ -82,30 +89,86 @@ int HYPRE_ParaSailsDestroy(HYPRE_ParaSails ps)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParaSailsSetup - Set up a ParaSails preconditioner, using the
- * input parameters "thresh" and "nlevels".
+ * HYPRE_ParaSailsSetup - This function should be used if the preconditioner
+ * pattern and values are set up with the same distributed matrix.
  *--------------------------------------------------------------------------*/
 
-int HYPRE_ParaSailsSetup(HYPRE_ParaSails ps, double thresh, 
-  int nlevels, double filter)
+int HYPRE_ParaSailsSetup(HYPRE_ParaSails obj,
+  HYPRE_DistributedMatrix *distmat, int sym, double thresh, int nlevels,
+  double filter, double loadbal)
 {
     double cost;
+    Matrix *mat;
+    hypre_ParaSails *internal = (hypre_ParaSails *) obj;
 
-    hypre_ParaSails *internal = (hypre_ParaSails *) ps;
+    mat = convert_matrix(internal->comm, distmat);
 
-    ParaSailsSetupPattern(internal->ps, internal->A, thresh, nlevels);
+    ParaSailsDestroy(internal->ps);
 
-#if 1
-    cost = ParaSailsStatsPattern(internal->ps, internal->A);
-#endif
+    internal->ps = ParaSailsCreate(internal->comm, 
+        mat->beg_row, mat->end_row, sym);
 
-    internal->ps->loadbal_beta = 0.9;
+    ParaSailsSetupPattern(internal->ps, mat, thresh, nlevels);
 
-    ParaSailsSetupValues(internal->ps, internal->A, filter);
+    cost = ParaSailsStatsPattern(internal->ps, mat);
 
-#if 1
-    ParaSailsStatsValues(internal->ps, internal->A);
-#endif
+    internal->ps->loadbal_beta = loadbal;
+
+    ParaSailsSetupValues(internal->ps, mat, filter);
+
+    ParaSailsStatsValues(internal->ps, mat);
+
+    MatrixDestroy(mat);
+
+    return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParaSailsSetupPattern - Set up pattern using a distributed matrix.
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_ParaSailsSetupPattern(HYPRE_ParaSails obj,
+  HYPRE_DistributedMatrix *distmat, int sym, double thresh, int nlevels)
+{
+    double cost;
+    Matrix *mat;
+    hypre_ParaSails *internal = (hypre_ParaSails *) obj;
+
+    mat = convert_matrix(internal->comm, distmat);
+
+    ParaSailsDestroy(internal->ps);
+
+    internal->ps = ParaSailsCreate(internal->comm, 
+        mat->beg_row, mat->end_row, sym);
+
+    ParaSailsSetupPattern(internal->ps, mat, thresh, nlevels);
+
+    cost = ParaSailsStatsPattern(internal->ps, mat);
+
+    MatrixDestroy(mat);
+
+    return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParaSailsSetupValues - Set up values using a distributed matrix.
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_ParaSailsSetupValues(HYPRE_ParaSails obj,
+  HYPRE_DistributedMatrix *distmat, double filter, double loadbal)
+{
+    Matrix *mat;
+    hypre_ParaSails *internal = (hypre_ParaSails *) obj;
+
+    mat = convert_matrix(internal->comm, distmat);
+
+    internal->ps->loadbal_beta = loadbal;
+
+    ParaSailsSetupValues(internal->ps, mat, filter);
+
+    ParaSailsStatsValues(internal->ps, mat);
+
+    MatrixDestroy(mat);
 
     return 0;
 }
@@ -115,9 +178,9 @@ int HYPRE_ParaSailsSetup(HYPRE_ParaSails ps, double thresh,
  * "u", and return the result in the array "v".
  *--------------------------------------------------------------------------*/
 
-int HYPRE_ParaSailsApply(HYPRE_ParaSails ps, double *u, double *v)
+int HYPRE_ParaSailsApply(HYPRE_ParaSails obj, double *u, double *v)
 {
-    hypre_ParaSails *internal = (hypre_ParaSails *) ps;
+    hypre_ParaSails *internal = (hypre_ParaSails *) obj;
 
     ParaSailsApply(internal->ps, u, v);
 

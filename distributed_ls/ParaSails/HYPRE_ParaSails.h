@@ -16,9 +16,13 @@
 
 typedef void *HYPRE_ParaSails;
 
-int HYPRE_ParaSailsCreate(MPI_Comm comm, HYPRE_DistributedMatrix *distmat, 
-  HYPRE_ParaSails *obj, int symmetric);
+int HYPRE_ParaSailsCreate(MPI_Comm comm, HYPRE_ParaSails *obj);
 int HYPRE_ParaSailsDestroy(HYPRE_ParaSails ps);
-int HYPRE_ParaSailsSetup(HYPRE_ParaSails ps, double thresh, 
-  int nlevels, double filter);
+int HYPRE_ParaSailsSetup(HYPRE_ParaSails obj,
+  HYPRE_DistributedMatrix *distmat, int sym, double thresh, int nlevels,
+  double filter, double loadbal);
+int HYPRE_ParaSailsSetupPattern(HYPRE_ParaSails obj,
+  HYPRE_DistributedMatrix *distmat, int sym, double thresh, int nlevels);
+int HYPRE_ParaSailsSetupValues(HYPRE_ParaSails obj,
+  HYPRE_DistributedMatrix *distmat, double filter, double loadbal);
 int HYPRE_ParaSailsApply(HYPRE_ParaSails ps, double *u, double *v);
