@@ -252,9 +252,9 @@ SetValues must be changed to reflect the new call); the result is:
    bHYPRE_cols = SIDL_int__array_borrow( cols, 1, lower, upper, stride );
    /* ...code to set up other SetValues array arguments... */
    
-   ierr += bHYPRE_IJBuildMatrix_SetValues( bHYPRE_ij_A, 1,
-                                           bHYPRE_row_sizes, bHYPRE_ncols,
-                                           bHYPRE_cols, bHYPRE_values );
+   ierr += bHYPRE_IJBuildMatrix_SetValues( bHYPRE_ij_A, nrows, bHYPRE_ncols,
+                                           bHYPRE_rows, bHYPRE_cols,
+                                           bHYPRE_values );
 
 The key line here is the one with SIDL_int__array_borrow.  This
 function "stuffs" the C array "cols" into the Babel defined structure
