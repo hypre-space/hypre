@@ -59,9 +59,6 @@ hypre_F90_IFACE(hypre_paramgsetup)( long int *solver,
 /*--------------------------------------------------------------------------
  * HYPRE_ParAMGSolve
  *--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------
- * HYPRE_ParAMGSolve
- *--------------------------------------------------------------------------*/
 
 void 
 hypre_F90_IFACE(hypre_paramgsolve)( long int *solver,
@@ -278,17 +275,17 @@ hypre_F90_IFACE(hypre_paramginitgridrelaxation)( long int *num_grid_sweeps,
                                                  int      *max_levels,
                                                  int      *ierr               )
 {
-   *num_grid_sweeps   = (long int) hypre_CTAlloc(int**, 1);
-   *grid_relax_type   = (long int) hypre_CTAlloc(int**, 1);
-   *grid_relax_points = (long int) hypre_CTAlloc(int***, 1);
-   *relax_weights     = (long int) hypre_CTAlloc(double**, 1);
+   *num_grid_sweeps   = (long int) hypre_CTAlloc(int*, 1);
+   *grid_relax_type   = (long int) hypre_CTAlloc(int*, 1);
+   *grid_relax_points = (long int) hypre_CTAlloc(int**, 1);
+   *relax_weights     = (long int) hypre_CTAlloc(double*, 1);
 
-   *ierr = (int) ( HYPRE_ParAMGInitGridRelaxation( (int **)     *num_grid_sweeps,
-                                                   (int **)     *grid_relax_type,
-                                                   (int ***)    *grid_relax_points,
-                                                   (int)        *coarsen_type,
-                                                   (double **)  *relax_weights,
-                                                   (int)        *max_levels         ) );
+   *ierr = (int) ( HYPRE_ParAMGInitGridRelaxation( (int **)    *num_grid_sweeps,
+                                                   (int **)    *grid_relax_type,
+                                                   (int ***)   *grid_relax_points,
+                                                   (int)       *coarsen_type,
+                                                   (double **) *relax_weights,
+                                                   (int)       *max_levels         ) );
 
 }
 
