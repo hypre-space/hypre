@@ -170,7 +170,7 @@ the (l+1)-th sweep on the fine
 grid (k=0), the down cycle (k=1), the up cycle (k=2) and the coarse grid (k=3),
 e.g. if grid$\_$relax$\_$points[1][0] is -1, all points marked -1 (which are in
 general fine points) are relaxed on the first sweep of the down cycle.
-Note: grid_relax_points[3][l] needs to be 0 always, since the concept of 
+Note: grid\_relax\_points[3][l] needs to be 0 always, since the concept of 
 coarse and fine points does not exist on the coarsest grid. If the user
 sets it to another value, it will be automatically set to 0 and a warning
 printed, unless the direct solver is used.
