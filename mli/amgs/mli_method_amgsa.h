@@ -36,6 +36,7 @@ class MLI_Method_AMGSA : public MLI_Method
    int      curr_level;              /* current level being processed    */
    int      output_level;            /* for diagnostics                  */
    int      node_dofs;               /* equation block size (fixed)      */
+   int      curr_node_dofs;          /* current block size (this stage)  */
    double   threshold;               /* for creating aggregation graph   */
    int      nullspace_dim;           /* null space information (changes  */
    int      nullspace_len;           /* length of nullspace in each dim  */

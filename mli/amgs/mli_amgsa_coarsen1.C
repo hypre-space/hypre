@@ -101,7 +101,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out)
     * reduce Amat based on the block size information (if node_dofs > 1)
     *-----------------------------------------------------------------*/
 
-   blk_size = node_dofs;
+   blk_size = curr_node_dofs;
    if (blk_size > 1) MLI_Matrix_Compress(mli_Amat, blk_size, &mli_A2mat);
    else              mli_A2mat = mli_Amat;
    A2mat = (hypre_ParCSRMatrix *) mli_A2mat->getMatrix();
@@ -306,7 +306,7 @@ printf("\n");
    }
    if ( nullspace_vec != NULL ) delete [] nullspace_vec;
    nullspace_vec = new_null;
-   node_dofs = nullspace_dim;
+   curr_node_dofs = nullspace_dim;
 
    /*-----------------------------------------------------------------
     * if damping factor for prolongator smoother = 0
@@ -333,15 +333,18 @@ printf("\n");
       col_val = new double[nullspace_dim];
       for ( irow = 0; irow < P_local_nrows; irow++ )
       {
-         for ( j = 0; j < nullspace_dim; j++ )
+         if ( P_cols[irow] >= 0 )
          {
-            col_ind[j] = P_cols[irow] + j;
-            col_val[j] = P_vecs[j][irow];
-         }
-         row_num = P_start_row + irow;
-         HYPRE_IJMatrixSetValues(IJPmat, 1, &nullspace_dim, 
+            for ( j = 0; j < nullspace_dim; j++ )
+            {
+               col_ind[j] = P_cols[irow] + j;
+               col_val[j] = P_vecs[j][irow];
+            }
+            row_num = P_start_row + irow;
+            HYPRE_IJMatrixSetValues(IJPmat, 1, &nullspace_dim, 
                              (const int *) &row_num, (const int *) col_ind, 
                              (const double *) col_val);
+         }
       }
       ierr = HYPRE_IJMatrixAssemble(IJPmat);
       assert( !ierr );
@@ -702,15 +705,18 @@ printf("\n");
       col_val = new double[nullspace_dim];
       for ( irow = 0; irow < P_local_nrows; irow++ )
       {
-         for ( j = 0; j < nullspace_dim; j++ )
+         if ( P_cols[irow] >= 0 )
          {
-            col_ind[j] = P_cols[irow] + j;
-            col_val[j] = P_vecs[j][irow];
-         }
-         row_num = P_start_row + irow;
-         HYPRE_IJMatrixSetValues(IJPmat, 1, &nullspace_dim, 
+            for ( j = 0; j < nullspace_dim; j++ )
+            {
+               col_ind[j] = P_cols[irow] + j;
+               col_val[j] = P_vecs[j][irow];
+            }
+            row_num = P_start_row + irow;
+            HYPRE_IJMatrixSetValues(IJPmat, 1, &nullspace_dim, 
                              (const int *) &row_num, (const int *) col_ind, 
                              (const double *) col_val);
+         }
       }
       ierr = HYPRE_IJMatrixAssemble(IJPmat);
       assert( !ierr );
@@ -949,8 +955,8 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
                         nselected++;
                      }
                   }
-                  naggr++;
                }
+               naggr++;
             }
             hypre_ParCSRMatrixRestoreRow(hypre_graph,row_num,&row_leng,&cols,
                                          NULL);

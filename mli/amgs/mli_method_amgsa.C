@@ -31,8 +31,9 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    max_levels        = 40;
    num_levels        = 40;
    curr_level        = 0;
-   output_level      = 1;
+   output_level      = 0;
    node_dofs         = 1;
+   curr_node_dofs    = 1;
    threshold         = 0.08;
    nullspace_dim     = 1;
    nullspace_vec     = NULL;
@@ -691,9 +692,10 @@ int MLI_Method_AMGSA::setNullSpace( int ndofs, int ndim, double *nullvec,
       cout.flush();
       ndim = ndofs;
    }
-   node_dofs     = ndofs;
-   nullspace_dim = ndim;
-   nullspace_len = length;
+   node_dofs      = ndofs;
+   curr_node_dofs = ndofs;
+   nullspace_dim  = ndim;
+   nullspace_len  = length;
    if ( nullspace_vec != NULL ) delete [] nullspace_vec;
    if ( nullvec != NULL )
    {
@@ -717,15 +719,17 @@ int MLI_Method_AMGSA::setNodalCoordinates( int num_nodes, int ndofs,
 
    if ( ndofs == 1 )
    {
-      node_dofs     = 1;
-      nullspace_len = num_nodes;
-      nullspace_dim = 1;
+      node_dofs      = 1;
+      curr_node_dofs = 1;
+      nullspace_len  = num_nodes;
+      nullspace_dim  = 1;
    }
    else if ( ndofs == 3 )
    {
-      node_dofs     = 3;
-      nullspace_len = num_nodes * 3;
-      nullspace_dim = 6;
+      node_dofs      = 3;
+      curr_node_dofs = 3;
+      nullspace_len  = num_nodes * 3;
+      nullspace_dim  = 6;
    }
    else
    {
@@ -1001,7 +1005,7 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
 int MLI_Method_AMGSA::getNullSpace(int &ndofs,int &ndim,double *&nullvec,
                                    int &leng) 
 {
-   ndofs   = node_dofs;
+   ndofs   = curr_node_dofs;
    ndim    = nullspace_dim;
    nullvec = nullspace_vec;
    leng    = nullspace_len;
