@@ -73,7 +73,7 @@ int  impl_Hypre_ParCSRMatrix_Apply
    assert(hypre_IJMatrixLocalStorage(hM));
    parM = hypre_IJMatrixLocalStorage(hM);
 
-   xin = (Hypre_ParCSRVector) Hypre_Vector_castTo( x, "Hypre_ParCSRVector" );
+   xin = (Hypre_ParCSRVector) Hypre_Vector_castTo( x, "Hypre.ParCSRVector" );
    if ( xin==NULL ) return 1;
    HPx = xin->Hypre_ParCSRVector_data;
    Hx = HPx->Hvec;
@@ -81,7 +81,7 @@ int  impl_Hypre_ParCSRMatrix_Apply
    assert( hypre_IJVectorLocalStorage(hx) );
    par_x = hypre_IJVectorLocalStorage(hx);
 
-   yin = (Hypre_ParCSRVector) Hypre_Vector_castTo( *y, "Hypre_ParCSRVector" );
+   yin = (Hypre_ParCSRVector) Hypre_Vector_castTo( *y, "Hypre.ParCSRVector" );
    if ( yin==NULL ) return 1;
    HPy = yin->Hypre_ParCSRVector_data;
    Hy = HPy->Hvec;

@@ -111,7 +111,7 @@ impl_Hypre_PCG_Apply(Hypre_PCG this, Hypre_Vector b, Hypre_Vector* xp)
    Hypre_LinearOperator  matvec = (pcg_data -> matvec);
    Hypre_Solver    precond      = (pcg_data -> preconditioner);
    Hypre_LinearOperator precond_solver = (Hypre_LinearOperator)
-      Hypre_Solver_castTo( precond, "Hypre_LinearOperator" );
+      Hypre_Solver_castTo( precond, "Hypre.LinearOperator" );
 
    int             logging      = (pcg_data -> logging);
    double         *norms        = (pcg_data -> norms);
@@ -602,7 +602,7 @@ impl_Hypre_PCG_Setup( Hypre_PCG this,
  * impl_Hypre_PCGGetConstructedObject
  **********************************************************/
 int impl_Hypre_PCG_GetConstructedObject( Hypre_PCG this, Hypre_Solver* obj ) {
-   *obj = (Hypre_Solver) Hypre_PCG_castTo( this, "Hypre_Solver" );
+   *obj = (Hypre_Solver) Hypre_PCG_castTo( this, "Hypre.Solver" );
    return 0;
 } /* end impl_Hypre_PCGGetConstructedObject */
 

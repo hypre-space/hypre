@@ -98,9 +98,9 @@ int impl_Hypre_StructMatrix_Apply
    HYPRE_StructVector * Vx;
    hypre_StructVector * hx;
 
-   SVb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
+   SVb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre.StructVector" );
    if ( SVb==NULL ) return 1;
-   SVx = (Hypre_StructVector) Hypre_Vector_castTo( *x, "Hypre_StructVector" );
+   SVx = (Hypre_StructVector) Hypre_Vector_castTo( *x, "Hypre.StructVector" );
    if ( SVb==NULL ) return 1;
 
    SVxp = SVx->Hypre_StructVector_data;

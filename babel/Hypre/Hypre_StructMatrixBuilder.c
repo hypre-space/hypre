@@ -126,7 +126,7 @@ int  impl_Hypre_StructMatrixBuilder_GetConstructedObject
       return 1;
    };
    *obj = (Hypre_LinearOperator)
-      Hypre_StructMatrix_castTo( newmat, "Hypre_LinearOperator" );
+      Hypre_StructMatrix_castTo( newmat, "Hypre.LinearOperator" );
    return 0;
 } /* end impl_Hypre_StructMatrixBuilderGetConstructedObject */
 

@@ -276,7 +276,7 @@ impl_Hypre_GMRES_Setup( Hypre_GMRES this,
  * impl_Hypre_GMRESGetConstructedObject
  **********************************************************/
 int impl_Hypre_GMRES_GetConstructedObject(Hypre_GMRES this, Hypre_Solver* obj) {
-   *obj = (Hypre_Solver) Hypre_GMRES_castTo( this, "Hypre_Solver" );
+   *obj = (Hypre_Solver) Hypre_GMRES_castTo( this, "Hypre.Solver" );
    return 0;
 } /* end impl_Hypre_GMRESGetConstructedObject */
 

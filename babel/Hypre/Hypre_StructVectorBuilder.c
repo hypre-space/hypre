@@ -111,7 +111,7 @@ int  impl_Hypre_StructVectorBuilder_GetConstructedObject
       *obj = (Hypre_Vector) NULL;
       return 1;
    };
-   *obj = (Hypre_Vector) Hypre_StructVector_castTo( newvec, "Hypre_Vector" );
+   *obj = (Hypre_Vector) Hypre_StructVector_castTo( newvec, "Hypre.Vector" );
    return 0;
 } /* end impl_Hypre_StructVectorBuilderGetConstructedObject */
 

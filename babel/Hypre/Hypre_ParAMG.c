@@ -284,11 +284,11 @@ int  impl_Hypre_ParAMG_Setup
    hypre_IJVector * vx;
    hypre_ParVector * x_par;
 
-   M = (Hypre_ParCSRMatrix) Hypre_LinearOperator_castTo( A, "Hypre_ParCSRMatrix" );
+   M = (Hypre_ParCSRMatrix) Hypre_LinearOperator_castTo( A, "Hypre.ParCSRMatrix" );
    if ( M==NULL ) return 1;
-   VPb = (Hypre_ParCSRVector) Hypre_Vector_castTo( b, "Hypre_ParCSRVector" );
+   VPb = (Hypre_ParCSRVector) Hypre_Vector_castTo( b, "Hypre.ParCSRVector" );
    if ( VPb==NULL ) return 1;
-   VPx = (Hypre_ParCSRVector) Hypre_Vector_castTo( x, "Hypre_ParCSRVector" );
+   VPx = (Hypre_ParCSRVector) Hypre_Vector_castTo( x, "Hypre.ParCSRVector" );
    if ( VPx==NULL ) return 1;
 
    Mp = M->Hypre_ParCSRMatrix_data;
@@ -355,9 +355,9 @@ int  impl_Hypre_ParAMG_Apply(Hypre_ParAMG this, Hypre_Vector b, Hypre_Vector* x)
    hypre_IJVector * vx;
    hypre_ParVector * x_par;
 
-   VPb = (Hypre_ParCSRVector) Hypre_Vector_castTo( b, "Hypre_ParCSRVector" );
+   VPb = (Hypre_ParCSRVector) Hypre_Vector_castTo( b, "Hypre.ParCSRVector" );
    if ( VPb==NULL ) return 1;
-   VPx = (Hypre_ParCSRVector) Hypre_Vector_castTo( *x, "Hypre_ParCSRVector" );
+   VPx = (Hypre_ParCSRVector) Hypre_Vector_castTo( *x, "Hypre.ParCSRVector" );
    if ( VPx==NULL ) return 1;
 
    M = this->Hypre_ParAMG_data->Hmatrix;
@@ -389,7 +389,7 @@ int impl_Hypre_ParAMG_GetSystemOperator
    Hypre_ParCSRMatrix mat =  this->Hypre_ParAMG_data->Hmatrix;
    
    *op = (Hypre_LinearOperator)
-      Hypre_ParCSRMatrix_castTo( mat, "Hypre_LinearOperator" );
+      Hypre_ParCSRMatrix_castTo( mat, "Hypre.LinearOperator" );
    return 0;
 } /* end impl_Hypre_ParAMGGetSystemOperator */
 

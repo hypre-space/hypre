@@ -60,10 +60,10 @@ int  impl_Hypre_StructSMG_Apply
    struct Hypre_StructVector_private_type *SVbp, *SVxp;
    HYPRE_StructVector *Vb, *Vx;
 
-   Sb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
+   Sb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre.StructVector" );
    if ( Sb == NULL ) return 1;
 
-   Sx = (Hypre_StructVector) Hypre_Vector_castTo( *x, "Hypre_StructVector" );
+   Sx = (Hypre_StructVector) Hypre_Vector_castTo( *x, "Hypre.StructVector" );
    if ( Sx == NULL ) return 1;
 
    SVbp = Sb->Hypre_StructVector_data;
@@ -92,7 +92,7 @@ int impl_Hypre_StructSMG_GetSystemOperator
    Hypre_StructMatrix mat =  this->Hypre_StructSMG_data->hsmatrix;
    
    *op = (Hypre_LinearOperator)
-      Hypre_StructMatrix_castTo( mat, "Hypre_LinearOperator" );
+      Hypre_StructMatrix_castTo( mat, "Hypre.LinearOperator" );
    return 0;
 } /* end impl_Hypre_StructSMGGetSystemOperator */
 
@@ -283,11 +283,11 @@ int  impl_Hypre_StructSMG_Setup
    struct Hypre_StructSMG_private_type *HSMGp = this->Hypre_StructSMG_data;
    HYPRE_StructSolver *S = HSMGp->hssolver;
 
-   SM = (Hypre_StructMatrix) Hypre_LinearOperator_castTo( A, "Hypre_StructMatrix" );
+   SM = (Hypre_StructMatrix) Hypre_LinearOperator_castTo( A, "Hypre.StructMatrix" );
    if ( SM==NULL ) return 1;
-   SVb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
+   SVb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre.StructVector" );
    if ( SVb==NULL ) return 1;
-   SVx = (Hypre_StructVector) Hypre_Vector_castTo( x, "Hypre_StructVector" );
+   SVx = (Hypre_StructVector) Hypre_Vector_castTo( x, "Hypre.StructVector" );
    if ( SVb==NULL ) return 1;
 
    SMp = SM->Hypre_StructMatrix_data;

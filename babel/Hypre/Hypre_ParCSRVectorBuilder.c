@@ -218,7 +218,7 @@ int impl_Hypre_ParCSRVectorBuilder_GetConstructedObject
       *obj = (Hypre_Vector) NULL;
       return 1;
    };
-   *obj = (Hypre_Vector) Hypre_ParCSRVector_castTo( newvec, "Hypre_Vector" );
+   *obj = (Hypre_Vector) Hypre_ParCSRVector_castTo( newvec, "Hypre.Vector" );
    return 0;
 } /* end impl_Hypre_ParCSRVectorBuilderGetConstructedObject */
 

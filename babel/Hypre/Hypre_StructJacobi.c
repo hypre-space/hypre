@@ -78,9 +78,9 @@ int  impl_Hypre_StructJacobi_Apply
    struct Hypre_StructMatrix_private_type *SMp = A->Hypre_StructMatrix_data;
    HYPRE_StructMatrix *MA = SMp->hsmat;
 
-   SVb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
+   SVb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre.StructVector" );
    if ( SVb==NULL ) return 1;
-   SVx = (Hypre_StructVector) Hypre_Vector_castTo( *x, "Hypre_StructVector" );
+   SVx = (Hypre_StructVector) Hypre_Vector_castTo( *x, "Hypre.StructVector" );
    if ( SVb==NULL ) return 1;
 
    SVbp = SVb->Hypre_StructVector_data;
@@ -109,7 +109,7 @@ int impl_Hypre_StructJacobi_GetSystemOperator
 {
    Hypre_StructMatrix SM = this->Hypre_StructJacobi_data->hsmatrix;
    Hypre_LinearOperator LO = (Hypre_LinearOperator)
-      Hypre_StructMatrix_castTo( SM, "Hypre_LinearOperator" );
+      Hypre_StructMatrix_castTo( SM, "Hypre.LinearOperator" );
 
    *op = LO;
    return 0;
@@ -267,7 +267,7 @@ int  impl_Hypre_StructJacobi_Start(Hypre_StructJacobi this, Hypre_MPI_Com comm) 
 /* the StructSolver this inherits from keeps its own pointer to the
    underlying HYPRE object.  Make sure they are the same.
    Hypre_StructSolver HSS = Hypre_StructJacobi_castTo
-      ( this, "Hypre_StructSolver" );
+      ( this, "Hypre.StructSolver" );
    struct Hypre_StructSolver_private_type *HSSp = HSS->Hypre_StructSolver_data;
    HSSp->hssolver = S;
 */
@@ -303,11 +303,11 @@ int  impl_Hypre_StructJacobi_Setup
    struct Hypre_StructJacobi_private_type *HSJp = this->Hypre_StructJacobi_data;
    HYPRE_StructSolver *S = HSJp->hssolver;
 
-   SM = (Hypre_StructMatrix) Hypre_LinearOperator_castTo( A, "Hypre_StructMatrix" );
+   SM = (Hypre_StructMatrix) Hypre_LinearOperator_castTo( A, "Hypre.StructMatrix" );
    if ( SM==NULL ) return 1;
-   SVb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
+   SVb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre.StructVector" );
    if ( SVb==NULL ) return 1;
-   SVx = (Hypre_StructVector) Hypre_Vector_castTo( x, "Hypre_StructVector" );
+   SVx = (Hypre_StructVector) Hypre_Vector_castTo( x, "Hypre.StructVector" );
    if ( SVb==NULL ) return 1;
 
    SMp = SM->Hypre_StructMatrix_data;

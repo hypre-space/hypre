@@ -83,7 +83,7 @@ int  impl_Hypre_ParCSRVector_Copy(Hypre_ParCSRVector this, Hypre_Vector x) {
    hypre_IJVector *hx;
    hypre_ParVector *x_par;
 
-   xin = (Hypre_ParCSRVector) Hypre_Vector_castTo( x, "Hypre_ParCSRVector" );
+   xin = (Hypre_ParCSRVector) Hypre_Vector_castTo( x, "Hypre.ParCSRVector" );
    if ( xin==NULL ) return 1;
    HPx = xin->Hypre_ParCSRVector_data;
    Hx = HPx->Hvec;
@@ -133,7 +133,7 @@ int  impl_Hypre_ParCSRVector_Clone(Hypre_ParCSRVector this, Hypre_Vector* x) {
    ierr += Hypre_ParCSRVectorBuilder_Setup( Bldr );
    ierr += Hypre_ParCSRVectorBuilder_GetConstructedObject( Bldr, x );
 
-   HPx = ((Hypre_ParCSRVector)Hypre_Vector_castTo(*x,"Hypre_ParCSRVector"))->
+   HPx = ((Hypre_ParCSRVector)Hypre_Vector_castTo(*x,"Hypre.ParCSRVector"))->
       Hypre_ParCSRVector_data;
    Hx = HPx->Hvec;
    hx = (hypre_IJVector *) *Hx;
@@ -175,7 +175,7 @@ int impl_Hypre_ParCSRVector_Dot
    struct Hypre_ParCSRVector_private_type *HPx;
    HYPRE_IJVector *Hx;
 
-   xin = (Hypre_ParCSRVector) Hypre_Vector_castTo( x, "Hypre_ParCSRVector" );
+   xin = (Hypre_ParCSRVector) Hypre_Vector_castTo( x, "Hypre.ParCSRVector" );
    if ( xin==NULL ) return 1;
    HPx = xin->Hypre_ParCSRVector_data;
    Hx = HPx->Hvec;
@@ -201,7 +201,7 @@ int  impl_Hypre_ParCSRVector_Axpy( Hypre_ParCSRVector this, double a,
    struct Hypre_ParCSRVector_private_type *HPx;
    HYPRE_IJVector *Hx;
 
-   xin = (Hypre_ParCSRVector) Hypre_Vector_castTo( x, "Hypre_ParCSRVector" );
+   xin = (Hypre_ParCSRVector) Hypre_Vector_castTo( x, "Hypre.ParCSRVector" );
    if ( xin==NULL ) return 1;
    HPx = xin->Hypre_ParCSRVector_data;
    Hx = HPx->Hvec;
