@@ -19,7 +19,6 @@
 #include <math.h>
 #include <stdarg.h>
 
-#include <mpi.h>
 #include <assert.h>
 #include <signal.h>
 

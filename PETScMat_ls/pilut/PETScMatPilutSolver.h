@@ -16,12 +16,10 @@
 #define hypre_PETSC_MAT_PILUT_SOLVER_HEADER
 
 #include "../../utilities/general.h"
-#include "../../utilities/memory.h"
+#include "../../utilities/utilities.h"
 #ifdef HYPRE_DEBUG
 #include <gmalloc.h>
 #endif
-
-#include "mpi.h"
 
 /* Include Petsc matrix and vector headers */
 #include "mat.h"

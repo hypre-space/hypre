@@ -16,10 +16,11 @@
 #define hypre_DISTRIBUTED_MATRIX_HEADER
 
 #include "../utilities/general.h"
-#include "../utilities/memory.h"
+#include "../utilities/utilities.h"
 
-#include "mpi.h"
-#include "HYPRE.h"
+#include "../HYPRE.h"
+
+#include "./HYPRE_distributed_matrix_types.h"
 
 /*--------------------------------------------------------------------------
  * hypre_DistributedMatrix:

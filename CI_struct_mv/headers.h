@@ -7,25 +7,27 @@
  * $Revision$
  *********************************************************************EHEADER*/
 
-#include "general.h"
-#include "../utilities/memory.h"
+#include "../utilities/general.h"
 
 #ifdef HYPRE_DEBUG
 #include <gmalloc.h>
 #endif
 
-#include "mpi.h"
+#include "../utilities/utilities.h"
 
-#include "box.h"
-#include "struct_stencil.h"
-#include "struct_grid.h"
+#include "./box.h"
+#include "./struct_stencil.h"
+#include "./struct_grid.h"
 
-#include "grid_to_coord.h"
-#include "struct_matrix.h"
-#include "struct_vector.h"
+#include "./grid_to_coord.h"
+#include "./struct_matrix.h"
+#include "./struct_vector.h"
 
-#include "HYPRE.h"
-#include "hypre_protos.h"
-#include "internal_protos.h"
+#include "../HYPRE.h"
+
+#include "./HYPRE_CI_struct_matrix_vector_types.h"
+
+#include "./hypre_protos.h"
+#include "./internal_protos.h"
 
 

@@ -27,10 +27,15 @@ int
 hypre_FreeStructInterfaceSolverPETSc( hypre_StructInterfaceSolver *struct_solver )
 {
 
+#ifdef PETSC_AVAILABLE
    HYPRE_FreePETScSolverParILUT
       ( (HYPRE_PETScSolverParILUT) hypre_StructInterfaceSolverData( struct_solver ) );
 
    return(0);
+
+#else
+   return(-1);
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -40,12 +45,17 @@ hypre_FreeStructInterfaceSolverPETSc( hypre_StructInterfaceSolver *struct_solver
 int 
 hypre_StructInterfaceSolverInitializePETSc( hypre_StructInterfaceSolver *struct_solver )
 {
+#ifdef PETSC_AVAILABLE
    int ierr = 0;
 
    hypre_StructInterfaceSolverData( struct_solver ) = HYPRE_NewPETScSolverParILUT
       ( hypre_StructInterfaceSolverContext( struct_solver ));
 
    return(ierr);
+
+#else
+   return(-1);
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -56,6 +66,7 @@ hypre_StructInterfaceSolverInitializePETSc( hypre_StructInterfaceSolver *struct_
 int 
 hypre_StructInterfaceSolverSetupPETSc( hypre_StructInterfaceSolver *struct_solver )
 {
+#ifdef PETSC_AVAILABLE
    HYPRE_StructInterfaceMatrix matrix=hypre_StructInterfaceSolverMatrix(struct_solver);
    HYPRE_StructInterfaceVector soln=hypre_StructInterfaceSolverSoln(struct_solver);
    HYPRE_StructInterfaceVector rhs=hypre_StructInterfaceSolverRhs(struct_solver);
@@ -78,6 +89,10 @@ hypre_StructInterfaceSolverSetupPETSc( hypre_StructInterfaceSolver *struct_solve
       solver_data, Petsc_soln, Petsc_rhs );
 
    return(ierr);
+
+#else
+   return(-1);
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -88,6 +103,7 @@ hypre_StructInterfaceSolverSetupPETSc( hypre_StructInterfaceSolver *struct_solve
 int 
 hypre_StructInterfaceSolverSolvePETSc( hypre_StructInterfaceSolver *struct_solver )
 {
+#ifdef PETSC_AVAILABLE
    HYPRE_StructInterfaceVector  soln=hypre_StructInterfaceSolverSoln(struct_solver);
    HYPRE_StructInterfaceVector  rhs=hypre_StructInterfaceSolverRhs(struct_solver);
    HYPRE_PETScSolverParILUT solver_data=hypre_StructInterfaceSolverData( struct_solver );
@@ -103,6 +119,10 @@ hypre_StructInterfaceSolverSolvePETSc( hypre_StructInterfaceSolver *struct_solve
       solver_data, Petsc_soln, Petsc_rhs );
 
    return(ierr);
+
+#else
+   return(-1);
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -113,12 +133,17 @@ int
 hypre_StructInterfaceSolverPETScSetDropTolerance( hypre_StructInterfaceSolver *struct_solver, 
                                        double tol )
 {
+#ifdef PETSC_AVAILABLE
    int ierr=0;
 
    ierr = HYPRE_PETScSolverParILUTSetDropTolerance
       ( (HYPRE_PETScSolverParILUT) hypre_StructInterfaceSolverData( struct_solver ), tol );
 
    return(ierr);
+
+#else
+   return(-1);
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -129,12 +154,17 @@ int
 hypre_StructInterfaceSolverPETScSetFactorRowSize( hypre_StructInterfaceSolver *struct_solver, 
                                        int size )
 {
+#ifdef PETSC_AVAILABLE
    int ierr=0;
 
    ierr = HYPRE_PETScSolverParILUTSetFactorRowSize
       ( (HYPRE_PETScSolverParILUT) hypre_StructInterfaceSolverData( struct_solver ), size );
 
    return(ierr);
+
+#else
+   return(-1);
+#endif
 }
 
 

@@ -4,12 +4,17 @@
 
 
 #include "../../utilities/general.h"
-#include "../../utilities/memory.h"
+#include "../../utilities/utilities.h"
 #ifdef HYPRE_DEBUG
 #include <gmalloc.h>
 #endif
 
-#include "HYPRE.h"
+#include "../../HYPRE.h"
+
+#include "./HYPRE_DistributedMatrixPilutSolver_types.h"
+
+#include "../../distributed_matrix/HYPRE_distributed_matrix_types.h"
+#include "../../distributed_matrix/HYPRE_distributed_matrix_protos.h"
 
 #include "./macros.h" /*contains some macros that are used here */
 
@@ -72,8 +77,6 @@ int lu_recv[MAX_NPES];
 
 #include "./const.h"
 
-/* Include HYPRE library prototypes */
-#include "HYPRE.h"
 
 /* prototype definitions for BLAS calls that are used */
 double SNRM2( int *, double *, int *);

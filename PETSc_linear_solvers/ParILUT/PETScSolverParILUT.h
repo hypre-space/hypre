@@ -16,17 +16,15 @@
 #define hypre_PETScSolverParILUT_HEADER
 
 #include "../../utilities/general.h"
-#include "../../utilities/memory.h"
+#include "../../utilities/utilities.h"
 #ifdef HYPRE_DEBUG
 #include <gmalloc.h>
 #endif
 
-#include "mpi.h"
-
 /* Include Petsc linear solver headers */
 #include "sles.h"
 
-#include "HYPRE.h"
+#include "../../HYPRE.h"
 
 /* type definition for member SlesOwner in ParILUTData structure */
 #define ParILUTLibrary 47

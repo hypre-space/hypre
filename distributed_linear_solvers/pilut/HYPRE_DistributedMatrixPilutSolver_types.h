@@ -14,11 +14,10 @@
  *
  *****************************************************************************/
 
-#ifndef HYPRE_DISTRIBUTED_MATRIX_TYPES_HEADER
-#define HYPRE_DISTRIBUTED_MATRIX_TYPES_HEADER
+#ifndef HYPRE_DISTRIBUTED_MATRIX_SOLVER_PILUT_TYPES_HEADER
+#define HYPRE_DISTRIBUTED_MATRIX_SOLVER_PILUT_TYPES_HEADER
 
-#include "mpi.h"
 
-typedef void *HYPRE_DistributedMatrix;
+typedef void *HYPRE_DistributedMatrixPilutSolver;
 
 #endif
