@@ -67,7 +67,6 @@ New internal installation: V2000-05-31
 
 New internal installation: V1.00.00
 
-Not sure if this "counts"
 - Setup time for PILUT have been dramatically reduced in the case of
   very small drop tolerances, and memory problems that were causing
   coredumps on >2 processors have been fixed.
@@ -83,5 +82,8 @@ Not sure if this "counts"
 - Added a new interface for semi-structured grids.  This is still very
   much a beta implementation, and should be used with extreme caution
   until further notice.
+
+- The main header files have been restructured to be more readable.
+  They will soon include full documentation for their interfaces.
 
 
