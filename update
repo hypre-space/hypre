@@ -125,9 +125,9 @@ fi
     if [ ! -d UPDATE ]
     then
 	mkdir UPDATE
-	chmod $HYPRE_INSTALL_PERMISSIONS UPDATE
-	chmod go-w UPDATE
     fi
+    chmod $HYPRE_INSTALL_PERMISSIONS UPDATE
+    chmod go-w UPDATE
 
     # update only if no VERSION_DATE file
     if [ ! -f UPDATE/VERSION_DATE ]
