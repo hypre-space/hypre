@@ -1208,7 +1208,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    int              measure, max_measure;
    int              i, j, k, jA, jS, jS_offd, kS, ig;
    int		    ic, ji, jj, jk, jl, jm, index;
-   int		    max_ci_size, ci_size, ci_tilde_size;
+   int		    ci_size, ci_tilde_size;
    int		    ci_size_offd, ci_tilde_size_offd;
    int		    set_empty = 1;
    int		    C_i_nonempty = 0;
@@ -1571,8 +1571,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    {
       if (CF_marker[i] == -1)
       {
-	 max_ci_size = S_i[i+1]-S_i[i];
-	 ci_tilde_size = max_ci_size;
+	 ci_tilde_size = 0;
 	 ci_size = 0;
 	 for (ji = S_i[i]; ji < S_i[i+1]; ji++)
 	 {
@@ -1605,17 +1604,17 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 		  {
 		     CF_marker[i] = 1;
 		     coarse_size++;
-		     for (jj=max_ci_size ; jj < ci_tilde_size; jj++)
+		     for (jj=0 ; jj < ci_tilde_size; jj++)
 		     {
-			CF_marker[graph_array[jj]] = -1;
+			CF_marker[graph_ptr[jj]] = -1;
 		        coarse_size--;
 		     }
-		     ci_tilde_size = max_ci_size;
+		     ci_tilde_size = 0;
 		     break;
 		  }
 		  else
 		  {
-		     graph_array[ci_tilde_size++] = j;
+		     graph_ptr[ci_tilde_size++] = j;
 		     CF_marker[j] = 1;
 		     coarse_size++;
 		     C_i_nonempty = 1;
