@@ -108,18 +108,26 @@ hypre_SchwarzSetup(void               *schwarz_vdata,
    hypre_ParVectorInitialize(Vtemp);
    hypre_SchwarzDataVtemp(schwarz_data) = Vtemp;
 
-   hypre_AMGCreateDomainDof (hypre_ParCSRMatrixDiag(A),
+   if (variant)
+   {
+      hypre_ParAMGCreateDomainDof(A,
 			     domain_type, overlap,
 			     num_functions, dof_func,
 			     &domain_structure);
-   hypre_SchwarzDataDomainStructure(schwarz_data) = domain_structure;
 
-   if (variant)
-   {
-      hypre_GenerateScale(domain_structure, num_variables, relax_weight,
+      hypre_ParGenerateScale(A, domain_structure, relax_weight,
 	&scale);
       hypre_SchwarzDataScale(schwarz_data) = scale;
    }
+   else
+   {
+      hypre_AMGCreateDomainDof (hypre_ParCSRMatrixDiag(A),
+			     domain_type, overlap,
+			     num_functions, dof_func,
+			     &domain_structure);
+   }
+
+   hypre_SchwarzDataDomainStructure(schwarz_data) = domain_structure;
 
    return ierr;
 }
@@ -144,7 +152,7 @@ hypre_SchwarzSolve(void               *schwarz_vdata,
 
    if (variant)
    {
-      ierr = hypre_AdSchwarzSolve(A, f, domain_structure, scale, u, Vtemp);
+      ierr = hypre_ParAdSchwarzSolve(A, f, domain_structure, scale, u, Vtemp);
    }
    else
    {

@@ -2099,3 +2099,820 @@ hypre_GenerateScale(hypre_CSRMatrix *domain_structure,
    return ierr;
 }
 
+
+int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
+		       hypre_ParVector *F,
+		       hypre_CSRMatrix *domain_structure,
+		       double *scale,
+		       hypre_ParVector *X,
+		       hypre_ParVector *Vtemp)
+
+{
+  MPI_Comm comm = hypre_ParCSRMatrixComm(A);
+  hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+  int num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+  int *recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+  int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+  int *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+  int *send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+
+  hypre_ParCSRCommHandle *comm_handle;
+
+  int ierr = 0;
+  double *x_data;
+  double *x_ext_data;
+  double *aux;
+  double *vtemp_data;
+  double *vtemp_ext_data;
+  int num_domains, max_domain_size;
+  int *i_domain_dof;
+  int *j_domain_dof;
+  double *domain_matrixinverse;
+  hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+  int *a_diag_i = hypre_CSRMatrixI(A_diag);
+  int *a_diag_j = hypre_CSRMatrixJ(A_diag);
+  double *a_diag_data = hypre_CSRMatrixData(A_diag);
+  int num_variables;
+  int num_cols_offd;
+  double *scale_ext;
+  double *buf_data;
+  int index; 
+ 
+#ifdef ESSL
+#else
+  char uplo = 'L';
+  int one = 1;
+#endif
+
+  int jj,i,j,k, j_loc; /*, j_loc, k_loc;*/
+
+
+  int matrix_size, matrix_size_counter = 0;
+
+  /* initiate:      ----------------------------------------------- */
+  num_variables = hypre_CSRMatrixNumRows(A_diag); 
+  num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
+  x_data = hypre_VectorData(hypre_ParVectorLocalVector(X));
+  vtemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Vtemp));
+
+  hypre_ParVectorCopy(F,Vtemp);
+  hypre_ParCSRMatrixMatvec(-1.0,A,X,1.0,Vtemp); 
+
+  /* forward solve: ----------------------------------------------- */
+
+  num_domains = hypre_CSRMatrixNumRows(domain_structure);
+  max_domain_size = hypre_CSRMatrixNumCols(domain_structure);
+  i_domain_dof = hypre_CSRMatrixI(domain_structure);
+  j_domain_dof = hypre_CSRMatrixJ(domain_structure);
+  domain_matrixinverse = hypre_CSRMatrixData(domain_structure);
+  aux = hypre_CTAlloc(double, max_domain_size);
+
+  buf_data = hypre_CTAlloc(double, send_map_starts[num_sends]);
+  x_ext_data = hypre_CTAlloc(double, num_cols_offd);
+  vtemp_ext_data = hypre_CTAlloc(double, num_cols_offd);
+  scale_ext = hypre_CTAlloc(double, num_cols_offd);
+
+  index = 0;
+  for (i=0; i < num_sends; i++)
+  {
+     for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
+        buf_data[index++] = vtemp_data[send_map_elmts[j]];
+  }
+
+  comm_handle = hypre_ParCSRCommHandleCreate(1,comm_pkg,buf_data,
+		vtemp_ext_data);
+  hypre_ParCSRCommHandleDestroy(comm_handle);
+  comm_handle = NULL;
+
+  index = 0;
+  for (i=0; i < num_sends; i++)
+  {
+     for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
+        buf_data[index++] = scale[send_map_elmts[j]];
+  }
+
+  comm_handle = hypre_ParCSRCommHandleCreate(1,comm_pkg,buf_data,scale_ext);
+  hypre_ParCSRCommHandleDestroy(comm_handle);
+  comm_handle = NULL;
+
+  matrix_size_counter = 0;
+  for (i=0; i < num_domains; i++)
+    {
+      matrix_size = i_domain_dof[i+1] - i_domain_dof[i];
+
+      /* copy data contiguously into aux  --------------------------- */
+
+      jj = 0;
+      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
+	{
+	  j_loc = j_domain_dof[j]; 
+	  if (j_loc < num_variables)
+	     aux[jj] = vtemp_data[j_loc];
+	  else
+	     aux[jj] = vtemp_ext_data[j_loc-num_variables];
+	  jj++;
+	}
+      /* solve for correction: ------------------------------------- */
+#ifdef ESSL
+	dpps(&domain_matrixinverse[matrix_size_counter], matrix_size, aux, 1);
+#else
+        /* dpotrs_(&uplo, &matrix_size, &one,  
+	&domain_matrixinverse[matrix_size_counter], &matrix_size, aux,
+	&matrix_size, &ierr); */
+        hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(&uplo, &matrix_size, &one, 
+	&domain_matrixinverse[matrix_size_counter], &matrix_size, aux,
+	&matrix_size, &ierr); 
+#endif
+      if (ierr) printf (" error in dpotrs !!!\n");
+      jj = 0;
+      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
+	{
+	   j_loc = j_domain_dof[j]; 
+	   if (j_loc < num_variables)
+	      x_data[j_loc]+= scale[j_loc] * aux[jj++];
+	   else
+	   {
+	      j_loc -= num_variables;
+	      x_ext_data[j_loc] += scale_ext[j_loc] * aux[jj++];
+	   }
+	}
+#ifdef ESSL
+      matrix_size_counter += matrix_size * (matrix_size+1)/2;  
+#else
+      matrix_size_counter += matrix_size * matrix_size;
+#endif
+
+    }
+
+  comm_handle = hypre_ParCSRCommHandleCreate (2,comm_pkg,x_ext_data,buf_data); 
+
+  hypre_ParCSRCommHandleDestroy(comm_handle);
+  comm_handle = NULL;
+
+  index = 0;
+  for (i=0; i < num_sends; i++)
+  {
+     for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
+	x_data[send_map_elmts[j]] += buf_data[index++];
+  }
+
+  hypre_ParVectorCopy(F,Vtemp);
+  hypre_ParCSRMatrixMatvec(-1.0,A,X,1.0,Vtemp);
+
+  for (i=0; i < num_cols_offd; i++)
+     x_ext_data[i] = 0.0;
+
+  index = 0;
+  for (i=0; i < num_sends; i++)
+  {
+     for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
+        buf_data[index++] = vtemp_data[send_map_elmts[j]];
+  }
+
+  comm_handle = hypre_ParCSRCommHandleCreate(1,comm_pkg,buf_data,
+		vtemp_ext_data);
+  hypre_ParCSRCommHandleDestroy(comm_handle);
+  comm_handle = NULL;
+
+  /* backward solve: ------------------------------------------------ */
+    for (i=num_domains-1; i > -1; i--)
+    {
+      matrix_size = i_domain_dof[i+1] - i_domain_dof[i];
+#ifdef ESSL
+      matrix_size_counter -= matrix_size * (matrix_size+1)/2;  
+#else
+      matrix_size_counter -= matrix_size * matrix_size;
+#endif
+ 
+      /* compute residual: ---------------------------------------- */
+      jj = 0;
+      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
+	{
+	  j_loc = j_domain_dof[j]; 
+	  if (j_loc < num_variables)
+	     aux[jj] = vtemp_data[j_loc];
+	  else
+	     aux[jj] = vtemp_ext_data[j_loc-num_variables];
+	  jj++;
+	}
+
+      /* solve for correction: ------------------------------------- */
+#ifdef ESSL
+	dpps(&domain_matrixinverse[matrix_size_counter], matrix_size, aux, 1);
+#else
+        /* dpotrs_(&uplo, &matrix_size, &one,  
+	&domain_matrixinverse[matrix_size_counter], &matrix_size, aux,
+	&matrix_size, &ierr); */
+        hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(&uplo, &matrix_size, &one, 
+	&domain_matrixinverse[matrix_size_counter], &matrix_size, aux,
+	&matrix_size, &ierr); 
+#endif
+      if (ierr) printf (" error in dpotrs !!!\n");
+      jj = 0;
+      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
+	{
+	   j_loc = j_domain_dof[j];
+	   if (j_loc < num_variables)
+	      x_data[j_loc]+= scale[j_loc] * aux[jj++];
+	   else
+	   {
+	      j_loc -= num_variables;
+	      x_ext_data[j_loc] += scale_ext[j_loc] * aux[jj++];
+	   }
+	}
+    }			      
+
+  comm_handle = hypre_ParCSRCommHandleCreate (2,comm_pkg,x_ext_data,buf_data); 
+
+  hypre_ParCSRCommHandleDestroy(comm_handle);
+  comm_handle = NULL;
+
+  index = 0;
+  for (i=0; i < num_sends; i++)
+  {
+     for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
+	x_data[send_map_elmts[j]] += buf_data[index++];
+  }
+
+  hypre_TFree(buf_data);
+  hypre_TFree(x_ext_data);
+  hypre_TFree(vtemp_ext_data);
+  hypre_TFree(scale_ext);
+  hypre_TFree(aux);
+
+  return ierr;
+
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParAMGCreateDomainDof:  
+ *--------------------------------------------------------------------------*/
+
+/*****************************************************************************
+ *
+ * Routine for constructing graph domain_dof with minimal overlap
+ *             and computing the respective matrix inverses to be
+ *             used in an overlapping additive Schwarz procedure (smoother
+ *             in AMG); 
+ *
+ *****************************************************************************/
+int
+hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
+                         int domain_type, int overlap,
+                         int num_functions, int *dof_func,
+			 hypre_CSRMatrix     **domain_structure_pointer)
+
+{
+  MPI_Comm comm = hypre_ParCSRMatrixComm(A);
+  hypre_CSRMatrix *domain_structure;
+  int *i_domain_dof, *j_domain_dof;
+  double *domain_matrixinverse;
+  int num_domains;
+  double *scale;
+  double *scale_int;
+  double *scale_ext;
+
+  hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+  int *a_diag_i = hypre_CSRMatrixI(A_diag);
+  int *a_diag_j = hypre_CSRMatrixJ(A_diag);
+  double *a_diag_data = hypre_CSRMatrixData(A_diag);
+  int num_variables = hypre_CSRMatrixNumRows(A_diag);
+  int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
+  int col_0 = first_col_diag -1 ;
+  int col_n = first_col_diag + num_variables;
+
+  hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+  int *a_offd_i = hypre_CSRMatrixI(A_offd);
+  int *a_offd_j = hypre_CSRMatrixJ(A_offd);
+  double *a_offd_data = hypre_CSRMatrixData(A_offd);
+  int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+  int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+
+  hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+  int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+  int *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+  int *send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+
+  hypre_ParCSRCommHandle *comm_handle;
+
+  hypre_CSRMatrix *A_ext;
+  int *a_ext_i;
+  int *a_ext_j;
+  double *a_ext_data;
+
+  /* int *i_dof_to_accept_weight; */
+  int *i_dof_to_prefer_weight,
+    *w_dof_dof, *i_dof_weight;
+  int *i_dof_to_aggregate, *i_aggregate_dof, *j_aggregate_dof;
+  
+  int *i_dof_index;
+  int *i_dof_index_offd;
+  int *i_proc;
+
+  int ierr = 0;
+  int i,j,k, jj,  l_loc, i_loc, j_loc;
+  int i_dof;
+  int nf;
+  int *i_local_to_global;
+  int *i_global_to_local;
+
+  int local_dof_counter, max_local_dof_counter=0; 
+
+  int domain_dof_counter = 0, domain_matrixinverse_counter = 0;
+
+
+  double *AE;
+
+#ifdef ESSL
+#else
+  char uplo = 'L';
+#endif
+
+  int cnt;
+  int index, start;
+
+  /* --------------------------------------------------------------------- */
+
+  /*=======================================================================*/
+  /*    create artificial domains by agglomeration;                        */
+  /*=======================================================================*/
+
+  printf("----------- create artificials domain by agglomeration;  ======\n");
+
+  i_aggregate_dof = hypre_CTAlloc(int,num_variables+1);
+  j_aggregate_dof = hypre_CTAlloc (int,num_variables);
+
+  if (domain_type == 2)
+  {
+     i_dof_to_prefer_weight = hypre_CTAlloc (int, num_variables);
+     w_dof_dof = hypre_CTAlloc (int, a_diag_i[num_variables]);
+
+     for (i=0; i<num_variables; i++)
+        for (j=a_diag_i[i]; j< a_diag_i[i+1]; j++)
+        {
+	   if (a_diag_j[j] == i) 
+	      w_dof_dof[j]=0;
+	   else
+	      w_dof_dof[j]=1;
+        }
+
+
+     printf("end computing weights for agglomeration procedure: --------\n");
+
+
+     i_dof_weight = hypre_CTAlloc (int, num_variables);
+     ierr = hypre_AMGeAgglomerate(i_aggregate_dof, j_aggregate_dof,
+			       a_diag_i, a_diag_j, w_dof_dof,
+			       a_diag_i, a_diag_j,
+			       a_diag_i, a_diag_j,
+			       i_dof_to_prefer_weight,
+			       i_dof_weight,
+			       num_variables, num_variables,
+			       &num_domains);
+
+     hypre_TFree(i_dof_to_prefer_weight);
+     hypre_TFree(i_dof_weight);
+     hypre_TFree(w_dof_dof);
+
+  }
+  else
+  {
+     nf = 1;
+     if (domain_type == 1) nf = num_functions;
+
+     num_domains = num_variables/nf;
+     for (i=0; i < num_domains+1; i++)
+     {
+        i_aggregate_dof[i] = nf*i;
+     }
+     for (i=0; i < num_variables; i++)
+     {
+        j_aggregate_dof[i] = i;
+     }
+  }
+  printf("num_variables: %d, num_domains: %d\n", num_variables, num_domains);
+
+  if (overlap == 1)
+  {
+     i_domain_dof = hypre_CTAlloc(int, num_domains+1);
+
+     i_dof_to_aggregate = hypre_CTAlloc (int, num_variables);
+     for (i=0; i < num_domains; i++)
+        for (j=i_aggregate_dof[i]; j < i_aggregate_dof[i+1]; j++)
+           i_dof_to_aggregate[j_aggregate_dof[j]] = i;
+
+     i_proc = hypre_CTAlloc (int, num_cols_offd);
+     for (i=0; i < num_cols_offd; i++)
+        if (col_map_offd[i] > (num_variables + col_0))
+           i_proc[i] = num_variables;
+        else
+           i_proc[i] = -1;
+
+     /* make domains from aggregates: *********************************/
+
+     i_dof_index = hypre_CTAlloc (int, num_variables);
+
+     i_dof_index_offd = hypre_CTAlloc (int, num_cols_offd);
+
+     for (i=0; i < num_variables; i++)
+        i_dof_index[i] = -1;
+
+     for (i=0; i < num_cols_offd; i++)
+        i_dof_index_offd[i] = -1;
+
+     domain_dof_counter=0;
+     for (i=0; i < num_domains; i++)
+     {
+        i_domain_dof[i] =  domain_dof_counter;
+        for (j=i_aggregate_dof[i]; j < i_aggregate_dof[i+1]; j++)
+        {
+           for (k=a_diag_i[j_aggregate_dof[j]];
+	          	k<a_diag_i[j_aggregate_dof[j]+1]; k++)
+	   if (i_dof_to_aggregate[a_diag_j[k]] >= i 
+	     && i_dof_index[a_diag_j[k]]==-1)
+	   {
+	      i_dof_index[a_diag_j[k]]++;
+	      domain_dof_counter++;
+	   }
+           for (k=a_offd_i[j_aggregate_dof[j]];
+	    		k<a_offd_i[j_aggregate_dof[j]+1]; k++)
+	   if (i_proc[a_offd_j[k]] >= i 
+	     	&& i_dof_index_offd[a_offd_j[k]]==-1)
+	   {
+	      i_dof_index_offd[a_offd_j[k]]++;
+	      domain_dof_counter++;
+	   }
+        }
+        for (j=i_aggregate_dof[i]; j < i_aggregate_dof[i+1]; j++)
+        {
+           for (k=a_diag_i[j_aggregate_dof[j]];
+	    		k<a_diag_i[j_aggregate_dof[j]+1]; k++)
+	      i_dof_index[a_diag_j[k]]=-1;
+           for (k=a_offd_i[j_aggregate_dof[j]];
+	    		k<a_offd_i[j_aggregate_dof[j]+1]; k++)
+	      i_dof_index_offd[a_offd_j[k]]=-1;
+     	}
+
+     }
+
+     i_domain_dof[num_domains] =  domain_dof_counter;
+     j_domain_dof = hypre_CTAlloc (int, domain_dof_counter);
+
+     domain_dof_counter=0;
+     for (i=0; i < num_domains; i++)
+     {
+        for (j=i_aggregate_dof[i]; j < i_aggregate_dof[i+1]; j++)
+        {
+	   for (k=a_diag_i[j_aggregate_dof[j]];
+	     		k<a_diag_i[j_aggregate_dof[j]+1]; k++)
+	      if (i_dof_to_aggregate[a_diag_j[k]] >= i
+	      		&& i_dof_index[a_diag_j[k]]==-1)
+	      {
+	         i_dof_index[a_diag_j[k]]++;
+	         j_domain_dof[domain_dof_counter] = a_diag_j[k];
+	         domain_dof_counter++;
+	      }
+	   for (k=a_offd_i[j_aggregate_dof[j]];
+	     		k<a_offd_i[j_aggregate_dof[j]+1]; k++)
+	      if (i_proc[a_offd_j[k]] >= i
+	      		&& i_dof_index_offd[a_offd_j[k]]==-1)
+	      {
+	         i_dof_index_offd[a_offd_j[k]]++;
+	         j_domain_dof[domain_dof_counter] = a_offd_j[k]+num_variables;
+	         domain_dof_counter++;
+	      }
+         }
+
+         for (j=i_aggregate_dof[i]; j < i_aggregate_dof[i+1]; j++)
+         {
+	    for (k=a_diag_i[j_aggregate_dof[j]];
+	     	k<a_diag_i[j_aggregate_dof[j]+1]; k++)
+	    i_dof_index[a_diag_j[k]]=-1;
+	    for (k=a_offd_i[j_aggregate_dof[j]];
+	     	k<a_offd_i[j_aggregate_dof[j]+1]; k++)
+	       i_dof_index_offd[a_offd_j[k]]=-1;
+         }
+
+     }
+
+     free(i_aggregate_dof);
+     free(j_aggregate_dof);
+     free(i_dof_to_aggregate);
+     hypre_TFree(i_dof_index);
+     hypre_TFree(i_dof_index_offd);
+  }
+  else if (overlap == 2)
+  {
+     i_domain_dof = hypre_CTAlloc(int, num_domains+1);
+
+     i_dof_to_aggregate = hypre_CTAlloc (int, num_variables);
+     for (i=0; i < num_domains; i++)
+        for (j=i_aggregate_dof[i]; j < i_aggregate_dof[i+1]; j++)
+           i_dof_to_aggregate[j_aggregate_dof[j]] = i;
+
+     i_proc = hypre_CTAlloc (int, num_cols_offd);
+     for (i=0; i < num_cols_offd; i++)
+        if (col_map_offd[i] > (num_variables + col_0))
+           i_proc[i] = num_variables;
+        else
+           i_proc[i] = -1;
+
+     /* make domains from aggregates: *********************************/
+
+     i_dof_index = hypre_CTAlloc (int, num_variables);
+
+     i_dof_index_offd = hypre_CTAlloc (int, num_cols_offd);
+
+     for (i=0; i < num_variables; i++)
+        i_dof_index[i] = -1;
+
+     for (i=0; i < num_cols_offd; i++)
+        i_dof_index_offd[i] = -1;
+
+     domain_dof_counter=0;
+     for (i=0; i < num_domains; i++)
+     {
+        i_domain_dof[i] =  domain_dof_counter;
+        for (j=i_aggregate_dof[i]; j < i_aggregate_dof[i+1]; j++)
+        {
+           for (k=a_diag_i[j_aggregate_dof[j]];
+	          	k<a_diag_i[j_aggregate_dof[j]+1]; k++)
+	      if ( i_dof_index[a_diag_j[k]]==-1)
+	      {
+	         i_dof_index[a_diag_j[k]]++;
+	         domain_dof_counter++;
+	      }
+           for (k=a_offd_i[j_aggregate_dof[j]];
+	    		k<a_offd_i[j_aggregate_dof[j]+1]; k++)
+	      if ( i_dof_index_offd[a_offd_j[k]]==-1)
+	      {
+	         i_dof_index_offd[a_offd_j[k]]++;
+	         domain_dof_counter++;
+	      }
+        }
+        for (j=i_aggregate_dof[i]; j < i_aggregate_dof[i+1]; j++)
+        {
+           for (k=a_diag_i[j_aggregate_dof[j]];
+	    		k<a_diag_i[j_aggregate_dof[j]+1]; k++)
+	      i_dof_index[a_diag_j[k]]=-1;
+           for (k=a_offd_i[j_aggregate_dof[j]];
+	    		k<a_offd_i[j_aggregate_dof[j]+1]; k++)
+	      i_dof_index_offd[a_offd_j[k]]=-1;
+     	}
+
+     }
+
+     i_domain_dof[num_domains] =  domain_dof_counter;
+     j_domain_dof = hypre_CTAlloc (int, domain_dof_counter);
+
+     domain_dof_counter=0;
+     for (i=0; i < num_domains; i++)
+     {
+        for (j=i_aggregate_dof[i]; j < i_aggregate_dof[i+1]; j++)
+        {
+	   for (k=a_diag_i[j_aggregate_dof[j]];
+	     		k<a_diag_i[j_aggregate_dof[j]+1]; k++)
+	      if ( i_dof_index[a_diag_j[k]]==-1)
+	      {
+	         i_dof_index[a_diag_j[k]]++;
+	         j_domain_dof[domain_dof_counter] = a_diag_j[k];
+	         domain_dof_counter++;
+	      }
+	   for (k=a_offd_i[j_aggregate_dof[j]];
+	     		k<a_offd_i[j_aggregate_dof[j]+1]; k++)
+	      if ( i_dof_index_offd[a_offd_j[k]]==-1)
+	      {
+	         i_dof_index_offd[a_offd_j[k]]++;
+	         j_domain_dof[domain_dof_counter] = a_offd_j[k]+num_variables;
+	         domain_dof_counter++;
+	      }
+         }
+
+         for (j=i_aggregate_dof[i]; j < i_aggregate_dof[i+1]; j++)
+         {
+	    for (k=a_diag_i[j_aggregate_dof[j]];
+	     	k<a_diag_i[j_aggregate_dof[j]+1]; k++)
+	    i_dof_index[a_diag_j[k]]=-1;
+	    for (k=a_offd_i[j_aggregate_dof[j]];
+	     	k<a_offd_i[j_aggregate_dof[j]+1]; k++)
+	       i_dof_index_offd[a_offd_j[k]]=-1;
+         }
+
+     }
+
+     hypre_TFree(i_aggregate_dof);
+     hypre_TFree(j_aggregate_dof);
+     hypre_TFree(i_dof_to_aggregate);
+     hypre_TFree(i_dof_index);
+     hypre_TFree(i_dof_index_offd);
+  }
+  else
+  {
+     i_domain_dof = i_aggregate_dof;
+     j_domain_dof = j_aggregate_dof;
+  }
+
+  printf("END domain_dof computations: =================================\n");
+
+  domain_matrixinverse_counter = 0;
+  local_dof_counter = 0;
+  
+  for (i=0; i < num_domains; i++)
+  {
+     local_dof_counter = i_domain_dof[i+1]-i_domain_dof[i];
+#ifdef ESSL
+      if (i == num_domains-1)
+       domain_matrixinverse_counter+= local_dof_counter*local_dof_counter;
+      else
+       domain_matrixinverse_counter+= local_dof_counter*(local_dof_counter+1)/2;
+#else
+      domain_matrixinverse_counter+= local_dof_counter * local_dof_counter;
+#endif
+
+      if (local_dof_counter > max_local_dof_counter)
+	max_local_dof_counter = local_dof_counter;
+    }
+
+  domain_matrixinverse = hypre_CTAlloc(double, domain_matrixinverse_counter);
+
+  A_ext = hypre_ParCSRMatrixExtractBExt(A,A,1);
+  a_ext_i = hypre_CSRMatrixI(A_ext);
+  a_ext_j = hypre_CSRMatrixJ(A_ext);
+  a_ext_data = hypre_CSRMatrixData(A_ext);
+
+  i_local_to_global = hypre_CTAlloc(int, max_local_dof_counter);
+
+  i_global_to_local = hypre_CTAlloc(int, num_variables+num_cols_offd);
+
+  for (i=0; i < num_variables+num_cols_offd; i++)
+    i_global_to_local[i] = -1;
+
+  domain_matrixinverse_counter = 0;
+  for (i=0; i < num_domains; i++)
+    {
+      local_dof_counter = 0;
+      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
+	{
+	  i_global_to_local[j_domain_dof[j]] = local_dof_counter;
+	  i_local_to_global[local_dof_counter] = j_domain_dof[j];
+	  local_dof_counter++;
+	}
+
+
+      /* get local matrix in AE: ======================================== */
+      AE = &domain_matrixinverse[domain_matrixinverse_counter];
+      cnt = 0;  
+      for (i_loc=0; i_loc < local_dof_counter; i_loc++)
+	for (j_loc=0; j_loc < local_dof_counter; j_loc++)
+	  AE[cnt++] = 0.e0;
+
+      
+
+      for (i_loc=0; i_loc < local_dof_counter; i_loc++)
+	{
+	  i_dof = i_local_to_global[i_loc];
+	  if (i_dof < num_variables)
+	  {
+	    for (j=a_diag_i[i_dof]; j < a_diag_i[i_dof+1]; j++)
+	    {
+	      j_loc = i_global_to_local[a_diag_j[j]];
+	      if (j_loc >=0)
+		AE[i_loc + j_loc * local_dof_counter] = a_diag_data[j];
+	    }
+	    for (j=a_offd_i[i_dof]; j < a_offd_i[i_dof+1]; j++)
+	    {
+	      j_loc = i_global_to_local[a_offd_j[j]+num_variables];
+	      if (j_loc >=0)
+		AE[i_loc + j_loc * local_dof_counter] = a_offd_data[j];
+	    }
+	  }
+	  else
+	  {
+	    i_dof -= num_variables;
+	    for (j=a_ext_i[i_dof]; j < a_ext_i[i_dof+1]; j++)
+	    {
+	      jj = a_ext_j[j];
+	      if (jj > col_0 && jj < col_n)
+	      {
+	         jj = jj - first_col_diag;
+	      }
+	      else
+	      {
+		 jj = hypre_BinarySearch(col_map_offd,jj,num_cols_offd);
+		 if (jj > -1) jj += num_variables;
+	      }
+	      if (jj > -1)
+	      {
+	         j_loc = i_global_to_local[jj];
+	         if (j_loc >=0)
+		    AE[i_loc + j_loc * local_dof_counter] = a_ext_data[j];
+	      }
+	    }
+	  }
+	}
+
+      /* get block for Schwarz smoother: ============================= */
+      /* ierr = matinv(XE, AE, local_dof_counter); */
+      /* printf("ierr_AE_inv: %d\n", ierr); */
+#ifdef ESSL
+ 	cnt = local_dof_counter;
+        for (j_loc=1; j_loc < local_dof_counter; j_loc++)
+	   for (i_loc=j_loc; i_loc < local_dof_counter; i_loc++)
+	      AE[cnt++] = AE[i_loc + j_loc * local_dof_counter];
+   	dppf(AE, local_dof_counter, 1);
+#else
+    	hypre_F90_NAME_BLAS(dpotrf,DPOTRF)(&uplo,&local_dof_counter, AE,
+		&local_dof_counter, &ierr);
+#endif	  
+
+#ifdef ESSL
+      domain_matrixinverse_counter+=local_dof_counter*(local_dof_counter+1)/2;
+#else
+      domain_matrixinverse_counter+=local_dof_counter*local_dof_counter;
+#endif
+
+      for (l_loc=0; l_loc < local_dof_counter; l_loc++)
+	i_global_to_local[i_local_to_global[l_loc]] = -1;
+	  
+    }
+
+  hypre_TFree(i_local_to_global);
+
+  domain_structure = hypre_CSRMatrixCreate(num_domains, max_local_dof_counter,
+			i_domain_dof[num_domains]);
+
+  hypre_CSRMatrixI(domain_structure) = i_domain_dof;
+  hypre_CSRMatrixJ(domain_structure) = j_domain_dof;
+  hypre_CSRMatrixData(domain_structure) = domain_matrixinverse;
+
+  *domain_structure_pointer = domain_structure;
+
+  return ierr;
+
+}
+int
+hypre_ParGenerateScale(hypre_ParCSRMatrix *A,
+		    hypre_CSRMatrix *domain_structure,
+                    double           relaxation_weight,
+                    double         **scale_pointer)
+{
+   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
+   int num_domains = hypre_CSRMatrixNumRows(domain_structure);
+   int *i_domain_dof = hypre_CSRMatrixI(domain_structure);
+   int *j_domain_dof = hypre_CSRMatrixJ(domain_structure);
+   int i, j, ierr = 0;
+   double *scale;
+   double *scale_ext;
+   double *scale_int;
+
+   hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   int *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+   int *send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+
+   int num_variables = hypre_ParCSRMatrixNumRows(A);
+   int num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
+   int j_loc, index, start;
+  
+   hypre_ParCSRCommHandle *comm_handle;
+
+   scale = hypre_CTAlloc(double, num_variables);
+   scale_ext = hypre_CTAlloc(double,num_cols_offd);
+
+   for (i=0; i < num_domains; i++)
+   {  
+      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
+      {
+	 j_loc = j_domain_dof[j];
+	 if (j_loc < num_variables)
+	    scale[j_loc] += 1.0;
+	 else
+	    scale_ext[j_loc-num_variables] += 1.0;
+      }
+   }
+
+   scale_int = hypre_CTAlloc(double, send_map_starts[num_sends]);
+   comm_handle = hypre_ParCSRCommHandleCreate (2,comm_pkg,scale_ext,scale_int); 
+
+   hypre_ParCSRCommHandleDestroy(comm_handle);
+   comm_handle = NULL;
+
+   index = 0;
+   for (i=0; i < num_sends; i++)
+   {
+      start = send_map_starts[i];
+      for (j=start; j < send_map_starts[i+1]; j++)
+	 scale[send_map_elmts[j]] += scale_int[index++];
+   }
+
+   hypre_TFree(scale_int);
+   hypre_TFree(scale_ext);
+
+   for (i=0; i < num_variables; i++)
+      scale[i] = relaxation_weight/scale[i];
+
+   *scale_pointer = scale;
+
+   return ierr;
+}
+
