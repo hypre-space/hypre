@@ -14,6 +14,7 @@
  * History:     Modified from lapack routines DGECON.
  */
 #include <math.h>
+#include "fortran.h"
 #include "dsp_defs.h"
 #include "superlu_util.h"
 

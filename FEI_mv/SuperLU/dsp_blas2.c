@@ -14,6 +14,7 @@
  * Purpose:		Sparse BLAS 2, using some dense BLAS 2 operations.
  */
 
+#include "fortran.h"
 #include "dsp_defs.h"
 #include "superlu_util.h"
 

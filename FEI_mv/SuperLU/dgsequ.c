@@ -14,6 +14,7 @@
  * History:     Modified from LAPACK routine DGEEQU
  */
 #include <math.h>
+#include "fortran.h"
 #include "dsp_defs.h"
 #include "superlu_util.h"
 

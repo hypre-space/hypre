@@ -27,6 +27,7 @@ CFLAGS =\
  -I../..\
  -I$(srcdir)\
  -I$(srcdir)/../..\
+ -I$(srcdir)/../../utilities\
  ${C_COMPILE_FLAGS}\
  ${C_SUPERLU_FLAGS}\
  ${CINCLUDES}

@@ -6,8 +6,11 @@
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
+ * Changes made to this file corresponding to calls to blas/lapack functions
+ * in Nov 2003 at LLNL
  */
 #include <math.h>
+#include "fortran.h"
 #include "Cnames.h"
 
 int
