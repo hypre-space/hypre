@@ -95,7 +95,7 @@ veryclean: clean
 
 libHYPRE_IJ_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} -rcu $@ ${OBJS}
 	${RANLIB} $@
 
 driver: driver.o libHYPRE_IJ_mv.a

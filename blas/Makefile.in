@@ -80,7 +80,7 @@ veryclean: clean
 
 libHYPRE_blas.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} -rcu $@ ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}

@@ -91,7 +91,7 @@ veryclean: clean
 
 libHYPRE_seq_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} -rcu $@ ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}

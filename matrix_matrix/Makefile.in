@@ -77,7 +77,7 @@ RANLIB = @RANLIB@
 
 lib: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -rcu libHYPRE_MatrixMatrix.a ${OBJS}
+	@${AR} -rcu libHYPRE_MatrixMatrix.a ${OBJS}
 	${RANLIB} libHYPRE_MatrixMatrix.a
 
 ${OBJS}: ${HEADERS}

@@ -156,10 +156,10 @@ all:
 	make fe;
 
 src fe: $(FEI_OBJS)
-	ar rs $(PLIB) $(FEI_OBJS)
+	${AR} rs $(PLIB) $(FEI_OBJS)
 
 other: $(OTHER_OBJ)
-	ar rs $(PLIB) $(OTHER_OBJ)
+	${AR} rs $(PLIB) $(OTHER_OBJ)
 
 drivers driver fei-drivers:
 	cd fei-drivers; make FEI_ROOT="$(FEI_ROOT)";

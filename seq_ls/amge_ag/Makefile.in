@@ -116,7 +116,7 @@ driver: driver_amge_ag_Schwarz.o libHYPRE_amge_ls.a
 
 libHYPRE_amge_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} -rcu $@ ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}

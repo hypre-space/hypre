@@ -84,7 +84,7 @@ UTILITIES_OBJS = ${UTILITIES_FILES:.c=.o}
  
 libHYPRE_utilities.a: ${UTILITIES_OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${UTILITIES_OBJS}
+	${AR} -rcu $@ ${UTILITIES_OBJS}
 	${RANLIB} $@
 
 ${UTILITIES_OBJS}: ${UTILITIES_HEADERS}

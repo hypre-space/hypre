@@ -93,7 +93,7 @@ RANLIB = @RANLIB@
 
 libHYPRE_DistributedMatrixPilutSolver.a: ${PROTOS} ${OBJS}
 	@echo "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} -rcu $@ ${OBJS}
 	@RANLIB@ $@
 
 ##################################################################

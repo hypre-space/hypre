@@ -186,7 +186,7 @@ driver: driver.o libHYPRE_parcsr_ls.a
 
 libHYPRE_parcsr_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} -rcu $@ ${OBJS}
 	@RANLIB@ $@
  
 ${OBJS}: ${HEADERS}

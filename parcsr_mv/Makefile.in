@@ -146,7 +146,7 @@ veryclean: clean
 
 libHYPRE_parcsr_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} -rcu $@ ${OBJS}
 	@RANLIB@ $@
 
 ${OBJS}: ${HEADERS}

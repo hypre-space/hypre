@@ -43,7 +43,7 @@ veryclean: clean
 
 libHYPRE_mli.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} -rcu $@ ${OBJS}
 	${RANLIB} $@
 	@cp -f libHYPRE_mli.a $$HYPRE_INSTALL_DIR/lib
  

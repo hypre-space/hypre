@@ -124,7 +124,7 @@ veryclean: clean
 
 libHYPRE_Euclid.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} -rcu $@ ${OBJS}
 	${RANLIB} $@
 
 

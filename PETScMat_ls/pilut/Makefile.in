@@ -84,7 +84,7 @@ link:
 
 lib: ${PROTOS} ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru lib_HYPRE_PETScMatPilutSolver.a ${OBJS}
+	@${AR} -ru lib_HYPRE_PETScMatPilutSolver.a ${OBJS}
 	@ranlib lib_HYPRE_PETScMatPilutSolver.a 
 
 

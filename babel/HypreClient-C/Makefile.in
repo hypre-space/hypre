@@ -36,7 +36,7 @@ OBJS = ${FILES:.c=.o}
 
 libHypreBabelClient-C.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} -rcu $@ ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}

@@ -78,7 +78,7 @@ link:
 
 lib: ${PROTOS} ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru lib_HYPRE_PETScSolverParILUT.a ${OBJS}
+	@${AR} -ru lib_HYPRE_PETScSolverParILUT.a ${OBJS}
 	@ranlib lib_HYPR_EPETScSolverParILUT.a 
 
 

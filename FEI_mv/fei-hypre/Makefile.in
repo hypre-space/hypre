@@ -130,7 +130,7 @@ driver: driver.o libHYPRE_FEI.a
 
 libHYPRE_FEI.a: ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -rcu libHYPRE_FEI.a ${OBJS}
+	@${AR} -rcu libHYPRE_FEI.a ${OBJS}
 	${RANLIB} $@
 
 ##################################################################
