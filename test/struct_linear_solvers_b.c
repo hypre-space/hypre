@@ -13,6 +13,7 @@
 #include "Hypre_StructVector.h"
 #include "Hypre_MPI_Com.h"
 #include "Hypre_StructJacobi.h"
+#include "Hypre_Solver.h"
 
 #ifdef HYPRE_DEBUG
 #include <cegdb.h>
@@ -319,6 +320,9 @@ main( int   argc,
    /*-----------------------------------------------------------
     * Set up periodic flags and set istart = 0 for periodic dims
     *-----------------------------------------------------------*/
+
+   time_index = hypre_InitializeTiming("Struct Interface");
+   hypre_BeginTiming(time_index);
 
    periodic[0] = px;
    periodic[1] = py;
@@ -680,6 +684,11 @@ main( int   argc,
  
    hypre_TFree(values);
 
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Struct Interface", MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+
 
 /* JfP: temporarily, call Jacobi iteration, using as a model the
    code which calls multigrid ... */
@@ -694,7 +703,7 @@ main( int   argc,
       Hypre_StructJacobi_SetParameter( solver_SJ, "tol", 1.0e-4 );
       Hypre_StructJacobi_SetParameter( solver_SJ, "max_iter", 500 );
 
-      Hypre_StructJacobi_Setup( solver_SJ, A, b, x, comm );
+      Hypre_StructJacobi_Setup( solver_SJ, A, b, x );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -720,10 +729,14 @@ main( int   argc,
    */
 /* 27jan2000: this doesn't work with my old version of Babel, supposedly
    fixed in the new version */
+/* 3feb2000: Babel 0.3.0, this still doesn't work: the CastTo function
+   returns solver==0 */
       solver = (Hypre_Solver) Hypre_StructJacobi_CastTo( solver_SJ,
                                                          "Hypre_Solver" );
+/*
       mat_test = Hypre_Solver_GetSystemOperator(solver);
       Hypre_StructMatrix_print(mat_test);
+      */
 
       Hypre_StructJacobi_destructor( solver_SJ );
    }
