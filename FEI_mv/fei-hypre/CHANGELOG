@@ -57,4 +57,7 @@
 06/25/01    2.0.1R1
             - change to the new IJ interface
             - add timings for non-MPI version
+07/17/01    2.0.1R2
+            - improve the projection methods 
+            - add amgMaxIter 
  

@@ -123,6 +123,10 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   HYbs_(NULL),
                   HYx_(NULL),
                   HYr_(NULL),
+                  currA_(NULL),
+                  currB_(NULL),
+                  currX_(NULL),
+                  currR_(NULL),
                   reducedA_(NULL),
                   reducedB_(NULL),
                   reducedX_(NULL),
@@ -201,6 +205,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     amgCoarsenType_     = 0;    // default coarsening
     amgMeasureType_     = 0;    // local measure
     amgSystemSize_      = 1;    // system size
+    amgMaxIter_         = 1;    // number of iterations
     amgNumSweeps_[0]    = 1;    // no. of sweeps for fine grid
     amgNumSweeps_[1]    = 1;    // no. of presmoothing sweeps 
     amgNumSweeps_[2]    = 1;    // no. of postsmoothing sweeps 
@@ -299,19 +304,11 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
     }
     if ( HYpxs_ != NULL ) 
     {
-       for ( i = 0; i < projectSize_; i++ ) 
+       for ( i = 0; i <= projectSize_; i++ ) 
           if ( HYpxs_[i] != NULL ) HYPRE_IJVectorDestroy(HYpxs_[i]);
        delete [] HYpxs_;
        HYpxs_ = NULL;
     }
-    if ( projectionMatrix_ != NULL ) 
-    {
-       for ( i = 0; i < projectSize_; i++ ) 
-          if ( projectionMatrix_[i] != NULL ) delete [] projectionMatrix_[i];
-       delete [] projectionMatrix_;
-       projectionMatrix_ = NULL;
-    }
- 
     if (reducedA_ != NULL) {HYPRE_IJMatrixDestroy(reducedA_); reducedA_ = NULL;}
     if (reducedB_ != NULL) {HYPRE_IJVectorDestroy(reducedB_); reducedB_ = NULL;}
     if (reducedX_ != NULL) {HYPRE_IJVectorDestroy(reducedX_); reducedX_ = NULL;}
@@ -1425,7 +1422,7 @@ int HYPRE_LinSysCore::getMatrixRowLength(int row, int& length)
       //--old_IJ--------------------------------------------------------------
       // A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
       //--new_IJ--------------------------------------------------------------
-       HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
+      HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
       //----------------------------------------------------------------------
        HYPRE_ParCSRMatrixGetRow(A_csr,row,&rowLeng,&colInd,&colVal);
        length = rowLeng;

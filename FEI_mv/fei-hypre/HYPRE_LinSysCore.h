@@ -5,7 +5,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R1"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R2"
 
 // *************************************************************************
 // system libraries used
@@ -533,6 +533,7 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
    int             amgCoarsenType_;
+   int             amgMaxIter_;
    int             amgMeasureType_;
    int             amgNumSweeps_[4];
    int             amgRelaxType_[4];
