@@ -1,269 +1,316 @@
-#ifndef __FEI_Implementation_H
-#define __FEI_Implementation_H
+#ifndef _FEI_Implementation_h_
+#define _FEI_Implementation_h_
 
-//required headers:
-//
-//#include "base/fei_base.h"
-//
+/**
+This is the (C++) user's point of interaction with the FEI implementation. The
+user will declare an instance of this class in their code, and call the public
+FEI functions on that instance. The functions implemented by this class are
+those in the abstract FEI declaration, plus possibly others. i.e., the functions
+provided by this class are a superset of those in the FEI specification.
+ */
 
 class FEI_Implementation : public FEI {
 
-  public:
-    //Constructor
-    FEI_Implementation(LinearSystemCore* linSysCore, MPI_Comm comm,
-                       int masterRank=0);
+ public:
+  /** Constructor.
+      @param lsMgr an instance of an ESI_LSManager. (LSC_LSMgr can be used here,
+      it is a wrapper for the old LinearSystemCore.)
+      @param comm MPI_Comm communicator
+      @param masterRank The "master" mpi rank. Defaults to 0 if not supplied.
+      This is not an important parameter, simply determining which processor
+      will produce screen output if the parameter "outputLevel" is set to a
+      value greater than 0 via a call to the parameters function.
+  */
+   FEI_Implementation(ESI_LSManager* lsMgr, MPI_Comm comm,
+                      int masterRank=0);
 
-    //Destructor
-    virtual ~FEI_Implementation();
+   /** Destructor. */
+   virtual ~FEI_Implementation();
 
 //public FEI functions:
 
-    // set misc. argc/argv style parameters for solver choice, etc.
-    void parameters(int numParams, char **paramStrings);
+   // set misc. argc/argv style parameters for solver choice, etc.
+   int parameters(int numParams, char **paramStrings);
 
-//Structural initialization sequence.............................
+//Structural initialization functions.............................
 
-    //direct data to a specific internal data structure
-    //i.e., set the current matrix 'context'.
-    int setMatrixID(int index);
+   int setIDLists(int numMatrices,
+                  const int* matrixIDs,
+                  int numRHSs,
+                  const int* rhsIDs);
 
-    //direct data to a specific internal data structure
-    //i.e., set the current RHS 'context'.
-    int setRHSID(int index);
+   int setSolveType(int solveType);
 
-    // per-solve-step initialization
-    int initSolveStep(int numElemBlocks, 
-                      int solveType);    
+   // identify all the solution fields present in the analysis
+   int initFields(int numFields, 
+                  const int *fieldSizes, 
+                  const int *fieldIDs);
 
-    // per-solve-step initialization
-    int initSolveStep(int numElemBlocks,
-                      int solveType,
-                      int numMatrices,
-                      int* matrixIDs,
-                      int* numRHSs,
-                      int** rhsIDs);
+   int initElemBlock(GlobalID elemBlockID,
+                     int numElements,
+                     int numNodesPerElement,
+                     const int* numFieldsPerNode,
+                     const int* const* nodalFieldIDs,
+                     int numElemDOFPerElement,
+                     const int* elemDOFFieldIDs,
+                     int interleaveStrategy);
 
-    // identify all the solution fields present in the analysis
-    int initFields(int numFields, 
-                   const int *cardFields, 
-                   const int *fieldIDs);
+   int initElem(GlobalID elemBlockID,
+                GlobalID elemID,
+                const GlobalID* elemConn);
 
-    // begin blocked-element initialization step..................
-    int beginInitElemBlock(GlobalID elemBlockID,  
-                           int numNodesPerElement, 
-                           const int *numElemFields,
-                           const int *const *elemFieldIDs,
-                           int interleaveStrategy,
-                           int lumpingStrategy,
-                           int numElemDOF, 
-                           int numElemSets,
-                           int numElemTotal);                                    
-    // initialize element sets that make up the blocks
-    int initElemSet(int numElems, 
-                    const GlobalID *elemIDs, 
-                    const GlobalID *const *elemConn); 
+   // identify sets of shared nodes
+   int initSharedNodes(int numSharedNodes,
+                       const GlobalID *sharedNodeIDs,  
+                       const int* numProcsPerNode, 
+                       const int *const *sharingProcIDs);
 
-    // end blocked-element initialization
-    int endInitElemBlock();
+   int initCRMult(int numCRNodes,
+                  const GlobalID* CRNodes,
+                  const int *CRFields,
+                  int& CRID); 
 
-    // begin node set initialization phase........................
-    int beginInitNodeSets(int numSharedNodeSets, 
-                          int numExtNodeSets);
+   int initCRPen(int numCRNodes,
+                 const GlobalID* CRNodes, 
+                 const int *CRFields,
+                 int& CRID); 
 
-    // identify sets of shared nodes
-    int initSharedNodeSet(const GlobalID *sharedNodeIDs,  
-                          int lenSharedNodeIDs, 
-                          const int *const *sharedProcIDs, 
-                          const int *lenSharedProcIDs);
+   int initCoefAccessPattern(int patternID,
+                             int numRowIDs,
+                             const int* numFieldsPerRow,
+                             const int* const* rowFieldIDs,
+                             int numColIDsPerRow,
+                             const int* numFieldsPerCol,
+                             const int* const* colFieldIDs,
+                             int interleaveStrategy);
 
-    // identify sets of external (off-proc) nodes requiring communication
-    int initExtNodeSet(const GlobalID *extNodeIDs,  
-                       int lenExtNodeIDs, 
-                       const int *const *extProcIDs, 
-                       const int *lenExtProcIDs);
+   int initCoefAccess(int patternID,
+		      const int* rowIDTypes,
+                      const GlobalID* rowIDs,
+		      const int* colIDTypes,
+                      const GlobalID* colIDs);
 
-    // end node set initialization
-    int endInitNodeSets();
+   int initSubstructure(int substructureID,
+                        int numIDs,
+			const int* IDTypes,
+                        const GlobalID* IDs);
 
-    // begin constraint relation initialization phase.........
-    int beginInitCREqns(int numCRMultSets, 
-                        int numCRPenSets);
-
-    // constraint relation initialization
-    // - lagrange multiplier formulation
-    int initCRMult(const GlobalID *const *CRNodeTable,
-                   const int *CRFieldList,
-                   int numMultCRs, 
-                   int lenCRNodeList,
-                   int& CRMultID); 
-
-    // constraint relation initialization
-    // - penalty function formulation
-    int initCRPen(const GlobalID *const *CRNodeTable, 
-                  const int *CRFieldList,
-                  int numPenCRs, 
-                  int lenCRNodeList,
-                  int& CRPenID); 
-
-    // end constraint relation list initialization
-    int endInitCREqns();
-
-    // indicate that overall initialization sequence is complete
-    int initComplete();
+   // indicate that overall initialization sequence is complete
+   int initComplete();
 
 // FEI data loading sequence..........................................
 
-    // set a value (usually zeros) throughout the linear system
-    int resetSystem(double s);
+   //direct data to a specific internal data structure
+   //i.e., set the current matrix 'context'.
+   int setCurrentMatrix(int matID);
 
-    // set a value (usually zeros) throughout the matrix or rhs-vector
-    // separately
-    int resetMatrix(double s);
-    int resetRHSVector(double s);
+   //direct data to a specific internal data structure
+   //i.e., set the current RHS 'context'.
+   int setCurrentRHS(int rhsID);
 
-    // begin node-set data load step.............................
-    int beginLoadNodeSets(int numBCNodeSets);
+   // set a value (usually zeros) throughout the linear system
+   int resetSystem(double s=0.0);
 
-    // boundary condition data load step
-    int loadBCSet(const GlobalID *BCNodeSet,  
-                  int lenBCNodeSet,  
-                  int BCFieldID,
-                  const double *const *alphaBCDataTable,  
-                  const double *const *betaBCDataTable,  
-                  const double *const *gammaBCDataTable);
+   // set a value (usually zeros) throughout the matrix or rhs-vector
+   // separately
+   int resetMatrix(double s=0.0);
+   int resetRHSVector(double s=0.0);
 
-    // end node-set data load step
-    int endLoadNodeSets();
+    int loadNodeBCs(int numNodes,
+                    const GlobalID *nodeIDs,  
+                    int fieldID,
+                    const double *const *alpha,  
+                    const double *const *beta,  
+                    const double *const *gamma);
 
-    // begin blocked-element data loading step....................
-    int beginLoadElemBlock(GlobalID elemBlockID,
-                                   int numElemSets,
-                                   int numElemTotal);
+    int loadElemBCs(int numElems,
+                    const GlobalID* elemIDs,  
+                    int fieldID,
+                    const double *const *alpha,  
+                    const double *const *beta,  
+                    const double *const *gamma);
 
-    // elemSet-based stiffness/rhs data loading step
-    int loadElemSet(int elemSetID, 
-                    int numElems, 
-                    const GlobalID *elemIDs,  
-                    const GlobalID *const *elemConn,
-                    const double *const *const *elemStiffness,
-                    const double *const *elemLoad,
-                    int elemFormat);
+   int sumInElem(GlobalID elemBlockID,
+                 GlobalID elemID,
+                 const GlobalID* elemConn,
+                 const double* const* elemStiffness,
+                 const double* elemLoad,
+                 int elemFormat);
 
-    // elemSet-based stiffness matrix data loading step
-    int loadElemSetMatrix(int elemSetID,
-                          int numElems,
-                          const GlobalID *elemIDs,
-                          const GlobalID *const *elemConn,
-                          const double *const *const *elemStiffness,
-                          int elemFormat);
+   int sumInElemMatrix(GlobalID elemBlockID,
+                       GlobalID elemID,
+                       const GlobalID* elemConn,
+                       const double* const* elemStiffness,
+                       int elemFormat);
 
-    // elemSet-based stiffness/rhs data loading step
-    int loadElemSetRHS(int elemSetID, 
-                       int numElems, 
-                       const GlobalID *elemIDs,  
-                       const GlobalID *const *elemConn,
-                       const double *const *elemLoad);
+   int sumInElemRHS(GlobalID elemBlockID,
+                    GlobalID elemID,
+                    const GlobalID* elemConn,
+                    const double* elemLoad);
 
-    // element-wise transfer operator loading.
-    int loadElemSetTransfers(int elemSetID,
-                             int numElems,
-                             GlobalID** coarseNodeLists,
-                             GlobalID** fineNodeLists,
-                             int fineNodesPerCoarseElem,
-                             double*** elemProlong,
-                             double*** elemRestrict);
+   //element-wise transfer operator
+   int loadElemTransfer(GlobalID elemBlockID,
+                        GlobalID elemID,
+                        const GlobalID* coarseNodeList,
+                        int fineNodesPerCoarseElem,
+                        const GlobalID* fineNodeList,
+                        const double* const* elemProlong,
+                        const double* const* elemRestrict);
 
-    // end blocked-element data loading step
-    int endLoadElemBlock();
+   int loadCRMult(int CRID,
+                  int numCRNodes,
+                  const GlobalID* CRNodes,
+                  const int* CRFields,
+                  const double* CRWeights,
+                  double CRValue);
 
+   int loadCRPen(int CRID,
+                 int numCRNodes,
+                 const GlobalID* CRNodes,
+                 const int* CRFields,
+                 const double* CRWeights,
+                 double CRValue,
+                 double penValue);
 
-    // begin constraint relation data load step...................
-    int beginLoadCREqns(int numCRMultSets, 
-                                int numCRPenSets);                                
+   int sumIntoMatrix(int patternID,
+		     const int* rowIDTypes,
+                     const GlobalID* rowIDs,
+		     const int* colIDTypes,
+                     const GlobalID* colIDs,
+                     const double* const* matrixEntries);
 
-    // lagrange-multiplier constraint relation load step
-    int loadCRMult(int CRMultID, 
-                           int numMultCRs,
-                           const GlobalID *const *CRNodeTable, 
-                           const int *CRFieldList,
-                           const double *const *CRWeightTable,
-                           const double *CRValueList,
-                           int lenCRNodeList);
+   int sumIntoRHS(int patternID,
+		  const int* IDTypes,
+                  const GlobalID* IDs,
+                  const double* rhsEntries);
 
-    // penalty formulation constraint relation load step
-    int loadCRPen(int CRPenID, 
-                          int numPenCRs, 
-                          const GlobalID *const *CRNodeTable,
-                          const int *CRFieldList,
-                          const double *const *CRWeightTable,
-                          const double *CRValueList,
-                          const double *penValues,
-                          int lenCRNodeList);
+   int putIntoMatrix(int patternID,
+		     const int* rowIDTypes,
+                     const GlobalID* rowIDs,
+		     const int* colIDTypes,
+                     const GlobalID* colIDs,
+                     const double* const* matrixEntries);
 
-    // end constraint relation data load step
-    int endLoadCREqns();
+   int putIntoRHS(int patternID,
+		  const int* IDTypes,
+                  const GlobalID* IDs,
+                  const double* rhsEntries);
 
-    // indicate that overall data loading sequence is complete
-    int loadComplete();
+   int getFromMatrix(int patternID,
+		     const int* rowIDTypes,
+                     const GlobalID* rowIDs,
+		     const int* colIDTypes,
+                     const GlobalID* colIDs,
+                     double** matrixEntries);
+
+   int getFromRHS(int patternID,
+		  const int* IDTypes,
+                  const GlobalID* IDs,
+                  double* rhsEntries);
 
 // Equation solution services.....................................
 
     // set scalar coefficients for forming aggregate (linear-combination)
     // system of matrices.
-    int setMatScalars(int* IDs,
-                      double* scalars, 
-                      int numScalars);
+
+   int setMatScalars(int numScalars,
+                     const int* IDs, 
+                     const double* scalars);
 
     // set scalar coefficients for aggregating RHS vectors.
-    int setRHSScalars(int* IDs,
-                      double* scalars,
-                      int numScalars);
     
-    //get residual norms
-    int residualNorm(int whichNorm, int numFields,
-                                     int* fieldIDs, double* norms);
+   int setRHSScalars(int numScalars,
+                     const int* IDs,
+                     const double* scalars);
+    
+   //get residual norms
+   int residualNorm(int whichNorm,
+                    int numFields,
+                    int* fieldIDs,
+                    double* norms);
 
     // start iterative solution
-    int iterateToSolve(int& status);
+   int solve(int& status);
 
-    // query function iterations performed.
-    int iterations() const {return(fei_[index_soln_fei_]->iterations());};
+    // query iterations performed.
+
+   int iterations(int& itersTaken) const {
+      itersTaken = fei_[index_soln_fei_]->iterations();
+      return(0);
+   };
+
+   int version(char*& versionString);
+
+   // query for some accumulated timing information. Collective function.
+   int cumulative_MPI_Wtimes(double& initTime,
+                             double& loadTime,
+                             double& solveTime,
+                             double& solnReturnTime,
+                             int timingMode);
+
+   // query the amount of memory currently allocated within this implementation
+   int allocatedSize(int& bytes);
 
 // Solution return services.......................................
  
     // return all nodal solution params on a block-by-block basis 
+ 
     int getBlockNodeSolution(GlobalID elemBlockID,  
-                             GlobalID *nodeIDList, 
-                             int &lenNodeIDList, 
-                             int *offset,  
+                             int numNodes, 
+                             const GlobalID *nodeIDs, 
+                             int *offsets,
                              double *results);
  
     // return nodal solution for one field on a block-by-block basis 
     int getBlockFieldNodeSolution(GlobalID elemBlockID,
                                   int fieldID,
-                                  GlobalID *nodeIDList, 
-                                  int& lenNodeIDList, 
-                                  int *offset,
+                                  int numNodes, 
+                                  const GlobalID *nodeIDs, 
                                   double *results);
          
     // return element solution params on a block-by-block basis 
     int getBlockElemSolution(GlobalID elemBlockID,  
-                             GlobalID *elemIDList,
-                             int& lenElemIDList, 
-                             int *offset,  
-                             double *results, 
-                             int& numElemDOF);
-                                      
-    // return Lagrange solution to FE analysis on a constraint-set basis 
-    int getCRMultParam(int CRMultID, 
-                       int numMultCRs,
-                       double *multValues);
+                             int numElems, 
+                             const GlobalID *elemIDs,
+                             int& numElemDOFPerElement,
+                             double *results);
 
-    // return Lagrange solution to FE analysis on a whole-processor basis 
-    int getCRMultSolution(int& numCRMultSets, 
-                          int *CRMultIDs,  
-                          int *offset, 
-                          double *results);
+   int getNumCRMultipliers(int& numMultCRs);
+   int getCRMultIDList(int numMultCRs, int* multIDs);
+
+   // get Lagrange Multipliers
+   int getCRMultipliers(int numCRs,
+                        const int* CRIDs,
+                        double *multipliers);
+
+   int getSubstructureSize( int substructureID,
+			    int& numIDs );
+
+   int getSubstructureIDList(int substructureID,
+			     int numNodes,
+			     int* IDTypes,
+			     GlobalID* IDs );
+
+   int getSubstructureFieldSolution(int substructureID,
+				    int fieldID,
+				    int numIDs,
+				    const int* IDTypes,
+				    const GlobalID *IDs,
+				    double *results);
+
+   int putSubstructureFieldSolution(int substructureID,
+				    int fieldID,
+				    int numIDs,
+				    const int* IDTypes,
+				    const GlobalID *IDs,
+				    const double *estimates);
+
+   int putSubstructureFieldData(int substructureID,
+				int fieldID,
+				int numNodes,
+				const int* IDTypes,
+				const GlobalID *nodeIDs,
+				const double *data);   
 
  
 // associated "puts" paralleling the solution return services.
@@ -278,88 +325,110 @@ class FEI_Implementation : public FEI {
 
     // put nodal-based solution guess on a block-by-block basis 
     int putBlockNodeSolution(GlobalID elemBlockID, 
-                             const GlobalID *nodeIDList, 
-                             int lenNodeIDList, 
-                             const int *offset, 
+                             int numNodes, 
+                             const GlobalID *nodeIDs, 
+                             const int *offsets,
                              const double *estimates);
 
     // put nodal-based guess for one field on a block-by-block basis 
     int putBlockFieldNodeSolution(GlobalID elemBlockID, 
                                   int fieldID, 
-                                  const GlobalID *nodeIDList, 
-                                  int lenNodeIDList, 
-                                  const int *offset,
+                                  int numNodes, 
+                                  const GlobalID *nodeIDs, 
                                   const double *estimates);
          
     // put element-based solution guess on a block-by-block basis
     int putBlockElemSolution(GlobalID elemBlockID,  
-                             const GlobalID *elemIDList, 
-                             int lenElemIDList, 
-                             const int *offset,  
-                             const double *estimates, 
-                             int numElemDOF);
+                             int numElems, 
+                             const GlobalID *elemIDs, 
+                             int dofPerElem,
+                             const double *estimates);
 
     // put Lagrange solution to FE analysis on a constraint-set basis 
-    int putCRMultParam(int CRMultID, 
-                       int numMultCRs,
-                       const double *multEstimates);
+    int putCRMultipliers(int numMultCRs, 
+                         const int* CRIDs,
+                         const double* multEstimates);
 
 // utility functions that aid in integrating the FEI calls..............
 
 // support methods for the "gets" and "puts" of the soln services.
 
-    // return info associated with Lagrange multiplier solution
-    int getCRMultSizes(int& numCRMultIDs, 
-                       int& lenResults);
 
     // return info associated with blocked nodal solution
     int getBlockNodeIDList(GlobalID elemBlockID,
-                           GlobalID *nodeIDList, 
-                           int& lenNodeIDList);
-                               
-    // return info associated with blocked element solution
-    int getBlockElemIDList(GlobalID elemBlockID, 
-                           GlobalID *elemIDList, 
-                           int& lenElemIDList);
- 
-// miscellaneous self-explanatory "read-only" utility functions............ 
- 
-    int getNumSolnParams(GlobalID globalNodeID) const;
+                           int numNodes,
+                           GlobalID *nodeIDs);
 
-    //  return the number of stored element blocks
-    int getNumElemBlocks() const;
+    // return info associated with blocked element solution
+   int getBlockElemIDList(GlobalID elemBlockID, 
+                          int numElems, 
+                          GlobalID* elemIDs);
+ 
+// miscellaneous self-explanatory "read-only" query functions............ 
+ 
+    int getNumSolnParams(GlobalID nodeID, int& numSolnParams) const;
+
+    int getNumElemBlocks(int& numElemBlocks) const;
 
     //  return the number of active nodes in a given element block
-    int getNumBlockActNodes(GlobalID blockID) const;
+    int getNumBlockActNodes(GlobalID blockID, int& numNodes) const;
 
     //  return the number of active equations in a given element block
-    int getNumBlockActEqns(GlobalID blockID) const;
+    int getNumBlockActEqns(GlobalID blockID, int& numEqns) const;
 
     //  return the number of nodes associated with elements of a
     //  given block ID
-    int getNumNodesPerElement(GlobalID blockID) const;
+    int getNumNodesPerElement(GlobalID blockID, int& nodesPerElem) const;
     
     //  return the number of equations (including element eqns)
     //  associated with elements of a given block ID
-    int getNumEqnsPerElement(GlobalID blockID) const;
+    int getNumEqnsPerElement(GlobalID blockID, int& numEqns) const;
 
     //  return the number of elements associated with this blockID
-    int getNumBlockElements(GlobalID blockID) const;
+    int getNumBlockElements(GlobalID blockID, int& numElems) const;
 
     //  return the number of elements eqns for elems w/ this blockID
-    int getNumBlockElemEqns(GlobalID blockID) const;
+    int getNumBlockElemDOF(GlobalID blockID, int& DOFPerElem) const;
+
+
+    //And now a couple of non-FEI query functions that Sandia applications
+    //need to augment the matrix-access functions. I (Alan Williams) will
+    //argue to have these included in the FEI 2.1 specification update.
+
+    //Query the size of a field. This info is supplied to the FEI (initFields)
+    //by the application, but may not be easily obtainable on the app side at
+    //all times. Thus, it would be nice if the FEI could answer this query.
+    int getFieldSize(int fieldID, int& numScalars);
+
+    /**Since the ultimate intent for matrix-access is to bypass the FEI and go
+     straight to the underlying ESI data objects, we need a translation
+     function to map between the IDs that the FEI deals in, and equation
+     numbers that ESI linear algebra objects deal in.
+     @param ID Identifier of either a node or an element.
+     @param idType Can take either of the values FEI_NODE or FEI_ELEMENT.
+     @param fieldID Identifies a particular field at this [node||element].
+     @param numEqns Output. Number of equations associated with this
+     node/field (or element/field) pair.
+     @param eqnNumbers Caller-allocated array. On exit, this is filled with the
+     above-described equation-numbers. They are global 0-based numbers.
+    */
+    int getEqnNumbers(GlobalID ID,
+		      int idType, 
+		      int fieldID,
+		      int& numEqns,
+		      int* eqnNumbers);
 
   //============================================================================
   private: //functions
 
-    void allocateInternalFEIs();
-    void allocateInternalFEIs(int numMatrices, int* matrixIDs,
+    int allocateInternalFEIs();
+    int allocateInternalFEIs(int numMatrices, int* matrixIDs,
                               int* numRHSs, int** rhsIDs);
     void debugOut(const char* msg);
     void debugOut(const char* msg, int whichFEI);
 
     void buildLinearSystem();
-    void aggregateSystem();
+    int aggregateSystem();
 
     void messageAbort(const char* msg);
     void notAllocatedAbort(const char* name);
@@ -371,15 +440,17 @@ class FEI_Implementation : public FEI {
   //============================================================================
   private: //member variables
 
-    LinearSystemCore* constructorLinSysCore_;
+    ESI_LSManager* constructorLsMgr_;
+    ESI_LSManager** lsMgr_;
     LinearSystemCore** linSysCore_;
+    bool haveESI_;
     BASE_FEI** fei_;
 
     int numInternalFEIs_;
     bool internalFEIsAllocated_;
 
-    intArray feiIDs_;
-    intArray numRHSIDs_;
+    feiArray<int> feiIDs_;
+    feiArray<int> numRHSIDs_;
     int** rhsIDs_;
 
     bool IDsAllocated_;
@@ -391,16 +462,15 @@ class FEI_Implementation : public FEI {
 
     int index_soln_fei_;
     int index_current_fei_;
-    int index_current_rhs_;
     int index_current_rhs_row_;
 
     int solveType_;
 
-    bool initSolveStepCalled_;
+    bool setSolveTypeCalled_;
     bool initPhaseIsComplete_;
 
     bool aggregateSystemFormed_;
-    bool newMatrixDataLoaded_;
+    int newMatrixDataLoaded_;
     bool linearSystemFinalized_;
 
     Data *soln_fei_matrix_;
@@ -419,7 +489,7 @@ class FEI_Implementation : public FEI {
     int debugOutput_;
     FILE *debugFile_;
 
-    double baseTime_, wTime_, sTime_;
+    double initTime_, loadTime_, solveTime_, solnReturnTime_;
 
     int numParams_;
     char** paramStrings_;

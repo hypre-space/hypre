@@ -8,12 +8,12 @@ class Utils {
 
    static int getParam(const char* flag, int numParams, char** strings, char* param);
 
-   static int sortedIntListFind(int item, int* list, int len, int* insert);
+   static int sortedIntListFind(int item,const int* list, int len, int* insert);
 
-   static int intListFind(int item, int* list, int len);
+   static int intListFind(int item, const int* list, int len);
 
-   static int sortedGlobalIDListFind(GlobalID item, GlobalID* list, int len,
-                                     int* insert);
+   static int sortedGlobalIDListFind(GlobalID item, const GlobalID* list,
+                                     int len, int* insert);
 
    static int sortedIntListInsert(int item, int*& list, int& len,
                                   int& allocatedLength);
@@ -30,9 +30,9 @@ class Utils {
    static void GlobalIDListInsert(GlobalID item, int index, GlobalID*& list,
                                   int& len, int& allocatedLength);
 
-   static void doubleArrayListInsert(int index, doubleArray**& daList, int& len);
+   static void doubleArrayListInsert(int index, feiArray<double>**& daList, int& len);
 
-   static void intArrayListInsert(int index, intArray**& iaList, int& len);
+   static void intArrayListInsert(int index, feiArray<int>**& iaList, int& len);
 
    static void intTableInsertRow(int* newRow, int whichRow,
                                  int**& table, int& numRows);

@@ -1,14 +1,21 @@
-#ifndef __cfei_H
-#define __cfei_H
+#ifndef _cfei_H_
+#define _cfei_H_
 
 /*------------------------------------------------------------------------------
    This is the header for the prototypes of the procedural ("C") version
    of the finite element interface.
 
+   For explanations of parameters and semantics, see the C++ header, or
+   doxygen output created there-from. With the exception of create/destroy
+   functions, all FEI functions in this header mirror those in the C++ header
+   but have 'FEI_' pre-pended to the name, and have 'CFEI* cfei' as the first
+   argument, and arguments which are references in C++ (e.g., an output int)
+   are pointers in this C interface.
+
    NOTE: ALL functions return an error code which is 0 if successful,
          non-zero if un-successful.
 
-   Noteworthy special case: the iterateToSolve function may return non-zero
+   Noteworthy special case: the solve function may return non-zero
    if the solver failed to converge. This is, of course, a non-fatal 
    situation, and the caller should then check the 'status' argument for
    possible further information (solver-specific/solver-dependent).
@@ -16,7 +23,7 @@
 
 /*------------------------------------------------------------------------------
    First, we define a "Linear System Core" struct. This is the beast that
-   provides all solver-library-specific functionality like sumIntoMatrix,
+   handles all solver-library-specific functionality like sumIntoMatrix,
    launchSolver, etc., etc. The pointer 'lsc_' needs to hold an instance
    of an object which implements the C++ interface defined in
    ../base/LinearSystemCore.h. Naturally, an implementation-specific 
@@ -36,6 +43,21 @@ struct LinSysCore_struct {
 typedef struct LinSysCore_struct LinSysCore;
 
 /*------------------------------------------------------------------------------
+   The LinSysCore struct is going to obsolete, as soon as ESI objects become
+   widely implemented. We will replace LinSysCore with a close cousin, which
+   we'll call the "Linear System Manager". It will be more like a broker,
+   handing out interfaces to individual objects such as matrices, vectors, etc.,
+   on demand. For now, it will just be a wrapper around LinSysCore so that we
+   don't lose our backwards compatibility.
+------------------------------------------------------------------------------*/
+
+struct LinSysMgr_struct {
+   void* lsm_;
+};
+typedef struct LinSysMgr_struct LinSysMgr;
+
+
+/*------------------------------------------------------------------------------
    Next, define an opaque CFEI thingy which will be an FEI context, and will
    be the first argument to all of the C FEI functions which follow in this
    header.
@@ -50,6 +72,10 @@ typedef struct CFEI_struct CFEI;
    And now, the function prototypes...
 ------------------------------------------------------------------------------*/
 
+/* include fei_defs.h for the #defines of parameters such as FEI_LOCAL_TIMES,
+  FEI_NODE_MAJOR, etc. */
+#include <fei_defs.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -58,9 +84,13 @@ extern "C" {
    Initialization function. Creates an FEI instance, wrapped in a CFEI pointer.
 */
 int FEI_create(CFEI** cfei,
-               LinSysCore* lsc,
+               LinSysMgr* lsm,
                MPI_Comm FEI_COMM_WORLD, 
                int masterRank);
+
+/* Function to create a LinSysMgr struct from a LinSysCore */
+int LinSysMgr_create(LinSysMgr** lsm,
+                     LinSysCore* lsc);
 
 /* A function to destroy allocated memory. */
 int FEI_destroy(CFEI** cfei);
@@ -68,304 +98,353 @@ int FEI_destroy(CFEI** cfei);
 /* A function to destroy those LinSysCore things. */
 int LinSysCore_destroy(LinSysCore** lsc);
 
-/* Structural initialization sequence.............................*/
+/* A function to destroy those LinSysMgr things. */
+int LinSysMgr_destroy(LinSysMgr** lsm);
 
-/* per-solve-step initialization */
-int FEI_initSolveStep(CFEI* cfei, 
-                      int numElemBlocks, 
-                      int solveType);
+/*                                     */
+/* And now all of the FEI functions... */
+/*                                     */
 
-/* identify all the solution fields present in the analysis.......*/
-int FEI_initFields(CFEI* cfei, 
-                   int numFields, 
-                   int *cardFields, 
-                   int *fieldIDs); 
-
-/* begin blocked-element initialization step..................*/
-int FEI_beginInitElemBlock(CFEI* cfei, 
-                           GlobalID elemBlockID, 
-                           int numNodesPerElement, 
-                           int *numElemFields,
-                           int **elemFieldIDs,
-                           int interleaveStrategy,
-                           int lumpingStrategy,
-                           int numElemDOF, 
-                           int numElemSets,
-                           int numElemTotal);
-
-/* initialize element sets that make up the blocks */
-int FEI_initElemSet(CFEI* cfei, 
-                    int numElems,
-                    GlobalID *elemIDs, 
-                    GlobalID **elemConn);
-
-/* end blocked-element initialization */
-int FEI_endInitElemBlock(CFEI* cfei);
-
-/* begin collective node set initialization step........................*/
-int FEI_beginInitNodeSets(CFEI* cfei, 
-                          int numSharedNodeSets, 
-                          int numExtNodeSets);
-
-/* initialize nodal sets for shared nodes */
-int FEI_initSharedNodeSet(CFEI* cfei, 
-                          GlobalID *sharedNodeIDs,
-                          int lenSharedNodeIDs, 
-                          int **sharedProcIDs,
-                          int *lenSharedProcIDs);
-
-/* initialize nodal sets for external (off-processor) communcation */
-int FEI_initExtNodeSet(CFEI* cfei, 
-                       GlobalID *extNodeIDs,
-                       int lenExtNodeIDs, 
-                       int **extProcIDs, 
-                       int *lenExtProcIDs);
-
-/* end node set initialization */
-int FEI_endInitNodeSets(CFEI* cfei);
-
-
-/* begin constraint relation set initialization step.........*/
-int FEI_beginInitCREqns(CFEI* cfei, 
-                        int numCRMultSets,
-                        int numCRPenSets);
-
-/* constraint relation initialization - lagrange multiplier formulation */
-int FEI_initCRMult(CFEI* cfei,
-                   GlobalID **CRNodeTable,
-                   int *CRFieldList,
-                   int numMultCRs,
-                   int lenCRNodeList,
-                   int* CRMultID);
-
-/* constraint relation initialization - penalty function formulation */
-int FEI_initCRPen(CFEI* cfei, 
-                  GlobalID **CRNodeTable, 
-                  int *CRFieldList,
-                  int numPenCRs, 
-                  int lenCRNodeList, 
-                  int* CRPenID); 
-
-/* end constraint relation list initialization */
-int FEI_endInitCREqns(CFEI* cfei);
-
-/* indicate that overall initialization sequence is complete */
-int FEI_initComplete(CFEI* cfei);
-
-/* FE data load sequence..........................................*/
-
-/* set a value (usually zeros) througout the linear system.....*/
-int FEI_resetSystem(CFEI* cfei, double s);
-int FEI_resetMatrix(CFEI* cfei, double s);
-int FEI_resetRHSVector(CFEI* cfei, double s);
-
-/* begin node-set data load step.............................*/
-int FEI_beginLoadNodeSets(CFEI* cfei, int numBCNodeSets);
-
-/* boundary condition data load step */
-int FEI_loadBCSet(CFEI* cfei, 
-                  GlobalID *BCNodeSet,
-                  int lenBCNodeSet,
-                  int BCFieldID,
-                  double **alphaBCDataTable,
-                  double **betaBCDataTable,
-                  double **gammaBCDataTable);
-
-/* end node-set data load step */
-int FEI_endLoadNodeSets(CFEI* cfei);
-
-/* begin blocked-element data loading step....................*/
-int FEI_beginLoadElemBlock(CFEI* cfei, 
-                           GlobalID elemBlockID,
-                           int numElemSets,
-                           int numElemTotal);
-  
-/* elemSet-based stiffness/rhs data loading step */
-int FEI_loadElemSet(CFEI* cfei, 
-                    int elemSetID, 
-                    int numElems, 
-                    GlobalID *elemIDs,  
-                    GlobalID **elemConn,
-                    double ***elemStiffness,
-                    double **elemLoad,
-                    int elemFormat);
-
-/* end blocked-element data loading step*/
-int FEI_endLoadElemBlock(CFEI* cfei);
-
-
-/* begin constraint relation data load step...................*/
-int FEI_beginLoadCREqns(CFEI* cfei, 
-                        int numCRMultSets,
-                        int numCRPenSets);
-
-/* lagrange-multiplier constraint relation load step */
-int FEI_loadCRMult(CFEI* cfei, 
-                   int CRMultID, 
-                   int numMultCRs,
-                   GlobalID **CRNodeTable,  
-                   int *CRFieldList,
-                   double **CRWeightTable,
-                   double *CRValueList,
-                   int lenCRNodeList);
-
-/* penalty formulation constraint relation load step */
-int FEI_loadCRPen(CFEI* cfei, 
-                  int CRPenID,
-                  int numPenCRs, 
-                  GlobalID **CRNodeTable,
-                  int *CRFieldList,
-                  double **CRWeightTable,  
-                  double *CRValueList,
-                  double *penValues,
-                  int lenCRNodeList);
-
-/* end constraint relation data load step */
-int FEI_endLoadCREqns(CFEI* cfei);
-
-/* indicate that overall data loading sequence is complete */
-int FEI_loadComplete(CFEI* cfei);
-
-/* Equation solution services..................................... */
-
-/* set parameters associated with solver choice, etc. */
 int FEI_parameters(CFEI* cfei, 
                    int numParams, 
                    char **paramStrings);
 
-/* start iterative solution */
-int FEI_iterateToSolve(CFEI* cfei, int* status);
+int FEI_setIDLists(CFEI* cfei,
+                   int numMatrices,
+                   const int* matrixIDs,
+                   int numRHSs,
+                   const int* rhsIDs);
 
-/* query how many iterations it took to solve. */
-int FEI_iterations(CFEI* cfei, int* iterations);
+int FEI_setSolveType(CFEI* cfei, 
+                     int solveType);
 
-/* Solution return services....................................... */
- 
-/* return nodal-based solution to FE analysis on a block-by-block basis */
+int FEI_initFields(CFEI* cfei, 
+                   int numFields, 
+                   int *fieldSizes, 
+                   int *fieldIDs); 
+
+int FEI_initElemBlock(CFEI* cfei, 
+                      GlobalID elemBlockID, 
+                      int numElements, 
+                      int numNodesPerElement, 
+                      int* numFieldsPerNode,
+                      int** nodalFieldIDs,
+                      int numElemDofFieldsPerElement,
+                      int* elemDOFFieldIDs,
+                      int interleaveStrategy); 
+
+int FEI_initElem(CFEI* cfei, 
+                 GlobalID elemBlockID, 
+                 GlobalID elemID, 
+                 GlobalID *elemConn);
+
+int FEI_initSharedNodes(CFEI* cfei, 
+                        int numSharedNodes, 
+                        GlobalID *sharedNodeIDs,
+                        int* numProcsPerNode,
+                        int** sharingProcIDs);
+
+int FEI_initCRMult(CFEI* cfei,
+                   int numCRNodes,
+                   GlobalID* CRNodes,
+                   int *CRFields,
+                   int* CRID);
+
+int FEI_initCRPen(CFEI* cfei, 
+                  int numCRNodes,
+                  GlobalID* CRNodes, 
+                  int *CRFields,
+                  int* CRID); 
+
+int FEI_initCoefAccessPattern( CFEI* cfei,
+                               int patternID,
+                               int numRowIDs,
+                               int* numFieldsPerRow,
+                               int** rowFieldIDs,
+                               int numColIDsPerRow,
+                               int* numFieldsPerCol,
+                               int** colFieldIDs,
+                               int interleaveStrategy );
+
+int FEI_initCoefAccess( CFEI* cfei,
+                        int patternID,
+			int* rowIDTypes,
+                        GlobalID* rowIDs,
+			int* colIDTypes,
+                        GlobalID* colIDs );
+
+int FEI_initComplete(CFEI* cfei);
+
+int FEI_resetSystem(CFEI* cfei, double s);
+int FEI_resetMatrix(CFEI* cfei, double s);
+int FEI_resetRHSVector(CFEI* cfei, double s);
+
+int FEI_setCurrentMatrix(CFEI* cfei, int matID);
+int FEI_setCurrentRHS(CFEI* cfei, int rhsID);
+
+int FEI_loadNodeBCs(CFEI* cfei,
+                    int numNodes,
+                    GlobalID *BCNodes,
+                    int fieldID,
+                    double **alpha,
+                    double **beta,
+                    double **gamma);
+
+int FEI_loadElemBCs( CFEI* cfei,
+                     int numElems,
+                     GlobalID *elemIDs,
+                     int fieldID,
+                     double **alpha,  
+                     double **beta,  
+                     double **gamma );
+
+int FEI_sumInElem(CFEI* cfei, 
+                  GlobalID elemBlockID, 
+                  GlobalID elemID,
+                  GlobalID* elemConn,
+                  double **elemStiffness,
+                  double *elemLoad,
+                  int elemFormat);
+
+int FEI_sumInElemMatrix(CFEI* cfei, 
+                        GlobalID elemBlockID, 
+                        GlobalID elemID,
+                        GlobalID* elemConn,
+                        double **elemStiffness,
+                        int elemFormat);
+
+int FEI_sumInElemRHS(CFEI* cfei, 
+                     GlobalID elemBlockID, 
+                     GlobalID elemID,
+                     GlobalID* elemConn,
+                     double *elemLoad);
+
+int FEI_loadElemTransfer(CFEI* cfei,
+                         GlobalID elemBlockID,
+                         GlobalID elemID,
+                         GlobalID* coarseNodeList,
+                         int fineNodesPerCoarseElem,
+                         GlobalID* fineNodeList,
+                         double** elemProlong,
+                         double** elemRestrict);
+
+int FEI_loadCRMult(CFEI* cfei, 
+                   int CRID, 
+                   int numCRNodes,
+                   GlobalID *CRNodes,  
+                   int *CRFields,
+                   double *CRWeights,
+                   double CRValue);
+
+int FEI_loadCRPen(CFEI* cfei, 
+                  int CRID,
+                  int numCRNodes, 
+                  GlobalID *CRNodes,
+                  int *CRFields,
+                  double *CRWeights,  
+                  double CRValue,
+                  double penValue);
+
+int FEI_sumIntoMatrix(CFEI* cfei,
+		      int patternID,
+		      int* rowIDTypes,
+		      GlobalID* rowIDs,
+		      int* colIDTypes,
+		      GlobalID* colIDs,
+		      double** matrixEntries);
+
+int FEI_getFromMatrix(CFEI* cfei,
+		      int patternID,
+		      int* rowIDTypes,
+		      GlobalID* rowIDs,
+		      int* colIDTypes,
+		      GlobalID* colIDs,
+		      double** matrixEntries);
+
+int FEI_putIntoMatrix(CFEI* cfei, int patternID,
+		      int* rowIDTypes,
+		      GlobalID* rowIDs,
+		      int* colIDTypes,
+		      GlobalID* colIDs,
+		      double* * matrixEntries);
+
+int FEI_sumIntoRHS(CFEI* cfei, int patternID,
+		   int* IDTypes,
+		   GlobalID* IDs,
+		   double* vectorEntries);
+
+int FEI_getFromRHS(CFEI* cfei, int patternID,
+		   int* IDTypes,
+		   GlobalID* IDs,
+		   double* vectorEntries);
+
+int FEI_putIntoRHS(CFEI* cfei, int patternID,
+		   int* IDTypes,
+		   GlobalID* IDs,
+		   double* vectorEntries);
+
+int FEI_setMatScalars(CFEI* cfei,
+                      int numScalars,
+                      int* IDs,
+                      double* scalars);
+
+int FEI_setRHSScalars(CFEI* cfei,
+                      int numScalars,
+                      int* IDs,
+                      double* scalars);
+
+int FEI_residualNorm(CFEI* cfei,
+                      int whichNorm,
+                     int numFields,
+                     int* fieldIDs,
+                     double* norms);
+
+int FEI_solve(CFEI* cfei, int* status);
+
+int FEI_iterations(CFEI* cfei, int* itersTaken);
+
+int FEI_version(CFEI* cfei, char** versionStringPtr);
+
+int FEI_cumulative_MPI_Wtimes(CFEI* cfei,
+                              double* initTime,
+                              double* loadTime,
+                              double* solveTime,
+                              double* solnReturnTime,
+                              int timingMode);
+
+int FEI_allocatedSize(CFEI* cfei,
+                      int* bytes);
+
 int FEI_getBlockNodeSolution(CFEI* cfei, 
                              GlobalID elemBlockID,
-                             GlobalID *nodeIDList, 
-                             int* lenNodeIDList, 
-                             int *offset,
-                             double *answers);
+                             int numNodes, 
+                             GlobalID* nodeIDs, 
+                             int *offsets,
+                             double *results);
 
-/* return field-based solution to FE analysis on a block-by-block basis */
 int FEI_getBlockFieldNodeSolution(CFEI* cfei, 
                                   GlobalID elemBlockID,
                                   int fieldID,
-                                  GlobalID *nodeIDList, 
-                                  int* lenNodeIDList, 
-                                  int *offset,
+                                  int numNodes, 
+                                  GlobalID* nodeIDs, 
                                   double *results);
 
-/* return element-based solution to FE analysis on a block-by-block basis */
 int FEI_getBlockElemSolution(CFEI* cfei, 
                              GlobalID elemBlockID,
-                             GlobalID *elemIDList, 
-                             int* lenElemIDList, 
-                             int *offset,
-                             double *results, 
-                             int* numElemDOF);
+                             int numElems, 
+                             GlobalID *elemIDs, 
+                             int* numElemDOFPerElement,
+                             double *results);
 
-/* return Lagrange solution to FE analysis on a whole-processor basis */
-int FEI_getCRMultSolution(CFEI* cfei, 
-                          int* numCRMultSets, 
-                          int *CRMultIDs,
-                          int *offset, 
-                          double *results);
+int FEI_getNumCRMultipliers(CFEI* cfei, 
+                            int* numMultCRs);
 
-/* return Lagrange solution to FE analysis on a constraint-set basis */
-int FEI_getCRMultParam(CFEI* cfei, 
-                       int CRMultID, 
-                       int numMultCRs,
-                       double *multValues); 
+int FEI_getCRMultIDList(CFEI* cfei,
+                        int numMultCRs,
+                        int* multIDs);
 
-/* put nodal-based solution to FE analysis on a block-by-block basis */
+int FEI_getCRMultipliers(CFEI* cfei,
+                         int numMultCRs,
+                         int* CRIDs,
+                         double* multipliers);
+
 int FEI_putBlockNodeSolution(CFEI* cfei, 
                              GlobalID elemBlockID,  
-                             GlobalID *nodeIDList, 
-                             int lenNodeIDList, 
-                             const int *offset,  
-                             const double *estimates);
+                             int numNodes, 
+                             GlobalID *nodeIDs, 
+                             int *offsets,  
+                             double *estimates);
 
-/* put field-based solution to FE analysis on a block-by-block basis */
 int FEI_putBlockFieldNodeSolution(CFEI* cfei, 
                                   GlobalID elemBlockID,  
                                   int fieldID, 
-                                  GlobalID *nodeIDList, 
-                                  int lenNodeIDList, 
-                                  int *offset,  
+                                  int numNodes, 
+                                  GlobalID *nodeIDs, 
                                   double *estimates);
          
-/*  put element-based solution to FE analysis on a block-by-block basis */ 
-int FEI_putElemBlockSolution(CFEI* cfei, 
+int FEI_putBlockElemSolution(CFEI* cfei, 
                              GlobalID elemBlockID,  
-                             GlobalID *elemIDList, 
-                             int lenElemIDList, 
-                             int *offset,  
-                             double *estimates, 
-                             int numElemDOF);
-  
-/*  put Lagrange solution to FE analysis on a constraint-set basis */
-int FEI_putCRMultParam(CFEI* cfei, 
-                       int CRMultID, 
-                       int numMultCRs,
-                       double *multEstimates);
+                             int numElems, 
+                             GlobalID *elemIDs, 
+                             int dofPerElem,
+                             double *estimates);
  
-/*  some utility functions to aid in using the "put" functions for passing */
-/*  an initial guess to the solver */
-
-/* return sizes associated with Lagrange solution to FE analysis */
-int FEI_getCRMultSizes(CFEI* cfei, 
-                       int* numCRMultIDs, 
-                       int* lenAnswers);
+int FEI_putCRMultipliers(CFEI* cfei, 
+                         int numMultCRs, 
+                         int* CRIDs,
+                         double *multEstimates);
  
-/* form some data structures needed to return element solution parameters */
-int FEI_getBlockElemIDList(CFEI* cfei, 
-                           GlobalID elemBlockID, 
-                           GlobalID *elemIDList, 
-                           int *lenElemIDList);
-
-/* form some data structures needed to return nodal solution parameters */
 int FEI_getBlockNodeIDList(CFEI* cfei, 
                            GlobalID elemBlockID,
-                           GlobalID *nodeIDList, 
-                           int *lenNodeIDList);
+                           int numNodes, 
+                           GlobalID* nodeIDs);
 
-/*  return the number of solution parameters at a given node */
-int FEI_getNumSolnParams(CFEI* cfei, GlobalID globalNodeID, int* numSolnParams);
+int FEI_getBlockElemIDList(CFEI* cfei, 
+                           GlobalID elemBlockID,
+                           int numElems,
+                           GlobalID* elemIDs);
 
-/*  return the number of stored element blocks */
+int FEI_getNumSolnParams(CFEI* cfei,
+                         GlobalID nodeID,
+                         int* numSolnParams);
+
 int FEI_getNumElemBlocks(CFEI* cfei, int* numElemBlocks);
 
-/*  return the number of active nodes in a given element block */
-int FEI_getNumBlockActNodes(CFEI* cfei, GlobalID blockID,
-                            int* numBlockActNodes);
+int FEI_getNumBlockActNodes(CFEI* cfei,
+                            GlobalID blockID,
+                            int* numNodes);
 
-/*  return the number of active equations in a given element block */
-int FEI_getNumBlockActEqns(CFEI* cfei, GlobalID blockID, int* numBlockActEqns);
+int FEI_getNumBlockActEqns(CFEI* cfei,
+                           GlobalID blockID,
+                           int* numEqns);
 
-/*  return the number of nodes associated with elements of a
-    given block ID */
-int FEI_getNumNodesPerElement(CFEI* cfei, GlobalID blockID,
-                              int* numNodesPerElement);
+int FEI_getNumNodesPerElement(CFEI* cfei,
+                              GlobalID blockID,
+                              int* nodesPerElem);
 
-/*  return the number of eqns associated with elements of a
-    given block ID */
-int FEI_getNumEqnsPerElement(CFEI* cfei, GlobalID blockID,
-                             int* numEqnsPerElement);
+int FEI_getNumEqnsPerElement(CFEI* cfei,
+                             GlobalID blockID,
+                             int* numEqns);
  
-/*  return the number of elements in a given element block */
-int FEI_getNumBlockElements(CFEI* cfei, GlobalID blockID,
-                            int* numBlockElements);
+int FEI_getNumBlockElements(CFEI* cfei,
+                            GlobalID blockID,
+                            int* numElems);
 
-/*  return the number of element equations in a given element block */
-int FEI_getNumBlockElemEqns(CFEI* cfei, GlobalID blockID,
-                            int* numBlockElemEqns);
+int FEI_getNumBlockElemDOF(CFEI* cfei,
+                           GlobalID blockID,
+                           int* DOFPerElem);
+
+int FEI_initSubstructure( CFEI* cfei, int substructureID,
+                                 int numIDs, int* IDTypes,
+                                 GlobalID* IDs);
+
+int FEI_getSubstructureSize( CFEI* cfei, int substructureID,
+                                        int* numIDs );
+
+int FEI_getSubstructureIDList(CFEI* cfei, int substructureID,
+			      int numIDs, int* IDTypes,
+                                         GlobalID* IDs );
+
+int FEI_getSubstructureFieldSolution(CFEI* cfei, int substructureID,
+                                         int fieldID,
+                                         int numIDs, int* IDTypes, 
+                                         GlobalID *IDs, 
+                                         double *results);
+
+int FEI_putSubstructureFieldSolution(CFEI* cfei, int substructureID, 
+                                         int fieldID, 
+                                         int numIDs, int* IDTypes, 
+                                         GlobalID *IDs, 
+                                         double *estimates);
+
+int FEI_putSubstructureFieldData(CFEI* cfei, int substructureID, 
+                                        int fieldID, 
+                                        int numIDs, int* IDTypes,
+                                        GlobalID *IDs, 
+                                        double *data);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-

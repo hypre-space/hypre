@@ -1,14 +1,6 @@
 #ifndef _basicTypes_h_
 #define _basicTypes_h_
 
-#ifdef EIGHT_BYTE_GLOBAL_ID
-    typedef long long   GlobalID;
-    #define GlobalID_MAX LLONG_MAX
-    #define GlobalID_MIN LLONG_MIN
-#else
-    typedef int GlobalID;
-#endif
-
 /*
 // Following are some #defines that will provide bool support
 // when using a compiler that doesn't have a native 'bool' type.
