@@ -36,7 +36,8 @@ FILES =\
  gmres.c\
  pcg.c\
  bicgstab.c\
- cgnr.c
+ cgnr.c\
+ HYPRE_pcg.c
 
 OBJS = ${FILES:.c=.o}
 

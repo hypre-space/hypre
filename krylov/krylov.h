@@ -13,6 +13,20 @@ extern "C" {
 #endif
 
 
+/* HYPRE_pcg.c */
+int HYPRE_PCGSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
+int HYPRE_PCGSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
+int HYPRE_PCGSetTol( HYPRE_Solver solver , double tol );
+int HYPRE_PCGSetMaxIter( HYPRE_Solver solver , int max_iter );
+int HYPRE_PCGSetStopCrit( HYPRE_Solver solver , int stop_crit );
+int HYPRE_PCGSetTwoNorm( HYPRE_Solver solver , int two_norm );
+int HYPRE_PCGSetRelChange( HYPRE_Solver solver , int rel_change );
+int HYPRE_PCGSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
+int HYPRE_PCGGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
+int HYPRE_PCGSetLogging( HYPRE_Solver solver , int logging );
+int HYPRE_PCGGetNumIterations( HYPRE_Solver solver , int *num_iterations );
+int HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
+
 /* bicgstab.c */
 hypre_BiCGSTABFunctions *hypre_BiCGSTABFunctionsCreate( void *(*CreateVector )(void *vvector ), int (*DestroyVector )(void *vvector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), int (*precond )(), int (*precond_setup )());
 void *hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions *bicgstab_functions );
