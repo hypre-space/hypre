@@ -38,6 +38,17 @@ HYPRE_FreeDistributedMatrix( HYPRE_DistributedMatrix matrix )
 
 
 /*--------------------------------------------------------------------------
+ * HYPRE_LimitedFreeDistributedMatrix
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_LimitedFreeDistributedMatrix( HYPRE_DistributedMatrix matrix )
+{
+   return( hypre_LimitedFreeDistributedMatrix( (hypre_DistributedMatrix *) matrix ) );
+}
+
+
+/*--------------------------------------------------------------------------
  * HYPRE_InitializeDistributedMatrix
  *--------------------------------------------------------------------------*/
 
