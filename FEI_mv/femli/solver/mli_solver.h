@@ -55,16 +55,13 @@ class MLI_Solver
 public :
 
    MLI_Solver(char *name);
-   virtual ~MLI_Solver()     { }
+   virtual ~MLI_Solver();
 
-   char* getName()           { return solver_name; }
-
+   char*   getName();
    virtual int setup(MLI_Matrix *)=0;
    virtual int solve(MLI_Vector *, MLI_Vector *)=0;
-   virtual int setParams(char *paramString,int argc,char **argv)  
-               {(void) paramString; (void) argc; (void) argv; return -1;}
-   virtual int getParams(char *paramString,int *argc,char **argv)
-               {(void) paramString; (void) argc; (void) argv; return -1;}
+   virtual int setParams(char *paramString,int argc,char **argv);
+   virtual int getParams(char *paramString,int *argc,char **argv);
 };
 
 /*--------------------------------------------------------------------------
