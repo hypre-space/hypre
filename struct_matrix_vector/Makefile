@@ -119,9 +119,9 @@ docs_html:
 
 docs_tex: 
 	@doc++ -t -o DevManual.tex DevManual.dxx
-	latex DevManual
-	latex DevManual
-	dvips DevManual
+	@latex DevManual
+	@latex DevManual
+	@dvips DevManual -o
 
 ##################################################################
 # Generic rules

@@ -71,8 +71,17 @@ typedef struct
 
 typedef struct
 {
-   int           num_requests;
-   MPI_Request  *requests;
+   hypre_CommPkg  *comm_pkg;
+   double         *send_data;
+   double         *recv_data;
+
+   int             num_requests;
+   MPI_Request    *requests;
+
+#if defined(HYPRE_COMM_SIMPLE)
+   double        **send_buffers;
+   double        **recv_buffers;
+#endif
 
 } hypre_CommHandle;
 
@@ -126,8 +135,15 @@ typedef struct
  * Accessor macros: hypre_CommHandle
  *--------------------------------------------------------------------------*/
  
+#define hypre_CommHandleCommPkg(comm_handle)     (comm_handle -> comm_pkg)
+#define hypre_CommHandleSendData(comm_handle)    (comm_handle -> send_data)
+#define hypre_CommHandleRecvData(comm_handle)    (comm_handle -> recv_data)
 #define hypre_CommHandleNumRequests(comm_handle) (comm_handle -> num_requests)
 #define hypre_CommHandleRequests(comm_handle)    (comm_handle -> requests)
 #define hypre_CommHandleRequest(comm_handle, i)  (comm_handle -> requests[(i)])
+#if defined(HYPRE_COMM_SIMPLE)
+#define hypre_CommHandleSendBuffers(comm_handle) (comm_handle -> send_buffers)
+#define hypre_CommHandleRecvBuffers(comm_handle) (comm_handle -> recv_buffers)
+#endif
 
 #endif

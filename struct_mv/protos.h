@@ -91,7 +91,9 @@ int hypre_UnCommitCommPkg P((hypre_CommPkg *comm_pkg ));
 int hypre_BuildCommMPITypes P((int num_comms , int *comm_procs , hypre_CommType **comm_types , MPI_Datatype *comm_mpi_types ));
 int hypre_BuildCommEntryMPIType P((hypre_CommTypeEntry *comm_entry , MPI_Datatype *comm_entry_mpi_type ));
 hypre_CommHandle *hypre_InitializeCommunication P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
+hypre_CommHandle *hypre_InitializeCommunication P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
 int hypre_FinalizeCommunication P((hypre_CommHandle *comm_handle ));
+int hypre_ExchangeLocalData P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
 
 /* communication_info.c */
 void hypre_NewCommInfoFromStencil P((hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr , hypre_StructGrid *grid , hypre_StructStencil *stencil ));
@@ -104,27 +106,9 @@ void hypre_FreeComputePkg P((hypre_ComputePkg *compute_pkg ));
 hypre_CommHandle *hypre_InitializeIndtComputations P((hypre_ComputePkg *compute_pkg , double *data ));
 void hypre_FinalizeIndtComputations P((hypre_CommHandle *comm_handle ));
 
-/* create_2d_laplacian.c */
-int main P((int argc , char *argv []));
-
-/* create_3d_laplacian.c */
-int main P((int argc , char *argv []));
-
-/* driver.c */
-int main P((int argc , char *argv []));
-
-/* driver_internal.c */
-int main P((int argc , char *argv []));
-
 /* grow.c */
 hypre_BoxArray *hypre_GrowBoxByStencil P((hypre_Box *box , hypre_StructStencil *stencil , int transpose ));
 hypre_BoxArrayArray *hypre_GrowBoxArrayByStencil P((hypre_BoxArray *box_array , hypre_StructStencil *stencil , int transpose ));
-
-/* one_to_many.c */
-int main P((int argc , char *argv []));
-
-/* one_to_many_vector.c */
-int main P((int argc , char *argv []));
 
 /* project.c */
 hypre_SBox *hypre_ProjectBox P((hypre_Box *box , hypre_Index index , hypre_Index stride ));
