@@ -416,7 +416,7 @@ hypre_ParCSRMatrixPrintIJ( hypre_ParCSRMatrix *matrix,
       }
 
       /* print offd columns */
-      if (offd)
+      if ( offd && offd_i && hypre_CSRMatrixNumNonzeros(offd)>0 )
       {
          for (j = offd_i[i]; j < offd_i[i+1]; j++)
          {
