@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050208 15:29:09 PST
- * Generated:     20050208 15:29:10 PST
+ * sidl Created:  20050225 15:45:42 PST
+ * Generated:     20050225 15:45:43 PST
  * Description:   Intermediate Object Representation for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -62,8 +62,6 @@ extern void bHYPRE_StructVector__IOR_version(int32_t *major, int32_t *minor);
 
 struct bHYPRE_StructGrid__array;
 struct bHYPRE_StructGrid__object;
-struct bHYPRE_StructStencil__array;
-struct bHYPRE_StructStencil__object;
 struct sidl_BaseInterface__array;
 struct sidl_BaseInterface__object;
 struct sidl_ClassInfo__array;
@@ -116,9 +114,9 @@ struct bHYPRE_StructVector__epv {
   int32_t (*f_SetGrid)(
     struct bHYPRE_StructVector__object* self,
     struct bHYPRE_StructGrid__object* grid);
-  int32_t (*f_SetStencil)(
+  int32_t (*f_SetNumGhost)(
     struct bHYPRE_StructVector__object* self,
-    struct bHYPRE_StructStencil__object* stencil);
+    struct sidl_int__array* num_ghost);
   int32_t (*f_SetValue)(
     struct bHYPRE_StructVector__object* self,
     struct sidl_int__array* grid_index,
