@@ -65,11 +65,6 @@ hypre_NewStructMatrix( MPI_Comm             comm,
    for (i = 0; i < 6; i++)
       hypre_StructMatrixNumGhost(matrix)[i] = 0;
 
-   /* default ghost layer is 1 for SMG */
-   for (i = 0; i < 2*dim; i++)
-      hypre_StructMatrixNumGhost(matrix)[i] = 1;
-
-
    return matrix;
 }
 
@@ -141,6 +136,7 @@ hypre_InitializeStructMatrixShell( hypre_StructMatrix *matrix )
    int                  *symm_elements;
                     
    int                  *num_ghost;
+   int                   extra_ghost[] = {0, 0, 0, 0, 0, 0};
  
    hypre_BoxArray       *data_space;
    hypre_BoxArray       *boxes;
@@ -200,6 +196,8 @@ hypre_InitializeStructMatrixShell( hypre_StructMatrix *matrix )
 
    /*-----------------------------------------------------------------------
     * Set ghost-layer size for symmetric storage
+    *   - All stencil coeffs are to be available at each point in the
+    *     grid, as well as in the user-specified ghost layer.
     *-----------------------------------------------------------------------*/
 
    num_ghost     = hypre_StructMatrixNumGhost(matrix);
@@ -212,64 +210,20 @@ hypre_InitializeStructMatrixShell( hypre_StructMatrix *matrix )
    {
       if (symm_elements[i] >= 0)
       {
-         j = 0;
          for (d = 0; d < 3; d++)
          {
-            num_ghost[j] =
-               max(num_ghost[  j], -hypre_IndexD(stencil_shape[i], d));
-            num_ghost[j+1] =
-               max(num_ghost[j+1],  hypre_IndexD(stencil_shape[i], d));
-            j += 2;
+            extra_ghost[2*d] =
+               max(extra_ghost[2*d], -hypre_IndexD(stencil_shape[i], d));
+            extra_ghost[2*d + 1] =
+               max(extra_ghost[2*d + 1],  hypre_IndexD(stencil_shape[i], d));
          }
       }
    }
 
-
-   /*-----------------------------------------------------------------------
-    * Set additional ghost-layer size for symmetric storage in SMG
-    *-----------------------------------------------------------------------*/
-
-   dim = hypre_StructStencilDim(stencil);
-
-   for (i = 0; i < stencil_size; i++)
+   for (d = 0; d < 3; d++)
    {
-      if (symm_elements[i] >= 0)
-      {
-         j = symm_elements[i];
-
-         ix = hypre_IndexD(stencil_shape[i], 0);
-         iy = hypre_IndexD(stencil_shape[i], 1);
-         iz = hypre_IndexD(stencil_shape[i], 2);
-         jx = hypre_IndexD(stencil_shape[j], 0);
-         jy = hypre_IndexD(stencil_shape[j], 1);
-         jz = hypre_IndexD(stencil_shape[j], 2);
-
-         if (iz < jz)
-            lower_triangular = 0;
-         else if (jz < iz)
-            lower_triangular = 1;
-         else if (iy < jy)
-            lower_triangular = 0;
-         else if (jy < iy)
-            lower_triangular = 1;
-         else if (ix < jx)
-            lower_triangular = 0;
-         else
-            lower_triangular = 1;
-
-         if (!lower_triangular)
-         {
-            k = 0;
-            for (d = 0; d < dim; d++)
-            {
-               num_ghost[k] =
-                max(num_ghost[  k], -hypre_IndexD(stencil_shape[i], d) + 1);
-               num_ghost[k+1] =
-                max(num_ghost[k+1],  hypre_IndexD(stencil_shape[i], d) + 1);
-               k += 2;
-            }
-         }
-      }
+      num_ghost[2*d]     += extra_ghost[2*d];
+      num_ghost[2*d + 1] += extra_ghost[2*d + 1];
    }
 
    /*-----------------------------------------------------------------------

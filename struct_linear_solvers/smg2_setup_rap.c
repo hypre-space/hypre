@@ -126,8 +126,13 @@ hypre_SMG2NewRAPOp( hypre_StructMatrix *R,
    hypre_StructMatrixSymmetric(RAP) = hypre_StructMatrixSymmetric(A);
 
    /*-----------------------------------------------------------------------
-    * Set number of ghost points - one one each boundary
+    * Set number of ghost points
     *-----------------------------------------------------------------------*/
+   if (hypre_StructMatrixSymmetric(A))
+   {
+      RAP_num_ghost[1] = 0;
+      RAP_num_ghost[3] = 0;
+   }
    hypre_SetStructMatrixNumGhost(RAP, RAP_num_ghost);
 
    hypre_InitializeStructMatrixShell(RAP);

@@ -33,15 +33,15 @@ hypre_SMG3NewRAPOp( hypre_StructMatrix *R,
 
    hypre_Index           *RAP_stencil_shape;
    hypre_StructStencil   *RAP_stencil;
-   int                  RAP_stencil_size;
-   int                  RAP_stencil_dim;
-   int                  RAP_num_ghost[] = {1, 1, 1, 1, 1, 1};
+   int                    RAP_stencil_size;
+   int                    RAP_stencil_dim;
+   int                    RAP_num_ghost[] = {1, 1, 1, 1, 1, 1};
 
    hypre_StructStencil   *A_stencil;
-   int                  A_stencil_size;
+   int                    A_stencil_size;
 
-   int                  k, j, i;
-   int                  stencil_rank;
+   int                    k, j, i;
+   int                    stencil_rank;
 
    RAP_stencil_dim = 3;
  
@@ -197,8 +197,14 @@ hypre_SMG3NewRAPOp( hypre_StructMatrix *R,
    hypre_StructMatrixSymmetric(RAP) = hypre_StructMatrixSymmetric(A);
 
    /*-----------------------------------------------------------------------
-    * Set number of ghost points - one one each boundary
+    * Set number of ghost points
     *-----------------------------------------------------------------------*/
+   if (hypre_StructMatrixSymmetric(A))
+   {
+      RAP_num_ghost[1] = 0;
+      RAP_num_ghost[3] = 0;
+      RAP_num_ghost[5] = 0;
+   }
    hypre_SetStructMatrixNumGhost(RAP, RAP_num_ghost);
 
    hypre_InitializeStructMatrixShell(RAP);
