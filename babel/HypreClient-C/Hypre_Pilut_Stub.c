@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_Pilut_Stub.c
- * Symbol:        Hypre.Pilut-v0.1.6
+ * Symbol:        Hypre.Pilut-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:41 PST
- * Generated:     20030210 16:05:46 PST
+ * SIDL Created:  20030306 17:05:18 PST
+ * Generated:     20030306 17:05:20 PST
  * Description:   Client-side glue code for Hypre.Pilut
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 462
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1242
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #include "Hypre_Pilut.h"
@@ -174,69 +174,23 @@ Hypre_Pilut_getClassInfo(
 }
 
 /*
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 
 int32_t
 Hypre_Pilut_SetCommunicator(
   Hypre_Pilut self,
-  void* comm)
+  void* mpi_comm)
 {
   return (*self->d_epv->f_SetCommunicator)(
     self,
-    comm);
+    mpi_comm);
 }
 
 /*
- * Method:  GetDoubleValue[]
- */
-
-int32_t
-Hypre_Pilut_GetDoubleValue(
-  Hypre_Pilut self,
-  const char* name,
-  double* value)
-{
-  return (*self->d_epv->f_GetDoubleValue)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Method:  GetIntValue[]
- */
-
-int32_t
-Hypre_Pilut_GetIntValue(
-  Hypre_Pilut self,
-  const char* name,
-  int32_t* value)
-{
-  return (*self->d_epv->f_GetIntValue)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Method:  SetDoubleParameter[]
- */
-
-int32_t
-Hypre_Pilut_SetDoubleParameter(
-  Hypre_Pilut self,
-  const char* name,
-  double value)
-{
-  return (*self->d_epv->f_SetDoubleParameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Method:  SetIntParameter[]
+ * Set the int parameter associated with {\tt name}.
+ * 
  */
 
 int32_t
@@ -252,7 +206,25 @@ Hypre_Pilut_SetIntParameter(
 }
 
 /*
- * Method:  SetStringParameter[]
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+Hypre_Pilut_SetDoubleParameter(
+  Hypre_Pilut self,
+  const char* name,
+  double value)
+{
+  return (*self->d_epv->f_SetDoubleParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Set the string parameter associated with {\tt name}.
+ * 
  */
 
 int32_t
@@ -268,7 +240,8 @@ Hypre_Pilut_SetStringParameter(
 }
 
 /*
- * Method:  SetIntArrayParameter[]
+ * Set the int array parameter associated with {\tt name}.
+ * 
  */
 
 int32_t
@@ -284,7 +257,8 @@ Hypre_Pilut_SetIntArrayParameter(
 }
 
 /*
- * Method:  SetDoubleArrayParameter[]
+ * Set the double array parameter associated with {\tt name}.
+ * 
  */
 
 int32_t
@@ -300,7 +274,43 @@ Hypre_Pilut_SetDoubleArrayParameter(
 }
 
 /*
- * Method:  Setup[]
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+Hypre_Pilut_GetIntValue(
+  Hypre_Pilut self,
+  const char* name,
+  int32_t* value)
+{
+  return (*self->d_epv->f_GetIntValue)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+Hypre_Pilut_GetDoubleValue(
+  Hypre_Pilut self,
+  const char* name,
+  double* value)
+{
+  return (*self->d_epv->f_GetDoubleValue)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
  */
 
 int32_t
@@ -316,7 +326,8 @@ Hypre_Pilut_Setup(
 }
 
 /*
- * Method:  Apply[]
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
  */
 
 int32_t
@@ -332,7 +343,8 @@ Hypre_Pilut_Apply(
 }
 
 /*
- * Method:  SetOperator[]
+ * Set the operator for the linear system being solved.
+ * 
  */
 
 int32_t
@@ -346,21 +358,46 @@ Hypre_Pilut_SetOperator(
 }
 
 /*
- * Method:  GetResidual[]
+ * (Optional) Set the convergence tolerance.
+ * 
+ * RDF: New
+ * 
  */
 
 int32_t
-Hypre_Pilut_GetResidual(
+Hypre_Pilut_SetTolerance(
   Hypre_Pilut self,
-  Hypre_Vector* r)
+  double tolerance)
 {
-  return (*self->d_epv->f_GetResidual)(
+  return (*self->d_epv->f_SetTolerance)(
     self,
-    r);
+    tolerance);
 }
 
 /*
- * Method:  SetLogging[]
+ * (Optional) Set maximum number of iterations.
+ * 
+ * RDF: New
+ * 
+ */
+
+int32_t
+Hypre_Pilut_SetMaxIterations(
+  Hypre_Pilut self,
+  int32_t max_iterations)
+{
+  return (*self->d_epv->f_SetMaxIterations)(
+    self,
+    max_iterations);
+}
+
+/*
+ * (Optional) Set the {\it logging level}, specifying the degree
+ * of additional informational data to be accumulated.  Does
+ * nothing by default (level = 0).  Other levels (if any) are
+ * implementation-specific.  Must be called before {\tt Setup}
+ * and {\tt Apply}.
+ * 
  */
 
 int32_t
@@ -374,7 +411,12 @@ Hypre_Pilut_SetLogging(
 }
 
 /*
- * Method:  SetPrintLevel[]
+ * (Optional) Set the {\it print level}, specifying the degree
+ * of informational data to be printed either to the screen or
+ * to a file.  Does nothing by default (level=0).  Other levels
+ * (if any) are implementation-specific.  Must be called before
+ * {\tt Setup} and {\tt Apply}.
+ * 
  */
 
 int32_t
@@ -385,6 +427,40 @@ Hypre_Pilut_SetPrintLevel(
   return (*self->d_epv->f_SetPrintLevel)(
     self,
     level);
+}
+
+/*
+ * (Optional) Return the number of iterations taken.
+ * 
+ * RDF: New
+ * 
+ */
+
+int32_t
+Hypre_Pilut_GetNumIterations(
+  Hypre_Pilut self,
+  int32_t* num_iterations)
+{
+  return (*self->d_epv->f_GetNumIterations)(
+    self,
+    num_iterations);
+}
+
+/*
+ * (Optional) Return the norm of the relative residual.
+ * 
+ * RDF: New
+ * 
+ */
+
+int32_t
+Hypre_Pilut_GetRelResidualNorm(
+  Hypre_Pilut self,
+  double* norm)
+{
+  return (*self->d_epv->f_GetRelResidualNorm)(
+    self,
+    norm);
 }
 
 /*

@@ -1,26 +1,27 @@
 C       
 C       File:          Hypre_StructMatrix_Impl.f
-C       Symbol:        Hypre.StructMatrix-v0.1.6
+C       Symbol:        Hypre.StructMatrix-v0.1.7
 C       Symbol Type:   class
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030210 16:05:50 PST
-C       Generated:     20030210 16:05:56 PST
+C       SIDL Created:  20030306 17:05:23 PST
+C       Generated:     20030306 17:05:26 PST
 C       Description:   Client-side documentation text for Hypre.StructMatrix
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
-C       source-line   = 425
-C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+C       source-line   = 1134
+C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
 
 C       
-C       Symbol "Hypre.StructMatrix" (version 0.1.6)
+C       Symbol "Hypre.StructMatrix" (version 0.1.7)
 C       
-C       A single class that implements both a build interface and an operator
-C       interface. It returns itself for <code>GetConstructedObject</code>.
+C       A single class that implements both a build interface and an
+C       operator interface. It returns itself for GetConstructedObject.
+C       
 C       
 
 
@@ -158,176 +159,17 @@ C       out SIDL.ClassInfo retval
 
 
 C       
-C       Method:  SetCommunicator[]
+C       Set the MPI Communicator.
+C       
 C       
 
-        subroutine Hypre_StructMatrix_SetCommunicator_f(self, comm,
+        subroutine Hypre_StructMatrix_SetCommunicator_f(self, mpi_comm,
      &     retval)
         implicit none
 C       in Hypre.StructMatrix self
         integer*8 self
-C       in opaque comm
-        integer*8 comm
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  GetDoubleValue[]
-C       
-
-        subroutine Hypre_StructMatrix_GetDoubleValue_f(self, name,
-     &     value, retval)
-        implicit none
-C       in Hypre.StructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       out double value
-        double precision value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  GetIntValue[]
-C       
-
-        subroutine Hypre_StructMatrix_GetIntValue_f(self, name, value,
-     &     retval)
-        implicit none
-C       in Hypre.StructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       out int value
-        integer*4 value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  SetDoubleParameter[]
-C       
-
-        subroutine Hypre_StructMatrix_SetDoubleParameter_f(self, name,
-     &     value, retval)
-        implicit none
-C       in Hypre.StructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in double value
-        double precision value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  SetIntParameter[]
-C       
-
-        subroutine Hypre_StructMatrix_SetIntParameter_f(self, name,
-     &     value, retval)
-        implicit none
-C       in Hypre.StructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in int value
-        integer*4 value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  SetStringParameter[]
-C       
-
-        subroutine Hypre_StructMatrix_SetStringParameter_f(self, name,
-     &     value, retval)
-        implicit none
-C       in Hypre.StructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in string value
-        character*(*) value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  SetIntArrayParameter[]
-C       
-
-        subroutine Hypre_StructMatrix_SetIntArrayParameter_f(self, name,
-     &     value, retval)
-        implicit none
-C       in Hypre.StructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in array<int> value
-        integer*8 value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  SetDoubleArrayParameter[]
-C       
-
-        subroutine Hypre_StructMatrix_SetDoubleArrayParameter_f(self,
-     &     name, value, retval)
-        implicit none
-C       in Hypre.StructMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in array<double> value
-        integer*8 value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  Setup[]
-C       
-
-        subroutine Hypre_StructMatrix_Setup_f(self, b, x, retval)
-        implicit none
-C       in Hypre.StructMatrix self
-        integer*8 self
-C       in Hypre.Vector b
-        integer*8 b
-C       in Hypre.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  Apply[]
-C       
-
-        subroutine Hypre_StructMatrix_Apply_f(self, b, x, retval)
-        implicit none
-C       in Hypre.StructMatrix self
-        integer*8 self
-C       in Hypre.Vector b
-        integer*8 b
-C       inout Hypre.Vector x
-        integer*8 x
+C       in opaque mpi_comm
+        integer*8 mpi_comm
 C       out int retval
         integer*4 retval
         end
@@ -336,7 +178,6 @@ C       out int retval
 C       
 C       Prepare an object for setting coefficient values, whether for
 C       the first time or subsequently.
-C       
 C       
 C       
 
@@ -350,11 +191,11 @@ C       out int retval
 
 
 C       
-C       Finalize the construction of an object before using, either for
-C       the first time or on subsequent uses. "Initialize" and "Assemble"
-C       always appear in a matched set, with Initialize preceding Assemble. Values
-C       can only be set in between a call to Initialize and Assemble.
-C       
+C       Finalize the construction of an object before using, either
+C       for the first time or on subsequent uses. {\tt Initialize}
+C       and {\tt Assemble} always appear in a matched set, with
+C       Initialize preceding Assemble. Values can only be set in
+C       between a call to Initialize and Assemble.
 C       
 C       
 
@@ -368,14 +209,15 @@ C       out int retval
 
 
 C       
-C       The problem definition interface is a "builder" that creates an object
-C       that contains the problem definition information, e.g. a matrix. To
-C       perform subsequent operations with that object, it must be returned from
-C       the problem definition object. "GetObject" performs this function.
-C       <note>At compile time, the type of the returned object is unknown.
-C       Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
-C       be used on the returned object to convert it into a known type.</note>
-C       
+C       The problem definition interface is a {\it builder} that
+C       creates an object that contains the problem definition
+C       information, e.g. a matrix. To perform subsequent operations
+C       with that object, it must be returned from the problem
+C       definition object. {\tt GetObject} performs this function.
+C       At compile time, the type of the returned object is unknown.
+C       Thus, the returned type is a SIDL.BaseInterface.
+C       QueryInterface or Cast must be used on the returned object to
+C       convert it into a known type.
 C       
 C       
 
@@ -494,6 +336,176 @@ C       in Hypre.StructMatrix self
         integer*8 self
 C       in int symmetric
         integer*4 symmetric
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the int parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine Hypre_StructMatrix_SetIntParameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in Hypre.StructMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in int value
+        integer*4 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the double parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine Hypre_StructMatrix_SetDoubleParameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in Hypre.StructMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in double value
+        double precision value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the string parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine Hypre_StructMatrix_SetStringParameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in Hypre.StructMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in string value
+        character*(*) value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the int array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine Hypre_StructMatrix_SetIntArrayParameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in Hypre.StructMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<int> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the double array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine Hypre_StructMatrix_SetDoubleArrayParameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in Hypre.StructMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<double> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the int parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine Hypre_StructMatrix_GetIntValue_f(self, name, value,
+     &     retval)
+        implicit none
+C       in Hypre.StructMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out int value
+        integer*4 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Get the double parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine Hypre_StructMatrix_GetDoubleValue_f(self, name,
+     &     value, retval)
+        implicit none
+C       in Hypre.StructMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out double value
+        double precision value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Do any preprocessing that may be necessary in
+C       order to execute {\tt Apply}.
+C       
+C       
+
+        subroutine Hypre_StructMatrix_Setup_f(self, b, x, retval)
+        implicit none
+C       in Hypre.StructMatrix self
+        integer*8 self
+C       in Hypre.Vector b
+        integer*8 b
+C       in Hypre.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Apply the operator to {\tt b}, returning {\tt x}.
+C       
+C       
+
+        subroutine Hypre_StructMatrix_Apply_f(self, b, x, retval)
+        implicit none
+C       in Hypre.StructMatrix self
+        integer*8 self
+C       in Hypre.Vector b
+        integer*8 b
+C       inout Hypre.Vector x
+        integer*8 x
 C       out int retval
         integer*4 retval
         end

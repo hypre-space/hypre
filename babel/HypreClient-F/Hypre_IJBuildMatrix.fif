@@ -1,29 +1,27 @@
 C       
 C       File:          Hypre_IJBuildMatrix_Impl.f
-C       Symbol:        Hypre.IJBuildMatrix-v0.1.6
+C       Symbol:        Hypre.IJBuildMatrix-v0.1.7
 C       Symbol Type:   interface
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030210 16:05:49 PST
-C       Generated:     20030210 16:05:58 PST
+C       SIDL Created:  20030306 17:05:23 PST
+C       Generated:     20030306 17:05:26 PST
 C       Description:   Client-side documentation text for Hypre.IJBuildMatrix
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
-C       source-line   = 155
-C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+C       source-line   = 85
+C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
 
 C       
-C       Symbol "Hypre.IJBuildMatrix" (version 0.1.6)
-C       
+C       Symbol "Hypre.IJBuildMatrix" (version 0.1.7)
 C       
 C       This interface represents a linear-algebraic conceptual view of a
 C       linear system.  The 'I' and 'J' in the name are meant to be
 C       mnemonic for the traditional matrix notation A(I,J).
-C       
 C       
 C       
 
@@ -138,7 +136,8 @@ C       out bool retval
 
 
 C       
-C       Method:  SetCommunicator[]
+C       Set the MPI Communicator.
+C       
 C       
 
         subroutine Hypre_IJBuildMatrix_SetCommunicator_f(self, mpi_comm,
@@ -158,7 +157,6 @@ C       Prepare an object for setting coefficient values, whether for
 C       the first time or subsequently.
 C       
 C       
-C       
 
         subroutine Hypre_IJBuildMatrix_Initialize_f(self, retval)
         implicit none
@@ -170,11 +168,11 @@ C       out int retval
 
 
 C       
-C       Finalize the construction of an object before using, either for
-C       the first time or on subsequent uses. "Initialize" and "Assemble"
-C       always appear in a matched set, with Initialize preceding Assemble. Values
-C       can only be set in between a call to Initialize and Assemble.
-C       
+C       Finalize the construction of an object before using, either
+C       for the first time or on subsequent uses. {\tt Initialize}
+C       and {\tt Assemble} always appear in a matched set, with
+C       Initialize preceding Assemble. Values can only be set in
+C       between a call to Initialize and Assemble.
 C       
 C       
 
@@ -188,14 +186,15 @@ C       out int retval
 
 
 C       
-C       The problem definition interface is a "builder" that creates an object
-C       that contains the problem definition information, e.g. a matrix. To
-C       perform subsequent operations with that object, it must be returned from
-C       the problem definition object. "GetObject" performs this function.
-C       <note>At compile time, the type of the returned object is unknown.
-C       Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
-C       be used on the returned object to convert it into a known type.</note>
-C       
+C       The problem definition interface is a {\it builder} that
+C       creates an object that contains the problem definition
+C       information, e.g. a matrix. To perform subsequent operations
+C       with that object, it must be returned from the problem
+C       definition object. {\tt GetObject} performs this function.
+C       At compile time, the type of the returned object is unknown.
+C       Thus, the returned type is a SIDL.BaseInterface.
+C       QueryInterface or Cast must be used on the returned object to
+C       convert it into a known type.
 C       
 C       
 
@@ -211,30 +210,33 @@ C       out int retval
 
 
 C       
-C       Create a matrix object.  Each process owns some unique consecutive
-C       range of rows, indicated by the global row indices {\tt ilower} and
-C       {\tt iupper}.  The row data is required to be such that the value
-C       of {\tt ilower} on any process $p$ be exactly one more than the
-C       value of {\tt iupper} on process $p-1$.  Note that the first row of
-C       the global matrix may start with any integer value.  In particular,
-C       one may use zero- or one-based indexing.
+C       Set the local range for a matrix object.  Each process owns
+C       some unique consecutive range of rows, indicated by the
+C       global row indices {\tt ilower} and {\tt iupper}.  The row
+C       data is required to be such that the value of {\tt ilower} on
+C       any process $p$ be exactly one more than the value of {\tt
+C       iupper} on process $p-1$.  Note that the first row of the
+C       global matrix may start with any integer value.  In
+C       particular, one may use zero- or one-based indexing.
 C       
-C       For square matrices, {\tt jlower} and {\tt jupper} typically should
-C       match {\tt ilower} and {\tt iupper}, respectively.  For rectangular
-C       matrices, {\tt jlower} and {\tt jupper} should define a
-C       partitioning of the columns.  This partitioning must be used for
-C       any vector $v$ that will be used in matrix-vector products with the
-C       rectangular matrix.  The matrix data structure may use {\tt jlower}
-C       and {\tt jupper} to store the diagonal blocks (rectangular in
-C       general) of the matrix separately from the rest of the matrix.
+C       For square matrices, {\tt jlower} and {\tt jupper} typically
+C       should match {\tt ilower} and {\tt iupper}, respectively.
+C       For rectangular matrices, {\tt jlower} and {\tt jupper}
+C       should define a partitioning of the columns.  This
+C       partitioning must be used for any vector $v$ that will be
+C       used in matrix-vector products with the rectangular matrix.
+C       The matrix data structure may use {\tt jlower} and {\tt
+C       jupper} to store the diagonal blocks (rectangular in general)
+C       of the matrix separately from the rest of the matrix.
 C       
 C       Collective.
 C       
+C       RDF: Changed name from 'Create' (x)
 C       
 C       
 
-        subroutine Hypre_IJBuildMatrix_Create_f(self, ilower, iupper,
-     &     jlower, jupper, retval)
+        subroutine Hypre_IJBuildMatrix_SetLocalRange_f(self, ilower,
+     &     iupper, jlower, jupper, retval)
         implicit none
 C       in Hypre.IJBuildMatrix self
         integer*8 self
@@ -252,18 +254,18 @@ C       out int retval
 
 
 C       
-C       Sets values for {\tt nrows} of the matrix.  The arrays {\tt ncols}
-C       and {\tt rows} are of dimension {\tt nrows} and contain the number
-C       of columns in each row and the row indices, respectively.  The
-C       array {\tt cols} contains the column indices for each of the {\tt
-C       rows}, and is ordered by rows.  The data in the {\tt values} array
-C       corresponds directly to the column entries in {\tt cols}.  Erases
-C       any previous values at the specified locations and replaces them
-C       with new ones, or, if there was no value there before, inserts a
-C       new one.
+C       Sets values for {\tt nrows} of the matrix.  The arrays {\tt
+C       ncols} and {\tt rows} are of dimension {\tt nrows} and
+C       contain the number of columns in each row and the row
+C       indices, respectively.  The array {\tt cols} contains the
+C       column indices for each of the {\tt rows}, and is ordered by
+C       rows.  The data in the {\tt values} array corresponds
+C       directly to the column entries in {\tt cols}.  Erases any
+C       previous values at the specified locations and replaces them
+C       with new ones, or, if there was no value there before,
+C       inserts a new one.
 C       
 C       Not collective.
-C       
 C       
 C       
 
@@ -288,13 +290,12 @@ C       out int retval
 
 
 C       
-C       Adds to values for {\tt nrows} of the matrix.  Usage details are
-C       analogous to \Ref{HYPRE_IJMatrixSetValues}.  Adds to any previous
-C       values at the specified locations, or, if there was no value there
-C       before, inserts a new one.
+C       Adds to values for {\tt nrows} of the matrix.  Usage details
+C       are analogous to {\tt SetValues}.  Adds to any previous
+C       values at the specified locations, or, if there was no value
+C       there before, inserts a new one.
 C       
 C       Not collective.
-C       
 C       
 C       
 
@@ -319,14 +320,92 @@ C       out int retval
 
 
 C       
-C       (Optional) Set the max number of nonzeros to expect in each row.
-C       The array {\tt sizes} contains estimated sizes for each row on this
-C       process.  This call can significantly improve the efficiency of
-C       matrix construction, and should always be utilized if possible.
+C       Gets range of rows owned by this processor and range of
+C       column partitioning for this processor.
+C       
+C       RDF: New (x)
+C       
+C       
+
+        subroutine Hypre_IJBuildMatrix_GetLocalRange_f(self, ilower,
+     &     iupper, jlower, jupper, retval)
+        implicit none
+C       in Hypre.IJBuildMatrix self
+        integer*8 self
+C       out int ilower
+        integer*4 ilower
+C       out int iupper
+        integer*4 iupper
+C       out int jlower
+        integer*4 jlower
+C       out int jupper
+        integer*4 jupper
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Gets number of nonzeros elements for {\tt nrows} rows
+C       specified in {\tt rows} and returns them in {\tt ncols},
+C       which needs to be allocated by the user.
+C       
+C       RDF: New (x)
+C       
+C       
+
+        subroutine Hypre_IJBuildMatrix_GetRowCounts_f(self, nrows, rows,
+     &     ncols, retval)
+        implicit none
+C       in Hypre.IJBuildMatrix self
+        integer*8 self
+C       in int nrows
+        integer*4 nrows
+C       in array<int> rows
+        integer*8 rows
+C       inout array<int> ncols
+        integer*8 ncols
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Gets values for {\tt nrows} rows or partial rows of the
+C       matrix.  Usage details are analogous to {\tt SetValues}.
+C       
+C       RDF: New (x)
+C       
+C       
+
+        subroutine Hypre_IJBuildMatrix_GetValues_f(self, nrows, ncols,
+     &     rows, cols, values, retval)
+        implicit none
+C       in Hypre.IJBuildMatrix self
+        integer*8 self
+C       in int nrows
+        integer*4 nrows
+C       in array<int> ncols
+        integer*8 ncols
+C       in array<int> rows
+        integer*8 rows
+C       in array<int> cols
+        integer*8 cols
+C       inout array<double> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Set the max number of nonzeros to expect in each
+C       row.  The array {\tt sizes} contains estimated sizes for each
+C       row on this process.  This call can significantly improve the
+C       efficiency of matrix construction, and should always be
+C       utilized if possible.
 C       
 C       Not collective.
-C       
-C       DEVELOPER NOTES: None.
 C       
 C       
 
@@ -343,36 +422,25 @@ C       out int retval
 
 
 C       
-C       (Optional) Set the max number of nonzeros to expect in each row of
-C       the diagonal and off-diagonal blocks.  The diagonal block is the
-C       submatrix whose column numbers correspond to rows owned by this
-C       process, and the off-diagonal block is everything else.  The arrays
-C       {\tt diag\_sizes} and {\tt offdiag\_sizes} contain estimated sizes
-C       for each row of the diagonal and off-diagonal blocks, respectively.
-C       This routine can significantly improve the efficiency of matrix
-C       construction, and should always be utilized if possible.
-C       
-C       Not collective.
-C       
+C       Print the matrix to file.  This is mainly for debugging
+C       purposes.
 C       
 C       
 
-        subroutine Hypre_IJBuildMatrix_SetDiagOffdSizes_f(self,
-     &     diag_sizes, offdiag_sizes, retval)
+        subroutine Hypre_IJBuildMatrix_Print_f(self, filename, retval)
         implicit none
 C       in Hypre.IJBuildMatrix self
         integer*8 self
-C       in array<int> diag_sizes
-        integer*8 diag_sizes
-C       in array<int> offdiag_sizes
-        integer*8 offdiag_sizes
+C       in string filename
+        character*(*) filename
 C       out int retval
         integer*4 retval
         end
 
 
 C       
-C       Read the matrix from file.  This is mainly for debugging purposes.
+C       Read the matrix from file.  This is mainly for debugging
+C       purposes.
 C       
 C       
 
@@ -385,22 +453,6 @@ C       in string filename
         character*(*) filename
 C       in opaque comm
         integer*8 comm
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Print the matrix to file.  This is mainly for debugging purposes.
-C       
-C       
-
-        subroutine Hypre_IJBuildMatrix_Print_f(self, filename, retval)
-        implicit none
-C       in Hypre.IJBuildMatrix self
-        integer*8 self
-C       in string filename
-        character*(*) filename
 C       out int retval
         integer*4 retval
         end

@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_GMRES_IOR.c
- * Symbol:        Hypre.GMRES-v0.1.6
+ * Symbol:        Hypre.GMRES-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:50 PST
- * Generated:     20030210 16:05:51 PST
+ * SIDL Created:  20030306 17:05:23 PST
+ * Generated:     20030306 17:05:24 PST
  * Description:   Intermediate Object Representation for Hypre.GMRES
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 466
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1262
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #include <stdlib.h>
@@ -145,38 +145,40 @@ static void Hypre_GMRES__init_epv(
   s_old__sidl_baseinterface = s1->d_sidl_baseinterface.d_epv;
   s_old__sidl_baseclass     = s1->d_epv;
 
-  epv->f__cast                     = ior_Hypre_GMRES__cast;
-  epv->f__delete                   = ior_Hypre_GMRES__delete;
-  epv->f__ctor                     = NULL;
-  epv->f__dtor                     = NULL;
-  epv->f_addRef                    = (void (*)(struct Hypre_GMRES__object*)) 
+  epv->f__cast                   = ior_Hypre_GMRES__cast;
+  epv->f__delete                 = ior_Hypre_GMRES__delete;
+  epv->f__ctor                   = NULL;
+  epv->f__dtor                   = NULL;
+  epv->f_addRef                  = (void (*)(struct Hypre_GMRES__object*)) 
     s1->d_epv->f_addRef;
-  epv->f_deleteRef                 = (void (*)(struct Hypre_GMRES__object*)) 
+  epv->f_deleteRef               = (void (*)(struct Hypre_GMRES__object*)) 
     s1->d_epv->f_deleteRef;
-  epv->f_isSame                    = (SIDL_bool (*)(struct Hypre_GMRES__object*,
+  epv->f_isSame                  = (SIDL_bool (*)(struct Hypre_GMRES__object*,
     struct SIDL_BaseInterface__object*)) s1->d_epv->f_isSame;
-  epv->f_queryInt                  = (struct SIDL_BaseInterface__object* 
+  epv->f_queryInt                = (struct SIDL_BaseInterface__object* 
     (*)(struct Hypre_GMRES__object*,const char*)) s1->d_epv->f_queryInt;
-  epv->f_isType                    = (SIDL_bool (*)(struct Hypre_GMRES__object*,
+  epv->f_isType                  = (SIDL_bool (*)(struct Hypre_GMRES__object*,
     const char*)) s1->d_epv->f_isType;
-  epv->f_getClassInfo              = (struct SIDL_ClassInfo__object* (*)(struct 
+  epv->f_getClassInfo            = (struct SIDL_ClassInfo__object* (*)(struct 
     Hypre_GMRES__object*)) s1->d_epv->f_getClassInfo;
-  epv->f_SetCommunicator           = NULL;
-  epv->f_GetDoubleValue            = NULL;
-  epv->f_GetIntValue               = NULL;
-  epv->f_SetDoubleParameter        = NULL;
-  epv->f_SetIntParameter           = NULL;
-  epv->f_SetStringParameter        = NULL;
-  epv->f_SetIntArrayParameter      = NULL;
-  epv->f_SetDoubleArrayParameter   = NULL;
-  epv->f_Setup                     = NULL;
-  epv->f_Apply                     = NULL;
-  epv->f_SetOperator               = NULL;
-  epv->f_GetResidual               = NULL;
-  epv->f_SetLogging                = NULL;
-  epv->f_SetPrintLevel             = NULL;
-  epv->f_SetPreconditioner         = NULL;
-  epv->f_GetPreconditionedResidual = NULL;
+  epv->f_SetCommunicator         = NULL;
+  epv->f_SetIntParameter         = NULL;
+  epv->f_SetDoubleParameter      = NULL;
+  epv->f_SetStringParameter      = NULL;
+  epv->f_SetIntArrayParameter    = NULL;
+  epv->f_SetDoubleArrayParameter = NULL;
+  epv->f_GetIntValue             = NULL;
+  epv->f_GetDoubleValue          = NULL;
+  epv->f_Setup                   = NULL;
+  epv->f_Apply                   = NULL;
+  epv->f_SetOperator             = NULL;
+  epv->f_SetTolerance            = NULL;
+  epv->f_SetMaxIterations        = NULL;
+  epv->f_SetLogging              = NULL;
+  epv->f_SetPrintLevel           = NULL;
+  epv->f_GetNumIterations        = NULL;
+  epv->f_GetRelResidualNorm      = NULL;
+  epv->f_SetPreconditioner       = NULL;
 
   Hypre_GMRES__set_epv(epv);
 
@@ -192,67 +194,71 @@ static void Hypre_GMRES__init_epv(
     const char*)) epv->f_isType;
   e0->f_SetCommunicator         = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
-  e0->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
-    double*)) epv->f_GetDoubleValue;
-  e0->f_GetIntValue             = (int32_t (*)(void*,const char*,
-    int32_t*)) epv->f_GetIntValue;
-  e0->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
-    double)) epv->f_SetDoubleParameter;
   e0->f_SetIntParameter         = (int32_t (*)(void*,const char*,
     int32_t)) epv->f_SetIntParameter;
+  e0->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
+    double)) epv->f_SetDoubleParameter;
   e0->f_SetStringParameter      = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
   e0->f_SetIntArrayParameter    = (int32_t (*)(void*,const char*,
     struct SIDL_int__array*)) epv->f_SetIntArrayParameter;
   e0->f_SetDoubleArrayParameter = (int32_t (*)(void*,const char*,
     struct SIDL_double__array*)) epv->f_SetDoubleArrayParameter;
+  e0->f_GetIntValue             = (int32_t (*)(void*,const char*,
+    int32_t*)) epv->f_GetIntValue;
+  e0->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
+    double*)) epv->f_GetDoubleValue;
   e0->f_Setup                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object*)) epv->f_Setup;
   e0->f_Apply                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object**)) epv->f_Apply;
 
-  e1->f__cast                     = (void* (*)(void*,const char*)) epv->f__cast;
-  e1->f__delete                   = (void (*)(void*)) epv->f__delete;
-  e1->f_addRef                    = (void (*)(void*)) epv->f_addRef;
-  e1->f_deleteRef                 = (void (*)(void*)) epv->f_deleteRef;
-  e1->f_isSame                    = (SIDL_bool (*)(void*,
+  e1->f__cast                   = (void* (*)(void*,const char*)) epv->f__cast;
+  e1->f__delete                 = (void (*)(void*)) epv->f__delete;
+  e1->f_addRef                  = (void (*)(void*)) epv->f_addRef;
+  e1->f_deleteRef               = (void (*)(void*)) epv->f_deleteRef;
+  e1->f_isSame                  = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e1->f_queryInt                  = (struct SIDL_BaseInterface__object* 
-    (*)(void*,const char*)) epv->f_queryInt;
-  e1->f_isType                    = (SIDL_bool (*)(void*,
+  e1->f_queryInt                = (struct SIDL_BaseInterface__object* (*)(void*,
+    const char*)) epv->f_queryInt;
+  e1->f_isType                  = (SIDL_bool (*)(void*,
     const char*)) epv->f_isType;
-  e1->f_SetCommunicator           = (int32_t (*)(void*,
+  e1->f_SetCommunicator         = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
-  e1->f_GetDoubleValue            = (int32_t (*)(void*,const char*,
-    double*)) epv->f_GetDoubleValue;
-  e1->f_GetIntValue               = (int32_t (*)(void*,const char*,
-    int32_t*)) epv->f_GetIntValue;
-  e1->f_SetDoubleParameter        = (int32_t (*)(void*,const char*,
-    double)) epv->f_SetDoubleParameter;
-  e1->f_SetIntParameter           = (int32_t (*)(void*,const char*,
+  e1->f_SetIntParameter         = (int32_t (*)(void*,const char*,
     int32_t)) epv->f_SetIntParameter;
-  e1->f_SetStringParameter        = (int32_t (*)(void*,const char*,
+  e1->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
+    double)) epv->f_SetDoubleParameter;
+  e1->f_SetStringParameter      = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
-  e1->f_SetIntArrayParameter      = (int32_t (*)(void*,const char*,
+  e1->f_SetIntArrayParameter    = (int32_t (*)(void*,const char*,
     struct SIDL_int__array*)) epv->f_SetIntArrayParameter;
-  e1->f_SetDoubleArrayParameter   = (int32_t (*)(void*,const char*,
+  e1->f_SetDoubleArrayParameter = (int32_t (*)(void*,const char*,
     struct SIDL_double__array*)) epv->f_SetDoubleArrayParameter;
-  e1->f_Setup                     = (int32_t (*)(void*,
+  e1->f_GetIntValue             = (int32_t (*)(void*,const char*,
+    int32_t*)) epv->f_GetIntValue;
+  e1->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
+    double*)) epv->f_GetDoubleValue;
+  e1->f_Setup                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object*)) epv->f_Setup;
-  e1->f_Apply                     = (int32_t (*)(void*,
+  e1->f_Apply                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object**)) epv->f_Apply;
-  e1->f_SetOperator               = (int32_t (*)(void*,
+  e1->f_SetOperator             = (int32_t (*)(void*,
     struct Hypre_Operator__object*)) epv->f_SetOperator;
-  e1->f_GetResidual               = (int32_t (*)(void*,
-    struct Hypre_Vector__object**)) epv->f_GetResidual;
-  e1->f_SetLogging                = (int32_t (*)(void*,
+  e1->f_SetTolerance            = (int32_t (*)(void*,
+    double)) epv->f_SetTolerance;
+  e1->f_SetMaxIterations        = (int32_t (*)(void*,
+    int32_t)) epv->f_SetMaxIterations;
+  e1->f_SetLogging              = (int32_t (*)(void*,
     int32_t)) epv->f_SetLogging;
-  e1->f_SetPrintLevel             = (int32_t (*)(void*,
+  e1->f_SetPrintLevel           = (int32_t (*)(void*,
     int32_t)) epv->f_SetPrintLevel;
-  e1->f_SetPreconditioner         = (int32_t (*)(void*,
+  e1->f_GetNumIterations        = (int32_t (*)(void*,
+    int32_t*)) epv->f_GetNumIterations;
+  e1->f_GetRelResidualNorm      = (int32_t (*)(void*,
+    double*)) epv->f_GetRelResidualNorm;
+  e1->f_SetPreconditioner       = (int32_t (*)(void*,
     struct Hypre_Solver__object*)) epv->f_SetPreconditioner;
-  e1->f_GetPreconditionedResidual = (int32_t (*)(void*,
-    struct Hypre_Vector__object**)) epv->f_GetPreconditionedResidual;
 
   e2->f__cast                   = (void* (*)(void*,const char*)) epv->f__cast;
   e2->f__delete                 = (void (*)(void*)) epv->f__delete;
@@ -266,32 +272,38 @@ static void Hypre_GMRES__init_epv(
     const char*)) epv->f_isType;
   e2->f_SetCommunicator         = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
-  e2->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
-    double*)) epv->f_GetDoubleValue;
-  e2->f_GetIntValue             = (int32_t (*)(void*,const char*,
-    int32_t*)) epv->f_GetIntValue;
-  e2->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
-    double)) epv->f_SetDoubleParameter;
   e2->f_SetIntParameter         = (int32_t (*)(void*,const char*,
     int32_t)) epv->f_SetIntParameter;
+  e2->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
+    double)) epv->f_SetDoubleParameter;
   e2->f_SetStringParameter      = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
   e2->f_SetIntArrayParameter    = (int32_t (*)(void*,const char*,
     struct SIDL_int__array*)) epv->f_SetIntArrayParameter;
   e2->f_SetDoubleArrayParameter = (int32_t (*)(void*,const char*,
     struct SIDL_double__array*)) epv->f_SetDoubleArrayParameter;
+  e2->f_GetIntValue             = (int32_t (*)(void*,const char*,
+    int32_t*)) epv->f_GetIntValue;
+  e2->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
+    double*)) epv->f_GetDoubleValue;
   e2->f_Setup                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object*)) epv->f_Setup;
   e2->f_Apply                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object**)) epv->f_Apply;
   e2->f_SetOperator             = (int32_t (*)(void*,
     struct Hypre_Operator__object*)) epv->f_SetOperator;
-  e2->f_GetResidual             = (int32_t (*)(void*,
-    struct Hypre_Vector__object**)) epv->f_GetResidual;
+  e2->f_SetTolerance            = (int32_t (*)(void*,
+    double)) epv->f_SetTolerance;
+  e2->f_SetMaxIterations        = (int32_t (*)(void*,
+    int32_t)) epv->f_SetMaxIterations;
   e2->f_SetLogging              = (int32_t (*)(void*,
     int32_t)) epv->f_SetLogging;
   e2->f_SetPrintLevel           = (int32_t (*)(void*,
     int32_t)) epv->f_SetPrintLevel;
+  e2->f_GetNumIterations        = (int32_t (*)(void*,
+    int32_t*)) epv->f_GetNumIterations;
+  e2->f_GetRelResidualNorm      = (int32_t (*)(void*,
+    double*)) epv->f_GetRelResidualNorm;
 
   e3->f__cast        = (void* (*)(struct SIDL_BaseClass__object*,
     const char*)) epv->f__cast;
@@ -559,46 +571,7 @@ remote_Hypre_GMRES_getClassInfo(
 static int32_t
 remote_Hypre_GMRES_SetCommunicator(
   struct Hypre_GMRES__object* self,
-  void* comm)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:GetDoubleValue
- */
-
-static int32_t
-remote_Hypre_GMRES_GetDoubleValue(
-  struct Hypre_GMRES__object* self,
-  const char* name,
-  double* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:GetIntValue
- */
-
-static int32_t
-remote_Hypre_GMRES_GetIntValue(
-  struct Hypre_GMRES__object* self,
-  const char* name,
-  int32_t* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetDoubleParameter
- */
-
-static int32_t
-remote_Hypre_GMRES_SetDoubleParameter(
-  struct Hypre_GMRES__object* self,
-  const char* name,
-  double value)
+  void* mpi_comm)
 {
   return 0;
 }
@@ -612,6 +585,19 @@ remote_Hypre_GMRES_SetIntParameter(
   struct Hypre_GMRES__object* self,
   const char* name,
   int32_t value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetDoubleParameter
+ */
+
+static int32_t
+remote_Hypre_GMRES_SetDoubleParameter(
+  struct Hypre_GMRES__object* self,
+  const char* name,
+  double value)
 {
   return 0;
 }
@@ -656,6 +642,32 @@ remote_Hypre_GMRES_SetDoubleArrayParameter(
 }
 
 /*
+ * REMOTE METHOD STUB:GetIntValue
+ */
+
+static int32_t
+remote_Hypre_GMRES_GetIntValue(
+  struct Hypre_GMRES__object* self,
+  const char* name,
+  int32_t* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetDoubleValue
+ */
+
+static int32_t
+remote_Hypre_GMRES_GetDoubleValue(
+  struct Hypre_GMRES__object* self,
+  const char* name,
+  double* value)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:Setup
  */
 
@@ -694,13 +706,25 @@ remote_Hypre_GMRES_SetOperator(
 }
 
 /*
- * REMOTE METHOD STUB:GetResidual
+ * REMOTE METHOD STUB:SetTolerance
  */
 
 static int32_t
-remote_Hypre_GMRES_GetResidual(
+remote_Hypre_GMRES_SetTolerance(
   struct Hypre_GMRES__object* self,
-  struct Hypre_Vector__object** r)
+  double tolerance)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetMaxIterations
+ */
+
+static int32_t
+remote_Hypre_GMRES_SetMaxIterations(
+  struct Hypre_GMRES__object* self,
+  int32_t max_iterations)
 {
   return 0;
 }
@@ -730,6 +754,30 @@ remote_Hypre_GMRES_SetPrintLevel(
 }
 
 /*
+ * REMOTE METHOD STUB:GetNumIterations
+ */
+
+static int32_t
+remote_Hypre_GMRES_GetNumIterations(
+  struct Hypre_GMRES__object* self,
+  int32_t* num_iterations)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetRelResidualNorm
+ */
+
+static int32_t
+remote_Hypre_GMRES_GetRelResidualNorm(
+  struct Hypre_GMRES__object* self,
+  double* norm)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:SetPreconditioner
  */
 
@@ -737,18 +785,6 @@ static int32_t
 remote_Hypre_GMRES_SetPreconditioner(
   struct Hypre_GMRES__object* self,
   struct Hypre_Solver__object* s)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:GetPreconditionedResidual
- */
-
-static int32_t
-remote_Hypre_GMRES_GetPreconditionedResidual(
-  struct Hypre_GMRES__object* self,
-  struct Hypre_Vector__object** r)
 {
   return 0;
 }
@@ -767,33 +803,34 @@ static void Hypre_GMRES__init_remote_epv(void)
   struct SIDL_BaseClass__epv*             e3  = &s_rem__sidl_baseclass;
   struct SIDL_BaseInterface__epv*         e4  = &s_rem__sidl_baseinterface;
 
-  epv->f__cast                     = remote_Hypre_GMRES__cast;
-  epv->f__delete                   = remote_Hypre_GMRES__delete;
-  epv->f__ctor                     = NULL;
-  epv->f__dtor                     = NULL;
-  epv->f_addRef                    = remote_Hypre_GMRES_addRef;
-  epv->f_deleteRef                 = remote_Hypre_GMRES_deleteRef;
-  epv->f_isSame                    = remote_Hypre_GMRES_isSame;
-  epv->f_queryInt                  = remote_Hypre_GMRES_queryInt;
-  epv->f_isType                    = remote_Hypre_GMRES_isType;
-  epv->f_getClassInfo              = remote_Hypre_GMRES_getClassInfo;
-  epv->f_SetCommunicator           = remote_Hypre_GMRES_SetCommunicator;
-  epv->f_GetDoubleValue            = remote_Hypre_GMRES_GetDoubleValue;
-  epv->f_GetIntValue               = remote_Hypre_GMRES_GetIntValue;
-  epv->f_SetDoubleParameter        = remote_Hypre_GMRES_SetDoubleParameter;
-  epv->f_SetIntParameter           = remote_Hypre_GMRES_SetIntParameter;
-  epv->f_SetStringParameter        = remote_Hypre_GMRES_SetStringParameter;
-  epv->f_SetIntArrayParameter      = remote_Hypre_GMRES_SetIntArrayParameter;
-  epv->f_SetDoubleArrayParameter   = remote_Hypre_GMRES_SetDoubleArrayParameter;
-  epv->f_Setup                     = remote_Hypre_GMRES_Setup;
-  epv->f_Apply                     = remote_Hypre_GMRES_Apply;
-  epv->f_SetOperator               = remote_Hypre_GMRES_SetOperator;
-  epv->f_GetResidual               = remote_Hypre_GMRES_GetResidual;
-  epv->f_SetLogging                = remote_Hypre_GMRES_SetLogging;
-  epv->f_SetPrintLevel             = remote_Hypre_GMRES_SetPrintLevel;
-  epv->f_SetPreconditioner         = remote_Hypre_GMRES_SetPreconditioner;
-  epv->f_GetPreconditionedResidual = 
-    remote_Hypre_GMRES_GetPreconditionedResidual;
+  epv->f__cast                   = remote_Hypre_GMRES__cast;
+  epv->f__delete                 = remote_Hypre_GMRES__delete;
+  epv->f__ctor                   = NULL;
+  epv->f__dtor                   = NULL;
+  epv->f_addRef                  = remote_Hypre_GMRES_addRef;
+  epv->f_deleteRef               = remote_Hypre_GMRES_deleteRef;
+  epv->f_isSame                  = remote_Hypre_GMRES_isSame;
+  epv->f_queryInt                = remote_Hypre_GMRES_queryInt;
+  epv->f_isType                  = remote_Hypre_GMRES_isType;
+  epv->f_getClassInfo            = remote_Hypre_GMRES_getClassInfo;
+  epv->f_SetCommunicator         = remote_Hypre_GMRES_SetCommunicator;
+  epv->f_SetIntParameter         = remote_Hypre_GMRES_SetIntParameter;
+  epv->f_SetDoubleParameter      = remote_Hypre_GMRES_SetDoubleParameter;
+  epv->f_SetStringParameter      = remote_Hypre_GMRES_SetStringParameter;
+  epv->f_SetIntArrayParameter    = remote_Hypre_GMRES_SetIntArrayParameter;
+  epv->f_SetDoubleArrayParameter = remote_Hypre_GMRES_SetDoubleArrayParameter;
+  epv->f_GetIntValue             = remote_Hypre_GMRES_GetIntValue;
+  epv->f_GetDoubleValue          = remote_Hypre_GMRES_GetDoubleValue;
+  epv->f_Setup                   = remote_Hypre_GMRES_Setup;
+  epv->f_Apply                   = remote_Hypre_GMRES_Apply;
+  epv->f_SetOperator             = remote_Hypre_GMRES_SetOperator;
+  epv->f_SetTolerance            = remote_Hypre_GMRES_SetTolerance;
+  epv->f_SetMaxIterations        = remote_Hypre_GMRES_SetMaxIterations;
+  epv->f_SetLogging              = remote_Hypre_GMRES_SetLogging;
+  epv->f_SetPrintLevel           = remote_Hypre_GMRES_SetPrintLevel;
+  epv->f_GetNumIterations        = remote_Hypre_GMRES_GetNumIterations;
+  epv->f_GetRelResidualNorm      = remote_Hypre_GMRES_GetRelResidualNorm;
+  epv->f_SetPreconditioner       = remote_Hypre_GMRES_SetPreconditioner;
 
   e0->f__cast                   = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete                 = (void (*)(void*)) epv->f__delete;
@@ -807,67 +844,71 @@ static void Hypre_GMRES__init_remote_epv(void)
     const char*)) epv->f_isType;
   e0->f_SetCommunicator         = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
-  e0->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
-    double*)) epv->f_GetDoubleValue;
-  e0->f_GetIntValue             = (int32_t (*)(void*,const char*,
-    int32_t*)) epv->f_GetIntValue;
-  e0->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
-    double)) epv->f_SetDoubleParameter;
   e0->f_SetIntParameter         = (int32_t (*)(void*,const char*,
     int32_t)) epv->f_SetIntParameter;
+  e0->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
+    double)) epv->f_SetDoubleParameter;
   e0->f_SetStringParameter      = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
   e0->f_SetIntArrayParameter    = (int32_t (*)(void*,const char*,
     struct SIDL_int__array*)) epv->f_SetIntArrayParameter;
   e0->f_SetDoubleArrayParameter = (int32_t (*)(void*,const char*,
     struct SIDL_double__array*)) epv->f_SetDoubleArrayParameter;
+  e0->f_GetIntValue             = (int32_t (*)(void*,const char*,
+    int32_t*)) epv->f_GetIntValue;
+  e0->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
+    double*)) epv->f_GetDoubleValue;
   e0->f_Setup                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object*)) epv->f_Setup;
   e0->f_Apply                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object**)) epv->f_Apply;
 
-  e1->f__cast                     = (void* (*)(void*,const char*)) epv->f__cast;
-  e1->f__delete                   = (void (*)(void*)) epv->f__delete;
-  e1->f_addRef                    = (void (*)(void*)) epv->f_addRef;
-  e1->f_deleteRef                 = (void (*)(void*)) epv->f_deleteRef;
-  e1->f_isSame                    = (SIDL_bool (*)(void*,
+  e1->f__cast                   = (void* (*)(void*,const char*)) epv->f__cast;
+  e1->f__delete                 = (void (*)(void*)) epv->f__delete;
+  e1->f_addRef                  = (void (*)(void*)) epv->f_addRef;
+  e1->f_deleteRef               = (void (*)(void*)) epv->f_deleteRef;
+  e1->f_isSame                  = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e1->f_queryInt                  = (struct SIDL_BaseInterface__object* 
-    (*)(void*,const char*)) epv->f_queryInt;
-  e1->f_isType                    = (SIDL_bool (*)(void*,
+  e1->f_queryInt                = (struct SIDL_BaseInterface__object* (*)(void*,
+    const char*)) epv->f_queryInt;
+  e1->f_isType                  = (SIDL_bool (*)(void*,
     const char*)) epv->f_isType;
-  e1->f_SetCommunicator           = (int32_t (*)(void*,
+  e1->f_SetCommunicator         = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
-  e1->f_GetDoubleValue            = (int32_t (*)(void*,const char*,
-    double*)) epv->f_GetDoubleValue;
-  e1->f_GetIntValue               = (int32_t (*)(void*,const char*,
-    int32_t*)) epv->f_GetIntValue;
-  e1->f_SetDoubleParameter        = (int32_t (*)(void*,const char*,
-    double)) epv->f_SetDoubleParameter;
-  e1->f_SetIntParameter           = (int32_t (*)(void*,const char*,
+  e1->f_SetIntParameter         = (int32_t (*)(void*,const char*,
     int32_t)) epv->f_SetIntParameter;
-  e1->f_SetStringParameter        = (int32_t (*)(void*,const char*,
+  e1->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
+    double)) epv->f_SetDoubleParameter;
+  e1->f_SetStringParameter      = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
-  e1->f_SetIntArrayParameter      = (int32_t (*)(void*,const char*,
+  e1->f_SetIntArrayParameter    = (int32_t (*)(void*,const char*,
     struct SIDL_int__array*)) epv->f_SetIntArrayParameter;
-  e1->f_SetDoubleArrayParameter   = (int32_t (*)(void*,const char*,
+  e1->f_SetDoubleArrayParameter = (int32_t (*)(void*,const char*,
     struct SIDL_double__array*)) epv->f_SetDoubleArrayParameter;
-  e1->f_Setup                     = (int32_t (*)(void*,
+  e1->f_GetIntValue             = (int32_t (*)(void*,const char*,
+    int32_t*)) epv->f_GetIntValue;
+  e1->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
+    double*)) epv->f_GetDoubleValue;
+  e1->f_Setup                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object*)) epv->f_Setup;
-  e1->f_Apply                     = (int32_t (*)(void*,
+  e1->f_Apply                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object**)) epv->f_Apply;
-  e1->f_SetOperator               = (int32_t (*)(void*,
+  e1->f_SetOperator             = (int32_t (*)(void*,
     struct Hypre_Operator__object*)) epv->f_SetOperator;
-  e1->f_GetResidual               = (int32_t (*)(void*,
-    struct Hypre_Vector__object**)) epv->f_GetResidual;
-  e1->f_SetLogging                = (int32_t (*)(void*,
+  e1->f_SetTolerance            = (int32_t (*)(void*,
+    double)) epv->f_SetTolerance;
+  e1->f_SetMaxIterations        = (int32_t (*)(void*,
+    int32_t)) epv->f_SetMaxIterations;
+  e1->f_SetLogging              = (int32_t (*)(void*,
     int32_t)) epv->f_SetLogging;
-  e1->f_SetPrintLevel             = (int32_t (*)(void*,
+  e1->f_SetPrintLevel           = (int32_t (*)(void*,
     int32_t)) epv->f_SetPrintLevel;
-  e1->f_SetPreconditioner         = (int32_t (*)(void*,
+  e1->f_GetNumIterations        = (int32_t (*)(void*,
+    int32_t*)) epv->f_GetNumIterations;
+  e1->f_GetRelResidualNorm      = (int32_t (*)(void*,
+    double*)) epv->f_GetRelResidualNorm;
+  e1->f_SetPreconditioner       = (int32_t (*)(void*,
     struct Hypre_Solver__object*)) epv->f_SetPreconditioner;
-  e1->f_GetPreconditionedResidual = (int32_t (*)(void*,
-    struct Hypre_Vector__object**)) epv->f_GetPreconditionedResidual;
 
   e2->f__cast                   = (void* (*)(void*,const char*)) epv->f__cast;
   e2->f__delete                 = (void (*)(void*)) epv->f__delete;
@@ -881,32 +922,38 @@ static void Hypre_GMRES__init_remote_epv(void)
     const char*)) epv->f_isType;
   e2->f_SetCommunicator         = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
-  e2->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
-    double*)) epv->f_GetDoubleValue;
-  e2->f_GetIntValue             = (int32_t (*)(void*,const char*,
-    int32_t*)) epv->f_GetIntValue;
-  e2->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
-    double)) epv->f_SetDoubleParameter;
   e2->f_SetIntParameter         = (int32_t (*)(void*,const char*,
     int32_t)) epv->f_SetIntParameter;
+  e2->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
+    double)) epv->f_SetDoubleParameter;
   e2->f_SetStringParameter      = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
   e2->f_SetIntArrayParameter    = (int32_t (*)(void*,const char*,
     struct SIDL_int__array*)) epv->f_SetIntArrayParameter;
   e2->f_SetDoubleArrayParameter = (int32_t (*)(void*,const char*,
     struct SIDL_double__array*)) epv->f_SetDoubleArrayParameter;
+  e2->f_GetIntValue             = (int32_t (*)(void*,const char*,
+    int32_t*)) epv->f_GetIntValue;
+  e2->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
+    double*)) epv->f_GetDoubleValue;
   e2->f_Setup                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object*)) epv->f_Setup;
   e2->f_Apply                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object**)) epv->f_Apply;
   e2->f_SetOperator             = (int32_t (*)(void*,
     struct Hypre_Operator__object*)) epv->f_SetOperator;
-  e2->f_GetResidual             = (int32_t (*)(void*,
-    struct Hypre_Vector__object**)) epv->f_GetResidual;
+  e2->f_SetTolerance            = (int32_t (*)(void*,
+    double)) epv->f_SetTolerance;
+  e2->f_SetMaxIterations        = (int32_t (*)(void*,
+    int32_t)) epv->f_SetMaxIterations;
   e2->f_SetLogging              = (int32_t (*)(void*,
     int32_t)) epv->f_SetLogging;
   e2->f_SetPrintLevel           = (int32_t (*)(void*,
     int32_t)) epv->f_SetPrintLevel;
+  e2->f_GetNumIterations        = (int32_t (*)(void*,
+    int32_t*)) epv->f_GetNumIterations;
+  e2->f_GetRelResidualNorm      = (int32_t (*)(void*,
+    double*)) epv->f_GetRelResidualNorm;
 
   e3->f__cast        = (void* (*)(struct SIDL_BaseClass__object*,
     const char*)) epv->f__cast;

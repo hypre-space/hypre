@@ -1,29 +1,24 @@
 /*
  * File:          Hypre_CoefficientAccess.h
- * Symbol:        Hypre.CoefficientAccess-v0.1.6
+ * Symbol:        Hypre.CoefficientAccess-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:40 PST
- * Generated:     20030210 16:05:45 PST
+ * SIDL Created:  20030306 17:05:17 PST
+ * Generated:     20030306 17:05:20 PST
  * Description:   Client-side glue code for Hypre.CoefficientAccess
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 380
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 776
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_CoefficientAccess_h
 #define included_Hypre_CoefficientAccess_h
 
 /**
- * Symbol "Hypre.CoefficientAccess" (version 0.1.6)
- * 
- * The GetRow method will allocate space for its two output arrays on
- * the first call.  The space will be reused on subsequent calls.
- * Thus the user must not delete them, yet must not depend on the
- * data from GetRow to persist beyond the next GetRow call.
+ * Symbol "Hypre.CoefficientAccess" (version 0.1.7)
  */
 struct Hypre_CoefficientAccess__object;
 struct Hypre_CoefficientAccess__array;
@@ -108,7 +103,12 @@ Hypre_CoefficientAccess_isType(
   const char* name);
 
 /**
- * Method:  GetRow[]
+ * The GetRow method will allocate space for its two output
+ * arrays on the first call.  The space will be reused on
+ * subsequent calls.  Thus the user must not delete them, yet
+ * must not depend on the data from GetRow to persist beyond the
+ * next GetRow call.
+ * 
  */
 int32_t
 Hypre_CoefficientAccess_GetRow(

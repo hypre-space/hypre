@@ -1,24 +1,24 @@
 /*
  * File:          Hypre_IJBuildVector.h
- * Symbol:        Hypre.IJBuildVector-v0.1.6
+ * Symbol:        Hypre.IJBuildVector-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:40 PST
- * Generated:     20030210 16:05:48 PST
+ * SIDL Created:  20030306 17:05:17 PST
+ * Generated:     20030306 17:05:20 PST
  * Description:   Client-side glue code for Hypre.IJBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 249
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 211
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_IJBuildVector_h
 #define included_Hypre_IJBuildVector_h
 
 /**
- * Symbol "Hypre.IJBuildVector" (version 0.1.6)
+ * Symbol "Hypre.IJBuildVector" (version 0.1.7)
  */
 struct Hypre_IJBuildVector__object;
 struct Hypre_IJBuildVector__array;
@@ -103,7 +103,8 @@ Hypre_IJBuildVector_isType(
   const char* name);
 
 /**
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 int32_t
 Hypre_IJBuildVector_SetCommunicator(
@@ -114,18 +115,17 @@ Hypre_IJBuildVector_SetCommunicator(
  * Prepare an object for setting coefficient values, whether for
  * the first time or subsequently.
  * 
- * 
  */
 int32_t
 Hypre_IJBuildVector_Initialize(
   Hypre_IJBuildVector self);
 
 /**
- * Finalize the construction of an object before using, either for
- * the first time or on subsequent uses. "Initialize" and "Assemble"
- * always appear in a matched set, with Initialize preceding Assemble. Values
- * can only be set in between a call to Initialize and Assemble.
- * 
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
  * 
  */
 int32_t
@@ -133,14 +133,15 @@ Hypre_IJBuildVector_Assemble(
   Hypre_IJBuildVector self);
 
 /**
- * The problem definition interface is a "builder" that creates an object
- * that contains the problem definition information, e.g. a matrix. To
- * perform subsequent operations with that object, it must be returned from
- * the problem definition object. "GetObject" performs this function.
- * <note>At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
- * be used on the returned object to convert it into a known type.</note>
- * 
+ * The problem definition interface is a {\it builder} that
+ * creates an object that contains the problem definition
+ * information, e.g. a matrix. To perform subsequent operations
+ * with that object, it must be returned from the problem
+ * definition object. {\tt GetObject} performs this function.
+ * At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a SIDL.BaseInterface.
+ * QueryInterface or Cast must be used on the returned object to
+ * convert it into a known type.
  * 
  */
 int32_t
@@ -149,94 +150,34 @@ Hypre_IJBuildVector_GetObject(
   SIDL_BaseInterface* A);
 
 /**
- * Method:  SetGlobalSize[]
- */
-int32_t
-Hypre_IJBuildVector_SetGlobalSize(
-  Hypre_IJBuildVector self,
-  int32_t n);
-
-/**
- * Method:  SetPartitioning[]
- */
-int32_t
-Hypre_IJBuildVector_SetPartitioning(
-  Hypre_IJBuildVector self,
-  struct SIDL_int__array* partitioning);
-
-/**
- * Method:  SetLocalComponents[]
- */
-int32_t
-Hypre_IJBuildVector_SetLocalComponents(
-  Hypre_IJBuildVector self,
-  int32_t num_values,
-  struct SIDL_int__array* glob_vec_indices,
-  struct SIDL_int__array* value_indices,
-  struct SIDL_double__array* values);
-
-/**
- * Method:  AddtoLocalComponents[]
- */
-int32_t
-Hypre_IJBuildVector_AddtoLocalComponents(
-  Hypre_IJBuildVector self,
-  int32_t num_values,
-  struct SIDL_int__array* glob_vec_indices,
-  struct SIDL_int__array* value_indices,
-  struct SIDL_double__array* values);
-
-/**
- * Method:  SetLocalComponentsInBlock[]
- */
-int32_t
-Hypre_IJBuildVector_SetLocalComponentsInBlock(
-  Hypre_IJBuildVector self,
-  int32_t glob_vec_index_start,
-  int32_t glob_vec_index_stop,
-  struct SIDL_int__array* value_indices,
-  struct SIDL_double__array* values);
-
-/**
- * Method:  AddToLocalComponentsInBlock[]
- */
-int32_t
-Hypre_IJBuildVector_AddToLocalComponentsInBlock(
-  Hypre_IJBuildVector self,
-  int32_t glob_vec_index_start,
-  int32_t glob_vec_index_stop,
-  struct SIDL_int__array* value_indices,
-  struct SIDL_double__array* values);
-
-/**
- * Create a vector object.  Each process owns some unique consecutive
- * range of vector unknowns, indicated by the global indices {\tt
- * jlower} and {\tt jupper}.  The data is required to be such that the
- * value of {\tt jlower} on any process $p$ be exactly one more than
- * the value of {\tt jupper} on process $p-1$.  Note that the first
- * index of the global vector may start with any integer value.  In
+ * Set the local range for a vector object.  Each process owns
+ * some unique consecutive range of vector unknowns, indicated
+ * by the global indices {\tt jlower} and {\tt jupper}.  The
+ * data is required to be such that the value of {\tt jlower} on
+ * any process $p$ be exactly one more than the value of {\tt
+ * jupper} on process $p-1$.  Note that the first index of the
+ * global vector may start with any integer value.  In
  * particular, one may use zero- or one-based indexing.
  * 
  * Collective.
  * 
+ * RDF: Changed name from 'Create' (x)
  * 
  */
 int32_t
-Hypre_IJBuildVector_Create(
+Hypre_IJBuildVector_SetLocalRange(
   Hypre_IJBuildVector self,
-  void* comm,
   int32_t jlower,
   int32_t jupper);
 
 /**
- * Sets values in vector.  The arrays {\tt values} and {\tt indices}
- * are of dimension {\tt nvalues} and contain the vector values to be
- * set and the corresponding global vector indices, respectively.
- * Erases any previous values at the specified locations and replaces
- * them with new ones.
+ * Sets values in vector.  The arrays {\tt values} and {\tt
+ * indices} are of dimension {\tt nvalues} and contain the
+ * vector values to be set and the corresponding global vector
+ * indices, respectively.  Erases any previous values at the
+ * specified locations and replaces them with new ones.
  * 
  * Not collective.
- * 
  * 
  */
 int32_t
@@ -248,10 +189,9 @@ Hypre_IJBuildVector_SetValues(
 
 /**
  * Adds to values in vector.  Usage details are analogous to
- * \Ref{SetValues}.
+ * {\tt SetValues}.
  * 
  * Not collective.
- * 
  * 
  */
 int32_t
@@ -262,8 +202,47 @@ Hypre_IJBuildVector_AddToValues(
   struct SIDL_double__array* values);
 
 /**
- * Read the vector from file.  This is mainly for debugging purposes.
+ * Returns range of the part of the vector owned by this
+ * processor.
  * 
+ * RDF: New (x)
+ * 
+ */
+int32_t
+Hypre_IJBuildVector_GetLocalRange(
+  Hypre_IJBuildVector self,
+  int32_t* jlower,
+  int32_t* jupper);
+
+/**
+ * Gets values in vector.  Usage details are analogous to {\tt
+ * SetValues}.
+ * 
+ * Not collective.
+ * 
+ * RDF: New (x)
+ * 
+ */
+int32_t
+Hypre_IJBuildVector_GetValues(
+  Hypre_IJBuildVector self,
+  int32_t nvalues,
+  struct SIDL_int__array* indices,
+  struct SIDL_double__array** values);
+
+/**
+ * Print the vector to file.  This is mainly for debugging
+ * purposes.
+ * 
+ */
+int32_t
+Hypre_IJBuildVector_Print(
+  Hypre_IJBuildVector self,
+  const char* filename);
+
+/**
+ * Read the vector from file.  This is mainly for debugging
+ * purposes.
  * 
  */
 int32_t
@@ -271,15 +250,6 @@ Hypre_IJBuildVector_Read(
   Hypre_IJBuildVector self,
   const char* filename,
   void* comm);
-
-/**
- * Print the vector to file.  This is mainly for debugging purposes.
- * 
- */
-int32_t
-Hypre_IJBuildVector_Print(
-  Hypre_IJBuildVector self,
-  const char* filename);
 
 /**
  * Cast method for interface and class type conversions.

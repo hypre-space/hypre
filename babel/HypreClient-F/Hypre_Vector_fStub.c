@@ -1,21 +1,21 @@
 /*
  * File:          Hypre_Vector_fStub.c
- * Symbol:        Hypre.Vector-v0.1.6
+ * Symbol:        Hypre.Vector-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:49 PST
- * Generated:     20030210 16:05:54 PST
+ * SIDL Created:  20030306 17:05:23 PST
+ * Generated:     20030306 17:05:25 PST
  * Description:   Client-side glue code for Hypre.Vector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 34
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 669
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 /*
- * Symbol "Hypre.Vector" (version 0.1.6)
+ * Symbol "Hypre.Vector" (version 0.1.7)
  */
 
 #include <stddef.h>
@@ -234,7 +234,8 @@ SIDLFortran77Symbol(hypre_vector_istype_f,HYPRE_VECTOR_ISTYPE_F,Hypre_Vector_isT
 }
 
 /*
- * y <- 0 (where y=self)
+ * Set {\tt self} to 0.
+ * 
  */
 
 void
@@ -257,7 +258,8 @@ SIDLFortran77Symbol(hypre_vector_clear_f,HYPRE_VECTOR_CLEAR_F,Hypre_Vector_Clear
 }
 
 /*
- * y <- x 
+ * Copy x into {\tt self}.
+ * 
  */
 
 void
@@ -286,7 +288,12 @@ SIDLFortran77Symbol(hypre_vector_copy_f,HYPRE_VECTOR_COPY_F,Hypre_Vector_Copy_f)
 }
 
 /*
- * create an x compatible with y
+ * Create an {\tt x} compatible with {\tt self}.
+ * 
+ * NOTE: When this method is used in an inherited class, the
+ * cloned {\tt Vector} object can be cast to an object with the
+ * inherited class type.
+ * 
  */
 
 void
@@ -313,7 +320,8 @@ SIDLFortran77Symbol(hypre_vector_clone_f,HYPRE_VECTOR_CLONE_F,Hypre_Vector_Clone
 }
 
 /*
- * y <- a*y 
+ * Scale {\self} by {\tt a}.
+ * 
  */
 
 void
@@ -338,7 +346,8 @@ SIDLFortran77Symbol(hypre_vector_scale_f,HYPRE_VECTOR_SCALE_F,Hypre_Vector_Scale
 }
 
 /*
- * d <- (y,x)
+ * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+ * 
  */
 
 void
@@ -369,7 +378,8 @@ SIDLFortran77Symbol(hypre_vector_dot_f,HYPRE_VECTOR_DOT_F,Hypre_Vector_Dot_f)
 }
 
 /*
- * y <- a*x + y
+ * Add {\tt a}*{\tt x} to {\tt self}.
+ * 
  */
 
 void

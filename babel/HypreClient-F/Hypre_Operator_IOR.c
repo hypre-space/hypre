@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_Operator_IOR.c
- * Symbol:        Hypre.Operator-v0.1.6
+ * Symbol:        Hypre.Operator-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:49 PST
- * Generated:     20030210 16:05:52 PST
+ * SIDL Created:  20030306 17:05:23 PST
+ * Generated:     20030306 17:05:25 PST
  * Description:   Intermediate Object Representation for Hypre.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 326
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 604
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #include <stdlib.h>
@@ -121,46 +121,7 @@ remote_Hypre_Operator_isType(
 static int32_t
 remote_Hypre_Operator_SetCommunicator(
   void* self,
-  void* comm)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:GetDoubleValue
- */
-
-static int32_t
-remote_Hypre_Operator_GetDoubleValue(
-  void* self,
-  const char* name,
-  double* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:GetIntValue
- */
-
-static int32_t
-remote_Hypre_Operator_GetIntValue(
-  void* self,
-  const char* name,
-  int32_t* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetDoubleParameter
- */
-
-static int32_t
-remote_Hypre_Operator_SetDoubleParameter(
-  void* self,
-  const char* name,
-  double value)
+  void* mpi_comm)
 {
   return 0;
 }
@@ -174,6 +135,19 @@ remote_Hypre_Operator_SetIntParameter(
   void* self,
   const char* name,
   int32_t value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetDoubleParameter
+ */
+
+static int32_t
+remote_Hypre_Operator_SetDoubleParameter(
+  void* self,
+  const char* name,
+  double value)
 {
   return 0;
 }
@@ -213,6 +187,32 @@ remote_Hypre_Operator_SetDoubleArrayParameter(
   void* self,
   const char* name,
   struct SIDL_double__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetIntValue
+ */
+
+static int32_t
+remote_Hypre_Operator_GetIntValue(
+  void* self,
+  const char* name,
+  int32_t* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetDoubleValue
+ */
+
+static int32_t
+remote_Hypre_Operator_GetDoubleValue(
+  void* self,
+  const char* name,
+  double* value)
 {
   return 0;
 }
@@ -259,14 +259,14 @@ static void Hypre_Operator__init_remote_epv(void)
   epv->f_queryInt                = remote_Hypre_Operator_queryInt;
   epv->f_isType                  = remote_Hypre_Operator_isType;
   epv->f_SetCommunicator         = remote_Hypre_Operator_SetCommunicator;
-  epv->f_GetDoubleValue          = remote_Hypre_Operator_GetDoubleValue;
-  epv->f_GetIntValue             = remote_Hypre_Operator_GetIntValue;
-  epv->f_SetDoubleParameter      = remote_Hypre_Operator_SetDoubleParameter;
   epv->f_SetIntParameter         = remote_Hypre_Operator_SetIntParameter;
+  epv->f_SetDoubleParameter      = remote_Hypre_Operator_SetDoubleParameter;
   epv->f_SetStringParameter      = remote_Hypre_Operator_SetStringParameter;
   epv->f_SetIntArrayParameter    = remote_Hypre_Operator_SetIntArrayParameter;
   epv->f_SetDoubleArrayParameter = 
     remote_Hypre_Operator_SetDoubleArrayParameter;
+  epv->f_GetIntValue             = remote_Hypre_Operator_GetIntValue;
+  epv->f_GetDoubleValue          = remote_Hypre_Operator_GetDoubleValue;
   epv->f_Setup                   = remote_Hypre_Operator_Setup;
   epv->f_Apply                   = remote_Hypre_Operator_Apply;
   s_remote_initialized = 1;

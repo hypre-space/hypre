@@ -1,25 +1,26 @@
 C       
 C       File:          Hypre_StructGrid_Impl.f
-C       Symbol:        Hypre.StructGrid-v0.1.6
+C       Symbol:        Hypre.StructGrid-v0.1.7
 C       Symbol Type:   class
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030210 16:05:50 PST
-C       Generated:     20030210 16:05:55 PST
+C       SIDL Created:  20030306 17:05:23 PST
+C       Generated:     20030306 17:05:26 PST
 C       Description:   Client-side documentation text for Hypre.StructGrid
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
-C       source-line   = 408
-C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+C       source-line   = 1111
+C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
 
 C       
-C       Symbol "Hypre.StructGrid" (version 0.1.6)
+C       Symbol "Hypre.StructGrid" (version 0.1.7)
 C       
 C       Define a structured grid class.
+C       
 C       
 
 
@@ -157,16 +158,17 @@ C       out SIDL.ClassInfo retval
 
 
 C       
-C       Method:  SetCommunicator[]
+C       Set the MPI Communicator.
+C       
 C       
 
-        subroutine Hypre_StructGrid_SetCommunicator_f(self, MPI_comm,
+        subroutine Hypre_StructGrid_SetCommunicator_f(self, mpi_comm,
      &     retval)
         implicit none
 C       in Hypre.StructGrid self
         integer*8 self
-C       in opaque MPI_comm
-        integer*8 MPI_comm
+C       in opaque mpi_comm
+        integer*8 mpi_comm
 C       out int retval
         integer*4 retval
         end

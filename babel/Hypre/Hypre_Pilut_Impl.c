@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_Pilut_Impl.c
- * Symbol:        Hypre.Pilut-v0.1.6
+ * Symbol:        Hypre.Pilut-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:37 PST
+ * SIDL Created:  20030306 17:05:12 PST
+ * Generated:     20030306 17:05:15 PST
  * Description:   Server-side implementation for Hypre.Pilut
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 462
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1242
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -20,7 +20,13 @@
  */
 
 /*
- * Symbol "Hypre.Pilut" (version 0.1.6)
+ * Symbol "Hypre.Pilut" (version 0.1.7)
+ * 
+ * Objects of this type can be cast to Solver objects using the
+ * {\tt \_\_cast} methods.
+ * 
+ * RDF: Documentation goes here.
+ * 
  */
 
 #include "Hypre_Pilut_Impl.h"
@@ -62,7 +68,8 @@ impl_Hypre_Pilut__dtor(
 }
 
 /*
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 
 #undef __FUNC__
@@ -70,7 +77,7 @@ impl_Hypre_Pilut__dtor(
 
 int32_t
 impl_Hypre_Pilut_SetCommunicator(
-  Hypre_Pilut self, void* comm)
+  Hypre_Pilut self, void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -79,58 +86,8 @@ impl_Hypre_Pilut_SetCommunicator(
 }
 
 /*
- * Method:  GetDoubleValue[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_Pilut_GetDoubleValue"
-
-int32_t
-impl_Hypre_Pilut_GetDoubleValue(
-  Hypre_Pilut self, const char* name, double* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.GetDoubleValue) */
-  /* Insert the implementation of the GetDoubleValue method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.GetDoubleValue) */
-}
-
-/*
- * Method:  GetIntValue[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_Pilut_GetIntValue"
-
-int32_t
-impl_Hypre_Pilut_GetIntValue(
-  Hypre_Pilut self, const char* name, int32_t* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.GetIntValue) */
-  /* Insert the implementation of the GetIntValue method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.GetIntValue) */
-}
-
-/*
- * Method:  SetDoubleParameter[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_Pilut_SetDoubleParameter"
-
-int32_t
-impl_Hypre_Pilut_SetDoubleParameter(
-  Hypre_Pilut self, const char* name, double value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetDoubleParameter) */
-  /* Insert the implementation of the SetDoubleParameter method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetDoubleParameter) */
-}
-
-/*
- * Method:  SetIntParameter[]
+ * Set the int parameter associated with {\tt name}.
+ * 
  */
 
 #undef __FUNC__
@@ -147,7 +104,26 @@ impl_Hypre_Pilut_SetIntParameter(
 }
 
 /*
- * Method:  SetStringParameter[]
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_Pilut_SetDoubleParameter"
+
+int32_t
+impl_Hypre_Pilut_SetDoubleParameter(
+  Hypre_Pilut self, const char* name, double value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetDoubleParameter) */
+  /* Insert the implementation of the SetDoubleParameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetDoubleParameter) */
+}
+
+/*
+ * Set the string parameter associated with {\tt name}.
+ * 
  */
 
 #undef __FUNC__
@@ -164,7 +140,8 @@ impl_Hypre_Pilut_SetStringParameter(
 }
 
 /*
- * Method:  SetIntArrayParameter[]
+ * Set the int array parameter associated with {\tt name}.
+ * 
  */
 
 #undef __FUNC__
@@ -181,7 +158,8 @@ impl_Hypre_Pilut_SetIntArrayParameter(
 }
 
 /*
- * Method:  SetDoubleArrayParameter[]
+ * Set the double array parameter associated with {\tt name}.
+ * 
  */
 
 #undef __FUNC__
@@ -198,7 +176,45 @@ impl_Hypre_Pilut_SetDoubleArrayParameter(
 }
 
 /*
- * Method:  Setup[]
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_Pilut_GetIntValue"
+
+int32_t
+impl_Hypre_Pilut_GetIntValue(
+  Hypre_Pilut self, const char* name, int32_t* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.GetIntValue) */
+  /* Insert the implementation of the GetIntValue method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.GetIntValue) */
+}
+
+/*
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_Pilut_GetDoubleValue"
+
+int32_t
+impl_Hypre_Pilut_GetDoubleValue(
+  Hypre_Pilut self, const char* name, double* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.GetDoubleValue) */
+  /* Insert the implementation of the GetDoubleValue method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.GetDoubleValue) */
+}
+
+/*
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
  */
 
 #undef __FUNC__
@@ -215,7 +231,8 @@ impl_Hypre_Pilut_Setup(
 }
 
 /*
- * Method:  Apply[]
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
  */
 
 #undef __FUNC__
@@ -232,7 +249,8 @@ impl_Hypre_Pilut_Apply(
 }
 
 /*
- * Method:  SetOperator[]
+ * Set the operator for the linear system being solved.
+ * 
  */
 
 #undef __FUNC__
@@ -249,24 +267,50 @@ impl_Hypre_Pilut_SetOperator(
 }
 
 /*
- * Method:  GetResidual[]
+ * (Optional) Set the convergence tolerance.
+ * 
+ * RDF: New
+ * 
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_Pilut_GetResidual"
+#define __FUNC__ "impl_Hypre_Pilut_SetTolerance"
 
 int32_t
-impl_Hypre_Pilut_GetResidual(
-  Hypre_Pilut self, Hypre_Vector* r)
+impl_Hypre_Pilut_SetTolerance(
+  Hypre_Pilut self, double tolerance)
 {
-  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.GetResidual) */
-  /* Insert the implementation of the GetResidual method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.GetResidual) */
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetTolerance) */
+  /* Insert the implementation of the SetTolerance method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetTolerance) */
 }
 
 /*
- * Method:  SetLogging[]
+ * (Optional) Set maximum number of iterations.
+ * 
+ * RDF: New
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_Pilut_SetMaxIterations"
+
+int32_t
+impl_Hypre_Pilut_SetMaxIterations(
+  Hypre_Pilut self, int32_t max_iterations)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetMaxIterations) */
+  /* Insert the implementation of the SetMaxIterations method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetMaxIterations) */
+}
+
+/*
+ * (Optional) Set the {\it logging level}, specifying the degree
+ * of additional informational data to be accumulated.  Does
+ * nothing by default (level = 0).  Other levels (if any) are
+ * implementation-specific.  Must be called before {\tt Setup}
+ * and {\tt Apply}.
+ * 
  */
 
 #undef __FUNC__
@@ -283,7 +327,12 @@ impl_Hypre_Pilut_SetLogging(
 }
 
 /*
- * Method:  SetPrintLevel[]
+ * (Optional) Set the {\it print level}, specifying the degree
+ * of informational data to be printed either to the screen or
+ * to a file.  Does nothing by default (level=0).  Other levels
+ * (if any) are implementation-specific.  Must be called before
+ * {\tt Setup} and {\tt Apply}.
+ * 
  */
 
 #undef __FUNC__
@@ -299,13 +348,48 @@ impl_Hypre_Pilut_SetPrintLevel(
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetPrintLevel) */
 }
 
+/*
+ * (Optional) Return the number of iterations taken.
+ * 
+ * RDF: New
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_Pilut_GetNumIterations"
+
+int32_t
+impl_Hypre_Pilut_GetNumIterations(
+  Hypre_Pilut self, int32_t* num_iterations)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.GetNumIterations) */
+  /* Insert the implementation of the GetNumIterations method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.GetNumIterations) */
+}
+
+/*
+ * (Optional) Return the norm of the relative residual.
+ * 
+ * RDF: New
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_Pilut_GetRelResidualNorm"
+
+int32_t
+impl_Hypre_Pilut_GetRelResidualNorm(
+  Hypre_Pilut self, double* norm)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.GetRelResidualNorm) */
+  /* Insert the implementation of the GetRelResidualNorm method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.GetRelResidualNorm) */
+}
+
 /**
  * ================= BEGIN UNREFERENCED METHOD(S) ================
  * The following code segment(s) belong to unreferenced method(s).
  * This can result from a method rename/removal in the SIDL file.
  * Move or remove the code in order to compile cleanly.
  */
-  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetParameter) */
-  /* Insert the implementation of the SetParameter method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetParameter) */
 /* ================== END UNREFERENCED METHOD(S) ================= */

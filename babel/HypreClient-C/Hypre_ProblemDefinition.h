@@ -1,42 +1,45 @@
 /*
  * File:          Hypre_ProblemDefinition.h
- * Symbol:        Hypre.ProblemDefinition-v0.1.6
+ * Symbol:        Hypre.ProblemDefinition-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:40 PST
- * Generated:     20030210 16:05:47 PST
+ * SIDL Created:  20030306 17:05:16 PST
+ * Generated:     20030306 17:05:20 PST
  * Description:   Client-side glue code for Hypre.ProblemDefinition
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 87
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 42
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_ProblemDefinition_h
 #define included_Hypre_ProblemDefinition_h
 
 /**
- * Symbol "Hypre.ProblemDefinition" (version 0.1.6)
+ * Symbol "Hypre.ProblemDefinition" (version 0.1.7)
  * 
- * <p>The purpose of a ProblemDefinition is to:</p>
- * <ul>
- * <li>present the user with a particular view of how to define
- *     a problem</li>
- * <li>construct and return a "problem object"</li>
- * </ul>
+ * The purpose of a ProblemDefinition is to:
  * 
- * <p>A "problem object" is an intentionally vague term that corresponds
- * to any useful object used to define a problem.  Prime examples are:</p>
- * <ul>
- * <li>a LinearOperator object, i.e., something with a matvec</li>
- * <li>a MatrixAccess object, i.e., something with a getrow</li>
- * <li>a Vector, i.e., something with a dot, axpy, ...</li>
- * </ul>
+ * \begin{itemize}
+ * \item provide a particular view of how to define a problem
+ * \item construct and return a {\it problem object}
+ * \end{itemize}
  * 
- * <p>Note that the terms "Initialize" and "Assemble" are reserved here
- * for defining problem objects through a particular user interface.</p>
+ * A {\it problem object} is an intentionally vague term that
+ * corresponds to any useful object used to define a problem.
+ * Prime examples are:
+ * 
+ * \begin{itemize}
+ * \item a LinearOperator object, i.e., something with a matvec
+ * \item a MatrixAccess object, i.e., something with a getrow
+ * \item a Vector, i.e., something with a dot, axpy, ...
+ * \end{itemize}
+ * 
+ * Note that {\tt Initialize} and {\tt Assemble} are reserved here
+ * for defining problem objects through a particular interface.
+ * 
  */
 struct Hypre_ProblemDefinition__object;
 struct Hypre_ProblemDefinition__array;
@@ -121,7 +124,8 @@ Hypre_ProblemDefinition_isType(
   const char* name);
 
 /**
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 int32_t
 Hypre_ProblemDefinition_SetCommunicator(
@@ -132,18 +136,17 @@ Hypre_ProblemDefinition_SetCommunicator(
  * Prepare an object for setting coefficient values, whether for
  * the first time or subsequently.
  * 
- * 
  */
 int32_t
 Hypre_ProblemDefinition_Initialize(
   Hypre_ProblemDefinition self);
 
 /**
- * Finalize the construction of an object before using, either for
- * the first time or on subsequent uses. "Initialize" and "Assemble"
- * always appear in a matched set, with Initialize preceding Assemble. Values
- * can only be set in between a call to Initialize and Assemble.
- * 
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
  * 
  */
 int32_t
@@ -151,14 +154,15 @@ Hypre_ProblemDefinition_Assemble(
   Hypre_ProblemDefinition self);
 
 /**
- * The problem definition interface is a "builder" that creates an object
- * that contains the problem definition information, e.g. a matrix. To
- * perform subsequent operations with that object, it must be returned from
- * the problem definition object. "GetObject" performs this function.
- * <note>At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
- * be used on the returned object to convert it into a known type.</note>
- * 
+ * The problem definition interface is a {\it builder} that
+ * creates an object that contains the problem definition
+ * information, e.g. a matrix. To perform subsequent operations
+ * with that object, it must be returned from the problem
+ * definition object. {\tt GetObject} performs this function.
+ * At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a SIDL.BaseInterface.
+ * QueryInterface or Cast must be used on the returned object to
+ * convert it into a known type.
  * 
  */
 int32_t

@@ -1,24 +1,24 @@
 /*
  * File:          Hypre_Vector.h
- * Symbol:        Hypre.Vector-v0.1.6
+ * Symbol:        Hypre.Vector-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:39 PST
- * Generated:     20030210 16:05:44 PST
+ * SIDL Created:  20030306 17:05:17 PST
+ * Generated:     20030306 17:05:20 PST
  * Description:   Client-side glue code for Hypre.Vector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 34
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 669
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_Vector_h
 #define included_Hypre_Vector_h
 
 /**
- * Symbol "Hypre.Vector" (version 0.1.6)
+ * Symbol "Hypre.Vector" (version 0.1.7)
  */
 struct Hypre_Vector__object;
 struct Hypre_Vector__array;
@@ -103,14 +103,16 @@ Hypre_Vector_isType(
   const char* name);
 
 /**
- * y <- 0 (where y=self)
+ * Set {\tt self} to 0.
+ * 
  */
 int32_t
 Hypre_Vector_Clear(
   Hypre_Vector self);
 
 /**
- * y <- x 
+ * Copy x into {\tt self}.
+ * 
  */
 int32_t
 Hypre_Vector_Copy(
@@ -118,7 +120,12 @@ Hypre_Vector_Copy(
   Hypre_Vector x);
 
 /**
- * create an x compatible with y
+ * Create an {\tt x} compatible with {\tt self}.
+ * 
+ * NOTE: When this method is used in an inherited class, the
+ * cloned {\tt Vector} object can be cast to an object with the
+ * inherited class type.
+ * 
  */
 int32_t
 Hypre_Vector_Clone(
@@ -126,7 +133,8 @@ Hypre_Vector_Clone(
   Hypre_Vector* x);
 
 /**
- * y <- a*y 
+ * Scale {\self} by {\tt a}.
+ * 
  */
 int32_t
 Hypre_Vector_Scale(
@@ -134,7 +142,8 @@ Hypre_Vector_Scale(
   double a);
 
 /**
- * d <- (y,x)
+ * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+ * 
  */
 int32_t
 Hypre_Vector_Dot(
@@ -143,7 +152,8 @@ Hypre_Vector_Dot(
   double* d);
 
 /**
- * y <- a*x + y
+ * Add {\tt a}*{\tt x} to {\tt self}.
+ * 
  */
 int32_t
 Hypre_Vector_Axpy(

@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_PCG_Skel.c
- * Symbol:        Hypre.PCG-v0.1.6
+ * Symbol:        Hypre.PCG-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:38 PST
+ * SIDL Created:  20030306 17:05:12 PST
+ * Generated:     20030306 17:05:15 PST
  * Description:   Server-side glue code for Hypre.PCG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 464
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1252
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #include "Hypre_PCG_IOR.h"
@@ -32,28 +32,16 @@ impl_Hypre_PCG_SetCommunicator(
   void*);
 
 extern int32_t
-impl_Hypre_PCG_GetDoubleValue(
+impl_Hypre_PCG_SetIntParameter(
   Hypre_PCG,
   const char*,
-  double*);
-
-extern int32_t
-impl_Hypre_PCG_GetIntValue(
-  Hypre_PCG,
-  const char*,
-  int32_t*);
+  int32_t);
 
 extern int32_t
 impl_Hypre_PCG_SetDoubleParameter(
   Hypre_PCG,
   const char*,
   double);
-
-extern int32_t
-impl_Hypre_PCG_SetIntParameter(
-  Hypre_PCG,
-  const char*,
-  int32_t);
 
 extern int32_t
 impl_Hypre_PCG_SetStringParameter(
@@ -74,6 +62,18 @@ impl_Hypre_PCG_SetDoubleArrayParameter(
   struct SIDL_double__array*);
 
 extern int32_t
+impl_Hypre_PCG_GetIntValue(
+  Hypre_PCG,
+  const char*,
+  int32_t*);
+
+extern int32_t
+impl_Hypre_PCG_GetDoubleValue(
+  Hypre_PCG,
+  const char*,
+  double*);
+
+extern int32_t
 impl_Hypre_PCG_Setup(
   Hypre_PCG,
   Hypre_Vector,
@@ -91,9 +91,14 @@ impl_Hypre_PCG_SetOperator(
   Hypre_Operator);
 
 extern int32_t
-impl_Hypre_PCG_GetResidual(
+impl_Hypre_PCG_SetTolerance(
   Hypre_PCG,
-  Hypre_Vector*);
+  double);
+
+extern int32_t
+impl_Hypre_PCG_SetMaxIterations(
+  Hypre_PCG,
+  int32_t);
 
 extern int32_t
 impl_Hypre_PCG_SetLogging(
@@ -106,14 +111,19 @@ impl_Hypre_PCG_SetPrintLevel(
   int32_t);
 
 extern int32_t
+impl_Hypre_PCG_GetNumIterations(
+  Hypre_PCG,
+  int32_t*);
+
+extern int32_t
+impl_Hypre_PCG_GetRelResidualNorm(
+  Hypre_PCG,
+  double*);
+
+extern int32_t
 impl_Hypre_PCG_SetPreconditioner(
   Hypre_PCG,
   Hypre_Solver);
-
-extern int32_t
-impl_Hypre_PCG_GetPreconditionedResidual(
-  Hypre_PCG,
-  Hypre_Vector*);
 
 void
 Hypre_PCG__set_epv(struct Hypre_PCG__epv *epv)
@@ -121,21 +131,23 @@ Hypre_PCG__set_epv(struct Hypre_PCG__epv *epv)
   epv->f__ctor = impl_Hypre_PCG__ctor;
   epv->f__dtor = impl_Hypre_PCG__dtor;
   epv->f_SetCommunicator = impl_Hypre_PCG_SetCommunicator;
-  epv->f_GetDoubleValue = impl_Hypre_PCG_GetDoubleValue;
-  epv->f_GetIntValue = impl_Hypre_PCG_GetIntValue;
-  epv->f_SetDoubleParameter = impl_Hypre_PCG_SetDoubleParameter;
   epv->f_SetIntParameter = impl_Hypre_PCG_SetIntParameter;
+  epv->f_SetDoubleParameter = impl_Hypre_PCG_SetDoubleParameter;
   epv->f_SetStringParameter = impl_Hypre_PCG_SetStringParameter;
   epv->f_SetIntArrayParameter = impl_Hypre_PCG_SetIntArrayParameter;
   epv->f_SetDoubleArrayParameter = impl_Hypre_PCG_SetDoubleArrayParameter;
+  epv->f_GetIntValue = impl_Hypre_PCG_GetIntValue;
+  epv->f_GetDoubleValue = impl_Hypre_PCG_GetDoubleValue;
   epv->f_Setup = impl_Hypre_PCG_Setup;
   epv->f_Apply = impl_Hypre_PCG_Apply;
   epv->f_SetOperator = impl_Hypre_PCG_SetOperator;
-  epv->f_GetResidual = impl_Hypre_PCG_GetResidual;
+  epv->f_SetTolerance = impl_Hypre_PCG_SetTolerance;
+  epv->f_SetMaxIterations = impl_Hypre_PCG_SetMaxIterations;
   epv->f_SetLogging = impl_Hypre_PCG_SetLogging;
   epv->f_SetPrintLevel = impl_Hypre_PCG_SetPrintLevel;
+  epv->f_GetNumIterations = impl_Hypre_PCG_GetNumIterations;
+  epv->f_GetRelResidualNorm = impl_Hypre_PCG_GetRelResidualNorm;
   epv->f_SetPreconditioner = impl_Hypre_PCG_SetPreconditioner;
-  epv->f_GetPreconditionedResidual = impl_Hypre_PCG_GetPreconditionedResidual;
 }
 
 struct Hypre_PCG__data*

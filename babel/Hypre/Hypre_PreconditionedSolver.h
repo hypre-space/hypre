@@ -1,24 +1,24 @@
 /*
  * File:          Hypre_PreconditionedSolver.h
- * Symbol:        Hypre.PreconditionedSolver-v0.1.6
+ * Symbol:        Hypre.PreconditionedSolver-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:34 PST
+ * SIDL Created:  20030306 17:05:11 PST
+ * Generated:     20030306 17:05:14 PST
  * Description:   Client-side glue code for Hypre.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 367
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 766
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_PreconditionedSolver_h
 #define included_Hypre_PreconditionedSolver_h
 
 /**
- * Symbol "Hypre.PreconditionedSolver" (version 0.1.6)
+ * Symbol "Hypre.PreconditionedSolver" (version 0.1.7)
  */
 struct Hypre_PreconditionedSolver__object;
 struct Hypre_PreconditionedSolver__array;
@@ -112,42 +112,17 @@ Hypre_PreconditionedSolver_isType(
   const char* name);
 
 /**
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 int32_t
 Hypre_PreconditionedSolver_SetCommunicator(
   Hypre_PreconditionedSolver self,
-  void* comm);
+  void* mpi_comm);
 
 /**
- * Method:  GetDoubleValue[]
- */
-int32_t
-Hypre_PreconditionedSolver_GetDoubleValue(
-  Hypre_PreconditionedSolver self,
-  const char* name,
-  double* value);
-
-/**
- * Method:  GetIntValue[]
- */
-int32_t
-Hypre_PreconditionedSolver_GetIntValue(
-  Hypre_PreconditionedSolver self,
-  const char* name,
-  int32_t* value);
-
-/**
- * Method:  SetDoubleParameter[]
- */
-int32_t
-Hypre_PreconditionedSolver_SetDoubleParameter(
-  Hypre_PreconditionedSolver self,
-  const char* name,
-  double value);
-
-/**
- * Method:  SetIntParameter[]
+ * Set the int parameter associated with {\tt name}.
+ * 
  */
 int32_t
 Hypre_PreconditionedSolver_SetIntParameter(
@@ -156,7 +131,18 @@ Hypre_PreconditionedSolver_SetIntParameter(
   int32_t value);
 
 /**
- * Method:  SetStringParameter[]
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+Hypre_PreconditionedSolver_SetDoubleParameter(
+  Hypre_PreconditionedSolver self,
+  const char* name,
+  double value);
+
+/**
+ * Set the string parameter associated with {\tt name}.
+ * 
  */
 int32_t
 Hypre_PreconditionedSolver_SetStringParameter(
@@ -165,7 +151,8 @@ Hypre_PreconditionedSolver_SetStringParameter(
   const char* value);
 
 /**
- * Method:  SetIntArrayParameter[]
+ * Set the int array parameter associated with {\tt name}.
+ * 
  */
 int32_t
 Hypre_PreconditionedSolver_SetIntArrayParameter(
@@ -174,7 +161,8 @@ Hypre_PreconditionedSolver_SetIntArrayParameter(
   struct SIDL_int__array* value);
 
 /**
- * Method:  SetDoubleArrayParameter[]
+ * Set the double array parameter associated with {\tt name}.
+ * 
  */
 int32_t
 Hypre_PreconditionedSolver_SetDoubleArrayParameter(
@@ -183,7 +171,29 @@ Hypre_PreconditionedSolver_SetDoubleArrayParameter(
   struct SIDL_double__array* value);
 
 /**
- * Method:  Setup[]
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+Hypre_PreconditionedSolver_GetIntValue(
+  Hypre_PreconditionedSolver self,
+  const char* name,
+  int32_t* value);
+
+/**
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+Hypre_PreconditionedSolver_GetDoubleValue(
+  Hypre_PreconditionedSolver self,
+  const char* name,
+  double* value);
+
+/**
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
  */
 int32_t
 Hypre_PreconditionedSolver_Setup(
@@ -192,7 +202,8 @@ Hypre_PreconditionedSolver_Setup(
   Hypre_Vector x);
 
 /**
- * Method:  Apply[]
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
  */
 int32_t
 Hypre_PreconditionedSolver_Apply(
@@ -201,7 +212,8 @@ Hypre_PreconditionedSolver_Apply(
   Hypre_Vector* x);
 
 /**
- * Method:  SetOperator[]
+ * Set the operator for the linear system being solved.
+ * 
  */
 int32_t
 Hypre_PreconditionedSolver_SetOperator(
@@ -209,15 +221,34 @@ Hypre_PreconditionedSolver_SetOperator(
   Hypre_Operator A);
 
 /**
- * Method:  GetResidual[]
+ * (Optional) Set the convergence tolerance.
+ * 
+ * RDF: New
+ * 
  */
 int32_t
-Hypre_PreconditionedSolver_GetResidual(
+Hypre_PreconditionedSolver_SetTolerance(
   Hypre_PreconditionedSolver self,
-  Hypre_Vector* r);
+  double tolerance);
 
 /**
- * Method:  SetLogging[]
+ * (Optional) Set maximum number of iterations.
+ * 
+ * RDF: New
+ * 
+ */
+int32_t
+Hypre_PreconditionedSolver_SetMaxIterations(
+  Hypre_PreconditionedSolver self,
+  int32_t max_iterations);
+
+/**
+ * (Optional) Set the {\it logging level}, specifying the degree
+ * of additional informational data to be accumulated.  Does
+ * nothing by default (level = 0).  Other levels (if any) are
+ * implementation-specific.  Must be called before {\tt Setup}
+ * and {\tt Apply}.
+ * 
  */
 int32_t
 Hypre_PreconditionedSolver_SetLogging(
@@ -225,7 +256,12 @@ Hypre_PreconditionedSolver_SetLogging(
   int32_t level);
 
 /**
- * Method:  SetPrintLevel[]
+ * (Optional) Set the {\it print level}, specifying the degree
+ * of informational data to be printed either to the screen or
+ * to a file.  Does nothing by default (level=0).  Other levels
+ * (if any) are implementation-specific.  Must be called before
+ * {\tt Setup} and {\tt Apply}.
+ * 
  */
 int32_t
 Hypre_PreconditionedSolver_SetPrintLevel(
@@ -233,20 +269,35 @@ Hypre_PreconditionedSolver_SetPrintLevel(
   int32_t level);
 
 /**
- * Method:  SetPreconditioner[]
+ * (Optional) Return the number of iterations taken.
+ * 
+ * RDF: New
+ * 
+ */
+int32_t
+Hypre_PreconditionedSolver_GetNumIterations(
+  Hypre_PreconditionedSolver self,
+  int32_t* num_iterations);
+
+/**
+ * (Optional) Return the norm of the relative residual.
+ * 
+ * RDF: New
+ * 
+ */
+int32_t
+Hypre_PreconditionedSolver_GetRelResidualNorm(
+  Hypre_PreconditionedSolver self,
+  double* norm);
+
+/**
+ * Set the preconditioner.
+ * 
  */
 int32_t
 Hypre_PreconditionedSolver_SetPreconditioner(
   Hypre_PreconditionedSolver self,
   Hypre_Solver s);
-
-/**
- * Method:  GetPreconditionedResidual[]
- */
-int32_t
-Hypre_PreconditionedSolver_GetPreconditionedResidual(
-  Hypre_PreconditionedSolver self,
-  Hypre_Vector* r);
 
 /**
  * Cast method for interface and class type conversions.

@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_StructVector_Impl.c
- * Symbol:        Hypre.StructVector-v0.1.6
+ * Symbol:        Hypre.StructVector-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:37 PST
+ * SIDL Created:  20030306 17:05:12 PST
+ * Generated:     20030306 17:05:15 PST
  * Description:   Server-side implementation for Hypre.StructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 427
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1139
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -20,7 +20,7 @@
  */
 
 /*
- * Symbol "Hypre.StructVector" (version 0.1.6)
+ * Symbol "Hypre.StructVector" (version 0.1.7)
  */
 
 #include "Hypre_StructVector_Impl.h"
@@ -62,7 +62,8 @@ impl_Hypre_StructVector__dtor(
 }
 
 /*
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 
 #undef __FUNC__
@@ -82,7 +83,6 @@ impl_Hypre_StructVector_SetCommunicator(
  * Prepare an object for setting coefficient values, whether for
  * the first time or subsequently.
  * 
- * 
  */
 
 #undef __FUNC__
@@ -99,11 +99,11 @@ impl_Hypre_StructVector_Initialize(
 }
 
 /*
- * Finalize the construction of an object before using, either for
- * the first time or on subsequent uses. "Initialize" and "Assemble"
- * always appear in a matched set, with Initialize preceding Assemble. Values
- * can only be set in between a call to Initialize and Assemble.
- * 
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
  * 
  */
 
@@ -121,14 +121,15 @@ impl_Hypre_StructVector_Assemble(
 }
 
 /*
- * The problem definition interface is a "builder" that creates an object
- * that contains the problem definition information, e.g. a matrix. To
- * perform subsequent operations with that object, it must be returned from
- * the problem definition object. "GetObject" performs this function.
- * <note>At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
- * be used on the returned object to convert it into a known type.</note>
- * 
+ * The problem definition interface is a {\it builder} that
+ * creates an object that contains the problem definition
+ * information, e.g. a matrix. To perform subsequent operations
+ * with that object, it must be returned from the problem
+ * definition object. {\tt GetObject} performs this function.
+ * At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a SIDL.BaseInterface.
+ * QueryInterface or Cast must be used on the returned object to
+ * convert it into a known type.
  * 
  */
 
@@ -215,7 +216,8 @@ impl_Hypre_StructVector_SetBoxValues(
 }
 
 /*
- * y <- 0 (where y=self)
+ * Set {\tt self} to 0.
+ * 
  */
 
 #undef __FUNC__
@@ -232,7 +234,8 @@ impl_Hypre_StructVector_Clear(
 }
 
 /*
- * y <- x 
+ * Copy x into {\tt self}.
+ * 
  */
 
 #undef __FUNC__
@@ -249,7 +252,12 @@ impl_Hypre_StructVector_Copy(
 }
 
 /*
- * create an x compatible with y
+ * Create an {\tt x} compatible with {\tt self}.
+ * 
+ * NOTE: When this method is used in an inherited class, the
+ * cloned {\tt Vector} object can be cast to an object with the
+ * inherited class type.
+ * 
  */
 
 #undef __FUNC__
@@ -266,7 +274,8 @@ impl_Hypre_StructVector_Clone(
 }
 
 /*
- * y <- a*y 
+ * Scale {\self} by {\tt a}.
+ * 
  */
 
 #undef __FUNC__
@@ -283,7 +292,8 @@ impl_Hypre_StructVector_Scale(
 }
 
 /*
- * d <- (y,x)
+ * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+ * 
  */
 
 #undef __FUNC__
@@ -300,7 +310,8 @@ impl_Hypre_StructVector_Dot(
 }
 
 /*
- * y <- a*x + y
+ * Add {\tt a}*{\tt x} to {\tt self}.
+ * 
  */
 
 #undef __FUNC__

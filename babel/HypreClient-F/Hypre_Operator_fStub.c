@@ -1,26 +1,27 @@
 /*
  * File:          Hypre_Operator_fStub.c
- * Symbol:        Hypre.Operator-v0.1.6
+ * Symbol:        Hypre.Operator-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:49 PST
- * Generated:     20030210 16:05:56 PST
+ * SIDL Created:  20030306 17:05:23 PST
+ * Generated:     20030306 17:05:26 PST
  * Description:   Client-side glue code for Hypre.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 326
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 604
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 /*
- * Symbol "Hypre.Operator" (version 0.1.6)
+ * Symbol "Hypre.Operator" (version 0.1.7)
  * 
- * An Operator is anything that maps one Vector to another.
- * The terms "Setup" and "Apply" are reserved for Operators.
+ * An Operator is anything that maps one Vector to another.  The
+ * terms {\tt Setup} and {\tt Apply} are reserved for Operators.
  * The implementation is allowed to assume that supplied parameter
  * arrays will not be destroyed.
+ * 
  */
 
 #include <stddef.h>
@@ -240,138 +241,38 @@ SIDLFortran77Symbol(hypre_operator_istype_f,HYPRE_OPERATOR_ISTYPE_F,Hypre_Operat
 }
 
 /*
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 
 void
 SIDLFortran77Symbol(hypre_operator_setcommunicator_f,HYPRE_OPERATOR_SETCOMMUNICATOR_F,Hypre_Operator_SetCommunicator_f)
 (
   int64_t *self,
-  int64_t *comm,
+  int64_t *mpi_comm,
   int32_t *retval
 )
 {
   struct Hypre_Operator__epv *_epv = NULL;
   struct Hypre_Operator__object* _proxy_self = NULL;
-  void* _proxy_comm = NULL;
+  void* _proxy_mpi_comm = NULL;
   _proxy_self =
     (struct Hypre_Operator__object*)
     (ptrdiff_t)(*self);
-  _proxy_comm =
+  _proxy_mpi_comm =
     (void*)
-    (ptrdiff_t)(*comm);
+    (ptrdiff_t)(*mpi_comm);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetCommunicator))(
       _proxy_self->d_object,
-      _proxy_comm
+      _proxy_mpi_comm
     );
 }
 
 /*
- * Method:  GetDoubleValue[]
- */
-
-void
-SIDLFortran77Symbol(hypre_operator_getdoublevalue_f,HYPRE_OPERATOR_GETDOUBLEVALUE_F,Hypre_Operator_GetDoubleValue_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  double *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct Hypre_Operator__epv *_epv = NULL;
-  struct Hypre_Operator__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  _proxy_self =
-    (struct Hypre_Operator__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    SIDL_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetDoubleValue))(
-      _proxy_self->d_object,
-      _proxy_name,
-      value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Method:  GetIntValue[]
- */
-
-void
-SIDLFortran77Symbol(hypre_operator_getintvalue_f,HYPRE_OPERATOR_GETINTVALUE_F,Hypre_Operator_GetIntValue_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  int32_t *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct Hypre_Operator__epv *_epv = NULL;
-  struct Hypre_Operator__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  _proxy_self =
-    (struct Hypre_Operator__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    SIDL_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetIntValue))(
-      _proxy_self->d_object,
-      _proxy_name,
-      value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Method:  SetDoubleParameter[]
- */
-
-void
-SIDLFortran77Symbol(hypre_operator_setdoubleparameter_f,HYPRE_OPERATOR_SETDOUBLEPARAMETER_F,Hypre_Operator_SetDoubleParameter_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  double *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct Hypre_Operator__epv *_epv = NULL;
-  struct Hypre_Operator__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  _proxy_self =
-    (struct Hypre_Operator__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    SIDL_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetDoubleParameter))(
-      _proxy_self->d_object,
-      _proxy_name,
-      *value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Method:  SetIntParameter[]
+ * Set the int parameter associated with {\tt name}.
+ * 
  */
 
 void
@@ -405,7 +306,43 @@ SIDLFortran77Symbol(hypre_operator_setintparameter_f,HYPRE_OPERATOR_SETINTPARAME
 }
 
 /*
- * Method:  SetStringParameter[]
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_operator_setdoubleparameter_f,HYPRE_OPERATOR_SETDOUBLEPARAMETER_F,Hypre_Operator_SetDoubleParameter_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  double *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct Hypre_Operator__epv *_epv = NULL;
+  struct Hypre_Operator__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  _proxy_self =
+    (struct Hypre_Operator__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetDoubleParameter))(
+      _proxy_self->d_object,
+      _proxy_name,
+      *value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Set the string parameter associated with {\tt name}.
+ * 
  */
 
 void
@@ -446,7 +383,8 @@ SIDLFortran77Symbol(hypre_operator_setstringparameter_f,HYPRE_OPERATOR_SETSTRING
 }
 
 /*
- * Method:  SetIntArrayParameter[]
+ * Set the int array parameter associated with {\tt name}.
+ * 
  */
 
 void
@@ -484,7 +422,8 @@ SIDLFortran77Symbol(hypre_operator_setintarrayparameter_f,HYPRE_OPERATOR_SETINTA
 }
 
 /*
- * Method:  SetDoubleArrayParameter[]
+ * Set the double array parameter associated with {\tt name}.
+ * 
  */
 
 void
@@ -522,7 +461,79 @@ SIDLFortran77Symbol(hypre_operator_setdoublearrayparameter_f,HYPRE_OPERATOR_SETD
 }
 
 /*
- * Method:  Setup[]
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_operator_getintvalue_f,HYPRE_OPERATOR_GETINTVALUE_F,Hypre_Operator_GetIntValue_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  int32_t *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct Hypre_Operator__epv *_epv = NULL;
+  struct Hypre_Operator__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  _proxy_self =
+    (struct Hypre_Operator__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetIntValue))(
+      _proxy_self->d_object,
+      _proxy_name,
+      value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_operator_getdoublevalue_f,HYPRE_OPERATOR_GETDOUBLEVALUE_F,Hypre_Operator_GetDoubleValue_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  double *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct Hypre_Operator__epv *_epv = NULL;
+  struct Hypre_Operator__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  _proxy_self =
+    (struct Hypre_Operator__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetDoubleValue))(
+      _proxy_self->d_object,
+      _proxy_name,
+      value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
  */
 
 void
@@ -557,7 +568,8 @@ SIDLFortran77Symbol(hypre_operator_setup_f,HYPRE_OPERATOR_SETUP_F,Hypre_Operator
 }
 
 /*
- * Method:  Apply[]
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
  */
 
 void

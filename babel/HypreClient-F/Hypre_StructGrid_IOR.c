@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_StructGrid_IOR.c
- * Symbol:        Hypre.StructGrid-v0.1.6
+ * Symbol:        Hypre.StructGrid-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:50 PST
- * Generated:     20030210 16:05:51 PST
+ * SIDL Created:  20030306 17:05:23 PST
+ * Generated:     20030306 17:05:24 PST
  * Description:   Intermediate Object Representation for Hypre.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 408
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1111
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #include <stdlib.h>
@@ -407,7 +407,7 @@ remote_Hypre_StructGrid_getClassInfo(
 static int32_t
 remote_Hypre_StructGrid_SetCommunicator(
   struct Hypre_StructGrid__object* self,
-  void* MPI_comm)
+  void* mpi_comm)
 {
   return 0;
 }

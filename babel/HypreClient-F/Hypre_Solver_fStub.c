@@ -1,21 +1,21 @@
 /*
  * File:          Hypre_Solver_fStub.c
- * Symbol:        Hypre.Solver-v0.1.6
+ * Symbol:        Hypre.Solver-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:49 PST
- * Generated:     20030210 16:05:58 PST
+ * SIDL Created:  20030306 17:05:23 PST
+ * Generated:     20030306 17:05:27 PST
  * Description:   Client-side glue code for Hypre.Solver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 340
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 710
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 /*
- * Symbol "Hypre.Solver" (version 0.1.6)
+ * Symbol "Hypre.Solver" (version 0.1.7)
  */
 
 #include <stddef.h>
@@ -236,138 +236,38 @@ SIDLFortran77Symbol(hypre_solver_istype_f,HYPRE_SOLVER_ISTYPE_F,Hypre_Solver_isT
 }
 
 /*
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 
 void
 SIDLFortran77Symbol(hypre_solver_setcommunicator_f,HYPRE_SOLVER_SETCOMMUNICATOR_F,Hypre_Solver_SetCommunicator_f)
 (
   int64_t *self,
-  int64_t *comm,
+  int64_t *mpi_comm,
   int32_t *retval
 )
 {
   struct Hypre_Solver__epv *_epv = NULL;
   struct Hypre_Solver__object* _proxy_self = NULL;
-  void* _proxy_comm = NULL;
+  void* _proxy_mpi_comm = NULL;
   _proxy_self =
     (struct Hypre_Solver__object*)
     (ptrdiff_t)(*self);
-  _proxy_comm =
+  _proxy_mpi_comm =
     (void*)
-    (ptrdiff_t)(*comm);
+    (ptrdiff_t)(*mpi_comm);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetCommunicator))(
       _proxy_self->d_object,
-      _proxy_comm
+      _proxy_mpi_comm
     );
 }
 
 /*
- * Method:  GetDoubleValue[]
- */
-
-void
-SIDLFortran77Symbol(hypre_solver_getdoublevalue_f,HYPRE_SOLVER_GETDOUBLEVALUE_F,Hypre_Solver_GetDoubleValue_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  double *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct Hypre_Solver__epv *_epv = NULL;
-  struct Hypre_Solver__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  _proxy_self =
-    (struct Hypre_Solver__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    SIDL_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetDoubleValue))(
-      _proxy_self->d_object,
-      _proxy_name,
-      value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Method:  GetIntValue[]
- */
-
-void
-SIDLFortran77Symbol(hypre_solver_getintvalue_f,HYPRE_SOLVER_GETINTVALUE_F,Hypre_Solver_GetIntValue_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  int32_t *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct Hypre_Solver__epv *_epv = NULL;
-  struct Hypre_Solver__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  _proxy_self =
-    (struct Hypre_Solver__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    SIDL_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetIntValue))(
-      _proxy_self->d_object,
-      _proxy_name,
-      value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Method:  SetDoubleParameter[]
- */
-
-void
-SIDLFortran77Symbol(hypre_solver_setdoubleparameter_f,HYPRE_SOLVER_SETDOUBLEPARAMETER_F,Hypre_Solver_SetDoubleParameter_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  double *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct Hypre_Solver__epv *_epv = NULL;
-  struct Hypre_Solver__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  _proxy_self =
-    (struct Hypre_Solver__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    SIDL_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetDoubleParameter))(
-      _proxy_self->d_object,
-      _proxy_name,
-      *value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Method:  SetIntParameter[]
+ * Set the int parameter associated with {\tt name}.
+ * 
  */
 
 void
@@ -401,7 +301,43 @@ SIDLFortran77Symbol(hypre_solver_setintparameter_f,HYPRE_SOLVER_SETINTPARAMETER_
 }
 
 /*
- * Method:  SetStringParameter[]
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_solver_setdoubleparameter_f,HYPRE_SOLVER_SETDOUBLEPARAMETER_F,Hypre_Solver_SetDoubleParameter_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  double *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct Hypre_Solver__epv *_epv = NULL;
+  struct Hypre_Solver__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  _proxy_self =
+    (struct Hypre_Solver__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetDoubleParameter))(
+      _proxy_self->d_object,
+      _proxy_name,
+      *value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Set the string parameter associated with {\tt name}.
+ * 
  */
 
 void
@@ -442,7 +378,8 @@ SIDLFortran77Symbol(hypre_solver_setstringparameter_f,HYPRE_SOLVER_SETSTRINGPARA
 }
 
 /*
- * Method:  SetIntArrayParameter[]
+ * Set the int array parameter associated with {\tt name}.
+ * 
  */
 
 void
@@ -480,7 +417,8 @@ SIDLFortran77Symbol(hypre_solver_setintarrayparameter_f,HYPRE_SOLVER_SETINTARRAY
 }
 
 /*
- * Method:  SetDoubleArrayParameter[]
+ * Set the double array parameter associated with {\tt name}.
+ * 
  */
 
 void
@@ -518,7 +456,79 @@ SIDLFortran77Symbol(hypre_solver_setdoublearrayparameter_f,HYPRE_SOLVER_SETDOUBL
 }
 
 /*
- * Method:  Setup[]
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_solver_getintvalue_f,HYPRE_SOLVER_GETINTVALUE_F,Hypre_Solver_GetIntValue_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  int32_t *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct Hypre_Solver__epv *_epv = NULL;
+  struct Hypre_Solver__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  _proxy_self =
+    (struct Hypre_Solver__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetIntValue))(
+      _proxy_self->d_object,
+      _proxy_name,
+      value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_solver_getdoublevalue_f,HYPRE_SOLVER_GETDOUBLEVALUE_F,Hypre_Solver_GetDoubleValue_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  double *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct Hypre_Solver__epv *_epv = NULL;
+  struct Hypre_Solver__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  _proxy_self =
+    (struct Hypre_Solver__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetDoubleValue))(
+      _proxy_self->d_object,
+      _proxy_name,
+      value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
  */
 
 void
@@ -553,7 +563,8 @@ SIDLFortran77Symbol(hypre_solver_setup_f,HYPRE_SOLVER_SETUP_F,Hypre_Solver_Setup
 }
 
 /*
- * Method:  Apply[]
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
  */
 
 void
@@ -589,7 +600,8 @@ SIDLFortran77Symbol(hypre_solver_apply_f,HYPRE_SOLVER_APPLY_F,Hypre_Solver_Apply
 }
 
 /*
- * Method:  SetOperator[]
+ * Set the operator for the linear system being solved.
+ * 
  */
 
 void
@@ -618,34 +630,68 @@ SIDLFortran77Symbol(hypre_solver_setoperator_f,HYPRE_SOLVER_SETOPERATOR_F,Hypre_
 }
 
 /*
- * Method:  GetResidual[]
+ * (Optional) Set the convergence tolerance.
+ * 
+ * RDF: New
+ * 
  */
 
 void
-SIDLFortran77Symbol(hypre_solver_getresidual_f,HYPRE_SOLVER_GETRESIDUAL_F,Hypre_Solver_GetResidual_f)
+SIDLFortran77Symbol(hypre_solver_settolerance_f,HYPRE_SOLVER_SETTOLERANCE_F,Hypre_Solver_SetTolerance_f)
 (
   int64_t *self,
-  int64_t *r,
+  double *tolerance,
   int32_t *retval
 )
 {
   struct Hypre_Solver__epv *_epv = NULL;
   struct Hypre_Solver__object* _proxy_self = NULL;
-  struct Hypre_Vector__object* _proxy_r = NULL;
   _proxy_self =
     (struct Hypre_Solver__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   *retval = 
-    (*(_epv->f_GetResidual))(
+    (*(_epv->f_SetTolerance))(
       _proxy_self->d_object,
-      &_proxy_r
+      *tolerance
     );
-  *r = (ptrdiff_t)_proxy_r;
 }
 
 /*
- * Method:  SetLogging[]
+ * (Optional) Set maximum number of iterations.
+ * 
+ * RDF: New
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_solver_setmaxiterations_f,HYPRE_SOLVER_SETMAXITERATIONS_F,Hypre_Solver_SetMaxIterations_f)
+(
+  int64_t *self,
+  int32_t *max_iterations,
+  int32_t *retval
+)
+{
+  struct Hypre_Solver__epv *_epv = NULL;
+  struct Hypre_Solver__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct Hypre_Solver__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetMaxIterations))(
+      _proxy_self->d_object,
+      *max_iterations
+    );
+}
+
+/*
+ * (Optional) Set the {\it logging level}, specifying the degree
+ * of additional informational data to be accumulated.  Does
+ * nothing by default (level = 0).  Other levels (if any) are
+ * implementation-specific.  Must be called before {\tt Setup}
+ * and {\tt Apply}.
+ * 
  */
 
 void
@@ -670,7 +716,12 @@ SIDLFortran77Symbol(hypre_solver_setlogging_f,HYPRE_SOLVER_SETLOGGING_F,Hypre_So
 }
 
 /*
- * Method:  SetPrintLevel[]
+ * (Optional) Set the {\it print level}, specifying the degree
+ * of informational data to be printed either to the screen or
+ * to a file.  Does nothing by default (level=0).  Other levels
+ * (if any) are implementation-specific.  Must be called before
+ * {\tt Setup} and {\tt Apply}.
+ * 
  */
 
 void
@@ -691,6 +742,62 @@ SIDLFortran77Symbol(hypre_solver_setprintlevel_f,HYPRE_SOLVER_SETPRINTLEVEL_F,Hy
     (*(_epv->f_SetPrintLevel))(
       _proxy_self->d_object,
       *level
+    );
+}
+
+/*
+ * (Optional) Return the number of iterations taken.
+ * 
+ * RDF: New
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_solver_getnumiterations_f,HYPRE_SOLVER_GETNUMITERATIONS_F,Hypre_Solver_GetNumIterations_f)
+(
+  int64_t *self,
+  int32_t *num_iterations,
+  int32_t *retval
+)
+{
+  struct Hypre_Solver__epv *_epv = NULL;
+  struct Hypre_Solver__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct Hypre_Solver__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetNumIterations))(
+      _proxy_self->d_object,
+      num_iterations
+    );
+}
+
+/*
+ * (Optional) Return the norm of the relative residual.
+ * 
+ * RDF: New
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_solver_getrelresidualnorm_f,HYPRE_SOLVER_GETRELRESIDUALNORM_F,Hypre_Solver_GetRelResidualNorm_f)
+(
+  int64_t *self,
+  double *norm,
+  int32_t *retval
+)
+{
+  struct Hypre_Solver__epv *_epv = NULL;
+  struct Hypre_Solver__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct Hypre_Solver__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetRelResidualNorm))(
+      _proxy_self->d_object,
+      norm
     );
 }
 

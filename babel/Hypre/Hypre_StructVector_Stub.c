@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_StructVector_Stub.c
- * Symbol:        Hypre.StructVector-v0.1.6
+ * Symbol:        Hypre.StructVector-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:33 PST
+ * SIDL Created:  20030306 17:05:12 PST
+ * Generated:     20030306 17:05:14 PST
  * Description:   Client-side glue code for Hypre.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 427
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1139
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #include "Hypre_StructVector.h"
@@ -175,7 +175,8 @@ Hypre_StructVector_getClassInfo(
 }
 
 /*
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 
 int32_t
@@ -192,7 +193,6 @@ Hypre_StructVector_SetCommunicator(
  * Prepare an object for setting coefficient values, whether for
  * the first time or subsequently.
  * 
- * 
  */
 
 int32_t
@@ -204,11 +204,11 @@ Hypre_StructVector_Initialize(
 }
 
 /*
- * Finalize the construction of an object before using, either for
- * the first time or on subsequent uses. "Initialize" and "Assemble"
- * always appear in a matched set, with Initialize preceding Assemble. Values
- * can only be set in between a call to Initialize and Assemble.
- * 
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
  * 
  */
 
@@ -221,14 +221,15 @@ Hypre_StructVector_Assemble(
 }
 
 /*
- * The problem definition interface is a "builder" that creates an object
- * that contains the problem definition information, e.g. a matrix. To
- * perform subsequent operations with that object, it must be returned from
- * the problem definition object. "GetObject" performs this function.
- * <note>At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
- * be used on the returned object to convert it into a known type.</note>
- * 
+ * The problem definition interface is a {\it builder} that
+ * creates an object that contains the problem definition
+ * information, e.g. a matrix. To perform subsequent operations
+ * with that object, it must be returned from the problem
+ * definition object. {\tt GetObject} performs this function.
+ * At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a SIDL.BaseInterface.
+ * QueryInterface or Cast must be used on the returned object to
+ * convert it into a known type.
  * 
  */
 
@@ -305,7 +306,8 @@ Hypre_StructVector_SetBoxValues(
 }
 
 /*
- * y <- 0 (where y=self)
+ * Set {\tt self} to 0.
+ * 
  */
 
 int32_t
@@ -317,7 +319,8 @@ Hypre_StructVector_Clear(
 }
 
 /*
- * y <- x 
+ * Copy x into {\tt self}.
+ * 
  */
 
 int32_t
@@ -331,7 +334,12 @@ Hypre_StructVector_Copy(
 }
 
 /*
- * create an x compatible with y
+ * Create an {\tt x} compatible with {\tt self}.
+ * 
+ * NOTE: When this method is used in an inherited class, the
+ * cloned {\tt Vector} object can be cast to an object with the
+ * inherited class type.
+ * 
  */
 
 int32_t
@@ -345,7 +353,8 @@ Hypre_StructVector_Clone(
 }
 
 /*
- * y <- a*y 
+ * Scale {\self} by {\tt a}.
+ * 
  */
 
 int32_t
@@ -359,7 +368,8 @@ Hypre_StructVector_Scale(
 }
 
 /*
- * d <- (y,x)
+ * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+ * 
  */
 
 int32_t
@@ -375,7 +385,8 @@ Hypre_StructVector_Dot(
 }
 
 /*
- * y <- a*x + y
+ * Add {\tt a}*{\tt x} to {\tt self}.
+ * 
  */
 
 int32_t

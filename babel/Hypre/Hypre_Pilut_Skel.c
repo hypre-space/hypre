@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_Pilut_Skel.c
- * Symbol:        Hypre.Pilut-v0.1.6
+ * Symbol:        Hypre.Pilut-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:37 PST
+ * SIDL Created:  20030306 17:05:12 PST
+ * Generated:     20030306 17:05:15 PST
  * Description:   Server-side glue code for Hypre.Pilut
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 462
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1242
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #include "Hypre_Pilut_IOR.h"
@@ -32,28 +32,16 @@ impl_Hypre_Pilut_SetCommunicator(
   void*);
 
 extern int32_t
-impl_Hypre_Pilut_GetDoubleValue(
+impl_Hypre_Pilut_SetIntParameter(
   Hypre_Pilut,
   const char*,
-  double*);
-
-extern int32_t
-impl_Hypre_Pilut_GetIntValue(
-  Hypre_Pilut,
-  const char*,
-  int32_t*);
+  int32_t);
 
 extern int32_t
 impl_Hypre_Pilut_SetDoubleParameter(
   Hypre_Pilut,
   const char*,
   double);
-
-extern int32_t
-impl_Hypre_Pilut_SetIntParameter(
-  Hypre_Pilut,
-  const char*,
-  int32_t);
 
 extern int32_t
 impl_Hypre_Pilut_SetStringParameter(
@@ -74,6 +62,18 @@ impl_Hypre_Pilut_SetDoubleArrayParameter(
   struct SIDL_double__array*);
 
 extern int32_t
+impl_Hypre_Pilut_GetIntValue(
+  Hypre_Pilut,
+  const char*,
+  int32_t*);
+
+extern int32_t
+impl_Hypre_Pilut_GetDoubleValue(
+  Hypre_Pilut,
+  const char*,
+  double*);
+
+extern int32_t
 impl_Hypre_Pilut_Setup(
   Hypre_Pilut,
   Hypre_Vector,
@@ -91,9 +91,14 @@ impl_Hypre_Pilut_SetOperator(
   Hypre_Operator);
 
 extern int32_t
-impl_Hypre_Pilut_GetResidual(
+impl_Hypre_Pilut_SetTolerance(
   Hypre_Pilut,
-  Hypre_Vector*);
+  double);
+
+extern int32_t
+impl_Hypre_Pilut_SetMaxIterations(
+  Hypre_Pilut,
+  int32_t);
 
 extern int32_t
 impl_Hypre_Pilut_SetLogging(
@@ -105,25 +110,38 @@ impl_Hypre_Pilut_SetPrintLevel(
   Hypre_Pilut,
   int32_t);
 
+extern int32_t
+impl_Hypre_Pilut_GetNumIterations(
+  Hypre_Pilut,
+  int32_t*);
+
+extern int32_t
+impl_Hypre_Pilut_GetRelResidualNorm(
+  Hypre_Pilut,
+  double*);
+
 void
 Hypre_Pilut__set_epv(struct Hypre_Pilut__epv *epv)
 {
   epv->f__ctor = impl_Hypre_Pilut__ctor;
   epv->f__dtor = impl_Hypre_Pilut__dtor;
   epv->f_SetCommunicator = impl_Hypre_Pilut_SetCommunicator;
-  epv->f_GetDoubleValue = impl_Hypre_Pilut_GetDoubleValue;
-  epv->f_GetIntValue = impl_Hypre_Pilut_GetIntValue;
-  epv->f_SetDoubleParameter = impl_Hypre_Pilut_SetDoubleParameter;
   epv->f_SetIntParameter = impl_Hypre_Pilut_SetIntParameter;
+  epv->f_SetDoubleParameter = impl_Hypre_Pilut_SetDoubleParameter;
   epv->f_SetStringParameter = impl_Hypre_Pilut_SetStringParameter;
   epv->f_SetIntArrayParameter = impl_Hypre_Pilut_SetIntArrayParameter;
   epv->f_SetDoubleArrayParameter = impl_Hypre_Pilut_SetDoubleArrayParameter;
+  epv->f_GetIntValue = impl_Hypre_Pilut_GetIntValue;
+  epv->f_GetDoubleValue = impl_Hypre_Pilut_GetDoubleValue;
   epv->f_Setup = impl_Hypre_Pilut_Setup;
   epv->f_Apply = impl_Hypre_Pilut_Apply;
   epv->f_SetOperator = impl_Hypre_Pilut_SetOperator;
-  epv->f_GetResidual = impl_Hypre_Pilut_GetResidual;
+  epv->f_SetTolerance = impl_Hypre_Pilut_SetTolerance;
+  epv->f_SetMaxIterations = impl_Hypre_Pilut_SetMaxIterations;
   epv->f_SetLogging = impl_Hypre_Pilut_SetLogging;
   epv->f_SetPrintLevel = impl_Hypre_Pilut_SetPrintLevel;
+  epv->f_GetNumIterations = impl_Hypre_Pilut_GetNumIterations;
+  epv->f_GetRelResidualNorm = impl_Hypre_Pilut_GetRelResidualNorm;
 }
 
 struct Hypre_Pilut__data*

@@ -1,30 +1,28 @@
 /*
  * File:          Hypre_IJBuildMatrix.h
- * Symbol:        Hypre.IJBuildMatrix-v0.1.6
+ * Symbol:        Hypre.IJBuildMatrix-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:40 PST
- * Generated:     20030210 16:05:48 PST
+ * SIDL Created:  20030306 17:05:17 PST
+ * Generated:     20030306 17:05:20 PST
  * Description:   Client-side glue code for Hypre.IJBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 155
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 85
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_IJBuildMatrix_h
 #define included_Hypre_IJBuildMatrix_h
 
 /**
- * Symbol "Hypre.IJBuildMatrix" (version 0.1.6)
- * 
+ * Symbol "Hypre.IJBuildMatrix" (version 0.1.7)
  * 
  * This interface represents a linear-algebraic conceptual view of a
  * linear system.  The 'I' and 'J' in the name are meant to be
  * mnemonic for the traditional matrix notation A(I,J).
- * 
  * 
  */
 struct Hypre_IJBuildMatrix__object;
@@ -110,7 +108,8 @@ Hypre_IJBuildMatrix_isType(
   const char* name);
 
 /**
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 int32_t
 Hypre_IJBuildMatrix_SetCommunicator(
@@ -121,18 +120,17 @@ Hypre_IJBuildMatrix_SetCommunicator(
  * Prepare an object for setting coefficient values, whether for
  * the first time or subsequently.
  * 
- * 
  */
 int32_t
 Hypre_IJBuildMatrix_Initialize(
   Hypre_IJBuildMatrix self);
 
 /**
- * Finalize the construction of an object before using, either for
- * the first time or on subsequent uses. "Initialize" and "Assemble"
- * always appear in a matched set, with Initialize preceding Assemble. Values
- * can only be set in between a call to Initialize and Assemble.
- * 
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
  * 
  */
 int32_t
@@ -140,14 +138,15 @@ Hypre_IJBuildMatrix_Assemble(
   Hypre_IJBuildMatrix self);
 
 /**
- * The problem definition interface is a "builder" that creates an object
- * that contains the problem definition information, e.g. a matrix. To
- * perform subsequent operations with that object, it must be returned from
- * the problem definition object. "GetObject" performs this function.
- * <note>At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
- * be used on the returned object to convert it into a known type.</note>
- * 
+ * The problem definition interface is a {\it builder} that
+ * creates an object that contains the problem definition
+ * information, e.g. a matrix. To perform subsequent operations
+ * with that object, it must be returned from the problem
+ * definition object. {\tt GetObject} performs this function.
+ * At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a SIDL.BaseInterface.
+ * QueryInterface or Cast must be used on the returned object to
+ * convert it into a known type.
  * 
  */
 int32_t
@@ -156,29 +155,32 @@ Hypre_IJBuildMatrix_GetObject(
   SIDL_BaseInterface* A);
 
 /**
- * Create a matrix object.  Each process owns some unique consecutive
- * range of rows, indicated by the global row indices {\tt ilower} and
- * {\tt iupper}.  The row data is required to be such that the value
- * of {\tt ilower} on any process $p$ be exactly one more than the
- * value of {\tt iupper} on process $p-1$.  Note that the first row of
- * the global matrix may start with any integer value.  In particular,
- * one may use zero- or one-based indexing.
+ * Set the local range for a matrix object.  Each process owns
+ * some unique consecutive range of rows, indicated by the
+ * global row indices {\tt ilower} and {\tt iupper}.  The row
+ * data is required to be such that the value of {\tt ilower} on
+ * any process $p$ be exactly one more than the value of {\tt
+ * iupper} on process $p-1$.  Note that the first row of the
+ * global matrix may start with any integer value.  In
+ * particular, one may use zero- or one-based indexing.
  * 
- * For square matrices, {\tt jlower} and {\tt jupper} typically should
- * match {\tt ilower} and {\tt iupper}, respectively.  For rectangular
- * matrices, {\tt jlower} and {\tt jupper} should define a
- * partitioning of the columns.  This partitioning must be used for
- * any vector $v$ that will be used in matrix-vector products with the
- * rectangular matrix.  The matrix data structure may use {\tt jlower}
- * and {\tt jupper} to store the diagonal blocks (rectangular in
- * general) of the matrix separately from the rest of the matrix.
+ * For square matrices, {\tt jlower} and {\tt jupper} typically
+ * should match {\tt ilower} and {\tt iupper}, respectively.
+ * For rectangular matrices, {\tt jlower} and {\tt jupper}
+ * should define a partitioning of the columns.  This
+ * partitioning must be used for any vector $v$ that will be
+ * used in matrix-vector products with the rectangular matrix.
+ * The matrix data structure may use {\tt jlower} and {\tt
+ * jupper} to store the diagonal blocks (rectangular in general)
+ * of the matrix separately from the rest of the matrix.
  * 
  * Collective.
  * 
+ * RDF: Changed name from 'Create' (x)
  * 
  */
 int32_t
-Hypre_IJBuildMatrix_Create(
+Hypre_IJBuildMatrix_SetLocalRange(
   Hypre_IJBuildMatrix self,
   int32_t ilower,
   int32_t iupper,
@@ -186,18 +188,18 @@ Hypre_IJBuildMatrix_Create(
   int32_t jupper);
 
 /**
- * Sets values for {\tt nrows} of the matrix.  The arrays {\tt ncols}
- * and {\tt rows} are of dimension {\tt nrows} and contain the number
- * of columns in each row and the row indices, respectively.  The
- * array {\tt cols} contains the column indices for each of the {\tt
- * rows}, and is ordered by rows.  The data in the {\tt values} array
- * corresponds directly to the column entries in {\tt cols}.  Erases
- * any previous values at the specified locations and replaces them
- * with new ones, or, if there was no value there before, inserts a
- * new one.
+ * Sets values for {\tt nrows} of the matrix.  The arrays {\tt
+ * ncols} and {\tt rows} are of dimension {\tt nrows} and
+ * contain the number of columns in each row and the row
+ * indices, respectively.  The array {\tt cols} contains the
+ * column indices for each of the {\tt rows}, and is ordered by
+ * rows.  The data in the {\tt values} array corresponds
+ * directly to the column entries in {\tt cols}.  Erases any
+ * previous values at the specified locations and replaces them
+ * with new ones, or, if there was no value there before,
+ * inserts a new one.
  * 
  * Not collective.
- * 
  * 
  */
 int32_t
@@ -210,13 +212,12 @@ Hypre_IJBuildMatrix_SetValues(
   struct SIDL_double__array* values);
 
 /**
- * Adds to values for {\tt nrows} of the matrix.  Usage details are
- * analogous to \Ref{HYPRE_IJMatrixSetValues}.  Adds to any previous
- * values at the specified locations, or, if there was no value there
- * before, inserts a new one.
+ * Adds to values for {\tt nrows} of the matrix.  Usage details
+ * are analogous to {\tt SetValues}.  Adds to any previous
+ * values at the specified locations, or, if there was no value
+ * there before, inserts a new one.
  * 
  * Not collective.
- * 
  * 
  */
 int32_t
@@ -229,14 +230,59 @@ Hypre_IJBuildMatrix_AddToValues(
   struct SIDL_double__array* values);
 
 /**
- * (Optional) Set the max number of nonzeros to expect in each row.
- * The array {\tt sizes} contains estimated sizes for each row on this
- * process.  This call can significantly improve the efficiency of
- * matrix construction, and should always be utilized if possible.
+ * Gets range of rows owned by this processor and range of
+ * column partitioning for this processor.
+ * 
+ * RDF: New (x)
+ * 
+ */
+int32_t
+Hypre_IJBuildMatrix_GetLocalRange(
+  Hypre_IJBuildMatrix self,
+  int32_t* ilower,
+  int32_t* iupper,
+  int32_t* jlower,
+  int32_t* jupper);
+
+/**
+ * Gets number of nonzeros elements for {\tt nrows} rows
+ * specified in {\tt rows} and returns them in {\tt ncols},
+ * which needs to be allocated by the user.
+ * 
+ * RDF: New (x)
+ * 
+ */
+int32_t
+Hypre_IJBuildMatrix_GetRowCounts(
+  Hypre_IJBuildMatrix self,
+  int32_t nrows,
+  struct SIDL_int__array* rows,
+  struct SIDL_int__array** ncols);
+
+/**
+ * Gets values for {\tt nrows} rows or partial rows of the
+ * matrix.  Usage details are analogous to {\tt SetValues}.
+ * 
+ * RDF: New (x)
+ * 
+ */
+int32_t
+Hypre_IJBuildMatrix_GetValues(
+  Hypre_IJBuildMatrix self,
+  int32_t nrows,
+  struct SIDL_int__array* ncols,
+  struct SIDL_int__array* rows,
+  struct SIDL_int__array* cols,
+  struct SIDL_double__array** values);
+
+/**
+ * (Optional) Set the max number of nonzeros to expect in each
+ * row.  The array {\tt sizes} contains estimated sizes for each
+ * row on this process.  This call can significantly improve the
+ * efficiency of matrix construction, and should always be
+ * utilized if possible.
  * 
  * Not collective.
- * 
- * DEVELOPER NOTES: None.
  * 
  */
 int32_t
@@ -245,27 +291,18 @@ Hypre_IJBuildMatrix_SetRowSizes(
   struct SIDL_int__array* sizes);
 
 /**
- * (Optional) Set the max number of nonzeros to expect in each row of
- * the diagonal and off-diagonal blocks.  The diagonal block is the
- * submatrix whose column numbers correspond to rows owned by this
- * process, and the off-diagonal block is everything else.  The arrays
- * {\tt diag\_sizes} and {\tt offdiag\_sizes} contain estimated sizes
- * for each row of the diagonal and off-diagonal blocks, respectively.
- * This routine can significantly improve the efficiency of matrix
- * construction, and should always be utilized if possible.
- * 
- * Not collective.
- * 
+ * Print the matrix to file.  This is mainly for debugging
+ * purposes.
  * 
  */
 int32_t
-Hypre_IJBuildMatrix_SetDiagOffdSizes(
+Hypre_IJBuildMatrix_Print(
   Hypre_IJBuildMatrix self,
-  struct SIDL_int__array* diag_sizes,
-  struct SIDL_int__array* offdiag_sizes);
+  const char* filename);
 
 /**
- * Read the matrix from file.  This is mainly for debugging purposes.
+ * Read the matrix from file.  This is mainly for debugging
+ * purposes.
  * 
  */
 int32_t
@@ -273,15 +310,6 @@ Hypre_IJBuildMatrix_Read(
   Hypre_IJBuildMatrix self,
   const char* filename,
   void* comm);
-
-/**
- * Print the matrix to file.  This is mainly for debugging purposes.
- * 
- */
-int32_t
-Hypre_IJBuildMatrix_Print(
-  Hypre_IJBuildMatrix self,
-  const char* filename);
 
 /**
  * Cast method for interface and class type conversions.

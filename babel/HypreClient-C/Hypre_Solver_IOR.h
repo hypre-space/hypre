@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_Solver_IOR.h
- * Symbol:        Hypre.Solver-v0.1.6
+ * Symbol:        Hypre.Solver-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:40 PST
- * Generated:     20030210 16:05:44 PST
+ * SIDL Created:  20030306 17:05:17 PST
+ * Generated:     20030306 17:05:19 PST
  * Description:   Intermediate Object Representation for Hypre.Solver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 340
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 710
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_Solver_IOR_h
@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "Hypre.Solver" (version 0.1.6)
+ * Symbol "Hypre.Solver" (version 0.1.7)
  */
 
 struct Hypre_Solver__array;
@@ -70,26 +70,18 @@ struct Hypre_Solver__epv {
   SIDL_bool (*f_isType)(
     void* self,
     const char* name);
-  /* Methods introduced in Hypre.Operator-v0.1.6 */
+  /* Methods introduced in Hypre.Operator-v0.1.7 */
   int32_t (*f_SetCommunicator)(
     void* self,
-    void* comm);
-  int32_t (*f_GetDoubleValue)(
-    void* self,
-    const char* name,
-    double* value);
-  int32_t (*f_GetIntValue)(
-    void* self,
-    const char* name,
-    int32_t* value);
-  int32_t (*f_SetDoubleParameter)(
-    void* self,
-    const char* name,
-    double value);
+    void* mpi_comm);
   int32_t (*f_SetIntParameter)(
     void* self,
     const char* name,
     int32_t value);
+  int32_t (*f_SetDoubleParameter)(
+    void* self,
+    const char* name,
+    double value);
   int32_t (*f_SetStringParameter)(
     void* self,
     const char* name,
@@ -102,6 +94,14 @@ struct Hypre_Solver__epv {
     void* self,
     const char* name,
     struct SIDL_double__array* value);
+  int32_t (*f_GetIntValue)(
+    void* self,
+    const char* name,
+    int32_t* value);
+  int32_t (*f_GetDoubleValue)(
+    void* self,
+    const char* name,
+    double* value);
   int32_t (*f_Setup)(
     void* self,
     struct Hypre_Vector__object* b,
@@ -110,19 +110,28 @@ struct Hypre_Solver__epv {
     void* self,
     struct Hypre_Vector__object* b,
     struct Hypre_Vector__object** x);
-  /* Methods introduced in Hypre.Solver-v0.1.6 */
+  /* Methods introduced in Hypre.Solver-v0.1.7 */
   int32_t (*f_SetOperator)(
     void* self,
     struct Hypre_Operator__object* A);
-  int32_t (*f_GetResidual)(
+  int32_t (*f_SetTolerance)(
     void* self,
-    struct Hypre_Vector__object** r);
+    double tolerance);
+  int32_t (*f_SetMaxIterations)(
+    void* self,
+    int32_t max_iterations);
   int32_t (*f_SetLogging)(
     void* self,
     int32_t level);
   int32_t (*f_SetPrintLevel)(
     void* self,
     int32_t level);
+  int32_t (*f_GetNumIterations)(
+    void* self,
+    int32_t* num_iterations);
+  int32_t (*f_GetRelResidualNorm)(
+    void* self,
+    double* norm);
 };
 
 /*

@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_IJBuildMatrix_IOR.h
- * Symbol:        Hypre.IJBuildMatrix-v0.1.6
+ * Symbol:        Hypre.IJBuildMatrix-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:40 PST
- * Generated:     20030210 16:05:44 PST
+ * SIDL Created:  20030306 17:05:17 PST
+ * Generated:     20030306 17:05:19 PST
  * Description:   Intermediate Object Representation for Hypre.IJBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 155
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 85
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_IJBuildMatrix_IOR_h
@@ -25,13 +25,11 @@ extern "C" {
 #endif
 
 /*
- * Symbol "Hypre.IJBuildMatrix" (version 0.1.6)
- * 
+ * Symbol "Hypre.IJBuildMatrix" (version 0.1.7)
  * 
  * This interface represents a linear-algebraic conceptual view of a
  * linear system.  The 'I' and 'J' in the name are meant to be
  * mnemonic for the traditional matrix notation A(I,J).
- * 
  * 
  */
 
@@ -73,7 +71,7 @@ struct Hypre_IJBuildMatrix__epv {
   SIDL_bool (*f_isType)(
     void* self,
     const char* name);
-  /* Methods introduced in Hypre.ProblemDefinition-v0.1.6 */
+  /* Methods introduced in Hypre.ProblemDefinition-v0.1.7 */
   int32_t (*f_SetCommunicator)(
     void* self,
     void* mpi_comm);
@@ -84,8 +82,8 @@ struct Hypre_IJBuildMatrix__epv {
   int32_t (*f_GetObject)(
     void* self,
     struct SIDL_BaseInterface__object** A);
-  /* Methods introduced in Hypre.IJBuildMatrix-v0.1.6 */
-  int32_t (*f_Create)(
+  /* Methods introduced in Hypre.IJBuildMatrix-v0.1.7 */
+  int32_t (*f_SetLocalRange)(
     void* self,
     int32_t ilower,
     int32_t iupper,
@@ -105,20 +103,34 @@ struct Hypre_IJBuildMatrix__epv {
     struct SIDL_int__array* rows,
     struct SIDL_int__array* cols,
     struct SIDL_double__array* values);
+  int32_t (*f_GetLocalRange)(
+    void* self,
+    int32_t* ilower,
+    int32_t* iupper,
+    int32_t* jlower,
+    int32_t* jupper);
+  int32_t (*f_GetRowCounts)(
+    void* self,
+    int32_t nrows,
+    struct SIDL_int__array* rows,
+    struct SIDL_int__array** ncols);
+  int32_t (*f_GetValues)(
+    void* self,
+    int32_t nrows,
+    struct SIDL_int__array* ncols,
+    struct SIDL_int__array* rows,
+    struct SIDL_int__array* cols,
+    struct SIDL_double__array** values);
   int32_t (*f_SetRowSizes)(
     void* self,
     struct SIDL_int__array* sizes);
-  int32_t (*f_SetDiagOffdSizes)(
+  int32_t (*f_Print)(
     void* self,
-    struct SIDL_int__array* diag_sizes,
-    struct SIDL_int__array* offdiag_sizes);
+    const char* filename);
   int32_t (*f_Read)(
     void* self,
     const char* filename,
     void* comm);
-  int32_t (*f_Print)(
-    void* self,
-    const char* filename);
 };
 
 /*

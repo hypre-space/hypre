@@ -1,28 +1,29 @@
 C       
 C       File:          Hypre_Operator_Impl.f
-C       Symbol:        Hypre.Operator-v0.1.6
+C       Symbol:        Hypre.Operator-v0.1.7
 C       Symbol Type:   interface
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030210 16:05:49 PST
-C       Generated:     20030210 16:05:56 PST
+C       SIDL Created:  20030306 17:05:23 PST
+C       Generated:     20030306 17:05:26 PST
 C       Description:   Client-side documentation text for Hypre.Operator
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
-C       source-line   = 326
-C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+C       source-line   = 604
+C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
 
 C       
-C       Symbol "Hypre.Operator" (version 0.1.6)
+C       Symbol "Hypre.Operator" (version 0.1.7)
 C       
-C       An Operator is anything that maps one Vector to another.
-C       The terms "Setup" and "Apply" are reserved for Operators.
+C       An Operator is anything that maps one Vector to another.  The
+C       terms {\tt Setup} and {\tt Apply} are reserved for Operators.
 C       The implementation is allowed to assume that supplied parameter
 C       arrays will not be destroyed.
+C       
 C       
 
 
@@ -136,76 +137,25 @@ C       out bool retval
 
 
 C       
-C       Method:  SetCommunicator[]
+C       Set the MPI Communicator.
+C       
 C       
 
-        subroutine Hypre_Operator_SetCommunicator_f(self, comm, retval)
-        implicit none
-C       in Hypre.Operator self
-        integer*8 self
-C       in opaque comm
-        integer*8 comm
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  GetDoubleValue[]
-C       
-
-        subroutine Hypre_Operator_GetDoubleValue_f(self, name, value,
+        subroutine Hypre_Operator_SetCommunicator_f(self, mpi_comm,
      &     retval)
         implicit none
 C       in Hypre.Operator self
         integer*8 self
-C       in string name
-        character*(*) name
-C       out double value
-        double precision value
+C       in opaque mpi_comm
+        integer*8 mpi_comm
 C       out int retval
         integer*4 retval
         end
 
 
 C       
-C       Method:  GetIntValue[]
+C       Set the int parameter associated with {\tt name}.
 C       
-
-        subroutine Hypre_Operator_GetIntValue_f(self, name, value,
-     &     retval)
-        implicit none
-C       in Hypre.Operator self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       out int value
-        integer*4 value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  SetDoubleParameter[]
-C       
-
-        subroutine Hypre_Operator_SetDoubleParameter_f(self, name,
-     &     value, retval)
-        implicit none
-C       in Hypre.Operator self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in double value
-        double precision value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  SetIntParameter[]
 C       
 
         subroutine Hypre_Operator_SetIntParameter_f(self, name, value,
@@ -223,7 +173,27 @@ C       out int retval
 
 
 C       
-C       Method:  SetStringParameter[]
+C       Set the double parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine Hypre_Operator_SetDoubleParameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in Hypre.Operator self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in double value
+        double precision value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the string parameter associated with {\tt name}.
+C       
 C       
 
         subroutine Hypre_Operator_SetStringParameter_f(self, name,
@@ -241,7 +211,8 @@ C       out int retval
 
 
 C       
-C       Method:  SetIntArrayParameter[]
+C       Set the int array parameter associated with {\tt name}.
+C       
 C       
 
         subroutine Hypre_Operator_SetIntArrayParameter_f(self, name,
@@ -259,7 +230,8 @@ C       out int retval
 
 
 C       
-C       Method:  SetDoubleArrayParameter[]
+C       Set the double array parameter associated with {\tt name}.
+C       
 C       
 
         subroutine Hypre_Operator_SetDoubleArrayParameter_f(self, name,
@@ -277,7 +249,47 @@ C       out int retval
 
 
 C       
-C       Method:  Setup[]
+C       Set the int parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine Hypre_Operator_GetIntValue_f(self, name, value,
+     &     retval)
+        implicit none
+C       in Hypre.Operator self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out int value
+        integer*4 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Get the double parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine Hypre_Operator_GetDoubleValue_f(self, name, value,
+     &     retval)
+        implicit none
+C       in Hypre.Operator self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out double value
+        double precision value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Do any preprocessing that may be necessary in
+C       order to execute {\tt Apply}.
+C       
 C       
 
         subroutine Hypre_Operator_Setup_f(self, b, x, retval)
@@ -294,7 +306,8 @@ C       out int retval
 
 
 C       
-C       Method:  Apply[]
+C       Apply the operator to {\tt b}, returning {\tt x}.
+C       
 C       
 
         subroutine Hypre_Operator_Apply_f(self, b, x, retval)

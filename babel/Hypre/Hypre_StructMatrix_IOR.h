@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_StructMatrix_IOR.h
- * Symbol:        Hypre.StructMatrix-v0.1.6
+ * Symbol:        Hypre.StructMatrix-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:30 PST
+ * SIDL Created:  20030306 17:05:12 PST
+ * Generated:     20030306 17:05:13 PST
  * Description:   Intermediate Object Representation for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 425
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1134
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_StructMatrix_IOR_h
@@ -26,8 +26,8 @@
 #ifndef included_Hypre_ProblemDefinition_IOR_h
 #include "Hypre_ProblemDefinition_IOR.h"
 #endif
-#ifndef included_Hypre_StructuredGridBuildMatrix_IOR_h
-#include "Hypre_StructuredGridBuildMatrix_IOR.h"
+#ifndef included_Hypre_StructBuildMatrix_IOR_h
+#include "Hypre_StructBuildMatrix_IOR.h"
 #endif
 #ifndef included_SIDL_BaseClass_IOR_h
 #include "SIDL_BaseClass_IOR.h"
@@ -38,10 +38,11 @@ extern "C" {
 #endif
 
 /*
- * Symbol "Hypre.StructMatrix" (version 0.1.6)
+ * Symbol "Hypre.StructMatrix" (version 0.1.7)
  * 
- * A single class that implements both a build interface and an operator
- * interface. It returns itself for <code>GetConstructedObject</code>.
+ * A single class that implements both a build interface and an
+ * operator interface. It returns itself for GetConstructedObject.
+ * 
  */
 
 struct Hypre_StructMatrix__array;
@@ -107,26 +108,18 @@ struct Hypre_StructMatrix__epv {
   struct SIDL_ClassInfo__object* (*f_getClassInfo)(
     struct Hypre_StructMatrix__object* self);
   /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
-  /* Methods introduced in Hypre.Operator-v0.1.6 */
+  /* Methods introduced in Hypre.Operator-v0.1.7 */
   int32_t (*f_SetCommunicator)(
     struct Hypre_StructMatrix__object* self,
-    void* comm);
-  int32_t (*f_GetDoubleValue)(
-    struct Hypre_StructMatrix__object* self,
-    const char* name,
-    double* value);
-  int32_t (*f_GetIntValue)(
-    struct Hypre_StructMatrix__object* self,
-    const char* name,
-    int32_t* value);
-  int32_t (*f_SetDoubleParameter)(
-    struct Hypre_StructMatrix__object* self,
-    const char* name,
-    double value);
+    void* mpi_comm);
   int32_t (*f_SetIntParameter)(
     struct Hypre_StructMatrix__object* self,
     const char* name,
     int32_t value);
+  int32_t (*f_SetDoubleParameter)(
+    struct Hypre_StructMatrix__object* self,
+    const char* name,
+    double value);
   int32_t (*f_SetStringParameter)(
     struct Hypre_StructMatrix__object* self,
     const char* name,
@@ -139,6 +132,14 @@ struct Hypre_StructMatrix__epv {
     struct Hypre_StructMatrix__object* self,
     const char* name,
     struct SIDL_double__array* value);
+  int32_t (*f_GetIntValue)(
+    struct Hypre_StructMatrix__object* self,
+    const char* name,
+    int32_t* value);
+  int32_t (*f_GetDoubleValue)(
+    struct Hypre_StructMatrix__object* self,
+    const char* name,
+    double* value);
   int32_t (*f_Setup)(
     struct Hypre_StructMatrix__object* self,
     struct Hypre_Vector__object* b,
@@ -148,7 +149,7 @@ struct Hypre_StructMatrix__epv {
     struct Hypre_Vector__object* b,
     struct Hypre_Vector__object** x);
   /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
-  /* Methods introduced in Hypre.ProblemDefinition-v0.1.6 */
+  /* Methods introduced in Hypre.ProblemDefinition-v0.1.7 */
   int32_t (*f_Initialize)(
     struct Hypre_StructMatrix__object* self);
   int32_t (*f_Assemble)(
@@ -156,7 +157,7 @@ struct Hypre_StructMatrix__epv {
   int32_t (*f_GetObject)(
     struct Hypre_StructMatrix__object* self,
     struct SIDL_BaseInterface__object** A);
-  /* Methods introduced in Hypre.StructuredGridBuildMatrix-v0.1.6 */
+  /* Methods introduced in Hypre.StructBuildMatrix-v0.1.7 */
   int32_t (*f_SetGrid)(
     struct Hypre_StructMatrix__object* self,
     struct Hypre_StructGrid__object* grid);
@@ -182,7 +183,7 @@ struct Hypre_StructMatrix__epv {
   int32_t (*f_SetSymmetric)(
     struct Hypre_StructMatrix__object* self,
     int32_t symmetric);
-  /* Methods introduced in Hypre.StructMatrix-v0.1.6 */
+  /* Methods introduced in Hypre.StructMatrix-v0.1.7 */
 };
 
 /*
@@ -190,13 +191,12 @@ struct Hypre_StructMatrix__epv {
  */
 
 struct Hypre_StructMatrix__object {
-  struct SIDL_BaseClass__object                  d_sidl_baseclass;
-  struct Hypre_Operator__object                  d_hypre_operator;
-  struct Hypre_ProblemDefinition__object         d_hypre_problemdefinition;
-  struct Hypre_StructuredGridBuildMatrix__object 
-    d_hypre_structuredgridbuildmatrix;
-  struct Hypre_StructMatrix__epv*                d_epv;
-  void*                                          d_data;
+  struct SIDL_BaseClass__object          d_sidl_baseclass;
+  struct Hypre_Operator__object          d_hypre_operator;
+  struct Hypre_ProblemDefinition__object d_hypre_problemdefinition;
+  struct Hypre_StructBuildMatrix__object d_hypre_structbuildmatrix;
+  struct Hypre_StructMatrix__epv*        d_epv;
+  void*                                  d_data;
 };
 
 struct Hypre_StructMatrix__external {

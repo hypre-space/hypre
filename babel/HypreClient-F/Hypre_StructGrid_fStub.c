@@ -1,23 +1,24 @@
 /*
  * File:          Hypre_StructGrid_fStub.c
- * Symbol:        Hypre.StructGrid-v0.1.6
+ * Symbol:        Hypre.StructGrid-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:50 PST
- * Generated:     20030210 16:05:55 PST
+ * SIDL Created:  20030306 17:05:23 PST
+ * Generated:     20030306 17:05:26 PST
  * Description:   Client-side glue code for Hypre.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 408
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1111
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 /*
- * Symbol "Hypre.StructGrid" (version 0.1.6)
+ * Symbol "Hypre.StructGrid" (version 0.1.7)
  * 
  * Define a structured grid class.
+ * 
  */
 
 #include <stddef.h>
@@ -300,31 +301,32 @@ SIDLFortran77Symbol(hypre_structgrid_getclassinfo_f,HYPRE_STRUCTGRID_GETCLASSINF
 }
 
 /*
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 
 void
 SIDLFortran77Symbol(hypre_structgrid_setcommunicator_f,HYPRE_STRUCTGRID_SETCOMMUNICATOR_F,Hypre_StructGrid_SetCommunicator_f)
 (
   int64_t *self,
-  int64_t *MPI_comm,
+  int64_t *mpi_comm,
   int32_t *retval
 )
 {
   struct Hypre_StructGrid__epv *_epv = NULL;
   struct Hypre_StructGrid__object* _proxy_self = NULL;
-  void* _proxy_MPI_comm = NULL;
+  void* _proxy_mpi_comm = NULL;
   _proxy_self =
     (struct Hypre_StructGrid__object*)
     (ptrdiff_t)(*self);
-  _proxy_MPI_comm =
+  _proxy_mpi_comm =
     (void*)
-    (ptrdiff_t)(*MPI_comm);
+    (ptrdiff_t)(*mpi_comm);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetCommunicator))(
       _proxy_self,
-      _proxy_MPI_comm
+      _proxy_mpi_comm
     );
 }
 

@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_Vector_IOR.h
- * Symbol:        Hypre.Vector-v0.1.6
+ * Symbol:        Hypre.Vector-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:27 PST
- * Generated:     20030210 16:05:29 PST
+ * SIDL Created:  20030306 17:05:11 PST
+ * Generated:     20030306 17:05:12 PST
  * Description:   Intermediate Object Representation for Hypre.Vector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 34
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 669
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_Vector_IOR_h
@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "Hypre.Vector" (version 0.1.6)
+ * Symbol "Hypre.Vector" (version 0.1.7)
  */
 
 struct Hypre_Vector__array;
@@ -66,7 +66,7 @@ struct Hypre_Vector__epv {
   SIDL_bool (*f_isType)(
     void* self,
     const char* name);
-  /* Methods introduced in Hypre.Vector-v0.1.6 */
+  /* Methods introduced in Hypre.Vector-v0.1.7 */
   int32_t (*f_Clear)(
     void* self);
   int32_t (*f_Copy)(

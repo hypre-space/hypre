@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_PCG_IOR.h
- * Symbol:        Hypre.PCG-v0.1.6
+ * Symbol:        Hypre.PCG-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:31 PST
+ * SIDL Created:  20030306 17:05:12 PST
+ * Generated:     20030306 17:05:13 PST
  * Description:   Intermediate Object Representation for Hypre.PCG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 464
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1252
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_PCG_IOR_h
@@ -38,7 +38,13 @@ extern "C" {
 #endif
 
 /*
- * Symbol "Hypre.PCG" (version 0.1.6)
+ * Symbol "Hypre.PCG" (version 0.1.7)
+ * 
+ * Objects of this type can be cast to PreconditionedSolver objects
+ * using the {\tt \_\_cast} methods.
+ * 
+ * RDF: Documentation goes here. (x)
+ * 
  */
 
 struct Hypre_PCG__array;
@@ -100,26 +106,18 @@ struct Hypre_PCG__epv {
   struct SIDL_ClassInfo__object* (*f_getClassInfo)(
     struct Hypre_PCG__object* self);
   /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
-  /* Methods introduced in Hypre.Operator-v0.1.6 */
+  /* Methods introduced in Hypre.Operator-v0.1.7 */
   int32_t (*f_SetCommunicator)(
     struct Hypre_PCG__object* self,
-    void* comm);
-  int32_t (*f_GetDoubleValue)(
-    struct Hypre_PCG__object* self,
-    const char* name,
-    double* value);
-  int32_t (*f_GetIntValue)(
-    struct Hypre_PCG__object* self,
-    const char* name,
-    int32_t* value);
-  int32_t (*f_SetDoubleParameter)(
-    struct Hypre_PCG__object* self,
-    const char* name,
-    double value);
+    void* mpi_comm);
   int32_t (*f_SetIntParameter)(
     struct Hypre_PCG__object* self,
     const char* name,
     int32_t value);
+  int32_t (*f_SetDoubleParameter)(
+    struct Hypre_PCG__object* self,
+    const char* name,
+    double value);
   int32_t (*f_SetStringParameter)(
     struct Hypre_PCG__object* self,
     const char* name,
@@ -132,6 +130,14 @@ struct Hypre_PCG__epv {
     struct Hypre_PCG__object* self,
     const char* name,
     struct SIDL_double__array* value);
+  int32_t (*f_GetIntValue)(
+    struct Hypre_PCG__object* self,
+    const char* name,
+    int32_t* value);
+  int32_t (*f_GetDoubleValue)(
+    struct Hypre_PCG__object* self,
+    const char* name,
+    double* value);
   int32_t (*f_Setup)(
     struct Hypre_PCG__object* self,
     struct Hypre_Vector__object* b,
@@ -140,27 +146,33 @@ struct Hypre_PCG__epv {
     struct Hypre_PCG__object* self,
     struct Hypre_Vector__object* b,
     struct Hypre_Vector__object** x);
-  /* Methods introduced in Hypre.Solver-v0.1.6 */
+  /* Methods introduced in Hypre.Solver-v0.1.7 */
   int32_t (*f_SetOperator)(
     struct Hypre_PCG__object* self,
     struct Hypre_Operator__object* A);
-  int32_t (*f_GetResidual)(
+  int32_t (*f_SetTolerance)(
     struct Hypre_PCG__object* self,
-    struct Hypre_Vector__object** r);
+    double tolerance);
+  int32_t (*f_SetMaxIterations)(
+    struct Hypre_PCG__object* self,
+    int32_t max_iterations);
   int32_t (*f_SetLogging)(
     struct Hypre_PCG__object* self,
     int32_t level);
   int32_t (*f_SetPrintLevel)(
     struct Hypre_PCG__object* self,
     int32_t level);
-  /* Methods introduced in Hypre.PreconditionedSolver-v0.1.6 */
+  int32_t (*f_GetNumIterations)(
+    struct Hypre_PCG__object* self,
+    int32_t* num_iterations);
+  int32_t (*f_GetRelResidualNorm)(
+    struct Hypre_PCG__object* self,
+    double* norm);
+  /* Methods introduced in Hypre.PreconditionedSolver-v0.1.7 */
   int32_t (*f_SetPreconditioner)(
     struct Hypre_PCG__object* self,
     struct Hypre_Solver__object* s);
-  int32_t (*f_GetPreconditionedResidual)(
-    struct Hypre_PCG__object* self,
-    struct Hypre_Vector__object** r);
-  /* Methods introduced in Hypre.PCG-v0.1.6 */
+  /* Methods introduced in Hypre.PCG-v0.1.7 */
 };
 
 /*

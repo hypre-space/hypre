@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_StructMatrix_Impl.h
- * Symbol:        Hypre.StructMatrix-v0.1.6
+ * Symbol:        Hypre.StructMatrix-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:38 PST
+ * SIDL Created:  20030306 17:05:12 PST
+ * Generated:     20030306 17:05:15 PST
  * Description:   Server-side implementation for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 425
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1134
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_StructMatrix_Impl_h
@@ -86,60 +86,6 @@ impl_Hypre_StructMatrix_SetCommunicator(
   void*);
 
 extern int32_t
-impl_Hypre_StructMatrix_GetDoubleValue(
-  Hypre_StructMatrix,
-  const char*,
-  double*);
-
-extern int32_t
-impl_Hypre_StructMatrix_GetIntValue(
-  Hypre_StructMatrix,
-  const char*,
-  int32_t*);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetDoubleParameter(
-  Hypre_StructMatrix,
-  const char*,
-  double);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetIntParameter(
-  Hypre_StructMatrix,
-  const char*,
-  int32_t);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetStringParameter(
-  Hypre_StructMatrix,
-  const char*,
-  const char*);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetIntArrayParameter(
-  Hypre_StructMatrix,
-  const char*,
-  struct SIDL_int__array*);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetDoubleArrayParameter(
-  Hypre_StructMatrix,
-  const char*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_Hypre_StructMatrix_Setup(
-  Hypre_StructMatrix,
-  Hypre_Vector,
-  Hypre_Vector);
-
-extern int32_t
-impl_Hypre_StructMatrix_Apply(
-  Hypre_StructMatrix,
-  Hypre_Vector,
-  Hypre_Vector*);
-
-extern int32_t
 impl_Hypre_StructMatrix_Initialize(
   Hypre_StructMatrix);
 
@@ -188,6 +134,60 @@ extern int32_t
 impl_Hypre_StructMatrix_SetSymmetric(
   Hypre_StructMatrix,
   int32_t);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetIntParameter(
+  Hypre_StructMatrix,
+  const char*,
+  int32_t);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetDoubleParameter(
+  Hypre_StructMatrix,
+  const char*,
+  double);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetStringParameter(
+  Hypre_StructMatrix,
+  const char*,
+  const char*);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetIntArrayParameter(
+  Hypre_StructMatrix,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetDoubleArrayParameter(
+  Hypre_StructMatrix,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_StructMatrix_GetIntValue(
+  Hypre_StructMatrix,
+  const char*,
+  int32_t*);
+
+extern int32_t
+impl_Hypre_StructMatrix_GetDoubleValue(
+  Hypre_StructMatrix,
+  const char*,
+  double*);
+
+extern int32_t
+impl_Hypre_StructMatrix_Setup(
+  Hypre_StructMatrix,
+  Hypre_Vector,
+  Hypre_Vector);
+
+extern int32_t
+impl_Hypre_StructMatrix_Apply(
+  Hypre_StructMatrix,
+  Hypre_Vector,
+  Hypre_Vector*);
 
 #ifdef __cplusplus
 }

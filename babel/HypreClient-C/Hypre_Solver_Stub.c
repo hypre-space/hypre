@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_Solver_Stub.c
- * Symbol:        Hypre.Solver-v0.1.6
+ * Symbol:        Hypre.Solver-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:40 PST
- * Generated:     20030210 16:05:48 PST
+ * SIDL Created:  20030306 17:05:17 PST
+ * Generated:     20030306 17:05:21 PST
  * Description:   Client-side glue code for Hypre.Solver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 340
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 710
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #include "Hypre_Solver.h"
@@ -120,69 +120,23 @@ Hypre_Solver_isType(
 }
 
 /*
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 
 int32_t
 Hypre_Solver_SetCommunicator(
   Hypre_Solver self,
-  void* comm)
+  void* mpi_comm)
 {
   return (*self->d_epv->f_SetCommunicator)(
     self->d_object,
-    comm);
+    mpi_comm);
 }
 
 /*
- * Method:  GetDoubleValue[]
- */
-
-int32_t
-Hypre_Solver_GetDoubleValue(
-  Hypre_Solver self,
-  const char* name,
-  double* value)
-{
-  return (*self->d_epv->f_GetDoubleValue)(
-    self->d_object,
-    name,
-    value);
-}
-
-/*
- * Method:  GetIntValue[]
- */
-
-int32_t
-Hypre_Solver_GetIntValue(
-  Hypre_Solver self,
-  const char* name,
-  int32_t* value)
-{
-  return (*self->d_epv->f_GetIntValue)(
-    self->d_object,
-    name,
-    value);
-}
-
-/*
- * Method:  SetDoubleParameter[]
- */
-
-int32_t
-Hypre_Solver_SetDoubleParameter(
-  Hypre_Solver self,
-  const char* name,
-  double value)
-{
-  return (*self->d_epv->f_SetDoubleParameter)(
-    self->d_object,
-    name,
-    value);
-}
-
-/*
- * Method:  SetIntParameter[]
+ * Set the int parameter associated with {\tt name}.
+ * 
  */
 
 int32_t
@@ -198,7 +152,25 @@ Hypre_Solver_SetIntParameter(
 }
 
 /*
- * Method:  SetStringParameter[]
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+Hypre_Solver_SetDoubleParameter(
+  Hypre_Solver self,
+  const char* name,
+  double value)
+{
+  return (*self->d_epv->f_SetDoubleParameter)(
+    self->d_object,
+    name,
+    value);
+}
+
+/*
+ * Set the string parameter associated with {\tt name}.
+ * 
  */
 
 int32_t
@@ -214,7 +186,8 @@ Hypre_Solver_SetStringParameter(
 }
 
 /*
- * Method:  SetIntArrayParameter[]
+ * Set the int array parameter associated with {\tt name}.
+ * 
  */
 
 int32_t
@@ -230,7 +203,8 @@ Hypre_Solver_SetIntArrayParameter(
 }
 
 /*
- * Method:  SetDoubleArrayParameter[]
+ * Set the double array parameter associated with {\tt name}.
+ * 
  */
 
 int32_t
@@ -246,7 +220,43 @@ Hypre_Solver_SetDoubleArrayParameter(
 }
 
 /*
- * Method:  Setup[]
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+Hypre_Solver_GetIntValue(
+  Hypre_Solver self,
+  const char* name,
+  int32_t* value)
+{
+  return (*self->d_epv->f_GetIntValue)(
+    self->d_object,
+    name,
+    value);
+}
+
+/*
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+Hypre_Solver_GetDoubleValue(
+  Hypre_Solver self,
+  const char* name,
+  double* value)
+{
+  return (*self->d_epv->f_GetDoubleValue)(
+    self->d_object,
+    name,
+    value);
+}
+
+/*
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
  */
 
 int32_t
@@ -262,7 +272,8 @@ Hypre_Solver_Setup(
 }
 
 /*
- * Method:  Apply[]
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
  */
 
 int32_t
@@ -278,7 +289,8 @@ Hypre_Solver_Apply(
 }
 
 /*
- * Method:  SetOperator[]
+ * Set the operator for the linear system being solved.
+ * 
  */
 
 int32_t
@@ -292,21 +304,46 @@ Hypre_Solver_SetOperator(
 }
 
 /*
- * Method:  GetResidual[]
+ * (Optional) Set the convergence tolerance.
+ * 
+ * RDF: New
+ * 
  */
 
 int32_t
-Hypre_Solver_GetResidual(
+Hypre_Solver_SetTolerance(
   Hypre_Solver self,
-  Hypre_Vector* r)
+  double tolerance)
 {
-  return (*self->d_epv->f_GetResidual)(
+  return (*self->d_epv->f_SetTolerance)(
     self->d_object,
-    r);
+    tolerance);
 }
 
 /*
- * Method:  SetLogging[]
+ * (Optional) Set maximum number of iterations.
+ * 
+ * RDF: New
+ * 
+ */
+
+int32_t
+Hypre_Solver_SetMaxIterations(
+  Hypre_Solver self,
+  int32_t max_iterations)
+{
+  return (*self->d_epv->f_SetMaxIterations)(
+    self->d_object,
+    max_iterations);
+}
+
+/*
+ * (Optional) Set the {\it logging level}, specifying the degree
+ * of additional informational data to be accumulated.  Does
+ * nothing by default (level = 0).  Other levels (if any) are
+ * implementation-specific.  Must be called before {\tt Setup}
+ * and {\tt Apply}.
+ * 
  */
 
 int32_t
@@ -320,7 +357,12 @@ Hypre_Solver_SetLogging(
 }
 
 /*
- * Method:  SetPrintLevel[]
+ * (Optional) Set the {\it print level}, specifying the degree
+ * of informational data to be printed either to the screen or
+ * to a file.  Does nothing by default (level=0).  Other levels
+ * (if any) are implementation-specific.  Must be called before
+ * {\tt Setup} and {\tt Apply}.
+ * 
  */
 
 int32_t
@@ -331,6 +373,40 @@ Hypre_Solver_SetPrintLevel(
   return (*self->d_epv->f_SetPrintLevel)(
     self->d_object,
     level);
+}
+
+/*
+ * (Optional) Return the number of iterations taken.
+ * 
+ * RDF: New
+ * 
+ */
+
+int32_t
+Hypre_Solver_GetNumIterations(
+  Hypre_Solver self,
+  int32_t* num_iterations)
+{
+  return (*self->d_epv->f_GetNumIterations)(
+    self->d_object,
+    num_iterations);
+}
+
+/*
+ * (Optional) Return the norm of the relative residual.
+ * 
+ * RDF: New
+ * 
+ */
+
+int32_t
+Hypre_Solver_GetRelResidualNorm(
+  Hypre_Solver self,
+  double* norm)
+{
+  return (*self->d_epv->f_GetRelResidualNorm)(
+    self->d_object,
+    norm);
 }
 
 /*

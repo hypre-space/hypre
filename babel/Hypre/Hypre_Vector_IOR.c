@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_Vector_IOR.c
- * Symbol:        Hypre.Vector-v0.1.6
+ * Symbol:        Hypre.Vector-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:27 PST
- * Generated:     20030210 16:05:29 PST
+ * SIDL Created:  20030306 17:05:11 PST
+ * Generated:     20030306 17:05:12 PST
  * Description:   Intermediate Object Representation for Hypre.Vector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 34
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 669
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #include <stdlib.h>

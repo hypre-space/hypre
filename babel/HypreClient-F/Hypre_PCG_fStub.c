@@ -1,21 +1,27 @@
 /*
  * File:          Hypre_PCG_fStub.c
- * Symbol:        Hypre.PCG-v0.1.6
+ * Symbol:        Hypre.PCG-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:50 PST
- * Generated:     20030210 16:05:57 PST
+ * SIDL Created:  20030306 17:05:23 PST
+ * Generated:     20030306 17:05:26 PST
  * Description:   Client-side glue code for Hypre.PCG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 464
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1252
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 /*
- * Symbol "Hypre.PCG" (version 0.1.6)
+ * Symbol "Hypre.PCG" (version 0.1.7)
+ * 
+ * Objects of this type can be cast to PreconditionedSolver objects
+ * using the {\tt \_\_cast} methods.
+ * 
+ * RDF: Documentation goes here. (x)
+ * 
  */
 
 #include <stddef.h>
@@ -300,138 +306,38 @@ SIDLFortran77Symbol(hypre_pcg_getclassinfo_f,HYPRE_PCG_GETCLASSINFO_F,Hypre_PCG_
 }
 
 /*
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 
 void
 SIDLFortran77Symbol(hypre_pcg_setcommunicator_f,HYPRE_PCG_SETCOMMUNICATOR_F,Hypre_PCG_SetCommunicator_f)
 (
   int64_t *self,
-  int64_t *comm,
+  int64_t *mpi_comm,
   int32_t *retval
 )
 {
   struct Hypre_PCG__epv *_epv = NULL;
   struct Hypre_PCG__object* _proxy_self = NULL;
-  void* _proxy_comm = NULL;
+  void* _proxy_mpi_comm = NULL;
   _proxy_self =
     (struct Hypre_PCG__object*)
     (ptrdiff_t)(*self);
-  _proxy_comm =
+  _proxy_mpi_comm =
     (void*)
-    (ptrdiff_t)(*comm);
+    (ptrdiff_t)(*mpi_comm);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetCommunicator))(
       _proxy_self,
-      _proxy_comm
+      _proxy_mpi_comm
     );
 }
 
 /*
- * Method:  GetDoubleValue[]
- */
-
-void
-SIDLFortran77Symbol(hypre_pcg_getdoublevalue_f,HYPRE_PCG_GETDOUBLEVALUE_F,Hypre_PCG_GetDoubleValue_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  double *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct Hypre_PCG__epv *_epv = NULL;
-  struct Hypre_PCG__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  _proxy_self =
-    (struct Hypre_PCG__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    SIDL_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetDoubleValue))(
-      _proxy_self,
-      _proxy_name,
-      value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Method:  GetIntValue[]
- */
-
-void
-SIDLFortran77Symbol(hypre_pcg_getintvalue_f,HYPRE_PCG_GETINTVALUE_F,Hypre_PCG_GetIntValue_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  int32_t *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct Hypre_PCG__epv *_epv = NULL;
-  struct Hypre_PCG__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  _proxy_self =
-    (struct Hypre_PCG__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    SIDL_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetIntValue))(
-      _proxy_self,
-      _proxy_name,
-      value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Method:  SetDoubleParameter[]
- */
-
-void
-SIDLFortran77Symbol(hypre_pcg_setdoubleparameter_f,HYPRE_PCG_SETDOUBLEPARAMETER_F,Hypre_PCG_SetDoubleParameter_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  double *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct Hypre_PCG__epv *_epv = NULL;
-  struct Hypre_PCG__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  _proxy_self =
-    (struct Hypre_PCG__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    SIDL_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetDoubleParameter))(
-      _proxy_self,
-      _proxy_name,
-      *value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Method:  SetIntParameter[]
+ * Set the int parameter associated with {\tt name}.
+ * 
  */
 
 void
@@ -465,7 +371,43 @@ SIDLFortran77Symbol(hypre_pcg_setintparameter_f,HYPRE_PCG_SETINTPARAMETER_F,Hypr
 }
 
 /*
- * Method:  SetStringParameter[]
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_pcg_setdoubleparameter_f,HYPRE_PCG_SETDOUBLEPARAMETER_F,Hypre_PCG_SetDoubleParameter_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  double *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct Hypre_PCG__epv *_epv = NULL;
+  struct Hypre_PCG__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  _proxy_self =
+    (struct Hypre_PCG__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetDoubleParameter))(
+      _proxy_self,
+      _proxy_name,
+      *value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Set the string parameter associated with {\tt name}.
+ * 
  */
 
 void
@@ -506,7 +448,8 @@ SIDLFortran77Symbol(hypre_pcg_setstringparameter_f,HYPRE_PCG_SETSTRINGPARAMETER_
 }
 
 /*
- * Method:  SetIntArrayParameter[]
+ * Set the int array parameter associated with {\tt name}.
+ * 
  */
 
 void
@@ -544,7 +487,8 @@ SIDLFortran77Symbol(hypre_pcg_setintarrayparameter_f,HYPRE_PCG_SETINTARRAYPARAME
 }
 
 /*
- * Method:  SetDoubleArrayParameter[]
+ * Set the double array parameter associated with {\tt name}.
+ * 
  */
 
 void
@@ -582,7 +526,79 @@ SIDLFortran77Symbol(hypre_pcg_setdoublearrayparameter_f,HYPRE_PCG_SETDOUBLEARRAY
 }
 
 /*
- * Method:  Setup[]
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_pcg_getintvalue_f,HYPRE_PCG_GETINTVALUE_F,Hypre_PCG_GetIntValue_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  int32_t *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct Hypre_PCG__epv *_epv = NULL;
+  struct Hypre_PCG__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  _proxy_self =
+    (struct Hypre_PCG__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetIntValue))(
+      _proxy_self,
+      _proxy_name,
+      value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_pcg_getdoublevalue_f,HYPRE_PCG_GETDOUBLEVALUE_F,Hypre_PCG_GetDoubleValue_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  double *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct Hypre_PCG__epv *_epv = NULL;
+  struct Hypre_PCG__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  _proxy_self =
+    (struct Hypre_PCG__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetDoubleValue))(
+      _proxy_self,
+      _proxy_name,
+      value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
  */
 
 void
@@ -617,7 +633,8 @@ SIDLFortran77Symbol(hypre_pcg_setup_f,HYPRE_PCG_SETUP_F,Hypre_PCG_Setup_f)
 }
 
 /*
- * Method:  Apply[]
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
  */
 
 void
@@ -653,7 +670,8 @@ SIDLFortran77Symbol(hypre_pcg_apply_f,HYPRE_PCG_APPLY_F,Hypre_PCG_Apply_f)
 }
 
 /*
- * Method:  SetOperator[]
+ * Set the operator for the linear system being solved.
+ * 
  */
 
 void
@@ -682,34 +700,68 @@ SIDLFortran77Symbol(hypre_pcg_setoperator_f,HYPRE_PCG_SETOPERATOR_F,Hypre_PCG_Se
 }
 
 /*
- * Method:  GetResidual[]
+ * (Optional) Set the convergence tolerance.
+ * 
+ * RDF: New
+ * 
  */
 
 void
-SIDLFortran77Symbol(hypre_pcg_getresidual_f,HYPRE_PCG_GETRESIDUAL_F,Hypre_PCG_GetResidual_f)
+SIDLFortran77Symbol(hypre_pcg_settolerance_f,HYPRE_PCG_SETTOLERANCE_F,Hypre_PCG_SetTolerance_f)
 (
   int64_t *self,
-  int64_t *r,
+  double *tolerance,
   int32_t *retval
 )
 {
   struct Hypre_PCG__epv *_epv = NULL;
   struct Hypre_PCG__object* _proxy_self = NULL;
-  struct Hypre_Vector__object* _proxy_r = NULL;
   _proxy_self =
     (struct Hypre_PCG__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   *retval = 
-    (*(_epv->f_GetResidual))(
+    (*(_epv->f_SetTolerance))(
       _proxy_self,
-      &_proxy_r
+      *tolerance
     );
-  *r = (ptrdiff_t)_proxy_r;
 }
 
 /*
- * Method:  SetLogging[]
+ * (Optional) Set maximum number of iterations.
+ * 
+ * RDF: New
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_pcg_setmaxiterations_f,HYPRE_PCG_SETMAXITERATIONS_F,Hypre_PCG_SetMaxIterations_f)
+(
+  int64_t *self,
+  int32_t *max_iterations,
+  int32_t *retval
+)
+{
+  struct Hypre_PCG__epv *_epv = NULL;
+  struct Hypre_PCG__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct Hypre_PCG__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetMaxIterations))(
+      _proxy_self,
+      *max_iterations
+    );
+}
+
+/*
+ * (Optional) Set the {\it logging level}, specifying the degree
+ * of additional informational data to be accumulated.  Does
+ * nothing by default (level = 0).  Other levels (if any) are
+ * implementation-specific.  Must be called before {\tt Setup}
+ * and {\tt Apply}.
+ * 
  */
 
 void
@@ -734,7 +786,12 @@ SIDLFortran77Symbol(hypre_pcg_setlogging_f,HYPRE_PCG_SETLOGGING_F,Hypre_PCG_SetL
 }
 
 /*
- * Method:  SetPrintLevel[]
+ * (Optional) Set the {\it print level}, specifying the degree
+ * of informational data to be printed either to the screen or
+ * to a file.  Does nothing by default (level=0).  Other levels
+ * (if any) are implementation-specific.  Must be called before
+ * {\tt Setup} and {\tt Apply}.
+ * 
  */
 
 void
@@ -759,7 +816,64 @@ SIDLFortran77Symbol(hypre_pcg_setprintlevel_f,HYPRE_PCG_SETPRINTLEVEL_F,Hypre_PC
 }
 
 /*
- * Method:  SetPreconditioner[]
+ * (Optional) Return the number of iterations taken.
+ * 
+ * RDF: New
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_pcg_getnumiterations_f,HYPRE_PCG_GETNUMITERATIONS_F,Hypre_PCG_GetNumIterations_f)
+(
+  int64_t *self,
+  int32_t *num_iterations,
+  int32_t *retval
+)
+{
+  struct Hypre_PCG__epv *_epv = NULL;
+  struct Hypre_PCG__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct Hypre_PCG__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetNumIterations))(
+      _proxy_self,
+      num_iterations
+    );
+}
+
+/*
+ * (Optional) Return the norm of the relative residual.
+ * 
+ * RDF: New
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_pcg_getrelresidualnorm_f,HYPRE_PCG_GETRELRESIDUALNORM_F,Hypre_PCG_GetRelResidualNorm_f)
+(
+  int64_t *self,
+  double *norm,
+  int32_t *retval
+)
+{
+  struct Hypre_PCG__epv *_epv = NULL;
+  struct Hypre_PCG__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct Hypre_PCG__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetRelResidualNorm))(
+      _proxy_self,
+      norm
+    );
+}
+
+/*
+ * Set the preconditioner.
+ * 
  */
 
 void
@@ -785,33 +899,6 @@ SIDLFortran77Symbol(hypre_pcg_setpreconditioner_f,HYPRE_PCG_SETPRECONDITIONER_F,
       _proxy_self,
       _proxy_s
     );
-}
-
-/*
- * Method:  GetPreconditionedResidual[]
- */
-
-void
-SIDLFortran77Symbol(hypre_pcg_getpreconditionedresidual_f,HYPRE_PCG_GETPRECONDITIONEDRESIDUAL_F,Hypre_PCG_GetPreconditionedResidual_f)
-(
-  int64_t *self,
-  int64_t *r,
-  int32_t *retval
-)
-{
-  struct Hypre_PCG__epv *_epv = NULL;
-  struct Hypre_PCG__object* _proxy_self = NULL;
-  struct Hypre_Vector__object* _proxy_r = NULL;
-  _proxy_self =
-    (struct Hypre_PCG__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetPreconditionedResidual))(
-      _proxy_self,
-      &_proxy_r
-    );
-  *r = (ptrdiff_t)_proxy_r;
 }
 
 void

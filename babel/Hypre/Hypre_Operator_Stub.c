@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_Operator_Stub.c
- * Symbol:        Hypre.Operator-v0.1.6
+ * Symbol:        Hypre.Operator-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:34 PST
+ * SIDL Created:  20030306 17:05:11 PST
+ * Generated:     20030306 17:05:14 PST
  * Description:   Client-side glue code for Hypre.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 326
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 604
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #include "Hypre_Operator.h"
@@ -120,69 +120,23 @@ Hypre_Operator_isType(
 }
 
 /*
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 
 int32_t
 Hypre_Operator_SetCommunicator(
   Hypre_Operator self,
-  void* comm)
+  void* mpi_comm)
 {
   return (*self->d_epv->f_SetCommunicator)(
     self->d_object,
-    comm);
+    mpi_comm);
 }
 
 /*
- * Method:  GetDoubleValue[]
- */
-
-int32_t
-Hypre_Operator_GetDoubleValue(
-  Hypre_Operator self,
-  const char* name,
-  double* value)
-{
-  return (*self->d_epv->f_GetDoubleValue)(
-    self->d_object,
-    name,
-    value);
-}
-
-/*
- * Method:  GetIntValue[]
- */
-
-int32_t
-Hypre_Operator_GetIntValue(
-  Hypre_Operator self,
-  const char* name,
-  int32_t* value)
-{
-  return (*self->d_epv->f_GetIntValue)(
-    self->d_object,
-    name,
-    value);
-}
-
-/*
- * Method:  SetDoubleParameter[]
- */
-
-int32_t
-Hypre_Operator_SetDoubleParameter(
-  Hypre_Operator self,
-  const char* name,
-  double value)
-{
-  return (*self->d_epv->f_SetDoubleParameter)(
-    self->d_object,
-    name,
-    value);
-}
-
-/*
- * Method:  SetIntParameter[]
+ * Set the int parameter associated with {\tt name}.
+ * 
  */
 
 int32_t
@@ -198,7 +152,25 @@ Hypre_Operator_SetIntParameter(
 }
 
 /*
- * Method:  SetStringParameter[]
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+Hypre_Operator_SetDoubleParameter(
+  Hypre_Operator self,
+  const char* name,
+  double value)
+{
+  return (*self->d_epv->f_SetDoubleParameter)(
+    self->d_object,
+    name,
+    value);
+}
+
+/*
+ * Set the string parameter associated with {\tt name}.
+ * 
  */
 
 int32_t
@@ -214,7 +186,8 @@ Hypre_Operator_SetStringParameter(
 }
 
 /*
- * Method:  SetIntArrayParameter[]
+ * Set the int array parameter associated with {\tt name}.
+ * 
  */
 
 int32_t
@@ -230,7 +203,8 @@ Hypre_Operator_SetIntArrayParameter(
 }
 
 /*
- * Method:  SetDoubleArrayParameter[]
+ * Set the double array parameter associated with {\tt name}.
+ * 
  */
 
 int32_t
@@ -246,7 +220,43 @@ Hypre_Operator_SetDoubleArrayParameter(
 }
 
 /*
- * Method:  Setup[]
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+Hypre_Operator_GetIntValue(
+  Hypre_Operator self,
+  const char* name,
+  int32_t* value)
+{
+  return (*self->d_epv->f_GetIntValue)(
+    self->d_object,
+    name,
+    value);
+}
+
+/*
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+Hypre_Operator_GetDoubleValue(
+  Hypre_Operator self,
+  const char* name,
+  double* value)
+{
+  return (*self->d_epv->f_GetDoubleValue)(
+    self->d_object,
+    name,
+    value);
+}
+
+/*
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
  */
 
 int32_t
@@ -262,7 +272,8 @@ Hypre_Operator_Setup(
 }
 
 /*
- * Method:  Apply[]
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
  */
 
 int32_t

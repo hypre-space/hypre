@@ -1,23 +1,23 @@
 C       
 C       File:          Hypre_PreconditionedSolver_Impl.f
-C       Symbol:        Hypre.PreconditionedSolver-v0.1.6
+C       Symbol:        Hypre.PreconditionedSolver-v0.1.7
 C       Symbol Type:   interface
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030210 16:05:49 PST
-C       Generated:     20030210 16:05:56 PST
+C       SIDL Created:  20030306 17:05:23 PST
+C       Generated:     20030306 17:05:26 PST
 C       Description:   Client-side documentation text for Hypre.PreconditionedSolver
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
-C       source-line   = 367
-C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+C       source-line   = 766
+C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
 
 C       
-C       Symbol "Hypre.PreconditionedSolver" (version 0.1.6)
+C       Symbol "Hypre.PreconditionedSolver" (version 0.1.7)
 C       
 
 
@@ -135,77 +135,25 @@ C       out bool retval
 
 
 C       
-C       Method:  SetCommunicator[]
+C       Set the MPI Communicator.
+C       
 C       
 
         subroutine Hypre_PreconditionedSolver_SetCommunicator_f(self,
-     &     comm, retval)
+     &     mpi_comm, retval)
         implicit none
 C       in Hypre.PreconditionedSolver self
         integer*8 self
-C       in opaque comm
-        integer*8 comm
+C       in opaque mpi_comm
+        integer*8 mpi_comm
 C       out int retval
         integer*4 retval
         end
 
 
 C       
-C       Method:  GetDoubleValue[]
+C       Set the int parameter associated with {\tt name}.
 C       
-
-        subroutine Hypre_PreconditionedSolver_GetDoubleValue_f(self,
-     &     name, value, retval)
-        implicit none
-C       in Hypre.PreconditionedSolver self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       out double value
-        double precision value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  GetIntValue[]
-C       
-
-        subroutine Hypre_PreconditionedSolver_GetIntValue_f(self, name,
-     &     value, retval)
-        implicit none
-C       in Hypre.PreconditionedSolver self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       out int value
-        integer*4 value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  SetDoubleParameter[]
-C       
-
-        subroutine Hypre_PreconditionedSolver_SetDoubleParameter_f(self,
-     &     name, value, retval)
-        implicit none
-C       in Hypre.PreconditionedSolver self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in double value
-        double precision value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  SetIntParameter[]
 C       
 
         subroutine Hypre_PreconditionedSolver_SetIntParameter_f(self,
@@ -223,7 +171,27 @@ C       out int retval
 
 
 C       
-C       Method:  SetStringParameter[]
+C       Set the double parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine Hypre_PreconditionedSolver_SetDoubleParameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in Hypre.PreconditionedSolver self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in double value
+        double precision value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the string parameter associated with {\tt name}.
+C       
 C       
 
         subroutine Hypre_PreconditionedSolver_SetStringParameter_f(self,
@@ -241,7 +209,8 @@ C       out int retval
 
 
 C       
-C       Method:  SetIntArrayParameter[]
+C       Set the int array parameter associated with {\tt name}.
+C       
 C       
 
         subroutine 
@@ -260,7 +229,8 @@ C       out int retval
 
 
 C       
-C       Method:  SetDoubleArrayParameter[]
+C       Set the double array parameter associated with {\tt name}.
+C       
 C       
 
         subroutine 
@@ -279,7 +249,47 @@ C       out int retval
 
 
 C       
-C       Method:  Setup[]
+C       Set the int parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine Hypre_PreconditionedSolver_GetIntValue_f(self, name,
+     &     value, retval)
+        implicit none
+C       in Hypre.PreconditionedSolver self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out int value
+        integer*4 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Get the double parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine Hypre_PreconditionedSolver_GetDoubleValue_f(self,
+     &     name, value, retval)
+        implicit none
+C       in Hypre.PreconditionedSolver self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out double value
+        double precision value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Do any preprocessing that may be necessary in
+C       order to execute {\tt Apply}.
+C       
 C       
 
         subroutine Hypre_PreconditionedSolver_Setup_f(self, b, x,
@@ -297,7 +307,8 @@ C       out int retval
 
 
 C       
-C       Method:  Apply[]
+C       Apply the operator to {\tt b}, returning {\tt x}.
+C       
 C       
 
         subroutine Hypre_PreconditionedSolver_Apply_f(self, b, x,
@@ -315,7 +326,8 @@ C       out int retval
 
 
 C       
-C       Method:  SetOperator[]
+C       Set the operator for the linear system being solved.
+C       
 C       
 
         subroutine Hypre_PreconditionedSolver_SetOperator_f(self, A,
@@ -331,23 +343,50 @@ C       out int retval
 
 
 C       
-C       Method:  GetResidual[]
+C       (Optional) Set the convergence tolerance.
+C       
+C       RDF: New
+C       
 C       
 
-        subroutine Hypre_PreconditionedSolver_GetResidual_f(self, r,
-     &     retval)
+        subroutine Hypre_PreconditionedSolver_SetTolerance_f(self,
+     &     tolerance, retval)
         implicit none
 C       in Hypre.PreconditionedSolver self
         integer*8 self
-C       out Hypre.Vector r
-        integer*8 r
+C       in double tolerance
+        double precision tolerance
 C       out int retval
         integer*4 retval
         end
 
 
 C       
-C       Method:  SetLogging[]
+C       (Optional) Set maximum number of iterations.
+C       
+C       RDF: New
+C       
+C       
+
+        subroutine Hypre_PreconditionedSolver_SetMaxIterations_f(self,
+     &     max_iterations, retval)
+        implicit none
+C       in Hypre.PreconditionedSolver self
+        integer*8 self
+C       in int max_iterations
+        integer*4 max_iterations
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Set the {\it logging level}, specifying the degree
+C       of additional informational data to be accumulated.  Does
+C       nothing by default (level = 0).  Other levels (if any) are
+C       implementation-specific.  Must be called before {\tt Setup}
+C       and {\tt Apply}.
+C       
 C       
 
         subroutine Hypre_PreconditionedSolver_SetLogging_f(self, level,
@@ -363,7 +402,12 @@ C       out int retval
 
 
 C       
-C       Method:  SetPrintLevel[]
+C       (Optional) Set the {\it print level}, specifying the degree
+C       of informational data to be printed either to the screen or
+C       to a file.  Does nothing by default (level=0).  Other levels
+C       (if any) are implementation-specific.  Must be called before
+C       {\tt Setup} and {\tt Apply}.
+C       
 C       
 
         subroutine Hypre_PreconditionedSolver_SetPrintLevel_f(self,
@@ -379,7 +423,46 @@ C       out int retval
 
 
 C       
-C       Method:  SetPreconditioner[]
+C       (Optional) Return the number of iterations taken.
+C       
+C       RDF: New
+C       
+C       
+
+        subroutine Hypre_PreconditionedSolver_GetNumIterations_f(self,
+     &     num_iterations, retval)
+        implicit none
+C       in Hypre.PreconditionedSolver self
+        integer*8 self
+C       out int num_iterations
+        integer*4 num_iterations
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Return the norm of the relative residual.
+C       
+C       RDF: New
+C       
+C       
+
+        subroutine Hypre_PreconditionedSolver_GetRelResidualNorm_f(self,
+     &     norm, retval)
+        implicit none
+C       in Hypre.PreconditionedSolver self
+        integer*8 self
+C       out double norm
+        double precision norm
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the preconditioner.
+C       
 C       
 
         subroutine Hypre_PreconditionedSolver_SetPreconditioner_f(self,
@@ -389,23 +472,6 @@ C       in Hypre.PreconditionedSolver self
         integer*8 self
 C       in Hypre.Solver s
         integer*8 s
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  GetPreconditionedResidual[]
-C       
-
-        subroutine 
-     &     Hypre_PreconditionedSolver_GetPreconditionedResidual_f(self,
-     &     r, retval)
-        implicit none
-C       in Hypre.PreconditionedSolver self
-        integer*8 self
-C       out Hypre.Vector r
-        integer*8 r
 C       out int retval
         integer*4 retval
         end

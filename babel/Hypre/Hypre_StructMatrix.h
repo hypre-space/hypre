@@ -1,27 +1,28 @@
 /*
  * File:          Hypre_StructMatrix.h
- * Symbol:        Hypre.StructMatrix-v0.1.6
+ * Symbol:        Hypre.StructMatrix-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:34 PST
+ * SIDL Created:  20030306 17:05:12 PST
+ * Generated:     20030306 17:05:14 PST
  * Description:   Client-side glue code for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 425
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1134
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_StructMatrix_h
 #define included_Hypre_StructMatrix_h
 
 /**
- * Symbol "Hypre.StructMatrix" (version 0.1.6)
+ * Symbol "Hypre.StructMatrix" (version 0.1.7)
  * 
- * A single class that implements both a build interface and an operator
- * interface. It returns itself for <code>GetConstructedObject</code>.
+ * A single class that implements both a build interface and an
+ * operator interface. It returns itself for GetConstructedObject.
+ * 
  */
 struct Hypre_StructMatrix__object;
 struct Hypre_StructMatrix__array;
@@ -131,98 +132,17 @@ Hypre_StructMatrix_getClassInfo(
   Hypre_StructMatrix self);
 
 /**
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 int32_t
 Hypre_StructMatrix_SetCommunicator(
   Hypre_StructMatrix self,
-  void* comm);
-
-/**
- * Method:  GetDoubleValue[]
- */
-int32_t
-Hypre_StructMatrix_GetDoubleValue(
-  Hypre_StructMatrix self,
-  const char* name,
-  double* value);
-
-/**
- * Method:  GetIntValue[]
- */
-int32_t
-Hypre_StructMatrix_GetIntValue(
-  Hypre_StructMatrix self,
-  const char* name,
-  int32_t* value);
-
-/**
- * Method:  SetDoubleParameter[]
- */
-int32_t
-Hypre_StructMatrix_SetDoubleParameter(
-  Hypre_StructMatrix self,
-  const char* name,
-  double value);
-
-/**
- * Method:  SetIntParameter[]
- */
-int32_t
-Hypre_StructMatrix_SetIntParameter(
-  Hypre_StructMatrix self,
-  const char* name,
-  int32_t value);
-
-/**
- * Method:  SetStringParameter[]
- */
-int32_t
-Hypre_StructMatrix_SetStringParameter(
-  Hypre_StructMatrix self,
-  const char* name,
-  const char* value);
-
-/**
- * Method:  SetIntArrayParameter[]
- */
-int32_t
-Hypre_StructMatrix_SetIntArrayParameter(
-  Hypre_StructMatrix self,
-  const char* name,
-  struct SIDL_int__array* value);
-
-/**
- * Method:  SetDoubleArrayParameter[]
- */
-int32_t
-Hypre_StructMatrix_SetDoubleArrayParameter(
-  Hypre_StructMatrix self,
-  const char* name,
-  struct SIDL_double__array* value);
-
-/**
- * Method:  Setup[]
- */
-int32_t
-Hypre_StructMatrix_Setup(
-  Hypre_StructMatrix self,
-  Hypre_Vector b,
-  Hypre_Vector x);
-
-/**
- * Method:  Apply[]
- */
-int32_t
-Hypre_StructMatrix_Apply(
-  Hypre_StructMatrix self,
-  Hypre_Vector b,
-  Hypre_Vector* x);
+  void* mpi_comm);
 
 /**
  * Prepare an object for setting coefficient values, whether for
  * the first time or subsequently.
- * 
  * 
  */
 int32_t
@@ -230,11 +150,11 @@ Hypre_StructMatrix_Initialize(
   Hypre_StructMatrix self);
 
 /**
- * Finalize the construction of an object before using, either for
- * the first time or on subsequent uses. "Initialize" and "Assemble"
- * always appear in a matched set, with Initialize preceding Assemble. Values
- * can only be set in between a call to Initialize and Assemble.
- * 
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
  * 
  */
 int32_t
@@ -242,14 +162,15 @@ Hypre_StructMatrix_Assemble(
   Hypre_StructMatrix self);
 
 /**
- * The problem definition interface is a "builder" that creates an object
- * that contains the problem definition information, e.g. a matrix. To
- * perform subsequent operations with that object, it must be returned from
- * the problem definition object. "GetObject" performs this function.
- * <note>At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
- * be used on the returned object to convert it into a known type.</note>
- * 
+ * The problem definition interface is a {\it builder} that
+ * creates an object that contains the problem definition
+ * information, e.g. a matrix. To perform subsequent operations
+ * with that object, it must be returned from the problem
+ * definition object. {\tt GetObject} performs this function.
+ * At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a SIDL.BaseInterface.
+ * QueryInterface or Cast must be used on the returned object to
+ * convert it into a known type.
  * 
  */
 int32_t
@@ -311,6 +232,97 @@ int32_t
 Hypre_StructMatrix_SetSymmetric(
   Hypre_StructMatrix self,
   int32_t symmetric);
+
+/**
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+Hypre_StructMatrix_SetIntParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  int32_t value);
+
+/**
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+Hypre_StructMatrix_SetDoubleParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  double value);
+
+/**
+ * Set the string parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+Hypre_StructMatrix_SetStringParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  const char* value);
+
+/**
+ * Set the int array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+Hypre_StructMatrix_SetIntArrayParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  struct SIDL_int__array* value);
+
+/**
+ * Set the double array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+Hypre_StructMatrix_SetDoubleArrayParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  struct SIDL_double__array* value);
+
+/**
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+Hypre_StructMatrix_GetIntValue(
+  Hypre_StructMatrix self,
+  const char* name,
+  int32_t* value);
+
+/**
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+Hypre_StructMatrix_GetDoubleValue(
+  Hypre_StructMatrix self,
+  const char* name,
+  double* value);
+
+/**
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
+ */
+int32_t
+Hypre_StructMatrix_Setup(
+  Hypre_StructMatrix self,
+  Hypre_Vector b,
+  Hypre_Vector x);
+
+/**
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+int32_t
+Hypre_StructMatrix_Apply(
+  Hypre_StructMatrix self,
+  Hypre_Vector b,
+  Hypre_Vector* x);
 
 /**
  * Cast method for interface and class type conversions.

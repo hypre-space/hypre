@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_StructMatrix_IOR.c
- * Symbol:        Hypre.StructMatrix-v0.1.6
+ * Symbol:        Hypre.StructMatrix-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:50 PST
- * Generated:     20030210 16:05:52 PST
+ * SIDL Created:  20030306 17:05:23 PST
+ * Generated:     20030306 17:05:25 PST
  * Description:   Intermediate Object Representation for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 425
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1134
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #include <stdlib.h>
@@ -64,10 +64,8 @@ static struct Hypre_Operator__epv s_rem__hypre_operator;
 static struct Hypre_ProblemDefinition__epv s_new__hypre_problemdefinition;
 static struct Hypre_ProblemDefinition__epv s_rem__hypre_problemdefinition;
 
-static struct Hypre_StructuredGridBuildMatrix__epv 
-  s_new__hypre_structuredgridbuildmatrix;
-static struct Hypre_StructuredGridBuildMatrix__epv 
-  s_rem__hypre_structuredgridbuildmatrix;
+static struct Hypre_StructBuildMatrix__epv s_new__hypre_structbuildmatrix;
+static struct Hypre_StructBuildMatrix__epv s_rem__hypre_structbuildmatrix;
 
 static struct SIDL_BaseClass__epv  s_new__sidl_baseclass;
 static struct SIDL_BaseClass__epv* s_old__sidl_baseclass;
@@ -103,8 +101,8 @@ static void* ior_Hypre_StructMatrix__cast(
     cast = (void*) &s0->d_hypre_operator;
   } else if (!strcmp(name, "Hypre.ProblemDefinition")) {
     cast = (void*) &s0->d_hypre_problemdefinition;
-  } else if (!strcmp(name, "Hypre.StructuredGridBuildMatrix")) {
-    cast = (void*) &s0->d_hypre_structuredgridbuildmatrix;
+  } else if (!strcmp(name, "Hypre.StructBuildMatrix")) {
+    cast = (void*) &s0->d_hypre_structbuildmatrix;
   } else if (!strcmp(name, "SIDL.BaseClass")) {
     cast = (void*) s1;
   } else if (!strcmp(name, "SIDL.BaseInterface")) {
@@ -136,14 +134,12 @@ static void Hypre_StructMatrix__init_epv(
   struct Hypre_StructMatrix__object* s0 = self;
   struct SIDL_BaseClass__object*     s1 = &s0->d_sidl_baseclass;
 
-  struct Hypre_StructMatrix__epv*              epv = &s_new__hypre_structmatrix;
-  struct Hypre_Operator__epv*                  e0  = &s_new__hypre_operator;
-  struct Hypre_ProblemDefinition__epv*         e1  = 
-    &s_new__hypre_problemdefinition;
-  struct Hypre_StructuredGridBuildMatrix__epv* e2  = 
-    &s_new__hypre_structuredgridbuildmatrix;
-  struct SIDL_BaseClass__epv*                  e3  = &s_new__sidl_baseclass;
-  struct SIDL_BaseInterface__epv*              e4  = &s_new__sidl_baseinterface;
+  struct Hypre_StructMatrix__epv*      epv = &s_new__hypre_structmatrix;
+  struct Hypre_Operator__epv*          e0  = &s_new__hypre_operator;
+  struct Hypre_ProblemDefinition__epv* e1  = &s_new__hypre_problemdefinition;
+  struct Hypre_StructBuildMatrix__epv* e2  = &s_new__hypre_structbuildmatrix;
+  struct SIDL_BaseClass__epv*          e3  = &s_new__sidl_baseclass;
+  struct SIDL_BaseInterface__epv*      e4  = &s_new__sidl_baseinterface;
 
   s_old__sidl_baseinterface = s1->d_sidl_baseinterface.d_epv;
   s_old__sidl_baseclass     = s1->d_epv;
@@ -166,15 +162,6 @@ static void Hypre_StructMatrix__init_epv(
   epv->f_getClassInfo            = (struct SIDL_ClassInfo__object* (*)(struct 
     Hypre_StructMatrix__object*)) s1->d_epv->f_getClassInfo;
   epv->f_SetCommunicator         = NULL;
-  epv->f_GetDoubleValue          = NULL;
-  epv->f_GetIntValue             = NULL;
-  epv->f_SetDoubleParameter      = NULL;
-  epv->f_SetIntParameter         = NULL;
-  epv->f_SetStringParameter      = NULL;
-  epv->f_SetIntArrayParameter    = NULL;
-  epv->f_SetDoubleArrayParameter = NULL;
-  epv->f_Setup                   = NULL;
-  epv->f_Apply                   = NULL;
   epv->f_Initialize              = NULL;
   epv->f_Assemble                = NULL;
   epv->f_GetObject               = NULL;
@@ -184,6 +171,15 @@ static void Hypre_StructMatrix__init_epv(
   epv->f_SetBoxValues            = NULL;
   epv->f_SetNumGhost             = NULL;
   epv->f_SetSymmetric            = NULL;
+  epv->f_SetIntParameter         = NULL;
+  epv->f_SetDoubleParameter      = NULL;
+  epv->f_SetStringParameter      = NULL;
+  epv->f_SetIntArrayParameter    = NULL;
+  epv->f_SetDoubleArrayParameter = NULL;
+  epv->f_GetIntValue             = NULL;
+  epv->f_GetDoubleValue          = NULL;
+  epv->f_Setup                   = NULL;
+  epv->f_Apply                   = NULL;
 
   Hypre_StructMatrix__set_epv(epv);
 
@@ -199,20 +195,20 @@ static void Hypre_StructMatrix__init_epv(
     const char*)) epv->f_isType;
   e0->f_SetCommunicator         = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
-  e0->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
-    double*)) epv->f_GetDoubleValue;
-  e0->f_GetIntValue             = (int32_t (*)(void*,const char*,
-    int32_t*)) epv->f_GetIntValue;
-  e0->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
-    double)) epv->f_SetDoubleParameter;
   e0->f_SetIntParameter         = (int32_t (*)(void*,const char*,
     int32_t)) epv->f_SetIntParameter;
+  e0->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
+    double)) epv->f_SetDoubleParameter;
   e0->f_SetStringParameter      = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
   e0->f_SetIntArrayParameter    = (int32_t (*)(void*,const char*,
     struct SIDL_int__array*)) epv->f_SetIntArrayParameter;
   e0->f_SetDoubleArrayParameter = (int32_t (*)(void*,const char*,
     struct SIDL_double__array*)) epv->f_SetDoubleArrayParameter;
+  e0->f_GetIntValue             = (int32_t (*)(void*,const char*,
+    int32_t*)) epv->f_GetIntValue;
+  e0->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
+    double*)) epv->f_GetDoubleValue;
   e0->f_Setup                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object*)) epv->f_Setup;
   e0->f_Apply                   = (int32_t (*)(void*,
@@ -368,17 +364,16 @@ void Hypre_StructMatrix__init(
   s1->d_sidl_baseinterface.d_epv = &s_new__sidl_baseinterface;
   s1->d_epv                      = &s_new__sidl_baseclass;
 
-  s0->d_hypre_operator.d_epv                  = &s_new__hypre_operator;
-  s0->d_hypre_problemdefinition.d_epv         = &s_new__hypre_problemdefinition;
-  s0->d_hypre_structuredgridbuildmatrix.d_epv = 
-    &s_new__hypre_structuredgridbuildmatrix;
-  s0->d_epv                                   = &s_new__hypre_structmatrix;
+  s0->d_hypre_operator.d_epv          = &s_new__hypre_operator;
+  s0->d_hypre_problemdefinition.d_epv = &s_new__hypre_problemdefinition;
+  s0->d_hypre_structbuildmatrix.d_epv = &s_new__hypre_structbuildmatrix;
+  s0->d_epv                           = &s_new__hypre_structmatrix;
 
   s0->d_hypre_operator.d_object = self;
 
   s0->d_hypre_problemdefinition.d_object = self;
 
-  s0->d_hypre_structuredgridbuildmatrix.d_object = self;
+  s0->d_hypre_structbuildmatrix.d_object = self;
 
   s0->d_data = NULL;
 
@@ -527,124 +522,7 @@ remote_Hypre_StructMatrix_getClassInfo(
 static int32_t
 remote_Hypre_StructMatrix_SetCommunicator(
   struct Hypre_StructMatrix__object* self,
-  void* comm)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:GetDoubleValue
- */
-
-static int32_t
-remote_Hypre_StructMatrix_GetDoubleValue(
-  struct Hypre_StructMatrix__object* self,
-  const char* name,
-  double* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:GetIntValue
- */
-
-static int32_t
-remote_Hypre_StructMatrix_GetIntValue(
-  struct Hypre_StructMatrix__object* self,
-  const char* name,
-  int32_t* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetDoubleParameter
- */
-
-static int32_t
-remote_Hypre_StructMatrix_SetDoubleParameter(
-  struct Hypre_StructMatrix__object* self,
-  const char* name,
-  double value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetIntParameter
- */
-
-static int32_t
-remote_Hypre_StructMatrix_SetIntParameter(
-  struct Hypre_StructMatrix__object* self,
-  const char* name,
-  int32_t value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetStringParameter
- */
-
-static int32_t
-remote_Hypre_StructMatrix_SetStringParameter(
-  struct Hypre_StructMatrix__object* self,
-  const char* name,
-  const char* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetIntArrayParameter
- */
-
-static int32_t
-remote_Hypre_StructMatrix_SetIntArrayParameter(
-  struct Hypre_StructMatrix__object* self,
-  const char* name,
-  struct SIDL_int__array* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetDoubleArrayParameter
- */
-
-static int32_t
-remote_Hypre_StructMatrix_SetDoubleArrayParameter(
-  struct Hypre_StructMatrix__object* self,
-  const char* name,
-  struct SIDL_double__array* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Setup
- */
-
-static int32_t
-remote_Hypre_StructMatrix_Setup(
-  struct Hypre_StructMatrix__object* self,
-  struct Hypre_Vector__object* b,
-  struct Hypre_Vector__object* x)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Apply
- */
-
-static int32_t
-remote_Hypre_StructMatrix_Apply(
-  struct Hypre_StructMatrix__object* self,
-  struct Hypre_Vector__object* b,
-  struct Hypre_Vector__object** x)
+  void* mpi_comm)
 {
   return 0;
 }
@@ -763,19 +641,134 @@ remote_Hypre_StructMatrix_SetSymmetric(
 }
 
 /*
+ * REMOTE METHOD STUB:SetIntParameter
+ */
+
+static int32_t
+remote_Hypre_StructMatrix_SetIntParameter(
+  struct Hypre_StructMatrix__object* self,
+  const char* name,
+  int32_t value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetDoubleParameter
+ */
+
+static int32_t
+remote_Hypre_StructMatrix_SetDoubleParameter(
+  struct Hypre_StructMatrix__object* self,
+  const char* name,
+  double value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetStringParameter
+ */
+
+static int32_t
+remote_Hypre_StructMatrix_SetStringParameter(
+  struct Hypre_StructMatrix__object* self,
+  const char* name,
+  const char* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetIntArrayParameter
+ */
+
+static int32_t
+remote_Hypre_StructMatrix_SetIntArrayParameter(
+  struct Hypre_StructMatrix__object* self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetDoubleArrayParameter
+ */
+
+static int32_t
+remote_Hypre_StructMatrix_SetDoubleArrayParameter(
+  struct Hypre_StructMatrix__object* self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetIntValue
+ */
+
+static int32_t
+remote_Hypre_StructMatrix_GetIntValue(
+  struct Hypre_StructMatrix__object* self,
+  const char* name,
+  int32_t* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetDoubleValue
+ */
+
+static int32_t
+remote_Hypre_StructMatrix_GetDoubleValue(
+  struct Hypre_StructMatrix__object* self,
+  const char* name,
+  double* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Setup
+ */
+
+static int32_t
+remote_Hypre_StructMatrix_Setup(
+  struct Hypre_StructMatrix__object* self,
+  struct Hypre_Vector__object* b,
+  struct Hypre_Vector__object* x)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Apply
+ */
+
+static int32_t
+remote_Hypre_StructMatrix_Apply(
+  struct Hypre_StructMatrix__object* self,
+  struct Hypre_Vector__object* b,
+  struct Hypre_Vector__object** x)
+{
+  return 0;
+}
+
+/*
  * REMOTE EPV: create remote entry point vectors (EPVs).
  */
 
 static void Hypre_StructMatrix__init_remote_epv(void)
 {
-  struct Hypre_StructMatrix__epv*              epv = &s_rem__hypre_structmatrix;
-  struct Hypre_Operator__epv*                  e0  = &s_rem__hypre_operator;
-  struct Hypre_ProblemDefinition__epv*         e1  = 
-    &s_rem__hypre_problemdefinition;
-  struct Hypre_StructuredGridBuildMatrix__epv* e2  = 
-    &s_rem__hypre_structuredgridbuildmatrix;
-  struct SIDL_BaseClass__epv*                  e3  = &s_rem__sidl_baseclass;
-  struct SIDL_BaseInterface__epv*              e4  = &s_rem__sidl_baseinterface;
+  struct Hypre_StructMatrix__epv*      epv = &s_rem__hypre_structmatrix;
+  struct Hypre_Operator__epv*          e0  = &s_rem__hypre_operator;
+  struct Hypre_ProblemDefinition__epv* e1  = &s_rem__hypre_problemdefinition;
+  struct Hypre_StructBuildMatrix__epv* e2  = &s_rem__hypre_structbuildmatrix;
+  struct SIDL_BaseClass__epv*          e3  = &s_rem__sidl_baseclass;
+  struct SIDL_BaseInterface__epv*      e4  = &s_rem__sidl_baseinterface;
 
   epv->f__cast                   = remote_Hypre_StructMatrix__cast;
   epv->f__delete                 = remote_Hypre_StructMatrix__delete;
@@ -788,17 +781,6 @@ static void Hypre_StructMatrix__init_remote_epv(void)
   epv->f_isType                  = remote_Hypre_StructMatrix_isType;
   epv->f_getClassInfo            = remote_Hypre_StructMatrix_getClassInfo;
   epv->f_SetCommunicator         = remote_Hypre_StructMatrix_SetCommunicator;
-  epv->f_GetDoubleValue          = remote_Hypre_StructMatrix_GetDoubleValue;
-  epv->f_GetIntValue             = remote_Hypre_StructMatrix_GetIntValue;
-  epv->f_SetDoubleParameter      = remote_Hypre_StructMatrix_SetDoubleParameter;
-  epv->f_SetIntParameter         = remote_Hypre_StructMatrix_SetIntParameter;
-  epv->f_SetStringParameter      = remote_Hypre_StructMatrix_SetStringParameter;
-  epv->f_SetIntArrayParameter    = 
-    remote_Hypre_StructMatrix_SetIntArrayParameter;
-  epv->f_SetDoubleArrayParameter = 
-    remote_Hypre_StructMatrix_SetDoubleArrayParameter;
-  epv->f_Setup                   = remote_Hypre_StructMatrix_Setup;
-  epv->f_Apply                   = remote_Hypre_StructMatrix_Apply;
   epv->f_Initialize              = remote_Hypre_StructMatrix_Initialize;
   epv->f_Assemble                = remote_Hypre_StructMatrix_Assemble;
   epv->f_GetObject               = remote_Hypre_StructMatrix_GetObject;
@@ -808,6 +790,17 @@ static void Hypre_StructMatrix__init_remote_epv(void)
   epv->f_SetBoxValues            = remote_Hypre_StructMatrix_SetBoxValues;
   epv->f_SetNumGhost             = remote_Hypre_StructMatrix_SetNumGhost;
   epv->f_SetSymmetric            = remote_Hypre_StructMatrix_SetSymmetric;
+  epv->f_SetIntParameter         = remote_Hypre_StructMatrix_SetIntParameter;
+  epv->f_SetDoubleParameter      = remote_Hypre_StructMatrix_SetDoubleParameter;
+  epv->f_SetStringParameter      = remote_Hypre_StructMatrix_SetStringParameter;
+  epv->f_SetIntArrayParameter    = 
+    remote_Hypre_StructMatrix_SetIntArrayParameter;
+  epv->f_SetDoubleArrayParameter = 
+    remote_Hypre_StructMatrix_SetDoubleArrayParameter;
+  epv->f_GetIntValue             = remote_Hypre_StructMatrix_GetIntValue;
+  epv->f_GetDoubleValue          = remote_Hypre_StructMatrix_GetDoubleValue;
+  epv->f_Setup                   = remote_Hypre_StructMatrix_Setup;
+  epv->f_Apply                   = remote_Hypre_StructMatrix_Apply;
 
   e0->f__cast                   = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete                 = (void (*)(void*)) epv->f__delete;
@@ -821,20 +814,20 @@ static void Hypre_StructMatrix__init_remote_epv(void)
     const char*)) epv->f_isType;
   e0->f_SetCommunicator         = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
-  e0->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
-    double*)) epv->f_GetDoubleValue;
-  e0->f_GetIntValue             = (int32_t (*)(void*,const char*,
-    int32_t*)) epv->f_GetIntValue;
-  e0->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
-    double)) epv->f_SetDoubleParameter;
   e0->f_SetIntParameter         = (int32_t (*)(void*,const char*,
     int32_t)) epv->f_SetIntParameter;
+  e0->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
+    double)) epv->f_SetDoubleParameter;
   e0->f_SetStringParameter      = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
   e0->f_SetIntArrayParameter    = (int32_t (*)(void*,const char*,
     struct SIDL_int__array*)) epv->f_SetIntArrayParameter;
   e0->f_SetDoubleArrayParameter = (int32_t (*)(void*,const char*,
     struct SIDL_double__array*)) epv->f_SetDoubleArrayParameter;
+  e0->f_GetIntValue             = (int32_t (*)(void*,const char*,
+    int32_t*)) epv->f_GetIntValue;
+  e0->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
+    double*)) epv->f_GetDoubleValue;
   e0->f_Setup                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object*)) epv->f_Setup;
   e0->f_Apply                   = (int32_t (*)(void*,
@@ -941,9 +934,8 @@ Hypre_StructMatrix__remote(const char *url)
   s0->d_hypre_problemdefinition.d_epv    = &s_rem__hypre_problemdefinition;
   s0->d_hypre_problemdefinition.d_object = NULL; /* FIXME */
 
-  s0->d_hypre_structuredgridbuildmatrix.d_epv    = 
-    &s_rem__hypre_structuredgridbuildmatrix;
-  s0->d_hypre_structuredgridbuildmatrix.d_object = NULL; /* FIXME */
+  s0->d_hypre_structbuildmatrix.d_epv    = &s_rem__hypre_structbuildmatrix;
+  s0->d_hypre_structbuildmatrix.d_object = NULL; /* FIXME */
 
   s0->d_data = NULL; /* FIXME */
   s0->d_epv  = &s_rem__hypre_structmatrix;

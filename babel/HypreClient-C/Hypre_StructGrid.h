@@ -1,26 +1,27 @@
 /*
  * File:          Hypre_StructGrid.h
- * Symbol:        Hypre.StructGrid-v0.1.6
+ * Symbol:        Hypre.StructGrid-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:40 PST
- * Generated:     20030210 16:05:45 PST
+ * SIDL Created:  20030306 17:05:18 PST
+ * Generated:     20030306 17:05:20 PST
  * Description:   Client-side glue code for Hypre.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 408
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1111
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_StructGrid_h
 #define included_Hypre_StructGrid_h
 
 /**
- * Symbol "Hypre.StructGrid" (version 0.1.6)
+ * Symbol "Hypre.StructGrid" (version 0.1.7)
  * 
  * Define a structured grid class.
+ * 
  */
 struct Hypre_StructGrid__object;
 struct Hypre_StructGrid__array;
@@ -121,12 +122,13 @@ Hypre_StructGrid_getClassInfo(
   Hypre_StructGrid self);
 
 /**
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 int32_t
 Hypre_StructGrid_SetCommunicator(
   Hypre_StructGrid self,
-  void* MPI_comm);
+  void* mpi_comm);
 
 /**
  * Method:  SetDimension[]

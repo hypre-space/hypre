@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_ProblemDefinition_IOR.h
- * Symbol:        Hypre.ProblemDefinition-v0.1.6
+ * Symbol:        Hypre.ProblemDefinition-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:40 PST
- * Generated:     20030210 16:05:44 PST
+ * SIDL Created:  20030306 17:05:16 PST
+ * Generated:     20030306 17:05:19 PST
  * Description:   Intermediate Object Representation for Hypre.ProblemDefinition
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 87
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 42
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_ProblemDefinition_IOR_h
@@ -25,25 +25,28 @@ extern "C" {
 #endif
 
 /*
- * Symbol "Hypre.ProblemDefinition" (version 0.1.6)
+ * Symbol "Hypre.ProblemDefinition" (version 0.1.7)
  * 
- * <p>The purpose of a ProblemDefinition is to:</p>
- * <ul>
- * <li>present the user with a particular view of how to define
- *     a problem</li>
- * <li>construct and return a "problem object"</li>
- * </ul>
+ * The purpose of a ProblemDefinition is to:
  * 
- * <p>A "problem object" is an intentionally vague term that corresponds
- * to any useful object used to define a problem.  Prime examples are:</p>
- * <ul>
- * <li>a LinearOperator object, i.e., something with a matvec</li>
- * <li>a MatrixAccess object, i.e., something with a getrow</li>
- * <li>a Vector, i.e., something with a dot, axpy, ...</li>
- * </ul>
+ * \begin{itemize}
+ * \item provide a particular view of how to define a problem
+ * \item construct and return a {\it problem object}
+ * \end{itemize}
  * 
- * <p>Note that the terms "Initialize" and "Assemble" are reserved here
- * for defining problem objects through a particular user interface.</p>
+ * A {\it problem object} is an intentionally vague term that
+ * corresponds to any useful object used to define a problem.
+ * Prime examples are:
+ * 
+ * \begin{itemize}
+ * \item a LinearOperator object, i.e., something with a matvec
+ * \item a MatrixAccess object, i.e., something with a getrow
+ * \item a Vector, i.e., something with a dot, axpy, ...
+ * \end{itemize}
+ * 
+ * Note that {\tt Initialize} and {\tt Assemble} are reserved here
+ * for defining problem objects through a particular interface.
+ * 
  */
 
 struct Hypre_ProblemDefinition__array;
@@ -84,7 +87,7 @@ struct Hypre_ProblemDefinition__epv {
   SIDL_bool (*f_isType)(
     void* self,
     const char* name);
-  /* Methods introduced in Hypre.ProblemDefinition-v0.1.6 */
+  /* Methods introduced in Hypre.ProblemDefinition-v0.1.7 */
   int32_t (*f_SetCommunicator)(
     void* self,
     void* mpi_comm);

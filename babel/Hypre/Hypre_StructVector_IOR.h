@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_StructVector_IOR.h
- * Symbol:        Hypre.StructVector-v0.1.6
+ * Symbol:        Hypre.StructVector-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:30 PST
+ * SIDL Created:  20030306 17:05:12 PST
+ * Generated:     20030306 17:05:13 PST
  * Description:   Intermediate Object Representation for Hypre.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 427
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1139
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_StructVector_IOR_h
@@ -23,8 +23,8 @@
 #ifndef included_Hypre_ProblemDefinition_IOR_h
 #include "Hypre_ProblemDefinition_IOR.h"
 #endif
-#ifndef included_Hypre_StructuredGridBuildVector_IOR_h
-#include "Hypre_StructuredGridBuildVector_IOR.h"
+#ifndef included_Hypre_StructBuildVector_IOR_h
+#include "Hypre_StructBuildVector_IOR.h"
 #endif
 #ifndef included_Hypre_Vector_IOR_h
 #include "Hypre_Vector_IOR.h"
@@ -38,7 +38,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "Hypre.StructVector" (version 0.1.6)
+ * Symbol "Hypre.StructVector" (version 0.1.7)
  */
 
 struct Hypre_StructVector__array;
@@ -102,7 +102,7 @@ struct Hypre_StructVector__epv {
   struct SIDL_ClassInfo__object* (*f_getClassInfo)(
     struct Hypre_StructVector__object* self);
   /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
-  /* Methods introduced in Hypre.ProblemDefinition-v0.1.6 */
+  /* Methods introduced in Hypre.ProblemDefinition-v0.1.7 */
   int32_t (*f_SetCommunicator)(
     struct Hypre_StructVector__object* self,
     void* mpi_comm);
@@ -113,7 +113,7 @@ struct Hypre_StructVector__epv {
   int32_t (*f_GetObject)(
     struct Hypre_StructVector__object* self,
     struct SIDL_BaseInterface__object** A);
-  /* Methods introduced in Hypre.StructuredGridBuildVector-v0.1.6 */
+  /* Methods introduced in Hypre.StructBuildVector-v0.1.7 */
   int32_t (*f_SetGrid)(
     struct Hypre_StructVector__object* self,
     struct Hypre_StructGrid__object* grid);
@@ -130,7 +130,7 @@ struct Hypre_StructVector__epv {
     struct SIDL_int__array* iupper,
     struct SIDL_double__array* values);
   /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
-  /* Methods introduced in Hypre.Vector-v0.1.6 */
+  /* Methods introduced in Hypre.Vector-v0.1.7 */
   int32_t (*f_Clear)(
     struct Hypre_StructVector__object* self);
   int32_t (*f_Copy)(
@@ -150,7 +150,7 @@ struct Hypre_StructVector__epv {
     struct Hypre_StructVector__object* self,
     double a,
     struct Hypre_Vector__object* x);
-  /* Methods introduced in Hypre.StructVector-v0.1.6 */
+  /* Methods introduced in Hypre.StructVector-v0.1.7 */
 };
 
 /*
@@ -158,13 +158,12 @@ struct Hypre_StructVector__epv {
  */
 
 struct Hypre_StructVector__object {
-  struct SIDL_BaseClass__object                  d_sidl_baseclass;
-  struct Hypre_ProblemDefinition__object         d_hypre_problemdefinition;
-  struct Hypre_StructuredGridBuildVector__object 
-    d_hypre_structuredgridbuildvector;
-  struct Hypre_Vector__object                    d_hypre_vector;
-  struct Hypre_StructVector__epv*                d_epv;
-  void*                                          d_data;
+  struct SIDL_BaseClass__object          d_sidl_baseclass;
+  struct Hypre_ProblemDefinition__object d_hypre_problemdefinition;
+  struct Hypre_StructBuildVector__object d_hypre_structbuildvector;
+  struct Hypre_Vector__object            d_hypre_vector;
+  struct Hypre_StructVector__epv*        d_epv;
+  void*                                  d_data;
 };
 
 struct Hypre_StructVector__external {

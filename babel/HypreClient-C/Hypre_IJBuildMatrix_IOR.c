@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_IJBuildMatrix_IOR.c
- * Symbol:        Hypre.IJBuildMatrix-v0.1.6
+ * Symbol:        Hypre.IJBuildMatrix-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:40 PST
- * Generated:     20030210 16:05:44 PST
+ * SIDL Created:  20030306 17:05:17 PST
+ * Generated:     20030306 17:05:19 PST
  * Description:   Intermediate Object Representation for Hypre.IJBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 155
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 85
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #include <stdlib.h>
@@ -161,11 +161,11 @@ remote_Hypre_IJBuildMatrix_GetObject(
 }
 
 /*
- * REMOTE METHOD STUB:Create
+ * REMOTE METHOD STUB:SetLocalRange
  */
 
 static int32_t
-remote_Hypre_IJBuildMatrix_Create(
+remote_Hypre_IJBuildMatrix_SetLocalRange(
   void* self,
   int32_t ilower,
   int32_t iupper,
@@ -208,6 +208,51 @@ remote_Hypre_IJBuildMatrix_AddToValues(
 }
 
 /*
+ * REMOTE METHOD STUB:GetLocalRange
+ */
+
+static int32_t
+remote_Hypre_IJBuildMatrix_GetLocalRange(
+  void* self,
+  int32_t* ilower,
+  int32_t* iupper,
+  int32_t* jlower,
+  int32_t* jupper)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetRowCounts
+ */
+
+static int32_t
+remote_Hypre_IJBuildMatrix_GetRowCounts(
+  void* self,
+  int32_t nrows,
+  struct SIDL_int__array* rows,
+  struct SIDL_int__array** ncols)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetValues
+ */
+
+static int32_t
+remote_Hypre_IJBuildMatrix_GetValues(
+  void* self,
+  int32_t nrows,
+  struct SIDL_int__array* ncols,
+  struct SIDL_int__array* rows,
+  struct SIDL_int__array* cols,
+  struct SIDL_double__array** values)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:SetRowSizes
  */
 
@@ -220,14 +265,13 @@ remote_Hypre_IJBuildMatrix_SetRowSizes(
 }
 
 /*
- * REMOTE METHOD STUB:SetDiagOffdSizes
+ * REMOTE METHOD STUB:Print
  */
 
 static int32_t
-remote_Hypre_IJBuildMatrix_SetDiagOffdSizes(
+remote_Hypre_IJBuildMatrix_Print(
   void* self,
-  struct SIDL_int__array* diag_sizes,
-  struct SIDL_int__array* offdiag_sizes)
+  const char* filename)
 {
   return 0;
 }
@@ -246,18 +290,6 @@ remote_Hypre_IJBuildMatrix_Read(
 }
 
 /*
- * REMOTE METHOD STUB:Print
- */
-
-static int32_t
-remote_Hypre_IJBuildMatrix_Print(
-  void* self,
-  const char* filename)
-{
-  return 0;
-}
-
-/*
  * REMOTE EPV: create remote entry point vectors (EPVs).
  */
 
@@ -265,24 +297,26 @@ static void Hypre_IJBuildMatrix__init_remote_epv(void)
 {
   struct Hypre_IJBuildMatrix__epv* epv = &s_rem__hypre_ijbuildmatrix;
 
-  epv->f__cast            = remote_Hypre_IJBuildMatrix__cast;
-  epv->f__delete          = remote_Hypre_IJBuildMatrix__delete;
-  epv->f_addRef           = remote_Hypre_IJBuildMatrix_addRef;
-  epv->f_deleteRef        = remote_Hypre_IJBuildMatrix_deleteRef;
-  epv->f_isSame           = remote_Hypre_IJBuildMatrix_isSame;
-  epv->f_queryInt         = remote_Hypre_IJBuildMatrix_queryInt;
-  epv->f_isType           = remote_Hypre_IJBuildMatrix_isType;
-  epv->f_SetCommunicator  = remote_Hypre_IJBuildMatrix_SetCommunicator;
-  epv->f_Initialize       = remote_Hypre_IJBuildMatrix_Initialize;
-  epv->f_Assemble         = remote_Hypre_IJBuildMatrix_Assemble;
-  epv->f_GetObject        = remote_Hypre_IJBuildMatrix_GetObject;
-  epv->f_Create           = remote_Hypre_IJBuildMatrix_Create;
-  epv->f_SetValues        = remote_Hypre_IJBuildMatrix_SetValues;
-  epv->f_AddToValues      = remote_Hypre_IJBuildMatrix_AddToValues;
-  epv->f_SetRowSizes      = remote_Hypre_IJBuildMatrix_SetRowSizes;
-  epv->f_SetDiagOffdSizes = remote_Hypre_IJBuildMatrix_SetDiagOffdSizes;
-  epv->f_Read             = remote_Hypre_IJBuildMatrix_Read;
-  epv->f_Print            = remote_Hypre_IJBuildMatrix_Print;
+  epv->f__cast           = remote_Hypre_IJBuildMatrix__cast;
+  epv->f__delete         = remote_Hypre_IJBuildMatrix__delete;
+  epv->f_addRef          = remote_Hypre_IJBuildMatrix_addRef;
+  epv->f_deleteRef       = remote_Hypre_IJBuildMatrix_deleteRef;
+  epv->f_isSame          = remote_Hypre_IJBuildMatrix_isSame;
+  epv->f_queryInt        = remote_Hypre_IJBuildMatrix_queryInt;
+  epv->f_isType          = remote_Hypre_IJBuildMatrix_isType;
+  epv->f_SetCommunicator = remote_Hypre_IJBuildMatrix_SetCommunicator;
+  epv->f_Initialize      = remote_Hypre_IJBuildMatrix_Initialize;
+  epv->f_Assemble        = remote_Hypre_IJBuildMatrix_Assemble;
+  epv->f_GetObject       = remote_Hypre_IJBuildMatrix_GetObject;
+  epv->f_SetLocalRange   = remote_Hypre_IJBuildMatrix_SetLocalRange;
+  epv->f_SetValues       = remote_Hypre_IJBuildMatrix_SetValues;
+  epv->f_AddToValues     = remote_Hypre_IJBuildMatrix_AddToValues;
+  epv->f_GetLocalRange   = remote_Hypre_IJBuildMatrix_GetLocalRange;
+  epv->f_GetRowCounts    = remote_Hypre_IJBuildMatrix_GetRowCounts;
+  epv->f_GetValues       = remote_Hypre_IJBuildMatrix_GetValues;
+  epv->f_SetRowSizes     = remote_Hypre_IJBuildMatrix_SetRowSizes;
+  epv->f_Print           = remote_Hypre_IJBuildMatrix_Print;
+  epv->f_Read            = remote_Hypre_IJBuildMatrix_Read;
   s_remote_initialized = 1;
 }
 

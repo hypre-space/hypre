@@ -1,28 +1,30 @@
 /*
  * File:          Hypre_StructStencil.h
- * Symbol:        Hypre.StructStencil-v0.1.6
+ * Symbol:        Hypre.StructStencil-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:40 PST
- * Generated:     20030210 16:05:46 PST
+ * SIDL Created:  20030306 17:05:18 PST
+ * Generated:     20030306 17:05:20 PST
  * Description:   Client-side glue code for Hypre.StructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 398
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1098
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_StructStencil_h
 #define included_Hypre_StructStencil_h
 
 /**
- * Symbol "Hypre.StructStencil" (version 0.1.6)
+ * Symbol "Hypre.StructStencil" (version 0.1.7)
  * 
- * Define a structured stencil for a structured problem description.
- * More than one implementation is not envisioned, thus the decision has
- * been made to make this a class rather than an interface.
+ * Define a structured stencil for a structured problem
+ * description.  More than one implementation is not envisioned,
+ * thus the decision has been made to make this a class rather than
+ * an interface.
+ * 
  */
 struct Hypre_StructStencil__object;
 struct Hypre_StructStencil__array;

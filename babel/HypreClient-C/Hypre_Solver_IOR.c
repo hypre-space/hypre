@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_Solver_IOR.c
- * Symbol:        Hypre.Solver-v0.1.6
+ * Symbol:        Hypre.Solver-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:40 PST
- * Generated:     20030210 16:05:44 PST
+ * SIDL Created:  20030306 17:05:17 PST
+ * Generated:     20030306 17:05:19 PST
  * Description:   Intermediate Object Representation for Hypre.Solver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 340
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 710
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #include <stdlib.h>
@@ -121,46 +121,7 @@ remote_Hypre_Solver_isType(
 static int32_t
 remote_Hypre_Solver_SetCommunicator(
   void* self,
-  void* comm)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:GetDoubleValue
- */
-
-static int32_t
-remote_Hypre_Solver_GetDoubleValue(
-  void* self,
-  const char* name,
-  double* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:GetIntValue
- */
-
-static int32_t
-remote_Hypre_Solver_GetIntValue(
-  void* self,
-  const char* name,
-  int32_t* value)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:SetDoubleParameter
- */
-
-static int32_t
-remote_Hypre_Solver_SetDoubleParameter(
-  void* self,
-  const char* name,
-  double value)
+  void* mpi_comm)
 {
   return 0;
 }
@@ -174,6 +135,19 @@ remote_Hypre_Solver_SetIntParameter(
   void* self,
   const char* name,
   int32_t value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetDoubleParameter
+ */
+
+static int32_t
+remote_Hypre_Solver_SetDoubleParameter(
+  void* self,
+  const char* name,
+  double value)
 {
   return 0;
 }
@@ -218,6 +192,32 @@ remote_Hypre_Solver_SetDoubleArrayParameter(
 }
 
 /*
+ * REMOTE METHOD STUB:GetIntValue
+ */
+
+static int32_t
+remote_Hypre_Solver_GetIntValue(
+  void* self,
+  const char* name,
+  int32_t* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetDoubleValue
+ */
+
+static int32_t
+remote_Hypre_Solver_GetDoubleValue(
+  void* self,
+  const char* name,
+  double* value)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:Setup
  */
 
@@ -256,13 +256,25 @@ remote_Hypre_Solver_SetOperator(
 }
 
 /*
- * REMOTE METHOD STUB:GetResidual
+ * REMOTE METHOD STUB:SetTolerance
  */
 
 static int32_t
-remote_Hypre_Solver_GetResidual(
+remote_Hypre_Solver_SetTolerance(
   void* self,
-  struct Hypre_Vector__object** r)
+  double tolerance)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetMaxIterations
+ */
+
+static int32_t
+remote_Hypre_Solver_SetMaxIterations(
+  void* self,
+  int32_t max_iterations)
 {
   return 0;
 }
@@ -292,6 +304,30 @@ remote_Hypre_Solver_SetPrintLevel(
 }
 
 /*
+ * REMOTE METHOD STUB:GetNumIterations
+ */
+
+static int32_t
+remote_Hypre_Solver_GetNumIterations(
+  void* self,
+  int32_t* num_iterations)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetRelResidualNorm
+ */
+
+static int32_t
+remote_Hypre_Solver_GetRelResidualNorm(
+  void* self,
+  double* norm)
+{
+  return 0;
+}
+
+/*
  * REMOTE EPV: create remote entry point vectors (EPVs).
  */
 
@@ -307,19 +343,22 @@ static void Hypre_Solver__init_remote_epv(void)
   epv->f_queryInt                = remote_Hypre_Solver_queryInt;
   epv->f_isType                  = remote_Hypre_Solver_isType;
   epv->f_SetCommunicator         = remote_Hypre_Solver_SetCommunicator;
-  epv->f_GetDoubleValue          = remote_Hypre_Solver_GetDoubleValue;
-  epv->f_GetIntValue             = remote_Hypre_Solver_GetIntValue;
-  epv->f_SetDoubleParameter      = remote_Hypre_Solver_SetDoubleParameter;
   epv->f_SetIntParameter         = remote_Hypre_Solver_SetIntParameter;
+  epv->f_SetDoubleParameter      = remote_Hypre_Solver_SetDoubleParameter;
   epv->f_SetStringParameter      = remote_Hypre_Solver_SetStringParameter;
   epv->f_SetIntArrayParameter    = remote_Hypre_Solver_SetIntArrayParameter;
   epv->f_SetDoubleArrayParameter = remote_Hypre_Solver_SetDoubleArrayParameter;
+  epv->f_GetIntValue             = remote_Hypre_Solver_GetIntValue;
+  epv->f_GetDoubleValue          = remote_Hypre_Solver_GetDoubleValue;
   epv->f_Setup                   = remote_Hypre_Solver_Setup;
   epv->f_Apply                   = remote_Hypre_Solver_Apply;
   epv->f_SetOperator             = remote_Hypre_Solver_SetOperator;
-  epv->f_GetResidual             = remote_Hypre_Solver_GetResidual;
+  epv->f_SetTolerance            = remote_Hypre_Solver_SetTolerance;
+  epv->f_SetMaxIterations        = remote_Hypre_Solver_SetMaxIterations;
   epv->f_SetLogging              = remote_Hypre_Solver_SetLogging;
   epv->f_SetPrintLevel           = remote_Hypre_Solver_SetPrintLevel;
+  epv->f_GetNumIterations        = remote_Hypre_Solver_GetNumIterations;
+  epv->f_GetRelResidualNorm      = remote_Hypre_Solver_GetRelResidualNorm;
   s_remote_initialized = 1;
 }
 

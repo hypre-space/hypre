@@ -305,7 +305,4 @@ impl_Hypre_StructSMG_SetPrintLevel(
  * This can result from a method rename/removal in the SIDL file.
  * Move or remove the code in order to compile cleanly.
  */
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetParameter) */
-  /* Insert the implementation of the SetParameter method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetParameter) */
 /* ================== END UNREFERENCED METHOD(S) ================= */

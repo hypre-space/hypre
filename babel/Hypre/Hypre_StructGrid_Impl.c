@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_StructGrid_Impl.c
- * Symbol:        Hypre.StructGrid-v0.1.6
+ * Symbol:        Hypre.StructGrid-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:37 PST
+ * SIDL Created:  20030306 17:05:12 PST
+ * Generated:     20030306 17:05:15 PST
  * Description:   Server-side implementation for Hypre.StructGrid
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 408
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1111
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -20,9 +20,10 @@
  */
 
 /*
- * Symbol "Hypre.StructGrid" (version 0.1.6)
+ * Symbol "Hypre.StructGrid" (version 0.1.7)
  * 
  * Define a structured grid class.
+ * 
  */
 
 #include "Hypre_StructGrid_Impl.h"
@@ -64,7 +65,8 @@ impl_Hypre_StructGrid__dtor(
 }
 
 /*
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 
 #undef __FUNC__
@@ -72,7 +74,7 @@ impl_Hypre_StructGrid__dtor(
 
 int32_t
 impl_Hypre_StructGrid_SetCommunicator(
-  Hypre_StructGrid self, void* MPI_comm)
+  Hypre_StructGrid self, void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructGrid.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */

@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_StructGrid_IOR.h
- * Symbol:        Hypre.StructGrid-v0.1.6
+ * Symbol:        Hypre.StructGrid-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:30 PST
+ * SIDL Created:  20030306 17:05:12 PST
+ * Generated:     20030306 17:05:13 PST
  * Description:   Intermediate Object Representation for Hypre.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 408
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1111
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_StructGrid_IOR_h
@@ -29,9 +29,10 @@ extern "C" {
 #endif
 
 /*
- * Symbol "Hypre.StructGrid" (version 0.1.6)
+ * Symbol "Hypre.StructGrid" (version 0.1.7)
  * 
  * Define a structured grid class.
+ * 
  */
 
 struct Hypre_StructGrid__array;
@@ -90,10 +91,10 @@ struct Hypre_StructGrid__epv {
   /* Methods introduced in SIDL.BaseClass-v0.8.1 */
   struct SIDL_ClassInfo__object* (*f_getClassInfo)(
     struct Hypre_StructGrid__object* self);
-  /* Methods introduced in Hypre.StructGrid-v0.1.6 */
+  /* Methods introduced in Hypre.StructGrid-v0.1.7 */
   int32_t (*f_SetCommunicator)(
     struct Hypre_StructGrid__object* self,
-    void* MPI_comm);
+    void* mpi_comm);
   int32_t (*f_SetDimension)(
     struct Hypre_StructGrid__object* self,
     int32_t dim);

@@ -1,23 +1,23 @@
 C       
 C       File:          Hypre_IJBuildVector_Impl.f
-C       Symbol:        Hypre.IJBuildVector-v0.1.6
+C       Symbol:        Hypre.IJBuildVector-v0.1.7
 C       Symbol Type:   interface
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030210 16:05:49 PST
-C       Generated:     20030210 16:05:57 PST
+C       SIDL Created:  20030306 17:05:23 PST
+C       Generated:     20030306 17:05:26 PST
 C       Description:   Client-side documentation text for Hypre.IJBuildVector
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
-C       source-line   = 249
-C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+C       source-line   = 211
+C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
 
 C       
-C       Symbol "Hypre.IJBuildVector" (version 0.1.6)
+C       Symbol "Hypre.IJBuildVector" (version 0.1.7)
 C       
 
 
@@ -131,7 +131,8 @@ C       out bool retval
 
 
 C       
-C       Method:  SetCommunicator[]
+C       Set the MPI Communicator.
+C       
 C       
 
         subroutine Hypre_IJBuildVector_SetCommunicator_f(self, mpi_comm,
@@ -151,7 +152,6 @@ C       Prepare an object for setting coefficient values, whether for
 C       the first time or subsequently.
 C       
 C       
-C       
 
         subroutine Hypre_IJBuildVector_Initialize_f(self, retval)
         implicit none
@@ -163,11 +163,11 @@ C       out int retval
 
 
 C       
-C       Finalize the construction of an object before using, either for
-C       the first time or on subsequent uses. "Initialize" and "Assemble"
-C       always appear in a matched set, with Initialize preceding Assemble. Values
-C       can only be set in between a call to Initialize and Assemble.
-C       
+C       Finalize the construction of an object before using, either
+C       for the first time or on subsequent uses. {\tt Initialize}
+C       and {\tt Assemble} always appear in a matched set, with
+C       Initialize preceding Assemble. Values can only be set in
+C       between a call to Initialize and Assemble.
 C       
 C       
 
@@ -181,14 +181,15 @@ C       out int retval
 
 
 C       
-C       The problem definition interface is a "builder" that creates an object
-C       that contains the problem definition information, e.g. a matrix. To
-C       perform subsequent operations with that object, it must be returned from
-C       the problem definition object. "GetObject" performs this function.
-C       <note>At compile time, the type of the returned object is unknown.
-C       Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
-C       be used on the returned object to convert it into a known type.</note>
-C       
+C       The problem definition interface is a {\it builder} that
+C       creates an object that contains the problem definition
+C       information, e.g. a matrix. To perform subsequent operations
+C       with that object, it must be returned from the problem
+C       definition object. {\tt GetObject} performs this function.
+C       At compile time, the type of the returned object is unknown.
+C       Thus, the returned type is a SIDL.BaseInterface.
+C       QueryInterface or Cast must be used on the returned object to
+C       convert it into a known type.
 C       
 C       
 
@@ -204,148 +205,26 @@ C       out int retval
 
 
 C       
-C       Method:  SetGlobalSize[]
-C       
-
-        subroutine Hypre_IJBuildVector_SetGlobalSize_f(self, n, retval)
-        implicit none
-C       in Hypre.IJBuildVector self
-        integer*8 self
-C       in int n
-        integer*4 n
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  SetPartitioning[]
-C       
-
-        subroutine Hypre_IJBuildVector_SetPartitioning_f(self,
-     &     partitioning, retval)
-        implicit none
-C       in Hypre.IJBuildVector self
-        integer*8 self
-C       in array<int> partitioning
-        integer*8 partitioning
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  SetLocalComponents[]
-C       
-
-        subroutine Hypre_IJBuildVector_SetLocalComponents_f(self,
-     &     num_values, glob_vec_indices, value_indices, values, retval)
-        implicit none
-C       in Hypre.IJBuildVector self
-        integer*8 self
-C       in int num_values
-        integer*4 num_values
-C       in array<int> glob_vec_indices
-        integer*8 glob_vec_indices
-C       in array<int> value_indices
-        integer*8 value_indices
-C       in array<double> values
-        integer*8 values
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  AddtoLocalComponents[]
-C       
-
-        subroutine Hypre_IJBuildVector_AddtoLocalComponents_f(self,
-     &     num_values, glob_vec_indices, value_indices, values, retval)
-        implicit none
-C       in Hypre.IJBuildVector self
-        integer*8 self
-C       in int num_values
-        integer*4 num_values
-C       in array<int> glob_vec_indices
-        integer*8 glob_vec_indices
-C       in array<int> value_indices
-        integer*8 value_indices
-C       in array<double> values
-        integer*8 values
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  SetLocalComponentsInBlock[]
-C       
-
-        subroutine Hypre_IJBuildVector_SetLocalComponentsInBlock_f(self,
-     &     glob_vec_index_start, glob_vec_index_stop, value_indices,
-     &     values, retval)
-        implicit none
-C       in Hypre.IJBuildVector self
-        integer*8 self
-C       in int glob_vec_index_start
-        integer*4 glob_vec_index_start
-C       in int glob_vec_index_stop
-        integer*4 glob_vec_index_stop
-C       in array<int> value_indices
-        integer*8 value_indices
-C       in array<double> values
-        integer*8 values
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Method:  AddToLocalComponentsInBlock[]
-C       
-
-        subroutine 
-     &     Hypre_IJBuildVector_AddToLocalComponentsInBlock_f(self,
-     &     glob_vec_index_start, glob_vec_index_stop, value_indices,
-     &     values, retval)
-        implicit none
-C       in Hypre.IJBuildVector self
-        integer*8 self
-C       in int glob_vec_index_start
-        integer*4 glob_vec_index_start
-C       in int glob_vec_index_stop
-        integer*4 glob_vec_index_stop
-C       in array<int> value_indices
-        integer*8 value_indices
-C       in array<double> values
-        integer*8 values
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Create a vector object.  Each process owns some unique consecutive
-C       range of vector unknowns, indicated by the global indices {\tt
-C       jlower} and {\tt jupper}.  The data is required to be such that the
-C       value of {\tt jlower} on any process $p$ be exactly one more than
-C       the value of {\tt jupper} on process $p-1$.  Note that the first
-C       index of the global vector may start with any integer value.  In
+C       Set the local range for a vector object.  Each process owns
+C       some unique consecutive range of vector unknowns, indicated
+C       by the global indices {\tt jlower} and {\tt jupper}.  The
+C       data is required to be such that the value of {\tt jlower} on
+C       any process $p$ be exactly one more than the value of {\tt
+C       jupper} on process $p-1$.  Note that the first index of the
+C       global vector may start with any integer value.  In
 C       particular, one may use zero- or one-based indexing.
 C       
 C       Collective.
 C       
+C       RDF: Changed name from 'Create' (x)
 C       
 C       
 
-        subroutine Hypre_IJBuildVector_Create_f(self, comm, jlower,
+        subroutine Hypre_IJBuildVector_SetLocalRange_f(self, jlower,
      &     jupper, retval)
         implicit none
 C       in Hypre.IJBuildVector self
         integer*8 self
-C       in opaque comm
-        integer*8 comm
 C       in int jlower
         integer*4 jlower
 C       in int jupper
@@ -356,14 +235,13 @@ C       out int retval
 
 
 C       
-C       Sets values in vector.  The arrays {\tt values} and {\tt indices}
-C       are of dimension {\tt nvalues} and contain the vector values to be
-C       set and the corresponding global vector indices, respectively.
-C       Erases any previous values at the specified locations and replaces
-C       them with new ones.
+C       Sets values in vector.  The arrays {\tt values} and {\tt
+C       indices} are of dimension {\tt nvalues} and contain the
+C       vector values to be set and the corresponding global vector
+C       indices, respectively.  Erases any previous values at the
+C       specified locations and replaces them with new ones.
 C       
 C       Not collective.
-C       
 C       
 C       
 
@@ -385,10 +263,9 @@ C       out int retval
 
 C       
 C       Adds to values in vector.  Usage details are analogous to
-C       \Ref{SetValues}.
+C       {\tt SetValues}.
 C       
 C       Not collective.
-C       
 C       
 C       
 
@@ -409,8 +286,73 @@ C       out int retval
 
 
 C       
-C       Read the vector from file.  This is mainly for debugging purposes.
+C       Returns range of the part of the vector owned by this
+C       processor.
 C       
+C       RDF: New (x)
+C       
+C       
+
+        subroutine Hypre_IJBuildVector_GetLocalRange_f(self, jlower,
+     &     jupper, retval)
+        implicit none
+C       in Hypre.IJBuildVector self
+        integer*8 self
+C       out int jlower
+        integer*4 jlower
+C       out int jupper
+        integer*4 jupper
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Gets values in vector.  Usage details are analogous to {\tt
+C       SetValues}.
+C       
+C       Not collective.
+C       
+C       RDF: New (x)
+C       
+C       
+
+        subroutine Hypre_IJBuildVector_GetValues_f(self, nvalues,
+     &     indices, values, retval)
+        implicit none
+C       in Hypre.IJBuildVector self
+        integer*8 self
+C       in int nvalues
+        integer*4 nvalues
+C       in array<int> indices
+        integer*8 indices
+C       inout array<double> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Print the vector to file.  This is mainly for debugging
+C       purposes.
+C       
+C       
+
+        subroutine Hypre_IJBuildVector_Print_f(self, filename, retval)
+        implicit none
+C       in Hypre.IJBuildVector self
+        integer*8 self
+C       in string filename
+        character*(*) filename
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Read the vector from file.  This is mainly for debugging
+C       purposes.
 C       
 C       
 
@@ -423,22 +365,6 @@ C       in string filename
         character*(*) filename
 C       in opaque comm
         integer*8 comm
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Print the vector to file.  This is mainly for debugging purposes.
-C       
-C       
-
-        subroutine Hypre_IJBuildVector_Print_f(self, filename, retval)
-        implicit none
-C       in Hypre.IJBuildVector self
-        integer*8 self
-C       in string filename
-        character*(*) filename
 C       out int retval
         integer*4 retval
         end

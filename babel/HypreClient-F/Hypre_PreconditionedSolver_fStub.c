@@ -1,21 +1,21 @@
 /*
  * File:          Hypre_PreconditionedSolver_fStub.c
- * Symbol:        Hypre.PreconditionedSolver-v0.1.6
+ * Symbol:        Hypre.PreconditionedSolver-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:49 PST
- * Generated:     20030210 16:05:56 PST
+ * SIDL Created:  20030306 17:05:23 PST
+ * Generated:     20030306 17:05:26 PST
  * Description:   Client-side glue code for Hypre.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 367
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 766
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 /*
- * Symbol "Hypre.PreconditionedSolver" (version 0.1.6)
+ * Symbol "Hypre.PreconditionedSolver" (version 0.1.7)
  */
 
 #include <stddef.h>
@@ -237,138 +237,38 @@ SIDLFortran77Symbol(hypre_preconditionedsolver_istype_f,HYPRE_PRECONDITIONEDSOLV
 }
 
 /*
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 
 void
 SIDLFortran77Symbol(hypre_preconditionedsolver_setcommunicator_f,HYPRE_PRECONDITIONEDSOLVER_SETCOMMUNICATOR_F,Hypre_PreconditionedSolver_SetCommunicator_f)
 (
   int64_t *self,
-  int64_t *comm,
+  int64_t *mpi_comm,
   int32_t *retval
 )
 {
   struct Hypre_PreconditionedSolver__epv *_epv = NULL;
   struct Hypre_PreconditionedSolver__object* _proxy_self = NULL;
-  void* _proxy_comm = NULL;
+  void* _proxy_mpi_comm = NULL;
   _proxy_self =
     (struct Hypre_PreconditionedSolver__object*)
     (ptrdiff_t)(*self);
-  _proxy_comm =
+  _proxy_mpi_comm =
     (void*)
-    (ptrdiff_t)(*comm);
+    (ptrdiff_t)(*mpi_comm);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetCommunicator))(
       _proxy_self->d_object,
-      _proxy_comm
+      _proxy_mpi_comm
     );
 }
 
 /*
- * Method:  GetDoubleValue[]
- */
-
-void
-SIDLFortran77Symbol(hypre_preconditionedsolver_getdoublevalue_f,HYPRE_PRECONDITIONEDSOLVER_GETDOUBLEVALUE_F,Hypre_PreconditionedSolver_GetDoubleValue_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  double *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct Hypre_PreconditionedSolver__epv *_epv = NULL;
-  struct Hypre_PreconditionedSolver__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  _proxy_self =
-    (struct Hypre_PreconditionedSolver__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    SIDL_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetDoubleValue))(
-      _proxy_self->d_object,
-      _proxy_name,
-      value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Method:  GetIntValue[]
- */
-
-void
-SIDLFortran77Symbol(hypre_preconditionedsolver_getintvalue_f,HYPRE_PRECONDITIONEDSOLVER_GETINTVALUE_F,Hypre_PreconditionedSolver_GetIntValue_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  int32_t *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct Hypre_PreconditionedSolver__epv *_epv = NULL;
-  struct Hypre_PreconditionedSolver__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  _proxy_self =
-    (struct Hypre_PreconditionedSolver__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    SIDL_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetIntValue))(
-      _proxy_self->d_object,
-      _proxy_name,
-      value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Method:  SetDoubleParameter[]
- */
-
-void
-SIDLFortran77Symbol(hypre_preconditionedsolver_setdoubleparameter_f,HYPRE_PRECONDITIONEDSOLVER_SETDOUBLEPARAMETER_F,Hypre_PreconditionedSolver_SetDoubleParameter_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  double *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct Hypre_PreconditionedSolver__epv *_epv = NULL;
-  struct Hypre_PreconditionedSolver__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  _proxy_self =
-    (struct Hypre_PreconditionedSolver__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    SIDL_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetDoubleParameter))(
-      _proxy_self->d_object,
-      _proxy_name,
-      *value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Method:  SetIntParameter[]
+ * Set the int parameter associated with {\tt name}.
+ * 
  */
 
 void
@@ -402,7 +302,43 @@ SIDLFortran77Symbol(hypre_preconditionedsolver_setintparameter_f,HYPRE_PRECONDIT
 }
 
 /*
- * Method:  SetStringParameter[]
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_preconditionedsolver_setdoubleparameter_f,HYPRE_PRECONDITIONEDSOLVER_SETDOUBLEPARAMETER_F,Hypre_PreconditionedSolver_SetDoubleParameter_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  double *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct Hypre_PreconditionedSolver__epv *_epv = NULL;
+  struct Hypre_PreconditionedSolver__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  _proxy_self =
+    (struct Hypre_PreconditionedSolver__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetDoubleParameter))(
+      _proxy_self->d_object,
+      _proxy_name,
+      *value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Set the string parameter associated with {\tt name}.
+ * 
  */
 
 void
@@ -443,7 +379,8 @@ SIDLFortran77Symbol(hypre_preconditionedsolver_setstringparameter_f,HYPRE_PRECON
 }
 
 /*
- * Method:  SetIntArrayParameter[]
+ * Set the int array parameter associated with {\tt name}.
+ * 
  */
 
 void
@@ -481,7 +418,8 @@ SIDLFortran77Symbol(hypre_preconditionedsolver_setintarrayparameter_f,HYPRE_PREC
 }
 
 /*
- * Method:  SetDoubleArrayParameter[]
+ * Set the double array parameter associated with {\tt name}.
+ * 
  */
 
 void
@@ -519,7 +457,79 @@ SIDLFortran77Symbol(hypre_preconditionedsolver_setdoublearrayparameter_f,HYPRE_P
 }
 
 /*
- * Method:  Setup[]
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_preconditionedsolver_getintvalue_f,HYPRE_PRECONDITIONEDSOLVER_GETINTVALUE_F,Hypre_PreconditionedSolver_GetIntValue_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  int32_t *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct Hypre_PreconditionedSolver__epv *_epv = NULL;
+  struct Hypre_PreconditionedSolver__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  _proxy_self =
+    (struct Hypre_PreconditionedSolver__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetIntValue))(
+      _proxy_self->d_object,
+      _proxy_name,
+      value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_preconditionedsolver_getdoublevalue_f,HYPRE_PRECONDITIONEDSOLVER_GETDOUBLEVALUE_F,Hypre_PreconditionedSolver_GetDoubleValue_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  double *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct Hypre_PreconditionedSolver__epv *_epv = NULL;
+  struct Hypre_PreconditionedSolver__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  _proxy_self =
+    (struct Hypre_PreconditionedSolver__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetDoubleValue))(
+      _proxy_self->d_object,
+      _proxy_name,
+      value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
  */
 
 void
@@ -554,7 +564,8 @@ SIDLFortran77Symbol(hypre_preconditionedsolver_setup_f,HYPRE_PRECONDITIONEDSOLVE
 }
 
 /*
- * Method:  Apply[]
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
  */
 
 void
@@ -590,7 +601,8 @@ SIDLFortran77Symbol(hypre_preconditionedsolver_apply_f,HYPRE_PRECONDITIONEDSOLVE
 }
 
 /*
- * Method:  SetOperator[]
+ * Set the operator for the linear system being solved.
+ * 
  */
 
 void
@@ -619,34 +631,68 @@ SIDLFortran77Symbol(hypre_preconditionedsolver_setoperator_f,HYPRE_PRECONDITIONE
 }
 
 /*
- * Method:  GetResidual[]
+ * (Optional) Set the convergence tolerance.
+ * 
+ * RDF: New
+ * 
  */
 
 void
-SIDLFortran77Symbol(hypre_preconditionedsolver_getresidual_f,HYPRE_PRECONDITIONEDSOLVER_GETRESIDUAL_F,Hypre_PreconditionedSolver_GetResidual_f)
+SIDLFortran77Symbol(hypre_preconditionedsolver_settolerance_f,HYPRE_PRECONDITIONEDSOLVER_SETTOLERANCE_F,Hypre_PreconditionedSolver_SetTolerance_f)
 (
   int64_t *self,
-  int64_t *r,
+  double *tolerance,
   int32_t *retval
 )
 {
   struct Hypre_PreconditionedSolver__epv *_epv = NULL;
   struct Hypre_PreconditionedSolver__object* _proxy_self = NULL;
-  struct Hypre_Vector__object* _proxy_r = NULL;
   _proxy_self =
     (struct Hypre_PreconditionedSolver__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   *retval = 
-    (*(_epv->f_GetResidual))(
+    (*(_epv->f_SetTolerance))(
       _proxy_self->d_object,
-      &_proxy_r
+      *tolerance
     );
-  *r = (ptrdiff_t)_proxy_r;
 }
 
 /*
- * Method:  SetLogging[]
+ * (Optional) Set maximum number of iterations.
+ * 
+ * RDF: New
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_preconditionedsolver_setmaxiterations_f,HYPRE_PRECONDITIONEDSOLVER_SETMAXITERATIONS_F,Hypre_PreconditionedSolver_SetMaxIterations_f)
+(
+  int64_t *self,
+  int32_t *max_iterations,
+  int32_t *retval
+)
+{
+  struct Hypre_PreconditionedSolver__epv *_epv = NULL;
+  struct Hypre_PreconditionedSolver__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct Hypre_PreconditionedSolver__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetMaxIterations))(
+      _proxy_self->d_object,
+      *max_iterations
+    );
+}
+
+/*
+ * (Optional) Set the {\it logging level}, specifying the degree
+ * of additional informational data to be accumulated.  Does
+ * nothing by default (level = 0).  Other levels (if any) are
+ * implementation-specific.  Must be called before {\tt Setup}
+ * and {\tt Apply}.
+ * 
  */
 
 void
@@ -671,7 +717,12 @@ SIDLFortran77Symbol(hypre_preconditionedsolver_setlogging_f,HYPRE_PRECONDITIONED
 }
 
 /*
- * Method:  SetPrintLevel[]
+ * (Optional) Set the {\it print level}, specifying the degree
+ * of informational data to be printed either to the screen or
+ * to a file.  Does nothing by default (level=0).  Other levels
+ * (if any) are implementation-specific.  Must be called before
+ * {\tt Setup} and {\tt Apply}.
+ * 
  */
 
 void
@@ -696,7 +747,64 @@ SIDLFortran77Symbol(hypre_preconditionedsolver_setprintlevel_f,HYPRE_PRECONDITIO
 }
 
 /*
- * Method:  SetPreconditioner[]
+ * (Optional) Return the number of iterations taken.
+ * 
+ * RDF: New
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_preconditionedsolver_getnumiterations_f,HYPRE_PRECONDITIONEDSOLVER_GETNUMITERATIONS_F,Hypre_PreconditionedSolver_GetNumIterations_f)
+(
+  int64_t *self,
+  int32_t *num_iterations,
+  int32_t *retval
+)
+{
+  struct Hypre_PreconditionedSolver__epv *_epv = NULL;
+  struct Hypre_PreconditionedSolver__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct Hypre_PreconditionedSolver__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetNumIterations))(
+      _proxy_self->d_object,
+      num_iterations
+    );
+}
+
+/*
+ * (Optional) Return the norm of the relative residual.
+ * 
+ * RDF: New
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_preconditionedsolver_getrelresidualnorm_f,HYPRE_PRECONDITIONEDSOLVER_GETRELRESIDUALNORM_F,Hypre_PreconditionedSolver_GetRelResidualNorm_f)
+(
+  int64_t *self,
+  double *norm,
+  int32_t *retval
+)
+{
+  struct Hypre_PreconditionedSolver__epv *_epv = NULL;
+  struct Hypre_PreconditionedSolver__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct Hypre_PreconditionedSolver__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetRelResidualNorm))(
+      _proxy_self->d_object,
+      norm
+    );
+}
+
+/*
+ * Set the preconditioner.
+ * 
  */
 
 void
@@ -722,33 +830,6 @@ SIDLFortran77Symbol(hypre_preconditionedsolver_setpreconditioner_f,HYPRE_PRECOND
       _proxy_self->d_object,
       _proxy_s
     );
-}
-
-/*
- * Method:  GetPreconditionedResidual[]
- */
-
-void
-SIDLFortran77Symbol(hypre_preconditionedsolver_getpreconditionedresidual_f,HYPRE_PRECONDITIONEDSOLVER_GETPRECONDITIONEDRESIDUAL_F,Hypre_PreconditionedSolver_GetPreconditionedResidual_f)
-(
-  int64_t *self,
-  int64_t *r,
-  int32_t *retval
-)
-{
-  struct Hypre_PreconditionedSolver__epv *_epv = NULL;
-  struct Hypre_PreconditionedSolver__object* _proxy_self = NULL;
-  struct Hypre_Vector__object* _proxy_r = NULL;
-  _proxy_self =
-    (struct Hypre_PreconditionedSolver__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetPreconditionedResidual))(
-      _proxy_self->d_object,
-      &_proxy_r
-    );
-  *r = (ptrdiff_t)_proxy_r;
 }
 
 void

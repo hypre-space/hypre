@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_StructVector_IOR.c
- * Symbol:        Hypre.StructVector-v0.1.6
+ * Symbol:        Hypre.StructVector-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:30 PST
+ * SIDL Created:  20030306 17:05:12 PST
+ * Generated:     20030306 17:05:13 PST
  * Description:   Intermediate Object Representation for Hypre.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 427
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1139
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #include <stdlib.h>
@@ -61,10 +61,8 @@ static struct Hypre_StructVector__epv s_rem__hypre_structvector;
 static struct Hypre_ProblemDefinition__epv s_new__hypre_problemdefinition;
 static struct Hypre_ProblemDefinition__epv s_rem__hypre_problemdefinition;
 
-static struct Hypre_StructuredGridBuildVector__epv 
-  s_new__hypre_structuredgridbuildvector;
-static struct Hypre_StructuredGridBuildVector__epv 
-  s_rem__hypre_structuredgridbuildvector;
+static struct Hypre_StructBuildVector__epv s_new__hypre_structbuildvector;
+static struct Hypre_StructBuildVector__epv s_rem__hypre_structbuildvector;
 
 static struct Hypre_Vector__epv s_new__hypre_vector;
 static struct Hypre_Vector__epv s_rem__hypre_vector;
@@ -101,8 +99,8 @@ static void* ior_Hypre_StructVector__cast(
     cast = (void*) s0;
   } else if (!strcmp(name, "Hypre.ProblemDefinition")) {
     cast = (void*) &s0->d_hypre_problemdefinition;
-  } else if (!strcmp(name, "Hypre.StructuredGridBuildVector")) {
-    cast = (void*) &s0->d_hypre_structuredgridbuildvector;
+  } else if (!strcmp(name, "Hypre.StructBuildVector")) {
+    cast = (void*) &s0->d_hypre_structbuildvector;
   } else if (!strcmp(name, "Hypre.Vector")) {
     cast = (void*) &s0->d_hypre_vector;
   } else if (!strcmp(name, "SIDL.BaseClass")) {
@@ -136,14 +134,12 @@ static void Hypre_StructVector__init_epv(
   struct Hypre_StructVector__object* s0 = self;
   struct SIDL_BaseClass__object*     s1 = &s0->d_sidl_baseclass;
 
-  struct Hypre_StructVector__epv*              epv = &s_new__hypre_structvector;
-  struct Hypre_ProblemDefinition__epv*         e0  = 
-    &s_new__hypre_problemdefinition;
-  struct Hypre_StructuredGridBuildVector__epv* e1  = 
-    &s_new__hypre_structuredgridbuildvector;
-  struct Hypre_Vector__epv*                    e2  = &s_new__hypre_vector;
-  struct SIDL_BaseClass__epv*                  e3  = &s_new__sidl_baseclass;
-  struct SIDL_BaseInterface__epv*              e4  = &s_new__sidl_baseinterface;
+  struct Hypre_StructVector__epv*      epv = &s_new__hypre_structvector;
+  struct Hypre_ProblemDefinition__epv* e0  = &s_new__hypre_problemdefinition;
+  struct Hypre_StructBuildVector__epv* e1  = &s_new__hypre_structbuildvector;
+  struct Hypre_Vector__epv*            e2  = &s_new__hypre_vector;
+  struct SIDL_BaseClass__epv*          e3  = &s_new__sidl_baseclass;
+  struct SIDL_BaseInterface__epv*      e4  = &s_new__sidl_baseinterface;
 
   s_old__sidl_baseinterface = s1->d_sidl_baseinterface.d_epv;
   s_old__sidl_baseclass     = s1->d_epv;
@@ -347,15 +343,14 @@ void Hypre_StructVector__init(
   s1->d_sidl_baseinterface.d_epv = &s_new__sidl_baseinterface;
   s1->d_epv                      = &s_new__sidl_baseclass;
 
-  s0->d_hypre_problemdefinition.d_epv         = &s_new__hypre_problemdefinition;
-  s0->d_hypre_structuredgridbuildvector.d_epv = 
-    &s_new__hypre_structuredgridbuildvector;
-  s0->d_hypre_vector.d_epv                    = &s_new__hypre_vector;
-  s0->d_epv                                   = &s_new__hypre_structvector;
+  s0->d_hypre_problemdefinition.d_epv = &s_new__hypre_problemdefinition;
+  s0->d_hypre_structbuildvector.d_epv = &s_new__hypre_structbuildvector;
+  s0->d_hypre_vector.d_epv            = &s_new__hypre_vector;
+  s0->d_epv                           = &s_new__hypre_structvector;
 
   s0->d_hypre_problemdefinition.d_object = self;
 
-  s0->d_hypre_structuredgridbuildvector.d_object = self;
+  s0->d_hypre_structbuildvector.d_object = self;
 
   s0->d_hypre_vector.d_object = self;
 
@@ -675,14 +670,12 @@ remote_Hypre_StructVector_Axpy(
 
 static void Hypre_StructVector__init_remote_epv(void)
 {
-  struct Hypre_StructVector__epv*              epv = &s_rem__hypre_structvector;
-  struct Hypre_ProblemDefinition__epv*         e0  = 
-    &s_rem__hypre_problemdefinition;
-  struct Hypre_StructuredGridBuildVector__epv* e1  = 
-    &s_rem__hypre_structuredgridbuildvector;
-  struct Hypre_Vector__epv*                    e2  = &s_rem__hypre_vector;
-  struct SIDL_BaseClass__epv*                  e3  = &s_rem__sidl_baseclass;
-  struct SIDL_BaseInterface__epv*              e4  = &s_rem__sidl_baseinterface;
+  struct Hypre_StructVector__epv*      epv = &s_rem__hypre_structvector;
+  struct Hypre_ProblemDefinition__epv* e0  = &s_rem__hypre_problemdefinition;
+  struct Hypre_StructBuildVector__epv* e1  = &s_rem__hypre_structbuildvector;
+  struct Hypre_Vector__epv*            e2  = &s_rem__hypre_vector;
+  struct SIDL_BaseClass__epv*          e3  = &s_rem__sidl_baseclass;
+  struct SIDL_BaseInterface__epv*      e4  = &s_rem__sidl_baseinterface;
 
   epv->f__cast           = remote_Hypre_StructVector__cast;
   epv->f__delete         = remote_Hypre_StructVector__delete;
@@ -823,9 +816,8 @@ Hypre_StructVector__remote(const char *url)
   s0->d_hypre_problemdefinition.d_epv    = &s_rem__hypre_problemdefinition;
   s0->d_hypre_problemdefinition.d_object = NULL; /* FIXME */
 
-  s0->d_hypre_structuredgridbuildvector.d_epv    = 
-    &s_rem__hypre_structuredgridbuildvector;
-  s0->d_hypre_structuredgridbuildvector.d_object = NULL; /* FIXME */
+  s0->d_hypre_structbuildvector.d_epv    = &s_rem__hypre_structbuildvector;
+  s0->d_hypre_structbuildvector.d_object = NULL; /* FIXME */
 
   s0->d_hypre_vector.d_epv    = &s_rem__hypre_vector;
   s0->d_hypre_vector.d_object = NULL; /* FIXME */

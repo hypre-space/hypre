@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_GMRES_Impl.h
- * Symbol:        Hypre.GMRES-v0.1.6
+ * Symbol:        Hypre.GMRES-v0.1.7
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:36 PST
+ * SIDL Created:  20030306 17:05:12 PST
+ * Generated:     20030306 17:05:15 PST
  * Description:   Server-side implementation for Hypre.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 466
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1262
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_GMRES_Impl_h
@@ -107,28 +107,16 @@ impl_Hypre_GMRES_SetCommunicator(
   void*);
 
 extern int32_t
-impl_Hypre_GMRES_GetDoubleValue(
+impl_Hypre_GMRES_SetIntParameter(
   Hypre_GMRES,
   const char*,
-  double*);
-
-extern int32_t
-impl_Hypre_GMRES_GetIntValue(
-  Hypre_GMRES,
-  const char*,
-  int32_t*);
+  int32_t);
 
 extern int32_t
 impl_Hypre_GMRES_SetDoubleParameter(
   Hypre_GMRES,
   const char*,
   double);
-
-extern int32_t
-impl_Hypre_GMRES_SetIntParameter(
-  Hypre_GMRES,
-  const char*,
-  int32_t);
 
 extern int32_t
 impl_Hypre_GMRES_SetStringParameter(
@@ -149,6 +137,18 @@ impl_Hypre_GMRES_SetDoubleArrayParameter(
   struct SIDL_double__array*);
 
 extern int32_t
+impl_Hypre_GMRES_GetIntValue(
+  Hypre_GMRES,
+  const char*,
+  int32_t*);
+
+extern int32_t
+impl_Hypre_GMRES_GetDoubleValue(
+  Hypre_GMRES,
+  const char*,
+  double*);
+
+extern int32_t
 impl_Hypre_GMRES_Setup(
   Hypre_GMRES,
   Hypre_Vector,
@@ -166,9 +166,14 @@ impl_Hypre_GMRES_SetOperator(
   Hypre_Operator);
 
 extern int32_t
-impl_Hypre_GMRES_GetResidual(
+impl_Hypre_GMRES_SetTolerance(
   Hypre_GMRES,
-  Hypre_Vector*);
+  double);
+
+extern int32_t
+impl_Hypre_GMRES_SetMaxIterations(
+  Hypre_GMRES,
+  int32_t);
 
 extern int32_t
 impl_Hypre_GMRES_SetLogging(
@@ -181,14 +186,19 @@ impl_Hypre_GMRES_SetPrintLevel(
   int32_t);
 
 extern int32_t
+impl_Hypre_GMRES_GetNumIterations(
+  Hypre_GMRES,
+  int32_t*);
+
+extern int32_t
+impl_Hypre_GMRES_GetRelResidualNorm(
+  Hypre_GMRES,
+  double*);
+
+extern int32_t
 impl_Hypre_GMRES_SetPreconditioner(
   Hypre_GMRES,
   Hypre_Solver);
-
-extern int32_t
-impl_Hypre_GMRES_GetPreconditionedResidual(
-  Hypre_GMRES,
-  Hypre_Vector*);
 
 #ifdef __cplusplus
 }

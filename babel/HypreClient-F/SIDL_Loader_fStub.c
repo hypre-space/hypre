@@ -3,8 +3,8 @@
  * Symbol:        SIDL.Loader-v0.8.1
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 13:48:00 PST
- * Generated:     20030210 16:05:58 PST
+ * SIDL Created:  20030205 11:28:53 PST
+ * Generated:     20030306 17:05:27 PST
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for SIDL.Loader
@@ -36,7 +36,7 @@
  * 
  * babel-version = 0.8.0
  * source-line   = 261
- * source-url    = file:/home/painter/babel-0.8.0/share/../runtime/sidl/sidl.sidl
+ * source-url    = file:/usr/casc/babel/tarballs/babel-0.8.0/casc-solaris-gcc2.95/share/../../runtime/sidl/sidl.sidl
  */
 
 /*

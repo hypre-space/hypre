@@ -1,23 +1,23 @@
 C       
 C       File:          Hypre_StructVector_Impl.f
-C       Symbol:        Hypre.StructVector-v0.1.6
+C       Symbol:        Hypre.StructVector-v0.1.7
 C       Symbol Type:   class
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030210 16:05:50 PST
-C       Generated:     20030210 16:05:55 PST
+C       SIDL Created:  20030306 17:05:23 PST
+C       Generated:     20030306 17:05:26 PST
 C       Description:   Client-side documentation text for Hypre.StructVector
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
-C       source-line   = 427
-C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+C       source-line   = 1139
+C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
 
 C       
-C       Symbol "Hypre.StructVector" (version 0.1.6)
+C       Symbol "Hypre.StructVector" (version 0.1.7)
 C       
 
 
@@ -155,7 +155,8 @@ C       out SIDL.ClassInfo retval
 
 
 C       
-C       Method:  SetCommunicator[]
+C       Set the MPI Communicator.
+C       
 C       
 
         subroutine Hypre_StructVector_SetCommunicator_f(self, mpi_comm,
@@ -175,7 +176,6 @@ C       Prepare an object for setting coefficient values, whether for
 C       the first time or subsequently.
 C       
 C       
-C       
 
         subroutine Hypre_StructVector_Initialize_f(self, retval)
         implicit none
@@ -187,11 +187,11 @@ C       out int retval
 
 
 C       
-C       Finalize the construction of an object before using, either for
-C       the first time or on subsequent uses. "Initialize" and "Assemble"
-C       always appear in a matched set, with Initialize preceding Assemble. Values
-C       can only be set in between a call to Initialize and Assemble.
-C       
+C       Finalize the construction of an object before using, either
+C       for the first time or on subsequent uses. {\tt Initialize}
+C       and {\tt Assemble} always appear in a matched set, with
+C       Initialize preceding Assemble. Values can only be set in
+C       between a call to Initialize and Assemble.
 C       
 C       
 
@@ -205,14 +205,15 @@ C       out int retval
 
 
 C       
-C       The problem definition interface is a "builder" that creates an object
-C       that contains the problem definition information, e.g. a matrix. To
-C       perform subsequent operations with that object, it must be returned from
-C       the problem definition object. "GetObject" performs this function.
-C       <note>At compile time, the type of the returned object is unknown.
-C       Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
-C       be used on the returned object to convert it into a known type.</note>
-C       
+C       The problem definition interface is a {\it builder} that
+C       creates an object that contains the problem definition
+C       information, e.g. a matrix. To perform subsequent operations
+C       with that object, it must be returned from the problem
+C       definition object. {\tt GetObject} performs this function.
+C       At compile time, the type of the returned object is unknown.
+C       Thus, the returned type is a SIDL.BaseInterface.
+C       QueryInterface or Cast must be used on the returned object to
+C       convert it into a known type.
 C       
 C       
 
@@ -297,7 +298,8 @@ C       out int retval
 
 
 C       
-C       y <- 0 (where y=self)
+C       Set {\tt self} to 0.
+C       
 C       
 
         subroutine Hypre_StructVector_Clear_f(self, retval)
@@ -310,7 +312,8 @@ C       out int retval
 
 
 C       
-C       y <- x 
+C       Copy x into {\tt self}.
+C       
 C       
 
         subroutine Hypre_StructVector_Copy_f(self, x, retval)
@@ -325,7 +328,12 @@ C       out int retval
 
 
 C       
-C       create an x compatible with y
+C       Create an {\tt x} compatible with {\tt self}.
+C       
+C       NOTE: When this method is used in an inherited class, the
+C       cloned {\tt Vector} object can be cast to an object with the
+C       inherited class type.
+C       
 C       
 
         subroutine Hypre_StructVector_Clone_f(self, x, retval)
@@ -340,7 +348,8 @@ C       out int retval
 
 
 C       
-C       y <- a*y 
+C       Scale {\self} by {\tt a}.
+C       
 C       
 
         subroutine Hypre_StructVector_Scale_f(self, a, retval)
@@ -355,7 +364,8 @@ C       out int retval
 
 
 C       
-C       d <- (y,x)
+C       Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+C       
 C       
 
         subroutine Hypre_StructVector_Dot_f(self, x, d, retval)
@@ -372,7 +382,8 @@ C       out int retval
 
 
 C       
-C       y <- a*x + y
+C       Add {\tt a}*{\tt x} to {\tt self}.
+C       
 C       
 
         subroutine Hypre_StructVector_Axpy_f(self, a, x, retval)

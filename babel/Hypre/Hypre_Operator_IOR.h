@@ -1,17 +1,17 @@
 /*
  * File:          Hypre_Operator_IOR.h
- * Symbol:        Hypre.Operator-v0.1.6
+ * Symbol:        Hypre.Operator-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:31 PST
+ * SIDL Created:  20030306 17:05:11 PST
+ * Generated:     20030306 17:05:13 PST
  * Description:   Intermediate Object Representation for Hypre.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 326
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 604
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_Operator_IOR_h
@@ -25,12 +25,13 @@ extern "C" {
 #endif
 
 /*
- * Symbol "Hypre.Operator" (version 0.1.6)
+ * Symbol "Hypre.Operator" (version 0.1.7)
  * 
- * An Operator is anything that maps one Vector to another.
- * The terms "Setup" and "Apply" are reserved for Operators.
+ * An Operator is anything that maps one Vector to another.  The
+ * terms {\tt Setup} and {\tt Apply} are reserved for Operators.
  * The implementation is allowed to assume that supplied parameter
  * arrays will not be destroyed.
+ * 
  */
 
 struct Hypre_Operator__array;
@@ -73,26 +74,18 @@ struct Hypre_Operator__epv {
   SIDL_bool (*f_isType)(
     void* self,
     const char* name);
-  /* Methods introduced in Hypre.Operator-v0.1.6 */
+  /* Methods introduced in Hypre.Operator-v0.1.7 */
   int32_t (*f_SetCommunicator)(
     void* self,
-    void* comm);
-  int32_t (*f_GetDoubleValue)(
-    void* self,
-    const char* name,
-    double* value);
-  int32_t (*f_GetIntValue)(
-    void* self,
-    const char* name,
-    int32_t* value);
-  int32_t (*f_SetDoubleParameter)(
-    void* self,
-    const char* name,
-    double value);
+    void* mpi_comm);
   int32_t (*f_SetIntParameter)(
     void* self,
     const char* name,
     int32_t value);
+  int32_t (*f_SetDoubleParameter)(
+    void* self,
+    const char* name,
+    double value);
   int32_t (*f_SetStringParameter)(
     void* self,
     const char* name,
@@ -105,6 +98,14 @@ struct Hypre_Operator__epv {
     void* self,
     const char* name,
     struct SIDL_double__array* value);
+  int32_t (*f_GetIntValue)(
+    void* self,
+    const char* name,
+    int32_t* value);
+  int32_t (*f_GetDoubleValue)(
+    void* self,
+    const char* name,
+    double* value);
   int32_t (*f_Setup)(
     void* self,
     struct Hypre_Vector__object* b,

@@ -1,21 +1,21 @@
 /*
  * File:          Hypre_IJBuildVector_fStub.c
- * Symbol:        Hypre.IJBuildVector-v0.1.6
+ * Symbol:        Hypre.IJBuildVector-v0.1.7
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:49 PST
- * Generated:     20030210 16:05:57 PST
+ * SIDL Created:  20030306 17:05:23 PST
+ * Generated:     20030306 17:05:26 PST
  * Description:   Client-side glue code for Hypre.IJBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 249
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+ * source-line   = 211
+ * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
  */
 
 /*
- * Symbol "Hypre.IJBuildVector" (version 0.1.6)
+ * Symbol "Hypre.IJBuildVector" (version 0.1.7)
  */
 
 #include <stddef.h>
@@ -234,7 +234,8 @@ SIDLFortran77Symbol(hypre_ijbuildvector_istype_f,HYPRE_IJBUILDVECTOR_ISTYPE_F,Hy
 }
 
 /*
- * Method:  SetCommunicator[]
+ * Set the MPI Communicator.
+ * 
  */
 
 void
@@ -266,7 +267,6 @@ SIDLFortran77Symbol(hypre_ijbuildvector_setcommunicator_f,HYPRE_IJBUILDVECTOR_SE
  * Prepare an object for setting coefficient values, whether for
  * the first time or subsequently.
  * 
- * 
  */
 
 void
@@ -289,11 +289,11 @@ SIDLFortran77Symbol(hypre_ijbuildvector_initialize_f,HYPRE_IJBUILDVECTOR_INITIAL
 }
 
 /*
- * Finalize the construction of an object before using, either for
- * the first time or on subsequent uses. "Initialize" and "Assemble"
- * always appear in a matched set, with Initialize preceding Assemble. Values
- * can only be set in between a call to Initialize and Assemble.
- * 
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
  * 
  */
 
@@ -317,14 +317,15 @@ SIDLFortran77Symbol(hypre_ijbuildvector_assemble_f,HYPRE_IJBUILDVECTOR_ASSEMBLE_
 }
 
 /*
- * The problem definition interface is a "builder" that creates an object
- * that contains the problem definition information, e.g. a matrix. To
- * perform subsequent operations with that object, it must be returned from
- * the problem definition object. "GetObject" performs this function.
- * <note>At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
- * be used on the returned object to convert it into a known type.</note>
- * 
+ * The problem definition interface is a {\it builder} that
+ * creates an object that contains the problem definition
+ * information, e.g. a matrix. To perform subsequent operations
+ * with that object, it must be returned from the problem
+ * definition object. {\tt GetObject} performs this function.
+ * At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a SIDL.BaseInterface.
+ * QueryInterface or Cast must be used on the returned object to
+ * convert it into a known type.
  * 
  */
 
@@ -352,242 +353,25 @@ SIDLFortran77Symbol(hypre_ijbuildvector_getobject_f,HYPRE_IJBUILDVECTOR_GETOBJEC
 }
 
 /*
- * Method:  SetGlobalSize[]
- */
-
-void
-SIDLFortran77Symbol(hypre_ijbuildvector_setglobalsize_f,HYPRE_IJBUILDVECTOR_SETGLOBALSIZE_F,Hypre_IJBuildVector_SetGlobalSize_f)
-(
-  int64_t *self,
-  int32_t *n,
-  int32_t *retval
-)
-{
-  struct Hypre_IJBuildVector__epv *_epv = NULL;
-  struct Hypre_IJBuildVector__object* _proxy_self = NULL;
-  _proxy_self =
-    (struct Hypre_IJBuildVector__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetGlobalSize))(
-      _proxy_self->d_object,
-      *n
-    );
-}
-
-/*
- * Method:  SetPartitioning[]
- */
-
-void
-SIDLFortran77Symbol(hypre_ijbuildvector_setpartitioning_f,HYPRE_IJBUILDVECTOR_SETPARTITIONING_F,Hypre_IJBuildVector_SetPartitioning_f)
-(
-  int64_t *self,
-  int64_t *partitioning,
-  int32_t *retval
-)
-{
-  struct Hypre_IJBuildVector__epv *_epv = NULL;
-  struct Hypre_IJBuildVector__object* _proxy_self = NULL;
-  struct SIDL_int__array* _proxy_partitioning = NULL;
-  _proxy_self =
-    (struct Hypre_IJBuildVector__object*)
-    (ptrdiff_t)(*self);
-  _proxy_partitioning =
-    (struct SIDL_int__array*)
-    (ptrdiff_t)(*partitioning);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetPartitioning))(
-      _proxy_self->d_object,
-      _proxy_partitioning
-    );
-}
-
-/*
- * Method:  SetLocalComponents[]
- */
-
-void
-SIDLFortran77Symbol(hypre_ijbuildvector_setlocalcomponents_f,HYPRE_IJBUILDVECTOR_SETLOCALCOMPONENTS_F,Hypre_IJBuildVector_SetLocalComponents_f)
-(
-  int64_t *self,
-  int32_t *num_values,
-  int64_t *glob_vec_indices,
-  int64_t *value_indices,
-  int64_t *values,
-  int32_t *retval
-)
-{
-  struct Hypre_IJBuildVector__epv *_epv = NULL;
-  struct Hypre_IJBuildVector__object* _proxy_self = NULL;
-  struct SIDL_int__array* _proxy_glob_vec_indices = NULL;
-  struct SIDL_int__array* _proxy_value_indices = NULL;
-  struct SIDL_double__array* _proxy_values = NULL;
-  _proxy_self =
-    (struct Hypre_IJBuildVector__object*)
-    (ptrdiff_t)(*self);
-  _proxy_glob_vec_indices =
-    (struct SIDL_int__array*)
-    (ptrdiff_t)(*glob_vec_indices);
-  _proxy_value_indices =
-    (struct SIDL_int__array*)
-    (ptrdiff_t)(*value_indices);
-  _proxy_values =
-    (struct SIDL_double__array*)
-    (ptrdiff_t)(*values);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetLocalComponents))(
-      _proxy_self->d_object,
-      *num_values,
-      _proxy_glob_vec_indices,
-      _proxy_value_indices,
-      _proxy_values
-    );
-}
-
-/*
- * Method:  AddtoLocalComponents[]
- */
-
-void
-SIDLFortran77Symbol(hypre_ijbuildvector_addtolocalcomponents_f,HYPRE_IJBUILDVECTOR_ADDTOLOCALCOMPONENTS_F,Hypre_IJBuildVector_AddtoLocalComponents_f)
-(
-  int64_t *self,
-  int32_t *num_values,
-  int64_t *glob_vec_indices,
-  int64_t *value_indices,
-  int64_t *values,
-  int32_t *retval
-)
-{
-  struct Hypre_IJBuildVector__epv *_epv = NULL;
-  struct Hypre_IJBuildVector__object* _proxy_self = NULL;
-  struct SIDL_int__array* _proxy_glob_vec_indices = NULL;
-  struct SIDL_int__array* _proxy_value_indices = NULL;
-  struct SIDL_double__array* _proxy_values = NULL;
-  _proxy_self =
-    (struct Hypre_IJBuildVector__object*)
-    (ptrdiff_t)(*self);
-  _proxy_glob_vec_indices =
-    (struct SIDL_int__array*)
-    (ptrdiff_t)(*glob_vec_indices);
-  _proxy_value_indices =
-    (struct SIDL_int__array*)
-    (ptrdiff_t)(*value_indices);
-  _proxy_values =
-    (struct SIDL_double__array*)
-    (ptrdiff_t)(*values);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_AddtoLocalComponents))(
-      _proxy_self->d_object,
-      *num_values,
-      _proxy_glob_vec_indices,
-      _proxy_value_indices,
-      _proxy_values
-    );
-}
-
-/*
- * Method:  SetLocalComponentsInBlock[]
- */
-
-void
-SIDLFortran77Symbol(hypre_ijbuildvector_setlocalcomponentsinblock_f,HYPRE_IJBUILDVECTOR_SETLOCALCOMPONENTSINBLOCK_F,Hypre_IJBuildVector_SetLocalComponentsInBlock_f)
-(
-  int64_t *self,
-  int32_t *glob_vec_index_start,
-  int32_t *glob_vec_index_stop,
-  int64_t *value_indices,
-  int64_t *values,
-  int32_t *retval
-)
-{
-  struct Hypre_IJBuildVector__epv *_epv = NULL;
-  struct Hypre_IJBuildVector__object* _proxy_self = NULL;
-  struct SIDL_int__array* _proxy_value_indices = NULL;
-  struct SIDL_double__array* _proxy_values = NULL;
-  _proxy_self =
-    (struct Hypre_IJBuildVector__object*)
-    (ptrdiff_t)(*self);
-  _proxy_value_indices =
-    (struct SIDL_int__array*)
-    (ptrdiff_t)(*value_indices);
-  _proxy_values =
-    (struct SIDL_double__array*)
-    (ptrdiff_t)(*values);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetLocalComponentsInBlock))(
-      _proxy_self->d_object,
-      *glob_vec_index_start,
-      *glob_vec_index_stop,
-      _proxy_value_indices,
-      _proxy_values
-    );
-}
-
-/*
- * Method:  AddToLocalComponentsInBlock[]
- */
-
-void
-SIDLFortran77Symbol(hypre_ijbuildvector_addtolocalcomponentsinblock_f,HYPRE_IJBUILDVECTOR_ADDTOLOCALCOMPONENTSINBLOCK_F,Hypre_IJBuildVector_AddToLocalComponentsInBlock_f)
-(
-  int64_t *self,
-  int32_t *glob_vec_index_start,
-  int32_t *glob_vec_index_stop,
-  int64_t *value_indices,
-  int64_t *values,
-  int32_t *retval
-)
-{
-  struct Hypre_IJBuildVector__epv *_epv = NULL;
-  struct Hypre_IJBuildVector__object* _proxy_self = NULL;
-  struct SIDL_int__array* _proxy_value_indices = NULL;
-  struct SIDL_double__array* _proxy_values = NULL;
-  _proxy_self =
-    (struct Hypre_IJBuildVector__object*)
-    (ptrdiff_t)(*self);
-  _proxy_value_indices =
-    (struct SIDL_int__array*)
-    (ptrdiff_t)(*value_indices);
-  _proxy_values =
-    (struct SIDL_double__array*)
-    (ptrdiff_t)(*values);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_AddToLocalComponentsInBlock))(
-      _proxy_self->d_object,
-      *glob_vec_index_start,
-      *glob_vec_index_stop,
-      _proxy_value_indices,
-      _proxy_values
-    );
-}
-
-/*
- * Create a vector object.  Each process owns some unique consecutive
- * range of vector unknowns, indicated by the global indices {\tt
- * jlower} and {\tt jupper}.  The data is required to be such that the
- * value of {\tt jlower} on any process $p$ be exactly one more than
- * the value of {\tt jupper} on process $p-1$.  Note that the first
- * index of the global vector may start with any integer value.  In
+ * Set the local range for a vector object.  Each process owns
+ * some unique consecutive range of vector unknowns, indicated
+ * by the global indices {\tt jlower} and {\tt jupper}.  The
+ * data is required to be such that the value of {\tt jlower} on
+ * any process $p$ be exactly one more than the value of {\tt
+ * jupper} on process $p-1$.  Note that the first index of the
+ * global vector may start with any integer value.  In
  * particular, one may use zero- or one-based indexing.
  * 
  * Collective.
  * 
+ * RDF: Changed name from 'Create' (x)
  * 
  */
 
 void
-SIDLFortran77Symbol(hypre_ijbuildvector_create_f,HYPRE_IJBUILDVECTOR_CREATE_F,Hypre_IJBuildVector_Create_f)
+SIDLFortran77Symbol(hypre_ijbuildvector_setlocalrange_f,HYPRE_IJBUILDVECTOR_SETLOCALRANGE_F,Hypre_IJBuildVector_SetLocalRange_f)
 (
   int64_t *self,
-  int64_t *comm,
   int32_t *jlower,
   int32_t *jupper,
   int32_t *retval
@@ -595,32 +379,26 @@ SIDLFortran77Symbol(hypre_ijbuildvector_create_f,HYPRE_IJBUILDVECTOR_CREATE_F,Hy
 {
   struct Hypre_IJBuildVector__epv *_epv = NULL;
   struct Hypre_IJBuildVector__object* _proxy_self = NULL;
-  void* _proxy_comm = NULL;
   _proxy_self =
     (struct Hypre_IJBuildVector__object*)
     (ptrdiff_t)(*self);
-  _proxy_comm =
-    (void*)
-    (ptrdiff_t)(*comm);
   _epv = _proxy_self->d_epv;
   *retval = 
-    (*(_epv->f_Create))(
+    (*(_epv->f_SetLocalRange))(
       _proxy_self->d_object,
-      _proxy_comm,
       *jlower,
       *jupper
     );
 }
 
 /*
- * Sets values in vector.  The arrays {\tt values} and {\tt indices}
- * are of dimension {\tt nvalues} and contain the vector values to be
- * set and the corresponding global vector indices, respectively.
- * Erases any previous values at the specified locations and replaces
- * them with new ones.
+ * Sets values in vector.  The arrays {\tt values} and {\tt
+ * indices} are of dimension {\tt nvalues} and contain the
+ * vector values to be set and the corresponding global vector
+ * indices, respectively.  Erases any previous values at the
+ * specified locations and replaces them with new ones.
  * 
  * Not collective.
- * 
  * 
  */
 
@@ -659,10 +437,9 @@ SIDLFortran77Symbol(hypre_ijbuildvector_setvalues_f,HYPRE_IJBUILDVECTOR_SETVALUE
 
 /*
  * Adds to values in vector.  Usage details are analogous to
- * \Ref{SetValues}.
+ * {\tt SetValues}.
  * 
  * Not collective.
- * 
  * 
  */
 
@@ -700,8 +477,117 @@ SIDLFortran77Symbol(hypre_ijbuildvector_addtovalues_f,HYPRE_IJBUILDVECTOR_ADDTOV
 }
 
 /*
- * Read the vector from file.  This is mainly for debugging purposes.
+ * Returns range of the part of the vector owned by this
+ * processor.
  * 
+ * RDF: New (x)
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_ijbuildvector_getlocalrange_f,HYPRE_IJBUILDVECTOR_GETLOCALRANGE_F,Hypre_IJBuildVector_GetLocalRange_f)
+(
+  int64_t *self,
+  int32_t *jlower,
+  int32_t *jupper,
+  int32_t *retval
+)
+{
+  struct Hypre_IJBuildVector__epv *_epv = NULL;
+  struct Hypre_IJBuildVector__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct Hypre_IJBuildVector__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetLocalRange))(
+      _proxy_self->d_object,
+      jlower,
+      jupper
+    );
+}
+
+/*
+ * Gets values in vector.  Usage details are analogous to {\tt
+ * SetValues}.
+ * 
+ * Not collective.
+ * 
+ * RDF: New (x)
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_ijbuildvector_getvalues_f,HYPRE_IJBUILDVECTOR_GETVALUES_F,Hypre_IJBuildVector_GetValues_f)
+(
+  int64_t *self,
+  int32_t *nvalues,
+  int64_t *indices,
+  int64_t *values,
+  int32_t *retval
+)
+{
+  struct Hypre_IJBuildVector__epv *_epv = NULL;
+  struct Hypre_IJBuildVector__object* _proxy_self = NULL;
+  struct SIDL_int__array* _proxy_indices = NULL;
+  struct SIDL_double__array* _proxy_values = NULL;
+  _proxy_self =
+    (struct Hypre_IJBuildVector__object*)
+    (ptrdiff_t)(*self);
+  _proxy_indices =
+    (struct SIDL_int__array*)
+    (ptrdiff_t)(*indices);
+  _proxy_values =
+    (struct SIDL_double__array*)
+    (ptrdiff_t)(*values);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetValues))(
+      _proxy_self->d_object,
+      *nvalues,
+      _proxy_indices,
+      &_proxy_values
+    );
+  *values = (ptrdiff_t)_proxy_values;
+}
+
+/*
+ * Print the vector to file.  This is mainly for debugging
+ * purposes.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(hypre_ijbuildvector_print_f,HYPRE_IJBUILDVECTOR_PRINT_F,Hypre_IJBuildVector_Print_f)
+(
+  int64_t *self,
+  SIDL_F77_String filename
+  SIDL_F77_STR_NEAR_LEN_DECL(filename),
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(filename)
+)
+{
+  struct Hypre_IJBuildVector__epv *_epv = NULL;
+  struct Hypre_IJBuildVector__object* _proxy_self = NULL;
+  char* _proxy_filename = NULL;
+  _proxy_self =
+    (struct Hypre_IJBuildVector__object*)
+    (ptrdiff_t)(*self);
+  _proxy_filename =
+    SIDL_copy_fortran_str(SIDL_F77_STR(filename),
+      SIDL_F77_STR_LEN(filename));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Print))(
+      _proxy_self->d_object,
+      _proxy_filename
+    );
+  free((void *)_proxy_filename);
+}
+
+/*
+ * Read the vector from file.  This is mainly for debugging
+ * purposes.
  * 
  */
 
@@ -735,39 +621,6 @@ SIDLFortran77Symbol(hypre_ijbuildvector_read_f,HYPRE_IJBUILDVECTOR_READ_F,Hypre_
       _proxy_self->d_object,
       _proxy_filename,
       _proxy_comm
-    );
-  free((void *)_proxy_filename);
-}
-
-/*
- * Print the vector to file.  This is mainly for debugging purposes.
- * 
- */
-
-void
-SIDLFortran77Symbol(hypre_ijbuildvector_print_f,HYPRE_IJBUILDVECTOR_PRINT_F,Hypre_IJBuildVector_Print_f)
-(
-  int64_t *self,
-  SIDL_F77_String filename
-  SIDL_F77_STR_NEAR_LEN_DECL(filename),
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(filename)
-)
-{
-  struct Hypre_IJBuildVector__epv *_epv = NULL;
-  struct Hypre_IJBuildVector__object* _proxy_self = NULL;
-  char* _proxy_filename = NULL;
-  _proxy_self =
-    (struct Hypre_IJBuildVector__object*)
-    (ptrdiff_t)(*self);
-  _proxy_filename =
-    SIDL_copy_fortran_str(SIDL_F77_STR(filename),
-      SIDL_F77_STR_LEN(filename));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_Print))(
-      _proxy_self->d_object,
-      _proxy_filename
     );
   free((void *)_proxy_filename);
 }
