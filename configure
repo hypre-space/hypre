@@ -26267,7 +26267,7 @@ if test -d babel || test "$casc_using_babel" = "yes" ; then
                                           ac_config_files="$ac_config_files babel/Makefile babel/bHYPRE/Makefile babel/bHYPREClient-C/Makefile babel/bHYPREClient-F/Makefile"
 
 fi
-                                                                                                                                                                                                                                                                                                  ac_config_files="$ac_config_files blas/Makefile config/Makefile distributed_ls/Makefile distributed_ls/Euclid/Makefile distributed_ls/ParaSails/Makefile distributed_ls/pilut/Makefile distributed_matrix/Makefile krylov/Makefile lapack/Makefile lib/Makefile matrix_matrix/Makefile parcsr_es/Makefile parcsr_es/LOBPCG/Makefile parcsr_ls/Makefile parcsr_mv/Makefile seq_mv/Makefile sstruct_ls/Makefile sstruct_mv/Makefile struct_ls/Makefile struct_mv/Makefile test/Makefile test/AUTOTEST/Makefile test/TEST_fei/Makefile test/TEST_ij/Makefile test/TEST_ij_es/Makefile test/TEST_sstruct/Makefile test/TEST_struct/Makefile test/TEST_timing/Makefile utilities/Makefile"
+                                                                                                                                                                                                                                                                                                                                                              ac_config_files="$ac_config_files blas/Makefile config/Makefile distributed_ls/Makefile distributed_ls/Euclid/Makefile distributed_ls/ParaSails/Makefile distributed_ls/pilut/Makefile distributed_matrix/Makefile eigensolvers/Makefile eigensolvers/krylov/Makefile eigensolvers/lib/Makefile eigensolvers/multivector/Makefile eigensolvers/parcsr_ls/Makefile eigensolvers/sstruct_ls/Makefile eigensolvers/struct_ls/Makefile eigensolvers/utilities/Makefile krylov/Makefile lapack/Makefile lib/Makefile matrix_matrix/Makefile parcsr_ls/Makefile parcsr_mv/Makefile seq_mv/Makefile sstruct_ls/Makefile sstruct_mv/Makefile struct_ls/Makefile struct_mv/Makefile test/Makefile test/AUTOTEST/Makefile test/TEST_fei/Makefile test/TEST_ij/Makefile test/TEST_ij_es/Makefile test/TEST_sstruct/Makefile test/TEST_struct/Makefile test/TEST_timing/Makefile utilities/Makefile"
 
 #if test "$casc_using_mli" = "yes"; then
 #  if test -d mli; then
@@ -26929,12 +26929,18 @@ do
   "distributed_ls/ParaSails/Makefile" ) CONFIG_FILES="$CONFIG_FILES distributed_ls/ParaSails/Makefile" ;;
   "distributed_ls/pilut/Makefile" ) CONFIG_FILES="$CONFIG_FILES distributed_ls/pilut/Makefile" ;;
   "distributed_matrix/Makefile" ) CONFIG_FILES="$CONFIG_FILES distributed_matrix/Makefile" ;;
+  "eigensolvers/Makefile" ) CONFIG_FILES="$CONFIG_FILES eigensolvers/Makefile" ;;
+  "eigensolvers/krylov/Makefile" ) CONFIG_FILES="$CONFIG_FILES eigensolvers/krylov/Makefile" ;;
+  "eigensolvers/lib/Makefile" ) CONFIG_FILES="$CONFIG_FILES eigensolvers/lib/Makefile" ;;
+  "eigensolvers/multivector/Makefile" ) CONFIG_FILES="$CONFIG_FILES eigensolvers/multivector/Makefile" ;;
+  "eigensolvers/parcsr_ls/Makefile" ) CONFIG_FILES="$CONFIG_FILES eigensolvers/parcsr_ls/Makefile" ;;
+  "eigensolvers/sstruct_ls/Makefile" ) CONFIG_FILES="$CONFIG_FILES eigensolvers/sstruct_ls/Makefile" ;;
+  "eigensolvers/struct_ls/Makefile" ) CONFIG_FILES="$CONFIG_FILES eigensolvers/struct_ls/Makefile" ;;
+  "eigensolvers/utilities/Makefile" ) CONFIG_FILES="$CONFIG_FILES eigensolvers/utilities/Makefile" ;;
   "krylov/Makefile" ) CONFIG_FILES="$CONFIG_FILES krylov/Makefile" ;;
   "lapack/Makefile" ) CONFIG_FILES="$CONFIG_FILES lapack/Makefile" ;;
   "lib/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
   "matrix_matrix/Makefile" ) CONFIG_FILES="$CONFIG_FILES matrix_matrix/Makefile" ;;
-  "parcsr_es/Makefile" ) CONFIG_FILES="$CONFIG_FILES parcsr_es/Makefile" ;;
-  "parcsr_es/LOBPCG/Makefile" ) CONFIG_FILES="$CONFIG_FILES parcsr_es/LOBPCG/Makefile" ;;
   "parcsr_ls/Makefile" ) CONFIG_FILES="$CONFIG_FILES parcsr_ls/Makefile" ;;
   "parcsr_mv/Makefile" ) CONFIG_FILES="$CONFIG_FILES parcsr_mv/Makefile" ;;
   "seq_mv/Makefile" ) CONFIG_FILES="$CONFIG_FILES seq_mv/Makefile" ;;
