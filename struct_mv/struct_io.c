@@ -87,6 +87,90 @@ hypre_PrintBoxArrayData( FILE            *file,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PrintCCVDBoxArrayData
+ * Note that the the stencil loop (j) is _outside_ the space index loop (datai),
+ * unlie hypre_PrintBoxArrayData (there is no j loop in hypre_PrintCCBoxArrayData)
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PrintCCVDBoxArrayData( FILE            *file,
+                         hypre_BoxArray  *box_array,
+                         hypre_BoxArray  *data_space,
+                         int              num_values,
+                             int              center_rank,
+                         double          *data       )
+{
+   int              ierr = 0;
+
+   hypre_Box       *box;
+   hypre_Box       *data_box;
+                   
+   int              data_box_volume;
+   int              datai;
+                   
+   hypre_Index      loop_size;
+   hypre_IndexRef   start;
+   hypre_Index      stride;
+                   
+   int              i, j;
+   int              loopi, loopj, loopk;
+
+   /*----------------------------------------
+    * Print data
+    *----------------------------------------*/
+
+   hypre_SetIndex(stride, 1, 1, 1);
+
+   hypre_ForBoxI(i, box_array)
+      {
+         box      = hypre_BoxArrayBox(box_array, i);
+         data_box = hypre_BoxArrayBox(data_space, i);
+
+         start = hypre_BoxIMin(box);
+         data_box_volume = hypre_BoxVolume(data_box);
+
+         hypre_BoxGetSize(box, loop_size);
+
+         for (j = 0; j < num_values; j++)
+         {
+            if ( j!=center_rank )
+            {
+               datai = hypre_CCBoxIndexRank_noargs();
+               fprintf(file, "%d: (%d, %d, %d; %d) %e\n",
+                       i,
+                       hypre_IndexX(start),
+                       hypre_IndexY(start),
+                       hypre_IndexZ(start),
+                       j,
+                       data[datai]);
+               ++data;
+            }
+            else
+            {
+               hypre_BoxLoop1Begin(loop_size,
+                                   data_box, start, stride, datai);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
+#include "hypre_box_smp_forloop.h"
+               hypre_BoxLoop1For(loopi, loopj, loopk, datai)
+                  {
+                     fprintf(file, "%d: (%d, %d, %d; %d) %e\n",
+                             i,
+                             hypre_IndexX(start) + loopi,
+                             hypre_IndexY(start) + loopj,
+                             hypre_IndexZ(start) + loopk,
+                             j,
+                             data[datai]);
+                  }
+               hypre_BoxLoop1End(datai);
+               data += data_box_volume;
+            }
+         }
+      }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_PrintCCBoxArrayData
  * same as hypre_PrintBoxArrayData but for constant coefficients
  *--------------------------------------------------------------------------*/
@@ -139,6 +223,7 @@ hypre_PrintCCBoxArrayData( FILE            *file,
 
 /*--------------------------------------------------------------------------
  * hypre_ReadBoxArrayData
+ * >>> This does not work for constant_coefficient = 1 or 2
  *--------------------------------------------------------------------------*/
 
 int

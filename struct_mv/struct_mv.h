@@ -1510,7 +1510,9 @@ typedef struct hypre_StructMatrix_struct
                                           index of matrix data corresponding
                                           to box b and stencil coefficient s */
    int                   constant_coefficient;  /* normally 0; set to 1 for
-                                                   constant coefficient matrices */
+                                                   constant coefficient matrices
+                                                   or 2 for constant coefficient
+                                                   with variable diagonal */
                       
    int                   symmetric;    /* Is the matrix symmetric */
    int                  *symm_elements;/* Which elements are "symmetric" */
@@ -1784,6 +1786,7 @@ double hypre_StructInnerProd( hypre_StructVector *x , hypre_StructVector *y );
 
 /* struct_io.c */
 int hypre_PrintBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , double *data );
+int hypre_PrintCCVDBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , int center_rank , double *data );
 int hypre_PrintCCBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , double *data );
 int hypre_ReadBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , double *data );
 

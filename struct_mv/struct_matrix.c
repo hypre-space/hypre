@@ -277,11 +277,28 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
                if (symm_elements[j] < 0)
                {
                   data_indices[i][j] = data_size;
-                  if ( constant_coefficient ) {
+                  if ( constant_coefficient==1 )
+                  {
                      ++data_size;
                   }
-                  else {
+                  else if ( constant_coefficient==0 )
+                  {
                      data_size += data_box_volume;
+                  }
+                  else
+                  {
+                     assert( constant_coefficient==2 );
+                     if (
+                        hypre_IndexX(stencil_shape[j])==0 &&
+                        hypre_IndexY(stencil_shape[j])==0 &&
+                        hypre_IndexZ(stencil_shape[j])==0 )  /* diagonal, variable coefficient */
+                     {
+                        data_size += data_box_volume;
+                     }
+                     else /* off-diagonal, constant coefficient */
+                     {
+                        ++data_size;
+                     }
                   }
                }
             }
@@ -291,13 +308,28 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
             {
                if (symm_elements[j] >= 0)
                {
-                  if ( constant_coefficient ) {
+                  if ( constant_coefficient==1 ) {
                      data_indices[i][j] = data_indices[i][symm_elements[j]];
                   }
-                  else
+                  else if ( constant_coefficient==0 )
                   {
                      data_indices[i][j] = data_indices[i][symm_elements[j]] +
                         hypre_BoxOffsetDistance(data_box, stencil_shape[j]);
+                  }
+                  else
+                  {
+                     if (
+                        hypre_IndexX(stencil_shape[j])==0 &&
+                        hypre_IndexY(stencil_shape[j])==0 &&
+                        hypre_IndexZ(stencil_shape[j])==0 )  /* diagonal, variable coefficient */
+                     {
+                        data_indices[i][j] = data_indices[i][symm_elements[j]] +
+                           hypre_BoxOffsetDistance(data_box, stencil_shape[j]);
+                     }
+                     else /* off-diagonal, constant coefficient */
+                     {
+                        data_indices[i][j] = data_indices[i][symm_elements[j]];
+                     }
                   }
                }
             }
@@ -369,12 +401,15 @@ hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
             data_box = hypre_BoxArrayBox(data_boxes, i);
             start = hypre_BoxIMin(data_box);
 
-            if ( constant_coefficient )
+            if ( constant_coefficient==1 )
             {
                datai = hypre_CCBoxIndexRank(data_box,start);
                datap[datai] = 1.0;
             }
             else
+               /* either fully variable coefficient matrix, constant_coefficient=0,
+                  or variable diagonal (otherwise constant) coefficient matrix,
+                  constant_coefficient=2 */
             {
                hypre_BoxGetSize(data_box, loop_size);
 
@@ -432,6 +467,9 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
 
    hypre_BoxArray     *boxes;
    hypre_Box          *box;
+   hypre_Index        center_index;
+   hypre_StructStencil  *stencil;
+   int                center_rank;
    int                constant_coefficient;
 
    double             *matp;
@@ -445,7 +483,7 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
       {
          box = hypre_BoxArrayBox(boxes, i);
 
-         if ( constant_coefficient )
+         if ( constant_coefficient==1 )
          {
             if (action > 0)
             {
@@ -475,7 +513,95 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
                }
             }
          }
+         else if ( constant_coefficient==2 )
+         {
+            hypre_SetIndex(center_index, 0, 0, 0);
+            stencil = hypre_StructMatrixStencil(matrix);
+            center_rank = hypre_StructStencilElementRank( stencil, center_index );
+            if ( action > 0 )
+            {
+               for (s = 0; s < num_stencil_indices; s++)
+               {
+                  if ( stencil_indices[s] == center_rank )
+                  {  /* center (diagonal), like constant_coefficient==0 */
+                     if ((hypre_IndexX(grid_index) >= hypre_BoxIMinX(box)) &&
+                         (hypre_IndexX(grid_index) <= hypre_BoxIMaxX(box)) &&
+                         (hypre_IndexY(grid_index) >= hypre_BoxIMinY(box)) &&
+                         (hypre_IndexY(grid_index) <= hypre_BoxIMaxY(box)) &&
+                         (hypre_IndexZ(grid_index) >= hypre_BoxIMinZ(box)) &&
+                         (hypre_IndexZ(grid_index) <= hypre_BoxIMaxZ(box))   )
+                     {
+                        matp = hypre_StructMatrixBoxDataValue(matrix, i,
+                                                              stencil_indices[s],
+                                                              grid_index);
+                        *matp += values[s];
+                     }
+                  }
+                  else
+                  {  /* non-center, like constant_coefficient==1 */
+                     matp = hypre_StructMatrixBoxData(matrix, i,
+                                                      stencil_indices[s]);
+                     *matp += values[s];
+                  }
+               }
+            }
+            else if ( action > -1 )
+            {
+               for (s = 0; s < num_stencil_indices; s++)
+               {
+                  if ( stencil_indices[s] == center_rank )
+                  {  /* center (diagonal), like constant_coefficient==0 */
+                     if ((hypre_IndexX(grid_index) >= hypre_BoxIMinX(box)) &&
+                         (hypre_IndexX(grid_index) <= hypre_BoxIMaxX(box)) &&
+                         (hypre_IndexY(grid_index) >= hypre_BoxIMinY(box)) &&
+                         (hypre_IndexY(grid_index) <= hypre_BoxIMaxY(box)) &&
+                         (hypre_IndexZ(grid_index) >= hypre_BoxIMinZ(box)) &&
+                         (hypre_IndexZ(grid_index) <= hypre_BoxIMaxZ(box))   )
+                     {
+                        matp = hypre_StructMatrixBoxDataValue(matrix, i,
+                                                              stencil_indices[s],
+                                                              grid_index);
+                        *matp = values[s];
+                     }
+                  }
+                  else
+                  {  /* non-center, like constant_coefficient==1 */
+                     matp = hypre_StructMatrixBoxData(matrix, i,
+                                                      stencil_indices[s]);
+                     *matp += values[s];
+                  }
+               }
+            }
+            else
+            {
+               for (s = 0; s < num_stencil_indices; s++)
+               {
+                  if ( stencil_indices[s] == center_rank )
+                  {  /* center (diagonal), like constant_coefficient==0 */
+                     if ((hypre_IndexX(grid_index) >= hypre_BoxIMinX(box)) &&
+                         (hypre_IndexX(grid_index) <= hypre_BoxIMaxX(box)) &&
+                         (hypre_IndexY(grid_index) >= hypre_BoxIMinY(box)) &&
+                         (hypre_IndexY(grid_index) <= hypre_BoxIMaxY(box)) &&
+                         (hypre_IndexZ(grid_index) >= hypre_BoxIMinZ(box)) &&
+                         (hypre_IndexZ(grid_index) <= hypre_BoxIMaxZ(box))   )
+                     {
+                        matp = hypre_StructMatrixBoxDataValue(matrix, i,
+                                                              stencil_indices[s],
+                                                              grid_index);
+                        *matp += values[s];
+                     }
+                  }
+                  else
+                  {  /* non-center, like constant_coefficient==1 */
+                     matp = hypre_StructMatrixBoxData(matrix, i,
+                                                      stencil_indices[s]);
+                     values[s] = *matp;
+                  }
+               }
+            }
+         }
          else
+            /* variable coefficient, constant_coefficient=0 */
          {
             if ((hypre_IndexX(grid_index) >= hypre_BoxIMinX(box)) &&
                 (hypre_IndexX(grid_index) <= hypre_BoxIMaxX(box)) &&
@@ -541,6 +667,9 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
    hypre_Box       *grid_box;
    hypre_BoxArray  *box_array;
    hypre_Box       *box;
+   hypre_Index        center_index;
+   hypre_StructStencil *stencil;
+   int                center_rank;
                    
    hypre_BoxArray  *data_space;
    hypre_Box       *data_box;
@@ -603,12 +732,20 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                hypre_CopyIndex(data_start, dval_start);
                hypre_IndexD(dval_start, 0) *= num_stencil_indices;
 
+               if ( constant_coefficient==2 )
+               {
+                  hypre_SetIndex(center_index, 0, 0, 0);
+                  stencil = hypre_StructMatrixStencil(matrix);
+                  center_rank = hypre_StructStencilElementRank( stencil, center_index );
+               }
+
                for (s = 0; s < num_stencil_indices; s++)
                {
                   datap = hypre_StructMatrixBoxData(matrix, i,
                                                     stencil_indices[s]);
 
-                  if ( constant_coefficient )
+                  if ( constant_coefficient==1 ||
+                       ( constant_coefficient==2 && stencil_indices[s]!=center_rank ))
                      /* datap has only one data point for a given i and s */
                   {
                      hypre_BoxGetSize(box, loop_size);
@@ -792,6 +929,7 @@ hypre_StructMatrixPrint( const char         *filename,
 
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
+   hypre_Index           center_index;
 
    int                   num_values;
 
@@ -801,6 +939,7 @@ hypre_StructMatrixPrint( const char         *filename,
                    
    int                   i, j;
    int                   constant_coefficient;
+   int                   center_rank;
    int                   myid;
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(matrix);
@@ -871,10 +1010,18 @@ hypre_StructMatrixPrint( const char         *filename,
       boxes = hypre_StructGridBoxes(grid);
  
    fprintf(file, "\nData:\n");
-   if ( constant_coefficient )
+   if ( constant_coefficient==1 )
    {
       hypre_PrintCCBoxArrayData(file, boxes, data_space, num_values,
                               hypre_StructMatrixData(matrix));
+   }
+   else if ( constant_coefficient==2 )
+   {
+      hypre_SetIndex(center_index, 0, 0, 0);
+      center_rank = hypre_StructStencilElementRank( stencil, center_index );
+      hypre_PrintCCVDBoxArrayData(file, boxes, data_space, num_values,
+                                  center_rank,
+                                  hypre_StructMatrixData(matrix));
    }
    else
    {
