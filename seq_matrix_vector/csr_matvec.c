@@ -39,6 +39,26 @@ hypre_Matvec( double           alpha,
 
    int         ierr = 0;
 
+   /*---------------------------------------------------------------------
+    *  Check for size compatibility.  Matvec returns ierr = 1 if
+    *  length of X doesn't equal the number of columns of A,
+    *  ierr = 2 if the length of Y doesn't equal the number of rows
+    *  of A, and ierr = 3 if both are true.
+    *
+    *  Because temporary vectors are often used in Matvec, none of 
+    *  these conditions terminates processing, and the ierr flag
+    *  is informational only.
+    *--------------------------------------------------------------------*/
+ 
+    if (num_cols != x_size)
+              ierr = 1;
+
+    if (num_rows != y_size)
+              ierr = 2;
+
+    if (num_cols != x_size && num_rows != y_size)
+              ierr = 3;
+
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation - RDF: USE MACHINE EPS
     *-----------------------------------------------------------------------*/
@@ -116,9 +136,12 @@ hypre_MatvecT( double           alpha,
    int        *A_i       = hypre_CSRMatrixI(A);
    int        *A_j       = hypre_CSRMatrixJ(A);
    int         num_rows  = hypre_CSRMatrixNumRows(A);
+   int         num_cols  = hypre_CSRMatrixNumCols(A);
 
    double     *x_data = hypre_VectorData(x);
    double     *y_data = hypre_VectorData(y);
+   int         x_size = hypre_VectorSize(x);
+   int         y_size = hypre_VectorSize(y);
 
    double      temp;
 
@@ -126,13 +149,32 @@ hypre_MatvecT( double           alpha,
 
    int         ierr  = 0;
 
+   /*---------------------------------------------------------------------
+    *  Check for size compatibility.  MatvecT returns ierr = 1 if
+    *  length of X doesn't equal the number of rows of A,
+    *  ierr = 2 if the length of Y doesn't equal the number of 
+    *  columns of A, and ierr = 3 if both are true.
+    *
+    *  Because temporary vectors are often used in MatvecT, none of 
+    *  these conditions terminates processing, and the ierr flag
+    *  is informational only.
+    *--------------------------------------------------------------------*/
+ 
+    if (num_rows != x_size)
+              ierr = 1;
+
+    if (num_cols != y_size)
+              ierr = 2;
+
+    if (num_rows != x_size && num_cols != y_size)
+              ierr = 3;
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation - RDF: USE MACHINE EPS
     *-----------------------------------------------------------------------*/
 
    if (alpha == 0.0)
    {
-      for (i = 0; i < num_rows; i++)
+      for (i = 0; i < num_cols; i++)
 	 y_data[i] *= beta;
 
       return ierr;
@@ -141,19 +183,19 @@ hypre_MatvecT( double           alpha,
    /*-----------------------------------------------------------------------
     * y = (beta/alpha)*y
     *-----------------------------------------------------------------------*/
-   
+
    temp = beta / alpha;
    
    if (temp != 1.0)
    {
       if (temp == 0.0)
       {
-	 for (i = 0; i < num_rows; i++)
+	 for (i = 0; i < num_cols; i++)
 	    y_data[i] = 0.0;
       }
       else
       {
-	 for (i = 0; i < num_rows; i++)
+	 for (i = 0; i < num_cols; i++)
 	    y_data[i] *= temp;
       }
    }
@@ -177,7 +219,7 @@ hypre_MatvecT( double           alpha,
 
    if (alpha != 1.0)
    {
-      for (i = 0; i < num_rows; i++)
+      for (i = 0; i < num_cols; i++)
 	 y_data[i] *= alpha;
    }
 
