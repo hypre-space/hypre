@@ -1227,12 +1227,13 @@ main( int   argc,
    if (values[0] != -1.) ++ierr;
    for (i = 1; i < part_x[myid+1] - part_x[myid] - 1; i++)
      if (values[i] != 0.) ++ierr;
-   if (values[part_x[myid+1]-1] != 1.) ++ierr;
+   if (values[part_x[myid+1]-part_x[myid]-1] != 1.) ++ierr;
    if (ierr)
    {
      printf("One of HYPRE_IJVectorSet(Get)LocalComponents\n");
      printf("calls bad\n");
      printf("IJVector Error 10 with ierr = %d\n", ierr);
+     printf("myid = %d IJVector components\n",myid);
      exit(1);
    }
 
@@ -1256,7 +1257,7 @@ main( int   argc,
    if (values[0] != -100.) ++ierr;
    for (i = 1; i < part_x[myid+1] - part_x[myid] - 1; i++)
      if (values[i] != 0.) ++ierr;
-   if (values[part_x[myid+1]-1] != 100.) ++ierr;
+   if (values[part_x[myid+1]-part_x[myid]-1] != 100.) ++ierr;
    if (ierr)
    {
      printf("One of HYPRE_IJVectorSet(AddTo,Get)LocalComponents\n");
