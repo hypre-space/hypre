@@ -24,7 +24,7 @@
 #endif
 #else /* not HYPRE */
 #include "mpi.h"
-#define hypre_F90_NAME(name) name##_
+#define hypre_F90_NAME_BLAS(name) name##_
 #endif
 
 #ifndef _COMMON_H

@@ -32,10 +32,10 @@
 #ifdef ESSL
 #include <essl.h>
 #else
-void hypre_F90_NAME(dpotrf)(char *, int *, double *, int *, int *);
-void hypre_F90_NAME(dpotrs)(char *, int *, int *, double *, int *, double *,
-  int *, int *);
-void hypre_F90_NAME(dgels)(char *, int *, int *, int *, double *, int *,
+void hypre_F90_NAME_BLAS(dpotrf)(char *, int *, double *, int *, int *);
+void hypre_F90_NAME_BLAS(dpotrs)(char *, int *, int *, double *, int *, 
+  double *, int *, int *);
+void hypre_F90_NAME_BLAS(dgels)(char *, int *, int *, int *, double *, int *,
   double *, int *, double *, int *, int *);
 #endif
 
@@ -1117,7 +1117,7 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         dpps(ahat, len, val, 1);
 #else
         /* Solve local linear system - factor phase */
-        hypre_F90_NAME(dpotrf)(&uplo, &len, ahat, &len, &info);
+        hypre_F90_NAME_BLAS(dpotrf)(&uplo, &len, ahat, &len, &info);
         if (info != 0)
         {
             printf("Matrix may not be symmetric positive definite.\n");
@@ -1128,7 +1128,8 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         }
 
         /* Solve local linear system - solve phase */
-        hypre_F90_NAME(dpotrs)(&uplo, &len, &one, ahat, &len, val, &len, &info);
+        hypre_F90_NAME_BLAS(dpotrs)(&uplo, &len, &one, ahat, &len, val, &len, 
+          &info);
         if (info != 0)
         {
             printf("ParaSails: row %d, dpotrs returned %d.\n", row, info);
@@ -1294,7 +1295,7 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
             &info, work, work_size);
 #else
         /* rhs in bhat, and put solution in bhat */
-        hypre_F90_NAME(dgels)(&trans, &npat, &len, &one, ahat, &npat,
+        hypre_F90_NAME_BLAS(dgels)(&trans, &npat, &len, &one, ahat, &npat,
             bhat, &npat, work, &work_size, &info);
 
         if (info != 0)
