@@ -9,16 +9,16 @@
 
 /******************************************************************************
  *
- * Header info for Matrix data structures
+ * Header info for hypre_Matrix data structures
  *
  *****************************************************************************/
 
-#ifndef _MATRIX_HEADER
-#define _MATRIX_HEADER
+#ifndef HYPRE_MATRIX_HEADER
+#define HYPRE_MATRIX_HEADER
 
 
 /*--------------------------------------------------------------------------
- * Matrix
+ * hypre_Matrix
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -28,16 +28,16 @@ typedef struct
    int     *ja;
    int      size;
 
-} Matrix;
+} hypre_Matrix;
 
 /*--------------------------------------------------------------------------
- * Accessor functions for the Matrix structure
+ * Accessor functions for the hypre_Matrix structure
  *--------------------------------------------------------------------------*/
 
-#define MatrixData(matrix)      ((matrix) -> data)
-#define MatrixIA(matrix)        ((matrix) -> ia)
-#define MatrixJA(matrix)        ((matrix) -> ja)
-#define MatrixSize(matrix)      ((matrix) -> size)
+#define hypre_MatrixData(matrix)      ((matrix) -> data)
+#define hypre_MatrixIA(matrix)        ((matrix) -> ia)
+#define hypre_MatrixJA(matrix)        ((matrix) -> ja)
+#define hypre_MatrixSize(matrix)      ((matrix) -> size)
 
 /*--------------------------------------------------------------------------
  * Prototypes
@@ -51,8 +51,8 @@ typedef struct
 
 
 /* matrix.c */
-Matrix *NewMatrix P((double *data , int *ia , int *ja , int size ));
-void FreeMatrix P((Matrix *matrix ));
+hypre_Matrix *hypre_NewMatrix P((double *data , int *ia , int *ja , int size ));
+void hypre_FreeMatrix P((hypre_Matrix *matrix ));
 
 #undef P
 

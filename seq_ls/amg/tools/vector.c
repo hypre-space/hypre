@@ -18,35 +18,35 @@
 
 
 /*--------------------------------------------------------------------------
- * NewVector
+ * hypre_NewVector
  *--------------------------------------------------------------------------*/
 
-Vector  *NewVector(data, size)
+hypre_Vector  *hypre_NewVector(data, size)
 double  *data;
 int      size;
 {
-   Vector     *new;
+   hypre_Vector     *new;
 
 
-   new = talloc(Vector, 1);
+   new = hypre_TAlloc(hypre_Vector, 1);
 
-   VectorData(new) = data;
-   VectorSize(new) = size;
+   hypre_VectorData(new) = data;
+   hypre_VectorSize(new) = size;
 
    return new;
 }
 
 /*--------------------------------------------------------------------------
- * FreeVector
+ * hypre_FreeVector
  *--------------------------------------------------------------------------*/
 
-void     FreeVector(vector)
-Vector  *vector;
+void     hypre_FreeVector(vector)
+hypre_Vector  *vector;
 {
    if (vector)
    {
-      tfree(VectorData(vector));
-      tfree(vector);
+      hypre_TFree(hypre_VectorData(vector));
+      hypre_TFree(vector);
    }
 }
 

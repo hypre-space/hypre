@@ -38,7 +38,7 @@ char *argv[];
    double  *S_data;
    int     *S_ia;
    int     *S_ja;
-   Matrix  *A;
+   hypre_Matrix  *A;
 
    double  *x;
    double  *y;
@@ -74,7 +74,7 @@ char *argv[];
    ft = ftell(fp);
 
    /* compute S_ia */
-   S_ia = talloc(int, (n+1));
+   S_ia = hypre_TAlloc(int, (n+1));
 
    m = 1;
    i = 0;
@@ -100,8 +100,8 @@ char *argv[];
    fseek(fp, ft, 0);
 
    /* read in column info, S_ja, and values S_data */
-   S_ja = talloc(int, S_ia[n]);
-   S_data = talloc(double, S_ia[n]);
+   S_ja = hypre_TAlloc(int, S_ia[n]);
+   S_data = hypre_TAlloc(double, S_ia[n]);
  
   
    for (i = 0; i < S_ia[n]; i++)
@@ -132,14 +132,14 @@ char *argv[];
 
   
    /* create the matrix */
-   A = NewMatrix(S_data, S_ia, S_ja, n); 
+   A = hypre_NewMatrix(S_data, S_ia, S_ja, n); 
 
    /*-------------------------------------------------------
     * Write out the matrix data
     *-------------------------------------------------------*/
 
    sprintf(file_name, "%s.in.ysmp", run_name);
-   WriteYSMP(file_name, A);
+   hypre_WriteYSMP(file_name, A);
 
    return 0;
 }

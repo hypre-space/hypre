@@ -17,12 +17,12 @@
 
 
 /*--------------------------------------------------------------------------
- * WriteYSMP
+ * hypre_WriteYSMP
  *--------------------------------------------------------------------------*/
 
-void     WriteYSMP(file_name, matrix)
+void     hypre_WriteYSMP(file_name, matrix)
 char    *file_name;
-Matrix  *matrix;
+hypre_Matrix  *matrix;
 {
    FILE    *fp;
 
@@ -38,10 +38,10 @@ Matrix  *matrix;
     * Write the matrix data
     *----------------------------------------------------------*/
 
-   data = MatrixData(matrix);
-   ia   = MatrixIA(matrix);
-   ja   = MatrixJA(matrix);
-   size = MatrixSize(matrix);
+   data = hypre_MatrixData(matrix);
+   ia   = hypre_MatrixIA(matrix);
+   ja   = hypre_MatrixJA(matrix);
+   size = hypre_MatrixSize(matrix);
 
    fp = fopen(file_name, "w");
 
@@ -62,12 +62,12 @@ Matrix  *matrix;
 }
 
 /*--------------------------------------------------------------------------
- * WriteVec
+ * hypre_WriteVec
  *--------------------------------------------------------------------------*/
 
-void     WriteVec(file_name, vector)
+void     hypre_WriteVec(file_name, vector)
 char    *file_name;
-Vector  *vector;
+hypre_Vector  *vector;
 {
    FILE    *fp;
 
@@ -81,8 +81,8 @@ Vector  *vector;
     * Write in the data
     *----------------------------------------------------------*/
 
-   data = VectorData(vector);
-   size = VectorSize(vector);
+   data = hypre_VectorData(vector);
+   size = hypre_VectorSize(vector);
 
    fp = fopen(file_name, "w");
 

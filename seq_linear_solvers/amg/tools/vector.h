@@ -9,16 +9,16 @@
 
 /******************************************************************************
  *
- * Header info for Vector data structures
+ * Header info for hypre_Vector data structures
  *
  *****************************************************************************/
 
-#ifndef _VECTOR_HEADER
-#define _VECTOR_HEADER
+#ifndef HYPRE_VECTOR_HEADER
+#define HYPRE_VECTOR_HEADER
 
 
 /*--------------------------------------------------------------------------
- * Vector
+ * hypre_Vector
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -26,14 +26,14 @@ typedef struct
    double  *data;
    int      size;
 
-} Vector;
+} hypre_Vector;
 
 /*--------------------------------------------------------------------------
- * Accessor functions for the Vector structure
+ * Accessor functions for the hypre_Vector structure
  *--------------------------------------------------------------------------*/
 
-#define VectorData(vector)      ((vector) -> data)
-#define VectorSize(vector)      ((vector) -> size)
+#define hypre_VectorData(vector)      ((vector) -> data)
+#define hypre_VectorSize(vector)      ((vector) -> size)
 
 /*--------------------------------------------------------------------------
  * Prototypes
@@ -47,8 +47,8 @@ typedef struct
 
 
 /* vector.c */
-Vector *NewVector P((double *data , int size ));
-void FreeVector P((Vector *vector ));
+hypre_Vector *hypre_NewVector P((double *data , int size ));
+void hypre_FreeVector P((hypre_Vector *vector ));
 
 #undef P
 

@@ -18,41 +18,41 @@
 
 
 /*--------------------------------------------------------------------------
- * NewMatrix
+ * hypre_NewMatrix
  *--------------------------------------------------------------------------*/
 
-Matrix  *NewMatrix(data, ia, ja, size)
+hypre_Matrix  *hypre_NewMatrix(data, ia, ja, size)
 double  *data;
 int     *ia;
 int     *ja;
 int      size;
 {
-   Matrix     *new;
+   hypre_Matrix     *new;
 
 
-   new = talloc(Matrix, 1);
+   new = hypre_TAlloc(hypre_Matrix, 1);
 
-   MatrixData(new) = data;
-   MatrixIA(new)   = ia;
-   MatrixJA(new)   = ja;
-   MatrixSize(new) = size;
+   hypre_MatrixData(new) = data;
+   hypre_MatrixIA(new)   = ia;
+   hypre_MatrixJA(new)   = ja;
+   hypre_MatrixSize(new) = size;
 
    return new;
 }
 
 /*--------------------------------------------------------------------------
- * FreeMatrix
+ * hypre_FreeMatrix
  *--------------------------------------------------------------------------*/
 
-void     FreeMatrix(matrix)
-Matrix  *matrix;
+void     hypre_FreeMatrix(matrix)
+hypre_Matrix  *matrix;
 {
    if (matrix)
    {
-      tfree(MatrixData(matrix));
-      tfree(MatrixIA(matrix));
-      tfree(MatrixJA(matrix));
-      tfree(matrix);
+      hypre_TFree(hypre_MatrixData(matrix));
+      hypre_TFree(hypre_MatrixIA(matrix));
+      hypre_TFree(hypre_MatrixJA(matrix));
+      hypre_TFree(matrix);
    }
 }
 

@@ -34,12 +34,12 @@
 
 
 /* read.c */
-Matrix *ReadYSMP P((char *file_name ));
-Vector *ReadVec P((char *file_name ));
+hypre_Matrix *ReadYSMP P((char *file_name ));
+hypre_Vector *ReadVec P((char *file_name ));
 
 /* write.c */
-void WriteYSMP P((char *file_name , Matrix *matrix ));
-void WriteVec P((char *file_name , Vector *vector ));
+void hypre_WriteYSMP P((char *file_name , hypre_Matrix *matrix ));
+void hypre_WriteVec P((char *file_name , hypre_Vector *vector ));
 
 #undef P
 

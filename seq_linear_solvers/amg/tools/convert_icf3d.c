@@ -35,7 +35,7 @@ char *argv[];
    double  *A_data;
    int     *A_ia;
    int     *A_ja;
-   Matrix  *A;
+   hypre_Matrix  *A;
 
    double  *x;
    double  *y;
@@ -73,7 +73,7 @@ char *argv[];
    ft = ftell(fp);
 
    /* compute symmetric S_ia */
-   S_ia = talloc(int, (n+1));
+   S_ia = hypre_TAlloc(int, (n+1));
    S_ia[0] = 0;
    m = 1;
    for (i = 0; i < n;)
@@ -91,7 +91,7 @@ char *argv[];
    fseek(fp, ft, 0);
 
    /* read in symmetric S_ja (put diagonal at beginning of row) */
-   S_ja = talloc(int, S_ia[n]);
+   S_ja = hypre_TAlloc(int, S_ia[n]);
    for (i = 0; i < n; i++)
    {
       for (j = (S_ia[i]+1); j < S_ia[i+1]; j++)
@@ -100,7 +100,7 @@ char *argv[];
    }
 
    /* read in symmetric S_data (put diagonal at beginning of row) */
-   S_data = talloc(double, S_ia[n]);
+   S_data = hypre_TAlloc(double, S_ia[n]);
    for (i = 0; i < n; i++)
    {
       for (j = (S_ia[i]+1); j < S_ia[i+1]; j++)
@@ -109,9 +109,9 @@ char *argv[];
    }
 
    /* read in x, y, z coordinates */
-   x = talloc(double, n);
-   y = talloc(double, n);
-   z = talloc(double, n);
+   x = hypre_TAlloc(double, n);
+   y = hypre_TAlloc(double, n);
+   z = hypre_TAlloc(double, n);
    for (i = 0; i < n; i++)
       fscanf(fp, "%*d%le%le%le", &x[i], &y[i], &z[i]);
 
@@ -134,16 +134,16 @@ char *argv[];
 
    fclose(fp);
 
-   tfree(x);
-   tfree(y);
-   tfree(z);
+   hypre_TFree(x);
+   hypre_TFree(y);
+   hypre_TFree(z);
 
    /*-------------------------------------------------------
     * Set up the matrix structure
     *-------------------------------------------------------*/
 
    /* compute number of additional row elements in A */
-   iarray = talloc(int, n);
+   iarray = hypre_TAlloc(int, n);
    for (i = 0; i < n; i++)
       iarray[i] = 0;
    for (i = 0; i < n; i++)
@@ -153,7 +153,7 @@ char *argv[];
    }
 
    /* compute A_ia */
-   A_ia = talloc(int, (n+1));
+   A_ia = hypre_TAlloc(int, (n+1));
    m = 0;
    for (i = 0; i < n; i++)
    {
@@ -163,8 +163,8 @@ char *argv[];
    A_ia[n] = S_ia[n] + m;
 
    /* copy S_ja and S_data into A_ja and A_data */
-   A_ja = talloc(int, A_ia[n]);
-   A_data = talloc(double, A_ia[n]);
+   A_ja = hypre_TAlloc(int, A_ia[n]);
+   A_data = hypre_TAlloc(double, A_ia[n]);
    for (i = 0; i < n; i++)
    {
       m = S_ia[i+1] - S_ia[i];
@@ -198,14 +198,14 @@ char *argv[];
       A_ia[i]++;
 
    /* create the matrix */
-   A = NewMatrix(A_data, A_ia, A_ja, n);
+   A = hypre_NewMatrix(A_data, A_ia, A_ja, n);
 
    /*-------------------------------------------------------
     * Write out the matrix data
     *-------------------------------------------------------*/
 
    sprintf(file_name, "%s.in.ysmp", run_name);
-   WriteYSMP(file_name, A);
+   hypre_WriteYSMP(file_name, A);
 
    return 0;
 }

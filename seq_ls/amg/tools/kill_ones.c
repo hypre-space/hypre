@@ -13,18 +13,18 @@
 #include "matrix.h"
 #include "io.h"
 
-#define  NDIMU(nv)  (50*nv)
-#define  NDIMA(na)  (6*na)
+#define  hypre_NDIMU(nv)  (50*nv)
+#define  hypre_NDIMA(na)  (6*na)
 
 
 /*--------------------------------------------------------------------------
  * RYSMP reads old-style ysmp files (with `1 1')
  *--------------------------------------------------------------------------*/
  
-Matrix   *RYSMP(file_name)
+hypre_Matrix   *RYSMP(file_name)
 char     *file_name;
 {
-   Matrix  *matrix;
+   hypre_Matrix  *matrix;
  
    FILE    *fp;
  
@@ -47,15 +47,15 @@ char     *file_name;
 
    fscanf(fp, "%d", &size);
  
-   ia = ctalloc(int, NDIMU(size+1));
+   ia = hypre_CTAlloc(int, hypre_NDIMU(size+1));
    for (j = 0; j < size+1; j++)
       fscanf(fp, "%d", &ia[j]);
  
-   ja = ctalloc(int, NDIMA(ia[size]-1));
+   ja = hypre_CTAlloc(int, hypre_NDIMA(ia[size]-1));
    for (j = 0; j < ia[size]-1; j++)
       fscanf(fp, "%d", &ja[j]);
  
-   data = ctalloc(double, NDIMA(ia[size]-1));
+   data = hypre_CTAlloc(double, hypre_NDIMA(ia[size]-1));
    for (j = 0; j < ia[size]-1; j++)
       fscanf(fp, "%le", &data[j]);
  
@@ -65,7 +65,7 @@ char     *file_name;
     * Create the matrix structure
     *----------------------------------------------------------*/
  
-   matrix = NewMatrix(data, ia, ja, size);
+   matrix = hypre_NewMatrix(data, ia, ja, size);
  
    return matrix;
 }
@@ -85,7 +85,7 @@ char *argv[];
 
    FILE    *fp;
 
-   Matrix  *A;
+   hypre_Matrix  *A;
 
    /*-------------------------------------------------------
     * Check that the number of command args is correct
@@ -103,7 +103,7 @@ char *argv[];
    sprintf(file_name_new, "%s.new", run_name);
 
    A = RYSMP(file_name_old);
-   WriteYSMP(file_name_new,A);
+   hypre_WriteYSMP(file_name_new,A);
 
    return 0;
 }
