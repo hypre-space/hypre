@@ -17,9 +17,7 @@
 
 #include "../includes/general.h"
 #include "../utilities/memory.h"
-#ifdef HYPRE_DEBUG
-#include <gmalloc.h>
-#endif
+
 #include "mpi.h"
 #include "HYPRE.h"
 
