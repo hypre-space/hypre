@@ -1626,8 +1626,27 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       else
       {
          if (measure < 0) printf("negative measure!\n");
-         CF_marker[j] = CPOINT;
-         ++coarse_size; 
+         CF_marker[j] = FPOINT;
+         for (k = S_i[j]; k < S_i[j+1]; k++)
+         {
+            nabor = S_j[k];
+            if (nabor < j)
+            {
+               new_meas = measure_array[nabor];
+	       if (new_meas > 0)
+                  remove_point(&LoL_head, &LoL_tail, new_meas, 
+                               nabor, lists, where);
+
+               new_meas = ++(measure_array[nabor]);
+                 
+               enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                                 nabor, lists, where);
+            }
+	    else
+            {
+               new_meas = ++(measure_array[nabor]);
+            }
+         }
          --num_left;
       }
    }
@@ -1702,11 +1721,33 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
             remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
 
             measure_array[nabor] = --measure;
+	
+	    if (measure > 0)
+               enter_on_lists(&LoL_head, &LoL_tail, measure, nabor, 
+				lists, where);
+	    else
+	    {
+               CF_marker[nabor] = FPOINT;
+               --num_left;
 
-            enter_on_lists(&LoL_head, &LoL_tail, measure, nabor, lists, where);
+               for (k = S_i[nabor]; k < S_i[nabor+1]; k++)
+               {
+                  nabor_two = S_j[k];
+                  if (CF_marker[nabor_two] == UNDECIDED)
+                  {
+                     new_meas = measure_array[nabor_two];
+                     remove_point(&LoL_head, &LoL_tail, new_meas, 
+                               nabor_two, lists, where);
+
+                     new_meas = ++(measure_array[nabor_two]);
+                 
+                     enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                                 nabor_two, lists, where);
+                  }
+               }
+	    }
          }
       }
-
    }
 
    hypre_TFree(measure_array);
@@ -1829,6 +1870,11 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                            CF_marker[ci_tilde] = -1;
                            coarse_size--;
                            ci_tilde = -1;
+                        }
+                        if (ci_tilde_offd > -1)
+                        {
+                           CF_marker_offd[ci_tilde_offd] = -1;
+                           ci_tilde_offd = -1;
                         }
                         C_i_nonempty = 0;
                         break_var = 0;
@@ -2080,6 +2126,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    		           if (ci_tilde > -1)
    		           {
    			      CF_marker[ci_tilde] = -1;
+			      coarse_size--;
 			      ci_tilde = -1;
    		           }
    		           if (ci_tilde_offd > -1)
@@ -2095,6 +2142,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    		           ci_tilde = j;
    		           ci_tilde_mark = i;
    		           CF_marker[j] = 1;
+   		           coarse_size++;
    		           C_i_nonempty = 1;
    		           i--;
    		           break;
@@ -2140,6 +2188,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    		           if (ci_tilde > -1)
    		           {
    			      CF_marker[ci_tilde] = -1;
+   			      coarse_size--;
    			      ci_tilde = -1;
    		           }
    		           if (ci_tilde_offd > -1)
