@@ -82,6 +82,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   hypre_TFree( structural_union );
 
   nbnd = lnrows - nlocal ;
+  printf("nbnd = %d, lnrows=%d, nlocal=%d\n", nbnd, lnrows, nlocal );
   ldu->nnodes[0] = nlocal;
 
   /* myprintf("Nlocal: %d, Nbnd: %d\n", nlocal, nbnd); */

@@ -91,8 +91,8 @@ void ParILUT(DataDistType *ddist, FactorMatType *ldu,
   nlevel = 0;
 
   while( nleft > 0 ) {
-     printf("PE %d Nlevel: %d, Nleft: %d, (%d,%d)\n",
-     mype, nlevel, nleft, ndone, ntogo); fflush(0);
+    /* printf("PE %d Nlevel: %d, Nleft: %d, (%d,%d)\n",
+     * mype, nlevel, nleft, ndone, ntogo); fflush(0); */
 
     ComputeCommInfo(rmats[nlevel%2], &cinfo, ddist->ddist_rowdist, globals );
     nmis = SelectSet(rmats[nlevel%2], &cinfo, perm, iperm, newperm, newiperm, globals );
@@ -379,6 +379,8 @@ int SelectSet(ReduceMatType *rmat, CommInfoType *cinfo,
 * as input the factored rows in LDU, the new permutation vectors, and the
 * global map with local MIS rows already marked. This also updates the
 * rnbrptr[i] to be the actual number of rows recieved from PE rnbrind[i].
+* 3/20/98: Bug fix, lengths input to sgatherbuf increased by one to reflect
+*   fact that diagonal element is also transmitted. -AJC
 **************************************************************************/
 void SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
 		      int *newperm, int nmis, hypre_PilutSolverGlobals *globals)
@@ -387,7 +389,8 @@ void SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
   int *snbrind, *rnbrind, *rnbrptr, *sgatherbuf, *incolind;
   int *usrowptr, *uerowptr, *ucolind;
   double *dgatherbuf, *uvalues, *dvalues, *invalues;
-  MPI_Status Status ;
+  MPI_Status Status; 
+  MPI_Request *index_requests, *value_requests ;
 
   PrintLine("SendFactoredRows", globals);
 
@@ -411,7 +414,27 @@ void SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
   uvalues  = ldu->uvalues;
   dvalues  = ldu->dvalues;
 
-  /* pack the colind */
+  /* Allocate requests */
+  index_requests = hypre_TAlloc( MPI_Request, rnnbr );
+  value_requests = hypre_TAlloc( MPI_Request, rnnbr );
+
+  /* Issue asynchronous receives for rows from other processors.
+     Asynchronous receives needed to avoid overflowing comm buffers. */
+  j = 0;
+  cnt = (cinfo->maxntogo)*(global_maxnz+2) ;
+  for (i=0; i<rnnbr; i++) {
+    penum = rnbrind[i];
+
+    MPI_Irecv( incolind+j, cnt, MPI_INTEGER,
+	      penum, TAG_Send_colind, pilut_comm, &index_requests[i] );
+
+    MPI_Irecv( invalues+j, cnt, MPI_DOUBLE_PRECISION,
+	      penum, TAG_Send_values, pilut_comm, &value_requests[i] );
+
+    j += cnt;
+  }
+
+  /* pack the colind for sending*/
   l = 0;
   for (j=ndone; j<ndone+nmis; j++) {
     k = newperm[j];
@@ -419,7 +442,9 @@ void SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
     assert(IsInMIS(map[k+firstrow]));
     CheckBounds(0, uerowptr[k]-usrowptr[k], global_maxnz+1, globals);
 
-    sgatherbuf[l++] = uerowptr[k]-usrowptr[k];  /* store length */
+    /* sgatherbuf[l++] = uerowptr[k]-usrowptr[k]; */  /* store length */
+    /* Bug fix, 3/20/98 */
+    sgatherbuf[l++] = uerowptr[k]-usrowptr[k]+1;  /* store length */
     sgatherbuf[l++] = k+firstrow;               /* store row #  */
 
     for (ku=usrowptr[k], kg=l;   ku<uerowptr[k];   ku++, kg++)
@@ -454,14 +479,13 @@ void SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
 	      snbrind[i], TAG_Send_values, pilut_comm );
   }
 
-  /* Recieve rows (assumes buffering) (see ComputeCommInfo in original code) */
+  /* Finish receiving rows */
   j = 0;
   cnt = (cinfo->maxntogo)*(global_maxnz+2) ;
   for (i=0; i<rnnbr; i++) {
     penum = rnbrind[i];
 
-    MPI_Recv( incolind+j, cnt, MPI_INTEGER,
-	      penum, TAG_Send_colind, pilut_comm, &Status );
+    MPI_Wait( &index_requests[i], &Status);
 
     /* save where each row is recieved into the map */
     MPI_Get_count( &Status, MPI_INTEGER, &inCnt );
@@ -469,12 +493,15 @@ void SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
     for (k=0; k<inCnt; k += global_maxnz+2)
       map[incolind[j+k+1]] = ((j+k)<<1) + 1; /* pack MIS flag in LSB */
 
-    MPI_Recv( invalues+j, cnt, MPI_DOUBLE_PRECISION,
-	      penum, TAG_Send_values, pilut_comm, &Status );
+    MPI_Wait( &value_requests[i], &Status);
 
     j += cnt;
     CheckBounds(0, j, (cinfo->maxnrecv)*(global_maxnz+2)+2, globals);
   }
+
+  /* clean up memory */
+  hypre_TFree(index_requests);
+  hypre_TFree(value_requests);
 }
 
 
@@ -649,7 +676,8 @@ void ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
     SecondDropSmall( rtol, globals );
     m = SeperateLU_byMIS( globals);
     UpdateL( i, m, ldu, globals );
-    FormNRmat( inr++, m, nrmat, rrowlen, rcolind, rvalues, globals );
+    FormNRmat( inr++, m, nrmat, global_maxnz, rrowlen, rcolind, rvalues, globals );
+    /* FormNRmat( inr++, m, nrmat, 3*global_maxnz, rcolind, rvalues, globals ); */
   }
 }
 
@@ -990,30 +1018,50 @@ void UpdateL(int lrow, int last, FactorMatType *ldu,
 
 
 /*************************************************************************
-* This function forms the new reduced row the given row, assuming that the
+* This function forms the new reduced row corresponding to 
+* the given row, assuming that the
 * workspace has already been split into L and U (rmat) entries. It reuses
 * the memory for the row in the reduced matrix, storing the new row into
 * nrmat->*[rrow].
+* New version allows new row to be larger than original row, so it does not
+* necessarily reuse the same memory. AC 3-18
 **************************************************************************/
 void FormNRmat(int rrow, int first, ReduceMatType *nrmat,
-	       int rrowlen, int *rcolind, double *rvalues,
+               int max_rowlen,
+	       int in_rowlen, int *in_colind, double *in_values,
                hypre_PilutSolverGlobals *globals )
 {
-  int nz, max, j;
+  int nz, max, j, out_rowlen, *rcolind;
+  double *rvalues;
 
-  assert(rcolind[0] == jw[0]);  /* diagonal at the beginning */
+  assert(in_colind[0] == jw[0]);  /* diagonal at the beginning */
+
+  /* check to see if we need to reallocate space */
+  out_rowlen = min( max_rowlen, lastjr-first+1 );
+  if( out_rowlen > in_rowlen )
+  {
+    free_multi( in_colind, in_values, -1 );
+    rcolind = idx_malloc( out_rowlen, "FornNRmat: rcolind");
+    rvalues = fp_malloc( out_rowlen, "FornNRmat: rvalues");
+  }else
+  {
+    rcolind = in_colind;
+    rvalues = in_values;
+  }
+
+  rcolind[0] = jw[0];
   rvalues[0] = w[0];
 
   /* The entries [first, lastjr) are part of U (rmat) */
-  if (lastjr-first+1 <= rrowlen) { /* Simple copy */
+  if (lastjr-first+1 <= max_rowlen) { /* Simple copy */
     for (nz=1, j=first;   j<lastjr;   nz++, j++) {
       rcolind[nz] = jw[j];
       rvalues[nz] =  w[j];
     }
     assert(nz == lastjr-first+1);
   }
-  else { /* Keep large rowlen elements in the reduced row */
-    for (nz=1; nz<rrowlen; nz++) {
+  else { /* Keep largest out_rowlen elements in the reduced row */
+    for (nz=1; nz<out_rowlen; nz++) {
       max = first;
       for (j=first+1; j<lastjr; j++) {
 	if (fabs(w[j]) > fabs(w[max]))
@@ -1026,13 +1074,13 @@ void FormNRmat(int rrow, int first, ReduceMatType *nrmat,
       jw[max] = jw[--lastjr];  /* swap max out */
        w[max] =  w[  lastjr];
     }
-    assert(nz == rrowlen);
+    assert(nz == out_rowlen);
   }
-  assert(nz <= rrowlen);
+  assert(nz <= max_rowlen);
   
   /* link the reused storage to the new reduced system */
   nrmat->rmat_rnz[rrow]     = nz;
-  nrmat->rmat_rrowlen[rrow] = rrowlen;
+  nrmat->rmat_rrowlen[rrow] = out_rowlen;
   nrmat->rmat_rcolind[rrow] = rcolind;
   nrmat->rmat_rvalues[rrow] = rvalues;
 }

@@ -54,7 +54,7 @@ void SecondDropSmall P((double rtol , hypre_PilutSolverGlobals *globals ));
 int SeperateLU_byDIAG P((int diag , int *newiperm , hypre_PilutSolverGlobals *globals ));
 int SeperateLU_byMIS P((hypre_PilutSolverGlobals *globals ));
 void UpdateL P((int lrow , int last , FactorMatType *ldu , hypre_PilutSolverGlobals *globals ));
-void FormNRmat P((int rrow , int first , ReduceMatType *nrmat , int rrowlen , int *rcolind , double *rvalues , hypre_PilutSolverGlobals *globals ));
+void FormNRmat P((int rrow , int first , ReduceMatType *nrmat , int max_rowlen, int in_rowlen , int *rcolind , double *rvalues , hypre_PilutSolverGlobals *globals ));
 void FormDU P((int lrow , int first , FactorMatType *ldu , int *rcolind , double *rvalues , double tol , hypre_PilutSolverGlobals *globals ));
 void EraseMap P((CommInfoType *cinfo , int *newperm , int nmis , hypre_PilutSolverGlobals *globals ));
 void ParINIT P((ReduceMatType *nrmat , CommInfoType *cinfo , int *rowdist , hypre_PilutSolverGlobals *globals ));
@@ -93,9 +93,6 @@ int SelectInterior( int local_num_rows,
                     int *external_rows,
 		    int *newperm, int *newiperm, 
                     hypre_PilutSolverGlobals *globals );
-/*
-int SelectInterior P((int local_num_rows , HYPRE_DistributedMatrix matrix , int *newperm , int *newiperm , hypre_PilutSolverGlobals *globals ));
-*/
 void SecondDrop P((int maxnz , double tol , int row , int *perm , int *iperm , FactorMatType *ldu , hypre_PilutSolverGlobals *globals ));
 void SecondDropUpdate P((int maxnz , int maxnzkeep , double tol , int row , int nlocal , int *perm , int *iperm , FactorMatType *ldu , ReduceMatType *rmat , hypre_PilutSolverGlobals *globals ));
 
