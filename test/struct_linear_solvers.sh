@@ -23,7 +23,7 @@
 . ./autotest_arch.sh
 
 MPIRUN="./mpirun.$HYPRE_ARCH"
-SLS="struct_linear_solvers"
+SLS="./struct_linear_solvers"
 
 #=============================================================================
 # SMG: Run base 3d case
