@@ -560,6 +560,11 @@ package bHYPRE version 1.0.0
       int SetNumGhost(in array<int,1,column-major> num_ghost);
 
       int SetSymmetric(in int symmetric);
+      int SetConstantEntries( in int num_stencil_constant_points,
+                              in array<int,1,column-major> stencil_constant_points );
+      int SetConstantValues( in int num_stencil_indices,
+                             in array<int,1,column-major> stencil_indices,
+                             in array<double,1,column-major> values );
    }
 
    /*----------- Interface -------------------------------------------------*/
@@ -1122,9 +1127,14 @@ package bHYPRE version 1.0.0
    /**
     * A single class that implements both a build interface and an
     * operator interface. It returns itself for GetConstructedObject.
+    * A StructMatrix is a matrix on a structured grid.
+    * One function unique to a StructMatrix is SetConstantEntries.
+    * This declares that matrix entries corresponding to certain stencil points
+    * (supplied as stencil element indices) will be constant throughout the grid.
     **/
    class StructMatrix implements-all StructBuildMatrix, Operator
-   { }
+   {
+   }
 
    /*-----------------------*/
    
@@ -1251,6 +1261,10 @@ package bHYPRE version 1.0.0
    }
 
    class StructSMG implements-all Solver
+   {
+   }
+
+   class StructPFMG implements-all Solver
    {
    }
 }
