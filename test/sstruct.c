@@ -259,7 +259,7 @@ ReadData( char         *filename,
    int                sdata_size;
    int                size;
    int                memchunk = 10000;
-   int                maxline  = 500;
+   int                maxline  = 250;
 
    char               key[250];
 
@@ -1394,7 +1394,6 @@ main( int   argc,
    Index                 ilower, iupper;
    Index                 index, to_index;
    double               *values;
-   double                max_norm;
 
    int                   num_iterations;
    double                final_res_norm;
@@ -1918,8 +1917,6 @@ main( int   argc,
    }
 
    
-   max_norm= hypre_SStructMaxNorm(x);
-   printf("max_norm norm = %e \n", max_norm);
  
    hypre_EndTiming(time_index);
    hypre_PrintTiming("SStruct Interface", MPI_COMM_WORLD);
