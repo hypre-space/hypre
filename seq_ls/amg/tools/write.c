@@ -45,9 +45,6 @@ Matrix  *matrix;
 
    fp = fopen(file_name, "w");
 
-   /* write junk line */
-   fprintf(fp, "1 1\n");
-
    fprintf(fp, "%d\n", size);
 
    for (j = 0; j < size+1; j++)
@@ -88,9 +85,6 @@ Vector  *vector;
    size = VectorSize(vector);
 
    fp = fopen(file_name, "w");
-
-   /* write junk line */
-   fprintf(fp, "1 1\n");
 
    fprintf(fp, "%d\n", size);
 

@@ -1,5 +1,5 @@
 function [nv,ia,ja,a] = writeysmp(filename,A,nv,ia,ja,a)
-%  function [nv,ia,ja,a] = writeysmp(nv,ia,ja,a,filename)
+%  function [nv,ia,ja,a] = writeysmp(filename,A,nv,ia,ja,a)
 %
 %  writes ysmp file in 'filename' (no qualifiers added,
 %  eg. not 'filename.ysmp')
@@ -14,7 +14,6 @@ end;
 outdat = [filename];
 fid=fopen(outdat,'w');
 
-fprintf(fid,'1 1\n'); % dummy row
 fprintf(fid,'%d\n',nv); % number of variables (nv)
 fprintf(fid,'%d\n',ia);
 fprintf(fid,'%d\n',ja);

@@ -23,9 +23,6 @@ function [A,ia,ja,a] = readysmp(filename)
 
 fid=fopen(filename,'r');
 
-% read junk line
-junk = fscanf(fid,'%d',2);
-
 nv = fscanf(fid,'%d',1); % number of variables (nv)
 [ia, count] = fscanf(fid,'%d ',nv+1);
 [ja, count] = fscanf(fid,'%d ',ia(nv+1)-1); % This is ja

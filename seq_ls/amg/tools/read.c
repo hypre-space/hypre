@@ -41,9 +41,6 @@ char     *file_name;
 
    fp = fopen(file_name, "r");
 
-   /* read in junk line */
-   fscanf(fp, "%*[^\n]\n");
-
    fscanf(fp, "%d", &size);
 
    ia = talloc(int, NDIMU(size+1));
@@ -91,9 +88,6 @@ char     *file_name;
     *----------------------------------------------------------*/
 
    fp = fopen(file_name, "r");
-
-   /* read in junk line */
-   fscanf(fp, "%*[^\n]\n");
 
    fscanf(fp, "%d", &size);
 
