@@ -103,7 +103,7 @@ FILES = HYPRE_LinSysCore.C HYPRE_LSC_aux.C cfei_hypre.C hypre_slide_reduce.C \
         HYPRE_LSI_blkprec.C HYPRE_parcsr_symqmr.c SymQMR.c \
         HYPRE_parcsr_fgmres.c fgmres.c HYPRE_LSI_mli.C \
         HYPRE_SlideReduction.C HYPRE_LSI_UZAWA.C HYPRE_LSI_Dsuperlu.c \
-        HYPRE_parcsr_lsicg.c lsicg.c
+        HYPRE_parcsr_lsicg.c lsicg.c FEI_HYPRE_Impl.C
 
 TEMP = ${FILES:.c=.o}
 OBJS = ${TEMP:.C=.o}
