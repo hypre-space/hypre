@@ -206,44 +206,7 @@ hypre_thread_MPI_Allgather( void        *sendbuf,
   }
   else
   { 
-#if 0
-   switch (sendtype)
-   {
-      case MPI_INT:
-      {
-         int *crecvbuf = (int *)recvbuf;
-         int *csendbuf = (int *)sendbuf;
-         for (i = 0; i < sendcount; i++)
-         {
-	    crecvbuf[i] = csendbuf[i];
-         }
-      } 
-      break;
-
-      case MPI_DOUBLE:
-      {
-         double *crecvbuf = (double *)recvbuf;
-         double *csendbuf = (double *)sendbuf;
-         for (i = 0; i < sendcount; i++)
-         {
-	    crecvbuf[i] = csendbuf[i];
-         }
-      } 
-      break;
-
-      case MPI_CHAR:
-      {
-         char *crecvbuf = (char *)recvbuf;
-         char *csendbuf = (char *)sendbuf;
-         for (i = 0; i < sendcount; i++)
-         {
-	    crecvbuf[i] = csendbuf[i];
-         }
-      } 
-      break;
-   }
-#endif
-   returnval=0;
+     returnval=0;
   }
   hypre_barrier(&mpi_mtx, unthreaded);
   return returnval;
@@ -270,45 +233,7 @@ hypre_thread_MPI_Allgatherv( void        *sendbuf,
   }
   else
   {
-#if 0
- switch (sendtype)
-   {
-      case MPI_INT:
-      {
-         int *crecvbuf = (int *)recvbuf;
-         int *csendbuf = (int *)sendbuf;
-         for (i = 0; i < sendcount; i++)
-         {
-	    crecvbuf[i] = csendbuf[i];
-         }
-      } 
-      break;
-
-      case MPI_DOUBLE:
-      {
-         double *crecvbuf = (double *)recvbuf;
-         double *csendbuf = (double *)sendbuf;
-         for (i = 0; i < sendcount; i++)
-         {
-	    crecvbuf[i] = csendbuf[i];
-         }
-      } 
-      break;
-
-      case MPI_CHAR:
-      {
-         char *crecvbuf = (char *)recvbuf;
-         char *csendbuf = (char *)sendbuf;
-         for (i = 0; i < sendcount; i++)
-         {
-	    crecvbuf[i] = csendbuf[i];
-         }
-      } 
-      break;
-   }
-#endif
-   returnval=0;
-
+     returnval=0;
   }
   hypre_barrier(&mpi_mtx, unthreaded);
   return returnval;
@@ -554,35 +479,7 @@ hypre_thread_MPI_Allreduce( void        *sendbuf,
   }
   else
   {
-#if 0
-   switch (datatype)
-   {
-      case MPI_INT:
-      {
-         int *crecvbuf = (int *)recvbuf;
-         int *csendbuf = (int *)sendbuf;
-         crecvbuf[0] = csendbuf[0];
-      } 
-      break;
-
-      case MPI_DOUBLE:
-      {
-         double *crecvbuf = (double *)recvbuf;
-         double *csendbuf = (double *)sendbuf;
-         crecvbuf[0] = csendbuf[0];
-      } 
-      break;
-
-      case MPI_CHAR:
-      {
-         char *crecvbuf = (char *)recvbuf;
-         char *csendbuf = (char *)sendbuf;
-         crecvbuf[0] = csendbuf[0];
-      } 
-      break;
-   }
-#endif
-   returnval=0;
+    returnval=0;
   }
   hypre_barrier(&mpi_mtx, unthreaded);
   return returnval;

@@ -60,15 +60,16 @@ void hypre_pthread_worker( int threadid );
 int ifetchadd( int *w, pthread_mutex_t *mutex_fetchadd );
 int hypre_fetch_and_add( int *w );
 void hypre_barrier(pthread_mutex_t *mpi_mtx, int unthreaded);
+int hypre_GetThreadID( void );
+
 
 pthread_t initial_thread;
 pthread_t hypre_thread[NUM_THREADS];
-pthread_cond_t hypre_cond_boxloops;
 pthread_mutex_t hypre_mutex_boxloops;
 pthread_mutex_t talloc_mtx;
 hypre_workqueue_t hypre_qptr;
 pthread_mutex_t mpi_mtx;
-pthread_cond_t mpi_cnd;
+pthread_mutex_t time_mtx;
 int hypre_thread_release;
 
 #endif

@@ -94,6 +94,7 @@ extern hypre_TimingType *hypre_global_timing;
  * Accessor functions
  *-------------------------------------------------------*/
 
+#ifndef HYPRE_USE_PTHREADS
 #define hypre_TimingWallTime(i) (hypre_global_timing -> wall_time[(i)])
 #define hypre_TimingCPUTime(i)  (hypre_global_timing -> cpu_time[(i)])
 #define hypre_TimingFLOPS(i)    (hypre_global_timing -> flops[(i)])
@@ -103,6 +104,18 @@ extern hypre_TimingType *hypre_global_timing;
 #define hypre_TimingWallCount   (hypre_global_timing -> wall_count)
 #define hypre_TimingCPUCount    (hypre_global_timing -> CPU_count)
 #define hypre_TimingFLOPCount   (hypre_global_timing -> FLOP_count)
+#else
+#define hypre_TimingWallTime(i) (hypre_global_timing[threadid].wall_time[(i)])
+#define hypre_TimingCPUTime(i)  (hypre_global_timing[threadid].cpu_time[(i)])
+#define hypre_TimingFLOPS(i)    (hypre_global_timing[threadid].flops[(i)])
+#define hypre_TimingName(i)     (hypre_global_timing[threadid].name[(i)])
+#define hypre_TimingState(i)    (hypre_global_timing[threadid].state[(i)])
+#define hypre_TimingNumRegs(i)  (hypre_global_timing[threadid].num_regs[(i)])
+#define hypre_TimingWallCount   (hypre_global_timing[threadid].wall_count)
+#define hypre_TimingCPUCount    (hypre_global_timing[threadid].CPU_count)
+#define hypre_TimingFLOPCount   (hypre_global_timing[threadid].FLOP_count)
+#define hypre_TimingAllFLOPS    (hypre_global_timing[NUM_THREADS].FLOP_count)
+#endif
 
 /*-------------------------------------------------------
  * Prototypes

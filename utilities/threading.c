@@ -47,8 +47,7 @@ int HYPRE_InitPthreads( MPI_Comm comm )
    pthread_mutex_init(&hypre_mutex_boxloops, NULL);
    pthread_mutex_init(&mpi_mtx, NULL);
    pthread_mutex_init(&talloc_mtx, NULL);
-   pthread_cond_init(&hypre_cond_boxloops, NULL);
-   pthread_cond_init(&mpi_cnd, NULL);
+   pthread_mutex_init(&time_mtx, NULL);
    hypre_thread_counter = 0;
    hypre_thread_release = 0;
 
@@ -67,10 +66,9 @@ void HYPRE_DestroyPthreads( void )
    pthread_mutex_destroy(&hypre_mutex_boxloops);
    pthread_mutex_destroy(&mpi_mtx);
    pthread_mutex_destroy(&talloc_mtx);
+   pthread_mutex_destroy(&time_mtx);
    pthread_cond_destroy(&hypre_qptr->work_wait);
    pthread_cond_destroy(&hypre_qptr->finish_wait);
-   pthread_cond_destroy(&hypre_cond_boxloops);
-   pthread_cond_destroy(&mpi_cnd); 
    free (hypre_qptr);
 }
 
@@ -186,5 +184,21 @@ void hypre_barrier(pthread_mutex_t *mtx, int unthreaded)
    }
 }
 
+int
+hypre_GetThreadID( void )
+{
+   int i;
+
+   if (pthread_equal(pthread_self(), initial_thread)) 
+      return NUM_THREADS;
+
+   for (i = 0; i < NUM_THREADS; i++)
+   {
+      if (pthread_equal(pthread_self(), hypre_thread[i]))
+         return i;
+   }
+
+   return -1;
+}
 
 #endif
