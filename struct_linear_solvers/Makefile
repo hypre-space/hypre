@@ -72,6 +72,12 @@ LFLAGS =\
 # Main rules
 ##################################################################
 
+all: driver driver_internal
+
+driver: driver.o libHYPRE_ls.a
+	@echo  "Linking" $@ "... "
+	${CC} -o driver driver.o ${LFLAGS}
+
 driver_internal: driver_internal.o libHYPRE_ls.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_internal driver_internal.o ${LFLAGS}
