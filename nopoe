@@ -1,4 +1,7 @@
 #!/usr/bin/ksh
+# This script will be needed to build hypre with the Babel interface
+# in multiprocessing AIX systems. See the file babel-runtime/HYPRE_README.txt .
+#
 # Wrapper script to set up environment so the arguments run a 1 task
 # mpi run on the local node.  Essentially runs ip over ethernet with
 # resd=no and a hostfile (containing the local machine name)
