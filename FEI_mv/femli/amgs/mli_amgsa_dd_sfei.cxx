@@ -1057,7 +1057,7 @@ double MLI_Method_AMGSA::genP_DD(MLI_Matrix *mli_Amat,MLI_Matrix **PmatOut)
    int    blkSize, naggr, *node2aggr, ierr, PLocalNCols, PStartCol;
    int    PLocalNRows, PStartRow, *eqn2aggr, irow, jcol, ig;
    int    *PCols, maxAggSize, *aggCntArray, index, **aggIndArray;
-   int    aggSize, info, nzcnt, *rowLengths, rowNum, *colInd;
+   int    aggSize, nzcnt, *rowLengths, rowNum, *colInd;
    double **PVecs, *newNull, *qArray, *rArray, *colVal;
    char   paramString[200];
    HYPRE_IJMatrix      IJPmat;
