@@ -341,8 +341,6 @@ typedef struct {
 /* ... should be   hypre_NumbersNode * digit[11]; */
 } hypre_NumbersNode;
 
-#endif
-
 
 hypre_NumbersNode * hypre_NumbersNewNode();
 void hypre_NumbersDeleteNode( hypre_NumbersNode * node );
@@ -352,6 +350,7 @@ int hypre_NumbersQuery( hypre_NumbersNode * node, const int n );
 int * hypre_NumbersArray( hypre_NumbersNode * node );
 
 
+#endif
 /*BHEADER**********************************************************************
  * (c) 1996   The Regents of the University of California
  *
