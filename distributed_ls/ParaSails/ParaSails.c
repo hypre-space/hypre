@@ -15,8 +15,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#include <string.h>
 #include <strings.h>
+#include <string.h>
 #include "Common.h"
 #include "Matrix.h"
 #include "Numbering.h"
