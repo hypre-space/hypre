@@ -2,7 +2,7 @@
 all: lib_HYPRE_DistributedMatrixPilutSolver.a
 
 install:all
-	@cp -f HYPRE_*.h DistributedMatrixPilutSolver.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f lib_HYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 
 MPI_INCLUDES = -I/usr/local/mpi/mpich/include
