@@ -191,7 +191,6 @@ MLI_Solver::MLI_Solver( char *str )
 
 MLI_Solver *MLI_Solver_CreateFromName( char *str )
 {
-   char       param_string[20];
    MLI_Solver *solver_ptr=NULL;
 
    if      (!strcasecmp(str, "Jacobi")) solver_ptr = new MLI_Solver_Jacobi();
@@ -245,7 +244,6 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
 
 MLI_Solver *MLI_Solver_CreateFromID( int solver_id )
 {
-   char       param_string[20];
    MLI_Solver *solver_ptr=NULL;
 
    switch ( solver_id )

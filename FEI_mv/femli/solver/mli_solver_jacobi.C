@@ -48,7 +48,7 @@ MLI_Solver_Jacobi::~MLI_Solver_Jacobi()
 
 int MLI_Solver_Jacobi::setup(MLI_Matrix *Amat)
 {
-   int                i, startRow, globalNRows, *partition, *ADiagI, *ADiagJ;
+   int                i, globalNRows, *partition, *ADiagI, *ADiagJ;
    int                j, localNRows, status;
    double             *ADiagA, *ritzValues;
    MPI_Comm           comm;
@@ -70,7 +70,6 @@ int MLI_Solver_Jacobi::setup(MLI_Matrix *Amat)
    ADiagA      = hypre_CSRMatrixData(ADiag);
    localNRows  = hypre_CSRMatrixNumRows(ADiag);
    globalNRows = hypre_ParCSRMatrixGlobalNumRows( A );
-   startRow    = hypre_ParCSRMatrixFirstRowIndex(A);
 
    /*-----------------------------------------------------------------
     * extract and store matrix diagonal
@@ -125,7 +124,7 @@ int MLI_Solver_Jacobi::setup(MLI_Matrix *Amat)
 int MLI_Solver_Jacobi::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 {
    int                i, is, localNRows;
-   double             *ADiagA, *rData, *uData, weight;
+   double             *rData, *uData, weight;
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix    *ADiag;
    hypre_ParVector    *f, *u, *r;

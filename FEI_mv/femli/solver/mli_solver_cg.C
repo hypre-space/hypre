@@ -55,7 +55,6 @@ int MLI_Solver_CG::setup(MLI_Matrix *Amat_in)
 {
    int  numSweeps;
    char paramString[100], *argv[1];;
-   hypre_ParCSRMatrix *A;
 
    /*-----------------------------------------------------------------
     * set local matrix
@@ -205,6 +204,5 @@ int MLI_Solver_CG::setParams( char *param_string, int argc, char **argv )
       printf("                Params = %s\n", param_string);
       return 1;
    }
-   return 0;
 }
 

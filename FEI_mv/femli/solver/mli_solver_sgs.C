@@ -228,7 +228,6 @@ int MLI_Solver_SGS::setParams( char *paramString, int argc, char **argv )
 {
    int    i;
    double *weights;
-   char   param1[200];
 
    if ( !strcasecmp(paramString, "numSweeps") )
    {
