@@ -596,25 +596,25 @@ int HYPRE_ParaSailsSetLogging(HYPRE_Solver solver,
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-/*
+/**
  * @name ParCSR Euclid Preconditioner 
  *
- * OpenMP and MPI Parallel ILU preconditioner 
- * for the ParCSR matrix format.
+ * MPI Parallel ILU preconditioner for the ParCSR matrix format.
  **/
+/*@{*/
 
-/*
+/**
  * Create a Euclid object.
  **/
 int HYPRE_ParCSREuclidCreate(MPI_Comm      comm,
                              HYPRE_Solver *solver);
 
-/*
+/**
  * Destroy a Euclid object.
  **/
 int HYPRE_ParCSREuclidDestroy(HYPRE_Solver solver);
 
-/*
+/**
  * Set up the Euclid preconditioner.  This function should be passed
  * to the iterative solver {\tt SetPrecond} function.
  *
@@ -628,7 +628,7 @@ int HYPRE_ParCSREuclidSetup(HYPRE_Solver       solver,
                             HYPRE_ParVector    b,
                             HYPRE_ParVector    x);
 
-/*
+/**
  * Apply the Euclid preconditioner. This function should be passed
  * to the iterative solver {\tt SetPrecond} function.
  *
@@ -642,14 +642,15 @@ int HYPRE_ParCSREuclidSolve(HYPRE_Solver       solver,
                             HYPRE_ParVector    b,
                             HYPRE_ParVector    x);
 
-/*
- * Insert command line (flag, value) pairs in Euclid's
- * database. All Euclid options (e.g, level, ILU method,
- * parallelization algorithm) are internally selected by
- * this database.  To insert values from a file instead
+/**
+ * Insert (name, value) pairs in Euclid's options database
+ * by passing Euclid the command line (or an array of strings).
+ * All Euclid options (e.g, level, drop-tolerance) are stored in
+ * this database.  
+ * If a (name, value) pair already exists, this call updates the value.
+ *
+ * To insert (name, value) pairs from a file instead
  * of the command line, use HYPRE\_ParCSREuclidSetParamsFromFile().
- * If a (flag, value) pair already exists, this call updates
- * its value.
  *
  * See Euclid documentation for comprehensive listing
  * of settable parameters.
@@ -661,12 +662,13 @@ int HYPRE_ParCSREuclidSetParams(HYPRE_Solver solver,
                                 int argc,
                                 char *argv[]);
 
-/*
- * Insert (flag, value) pairs in Euclid's  database.
+/**
+ * Insert (name, value) pairs in Euclid's options database.
  * Each line of the file should either begin with a "#"
- * indicating a comment line, or contain a (flag value)
+ * indicating a comment line, or contain a (name value)
  * pair, e.g:
  *
+ * >cat optionsFile
  * #sample runtime parameter file
  * -blockJacobi 3
  * -matFile     /home/hysom/myfile.euclid
@@ -681,6 +683,7 @@ int HYPRE_ParCSREuclidSetParams(HYPRE_Solver solver,
 int HYPRE_ParCSREuclidSetParamsFromFile(HYPRE_Solver solver,
                                         char *filename);
 
+#if 0
 /*
  * Returns returns rho, which is the number of nonzeros in
  * the preconditioner (ILU factors) divided by the number of
@@ -695,20 +698,21 @@ int HYPRE_ParCSREuclidSetParamsFromFile(HYPRE_Solver solver,
  * @param rho[OUT] rho, also called preconditioner density
  **/
 int HYPRE_ParCSREuclidReadRho(HYPRE_Solver solver, double *rho);
+#endif
 
 
-
-/*
+/**
  * Prints settings used during factorization; also
  * prints info on preconditioner size, etc.  Best if called
  * after HYPRE\_ParCSRPilutSetup -- else, data may be incorrect.
- *
+ * Euclid's reports can also be printed by including the
+ * appropriate option on the command line; see the user
+ * manual for details.
  **/
 int HYPRE_ParCSREuclidPrintParams(HYPRE_Solver solver);
 
-/*
- * Set the logging parameter for the
- * Euclid object.
+/**
+ * Set the logging parameter for the Euclid object.
  *
  * @param solver [IN] Preconditioner object for which to set the logging
  *                    parameter.
@@ -719,6 +723,7 @@ int HYPRE_ParCSREuclidPrintParams(HYPRE_Solver solver);
 int HYPRE_ParCSREuclidSetLogging(HYPRE_Solver solver,
                                  int          logging);
 
+/*@}*/
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
