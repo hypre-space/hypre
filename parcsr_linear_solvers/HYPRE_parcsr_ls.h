@@ -55,16 +55,6 @@ struct hypre_Solver_struct;
 struct hypre_Solver_struct;
 typedef struct hypre_Solver_struct *HYPRE_Solver;
 #endif
-#ifndef HYPRE_MATRIX_STRUCT
-#define HYPRE_MATRIX_STRUCT
-struct hypre_Matrix_struct;
-typedef struct hypre_Matrix_struct *HYPRE_Matrix;
-#endif
-#ifndef HYPRE_VECTOR_STRUCT
-#define HYPRE_VECTOR_STRUCT
-struct hypre_Vector_struct;
-typedef struct hypre_Vector_struct *HYPRE_Vector;
-#endif
 
 typedef int (*HYPRE_PtrToParSolverFcn)(HYPRE_Solver,
                                        HYPRE_ParCSRMatrix,
