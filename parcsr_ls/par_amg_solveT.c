@@ -428,7 +428,7 @@ hypre_ParAMGCycleT( void              *amg_vdata,
                                             CF_marker_array[level],
                                             relax_type,
                                             relax_points,
-                                            relax_weight,
+                                            relax_weight[level],
                                             U_array[level],
                                             Vtemp);
 
