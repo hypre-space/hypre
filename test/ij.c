@@ -81,9 +81,7 @@ main( int   argc,
    int                *row_sizes;
    int                *diag_sizes;
    int                *offdiag_sizes;
-   int                *rows;
    int                 size;
-   int                *ncols;
    int                *col_inds;
    int                *dof_func;
    int		       num_functions = 1;
@@ -1047,10 +1045,6 @@ main( int   argc,
       not changed somehow.  If one has not used IJMatrixRead, one has
       the opportunity to IJMatrixAddTo before a IJMatrixAssemble. */
 
-   ncols    = hypre_CTAlloc(int, last_local_row - first_local_row + 1);
-   rows     = hypre_CTAlloc(int, last_local_row - first_local_row + 1);
-   col_inds = hypre_CTAlloc(int, last_local_row - first_local_row + 1);
-   values   = hypre_CTAlloc(double, last_local_row - first_local_row + 1);
 
        ierr = HYPRE_IJMatrixInitialize( ij_A );
 
