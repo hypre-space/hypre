@@ -311,7 +311,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    int                    t0loproc;
 
    /* type 1 communications used to get column data from other processes */
-   MPI_Request           *t1requests;
+   MPI_Request           *t1requests, tmprequest;
    MPI_Status            *t1statuses;
    int                  **t1sendbufs;
    int                  **t1recvbufs;
@@ -507,8 +507,9 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       }
       for (i = 0; i < t1ncomms; i++)
       {
-         MPI_Send(t1sendbufs[i], t1bufsizes[i]*5, MPI_INT, t1bufprocs[i],
-                  1, comm);
+         /* Note: No need to check below that these have completed */
+         MPI_Isend(t1sendbufs[i], t1bufsizes[i]*5, MPI_INT, t1bufprocs[i],
+                   1, comm, &tmprequest);
       }
 
       t1complete = 0;
