@@ -26,8 +26,11 @@ hypre_NewBox( hypre_Index imin,
    hypre_Box *box;
    int        d;
 
-/*   box = hypre_TAlloc(hypre_Box, 1);*/
+#ifdef HYPRE_USE_PTHREADS
+   box = hypre_TAlloc(hypre_Box, 1);
+#else
    box = hypre_BoxAlloc();
+#endif
 
    for (d = 0; d < 3; d++)
    {
@@ -87,8 +90,11 @@ hypre_FreeBox( hypre_Box *box )
 {
    if (box)
    {
-/*      hypre_TFree(box);*/
+#ifdef HYPRE_USE_PTHREADS
+      hypre_TFree(box);
+#else
       hypre_BoxFree(box);
+#endif
    }
 }
 

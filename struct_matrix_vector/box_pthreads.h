@@ -101,14 +101,23 @@ Arguments:  $1 -- the name of the increment variable for the loop
 #ifndef NUM_THREADS
 #define NUM_THREADS 4
 #endif
+#ifndef MAX_ISIZE
+#define MAX_ISIZE 5
+#endif
+#ifndef MAX_JSIZE
+#define MAX_JSIZE 5
+#endif
+#ifndef MAX_KSIZE
+#define MAX_KSIZE 5
+#endif
 
 int hypre_thread_counter;
 int iteration_counter[3]={0,0,0};
 
 #define hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz)\
-   int hypre__cx = hypre__nx / 4 + !!(hypre__nx % 4);\
-   int hypre__cy = hypre__ny / 4 + !!(hypre__ny % 4);\
-   int hypre__cz = hypre__nz / 4 + !!(hypre__nz % 4);\
+   int hypre__cx = min(hypre__nx / 4 + !!(hypre__nx % 4), MAX_ISIZE);\
+   int hypre__cy = min(hypre__ny / 4 + !!(hypre__ny % 4), MAX_JSIZE);\
+   int hypre__cz = min(hypre__nz / 4 + !!(hypre__nz % 4), MAX_KSIZE);\
    int znumchunk = hypre__nz / hypre__cz + !!(hypre__nz % hypre__cz);\
    int ynumchunk = hypre__ny / hypre__cy + !!(hypre__ny % hypre__cy);\
    int xnumchunk = hypre__nx / hypre__cx + !!(hypre__nx % hypre__cx);\
