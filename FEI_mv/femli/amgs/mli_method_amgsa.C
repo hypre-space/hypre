@@ -880,7 +880,7 @@ int MLI_Method_AMGSA::resetNullSpaceComponents(int length, int start,
 int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim, 
                          double *coords, int numNS, double *scalings)
 {
-   int i, j, k, k2, offset, voffset, mypid;
+   int i, j, k, offset, voffset, mypid;
    MPI_Comm comm = getComm();
    MPI_Comm_rank( comm, &mypid );
 
