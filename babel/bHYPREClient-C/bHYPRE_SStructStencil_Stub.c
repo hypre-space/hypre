@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.SStructStencil-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:42 PST
- * Generated:     20030314 14:22:45 PST
+ * SIDL Created:  20030320 16:52:34 PST
+ * Generated:     20030320 16:52:43 PST
  * Description:   Client-side glue code for bHYPRE.SStructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 989
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1001
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "bHYPRE_SStructStencil.h"

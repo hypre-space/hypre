@@ -3,8 +3,8 @@ C       File:          SIDL_BaseClass_Impl.f
 C       Symbol:        SIDL.BaseClass-v0.8.1
 C       Symbol Type:   class
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030205 11:28:53 PST
-C       Generated:     20030314 14:22:49 PST
+C       SIDL Created:  20030121 13:48:00 PST
+C       Generated:     20030320 16:52:50 PST
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for SIDL.BaseClass
@@ -36,7 +36,7 @@ C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
 C       source-line   = 104
-C       source-url    = file:/usr/casc/babel/tarballs/babel-0.8.0/casc-solaris-gcc2.95/share/../../runtime/sidl/sidl.sidl
+C       source-url    = file:/home/painter/babel-0.8.0/share/../runtime/sidl/sidl.sidl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!

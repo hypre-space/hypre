@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:42 PST
- * Generated:     20030314 14:22:45 PST
+ * SIDL Created:  20030320 16:52:34 PST
+ * Generated:     20030320 16:52:42 PST
  * Description:   Client-side glue code for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 1112
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1124
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_StructMatrix_h
@@ -264,21 +264,41 @@ bHYPRE_StructMatrix_SetStringParameter(
   const char* value);
 
 /**
- * Set the int array parameter associated with {\tt name}.
+ * Set the int 1-D array parameter associated with {\tt name}.
  * 
  */
 int32_t
-bHYPRE_StructMatrix_SetIntArrayParameter(
+bHYPRE_StructMatrix_SetIntArray1Parameter(
   bHYPRE_StructMatrix self,
   const char* name,
   struct SIDL_int__array* value);
 
 /**
- * Set the double array parameter associated with {\tt name}.
+ * Set the int 2-D array parameter associated with {\tt name}.
  * 
  */
 int32_t
-bHYPRE_StructMatrix_SetDoubleArrayParameter(
+bHYPRE_StructMatrix_SetIntArray2Parameter(
+  bHYPRE_StructMatrix self,
+  const char* name,
+  struct SIDL_int__array* value);
+
+/**
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_StructMatrix_SetDoubleArray1Parameter(
+  bHYPRE_StructMatrix self,
+  const char* name,
+  struct SIDL_double__array* value);
+
+/**
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_StructMatrix_SetDoubleArray2Parameter(
   bHYPRE_StructMatrix self,
   const char* name,
   struct SIDL_double__array* value);

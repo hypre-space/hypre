@@ -3,15 +3,15 @@ C       File:          bHYPRE_IJBuildMatrix_Impl.f
 C       Symbol:        bHYPRE.IJBuildMatrix-v1.0.0
 C       Symbol Type:   interface
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030314 14:22:47 PST
-C       Generated:     20030314 14:22:50 PST
+C       SIDL Created:  20030320 16:52:44 PST
+C       Generated:     20030320 16:52:51 PST
 C       Description:   Client-side documentation text for bHYPRE.IJBuildMatrix
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
 C       source-line   = 85
-C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -274,13 +274,13 @@ C       in bHYPRE.IJBuildMatrix self
         integer*8 self
 C       in int nrows
         integer*4 nrows
-C       in array<int> ncols
+C       in array<int,column-major> ncols
         integer*8 ncols
-C       in array<int> rows
+C       in array<int,column-major> rows
         integer*8 rows
-C       in array<int> cols
+C       in array<int,column-major> cols
         integer*8 cols
-C       in array<double> values
+C       in array<double,column-major> values
         integer*8 values
 C       out int retval
         integer*4 retval
@@ -304,13 +304,13 @@ C       in bHYPRE.IJBuildMatrix self
         integer*8 self
 C       in int nrows
         integer*4 nrows
-C       in array<int> ncols
+C       in array<int,column-major> ncols
         integer*8 ncols
-C       in array<int> rows
+C       in array<int,column-major> rows
         integer*8 rows
-C       in array<int> cols
+C       in array<int,column-major> cols
         integer*8 cols
-C       in array<double> values
+C       in array<double,column-major> values
         integer*8 values
 C       out int retval
         integer*4 retval
@@ -355,9 +355,9 @@ C       in bHYPRE.IJBuildMatrix self
         integer*8 self
 C       in int nrows
         integer*4 nrows
-C       in array<int> rows
+C       in array<int,column-major> rows
         integer*8 rows
-C       inout array<int> ncols
+C       inout array<int,column-major> ncols
         integer*8 ncols
 C       out int retval
         integer*4 retval
@@ -377,13 +377,13 @@ C       in bHYPRE.IJBuildMatrix self
         integer*8 self
 C       in int nrows
         integer*4 nrows
-C       in array<int> ncols
+C       in array<int,column-major> ncols
         integer*8 ncols
-C       in array<int> rows
+C       in array<int,column-major> rows
         integer*8 rows
-C       in array<int> cols
+C       in array<int,column-major> cols
         integer*8 cols
-C       inout array<double> values
+C       inout array<double,column-major> values
         integer*8 values
 C       out int retval
         integer*4 retval
@@ -406,7 +406,7 @@ C
         implicit none
 C       in bHYPRE.IJBuildMatrix self
         integer*8 self
-C       in array<int> sizes
+C       in array<int,column-major> sizes
         integer*8 sizes
 C       out int retval
         integer*4 retval

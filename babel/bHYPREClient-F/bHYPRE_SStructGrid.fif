@@ -3,15 +3,15 @@ C       File:          bHYPRE_SStructGrid_Impl.f
 C       Symbol:        bHYPRE.SStructGrid-v1.0.0
 C       Symbol Type:   class
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030314 14:22:47 PST
-C       Generated:     20030314 14:22:50 PST
+C       SIDL Created:  20030320 16:52:45 PST
+C       Generated:     20030320 16:52:51 PST
 C       Description:   Client-side documentation text for bHYPRE.SStructGrid
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
-C       source-line   = 892
-C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+C       source-line   = 904
+C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -189,9 +189,9 @@ C       in bHYPRE.SStructGrid self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int> ilower
+C       in array<int,column-major> ilower
         integer*8 ilower
-C       in array<int> iupper
+C       in array<int,column-major> iupper
         integer*8 iupper
 C       out int retval
         integer*4 retval
@@ -235,7 +235,7 @@ C       in bHYPRE.SStructGrid self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int> index
+C       in array<int,column-major> index
         integer*8 index
 C       in int var
         integer*4 var
@@ -280,17 +280,17 @@ C       in bHYPRE.SStructGrid self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int> ilower
+C       in array<int,column-major> ilower
         integer*8 ilower
-C       in array<int> iupper
+C       in array<int,column-major> iupper
         integer*8 iupper
 C       in int nbor_part
         integer*4 nbor_part
-C       in array<int> nbor_ilower
+C       in array<int,column-major> nbor_ilower
         integer*8 nbor_ilower
-C       in array<int> nbor_iupper
+C       in array<int,column-major> nbor_iupper
         integer*8 nbor_iupper
-C       in array<int> index_map
+C       in array<int,column-major> index_map
         integer*8 index_map
 C       out int retval
         integer*4 retval
@@ -335,7 +335,7 @@ C       in bHYPRE.SStructGrid self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int> periodic
+C       in array<int,column-major> periodic
         integer*8 periodic
 C       out int retval
         integer*4 retval
@@ -352,7 +352,7 @@ C
         implicit none
 C       in bHYPRE.SStructGrid self
         integer*8 self
-C       in array<int> num_ghost
+C       in array<int,column-major> num_ghost
         integer*8 num_ghost
 C       out int retval
         integer*4 retval

@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:47 PST
- * Generated:     20030314 14:22:50 PST
+ * SIDL Created:  20030320 16:52:45 PST
+ * Generated:     20030320 16:52:51 PST
  * Description:   Client-side glue code for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 825
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 837
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -303,6 +303,182 @@ SIDLFortran77Symbol(bhypre_sstructparcsrvector_getclassinfo_f,BHYPRE_SSTRUCTPARC
       _proxy_self
     );
   *retval = (ptrdiff_t)_proxy_retval;
+}
+
+/*
+ * Set {\tt self} to 0.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructparcsrvector_clear_f,BHYPRE_SSTRUCTPARCSRVECTOR_CLEAR_F,bHYPRE_SStructParCSRVector_Clear_f)
+(
+  int64_t *self,
+  int32_t *retval
+)
+{
+  struct bHYPRE_SStructParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_SStructParCSRVector__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Clear))(
+      _proxy_self
+    );
+}
+
+/*
+ * Copy x into {\tt self}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructparcsrvector_copy_f,BHYPRE_SSTRUCTPARCSRVECTOR_COPY_F,bHYPRE_SStructParCSRVector_Copy_f)
+(
+  int64_t *self,
+  int64_t *x,
+  int32_t *retval
+)
+{
+  struct bHYPRE_SStructParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_SStructParCSRVector__object* _proxy_self = NULL;
+  struct bHYPRE_Vector__object* _proxy_x = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  _proxy_x =
+    (struct bHYPRE_Vector__object*)
+    (ptrdiff_t)(*x);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Copy))(
+      _proxy_self,
+      _proxy_x
+    );
+}
+
+/*
+ * Create an {\tt x} compatible with {\tt self}.
+ * 
+ * NOTE: When this method is used in an inherited class, the
+ * cloned {\tt Vector} object can be cast to an object with the
+ * inherited class type.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructparcsrvector_clone_f,BHYPRE_SSTRUCTPARCSRVECTOR_CLONE_F,bHYPRE_SStructParCSRVector_Clone_f)
+(
+  int64_t *self,
+  int64_t *x,
+  int32_t *retval
+)
+{
+  struct bHYPRE_SStructParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_SStructParCSRVector__object* _proxy_self = NULL;
+  struct bHYPRE_Vector__object* _proxy_x = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Clone))(
+      _proxy_self,
+      &_proxy_x
+    );
+  *x = (ptrdiff_t)_proxy_x;
+}
+
+/*
+ * Scale {\self} by {\tt a}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructparcsrvector_scale_f,BHYPRE_SSTRUCTPARCSRVECTOR_SCALE_F,bHYPRE_SStructParCSRVector_Scale_f)
+(
+  int64_t *self,
+  double *a,
+  int32_t *retval
+)
+{
+  struct bHYPRE_SStructParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_SStructParCSRVector__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Scale))(
+      _proxy_self,
+      *a
+    );
+}
+
+/*
+ * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructparcsrvector_dot_f,BHYPRE_SSTRUCTPARCSRVECTOR_DOT_F,bHYPRE_SStructParCSRVector_Dot_f)
+(
+  int64_t *self,
+  int64_t *x,
+  double *d,
+  int32_t *retval
+)
+{
+  struct bHYPRE_SStructParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_SStructParCSRVector__object* _proxy_self = NULL;
+  struct bHYPRE_Vector__object* _proxy_x = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  _proxy_x =
+    (struct bHYPRE_Vector__object*)
+    (ptrdiff_t)(*x);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Dot))(
+      _proxy_self,
+      _proxy_x,
+      d
+    );
+}
+
+/*
+ * Add {\tt a}*{\tt x} to {\tt self}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructparcsrvector_axpy_f,BHYPRE_SSTRUCTPARCSRVECTOR_AXPY_F,bHYPRE_SStructParCSRVector_Axpy_f)
+(
+  int64_t *self,
+  double *a,
+  int64_t *x,
+  int32_t *retval
+)
+{
+  struct bHYPRE_SStructParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_SStructParCSRVector__object* _proxy_self = NULL;
+  struct bHYPRE_Vector__object* _proxy_x = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  _proxy_x =
+    (struct bHYPRE_Vector__object*)
+    (ptrdiff_t)(*x);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Axpy))(
+      _proxy_self,
+      *a,
+      _proxy_x
+    );
 }
 
 /*
@@ -837,182 +1013,6 @@ SIDLFortran77Symbol(bhypre_sstructparcsrvector_print_f,BHYPRE_SSTRUCTPARCSRVECTO
       *all
     );
   free((void *)_proxy_filename);
-}
-
-/*
- * Set {\tt self} to 0.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_sstructparcsrvector_clear_f,BHYPRE_SSTRUCTPARCSRVECTOR_CLEAR_F,bHYPRE_SStructParCSRVector_Clear_f)
-(
-  int64_t *self,
-  int32_t *retval
-)
-{
-  struct bHYPRE_SStructParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_SStructParCSRVector__object* _proxy_self = NULL;
-  _proxy_self =
-    (struct bHYPRE_SStructParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_Clear))(
-      _proxy_self
-    );
-}
-
-/*
- * Copy x into {\tt self}.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_sstructparcsrvector_copy_f,BHYPRE_SSTRUCTPARCSRVECTOR_COPY_F,bHYPRE_SStructParCSRVector_Copy_f)
-(
-  int64_t *self,
-  int64_t *x,
-  int32_t *retval
-)
-{
-  struct bHYPRE_SStructParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_SStructParCSRVector__object* _proxy_self = NULL;
-  struct bHYPRE_Vector__object* _proxy_x = NULL;
-  _proxy_self =
-    (struct bHYPRE_SStructParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _proxy_x =
-    (struct bHYPRE_Vector__object*)
-    (ptrdiff_t)(*x);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_Copy))(
-      _proxy_self,
-      _proxy_x
-    );
-}
-
-/*
- * Create an {\tt x} compatible with {\tt self}.
- * 
- * NOTE: When this method is used in an inherited class, the
- * cloned {\tt Vector} object can be cast to an object with the
- * inherited class type.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_sstructparcsrvector_clone_f,BHYPRE_SSTRUCTPARCSRVECTOR_CLONE_F,bHYPRE_SStructParCSRVector_Clone_f)
-(
-  int64_t *self,
-  int64_t *x,
-  int32_t *retval
-)
-{
-  struct bHYPRE_SStructParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_SStructParCSRVector__object* _proxy_self = NULL;
-  struct bHYPRE_Vector__object* _proxy_x = NULL;
-  _proxy_self =
-    (struct bHYPRE_SStructParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_Clone))(
-      _proxy_self,
-      &_proxy_x
-    );
-  *x = (ptrdiff_t)_proxy_x;
-}
-
-/*
- * Scale {\self} by {\tt a}.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_sstructparcsrvector_scale_f,BHYPRE_SSTRUCTPARCSRVECTOR_SCALE_F,bHYPRE_SStructParCSRVector_Scale_f)
-(
-  int64_t *self,
-  double *a,
-  int32_t *retval
-)
-{
-  struct bHYPRE_SStructParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_SStructParCSRVector__object* _proxy_self = NULL;
-  _proxy_self =
-    (struct bHYPRE_SStructParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_Scale))(
-      _proxy_self,
-      *a
-    );
-}
-
-/*
- * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_sstructparcsrvector_dot_f,BHYPRE_SSTRUCTPARCSRVECTOR_DOT_F,bHYPRE_SStructParCSRVector_Dot_f)
-(
-  int64_t *self,
-  int64_t *x,
-  double *d,
-  int32_t *retval
-)
-{
-  struct bHYPRE_SStructParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_SStructParCSRVector__object* _proxy_self = NULL;
-  struct bHYPRE_Vector__object* _proxy_x = NULL;
-  _proxy_self =
-    (struct bHYPRE_SStructParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _proxy_x =
-    (struct bHYPRE_Vector__object*)
-    (ptrdiff_t)(*x);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_Dot))(
-      _proxy_self,
-      _proxy_x,
-      d
-    );
-}
-
-/*
- * Add {\tt a}*{\tt x} to {\tt self}.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_sstructparcsrvector_axpy_f,BHYPRE_SSTRUCTPARCSRVECTOR_AXPY_F,bHYPRE_SStructParCSRVector_Axpy_f)
-(
-  int64_t *self,
-  double *a,
-  int64_t *x,
-  int32_t *retval
-)
-{
-  struct bHYPRE_SStructParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_SStructParCSRVector__object* _proxy_self = NULL;
-  struct bHYPRE_Vector__object* _proxy_x = NULL;
-  _proxy_self =
-    (struct bHYPRE_SStructParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _proxy_x =
-    (struct bHYPRE_Vector__object*)
-    (ptrdiff_t)(*x);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_Axpy))(
-      _proxy_self,
-      *a,
-      _proxy_x
-    );
 }
 
 void

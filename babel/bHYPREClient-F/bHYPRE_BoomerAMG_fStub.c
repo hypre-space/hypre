@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:47 PST
- * Generated:     20030314 14:22:50 PST
+ * SIDL Created:  20030320 16:52:45 PST
+ * Generated:     20030320 16:52:52 PST
  * Description:   Client-side glue code for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 1205
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1217
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -41,16 +41,16 @@
  * \item[CycleType] ({\tt Int}) - type of cycle used; a V-cycle
  * (default) or a W-cycle.
  * 
- * \item[NumGridSweeps] ({\tt IntArray}) - number of sweeps for
+ * \item[NumGridSweeps] ({\tt IntArray 1D}) - number of sweeps for
  * fine and coarse grid, up and down cycle.
  * 
- * \item[GridRelaxType] ({\tt IntArray}) - type of smoother used on
+ * \item[GridRelaxType] ({\tt IntArray 1D}) - type of smoother used on
  * fine and coarse grid, up and down cycle.
  * 
- * \item[GridRelaxPoints] ({\tt IntArray}) - point ordering used in
+ * \item[GridRelaxPoints] ({\tt IntArray 2D}) - point ordering used in
  * relaxation.
  * 
- * \item[RelaxWeight] ({\tt DoubleArray}) - relaxation weight for
+ * \item[RelaxWeight] ({\tt DoubleArray 1D}) - relaxation weight for
  * smoothed Jacobi and hybrid SOR.
  * 
  * \item[TruncFactor] ({\tt Double}) - truncation factor for
@@ -70,7 +70,7 @@
  * \item[NumFunctions] ({\tt Int}) - size of the system of PDEs
  * (when using the systems version).
  * 
- * \item[DOFFunc] ({\tt IntArray}) - mapping that assigns the
+ * \item[DOFFunc] ({\tt IntArray 1D}) - mapping that assigns the
  * function to each variable (when using the systems version).
  * 
  * \item[Variant] ({\tt Int}) - variant of Schwarz used.
@@ -515,12 +515,12 @@ SIDLFortran77Symbol(bhypre_boomeramg_setstringparameter_f,BHYPRE_BOOMERAMG_SETST
 }
 
 /*
- * Set the int array parameter associated with {\tt name}.
+ * Set the int 1-D array parameter associated with {\tt name}.
  * 
  */
 
 void
-SIDLFortran77Symbol(bhypre_boomeramg_setintarrayparameter_f,BHYPRE_BOOMERAMG_SETINTARRAYPARAMETER_F,bHYPRE_BoomerAMG_SetIntArrayParameter_f)
+SIDLFortran77Symbol(bhypre_boomeramg_setintarray1parameter_f,BHYPRE_BOOMERAMG_SETINTARRAY1PARAMETER_F,bHYPRE_BoomerAMG_SetIntArray1Parameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -545,7 +545,7 @@ SIDLFortran77Symbol(bhypre_boomeramg_setintarrayparameter_f,BHYPRE_BOOMERAMG_SET
     (ptrdiff_t)(*value);
   _epv = _proxy_self->d_epv;
   *retval = 
-    (*(_epv->f_SetIntArrayParameter))(
+    (*(_epv->f_SetIntArray1Parameter))(
       _proxy_self,
       _proxy_name,
       _proxy_value
@@ -554,12 +554,51 @@ SIDLFortran77Symbol(bhypre_boomeramg_setintarrayparameter_f,BHYPRE_BOOMERAMG_SET
 }
 
 /*
- * Set the double array parameter associated with {\tt name}.
+ * Set the int 2-D array parameter associated with {\tt name}.
  * 
  */
 
 void
-SIDLFortran77Symbol(bhypre_boomeramg_setdoublearrayparameter_f,BHYPRE_BOOMERAMG_SETDOUBLEARRAYPARAMETER_F,bHYPRE_BoomerAMG_SetDoubleArrayParameter_f)
+SIDLFortran77Symbol(bhypre_boomeramg_setintarray2parameter_f,BHYPRE_BOOMERAMG_SETINTARRAY2PARAMETER_F,bHYPRE_BoomerAMG_SetIntArray2Parameter_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  int64_t *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct bHYPRE_BoomerAMG__epv *_epv = NULL;
+  struct bHYPRE_BoomerAMG__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  struct SIDL_int__array* _proxy_value = NULL;
+  _proxy_self =
+    (struct bHYPRE_BoomerAMG__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _proxy_value =
+    (struct SIDL_int__array*)
+    (ptrdiff_t)(*value);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetIntArray2Parameter))(
+      _proxy_self,
+      _proxy_name,
+      _proxy_value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_boomeramg_setdoublearray1parameter_f,BHYPRE_BOOMERAMG_SETDOUBLEARRAY1PARAMETER_F,bHYPRE_BoomerAMG_SetDoubleArray1Parameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -584,7 +623,46 @@ SIDLFortran77Symbol(bhypre_boomeramg_setdoublearrayparameter_f,BHYPRE_BOOMERAMG_
     (ptrdiff_t)(*value);
   _epv = _proxy_self->d_epv;
   *retval = 
-    (*(_epv->f_SetDoubleArrayParameter))(
+    (*(_epv->f_SetDoubleArray1Parameter))(
+      _proxy_self,
+      _proxy_name,
+      _proxy_value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_boomeramg_setdoublearray2parameter_f,BHYPRE_BOOMERAMG_SETDOUBLEARRAY2PARAMETER_F,bHYPRE_BoomerAMG_SetDoubleArray2Parameter_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  int64_t *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct bHYPRE_BoomerAMG__epv *_epv = NULL;
+  struct bHYPRE_BoomerAMG__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  struct SIDL_double__array* _proxy_value = NULL;
+  _proxy_self =
+    (struct bHYPRE_BoomerAMG__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _proxy_value =
+    (struct SIDL_double__array*)
+    (ptrdiff_t)(*value);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetDoubleArray2Parameter))(
       _proxy_self,
       _proxy_name,
       _proxy_value

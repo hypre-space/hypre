@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.ParCSRDiagScale-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:47 PST
- * Generated:     20030314 14:22:50 PST
+ * SIDL Created:  20030320 16:52:45 PST
+ * Generated:     20030320 16:52:53 PST
  * Description:   Client-side glue code for bHYPRE.ParCSRDiagScale
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 1128
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1140
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -448,12 +448,12 @@ SIDLFortran77Symbol(bhypre_parcsrdiagscale_setstringparameter_f,BHYPRE_PARCSRDIA
 }
 
 /*
- * Set the int array parameter associated with {\tt name}.
+ * Set the int 1-D array parameter associated with {\tt name}.
  * 
  */
 
 void
-SIDLFortran77Symbol(bhypre_parcsrdiagscale_setintarrayparameter_f,BHYPRE_PARCSRDIAGSCALE_SETINTARRAYPARAMETER_F,bHYPRE_ParCSRDiagScale_SetIntArrayParameter_f)
+SIDLFortran77Symbol(bhypre_parcsrdiagscale_setintarray1parameter_f,BHYPRE_PARCSRDIAGSCALE_SETINTARRAY1PARAMETER_F,bHYPRE_ParCSRDiagScale_SetIntArray1Parameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -478,7 +478,7 @@ SIDLFortran77Symbol(bhypre_parcsrdiagscale_setintarrayparameter_f,BHYPRE_PARCSRD
     (ptrdiff_t)(*value);
   _epv = _proxy_self->d_epv;
   *retval = 
-    (*(_epv->f_SetIntArrayParameter))(
+    (*(_epv->f_SetIntArray1Parameter))(
       _proxy_self,
       _proxy_name,
       _proxy_value
@@ -487,12 +487,51 @@ SIDLFortran77Symbol(bhypre_parcsrdiagscale_setintarrayparameter_f,BHYPRE_PARCSRD
 }
 
 /*
- * Set the double array parameter associated with {\tt name}.
+ * Set the int 2-D array parameter associated with {\tt name}.
  * 
  */
 
 void
-SIDLFortran77Symbol(bhypre_parcsrdiagscale_setdoublearrayparameter_f,BHYPRE_PARCSRDIAGSCALE_SETDOUBLEARRAYPARAMETER_F,bHYPRE_ParCSRDiagScale_SetDoubleArrayParameter_f)
+SIDLFortran77Symbol(bhypre_parcsrdiagscale_setintarray2parameter_f,BHYPRE_PARCSRDIAGSCALE_SETINTARRAY2PARAMETER_F,bHYPRE_ParCSRDiagScale_SetIntArray2Parameter_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  int64_t *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct bHYPRE_ParCSRDiagScale__epv *_epv = NULL;
+  struct bHYPRE_ParCSRDiagScale__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  struct SIDL_int__array* _proxy_value = NULL;
+  _proxy_self =
+    (struct bHYPRE_ParCSRDiagScale__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _proxy_value =
+    (struct SIDL_int__array*)
+    (ptrdiff_t)(*value);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetIntArray2Parameter))(
+      _proxy_self,
+      _proxy_name,
+      _proxy_value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_parcsrdiagscale_setdoublearray1parameter_f,BHYPRE_PARCSRDIAGSCALE_SETDOUBLEARRAY1PARAMETER_F,bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -517,7 +556,46 @@ SIDLFortran77Symbol(bhypre_parcsrdiagscale_setdoublearrayparameter_f,BHYPRE_PARC
     (ptrdiff_t)(*value);
   _epv = _proxy_self->d_epv;
   *retval = 
-    (*(_epv->f_SetDoubleArrayParameter))(
+    (*(_epv->f_SetDoubleArray1Parameter))(
+      _proxy_self,
+      _proxy_name,
+      _proxy_value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_parcsrdiagscale_setdoublearray2parameter_f,BHYPRE_PARCSRDIAGSCALE_SETDOUBLEARRAY2PARAMETER_F,bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  int64_t *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct bHYPRE_ParCSRDiagScale__epv *_epv = NULL;
+  struct bHYPRE_ParCSRDiagScale__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  struct SIDL_double__array* _proxy_value = NULL;
+  _proxy_self =
+    (struct bHYPRE_ParCSRDiagScale__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    SIDL_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _proxy_value =
+    (struct SIDL_double__array*)
+    (ptrdiff_t)(*value);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetDoubleArray2Parameter))(
       _proxy_self,
       _proxy_name,
       _proxy_value

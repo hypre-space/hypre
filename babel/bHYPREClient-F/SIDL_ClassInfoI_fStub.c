@@ -3,8 +3,8 @@
  * Symbol:        SIDL.ClassInfoI-v0.8.1
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030205 11:28:53 PST
- * Generated:     20030314 14:22:50 PST
+ * SIDL Created:  20030121 13:48:00 PST
+ * Generated:     20030320 16:52:50 PST
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for SIDL.ClassInfoI
@@ -36,7 +36,7 @@
  * 
  * babel-version = 0.8.0
  * source-line   = 345
- * source-url    = file:/usr/casc/babel/tarballs/babel-0.8.0/casc-solaris-gcc2.95/share/../../runtime/sidl/sidl.sidl
+ * source-url    = file:/home/painter/babel-0.8.0/share/../runtime/sidl/sidl.sidl
  */
 
 /*

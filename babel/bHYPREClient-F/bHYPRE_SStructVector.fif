@@ -3,15 +3,15 @@ C       File:          bHYPRE_SStructVector_Impl.f
 C       Symbol:        bHYPRE.SStructVector-v1.0.0
 C       Symbol Type:   class
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030314 14:22:47 PST
-C       Generated:     20030314 14:22:50 PST
+C       SIDL Created:  20030320 16:52:45 PST
+C       Generated:     20030320 16:52:51 PST
 C       Description:   Client-side documentation text for bHYPRE.SStructVector
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
-C       source-line   = 1062
-C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+C       source-line   = 1074
+C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -161,6 +161,108 @@ C       out SIDL.ClassInfo retval
 
 
 C       
+C       Set {\tt self} to 0.
+C       
+C       
+
+        subroutine bHYPRE_SStructVector_Clear_f(self, retval)
+        implicit none
+C       in bHYPRE.SStructVector self
+        integer*8 self
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Copy x into {\tt self}.
+C       
+C       
+
+        subroutine bHYPRE_SStructVector_Copy_f(self, x, retval)
+        implicit none
+C       in bHYPRE.SStructVector self
+        integer*8 self
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Create an {\tt x} compatible with {\tt self}.
+C       
+C       NOTE: When this method is used in an inherited class, the
+C       cloned {\tt Vector} object can be cast to an object with the
+C       inherited class type.
+C       
+C       
+
+        subroutine bHYPRE_SStructVector_Clone_f(self, x, retval)
+        implicit none
+C       in bHYPRE.SStructVector self
+        integer*8 self
+C       out bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Scale {\self} by {\tt a}.
+C       
+C       
+
+        subroutine bHYPRE_SStructVector_Scale_f(self, a, retval)
+        implicit none
+C       in bHYPRE.SStructVector self
+        integer*8 self
+C       in double a
+        double precision a
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+C       
+C       
+
+        subroutine bHYPRE_SStructVector_Dot_f(self, x, d, retval)
+        implicit none
+C       in bHYPRE.SStructVector self
+        integer*8 self
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out double d
+        double precision d
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Add {\tt a}*{\tt x} to {\tt self}.
+C       
+C       
+
+        subroutine bHYPRE_SStructVector_Axpy_f(self, a, x, retval)
+        implicit none
+C       in bHYPRE.SStructVector self
+        integer*8 self
+C       in double a
+        double precision a
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
 C       Set the MPI Communicator.
 C       
 C       
@@ -270,11 +372,11 @@ C       in bHYPRE.SStructVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int> index
+C       in array<int,column-major> index
         integer*8 index
 C       in int var
         integer*4 var
-C       in array<double> value
+C       in array<double,column-major> value
         integer*8 value
 C       out int retval
         integer*4 retval
@@ -301,13 +403,13 @@ C       in bHYPRE.SStructVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int> ilower
+C       in array<int,column-major> ilower
         integer*8 ilower
-C       in array<int> iupper
+C       in array<int,column-major> iupper
         integer*8 iupper
 C       in int var
         integer*4 var
-C       in array<double> values
+C       in array<double,column-major> values
         integer*8 values
 C       out int retval
         integer*4 retval
@@ -334,11 +436,11 @@ C       in bHYPRE.SStructVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int> index
+C       in array<int,column-major> index
         integer*8 index
 C       in int var
         integer*4 var
-C       in array<double> value
+C       in array<double,column-major> value
         integer*8 value
 C       out int retval
         integer*4 retval
@@ -365,13 +467,13 @@ C       in bHYPRE.SStructVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int> ilower
+C       in array<int,column-major> ilower
         integer*8 ilower
-C       in array<int> iupper
+C       in array<int,column-major> iupper
         integer*8 iupper
 C       in int var
         integer*4 var
-C       in array<double> values
+C       in array<double,column-major> values
         integer*8 values
 C       out int retval
         integer*4 retval
@@ -411,7 +513,7 @@ C       in bHYPRE.SStructVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int> index
+C       in array<int,column-major> index
         integer*8 index
 C       in int var
         integer*4 var
@@ -441,13 +543,13 @@ C       in bHYPRE.SStructVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int> ilower
+C       in array<int,column-major> ilower
         integer*8 ilower
-C       in array<int> iupper
+C       in array<int,column-major> iupper
         integer*8 iupper
 C       in int var
         integer*4 var
-C       inout array<double> values
+C       inout array<double,column-major> values
         integer*8 values
 C       out int retval
         integer*4 retval
@@ -483,108 +585,6 @@ C       in string filename
         character*(*) filename
 C       in int all
         integer*4 all
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set {\tt self} to 0.
-C       
-C       
-
-        subroutine bHYPRE_SStructVector_Clear_f(self, retval)
-        implicit none
-C       in bHYPRE.SStructVector self
-        integer*8 self
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Copy x into {\tt self}.
-C       
-C       
-
-        subroutine bHYPRE_SStructVector_Copy_f(self, x, retval)
-        implicit none
-C       in bHYPRE.SStructVector self
-        integer*8 self
-C       in bHYPRE.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Create an {\tt x} compatible with {\tt self}.
-C       
-C       NOTE: When this method is used in an inherited class, the
-C       cloned {\tt Vector} object can be cast to an object with the
-C       inherited class type.
-C       
-C       
-
-        subroutine bHYPRE_SStructVector_Clone_f(self, x, retval)
-        implicit none
-C       in bHYPRE.SStructVector self
-        integer*8 self
-C       out bHYPRE.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Scale {\self} by {\tt a}.
-C       
-C       
-
-        subroutine bHYPRE_SStructVector_Scale_f(self, a, retval)
-        implicit none
-C       in bHYPRE.SStructVector self
-        integer*8 self
-C       in double a
-        double precision a
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
-C       
-C       
-
-        subroutine bHYPRE_SStructVector_Dot_f(self, x, d, retval)
-        implicit none
-C       in bHYPRE.SStructVector self
-        integer*8 self
-C       in bHYPRE.Vector x
-        integer*8 x
-C       out double d
-        double precision d
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Add {\tt a}*{\tt x} to {\tt self}.
-C       
-C       
-
-        subroutine bHYPRE_SStructVector_Axpy_f(self, a, x, retval)
-        implicit none
-C       in bHYPRE.SStructVector self
-        integer*8 self
-C       in double a
-        double precision a
-C       in bHYPRE.Vector x
-        integer*8 x
 C       out int retval
         integer*4 retval
         end

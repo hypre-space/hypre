@@ -3,15 +3,15 @@ C       File:          bHYPRE_BoomerAMG_Impl.f
 C       Symbol:        bHYPRE.BoomerAMG-v1.0.0
 C       Symbol Type:   class
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030314 14:22:47 PST
-C       Generated:     20030314 14:22:50 PST
+C       SIDL Created:  20030320 16:52:45 PST
+C       Generated:     20030320 16:52:52 PST
 C       Description:   Client-side documentation text for bHYPRE.BoomerAMG
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
-C       source-line   = 1205
-C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+C       source-line   = 1217
+C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -43,16 +43,16 @@ C
 C       \item[CycleType] ({\tt Int}) - type of cycle used; a V-cycle
 C       (default) or a W-cycle.
 C       
-C       \item[NumGridSweeps] ({\tt IntArray}) - number of sweeps for
+C       \item[NumGridSweeps] ({\tt IntArray 1D}) - number of sweeps for
 C       fine and coarse grid, up and down cycle.
 C       
-C       \item[GridRelaxType] ({\tt IntArray}) - type of smoother used on
+C       \item[GridRelaxType] ({\tt IntArray 1D}) - type of smoother used on
 C       fine and coarse grid, up and down cycle.
 C       
-C       \item[GridRelaxPoints] ({\tt IntArray}) - point ordering used in
+C       \item[GridRelaxPoints] ({\tt IntArray 2D}) - point ordering used in
 C       relaxation.
 C       
-C       \item[RelaxWeight] ({\tt DoubleArray}) - relaxation weight for
+C       \item[RelaxWeight] ({\tt DoubleArray 1D}) - relaxation weight for
 C       smoothed Jacobi and hybrid SOR.
 C       
 C       \item[TruncFactor] ({\tt Double}) - truncation factor for
@@ -72,7 +72,7 @@ C
 C       \item[NumFunctions] ({\tt Int}) - size of the system of PDEs
 C       (when using the systems version).
 C       
-C       \item[DOFFunc] ({\tt IntArray}) - mapping that assigns the
+C       \item[DOFFunc] ({\tt IntArray 1D}) - mapping that assigns the
 C       function to each variable (when using the systems version).
 C       
 C       \item[Variant] ({\tt Int}) - variant of Schwarz used.
@@ -302,18 +302,18 @@ C       out int retval
 
 
 C       
-C       Set the int array parameter associated with {\tt name}.
+C       Set the int 1-D array parameter associated with {\tt name}.
 C       
 C       
 
-        subroutine bHYPRE_BoomerAMG_SetIntArrayParameter_f(self, name,
+        subroutine bHYPRE_BoomerAMG_SetIntArray1Parameter_f(self, name,
      &     value, retval)
         implicit none
 C       in bHYPRE.BoomerAMG self
         integer*8 self
 C       in string name
         character*(*) name
-C       in array<int> value
+C       in array<int,column-major> value
         integer*8 value
 C       out int retval
         integer*4 retval
@@ -321,18 +321,56 @@ C       out int retval
 
 
 C       
-C       Set the double array parameter associated with {\tt name}.
+C       Set the int 2-D array parameter associated with {\tt name}.
 C       
 C       
 
-        subroutine bHYPRE_BoomerAMG_SetDoubleArrayParameter_f(self,
+        subroutine bHYPRE_BoomerAMG_SetIntArray2Parameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.BoomerAMG self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<int,2,column-major> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the double 1-D array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetDoubleArray1Parameter_f(self,
      &     name, value, retval)
         implicit none
 C       in bHYPRE.BoomerAMG self
         integer*8 self
 C       in string name
         character*(*) name
-C       in array<double> value
+C       in array<double,column-major> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the double 2-D array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetDoubleArray2Parameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in bHYPRE.BoomerAMG self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<double,2,column-major> value
         integer*8 value
 C       out int retval
         integer*4 retval

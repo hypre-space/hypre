@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.PreconditionedSolver-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:41 PST
- * Generated:     20030314 14:22:44 PST
+ * SIDL Created:  20030320 16:52:33 PST
+ * Generated:     20030320 16:52:38 PST
  * Description:   Intermediate Object Representation for bHYPRE.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 744
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 756
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_PreconditionedSolver_IOR_h
@@ -88,11 +88,19 @@ struct bHYPRE_PreconditionedSolver__epv {
     void* self,
     const char* name,
     const char* value);
-  int32_t (*f_SetIntArrayParameter)(
+  int32_t (*f_SetIntArray1Parameter)(
     void* self,
     const char* name,
     struct SIDL_int__array* value);
-  int32_t (*f_SetDoubleArrayParameter)(
+  int32_t (*f_SetIntArray2Parameter)(
+    void* self,
+    const char* name,
+    struct SIDL_int__array* value);
+  int32_t (*f_SetDoubleArray1Parameter)(
+    void* self,
+    const char* name,
+    struct SIDL_double__array* value);
+  int32_t (*f_SetDoubleArray2Parameter)(
     void* self,
     const char* name,
     struct SIDL_double__array* value);

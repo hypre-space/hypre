@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.SStructParCSRMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:42 PST
- * Generated:     20030314 14:22:44 PST
+ * SIDL Created:  20030320 16:52:34 PST
+ * Generated:     20030320 16:52:40 PST
  * Description:   Client-side glue code for bHYPRE.SStructParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 815
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 827
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructParCSRMatrix_h
@@ -170,21 +170,41 @@ bHYPRE_SStructParCSRMatrix_SetStringParameter(
   const char* value);
 
 /**
- * Set the int array parameter associated with {\tt name}.
+ * Set the int 1-D array parameter associated with {\tt name}.
  * 
  */
 int32_t
-bHYPRE_SStructParCSRMatrix_SetIntArrayParameter(
+bHYPRE_SStructParCSRMatrix_SetIntArray1Parameter(
   bHYPRE_SStructParCSRMatrix self,
   const char* name,
   struct SIDL_int__array* value);
 
 /**
- * Set the double array parameter associated with {\tt name}.
+ * Set the int 2-D array parameter associated with {\tt name}.
  * 
  */
 int32_t
-bHYPRE_SStructParCSRMatrix_SetDoubleArrayParameter(
+bHYPRE_SStructParCSRMatrix_SetIntArray2Parameter(
+  bHYPRE_SStructParCSRMatrix self,
+  const char* name,
+  struct SIDL_int__array* value);
+
+/**
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRMatrix_SetDoubleArray1Parameter(
+  bHYPRE_SStructParCSRMatrix self,
+  const char* name,
+  struct SIDL_double__array* value);
+
+/**
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRMatrix_SetDoubleArray2Parameter(
   bHYPRE_SStructParCSRMatrix self,
   const char* name,
   struct SIDL_double__array* value);

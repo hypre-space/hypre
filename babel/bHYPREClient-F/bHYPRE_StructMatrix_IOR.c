@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:47 PST
- * Generated:     20030314 14:22:49 PST
+ * SIDL Created:  20030320 16:52:45 PST
+ * Generated:     20030320 16:52:49 PST
  * Description:   Intermediate Object Representation for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 1112
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1124
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include <stdlib.h>
@@ -144,42 +144,44 @@ static void bHYPRE_StructMatrix__init_epv(
   s_old__sidl_baseinterface = s1->d_sidl_baseinterface.d_epv;
   s_old__sidl_baseclass     = s1->d_epv;
 
-  epv->f__cast                   = ior_bHYPRE_StructMatrix__cast;
-  epv->f__delete                 = ior_bHYPRE_StructMatrix__delete;
-  epv->f__ctor                   = NULL;
-  epv->f__dtor                   = NULL;
-  epv->f_addRef                  = (void (*)(struct 
+  epv->f__cast                    = ior_bHYPRE_StructMatrix__cast;
+  epv->f__delete                  = ior_bHYPRE_StructMatrix__delete;
+  epv->f__ctor                    = NULL;
+  epv->f__dtor                    = NULL;
+  epv->f_addRef                   = (void (*)(struct 
     bHYPRE_StructMatrix__object*)) s1->d_epv->f_addRef;
-  epv->f_deleteRef               = (void (*)(struct 
+  epv->f_deleteRef                = (void (*)(struct 
     bHYPRE_StructMatrix__object*)) s1->d_epv->f_deleteRef;
-  epv->f_isSame                  = (SIDL_bool (*)(struct 
+  epv->f_isSame                   = (SIDL_bool (*)(struct 
     bHYPRE_StructMatrix__object*,
     struct SIDL_BaseInterface__object*)) s1->d_epv->f_isSame;
-  epv->f_queryInt                = (struct SIDL_BaseInterface__object* 
+  epv->f_queryInt                 = (struct SIDL_BaseInterface__object* 
     (*)(struct bHYPRE_StructMatrix__object*,const char*)) s1->d_epv->f_queryInt;
-  epv->f_isType                  = (SIDL_bool (*)(struct 
+  epv->f_isType                   = (SIDL_bool (*)(struct 
     bHYPRE_StructMatrix__object*,const char*)) s1->d_epv->f_isType;
-  epv->f_getClassInfo            = (struct SIDL_ClassInfo__object* (*)(struct 
+  epv->f_getClassInfo             = (struct SIDL_ClassInfo__object* (*)(struct 
     bHYPRE_StructMatrix__object*)) s1->d_epv->f_getClassInfo;
-  epv->f_SetCommunicator         = NULL;
-  epv->f_Initialize              = NULL;
-  epv->f_Assemble                = NULL;
-  epv->f_GetObject               = NULL;
-  epv->f_SetGrid                 = NULL;
-  epv->f_SetStencil              = NULL;
-  epv->f_SetValues               = NULL;
-  epv->f_SetBoxValues            = NULL;
-  epv->f_SetNumGhost             = NULL;
-  epv->f_SetSymmetric            = NULL;
-  epv->f_SetIntParameter         = NULL;
-  epv->f_SetDoubleParameter      = NULL;
-  epv->f_SetStringParameter      = NULL;
-  epv->f_SetIntArrayParameter    = NULL;
-  epv->f_SetDoubleArrayParameter = NULL;
-  epv->f_GetIntValue             = NULL;
-  epv->f_GetDoubleValue          = NULL;
-  epv->f_Setup                   = NULL;
-  epv->f_Apply                   = NULL;
+  epv->f_SetCommunicator          = NULL;
+  epv->f_Initialize               = NULL;
+  epv->f_Assemble                 = NULL;
+  epv->f_GetObject                = NULL;
+  epv->f_SetGrid                  = NULL;
+  epv->f_SetStencil               = NULL;
+  epv->f_SetValues                = NULL;
+  epv->f_SetBoxValues             = NULL;
+  epv->f_SetNumGhost              = NULL;
+  epv->f_SetSymmetric             = NULL;
+  epv->f_SetIntParameter          = NULL;
+  epv->f_SetDoubleParameter       = NULL;
+  epv->f_SetStringParameter       = NULL;
+  epv->f_SetIntArray1Parameter    = NULL;
+  epv->f_SetIntArray2Parameter    = NULL;
+  epv->f_SetDoubleArray1Parameter = NULL;
+  epv->f_SetDoubleArray2Parameter = NULL;
+  epv->f_GetIntValue              = NULL;
+  epv->f_GetDoubleValue           = NULL;
+  epv->f_Setup                    = NULL;
+  epv->f_Apply                    = NULL;
 
   bHYPRE_StructMatrix__set_epv(epv);
 
@@ -209,35 +211,39 @@ static void bHYPRE_StructMatrix__init_epv(
     const char*)) epv->f_queryInt;
   e1->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
 
-  e2->f__cast                   = (void* (*)(void*,const char*)) epv->f__cast;
-  e2->f__delete                 = (void (*)(void*)) epv->f__delete;
-  e2->f_addRef                  = (void (*)(void*)) epv->f_addRef;
-  e2->f_deleteRef               = (void (*)(void*)) epv->f_deleteRef;
-  e2->f_isSame                  = (SIDL_bool (*)(void*,
+  e2->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
+  e2->f__delete                  = (void (*)(void*)) epv->f__delete;
+  e2->f_addRef                   = (void (*)(void*)) epv->f_addRef;
+  e2->f_deleteRef                = (void (*)(void*)) epv->f_deleteRef;
+  e2->f_isSame                   = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e2->f_queryInt                = (struct SIDL_BaseInterface__object* (*)(void*,
-    const char*)) epv->f_queryInt;
-  e2->f_isType                  = (SIDL_bool (*)(void*,
+  e2->f_queryInt                 = (struct SIDL_BaseInterface__object* 
+    (*)(void*,const char*)) epv->f_queryInt;
+  e2->f_isType                   = (SIDL_bool (*)(void*,
     const char*)) epv->f_isType;
-  e2->f_SetCommunicator         = (int32_t (*)(void*,
+  e2->f_SetCommunicator          = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
-  e2->f_SetIntParameter         = (int32_t (*)(void*,const char*,
+  e2->f_SetIntParameter          = (int32_t (*)(void*,const char*,
     int32_t)) epv->f_SetIntParameter;
-  e2->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
+  e2->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,
     double)) epv->f_SetDoubleParameter;
-  e2->f_SetStringParameter      = (int32_t (*)(void*,const char*,
+  e2->f_SetStringParameter       = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
-  e2->f_SetIntArrayParameter    = (int32_t (*)(void*,const char*,
-    struct SIDL_int__array*)) epv->f_SetIntArrayParameter;
-  e2->f_SetDoubleArrayParameter = (int32_t (*)(void*,const char*,
-    struct SIDL_double__array*)) epv->f_SetDoubleArrayParameter;
-  e2->f_GetIntValue             = (int32_t (*)(void*,const char*,
+  e2->f_SetIntArray1Parameter    = (int32_t (*)(void*,const char*,
+    struct SIDL_int__array*)) epv->f_SetIntArray1Parameter;
+  e2->f_SetIntArray2Parameter    = (int32_t (*)(void*,const char*,
+    struct SIDL_int__array*)) epv->f_SetIntArray2Parameter;
+  e2->f_SetDoubleArray1Parameter = (int32_t (*)(void*,const char*,
+    struct SIDL_double__array*)) epv->f_SetDoubleArray1Parameter;
+  e2->f_SetDoubleArray2Parameter = (int32_t (*)(void*,const char*,
+    struct SIDL_double__array*)) epv->f_SetDoubleArray2Parameter;
+  e2->f_GetIntValue              = (int32_t (*)(void*,const char*,
     int32_t*)) epv->f_GetIntValue;
-  e2->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
+  e2->f_GetDoubleValue           = (int32_t (*)(void*,const char*,
     double*)) epv->f_GetDoubleValue;
-  e2->f_Setup                   = (int32_t (*)(void*,
+  e2->f_Setup                    = (int32_t (*)(void*,
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object*)) epv->f_Setup;
-  e2->f_Apply                   = (int32_t (*)(void*,
+  e2->f_Apply                    = (int32_t (*)(void*,
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object**)) epv->f_Apply;
 
   e3->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
@@ -680,11 +686,11 @@ remote_bHYPRE_StructMatrix_SetStringParameter(
 }
 
 /*
- * REMOTE METHOD STUB:SetIntArrayParameter
+ * REMOTE METHOD STUB:SetIntArray1Parameter
  */
 
 static int32_t
-remote_bHYPRE_StructMatrix_SetIntArrayParameter(
+remote_bHYPRE_StructMatrix_SetIntArray1Parameter(
   struct bHYPRE_StructMatrix__object* self,
   const char* name,
   struct SIDL_int__array* value)
@@ -693,11 +699,37 @@ remote_bHYPRE_StructMatrix_SetIntArrayParameter(
 }
 
 /*
- * REMOTE METHOD STUB:SetDoubleArrayParameter
+ * REMOTE METHOD STUB:SetIntArray2Parameter
  */
 
 static int32_t
-remote_bHYPRE_StructMatrix_SetDoubleArrayParameter(
+remote_bHYPRE_StructMatrix_SetIntArray2Parameter(
+  struct bHYPRE_StructMatrix__object* self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetDoubleArray1Parameter
+ */
+
+static int32_t
+remote_bHYPRE_StructMatrix_SetDoubleArray1Parameter(
+  struct bHYPRE_StructMatrix__object* self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetDoubleArray2Parameter
+ */
+
+static int32_t
+remote_bHYPRE_StructMatrix_SetDoubleArray2Parameter(
   struct bHYPRE_StructMatrix__object* self,
   const char* name,
   struct SIDL_double__array* value)
@@ -770,39 +802,43 @@ static void bHYPRE_StructMatrix__init_remote_epv(void)
   struct bHYPRE_ProblemDefinition__epv* e3  = &s_rem__bhypre_problemdefinition;
   struct bHYPRE_StructBuildMatrix__epv* e4  = &s_rem__bhypre_structbuildmatrix;
 
-  epv->f__cast                   = remote_bHYPRE_StructMatrix__cast;
-  epv->f__delete                 = remote_bHYPRE_StructMatrix__delete;
-  epv->f__ctor                   = NULL;
-  epv->f__dtor                   = NULL;
-  epv->f_addRef                  = remote_bHYPRE_StructMatrix_addRef;
-  epv->f_deleteRef               = remote_bHYPRE_StructMatrix_deleteRef;
-  epv->f_isSame                  = remote_bHYPRE_StructMatrix_isSame;
-  epv->f_queryInt                = remote_bHYPRE_StructMatrix_queryInt;
-  epv->f_isType                  = remote_bHYPRE_StructMatrix_isType;
-  epv->f_getClassInfo            = remote_bHYPRE_StructMatrix_getClassInfo;
-  epv->f_SetCommunicator         = remote_bHYPRE_StructMatrix_SetCommunicator;
-  epv->f_Initialize              = remote_bHYPRE_StructMatrix_Initialize;
-  epv->f_Assemble                = remote_bHYPRE_StructMatrix_Assemble;
-  epv->f_GetObject               = remote_bHYPRE_StructMatrix_GetObject;
-  epv->f_SetGrid                 = remote_bHYPRE_StructMatrix_SetGrid;
-  epv->f_SetStencil              = remote_bHYPRE_StructMatrix_SetStencil;
-  epv->f_SetValues               = remote_bHYPRE_StructMatrix_SetValues;
-  epv->f_SetBoxValues            = remote_bHYPRE_StructMatrix_SetBoxValues;
-  epv->f_SetNumGhost             = remote_bHYPRE_StructMatrix_SetNumGhost;
-  epv->f_SetSymmetric            = remote_bHYPRE_StructMatrix_SetSymmetric;
-  epv->f_SetIntParameter         = remote_bHYPRE_StructMatrix_SetIntParameter;
-  epv->f_SetDoubleParameter      = 
+  epv->f__cast                    = remote_bHYPRE_StructMatrix__cast;
+  epv->f__delete                  = remote_bHYPRE_StructMatrix__delete;
+  epv->f__ctor                    = NULL;
+  epv->f__dtor                    = NULL;
+  epv->f_addRef                   = remote_bHYPRE_StructMatrix_addRef;
+  epv->f_deleteRef                = remote_bHYPRE_StructMatrix_deleteRef;
+  epv->f_isSame                   = remote_bHYPRE_StructMatrix_isSame;
+  epv->f_queryInt                 = remote_bHYPRE_StructMatrix_queryInt;
+  epv->f_isType                   = remote_bHYPRE_StructMatrix_isType;
+  epv->f_getClassInfo             = remote_bHYPRE_StructMatrix_getClassInfo;
+  epv->f_SetCommunicator          = remote_bHYPRE_StructMatrix_SetCommunicator;
+  epv->f_Initialize               = remote_bHYPRE_StructMatrix_Initialize;
+  epv->f_Assemble                 = remote_bHYPRE_StructMatrix_Assemble;
+  epv->f_GetObject                = remote_bHYPRE_StructMatrix_GetObject;
+  epv->f_SetGrid                  = remote_bHYPRE_StructMatrix_SetGrid;
+  epv->f_SetStencil               = remote_bHYPRE_StructMatrix_SetStencil;
+  epv->f_SetValues                = remote_bHYPRE_StructMatrix_SetValues;
+  epv->f_SetBoxValues             = remote_bHYPRE_StructMatrix_SetBoxValues;
+  epv->f_SetNumGhost              = remote_bHYPRE_StructMatrix_SetNumGhost;
+  epv->f_SetSymmetric             = remote_bHYPRE_StructMatrix_SetSymmetric;
+  epv->f_SetIntParameter          = remote_bHYPRE_StructMatrix_SetIntParameter;
+  epv->f_SetDoubleParameter       = 
     remote_bHYPRE_StructMatrix_SetDoubleParameter;
-  epv->f_SetStringParameter      = 
+  epv->f_SetStringParameter       = 
     remote_bHYPRE_StructMatrix_SetStringParameter;
-  epv->f_SetIntArrayParameter    = 
-    remote_bHYPRE_StructMatrix_SetIntArrayParameter;
-  epv->f_SetDoubleArrayParameter = 
-    remote_bHYPRE_StructMatrix_SetDoubleArrayParameter;
-  epv->f_GetIntValue             = remote_bHYPRE_StructMatrix_GetIntValue;
-  epv->f_GetDoubleValue          = remote_bHYPRE_StructMatrix_GetDoubleValue;
-  epv->f_Setup                   = remote_bHYPRE_StructMatrix_Setup;
-  epv->f_Apply                   = remote_bHYPRE_StructMatrix_Apply;
+  epv->f_SetIntArray1Parameter    = 
+    remote_bHYPRE_StructMatrix_SetIntArray1Parameter;
+  epv->f_SetIntArray2Parameter    = 
+    remote_bHYPRE_StructMatrix_SetIntArray2Parameter;
+  epv->f_SetDoubleArray1Parameter = 
+    remote_bHYPRE_StructMatrix_SetDoubleArray1Parameter;
+  epv->f_SetDoubleArray2Parameter = 
+    remote_bHYPRE_StructMatrix_SetDoubleArray2Parameter;
+  epv->f_GetIntValue              = remote_bHYPRE_StructMatrix_GetIntValue;
+  epv->f_GetDoubleValue           = remote_bHYPRE_StructMatrix_GetDoubleValue;
+  epv->f_Setup                    = remote_bHYPRE_StructMatrix_Setup;
+  epv->f_Apply                    = remote_bHYPRE_StructMatrix_Apply;
 
   e0->f__cast        = (void* (*)(struct SIDL_BaseClass__object*,
     const char*)) epv->f__cast;
@@ -830,35 +866,39 @@ static void bHYPRE_StructMatrix__init_remote_epv(void)
     const char*)) epv->f_queryInt;
   e1->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
 
-  e2->f__cast                   = (void* (*)(void*,const char*)) epv->f__cast;
-  e2->f__delete                 = (void (*)(void*)) epv->f__delete;
-  e2->f_addRef                  = (void (*)(void*)) epv->f_addRef;
-  e2->f_deleteRef               = (void (*)(void*)) epv->f_deleteRef;
-  e2->f_isSame                  = (SIDL_bool (*)(void*,
+  e2->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
+  e2->f__delete                  = (void (*)(void*)) epv->f__delete;
+  e2->f_addRef                   = (void (*)(void*)) epv->f_addRef;
+  e2->f_deleteRef                = (void (*)(void*)) epv->f_deleteRef;
+  e2->f_isSame                   = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e2->f_queryInt                = (struct SIDL_BaseInterface__object* (*)(void*,
-    const char*)) epv->f_queryInt;
-  e2->f_isType                  = (SIDL_bool (*)(void*,
+  e2->f_queryInt                 = (struct SIDL_BaseInterface__object* 
+    (*)(void*,const char*)) epv->f_queryInt;
+  e2->f_isType                   = (SIDL_bool (*)(void*,
     const char*)) epv->f_isType;
-  e2->f_SetCommunicator         = (int32_t (*)(void*,
+  e2->f_SetCommunicator          = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
-  e2->f_SetIntParameter         = (int32_t (*)(void*,const char*,
+  e2->f_SetIntParameter          = (int32_t (*)(void*,const char*,
     int32_t)) epv->f_SetIntParameter;
-  e2->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
+  e2->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,
     double)) epv->f_SetDoubleParameter;
-  e2->f_SetStringParameter      = (int32_t (*)(void*,const char*,
+  e2->f_SetStringParameter       = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
-  e2->f_SetIntArrayParameter    = (int32_t (*)(void*,const char*,
-    struct SIDL_int__array*)) epv->f_SetIntArrayParameter;
-  e2->f_SetDoubleArrayParameter = (int32_t (*)(void*,const char*,
-    struct SIDL_double__array*)) epv->f_SetDoubleArrayParameter;
-  e2->f_GetIntValue             = (int32_t (*)(void*,const char*,
+  e2->f_SetIntArray1Parameter    = (int32_t (*)(void*,const char*,
+    struct SIDL_int__array*)) epv->f_SetIntArray1Parameter;
+  e2->f_SetIntArray2Parameter    = (int32_t (*)(void*,const char*,
+    struct SIDL_int__array*)) epv->f_SetIntArray2Parameter;
+  e2->f_SetDoubleArray1Parameter = (int32_t (*)(void*,const char*,
+    struct SIDL_double__array*)) epv->f_SetDoubleArray1Parameter;
+  e2->f_SetDoubleArray2Parameter = (int32_t (*)(void*,const char*,
+    struct SIDL_double__array*)) epv->f_SetDoubleArray2Parameter;
+  e2->f_GetIntValue              = (int32_t (*)(void*,const char*,
     int32_t*)) epv->f_GetIntValue;
-  e2->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
+  e2->f_GetDoubleValue           = (int32_t (*)(void*,const char*,
     double*)) epv->f_GetDoubleValue;
-  e2->f_Setup                   = (int32_t (*)(void*,
+  e2->f_Setup                    = (int32_t (*)(void*,
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object*)) epv->f_Setup;
-  e2->f_Apply                   = (int32_t (*)(void*,
+  e2->f_Apply                    = (int32_t (*)(void*,
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object**)) epv->f_Apply;
 
   e3->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;

@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.Operator-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:41 PST
- * Generated:     20030314 14:22:45 PST
+ * SIDL Created:  20030320 16:52:33 PST
+ * Generated:     20030320 16:52:43 PST
  * Description:   Client-side glue code for bHYPRE.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
  * source-line   = 590
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_Operator_h
@@ -151,21 +151,41 @@ bHYPRE_Operator_SetStringParameter(
   const char* value);
 
 /**
- * Set the int array parameter associated with {\tt name}.
+ * Set the int 1-D array parameter associated with {\tt name}.
  * 
  */
 int32_t
-bHYPRE_Operator_SetIntArrayParameter(
+bHYPRE_Operator_SetIntArray1Parameter(
   bHYPRE_Operator self,
   const char* name,
   struct SIDL_int__array* value);
 
 /**
- * Set the double array parameter associated with {\tt name}.
+ * Set the int 2-D array parameter associated with {\tt name}.
  * 
  */
 int32_t
-bHYPRE_Operator_SetDoubleArrayParameter(
+bHYPRE_Operator_SetIntArray2Parameter(
+  bHYPRE_Operator self,
+  const char* name,
+  struct SIDL_int__array* value);
+
+/**
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_Operator_SetDoubleArray1Parameter(
+  bHYPRE_Operator self,
+  const char* name,
+  struct SIDL_double__array* value);
+
+/**
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_Operator_SetDoubleArray2Parameter(
   bHYPRE_Operator self,
   const char* name,
   struct SIDL_double__array* value);

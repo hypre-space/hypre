@@ -3,15 +3,15 @@ C       File:          bHYPRE_SStructVariable.inc
 C       Symbol:        bHYPRE.SStructVariable-v1.0.0
 C       Symbol Type:   enumeration
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030314 14:22:47 PST
-C       Generated:     20030314 14:22:50 PST
+C       SIDL Created:  20030320 16:52:45 PST
+C       Generated:     20030320 16:52:52 PST
 C       Description:   Client-side glue code for bHYPRE.SStructVariable
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
-C       source-line   = 876
-C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+C       source-line   = 888
+C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
 
 

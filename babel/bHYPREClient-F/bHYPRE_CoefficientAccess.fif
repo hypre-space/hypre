@@ -3,15 +3,15 @@ C       File:          bHYPRE_CoefficientAccess_Impl.f
 C       Symbol:        bHYPRE.CoefficientAccess-v1.0.0
 C       Symbol Type:   interface
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030314 14:22:47 PST
-C       Generated:     20030314 14:22:51 PST
+C       SIDL Created:  20030320 16:52:45 PST
+C       Generated:     20030320 16:52:53 PST
 C       Description:   Client-side documentation text for bHYPRE.CoefficientAccess
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
-C       source-line   = 754
-C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+C       source-line   = 766
+C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -149,9 +149,9 @@ C       in int row
         integer*4 row
 C       out int size
         integer*4 size
-C       out array<int> col_ind
+C       out array<int,column-major> col_ind
         integer*8 col_ind
-C       out array<double> values
+C       out array<double,column-major> values
         integer*8 values
 C       out int retval
         integer*4 retval

@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:42 PST
- * Generated:     20030314 14:22:43 PST
+ * SIDL Created:  20030320 16:52:34 PST
+ * Generated:     20030320 16:52:36 PST
  * Description:   Intermediate Object Representation for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 1205
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1217
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_BoomerAMG_IOR_h
@@ -61,16 +61,16 @@ extern "C" {
  * \item[CycleType] ({\tt Int}) - type of cycle used; a V-cycle
  * (default) or a W-cycle.
  * 
- * \item[NumGridSweeps] ({\tt IntArray}) - number of sweeps for
+ * \item[NumGridSweeps] ({\tt IntArray 1D}) - number of sweeps for
  * fine and coarse grid, up and down cycle.
  * 
- * \item[GridRelaxType] ({\tt IntArray}) - type of smoother used on
+ * \item[GridRelaxType] ({\tt IntArray 1D}) - type of smoother used on
  * fine and coarse grid, up and down cycle.
  * 
- * \item[GridRelaxPoints] ({\tt IntArray}) - point ordering used in
+ * \item[GridRelaxPoints] ({\tt IntArray 2D}) - point ordering used in
  * relaxation.
  * 
- * \item[RelaxWeight] ({\tt DoubleArray}) - relaxation weight for
+ * \item[RelaxWeight] ({\tt DoubleArray 1D}) - relaxation weight for
  * smoothed Jacobi and hybrid SOR.
  * 
  * \item[TruncFactor] ({\tt Double}) - truncation factor for
@@ -90,7 +90,7 @@ extern "C" {
  * \item[NumFunctions] ({\tt Int}) - size of the system of PDEs
  * (when using the systems version).
  * 
- * \item[DOFFunc] ({\tt IntArray}) - mapping that assigns the
+ * \item[DOFFunc] ({\tt IntArray 1D}) - mapping that assigns the
  * function to each variable (when using the systems version).
  * 
  * \item[Variant] ({\tt Int}) - variant of Schwarz used.
@@ -186,11 +186,19 @@ struct bHYPRE_BoomerAMG__epv {
     struct bHYPRE_BoomerAMG__object* self,
     const char* name,
     const char* value);
-  int32_t (*f_SetIntArrayParameter)(
+  int32_t (*f_SetIntArray1Parameter)(
     struct bHYPRE_BoomerAMG__object* self,
     const char* name,
     struct SIDL_int__array* value);
-  int32_t (*f_SetDoubleArrayParameter)(
+  int32_t (*f_SetIntArray2Parameter)(
+    struct bHYPRE_BoomerAMG__object* self,
+    const char* name,
+    struct SIDL_int__array* value);
+  int32_t (*f_SetDoubleArray1Parameter)(
+    struct bHYPRE_BoomerAMG__object* self,
+    const char* name,
+    struct SIDL_double__array* value);
+  int32_t (*f_SetDoubleArray2Parameter)(
     struct bHYPRE_BoomerAMG__object* self,
     const char* name,
     struct SIDL_double__array* value);

@@ -3,15 +3,15 @@ C       File:          bHYPRE_Solver_Impl.f
 C       Symbol:        bHYPRE.Solver-v1.0.0
 C       Symbol Type:   interface
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030314 14:22:47 PST
-C       Generated:     20030314 14:22:50 PST
+C       SIDL Created:  20030320 16:52:45 PST
+C       Generated:     20030320 16:52:51 PST
 C       Description:   Client-side documentation text for bHYPRE.Solver
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
-C       source-line   = 696
-C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+C       source-line   = 708
+C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -205,18 +205,18 @@ C       out int retval
 
 
 C       
-C       Set the int array parameter associated with {\tt name}.
+C       Set the int 1-D array parameter associated with {\tt name}.
 C       
 C       
 
-        subroutine bHYPRE_Solver_SetIntArrayParameter_f(self, name,
+        subroutine bHYPRE_Solver_SetIntArray1Parameter_f(self, name,
      &     value, retval)
         implicit none
 C       in bHYPRE.Solver self
         integer*8 self
 C       in string name
         character*(*) name
-C       in array<int> value
+C       in array<int,column-major> value
         integer*8 value
 C       out int retval
         integer*4 retval
@@ -224,18 +224,56 @@ C       out int retval
 
 
 C       
-C       Set the double array parameter associated with {\tt name}.
+C       Set the int 2-D array parameter associated with {\tt name}.
 C       
 C       
 
-        subroutine bHYPRE_Solver_SetDoubleArrayParameter_f(self, name,
+        subroutine bHYPRE_Solver_SetIntArray2Parameter_f(self, name,
      &     value, retval)
         implicit none
 C       in bHYPRE.Solver self
         integer*8 self
 C       in string name
         character*(*) name
-C       in array<double> value
+C       in array<int,2,column-major> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the double 1-D array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_Solver_SetDoubleArray1Parameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.Solver self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<double,column-major> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the double 2-D array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_Solver_SetDoubleArray2Parameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.Solver self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<double,2,column-major> value
         integer*8 value
 C       out int retval
         integer*4 retval

@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:41 PST
- * Generated:     20030314 14:22:45 PST
+ * SIDL Created:  20030320 16:52:33 PST
+ * Generated:     20030320 16:52:43 PST
  * Description:   Client-side glue code for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 777
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 789
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_IJParCSRMatrix_h
@@ -148,6 +148,22 @@ bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
   struct SIDL_int__array* offdiag_sizes);
 
 /**
+ * The GetRow method will allocate space for its two output
+ * arrays on the first call.  The space will be reused on
+ * subsequent calls.  Thus the user must not delete them, yet
+ * must not depend on the data from GetRow to persist beyond the
+ * next GetRow call.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_GetRow(
+  bHYPRE_IJParCSRMatrix self,
+  int32_t row,
+  int32_t* size,
+  struct SIDL_int__array** col_ind,
+  struct SIDL_double__array** values);
+
+/**
  * Set the MPI Communicator.
  * 
  */
@@ -155,97 +171,6 @@ int32_t
 bHYPRE_IJParCSRMatrix_SetCommunicator(
   bHYPRE_IJParCSRMatrix self,
   void* mpi_comm);
-
-/**
- * Set the int parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_SetIntParameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  int32_t value);
-
-/**
- * Set the double parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_SetDoubleParameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  double value);
-
-/**
- * Set the string parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_SetStringParameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  const char* value);
-
-/**
- * Set the int array parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_SetIntArrayParameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  struct SIDL_int__array* value);
-
-/**
- * Set the double array parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_SetDoubleArrayParameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  struct SIDL_double__array* value);
-
-/**
- * Set the int parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_GetIntValue(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  int32_t* value);
-
-/**
- * Get the double parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_GetDoubleValue(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  double* value);
-
-/**
- * (Optional) Do any preprocessing that may be necessary in
- * order to execute {\tt Apply}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_Setup(
-  bHYPRE_IJParCSRMatrix self,
-  bHYPRE_Vector b,
-  bHYPRE_Vector x);
-
-/**
- * Apply the operator to {\tt b}, returning {\tt x}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_Apply(
-  bHYPRE_IJParCSRMatrix self,
-  bHYPRE_Vector b,
-  bHYPRE_Vector* x);
 
 /**
  * Prepare an object for setting coefficient values, whether for
@@ -435,20 +360,115 @@ bHYPRE_IJParCSRMatrix_Read(
   void* comm);
 
 /**
- * The GetRow method will allocate space for its two output
- * arrays on the first call.  The space will be reused on
- * subsequent calls.  Thus the user must not delete them, yet
- * must not depend on the data from GetRow to persist beyond the
- * next GetRow call.
+ * Set the int parameter associated with {\tt name}.
  * 
  */
 int32_t
-bHYPRE_IJParCSRMatrix_GetRow(
+bHYPRE_IJParCSRMatrix_SetIntParameter(
   bHYPRE_IJParCSRMatrix self,
-  int32_t row,
-  int32_t* size,
-  struct SIDL_int__array** col_ind,
-  struct SIDL_double__array** values);
+  const char* name,
+  int32_t value);
+
+/**
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_SetDoubleParameter(
+  bHYPRE_IJParCSRMatrix self,
+  const char* name,
+  double value);
+
+/**
+ * Set the string parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_SetStringParameter(
+  bHYPRE_IJParCSRMatrix self,
+  const char* name,
+  const char* value);
+
+/**
+ * Set the int 1-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
+  bHYPRE_IJParCSRMatrix self,
+  const char* name,
+  struct SIDL_int__array* value);
+
+/**
+ * Set the int 2-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
+  bHYPRE_IJParCSRMatrix self,
+  const char* name,
+  struct SIDL_int__array* value);
+
+/**
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
+  bHYPRE_IJParCSRMatrix self,
+  const char* name,
+  struct SIDL_double__array* value);
+
+/**
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
+  bHYPRE_IJParCSRMatrix self,
+  const char* name,
+  struct SIDL_double__array* value);
+
+/**
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_GetIntValue(
+  bHYPRE_IJParCSRMatrix self,
+  const char* name,
+  int32_t* value);
+
+/**
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_GetDoubleValue(
+  bHYPRE_IJParCSRMatrix self,
+  const char* name,
+  double* value);
+
+/**
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_Setup(
+  bHYPRE_IJParCSRMatrix self,
+  bHYPRE_Vector b,
+  bHYPRE_Vector x);
+
+/**
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_Apply(
+  bHYPRE_IJParCSRMatrix self,
+  bHYPRE_Vector b,
+  bHYPRE_Vector* x);
 
 /**
  * Cast method for interface and class type conversions.

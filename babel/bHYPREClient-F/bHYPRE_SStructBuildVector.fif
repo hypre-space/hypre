@@ -3,15 +3,15 @@ C       File:          bHYPRE_SStructBuildVector_Impl.f
 C       Symbol:        bHYPRE.SStructBuildVector-v1.0.0
 C       Symbol Type:   interface
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030314 14:22:47 PST
-C       Generated:     20030314 14:22:50 PST
+C       SIDL Created:  20030320 16:52:45 PST
+C       Generated:     20030320 16:52:52 PST
 C       Description:   Client-side documentation text for bHYPRE.SStructBuildVector
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
 C       source-line   = 418
-C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -245,11 +245,11 @@ C       in bHYPRE.SStructBuildVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int> index
+C       in array<int,column-major> index
         integer*8 index
 C       in int var
         integer*4 var
-C       in array<double> value
+C       in array<double,column-major> value
         integer*8 value
 C       out int retval
         integer*4 retval
@@ -276,13 +276,13 @@ C       in bHYPRE.SStructBuildVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int> ilower
+C       in array<int,column-major> ilower
         integer*8 ilower
-C       in array<int> iupper
+C       in array<int,column-major> iupper
         integer*8 iupper
 C       in int var
         integer*4 var
-C       in array<double> values
+C       in array<double,column-major> values
         integer*8 values
 C       out int retval
         integer*4 retval
@@ -309,11 +309,11 @@ C       in bHYPRE.SStructBuildVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int> index
+C       in array<int,column-major> index
         integer*8 index
 C       in int var
         integer*4 var
-C       in array<double> value
+C       in array<double,column-major> value
         integer*8 value
 C       out int retval
         integer*4 retval
@@ -340,13 +340,13 @@ C       in bHYPRE.SStructBuildVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int> ilower
+C       in array<int,column-major> ilower
         integer*8 ilower
-C       in array<int> iupper
+C       in array<int,column-major> iupper
         integer*8 iupper
 C       in int var
         integer*4 var
-C       in array<double> values
+C       in array<double,column-major> values
         integer*8 values
 C       out int retval
         integer*4 retval
@@ -386,7 +386,7 @@ C       in bHYPRE.SStructBuildVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int> index
+C       in array<int,column-major> index
         integer*8 index
 C       in int var
         integer*4 var
@@ -416,13 +416,13 @@ C       in bHYPRE.SStructBuildVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int> ilower
+C       in array<int,column-major> ilower
         integer*8 ilower
-C       in array<int> iupper
+C       in array<int,column-major> iupper
         integer*8 iupper
 C       in int var
         integer*4 var
-C       inout array<double> values
+C       inout array<double,column-major> values
         integer*8 values
 C       out int retval
         integer*4 retval

@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.IJBuildVector-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:47 PST
- * Generated:     20030314 14:22:48 PST
+ * SIDL Created:  20030320 16:52:45 PST
+ * Generated:     20030320 16:52:46 PST
  * Description:   Intermediate Object Representation for bHYPRE.IJBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
  * source-line   = 203
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_IJBuildVector_IOR_h
