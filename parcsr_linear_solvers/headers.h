@@ -11,5 +11,5 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "hypre_parcsr_ls.h"
+#include "parcsr_ls.h"
 
