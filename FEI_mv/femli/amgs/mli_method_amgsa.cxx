@@ -1387,7 +1387,7 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
 {
    int          mypid, level, globalNRows, totNRows, fineNRows;
    int          maxNnz, minNnz, fineNnz, totNnz, thisNnz, itemp;
-   double       maxVal, minVal, dtemp;
+   double       maxVal, minVal, dtemp, dthisNnz, dtotNnz, dfineNnz;
    char         paramString[100];
    MLI_Matrix   *mli_Amat, *mli_Pmat;
    MPI_Comm     comm = getComm();
@@ -1410,7 +1410,7 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
       printf("\t*** total RAP   time = %e seconds\n", RAPTime_);
       printf("\t*** total GenML time = %e seconds\n", totalTime_);
       printf("\t******************** Amatrix ***************************\n");
-      printf("\t*level   Nrows MaxNnz MinNnz TotalNnz  maxValue  minValue*\n");
+      printf("\t*level   Nrows  MaxNnz MinNnz  TotalNnz  maxValue  minValue*\n");
    }
 
    /* --------------------------------------------------------------- */
@@ -1418,6 +1418,7 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
    /* --------------------------------------------------------------- */
 
    totNnz = totNRows = 0;
+   dtotNnz = 0.0;
    for ( level = 0; level <= currLevel_; level++ )
    {
       mli_Amat = mli->getSystemMatrix( level );
@@ -1433,13 +1434,24 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
       mli_Amat->getMatrixInfo(paramString, itemp, maxVal);
       sprintf(paramString, "minval");
       mli_Amat->getMatrixInfo(paramString, itemp, minVal);
+      sprintf(paramString, "dtotnnz");
+      mli_Amat->getMatrixInfo(paramString, itemp, dthisNnz);
       if ( mypid == 0 )
       {
-         printf("\t*%3d %9d %5d  %5d %10d %8.3e %8.3e *\n",level,
-                globalNRows, maxNnz, minNnz, thisNnz, maxVal, minVal);
+         if (globalNRows > 25000000)
+            printf("\t*%3d %10d %5d  %5d %11.5e %8.3e %8.3e *\n",level,
+                   globalNRows, maxNnz, minNnz, dthisNnz, maxVal, minVal);
+         else
+            printf("\t*%3d %10d %5d  %5d %11d %8.3e %8.3e *\n",level,
+                   globalNRows, maxNnz, minNnz, thisNnz, maxVal, minVal);
       }
-      if ( level == 0 ) fineNnz = thisNnz;
+      if ( level == 0 ) 
+      {
+         fineNnz = thisNnz;
+         dfineNnz = dthisNnz;
+      }
       totNnz += thisNnz;
+      dtotNnz += dthisNnz;
       if ( level == 0 ) fineNRows = globalNRows;
       totNRows += globalNRows;
    }
@@ -1451,7 +1463,7 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
    if ( mypid == 0 )
    {
       printf("\t******************** Pmatrix ***************************\n");
-      printf("\t*level   Nrows MaxNnz MinNnz TotalNnz  maxValue  minValue*\n");
+      printf("\t*level   Nrows  MaxNnz MinNnz  TotalNnz  maxValue  minValue*\n");
       fflush(stdout);
    }
    for ( level = 1; level <= currLevel_; level++ )
@@ -1471,7 +1483,7 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
       mli_Pmat->getMatrixInfo(paramString, itemp, minVal);
       if ( mypid == 0 )
       {
-         printf("\t*%3d %9d %5d  %5d %10d %8.3e %8.3e *\n",level,
+         printf("\t*%3d %10d %5d  %5d %11d %8.3e %8.3e *\n",level,
                 globalNRows, maxNnz, minNnz, thisNnz, maxVal, minVal);
       }
    }
@@ -1483,7 +1495,7 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
    if ( mypid == 0 )
    {
       printf("\t********************************************************\n");
-      dtemp = (double) totNnz / (double) fineNnz;
+      dtemp = dtotNnz / dfineNnz;
       printf("\t*** Amat complexity  = %e\n", dtemp);
       dtemp = (double) totNRows / (double) fineNRows;
       printf("\t*** grid complexity  = %e\n", dtemp);
