@@ -762,16 +762,16 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
     *
     *-------------------------------------------------------------------*/
 
-/*   if (num_cols_P_offd)
-   { */
-   	P_offd = hypre_ParCSRMatrixOffd(P);
+   P_offd = hypre_ParCSRMatrixOffd(P);
+   hypre_CSRMatrixI(P_offd) = P_offd_i; 
+   if (num_cols_P_offd)
+   { 
 	hypre_CSRMatrixData(P_offd) = P_offd_data; 
-   	hypre_CSRMatrixI(P_offd) = P_offd_i; 
    	hypre_CSRMatrixJ(P_offd) = P_offd_j; 
-   	hypre_ParCSRMatrixOffd(P) = P_offd;
    	hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
-        hypre_GetCommPkgRTFromCommPkgA(P,A);
-/*   }  */ 
+   } 
+   hypre_ParCSRMatrixOffd(P) = P_offd;
+   hypre_GetCommPkgRTFromCommPkgA(P,A);
 
    *P_ptr = P;
 
