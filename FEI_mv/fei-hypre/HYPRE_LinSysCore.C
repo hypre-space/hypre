@@ -77,19 +77,6 @@ extern "C" {
 #ifdef MLPACK
    int HYPRE_ParCSRMLCreate( MPI_Comm, HYPRE_Solver *);
    int HYPRE_ParCSRMLDestroy( HYPRE_Solver );
-   int HYPRE_ParCSRMLSetup( HYPRE_Solver, HYPRE_ParCSRMatrix,
-                            HYPRE_ParVector, HYPRE_ParVector );
-   int HYPRE_ParCSRMLSolve( HYPRE_Solver, HYPRE_ParCSRMatrix,
-                            HYPRE_ParVector, HYPRE_ParVector );
-   int HYPRE_ParCSRMLSetStrongThreshold( HYPRE_Solver, double );
-   int HYPRE_ParCSRMLSetNumPreSmoothings( HYPRE_Solver, int );
-   int HYPRE_ParCSRMLSetNumPostSmoothings( HYPRE_Solver, int );
-   int HYPRE_ParCSRMLSetPreSmoother( HYPRE_Solver, int );
-   int HYPRE_ParCSRMLSetPostSmoother( HYPRE_Solver, int );
-   int HYPRE_ParCSRMLSetDampingFactor( HYPRE_Solver, double );
-   int HYPRE_ParCSRMLSetMethod( HYPRE_Solver, int );
-   int HYPRE_ParCSRMLSetCoarsenScheme( HYPRE_Solver , int );
-   int HYPRE_ParCSRMLSetCoarseSolver( HYPRE_Solver, int );
 #endif
 
    void qsort0(int *, int, int);
@@ -260,6 +247,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     mlStrongThreshold_  = 0.08; // one suggested by Vanek/Brezina/Mandel
     mlCoarseSolver_     = 0;    // default coarse solver = SuperLU
     mlCoarsenScheme_    = 1;    // default coarsening scheme = uncoupled
+    mlNumPDEs_          = 1;    // default block size 
 
     rhsIDs_             = new int[1];
     rhsIDs_[0]          = 0;
@@ -1243,7 +1231,7 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int row, int numValues,
     }
 
 #ifdef HAVE_AMGE
-    HYPRE_LSI_AMGePutRow(row, numValues, (double*) values, (int*)scatterIndices);
+    HYPRE_LSI_AMGePutRow(row,numValues,(double*) values,(int*)scatterIndices);
 #endif
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )

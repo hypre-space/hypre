@@ -74,6 +74,7 @@ extern "C" {
    int HYPRE_ParCSRMLSetMethod( HYPRE_Solver, int );
    int HYPRE_ParCSRMLSetCoarsenScheme( HYPRE_Solver , int );
    int HYPRE_ParCSRMLSetCoarseSolver( HYPRE_Solver, int );
+   int HYPRE_ParCSRMLSetNumPDEs( HYPRE_Solver, int );
 #endif
 
    void  qsort1(int *, double *, int, int);
@@ -85,22 +86,15 @@ extern "C" {
    int   HYPRE_LSI_GetParCSRMatrix(HYPRE_IJMatrix,int nrows,int nnz,int*,
                                    int*,double*);
 
+#ifdef HAVE_MLI
+   int   HYPRE_MLI_SetParams(HYPRE_Solver, char *);
+#endif
+
 #ifdef Y12M
    void y12maf_(int*,int*,double*,int*,int*,int*,int*,double*,
                 int*,int*, double*,int*,double*,int*);
 #endif
 
-#ifdef HAVE_AMGE
-    int HYPRE_LSI_AMGeCreate();
-    int HYPRE_LSI_AMGeDestroy();
-    int HYPRE_LSI_AMGeSetNNodes(int);
-    int HYPRE_LSI_AMGeSetNElements(int);
-    int HYPRE_LSI_AMGeSetSystemSize(int);
-    int HYPRE_LSI_AMGePutRow(int,int,double*,int*);
-    int HYPRE_LSI_AMGeSolve( double *rhs, double *sol ); 
-    int HYPRE_LSI_AMGeSetBoundary( int leng, int *colInd );
-    int HYPRE_LSI_AMGeWriteToFile();
-#endif
 }
 
 //***************************************************************************
@@ -184,7 +178,8 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
           if (!strcmp(param2, "printSol")) HYOutputLevel_ |= HYFEI_PRINTSOL;
           if (!strcmp(param2, "printReducedMat")) 
              HYOutputLevel_ |= HYFEI_PRINTREDMAT;
-          if (!strcmp(param2, "printFEInfo")) HYOutputLevel_ |= HYFEI_PRINTFEINFO;
+          if (!strcmp(param2, "printFEInfo")) 
+             HYOutputLevel_ |= HYFEI_PRINTFEINFO;
           if (!strcmp(param2, "ddilut")) HYOutputLevel_ |= HYFEI_DDILUT;
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
           {
@@ -908,13 +903,18 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
 
        else if ( !strcmp(param1, "MLI") )
        {
+#ifdef HAVE_MLI
           if (HYPreconID_ == HYMLI && HYPrecon_ != NULL )
           {
-//HYPRE_LSI_MLIPrecondSetParams(HYPrecon_, params[i]); 
+             HYPRE_MLI_SetParams(HYPrecon_, params[i]); 
              if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
                 printf("       HYPRE_LSC::set MLI parameter.\n");
           }
           else if (HYPreconID_ != HYMLI ) MLI_ind[MLI_leng++] = i;
+#else
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
+             printf("       HYPRE_LSC::MLI SetParams - MLI unavailable.\n");
+#endif
        }
 
        //---------------------------------------------------------------
@@ -1103,6 +1103,21 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
        }
 
        //---------------------------------------------------------------
+       // mlpack preconditoner : no of PDEs (block size)
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "mlNumPDEs") )
+       {
+          sscanf(params[i],"%s %d", param, &mlNumPDEs_);
+          if ( mlNumPDEs_ < 1 ) mlNumPDEs_ = 1;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LSC::parameters mlNumPDEs = %d\n",
+                    mlNumPDEs_);
+          }
+       }
+
+       //---------------------------------------------------------------
        // error 
        //---------------------------------------------------------------
 
@@ -1125,12 +1140,13 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
        for ( i = 0; i < blockP_leng; i++ )
           HYPRE_LSI_BlockPrecondSetParams(HYPrecon_, params[blockP_ind[i]]); 
     }
+#ifdef HAVE_MLI
     if (HYPreconID_ == HYMLI && MLI_leng > 0 )
     {
        for ( i = 0; i < MLI_leng; i++ ) 
-MLI_ind[i] = 0;
-//HYPRE_LSI_MLIPrecondSetParams(HYPrecon_, params[MLI_ind[i]]); 
+          HYPRE_MLI_SetParams(HYPrecon_, params[MLI_ind[i]]); 
     }
+#endif
     delete [] blockP_ind;
     delete [] MLI_ind;
 
@@ -1386,6 +1402,7 @@ void HYPRE_LinSysCore::setupPCGPrecon()
                HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
                HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
                HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_ParCSRMLSetNumPDEs(HYPrecon_,mlNumPDEs_);
                HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParCSRMLSolve,
                                          HYPRE_ParCSRMLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
@@ -1677,6 +1694,7 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
                HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
                HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
                HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_ParCSRMLSetNumPDEs(HYPrecon_,mlNumPDEs_);
                HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
                                            HYPRE_ParCSRMLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
@@ -1983,6 +2001,7 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
                HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
                HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
                HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_ParCSRMLSetNumPDEs(HYPrecon_,mlNumPDEs_);
                HYPRE_ParCSRFGMRESSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
                                             HYPRE_ParCSRMLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
@@ -2276,6 +2295,7 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
                HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
                HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
                HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_ParCSRMLSetNumPDEs(HYPrecon_,mlNumPDEs_);
                HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
                                               HYPRE_ParCSRMLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
@@ -2570,6 +2590,7 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
                HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
                HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
                HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_ParCSRMLSetNumPDEs(HYPrecon_,mlNumPDEs_);
                HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
                                                HYPRE_ParCSRMLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
@@ -2860,6 +2881,7 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
                HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
                HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
                HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_ParCSRMLSetNumPDEs(HYPrecon_,mlNumPDEs_);
                HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
                                            HYPRE_ParCSRMLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
@@ -3150,6 +3172,7 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
                HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
                HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
                HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_ParCSRMLSetNumPDEs(HYPrecon_,mlNumPDEs_);
                HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
                                            HYPRE_ParCSRMLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
@@ -3386,6 +3409,7 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
                HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
                HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
                HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_ParCSRMLSetNumPDEs(HYPrecon_,mlNumPDEs_);
                HYPRE_ParCSRSymQMRSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
                                             HYPRE_ParCSRMLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
