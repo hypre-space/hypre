@@ -39,13 +39,16 @@ int FindNumReplies(MPI_Comm comm, int *replies_list)
 {
     int num_replies;
     int npes, mype;
-    int *replies_list2 = (int *) malloc(npes * sizeof(int));
+    int *replies_list2;
 
     MPI_Comm_rank(comm, &mype);
     MPI_Comm_size(comm, &npes);
 
+    replies_list2 = (int *) malloc(npes * sizeof(int));
+
     MPI_Allreduce(replies_list, replies_list2, npes, MPI_INT, MPI_SUM, comm);
     num_replies = replies_list2[mype];
+
     free(replies_list2);
 
     return num_replies;
@@ -814,6 +817,10 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat,
     {
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
+
+    printf("%d: rows (%d %d), local beg: %d\n", mype, mat->beg_row, 
+      mat->end_row, local_beg_row);fflush(stdout);
+
     printf("%d: Time for ahat: %f, for local solves: %f\n", mype, timea, timet);
     fflush(NULL);
     }
