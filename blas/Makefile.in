@@ -19,7 +19,8 @@ BLAS_FILES = hypre_no_blas.c
 
 BLAS_HEADERS = \
 f2c.h \
-hypre_blas.h
+hypre_blas.h\
+hypre_no_blas.h
 
 ${BLASNEED}BLAS_FILES = \
 ${BLASNEED}blas_utils.c\
