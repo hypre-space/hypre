@@ -1055,7 +1055,7 @@ int HYPRE_SlideReduction::composeGlobalList()
          if ( slaveEqnList_[is] == slaveEqnList_[is-1] )
          {
             printf("%4d : HYPRE_SlideReduction ERROR - repeated slave",mypid);
-            printf(" equation %d\n", mypid, slaveEqnList_[is]);
+            printf(" equation %d\n", slaveEqnList_[is]);
             ierr = 1;
             break;
          }
@@ -1529,7 +1529,7 @@ int HYPRE_SlideReduction::buildReducedRHSVector(HYPRE_IJVector b)
 
    HYPRE_IJMatrixGetObject(invA22mat_, (void **) &invA22_csr);
    HYPRE_ParCSRMatrixMatvec( 1.0, invA22_csr, f2_csr, 0.0, f2hat_csr );
-   //HYPRE_IJVectorDestroy(f2); 
+   HYPRE_IJVectorDestroy(f2); 
 
    //------------------------------------------------------------------
    // form reducedB = A21^T * f2hat
@@ -1548,7 +1548,7 @@ int HYPRE_SlideReduction::buildReducedRHSVector(HYPRE_IJVector b)
    HYPRE_IJVectorGetObject(reducedBvec_, (void **) &rb_csr);
    HYPRE_IJMatrixGetObject(A21mat_, (void **) &A21_csr);
    HYPRE_ParCSRMatrixMatvecT(-1.0, A21_csr, f2hat_csr, 0.0, rb_csr);
-   //HYPRE_IJVectorDestroy(f2hat); 
+   HYPRE_IJVectorDestroy(f2hat); 
 
    //------------------------------------------------------------------
    // finally form reducedB = f1 - f2til
@@ -1743,7 +1743,7 @@ int HYPRE_SlideReduction::buildReducedSolnVector(HYPRE_IJVector x,
    // compute true residual
    //------------------------------------------------------------------
 
-#if 1
+#if 0
    double          rnorm;
    HYPRE_IJVector  R;
    HYPRE_ParVector R_csr;
@@ -1777,6 +1777,7 @@ int HYPRE_SlideReduction::buildReducedSolnVector(HYPRE_IJVector x,
    }
    for ( irow = endRow-nConstraints+1; irow <= endRow; irow++ )
       rnorm2 += (R_data[irow-startRow] * R_data[irow-startRow]);
+   HYPRE_IJVectorDestroy(R); 
    if ( mypid == 0 )
       printf("HYPRE_SlideRedction norm check = %e %e %e\n", sqrt(rnorm),
              sqrt(rnorm-rnorm2), sqrt(rnorm2));
@@ -2809,7 +2810,7 @@ fclose(fp2);
    free( procNRows );
    HYPRE_IJMatrixDestroy( IJC );
    HYPRE_IJMatrixDestroy( IJCT );
-   //HYPRE_ParCSRMatrixDestroy( (HYPRE_ParCSRMatrix) hypreCBC );
+   HYPRE_ParCSRMatrixDestroy( (HYPRE_ParCSRMatrix) hypreCBC );
 
    //------------------------------------------------------------------
    // finally assemble the matrix and sanitize
