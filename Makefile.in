@@ -27,6 +27,7 @@ HYPRE_EXTRA_DIRS =\
  distributed_linear_solvers/pilut\
  parcsr_linear_solvers\
  seq_linear_solvers/pamg\
+ IJ_matrix_vector\
  CI_struct_matrix_vector\
  CI_struct_linear_solvers @HYPRE_PETSCLIBDIRS@
 
