@@ -22,6 +22,11 @@
   the code was modified is included with the above copyright notice.
 */
 
+
+#ifndef HYPRE_USING_HYPRE_BLAS
+#define USE_VENDOR_BLAS
+#endif
+
 #include "dsp_defs.h"
 #include "superlu_util.h"
 
