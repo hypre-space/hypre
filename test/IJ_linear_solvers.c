@@ -967,9 +967,10 @@ main( int   argc,
          HYPRE_ParAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_ParAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
-                                   HYPRE_ParAMGSolve,
-                                   HYPRE_ParAMGSetup,
-                                   pcg_precond);
+                                     HYPRE_ParAMGSolve,
+                                     HYPRE_ParAMGSetup,
+                                     HYPRE_ParAMGReinit,
+                                     pcg_precond);
       }
       else if (solver_id == 4)
       {
@@ -980,6 +981,7 @@ main( int   argc,
          HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
                                      HYPRE_ParCSRDiagScale,
                                      HYPRE_ParCSRDiagScaleSetup,
+                                     NULL,
                                      pcg_precond);
       }
       else if (solver_id == 7)
@@ -993,9 +995,10 @@ main( int   argc,
          }
 
          HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
-                                   HYPRE_ParCSRPilutSolve,
-                                   HYPRE_ParCSRPilutSetup,
-                                   pcg_precond);
+                                     HYPRE_ParCSRPilutSolve,
+                                     HYPRE_ParCSRPilutSetup,
+                                     NULL,
+                                     pcg_precond);
 
          if (drop_tol >= 0 )
             HYPRE_ParCSRPilutSetDropTolerance( pcg_precond,
