@@ -29,6 +29,7 @@ hypre_ParAMGInitialize()
    int      max_levels;
    double   strong_threshold;
    int      interp_type;
+   int      coarsen_type;
 
    /* solve params */
    int      max_iter;
@@ -57,6 +58,7 @@ hypre_ParAMGInitialize()
    max_levels = 25;
    strong_threshold = 0.25;
    interp_type = 200;
+   coarsen_type = 0;
 
    /* solve params */
    max_iter  = 20;
@@ -95,6 +97,7 @@ hypre_ParAMGInitialize()
    hypre_ParAMGSetMaxLevels(amg_data, max_levels);
    hypre_ParAMGSetStrongThreshold(amg_data, strong_threshold);
    hypre_ParAMGSetInterpType(amg_data, interp_type);
+   hypre_ParAMGSetCoarsenType(amg_data, coarsen_type);
 
    hypre_ParAMGSetMaxIter(amg_data, max_iter);
    hypre_ParAMGSetCycleType(amg_data, cycle_type);
@@ -106,6 +109,8 @@ hypre_ParAMGInitialize()
 
    hypre_ParAMGSetIOutDat(amg_data, ioutdat);
    hypre_ParAMGSetLogFileName(amg_data, log_file_name); 
+
+   hypre_ParAMGSetRestriction(amg_data, 0);
    
    return (void *) amg_data;
 }
@@ -125,6 +130,8 @@ hypre_ParAMGFinalize( void *data )
 /*   hypre_ParAMGFreeData(amg_data);*/
    hypre_TFree (hypre_ParAMGDataNumGridSweeps(amg_data));
    hypre_TFree (hypre_ParAMGDataGridRelaxType(amg_data));
+   for (i=0; i < 4; i++)
+   	hypre_TFree (hypre_ParAMGDataGridRelaxPoints(amg_data)[i]);
    hypre_TFree (hypre_ParAMGDataGridRelaxPoints(amg_data));
    for (i=1; i < num_levels; i++)
    {
@@ -139,6 +146,8 @@ hypre_ParAMGFinalize( void *data )
    hypre_TFree(hypre_ParAMGDataUArray(amg_data));
    hypre_TFree(hypre_ParAMGDataAArray(amg_data));
    hypre_TFree(hypre_ParAMGDataPArray(amg_data));
+   if (hypre_ParAMGDataRestriction(amg_data))
+	hypre_TFree(hypre_ParAMGDataRArray(amg_data));
    hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data));
    hypre_TFree(amg_data);
    return (ierr);
@@ -147,6 +156,18 @@ hypre_ParAMGFinalize( void *data )
 /*--------------------------------------------------------------------------
  * Routines to set the setup phase parameters
  *--------------------------------------------------------------------------*/
+
+int
+hypre_ParAMGSetRestriction( void *data,
+                            int   restr_par )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataRestriction(amg_data) = restr_par;
+
+   return (ierr);
+}
 
 int
 hypre_ParAMGSetMaxLevels( void *data,
@@ -195,6 +216,18 @@ hypre_ParAMGSetMaxIter( void     *data,
 
    return (ierr);
 } 
+
+int
+hypre_ParAMGSetCoarsenType( void  *data,
+                          int    coarsen_type )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   hypre_ParAMGDataCoarsenType(amg_data) = coarsen_type;
+
+   return (ierr);
+}
 
 int
 hypre_ParAMGSetCycleType( void  *data,
