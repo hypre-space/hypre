@@ -293,7 +293,8 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 
    int                       part;
 
-   /* do S-matrix computations */
+  
+  /* do S-matrix computations */
    for (part = 0; part < nparts; part++)
    {
       pdata = pmatvec_data[part];
@@ -304,11 +305,24 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
    }
 
    /* do U-matrix computations */
-   hypre_SStructVectorConvert(x, &parx);
-   hypre_SStructVectorConvert(y, &pary);
-   hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, 1.0, pary);
-   hypre_SStructVectorRestore(x, NULL);
-   hypre_SStructVectorRestore(y, pary);
+
+  /* GEC1002 the data chunk pointed by the local-parvectors 
+    *  inside the semistruct vectors x and y is now identical to the
+    *  data chunk of the structure vectors x and y. The role of the function
+    *  convert is to pass the addresses of the data chunk
+    *  to the parx and pary. */  
+
+       hypre_SStructVectorConvert(x, &parx);
+       hypre_SStructVectorConvert(y, &pary); 
+
+       hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, 1.0, pary);
+
+       /* dummy functions since there is nothing to restore  */
+
+       hypre_SStructVectorRestore(x, NULL);
+       hypre_SStructVectorRestore(y, pary); 
+
+   parx = NULL; 
 
    return ierr;
 }
