@@ -123,6 +123,17 @@ HYPRE_StructHybridSetTwoNorm( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetStopCrit
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructHybridSetStopCrit( HYPRE_StructSolver solver,
+                              int                stop_crit    )
+{
+   return( hypre_HybridSetStopCrit( (void *) solver, stop_crit ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructHybridSetRelChange
  *--------------------------------------------------------------------------*/
 
@@ -131,6 +142,28 @@ HYPRE_StructHybridSetRelChange( HYPRE_StructSolver solver,
                                 int                rel_change    )
 {
    return( hypre_HybridSetRelChange( (void *) solver, rel_change ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetSolverType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructHybridSetSolverType( HYPRE_StructSolver solver,
+                                int                solver_type    )
+{
+   return( hypre_HybridSetSolverType( (void *) solver, solver_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetKDim
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructHybridSetKDim( HYPRE_StructSolver solver,
+                                int                k_dim    )
+{
+   return( hypre_HybridSetKDim( (void *) solver, k_dim ) );
 }
 
 /*--------------------------------------------------------------------------

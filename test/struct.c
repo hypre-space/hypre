@@ -36,6 +36,7 @@ main( int   argc,
    int                 px, py, pz;
    double              cx, cy, cz;
    int                 solver_id;
+   int                 solver_type;
 
    /*double              dxyz[3];*/
 
@@ -50,6 +51,7 @@ main( int   argc,
    int                 num_iterations;
    int                 time_index;
    double              final_res_norm;
+   double              cf_tol;
 
    int                 num_procs, myid;
 
@@ -128,6 +130,7 @@ main( int   argc,
    n_post = 1;
 
    solver_id = 0;
+   solver_type = 1;
 
    istart[0] = -3;
    istart[1] = -3;
@@ -136,6 +139,8 @@ main( int   argc,
    px = 0;
    py = 0;
    pz = 0;
+
+   cf_tol = 0.90;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -206,6 +211,16 @@ main( int   argc,
          arg_index++;
          solver_id = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-solver_type") == 0 )
+      {
+         arg_index++;
+         solver_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-cf") == 0 )
+      {
+         arg_index++;
+         cf_tol = atof(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          print_usage = 1;
@@ -254,6 +269,9 @@ main( int   argc,
       printf("                         37 - GMRES with 2-step Jacobi\n");
       printf("                         38 - GMRES with diagonal scaling\n");
       printf("                         39 - GMRES\n");
+      printf("  -solver_type <ID>    : solver type for Hybrid(default = PCG)\n");
+      printf("                         2 - GMRES\n");
+      printf("  -cf <cf>             : convergence factor for Hybrid\n");
       printf("\n");
    }
 
@@ -890,10 +908,16 @@ main( int   argc,
       HYPRE_StructHybridSetDSCGMaxIter(solver, 100);
       HYPRE_StructHybridSetPCGMaxIter(solver, 50);
       HYPRE_StructHybridSetTol(solver, 1.0e-06);
-      HYPRE_StructHybridSetConvergenceTol(solver, 0.90);
+      HYPRE_StructHybridSetConvergenceTol(solver, cf_tol);
       HYPRE_StructHybridSetTwoNorm(solver, 1);
       HYPRE_StructHybridSetRelChange(solver, 0);
+      if (solver_type == 2) /* for use with GMRES */
+      {
+         HYPRE_StructHybridSetStopCrit(solver, 0);
+         HYPRE_StructHybridSetKDim(solver, 10);
+      }
       HYPRE_StructHybridSetLogging(solver, 1);
+      HYPRE_StructHybridSetSolverType(solver, solver_type);
 
       if (solver_id == 20)
       {

@@ -635,6 +635,9 @@ int HYPRE_StructHybridSetPCGMaxIter(HYPRE_StructSolver solver,
 int HYPRE_StructHybridSetTwoNorm(HYPRE_StructSolver solver,
                                  int                two_norm);
 
+int HYPRE_StructHybridSetStopCrit(HYPRE_StructSolver solver,
+                                 int                stop_crit);
+
 int HYPRE_StructHybridSetRelChange(HYPRE_StructSolver solver,
                                    int                rel_change);
 

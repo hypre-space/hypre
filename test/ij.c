@@ -46,6 +46,7 @@ main( int   argc,
    int                 build_funcs_type;
    int                 build_funcs_arg_index;
    int                 solver_id;
+   int                 solver_type = 1;
    int                 ioutdat;
    int                 poutdat;
    int                 debug_flag;
@@ -664,6 +665,11 @@ main( int   argc,
          arg_index++;
          trunc_factor  = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-solver_type") == 0 )
+      {
+         arg_index++;
+         solver_type  = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-iout") == 0 )
       {
          arg_index++;
@@ -777,7 +783,7 @@ main( int   argc,
       printf("       12=Schwarz-PCG     13=GSMG           \n");     
       printf("       14=GSMG-PCG        15=GSMG-GMRES\n");     
       printf("       18=ParaSails-GMRES\n");     
-      printf("       20=Hybrid PCG/ DiagScale, AMG \n");
+      printf("       20=Hybrid solver/ DiagScale, AMG \n");
       printf("       43=Euclid-PCG      44=Euclid-GMRES   \n");
       printf("       45=Euclid-BICGSTAB\n");
       printf("\n");
@@ -805,6 +811,11 @@ main( int   argc,
       printf("  -nf <val>              : set number of functions for systems AMG\n");
       printf("  -numsamp <val>         : set number of sample vectors for GSMG\n");
       printf("  -interptype <val>      : set to 1 to get LS interpolation\n");
+     
+      printf("  -solver_type <val>     : sets solver within Hybrid solver\n");
+      printf("                         : 1  PCG  (default)\n");
+      printf("                         : 2  GMRES\n");
+      printf("                         : 3  BiCGSTAB\n");
      
       printf("  -w   <val>             : set Jacobi relax weight = val\n");
       printf("  -k   <val>             : dimension Krylov space for GMRES\n");
@@ -1501,6 +1512,7 @@ main( int   argc,
       HYPRE_ParCSRHybridCreate(&amg_solver); 
       HYPRE_ParCSRHybridSetTol(amg_solver, tol);
       HYPRE_ParCSRHybridSetConvergenceTol(amg_solver, cf_tol);
+      HYPRE_ParCSRHybridSetSolverType(amg_solver, solver_type);
       HYPRE_ParCSRHybridSetLogging(amg_solver, ioutdat);
       HYPRE_ParCSRHybridSetPLogging(amg_solver, poutdat);
       HYPRE_ParCSRHybridSetDSCGMaxIter(amg_solver, dscg_max_its );
