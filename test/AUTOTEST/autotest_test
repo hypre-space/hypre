@@ -297,7 +297,7 @@ mail_summary () {
 # look for all of the TEST_*/test.out.* files
           for k in ${OutFile}.*; do
 # look for non-zero length subtest, TEST_*/test.out.* files
-            if [ ! -s "${OutFile}" ] ; then
+            if [ -s "${OutFile}" ] ; then
               AutotestFailureCount=`expr $AutotestFailureCount + 1`
               TotalFailureCount=`expr $TotalFailureCount + 1`
               TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
