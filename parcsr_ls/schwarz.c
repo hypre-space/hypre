@@ -2123,9 +2123,9 @@ int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
 
 {
   hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-  int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-  int *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
-  int *send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+  int num_sends = 0;
+  int *send_map_starts;
+  int *send_map_elmts;
 
   hypre_ParCSRCommHandle *comm_handle;
 
@@ -2175,33 +2175,41 @@ int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
   domain_matrixinverse = hypre_CSRMatrixData(domain_structure);
   aux = hypre_CTAlloc(double, max_domain_size);
 
-  buf_data = hypre_CTAlloc(double, send_map_starts[num_sends]);
-  x_ext_data = hypre_CTAlloc(double, num_cols_offd);
-  vtemp_ext_data = hypre_CTAlloc(double, num_cols_offd);
-  scale_ext = hypre_CTAlloc(double, num_cols_offd);
-
-  index = 0;
-  for (i=0; i < num_sends; i++)
+  if (comm_pkg)
   {
-     for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
-        buf_data[index++] = vtemp_data[send_map_elmts[j]];
-  }
+     num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+     send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+     send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
 
-  comm_handle = hypre_ParCSRCommHandleCreate(1,comm_pkg,buf_data,
+     buf_data = hypre_CTAlloc(double, send_map_starts[num_sends]);
+     x_ext_data = hypre_CTAlloc(double, num_cols_offd);
+     vtemp_ext_data = hypre_CTAlloc(double, num_cols_offd);
+     scale_ext = hypre_CTAlloc(double, num_cols_offd);
+
+     index = 0;
+     for (i=0; i < num_sends; i++)
+     {
+        for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
+           buf_data[index++] = vtemp_data[send_map_elmts[j]];
+     }
+
+     comm_handle = hypre_ParCSRCommHandleCreate(1,comm_pkg,buf_data,
 		vtemp_ext_data);
-  hypre_ParCSRCommHandleDestroy(comm_handle);
-  comm_handle = NULL;
+     hypre_ParCSRCommHandleDestroy(comm_handle);
+     comm_handle = NULL;
 
-  index = 0;
-  for (i=0; i < num_sends; i++)
-  {
-     for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
-        buf_data[index++] = scale[send_map_elmts[j]];
+     index = 0;
+     for (i=0; i < num_sends; i++)
+     {
+        for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
+           buf_data[index++] = scale[send_map_elmts[j]];
+     }
+
+
+     comm_handle = hypre_ParCSRCommHandleCreate(1,comm_pkg,buf_data,scale_ext);
+     hypre_ParCSRCommHandleDestroy(comm_handle);
+     comm_handle = NULL;
   }
-
-  comm_handle = hypre_ParCSRCommHandleCreate(1,comm_pkg,buf_data,scale_ext);
-  hypre_ParCSRCommHandleDestroy(comm_handle);
-  comm_handle = NULL;
 
   matrix_size_counter = 0;
   for (i=0; i < num_domains; i++)
@@ -2252,6 +2260,8 @@ int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
 
     }
 
+  if (comm_pkg)
+  {
   comm_handle = hypre_ParCSRCommHandleCreate (2,comm_pkg,x_ext_data,buf_data); 
 
   hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -2263,6 +2273,7 @@ int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
      for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
 	x_data[send_map_elmts[j]] += buf_data[index++];
   }
+  }
 
   hypre_ParVectorCopy(F,Vtemp);
   hypre_ParCSRMatrixMatvec(-1.0,A,X,1.0,Vtemp);
@@ -2270,6 +2281,8 @@ int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
   for (i=0; i < num_cols_offd; i++)
      x_ext_data[i] = 0.0;
 
+  if (comm_pkg)
+  {
   index = 0;
   for (i=0; i < num_sends; i++)
   {
@@ -2281,6 +2294,7 @@ int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
 		vtemp_ext_data);
   hypre_ParCSRCommHandleDestroy(comm_handle);
   comm_handle = NULL;
+  }
 
   /* backward solve: ------------------------------------------------ */
     for (i=num_domains-1; i > -1; i--)
@@ -2330,6 +2344,8 @@ int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
 	}
     }			      
 
+  if (comm_pkg)
+  {
   comm_handle = hypre_ParCSRCommHandleCreate (2,comm_pkg,x_ext_data,buf_data); 
 
   hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -2347,6 +2363,7 @@ int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
   hypre_TFree(vtemp_ext_data);
   hypre_TFree(scale_ext);
   hypre_TFree(aux);
+  }
 
   return ierr;
 
@@ -2426,6 +2443,9 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
 #endif
 
   int cnt;
+  int num_procs;
+
+  MPI_Comm_size(hypre_ParCSRMatrixComm(A),&num_procs);
 
   /* --------------------------------------------------------------------- */
 
@@ -2734,10 +2754,15 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
   AE = hypre_CTAlloc(double, max_local_dof_counter*max_local_dof_counter);
 #endif
 
-  A_ext = hypre_ParCSRMatrixExtractBExt(A,A,1);
-  a_ext_i = hypre_CSRMatrixI(A_ext);
-  a_ext_j = hypre_CSRMatrixJ(A_ext);
-  a_ext_data = hypre_CSRMatrixData(A_ext);
+  if (num_procs > 1)
+  {
+     A_ext = hypre_ParCSRMatrixExtractBExt(A,A,1);
+     a_ext_i = hypre_CSRMatrixI(A_ext);
+     a_ext_j = hypre_CSRMatrixJ(A_ext);
+     a_ext_data = hypre_CSRMatrixData(A_ext);
+  }
+  else 
+     A_ext = NULL;
 
   i_local_to_global = hypre_CTAlloc(int, max_local_dof_counter);
 
@@ -2868,9 +2893,9 @@ hypre_ParGenerateScale(hypre_ParCSRMatrix *A,
    double *scale_int;
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   int *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
-   int *send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+   int num_sends = 0;
+   int *send_map_starts;
+   int *send_map_elmts;
 
    int num_variables = hypre_ParCSRMatrixNumRows(A);
    int num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
@@ -2878,8 +2903,15 @@ hypre_ParGenerateScale(hypre_ParCSRMatrix *A,
   
    hypre_ParCSRCommHandle *comm_handle;
 
+   if (comm_pkg)
+   {
+      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+      send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+      send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+   }
+
    scale = hypre_CTAlloc(double, num_variables);
-   scale_ext = hypre_CTAlloc(double,num_cols_offd);
+   if (num_cols_offd) scale_ext = hypre_CTAlloc(double,num_cols_offd);
 
    for (i=0; i < num_domains; i++)
    {  
@@ -2892,12 +2924,14 @@ hypre_ParGenerateScale(hypre_ParCSRMatrix *A,
 	    scale_ext[j_loc-num_variables] += 1.0;
       }
    }
+   if (comm_pkg)
+   {
+      scale_int = hypre_CTAlloc(double, send_map_starts[num_sends]);
+      comm_handle = hypre_ParCSRCommHandleCreate (2,comm_pkg,scale_ext,scale_int); 
 
-   scale_int = hypre_CTAlloc(double, send_map_starts[num_sends]);
-   comm_handle = hypre_ParCSRCommHandleCreate (2,comm_pkg,scale_ext,scale_int); 
-
-   hypre_ParCSRCommHandleDestroy(comm_handle);
-   comm_handle = NULL;
+      hypre_ParCSRCommHandleDestroy(comm_handle);
+      comm_handle = NULL;
+   }
 
    index = 0;
    for (i=0; i < num_sends; i++)
@@ -2907,8 +2941,8 @@ hypre_ParGenerateScale(hypre_ParCSRMatrix *A,
 	 scale[send_map_elmts[j]] += scale_int[index++];
    }
 
-   hypre_TFree(scale_int);
-   hypre_TFree(scale_ext);
+   if (comm_pkg) hypre_TFree(scale_int);
+   if (num_cols_offd) hypre_TFree(scale_ext);
 
    for (i=0; i < num_variables; i++)
       scale[i] = relaxation_weight/scale[i];
