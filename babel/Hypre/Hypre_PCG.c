@@ -494,6 +494,16 @@ int  impl_Hypre_PCG_SetIntParameter(Hypre_PCG this, char* name, int value)
 } /* end impl_Hypre_PCGSetIntParameter */
 
 /* ********************************************************
+ * impl_Hypre_PCGSetStringParameter
+ **********************************************************/
+int  impl_Hypre_PCG_SetStringParameter(Hypre_PCG this, char* name, char* value)
+{
+   printf( "Don't understand keyword %s to Hypre_PCG_SetStringParameter\n",
+           name );
+   return 1;
+} /* end impl_Hypre_PCGSetStringParameter */
+
+/* ********************************************************
  * impl_Hypre_PCGNew
  **********************************************************/
 int  impl_Hypre_PCG_New(Hypre_PCG this, Hypre_MPI_Com comm) {
