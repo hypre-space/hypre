@@ -360,8 +360,8 @@ hypre_PrintTiming( char     *heading,
 int
 hypre_InitializeTiming( char *name )
 {
-   int      time_index;
-
+   int      time_index=0;
+#if 0
    double  *old_wall_time;
    double  *old_cpu_time;
    double  *old_flops;
@@ -466,7 +466,7 @@ hypre_InitializeTiming( char *name )
       hypre_TimingNumRegs(time_index) = 1;
       (hypre_global_timing[threadid].num_names) ++;
    }
-
+#endif
    return time_index;
 }
 
@@ -478,7 +478,7 @@ int
 hypre_FinalizeTiming( int time_index )
 {
    int  ierr = 0;
-
+#if 0
    int  i;
    int  threadid = hypre_GetThreadID();
 
@@ -499,7 +499,8 @@ hypre_FinalizeTiming( int time_index )
       }
    }
 
-   if ((hypre_global_timing[threadid].num_names) == 0)
+   if ((hypre_global_timing[threadid].num_names) == 0 &&
+        threadid != hypre_NumThreads)
    {
       for (i = 0; i < (hypre_global_timing[threadid].size); i++)
       {
@@ -517,7 +518,7 @@ hypre_FinalizeTiming( int time_index )
       hypre_global_timing = NULL;
       pthread_mutex_unlock(&time_mtx);
    }
-
+#endif
    return ierr;
 }
 
@@ -529,7 +530,7 @@ int
 hypre_IncFLOPCount( int inc )
 {
    int  ierr = 0;
-
+#if 0
    int threadid = hypre_GetThreadID();
 
    if (hypre_global_timing == NULL)
@@ -543,7 +544,7 @@ hypre_IncFLOPCount( int inc )
       hypre_TimingAllFLOPS += (double) (inc);
       pthread_mutex_unlock(&time_mtx);
    }
-
+#endif
    return ierr;
 }
 
@@ -555,7 +556,7 @@ int
 hypre_BeginTiming( int time_index )
 {
    int  ierr = 0;
-
+#if 0
    int threadid = hypre_GetThreadID();
 
    if (hypre_global_timing == NULL)
@@ -573,7 +574,7 @@ hypre_BeginTiming( int time_index )
       hypre_StartTiming();
    }
    hypre_TimingState(time_index) ++;
-
+#endif
    return ierr;
 }
 
@@ -585,7 +586,7 @@ int
 hypre_EndTiming( int time_index )
 {
    int  ierr = 0;
-
+#if 0
    int threadid = hypre_GetThreadID();
 
    if (hypre_global_timing == NULL)
@@ -603,7 +604,7 @@ hypre_EndTiming( int time_index )
          hypre_TimingFLOPS(time_index)    += hypre_TimingAllFLOPS;
       hypre_StartTiming();
    }
-
+#endif
    return ierr;
 }
 
@@ -615,7 +616,7 @@ int
 hypre_ClearTiming( )
 {
    int  ierr = 0;
-
+#if 0
    int threadid = hypre_GetThreadID();
 
    int  i;
@@ -629,7 +630,7 @@ hypre_ClearTiming( )
       hypre_TimingCPUTime(i)  = 0.0;
       hypre_TimingFLOPS(i)    = 0.0;
    }
-
+#endif
    return ierr;
 }
 
@@ -650,7 +651,7 @@ hypre_PrintTiming( char     *heading,
                    MPI_Comm  comm  )
 {
    int  ierr = 0;
-
+#if 0
    double  local_wall_time;
    double  local_cpu_time;
    double  wall_time;
@@ -808,7 +809,7 @@ hypre_PrintTiming( char     *heading,
          }
       }
    }
-
+#endif
    return ierr;
 }
 

@@ -490,6 +490,7 @@ pthread_t initial_thread;
 pthread_t hypre_thread[hypre_MAX_THREADS];
 pthread_mutex_t hypre_mutex_boxloops;
 pthread_mutex_t talloc_mtx;
+pthread_mutex_t worker_mtx;
 hypre_workqueue_t hypre_qptr;
 pthread_mutex_t mpi_mtx;
 pthread_mutex_t time_mtx;

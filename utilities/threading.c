@@ -49,6 +49,7 @@ int HYPRE_InitPthreads( int num_threads )
    pthread_mutex_init(&mpi_mtx, NULL);
    pthread_mutex_init(&talloc_mtx, NULL);
    pthread_mutex_init(&time_mtx, NULL);
+   pthread_mutex_init(&worker_mtx, NULL);
    hypre_thread_counter = 0;
    hypre_thread_release = 0;
 
@@ -68,6 +69,7 @@ void HYPRE_DestroyPthreads( void )
    pthread_mutex_destroy(&mpi_mtx);
    pthread_mutex_destroy(&talloc_mtx);
    pthread_mutex_destroy(&time_mtx);
+   pthread_mutex_destroy(&worker_mtx);
    pthread_cond_destroy(&hypre_qptr->work_wait);
    pthread_cond_destroy(&hypre_qptr->finish_wait);
    free (hypre_qptr);
@@ -100,6 +102,8 @@ void hypre_pthread_worker( int threadid )
       pthread_mutex_unlock(&hypre_qptr->lock);
 
       (*funcptr)(argptr);
+
+      hypre_barrier(&worker_mtx, 0);
 
       pthread_mutex_lock(&hypre_qptr->lock);
    }

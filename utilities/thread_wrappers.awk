@@ -148,14 +148,7 @@ BEGIN {
 	{
 	  base_type = substr(arg_type[i], 1, m-1);
 	  base_pointer = substr(arg_type[i], m);
-	  if (base_pointer ~ "\*")
-	    {
-	      print "   pushargs."arg[i]" = ("base_type"Array *)"arg[i]";";
-	    }
-	  else
-	    {
-	      print "   pushargs."arg[i]" = ("base_type"Array *)&"arg[i]";";
-	    }
+	  print "   pushargs."arg[i]" = ("base_type"Array *)"arg[i]";";
 	}
       else
 	{
