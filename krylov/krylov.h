@@ -843,7 +843,7 @@ int HYPRE_GMRESGetResidual( HYPRE_Solver solver , void **residual );
 int HYPRE_PCGSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
 int HYPRE_PCGSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
 int HYPRE_PCGSetTol( HYPRE_Solver solver , double tol );
-int HYPRE_PCGSetAbsoluteTolFactor( HYPRE_Solver solver , int abstolf );
+int HYPRE_PCGSetAbsoluteTolFactor( HYPRE_Solver solver , double abstolf );
 int HYPRE_PCGSetConvergenceFactorTol( HYPRE_Solver solver , double cf_tol );
 int HYPRE_PCGSetMaxIter( HYPRE_Solver solver , int max_iter );
 int HYPRE_PCGSetStopCrit( HYPRE_Solver solver , int stop_crit );

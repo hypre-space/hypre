@@ -88,7 +88,7 @@ HYPRE_PCGSetTol( HYPRE_Solver solver,
 
 int
 HYPRE_PCGSetAbsoluteTolFactor( HYPRE_Solver solver,
-                               int       abstolf )
+                               double abstolf )
 {
    return( hypre_PCGSetAbsoluteTolFactor( (void *) solver, abstolf ) );
 }
