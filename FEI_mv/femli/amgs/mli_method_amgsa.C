@@ -7,7 +7,6 @@
  *********************************************************************EHEADER*/
 
 #include <string.h>
-#include <strings.h>
 #include <assert.h>
 #include "HYPRE.h"
 #include "util/mli_utils.h"

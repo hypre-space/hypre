@@ -17,7 +17,6 @@
  *--------------------------------------------------------------------------*/
 
 #include <string.h>
-#include <strings.h>
 #include "amgs/mli_method.h"
 #include "amgs/mli_method_amgsa.h"
 #include "amgs/mli_method_amgrs.h"
