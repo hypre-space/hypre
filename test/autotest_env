@@ -17,8 +17,8 @@ CVSROOT=/home/casc/repository
 export CVSROOT
 
 PATH=/usr/xpg4/bin:/opt/SUNWspro/bin:/usr/ccs/bin:/usr/bin:/bin
-PATH=${PATH}:/usr/sbin:/usr/ucb:/usr/local/bin:/usr/local/scripts
-PATH=${PATH}:/usr/local/mpi/mpich/bin:/home/casc/bin
+PATH=${PATH}:/usr/sbin:/usr/ucb:/usr/apps/bin:/usr/local/scripts
+PATH=${PATH}:/usr/local/bin:/home/casc/bin
 export PATH
 
 #==============================================================================
@@ -60,7 +60,17 @@ HYPRE_FEI_EMAIL="$HYPRE_DEFAULT_EMAIL\
  chow8@llnl.gov\
  chtong@llnl.gov"
 
-HYPRE_ALL_EMAIL="$HYPRE_IJ_EMAIL"
+HYPRE_ALL_EMAIL="$HYPRE_DEFAULT_EMAIL\
+ painter1@llnl.gov\
+ castilla1@llnl.gov\
+ hysom1@llnl.gov\
+ lee123@llnl.gov\
+ jones97@llnl.gov\
+ yang11@llnl.gov\
+ vhenson@llnl.gov\
+ chow8@llnl.gov\
+ mlambert@llnl.gov\
+ chtong@llnl.gov"
 
 export HYPRE_DEFAULT_EMAIL HYPRE_CHECKOUT_EMAIL HYPRE_CONFIGURE_EMAIL
 export HYPRE_STRUCT_EMAIL HYPRE_IJ_EMAIL HYPRE_FEI_EMAIL
