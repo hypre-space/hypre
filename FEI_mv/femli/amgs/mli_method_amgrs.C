@@ -127,7 +127,7 @@ int MLI_Method_AMGRS::setParams(char *in_name, int argc, char *argv[])
    else if ( !strcasecmp(param1, "setTruncationFactor" ))
    {
       sscanf(in_name,"%s %lg", param1, &truncFactor_);
-      return ( setStrengthThreshold( thresh ) );
+      return 0;
    }
    else if ( !strcasecmp(param1, "setNodeDOF" ))
    {
