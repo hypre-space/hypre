@@ -1,37 +1,28 @@
 HYPRE
 
-This document is the home hypre web page and describes the goals
-of the hypre program.
+The following document is the HYPRE home web page:
 
     http://www.llnl.gov/casc/hypre/
 
-Legal stuff (copyright, disclaimer, licensing restrictions, etc.)
-can be found in the file COPYRIGHT, and through the hypre software
-distribution page
+Legal stuff (copyright, disclaimer, licensing restrictions, etc.)  can
+be found in the file `COPYRIGHT_and_DISCLAIMER', and through the hypre
+software distribution page:
 
     http://www.llnl.gov/casc/hypre/download/hypre_agree.html
 
-To install this package, please see chapter 8.1 in the "HYPRE
-Users Manual".
+To install this package, please see the HYPRE Users Manual.
 
-The "HYPRE Users Manual" is available from:
-
-    http://www.llnl.gov/casc/hypre/pubs/HYPRE_usr_manual.ps
-
-The "HYPRE Reference Manual" can be found at:
-
-    http://www.llnl.gov/casc/hypre/pubs/HYPRE_ref_manual.ps
+The HYPRE Users Manual and Reference Manual are available via the
+`Software' link on the HYPRE home page.
 
 An overview of the differences between releases of hypre can be found
-in the file CHANGELOG
+in the file `CHANGELOG'.
 
 To subscribe to the mailing list "New Release Announcements (hypre-
-announce)" or "New Beta Release Announcements (hypre-beta-announce) 
-go to
-
-    http://www.llnl.gov/CASC/hypre/maillists/get_subscription.cgi
+announce)" or "New Beta Release Announcements (hypre-beta-announce),
+use the `Mailing Lists' link on the HYPRE home page.
 
 We appreciate feedback from users of this package. Please submit
-comments, suggestions, and bug reports to 
+comments, suggestions, and bug reports via:
 
     http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE
