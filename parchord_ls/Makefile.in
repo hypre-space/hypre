@@ -1,0 +1,106 @@
+#BHEADER***********************************************************************
+# (c) 1997   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .c .f .o
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+CC = @CC@
+
+C_COMPILE_FLAGS=@CFLAGS@
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+F77_COMPILE_FLAGS=@F77FLAGS@ 
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CDEFS = 
+ 
+CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I..\
+ -I../utilities\
+ -I../seq_mv\
+ ${CINCLUDES}\
+ ${CDEFS}
+ 
+RANLIB = @RANLIB@
+ 
+MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@ 
+LIBFLAGS = @LIBDIRS@ @LIBS@
+LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
+ 
+LFLAGS =\
+ -L.\
+ -L../seq_mv\
+ -L../utilities\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_utilities\
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+
+HEADERS =\
+ par_chord_matrix.h
+
+
+FILES =\
+ par_chord_mm.c\
+ par_chord_matrix.c\
+ compute_outprocessors.c
+
+DRIVER_FILES =\
+ driver.c
+
+OBJS = ${FILES:.c=.o}
+DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: libHYPRE_parcsr_mv.a
+ 
+driver: driver.o libHYPRE_parcsr_mv.a 
+	@echo  "Linking" $@ "... "
+	${CC} -o driver driver.o ${LFLAGS} 
+ 
+
+install: all
+	@cp -f HYPRE_*.h parcsr_matrix_vector.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+ 
+clean:
+	@rm -f *.o
+
+veryclean: clean
+	@rm -f libHYPRE_parcsr_mv.a
+	@rm -f driver 
+
+##################################################################
+# Rules
+##################################################################
+
+libHYPRE_parcsr_mv.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	@RANLIB@ $@
+
+${OBJS}: ${HEADERS}
+
+${DRIVER_OBJS}: ${HEADERS}
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+
+
+
+
