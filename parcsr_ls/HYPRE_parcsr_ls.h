@@ -519,7 +519,7 @@ int HYPRE_EuclidSetParams(HYPRE_Solver solver,
  * pair, e.g:
  *
  * >cat optionsFile
- * #sample runtime parameter file \\
+ * \#sample runtime parameter file \\
  * -blockJacobi 3 \\
  * -matFile     /home/hysom/myfile.euclid \\
  * -doSomething true \\
