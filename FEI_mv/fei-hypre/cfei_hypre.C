@@ -15,11 +15,13 @@
 /* Create function for a HYPRE_LinSysCore object.                             */
 /*----------------------------------------------------------------------------*/
 
+#ifndef NOFEI
 LinearSystemCore *HYPRE_base_create( MPI_Comm comm ) 
 {
    HYPRE_LinSysCore* linSys = new HYPRE_LinSysCore(comm);
    return (linSys);
 }
+#endif
 
 /******************************************************************************/
 /* Create function for a HYPRE_LinSysCore object.                             */
