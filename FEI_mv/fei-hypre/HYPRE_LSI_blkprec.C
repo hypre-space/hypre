@@ -328,8 +328,6 @@ int HYPRE_LSI_BlockP::setLookup(Lookup *object)
 
 //******************************************************************************
 // Given a matrix A, compute the sizes and indices of the 2 x 2 blocks
-//******************************************************************************
-// Given a matrix A, compute the sizes and indices of the 2 x 2 blocks
 // (P22Size_,P22GSize_,P22LocalInds_,P22GlobalInds_,P22Offsets_,APartition_)
 //------------------------------------------------------------------------------
 
