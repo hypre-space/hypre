@@ -1179,24 +1179,24 @@ case $ARCH in
     fi
 
     if test -z "$CFLAGS"; then
-      CASC_SET_COPT(-O -64 -OPT:Olimit=0)
+      CASC_SET_COPT(-O -OPT:Olimit=0)
       if test "$casc_using_openmp" = "yes" ; then
         CFLAGS="$CFLAGS -mp"
       fi
     fi
     if test -z "$CXXFLAGS"; then
-      CASC_SET_CXXOPT(-64)
+      CASC_SET_CXXOPT(-O)
       if test "$casc_using_openmp" = "yes" ; then
         CXXFLAGS="$CXXFLAGS -mp"
       fi
     fi
     if test -z "$F77FLAGS"; then
-      CASC_SET_FOPT(-O -64)
+      CASC_SET_FOPT(-O)
       if test "$casc_using_openmp" = "yes" ; then
         F77FLAGS="$F77FLAGS -mp"
       fi
     fi
-    LDFLAGS="$LDFLAGS -O -64"
+    LDFLAGS="$LDFLAGS -O"
     CASC_SET_CDEBUG(-g)
     CASC_SET_CXXDEBUG(-g)
     CASC_SET_FDEBUG(-g)

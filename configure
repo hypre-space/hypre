@@ -6594,7 +6594,7 @@ unset ac_cv_lib_$ac_lib_var
     if test -z "$CFLAGS"; then
       
    if test -z "$COPT"; then
-      COPT="-O -64 -OPT:Olimit=0"
+      COPT="-O -OPT:Olimit=0"
    fi
    
 
@@ -6605,7 +6605,7 @@ unset ac_cv_lib_$ac_lib_var
     if test -z "$CXXFLAGS"; then
       
    if test -z "$CXXOPT"; then
-      CXXOPT="-64"
+      CXXOPT="-O"
    fi
    
 
@@ -6616,7 +6616,7 @@ unset ac_cv_lib_$ac_lib_var
     if test -z "$F77FLAGS"; then
       
    if test -z "$FOPT"; then
-      FOPT="-O -64"
+      FOPT="-O"
    fi
    
 
@@ -6624,7 +6624,7 @@ unset ac_cv_lib_$ac_lib_var
         F77FLAGS="$F77FLAGS -mp"
       fi
     fi
-    LDFLAGS="$LDFLAGS -O -64"
+    LDFLAGS="$LDFLAGS -O"
     
    if test -z "$CDEBUG"; then
       CDEBUG="-g"
