@@ -20,7 +20,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structvectorcreate)( int      *comm,
+hypre_F90_IFACE(hypre_structvectorcreate, HYPRE_STRUCTVECTORCREATE)( int      *comm,
                                            long int *grid,
                                            long int *vector,
                                            int      *ierr    )
@@ -36,7 +36,7 @@ hypre_F90_IFACE(hypre_structvectorcreate)( int      *comm,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structvectordestroy)( long int *vector,
+hypre_F90_IFACE(hypre_structvectordestroy, HYPRE_STRUCTVECTORDESTROY)( long int *vector,
                                             int      *ierr   )
 {
    *ierr = (int) ( HYPRE_StructVectorDestroy( (HYPRE_StructVector) *vector ) );
@@ -47,7 +47,7 @@ hypre_F90_IFACE(hypre_structvectordestroy)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structvectorinitialize)( long int *vector,
+hypre_F90_IFACE(hypre_structvectorinitialize, HYPRE_STRUCTVECTORINITIALIZE)( long int *vector,
                                                int      *ierr   )
 {
    *ierr = (int)
@@ -59,7 +59,7 @@ hypre_F90_IFACE(hypre_structvectorinitialize)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structvectorsetvalues)( long int *vector,
+hypre_F90_IFACE(hypre_structvectorsetvalues, HYPRE_STRUCTVECTORSETVALUES)( long int *vector,
                                               int      *grid_index,
                                               double   *values,
                                               int      *ierr       )
@@ -75,7 +75,7 @@ hypre_F90_IFACE(hypre_structvectorsetvalues)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structvectorsetboxvalues)( long int *vector,
+hypre_F90_IFACE(hypre_structvectorsetboxvalues, HYPRE_STRUCTVECTORSETBOXVALUES)( long int *vector,
                                                  int      *ilower,
                                                  int      *iupper,
                                                  double   *values,
@@ -93,7 +93,7 @@ hypre_F90_IFACE(hypre_structvectorsetboxvalues)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structvectoraddtovalues)( long int *vector,
+hypre_F90_IFACE(hypre_structvectoraddtovalues, HYPRE_STRUCTVECTORADDTOVALUES)( long int *vector,
                                                 int      *grid_index,
                                                 double   *values,
                                                 int      *ierr       )
@@ -109,7 +109,7 @@ hypre_F90_IFACE(hypre_structvectoraddtovalues)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structvectoraddtoboxvalues)( long int *vector,
+hypre_F90_IFACE(hypre_structvectoraddtoboxvalues, HYPRE_STRUCTVECTORADDTOBOXVALUES)( long int *vector,
                                                    int      *ilower,
                                                    int      *iupper,
                                                    double   *values,
@@ -127,7 +127,7 @@ hypre_F90_IFACE(hypre_structvectoraddtoboxvalues)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structvectorgetvalues)( long int *vector,
+hypre_F90_IFACE(hypre_structvectorgetvalues, HYPRE_STRUCTVECTORGETVALUES)( long int *vector,
                                               int      *grid_index,
                                               double   *values_ptr,
                                               int      *ierr       )
@@ -143,7 +143,7 @@ hypre_F90_IFACE(hypre_structvectorgetvalues)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structvectorgetboxvalues)( long int *vector,
+hypre_F90_IFACE(hypre_structvectorgetboxvalues, HYPRE_STRUCTVECTORGETBOXVALUES)( long int *vector,
                                                  int      *ilower,
                                                  int      *iupper,
                                                  double   *values,
@@ -161,7 +161,7 @@ hypre_F90_IFACE(hypre_structvectorgetboxvalues)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structvectorassemble)( long int *vector,
+hypre_F90_IFACE(hypre_structvectorassemble, HYPRE_STRUCTVECTORASSEMBLE)( long int *vector,
                                              int      *ierr   )
 {
    *ierr = (int)
@@ -173,7 +173,7 @@ hypre_F90_IFACE(hypre_structvectorassemble)( long int *vector,
  *--------------------------------------------------------------------------*/
  
 void
-hypre_F90_IFACE(hypre_structvectorsetnumghost)( long int *vector,
+hypre_F90_IFACE(hypre_structvectorsetnumghost, HYPRE_STRUCTVECTORSETNUMGHOST)( long int *vector,
                                                 int      *num_ghost,
                                                 int      *ierr      )
 {
@@ -187,7 +187,7 @@ hypre_F90_IFACE(hypre_structvectorsetnumghost)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structvectorsetconstantva)( long int *vector,
+hypre_F90_IFACE(hypre_structvectorsetconstantva, HYPRE_STRUCTVECTORSETCONSTANTVA)( long int *vector,
                                                   double   *values,
                                                   int      *ierr   )
 {
@@ -201,7 +201,7 @@ hypre_F90_IFACE(hypre_structvectorsetconstantva)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structvectorgetmigratecom)( long int *from_vector,
+hypre_F90_IFACE(hypre_structvectorgetmigratecom, HYPRE_STRUCTVECTORGETMIGRATECOM)( long int *from_vector,
                                                   long int *to_vector,
                                                   long int *comm_pkg,
                                                   int      *ierr        )
@@ -217,7 +217,7 @@ hypre_F90_IFACE(hypre_structvectorgetmigratecom)( long int *from_vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structvectormigrate)( long int *comm_pkg,
+hypre_F90_IFACE(hypre_structvectormigrate, HYPRE_STRUCTVECTORMIGRATE)( long int *comm_pkg,
                                             long int *from_vector,
                                             long int *to_vector,
                                             int      *ierr        )
@@ -233,7 +233,7 @@ hypre_F90_IFACE(hypre_structvectormigrate)( long int *comm_pkg,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_destroycommpkg)( long int *comm_pkg,
+hypre_F90_IFACE(hypre_destroycommpkg, HYPRE_DESTROYCOMMPKG)( long int *comm_pkg,
                                        int      *ierr     )
 {
    *ierr = (int)

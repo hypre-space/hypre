@@ -20,7 +20,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(generatelaplacian)( int      *comm,
+hypre_F90_IFACE(generatelaplacian, GENERATELAPLACIAN)( int      *comm,
                                     int      *nx,
                                     int      *ny,
                                     int      *nz,

@@ -20,7 +20,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structstencilcreate)( int      *dim,
+hypre_F90_IFACE(hypre_structstencilcreate, HYPRE_STRUCTSTENCILCREATE)( int      *dim,
                                             int      *size,
                                             long int *stencil,
                                             int      *ierr    )
@@ -36,7 +36,7 @@ hypre_F90_IFACE(hypre_structstencilcreate)( int      *dim,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structstencilsetelement)( long int *stencil,
+hypre_F90_IFACE(hypre_structstencilsetelement, HYPRE_STRUCTSTENCILSETELEMENT)( long int *stencil,
                                                 int      *element_index,
                                                 int      *offset,
                                                 int      *ierr          )
@@ -52,7 +52,7 @@ hypre_F90_IFACE(hypre_structstencilsetelement)( long int *stencil,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structstencildestroy)( long int *stencil,
+hypre_F90_IFACE(hypre_structstencildestroy, HYPRE_STRUCTSTENCILDESTROY)( long int *stencil,
                                              int      *ierr    )
 {
    *ierr = (int)

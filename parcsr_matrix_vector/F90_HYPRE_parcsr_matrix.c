@@ -20,7 +20,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrmatrixcreate)( int      *comm,
+hypre_F90_IFACE(hypre_parcsrmatrixcreate, HYPRE_PARCSRMATRIXCREATE)( int      *comm,
                                         int      *global_num_rows,
                                         int      *global_num_cols,
                                         int      *row_starts,
@@ -49,7 +49,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixcreate)( int      *comm,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrmatrixdestroy)( long int *matrix,
+hypre_F90_IFACE(hypre_parcsrmatrixdestroy, HYPRE_PARCSRMATRIXDESTROY)( long int *matrix,
                                             int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParCSRMatrixDestroy( (HYPRE_ParCSRMatrix) *matrix ) );
@@ -60,7 +60,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixdestroy)( long int *matrix,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrmatrixinitialize)( long int *matrix,
+hypre_F90_IFACE(hypre_parcsrmatrixinitialize, HYPRE_PARCSRMATRIXINITIALIZE)( long int *matrix,
                                                int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParCSRMatrixInitialize( (HYPRE_ParCSRMatrix) *matrix ) );
@@ -71,7 +71,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixinitialize)( long int *matrix,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrmatrixread)( int      *comm,
+hypre_F90_IFACE(hypre_parcsrmatrixread, HYPRE_PARCSRMATRIXREAD)( int      *comm,
                                          char     *file_name,
                                          long int *matrix,
                                          int      *ierr       )
@@ -87,7 +87,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixread)( int      *comm,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrmatrixprint)( long int *matrix,
+hypre_F90_IFACE(hypre_parcsrmatrixprint, HYPRE_PARCSRMATRIXPRINT)( long int *matrix,
                                           char     *fort_file_name,
                                           int      *fort_file_name_size,
                                           int      *ierr       )
@@ -112,7 +112,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixprint)( long int *matrix,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrmatrixgetcomm)( long int *matrix,
+hypre_F90_IFACE(hypre_parcsrmatrixgetcomm, HYPRE_PARCSRMATRIXGETCOMM)( long int *matrix,
                                             int      *comm,
                                             int      *ierr    )
 {
@@ -125,7 +125,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetcomm)( long int *matrix,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrmatrixgetdims)( long int *matrix,
+hypre_F90_IFACE(hypre_parcsrmatrixgetdims, HYPRE_PARCSRMATRIXGETDIMS)( long int *matrix,
                                             int      *M,
                                             int      *N,
                                             int      *ierr    )
@@ -140,7 +140,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetdims)( long int *matrix,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrmatrixgetlocalrange)( long int *matrix,
+hypre_F90_IFACE(hypre_parcsrmatrixgetlocalrange, HYPRE_PARCSRMATRIXGETLOCALRANGE)( long int *matrix,
                                                   int      *row_start,
                                                   int      *row_end,
                                                   int      *col_start,
@@ -159,7 +159,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetlocalrange)( long int *matrix,
  *--------------------------------------------------------------------------*/
  
 void
-hypre_F90_IFACE(hypre_parcsrmatrixgetrow)( long int *matrix,
+hypre_F90_IFACE(hypre_parcsrmatrixgetrow, HYPRE_PARCSRMATRIXGETROW)( long int *matrix,
                                            int      *row,
                                            int      *size,
                                            long int *col_ind_ptr,
@@ -184,7 +184,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetrow)( long int *matrix,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrmatrixrestorerow)( long int *matrix,
+hypre_F90_IFACE(hypre_parcsrmatrixrestorerow, HYPRE_PARCSRMATRIXRESTOREROW)( long int *matrix,
                                                int      *row,
                                                int      *size,
                                                long int *col_ind_ptr,
@@ -210,7 +210,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixrestorerow)( long int *matrix,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrmatrixmatvec)( double   *alpha,
+hypre_F90_IFACE(hypre_parcsrmatrixmatvec, HYPRE_PARCSRMATRIXMATVEC)( double   *alpha,
                                            long int *A,
                                            long int *x,
                                            double   *beta,
@@ -230,7 +230,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixmatvec)( double   *alpha,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrmatrixmatvect)( double   *alpha,
+hypre_F90_IFACE(hypre_parcsrmatrixmatvect, HYPRE_PARCSRMATRIXMATVECT)( double   *alpha,
                                             long int *A,
                                             long int *x,
                                             double   *beta,

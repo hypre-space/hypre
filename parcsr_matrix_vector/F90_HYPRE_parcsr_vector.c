@@ -20,7 +20,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parvectorcreate)( int      *comm,
+hypre_F90_IFACE(hypre_parvectorcreate, HYPRE_PARVECTORCREATE)( int      *comm,
                                      int      *global_size,
                                      long int *partitioning,
                                      long int *vector,
@@ -39,7 +39,7 @@ hypre_F90_IFACE(hypre_parvectorcreate)( int      *comm,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parvectordestroy)( long int *vector,
+hypre_F90_IFACE(hypre_parvectordestroy, HYPRE_PARVECTORDESTROY)( long int *vector,
                                          int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParVectorDestroy( (HYPRE_ParVector) *vector ) );
@@ -50,7 +50,7 @@ hypre_F90_IFACE(hypre_parvectordestroy)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parvectorinitialize)( long int *vector,
+hypre_F90_IFACE(hypre_parvectorinitialize, HYPRE_PARVECTORINITIALIZE)( long int *vector,
                                             int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParVectorInitialize( (HYPRE_ParVector) *vector ) );
@@ -61,7 +61,7 @@ hypre_F90_IFACE(hypre_parvectorinitialize)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parvectorread)( int      *comm,
+hypre_F90_IFACE(hypre_parvectorread, HYPRE_PARVECTORREAD)( int      *comm,
                                       long int *vector,
                                       char     *file_name,
                                       int      *ierr       )
@@ -77,7 +77,7 @@ hypre_F90_IFACE(hypre_parvectorread)( int      *comm,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parvectorprint)( long int *vector,
+hypre_F90_IFACE(hypre_parvectorprint, HYPRE_PARVECTORPRINT)( long int *vector,
                                        char     *fort_file_name,
                                        int      *fort_file_name_size,
                                        int      *ierr       )

@@ -16,30 +16,30 @@
 #ifndef HYPRE_FORT_HEADER
 #define HYPRE_FORT_HEADER
 
-#if defined(HYPRE_SOLARIS) || defined(HYPRE_ALPHA)
+#if defined(HYPRE_RS6000)
 
-#  define hypre_NAME_C_CALLING_FORT(name) name##_
-#  define hypre_NAME_FORT_CALLING_C(name) name##_
+#  define hypre_NAME_C_CALLING_FORT(name,NAME) name
+#  define hypre_NAME_FORT_CALLING_C(name,NAME) name
 
-#elif defined(HYPRE_RS6000)
+#elif defined(HYPRE_CRAY)
 
-#  define hypre_NAME_C_CALLING_FORT(name) name
-#  define hypre_NAME_FORT_CALLING_C(name) name
+#  define hypre_NAME_C_CALLING_FORT(name,NAME) NAME
+#  define hypre_NAME_FORT_CALLING_C(name,NAME) NAME
 
 #else
 
-#  define hypre_NAME_C_CALLING_FORT(name) name##_
-#  define hypre_NAME_FORT_CALLING_C(name) name##_
+#  define hypre_NAME_C_CALLING_FORT(name,NAME) name##_
+#  define hypre_NAME_FORT_CALLING_C(name,NAME) name##_
 
 #endif
 
-#define hypre_F90_IFACE(iface_name) hypre_NAME_FORT_CALLING_C(iface_name)
-#define hypre_F90_NAME(iface_name)  hypre_NAME_C_CALLING_FORT(iface_name)
+#define hypre_F90_IFACE(name,NAME) hypre_NAME_FORT_CALLING_C(name,NAME)
+#define hypre_F90_NAME(name,NAME)  hypre_NAME_C_CALLING_FORT(name,NAME)
 
 #ifdef HYPRE_USING_HYPRE_BLAS
-#define hypre_F90_NAME_BLAS(iface_name)  iface_name##_
+#define hypre_F90_NAME_BLAS(name,NAME)  name##_
 #else
-#define hypre_F90_NAME_BLAS(iface_name)  hypre_NAME_C_CALLING_FORT(iface_name)
+#define hypre_F90_NAME_BLAS(name,NAME)  hypre_NAME_C_CALLING_FORT(name,NAME)
 #endif
 
 #endif

@@ -20,7 +20,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrparasailscreate)( int      *comm,
+hypre_F90_IFACE(hypre_parcsrparasailscreate, HYPRE_PARCSRPARASAILSCREATE)( int      *comm,
                                               long int *solver,
                                               int      *ierr    )
 
@@ -34,7 +34,7 @@ hypre_F90_IFACE(hypre_parcsrparasailscreate)( int      *comm,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrparasailsdestroy)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrparasailsdestroy, HYPRE_PARCSRPARASAILSDESTROY)( long int *solver,
                                                int      *ierr    )
 
 {
@@ -46,7 +46,7 @@ hypre_F90_IFACE(hypre_parcsrparasailsdestroy)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrparasailssetup)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrparasailssetup, HYPRE_PARCSRPARASAILSSETUP)( long int *solver,
                                              long int *A,
                                              long int *b,
                                              long int *x,
@@ -63,7 +63,7 @@ hypre_F90_IFACE(hypre_parcsrparasailssetup)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrparasailssolve)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrparasailssolve, HYPRE_PARCSRPARASAILSSOLVE)( long int *solver,
                                              long int *A,
                                              long int *b,
                                              long int *x,
@@ -80,7 +80,7 @@ hypre_F90_IFACE(hypre_parcsrparasailssolve)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrparasailssetparams)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrparasailssetparams, HYPRE_PARCSRPARASAILSSETPARAMS)( long int *solver,
                                                  double   *thresh,
                                                  int      *nlevels,
                                                  int      *ierr    )
@@ -95,7 +95,7 @@ hypre_F90_IFACE(hypre_parcsrparasailssetparams)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrparasailssetfilter)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrparasailssetfilter, HYPRE_PARCSRPARASAILSSETFILTER)( long int *solver,
                                                  double   *filter,
                                                  int      *ierr    )
 {
@@ -108,7 +108,7 @@ hypre_F90_IFACE(hypre_parcsrparasailssetfilter)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrparasailssetsym)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrparasailssetsym, HYPRE_PARCSRPARASAILSSETSYM)( long int *solver,
                                               int      *sym,
                                               int      *ierr    )
 {

@@ -20,7 +20,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrbicgstabcreate)( int      *comm,
+hypre_F90_IFACE(hypre_parcsrbicgstabcreate, HYPRE_PARCSRBICGSTABCREATE)( int      *comm,
                                           long int *solver,
                                           int      *ierr    )
 
@@ -34,7 +34,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabcreate)( int      *comm,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrbicgstabdestroy)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrbicgstabdestroy, HYPRE_PARCSRBICGSTABDESTROY)( long int *solver,
                                             int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParCSRBiCGSTABDestroy( (HYPRE_Solver) *solver ) );
@@ -45,7 +45,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabdestroy)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrbicgstabsetup)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrbicgstabsetup, HYPRE_PARCSRBICGSTABSETUP)( long int *solver,
                                          long int *A,
                                          long int *b,
                                          long int *x,
@@ -62,7 +62,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabsetup)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrbicgstabsolve)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrbicgstabsolve, HYPRE_PARCSRBICGSTABSOLVE)( long int *solver,
                                          long int *A,
                                          long int *b,
                                          long int *x,
@@ -79,7 +79,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabsolve)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrbicgstabsettol)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrbicgstabsettol, HYPRE_PARCSRBICGSTABSETTOL)( long int *solver,
                                           double   *tol,
                                           int      *ierr    )
 {
@@ -92,7 +92,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabsettol)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrbicgstabsetminiter)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrbicgstabsetminiter, HYPRE_PARCSRBICGSTABSETMINITER)( long int *solver,
                                               int      *min_iter,
                                               int      *ierr      )
 {
@@ -105,7 +105,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabsetminiter)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrbicgstabsetmaxiter)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrbicgstabsetmaxiter, HYPRE_PARCSRBICGSTABSETMAXITER)( long int *solver,
                                               int      *max_iter,
                                               int      *ierr      )
 {
@@ -118,7 +118,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabsetmaxiter)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrbicgstabsetprecond)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrbicgstabsetprecond, HYPRE_PARCSRBICGSTABSETPRECOND)( long int *solver,
                                               int      *precond_id,
                                               long int *precond_solver,
                                               int      *ierr          )
@@ -179,7 +179,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabsetprecond)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrbicgstabgetprecond)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrbicgstabgetprecond, HYPRE_PARCSRBICGSTABGETPRECOND)( long int *solver,
                                               long int *precond_solver_ptr,
                                               int      *ierr                )
 {
@@ -194,7 +194,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabgetprecond)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrbicgstabsetlogging)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrbicgstabsetlogging, HYPRE_PARCSRBICGSTABSETLOGGING)( long int *solver,
                                               int      *logging,
                                               int      *ierr     )
 {
@@ -207,7 +207,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabsetlogging)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrbicgstabgetnumiter)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrbicgstabgetnumiter, HYPRE_PARCSRBICGSTABGETNUMITER)( long int *solver,
                                                   int      *num_iterations,
                                                   int      *ierr            )
 {
@@ -221,7 +221,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabgetnumiter)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrbicgstabgetfinalrel)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrbicgstabgetfinalrel, HYPRE_PARCSRBICGSTABGETFINALREL)( long int *solver,
                                                   double   *norm,
                                                   int      *ierr    )
 {

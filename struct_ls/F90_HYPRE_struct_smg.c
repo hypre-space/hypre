@@ -20,7 +20,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsmgcreate)( int      *comm,
+hypre_F90_IFACE(hypre_structsmgcreate, HYPRE_STRUCTSMGCREATE)( int      *comm,
                                         long int *solver,
                                         int      *ierr   )
 {
@@ -33,7 +33,7 @@ hypre_F90_IFACE(hypre_structsmgcreate)( int      *comm,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsmgdestroy)( long int *solver,
+hypre_F90_IFACE(hypre_structsmgdestroy, HYPRE_STRUCTSMGDESTROY)( long int *solver,
                                          int      *ierr   )
 {
    *ierr = (int) ( HYPRE_StructSMGDestroy( (HYPRE_StructSolver) *solver ) );
@@ -44,7 +44,7 @@ hypre_F90_IFACE(hypre_structsmgdestroy)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structsmgsetup)( long int *solver,
+hypre_F90_IFACE(hypre_structsmgsetup, HYPRE_STRUCTSMGSETUP)( long int *solver,
                                        long int *A,
                                        long int *b,
                                        long int *x,
@@ -61,7 +61,7 @@ hypre_F90_IFACE(hypre_structsmgsetup)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structsmgsolve)( long int *solver,
+hypre_F90_IFACE(hypre_structsmgsolve, HYPRE_STRUCTSMGSOLVE)( long int *solver,
                                        long int *A,
                                        long int *b,
                                        long int *x,
@@ -78,7 +78,7 @@ hypre_F90_IFACE(hypre_structsmgsolve)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsmgsetmemoryuse)( long int *solver,
+hypre_F90_IFACE(hypre_structsmgsetmemoryuse, HYPRE_STRUCTSMGSETMEMORYUSE)( long int *solver,
                                               int      *memory_use,
                                               int      *ierr       )
 {
@@ -92,7 +92,7 @@ hypre_F90_IFACE(hypre_structsmgsetmemoryuse)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsmgsettol)( long int *solver,
+hypre_F90_IFACE(hypre_structsmgsettol, HYPRE_STRUCTSMGSETTOL)( long int *solver,
                                         double   *tol,
                                         int      *ierr   )
 {
@@ -105,7 +105,7 @@ hypre_F90_IFACE(hypre_structsmgsettol)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsmgsetmaxiter)( long int *solver,
+hypre_F90_IFACE(hypre_structsmgsetmaxiter, HYPRE_STRUCTSMGSETMAXITER)( long int *solver,
                                             int      *max_iter,
                                             int      *ierr     )
 {
@@ -119,7 +119,7 @@ hypre_F90_IFACE(hypre_structsmgsetmaxiter)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsmgsetrelchange)( long int *solver,
+hypre_F90_IFACE(hypre_structsmgsetrelchange, HYPRE_STRUCTSMGSETRELCHANGE)( long int *solver,
                                               int      *rel_change,
                                               int      *ierr       )
 {
@@ -133,7 +133,7 @@ hypre_F90_IFACE(hypre_structsmgsetrelchange)( long int *solver,
  *--------------------------------------------------------------------------*/
  
 void
-hypre_F90_IFACE(hypre_structsmgsetzeroguess)( long int *solver,
+hypre_F90_IFACE(hypre_structsmgsetzeroguess, HYPRE_STRUCTSMGSETZEROGUESS)( long int *solver,
                                               int      *ierr   )
 {
    *ierr = (int)
@@ -145,7 +145,7 @@ hypre_F90_IFACE(hypre_structsmgsetzeroguess)( long int *solver,
  *--------------------------------------------------------------------------*/
  
 void
-hypre_F90_IFACE(hypre_structsmgsetnonzeroguess)( long int *solver,
+hypre_F90_IFACE(hypre_structsmgsetnonzeroguess, HYPRE_STRUCTSMGSETNONZEROGUESS)( long int *solver,
                                                  int      *ierr   )
 {
    *ierr = (int)
@@ -160,7 +160,7 @@ hypre_F90_IFACE(hypre_structsmgsetnonzeroguess)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsmgsetnumprerelax)( long int *solver,
+hypre_F90_IFACE(hypre_structsmgsetnumprerelax, HYPRE_STRUCTSMGSETNUMPRERELAX)( long int *solver,
                                                 int      *num_pre_relax,
                                                 int      *ierr         )
 {
@@ -174,7 +174,7 @@ hypre_F90_IFACE(hypre_structsmgsetnumprerelax)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsmgsetnumpostrelax)( long int *solver,
+hypre_F90_IFACE(hypre_structsmgsetnumpostrelax, HYPRE_STRUCTSMGSETNUMPOSTRELAX)( long int *solver,
                                                  int      *num_post_relax,
                                                  int      *ierr           )
 {
@@ -189,7 +189,7 @@ hypre_F90_IFACE(hypre_structsmgsetnumpostrelax)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsmgsetlogging)( long int *solver,
+hypre_F90_IFACE(hypre_structsmgsetlogging, HYPRE_STRUCTSMGSETLOGGING)( long int *solver,
                                             int      *logging,
                                             int      *ierr    )
 {
@@ -203,7 +203,7 @@ hypre_F90_IFACE(hypre_structsmgsetlogging)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsmggetnumiterations)( long int *solver,
+hypre_F90_IFACE(hypre_structsmggetnumiterations, HYPRE_STRUCTSMGGETNUMITERATIONS)( long int *solver,
                                                   int      *num_iterations,
                                                   int      *ierr           )
 {
@@ -218,7 +218,7 @@ hypre_F90_IFACE(hypre_structsmggetnumiterations)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structsmggetfinalrelative)( long int *solver,
+hypre_F90_IFACE(hypre_structsmggetfinalrelative, HYPRE_STRUCTSMGGETFINALRELATIVE)( long int *solver,
                                                   double   *norm,
                                                   int      *ierr   )
 {

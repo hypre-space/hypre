@@ -20,7 +20,7 @@
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_setparvectordataowner)( long int *vector,
+hypre_F90_IFACE(hypre_setparvectordataowner, HYPRE_SETPARVECTORDATAOWNER)( long int *vector,
                                               int      *owns_data,
                                               int      *ierr       )
 {
@@ -33,7 +33,7 @@ hypre_F90_IFACE(hypre_setparvectordataowner)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_setparvectorpartitioningo)( long int *vector,
+hypre_F90_IFACE(hypre_setparvectorpartitioningo, HYPRE_SETPARVECTORPARTITIONINGO)( long int *vector,
                                                   int      *owns_partitioning,
                                                   int      *ierr    )
 {
@@ -47,7 +47,7 @@ hypre_F90_IFACE(hypre_setparvectorpartitioningo)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_setparvectorconstantvalue)( long int *vector,
+hypre_F90_IFACE(hypre_setparvectorconstantvalue, HYPRE_SETPARVECTORCONSTANTVALUE)( long int *vector,
                                                   double   *value,
                                                   int      *ierr    )
 {
@@ -61,7 +61,7 @@ hypre_F90_IFACE(hypre_setparvectorconstantvalue)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_setparvectorrandomvalues)( long int *vector,
+hypre_F90_IFACE(hypre_setparvectorrandomvalues, HYPRE_SETPARVECTORRANDOMVALUES)( long int *vector,
                                                  int      *seed,
                                                  int      *ierr    )
 {
@@ -74,7 +74,7 @@ hypre_F90_IFACE(hypre_setparvectorrandomvalues)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_copyparvector)( long int *x,
+hypre_F90_IFACE(hypre_copyparvector, HYPRE_COPYPARVECTOR)( long int *x,
                                       long int *y,
                                       int      *ierr )
 {
@@ -87,7 +87,7 @@ hypre_F90_IFACE(hypre_copyparvector)( long int *x,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_scaleparvector)( long int *vector,
+hypre_F90_IFACE(hypre_scaleparvector, HYPRE_SCALEPARVECTOR)( long int *vector,
                                        double   *scale,
                                        int      *ierr    )
 {
@@ -100,7 +100,7 @@ hypre_F90_IFACE(hypre_scaleparvector)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_paraxpy)( double   *a,
+hypre_F90_IFACE(hypre_paraxpy, HYPRE_PARAXPY)( double   *a,
                                 long int *x,
                                 long int *y,
                                 int      *ierr )
@@ -115,7 +115,7 @@ hypre_F90_IFACE(hypre_paraxpy)( double   *a,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parinnerprod)( long int *x,
+hypre_F90_IFACE(hypre_parinnerprod, HYPRE_PARINNERPROD)( long int *x,
                                      long int *y,
                                      double   *inner_prod, 
                                      int      *ierr           )
@@ -131,7 +131,7 @@ hypre_F90_IFACE(hypre_parinnerprod)( long int *x,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_vectortoparvector)( int      *comm,
+hypre_F90_IFACE(hypre_vectortoparvector, HYPRE_VECTORTOPARVECTOR)( int      *comm,
                                           long int *vector,
                                           int      *vec_starts,
                                           long int *par_vector,
@@ -150,7 +150,7 @@ hypre_F90_IFACE(hypre_vectortoparvector)( int      *comm,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parvectortovectorall)( long int *par_vector,
+hypre_F90_IFACE(hypre_parvectortovectorall, HYPRE_PARVECTORTOVECTORALL)( long int *par_vector,
                                              long int *vector,
                                              int      *ierr        )
 {

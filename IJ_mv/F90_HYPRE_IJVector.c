@@ -20,7 +20,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorcreate)( int      *comm,
+hypre_F90_IFACE(hypre_ijvectorcreate, HYPRE_IJVECTORCREATE)( int      *comm,
                                        long int *vector,
                                        int      *global_n,
                                        int      *ierr      )
@@ -35,7 +35,7 @@ hypre_F90_IFACE(hypre_ijvectorcreate)( int      *comm,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijvectordestroy)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectordestroy, HYPRE_IJVECTORDESTROY)( long int *vector,
                                         int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJVectorDestroy( (HYPRE_IJVector) *vector ) );
@@ -46,7 +46,7 @@ hypre_F90_IFACE(hypre_ijvectordestroy)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijvectorsetpartitioning)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectorsetpartitioning, HYPRE_IJVECTORSETPARTITIONING)( long int *vector,
                                                 long int *partitioning,
                                                 int      *ierr    )
 {
@@ -59,7 +59,7 @@ hypre_F90_IFACE(hypre_ijvectorsetpartitioning)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijvectorsetlocalpartition)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectorsetlocalpartition, HYPRE_IJVECTORSETLOCALPARTITION)( long int *vector,
                                                   int      *vec_start_this_proc,
                                                   int      *vec_start_next_proc,
                                                   int      *ierr    )
@@ -74,7 +74,7 @@ hypre_F90_IFACE(hypre_ijvectorsetlocalpartition)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorinitialize)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectorinitialize, HYPRE_IJVECTORINITIALIZE)( long int *vector,
                                            int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJVectorInitialize( (HYPRE_IJVector) *vector ) );
@@ -85,7 +85,7 @@ hypre_F90_IFACE(hypre_ijvectorinitialize)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijvectordistribute)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectordistribute, HYPRE_IJVECTORDISTRIBUTE)( long int *vector,
                                            int      *vec_starts,
                                            int      *ierr        )
 {
@@ -98,7 +98,7 @@ hypre_F90_IFACE(hypre_ijvectordistribute)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijvectorsetlocalstoragety)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectorsetlocalstoragety, HYPRE_IJVECTORSETLOCALSTORAGETY)( long int *vector,
                                                   int      *type,
                                                   int      *ierr    )
 {
@@ -111,7 +111,7 @@ hypre_F90_IFACE(hypre_ijvectorsetlocalstoragety)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorzerolocalcomps)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectorzerolocalcomps, HYPRE_IJVECTORZEROLOCALCOMPS)( long int *vector,
                                                int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJVectorZeroLocalComponents(
@@ -123,7 +123,7 @@ hypre_F90_IFACE(hypre_ijvectorzerolocalcomps)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorsetlocalcomps)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectorsetlocalcomps, HYPRE_IJVECTORSETLOCALCOMPS)( long int *vector,
                                            int      *num_values,
                                            int      *glob_vec_indices,
                                            int      *value_indices,
@@ -143,7 +143,7 @@ hypre_F90_IFACE(hypre_ijvectorsetlocalcomps)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorsetlocalcompsinbl)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectorsetlocalcompsinbl, HYPRE_IJVECTORSETLOCALCOMPSINBL)( long int *vector,
                                                   int      *glob_vec_start,
                                                   int      *glob_vec_stop,
                                                   int      *value_indices,
@@ -163,7 +163,7 @@ hypre_F90_IFACE(hypre_ijvectorsetlocalcompsinbl)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectoraddtolocalcomps)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectoraddtolocalcomps, HYPRE_IJVECTORADDTOLOCALCOMPS)( long int *vector,
                                                 int      *num_values,
                                                 int      *glob_vec_indices,
                                                 int      *value_indices,
@@ -183,7 +183,7 @@ hypre_F90_IFACE(hypre_ijvectoraddtolocalcomps)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectoraddtolocalcompsbl)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectoraddtolocalcompsbl, HYPRE_IJVECTORADDTOLOCALCOMPSBL)( long int *vector,
                                                   int      *glob_vec_start,
                                                   int      *glob_vec_stop,
                                                   int      *value_indices,
@@ -203,7 +203,7 @@ hypre_F90_IFACE(hypre_ijvectoraddtolocalcompsbl)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorassemble)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectorassemble, HYPRE_IJVECTORASSEMBLE)( long int *vector,
                                          int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJVectorAssemble( (HYPRE_IJVector) *vector ) );
@@ -214,7 +214,7 @@ hypre_F90_IFACE(hypre_ijvectorassemble)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorgetlocalcomps)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectorgetlocalcomps, HYPRE_IJVECTORGETLOCALCOMPS)( long int *vector,
                                               int      *num_values,
                                               int      *glob_vec_indices,
                                               int      *value_indices,
@@ -234,7 +234,7 @@ hypre_F90_IFACE(hypre_ijvectorgetlocalcomps)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorgetlocalcompsinbl)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectorgetlocalcompsinbl, HYPRE_IJVECTORGETLOCALCOMPSINBL)( long int *vector,
                                                   int      *glob_vec_start,
                                                   int      *glob_vec_stop,
                                                   int      *value_indices,
@@ -255,7 +255,7 @@ hypre_F90_IFACE(hypre_ijvectorgetlocalcompsinbl)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorgetlocalstoragety)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectorgetlocalstoragety, HYPRE_IJVECTORGETLOCALSTORAGETY)( long int *vector,
                                                   int      *type,
                                                   int      *ierr    )
 {
@@ -270,7 +270,7 @@ hypre_F90_IFACE(hypre_ijvectorgetlocalstoragety)( long int *vector,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorgetlocalstorage)( long int *vector,
+hypre_F90_IFACE(hypre_ijvectorgetlocalstorage, HYPRE_IJVECTORGETLOCALSTORAGE)( long int *vector,
                                                 long int *local_storage,
                                                 int      *ierr           )
 {

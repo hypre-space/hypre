@@ -20,7 +20,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrgmrescreate)( int      *comm,
+hypre_F90_IFACE(hypre_parcsrgmrescreate, HYPRE_PARCSRGMRESCREATE)( int      *comm,
                                           long int *solver,
                                           int      *ierr    )
 
@@ -34,7 +34,7 @@ hypre_F90_IFACE(hypre_parcsrgmrescreate)( int      *comm,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrgmresdestroy)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrgmresdestroy, HYPRE_PARCSRGMRESDESTROY)( long int *solver,
                                             int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParCSRGMRESDestroy( (HYPRE_Solver) *solver ) );
@@ -45,7 +45,7 @@ hypre_F90_IFACE(hypre_parcsrgmresdestroy)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrgmressetup)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrgmressetup, HYPRE_PARCSRGMRESSETUP)( long int *solver,
                                          long int *A,
                                          long int *b,
                                          long int *x,
@@ -62,7 +62,7 @@ hypre_F90_IFACE(hypre_parcsrgmressetup)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrgmressolve)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrgmressolve, HYPRE_PARCSRGMRESSOLVE)( long int *solver,
                                          long int *A,
                                          long int *b,
                                          long int *x,
@@ -79,7 +79,7 @@ hypre_F90_IFACE(hypre_parcsrgmressolve)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrgmressetkdim)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrgmressetkdim, HYPRE_PARCSRGMRESSETKDIM)( long int *solver,
                                            int      *kdim,
                                            int      *ierr    )
 {
@@ -92,7 +92,7 @@ hypre_F90_IFACE(hypre_parcsrgmressetkdim)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrgmressettol)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrgmressettol, HYPRE_PARCSRGMRESSETTOL)( long int *solver,
                                           double   *tol,
                                           int      *ierr    )
 {
@@ -105,7 +105,7 @@ hypre_F90_IFACE(hypre_parcsrgmressettol)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrgmressetminiter)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrgmressetminiter, HYPRE_PARCSRGMRESSETMINITER)( long int *solver,
                                               int      *min_iter,
                                               int      *ierr      )
 {
@@ -118,7 +118,7 @@ hypre_F90_IFACE(hypre_parcsrgmressetminiter)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrgmressetmaxiter)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrgmressetmaxiter, HYPRE_PARCSRGMRESSETMAXITER)( long int *solver,
                                               int      *max_iter,
                                               int      *ierr      )
 {
@@ -131,7 +131,7 @@ hypre_F90_IFACE(hypre_parcsrgmressetmaxiter)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrgmressetprecond)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrgmressetprecond, HYPRE_PARCSRGMRESSETPRECOND)( long int *solver,
                                               int      *precond_id,
                                               long int *precond_solver,
                                               int      *ierr          )
@@ -192,7 +192,7 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrgmresgetprecond)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrgmresgetprecond, HYPRE_PARCSRGMRESGETPRECOND)( long int *solver,
                                               long int *precond_solver_ptr,
                                               int      *ierr                )
 {
@@ -207,7 +207,7 @@ hypre_F90_IFACE(hypre_parcsrgmresgetprecond)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrgmressetlogging)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrgmressetlogging, HYPRE_PARCSRGMRESSETLOGGING)( long int *solver,
                                               int      *logging,
                                               int      *ierr     )
 {
@@ -220,7 +220,7 @@ hypre_F90_IFACE(hypre_parcsrgmressetlogging)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrgmresgetnumiteratio)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrgmresgetnumiteratio, HYPRE_PARCSRGMRESGETNUMITERATIO)( long int *solver,
                                                   int      *num_iterations,
                                                   int      *ierr            )
 {
@@ -234,7 +234,7 @@ hypre_F90_IFACE(hypre_parcsrgmresgetnumiteratio)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrgmresgetfinalrelati)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrgmresgetfinalrelati, HYPRE_PARCSRGMRESGETFINALRELATI)( long int *solver,
                                                   double   *norm,
                                                   int      *ierr    )
 {

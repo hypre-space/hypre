@@ -20,7 +20,7 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrpilutcreate)( int      *comm,
+hypre_F90_IFACE(hypre_parcsrpilutcreate, HYPRE_PARCSRPILUTCREATE)( int      *comm,
                                               long int *solver,
                                               int      *ierr    )
 
@@ -34,7 +34,7 @@ hypre_F90_IFACE(hypre_parcsrpilutcreate)( int      *comm,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrpilutdestroy)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrpilutdestroy, HYPRE_PARCSRPILUTDESTROY)( long int *solver,
                                             int      *ierr    )
 
 {
@@ -46,7 +46,7 @@ hypre_F90_IFACE(hypre_parcsrpilutdestroy)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrpilutsetup)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrpilutsetup, HYPRE_PARCSRPILUTSETUP)( long int *solver,
                                          long int *A,
                                          long int *b,
                                          long int *x,
@@ -63,7 +63,7 @@ hypre_F90_IFACE(hypre_parcsrpilutsetup)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrpilutsolve)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrpilutsolve, HYPRE_PARCSRPILUTSOLVE)( long int *solver,
                                          long int *A,
                                          long int *b,
                                          long int *x,
@@ -80,7 +80,7 @@ hypre_F90_IFACE(hypre_parcsrpilutsolve)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrpilutsetmaxiter)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrpilutsetmaxiter, HYPRE_PARCSRPILUTSETMAXITER)( long int *solver,
                                               int      *max_iter,
                                               int      *ierr      )
 {
@@ -93,7 +93,7 @@ hypre_F90_IFACE(hypre_parcsrpilutsetmaxiter)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrpilutsetdroptoleran)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrpilutsetdroptoleran, HYPRE_PARCSRPILUTSETDROPTOLERAN)( long int *solver,
                                                   double   *tol,
                                                   int      *ierr    )
 {
@@ -106,7 +106,7 @@ hypre_F90_IFACE(hypre_parcsrpilutsetdroptoleran)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrpilutsetfacrowsize)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrpilutsetfacrowsize, HYPRE_PARCSRPILUTSETFACROWSIZE)( long int *solver,
                                                  int      *size,
                                                  int      *ierr    )
 {
