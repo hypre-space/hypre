@@ -2108,8 +2108,8 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
 
 /* ======
 This should ultimately be taken out even for newer ale3d implementation
-            if ( index >= localStartRow_-1 && index < localEndRow_)
    =====*/
+            if ( index >= localStartRow_-1 && index < localEndRow_)
             {
                if ( newData[newNumNodes*fieldSize] == -99999.9 )
                { 
@@ -2130,7 +2130,7 @@ This should ultimately be taken out even for newer ale3d implementation
             MLI_FieldSize_  = fieldSize;
             MLI_NumNodes_   = nRows / fieldSize;
          }
-         for ( i = 0; i < numNodes; i++ )
+         for ( i = 0; i < newNumNodes; i++ )
          {
             index = eqnNumbers[i] - localStartRow_ + 1;
             for ( j = 0; j < fieldSize; j++ ) 
@@ -3925,38 +3925,44 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    {
       if (haveFEData_ == 1) HYPRE_LSI_MLISetFEData( HYPrecon_, feData_ );
       if (haveFEData_ == 2) HYPRE_LSI_MLISetSFEI( HYPrecon_, feData_ );
-      if ( MLI_EqnNumbers_ != NULL )
+   }
+   if ( HYPreconID_ == HYMLI && MLI_EqnNumbers_ != NULL )
+   {
+      int *iArray = new int[MLI_NumNodes_];
+      for (i = 0; i < MLI_NumNodes_; i++) iArray[i] = i;
+      HYPRE_LSI_qsort1a(MLI_EqnNumbers_, iArray, 0, MLI_NumNodes_-1);
+      double *tempNodalCoord = MLI_NodalCoord_; 
+      int ncount = 1;
+      for (i = 1; i < MLI_NumNodes_; i++) 
+         if (MLI_EqnNumbers_[i] != MLI_EqnNumbers_[ncount-1]) ncount++;
+      MLI_NodalCoord_ = new double[ncount*MLI_FieldSize_];
+      for (j = 0; j < MLI_FieldSize_; j++) 
+         MLI_NodalCoord_[j] = tempNodalCoord[iArray[0]*MLI_FieldSize_+j];
+      ncount = 1;
+      for (i = 1; i < MLI_NumNodes_; i++) 
       {
-         int *iArray = new int[MLI_NumNodes_];
-         for (i = 0; i < MLI_NumNodes_; i++) iArray[i] = i;
-         HYPRE_LSI_qsort1a(MLI_EqnNumbers_, iArray, 0, MLI_NumNodes_-1);
-         double *tempNodalCoord = MLI_NodalCoord_; 
-         int ncount = 1;
-         for (i = 1; i < MLI_NumNodes_; i++) 
-            if (MLI_EqnNumbers_[i] != MLI_EqnNumbers_[ncount-1]) ncount++;
-         MLI_NodalCoord_ = new double[ncount*MLI_FieldSize_];
-         for (j = 0; j < MLI_FieldSize_; j++) 
-            MLI_NodalCoord_[j] = tempNodalCoord[iArray[0]*MLI_FieldSize_+j];
-         ncount = 1;
-         for (i = 1; i < MLI_NumNodes_; i++) 
+         if (MLI_EqnNumbers_[i] != MLI_EqnNumbers_[ncount-1]) 
          {
-            if (MLI_EqnNumbers_[i] != MLI_EqnNumbers_[ncount-1]) 
-            {
-               MLI_EqnNumbers_[ncount] = MLI_EqnNumbers_[i];
-               for (j = 0; j < MLI_FieldSize_; j++) 
-                  MLI_NodalCoord_[ncount*MLI_FieldSize_+j] =
-                     tempNodalCoord[iArray[i]*MLI_FieldSize_+j];
-               ncount++;
-            }
+            MLI_EqnNumbers_[ncount] = MLI_EqnNumbers_[i];
+            for (j = 0; j < MLI_FieldSize_; j++) 
+               MLI_NodalCoord_[ncount*MLI_FieldSize_+j] =
+                  tempNodalCoord[iArray[i]*MLI_FieldSize_+j];
+            ncount++;
          }
-         MLI_NumNodes_ = ncount;
-         assert( MLI_NumNodes_ == (localEndRow_-localStartRow_+1) );
-         delete [] tempNodalCoord;
-         delete [] iArray;
-         HYPRE_LSI_MLILoadNodalCoordinates(HYPrecon_, MLI_NumNodes_, 
-                  MLI_FieldSize_, MLI_EqnNumbers_, MLI_FieldSize_, 
-                  MLI_NodalCoord_, localEndRow_-localStartRow_+1);
       }
+      MLI_NumNodes_ = ncount;
+      assert( MLI_NumNodes_ == (localEndRow_-localStartRow_+1) );
+      delete [] tempNodalCoord;
+      delete [] iArray;
+      for (i = 0; i < MLI_NumNodes_; i++) 
+      {
+         if (MLI_NodalCoord_[i] == -9999999.0) 
+            printf("%d : HYPRE launchSolver ERROR - coord %d not filled.\n",
+                   mypid_, i);
+      }
+      HYPRE_LSI_MLILoadNodalCoordinates(HYPrecon_, MLI_NumNodes_, 
+               MLI_FieldSize_, MLI_EqnNumbers_, MLI_FieldSize_, 
+               MLI_NodalCoord_, localEndRow_-localStartRow_+1);
    }
 #endif
 
