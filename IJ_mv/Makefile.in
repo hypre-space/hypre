@@ -59,13 +59,13 @@ HEADERS =\
 
 FILES =\
  aux_parcsr_matrix.c\
- hypre_IJMatrix_parcsr.c\
- hypre_IJVector_parcsr.c\
- hypre_IJMatrix.c\
- hypre_IJVector.c\
+ IJMatrix_parcsr.c\
+ IJVector_parcsr.c\
+ IJMatrix.c\
+ IJVector.c\
  HYPRE_IJMatrix.c\
  HYPRE_IJVector.c\
- F90_hypre_IJMatrix.c\
+ F90_IJMatrix.c\
  F90_HYPRE_IJMatrix.c\
  F90_HYPRE_IJVector.c
 
