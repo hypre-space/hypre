@@ -268,7 +268,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
 
          hypre_SetIndex(index_temp,0,0,1);
          MapIndex(index_temp, cdir, index);
-         if ( constant_coefficient==0 )
+         if ( constant_coefficient==1 )
          {
             pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
                hypre_CCBoxOffsetDistance(P_dbox, index);
@@ -514,15 +514,6 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
                hypre_BoxBoundaryDG( cgrid_box, cgrid, cboundaryb, cboundarya, cdir );
                /* ... cgrid_box comes from the grid, so there are no ghost zones
                   involved here */
-
-               hypre_ForBoxI(cbi, cboundarya)
-                  {
-                     cg_bdy_box = hypre_BoxArrayBox( cboundarya, cbi);
-                  }
-               hypre_ForBoxI(cbi, cboundaryb)
-                  {
-                     cg_bdy_box = hypre_BoxArrayBox( cboundaryb, cbi);
-                  }
 
                /* new diagonal (variable) elements...*/
                hypre_BoxLoop2Begin(loop_size,
