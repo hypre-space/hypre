@@ -840,6 +840,9 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    int    ierr = 0;
 
    int                   *num_ghost = hypre_StructMatrixNumGhost(matrix);
+   int                    constant_coefficient, diag_rank;
+   hypre_StructStencil   *stencil;
+   hypre_Index            diag_index;
 
    hypre_CommInfo        *comm_info;
    hypre_CommPkg         *comm_pkg;
@@ -849,6 +852,15 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    /*-----------------------------------------------------------------------
     * If the CommPkg has not been set up, set it up
     *-----------------------------------------------------------------------*/
+
+   constant_coefficient = hypre_StructMatrixConstantCoefficient( matrix );
+
+   if ( constant_coefficient==2 )
+   {
+      stencil = hypre_StructMatrixStencil(matrix);
+      hypre_SetIndex(diag_index, 0, 0, 0);
+      diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
+   }
 
    comm_pkg = hypre_StructMatrixCommPkg(matrix);
 
@@ -860,6 +872,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
                           hypre_StructMatrixDataSpace(matrix),
                           hypre_StructMatrixDataSpace(matrix),
                           hypre_StructMatrixNumValues(matrix),
+                          constant_coefficient, diag_rank,
                           hypre_StructMatrixComm(matrix), &comm_pkg);
 
       hypre_StructMatrixCommPkg(matrix) = comm_pkg;
@@ -873,7 +886,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
                                  hypre_StructMatrixData(matrix),
                                  hypre_StructMatrixData(matrix),
                                  &comm_handle);
-   hypre_FinalizeCommunication(comm_handle);
+   hypre_FinalizeCommunication(comm_handle,constant_coefficient);
 
    return(ierr);
 }
@@ -1052,11 +1065,29 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
    hypre_CommHandle      *comm_handle;
 
    int                    ierr = 0;
+   int                    constant_coefficient, diag_rank, diag_rank1;
+   hypre_StructStencil   *stencil;
+   hypre_Index            diag_index;
 
    /*------------------------------------------------------
     * Set up hypre_CommPkg
     *------------------------------------------------------*/
- 
+
+   constant_coefficient = hypre_StructMatrixConstantCoefficient( from_matrix );
+   assert( constant_coefficient == hypre_StructMatrixConstantCoefficient( to_matrix ) );
+
+   if ( constant_coefficient==2 )
+   {
+      stencil = hypre_StructMatrixStencil(from_matrix);
+      hypre_SetIndex(diag_index, 0, 0, 0);
+      diag_rank1 = hypre_StructStencilElementRank(stencil, diag_index);
+      stencil = hypre_StructMatrixStencil(to_matrix);
+      diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
+      assert( diag_rank==diag_rank1 );
+      /* if we really need to do it, it's a minor change to let diag_rank!=diag_rank1,
+         but they would both have to be passed through the argument list */
+   }
+
    hypre_CreateCommInfoFromGrids(hypre_StructMatrixGrid(from_matrix),
                                  hypre_StructMatrixGrid(to_matrix),
                                  &comm_info);
@@ -1064,6 +1095,7 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
                        hypre_StructMatrixDataSpace(from_matrix),
                        hypre_StructMatrixDataSpace(to_matrix),
                        hypre_StructMatrixNumValues(from_matrix),
+                       constant_coefficient, diag_rank,
                        hypre_StructMatrixComm(from_matrix), &comm_pkg);
    /* is this correct for periodic? */
 
@@ -1075,7 +1107,7 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
                                  hypre_StructMatrixData(from_matrix),
                                  hypre_StructMatrixData(to_matrix),
                                  &comm_handle);
-   hypre_FinalizeCommunication(comm_handle);
+   hypre_FinalizeCommunication(comm_handle,constant_coefficient);
 
    return ierr;
 }
