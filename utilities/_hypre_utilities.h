@@ -514,6 +514,8 @@ HYPRE_Int hypre_GetThreadNum( void );
 
 #endif
 
+void hypre_GetSimpleThreadPartition( HYPRE_Int *begin, HYPRE_Int *end, HYPRE_Int n );
+
 #endif
 
 /*BHEADER**********************************************************************
@@ -882,6 +884,14 @@ void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_ou
  *                  workspace[3*tid:3*tid+3) contain result for tid
  */
 void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *in_out3, HYPRE_Int *sum3, HYPRE_Int *workspace);
+
+/**
+ * n prefix-sums together.
+ * workspace[n*tid:n*(tid+1)) contain result for tid
+ *
+ * @param workspace at least with length n*(nthreads+1)
+ */
+void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, HYPRE_Int *workspace);
 
 /* hypre_merge_sort.c */
 /**
