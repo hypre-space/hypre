@@ -214,4 +214,9 @@ hypre_GetThreadID( void )
    return -1;
 }
 
+#else
+
+/* this is used only to eliminate compiler warnings */
+int hypre_empty;
+
 #endif

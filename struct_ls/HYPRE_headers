@@ -33,6 +33,11 @@ cat > $TWRAPPER_FILE <<@
 
 cat >> $TWRAPPER_FILE <<@
 
+#else
+
+/* this is used only to eliminate compiler warnings */
+int hypre_empty;
+
 #endif
 
 @

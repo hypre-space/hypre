@@ -1458,5 +1458,10 @@ HYPRE_FreeCommPkgPush(
    return returnvalue;
 }
 
+#else
+
+/* this is used only to eliminate compiler warnings */
+int hypre_empty;
+
 #endif
 

@@ -309,4 +309,9 @@ MPI_Type_commit( MPI_Datatype *datatype )
    return(0);
 }
 
+#else
+
+/* this is used only to eliminate compiler warnings */
+int hypre_empty;
+
 #endif
