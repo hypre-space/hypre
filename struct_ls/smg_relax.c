@@ -202,6 +202,9 @@ zzz_SMGRelaxSetup( void             *relax_vdata,
       {
          solve_data[i] = zzz_SMGInitialize(relax_data -> comm);
          zzz_SMGSetBase(solve_data[i], base_index, base_stride);
+         zzz_SMGSetTol(solve_data[i], 0.0);
+         zzz_SMGSetMaxIter(solve_data[i], 1);
+         zzz_SMGSetZeroGuess(solve_data[i]);
          zzz_SMGSetup(solve_data[i], A_sol, temp_vec, x);
       }
       else
@@ -237,6 +240,7 @@ zzz_SMGRelax( void             *relax_vdata,
    zzz_SMGRelaxData   *relax_data = relax_vdata;
 
    int                 max_iter        = (relax_data -> max_iter);
+   int                 zero_guess      = (relax_data -> zero_guess);
    int                 num_spaces      = (relax_data -> num_spaces);
    int                 num_pre_spaces  = (relax_data -> num_pre_spaces);
    int                *pre_space_ranks = (relax_data -> pre_space_ranks);
@@ -246,6 +250,7 @@ zzz_SMGRelax( void             *relax_vdata,
    void              **solve_data      = (relax_data -> solve_data);
 
    int                 i, is;
+   int                 first_residual = 1;
 
    int                 ierr;
 
@@ -256,7 +261,17 @@ zzz_SMGRelax( void             *relax_vdata,
    for (i = 0; i < num_pre_spaces; i++)
    {
       is = pre_space_ranks[i];
-      zzz_SMGResidual(residual_data[is], x, b, temp_vec);
+
+      if (first_residual && zero_guess)
+      {
+         zzz_StructCopy(b, temp_vec);
+         first_residual = 0;
+      }
+      else
+      {
+         zzz_SMGResidual(residual_data[is], x, b, temp_vec);
+      }
+
       if (stencil_dim > 2)
          zzz_SMGSolve(solve_data[is], temp_vec, x);
       else
@@ -271,7 +286,16 @@ zzz_SMGRelax( void             *relax_vdata,
    {
       for (is = 0; is < num_spaces; is++)
       {
-         zzz_SMGResidual(residual_data[is], x, b, temp_vec);
+         if (first_residual && zero_guess)
+         {
+            zzz_StructCopy(b, temp_vec);
+            first_residual = 0;
+         }
+         else
+         {
+            zzz_SMGResidual(residual_data[is], x, b, temp_vec);
+         }
+
          if (stencil_dim > 2)
             zzz_SMGSolve(solve_data[is], temp_vec, x);
          else

@@ -163,7 +163,7 @@ zzz_SMGSolve( void             *smg_vdata,
 
       for (l = (num_levels - 2); l >= 0; l--)
       {
-	 zzz_SMGIntAdd(intadd_data_l[l], x_l[l+1], e_l[l], x_l[l]);
+         zzz_SMGIntAdd(intadd_data_l[l], x_l[l+1], e_l[l], x_l[l]);
 #if 1
       /* for debugging purposes */
    {

@@ -38,7 +38,7 @@ zzz_SMGNewRAPOp( zzz_StructMatrix *R,
       break;
     
       case 3:
-      RAP = zzz_SMG2NewRAPOp(R ,A, PT);
+      RAP = zzz_SMG3NewRAPOp(R ,A, PT);
       break;
    } 
 
