@@ -204,6 +204,9 @@ AC_ARG_WITH(petsc,
    then
       casc_using_petsc=yes
       HYPRE_PETSCDEFS="$HYPRE_PETSCDEFS -DPETSC_AVAILABLE"
+      HYPRE_PETSC_DIRS="PETScMat_linear_solvers/pilut PETSc_linear_solvers/ParILUT"
+   else
+      HYPRE_PETSC_DIRS=""
    fi
 )
 
@@ -634,6 +637,8 @@ dnl * libraries
 AC_SUBST(PETSCLIBS)
 AC_SUBST(PETSCLIBDIRS)
 AC_SUBST(PETSCINCLUDE)
+AC_SUBST(HYPRE_PETSCDEFS)
+AC_SUBST(HYPRE_PETSC_DIRS)
 
 
 AC_SUBST(HYPRE_TOP_SRC_DIR)
