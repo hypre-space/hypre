@@ -14,24 +14,26 @@ INCLUDES = -I.. ${HYPRE_INCLUDES} ${BABEL_INCLUDES}
 # these are implementations of the babel objects.
 PREBUILT_SRCS = Hypre_Box.c\
 	Hypre_MPI_Com.c\
-	Hypre_StructSolver.c\
 	Hypre_PCG.c\
 	Hypre_StructSMG.c\
 	Hypre_StructJacobi.c\
 	Hypre_StructMatrix.c\
+	Hypre_StructMatrixBldr.c\
 	Hypre_StructStencil.c\
 	Hypre_StructVector.c\
+	Hypre_StructVectorBldr.c\
 	Hypre_StructuredGrid.c
 
 PREBUILT_HDRS = Hypre_Box_Data.h\
 	Hypre_MPI_Com_Data.h\
-	Hypre_StructSolver_Data.h\
 	Hypre_PCG_Data.h\
 	Hypre_StructSMG_Data.h\
 	Hypre_StructJacobi_Data.h\
 	Hypre_StructMatrix_Data.h\
+	Hypre_StructMatrixBldr_Data.h\
 	Hypre_StructStencil_Data.h\
 	Hypre_StructVector_Data.h\
+	Hypre_StructVectorBldr_Data.h\
 	Hypre_StructuredGrid_Data.h
 
 
@@ -40,7 +42,6 @@ GENERATED_SRCS = Hypre_Box_Skel.c\
 	Hypre_LinearOperator_Skel.c\
 	Hypre_MPI_Com_Skel.c\
 	Hypre_Operator_Skel.c\
-	Hypre_StructSolver_Skel.c\
 	Hypre_PCG_Skel.c\
 	Hypre_StructSMG_Skel.c\
 	Hypre_StructJacobi_Skel.c\
@@ -50,8 +51,10 @@ GENERATED_SRCS = Hypre_Box_Skel.c\
 	Hypre_SolverBuilder_Skel.c\
 	Hypre_Stencil_Skel.c\
 	Hypre_StructMatrix_Skel.c\
+	Hypre_StructMatrixBldr_Skel.c\
 	Hypre_StructStencil_Skel.c\
 	Hypre_StructVector_Skel.c\
+	Hypre_StructVectorBldr_Skel.c\
 	Hypre_StructuredGridBuilder_Skel.c\
 	Hypre_StructuredGridMatrixBuilder_Skel.c\
 	Hypre_StructuredGridVectorBuilder_Skel.c\
@@ -66,8 +69,6 @@ GENERATED_HDRS = Hypre.h\
 	Hypre_MPI_Com_Skel.h\
 	Hypre_Operator.h\
 	Hypre_Operator_Skel.h\
-	Hypre_StructSolver.h\
-	Hypre_StructSolver_Skel.h\
 	Hypre_PCG.h\
 	Hypre_PCG_Skel.h\
 	Hypre_StructSMG.h\
@@ -85,6 +86,7 @@ GENERATED_HDRS = Hypre.h\
 	Hypre_Stencil.h\
 	Hypre_Stencil_Skel.h\
 	Hypre_StructMatrix.h\
+	Hypre_StructMatrixBldr.h\
 	Hypre_StructMatrix_Skel.h\
 	Hypre_StructStencil.h\
 	Hypre_StructStencil_Skel.h\
@@ -96,6 +98,7 @@ GENERATED_HDRS = Hypre.h\
 	Hypre_StructuredGridMatrixBuilder_Skel.h\
 	Hypre_StructuredGridVectorBuilder_Skel.h\
 	Hypre_StructVector.h\
+	Hypre_StructVectorBldr.h\
 	Hypre_StructVector_Skel.h
 
 clean-local: 
