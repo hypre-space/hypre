@@ -249,6 +249,7 @@ MOSTFILES = \
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_seqsuperlu.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_sgs.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_superlu.cxx\
+ $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx\
  $(top_srcdir)/FEI_mv/femli/vector/mli_vector.cxx\
  $(top_srcdir)/FEI_mv/femli/util/mli_utils_fortran.f\
  $(top_srcdir)/IJ_mv/F90_HYPRE_IJMatrix.c\

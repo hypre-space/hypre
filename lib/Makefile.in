@@ -209,6 +209,7 @@ am__libHYPRE_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_seqsuperlu.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_sgs.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_superlu.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx \
 	$(top_srcdir)/FEI_mv/femli/vector/mli_vector.cxx \
 	$(top_srcdir)/FEI_mv/femli/util/mli_utils_fortran.f \
 	$(top_srcdir)/IJ_mv/F90_HYPRE_IJMatrix.c \
@@ -586,21 +587,22 @@ am__objects_4 = bicgs.$(OBJEXT) bicgstabl.$(OBJEXT) \
 	mli_solver_jacobi.$(OBJEXT) mli_solver_kaczmarz.$(OBJEXT) \
 	mli_solver_mls.$(OBJEXT) mli_solver_parasails.$(OBJEXT) \
 	mli_solver_seqsuperlu.$(OBJEXT) mli_solver_sgs.$(OBJEXT) \
-	mli_solver_superlu.$(OBJEXT) mli_vector.$(OBJEXT) \
-	mli_utils_fortran.$(OBJEXT) F90_HYPRE_IJMatrix.$(OBJEXT) \
-	F90_HYPRE_IJVector.$(OBJEXT) F90_IJMatrix.$(OBJEXT) \
-	HYPRE_IJMatrix.$(OBJEXT) HYPRE_IJVector.$(OBJEXT) \
-	IJMatrix.$(OBJEXT) IJMatrix_parcsr.$(OBJEXT) \
-	IJVector.$(OBJEXT) IJVector_parcsr.$(OBJEXT) \
-	aux_parcsr_matrix.$(OBJEXT) aux_par_vector.$(OBJEXT) \
-	Euclid_apply.$(OBJEXT) Euclid_dh.$(OBJEXT) \
-	ExternalRows_dh.$(OBJEXT) Factor_dh.$(OBJEXT) \
-	Hash_dh.$(OBJEXT) Hash_i_dh.$(OBJEXT) MatGenFD.$(OBJEXT) \
-	Mat_dh.$(OBJEXT) Mem_dh.$(OBJEXT) Numbering_dh.$(OBJEXT) \
-	Parser_dh.$(OBJEXT) SortedList_dh.$(OBJEXT) \
-	SortedSet_dh.$(OBJEXT) SubdomainGraph_dh.$(OBJEXT) \
-	TimeLog_dh.$(OBJEXT) Timer_dh.$(OBJEXT) Vec_dh.$(OBJEXT) \
-	blas_dh.$(OBJEXT) getRow_dh.$(OBJEXT) globalObjects.$(OBJEXT) \
+	mli_solver_superlu.$(OBJEXT) mli_solver_mli.$(OBJEXT) \
+	mli_vector.$(OBJEXT) mli_utils_fortran.$(OBJEXT) \
+	F90_HYPRE_IJMatrix.$(OBJEXT) F90_HYPRE_IJVector.$(OBJEXT) \
+	F90_IJMatrix.$(OBJEXT) HYPRE_IJMatrix.$(OBJEXT) \
+	HYPRE_IJVector.$(OBJEXT) IJMatrix.$(OBJEXT) \
+	IJMatrix_parcsr.$(OBJEXT) IJVector.$(OBJEXT) \
+	IJVector_parcsr.$(OBJEXT) aux_parcsr_matrix.$(OBJEXT) \
+	aux_par_vector.$(OBJEXT) Euclid_apply.$(OBJEXT) \
+	Euclid_dh.$(OBJEXT) ExternalRows_dh.$(OBJEXT) \
+	Factor_dh.$(OBJEXT) Hash_dh.$(OBJEXT) Hash_i_dh.$(OBJEXT) \
+	MatGenFD.$(OBJEXT) Mat_dh.$(OBJEXT) Mem_dh.$(OBJEXT) \
+	Numbering_dh.$(OBJEXT) Parser_dh.$(OBJEXT) \
+	SortedList_dh.$(OBJEXT) SortedSet_dh.$(OBJEXT) \
+	SubdomainGraph_dh.$(OBJEXT) TimeLog_dh.$(OBJEXT) \
+	Timer_dh.$(OBJEXT) Vec_dh.$(OBJEXT) blas_dh.$(OBJEXT) \
+	getRow_dh.$(OBJEXT) globalObjects.$(OBJEXT) \
 	ilu_mpi_bj.$(OBJEXT) ilu_mpi_pilu.$(OBJEXT) ilu_seq.$(OBJEXT) \
 	io_dh.$(OBJEXT) krylov_dh.$(OBJEXT) mat_dh_private.$(OBJEXT) \
 	shellSort_dh.$(OBJEXT) sig_dh.$(OBJEXT) ConjGrad.$(OBJEXT) \
@@ -804,6 +806,7 @@ am__libHYPRE_LSI_a_SOURCES_DIST =  \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_seqsuperlu.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_sgs.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_superlu.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx \
 	$(top_srcdir)/FEI_mv/femli/vector/mli_vector.cxx \
 	$(top_srcdir)/FEI_mv/femli/util/mli_utils_fortran.f \
 	$(top_srcdir)/IJ_mv/F90_HYPRE_IJMatrix.c \
@@ -1249,6 +1252,7 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_seqsuperlu.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_sgs.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_superlu.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx \
 	$(top_srcdir)/FEI_mv/femli/vector/mli_vector.cxx \
 	$(top_srcdir)/FEI_mv/femli/util/mli_utils_fortran.f \
 	$(top_srcdir)/IJ_mv/F90_HYPRE_IJMatrix.c \
@@ -1591,14 +1595,14 @@ am__objects_10 = bicgs.lo bicgstabl.lo FEI_HYPRE_Impl.lo \
 	mli_solver_hsgs.lo mli_solver_jacobi.lo mli_solver_kaczmarz.lo \
 	mli_solver_mls.lo mli_solver_parasails.lo \
 	mli_solver_seqsuperlu.lo mli_solver_sgs.lo \
-	mli_solver_superlu.lo mli_vector.lo mli_utils_fortran.lo \
-	F90_HYPRE_IJMatrix.lo F90_HYPRE_IJVector.lo F90_IJMatrix.lo \
-	HYPRE_IJMatrix.lo HYPRE_IJVector.lo IJMatrix.lo \
-	IJMatrix_parcsr.lo IJVector.lo IJVector_parcsr.lo \
-	aux_parcsr_matrix.lo aux_par_vector.lo Euclid_apply.lo \
-	Euclid_dh.lo ExternalRows_dh.lo Factor_dh.lo Hash_dh.lo \
-	Hash_i_dh.lo MatGenFD.lo Mat_dh.lo Mem_dh.lo Numbering_dh.lo \
-	Parser_dh.lo SortedList_dh.lo SortedSet_dh.lo \
+	mli_solver_superlu.lo mli_solver_mli.lo mli_vector.lo \
+	mli_utils_fortran.lo F90_HYPRE_IJMatrix.lo \
+	F90_HYPRE_IJVector.lo F90_IJMatrix.lo HYPRE_IJMatrix.lo \
+	HYPRE_IJVector.lo IJMatrix.lo IJMatrix_parcsr.lo IJVector.lo \
+	IJVector_parcsr.lo aux_parcsr_matrix.lo aux_par_vector.lo \
+	Euclid_apply.lo Euclid_dh.lo ExternalRows_dh.lo Factor_dh.lo \
+	Hash_dh.lo Hash_i_dh.lo MatGenFD.lo Mat_dh.lo Mem_dh.lo \
+	Numbering_dh.lo Parser_dh.lo SortedList_dh.lo SortedSet_dh.lo \
 	SubdomainGraph_dh.lo TimeLog_dh.lo Timer_dh.lo Vec_dh.lo \
 	blas_dh.lo getRow_dh.lo globalObjects.lo ilu_mpi_bj.lo \
 	ilu_mpi_pilu.lo ilu_seq.lo io_dh.lo krylov_dh.lo \
@@ -1767,6 +1771,7 @@ am__libHYPRE_LSI_la_SOURCES_DIST =  \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_seqsuperlu.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_sgs.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_superlu.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx \
 	$(top_srcdir)/FEI_mv/femli/vector/mli_vector.cxx \
 	$(top_srcdir)/FEI_mv/femli/util/mli_utils_fortran.f \
 	$(top_srcdir)/IJ_mv/F90_HYPRE_IJMatrix.c \
@@ -2457,6 +2462,7 @@ MOSTFILES = \
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_seqsuperlu.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_sgs.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_superlu.cxx\
+ $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx\
  $(top_srcdir)/FEI_mv/femli/vector/mli_vector.cxx\
  $(top_srcdir)/FEI_mv/femli/util/mli_utils_fortran.f\
  $(top_srcdir)/IJ_mv/F90_HYPRE_IJMatrix.c\
@@ -7209,6 +7215,15 @@ mli_solver_superlu.obj: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_superlu.cxx
 
 mli_solver_superlu.lo: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_superlu.cxx
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_superlu.lo `test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_superlu.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/solver/mli_solver_superlu.cxx
+
+mli_solver_mli.o: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_mli.o `test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx
+
+mli_solver_mli.obj: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_mli.obj `if test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx'; then $(CYGPATH_W) '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx'; fi`
+
+mli_solver_mli.lo: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_mli.lo `test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/solver/mli_solver_mli.cxx
 
 mli_vector.o: $(top_srcdir)/FEI_mv/femli/vector/mli_vector.cxx
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_vector.o `test -f '$(top_srcdir)/FEI_mv/femli/vector/mli_vector.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/vector/mli_vector.cxx
