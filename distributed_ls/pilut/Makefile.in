@@ -1,6 +1,9 @@
 
 all: lib
 
+install:all
+
+
 
 MPI_INCLUDES = -I/usr/local/mpi/mpich/include
 MPI_LIBDIR   = -L/usr/local/mpi/mpich/lib/solaris/ch_p4/
@@ -43,5 +46,5 @@ include ../../bmakes/Makefile
 ##################################################################
 
 lib:    $(PROTOS) $(OBJS)
-	ar -r lib_HYPREDistributedMatrixPilutSolver.a $(OBJS)
+	ar -r lib_HYPRE_DistributedMatrixPilutSolver.a $(OBJS)
 

@@ -11,6 +11,10 @@
 .SUFFIXES:
 .SUFFIXES: .c .f .o
 
+all: lib
+
+install:all
+
 
 
 #Headers
@@ -45,6 +49,6 @@ link:
 
 lib: ${PROTOS} ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru lib_HYPREPETScSolverParILUT.a ${OBJS}
-	@ranlib lib_HYPREPETScSolverParILUT.a 
+	@ar -ru lib_HYPRE_PETScSolverParILUT.a ${OBJS}
+	@ranlib lib_HYPR_EPETScSolverParILUT.a 
 

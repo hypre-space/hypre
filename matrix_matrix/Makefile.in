@@ -13,6 +13,10 @@
 
 default: lib
 
+all: lib
+
+install:all
+
 HEADERS =
  
 HYPREFILES =\

@@ -12,7 +12,7 @@
 HYPRE_DIR = @HYPRE_TOP_SRC_DIR@
 
 CC = @CC@
-CCC = @CXX@
+CXX = @CXX@
 F77 = @F77@
 
 C_COMPILE_FLAGS=@CFLAGS@
@@ -27,6 +27,16 @@ CDEFS = @HYPREDEFS@ @HYPRE_PETSCDEFS@ -DHYPRE_TIMING -DHYPRE_NO_PTHREAD_MANGLING
 CFLAGS = \
  @PETSCINCLUDE@ \
  ${C_COMPILE_FLAGS}\
+ -I$(HYPRE_DIR)/utilities\
+ -I$(HYPRE_DIR)\
+ ${CINCLUDES}\
+ ${COPT}\
+ ${CDEBUG}\
+ ${CDEFS}
+
+CXXFLAGS = \
+ @PETSCINCLUDE@ \
+ ${CXX_COMPILE_FLAGS}\
  -I$(HYPRE_DIR)/utilities\
  -I$(HYPRE_DIR)\
  ${CINCLUDES}\
@@ -54,6 +64,9 @@ veryclean: clean
 
 .c.o:
 	${CC} -o $@ -c ${CFLAGS} $<
+
+.cc.o:
+	${CXX} -o $@ -c ${CFLAGS} $<
 
 .f.o:
 	${F77} -o $@ -c ${FFLAGS} $<

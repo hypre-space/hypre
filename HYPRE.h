@@ -46,13 +46,13 @@
  * Prototypes
  *--------------------------------------------------------------------------*/
 
+#include "utilities/HYPRE_utilities.h"
 #include "CI_struct_matrix_vector/HYPRE_protos.h"
 #include "CI_struct_linear_solvers/HYPRE_protos.h"
 #include "distributed_matrix/HYPRE_protos.h"
 #include "distributed_linear_solvers/pilut/HYPRE_protos.h"
 #include "PETScMat_linear_solvers/pilut/HYPRE_protos.h"
 #include "PETSc_linear_solvers/ParILUT/HYPRE_protos.h"
-
 #include "matrix_matrix/HYPRE_protos.h"
 
 #ifdef __STDC__

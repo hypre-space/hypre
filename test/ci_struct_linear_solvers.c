@@ -2,8 +2,11 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "hypre_utilities.h"
-#include "HYPRE.h"  
+#include "utilities.h"
+#include "../CI_struct_matrix_vector/HYPRE_types.h"  
+#include "../CI_struct_matrix_vector/HYPRE_protos.h"  
+#include "../CI_struct_linear_solvers/HYPRE_types.h"  
+#include "../CI_struct_linear_solvers/HYPRE_protos.h"  
  
 #ifdef HYPRE_DEBUG
 #include <cegdb.h>

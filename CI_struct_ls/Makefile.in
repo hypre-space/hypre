@@ -9,6 +9,10 @@
 
 default: lib
 
+all: default
+
+install:all
+
 .SUFFIXES:
 .SUFFIXES: .c .f .o
 

@@ -11,6 +11,12 @@
 .SUFFIXES:
 .SUFFIXES: .c .f .o
 
+default: lib
+
+all: default
+
+install:all
+
 #Headers
 HEADERS=\
  PETScMatPilutSolver.h
@@ -36,7 +42,7 @@ include ../../bmakes/Makefile
 # Main rules
 ##################################################################
 
-driver: driver.o lib_HYPREPETScMatPilutSolver.a
+driver: driver.o lib_HYPRE_PETScMatPilutSolver.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS}
 
@@ -46,6 +52,6 @@ link:
 
 lib: ${PROTOS} ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru lib_HYPREPETScMatPilutSolver.a ${OBJS}
-	@ranlib lib_HYPREPETScMatPilutSolver.a 
+	@ar -ru lib_HYPRE_PETScMatPilutSolver.a ${OBJS}
+	@ranlib lib_HYPRE_PETScMatPilutSolver.a 
 

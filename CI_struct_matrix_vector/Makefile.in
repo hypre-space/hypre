@@ -13,6 +13,10 @@
 
 default: lib
 
+all: default
+
+install:all
+
 HEADERS =\
  box.h\
  struct_grid.h\
@@ -61,8 +65,8 @@ link:
 
 libHYPRE_CI_mv.a: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru libHYPRE_CI_mv.a ${OBJS}
-	@ranlib libHYPRE_CI_mv.a
+	@ar -ru lib_HYPRE_CI_mv.a ${OBJS}
+	@ranlib lib_HYPRE_CI_mv.a
 
 ${OBJS}: ${HEADERS}
 

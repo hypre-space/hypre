@@ -10,6 +10,10 @@
 
 .SUFFIXES: .cc .c .f .o
 
+all: lib
+
+install:all
+
 #Headers
 HEADERS =\
  distributed_matrix.h
@@ -51,6 +55,6 @@ link:
 lib: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
 	@echo  "Building ${OBJS} ... "
-	@ar -ru lib_HYPREDistributedMatrix.a ${OBJS}
-	@ranlib lib_HYPREDistributedMatrix.a 
+	@ar -ru lib_HYPRE_DistributedMatrix.a ${OBJS}
+	@ranlib lib_HYPRE_DistributedMatrix.a 
 
