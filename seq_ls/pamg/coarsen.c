@@ -1346,50 +1346,31 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
 	 coarse_size++;
 
 	 for (jS = S_i[i]; jS < S_i[i+1]; jS++) {
-	   j = S_j[jS];
-	   /* make point j an F point*/
-	   CF_marker[j]= F_PT;
+	   /*j = S_j[jS];
+	   CF_marker[j]= F_PT*/
 	   /* "remove" edge from S in equation i */
 	   if (S_data[jS] < 0){
 	     S_data[jS] = -S_data[jS];
 	   }
+	 }
+       }  
+       else  
+       {  
+	 for (jS = S_i[i]; jS < S_i[i+1]; jS++) {
+	   j = S_j[jS];
+	   if (CF_marker[j] > 0)
+	   {
+	      CF_marker[i] = F_PT;
 	   /* now loop over the columns of equation j */
-	   for (jjS = S_i[j]; jjS < S_i[j+1]; jjS++) {
+	      for (jjS = S_i[j]; jjS < S_i[j+1]; jjS++) {
 	     /* "remove" edge from S in equation j */
-	     if (S_data[jjS] < 0){
-	       S_data[jjS] = -S_data[jjS];
-	     }
+	         if (S_data[jjS] < 0){
+	            S_data[jjS] = -S_data[jjS];
+	         }
+	      }
 	   }
 	 }
        }  
-
-       /*---------------------------------------------
-	* Now treat the case where point i is not in the
-	* independent set: loop over
-	* all the points j that influence equation i; if
-	* j is a C point, then make i an F point.
-	* If i is a new F point, then remove all the edges
-        * from the graph for equation i.
-	*---------------------------------------------*/
-
-       else {
-	 for (jS = S_i[i]; jS < S_i[i+1]; jS++){
-	   j = S_j[jS];
-
-	   if (CF_marker[j] > 0){
-	     CF_marker[i] = F_PT;
-	   }
-	 }
-         /* remove all the edges for equation i */
-	 if (CF_marker[i] == F_PT){
-	   for (jS = S_i[i]; jS < S_i[i+1]; jS++){
-	     if (S_data[jS] < 0){
-	       /* "remove" edge from S */
-	       S_data[jS] = -S_data[jS];
-	     }
-	   }
-	 }       
-       }
      }
 
      /*---------------------------------------------
