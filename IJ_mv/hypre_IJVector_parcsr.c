@@ -512,7 +512,7 @@ hypre_GetIJVectorParLocalComponents(hypre_IJVector *vector,
  *****************************************************************************/
 
 int
-hypre_GerIJVectorParLocalComponentsInBlock(hypre_IJVector *vector,
+hypre_GetIJVectorParLocalComponentsInBlock(hypre_IJVector *vector,
                                            int             glob_vec_index_start,
                                            int             glob_vec_index_stop,
                                            int            *value_indices,
