@@ -31,6 +31,7 @@ hypre_ParaSails;
  * matrix, which affects load balance
  *--------------------------------------------------------------------------*/
 
+#ifdef BALANCE_INFO
 static void balance_info(MPI_Comm comm, Matrix *mat)
 {
     int mype, num_local, i, total;
@@ -47,6 +48,7 @@ static void balance_info(MPI_Comm comm, Matrix *mat)
     printf("%4d: nrows %d, nnz %d, send %d (%d), recv %d (%d)\n", mype, 
     num_local, total, mat->num_send, mat->sendlen, mat->num_recv, mat->recvlen);
 }
+#endif
 
 /*--------------------------------------------------------------------------
  * convert_matrix - Create and convert distributed matrix to native 
@@ -74,7 +76,7 @@ static Matrix *convert_matrix(MPI_Comm comm, HYPRE_DistributedMatrix *distmat)
 
     MatrixComplete(mat);
 
-#if 0
+#ifdef BALANCE_INFO
     balance_info(comm, mat);
 #endif
 
