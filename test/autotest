@@ -72,6 +72,7 @@ cvs -q checkout -P linear_solvers 1> $0.checkout.log 2> $0.checkout.err
 echo "$HYPRE_CHECKOUT_EMAIL" > $0.checkout.err.email 
 chmod -fR ug+rw linear_solvers
 chgrp -fR hypre linear_solvers
+export HYPRE_ARCH HYPRE_COMPILE_MACHINE HYPRE_RUN_MACHINE HYPRE_REMOTE_DIR
 
 #==============================================================================
 # Run test suites on remote machines
@@ -133,6 +134,14 @@ do
         HYPRE_COMPILE_MACHINE="riptide"
         HYPRE_RUN_MACHINE="riptide"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/mips-sgi-irix6.5/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
+	perform_test
+        shift;;
+    -vivid)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="vivid"
+        HYPRE_RUN_MACHINE="vivid"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/i686-pc-linux-gnu/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf"
 	perform_test
         shift;;
