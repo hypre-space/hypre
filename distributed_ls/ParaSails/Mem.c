@@ -82,8 +82,8 @@ char *MemAlloc(Mem *m, int size)
     int req;
     char *p;
 
-    /* Round up the size to a multiple of a pointer size */
-    size = ((size + sizeof(int *) - 1) / sizeof(int *)) * sizeof(int *);
+    /* Align on 16-byte boundary */
+    size = ((size + 15) / 16) * 16;
 
     if (m->bytes_left < size)
     {
