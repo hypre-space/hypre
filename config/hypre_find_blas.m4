@@ -10,22 +10,19 @@ dnl
 dnl 	$BLASLIBS $LIBS $FLIBS
 dnl
 dnl in that order.  FLIBS is the output variable of the
-dnl AC_F77_LIBRARY_LDFLAGS macro (called if necessary by ACX_BLAS),
-dnl and is sometimes necessary in order to link with F77 libraries.
-dnl Users will also need to use AC_F77_DUMMY_MAIN (see the autoconf
-dnl manual), for the same reason.
+dnl AC_F77_LIBRARY_LDFLAGS macro, and is sometimes necessary in order to link
+dnl with F77 libraries.
 dnl
 dnl Many libraries are searched for, from ATLAS to CXML to ESSL.
-dnl The user may specify a BLAS library by using the --with-blas-libs and
-dnl --with-blas-dirs options.  In order to link successfully,
-dnl however, be aware that you will probably need to use the same
-dnl Fortran compiler (which can be set via the F77 env. var.) as
-dnl was used to compile the BLAS library.
+dnl The user may specify a BLAS library by using the --with-blas-libs=<lib>
+dnl and --with-blas-lib-dirs=<dir> options.  In order to link successfully,
+dnl however, be aware that you will probably need to use the same Fortran
+dnl compiler (which can be set via the F77 env. var.) as was used to compile
+dnl the BLAS library.
 dnl
 dnl ACTION-IF-FOUND is a list of shell commands to run if a BLAS
 dnl library is found, and ACTION-IF-NOT-FOUND is a list of commands
-dnl to run it if it is not found.  If ACTION-IF-FOUND is not specified,
-dnl the default action will define HAVE_BLAS.
+dnl to run it if it is not found. 
 dnl
 dnl This macro requires autoconf 2.50 or later.
 dnl
@@ -38,7 +35,6 @@ AC_DEFUN([HYPRE_FIND_BLAS],
   AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
 
   hypre_blas_ok=no
-  BLASLIBS=""
 
   AC_ARG_WITH(blas,
 	[AS_HELP_STRING([  --with-blas], [Find a system-provided BLAS library])])
@@ -55,7 +51,7 @@ AC_DEFUN([HYPRE_FIND_BLAS],
   hypre_blas_save_LIBS="$LIBS"
   LIBS="$LIBS $FLIBS"
 
-# First, check BLASLIBS environment variable
+# Is BLASLIBS environment variable set?
   if test $hypre_blas_ok = no; then
     if test "x$BLASLIBS" != x; then
 	save_LIBS="$LIBS"; LIBS="$BLASLIBS $LIBS"
@@ -69,8 +65,13 @@ AC_DEFUN([HYPRE_FIND_BLAS],
 # BLAS linked to by default?  (happens on some supercomputers)
   if test $hypre_blas_ok = no; then
 	save_LIBS="$LIBS"; LIBS="$LIBS"
-	AC_CHECK_FUNC($dgemm, [hypre_blas_ok=yes])
+	AC_CHECK_FUNC($dgemm, [hypre_blas_ok=yes; BLASLIBS="$LIBS"])
 	LIBS="$save_LIBS"
+  fi
+
+# Generic BLAS library? 
+  if test $hypre_blas_ok = no; then
+	AC_CHECK_LIB(blas, $dgemm, [hypre_blas_ok=yes; BLASLIBS="-lblas"])
   fi
 
 # BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
@@ -121,11 +122,6 @@ AC_DEFUN([HYPRE_FIND_BLAS],
 	AC_CHECK_LIB(essl, $dgemm,
 			[hypre_blas_ok=yes; BLASLIBS="-lessl"
 	AC_DEFINE(HYPRE_USING_ESSL, 1, [Using essl for Blas])])
-  fi
-
-# Generic BLAS library? 
-  if test $hypre_blas_ok = no; then
-	AC_CHECK_LIB(blas, $dgemm, [hypre_blas_ok=yes; BLASLIBS="-lblas"])
   fi
 
   LIBS="$hypre_blas_save_LIBS"
