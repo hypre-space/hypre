@@ -292,7 +292,6 @@ clean cleandir veryclean:
 	cd lib; make clean FEI_ROOT="$(FEI_ROOT)" HYPRE_ARCH="$(HYPRE_ARCH)"
 	cd fei-drivers; make clean FEI_ROOT="$(FEI_ROOT)"
 	cd util; make clean FEI_ROOT="$(FEI_ROOT)"
-	cd unit-tests; make clean FEI_ROOT="$(FEI_ROOT)"
 
 neat:
 	touch erase.this
