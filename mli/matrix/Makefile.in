@@ -70,6 +70,7 @@ FILES =\
 DRIVER_FILES =\
  driver.c\
  driver_matmul.c\
+ driver_aat.c\
  driver_matvec.c
 
 OBJS = ${FILES:.c=.o}
@@ -84,6 +85,10 @@ all: libHYPRE_mli_mat.a
 driver_matmul: driver_matmul.o libHYPRE_mli_mat.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_matmul driver_matmul.o ${LFLAGS} 
+
+driver_aat: driver_aat.o libHYPRE_mli_mat.a
+	@echo  "Linking" $@ "... "
+	${CC} -o driver_aat driver_aat.o ${LFLAGS} 
 
 install: all
 	@cp -f $(srcdir)/*.h $$HYPRE_INSTALL_DIR/include/.

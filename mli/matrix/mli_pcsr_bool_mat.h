@@ -63,6 +63,7 @@ typedef struct
    int 	                *row_starts; 
    int 	                *col_starts;
    hypre_ParCSRCommPkg  *comm_pkg;
+   hypre_ParCSRCommPkg  *comm_pkgT;
    int                   owns_data;
    int                   owns_row_starts;
    int                   owns_col_starts;
@@ -88,6 +89,7 @@ typedef struct
 #define MLI_ParCSRBooleanMatrix_Get_RowStarts(matrix)     ((matrix)->row_starts)
 #define MLI_ParCSRBooleanMatrix_Get_ColStarts(matrix)     ((matrix)->col_starts)
 #define MLI_ParCSRBooleanMatrix_Get_CommPkg(matrix)       ((matrix)->comm_pkg)
+#define MLI_ParCSRBooleanMatrix_Get_CommPkgT(matrix)      ((matrix)->comm_pkgT)
 #define MLI_ParCSRBooleanMatrix_Get_OwnsData(matrix)      ((matrix)->owns_data)
 #define MLI_ParCSRBooleanMatrix_Get_OwnsRowStarts(matrix) ((matrix)->owns_row_starts)
 #define MLI_ParCSRBooleanMatrix_Get_OwnsColStarts(matrix) ((matrix)->owns_col_starts)

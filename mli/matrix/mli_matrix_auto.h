@@ -75,6 +75,7 @@ typedef struct
    int 	                *row_starts; 
    int 	                *col_starts;
    hypre_ParCSRCommPkg  *comm_pkg;
+   hypre_ParCSRCommPkg  *comm_pkgT;
    int                   owns_data;
    int                   owns_row_starts;
    int                   owns_col_starts;
@@ -100,6 +101,7 @@ typedef struct
 #define MLI_ParCSRBooleanMatrix_Get_RowStarts(matrix)     ((matrix)->row_starts)
 #define MLI_ParCSRBooleanMatrix_Get_ColStarts(matrix)     ((matrix)->col_starts)
 #define MLI_ParCSRBooleanMatrix_Get_CommPkg(matrix)       ((matrix)->comm_pkg)
+#define MLI_ParCSRBooleanMatrix_Get_CommPkgT(matrix)      ((matrix)->comm_pkgT)
 #define MLI_ParCSRBooleanMatrix_Get_OwnsData(matrix)      ((matrix)->owns_data)
 #define MLI_ParCSRBooleanMatrix_Get_OwnsRowStarts(matrix) ((matrix)->owns_row_starts)
 #define MLI_ParCSRBooleanMatrix_Get_OwnsColStarts(matrix) ((matrix)->owns_col_starts)
@@ -110,6 +112,9 @@ typedef struct
 #define MLI_ParCSRBooleanMatrix_Get_Getrowactive(matrix)  ((matrix)->getrowactive)
 
 #endif
+
+/* driver_aat.c */
+int main( int argc , char *argv []);
 
 /* driver_matmul.c */
 int main( int argc , char *argv []);
@@ -141,6 +146,8 @@ int BooleanGenerateDiagAndOffd( MLI_CSRBooleanMatrix *A , MLI_ParCSRBooleanMatri
 /* mli_pcsr_bool_matop.c */
 MLI_ParCSRBooleanMatrix *MLI_ParBooleanMatmul( MLI_ParCSRBooleanMatrix *A , MLI_ParCSRBooleanMatrix *B );
 MLI_CSRBooleanMatrix *MLI_ParCSRBooleanMatrixExtractBExt( MLI_ParCSRBooleanMatrix *B , MLI_ParCSRBooleanMatrix *A );
+MLI_CSRBooleanMatrix *MLI_ParCSRBooleanMatrixExtractAExt( MLI_ParCSRBooleanMatrix *A , int **pA_ext_row_map );
+MLI_ParCSRBooleanMatrix *MLI_ParBooleanAAt( MLI_ParCSRBooleanMatrix *A );
 
 
 #ifdef __cplusplus

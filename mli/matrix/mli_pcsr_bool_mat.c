@@ -527,6 +527,10 @@ int MLI_ParCSRBooleanMatrixPrintIJ( MLI_ParCSRBooleanMatrix *matrix,
    FILE    *file;
    MLI_CSRBooleanMatrix *diag = MLI_ParCSRBooleanMatrix_Get_Diag(matrix);
    MLI_CSRBooleanMatrix *offd = MLI_ParCSRBooleanMatrix_Get_Offd(matrix);
+   int  num_cols_offd = 0;
+
+   if (offd) num_cols_offd = 
+      MLI_CSRBooleanMatrix_Get_NCols(MLI_ParCSRBooleanMatrix_Get_Offd(matrix));
 
    MPI_Comm_rank(comm, &myid);
    
@@ -543,7 +547,7 @@ int MLI_ParCSRBooleanMatrixPrintIJ( MLI_ParCSRBooleanMatrix *matrix,
 
    diag_i    = MLI_CSRBooleanMatrix_Get_I(diag);
    diag_j    = MLI_CSRBooleanMatrix_Get_J(diag);
-   if (offd)
+   if (num_cols_offd)
    {
       offd_i    = MLI_CSRBooleanMatrix_Get_I(offd);
       offd_j    = MLI_CSRBooleanMatrix_Get_J(offd);
@@ -560,7 +564,7 @@ int MLI_ParCSRBooleanMatrixPrintIJ( MLI_ParCSRBooleanMatrix *matrix,
       }
 
       /* print offd columns */
-      if (offd)
+      if (num_cols_offd)
       {
          for (j = offd_i[i]; j < offd_i[i+1]; j++)
          {
