@@ -515,15 +515,21 @@ FILES_LSI = $(MOSTFILES)
 # Targets
 ##################################################################
 
-all: libHYPRE.a libHYPRE_LSI.a
+all:
 	@\
 	for file in ${FILES}; \
 	do \
 	  (cp -fp $$file .); \
 	done
+	@echo  "Building libHYPRE.a ... "
+	${AR} libHYPRE.a ${FILES}
+	${RANLIB} libHYPRE.a
+	@echo  "Building libHYPRE_LSI.a ... "
+	${AR} libHYPRE_LSI.a ${FILES_LSI}
+	${RANLIB} libHYPRE_LSI.a
 	cp -fp libHYPRE* ${HYPRE_BUILD_DIR}/lib/.
 
-install: all libHYPRE.a libHYPRE_LSI.a
+install: all
 	cp -fp libHYPRE* ${HYPRE_LIB_INSTALL}/.
 
 clean:
@@ -531,18 +537,3 @@ clean:
 
 distclean: clean
 	rm -f Makefile
-
-
-##################################################################
-# Rules
-##################################################################
-
-libHYPRE.a: ${FILES}
-	@echo  "Building $@ ... "
-	${AR} $@ ${FILES}
-	${RANLIB} $@
-
-libHYPRE_LSI.a: ${FILES_LSI}
-	@echo  "Building $@ ... "
-	${AR} $@ ${FILES_LSI}
-	${RANLIB} $@
