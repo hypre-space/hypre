@@ -65,3 +65,9 @@ New internal installation: V2000-05-31
   may be used to retrieve version information.
 
 
+New internal installation that hasn't been done yet:
+
+Not sure if this "counts"
+- Setup time for PILUT have been dramatically reduced in the case of
+  very small drop tolerances, and memory problems that were causing
+  coredumps on >2 processors have been fixed.
