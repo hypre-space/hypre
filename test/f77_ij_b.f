@@ -127,7 +127,6 @@ c     Babel-interface variables
       data   double_zero /0.0/
       double precision double_one
       data   double_one /1.0/
-      integer*8 linop;
 
 
 c-----------------------------------------------------------------------
@@ -305,7 +304,8 @@ c     to perform them.
      1     first_local_col, last_local_col, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call SIDL_int__array_create1d_f( local_num_rows, bHYPRE_row_sizes )
+      call SIDL_int__array_create1d_f(
+     1     local_num_rows, bHYPRE_row_sizes )
       size = 7
 
       do i = 1, local_num_rows
@@ -326,6 +326,7 @@ c     Loop through all locally stored rows and insert them into ij_matrix
       call HYPRE_IJMatrixGetObject( A, A_parcsr, ierrtmp)
       ierr = ierr + ierrtmp
 
+      stride(1) = 1
       do i = first_local_row, last_local_row
          call HYPRE_ParCSRMatrixGetRow(
      1        A_parcsr, i, size, col_inds, values, ierrtmp )
@@ -412,7 +413,8 @@ c-----------------------------------------------------------------------
       ierr = ierr + ierrtmp
 
       call SIDL_int__array_create1d_f( local_num_cols, bHYPRE_indices )
-      call SIDL_double__array_create1d_f( local_num_cols, bHYPRE_values )
+      call SIDL_double__array_create1d_f(
+     1     local_num_cols, bHYPRE_values )
       do i=0, local_num_cols-1
          call SIDL_int__array_set1_f( bHYPRE_indices, i,
      1        first_local_col + i )
@@ -466,7 +468,8 @@ c-----------------------------------------------------------------------
       ierr = ierr + ierrtmp
 
       call SIDL_int__array_create1d_f( local_num_cols, bHYPRE_indices )
-      call SIDL_double__array_create1d_f( local_num_cols, bHYPRE_values )
+      call SIDL_double__array_create1d_f(
+     1     local_num_cols, bHYPRE_values )
       do i=0, local_num_cols-1
          call SIDL_int__array_set1_f( bHYPRE_indices, i,
      1        first_local_col + i )
@@ -542,7 +545,9 @@ c      print *, 'Solver: AMG'
       call bHYPRE_BoomerAMG_SetCommunicator_f(
      1     bHYPRE_AMG, MPI_COMM_WORLD, ierrtmp )
       ierr = ierr + ierrtmp
-      call bHYPRE_BoomerAMG_SetOperator_f( bHYPRE_AMG, bHYPRE_op_A )
+      call bHYPRE_BoomerAMG_SetOperator_f( bHYPRE_AMG, bHYPRE_op_A,
+     1     ierrtmp )
+      ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetIntParameter_f(
      1     bHYPRE_AMG, "CoarsenType", hybrid*coarsen_type, ierrtmp )
       ierr = ierr + ierrtmp
@@ -556,9 +561,8 @@ c      print *, 'Solver: AMG'
      1     bHYPRE_AMG, "TruncFactor", trunc_factor, ierrtmp )
       ierr = ierr + ierrtmp
 c     /* note: log output not specified ... */
-      call bHYPRE_BoomerAMG_SetIntParameter_f(
-     1     bHYPRE_AMG, "PrintLevel", ioutdat, ierrtmp )
-      ierr = ierr + ierrtmp
+      call bHYPRE_BoomerAMG_SetPrintLevel_f(
+     1     bHYPRE_AMG, ioutdat )
       call bHYPRE_BoomerAMG_SetIntParameter_f(
      1     bHYPRE_AMG, "CycleType", cycle_type, ierrtmp )
       ierr = ierr + ierrtmp
@@ -570,7 +574,7 @@ c     /* note: log output not specified ... */
          call SIDL_int__array_set1_deref_f(
      1        bHYPRE_num_grid_sweeps, i-1, num_grid_sweeps, i-1 )
       enddo
-      call bHYPRE_BoomerAMG_SetIntArrayParameter_f( bHYPRE_AMG,
+      call bHYPRE_BoomerAMG_SetIntArray1Parameter_f( bHYPRE_AMG,
      1     "NumGridSweeps", bHYPRE_num_grid_sweeps, ierrtmp )
       ierr = ierr + ierrtmp
       dimsl(1) = 1
@@ -581,7 +585,7 @@ c     /* note: log output not specified ... */
         call SIDL_int__array_set1_deref_f(
      1        bHYPRE_grid_relax_type, i-1, grid_relax_type, i-1 )
       enddo
-      call bHYPRE_BoomerAMG_SetIntArrayParameter_f( bHYPRE_AMG,
+      call bHYPRE_BoomerAMG_SetIntArray1Parameter_f( bHYPRE_AMG,
      1     "GridRelaxType", bHYPRE_grid_relax_type, ierrtmp )
       ierr = ierr + ierrtmp
 
@@ -597,7 +601,7 @@ c        relax_weight(i)=1.0: simple to set, fine for testing:
          call SIDL_double__array_set1_f(
      1        bHYPRE_relax_weight, i-1, relax_weight(i) )
       enddo
-      call bHYPRE_BoomerAMG_SetDoubleArrayParameter_f(
+      call bHYPRE_BoomerAMG_SetDoubleArray1Parameter_f(
      1     bHYPRE_AMG, "RelaxWeight", bHYPRE_relax_weight, ierrtmp )
       ierr = ierr + ierrtmp
 
@@ -612,14 +616,10 @@ c left at default: GridRelaxPoints
      1     bHYPRE_AMG, "MaxRowSum", max_row_sum, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call bHYPRE_IJParCSRMatrix__cast_f(
-     1     bHYPRE_ParCSR_A, "bHYPRE.LinearOperator", linop )
       call bHYPRE_BoomerAMG_Setup_f(
      1     bHYPRE_AMG, bHYPRE_Vector_b, bHYPRE_Vector_x, ierrtmp )
       ierr = ierr + ierrtmp
-      call bHYPRE_IJParCSRVector_print_f(
-     1     bHYPRE_parcsr_x, "driver.out.x2", ierrtmp )
-      ierr = ierr + ierrtmp
+
       call bHYPRE_BoomerAMG_Apply_f(
      1     bHYPRE_AMG, bHYPRE_Vector_b, bHYPRE_Vector_x, ierrtmp )
       ierr = ierr + ierrtmp
@@ -635,13 +635,11 @@ c-----------------------------------------------------------------------
       ierr = ierr + ierrtmp
 
       if (myid .eq. 0) then
-         call bHYPRE_BoomerAMG_GetIntValue_f(
-     1        bHYPRE_AMG, "Iterations", num_iterations, ierrtmp )
-         ierr = ierr + ierrtmp
-         call bHYPRE_BoomerAMG_GetDoubleValue_f(
-     1        bHYPRE_AMG, "Final Relative Residual Norm", final_res_norm,
-     1        ierrtmp )
-         ierr = ierr + ierrtmp
+         call bHYPRE_BoomerAMG_GetNumIterations_f(
+     1        bHYPRE_AMG, num_iterations )
+         call bHYPRE_BoomerAMG_GetRelResidualNorm_f(
+     1        bHYPRE_AMG,
+     1        final_res_norm )
          print *, 'Iterations = ', num_iterations
          print *, 'Final Residual Norm = ', final_res_norm
          print *, 'Error Flag = ', ierr
