@@ -21,6 +21,7 @@ C_COMPILE_FLAGS =\
  -I../distributed_ls/Euclid\
  -I$(srcdir)\
  -I$(srcdir)/..\
+ -I$(srcdir)/../multivector\
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../krylov\
  -I$(srcdir)/../seq_mv\
@@ -34,6 +35,7 @@ C_COMPILE_FLAGS =\
 HEADERS =\
  Common.h\
  headers.h\
+ HYPRE_parcsr_int.h\
  HYPRE_parcsr_ls.h\
  par_amg.h\
  parcsr_ls.h\
@@ -55,6 +57,7 @@ FILES =\
  HYPRE_parcsr_Euclid.c\
  HYPRE_parcsr_gmres.c\
  HYPRE_parcsr_hybrid.c\
+ HYPRE_parcsr_int.c\
  HYPRE_parcsr_ParaSails.c\
  HYPRE_parcsr_pcg.c\
  HYPRE_parcsr_pilut.c\
