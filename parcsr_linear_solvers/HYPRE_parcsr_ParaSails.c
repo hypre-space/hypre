@@ -34,12 +34,13 @@
 /* If code is more mysterious, then it must be good */
 typedef struct
 {
-    MPI_Comm        comm;
     HYPRE_ParaSails obj;
+    int             sym;
     double          thresh;
     int             nlevels;
     double          filter;
-    int             sym;
+    double          loadbal;
+    int             reuse; /* reuse pattern */
 }
 Secret;
 
@@ -59,12 +60,14 @@ HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
    if (secret == NULL)
        return 1;
 
-   secret->comm    = comm;
-   secret->obj     = (HYPRE_ParaSails) NULL;
-   secret->thresh  = 0.1; /* defaults */
+   secret->sym     = 1;
+   secret->thresh  = 0.1;
    secret->nlevels = 1;
-   secret->filter  = 0.0; /* 0.05 has been suggested */
-   secret->sym     = 1;   /* default is symmetric */
+   secret->filter  = 0.1;
+   secret->loadbal = 0.0;
+   secret->reuse   = 0;
+
+   HYPRE_ParaSailsCreate(comm, &secret->obj);
 
    *solver = (HYPRE_Solver) secret;
 
@@ -91,6 +94,8 @@ HYPRE_ParCSRParaSailsDestroy( HYPRE_Solver solver )
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRParaSailsSetup - Set up function for ParaSails.
+ * This function is not called on subsequent times if the preconditioner is 
+ * being reused.
  *--------------------------------------------------------------------------*/
 
 int 
@@ -100,21 +105,24 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
                    HYPRE_ParVector x      )
 {
    int ierr = 0;
+   static int virgin = 1;
    HYPRE_DistributedMatrix matrix;
    Secret *secret = (Secret *) solver;
 
    ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix( A, &matrix );
    if (ierr) return ierr;
 
-   if (secret->obj != NULL)
-       HYPRE_ParaSailsDestroy(secret->obj);
-
-   ierr = HYPRE_ParaSailsCreate(secret->comm, matrix, &secret->obj,
-      secret->sym);
-   if (ierr) return ierr;
-
-   ierr = HYPRE_ParaSailsSetup(secret->obj, secret->thresh, 
-       secret->nlevels, secret->filter);
+   if (virgin || secret->reuse == 0) /* call set up at least once */
+   {
+       virgin = 0;
+       ierr = HYPRE_ParaSailsSetup(secret->obj, matrix, secret->sym, 
+           secret->thresh, secret->nlevels, secret->filter, secret->loadbal);
+   }
+   else /* reuse is true; this is a subsequent call */
+   {
+       ierr = HYPRE_ParaSailsSetupValues(secret->obj, matrix,
+	 secret->filter, secret->loadbal);
+   }
 
    return ierr;
 }
@@ -186,6 +194,36 @@ HYPRE_ParCSRParaSailsSetSym(HYPRE_Solver solver,
    Secret *secret = (Secret *) solver;
 
    secret->sym = sym;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRParaSailsSetLoadbal
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRParaSailsSetLoadbal(HYPRE_Solver solver, 
+                    double loadbal)
+{
+   Secret *secret = (Secret *) solver;
+
+   secret->loadbal = loadbal;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRParaSailsSetReuse - reuse pattern if "reuse" if nonzero
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRParaSailsSetReuse(HYPRE_Solver solver, 
+                    int reuse)
+{
+   Secret *secret = (Secret *) solver;
+
+   secret->reuse = reuse;
 
    return 0;
 }
