@@ -81,8 +81,8 @@ do
     if test -f purify.log
     then
       mv purify.log ${i}.purify.log
-      grep -i hypre_ ${i}.purify.log > ${i}.purify.err
-      cp ${i}.email ${i}.purify.err.email
+      mv ${i}.err ${i}.err.log
+      grep -i hypre_ ${i}.purify.log > ${i}.err
     fi
 done
 
@@ -95,15 +95,7 @@ if [ "$HYPRE_SEND_MAIL" = "yes" ]
 then
     echo "checking for errors..."
 
-    HYPRE_MAIL=/usr/ucb/Mail
-    case $HYPRE_ARCH in
-	dec)
-	    HYPRE_MAIL=/usr/bin/Mail;;
-	blue)
-	    HYPRE_MAIL=/usr/bin/Mail;;
-	red)
-	    HYPRE_MAIL=/usr/ucb/Mail;;
-    esac
+    HYPRE_MAIL=/usr/bin/mailx
 
     for i in $HYPRE_TEST_DRIVERS
     do
