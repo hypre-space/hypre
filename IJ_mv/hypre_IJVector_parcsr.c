@@ -525,7 +525,7 @@ hypre_AddToIJVectorParLocalComponentsInBlock(hypre_IJVector *vector,
  *****************************************************************************/
 
 int
-hypre_AssembleStructVectorPar(hypre_IJVector *vector)
+hypre_AssembleIJVectorPar(hypre_IJVector *vector)
 {
    int ierr = 0;
    int my_id;

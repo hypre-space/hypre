@@ -78,6 +78,7 @@ int HYPRE_SetIJVectorLocalComponentsInBlock P((HYPRE_IJVector IJvector , int glo
 int HYPRE_AddToIJVectorLocalComponents P((HYPRE_IJVector IJvector , int num_values , const int *glob_vec_indices , const int *value_indices , const double *values ));
 int HYPRE_AddToIJVectorLocalComponentsInBlock P((HYPRE_IJVector IJvector , int glob_vec_index_start , int glob_vec_index_stop , const int *value_indices , const double *values ));
 
+int HYPRE_AssembleIJVector P((HYPRE_IJVector IJvector ));
 int HYPRE_GetIJVectorLocalComponents P((HYPRE_IJVector IJvector , int num_values , const int *glob_vec_indices , const int *value_indices, double *values )); 
 int HYPRE_GetIJVectorLocalComponentsInBlock P((HYPRE_IJVector IJvector , int global_vec_index_start, int glob_vec_index_stop , const int *value_indices , double *values )); 
 
