@@ -163,13 +163,15 @@ int MLI_Utils_HypreMatrixFormJacobi(void *A, double alpha, void **J)
       for ( icol = 0; icol < rowSize; icol++ )
       {
          newColInd[icol] = colInd[icol];
-#if 0
-/* Note : no diagonal scaling */
-newColVal[icol] = - alpha * colVal[icol] / colVal[0];
-if ( colInd[icol] == rownum ) newColVal[icol] = 1.0 - alpha;
-#endif
+
+         /* diagonal scaling */
+         newColVal[icol] = - alpha * colVal[icol] / colVal[0];
+         if ( colInd[icol] == rownum ) newColVal[icol] = 1.0 - alpha;
+
+#if 0 // no diagonal scaling
          newColVal[icol] = - alpha * colVal[icol];
          if ( colInd[icol] == rownum ) newColVal[icol] += 1.0;
+#endif
       } 
       newRowSize = rowSize;
       if ( rowLengths[irow] == rowSize+1 ) 
@@ -226,7 +228,7 @@ int MLI_Utils_GenPartition(MPI_Comm comm, int nlocal, int **rowPart)
 }
 
 /***************************************************************************
- * Given matrix A and vector v, scale the vector by v'*A*v.
+ * Given matrix A and vector v, scale the vector by (v'*v)/(v'*A*v).
  *--------------------------------------------------------------------------*/
 
 int MLI_Utils_ScaleVec(hypre_ParCSRMatrix *Amat, hypre_ParVector *vec)
@@ -234,7 +236,7 @@ int MLI_Utils_ScaleVec(hypre_ParCSRMatrix *Amat, hypre_ParVector *vec)
    MPI_Comm        comm;
    int             mypid, nprocs, *partition;
    hypre_ParVector *temp;
-   double          norm2;
+   double          norm1, norm2;
 
    /* -----------------------------------------------------------------
     * fetch matrix parameters
@@ -253,12 +255,20 @@ int MLI_Utils_ScaleVec(hypre_ParCSRMatrix *Amat, hypre_ParVector *vec)
    hypre_ParVectorInitialize(temp);
 
    /* -----------------------------------------------------------------
+    * normalize vector
+    * ----------------------------------------------------------------*/
+   norm2 = hypre_ParVectorInnerProd(vec, vec);
+   hypre_ParVectorScale(1./sqrt(norm2), vec);
+ 
+   /* -----------------------------------------------------------------
     * multiply by matrix, perform inner product, and scale
     * ----------------------------------------------------------------*/
  
+   norm1 = hypre_ParVectorInnerProd(vec, vec);
    hypre_ParCSRMatrixMatvec(1.0, Amat, vec, 0.0, temp);
    norm2 = hypre_ParVectorInnerProd(vec, temp);
-   hypre_ParVectorScale(norm2, vec);
+   hypre_ParVectorScale(norm1/norm2, vec);
+   // printf("Rayleigh quotient: %f\n", norm2/norm1);
 
    hypre_ParVectorDestroy(temp);
    return 0;
