@@ -14,8 +14,13 @@ main( int   argc,
    int                 print_usage;
    int                 build_matrix_type;
    int                 build_matrix_arg_index;
+   int                 build_rhs_type;
+   int                 build_rhs_arg_index;
    int                 solver_id;
    int                 ioutdat;
+   int                 ierr; 
+   double              norm;
+
 
    hypre_ParCSRMatrix *A;
    hypre_ParVector    *b;
@@ -45,6 +50,8 @@ main( int   argc,
  
    build_matrix_type      = 1;
    build_matrix_arg_index = argc;
+   build_rhs_type = 0;
+   build_rhs_arg_index = argc;
 
    solver_id = 0;
 
@@ -88,6 +95,24 @@ main( int   argc,
          arg_index++;
          solver_id = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-rhsfromfile") == 0 )
+      {
+         arg_index++;
+         build_rhs_type      = 1;
+         build_rhs_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-rhsfromonefile") == 0 )
+      {
+         arg_index++;
+         build_rhs_type      = 2;
+         build_rhs_arg_index = arg_index;
+      }      
+      else if ( strcmp(argv[arg_index], "-rhsrand") == 0 )
+      {
+         arg_index++;
+         build_rhs_type      = 3;
+         build_rhs_arg_index = arg_index;
+      }  
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          print_usage = 1;
@@ -163,20 +188,77 @@ main( int   argc,
    hypre_PrintParCSRMatrix(A, "driver.out.A");
 #endif
 
-   b = hypre_CreateParVector(MPI_COMM_WORLD,
-                             hypre_ParCSRMatrixGlobalNumRows(A),
-                             hypre_ParCSRMatrixRowStarts(A));
-   hypre_SetParVectorPartitioningOwner(b, 0);
-   hypre_InitializeParVector(b);
-   hypre_SetParVectorConstantValues(b, 0.0);
+   if (build_rhs_type == 1)
+   {
+      /* BuildRHSParFromFile(argc, argv, build_rhs_arg_index, &b); */
+      printf("Rhs from file not yet implemented.  Defaults to b=0\n");
+      b = hypre_CreateParVector(MPI_COMM_WORLD,
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixRowStarts(A));
+      hypre_SetParVectorPartitioningOwner(b, 0);
+      hypre_InitializeParVector(b);
+      hypre_SetParVectorConstantValues(b, 0.0);
 
-   x = hypre_CreateParVector(MPI_COMM_WORLD,
-                             hypre_ParCSRMatrixGlobalNumRows(A),
-                             hypre_ParCSRMatrixRowStarts(A));
-   hypre_SetParVectorPartitioningOwner(x, 0);
-   hypre_InitializeParVector(x);
-   hypre_SetParVectorConstantValues(x, 1.0);
+      x = hypre_CreateParVector(MPI_COMM_WORLD,
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixRowStarts(A));
+      hypre_SetParVectorPartitioningOwner(x, 0);
+      hypre_InitializeParVector(x);
+      hypre_SetParVectorConstantValues(x, 1.0);
+   }
+   else if ( build_rhs_type == 2 )
+   {
+      /*BuildRHSParFromOneFile(argc, argv, build_rhs_arg_index, &b); */
+      printf("Rhs from one file not yet implemented.  Defaults to b=0\n");           b = hypre_CreateParVector(MPI_COMM_WORLD,
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixRowStarts(A));
+      hypre_SetParVectorPartitioningOwner(b, 0);
+      hypre_InitializeParVector(b);
+      hypre_SetParVectorConstantValues(b, 0.0);
 
+      x = hypre_CreateParVector(MPI_COMM_WORLD,
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixRowStarts(A));
+      hypre_SetParVectorPartitioningOwner(x, 0);
+      hypre_InitializeParVector(x);
+      hypre_SetParVectorConstantValues(x, 1.0);
+
+   }
+   else if ( build_rhs_type == 3 )
+   {
+
+      b = hypre_CreateParVector(MPI_COMM_WORLD,
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixRowStarts(A));
+      hypre_SetParVectorPartitioningOwner(b, 0);
+      hypre_InitializeParVector(b);
+      hypre_SetParVectorRandomValues(b, 22775);
+      norm = 1.0/sqrt(hypre_ParInnerProd(b,b));
+      ierr = hypre_ScaleParVector(norm, b);      
+
+      x = hypre_CreateParVector(MPI_COMM_WORLD,
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixRowStarts(A));
+      hypre_SetParVectorPartitioningOwner(x, 0);
+      hypre_InitializeParVector(x);
+      hypre_SetParVectorConstantValues(x, 0.0);      
+   }
+   else /* if ( build_rhs_type == 0 ) */
+   {
+      b = hypre_CreateParVector(MPI_COMM_WORLD,
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixRowStarts(A));
+      hypre_SetParVectorPartitioningOwner(b, 0);
+      hypre_InitializeParVector(b);
+      hypre_SetParVectorConstantValues(b, 0.0);
+
+      x = hypre_CreateParVector(MPI_COMM_WORLD,
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixRowStarts(A));
+      hypre_SetParVectorPartitioningOwner(x, 0);
+      hypre_InitializeParVector(x);
+      hypre_SetParVectorConstantValues(x, 1.0);
+   }
    /*-----------------------------------------------------------
     * Solve the system using AMG
     *-----------------------------------------------------------*/
