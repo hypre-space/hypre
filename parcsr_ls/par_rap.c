@@ -1067,6 +1067,19 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
          }
    }
 
+   /*-----------------------------------------------------------------------
+    *  Convert RAP_ext column indices
+    *-----------------------------------------------------------------------*/
+
+   for (i=0; i < RAP_ext_size; i++)
+      if (RAP_ext_j[i] < first_col_diag_RAP 
+                        || RAP_ext_j[i] > last_col_diag_RAP)
+            RAP_ext_j[i] = num_cols_diag_P
+                                + hypre_BinarySearch(col_map_offd_RAP,
+                                                RAP_ext_j[i],num_cols_offd_RAP);
+      else
+            RAP_ext_j[i] -= first_col_diag_RAP;
+
 /*   need to allocate new P_marker etc. and make further changes */
    /*-----------------------------------------------------------------------
     *  Initialize some stuff.
@@ -1131,24 +1144,20 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
                 for (k=RAP_ext_i[j]; k < RAP_ext_i[j+1]; k++)
                 {
                    jcol = RAP_ext_j[k];
-                   if (jcol < first_col_diag_RAP || jcol > last_col_diag_RAP)
+                   if (jcol < num_cols_diag_P)
                    {
-                        jcol = num_cols_diag_P 
-                                + hypre_BinarySearch(col_map_offd_RAP,
-                                                jcol,num_cols_offd_RAP);
-                        if (P_marker[jcol] < jj_row_begin_offd)
-                        {
-                                P_marker[jcol] = jj_count_offd;
-                                jj_count_offd++;
-                        }
-                   }
-                   else
-                   {
-                        jcol -= first_col_diag_P;
                         if (P_marker[jcol] < jj_row_begin_diag)
                         {
                                 P_marker[jcol] = jj_count_diag;
                                 jj_count_diag++;
+                        }
+                   }
+                   else
+                   {
+                        if (P_marker[jcol] < jj_row_begin_offd)
+                        {
+                                P_marker[jcol] = jj_count_offd;
+                                jj_count_offd++;
                         }
                    }
                 }
@@ -1415,11 +1424,22 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
                 for (k=RAP_ext_i[j]; k < RAP_ext_i[j+1]; k++)
                 {
                    jcol = RAP_ext_j[k];
-                   if (jcol < first_col_diag_RAP || jcol > last_col_diag_RAP)
+                   if (jcol < num_cols_diag_P)
                    {
-                        jcol = num_cols_diag_P 
-                                + hypre_BinarySearch(col_map_offd_RAP,
-                                                jcol,num_cols_offd_RAP);
+                        if (P_marker[jcol] < jj_row_begin_diag)
+                        {
+                                P_marker[jcol] = jj_count_diag;
+                                RAP_diag_data[jj_count_diag] 
+                                        = RAP_ext_data[k];
+                                RAP_diag_j[jj_count_diag] = jcol;
+                                jj_count_diag++;
+                        }
+                        else
+                                RAP_diag_data[P_marker[jcol]]
+                                        += RAP_ext_data[k];
+                   }
+                   else
+                   {
                         if (P_marker[jcol] < jj_row_begin_offd)
                         {
                                 P_marker[jcol] = jj_count_offd;
@@ -1431,21 +1451,6 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
                         }
                         else
                                 RAP_offd_data[P_marker[jcol]]
-                                        += RAP_ext_data[k];
-                   }
-                   else
-                   {
-                        jcol -= first_col_diag_P; 
-                        if (P_marker[jcol] < jj_row_begin_diag)
-                        {
-                                P_marker[jcol] = jj_count_diag;
-                                RAP_diag_data[jj_count_diag] 
-                                        = RAP_ext_data[k];
-                                RAP_diag_j[jj_count_diag] = jcol;
-                                jj_count_diag++;
-                        }
-                        else
-                                RAP_diag_data[P_marker[jcol]]
                                         += RAP_ext_data[k];
                    }
                 }
