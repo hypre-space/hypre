@@ -132,6 +132,14 @@ hypre_ParAMGCreate()
 
    hypre_ParAMGSetRestriction(amg_data, 0);
    
+   hypre_ParAMGDataAArray(amg_data) = NULL;
+   hypre_ParAMGDataPArray(amg_data) = NULL;
+   hypre_ParAMGDataRArray(amg_data) = NULL;
+   hypre_ParAMGDataCFMarkerArray(amg_data) = NULL;
+   hypre_ParAMGDataVtemp(amg_data)  = NULL;
+   hypre_ParAMGDataFArray(amg_data) = NULL;
+   hypre_ParAMGDataUArray(amg_data) = NULL;
+
    return (void *) amg_data;
 }
 
