@@ -96,8 +96,8 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
    (pcg_data -> converged)    = 0;
    (pcg_data -> matvec_data)  = NULL;
    (pcg_data -> precond_data) = NULL;
-   (pcg_data -> printlevel)   = 0;
-   (pcg_data -> log_level)    = 0;
+   (pcg_data -> print_level)  = 0;
+   (pcg_data -> logging)      = 0;
    (pcg_data -> norms)        = NULL;
    (pcg_data -> rel_norms)    = NULL;
    (pcg_data -> p)            = NULL;
@@ -217,7 +217,7 @@ hypre_PCGSetup( void *pcg_vdata,
     * Allocate space for log info
     *-----------------------------------------------------*/
 
-   if ( (pcg_data->log_level)>0  || (pcg_data->printlevel)>0 ) 
+   if ( (pcg_data->logging)>0  || (pcg_data->print_level)>0 ) 
    {
       if ( (pcg_data -> norms) != NULL )
          hypre_TFreeF( pcg_data -> norms, pcg_functions );
@@ -276,8 +276,8 @@ hypre_PCGSolve( void *pcg_vdata,
    void           *matvec_data  = (pcg_data -> matvec_data);
    int           (*precond)()   = (pcg_functions -> precond);
    void           *precond_data = (pcg_data -> precond_data);
-   int             printlevel  = (pcg_data -> printlevel);
-   int             log_level    = (pcg_data -> log_level);
+   int             print_level  = (pcg_data -> print_level);
+   int             logging      = (pcg_data -> logging);
    double         *norms        = (pcg_data -> norms);
    double         *rel_norms    = (pcg_data -> rel_norms);
                 
@@ -319,7 +319,7 @@ hypre_PCGSolve( void *pcg_vdata,
    {
       /* bi_prod = <b,b> */
       bi_prod = (*(pcg_functions->InnerProd))(b, b);
-      if (printlevel > 1 && my_id == 0) 
+      if (print_level > 1 && my_id == 0) 
           printf("<b,b>: %e\n",bi_prod);
    }
    else
@@ -328,7 +328,7 @@ hypre_PCGSolve( void *pcg_vdata,
       (*(pcg_functions->ClearVector))(p);
       precond(precond_data, A, b, p);
       bi_prod = (*(pcg_functions->InnerProd))(p, b);
-      if (printlevel > 1 && my_id == 0)
+      if (print_level > 1 && my_id == 0)
           printf("<C*b,b>: %e\n",bi_prod);
    };
 
@@ -342,7 +342,7 @@ hypre_PCGSolve( void *pcg_vdata,
          machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
          by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
          found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
-      if (printlevel > 0 || log_level > 0)
+      if (print_level > 0 || logging > 0)
       {
         printf("\n\nERROR detected by Hypre ...  BEGIN\n");
         printf("ERROR -- hypre_PCGSolve: INFs and/or NaNs detected in input.\n");
@@ -369,7 +369,7 @@ hypre_PCGSolve( void *pcg_vdata,
    {
       /* Set x equal to zero and return */
       (*(pcg_functions->CopyVector))(b, x);
-      if (log_level>0 || printlevel>0)
+      if (logging>0 || print_level>0)
       {
          norms[0]     = 0.0;
          rel_norms[i] = 0.0;
@@ -401,7 +401,7 @@ hypre_PCGSolve( void *pcg_vdata,
          machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
          by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
          found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
-      if (printlevel > 0 || log_level > 0)
+      if (print_level > 0 || logging > 0)
       {
         printf("\n\nERROR detected by Hypre ...  BEGIN\n");
         printf("ERROR -- hypre_PCGSolve: INFs and/or NaNs detected in input.\n");
@@ -414,16 +414,16 @@ hypre_PCGSolve( void *pcg_vdata,
    }
 
    /* Set initial residual norm */
-   if ( log_level>0 || printlevel > 0 || cf_tol > 0.0 )
+   if ( logging>0 || print_level > 0 || cf_tol > 0.0 )
    {
       if (two_norm)
          i_prod_0 = (*(pcg_functions->InnerProd))(r,r);
       else
          i_prod_0 = gamma;
 
-      if ( log_level>0 || printlevel>0 ) norms[0] = sqrt(i_prod_0);
+      if ( logging>0 || print_level>0 ) norms[0] = sqrt(i_prod_0);
    }
-   if ( printlevel > 1 && my_id==0 )  /* formerly for par_csr only */
+   if ( print_level > 1 && my_id==0 )  /* formerly for par_csr only */
    {
       printf("\n\n");
       if (two_norm)
@@ -487,12 +487,12 @@ hypre_PCGSolve( void *pcg_vdata,
 #endif
  
       /* print norm info */
-      if ( log_level>0 || printlevel>0 )
+      if ( logging>0 || print_level>0 )
       {
          norms[i]     = sqrt(i_prod);
          rel_norms[i] = bi_prod ? sqrt(i_prod/bi_prod) : 0;
       }
-      if ( printlevel > 1 && my_id==0 )
+      if ( print_level > 1 && my_id==0 )
       {
          if (two_norm)
          {
@@ -576,7 +576,7 @@ hypre_PCGSolve( void *pcg_vdata,
       (*(pcg_functions->Axpy))(1.0, s, p);
    }
 
-   if ( printlevel > 1 && my_id==0 )  /* formerly for par_csr only */
+   if ( print_level > 1 && my_id==0 )  /* formerly for par_csr only */
       printf("\n\n");
 
    (pcg_data -> num_iterations) = i;
@@ -748,23 +748,23 @@ hypre_PCGSetPrintLevel( void *pcg_vdata,
    hypre_PCGData *pcg_data = pcg_vdata;
    int            ierr = 0;
  
-   (pcg_data -> printlevel) = level;
+   (pcg_data -> print_level) = level;
  
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGSetLogLevel
+ * hypre_PCGSetLogging
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGSetLogLevel( void *pcg_vdata,
+hypre_PCGSetLogging( void *pcg_vdata,
                       int   level)
 {
    hypre_PCGData *pcg_data = pcg_vdata;
    int            ierr = 0;
  
-   (pcg_data -> log_level) = level;
+   (pcg_data -> logging) = level;
  
    return ierr;
 }
@@ -812,7 +812,7 @@ hypre_PCGPrintLogging( void *pcg_vdata,
    hypre_PCGData *pcg_data = pcg_vdata;
 
    int            num_iterations  = (pcg_data -> num_iterations);
-   int            printlevel         = (pcg_data -> printlevel);
+   int            print_level     = (pcg_data -> print_level);
    double        *norms           = (pcg_data -> norms);
    double        *rel_norms       = (pcg_data -> rel_norms);
 
@@ -821,7 +821,7 @@ hypre_PCGPrintLogging( void *pcg_vdata,
 
    if (myid == 0)
    {
-      if (printlevel > 0)
+      if (print_level > 0)
       {
          for (i = 0; i < num_iterations; i++)
          {

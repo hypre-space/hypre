@@ -163,20 +163,6 @@ HYPRE_GMRESGetPrecond( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GMRESSetLogging
- *--------------------------------------------------------------------------*/
-
-int
-HYPRE_GMRESSetLogging( HYPRE_Solver solver,
-                             int level)
-{
-   int ierr = 0;
-   ierr += hypre_GMRESSetPrintLevel( (void *) solver, level );
-   ierr += hypre_GMRESSetLogLevel( (void *) solver, level );
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_GMRESSetPrintLevel
  *--------------------------------------------------------------------------*/
 
@@ -188,15 +174,14 @@ HYPRE_GMRESSetPrintLevel( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GMRESSetLogLevel
- * soon will not be needed, as SetLogging will be identical
+ * HYPRE_GMRESSetLogging
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_GMRESSetLogLevel( HYPRE_Solver solver,
+HYPRE_GMRESSetLogging( HYPRE_Solver solver,
                      int          level )
 {
-   return( hypre_GMRESSetLogLevel( (void *) solver, level ) );
+   return( hypre_GMRESSetLogging( (void *) solver, level ) );
 }
 
 /*--------------------------------------------------------------------------

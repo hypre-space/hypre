@@ -105,8 +105,8 @@ typedef struct
    /* log info (always logged) */
    int      num_iterations;
  
-   int     printlevel; /* printing when printlevel>0 */
-   int     log_level;  /* extra computations for logging when log_level>0 */
+   int     print_level; /* printing when print_level>0 */
+   int     logging;  /* extra computations for logging when logging>0 */
    double  *norms;
    char    *log_file_name;
 

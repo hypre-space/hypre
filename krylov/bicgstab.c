@@ -76,6 +76,7 @@ hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions )
    (bicgstab_data -> stop_crit)      = 0; /* rel. residual norm */
    (bicgstab_data -> precond_data)   = NULL;
    (bicgstab_data -> logging)        = 0;
+   (bicgstab_data -> print_level)    = 0;
    (bicgstab_data -> p)              = NULL;
    (bicgstab_data -> q)              = NULL;
    (bicgstab_data -> r)              = NULL;
@@ -215,6 +216,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 
    /* logging variables */
    int             logging        = (bicgstab_data -> logging);
+   int             print_level    = (bicgstab_data -> print_level);
    double         *norms          = (bicgstab_data -> norms);
 /*   char           *log_file_name  = (bicgstab_data -> log_file_name);
      FILE           *fp; */
@@ -259,7 +261,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
          machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
          by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
          found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
-      if (logging > 0)
+      if (print_level > 0)
       {
         printf("\n\nERROR detected by Hypre ...  BEGIN\n");
         printf("ERROR -- hypre_BiCGSTABSolve: INFs and/or NaNs detected in input.\n");
@@ -285,7 +287,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
          machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
          by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
          found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
-      if (logging > 0)
+      if (print_level > 0)
       {
         printf("\n\nERROR detected by Hypre ...  BEGIN\n");
         printf("ERROR -- hypre_BiCGSTABSolve: INFs and/or NaNs detected in input.\n");
@@ -300,7 +302,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    if (logging > 0)
    {
       norms[0] = r_norm;
-      if (logging > 1 && my_id == 0)
+      if (print_level > 0 && my_id == 0)
       {
   	 printf("L2 norm of b: %e\n", b_norm);
          if (b_norm == 0.0)
@@ -326,7 +328,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    if (stop_crit)
       epsilon = accuracy;
 
-   if (logging > 1 && my_id == 0)
+   if (print_level > 0 && my_id == 0)
    {
       if (b_norm > 0.0)
          {printf("=============================================\n\n");
@@ -361,7 +363,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 	   r_norm = sqrt((*(bicgstab_functions->InnerProd))(r,r));
 	   if (r_norm <= epsilon)
            {
-              if (logging > 1 && my_id == 0)
+              if (print_level > 0 && my_id == 0)
               {
                  printf("\n\n");
                  printf("Final L2 norm of residual: %e\n\n", r_norm);
@@ -443,7 +445,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 	   norms[iter] = r_norm;
 	}
 
-        if (logging > 1 && my_id == 0)
+        if (print_level > 0 && my_id == 0)
 	{
            if (b_norm > 0.0)
               printf("% 5d    %e    %f   %e\n", iter, norms[iter],
@@ -600,6 +602,22 @@ hypre_BiCGSTABSetLogging( void *bicgstab_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_BiCGSTABSetPrintLevel
+ *--------------------------------------------------------------------------*/
+ 
+int
+hypre_BiCGSTABSetPrintLevel( void *bicgstab_vdata,
+                       int   print_level)
+{
+   hypre_BiCGSTABData *bicgstab_data = bicgstab_vdata;
+   int              ierr = 0;
+ 
+   (bicgstab_data -> print_level) = print_level;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_BiCGSTABGetConverged
  *--------------------------------------------------------------------------*/
  
@@ -643,6 +661,22 @@ hypre_BiCGSTABGetFinalRelativeResidualNorm( void   *bicgstab_vdata,
    int 		ierr = 0;
  
    *relative_residual_norm = (bicgstab_data -> rel_residual_norm);
+   
+   return ierr;
+} 
+
+/*--------------------------------------------------------------------------
+ * hypre_BiCGSTABGetResidual
+ *--------------------------------------------------------------------------*/
+ 
+int
+hypre_BiCGSTABGetResidual( void   *bicgstab_vdata,
+                           void **residual )
+{
+   hypre_BiCGSTABData *bicgstab_data = bicgstab_vdata;
+   int 		ierr = 0;
+ 
+   *residual = (bicgstab_data -> r);
    
    return ierr;
 } 

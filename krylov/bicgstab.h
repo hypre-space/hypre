@@ -117,6 +117,7 @@ typedef struct
  
    /* additional log info (logged when `logging' > 0) */
    int      logging;
+   int      print_level;
    double  *norms;
    char    *log_file_name;
 

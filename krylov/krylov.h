@@ -175,6 +175,7 @@ typedef struct
  
    /* additional log info (logged when `logging' > 0) */
    int      logging;
+   int      print_level;
    double  *norms;
    char    *log_file_name;
 
@@ -497,8 +498,8 @@ typedef struct
    /* log info (always logged) */
    int      num_iterations;
  
-   int     printlevel; /* printing when printlevel>0 */
-   int     log_level;  /* extra computations for logging when log_level>0 */
+   int     print_level; /* printing when print_level>0 */
+   int     logging;  /* extra computations when logging>0 */
    double  *norms;
    char    *log_file_name;
 
@@ -662,7 +663,7 @@ typedef struct
    void    *p;
    void    *s;
    void    *r; /* ...contains the residual.  This is currently kept permanently.
-                  If that is ever changed, it still must be kept if log_level>2 */
+                  If that is ever changed, it still must be kept if logging>1 */
 
    void    *matvec_data;
    void    *precond_data;
@@ -673,8 +674,8 @@ typedef struct
    int      num_iterations;
    double   rel_residual_norm;
 
-   int     printlevel; /* printing when printlevel>0 */
-   int     log_level;  /* extra computations for logging when log_level>0 */
+   int     print_level; /* printing when print_level>0 */
+   int     logging;  /* extra computations for logging when logging>0 */
    double  *norms;
    double  *rel_norms;
 
@@ -758,6 +759,7 @@ int hypre_BiCGSTABSetLogging( void *bicgstab_vdata , int logging );
 int hypre_BiCGSTABGetConverged( void *bicgstab_vdata , int *converged );
 int hypre_BiCGSTABGetNumIterations( void *bicgstab_vdata , int *num_iterations );
 int hypre_BiCGSTABGetFinalRelativeResidualNorm( void *bicgstab_vdata , double *relative_residual_norm );
+int hypre_BiCGSTABGetResidual( void *bicgstab_vdata , void **residual );
 
 /* cgnr.c */
 hypre_CGNRFunctions *hypre_CGNRFunctionsCreate( int (*CommInfo )(void *A ,int *my_id ,int *num_procs ), void *(*CreateVector )(void *vector ), int (*DestroyVector )(void *vector ), void *(*MatvecCreate )(void *A ,void *x ), int (*Matvec )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecT )(void *matvec_data ,double alpha ,void *A ,void *x ,double beta ,void *y ), int (*MatvecDestroy )(void *matvec_data ), double (*InnerProd )(void *x ,void *y ), int (*CopyVector )(void *x ,void *y ), int (*ClearVector )(void *x ), int (*ScaleVector )(double alpha ,void *x ), int (*Axpy )(double alpha ,void *x ,void *y ), int (*PrecondSetup )(void *vdata ,void *A ,void *b ,void *x ), int (*Precond )(void *vdata ,void *A ,void *b ,void *x ), int (*PrecondT )(void *vdata ,void *A ,void *b ,void *x ));
@@ -793,7 +795,7 @@ int hypre_GMRESSetStopCrit( void *gmres_vdata , int stop_crit );
 int hypre_GMRESSetPrecond( void *gmres_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data );
 int hypre_GMRESGetPrecond( void *gmres_vdata , HYPRE_Solver *precond_data_ptr );
 int hypre_GMRESSetPrintLevel( void *gmres_vdata , int level );
-int hypre_GMRESSetLogLevel( void *gmres_vdata , int level );
+int hypre_GMRESSetLogging( void *gmres_vdata , int level );
 int hypre_GMRESGetConverged( void *gmres_vdata , int *converged );
 int hypre_GMRESGetNumIterations( void *gmres_vdata , int *num_iterations );
 int hypre_GMRESGetFinalRelativeResidualNorm( void *gmres_vdata , double *relative_residual_norm );
@@ -812,6 +814,7 @@ int HYPRE_BiCGSTABGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_p
 int HYPRE_BiCGSTABSetLogging( HYPRE_Solver solver , int logging );
 int HYPRE_BiCGSTABGetNumIterations( HYPRE_Solver solver , int *num_iterations );
 int HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
+int HYPRE_BiCGSTABGetResidual( HYPRE_Solver solver , void **residual );
 
 /* HYPRE_cgnr.c */
 int HYPRE_CGNRDestroy( HYPRE_Solver solver );
@@ -841,7 +844,7 @@ int HYPRE_GMRESSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , 
 int HYPRE_GMRESGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
 int HYPRE_GMRESSetLogging( HYPRE_Solver solver , int level );
 int HYPRE_GMRESSetPrintLevel( HYPRE_Solver solver , int level );
-int HYPRE_GMRESSetLogLevel( HYPRE_Solver solver , int level );
+int HYPRE_GMRESSetLogging( HYPRE_Solver solver , int level );
 int HYPRE_GMRESGetNumIterations( HYPRE_Solver solver , int *num_iterations );
 int HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
 int HYPRE_GMRESGetResidual( HYPRE_Solver solver , void **residual );
@@ -860,7 +863,7 @@ int HYPRE_PCGSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HY
 int HYPRE_PCGGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
 int HYPRE_PCGSetLogging( HYPRE_Solver solver , int level );
 int HYPRE_PCGSetPrintLevel( HYPRE_Solver solver , int level );
-int HYPRE_PCGSetLogLevel( HYPRE_Solver solver , int level );
+int HYPRE_PCGSetLogging( HYPRE_Solver solver , int level );
 int HYPRE_PCGGetNumIterations( HYPRE_Solver solver , int *num_iterations );
 int HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
 int HYPRE_PCGGetResidual( HYPRE_Solver solver , void **residual );
@@ -882,7 +885,7 @@ int hypre_PCGSetStopCrit( void *pcg_vdata , int stop_crit );
 int hypre_PCGGetPrecond( void *pcg_vdata , HYPRE_Solver *precond_data_ptr );
 int hypre_PCGSetPrecond( void *pcg_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data );
 int hypre_PCGSetPrintLevel( void *pcg_vdata , int level );
-int hypre_PCGSetLogLevel( void *pcg_vdata , int level );
+int hypre_PCGSetLogging( void *pcg_vdata , int level );
 int hypre_PCGGetNumIterations( void *pcg_vdata , int *num_iterations );
 int hypre_PCGGetConverged( void *pcg_vdata , int *converged );
 int hypre_PCGPrintLogging( void *pcg_vdata , int myid );

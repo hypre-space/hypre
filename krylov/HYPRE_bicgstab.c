@@ -155,6 +155,17 @@ HYPRE_BiCGSTABSetLogging( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BiCGSTABSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BiCGSTABSetPrintLevel( HYPRE_Solver solver,
+                             int print_level)
+{
+   return( hypre_BiCGSTABSetPrintLevel( (void *) solver, print_level ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BiCGSTABGetNumIterations
  *--------------------------------------------------------------------------*/
 
@@ -174,4 +185,15 @@ HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                                double             *norm   )
 {
    return( hypre_BiCGSTABGetFinalRelativeResidualNorm( (void *) solver, norm ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BiCGSTABGetResidual
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BiCGSTABGetResidual( HYPRE_Solver  solver,
+                            void             **residual  )
+{
+   return( hypre_BiCGSTABGetResidual( (void *) solver, residual ) );
 }
