@@ -842,7 +842,7 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
 
 /*--------------------------------------------------------------------------
  * ComputeValuesNonsym
-/*--------------------------------------------------------------------------*/
+ *--------------------------------------------------------------------------*/
 
 static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
   int local_beg_row, Numbering *numb)
@@ -1490,6 +1490,8 @@ void ParaSailsStats(ParaSails *ps, Matrix *A)
     int n, nnzm, nnza;
     MPI_Comm comm = ps->comm;
     double max_pattern_time, max_values_time, max_cost;
+    double temp, *setup_times = NULL;
+    int i;
 
     MPI_Comm_rank(comm, &mype);
     MPI_Comm_size(comm, &npes);
@@ -1508,10 +1510,24 @@ void ParaSailsStats(ParaSails *ps, Matrix *A)
 	1, MPI_DOUBLE, MPI_MAX, comm);
     MPI_Allreduce(&ps->cost, &max_cost, 1, MPI_DOUBLE, MPI_MAX, comm);
 
+    if (!mype)
+        setup_times = (double *) malloc(npes * sizeof(double));
+
+    temp = ps->setup_pattern_time + ps->setup_values_time;
+    MPI_Gather(&temp, 1, MPI_DOUBLE, setup_times, 1, MPI_DOUBLE, 0, comm);
+
     if (mype)
 	return;
 
     printf("******************* ParaSails *******************\n");
+    printf("Setup times:\n");
+
+    for (i=0; i<npes; i++)
+        printf("%3d: %8.1f\n", setup_times[i]);
+
+    free(setup_times);
+
+    printf("*************************************************\n");
     printf("symmetric             : %d\n", ps->symmetric);
     printf("thresh                : %f\n", ps->thresh);
     printf("num_levels            : %d\n", ps->num_levels);

@@ -140,7 +140,6 @@ int main(int argc, char *argv[])
 
         time1 = MPI_Wtime();
 	setup_time = time1-time0;
-        printf("SETUP %3d %8.1f\n", mype, setup_time);
 	fflush(NULL);
         MPI_Barrier(MPI_COMM_WORLD);
 
