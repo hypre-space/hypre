@@ -243,6 +243,8 @@ HYPRE_LSI_BlockP::HYPRE_LSI_BlockP()
    P22Offsets_               = NULL;
    P22Size_                  = -1;
    P22GSize_                 = -1;
+   block1FieldID_            = 0;
+   block2FieldID_            = 1;
    assembled_                = 0;
    outputLevel_              = 0;
    lumpedMassLength_         = 0;
@@ -364,6 +366,16 @@ int HYPRE_LSI_BlockP::setParams(char *params)
    {
       sscanf(params,"%s %s %d", param1, param2, &outputLevel_);
       printf("HYPRE_LSI_BlockP::outputLevel = %d.\n", outputLevel_);
+   }
+   else if ( !strcmp(param2, "block1FieldID") )
+   {
+      sscanf(params,"%s %s %d", param1, param2, &block1FieldID_);
+      printf("HYPRE_LSI_BlockP::block1FieldID = %d.\n", block1FieldID_);
+   }
+   else if ( !strcmp(param2, "block2FieldID") )
+   {
+      sscanf(params,"%s %s %d", param1, param2, &block2FieldID_);
+      printf("HYPRE_LSI_BlockP::block2FieldID = %d.\n", block2FieldID_);
    }
    else if ( !strcmp(param2, "printInfo") )
    {
@@ -1235,9 +1247,9 @@ int HYPRE_LSI_BlockP::destroySolverPrecond()
 
 int HYPRE_LSI_BlockP::computeBlockInfo()
 {
-   int      mypid, nprocs, start_row, end_row, local_nrows, irow, last_node_num;
-   int      j, row_size, *col_ind, *disp_array, index, global_nrows, count;
-   int      node_num;
+   int      mypid, nprocs, start_row, end_row, local_nrows, irow;
+   int      j, row_size, *col_ind, *disp_array, index, global_nrows;
+   int      node_num, field_id;
    double   *col_val;
    MPI_Comm mpi_comm;
 
@@ -1273,22 +1285,13 @@ int HYPRE_LSI_BlockP::computeBlockInfo()
    // find the local size of the (2,2) block
    //------------------------------------------------------------------
 
-   P22Size_      = count = 0;
-   last_node_num = -1;
+   P22Size_ = 0;
    for ( irow = start_row; irow <= end_row; irow++ )
    {
-      node_num = lookup_->getAssociatedNodeNumber(irow);
-      if ( node_num != last_node_num ) 
-      {
-         if (count == 1) break; 
-         last_node_num = node_num; 
-         count = 1;
-      }
-      else count++;
+      field_id = lookup_->getAssociatedFieldID(irow);
+      if      (block2FieldID_ >= 0 && field_id == block2FieldID_) P22Size_++;
+      else if (block2FieldID_ <  0 && field_id != block1FieldID_) P22Size_++;
    }
-   index = irow - 1;
-   for ( irow = index; irow <= end_row; irow++ ) P22Size_++;
-
    if ( outputLevel_ > 0 )
    {
       printf("%4d computeBlockInfo : P22_size = %d\n", mypid, P22Size_);
@@ -1305,22 +1308,15 @@ int HYPRE_LSI_BlockP::computeBlockInfo()
    // compose a local list of rows for the (2,2) block
    //------------------------------------------------------------------
 
-   P22Size_      = count = 0;
-   last_node_num = -1;
+   P22Size_ = 0;
    for ( irow = start_row; irow <= end_row; irow++ )
    {
-      node_num = lookup_->getAssociatedNodeNumber(irow);
-      if ( node_num != last_node_num ) 
-      {
-         if (count == 1) break; 
-         last_node_num = node_num; 
-         count = 1;
-      }
-      else count++;
+      field_id = lookup_->getAssociatedFieldID(irow);
+      if ( block2FieldID_ >= 0 && field_id == block2FieldID_ ) 
+         P22LocalInds_[P22Size_++] = irow;
+      else if ( block2FieldID_ <  0 && field_id != block1FieldID_ ) 
+         P22LocalInds_[P22Size_++] = irow;
    }
-   index = irow - 1;
-   for ( irow = index; irow <= end_row; irow++ ) 
-      P22LocalInds_[P22Size_++] = irow;
 
    //------------------------------------------------------------------
    // compose a global list of rows for the (2,2) block

@@ -102,6 +102,8 @@ class HYPRE_LSI_BlockP
    int            *P22LocalInds_;    // pressure local row indices (global)
    int            *P22GlobalInds_;   // pressure off-processor row indices
    int            *P22Offsets_;      // processor partiton of matrix A22
+   int            block1FieldID_;    // identifier for (1,1) block
+   int            block2FieldID_;    // identifier for (2,2) block
    int            assembled_;        // set up complete flag
    int            outputLevel_;      // for diagnostics
    int            lumpedMassLength_; // length of M_v and M_p
