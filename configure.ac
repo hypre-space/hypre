@@ -45,8 +45,8 @@ AM_INIT_AUTOMAKE([1.7.5 foreign no-installinfo no-installman no-texinfo.tex])
 dnl Change the default prefix (/usr/local) to ./hypre
 AC_PREFIX_DEFAULT("HYPRE_TOP_SRC_DIR/hypre")
 m4_pattern_allow([HYPRE_[A-Z_]+])
-DATETIME="HYPRE_DATE"
-AC_SUBST(DATETIME)
+PACKAGE_DATETIME="HYPRE_DATE"
+AC_SUBST(PACKAGE_DATETIME)
 
 if test "x$CFLAGS" != "x" ; then
   casc_user_chose_cflags=yes
@@ -350,8 +350,13 @@ AC_SUBST(FEI_BASE_DIR)
 AC_SUBST(FEI_LIB_DIR)
 AC_SUBST(FEI_INC_DIR)
 
+# subsitute output variables in these files
 AC_CONFIG_FILES([
-  utilities/HYPRE_utilities.h
+  docs/bref_manual.dxx
+  docs/ref_manual.dxx
+  utilities/HYPRE_utilities.h])
+
+AC_CONFIG_FILES([
   Makefile
   FEI_mv/Makefile
   FEI_mv/SuperLU/Makefile

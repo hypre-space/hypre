@@ -67,8 +67,19 @@ DIST_SUBDIRS = . config\
  FEI_mv test lib docs
 #FEI_mv babel babel-runtime test lib docs
 
-docs: docs/HYPRE_usr_manual.ps
-	@ (cd docs && $(MAKE) $(AM_MAKEFLAGS) $@)
+docs: dvi ps pdf html
+
+dvi-local:
+	(cd docs && $(MAKE) $(AM_MAKEFLAGS) dvi)
+
+ps-local:
+	(cd docs && $(MAKE) $(AM_MAKEFLAGS) ps)
+
+pdf-local: 
+	(cd docs && $(MAKE) $(AM_MAKEFLAGS) pdf)
+
+html-local: 
+	(cd docs && $(MAKE) $(AM_MAKEFLAGS) html)
 
 nofei:
 	@ \
