@@ -210,11 +210,12 @@ hypre_F90_IFACE(hypre_parcsrmatrixrestorerow)( long int *matrix,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrmatrixmatvec( double   *alpha,
-                                          long int *A,
-                                          long int *x,
-                                          double   *beta,
-                                          long int *y      )
+hypre_F90_IFACE(hypre_parcsrmatrixmatvec)( double   *alpha,
+                                           long int *A,
+                                           long int *x,
+                                           double   *beta,
+                                           long int *y,  
+                                           int      *ierr   )
 {
 
    *ierr = (int) ( HYPRE_ParCSRMatrixMatvec( (double)             *alpha,
@@ -229,11 +230,12 @@ hypre_F90_IFACE(hypre_parcsrmatrixmatvec( double   *alpha,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrmatrixmatvect( double   *alpha,
-                                           long int *A,
-                                           long int *x,
-                                           double   *beta,
-                                           long int *y      )
+hypre_F90_IFACE(hypre_parcsrmatrixmatvect)( double   *alpha,
+                                            long int *A,
+                                            long int *x,
+                                            double   *beta,
+                                            long int *y,
+                                            int      *ierr    )
 {
 
    *ierr = (int) ( HYPRE_ParCSRMatrixMatvecT( (double)             *alpha,
