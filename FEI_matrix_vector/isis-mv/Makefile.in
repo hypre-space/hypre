@@ -18,11 +18,11 @@ CC = @CC@
 CXX = @CXX@
 
 CFLAGS =\
- @MPIINCLUDE@\
+ -I../..\
  -I../fei-isis
 
 CXXFLAGS =\
- @MPIINCLUDE@\
+ -I../..\
  -I../fei-isis
 
 HEADERS =\
@@ -65,10 +65,12 @@ lib: ${OBJS}
 	@ranlib libHYPRE_FEI_isismv.a 
 
 clean:
-	@rm -rf *.o ti_files
+	@touch erase.tmp
+	@rm -rf erase.tmp *.o ti_files
 
 veryclean: clean
-	@rm -f libHYPRE_*.a
+	@touch erase.tmp
+	@rm -rf erase.tmp *.a *.o ti_files
 
 ##################################################################
 # Generic rules

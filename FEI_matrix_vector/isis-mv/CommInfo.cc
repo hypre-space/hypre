@@ -31,7 +31,9 @@
 #include <stdlib.h>
 #include <iostream.h>
 
-#include <mpi.h>
+//#include <mpi.h> Taken out to be HYPRE-compatible
+#include "utilities/utilities.h"
+
 #include "CommInfo.h"
 
 //==============================================================================

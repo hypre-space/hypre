@@ -33,7 +33,9 @@
 
 #include "other/basicTypes.h" // needed for definition of bool
 
-#include <mpi.h>
+//#include <mpi.h> Taken out to be HYPRE compatible
+#include "utilities/utilities.h"
+
 #include "CommInfo.h"
 #include "Map.h"
 
