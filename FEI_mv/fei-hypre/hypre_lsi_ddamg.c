@@ -1063,7 +1063,7 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
    HYPRE_IJVectorGetObject(localx, (void**) &Lx_csr);
    HYPRE_IJVectorGetObject(localb, (void**) &Lb_csr);
 
-   /*HYPRE_BoomerAMGSetIOutDat(SeqPrecon, 2);*/
+   /*HYPRE_BoomerAMGSetPrintLevel(SeqPrecon, 2);*/
    /*HYPRE_BoomerAMGSetDebugFlag(SeqPrecon, 1);*/
    HYPRE_BoomerAMGSetup( SeqPrecon, LA_csr, Lb_csr, Lx_csr);
    MPI_Barrier(MPI_COMM_WORLD);

@@ -1465,7 +1465,7 @@ int HYPRE_LSI_Uzawa::setupPrecon(HYPRE_Solver *precon,HYPRE_ParCSRMatrix Amat,
           HYPRE_BoomerAMGCreate(precon);
           HYPRE_BoomerAMGSetMaxIter(*precon, 1);
           HYPRE_BoomerAMGSetCycleType(*precon, 1);
-          HYPRE_BoomerAMGSetIOutDat(*precon, outputLevel_);
+          HYPRE_BoomerAMGSetPrintLevel(*precon, outputLevel_);
           HYPRE_BoomerAMGSetMaxLevels(*precon, 25);
           HYPRE_BoomerAMGSetMeasureType(*precon, 0);
           HYPRE_BoomerAMGSetCoarsenType(*precon, 0);

@@ -1330,7 +1330,7 @@ void HYPRE_LinSysCore::setupPCGPrecon()
            if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
            {
               HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
-              HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
+              HYPRE_BoomerAMGSetPrintLevel(HYPrecon_, 3);
            }
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
               HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_BoomerAMGSolve,
@@ -1620,7 +1620,7 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
            if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
            {
               HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
-              HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
+              HYPRE_BoomerAMGSetPrintLevel(HYPrecon_, 3);
            }
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
               HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_BoomerAMGSolve,
@@ -1910,7 +1910,7 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
            if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
            {
               HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
-              HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
+              HYPRE_BoomerAMGSetPrintLevel(HYPrecon_, 3);
            }
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
               HYPRE_ParCSRFGMRESSetPrecond(HYSolver_,HYPRE_BoomerAMGSolve,
@@ -2225,7 +2225,7 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
            if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
            {
               HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
-              HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
+              HYPRE_BoomerAMGSetPrintLevel(HYPrecon_, 3);
            }
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
               HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_BoomerAMGSolve,
@@ -2515,7 +2515,7 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
            if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
            {
               HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
-              HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
+              HYPRE_BoomerAMGSetPrintLevel(HYPrecon_, 3);
            }
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
               HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_BoomerAMGSolve,
@@ -2803,7 +2803,7 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
            if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
            {
               HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
-              HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
+              HYPRE_BoomerAMGSetPrintLevel(HYPrecon_, 3);
            }
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
               HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_BoomerAMGSolve,
@@ -3090,7 +3090,7 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
            if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
            {
               HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
-              HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
+              HYPRE_BoomerAMGSetPrintLevel(HYPrecon_, 3);
            }
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
               HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_BoomerAMGSolve,
@@ -3334,7 +3334,7 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
            if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
            {
               HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
-              HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
+              HYPRE_BoomerAMGSetPrintLevel(HYPrecon_, 3);
            }
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_,HYPRE_BoomerAMGSolve,
@@ -3499,7 +3499,7 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
    if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
    {
       HYPRE_BoomerAMGSetDebugFlag(HYSolver_, 0);
-      HYPRE_BoomerAMGSetIOutDat(HYSolver_, 3);
+      HYPRE_BoomerAMGSetPrintLevel(HYSolver_, 3);
    }
    HYPRE_BoomerAMGSetMaxIter(HYSolver_, maxIterations_);
    HYPRE_BoomerAMGSetMeasureType(HYSolver_, 0);
