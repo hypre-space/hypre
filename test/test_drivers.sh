@@ -80,8 +80,9 @@ do
 
     if test -f purify.log
     then
-      mv purify.log $i.purify.log
-      grep -i hypre_ $i.purify.log > $i.purify.err
+      mv purify.log ${i}.purify.log
+      grep -i hypre_ ${i}.purify.log > ${i}.purify.err
+      cp ${i}.email ${i}.purify.err.email
     fi
 done
 
