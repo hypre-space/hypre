@@ -2727,7 +2727,7 @@ void HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
 {
     int i, ierr, *local_ind, *iarray, *iarray2;
 
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LSC::entering putInitalGuess.\n",mypid_);
     }
@@ -6117,7 +6117,7 @@ void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
        {
           newLeng--;
           colValues_[localRow][ind2] = values[i];
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
              printf("%4d : putIntoMappedMatrix (add) : row, col = %8d %8d %e \n",
                     mypid_, localRow, colIndices_[localRow][ind2]-1,
                     colValues_[localRow][ind2]);
@@ -6127,7 +6127,7 @@ void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
           ind2 = index;
           colIndices_[localRow][index] = mappedCol + 1;
           colValues_[localRow][index++] = values[i];
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
              printf("%4d : putIntoMappedMatrix : row, col = %8d %8d %e \n",
                     mypid_, localRow, colIndices_[localRow][ind2]-1,
                     colValues_[localRow][ind2]);
