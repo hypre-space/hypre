@@ -33,6 +33,7 @@ hypre_BoomerAMGCreate()
    int      interp_type;
    int      coarsen_type;
    int      measure_type;
+   int      setup_type;
 
    /* solve params */
    int      min_iter;
@@ -69,6 +70,7 @@ hypre_BoomerAMGCreate()
    interp_type = 200;
    coarsen_type = 6;
    measure_type = 0;
+   setup_type = 1;
 
    /* solve params */
    min_iter  = 0;
@@ -122,6 +124,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetInterpType(amg_data, interp_type);
    hypre_BoomerAMGSetCoarsenType(amg_data, coarsen_type);
    hypre_BoomerAMGSetMeasureType(amg_data, measure_type);
+   hypre_BoomerAMGSetSetupType(amg_data, setup_type);
 
    hypre_BoomerAMGSetMinIter(amg_data, min_iter);
    hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
@@ -320,6 +323,18 @@ hypre_BoomerAMGSetMeasureType( void  *data,
    hypre_ParAMGData  *amg_data = data;
 
    hypre_ParAMGDataMeasureType(amg_data) = measure_type;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetSetupType( void  *data,
+                             int    setup_type )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   hypre_ParAMGDataSetupType(amg_data) = setup_type;
 
    return (ierr);
 }

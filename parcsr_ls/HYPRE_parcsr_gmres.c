@@ -144,6 +144,18 @@ HYPRE_ParCSRGMRESSetPrecond( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRGMRESGetPrecond
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRGMRESGetPrecond( HYPRE_Solver  solver,
+                             long int      *precond_data_ptr )
+{
+   return( hypre_GMRESGetPrecond( (void *)     solver,
+                                  (long int *) precond_data_ptr ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRGMRESSetLogging
  *--------------------------------------------------------------------------*/
 

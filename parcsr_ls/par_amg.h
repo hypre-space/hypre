@@ -23,6 +23,7 @@ typedef struct
    double   max_row_sum;
    double   trunc_factor;
    int      measure_type;
+   int      setup_type;
    int      coarsen_type;
    int      interp_type;
    int      restr_par;
@@ -90,6 +91,7 @@ typedef struct
 #define hypre_ParAMGDataInterpType(amg_data) ((amg_data)->interp_type)
 #define hypre_ParAMGDataCoarsenType(amg_data) ((amg_data)->coarsen_type)
 #define hypre_ParAMGDataMeasureType(amg_data) ((amg_data)->measure_type)
+#define hypre_ParAMGDataSetupType(amg_data) ((amg_data)->setup_type)
 
 /* solve params */
 

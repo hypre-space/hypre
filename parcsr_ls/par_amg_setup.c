@@ -58,10 +58,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int       coarse_size;
    int       coarsen_type;
    int       measure_type;
+   int       setup_type;
    int       fine_size;
    double    size;
    int       not_finished_coarsening = 1;
-   int       Setup_err_flag;
+   int       Setup_err_flag = 0;
    int       coarse_threshold = 9;
    int       j;
    int       num_procs,my_id;
@@ -77,9 +78,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    amg_ioutdat = hypre_ParAMGDataIOutDat(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
+   setup_type = hypre_ParAMGDataSetupType(amg_data);
    debug_flag = hypre_ParAMGDataDebugFlag(amg_data);
    relax_weight = hypre_ParAMGDataRelaxWeight(amg_data);
    
+   if (setup_type == 0) return Setup_err_flag;
+
    A_array = hypre_ParAMGDataAArray(amg_data);
    P_array = hypre_ParAMGDataPArray(amg_data);
    CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
@@ -414,6 +418,5 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    } 
 #endif
 
-   Setup_err_flag = 0;
    return(Setup_err_flag);
 }  

@@ -195,9 +195,20 @@ HYPRE_BoomerAMGSetCoarsenType( HYPRE_Solver solver,
 
 int
 HYPRE_BoomerAMGSetMeasureType( HYPRE_Solver solver,
-                            int          measure_type  )
+                               int          measure_type  )
 {
    return( hypre_BoomerAMGSetMeasureType( (void *) solver, measure_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetSetupType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetSetupType( HYPRE_Solver solver,
+                             int          setup_type  )
+{
+   return( hypre_BoomerAMGSetSetupType( (void *) solver, setup_type ) );
 }
 
 /*--------------------------------------------------------------------------

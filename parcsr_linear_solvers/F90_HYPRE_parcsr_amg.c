@@ -215,11 +215,24 @@ hypre_F90_IFACE(hypre_boomeramgsetcoarsentype)( long int *solver,
 
 void
 hypre_F90_IFACE(hypre_boomeramgsetmeasuretype)( long int *solver,
-                                             int      *measure_type,
-                                             int      *ierr          )
+                                                int      *measure_type,
+                                                int      *ierr          )
 {
    *ierr = (int) ( HYPRE_BoomerAMGSetMeasureType( (HYPRE_Solver) *solver,
-                                               (int)          *measure_type ) );
+                                                  (int)          *measure_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetSetupType
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetsetuptype)( long int *solver,
+                                              int      *setup_type,
+                                              int      *ierr          )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetSetupType( (HYPRE_Solver) *solver,
+                                                (int)          *setup_type ) );
 }
 
 /*--------------------------------------------------------------------------
