@@ -16,7 +16,7 @@
 hypre_ParCSRMatrix *
 hypre_GenerateLaplacian(MPI_Comm comm, int nx, int ny, int nz, 
 			int P, int Q, int R, int p, int q, int r,
-			double *value, int **global_part_ptr)
+			double *value)
 {
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix *diag;
@@ -336,13 +336,13 @@ hypre_GenerateLaplacian(MPI_Comm comm, int nx, int ny, int nz,
    hypre_ParCSRMatrixGlobalNumCols(A) = nx*ny*nz;
    hypre_ParCSRMatrixFirstRowIndex(A) = global_part[my_id];
    hypre_ParCSRMatrixFirstColDiag(A) = global_part[my_id];
+   hypre_ParCSRMatrixRowStarts(A) = global_part;
+   hypre_ParCSRMatrixColStarts(A) = global_part;
    hypre_ParCSRMatrixCommPkg(A) = NULL;
 
    hypre_TFree(nx_part);
    hypre_TFree(ny_part);
    hypre_TFree(nz_part);
-
-   *global_part_ptr = global_part;
 
    return A;
 }
