@@ -206,7 +206,7 @@ int MLI_Method_AMGCR::setParams(char *inName, int argc, char *argv[])
 int MLI_Method_AMGCR::setup( MLI *mli ) 
 {
    int         level, mypid, *ISMarker, localNRows;
-   int         numColsOffd, irow, nrows, gNRows, numFpts, *fList;;
+   int         irow, nrows, gNRows, numFpts, *fList;;
    int         *ADiagI, *ADiagJ, jcol;
    double      startTime, elapsedTime;
    char        paramString[100], *targv[10];
@@ -248,7 +248,6 @@ int MLI_Method_AMGCR::setup( MLI *mli )
       ADiag = hypre_ParCSRMatrixDiag(hypreA);
       AOffd = hypre_ParCSRMatrixOffd(hypreA);
       localNRows = hypre_CSRMatrixNumRows(ADiag);
-      numColsOffd = hypre_CSRMatrixNumCols(AOffd);
       if (localNRows < minCoarseSize_) break;
 
       if (mypid == 0 && outputLevel_ > 0)
@@ -293,8 +292,6 @@ int MLI_Method_AMGCR::setup( MLI *mli )
       }
       for (irow = 0; irow < localNRows; irow++) 
          if (ISMarker[irow] < 0) ISMarker[irow] = 0;
-      //for (irow = 0; irow < localNRows+numColsOffd; irow++) 
-      //   printf("ISMarker %5d = %d\n", irow, ISMarker[irow]);
       mli_Affmat = performCR(mli_Amat, ISMarker, &mli_Afcmat);
 
       nrows = 0;
@@ -426,7 +423,7 @@ int MLI_Method_AMGCR::setNumLevels( int nlevels )
 
 int MLI_Method_AMGCR::selectIndepSet(MLI_Matrix *mli_Amat, int **indepSet)
 {
-   int    irow, localNRows, numColsOffd, *colMapOffd, graphArraySize;
+   int    irow, localNRows, numColsOffd, graphArraySize;
    int    *graphArray, *graphArrayOffd, *ISMarker, *ISMarkerOffd;
    int    nprocs, *ADiagI, *ADiagJ;
    double *measureArray;
@@ -440,7 +437,6 @@ int MLI_Method_AMGCR::selectIndepSet(MLI_Matrix *mli_Amat, int **indepSet)
    ADiagJ = hypre_CSRMatrixJ(ADiag);
    AOffd = hypre_ParCSRMatrixOffd(hypreA);
    localNRows = hypre_CSRMatrixNumRows(ADiag);
-   colMapOffd = hypre_ParCSRMatrixColMapOffd(hypreA);
    numColsOffd = hypre_CSRMatrixNumCols(AOffd);
    comm = getComm();
    MPI_Comm_size(comm, &nprocs);

@@ -958,7 +958,7 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
    int    numVectors = 1, *SDiagI, *SDiagJ, count;
    int    numNew1, numNew2, numNew3, *sortIndices, stopRefine=1;
    double maxEigen, relaxWts[5], colValue, rnorm0, rnorm1, dOne=1.0;
-   double *XaccData, *XData, arnorm0, arnorm1, *ADiagD;
+   double *XaccData, *XData, *ADiagD;
    double aratio, ratio1, *ADiagA, targetMu=MU;
    char   paramString[200], *targv[2];
    HYPRE_IJMatrix     IJPFF, IJPFC;
@@ -1099,7 +1099,6 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
       for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++)
          if (ADiagJ[jcol] == irow) {ADiagD[irow] = ADiagA[jcol]; break;}
    fList = new int[localNRows];
-   arnorm1 = arnorm0 = 1;
    aratio = 0.0;
    numNew1 = numNew2 = numNew3 = 0;
    for (iT = 0; iT < numTrials; iT++)
@@ -1271,8 +1270,6 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
       targv[0] = (char *) &numSweeps;
       targv[1] = (char *) relaxWts;
       strcpy(paramString, "relaxWeight");
-      arnorm0 = 1.0;
-      arnorm1 = 0.0;
       aratio = 0.0;
       XData = (double *) hypre_VectorData(hypre_ParVectorLocalVector(hypreX));
       XaccData = (double *) 
@@ -1314,12 +1311,6 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
                 rnorm0,rnorm1,aratio);
          if (rnorm0 > 1.0e-10) aratio = rnorm1 / rnorm0;
          else aratio = 0.0;
-         //if (iV == 0) arnorm0 = rnorm0;
-         //else         arnorm0 += rnorm0;
-         //arnorm1 += rnorm1;
-         //if (rnorm0 > 1.0e-10) aratio += (rnorm1/rnorm0);
-         //else                  aratio = 0.0;
-         //if (rnorm1/rnorm0 < targetMu) break;
       }
       delete smootherPtr;
 
