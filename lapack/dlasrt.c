@@ -49,11 +49,11 @@
     integer i__1, i__2;
     /* Local variables */
     static integer endd, i__, j;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     static integer stack[64]	/* was [2][32] */;
     static doublereal dmnmx, d1, d2, d3;
     static integer start;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
     static integer stkpnt, dir;
     static doublereal tmp;
 #define stack_ref(a_1,a_2) stack[(a_2)*2 + a_1 - 3]
@@ -63,9 +63,9 @@
     /* Function Body */
     *info = 0;
     dir = -1;
-    if (lsame_(id, "D")) {
+    if (hypre_lsame_(id, "D")) {
 	dir = 0;
-    } else if (lsame_(id, "I")) {
+    } else if (hypre_lsame_(id, "I")) {
 	dir = 1;
     }
     if (dir == -1) {
@@ -75,7 +75,7 @@
     }
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("DLASRT", &i__1);
+	hypre_xerbla_("DLASRT", &i__1);
 	return 0;
     }
 

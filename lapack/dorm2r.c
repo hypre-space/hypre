@@ -102,9 +102,9 @@
     extern /* Subroutine */ int dlarf_(char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *);
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     static integer i1, i2, i3, ic, jc, mi, ni, nq;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
     static logical notran;
     static doublereal aii;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
@@ -122,8 +122,8 @@
 
     /* Function Body */
     *info = 0;
-    left = lsame_(side, "L");
-    notran = lsame_(trans, "N");
+    left = hypre_lsame_(side, "L");
+    notran = hypre_lsame_(trans, "N");
 
 /*     NQ is the order of Q */
 
@@ -132,9 +132,9 @@
     } else {
 	nq = *n;
     }
-    if (! left && ! lsame_(side, "R")) {
+    if (! left && ! hypre_lsame_(side, "R")) {
 	*info = -1;
-    } else if (! notran && ! lsame_(trans, "T")) {
+    } else if (! notran && ! hypre_lsame_(trans, "T")) {
 	*info = -2;
     } else if (*m < 0) {
 	*info = -3;
@@ -149,7 +149,7 @@
     }
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("DORM2R", &i__1);
+	hypre_xerbla_("DORM2R", &i__1);
 	return 0;
     }
 

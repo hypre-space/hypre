@@ -153,7 +153,7 @@
     static doublereal alpha;
     extern /* Subroutine */ int dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     extern /* Subroutine */ int dgemv_(char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *, integer *), daxpy_(integer *, 
@@ -180,7 +180,7 @@
 	return 0;
     }
 
-    if (lsame_(uplo, "U")) {
+    if (hypre_lsame_(uplo, "U")) {
 
 /*        Reduce last NB columns of upper triangle */
 

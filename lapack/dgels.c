@@ -128,7 +128,7 @@
     static integer brow;
     static logical tpsd;
     static integer i__, j, iascl, ibscl;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     extern /* Subroutine */ int dtrsm_(char *, char *, char *, char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *);
@@ -146,7 +146,7 @@
 	     dgeqrf_(integer *, integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *, integer *, integer *), dlaset_(char *,
 	     integer *, integer *, doublereal *, doublereal *, doublereal *, 
-	    integer *), xerbla_(char *, integer *);
+	    integer *), hypre_xerbla_(char *, integer *);
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     static integer scllen;
@@ -174,7 +174,7 @@
     *info = 0;
     mn = min(*m,*n);
     lquery = *lwork == -1;
-    if (! (lsame_(trans, "N") || lsame_(trans, "T"))) {
+    if (! (hypre_lsame_(trans, "N") || hypre_lsame_(trans, "T"))) {
 	*info = -1;
     } else if (*m < 0) {
 	*info = -2;
@@ -203,7 +203,7 @@
     if (*info == 0 || *info == -10) {
 
 	tpsd = TRUE_;
-	if (lsame_(trans, "N")) {
+	if (hypre_lsame_(trans, "N")) {
 	    tpsd = FALSE_;
 	}
 
@@ -246,7 +246,7 @@
 
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("DGELS ", &i__1);
+	hypre_xerbla_("DGELS ", &i__1);
 	return 0;
     } else if (lquery) {
 	return 0;

@@ -71,7 +71,7 @@
 	    doublereal *, doublereal *, integer *, integer *, doublereal *, 
 	    integer *, integer *);
     static doublereal oldgam, safmin;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
     static doublereal safmax;
     extern doublereal dlanst_(char *, integer *, doublereal *, doublereal *);
     extern /* Subroutine */ int dlasrt_(char *, integer *, doublereal *, 
@@ -95,7 +95,7 @@
     if (*n < 0) {
 	*info = -1;
 	i__1 = -(*info);
-	xerbla_("DSTERF", &i__1);
+	hypre_xerbla_("DSTERF", &i__1);
 	return 0;
     }
     if (*n <= 1) {

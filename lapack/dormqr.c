@@ -116,7 +116,7 @@
     static logical left;
     static integer i__;
     static doublereal t[4160]	/* was [65][64] */;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     static integer nbmin, iinfo, i1, i2, i3;
     extern /* Subroutine */ int dorm2r_(char *, char *, integer *, integer *, 
 	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
@@ -128,7 +128,7 @@
 	    integer *);
     static integer nq, nw;
     extern /* Subroutine */ int dlarft_(char *, char *, integer *, integer *, 
-	    doublereal *, integer *, doublereal *, doublereal *, integer *), xerbla_(char *, integer *);
+	    doublereal *, integer *, doublereal *, doublereal *, integer *), hypre_xerbla_(char *, integer *);
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     static logical notran;
@@ -150,8 +150,8 @@
 
     /* Function Body */
     *info = 0;
-    left = lsame_(side, "L");
-    notran = lsame_(trans, "N");
+    left = hypre_lsame_(side, "L");
+    notran = hypre_lsame_(trans, "N");
     lquery = *lwork == -1;
 
 /*     NQ is the order of Q and NW is the minimum dimension of WORK */
@@ -163,9 +163,9 @@
 	nq = *n;
 	nw = *m;
     }
-    if (! left && ! lsame_(side, "R")) {
+    if (! left && ! hypre_lsame_(side, "R")) {
 	*info = -1;
-    } else if (! notran && ! lsame_(trans, "T")) {
+    } else if (! notran && ! hypre_lsame_(trans, "T")) {
 	*info = -2;
     } else if (*m < 0) {
 	*info = -3;
@@ -200,7 +200,7 @@
 
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("DORMQR", &i__1);
+	hypre_xerbla_("DORMQR", &i__1);
 	return 0;
     } else if (lquery) {
 	return 0;

@@ -44,6 +44,7 @@ FILES =\
  dlabad.c\
  dlae2.c\
  dlaev2.c\
+ dlamch.c\
  dlange.c\
  dlanst.c\
  dlansy.c\

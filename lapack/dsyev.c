@@ -95,7 +95,7 @@
     extern /* Subroutine */ int dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
     static doublereal sigma;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     static integer iinfo;
     static logical lower, wantz;
     static integer nb;
@@ -107,7 +107,7 @@
     static doublereal safmin;
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
     static doublereal bignum;
     static integer indtau;
     extern /* Subroutine */ int dsterf_(integer *, doublereal *, doublereal *,
@@ -135,14 +135,14 @@
     --work;
 
     /* Function Body */
-    wantz = lsame_(jobz, "V");
-    lower = lsame_(uplo, "L");
+    wantz = hypre_lsame_(jobz, "V");
+    lower = hypre_lsame_(uplo, "L");
     lquery = *lwork == -1;
 
     *info = 0;
-    if (! (wantz || lsame_(jobz, "N"))) {
+    if (! (wantz || hypre_lsame_(jobz, "N"))) {
 	*info = -1;
-    } else if (! (lower || lsame_(uplo, "U"))) {
+    } else if (! (lower || hypre_lsame_(uplo, "U"))) {
 	*info = -2;
     } else if (*n < 0) {
 	*info = -3;
@@ -167,7 +167,7 @@
 
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("DSYEV ", &i__1);
+	hypre_xerbla_("DSYEV ", &i__1);
 	return 0;
     } else if (lquery) {
 	return 0;

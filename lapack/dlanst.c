@@ -66,7 +66,7 @@ doublereal dlanst_(char *norm, integer *n, doublereal *d__, doublereal *e)
     /* Local variables */
     static integer i__;
     static doublereal scale;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     static doublereal anorm;
     extern /* Subroutine */ int dlassq_(integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *);
@@ -79,7 +79,7 @@ doublereal dlanst_(char *norm, integer *n, doublereal *d__, doublereal *e)
     /* Function Body */
     if (*n <= 0) {
 	anorm = 0.;
-    } else if (lsame_(norm, "M")) {
+    } else if (hypre_lsame_(norm, "M")) {
 
 /*        Find max(abs(A(i,j))). */
 
@@ -94,8 +94,8 @@ doublereal dlanst_(char *norm, integer *n, doublereal *d__, doublereal *e)
 	    anorm = max(d__2,d__3);
 /* L10: */
 	}
-    } else if (lsame_(norm, "O") || *(unsigned char *)
-	    norm == '1' || lsame_(norm, "I")) {
+    } else if (hypre_lsame_(norm, "O") || *(unsigned char *)
+	    norm == '1' || hypre_lsame_(norm, "I")) {
 
 /*        Find norm1(A). */
 
@@ -115,7 +115,7 @@ doublereal dlanst_(char *norm, integer *n, doublereal *d__, doublereal *e)
 /* L20: */
 	    }
 	}
-    } else if (lsame_(norm, "F") || lsame_(norm, "E")) {
+    } else if (hypre_lsame_(norm, "F") || hypre_lsame_(norm, "E")) {
 
 /*        Find normF(A). */
 

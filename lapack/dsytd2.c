@@ -131,14 +131,14 @@
 	    integer *);
     static integer i__;
     static doublereal alpha;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     extern /* Subroutine */ int daxpy_(integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *);
     static logical upper;
     extern /* Subroutine */ int dsymv_(char *, integer *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    doublereal *, integer *), dlarfg_(integer *, doublereal *,
-	     doublereal *, integer *, doublereal *), xerbla_(char *, integer *
+	     doublereal *, integer *, doublereal *), hypre_xerbla_(char *, integer *
 	    );
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
@@ -152,8 +152,8 @@
 
     /* Function Body */
     *info = 0;
-    upper = lsame_(uplo, "U");
-    if (! upper && ! lsame_(uplo, "L")) {
+    upper = hypre_lsame_(uplo, "U");
+    if (! upper && ! hypre_lsame_(uplo, "L")) {
 	*info = -1;
     } else if (*n < 0) {
 	*info = -2;
@@ -162,7 +162,7 @@
     }
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("DSYTD2", &i__1);
+	hypre_xerbla_("DSYTD2", &i__1);
 	return 0;
     }
 

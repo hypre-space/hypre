@@ -74,7 +74,7 @@
     extern /* Subroutine */ int dlarf_(char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *), dlarfg_(integer *, doublereal *, 
-	    doublereal *, integer *, doublereal *), xerbla_(char *, integer *);
+	    doublereal *, integer *, doublereal *), hypre_xerbla_(char *, integer *);
     static doublereal aii;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
@@ -95,7 +95,7 @@
     }
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("DGELQ2", &i__1);
+	hypre_xerbla_("DGELQ2", &i__1);
 	return 0;
     }
 

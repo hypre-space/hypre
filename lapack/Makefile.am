@@ -3,6 +3,7 @@
 lib_LTLIBRARIES = libHYPRE_lapack.la
 libHYPRE_lapack_la_SOURCES = $(FILES)
 libHYPRE_lapack_la_LDFLAGS = -avoid-version
+EXTRA_DIST = README
 
 #
 FILES = \
@@ -14,6 +15,7 @@ FILES = \
  dlabad.c\
  dlae2.c\
  dlaev2.c\
+ dlamch.c\
  dlange.c\
  dlanst.c\
  dlansy.c\

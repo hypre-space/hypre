@@ -27,6 +27,14 @@ int dlae2_ ( doublereal *a , doublereal *b , doublereal *c__ , doublereal *rt1 ,
 /* dlaev2.c */
 int dlaev2_ ( doublereal *a , doublereal *b , doublereal *c__ , doublereal *rt1 , doublereal *rt2 , doublereal *cs1 , doublereal *sn1 );
 
+/* dlamch.c */
+doublereal dlamch_ ( char *cmach );
+int dlamc1_ ( integer *beta , integer *t , logical *rnd , logical *ieee1 );
+int dlamc2_ ( integer *beta , integer *t , logical *rnd , doublereal *eps , integer *emin , doublereal *rmin , integer *emax , doublereal *rmax );
+doublereal dlamc3_ ( doublereal *a , doublereal *b );
+int dlamc4_ ( integer *emin , doublereal *start , integer *base );
+int dlamc5_ ( integer *beta , integer *p , integer *emin , logical *ieee , integer *emax , doublereal *rmax );
+
 /* dlange.c */
 doublereal dlange_ ( char *norm , integer *m , integer *n , doublereal *a , integer *lda , doublereal *work );
 
@@ -136,8 +144,8 @@ int dsytrd_ ( char *uplo , integer *n , doublereal *a , integer *lda , doublerea
 integer ilaenv_ ( integer *ispec , char *name__ , char *opts , integer *n1 , integer *n2 , integer *n3 , integer *n4 , ftnlen name_len , ftnlen opts_len );
 
 /* lapack_utils.c */
-int xerbla_ ( char *srname , integer *info );
-logical lsame_ ( char *ca , char *cb );
+int hypre_xerbla_ ( char *srname , integer *info );
+logical hypre_lsame_ ( char *ca , char *cb );
 doublereal dlamch_ ( char *cmach );
 int dlamc1_ ( integer *beta , integer *t , logical *rnd , logical *ieee1 );
 int dlamc2_ ( integer *beta , integer *t , logical *rnd , doublereal *eps , integer *emin , doublereal *rmin , integer *emax , doublereal *rmax );

@@ -85,7 +85,7 @@
     integer a_dim1, a_offset, b_dim1, b_offset, i__1, i__2, i__3;
     /* Local variables */
     static integer k;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     extern /* Subroutine */ int dtrmm_(char *, char *, char *, char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *), dsymm_(
@@ -103,7 +103,7 @@
 	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *, integer *);
     static integer nb;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
@@ -119,10 +119,10 @@
 
     /* Function Body */
     *info = 0;
-    upper = lsame_(uplo, "U");
+    upper = hypre_lsame_(uplo, "U");
     if (*itype < 1 || *itype > 3) {
 	*info = -1;
-    } else if (! upper && ! lsame_(uplo, "L")) {
+    } else if (! upper && ! hypre_lsame_(uplo, "L")) {
 	*info = -2;
     } else if (*n < 0) {
 	*info = -3;
@@ -133,7 +133,7 @@
     }
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("DSYGST", &i__1);
+	hypre_xerbla_("DSYGST", &i__1);
 	return 0;
     }
 

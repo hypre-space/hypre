@@ -82,12 +82,12 @@
     static logical done;
     static doublereal ctoc;
     static integer i__, j;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     static integer itype, k1, k2, k3, k4;
     static doublereal cfrom1;
     extern doublereal dlamch_(char *);
     static doublereal cfromc;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
     static doublereal bignum, smlnum, mul, cto1;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
@@ -98,19 +98,19 @@
     /* Function Body */
     *info = 0;
 
-    if (lsame_(type__, "G")) {
+    if (hypre_lsame_(type__, "G")) {
 	itype = 0;
-    } else if (lsame_(type__, "L")) {
+    } else if (hypre_lsame_(type__, "L")) {
 	itype = 1;
-    } else if (lsame_(type__, "U")) {
+    } else if (hypre_lsame_(type__, "U")) {
 	itype = 2;
-    } else if (lsame_(type__, "H")) {
+    } else if (hypre_lsame_(type__, "H")) {
 	itype = 3;
-    } else if (lsame_(type__, "B")) {
+    } else if (hypre_lsame_(type__, "B")) {
 	itype = 4;
-    } else if (lsame_(type__, "Q")) {
+    } else if (hypre_lsame_(type__, "Q")) {
 	itype = 5;
-    } else if (lsame_(type__, "Z")) {
+    } else if (hypre_lsame_(type__, "Z")) {
 	itype = 6;
     } else {
 	itype = -1;
@@ -146,7 +146,7 @@
 
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("DLASCL", &i__1);
+	hypre_xerbla_("DLASCL", &i__1);
 	return 0;
     }
 

@@ -76,11 +76,11 @@
     integer a_dim1, a_offset, i__1, i__2, i__3;
     /* Local variables */
     static integer i__, j;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     static integer iinfo;
     static logical upper;
     static integer nb;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     extern /* Subroutine */ int dorgql_(integer *, integer *, integer *, 
@@ -101,8 +101,8 @@
     /* Function Body */
     *info = 0;
     lquery = *lwork == -1;
-    upper = lsame_(uplo, "U");
-    if (! upper && ! lsame_(uplo, "L")) {
+    upper = hypre_lsame_(uplo, "U");
+    if (! upper && ! hypre_lsame_(uplo, "L")) {
 	*info = -1;
     } else if (*n < 0) {
 	*info = -2;
@@ -138,7 +138,7 @@
 
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("DORGTR", &i__1);
+	hypre_xerbla_("DORGTR", &i__1);
 	return 0;
     } else if (lquery) {
 	return 0;

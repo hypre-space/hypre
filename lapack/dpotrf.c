@@ -74,7 +74,7 @@
     extern /* Subroutine */ int dgemm_(char *, char *, integer *, integer *, 
 	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *);
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     extern /* Subroutine */ int dtrsm_(char *, char *, char *, char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *);
@@ -84,7 +84,7 @@
 	     integer *), dpotf2_(char *, integer *, 
 	    doublereal *, integer *, integer *);
     static integer jb, nb;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
@@ -96,8 +96,8 @@
 
     /* Function Body */
     *info = 0;
-    upper = lsame_(uplo, "U");
-    if (! upper && ! lsame_(uplo, "L")) {
+    upper = hypre_lsame_(uplo, "U");
+    if (! upper && ! hypre_lsame_(uplo, "L")) {
 	*info = -1;
     } else if (*n < 0) {
 	*info = -2;
@@ -106,7 +106,7 @@
     }
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("DPOTRF", &i__1);
+	hypre_xerbla_("DPOTRF", &i__1);
 	return 0;
     }
 

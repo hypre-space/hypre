@@ -97,7 +97,7 @@
 	    integer *);
     static integer nx;
     extern /* Subroutine */ int dlarft_(char *, char *, integer *, integer *, 
-	    doublereal *, integer *, doublereal *, doublereal *, integer *), xerbla_(char *, integer *);
+	    doublereal *, integer *, doublereal *, doublereal *, integer *), hypre_xerbla_(char *, integer *);
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     static integer ldwork, lwkopt;
@@ -130,7 +130,7 @@
     }
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("DGELQF", &i__1);
+	hypre_xerbla_("DGELQF", &i__1);
 	return 0;
     } else if (lquery) {
 	return 0;

@@ -84,7 +84,7 @@ doublereal dlansy_(char *norm, char *uplo, integer *n, doublereal *a, integer
     static doublereal absa;
     static integer i__, j;
     static doublereal scale;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     static doublereal value;
     extern /* Subroutine */ int dlassq_(integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *);
@@ -100,12 +100,12 @@ doublereal dlansy_(char *norm, char *uplo, integer *n, doublereal *a, integer
     /* Function Body */
     if (*n == 0) {
 	value = 0.;
-    } else if (lsame_(norm, "M")) {
+    } else if (hypre_lsame_(norm, "M")) {
 
 /*        Find max(abs(A(i,j))). */
 
 	value = 0.;
-	if (lsame_(uplo, "U")) {
+	if (hypre_lsame_(uplo, "U")) {
 	    i__1 = *n;
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = j;
@@ -130,12 +130,12 @@ doublereal dlansy_(char *norm, char *uplo, integer *n, doublereal *a, integer
 /* L40: */
 	    }
 	}
-    } else if (lsame_(norm, "I") || lsame_(norm, "O") || *(unsigned char *)norm == '1') {
+    } else if (hypre_lsame_(norm, "I") || hypre_lsame_(norm, "O") || *(unsigned char *)norm == '1') {
 
 /*        Find normI(A) ( = norm1(A), since A is symmetric). */
 
 	value = 0.;
-	if (lsame_(uplo, "U")) {
+	if (hypre_lsame_(uplo, "U")) {
 	    i__1 = *n;
 	    for (j = 1; j <= i__1; ++j) {
 		sum = 0.;
@@ -176,13 +176,13 @@ doublereal dlansy_(char *norm, char *uplo, integer *n, doublereal *a, integer
 /* L100: */
 	    }
 	}
-    } else if (lsame_(norm, "F") || lsame_(norm, "E")) {
+    } else if (hypre_lsame_(norm, "F") || hypre_lsame_(norm, "E")) {
 
 /*        Find normF(A). */
 
 	scale = 0.;
 	sum = 1.;
-	if (lsame_(uplo, "U")) {
+	if (hypre_lsame_(uplo, "U")) {
 	    i__1 = *n;
 	    for (j = 2; j <= i__1; ++j) {
 		i__2 = j - 1;

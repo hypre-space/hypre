@@ -140,7 +140,7 @@
     integer a_dim1, a_offset, i__1, i__2, i__3;
     /* Local variables */
     static integer i__, j;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     static integer nbmin, iinfo;
     static logical upper;
     extern /* Subroutine */ int dsytd2_(char *, integer *, doublereal *, 
@@ -150,7 +150,7 @@
     static integer nb, kk, nx;
     extern /* Subroutine */ int dlatrd_(char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, doublereal *,
-	     integer *), xerbla_(char *, integer *);
+	     integer *), hypre_xerbla_(char *, integer *);
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     static integer ldwork, lwkopt;
@@ -169,9 +169,9 @@
 
     /* Function Body */
     *info = 0;
-    upper = lsame_(uplo, "U");
+    upper = hypre_lsame_(uplo, "U");
     lquery = *lwork == -1;
-    if (! upper && ! lsame_(uplo, "L")) {
+    if (! upper && ! hypre_lsame_(uplo, "L")) {
 	*info = -1;
     } else if (*n < 0) {
 	*info = -2;
@@ -193,7 +193,7 @@
 
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("DSYTRD", &i__1);
+	hypre_xerbla_("DSYTRD", &i__1);
 	return 0;
     } else if (lquery) {
 	return 0;

@@ -114,7 +114,7 @@
     doublereal d__1;
     /* Local variables */
     static integer i__, j;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     extern /* Subroutine */ int dgemv_(char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *, integer *), dtrmv_(char *, 
@@ -138,7 +138,7 @@
 	return 0;
     }
 
-    if (lsame_(direct, "F")) {
+    if (hypre_lsame_(direct, "F")) {
 	i__1 = *k;
 	for (i__ = 1; i__ <= i__1; ++i__) {
 	    if (tau[i__] == 0.) {
@@ -156,7 +156,7 @@
 
 		vii = v_ref(i__, i__);
 		v_ref(i__, i__) = 1.;
-		if (lsame_(storev, "C")) {
+		if (hypre_lsame_(storev, "C")) {
 
 /*                 T(1:i-1,i) := - tau(i) * V(i:n,1:i-1)' * V(i:n,i) */
 
@@ -204,7 +204,7 @@
 /*              general case */
 
 		if (i__ < *k) {
-		    if (lsame_(storev, "C")) {
+		    if (hypre_lsame_(storev, "C")) {
 			vii = v_ref(*n - *k + i__, i__);
 			v_ref(*n - *k + i__, i__) = 1.;
 

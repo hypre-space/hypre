@@ -96,7 +96,7 @@
     static doublereal b, c__, f, g;
     static integer i__, j, k, l, m;
     static doublereal p, r__, s;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     extern /* Subroutine */ int dlasr_(char *, char *, char *, integer *, 
 	    integer *, doublereal *, doublereal *, doublereal *, integer *);
     static doublereal anorm;
@@ -119,7 +119,7 @@
     extern /* Subroutine */ int dlartg_(doublereal *, doublereal *, 
 	    doublereal *, doublereal *, doublereal *);
     static doublereal safmax;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
     extern doublereal dlanst_(char *, integer *, doublereal *, doublereal *);
     extern /* Subroutine */ int dlasrt_(char *, integer *, doublereal *, 
 	    integer *);
@@ -144,11 +144,11 @@
     /* Function Body */
     *info = 0;
 
-    if (lsame_(compz, "N")) {
+    if (hypre_lsame_(compz, "N")) {
 	icompz = 0;
-    } else if (lsame_(compz, "V")) {
+    } else if (hypre_lsame_(compz, "V")) {
 	icompz = 1;
-    } else if (lsame_(compz, "I")) {
+    } else if (hypre_lsame_(compz, "I")) {
 	icompz = 2;
     } else {
 	icompz = -1;
@@ -162,7 +162,7 @@
     }
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("DSTEQR", &i__1);
+	hypre_xerbla_("DSTEQR", &i__1);
 	return 0;
     }
 

@@ -59,7 +59,7 @@
     integer a_dim1, a_offset, i__1, i__2, i__3;
     /* Local variables */
     static integer i__, j;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
     a_dim1 = *lda;
@@ -67,7 +67,7 @@
     a -= a_offset;
 
     /* Function Body */
-    if (lsame_(uplo, "U")) {
+    if (hypre_lsame_(uplo, "U")) {
 
 /*        Set the strictly upper triangular or trapezoidal part of the   
           array to ALPHA. */
@@ -84,7 +84,7 @@
 /* L20: */
 	}
 
-    } else if (lsame_(uplo, "L")) {
+    } else if (hypre_lsame_(uplo, "L")) {
 
 /*        Set the strictly lower triangular or trapezoidal part of the   
           array to ALPHA. */

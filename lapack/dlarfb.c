@@ -103,7 +103,7 @@
     extern /* Subroutine */ int dgemm_(char *, char *, integer *, integer *, 
 	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *);
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     extern /* Subroutine */ int dcopy_(integer *, doublereal *, integer *, 
 	    doublereal *, integer *), dtrmm_(char *, char *, char *, char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
@@ -132,21 +132,21 @@
 	return 0;
     }
 
-    if (lsame_(trans, "N")) {
+    if (hypre_lsame_(trans, "N")) {
 	*(unsigned char *)transt = 'T';
     } else {
 	*(unsigned char *)transt = 'N';
     }
 
-    if (lsame_(storev, "C")) {
+    if (hypre_lsame_(storev, "C")) {
 
-	if (lsame_(direct, "F")) {
+	if (hypre_lsame_(direct, "F")) {
 
 /*           Let  V =  ( V1 )    (first K rows)   
                        ( V2 )   
              where  V1  is unit lower triangular. */
 
-	    if (lsame_(side, "L")) {
+	    if (hypre_lsame_(side, "L")) {
 
 /*              Form  H * C  or  H' * C  where  C = ( C1 )   
                                                     ( C2 )   
@@ -209,7 +209,7 @@
 /* L30: */
 		}
 
-	    } else if (lsame_(side, "R")) {
+	    } else if (hypre_lsame_(side, "R")) {
 
 /*              Form  C * H  or  C * H'  where  C = ( C1  C2 )   
 
@@ -278,7 +278,7 @@
                        ( V2 )    (last K rows)   
              where  V2  is unit upper triangular. */
 
-	    if (lsame_(side, "L")) {
+	    if (hypre_lsame_(side, "L")) {
 
 /*              Form  H * C  or  H' * C  where  C = ( C1 )   
                                                     ( C2 )   
@@ -346,7 +346,7 @@
 /* L90: */
 		}
 
-	    } else if (lsame_(side, "R")) {
+	    } else if (hypre_lsame_(side, "R")) {
 
 /*              Form  C * H  or  C * H'  where  C = ( C1  C2 )   
 
@@ -415,14 +415,14 @@
 	    }
 	}
 
-    } else if (lsame_(storev, "R")) {
+    } else if (hypre_lsame_(storev, "R")) {
 
-	if (lsame_(direct, "F")) {
+	if (hypre_lsame_(direct, "F")) {
 
 /*           Let  V =  ( V1  V2 )    (V1: first K columns)   
              where  V1  is unit upper triangular. */
 
-	    if (lsame_(side, "L")) {
+	    if (hypre_lsame_(side, "L")) {
 
 /*              Form  H * C  or  H' * C  where  C = ( C1 )   
                                                     ( C2 )   
@@ -485,7 +485,7 @@
 /* L150: */
 		}
 
-	    } else if (lsame_(side, "R")) {
+	    } else if (hypre_lsame_(side, "R")) {
 
 /*              Form  C * H  or  C * H'  where  C = ( C1  C2 )   
 
@@ -554,7 +554,7 @@
 /*           Let  V =  ( V1  V2 )    (V2: last K columns)   
              where  V2  is unit lower triangular. */
 
-	    if (lsame_(side, "L")) {
+	    if (hypre_lsame_(side, "L")) {
 
 /*              Form  H * C  or  H' * C  where  C = ( C1 )   
                                                     ( C2 )   
@@ -621,7 +621,7 @@
 /* L210: */
 		}
 
-	    } else if (lsame_(side, "R")) {
+	    } else if (hypre_lsame_(side, "R")) {
 
 /*              Form  C * H  or  C * H'  where  C = ( C1  C2 )   
 
