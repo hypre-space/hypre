@@ -2221,7 +2221,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem()
           globalSelectedListAux[globalNSelected++] = globalSelectedListAux[i];
        }
     }
-    if ( (HYOutputLevel_ & HYFEI_SLIDEREDUCE2) && mypid == 0 )
+    if ( (HYOutputLevel_ & HYFEI_SLIDEREDUCE2) && mypid_ == 0 )
     {
        for (i = 0; i < globalNSelected; i++) 
           printf("%d : Globallist %d = %d %d\n",mypid_,i,globalSelectedList[i],
