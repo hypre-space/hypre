@@ -197,6 +197,13 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    return ierr;
 }
 
+/* ----------------------------------------------------------------------
+ * hypre_GenerateMatvecCommunicationInfo
+ * generates the comm_pkg for A 
+ * if no row and/or column partitioning is given, the routine determines
+ * them with MPE_Decomp1d 
+ * ---------------------------------------------------------------------*/
+
 int
 hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
 					int *row_part_starts ,
@@ -218,6 +225,7 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
    
    int  *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
    int  first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
+   int  first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
 
    int	i, j, j2, k;
    int	*proc_mark, *tmp, *recv_buf, *displs, *info;
@@ -227,8 +235,6 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
    int  row_len = hypre_ParCSRMatrixGlobalNumCols(A);	
    int	num_cols_diag = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
    int	num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
-   int no_row_part_starts = 0;
-   int no_col_part_starts = 0;
 
    MPI_Comm_size(comm, &num_procs);  
    MPI_Comm_rank(comm, &my_id);
@@ -242,31 +248,35 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
 
    if (!row_part_starts)
    {
-	no_row_part_starts = 1;
    	row_part_starts = hypre_CTAlloc(int, num_procs+1);
 
    	for (i=0; i < num_procs; i++)
    	{
-        	MPE_Decomp1d(row_len, num_procs, i, &row_part_starts[i],
-		&proc_mark[i]);
+        	MPE_Decomp1d(hypre_ParCSRMatrixGlobalNumCols(A), num_procs, i, 
+		&row_part_starts[i], &proc_mark[i]);
      		row_part_starts[i]--;
    	}
-   	row_part_starts[num_procs] = row_len;
+   	row_part_starts[num_procs] = hypre_ParCSRMatrixGlobalNumCols(A);
    }
+
+   if (row_part_starts[my_id]-first_row_index)
+	printf("Conflicting row partitioning!!!");
 
    if (!col_part_starts)
    {
-	no_col_part_starts = 1;
    	col_part_starts = hypre_CTAlloc(int, num_procs+1);
 
    	for (i=0; i < num_procs; i++)
    	{
-        	MPE_Decomp1d(hypre_ParCSRMatrixGlobalNumRows(A), num_procs, i, 
+        	MPE_Decomp1d(row_len, num_procs, i, 
 		&col_part_starts[i], &proc_mark[i]);
      		col_part_starts[i]--;
    	}
-   	col_part_starts[num_procs] = hypre_ParCSRMatrixGlobalNumRows(A);
+   	col_part_starts[num_procs] = row_len;
    }
+
+   if (col_part_starts[my_id]-first_col_diag)
+	printf("Conflicting column partitioning!!!");
 
 
 /* ----------------------------------------------------------------------
@@ -282,9 +292,9 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
    {
 	offd_col = col_map_offd[i];
 	proc_num = offd_col / num_cols_diag;
-	while (row_part_starts[proc_num] > offd_col )
+	while (col_part_starts[proc_num] > offd_col )
 		proc_num = proc_num-1;
-	while (row_part_starts[proc_num+1]-1 < offd_col )
+	while (col_part_starts[proc_num+1]-1 < offd_col )
 		proc_num = proc_num+1;
 	proc_mark[proc_num]++;
    }
@@ -328,8 +338,8 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
 		tmp[j++] = i;
 		tmp[j++] = proc_mark[i];
 		for (k=0; k < num_cols_offd; k++)
-			if (col_map_offd[k] >= row_part_starts[i] && 
-				col_map_offd[k] < row_part_starts[i+1])
+			if (col_map_offd[k] >= col_part_starts[i] && 
+				col_map_offd[k] < col_part_starts[i+1])
 				tmp[j++] = col_map_offd[k];
 	}
 
@@ -359,9 +369,9 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
    }
 		
 /* ----------------------------------------------------------------------
- * determine send_procs and actual elements to be send and (in send_map_elmts)
- * and send_map_starts the i-th entry of which points to the beginning of the 
- * elements to be send for proc. i
+ * determine send_procs and actual elements to be send (in send_map_elmts)
+ * and send_map_starts whose i-th entry points to the beginning of the 
+ * elements to be send to proc. i
  * ---------------------------------------------------------------------*/
 
    send_procs = hypre_CTAlloc(int, num_sends);
@@ -396,12 +406,6 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
 		j++;
 	}	
    }
-/* ----------------------------------------------------------------------
- * determine send_procs and actual elements to be send and (in send_map_elmts)
- * and send_map_starts the i-th entry of which points to the beginning of the 
- * elements to be send for proc. i
- * ---------------------------------------------------------------------*/
-
 		
    comm_pkg = hypre_CTAlloc(hypre_CommPkg, 1);
 
@@ -425,8 +429,6 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
    hypre_TFree(recv_buf);
    hypre_TFree(displs);
    hypre_TFree(info);
-   if (no_row_part_starts) hypre_TFree(row_part_starts);
-   if (no_col_part_starts) hypre_TFree(col_part_starts);
  
    return ierr;
 }
@@ -458,7 +460,7 @@ hypre_InitializeVectorCommPkg(MPI_Comm comm, int vec_len, int *vec_starts)
    for (i=0; i < num_procs; i++)
    {
         len = vec_starts[i+1]-vec_starts[i];
-        MPI_Type_vector(len,1,1,MPI_DOUBLE, &vector_mpi_types[i]);
+        MPI_Type_contiguous(len,MPI_DOUBLE, &vector_mpi_types[i]);
         MPI_Type_commit(&vector_mpi_types[i]);
    }
    vec_starts[num_procs] = vec_len;
