@@ -100,7 +100,8 @@ int hypre_AMGeAgglomerate(int *i_AE_element, int *j_AE_element,
   first[1] = 0;
 
   last = previous[tail];
-  weight_max = i_face_weight[last];
+  if (last > -1)
+    weight_max = i_face_weight[last];
 
 
   k = last;
