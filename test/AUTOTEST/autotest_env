@@ -34,7 +34,8 @@ export HYPRE_AUTOTEST_DIR
 
 HYPRE_DEFAULT_EMAIL="\
  rfalgout@llnl.gov\
- treadway1@llnl.gov"
+ treadway1@llnl.gov\
+ hill66@llnl.gov"
 
 HYPRE_CHECKOUT_EMAIL="$HYPRE_DEFAULT_EMAIL"
 

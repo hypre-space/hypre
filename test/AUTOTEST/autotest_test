@@ -102,7 +102,7 @@ initialize_variables ()
   fi
   if [ -z "${HYPRE_DEFAULT_EMAIL}" -o "${HYPRE_DEFAULT_EMAIL}" = "" ] ; then
     if [ -z "${USER_EMAIL}" -o "${USER_EMAIL}" = "" ] ; then
-      USER_EMAIL=Treadway1@LLNL.gov
+      USER_EMAIL=Hill66@LLNL.gov
     fi
     HYPRE_DEFAULT_EMAIL=${HYPRE_DEFAULT_EMAIL:=$USER_EMAIL}
     HYPRE_CHECKOUT_EMAIL=${HYPRE_CHECKOUT_EMAIL:=$USER_EMAIL}
@@ -678,16 +678,16 @@ mail_summary () {
       fi
     else
       if [ "$DEBUG_MODE" = "yes" ] ; then
-        ${HYPRE_MAIL} -s "$SUBJECT" -f Treadway1@LLNL.gov $USER_EMAIL < $SUMFILE 
+        ${HYPRE_MAIL} -s "$SUBJECT" -f Hill66@LLNL.gov $USER_EMAIL < $SUMFILE 
       else
-        ${HYPRE_MAIL} -s "$SUBJECT" -f Treadway1@LLNL.gov $HYPRE_ALL_EMAIL < $SUMFILE 
+        ${HYPRE_MAIL} -s "$SUBJECT" -f Hill66@LLNL.gov $HYPRE_ALL_EMAIL < $SUMFILE 
       fi
     fi
   else
     if [ "$DEBUG_MODE" = "yes" ] ; then
-      ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $USER_EMAIL < $SUMFILE 
+      ${HYPRE_MAIL} -s "$SUBJECT" -r Hill66@LLNL.gov $USER_EMAIL < $SUMFILE 
     else
-      ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $HYPRE_ALL_EMAIL < $SUMFILE 
+      ${HYPRE_MAIL} -s "$SUBJECT" -r Hill66@LLNL.gov $HYPRE_ALL_EMAIL < $SUMFILE 
     fi
   fi
   echo "Autotest mail sent"
@@ -716,16 +716,16 @@ mail_errors () {
                 fi
               else
                 if [ "$DEBUG_MODE" = "yes" ] ; then
-                  ${HYPRE_MAIL} -s "$SUBJECT" -f Treadway1@LLNL.gov $USER_EMAIL < $i 
+                  ${HYPRE_MAIL} -s "$SUBJECT" -f Hill66@LLNL.gov $USER_EMAIL < $i 
                 else
-                  ${HYPRE_MAIL} -s "$SUBJECT" -f Treadway1@LLNL.gov $RECIPIENTS < $i 
+                  ${HYPRE_MAIL} -s "$SUBJECT" -f Hill66@LLNL.gov $RECIPIENTS < $i 
                 fi
               fi
             else
               if [ "$DEBUG_MODE" = "yes" ] ; then
-                ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $USER_EMAIL < $i 
+                ${HYPRE_MAIL} -s "$SUBJECT" -r Hill66@LLNL.gov $USER_EMAIL < $i 
               else
-                ${HYPRE_MAIL} -s "$SUBJECT" -r Treadway1@LLNL.gov $RECIPIENTS < $i 
+                ${HYPRE_MAIL} -s "$SUBJECT" -r Hill66@LLNL.gov $RECIPIENTS < $i 
               fi
             fi
           fi
