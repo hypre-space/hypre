@@ -99,7 +99,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          hypre_SStructPVectorSetConstantValues(x, 0.0);
       }
 
-      hypre_EndTiming(pfmg_data -> time_index);
+      hypre_EndTiming(sys_pfmg_data -> time_index);
       return ierr;
    }
 
@@ -120,7 +120,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             rel_norms[0] = 0.0;
          }
 
-         hypre_EndTiming(pfmg_data -> time_index);
+         hypre_EndTiming(sys_pfmg_data -> time_index);
          return ierr;
       }
    }
