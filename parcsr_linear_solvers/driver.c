@@ -42,7 +42,7 @@ main( int   argc,
    double   trunc_factor;
    int      cycle_type;
    int      coarsen_type = 0;
-   int      hinybrid = 1;
+   int      hybrid = 1;
    int      measure_type = 0;
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
@@ -179,10 +179,10 @@ main( int   argc,
          arg_index++;
          coarsen_type      = 6;
       }    
-      else if ( strcmp(argv[arg_index], "-nohinybrid") == 0 )
+      else if ( strcmp(argv[arg_index], "-nohybrid") == 0 )
       {
          arg_index++;
-         hinybrid      = -1;
+         hybrid      = -1;
       }    
       else if ( strcmp(argv[arg_index], "-gm") == 0 )
       {
@@ -366,7 +366,7 @@ main( int   argc,
       printf("   -ruge2b               : 2nd pass is global\n");
       printf("   -rugerlx              : relaxes special points\n");
       printf("   -falgout              : local ruge followed by LJP\n");
-      printf("   -nohinybrid             : no switch in coarsening\n");
+      printf("   -nohybrid             : no switch in coarsening\n");
       printf("   -gm                   : use global measures\n");
       printf("\n");
       printf("  -rlx <val>             : relaxation type\n");
@@ -531,7 +531,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       amg_solver = HYPRE_ParAMGInitialize(); 
-      HYPRE_ParAMGSetCoarsenType(amg_solver, (hinybrid*coarsen_type));
+      HYPRE_ParAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
       HYPRE_ParAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_ParAMGSetTol(amg_solver, tol);
       HYPRE_ParAMGSetStrongThreshold(amg_solver, strong_threshold);
