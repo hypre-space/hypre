@@ -87,10 +87,23 @@ AC_SUBST(LAPACK_LIBS)
 # Finally, execute ACTION-IF-FOUND/ACTION-IF-NOT-FOUND:
 if test x"$acx_lapack_ok" = xyes; then
         ifelse([$1],,AC_DEFINE(HAVE_LAPACK,1,[Define if you have LAPACK library.]),[$1])
-        :
+   AC_F77_FUNC(lsame)
+   acx_lsame_ok=no
+   save_LIBS="$LIBS"; LIBS="$LAPACK_LIBS $BLAS_LIBS $LIBS $FLIBS"
+   AC_MSG_CHECKING([for $lsame in Blas and Lapack libraries])
+   AC_TRY_LINK_FUNC($dsygv, [acx_lsame_ok=yes], [LAPACK_LIBS=""])
+   AC_MSG_RESULT($acx_lsame_ok)
+   LIBS="$save_LIBS"
+   if test acx_lsame_ok = no; then
+        AC_DEFINE(HYPRE_USING_BLAS_WRAPPERS,1,[Using Hypre lsame and xerbla])
+   fi
 else
+   if test x"$acx_lapack_ok" = xdisable; then
+        :
+   else
         acx_lapack_ok=no
         AC_DEFINE(HYPRE_USING_HYPRE_LAPACK,1,[Using Hypre LAPACK Library])
         $2
+   fi
 fi
 ])dnl ACX_LAPACK

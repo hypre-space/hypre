@@ -144,8 +144,12 @@ if test x"$acx_blas_ok" = xyes; then
         ifelse([$1],,AC_DEFINE(HAVE_BLAS,1,[Define if you have a BLAS library.]),[$1])
         :
 else
+    if test x"$acx_blas_ok" = xdisabled; then
+        :
+    else
         acx_blas_ok=no
         AC_DEFINE(HYPRE_USING_HYPRE_BLAS,1,[Using Hypre Blas Library])
         $2
+    fi
 fi
 ])dnl ACX_BLAS
