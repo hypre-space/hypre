@@ -120,6 +120,28 @@
 }
 \def\endCopyrightPage{\end{titlepage}}
 
+%=====================================================================
+%=====================================================================
+%
+% Miscellaneous commands and environments:
+%
+%=====================================================================
+%=====================================================================
+
+%---------------------------------------------------------------------
+% Environment: display
+%   This environment is an indented "display" mode, with no
+%   paragraph indentation.  A `verbatim' environment may be
+%   used within it to create "example" displays, as in the
+%   Texinfo `@example' environment.
+%---------------------------------------------------------------------
+
+\def\display{%
+\begin{list}{}{\setlength{\listparindent}{0in}}
+\item
+}
+\def\enddisplay{\end{list}}
+
 %---------------------------------------------------------------------
 % Command: InsertGraphics
 %---------------------------------------------------------------------

@@ -67,8 +67,10 @@ ref_ps: HYPRE_code_ref.ps
 
 USR_FILES =\
  usr_building_code.tex\
+ usr_example.tex\
+ usr_struct.tex\
  usr_manual.tex
- 
+
 HYPRE_usr_manual/usr_manual.html: usr_manual.dvi
 	latex2html ${ONLINE_OPTS} -dir HYPRE_usr_manual usr_manual.tex
 	@cp -f hypre_wiw.gif HYPRE_usr_manual/.
@@ -97,10 +99,10 @@ DEV_FILES =\
  dev_install.tex\
  dev_language_interop.tex\
  dev_makefile.tex\
- dev_manual.tex\
  dev_reference.tex\
  dev_repository.tex\
- dev_requirements.tex
+ dev_requirements.tex\
+ dev_manual.tex
 
 HYPRE_dev_manual/dev_manual.html: dev_manual.dvi
 	latex2html ${ONLINE_OPTS} -dir HYPRE_dev_manual dev_manual.tex
