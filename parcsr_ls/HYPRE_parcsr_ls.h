@@ -49,7 +49,7 @@ int HYPRE_ParAMGSetTol P((HYPRE_Solver solver , double tol ));
 int HYPRE_ParAMGSetNumGridSweeps P((HYPRE_Solver solver , int *num_grid_sweeps ));
 int HYPRE_ParAMGSetGridRelaxType P((HYPRE_Solver solver , int *grid_relax_type ));
 int HYPRE_ParAMGSetGridRelaxPoints P((HYPRE_Solver solver , int **grid_relax_points ));
-int HYPRE_ParAMGSetRelaxWeight P((HYPRE_Solver solver , double relax_weight ));
+int HYPRE_ParAMGSetRelaxWeight P((HYPRE_Solver solver , double *relax_weight ));
 int HYPRE_ParAMGSetIOutDat P((HYPRE_Solver solver , int ioutdat ));
 int HYPRE_ParAMGSetLogFileName P((HYPRE_Solver solver , char *log_file_name ));
 int HYPRE_ParAMGSetLogging P((HYPRE_Solver solver , int ioutdat , char *log_file_name ));
