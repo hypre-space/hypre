@@ -21,11 +21,9 @@
  *Spamg
  *--------------------------------------------------------------------------*/
 
-void main(argc, argv)
-
-int   argc;
-char *argv[];
-
+int
+main( int   argc,
+      char *argv[] )
 {
    void             *amg_data;
 
@@ -93,8 +91,6 @@ char *argv[];
    hypre_AMGSetGridRelaxPoints(grid_relax_points, amg_data);
 --------------*/
 
-
-
    filename = argv[1];
    A = hypre_ReadCSRMatrix(filename);
 
@@ -114,7 +110,7 @@ char *argv[];
 
    hypre_FinalizeMemoryDebug(); 
                 
-  dmalloc_shutdown();
+   return 0;
 }
 
 

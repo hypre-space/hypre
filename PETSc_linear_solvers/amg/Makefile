@@ -15,7 +15,6 @@ HEADERS =\
  headers.h
 
 FILES =\
- SPamg.c\
  amg.c\
  amg_setup.c\
  coarsen.c\
@@ -38,7 +37,8 @@ CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I/usr/local/mpi/mpich/include\
- -g -Wall -DHYPRE_MEMORY_DMALLOC\
+ -I../..\
+ -g -Wall -DHYPRE_MEMORY_DMALLOC
 #-g -Wall  
 
 FFLAGS = -g
@@ -59,19 +59,13 @@ LFLAGS =\
  -ldmalloc\
  -lm
 
-
-
-SPAMGFILES =  SPamg.o amg.o amg_setup.o coarsen.o  indepset.o \
-               random.o transpose.o interp.o rap.o amgstats.o \
-               amg_solve.o cycle.o relax.o
-
 ##################################################################
 # Main rules
 ##################################################################
 
-SPamg: ${SPAMGFILES} libHYPRE_ls.a
+SPamg: SPamg.o libHYPRE_ls.a
 	@echo  "Linking" $@ "... "
-	${CC} -o SPamg ${SPAMGFILES}  ${LFLAGS}
+	${CC} -o SPamg SPamg.o ${LFLAGS}
 
 libHYPRE_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
