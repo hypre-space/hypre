@@ -355,7 +355,7 @@ void HYPRE_SLE::sumIntoSystemMatrix(int row, int numValues,
 
 //------------------------------------------------------------------------------
 void HYPRE_SLE::enforceEssentialBC(int* globalEqn, double* alpha,
-                                  double* gamma, int len) {
+                                  double* gamma, int len) 
 //
 //This function must enforce an essential boundary condition on
 //the equations in 'globalEqn'. This means, that the following modification
@@ -368,11 +368,95 @@ void HYPRE_SLE::enforceEssentialBC(int* globalEqn, double* alpha,
 //all of row 'globalEqn' and column 'globalEqn' in A should be zeroed,
 //except for 1.0 on the diagonal.
 //
+{
+    int       i, j;
+    double    values[100];
+    double   *values_temp;
+    int       indices[100];
+    int      *indices_temp;
+    int       localEqn;
+    int       row_size;
+
+    for (i=0; i<len; i++)
+    {
+        globalEqn[i]--;               // change indices to 0-based
+        gamma[i] /= alpha[i];          // modify gamma for rhs
+    }
+
+    // To preserve symmetry, should zero out column globalEqn[i].
+    // This requires getting row globalEqn[i], looping over
+    // its columns, and making modifications in the cooresponding
+    // rows. This requires use of the GetRow function. Also note
+    // that some rows requiring modification will be on different
+    // processors than globalEqn[i].
+    //
+    // For the moment, we only modify the row globalEqn[i].
+
+    for (i=0; i<len; i++)
+    {
+       if (globalEqn[i]+1 >= first_row && globalEqn[i]+1 <= last_row)
+       {
+          localEqn = globalEqn[i] + 1 - first_row;
+          row_size = sysMatIndices[localEqn].size();
+
+          // If row_size is larger than 100 (the allocated size of
+          // values and indices), allocate temporary space.
+          if (row_size > 100)
+          {
+             values_temp = new double[row_size];
+             indices_temp = new int[row_size];
+          }
+          else
+          {
+             values_temp = values;
+             indices_temp = indices;
+          }
+
+          // Set up identity row.
+          for (j = 0; j < row_size; j++)
+          {
+             indices_temp[j] = (sysMatIndices[localEqn])[j] - 1;
+
+             if (indices_temp[j] == globalEqn[i])
+             {
+                values_temp[j]=1.0;
+             }
+             else
+             {
+                values_temp[j]=0.0;
+             }
+          }
+
+          // Set row for boundary point to identity
+          HYPRE_IJMatrixInsertRow( A,  row_size, globalEqn[i], 
+                                   indices_temp, values_temp);
+
+
+          // Free temporary space
+          if (row_size > 100)
+          {
+             delete []indices_temp;
+             delete []values_temp;
+          }
+
+          // Set rhs for boundary point
+          HYPRE_IJVectorSetLocalComponents(b, 1, &globalEqn[i],
+                                           NULL, &gamma[i]);
+
+       }
+    }
+
+    for (i=0; i<len; i++)
+    {
+        globalEqn[i]++;               // change indices back to 1-based
+        gamma[i] *= alpha[i];          // restore gamma
+    }
+
 }
 
 //------------------------------------------------------------------------------
 void HYPRE_SLE::enforceOtherBC(int* globalEqn, double* alpha, double* beta,
-                              double* gamma, int len) {
+                              double* gamma, int len)
 //
 //This function must enforce a natural or mixed boundary condition
 //on equation 'globalEqn'. This means that the following modification should
@@ -381,6 +465,37 @@ void HYPRE_SLE::enforceOtherBC(int* globalEqn, double* alpha, double* beta,
 //A[globalEqn,globalEqn] += alpha/beta;
 //b[globalEqn] += gamma/beta;
 //
+//
+//Currently loops over boundary points and uses HYPRE_AddIJMatrixRow to
+//modify the diagonal. Uses a single call to  HYPRE_AddToIJVectorLocalComponents
+//to modify right hand side. 
+// 
+{
+    int    i;
+    double value;
+
+    for (i=0; i<len; i++)
+    {
+	globalEqn[i]--;               // change indices to 0-based
+        gamma[i] /= beta[i];          // modify gamma for rhs
+    }
+
+    for (i=0; i<len; i++)
+    {
+       if (globalEqn[i]+1 >= first_row && globalEqn[i]+1 <= last_row)
+       {
+          value = alpha[i]/beta[i];
+          HYPRE_IJMatrixAddToRow( A, 1, globalEqn[i], &globalEqn[i], &value);
+          HYPRE_IJVectorAddToLocalComponents(b, 1, &globalEqn[i], NULL, &gamma[i]);
+       }
+    }
+
+    for (i=0; i<len; i++)
+    {
+	globalEqn[i]++;               // change indices back to 1-based
+        gamma[i] *= beta[i];          // restore gamma
+    }
+
 }
 
 //------------------------------------------------------------------------------
@@ -438,7 +553,20 @@ void HYPRE_SLE::launchSolver(int* solveStatus)
 //  0  0  0 -1  2 -1      0
 //  0  0  0  0 -1  1      0
 //
-// After the essential boundary conditions are applied, we have:
+//  We then enforce a essential BC in row 1 (alpha=2, beta=0, gamma=2)
+//  and a mixed BC in row 6 (alpha=5, beta =5, gamma=10).
+//  The resulting system is:
+//
+//  1  0  0  0  0  0      1
+// -1  2 -1  0  0  0      0
+//  0 -1  2 -1  0  0     -1
+//  0  0 -1  2 -1  0      0
+//  0  0  0 -1  2 -1      0
+//  0  0  0  0 -1  2      2
+//
+//  The solution is [ 1.0, 0.5, 0.0, 0.5, 1.0, 1.5]
+//  NOTE: for CG to perform converge on this "non-symetric" matrix, it
+//  is necessary for the initial guess to satisfy the essential BC.
 
 void fei_hypre_test(int argc, char *argv[])
 {
@@ -476,7 +604,16 @@ void fei_hypre_test(int argc, char *argv[])
 
     const int indg1[] = {1, 2, 3};
     const int indg2[] = {4, 5, 6};
-    const double valg[] = {0.1, 0.2, 0.3};
+    const double valg[] = {1.0, 0.2, 0.3};
+
+    int dir_index[] = {1};
+    double dir_alpha[] = {2.0};
+    double dir_gamma[] = {2.0};
+
+    int mix_index[] = {6};
+    double mix_alpha[] = {5.0};
+    double mix_beta[] = {5.0};
+    double mix_gamma[] = {10.0};
 
     MPI_Init(&argc, &argv);
 
@@ -533,6 +670,9 @@ void fei_hypre_test(int argc, char *argv[])
         default:
 	    assert(0);
     }
+
+    H.enforceOtherBC(mix_index, mix_alpha, mix_beta, mix_gamma, 1);
+    H.enforceEssentialBC(dir_index, dir_alpha, dir_gamma, 1);
 
     H.matrixLoadComplete();
 
