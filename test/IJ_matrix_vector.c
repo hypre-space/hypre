@@ -38,7 +38,6 @@ main( int   argc,
    int                 build_matrix_arg_index;
    int                 build_rhs_type;
    int                 build_rhs_arg_index;
-   int                 ierr,i,j; 
    double              norm;
    void		      *object;
 
@@ -48,15 +47,12 @@ main( int   argc,
    HYPRE_IJVector      ij_v;
 
    HYPRE_ParCSRMatrix  parcsr_A;
-   HYPRE_ParCSRMatrix  A;
    HYPRE_ParVector     b;
    HYPRE_ParVector     x;
 
    int                 num_procs, myid;
-   int                 global_n;
    int                 local_row;
    int                *indices;
-   int                *row;
    int                *row_sizes;
    int                *diag_sizes;
    int                *offdiag_sizes;
@@ -65,12 +61,13 @@ main( int   argc,
    int                *ncols;
    int                *col_inds;
 
-   int		       time_index;
    MPI_Comm            comm = MPI_COMM_WORLD;
-   int M, N;
-   int first_local_row, last_local_row, local_num_rows;
-   int first_local_col, last_local_col, local_num_cols;
-   double *values;
+   int		       time_index;
+   int                 ierr = 0;
+   int                 M, N, i, j;
+   int                 first_local_row, last_local_row, local_num_rows;
+   int                 first_local_col, last_local_col, local_num_cols;
+   double             *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -292,7 +289,7 @@ main( int   argc,
       return(-1);
    }
 
-   time_index = hypre_InitializeTiming("IJ Matrix Setup");
+   time_index = hypre_InitializeTiming("Spatial Operator");
    hypre_BeginTiming(time_index);
     
    if (build_matrix_type < 2)
@@ -423,7 +420,7 @@ main( int   argc,
    }
 
    hypre_EndTiming(time_index);
-   hypre_PrintTiming("IJ Matrix Setup", MPI_COMM_WORLD);
+   hypre_PrintTiming("Initial IJ Matrix Setup", MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
   
@@ -433,6 +430,9 @@ main( int   argc,
        return(-1);
    }
 
+   time_index = hypre_InitializeTiming("Backward Euler Time Step");
+   hypre_BeginTiming(time_index);
+    
    /* This is to emphasize that one can IJMatrixAddToValues after an
       IJMatrixRead or an IJMatrixAssemble.  After an IJMatrixRead,
       assembly is unnecessary if the sparsity pattern of the matrix is
@@ -453,14 +453,11 @@ main( int   argc,
      values[j] = -27.8;
    }
      
-   for (i = first_local_row; i <= last_local_row; i++)
-   {
-      ierr += HYPRE_IJMatrixAddToValues( ij_A,
-                                         local_num_rows,
-                                         ncols, rows,
-                                         (const int *) col_inds,
-                                         (const double *) values );
-   }
+   ierr += HYPRE_IJMatrixAddToValues( ij_A,
+                                      local_num_rows,
+                                      ncols, rows,
+                                      (const int *) col_inds,
+                                      (const double *) values );
 
    hypre_TFree(values);
    hypre_TFree(col_inds);
@@ -472,6 +469,11 @@ main( int   argc,
 
    ierr += HYPRE_IJMatrixAssemble( ij_A );
 
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("IJ Matrix Diagonal Augmentation", MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+  
    /*-----------------------------------------------------------
     * Fetch the resulting underlying matrix out
     *-----------------------------------------------------------*/
@@ -526,16 +528,20 @@ main( int   argc,
 
    indices = hypre_CTAlloc(int, local_num_cols);
 
-   for (i = 0; i <= last_local_col; i++)
+   for (i = first_local_col; i <= last_local_col; i++)
    {
-     values[i] = (double)i;
-     indices[i] = last_local_col - i;
+     j = i - first_local_col;
+     values[j] = (double)i;
+     indices[j] = last_local_col - i;
    }
 
    HYPRE_IJVectorSetValues(ij_v, local_num_cols, indices, values);
 
-   for (i = 0; i < local_num_cols; i++)
-     values[i] = (double)i*i;
+   for (i = first_local_col; i <= last_local_col; i++)
+   {
+     j = i - first_local_col;
+     values[j] = (double)i*i;
+   }
 
    HYPRE_IJVectorAddToValues(ij_v, local_num_cols, indices, values);
 
@@ -544,8 +550,12 @@ main( int   argc,
    hypre_TFree(indices);
 
    ierr = 0;
-   for (i = 0; i < local_num_cols; i++)
-     if (values[i] != (double)(i*i + i)) ++ierr;
+   for (i = first_local_col; i <= last_local_col; i++)
+   {
+     j = i - first_local_col;
+     if (values[j] != (double)(i*i + i)) ++ierr;
+   }
+
    if (ierr)
    {
      printf("One of HYPRE_IJVectorSet(Get)Values\n");
@@ -560,7 +570,7 @@ main( int   argc,
     * Set up the RHS and initial guess
     *-----------------------------------------------------------*/
 
-   time_index = hypre_InitializeTiming("IJ Vector Setup");
+   time_index = hypre_InitializeTiming("RHS and Initial Guess");
    hypre_BeginTiming(time_index);
 
    if ( build_rhs_type == 0 )
@@ -937,7 +947,7 @@ BuildParLaplacian( int                  argc,
       printf("  Laplacian:\n");
       printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
       printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
-      printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
+      printf("    (cx, cy, cz) = (%f, %f, %f)\n\n", cx, cy, cz);
    }
 
    /*-----------------------------------------------------------
@@ -1102,7 +1112,7 @@ BuildParDifConv( int                  argc,
       printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
       printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
       printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
-      printf("    (ax, ay, az) = (%f, %f, %f)\n", ax, ay, az);
+      printf("    (ax, ay, az) = (%f, %f, %f)\n\n", ax, ay, az);
    }
 
    /*-----------------------------------------------------------
@@ -1480,7 +1490,7 @@ BuildParLaplacian27pt( int                  argc,
    {
       printf("  Laplacian_27pt:\n");
       printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
-      printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
+      printf("    (Px, Py, Pz) = (%d, %d, %d)\n\n", P,  Q,  R);
    }
 
    /*-----------------------------------------------------------

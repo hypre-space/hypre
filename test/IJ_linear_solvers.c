@@ -772,7 +772,7 @@ main( int   argc,
       return(-1);
    }
 
-   time_index = hypre_InitializeTiming("IJ Matrix Setup");
+   time_index = hypre_InitializeTiming("Spatial operator");
    hypre_BeginTiming(time_index);
 
    if (build_matrix_type < 2)
@@ -938,14 +938,11 @@ main( int   argc,
      values[j] = val;
    }
       
-   for (i = first_local_row; i <= last_local_row; i++)
-   {
-      ierr += HYPRE_IJMatrixAddToValues( ij_A,
-                                         local_num_rows,
-                                         ncols, rows,
-                                         (const int *) col_inds,
-                                         (const double *) values );
-   }
+   ierr += HYPRE_IJMatrixAddToValues( ij_A,
+                                      local_num_rows,
+                                      ncols, rows,
+                                      (const int *) col_inds,
+                                      (const double *) values );
 
    hypre_TFree(values);
    hypre_TFree(col_inds);
@@ -971,7 +968,7 @@ main( int   argc,
     * Set up the RHS and initial guess
     *-----------------------------------------------------------*/
 
-   time_index = hypre_InitializeTiming("IJ Vector Setup");
+   time_index = hypre_InitializeTiming("RHS and Initial Guess");
    hypre_BeginTiming(time_index);
 
    if ( build_rhs_type == 0 )
