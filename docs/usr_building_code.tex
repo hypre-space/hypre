@@ -41,37 +41,22 @@ To specify another BLAS library available on a
 platform, use \verb+--with-BLAS=+{\itshape pathname} or
 \verb+--with-BLAS=+{\itshape link list}.  On platforms with
 default use of the BLAS packaged within {\slshape hypre},
-\verb+--with-system-blas+ might also allow use
+\verb+--with-system-blas+ still allows use
 of another BLAS appropriately user-installed on the system.
-
-\item[BLAS] If you want the optimum BLAS for the platform,
-no configure option for it needs to be specified.
-To specify another BLAS library available on a
-platform, use \verb+--with-BLAS=+{\itshape pathname} or
-\verb+--with-BLAS=+{\itshape link list}.  On platforms with
-default use of the BLAS packaged with {\slshape hypre},
-\verb+--with-system-blas+ overrides the default.
 
 \end{description}
 
-Configure automatically generates a file 
-\verb+HYPRE_config.h+ that includes all the
-header files found to be necessary by configure.  This file may be used
-to see how a compiled version of the library was configured and may also
-be included by the user in his/her own code.
+Configure automatically generates a file \verb+HYPRE_config.h+ that
+includes all the header files found to be necessary by configure.
+This file may be used to see how a compiled version of the library
+was configured and may also be included by the user in his/her own code.
 
 \section{Linking into another program}
 
 A program linking with {\slshape hypre} must be compiled with
-\verb+-I$HYPRE_DIR/hypre/include+ and linked with
-\verb+-L$HYPRE_DIR/hypre/lib -l+{\itshape hypre library name}... 
+\verb+-I$HYPRE_DIR/include+ and linked with
+\verb+-L$HYPRE_DIR/lib -l+{\itshape hypre library name}... 
 \verb+-l+{\itshape hypre library name}.
-This assumes that {\slshape hypre} has been
-successfully configured and compiled in directory \verb+$HYPRE_DIR+
-on the platfrom, so that \verb+$HYPRE_DIR/hypre/lib+
-and \verb+$HYPRE_DIR/hypre/include+ are correctly filled.
-
 When using a formal {\slshape hypre} installation, \verb+$HYPRE_DIR+ is
 \verb+/usr/apps/hypre+.
-When using a "hacked" installation, the hacker sets \verb+$HYPRE_DIR+,
-and must link with it in the code calling {\slshape hypre}. 
+When using a "hacked" installation, the hacker sets \verb+$HYPRE_DIR+.
