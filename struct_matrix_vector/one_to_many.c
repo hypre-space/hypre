@@ -4,8 +4,9 @@
 /* debugging header */
 #include <cegdb.h>
 
-/* malloc debug stuff */
+#ifdef ZZZ_MALLOC_DEBUG
 char malloc_logpath_memory[256];
+#endif
  
 /*--------------------------------------------------------------------------
  * Driver to convert an input matrix file for the parallel smg code into
@@ -71,9 +72,10 @@ i_file, idummy;
 
    cegdb(&argc, &argv, myid);
 
-   /* malloc debug stuff */
+#ifdef ZZZ_MALLOC_DEBUG
    malloc_logpath = malloc_logpath_memory;
    sprintf(malloc_logpath, "malloc.log.%04d", myid);
+#endif
 
    /* set number of subdivisions to use in decomposing the matrix into
       several different files */
@@ -346,9 +348,10 @@ i_file, idummy;
    zzz_TFree(stencils);
    zzz_TFree(stencil_shapes);
 
-   /* malloc debug stuff */
+#ifdef ZZZ_MALLOC_DEBUG
    malloc_verify(0);
    malloc_shutdown();
+#endif
 
    /* Finalize MPI */
    MPI_Finalize();

@@ -4,8 +4,9 @@
 /* debugging header */
 #include <cegdb.h>
 
-/* malloc debug stuff */
+#ifdef ZZZ_MALLOC_DEBUG
 char malloc_logpath_memory[256];
+#endif
  
 /*--------------------------------------------------------------------------
  * Test driver for structured matrix interface (structured storage)
@@ -43,9 +44,10 @@ main( int   argc,
 
    cegdb(&argc, &argv, myid);
 
-   /* malloc debug stuff */
+#ifdef ZZZ_MALLOC_DEBUG
    malloc_logpath = malloc_logpath_memory;
    sprintf(malloc_logpath, "malloc.log.%04d", myid);
+#endif
 
    /*-----------------------------------------------------------
     * Read in the matrix
@@ -110,9 +112,10 @@ main( int   argc,
    zzz_FreeStructVector(vector);
    zzz_FreeStructVector(tmp_vector);
 
-   /* malloc debug stuff */
+#ifdef ZZZ_MALLOC_DEBUG
    malloc_verify(0);
    malloc_shutdown();
+#endif
 
    /* Finalize MPI */
    MPI_Finalize();

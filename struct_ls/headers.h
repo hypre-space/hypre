@@ -18,6 +18,7 @@
 
 #include "protos.h"
 
-/* malloc debug stuff */
+#ifdef ZZZ_MALLOC_DEBUG
 #include <gmalloc.h>
+#endif
 
