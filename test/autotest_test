@@ -21,6 +21,8 @@ initialize_variables ()
   Skip=0
   Build=1
   Run=2
+  PurifytoFile="--with-purify=-log-file=struct_linear_solvers.purify \
+-append-logfile=yes -best-effort"
 #
 # Assume that we are started from autotest and have done 
 # a "cd ${HYPRE_AUTOTEST_DIR}", however as long as we are
@@ -79,7 +81,7 @@ parse_arguments () {
 # probably implement the obsolute getopt) then
 # getopts(1) will be used.
 #
-  while getopts :a:b:cdfhmno:p:r:st:xy arg
+  while getopts :a:b:cdfhmno:p:q:r:st:xy arg
   do
     argcur=$arg
     case $arg in
@@ -94,6 +96,8 @@ parse_arguments () {
       n) confbuildtest $Build   "--without-MPI" "no_mip"    1 1 0 1 1 0;;
       o) confbuildtest $OPTARG  "--with-openmp" "openmp"    0 0 0 0 1 0;;
       p) confbuildtest $OPTARG  "--with-petac"  "petac"     0 0 0 1 0 0;;
+      q) confbuildtest $OPTARG  "$PurifytoFile" "purify"    1 1 1 1 1 1;;
+     +q) confbuildtest $OPTARG  "--with-purify" "purify"    1 1 1 1 1 1;;
       r) HYPRE_RUN_MACHINE=$OPTARG;;
       s) confbuildtest $Build   "--with-strict-checking" \
                                          "strict_checking"  1 1 0 1 1 0;;
@@ -138,6 +142,10 @@ usage () {
   printf "         all, and beta (no execute option).\n"
   printf "-o opt   openMP; configure --with-openmp, make beta.\n"
   printf "-p opt   PETSc; perform configure --with-petsc, make all.\n"
+  printf "-q opt   Purify; perform configure --with-purify, then all of the\n"
+  printf "         step performed with the -a option. Output is appended to\n"
+  printf "         a file called struct_linear_solvers.purify.\n"
+  printf "+q opt   Purify; no file output option (interactive).\n"
   printf "-r host  Remote; remote exection is performed on "host".\n"
   printf "-s       Strict; configure --with-strict-checking,\n"
   printf "         followed by make struct, IJ, all, beta(no execute option).\n"
@@ -195,7 +203,7 @@ then
   if [ ${BuildOpt} -eq $Build -o ${BuildOpt} -eq $Run ]
   then
     cd $StdBuildDir
-    ./configure $ConfigOption 1> ${Hdr}.${MessageStr}.configure.log \
+    ./configure "$ConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
 	2> ${Hdr}.${MessageStr}.configure.err
     echo "$HYPRE_CONFIGURE_EMAIL" > ${Hdr}.${MessageStr}.configure.err.email
 
