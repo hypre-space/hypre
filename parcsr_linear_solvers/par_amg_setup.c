@@ -80,23 +80,30 @@ hypre_ParAMGSetup( void               *amg_vdata,
 
    if (A_array != NULL || P_array != NULL || CF_marker_array != NULL)
    {
-      for (j = 1; j < max_levels; j++)
-         hypre_ParCSRMatrixDestroy(A_array[j]);
+      num_levels = hypre_ParAMGDataNumLevels(amg_data);
 
-      for (j = 0; j < max_levels-1; j++)
+      for (j = 1; j < num_levels; j++)
       {
-         hypre_ParCSRMatrixDestroy(P_array[j]);
-         hypre_TFree(CF_marker_array[j]);
+        if (A_array[j] != NULL)
+           hypre_ParCSRMatrixDestroy(A_array[j]);
       }
-     
-      hypre_TFree(A_array);
-      hypre_TFree(P_array);
-      hypre_TFree(CF_marker_array);
+
+      for (j = 0; j < num_levels-1; j++)
+      {
+         if (P_array[j] != NULL)
+            hypre_ParCSRMatrixDestroy(P_array[j]);
+
+         if (CF_marker_array[j] != NULL)
+            hypre_TFree(CF_marker_array[j]);
+      }
    }
 
-   A_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_levels);
-   P_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_levels-1);
-   CF_marker_array = hypre_CTAlloc(int*, max_levels-1);
+   if (A_array == NULL)
+      A_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_levels);
+   if (P_array == NULL)
+      P_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_levels-1);
+   if (CF_marker_array == NULL)
+      CF_marker_array = hypre_CTAlloc(int*, max_levels-1);
 
    hypre_ParCSRMatrixSetNumNonzeros(A);
    A_array[0] = A;
@@ -266,16 +273,17 @@ hypre_ParAMGSetup( void               *amg_vdata,
    {
       for (j = 1; j < num_levels; j++)
       {
-         hypre_ParVectorDestroy(F_array[j]);
-         hypre_ParVectorDestroy(U_array[j]);
+         if (F_array[j] != NULL)
+            hypre_ParVectorDestroy(F_array[j]);
+         if (U_array[j] != NULL)
+            hypre_ParVectorDestroy(U_array[j]);
       }
-
-      hypre_TFree(F_array);
-      hypre_TFree(U_array);
    }
-   
-   F_array = hypre_CTAlloc(hypre_ParVector*, num_levels);
-   U_array = hypre_CTAlloc(hypre_ParVector*, num_levels);
+
+   if (F_array == NULL)
+      F_array = hypre_CTAlloc(hypre_ParVector*, num_levels);
+   if (U_array == NULL)
+      U_array = hypre_CTAlloc(hypre_ParVector*, num_levels);
 
    F_array[0] = f;
    U_array[0] = u;
