@@ -7,8 +7,19 @@
 #include "../../IJ_mv/HYPRE_IJ_mv.h"
 #include "../../parcsr_mv/HYPRE_parcsr_mv.h"
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
+#include "LinearSystemCore.h"
 #include "HYPRE_LinSysCore.h"
 #include "cfei_hypre.h"
+
+/******************************************************************************/
+/* Create function for a HYPRE_LinSysCore object.                             */
+/*----------------------------------------------------------------------------*/
+
+LinearSystemCore *HYPRE_base_create( MPI_Comm comm ) 
+{
+   HYPRE_LinSysCore* linSys = new HYPRE_LinSysCore(comm);
+   return (linSys);
+}
 
 /******************************************************************************/
 /* Create function for a HYPRE_LinSysCore object.                             */
