@@ -54,7 +54,7 @@ main( int   argc,
    HYPRE_IJMatrix      ij_matrix; HYPRE_IJVector      ij_b;
    HYPRE_IJVector      ij_x;
    /* concrete underlying type for ij_matrix defaults to parcsr. AJC. */
-   int                 ij_matrix_storage_type=HYPRE_PARCSR;
+   /* int                 ij_matrix_storage_type=HYPRE_PARCSR; */
    int                 ij_vector_storage_type=HYPRE_PARCSR;
 
    HYPRE_ParCSRMatrix  parcsr_A;
@@ -190,7 +190,7 @@ main( int   argc,
       else if ( strcmp(argv[arg_index], "-concrete_parcsr") == 0 )
       {
          arg_index++;
-         ij_matrix_storage_type      = HYPRE_PARCSR;
+         /* ij_matrix_storage_type      = HYPRE_PARCSR; */
          build_matrix_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-solver") == 0 )
@@ -556,7 +556,8 @@ main( int   argc,
    }
    else
    {
-      printf("You have asked for an unsupported problem, problem = \n.", build_matrix_type);
+      printf("You have asked for an unsupported problem, problem = %d.\n", 
+		build_matrix_type);
       return(-1);
    }
 
