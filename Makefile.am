@@ -44,6 +44,12 @@ else !LAPACKNEEDED
 LAPACKDIR = 
 endif !LAPACKNEEDED
 
+if LIBDIRNEEDED
+LIBDIR = lapack
+else !LIBDIRNEEDED
+LIBDIR = 
+endif !LIBDIRNEEDED
+
 ## We need `.' in SUBDIRS because we want `check' to build `.' before
 ## tests.
 SUBDIRS = . config\
@@ -55,7 +61,7 @@ SUBDIRS = . config\
  sstruct_mv sstruct_ls\
  seq_mv parcsr_mv distributed_matrix matrix_matrix\
  IJ_mv distributed_ls parcsr_ls parcsr_es\
- FEI_mv $(SEQLS) $(TOOLS) $(BABELDIR) lib
+ FEI_mv $(SEQLS) $(TOOLS) $(BABELDIR) $(LIBDIR)
 
 DIST_SUBDIRS = . config\
  blas lapack utilities\

@@ -16,6 +16,7 @@ casc_using_mpi=yes
 casc_using_debug=no
 casc_using_openmp=no   
 casc_using_babel=no   
+casc_using_libdir=yes
 HYPRE_BABELLIBDIR=""
 BABEL_RUNTIME_DIR=""
 BABELDIR=""
@@ -96,6 +97,15 @@ AC_HELP_STRING([--with-babel],[use babel]),
     HYPRE_BABELLIBDIR="HYPRE_TOP_SRC_DIR/babel"
     BABEL_RUNTIME_DIR="HYPRE_TOP_SRC_DIR/babel-runtime"
   fi], [casc_using_babel=no]
+)
+
+AC_ARG_WITH(libdir,
+AC_HELP_STRING([--with-libdir],[build libHYPRE and libHYPRE_LSI libraries]),
+[ if test "$withval" = "no"; then
+    casc_using_libdir=no
+  elif test "$withval" = "yes"; then
+    casc_using_libdir=yes
+  fi], [casc_using_libdir=yes]
 )
 
 #AC_ARG_WITH(mli,
@@ -386,7 +396,6 @@ AC_CONFIG_FILES([
   docs/Makefile
   krylov/Makefile
   lapack/Makefile
-  lib/Makefile
   matrix_matrix/Makefile
   parcsr_es/Makefile
   parcsr_es/LOBPCG/Makefile
@@ -421,7 +430,12 @@ if test "$casc_using_babel" = "yes"; then
   fi
 fi
 AC_SUBST(BABELDIR)
-
+if test "$casc_using_libdir" = "yes"; then
+  if test -d lib; then
+    AC_CONFIG_FILES([lib/Makefile])
+  fi
+fi
+AM_CONDITIONAL([LIBDIRNEEDED],[test "$casc_using_libdir" = yes])
 #if test "$casc_using_mli" = "yes"; then
 #  if test -d mli; then
 #    AC_CONFIG_FILES([mli/Makefile
