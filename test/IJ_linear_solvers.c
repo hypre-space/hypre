@@ -47,6 +47,7 @@ main( int   argc,
    int                 ierr,i,j; 
    int                 max_levels = 25;
    int                 num_iterations; 
+   double              max_row_sum = 1.0;
    double              norm;
    double              final_res_norm;
 
@@ -271,6 +272,11 @@ main( int   argc,
          arg_index++;
          relax_default = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-mxl") == 0 )
+      {
+         arg_index++;
+         max_levels = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-dbg") == 0 )
       {
          arg_index++;
@@ -396,6 +402,11 @@ main( int   argc,
          arg_index++;
          tol  = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-mxrs") == 0 )
+      {
+         arg_index++;
+         max_row_sum  = atof(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-drop_tol") == 0 )
       {
          arg_index++;
@@ -472,16 +483,19 @@ main( int   argc,
       printf("   -nohybrid             : no switch in coarsening\n");
       printf("   -gm                   : use global measures\n");
       printf("\n");
-      printf("  -rlx <val>             : relaxation type\n");
+      printf("  -rlx  <val>            : relaxation type\n");
       printf("       0=Weighted Jacobi  \n");
       printf("       1=Gauss-Seidel (very slow!)  \n");
       printf("       3=Hybrid Jacobi/Gauss-Seidel  \n");
+      printf("  -mxl  <val>            : maximum number of AMG levels\n");
       printf("\n");  
-      printf("  -th <val>              : set AMG threshold Theta = val \n");
-      printf("  -tr <val>              : set AMG interpolation truncation factor = val \n");
-      printf("  -tol <val>             : set AMG convergence tolerance to val\n");
-      printf("  -w  <val>              : set Jacobi relax weight = val\n");
-      printf("  -k  <val>              : dimension Krylov space for GMRES\n");
+      printf("  -th   <val>            : set AMG threshold Theta = val \n");
+      printf("  -tr   <val>            : set AMG interpolation truncation factor = val \n");
+      printf("  -tol  <val>            : set AMG convergence tolerance to val\n");
+      printf("  -mxrs <val>            : set AMG maximum row sum threshold for dependency weakening \n");
+     
+      printf("  -w   <val>             : set Jacobi relax weight = val\n");
+      printf("  -k   <val>             : dimension Krylov space for GMRES\n");
       printf("\n");  
       printf("  -drop_tol  <val>       : set threshold for dropping in PILUT\n");
       printf("  -nonzeros_to_keep <val>: number of nonzeros in each row to keep\n");
@@ -804,7 +818,7 @@ main( int   argc,
       HYPRE_BoomerAMGSetRelaxWeight(amg_solver, relax_weight);
       HYPRE_BoomerAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
       HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
-      HYPRE_BoomerAMGSetMaxRowSum(amg_solver, 1.0);
+      HYPRE_BoomerAMGSetMaxRowSum(amg_solver, max_row_sum);
       HYPRE_BoomerAMGSetDebugFlag(amg_solver, debug_flag);
 
       HYPRE_BoomerAMGSetup(amg_solver, A, b, x);
@@ -858,6 +872,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
          HYPRE_BoomerAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
@@ -866,6 +881,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
+         HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_ParCSRPCGSetPrecond(pcg_solver,
                                    HYPRE_BoomerAMGSolve,
                                    HYPRE_BoomerAMGSetup,
@@ -977,6 +993,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
          HYPRE_BoomerAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
@@ -985,6 +1002,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
+         HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
                                      HYPRE_BoomerAMGSolve,
                                      HYPRE_BoomerAMGSetup,
@@ -1102,6 +1120,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
          HYPRE_BoomerAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
@@ -1110,10 +1129,11 @@ main( int   argc,
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
+         HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_ParCSRBiCGSTABSetPrecond(pcg_solver,
-                                     HYPRE_BoomerAMGSolve,
-                                     HYPRE_BoomerAMGSetup,
-                                     pcg_precond);
+                                        HYPRE_BoomerAMGSolve,
+                                        HYPRE_BoomerAMGSetup,
+                                        pcg_precond);
       }
       else if (solver_id == 10)
       {
@@ -1122,9 +1142,9 @@ main( int   argc,
          pcg_precond = NULL;
 
          HYPRE_ParCSRBiCGSTABSetPrecond(pcg_solver,
-                                     HYPRE_ParCSRDiagScale,
-                                     HYPRE_ParCSRDiagScaleSetup,
-                                     pcg_precond);
+                                        HYPRE_ParCSRDiagScale,
+                                        HYPRE_ParCSRDiagScaleSetup,
+                                        pcg_precond);
       }
       else if (solver_id == 11)
       {
@@ -1137,9 +1157,9 @@ main( int   argc,
          }
 
          HYPRE_ParCSRBiCGSTABSetPrecond(pcg_solver,
-                                     HYPRE_ParCSRPilutSolve,
-                                     HYPRE_ParCSRPilutSetup,
-                                     pcg_precond);
+                                        HYPRE_ParCSRPilutSolve,
+                                        HYPRE_ParCSRPilutSetup,
+                                        pcg_precond);
 
          if (drop_tol >= 0 )
             HYPRE_ParCSRPilutSetDropTolerance( pcg_precond,
@@ -1219,6 +1239,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
          HYPRE_BoomerAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
@@ -1227,6 +1248,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
+         HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_ParCSRCGNRSetPrecond(pcg_solver,
                                    HYPRE_BoomerAMGSolve,
                                    HYPRE_BoomerAMGSolveT,
