@@ -73,7 +73,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int       num_functions = hypre_ParAMGDataNumFunctions(amg_data);
    int	    *coarse_dof_func;
    int	    *coarse_pnts_global;
-   /* double   *scale; */
    hypre_CSRMatrix *domain_structure;
 
    HYPRE_Solver *smoother;
@@ -429,21 +428,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       HYPRE_ParCSRPilutSetDropTolerance(smoother[0],1.e-6);
       HYPRE_ParCSRPilutSetFactorRowSize(smoother[0],20);
    }
-   else if (smooth_option[0] > 4)
+   else if (smooth_option[0] == 6)
    {
-      hypre_ParAMGDataDomainStructure(amg_data) = 	
-			hypre_CTAlloc(hypre_CSRMatrix *, max_levels);
-      /* hypre_ParAMGDataScaleArray(amg_data) = hypre_CTAlloc(double*, max_levels); */
-      if (smooth_option[0] == 6)
-         hypre_AMGNodalSchwarzSmoother (hypre_ParCSRMatrixDiag(A_array[0]),
-                                        num_functions,
-                                        1,
-                                        &domain_structure);
-      if (smooth_option[0] == 5)
-         hypre_AMGCreateDomainDof (hypre_ParCSRMatrixDiag(A_array[0]),
-                                        &domain_structure);
-      hypre_ParAMGDataDomainStructure(amg_data)[0] = domain_structure;
-      /* hypre_ParAMGDataDomainScaleArray(amg_data)[0] = scale); */
+      smoother = hypre_CTAlloc(HYPRE_Solver, num_levels);
+      hypre_ParAMGDataSmoother(amg_data) = smoother;
+      HYPRE_SchwarzCreate(&smoother[0]);
+      HYPRE_SchwarzSetNumFunctions(smoother[0],num_functions);
+      HYPRE_SchwarzSetVariant(smoother[0],hypre_ParAMGDataVariant(amg_data));
+      HYPRE_SchwarzSetOverlap(smoother[0],hypre_ParAMGDataOverlap(amg_data));
+      HYPRE_SchwarzSetDomainType(smoother[0],
+		hypre_ParAMGDataDomainType(amg_data));
+      HYPRE_SchwarzSetup(smoother[0],
+                        (HYPRE_ParCSRMatrix) A_array[0],
+                        (HYPRE_ParVector) F_array[0],
+                        (HYPRE_ParVector) U_array[0]);
    }
       
    for (j = 1; j < num_levels; j++)
@@ -485,19 +483,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else if (smooth_option[j] == 6)
       {
-         hypre_AMGNodalSchwarzSmoother (hypre_ParCSRMatrixDiag(A_array[j]),
-                                        num_functions,
-                                        1,
-                                        &domain_structure);
-         hypre_ParAMGDataDomainStructure(amg_data)[j] = domain_structure;
-         /* hypre_ParAMGDataScaleArray(amg_data)[j] = scale; */
-      }
-      else if (smooth_option[j] == 5)
-      {
-         hypre_AMGCreateDomainDof (hypre_ParCSRMatrixDiag(A_array[j]),
-                                        &domain_structure);
-         hypre_ParAMGDataDomainStructure(amg_data)[j] = domain_structure;
-         /* hypre_ParAMGDataScaleArray(amg_data)[j] = scale; */
+         HYPRE_SchwarzCreate(&smoother[j]);
+         HYPRE_SchwarzSetNumFunctions(smoother[j],num_functions);
+         HYPRE_SchwarzSetVariant(smoother[j],hypre_ParAMGDataVariant(amg_data));
+         HYPRE_SchwarzSetOverlap(smoother[j],hypre_ParAMGDataOverlap(amg_data));
+         HYPRE_SchwarzSetDomainType(smoother[j],
+		hypre_ParAMGDataDomainType(amg_data));
+         HYPRE_SchwarzSetup(smoother[j],
+                        (HYPRE_ParCSRMatrix) A_array[j],
+                        (HYPRE_ParVector) F_array[j],
+                        (HYPRE_ParVector) U_array[j]);
       }
    }
 

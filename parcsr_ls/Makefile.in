@@ -79,6 +79,7 @@ HEADERS =\
  headers.h\
  par_amg.h\
  parcsr_ls.h\
+ schwarz.h\
  Common.h\
  HYPRE_parcsr_ls.h
 
@@ -103,6 +104,7 @@ FILES =\
  par_rap_communication.c\
  par_scaled_matnorm.c\
  pcg_par.c\
+ par_schwarz.c\
  schwarz.c\
  transpose.c\
  HYPRE_parcsr_amg.c\
@@ -111,6 +113,7 @@ FILES =\
  HYPRE_parcsr_gmres.c\
  HYPRE_parcsr_pcg.c\
  HYPRE_parcsr_pilut.c\
+ HYPRE_parcsr_schwarz.c\
  HYPRE_parcsr_ParaSails.c\
  HYPRE_parcsr_Euclid.c\
  F90_par_laplace.c\

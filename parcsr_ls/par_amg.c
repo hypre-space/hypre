@@ -49,6 +49,8 @@ hypre_BoomerAMGCreate()
    double  *relax_weight;
    int     *smooth_option;  
 
+   int      variant, overlap, domain_type;
+
    /* log info */
    int      num_iterations;
 
@@ -74,6 +76,10 @@ hypre_BoomerAMGCreate()
    measure_type = 0;
    setup_type = 1;
    num_functions = 1;
+
+   variant = 0;
+   overlap = 1;
+   domain_type = 2;
 
    /* solve params */
    min_iter  = 0;
@@ -131,6 +137,9 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetMeasureType(amg_data, measure_type);
    hypre_BoomerAMGSetSetupType(amg_data, setup_type);
    hypre_BoomerAMGSetNumFunctions(amg_data, num_functions);
+   hypre_BoomerAMGSetVariant(amg_data, variant);
+   hypre_BoomerAMGSetOverlap(amg_data, overlap);
+   hypre_BoomerAMGSetDomainType(amg_data, domain_type);
 
    hypre_BoomerAMGSetMinIter(amg_data, min_iter);
    hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
@@ -162,8 +171,6 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataDofPointArray(amg_data) = NULL;
    hypre_ParAMGDataPointDofMapArray(amg_data) = NULL;
    hypre_ParAMGDataSmoother(amg_data) = NULL;
-   hypre_ParAMGDataDomainStructure(amg_data) = NULL;
-   hypre_ParAMGDataScaleArray(amg_data) = NULL;
 
    return (void *) amg_data;
 }
@@ -242,24 +249,25 @@ hypre_BoomerAMGDestroy( void *data )
 	 {
 	    HYPRE_ParCSRParaSailsDestroy(smoother[i]);
          }
-         else if (hypre_ParAMGDataSmoothOption(amg_data)[i] > 4)
+         else if (hypre_ParAMGDataSmoothOption(amg_data)[i] > 2)
 	 {
-	    hypre_CSRMatrixDestroy(
+	    HYPRE_SchwarzDestroy(smoother[i]);
+	    /* hypre_CSRMatrixDestroy(
 			hypre_ParAMGDataDomainStructure(amg_data)[i]);
 	    if (hypre_ParAMGDataScaleArray(amg_data))
-	       hypre_TFree (hypre_ParAMGDataScaleArray(amg_data)[i]);
+	       hypre_TFree (hypre_ParAMGDataScaleArray(amg_data)[i]); */
          } 
       }
-      if (hypre_ParAMGDataSmoothOption(amg_data)[0] > 6)
+      if (hypre_ParAMGDataSmoothOption(amg_data)[0] > 2)
       {
          hypre_TFree (hypre_ParAMGDataSmoother(amg_data));
       }
-      else if (hypre_ParAMGDataSmoothOption(amg_data)[0] > 4)
+      /* else if (hypre_ParAMGDataSmoothOption(amg_data)[0] > 4)
       {
 	 hypre_TFree (hypre_ParAMGDataDomainStructure(amg_data));
 	 if (hypre_ParAMGDataScaleArray(amg_data))
 	    hypre_TFree (hypre_ParAMGDataScaleArray(amg_data));
-      } 
+      } */
    }
    if (hypre_ParAMGDataSmoothOption(amg_data))
       hypre_TFree(hypre_ParAMGDataSmoothOption(amg_data));
@@ -666,3 +674,40 @@ hypre_BoomerAMGGetRelResidualNorm( void     *data,
 
    return (ierr);
 }
+
+int
+hypre_BoomerAMGSetVariant( void     *data,
+                            int       variant)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataVariant(amg_data) = variant;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetOverlap( void     *data,
+                            int       overlap)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataOverlap(amg_data) = overlap;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetDomainType( void     *data,
+                            int       domain_type)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataDomainType(amg_data) = domain_type;
+
+   return (ierr);
+}
+

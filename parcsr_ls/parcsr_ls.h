@@ -70,6 +70,9 @@ int HYPRE_BoomerAMGSetLogging( HYPRE_Solver solver , int ioutdat , char *log_fil
 int HYPRE_BoomerAMGSetDebugFlag( HYPRE_Solver solver , int debug_flag );
 int HYPRE_BoomerAMGGetNumIterations( HYPRE_Solver solver , int *num_iterations );
 int HYPRE_BoomerAMGGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *rel_resid_norm );
+int HYPRE_BoomerAMGSetVariant( HYPRE_Solver solver , int variant );
+int HYPRE_BoomerAMGSetOverlap( HYPRE_Solver solver , int overlap );
+int HYPRE_BoomerAMGSetDomainType( HYPRE_Solver solver , int domain_type );
 int HYPRE_BoomerAMGSetNumFunctions( HYPRE_Solver solver , int num_functions );
 int HYPRE_BoomerAMGSetDofFunc( HYPRE_Solver solver , int *dof_func );
 
@@ -146,6 +149,18 @@ int HYPRE_ParCSRPilutSetMaxIter( HYPRE_Solver solver , int max_iter );
 int HYPRE_ParCSRPilutSetDropTolerance( HYPRE_Solver solver , double tol );
 int HYPRE_ParCSRPilutSetFactorRowSize( HYPRE_Solver solver , int size );
 
+/* HYPRE_parcsr_schwarz.c */
+int HYPRE_SchwarzCreate( HYPRE_Solver *solver );
+int HYPRE_SchwarzDestroy( HYPRE_Solver solver );
+int HYPRE_SchwarzSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_SchwarzSolve( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_SchwarzSetVariant( HYPRE_Solver solver , int variant );
+int HYPRE_SchwarzSetOverlap( HYPRE_Solver solver , int overlap );
+int HYPRE_SchwarzSetDomainType( HYPRE_Solver solver , int domain_type );
+int HYPRE_SchwarzSetDomainStructure( HYPRE_Solver solver , HYPRE_CSRMatrix domain_structure );
+int HYPRE_SchwarzSetNumFunctions( HYPRE_Solver solver , int num_functions );
+int HYPRE_SchwarzSetDofFunc( HYPRE_Solver solver , int *dof_func );
+
 /* driver.c */
 int main( int argc , char *argv []);
 int BuildParFromFile( int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
@@ -189,6 +204,9 @@ int hypre_BoomerAMGSetPointDofMap( void *data , int *point_dof_map );
 int hypre_BoomerAMGSetDofPoint( void *data , int *dof_point );
 int hypre_BoomerAMGGetNumIterations( void *data , int *num_iterations );
 int hypre_BoomerAMGGetRelResidualNorm( void *data , double *rel_resid_norm );
+int hypre_BoomerAMGSetVariant( void *data , int variant );
+int hypre_BoomerAMGSetOverlap( void *data , int overlap );
+int hypre_BoomerAMGSetDomainType( void *data , int domain_type );
 
 /* par_amg_setup.c */
 int hypre_BoomerAMGSetup( void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );
@@ -250,6 +268,19 @@ int gselim( double *A , double *x , int n );
 /* par_scaled_matnorm.c */
 int hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A , double *scnorm );
 
+/* par_schwarz.c */
+void *hypre_SchwarzCreate( void );
+int hypre_SchwarzDestroy( void *data );
+int hypre_SchwarzSetup( void *schwarz_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );
+int hypre_SchwarzSolve( void *schwarz_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );
+int hypre_SchwarzSetVariant( void *data , int variant );
+int hypre_SchwarzSetDomainType( void *data , int domain_type );
+int hypre_SchwarzSetOverlap( void *data , int overlap );
+int hypre_SchwarzSetNumFunctions( void *data , int num_functions );
+int hypre_SchwarzSetDomainStructure( void *data , hypre_CSRMatrix *domain_structure );
+int hypre_SchwarzSetScale( void *data , double *scale );
+int hypre_SchwarzSetDofFunc( void *data , int *dof_func );
+
 /* par_stats.c */
 int hypre_BoomerAMGSetupStats( void *amg_vdata , hypre_ParCSRMatrix *A );
 int hypre_BoomerAMGWriteSolverParams( void *data );
@@ -281,13 +312,15 @@ void hypre_F90_NAME_BLAS( int dpotrf , int DPOTRF );
 int hypre_MPSchwarzSolve( hypre_ParCSRMatrix *par_A , hypre_Vector *rhs_vector , hypre_CSRMatrix *domain_structure , hypre_ParVector *par_x , hypre_Vector *aux_vector );
 int transpose_matrix_create( int **i_face_element_pointer , int **j_face_element_pointer , int *i_element_face , int *j_element_face , int num_elements , int num_faces );
 int matrix_matrix_product( int **i_element_edge_pointer , int **j_element_edge_pointer , int *i_element_face , int *j_element_face , int *i_face_edge , int *j_face_edge , int num_elements , int num_faces , int num_edges );
-int hypre_AMGCreateDomainDof( hypre_CSRMatrix *A , hypre_CSRMatrix **domain_structure_pointer );
+int hypre_AMGCreateDomainDof( hypre_CSRMatrix *A , int domain_type , int overlap , int num_functions , int *dof_func , hypre_CSRMatrix **domain_structure_pointer );
 int hypre_AMGeAgglomerate( int *i_AE_element , int *j_AE_element , int *i_face_face , int *j_face_face , int *w_face_face , int *i_face_element , int *j_face_element , int *i_element_face , int *j_element_face , int *i_face_to_prefer_weight , int *i_face_weight , int num_faces , int num_elements , int *num_AEs_pointer );
 int update_entry( int weight , int *weight_max , int *previous , int *next , int *first , int *last , int head , int tail , int i );
 int remove_entry( int weight , int *weight_max , int *previous , int *next , int *first , int *last , int head , int tail , int i );
 int move_entry( int weight , int *weight_max , int *previous , int *next , int *first , int *last , int head , int tail , int i );
 int matinv( double *x , double *a , int k );
 int hypre_parCorrRes( hypre_ParCSRMatrix *A , hypre_ParVector *x , hypre_Vector *rhs , double **tmp_ptr );
+int hypre_AdSchwarzSolve( hypre_ParCSRMatrix *par_A , hypre_ParVector *par_rhs , hypre_CSRMatrix *domain_structure , double *scale , hypre_ParVector *par_x , hypre_ParVector *par_aux );
+int hypre_GenerateScale( hypre_CSRMatrix *domain_structure , int num_variables , double **scale_pointer );
 
 /* transpose.c */
 int hypre_CSRMatrixTranspose( hypre_CSRMatrix *A , hypre_CSRMatrix **AT );

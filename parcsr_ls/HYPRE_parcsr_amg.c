@@ -446,6 +446,39 @@ HYPRE_BoomerAMGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetVariant
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetVariant( HYPRE_Solver  solver,
+                              int          variant  )
+{
+   return( hypre_BoomerAMGSetVariant( (void *) solver, variant ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetOverlap
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetOverlap( HYPRE_Solver  solver,
+                              int          overlap  )
+{
+   return( hypre_BoomerAMGSetOverlap( (void *) solver, overlap ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetDomainType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetDomainType( HYPRE_Solver  solver,
+                              int          domain_type  )
+{
+   return( hypre_BoomerAMGSetDomainType( (void *) solver, domain_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetNumFunctions
  *--------------------------------------------------------------------------*/
 

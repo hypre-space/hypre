@@ -254,6 +254,24 @@ int HYPRE_BoomerAMGSetDofFunc(HYPRE_Solver solver,
                               int         *dof_func);
 
 /**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetVariant(HYPRE_Solver solver,
+                                int          variant);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetOverlap(HYPRE_Solver solver,
+                                int          overlap);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetDomainType(HYPRE_Solver solver,
+                                int          domain_type);
+
+/**
  * Return the number of iterations taken.
  **/
 int HYPRE_BoomerAMGGetNumIterations(HYPRE_Solver  solver,
@@ -806,6 +824,42 @@ int HYPRE_ParCSRGMRESGetNumIterations(HYPRE_Solver  solver,
  **/
 int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                   double       *norm);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/*
+ * @name Schwarz Solver
+ **/
+
+int HYPRE_SchwarzCreate( HYPRE_Solver *solver);
+
+int HYPRE_SchwarzDestroy(HYPRE_Solver solver);
+
+int HYPRE_SchwarzSetup(HYPRE_Solver       solver,
+                              HYPRE_ParCSRMatrix A,
+                              HYPRE_ParVector    b,
+                              HYPRE_ParVector    x);
+
+int HYPRE_SchwarzSolve(HYPRE_Solver       solver,
+                              HYPRE_ParCSRMatrix A,
+                              HYPRE_ParVector    b,
+                              HYPRE_ParVector    x);
+
+int HYPRE_SchwarzSetVariant(HYPRE_Solver solver, int variant);
+
+int HYPRE_SchwarzSetOverlap(HYPRE_Solver solver, int overlap);
+
+int HYPRE_SchwarzSetDomainType(HYPRE_Solver solver, int domain_type);
+
+int HYPRE_SchwarzSetDomainStructure(HYPRE_Solver solver,
+                                   HYPRE_CSRMatrix domain_structure);
+
+int HYPRE_SchwarzSetNumFunctions(HYPRE_Solver solver, int num_functions);
+
+int HYPRE_SchwarzSetDofFunc(HYPRE_Solver solver, int *dof_func);
 
 /*@}*/
 
