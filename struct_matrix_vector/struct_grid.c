@@ -32,7 +32,7 @@ hypre_NewStructGrid( MPI_Comm  comm,
    hypre_StructGridLocalSize(grid)   = 0;
    hypre_StructGridNeighbors(grid)   = NULL;
    hypre_StructGridMaxDistance(grid) = 5;
-
+   hypre_SetIndex(hypre_StructGridPeriodic(grid), 0, 0, 0);
    hypre_StructGridAllBoxes(grid)     = NULL;
    hypre_StructGridProcesses(grid)    = NULL;
    hypre_StructGridBoxRanks(grid)     = NULL;
@@ -66,6 +66,21 @@ hypre_FreeStructGrid( hypre_StructGrid *grid )
       hypre_FreeBoxArray(hypre_StructGridBoxes(grid));
       hypre_TFree(grid);
    }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SetStructGridPeriodic
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_SetStructGridPeriodic( hypre_StructGrid  *grid,
+                             hypre_Index        periodic)
+{
+   int          ierr = 0;
+
+   hypre_CopyIndex(periodic, hypre_StructGridPeriodic(grid));
 
    return ierr;
 }
