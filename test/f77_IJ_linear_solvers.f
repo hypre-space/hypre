@@ -288,12 +288,6 @@ c Generate a Dirichlet Laplacian
 
       else
 
-c       call HYPRE_ParCSRMatrixCreate(MPI_COMM_WORLD, gnrows, gncols,
-c    &     rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg,
-c    &     A_storage, ierr)
-
-c       call HYPRE_ParCSRMatrixInitialize(A_storage, ierr)
-
         call HYPRE_GenerateLaplacian(MPI_COMM_WORLD, nx, ny, nz,
      &                               Px, Py, Pz, p, q, r, values,
      &                               A_storage, ierr)
