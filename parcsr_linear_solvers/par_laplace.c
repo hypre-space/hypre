@@ -335,15 +335,13 @@ hypre_GenerateLaplacian( MPI_Comm comm,
    hypre_CSRMatrixJ(diag) = diag_j;
    hypre_CSRMatrixData(diag) = diag_data;
 
+   offd = hypre_ParCSRMatrixOffd(A);
+   hypre_CSRMatrixI(offd) = offd_i;
    if (num_cols_offd)
    {
-      offd = hypre_ParCSRMatrixOffd(A);
-      hypre_CSRMatrixI(offd) = offd_i;
       hypre_CSRMatrixJ(offd) = offd_j;
       hypre_CSRMatrixData(offd) = offd_data;
    }
-   else
-      hypre_TFree(offd_i);
 
    hypre_TFree(nx_part);
    hypre_TFree(ny_part);
