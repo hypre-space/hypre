@@ -455,7 +455,6 @@ int MLI_Method_AMGRS::setup( MLI *mli )
            delete func_ptr;
 #endif
       }
-mli_cAmat->print("camat");
       mli->setSystemMatrix(level+1, mli_cAmat);
       elapsed_time = (MLI_Utils_WTime() - start_time);
       RAPTime_ += elapsed_time;
