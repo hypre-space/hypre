@@ -1985,10 +1985,7 @@ with_fortran90=no
 # ... was with_fortran90=yes    which doesn't work on frost
 with_cxx=yes
 with_python=yes
-with_java=no
-# ... was with_java=yes   which doesn't work on frost without help
-# in the form of an additional configure argument
-#  JNI_INCLUDES="-I /usr/java130/include"
+with_java=yes
 msgs="
 	Recap:"
 
@@ -7223,7 +7220,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:7226:" \
+echo "$as_me:7223:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -7429,7 +7426,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:7432: \"$ac_link\") >&5
+(eval echo $as_me:7429: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -7508,7 +7505,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:7511: \"$ac_link\") >&5
+(eval echo $as_me:7508: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -9772,7 +9769,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 9775 "configure" */
+/* #line 9772 "configure" */
 public class Test {
 }
 EOF
@@ -9942,7 +9939,7 @@ EOF
 if uudecode$EXEEXT Test.uue; then
         ac_cv_prog_uudecode_base64=yes
 else
-        echo "configure: 9945: uudecode had trouble decoding base 64 file 'Test.uue'" >&5
+        echo "configure: 9942: uudecode had trouble decoding base 64 file 'Test.uue'" >&5
         echo "configure: failed file was:" >&5
         cat Test.uue >&5
         ac_cv_prog_uudecode_base64=no
@@ -10060,7 +10057,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 10063 "configure" */
+/* #line 10060 "configure" */
 public class Test {
 }
 EOF
@@ -10097,7 +10094,7 @@ JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 TEST=Test
 cat << \EOF > $JAVA_TEST
-/* [#]line 10100 "configure" */
+/* [#]line 10097 "configure" */
 public class Test {
 public static void main (String args[]) {
         System.exit (0);
@@ -10321,7 +10318,7 @@ echo "$as_me: error: no acceptable jdb program found in \$PATH" >&2;}
 
 
 cat << \EOF > Test.java
-/* #line 10324 "configure" */
+/* #line 10321 "configure" */
 
 public class Test {
 
@@ -10544,7 +10541,7 @@ rm -f conftest.err conftest.$ac_ext
     CPPFLAGS="$ac_save_CPPFLAGS"
 
 fi
-    if test "x$ac_cv_header_jni_h" = "Xno"; then
+    if test "X$ac_cv_header_jni_h" = "Xno"; then
       { echo "$as_me:$LINENO: WARNING: Cannot find jni.h, Java support will be disabled" >&5
 echo "$as_me: WARNING: Cannot find jni.h, Java support will be disabled" >&2;}
       with_java=no
@@ -11431,7 +11428,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:11434: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:11431: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -13256,7 +13253,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 13259 "configure"
+#line 13256 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13354,7 +13351,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 13357 "configure"
+#line 13354 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14419,7 +14416,7 @@ fi
 #
 # LLNL:  Added to be consistent with F77
 # Provide some information about the compiler.
-echo "$as_me:14422:" \
+echo "$as_me:14419:" \
      "checking for Fortran 90 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -14580,7 +14577,7 @@ _ACEOF
 # flags.
 ac_save_F90FLAGS=$F90FLAGS
 F90FLAGS="$F90FLAGS $ac_verb"
-(eval echo $as_me:14583: \"$ac_link\") >&5
+(eval echo $as_me:14580: \"$ac_link\") >&5
 ac_f90_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f90_v_output" >&5
 F90FLAGS=$ac_save_F90FLAGS
@@ -14654,7 +14651,7 @@ _ACEOF
 # flags.
 ac_save_F90FLAGS=$F90FLAGS
 F90FLAGS="$F90FLAGS $ac_cv_prog_f90_v"
-(eval echo $as_me:14657: \"$ac_link\") >&5
+(eval echo $as_me:14654: \"$ac_link\") >&5
 ac_f90_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f90_v_output" >&5
 F90FLAGS=$ac_save_F90FLAGS
@@ -16125,7 +16122,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 16128 "configure"' > conftest.$ac_ext
+  echo '#line 16125 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -16666,7 +16663,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:16669: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:16666: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -18491,7 +18488,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 18494 "configure"
+#line 18491 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -18589,7 +18586,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 18592 "configure"
+#line 18589 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -20090,7 +20087,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 20093 "configure"
+#line 20090 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

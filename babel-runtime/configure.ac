@@ -57,10 +57,7 @@ with_fortran90=no
 # ... was with_fortran90=yes    which doesn't work on frost
 with_cxx=yes
 with_python=yes
-with_java=no
-# ... was with_java=yes   which doesn't work on frost without help
-# in the form of an additional configure argument
-#  JNI_INCLUDES="-I /usr/java130/include"
+with_java=yes
 msgs="
 	Recap:"
 
