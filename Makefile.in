@@ -69,7 +69,7 @@ HYPRE_EXTRA_DIRS =\
  structIJ_matrix_vector\
  CI_struct_matrix_vector\
  CI_struct_linear_solvers @HYPRE_PETSCLIBDIRS@\
- babel/Hypre
+ @HYPRE_BABELLIBDIR@
 
 all: krylov struct sstruct IJ fei
 	@ \

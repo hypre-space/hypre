@@ -830,6 +830,7 @@ then
   HYPRE_FIND_MPI
 fi
 
+HYPRE_BABELLIBDIR=""
 if test "$casc_using_babel" = "yes"
 then
 dnl jfp: temporary, until Babel has been installed somewhere:
@@ -848,6 +849,10 @@ BABELLIBFLAGS="-L../babel/Hypre -lhypre_class -L${BABEL_DIR}/babel -lbabel"
 
  babeldir="$HOME"
  AC_SUBST(babeldir)
+
+ HYPRE_BABELLIBDIR="$HYPRE_TOP_SRC_DIR/babel/Hypre"
+
+
 dnl   CASC_FIND_BABEL
 
   AM_INIT_AUTOMAKE()
@@ -963,6 +968,7 @@ dnl * libraries
 AC_SUBST(BABEL_DIR)
 AC_SUBST(BABEL_HYPRE_INCLUDES)
 AC_SUBST(BABELLIBFLAGS)
+AC_SUBST(HYPRE_BABELLIBDIR)
 
 dnl *PETSC-related header files, libraries and directories for those
 dnl * libraries
