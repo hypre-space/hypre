@@ -3471,7 +3471,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
    MPI_Comm_rank( mpiComm_, &mypid);
    MPI_Comm_size( mpiComm_, &nprocs);
 
-   if ( ! strcasecmp("help",data_key) )
+   if ( ! strcmp("help",data_key) )
    {
       printf("impSpecifRequests : Available requests are \n");
       printf("    getElemOffset : get element processor offset \n");
@@ -3504,7 +3504,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    // --- get element processor offset
 
-   if ( ! strcasecmp("getElemOffset",data_key) )
+   if ( ! strcmp("getElemOffset",data_key) )
    {
       if ( argc < 1 ) 
       {
@@ -3518,7 +3518,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    // --- get node processor offset
 
-   else if ( ! strcasecmp("getNodeOffset", data_key) )
+   else if ( ! strcmp("getNodeOffset", data_key) )
    {
       if ( argc < 1 ) 
       {
@@ -3532,7 +3532,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    // --- get face processor offset
 
-   else if ( ! strcasecmp("getFaceOffset", data_key) )
+   else if ( ! strcmp("getFaceOffset", data_key) )
    {
       if ( argc < 1 ) 
       {
@@ -3546,7 +3546,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    // --- get number of external nodes (to my processor)
 
-   else if ( ! strcasecmp("getNumExtNodes", data_key) )
+   else if ( ! strcmp("getNumExtNodes", data_key) )
    {
       if ( argc < 1 ) 
       {
@@ -3560,7 +3560,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    // --- get number of external faces (to my processor)
 
-   else if ( ! strcasecmp("getNumExtFaces", data_key) )
+   else if ( ! strcmp("getNumExtFaces", data_key) )
    {
       if ( argc < 1 ) 
       {
@@ -3574,7 +3574,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    // --- get the mapped globalIDs of external nodes
 
-   else if ( ! strcasecmp("getExtNodeNewGlobalIDs", data_key) )
+   else if ( ! strcmp("getExtNodeNewGlobalIDs", data_key) )
    {
       if ( argc < 1 ) 
       {
@@ -3589,7 +3589,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    // --- get the mapped globalIDs of external faces
 
-   else if ( ! strcasecmp("getExtFaceNewGlobalIDs", data_key) )
+   else if ( ! strcmp("getExtFaceNewGlobalIDs", data_key) )
    {
       if ( argc < 1 ) 
       {
@@ -3604,7 +3604,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    // --- get the mapped globalIDs of external faces
 
-   else if ( ! strcasecmp("destroyElemMatrix", data_key) )
+   else if ( ! strcmp("destroyElemMatrix", data_key) )
    {
       int elemNum = *(int *) argv[0];
       int index = searchElement(elemNum);
@@ -3622,7 +3622,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    // --- create node element matrix (given local nodeExt element matrix)
 
-   else if ( ! strcasecmp("updateNodeElemMatrix",data_key) )
+   else if ( ! strcmp("updateNodeElemMatrix",data_key) )
    {
       int         *ncols = (int *) argv[0], **cols = (int **) argv[1];
       int         nNodes = currBlock->numLocalNodes_;
@@ -3813,7 +3813,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    // --- create face element matrix (given local faceExt element matrix)
 
-   else if ( !strcasecmp("updatefaceElemMatrix",data_key) )
+   else if ( !strcmp("updatefaceElemMatrix",data_key) )
    {
       MPI_Barrier(mpiComm_);
 
