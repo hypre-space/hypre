@@ -108,6 +108,7 @@ GENERATED_HDRS = Hypre.h\
 	Hypre_SolverBuilder.h\
 	Hypre_SolverBuilder_Skel.h\
 	Hypre_Pilut_Skel.h\
+	Hypre_GMRES.h\
 	Hypre_GMRES_Skel.h\
 	Hypre_ParAMG_Skel.h\
 	Hypre_ParCSRVector_Skel.h\

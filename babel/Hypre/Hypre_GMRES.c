@@ -158,6 +158,14 @@ int  impl_Hypre_GMRES_SetPreconditioner
 
 
 /* ********************************************************
+ * impl_Hypre_GMRESGetPreconditioner
+ **********************************************************/
+Hypre_Solver  impl_Hypre_GMRES_GetPreconditioner( Hypre_GMRES this ) {
+   Hypre_GMRES_Private gmr_data = Hypre_GMRES_getPrivate(this);
+   return gmr_data->preconditioner;
+} /* end impl_Hypre_PCGGetPreconditioner */
+
+/* ********************************************************
  * impl_Hypre_GMRES_New
  **********************************************************/
 int  
@@ -217,8 +225,10 @@ impl_Hypre_GMRES_Setup( Hypre_GMRES this,
 
    if ((gmr_data->p) == NULL)
    {
-/* >>>>>>> TO DO: I'm not sure whether this will work >>>>>>>> */
-      vp = hypre_CTAlloc (Hypre_Vector, k_dim+1);   /* WILL THIS WORK? */
+      vp = hypre_CTAlloc( Hypre_Vector, k_dim+1 );
+      /* ... This works because a Hypre_Vector is really just a pointer.
+       If we needed to allocate space for the actual underlying objects,
+       allocating something involving Hypre_Vector's couldn't work.*/
       for (i=0; i < k_dim+1; i++)
       {	
          ierr += Hypre_Vector_Clone (x, &(vp[i])); 
