@@ -58,10 +58,12 @@ dsnode_bmod (
 #endif
     int            incx = 1, incy = 1;
     double         alpha = -1.0, beta = 1.0;
+#else
+    int            i, iptr; 
 #endif
 
     int            luptr, nsupc, nsupr, nrow;
-    int            isub, irow, i, iptr; 
+    int            isub, irow; 
     register int   ufirst, nextlu;
     int            *lsub, *xlsub;
     double         *lusup;
