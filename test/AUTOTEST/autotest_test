@@ -538,9 +538,9 @@ mail_summary () {
         TestCaseFailedFlag=0
         ErrFile=`echo $j | sed -e 's/\.sh$/.err/'`
         OutFile=`echo $j | sed -e 's/\.sh$/.out/'`
-# look for non-zero length subtest, TEST_*/test.err.* files
+# look for non-zero length subtest, TEST_*/test.err.[0-9]* files
         if [ "$PurifySelected" = "0" -a "$InsureSelected" = "0" ] ; then
-          for k in ${ErrFile}.*; do
+          for k in "${ErrFile}.[0-9]*"; do
             apply_error_filters ${k}
             if [ -s "${k}" ] ; then
               if [ "$DEBUG_MODE" = "yes" ] ; then
@@ -557,8 +557,8 @@ mail_summary () {
         fi
         if [ "$TestCaseFailedFlag" = "0" ] ; then
 # look for all of the TEST_*/test.out.* files
-          for k in ${OutFile}.*; do
-# look for non-zero length subtest, TEST_*/test.out.* files
+          for k in ${OutFile}.[0-9]*; do
+# look for non-zero length subtest, TEST_*/test.out.[0-9]* files
             apply_error_filters ${k}
             if [ -s "${OutFile}" ] ; then
               if [ "$DEBUG_MODE" = "yes" ] ; then
