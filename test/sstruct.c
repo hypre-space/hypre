@@ -2272,6 +2272,7 @@ main( int   argc,
       HYPRE_SStructBiCGSTABCreate(MPI_COMM_WORLD, &solver);
       HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver) solver, 100 );
       HYPRE_BiCGSTABSetTol( (HYPRE_Solver) solver, 1.0e-06 );
+      HYPRE_BiCGSTABSetPrintLevel( (HYPRE_Solver) solver, 1 );
       HYPRE_BiCGSTABSetLogging( (HYPRE_Solver) solver, 1 );
 
       if ((solver_id == 50) || (solver_id == 51))
@@ -2346,6 +2347,7 @@ main( int   argc,
       HYPRE_ParCSRBiCGSTABCreate(MPI_COMM_WORLD, &par_solver);
       HYPRE_BiCGSTABSetMaxIter(par_solver, 100);
       HYPRE_BiCGSTABSetTol(par_solver, 1.0e-06);
+      HYPRE_BiCGSTABSetPrintLevel(par_solver, 1);
       HYPRE_BiCGSTABSetLogging(par_solver, 1);
 
       if (solver_id == 60)
@@ -2438,6 +2440,7 @@ main( int   argc,
       HYPRE_ParCSRHybridSetTol(par_solver, 1.0e-06);
       HYPRE_ParCSRHybridSetTwoNorm(par_solver, 1);
       HYPRE_ParCSRHybridSetRelChange(par_solver, 0);
+      HYPRE_ParCSRHybridSetPrintLevel(par_solver,1);
       HYPRE_ParCSRHybridSetLogging(par_solver,1);
       HYPRE_ParCSRHybridSetup(par_solver,par_A,par_b,par_x);
 

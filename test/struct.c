@@ -1504,6 +1504,7 @@ main( int   argc,
       HYPRE_StructBiCGSTABCreate(MPI_COMM_WORLD, &solver);
       HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver)solver, 50 );
       HYPRE_BiCGSTABSetTol( (HYPRE_Solver)solver, 1.0e-06 );
+      HYPRE_BiCGSTABSetPrintLevel( (HYPRE_Solver)solver, 1 );
       HYPRE_BiCGSTABSetLogging( (HYPRE_Solver)solver, 1 );
 
       if (solver_id == 40)
@@ -1516,6 +1517,7 @@ main( int   argc,
          HYPRE_StructSMGSetZeroGuess(precond);
          HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSMGSetNumPostRelax(precond, n_post);
+         HYPRE_StructSMGSetPrintLevel(precond, 0);
          HYPRE_StructSMGSetLogging(precond, 0);
          HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -1536,6 +1538,7 @@ main( int   argc,
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
          HYPRE_StructPFMGSetSkipRelax(precond, skip);
          /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
+         HYPRE_StructPFMGSetPrintLevel(precond, 0);
          HYPRE_StructPFMGSetLogging(precond, 0);
          HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
@@ -1555,6 +1558,7 @@ main( int   argc,
          HYPRE_StructSparseMSGSetRelaxType(precond, 1);
          HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
+         HYPRE_StructSparseMSGSetPrintLevel(precond, 0);
          HYPRE_StructSparseMSGSetLogging(precond, 0);
          HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
@@ -1711,8 +1715,12 @@ main( int   argc,
    return (0);
 }
 /*-------------------------------------------------------------------------
- * i can actually put any grid here and it will do it   
+ * add constant values to a vector. Need to pass the initialized 
+ * vector, grid, period of grid
+ * and the constant value.
  *-------------------------------------------------------------------------*/
+
+
 
 int
 AddValuesVector( hypre_StructGrid  *gridvector,
@@ -1739,6 +1747,13 @@ AddValuesVector( hypre_StructGrid  *gridvector,
             box      = hypre_BoxArrayBox(gridboxes, ib);
             volume   =  hypre_BoxVolume(box);
 	    values   = hypre_CTAlloc(double, volume);
+
+   /*-----------------------------------------------------------
+    * For periodic b.c. in all directions, need rhs to satisfy 
+    * compatibility condition. Achieved by setting a source and
+    *  sink of equal strength.  All other problems have rhs = 1.
+    *-----------------------------------------------------------*/
+
 
 	    if ((dim == 2 && period[0] != 0 && period[1] != 0) ||
                (dim == 3 && period[0] != 0 && period[1] != 0 && period[2] != 0))
@@ -1767,8 +1782,12 @@ AddValuesVector( hypre_StructGrid  *gridvector,
 
  return ierr;
 }
-/********************************/
-/* now the addvalues to matrix  MATRIXMATRIX */
+/******************************************************************************
+* Adds values to matrix based on a 7 point (3d) 
+* symmetric stencil for a pure laplacian problem.
+* It need an initialized matrix, an assembled grid, and the constants
+* that determine the 7 point (3d) laplacian.
+******************************************************************************/
 int
 AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                                      double            cx,
@@ -1776,7 +1795,6 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 				     double            cz)
 {
 
-#include  "struct_mv.h"
   int ierr=0;
   hypre_BoxArray     *gridboxes;
  int                i,s,bi;
@@ -1839,12 +1857,15 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 
 
 
-/***************************ZEROING THE EXTREMES OF THE GRID *****************/
+/*********************************************************************************
+ * this function sets to zero the stencil entries that are on the boundary
+ * Grid, matrix and the period are needed. 
+ *********************************************************************************/ 
 
 int
 SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,int* period)
 {
-#include  "struct_mv.h"
+
   int ierr=0;
   hypre_BoxArray     *gridboxes;
   int                size,i,j,d,ib;
