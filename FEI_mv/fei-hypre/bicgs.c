@@ -285,9 +285,10 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
 
       dtmp = 1.0;
       hypre_ParKrylovAxpy(dtmp,q,u);
-      hypre_ParKrylovAxpy(alpha,u,x);
 
       precond(precond_data, A, u, t1);
+      hypre_ParKrylovAxpy(alpha,t1,x);
+
       hypre_ParKrylovMatvec(matvec_data,1.0,A,t1,0.0,t2);
 
       dtmp = - alpha;
@@ -301,8 +302,6 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
       if ( my_id == 0 && logging )
          printf(" BiCGS : iter %4d - res. norm = %e \n", iter, r_norm);
    }
-   precond(precond_data, A, x, t1);
-   hypre_ParKrylovCopyVector(t1,x);
 
    (bicgs_data -> num_iterations) = iter;
    if (b_norm > 0.0)
