@@ -595,6 +595,33 @@ then
 
    ;;
 
+    LINUX | Linux )
+
+      if test "$casc_user_chose_compilers" = "no"
+      then
+        if test "$casc_using_mpi" = "no"
+        then
+          AC_CHECK_PROGS(CC, cc gcc kcc)
+          AC_CHECK_PROGS(CXX, CC g++)
+          AC_CHECK_PROGS(F77, f77 g77)
+        else
+          AC_CHECK_PROGS(CC, mpicc)
+          AC_CHECK_PROGS(CXX, mpiCC)
+          AC_CHECK_PROGS(F77, mpif77)
+        fi
+      fi
+
+      CASC_SET_COPT(-O)
+      CASC_SET_CDEBUG(-g)
+      CASC_SET_CXXOPT(-O)
+      CASC_SET_CXXDEBUG(-g)
+      CASC_SET_FOPT(-O)
+      CASC_SET_FDEBUG(-g)
+
+      AC_DEFINE(HYPRE_LINUX)
+
+   ;;
+
    alpha)
 
      if test "$casc_user_chose_compilers" = "no"
