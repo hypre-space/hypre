@@ -338,7 +338,7 @@ private :
    int search(int, int *, int);
    int searchElement(int);
    int searchEdge(int);   
-   int intSort2(int nlist, int *list, int *list2);
+   int intSort2(int *list, int *list2, int left, int right);
 };
 
 #endif

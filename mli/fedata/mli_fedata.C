@@ -193,7 +193,7 @@ int MLI_FEData::beginInitElemSet(int nElems, int *gid)
    elemMaterial_ = new int[numLocalElems_];
    for ( i = 0; i < numLocalElems_; i++ ) elemMaterial_[i] = 0;
 
-   intSort2(numLocalElems_, elemGlobalID_, NULL);
+   intSort2(elemGlobalID_, NULL, 0, numLocalElems_-1);
    for ( i = 1; i < numLocalElems_; i++ ) 
    { 
       if ( elemGlobalID_[i] == elemGlobalID_[i-1] )
@@ -499,7 +499,7 @@ int MLI_FEData::beginInitNodeSet()
       for ( j = 0; j < elemNodeLeng_[i]; j++ ) 
          node_array[count++] = elemNodeList_[i][j];
    }
-   intSort2(count, node_array, NULL);
+   intSort2(node_array, NULL, 0, count-1);
    count2 = 1;
    for ( i = 1; i < count; i++ ) 
       if ( node_array[i] != node_array[i-1] ) 
@@ -524,53 +524,31 @@ int MLI_FEData::beginInitNodeSet()
 // terminate initializing nodal information 
 //-------------------------------------------------------------------------
 
-/*
-  void critical();
-  void end_critical();
- */
-
 int MLI_FEData::endInitNodeSet()
 {
    int    i, j, nnodesLocal, nnodesExt, *extNodeFlag, *newNodeList;
    int    count, *iarray;
    double *darray;
-   /*
-     critical();
-     for(i=0; i<numLocalNodes_; i++){
-     cout << nodeGlobalID_[i] << "  ";
-     for (j = 0; j<spaceDimension_; j++ ) 
-     cout << nodeCoordinates_[i*spaceDimension_+j] << "  "; 
-     cout << endl;
-     }
-     end_critical();
-   */
-   nnodesExt = 0;
+   char   param_string[100];
+
+   nnodesExt   = 0;
    extNodeFlag = new int[numLocalNodes_];
 
-   for ( i = 0; i < numLocalNodes_; i++ )
-     extNodeFlag[i] = 0;
+   for ( i = 0; i < numLocalNodes_; i++ ) extNodeFlag[i] = 0;
 
    for ( i = 0; i < numSharedNodes_; i++ )
-     for ( j = 0; j < sharedNodeLeng_[i]; j++ )
-       if ( sharedNodeProc_[i][j] < mypid_ ) 
+      for ( j = 0; j < sharedNodeLeng_[i]; j++ )
+         if ( sharedNodeProc_[i][j] < mypid_ ) 
 	 {
 	   nnodesExt++; 
 	   extNodeFlag[searchNode(sharedNodeID_[i])] = - 1;
 	   break;
 	 }
-   /*
-     critical();
-     for(i=0; i<9; i++)
-     cout << extNodeFlag[i] << "  ";
-     cout << endl;
-     end_critical();
 
-     cout << "external = " << nnodesExt << "Shared = " << numSharedNodes_; 
-   */
    numExternalNodes_ = nnodesExt;
-   nnodesLocal = numLocalNodes_;
-   numLocalNodes_ -= numExternalNodes_;
-   newNodeList = new int[nnodesLocal];
+   nnodesLocal       = numLocalNodes_;
+   numLocalNodes_   -= numExternalNodes_;
+   newNodeList       = new int[nnodesLocal];
 
    count = 0;
    for ( i = 0; i < nnodesLocal; i++ )
@@ -629,34 +607,38 @@ int MLI_FEData::endInitNodeSet()
    MPI_Status Status;
    int *ind = new int[numSharedNodes_], external_index;
 
-   getSpecificData("node_offset", &node_off);
+   strcpy( param_string, "node_offset" );
+   getSpecificData(param_string, &node_off);
    MPI_Barrier(MPI_COMM_WORLD);
 
    // send the indices of the owned shared nodes
+
    for(i=0; i<numSharedNodes_; i++)
-     {
-       ind[i] = search(sharedNodeID_[i], nodeGlobalID_, numLocalNodes_);
+   {
+      ind[i] = search(sharedNodeID_[i], nodeGlobalID_, numLocalNodes_);
        
-       // the shared node is owned by this subdomain
-       if (ind[i] >= 0)
-	 {
-	   ind[i] += node_off;
-	   for(j=0; j<sharedNodeLeng_[i]; j++)
-	     if (sharedNodeProc_[i][j] != mypid_)
-	       MPI_Isend(&ind[i], 1, MPI_INT, sharedNodeProc_[i][j], 
-			 sharedNodeID_[i], MPI_COMM_WORLD, &request);
-	 }
-     }
+      // the shared node is owned by this subdomain
+
+      if (ind[i] >= 0)
+      {
+         ind[i] += node_off;
+         for ( j = 0; j < sharedNodeLeng_[i]; j++ )
+            if (sharedNodeProc_[i][j] != mypid_)
+               MPI_Isend(&ind[i], 1, MPI_INT, sharedNodeProc_[i][j], 
+                         sharedNodeID_[i], MPI_COMM_WORLD, &request);
+      }
+   }
 
    // receive the indices of the external nodes
+
    for(i=0; i<numExternalNodes_; i++)
-     {
-       MPI_Recv( &external_index, 1, MPI_INT, MPI_ANY_SOURCE,
-		 MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
-       externalNodes_[ search ( Status.MPI_TAG, 
+   {
+      MPI_Recv( &external_index, 1, MPI_INT, MPI_ANY_SOURCE,
+	        MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+      externalNodes_[ search ( Status.MPI_TAG, 
 				nodeGlobalID_ + numLocalNodes_, 
 				numExternalNodes_ ) ] = external_index;
-     }
+   }
    MPI_Barrier(MPI_COMM_WORLD);
 
    delete [] ind;
@@ -857,7 +839,7 @@ int MLI_FEData::beginInitEdgeSet()
       for ( j = 0; j < elemEdgeLeng_[i]; j++ ) 
          edge_array[count++] = elemEdgeList_[i][j];
    }
-   intSort2(count, edge_array, NULL);
+   intSort2(edge_array, NULL, 0, count-1);
    count2 = 1;
    for ( i = 1; i < count; i++ ) 
       if ( edge_array[i] != edge_array[i-1] ) 
@@ -902,7 +884,7 @@ int MLI_FEData::beginInitFaceSet()
       for ( j = 0; j < elemFaceLeng_[i]; j++ ) 
          face_array[count++] = elemFaceList_[i][j];
    }
-   intSort2(count, face_array, NULL);
+   intSort2(face_array, NULL, 0, count-1);
    count2 = 1;
    for ( i = 1; i < count; i++ ) 
       if ( face_array[i] != face_array[i-1] ) 
@@ -954,47 +936,27 @@ int MLI_FEData::endInitFaceSet()
 {
    int    i, j, nfacesLocal, nfacesExt, *extFaceFlag, *newFaceList;
    int    count, *iarray, **darray;
-   /*
-     critical();
-     int *nodes = new int[4]; 
-     cout << "faces ,,,," << endl;
-     for(i=0; i<numLocalFaces_; i++){
-     cout << faceGlobalID_[i] << "  ";
-     for (j = 0; j<faceNodeLeng_[i]; j++ ) 
-     cout << faceNodeList_[i][j] << "  "; 
-     cout << endl;
-     }
-     end_critical();
-   */
-   nfacesExt = 0;
+   char   param_string[100];
+
+   nfacesExt   = 0;
    extFaceFlag = new int[numLocalFaces_];
 
-   for ( i = 0; i < numLocalFaces_; i++ )
-     extFaceFlag[i] = 0;
+   for ( i = 0; i < numLocalFaces_; i++ ) extFaceFlag[i] = 0;
 
    for ( i = 0; i < numSharedFaces_; i++ )
-     for ( j = 0; j < sharedFaceLeng_[i]; j++ )
-       if ( sharedFaceProc_[i][j] < mypid_ ) 
+      for ( j = 0; j < sharedFaceLeng_[i]; j++ )
+         if ( sharedFaceProc_[i][j] < mypid_ ) 
 	 {
-	   nfacesExt++; 
-	   extFaceFlag[searchFace(sharedFaceID_[i])] = - 1;
-	   break;
+	    nfacesExt++; 
+	    extFaceFlag[searchFace(sharedFaceID_[i])] = - 1;
+	    break;
 	 }
 
-   /*
-     critical();
-     for(i=0; i<6; i++)
-     cout << extFaceFlag[i] << "  ";
-     cout << endl;
-     end_critical();
-     
-     cout << "external = " << nfacesExt << "Shared = " << numSharedFaces_; 
-   */
-
    numExternalFaces_ = nfacesExt;
-   nfacesLocal = numLocalFaces_;
-   numLocalFaces_ -= numExternalFaces_;
-   newFaceList = new int[nfacesLocal];
+   nfacesLocal       = numLocalFaces_;
+   numLocalFaces_   -= numExternalFaces_;
+   newFaceList       = new int[nfacesLocal];
+
    count = 0;
    for ( i = 0; i < nfacesLocal; i++ )
    {
@@ -1031,70 +993,55 @@ int MLI_FEData::endInitFaceSet()
    {
       darray = faceNodeList_;
       faceNodeList_ = new int*[nfacesLocal]; 
-      for(i=0; i<nfacesLocal; i++){
-	faceNodeList_[extFaceFlag[i]] = darray[i];
-	/*
-	  if (mypid_==1){
-	  cout << extFaceFlag[i] << "  ";
-	  for(j=0; j<3; j++)
-	  cout << darray[i][j] << " ";
-	  cout << endl;
-	  }
-	*/
-      }
+      for ( i = 0; i < nfacesLocal; i++ )
+         faceNodeList_[extFaceFlag[i]] = darray[i];
       delete [] darray;
    }
    delete [] extFaceFlag;
    
    // fix the indices for the external faces
+
    externalFaces_ = new int[numExternalFaces_];
 
    MPI_Request request;
-   MPI_Status Status;
-   int *ind = new int[numSharedFaces_], external_index;
+   MPI_Status  Status;
+   int         *ind = new int[numSharedFaces_], external_index;
 
-   getSpecificData("face_offset", &face_off);
+   strcpy( param_string, "face_offset" );
+   getSpecificData(param_string, &face_off);
    MPI_Barrier(MPI_COMM_WORLD);
 
    // send the indices of the owned shared faces
+
    for(i=0; i<numSharedFaces_; i++)
-     {
-       ind[i] = search(sharedFaceID_[i], faceGlobalID_, numLocalFaces_);
+   {
+      ind[i] = search(sharedFaceID_[i], faceGlobalID_, numLocalFaces_);
        
-       // the shared face is owned by this subdomain
-       if (ind[i] >= 0)
-	 {
-	   ind[i] += face_off;
-	   for(j=0; j<sharedFaceLeng_[i]; j++)
-	     if (sharedFaceProc_[i][j] != mypid_)
-	       MPI_Isend(&ind[i], 1, MPI_INT, sharedFaceProc_[i][j], 
-			 sharedFaceID_[i], MPI_COMM_WORLD, &request);
-	 }
-     }
+      // the shared face is owned by this subdomain
+
+      if (ind[i] >= 0)
+      {
+         ind[i] += face_off;
+         for ( j = 0; j < sharedFaceLeng_[i]; j++ )
+            if (sharedFaceProc_[i][j] != mypid_)
+               MPI_Isend(&ind[i], 1, MPI_INT, sharedFaceProc_[i][j], 
+                         sharedFaceID_[i], MPI_COMM_WORLD, &request);
+      }
+   }
 
    // receive the indices of the external faces
-   for(i=0; i<numExternalFaces_; i++)
-     {
-       MPI_Recv( &external_index, 1, MPI_INT, MPI_ANY_SOURCE,
-		 MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
-       externalFaces_[ search ( Status.MPI_TAG, 
+
+   for ( i = 0; i < numExternalFaces_; i++ )
+   {
+      MPI_Recv( &external_index, 1, MPI_INT, MPI_ANY_SOURCE,
+	        MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+      externalFaces_[ search ( Status.MPI_TAG, 
 				faceGlobalID_ + numLocalFaces_, 
 				numExternalFaces_ ) ] = external_index;
-     }
+   }
    MPI_Barrier(MPI_COMM_WORLD);
    
    delete [] ind;
-   /*
-     cout <<endl << endl;
-     for(i=0; i<nfacesLocal; i++){
-     if (mypid_==1){
-     for(j=0; j<3; j++)
-     cout << faceNodeList_[i][j] << " ";
-     cout << endl;
-     }
-     }
-   */
- 
    return 1;
 }
 
@@ -1291,17 +1238,16 @@ int MLI_FEData::getFaceIDs ( int *gid )
   int i;
   
   if ( processFaceFlag_ != 1 )
-    {
-      printf("MLI_FEData ERROR : getFaceIDs - faceSet not done.\n");
-      return 0;
-    }
+  {
+     printf("MLI_FEData ERROR : getFaceIDs - faceSet not done.\n");
+     return 0;
+  }
   if ( faceGlobalID_ == NULL || numLocalFaces_ <= 0 )
-    {
-      printf("MLI_FEData ERROR : getFaceIDs - info not available.\n");
-      return 0;
-    }
-  for ( i = 0; i < numLocalFaces_; i++ )
-    gid[i] = faceGlobalID_[i];
+  {
+     printf("MLI_FEData ERROR : getFaceIDs - info not available.\n");
+     return 0;
+  }
+  for ( i = 0; i < numLocalFaces_; i++ ) gid[i] = faceGlobalID_[i];
   return 1;
 }
 
@@ -1396,15 +1342,13 @@ int MLI_FEData::getElemNodeList(int elemID, int *nodeList)
 int MLI_FEData::getNodeGlobalID(int node_index, int &global_node_index)
 {
    global_node_index = search ( node_index, nodeGlobalID_, numLocalNodes_ );
-   if (global_node_index < 0){
-     global_node_index = search ( node_index,
-				  nodeGlobalID_ + numLocalNodes_,
-				  numExternalNodes_
-				  );
+   if (global_node_index < 0)
+   {
+      global_node_index = search( node_index, nodeGlobalID_ + numLocalNodes_,
+                                  numExternalNodes_);
      global_node_index = externalNodes_[global_node_index];
    }
-   else
-     global_node_index += node_off;
+   else global_node_index += node_off;
 
    return 1;
 }
@@ -1680,18 +1624,16 @@ int MLI_FEData::getElemFaceList(int elemID, int *faceList)
 
 int MLI_FEData::getFaceGlobalID(int face_index, int &global_face_index)
 {
-  global_face_index = search ( face_index, faceGlobalID_, numLocalFaces_ );
-  if (global_face_index < 0){
-    global_face_index = search ( face_index,
-				 faceGlobalID_ + numLocalFaces_,
-				 numExternalFaces_
-				 );
-    global_face_index = externalFaces_[global_face_index];
-  }
-  else
-    global_face_index += face_off;
+   global_face_index = search ( face_index, faceGlobalID_, numLocalFaces_ );
+   if ( global_face_index < 0 ) 
+   {
+      global_face_index = search(face_index, faceGlobalID_ + numLocalFaces_,
+                                 numExternalFaces_);
+      global_face_index = externalFaces_[global_face_index];
+   }
+   else global_face_index += face_off;
   
-  return 1;
+   return 1;
 }
 
 //*************************************************************************
@@ -2164,122 +2106,127 @@ int MLI_FEData::getShapeFuncInterpolant(int element, int nn, double *coord,
 //*************************************************************************
 // get specific (specified by data_key) information in data
 //-------------------------------------------------------------------------
+
 int MLI_FEData::getSpecificData(char *data_key, void *data)
 {
-  int numprocs, offset;
-  MPI_Status Status;
+   int        numprocs, offset, flag=1;
+   MPI_Status Status;
 
-  MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
+   MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
   
-  if (strcmp("elem_offset",data_key)==0){
-    int flag = 1;
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    *(int *)data = 0;
-    if (mypid_ != 0)
-      MPI_Recv( data, 1, MPI_INT, MPI_ANY_SOURCE,
-		MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
-    
-    if (mypid_ + 1 < numprocs){
-      offset = numLocalElems_ + *(int *)data;
-      MPI_Send(&offset, 1, MPI_INT, mypid_+1, flag, MPI_COMM_WORLD);
-    }
-    return 1;
-  }
-  else if (strcmp("node_offset", data_key)==0){
-    int flag = 1;
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    *(int *)data = 0;
-    if (mypid_ != 0)
-      MPI_Recv( data, 1, MPI_INT, MPI_ANY_SOURCE,
-		MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
-    
-    if (mypid_ + 1 < numprocs){
-      offset = numLocalNodes_ + *(int *)data;
-      MPI_Send(&offset, 1, MPI_INT, mypid_+1, flag, MPI_COMM_WORLD);
-    }
-    return 1;
-  }
-  else if (strcmp("edge_offset", data_key)==0){
-    int flag = 1;
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    *(int *)data = 0;
-    if (mypid_ != 0)
-      MPI_Recv( data, 1, MPI_INT, MPI_ANY_SOURCE,
-		MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
-    
-    if (mypid_ + 1 < numprocs){
-      offset = numLocalEdges_ + *(int *)data;
-      MPI_Send(&offset, 1, MPI_INT, mypid_+1, flag, MPI_COMM_WORLD);
-    }
-    return 1;
-  }
-  else if (strcmp("face_offset", data_key)==0){
-    int flag = 1;
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    *(int *)data = 0;
-    if (mypid_ != 0)
-      MPI_Recv( data, 1, MPI_INT, MPI_ANY_SOURCE,
-		MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
-    
-    if (mypid_ + 1 < numprocs){
-      offset = numLocalFaces_ + *(int *)data;
-      MPI_Send(&offset, 1, MPI_INT, mypid_+1, flag, MPI_COMM_WORLD);
-    }
-    return 1;
-  }
-  // return the owners for the external nodes
-  else if (strcmp("external_node_owners", data_key)==0){
-    int i, j, ind, *owners = (int *)data;
-    MPI_Request request;
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    for(i=0; i<numSharedNodes_; i++)
+   if ( strcmp("elem_offset",data_key)==0 )
+   {
+      MPI_Barrier(MPI_COMM_WORLD);
+      *(int *)data = 0;
+      if (mypid_ != 0)
+         MPI_Recv( data, 1, MPI_INT, MPI_ANY_SOURCE,
+                   MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+     
+      if (mypid_ + 1 < numprocs)
       {
-	ind = search(sharedNodeID_[i], nodeGlobalID_, numLocalNodes_);
-       
-	// the shared node is owned by this subdomain
-	if (ind >= 0)
-	  for(j=0; j<sharedNodeLeng_[i]; j++)
-	    if (sharedNodeProc_[i][j] != mypid_)
-	      MPI_Isend(sharedNodeID_+i, 1, MPI_INT, sharedNodeProc_[i][j], 
-			mypid_, MPI_COMM_WORLD, &request);
+         offset = numLocalElems_ + *(int *)data;
+         MPI_Send(&offset, 1, MPI_INT, mypid_+1, flag, MPI_COMM_WORLD);
+      }
+      return 1;
+   }
+   else if (strcmp("node_offset", data_key)==0)
+   {
+      MPI_Barrier(MPI_COMM_WORLD);
+      *(int *)data = 0;
+      if (mypid_ != 0)
+         MPI_Recv( data, 1, MPI_INT, MPI_ANY_SOURCE,
+                   MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+    
+      if (mypid_ + 1 < numprocs)
+      {
+         offset = numLocalNodes_ + *(int *)data;
+         MPI_Send(&offset, 1, MPI_INT, mypid_+1, flag, MPI_COMM_WORLD);
+      }
+      return 1;
+   }
+   else if (strcmp("edge_offset", data_key)==0)
+   {
+      MPI_Barrier(MPI_COMM_WORLD);
+      *(int *)data = 0;
+      if (mypid_ != 0)
+         MPI_Recv( data, 1, MPI_INT, MPI_ANY_SOURCE,
+                   MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+    
+      if (mypid_ + 1 < numprocs)
+      {
+         offset = numLocalEdges_ + *(int *)data;
+         MPI_Send(&offset, 1, MPI_INT, mypid_+1, flag, MPI_COMM_WORLD);
+      }
+      return 1;
+   }
+   else if (strcmp("face_offset", data_key)==0)
+   {
+      MPI_Barrier(MPI_COMM_WORLD);
+      *(int *)data = 0;
+      if (mypid_ != 0)
+         MPI_Recv( data, 1, MPI_INT, MPI_ANY_SOURCE,
+                   MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+     
+      if (mypid_ + 1 < numprocs)
+      {
+         offset = numLocalFaces_ + *(int *)data;
+         MPI_Send(&offset, 1, MPI_INT, mypid_+1, flag, MPI_COMM_WORLD);
+      }
+      return 1;
+   }
+
+   // return the owners for the external nodes
+
+   else if (strcmp("external_node_owners", data_key)==0)
+   {
+      int i, j, ind, *owners = (int *)data;
+      MPI_Request request;
+
+      MPI_Barrier(MPI_COMM_WORLD);
+      for ( i = 0; i < numSharedNodes_; i++ )
+      {
+         ind = search(sharedNodeID_[i], nodeGlobalID_, numLocalNodes_);
+        
+         // the shared node is owned by this subdomain
+         if (ind >= 0)
+ 	    for ( j = 0; j < sharedNodeLeng_[i]; j++ )
+ 	       if (sharedNodeProc_[i][j] != mypid_)
+                  MPI_Isend(sharedNodeID_+i, 1, MPI_INT, sharedNodeProc_[i][j], 
+                            mypid_, MPI_COMM_WORLD, &request);
 	  
       }
-    
-    for(i=0; i<numExternalNodes_; i++)
+      for(i=0; i<numExternalNodes_; i++)
       {
-	MPI_Recv( &j, 1, MPI_INT, MPI_ANY_SOURCE,
-		  MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
-	owners[ search ( j, nodeGlobalID_ + numLocalNodes_, 
-			 numExternalNodes_ ) ] = Status.MPI_TAG; 
+         MPI_Recv( &j, 1, MPI_INT, MPI_ANY_SOURCE,
+                   MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+         owners[ search ( j, nodeGlobalID_ + numLocalNodes_, 
+                          numExternalNodes_ ) ] = Status.MPI_TAG; 
       }
-    MPI_Barrier(MPI_COMM_WORLD);
+      MPI_Barrier(MPI_COMM_WORLD);
     
-    return 1;
-  }
-
-  return 0;
+      return 1;
+   }
+   return 0;
 }
 
 //*************************************************************************
 // get specific (specified by data_key) information in data
 //-------------------------------------------------------------------------
+
 int MLI_FEData::getSpecificData(char *data_key, void *data1, void *data2)
 {
-  int numprocs, i, j;
-  MPI_Request request;
-  MPI_Status Status;
+   int         numprocs, i, j;
+   MPI_Request request;
+   MPI_Status  Status;
+   char        param_string[100];
 
-  MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
+   MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
   
-  // Until this point table node_element has only local elements;
-  // here the elements for owned shared nodes are updated  
-  if (strcmp("update_node_elements",data_key)==0)
-    {
+   // Until this point table node_element has only local elements;
+   // here the elements for owned shared nodes are updated  
+
+   if (strcmp("update_node_elements",data_key)==0)
+   {
       MPI_Barrier(MPI_COMM_WORLD);
 
       int Buf[100];
@@ -2288,50 +2235,53 @@ int MLI_FEData::getSpecificData(char *data_key, void *data1, void *data2)
       int *columns, l, k, *p;
       
       // get the owners for the external nodes
+
       int *owner = new int [numExternalNodes_];
-      getSpecificData("external_node_owners", owner);
+      strcpy( param_string, "external_node_owners" );
+      getSpecificData(param_string, owner);
       
       // external nodes send with which elements are connected
-      for(i=0; i<numExternalNodes_; i++)
-	MPI_Isend(cols[i+numLocalNodes_], ncols[i+numLocalNodes_], MPI_INT, 
-		  owner[i], nodeGlobalID_[i+numLocalNodes_], 
-		  MPI_COMM_WORLD, &request);
+
+      for ( i = 0; i < numExternalNodes_; i++ )
+         MPI_Isend(cols[i+numLocalNodes_], ncols[i+numLocalNodes_], MPI_INT, 
+		   owner[i], nodeGlobalID_[i+numLocalNodes_], 
+		   MPI_COMM_WORLD, &request);
       
       // owners of shared nodes receive data
+
       for(i=0; i<numSharedNodes_; i++)
-	{
-	  ind[i] = search(sharedNodeID_[i], nodeGlobalID_, numLocalNodes_);
+      {
+         ind[i] = search(sharedNodeID_[i], nodeGlobalID_, numLocalNodes_);
 	  
-	  // the shared node is owned by this subdomain
-	  if (ind[i] >= 0)
-	    {
-	      for(j=0; j<sharedNodeLeng_[i]; j++)
-		if (sharedNodeProc_[i][j] != mypid_)
-		  {
-		    MPI_Recv( Buf, 100, MPI_INT, MPI_ANY_SOURCE,
-			      MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
-		    MPI_Get_count( &Status, MPI_INT, &n);
-		    k = search( Status.MPI_TAG,nodeGlobalID_,numLocalNodes_);
-		    columns = new int[ncols[k]+n];
-		  
-		    for(l=0; l<ncols[k]; l++)
-		      columns[l] = cols[k][l];
-		    for(l=0; l<n; l++)
-		      columns[ncols[k]++] = Buf[l];
-		    
-		    delete [] cols[k];
-		    cols[k] = columns;
-		  }
-	    }
-	}
+         // the shared node is owned by this subdomain
+
+         if (ind[i] >= 0)
+         {
+            for ( j = 0; j < sharedNodeLeng_[i]; j++ )
+               if (sharedNodeProc_[i][j] != mypid_)
+               {
+                  MPI_Recv( Buf, 100, MPI_INT, MPI_ANY_SOURCE,
+                            MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+                  MPI_Get_count( &Status, MPI_INT, &n);
+                  k = search( Status.MPI_TAG,nodeGlobalID_,numLocalNodes_);
+                  columns = new int[ncols[k]+n];
+                  for ( l = 0; l < ncols[k]; l++ ) columns[l] = cols[k][l];
+                  for ( l = 0; l < n; l++ ) columns[ncols[k]++] = Buf[l];
+                  delete [] cols[k];
+                  cols[k] = columns;
+               }
+         }
+      }
       delete [] ind;
       delete [] owner;
       
       return 1;
-    }
-  // The same as above but for the faces
-  else if (strcmp("update_face_elements",data_key)==0)
-    {
+   }
+
+   // The same as above but for the faces
+
+   else if (strcmp("update_face_elements",data_key)==0)
+   {
       MPI_Barrier(MPI_COMM_WORLD);
 
       int Buf[100];
@@ -2340,49 +2290,51 @@ int MLI_FEData::getSpecificData(char *data_key, void *data1, void *data2)
       int *columns, l, k, *p;
       
       // get the owners for the external faces
+
       int *owner = new int [numExternalFaces_];
-      getSpecificData("external_face_owners", owner);
+      strcpy( param_string, "external_face_owners" );
+      getSpecificData( param_string, owner);
       
       // external faces send with which elements are connected
-      for(i=0; i<numExternalFaces_; i++)
-	MPI_Isend(cols[i+numLocalFaces_], ncols[i+numLocalFaces_], MPI_INT, 
-		  owner[i], faceGlobalID_[i+numLocalFaces_], 
-		  MPI_COMM_WORLD, &request);
+
+      for ( i = 0; i < numExternalFaces_; i++ )
+         MPI_Isend(cols[i+numLocalFaces_], ncols[i+numLocalFaces_], MPI_INT, 
+		   owner[i], faceGlobalID_[i+numLocalFaces_], 
+		   MPI_COMM_WORLD, &request);
       
       // owners of shared faces receive data
-      for(i=0; i<numSharedFaces_; i++)
-	{
-	  ind[i] = search(sharedFaceID_[i], faceGlobalID_, numLocalFaces_);
+
+      for ( i = 0; i < numSharedFaces_; i++ )
+      {
+         ind[i] = search(sharedFaceID_[i], faceGlobalID_, numLocalFaces_);
 	  
-	  // the shared face is owned by this subdomain
-	  if (ind[i] >= 0)
-	    {
-	      for(j=0; j<sharedFaceLeng_[i]; j++)
-		if (sharedFaceProc_[i][j] != mypid_)
-		  {
-		    MPI_Recv( Buf, 100, MPI_INT, MPI_ANY_SOURCE,
-			      MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
-		    MPI_Get_count( &Status, MPI_INT, &n);
-		    k = search( Status.MPI_TAG,faceGlobalID_,numLocalFaces_);
-		    columns = new int[ncols[k]+n];
+	 // the shared face is owned by this subdomain
+
+	 if (ind[i] >= 0)
+	 {
+	    for ( j = 0; j < sharedFaceLeng_[i]; j++ )
+               if (sharedFaceProc_[i][j] != mypid_)
+	       {
+                  MPI_Recv( Buf, 100, MPI_INT, MPI_ANY_SOURCE,
+                            MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+                  MPI_Get_count( &Status, MPI_INT, &n);
+                  k = search( Status.MPI_TAG,faceGlobalID_,numLocalFaces_);
+                  columns = new int[ncols[k]+n];
 		  
-		    for(l=0; l<ncols[k]; l++)
-		      columns[l] = cols[k][l];
-		    for(l=0; l<n; l++)
-		      columns[ncols[k]++] = Buf[l];
+                  for( l = 0; l < ncols[k]; l++ ) columns[l] = cols[k][l];
+                  for( l = 0; l < n; l++ ) columns[ncols[k]++] = Buf[l];
 		    
-		    delete [] cols[k];
-		    cols[k] = columns;
-		  }
-	    }
-	}
+                  delete [] cols[k];
+                  cols[k] = columns;
+               }
+	 }
+      }
       delete [] ind;
       delete [] owner;
       
       return 1;
-    }
-
-  return 0;
+   }
+   return 0;
 }
 
 //*************************************************************************
@@ -2673,7 +2625,7 @@ int MLI_FEData::processElemInfo()
 
    intarray = new int[numLocalElems_];
    for ( i = 0; i < numLocalElems_; i++ ) intarray[i] = i;
-   intSort2(numLocalElems_, elemGlobalID_, intarray);
+   intSort2(elemGlobalID_, intarray, 0, numLocalElems_-1);
   
    for ( i = 1; i < numLocalElems_; i++ ) 
    { 
@@ -2735,7 +2687,7 @@ int MLI_FEData::processElemInfo()
 
    intarray = new int[numLocalElems_];
    for ( i = 0; i < numLocalElems_; i++ ) intarray[i] = i;
-   intSort2(numLocalElems_, elemGlobalID_, intarray);
+   intSort2(elemGlobalID_, intarray, 0, numLocalElems_-1);
   
    for ( i = 1; i < numLocalElems_; i++ ) 
    { 
@@ -2925,100 +2877,50 @@ int MLI_FEData::searchFace(int key)
 
 //-------------------------------------------------------------------------
 
-int MLI_FEData::intSort2(int N, int list[], int list2[])
+int MLI_FEData::intSort2(int *ilist, int *ilist2, int left, int right)
 {
-   int    l, r, RR, K, j, i, flag;
-   int    RR2;
+   int i, last, mid, itemp;
 
-   if (N <= 1) return 0;
-
-   l   = N / 2 + 1;
-   r   = N - 1;
-   l   = l - 1;
-   RR  = list[l - 1];
-   K   = list[l - 1];
-
-   if (list2 != NULL) {
-      RR2 = list2[l - 1];
-      while (r != 0) {
-         j = l;
-         flag = 1;
-
-         while (flag == 1) {
-            i = j;
-            j = j + j;
-
-            if (j > r + 1)
-               flag = 0;
-            else {
-               if (j < r + 1)
-                  if (list[j] > list[j - 1]) j = j + 1;
-
-               if (list[j - 1] > K) {
-                  list[ i - 1] = list[ j - 1];
-                  list2[i - 1] = list2[j - 1];
-               }
-               else {
-                  flag = 0;
-               }
-            }
-         }
-         list[ i - 1] = RR;
-         list2[i - 1] = RR2;
-         if (l == 1) {
-            RR  = list [r];
-            RR2 = list2[r];
-            K = list[r];
-            list[r ] = list[0];
-            list2[r] = list2[0];
-            r = r - 1;
-         }
-         else {
-            l   = l - 1;
-            RR  = list[ l - 1];
-            RR2 = list2[l - 1];
-            K   = list[l - 1];
-         }
-      }
-      list[ 0] = RR;
-      list2[0] = RR2;
+   if (left >= right) return 0;
+   mid          = (left + right) / 2;
+   itemp        = ilist[left];
+   ilist[left]  = ilist[mid];
+   ilist[mid]   = itemp;
+   if ( ilist2 != NULL )
+   {
+      itemp        = ilist2[left];
+      ilist2[left] = ilist2[mid];
+      ilist2[mid]  = itemp;
    }
-   else {
-      while (r != 0) {
-         j = l;
-         flag = 1;
-         while (flag == 1) {
-            i = j;
-            j = j + j;
-            if (j > r + 1)
-               flag = 0;
-            else {
-               if (j < r + 1)
-                  if (list[j] > list[j - 1]) j = j + 1;
-               if (list[j - 1] > K) {
-                  list[ i - 1] = list[ j - 1];
-               }
-               else {
-                  flag = 0;
-               }
-            }
-         }
-         list[ i - 1] = RR;
-         if (l == 1) {
-            RR  = list [r];
-            K = list[r];
-            list[r ] = list[0];
-            r = r - 1;
-         }
-         else {
-            l   = l - 1;
-            RR  = list[ l - 1];
-            K   = list[l - 1];
-         }
-      }
-      list[ 0] = RR;
+   last         = left;
+   for (i = left+1; i <= right; i++)
+   {
+      if (ilist[i] < ilist[left])
+      {
+         last++;
+         itemp        = ilist[last];
+         ilist[last]  = ilist[i];
+         ilist[i]     = itemp;
+         if ( ilist2 != NULL )
+         {
+            itemp        = ilist2[last];
+            ilist2[last] = ilist2[i];
+            ilist2[i]    = itemp;
+         } 
+      } 
+   } 
+   itemp        = ilist[left];
+   ilist[left]  = ilist[last];
+   ilist[last]  = itemp;
+   if ( ilist2 != NULL )
+   {
+      itemp        = ilist2[left];
+      ilist2[left] = ilist2[last];
+      ilist2[last] = itemp;
    }
-   return 1;
+   intSort2(ilist, ilist2, left, last-1);
+   intSort2(ilist, ilist2, last+1, right);
+   return 0;
 }
 
 //*************************************************************************
@@ -3078,97 +2980,109 @@ int MLI_FEData::writeToFile()
 
 //============================================================================
 
-int MLI_FEData::Print(ostream &out){
-  int i, j;
+int MLI_FEData::Print(ostream &out)
+{
+   int i, j;
 
-  // output the nodes
-  out << "node_coord" << endl
-      << "local "     << numLocalNodes_ << " offset " << node_off << endl;
+   // output the nodes
+
+   out << "node_coord" << endl
+       << "local "     << numLocalNodes_ << " offset " << node_off << endl;
   
-  for(i=0; i<numLocalNodes_; i++){
-    out << "globalID "  << nodeGlobalID_[i] 
-	<< "  localID " << i+node_off << "   ";
-    for (j = 0; j<spaceDimension_; j++ ) 
-      out << nodeCoordinates_[i*spaceDimension_+j] << "  "; 
-    out << endl;
-  }
+   for ( i = 0; i < numLocalNodes_; i++ )
+   {
+      out << "globalID "  << nodeGlobalID_[i] 
+ 	  << "  localID " << i+node_off << "   ";
+      for (j = 0; j < spaceDimension_; j++ ) 
+         out << nodeCoordinates_[i*spaceDimension_+j] << "  "; 
+      out << endl;
+   }
 
-  out << "external " << numExternalNodes_ << endl;
+   out << "external " << numExternalNodes_ << endl;
   
-  for(i=0; i<numExternalNodes_; i++){
-    out << "globalID " << nodeGlobalID_[i+numLocalNodes_] 
-	<< "localID "  << externalNodes_[i] << "  ";
-    for(j=0; j<spaceDimension_; j++ ) 
-      out << nodeCoordinates_[(i+numLocalNodes_)*spaceDimension_+j] << "  "; 
-    out << endl;
-  }
+   for ( i = 0; i < numExternalNodes_; i++ )
+   {
+      out << "globalID " << nodeGlobalID_[i+numLocalNodes_] 
+	  << "localID "  << externalNodes_[i] << "  ";
+      for ( j = 0; j < spaceDimension_; j++ ) 
+         out << nodeCoordinates_[(i+numLocalNodes_)*spaceDimension_+j] << "  "; 
+      out << endl;
+   }
 
-  // output the shared nodes
-  out << "shared_nodes " << endl 
-      << "local " << numSharedNodes_ << endl;
-  for(i=0; i<numSharedNodes_; i++){
-    out << "globalID " << sharedNodeID_[i] << "  in_processors  ";
-    for(j=0; j<sharedNodeLeng_[i]; j++)
-      out << sharedNodeProc_[i][j] << " ";
-    out << endl;
-  }
-  out << endl;
+   // output the shared nodes
 
-  // output the elements
-  out << "element_globalIDnode" << endl
-      << "local " << numLocalElems_ << endl;
+   out << "shared_nodes " << endl 
+       << "local " << numSharedNodes_ << endl;
+   for ( i = 0; i < numSharedNodes_; i++ )
+   {
+      out << "globalID " << sharedNodeID_[i] << "  in_processors  ";
+      for ( j = 0; j < sharedNodeLeng_[i]; j++ )
+         out << sharedNodeProc_[i][j] << " ";
+      out << endl;
+   }
+   out << endl;
 
-  for(i=0; i<numLocalElems_; i++){
-    for(j=0; j<elemNodeLeng_[i]; j++)
-      out << elemNodeList_[i][j] << "  ";
-    out << endl;
-  }
+   // output the elements
 
-  // output element_face
-  out << "element_globalIDface" << endl
-      << "local " << numLocalElems_ << endl;
+   out << "element_globalIDnode" << endl
+       << "local " << numLocalElems_ << endl;
 
-  for(i=0; i<numLocalElems_; i++){
-    for(j=0; j<elemFaceLeng_[i]; j++)
-      out << elemFaceList_[i][j] << "  ";
-    out << endl;
-  }
-  out << endl;
+   for ( i = 0; i < numLocalElems_; i++ )
+   {
+      for(j=0; j<elemNodeLeng_[i]; j++)
+         out << elemNodeList_[i][j] << "  ";
+      out << endl;
+   }
 
-  // output face_node
-  out << "face_globalIDnode"  << endl
-      << "local "     << numLocalFaces_ << " offset " << face_off << endl;
+   // output element_face
+
+   out << "element_globalIDface" << endl
+       << "local " << numLocalElems_ << endl;
+
+   for ( i = 0; i < numLocalElems_; i++ )
+   {
+      for ( j = 0; j < elemFaceLeng_[i]; j++ )
+         out << elemFaceList_[i][j] << "  ";
+      out << endl;
+   }
+   out << endl;
+
+   // output face_node
+
+   out << "face_globalIDnode"  << endl
+       << "local "     << numLocalFaces_ << " offset " << face_off << endl;
   
-  for(i=0; i<numLocalFaces_; i++){
-    out << "globalID "  << faceGlobalID_[i] 
-	<< "  localID " << i+face_off << "   ";
-    for (j = 0; j<faceNodeLeng_[i]; j++ ) 
-      out << faceNodeList_[i][j] << "  "; 
-    out << endl;
-  }
+   for ( i = 0; i < numLocalFaces_; i++ )
+   {
+      out << "globalID "  << faceGlobalID_[i] 
+	  << "  localID " << i+face_off << "   ";
+      for ( j = 0; j < faceNodeLeng_[i]; j++ ) 
+         out << faceNodeList_[i][j] << "  "; 
+      out << endl;
+   }
   
-  out << "globalIDexternal " << numExternalFaces_ << endl;
+   out << "globalIDexternal " << numExternalFaces_ << endl;
   
-  for(i=0; i<numExternalFaces_; i++){
-    out << "globalID " << faceGlobalID_[i+numLocalFaces_] 
-	<< " localID "  << externalFaces_[i] << "  ";
+   for(i=0; i<numExternalFaces_; i++){
+      out << "globalID " << faceGlobalID_[i+numLocalFaces_] 
+  	  << " localID "  << externalFaces_[i] << "  ";
 
-    for(j=0; j<faceNodeLeng_[i+numLocalFaces_]; j++ ) 
-      out << faceNodeList_[i+numLocalFaces_][j] << "  "; 
-    out << endl;
-  }  
+      for(j=0; j<faceNodeLeng_[i+numLocalFaces_]; j++ ) 
+         out << faceNodeList_[i+numLocalFaces_][j] << "  "; 
+      out << endl;
+   }  
 
-  // output the shared faces
-  out << "shared_faces " << endl 
-      << "local " << numSharedFaces_ << endl;
-  for(i=0; i<numSharedFaces_; i++){
-    out << "globalID " << sharedFaceID_[i] << "  in_processors  ";
-    for(j=0; j<sharedFaceLeng_[i]; j++)
-      out << sharedFaceProc_[i][j] << " ";
-    out << endl;
-  }
+   // output the shared faces
 
-  return 1;
+   out << "shared_faces " << endl 
+       << "local " << numSharedFaces_ << endl;
+   for ( i = 0; i < numSharedFaces_; i++ )
+   {
+      out << "globalID " << sharedFaceID_[i] << "  in_processors  ";
+      for ( j = 0; j < sharedFaceLeng_[i]; j++ )
+         out << sharedFaceProc_[i][j] << " ";
+      out << endl;
+   }
+   return 1;
 }
 
-//============================================================================
