@@ -209,7 +209,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    int        iter; 
    int        j; 
    int        my_id, num_procs;
-   double     alpha, beta, gamma, epsilon, res, r_norm, b_norm;
+   double     alpha, beta, gamma, epsilon, temp, res, r_norm, b_norm;
    double     epsmac = 1.e-16; 
 
    hypre_KrylovCommInfo(A,&my_id,&num_procs);
@@ -292,7 +292,14 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 
         precond(precond_data, A, p, v);
         hypre_KrylovMatvec(matvec_data,1.0,A,v,0.0,q);
-      	alpha = res/hypre_KrylovInnerProd(r0,q);
+      	temp = hypre_KrylovInnerProd(r0,q);
+      	if (fabs(temp) >= epsmac)
+	   alpha = res/temp;
+	else
+	{
+	   printf("BiCGSTAB broke down!! divide by near zero\n");
+	   return(1);
+	}
 	hypre_KrylovAxpy(alpha,v,x);
 	hypre_KrylovAxpy(-alpha,q,r);
         precond(precond_data, A, r, v);
@@ -300,11 +307,23 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       	gamma = hypre_KrylovInnerProd(r,s)/hypre_KrylovInnerProd(s,s);
 	hypre_KrylovAxpy(gamma,v,x);
 	hypre_KrylovAxpy(-gamma,s,r);
-        beta = 1.0/res;
+      	if (fabs(res) >= epsmac)
+           beta = 1.0/res;
+	else
+	{
+	   printf("BiCGSTAB broke down!! res=0 \n");
+	   return(2);
+	}
         res = hypre_KrylovInnerProd(r0,r);
         beta *= res;    
 	hypre_KrylovAxpy(-gamma,q,p);
-        hypre_KrylovScaleVector((beta*alpha/gamma),p);
+      	if (fabs(gamma) >= epsmac)
+           hypre_KrylovScaleVector((beta*alpha/gamma),p);
+	else
+	{
+	   printf("BiCGSTAB broke down!! gamma=0 \n");
+	   return(3);
+	}
 	hypre_KrylovAxpy(1.0,r,p);
 
 	r_norm = sqrt(hypre_KrylovInnerProd(r,r));
