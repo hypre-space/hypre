@@ -22,40 +22,50 @@ perform_test()
     set -xv
   fi
   print_header
-  echo "deleting old AUTOTEST directory...."
-  ${SSH_COMMAND} ${HYPRE_COMPILE_MACHINE} "\
+  if [ "${HYPRE_COMPILE_MACHINE}" = "`hostname | sed 's/\..*$//'`" ]
+  then
+    [ -f linear_solvers/test/AUTOTEST/autotest_env ] && \
+      . linear_solvers/test/AUTOTEST/autotest_env;\
+    [ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
+      . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT};\
+    linear_solvers/test/AUTOTEST/autotest_test \
+      ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE};\
+  else
+    echo "deleting old AUTOTEST directory...."
+    ${SSH_COMMAND} ${HYPRE_COMPILE_MACHINE} "\
     (\
         rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers;\
     )"
 
-  echo "copying new source...."
-  if test "${HYPRE_DIST_DIR}" ; then
-    scp -pr linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
-  else
-    ${SCP_COMMAND} -pr linear_solvers ${HYPRE_REMOTE_DIR}
-  fi
+    echo "copying new source...."
+    if test "${HYPRE_DIST_DIR}" ; then
+      scp -pr linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
+    else
+      ${SCP_COMMAND} -pr linear_solvers ${HYPRE_REMOTE_DIR}
+    fi
 
-  echo "scheduling remote autotest...."
-  ${SSH_COMMAND} -f ${HYPRE_COMPILE_MACHINE} "\
+    echo "scheduling remote autotest...."
+    ${SSH_COMMAND} -f ${HYPRE_COMPILE_MACHINE} "\
     (\
-        cd ${HYPRE_REMOTE_DIR##*:};\
-	. linear_solvers/test/AUTOTEST/autotest_env;\
-	[ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
-          . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT};\
-        if test "${HYPRE_DIST_DIR}" ; then\
-          linear_solvers/test/AUTOTEST/autotest_test \
-            ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE} -p ${HYPRE_DIST_DIR};\
-        else\
-          linear_solvers/test/AUTOTEST/autotest_test \
+      cd ${HYPRE_REMOTE_DIR##*:};\
+      . linear_solvers/test/AUTOTEST/autotest_env;\
+      [ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
+        . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT};\
+      if test "${HYPRE_DIST_DIR}" ; then\
+        linear_solvers/test/AUTOTEST/autotest_test \
+          ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE} -p ${HYPRE_DIST_DIR};\
+      else\
+        linear_solvers/test/AUTOTEST/autotest_test \
             ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE};\
-        fi;\
-  chmod -fR a+rX,u+w,go-w linear_solvers;\
-  chgrp -fR hypre linear_solvers;\
-        if test "${HYPRE_DIST_DIR}" ; then\
-          rm -fR ${HYPRE_DIST_DIR}/linear_solvers ; \
-          ${SCP_COMMAND} -pr ${HYPRE_REMOTE_DIR##*:}/linear_solvers ${HYPRE_DIST_DIR};\
-        fi;\
+      fi;\
+    chmod -fR a+rX,u+w,go-w linear_solvers;\
+    chgrp -fR hypre linear_solvers;\
+      if test "${HYPRE_DIST_DIR}" ; then\
+        rm -fR ${HYPRE_DIST_DIR}/linear_solvers ; \
+        ${SCP_COMMAND} -pr ${HYPRE_REMOTE_DIR##*:}/linear_solvers ${HYPRE_DIST_DIR};\
+      fi;\
     )" 
+  fi
   echo "returning to autotest...."
   
 }
@@ -131,6 +141,7 @@ export SUBMSG
 AUTOMAKEMODE=""
 HYPRE_MESSAGE=""
 COMPILERSELECT=""
+StartingDir=`pwd`
 export AUTOMAKEMODE HYPRE_MESSAGE COMPILERSELECT
 # OpenSSH to F-Secure communication for RSA authentication
 SSH_COMMAND="ssh -1"
@@ -172,7 +183,7 @@ else
     exit
   fi
 
-  cd $HOME/hypre
+##cd $HOME/hypre
   rm -fR linear_solvers
   if [ "$1" = "-rev" ]
   then
@@ -188,10 +199,14 @@ else
   echo "$HYPRE_CHECKOUT_EMAIL" > $0.checkout.err.email 
   chmod -f a+rX,u+w,go-w $0.checkout.*
   chgrp -f hypre $0.checkout.*
-  cd $HYPRE_AUTOTEST_DIR
-  rm -fR linear_solvers $0.checkout.*
-  cp -pr $HOME/hypre/$0.checkout.* $HYPRE_AUTOTEST_DIR
-  cp -pr $HOME/hypre/linear_solvers $HYPRE_AUTOTEST_DIR
+  if test "${HYPRE_AUTOTEST_DIR}" &&
+     test -d $HYPRE_AUTOTEST_DIR
+  then
+    cd $HYPRE_AUTOTEST_DIR
+    rm -fR linear_solvers $0.checkout.*
+    cp -p $StartingDir/$0.checkout.* $HYPRE_AUTOTEST_DIR
+    cp -pr $StartingDir/linear_solvers $HYPRE_AUTOTEST_DIR
+  fi
 fi
 if [ "$1" = "-automake" ]
 then
