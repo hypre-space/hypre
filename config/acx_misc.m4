@@ -230,7 +230,7 @@ Currently this macro knows about GCC, and KCC.]),
   AC_CHECK_PROGS(CXX, icc pgCC xlC g++ gcc KCC)
   AC_CHECK_PROGS(F77, ifc pgf77 xlf g77)
   if test "x$GCC" = "xyes"; then
-    CFLAGS="$CFLAGS -Wall -ansi -pedantic"
+    CFLAGS="$CFLAGS -Wall -pedantic"
     CXXFLAGS="$CXXFLAGS -Wall -Wshadow -fno-implicit-templates"
     CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
     casc_using_debug=yes
@@ -645,3 +645,83 @@ then
   fi
 fi])
       
+
+dnl **********************************************************************
+dnl * ACX_ASCI_HOST
+dnl *
+dnl determine certain compiler options for a few ASCI customers
+dnl
+AC_DEFUN([ACX_ASCI_HOST],
+[HOSTNAME="`hostname`"
+  if test -z "$HOSTNAME"
+  then
+    HOSTNAME=unknown
+  else
+    case $HOSTNAME in
+      sasn100 )
+        AC_CHECK_PROGS(CC, cicc cc)
+        AC_CHECK_PROGS(CXX, ciCC CC) 
+        AC_CHECK_PROGS(F77, cif77 f77)
+        if  test "$casc_using_mpi" = "yes"
+        then
+          CFLAGS="$CFLAGS -I/opt/intel/tflop/current/tflops/cougar/include"
+          CXXFLAGS="$CXXFLAGS -I/opt/intel/tflop/current/tflops/cougar/include"
+          LDFLAGS="$LDFLAGS -L/opt/intel/tflop/current/tflops/cougar/lib/puma -lmpi"
+        fi
+      ;;
+      janus )
+        AC_CHECK_PROGS(CC, pgcc cc)
+        AC_CHECK_PROGS(CXX, pgCC CC) 
+        AC_CHECK_PROGS(F77, pgf77 f77)
+        if  test "$casc_using_mpi" = "yes"
+        then
+          CFLAGS="$CFLAGS -I/cougar/include"
+          CXXFLAGS="$CXXFLAGS -I/cougar/include"
+          LDFLAGS="$LDFLAGS -L/cougar/lib/puma -lmpi"
+        fi
+        CFLAGS="$CFLAGS -cougar -mp -Mx,123,0x2000"
+        CXXFLAGS="$CXXFLAGS -cougar -mp -Mx,123,0x2000"
+        LDFLAGS="$LDFLAGS -cougar -mp -Mx,123,0x2000"
+      ;;
+      nirvana )
+        AC_CHECK_PROGS(CC, cc kcc gcc)
+        AC_CHECK_PROGS(CXX, CC KCC g++) 
+        AC_CHECK_PROGS(F77, f77 g77)
+        if  test "$casc_using_mpi" = "yes"
+        then
+          LDFLAGS="$LDFLAGS -L/cougar/lib/puma -lmpi"
+        fi
+      ;;
+      n02 )
+        AC_CHECK_PROGS(CC, cc kcc gcc)
+        AC_CHECK_PROGS(CXX, CC KCC g++) 
+        AC_CHECK_PROGS(F77, f77 g77)
+        if  test "$casc_using_mpi" = "yes"
+        then
+          LDFLAGS="$LDFLAGS -L/usr/lib -lmpi"
+        fi
+        CFLAGS="$CFLAGS -64"
+        CXXFLAGS="$CXXFLAGS -64"
+        F77FLAGS="$F77FLAGS -64"
+        LDFLAGS="$LDFLAGS -64"
+      ;;
+      tckk*|tc2k* )
+        if test "$casc_using_openmp" = "no" ; then
+          AC_CHECK_PROGS(CC,cc kcc gcc c89) 
+          AC_CHECK_PROGS(CXX,cxx KCC g++)
+          AC_CHECK_PROGS(F77,f77 kf77 g77)
+        else
+          AC_CHECK_PROGS(CC,guidec) 
+          AC_CHECK_PROGS(CXX,guidec++)
+          AC_CHECK_PROGS(F77,guidef77)
+        fi
+        if  test "$casc_using_mpi" = "yes"
+        then
+          CFLAGS="$CFLAGS -I/usr/include"
+          CXXFLAGS="$CXXFLAGS -I/usr/include"
+          LDFLAGS="$LDFLAGS -L/usr/lib -lmpi"
+        fi
+      ;;
+    esac 
+  fi
+])
