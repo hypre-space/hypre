@@ -4,7 +4,7 @@
 #include "Mem_dh.h"
 #include "Timer_dh.h"
 #include "Parser_dh.h"
-#include "euclid_petsc.h"
+/* #include "euclid_petsc.h" */
 #include "mat_dh_private.h"
 
 

@@ -4,7 +4,10 @@
 #include "Mat_dh.h"
 #include "Mem_dh.h"
 #include "Vec_dh.h"
+
+#ifdef PETSC_MODE
 #include "euclid_petsc.h"
+#endif
 
 #define IS_UPPER_TRI 97
 #define IS_LOWER_TRI 98
