@@ -1031,6 +1031,7 @@ int MLI_FEData::initComplete()
       MPI_Send( sendBuf[i], sendLengs[i], MPI_INT, 
                 sendProcs[i], 183, mpiComm_);
    for ( i = 0; i < nRecv; i++ ) MPI_Wait( &request[i], &status );
+
    if ( nExtNodes > 0 ) currBlock->nodeExtNewGlobalIDs_ = new int[nExtNodes];
    for ( i = 0; i < nRecv; i++ ) recvLengs[i] = 0;
    for ( i = 0; i < nExtNodes; i++ ) 
@@ -3427,7 +3428,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
    // --- output help menu 
    // -------------------------------------------------------------
 
-   MPI_Comm_size( mpiComm_, &mypid);
+   MPI_Comm_rank( mpiComm_, &mypid);
    MPI_Comm_size( mpiComm_, &nprocs);
 
    if ( ! strcmp("help",data_key) )
@@ -3448,10 +3449,10 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
       cout << "    getNumExtFaces : get number of external faces \n";
       cout << "                  argc    - >= 1.\n";
       cout << "                  argv[0] - (int *) of length 1.\n";
-      cout << "    getExtNodeNewGlobalIDs : get  external nodes' mapped IDs \n";
+      cout << "    getExtNodeNewGlobalIDs : get  external nodes' mapped IDs\n";
       cout << "                  argc    - >= 1.\n";
       cout << "                  argv[0] - (int *) of length nNnodesExt.\n";
-      cout << "    getExtFaceNewGlobalIDs : get  external faces' mapped IDs \n";
+      cout << "    getExtFaceNewGlobalIDs : get  external faces' mapped IDs\n";
       cout << "                  argc    - >= 1.\n";
       cout << "                  argv[0] - (int *) of length nNnodesExt.\n";
       return 1;
@@ -3537,7 +3538,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
    {
       if ( argc < 1 ) 
       {
-         cout << "impSpecificRequests ERROR : getExtNodeNewGlobalIDs - argc<1\n";
+         cout << "impSpecificRequests ERROR : getExtNodeNewGlobalIDs-argc<1\n";
          exit(1);
       } 
       int *newGlobalIDs = (int *) argv[0];
@@ -3552,7 +3553,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
    {
       if ( argc < 1 ) 
       {
-         cout << "impSpecificRequests ERROR : getExtFaceNewGlobalIDs - argc<1\n";
+         cout << "impSpecificRequests ERROR : getExtFaceNewGlobalIDs-argc<1\n";
          exit(1);
       } 
       int *newGlobalIDs = (int *) argv[0];
@@ -3565,25 +3566,28 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    else if ( ! strcmp("updateNodeElemMatrix",data_key) )
    {
-      MPI_Barrier(mpiComm_);
+      int         *ncols = (int *) argv[0], **cols = (int **) argv[1];
+      int         nNodes = currBlock->numLocalNodes_;
+      int         nNodesExt = currBlock->numExternalNodes_;
+      int         *nodeList = currBlock->nodeGlobalIDs_;
+      int         *sharedNodeList = currBlock->sharedNodeIDs_;
+      int         numSharedNodes = currBlock->numSharedNodes_;
+      int         *sharedNodeNProcs = currBlock->sharedNodeNProcs_;
+      int         **sharedNodeProc = currBlock->sharedNodeProc_;
+      int         i, j, k, index, pnum, pSrc, *iBuf, msgID, nodeGID, ncnt;
+      int         *columns, *procList, *procTemp, nSends, *sendLengs;
+      int         *sendProcs, **sendBufs, nRecvs, *recvProcs, *recvLengs;
+      int         **recvBufs, *owner, length;
+      MPI_Request *request;
+      MPI_Status  status;
 
-      int i, j, index, n, pnum, Buf[100];
-      int *ncols = (int *) argv[0], **cols = (int **) argv[1];
-      int *ind = new int[currBlock->numSharedNodes_];
-      int *columns, l, k, *p;
-      MPI_Request request;
-      MPI_Status  Status;
-      
       // get the owners for the external nodes
 
-      int nNodes = currBlock->numLocalNodes_;
-      int nNodesExt = currBlock->numExternalNodes_;
-      int *nodeList = currBlock->nodeGlobalIDs_;
-      int *sharedNodeList = currBlock->sharedNodeIDs_;
-      int numSharedNodes = currBlock->numSharedNodes_;
-      int *sharedNodeNProcs = currBlock->sharedNodeNProcs_;
-      int **sharedNodeProc = currBlock->sharedNodeProc_;
-      int *owner = new int [nNodesExt];
+      MPI_Barrier(mpiComm_);
+
+      if ( nNodesExt > 0 ) owner = new int[nNodesExt];
+      else                 owner = NULL;
+
       for ( i = 0; i < numSharedNodes; i++ )
       {
          index = searchNode( sharedNodeList[i] ) - nNodes;
@@ -3597,41 +3601,155 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
          }
       }
 
-      // external nodes send with which elements are connected
+      // find out how many distinct processor numbers and fill the 
+      // send buffer
 
-      for ( i = 0; i < nNodesExt; i++ )
-         MPI_Isend(cols[i+nNodes], ncols[i+nNodes], MPI_INT, 
-                   owner[i], nodeList[i+nNodes], mpiComm_, &request);
+      if ( nNodesExt > 0 ) procList = new int[mypid];
+      else                 procList = NULL;
+      for ( i = 0; i < nNodesExt; i++ ) procList[i] = 0;
+      for ( i = 0; i < nNodesExt; i++ ) 
+         procList[owner[index]] += ncols[i+nNodes] + 2;
+      nSends = 0;
+      for ( i = 0; i < mypid; i++ ) if ( procList[i] > 0 ) nSends++;
+      sendLengs = NULL;
+      sendProcs = NULL;
+      sendBufs  = NULL;
+      if ( nSends > 0 ) 
+      {
+         sendLengs = new int[nSends];
+         sendProcs = new int[nSends];
+         sendBufs  = new int*[nSends];
+         nSends = 0;
+         for ( i = 0; i < mypid; i++ ) 
+         {
+            if ( procList[i] > 0 ) 
+            {
+               sendLengs[nSends] = procList[i];
+               sendProcs[nSends] = i;
+               sendBufs[i] = new int[sendLengs[nSends]];
+               sendLengs[nSends] = 0;
+               nSends++;
+            }
+         }
+         nSends = 0;
+         for ( i = 0; i < mypid; i++ ) 
+            if ( procList[i] > 0 ) procList[i] = nSends++; 
+         for ( i = 0; i < nNodesExt; i++ ) owner[i] = procList[owner[i]];
+         for ( i = 0; i < nNodesExt; i++ ) 
+         {
+            sendBufs[owner[i]][sendLengs[owner[i]]++] = nodeList[i+nNodes];
+            sendBufs[owner[i]][sendLengs[owner[i]]++] = ncols[i+nNodes];
+            for ( j = 0; j < ncols[i+nNodes]; j++ ) 
+               sendBufs[owner[i]][sendLengs[owner[i]]++] = cols[i+nNodes][j];
+         }
+      }
+
+      // let the receiver knows about its intent to send
+
+      procList = new int[nprocs];
+      procTemp = new int[nprocs];
+      for ( i = 0; i < nprocs; i++ ) procTemp[i] = 0;
+      for ( i = 0; i < nSends; i++ ) procTemp[sendProcs[i]] = 1;
+      MPI_Allreduce(procTemp,procList,nprocs,MPI_INT,MPI_SUM,mpiComm_);
+      nRecvs = procList[mypid];
+      delete [] procList;
+      delete [] procTemp;
+      recvLengs = NULL;
+      recvProcs = NULL;
+      recvBufs  = NULL;
+      request   = NULL;
+      if ( nRecvs > 0 )
+      {
+         request = new MPI_Request[nRecvs];
+         recvLengs = new int[nRecvs];
+         pSrc = MPI_ANY_SOURCE;
+         msgID = 33420;
+         for ( i = 0; i < nRecvs; i++ ) 
+            MPI_Irecv(&recvLengs[i],1,MPI_INT,pSrc,msgID,mpiComm_,&request[i]);
+      }
+      if ( nSends > 0 )
+      {
+         msgID = 33420;
+         for ( i = 0; i < nSends; i++ ) 
+            MPI_Send(&sendLengs[i],1,MPI_INT,sendProcs[i],msgID,mpiComm_);
+      }
+      if ( nRecvs > 0 )
+      {
+         recvProcs = new int[nRecvs];
+         recvBufs  = new int*[nRecvs];
+         for ( i = 0; i < nRecvs; i++ ) 
+         {
+            MPI_Wait( &request[i], &status );
+            recvProcs[i] = status.MPI_SOURCE;
+            recvBufs[i]  = new int[recvLengs[i]];
+         }
+      }
+      
+      // now send/receive the external information
+
+      if ( nRecvs > 0 )
+      {
+         msgID = 33421;
+         for ( i = 0; i < nRecvs; i++ ) 
+         {
+            pSrc   = recvProcs[i];
+            length = recvLengs[i];
+            iBuf   = recvBufs[i];
+            MPI_Irecv(iBuf,length,MPI_INT,pSrc,msgID,mpiComm_,&request[i]);
+         }
+      }
+      if ( nSends > 0 )
+      {
+         msgID = 33421;
+         for ( i = 0; i < nSends; i++ ) 
+         {
+            pSrc   = sendProcs[i];
+            length = sendLengs[i];
+            iBuf   = sendBufs[i];
+            MPI_Send(iBuf, length, MPI_INT, pSrc, msgID, mpiComm_);
+         }
+      }
+      if ( nRecvs > 0 )
+      {
+         for ( i = 0; i < nRecvs; i++ ) MPI_Wait( &request[i], &status );
+      }
       
       // owners of shared nodes receive data
 
-      for( i = 0; i < numSharedNodes; i++ )
+      for( i = 0; i < nRecvs; i++ )
       {
-         ind[i] = MLI_Utils_BinarySearch(sharedNodeList[i], nodeList, 
-                                         nNodes);
-	  
-         // the shared node is owned by this subdomain
- 
-         if (ind[i] >= 0)
+         ncnt = 0;
+         while ( ncnt < recvLengs[i] )
          {
-            for ( j = 0; j < sharedNodeNProcs[i]; j++ )
-               if ( sharedNodeProc[i][j] != mypid )
-               {
-                   MPI_Recv( Buf, 100, MPI_INT, MPI_ANY_SOURCE,
-                             MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
-                   MPI_Get_count( &Status, MPI_INT, &n);
-                   k = MLI_Utils_BinarySearch( Status.MPI_TAG, nodeList, 
-                                               nNodes);
-                   columns = new int[ncols[k]+n];
-                   for ( l = 0; l < ncols[k]; l++ ) columns[l] = cols[k][l];
-                   for ( l = 0; l < n; l++ ) columns[ncols[k]++] = Buf[l];
-                   delete [] cols[k];
-                   cols[k] = columns;
-               }
+            nodeGID = recvBufs[i][ncnt++];
+            length  = recvBufs[i][ncnt++];
+            iBuf    = recvBufs[i];
+            index   = MLI_Utils_BinarySearch(nodeGID, nodeList, nNodes);
+            if ( index < 0 )
+            {
+               printf("updateNodeElemMatrix ERROR : in communication.\n");
+               exit(1);
+            }
+            columns = new int[ncols[index]+length];
+            for ( j = 0; j < ncols[index]; j++ ) columns[j] = cols[index][j];
+            for ( j = 0; j < length; j++ ) 
+               columns[ncols[index]++] = iBuf[j+ncnt];
+            ncnt += length;
+            delete [] cols[index];
+            cols[index] = columns;
          }
       }
-      delete [] ind;
+      delete [] procList;
       delete [] owner;
+      for ( i = 0; i < nSends; i++ ) delete [] sendBufs[i];
+      delete [] sendBufs;
+      delete [] sendLengs;
+      delete [] sendProcs;
+      for ( i = 0; i < nRecvs; i++ ) delete [] recvBufs[i];
+      delete [] recvBufs;
+      delete [] recvLengs;
+      delete [] recvProcs;
+      delete [] request;
       return 1;
    }
 
