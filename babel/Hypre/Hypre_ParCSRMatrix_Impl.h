@@ -35,6 +35,16 @@
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE.h"
 #include "utilities.h"
+#ifndef included_Hypre_IJBuildMatrix_h
+#include "Hypre_IJBuildMatrix.h"
+#endif
+#ifndef included_Hypre_Operator_h
+#include "Hypre_Operator.h"
+#endif
+
+extern Hypre_IJBuildMatrix Hypre_cast_ParCSRMatrix_to_IJBuildMatrix( Hypre_ParCSRMatrix );
+extern Hypre_Operator Hypre_cast_ParCSRMatrix_to_Operator( Hypre_ParCSRMatrix );
+extern Hypre_ParCSRMatrix Hypre_cast_BaseInterface_to_ParCSRMatrix( SIDL_BaseInterface );
 
 /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix._includes) */
 

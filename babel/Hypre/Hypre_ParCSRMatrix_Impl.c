@@ -36,6 +36,8 @@
 
 /* following is to help debugging... */
 #include "../babel-runtime/sidl/SIDL_BaseClass_Impl.h"
+#include "Hypre_IJBuildMatrix.h"
+#include "Hypre_Operator.h"
 
 int
 Hypre_ParCSRMatrix_ReferenceCount(
@@ -50,6 +52,24 @@ Hypre_ParCSRMatrix_ReferenceCount(
       return 0;
 }
 /* ... end of section for debugging aids */
+
+Hypre_IJBuildMatrix Hypre_cast_ParCSRMatrix_to_IJBuildMatrix( Hypre_ParCSRMatrix self )
+{
+   return (Hypre_IJBuildMatrix) Hypre_ParCSRMatrix__cast2
+      ( self, "Hypre.IJBuildMatrix" );
+}
+
+Hypre_Operator Hypre_cast_ParCSRMatrix_to_Operator( Hypre_ParCSRMatrix self )
+{
+   return (Hypre_Operator) Hypre_ParCSRMatrix__cast2
+      ( self, "Hypre.Operator" );
+}
+
+Hypre_ParCSRMatrix Hypre_cast_BaseInterface_to_ParCSRMatrix( SIDL_BaseInterface self )
+{
+   return SIDL_BaseInterface__cast2( self, "Hypre.ParCSRMatrix" );
+}
+
 /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix._includes) */
 
 /*

@@ -34,6 +34,16 @@
 #include "HYPRE_parcsr_ls.h"
 #include "krylov.h"
 #include <assert.h>
+#ifndef included_Hypre_Solver_h
+#include "Hypre_Solver.h"
+#endif
+
+Hypre_Solver Hypre_cast_ParDiagScale_to_Solver( Hypre_ParDiagScale self )
+{
+   return (Hypre_Solver) Hypre_ParDiagScale__cast2
+      ( self, "Hypre.Solver" );
+}
+
 /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale._includes) */
 
 /*

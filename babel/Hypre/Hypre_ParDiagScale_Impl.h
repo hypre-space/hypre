@@ -35,6 +35,12 @@
 #include "HYPRE.h"
 #include "utilities.h"
 #include "Hypre_ParCSRMatrix.h"
+#ifndef included_Hypre_Solver_h
+#include "Hypre_Solver.h"
+#endif
+
+extern Hypre_Solver Hypre_cast_ParDiagScale_to_Solver( Hypre_ParDiagScale );
+
 /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale._includes) */
 
 /*

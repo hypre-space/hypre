@@ -61,6 +61,29 @@ Hypre_ParCSRVector_ReferenceCount(
 }
 /* ... end of section for debugging aids */
 
+Hypre_IJBuildVector Hypre_cast_ParCSRVector_to_IJBuildVector( Hypre_ParCSRVector self )
+{
+   return (Hypre_IJBuildVector) Hypre_ParCSRVector__cast2
+      ( self, "Hypre.IJBuildVector" );
+}
+
+Hypre_Vector Hypre_cast_ParCSRVector_to_Vector( Hypre_ParCSRVector self )
+{
+   return (Hypre_Vector) Hypre_ParCSRVector__cast2
+      ( self, "Hypre.Vector" );
+}
+
+Hypre_ParCSRVector Hypre_cast_Vector_to_ParCSRVector( Hypre_Vector self )
+{
+   return (Hypre_ParCSRVector) Hypre_Vector__cast2
+      ( self, "Hypre.ParCSRVector" );
+}
+
+Hypre_ParCSRVector Hypre_cast_BaseInterface_to_ParCSRVector( SIDL_BaseInterface self )
+{
+   return SIDL_BaseInterface__cast2( self, "Hypre.ParCSRVector" );
+}
+
 /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector._includes) */
 
 /*

@@ -35,6 +35,15 @@
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE.h"
 #include "utilities.h"
+#ifndef included_Hypre_IJBuildVector_h
+#include "Hypre_IJBuildVector.h"
+#endif
+
+extern Hypre_IJBuildVector Hypre_cast_ParCSRVector_to_IJBuildVector( Hypre_ParCSRVector );
+extern Hypre_Vector Hypre_cast_ParCSRVector_to_Vector( Hypre_ParCSRVector );
+extern Hypre_ParCSRVector Hypre_cast_Vector_to_ParCSRVector( Hypre_Vector );
+extern Hypre_ParCSRVector Hypre_cast_BaseInterface_to_ParCSRVector( SIDL_BaseInterface );
+
 /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector._includes) */
 
 /*
