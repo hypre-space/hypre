@@ -21,7 +21,7 @@
 //#ifndef NOFEI 
 //#include "LinearSystemCore.h"
 //#include "LSC.h"
-#endif
+//#endif
 //##############################################
 
 //############### 2.0 includes #################
