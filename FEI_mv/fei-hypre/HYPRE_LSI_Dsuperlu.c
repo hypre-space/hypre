@@ -71,7 +71,7 @@ int HYPRE_LSI_DSuperLUCreate( MPI_Comm comm, HYPRE_Solver *solver )
    
    sluPtr = (HYPRE_LSI_DSuperLU *) malloc(sizeof(HYPRE_LSI_DSuperLU));
 
-   assert (sluPtr);
+   assert ( sluPtr != NULL );
 
    sluPtr->comm_            = comm;
    sluPtr->Amat_            = NULL;
@@ -199,9 +199,9 @@ int HYPRE_LSI_DSuperLUSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    }
    procMaps  = sluPtr->procMaps_;
    procLengs = sluPtr->procLengs_;
-   assert ( procMaps );
-   assert ( procLengs );
-   for (ig = 0; ig < numGrids; ig++) assert( procMaps[ig] );
+   assert ( procMaps != NULL );
+   assert ( procLengs != NULL );
+   for (ig = 0; ig < numGrids; ig++) assert( procMaps[ig] != NULL );
 
    /* ---------------------------------------------------------------- */
    /* compute grid information                                         */
@@ -209,7 +209,7 @@ int HYPRE_LSI_DSuperLUSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
 
    sluPtr->sluGrids_ = (gridinfo_t **) malloc(numGrids*sizeof(gridinfo_t*));
    sluGrids = sluPtr->sluGrids_;
-   assert ( sluGrids );
+   assert ( sluGrids != NULL );
    for ( ig = 0; ig < numGrids; ig++ )
    {
       ilMinInd = 1;
@@ -341,7 +341,7 @@ int HYPRE_LSI_DSuperLUSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    ldb  = ldx;
    nrhs = 1;
    berr = (double *) malloc( sizeof(double) );
-   assert( berr );
+   assert( berr != NULL );
 
    /* ---------------------------------------------------------------- */
    /* solve                                                            */
@@ -478,7 +478,7 @@ int HYPRE_LSI_DSuperLUGetMatrix( HYPRE_Solver solver )
    for ( ip = 1; ip < newNprocs; ip++ )
       displArray[ip] = displArray[ip-1] + recvCntArray[ip-1];
    gcsrIA = (int *) malloc( (globalNRows+1) * sizeof(int) );
-   assert( gcsrIA );
+   assert( gcsrIA != NULL );
    MPI_Allgatherv(csrIA, localNRows, MPI_INT, gcsrIA,
                   recvCntArray, displArray, MPI_INT, newComm);
    sluPtr->recvArray_ = recvCntArray;
@@ -501,11 +501,11 @@ int HYPRE_LSI_DSuperLUGetMatrix( HYPRE_Solver solver )
    for ( ip = 1; ip < newNprocs; ip++ )
       displArray[ip] = displArray[ip-1] + recvCntArray[ip-1];
    gcsrJA = (int *) malloc( globalNNZ * sizeof(int) );
-   assert( gcsrJA );
+   assert( gcsrJA != NULL );
    MPI_Allgatherv(csrJA, localNNZ, MPI_INT, gcsrJA, recvCntArray, 
                   displArray, MPI_INT, newComm);
    gcsrAA = (double *) malloc( globalNNZ * sizeof(double) );
-   assert( gcsrAA );
+   assert( gcsrAA != NULL );
    MPI_Allgatherv(csrAA, localNNZ, MPI_DOUBLE, gcsrAA, recvCntArray, 
                   displArray, MPI_DOUBLE, newComm);
 
