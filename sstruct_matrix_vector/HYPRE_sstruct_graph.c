@@ -153,9 +153,8 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
                               int                  part,
                               int                 *index,
                               int                  var,
-                              int                  nentries,
                               int                  to_part,
-                              int                **to_indexes,
+                              int                 *to_index,
                               int                  to_var )
 {
    int  ierr = 0;
@@ -171,8 +170,7 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
 
    hypre_BoxMapEntry     *map_entry;
    hypre_Index            cindex;
-   int                    rank;
-   int                    i, j, first;
+   int                    rank, i;
 
    /* compute location (rank) for Uventry */
    hypre_CopyToCleanIndex(index, ndim, cindex);
@@ -188,35 +186,30 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
       hypre_SStructUVEntryPart(Uventry) = part;
       hypre_CopyToCleanIndex(index, ndim, hypre_SStructUVEntryIndex(Uventry));
       hypre_SStructUVEntryVar(Uventry) = var;
-      first = 0;
-      nUentries = nentries;
+      nUentries = 1;
       Uentries = hypre_TAlloc(hypre_SStructUEntry, nUentries);
    }
    else
    {
       Uventry = Uventries[rank];
-      first = hypre_SStructUVEntryNUEntries(Uventry);
-      nUentries = first + nentries;
+      nUentries = hypre_SStructUVEntryNUEntries(Uventry) + 1;
       Uentries = hypre_SStructUVEntryUEntries(Uventry);
       Uentries = hypre_TReAlloc(Uentries, hypre_SStructUEntry, nUentries);
    }
    hypre_SStructUVEntryNUEntries(Uventry) = nUentries;
    hypre_SStructUVEntryUEntries(Uventry)  = Uentries;
 
-   for (i = 0; i < nentries; i++)
-   {
-      j = first + i;
-      hypre_SStructUVEntryToPart(Uventry, j) = to_part;
-      hypre_CopyToCleanIndex(to_indexes[i], ndim,
-                             hypre_SStructUVEntryToIndex(Uventry, j));
-      hypre_SStructUVEntryToVar(Uventry, j) = to_var;
-   }
+   i = nUentries - 1;
+   hypre_SStructUVEntryToPart(Uventry, i) = to_part;
+   hypre_CopyToCleanIndex(to_index, ndim,
+                          hypre_SStructUVEntryToIndex(Uventry, i));
+   hypre_SStructUVEntryToVar(Uventry, i) = to_var;
 
    Uventries[rank] = Uventry;
 
    hypre_SStructGraphNUVEntries(graph) ++;
    hypre_SStructGraphUVEntries(graph) = Uventries;
-   hypre_SStructGraphTotUEntries(graph) += nentries;
+   hypre_SStructGraphTotUEntries(graph) ++;
 
    return ierr;
 }

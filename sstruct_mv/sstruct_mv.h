@@ -634,7 +634,7 @@ typedef struct hypre_SStructVector_struct
 int HYPRE_SStructGraphCreate( MPI_Comm comm , HYPRE_SStructGrid grid , HYPRE_SStructGraph *graph_ptr );
 int HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph );
 int HYPRE_SStructGraphSetStencil( HYPRE_SStructGraph graph , int part , int var , HYPRE_SStructStencil stencil );
-int HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph graph , int part , int *index , int var , int nentries , int to_part , int **to_indexes , int to_var );
+int HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph graph , int part , int *index , int var , int to_part , int *to_index , int to_var );
 int HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph );
 
 /* HYPRE_sstruct_grid.c */

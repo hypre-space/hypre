@@ -272,9 +272,9 @@ int HYPRE_SStructGraphSetStencil(HYPRE_SStructGraph   graph,
                                  HYPRE_SStructStencil stencil);
 
 /**
- * Add non-stencil graph entries at a particular index.  These graph
- * entries are appended to the existing graph entries, and are
- * referenced as such.
+ * Add a non-stencil graph entry at a particular index.  This graph
+ * entry is appended to the existing graph entries, and is referenced
+ * as such.
  *
  * NOTE: Users are required to set graph entries on all processes that
  * own the associated variables.  This means that some data will be
@@ -284,9 +284,8 @@ int HYPRE_SStructGraphAddEntries(HYPRE_SStructGraph   graph,
                                  int                  part,
                                  int                 *index,
                                  int                  var,
-                                 int                  nentries,
                                  int                  to_part,
-                                 int                **to_indexes,
+                                 int                 *to_index,
                                  int                  to_var);
 
 /**

@@ -1011,7 +1011,6 @@ main( int   argc,
 
    Index                 ilower, iupper;
    Index                 index, to_index;
-   int                 **to_index_ptr;
    double               *values;
 
    int                   num_iterations;
@@ -1224,8 +1223,6 @@ main( int   argc,
     * Set up the graph
     *-----------------------------------------------------------*/
 
-   to_index_ptr = hypre_TAlloc(int *, 1);
-
    HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
    for (part = 0; part < data.nparts; part++)
    {
@@ -1262,11 +1259,10 @@ main( int   argc,
                         (pdata.graph_to_strides[entry][j] /
                          pdata.graph_strides[entry][i]);
                   }
-                  to_index_ptr[0] = to_index;
                   HYPRE_SStructGraphAddEntries(graph, part, index,
                                                pdata.graph_vars[entry],
-                                               1, pdata.graph_to_parts[entry],
-                                               to_index_ptr,
+                                               pdata.graph_to_parts[entry],
+                                               to_index,
                                                pdata.graph_to_vars[entry]);
                }
             }
@@ -1275,8 +1271,6 @@ main( int   argc,
    }
 
    HYPRE_SStructGraphAssemble(graph);
-
-   hypre_TFree(to_index_ptr);
 
    /*-----------------------------------------------------------
     * Set up the matrix
