@@ -212,6 +212,10 @@ void    *data;
 
    WriteSetupParams(amg_data);   
    CALL_SETUP(Setup_err_flag, A, amg_data);
+   if (Setup_err_flag != 0)
+   {
+      return(Setup_err_flag);
+   }
    
    /*----------------------------------------------------------
     * Set some local variables
