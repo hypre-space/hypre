@@ -1,4 +1,4 @@
-/*BHEADER**********************************************************************
+/*bhEADER**********************************************************************
  * (c) 2001   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
@@ -7,7 +7,6 @@
  *********************************************************************EHEADER*/
 
 #include <string.h>
-#include <iostream.h>
 #include "parcsr_mv/parcsr_mv.h"
 #include "base/mli_defs.h"
 #include "solver/mli_solver_schwarz.h"
@@ -24,13 +23,14 @@
 MLI_Solver_Schwarz::MLI_Solver_Schwarz() : MLI_Solver(MLI_SOLVER_SCHWARZ_ID)
 {
    Amat_             = NULL;
-   nBlocks_          = 400;
+   nBlocks_          = 0;
    blockLengths_     = NULL;
    blockIndices_     = NULL;
    blockInverses_    = NULL;
    relaxWeights_     = NULL;
    nSweeps_          = 1;
    zeroInitialGuess_ = 0;
+   useOverlap_       = 1;
 }
 
 /******************************************************************************
@@ -65,7 +65,7 @@ MLI_Solver_Schwarz::~MLI_Solver_Schwarz()
 
 int MLI_Solver_Schwarz::setup(MLI_Matrix *Amat_in)
 {
-   int                nprocs, *offRowIndices=NULL, offNRows;
+   int                mypid, nprocs, *offRowIndices=NULL, offNRows=0;
    int                *offRowLengths=NULL, *offCols=NULL;
    double             *offVals=NULL;
    MPI_Comm           comm;
@@ -79,12 +79,13 @@ int MLI_Solver_Schwarz::setup(MLI_Matrix *Amat_in)
    A     = (hypre_ParCSRMatrix *) Amat_->getMatrix();
    comm  = hypre_ParCSRMatrixComm(A);
    MPI_Comm_size(comm,&nprocs);  
+   MPI_Comm_rank(comm,&mypid);  
    
    /*-----------------------------------------------------------------
     * fetch the extended (to other processors) portion of the matrix 
     *-----------------------------------------------------------------*/
 
-   if ( nprocs > 1 )
+   if ( nprocs > 1 && useOverlap_ != 0 )
       composedOverlappedMatrix(&offNRows, &offRowIndices, 
                   &offRowLengths, &offCols, &offVals);
 
@@ -115,20 +116,17 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    int     ip, nRecvs, *recvProcs, *recvStarts, nRecvBefore, offNRows;
    int     blockStartRow, ib, is, js, blockSize, blockEndRow, blkLeng;
    int     localNRows, iStart, iEnd, irow, jcol, colIndex, index, mypid;
-   int     nSends, numColsOffd, start, relaxError=0;
-   int     nprocs, *tmpJ, *partition, startRow, endRow;
+   int     nSends, numColsOffd, start, relaxError=0, maxBlkLeng;
+   int     nprocs, *partition, startRow, endRow, *tmpJ;
    int     *ADiagI, *ADiagJ, *AOffdI, *AOffdJ;
-   double  *ADiagA, *AOffdA, *uData, *fData;
-   double  relaxWeight, *vBufData, *tmpA, *vExtData, res, *Ax;
+   double  *ADiagA, *AOffdA, *uData, *fData, *tmpA, ddiag;
+   double  relaxWeight, *vBufData, *vExtData, res, *blkAX, *blkX;
    MPI_Comm               comm;
    hypre_ParCSRMatrix     *A;
    hypre_CSRMatrix        *ADiag, *AOffd;
    hypre_ParCSRCommPkg    *commPkg;
    hypre_ParCSRCommHandle *commHandle;
    hypre_ParVector        *f, *u;
-
-cout << "Schwarz smoother not available yet. \n";
-exit(1);
 
    /*-----------------------------------------------------------------
     * fetch machine and smoother parameters
@@ -155,7 +153,7 @@ exit(1);
    MPI_Comm_rank(comm,&mypid);  
    MPI_Comm_size(comm,&nprocs);  
    startRow    = partition[mypid];
-   endRow      = partition[mypid+1];
+   endRow      = partition[mypid+1] - 1;
    nRecvBefore = 0;
    offNRows    = 0;
    if ( nprocs > 1 )
@@ -163,13 +161,15 @@ exit(1);
       nRecvs      = hypre_ParCSRCommPkgNumRecvs(commPkg);
       recvProcs   = hypre_ParCSRCommPkgRecvProcs(commPkg);
       recvStarts  = hypre_ParCSRCommPkgRecvVecStarts(commPkg);
-      for ( ip = 0; ip < nRecvs; ip++ )
-         if ( recvProcs[ip] > mypid ) break;
-      nRecvBefore = recvStarts[ip];
-      offNRows    = recvStarts[nRecvs];
+      if ( useOverlap_ )
+      {
+         for ( ip = 0; ip < nRecvs; ip++ )
+            if ( recvProcs[ip] > mypid ) break;
+         nRecvBefore = recvStarts[ip];
+         offNRows    = recvStarts[nRecvs];
+      } 
    }
-   if ( nBlocks_ == localNRows ) blockSize = 1;
-   else                          blockSize = (localNRows+offNRows)/nBlocks_;
+   blockSize = ( localNRows + offNRows ) / nBlocks_;
 
    /*-----------------------------------------------------------------
     * setting up for interprocessor communication
@@ -189,9 +189,18 @@ exit(1);
    }
 
    /*-----------------------------------------------------------------
-    * perform SGS sweeps
+    * perform block SGS sweeps
     *-----------------------------------------------------------------*/
  
+   maxBlkLeng = 1;
+   if ( blockLengths_ != NULL ) 
+   {
+      for ( ib = 0; ib < nBlocks_; ib++ )
+         if (blockLengths_[ib] > maxBlkLeng) maxBlkLeng = blockLengths_[ib];
+   }
+   blkX  = new double[maxBlkLeng];
+   blkAX = new double[maxBlkLeng];
+
    for( is = 0; is < nSweeps_; is++ )
    {
       if ( relaxWeights_ != NULL ) relaxWeight = relaxWeights_[is];
@@ -231,27 +240,23 @@ exit(1);
          else                         blkLeng = 1;
          blockStartRow = ib * blockSize + startRow - nRecvBefore;
          blockEndRow   = blockStartRow + blkLeng - 1;
-         Ax = new double[blkLeng];
 
-         for ( irow = blockStartRow; irow < blockEndRow; irow++ )
+         for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
          {
+            index  = irow - startRow;
             if ( irow < startRow )
             {
+               ddiag = 1.0;
             }
             else if ( irow <= endRow )
             {
-               index  = irow - startRow;
                iStart = ADiagI[index];
                iEnd   = ADiagI[index+1];
                tmpJ   = &(ADiagJ[iStart]);
                tmpA   = &(ADiagA[iStart]);
                res    = fData[index];
                for (jcol = iStart; jcol < iEnd; jcol++)
-               {
-                  colIndex = tmpJ[jcol];
-                  if ( colIndex >= blockStartRow && colIndex <= blockEndRow )
-                     res -= tmpA[jcol] * uData[colIndex];
-               }
+                  res -= *tmpA++ * uData[*tmpJ++];
                if ( ! zeroInitialGuess_)
                {
                   iStart = AOffdI[index];
@@ -259,33 +264,34 @@ exit(1);
                   tmpJ   = &(AOffdJ[iStart]);
                   tmpA   = &(AOffdA[iStart]);
                   for (jcol = iStart; jcol < iEnd; jcol++)
-                  {
-                     colIndex = tmpJ[jcol];
-                     if (colIndex >= blockStartRow && colIndex <= blockEndRow)
-                     res -= tmpA[jcol] * uData[colIndex];
-                  }
+                     res -= *tmpA++ * vExtData[*tmpJ++];
                }
-               Ax[irow-blockStartRow] = res;
+               blkX[irow-blockStartRow] = res;
+               ddiag = 1.0 / ADiagA[ADiagI[index]];
             } 
             else if ( irow > endRow )
             {
+               ddiag = 1.0;
             }
          }
-         //MLI_Utils_Matvec(blockInverses_[ib], blkLeng, Ax);
-         for ( irow = blockStartRow; irow < blockEndRow; irow++ )
+
+         if ( blkLeng == 1 ) blkAX[0] = blkX[0] * ddiag;
+         else 
+            MLI_Utils_Matvec(blockInverses_[ib], blkLeng, blkX, blkAX);
+
+         for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
          {
             if ( irow < startRow )
             {
             }
             else if ( irow <= endRow )
             { 
-               uData[irow-startRow] += relaxWeight * Ax[irow-blockStartRow];
+               uData[irow-startRow] += relaxWeight * blkAX[irow-blockStartRow];
             }
             else 
             {
             }
          }
-         delete [] Ax;
       }
 
       /*-----------------------------------------------------------------
@@ -298,27 +304,23 @@ exit(1);
          else                         blkLeng = 1;
          blockStartRow = ib * blockSize + startRow - nRecvBefore;
          blockEndRow   = blockStartRow + blkLeng - 1;
-         Ax = new double[blkLeng];
 
-         for ( irow = blockStartRow; irow < blockEndRow; irow++ )
+         for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
          {
+            index  = irow - startRow;
             if ( irow < startRow )
             {
+               ddiag = 1.0;
             }
             else if ( irow <= endRow )
             {
-               index  = irow - startRow;
                iStart = ADiagI[index];
                iEnd   = ADiagI[index+1];
+               res    = fData[index];
                tmpJ   = &(ADiagJ[iStart]);
                tmpA   = &(ADiagA[iStart]);
-               res    = fData[index];
                for (jcol = iStart; jcol < iEnd; jcol++)
-               {
-                  colIndex = tmpJ[jcol];
-                  if ( colIndex >= blockStartRow && colIndex <= blockEndRow )
-                     res -= tmpA[jcol] * uData[colIndex];
-               }
+                  res -= *tmpA++ * uData[*tmpJ++];
                if ( ! zeroInitialGuess_ )
                {
                   iStart = AOffdI[index];
@@ -326,33 +328,34 @@ exit(1);
                   tmpJ   = &(AOffdJ[iStart]);
                   tmpA   = &(AOffdA[iStart]);
                   for (jcol = iStart; jcol < iEnd; jcol++)
-                  {
-                     colIndex = tmpJ[jcol];
-                     if (colIndex >= blockStartRow && colIndex <= blockEndRow)
-                     res -= tmpA[jcol] * uData[colIndex];
-                  }
+                     res -= *tmpA++ * vExtData[*tmpJ++];
                }
-               Ax[irow-blockStartRow] = res;
+               blkX[irow-blockStartRow] = res;
+               ddiag = 1.0 / ADiagA[ADiagI[index]];
             } 
             else if ( irow > endRow )
             {
+               ddiag = 1.0;
             }
          }
-         //MLI_Utils_Matvec(blockInverses_[ib], blkLeng, Ax);
-         for ( irow = blockStartRow; irow < blockEndRow; irow++ )
+
+         if ( blkLeng == 1 ) blkAX[0] = blkX[0] * ddiag;
+         else 
+            MLI_Utils_Matvec(blockInverses_[ib], blkLeng, blkX, blkAX);
+
+         for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
          {
             if ( irow < startRow )
             {
             }
             else if ( irow <= endRow )
             { 
-               uData[irow-startRow] += relaxWeight * Ax[irow-blockStartRow];
+               uData[irow-startRow] += relaxWeight * blkAX[irow-blockStartRow];
             }
             else 
             {
             }
          }
-         delete [] Ax;
       }
       zeroInitialGuess_ = 0;
    }
@@ -366,6 +369,8 @@ exit(1);
       delete [] vExtData;
       delete [] vBufData;
    }
+   delete [] blkAX;
+   delete [] blkX;
    return(relaxError); 
 }
 
@@ -375,22 +380,46 @@ exit(1);
 
 int MLI_Solver_Schwarz::setParams(char *param_string, int argc, char **argv)
 {
+   int    i;
+   double *weights;
    char   param1[200];
 
-   (void) argc;
-   (void) argv;
-   if ( !strcmp(param_string, "nblocks") )
+   if ( !strcasecmp(param_string, "nblocks") )
    {
       sscanf(param_string, "%s %d", param1, &nBlocks_);
       if ( nBlocks_ < 1 ) nBlocks_ = -1;
       return 0;
    }
-   else
-   {   
-      cout << "MLI_Solver_Schwarz::setParams - parameter not recognized.\n";
-      cout << "              Params = " << param_string << endl;
-      return 1;
+   else if ( !strcasecmp(param_string, "numSweeps") )
+   {
+      sscanf(param_string, "%s %d", param1, &nSweeps_);
+      if ( nSweeps_ < 1 ) nSweeps_ = 1;
+      return 0;
    }
+   else if ( !strcasecmp(param_string, "relaxWeight") )
+   {
+      if ( argc != 2 && argc != 1 ) 
+      {
+         printf("Solver_Schwarz::setParams ERROR : needs 1 or 2 args.\n");
+         return 1;
+      }
+      if ( argc >= 1 ) nSweeps_ = *(int*)   argv[0];
+      if ( argc == 2 ) weights  = (double*) argv[1];
+      if ( nSweeps_ < 1 ) nSweeps_ = 1;
+      if ( relaxWeights_ != NULL ) delete [] relaxWeights_;
+      relaxWeights_ = NULL;
+      if ( weights != NULL )
+      {
+         relaxWeights_ = new double[nSweeps_];
+         for ( i = 0; i < nSweeps_; i++ ) relaxWeights_[i] = weights[i];
+      }
+   }
+   else if ( !strcasecmp(param_string, "zeroInitialGuess") )
+   {
+      zeroInitialGuess_ = 1;
+      return 0;
+   }
+   return 1;
 }
 
 /******************************************************************************
@@ -432,7 +461,7 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(int *offNRows,
     *-----------------------------------------------------------------*/
 
    extNRows = localNRows;
-   if ( nprocs > 1 )
+   if ( nprocs > 1 && useOverlap_ )
    {
       commPkg    = hypre_ParCSRMatrixCommPkg(A);
       nSends     = hypre_ParCSRCommPkgNumSends(commPkg);
@@ -541,7 +570,7 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(int *offNRows,
                 &requests[reqNum++]);
    }
    status = new MPI_Status[reqNum];
-   MPI_Waitall( reqNum, requests, status );
+   if ( reqNum > 0 ) MPI_Waitall( reqNum, requests, status );
    delete [] status;
    if ( totalSendNnz > 0 ) delete [] iSendBuf;
 
@@ -584,11 +613,11 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(int *offNRows,
                 &requests[reqNum++]);
    }
    status = new MPI_Status[reqNum];
-   MPI_Waitall( reqNum, requests, status );
+   if ( reqNum > 0 ) MPI_Waitall( reqNum, requests, status );
    delete [] status;
    if ( totalSendNnz > 0 ) delete [] dSendBuf;
 
-   if ( nprocs > 1 ) delete [] requests;
+   if ( nprocs > 1 && useOverlap_ ) delete [] requests;
 
    if ( totalRecvNnz > 0 )
    {
@@ -660,7 +689,7 @@ int MLI_Solver_Schwarz::buildBlocks(int offNRows,
    startRow   = partition[mypid];
    endRow     = partition[mypid+1] - 1;
    localNRows = endRow - startRow + 1;
-   if ( nprocs > 1 )
+   if ( nprocs > 1 && useOverlap_ )
    {
       commPkg     = hypre_ParCSRMatrixCommPkg(A);
       nRecvs      = hypre_ParCSRCommPkgNumRecvs(commPkg);
@@ -678,12 +707,13 @@ int MLI_Solver_Schwarz::buildBlocks(int offNRows,
     * for now assuming contiguity)
     *-----------------------------------------------------------------*/
 
-   if ( nBlocks_ < 0 ) 
+   if ( nBlocks_ <= 0 ) nBlocks_ = ( localNRows + offNRows ) / 10;
+   if ( nBlocks_ >= (localNRows+offNRows) ) 
    {
-      nBlocks_ = localNRows;
+      nBlocks_ = localNRows + offNRows;
       return 0;
    }
-   blockSize = (localNRows + offNRows) / nBlocks_;
+   else blockSize = (localNRows + offNRows) / nBlocks_;
    blockLengths_ = new int[nBlocks_];
    for ( ib = 0; ib < nBlocks_; ib++ ) blockLengths_[ib] = blockSize;
    blockLengths_[nBlocks_-1] = localNRows+offNRows-blockSize*(nBlocks_-1);

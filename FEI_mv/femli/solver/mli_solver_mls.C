@@ -8,7 +8,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
 #include <stdio.h>
 #include <math.h>
 
@@ -29,7 +28,7 @@ MLI_Solver_MLS::MLI_Solver_MLS() : MLI_Solver(MLI_SOLVER_MLS_ID)
    mli_Wtemp = NULL;
    mli_Ytemp = NULL;
    max_eigen = -1.0;
-   mlsDeg    = 1;
+   mlsDeg    = 4;
    mlsBoost  = 1.1;
    mlsOver   = 1.1;
    for ( int i = 0; i < 5; i++ ) mlsOm[i] = 0.0;
@@ -69,7 +68,7 @@ int MLI_Solver_MLS::setup(MLI_Matrix *mat)
    Amat = mat;
    if ( max_eigen == 0.0 )
    {
-      cout << "MLI_Solver_MLS ERROR : max_eigen <= 0.0.\n";
+      printf("MLI_Solver_MLS::setup ERROR - max_eigen <= 0.0.\n");
       exit(1);
    }
 
@@ -159,7 +158,7 @@ int MLI_Solver_MLS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
    if ( max_eigen <= 0.0 )
    {
-      cout << "Solver_MLS::solver ERROR : max_eig <= 0.\n"; 
+      printf("MLI_Solver_MLS::solver ERROR - max_eig <= 0.\n"); 
       exit(1);
    }
 
@@ -325,15 +324,15 @@ int MLI_Solver_MLS::setParams( char *param_string, int argc, char **argv )
    {
       if ( argc != 2 && argc != 1 ) 
       {
-         cout << "Solver_MLS::setParams ERROR : needs 1 or 2 args.\n";
+         printf("MLI_Solver_MLS::setParams ERROR : needs 1 or 2 args.\n");
          return 1;
       }
       if ( argc == 2 ) weights = (double*) argv[1];
       max_eigen = weights[0];
       if ( max_eigen < 0.0 ) 
       {
-         cout << "Solver_MLS::setParams ERROR : max_eig <= 0 (" 
-              << max_eigen << ")\n";
+         printf("MLI_Solver_MLS::setParams ERROR - max_eig <= 0 (%e)\n", 
+                max_eigen);
          return 1;
       }
    }
@@ -352,7 +351,7 @@ int MLI_Solver_MLS::setParams( double eigen_in )
 {
    if ( max_eigen <= 0.0 )
    {
-      cerr << "Solver_MLS::setParams WARNING : max_eigen <= 0." << endl;
+      printf("MLI_Solver_MLS::setParams WARNING - max_eigen <= 0.\n");
       return 1; 
    }
    max_eigen = eigen_in;

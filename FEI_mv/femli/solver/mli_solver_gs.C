@@ -7,7 +7,6 @@
  *********************************************************************EHEADER*/
 
 #include <string.h>
-#include <iostream.h>
 #include "solver/mli_solver_gs.h"
 #include "base/mli_defs.h"
 #include "parcsr_mv/parcsr_mv.h"
@@ -18,7 +17,7 @@
 
 /******************************************************************************
  * constructor
- *****************************************************************************/
+ *---------------------------------------------------------------------------*/
 
 MLI_Solver_GS::MLI_Solver_GS() : MLI_Solver(MLI_SOLVER_GS_ID)
 {
@@ -242,17 +241,17 @@ int MLI_Solver_GS::setParams(char *param_string, int argc, char **argv)
    int    i;
    double *weights;
 
-   if ( !strcmp(param_string, "numSweeps") )
+   if ( !strcasecmp(param_string, "numSweeps") )
    {
       if ( argc == 1 ) nsweeps = *(int*) argv[0];
       if ( nsweeps < 1 ) nsweeps = 1;
       return 0;
    }
-   else if ( !strcmp(param_string, "relaxWeight") )
+   else if ( !strcasecmp(param_string, "relaxWeight") )
    {
       if ( argc != 2 && argc != 1 ) 
       {
-         cout << "Solver_GS::setParams ERROR : needs 1 or 2 args.\n";
+         printf("MLI_Solver_GS::setParams ERROR : needs 1 or 2 args.\n");
          return 1;
       }
       if ( argc >= 1 ) nsweeps = *(int*)   argv[0];
@@ -266,10 +265,10 @@ int MLI_Solver_GS::setParams(char *param_string, int argc, char **argv)
          for ( i = 0; i < nsweeps; i++ ) relax_weights[i] = weights[i];
       }
    }
-   else
+   else if ( strcasecmp(param_string, "zeroInitialGuess") )
    {   
-      cout << "MLI_Solver_GS::setParams - parameter not recognized.\n";
-      cout << "              Params = " << param_string << endl;
+      printf("MLI_Solver_GS::setParams - parameter not recognized.\n");
+      printf("              Params = %s\n", param_string);
       return 1;
    }
    return 0;
@@ -283,7 +282,7 @@ int MLI_Solver_GS::setParams( int ntimes, double *weights )
 {
    if ( ntimes <= 0 )
    {
-      cerr << "MLI_Solver_GS::setParams WARNING : nsweeps set to 1." << endl;
+      printf("MLI_Solver_GS::setParams WARNING : nsweeps set to 1.\n");
       ntimes = 1;
    }
    nsweeps = ntimes;
@@ -291,14 +290,15 @@ int MLI_Solver_GS::setParams( int ntimes, double *weights )
    relax_weights = new double[ntimes];
    if ( weights == NULL )
    {
-      cout << "MLI_Solver_GS::setParams - relax_weights set to 0.5." << endl;
+      printf("MLI_Solver_GS::setParams - relax_weights set to 0.5.\n");
       for ( int i = 0; i < ntimes; i++ ) relax_weights[i] = 0.5;
    }
    else
    {
       for ( int j = 0; j < ntimes; j++ ) 
       {
-         if (weights[j] >= 0. && weights[j] <= 2.) relax_weights[j] = weights[j];
+         if (weights[j] >= 0. && weights[j] <= 2.) 
+            relax_weights[j] = weights[j];
          else 
          {
             printf("MLI_Solver_GS::setParams - some weights set to 0.5.\n");

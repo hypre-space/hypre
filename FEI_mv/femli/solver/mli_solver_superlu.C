@@ -15,7 +15,6 @@
 #ifdef MLI_SUPERLU
 
 #include <string.h>
-#include <iostream.h>
 #include "base/mli_defs.h"
 #include "mli_solver_superlu.h"
 
@@ -70,9 +69,9 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
     * -------------------------------------------------------------*/
 
    mli_Amat = Amat;
-   if ( strcmp( mli_Amat->getName(), "HYPRE_ParCSR" ) )
+   if ( strcasecmp( mli_Amat->getName(), "HYPRE_ParCSR" ) )
    {
-      cout << "MLI_Solver_SuperLU setup ERROR : not HYPRE_ParCSR." << endl;
+      printf("MLI_Solver_SuperLU::setup ERROR - not HYPRE_ParCSR.\n");
       exit(1);
    }
    hypreA = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
@@ -255,7 +254,7 @@ int MLI_Solver_SuperLU::solve( MLI_Vector *f_in, MLI_Vector *u_in )
 
    if ( ! factorized )
    {
-      cout << "Solver_SuperLU Solve ERROR : not factorized yet." << endl;
+      printf("MLI_Solver_SuperLU::Solve ERROR - not factorized yet.\n");
       exit(1);
    }
 

@@ -21,7 +21,6 @@
  * --------------------------------------------------------------------------*/
 
 #include <string.h>
-#include <iostream.h>
 #include "base/mli_defs.h"
 #include "amgs/mli_method_amgsa.h"
 #include "mli_solver_arpacksuperlu.h"
@@ -245,12 +244,12 @@ int MLI_Solver_ARPACKSuperLU::setParams( char *paramString, int argc,
 {
    MLI_AMGSA_DD *ddObj;
 
-   if ( !strcmp(paramString, "ARPACKSuperLUObject") )
+   if ( !strcasecmp(paramString, "ARPACKSuperLUObject") )
    {
       if ( argc != 1 )
       {
-         cout << "Solver_ARPACKSuperLU::setParams - ARPACKSuperLUObj ";
-         cout << "allows only 1 argument.\n";
+         printf("MLI_Solver_ARPACKSuperLU::setParams - ARPACKSuperLUObj ");
+         printf("allows only 1 argument.\n");
       }
       ddObj         = (MLI_AMGSA_DD *) argv[0];
       nRecvs_       = ddObj->nRecvs;
@@ -266,10 +265,10 @@ int MLI_Solver_ARPACKSuperLU::setParams( char *paramString, int argc,
       SNodeEqnList_ = ddObj->SNodeEqnList;
       blockSize_    = ddObj->dofPerNode;
    }
-   else
+   else if ( strcasecmp(paramString, "zeroInitialGuess") )
    {   
-      cout << "Solver_ARPACKSuperLU::setParams - parameter not recognized.\n";
-      cout << "                Params = " << paramString << endl;
+      printf("Solver_ARPACKSuperLU::setParams - parameter not recognized.\n");
+      printf("                Params = %s\n", paramString);
       return 1;
    }
    return 0;

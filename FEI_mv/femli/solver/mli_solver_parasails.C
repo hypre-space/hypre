@@ -7,7 +7,6 @@
  *********************************************************************EHEADER*/
 
 #include <string.h>
-#include <iostream.h>
 
 #include "parcsr_mv/parcsr_mv.h"
 #include "base/mli_defs.h"
@@ -35,7 +34,8 @@ MLI_Solver_ParaSails::MLI_Solver_ParaSails()
    loadbal    = 0;        /* no load balance */
    factorized = 0;        /* not factorized */
 #else
-   cout << "ParaSails smoother not available.\n";
+   printf("MLI_Solver_ParaSails::constructor - ParaSails smoother ");
+   printf("not available.\n");
    exit(1);
 #endif
 }
@@ -110,7 +110,8 @@ int MLI_Solver_ParaSails::setup(MLI_Matrix *Amat_in)
    return 0;
 #else
    (void) Amat_in;
-   cout << "ParaSails smoother not available.\n";
+   printf("MLI_Solver_ParaSails::setup ERROR - ParaSails smoother ");
+   printf("not available.\n");
    exit(1);
    return 1;
 #endif
@@ -128,7 +129,8 @@ int MLI_Solver_ParaSails::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 #else
    (void) f_in;
    (void) u_in;
-   cout << "ParaSails smoother not available.\n";
+   printf("MLI_Solver_ParaSails::solve ERROR - ParaSails smoother \n");
+   printf("not available.\n");
    exit(1);
    return 1;
 #endif
@@ -142,30 +144,30 @@ int MLI_Solver_ParaSails::setParams(char *param_string, int argc, char **argv)
 {
    char param1[100];
 
-   if ( !strcmp(param_string, "nLevels") )
+   if ( !strcasecmp(param_string, "nLevels") )
    {
       sscanf(param_string, "%s %d", param1, &nlevels);
       if ( nlevels < 0 ) nlevels = 0;
    }
-   else if ( !strcmp(param_string, "symmetric") )   symmetric  = 1;
-   else if ( !strcmp(param_string, "unsymmetric") ) symmetric  = 0;
-   else if ( !strcmp(param_string, "factorized") )  factorized = 1;
-   else if ( !strcmp(param_string, "transpose") )   transpose  = 1;
-   else if ( !strcmp(param_string, "loadbal") )     loadbal    = 1;
-   else if ( !strcmp(param_string, "threshold") )
+   else if ( !strcasecmp(param_string, "symmetric") )   symmetric  = 1;
+   else if ( !strcasecmp(param_string, "unsymmetric") ) symmetric  = 0;
+   else if ( !strcasecmp(param_string, "factorized") )  factorized = 1;
+   else if ( !strcasecmp(param_string, "transpose") )   transpose  = 1;
+   else if ( !strcasecmp(param_string, "loadbal") )     loadbal    = 1;
+   else if ( !strcasecmp(param_string, "threshold") )
    {
       sscanf(param_string, "%s %lg", param1, &threshold);
       if ( threshold < 0 || threshold > 1. ) threshold = 0.;
    }
-   else if ( !strcmp(param_string, "filter") )
+   else if ( !strcasecmp(param_string, "filter") )
    {
       sscanf(param_string, "%s %lg", param1, &filter);
       if ( filter < 0 || filter > 1. ) filter = 0.;
    }
-   else
+   else if ( strcasecmp(param_string, "zeroInitialGuess") )
    {   
-      cout << "MLI_Solver_ParaSails::setParams - parameter not recognized.\n";
-      cout << "              Params = " << param_string << endl;
+      printf("MLI_Solver_ParaSails::setParams - parameter not recognized.\n");
+      printf("              Params = %s\n", param_string);
       return 1;
    }
    return 0;
@@ -246,7 +248,8 @@ int MLI_Solver_ParaSails::applyParaSails(MLI_Vector *f_in, MLI_Vector *u_in)
 #else
    (void) f_in;
    (void) u_in;
-   cout << "ParaSails smoother not available.\n";
+   printf("MLI_Solver_ParaSails::applyParaSails ERROR - ParaSails not");
+   printf(" available.\n");
    exit(1);
    return 1;
 #endif
@@ -327,7 +330,8 @@ int MLI_Solver_ParaSails::applyParaSailsTrans(MLI_Vector *f_in,
 #else
    (void) f_in;
    (void) u_in;
-   cout << "ParaSails smoother not available.\n";
+   printf("MLI_Solver_ParaSails::applyParaSailsTrans ERROR - ParaSails");
+   printf(" not available.\n");
    exit(1);
    return 1;
 #endif
@@ -341,7 +345,7 @@ int MLI_Solver_ParaSails::setNumLevels( int levels )
 {
    if ( levels < 0 )
    {
-      cerr << "MLI_Solver_ParaSails::setNumLevels WARNING : nlevels = 0.\n";
+      printf("MLI_Solver_ParaSails::setNumLevels WARNING : nlevels = 0.\n");
       nlevels = 0;
    }
    else nlevels = levels;
@@ -374,7 +378,7 @@ int MLI_Solver_ParaSails::setThreshold( double thresh )
 {
    if ( thresh < 0 || thresh > 1. )
    {
-      cerr << "MLI_Solver_ParaSails::setThreshold WARNING : thresh = 0.\n";
+      printf("MLI_Solver_ParaSails::setThreshold WARNING - thresh = 0.\n");
       threshold = 0.;
    }
    else threshold = thresh;
@@ -389,7 +393,7 @@ int MLI_Solver_ParaSails::setFilter( double data )
 {
    if ( data < 0 || data > 1. )
    {
-      cerr << "MLI_Solver_ParaSails::setThreshold WARNING : filter = 0.\n";
+      printf("MLI_Solver_ParaSails::setThreshold WARNING - filter = 0.\n");
       filter = 0.;
    }
    else filter = data;
