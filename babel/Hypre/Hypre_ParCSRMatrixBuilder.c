@@ -231,17 +231,18 @@ int  impl_Hypre_ParCSRMatrixBuilder_Setup(Hypre_ParCSRMatrixBuilder this) {
 /* ********************************************************
  * impl_Hypre_ParCSRMatrixBuilderGetConstructedObject
  **********************************************************/
-Hypre_LinearOperator  impl_Hypre_ParCSRMatrixBuilder_GetConstructedObject
-(Hypre_ParCSRMatrixBuilder this) {
+int impl_Hypre_ParCSRMatrixBuilder_GetConstructedObject
+( Hypre_ParCSRMatrixBuilder this, Hypre_LinearOperator *op ) {
    Hypre_ParCSRMatrix newmat = this->d_table->newmat;
 
    if ( newmat==NULL || this->d_table->matgood==0 ) {
       printf( "Hypre_ParCSRMatrixBuilder: object not constructed yet\n");
-      return (Hypre_LinearOperator) NULL;
+      *op = (Hypre_LinearOperator) NULL;
+      return 1;
    };
-   return (Hypre_LinearOperator) Hypre_ParCSRMatrix_castTo
+   *op = (Hypre_LinearOperator) Hypre_ParCSRMatrix_castTo
       ( newmat, "Hypre_LinearOperator" );
-
+   return 0;
 } /* end impl_Hypre_ParCSRMatrixBuilderGetConstructedObject */
 
 

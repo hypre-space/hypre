@@ -9,8 +9,8 @@
 #include "Hypre_StructMatrix_Data.h" 
 
  /* gkk: added... */
-#include "Hypre_StructuredGrid_Skel.h"
-#include "Hypre_StructuredGrid_Data.h"
+#include "Hypre_StructGrid_Skel.h"
+#include "Hypre_StructGrid_Data.h"
 #include "Hypre_StructStencil_Skel.h"
 #include "Hypre_StructStencil_Data.h"
 #include "Hypre_StructVector_Skel.h"

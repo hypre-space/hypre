@@ -337,23 +337,23 @@ impl_Hypre_PCG_Apply(Hypre_PCG this, Hypre_Vector b, Hypre_Vector* xp)
 /* ********************************************************
  * impl_Hypre_PCG_GetSystemOperator
  **********************************************************/
-Hypre_LinearOperator  
-impl_Hypre_PCG_GetSystemOperator(Hypre_PCG this) 
+int
+impl_Hypre_PCG_GetSystemOperator( Hypre_PCG this, Hypre_LinearOperator *op )
 {
-
    Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate(this);
 
-   return (pcg_data->matvec);
-
+   *op = (pcg_data->matvec);
+   return 0;
 } /* end impl_Hypre_PCGGetSystemOperator */
 
 
 /* ********************************************************
  * impl_Hypre_PCGGetResidual
  **********************************************************/
-Hypre_Vector  impl_Hypre_PCG_GetResidual(Hypre_PCG this) {
+int impl_Hypre_PCG_GetResidual( Hypre_PCG this, Hypre_Vector *resid ) {
    Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
-   return pcg_data->r;
+   *resid = pcg_data->r;
+   return 0;
 } /* end impl_Hypre_PCGGetResidual */
 
 /* ********************************************************
@@ -389,63 +389,74 @@ int  impl_Hypre_PCG_GetConvergenceInfo(Hypre_PCG this, char* name, double* value
 /* ********************************************************
  * impl_Hypre_PCGGetPreconditioner
  **********************************************************/
-Hypre_Solver  impl_Hypre_PCG_GetPreconditioner(Hypre_PCG this) {
+int impl_Hypre_PCG_GetPreconditioner( Hypre_PCG this, Hypre_Solver *precond ) {
    Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
-   return pcg_data->preconditioner;
+   *precond = pcg_data->preconditioner;
+   return 0;
 } /* end impl_Hypre_PCGGetPreconditioner */
 
 /* ********************************************************
- * impl_Hypre_PCGGetDoubleParameter
+ * impl_Hypre_PCGGetParameterDouble
  **********************************************************/
-double  impl_Hypre_PCG_GetDoubleParameter(Hypre_PCG this, char* name) {
+int impl_Hypre_PCG_GetParameterDouble
+( Hypre_PCG this, char* name, double *value ) {
    Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
 
    if ( !strcmp( name, "tol" ) ) {
-      return pcg_data->tol;
+      *value = pcg_data->tol;
+      return 0;
    }
    else if ( !strcmp( name, "cf_tol" ) ) {
-      return pcg_data->cf_tol;
+      *value = pcg_data->cf_tol;
+      return 0;
    }
    else {
       printf( "Don't understand keyword %s to Hypre_PCG_GetDoubleParameter\n",
               name );
+      *value = -123.456;
       return 1;
    }
-} /* end impl_Hypre_PCGGetDoubleParameter */
+} /* end impl_Hypre_PCGGetParameterDouble */
 
 /* ********************************************************
- * impl_Hypre_PCGGetIntParameter
+ * impl_Hypre_PCGGetParameterInt
  **********************************************************/
-int  impl_Hypre_PCG_GetIntParameter(Hypre_PCG this, char* name) {
+int  impl_Hypre_PCG_GetParameterInt( Hypre_PCG this, char* name, int *value ) {
    Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
 
    if ( !strcmp( name, "max_iter" ) ) {
-      return pcg_data->max_iter;
+      *value = pcg_data->max_iter;
+      return 0;
    }
    else if ( !strcmp( name, "two_norm" ) || !strcmp( name, "2-norm" ) ) {
-      return pcg_data->two_norm;
+      *value = pcg_data->two_norm;
+      return 0;
    }
    else if ( !strcmp( name, "rel_change" ) ||
              !strcmp( name, "relative change test" ) ) {
-      return pcg_data->rel_change;
+      *value = pcg_data->rel_change;
+      return 0;
    }
    else if ( !strcmp( name, "num_iterations" ) ) {
-      return pcg_data->num_iterations;
+      *value = pcg_data->num_iterations;
+      return 0;
    }
    else if ( !strcmp( name, "logging" ) || !strcmp( name, "log" ) ) {
-      return pcg_data->logging;
+      *value = pcg_data->logging;
+      return 0;
    }
    else {
       printf( "Don't understand keyword %s to Hypre_PCG_GetIntParameter\n",
               name );
+      *value = -123456;
       return 1;
    }
-} /* end impl_Hypre_PCGGetIntParameter */
+} /* end impl_Hypre_PCGGetParameterInt */
 
 /* ********************************************************
- * impl_Hypre_PCGSetDoubleParameter
+ * impl_Hypre_PCGSetParameterDouble
  **********************************************************/
-int  impl_Hypre_PCG_SetDoubleParameter(Hypre_PCG this, char* name, double value) {
+int  impl_Hypre_PCG_SetParameterDouble(Hypre_PCG this, char* name, double value) {
    Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
    if ( !strcmp( name, "tol" ) ) {
       pcg_data->tol = value;
@@ -460,12 +471,12 @@ int  impl_Hypre_PCG_SetDoubleParameter(Hypre_PCG this, char* name, double value)
               name );
       return 1;
    }
-} /* end impl_Hypre_PCGSetDoubleParameter */
+} /* end impl_Hypre_PCGSetParameterDouble */
 
 /* ********************************************************
- * impl_Hypre_PCGSetIntParameter
+ * impl_Hypre_PCGSetParameterInt
  **********************************************************/
-int  impl_Hypre_PCG_SetIntParameter(Hypre_PCG this, char* name, int value)
+int  impl_Hypre_PCG_SetParameterInt( Hypre_PCG this, char* name, int value )
 {
    Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
 
@@ -491,12 +502,13 @@ int  impl_Hypre_PCG_SetIntParameter(Hypre_PCG this, char* name, int value)
               name );
       return 1;
    }
-} /* end impl_Hypre_PCGSetIntParameter */
+} /* end impl_Hypre_PCGSetParameterInt */
 
 /* ********************************************************
- * impl_Hypre_PCGSetStringParameter
+ * impl_Hypre_PCGSetParameterString
  **********************************************************/
-int  impl_Hypre_PCG_SetStringParameter(Hypre_PCG this, char* name, char* value)
+int  impl_Hypre_PCG_SetParameterString
+( Hypre_PCG this, char* name, char* value )
 {
    printf( "Don't understand keyword %s to Hypre_PCG_SetStringParameter\n",
            name );
@@ -506,7 +518,7 @@ int  impl_Hypre_PCG_SetStringParameter(Hypre_PCG this, char* name, char* value)
 /* ********************************************************
  * impl_Hypre_PCGNew
  **********************************************************/
-int  impl_Hypre_PCG_New(Hypre_PCG this, Hypre_MPI_Com comm) {
+int impl_Hypre_PCG_New( Hypre_PCG this, Hypre_MPI_Com comm ) {
 
    Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
 
@@ -537,10 +549,10 @@ Hypre_PCG  impl_Hypre_PCG_Constructor(Hypre_MPI_Com comm) {
  * impl_Hypre_PCG_Setup
  **********************************************************/
 int
-impl_Hypre_PCG_Setup(Hypre_PCG this, 
-                     Hypre_LinearOperator A, 
-                     Hypre_Vector b, 
-                     Hypre_Vector x) 
+impl_Hypre_PCG_Setup( Hypre_PCG this, 
+                      Hypre_LinearOperator A, 
+                      Hypre_Vector b, 
+                      Hypre_Vector x )
 {
 
    Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
@@ -579,16 +591,17 @@ impl_Hypre_PCG_Setup(Hypre_PCG this,
 /* ********************************************************
  * impl_Hypre_PCGGetConstructedObject
  **********************************************************/
-Hypre_Solver  impl_Hypre_PCG_GetConstructedObject(Hypre_PCG this) {
-   return (Hypre_Solver) Hypre_PCG_castTo( this, "Hypre_Solver" );
+int impl_Hypre_PCG_GetConstructedObject( Hypre_PCG this, Hypre_Solver* obj ) {
+   *obj = (Hypre_Solver) Hypre_PCG_castTo( this, "Hypre_Solver" );
+   return 0;
 } /* end impl_Hypre_PCGGetConstructedObject */
 
 
 /* ********************************************************
  * impl_Hypre_PCGSetPreconditioner
  **********************************************************/
-int  
-impl_Hypre_PCG_SetPreconditioner(Hypre_PCG this, Hypre_Solver precond) 
+int
+impl_Hypre_PCG_SetPreconditioner( Hypre_PCG this, Hypre_Solver precond )
 {
 
    Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);

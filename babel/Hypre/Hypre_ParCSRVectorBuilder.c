@@ -209,15 +209,16 @@ int  impl_Hypre_ParCSRVectorBuilder_Setup(Hypre_ParCSRVectorBuilder this) {
 /* ********************************************************
  * impl_Hypre_ParCSRVectorBuilderGetConstructedObject
  **********************************************************/
-Hypre_Vector  impl_Hypre_ParCSRVectorBuilder_GetConstructedObject
-(Hypre_ParCSRVectorBuilder this) {
+int impl_Hypre_ParCSRVectorBuilder_GetConstructedObject
+( Hypre_ParCSRVectorBuilder this, Hypre_Vector *obj ) {
    Hypre_ParCSRVector newvec = this->d_table->newvec;
    if ( newvec==NULL || this->d_table->vecgood==0 ) {
       printf( "Hypre_ParCSRVectorBuilder: object not constructed yet\n");
-      return (Hypre_Vector) NULL;
+      *obj = (Hypre_Vector) NULL;
+      return 1;
    };
-   return (Hypre_Vector) Hypre_ParCSRVector_castTo( newvec, "Hypre_Vector" );
-
+   *obj = (Hypre_Vector) Hypre_ParCSRVector_castTo( newvec, "Hypre_Vector" );
+   return 0;
 } /* end impl_Hypre_ParCSRVectorBuilderGetConstructedObject */
 
 /* ********************************************************

@@ -96,21 +96,22 @@ int  impl_Hypre_StructJacobi_Apply
 /* ********************************************************
  * impl_Hypre_StructJacobiGetSystemOperator
  **********************************************************/
-Hypre_LinearOperator  impl_Hypre_StructJacobi_GetSystemOperator
-(Hypre_StructJacobi this) 
+int impl_Hypre_StructJacobi_GetSystemOperator
+( Hypre_StructJacobi this, Hypre_LinearOperator *op ) 
 {
    Hypre_StructMatrix SM = this->d_table->hsmatrix;
    Hypre_LinearOperator LO = (Hypre_LinearOperator)
       Hypre_StructMatrix_castTo( SM, "Hypre_LinearOperator" );
 
-   return LO;
-
+   *op = LO;
+   return 0;
 } /* end impl_Hypre_StructJacobiGetSystemOperator */
 
 /* ********************************************************
  * impl_Hypre_StructJacobiGetResidual
  **********************************************************/
-Hypre_Vector  impl_Hypre_StructJacobi_GetResidual(Hypre_StructJacobi this) {
+int impl_Hypre_StructJacobi_GetResidual
+( Hypre_StructJacobi this, Hypre_Vector *resid ) {
   
   /*
     The present StructJacobi code in Hypre doesn't provide a residual.
@@ -124,11 +125,11 @@ Hypre_Vector  impl_Hypre_StructJacobi_GetResidual(Hypre_StructJacobi this) {
     doesn't work.
   */
 
-   Hypre_Vector vec = Hypre_Vector_new();
+   *resid = Hypre_Vector_new();
 
    printf( "called Hypre_StructJacobi_GetResidual, which doesn't work!\n");
 
-   return vec;
+   return 1;
 
 } /* end impl_Hypre_StructJacobiGetResidual */
 
@@ -163,25 +164,29 @@ int  impl_Hypre_StructJacobi_GetConvergenceInfo
 } /* end impl_Hypre_StructJacobiGetConvergenceInfo */
 
 /* ********************************************************
- * impl_Hypre_StructJacobiGetDoubleParameter
+ * impl_Hypre_StructJacobiGetParameterDouble
  **********************************************************/
-double  impl_Hypre_StructJacobi_GetDoubleParameter(Hypre_StructJacobi this, char* name) {
-   printf( "Hypre_StructJacobi_GetDoubleParameter does not recognize name %s\n", name );
-   return 0;
-} /* end impl_Hypre_StructJacobiGetDoubleParameter */
+int impl_Hypre_StructJacobi_GetParameterDouble
+( Hypre_StructJacobi this, char* name, double *value) {
+   printf( "Hypre_StructJacobi_GetParameterDouble does not recognize name %s\n", name );
+   *value = -123.456;
+   return 1;
+} /* end impl_Hypre_StructJacobiGetParameterDouble */
 
 /* ********************************************************
- * impl_Hypre_StructJacobiGetIntParameter
+ * impl_Hypre_StructJacobiGetParameterInt
  **********************************************************/
-int  impl_Hypre_StructJacobi_GetIntParameter(Hypre_StructJacobi this, char* name) {
-   printf( "Hypre_StructJacobi_GetIntParameter does not recognize name %s\n", name );
-   return 0;
-} /* end impl_Hypre_StructJacobiGetIntParameter */
+int  impl_Hypre_StructJacobi_GetParameterInt
+( Hypre_StructJacobi this, char* name, int *value ) {
+   printf( "Hypre_StructJacobi_GetParameterInt does not recognize name %s\n", name );
+   *value = -123456;
+   return 1;
+} /* end impl_Hypre_StructJacobiGetParameterInt */
 
 /* ********************************************************
- * impl_Hypre_StructJacobiSetDoubleParameter
+ * impl_Hypre_StructJacobiSetParameterDouble
  **********************************************************/
-int impl_Hypre_StructJacobi_SetDoubleParameter
+int impl_Hypre_StructJacobi_SetParameterDouble
 (Hypre_StructJacobi this, char* name, double value) {
 
 /* JFP: This function just dispatches to the parameter's set function. */
@@ -200,12 +205,12 @@ int impl_Hypre_StructJacobi_SetDoubleParameter
    };
    return 1;
 
-} /* end impl_Hypre_StructJacobiSetDoubleParameter */
+} /* end impl_Hypre_StructJacobiSetParameterDouble */
 
 /* ********************************************************
- * impl_Hypre_StructJacobiSetIntParameter
+ * impl_Hypre_StructJacobiSetParameterInt
  **********************************************************/
-int  impl_Hypre_StructJacobi_SetIntParameter
+int  impl_Hypre_StructJacobi_SetParameterInt
 (Hypre_StructJacobi this, char* name, int value) {
 
 /* JFP: This function just dispatches to the parameter's set function. */
@@ -227,7 +232,7 @@ int  impl_Hypre_StructJacobi_SetIntParameter
    };
    return 1;
 
-} /* end impl_Hypre_StructJacobiSetIntParameter */
+} /* end impl_Hypre_StructJacobiSetParameterInt */
 
 /* ********************************************************
  * impl_Hypre_StructJacobiNew
@@ -314,9 +319,10 @@ Hypre_StructJacobi  impl_Hypre_StructJacobi_Constructor(Hypre_MPI_Com comm) {
 /* ********************************************************
  * impl_Hypre_StructJacobiGetConstructedObject
  **********************************************************/
-Hypre_Solver  impl_Hypre_StructJacobi_GetConstructedObject(Hypre_StructJacobi this) {
+int impl_Hypre_StructJacobi_GetConstructedObject
+( Hypre_StructJacobi this, Hypre_Solver *obj ) {
 
-   return (Hypre_Solver) this;
-
+   *obj = (Hypre_Solver) this;
+   return 0;
 } /* end impl_Hypre_StructJacobiGetConstructedObject */
 

@@ -78,20 +78,21 @@ int  impl_Hypre_StructSMG_Apply
 /* ********************************************************
  * impl_Hypre_StructSMGGetSystemOperator
  **********************************************************/
-Hypre_LinearOperator
-impl_Hypre_StructSMG_GetSystemOperator( Hypre_StructSMG this ) {
+int impl_Hypre_StructSMG_GetSystemOperator
+( Hypre_StructSMG this, Hypre_LinearOperator *op ) {
 
    Hypre_StructMatrix mat =  this->d_table->hsmatrix;
    
-   return (Hypre_LinearOperator)
+   *op = (Hypre_LinearOperator)
       Hypre_StructMatrix_castTo( mat, "Hypre_LinearOperator" );
+   return 0;
 } /* end impl_Hypre_StructSMGGetSystemOperator */
 
 /* ********************************************************
  * impl_Hypre_StructSMGGetResidual
  **********************************************************/
-Hypre_Vector
-impl_Hypre_StructSMG_GetResidual(Hypre_StructSMG this) {
+int impl_Hypre_StructSMG_GetResidual
+( Hypre_StructSMG this, Hypre_Vector *resid ) {
   
   /*
     The present HYPRE_struct_smg.c code in Hypre doesn't provide a residual.
@@ -105,11 +106,11 @@ impl_Hypre_StructSMG_GetResidual(Hypre_StructSMG this) {
     doesn't work.
   */
 
-   Hypre_Vector vec = Hypre_Vector_new();
+   *resid = Hypre_Vector_new();
 
    printf( "called Hypre_StructSMG_GetResidual, which doesn't work!\n");
 
-   return vec;
+   return 1;
 } /* end impl_Hypre_StructSMGGetResidual */
 
 /* ********************************************************
@@ -138,29 +139,27 @@ int  impl_Hypre_StructSMG_GetConvergenceInfo
 } /* end impl_Hypre_StructSMGGetConvergenceInfo */
 
 /* ********************************************************
- * impl_Hypre_StructSMGGetDoubleParameter
+ * impl_Hypre_StructSMGGetParameterDouble
  **********************************************************/
-double  impl_Hypre_StructSMG_GetDoubleParameter(Hypre_StructSMG this, char* name) {
-   double value;
-   int ivalue;
-   printf( "Hypre_StructJacobi_GetDoubleParameter does not recognize name %s\n", name );
+int impl_Hypre_StructSMG_GetParameterDouble
+( Hypre_StructSMG this, char* name, double *value ) {
+   printf( "Hypre_StructJacobi_GetParameterDouble does not recognize name %s\n", name );
    return 1;
-} /* end impl_Hypre_StructSMGGetDoubleParameter */
+} /* end impl_Hypre_StructSMGGetParameterDouble */
 
 /* ********************************************************
- * impl_Hypre_StructSMGGetIntParameter
+ * impl_Hypre_StructSMGGetParameterInt
  **********************************************************/
-int  impl_Hypre_StructSMG_GetIntParameter(Hypre_StructSMG this, char* name) {
-   double value;
-   int ivalue;
-   printf( "Hypre_StructJacobi_GetIntParameter does not recognize name %s\n", name );
+int impl_Hypre_StructSMG_GetParameterInt
+( Hypre_StructSMG this, char* name, int *value ) {
+   printf( "Hypre_StructJacobi_GetParameterInt does not recognize name %s\n", name );
    return 1;
-} /* end impl_Hypre_StructSMGGetIntParameter */
+} /* end impl_Hypre_StructSMGGetParameterInt */
 
 /* ********************************************************
- * impl_Hypre_StructSMGSetDoubleParameter
+ * impl_Hypre_StructSMGSetParameterDouble
  **********************************************************/
-int  impl_Hypre_StructSMG_SetDoubleParameter
+int  impl_Hypre_StructSMG_SetParameterDouble
 (Hypre_StructSMG this, char* name, double value) {
 
 /* This function just dispatches to the parameter's set function. */
@@ -179,12 +178,12 @@ int  impl_Hypre_StructSMG_SetDoubleParameter
    };
    return 1;
 
-} /* end impl_Hypre_StructSMGSetDoubleParameter */
+} /* end impl_Hypre_StructSMGSetParameterDouble */
 
 /* ********************************************************
- * impl_Hypre_StructSMGSetIntParameter
+ * impl_Hypre_StructSMGSetParameterInt
  **********************************************************/
-int impl_Hypre_StructSMG_SetIntParameter
+int impl_Hypre_StructSMG_SetParameterInt
 (Hypre_StructSMG this, char* name, int value) {
 
 /* This function just dispatches to the parameter's set function. */
@@ -221,7 +220,7 @@ int impl_Hypre_StructSMG_SetIntParameter
    };
    return 1;
 
-} /* end impl_Hypre_StructSMGSetIntParameter */
+} /* end impl_Hypre_StructSMGSetParameterInt */
 
 /* ********************************************************
  * impl_Hypre_StructSMGNew
@@ -299,9 +298,11 @@ Hypre_StructSMG  impl_Hypre_StructSMG_Constructor(Hypre_MPI_Com comm) {
 /* ********************************************************
  * impl_Hypre_StructSMGGetConstructedObject
  **********************************************************/
-Hypre_Solver  impl_Hypre_StructSMG_GetConstructedObject(Hypre_StructSMG this) {
+int impl_Hypre_StructSMG_GetConstructedObject
+( Hypre_StructSMG this, Hypre_Solver *obj ) {
 
-   return (Hypre_Solver) this;
+   *obj = (Hypre_Solver) this;
+   return 0;
 
 } /* end impl_Hypre_StructSMGGetConstructedObject */
 

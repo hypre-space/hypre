@@ -44,29 +44,30 @@ void Hypre_ParAMG_destructor(Hypre_ParAMG this) {
 } /* end destructor */
 
 /* ********************************************************
- * impl_Hypre_ParAMGGetDoubleParameter
+ * impl_Hypre_ParAMGGetParameterDouble
  **********************************************************/
-double  impl_Hypre_ParAMG_GetDoubleParameter(Hypre_ParAMG this, char* name) {
-   double value;
-   int ivalue;
-   printf( "Hypre_ParAMG_GetDoubleParameter does not recognize name %s\n", name );
+int impl_Hypre_ParAMG_GetParameterDouble
+( Hypre_ParAMG this, char* name, double *value ) {
+   printf( "Hypre_ParAMG_GetParameterDouble does not recognize name %s\n", name );
+   *value = -123.456;
    return 1;
-} /* end impl_Hypre_ParAMGGetDoubleParameter */
+} /* end impl_Hypre_ParAMGGetParameterDouble */
 
 /* ********************************************************
- * impl_Hypre_ParAMGGetIntParameter
+ * impl_Hypre_ParAMGGetParameterInt
  **********************************************************/
-int  impl_Hypre_ParAMG_GetIntParameter(Hypre_ParAMG this, char* name) {
-   double value;
-   int ivalue;
-   printf( "Hypre_ParAMG_GetIntParameter does not recognize name %s\n", name );
+int impl_Hypre_ParAMG_GetParameterInt
+( Hypre_ParAMG this, char* name, int *value ) {
+   printf( "Hypre_ParAMG_GetParameterInt does not recognize name %s\n", name );
+   *value = -123456;
    return 1;
-} /* end impl_Hypre_ParAMGGetIntParameter */
+} /* end impl_Hypre_ParAMGGetParameterInt */
 
 /* ********************************************************
- * impl_Hypre_ParAMGSetDoubleParameter
+ * impl_Hypre_ParAMGSetParameterDouble
  **********************************************************/
-int  impl_Hypre_ParAMG_SetDoubleParameter(Hypre_ParAMG this, char* name, double value) {
+int  impl_Hypre_ParAMG_SetParameterDouble
+( Hypre_ParAMG this, char* name, double value ) {
 /* This function just dispatches to the parameter's set function. */
    struct Hypre_ParAMG_private_type *HSp = this->d_table;
    HYPRE_Solver *S = HSp->Hsolver;
@@ -84,15 +85,15 @@ int  impl_Hypre_ParAMG_SetDoubleParameter(Hypre_ParAMG this, char* name, double 
       return HYPRE_ParAMGSetMaxRowSum( *S, value );
    }
    else
-      printf( "Hypre_ParAMG_SetDoubleParameter does not recognize name %s\n", name );
+      printf( "Hypre_ParAMG_SetParameterDouble does not recognize name %s\n", name );
 
    return 1;
-} /* end impl_Hypre_ParAMGSetDoubleParameter */
+} /* end impl_Hypre_ParAMGSetParameterDouble */
 
 /* ********************************************************
- * impl_Hypre_ParAMGSetDoubleArrayParameter
+ * impl_Hypre_ParAMGSetParameterDoubleArray
  **********************************************************/
-int  impl_Hypre_ParAMG_SetDoubleArrayParameter
+int impl_Hypre_ParAMG_SetParameterDoubleArray
 ( Hypre_ParAMG this, char* name, array1double value ) {
    struct Hypre_ParAMG_private_type *HSp = this->d_table;
    HYPRE_Solver *S = HSp->Hsolver;
@@ -102,25 +103,25 @@ int  impl_Hypre_ParAMG_SetDoubleArrayParameter
    }
    else
       printf(
-         "Hypre_ParAMG_SetDoubleArrayParameter does not recognize name %s\n", name );
+         "Hypre_ParAMG_SetParameterDoubleArray does not recognize name %s\n", name );
 
    return 1;
-} /* end impl_Hypre_ParAMGSetDoubleArrayParameter */
+} /* end impl_Hypre_ParAMGSetParameterDoubleArray */
 
 /* ********************************************************
- * impl_Hypre_ParAMGSetDoubleArray2Parameter
+ * impl_Hypre_ParAMGSetParameterDoubleArray2
  **********************************************************/
-int  impl_Hypre_ParAMG_SetDoubleArray2Parameter
+int  impl_Hypre_ParAMG_SetParameterDoubleArray2
 (Hypre_ParAMG this, char* name, array2double value) {
    printf(
-      "Hypre_ParAMG_SetDoubleArray2Parameter does not recognize name %s\n", name );
+      "Hypre_ParAMG_SetParameterDoubleArray2 does not recognize name %s\n", name );
    return 1;
-} /* end impl_Hypre_ParAMGSetDoubleArray2Parameter */
+} /* end impl_Hypre_ParAMGSetParameterDoubleArray2 */
 
 /* ********************************************************
- * impl_Hypre_ParAMGSetIntParameter
+ * impl_Hypre_ParAMGSetParameterInt
  **********************************************************/
-int  impl_Hypre_ParAMG_SetIntParameter(Hypre_ParAMG this, char* name, int value) {
+int  impl_Hypre_ParAMG_SetParameterInt(Hypre_ParAMG this, char* name, int value) {
    struct Hypre_ParAMG_private_type *HSp = this->d_table;
    HYPRE_Solver *S = HSp->Hsolver;
 
@@ -158,16 +159,16 @@ int  impl_Hypre_ParAMG_SetIntParameter(Hypre_ParAMG this, char* name, int value)
       return HYPRE_ParAMGSetLogging( *S, value, "Hypre_log_file" );
    }
    else
-      printf( "Hypre_ParAMG_SetIntParameter does not recognize name %s\n", name );
+      printf( "Hypre_ParAMG_SetParameterInt does not recognize name %s\n", name );
 
    return 1;
 
-} /* end impl_Hypre_ParAMGSetIntParameter */
+} /* end impl_Hypre_ParAMGSetParameterInt */
 
 /* ********************************************************
- * impl_Hypre_ParAMGSetIntArrayParameter
+ * impl_Hypre_ParAMGSetParameterIntArray
  **********************************************************/
-int  impl_Hypre_ParAMG_SetIntArrayParameter
+int  impl_Hypre_ParAMG_SetParameterIntArray
 ( Hypre_ParAMG this, char* name, array1int value ) {
    struct Hypre_ParAMG_private_type *HSp = this->d_table;
    HYPRE_Solver *S = HSp->Hsolver;
@@ -180,15 +181,15 @@ int  impl_Hypre_ParAMG_SetIntArrayParameter
    }
    else
       printf(
-         "Hypre_ParAMG_SetIntArrayParameter does not recognize name %s\n", name );
+         "Hypre_ParAMG_SetParameterIntArray does not recognize name %s\n", name );
 
    return 1;
-} /* end impl_Hypre_ParAMGSetIntArrayParameter */
+} /* end impl_Hypre_ParAMGSetParameterIntArray */
 
 /* ********************************************************
- * impl_Hypre_ParAMGSetIntArray2Parameter
+ * impl_Hypre_ParAMGSetParameterIntArray2
  **********************************************************/
-int  impl_Hypre_ParAMG_SetIntArray2Parameter
+int  impl_Hypre_ParAMG_SetParameterIntArray2
 ( Hypre_ParAMG this, char* name, array2int value ) {
    int dim0, dim1, i, j;
    int ** valuepp;
@@ -219,15 +220,15 @@ int  impl_Hypre_ParAMG_SetIntArray2Parameter
    }
    else
       printf(
-         "Hypre_ParAMG_SetIntArray2Parameter does not recognize name %s\n", name );
+         "Hypre_ParAMG_SetParameterIntArray2 does not recognize name %s\n", name );
    return 1;
-} /* end impl_Hypre_ParAMGSetIntArray2Parameter */
+} /* end impl_Hypre_ParAMGSetParameterIntArray2 */
 
 /* ********************************************************
- * impl_Hypre_ParAMGSetStringParameter
+ * impl_Hypre_ParAMGSetParameterString
  **********************************************************/
-int  impl_Hypre_ParAMG_SetStringParameter
-(Hypre_ParAMG this, char* name, char* value) {
+int  impl_Hypre_ParAMG_SetParameterString
+( Hypre_ParAMG this, char* name, char* value ) {
    struct Hypre_ParAMG_private_type *HSp = this->d_table;
    HYPRE_Solver *S = HSp->Hsolver;
 
@@ -235,10 +236,10 @@ int  impl_Hypre_ParAMG_SetStringParameter
       return HYPRE_ParAMGSetLogFileName( *S, value );
    }
    else
-      printf( "Hypre_ParAMG_SetStringParameter does not recognize name %s\n", name );
+      printf( "Hypre_ParAMG_SetParameterString does not recognize name %s\n", name );
 
    return 1;
-} /* end impl_Hypre_ParAMGSetStringParameter */
+} /* end impl_Hypre_ParAMGSetParameterString */
 
 /* ********************************************************
  * impl_Hypre_ParAMGNew
@@ -318,8 +319,10 @@ int  impl_Hypre_ParAMG_Setup
 /* ********************************************************
  * impl_Hypre_ParAMGGetConstructedObject
  **********************************************************/
-Hypre_Solver  impl_Hypre_ParAMG_GetConstructedObject(Hypre_ParAMG this) {
-   return (Hypre_Solver) this;
+int impl_Hypre_ParAMG_GetConstructedObject
+( Hypre_ParAMG this, Hypre_Solver *obj ) {
+   *obj = (Hypre_Solver) this;
+   return 0;
 } /* end impl_Hypre_ParAMGGetConstructedObject */
 
 /* ********************************************************
@@ -374,11 +377,13 @@ int  impl_Hypre_ParAMG_Apply(Hypre_ParAMG this, Hypre_Vector b, Hypre_Vector* x)
 /* ********************************************************
  * impl_Hypre_ParAMGGetSystemOperator
  **********************************************************/
-Hypre_LinearOperator  impl_Hypre_ParAMG_GetSystemOperator(Hypre_ParAMG this) {
+int impl_Hypre_ParAMG_GetSystemOperator
+( Hypre_ParAMG this, Hypre_LinearOperator *op ) {
    Hypre_ParCSRMatrix mat =  this->d_table->Hmatrix;
    
-   return (Hypre_LinearOperator)
+   *op = (Hypre_LinearOperator)
       Hypre_ParCSRMatrix_castTo( mat, "Hypre_LinearOperator" );
+   return 0;
 } /* end impl_Hypre_ParAMGGetSystemOperator */
 
 /* ********************************************************
@@ -386,10 +391,10 @@ Hypre_LinearOperator  impl_Hypre_ParAMG_GetSystemOperator(Hypre_ParAMG this) {
  *  Not implemented.  The residual is not conveniently available, so
  * the way to implement this function would be to recompute it.
  **********************************************************/
-Hypre_Vector  impl_Hypre_ParAMG_GetResidual(Hypre_ParAMG this) {
-   Hypre_Vector vec = Hypre_Vector_new(); /* legal but incorrect return value */
+int impl_Hypre_ParAMG_GetResidual( Hypre_ParAMG this, Hypre_Vector *resid ) {
+   *resid = Hypre_Vector_new(); /* legal type but certain to be incorrect */
    printf( "called Hypre_parAMG_GetResidual, which doesn't work!\n");
-   return vec;
+   return 1;
 } /* end impl_Hypre_ParAMGGetResidual */
 
 /* ********************************************************

@@ -35,57 +35,66 @@ void Hypre_GMRES_destructor(Hypre_GMRES this) {
 } /* end destructor */
 
 /* ********************************************************
- * impl_Hypre_GMRESGetDoubleParameter
+ * impl_Hypre_GMRESGetParameterDouble
  **********************************************************/
-double  impl_Hypre_GMRES_GetDoubleParameter(Hypre_GMRES this, char* name) {
+int impl_Hypre_GMRES_GetParameterDouble
+( Hypre_GMRES this, char* name, double *value ) {
    Hypre_GMRES_Private gmr_data = Hypre_GMRES_getPrivate(this);
 
    if ( !strcmp( name, "tol" ) ) {
-      return gmr_data->tol;
+      *value = gmr_data->tol;
+      return 0;
    }
    else {
-      printf( "Don't understand keyword %s to Hypre_GMRES_GetDoubleParameter\n",
+      printf( "Don't understand keyword %s to Hypre_GMRES_GetParameterDouble\n",
               name );
+      *value = -123.456;
       return 1;
    }
-} /* end impl_Hypre_GMRESGetDoubleParameter */
+} /* end impl_Hypre_GMRESGetParameterDouble */
 
 /* ********************************************************
- * impl_Hypre_GMRESGetIntParameter
+ * impl_Hypre_GMRESGetParameterInt
  **********************************************************/
-int  impl_Hypre_GMRES_GetIntParameter(Hypre_GMRES this, char* name) {
+int  impl_Hypre_GMRES_GetParameterInt(Hypre_GMRES this, char* name, int *value) {
    Hypre_GMRES_Private gmr_data = Hypre_GMRES_getPrivate(this);
 
    if ( !strcmp( name, "k_dim" ) || !strcmp( name, "k dim" ) ) {
-      return gmr_data->k_dim;
+      *value = gmr_data->k_dim;
+      return 0;
    }
    else if ( !strcmp( name, "min_iter" ) || !strcmp( name, "min iter" ) ) {
-      return gmr_data->min_iter;
+      *value = gmr_data->min_iter;
+      return 0;
    }
    else if ( !strcmp( name, "max_iter" ) || !strcmp( name, "max iter" ) ) {
-      return gmr_data->max_iter;
+      *value = gmr_data->max_iter;
+      return 0;
    }
    else if ( !strcmp( name, "logging" ) ) {
-      return gmr_data->logging;
+      *value = gmr_data->logging;
+      return 0;
    }
    else if
       ( !strcmp( name, "stop_crit" ) || !strcmp( name, "stop crit" )
         || !strcmp( name, "stopping criterion" ) ) {
-      return gmr_data->stop_crit;
+      *value = gmr_data->stop_crit;
+      return 0;
    }
    else {
-      printf( "Don't understand keyword %s to Hypre_GMRES_GetIntParameter\n",
+      printf( "Don't understand keyword %s to Hypre_GMRES_GetParameterInt\n",
               name );
+      *value = -123456;
       return 1;
    }
-} /* end impl_Hypre_GMRESGetIntParameter */
+} /* end impl_Hypre_GMRESGetParameterInt */
 
 
 /* ********************************************************
- * impl_Hypre_GMRES_SetDoubleParameter
+ * impl_Hypre_GMRES_SetParameterDouble
  **********************************************************/
 int  
-impl_Hypre_GMRES_SetDoubleParameter(Hypre_GMRES this, char* name, double value)
+impl_Hypre_GMRES_SetParameterDouble(Hypre_GMRES this, char* name, double value)
 {
    Hypre_GMRES_Private gmr_data = Hypre_GMRES_getPrivate(this);
 
@@ -94,18 +103,18 @@ impl_Hypre_GMRES_SetDoubleParameter(Hypre_GMRES this, char* name, double value)
       return 0;
    }
    else {
-      printf( "Don't understand keyword %s to Hypre_GMRES_GetDoubleParameter\n",
+      printf( "Don't understand keyword %s to Hypre_GMRES_SetParameterDouble\n",
               name );
       return 1;
    }
-} /* end impl_Hypre_GMRES_SetDoubleParameter */
+} /* end impl_Hypre_GMRES_SetParameterDouble */
 
 
 /* ********************************************************
- * impl_Hypre_GMRES_SetIntParameter
+ * impl_Hypre_GMRES_SetParameterInt
  **********************************************************/
 int  
-impl_Hypre_GMRES_SetIntParameter( Hypre_GMRES this, char* name, int value ) 
+impl_Hypre_GMRES_SetParameterInt( Hypre_GMRES this, char* name, int value ) 
 {
    Hypre_GMRES_Private gmr_data = Hypre_GMRES_getPrivate(this);
 
@@ -127,21 +136,21 @@ impl_Hypre_GMRES_SetIntParameter( Hypre_GMRES this, char* name, int value )
       return gmr_data->stop_crit;
    }
    else {
-      printf( "Don't understand keyword %s to Hypre_GMRES_GetIntParameter\n",
+      printf( "Don't understand keyword %s to Hypre_GMRES_SetParameterInt\n",
               name );
       return 1;
    }
-} /* end impl_Hypre_GMRES_SetIntParameter */
+} /* end impl_Hypre_GMRES_SetParameterInt */
 
 
 /* ********************************************************
- * impl_Hypre_GMRESSetStringParameter
+ * impl_Hypre_GMRESSetParameterString
  **********************************************************/
-int  impl_Hypre_GMRES_SetStringParameter
+int  impl_Hypre_GMRES_SetParameterString
 ( Hypre_GMRES this, char* name, char* value ) {
-   printf("Don't understand keyword %s to Hypre_GMRES_SetStringParameter\n",
+   printf("Don't understand keyword %s to Hypre_GMRES_SetParameterString\n",
           name );
-} /* end impl_Hypre_GMRESSetStringParameter */
+} /* end impl_Hypre_GMRESSetParameterString */
 
 /* ********************************************************
  * impl_Hypre_GMRESSetPreconditioner
@@ -160,9 +169,11 @@ int  impl_Hypre_GMRES_SetPreconditioner
 /* ********************************************************
  * impl_Hypre_GMRESGetPreconditioner
  **********************************************************/
-Hypre_Solver  impl_Hypre_GMRES_GetPreconditioner( Hypre_GMRES this ) {
+int impl_Hypre_GMRES_GetPreconditioner
+( Hypre_GMRES this, Hypre_Solver* precond ) {
    Hypre_GMRES_Private gmr_data = Hypre_GMRES_getPrivate(this);
-   return gmr_data->preconditioner;
+   *precond = gmr_data->preconditioner;
+   return 0;
 } /* end impl_Hypre_PCGGetPreconditioner */
 
 /* ********************************************************
@@ -192,7 +203,6 @@ impl_Hypre_GMRES_New( Hypre_GMRES this, Hypre_MPI_Com comm )
 
 /* ********************************************************
  * impl_Hypre_GMRESConstructor
- *       insert the library code below
  **********************************************************/
 Hypre_GMRES  impl_Hypre_GMRES_Constructor(Hypre_MPI_Com comm) {
    Hypre_GMRES gmr = Hypre_GMRES_new();
@@ -265,8 +275,9 @@ impl_Hypre_GMRES_Setup( Hypre_GMRES this,
 /* ********************************************************
  * impl_Hypre_GMRESGetConstructedObject
  **********************************************************/
-Hypre_Solver  impl_Hypre_GMRES_GetConstructedObject(Hypre_GMRES this) {
-   return (Hypre_Solver) Hypre_GMRES_castTo( this, "Hypre_Solver" );
+int impl_Hypre_GMRES_GetConstructedObject(Hypre_GMRES this, Hypre_Solver* obj) {
+   *obj = (Hypre_Solver) Hypre_GMRES_castTo( this, "Hypre_Solver" );
+   return 0;
 } /* end impl_Hypre_GMRESGetConstructedObject */
 
 
@@ -567,18 +578,20 @@ impl_Hypre_GMRES_Apply(Hypre_GMRES this, Hypre_Vector b, Hypre_Vector* xp)
 /* ********************************************************
  * impl_Hypre_GMRESGetSystemOperator
  **********************************************************/
-Hypre_LinearOperator  impl_Hypre_GMRES_GetSystemOperator( Hypre_GMRES this ) {
+int impl_Hypre_GMRES_GetSystemOperator
+( Hypre_GMRES this, Hypre_LinearOperator *op ) {
    Hypre_GMRES_Private gmr_data = Hypre_GMRES_getPrivate(this);
-
-   return (gmr_data->matvec);
+   *op = (gmr_data->matvec);
+   return 0;
 } /* end impl_Hypre_GMRESGetSystemOperator */
 
 /* ********************************************************
  * impl_Hypre_GMRESGetResidual
  **********************************************************/
-Hypre_Vector  impl_Hypre_GMRES_GetResidual(Hypre_GMRES this) {
+int impl_Hypre_GMRES_GetResidual( Hypre_GMRES this, Hypre_Vector* resid ) {
    Hypre_GMRES_Private gmr_data = Hypre_GMRES_getPrivate (this);
-   return gmr_data->r;
+   *resid = gmr_data->r;
+   return 0;
 } /* end impl_Hypre_GMRESGetResidual */
 
 

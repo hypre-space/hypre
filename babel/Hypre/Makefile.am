@@ -19,11 +19,11 @@ PREBUILT_SRCS = Hypre_Box.c\
 	Hypre_StructSMG.c\
 	Hypre_StructJacobi.c\
 	Hypre_StructMatrix.c\
-	Hypre_StructMatrixBldr.c\
+	Hypre_StructMatrixBuilder.c\
 	Hypre_StructStencil.c\
 	Hypre_StructVector.c\
-	Hypre_StructVectorBldr.c\
-	Hypre_StructuredGrid.c\
+	Hypre_StructVectorBuilder.c\
+	Hypre_StructGrid.c\
 	Hypre_Pilut.c\
 	Hypre_GMRES.c\
 	Hypre_ParAMG.c\
@@ -38,11 +38,11 @@ PREBUILT_HDRS = Hypre_Box_Data.h\
 	Hypre_StructSMG_Data.h\
 	Hypre_StructJacobi_Data.h\
 	Hypre_StructMatrix_Data.h\
-	Hypre_StructMatrixBldr_Data.h\
+	Hypre_StructMatrixBuilder_Data.h\
 	Hypre_StructStencil_Data.h\
 	Hypre_StructVector_Data.h\
-	Hypre_StructVectorBldr_Data.h\
-	Hypre_StructuredGrid_Data.h\
+	Hypre_StructVectorBuilder_Data.h\
+	Hypre_StructGrid_Data.h\
 	Hypre_Pilut_Data.h\
 	Hypre_GMRES_Data.h\
 	Hypre_ParAMG_Data.h\
@@ -65,15 +65,15 @@ GENERATED_SRCS = Hypre_Box_Skel.c\
 	Hypre_SolverBuilder_Skel.c\
 	Hypre_Stencil_Skel.c\
 	Hypre_StructMatrix_Skel.c\
-	Hypre_StructMatrixBldr_Skel.c\
+	Hypre_StructMatrixBuilder_Skel.c\
 	Hypre_StructStencil_Skel.c\
 	Hypre_Vector_Skel.c\
 	Hypre_StructVector_Skel.c\
-	Hypre_StructVectorBldr_Skel.c\
+	Hypre_StructVectorBuilder_Skel.c\
 	Hypre_StructuredGridBuilder_Skel.c\
 	Hypre_StructuredGridMatrixBuilder_Skel.c\
 	Hypre_StructuredGridVectorBuilder_Skel.c\
-	Hypre_StructuredGrid_Skel.c\
+	Hypre_StructGrid_Skel.c\
 	Hypre_Pilut_Skel.c\
 	Hypre_GMRES_Skel.c\
 	Hypre_ParAMG_Skel.c\
@@ -119,13 +119,13 @@ GENERATED_HDRS = Hypre.h\
 	Hypre_Stencil.h\
 	Hypre_Stencil_Skel.h\
 	Hypre_StructMatrix.h\
-	Hypre_StructMatrixBldr.h\
+	Hypre_StructMatrixBuilder.h\
 	Hypre_StructMatrix_Skel.h\
 	Hypre_StructStencil.h\
 	Hypre_StructStencil_Skel.h\
-	Hypre_StructuredGrid.h\
-	Hypre_StructuredGrid_Skel.h\
-	Hypre_StructuredGridBuilder.h\
+	Hypre_StructGrid.h\
+	Hypre_StructGrid_Skel.h\
+	Hypre_StructGridBuilder.h\
 	Hypre_StructuredGridBuilder_Skel.h\
 	Hypre_StructuredGridMatrixBuilder.h\
 	Hypre_StructuredGridMatrixBuilder_Skel.h\
@@ -133,7 +133,7 @@ GENERATED_HDRS = Hypre.h\
 	Hypre_Vector.h\
 	Hypre_Vector_Skel.h\
 	Hypre_StructVector.h\
-	Hypre_StructVectorBldr.h\
+	Hypre_StructVectorBuilder.h\
 	Hypre_StructVector_Skel.h\
 	Hypre_IJMatrixBuilder.h\
 	Hypre_IJVectorBuilder.h\

@@ -8,13 +8,13 @@
 #include "Hypre_StructVector_Skel.h" 
 #include "Hypre_StructVector_Data.h" 
 
-#include "Hypre_StructVectorBldr_Skel.h" 
-#include "Hypre_StructVectorBldr_Data.h" 
+#include "Hypre_StructVectorBuilder_Skel.h" 
+#include "Hypre_StructVectorBuilder_Data.h" 
 
 #include "Hypre_Box_Skel.h"
 #include "Hypre_Box_Data.h"
-#include "Hypre_StructuredGrid_Skel.h"
-#include "Hypre_StructuredGrid_Data.h"
+#include "Hypre_StructGrid_Skel.h"
+#include "Hypre_StructGrid_Data.h"
 
 /* A Hypre_StructVector points and interfaces to a hypre_StructVector.
    The hypre_StructVector is reference-counted.
@@ -140,30 +140,31 @@ int  impl_Hypre_StructVector_Copy(Hypre_StructVector this, Hypre_Vector x) {
  *    int Clone (out Vector x);              // create an x compatible with y
  **********************************************************/
 int  impl_Hypre_StructVector_Clone(Hypre_StructVector this, Hypre_Vector* x) {
+   int ierr = 0;
    int numghost_data[6] = {0, 0, 0, 0, 0, 0};
    array1int num_ghost;
    int dim;
    struct Hypre_StructVector_private_type *SVyp = this->d_table;
    HYPRE_StructVector *Vy = SVyp->hsvec;
    hypre_StructVector *vy = (hypre_StructVector *) *Vy;
-   Hypre_StructuredGrid G = SVyp->grid;
-   Hypre_StructVectorBldr SVB = Hypre_StructVectorBldr_Constructor( G );
+   Hypre_StructGrid G = SVyp->grid;
+   Hypre_StructVectorBuilder SVB = Hypre_StructVectorBuilder_Constructor( G );
    /* ... SVB ignores G */
 
    dim = Hypre_StructuredGrid_GetIntParameter( G, "dim" );
-   Hypre_StructVectorBldr_New( SVB, G );
+   Hypre_StructVectorBuilder_New( SVB, G );
 
    num_ghost.lower[0] = 0;
    num_ghost.upper[0] = 2*dim;
    num_ghost.data = numghost_data;
    Hypre_StructVector_GetNumGhost( this, num_ghost );
-   Hypre_StructVectorBldr_SetNumGhost( SVB, num_ghost );
+   Hypre_StructVectorBuilder_SetNumGhost( SVB, num_ghost );
 
-   Hypre_StructVectorBldr_Setup( SVB );
-   *x = Hypre_StructVectorBldr_GetConstructedObject( SVB );
+   Hypre_StructVectorBuilder_Setup( SVB );
+   ierr += Hypre_StructVectorBuilder_GetConstructedObject( SVB, x );
    /* ... *x is really a Hypre_StructVector */
 
-   return 0;
+   return ierr;
 
 /* TO DO: change get/set numghost to get/set parameter. */
 

@@ -27,32 +27,39 @@ void Hypre_Pilut_destructor(Hypre_Pilut this) {
 } /* end destructor */
 
 /* ********************************************************
- * impl_Hypre_PilutGetDoubleParameter
+ * impl_Hypre_PilutGetParameterDouble
  *       insert the library code below
  **********************************************************/
-double  impl_Hypre_Pilut_GetDoubleParameter(Hypre_Pilut this, char* name) {
-} /* end impl_Hypre_PilutGetDoubleParameter */
+int  impl_Hypre_Pilut_GetParameterDouble(Hypre_Pilut this, char* name, double* value) {
+} /* end impl_Hypre_PilutGetParameterDouble */
 
 /* ********************************************************
- * impl_Hypre_PilutGetIntParameter
+ * impl_Hypre_PilutGetParameterInt
  *       insert the library code below
  **********************************************************/
-int  impl_Hypre_Pilut_GetIntParameter(Hypre_Pilut this, char* name) {
-} /* end impl_Hypre_PilutGetIntParameter */
+int  impl_Hypre_Pilut_GetParameterInt(Hypre_Pilut this, char* name, int* value) {
+} /* end impl_Hypre_PilutGetParameterInt */
 
 /* ********************************************************
- * impl_Hypre_PilutSetDoubleParameter
+ * impl_Hypre_PilutSetParameterDouble
  *       insert the library code below
  **********************************************************/
-int  impl_Hypre_Pilut_SetDoubleParameter(Hypre_Pilut this, char* name, double value) {
-} /* end impl_Hypre_PilutSetDoubleParameter */
+int  impl_Hypre_Pilut_SetParameterDouble(Hypre_Pilut this, char* name, double value) {
+} /* end impl_Hypre_PilutSetParameterDouble */
 
 /* ********************************************************
- * impl_Hypre_PilutSetIntParameter
+ * impl_Hypre_PilutSetParameterInt
  *       insert the library code below
  **********************************************************/
-int  impl_Hypre_Pilut_SetIntParameter(Hypre_Pilut this, char* name, int value) {
-} /* end impl_Hypre_PilutSetIntParameter */
+int  impl_Hypre_Pilut_SetParameterInt(Hypre_Pilut this, char* name, int value) {
+} /* end impl_Hypre_PilutSetParameterInt */
+
+/* ********************************************************
+ * impl_Hypre_PilutSetParameterString
+ *       insert the library code below
+ **********************************************************/
+int  impl_Hypre_Pilut_SetParameterString(Hypre_Pilut this, char* name, char* value) {
+} /* end impl_Hypre_PilutSetParameterString */
 
 /* ********************************************************
  * impl_Hypre_PilutNew
@@ -79,7 +86,7 @@ int  impl_Hypre_Pilut_Setup(Hypre_Pilut this, Hypre_LinearOperator A, Hypre_Vect
  * impl_Hypre_PilutGetConstructedObject
  *       insert the library code below
  **********************************************************/
-Hypre_Solver  impl_Hypre_Pilut_GetConstructedObject(Hypre_Pilut this) {
+int  impl_Hypre_Pilut_GetConstructedObject(Hypre_Pilut this, Hypre_Solver* obj) {
 } /* end impl_Hypre_PilutGetConstructedObject */
 
 /* ********************************************************
@@ -90,17 +97,24 @@ int  impl_Hypre_Pilut_Apply(Hypre_Pilut this, Hypre_Vector b, Hypre_Vector* x) {
 } /* end impl_Hypre_PilutApply */
 
 /* ********************************************************
+ * impl_Hypre_PilutGetDims
+ *       insert the library code below
+ **********************************************************/
+int  impl_Hypre_Pilut_GetDims(Hypre_Pilut this, int* m, int* n) {
+} /* end impl_Hypre_PilutGetDims */
+
+/* ********************************************************
  * impl_Hypre_PilutGetSystemOperator
  *       insert the library code below
  **********************************************************/
-Hypre_LinearOperator  impl_Hypre_Pilut_GetSystemOperator(Hypre_Pilut this) {
+int  impl_Hypre_Pilut_GetSystemOperator(Hypre_Pilut this, Hypre_LinearOperator* op) {
 } /* end impl_Hypre_PilutGetSystemOperator */
 
 /* ********************************************************
  * impl_Hypre_PilutGetResidual
  *       insert the library code below
  **********************************************************/
-Hypre_Vector  impl_Hypre_Pilut_GetResidual(Hypre_Pilut this) {
+int  impl_Hypre_Pilut_GetResidual(Hypre_Pilut this, Hypre_Vector* resid) {
 } /* end impl_Hypre_PilutGetResidual */
 
 /* ********************************************************

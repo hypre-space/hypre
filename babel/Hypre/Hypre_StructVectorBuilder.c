@@ -14,7 +14,7 @@
 #include "HYPRE_mv.h"
 #include "struct_matrix_vector.h"
 #include "Hypre_Box_Skel.h"
-#include "Hypre_StructuredGrid_Skel.h"
+#include "Hypre_StructGrid_Skel.h"
 
 /* *************************************************
  * Constructor
@@ -108,9 +108,11 @@ int  impl_Hypre_StructVectorBuilder_GetConstructedObject
    Hypre_StructVector newvec = this->d_table->newvec;
    if ( newvec==NULL || this->d_table->vecgood==0 ) {
       printf( "Hypre_StructVectorBuilder: object not constructed yet\n");
-      return (Hypre_Vector) NULL;
+      *obj = (Hypre_Vector) NULL;
+      return 1;
    };
-   return (Hypre_Vector) Hypre_StructVector_castTo( newvec, "Hypre_Vector" );
+   *obj = (Hypre_Vector) Hypre_StructVector_castTo( newvec, "Hypre_Vector" );
+   return 0;
 } /* end impl_Hypre_StructVectorBuilderGetConstructedObject */
 
 /* ********************************************************
