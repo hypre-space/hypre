@@ -38,6 +38,7 @@
 #include "solver/mli_solver_seqsuperlu.h"
 #include "solver/mli_solver_arpacksuperlu.h"
 #include "solver/mli_solver_kaczmarz.h"
+#include "solver/mli_solver_mli.h"
 
 /*****************************************************************************
  * constructor 
@@ -144,6 +145,12 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
       strcpy( paramString, "baseMethod BSGS");
       solver_ptr->setParams( paramString, 0, NULL);
    }
+   else if (!strcmp(str,"CGMLI")) 
+   {
+      solver_ptr = new MLI_Solver_CG(str);
+      strcpy( paramString, "baseMethod MLI");
+      solver_ptr->setParams( paramString, 0, NULL);
+   }
    else if (!strcmp(str,"GMRESJacobi")) 
    {
       solver_ptr = new MLI_Solver_GMRES(str);
@@ -154,6 +161,12 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
    {
       solver_ptr = new MLI_Solver_GMRES(str);
       strcpy( paramString, "baseMethod SGS");
+      solver_ptr->setParams( paramString, 0, NULL);
+   }
+   else if (!strcmp(str,"GMRESMLI")) 
+   {
+      solver_ptr = new MLI_Solver_GMRES(str);
+      strcpy( paramString, "baseMethod MLI");
       solver_ptr->setParams( paramString, 0, NULL);
    }
    else if (!strcmp(str, "Kaczmarz"))   

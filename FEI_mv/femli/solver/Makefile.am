@@ -15,6 +15,7 @@ FILES = \
  mli_solver_hschwarz.cxx \
  mli_solver_parasails.cxx \
  mli_solver_mls.cxx \
+ mli_solver_mli.cxx \
  mli_solver_chebyshev.cxx \
  mli_solver_cg.cxx \
  mli_solver_gmres.cxx \
@@ -32,6 +33,7 @@ FILES = \
  mli_solver_hschwarz.h \
  mli_solver_parasails.h \
  mli_solver_mls.h \
+ mli_solver_mli.h \
  mli_solver_chebyshev.h \
  mli_solver_cg.h \
  mli_solver_gmres.h \

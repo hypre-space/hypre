@@ -13,6 +13,7 @@
 #include "solver/mli_solver_bjacobi.h"
 #include "solver/mli_solver_bsgs.h"
 #include "solver/mli_solver_hsgs.h"
+#include "solver/mli_solver_mli.h"
 
 /******************************************************************************
  * constructor
@@ -109,6 +110,10 @@ int MLI_Solver_GMRES::setup(MLI_Matrix *Amat_in)
                                   numSweeps = 1;
                                   argv[0] = (char *) &numSweeps;
                                   baseSolver_->setParams(paramString,1,argv);
+                                  break;
+      case MLI_SOLVER_MLI_ID :    sprintf(paramString, "MLI");
+                                  baseSolver_ = 
+                                     new MLI_Solver_BSGS(paramString);
                                   break;
       default : printf("MLI_Solver_GMRES ERROR : no base method.\n");
                 exit(1);
@@ -354,6 +359,8 @@ int MLI_Solver_GMRES::setParams( char *paramString, int argc, char **argv )
          baseMethod_ = MLI_SOLVER_SGS_ID;
       else if ( !strcmp(param2, "BSGS") )
          baseMethod_ = MLI_SOLVER_BSGS_ID;
+      else if ( !strcmp(param2, "MLI") )
+         baseMethod_ = MLI_SOLVER_MLI_ID;
       else
          baseMethod_ = MLI_SOLVER_BJACOBI_ID;
       return 0;

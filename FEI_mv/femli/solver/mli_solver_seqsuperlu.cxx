@@ -15,7 +15,12 @@
 #ifdef MLI_SUPERLU
 
 #include <string.h>
+#include <malloc.h>
+#include <assert.h>
 #include "mli_solver_seqsuperlu.h"
+#include "HYPRE.h"
+#include "parcsr_mv/parcsr_mv.h"
+#include "IJ_mv/IJ_mv.h"
 
 /* ****************************************************************************
  * constructor 
@@ -28,11 +33,23 @@ MLI_Solver_SeqSuperLU::MLI_Solver_SeqSuperLU(char *name) : MLI_Solver(name)
    mliAmat_      = NULL;
    factorized_   = 0;
    localNRows_   = 0;
-   nSubProblems_ = 0;
+   nSubProblems_ = 1;
    subProblemRowSizes_   = NULL;
    subProblemRowIndices_ = NULL;
-   numColors_ = 0;
-   myColors_  = NULL;
+   numColors_ = 1;
+   myColors_  = new int[numColors_];
+   myColors_[0] = 0;
+
+   // for domain decomposition with coarse overlaps
+   nSends_ = 0;
+   nRecvs_ = 0;
+   sendProcs_ = NULL;
+   recvProcs_ = NULL;
+   sendLengs_ = NULL;
+   recvLengs_ = NULL;
+   PSmat_ = NULL;
+   AComm_ = 0;
+   PSvec_ = NULL;
 }
 
 /* ****************************************************************************
@@ -71,7 +88,13 @@ MLI_Solver_SeqSuperLU::~MLI_Solver_SeqSuperLU()
             delete [] subProblemRowIndices_[iP];
       delete [] subProblemRowIndices_;
    }
-   if ( myColors_ != NULL ) delete [] myColors_;
+   if ( myColors_  != NULL ) delete [] myColors_;
+   if ( sendProcs_ != NULL ) delete [] sendProcs_;
+   if ( recvProcs_ != NULL ) delete [] recvProcs_;
+   if ( sendLengs_ != NULL ) delete [] sendLengs_;
+   if ( recvLengs_ != NULL ) delete [] recvLengs_;
+   if ( PSmat_     != NULL ) delete PSmat_;
+   if ( PSvec_     != NULL ) delete PSvec_;
 }
 
 /* ****************************************************************************
@@ -131,13 +154,9 @@ int MLI_Solver_SeqSuperLU::setup( MLI_Matrix *Amat )
     * set up coloring and then take out overlap subdomains 
     * -------------------------------------------------------------*/
 
-//   setupBlockColoring();
-myColors_ = new int[nSubProblems_];
-numColors_ = 1;
-for (iP = 0; iP < nSubProblems_; iP++) myColors_[iP] = 0;
-printf("nSubProblems = %d\n", nSubProblems_);
+   if ( numColors_ > 1 ) setupBlockColoring();
 #if 0
-   if (nSubProblems_ > 0)
+   if ( nSubProblems_ > 0 )
    {
       int *domainNumArray = new int[nrows];
       for (iP = nSubProblems_-1; iP >= 0; iP--)
@@ -177,7 +196,7 @@ printf("nSubProblems = %d\n", nSubProblems_);
     * -------------------------------------------------------------*/
 
    countArray = new int[nrows];
-   rowArray = new int[nrows];
+   if ( subProblemRowIndices_ != NULL ) rowArray = new int[nrows];
 
 #if 0
 FILE *fp = fopen("matfile","w");
@@ -272,14 +291,19 @@ fclose(fp);
       }
       else
       {
-         for (irow = 0; irow < nrows; irow++) rowArray[irow] = 1;
          for ( irow = 0; irow < nrows; irow++ ) countArray[irow] = 0;
          for ( irow = 0; irow < nrows; irow++ ) 
+         {
             for ( icol = csrIA[irow]; icol < csrIA[irow+1]; icol++ ) 
+            {
+               if (csrJA[icol] < 0 || csrJA[icol] >= nrows)
+                  printf("SeqSuperLU ERROR : colNum = %d\n", colNum);
                countArray[csrJA[icol]]++;
+            }
+         }
          cscJA = (int *)    malloc( (nrows+1) * sizeof(int) );
-         cscIA = (int *)    malloc( nnz * sizeof(int) );
          cscAA = (double *) malloc( nnz * sizeof(double) );
+         cscIA = (int *)    malloc( nnz * sizeof(int) );
          cscJA[0] = 0;
          nnz = 0;
          for ( icol = 1; icol <= nrows; icol++ ) 
@@ -292,7 +316,15 @@ fclose(fp);
             for ( icol = csrIA[irow]; icol < csrIA[irow+1]; icol++ ) 
             {
                colNum = csrJA[icol];
+               if (colNum < 0 || colNum >= nrows)
+               {
+                  printf("ERROR : irow, icol, colNum = %d, %d, %d\n", irow, 
+                      icol, colNum);
+                  exit(1);
+               }
                index  = cscJA[colNum]++;
+               if (index < 0 || index >= nnz)
+                  printf("ERROR : index = %d %d %d\n", index, colNum, irow);
                cscIA[index] = irow;
                cscAA[index] = csrAA[icol];
             }
@@ -330,7 +362,7 @@ fclose(fp);
    }
    factorized_ = 1;
    delete [] countArray;
-   delete [] rowArray;
+   if ( subProblemRowIndices_ != NULL ) delete [] rowArray;
    return 0;
 }
 
@@ -343,17 +375,19 @@ int MLI_Solver_SeqSuperLU::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 {
    int    iP, iC, irow, nrows, info, nSubRows, extNCols, nprocs, endp1;
    int    jP, jcol, index, nSends, start, rowInd, *AOffdI, *AOffdJ;
-   int    *ADiagI, *ADiagJ;
+   int    *ADiagI, *ADiagJ, rlength, offset, length;
    double *uData, *fData, *subUData, *sBuffer, *rBuffer, res, *AOffdA;
-   double *ADiagA;
+   double *ADiagA, *f2Data, *u2Data, one=1.0, zero=0.0;
    char   trans[1];
    MPI_Comm    comm;
    SuperMatrix B;
-   hypre_ParVector *f, *u;
+   hypre_ParVector *f, *u, *f2;
    hypre_CSRMatrix *ADiag, *AOffd;
-   hypre_ParCSRMatrix  *A;
+   hypre_ParCSRMatrix  *A, *P;
    hypre_ParCSRCommPkg *commPkg;
    hypre_ParCSRCommHandle *commHandle;
+   MPI_Request *mpiRequests;
+   MPI_Status  mpiStatus;
 
    /* -------------------------------------------------------------
     * check that the factorization has been called
@@ -394,14 +428,33 @@ int MLI_Solver_SeqSuperLU::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    f      = (hypre_ParVector *) fIn->getVector();
    fData  = hypre_VectorData(hypre_ParVectorLocalVector(f));
 
+   /* -------------------------------------------------------------
+    * allocate communication buffers if overlap but not DD
+    * -----------------------------------------------------------*/
+
    rBuffer = sBuffer = NULL;
-   if (nprocs > 1)
+   if ( PSmat_ != NULL )
+   { 
+      rlength = 0;
+      for ( iP = 0; iP < nRecvs_; iP++ ) rlength += recvLengs_[iP]; 
+      f2      = (hypre_ParVector *) PSvec_->getVector();
+      f2Data  = hypre_VectorData(hypre_ParVectorLocalVector(f2));
+      u2Data  = new double[localNRows_];
+      if ( nRecvs_ > 0 ) mpiRequests = new MPI_Request[nRecvs_];
+   }
+   else
    {
-      nSends = hypre_ParCSRCommPkgNumSends(commPkg);
-      if ( nSends > 0 )
-         sBuffer = new double[hypre_ParCSRCommPkgSendMapStart(commPkg,nSends)];
-      else sBuffer = NULL;
-      if ( extNCols > 0 ) rBuffer = new double[extNCols];
+      if (nprocs > 1)
+      {
+         nSends = hypre_ParCSRCommPkgNumSends(commPkg);
+         if ( nSends > 0 )
+         {
+            length = hypre_ParCSRCommPkgSendMapStart(commPkg,nSends);
+            sBuffer = new double[length];
+         }
+         else sBuffer = NULL;
+         if ( extNCols > 0 ) rBuffer = new double[extNCols];
+      }
    }
 
    /* -------------------------------------------------------------
@@ -412,13 +465,45 @@ int MLI_Solver_SeqSuperLU::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 
    if ( nSubProblems_ == 1 )
    {
-      for ( irow = 0; irow < nrows; irow++ ) uData[irow] = fData[irow];
-      dCreate_Dense_Matrix(&B, nrows, 1, uData, nrows, DN, D_D, GE);
-      *trans  = 'N';
-      dgstrs (trans, &(superLU_Lmats[0]), &(superLU_Umats[0]), permRs_[0], 
-              permCs_[0], &B, &info);
-      Destroy_SuperMatrix_Store(&B);
-      return info;
+      if ( PSmat_ != NULL )
+      {
+         P = (hypre_ParCSRMatrix *) PSmat_->getMatrix();
+         hypre_ParCSRMatrixMatvecT(one, P, f, zero, f2); 
+         offset = nrows - rlength;
+         for ( iP = 0; iP < nRecvs_; iP++ )
+         {
+            MPI_Irecv(&u2Data[offset],recvLengs_[iP],MPI_DOUBLE,
+                      recvProcs_[iP], 45716, AComm_, &(mpiRequests[iP]));
+            offset += recvLengs_[iP];
+         }
+         length = nrows - rlength;
+         for ( iP = 0; iP < nSends_; iP++ )
+            MPI_Send(f2Data,sendLengs_[iP],MPI_DOUBLE,sendProcs_[iP],45716,
+                     AComm_);
+         for ( iP = 0; iP < nRecvs_; iP++ )
+            MPI_Wait( &(mpiRequests[iP]), &mpiStatus );
+         if ( nRecvs_ > 0 ) delete [] mpiRequests;
+         length = nrows - rlength;
+         for ( irow = 0; irow < length; irow++ ) u2Data[irow] = fData[irow];
+         dCreate_Dense_Matrix(&B, nrows, 1, u2Data, nrows, DN, D_D, GE);
+         *trans  = 'N';
+         dgstrs (trans, &(superLU_Lmats[0]), &(superLU_Umats[0]), permRs_[0], 
+                 permCs_[0], &B, &info);
+         Destroy_SuperMatrix_Store(&B);
+         for ( irow = 0; irow < length; irow++ ) uData[irow] = u2Data[irow];
+         //delete [] u2Data;
+         return info;
+      }
+      else
+      {
+         for ( irow = 0; irow < nrows; irow++ ) uData[irow] = fData[irow];
+         dCreate_Dense_Matrix(&B, nrows, 1, uData, nrows, DN, D_D, GE);
+         *trans  = 'N';
+         dgstrs (trans, &(superLU_Lmats[0]), &(superLU_Umats[0]), permRs_[0], 
+                 permCs_[0], &B, &info);
+         Destroy_SuperMatrix_Store(&B);
+         return info;
+      }
    }
 
    /* -------------------------------------------------------------
@@ -500,7 +585,6 @@ int MLI_Solver_SeqSuperLU::setParams(char *paramString, int argc, char **argv)
          subProblemRowIndices_ = NULL; 
       }
       nSubProblems_ = *(int *) argv[0];
-printf("SeqSuperLU setParam : nSubProblems = %d\n", nSubProblems_);
       if (nSubProblems_ <= 0) nSubProblems_ = 1;
       if (nSubProblems_ > 1)
       {
@@ -516,6 +600,62 @@ printf("SeqSuperLU setParam : nSubProblems = %d\n", nSubProblems_);
                subProblemRowIndices_[i][j] = iArray2[i][j];
          }
       }
+   }
+   else if ( !strcmp(param1, "setPmat") )
+   {
+      if ( argc != 1 ) 
+      {
+         printf("MLI_Solver_SeqSuperLU::setParams ERROR : needs 1 arg.\n");
+         return 1;
+      }
+      HYPRE_IJVector auxVec;
+      PSmat_ = (MLI_Matrix *) argv[0];
+      hypre_ParCSRMatrix *hypreAux;
+      hypre_ParCSRMatrix *ps = (hypre_ParCSRMatrix *) PSmat_->getMatrix();
+      int nCols = hypre_ParCSRMatrixNumCols(ps);
+      int start = hypre_ParCSRMatrixFirstColDiag(ps);
+      MPI_Comm vComm = hypre_ParCSRMatrixComm(ps);
+      HYPRE_IJVectorCreate(vComm, start, start+nCols-1, &auxVec);
+      HYPRE_IJVectorSetObjectType(auxVec, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(auxVec);
+      HYPRE_IJVectorAssemble(auxVec);
+      HYPRE_IJVectorGetObject(auxVec, (void **) &hypreAux);
+      HYPRE_IJVectorSetObjectType(auxVec, -1);
+      HYPRE_IJVectorDestroy(auxVec);
+      strcpy( paramString, "HYPRE_ParVector" );
+      MLI_Function *funcPtr = new MLI_Function();
+      MLI_Utils_HypreParVectorGetDestroyFunc(funcPtr);
+      PSvec_ = new MLI_Vector( (void*) hypreAux, paramString, funcPtr );
+      delete funcPtr;
+   }
+   else if ( !strcmp(param1, "setCommData") )
+   {
+      if ( argc != 7 ) 
+      {
+         printf("MLI_Solver_SeqSuperLU::setParams ERROR : needs 7 arg.\n");
+         return 1;
+      }
+      nRecvs_ = *(int *) argv[0];
+      if ( nRecvs_ > 0 ) 
+      {
+         recvProcs_ = new int[nRecvs_];
+         recvLengs_ = new int[nRecvs_];
+         iArray =  (int *) argv[1];
+         for ( i = 0; i < nRecvs_; i++ ) recvProcs_[i] = iArray[i];
+         iArray =  (int *) argv[2];
+         for ( i = 0; i < nRecvs_; i++ ) recvLengs_[i] = iArray[i];
+      }
+      nSends_ = *(int *) argv[3];
+      if ( nSends_ > 0 ) 
+      {
+         sendProcs_ = new int[nSends_];
+         sendLengs_ = new int[nSends_];
+         iArray =  (int *) argv[4];
+         for ( i = 0; i < nSends_; i++ ) sendProcs_[i] = iArray[i];
+         iArray =  (int *) argv[5];
+         for ( i = 0; i < nSends_; i++ ) sendLengs_[i] = iArray[i];
+      }
+      AComm_ = *(int *) argv[6];
    }
    else
    {   
@@ -602,10 +742,6 @@ int MLI_Solver_SeqSuperLU::setupBlockColoring()
          if (graphMatrix[i*nSubProblems_+j] == 1) GDiagJ[nEntries++] = j;
       GDiagI[i+1] = nEntries;
    }
-printf("print graph\n");
-for (i = 0; i < nSubProblems_; i++) 
-for (j = GDiagI[i]; j < GDiagI[i+1]; j++) 
-printf("Graph %d = %d\n",i, GDiagJ[j]);
    delete [] graphMatrix;
 
    /*---------------------------------------------------------------*/

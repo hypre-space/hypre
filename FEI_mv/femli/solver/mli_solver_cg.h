@@ -29,6 +29,15 @@ class MLI_Solver_CG : public MLI_Solver
    MLI_Vector  *apVec_;
    MLI_Solver  *baseSolver_;
    int         baseMethod_;
+   MLI_Matrix  *PSmat_;
+   MLI_Vector  *PSvec_;
+   int	       nRecvs_;
+   int	       *recvProcs_;
+   int	       *recvLengs_;
+   int	       nSends_;
+   int	       *sendProcs_;
+   int	       *sendLengs_;
+   MPI_Comm    AComm_;
 
 public :
 

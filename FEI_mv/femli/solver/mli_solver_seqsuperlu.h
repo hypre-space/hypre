@@ -36,6 +36,15 @@ class MLI_Solver_SeqSuperLU : public MLI_Solver
    int          *subProblemRowSizes_;
    int          numColors_;
    int          *myColors_;
+   int          nRecvs_;
+   int          *recvProcs_;
+   int          *recvLengs_;
+   int          nSends_;
+   int          *sendProcs_;
+   int          *sendLengs_;
+   MPI_Comm     AComm_;
+   MLI_Matrix   *PSmat_;
+   MLI_Vector   *PSvec_;
 
 public :
 
