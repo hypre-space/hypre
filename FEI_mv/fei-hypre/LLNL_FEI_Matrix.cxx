@@ -96,7 +96,7 @@ int LLNL_FEI_Matrix::parameters(int numParams, char **paramString)
       else if ( !strcmp(param1, "setDebug") )
       {
          sscanf(paramString[i],"%s %s", param1, param);
-         if ( !strcmp(param, "printMat") ) FLAG_PrintMatrix_ = 1;
+         if ( !strcmp(param, "printMatrix") ) FLAG_PrintMatrix_ = 1;
       }
       else if ( !strcmp(param1, "matrixNoOverlap") )
       {
