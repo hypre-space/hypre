@@ -29,8 +29,7 @@ int hypre_BuildParVectorMPITypes P((MPI_Comm comm, int vec_len,
 hypre_CommHandle *hypre_InitializeCommunication P((int job,
 	hypre_CommPkg *comm_pkg, void *send_data, void *recv_data));
 int hypre_FinalizeCommunication P((hypre_CommHandle *comm_handle));
-int hypre_GenerateMatvecCommunicationInfo P((hypre_ParCSRMatrix *A, 
-	int *row_part_starts, int *col_part_starts));
+int hypre_GenerateMatvecCommunicationInfo P((hypre_ParCSRMatrix *A));
 hypre_VectorCommPkg *hypre_InitializeVectorCommPkg P((MPI_Comm comm, 
 	int vec_len, int *vec_starts));
 int hypre_DestroyVectorCommPkg P(( hypre_VectorCommPkg *vector_comm_pkg));
@@ -43,25 +42,30 @@ int hypre_BuildCSRJDataType P((int num_nonzeros, double *a_data, int *a_j,
 /* par_csr_matrix.c */
 hypre_ParCSRMatrix *hypre_CreateParCSRMatrix P((MPI_Comm comm,
 		int global_num_rows, int global_num_cols,
-		int first_row_index, int first_col_diag,
-		int local_num_rows, int local_num_cols, int num_cols_offd,
+		int *row_starts, int *col_starts, int num_cols_offd,
 		int num_nonzeros_diag, int num_nonzeros_offd));
 int hypre_DestroyParCSRMatrix P(( hypre_ParCSRMatrix *matrix));
 int hypre_InitializeParCSRMatrix P(( hypre_ParCSRMatrix *matrix));
 hypre_ParCSRMatrix *hypre_ReadParCSRMatrix P(( MPI_Comm comm, char *file_name));
 int hypre_PrintParCSRMatrix P(( hypre_ParCSRMatrix *matrix, char *file_name));
 hypre_ParCSRMatrix *hypre_CSRMatrixToParCSRMatrix P((MPI_Comm comm,
-	hypre_CSRMatrix *A, int **row_starts_ptr, int **col_starts_ptr));
+	hypre_CSRMatrix *A, int *row_starts, int *col_starts));
 int GenerateDiagAndOffd P((hypre_CSRMatrix *A, hypre_ParCSRMatrix *matrix,
 	int first_col_diag, int last_col_diag));
 hypre_CSRMatrix *hypre_MergeDiagAndOffd P((hypre_ParCSRMatrix *par_matrix));
 hypre_CSRMatrix *hypre_ParCSRMatrixToCSRMatrixAll P((MPI_Comm,
-	hypre_ParCSRMatrix *par_matrix, int *partitioning));
+	hypre_ParCSRMatrix *par_matrix));
  
 /* par_csr_matvec.c */
 int hypre_ParMatvec P((double alpha, hypre_ParCSRMatrix *A, 
 	hypre_ParVector *x, double beta, hypre_ParVector *y));
 int hypre_ParMatvecT P((double alpha, hypre_ParCSRMatrix *A, 
 	hypre_ParVector *x, double beta, hypre_ParVector *y));
+
+/* par_csr_matop.c */
+hypre_ParCSRMatrix *hypre_ParMatmul P((hypre_ParCSRMatrix *A, 
+	hypre_ParCSRMatrix *B));
+hypre_CSRMatrix *hypre_ExtractBExt P((hypre_ParCSRMatrix *B, 
+	hypre_ParCSRMatrix *A));
 
 #undef P
