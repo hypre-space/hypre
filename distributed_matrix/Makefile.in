@@ -62,3 +62,10 @@ lib: $(PROTOS) ${OBJS}
 	@ar -rcu lib_HYPRE_DistributedMatrix.a ${OBJS}
 	@ranlib lib_HYPRE_DistributedMatrix.a 
 
+##################################################################
+# Generic rules
+##################################################################
+
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} -I../seq_matrix_vector -I../parcsr_matrix_vector $<
