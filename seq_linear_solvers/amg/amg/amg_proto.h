@@ -23,9 +23,11 @@ void FreeGlobals P((void ));
 /* matrix.c */
 Matrix *NewMatrix P((double *data , int *ia , int *ja , int size ));
 void FreeMatrix P((Matrix *matrix ));
+void Matvec P((double alpha , Matrix *A , Vector *x , double beta , Vector *y ));
 
 /* pcg.c */
 void PCG P((Vector *x , Vector *b , double tol , Data *data ));
+void PCGSetup P((Problem *problem , void (*precond )(), Data *precond_data , Data *data ));
 Data *ReadPCGParams P((FILE *fp ));
 Data *NewPCGData P((int max_iter , int two_norm , char *log_file_name ));
 void FreePCGData P((Data *data ));
@@ -49,6 +51,10 @@ void FreeSolver P((Solver *solver ));
 /* vector.c */
 Vector *NewVector P((double *data , int size ));
 void FreeVector P((Vector *vector ));
+void InitVector P((Vector *v , double value ));
+void Scale P((double alpha , Vector *y ));
+void Axpy P((double alpha , Vector *x , Vector *y ));
+double InnerProd P((Vector *x , Vector *y ));
 
 /* write.c */
 void WriteYSMP P((char *file_name , Matrix *matrix ));

@@ -30,6 +30,7 @@ char *argv[];
    Vector      *f;
    double       stop_tolerance;
    Data        *amgs01_data;
+   Data        *pcg_data;
 
 
    /*-------------------------------------------------------
@@ -90,7 +91,7 @@ char *argv[];
    fclose(fp);
 
    /*-------------------------------------------------------
-    * Call AMGS01
+    * Call the solver
     *-------------------------------------------------------*/
 
    u = ProblemU(problem);
@@ -98,9 +99,24 @@ char *argv[];
 
    stop_tolerance = SolverStopTolerance(solver);
    amgs01_data    = SolverAMGS01Data(solver);
+   pcg_data       = SolverPCGData(solver);
 
-   AMGS01Setup(problem, amgs01_data);
-   AMGS01(u, f, stop_tolerance, amgs01_data);
+   /* call AMGS01 */
+   if (SolverType(solver) == 0)
+   {
+      AMGS01Setup(problem, amgs01_data);
+
+      AMGS01(u, f, stop_tolerance, amgs01_data);
+   }
+
+   /* call PCG */
+   else if (SolverType(solver) == 1)
+   {
+      AMGS01Setup(problem, amgs01_data);
+      PCGSetup(problem, AMGS01, amgs01_data, pcg_data);
+
+      PCG(u, f, stop_tolerance, pcg_data);
+   }
 
    return 0;
 }

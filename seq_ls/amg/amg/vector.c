@@ -49,3 +49,82 @@ Vector  *vector;
    }
 }
 
+/*--------------------------------------------------------------------------
+ * InitVector
+ *--------------------------------------------------------------------------*/
+
+void    InitVector(v, value)
+Vector *v;
+double  value;
+{
+   double     *vp = VectorData(v);
+   int         n  = VectorSize(v);
+
+   int         i;
+
+
+   for (i = 0; i < n; i++)
+      vp[i] = value;
+}
+
+/*--------------------------------------------------------------------------
+ * Scale
+ *--------------------------------------------------------------------------*/
+
+void     Scale(alpha, y)
+double   alpha;
+Vector  *y;
+{
+   double     *yp = VectorData(y);
+   int         n  = VectorSize(y);
+
+   int         i;
+
+
+   for (i = 0; i < n; i++)
+      yp[i] *= alpha;
+}
+
+/*--------------------------------------------------------------------------
+ * Axpy
+ *--------------------------------------------------------------------------*/
+
+void     Axpy(alpha, x, y)
+double   alpha;
+Vector  *x;
+Vector  *y;
+{
+   double     *xp = VectorData(x);
+   double     *yp = VectorData(y);
+   int         n  = VectorSize(x);
+
+   int         i;
+
+
+   for (i = 0; i < n; i++)
+      yp[i] += alpha * xp[i];
+}
+
+/*--------------------------------------------------------------------------
+ * InnerProd
+ *--------------------------------------------------------------------------*/
+
+double   InnerProd(x, y)
+Vector  *x;
+Vector  *y;
+{
+   double     *xp = VectorData(x);
+   double     *yp = VectorData(y);
+   int         n  = VectorSize(x);
+
+   int         i;
+
+   double      result = 0.0;
+
+
+   for (i = 0; i < n; i++)
+      result += yp[i] * xp[i];
+  
+   return result;
+}
+

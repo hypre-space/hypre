@@ -23,10 +23,17 @@
 
 typedef struct
 {
-   int    max_iter;
-   int    two_norm;
+   int      max_iter;
+   int      two_norm;
 
-   char  *log_file_name;
+   Matrix  *A;
+   Vector  *p;
+   Vector  *s;
+
+   void   (*precond)();
+   Data    *precond_data;
+
+   char    *log_file_name;
 
 } PCGData;
 
@@ -36,6 +43,13 @@ typedef struct
 
 #define PCGDataMaxIter(pcg_data)      ((pcg_data) -> max_iter)
 #define PCGDataTwoNorm(pcg_data)      ((pcg_data) -> two_norm)
+
+#define PCGDataA(pcg_data)            ((pcg_data) -> A)
+#define PCGDataP(pcg_data)            ((pcg_data) -> p)
+#define PCGDataS(pcg_data)            ((pcg_data) -> s)
+
+#define PCGDataPrecond(pcg_data)      ((pcg_data) -> precond)
+#define PCGDataPrecondData(pcg_data)  ((pcg_data) -> precond_data)
 
 #define PCGDataLogFileName(pcg_data)  ((pcg_data) -> log_file_name)
 

@@ -48,9 +48,12 @@ char     *file_name;
    FILE    *temp_fp;
    int      flag;
    double  *data;
+   double   dtemp;
 
    int      i, j, k;
 
+
+   SeedRand(1);
 
    /*----------------------------------------------------------
     * Open the problem file
@@ -97,8 +100,19 @@ char     *file_name;
    else
    {
       data = talloc(double, NDIMU(num_variables));
-      for (i = 0; i < num_variables; i++)
-	 data[i] = 0.0;
+
+      if (flag == 1)
+      {
+	 fscanf(fp, "%le", &dtemp);
+	 for (i = 0; i < num_variables; i++)
+	    data[i] = dtemp;
+      }
+      else if (flag == 2)
+      {
+	 for (i = 0; i < num_variables; i++)
+	    data[i] = Rand();
+      }
+
       f = NewVector(data, num_variables);
    }
 
@@ -121,10 +135,20 @@ char     *file_name;
    }
    else
    {
-      SeedRand(1);
       data = talloc(double, NDIMU(num_variables));
-      for (i = 0; i < num_variables; i++)
-	 data[i] = Rand();
+
+      if (flag == 1)
+      {
+	 fscanf(fp, "%le", &dtemp);
+	 for (i = 0; i < num_variables; i++)
+	    data[i] = dtemp;
+      }
+      else if (flag == 2)
+      {
+	 for (i = 0; i < num_variables; i++)
+	    data[i] = Rand();
+      }
+
       u = NewVector(data, num_variables);
    }
 

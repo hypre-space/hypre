@@ -42,17 +42,18 @@ double    tol;
 Data     *data;
 {
    PCGData  *pcg_data      = data;
-#if 0
+
    int        max_iter     = PCGDataMaxIter(pcg_data);
    int        two_norm     = PCGDataTwoNorm(pcg_data);
 
-   PFModule  *precond      = (instance_xtra -> precond);
+   Matrix    *A            = PCGDataA(pcg_data);
+   Vector    *p            = PCGDataP(pcg_data);
+   Vector    *s            = PCGDataS(pcg_data);
 
-   Matrix    *A            = (instance_xtra -> A);
+   void     (*precond)()   = PCGDataPrecond(pcg_data);
+   Data      *precond_data = PCGDataPrecondData(pcg_data);
 
    Vector    *r;
-   Vector    *p            = (instance_xtra -> p);
-   Vector    *s            = (instance_xtra -> s);
 
    double     alpha, beta;
    double     gamma, gamma_old;
@@ -60,32 +61,23 @@ Data     *data;
    
    int        i = 0;
 	     
+   /* logging variables */
    double    *norm_log;
    double    *rel_norm_log;
+   FILE      *log_fp;
+   int        j;
 
 
    /*-----------------------------------------------------------------------
     * Initialize some logging variables
     *-----------------------------------------------------------------------*/
 
-   IfLogging(1)
-   {
-      norm_log     = talloc(double, max_iter);
-      rel_norm_log = talloc(double, max_iter);
-   }
-
-   /*-----------------------------------------------------------------------
-    * Begin timing
-    *-----------------------------------------------------------------------*/
-
-   BeginTiming(public_xtra -> time_index);
+   norm_log     = talloc(double, max_iter);
+   rel_norm_log = talloc(double, max_iter);
 
    /*-----------------------------------------------------------------------
     * Start pcg solve
     *-----------------------------------------------------------------------*/
-
-   if (zero)
-      InitVector(x, 0.0);
 
    if (two_norm)
    {
@@ -96,7 +88,8 @@ Data     *data;
    else
    {
       /* eps = (tol^2)*<C*b,b> */
-      PFModuleInvoke(void, precond, (p, b, 0.0, 1));
+      InitVector(p, 0.0);
+      precond(p, b, 0.0, precond_data);
       bi_prod = InnerProd(p, b);
       eps = (tol*tol)*bi_prod;
    }
@@ -105,7 +98,8 @@ Data     *data;
    Matvec(-1.0, A, x, 1.0, (r = b));
 
    /* p = C*r */
-   PFModuleInvoke(void, precond, (p, r, 0.0, 1));
+   InitVector(p, 0.0);
+   precond(p, r, 0.0, precond_data);
 
    /* gamma = <r,p> */
    gamma = InnerProd(r,p);
@@ -129,7 +123,8 @@ Data     *data;
       Axpy(-alpha, s, r);
 	 
       /* s = C*r */
-      PFModuleInvoke(void, precond, (s, r, 0.0, 1));
+      InitVector(s, 0.0);
+      precond(s, r, 0.0, precond_data);
 
       /* gamma = <r,s> */
       gamma = InnerProd(r, s);
@@ -141,23 +136,17 @@ Data     *data;
 	 i_prod = gamma;
 
 #if 0
-      if(!amps_Rank(amps_CommWorld))
-      {
-	 if (two_norm)
-	    amps_Printf("Iter (%d): ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
-			i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
-	 else
-	    amps_Printf("Iter (%d): ||r||_C = %e, ||r||_C/||b||_C = %e\n",
-			i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
-      }
+      if (two_norm)
+	 printf("Iter (%d): ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
+		i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
+      else
+	 printf("Iter (%d): ||r||_C = %e, ||r||_C/||b||_C = %e\n",
+		i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
 #endif
  
       /* log norm info */
-      IfLogging(1)
-      {
-	 norm_log[i-1]     = sqrt(i_prod);
-	 rel_norm_log[i-1] = bi_prod ? sqrt(i_prod/bi_prod) : 0;
-      }
+      norm_log[i-1]     = sqrt(i_prod);
+      rel_norm_log[i-1] = bi_prod ? sqrt(i_prod/bi_prod) : 0;
 
       /* check for convergence */
       if (i_prod < eps)
@@ -172,58 +161,71 @@ Data     *data;
    }
 
 #if 1
-   if(!amps_Rank(amps_CommWorld))
-   {
-      if (two_norm)
-	 amps_Printf("Iterations = %d: ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
-		     i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
-      else
-	 amps_Printf("Iterations = %d: ||r||_C = %e, ||r||_C/||b||_C = %e\n",
-		     i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
-   }
+   if (two_norm)
+      printf("Iterations = %d: ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
+	     i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
+   else
+      printf("Iterations = %d: ||r||_C = %e, ||r||_C/||b||_C = %e\n",
+	     i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
 #endif
-
-   /*-----------------------------------------------------------------------
-    * End timing
-    *-----------------------------------------------------------------------*/
-
-   IncFLOPCount(i*2 - 1);
-   EndTiming(public_xtra -> time_index);
 
    /*-----------------------------------------------------------------------
     * Print log
     *-----------------------------------------------------------------------*/
 
-   IfLogging(1)
+   log_fp = fopen(GlobalsLogFileName, "a");
+
+   fprintf(log_fp, "\nPCG INFO:\n\n");
+
+   if (two_norm)
    {
-      FILE *log_file;
-      int        j;
-
-      log_file = OpenLogFile("PCG");
-
-      if (two_norm)
-      {
-	 fprintf(log_file, "Iters       ||r||_2    ||r||_2/||b||_2\n");
-	 fprintf(log_file, "-----    ------------    ------------\n");
-      }
-      else
-      {
-	 fprintf(log_file, "Iters       ||r||_C    ||r||_C/||b||_C\n");
-	 fprintf(log_file, "-----    ------------    ------------\n");
-      }
-
-      for (j = 0; j < i; j++)
-      {
-	 fprintf(log_file, "% 5d    %e    %e\n",
-		      (j+1), norm_log[j], rel_norm_log[j]);
-      }
-
-      CloseLogFile(log_file);
-
-      tfree(norm_log);
-      tfree(rel_norm_log);
+      fprintf(log_fp, "Iters       ||r||_2    ||r||_2/||b||_2\n");
+      fprintf(log_fp, "-----    ------------    ------------\n");
    }
-#endif
+   else
+   {
+      fprintf(log_fp, "Iters       ||r||_C    ||r||_C/||b||_C\n");
+      fprintf(log_fp, "-----    ------------    ------------\n");
+   }
+   
+   for (j = 0; j < i; j++)
+   {
+      fprintf(log_fp, "% 5d    %e    %e\n",
+	      (j+1), norm_log[j], rel_norm_log[j]);
+   }
+   
+   fclose(log_fp);
+   
+   tfree(norm_log);
+   tfree(rel_norm_log);
+}
+
+/*--------------------------------------------------------------------------
+ * PCGSetup
+ *--------------------------------------------------------------------------*/
+
+void      PCGSetup(problem, precond, precond_data, data)
+Problem  *problem;
+void    (*precond)();
+Data     *precond_data;
+Data     *data;
+{
+   PCGData  *pcg_data = data;
+
+   double   *darray;
+   int       size;
+
+
+   PCGDataA(pcg_data) = ProblemA(problem);
+
+   size = VectorSize(ProblemF(problem));
+   darray = talloc(double, NDIMU(size));
+   PCGDataP(pcg_data) = NewVector(darray, size);
+   darray = talloc(double, NDIMU(size));
+   PCGDataS(pcg_data) = NewVector(darray, size);
+
+   PCGDataPrecond(pcg_data)     = precond;
+   PCGDataPrecondData(pcg_data) = precond_data;
 }
 
 /*--------------------------------------------------------------------------
@@ -283,3 +285,5 @@ Data  *data;
       tfree(pcg_data);
    }
 }
+
+
