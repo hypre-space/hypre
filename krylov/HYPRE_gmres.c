@@ -114,6 +114,17 @@ HYPRE_GMRESSetStopCrit( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_GMRESSetRelChange
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_GMRESSetRelChange( HYPRE_Solver solver,
+                         int                rel_change )
+{
+   return( hypre_GMRESSetRelChange( (void *) solver, rel_change ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_GMRESSetPrecond
  *--------------------------------------------------------------------------*/
 

@@ -82,6 +82,7 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions )
    (gmres_data -> tol)            = 1.0e-06;
    (gmres_data -> min_iter)       = 0;
    (gmres_data -> max_iter)       = 1000;
+   (gmres_data -> rel_change)   = 0;
    (gmres_data -> stop_crit)      = 0; /* rel. residual norm */
    (gmres_data -> precond_data)   = NULL;
    (gmres_data -> logging)        = 0;
@@ -198,6 +199,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    int 		     k_dim        = (gmres_data -> k_dim);
    int               min_iter     = (gmres_data -> min_iter);
    int 		     max_iter     = (gmres_data -> max_iter);
+   int               rel_change   = (gmres_data -> rel_change);
    int 		     stop_crit    = (gmres_data -> stop_crit);
    double 	     accuracy     = (gmres_data -> tol);
    void             *matvec_data  = (gmres_data -> matvec_data);
@@ -220,8 +222,18 @@ hypre_GMRESSolve(void  *gmres_vdata,
    double     *rs, **hh, *c, *s;
    int        iter; 
    int        my_id, num_procs;
-   double     epsilon, gamma, t, r_norm, b_norm;
+   double     epsilon, gamma, t, r_norm, b_norm, x_norm;
    double     epsmac = 1.e-16; 
+
+   double          guard_zero_residual; 
+
+   /*-----------------------------------------------------------------------
+    * With relative change convergence test on, it is possible to attempt
+    * another iteration with a zero residual. This causes the parameter
+    * alpha to go NaN. The guard_zero_residual parameter is to circumvent
+    * this. Perhaps it should be set to something non-zero (but small).
+    *-----------------------------------------------------------------------*/
+   guard_zero_residual = 0.0;
 
    (*(gmres_functions->CommInfo))(A,&my_id,&num_procs);
    if (logging > 0)
@@ -275,7 +287,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    };
 
 /* convergence criterion |r_i| <= accuracy , absolute residual norm*/
-   if (stop_crit)
+   if ( stop_crit && !rel_change )
       epsilon = accuracy;
 
    while (iter < max_iter)
@@ -377,12 +389,22 @@ hypre_GMRESSolve(void  *gmres_vdata,
         {
 		(*(gmres_functions->CopyVector))(b,r);
           	(*(gmres_functions->Matvec))(matvec_data,-1.0,A,x,1.0,r);
-		r_norm = sqrt((*(gmres_functions->InnerProd))(r,r));
+		r_norm = sqrt( (*(gmres_functions->InnerProd))(r,r) );
 		if (r_norm <= epsilon)
                 {
-                  if (logging > 0 && my_id == 0)
-                     printf("Final L2 norm of residual: %e\n\n", r_norm);
-                  break;
+                   if (logging > 0 && my_id == 0)
+                      printf("Final L2 norm of residual: %e\n\n", r_norm);
+                   if (rel_change && r_norm > guard_zero_residual)
+                      /* Also test on relative change of iterates, x_i - x_(i-1) */
+                   {  /* At this point r = x_i - x_(i-1) */
+                      x_norm = sqrt( (*(gmres_functions->InnerProd))(x,x) );
+                      if ( r_norm/x_norm < epsilon || x_norm<=guard_zero_residual )
+                         break;
+                   }
+                   else
+                   {
+                      break;
+                   }
                 }
 		else
 		{
@@ -511,6 +533,22 @@ hypre_GMRESSetMaxIter( void *gmres_vdata,
    int              ierr = 0;
  
    (gmres_data -> max_iter) = max_iter;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESSetRelChange
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_GMRESSetRelChange( void *gmres_vdata,
+                         int   rel_change  )
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+   int            ierr = 0;
+ 
+   (gmres_data -> rel_change) = rel_change;
  
    return ierr;
 }

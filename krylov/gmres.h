@@ -75,11 +75,19 @@ typedef struct
  * The {\tt hypre\_GMRESData} object ...
  **/
 
+/* rel_change!=0 means: if pass the other stopping criteria,
+ also check the relative change in the solution x.
+   stop_crit!=0 means: absolute error tolerance rather than
+ the usual relative error tolerance on the residual.  Never
+ applies if rel_change!=0.
+*/
+
 typedef struct
 {
    int      k_dim;
    int      min_iter;
    int      max_iter;
+   int      rel_change;
    int      stop_crit;
    double   tol;
    double   rel_residual_norm;
