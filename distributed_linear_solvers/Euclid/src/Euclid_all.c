@@ -312,9 +312,11 @@ void Euclid_dhPrintParams(Euclid_dh ctx, FILE *fp)
       fprintf(fp, "DOUBLE precision\n");
     }
 
-    fprintf(fp, "global matrix dimension: %i\n", ctx->n);
+    fprintf(fp, "global matrix rows:      %i\n", ctx->n);
+    fprintf(fp, "local matrix rows:       %i (on P_0)\n", ctx->m);
     fprintf(fp, "number of MPI tasks:     %i\n", np_dh);
-    fprintf(fp, "nonzeros in input:       %i\n", ctx->nzA);
+    fprintf(fp, "nonzeros in A (global):  %i\n", ctx->nzAglobal);
+    fprintf(fp, "nonzeros in A (local):   %i (on P_0)\n", ctx->nzA);
 
     if (ctx->isScaled) {
       fprintf(fp, "row scaling in effect\n");
@@ -689,13 +691,13 @@ void find_nzA_private(Euclid_dh ctx)
     nzLocal += len;
     EuclidRestoreRow(ctx->A, row, &len, NULL, NULL); CHECK_V_ERROR;
   }
+  ctx->nzA = nzLocal;
 
   if (np_dh > 1) {
     MPI_Allreduce(&nzLocal, &nzGlobal, 1, MPI_INT, MPI_SUM, comm_dh);
   } else {
     nzGlobal = nzLocal;
   }
-  ctx->nzA = nzGlobal;
   ctx->nzAglobal = nzGlobal;
   END_FUNC_DH
 }
