@@ -28,9 +28,9 @@
 #define NULL 0
 #endif
 
-#define  NDIMU(nv)  (50*nv)
-#define  NDIMP(np)  (50*np)
-#define  NDIMA(na)  (6*na)
+#define  NDIMU(nv)  (3*nv)
+#define  NDIMP(np)  (3*np)
+#define  NDIMA(na)  (3*na)
 #define  NDIMB(na)  (3*na)
 
 /*--------------------------------------------------------------------------
