@@ -24,8 +24,10 @@
 #include <essl.h>
 #else
 #include "fortran.h"
+#if 0
 void hypre_F90_NAME_BLAS(dgels, DGELS)(char *, int *, int *, int *, double *, 
   int *, double *, int *, double *, int *, int *);
+#endif
 #endif
 
 #ifndef ABS
