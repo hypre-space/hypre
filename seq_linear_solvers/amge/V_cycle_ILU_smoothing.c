@@ -52,7 +52,7 @@ int hypre_VcycleILUsmoothing(double **x, double **rhs,
 {
 
   int ierr=0, i, j, k, l, l_coarse;
-  int nu_new;
+  int nu_new = nu;
   int num_V_cycles;
 
   int max_CG_iter=999; 
@@ -102,7 +102,7 @@ int hypre_VcycleILUsmoothing(double **x, double **rhs,
   aux_v = (double *) malloc(num_dofs[0] * sizeof(double));
   aux_w = (double *) malloc(num_dofs[0] * sizeof(double));
   aux_d = (double *) malloc(num_dofs[0] * sizeof(double));
-  */
+
 
   for (i=0; i <num_dofs[0]; i++)
     res_norm+=rhs[0][i]*rhs[0][i];
@@ -116,7 +116,7 @@ int hypre_VcycleILUsmoothing(double **x, double **rhs,
 
   l = 0;
 
-  nu_new = nu;  
+  /*   nu_new = nu;  */
 
   /* initial iterate x[0] is input/output: ------------------- */
 
@@ -141,8 +141,8 @@ loop_20:
 
 			num_dofs[l]);
 
+  /*-------------------------------------------------------------
 
-  /*
 
   ierr = hypre_ILUpcg(x[l], rhs[l],
 		      sparse_matrix[l],
@@ -163,7 +163,8 @@ loop_20:
 		      aux_v, aux_w, aux_d, nu_new,
 
 		      num_dofs[l]);
-  */
+
+		      ---------------------------------------------------*
 
   /* sparse-matrix vector product: --------------------------*/
 
@@ -221,6 +222,7 @@ loop_20:
 			    num_coarsedofs);
 
 
+
       l++;
       goto loop_10;
     }
@@ -251,6 +253,8 @@ loop_10:
     x[l][i] += v[i];
  
 
+  /* post--smoothing: ---------------------------------------*/   
+
 
   ierr = sparse_matrix_vector_product(w,
 				      sparse_matrix[l], 
@@ -260,13 +264,10 @@ loop_10:
 
 
 
-  /* compute residual: w <-- rhs - v;     */
+
   for (i=0; i < num_dofs[l]; i++)
     w[i] = rhs[l][i] - w[i];
 
-
-
-  /* post--smoothing: ---------------------------------------*/   
 
   ierr = hypre_ILUsolve(v,
 			i_ILUdof_to_dof[l],
@@ -285,34 +286,34 @@ loop_10:
 
 			num_dofs[l]);
 
-  /* update iterate: ----------------------------------------*/
-
   for (i=0; i < num_dofs[l]; i++)
     x[l][i] += v[i];
  
+
+
+
+  /* =======================================================  
   
-  /*
-  ierr = hypre_ILU_pcg(x[l], rhs[l],
-		       sparse_matrix[l],
+  ierr = hypre_ILUpcg(x[l], rhs[l],
+		      sparse_matrix[l],
 
-		       i_dof_dof[l], j_dof_dof[l],
+		      i_dof_dof[l], j_dof_dof[l],
 
-		       i_ILUdof_to_dof[l],
+		      i_ILUdof_to_dof[l],
 				   
-		       i_ILUdof_ILUdof[l], 
-		       j_ILUdof_ILUdof[l],
-		       LD_data[l],
+		      i_ILUdof_ILUdof[l], 
+		      j_ILUdof_ILUdof[l],
+		      LD_data[l],
 
-		       i_ILUdof_ILUdof_t[l], 
-		       j_ILUdof_ILUdof_t[l],
-		       U_data[l],
+		      i_ILUdof_ILUdof_t[l], 
+		      j_ILUdof_ILUdof_t[l],
+		      U_data[l],
 
-		       aux_v, aux_w, aux_d, nu_new,
+		      aux_v, aux_w, aux_d, nu_new,
 
-		       num_dofs[l]);
+		      num_dofs[l]);
 
-  */
-
+   ================================================================== */
   if ( l > 0) goto loop_10;
 
 
