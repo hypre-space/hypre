@@ -1,7 +1,0 @@
-/**@name Interface Reference
-
-*/
-
-//@{
-	//@Include: ../struct_linear_solvers/HYPRE_struct_pcg.dxx
-//@}

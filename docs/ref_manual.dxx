@@ -1,0 +1,10 @@
+/**@name HYPRE Reference Manual
+*/
+/* \tex{\input{version}\HYPREVersion{}}*/
+
+//@{
+	//@Include: ../struct_matrix_vector/HYPRE_struct_mv.h
+	//@Include: ../struct_linear_solvers/HYPRE_struct_ls.h
+	//@Include: ../sstruct_matrix_vector/HYPRE_sstruct_mv.h
+	//@Include: ../sstruct_linear_solvers/HYPRE_sstruct_ls.h
+//@}

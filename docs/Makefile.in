@@ -31,21 +31,21 @@ all: html ps
 install: all
 	@cp -fr HYPRE_usr_manual    $$HYPRE_INSTALL_DIR/docs/.
 	@cp -f  HYPRE_usr_manual.ps $$HYPRE_INSTALL_DIR/docs/.
-	@cp -fr HYPRE_code_ref      $$HYPRE_INSTALL_DIR/docs/.
-	@cp -f  HYPRE_code_ref.ps   $$HYPRE_INSTALL_DIR/docs/.
+	@cp -fr HYPRE_ref_manual    $$HYPRE_INSTALL_DIR/docs/.
+	@cp -f  HYPRE_ref_manual.ps $$HYPRE_INSTALL_DIR/docs/.
 
 clean:
 	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
 	@/bin/rm -f *.idx *.ilg *.ind 
-	@/bin/rm -f code_ref.tex version.tex
+	@/bin/rm -f ref_manual.tex version.tex
 
 veryclean: clean
 	@/bin/rm -fr HYPRE_usr_manual
 	@/bin/rm -f  HYPRE_usr_manual.ps
 	@/bin/rm -fr HYPRE_dev_manual
 	@/bin/rm -f  HYPRE_dev_manual.ps
-	@/bin/rm -fr HYPRE_code_ref
-	@/bin/rm -f  HYPRE_code_ref.tex HYPRE_code_ref.ps
+	@/bin/rm -fr HYPRE_ref_manual
+	@/bin/rm -f  HYPRE_ref_manual.tex HYPRE_ref_manual.ps
 
 ##################################################################
 # Rules
@@ -64,8 +64,8 @@ dev_html: HYPRE_dev_manual/dev_manual.html
 dev_ps: HYPRE_dev_manual.ps
 
 ref: ref_html ref_ps
-ref_html: HYPRE_code_ref/index.html
-ref_ps: HYPRE_code_ref.ps
+ref_html: HYPRE_ref_manual/index.html
+ref_ps: HYPRE_ref_manual.ps
 
 ##########
 
@@ -127,30 +127,19 @@ dev_manual.idx: ${DEV_FILES}
 
 ##########
 
-DOCIFIED_FILES=\
- ../struct_linear_solvers/HYPRE_struct_pcg.c
-# ../struct_matrix_vector/communication.c
+HYPRE_ref_manual/index.html: ref_manual.dxx 
+	doc++ -d HYPRE_ref_manual -B hypre_wiw.html ref_manual.dxx 2>&1
+	cp -f hypre_wiw.gif HYPRE_ref_manual
 
-DXX_FILES =\
- interface_ref.dxx\
- implementation_ref.dxx\
- ${DOCIFIED_FILES:.c=.dxx}
+HYPRE_ref_manual.ps: ref_manual.dvi
+	${DVIPS} -o HYPRE_ref_manual.ps ref_manual.dvi 		
 
-HYPRE_code_ref/index.html: code_ref.dxx 
-	doc++ -d HYPRE_code_ref -B hypre_wiw.html code_ref.dxx 2>&1
-	cp -f hypre_wiw.gif HYPRE_code_ref
+ref_manual.dvi: version.tex ref_manual.tex
+	${LATEX} ref_manual
+	${LATEX} ref_manual
 
-HYPRE_code_ref.ps: code_ref.dvi
-	${DVIPS} -o HYPRE_code_ref.ps code_ref.dvi 		
-
-code_ref.dvi: code_ref.tex
-	${LATEX} code_ref
-	${LATEX} code_ref
-
-code_ref.tex: code_ref.dxx
-	doc++ -t -o code_ref.tex code_ref.dxx
-
-code_ref.dxx: ${DXX_FILES}
+ref_manual.tex: ref_manual.dxx
+	doc++ -t -o ref_manual.tex ref_manual.dxx
 
 ##########
 
@@ -165,5 +154,3 @@ version.tex:
 # Generic rules
 ##################################################################
 
-.c.dxx:
-	docify $< $@
