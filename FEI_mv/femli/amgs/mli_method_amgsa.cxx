@@ -577,7 +577,8 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    /* space dimension equal to node degree of freedom                 */
    /* --------------------------------------------------------------- */
 
-   if (nullspaceDim_ != nodeDofs_ && nullspaceVec_ == NULL)
+   if (nullspaceDim_ != nodeDofs_ && nullspaceVec_ == NULL 
+       && numSmoothVec_ == 0)
       nullspaceDim_ = nodeDofs_;
 
    /* --------------------------------------------------------------- */

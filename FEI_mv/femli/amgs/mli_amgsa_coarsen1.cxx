@@ -249,6 +249,33 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
    }
 
    /*-----------------------------------------------------------------
+    * create smooth vectors if this option was chosen
+    *-----------------------------------------------------------------*/
+
+   if (currLevel_ == 0 && numSmoothVec_ != 0)
+   {
+       printf("Setting up smooth vectors\n");
+
+       /* warn if nullspaceVec_ is not NULL */
+       if (nullspaceVec_ != NULL)
+       {
+           printf("Setting up smooth vectors; zeroing nullspaceVec_\n");
+           delete [] nullspaceVec_;
+           nullspaceVec_ = NULL;
+       }
+
+       /* generate smooth vectors */
+
+       /* extract data and put in nullspaceVec_ */
+       nullspaceVec_ = new double[PLocalNRows*numSmoothVec_];
+       for (i=0; i<PLocalNRows*numSmoothVec_; i++)
+           nullspaceVec_[i] = 2.0*((double) random() / RAND_MAX) - 1.0;
+
+       /* do not later retrieve from P_vecs structure */
+       /* it will not contain all the vectors */
+   }
+
+   /*-----------------------------------------------------------------
     * create a compact form for the null space vectors 
     * (get ready to perform QR on them)
     *-----------------------------------------------------------------*/
@@ -431,6 +458,8 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
    }
    else if ( PLocalNRows > 0 && numSmoothVec_ != 0)
    {
+      double    *uArray, *sArray, *vtArray, *workArray;
+
       printf("using SVD and numSmoothVec_ = %d\n", numSmoothVec_);
 
       /* ------ count the size of each aggregate ------ */
@@ -458,13 +487,18 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
             aggIndArray[index][aggCntArray[index]++] = irow;
       }
 
-      /* ------ allocate storage for QR factorization ------ */
+      /* ------ allocate storage for SVD factorization ------ */
+#ifndef MIN
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
 
-      qArray  = new double[maxAggSize * nullspaceDim_];
-      rArray  = new double[nullspaceDim_ * nullspaceDim_];
-      newNull = new double[naggr*nullspaceDim_*nullspaceDim_]; 
+      uArray  = new double[maxAggSize * numSmoothVec_ ];
+      sArray  = new double[MIN(maxAggSize, numSmoothVec_)];
+      vtArray = new double[MIN(maxAggSize, numSmoothVec_) * numSmoothVec_];
+      workArray = new double[5*(maxAggSize + numSmoothVec_)];
+      newNull = new double[naggr*nullspaceDim_*numSmoothVec_]; 
 
-      /* ------ perform QR on each aggregate ------ */
+      /* ------ perform SVD on each aggregate ------ */
 
       for ( i = 0; i < naggr; i++ ) 
       {
@@ -472,7 +506,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
 
          if ( aggSize < nullspaceDim_ )
          {
-            printf("Aggregation ERROR : underdetermined system in QR.\n");
+            printf("Aggregation ERROR : underdetermined system in SVD.\n");
             printf("            error on Proc %d\n", mypid);
             printf("            error on aggr %d (%d)\n", i, naggr);
             printf("            aggr size is %d\n", aggSize);
@@ -481,98 +515,52 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
           
          /* ------ put data into the temporary array ------ */
 
-         for ( j = 0; j < aggSize; j++ ) 
-         {
-            for ( k = 0; k < nullspaceDim_; k++ ) 
-               qArray[aggSize*k+j] = P_vecs[k][aggIndArray[i][j]]; 
-         }
-
-         /* ------ call QR function ------ */
-
-#if 0
-         if ( mypid == 0 && i == 0)
+         for ( k = 0; k < numSmoothVec_; k++ ) 
          {
             for ( j = 0; j < aggSize; j++ ) 
-            {
-               printf("%5d : (size=%d)\n", aggIndArray[i][j], aggSize);
-               for ( k = 0; k < nullspaceDim_; k++ ) 
-                  printf("%10.3e ", qArray[aggSize*k+j]);
-               printf("\n");
-            }
+               uArray[aggSize*k+j] = 
+                   nullspaceVec_[PLocalNRows*k+aggIndArray[i][j]];
          }
-#endif
-         if ( currLevel_ < (numLevels_-1) )
+
+         /* ------ call SVD function ------ */
+
+         info = MLI_Utils_SVD(uArray, sArray, vtArray, workArray, 
+             aggSize, numSmoothVec_, 5*(maxAggSize + numSmoothVec_)); 
+
+         if (info != 0)
          {
-            info = MLI_Utils_QR(qArray, rArray, aggSize, nullspaceDim_); 
-            if (info != 0)
-            {
-               printf("%4d : Aggregation WARNING : QR returns non-zero for\n",
-                      mypid);
-               printf("  aggregate %d, size = %d, info = %d\n",i,aggSize,info);
-#if 0
-/*
-               for ( j = 0; j < aggSize; j++ ) 
-               {
-                  for ( k = 0; k < nullspaceDim_; k++ ) 
-                     qArray[aggSize*k+j] = P_vecs[k][aggIndArray[i][j]]; 
-               }
-*/
-               printf("PArray : \n");
-               for ( j = 0; j < aggSize; j++ ) 
-               {
-                  index = aggIndArray[i][j];;
-                  printf("%5d : ", index);
-                  for ( k = 0; k < nullspaceDim_; k++ ) 
-                     printf("%16.8e ", P_vecs[k][index]);
-                  printf("\n");
-               }
-               printf("RArray : \n");
-               for ( j = 0; j < nullspaceDim_; j++ )
-               {
-                  for ( k = 0; k < nullspaceDim_; k++ )
-                     printf("%16.8e ", rArray[j+nullspaceDim_*k]);
-                  printf("\n");
-               }
-#endif
-            }
-         }
-         else
-         {
-            for ( k = 0; k < nullspaceDim_; k++ ) 
-            {
-               alpha = 0.0;
-               for ( j = 0; j < aggSize; j++ ) 
-                  alpha += qArray[aggSize*k+j] * qArray[aggSize*k+j];
-               alpha = 1.0 / sqrt(alpha);
-               for ( j = 0; j < aggSize; j++ ) 
-                  qArray[aggSize*k+j] *= alpha;
-            }
+            printf("%4d : Aggregation WARNING : SVD returns non-zero for\n",
+                   mypid);
+            printf("  aggregate %d, size = %d, info = %d\n",i,aggSize,info);
          }
 
-         /* ------ after QR, put the R into the next null space ------ */
+         /* ------ after SVD, save the next null space ------ */
 
-         for ( j = 0; j < nullspaceDim_; j++ )
-            for ( k = 0; k < nullspaceDim_; k++ )
-               newNull[i*nullspaceDim_+j+k*naggr*nullspaceDim_] = 
-                         rArray[j+nullspaceDim_*k];
+         for ( k = 0; k < numSmoothVec_; k++ )
+            for ( j = 0; j < nullspaceDim_; j++ )
+               newNull[i*nullspaceDim_ + j + k*naggr*nullspaceDim_] = 
+                         sArray[j] * vtArray[j+MIN(aggSize, numSmoothVec_)*k];
 
-         /* ------ put the P to P_vecs ------ */
+         /* ------ store into P_vecs ------ */
 
          for ( j = 0; j < aggSize; j++ )
          {
             for ( k = 0; k < nullspaceDim_; k++ )
             {
                index = aggIndArray[i][j];
-               P_vecs[k][index] = qArray[ k*aggSize + j ];
+               P_vecs[k][index] = uArray[ k*aggSize + j ];
             }
          } 
       }
       for ( i = 0; i < naggr; i++ ) delete [] aggIndArray[i];
       delete [] aggIndArray;
       delete [] aggCntArray;
-      delete [] qArray;
-      delete [] rArray;
+      delete [] uArray;
+      delete [] sArray;
+      delete [] vtArray;
+      delete [] workArray;
    }
+
    if ( nullspaceVec_ != NULL ) delete [] nullspaceVec_;
    nullspaceVec_ = newNull;
    currNodeDofs_ = nullspaceDim_;
