@@ -25,6 +25,7 @@ int  hypre_AMGRelax( hypre_CSRMatrix *A,
                          int            *cf_marker,
                          int             relax_type,
                          int             relax_points,
+                         double          relax_weight,
                          hypre_Vector    *u,
                          hypre_Vector    *Vtemp )
 {
@@ -50,7 +51,8 @@ int  hypre_AMGRelax( hypre_CSRMatrix *A,
    double         *b_vec;
 
    double          zero = 0.0;
-   
+   double 	   one_minus_weight = 1.0 -relax_weight;
+ 
    /*-----------------------------------------------------------------------
     * Switch statement to direct control based on relax_type:
     *     relax_type = 0 -> Jacobi
@@ -60,7 +62,7 @@ int  hypre_AMGRelax( hypre_CSRMatrix *A,
    
    switch (relax_type)
    {
-      case 0: /* Jacobi */
+      case 0: /* Weighted Jacobi */
       {
 
          /*-----------------------------------------------------------------
@@ -93,7 +95,8 @@ int  hypre_AMGRelax( hypre_CSRMatrix *A,
                      ii = A_j[jj];
                      res -= A_data[jj] * Vtemp_data[ii];
                   }
-                  u_data[i] = res / A_data[A_i[i]];
+                  u_data[i] *= one_minus_weight;
+                  u_data[i] += relax_weight * res / A_data[A_i[i]];
                }
             }
          }
@@ -120,7 +123,8 @@ int  hypre_AMGRelax( hypre_CSRMatrix *A,
                      ii = A_j[jj];
                      res -= A_data[jj] * Vtemp_data[ii];
                   }
-                  u_data[i] = res / A_data[A_i[i]];
+                  u_data[i] *= one_minus_weight;
+                  u_data[i] += relax_weight * res / A_data[A_i[i]];
                }
             }     
          }
