@@ -604,6 +604,9 @@ main( int   argc,
    a real change, it just hides things.
 
    Most of the above comments apply to vector building as well.
+
+  5.  Replace the HYPRE_IJ setrow stuff with Babel setrow.
+  This should Babelize as fully as we will want.
 */
 
    if ( build_matrix_type == 0 )
@@ -752,9 +755,9 @@ main( int   argc,
     A = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage( ij_matrix);
 
     ierr += Hypre_ParCSRMatrixBuilder_New_fromHYPRE( MatBuilder, &ij_matrix );
-    ij_matrix_Hypre = Hypre_LinearOperator_castTo(
-       Hypre_ParCSRMatrixBuilder_GetConstructedObject( MatBuilder ),
-       "Hypre_ParCSRMatrix" );
+    ierr += Hypre_ParCSRMatrixBuilder_GetConstructedObject
+       ( MatBuilder, &linop );
+    ij_matrix_Hypre = Hypre_LinearOperator_castTo( linop, "Hypre_ParCSRMatrix" );
 
 #if 0
     /* compare the two matrices that should be the same */
@@ -889,10 +892,12 @@ main( int   argc,
       hypre_IJVectorLocalStorage((hypre_IJVector*)ij_b) = b;
    };
    ierr += Hypre_ParCSRVectorBuilder_New_fromHYPRE( VecBuilder, Hcomm, &ij_x );
-   x_HypreV = Hypre_ParCSRVectorBuilder_GetConstructedObject( VecBuilder );
+   ierr += Hypre_ParCSRVectorBuilder_GetConstructedObject
+      ( VecBuilder, &x_HypreV );
    x_Hypre = Hypre_Vector_castTo( x_HypreV, "Hypre_ParCSRVector" );
    ierr += Hypre_ParCSRVectorBuilder_New_fromHYPRE( VecBuilder, Hcomm, &ij_b );
-   b_HypreV = Hypre_ParCSRVectorBuilder_GetConstructedObject( VecBuilder );
+   ierr += Hypre_ParCSRVectorBuilder_GetConstructedObject
+      ( VecBuilder, &b_HypreV );
    b_Hypre = Hypre_Vector_castTo( b_HypreV, "Hypre_ParCSRVector" );
 
    /*-----------------------------------------------------------
@@ -906,27 +911,27 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       AMG_Solver = Hypre_ParAMG_Constructor( Hcomm );
-      Hypre_ParAMG_SetIntParameter( AMG_Solver, "coarsen type",
+      Hypre_ParAMG_SetParameterInt( AMG_Solver, "coarsen type",
                                     (hybrid*coarsen_type) );
-      Hypre_ParAMG_SetIntParameter( AMG_Solver, "measure type", measure_type );
-      Hypre_ParAMG_SetDoubleParameter( AMG_Solver, "tol", tol );
-      Hypre_ParAMG_SetDoubleParameter( AMG_Solver, "strong threshold",
+      Hypre_ParAMG_SetParameterInt( AMG_Solver, "measure type", measure_type );
+      Hypre_ParAMG_SetParameterDouble( AMG_Solver, "tol", tol );
+      Hypre_ParAMG_SetParameterDouble( AMG_Solver, "strong threshold",
                                        strong_threshold );
-      Hypre_ParAMG_SetDoubleParameter( AMG_Solver, "trunc factor", trunc_factor );
-      Hypre_ParAMG_SetIntParameter( AMG_Solver, "logging", ioutdat );
-      Hypre_ParAMG_SetStringParameter( AMG_Solver, "log file name",
+      Hypre_ParAMG_SetParameterDouble( AMG_Solver, "trunc factor", trunc_factor );
+      Hypre_ParAMG_SetParameterInt( AMG_Solver, "logging", ioutdat );
+      Hypre_ParAMG_SetParameterString( AMG_Solver, "log file name",
                                        "driver.out.log" );
-      Hypre_ParAMG_SetIntParameter( AMG_Solver, "cycle type", cycle_type );
-      Hypre_ParAMG_SetIntArrayParameter( AMG_Solver, "num grid sweeps",
+      Hypre_ParAMG_SetParameterInt( AMG_Solver, "cycle type", cycle_type );
+      Hypre_ParAMG_SetParameterIntArray( AMG_Solver, "num grid sweeps",
                                          Num_Grid_Sweeps );
-      Hypre_ParAMG_SetIntArrayParameter( AMG_Solver, "grid relax type",
+      Hypre_ParAMG_SetParameterIntArray( AMG_Solver, "grid relax type",
                                          Grid_Relax_Type );
-      Hypre_ParAMG_SetDoubleArrayParameter( AMG_Solver, "relax weight",
+      Hypre_ParAMG_SetParameterDoubleArray( AMG_Solver, "relax weight",
                                             Relax_Weight );
-      Hypre_ParAMG_SetIntArray2Parameter( AMG_Solver, "grid relax points",
+      Hypre_ParAMG_SetParameterIntArray2( AMG_Solver, "grid relax points",
                                           Grid_Relax_Points );
-      Hypre_ParAMG_SetIntParameter( AMG_Solver, "max levels", max_levels );
-      Hypre_ParAMG_SetIntParameter( AMG_Solver, "debug", debug_flag );
+      Hypre_ParAMG_SetParameterInt( AMG_Solver, "max levels", max_levels );
+      Hypre_ParAMG_SetParameterInt( AMG_Solver, "debug", debug_flag );
 
 /*
       amg_solver = *(AMG_Solver->d_table->Hsolver);
@@ -997,12 +1002,12 @@ main( int   argc,
       hypre_BeginTiming(time_index);
  
       PCG_Solver = Hypre_PCG_Constructor( Hcomm );
-      ierr += Hypre_PCG_SetIntParameter( PCG_Solver, "max iter", 500 );
-      ierr += Hypre_PCG_SetDoubleParameter( PCG_Solver, "tol", tol );
-      ierr += Hypre_PCG_SetIntParameter( PCG_Solver, "2-norm", 1 );
-      ierr += Hypre_PCG_SetIntParameter( PCG_Solver,
+      ierr += Hypre_PCG_SetParameterInt( PCG_Solver, "max iter", 500 );
+      ierr += Hypre_PCG_SetParameterDouble( PCG_Solver, "tol", tol );
+      ierr += Hypre_PCG_SetParameterInt( PCG_Solver, "2-norm", 1 );
+      ierr += Hypre_PCG_SetParameterInt( PCG_Solver,
                                          "relative change test", 0 );
-      ierr += Hypre_PCG_SetIntParameter( PCG_Solver, "logging", 1 );
+      ierr += Hypre_PCG_SetParameterInt( PCG_Solver, "logging", 1 );
 /* 
       HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_ParCSRPCGSetMaxIter(pcg_solver, 500);
@@ -1019,26 +1024,26 @@ main( int   argc,
          AMG_Solver = Hypre_ParAMG_Constructor( Hcomm );
          PCG_Precond = (Hypre_Solver) Hypre_ParAMG_castTo(
             AMG_Solver, "Hypre_Solver" );
-         Hypre_ParAMG_SetIntParameter( AMG_Solver, "coarsen type",
+         Hypre_ParAMG_SetParameterInt( AMG_Solver, "coarsen type",
                                        (hybrid*coarsen_type) );
-         Hypre_ParAMG_SetIntParameter( AMG_Solver, "measure type", measure_type );
-         Hypre_ParAMG_SetDoubleParameter( AMG_Solver, "strong threshold",
+         Hypre_ParAMG_SetParameterInt( AMG_Solver, "measure type", measure_type );
+         Hypre_ParAMG_SetParameterDouble( AMG_Solver, "strong threshold",
                                           strong_threshold );
-         Hypre_ParAMG_SetIntParameter( AMG_Solver, "max iter", 1 );
-         Hypre_ParAMG_SetIntParameter( AMG_Solver, "logging", ioutdat );
-         Hypre_ParAMG_SetStringParameter( AMG_Solver, "log file name",
+         Hypre_ParAMG_SetParameterInt( AMG_Solver, "max iter", 1 );
+         Hypre_ParAMG_SetParameterInt( AMG_Solver, "logging", ioutdat );
+         Hypre_ParAMG_SetParameterString( AMG_Solver, "log file name",
                                           "driver.out.log" );
-         Hypre_ParAMG_SetIntParameter( AMG_Solver, "cycle type", cycle_type );
-         Hypre_ParAMG_SetIntArrayParameter( AMG_Solver, "num grid sweeps",
+         Hypre_ParAMG_SetParameterInt( AMG_Solver, "cycle type", cycle_type );
+         Hypre_ParAMG_SetParameterIntArray( AMG_Solver, "num grid sweeps",
                                             Num_Grid_Sweeps );
-         Hypre_ParAMG_SetIntArrayParameter( AMG_Solver, "grid relax type",
+         Hypre_ParAMG_SetParameterIntArray( AMG_Solver, "grid relax type",
                                             Grid_Relax_Type );
-         Hypre_ParAMG_SetDoubleArrayParameter( AMG_Solver, "relax weight",
+         Hypre_ParAMG_SetParameterDoubleArray( AMG_Solver, "relax weight",
                                                Relax_Weight );
-         Hypre_ParAMG_SetIntArray2Parameter( AMG_Solver, "grid relax points",
+         Hypre_ParAMG_SetParameterIntArray2( AMG_Solver, "grid relax points",
                                              Grid_Relax_Points );
-         Hypre_ParAMG_SetIntParameter( AMG_Solver, "max levels", max_levels );
-         Hypre_ParAMG_SetIntParameter( AMG_Solver, "debug", debug_flag );
+         Hypre_ParAMG_SetParameterInt( AMG_Solver, "max levels", max_levels );
+         Hypre_ParAMG_SetParameterInt( AMG_Solver, "debug", debug_flag );
 
 /*
          amg_solver = *(AMG_Solver->d_table->Hsolver);
@@ -1163,10 +1168,10 @@ main( int   argc,
       hypre_BeginTiming(time_index);
  
       GMRES_Solver = Hypre_GMRES_Constructor( Hcomm );
-      ierr += Hypre_GMRES_SetIntParameter( GMRES_Solver, "k_dim", k_dim );
-      ierr += Hypre_GMRES_SetIntParameter( GMRES_Solver, "max iter", 100 );
-      ierr += Hypre_GMRES_SetDoubleParameter( GMRES_Solver, "tol", tol );
-      ierr += Hypre_GMRES_SetIntParameter( GMRES_Solver, "logging", 1 );
+      ierr += Hypre_GMRES_SetParameterInt( GMRES_Solver, "k_dim", k_dim );
+      ierr += Hypre_GMRES_SetParameterInt( GMRES_Solver, "max iter", 100 );
+      ierr += Hypre_GMRES_SetParameterDouble( GMRES_Solver, "tol", tol );
+      ierr += Hypre_GMRES_SetParameterInt( GMRES_Solver, "logging", 1 );
       
 /*
       HYPRE_ParCSRGMRESCreate(MPI_COMM_WORLD, &pcg_solver);
@@ -1183,26 +1188,26 @@ main( int   argc,
          AMG_Solver = Hypre_ParAMG_Constructor( Hcomm );
          GMRES_Precond = (Hypre_Solver) Hypre_ParAMG_castTo(
             AMG_Solver, "Hypre_Solver" );
-         Hypre_ParAMG_SetIntParameter( AMG_Solver, "coarsen type",
+         Hypre_ParAMG_SetParameterInt( AMG_Solver, "coarsen type",
                                        (hybrid*coarsen_type) );
-         Hypre_ParAMG_SetIntParameter( AMG_Solver, "measure type", measure_type );
-         Hypre_ParAMG_SetDoubleParameter( AMG_Solver, "strong threshold",
+         Hypre_ParAMG_SetParameterInt( AMG_Solver, "measure type", measure_type );
+         Hypre_ParAMG_SetParameterDouble( AMG_Solver, "strong threshold",
                                           strong_threshold );
-         Hypre_ParAMG_SetIntParameter( AMG_Solver, "logging", ioutdat );
-         Hypre_ParAMG_SetStringParameter( AMG_Solver, "log file name",
+         Hypre_ParAMG_SetParameterInt( AMG_Solver, "logging", ioutdat );
+         Hypre_ParAMG_SetParameterString( AMG_Solver, "log file name",
                                           "driver.out.log" );
-         Hypre_ParAMG_SetIntParameter( AMG_Solver, "max iter", 1 );
-         Hypre_ParAMG_SetIntParameter( AMG_Solver, "cycle type", cycle_type );
-         Hypre_ParAMG_SetIntArrayParameter( AMG_Solver, "num grid sweeps",
+         Hypre_ParAMG_SetParameterInt( AMG_Solver, "max iter", 1 );
+         Hypre_ParAMG_SetParameterInt( AMG_Solver, "cycle type", cycle_type );
+         Hypre_ParAMG_SetParameterIntArray( AMG_Solver, "num grid sweeps",
                                             Num_Grid_Sweeps );
-         Hypre_ParAMG_SetIntArrayParameter( AMG_Solver, "grid relax type",
+         Hypre_ParAMG_SetParameterIntArray( AMG_Solver, "grid relax type",
                                             Grid_Relax_Type );
-         Hypre_ParAMG_SetDoubleArrayParameter( AMG_Solver, "relax weight",
+         Hypre_ParAMG_SetParameterDoubleArray( AMG_Solver, "relax weight",
                                                Relax_Weight );
-         Hypre_ParAMG_SetIntArray2Parameter( AMG_Solver, "grid relax points",
+         Hypre_ParAMG_SetParameterIntArray2( AMG_Solver, "grid relax points",
                                              Grid_Relax_Points );
-         Hypre_ParAMG_SetIntParameter( AMG_Solver, "max levels", max_levels );
-         Hypre_ParAMG_SetIntParameter( AMG_Solver, "debug", debug_flag );
+         Hypre_ParAMG_SetParameterInt( AMG_Solver, "max levels", max_levels );
+         Hypre_ParAMG_SetParameterInt( AMG_Solver, "debug", debug_flag );
 
 /*
          HYPRE_BoomerAMGCreate(&pcg_precond); 

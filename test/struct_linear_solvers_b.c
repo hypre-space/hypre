@@ -8,11 +8,11 @@
 #include "HYPRE_ls.h"
 #include "Hypre_Box.h"
 #include "Hypre_StructStencil.h"
-#include "Hypre_StructuredGrid.h"
+#include "Hypre_StructGrid.h"
 #include "Hypre_StructMatrix.h"
-#include "Hypre_StructMatrixBldr.h"
+#include "Hypre_StructMatrixBuilder.h"
 #include "Hypre_StructVector.h"
-#include "Hypre_StructVectorBldr.h"
+#include "Hypre_StructVectorBuilder.h"
 #include "Hypre_MPI_Com.h"
 #include "Hypre_StructJacobi.h"
 #include "Hypre_StructSMG.h"
@@ -51,8 +51,8 @@ main( int   argc,
    int                 A_num_ghost[6] = {0, 0, 0, 0, 0, 0};
    double              doubtemp;
                      
-   Hypre_StructMatrixBldr MatBldr;
-   Hypre_StructVectorBldr VecBldr;
+   Hypre_StructMatrixBuilder MatBldr;
+   Hypre_StructVectorBuilder VecBldr;
    Hypre_LinearOperator lo_test;
    Hypre_StructMatrix  A_SM;
    Hypre_LinearOperator A_LO;
@@ -106,7 +106,7 @@ main( int   argc,
 
    int               **offsets;
 
-   Hypre_StructuredGrid grid;
+   Hypre_StructGrid grid;
    Hypre_StructStencil stencil;
 /*    HYPRE_StructGrid    grid; */
 /*    HYPRE_StructStencil stencil; */
@@ -503,18 +503,18 @@ main( int   argc,
          break;
    } 
 
-   grid = Hypre_StructuredGrid_Constructor( comm, dim );
+   grid = Hypre_StructGrid_Constructor( comm, dim );
    for (ib = 0; ib < nblocks; ib++)
    {
-      Hypre_StructuredGrid_SetGridExtents( grid, box[ib] );
+      Hypre_StructGrid_SetGridExtents( grid, box[ib] );
    }
 
    periodic_arr.lower[0] = 0;
    periodic_arr.upper[0] = dim;
    periodic_arr.data = periodic;
-   Hypre_StructuredGrid_SetIntArrayParameter( grid, "periodic", periodic_arr );
+   Hypre_StructGrid_SetParameterIntArray( grid, "periodic", periodic_arr );
 
-   Hypre_StructuredGrid_Setup( grid );
+   Hypre_StructGrid_Setup( grid );
 
 /*    HYPRE_StructGridCreate(MPI_COMM_WORLD, dim, &grid); */
 /*    for (ib = 0; ib < nblocks; ib++) */
@@ -532,7 +532,7 @@ main( int   argc,
    for (s = 0; s < dim + 1; s++)
    {
       arroffsets.data = offsets[s];
-      Hypre_StructStencil_SetElement( stencil, s, &arroffsets );
+      Hypre_StructStencil_SetElement( stencil, s, arroffsets );
    };
    Hypre_StructStencil_Setup( stencil );
 
@@ -557,9 +557,9 @@ main( int   argc,
    num_ghost.lower[0] = 0;
    num_ghost.upper[0] = 2*dim;
    num_ghost.data = A_num_ghost;
-   MatBldr = Hypre_StructMatrixBldr_Constructor
+   MatBldr = Hypre_StructMatrixBuilder_Constructor
       ( grid, stencil, symmetric, num_ghost );
-   Hypre_StructMatrixBldr_New( MatBldr, grid, stencil, symmetric, num_ghost );
+   Hypre_StructMatrixBuilder_New( MatBldr, grid, stencil, symmetric, num_ghost );
 
    /*-----------------------------------------------------------
     * Fill in the matrix elements
@@ -601,7 +601,7 @@ main( int   argc,
    doubvals.data = values;
    for (ib = 0; ib < nblocks; ib++)
    {
-      Hypre_StructMatrixBldr_SetValues( MatBldr, box[ib], intvals, doubvals );
+      Hypre_StructMatrixBuilder_SetBoxValues( MatBldr, box[ib], intvals, doubvals );
 /*       HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib], (dim+1), */
 /*                                      stencil_indices, values); */
    }
@@ -641,7 +641,8 @@ main( int   argc,
             doubvals.upper[0] = volume;
             doubvals.data = values;
 
-            Hypre_StructMatrixBldr_SetValues( MatBldr, bbox, intvals, doubvals );
+            Hypre_StructMatrixBuilder_SetBoxValues
+               ( MatBldr, bbox, intvals, doubvals );
 /*             HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib], */
 /*                                            1, stencil_indices, values); */
             iupper[ib][d] = isave;
@@ -650,8 +651,8 @@ main( int   argc,
       }
    }
 
-   Hypre_StructMatrixBldr_Setup( MatBldr );
-   A_LO = Hypre_StructMatrixBldr_GetConstructedObject( MatBldr );
+   Hypre_StructMatrixBuilder_Setup( MatBldr );
+   Hypre_StructMatrixBuilder_GetConstructedObject( MatBldr, &A_LO );
    A_SM = (Hypre_StructMatrix) Hypre_LinearOperator_castTo
       ( A_LO, "Hypre_StructMatrix" );
 
@@ -668,8 +669,8 @@ main( int   argc,
 
    values = hypre_CTAlloc(double, volume);
 
-   VecBldr = Hypre_StructVectorBldr_Constructor( grid );
-   Hypre_StructVectorBldr_New( VecBldr, grid );
+   VecBldr = Hypre_StructVectorBuilder_Constructor( grid );
+   Hypre_StructVectorBuilder_New( VecBldr, grid );
 /*    HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil, &b); */
 /*    HYPRE_StructVectorInitialize(b); */
 
@@ -700,12 +701,12 @@ main( int   argc,
    doubvals.data = values;
    for (ib = 0; ib < nblocks; ib++)
    {
-      Hypre_StructVectorBldr_SetValues( VecBldr, box[ib], doubvals );
+      Hypre_StructVectorBuilder_SetBoxValues( VecBldr, box[ib], doubvals );
 /*       HYPRE_StructVectorSetBoxValues(b, ilower[ib], iupper[ib], values); */
    }
 /*   HYPRE_StructVectorAssemble(b); */
-   Hypre_StructVectorBldr_Setup( VecBldr );
-   b_V = Hypre_StructVectorBldr_GetConstructedObject( VecBldr );
+   Hypre_StructVectorBuilder_Setup( VecBldr );
+   Hypre_StructVectorBuilder_GetConstructedObject( VecBldr, &b_V );
    b_SV = (Hypre_StructVector) Hypre_Vector_castTo
       ( b_V, "Hypre_StructVector" );
 
@@ -714,7 +715,7 @@ main( int   argc,
 /*   HYPRE_StructVectorPrint("driver.out.b", b, 0); */
 #endif
 
-   Hypre_StructVectorBldr_New( VecBldr, grid );
+   Hypre_StructVectorBuilder_New( VecBldr, grid );
 /*    HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil, &x); */
 /*    HYPRE_StructVectorInitialize(x); */
    for (i = 0; i < volume; i++)
@@ -724,12 +725,12 @@ main( int   argc,
    doubvals.data = values;
    for (ib = 0; ib < nblocks; ib++)
    {
-      Hypre_StructVectorBldr_SetValues( VecBldr, box[ib], doubvals );
+      Hypre_StructVectorBuilder_SetBoxValues( VecBldr, box[ib], doubvals );
 /*       HYPRE_StructVectorSetBoxValues(x, ilower[ib], iupper[ib], values); */
    }
 /*   HYPRE_StructVectorAssemble(x); */
-   Hypre_StructVectorBldr_Setup( VecBldr );
-   x_V = Hypre_StructVectorBldr_GetConstructedObject( VecBldr );
+   Hypre_StructVectorBuilder_Setup( VecBldr );
+   Hypre_StructVectorBuilder_GetConstructedObject( VecBldr, &x_V );
    x_SV = (Hypre_StructVector) Hypre_Vector_castTo
       ( x_V, "Hypre_StructVector" );
 
@@ -756,8 +757,8 @@ main( int   argc,
 
       solver_SJ = Hypre_StructJacobi_Constructor( comm );
 
-      Hypre_StructJacobi_SetDoubleParameter( solver_SJ, "tol", 1.0e-4 );
-      Hypre_StructJacobi_SetIntParameter( solver_SJ, "max_iter", 500 );
+      Hypre_StructJacobi_SetParameterDouble( solver_SJ, "tol", 1.0e-4 );
+      Hypre_StructJacobi_SetParameterInt( solver_SJ, "max_iter", 500 );
 
       Hypre_StructJacobi_Setup( solver_SJ, A_LO, b_V, x_V );
 
@@ -785,7 +786,7 @@ main( int   argc,
    */
       solver = (Hypre_Solver) Hypre_StructJacobi_castTo( solver_SJ,
                                                          "Hypre_Solver" ); 
-      lo_test = Hypre_Solver_GetSystemOperator(solver);
+      Hypre_Solver_GetSystemOperator( solver, &lo_test );
 
       Hypre_StructJacobi_destructor( solver_SJ );
    }
@@ -799,11 +800,11 @@ main( int   argc,
 
       solver_PCG = Hypre_PCG_Constructor( comm );
 
-      Hypre_PCG_SetIntParameter( solver_PCG, "max_iter", 50 );
-      Hypre_PCG_SetDoubleParameter( solver_PCG, "tol", 1.0e-06);
-      Hypre_PCG_SetIntParameter( solver_PCG, "2-norm", 1);
-      Hypre_PCG_SetIntParameter( solver_PCG, "relative change test", 0);
-      Hypre_PCG_SetIntParameter( solver_PCG, "log", 1);
+      Hypre_PCG_SetParameterInt( solver_PCG, "max_iter", 50 );
+      Hypre_PCG_SetParameterDouble( solver_PCG, "tol", 1.0e-06);
+      Hypre_PCG_SetParameterInt( solver_PCG, "2-norm", 1);
+      Hypre_PCG_SetParameterInt( solver_PCG, "relative change test", 0);
+      Hypre_PCG_SetParameterInt( solver_PCG, "log", 1);
 
       if (solver_id == 10)
       {
@@ -812,14 +813,14 @@ main( int   argc,
          precond = (Hypre_Solver) Hypre_StructSMG_castTo
             ( solver_SMG, "Hypre_Solver" ); 
 
-         Hypre_StructSMG_SetIntParameter( solver_SMG, "memory use", 0 );
-         Hypre_StructSMG_SetIntParameter( solver_SMG, "max iter", 1 );
-         Hypre_StructSMG_SetDoubleParameter( solver_SMG, "tol", 0.0 );
-         Hypre_StructSMG_SetIntParameter( solver_SMG, "zero guess", 1 );
-         Hypre_StructSMG_SetIntParameter( solver_SMG, "rel change", 0 );
-         Hypre_StructSMG_SetIntParameter( solver_SMG, "num prerelax", n_pre );
-         Hypre_StructSMG_SetIntParameter( solver_SMG, "num postrelax", n_post );
-         Hypre_StructSMG_SetIntParameter( solver_SMG, "logging", 0 );
+         Hypre_StructSMG_SetParameterInt( solver_SMG, "memory use", 0 );
+         Hypre_StructSMG_SetParameterInt( solver_SMG, "max iter", 1 );
+         Hypre_StructSMG_SetParameterDouble( solver_SMG, "tol", 0.0 );
+         Hypre_StructSMG_SetParameterInt( solver_SMG, "zero guess", 1 );
+         Hypre_StructSMG_SetParameterInt( solver_SMG, "rel change", 0 );
+         Hypre_StructSMG_SetParameterInt( solver_SMG, "num prerelax", n_pre );
+         Hypre_StructSMG_SetParameterInt( solver_SMG, "num postrelax", n_post );
+         Hypre_StructSMG_SetParameterInt( solver_SMG, "logging", 0 );
 
          Hypre_StructSMG_Setup( solver_SMG, A_LO, b_V, x_V );
       }
@@ -829,9 +830,9 @@ main( int   argc,
          solver_SJ = Hypre_StructJacobi_Constructor( comm );
          precond = (Hypre_Solver) Hypre_StructJacobi_castTo
             ( solver_SJ, "Hypre_Solver" ); 
-         Hypre_StructJacobi_SetDoubleParameter( solver_SJ, "tol", 0.0 );
-         Hypre_StructJacobi_SetIntParameter( solver_SJ, "max_iter", 2 );
-         Hypre_StructJacobi_SetIntParameter( solver_SJ, "zero guess", 0 );
+         Hypre_StructJacobi_SetParameterDouble( solver_SJ, "tol", 0.0 );
+         Hypre_StructJacobi_SetParameterInt( solver_SJ, "max_iter", 2 );
+         Hypre_StructJacobi_SetParameterInt( solver_SJ, "zero guess", 0 );
       
          Hypre_StructJacobi_Setup( solver_SJ, A_LO, b_V, x_V );
       }
@@ -899,13 +900,13 @@ main( int   argc,
 
       solver_SMG = Hypre_StructSMG_Constructor( comm );
 
-      Hypre_StructSMG_SetIntParameter( solver_SMG, "memory use", 0 );
-      Hypre_StructSMG_SetIntParameter( solver_SMG, "max iter", 50 );
-      Hypre_StructSMG_SetDoubleParameter( solver_SMG, "tol", 1.0e-6 );
-      Hypre_StructSMG_SetIntParameter( solver_SMG, "rel change", 0 );
-      Hypre_StructSMG_SetIntParameter( solver_SMG, "num prerelax", n_pre );
-      Hypre_StructSMG_SetIntParameter( solver_SMG, "num postrelax", n_post );
-      Hypre_StructSMG_SetIntParameter( solver_SMG, "logging", 1 );
+      Hypre_StructSMG_SetParameterInt( solver_SMG, "memory use", 0 );
+      Hypre_StructSMG_SetParameterInt( solver_SMG, "max iter", 50 );
+      Hypre_StructSMG_SetParameterDouble( solver_SMG, "tol", 1.0e-6 );
+      Hypre_StructSMG_SetParameterInt( solver_SMG, "rel change", 0 );
+      Hypre_StructSMG_SetParameterInt( solver_SMG, "num prerelax", n_pre );
+      Hypre_StructSMG_SetParameterInt( solver_SMG, "num postrelax", n_post );
+      Hypre_StructSMG_SetParameterInt( solver_SMG, "logging", 1 );
 
       Hypre_StructSMG_Setup( solver_SMG, A_LO, b_V, x_V );
 /*
@@ -1312,7 +1313,7 @@ main( int   argc,
 
    Hypre_MPI_Com_destructor(comm);
    Hypre_StructStencil_destructor(stencil);
-   Hypre_StructuredGrid_destructor(grid);
+   Hypre_StructGrid_destructor(grid);
    for (ib = 0; ib < nblocks; ib++)
       Hypre_Box_destructor(box[ib]);
    Hypre_StructMatrix_destructor(A_SM);
