@@ -15,7 +15,7 @@ noinst_HEADERS = \
  headers.h\
  par_amg.h\
  schwarz.h
-dependent_includes = $(include_HEADERS)
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 
 AM_CPPFLAGS = \
  -DHYPRE_MODE -DOPTIMIZED_DH\
@@ -78,6 +78,7 @@ FILES = \
  pcg_par.c\
  schwarz.c
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+OBJECTS = $(FILES:.c=.o)
+
+$(OBJECTS): $(dependent_includes)
 

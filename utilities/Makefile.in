@@ -253,7 +253,7 @@ noinst_HEADERS = \
  timing.h\
  umalloc_local.h
 
-dependent_includes = $(include_HEADERS)
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 EXTRA_DIST = HYPRE_utilities.h.in
 AM_CPPFLAGS = -DHYPRE_TIMING
 
@@ -273,6 +273,7 @@ FILES = \
  timing.c\
  umalloc_local.c
 
+OBJECTS = $(FILES:.c=.o)
 all: all-am
 
 .SUFFIXES:
@@ -581,8 +582,7 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
 	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+$(OBJECTS): $(dependent_includes)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

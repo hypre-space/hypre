@@ -39,5 +39,7 @@ FILES = \
  idamax.c\
  blas_utils.c
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+OBJECTS = $(FILES:.c=.o)
+
+$(OBJECTS): $(dependent_includes)
+

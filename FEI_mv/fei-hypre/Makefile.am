@@ -45,7 +45,7 @@ noinst_HEADERS = \
  HYPRE_parcsr_fgmres.h\
  HYPRE_parcsr_lsicg.h\
  HYPRE_parcsr_symqmr.h
-dependent_includes = $(include_HEADERS)
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 
 AM_CPPFLAGS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED\
  $(CSUPERLUFLAGS)\
@@ -125,9 +125,11 @@ FILES = \
  hypre_slide_reduce.cxx\
  lsicg.c
 
+OBJECTS0 = $(FILES:.c=.o)
+OBJECTS = $(OBJECTS0:.cxx=.o)
+
 snl_LinearSystemCore.h:
 	test -f $(BASE_DIR)/LinearSystemCore.h && $(INSTALL_DATA) $(BASE_DIR)/LinearSystemCore.h snl_LinearSystemCore.h
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+$(OBJECTS): $(dependent_includes)
 

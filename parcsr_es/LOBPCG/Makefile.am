@@ -12,7 +12,7 @@ endif !STATICONLY
 include_HEADERS = HYPRE_lobpcg.h lobpcg.h
 noinst_HEADERS = \
  mmio.h
-dependent_includes = $(include_HEADERS)
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_srcdir)\
@@ -34,6 +34,7 @@ FILES = \
  lobpcg_matrix.c\
  lobpcg_utilities.c
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+OBJECTS = $(FILES:.c=.o)
+
+$(OBJECTS): $(dependent_includes)
 

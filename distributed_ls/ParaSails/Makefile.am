@@ -53,6 +53,7 @@ FILES = \
  StoredRows.c\
  hypre_ParaSails.c
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+OBJECTS = $(FILES:.c=.o)
+
+$(OBJECTS): $(dependent_includes)
 

@@ -318,7 +318,7 @@ noinst_HEADERS = \
  HYPRE_parcsr_lsicg.h\
  HYPRE_parcsr_symqmr.h
 
-dependent_includes = $(include_HEADERS)
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 AM_CPPFLAGS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED\
  $(CSUPERLUFLAGS)\
  -I$(top_srcdir)\
@@ -397,6 +397,8 @@ FILES = \
  hypre_slide_reduce.cxx\
  lsicg.c
 
+OBJECTS0 = $(FILES:.c=.o)
+OBJECTS = $(OBJECTS0:.cxx=.o)
 all: all-am
 
 .SUFFIXES:
@@ -719,8 +721,7 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
 snl_LinearSystemCore.h:
 	test -f $(BASE_DIR)/LinearSystemCore.h && $(INSTALL_DATA) $(BASE_DIR)/LinearSystemCore.h snl_LinearSystemCore.h
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+$(OBJECTS): $(dependent_includes)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

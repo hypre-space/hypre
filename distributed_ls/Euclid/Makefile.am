@@ -83,6 +83,7 @@ FILES = \
  shellSort_dh.c\
  sig_dh.c
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+OBJECTS = $(FILES:.c=.o)
+
+$(OBJECTS): $(dependent_includes)
 

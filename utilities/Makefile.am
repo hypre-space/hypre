@@ -21,7 +21,7 @@ noinst_HEADERS = \
  threading.h\
  timing.h\
  umalloc_local.h
-dependent_includes = $(include_HEADERS)
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 
 EXTRA_DIST = HYPRE_utilities.h.in
 
@@ -43,6 +43,7 @@ FILES = \
  timing.c\
  umalloc_local.c
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+OBJECTS = $(FILES:.c=.o)
+
+$(OBJECTS): $(dependent_includes)
 

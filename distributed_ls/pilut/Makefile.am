@@ -18,7 +18,7 @@ noinst_HEADERS = \
  internal_protos.h\
  macros.h\
  struct.h
-dependent_includes = $(include_HEADERS)
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_srcdir)\
@@ -43,6 +43,7 @@ FILES = \
  trifactor.c\
  util.c
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+OBJECTS = $(FILES:.c=.o)
+
+$(OBJECTS): $(dependent_includes)
 

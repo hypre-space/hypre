@@ -22,6 +22,7 @@ CPPFLAGS = -I..\
 FILES = \
  HYPRE_PETScSolverParILUT.c HYPRE_PETScSolverParILUTSetup.c
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+OBJECTS = $(FILES:.c=.o)
+
+$(OBJECTS): $(dependent_includes)
 

@@ -284,6 +284,7 @@ FILES = \
  StoredRows.c\
  hypre_ParaSails.c
 
+OBJECTS = $(FILES:.c=.o)
 all: all-am
 
 .SUFFIXES:
@@ -571,8 +572,7 @@ uninstall-am: uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 	uninstall-libLTLIBRARIES
 
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+$(OBJECTS): $(dependent_includes)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

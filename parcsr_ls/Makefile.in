@@ -302,7 +302,7 @@ noinst_HEADERS = \
  par_amg.h\
  schwarz.h
 
-dependent_includes = $(include_HEADERS)
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 AM_CPPFLAGS = \
  -DHYPRE_MODE -DOPTIMIZED_DH\
  -I$(top_builddir)/utilities\
@@ -365,6 +365,7 @@ FILES = \
  pcg_par.c\
  schwarz.c
 
+OBJECTS = $(FILES:.c=.o)
 all: all-am
 
 .SUFFIXES:
@@ -671,8 +672,7 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
 	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+$(OBJECTS): $(dependent_includes)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

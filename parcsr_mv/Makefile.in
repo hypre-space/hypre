@@ -257,7 +257,7 @@ noinst_HEADERS = \
  par_csr_matrix.h\
  par_vector.h
 
-dependent_includes = $(include_HEADERS)
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 AM_CPPFLAGS = \
  -I$(top_builddir)/utilities\
  -I$(top_srcdir)/utilities\
@@ -293,6 +293,7 @@ FILES = \
  par_csr_matvec.c\
  par_vector.c
 
+OBJECTS = $(FILES:.c=.o)
 all: all-am
 
 .SUFFIXES:
@@ -599,8 +600,7 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
 	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+$(OBJECTS): $(dependent_includes)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -15,7 +15,7 @@ include_HEADERS = distributed_matrix.h \
  HYPRE_distributed_matrix_types.h
 noinst_HEADERS = \
  internal_protos.h
-dependent_includes = $(include_HEADERS)
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_srcdir)\
@@ -32,5 +32,7 @@ FILES = \
  distributed_matrix_PETSc.c\
  distributed_matrix_parcsr.c
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+OBJECTS = $(FILES:.c=.o)
+
+$(OBJECTS): $(dependent_includes)
+

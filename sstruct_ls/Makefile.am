@@ -13,7 +13,7 @@ include_HEADERS = HYPRE_sstruct_ls.h sstruct_ls.h
 noinst_HEADERS = \
  headers.h\
  sys_pfmg.h
-dependent_includes = $(include_HEADERS)
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_srcdir)\
@@ -47,6 +47,7 @@ FILES = \
  sys_semi_interp.c\
  sys_semi_restrict.c
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+OBJECTS = $(FILES:.c=.o)
+
+$(OBJECTS): $(dependent_includes)
 

@@ -15,7 +15,7 @@ noinst_HEADERS = \
  IJ_vector.h\
  aux_parcsr_matrix.h\
  headers.h
-dependent_includes = $(include_HEADERS)
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_builddir)/utilities\
@@ -41,5 +41,7 @@ FILES = \
  IJVector_parcsr.c\
  aux_parcsr_matrix.c
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+OBJECTS = $(FILES:.c=.o)
+
+$(OBJECTS): $(dependent_includes)
+

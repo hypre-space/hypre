@@ -16,7 +16,7 @@ noinst_HEADERS = \
  cgnr.h\
  gmres.h\
  pcg.h
-dependent_includes = $(include_HEADERS)
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_builddir)/utilities\
@@ -33,5 +33,7 @@ FILES = \
  gmres.c\
  pcg.c
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+OBJECTS = $(FILES:.c=.o)
+
+$(OBJECTS): $(dependent_includes)
+

@@ -18,7 +18,7 @@ noinst_HEADERS = \
  sstruct_matrix.h\
  sstruct_stencil.h\
  sstruct_vector.h
-dependent_includes = $(include_HEADERS)
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_srcdir)\
@@ -48,6 +48,7 @@ FILES = \
  sstruct_stencil.c\
  sstruct_vector.c
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+OBJECTS = $(FILES:.c=.o)
+
+$(OBJECTS): $(dependent_includes)
 

@@ -15,7 +15,7 @@ noinst_HEADERS = \
  pfmg.h\
  smg.h\
  sparse_msg.h
-dependent_includes = $(include_HEADERS)
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_builddir)/utilities\
@@ -79,6 +79,7 @@ FILES = \
  sparse_msg_setup_rap.c\
  sparse_msg_solve.c
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+OBJECTS = $(FILES:.c=.o)
+
+$(OBJECTS): $(dependent_includes)
 

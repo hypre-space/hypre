@@ -26,5 +26,7 @@ FILES = \
  HYPRE_ConvertPETScMatrixToDistributedMatrix.c\
  HYPRE_ConvertParCSRMatrixToDistributedMatrix.c
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+OBJECTS = $(FILES:.c=.o)
+
+$(OBJECTS): $(dependent_includes)
+
