@@ -16,41 +16,35 @@
 
 Version 1.9.0a released, 2005/01/18.
 
-- NOTE: link lines may need changing depending on configure options used
+- NOTE: Link lines may need to be changed depending on configure options used.
 
-- Removed all automake & libtool use from build system, this includes all 
-  Makefile.am and Makefile.in files.  Autoconf reads configure.in to create the
-  configure script. Each directory, except config, has ONLY a Makefile.
+- The build system introduced in v1.8.3a was too difficult to maintain, so we
+  have reverted to a system similar to the previous one.  In particular, all of
+  the new automake and libtool stuff was removed.  In the new system, each
+  directory (except 'config') has ONLY a 'Makefile' (no more 'Makefile.in' or
+  'Makefile.am' files).  When the 'configure' script is run, the single file
+  'config/Makefile.config' is created.  This file is included in all Makefiles
+  in all sub-directories.  Shared libraries CANNOT be created with this system.
 
-- The config sub-directory has a file named Makefile.config.in that contains all
-  of the configurable variables.  When the configure script is run, it will replace
-  the appropriate variables.  This file is included in all Makefiles in all
-  sub-directories.
+- The makefile targets are now more inline with GNU standards.  To get details,
+  type 'make help'.
 
-- When the configure.in file is changed; must run ./config/bootstrap from the 
-  linear_solvers directory to create the configure script.  This forces the 
-  required autoconf versions to be used.
+- The makefile target 'nofei' has been removed and is now run by default.
 
-- Configure has many options that allow the user to specify specific libraries
-  and/or directories to use as well as options to disable some searches.  To 
-  view the options run './configure --help'
+- The library files 'libHYPRE_blas.a' and 'libHYPRE_lapack.a' are no longer
+  created when 'configure' is run '--without-blas' and/or '--without-lapack'.
+  This created confusion before and really didn't make sense anyway.  These
+  options are now consistent with the '--without-MPI' option.  Also, there is
+  no longer any danger of name conflicts with external blas or lapack libraries
+  as was the case before.
 
-- shared libraries can NOT be created with this version
+- Added new parallel coarsening schemes PMIS and HMIS with reduced complexities
+  as well as the option of using one pass of Ruge-Stueben only.
 
-- the makefile target nofei has been removed as it is now the default
+- Added the capability to set values from any processor through the IJ matrix
+  and vector interfaces.
 
-- internal blas and lapack routines are included in the libHYPRE_utilities.a 
-  file if configure is run --without-blas and/or --without-lapack, rather than 
-  in separate libraries.
-
-************************
-
--added new parallel coarsening schemes PMIS and HMIS with reduced complexities
- as well as the option of using one pass of Ruge-Stueben only
-
--added capability to set values from any processor for IJ matrices and vectors
-
-- PFMG solver supports matrices with constant coefficients
+- Added support to the PFMG solver for matrices with constant coefficients.
 
 ************************
 
