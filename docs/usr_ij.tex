@@ -2,38 +2,36 @@
 \chapter{The IJ Linear System Interface}
 \label{IJ}
 
-The {\bf IJ linear system} interface is the lowest common denominator
-for enumeration of an unaugmented linear system of equations to be
-solved by {\slshape hypre} and cooperative packages.  It is designed
-to insulate the user from underlying implementation details of sparse
-linear system solvers.
+The {\bf IJ linear system (IJ)} interface is the lowest common
+denominator
+for enumeration of an {\bf unaugmented} linear system of equations
+to be solved by {\slshape hypre} and cooperative packages.
+No underlying assumptions are made about the sparsity pattern of
+a linear system passed through the IJ interface.
+Like all Hypre interfaces, it is designed
+to insulate the user from underlying implementation details.
 
-An example of an augmented linear system is, for example, a linear
-system plus the stiffness matrices from which the matrix coefficients
-are assembled in a finite element discretization.  At the current time,
-information about stiffness
-matrices cannot be passed through the IJ interface. 
+Just to define an {\bf augmented} linear system, an example would be
+a linear system plus the stiffness matrices from which the matrix
+coefficients are assembled in a finite element discretization.
+It contains more information than just the linear system
+of equations.
 
-Use of the IJ interface implies that no underlying
-assumptions are being made about the sparsity of the linear system. 
 One would typically use the IJ interface to enumerate the linear
 system originating from an unstructured grid PDE discretization.
 However, the interface can be used for discretizations from more
-structured grids, with consequent solver inefficiencies.  This
-is because use of the IJ interface implies that solution
-proceeds without sparsity assumptions.  Proceeding without sparsity
-assumptions increases the expense of many matrix operations. 
+structured grids, with consequent solver inefficiencies from lack
+of built-in sparsity assumptions.
 
 IJ Matrix interface calls facilitate creation and destruction of 
-interface abstracts, enumeration of rows and blocks of
+interface objects, enumeration of rows and blocks of
 linear system coefficients, and determination and querying of
 underlying linear system data structure formats.  Hypre supports
-multiple underlying data structure formats for unstructured linear
-systems in order to cooperate with packages such as PETSc and ISIS, 
-as well as for convenience to the {\slshape hypre} developer.
-One current native support for unstructured linear systems is a
-format abbreviated {\bf ParCSR}, meaning {\bf Par}allel
-{\bf C}ompressed {\bf S}parse {\bf R}ow.  Another native support
+multiple underlying data structure formats in order to cooperate
+with packages such as PETSc and ISIS, as well as for convenience
+to the {\slshape hypre} solver developer.
+One format is abbreviated {\bf ParCSR}, meaning {\bf Par}allel
+{\bf C}ompressed {\bf S}parse {\bf R}ow.  Another format
 is DistributedMatrix.
 
 Currently, {\slshape hypre} solvers which operate directly on linear
@@ -41,3 +39,6 @@ systems passing through the IJ interface have either
 ParCSR (interface) implementations, or DistributedMatrix
 implementations.
 
+\section{IJ Matrix Interface}
+
+\section{IJ Vector Interface}
