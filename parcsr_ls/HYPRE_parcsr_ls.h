@@ -43,8 +43,11 @@ int HYPRE_ParAMGSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParV
 int HYPRE_ParAMGSolveT P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParAMGSetMaxLevels P((HYPRE_Solver solver , int max_levels ));
 int HYPRE_ParAMGSetStrongThreshold P((HYPRE_Solver solver , double strong_threshold ));
+int HYPRE_ParAMGSetTruncFactor P((HYPRE_Solver solver , double trunc_factor ));
 int HYPRE_ParAMGSetInterpType P((HYPRE_Solver solver , int interp_type ));
 int HYPRE_ParAMGSetMaxIter P((HYPRE_Solver solver , int max_iter ));
+int HYPRE_ParAMGSetCoarsenType P((HYPRE_Solver solver , int coarsen_type ));
+int HYPRE_ParAMGSetMeasureType P((HYPRE_Solver solver , int measure_type ));
 int HYPRE_ParAMGSetCycleType P((HYPRE_Solver solver , int cycle_type ));
 int HYPRE_ParAMGSetTol P((HYPRE_Solver solver , double tol ));
 int HYPRE_ParAMGSetNumGridSweeps P((HYPRE_Solver solver , int *num_grid_sweeps ));
@@ -105,6 +108,29 @@ int HYPRE_ParCSRPilutSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE
 int HYPRE_ParCSRPilutSetMaxIter P((HYPRE_Solver solver , int max_iter ));
 int HYPRE_ParCSRPilutSetDropTolerance P((HYPRE_Solver solver , double tol ));
 int HYPRE_ParCSRPilutSetFactorRowSize P((HYPRE_Solver solver , int size ));
+
+/* par_laplace.c */
+HYPRE_ParCSRMatrix GenerateLaplacian P((MPI_Comm comm , int nx , int ny , int nz
+ , int P , int Q , int R , int p , int q , int r , double *value ));
+int map P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , 
+int R , int *nx_part , int *ny_part , int *nz_part , int *global_part ));
+
+/* par_laplace_27pt.c */
+HYPRE_ParCSRMatrix GenerateLaplacian27pt P((MPI_Comm comm , int nx , int ny , 
+int nz , int P , int Q , int R , int p , int q , int r , double *value ));
+int map3 P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , 
+int R , int *nx_part , int *ny_part , int *nz_part , int *global_part ));
+
+/* par_laplace_9pt.c */
+HYPRE_ParCSRMatrix GenerateLaplacian9pt P((MPI_Comm comm , int nx , int ny , int
+ P , int Q , int p , int q , double *value ));
+int map2 P((int ix , int iy , int p , int q , int P , int Q , int *nx_part , int
+ *ny_part , int *global_part ));
+
+/* par_difconv.c */
+HYPRE_ParCSRMatrix GenerateDifConv P((MPI_Comm comm , int nx , int ny , int nz ,
+ int P , int Q , int R , int p , int q , int r , double *value ));
+#undef P
 
 #undef P
 

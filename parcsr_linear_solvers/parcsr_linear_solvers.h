@@ -260,7 +260,7 @@ int hypre_ParAMGCoarsenFalgout P((hypre_ParCSRMatrix *A , double strength_thresh
 int hypre_ParAMGCycle P((void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array ));
 
 /* par_difconv.c */
-hypre_ParCSRMatrix *GenerateDifConv P((MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value ));
+HYPRE_ParCSRMatrix GenerateDifConv P((MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value ));
 
 /* par_indepset.c */
 int hypre_InitParAMGIndepSet P((hypre_ParCSRMatrix *S , double *measure_array ));
@@ -270,15 +270,15 @@ int hypre_ParAMGIndepSet P((hypre_ParCSRMatrix *S , hypre_CSRMatrix *S_ext , dou
 int hypre_ParAMGBuildInterp P((hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int debug_flag , double trunc_factor , hypre_ParCSRMatrix **P_ptr ));
 
 /* par_laplace.c */
-hypre_ParCSRMatrix *GenerateLaplacian P((MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value ));
+HYPRE_ParCSRMatrix GenerateLaplacian P((MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value ));
 int map P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part ));
 
 /* par_laplace_27pt.c */
-hypre_ParCSRMatrix *GenerateLaplacian27pt P((MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value ));
+HYPRE_ParCSRMatrix GenerateLaplacian27pt P((MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value ));
 int map3 P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part ));
 
 /* par_laplace_9pt.c */
-hypre_ParCSRMatrix *GenerateLaplacian9pt P((MPI_Comm comm , int nx , int ny , int P , int Q , int p , int q , double *value ));
+HYPRE_ParCSRMatrix GenerateLaplacian9pt P((MPI_Comm comm , int nx , int ny , int P , int Q , int p , int q , double *value ));
 int map2 P((int ix , int iy , int p , int q , int P , int Q , int *nx_part , int *ny_part , int *global_part ));
 
 /* par_rap.c */

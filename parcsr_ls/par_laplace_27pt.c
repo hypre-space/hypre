@@ -13,7 +13,7 @@
  * hypre_GenerateLaplacian27pt
  *--------------------------------------------------------------------------*/
 
-hypre_ParCSRMatrix *
+HYPRE_ParCSRMatrix 
 GenerateLaplacian27pt(MPI_Comm comm,
                       int      nx,
                       int      ny,
@@ -1645,7 +1645,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
    hypre_TFree(ny_part);
    hypre_TFree(nz_part);
 
-   return A;
+   return (HYPRE_ParCSRMatrix) A;
 }
 
 /*--------------------------------------------------------------------------

@@ -13,7 +13,7 @@
  * hypre_GenerateDifConv
  *--------------------------------------------------------------------------*/
 
-hypre_ParCSRMatrix *
+HYPRE_ParCSRMatrix 
 GenerateDifConv( MPI_Comm comm,
                  int      nx,
                  int      ny,
@@ -335,6 +335,6 @@ GenerateDifConv( MPI_Comm comm,
    hypre_TFree(ny_part);
    hypre_TFree(nz_part);
 
-   return A;
+   return (HYPRE_ParCSRMatrix) A;
 }
 
