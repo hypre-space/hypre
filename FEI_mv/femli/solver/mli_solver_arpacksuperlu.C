@@ -43,8 +43,8 @@ extern "C"
  * constructor 
  * --------------------------------------------------------------------------*/
 
-MLI_Solver_ARPACKSuperLU::MLI_Solver_ARPACKSuperLU( ) : 
-                          MLI_Solver(MLI_SOLVER_ARPACKSUPERLU_ID)
+MLI_Solver_ARPACKSuperLU::MLI_Solver_ARPACKSuperLU(char *name) : 
+                          MLI_Solver(name)
 {
    nRecvs_       = 0;
    recvLengs_    = NULL;
@@ -187,15 +187,10 @@ int MLI_Solver_ARPACKSuperLU::solve( MLI_Vector *f_in, MLI_Vector *u_in )
    }
    if ( nRecvs_ > 0 ) delete [] dRecvBufs;
 
-for ( iE = 0; iE < SLeng; iE++ ) 
-if ( permutedF[iE] == -9999.0 )
-printf("%d : permuted %d not filled.\n", mypid, iE);
-
    /* -------------------------------------------------------------
     * solve using SuperLU
     * -----------------------------------------------------------*/
 
-printf("%d : ARPACKSuperLU solve \n", mypid);
    strcpy( paramString, "solve" );
    dnstev_(NULL, NULL, paramString, NULL, NULL, NULL, NULL, NULL,
            permutedF, permutedX, NULL, NULL, &info);
@@ -214,8 +209,6 @@ printf("%d : ARPACKSuperLU solve \n", mypid);
             u_data[AIndex+iB] = permutedX[SIndex+iB];
       }
    }
-for ( iE = 0; iE < SLeng; iE++ ) 
-printf("%d : f,u %5d = %e %e\n", mypid, iE, f_data[iE], u_data[iE]);
 
    /* -------------------------------------------------------------
     * clean up
@@ -245,7 +238,7 @@ int MLI_Solver_ARPACKSuperLU::setParams( char *paramString, int argc,
 {
    MLI_AMGSA_DD *ddObj;
 
-   if ( !strcasecmp(paramString, "ARPACKSuperLUObject") )
+   if ( !strcmp(paramString, "ARPACKSuperLUObject") )
    {
       if ( argc != 1 )
       {
@@ -266,7 +259,7 @@ int MLI_Solver_ARPACKSuperLU::setParams( char *paramString, int argc,
       SNodeEqnList_ = ddObj->SNodeEqnList;
       blockSize_    = ddObj->dofPerNode;
    }
-   else if ( strcasecmp(paramString, "zeroInitialGuess") )
+   else if ( strcmp(paramString, "zeroInitialGuess") )
    {   
       printf("Solver_ARPACKSuperLU::setParams - parameter not recognized.\n");
       printf("                Params = %s\n", paramString);

@@ -6,10 +6,9 @@
  *
  *********************************************************************EHEADER*/
 
-#ifndef __MLI_SOLVER_CG__
-#define __MLI_SOLVER_CG__
+#ifndef __MLI_SOLVER_CG_H__
+#define __MLI_SOLVER_CG_H__
 
-#include <stdio.h>
 #include "matrix/mli_matrix.h"
 #include "vector/mli_vector.h"
 #include "solver/mli_solver.h"
@@ -33,13 +32,13 @@ class MLI_Solver_CG : public MLI_Solver
 
 public :
 
-   MLI_Solver_CG();
+   MLI_Solver_CG(char *name);
    ~MLI_Solver_CG();
 
    int setup(MLI_Matrix *Amat);
    int solve(MLI_Vector *f, MLI_Vector *u);
 
-   int setParams( char *param_string, int argc, char **argv );
+   int setParams( char *paramString, int argc, char **argv );
 };
 
 #endif

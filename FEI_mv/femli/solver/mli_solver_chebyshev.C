@@ -55,7 +55,7 @@ MLI_Solver_Chebyshev::~MLI_Solver_Chebyshev()
 int MLI_Solver_Chebyshev::setup(MLI_Matrix *mat)
 {
    int                i, j, localNRows, *ADiagI, *ADiagJ;
-   double             *ADiagA, *ritzValues, omega=0.5, scale;
+   double             *ADiagA, *ritzValues, omega=3.0/3.0, scale;
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix    *ADiag;
 
@@ -124,7 +124,7 @@ int MLI_Solver_Chebyshev::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 {
    int                i, j, localNRows;
    double             *pData, *zData, alpha, beta, cValue, dValue;
-   double             *rData, lambdaMax, lambdaMin, omega=0.5;
+   double             *rData, lambdaMax, lambdaMin, omega=2.0/3.0;
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix    *ADiag;
    hypre_ParVector    *r, *z, *p, *u, *f;
@@ -144,8 +144,8 @@ int MLI_Solver_Chebyshev::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    rData      = hypre_VectorData(hypre_ParVectorLocalVector(r));
    zData      = hypre_VectorData(hypre_ParVectorLocalVector(z));
    pData      = hypre_VectorData(hypre_ParVectorLocalVector(p));
-   lambdaMax  = 1.0 - omega * minEigen_ / maxEigen_;
-   lambdaMin  = 1.0 - omega;
+   lambdaMin  = omega * minEigen_ / maxEigen_;
+   lambdaMax  = omega;
    dValue     = 0.5 * (lambdaMax + lambdaMin);
    cValue     = 0.5 * (lambdaMax - lambdaMin);
    

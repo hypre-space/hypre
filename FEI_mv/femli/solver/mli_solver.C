@@ -25,289 +25,130 @@
 #include "seq_mv/seq_mv.h"
 #include "solver/mli_solver.h"
 #include "solver/mli_solver_jacobi.h"
+#include "solver/mli_solver_bjacobi.h"
 #include "solver/mli_solver_gs.h"
 #include "solver/mli_solver_sgs.h"
-#include "solver/mli_solver_parasails.h"
 #include "solver/mli_solver_bsgs.h"
+#include "solver/mli_solver_parasails.h"
 #include "solver/mli_solver_mls.h"
-#include "solver/mli_solver_superlu.h"
-#include "solver/mli_solver_arpacksuperlu.h"
 #include "solver/mli_solver_chebyshev.h"
 #include "solver/mli_solver_cg.h"
+#include "solver/mli_solver_superlu.h"
+#include "solver/mli_solver_seqsuperlu.h"
+#include "solver/mli_solver_arpacksuperlu.h"
 
 /*****************************************************************************
  * constructor 
  *--------------------------------------------------------------------------*/
 
-MLI_Solver::MLI_Solver( int sid )
-{
-   switch ( sid )
-   {
-      case MLI_SOLVER_JACOBI_ID :
-           strcpy( solver_name, "Jacobi" );
-           solver_id  = MLI_SOLVER_JACOBI_ID;
-           break;
-      case MLI_SOLVER_GS_ID :
-           strcpy( solver_name, "GS" );
-           solver_id  = MLI_SOLVER_GS_ID;
-           break;
-      case MLI_SOLVER_SGS_ID :
-           strcpy( solver_name, "SGS" );
-           solver_id  = MLI_SOLVER_SGS_ID;
-           break;
-      case MLI_SOLVER_PARASAILS_ID :
-#ifdef MLI_PARASAILS
-           strcpy( solver_name, "ParaSails" );
-           solver_id  = MLI_SOLVER_PARASAILS_ID;
-#else
-           printf("MLI_Solver::constructor ERROR - ParaSails not available\n");
-           exit(1);
-#endif
-           break;
-      case MLI_SOLVER_BSGS_ID :
-           strcpy( solver_name, "BSGS" );
-           solver_id  = MLI_SOLVER_BSGS_ID;
-           break;
-      case MLI_SOLVER_MLS_ID :
-           strcpy( solver_name, "MLS" );
-           solver_id  = MLI_SOLVER_MLS_ID;
-           break;
-      case MLI_SOLVER_SUPERLU_ID :
-#ifdef MLI_SUPERLU
-           strcpy( solver_name, "SuperLU" );
-           solver_id  = MLI_SOLVER_SUPERLU_ID;
-#else
-           printf("MLI_Solver::constructor ERROR - SuperLU not available\n");
-           exit(1);
-#endif
-           break;
-      case MLI_SOLVER_ARPACKSUPERLU_ID :
-#ifdef MLI_SUPERLU
-           strcpy( solver_name, "ARPACKSuperLU" );
-           solver_id  = MLI_SOLVER_ARPACKSUPERLU_ID;
-#else
-           printf("MLI_Solver::constructor ERROR - SuperLU not available\n");
-           exit(1);
-#endif
-           break;
-      case MLI_SOLVER_CHEBYSHEV_ID :
-           strcpy( solver_name, "Chebyshev" );
-           solver_id  = MLI_SOLVER_CHEBYSHEV_ID;
-           break;
-      case MLI_SOLVER_CG_ID :
-           strcpy( solver_name, "CG" );
-           solver_id  = MLI_SOLVER_CG_ID;
-           break;
-      default :
-           printf("MLI_Solver::constructor ERROR - invalid solver.\n");
-           printf("Valid ones are : Jacobi, GS, SGS, ParaSails, \n");
-           printf("BSGS, MLS, SuperLU, ARPACKSuperLU, Chebyshev, CG.\n");
-           fflush(stdout);
-           exit(1);
-   }
-}
-
-/*****************************************************************************
- * another constructor 
- *--------------------------------------------------------------------------*/
-
 MLI_Solver::MLI_Solver( char *str )
 {
-   if ( !strcasecmp(str, "Jacobi" ) )
-   {
-      strcpy( solver_name, str );
-      solver_id  = MLI_SOLVER_JACOBI_ID;
-   }
-   else if ( !strcasecmp(str, "GS" ) )
-   {
-      strcpy( solver_name, str );
-      solver_id  = MLI_SOLVER_GS_ID;
-   }
-   else if ( !strcasecmp(str, "SGS" ) )
-   {
-      strcpy( solver_name, str );
-      solver_id  = MLI_SOLVER_SGS_ID;
-   }
-   else if ( !strcasecmp(str, "ParaSails" ) )
-   {
-#ifdef MLI_PARASAILS
-      strcpy( solver_name, str );
-      solver_id  = MLI_SOLVER_PARASAILS_ID;
-#else
-      printf("MLI_Solver::constructor ERROR - SuperLU not available\n");
-      exit(1);
-#endif
-   }
-   else if ( !strcasecmp(str, "BSGS" ) )
-   {
-      strcpy( solver_name, str );
-      solver_id  = MLI_SOLVER_BSGS_ID;
-   }
-   else if ( !strcasecmp(str, "MLS" ) )
-   {
-      strcpy( solver_name, str );
-      solver_id  = MLI_SOLVER_MLS_ID;
-   }
-   else if ( !strcasecmp(str, "SuperLU" ) )
-   {
-#ifdef MLI_SUPERLU
-      strcpy( solver_name, str );
-      solver_id  = MLI_SOLVER_SUPERLU_ID;
-#else
-      printf("MLI_Solver::constructor ERROR - SuperLU not available\n");
-      exit(1);
-#endif
-   }
-   else if ( !strcasecmp(str, "ARPACKSuperLU" ) )
-   {
-#ifdef MLI_SUPERLU
-      strcpy( solver_name, str );
-      solver_id  = MLI_SOLVER_ARPACKSUPERLU_ID;
-#else
-      printf("MLI_Solver::constructor ERROR - SuperLU not available\n");
-      exit(1);
-#endif
-   }
-   else if ( !strcasecmp(str, "Chebyshev" ) )
-   {
-      strcpy( solver_name, str );
-      solver_id  = MLI_SOLVER_CHEBYSHEV_ID;
-   }
-   else if ( !strcasecmp(str, "CG" ) )
-   {
-      strcpy( solver_name, str );
-      solver_id  = MLI_SOLVER_CG_ID;
-   }
-   else
-   {
-      printf("MLI_Solver::constructor ERROR - solver %s undefined\n",str);
-      exit(1);
-   }
+   strcpy( solver_name, str );
 }
 
 /*****************************************************************************
- * create a solver 
+ * create a solver from its name 
  *--------------------------------------------------------------------------*/
 
 MLI_Solver *MLI_Solver_CreateFromName( char *str )
 {
+   char       paramString[100];
    MLI_Solver *solver_ptr=NULL;
 
-   if      (!strcasecmp(str, "Jacobi")) solver_ptr = new MLI_Solver_Jacobi();
-   else if (!strcasecmp(str, "GS"))     solver_ptr = new MLI_Solver_GS();
-   else if (!strcasecmp(str, "SGS"))    solver_ptr = new MLI_Solver_SGS();
-   else if (!strcasecmp(str, "ParaSails")) 
+   if      (!strcmp(str,"Jacobi"))  solver_ptr = new MLI_Solver_Jacobi(str);
+   else if (!strcmp(str,"BJacobi")) solver_ptr = new MLI_Solver_BJacobi(str);
+   else if (!strcmp(str,"GS"))      solver_ptr = new MLI_Solver_GS(str);
+   else if (!strcmp(str,"SGS"))     solver_ptr = new MLI_Solver_SGS(str);
+   else if (!strcmp(str,"MCSGS")) 
    {
-#ifdef MLI_PARASAILS
-      solver_ptr = new MLI_Solver_ParaSails();
-#else
-      printf("MLI_Solver_Create ERROR : ParaSails not available\n");
-      exit(1);
-#endif
+      solver_ptr = new MLI_Solver_SGS(str);
+      strcpy( paramString, "setScheme multicolor");
+      solver_ptr->setParams( paramString, 0, NULL);
    }
-   else if (!strcasecmp(str, "BSGS")) solver_ptr = new MLI_Solver_BSGS();
-   else if (!strcasecmp(str, "MLS"))     solver_ptr = new MLI_Solver_MLS();
-   else if (!strcasecmp(str, "SuperLU"))   
+   else if (!strcmp(str,"BSGS"))    solver_ptr = new MLI_Solver_BSGS(str);
+   else if (!strcmp(str,"MCBSGS")) 
+   {
+      solver_ptr = new MLI_Solver_BSGS(str);
+      strcpy( paramString, "setScheme multicolor");
+      solver_ptr->setParams( paramString, 0, NULL);
+   }
+   else if (!strcmp(str,"ParaSails"))solver_ptr = new MLI_Solver_ParaSails(str);
+   else if (!strcmp(str,"MLS"))      solver_ptr = new MLI_Solver_MLS(str);
+   else if (!strcmp(str,"Chebyshev"))solver_ptr = new MLI_Solver_Chebyshev(str);
+   else if (!strcmp(str,"CGJacobi")) 
+   {
+      solver_ptr = new MLI_Solver_CG(str);
+      strcpy( paramString, "baseMethod Jacobi");
+      solver_ptr->setParams( paramString, 0, NULL);
+   }
+   else if (!strcmp(str,"CGBJacobi")) 
+   {
+      solver_ptr = new MLI_Solver_CG(str);
+      strcpy( paramString, "baseMethod BJacobi");
+      solver_ptr->setParams( paramString, 0, NULL);
+   }
+   else if (!strcmp(str,"CGSGS")) 
+   {
+      solver_ptr = new MLI_Solver_CG(str);
+      strcpy( paramString, "baseMethod SGS");
+      solver_ptr->setParams( paramString, 0, NULL);
+   }
+   else if (!strcmp(str,"CGBSGS")) 
+   {
+      solver_ptr = new MLI_Solver_CG(str);
+      strcpy( paramString, "baseMethod BSGS");
+      solver_ptr->setParams( paramString, 0, NULL);
+   }
+   else if (!strcmp(str,"SuperLU"))   
    {
 #ifdef MLI_SUPERLU
-      solver_ptr = new MLI_Solver_SuperLU();
+      solver_ptr = new MLI_Solver_SuperLU(str);
 #else
       printf("MLI_Solver_Create ERROR : SuperLU not available\n");
       exit(1);
 #endif
    }
-   else if (!strcasecmp(str, "ARPACKSuperLU"))   
+   else if (!strcmp(str,"SeqSuperLU"))   
    {
 #ifdef MLI_SUPERLU
-      solver_ptr = new MLI_Solver_ARPACKSuperLU();
+      solver_ptr = new MLI_Solver_SeqSuperLU(str);
 #else
       printf("MLI_Solver_Create ERROR : SuperLU not available\n");
       exit(1);
 #endif
    }
-   else if ( !strcasecmp(str, "Chebyshev" ) )
+   else if (!strcmp(str, "ARPACKSuperLU"))   
    {
-      solver_ptr = new MLI_Solver_Chebyshev();
+#ifdef MLI_SUPERLU
+      solver_ptr = new MLI_Solver_ARPACKSuperLU(str);
+#else
+      printf("MLI_Solver_Create ERROR : SuperLU not available\n");
+      exit(1);
+#endif
    }
    else
    {
       printf("MLI_Solver_Create ERROR : solver %s undefined.\n",str);
+      printf("Valid ones are : \n");
+      printf("\t Jacobi \n");
+      printf("\t BJacobi \n");
+      printf("\t GS \n");
+      printf("\t SGS \n");
+      printf("\t MCSGS \n");
+      printf("\t BSGS \n");
+      printf("\t MCBSGS \n");
+      printf("\t ParaSails \n");
+      printf("\t MLS \n");
+      printf("\t Chebyshev \n");
+      printf("\t CGJacobi \n");
+      printf("\t CGBJacobi \n");
+      printf("\t CGSGS \n");
+      printf("\t CGBSGS \n");
+      printf("\t SuperLU\n");
+      printf("\t SeqSuperLU\n");
+      printf("\t ARPACKSuperLU\n"); 
       fflush(stdout);
       exit(1);
-   }
-   return solver_ptr;
-}
-
-/*****************************************************************************
- * create a solver 
- *--------------------------------------------------------------------------*/
-
-MLI_Solver *MLI_Solver_CreateFromID( int solver_id )
-{
-   MLI_Solver *solver_ptr=NULL;
-
-   switch ( solver_id )
-   {
-      case MLI_SOLVER_JACOBI_ID :
-           solver_ptr = new MLI_Solver_Jacobi();
-           break;
-      case MLI_SOLVER_GS_ID :
-           solver_ptr = new MLI_Solver_GS();
-           break;
-      case MLI_SOLVER_SGS_ID :
-           solver_ptr = new MLI_Solver_SGS();
-           break;
-      case MLI_SOLVER_PARASAILS_ID :
-#ifdef MLI_PARASAILS
-           solver_ptr = new MLI_Solver_ParaSails();
-#else
-           printf("MLI_Solver_Create ERROR : ParaSails not available\n");
-           exit(1);
-#endif
-           break;
-      case MLI_SOLVER_BSGS_ID :
-           solver_ptr = new MLI_Solver_BSGS();
-           break;
-      case MLI_SOLVER_MLS_ID :
-           solver_ptr = new MLI_Solver_MLS();
-           break;
-      case MLI_SOLVER_SUPERLU_ID :
-#ifdef MLI_SUPERLU
-           solver_ptr = new MLI_Solver_SuperLU();
-#else
-           printf("MLI_Solver_Create ERROR : SuperLU not available\n");
-           exit(1);
-#endif
-           break;
-      case MLI_SOLVER_ARPACKSUPERLU_ID :
-#ifdef MLI_SUPERLU
-           solver_ptr = new MLI_Solver_ARPACKSuperLU();
-#else
-           printf("MLI_Solver_Create ERROR : SuperLU not available\n");
-           exit(1);
-#endif
-           break;
-      case MLI_SOLVER_CHEBYSHEV_ID :
-           solver_ptr = new MLI_Solver_Chebyshev();
-           break;
-      case MLI_SOLVER_CG_ID :
-           solver_ptr = new MLI_Solver_CG();
-           break;
-      default :
-           printf("MLI_Solver_Create ERROR : invalid solver.\n");
-           printf("Valid ones are : \n");
-           printf("\t %5d (Jacobi)       \n", MLI_SOLVER_JACOBI_ID);
-           printf("\t %5d (GS)           \n", MLI_SOLVER_GS_ID);
-           printf("\t %5d (SGS)          \n", MLI_SOLVER_SGS_ID);
-           printf("\t %5d (ParaSails)    \n", MLI_SOLVER_PARASAILS_ID);
-           printf("\t %5d (BSGS)         \n", MLI_SOLVER_BSGS_ID);
-           printf("\t %5d (MLS)          \n", MLI_SOLVER_MLS_ID);
-           printf("\t %5d (SuperLU)      \n", MLI_SOLVER_SUPERLU_ID);
-           printf("\t %5d (ARPACKSuperLU)\n", MLI_SOLVER_ARPACKSUPERLU_ID); 
-           printf("\t %5d (Chebyshev)    \n", MLI_SOLVER_CHEBYSHEV_ID); 
-           printf("\t %5d (CG)           \n", MLI_SOLVER_CG_ID); 
-           fflush(stdout);
-           exit(1);
    }
    return solver_ptr;
 }

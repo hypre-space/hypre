@@ -6,21 +6,20 @@
  *
  *********************************************************************EHEADER*/
 
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
 #include <stdio.h>
-
+#include <string.h>
 #include "base/mli_defs.h"
-#include "parcsr_mv/parcsr_mv.h"
 #include "solver/mli_solver_cg.h"
 #include "solver/mli_solver_jacobi.h"
+#include "solver/mli_solver_bjacobi.h"
+#include "solver/mli_solver_sgs.h"
+#include "solver/mli_solver_bsgs.h"
 
 /******************************************************************************
  * constructor
  *---------------------------------------------------------------------------*/
 
-MLI_Solver_CG::MLI_Solver_CG() : MLI_Solver(MLI_SOLVER_CG_ID)
+MLI_Solver_CG::MLI_Solver_CG(char *name) : MLI_Solver(name)
 {
    Amat_             = NULL;
    rVec_             = NULL;
@@ -30,7 +29,7 @@ MLI_Solver_CG::MLI_Solver_CG() : MLI_Solver(MLI_SOLVER_CG_ID)
    maxIterations_    = 3;
    tolerance_        = 0.0;
    baseSolver_       = NULL;
-   baseMethod_       = MLI_SOLVER_JACOBI_ID;
+   baseMethod_       = MLI_SOLVER_BSGS_ID;
    zeroInitialGuess_ = 0;
 }
 
@@ -53,8 +52,9 @@ MLI_Solver_CG::~MLI_Solver_CG()
 
 int MLI_Solver_CG::setup(MLI_Matrix *Amat_in)
 {
-   int  numSweeps;
-   char paramString[100], *argv[1];;
+   int    numSweeps;
+   double value=4.0/3.0;
+   char   paramString[100], *argv[1];;
 
    /*-----------------------------------------------------------------
     * set local matrix
@@ -68,9 +68,37 @@ int MLI_Solver_CG::setup(MLI_Matrix *Amat_in)
 
    switch( baseMethod_ )
    {
-      case MLI_SOLVER_JACOBI_ID : baseSolver_ = new MLI_Solver_Jacobi();
+      case MLI_SOLVER_JACOBI_ID : sprintf(paramString, "Jacobi");
+                                  baseSolver_ = 
+                                     new MLI_Solver_Jacobi(paramString);
                                   sprintf(paramString, "numSweeps");
-                                  numSweeps = 2;
+                                  numSweeps = 1;
+                                  argv[0] = (char *) &numSweeps;
+                                  baseSolver_->setParams(paramString,1,argv);
+                                  sprintf(paramString, "setMaxEigen");
+                                  argv[0] = (char *) &value;
+                                  baseSolver_->setParams(paramString,1,argv);
+                                  break;
+      case MLI_SOLVER_BJACOBI_ID: sprintf(paramString, "BJacobi");
+                                  baseSolver_ = 
+                                     new MLI_Solver_BJacobi(paramString);
+                                  sprintf(paramString, "numSweeps");
+                                  numSweeps = 1;
+                                  argv[0] = (char *) &numSweeps;
+                                  baseSolver_->setParams(paramString,1,argv);
+                                  break;
+      case MLI_SOLVER_SGS_ID :    sprintf(paramString, "SGS");
+                                  baseSolver_ = 
+                                     new MLI_Solver_SGS(paramString);
+                                  sprintf(paramString, "numSweeps");
+                                  numSweeps = 1;
+                                  argv[0] = (char *) &numSweeps;
+                                  baseSolver_->setParams(paramString,1,argv);
+      case MLI_SOLVER_BSGS_ID :   sprintf(paramString, "BSGS");
+                                  baseSolver_ = 
+                                     new MLI_Solver_BSGS(paramString);
+                                  sprintf(paramString, "numSweeps");
+                                  numSweeps = 1;
                                   argv[0] = (char *) &numSweeps;
                                   baseSolver_->setParams(paramString,1,argv);
                                   break;
@@ -100,6 +128,7 @@ int MLI_Solver_CG::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    int                i, iter, localNRows;
    double             *pData, *zData;
    double             rho, rhom1, alpha, beta, sigma, rnorm;
+   char               paramString[30];
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix    *ADiag;
    hypre_ParVector    *f, *u, *p, *z, *r, *ap;
@@ -135,9 +164,10 @@ int MLI_Solver_CG::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
    pData  = hypre_VectorData(hypre_ParVectorLocalVector(p));
    zData  = hypre_VectorData(hypre_ParVectorLocalVector(z));
+   strcpy(paramString, "zeroInitialGuess");
 
    /*-----------------------------------------------------------------
-    * Perform Jacobi iterations
+    * Perform iterations
     *-----------------------------------------------------------------*/
  
    iter = 0;
@@ -146,6 +176,7 @@ int MLI_Solver_CG::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    {
       iter++;
       hypre_ParVectorSetConstantValues(z, 0.0);
+      baseSolver_->setParams( paramString, 0, NULL );
       baseSolver_->solve( rVec_, zVec_ );
       rhom1 = rho;
       rho   = hypre_ParVectorInnerProd(r, z);
@@ -179,29 +210,60 @@ int MLI_Solver_CG::solve(MLI_Vector *f_in, MLI_Vector *u_in)
  * set CG parameters
  *---------------------------------------------------------------------------*/
 
-int MLI_Solver_CG::setParams( char *param_string, int argc, char **argv )
+int MLI_Solver_CG::setParams( char *paramString, int argc, char **argv )
 {
-   char   param1[200];
+   char   param1[100], param2[100];
 
-   if ( !strcasecmp(param_string, "maxIterations") )
+   sscanf(paramString, "%s", param1);
+   if ( !strcmp(param1, "maxIterations") )
    {
-      sscanf(param_string, "%s %d", param1, &maxIterations_);
+      sscanf(paramString, "%s %d", param1, &maxIterations_);
       return 0;
    }
-   else if ( !strcasecmp(param_string, "tolerance") )
+   else if ( !strcmp(param1, "tolerance") )
    {
-      sscanf(param_string, "%s %lg", param1, &tolerance_);
+      sscanf(paramString, "%s %lg", param1, &tolerance_);
       return 0;
    }
-   else if ( !strcasecmp(param_string, "zeroInitialGuess") )
+   else if ( !strcmp(param1, "zeroInitialGuess") )
    {
       zeroInitialGuess_ = 1;
+      return 0;
+   }
+   else if ( !strcmp(param1, "numSweeps") )
+   {
+      sscanf(paramString, "%s %d", param1, &maxIterations_);
+      return 0;
+   }
+   else if ( !strcmp(param1, "relaxWeight") )
+   {
+      if ( argc < 1 ) 
+      {
+         printf("MLI_Solver_CG::setParams ERROR : needs 1 arg.\n");
+         return 1;
+      }
+      if ( argc >= 1 ) maxIterations_ = *(int*) argv[0];
+      return 0;
+   }
+   else if ( !strcmp(param1, "baseMethod") )
+   {
+      sscanf(paramString, "%s %s", param1, param2);
+      if ( !strcmp(param2, "Jacobi") ) 
+         baseMethod_ = MLI_SOLVER_JACOBI_ID;
+      else if ( !strcmp(param2, "BJacobi") )
+         baseMethod_ = MLI_SOLVER_BJACOBI_ID;
+      else if ( !strcmp(param2, "SGS") )
+         baseMethod_ = MLI_SOLVER_SGS_ID;
+      else if ( !strcmp(param2, "BSGS") )
+         baseMethod_ = MLI_SOLVER_BSGS_ID;
+      else
+         baseMethod_ = MLI_SOLVER_BJACOBI_ID;
       return 0;
    }
    else
    {   
       printf("MLI_Solver_CG::setParams - parameter not recognized.\n");
-      printf("                Params = %s\n", param_string);
+      printf("                Params = %s\n", paramString);
       return 1;
    }
 }

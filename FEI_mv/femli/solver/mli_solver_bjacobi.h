@@ -6,8 +6,8 @@
  *
  *********************************************************************EHEADER*/
 
-#ifndef __MLI_SOLVER_BSGS_H__
-#define __MLI_SOLVER_BSGS_H__
+#ifndef __MLI_SOLVER_BJACOBI_H__
+#define __MLI_SOLVER_BJACOBI_H__
 
 #include <stdio.h>
 #include "matrix/mli_matrix.h"
@@ -16,10 +16,10 @@
 #include "solver/mli_solver_seqsuperlu.h"
 
 /******************************************************************************
- * data structure for the BSGS relaxation scheme
+ * data structure for the BJacobi relaxation scheme
  *---------------------------------------------------------------------------*/
 
-class MLI_Solver_BSGS : public MLI_Solver
+class MLI_Solver_BJacobi : public MLI_Solver
 {
    MLI_Matrix *Amat_;
    int        nSweeps_;
@@ -36,14 +36,11 @@ class MLI_Solver_BSGS : public MLI_Solver
    int        *offCols_;
    double     *offVals_;
    MLI_Solver_SeqSuperLU **blockSolvers_;
-   int        scheme_;
-   int        numColors_;
-   int        myColor_;
 
 public :
 
-   MLI_Solver_BSGS(char *name);
-   ~MLI_Solver_BSGS();
+   MLI_Solver_BJacobi(char *name);
+   ~MLI_Solver_BJacobi();
    int setup(MLI_Matrix *Amat);
    int solve(MLI_Vector *f, MLI_Vector *u);
    int setParams( char *paramString, int argc, char **argv);
@@ -52,7 +49,6 @@ public :
    int buildBlocks();
    int adjustOffColIndices();
    int cleanBlocks();
-   int doProcColoring();
 };
 
 #endif

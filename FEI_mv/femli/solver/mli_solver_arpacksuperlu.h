@@ -8,8 +8,8 @@
 
 #ifdef MLI_SUPERLU
 
-#ifndef __MLI_SOLVER_ARPACKSUPERLUH__
-#define __MLI_SOLVER_ARPACKSUPERLUH__
+#ifndef __MLI_SOLVER_ARPACKSUPERLU_H__
+#define __MLI_SOLVER_ARPACKSUPERLU_H__
 
 #include <stdio.h>
 #include "vector/mli_vector.h"
@@ -38,7 +38,7 @@ class MLI_Solver_ARPACKSuperLU : public MLI_Solver
 
 public :
 
-   MLI_Solver_ARPACKSuperLU();
+   MLI_Solver_ARPACKSuperLU(char *name);
    ~MLI_Solver_ARPACKSuperLU();
    int setup(MLI_Matrix *mat);
    int solve(MLI_Vector *f, MLI_Vector *u);

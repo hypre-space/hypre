@@ -6,8 +6,8 @@
  *
  *********************************************************************EHEADER*/
 
-#ifndef __MLI_SOLVER_CHEBYSHEV__
-#define __MLI_SOLVER_CHEBYSHEV__
+#ifndef __MLI_SOLVER_CHEBYSHEV_H__
+#define __MLI_SOLVER_CHEBYSHEV_H__
 
 #include <stdio.h>
 #include "matrix/mli_matrix.h"
@@ -32,7 +32,7 @@ class MLI_Solver_Chebyshev : public MLI_Solver
 
 public :
 
-   MLI_Solver_Chebyshev();
+   MLI_Solver_Chebyshev(char *name);
    ~MLI_Solver_Chebyshev();
    int setup(MLI_Matrix *Amat);
    int solve(MLI_Vector *f, MLI_Vector *u);

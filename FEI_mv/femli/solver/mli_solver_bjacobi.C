@@ -6,32 +6,27 @@
  *
  *********************************************************************EHEADER*/
 
+#include <stdio.h>
 #include <string.h>
-#include <strings.h>
-#include "seq_mv/seq_mv.h"
-#include "parcsr_mv/parcsr_mv.h"
 #include "base/mli_defs.h"
-#include "util/mli_utils.h"
-#include "cintface/cmli.h"
-#include "solver/mli_solver_bsgs.h"
-#include "solver/mli_solver_seqsuperlu.h"
+#include "solver/mli_solver_bjacobi.h"
 
 /******************************************************************************
- * BSGS relaxation scheme 
+ * BJacobi relaxation scheme 
  *****************************************************************************/
 
 /******************************************************************************
  * constructor
  *--------------------------------------------------------------------------*/
 
-MLI_Solver_BSGS::MLI_Solver_BSGS(char *name) : MLI_Solver(name)
+MLI_Solver_BJacobi::MLI_Solver_BJacobi(char *name) : MLI_Solver(name)
 {
    Amat_             = NULL;
    nSweeps_          = 1;
    relaxWeights_     = NULL;
    zeroInitialGuess_ = 0;
    useOverlap_       = 0;
-   blockSize_        = 252;
+   blockSize_        = 500;
    nBlocks_          = 0;
    blockLengths_     = NULL;
    blockSolvers_     = NULL;
@@ -41,16 +36,13 @@ MLI_Solver_BSGS::MLI_Solver_BSGS(char *name) : MLI_Solver(name)
    offRowLengths_    = NULL;
    offCols_          = NULL;
    offVals_          = NULL;
-   myColor_          = 0;
-   numColors_        = 1;
-   scheme_           = 1;
 }
 
 /******************************************************************************
  * destructor
  *--------------------------------------------------------------------------*/
 
-MLI_Solver_BSGS::~MLI_Solver_BSGS()
+MLI_Solver_BJacobi::~MLI_Solver_BJacobi()
 {
    cleanBlocks();
    if (relaxWeights_ != NULL) delete [] relaxWeights_;
@@ -60,30 +52,12 @@ MLI_Solver_BSGS::~MLI_Solver_BSGS()
  * setup 
  *--------------------------------------------------------------------------*/
 
-int MLI_Solver_BSGS::setup(MLI_Matrix *Amat_in)
+int MLI_Solver_BJacobi::setup(MLI_Matrix *Amat_in)
 {
    hypre_ParCSRMatrix *A;
    MPI_Comm           comm;
 
    Amat_ = Amat_in;
-
-   /*-----------------------------------------------------------------
-    * set up coloring scheme 
-    *-----------------------------------------------------------------*/
-
-   if      ( scheme_ == 0 ) doProcColoring();
-   else if ( scheme_ == 1 )
-   {
-      myColor_   = 0;
-      numColors_ = 1;
-   }
-   else
-   {
-      A    = (hypre_ParCSRMatrix *) Amat_->getMatrix();
-      comm = hypre_ParCSRMatrixComm(A);
-      MPI_Comm_size(comm, &numColors_);
-      MPI_Comm_rank(comm, &myColor_);
-   }
 
    /*-----------------------------------------------------------------
     * clean up first
@@ -96,7 +70,6 @@ int MLI_Solver_BSGS::setup(MLI_Matrix *Amat_in)
     *-----------------------------------------------------------------*/
 
    composeOverlappedMatrix();
-   adjustOffColIndices();
 
    /*-----------------------------------------------------------------
     * construct the extended matrix
@@ -111,14 +84,14 @@ int MLI_Solver_BSGS::setup(MLI_Matrix *Amat_in)
  * solve function
  *---------------------------------------------------------------------------*/
 
-int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
+int MLI_Solver_BJacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 {
    int     iP, jP, iC, nRecvs, *recvProcs, *recvStarts, nRecvBefore;
    int     blockStartRow, iB, iS, blockEndRow, blkLeng;
    int     localNRows, iStart, iEnd, irow, jcol, colIndex, index, mypid;
    int     nSends, numColsOffd, start, relaxError=0, maxBlkLeng;
    int     nprocs, *partition, startRow, endRow, offOffset, *tmpJ;
-   int     *ADiagI, *ADiagJ, *AOffdI, *AOffdJ, offIRow, totalOffNNZ;
+   int     *ADiagI, *ADiagJ, *AOffdI, *AOffdJ, offIRow;
    double  *ADiagA, *AOffdA, *uData, *fData, *tmpA, ddiag, *fExtData;
    double  relaxWeight, *vBufData, *vExtData, res, *dbleX, *dbleB;
    MPI_Comm               comm;
@@ -157,7 +130,6 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    startRow    = partition[mypid];
    endRow      = partition[mypid+1] - 1;
    nRecvBefore = 0;
-   totalOffNNZ = 0;
    if ( nprocs > 1 )
    {
       nRecvs      = hypre_ParCSRCommPkgNumRecvs(commPkg);
@@ -168,9 +140,6 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
          for ( iP = 0; iP < nRecvs; iP++ )
             if ( recvProcs[iP] > mypid ) break;
          nRecvBefore = recvStarts[iP];
-         offNRows_   = recvStarts[nRecvs];
-         for ( iP = 0; iP < offNRows_; iP++ )
-            totalOffNNZ += offRowLengths_[iP];
       } 
    }
 
@@ -216,7 +185,7 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    sluX  = hypre_SeqVectorCreate( maxBlkLeng_ );
 
    /*-----------------------------------------------------------------
-    * perform block SGS sweeps
+    * perform block Jacobi sweeps
     *-----------------------------------------------------------------*/
  
    for ( iS = 0; iS < nSweeps_; iS++ )
@@ -225,226 +194,118 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
       else                         relaxWeight = 1.0;
       if ( relaxWeight <= 0.0 ) relaxWeight = 1.0;
 
-      for ( iC = 0; iC < numColors_; iC++ )
+      if (nprocs > 1)
       {
-         if (nprocs > 1)
+         if ( ! zeroInitialGuess_)
          {
-            if ( ! zeroInitialGuess_)
+            index = 0;
+            for (iP = 0; iP < nSends; iP++)
             {
-               index = 0;
-               for (iP = 0; iP < nSends; iP++)
-               {
-                  start = hypre_ParCSRCommPkgSendMapStart(commPkg, iP);
-                  for (jP=start;
-                       jP<hypre_ParCSRCommPkgSendMapStart(commPkg,iP+1); jP++)
-                     vBufData[index++]
-                         = uData[hypre_ParCSRCommPkgSendMapElmt(commPkg,jP)];
-               }
-               commHandle = hypre_ParCSRCommHandleCreate(1,commPkg,vBufData,
-                                                         vExtData);
-               hypre_ParCSRCommHandleDestroy(commHandle);
-               commHandle = NULL;
+               start = hypre_ParCSRCommPkgSendMapStart(commPkg, iP);
+               for (jP=start;
+                    jP<hypre_ParCSRCommPkgSendMapStart(commPkg,iP+1); jP++)
+                  vBufData[index++]
+                      = uData[hypre_ParCSRCommPkgSendMapElmt(commPkg,jP)];
             }
+            commHandle = hypre_ParCSRCommHandleCreate(1,commPkg,vBufData,
+                                                      vExtData);
+            hypre_ParCSRCommHandleDestroy(commHandle);
+            commHandle = NULL;
          }
-
-         /*--------------------------------------------------------------
-          * process each block forward
-          *--------------------------------------------------------------*/
-
-         if ( iC == myColor_ )
-         {
-            offOffset = offIRow = 0;
-            if ( offRowLengths_ != NULL ) 
-            {
-               offOffset = 0;
-               offIRow--;
-            }
-            for ( iB = 0; iB < nBlocks_; iB++ )
-            {
-               blkLeng = blockLengths_[iB];
-               blockStartRow = iB * blockSize_ + startRow - nRecvBefore;
-               blockEndRow   = blockStartRow + blkLeng - 1;
-
-               for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
-               {
-                  index  = irow - startRow;
-                  if ( irow >= startRow && irow <= endRow )
-                  {
-                     iStart = ADiagI[index];
-                     iEnd   = ADiagI[index+1];
-                     tmpJ   = &(ADiagJ[iStart]);
-                     tmpA   = &(ADiagA[iStart]);
-                     res    = fData[index];
-                     for (jcol = iStart; jcol < iEnd; jcol++)
-                        res -= *tmpA++ * uData[*tmpJ++];
-                     if ( ! zeroInitialGuess_)
-                     {
-                        iStart = AOffdI[index];
-                        iEnd   = AOffdI[index+1];
-                        tmpJ   = &(AOffdJ[iStart]);
-                        tmpA   = &(AOffdA[iStart]);
-                        for (jcol = iStart; jcol < iEnd; jcol++)
-                           res -= *tmpA++ * vExtData[*tmpJ++];
-                     }
-                     dbleB[irow-blockStartRow] = res;
-                  }
-                  else
-                  {
-                     offIRow++;
-                     iStart = 0;
-                     iEnd   = offRowLengths_[offIRow];
-                     tmpA   = &(offVals_[offOffset]);
-                     tmpJ   = &(offCols_[offOffset]);
-                     res    = fExtData[offIRow];
-                     for (jcol = iStart; jcol < iEnd; jcol++)
-                     {
-                        colIndex = *tmpJ++;
-                        if ( colIndex >= localNRows )   
-                           res -= *tmpA++ * vExtData[colIndex-localNRows];
-                        else if ( colIndex >= 0 )   
-                           res -= *tmpA++ * uData[colIndex];
-                        else tmpA++;
-                     }
-                     offOffset += iEnd;
-                     dbleB[irow-blockStartRow] = res;
-                  }
-               }
-               hypre_VectorSize(sluB) = blkLeng;
-               hypre_VectorSize(sluX) = blkLeng;
-               hypre_VectorData(sluB) = dbleB;
-               hypre_VectorData(sluX) = dbleX;
-               mliB = new MLI_Vector((void*) sluB, "HYPRE_Vector", NULL);
-               mliX = new MLI_Vector((void*) sluX, "HYPRE_Vector", NULL);
-
-               blockSolvers_[iB]->solve( mliB, mliX );
-
-               delete mliB;
-               delete mliX;
-
-               for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
-               {
-                  if ( irow < startRow )
-                     vExtData[offIRow-blockSize_+irow-blockStartRow+1] += 
-                               relaxWeight * dbleX[irow-blockStartRow];
-                  else if ( irow <= endRow )
-                     uData[irow-startRow] += relaxWeight * 
-                                             dbleX[irow-blockStartRow];
-                  else 
-                     vExtData[offIRow-blockSize_+irow-blockStartRow+1] += 
-                               relaxWeight * dbleX[irow-blockStartRow];
-               }
-            }
-         }
-         zeroInitialGuess_ = 0;
       }
 
-      /*-----------------------------------------------------------------
-       * process each block backward
-       *-----------------------------------------------------------------*/
+      /*--------------------------------------------------------------
+       * process each block 
+       *--------------------------------------------------------------*/
 
-      for ( iC = 0; iC < numColors_; iC++ )
+      offOffset = offIRow = 0;
+      if ( offRowLengths_ != NULL ) 
       {
-         if ( numColors_ > 1 && nprocs > 1 )
-         {
-            if ( ! zeroInitialGuess_)
-            {
-               index = 0;
-               for (iP = 0; iP < nSends; iP++)
-               {
-                  start = hypre_ParCSRCommPkgSendMapStart(commPkg, iP);
-                  for (jP=start;
-                       jP<hypre_ParCSRCommPkgSendMapStart(commPkg,iP+1); jP++)
-                     vBufData[index++]
-                         = uData[hypre_ParCSRCommPkgSendMapElmt(commPkg,jP)];
-               }
-               commHandle = hypre_ParCSRCommHandleCreate(1,commPkg,vBufData,
-                                                         vExtData);
-               hypre_ParCSRCommHandleDestroy(commHandle);
-               commHandle = NULL;
-            }
-         }
-         if ( iC == myColor_ )
-         {
-            offOffset = totalOffNNZ;
-            offIRow   = offNRows_;
-            for ( iB = nBlocks_-1; iB >= 0; iB-- )
-            {
-               blkLeng = blockLengths_[iB];
-               blockStartRow = iB * blockSize_ + startRow - nRecvBefore;
-               blockEndRow   = blockStartRow + blkLeng - 1;
+         offOffset = 0;
+         offIRow--;
+      }
+      for ( iB = 0; iB < nBlocks_; iB++ )
+      {
+         blkLeng = blockLengths_[iB];
+         blockStartRow = iB * blockSize_ + startRow - nRecvBefore;
+         blockEndRow   = blockStartRow + blkLeng - 1;
 
-               for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
+         for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
+         {
+            index  = irow - startRow;
+            if ( irow >= startRow && irow <= endRow )
+            {
+               res    = fData[index];
+               if ( zeroInitialGuess_ == 0 )
                {
-                  index  = irow - startRow;
-                  if ( irow >= startRow && irow <= endRow )
+                  iStart = ADiagI[index];
+                  iEnd   = ADiagI[index+1];
+                  tmpJ   = &(ADiagJ[iStart]);
+                  tmpA   = &(ADiagA[iStart]);
+                  for (jcol = iStart; jcol < iEnd; jcol++)
+                     res -= *tmpA++ * uData[*tmpJ++];
+                  if ( AOffdI != NULL )
                   {
-                     iStart = ADiagI[index];
-                     iEnd   = ADiagI[index+1];
-                     tmpJ   = &(ADiagJ[iStart]);
-                     tmpA   = &(ADiagA[iStart]);
-                     res    = fData[index];
+                     iStart = AOffdI[index];
+                     iEnd   = AOffdI[index+1];
+                     tmpJ   = &(AOffdJ[iStart]);
+                     tmpA   = &(AOffdA[iStart]);
                      for (jcol = iStart; jcol < iEnd; jcol++)
-                        res -= *tmpA++ * uData[*tmpJ++];
-                     if ( ! zeroInitialGuess_ )
-                     {
-                        iStart = AOffdI[index];
-                        iEnd   = AOffdI[index+1];
-                        tmpJ   = &(AOffdJ[iStart]);
-                        tmpA   = &(AOffdA[iStart]);
-                        for (jcol = iStart; jcol < iEnd; jcol++)
-                           res -= *tmpA++ * vExtData[*tmpJ++];
-                     }
-                     dbleB[irow-blockStartRow] = res;
-                  } 
-                  else
-                  {
-                     offIRow--;
-                     iStart    = 0;
-                     iEnd      = offRowLengths_[offIRow];
-                     offOffset -= iEnd;
-                     tmpA      = &(offVals_[offOffset]);
-                     tmpJ      = &(offCols_[offOffset]);
-                     res       = fExtData[offIRow];
-                     for (jcol = iStart; jcol < iEnd; jcol++)
-                     {
-                        colIndex = *tmpJ++;
-                        if ( colIndex >= localNRows )   
-                           res -= *tmpA++ * vExtData[colIndex-localNRows];
-                        else if ( colIndex >= 0 )   
-                           res -= *tmpA++ * uData[colIndex];
-                        else tmpA++;
-                     }
-                     dbleB[irow-blockStartRow] = res;
+                        res -= *tmpA++ * vExtData[*tmpJ++];
                   }
                }
-
-               hypre_VectorSize(sluB) = blkLeng;
-               hypre_VectorSize(sluX) = blkLeng;
-               hypre_VectorData(sluB) = dbleB;
-               hypre_VectorData(sluX) = dbleX;
-               mliB = new MLI_Vector((void*) sluB, "HYPRE_Vector", NULL);
-               mliX = new MLI_Vector((void*) sluX, "HYPRE_Vector", NULL);
-
-               blockSolvers_[iB]->solve( mliB, mliX );
-
-               delete mliB;
-               delete mliX;
-
-               for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
+               dbleB[irow-blockStartRow] = res;
+            }
+            else
+            {
+               res = fExtData[offIRow];
+               if ( zeroInitialGuess_ == 0 )
                {
-                  if ( irow < startRow )
-                     vExtData[offIRow+irow-blockStartRow] += 
-                               relaxWeight * dbleX[irow-blockStartRow];
-                  else if ( irow <= endRow )
-                     uData[irow-startRow] += relaxWeight *
-                                             dbleX[irow-blockStartRow];
-                  else 
-                     vExtData[offIRow+irow-blockStartRow] += 
-                               relaxWeight * dbleX[irow-blockStartRow];
+                  iStart = 0;
+                  iEnd   = offRowLengths_[offIRow];
+                  tmpA   = &(offVals_[offOffset]);
+                  tmpJ   = &(offCols_[offOffset]);
+                  for (jcol = iStart; jcol < iEnd; jcol++)
+                  {
+                     colIndex = *tmpJ++;
+                     if ( colIndex >= localNRows )   
+                        res -= *tmpA++ * vExtData[colIndex-localNRows];
+                     else if ( colIndex >= 0 )   
+                        res -= *tmpA++ * uData[colIndex];
+                     else tmpA++;
+                  }
+                  offOffset += iEnd;
                }
+               offIRow++;
+               dbleB[irow-blockStartRow] = res;
             }
          }
+         hypre_VectorSize(sluB) = blkLeng;
+         hypre_VectorSize(sluX) = blkLeng;
+         hypre_VectorData(sluB) = dbleB;
+         hypre_VectorData(sluX) = dbleX;
+         mliB = new MLI_Vector((void*) sluB, "HYPRE_Vector", NULL);
+         mliX = new MLI_Vector((void*) sluX, "HYPRE_Vector", NULL);
+
+         blockSolvers_[iB]->solve( mliB, mliX );
+
+         delete mliB;
+         delete mliX;
+
+         for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
+         {
+            if ( irow < startRow )
+               vExtData[offIRow-blockSize_+irow-blockStartRow+1] += 
+                         relaxWeight * dbleX[irow-blockStartRow];
+            else if ( irow <= endRow )
+               uData[irow-startRow] += relaxWeight * 
+                                       dbleX[irow-blockStartRow];
+            else 
+               vExtData[offIRow-blockSize_+irow-blockStartRow+1] += 
+                         relaxWeight * dbleX[irow-blockStartRow];
+         }
       }
+      zeroInitialGuess_ = 0;
    }
 
    /*-----------------------------------------------------------------
@@ -489,11 +350,11 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
  * set parameters
  *---------------------------------------------------------------------------*/
 
-int MLI_Solver_BSGS::setParams(char *paramString, int argc, char **argv)
+int MLI_Solver_BJacobi::setParams(char *paramString, int argc, char **argv)
 {
    int    i;
    double *weights;
-   char   param1[200], param2[200];
+   char   param1[200];
 
    sscanf(paramString, "%s", param1);
    if ( !strcmp(param1, "blockSize") )
@@ -512,7 +373,7 @@ int MLI_Solver_BSGS::setParams(char *paramString, int argc, char **argv)
    {
       if ( argc != 2 && argc != 1 ) 
       {
-         printf("Solver_BSGS::setParams ERROR : needs 1 or 2 args.\n");
+         printf("Solver_BJacobi::setParams ERROR : needs 1 or 2 args.\n");
          return 1;
       }
       if ( argc >= 1 ) nSweeps_ = *(int*)   argv[0];
@@ -526,14 +387,6 @@ int MLI_Solver_BSGS::setParams(char *paramString, int argc, char **argv)
          for ( i = 0; i < nSweeps_; i++ ) relaxWeights_[i] = weights[i];
       }
    }
-   else if ( !strcmp(param1, "setScheme") )
-   {
-      sscanf(paramString, "%s %s", param1, param2);
-      if      ( !strcmp(param2, "multicolor") ) scheme_ = 0;
-      else if ( !strcmp(param2, "parallel") )   scheme_ = 1;
-      else if ( !strcmp(param2, "sequential") ) scheme_ = 2;
-      return 0;
-   }
    else if ( !strcmp(param1, "zeroInitialGuess") )
    {
       zeroInitialGuess_ = 1;
@@ -546,7 +399,7 @@ int MLI_Solver_BSGS::setParams(char *paramString, int argc, char **argv)
  * compose overlapped matrix
  *--------------------------------------------------------------------------*/
 
-int MLI_Solver_BSGS::composeOverlappedMatrix()
+int MLI_Solver_BJacobi::composeOverlappedMatrix()
 {
    hypre_ParCSRMatrix *A;
    MPI_Comm    comm;
@@ -557,7 +410,7 @@ int MLI_Solver_BSGS::composeOverlappedMatrix()
    int         *recvProcs, *recvStarts, proc, offset, length, reqNum; 
    int         totalSendNnz, totalRecvNnz, index, base, totalSends;
    int         totalRecvs, rowNum, rowSize, *colInd, *sendStarts;
-   int         limit, *iSendBuf, curNnz, *recvIndices; 
+   int         limit, *iSendBuf, curNnz, *recvIndices, colIndex; 
    double      *dSendBuf, *colVal;
    hypre_ParCSRCommPkg *commPkg;
 
@@ -739,6 +592,27 @@ int MLI_Solver_BSGS::composeOverlappedMatrix()
 
    if ( nprocs > 1 && useOverlap_ ) delete [] requests;
 
+   /*-----------------------------------------------------------------
+    * convert column indices
+    *-----------------------------------------------------------------*/
+
+   offset = 0;
+   for ( i = 0; i < offNRows_; i++ )
+   {
+      for ( j = 0; j < offRowLengths_[i]; j++ )
+      {
+         colIndex = offCols_[offset];
+         if ( colIndex >= startRow && colIndex <= endRow )
+            offCols_[offset] = colIndex - startRow;
+         else
+         {
+            index = MLI_Utils_BinarySearch(colIndex,offRowIndices_,offNRows_);
+            if ( index >= 0 ) offCols_[offset] = localNRows + index;
+            else              offCols_[offset] = -1;
+         }
+         offset++;
+      }
+   }
    return 0;
 }
 
@@ -746,7 +620,7 @@ int MLI_Solver_BSGS::composeOverlappedMatrix()
  * build the blocks 
  *--------------------------------------------------------------------------*/
 
-int MLI_Solver_BSGS::buildBlocks()
+int MLI_Solver_BJacobi::buildBlocks()
 {
    int      iB, iP, mypid, nprocs, *partition, startRow, endRow;
    int      localNRows, nRecvs, *recvProcs, *recvStarts, nRecvBefore=0; 
@@ -799,7 +673,7 @@ int MLI_Solver_BSGS::buildBlocks()
    maxBlkLeng_ = 0;
    for ( iB = 0; iB < nBlocks_; iB++ ) 
       maxBlkLeng_ = ( blockLengths_[iB] > maxBlkLeng_ ) ? 
-                       blockLengths_[iB] : maxBlkLeng_;
+                      blockLengths_[iB] : maxBlkLeng_;
 
    /*-----------------------------------------------------------------
     * construct block matrices inverses
@@ -889,7 +763,7 @@ int MLI_Solver_BSGS::buildBlocks()
  * adjust the off processor incoming matrix
  *--------------------------------------------------------------------------*/
 
-int MLI_Solver_BSGS::adjustOffColIndices()
+int MLI_Solver_BJacobi::adjustOffColIndices()
 {
    int                mypid, *partition, startRow, endRow, localNRows;
    int                offset, index, colIndex, irow, jcol;
@@ -937,7 +811,7 @@ int MLI_Solver_BSGS::adjustOffColIndices()
  * clean blocks
  *--------------------------------------------------------------------------*/
 
-int MLI_Solver_BSGS::cleanBlocks()
+int MLI_Solver_BJacobi::cleanBlocks()
 {
    int iB;
 
@@ -959,83 +833,6 @@ int MLI_Solver_BSGS::cleanBlocks()
    offRowLengths_ = NULL;
    offCols_       = NULL;
    offVals_       = NULL;
-   return 0;
-}
-
-/******************************************************************************
- * color processors
- *---------------------------------------------------------------------------*/
-
-int MLI_Solver_BSGS::doProcColoring()
-{
-   int                 nSends, *sendProcs, mypid, nprocs, *commGraphI;
-   int                 *commGraphJ, *recvCounts, i, j, *colors, *colorsAux;
-   int                 pIndex, pColor;
-   MPI_Comm            comm;
-   hypre_ParCSRMatrix  *A;
-   hypre_ParCSRCommPkg *commPkg;
-
-   A       = (hypre_ParCSRMatrix *) Amat_->getMatrix();
-   comm    = hypre_ParCSRMatrixComm(A);
-   commPkg = hypre_ParCSRMatrixCommPkg(A);
-   if ( commPkg == NULL )
-   {
-      hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) A);
-      commPkg = hypre_ParCSRMatrixCommPkg(A);
-   }
-   nSends    = hypre_ParCSRCommPkgNumSends(commPkg);
-   sendProcs = hypre_ParCSRCommPkgSendProcs(commPkg);
-
-   MPI_Comm_rank(comm, &mypid);
-   MPI_Comm_size(comm, &nprocs);
-
-   commGraphI = new int[nprocs+1]; 
-   recvCounts = new int[nprocs];
-   MPI_Allgather(&nSends, 1, MPI_INT, recvCounts, 1, MPI_INT, comm);
-   commGraphI[0] = 0;
-   for ( i = 1; i <= nprocs; i++ )
-      commGraphI[i] = commGraphI[i-1] + recvCounts[i-1];
-   commGraphJ = new int[commGraphI[nprocs]]; 
-   MPI_Allgatherv(sendProcs, nSends, MPI_INT, commGraphJ,
-                  recvCounts, commGraphI, MPI_INT, comm);
-   delete [] recvCounts;
-
-#if 0
-   if ( mypid == 0 )
-   {
-      for ( i = 0; i < nprocs; i++ )
-         for ( j = commGraphI[i]; j < commGraphI[i+1]; j++ )
-            printf("Graph(%d,%d)\n", i, commGraphJ[j]);
-   }
-#endif
-
-   colors = new int[nprocs];
-   colorsAux = new int[nprocs];
-   for ( i = 0; i < nprocs; i++ ) colors[i] = colorsAux[i] = -1;
-   for ( i = 0; i < nprocs; i++ )
-   {
-      for ( j = commGraphI[i]; j < commGraphI[i+1]; j++ )
-      {
-         pIndex = commGraphJ[j];
-         pColor = colors[pIndex];
-         if ( pColor >= 0 ) colorsAux[pColor] = 1;
-      }
-      for ( j = 0; j < nprocs; j++ ) 
-         if ( colorsAux[j] < 0 ) break;
-      colors[i] = j;
-      for ( j = commGraphI[i]; j < commGraphI[i+1]; j++ )
-      {
-         pIndex = commGraphJ[j];
-         pColor = colors[pIndex];
-         if ( pColor >= 0 ) colorsAux[pColor] = -1;
-      }
-   }
-   delete [] colorsAux;
-   myColor_ = colors[mypid];
-   numColors_ = 0;
-   for ( j = 0; j < nprocs; j++ ) 
-      if ( colors[j]+1 > numColors_ ) numColors_ = colors[j]+1;
-   delete [] colors;
    return 0;
 }
 

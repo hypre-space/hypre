@@ -53,28 +53,32 @@ CXXFLAGS =\
 HEADERS =\
  mli_solver.h \
  mli_solver_jacobi.h \
+ mli_solver_bjacobi.h \
  mli_solver_gs.h \
  mli_solver_sgs.h \
- mli_solver_parasails.h \
  mli_solver_bsgs.h \
+ mli_solver_parasails.h \
  mli_solver_mls.h \
- mli_solver_superlu.h \
- mli_solver_arpacksuperlu.h \
  mli_solver_chebyshev.h \
- mli_solver_cg.h
+ mli_solver_cg.h \
+ mli_solver_superlu.h \
+ mli_solver_seqsuperlu.h \
+ mli_solver_arpacksuperlu.h
 
 FILES =\
  mli_solver.C \
  mli_solver_jacobi.C \
+ mli_solver_bjacobi.C \
  mli_solver_gs.C \
  mli_solver_sgs.C \
- mli_solver_parasails.C \
  mli_solver_bsgs.C \
+ mli_solver_parasails.C \
  mli_solver_mls.C \
- mli_solver_superlu.C \
- mli_solver_arpacksuperlu.C \
  mli_solver_chebyshev.C \
- mli_solver_cg.C
+ mli_solver_cg.C \
+ mli_solver_superlu.C \
+ mli_solver_seqsuperlu.C \
+ mli_solver_arpacksuperlu.C
 
 OBJS = ${FILES:.C=.o}
 
