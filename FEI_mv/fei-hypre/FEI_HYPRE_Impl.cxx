@@ -3442,7 +3442,6 @@ int FEI_HYPRE_Impl::solveUsingSuperLU()
    SuperMatrix superLU_Umat;
    SuperMatrix AC;
    SuperMatrix B;
-   extern SuperLUStat_t SuperLUStat;
 
    /* ---------------------------------------------------------------
     * conversion from CSR to CSC
