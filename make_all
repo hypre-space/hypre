@@ -1,5 +1,10 @@
 #!/bin/csh -f
 #
+pushd utilities
+rm *.o
+make
+popd
+#
 pushd distributed_matrix
 rm *.o
 make lib
