@@ -17,7 +17,7 @@
 #define HYPRE_FORT_HEADER
 
 #if defined(F77_FUNC_)
-
+/* F77_FUNC_ macro assumes underscores exist in name */
 #  define hypre_NAME_C_CALLING_FORT(name,NAME) F77_FUNC_(name,NAME)
 #  define hypre_NAME_FORT_CALLING_C(name,NAME) F77_FUNC_(name,NAME)
 
@@ -52,13 +52,15 @@
 #define hypre_F90_NAME(name,NAME)  hypre_NAME_C_CALLING_FORT(name,NAME)
 
 #ifdef HYPRE_USING_HYPRE_BLAS
-#if defined(F77_FUNC)
-#define hypre_F90_NAME_BLAS(name,NAME) F77_FUNC(name,NAME)
-#else
 #define hypre_F90_NAME_BLAS(name,NAME)  name##_
-#endif
 #else
 #define hypre_F90_NAME_BLAS(name,NAME)  hypre_NAME_C_CALLING_FORT(name,NAME)
+#endif
+
+#ifdef HYPRE_USING_HYPRE_LAPACK
+#define hypre_F90_NAME_LAPACK(name,NAME)  name##_
+#else
+#define hypre_F90_NAME_LAPACK(name,NAME)  hypre_NAME_C_CALLING_FORT(name,NAME)
 #endif
 
 #endif
