@@ -813,7 +813,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
 #define C_PT 1
 #define F_PT -1
 #define Z_PT -2
-#define SF_PT -3
+#define SF_PT -3  /* special fine points */
 #define UNDECIDED 0 
 
 
@@ -897,21 +897,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    LoL_tail = NULL;
    lists = hypre_CTAlloc(int, num_variables);
    where = hypre_CTAlloc(int, num_variables);
-
-   CF_marker = hypre_CTAlloc(int, num_variables);
-   
-   num_left = 0;
-   for (j = 0; j < num_variables; j++)
-   {
-      if ((S_i[j+1]-S_i[j])== 0 &&
-		(S_offd_i[j+1]-S_offd_i[j]) == 0)
-         CF_marker[j] = SF_PT;
-      else
-      {
-         CF_marker[j] = UNDECIDED;
-         num_left++;
-      }
-   } 
 
 #if 0 /* debugging */
    char  filename[256];
@@ -1045,6 +1030,24 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    *
    *************************************************************/
 
+   CF_marker = hypre_CTAlloc(int, num_variables);
+   
+   num_left = 0;
+   for (j = 0; j < num_variables; j++)
+   {
+      if ((S_i[j+1]-S_i[j])== 0 &&
+		(S_offd_i[j+1]-S_offd_i[j]) == 0)
+      {
+         CF_marker[j] = SF_PT;
+         measure_array[j] = 0;
+      }
+      else
+      {
+         CF_marker[j] = UNDECIDED;
+         num_left++;
+      }
+   } 
+
    for (j = 0; j < num_variables; j++) 
    {    
       measure = measure_array[j];
@@ -1061,21 +1064,23 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
             for (k = S_i[j]; k < S_i[j+1]; k++)
             {
                nabor = S_j[k];
-               if (nabor < j)
+               if (CF_marker[nabor] != SF_PT)
                {
-                  new_meas = measure_array[nabor];
-	          if (new_meas > 0)
-                     remove_point(&LoL_head, &LoL_tail, new_meas, 
+                  if (nabor < j)
+                  {
+                     new_meas = measure_array[nabor];
+	             if (new_meas > 0)
+                        remove_point(&LoL_head, &LoL_tail, new_meas, 
                                nabor, lists, where);
 
-                  new_meas = ++(measure_array[nabor]);
-                 
-                  enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                     new_meas = ++(measure_array[nabor]);
+                     enter_on_lists(&LoL_head, &LoL_tail, new_meas,
                                  nabor, lists, where);
-               }
-	       else
-               {
-                  new_meas = ++(measure_array[nabor]);
+                  }
+	          else
+                  {
+                     new_meas = ++(measure_array[nabor]);
+                  }
                }
             }
             --num_left;
