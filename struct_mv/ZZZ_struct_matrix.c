@@ -83,6 +83,50 @@ ZZZ_SetStructMatrixValues( ZZZ_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * ZZZ_SetStructMatrixCoeffs
+ *--------------------------------------------------------------------------*/
+
+int 
+ZZZ_SetStructMatrixCoeffs( ZZZ_StructMatrix  matrix,
+                           int              *grid_index,
+                           double           *values              )
+{
+   zzz_StructMatrix *new_matrix = (zzz_StructMatrix *) matrix;
+   zzz_Index        *new_grid_index;
+
+   int                 d;
+   int                 s;
+   int                 ierr;
+   int                 stencil_size;
+   zzz_StructStencil  *stencil;
+   int                *stencil_indicies;
+
+   stencil = zzz_StructMatrixStencil(new_matrix);
+   stencil_size = zzz_StructStencilSize(stencil);
+   stencil_indicies = zzz_CTAlloc(int, stencil_size);
+   for (s = 0; s < stencil_size; s++)
+     {
+       stencil_indicies[s] = s;
+     }
+
+   new_grid_index = zzz_NewIndex();
+   for (d = 0; d < zzz_StructGridDim(zzz_StructMatrixGrid(new_matrix)); d++)
+   {
+      zzz_IndexD(new_grid_index, d) = grid_index[d];
+   }
+
+   ierr = zzz_SetStructMatrixValues( new_matrix,
+                                     new_grid_index,
+                                     stencil_size, stencil_indicies,
+                                     values );
+
+   zzz_FreeIndex(new_grid_index);
+   zzz_TFree(stencil_indicies);
+
+   return (ierr);
+}
+
+/*--------------------------------------------------------------------------
  * ZZZ_SetStructMatrixBoxValues
  *--------------------------------------------------------------------------*/
 
@@ -140,5 +184,26 @@ ZZZ_SetStructMatrixNumGhost( ZZZ_StructMatrix  matrix,
                              int              *num_ghost )
 {
    zzz_SetStructMatrixNumGhost( (zzz_StructMatrix *) matrix, num_ghost);
+}
+
+/*--------------------------------------------------------------------------
+ * ZZZ_StructMatrixGrid
+ *--------------------------------------------------------------------------*/
+
+ZZZ_StructGrid
+ZZZ_StructMatrixGrid( ZZZ_StructMatrix matrix )
+{
+   return ( (ZZZ_StructGrid) (zzz_StructMatrixGrid( (zzz_StructMatrix *) matrix) ) );
+}
+
+/*--------------------------------------------------------------------------
+ * ZZZ_SetStructMatrixSymmetric
+ *--------------------------------------------------------------------------*/
+ 
+void
+ZZZ_SetStructMatrixSymmetric( ZZZ_StructMatrix  matrix,
+                              int               symmetric )
+{
+   zzz_StructMatrixSymmetric( (zzz_StructMatrix *) matrix ) = symmetric;
 }
 
