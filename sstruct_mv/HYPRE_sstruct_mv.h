@@ -308,6 +308,15 @@ int HYPRE_SStructGraphAddEntries(HYPRE_SStructGraph   graph,
                                  int                  to_var);
 
 /**
+ * It is used before AddEntries and Assemble
+ *  to compute the right ranks in the graph.
+ *  Currently, {\tt type} can be either {\tt HYPRE\_SSTRUCT} (the
+ *  default) or {\tt HYPRE\_PARCSR}.  
+ * 
+ **/
+  int HYPRE_SStructGraphSetObjectType(HYPRE_SStructGraph  graph,
+                                       int                 type);
+/**
  * Finalize the construction of the graph before using.
  **/
 int HYPRE_SStructGraphAssemble(HYPRE_SStructGraph graph);

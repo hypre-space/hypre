@@ -432,7 +432,6 @@ typedef struct
    hypre_Index   to_index;
    int           to_var;
    int           rank;
-  int          ghrank;     /* GEC0902 adding the ghost rank  */
 
 } hypre_SStructUEntry;
 
@@ -461,9 +460,11 @@ typedef struct hypre_SStructGraph_struct
    int                    *iUventries;
 
    hypre_SStructUVEntry  **Uventries;
-   int                     totUentries;
+  int                     totUentries;
 
    int                     ref_count;
+
+   int                     type;    /* GEC0203 */
 
 } hypre_SStructGraph;
 
@@ -487,7 +488,7 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphUVEntry(graph, i)     ((graph) -> Uventries[i])
 #define hypre_SStructGraphTotUEntries(graph)    ((graph) -> totUentries)
 #define hypre_SStructGraphRefCount(graph)       ((graph) -> ref_count)
-
+#define hypre_SStructGraphObjectType(graph)     ((graph) -> type)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructUVEntry
@@ -503,7 +504,7 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructUVEntryToIndex(Uv, i)  ((Uv) -> Uentries[i].to_index)
 #define hypre_SStructUVEntryToVar(Uv, i)    ((Uv) -> Uentries[i].to_var)
 #define hypre_SStructUVEntryRank(Uv, i)     ((Uv) -> Uentries[i].rank)
-#define hypre_SStructUVEntryGhrank(Uv, i)     ((Uv) -> Uentries[i].ghrank)
+
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructUEntry
@@ -513,7 +514,6 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructUEntryToIndex(U)  ((U) -> to_index)
 #define hypre_SStructUEntryToVar(U)    ((U) -> to_var)
 #define hypre_SStructUEntryRank(U)     ((U) -> rank)
-#define hypre_SStructUEntryGhrank(U)     ((U) -> ghrank)
 
 #endif
 

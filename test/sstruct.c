@@ -1490,6 +1490,14 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
+
+   if ( ((solver_id >= 20) && (solver_id < 30)) ||
+        ((solver_id >= 40) && (solver_id < 50)) ||
+        (solver_id == 120))
+   {
+       HYPRE_SStructGraphSetObjectType(graph, HYPRE_PARCSR);  
+   }
+
    for (part = 0; part < data.nparts; part++)
    {
       pdata = data.pdata[part];

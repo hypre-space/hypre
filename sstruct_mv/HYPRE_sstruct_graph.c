@@ -60,6 +60,7 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
    hypre_SStructGraphUVEntries(graph)   = NULL;
    hypre_SStructGraphTotUEntries(graph) = 0;
    hypre_SStructGraphRefCount(graph)    = 1;
+   hypre_SStructGraphObjectType(graph) = HYPRE_SSTRUCT;
 
    *graph_ptr = graph;
 
@@ -167,6 +168,8 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
    int                    aUventries = hypre_SStructGraphAUVEntries(graph);
    int                   *iUventries = hypre_SStructGraphIUVEntries(graph);
  
+   int                    type       = hypre_SStructGraphObjectType(graph);
+                              
    hypre_SStructUVEntry **Uventries  = hypre_SStructGraphUVEntries(graph);
    hypre_SStructUVEntry  *Uventry;
    int                    nUentries;
@@ -174,7 +177,7 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
 
    hypre_BoxMapEntry     *map_entry;
    hypre_Index            cindex;
-   int                    rank, i, ghrank;
+   int                    rank, i, startrank;
 
    if (!nUventries)
    {
@@ -203,17 +206,26 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
    hypre_CopyToCleanIndex(index, ndim, cindex);
    hypre_SStructGridFindMapEntry(grid, part, cindex, var, &map_entry);
 
-    /* GEC0902 getting the ghrank */ 
-    hypre_SStructMapEntryGetGlobalCSRank(map_entry, cindex, &rank);
-    hypre_SStructMapEntryGetGlobalGhrank(map_entry, cindex, &ghrank);
+    /* GEC0203 getting the rank */ 
+   hypre_SStructMapEntryGetGlobalRank(map_entry, cindex, &rank, type);
+
    /* GEC 0902 filling up the iUventries with local ghrank
     * since HYPRE_SSTRUCT is chosen */
 
-    ghrank -= hypre_SStructGridGhstartRank(grid);
+   if (type == HYPRE_SSTRUCT) 
+   { 
+     startrank = hypre_SStructGridGhstartRank(grid);
+   }
+   if (type == HYPRE_PARCSR)
+   {
+     startrank = hypre_SStructGridStartRank(grid);
+   }
+    
+   rank -= startrank;
 
-    iUventries[nUventries] = ghrank;
+    iUventries[nUventries] = rank;
 
-   if (Uventries[ghrank] == NULL)
+   if (Uventries[rank] == NULL)
    {
       Uventry = hypre_TAlloc(hypre_SStructUVEntry, 1);
       hypre_SStructUVEntryPart(Uventry) = part;
@@ -224,7 +236,7 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
    }
    else
    {
-      Uventry = Uventries[ghrank];
+      Uventry = Uventries[rank];
       nUentries = hypre_SStructUVEntryNUEntries(Uventry) + 1;
       Uentries = hypre_SStructUVEntryUEntries(Uventry);
       Uentries = hypre_TReAlloc(Uentries, hypre_SStructUEntry, nUentries);
@@ -238,7 +250,7 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
                           hypre_SStructUVEntryToIndex(Uventry, i));
    hypre_SStructUVEntryToVar(Uventry, i) = to_var;
 
-   Uventries[ghrank] = Uventry; /* GEC1102 where ghrank labels Uventries */
+   Uventries[rank] = Uventry; /* GEC1102 where rank labels Uventries */
 
    hypre_SStructGraphNUVEntries(graph) ++;
    hypre_SStructGraphUVEntries(graph) = Uventries;
@@ -278,13 +290,17 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    int                   *iUventries  = hypre_SStructGraphIUVEntries(graph);
    hypre_SStructUVEntry **Uventries   = hypre_SStructGraphUVEntries(graph);
    int                    totUentries = hypre_SStructGraphTotUEntries(graph);
+
+   int                    type        = hypre_SStructGraphObjectType(graph);
+
+
    hypre_SStructUVEntry  *Uventry;
    hypre_SStructUEntry   *Uentry;
    int                    nUentries;
    int                    to_part;
    hypre_IndexRef         to_index;
    int                    to_var;
-   int                    proc, rank, ghrank;
+   int                    proc, rank;
    hypre_BoxMapEntry     *map_entry;
 
    /* type 0 communications used to determine completion (NULL messages) */
@@ -303,8 +319,6 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    int                   *t1bufprocs;
    hypre_SStructUEntry ***t1Uentries;
    int                    t1totsize;
-   /* GEC1002  introducing t1dblesize  */
-   int                    t1dblesize;
    int                    t1ncomms;
    int                    t1complete;
    struct UentryLink
@@ -370,13 +384,10 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          if (map_entry != NULL)
          {
             /* compute ranks locally */
-            /* GEC1002 the ghranks are also computed and stored
-             * in the jth uentry of the ith uventry             */
 
-            hypre_SStructMapEntryGetGlobalCSRank(map_entry, to_index, &rank);
-            hypre_SStructMapEntryGetGlobalGhrank(map_entry, to_index, &ghrank);
-            hypre_SStructUVEntryRank(Uventry, j) = rank;
-            hypre_SStructUVEntryGhrank(Uventry, j) = ghrank;
+           hypre_SStructMapEntryGetGlobalRank(map_entry, to_index, &rank, type);          
+           hypre_SStructUVEntryRank(Uventry, j) = rank;
+         
          }
          else
          {
@@ -419,8 +430,6 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    }
 
    /* set up remaining type 1 request info */
-   /* GEC1002 changes are in receive buffers for tag=2 communications and in 
-    *  send buffers of type tag =2 . We are sending and receiving two ranks */
  
    if (t1ncomms > 0)
    {
@@ -445,15 +454,9 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
       t1sendbufs    = hypre_TAlloc(int *, t1ncomms);
       t1sendbufs[0] = hypre_TAlloc(int, t1totsize*5);
-
-      /* GEC1002 here we modify the size of the receiving buffer 2*t1totsize */
-      t1dblesize  = 2*t1totsize ;
- 
       t1recvbufs    = hypre_TAlloc(int *, t1ncomms);
-      /* t1recvbufs[0] = hypre_TAlloc(int, t1totsize); */
+      t1recvbufs[0] = hypre_TAlloc(int, t1totsize);
 
-      /* a bigger size for t1recvbufs[0] */ 
-      t1recvbufs[0] = hypre_TAlloc(int, t1dblesize);
       for (j = 0; j < t1totsize; j++)
       {
          Uentry = t1Uentries[0][j];
@@ -469,9 +472,6 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
       /* GEC1002 commenting this out to replace it by something else  
        * since I think that a 5 is missing in sending buffer 
-       * and need to multiply by 2 the receiving buffer. We are pointing into
-       * the big piece every 2*n_{k} where n_{k} is the number of Uentries
-       * (or ranks) we will get from a processor k
        * 
        * for (i = 1; i < t1ncomms; i++)
        * {
@@ -483,11 +483,9 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       for (i = 1; i < t1ncomms; i++)
       {
          t1sendbufs[i] = t1sendbufs[i-1] + 5*t1bufsizes[i-1];
-         t1recvbufs[i] = t1sendbufs[i-1] + 2*t1bufsizes[i-1];
+         t1recvbufs[i] = t1sendbufs[i-1] + t1bufsizes[i-1];
          t1Uentries[i] = t1Uentries[i-1] + t1bufsizes[i-1];
       }  
-      
-
    }
 
    /*---------------------------------------------------------
@@ -503,11 +501,8 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       /* post type 1 requests (note: tag=1 on send; tag=2 on receive) */
       for (i = 0; i < t1ncomms; i++)
       {
-        /* GEC1002 we are receiving two pieces: rank and ghrank: 2*t1busizes[i]
-         * and the initial addresses for t1revbufs[i]'s are chosen to be 2*n_{i} apart
-         * (that is 2*t1bufsizes[i]) above   */
 
-         MPI_Irecv(t1recvbufs[i], 2*t1bufsizes[i], MPI_INT, t1bufprocs[i],
+         MPI_Irecv(t1recvbufs[i], t1bufsizes[i], MPI_INT, t1bufprocs[i],
                    2, comm, &t1requests[i]);
       }
       for (i = 0; i < t1ncomms; i++)
@@ -590,22 +585,11 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             hypre_SStructGridFindMapEntry(grid, to_part, to_index, to_var,
                                           &map_entry);
 
-	    /* GEC1002 we are computing the ghostrank too.And we need to send this too  */
-
-            hypre_SStructMapEntryGetGlobalCSRank(map_entry, to_index, &rank);
-            hypre_SStructMapEntryGetGlobalGhrank(map_entry, to_index, &ghrank);
-
-	    /* even is the usual rank and odd is the ghostrank */
-
-            t2commbuf[2*j] = rank;
-            t2commbuf[2*j+1] = ghrank;
-            
+            hypre_SStructMapEntryGetGlobalRank(map_entry, to_index, &rank, type);
+       
+            t2commbuf[j] = rank;     
          }
-	
-	    /* GEC1002 and we are sending twice as many integers  */
-
-         t2bufsize *= 2;
-         MPI_Send(t2commbuf, t2bufsize, MPI_INT, proc, 2, comm);
+	  MPI_Send(t2commbuf, t2bufsize, MPI_INT, proc, 2, comm);
 
          MPI_Iprobe(MPI_ANY_SOURCE, 1, comm, &t2flag, &t2status);
       }
@@ -650,12 +634,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       for (j = 0; j < t1totsize; j++)
       {
          Uentry = t1Uentries[0][j];
-
-	 /* GEC1002 now I am receiving two ranks, even and odd(ghrank).The pointer 
-          * t1recbufs[k] was chosen to point into the allocated chunk of size (2*t1totsize) */
-
-         hypre_SStructUEntryRank(Uentry) = t1recvbufs[0][2*j];
-         hypre_SStructUEntryGhrank(Uentry) = t1recvbufs[0][2*j+1] ;
+         hypre_SStructUEntryRank(Uentry) = t1recvbufs[0][j];       
       }
    }
 
@@ -683,4 +662,15 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    }
 
    return ierr;
+}
+/*****************************************************************
+ *
+ *
+ *****************************************************************/
+int HYPRE_SStructGraphSetObjectType(HYPRE_SStructGraph  graph,
+                                    int                 type)
+{
+  int ierr = 0;
+  hypre_SStructGraphObjectType(graph) = type;
+  return ierr;
 }

@@ -581,19 +581,11 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
 
    for (entry = 0; entry < nUventries; entry++)
    {
-     /* GEC0902 iUventries gives me the local rank (grid rank) whereas
-      * ighUventries gives me the localghostrank. Yet the Uventries are
-      * stored according to the grid no ghosts rank.   */
-      
-        i = iUventries[entry];
-
-       if (matrix_type == HYPRE_SSTRUCT)
-       {
-          row_sizes[i] += hypre_SStructUVEntryNUEntries(Uventries[i]);
-          max_row_size = hypre_max(max_row_size, row_sizes[i]);
-       }
-  
+         i = iUventries[entry];
+         row_sizes[i] += hypre_SStructUVEntryNUEntries(Uventries[i]);
+         max_row_size = hypre_max(max_row_size, row_sizes[i]);
    }
+
    /* ZTODO: Update row_sizes based on neighbor off-part couplings */
    ierr += HYPRE_IJMatrixSetRowSizes (ijmatrix, (const int *) row_sizes);
 
@@ -721,15 +713,8 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
          /* non-stencil entries */
          entry -= size;
          hypre_SStructGraphFindUVEntry(graph, part, index, var, &Uventry);
-         if (matrix_type == HYPRE_PARCSR)
-	 {
-	   col_coords[ncoeffs] = hypre_SStructUVEntryRank(Uventry, entry);  
-         }
-         if (matrix_type == HYPRE_SSTRUCT)
-	 {
-	   col_coords[ncoeffs] = hypre_SStructUVEntryGhrank(Uventry, entry);  
-         }
-         
+        
+	 col_coords[ncoeffs] = hypre_SStructUVEntryRank(Uventry, entry);   
          coeffs[ncoeffs] = values[i];
          ncoeffs++;
       }
