@@ -1369,11 +1369,10 @@ main( int   argc,
                   for (i = 0; i < 3; i++)
                   {
                      j = pdata.graph_index_maps[entry][i];
-                     k = pdata.graph_index_signs[entry][i];
-                     to_index[j] = pdata.graph_to_ilowers[entry][j] + k *
-                        (index[i] - pdata.graph_ilowers[entry][i]) *
-                        (1.0*pdata.graph_to_strides[entry][j] /
-                         pdata.graph_strides[entry][i]);
+                     k = index[i] - pdata.graph_ilowers[entry][i];
+                     k /= pdata.graph_strides[entry][i];
+                     k *= pdata.graph_index_signs[entry][i];
+                     to_index[j] = pdata.graph_to_ilowers[entry][j] + k;
                   }
                   HYPRE_SStructGraphAddEntries(graph, part, index,
                                                pdata.graph_vars[entry],
