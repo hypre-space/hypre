@@ -337,7 +337,7 @@ ssh ${HYPRE_COMPILE_MACHINE} "\
          rm -fR ${HYPRE_REMOTE_DIR}\
     )"
 
-echo "done"
+done
 
 #==============================================================================
 # Autotest completion check: create "autotest finished" file
