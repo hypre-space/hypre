@@ -14,6 +14,8 @@ HYPRE_BABEL_DIRS =\
  bHYPREClient-C\
  bHYPREClient-F
 
+HYPRE_BABEL_RUNTIME_SIDL_DIR = ${HYPRE_SRC_TOP_DIR}/babel-runtime/sidl
+
 all:
 	@ \
 	for i in ${HYPRE_BABEL_DIRS}; \
@@ -24,6 +26,7 @@ all:
 	    (cd $$i && $(MAKE) $@); \
 	  fi; \
 	done
+	cp -fp ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/*.h ${HYPRE_BUILD_DIR}/include
 
 install:
 	@ \
@@ -35,6 +38,7 @@ install:
 	    (cd $$i && $(MAKE) $@); \
 	  fi; \
 	done
+	cp -fp ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/*.h ${HYPRE_INC_INSTALL}
 
 clean:
 	@ \

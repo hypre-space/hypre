@@ -10,14 +10,10 @@
 include ../../config/Makefile.config
 include babel.make
 
-C_COMPILE_FLAGS=
-CXX_COMPILE_FLAGS=
-F77_COMPILE_FLAGS= 
 CINCLUDES=${INCLUDES} ${MPIINCLUDE}
 CDEFS = 
  
 BABEL_RUNTIME_INCLUDES=\
-  -I$(HYPRE_SRC_TOP_DIR)/babel-runtime/sidl\
   -I$(HYPRE_SRC_TOP_DIR)/babel-runtime/sidl
 
 C_COMPILE_FLAGS=\
@@ -144,13 +140,13 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libbHYPRE${HYPRE_LIB_SUFFIX}
-	cp -fp $(srcdir)/*.h ${HYPRE_BUILD_DIR}/include/.
-	cp -fp libbHYPRE* ${HYPRE_BUILD_DIR}/lib/.
+all: libbHYPRE.a
+	cp -fp $(srcdir)/*.h ${HYPRE_BUILD_DIR}/include
+	cp -fp libbHYPRE* ${HYPRE_BUILD_DIR}/lib
  
 install: all
-	cp -fp $(srcdir)/*.h ${HYPRE_INC_INSTALL}/.
-	cp -fp libbHYPRE* ${HYPRE_LIB_INSTALL}/.
+	cp -fp $(srcdir)/*.h ${HYPRE_INC_INSTALL}
+	cp -fp libbHYPRE* ${HYPRE_LIB_INSTALL}
  
 clean:
 	rm -f *.o libbHYPRE*
@@ -161,7 +157,7 @@ distclean: clean
 # Rules
 ##################################################################
 
-libbHYPRE${HYPRE_LIB_SUFFIX}: ${OBJS}
+libbHYPRE.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@

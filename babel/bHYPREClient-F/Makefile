@@ -14,7 +14,6 @@ CINCLUDES=${INCLUDES} ${MPIINCLUDE}
 CDEFS = 
  
 BABEL_RUNTIME_INCLUDES=\
-  -I$(HYPRE_SRC_TOP_DIR)/babel-runtime/sidl\
   -I$(HYPRE_SRC_TOP_DIR)/babel-runtime/sidl
 
 C_COMPILE_FLAGS=\
@@ -52,7 +51,7 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libbHYPREClient-F${HYPRE_LIB_SUFFIX}
+all: libbHYPREClient-F.a
 	cp -fp $(srcdir)/*.h ${HYPRE_BUILD_DIR}/include/.
 	cp -fp libbHYPRE* ${HYPRE_BUILD_DIR}/lib/.
  
@@ -69,7 +68,7 @@ distclean: clean
 # Rules
 ##################################################################
 
-libbHYPREClient-F${HYPRE_LIB_SUFFIX}: ${OBJS}
+libbHYPREClient-F.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
