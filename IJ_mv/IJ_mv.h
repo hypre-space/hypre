@@ -99,7 +99,7 @@ typedef struct
  * hypre_IJMatrix:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_IJMatrix_struct
 {
    MPI_Comm    comm;
 
@@ -167,7 +167,7 @@ hypre_GetIJMatrixISISMatrix( HYPRE_IJMatrix IJmatrix, RowMatrix *reference )
  * hypre_IJVector:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_IJVector_struct
 {
    MPI_Comm      comm;
 
@@ -236,8 +236,6 @@ int hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix , int nrows , int *nco
 int hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
 int hypre_IJMatrixAssembleParCSR( hypre_IJMatrix *matrix );
 int hypre_IJMatrixDestroyParCSR( hypre_IJMatrix *matrix );
-int hypre_IJMatrixPrintParCSR( hypre_IJMatrix *matrix , const char *filename );
-int hypre_IJMatrixReadParCSR( MPI_Comm comm , const char *filename , hypre_IJMatrix **matrix );
 
 /* IJMatrix_petsc.c */
 int hypre_IJMatrixSetLocalSizePETSc( hypre_IJMatrix *matrix , int local_m , int local_n );

@@ -488,27 +488,49 @@ HYPRE_IJMatrixSetDiagOffdSizes( HYPRE_IJMatrix matrix,
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_IJMatrixRead( const char *filename, MPI_Comm comm, int type,
-		    HYPRE_IJMatrix *matrix)
+HYPRE_IJMatrixRead( const char     *filename,
+                    MPI_Comm        comm,
+                    int             type,
+		    HYPRE_IJMatrix *matrix_ptr )
 {
    int ierr = 0;
-   hypre_IJMatrix *ijmatrix;
+   HYPRE_IJMatrix  matrix;
+   int             ilower, iupper, jlower, jupper;
+   int             nrows, ncols, I, J;
+   double          value;
+   int             myid;
+   char            new_filename[255];
+   FILE           *file;
 
-   /* if ( type == HYPRE_PETSC )
-      ierr = hypre_IJMatrixReadPETSc( comm, filename, &ijmatrix );
-   else if ( type == HYPRE_ISIS )
-      ierr = hypre_IJMatrixReadISIS( comm, filename, &ijmatrix );
-   else */ if ( type == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixReadParCSR( comm, filename, &ijmatrix );
-   else 
+   MPI_Comm_rank(comm, &myid);
+   
+   sprintf(new_filename,"%s.%05d", filename, myid);
+
+   if ((file = fopen(new_filename, "r")) == NULL)
    {
-      printf("Unrecognized object type -- HYPRE_IJMatrixRead\n");
+      printf("Error: can't open input file %s\n", new_filename);
       exit(1);
    }
 
-   *matrix = (HYPRE_IJMatrix ) ijmatrix;
-   hypre_IJMatrixAssembleFlag(ijmatrix) = 1;
- 
+   fscanf(file, "%d %d %d %d", &ilower, &iupper, &jlower, &jupper);
+   ierr = HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &matrix);
+
+   ierr += HYPRE_IJMatrixSetObjectType(matrix, type);
+   ierr += HYPRE_IJMatrixInitialize(matrix);
+
+   nrows = 1;
+   ncols = 1;
+   while ( fscanf(file, "%d %d %le", &I, &J, &value) != EOF )
+   {
+      ierr += HYPRE_IJMatrixSetValues(matrix, nrows, &ncols, &I, &J, &value);
+   }
+
+   ierr += HYPRE_IJMatrixAssemble(matrix);
+
+   fclose(file);
+
+   *matrix_ptr = matrix;
+
    return ierr;
 }
 
@@ -517,30 +539,85 @@ HYPRE_IJMatrixRead( const char *filename, MPI_Comm comm, int type,
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_IJMatrixPrint( HYPRE_IJMatrix matrix, const char *filename)
+HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
+                     const char     *filename )
 {
    int ierr = 0;
-   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+   MPI_Comm  comm = hypre_IJMatrixComm(matrix);
+   int      *row_partitioning;
+   int      *col_partitioning;
+   int       ilower, iupper, jlower, jupper;
+   int       i, j, ii;
+   int       ncols, *cols;
+   double   *values;
+   int       myid;
+   char      new_filename[255];
+   FILE     *file;
+   void     *object;
 
-   if (!ijmatrix)
-   {
-      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixPrint\n");
-      exit(1);
-   }
-
-   /* if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
-      ierr = hypre_IJMatrixPrintPETSc( ijmatrix , filename );
-   else if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_ISIS )
-      ierr = hypre_IJMatrixPrintISIS( ijmatrix , filename );
-   else */
-
-   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixPrintParCSR( ijmatrix , filename );
-   else
+   if ( (hypre_IJMatrixObjectType(matrix) != HYPRE_PARCSR) )
    {
       printf("Unrecognized object type -- HYPRE_IJMatrixPrint\n");
       exit(1);
    }
+
+   MPI_Comm_rank(comm, &myid);
+   
+   sprintf(new_filename,"%s.%05d", filename, myid);
+
+   if ((file = fopen(new_filename, "w")) == NULL)
+   {
+      printf("Error: can't open output file %s\n", new_filename);
+      exit(1);
+   }
+
+   if (!matrix)
+   {
+      printf("Variable matrix is NULL -- HYPRE_IJMatrixPrint\n");
+      exit(1);
+   }
+
+   row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
+   col_partitioning = hypre_IJMatrixColPartitioning(matrix);
+   ilower = row_partitioning[myid];
+   iupper = row_partitioning[myid+1] - 1;
+   jlower = col_partitioning[myid];
+   jupper = col_partitioning[myid+1] - 1;
+
+   fprintf(file, "%d %d %d %d\n", ilower, iupper, jlower, jupper);
+
+   ierr += HYPRE_IJMatrixGetObject(matrix, &object);
+
+   for (i = ilower; i <= iupper; i++)
+   {
+      if ( hypre_IJMatrixObjectType(matrix) == HYPRE_PARCSR )
+      {
+         ii = i - row_partitioning[0];
+         ierr += HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) object,
+                                          ii, &ncols, &cols, &values);
+         for (j = 0; j < ncols; j++)
+         {
+            cols[j] += col_partitioning[0];
+         }
+      }
+
+      for (j = 0; j < ncols; j++)
+      {
+         fprintf(file, "%d %d %le\n", i, cols[j], values[j]);
+      }
+
+      if ( hypre_IJMatrixObjectType(matrix) == HYPRE_PARCSR )
+      {
+         for (j = 0; j < ncols; j++)
+         {
+            cols[j] -= col_partitioning[0];
+         }
+         ierr += HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) object,
+                                              ii, &ncols, &cols, &values);
+      }
+   }
+
+   fclose(file);
 
    return ierr;
 }

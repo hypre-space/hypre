@@ -19,7 +19,7 @@
  * hypre_IJMatrix:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_IJMatrix_struct
 {
    MPI_Comm    comm;
 
