@@ -62,8 +62,8 @@ hypre_GMRESCreate( )
    (gmres_data -> tol)          = 1.0e-06;
    (gmres_data -> max_iter)     = 1000;
    (gmres_data -> matvec_data)  = NULL;
-   (gmres_data -> precond)      = hypre_PCGIdentity;
-   (gmres_data -> precond_setup)= hypre_PCGIdentitySetup;
+   (gmres_data -> precond)      = hypre_KrylovIdentity;
+   (gmres_data -> precond_setup)= hypre_KrylovIdentitySetup;
    (gmres_data -> precond_data) = NULL;
    (gmres_data -> logging)      = 0;
    (gmres_data -> norms)        = NULL;
@@ -88,13 +88,13 @@ hypre_GMRESDestroy( void *gmres_vdata )
          hypre_TFree(gmres_data -> norms);
       }
  
-      hypre_PCGMatvecDestroy(gmres_data -> matvec_data);
+      hypre_KrylovMatvecDestroy(gmres_data -> matvec_data);
  
-      hypre_PCGDestroyVector(gmres_data -> r);
-      hypre_PCGDestroyVector(gmres_data -> w);
+      hypre_KrylovDestroyVector(gmres_data -> r);
+      hypre_KrylovDestroyVector(gmres_data -> w);
       for (i = 0; i < (gmres_data -> k_dim+1); i++)
       {
-	 hypre_PCGDestroyVector( (gmres_data -> p) [i]);
+	 hypre_KrylovDestroyVector( (gmres_data -> p) [i]);
       }
       hypre_TFree(gmres_data -> p);
  
@@ -129,11 +129,11 @@ hypre_GMRESSetup( void *gmres_vdata,
     * compute phases of matvec and the preconditioner.
     *--------------------------------------------------*/
  
-   (gmres_data -> p) = hypre_PCGCreateVectorArray(k_dim+1,x);
-   (gmres_data -> r) = hypre_PCGCreateVector(b);
-   (gmres_data -> w) = hypre_PCGCreateVector(b);
+   (gmres_data -> p) = hypre_KrylovCreateVectorArray(k_dim+1,x);
+   (gmres_data -> r) = hypre_KrylovCreateVector(b);
+   (gmres_data -> w) = hypre_KrylovCreateVector(b);
  
-   (gmres_data -> matvec_data) = hypre_PCGMatvecCreate(A, x);
+   (gmres_data -> matvec_data) = hypre_KrylovMatvecCreate(A, x);
  
    precond_setup(precond_data, A, b, x);
  
@@ -204,13 +204,13 @@ hypre_GMRESSolve(void  *gmres_vdata,
    	hh[i] = hypre_CTAlloc(double,k_dim); 
    }
 
-   hypre_PCGCopyVector(b,p[0]);
+   hypre_KrylovCopyVector(b,p[0]);
 
 /* compute initial residual */
 
-   hypre_PCGMatvec(matvec_data,-1.0, A, x, 1.0, p[0]);
-   r_norm = sqrt(hypre_PCGInnerProd(p[0],p[0]));
-   b_norm = sqrt(hypre_PCGInnerProd(b,b));
+   hypre_KrylovMatvec(matvec_data,-1.0, A, x, 1.0, p[0]);
+   r_norm = sqrt(hypre_KrylovInnerProd(p[0],p[0]));
+   b_norm = sqrt(hypre_KrylovInnerProd(b,b));
    if (logging > 0)
    {
       norms[0] = r_norm;
@@ -235,33 +235,33 @@ hypre_GMRESSolve(void  *gmres_vdata,
    the thing converge to it, please!   - MAL
    the thing converge to it, please!   - MAL 
 
-           hypre_PCGCopyVector(b,x);
+           hypre_KrylovCopyVector(b,x);
 	   ierr = 0;
 	   return ierr; */
 
 	}
       	t = 1.0 / r_norm;
-	hypre_PCGScaleVector(t,p[0]);
+	hypre_KrylovScaleVector(t,p[0]);
 	i = 0;
 	while (i < k_dim && r_norm > epsilon && iter < max_iter)
 	{
 		i++;
 		iter++;
-		hypre_PCGClearVector(r);
+		hypre_KrylovClearVector(r);
 		precond(precond_data, A, p[i-1], r);
-		hypre_PCGMatvec(matvec_data, 1.0, A, r, 0.0, p[i]);
+		hypre_KrylovMatvec(matvec_data, 1.0, A, r, 0.0, p[i]);
 		/* modified Gram_Schmidt */
 		for (j=0; j < i; j++)
 		{
-			hh[j][i-1] = hypre_PCGInnerProd(p[j],p[i]);
-			hypre_PCGAxpy(-hh[j][i-1],p[j],p[i]);
+			hh[j][i-1] = hypre_KrylovInnerProd(p[j],p[i]);
+			hypre_KrylovAxpy(-hh[j][i-1],p[j],p[i]);
 		}
-		t = sqrt(hypre_PCGInnerProd(p[i],p[i]));
+		t = sqrt(hypre_KrylovInnerProd(p[i],p[i]));
 		hh[i][i-1] = t;	
 		if (t != 0.0)
 		{
 			t = 1.0/t;
-			hypre_PCGScaleVector(t,p[i]);
+			hypre_KrylovScaleVector(t,p[i]);
 		}
 		/* done with modified Gram_schmidt and Arnoldi step.
 		   update factorization of hh */
@@ -299,22 +299,22 @@ hypre_GMRESSolve(void  *gmres_vdata,
 	}
 	/* form linear combination of p's to get solution */
 	
-	hypre_PCGCopyVector(p[0],w);
-	hypre_PCGScaleVector(rs[0],w);
+	hypre_KrylovCopyVector(p[0],w);
+	hypre_KrylovScaleVector(rs[0],w);
 	for (j = 1; j < i; j++)
-		hypre_PCGAxpy(rs[j], p[j], w);
+		hypre_KrylovAxpy(rs[j], p[j], w);
 
-	hypre_PCGClearVector(r);
+	hypre_KrylovClearVector(r);
 	precond(precond_data, A, w, r);
 
-	hypre_PCGAxpy(1.0,r,x);
+	hypre_KrylovAxpy(1.0,r,x);
 
 /* check for convergence, evaluate actual residual */
 	if (r_norm <= epsilon) 
         {
-		hypre_PCGCopyVector(b,r);
-          	hypre_PCGMatvec(matvec_data,-1.0,A,x,1.0,r);
-		r_norm = sqrt(hypre_PCGInnerProd(r,r));
+		hypre_KrylovCopyVector(b,r);
+          	hypre_KrylovMatvec(matvec_data,-1.0,A,x,1.0,r);
+		r_norm = sqrt(hypre_KrylovInnerProd(r,r));
 		if (r_norm <= epsilon) break;
 	}
 /* compute residual vector and continue loop */
@@ -325,9 +325,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
 		rs[j] = c[j-1]*rs[j];
 	}
 
-	hypre_PCGAxpy(rs[0]-1.0,p[0],p[0]);
+	hypre_KrylovAxpy(rs[0]-1.0,p[0],p[0]);
 	for (j=1; j < i+1; j++)
-		hypre_PCGAxpy(rs[j],p[j],p[0]);	
+		hypre_KrylovAxpy(rs[j],p[j],p[0]);	
    }
 
    if (logging > 0)

@@ -22,19 +22,19 @@
  *   These functions must be defined somewhere else.
  *--------------------------------------------------------------------------*/
 
-char  *hypre_PCGCAlloc( int count, int elt_size );
-int    hypre_PCGFree( char *ptr ); 
-void  *hypre_PCGCreateVector( void *vector );
-int    hypre_PCGDestroyVector( void *vector );
-void  *hypre_PCGMatvecCreate( void *A, void *x );
-int    hypre_PCGMatvec( void *matvec_data,
+char  *hypre_KrylovCAlloc( int count, int elt_size );
+int    hypre_KrylovFree( char *ptr ); 
+void  *hypre_KrylovCreateVector( void *vector );
+int    hypre_KrylovDestroyVector( void *vector );
+void  *hypre_KrylovMatvecCreate( void *A, void *x );
+int    hypre_KrylovMatvec( void *matvec_data,
                         double alpha, void *A, void *x, double beta, void *y );
-int    hypre_PCGMatvecDestroy( void *matvec_data );
-double hypre_PCGInnerProd( void *x, void *y );
-int    hypre_PCGCopyVector( void *x, void *y );
-int    hypre_PCGClearVector( void *x );
-int    hypre_PCGScaleVector( double alpha, void *x );
-int    hypre_PCGAxpy( double alpha, void *x, void *y );
+int    hypre_KrylovMatvecDestroy( void *matvec_data );
+double hypre_KrylovInnerProd( void *x, void *y );
+int    hypre_KrylovCopyVector( void *x, void *y );
+int    hypre_KrylovClearVector( void *x );
+int    hypre_KrylovScaleVector( double alpha, void *x );
+int    hypre_KrylovAxpy( double alpha, void *x, void *y );
 
 /*--------------------------------------------------------------------------
  * hypre_PCGData
@@ -71,17 +71,17 @@ typedef struct
 } hypre_PCGData;
 
 #define hypre_CTAlloc(type, count) \
-( (type *)hypre_PCGCAlloc((unsigned int)(count), (unsigned int)sizeof(type)) )
+( (type *)hypre_KrylovCAlloc((unsigned int)(count), (unsigned int)sizeof(type)) )
 
 #define hypre_TFree(ptr) \
-( hypre_PCGFree((char *)ptr), ptr = NULL )
+( hypre_KrylovFree((char *)ptr), ptr = NULL )
 
 /*--------------------------------------------------------------------------
- * hypre_PCGIdentitySetup
+ * hypre_KrylovIdentitySetup
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGIdentitySetup( void *vdata,
+hypre_KrylovIdentitySetup( void *vdata,
                         void *A,
                         void *b,
                         void *x     )
@@ -91,25 +91,25 @@ hypre_PCGIdentitySetup( void *vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGIdentity
+ * hypre_KrylovIdentity
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGIdentity( void *vdata,
+hypre_KrylovIdentity( void *vdata,
                    void *A,
                    void *b,
                    void *x     )
 
 {
-   return( hypre_PCGCopyVector( b, x ) );
+   return( hypre_KrylovCopyVector( b, x ) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGCreate
+ * hypre_KrylovCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_PCGCreate( )
+hypre_KrylovCreate( )
 {
    hypre_PCGData *pcg_data;
 
@@ -121,8 +121,8 @@ hypre_PCGCreate( )
    (pcg_data -> two_norm)     = 0;
    (pcg_data -> rel_change)   = 0;
    (pcg_data -> matvec_data)  = NULL;
-   (pcg_data -> precond)       = hypre_PCGIdentity;
-   (pcg_data -> precond_setup) = hypre_PCGIdentitySetup;
+   (pcg_data -> precond)       = hypre_KrylovIdentity;
+   (pcg_data -> precond_setup) = hypre_KrylovIdentitySetup;
    (pcg_data -> precond_data)  = NULL;
    (pcg_data -> logging)      = 0;
    (pcg_data -> norms)        = NULL;
@@ -132,11 +132,11 @@ hypre_PCGCreate( )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGDestroy
+ * hypre_KrylovDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGDestroy( void *pcg_vdata )
+hypre_KrylovDestroy( void *pcg_vdata )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
    int ierr = 0;
@@ -149,11 +149,11 @@ hypre_PCGDestroy( void *pcg_vdata )
          hypre_TFree(pcg_data -> rel_norms);
       }
 
-      hypre_PCGMatvecDestroy(pcg_data -> matvec_data);
+      hypre_KrylovMatvecDestroy(pcg_data -> matvec_data);
 
-      hypre_PCGDestroyVector(pcg_data -> p);
-      hypre_PCGDestroyVector(pcg_data -> s);
-      hypre_PCGDestroyVector(pcg_data -> r);
+      hypre_KrylovDestroyVector(pcg_data -> p);
+      hypre_KrylovDestroyVector(pcg_data -> s);
+      hypre_KrylovDestroyVector(pcg_data -> r);
 
       hypre_TFree(pcg_data);
    }
@@ -162,11 +162,11 @@ hypre_PCGDestroy( void *pcg_vdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGSetup
+ * hypre_KrylovSetup
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGSetup( void *pcg_vdata,
+hypre_KrylovSetup( void *pcg_vdata,
                 void *A,
                 void *b,
                 void *x         )
@@ -185,11 +185,11 @@ hypre_PCGSetup( void *pcg_vdata,
     * compute phases of matvec and the preconditioner.
     *--------------------------------------------------*/
 
-   (pcg_data -> p) = hypre_PCGCreateVector(x);
-   (pcg_data -> s) = hypre_PCGCreateVector(x);
-   (pcg_data -> r) = hypre_PCGCreateVector(b);
+   (pcg_data -> p) = hypre_KrylovCreateVector(x);
+   (pcg_data -> s) = hypre_KrylovCreateVector(x);
+   (pcg_data -> r) = hypre_KrylovCreateVector(b);
 
-   (pcg_data -> matvec_data) = hypre_PCGMatvecCreate(A, x);
+   (pcg_data -> matvec_data) = hypre_KrylovMatvecCreate(A, x);
 
    precond_setup(precond_data, A, b, x);
 
@@ -208,7 +208,7 @@ hypre_PCGSetup( void *pcg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGSolve
+ * hypre_KrylovSolve
  *--------------------------------------------------------------------------
  *
  * We use the following convergence test as the default (see Ashby, Holst,
@@ -226,7 +226,7 @@ hypre_PCGSetup( void *pcg_vdata,
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGSolve( void *pcg_vdata,
+hypre_KrylovSolve( void *pcg_vdata,
                 void *A,
                 void *b,
                 void *x         )
@@ -272,14 +272,14 @@ hypre_PCGSolve( void *pcg_vdata,
    if (two_norm)
    {
       /* bi_prod = <b,b> */
-      bi_prod = hypre_PCGInnerProd(b, b);
+      bi_prod = hypre_KrylovInnerProd(b, b);
    }
    else
    {
       /* bi_prod = <C*b,b> */
-      hypre_PCGClearVector(p);
+      hypre_KrylovClearVector(p);
       precond(precond_data, A, b, p);
-      bi_prod = hypre_PCGInnerProd(p, b);
+      bi_prod = hypre_KrylovInnerProd(p, b);
    }
    eps = (tol*tol)*bi_prod;
 
@@ -287,7 +287,7 @@ hypre_PCGSolve( void *pcg_vdata,
    if (bi_prod == 0.0)
    {
       /* Set x equal to zero and return */
-      hypre_PCGCopyVector(b, x);
+      hypre_KrylovCopyVector(b, x);
       if (logging > 0)
       {
          norms[0]     = 0.0;
@@ -298,50 +298,50 @@ hypre_PCGSolve( void *pcg_vdata,
    }
 
    /* r = b - Ax */
-   hypre_PCGCopyVector(b, r);
-   hypre_PCGMatvec(matvec_data, -1.0, A, x, 1.0, r);
+   hypre_KrylovCopyVector(b, r);
+   hypre_KrylovMatvec(matvec_data, -1.0, A, x, 1.0, r);
  
    /* Set initial residual norm */
    if (logging > 0)
    {
-      norms[0] = sqrt(hypre_PCGInnerProd(r,r));
+      norms[0] = sqrt(hypre_KrylovInnerProd(r,r));
    }
 
    /* p = C*r */
-   hypre_PCGClearVector(p);
+   hypre_KrylovClearVector(p);
    precond(precond_data, A, r, p);
 
    /* gamma = <r,p> */
-   gamma = hypre_PCGInnerProd(r,p);
+   gamma = hypre_KrylovInnerProd(r,p);
 
    while ((i+1) <= max_iter)
    {
       i++;
 
       /* s = A*p */
-      hypre_PCGMatvec(matvec_data, 1.0, A, p, 0.0, s);
+      hypre_KrylovMatvec(matvec_data, 1.0, A, p, 0.0, s);
 
       /* alpha = gamma / <s,p> */
-      alpha = gamma / hypre_PCGInnerProd(s, p);
+      alpha = gamma / hypre_KrylovInnerProd(s, p);
 
       gamma_old = gamma;
 
       /* x = x + alpha*p */
-      hypre_PCGAxpy(alpha, p, x);
+      hypre_KrylovAxpy(alpha, p, x);
 
       /* r = r - alpha*s */
-      hypre_PCGAxpy(-alpha, s, r);
+      hypre_KrylovAxpy(-alpha, s, r);
 	 
       /* s = C*r */
-      hypre_PCGClearVector(s);
+      hypre_KrylovClearVector(s);
       precond(precond_data, A, r, s);
 
       /* gamma = <r,s> */
-      gamma = hypre_PCGInnerProd(r, s);
+      gamma = hypre_KrylovInnerProd(r, s);
 
       /* set i_prod for convergence test */
       if (two_norm)
-	 i_prod = hypre_PCGInnerProd(r,r);
+	 i_prod = hypre_KrylovInnerProd(r,r);
       else
 	 i_prod = gamma;
 
@@ -366,8 +366,8 @@ hypre_PCGSolve( void *pcg_vdata,
       {
          if (rel_change)
          {
-            pi_prod = hypre_PCGInnerProd(p,p);
-            xi_prod = hypre_PCGInnerProd(x,x);
+            pi_prod = hypre_KrylovInnerProd(p,p);
+            xi_prod = hypre_KrylovInnerProd(x,x);
             if ((alpha*alpha*pi_prod/xi_prod) < (eps/bi_prod))
                break;
          }
@@ -381,8 +381,8 @@ hypre_PCGSolve( void *pcg_vdata,
       beta = gamma / gamma_old;
 
       /* p = s + beta p */
-      hypre_PCGScaleVector(beta, p);   
-      hypre_PCGAxpy(1.0, s, p);
+      hypre_KrylovScaleVector(beta, p);   
+      hypre_KrylovAxpy(1.0, s, p);
    }
 
 #if 0
@@ -428,11 +428,11 @@ hypre_PCGSolve( void *pcg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGSetTol
+ * hypre_KrylovSetTol
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGSetTol( void   *pcg_vdata,
+hypre_KrylovSetTol( void   *pcg_vdata,
                  double  tol       )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
@@ -444,11 +444,11 @@ hypre_PCGSetTol( void   *pcg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGSetMaxIter
+ * hypre_KrylovSetMaxIter
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGSetMaxIter( void *pcg_vdata,
+hypre_KrylovSetMaxIter( void *pcg_vdata,
                      int   max_iter  )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
@@ -460,11 +460,11 @@ hypre_PCGSetMaxIter( void *pcg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGSetTwoNorm
+ * hypre_KrylovSetTwoNorm
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGSetTwoNorm( void *pcg_vdata,
+hypre_KrylovSetTwoNorm( void *pcg_vdata,
                      int   two_norm  )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
@@ -476,11 +476,11 @@ hypre_PCGSetTwoNorm( void *pcg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGSetRelChange
+ * hypre_KrylovSetRelChange
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGSetRelChange( void *pcg_vdata,
+hypre_KrylovSetRelChange( void *pcg_vdata,
                        int   rel_change  )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
@@ -492,11 +492,11 @@ hypre_PCGSetRelChange( void *pcg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGSetPrecond
+ * hypre_KrylovSetPrecond
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGSetPrecond( void  *pcg_vdata,
+hypre_KrylovSetPrecond( void  *pcg_vdata,
                      int  (*precond)(),
                      int  (*precond_setup)(),
                      void  *precond_data )
@@ -512,11 +512,11 @@ hypre_PCGSetPrecond( void  *pcg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGSetLogging
+ * hypre_KrylovSetLogging
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGSetLogging( void *pcg_vdata,
+hypre_KrylovSetLogging( void *pcg_vdata,
                      int   logging)
 {
    hypre_PCGData *pcg_data = pcg_vdata;
@@ -528,11 +528,11 @@ hypre_PCGSetLogging( void *pcg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGGetNumIterations
+ * hypre_KrylovGetNumIterations
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGGetNumIterations( void *pcg_vdata,
+hypre_KrylovGetNumIterations( void *pcg_vdata,
                            int  *num_iterations )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
@@ -544,11 +544,11 @@ hypre_PCGGetNumIterations( void *pcg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGPrintLogging
+ * hypre_KrylovPrintLogging
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGPrintLogging( void *pcg_vdata,
+hypre_KrylovPrintLogging( void *pcg_vdata,
                        int   myid)
 {
    hypre_PCGData *pcg_data = pcg_vdata;
@@ -577,11 +577,11 @@ hypre_PCGPrintLogging( void *pcg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGGetFinalRelativeResidualNorm
+ * hypre_KrylovGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGGetFinalRelativeResidualNorm( void   *pcg_vdata,
+hypre_KrylovGetFinalRelativeResidualNorm( void   *pcg_vdata,
                                        double *relative_residual_norm )
 {
    hypre_PCGData *pcg_data = pcg_vdata;

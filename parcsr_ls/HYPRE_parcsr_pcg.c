@@ -21,7 +21,7 @@
 int
 HYPRE_ParCSRPCGCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   *solver = ( (HYPRE_Solver) hypre_PCGCreate( ) );
+   *solver = ( (HYPRE_Solver) hypre_KrylovCreate( ) );
 
    return 0;
 }
@@ -33,7 +33,7 @@ HYPRE_ParCSRPCGCreate( MPI_Comm comm, HYPRE_Solver *solver )
 int 
 HYPRE_ParCSRPCGDestroy( HYPRE_Solver solver )
 {
-   return( hypre_PCGDestroy( (void *) solver ) );
+   return( hypre_KrylovDestroy( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -46,7 +46,7 @@ HYPRE_ParCSRPCGSetup( HYPRE_Solver solver,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x      )
 {
-   return( hypre_PCGSetup( (void *) solver,
+   return( hypre_KrylovSetup( (void *) solver,
                            (void *) A,
                            (void *) b,
                            (void *) x ) );
@@ -62,7 +62,7 @@ HYPRE_ParCSRPCGSolve( HYPRE_Solver solver,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x      )
 {
-   return( hypre_PCGSolve( (void *) solver,
+   return( hypre_KrylovSolve( (void *) solver,
                            (void *) A,
                            (void *) b,
                            (void *) x ) );
@@ -76,7 +76,7 @@ int
 HYPRE_ParCSRPCGSetTol( HYPRE_Solver solver,
                        double             tol    )
 {
-   return( hypre_PCGSetTol( (void *) solver, tol ) );
+   return( hypre_KrylovSetTol( (void *) solver, tol ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -87,7 +87,7 @@ int
 HYPRE_ParCSRPCGSetMaxIter( HYPRE_Solver solver,
                            int                max_iter )
 {
-   return( hypre_PCGSetMaxIter( (void *) solver, max_iter ) );
+   return( hypre_KrylovSetMaxIter( (void *) solver, max_iter ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -98,7 +98,7 @@ int
 HYPRE_ParCSRPCGSetTwoNorm( HYPRE_Solver solver,
                            int                two_norm )
 {
-   return( hypre_PCGSetTwoNorm( (void *) solver, two_norm ) );
+   return( hypre_KrylovSetTwoNorm( (void *) solver, two_norm ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -109,7 +109,7 @@ int
 HYPRE_ParCSRPCGSetRelChange( HYPRE_Solver solver,
                              int                rel_change )
 {
-   return( hypre_PCGSetRelChange( (void *) solver, rel_change ) );
+   return( hypre_KrylovSetRelChange( (void *) solver, rel_change ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -128,7 +128,7 @@ HYPRE_ParCSRPCGSetPrecond( HYPRE_Solver  solver,
 						HYPRE_ParVector x),
                            void                *precond_data )
 {
-   return( hypre_PCGSetPrecond( (void *) solver,
+   return( hypre_KrylovSetPrecond( (void *) solver,
                                 precond, precond_setup, precond_data ) );
 }
 
@@ -140,7 +140,7 @@ int
 HYPRE_ParCSRPCGSetLogging( HYPRE_Solver solver,
                            int                logging )
 {
-   return( hypre_PCGSetLogging( (void *) solver, logging ) );
+   return( hypre_KrylovSetLogging( (void *) solver, logging ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -151,7 +151,7 @@ int
 HYPRE_ParCSRPCGGetNumIterations( HYPRE_Solver  solver,
                                  int                *num_iterations )
 {
-   return( hypre_PCGGetNumIterations( (void *) solver, num_iterations ) );
+   return( hypre_KrylovGetNumIterations( (void *) solver, num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -162,7 +162,7 @@ int
 HYPRE_ParCSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                              double             *norm   )
 {
-   return( hypre_PCGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
+   return( hypre_KrylovGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -63,9 +63,9 @@ hypre_CGNRCreate( )
    (cgnr_data -> tol)          = 1.0e-06;
    (cgnr_data -> max_iter)     = 1000;
    (cgnr_data -> matvec_data)  = NULL;
-   (cgnr_data -> precond)       = hypre_PCGIdentity;
-   (cgnr_data -> precondT)      = hypre_PCGIdentity;
-   (cgnr_data -> precond_setup) = hypre_PCGIdentitySetup;
+   (cgnr_data -> precond)       = hypre_KrylovIdentity;
+   (cgnr_data -> precondT)      = hypre_KrylovIdentity;
+   (cgnr_data -> precond_setup) = hypre_KrylovIdentitySetup;
    (cgnr_data -> precond_data)  = NULL;
    (cgnr_data -> logging)      = 0;
    (cgnr_data -> norms)        = NULL;
@@ -90,12 +90,12 @@ hypre_CGNRDestroy( void *cgnr_vdata )
          hypre_TFree(cgnr_data -> norms);
       }
 
-      hypre_PCGMatvecDestroy(cgnr_data -> matvec_data);
+      hypre_KrylovMatvecDestroy(cgnr_data -> matvec_data);
 
-      hypre_PCGDestroyVector(cgnr_data -> p);
-      hypre_PCGDestroyVector(cgnr_data -> q);
-      hypre_PCGDestroyVector(cgnr_data -> r);
-      hypre_PCGDestroyVector(cgnr_data -> t);
+      hypre_KrylovDestroyVector(cgnr_data -> p);
+      hypre_KrylovDestroyVector(cgnr_data -> q);
+      hypre_KrylovDestroyVector(cgnr_data -> r);
+      hypre_KrylovDestroyVector(cgnr_data -> t);
 
       hypre_TFree(cgnr_data);
    }
@@ -127,12 +127,12 @@ hypre_CGNRSetup(void *cgnr_vdata,
     * compute phases of matvec and the preconditioner.
     *--------------------------------------------------*/
 
-   (cgnr_data -> p) = hypre_PCGCreateVector(x);
-   (cgnr_data -> q) = hypre_PCGCreateVector(x);
-   (cgnr_data -> r) = hypre_PCGCreateVector(b);
-   (cgnr_data -> t) = hypre_PCGCreateVector(b);
+   (cgnr_data -> p) = hypre_KrylovCreateVector(x);
+   (cgnr_data -> q) = hypre_KrylovCreateVector(x);
+   (cgnr_data -> r) = hypre_KrylovCreateVector(b);
+   (cgnr_data -> t) = hypre_KrylovCreateVector(b);
 
-   (cgnr_data -> matvec_data) = hypre_PCGMatvecCreate(A, x);
+   (cgnr_data -> matvec_data) = hypre_KrylovMatvecCreate(A, x);
 
    precond_setup(precond_data, A, b, x);
 
@@ -195,14 +195,14 @@ hypre_CGNRSolve(void *cgnr_vdata,
    }
 
    /* compute eps */
-   bi_prod = hypre_PCGInnerProd(b, b);
+   bi_prod = hypre_KrylovInnerProd(b, b);
    eps = (tol*tol)*bi_prod;
 
    /* Check to see if the rhs vector b is zero */
    if (bi_prod == 0.0)
    {
       /* Set x equal to zero and return */
-      hypre_PCGCopyVector(b, x);
+      hypre_KrylovCopyVector(b, x);
       if (logging > 0)
       {
          norms[0]     = 0.0;
@@ -212,56 +212,56 @@ hypre_CGNRSolve(void *cgnr_vdata,
    }
 
    /* r = b - Ax */
-   hypre_PCGCopyVector(b, r);
-   hypre_PCGMatvec(matvec_data, -1.0, A, x, 1.0, r);
+   hypre_KrylovCopyVector(b, r);
+   hypre_KrylovMatvec(matvec_data, -1.0, A, x, 1.0, r);
  
    /* Set initial residual norm */
    if (logging > 0)
    {
-      norms[0] = sqrt(hypre_PCGInnerProd(r,r));
+      norms[0] = sqrt(hypre_KrylovInnerProd(r,r));
    }
 
    /* t = C^T*A^T*r */
-   hypre_PCGMatvecT(matvec_data, 1.0, A, r, 0.0, q);
-   hypre_PCGClearVector(t);
+   hypre_KrylovMatvecT(matvec_data, 1.0, A, r, 0.0, q);
+   hypre_KrylovClearVector(t);
    precondT(precond_data, A, q, t);
 
    /* p = r */
-   hypre_PCGCopyVector(r, p);
+   hypre_KrylovCopyVector(r, p);
 
    /* gamma = <t,t> */
-   gamma = hypre_PCGInnerProd(t,t);
+   gamma = hypre_KrylovInnerProd(t,t);
 
    while ((i+1) <= max_iter)
    {
       i++;
 
       /* q = A*C*p */
-      hypre_PCGClearVector(t);
+      hypre_KrylovClearVector(t);
       precond(precond_data, A, p, t);
-      hypre_PCGMatvec(matvec_data, 1.0, A, t, 0.0, q);
+      hypre_KrylovMatvec(matvec_data, 1.0, A, t, 0.0, q);
 
       /* alpha = gamma / <q,q> */
-      alpha = gamma / hypre_PCGInnerProd(q, q);
+      alpha = gamma / hypre_KrylovInnerProd(q, q);
 
       gamma_old = gamma;
 
       /* x = x + alpha*p */
-      hypre_PCGAxpy(alpha, p, x);
+      hypre_KrylovAxpy(alpha, p, x);
 
       /* r = r - alpha*q */
-      hypre_PCGAxpy(-alpha, q, r);
+      hypre_KrylovAxpy(-alpha, q, r);
 	 
       /* t = C^T*A^T*r */
-      hypre_PCGMatvecT(matvec_data, 1.0, A, r, 0.0, q);
-      hypre_PCGClearVector(t);
+      hypre_KrylovMatvecT(matvec_data, 1.0, A, r, 0.0, q);
+      hypre_KrylovClearVector(t);
       precondT(precond_data, A, q, t);
 
       /* gamma = <t,t> */
-      gamma = hypre_PCGInnerProd(t, t);
+      gamma = hypre_KrylovInnerProd(t, t);
 
       /* set i_prod for convergence test */
-      i_prod = hypre_PCGInnerProd(r,r);
+      i_prod = hypre_KrylovInnerProd(r,r);
 
       /* log norm info */
       if (logging > 0)
@@ -275,15 +275,15 @@ hypre_CGNRSolve(void *cgnr_vdata,
          /*-----------------------------------------------------------------
           * Generate solution q = Cx
           *-----------------------------------------------------------------*/
-         hypre_PCGClearVector(q);
+         hypre_KrylovClearVector(q);
          precond(precond_data, A, x, q);
          /* r = b - Aq */
-         hypre_PCGCopyVector(b, r);
-         hypre_PCGMatvec(matvec_data, -1.0, A, q, 1.0, r);
-         i_prod = hypre_PCGInnerProd(r,r);
+         hypre_KrylovCopyVector(b, r);
+         hypre_KrylovMatvec(matvec_data, -1.0, A, q, 1.0, r);
+         i_prod = hypre_KrylovInnerProd(r,r);
          if (i_prod < eps) 
          {
-            hypre_PCGCopyVector(q,x);
+            hypre_KrylovCopyVector(q,x);
 	    x_not_set = 0;
 	    break;
          }
@@ -293,8 +293,8 @@ hypre_CGNRSolve(void *cgnr_vdata,
       beta = gamma / gamma_old;
 
       /* p = t + beta p */
-      hypre_PCGScaleVector(beta, p);   
-      hypre_PCGAxpy(1.0, t, p);
+      hypre_KrylovScaleVector(beta, p);   
+      hypre_KrylovAxpy(1.0, t, p);
    }
 
   /*-----------------------------------------------------------------
@@ -302,8 +302,8 @@ hypre_CGNRSolve(void *cgnr_vdata,
    *-----------------------------------------------------------------*/
    if (x_not_set)
    {
-      hypre_PCGCopyVector(x,q);
-      hypre_PCGClearVector(x);
+      hypre_KrylovCopyVector(x,q);
+      hypre_KrylovClearVector(x);
       precond(precond_data, A, q, x);
    }
 

@@ -302,37 +302,37 @@ int hypre_ParAMGSetupStats P((void *amg_vdata , hypre_ParCSRMatrix *A ));
 int hypre_ParAMGWriteSolverParams P((void *data ));
 
 /* pcg.c */
-int hypre_PCGIdentitySetup P((void *vdata , void *A , void *b , void *x ));
-int hypre_PCGIdentity P((void *vdata , void *A , void *b , void *x ));
-void *hypre_PCGCreate P((void ));
-int hypre_PCGDestroy P((void *pcg_vdata ));
-int hypre_PCGSetup P((void *pcg_vdata , void *A , void *b , void *x ));
-int hypre_PCGSolve P((void *pcg_vdata , void *A , void *b , void *x ));
-int hypre_PCGSetTol P((void *pcg_vdata , double tol ));
-int hypre_PCGSetMaxIter P((void *pcg_vdata , int max_iter ));
-int hypre_PCGSetTwoNorm P((void *pcg_vdata , int two_norm ));
-int hypre_PCGSetRelChange P((void *pcg_vdata , int rel_change ));
-int hypre_PCGSetPrecond P((void *pcg_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data ));
-int hypre_PCGSetLogging P((void *pcg_vdata , int logging ));
-int hypre_PCGGetNumIterations P((void *pcg_vdata , int *num_iterations ));
-int hypre_PCGPrintLogging P((void *pcg_vdata , int myid ));
-int hypre_PCGGetFinalRelativeResidualNorm P((void *pcg_vdata , double *relative_residual_norm ));
+int hypre_KrylovIdentitySetup P((void *vdata , void *A , void *b , void *x ));
+int hypre_KrylovIdentity P((void *vdata , void *A , void *b , void *x ));
+void *hypre_KrylovCreate P((void ));
+int hypre_KrylovDestroy P((void *pcg_vdata ));
+int hypre_KrylovSetup P((void *pcg_vdata , void *A , void *b , void *x ));
+int hypre_KrylovSolve P((void *pcg_vdata , void *A , void *b , void *x ));
+int hypre_KrylovSetTol P((void *pcg_vdata , double tol ));
+int hypre_KrylovSetMaxIter P((void *pcg_vdata , int max_iter ));
+int hypre_KrylovSetTwoNorm P((void *pcg_vdata , int two_norm ));
+int hypre_KrylovSetRelChange P((void *pcg_vdata , int rel_change ));
+int hypre_KrylovSetPrecond P((void *pcg_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data ));
+int hypre_KrylovSetLogging P((void *pcg_vdata , int logging ));
+int hypre_KrylovGetNumIterations P((void *pcg_vdata , int *num_iterations ));
+int hypre_KrylovPrintLogging P((void *pcg_vdata , int myid ));
+int hypre_KrylovGetFinalRelativeResidualNorm P((void *pcg_vdata , double *relative_residual_norm ));
 
 /* pcg_par.c */
-char *hypre_PCGCAlloc P((int count , int elt_size ));
-int hypre_PCGFree P((char *ptr ));
-void *hypre_PCGCreateVector P((void *vvector ));
-void *hypre_PCGCreateVectorArray P((int n , void *vvector ));
-int hypre_PCGDestroyVector P((void *vvector ));
-void *hypre_PCGMatvecCreate P((void *A , void *x ));
-int hypre_PCGMatvec P((void *matvec_data , double alpha , void *A , void *x , double beta , void *y ));
-int hypre_PCGMatvecT P((void *matvec_data , double alpha , void *A , void *x , double beta , void *y ));
-int hypre_PCGMatvecDestroy P((void *matvec_data ));
-double hypre_PCGInnerProd P((void *x , void *y ));
-int hypre_PCGCopyVector P((void *x , void *y ));
-int hypre_PCGClearVector P((void *x ));
-int hypre_PCGScaleVector P((double alpha , void *x ));
-int hypre_PCGAxpy P((double alpha , void *x , void *y ));
+char *hypre_KrylovCAlloc P((int count , int elt_size ));
+int hypre_KrylovFree P((char *ptr ));
+void *hypre_KrylovCreateVector P((void *vvector ));
+void *hypre_KrylovCreateVectorArray P((int n , void *vvector ));
+int hypre_KrylovDestroyVector P((void *vvector ));
+void *hypre_KrylovMatvecCreate P((void *A , void *x ));
+int hypre_KrylovMatvec P((void *matvec_data , double alpha , void *A , void *x , double beta , void *y ));
+int hypre_KrylovMatvecT P((void *matvec_data , double alpha , void *A , void *x , double beta , void *y ));
+int hypre_KrylovMatvecDestroy P((void *matvec_data ));
+double hypre_KrylovInnerProd P((void *x , void *y ));
+int hypre_KrylovCopyVector P((void *x , void *y ));
+int hypre_KrylovClearVector P((void *x ));
+int hypre_KrylovScaleVector P((double alpha , void *x ));
+int hypre_KrylovAxpy P((double alpha , void *x , void *y ));
 
 /* transpose.c */
 int hypre_CSRMatrixTranspose P((hypre_CSRMatrix *A , hypre_CSRMatrix **AT ));
