@@ -832,11 +832,12 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
 			CF_marker[graph_array[jj]] = -1;
 		     }
 		     ci_tilde_size = max_ci_size;
+		     break;
 		  }
 		  else
 		  {
-		     graph_array[ci_tilde_size++] = index;
-		     CF_marker[index] = 2;
+		     graph_array[ci_tilde_size++] = j;
+		     CF_marker[j] = 2;
 		     C_i_nonempty = 1;
 		     i--;
 		     break;
