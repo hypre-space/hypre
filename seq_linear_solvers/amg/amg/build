@@ -9,8 +9,10 @@
 #EHEADER***********************************************************************
 
 #===========================================================================
-# This script builds the AMG code
+# This script builds the AMG library
 #===========================================================================
+
+AMG_SRC=".."
 
 . $AMG_SRC/config/build_generic
 
@@ -18,11 +20,8 @@
 # Set various flags
 #=============================================================================
 
-AMG_LIBRARY=amg
-
-CFLAGS="$AMG_CC_FLAGS -I$AMG_SRC/config"
+CFLAGS="$AMG_CC_FLAGS"
 FFLAGS="$AMG_F77_FLAGS"
-LFLAGS="$AMG_LINK_FLAGS"
 
 if [ "$AMG_OPTIMIZE_FLAG" ]
 then
@@ -36,7 +35,14 @@ then
    FFLAGS="$FFLAGS $AMG_F77_DEBUG"
 fi
 
-export AMG_LIBRARY CFLAGS FFLAGS LFLAGS
+#=============================================================================
+# Export variables needed by make
+#=============================================================================
+
+export AMG_LIBRARY AMG_FILES AMG_HEADERS
+export AMG_CC CFLAGS AMG_F77 FFLAGS
+export AMG_AR AMG_RANLIB
+export AMG_INSTALL AMG_LIB_DIR AMG_INCLUDE_DIR
 
 #=============================================================================
 # Build
@@ -44,31 +50,16 @@ export AMG_LIBRARY CFLAGS FFLAGS LFLAGS
 
 if [ "$AMG_ALL_FLAG" ]
 then
-   echo "Building"
-   echo "       Library:                $AMG_LIBRARY"
+   echo ""
+   echo "Building library $AMG_LIBRARY"
    echo "       Arch:                   $AMG_ARCH"
    echo "       CC Options:             $CFLAGS"
    echo "       F77 Options:            $FFLAGS"
 
-   # define AMG_FILES
-   AMG_FILES=`cat rcs_files | \
-      awk '
-         BEGIN {STR = " "}
-         {
-           for (i = 1; i <= NF; i++) {
-             if (($i ~ /[^\ ]*\.c/) || \
-                 ($i ~ /[^\ ]*\.f/)    )
-               STR = STR $i " "
-           }
-         }
-         END {print STR}
-      '`
-
-   export AMG_FILES
-
-   $AMG_MAKE $AMG_LIBRARY.$AMG_ARCH.a
+   $AMG_MAKE
 
    echo "done"
+   echo ""
 fi
 
 #=============================================================================
@@ -77,8 +68,15 @@ fi
 
 if [ "$AMG_INSTALL_FLAG" ]
 then
-   $AMG_INSTALL $AMG_LIBRARY.$AMG_ARCH.a $AMG_LIB_DIR/lib$AMG_LIBRARY.a
-   $AMG_INSTALL amg.h vector.h matrix.h $AMG_INCLUDE_DIR
+   for i in $AMG_LIB_DIR $AMG_INCLUDE_DIR
+   do
+      if [ ! -d $i ]
+      then
+         $AMG_MKDIR $i
+      fi
+   done
+
+   $AMG_MAKE install
 fi
 
 #=============================================================================
@@ -87,11 +85,12 @@ fi
 
 if [ "$AMG_CLEAN_FLAG" ]
 then
-   rm -f *.$AMG_ARCH.o
+   $AMG_MAKE clean
 fi
 
 if [ "$AMG_VERYCLEAN_FLAG" ]
 then
+   $AMG_MAKE veryclean
    rm -f $AMG_LIBRARY.$AMG_ARCH.a
 fi
 

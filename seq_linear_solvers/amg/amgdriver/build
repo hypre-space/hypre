@@ -12,17 +12,31 @@
 # This script builds the AMG code
 #===========================================================================
 
+AMG_SRC=".."
+
 . $AMG_SRC/config/build_generic
+
+#=============================================================================
+# Make sure needed libraries are installed
+#=============================================================================
+
+LIBRARY_DIRS="amg cvode"
+ 
+if [ "$AMG_ALL_FLAG" ]
+then
+   AMG_BUILD_ARGS="$AMG_BUILD_ARGS install"
+fi
+
+for i in $LIBRARY_DIRS
+do
+   (cd $AMG_SRC/$i; ./build $AMG_BUILD_ARGS)
+done
 
 #=============================================================================
 # Set various flags
 #=============================================================================
 
-AMG_DRIVER=amgdriver
-
-LIBRARY_DIRS="amg cvode"
- 
-CFLAGS="$AMG_CC_FLAGS -I$AMG_SRC/config -I$AMG_DIR/include"
+CFLAGS="$AMG_CC_FLAGS"
 FFLAGS="$AMG_F77_FLAGS"
 LFLAGS="$AMG_LINK_FLAGS"
 
@@ -38,7 +52,14 @@ then
    FFLAGS="$FFLAGS $AMG_F77_DEBUG"
 fi
 
-export AMG_DRIVER CFLAGS FFLAGS LFLAGS
+#=============================================================================
+# Export variables needed by make
+#=============================================================================
+
+export AMG_DRIVER AMG_FILES AMG_HEADERS
+export AMG_CC CFLAGS AMG_F77 FFLAGS
+export AMG_LINK LFLAGS
+export AMG_INSTALL AMG_BIN_DIR
 
 #=============================================================================
 # Build
@@ -46,36 +67,16 @@ export AMG_DRIVER CFLAGS FFLAGS LFLAGS
 
 if [ "$AMG_ALL_FLAG" ]
 then
-   for i in $LIBRARY_DIRS
-   do
-      (cd $AMG_SRC/$i; ./build $AMG_BUILD_ARGS install)
-   done
-
-   echo "Building"
-   echo "       Program:                $AMG_DRIVER"
+   echo ""
+   echo "Building program $AMG_DRIVER"
    echo "       Arch:                   $AMG_ARCH"
    echo "       CC Options:             $CFLAGS"
    echo "       F77 Options:            $FFLAGS"
 
-   # define AMG_FILES
-   AMG_FILES=`cat rcs_files | \
-      awk '
-         BEGIN {STR = " "}
-         {
-           for (i = 1; i <= NF; i++) {
-             if (($i ~ /[^\ ]*\.c/) || \
-                 ($i ~ /[^\ ]*\.f/)    )
-               STR = STR $i " "
-           }
-         }
-         END {print STR}
-      '`
-
-   export AMG_FILES
-
-   $AMG_MAKE $AMG_DRIVER.$AMG_ARCH
+   $AMG_MAKE
 
    echo "done"
+   echo ""
 fi
 
 #=============================================================================
@@ -84,9 +85,12 @@ fi
 
 if [ "$AMG_INSTALL_FLAG" ]
 then
-   $AMG_INSTALL $AMG_SRC/amgdriver/$AMG_DRIVER.$AMG_ARCH \
-                $AMG_BIN_DIR/$AMG_DRIVER
-   $AMG_INSTALL $AMG_SRC/amgdriver/amgrun $AMG_BIN_DIR/.
+   if [ ! -d $AMG_BIN_DIR ]
+   then
+      $AMG_MKDIR $i
+   fi
+
+   $AMG_MAKE install
 fi
 
 #=============================================================================
@@ -95,21 +99,11 @@ fi
 
 if [ "$AMG_CLEAN_FLAG" ]
 then
-   for i in $LIBRARY_DIRS
-   do
-      (cd $AMG_SRC/$i; ./build $AMG_BUILD_ARGS)
-   done
-
-   rm -f *.$AMG_ARCH.o
+   $AMG_MAKE clean
 fi
 
 if [ "$AMG_VERYCLEAN_FLAG" ]
 then
-   for i in $LIBRARY_DIRS
-   do
-      (cd $AMG_SRC/$i; ./build $AMG_BUILD_ARGS)
-   done
-
-   rm -f $AMG_DRIVER.$AMG_ARCH
+   $AMG_MAKE veryclean
 fi
 

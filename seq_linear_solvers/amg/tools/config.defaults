@@ -1,0 +1,42 @@
+#BHEADER***********************************************************************
+# (c) 1996   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# Defaults for building the AMG tools
+#=============================================================================
+
+if [ -z $AMG_DIR ]
+then
+   AMG_DIR="$AMG_SRC"
+fi
+ 
+AMG_MAKE="make"
+
+AMG_CC="cc"
+AMG_CC_FLAGS=""
+AMG_CC_OPT="-O"
+AMG_CC_DEBUG="-g"
+
+AMG_F77="f77"
+AMG_F77_FLAGS=""
+AMG_F77_OPT="-O"
+AMG_F77_DEBUG="-g"
+
+AMG_F90="f90"
+AMG_F90_FLAGS=""
+AMG_F90_OPT="-O"
+AMG_F90_DEBUG="-g"
+
+AMG_LINK="cc"
+AMG_LINK_FLAGS=""
+
+AMG_MKDIR="mkdir -p"
+AMG_INSTALL="cp -fp"
+
+AMG_BIN_DIR="$AMG_DIR/bin"

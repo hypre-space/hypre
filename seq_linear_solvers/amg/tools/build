@@ -12,29 +12,37 @@
 # This script builds the AMG tools
 #===========================================================================
 
+AMG_SRC=".."
+
 . $AMG_SRC/config/build_generic
 
 #=============================================================================
 # Set various flags
 #=============================================================================
 
-CFLAGS=""
-FFLAGS=""
-LFLAGS=""
+CFLAGS="$AMG_CC_FLAGS"
+FFLAGS="$AMG_F77_FLAGS"
+LFLAGS="$AMG_LINK_FLAGS"
 
 if [ "$AMG_OPTIMIZE_FLAG" ]
 then
-   CFLAGS="$CFLAGS -O"
-   FFLAGS="$FFLAGS -O"
+   CFLAGS="$CFLAGS $AMG_CC_OPT"
+   FFLAGS="$FFLAGS $AMG_F77_OPT"
 fi
 
 if [ "$AMG_DEBUG_FLAG" ]
 then
-   CFLAGS="$CFLAGS -g"
-   FFLAGS="$FFLAGS -g"
+   CFLAGS="$CFLAGS $AMG_CC_DEBUG"
+   FFLAGS="$FFLAGS $AMG_F77_DEBUG"
 fi
 
-export CFLAGS FFLAGS LFLAGS
+#=============================================================================
+# Export variables needed by make
+#=============================================================================
+
+export AMG_CC CFLAGS AMG_F77 FFLAGS
+export AMG_LINK LFLAGS
+export AMG_INSTALL AMG_BIN_DIR
 
 #=============================================================================
 # Build
@@ -42,13 +50,16 @@ export CFLAGS FFLAGS LFLAGS
 
 if [ "$AMG_ALL_FLAG" ]
 then
-   # if on a new arch, first clean everything
-   if [ "$AMG_ARCH" != "$AMG_OLD_ARCH" ]
-   then
-      ./build veryclean
-   fi
+   echo ""
+   echo "Building Tools"
+   echo "       Arch:                   $AMG_ARCH"
+   echo "       CC Options:             $CFLAGS"
+   echo "       F77 Options:            $FFLAGS"
 
    $AMG_MAKE
+
+   echo "done"
+   echo ""
 fi
 
 #=============================================================================
@@ -57,13 +68,20 @@ fi
 
 if [ "$AMG_INSTALL_FLAG" ]
 then
-   UTILITIES="amgstrip amgcpio amgmvio convert_icf3d convert_ale3d \
+   if [ ! -d $AMG_BIN_DIR ]
+   then
+      $AMG_MKDIR $i
+   fi
+
+   $AMG_MAKE install
+
+   UTILITIES="amgstrip amgcpio amgmvio \
               readysmp.m readvec.m  writevec.m writeysmp.m manalyze.m \
               lapmake.m lapmake9.m matvec.m truncysmp.m"
 
    for i in $UTILITIES
    do
-      $AMG_INSTALL $AMG_SRC/tools/$i $AMG_BIN_DIR/.
+      $AMG_INSTALL $i $AMG_BIN_DIR/.
    done
 fi
 
@@ -73,16 +91,11 @@ fi
 
 if [ "$AMG_CLEAN_FLAG" ]
 then
-   rm -f *.o
+   $AMG_MAKE clean
 fi
 
 if [ "$AMG_VERYCLEAN_FLAG" ]
 then
-   UTILITIES="convert_icf3d convert_ale3d"
-
-   for i in $UTILITIES
-   do
-      rm -f $i
-   done
+   $AMG_MAKE veryclean
 fi
 

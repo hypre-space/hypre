@@ -12,6 +12,8 @@
 # This script builds the CVODE library
 #===========================================================================
 
+AMG_SRC=".."
+
 . $AMG_SRC/config/build_generic
 
 #=============================================================================
@@ -22,11 +24,15 @@ if [ "$AMG_ALL_FLAG" ]
 then
    if [ ! -f "$AMG_SRC/cvode/lib/libcvode.$AMG_ARCH.a" ]
    then
+      echo ""
       echo "Building cvode ..."
     
       (cd $AMG_SRC/cvode; make)
     
       mv $AMG_SRC/cvode/lib/libcvode.a $AMG_SRC/cvode/lib/libcvode.$AMG_ARCH.a
+
+      echo "done"
+      echo ""
    fi
 fi
 
@@ -36,14 +42,21 @@ fi
 
 if [ "$AMG_INSTALL_FLAG" ]
 then
-   /bin/rm -fr $AMG_LIB_DIR/cvode 
-   /bin/rm -fr $AMG_INCLUDE_DIR/cvode
-   $AMG_MKDIR $AMG_LIB_DIR/cvode
-   $AMG_MKDIR $AMG_INCLUDE_DIR/cvode
+   if [ -z $AMG_DIR ]
+   then
+      AMG_DIR="$AMG_SRC"
+   fi
+
+   LIB_DIR="$AMG_DIR/lib/cvode"
+   INCLUDE_DIR="$AMG_DIR/include/cvode"
+
+   /bin/rm -fr $LIB_DIR
+   /bin/rm -fr $INCLUDE_DIR
+   mkdir -p $LIB_DIR
+   mkdir -p $INCLUDE_DIR
     
-   $AMG_INSTALL $AMG_SRC/cvode/lib/libcvode.$AMG_ARCH.a \
-                $AMG_LIB_DIR/cvode/libcvode.a
-   $AMG_INSTALL $AMG_SRC/cvode/include/* $AMG_INCLUDE_DIR/cvode
+   cp -fp lib/libcvode.$AMG_ARCH.a $LIB_DIR/libcvode.a
+   cp -fp include/* $INCLUDE_DIR
 fi
 
 #=============================================================================
@@ -52,5 +65,5 @@ fi
 
 if [ "$AMG_VERYCLEAN_FLAG" ]
 then
-   rm -f $AMG_SRC/cvode/lib/libcvode.$AMG_ARCH.a
+   rm -f lib/libcvode.$AMG_ARCH.a
 fi

@@ -8,44 +8,57 @@
 #EHEADER***********************************************************************
 
 .SUFFIXES:
-.SUFFIXES: .c .f .${AMG_ARCH}.o
-
-AMG_OBJS1 = ${AMG_FILES:.c=.${AMG_ARCH}.o}
-AMG_OBJS  = ${AMG_OBJS1:.f=.${AMG_ARCH}.o}
+.SUFFIXES: .c .f .o
 
 ##################################################################
-# Main rules
+# Configuration for Solaris
 ##################################################################
 
-${AMG_DRIVER}.${AMG_ARCH}: ${AMG_OBJS}
+AMG_DIR = ..
+
+CC     = gcc
+CFLAGS = -I${AMG_DIR}/include -I/usr/local/include
+
+F77    = f77
+FFLAGS = -silent
+
+LINK   = gcc
+LFLAGS = -L${AMG_DIR}/lib -lamg \
+         -L/usr/local/lib -L/opt/SUNWspro/SC4.0/lib \
+         -lF77 -lsunmath -lm"
+
+##################################################################
+# Main Rules
+##################################################################
+
+all: amg_fdrive amg_fdrive2
+
+amg_fdrive: amg_fdrive.o
 	@echo  "Linking" $@ "... "
-	@${AMG_LINK} -o $@ ${AMG_OBJS} ${LFLAGS}
+	@${LINK} -o $@ amg_fdrive.o ${LFLAGS}
 
-${AMG_OBJS}: ${AMG_HEADERS}
+amg_fdrive2: amg_fdrive2.o
+	@echo  "Linking" $@ "... "
+	@${LINK} -o $@ amg_fdrive2.o ${LFLAGS}
 
 ##################################################################
-# Generic rules
+# Generic Rules
 ##################################################################
 
-.c.${AMG_ARCH}.o:
+.c.o:
 	@echo "Making (c) " $@
-	@${AMG_CC} -o $@ -c ${CFLAGS} $<
+	@${CC} -o $@ -c ${CFLAGS} $<
 
-.f.${AMG_ARCH}.o:
+.f.o:
 	@echo "Making (f) " $@
-	@${AMG_F77} -o $@ -c ${FFLAGS} $<
+	@${F77} -o $@ -c ${FFLAGS} $<
 
 ##################################################################
 # Miscellaneous rules
 ##################################################################
-
-install:
-	@${AMG_INSTALL} ${AMG_DRIVER}.${AMG_ARCH} ${AMG_BIN_DIR}/${AMG_DRIVER}
-	@${AMG_INSTALL} amgrun ${AMG_BIN_DIR}/.
-
+ 
 veryclean: clean
-	@rm -f ${AMG_DRIVER}.${AMG_ARCH}
-
+	@rm -f amg_fdrive amg_fdrive2
+ 
 clean:
-	@rm -f *.${AMG_ARCH}.o
-
+	@rm -f *.o

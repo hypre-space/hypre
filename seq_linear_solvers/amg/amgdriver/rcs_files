@@ -3,6 +3,10 @@ amg.c
 amgdriver.c
 amgrun
 build
+config.defaults
+config.irix
+config.solaris
+config.sunos
 default.in.problem
 default.in.solver
 general.h

@@ -3,6 +3,10 @@ amgcpio
 amgmvio
 amgstrip
 build
+config.defaults
+config.irix
+config.solaris
+config.sunos
 general.h
 hbo.m
 hbo2mat.f

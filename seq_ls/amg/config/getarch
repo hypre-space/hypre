@@ -43,5 +43,3 @@ then
    esac
 fi
 
-export AMG_ARCH
-

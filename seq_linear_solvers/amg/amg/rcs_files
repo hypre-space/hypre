@@ -8,6 +8,10 @@ bsetup.f
 build
 cforce.f
 color.f
+config.defaults
+config.irix
+config.solaris
+config.sunos
 crsgd.f
 data.c
 data.h

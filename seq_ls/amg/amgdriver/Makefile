@@ -14,14 +14,18 @@ AMG_OBJS1 = ${AMG_FILES:.c=.${AMG_ARCH}.o}
 AMG_OBJS  = ${AMG_OBJS1:.f=.${AMG_ARCH}.o}
 
 ##################################################################
-# Rules
+# Main rules
 ##################################################################
 
 ${AMG_DRIVER}.${AMG_ARCH}: ${AMG_OBJS}
-	@echo  "Linking" ${AMG_DRIVER} "... "
-	@${AMG_LINK} -o ${AMG_DRIVER}.${AMG_ARCH} \
-		${LFLAGS} ${AMG_OBJS} -L${AMG_DIR}/lib -lamg \
-		-L${AMG_DIR}/lib/cvode -lcvode ${AMG_LIBS}
+	@echo  "Linking" $@ "... "
+	@${AMG_LINK} -o $@ ${AMG_OBJS} ${LFLAGS}
+
+${AMG_OBJS}: ${AMG_HEADERS}
+
+##################################################################
+# Generic rules
+##################################################################
 
 .c.${AMG_ARCH}.o:
 	@echo "Making (c) " $@
@@ -30,4 +34,18 @@ ${AMG_DRIVER}.${AMG_ARCH}: ${AMG_OBJS}
 .f.${AMG_ARCH}.o:
 	@echo "Making (f) " $@
 	@${AMG_F77} -o $@ -c ${FFLAGS} $<
+
+##################################################################
+# Miscellaneous rules
+##################################################################
+
+install:
+	@${AMG_INSTALL} ${AMG_DRIVER}.${AMG_ARCH} ${AMG_BIN_DIR}/${AMG_DRIVER}
+	@${AMG_INSTALL} amgrun ${AMG_BIN_DIR}/.
+
+veryclean: clean
+	@rm -f ${AMG_DRIVER}.${AMG_ARCH}
+
+clean:
+	@rm -f *.${AMG_ARCH}.o
 

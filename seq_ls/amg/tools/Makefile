@@ -8,46 +8,66 @@
 #EHEADER***********************************************************************
 
 .SUFFIXES:
-.SUFFIXES: .c .f .o
-
-CC="gcc"
-F77="f77"
+.SUFFIXES: .c .f .${AMG_ARCH}.o
 
 ##################################################################
 # All
 ##################################################################
 
-all: convert_icf3d convert_ale3d
+all: convert_icf3d.${AMG_ARCH} convert_ale3d.${AMG_ARCH}
 
 ##################################################################
 # convert_icf3d
 ##################################################################
 
 CONVERT_ICF3D_HDRS = general.h matrix.h io.h
+CONVERT_ICF3D_FILES = convert_icf3d.c matrix.c write.c
+CONVERT_ICF3D_OBJS = ${CONVERT_ICF3D_FILES:.c=.${AMG_ARCH}.o}
 
-CONVERT_ICF3D_OBJS = convert_icf3d.o matrix.o write.o
+convert_icf3d.${AMG_ARCH}: ${CONVERT_ICF3D_OBJS}
+	@echo  "Linking" $@ "... "
+	@${AMG_LINK} -o $@ ${CONVERT_ICF3D_OBJS} ${LFLAGS}
 
-convert_icf3d: Makefile ${CONVERT_ICF3D_HDRS} ${CONVERT_ICF3D_OBJS}
-	@${CC} -o $@ ${LFLAGS} ${CONVERT_ICF3D_OBJS}
+${CONVERT_ICF3D_OBJS}: ${CONVERT_ICF3D_HDRS}
 
 ##################################################################
 # convert_ale3d
 ##################################################################
 
 CONVERT_ALE3D_HDRS = general.h matrix.h io.h
+CONVERT_ALE3D_FILES = convert_ale3d.c matrix.c write.c
+CONVERT_ALE3D_OBJS = ${CONVERT_ALE3D_FILES:.c=.${AMG_ARCH}.o}
 
-CONVERT_ALE3D_OBJS = convert_ale3d.o matrix.o write.o
+convert_ale3d.${AMG_ARCH}: ${CONVERT_ALE3D_OBJS}
+	@echo  "Linking" $@ "... "
+	@${AMG_LINK} -o $@ ${CONVERT_ALE3D_OBJS} ${LFLAGS}
 
-convert_ale3d: Makefile ${CONVERT_ALE3D_HDRS} ${CONVERT_ALE3D_OBJS}
-	@${CC} -o $@ ${LFLAGS} ${CONVERT_ICF3D_OBJS}
+${CONVERT_ALE3D_OBJS}: ${CONVERT_ALE3D_HDRS}
 
 ##################################################################
 # Generic rules
 ##################################################################
 
-.c.o:
-	@${CC} -o $@ -c ${CFLAGS} $<
+.c.${AMG_ARCH}.o:
+	@echo "Making (c) " $@
+	@${AMG_CC} -o $@ -c ${CFLAGS} $<
 
-.f.o:
-	@${F77} -o $@ -c ${FFLAGS} $<
+.f.${AMG_ARCH}.o:
+	@echo "Making (f) " $@
+	@${AMG_F77} -o $@ -c ${FFLAGS} $<
+
+##################################################################
+# Miscellaneous rules
+##################################################################
+
+install:
+	@${AMG_INSTALL} convert_icf3d.${AMG_ARCH} ${AMG_BIN_DIR}/convert_icf3d
+	@${AMG_INSTALL} convert_ale3d.${AMG_ARCH} ${AMG_BIN_DIR}/convert_ale3d
+
+veryclean: clean
+	@rm -f convert_icf3d.${AMG_ARCH}
+	@rm -f convert_ale3d.${AMG_ARCH}
+
+clean:
+	@rm -f *.${AMG_ARCH}.o
 

@@ -5,7 +5,8 @@ AMG2.in.initu
 AMG2.in.control
 AMG2.in.rhs
 AMG2.in.ysmp
-Makefile
+Makefile.irix
+Makefile.solaris
+Makefile.sunos
 amg_fdrive.f
 amg_fdrive2.f
-build
