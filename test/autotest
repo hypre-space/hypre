@@ -78,7 +78,7 @@ do
         HYPRE_COMPILE_MACHINE="blue"
         HYPRE_RUN_MACHINE="blue"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/powerpc-ibm-aix4.3.3.0/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
+	HYPRE_MACHINE_COMMANDS="-m -o 2 -a 2 -cf"
 	perform_test
         shift;;
     -frost)
@@ -103,7 +103,7 @@ do
         HYPRE_COMPILE_MACHINE="west"
         HYPRE_RUN_MACHINE="southeast"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf4.0f/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -o 1 -a 2 -cf"
+	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -o 2 -a 2 -cf"
 	perform_test
         shift;;
     -lx)
@@ -152,7 +152,7 @@ do
         HYPRE_COMPILE_MACHINE="tc01"
         HYPRE_RUN_MACHINE="tc01"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf5.1/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
+	HYPRE_MACHINE_COMMANDS="-m -o 2 -a 2 -cf"
 	perform_test
         shift;;
     -tux)
