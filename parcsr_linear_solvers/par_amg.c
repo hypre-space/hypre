@@ -83,7 +83,7 @@ hypre_ParAMGCreate()
 
    for (j = 0; j < max_levels; j++)
    {
-      relax_weight[j] = 0.0;
+      relax_weight[j] = 1.0;
    }
 
    for (j = 0; j < 3; j++)
