@@ -212,6 +212,17 @@ hypre_F90_IFACE(hypre_addtoijveclocalcompsinblo)( long int *vector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_AssembleIJVector
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_assembleijvector)( long int *vector,
+                                         int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_AssembleIJVector( (HYPRE_IJVector) *vector ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_GetIJVectorLocalComponents
  *--------------------------------------------------------------------------*/
 

@@ -470,7 +470,7 @@ hypre_AddToIJVectorParLocalComponentsInBlock(hypre_IJVector *vector,
                                              const double   *values                ) 
 {
    int ierr = 0;
-   int my_id, num_procs;
+   int my_id;
    int i, j, vec_start, vec_stop, local_n, local_start, local_stop;
    double *data;
 
@@ -516,6 +516,35 @@ hypre_AddToIJVectorParLocalComponentsInBlock(hypre_IJVector *vector,
 
 }
 
+/******************************************************************************
+ *
+ * hypre_AssembleIJVectorPar
+ *
+ * assemble the partitioning of the vector
+ *
+ *****************************************************************************/
+
+int
+hypre_AssembleStructVectorPar(hypre_IJVector *vector)
+{
+   int ierr = 0;
+   int my_id;
+
+   hypre_ParVector *par_vector = hypre_IJVectorLocalStorage(vector);
+   MPI_Comm comm = hypre_IJVectorContext(vector);
+   int *partitioning = hypre_ParVectorPartitioning(par_vector);
+
+   MPI_Comm_rank(comm, &my_id);
+
+   if (!par_vector) ++ierr;
+   if (!partitioning) ++ierr;
+
+   ierr = MPI_Allgather(&partitioning[my_id], 1, MPI_INT,
+                        partitioning, 1, MPI_INT, comm);
+
+   return ierr;
+}
+                                 
 /******************************************************************************
  *
  * hypre_GetIJVectorParLocalComponents

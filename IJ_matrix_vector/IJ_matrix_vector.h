@@ -268,6 +268,7 @@ void hypre_F90_IFACE P((int hypre_setijveclocalcomps ));
 void hypre_F90_IFACE P((int hypre_setijveclocalcompsinblock ));
 void hypre_F90_IFACE P((int hypre_addtoijveclocalcomps ));
 void hypre_F90_IFACE P((int hypre_addtoijveclocalcompsinblo ));
+void hypre_F90_IFACE P((int hypre_assembleijvector ));
 void hypre_F90_IFACE P((int hypre_getijveclocalcomps ));
 void hypre_F90_IFACE P((int hypre_getijveclocalcompsinblock ));
 void hypre_F90_IFACE P((int hypre_getijveclocalstoragetype ));
@@ -307,6 +308,7 @@ int HYPRE_SetIJVectorLocalComponents P((HYPRE_IJVector IJvector , int num_values
 int HYPRE_SetIJVectorLocalComponentsInBlock P((HYPRE_IJVector IJvector , int glob_vec_index_start , int glob_vec_index_stop , const int *value_indices , const double *values ));
 int HYPRE_AddToIJVectorLocalComponents P((HYPRE_IJVector IJvector , int num_values , const int *glob_vec_indices , const int *value_indices , const double *values ));
 int HYPRE_AddToIJVectorLocalComponentsInBlock P((HYPRE_IJVector IJvector , int glob_vec_index_start , int glob_vec_index_stop , const int *value_indices , const double *values ));
+int HYPRE_AssembleIJVector P((HYPRE_IJVector IJvector ));
 int HYPRE_GetIJVectorLocalComponents P((HYPRE_IJVector IJvector , int num_values , const int *glob_vec_indices , const int *value_indices , double *values ));
 int HYPRE_GetIJVectorLocalComponentsInBlock P((HYPRE_IJVector IJvector , int glob_vec_index_start , int glob_vec_index_stop , const int *value_indices , double *values ));
 int HYPRE_GetIJVectorLocalStorageType P((HYPRE_IJVector IJvector , int *type ));
@@ -398,6 +400,7 @@ int hypre_SetIJVectorParLocalComponents P((hypre_IJVector *vector , int num_valu
 int hypre_SetIJVectorParLocalComponentsInBlock P((hypre_IJVector *vector , int glob_vec_index_start , int glob_vec_index_stop , const int *value_indices , const double *values ));
 int hypre_AddToIJVectorParLocalComponents P((hypre_IJVector *vector , int num_values , const int *glob_vec_indices , const int *value_indices , const double *values ));
 int hypre_AddToIJVectorParLocalComponentsInBlock P((hypre_IJVector *vector , int glob_vec_index_start , int glob_vec_index_stop , const int *value_indices , const double *values ));
+int hypre_AssembleStructVectorPar P((hypre_IJVector *vector ));
 int hypre_GetIJVectorParLocalComponents P((hypre_IJVector *vector , int num_values , const int *glob_vec_indices , const int *value_indices , double *values ));
 int hypre_GetIJVectorParLocalComponentsInBlock P((hypre_IJVector *vector , int glob_vec_index_start , int glob_vec_index_stop , const int *value_indices , double *values ));
 

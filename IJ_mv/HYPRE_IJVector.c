@@ -577,6 +577,23 @@ HYPRE_AddToIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_AssembleIJVector
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_AssembleIJVector( HYPRE_IJVector  IJvector )
+{
+   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+
+   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
+      return( hypre_AssembleIJVectorPETSc( vector ) );
+   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
+      return( hypre_AssembleIJVectorISIS( vector ) );
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+      return(  hypre_AssembleIJVectorPar( vector ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_GetIJVectorLocalComponents
  *--------------------------------------------------------------------------*/
 
