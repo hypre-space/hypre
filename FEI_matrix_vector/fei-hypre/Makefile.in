@@ -16,10 +16,14 @@ srcdir = @srcdir@
 CC = @CC@
 CXX = @CXX@
 
-SUPERLU_INCLUDE = -I/g/g2/chtong/SUPERLU/WEST/SuperLU/SRC
-SUPERLU_LIB     = -L/g/g2/chtong/SUPERLU/WEST/SuperLU
-MLPACK_INCLUDE  = -I/g/g2/chtong/ML/WEST/ml/src
-MLPACK_LIB      = -L/g/g2/chtong/ML/WEST/ml/src
+#SUPERLU_INCLUDE = -I/g/g2/chtong/SUPERLU/WEST/SuperLU/SRC
+#SUPERLU_LIB     = -L/g/g2/chtong/SUPERLU/WEST/SuperLU
+#MLPACK_INCLUDE  = -I/g/g2/chtong/ML/WEST/ml/src
+#MLPACK_LIB      = -L/g/g2/chtong/ML/WEST/ml/src
+SUPERLU_INCLUDE = 
+SUPERLU_LIB     = 
+MLPACK_INCLUDE  = 
+MLPACK_LIB      =
 
 C_COMPILE_FLAGS=@CFLAGS@
 CXX_COMPILE_FLAGS=@CXXFLAGS@
