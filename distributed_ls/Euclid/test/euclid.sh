@@ -1,12 +1,19 @@
 #!/bin/sh
 
+
+#notes:
+# this script should be called by: IJ_linear_solvers.sh per:
+# ../distributed_ls/Euclid/test/euclid.sh
+#
+# HYPRE_ARCH and MPIRUN are initialized by caller.
+
 #===========================================================================
-# Define HYPRE_ARCH and MPIRUN
+# goto Euclid's test directory
 #===========================================================================
 
-. ../../../test/hypre_arch.sh
-MPIRUN="../../../test/mpirun.$HYPRE_ARCH"
-DRIVER="../../../test/IJ_linear_solvers"
+CALLING_DIR=`pwd`
+EUCLID_TEST_DIR=${CALLING_DIR}/../distributed_ls/Euclid/test
+cd $EUCLID_TEST_DIR
 
 #=================================================================
 # single cpu tests
@@ -42,6 +49,5 @@ rm -f database eu.temp
 #=================================================================
 # mulitple cpu tests
 #=================================================================
-
 
 rm -rf *.out* *temp *database
