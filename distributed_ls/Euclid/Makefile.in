@@ -32,8 +32,8 @@ CFLAGS = \
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../parcsr_mv\
+ -I$(srcdir)/../../distributed_matrix\
  -I$(srcdir)/../../seq_mv\
- -I$(srcdir)/../../hypre/include\
  ${CINCLUDES}\
  ${CDEFS}
 
