@@ -1442,8 +1442,10 @@ int HYPRE_LSI_BlockP::solveUsingSuperLU(HYPRE_IJMatrix Amat,
    SUPERLU_FREE( ((NRformat *) U.Store)->rowptr);
    SUPERLU_FREE( ((NRformat *) U.Store)->nzval);
    SUPERLU_FREE( U.Store );
+   return info;
 #else
    printf("HYPRE_LSI_BlockP::solveUsingSuperLU : not available.\n");
+   return 1;
 #endif
 }
 
