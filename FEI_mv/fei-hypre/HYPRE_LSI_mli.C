@@ -259,19 +259,19 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    switch ( mli_object->coarseSolver_ )
    {
       case MLI_SOLVER_JACOBI_ID    : 
-           sprintf(paramString, "setPostSmoother Jacobi" ); break;
+           sprintf(paramString, "setCoarseSolver Jacobi" ); break;
       case MLI_SOLVER_GS_ID        : 
-           sprintf(paramString, "setPostSmoother GS" ); break;
+           sprintf(paramString, "setCoarseSolver GS" ); break;
       case MLI_SOLVER_SGS_ID       : 
-           sprintf(paramString, "setPostSmoother SGS" ); break;
+           sprintf(paramString, "setCoarseSolver SGS" ); break;
       case MLI_SOLVER_PARASAILS_ID : 
-           sprintf(paramString, "setPostSmoother ParaSails" ); break;
+           sprintf(paramString, "setCoarseSolver ParaSails" ); break;
       case MLI_SOLVER_SCHWARZ_ID   : 
-           sprintf(paramString, "setPostSmoother Schwarz" ); break;
+           sprintf(paramString, "setCoarseSolver Schwarz" ); break;
       case MLI_SOLVER_MLS_ID       : 
-           sprintf(paramString, "setPostSmoother MLS" ); break;
+           sprintf(paramString, "setCoarseSolver MLS" ); break;
       case MLI_SOLVER_SUPERLU_ID       : 
-           sprintf(paramString, "setPostSmoother SuperLU" ); break;
+           sprintf(paramString, "setCoarseSolver SuperLU" ); break;
    }
    targc    = 2;
    targv[0] = (char *) &mli_object->coarseSolverNSweeps_;
