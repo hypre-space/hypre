@@ -94,6 +94,7 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
    (pcg_data -> rel_change)   = 0;
    (pcg_data -> stop_crit)    = 0;
    (pcg_data -> converged)    = 0;
+   (pcg_data -> owns_matvec_data ) = 1;
    (pcg_data -> matvec_data)  = NULL;
    (pcg_data -> precond_data) = NULL;
    (pcg_data -> print_level)  = 0;
@@ -130,7 +131,7 @@ hypre_PCGDestroy( void *pcg_vdata )
          hypre_TFreeF( pcg_data -> rel_norms, pcg_functions );
          pcg_data -> rel_norms = NULL;
       }
-      if ( pcg_data -> matvec_data != NULL )
+      if ( pcg_data -> matvec_data != NULL && pcg_data->owns_matvec_data )
       {
          (*(pcg_functions->MatvecDestroy))(pcg_data -> matvec_data);
          pcg_data -> matvec_data = NULL;
@@ -207,7 +208,7 @@ hypre_PCGSetup( void *pcg_vdata,
       (*(pcg_functions->DestroyVector))(pcg_data -> r);
    (pcg_data -> r) = (*(pcg_functions->CreateVector))(b);
 
-   if ( pcg_data -> matvec_data != NULL )
+   if ( pcg_data -> matvec_data != NULL && pcg_data->owns_matvec_data )
       (*(pcg_functions->MatvecDestroy))(pcg_data -> matvec_data);
    (pcg_data -> matvec_data) = (*(pcg_functions->MatvecCreate))(A, x);
 
@@ -453,7 +454,12 @@ hypre_PCGSolve( void *pcg_vdata,
 
       /* alpha = gamma / <s,p> */
       sdotp = (*(pcg_functions->InnerProd))(s, p);
-      if ( sdotp==0.0 ) { ++ierr; break; };
+      if ( sdotp==0.0 )
+      {
+         ++ierr;
+         if (i==1) i_prod=i_prod_0;
+         break;
+      }
       alpha = gamma / sdotp;
 
       gamma_old = gamma;

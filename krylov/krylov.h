@@ -673,6 +673,7 @@ typedef struct
    void    *r; /* ...contains the residual.  This is currently kept permanently.
                   If that is ever changed, it still must be kept if logging>1 */
 
+   int      owns_matvec_data;  /* normally 1; if 0, don't delete it */
    void    *matvec_data;
    void    *precond_data;
 
@@ -688,6 +689,8 @@ typedef struct
    double  *rel_norms;
 
 } hypre_PCGData;
+
+#define hypre_PCGDataOwnsMatvecData(pcgdata)  ((pcgdata) -> owns_matvec_data)
 
 #ifdef __cplusplus
 extern "C" {
