@@ -73,6 +73,7 @@ extern "C" {
    int HYPRE_ParCSRMLSetPostSmoother( HYPRE_Solver, int );
    int HYPRE_ParCSRMLSetDampingFactor( HYPRE_Solver, double );
    int HYPRE_ParCSRMLSetMethod( HYPRE_Solver, int );
+   int HYPRE_ParCSRMLSetCoarsenScheme( HYPRE_Solver, int );
    int HYPRE_ParCSRMLSetCoarseSolver( HYPRE_Solver, int );
 #endif
 
