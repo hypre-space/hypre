@@ -42,6 +42,10 @@ dnl * to use with the chosen compiler those options are identified
 dnl * and the appropriate macros are assigned values.
 dnl *********************************************************************dnl * 
 
+unset CC
+unset CXX
+unset F77
+
 casc_user_chose_compilers=no
 casc_user_chose_mpi=no
 casc_using_pthreads=no
@@ -246,7 +250,7 @@ if test -z "$CC"
 then
 
   case $ARCH in
-     sun4 )
+     sun4 | solaris )
 
         if test "$casc_user_chose_compilers" = "no"
         then
