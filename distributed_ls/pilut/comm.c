@@ -10,12 +10,14 @@
  * - removed shmem validation
  */
 
+#include "HYPRE_config.h"
 #include <stdlib.h>
-#include <unistd.h>
+#if HAVE_UNISTD_H
+#  include <unistd.h>
+#endif /* HAVE_UNISTD_H */
 #include <time.h>
 
-#include "./DistributedMatrixPilutSolver.h"
-
+#include "DistributedMatrixPilutSolver.h"
 
 /*************************************************************************
 * High level collective routines
