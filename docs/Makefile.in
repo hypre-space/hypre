@@ -13,6 +13,8 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
+LATEX = latex -interaction=nonstopmode
+
 ONLINE_OPTS =\
  -split 2\
  -show_section_numbers\
@@ -80,11 +82,11 @@ HYPRE_usr_manual.ps: usr_manual.dvi
 	dvips -o HYPRE_usr_manual.ps usr_manual
 
 usr_manual.dvi: version.tex usr_manual.idx
-	latex usr_manual
-	latex usr_manual
+	${LATEX} usr_manual
+	${LATEX} usr_manual
 
 usr_manual.idx: ${USR_FILES} 
-	latex usr_manual
+	${LATEX} usr_manual
 	bibtex usr_manual
 	makeindex usr_manual.idx
 
@@ -113,11 +115,11 @@ HYPRE_dev_manual.ps: dev_manual.dvi
 	dvips -o HYPRE_dev_manual.ps dev_manual
 
 dev_manual.dvi: version.tex dev_manual.idx
-	latex dev_manual
-	latex dev_manual
+	${LATEX} dev_manual
+	${LATEX} dev_manual
 
 dev_manual.idx: ${DEV_FILES}
-	latex dev_manual
+	${LATEX} dev_manual
 	#bibtex dev_manual
 	makeindex dev_manual.idx
 
@@ -140,8 +142,8 @@ HYPRE_code_ref.ps: code_ref.dvi
 	dvips -o HYPRE_code_ref.ps code_ref.dvi 		
 
 code_ref.dvi: code_ref.tex
-	latex code_ref
-	latex code_ref
+	${LATEX} code_ref
+	${LATEX} code_ref
 
 code_ref.tex: code_ref.dxx
 	doc++ -t -o code_ref.tex code_ref.dxx
