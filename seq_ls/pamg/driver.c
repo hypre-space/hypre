@@ -382,7 +382,8 @@ main( int   argc,
       HYPRE_AMGSetGridRelaxPoints(amg_solver, grid_relax_points);
       HYPRE_AMGSetRelaxWeight(amg_solver, relax_weight);
       HYPRE_AMGSetMaxLevels(amg_solver, max_levels);
-      HYPRE_AMGSetup(amg_solver, A, b, x);
+      HYPRE_AMGSetup(amg_solver, (HYPRE_CSRMatrix) A, (HYPRE_Vector) b, 
+			(HYPRE_Vector) x);
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -391,7 +392,8 @@ main( int   argc,
       time_index = hypre_InitializeTiming("Solve");
       hypre_BeginTiming(time_index);
 
-      HYPRE_AMGSolve(amg_solver, A, b, x);
+      HYPRE_AMGSolve(amg_solver, (HYPRE_CSRMatrix) A, (HYPRE_Vector) b, 
+			(HYPRE_Vector) x);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
