@@ -107,16 +107,27 @@ HYPRE_SetIJVectorPartitioning( HYPRE_IJVector  IJvector,
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
    /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-      ierr = hypre_SetIJVectorPETScPartitioning(vector,
-                                                partitioning);
+   {
+      if (!hypre_IJVectorLocalStorage(vector)) hypre_NewIJVectorPETSc(vector);
+
+      ierr += hypre_SetIJVectorPETScPartitioning(vector,
+                                                 partitioning);
+   }
    else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-      ierr = hypre_SetIJVectorISISPartitioning(vector,
-                                               partitioning);
+   {
+      if (!hypre_IJVectorLocalStorage(vector)) hypre_NewIJVectorISIS(vector);
+
+      ierr += hypre_SetIJVectorISISPartitioning(vector,
+                                                partitioning);
+   }
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_SetIJVectorParPartitioning(vector,
-                                              partitioning);
+   {
+      if (!hypre_IJVectorLocalStorage(vector)) hypre_NewIJVectorPar(vector);
+
+      ierr += hypre_SetIJVectorParPartitioning(vector, partitioning);
+   }
    else
-      ierr = -1;
+      ++ierr;
 
    return(ierr);
 }
@@ -134,19 +145,31 @@ HYPRE_SetIJVectorLocalPartitioning( HYPRE_IJVector IJvector,
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
    /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-      ierr = hypre_SetIJVectorPETScLocalPartitioning(vector,
+   {
+      if (!hypre_IJVectorLocalStorage(vector)) hypre_NewIJVectorPETSc(vector);
+
+      ierr += hypre_SetIJVectorPETScLocalPartitioning(vector,
+                                                      vec_start,
+                                                      vec_stop   );
+   }
+   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
+   {
+      if (!hypre_IJVectorLocalStorage(vector)) hypre_NewIJVectorISIS(vector);
+
+      ierr += hypre_SetIJVectorISISLocalPartitioning(vector,
                                                      vec_start,
                                                      vec_stop   );
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-      ierr = hypre_SetIJVectorISISLocalPartitioning(vector,
+   }
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+   {
+      if (!hypre_IJVectorLocalStorage(vector)) hypre_NewIJVectorPar(vector);
+
+      ierr += hypre_SetIJVectorParLocalPartitioning(vector,
                                                     vec_start,
                                                     vec_stop   );
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_SetIJVectorParLocalPartitioning(vector,
-                                                   vec_start,
-                                                   vec_stop   );
+   }
    else
-      ierr = -1;
+      ++ierr;
 
    return(ierr);
 }
@@ -162,13 +185,13 @@ HYPRE_InitializeIJVector( HYPRE_IJVector IJvector )
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
    /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
-      ierr = hypre_InitializeIJVectorPETSc(vector);
+      ierr += hypre_InitializeIJVectorPETSc(vector);
    else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
-      ierr = hypre_InitializeIJVectorISIS(vector);
+      ierr += hypre_InitializeIJVectorISIS(vector);
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_InitializeIJVectorPar(vector);
+      ierr += hypre_InitializeIJVectorPar(vector);
    else
-      ierr = -1;
+      ++ierr;
 
    return(ierr);
 }
@@ -184,9 +207,9 @@ HYPRE_DistributeIJVector( HYPRE_IJVector IJvector, int *vec_starts )
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
    if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
-      ierr = hypre_DistributeIJVectorPar(vector, vec_starts);
+      ierr += hypre_DistributeIJVectorPar(vector, vec_starts);
    else
-      ierr = -1;
+      ++ierr;
 
    return(ierr);
 }
