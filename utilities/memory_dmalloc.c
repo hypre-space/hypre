@@ -15,6 +15,8 @@
  *
  *****************************************************************************/
 
+#ifdef HYPRE_MEMORY_DMALLOC
+
 #include "memory.h"
 #include <dmalloc.h>
 
@@ -125,3 +127,4 @@ hypre_FreeDML( char *ptr,
    }
 }
 
+#endif
