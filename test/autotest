@@ -55,7 +55,7 @@ fi
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
-./configure> $0.configure.log 2> $0.configure.err
+./configure 1> $0.configure.log 2> $0.configure.err
 if [ -s "$0.configure.err" ]
 then
    RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov"
@@ -64,7 +64,7 @@ fi
 
 make veryclean
 
-make struct> $0.struct.log 2> $0.struct.err
+make struct 1> $0.struct.log 2> $0.struct.err
 if [ -s "$0.struct.err" ]
 then
    RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov jones97@llnl.gov"
@@ -73,21 +73,21 @@ fi
 
 make
 
-make parcsr> $0.parcsr.log 2> $0.parcsr.err
+make parcsr 1> $0.parcsr.log 2> $0.parcsr.err
 if [ -s "$0.parcsr.err" ]
 then
    RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov"
    $HYPRE_MAIL -s "Error(s) in make parcsr" $RECIPIENTS < $0.parcsr.err
 fi
 
-#make ci_struct> $0.ci_struct.log 2> $0.ci_struct.err
+#make ci_struct 1> $0.ci_struct.log 2> $0.ci_struct.err
 #if [ -s "$0.ci_struct.err" ]
 #then
 #   RECIPIENTS="dwalker@llnl.gov cleary1@llnl.gov"
 #   $HYPRE_MAIL -s "Error(s) in make ci_struct" $RECIPIENTS < $0.ci_struct.err
 #fi
 
-make seq> $0.seq.log 2> $0.seq.err
+make seq 1> $0.seq.log 2> $0.seq.err
 if [ -s "$0.seq.err" ]
 then
    RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov rfalgout@llnl.gov"
@@ -126,7 +126,7 @@ cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
-./configure --with-pthreads> $0.configure_threads.log 2> $0.configure_threads.err
+./configure --with-pthreads 1> $0.configure_threads.log 2> $0.configure_threads.err
 if [ -s "$0.configure_threads.err" ]
 then
    RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov"
@@ -135,7 +135,7 @@ fi
 
 make veryclean
 
-make struct> $0.struct_threads.log 2> $0.struct_threads.err
+make struct 1> $0.struct_threads.log 2> $0.struct_threads.err
 if [ -s "$0.struct_threads.err" ]
 then
    RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov jones97@llnl.gov elliott22@llnl.gov"
@@ -144,21 +144,21 @@ fi
 
 make
 
-make parcsr> $0.parcsr_threads.log 2> $0.parcsr_threads.err
+make parcsr 1> $0.parcsr_threads.log 2> $0.parcsr_threads.err
 if [ -s "$0.parcsr_threads.err" ]
 then
    RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov"
    $HYPRE_MAIL -s "Error(s) in make parcsr (with pthreads)" $RECIPIENTS < $0.parcsr_threads.err
 fi
 
-#make ci_struct> $0.ci_struct_threads.log 2> $0.ci_struct_threads.err
+#make ci_struct 1> $0.ci_struct_threads.log 2> $0.ci_struct_threads.err
 #if [ -s "$0.parcsr_ci_struct.err" ]
 #then
 #   RECIPIENTS="dwalker@llnl.gov cleary1@llnl.gov"
 #   $HYPRE_MAIL -s "Error(s) in make ci_struct (with pthreads)" $RECIPIENTS < $0.ci_struct_threads.err
 #fi
 
-make seq> $0.seq_threads.log 2> $0.seq_threads.err
+make seq 1> $0.seq_threads.log 2> $0.seq_threads.err
 if [ -s "$0.seq_threads.err" ]
 then
    RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov rfalgout@llnl.gov"
@@ -180,7 +180,7 @@ make beta
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
-./configure --without-MPI> $0.configure_no_mpi.log 2> $0.configure_no_mpi.err
+./configure --without-MPI 1> $0.configure_no_mpi.log 2> $0.configure_no_mpi.err
 if [ -s "$0.configure_no_mpi.err" ]
 then
    RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov"
@@ -189,7 +189,7 @@ fi
 
 make veryclean
 
-make struct> $0.struct_no_mpi.log 2> $0.struct_no_mpi.err
+make struct 1> $0.struct_no_mpi.log 2> $0.struct_no_mpi.err
 if [ -s "$0.struct_no_mpi.err" ]
 then
    RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov jones97@llnl.gov"
@@ -198,7 +198,7 @@ fi
 
 make
 
-make parcsr> $0.parcsr_no_mpi.log 2> $0.parcsr_no_mpi.err
+make parcsr 1> $0.parcsr_no_mpi.log 2> $0.parcsr_no_mpi.err
 if [ -s "$0.parcsr_no_mpi.err" ]
 then
    RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov"
@@ -206,14 +206,14 @@ then
 fi
 
 
-#make ci_struct> $0.ci_struct_no_mpi.log 2> $0.ci_struct_no_mpi.err
+#make ci_struct 1> $0.ci_struct_no_mpi.log 2> $0.ci_struct_no_mpi.err
 #if [ -s "$0.ci_struct_no_mpi.err" ]
 #then
 #   RECIPIENTS="dwalker@llnl.gov cleary1@llnl.gov"
 #   $HYPRE_MAIL -s "Error(s) in make ci_struct without MPI" $RECIPIENTS < $0.ci_struct_no_mpi.err
 #fi
 
-make seq> $0.seq_no_mpi.log 2> $0.seq_no_mpi.err
+make seq 1> $0.seq_no_mpi.log 2> $0.seq_no_mpi.err
 if [ -s "$0.seq_no_mpi.err" ]
 then
    RECIPIENTS="dwalker@llnl.gov yang11@llnl.gov vhenson@llnl.gov rfalgout@llnl.gov"
@@ -223,7 +223,7 @@ fi
 make docs
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
-make> $0.test_no_mpi.log 2> $0.test_no_mpi.err
+make 1> $0.test_no_mpi.log 2> $0.test_no_mpi.err
 if [ -s "$0.test_no_mpi.err" ]
 then
    RECIPIENTS="dwalker@llnl.gov rfalgout@llnl.gov"
@@ -303,7 +303,7 @@ ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
 	cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
 	./configure;\
-	make beta
+	make beta;\
     )"
 
 # run test suite
