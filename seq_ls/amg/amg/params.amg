@@ -1,7 +1,7 @@
 
 c     parameter(ndima=500000,ndimu=40000,ndimp=15000,ndimb=100000)
-c     parameter(ndima=600000,ndimu=20000,ndimp=5000,ndimb=100000)
-      parameter(ndima=400000,ndimu=50000,ndimp=50000,ndimb=100000)
+      parameter(ndima=600000,ndimu=20000,ndimp=15000,ndimb=100000)
+c     parameter(ndima=400000,ndimu=50000,ndimp=50000,ndimb=100000)
 c     parameter(ndima=100000,ndimu=10000,ndimp=10000,ndimb=20000)
 c     parameter(ndima=60000,ndimu=5000,ndimp=5000,ndimb=10000)
 c     parameter(ndima=150000,ndimu=25000,ndimp=25000,ndimb=50000)
