@@ -75,7 +75,7 @@ impl_Hypre_ParCSRMatrix__dtor(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix._dtor) */
   /* Insert the implementation of the destructor method here... */
-   int ierr=0;
+   int ierr = 0;
    struct Hypre_ParCSRMatrix__data * data;
    HYPRE_IJMatrix ij_A;
 
@@ -84,6 +84,7 @@ impl_Hypre_ParCSRMatrix__dtor(
    ij_A = data -> ij_A;
 
    ierr = HYPRE_IJMatrixDestroy( ij_A );
+   assert( ierr == 0 );
 
    hypre_TFree( data );
 
@@ -106,11 +107,8 @@ impl_Hypre_ParCSRMatrix_SetCommunicator(
    /* The data type of the last argument, mpi_comm, should be MPI_Comm */
    int ierr=0;
    struct Hypre_ParCSRMatrix__data * data;
-   HYPRE_IJMatrix ij_A;
 
    data = Hypre_ParCSRMatrix__get_data( self );
-
-   ij_A = data -> ij_A;
 
 #ifdef HYPRE_DEBUG
    printf("impl_Hypre_ParCSRMatrix_SetCommunicator\n");
@@ -504,6 +502,7 @@ impl_Hypre_ParCSRMatrix_Print(
 
    ierr = HYPRE_IJMatrixPrint( ij_A, filename);
 
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.Print) */
 }
 
@@ -528,8 +527,6 @@ impl_Hypre_ParCSRMatrix_GetRow(
    HYPRE_ParCSRMatrix HypreP_A;
    int * iindices[1];
    double * dvalues[1];
-   int lower[1];
-   lower[0] = 0;
 
    data = Hypre_ParCSRMatrix__get_data( self );
 
@@ -566,6 +563,7 @@ impl_Hypre_ParCSRMatrix_GetDoubleValue(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
+   return 1;  /*  error to call this function, no double values available */
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.GetDoubleValue) */
 }
 
@@ -582,6 +580,7 @@ impl_Hypre_ParCSRMatrix_GetIntValue(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
+   return 1;  /*  error to call this function, no int values available */
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.GetIntValue) */
 }
 
@@ -599,15 +598,16 @@ impl_Hypre_ParCSRMatrix_SetDoubleParameter(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
    int ierr=0;
-   struct Hypre_ParCSRMatrix__data * data;
-   HYPRE_IJMatrix ij_A;
+   /* not used struct Hypre_ParCSRMatrix__data * data;*/
+   /* not used HYPRE_IJMatrix ij_A; */
 
-   data = Hypre_ParCSRMatrix__get_data( self );
+   /* not used data = Hypre_ParCSRMatrix__get_data( self ); */
 
-   ij_A = data -> ij_A;
+   /* not used ij_A = data -> ij_A; */
 
    printf("impl_Hypre_ParCSRMatrix_SetDoubleParameter\n");
    printf( "Stub\n");
+   ierr = 1;
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetDoubleParameter) */
@@ -627,15 +627,16 @@ impl_Hypre_ParCSRMatrix_SetIntParameter(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
    int ierr=0;
-   struct Hypre_ParCSRMatrix__data * data;
-   HYPRE_IJMatrix ij_A;
+   /* not used struct Hypre_ParCSRMatrix__data * data;*/
+   /* not used HYPRE_IJMatrix ij_A;*/
 
-   data = Hypre_ParCSRMatrix__get_data( self );
+   /* not used data = Hypre_ParCSRMatrix__get_data( self );*/
 
-   ij_A = data -> ij_A;
+   /* not used ij_A = data -> ij_A;*/
 
    printf("impl_Hypre_ParCSRMatrix_SetIntParameter\n");
    printf( "Stub\n");
+   ierr = 1;
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetIntParameter) */
@@ -655,15 +656,16 @@ impl_Hypre_ParCSRMatrix_SetStringParameter(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
    int ierr=0;
-   struct Hypre_ParCSRMatrix__data * data;
-   HYPRE_IJMatrix ij_A;
+   /* not used struct Hypre_ParCSRMatrix__data * data;*/
+   /* not used HYPRE_IJMatrix ij_A;*/
 
-   data = Hypre_ParCSRMatrix__get_data( self );
+   /* not used data = Hypre_ParCSRMatrix__get_data( self );*/
 
-   ij_A = data -> ij_A;
+   /* not used ij_A = data -> ij_A;*/
 
    printf("impl_Hypre_ParCSRMatrix_SetStringParameter\n");
    printf( "Stub\n");
+   ierr = 1;
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetStringParameter) */
@@ -683,15 +685,16 @@ impl_Hypre_ParCSRMatrix_SetIntArrayParameter(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetIntArrayParameter) */
   /* Insert the implementation of the SetIntArrayParameter method here... */
    int ierr=0;
-   struct Hypre_ParCSRMatrix__data * data;
-   HYPRE_IJMatrix ij_A;
+   /* not used struct Hypre_ParCSRMatrix__data * data;*/
+   /* not used HYPRE_IJMatrix ij_A;*/
 
-   data = Hypre_ParCSRMatrix__get_data( self );
+   /* not used data = Hypre_ParCSRMatrix__get_data( self );*/
 
-   ij_A = data -> ij_A;
+   /* not used ij_A = data -> ij_A;*/
 
    printf("impl_Hypre_ParCSRMatrix_SetIntArrayParameter\n");
    printf( "Stub\n");
+   ierr = 1;
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetIntArrayParameter) */
@@ -711,15 +714,16 @@ impl_Hypre_ParCSRMatrix_SetDoubleArrayParameter(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.SetDoubleArrayParameter) */
   /* Insert the implementation of the SetDoubleArrayParameter method here... */
    int ierr=0;
-   struct Hypre_ParCSRMatrix__data * data;
-   HYPRE_IJMatrix ij_A;
+   /* not used struct Hypre_ParCSRMatrix__data * data;*/
+   /* not used HYPRE_IJMatrix ij_A;*/
 
-   data = Hypre_ParCSRMatrix__get_data( self );
+   /* not used data = Hypre_ParCSRMatrix__get_data( self );*/
 
-   ij_A = data -> ij_A;
+   /* not used ij_A = data -> ij_A;*/
 
    printf("impl_Hypre_ParCSRMatrix_SetDoubleArrayParameter\n");
    printf( "Stub\n");
+   ierr = 1;
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.SetDoubleArrayParameter) */

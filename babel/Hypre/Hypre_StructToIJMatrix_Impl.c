@@ -79,6 +79,7 @@ impl_Hypre_StructToIJMatrix_SetIJMatrix(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetIJMatrix) */
   /* Insert the implementation of the SetIJMatrix method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetIJMatrix) */
 }
 
@@ -95,6 +96,7 @@ impl_Hypre_StructToIJMatrix_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetCommunicator) */
 }
 
@@ -114,6 +116,7 @@ impl_Hypre_StructToIJMatrix_Initialize(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.Initialize) */
   /* Insert the implementation of the Initialize method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.Initialize) */
 }
 
@@ -135,6 +138,7 @@ impl_Hypre_StructToIJMatrix_Assemble(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.Assemble) */
   /* Insert the implementation of the Assemble method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.Assemble) */
 }
 
@@ -159,6 +163,7 @@ impl_Hypre_StructToIJMatrix_GetObject(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.GetObject) */
   /* Insert the implementation of the GetObject method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.GetObject) */
 }
 
@@ -175,6 +180,7 @@ impl_Hypre_StructToIJMatrix_SetGrid(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetGrid) */
   /* Insert the implementation of the SetGrid method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetGrid) */
 }
 
@@ -191,6 +197,7 @@ impl_Hypre_StructToIJMatrix_SetStencil(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetStencil) */
   /* Insert the implementation of the SetStencil method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetStencil) */
 }
 
@@ -209,6 +216,7 @@ impl_Hypre_StructToIJMatrix_SetValues(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetValues) */
   /* Insert the implementation of the SetValues method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetValues) */
 }
 
@@ -227,6 +235,7 @@ impl_Hypre_StructToIJMatrix_SetBoxValues(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetBoxValues) */
   /* Insert the implementation of the SetBoxValues method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetBoxValues) */
 }
 
@@ -243,6 +252,7 @@ impl_Hypre_StructToIJMatrix_SetNumGhost(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetNumGhost) */
   /* Insert the implementation of the SetNumGhost method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetNumGhost) */
 }
 
@@ -259,5 +269,6 @@ impl_Hypre_StructToIJMatrix_SetSymmetric(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetSymmetric) */
   /* Insert the implementation of the SetSymmetric method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetSymmetric) */
 }

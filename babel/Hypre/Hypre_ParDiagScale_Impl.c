@@ -72,7 +72,7 @@ impl_Hypre_ParDiagScale__dtor(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale._dtor) */
   /* Insert the implementation of the destructor method here... */
-   int ierr = 0;
+
    struct Hypre_ParDiagScale__data * data;
    data = Hypre_ParDiagScale__get_data( self );
 
@@ -118,6 +118,7 @@ impl_Hypre_ParDiagScale_GetDoubleValue(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
+   return 1; /* there are no values to get */
   /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.GetDoubleValue) */
 }
 
@@ -133,7 +134,8 @@ impl_Hypre_ParDiagScale_GetIntValue(
   Hypre_ParDiagScale self, const char* name, int32_t* value)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.GetIntValue) */
-  /* Insert the implementation of the GetIntValue method here... */
+   /* Insert the implementation of the GetIntValue method here... */
+   return 1; /* there are no values to get */
   /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.GetIntValue) */
 }
 
@@ -150,7 +152,7 @@ impl_Hypre_ParDiagScale_SetDoubleParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
-   /* hypre diagonal scaling has no parameters */
+   return 1; /* hypre diagonal scaling has no parameters */
   /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetDoubleParameter) */
 }
 
@@ -167,7 +169,7 @@ impl_Hypre_ParDiagScale_SetIntParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
-   /* hypre diagonal scaling has no parameters */
+   return 1; /* hypre diagonal scaling has no parameters */
   /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetIntParameter) */
 }
 
@@ -184,7 +186,7 @@ impl_Hypre_ParDiagScale_SetStringParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
-   /* hypre diagonal scaling has no parameters */
+   return 1; /* hypre diagonal scaling has no parameters */
   /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetStringParameter) */
 }
 
@@ -201,7 +203,7 @@ impl_Hypre_ParDiagScale_SetIntArrayParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetIntArrayParameter) */
   /* Insert the implementation of the SetIntArrayParameter method here... */
-   /* hypre diagonal scaling has no parameters */
+   return 1; /* hypre diagonal scaling has no parameters */
   /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetIntArrayParameter) */
 }
 
@@ -218,7 +220,7 @@ impl_Hypre_ParDiagScale_SetDoubleArrayParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetDoubleArrayParameter) */
   /* Insert the implementation of the SetDoubleArrayParameter method here... */
-   /* hypre diagonal scaling has no parameters */
+   return 1; /* hypre diagonal scaling has no parameters */
   /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetDoubleArrayParameter) */
 }
 
@@ -236,6 +238,7 @@ impl_Hypre_ParDiagScale_Setup(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.Setup) */
   /* Insert the implementation of the Setup method here... */
    /* hypre diagonal scaling has no setup */
+   return 0;
   /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.Setup) */
 }
 
@@ -254,14 +257,15 @@ impl_Hypre_ParDiagScale_Apply(
   /* Insert the implementation of the Apply method here... */
    int ierr = 0;
    MPI_Comm * comm;
-   HYPRE_Solver * solver;
+   HYPRE_Solver dummy;
+   HYPRE_Solver * solver = &dummy;
    struct Hypre_ParDiagScale__data * data;
    Hypre_Operator mat;
-   HYPRE_Matrix HYPRE_A;
+   /* not used HYPRE_Matrix HYPRE_A;*/
    Hypre_ParCSRMatrix HypreP_A;
    HYPRE_ParCSRMatrix AA;
    HYPRE_IJMatrix ij_A;
-   HYPRE_Vector HYPRE_x, HYPRE_b;
+   /* not used HYPRE_Vector HYPRE_x, HYPRE_b;*/
    Hypre_ParCSRVector HypreP_b, HypreP_x;
    HYPRE_ParVector bb, xx;
    HYPRE_IJVector ij_b, ij_x;
@@ -289,7 +293,7 @@ impl_Hypre_ParDiagScale_Apply(
    ij_b = datab -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
    bb = (HYPRE_ParVector) objectb;
-   HYPRE_b = (HYPRE_Vector) bb;
+   /* not used HYPRE_b = (HYPRE_Vector) bb;*/
 
    HypreP_x = Hypre_Vector__cast2
       ( Hypre_Vector_queryInterface( *x, "Hypre.ParCSRVector"),
@@ -298,7 +302,7 @@ impl_Hypre_ParDiagScale_Apply(
    ij_x = datax -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
    xx = (HYPRE_ParVector) objectx;
-   HYPRE_b = (HYPRE_Vector) xx;
+   /* not used HYPRE_b = (HYPRE_Vector) xx;*/
 
    HypreP_A = Hypre_Operator__cast2
       ( Hypre_Operator_queryInterface( mat, "Hypre.ParCSRVector"),
@@ -307,7 +311,7 @@ impl_Hypre_ParDiagScale_Apply(
    ij_A = dataA -> ij_A;
    ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
    AA = (HYPRE_ParCSRMatrix) objectA;
-   HYPRE_A = (HYPRE_Matrix) AA;
+   /* not used HYPRE_A = (HYPRE_Matrix) AA;*/
 
    /* does x = y/diagA as approximation to solving Ax=y for x ... */
    ierr += HYPRE_ParCSRDiagScale( *solver, AA, xx, bb );
@@ -392,6 +396,6 @@ impl_Hypre_ParDiagScale_SetPrintLevel(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
-   /* hypre diagonal scaling does no printing */
+   return 1; /* hypre diagonal scaling does no printing */
   /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetPrintLevel) */
 }

@@ -74,6 +74,7 @@ impl_Hypre_StructToIJVector_SetIJVector(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.SetIJVector) */
   /* Insert the implementation of the SetIJVector method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.SetIJVector) */
 }
 
@@ -90,6 +91,7 @@ impl_Hypre_StructToIJVector_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.SetCommunicator) */
 }
 
@@ -109,6 +111,7 @@ impl_Hypre_StructToIJVector_Initialize(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.Initialize) */
   /* Insert the implementation of the Initialize method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.Initialize) */
 }
 
@@ -130,6 +133,7 @@ impl_Hypre_StructToIJVector_Assemble(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.Assemble) */
   /* Insert the implementation of the Assemble method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.Assemble) */
 }
 
@@ -154,6 +158,7 @@ impl_Hypre_StructToIJVector_GetObject(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.GetObject) */
   /* Insert the implementation of the GetObject method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.GetObject) */
 }
 
@@ -170,6 +175,7 @@ impl_Hypre_StructToIJVector_SetGrid(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.SetGrid) */
   /* Insert the implementation of the SetGrid method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.SetGrid) */
 }
 
@@ -186,6 +192,7 @@ impl_Hypre_StructToIJVector_SetStencil(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.SetStencil) */
   /* Insert the implementation of the SetStencil method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.SetStencil) */
 }
 
@@ -202,6 +209,7 @@ impl_Hypre_StructToIJVector_SetValue(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.SetValue) */
   /* Insert the implementation of the SetValue method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.SetValue) */
 }
 
@@ -218,6 +226,7 @@ impl_Hypre_StructToIJVector_SetBoxValues(
     struct SIDL_int__array* iupper, struct SIDL_double__array* values)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.SetBoxValues) */
+   return 1;
   /* Insert the implementation of the SetBoxValues method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.SetBoxValues) */
 }

@@ -77,6 +77,7 @@ impl_Hypre_StructMatrix_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetCommunicator) */
 }
 
@@ -96,6 +97,7 @@ impl_Hypre_StructMatrix_Initialize(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.Initialize) */
   /* Insert the implementation of the Initialize method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.Initialize) */
 }
 
@@ -117,6 +119,7 @@ impl_Hypre_StructMatrix_Assemble(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.Assemble) */
   /* Insert the implementation of the Assemble method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.Assemble) */
 }
 
@@ -141,6 +144,7 @@ impl_Hypre_StructMatrix_GetObject(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.GetObject) */
   /* Insert the implementation of the GetObject method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.GetObject) */
 }
 
@@ -157,6 +161,7 @@ impl_Hypre_StructMatrix_SetGrid(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetGrid) */
   /* Insert the implementation of the SetGrid method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetGrid) */
 }
 
@@ -173,6 +178,7 @@ impl_Hypre_StructMatrix_SetStencil(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetStencil) */
   /* Insert the implementation of the SetStencil method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetStencil) */
 }
 
@@ -191,6 +197,7 @@ impl_Hypre_StructMatrix_SetValues(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetValues) */
   /* Insert the implementation of the SetValues method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetValues) */
 }
 
@@ -209,6 +216,7 @@ impl_Hypre_StructMatrix_SetBoxValues(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetBoxValues) */
   /* Insert the implementation of the SetBoxValues method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetBoxValues) */
 }
 
@@ -225,6 +233,7 @@ impl_Hypre_StructMatrix_SetNumGhost(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetNumGhost) */
   /* Insert the implementation of the SetNumGhost method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetNumGhost) */
 }
 
@@ -241,6 +250,7 @@ impl_Hypre_StructMatrix_SetSymmetric(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetSymmetric) */
   /* Insert the implementation of the SetSymmetric method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetSymmetric) */
 }
 
@@ -257,6 +267,7 @@ impl_Hypre_StructMatrix_GetDoubleValue(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.GetDoubleValue) */
 }
 
@@ -273,6 +284,7 @@ impl_Hypre_StructMatrix_GetIntValue(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.GetIntValue) */
 }
 
@@ -289,6 +301,7 @@ impl_Hypre_StructMatrix_SetDoubleParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetDoubleParameter) */
 }
 
@@ -305,6 +318,7 @@ impl_Hypre_StructMatrix_SetIntParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetIntParameter) */
 }
 
@@ -321,6 +335,7 @@ impl_Hypre_StructMatrix_SetStringParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetStringParameter) */
 }
 
@@ -337,6 +352,7 @@ impl_Hypre_StructMatrix_SetIntArrayParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetIntArrayParameter) */
   /* Insert the implementation of the SetIntArrayParameter method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetIntArrayParameter) */
 }
 
@@ -353,6 +369,7 @@ impl_Hypre_StructMatrix_SetDoubleArrayParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetDoubleArrayParameter) */
   /* Insert the implementation of the SetDoubleArrayParameter method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetDoubleArrayParameter) */
 }
 
@@ -369,6 +386,7 @@ impl_Hypre_StructMatrix_Setup(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.Setup) */
   /* Insert the implementation of the Setup method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.Setup) */
 }
 
@@ -385,6 +403,7 @@ impl_Hypre_StructMatrix_Apply(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.Apply) */
   /* Insert the implementation of the Apply method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.Apply) */
 }
 

@@ -78,6 +78,7 @@ impl_Hypre_StructStencil_SetDimension(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructStencil.SetDimension) */
   /* Insert the implementation of the SetDimension method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructStencil.SetDimension) */
 }
 
@@ -94,6 +95,7 @@ impl_Hypre_StructStencil_SetSize(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructStencil.SetSize) */
   /* Insert the implementation of the SetSize method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructStencil.SetSize) */
 }
 
@@ -110,5 +112,6 @@ impl_Hypre_StructStencil_SetElement(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructStencil.SetElement) */
   /* Insert the implementation of the SetElement method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructStencil.SetElement) */
 }

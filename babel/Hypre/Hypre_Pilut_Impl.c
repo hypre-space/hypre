@@ -74,6 +74,7 @@ impl_Hypre_Pilut_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetCommunicator) */
 }
 
@@ -90,6 +91,7 @@ impl_Hypre_Pilut_GetDoubleValue(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.GetDoubleValue) */
 }
 
@@ -106,6 +108,7 @@ impl_Hypre_Pilut_GetIntValue(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.GetIntValue) */
 }
 
@@ -122,6 +125,7 @@ impl_Hypre_Pilut_SetDoubleParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetDoubleParameter) */
 }
 
@@ -138,6 +142,7 @@ impl_Hypre_Pilut_SetIntParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetIntParameter) */
 }
 
@@ -154,6 +159,7 @@ impl_Hypre_Pilut_SetStringParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetStringParameter) */
 }
 
@@ -170,6 +176,7 @@ impl_Hypre_Pilut_SetIntArrayParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetIntArrayParameter) */
   /* Insert the implementation of the SetIntArrayParameter method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetIntArrayParameter) */
 }
 
@@ -186,6 +193,7 @@ impl_Hypre_Pilut_SetDoubleArrayParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetDoubleArrayParameter) */
   /* Insert the implementation of the SetDoubleArrayParameter method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetDoubleArrayParameter) */
 }
 
@@ -202,6 +210,7 @@ impl_Hypre_Pilut_Setup(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.Setup) */
   /* Insert the implementation of the Setup method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.Setup) */
 }
 
@@ -218,6 +227,7 @@ impl_Hypre_Pilut_Apply(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.Apply) */
   /* Insert the implementation of the Apply method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.Apply) */
 }
 
@@ -234,6 +244,7 @@ impl_Hypre_Pilut_SetOperator(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetOperator) */
 }
 
@@ -250,6 +261,7 @@ impl_Hypre_Pilut_GetResidual(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.GetResidual) */
   /* Insert the implementation of the GetResidual method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.GetResidual) */
 }
 
@@ -266,6 +278,7 @@ impl_Hypre_Pilut_SetLogging(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetLogging) */
 }
 
@@ -282,6 +295,7 @@ impl_Hypre_Pilut_SetPrintLevel(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetPrintLevel) */
 }
 

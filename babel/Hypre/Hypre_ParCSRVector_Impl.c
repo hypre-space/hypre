@@ -95,7 +95,6 @@ impl_Hypre_ParCSRVector_Clear(
    int ierr = 0;
    void * object;
    struct Hypre_ParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
    HYPRE_ParVector xx;
    HYPRE_IJVector ij_x;
    data = Hypre_ParCSRVector__get_data( self );
@@ -264,7 +263,6 @@ impl_Hypre_ParCSRVector_Scale(
    int ierr = 0;
    void * object;
    struct Hypre_ParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
    HYPRE_ParVector xx;
    HYPRE_IJVector ij_x;
    data = Hypre_ParCSRVector__get_data( self );
@@ -575,7 +573,7 @@ impl_Hypre_ParCSRVector_SetLocalComponents(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.SetLocalComponents) */
   /* Insert the implementation of the SetLocalComponents method here... */
-/* >>> not implemented <<< */
+   return 1;  /* >>> not implemented <<< */
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.SetLocalComponents) */
 }
 
@@ -594,7 +592,7 @@ impl_Hypre_ParCSRVector_AddtoLocalComponents(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.AddtoLocalComponents) */
   /* Insert the implementation of the AddtoLocalComponents method here... */
-/* >>> not implemented <<< */
+   return 1;  /* >>> not implemented <<< */
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.AddtoLocalComponents) */
 }
 
@@ -615,7 +613,7 @@ impl_Hypre_ParCSRVector_SetLocalComponentsInBlock(
     */
   /* Insert the implementation of the SetLocalComponentsInBlock method here... 
     */
-/* >>> not implemented <<< */
+   return 1;  /* >>> not implemented <<< */
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.SetLocalComponentsInBlock) */
 }
 
@@ -636,6 +634,7 @@ impl_Hypre_ParCSRVector_AddToLocalComponentsInBlock(
     splicer.begin(Hypre.ParCSRVector.AddToLocalComponentsInBlock) */
   /* Insert the implementation of the AddToLocalComponentsInBlock method 
     here... */
+   return 1;     /* >>>> not implemented <<<< */
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.AddToLocalComponentsInBlock) 
     */
 }
@@ -797,5 +796,7 @@ impl_Hypre_ParCSRVector_Print(
    ij_b = data->ij_b;
 
    ierr = HYPRE_IJVectorPrint( ij_b, filename );
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Print) */
 }

@@ -76,6 +76,7 @@ impl_Hypre_StructGrid_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructGrid.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructGrid.SetCommunicator) */
 }
 
@@ -92,6 +93,7 @@ impl_Hypre_StructGrid_SetDimension(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructGrid.SetDimension) */
   /* Insert the implementation of the SetDimension method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructGrid.SetDimension) */
 }
 
@@ -109,6 +111,7 @@ impl_Hypre_StructGrid_SetExtents(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructGrid.SetExtents) */
   /* Insert the implementation of the SetExtents method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructGrid.SetExtents) */
 }
 
@@ -125,6 +128,7 @@ impl_Hypre_StructGrid_SetPeriodic(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructGrid.SetPeriodic) */
   /* Insert the implementation of the SetPeriodic method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructGrid.SetPeriodic) */
 }
 
@@ -141,5 +145,6 @@ impl_Hypre_StructGrid_Assemble(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructGrid.Assemble) */
   /* Insert the implementation of the Assemble method here... */
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructGrid.Assemble) */
 }
