@@ -152,11 +152,11 @@ hypre_NewIJMatrixParCSR(hypre_IJMatrix *matrix)
 
 /******************************************************************************
  *
- * hypre_SetIJMatrixRowSizesParCSR
+ * hypre_SetIJMatrixRowSizesParcsr
  *
  *****************************************************************************/
 int
-hypre_SetIJMatrixRowSizesParCSR(hypre_IJMatrix *matrix,
+hypre_SetIJMatrixRowSizesParcsr(hypre_IJMatrix *matrix,
 			      	int	       *sizes)
 {
    int *row_space;
