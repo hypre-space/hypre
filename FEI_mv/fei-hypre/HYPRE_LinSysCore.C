@@ -1265,7 +1265,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
           {
              printf("       HYPRE_LSC::parameters mlCoarseSolver = %d\n",
-                    mlCoarseSolver);
+                    mlCoarseSolver_);
           }
        }
 
