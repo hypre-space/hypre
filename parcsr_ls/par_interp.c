@@ -118,12 +118,16 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int local_numrows = hypre_CSRMatrixNumRows(A_diag);
    int col_n = col_1 + local_numrows;
 
+   double           wall_time;  /* for debugging instrumentation  */
+
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
     *-------------------------------------------------------------------*/
+
+   if (debug_flag==3) wall_time = time_getWallclockSeconds();
 
    CF_marker_cols = hypre_CTAlloc(int, hypre_CSRMatrixNumRows(A_diag));
    for (i = 0; i < n_fine; i++)
@@ -159,9 +163,19 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    hypre_FinalizeCommunication(comm_handle);   
 
+   if (debug_flag==3)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d     Interp: Comm 1 CF_marker =    %f\n",
+                    my_id, wall_time);
+      fflush(NULL);
+   }
+
    /*----------------------------------------------------------------------
     * Get the ghost rows of A
     *---------------------------------------------------------------------*/
+
+   if (debug_flag==3) wall_time = time_getWallclockSeconds();
 
    if (num_procs > 1)
    {
@@ -171,12 +185,20 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
       A_ext_data = hypre_CSRMatrixData(A_ext);
    }
    
-
+   if (debug_flag==3)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d     Interp: Comm 2   Get A_ext =  %f\n",
+                    my_id, wall_time);
+      fflush(NULL);
+   }
 
    /*-----------------------------------------------------------------------
     * Determine the number of C-pts on each processor, broadcast,
     * the first C-pt on each processor, and the total number of C-pts
     *----------------------------------------------------------------------*/
+
+   if (debug_flag==3) wall_time = time_getWallclockSeconds();
 
     num_cpts_global = hypre_CTAlloc(int, num_procs+1);
     num_cpts_local = 0;
@@ -188,6 +210,15 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
     MPI_Allgather(&num_cpts_local,1,MPI_INT,num_cpts_global,1,MPI_INT,comm);
     
+    if (debug_flag==3)
+    {
+       wall_time = time_getWallclockSeconds() - wall_time;
+       printf("Proc = %d     Interp: Comm 3 Allgather #C = %f\n",
+                     my_id, wall_time);
+       fflush(NULL);
+    }
+    if (debug_flag==3) wall_time = time_getWallclockSeconds();
+
     my_first_cpt = 0;
     for (i = 0; i < my_id; i++)
     {
@@ -310,9 +341,19 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
   
    strong_f_marker = -2;
 
+   if (debug_flag==3)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d     Interp: Internal work 1 =     %f\n",
+                    my_id, wall_time);
+      fflush(NULL);
+   }
+
    /*-----------------------------------------------------------------------
     *  Send and receive fine_to_coarse info.
     *-----------------------------------------------------------------------*/ 
+
+   if (debug_flag==3) wall_time = time_getWallclockSeconds();
 
    fine_to_coarse_offd = hypre_CTAlloc(int, num_cols_A_offd); 
 
@@ -330,6 +371,16 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 	fine_to_coarse_offd);  
 
    hypre_FinalizeCommunication(comm_handle);   
+
+   if (debug_flag==3)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d     Interp: Comm 4 FineToCoarse = %f\n",
+                    my_id, wall_time);
+      fflush(NULL);
+   }
+
+   if (debug_flag==3) wall_time = time_getWallclockSeconds();
 
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;
 
@@ -773,6 +824,16 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
     *  Determine the col_map_offd_P
     *----------------------------------------------------------------------*/
 
+   if (debug_flag==3)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d     Interp: Internal work 2 =     %f\n",
+                    my_id, wall_time);
+      fflush(NULL);
+   }
+
+   if (debug_flag==3) wall_time = time_getWallclockSeconds();
+
    coarse_counter = 0;
    for (i = 0; i < n_fine; i++)
    {
@@ -796,6 +857,14 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
 
    hypre_FinalizeCommunication(comm_handle);   
+
+   if (debug_flag==3)
+   {
+      wall_time = time_getWallclockSeconds() - wall_time;
+      printf("Proc = %d     Interp: Comm 5 CF_mar offd  = %f\n",
+                    my_id, wall_time);
+      fflush(NULL);
+   }
 
 /* Test begins here */
 
