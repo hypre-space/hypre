@@ -214,9 +214,18 @@ hypre_SemiRestrict( void               *restrict_vdata,
 
             if (R_stored_as_transpose)
             {
-               Rp0 = hypre_StructMatrixBoxData(R, fi, 1) -
-                  hypre_BoxOffsetDistance(R_dbox, stencil_shape[1]);
-               Rp1 = hypre_StructMatrixBoxData(R, fi, 0);
+               if ( constant_coefficient )
+               {
+                  Rp0 = hypre_StructMatrixBoxData(R, fi, 1) -
+                     hypre_CCBoxOffsetDistance(R_dbox, stencil_shape[1]);
+                  Rp1 = hypre_StructMatrixBoxData(R, fi, 0);
+               }
+               else
+               {
+                  Rp0 = hypre_StructMatrixBoxData(R, fi, 1) -
+                     hypre_BoxOffsetDistance(R_dbox, stencil_shape[1]);
+                  Rp1 = hypre_StructMatrixBoxData(R, fi, 0);
+               }
             }
             else
             {

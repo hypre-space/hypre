@@ -247,9 +247,18 @@ hypre_SemiInterp( void               *interp_vdata,
 
             if (P_stored_as_transpose)
             {
-               Pp0 = hypre_StructMatrixBoxData(P, fi, 1);
-               Pp1 = hypre_StructMatrixBoxData(P, fi, 0) -
-                  hypre_BoxOffsetDistance(P_dbox, stencil_shape[0]);
+               if ( constant_coefficient )
+               {
+                  Pp0 = hypre_StructMatrixBoxData(P, fi, 1);
+                  Pp1 = hypre_StructMatrixBoxData(P, fi, 0) -
+                     hypre_CCBoxOffsetDistance(P_dbox, stencil_shape[0]);
+               }
+               else
+               {
+                  Pp0 = hypre_StructMatrixBoxData(P, fi, 1);
+                  Pp1 = hypre_StructMatrixBoxData(P, fi, 0) -
+                     hypre_BoxOffsetDistance(P_dbox, stencil_shape[0]);
+               }
             }
             else
             {
