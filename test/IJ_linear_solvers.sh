@@ -39,12 +39,12 @@ head $DRIVER.testdata.tmp0 > $DRIVER.testdata
 #		     diffs it against 1 proc case
 #=============================================================================
 
-$MPIRUN -np 2 $DRIVER -P 1 1 2 -rlx 0 -xisone -P 1 1 2 
+$MPIRUN -np 2 $DRIVER -P 1 1 2 -rlx 0 -xisone 
 tail -21 $DRIVER.log > $DRIVER.testdata.tmp0
 head $DRIVER.testdata.tmp0 > $DRIVER.testdata.temp
 diff $DRIVER.testdata $DRIVER.testdata.temp >&2
 
-$MPIRUN -np 3 $DRIVER -P 1 1 3 -rlx 0 -xisone -P 1 1 3 
+$MPIRUN -np 3 $DRIVER -P 1 1 3 -rlx 0 -xisone 
 tail -21 $DRIVER.log > $DRIVER.testdata.tmp0
 head $DRIVER.testdata.tmp0 > $DRIVER.testdata.temp
 diff $DRIVER.testdata $DRIVER.testdata.temp >&2
@@ -95,6 +95,8 @@ $MPIRUN -np 4 $DRIVER -rhsrand -n 15 15 10 -P 2 2 1 -falgout -27pt
 #    2: DS_PCG
 #    3: BoomerAMG_GMRES
 #    4: DS_GMRES
+#    5: BoomerAMG_CGNR
+#    6: DS_CGNR
 #    8: ParaSails_PCG
 #=============================================================================
 
@@ -105,5 +107,9 @@ $MPIRUN -np 2 $DRIVER -solver 2 -rhsrand
 $MPIRUN -np 2 $DRIVER -solver 3 -rhsrand
 
 $MPIRUN -np 2 $DRIVER -solver 4 -rhsrand
+
+$MPIRUN -np 2 $DRIVER -solver 5 -rhsrand
+
+$MPIRUN -np 2 $DRIVER -solver 6 -rhsrand
 
 $MPIRUN -np 2 $DRIVER -solver 8 -rhsrand
