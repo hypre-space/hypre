@@ -584,10 +584,13 @@ hypre_IJVectorGetLocalComponentsPar(hypre_IJVector *vector,
    vec_stop  = partitioning[my_id+1];
 
 /* Determine whether *glob_vec_indices points to local indices only */
-   for (i = 0; i < num_values; i++)
-   { ierr += (glob_vec_indices[i] <  vec_start);
-     ierr += (glob_vec_indices[i] >= vec_stop);
-   };
+   if (glob_vec_indices)
+   {
+      for (i = 0; i < num_values; i++)
+      { ierr += (glob_vec_indices[i] <  vec_start);
+        ierr += (glob_vec_indices[i] >= vec_stop);
+      }
+   }
     
    data = hypre_VectorData(local_vector);
    if (!ierr && !value_indices)
