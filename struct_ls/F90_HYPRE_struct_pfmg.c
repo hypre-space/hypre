@@ -149,6 +149,20 @@ hypre_F90_IFACE(hypre_structpfmgsetrelaxtype, HYPRE_STRUCTPFMGSETRELAXTYPE)( lon
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructPFMGSetRAPType
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structpfmgsetraptype, HYPRE_STRUCTPFMGSETRAPTYPE)( long int *solver,
+                                               int      *rap_type,
+                                               int      *ierr       )
+{
+   *ierr = (int)
+      ( HYPRE_StructPFMGSetRAPType( (HYPRE_StructSolver) *solver,
+                                      (int)              *rap_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructPFMGSetNumPreRelax
  *--------------------------------------------------------------------------*/
 

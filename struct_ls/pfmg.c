@@ -38,6 +38,7 @@ hypre_PFMGCreate( MPI_Comm  comm )
    (pfmg_data -> dxyz)[1]        = 0.0;
    (pfmg_data -> dxyz)[2]        = 0.0;
    (pfmg_data -> relax_type)     = 1;       /* weighted Jacobi */
+   (pfmg_data -> rap_type)       = 0;       
    (pfmg_data -> num_pre_relax)  = 1;
    (pfmg_data -> num_post_relax) = 1;
    (pfmg_data -> skip_relax)     = 1;
@@ -198,6 +199,22 @@ hypre_PFMGSetRelaxType( void *pfmg_vdata,
    int             ierr = 0;
  
    (pfmg_data -> relax_type) = relax_type;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PFMGSetRAPType
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PFMGSetRAPType( void *pfmg_vdata,
+                      int   rap_type )
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   (pfmg_data -> rap_type) = rap_type;
  
    return ierr;
 }

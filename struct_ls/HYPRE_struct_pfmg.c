@@ -133,6 +133,17 @@ HYPRE_StructPFMGSetRelaxType( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructPFMGSetRAPType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructPFMGSetRAPType( HYPRE_StructSolver solver,
+                            int                rap_type )
+{
+   return( hypre_PFMGSetRAPType( (void *) solver, rap_type) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructPFMGSetNumPreRelax
  *--------------------------------------------------------------------------*/
 

@@ -49,6 +49,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    MPI_Comm              comm = (pfmg_data -> comm);
                      
    int                   relax_type = (pfmg_data -> relax_type);
+   int                   rap_type = (pfmg_data -> rap_type);
    int                   skip_relax = (pfmg_data -> skip_relax);
    double               *dxyz       = (pfmg_data -> dxyz);
                      
@@ -259,7 +260,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       }
 
       A_l[l+1] = hypre_PFMGCreateRAPOp(RT_l[l], A_l[l], P_l[l],
-                                       grid_l[l+1], cdir);
+                                       grid_l[l+1], cdir, rap_type);
       hypre_StructMatrixInitializeShell(A_l[l+1]);
       data_size += hypre_StructMatrixDataSize(A_l[l+1]);
 
@@ -354,7 +355,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
       /* set up the coarse grid operator */
       hypre_PFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l],
-                           cdir, cindex, stride, A_l[l+1]);
+                           cdir, cindex, stride, rap_type, A_l[l+1]);
 
       /* set up the interpolation routine */
       interp_data_l[l] = hypre_SemiInterpCreate();

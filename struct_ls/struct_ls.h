@@ -147,6 +147,7 @@ int HYPRE_StructPFMGSetRelChange( HYPRE_StructSolver solver , int rel_change );
 int HYPRE_StructPFMGSetZeroGuess( HYPRE_StructSolver solver );
 int HYPRE_StructPFMGSetNonZeroGuess( HYPRE_StructSolver solver );
 int HYPRE_StructPFMGSetRelaxType( HYPRE_StructSolver solver , int relax_type );
+int HYPRE_StructPFMGSetRAPType( HYPRE_StructSolver solver , int rap_type );
 int HYPRE_StructPFMGSetNumPreRelax( HYPRE_StructSolver solver , int num_pre_relax );
 int HYPRE_StructPFMGSetNumPostRelax( HYPRE_StructSolver solver , int num_post_relax );
 int HYPRE_StructPFMGSetSkipRelax( HYPRE_StructSolver solver , int skip_relax );
@@ -240,6 +241,7 @@ int hypre_PFMGSetMaxIter( void *pfmg_vdata , int max_iter );
 int hypre_PFMGSetRelChange( void *pfmg_vdata , int rel_change );
 int hypre_PFMGSetZeroGuess( void *pfmg_vdata , int zero_guess );
 int hypre_PFMGSetRelaxType( void *pfmg_vdata , int relax_type );
+int hypre_PFMGSetRAPType( void *pfmg_vdata , int rap_type );
 int hypre_PFMGSetNumPreRelax( void *pfmg_vdata , int num_pre_relax );
 int hypre_PFMGSetNumPostRelax( void *pfmg_vdata , int num_post_relax );
 int hypre_PFMGSetSkipRelax( void *pfmg_vdata , int skip_relax );
@@ -272,8 +274,16 @@ hypre_StructMatrix *hypre_PFMGCreateInterpOp( hypre_StructMatrix *A , hypre_Stru
 int hypre_PFMGSetupInterpOp( hypre_StructMatrix *A , int cdir , hypre_Index findex , hypre_Index stride , hypre_StructMatrix *P );
 
 /* pfmg_setup_rap.c */
-hypre_StructMatrix *hypre_PFMGCreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
-int hypre_PFMGSetupRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *Ac );
+hypre_StructMatrix *hypre_PFMGCreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir , int rap_type );
+int hypre_PFMGSetupRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , int cdir , hypre_Index cindex , hypre_Index cstride , int rap_type , hypre_StructMatrix *Ac );
+
+/* pfmg_setup_rap5.c */
+hypre_StructMatrix *hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
+int hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+
+/* pfmg_setup_rap7.c */
+hypre_StructMatrix *hypre_PFMGCreateCoarseOp7( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
+int hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
 
 /* pfmg_solve.c */
 int hypre_PFMGSolve( void *pfmg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );

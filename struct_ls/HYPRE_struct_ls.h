@@ -203,6 +203,12 @@ int HYPRE_StructPFMGSetRelaxType(HYPRE_StructSolver solver,
                                  int                relax_type);
 
 /**
+ * (Optional) Set type of code used for coarse operator.
+ **/
+int HYPRE_StructPFMGSetRAPType(HYPRE_StructSolver solver,
+                               int                rap_type);
+
+/**
  * (Optional) Set number of pre-relaxation sweeps.
  **/
 int HYPRE_StructPFMGSetNumPreRelax(HYPRE_StructSolver solver,
