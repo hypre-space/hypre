@@ -169,7 +169,7 @@ hypre_ParAMGCycle( void              *amg_vdata,
             cycle_op_count += num_coeffs[level]; 
          }
 
-#if 0
+
          Solve_err_flag = hypre_ParAMGRelax(A_array[level], 
                                             F_array[level],
                                             CF_marker_array[level],
@@ -177,7 +177,7 @@ hypre_ParAMGCycle( void              *amg_vdata,
                                             relax_points,
                                             U_array[level],
                                             Vtemp);
-#endif
+
  
          if (Solve_err_flag != 0)
             return(Solve_err_flag);
