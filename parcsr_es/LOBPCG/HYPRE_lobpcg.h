@@ -6,6 +6,13 @@
  * Authors: M. Argentati and A. Knyazev
  *********************************************************************EHEADER*/
 
+#ifndef HYPRE_LOBPCG_HEADER
+#define HYPRE_LOBPCG_HEADER
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*  matrix types */
 enum en1 {NONE1,DENSE,HYPRE_MATRIX,HYPRE_VECTORS};
 enum en2 {NONE2,GENERAL,SYMMETRIC};
@@ -97,3 +104,9 @@ int HYPRE_LobpcgGetEigvalHistory(HYPRE_LobpcgData lobpcg,double ***eigvalhistory
 int HYPRE_LobpcgGetBlocksize(HYPRE_LobpcgData lobpcg,int *bsize);
 
 int *CopyPartition(int *partition);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
