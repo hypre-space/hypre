@@ -451,12 +451,13 @@ void    *data;
    hypre_ParAMGData  *amg_data = data;
  
    /* amg solve params */
+   int      num_levels; 
    int      max_iter;
    int      cycle_type;    
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
    int    **grid_relax_points; 
-   double   relax_weight;
+   double  *relax_weight;
    double   tol;
  
    /* amg output params */
@@ -469,6 +470,7 @@ void    *data;
     * Get the amg_data data
     *----------------------------------------------------------*/
 
+   num_levels = hypre_ParAMGDataNumLevels(amg_data);
    max_iter   = hypre_ParAMGDataMaxIter(amg_data);
    cycle_type = hypre_ParAMGDataCycleType(amg_data);    
    num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);  
@@ -514,7 +516,8 @@ void    *data;
       for (j = 0; j < num_grid_sweeps[3]; j++)
               printf("  %2d", grid_relax_points[3][j]);
       printf( "\n\n");
-      printf( "  Relaxation Weight (Jacobi) %f\n",relax_weight);
+      for (j=0; j < num_levels; j++)
+      printf( "  Relaxation Weight (Jacobi) %f level %d\n",relax_weight[j],j);
 
       printf( " Output flag (ioutdat): %d \n", amg_ioutdat);
    }
