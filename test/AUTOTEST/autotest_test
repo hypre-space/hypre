@@ -456,7 +456,6 @@ apply_error_filters () {
           ': warning: assignment type mismatch:'
         do multi_line_delete $ErrorFile 1 "${ii}"
         done
-        done
         for ii in \
           'Warning: Releases of GCC earlier than version 3.0'
         do multi_line_range $ErrorFile 1 9 "${ii}"
