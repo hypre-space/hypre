@@ -273,7 +273,9 @@ char *argv[];
     * Print the solution and other info
     *-----------------------------------------------------------*/
 
+#if 0
    hypre_PrintStructVector("zout_x", x, 0);
+#endif
 
    hypre_SMGGetNumIterations(smg_data, &num_iterations);
    if (myid == 0)
