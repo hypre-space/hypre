@@ -234,6 +234,45 @@ HYPRE_SetIJMatrixLocalSize( HYPRE_IJMatrix IJmatrix, int local_m, int local_n )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SetIJMatrixRowSizes
+ *--------------------------------------------------------------------------*/
+
+/**
+* HYPRE_SetIJMatrixRowSizes( HYPRE_IJMatrix IJmatrix, int *sizes); 
+
+Not collective.
+Tells "matrix" how many nonzeros to expect in each row.
+Knowing this quantity apriori may have a significant impact on the time needed for the Assemble phase,
+and this option should always be utilized if the information is available.It is most useful in conjunction
+with the next function.
+@return integer error code
+@param HYPRE_IJMatrix &matrix [IN] 
+the matrix to be operated on.
+@param int *sizes [IN]
+a vector of length = local_m giving the estimated sizes for the diagonal parts of
+all local_m rows, in order from lowest globally numbered local row to highest.
+*/
+
+int 
+HYPRE_SetIJMatrixRowSizes( HYPRE_IJMatrix IJmatrix, int *sizes )
+{
+   int ierr = 0;
+   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+
+   if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC_MATRIX )
+      ierr = hypre_SetIJMatrixRowSizesPETSc( matrix , sizes );
+   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
+      ierr = hypre_SetIJMatrixRowSizesISIS( matrix , sizes );
+   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+      ierr = hypre_SetIJMatrixRowSizesParcsr( matrix , sizes );
+   else
+      ierr = -1;
+
+   return(ierr);
+}
+
+
+/*--------------------------------------------------------------------------
  * HYPRE_SetIJMatrixDiagRowSizes
  *--------------------------------------------------------------------------*/
 
