@@ -1462,7 +1462,7 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
                HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_ParCSRPilutSolve,
                                            HYPRE_DummyFunction, HYPrecon_);
             }
-            else if ( HYPreconReuse_ == 0 && HYPreconSetup_ == 1 )
+            else
             {
                HYPRE_ParCSRPilutCreate( comm_, &HYPrecon_ );
                HYPRE_ParCSRPilutSetFactorRowSize(HYPrecon_,pilutFillin_);
