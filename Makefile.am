@@ -3,6 +3,8 @@
 #
 ## Process this file with automake to create Makefile.in
 
+.PHONY: test
+
 ACLOCAL_AMFLAGS = -I config
 
 include_HEADERS = HYPRE.h HYPRE_config.h
@@ -83,11 +85,14 @@ config\
  sstruct_mv sstruct_ls\
  seq_mv parcsr_mv distributed_matrix matrix_matrix\
  IJ_mv distributed_ls parcsr_ls parcsr_es\
- FEI_mv babel babel-runtime test lib docs .
+ FEI_mv $(BABELDIR) test lib docs .
+# causes problems with "make distclean"
+# FEI_mv babel babel-runtime test lib docs .
 
-test-local:
-	echo "no automated test suite available yet."
-	echo "To compile test drivers enter: make tests"
+test:
+	@ \
+	$(MAKE) $(AM_MAKEFLAGS) install; \
+	(cd test && $(MAKE) $(AM_MAKEFLAGS) install)
 
 tests:
 	@ \
