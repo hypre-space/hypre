@@ -100,6 +100,8 @@ hypre_SchwarzSetup(void               *schwarz_vdata,
    int num_functions = hypre_SchwarzDataNumFunctions(schwarz_data);
    double relax_weight = hypre_SchwarzDataRelaxWeight(schwarz_data);
 
+   dof_func = hypre_SchwarzDataDofFunc(schwarz_data);
+
    Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
 			hypre_ParCSRMatrixGlobalNumRows(A),
 			hypre_ParCSRMatrixRowStarts(A));

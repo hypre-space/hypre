@@ -1950,17 +1950,10 @@ int hypre_AdSchwarzSolve(hypre_ParCSRMatrix *par_A,
 
 {
   int ierr = 0;
-  int num_dofs; 
-  int *i_dof_dof;
-  int *j_dof_dof;
-  double *a_dof_dof;
   double *x;
-  double *rhs;
   double *aux;
   double *tmp;
-  hypre_CSRMatrix *A;
   hypre_Vector *x_vector;
-  hypre_Vector *rhs_vector;
   hypre_Vector *aux_vector;
   MPI_Comm comm = hypre_ParCSRMatrixComm(par_A);
   int num_domains;
@@ -1975,7 +1968,7 @@ int hypre_AdSchwarzSolve(hypre_ParCSRMatrix *par_A,
   int one = 1;
 #endif
 
-  int jj,i,j,k; /*, j_loc, k_loc;*/
+  int jj,i,j; /*, j_loc, k_loc;*/
 
 
   int matrix_size, matrix_size_counter = 0;
@@ -1986,13 +1979,7 @@ int hypre_AdSchwarzSolve(hypre_ParCSRMatrix *par_A,
 
   /* initiate:      ----------------------------------------------- */
   x_vector = hypre_ParVectorLocalVector(par_x);
-  rhs_vector = hypre_ParVectorLocalVector(par_rhs);
   aux_vector = hypre_ParVectorLocalVector(par_aux);
-  A = hypre_ParCSRMatrixDiag(par_A);
-  num_dofs = hypre_CSRMatrixNumRows(A); 
-  i_dof_dof = hypre_CSRMatrixI(A);
-  j_dof_dof = hypre_CSRMatrixJ(A);
-  a_dof_dof = hypre_CSRMatrixData(A);
   x = hypre_VectorData(x_vector);
   aux = hypre_VectorData(aux_vector);
   num_domains = hypre_CSRMatrixNumRows(domain_structure);
@@ -2095,7 +2082,6 @@ hypre_GenerateScale(hypre_CSRMatrix *domain_structure,
    int num_domains = hypre_CSRMatrixNumRows(domain_structure);
    int *i_domain_dof = hypre_CSRMatrixI(domain_structure);
    int *j_domain_dof = hypre_CSRMatrixJ(domain_structure);
-   double *domain_matrixinverse = hypre_CSRMatrixData(domain_structure);
    int i, j, ierr = 0;
    double *scale;
 

@@ -43,7 +43,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    double               max_row_sum;
    double               trunc_factor;
 
-   int      num_variables;
    int      max_levels; 
    int      amg_ioutdat;
    int      debug_flag;
@@ -73,7 +72,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int       num_functions = hypre_ParAMGDataNumFunctions(amg_data);
    int	    *coarse_dof_func;
    int	    *coarse_pnts_global;
-   hypre_CSRMatrix *domain_structure;
 
    HYPRE_Solver *smoother;
    int      *smooth_option = hypre_ParAMGDataSmoothOption(amg_data);
@@ -146,8 +144,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    /*----------------------------------------------------------
     * Initialize hypre_ParAMGData
     *----------------------------------------------------------*/
-
-   num_variables = hypre_ParCSRMatrixNumRows(A);
 
    not_finished_coarsening = 1;
    level = 0;
@@ -229,6 +225,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       char  filename[255];
       FILE *fp;
       int   i;
+      int      num_variables;
 
       /* print out strength matrix */
       sprintf(filename, "zout_S_%02d.ysmp", level);
