@@ -260,7 +260,7 @@ HYPRE_SStructGridSetNeighborBox( HYPRE_SStructGrid  grid,
                           hypre_SStructNeighborILower(neighbor));
 
    hypre_CopyIndex(index_map, hypre_SStructNeighborCoord(neighbor));
-   for (d = (ndim-1); d < 3; d++)
+   for (d = ndim; d < 3; d++)
    {
       hypre_IndexD(hypre_SStructNeighborCoord(neighbor), d) = d;
    }
@@ -325,7 +325,7 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
    HYPRE_SStructVariable   *vartypes;
    hypre_Index              varoffset;
    int                      nvars;
-   int                      part, npart, var, i, b, vb, t, d;
+   int                      part, npart, var, i, b, vb, t, d, nd;
 
    /*-------------------------------------------------------------
     * set pneighbors for each pgrid info to crop pgrids
@@ -505,7 +505,8 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
                   dir    = hypre_SStructNeighborDir(vneighbor);
                   for (d = 0; d < 3; d++)
                   {
-                     ilower[d] += (imin1[coord[d]] - imin0[coord[d]]) * dir[d];
+                     nd = coord[d];
+                     ilower[nd] += (imin1[d] - imin0[d]) * dir[nd];
                   }
 
                   vb++;

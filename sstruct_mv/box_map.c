@@ -489,6 +489,7 @@ hypre_BoxMapIntersect( hypre_BoxMap        *map,
       {
          for (i = map_ilower[0]; i < map_iupper[0]; i++)
          {
+            /* the next 3 `if' statements eliminate duplicates */
             if (k > map_ilower[2])
             {
                if ( hypre_BoxMapTableEntry(map, i, j, k) ==
@@ -515,7 +516,10 @@ hypre_BoxMapIntersect( hypre_BoxMap        *map,
             }
 
             entries[nentries] = hypre_BoxMapTableEntry(map, i, j, k);
-            nentries++;
+            if (entries[nentries] != NULL)
+            {
+               nentries++;
+            }
          }
       }
    }

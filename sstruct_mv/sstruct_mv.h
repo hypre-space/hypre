@@ -179,11 +179,12 @@ typedef struct
 {
    int          type;
    int          proc;
-   int          offset;
-   int          part;
-   hypre_Index  ilower;
-   hypre_Index  coord;
-   hypre_Index  dir;
+   int          offset;  /* minimum offset for this box */
+   int          part;    /* part the box lives on */
+   hypre_Index  ilower;  /* local ilower on neighbor index-space */
+   hypre_Index  coord;   /* lives on local index-space */
+   hypre_Index  dir;     /* lives on neighbor index-space */
+   hypre_Index  stride;  /* lives on local index-space */
 
 } hypre_SStructNMapInfo;
 
@@ -294,6 +295,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructNMapInfoILower(info) ((info) -> ilower)
 #define hypre_SStructNMapInfoCoord(info)  ((info) -> coord)
 #define hypre_SStructNMapInfoDir(info)    ((info) -> dir)
+#define hypre_SStructNMapInfoStride(info) ((info) -> stride)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructNeighbor
@@ -777,6 +779,7 @@ int hypre_SStructGridRef( hypre_SStructGrid *grid , hypre_SStructGrid **grid_ref
 int hypre_SStructGridAssembleMaps( hypre_SStructGrid *grid );
 int hypre_SStructGridAssembleNBorMaps( hypre_SStructGrid *grid );
 int hypre_SStructGridFindMapEntry( hypre_SStructGrid *grid , int part , hypre_Index index , int var , hypre_BoxMapEntry **entry_ptr );
+int hypre_SStructMapEntryGetStrides( hypre_BoxMapEntry *entry , hypre_Index strides );
 int hypre_SStructMapEntryGetGlobalRank( hypre_BoxMapEntry *entry , hypre_Index index , int *rank_ptr );
 int hypre_SStructMapEntryGetProcess( hypre_BoxMapEntry *entry , int *proc_ptr );
 int hypre_SStructBoxToNBorBox( hypre_Box *box , hypre_Index index , hypre_Index nbor_index , hypre_Index coord , hypre_Index dir );

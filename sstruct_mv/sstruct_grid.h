@@ -88,11 +88,12 @@ typedef struct
 {
    int          type;
    int          proc;
-   int          offset;
-   int          part;
-   hypre_Index  ilower;
-   hypre_Index  coord;
-   hypre_Index  dir;
+   int          offset;  /* minimum offset for this box */
+   int          part;    /* part the box lives on */
+   hypre_Index  ilower;  /* local ilower on neighbor index-space */
+   hypre_Index  coord;   /* lives on local index-space */
+   hypre_Index  dir;     /* lives on neighbor index-space */
+   hypre_Index  stride;  /* lives on local index-space */
 
 } hypre_SStructNMapInfo;
 
@@ -203,6 +204,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructNMapInfoILower(info) ((info) -> ilower)
 #define hypre_SStructNMapInfoCoord(info)  ((info) -> coord)
 #define hypre_SStructNMapInfoDir(info)    ((info) -> dir)
+#define hypre_SStructNMapInfoStride(info) ((info) -> stride)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructNeighbor

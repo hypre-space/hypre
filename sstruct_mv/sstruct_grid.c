@@ -511,16 +511,21 @@ hypre_SStructGridAssembleNBorMaps( hypre_SStructGrid *grid )
 
    hypre_BoxMapEntry         *map_entry;
    hypre_Box                 *nbor_box;
+   hypre_Box                 *box;
    int                        nbor_part;
    hypre_Index                nbor_ilower;
    int                        nbor_offset;
    int                        nbor_proc;
+   hypre_Index                c;
+   int                       *d, *stride;
 
    int                        part, var, b;
 
    /*------------------------------------------------------
     * Add neighbor boxes to maps and re-assemble
     *------------------------------------------------------*/
+
+   box = hypre_BoxCreate();
 
    ninfo = hypre_TAlloc(hypre_SStructNMapInfo **, nparts);
    for (part = 0; part < nparts; part++)
@@ -549,6 +554,9 @@ hypre_SStructGridAssembleNBorMaps( hypre_SStructGrid *grid )
              */
             hypre_SStructGridFindMapEntry(grid, nbor_part, nbor_ilower, var,
                                           &map_entry);
+            hypre_BoxMapEntryGetExtents(map_entry,
+                                        hypre_BoxIMin(box),
+                                        hypre_BoxIMax(box));
             hypre_SStructMapEntryGetProcess(map_entry, &nbor_proc);
             hypre_SStructMapEntryGetGlobalRank(map_entry, nbor_ilower,
                                                &nbor_offset);
@@ -566,6 +574,25 @@ hypre_SStructGridAssembleNBorMaps( hypre_SStructGrid *grid )
             hypre_CopyIndex(hypre_SStructNeighborDir(vneighbor),
                             hypre_SStructNMapInfoDir(entry_ninfo));
 
+            /*------------------------------------------------------
+             * This computes strides in the local index-space,
+             * so they may be negative.
+             *------------------------------------------------------*/
+
+            /* want `c' to map from neighbor index-space back */
+            d = hypre_SStructNMapInfoCoord(entry_ninfo);
+            c[d[0]] = 0;
+            c[d[1]] = 1;
+            c[d[2]] = 2;
+            d = hypre_SStructNMapInfoDir(entry_ninfo);
+            stride = hypre_SStructNMapInfoStride(entry_ninfo);
+            stride[c[0]] = 1;
+            stride[c[1]] = hypre_BoxSizeD(box, 0);
+            stride[c[2]] = hypre_BoxSizeD(box, 1) * stride[c[1]];
+            stride[c[0]] *= d[0];
+            stride[c[1]] *= d[1];
+            stride[c[2]] *= d[2];
+
             hypre_BoxMapAddEntry(maps[part][var],
                                  hypre_BoxIMin(nbor_box),
                                  hypre_BoxIMax(nbor_box),
@@ -577,6 +604,8 @@ hypre_SStructGridAssembleNBorMaps( hypre_SStructGrid *grid )
    }
 
    hypre_SStructGridNInfo(grid) = ninfo;
+
+   hypre_BoxDestroy(box);
 
    return ierr;
 }
@@ -608,16 +637,16 @@ hypre_SStructMapEntryGetStrides( hypre_BoxMapEntry *entry,
                                  hypre_Index        strides )
 {
    int ierr = 0;
-
    hypre_SStructMapInfo *entry_info;
-   hypre_Index           imin;
-   hypre_Index           imax;
 
    hypre_BoxMapEntryGetInfo(entry, (void **) &entry_info);
-   hypre_BoxMapEntryGetExtents(entry, imin, imax);
 
    if (hypre_SStructMapInfoType(entry_info) == hypre_SSTRUCT_MAP_INFO_DEFAULT)
    {
+      hypre_Index  imin;
+      hypre_Index  imax;
+
+      hypre_BoxMapEntryGetExtents(entry, imin, imax);
       strides[0] = 1;
       strides[1] = hypre_IndexD(imax, 0) - hypre_IndexD(imin, 0) + 1;
       strides[2] = hypre_IndexD(imax, 1) - hypre_IndexD(imin, 1) + 1;
@@ -626,19 +655,9 @@ hypre_SStructMapEntryGetStrides( hypre_BoxMapEntry *entry,
    else
    {
       hypre_SStructNMapInfo *entry_ninfo;
-      hypre_Index            c, d;
 
       entry_ninfo = (hypre_SStructNMapInfo *) entry_info;
-      hypre_CopyIndex(hypre_SStructNMapInfoCoord(entry_ninfo), c);
-      hypre_CopyIndex(hypre_SStructNMapInfoDir(entry_ninfo), d);
-
-      strides[c[0]] = 1;
-      strides[c[1]] = hypre_IndexD(imax, c[0]) - hypre_IndexD(imin, c[0]) + 1;
-      strides[c[2]] = hypre_IndexD(imax, c[1]) - hypre_IndexD(imin, c[1]) + 1;
-      strides[c[2]] *= strides[c[1]];
-      strides[0] *= d[c[0]];
-      strides[1] *= d[c[1]];
-      strides[2] *= d[c[2]];
+      hypre_CopyIndex(hypre_SStructNMapInfoStride(entry_ninfo), strides);
    }
 
    return ierr;
@@ -692,6 +711,17 @@ hypre_SStructMapEntryGetProcess( hypre_BoxMapEntry *entry,
 }
 
 /*--------------------------------------------------------------------------
+ * Mapping Notes:
+ *
+ *   coord maps Box index-space to NBorBox index-space.  That is,
+ *   `coord[d]' is the dimension in the NBorBox index-space, and
+ *   `d' is the dimension in the Box index-space.
+ *
+ *   dir works on the NBorBox index-space.  That is, `dir[coord[d]]' is
+ *   the direction (positive or negative) of dimension `coord[d]' in
+ *   the NBorBox index-space, relative to the positive direction of
+ *   dimension `d' in the Box index-space.
+ *
  *--------------------------------------------------------------------------*/
 
 int
@@ -708,14 +738,13 @@ hypre_SStructBoxToNBorBox( hypre_Box   *box,
    int  nbor_imin[3];
    int  nbor_imax[3];
 
-   int  d;
+   int  d, nd;
 
    for (d = 0; d < 3; d++)
    {
-      nbor_imin[d] = nbor_index[d] +
-         (imin[coord[d]] - index[coord[d]]) * dir[d];
-      nbor_imax[d] = nbor_index[d] +
-         (imax[coord[d]] - index[coord[d]]) * dir[d];
+      nd = coord[d];
+      nbor_imin[nd] = nbor_index[nd] + (imin[d] - index[d]) * dir[nd];
+      nbor_imax[nd] = nbor_index[nd] + (imax[d] - index[d]) * dir[nd];
    }
 
    for (d = 0; d < 3; d++)
@@ -728,6 +757,7 @@ hypre_SStructBoxToNBorBox( hypre_Box   *box,
 }
 
 /*--------------------------------------------------------------------------
+ * See "Mapping Notes" in comment for `hypre_SStructBoxToNBorBox'.
  *--------------------------------------------------------------------------*/
 
 int
@@ -744,14 +774,13 @@ hypre_SStructNBorBoxToBox( hypre_Box   *nbor_box,
    int  imin[3];
    int  imax[3];
 
-   int  d;
+   int  d, nd;
 
    for (d = 0; d < 3; d++)
    {
-      imin[coord[d]] = index[coord[d]] +
-         (nbor_imin[d] - nbor_index[d]) * dir[d];
-      imax[coord[d]] = index[coord[d]] +
-         (nbor_imax[d] - nbor_index[d]) * dir[d];
+      nd = coord[d];
+      imin[d] = index[d] + (nbor_imin[nd] - nbor_index[nd]) * dir[nd];
+      imax[d] = index[d] + (nbor_imax[nd] - nbor_index[nd]) * dir[nd];
    }
 
    for (d = 0; d < 3; d++)

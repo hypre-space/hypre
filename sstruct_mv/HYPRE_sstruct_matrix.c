@@ -518,25 +518,28 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
                      sbox = hypre_StructGridBox(sgrid, sb);
                      hypre_IntersectBoxes(box, sbox, ibox);
 
-                     values = hypre_TReAlloc(values, double,
-                                             hypre_BoxVolume(ibox));
-
-                     /* move matrix values from S-matrix to U-matrix */
-                     hypre_StructMatrixSetBoxValues(smatrix, ibox,
-                                                    1, &sentry, values, -1);
-
-                     hypre_SStructUMatrixSetBoxValues(matrix, part,
-                                                      hypre_BoxIMin(ibox),
-                                                      hypre_BoxIMax(ibox),
-                                                      var, 1, &entry,
-                                                      values, 1);
-
-                     for (i = 0; i < hypre_BoxVolume(ibox); i++)
+                     if (hypre_BoxVolume(ibox))
                      {
-                        values[i] = 0;
+                        values = hypre_TReAlloc(values, double,
+                                                hypre_BoxVolume(ibox));
+
+                        /* move matrix values from S-matrix to U-matrix */
+                        hypre_StructMatrixSetBoxValues(smatrix, ibox,
+                                                       1, &sentry, values, -1);
+
+                        hypre_SStructUMatrixSetBoxValues(matrix, part,
+                                                         hypre_BoxIMin(ibox),
+                                                         hypre_BoxIMax(ibox),
+                                                         var, 1, &entry,
+                                                         values, 1);
+
+                        for (i = 0; i < hypre_BoxVolume(ibox); i++)
+                        {
+                           values[i] = 0;
+                        }
+                        hypre_StructMatrixSetBoxValues(smatrix, ibox,
+                                                       1, &sentry, values, 0);
                      }
-                     hypre_StructMatrixSetBoxValues(smatrix, ibox,
-                                                    1, &sentry, values, 0);
                   }
             }
          }
