@@ -145,18 +145,6 @@ void  impl_Hypre_StructJacobi_GetConvergenceInfo
 } /* end impl_Hypre_StructJacobiGetConvergenceInfo */
 
 /* ********************************************************
- * impl_Hypre_StructJacobiSetSystemOperator
- **********************************************************/
-void  impl_Hypre_StructJacobi_SetSystemOperator
-(Hypre_StructJacobi this, Hypre_StructMatrix op) {
-
-/* Sets the matrix.  Setup should (probably) be called before anything is
-   done with it. */
-
-   this->d_table->hsmatrix = op ;
-} /* end impl_Hypre_StructJacobiSetSystemOperator */
-
-/* ********************************************************
  * impl_Hypre_StructJacobiGetDoubleParameter
  **********************************************************/
 double  impl_Hypre_StructJacobi_GetDoubleParameter(Hypre_StructJacobi this, char* name) {

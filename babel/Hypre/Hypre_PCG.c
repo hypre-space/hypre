@@ -142,18 +142,6 @@ Hypre_Solver  impl_Hypre_PCG_GetPreconditioner(Hypre_PCG this) {
 } /* end impl_Hypre_PCGGetPreconditioner */
 
 /* ********************************************************
- * impl_Hypre_PCGSetSystemOperator
- **********************************************************/
-void  impl_Hypre_PCG_SetSystemOperator(Hypre_PCG this, Hypre_StructMatrix op) {
-
-/* Sets the matrix.  Setup should (probably) be called before anything is
-   done with it. */
-
-   this->d_table->hsmatrix = op ;
-
-} /* end impl_Hypre_PCGSetSystemOperator */
-
-/* ********************************************************
  * impl_Hypre_PCGGetDoubleParameter
  **********************************************************/
 double  impl_Hypre_PCG_GetDoubleParameter(Hypre_PCG this, char* name) {

@@ -121,19 +121,6 @@ void  impl_Hypre_StructSMG_GetConvergenceInfo
 } /* end impl_Hypre_StructSMGGetConvergenceInfo */
 
 /* ********************************************************
- * impl_Hypre_StructSMGSetSystemOperator
- **********************************************************/
-void  impl_Hypre_StructSMG_SetSystemOperator
-(Hypre_StructSMG this, Hypre_StructMatrix op) {
-
-/* Sets the matrix.  Setup should (probably) be called before anything is
-   done with it. */
-
-   this->d_table->hsmatrix = op ;
-
-} /* end impl_Hypre_StructSMGSetSystemOperator */
-
-/* ********************************************************
  * impl_Hypre_StructSMGGetDoubleParameter
  **********************************************************/
 double  impl_Hypre_StructSMG_GetDoubleParameter(Hypre_StructSMG this, char* name) {
