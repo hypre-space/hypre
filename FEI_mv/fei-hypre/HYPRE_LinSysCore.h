@@ -451,8 +451,6 @@ class HYPRE_LinSysCore
                                   HYPRE_ParVector b);
    void   addToAConjProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
    void   addToMinResProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
-   void   scaleMatrixVector(HYPRE_IJMatrix, HYPRE_IJVector,
-                            HYPRE_IJMatrix *, HYPRE_IJVector *, double **);
    int    HYPRE_Schur_Search(int,int,int*,int*,int,int);
 
    // ----------------------------------------------------------------------
@@ -503,6 +501,7 @@ class HYPRE_LinSysCore
    int             *rowLengths_;
    int             **colIndices_;
    double          **colValues_;
+   double          truncThresh_;
 
    // ----------------------------------------------------------------------
    // matrix and vectors for reduction
@@ -542,6 +541,7 @@ class HYPRE_LinSysCore
    int             systemAssembled_;
    int             slideReduction_;
    double          slideReductionMinNorm_;
+   int             slideReductionScaleMatrix_;
    int             schurReduction_;
    int             schurReductionCreated_;
    int             projectionScheme_;

@@ -18,6 +18,7 @@
 #include <assert.h>
 
 #define HYPRE_SLIDEMAX 100
+#define HYPRE_BITMASK2 3
 
 //***************************************************************************
 // local includes
@@ -72,6 +73,9 @@ HYPRE_SlideReduction::HYPRE_SlideReduction(MPI_Comm comm)
    eqnStatuses_      = NULL;
    blockMinNorm_     = 1.0e-4;
    hypreRAP_         = NULL;
+   truncTol_         = 1.0e-20;
+   scaleMatrixFlag_  = 0;
+   ADiagISqrts_      = NULL;
 }
 
 //***************************************************************************
@@ -97,6 +101,19 @@ HYPRE_SlideReduction::~HYPRE_SlideReduction()
    if ( reducedXvec_      != NULL ) HYPRE_IJVectorDestroy(reducedXvec_);
    if ( reducedRvec_      != NULL ) HYPRE_IJVectorDestroy(reducedRvec_);
    if ( hypreRAP_         != NULL ) HYPRE_ParCSRMatrixDestroy(hypreRAP_);
+   if ( ADiagISqrts_      != NULL ) delete [] ADiagISqrts_;
+}
+
+//***************************************************************************
+// set output level
+//---------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::setOutputLevel( int level )
+{
+   if ( level == 1 ) outputLevel_ |= 1;
+   if ( level == 2 ) outputLevel_ |= 2;
+   if ( level == 3 ) outputLevel_ |= 4;
+   return 0;
 }
 
 //***************************************************************************
@@ -123,7 +140,7 @@ int HYPRE_SlideReduction::setup(HYPRE_IJMatrix A, HYPRE_IJVector x,
    //------------------------------------------------------------------
 
    MPI_Comm_rank( mpiComm_, &mypid );
-   if ( mypid == 0 && outputLevel_ >= 1 )
+   if ( mypid == 0 && (outputLevel_ & HYPRE_BITMASK2) >= 1 )
       printf("%4d : HYPRE_SlideReduction begins....\n", mypid);
 
    Amat_ = A;
@@ -194,10 +211,16 @@ int HYPRE_SlideReduction::setup(HYPRE_IJMatrix A, HYPRE_IJVector x,
    buildReducedRHSVector(b);
 
    //------------------------------------------------------------------
+   // if scale matrix is request, scale matrix and vector
+   //------------------------------------------------------------------
+
+   if ( scaleMatrixFlag_ == 1 ) scaleMatrixVector();
+
+   //------------------------------------------------------------------
    // clean up and return
    //------------------------------------------------------------------
 
-   if ( mypid == 0 && outputLevel_ >= 1 )
+   if ( mypid == 0 && ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
       printf("%4d : HYPRE_SlideReduction ends.\n", mypid);
    return 0;
 }
@@ -267,7 +290,7 @@ int HYPRE_SlideReduction::findConstraints()
 #ifdef PRINTC
    fclose(fp);
 #endif
-   if ( outputLevel_ >= 1 )
+   if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
       printf("%4d : findConstraints - number of constraints = %d\n",
              mypid, nConstraints);
 
@@ -385,12 +408,12 @@ int HYPRE_SlideReduction::findSlaveEqns1()
          {
             constrListAux[nCandidates]   = searchIndex;
             candidateList[nCandidates++] = irow;
-            if ( outputLevel_ >= 3 )
+            if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 3 )
                printf("%4d : findSlaveEqns1 - candidate %d = %d(%d)\n", 
                       mypid, nCandidates-1, irow, searchIndex);
          }
       }
-      if ( outputLevel_ >= 1 )
+      if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
          printf("%4d : findSlaveEqns1 - nCandidates, nConstr = %d %d\n",
                 mypid, nCandidates, nConstraints);
    }
@@ -432,14 +455,14 @@ int HYPRE_SlideReduction::findSlaveEqns1()
          constrBlkInfo_[index]  = index;
          constrBlkSizes_[index] = 1;
          eqnStatuses_[searchIndex-startRow] = 1; 
-         if ( outputLevel_ >= 2 )
+         if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 2 )
             printf("%4d : findSlaveEqns1 - constr %7d <=> slave %d\n",
                    mypid, irow, searchIndex);
       } 
       else 
       {
          slaveEqnList_[irow-endRow+nConstraints-1] = -1;
-         if ( outputLevel_ >= 2 )
+         if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 2 )
          {
             printf("%4d : findSlaveEqns1 - constraint %4d fails",mypid,irow);
             printf(" to find a slave.\n");
@@ -463,13 +486,13 @@ int HYPRE_SlideReduction::findSlaveEqns1()
    MPI_Allreduce(&ncnt, &nSum, 1, MPI_INT, MPI_SUM, mpiComm_);
    if ( nSum > 0 ) 
    {
-      if ( mypid == 0 && outputLevel_ >= 1 )
+      if ( mypid == 0 && ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
       {
          printf("%4d : findSlaveEqns1 fails - total number of unsatisfied",
                 mypid);
          printf(" constraints = %d \n", nSum);
       }
-      if ( outputLevel_ >= 1 )
+      if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
       {
          for ( irow = 0; irow < nConstraints; irow++ )
             if ( slaveEqnList_[irow] == -1 ) 
@@ -519,7 +542,7 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
    nConstraints  = procNConstr_[mypid+1] - procNConstr_[mypid];
    newEndRow     = endRow - nConstraints;
    globalNConstr = procNConstr_[nprocs];
-   if ( mypid == 0 && outputLevel_ >= 1 )
+   if ( mypid == 0 && ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
       printf("%4d : findSlaveEqnsBlock - size = %d\n", mypid, blkSize);
 
    //------------------------------------------------------------------
@@ -584,13 +607,13 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
             if ( isACandidate )
             {
                candidateList[nCandidates++] = irow;
-               if ( outputLevel_ >= 3 )
+               if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 3 )
                   printf("%4d : findSlaveEqnsBlock - candidate %d = %d\n", 
                          mypid, nCandidates-1, irow);
             }
          }
       }
-      if ( outputLevel_ >= 1 )
+      if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
          printf("%4d : findSlaveEqnsBlock - nCandidates, nConstr = %d %d\n",
                    mypid, nCandidates, nConstraints);
    }
@@ -641,7 +664,7 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
                   else if ( constrListAuxs[irow][ip] == -1 )
                   {
                      constrListAuxs[irow][ip] = searchInd2;
-                     if ( outputLevel_ >= 2 )
+                     if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 2 )
                         printf("Slave candidate %d adds new constr %d\n",
                                candidateList[irow], searchInd2);
                   }
@@ -749,7 +772,7 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
 */
                      }
                   }
-                  if ( outputLevel_ >= 2 )
+                  if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 2 )
                   {
                      printf("%4d : constraint %d - candidate %d (%d) ", mypid,
                             irow, searchInd2, candidateList[searchInd2]);
@@ -761,7 +784,7 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
                   if (newBlkSize <= blkSize)
                   {
                      retVal = matrixCondEst(irow,colIndex,blkInfo,blkInfoCnt);
-                     if ( outputLevel_ >= 2 )
+                     if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 2 )
                         printf("%4d : pivot = %e (%e) : %d\n", mypid, retVal, 
                                searchValue,newBlkSize);
                      if ( retVal > searchValue )
@@ -834,14 +857,14 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
                         {
                            constrListAuxs[searchInd3][0] = -5;
                            eqnStatuses_[colInd2[jj]-startRow] = 1;
-                           if ( outputLevel_ >= 3 )
+                           if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 3 )
                               printf("*Slave candidate %d disabled.\n",
                                      candidateList[searchInd3]);
                         }
                         else if ( constrListAuxs[searchInd3][ip] == -1 )
                         {
                            constrListAuxs[searchInd3][ip] = irow;
-                           if ( outputLevel_ >= 3 )
+                           if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 3 )
                               printf("*Slave candidate %d adds new constr %d\n",
                                      candidateList[searchInd3], irow);
                         } 
@@ -851,13 +874,13 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
                                                &colInd2,&colVal2);
                }
             }
-            if ( outputLevel_ >= 2 )
+            if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 2 )
                printf("%4d : findSlaveEqnsBlock - constr %d <=> slave %d (%d)\n",
                       mypid, irow, searchIndex, newIndex);
          }
          else 
          {
-            if ( outputLevel_ >= 2 )
+            if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 2 )
             {
                if ( searchIndex < 0 && searchValue > blockMinNorm_ )
                {
@@ -877,7 +900,7 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
                          mypid, irow);
                   printf(" to find a slave.\n");
                }
-               if ( outputLevel_ >= 3 )
+               if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 3 )
                {
                   HYPRE_ParCSRMatrixGetRow(A_csr,irow,&rowSize,&colInd,&colVal);
                   colTmp = new int[rowSize];
@@ -971,13 +994,13 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
    MPI_Allreduce(&ncnt, &nSum, 1, MPI_INT, MPI_SUM, mpiComm_);
    if ( nSum > 0 ) 
    {
-      if ( mypid == 0 && outputLevel_ >= 1 )
+      if ( mypid == 0 && ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
       {
          printf("%4d : findSlaveEqnsBlock fails - total number of unsatisfied",
                 mypid);
          printf(" constraints = %d \n", nSum);
       }
-      if ( outputLevel_ >= 1 )
+      if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
       {
          for ( irow = 0; irow < nConstraints; irow++ )
             if ( slaveEqnList_[irow] == -1 ) 
@@ -1070,7 +1093,7 @@ int HYPRE_SlideReduction::composeGlobalList()
    delete [] recvCntArray;
    delete [] displArray;
 
-   if ( constrBlkInfo_ != NULL && outputLevel_ >= 1 )
+   if ( constrBlkInfo_ != NULL && ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
    {
       iArray1 = new int[nConstraints];
       iArray2 = new int[nConstraints];
@@ -1109,7 +1132,7 @@ int HYPRE_SlideReduction::composeGlobalList()
       delete [] iArray2;
    }
 
-   if ( outputLevel_ > 1 )
+   if ( ( outputLevel_ & HYPRE_BITMASK2 ) > 1 )
       for ( is = 0; is < nConstraints; is++ )
          printf("%4d : HYPRE_SlideReduction - slaveEqnList %d = %d(%d)\n",
                 mypid, is, slaveEqnList_[is], slaveEqnListAux_[is]);
@@ -1130,7 +1153,7 @@ int HYPRE_SlideReduction::buildReducedMatrix()
    int    rowSize, *colInd, *reducedAMatSize, rowCount, maxRowSize;
    int    rowSize2, *colInd2, newRowSize, rowIndex, searchIndex, uBound;
    int    procIndex, colIndex, ierr, *newColInd, totalNNZ;
-   double *colVal, *colVal2, *newColVal;
+   double *colVal, *colVal2, *newColVal, diag;
    HYPRE_ParCSRMatrix A_csr, A21_csr, invA22_csr, RAP_csr, reducedA_csr;
 
    //------------------------------------------------------------------
@@ -1169,7 +1192,7 @@ int HYPRE_SlideReduction::buildReducedMatrix()
 
    HYPRE_IJMatrixGetObject(A21mat_, (void **) &A21_csr);
    HYPRE_IJMatrixGetObject(invA22mat_, (void **) &invA22_csr);
-   if ( outputLevel_ >= 1 )
+   if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
       printf("%4d : buildReducedMatrix - Triple matrix product starts\n",
              mypid);
 
@@ -1178,7 +1201,7 @@ int HYPRE_SlideReduction::buildReducedMatrix()
                                       (hypre_ParCSRMatrix *) A21_csr,
                                       (hypre_ParCSRMatrix **) &RAP_csr);
 
-   if ( outputLevel_ >= 1 )
+   if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
       printf("%4d : buildReducedMatrix - Triple matrix product ends\n",
              mypid);
 
@@ -1218,7 +1241,7 @@ int HYPRE_SlideReduction::buildReducedMatrix()
 
    reducedAMatSize = new int[reducedANRows];
 
-   if ( outputLevel_ >= 1 )
+   if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
    {
       printf("%4d : buildReducedMatrix - reduceAGlobalDim = %d %d\n", mypid, 
                        reducedAGlobalNRows, reducedAGlobalNCols);
@@ -1255,7 +1278,8 @@ int HYPRE_SlideReduction::buildReducedMatrix()
          newRowSize = rowSize + rowSize2;
          maxRowSize = ( newRowSize > maxRowSize ) ? newRowSize : maxRowSize;
          newColInd = new int[newRowSize];
-         for (jcol = 0; jcol < rowSize; jcol++) newColInd[jcol] = colInd[jcol];
+         for (jcol = 0; jcol < rowSize; jcol++) 
+            newColInd[jcol] = colInd[jcol];
          for (jcol = 0; jcol < rowSize2; jcol++) 
             newColInd[rowSize+jcol] = colInd2[jcol];
          qsort0(newColInd, 0, newRowSize-1);
@@ -1285,7 +1309,7 @@ int HYPRE_SlideReduction::buildReducedMatrix()
       totalNNZA += rowSize;
       HYPRE_ParCSRMatrixRestoreRow(A_csr,irow,&rowSize,NULL,NULL);
    }
-   if ( outputLevel_ >= 1 )
+   if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
    {
       printf("%4d : buildReducedMatrix - NNZ of reducedA = %d %d %e\n", mypid, 
              totalNNZ, totalNNZA, 1.0*totalNNZ/totalNNZA);
@@ -1342,6 +1366,7 @@ int HYPRE_SlideReduction::buildReducedMatrix()
          newRowSize = ncnt + rowSize2;
          qsort1(newColInd, newColVal, 0, newRowSize-1);
          ncnt = 0;
+         diag = 1.0;
          for ( jcol = 0; jcol < newRowSize; jcol++ ) 
          {
             if ( jcol != ncnt && newColInd[jcol] == newColInd[ncnt] ) 
@@ -1352,8 +1377,19 @@ int HYPRE_SlideReduction::buildReducedMatrix()
                newColVal[ncnt] = newColVal[jcol];
                newColInd[ncnt] = newColInd[jcol];
             }  
+            if ( newColInd[ncnt] == rowIndex ) diag = newColVal[ncnt]; 
          } 
          newRowSize = ncnt + 1;
+         ncnt = 0;
+         for ( jcol = 0; jcol < newRowSize; jcol++ ) 
+         {
+            if ( habs(newColVal[jcol]/diag) >= truncTol_ )
+            { 
+               newColInd[ncnt] = newColInd[jcol];
+               newColVal[ncnt++] = newColVal[jcol];
+            }
+         }
+         newRowSize = ncnt;
          HYPRE_ParCSRMatrixRestoreRow(A_csr,irow,&rowSize,&colInd,&colVal);
          HYPRE_ParCSRMatrixRestoreRow(RAP_csr,rowIndex,&rowSize2,&colInd2,
                                       &colVal2);
@@ -1376,7 +1412,7 @@ int HYPRE_SlideReduction::buildReducedMatrix()
    HYPRE_IJMatrixAssemble(reducedAmat_);
    HYPRE_IJMatrixGetObject(reducedAmat_, (void **) &reducedA_csr);
 
-   if ( outputLevel_ >= 3 )
+   if ( outputLevel_ >= 5 )
    {
       char fname[40];
       sprintf(fname, "reducedA.%d", mypid);
@@ -1570,7 +1606,7 @@ int HYPRE_SlideReduction::buildReducedSolnVector(HYPRE_IJVector x,
 {
    int    mypid, nprocs, *procNRows, startRow, endRow, localNRows;
    int    nConstraints, newEndRow, vecStart, vecLocalLength, ierr;
-   int    irow, jcol, rowIndex, searchIndex;
+   int    irow, jcol, rowIndex, searchIndex, length;
    double *b_data, *v1_data, *rx_data, *x_data, *x2_data;
    HYPRE_ParCSRMatrix A_csr, A21_csr, invA22_csr;
    HYPRE_ParVector    x_csr, x2_csr, v1_csr, b_csr, rx_csr;
@@ -1590,7 +1626,8 @@ int HYPRE_SlideReduction::buildReducedSolnVector(HYPRE_IJVector x,
    localNRows   = endRow - startRow + 1;
    nConstraints = procNConstr_[mypid+1] - procNConstr_[mypid];
    newEndRow    = endRow - nConstraints;
-   if (outputLevel_ >= 1 && (procNConstr_==NULL || procNConstr_[nprocs]==0))
+   if (( outputLevel_ & HYPRE_BITMASK2 ) >= 1 && 
+       (procNConstr_==NULL || procNConstr_[nprocs]==0))
    {
       printf("%4d : buildReducedSolnVector WARNING - no local entry.\n",mypid);
       return 1;
@@ -1611,6 +1648,14 @@ int HYPRE_SlideReduction::buildReducedSolnVector(HYPRE_IJVector x,
    HYPRE_IJVectorGetObject(v1, (void **) &v1_csr);
    HYPRE_IJMatrixGetObject(A21mat_, (void **) &A21_csr);
    HYPRE_IJVectorGetObject(reducedXvec_, (void **) &rx_csr);
+   if ( scaleMatrixFlag_ == 1 && ADiagISqrts_ != NULL )
+   {
+      rx_local = hypre_ParVectorLocalVector((hypre_ParVector *) rx_csr);
+      rx_data  = (double *) hypre_VectorData(rx_local);
+      length   = hypre_VectorSize(rx_local);
+      for ( irow = 0; irow < length; irow++ )
+         rx_data[irow] *= ADiagISqrts_[irow];
+   }
    HYPRE_ParCSRMatrixMatvec( -1.0, A21_csr, rx_csr, 0.0, v1_csr );
 
    //------------------------------------------------------------------
@@ -1789,7 +1834,7 @@ int HYPRE_SlideReduction::buildA21Mat()
    A21StartRow    = 2 * procNConstr_[mypid];
    A21StartCol    = procNRows[mypid] - procNConstr_[mypid];
 
-   if ( outputLevel_ >= 1 )
+   if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
    {
       printf("%4d : buildA21Mat - A21StartRow  = %d\n", mypid, A21StartRow);
       printf("%4d : buildA21Mat - A21GlobalDim = %d %d\n", mypid, 
@@ -1878,7 +1923,7 @@ int HYPRE_SlideReduction::buildA21Mat()
    nnzA21 = 0;
    for ( irow = 0; irow < 2*nConstraints; irow++ ) nnzA21 += A21MatSize[irow];
    MPI_Allreduce(&nnzA21,&ncnt,1,MPI_INT,MPI_SUM,mpiComm_);
-   if ( mypid == 0 && outputLevel_ >= 1 )
+   if ( mypid == 0 && ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
       printf("   0 : buildA21Mat : NNZ of A21 = %d\n", ncnt);
 
    //------------------------------------------------------------------
@@ -1940,7 +1985,7 @@ int HYPRE_SlideReduction::buildA21Mat()
                   } 
                   if ( newRowSize > maxRowSize+1 ) 
                   {
-                     if ( outputLevel_ > 1 )
+                     if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 2 )
                      {
                         printf("%4d : buildA21Mat WARNING - ",mypid);
                         printf("passing array boundary(1).\n");
@@ -2000,7 +2045,7 @@ int HYPRE_SlideReduction::buildA21Mat()
    HYPRE_IJMatrixGetObject(A21mat_, (void **) &A21_csr);
    hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) A21_csr);
 
-   if ( outputLevel_ >= 4 )
+   if ( outputLevel_ >= 5 )
    {
       char fname[40];
       sprintf(fname, "A21.%d", mypid);
@@ -2773,7 +2818,7 @@ fclose(fp2);
    HYPRE_IJMatrixGetObject(invA22mat_, (void **) &invA22_csr);
    hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) invA22_csr);
 
-   if ( outputLevel_ >= 4 )
+   if ( outputLevel_ >= 5 )
    {
       char fname[40];
       sprintf( fname, "invA.%d", mypid );
@@ -3013,13 +3058,13 @@ int HYPRE_SlideReduction::findSlaveEqns2(int **couplings)
                  constrListAux2[nCandidates] <= endRow )
             {
                candidateList[nCandidates++] = irow;
-               if ( outputLevel_ >= 1 )
+               if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
                   printf("%4d : findSlaveEqns2 - candidate %d = %d\n", 
                          mypid, nCandidates-1, irow);
             }
          }
       }
-      if ( outputLevel_ >= 1 )
+      if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
          printf("%4d : findSlaveEqns2 - nCandidates, nConstr = %d %d\n",
                    mypid, nCandidates, nConstraints);
    }
@@ -3077,13 +3122,13 @@ int HYPRE_SlideReduction::findSlaveEqns2(int **couplings)
             (*couplings)[nPairs*2+1] = constrListAux[index];
             (*couplings)[nPairs*2+2] = constrListAux2[index];
             nPairs++;
-            if ( outputLevel_ >= 1 )
+            if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
                printf("%4d : findSlaveEqns2 - constr %d <=> slave %d\n",
                       mypid, irow, searchIndex);
          } 
          else 
          {
-            if ( outputLevel_ >= 1 )
+            if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
             {
                printf("%4d : findSlaveEqns2 - constraint %4d fails", mypid,
                       irow);
@@ -3111,13 +3156,13 @@ int HYPRE_SlideReduction::findSlaveEqns2(int **couplings)
    MPI_Allreduce(&ncnt, &nSum, 1, MPI_INT, MPI_SUM, mpiComm_);
    if ( nSum > 0 ) 
    {
-      if ( mypid == 0 && outputLevel_ >= 1 )
+      if ( mypid == 0 && ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
       {
          printf("%4d : findSlaveEqns2 fails - total number of unsatisfied",
                 mypid);
          printf(" constraints = %d \n", nSum);
       }
-      if ( outputLevel_ >= 1 )
+      if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
       {
          for ( irow = 0; irow < nConstraints; irow++ )
             if ( slaveEqnList_[irow] == -1 ) 
@@ -3175,7 +3220,7 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
    A21StartRow    = 2 * procNConstr_[mypid];
    A21StartCol    = procNRows[mypid] - procNConstr_[mypid];
 
-   if ( outputLevel_ >= 1 )
+   if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
    {
       printf("%4d : buildReducedMatrix - A21StartRow  = %d\n", mypid,
                                          A21StartRow);
@@ -3264,7 +3309,7 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
    nnzA21 = 0;
    for ( irow = 0; irow < 2*nConstraints; irow++ ) nnzA21 += A21MatSize[irow];
    MPI_Allreduce(&nnzA21,&ncnt,1,MPI_INT,MPI_SUM,mpiComm_);
-   if ( mypid == 0 && outputLevel_ >= 1 )
+   if ( mypid == 0 && ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
       printf("   0 : buildReducedMatrix : NNZ of A21 = %d\n", ncnt);
 
    //------------------------------------------------------------------
@@ -3326,7 +3371,7 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
                   } 
                   if ( newRowSize > maxRowSize+1 ) 
                   {
-                     if ( outputLevel_ > 1 )
+                     if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 2 )
                      {
                         printf("%4d : buildReducedMatrix WARNING - ",mypid);
                         printf("passing array boundary(1).\n");
@@ -3385,7 +3430,7 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
    HYPRE_IJMatrixGetObject(A21mat_, (void **) &A21_csr);
    hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) A21_csr);
 
-   if ( outputLevel_ >= 4 )
+   if ( outputLevel_ >= 5 )
    {
       char fname[40];
       sprintf(fname, "A21.%d", mypid);
@@ -4029,7 +4074,7 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
    HYPRE_IJMatrixGetObject(invA22mat_, (void **) &invA22_csr);
    hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) invA22_csr);
 
-   if ( outputLevel_ >= 4 )
+   if ( outputLevel_ >= 5 )
    {
       char fname[40];
       sprintf(fname, "invA22.%d", mypid);
@@ -4062,7 +4107,7 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
 
    HYPRE_IJMatrixGetObject(A21mat_, (void **) &A21_csr);
    HYPRE_IJMatrixGetObject(invA22mat_, (void **) &invA22_csr);
-   if ( outputLevel_ >= 1 )
+   if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
       printf("%4d : buildReducedMatrix - Triple matrix product starts\n",
              mypid);
 
@@ -4071,7 +4116,7 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
                                       (hypre_ParCSRMatrix *) A21_csr,
                                       (hypre_ParCSRMatrix **) &RAP_csr);
 
-   if ( outputLevel_ >= 1 )
+   if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
       printf("%4d : buildReducedMatrix - Triple matrix product ends\n", 
              mypid);
 
@@ -4118,7 +4163,7 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
    int reducedAGlobalNCols = reducedAGlobalNRows;
    int *reducedAMatSize    = new int[reducedANRows];
 
-   if ( outputLevel_ >= 1 )
+   if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
    {
       printf("%4d : buildReducedMatrix - reduceAGlobalDim = %d %d\n", mypid, 
                        reducedAGlobalNRows, reducedAGlobalNCols);
@@ -4261,7 +4306,7 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
    HYPRE_IJMatrixAssemble(reducedAmat_);
    HYPRE_IJMatrixGetObject(reducedAmat_, (void **) &reducedA_csr);
 
-   if ( outputLevel_ >= 2 )
+   if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 5 )
    {
       MPI_Barrier(mpiComm_);
       ncnt = 0;
@@ -4299,6 +4344,195 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
 
    free( procNRows );
    HYPRE_ParCSRMatrixDestroy(RAP_csr);
+   return 0;
+}
+
+//***************************************************************************
+// get matrix number of rows 
+//---------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::getMatrixNumRows()
+{
+   int mypid, nprocs, *procNRows, localNRows, nConstraints;
+   HYPRE_ParCSRMatrix A_csr;
+
+   MPI_Comm_rank( mpiComm_, &mypid );
+   MPI_Comm_size( mpiComm_, &nprocs );
+   HYPRE_IJMatrixGetObject(Amat_, (void **) &A_csr);
+   HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &procNRows );
+   localNRows   = procNRows[mypid+1] - procNRows[mypid];
+   nConstraints = procNConstr_[mypid+1] - procNConstr_[mypid];
+   hypre_TFree( procNRows );
+   return (localNRows-nConstraints);
+}
+
+//***************************************************************************
+// scale matrix
+//---------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::scaleMatrixVector()
+{
+   int                *partition, startRow, localNRows, index, offset;
+   int                 irow, jcol, iP, rowSize, *colInd, *rowLengs;
+   int                 mypid, nprocs;
+   int                 nSends, *sendStarts, *sendMap, *offdMap, ierr;
+   int                 nRecvs, *recvStarts, pstart, pend, maxRowLeng;
+   int                 *ADiagI, *ADiagJ, *AOffdI, *AOffdJ, rowInd;
+   double              *ADiagA, *AOffdA, *bData, *b2Data;
+   double              *scaleVec, *extScaleVec, *colVal, *sBuffer;
+   HYPRE_IJMatrix      newA;
+   HYPRE_IJVector      newB;
+   hypre_ParCSRMatrix  *A_csr;
+   hypre_CSRMatrix     *ADiag, *AOffd;
+   hypre_ParVector     *b_csr, *b2_csr;
+   hypre_ParCSRCommPkg *commPkg;
+   hypre_ParCSRCommHandle *commHandle;
+ 
+   //-----------------------------------------------------------------------
+   // fetch matrix and parameters 
+   //-----------------------------------------------------------------------
+
+   MPI_Comm_rank( mpiComm_, &mypid );
+   MPI_Comm_size( mpiComm_, &nprocs );
+printf("%d : scaleMatrixVector (1)\n", mypid);
+   HYPRE_IJMatrixGetObject(reducedAmat_, (void **) &A_csr);
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A_csr,&partition);
+   startRow    = partition[mypid];
+   localNRows  = partition[mypid+1] - startRow;
+   free( partition );
+   ADiag  = hypre_ParCSRMatrixDiag(A_csr);
+   ADiagI = hypre_CSRMatrixI(ADiag);
+   ADiagJ = hypre_CSRMatrixJ(ADiag);
+   ADiagA = hypre_CSRMatrixData(ADiag);
+   AOffd  = hypre_ParCSRMatrixOffd(A_csr);
+   AOffdI = hypre_CSRMatrixI(AOffd);
+   AOffdJ = hypre_CSRMatrixJ(AOffd);
+   AOffdA = hypre_CSRMatrixData(AOffd);
+   HYPRE_IJVectorGetObject(reducedBvec_, (void **) &b_csr);
+   bData  = hypre_VectorData(hypre_ParVectorLocalVector(b_csr));
+
+   offdMap = hypre_ParCSRMatrixColMapOffd(A_csr);
+   commPkg = hypre_ParCSRMatrixCommPkg((hypre_ParCSRMatrix *) A_csr);
+   nSends  = hypre_ParCSRCommPkgNumSends(commPkg);
+   nRecvs  = hypre_ParCSRCommPkgNumRecvs(commPkg);
+   recvStarts = hypre_ParCSRCommPkgRecvVecStarts(commPkg);
+   sendStarts = hypre_ParCSRCommPkgSendMapStarts(commPkg);
+   sendMap    = hypre_ParCSRCommPkgSendMapElmts(commPkg);
+
+   //-----------------------------------------------------------------------
+   // fetch diagonal of A
+   //-----------------------------------------------------------------------
+
+printf("%d : scaleMatrixVector (2)\n", mypid);
+   scaleVec  = new double[localNRows];
+   rowLengs  = new int[localNRows];
+   extScaleVec = NULL;
+   if ( nRecvs > 0 ) extScaleVec = new double[recvStarts[nprocs]];
+
+   maxRowLeng = 0;
+   for ( irow = 0; irow < localNRows; irow++ )
+   {
+      scaleVec[irow] = 0.0;
+      rowLengs[irow] = ADiagI[irow+1] - ADiagI[irow] + 
+                       AOffdI[irow+1] - AOffdI[irow];
+      if ( rowLengs[irow] > maxRowLeng ) maxRowLeng = rowLengs[irow];
+      for ( jcol = ADiagI[irow]; jcol < ADiagI[irow+1];  jcol++ )
+         if ( ADiagJ[jcol] == irow ) scaleVec[irow] = ADiagA[jcol];
+   }
+printf("%d : scaleMatrixVector (3)\n", mypid);
+   for ( irow = 0; irow < localNRows; irow++ )
+   {
+      if ( scaleVec[irow] <= 0.0 )
+      {
+         printf("%d : scaleMatrixVector - diag %d = %e <= 0 \n",mypid,irow,
+                scaleVec[irow]);
+         exit(1);
+      }
+      scaleVec[irow] = 1.0/sqrt(scaleVec[irow]);
+   }
+
+   //-----------------------------------------------------------------------
+   // exchange diagonal of A
+   //-----------------------------------------------------------------------
+
+printf("%d : scaleMatrixVector (4)\n", mypid);
+   if ( nSends > 0 )
+   {
+      sBuffer = new double[sendStarts[nprocs]];
+      offset = 0;
+      for ( iP = 0; iP < nSends; iP++ )
+      {
+         pstart = sendStarts[iP];
+         pend   = sendStarts[iP+1];
+         for ( jcol = pstart; jcol < pend; jcol++ )
+         {
+            index = sendMap[jcol];
+            sBuffer[offset++] = scaleVec[index];
+         }
+      }
+   }
+   else sBuffer = NULL;
+
+   commHandle = hypre_ParCSRCommHandleCreate(1, commPkg, sBuffer, 
+                                             &extScaleVec[localNRows]);
+   if ( nSends > 0 ) delete [] sBuffer;
+
+   //-----------------------------------------------------------------------
+   // construct new matrix
+   //-----------------------------------------------------------------------
+
+printf("%d : scaleMatrixVector (5)\n", mypid);
+   HYPRE_IJMatrixCreate(mpiComm_, startRow, startRow+localNRows-1,
+                        startRow, startRow+localNRows-1, &newA);
+   HYPRE_IJMatrixSetObjectType(newA, HYPRE_PARCSR);
+   HYPRE_IJMatrixSetRowSizes(newA, rowLengs);
+   HYPRE_IJMatrixInitialize(newA);
+   delete [] rowLengs;
+   colInd = new int[maxRowLeng];
+   colVal = new double[maxRowLeng];
+   for ( irow = 0; irow < localNRows; irow++ )
+   {
+      rowSize = 0;
+      for ( jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++ )
+      {
+         index = ADiagJ[jcol];
+         colInd[rowSize] = index + startRow; 
+         colVal[rowSize++] = scaleVec[irow]*scaleVec[index]*ADiagA[jcol];
+      }
+      for ( jcol = AOffdI[irow]; jcol < AOffdI[irow+1]; jcol++ )
+      {
+         index = AOffdJ[jcol];
+         colInd[rowSize] = offdMap[index]; 
+         colVal[rowSize++] = scaleVec[irow]*extScaleVec[index]*AOffdA[jcol];
+      }
+      rowInd = irow + startRow;
+      HYPRE_IJMatrixSetValues(newA, 1, &rowSize, (const int *) &rowInd,
+                  (const int *) colInd, (const double *) colVal);
+   }
+   HYPRE_IJMatrixAssemble(newA);
+printf("%d : scaleMatrixVector (6)\n", mypid);
+   delete [] colInd;
+   delete [] colVal;
+   delete [] extScaleVec;
+
+   //-----------------------------------------------------------------------
+   // construct new vector
+   //-----------------------------------------------------------------------
+
+   ierr  = HYPRE_IJVectorCreate(mpiComm_,startRow,startRow+localNRows-1,&newB);
+   ierr += HYPRE_IJVectorSetObjectType(newB, HYPRE_PARCSR);
+   ierr += HYPRE_IJVectorInitialize(newB);
+   ierr += HYPRE_IJVectorAssemble(newB);
+   ierr += HYPRE_IJVectorGetObject(newB, (void **) &b2_csr);
+   b2Data = hypre_VectorData(hypre_ParVectorLocalVector(b2_csr));
+   assert( !ierr );
+   for ( irow = 0; irow < localNRows; irow++ )
+      b2Data[irow] = bData[irow] * scaleVec[irow];
+
+printf("%d : scaleMatrixVector (7)\n", mypid);
+   ADiagISqrts_ = scaleVec;
+   reducedAmat_ = newA;
+   reducedBvec_ = newB;
    return 0;
 }
 

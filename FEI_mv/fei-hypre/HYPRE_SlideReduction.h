@@ -46,17 +46,24 @@ class HYPRE_SlideReduction
    int            *eqnStatuses_;
    double         blockMinNorm_;
    HYPRE_ParCSRMatrix hypreRAP_;
+   double         truncTol_;
+   double         *ADiagISqrts_;
+   int            scaleMatrixFlag_;
 
  public:
 
    HYPRE_SlideReduction(MPI_Comm);
    virtual ~HYPRE_SlideReduction();
-   int    setOutputLevel(int level) {outputLevel_ = level; return 0;}
+   int    setOutputLevel(int level);
+   int    setTruncationThreshold(double trunc) {truncTol_=trunc; return 0;}
+   int    setScaleMatrix()             {scaleMatrixFlag_ = 1;}
    int    setBlockMinNorm(double norm) {blockMinNorm_ = norm; return 0;}
    int    setup(HYPRE_IJMatrix , HYPRE_IJVector , HYPRE_IJVector );
    int    buildReducedMatrix();
    int    buildReducedRHSVector(HYPRE_IJVector);
    int    buildReducedSolnVector(HYPRE_IJVector x, HYPRE_IJVector b);
+   int    getMatrixNumRows(); 
+   double *getMatrixDiagonal() { return ADiagISqrts_; } 
    int    getReducedMatrix(HYPRE_IJMatrix *mat) 
                        { (*mat) = reducedAmat_; return 0; }
    int    getReducedRHSVector(HYPRE_IJVector *rhs) 
@@ -82,6 +89,7 @@ class HYPRE_SlideReduction
 
    int    findSlaveEqns2(int **couplings);
    int    buildReducedMatrix2();
+   int    scaleMatrixVector();
    double matrixCondEst(int, int, int *, int);
 };
 

@@ -105,6 +105,8 @@ extern "C" {
    void  qsort1(int *, double *, int, int);
 }
 
+#define habs(x)  ( ( (x) > 0 ) ? x : -(x))
+
 //***************************************************************************
 // constructor
 //---------------------------------------------------------------------------
@@ -150,6 +152,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   HYPreconSetup_(0),
                   slideReduction_(0),
                   slideReductionMinNorm_(-1.0),
+                  slideReductionScaleMatrix_(0),
                   schurReduction_(0),
                   schurReductionCreated_(0),
                   normalEqnFlag_(0),
@@ -273,6 +276,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    mlCoarsenScheme_    = 1;    // default coarsening scheme = uncoupled
    mlNumPDEs_          = 1;    // default block size 
 
+   truncThresh_        = 0.0;
    rhsIDs_             = new int[1];
    rhsIDs_[0]          = 0;
    feData_             = NULL;
@@ -1730,7 +1734,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
 {
    int    i, j, ierr, numLocalEqns, leng, eqnNum, nnz, *newColInd=NULL;
    int    maxRowLeng, newLeng, rowSize, *colInd, nrows;
-   double *newColVal=NULL, *colVal, value;
+   double *newColVal=NULL, *colVal, value, diag;
    char   fname[40];
    FILE   *fp;
    HYPRE_ParCSRMatrix A_csr;
@@ -1802,9 +1806,13 @@ int HYPRE_LinSysCore::matrixLoadComplete()
          eqnNum  = localStartRow_ - 1 + i;
          leng    = rowLengths_[i];
          newLeng = 0;
+         diag    = 1.0;
+         for ( j = 0; j < leng; j++ ) 
+            if ( (colIndices_[i][j]-1) == eqnNum ) 
+               if ( habs(colValues_[i][j]) > 1.0E-16 ) diag = colValues_[i][j];
          for ( j = 0; j < leng; j++ ) 
          {
-            if ( colValues_[i][j] != 0.0 )
+            if ( habs(colValues_[i][j]/diag) >= truncThresh_ )
             {
                newColInd[newLeng]   = colIndices_[i][j] - 1;
                newColVal[newLeng++] = colValues_[i][j];
@@ -3459,7 +3467,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    int                startRow, *procNRows, rowSize, *colInd, nnz, nrows;
    int                *constrMap, *numSweeps, *relaxType, *constrEqns;
    int                *matSizes, *rowInd;
-   double             rnorm=0.0, ddata, *colVal, *relaxWt;
+   double             rnorm=0.0, ddata, *colVal, *relaxWt, *diagVals;
    double             stime, etime, ptime, rtime1, rtime2, newnorm;
    char               fname[40];
    FILE               *fp;
@@ -3510,7 +3518,16 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
             slideObj->setOutputLevel(3);
          if ( slideReductionMinNorm_ >= 0.0 )
             slideObj->setBlockMinNorm( slideReductionMinNorm_ );
+         if ( slideReductionScaleMatrix_ == 1 )
+            slideObj->setScaleMatrix();
+         slideObj->setTruncationThreshold( truncThresh_ );
          slideObj->setup(currA_, currX_, currB_);
+         if ( slideReductionScaleMatrix_ == 1 && HYPreconID_ == HYMLI )
+         {
+            diagVals = slideObj->getMatrixDiagonal();
+            nrows    = slideObj->getMatrixNumRows();
+            HYPRE_LSI_MLILoadMatrixScalings(HYPrecon_, nrows, diagVals);
+         }
 #ifdef HAVE_MLI
          if ( HYPreconID_ == HYMLI )
          {

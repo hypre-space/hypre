@@ -83,6 +83,7 @@ typedef struct HYPRE_LSI_MLI_Struct
    double   *preSmootherWts_;     /* relaxation weights */
    double   *postSmootherWts_;    /* relaxation weights */
    int      smootherPrintRNorm_;  /* for smoother diagnostics */
+   int      smootherFindOmega_;   /* for SGS smoother */
    double   strengthThreshold_;   /* strength threshold */
    char     coarseSolver_[20];    /* default = SuperLU */
    int      coarseSolverNSweeps_; /* number of sweeps (if iterative used) */
@@ -147,6 +148,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->preSmootherWts_      = NULL;
    mli_object->postSmootherWts_     = NULL;
    mli_object->smootherPrintRNorm_  = 0;
+   mli_object->smootherFindOmega_   = 0;
    mli_object->strengthThreshold_   = 0.08;
    strcpy(mli_object->coarseSolver_, "SuperLU");
    mli_object->coarseSolverNSweeps_ = 0;
@@ -272,6 +274,11 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    if ( mli_object->smootherPrintRNorm_ == 1 )
    {
       strcpy(paramString, "setSmootherPrintRNorm");
+      method->setParams( paramString, 0, NULL );
+   }
+   if ( mli_object->smootherFindOmega_ == 1 )
+   {
+      strcpy(paramString, "setSmootherFindOmega");
       method->setParams( paramString, 0, NULL );
    }
 
@@ -567,6 +574,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      numSweeps <d> \n");
          printf("\t      smootherWeight <f> \n");
          printf("\t      smootherPrintRNorm \n");
+         printf("\t      smootherFindOmega \n");
          printf("\t      minCoarseSize <d> \n");
          printf("\t      Pweight <f> \n");
          printf("\t      nodeDOF <d> \n");
@@ -666,6 +674,10 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
    else if ( !strcasecmp(param2, "smootherPrintRNorm") )
    {
       mli_object->smootherPrintRNorm_ = 1;
+   }
+   else if ( !strcasecmp(param2, "smootherFindOmega") )
+   {
+      mli_object->smootherFindOmega_ = 1;
    }
    else if ( !strcasecmp(param2, "minCoarseSize") )
    {
