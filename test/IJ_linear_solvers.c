@@ -508,6 +508,9 @@ main( int   argc,
       printf("       10=DS-BiCGSTAB    \n");
       printf("       11=PILUT-BiCGSTAB \n");
       printf("       18=ParaSails-GMRES\n");     
+      printf("       43=Euclid-PCG\n");
+      printf("       44=Euclid-GMRES\n");
+      printf("       45=Euclid-BICGSTAB\n");
       printf("\n");
       printf("   -cljp                 : CLJP coarsening \n");
       printf("   -ruge                 : Ruge coarsening (local)\n");
@@ -923,7 +926,7 @@ main( int   argc,
     * Solve the system using PCG 
     *-----------------------------------------------------------*/
 
-   if (solver_id == 1 || solver_id == 2 || solver_id == 8)
+   if (solver_id == 1 || solver_id == 2 || solver_id == 8 || solver_id == 43)
    {
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
@@ -986,6 +989,25 @@ main( int   argc,
                                    HYPRE_ParCSRParaSailsSetup,
                                    pcg_precond);
       }
+      else if (solver_id == 43)
+      {
+         /* use Euclid preconditioning */
+         if (myid == 0) printf("Solver: Euclid-PCG\n");
+
+         HYPRE_ParCSREuclidCreate(MPI_COMM_WORLD, &pcg_precond);
+
+         /* note: There are three three methods of setting run-time 
+            parameters for Euclid: (see HYPRE_parcsr_ls.h); here
+            we'll use what I think is simplest: let Euclid internally 
+            parse the command line.
+         */   
+         HYPRE_ParCSREuclidSetParams(pcg_precond, argc, argv);
+
+         HYPRE_ParCSRPCGSetPrecond(pcg_solver,
+                                   HYPRE_ParCSREuclidSolve,
+                                   HYPRE_ParCSREuclidSetup,
+                                   pcg_precond);
+      }
  
       HYPRE_ParCSRPCGGetPrecond(pcg_solver, &pcg_precond_gotten);
       if (pcg_precond_gotten !=  pcg_precond)
@@ -1033,6 +1055,11 @@ main( int   argc,
       {
 	 HYPRE_ParCSRParaSailsDestroy(pcg_precond);
       }
+      else if (solver_id == 43)
+      {
+        HYPRE_ParCSREuclidPrintParams(pcg_precond);
+        HYPRE_ParCSREuclidDestroy(pcg_precond);
+      }
 
       if (myid == 0)
       {
@@ -1048,7 +1075,8 @@ main( int   argc,
     * Solve the system using GMRES 
     *-----------------------------------------------------------*/
 
-   if (solver_id == 3 || solver_id == 4 || solver_id == 7 || solver_id == 18)
+   if (solver_id == 3 || solver_id == 4 || solver_id == 7 
+                      || solver_id == 18 || solver_id == 44)
    {
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
@@ -1134,6 +1162,25 @@ main( int   argc,
                                    HYPRE_ParCSRParaSailsSetup,
                                    pcg_precond);
       }
+      else if (solver_id == 44)
+      {
+         /* use Euclid preconditioning */
+         if (myid == 0) printf("Solver: Euclid-GMRES\n");
+
+         HYPRE_ParCSREuclidCreate(MPI_COMM_WORLD, &pcg_precond);
+
+         /* note: There are three three methods of setting run-time 
+            parameters for Euclid: (see HYPRE_parcsr_ls.h); here
+            we'll use what I think is simplest: let Euclid internally 
+            parse the command line.
+         */   
+         HYPRE_ParCSREuclidSetParams(pcg_precond, argc, argv);
+
+         HYPRE_ParCSRGMRESSetPrecond (pcg_solver,
+                                   HYPRE_ParCSREuclidSolve,
+                                   HYPRE_ParCSREuclidSetup,
+                                   pcg_precond);
+      }
  
       HYPRE_ParCSRGMRESGetPrecond(pcg_solver, &pcg_precond_gotten);
       if (pcg_precond_gotten != pcg_precond)
@@ -1185,6 +1232,11 @@ main( int   argc,
       {
 	 HYPRE_ParCSRParaSailsDestroy(pcg_precond);
       }
+      else if (solver_id == 44)
+      {
+        HYPRE_ParCSREuclidPrintParams(pcg_precond);
+        HYPRE_ParCSREuclidDestroy(pcg_precond);
+      }
 
       if (myid == 0)
       {
@@ -1198,7 +1250,7 @@ main( int   argc,
     * Solve the system using BiCGSTAB 
     *-----------------------------------------------------------*/
 
-   if (solver_id == 9 || solver_id == 10 || solver_id == 11)
+   if (solver_id == 9 || solver_id == 10 || solver_id == 11 || solver_id == 45)
    {
       time_index = hypre_InitializeTiming("BiCGSTAB Setup");
       hypre_BeginTiming(time_index);
@@ -1269,6 +1321,25 @@ main( int   argc,
             HYPRE_ParCSRPilutSetFactorRowSize( pcg_precond,
                nonzeros_to_keep );
       }
+      else if (solver_id == 45)
+      {
+         /* use Euclid preconditioning */
+         if (myid == 0) printf("Solver: Euclid-BICGSTAB\n");
+
+         HYPRE_ParCSREuclidCreate(MPI_COMM_WORLD, &pcg_precond);
+
+         /* note: There are three three methods of setting run-time 
+            parameters for Euclid: (see HYPRE_parcsr_ls.h); here
+            we'll use what I think is simplest: let Euclid internally 
+            parse the command line.
+         */   
+         HYPRE_ParCSREuclidSetParams(pcg_precond, argc, argv);
+
+         HYPRE_ParCSRBiCGSTABSetPrecond(pcg_solver,
+                                   HYPRE_ParCSREuclidSolve,
+                                   HYPRE_ParCSREuclidSetup,
+                                   pcg_precond);
+      }
  
       HYPRE_ParCSRBiCGSTABSetup(pcg_solver, A, b, x);
  
@@ -1306,6 +1377,11 @@ main( int   argc,
       if (solver_id == 11)
       {
          HYPRE_ParCSRPilutDestroy(pcg_precond);
+      }
+      else if (solver_id == 45)
+      {
+        HYPRE_ParCSREuclidPrintParams(pcg_precond);
+        HYPRE_ParCSREuclidDestroy(pcg_precond);
       }
 
       if (myid == 0)
