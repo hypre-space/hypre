@@ -33,6 +33,9 @@ CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I$(srcdir)\
  -I$(srcdir)/../..\
+ -I$(srcdir)/../../seq_mv\
+ -I$(srcdir)/../../parcsr_mv\
+ -I$(srcdir)/../../utilities\
  ${CINCLUDES}\
  ${CDEFS}
  
@@ -40,6 +43,9 @@ CXXFLAGS =\
  ${CXX_COMPILE_FLAGS}\
  -I$(srcdir)\
  -I$(srcdir)/../..\
+ -I$(srcdir)/../../seq_mv\
+ -I$(srcdir)/../../parcsr_mv\
+ -I$(srcdir)/../../utilities\
  ${CXXINCLUDES}\
  ${CXXDEFS}
 
@@ -52,10 +58,12 @@ BLASLIBFLAGS =  @BLASLIBFLAGS@
 
 LFLAGS =\
  -L.\
- -L../../seq_mv\
- -L../../parcsr_mv\
- -L../../utilities\
+ -L../../hypre/lib\
+ -L../lib\
  -lHYPRE_mli\
+ -lkrylov\
+ -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_ls\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_utilities\
@@ -68,7 +76,7 @@ HEADERS =
 
 FILES =
 
-DRIVER_FILES =
+DRIVER_FILES = \
  driver.c
 
 OBJS = ${FILES:.c=.o}
@@ -80,7 +88,7 @@ DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
 driver: ${DRIVER_OBJS} ../lib/libHYPRE_mli.a
 	@echo  "Building" $@ "... "
-	${CXX} -o $@.o ${LFLAGS}
+	${CXX} -o driver $@.o ${LFLAGS}
  
 clean:
 	@rm -f *.o
