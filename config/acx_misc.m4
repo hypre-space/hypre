@@ -225,21 +225,48 @@ AC_HELP_STRING(
 [Try to find a compiler option that warns when a function prototype
 is not fully defined, as many other non-ANSI features as possible.
 Currently this macro knows about GCC, and KCC.]),
-[ if test "x$GCC" = "xyes"; then
-  CFLAGS="$CFLAGS -Wall -ansi -pedantic"
-  CXXFLAGS="$CXXFLAGS -Wall -Wshadow -fno-implicit-templates"
-  CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
-else
-  CC=KCC
-  CXX=KCC
-  CFLAGS="$CFLAGS --c --strict --lint --display_error_number"
-  CFLAGS="$CFLAGS --diag_suppress 45,236,450,826"
-  CFLAGS="$CFLAGS,1018,1021,1022,1023,1024,1030,1041"
-  CXXFLAGS="$CXXFLAGS --strict --lint --display_error_number"
-  CXXFLAGS="$CXXFLAGS --diag_suppress 381,450,1023,1024"
-  casc_user_chose_compilers=yes
-  casc_using_mpi=no
-fi
+[ 
+  AC_CHECK_PROGS(CC, icc pgcc xlc gcc kcc KCC)
+  AC_CHECK_PROGS(CXX, icc pgCC xlC g++ gcc KCC)
+  AC_CHECK_PROGS(F77, ifc pgf77 xlf g77)
+  if test "x$GCC" = "xyes"; then
+    CFLAGS="$CFLAGS -Wall -ansi -pedantic"
+    CXXFLAGS="$CXXFLAGS -Wall -Wshadow -fno-implicit-templates"
+    CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
+    casc_using_debug=yes
+  elif test "x$CC" = "xicc"; then
+    CFLAGS="$CFLAGS -Xc -Wall -x c"
+    CXXFLAGS="$CXXFLAGS -Xc -Wall -x c++"
+    casc_using_debug=yes
+  elif test "x$CC" = "xpgcc"; then
+    CFLAGS="$CFLAGS -Xa -Minform,inform"
+    CXXFLAGS="$CXXFLAGS -A --display_error_number -Minform,inform"
+    casc_using_debug=yes
+  elif test "x$CC" = "xxlc"; then
+    CFLAGS="$CFLAGS -qinfo=all"
+    CFLAGS="$CFLAGS -qsuppress=1506-290:1506-293:1506-412:1506-454"
+    CFLAGS="$CFLAGS:1506-456:1506-460:1506-464:1506-465:1506-733"
+    CXXFLAGS="$CXXFLAGS  -qinfo=all"
+    CXXFLAGS="$CXXFLAGS -qsuppress=1506-290:1506-293:1506-412:1506-454"
+    CXXFLAGS="$CXXFLAGS:1506-456:1506-460:1506-464:1506-465:1506-733"
+    casc_using_debug=yes
+  elif test "x$CC" = "xKCC"; then
+    CFLAGS="$CFLAGS --c --strict --lint --display_error_number"
+    CFLAGS="$CFLAGS --diag_suppress 45,236,450,826"
+    CFLAGS="$CFLAGS,1018,1021,1022,1023,1024,1030,1041"
+    CXXFLAGS="$CXXFLAGS --strict --lint --display_error_number"
+    CXXFLAGS="$CXXFLAGS --diag_suppress 381,450,1023,1024"
+    casc_using_debug=yes
+    casc_using_mpi=no
+  else
+    CC=gcc
+    CXX=g++
+    CFLAGS="$CFLAGS -Wall -pedantic"
+    CXXFLAGS="$CXXFLAGS -Wall -Wshadow -fno-implicit-templates"
+    CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
+    casc_user_chose_compilers=yes
+    casc_using_mpi=no
+  fi
 ])])
 dnl **********************************************************************
 dnl * ACX_CHECK_MPI
