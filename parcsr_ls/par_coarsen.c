@@ -610,14 +610,6 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
                j = S_diag_j[jS];
 	       if (j < 0) j = -j-1;
    
-               if (CF_marker[j] == SF_PT)
-               {
-                  if (S_diag_j[jS] > -1)
-                  {
-                     /* "remove" edge from S */
-                     S_diag_j[jS] = -S_diag_j[jS]-1;
-                  }
-               }
                if (CF_marker[j] > 0)
                {
                   if (S_diag_j[jS] > -1)
