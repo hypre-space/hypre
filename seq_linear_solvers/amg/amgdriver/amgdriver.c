@@ -43,6 +43,12 @@ char *argv[];
 
    amg_Clock_t time_ticks;
    amg_CPUClock_t cpu_ticks;
+   amg_Clock_t start_ticks;
+   amg_CPUClock_t start_cpu;
+   amg_Clock_t setup_ticks;
+   amg_CPUClock_t setup_cpu;
+   amg_Clock_t solve_ticks;
+   amg_CPUClock_t solve_cpu;
 
 
    /*-------------------------------------------------------
@@ -120,8 +126,8 @@ char *argv[];
    /* call AMG */
 
    amg_Clock_init();
-   time_ticks = -amg_Clock();
-   cpu_ticks = -amg_CPUClock();
+   start_ticks = amg_Clock(); 
+   start_cpu = amg_CPUClock();
 
    if (SolverType(solver) == SOLVER_AMG)
    {
@@ -135,8 +141,16 @@ char *argv[];
          return 1;
       }
 
+      setup_ticks = amg_Clock() - start_ticks;
+      setup_cpu =   amg_CPUClock() - start_cpu;
+
       solve_err_flag = amg_Solve(u, f, stop_tolerance, amg_data);
       if (solve_err_flag != 0) printf("solve error = %d\n",solve_err_flag);
+
+      solve_ticks = amg_Clock() - (start_ticks + setup_ticks);
+      solve_cpu =   amg_CPUClock() - (start_cpu + setup_cpu);
+      time_ticks =  amg_Clock() - start_ticks;
+      cpu_ticks =   amg_CPUClock() - start_cpu;
    }
 
    /* call Jacobi */
@@ -183,9 +197,12 @@ char *argv[];
       GMRES(u, f, stop_tolerance, gmres_data);
    }
 
-   time_ticks += amg_Clock();
-   cpu_ticks  += amg_CPUClock();
-   PrintTiming(time_ticks,cpu_ticks);
+   printf("\nSetup Time:\n");
+   PrintTiming((double) setup_ticks,(double) setup_cpu);
+   printf("\nSolve Time:\n");
+   PrintTiming((double) solve_ticks,(double) solve_cpu);
+   printf("\nOverall Time:\n");
+   PrintTiming((double) time_ticks,(double) cpu_ticks);
 
    /*-------------------------------------------------------
     * Debugging prints
