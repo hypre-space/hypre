@@ -58,7 +58,6 @@ void Hypre_StructJacobi_destructor(Hypre_StructJacobi this) {
 
 /* ********************************************************
  * impl_Hypre_StructJacobiApply
- *       insert the library code below
  **********************************************************/
 void  impl_Hypre_StructJacobi_Apply
 (Hypre_StructJacobi this, Hypre_StructVector b, Hypre_StructVector* x) {
@@ -82,7 +81,6 @@ void  impl_Hypre_StructJacobi_Apply
 
 /* ********************************************************
  * impl_Hypre_StructJacobiGetSystemOperator
- *       insert the library code below
  **********************************************************/
 Hypre_StructMatrix  impl_Hypre_StructJacobi_GetSystemOperator
 (Hypre_StructJacobi this) {
@@ -93,7 +91,6 @@ Hypre_StructMatrix  impl_Hypre_StructJacobi_GetSystemOperator
 
 /* ********************************************************
  * impl_Hypre_StructJacobiGetResidual
- *       insert the library code below
  **********************************************************/
 Hypre_StructVector  impl_Hypre_StructJacobi_GetResidual(Hypre_StructJacobi this) {
   
@@ -119,7 +116,6 @@ Hypre_StructVector  impl_Hypre_StructJacobi_GetResidual(Hypre_StructJacobi this)
 
 /* ********************************************************
  * impl_Hypre_StructJacobiGetConvergenceInfo
- *       insert the library code below
  **********************************************************/
 void  impl_Hypre_StructJacobi_GetConvergenceInfo
 (Hypre_StructJacobi this, char* name, double* value) {
@@ -150,7 +146,6 @@ void  impl_Hypre_StructJacobi_GetConvergenceInfo
 
 /* ********************************************************
  * impl_Hypre_StructJacobiSetSystemOperator
- *       insert the library code below
  **********************************************************/
 void  impl_Hypre_StructJacobi_SetSystemOperator
 (Hypre_StructJacobi this, Hypre_StructMatrix op) {
@@ -163,7 +158,6 @@ void  impl_Hypre_StructJacobi_SetSystemOperator
 
 /* ********************************************************
  * impl_Hypre_StructJacobiGetParameter
- *       insert the library code below
  **********************************************************/
 double  impl_Hypre_StructJacobi_GetParameter(Hypre_StructJacobi this, char* name) {
    printf( "Hypre_StructJacobi_GetParameter does not recognize name ~s\n", name );
@@ -172,7 +166,6 @@ double  impl_Hypre_StructJacobi_GetParameter(Hypre_StructJacobi this, char* name
 
 /* ********************************************************
  * impl_Hypre_StructJacobiSetParameter
- *       insert the library code below
  **********************************************************/
 void  impl_Hypre_StructJacobi_SetParameter
 (Hypre_StructJacobi this, char* name, double value) {
@@ -205,7 +198,6 @@ void  impl_Hypre_StructJacobi_SetParameter
 
 /* ********************************************************
  * impl_Hypre_StructJacobiNew
- *       insert the library code below
  **********************************************************/
 void  impl_Hypre_StructJacobi_New(Hypre_StructJacobi this, Hypre_MPI_Com comm) {
 
@@ -229,7 +221,6 @@ void  impl_Hypre_StructJacobi_New(Hypre_StructJacobi this, Hypre_MPI_Com comm) {
 
 /* ********************************************************
  * impl_Hypre_StructJacobiSetup
- *       insert the library code below
  **********************************************************/
 void  impl_Hypre_StructJacobi_Setup
 (Hypre_StructJacobi this, Hypre_StructMatrix A, Hypre_StructVector b,
@@ -255,7 +246,6 @@ void  impl_Hypre_StructJacobi_Setup
 
 /* ********************************************************
  * impl_Hypre_StructJacobiConstructor
- *       insert the library code below
  **********************************************************/
 Hypre_StructJacobi  impl_Hypre_StructJacobi_Constructor(Hypre_MPI_Com comm) {
    /* declared static; just combines the new and New functions */
@@ -266,7 +256,6 @@ Hypre_StructJacobi  impl_Hypre_StructJacobi_Constructor(Hypre_MPI_Com comm) {
 
 /* ********************************************************
  * impl_Hypre_StructJacobiGetConstructedObject
- *       insert the library code below
  **********************************************************/
 Hypre_Solver  impl_Hypre_StructJacobi_GetConstructedObject(Hypre_StructJacobi this) {
 
