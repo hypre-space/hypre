@@ -223,6 +223,7 @@ AC_ARG_WITH(SGI_smp,
 AC_ARG_WITH(pgcc_smp,
    [  --with-pgcc_smp          use pgcc SMP (Red)],
    HYPREDEFS="$HYPREDEFS -DHYPRE_USING_PGCC_SMP"
+dnl   CFLAGS="$CFLAGS -mp"
    casc_using_pgcc_smp=yes 
 )
 
@@ -305,6 +306,41 @@ case $HOSTNAME in
         fi
      fi
 
+     CFLAGS="$CFLAGS"
+     CASC_SET_COPT(-O)
+     CASC_SET_CDEBUG(-g)
+     CASC_SET_CXXOPT(-O)
+     CASC_SET_CXXDEBUG(-g) 
+     CASC_SET_FOPT(-O)
+     CASC_SET_FDEBUG(-g)
+      
+   ;;
+
+   janus )
+
+     if  test "$casc_user_chose_compilers" = "no"
+     then
+        AC_CHECK_PROGS(CC, pgcc cc)
+        AC_CHECK_PROGS(CXX, pgCC CC) 
+        AC_CHECK_PROGS(F77, pgf77 f77)
+     fi
+
+     if  test "$casc_user_chose_mpi" = "no" 
+     then       
+        if test "$casc_using_mpi" = "yes"
+        then
+           CASC_CHECK_HEADER(mpi.h, /cougar/include)
+           MPIINCLUDE="$MPIINCLUDE $INCLUDES"
+           CASC_ADD_LIB(mpi, main, /cougar/lib/puma, MPI)
+           if test -z "$MPILIBS"
+           then
+                AC_MSG_WARN([MPI not found-- must set manually using --with-flags])
+           fi
+        fi
+     fi
+     
+     CFLAGS="$CFLAGS -cougar -mp -Mx,123,0x2000"
+     LIBS="$LIBS -cougar -mp -Mx,123,0x2000"
      CASC_SET_COPT(-O)
      CASC_SET_CDEBUG(-g)
      CASC_SET_CXXOPT(-O)
@@ -442,8 +478,9 @@ then
 
    rs6000)
 
+
    AC_ARG_WITH(COMM_SIMPLE, [\
-   --without-COMM_SIMPLE           use MPI derived data types (for IBM only)],
+   --without-COMM_SIMPLE           use MPI derived data types],
    if test "$withval" = "no"
    then
      CFLAGS="$CFLAGS"
@@ -452,6 +489,7 @@ then
    fi,
      CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
 )
+
 
 
      if test "$casc_user_chose_compilers" = "no"
@@ -514,17 +552,6 @@ AC_PROG_CPP
    ;;
 
    IRIX64)
-
-   AC_ARG_WITH(COMM_SIMPLE, [\
-   --without-COMM_SIMPLE           use MPI derived data types (for SGI only)],
-   if test "$withval" = "no"
-   then
-     CFLAGS="$CFLAGS"
-   else
-     CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
-   fi,
-     CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
-)
   
      if test "$casc_user_chose_compilers" = "no"
      then
