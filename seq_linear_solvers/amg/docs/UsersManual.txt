@@ -110,7 +110,7 @@ examples for creating your own configuration file.
 Create a config file (say `config.mine') with no lines in it.
 Then, type:
 
-   build -arch config.mine
+   build -arch mine
 
 If the library builds, then you don't need to do any configuring.
 Otherwise, use the example configuration files as guides to change
@@ -120,7 +120,7 @@ defined in the `config.defaults' file may be overridden in your
 
 To install, type:
 
-   build -arch config.mine install
+   build -arch mine install
 
 This will also build the library if it hasn't already been built.
 The default is to install the library in a `lib' subdirectory
