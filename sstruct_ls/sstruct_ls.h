@@ -30,6 +30,20 @@ int HYPRE_SStructGMRESSetLogging( HYPRE_SStructSolver solver , int logging );
 int HYPRE_SStructGMRESGetNumIterations( HYPRE_SStructSolver solver , int *num_iterations );
 int HYPRE_SStructGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver , double *norm );
 
+/* HYPRE_sstruct_pcg.c */
+int HYPRE_SStructPCGCreate( MPI_Comm comm , HYPRE_SStructSolver *solver );
+int HYPRE_SStructPCGDestroy( HYPRE_SStructSolver solver );
+int HYPRE_SStructPCGSetup( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
+int HYPRE_SStructPCGSolve( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
+int HYPRE_SStructPCGSetTol( HYPRE_SStructSolver solver , double tol );
+int HYPRE_SStructPCGSetMaxIter( HYPRE_SStructSolver solver , int max_iter );
+int HYPRE_SStructPCGSetTwoNorm( HYPRE_SStructSolver solver , int two_norm );
+int HYPRE_SStructPCGSetRelChange( HYPRE_SStructSolver solver , int rel_change );
+int HYPRE_SStructPCGSetPrecond( HYPRE_SStructSolver solver , HYPRE_PtrToSStructSolverFcn precond , HYPRE_PtrToSStructSolverFcn precond_setup , void *precond_data );
+int HYPRE_SStructPCGSetLogging( HYPRE_SStructSolver solver , int logging );
+int HYPRE_SStructPCGGetNumIterations( HYPRE_SStructSolver solver , int *num_iterations );
+int HYPRE_SStructPCGGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver , double *norm );
+
 /* HYPRE_sstruct_split.c */
 int HYPRE_SStructSplitCreate( MPI_Comm comm , HYPRE_SStructSolver *solver_ptr );
 int HYPRE_SStructSplitDestroy( HYPRE_SStructSolver solver );

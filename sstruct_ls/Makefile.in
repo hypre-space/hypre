@@ -43,6 +43,7 @@ HEADERS =\
 
 FILES =\
  HYPRE_sstruct_gmres.c\
+ HYPRE_sstruct_pcg.c\
  HYPRE_sstruct_split.c\
  krylov.c\
  krylov_sstruct.c

@@ -907,6 +907,8 @@ PrintUsage( char *progname,
       printf("  -P <Px> <Py> <Pz>   : refine and distribute part(s)\n");
       printf("  -b <bx> <by> <bz>   : refine and block part(s)\n");
       printf("  -solver <ID>        : solver ID (default = 0)\n");
+      printf("                        28 - PCG with diagonal scaling\n");
+      printf("                        29 - PCG\n");
       printf("                        30 - GMRES with SMG split precond\n");
       printf("                        31 - GMRES with PFMG split precond\n");
       printf("                        38 - GMRES with diagonal scaling\n");
@@ -1423,6 +1425,55 @@ main( int   argc,
 #endif
 
    hypre_TFree(values);
+
+   /*-----------------------------------------------------------
+    * Solve the system using GMRES
+    *-----------------------------------------------------------*/
+
+   if ((solver_id >= 20) && (solver_id < 30))
+   {
+      time_index = hypre_InitializeTiming("PCG Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_SStructPCGCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_SStructPCGSetMaxIter(solver, 100);
+      HYPRE_SStructPCGSetTol(solver, 1.0e-06);
+      HYPRE_SStructPCGSetLogging(solver, 1);
+
+      if (solver_id == 28)
+      {
+#if 0 /* TODO */
+         /* use diagonal scaling as preconditioner */
+         precond = NULL;
+         HYPRE_SStructGMRESSetPrecond(solver,
+                                      HYPRE_SStructDiagScale,
+                                      HYPRE_SStructDiagScaleSetup,
+                                      precond);
+#endif
+      }
+
+      HYPRE_SStructPCGSetup(solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("PCG Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_SStructPCGSolve(solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_SStructPCGGetNumIterations(solver, &num_iterations);
+      HYPRE_SStructPCGGetFinalRelativeResidualNorm(solver, &final_res_norm);
+      HYPRE_SStructPCGDestroy(solver);
+
+   }
 
    /*-----------------------------------------------------------
     * Solve the system using GMRES
