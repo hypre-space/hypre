@@ -593,7 +593,6 @@ The matrix to be pointed to.
 void *
 HYPRE_IJMatrixGetLocalStorage( HYPRE_IJMatrix IJmatrix )
 {
-   int ierr = 0;
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
 
    return( hypre_IJMatrixLocalStorage( matrix ) );

@@ -108,7 +108,6 @@ int
 hypre_AuxParCSRMatrixInitialize( hypre_AuxParCSRMatrix *matrix )
 {
    int local_num_rows = hypre_AuxParCSRMatrixLocalNumRows(matrix);
-   int local_num_cols = hypre_AuxParCSRMatrixLocalNumCols(matrix);
    int *row_space = hypre_AuxParCSRMatrixRowSpace(matrix);
    int **aux_j;
    double **aux_data;

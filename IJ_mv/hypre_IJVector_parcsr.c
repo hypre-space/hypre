@@ -202,7 +202,7 @@ int
 hypre_IJVectorZeroLocalComponentsPar(hypre_IJVector *vector)
 {
    int ierr = 0;
-   int my_id, num_procs;
+   int my_id;
    int i, vec_start, vec_stop;
    double *data;
 
@@ -249,7 +249,7 @@ hypre_IJVectorSetLocalComponentsPar(hypre_IJVector *vector,
                                     const double   *values            )
 {
    int ierr = 0;
-   int my_id, num_procs;
+   int my_id;
    int i, j, vec_start, vec_stop;
    double *data;
 
@@ -329,7 +329,7 @@ hypre_IJVectorSetLocalComponentsInBlockPar(hypre_IJVector *vector,
                                            const double   *values                )
 {
    int ierr = 0;
-   int my_id, num_procs;
+   int my_id;
    int i, vec_start, vec_stop, local_n, local_start, local_stop;
    double *data;
 
@@ -389,7 +389,7 @@ hypre_IJVectorAddToLocalComponentsPar(hypre_IJVector *vector,
                                       const double   *values            )
 {
    int ierr = 0;
-   int my_id, num_procs;
+   int my_id;
    int i, j, vec_start, vec_stop;
    double *data;
 
@@ -471,7 +471,7 @@ hypre_IJVectorAddToLocalComponentsInBlockPar(hypre_IJVector *vector,
 {
    int ierr = 0;
    int my_id;
-   int i, j, vec_start, vec_stop, local_n, local_start, local_stop;
+   int i, vec_start, vec_stop, local_n, local_start, local_stop;
    double *data;
 
    hypre_ParVector *par_vector = hypre_IJVectorLocalStorage(vector);
@@ -561,7 +561,7 @@ hypre_IJVectorGetLocalComponentsPar(hypre_IJVector *vector,
                                     double         *values            )
 {
    int ierr = 0;
-   int my_id, num_procs;
+   int my_id;
    int i, j, vec_start, vec_stop;
    double *data;
 
@@ -643,8 +643,8 @@ hypre_IJVectorGetLocalComponentsInBlockPar(hypre_IJVector *vector,
                                            double         *values                )
 {
    int ierr = 0;
-   int my_id, num_procs;
-   int i, j, vec_start, vec_stop, local_n, local_start, local_stop;
+   int my_id;
+   int i, vec_start, vec_stop, local_n, local_start, local_stop;
    double *data;
 
    hypre_ParVector *par_vector = hypre_IJVectorLocalStorage(vector);

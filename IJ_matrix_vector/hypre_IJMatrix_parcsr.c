@@ -315,15 +315,13 @@ hypre_IJMatrixInsertRowParCSR(hypre_IJMatrix *matrix,
    int col_0, col_n;
    int i;
    /* double temp; */
-   int *indx_diag, *indx_offd;
    int **aux_j;
    int *local_j;
    double **aux_data;
    double *local_data;
-   int diag_space, offd_space;
    int *row_length, *row_space;
    int need_aux;
-   int indx_0, indx_offd_0;
+   int indx_0;
    int diag_indx, offd_indx;
 
    hypre_CSRMatrix *diag;
@@ -387,7 +385,6 @@ hypre_IJMatrixInsertRowParCSR(hypre_IJMatrix *matrix,
 	 offd_indx = offd_i[row_local];
 	 indx_0 = diag_i[row_local];
 	 diag_indx = indx_0;
-	 indx_offd_0 = offd_indx;
 	 
   	 for (i=0; i < n; i++)
 	 {
@@ -507,7 +504,7 @@ hypre_IJMatrixAddToRowAfterParCSR(hypre_IJMatrix *matrix,
    int row_length;
    int num_cols_offd;
    int col_0, col_n;
-   int i, j, pos, j_offd, not_found;
+   int i, j, j_offd, not_found;
    int pos_diag;
    int len_diag;
    int pos_offd;
@@ -642,19 +639,18 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
    int row_local;
    int col_0, col_n;
    int i, j, not_found;
-   int *indx_diag, *indx_offd;
    int **aux_j;
    int *local_j;
-   int *tmp_j, *tmp2_j;
+   int *tmp_j;
    double **aux_data;
    double *local_data;
-   double *tmp_data, *tmp2_data;
+   double *tmp_data;
    int diag_space, offd_space;
    int *row_length, *row_space;
    int need_aux;
-   int tmp_indx, indx;
+   int tmp_indx;
    int space, size, old_size;
-   int cnt, cnt_diag, cnt_offd, indx_0;
+   int cnt, cnt_diag, cnt_offd;
    int offd_indx, diag_indx;
    int *diag_i;
    int *diag_j;
@@ -776,7 +772,6 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
 	    offd_j = hypre_CSRMatrixJ(offd);
             offd_data = hypre_CSRMatrixData(offd);
          }
-	 indx_0 = diag_i[row_local];
 	 
 	 cnt_diag = diag_indx;
 	 cnt_offd = offd_indx;
@@ -917,16 +912,13 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    double *offd_data;
    int *row_starts = hypre_ParCSRMatrixRowStarts(par_matrix);
    int *col_starts = hypre_ParCSRMatrixColStarts(par_matrix);
-   int j_indx, cnt, i, j, j0;
+   int cnt, i, j, j0;
    int num_cols_offd;
    int *diag_pos;
    int *col_map_offd;
    int *row_length;
-   int *row_space;
    int **aux_j;
    double **aux_data;
-   int *indx_diag;
-   int *indx_offd;
    int need_aux = hypre_AuxParCSRMatrixNeedAux(aux_matrix);
    int my_id, num_procs;
    int num_rows;
@@ -934,7 +926,6 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    int *local_j;
    double *local_data;
    int col_0, col_n;
-   int len, pos;
    int nnz_offd;
    int *aux_offd_j;
    double temp; 

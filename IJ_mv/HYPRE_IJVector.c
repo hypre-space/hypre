@@ -593,6 +593,8 @@ HYPRE_IJVectorAssemble( HYPRE_IJVector  IJvector )
       return( hypre_AssembleIJVectorISIS( vector ) );
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
       return(  hypre_IJVectorAssemblePar( vector ) );
+   else 
+      return(0);
 }
 
 /*--------------------------------------------------------------------------
