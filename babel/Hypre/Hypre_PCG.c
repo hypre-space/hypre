@@ -39,7 +39,7 @@ void Hypre_PCG_destructor(Hypre_PCG this) {
    struct Hypre_PCG_private_type *HSJp = this->d_table;
    HYPRE_StructSolver *S = HSJp->hssolver;
 
-   HYPRE_PCGDestroy( *S );
+   HYPRE_StructPCGDestroy( *S );
    free(this->d_table);
 
 } /* end destructor */
@@ -233,7 +233,8 @@ Hypre_PCG  impl_Hypre_PCG_Constructor(Hypre_MPI_Com comm) {
 /* ********************************************************
  * impl_Hypre_PCGSetup
  **********************************************************/
-void  impl_Hypre_PCG_Setup(Hypre_PCG this, Hypre_StructMatrix A, Hypre_StructVector b, Hypre_StructVector x) {
+void  impl_Hypre_PCG_Setup
+(Hypre_PCG this, Hypre_StructMatrix A, Hypre_StructVector b, Hypre_StructVector x) {
    struct Hypre_PCG_private_type *HSp = this->d_table;
    HYPRE_StructSolver *S = HSp->hssolver;
 
@@ -256,9 +257,9 @@ void  impl_Hypre_PCG_Setup(Hypre_PCG this, Hypre_StructMatrix A, Hypre_StructVec
  * impl_Hypre_PCGGetConstructedObject
  *       insert the library code below
  **********************************************************/
-Hypre_SolverBuilder  impl_Hypre_PCG_GetConstructedObject(Hypre_PCG this) {
+Hypre_Solver impl_Hypre_PCG_GetConstructedObject(Hypre_PCG this) {
 
-   return (Hypre_SolverBuilder) this;
+   return (Hypre_Solver) this;
 
 } /* end impl_Hypre_PCGGetConstructedObject */
 
@@ -283,10 +284,29 @@ void  impl_Hypre_PCG_SetPreconditioner
 precond_data is the _same_ as *precond_solver
 */
 
+/* ******* TO DO: ********
+   The function names passed in arguments 2 & 3 below should depend
+   on the type of precond ... */
    HYPRE_StructPCGSetPrecond( *S,
-                              HYPRE_StructPFMGSolve,
-                              HYPRE_StructPFMGSetup,
+                              HYPRE_StructJacobiSolve,
+                              HYPRE_StructJacobiSetup,
                               *precond_solver );
 
     } /* end impl_Hypre_PCGSetPreconditioner */
 
+
+/* Print Logging; not in the SIDL file */
+
+void
+HYPRE_StructPCG_PrintLogging( HYPRE_StructSolver  solver )
+{
+   hypre_PCGPrintLogging( (void *) solver, 0 ) ;
+}
+
+void  Hypre_PCG_PrintLogging( Hypre_PCG this ) {
+
+   struct Hypre_PCG_private_type *HSPCGp = this->d_table;
+   HYPRE_StructSolver *S = HSPCGp->hssolver;
+   HYPRE_StructPCG_PrintLogging( *S );
+}
+;
