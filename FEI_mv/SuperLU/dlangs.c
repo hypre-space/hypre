@@ -67,14 +67,14 @@ double dlangs(char *norm, SuperMatrix *A)
     if ( MIN(A->nrow, A->ncol) == 0) {
 	value = 0.;
 	
-    } else if (lsame_(norm, "M")) {
+    } else if (slulsame_(norm, "M")) {
 	/* Find max(abs(A(i,j))). */
 	value = 0.;
 	for (j = 0; j < A->ncol; ++j)
 	    for (i = Astore->colptr[j]; i < Astore->colptr[j+1]; i++)
 		value = MAX( value, fabs( Aval[i]) );
 	
-    } else if (lsame_(norm, "O") || *(unsigned char *)norm == '1') {
+    } else if (slulsame_(norm, "O") || *(unsigned char *)norm == '1') {
 	/* Find norm1(A). */
 	value = 0.;
 	for (j = 0; j < A->ncol; ++j) {
@@ -84,7 +84,7 @@ double dlangs(char *norm, SuperMatrix *A)
 	    value = MAX(value,sum);
 	}
 	
-    } else if (lsame_(norm, "I")) {
+    } else if (slulsame_(norm, "I")) {
 	/* Find normI(A). */
 	if ( !(rwork = (double *) SUPERLU_MALLOC(A->nrow * sizeof(double))) )
 	    ABORT("SUPERLU_MALLOC fails for rwork.");
@@ -100,7 +100,7 @@ double dlangs(char *norm, SuperMatrix *A)
 	
 	SUPERLU_FREE (rwork);
 	
-    } else if (lsame_(norm, "F") || lsame_(norm, "E")) {
+    } else if (slulsame_(norm, "F") || slulsame_(norm, "E")) {
 	/* Find normF(A). */
 	ABORT("Not implemented.");
     } else

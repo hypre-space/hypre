@@ -246,7 +246,7 @@ dgstrf (char *refact, SuperMatrix *A, double diag_pivot_thresh,
 	     &repfnz, &panel_lsub, &xprune, &marker);
     dSetRWork(m, panel_size, dwork, &dense, &tempv);
     
-    usepr = lsame_(refact, "Y");
+    usepr = slulsame_(refact, "Y");
     if ( usepr ) {
 	/* Compute the inverse of perm_r */
 	iperm_r = (int *) intMalloc(m);
@@ -399,7 +399,7 @@ dgstrf (char *refact, SuperMatrix *A, double diag_pivot_thresh,
 
     dLUWorkFree(iwork, dwork, &Glu); /* Free work space and compress storage */
 
-    if ( lsame_(refact, "Y") ) {
+    if ( slulsame_(refact, "Y") ) {
         /* L and U structures may have changed due to possibly different
 	   pivoting, although the storage is available. */
         ((SCformat *)L->Store)->nnz = nnzL;
