@@ -18,7 +18,6 @@ int hypre_AMGIndepSet P((hypre_CSRMatrix *S , double *measure_array , double *wo
 /* par_rap.c */
 int hypre_ParAMGBuildCoarseOperator P((hypre_ParCSRMatrix *RT , hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *P , hypre_ParCSRMatrix **RAP_ptr , int *coarse_partitioning ));
 hypre_CSRMatrix *hypre_GeneratePExt P((hypre_ParCSRMatrix *P , hypre_ParCSRMatrix *A ));
-int BuildCSRJDataType P((int num_nonzeros , double *a_data , int *a_j , MPI_Datatype *csr_jdata_datatype ));
 hypre_CSRMatrix *hypre_ExchangeRAPData P((hypre_CSRMatrix *RAP_int , hypre_CommPkg *comm_pkg_RT ));
 
 /* par_rap_communication.c */
