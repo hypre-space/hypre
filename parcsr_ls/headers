@@ -8,7 +8,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-INTERNAL_HEADER=parcsr_linear_solvers.h
+INTERNAL_HEADER=parcsr_ls.h
 
 #===========================================================================
 # Include guards and other includes
@@ -25,8 +25,8 @@ cat > $INTERNAL_HEADER <<@
 
 #include "utilities.h"
 #include "krylov.h"
-#include "seq_matrix_vector.h"
-#include "parcsr_matrix_vector.h"
+#include "seq_mv.h"
+#include "parcsr_mv.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -22,29 +22,29 @@ HYPRE_KRYLOV_DIRS =\
 
 #These are the directories for the structured interface
 HYPRE_STRUCT_DIRS =\
- struct_matrix_vector\
- struct_linear_solvers
+ struct_mv\
+ struct_ls
 
 #These are the directories for the semi-structured interface
 HYPRE_SSTRUCT_DIRS =\
- sstruct_matrix_vector\
- sstruct_linear_solvers
+ sstruct_mv\
+ sstruct_ls
 
 #These are the directories for the IJ interface
 HYPRE_IJ_DIRS =\
- seq_matrix_vector\
- parcsr_matrix_vector\
+ seq_mv\
+ parcsr_mv\
  distributed_matrix\
  matrix_matrix\
- IJ_matrix_vector\
- distributed_linear_solvers\
- parcsr_linear_solvers
+ IJ_mv\
+ distributed_ls\
+ parcsr_ls
 
 #These are the directories for the FEI
 HYPRE_FEI_DIRS =\
- FEI_matrix_vector
-# FEI_matrix_vector/fei-base\
-# FEI_matrix_vector/isis-mv 
+ FEI_mv
+# FEI_mv/fei-base\
+# FEI_mv/isis-mv 
 
 HYPRE_FEI_LIBFILES =\
  libHYPRE_parcsr_ls.a  libHYPRE_DistributedMatrix.a \
@@ -65,10 +65,10 @@ HYPRE_DIRS =\
 
 # These are directories that are not yet officially in HYPRE
 HYPRE_EXTRA_DIRS =\
- seq_linear_solvers\
- structIJ_matrix_vector\
- CI_struct_matrix_vector\
- CI_struct_linear_solvers @HYPRE_PETSCLIBDIRS@ @HYPRE_BABELLIBDIR@
+ seq_ls\
+ structIJ_mv\
+ CI_struct_mv\
+ CI_struct_ls @HYPRE_PETSCLIBDIRS@ @HYPRE_BABELLIBDIR@
 
 all: krylov struct sstruct IJ fei
 	@ \

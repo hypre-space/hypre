@@ -15,17 +15,17 @@
 #define dabs(x) ((x > 0 ) ? x : -(x))
 
 /*-------------------------------------------------------------------------*/
-/* parcsr_matrix_vector.h is put here instead of in HYPRE_LinSysCore.h     */
+/* parcsr_mv.h is put here instead of in HYPRE_LinSysCore.h     */
 /* because it gives warning when compiling cfei.cc                         */
 /*-------------------------------------------------------------------------*/
 
 #include "utilities/utilities.h"
 
 #include "HYPRE.h"
-#include "IJ_matrix_vector/HYPRE_IJ_mv.h"
-#include "parcsr_matrix_vector/HYPRE_parcsr_mv.h"
-#include "parcsr_matrix_vector/parcsr_matrix_vector.h"
-#include "parcsr_linear_solvers/HYPRE_parcsr_ls.h"
+#include "IJ_mv/HYPRE_IJ_mv.h"
+#include "parcsr_mv/HYPRE_parcsr_mv.h"
+#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_ls/HYPRE_parcsr_ls.h"
 
 int  HYPRE_DummySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
                       HYPRE_ParVector x_csr, HYPRE_ParVector y_csr ){return 0;}

@@ -3,10 +3,10 @@
 cd ../../utilities
 make -f MakeIRIX clean
 make -f MakeIRIX
-cd ../seq_matrix_vector
+cd ../seq_mv
 make -f MakeIRIX clean
 make -f MakeIRIX 
-cd ../PETSc_linear_solvers/amg
+cd ../PETSc_ls/amg
 make -f MakeIRIX clean
 make -f MakeIRIX 
 

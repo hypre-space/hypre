@@ -27,20 +27,20 @@ CFLAGS =\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../krylov\
- -I$(srcdir)/../struct_matrix_vector\
- -I$(srcdir)/../seq_matrix_vector\
- -I$(srcdir)/../parcsr_matrix_vector\
- -I$(srcdir)/../IJ_matrix_vector\
- -I$(srcdir)/../sstruct_matrix_vector\
- -I$(srcdir)/../struct_linear_solvers\
- -I$(srcdir)/../parcsr_linear_solvers\
+ -I$(srcdir)/../struct_mv\
+ -I$(srcdir)/../seq_mv\
+ -I$(srcdir)/../parcsr_mv\
+ -I$(srcdir)/../IJ_mv\
+ -I$(srcdir)/../sstruct_mv\
+ -I$(srcdir)/../struct_ls\
+ -I$(srcdir)/../parcsr_ls\
  ${CINCLUDES}
 
 RANLIB= @RANLIB@
 
 HEADERS =\
  HYPRE_sstruct_ls.h\
- sstruct_linear_solvers.h\
+ sstruct_ls.h\
  headers.h
 
 FILES =\
@@ -60,7 +60,7 @@ all: libHYPRE_sstruct_ls.a
 
 install: all
 	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/sstruct_linear_solvers.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/sstruct_ls.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 
 clean:

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "CI_struct_linear_solvers.h"
+#include "CI_struct_ls.h"
 
 #ifdef PETSC_AVAILABLE
 #include "HYPRE_PETScSolverParILUT_types.h"
@@ -23,12 +23,12 @@
 
 #include "HYPRE.h"
 
-#include "struct_matrix_vector.h"
+#include "struct_mv.h"
 
-#include "HYPRE_CI_struct_linear_solvers_types.h"
+#include "HYPRE_CI_struct_ls_types.h"
 
-#include "HYPRE_CI_struct_matrix_vector_types.h"
-#include "HYPRE_CI_struct_matrix_vector_protos.h"
+#include "HYPRE_CI_struct_mv_types.h"
+#include "HYPRE_CI_struct_mv_protos.h"
 
 
 #include "struct_solver.h"

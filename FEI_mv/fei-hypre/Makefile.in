@@ -39,14 +39,14 @@ CFLAGS = -w ${C_COMPILE_FLAGS} ${CDEFS}\
  -I../..\
  -I$(srcdir)\
  -I$(srcdir)/../..\
- -I$(srcdir)/../../IJ_matrix_vector\
+ -I$(srcdir)/../../IJ_mv\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../krylov\
- -I$(srcdir)/../../parcsr_matrix_vector\
- -I$(srcdir)/../../parcsr_linear_solvers\
- -I$(srcdir)/../../seq_matrix_vector\
+ -I$(srcdir)/../../parcsr_mv\
+ -I$(srcdir)/../../parcsr_ls\
+ -I$(srcdir)/../../seq_mv\
  -I$(srcdir)/../../distributed_matrix\
- -I$(srcdir)/../../distributed_linear_solvers\
+ -I$(srcdir)/../../distributed_ls\
  -I$(srcdir)/../fei-base\
  ${SUPERLU_INCLUDE}\
  ${MLPACK_INCLUDE}\
@@ -56,12 +56,12 @@ MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
 CXXFLAGS = -w ${CXX_COMPILE_FLAGS} ${CXXDEFS}\
  -I../..\
  -I$(srcdir)/../..\
- -I$(srcdir)/../../IJ_matrix_vector\
+ -I$(srcdir)/../../IJ_mv\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../krylov\
- -I$(srcdir)/../../parcsr_matrix_vector\
- -I$(srcdir)/../../parcsr_linear_solvers\
- -I$(srcdir)/../../seq_matrix_vector\
+ -I$(srcdir)/../../parcsr_mv\
+ -I$(srcdir)/../../parcsr_ls\
+ -I$(srcdir)/../../seq_mv\
  -I$(srcdir)/../fei-base\
  ${SUPERLU_INCLUDE}\
  ${CXXINCLUDES}

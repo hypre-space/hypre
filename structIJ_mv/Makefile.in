@@ -25,18 +25,18 @@ CFLAGS =\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
- -I$(srcdir)/../seq_matrix_vector\
- -I$(srcdir)/../parcsr_matrix_vector\
- -I$(srcdir)/../parcsr_linear_solvers\
- -I$(srcdir)/../CI_struct_matrix_vector\
- -I$(srcdir)/../IJ_matrix_vector\
+ -I$(srcdir)/../seq_mv\
+ -I$(srcdir)/../parcsr_mv\
+ -I$(srcdir)/../parcsr_ls\
+ -I$(srcdir)/../CI_struct_mv\
+ -I$(srcdir)/../IJ_mv\
  ${CINCLUDES} ${CDEFS}
 
 RANLIB= @RANLIB@
 
 HEADERS =\
  headers.h\
- structIJ_matrix_vector.h\
+ structIJ_mv.h\
  HYPRE_structIJ_mv.h
 
 FILES =\
@@ -86,7 +86,7 @@ PETSCLIBFLAGS = @PETSCLIBDIRS@ @PETSCLIBS@ ${X11_LIB}
 LFLAGS =\
  -L.\
  -L../hypre/lib\
- -L../CI_struct_matrix_vector\
+ -L../CI_struct_mv\
  -lHYPRE_structIJ_mv \
  -lHYPRE_CI_mv \
  -lHYPRE_ls\

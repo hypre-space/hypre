@@ -148,7 +148,7 @@ AC_ARG_WITH(extra-ldpath,
 
 AC_ARG_WITH(purify,
 [  --with-purify=FLAGS     FLAGS are optional to pass to purify, e.g.
-			  \"-log-file=struct_linear_solvers.purify 
+			  \"-log-file=struct_ls.purify 
 			  -append-logfile=yes\" will send output to a file.
 			  assign cc and CC as the C and C++ compilers 
 			  if not already set by user and 
@@ -425,8 +425,8 @@ AC_ARG_WITH(petsc,
 [case "${withval}" in
    yes) casc_using_petsc=yes
      HYPRE_PETSCDEFS="$HYPRE_PETSCDEFS -DPETSC_AVAILABLE"
-     HYPRE_PETSCLIBDIRS="$HYPRE_TOP_SRC_DIR/PETScMat_linear_solvers/pilut \
-$HYPRE_TOP_SRC_DIR/PETSc_linear_solvers/ParILUT "
+     HYPRE_PETSCLIBDIRS="$HYPRE_TOP_SRC_DIR/PETScMat_ls/pilut \
+$HYPRE_TOP_SRC_DIR/PETSc_ls/ParILUT "
      HYPRE_PETSCLIBS=" -l_HYPRE_PETScSolverParILUT \
 -l_HYPRE_PETScMatPilutSolver " ;;
    no)  casc_using_petsc=no ;;
@@ -1034,38 +1034,38 @@ CASC_CONFIG_OUTPUT_LIST(\
  babel\
  babel/Hypre\
  blas\
- CI_struct_linear_solvers\
- CI_struct_matrix_vector\
- distributed_linear_solvers\
- distributed_linear_solvers/Euclid\
- distributed_linear_solvers/pilut\
- distributed_linear_solvers/ParaSails\
+ CI_struct_ls\
+ CI_struct_mv\
+ distributed_ls\
+ distributed_ls/Euclid\
+ distributed_ls/pilut\
+ distributed_ls/ParaSails\
  distributed_matrix\
  docs\
- FEI_matrix_vector\
- FEI_matrix_vector/fei-hypre\
- FEI_matrix_vector/fei-isis\
- FEI_matrix_vector/fei-isis/src\
- FEI_matrix_vector/isis-mv\
- IJ_matrix_vector\
+ FEI_mv\
+ FEI_mv/fei-hypre\
+ FEI_mv/fei-isis\
+ FEI_mv/fei-isis/src\
+ FEI_mv/isis-mv\
+ IJ_mv\
  krylov\
  matrix_matrix\
- parcsr_linear_solvers\
- parcsr_matrix_vector\
- PETSc_linear_solvers\
- PETSc_linear_solvers/ParILUT\
- PETScMat_linear_solvers\
- PETScMat_linear_solvers/pilut\
- seq_matrix_vector\
- seq_linear_solvers\
- seq_linear_solvers/amge\
- seq_linear_solvers/amge_ag\
- seq_linear_solvers/pamg\
- sstruct_matrix_vector\
- sstruct_linear_solvers\
- structIJ_matrix_vector\
- struct_matrix_vector\
- struct_linear_solvers\
+ parcsr_ls\
+ parcsr_mv\
+ PETSc_ls\
+ PETSc_ls/ParILUT\
+ PETScMat_ls\
+ PETScMat_ls/pilut\
+ seq_mv\
+ seq_ls\
+ seq_ls/amge\
+ seq_ls/amge_ag\
+ seq_ls/pamg\
+ sstruct_mv\
+ sstruct_ls\
+ structIJ_mv\
+ struct_mv\
+ struct_ls\
  test\
  tools\
  utilities)

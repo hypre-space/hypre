@@ -8,7 +8,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-INTERNAL_HEADER=sstruct_linear_solvers.h
+INTERNAL_HEADER=sstruct_ls.h
 
 #===========================================================================
 # Include guards and other includes
@@ -25,7 +25,7 @@ cat > $INTERNAL_HEADER <<@
 
 #include "utilities.h"
 #include "krylov.h"
-#include "sstruct_matrix_vector.h"
+#include "sstruct_mv.h"
 
 #ifdef __cplusplus
 extern "C" {

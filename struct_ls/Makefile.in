@@ -28,7 +28,7 @@ CFLAGS =\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../krylov\
- -I$(srcdir)/../struct_matrix_vector\
+ -I$(srcdir)/../struct_mv\
  ${CINCLUDES}
 
 RANLIB = @RANLIB@
@@ -38,7 +38,7 @@ HEADERS =\
  pfmg.h\
  sparse_msg.h\
  smg.h\
- struct_linear_solvers.h\
+ struct_ls.h\
  HYPRE_struct_ls.h
 
 FILES =\
@@ -101,7 +101,7 @@ all: libHYPRE_struct_ls.a
 
 install: all
 	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/struct_linear_solvers.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/struct_ls.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 clean:
 	@rm -f *.o *.dxx 

@@ -8,7 +8,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-INTERNAL_HEADER=struct_linear_solvers.h
+INTERNAL_HEADER=struct_ls.h
 
 #===========================================================================
 # Include guards and other includes
@@ -24,7 +24,7 @@ cat > $INTERNAL_HEADER <<@
 #define hypre_STRUCT_LS_HEADER
 
 #include "utilities.h"
-#include "struct_matrix_vector.h"
+#include "struct_mv.h"
 #include "krylov.h"
 
 #ifdef __cplusplus

@@ -5,13 +5,13 @@
 /* Must include implementation definition for ParVector since no data access
   functions are publically provided. AJC, 5/99 */
 /* Likewise for Vector. AJC, 5/99 */
-#include "../seq_matrix_vector/vector.h"
-#include "../parcsr_matrix_vector/par_vector.h"
+#include "../seq_mv/vector.h"
+#include "../parcsr_mv/par_vector.h"
 
 
   /* These are what we need from Euclid */
-#include "../distributed_linear_solvers/Euclid/include/Euclid_dh.h"
-#include "../distributed_linear_solvers/Euclid/include/Mem_dh.h"
+#include "../distributed_ls/Euclid/include/Euclid_dh.h"
+#include "../distributed_ls/Euclid/include/Mem_dh.h"
 
 /*------------------------------------------------------------------
  * Error checking
@@ -42,8 +42,8 @@
    *       used for debugging: when "logFuncsToStderr == true"
    *       a function call trace is force-written to stderr;
    *       (useful for debugging over dial-up lines!)  See
-   *       src/distributed_linear_solvers/Euclid/macros_dh.h and
-   *       src/distributed_linear_solvers/Euclid/src/globalObjects.c
+   *       src/distributed_ls/Euclid/macros_dh.h and
+   *       src/distributed_ls/Euclid/src/globalObjects.c
    *       for further info.
    */
 
@@ -83,7 +83,7 @@ HYPRE_ParCSREuclidCreate( MPI_Comm comm, HYPRE_Solver *solver )
    * these  are all pointers, are initially NULL, and are be set 
    * back to NULL in HYPRE_ParCSREuclidDestroy()
    * Global objects are defined in 
-   * src/distributed_linear_solvers/Euclid/src/globalObjects.c
+   * src/distributed_ls/Euclid/src/globalObjects.c
    *-----------------------------------------------------------*/
 
   comm_dh = comm;

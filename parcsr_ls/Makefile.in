@@ -32,7 +32,7 @@ FC_LIB         = -L/opt/SUNWspro/SC4.2/lib -lF77 -lM77 -lsunmath
 BLAS_LIB       =  @BLASLIBFLAGS@
 
 PILUT_LIBFLAGS =\
- -L../distributed_linear_solvers/pilut\
+ -L../distributed_ls/pilut\
  -L../distributed_matrix\
  -L../matrix_matrix\
  -l_HYPRE_DistributedMatrixPilutSolver \
@@ -44,16 +44,16 @@ PILUT_LIBFLAGS =\
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I..\
- -I../distributed_linear_solvers/Euclid/include\
+ -I../distributed_ls/Euclid/include\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../krylov\
- -I$(srcdir)/../seq_matrix_vector\
- -I$(srcdir)/../parcsr_matrix_vector\
+ -I$(srcdir)/../seq_mv\
+ -I$(srcdir)/../parcsr_mv\
  -I$(srcdir)/../distributed_matrix\
  -I$(srcdir)/../matrix_matrix\
- -I$(srcdir)/../IJ_matrix_vector\
+ -I$(srcdir)/../IJ_mv\
  ${CINCLUDES}\
  ${CDEFS}
  
@@ -65,8 +65,8 @@ LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
  
 LFLAGS =\
  -L.\
- -L../parcsr_matrix_vector\
- -L../seq_matrix_vector\
+ -L../parcsr_mv\
+ -L../seq_mv\
  -L../utilities\
  -lHYPRE_parcsr_ls\
  $(PILUT_LIBFLAGS)\
@@ -78,7 +78,7 @@ LFLAGS =\
 HEADERS =\
  headers.h\
  par_amg.h\
- parcsr_linear_solvers.h\
+ parcsr_ls.h\
  Common.h\
  HYPRE_parcsr_ls.h
 
@@ -136,7 +136,7 @@ all: libHYPRE_parcsr_ls.a
  
 install: all
 	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/parcsr_linear_solvers.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/parcsr_ls.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
  
 clean:

@@ -21,8 +21,8 @@
 #include <math.h>
 
 #include "utilities/utilities.h"
-#include "parcsr_linear_solvers/HYPRE_parcsr_ls.h"
-#include "parcsr_matrix_vector/parcsr_matrix_vector.h"
+#include "parcsr_ls/HYPRE_parcsr_ls.h"
+#include "parcsr_mv/parcsr_mv.h"
 
 #ifdef __cplusplus
 extern "C"

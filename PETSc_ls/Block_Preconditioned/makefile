@@ -25,8 +25,8 @@
   MPI_INC = -I/usr/local/mpi/mpich/include
   Amg_INC = -I/home/cleary/amg/install.SunOS/include \
             -I/usr/local/include -I/home/casc/include
-  ILU_INC = -I../../seq_linear_solvers/ilut
-  IC_INC = -I../../seq_linear_solvers/ict
+  ILU_INC = -I../../seq_ls/ilut
+  IC_INC = -I../../seq_ls/ict
   LIN_SOLVE_INC = -I../.. -I../../utilities
 
   INC = $(PETSC_INC) $(PETSC_PRIV_INC) $(MPI_INC) $($(LOCAL_SOLVER)_INC) \
@@ -66,13 +66,13 @@ PETSC    =	-L$(LDIR) -lpetscsles  \
 
 Amg   = -L$(AMG_DIR)/lib -lamg -L/usr/local/lib 
 
-ILU   = -L../../seq_linear_solvers/ilut -lilu
+ILU   = -L../../seq_ls/ilut -lilu
 
-IC   = -L../../seq_linear_solvers/ict -lic
+IC   = -L../../seq_ls/ict -lic
 
-SEQ_MATRIX = -L../../seq_matrix_vector -lHYPRE_seq_mat_vec
+SEQ_MATRIX = -L../../seq_mv -lHYPRE_seq_mat_vec
 
-SPARSKIT = -L../../seq_linear_solvers/sparskit -ldsparskit
+SPARSKIT = -L../../seq_ls/sparskit -ldsparskit
 
 DEBUG_LIBS = -L/home/casc/lib -lcegdb
 

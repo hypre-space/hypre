@@ -2,10 +2,10 @@
 cd ../../utilities
 make clean
 make
-cd ../seq_matrix_vector
+cd ../seq_mv
 make clean
 make
-cd ../PETSc_linear_solvers/amg
+cd ../PETSc_ls/amg
 make clean
 make
 

@@ -26,10 +26,10 @@ CFLAGS =\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
- -I$(srcdir)/../struct_matrix_vector\
- -I$(srcdir)/../seq_matrix_vector\
- -I$(srcdir)/../parcsr_matrix_vector\
- -I$(srcdir)/../parcsr_linear_solvers\
+ -I$(srcdir)/../struct_mv\
+ -I$(srcdir)/../seq_mv\
+ -I$(srcdir)/../parcsr_mv\
+ -I$(srcdir)/../parcsr_ls\
  ${CINCLUDES} ${CDEFS}
 
 RANLIB= @RANLIB@
@@ -41,9 +41,9 @@ LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
 LFLAGS =\
  -L.\
  -L../utilities\
- -L../struct_matrix_vector\
- -L../seq_matrix_vector\
- -L../parcsr_matrix_vector\
+ -L../struct_mv\
+ -L../seq_mv\
+ -L../parcsr_mv\
  -lHYPRE_IJ_mv\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
@@ -54,7 +54,7 @@ LFLAGS =\
 HEADERS =\
  aux_parcsr_matrix.h\
  HYPRE_IJ_mv.h \
- IJ_matrix_vector.h \
+ IJ_mv.h \
  IJ_matrix.h
 
 FILES =\
@@ -76,7 +76,7 @@ all: libHYPRE_IJ_mv.a
 
 install: all
 	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/IJ_matrix_vector.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/IJ_mv.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 
 clean:

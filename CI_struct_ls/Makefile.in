@@ -25,8 +25,8 @@ CFLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
- -I$(srcdir)/../CI_struct_matrix_vector\
- -I$(srcdir)/../PETSc_linear_solvers/ParILUT\
+ -I$(srcdir)/../CI_struct_mv\
+ -I$(srcdir)/../PETSc_ls/ParILUT\
  @PETSCINCLUDE@ \
  ${CINCLUDES} ${CDEFS}
 
@@ -34,7 +34,7 @@ RANLIB = @RANLIB@
 
 HEADERS =\
  headers.h\
- CI_struct_linear_solvers.h\
+ CI_struct_ls.h\
  HYPRE_CI_ls.h
  
 FILES =\

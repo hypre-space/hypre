@@ -23,13 +23,13 @@
 
 #include "../matrix_matrix/HYPRE_matrix_matrix_protos.h"
 
-#include "../distributed_linear_solvers/ParaSails/HYPRE_ParaSails.h"
+#include "../distributed_ls/ParaSails/HYPRE_ParaSails.h"
 
 /* Must include implementation definition for ParVector since no data access
   functions are publically provided. AJC, 5/99 */
 /* Likewise for Vector. AJC, 5/99 */
-#include "../seq_matrix_vector/vector.h"
-#include "../parcsr_matrix_vector/par_vector.h"
+#include "../seq_mv/vector.h"
+#include "../parcsr_mv/par_vector.h"
 
 /* If code is more mysterious, then it must be good */
 typedef struct
