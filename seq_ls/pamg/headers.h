@@ -11,8 +11,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "utilities/memory.h"
-/* #include "utilities/timing.h" */
+#include "utilities/hypre_utilities.h"
 #include "seq_matrix_vector/headers.h"
 
 /* #include "HYPRE_amg.h" */

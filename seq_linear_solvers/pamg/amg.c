@@ -151,10 +151,9 @@ char     log_file_name[256];
 void   hypre_AMGFinalize(data)
 void  *data;
 {
-   hypre_AMGData  *amg_data = data;
+/*   hypre_AMGData  *amg_data = data;*/
 
-
-   /*  hypre_AMGFreeData(amg_data); */
+/*   hypre_AMGFreeData(amg_data);*/
 }
 
 /*--------------------------------------------------------------------------

@@ -8,7 +8,7 @@
 #EHEADER***********************************************************************
 
 .SUFFIXES:
-.SUFFIXES: .c .f .o
+.SUFFIXES: .c .o
 
 HEADERS =\
  HYPRE_amg.h\
@@ -32,7 +32,6 @@ FILES =\
 OBJS = ${FILES:.c=.o}
 
 CC = gcc
-F77 = /home/casc/g77/bin/g77
 
 CFLAGS =\
  -I/usr/local/include\
@@ -47,15 +46,13 @@ FFLAGS = -g
 LFLAGS =\
  -L/usr/local/lib\
  -L/home/casc/lib\
- -L/home/casc/g77/lib\
  -L/usr/local/mpi/mpich/lib/solaris/ch_p4\
  -L.\
  -L../../seq_matrix_vector\
  -L../../utilities\
  -lHYPRE_ls\
  -lHYPRE_mv\
- -lHYPRE_memory\
- -lf2c\
+ -lHYPRE_utilities\
  -lcegdb\
  -ldmalloc\
  -lm
@@ -82,10 +79,6 @@ ${OBJS}: ${HEADERS}
 .c.o:
 	@echo "Making (c) " $@
 	@${CC} -o $@ -c ${CFLAGS} $<
-
-.f.${AMG_ARCH}.o:
-	@echo "Making (f) " $@
-	@${F77} -o $@ -c ${FFLAGS} $<
 
 ##################################################################
 # Miscellaneous rules
