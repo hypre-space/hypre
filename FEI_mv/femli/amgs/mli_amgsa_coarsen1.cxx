@@ -103,6 +103,31 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
    }
 
    /*-----------------------------------------------------------------
+    * read aggregate information if desired
+    *-----------------------------------------------------------------*/
+
+#if 0 /* read aggregate info from stdin */
+    if (currLevel_ == 0)
+    {
+          FILE *file;
+
+          printf("reading aggregates from marker file, n=%d\n",ALocalNRows);
+          file = stdin;
+
+          initCount = 0;
+          initAggr = new int[ALocalNRows];
+          for (i=0; i<ALocalNRows; i++)
+          {
+              fscanf(file, "%d", &initAggr[i]);
+              if (initAggr[i] > initCount)
+                  initCount = initAggr[i];
+          }
+          initCount++;
+          printf("number of aggregates = %d\n", initCount);
+    }
+#endif
+
+   /*-----------------------------------------------------------------
     * reduce Amat based on the block size information (if nodeDofs_ > 1)
     *-----------------------------------------------------------------*/
 
@@ -285,6 +310,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
 
    if (currLevel_ == 0 && numSmoothVec_ != 0)
       formSmoothVec(mli_Amat);
+      //formSmoothVecLanczos(mli_Amat);
 
    if (currLevel_ > 0 && numSmoothVec_ != 0)
       smoothTwice(mli_Amat);
@@ -1756,18 +1782,8 @@ int MLI_Method_AMGSA::formSmoothVec(MLI_Matrix *mli_Amat)
 
    for (i=0; i<numSmoothVec_; i++)
    {
-       /* put in random numbers */
-       // hypre_ParVectorSetRandomValues( trial_sol, /*seed*/ i );
-       // 0 is a lousy seed
-
        for (j=0; j<local_nrows; j++)
            sol_data[j] = 2.*((double)rand() / (double)RAND_MAX)-1.;
-
-#if 0
-       /* testing */
-       for (j=0; j<local_nrows; j++)
-           sol_data[j] = (double) (i+j+2)*(i+j+2)*(i+j+2)*(i+j+2)*(i+j+2);
-#endif
 
        /* call smoother */
        smoother->solve(mli_rhs, mli_sol);
@@ -1783,6 +1799,78 @@ int MLI_Method_AMGSA::formSmoothVec(MLI_Matrix *mli_Amat)
    delete smoother;
 
    return 0;
+}
+
+/***********************************************************************
+ * Construct the initial smooth vectors and put them in nullspaceVec_
+ * using Lanczos
+ * ------------------------------------------------------------------- */
+
+int MLI_Method_AMGSA::formSmoothVecLanczos(MLI_Matrix *mli_Amat)
+{
+    hypre_ParCSRMatrix *Amat;
+    MPI_Comm comm;
+    int mypid, nprocs;
+    int *partition;
+    hypre_ParVector    *trial_sol;
+    int local_nrows;
+    hypre_Vector       *sol_local;
+    double *sol_data;
+    double *nsptr;
+    int i, j;
+
+    Amat = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
+    comm = hypre_ParCSRMatrixComm(Amat);
+    MPI_Comm_rank(comm, &mypid);
+    MPI_Comm_size(comm, &nprocs);
+
+    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) Amat, &partition);
+    local_nrows = partition[mypid+1] - partition[mypid];
+
+    trial_sol = hypre_ParVectorCreate(comm, partition[nprocs], partition);
+    hypre_ParVectorInitialize( trial_sol );
+
+    sol_local = hypre_ParVectorLocalVector(trial_sol);
+    sol_data  = hypre_VectorData(sol_local);
+
+    if (nullspaceVec_ != NULL)
+    {
+        printf("Warning: formSmoothVecLanczos: zeroing nullspaceVec_\n");
+        delete [] nullspaceVec_;
+        nullspaceVec_ = NULL;
+    }
+
+    nullspaceVec_ = new double[local_nrows*numSmoothVec_];
+    nsptr = nullspaceVec_;
+
+    MLI_Utils_ComputeLowEnergyLanczos(Amat, numSmoothVecSteps_,
+        numSmoothVec_, nullspaceVec_);
+
+    /* need to scale the individual vectors */
+    for (i=0; i<numSmoothVec_; i++)
+    {
+        double *hold;
+
+        /* copy part of vector into sol_data */
+        hold = nsptr;
+        for (j=0; j<local_nrows; j++)
+        {
+            sol_data[j] = *nsptr++;
+            //printf("v%d %20.14f\n", i, sol_data[j]);
+        }
+
+        MLI_Utils_ScaleVec(Amat, trial_sol);
+
+        /* extract scaled vector */
+        nsptr = hold;
+        for (j=0; j<local_nrows; j++)
+        {
+            *nsptr++ = sol_data[j];
+            //printf("w%d %20.14f\n", i, sol_data[j]);
+        }
+    }
+
+    return 0;
 }
 
 /***********************************************************************
