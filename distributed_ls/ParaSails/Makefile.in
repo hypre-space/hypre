@@ -9,6 +9,9 @@
 
 .SUFFIXES: .c .f .o
 
+srcdir = @srcdir@
+VPATH = @srcdir@
+
 CC = @CC@
 
 C_COMPILE_FLAGS=@CFLAGS@
@@ -18,9 +21,10 @@ CINCLUDES=@INCLUDES@ @MPIINCLUDE@
  
 CFLAGS = \
  ${C_COMPILE_FLAGS}\
- -I../..\
- -I../../utilities\
- -I../../distributed_matrix\
+ -I$(srcdir)\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../distributed_matrix\
  ${CINCLUDES}\
  ${CDEFS}
 
@@ -90,7 +94,7 @@ convert: convert.o
 	${CC} -o $@ convert.o
 
 install: all
-	@cp -f HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 clean:
 	@rm -f *.o

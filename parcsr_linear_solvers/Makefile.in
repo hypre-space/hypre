@@ -32,9 +32,9 @@ FC_LIB         = -L/opt/SUNWspro/SC4.2/lib -lF77 -lM77 -lsunmath
 BLAS_LIB       =  @BLASLIBFLAGS@
 
 PILUT_LIBFLAGS =\
- -L${HYPRE_DIR}/distributed_linear_solvers/pilut\
- -L${HYPRE_DIR}/distributed_matrix\
- -L${HYPRE_DIR}/matrix_matrix\
+ -L../distributed_linear_solvers/pilut\
+ -L../distributed_matrix\
+ -L../matrix_matrix\
  -l_HYPRE_DistributedMatrixPilutSolver \
  -l_HYPRE_MatrixMatrix \
  -l_HYPRE_DistributedMatrix \
@@ -43,14 +43,16 @@ PILUT_LIBFLAGS =\
 
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
- -I..\
- -I../utilities\
- -I../krylov\
- -I../seq_matrix_vector\
- -I../parcsr_matrix_vector\
- -I../distributed_matrix\
- -I../matrix_matrix\
- -I../IJ_matrix_vector\
+ -I../distributed_linear_solvers/Euclid/include\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../utilities\
+ -I$(srcdir)/../krylov\
+ -I$(srcdir)/../seq_matrix_vector\
+ -I$(srcdir)/../parcsr_matrix_vector\
+ -I$(srcdir)/../distributed_matrix\
+ -I$(srcdir)/../matrix_matrix\
+ -I$(srcdir)/../IJ_matrix_vector\
  ${CINCLUDES}\
  ${CDEFS}
  
@@ -131,7 +133,8 @@ DRIVER_OBJS = ${FILES:.c=.o}
 all: libHYPRE_parcsr_ls.a 
  
 install: all
-	@cp -f HYPRE_*.h parcsr_linear_solvers.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/parcsr_linear_solvers.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
  
 clean:

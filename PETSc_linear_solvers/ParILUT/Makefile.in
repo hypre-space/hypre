@@ -11,6 +11,9 @@
 .SUFFIXES:
 .SUFFIXES: .c .f .o
 
+srcdir = @srcdir@
+VPATH = @srcdir@
+
 all: lib
 
 install:all
@@ -41,10 +44,10 @@ CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS = @HYPRE_PETSCDEFS@
 
 CFLAGS = \
- -I../..\
- -I../../utilities\
- -I.\
- -I../../PETScMat_linear_solvers/pilut \
+ -I$(srcdir)\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../PETScMat_linear_solvers/pilut \
  @PETSCINCLUDE@ \
  ${C_COMPILE_FLAGS}\
  ${CINCLUDES} ${CDEFS}
@@ -52,8 +55,9 @@ CFLAGS = \
 CXXFLAGS = \
  @PETSCINCLUDE@ \
  ${CXX_COMPILE_FLAGS}\
- -I../utilities\
- -I..\
+ -I$(srcdir)\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../utilities\
  ${CINCLUDES}\
  ${COPT}\
  ${CDEBUG} ${CDEFS}

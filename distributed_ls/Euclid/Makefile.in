@@ -7,14 +7,16 @@
 # $Revision$
 #EHEADER***********************************************************************
 
+.SUFFIXES: .c .f .o
+
+srcdir = @srcdir@
+VPATH = @srcdir@
 
 ########Euclid specific macros:
 PCPACK_DIR = `pwd`
 EUCLID_CFLAGS =  -DMPI_MODE -DMPI_TIMING -DUSING_MPI -DHYPRE_GET_ROW \
                  -DHYPRE_MODE -DOPTIMIZED_DH
-EUCLID_INCLUDES = -I./include
-
-.SUFFIXES: .c .f .o
+EUCLID_INCLUDES = -I$(srcdir)/include -Iinclude
 
 CC =  @CC@
 
@@ -27,10 +29,12 @@ CFLAGS = \
  ${EUCLID_CFLAGS} \
  ${EUCLID_INCLUDES} \
  ${C_COMPILE_FLAGS}\
- -I../..\
- -I../../utilities\
- -I../../parcsr_matrix_vector\
- -I../../hypre/include\
+ -I$(srcdir)\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../parcsr_matrix_vector\
+ -I$(srcdir)/../../seq_matrix_vector\
+ -I$(srcdir)/../../hypre/include\
  ${CINCLUDES}\
  ${CDEFS}
 
@@ -101,6 +105,8 @@ convert: convert.o
 	${CC} -o $@ convert.o
 
 setHomeDir:
+	@mkdir -p src
+	@mkdir -p include
 	@rm -f include/home_dh.h
 	@echo "#ifndef PCPACK_HOME_DH" > include/home_dh.h 
 	@echo "#define PCPACK_HOME_DH" >> include/home_dh.h 

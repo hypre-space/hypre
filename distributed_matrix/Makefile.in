@@ -10,10 +10,14 @@
 
 .SUFFIXES: .cc .c .f .o
 
+srcdir = @srcdir@
+VPATH = @srcdir@
+
 all: lib
 
 install:all
-	@cp -f HYPRE_*.h distributed_matrix.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/distributed_matrix.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 
 #Headers
@@ -53,11 +57,12 @@ CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS = @HYPRE_PETSCDEFS@
 
 CFLAGS = \
- -I..\
- -I../utilities\
- -I.\
- -I../seq_matrix_vector\
- -I../parcsr_matrix_vector\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../utilities\
+ -I$(srcdir)/../distributed_matrix\
+ -I$(srcdir)/../seq_matrix_vector\
+ -I$(srcdir)/../parcsr_matrix_vector\
  @PETSCINCLUDE@ \
  ${C_COMPILE_FLAGS}\
  ${CINCLUDES} ${CDEFS}
@@ -65,8 +70,9 @@ CFLAGS = \
 CXXFLAGS = \
  @PETSCINCLUDE@ \
  ${CXX_COMPILE_FLAGS}\
- -I../utilities\
- -I..\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../utilities\
  ${CINCLUDES}\
  ${COPT}\
  ${CDEBUG} ${CDEFS}

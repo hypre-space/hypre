@@ -1,8 +1,22 @@
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .c .f .o
+
+srcdir = @srcdir@
+VPATH = @srcdir@
 
 all: libHYPRE_DistributedMatrixPilutSolver.a
 
 install:all
-	@cp -f HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 
 MPI_INCLUDES = -I/usr/local/mpi/mpich/include
@@ -14,10 +28,10 @@ MPIRUN       = mpirun -np 4
 PETSC_INCLUDES = -I${PETSC_DIR}/include
 # General
 HYPRE_INCLUDES = \
- -I../..\
- -I../../utilities\
- -I.\
- -I../../distributed_matrix
+ -I$(srcdir)\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../distributed_matrix
 
 INCLUDES = $(HYPRE_INCLUDES) $(MPI_INCLUDES) $(PETSC_INCLUDES)
 LIBDIR   = $(MPI_LIBDIR)
@@ -42,8 +56,6 @@ OBJS = ${FILES:.c=.o}
 
 ${OBJS}: ${HEADERS}
 
-.SUFFIXES: .c .f .o
-
 CC = @CC@
 CXX = @CXX@
 F77 = @F77@
@@ -64,8 +76,9 @@ CFLAGS = \
 CXXFLAGS = \
  @PETSCINCLUDE@ \
  ${CXX_COMPILE_FLAGS}\
- -I../utilities\
- -I..\
+ -I$(srcdir)\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../utilities\
  ${CINCLUDES}\
  ${COPT}\
  ${CDEBUG} ${CDEFS}
