@@ -137,7 +137,6 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
    int                  num_boxes;
 
    hypre_RankLink     **rank_links;
-   hypre_RankLink     **last_links;
    hypre_RankLink      *rank_link;
 
    hypre_Box           *local_box;
@@ -224,7 +223,6 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
    num_local   = hypre_BoxNeighborsNumLocal(neighbors);
 
    rank_links = hypre_BoxNeighborsRankLinks(neighbors);
-   last_links = hypre_CTAlloc(hypre_RankLink *, num_local);
 
    inew = 0;
    num_boxes = 0;
@@ -286,18 +284,10 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
                      keep_box = 1;
                   }
 
-                  /* create new rank_link */
+                  /* create new rank_link and prepend to the list */
                   hypre_RankLinkCreate(num_boxes, p, &rank_link);
-                  if (rank_links[j] == NULL)
-                  {
-                     rank_links[j] = rank_link;
-                     last_links[j] = rank_links[j];
-                  }
-                  else
-                  {
-                     hypre_RankLinkNext(last_links[j]) = rank_link;
-                     last_links[j] = rank_link;
-                  }
+                  hypre_RankLinkNext(rank_link) = rank_links[j];
+                  rank_links[j] = rank_link;
                }
             }
          }
@@ -333,8 +323,6 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
          num_boxes++;
       }
    }
-
-   hypre_TFree(last_links);
 
    /*-----------------------------------------------------------------
     * Prune the array of neighbor boxes
