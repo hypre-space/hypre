@@ -13,7 +13,6 @@
  **************************************************************************/
 
 #include <string.h>
-#include <iostream.h>
 #include <stdio.h>
 #include "fedata/mli_fedata_utils.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"

@@ -13,7 +13,6 @@
  *****************************************************************************/
 
 #include <string.h>
-#include <iostream.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "base/mli.h"
@@ -26,8 +25,7 @@
 MLI::MLI( MPI_Comm comm )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI::MLI" << endl;
-   cout.flush();
+   printf("MLI::MLI\n");
 #endif
    mpi_comm       = comm;
    max_levels     = 40;
@@ -59,8 +57,7 @@ MLI::MLI( MPI_Comm comm )
 MLI::~MLI()
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI::~MLI" << endl;
-   cout.flush();
+   printf("MLI::~MLI\n");
 #endif
    for ( int i = 0; i < max_levels; i++ ) delete one_levels[i];
    delete [] one_levels;
@@ -75,13 +72,12 @@ MLI::~MLI()
 int MLI::setSystemMatrix( int level, MLI_Matrix *A )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI::setSystemMatrix, level = " << level << endl;
-   cout.flush();
+   printf("MLI::setSystemMatrix, level = %d\n", level);
 #endif
    if ( level >= 0 && level < max_levels ) one_levels[level]->setAmat( A );
    else
    {
-      cout << "MLI::setSystemMatrix ERROR : wrong level = " << level << endl;
+      printf("MLI::setSystemMatrix ERROR : wrong level = %d\n", level);
       exit(1);
    }
    return 0;
@@ -94,13 +90,12 @@ int MLI::setSystemMatrix( int level, MLI_Matrix *A )
 int MLI::setRestriction( int level, MLI_Matrix *R )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI::setRestriction, level = " << level << endl;
-   cout.flush();
+   printf("MLI::setRestriction, level = %d\n", level);
 #endif
    if ( level >= 0 && level < max_levels ) one_levels[level]->setRmat( R );
    else
    {
-      cout << "MLI::setRestriction ERROR : wrong level = " << level << endl;
+      printf("MLI::setRestriction ERROR : wrong level = %d\n", level);
       exit(1);
    }
    return 0;
@@ -113,13 +108,12 @@ int MLI::setRestriction( int level, MLI_Matrix *R )
 int MLI::setProlongation( int level, MLI_Matrix *P )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI::setProlongation, level = " << level << endl;
-   cout.flush();
+   printf("MLI::setProlongation, level = %d\n", level);
 #endif
    if ( level >= 0 && level < max_levels ) one_levels[level]->setPmat( P );
    else
    {
-      cout << "MLI::setProlongation ERROR : wrong level = " << level << endl;
+      printf("MLI::setProlongation ERROR : wrong level = %d\n", level);
       exit(1);
    }
    return 0;
@@ -132,8 +126,7 @@ int MLI::setProlongation( int level, MLI_Matrix *P )
 int MLI::setSmoother( int level, int pre_post, MLI_Solver *smoother )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI::setSmoother, level = " << level << endl;
-   cout.flush();
+   printf("MLI::setSmoother, level = %d\n", level);
 #endif
    if ( level >= 0 && level < max_levels )
    {
@@ -141,7 +134,7 @@ int MLI::setSmoother( int level, int pre_post, MLI_Solver *smoother )
    }
    else
    {
-      cout << "MLI::setSmoother ERROR : wrong level = " << level << endl;
+      printf("MLI::setSmoother ERROR : wrong level = %d\n", level);
       exit(1);
    }
    return 0;
@@ -154,8 +147,7 @@ int MLI::setSmoother( int level, int pre_post, MLI_Solver *smoother )
 int MLI::setCoarseSolve( MLI_Solver *solver )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI::setCoarseSolve" << endl;
-   cout.flush();
+   printf("MLI::setCoarseSolve\n");
 #endif
    if ( ! assembled ) coarse_solver = solver; 
    else               one_levels[coarsest_level]->setCoarseSolve(solver);
@@ -169,8 +161,7 @@ int MLI::setCoarseSolve( MLI_Solver *solver )
 int MLI::setFEData( int level, MLI_FEData *fedata, MLI_Mapper *map )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI::setFEData" << endl;
-   cout.flush();
+   printf("MLI::setFEData\n");
 #endif
    if ( level >= 0 && level < max_levels )
    {
@@ -178,7 +169,7 @@ int MLI::setFEData( int level, MLI_FEData *fedata, MLI_Mapper *map )
    }
    else
    {
-      cout << "MLI::setFEData ERROR : wrong level = " << level << endl;
+      printf("MLI::setFEData ERROR : wrong level = %d\n", level);
       exit(1);
    }
    return 0;
@@ -191,9 +182,7 @@ int MLI::setFEData( int level, MLI_FEData *fedata, MLI_Mapper *map )
 int MLI::setCyclesAtLevel( int level, int cycles )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI::setCyclesAtLevel at level " << level << " cycles = " 
-        << cycles << endl;
-   cout.flush();
+   printf("MLI::setCyclesAtLevel at level %d, cycles = %d\n",level,cycles);
 #endif
    if ( level >= 0 && level < max_levels )
    {
@@ -205,7 +194,7 @@ int MLI::setCyclesAtLevel( int level, int cycles )
    }
    else
    {
-      cout << "MLI::setCyclesAtLevel ERROR : wrong level = " << level << endl;
+      printf("MLI::setCyclesAtLevel ERROR : wrong level = %d\n",level);
       exit(1);
    }
    return 0;
@@ -218,8 +207,7 @@ int MLI::setCyclesAtLevel( int level, int cycles )
 int MLI::setMethod( MLI_Method *object )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI::setMethod = " << object->getName() << endl;
-   cout.flush();
+   printf("MLI::setMethod = %s\n", object->getName());
 #endif
    method_ptr = object;
    return 0;
@@ -282,7 +270,7 @@ int MLI::solve( MLI_Vector *sol, MLI_Vector *rhs )
 
    if ( ! assembled )
    {
-      cout << "MLI::solve ERROR - setup not called yet.\n";
+      printf("MLI::solve ERROR - setup not called yet.\n");
       exit(1);
    }
 
@@ -357,13 +345,12 @@ int MLI::print()
    MPI_Comm_rank(mpi_comm, &mypid);
    if ( mypid == 0 )
    {
-      cout << "\t***************** MLI Information *********************\n";
-      cout << "\t*** max_levels        = " << max_levels << endl;
-      cout << "\t*** output level      = " << output_level << endl;
-      cout << "\t*** max_iterations    = " << max_iterations << endl;
-      cout << "\t*** tolerance         = " << tolerance << endl;
-      cout << "\t*******************************************************\n";
-      cout.flush();
+      printf("\t***************** MLI Information *********************\n");
+      printf("\t*** max_levels        = %d\n", max_levels);
+      printf("\t*** output level      = %d\n", output_level);
+      printf("\t*** max_iterations    = %d\n", max_iterations);
+      printf("\t*** tolerance         = %e\n", tolerance);
+      printf("\t*******************************************************\n");
    }
    return 0;
 }
@@ -379,10 +366,10 @@ int MLI::printTiming()
    MPI_Comm_rank( mpi_comm, &mypid );
    if ( mypid == 0 )
    {
-      cout << "\t***************** MLI Timing Information **************\n";
-      cout << "\t*** MLI Build time = " << build_time << " seconds" << endl;
-      cout << "\t*** MLI Solve time = " << solve_time << " seconds" << endl;
-      cout << "\t*******************************************************\n";
+      printf("\t***************** MLI Timing Information **************\n");
+      printf("\t*** MLI Build time = %e seconds\n", build_time);
+      printf("\t*** MLI Solve time = %e seconds\n", solve_time);
+      printf("\t*******************************************************\n");
    }
    return 0;
 }
@@ -396,7 +383,7 @@ MLI_OneLevel* MLI::getOneLevelObject( int level )
    if ( level >= 0 && level < max_levels ) return one_levels[level];
    else
    {
-      cout << "MLI::getOneLevelObject ERROR : wrong level = " << level << endl;
+      printf("MLI::getOneLevelObject ERROR : wrong level = %d\n", level);
       return NULL;
    }
 }
@@ -411,7 +398,7 @@ MLI_Matrix* MLI::getSystemMatrix( int level )
       return one_levels[level]->getAmat();
    else
    {
-      cout << "MLI::getSystemMatrix ERROR : wrong level = " << level << endl;
+      printf("MLI::getSystemMatrix ERROR : wrong level = %d\n", level);
       return NULL;
    }
 }
@@ -426,7 +413,7 @@ MLI_Matrix* MLI::getProlongation( int level )
       return one_levels[level]->getPmat();
    else
    {
-      cout << "MLI::getProlongation ERROR : wrong level = " << level << endl;
+      printf("MLI::getProlongation ERROR : wrong level = %d\n", level);
       return NULL;
    }
 }
@@ -441,7 +428,7 @@ MLI_Matrix* MLI::getRestriction( int level )
       return one_levels[level]->getRmat();
    else
    {
-      cout << "MLI::getRestriction ERROR : wrong level = " << level << endl;
+      printf("MLI::getRestriction ERROR : wrong level = %d\n", level);
       return NULL;
    }
 }
@@ -460,13 +447,13 @@ MLI_Solver* MLI::getSmoother( int level, int pre_post )
          return one_levels[level]->getPostSmoother();
       else 
       {
-         cout << "MLI::getSmoother ERROR : pre or post ? " << endl;
+         printf("MLI::getSmoother ERROR : pre or post ? \n");
          return ((MLI_Solver *) NULL);
       }
    }
    else
    {
-      cout << "MLI::getRestriction ERROR : wrong level = " << level << endl;
+      printf("MLI::getRestriction ERROR : wrong level = %d\n", level);
       return ((MLI_Solver *) NULL);
    }
 }
@@ -481,7 +468,7 @@ MLI_FEData* MLI::getFEData( int level )
       return one_levels[level]->getFEData();
    else
    {
-      cout << "MLI::getFEData ERROR : wrong level = " << level << endl;
+      printf("MLI::getFEData ERROR : wrong level = %d\n", level);
       return ((MLI_FEData *) NULL);
    }
 }
@@ -496,7 +483,7 @@ MLI_Mapper* MLI::getNodeEqnMap( int level )
       return one_levels[level]->getNodeEqnMap();
    else
    {
-      cout << "MLI::getNodeEqnMap ERROR : wrong level = " << level << endl;
+      printf("MLI::getNodeEqnMap ERROR : wrong level = %d\n", level);
       return ((MLI_Mapper *) NULL);
    }
 }
@@ -508,13 +495,12 @@ MLI_Mapper* MLI::getNodeEqnMap( int level )
 int MLI::resetSystemMatrix( int level  )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI::resetSystemMatrix, level = " << level << endl;
-   cout.flush();
+   printf("MLI::resetSystemMatrix, level = %d\n", level);
 #endif
    if ( level >= 0 && level < max_levels ) one_levels[level]->resetAmat();
    else
    {
-      cout << "MLI::resetSystemMatrix ERROR : wrong level = " << level << endl;
+      printf("MLI::resetSystemMatrix ERROR : wrong level = %d\n", level);
       exit(1);
    }
    return 0;

@@ -13,7 +13,6 @@
  *****************************************************************************/
 
 #include <string.h>
-#include <iostream.h>
 #include "utilities/utilities.h"
 #include "util/mli_utils.h"
 #include "base/mli_oneLevel.h"
@@ -25,8 +24,7 @@
 MLI_OneLevel::MLI_OneLevel( MLI *mli )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_OneLevel::MLI_OneLevel" << endl;
-   cout.flush();
+   printf("MLI_OneLevel::MLI_OneLevel\n");
 #endif
    mli_object    = mli;
    level_num     = -1;
@@ -53,8 +51,7 @@ MLI_OneLevel::MLI_OneLevel( MLI *mli )
 MLI_OneLevel::~MLI_OneLevel()
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_OneLevel::~MLI_OneLevel" << endl;
-   cout.flush();
+   printf("MLI_OneLevel::~MLI_OneLevel\n");
 #endif
    if ( fedata != NULL ) delete fedata;
    if ( Amat   != NULL ) delete Amat;
@@ -76,8 +73,7 @@ MLI_OneLevel::~MLI_OneLevel()
 int MLI_OneLevel::setAmat( MLI_Matrix *A )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_OneLevel::setAmat" << endl;
-   cout.flush();
+   printf("MLI_OneLevel::setAmat\n");
 #endif
    if ( Amat != NULL ) delete Amat;
    Amat = A;
@@ -91,8 +87,7 @@ int MLI_OneLevel::setAmat( MLI_Matrix *A )
 int MLI_OneLevel::setRmat( MLI_Matrix *R )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_OneLevel::setRmat at level " << level_num << endl;
-   cout.flush();
+   printf("MLI_OneLevel::setRmat at level %d\n", level_num);
 #endif
    if ( Rmat != NULL ) delete Rmat;
    Rmat = R;
@@ -106,8 +101,7 @@ int MLI_OneLevel::setRmat( MLI_Matrix *R )
 int MLI_OneLevel::setPmat( MLI_Matrix *P )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_OneLevel::setPmat at level " << level_num << endl;
-   cout.flush();
+   printf("MLI_OneLevel::setPmat at level %d\n", level_num);
 #endif
    if ( Pmat != NULL ) delete Pmat;
    Pmat = P;
@@ -121,8 +115,7 @@ int MLI_OneLevel::setPmat( MLI_Matrix *P )
 int MLI_OneLevel::setSolutionVector( MLI_Vector *sol )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_OneLevel::setSolutionVector" << endl;
-   cout.flush();
+   printf("MLI_OneLevel::setSolutionVector\n");
 #endif
    if ( vec_sol != NULL ) delete vec_sol;
    vec_sol = sol;
@@ -136,8 +129,7 @@ int MLI_OneLevel::setSolutionVector( MLI_Vector *sol )
 int MLI_OneLevel::setRHSVector( MLI_Vector *rhs )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_OneLevel::setRHSVector" << endl;
-   cout.flush();
+   printf("MLI_OneLevel::setRHSVector\n");
 #endif
    if ( vec_rhs != NULL ) delete vec_rhs;
    vec_rhs = rhs;
@@ -151,8 +143,7 @@ int MLI_OneLevel::setRHSVector( MLI_Vector *rhs )
 int MLI_OneLevel::setResidualVector( MLI_Vector *res )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_OneLevel::setResidualVector" << endl;
-   cout.flush();
+   printf("MLI_OneLevel::setResidualVector\n");
 #endif
    if ( vec_res != NULL ) delete vec_res;
    vec_res = res;
@@ -166,8 +157,7 @@ int MLI_OneLevel::setResidualVector( MLI_Vector *res )
 int MLI_OneLevel::setSmoother( int pre_post, MLI_Solver *smoother )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_OneLevel::setSmoother, pre_post = " << pre_post << endl;
-   cout.flush();
+   printf("MLI_OneLevel::setSmoother, pre_post = %d\n", pre_post);
 #endif
    if      ( pre_post == MLI_SMOOTHER_PRE  ) pre_smoother = smoother;
    else if ( pre_post == MLI_SMOOTHER_POST ) postsmoother = smoother;
@@ -186,8 +176,7 @@ int MLI_OneLevel::setSmoother( int pre_post, MLI_Solver *smoother )
 int MLI_OneLevel::setCoarseSolve( MLI_Solver *solver )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_OneLevel::setCoarseSolve" << endl;
-   cout.flush();
+   printf("MLI_OneLevel::setCoarseSolve\n");
 #endif
    if ( coarse_solver != NULL ) delete coarse_solver;
    coarse_solver = solver;
@@ -201,8 +190,7 @@ int MLI_OneLevel::setCoarseSolve( MLI_Solver *solver )
 int MLI_OneLevel::setFEData( MLI_FEData *data, MLI_Mapper *map )
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_OneLevel::setFEData" << endl;
-   cout.flush();
+   printf("MLI_OneLevel::setFEData\n");
 #endif
    if ( fedata != NULL ) delete fedata;
    fedata = data;
@@ -218,23 +206,22 @@ int MLI_OneLevel::setFEData( MLI_FEData *data, MLI_Mapper *map )
 int MLI_OneLevel::setup()
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_OneLevel::setup at level " << level_num << endl;
-   cout.flush();
+   printf("MLI_OneLevel::setup at level %d\n", level_num);
 #endif
    if ( Amat == NULL )
    {
-      cout << "MLI_OneLevel::setup at level " << level_num << " - no Amat\n";
+      printf("MLI_OneLevel::setup at level %d\n", level_num);
       exit(1);
    } 
    if ( level_num != 0 && Pmat == NULL )
    {
-      cout << "MLI_OneLevel::setup at level " << level_num << " - no Pmat\n";
+      printf("MLI_OneLevel::setup at level %d - no Pmat\n", level_num);
       exit(1);
    } 
    if ( !strcmp(Amat->getName(),"HYPRE_ParCSR") && 
         !strcmp(Amat->getName(),"HYPRE_ParCSRT"))
    {
-      cout << "MLI_OneLevel::setup ERROR : Amat not HYPRE_ParCSR." << endl;
+      printf("MLI_OneLevel::setup ERROR : Amat not HYPRE_ParCSR.\n");
       exit(1);
    }
    if ( vec_res != NULL ) delete vec_res;
@@ -258,8 +245,7 @@ int MLI_OneLevel::solve1Cycle()
    int        i;
    MLI_Vector *sol, *rhs, *res;
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_OneLevel::solve1Cycle" << endl;
-   cout.flush();
+   printf("MLI_OneLevel::solve1Cycle\n");
 #endif
 
    sol = vec_sol;
@@ -275,9 +261,8 @@ int MLI_OneLevel::solve1Cycle()
       if ( coarse_solver != NULL ) 
       {
 #ifdef MLI_DEBUG_DETAILED
-         cout << "MLI_OneLevel::solve1Cycle - coarse solve at level " 
-              << level_num << endl;
-         cout.flush();
+         printf("MLI_OneLevel::solve1Cycle - coarse solve at level %d\n",
+                level_num);
 #endif
          coarse_solver->solve( rhs, sol );
       }
@@ -300,9 +285,8 @@ int MLI_OneLevel::solve1Cycle()
          if ( pre_smoother != NULL ) 
          {
 #ifdef MLI_DEBUG_DETAILED
-         cout << "MLI_OneLevel::solve1Cycle - presmoothing at level "
-              << level_num << endl;
-         cout.flush();
+         printf("MLI_OneLevel::solve1Cycle - presmoothing at level %d\n",
+                level_num);
 #endif
             pre_smoother->solve( rhs, sol );
          }
@@ -314,9 +298,8 @@ int MLI_OneLevel::solve1Cycle()
          /* ------------------------------------------------------------- */
 
 #ifdef MLI_DEBUG_DETAILED
-         cout << "MLI_OneLevel::solve1Cycle - restriction to level "
-              << level_num+1 << endl;
-         cout.flush();
+         printf("MLI_OneLevel::solve1Cycle - restriction to level %d\n",
+                level_num+1);
 #endif
          Rmat->apply(1.0, res, 0.0, NULL, next_level->vec_rhs);
          next_level->vec_sol->setConstantValue(0.0e0);
@@ -327,9 +310,8 @@ int MLI_OneLevel::solve1Cycle()
          /* ------------------------------------------------------------- */
 
 #ifdef MLI_DEBUG_DETAILED
-         cout << "MLI_OneLevel::solve1Cycle - interpolate to level "
-              << level_num << endl;
-         cout.flush();
+         printf("MLI_OneLevel::solve1Cycle - interpolate to level %d\n",
+                level_num);
 #endif
          next_level->Pmat->apply(1.0, next_level->vec_sol, 1.0, sol, sol);
 
@@ -341,9 +323,8 @@ int MLI_OneLevel::solve1Cycle()
          {
             postsmoother->solve( rhs, sol );
 #ifdef MLI_DEBUG_DETAILED
-            cout << "MLI_OneLevel::solve1Cycle - postsmoothing at level "
-                 << level_num << endl;
-            cout.flush();
+            printf("MLI_OneLevel::solve1Cycle - postsmoothing at level %d\n",
+                   level_num);
 #endif
          }
       }
@@ -358,8 +339,7 @@ int MLI_OneLevel::solve1Cycle()
 int MLI_OneLevel::resetAmat()
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_OneLevel::resetAmat" << endl;
-   cout.flush();
+   printf("MLI_OneLevel::resetAmat\n");
 #endif
    Amat = NULL;
    return 0;
@@ -372,8 +352,7 @@ int MLI_OneLevel::resetAmat()
 int MLI_OneLevel::resetSolutionVector()
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_OneLevel::resetSolutionVector" << endl;
-   cout.flush();
+   printf("MLI_OneLevel::resetSolutionVector\n");
 #endif
    vec_sol = NULL;
    return 0;
@@ -386,8 +365,7 @@ int MLI_OneLevel::resetSolutionVector()
 int MLI_OneLevel::resetRHSVector()
 {
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI_OneLevel::resetRHSVector" << endl;
-   cout.flush();
+   printf("MLI_OneLevel::resetRHSVector\n");
 #endif
    vec_rhs = NULL;
    return 0;

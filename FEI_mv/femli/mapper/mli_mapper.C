@@ -7,7 +7,6 @@
  *********************************************************************EHEADER*/
 
 #include <string.h>
-#include <iostream.h>
 #include <assert.h>
 #include "utilities/utilities.h"
 #include "HYPRE.h"
