@@ -730,7 +730,8 @@ case $ARCH in
     fi
 
     if test "$casc_user_chose_mpi" = "no" &&
-        test "$casc_using_mpi" = "yes"
+        test "$casc_using_mpi" = "yes" &&
+        test "$CC" != "mpicc"
     then
       CASC_CHECK_HEADER(mpi.h, /usr/include)
       MPIINCLUDE="$MPIINCLUDE $INCLUDES"
@@ -984,9 +985,9 @@ if test -z "$CC" ; then
      test "$casc_user_chose_mpi" = "no" &&
      test "$casc_using_mpi" = "yes"
   then
-    CASC_CHECK_HEADER(mpi.h, /usr/local/mpi/include)
+    CASC_CHECK_HEADER(mpi.h, /usr/include /usr/local/include /usr/local/mpi/include)
     MPIINCLUDE="$MPIINCLUDE $INCLUDES"
-    CASC_ADD_LIB(mpi, main, /usr/local/mpi/lib, MPI)
+    CASC_ADD_LIB(mpi, main, /usr/lib /usr/local/lib /usr/local/mpi/lib, MPI)
     if test -z "$MPILIBS" ; then
       AC_MSG_WARN([MPI not found--in default test-must set manually using --with-flags])
     fi
