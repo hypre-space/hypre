@@ -6,7 +6,7 @@
 #include "Parser_dh.h"
 #include "Mem_dh.h"
 #include "TimeLog_dh.h"
-#include "sig_dh.h"
+extern void sigRegister_dh(); /* use sig_dh.h if not for euclid_signals_len */
 
 /*-------------------------------------------------------------------------
  * Globally scoped variables, flags, and objects
