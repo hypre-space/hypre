@@ -569,7 +569,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
    int       local_nrows, naggr=0, *node2aggr, *aggr_size;
    int       irow, icol, col_num, row_num, row_leng, *cols, global_nrows;
    int       *node_stat, select_flag, nselected=0, count;
-   int       ibuf[2], itmp[2];
+   int       ibuf[2], itmp[2], min_aggr_size=2;
 
    /*-----------------------------------------------------------------
     * fetch machine and matrix parameters
@@ -590,6 +590,8 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
       printf("\t*** Aggregation(U) : total nodes to aggregate = %d\n",
              global_nrows);
    }
+   if ( nullspace_dim / curr_node_dofs >= min_aggr_size )
+      min_aggr_size = nullspace_dim / curr_node_dofs + 1;
 
    /*-----------------------------------------------------------------
     * this array is used to determine which row has been aggregated
@@ -634,7 +636,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
                else count++;
             }
          }
-         if ( select_flag == 1 && count > 1 )
+         if ( select_flag == 1 && count >= min_aggr_size )
          {
             nselected++;
             node2aggr[irow]  = naggr;
@@ -735,7 +737,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
                   if ( node_stat[col_num] == MLI_METHOD_AMGSA_READY ) count++;
                }
             }
-            if ( count > 1 )
+            if ( count > 1 && count >= (min_aggr_size-1) ) 
             {
                node2aggr[irow]  = naggr;
                node_stat[irow]  = MLI_METHOD_AMGSA_SELECTED;

@@ -51,7 +51,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    nullspace_dim     = 1;
    nullspace_vec     = NULL;
    nullspace_len     = 0;
-   P_weight          = 4.0/3.0;
+   P_weight          = 0.0/3.0;
    drop_tol_for_P    = 0.0;            /* tolerance to sparsify P*/
    sa_counts         = new int[40];    /* number of aggregates   */
    sa_data           = new int*[40];   /* node to aggregate data */
