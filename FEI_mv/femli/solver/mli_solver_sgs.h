@@ -41,6 +41,7 @@ public :
    int setParams(int nTimes, double *relaxWeights);
 
    int doProcColoring();
+   int findOmega();
 };
 
 #endif

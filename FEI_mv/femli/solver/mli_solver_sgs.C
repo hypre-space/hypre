@@ -276,11 +276,8 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
     * clean up and return
     *-----------------------------------------------------------------*/
 
-   if (nprocs > 1)
-   {
-      if ( vExtData != NULL ) delete [] vExtData;
-      if ( vBufData != NULL ) delete [] vBufData;
-   }
+   if ( vExtData != NULL ) delete [] vExtData;
+   if ( vBufData != NULL ) delete [] vBufData;
    return(relaxError); 
 }
 
@@ -466,6 +463,200 @@ int MLI_Solver_SGS::doProcColoring()
    delete [] colors;
    if ( mypid == 0 )
       printf("\tMLI_Solver_SGS : number of colors = %d\n", numColors_);
+   return 0;
+}
+
+/******************************************************************************
+ * search for optimal omega
+ *---------------------------------------------------------------------------*/
+
+int MLI_Solver_SGS::findOmega()
+{
+   int                 *ADiagI, *ADiagJ, *AOffdI, *AOffdJ;
+   double              *ADiagA, *AOffdA, *uData, *fData;
+   register int        iStart, iEnd, jj;
+   int                 i, j, is, iR, localNRows, extNRows, *tmpJ;
+   int                 iC, index, nprocs, mypid, nSends, start, numInc;
+   register double     res;
+   double              zero = 0.0, relaxWeight, rnorm, *relNorms;
+   double              *vBufData, *tmpData, *vExtData;
+   MPI_Comm            comm;
+   hypre_ParCSRMatrix     *A;
+   hypre_CSRMatrix        *ADiag, *AOffd;
+   hypre_ParCSRCommPkg    *commPkg;
+   hypre_ParCSRCommHandle *commHandle;
+   MLI_Vector             *mliRvec, *mliFvec, *mliUvec;
+   hypre_ParVector        *hypreR, *hypreF, *hypreU;
+
+   /*-----------------------------------------------------------------
+    * fetch machine and matrix parameters
+    *-----------------------------------------------------------------*/
+
+   A          = (hypre_ParCSRMatrix *) Amat_->getMatrix();
+   comm       = hypre_ParCSRMatrixComm(A);
+   commPkg    = hypre_ParCSRMatrixCommPkg(A);
+   ADiag      = hypre_ParCSRMatrixDiag(A);
+   localNRows = hypre_CSRMatrixNumRows(ADiag);
+   ADiagI     = hypre_CSRMatrixI(ADiag);
+   ADiagJ     = hypre_CSRMatrixJ(ADiag);
+   ADiagA     = hypre_CSRMatrixData(ADiag);
+   AOffd      = hypre_ParCSRMatrixOffd(A);
+   extNRows   = hypre_CSRMatrixNumCols(AOffd);
+   AOffdI     = hypre_CSRMatrixI(AOffd);
+   AOffdJ     = hypre_CSRMatrixJ(AOffd);
+   AOffdA     = hypre_CSRMatrixData(AOffd);
+   MPI_Comm_size(comm,&nprocs);  
+   MPI_Comm_rank(comm,&mypid);  
+
+   /*-----------------------------------------------------------------
+    * create temporary vectors
+    *-----------------------------------------------------------------*/
+
+   mliUvec = Amat_->createVector();
+   hypreU  = (hypre_ParVector *) mliUvec->getVector();
+   mliFvec = Amat_->createVector();
+   hypreF  = (hypre_ParVector *) mliFvec->getVector();
+   mliRvec = Amat_->createVector();
+   hypreR  = (hypre_ParVector *) mliRvec->getVector();
+   hypre_ParVectorSetRandomValues( hypreF, 23986131 ); 
+   fData   = hypre_VectorData(hypre_ParVectorLocalVector(hypreF));
+   uData   = hypre_VectorData(hypre_ParVectorLocalVector(hypreU));
+
+   /*-----------------------------------------------------------------
+    * setting up for interprocessor communication
+    *-----------------------------------------------------------------*/
+
+   if (nprocs > 1)
+   {
+      nSends = hypre_ParCSRCommPkgNumSends(commPkg);
+      if ( nSends > 0 )
+         vBufData = new double[hypre_ParCSRCommPkgSendMapStart(commPkg,nSends)];
+      else vBufData = NULL;
+      if ( extNRows > 0 ) vExtData = new double[extNRows];
+      else                vExtData = NULL;
+   }
+
+   /*-----------------------------------------------------------------
+    * perform SGS sweeps
+    *-----------------------------------------------------------------*/
+ 
+   numInc = 15;
+   relNorms = new double[numInc];
+   relNorms[0] = sqrt(hypre_ParVectorInnerProd( hypreF, hypreF ));
+
+   for( iR = 1; iR < numInc; iR++ )
+   {
+      relaxWeight = 0.1 * iR;
+      hypre_ParVectorSetConstantValues(hypreU, zero);
+      for( is = 0; is < nSweeps_; is++ )
+      {
+         /*--------------------------------------------------------------
+          * forward sweep
+          *--------------------------------------------------------------*/
+
+         if (nprocs > 1)
+         {
+            if ( zeroInitialGuess_ == 0 )
+            {
+               index = 0;
+               for (i = 0; i < nSends; i++)
+               {
+                  start = hypre_ParCSRCommPkgSendMapStart(commPkg, i);
+                  for (j=start;j<hypre_ParCSRCommPkgSendMapStart(commPkg,i+1);
+                       j++)
+                     vBufData[index++]
+                         = uData[hypre_ParCSRCommPkgSendMapElmt(commPkg,j)];
+               }
+               commHandle = hypre_ParCSRCommHandleCreate(1,commPkg,vBufData,
+                                                         vExtData);
+               hypre_ParCSRCommHandleDestroy(commHandle);
+               commHandle = NULL;
+            }
+         }
+
+         for (i = 0; i < localNRows; i++)
+         {
+            if ( ADiagA[ADiagI[i]] != zero)
+            {
+               res      = fData[i];
+               iStart   = ADiagI[i];
+               iEnd     = ADiagI[i+1];
+               tmpJ    = &(ADiagJ[iStart]);
+               tmpData = &(ADiagA[iStart]);
+               for (jj = iStart; jj < iEnd; jj++)
+                  res -= (*tmpData++) * uData[*tmpJ++];
+               if ( (zeroInitialGuess_ == 0) && (nprocs > 1) )
+               {
+                  iStart  = AOffdI[i];
+                  iEnd    = AOffdI[i+1];
+                  tmpJ    = &(AOffdJ[iStart]);
+                  tmpData = &(AOffdA[iStart]);
+                  for (jj = iStart; jj < iEnd; jj++)
+                     res -= (*tmpData++) * vExtData[*tmpJ++];
+               }
+               uData[i] += relaxWeight * res / ADiagA[ADiagI[i]];
+            }
+            else printf("MLI_Solver_SGS error : diag = 0.\n");
+         }
+
+         /*--------------------------------------------------------------
+          * backward sweep
+          *--------------------------------------------------------------*/
+
+         for (i = localNRows-1; i > -1; i--)
+         {
+            if ( ADiagA[ADiagI[i]] != zero)
+            {
+               res     = fData[i];
+               iStart  = ADiagI[i];
+               iEnd    = ADiagI[i+1];
+               tmpJ    = &(ADiagJ[iStart]);
+               tmpData = &(ADiagA[iStart]);
+               for (jj = iStart; jj < iEnd; jj++)
+                  res -= (*tmpData++) * uData[*tmpJ++];
+               if ( (zeroInitialGuess_ == 0 ) && (nprocs > 1) )
+               {
+                  iStart  = AOffdI[i];
+                  iEnd    = AOffdI[i+1];
+                  tmpJ    = &(AOffdJ[iStart]);
+                  tmpData = &(AOffdA[iStart]);
+                  for (jj = iStart; jj < iEnd; jj++)
+                     res -= (*tmpData++) * vExtData[*tmpJ++];
+               }
+               uData[i] += relaxWeight * res / ADiagA[ADiagI[i]];
+            }
+         }
+         zeroInitialGuess_ = 0;
+      }
+      hypre_ParVectorCopy( hypreF, hypreR );
+      hypre_ParCSRMatrixMatvec( -1.0, A, hypreU, 1.0, hypreR );
+      rnorm = sqrt(hypre_ParVectorInnerProd( hypreR, hypreR ));
+      relNorms[iR] = rnorm;
+   }
+   rnorm = relNorms[0];
+   jj = 0;
+   for ( iR = 1; iR < numInc; iR++ )
+   {
+      if ( relNorms[iR] < rnorm ) 
+      {
+         rnorm = relNorms[iR];
+         jj = iR;
+      }
+   }
+   if ( mypid == 0 )
+      printf("MLI_Solver_SGS::findOmega - optimal omega = %e(%e)\n",
+             0.1*jj,rnorm/relNorms[0]); 
+
+   /*-----------------------------------------------------------------
+    * clean up and return
+    *-----------------------------------------------------------------*/
+
+   delete mliRvec;
+   delete mliUvec;
+   delete mliFvec;
+   if ( vExtData != NULL ) delete [] vExtData;
+   if ( vBufData != NULL ) delete [] vBufData;
+   delete [] relNorms;
    return 0;
 }
 

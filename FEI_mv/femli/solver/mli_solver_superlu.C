@@ -136,12 +136,15 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
    row_num = recvCntArray[0];
    for ( i = 1; i < nprocs; i++ )
    {
-      itemp = gcsrIA[row_num];
-      gcsrIA[row_num] = 0;
-      for ( j = 0; j < recvCntArray[i]; j++ )
-         gcsrIA[row_num+j] += nnz;
-      nnz += itemp;
-      row_num += recvCntArray[i];
+      if ( recvCntArray[i] > 0 )
+      {
+         itemp = gcsrIA[row_num];
+         gcsrIA[row_num] = 0;
+         for ( j = 0; j < recvCntArray[i]; j++ )
+            gcsrIA[row_num+j] += nnz;
+         nnz += itemp;
+         row_num += recvCntArray[i];
+      }
    }
    gcsrIA[globalNRows] = nnz;
 
@@ -159,7 +162,7 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
    delete [] dispArray;
    delete [] csrIA;
    if ( csrJA != NULL ) delete [] csrJA;
-   if ( csrJA != NULL ) delete [] csrAA;
+   if ( csrAA != NULL ) delete [] csrAA;
 
    /* ---------------------------------------------------------------
     * conversion from CSR to CSC 
@@ -168,8 +171,17 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
    cntArray = new int[globalNRows];
    for ( irow = 0; irow < globalNRows; irow++ ) cntArray[irow] = 0;
    for ( irow = 0; irow < globalNRows; irow++ ) 
+   {
       for ( i = gcsrIA[irow]; i < gcsrIA[irow+1]; i++ ) 
-         cntArray[gcsrJA[i]]++;
+         if ( gcsrJA[i] >= 0 && gcsrJA[i] < globalNRows )
+            cntArray[gcsrJA[i]]++;
+         else
+         {
+            printf("%d : MLI_Solver_SuperLU ERROR : gcsrJA %d %d = %d(%d)\n",
+                   mypid, irow, i, gcsrJA[i], globalNRows);
+            exit(1);
+         }
+   }
    gcscJA = (int *)    malloc( (globalNRows+1) * sizeof(int) );
    gcscIA = (int *)    malloc( globalNnz * sizeof(int) );
    gcscAA = (double *) malloc( globalNnz * sizeof(double) );
