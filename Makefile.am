@@ -64,9 +64,18 @@ nofei:
 	  then \
 	    (cd $$i && $(MAKE) $(AM_MAKEFLAGS) clean); \
 	    (cd $$i && $(MAKE) CPPFLAGS=-DNOFEI $(AM_MAKEFLAGS)); \
-	    cp $$i/*.lo lib; \
-	    cp $$i/.libs/*.o lib/.libs; \
-	    cp $$i/*.o lib; \
+	    for j1 in $$i/*.lo; \
+	    do \
+	      test -f $$j1 && cp -f $$j1 lib; \
+	    done; \
+	    for j2 in $$i/.libs/*.o; \
+	    do \
+	      test -f $$j2 && cp -f $$j2 lib/.libs; \
+	    done; \
+	    for j3 in $$i/*.o; \
+	    do \
+	      test -f $$j3 && cp -f $$j3 lib; \
+	    done; \
 	  fi; \
 	done; \
 	(cd lib && touch libHYPRE.* .libs/libHYPRE.*); \
