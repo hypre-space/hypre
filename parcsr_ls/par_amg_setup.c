@@ -391,7 +391,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	    hypre_BoomerAMGCoarsenFalgout(S, A_array[level], measure_type,
                                     debug_flag, &CF_marker);
          }
-         if (coarsen_type == 7)
+         else if (coarsen_type == 7)
          {
 	    hypre_BoomerAMGCoarsen(S, A_array[level], 2,
                              debug_flag, &CF_marker);
