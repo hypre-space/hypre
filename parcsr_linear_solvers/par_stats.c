@@ -117,11 +117,13 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       printf("\nBoomerAMG SETUP PARAMETERS:\n\n");
       printf(" Max levels = %d\n",hypre_ParAMGDataMaxLevels(amg_data));
       printf(" Num levels = %d\n\n",num_levels);
-      printf(" Strength Threshhold = %f\n\n", 
+      printf(" Strength Threshold = %f\n", 
                          hypre_ParAMGDataStrongThreshold(amg_data));
-      if (hypre_ParAMGDataTruncFactor(amg_data) != 0.0)
-	printf(" Interpolation Truncation Factor = %f\n\n", 
+      printf(" Interpolation Truncation Factor = %f\n", 
                          hypre_ParAMGDataTruncFactor(amg_data));
+      printf(" Maximum Row Sum Threshold for Dependency Weakening = %f\n\n", 
+                         hypre_ParAMGDataMaxRowSum(amg_data));
+
       if (coarsen_type == 0)
       {
 	printf(" Coarsening Type = Cleary-Luby-Jones-Plassman\n");
