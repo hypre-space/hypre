@@ -76,15 +76,20 @@ done
 SUBMSG="test suite"
 for i in $HYPRE_TEST_DRIVERS
 do
-    echo "running ${i} test suite..."
-    ./${i}.sh 1> ${i}.log 2> ${i}.err
-
-    if test -f purify.log
+    if test -x ${i}
     then
-      mv purify.log ${i}.purify.log
-      mv ${i}.err ${i}.err.log
-      grep -i hypre_ ${i}.purify.log > ${i}.err
-      SUBMSG="from purify"
+        echo "running ${i} test suite..."
+        ./${i}.sh 1> ${i}.log 2> ${i}.err
+
+        if test -f purify.log
+        then
+          mv purify.log ${i}.purify.log
+          mv ${i}.err ${i}.err.log
+          grep -i hypre_ ${i}.purify.log > ${i}.err
+          SUBMSG="from purify"
+        fi
+    else
+        echo "ERROR ${i} test suite did not compile..."
     fi
 done
 
