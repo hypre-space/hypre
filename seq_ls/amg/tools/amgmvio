@@ -23,7 +23,7 @@ if [ "$2" != "" ]; then
 for i in $1.in.problem $1.in.solver $1.out*
 do
   EXT=`echo $i $1 | awk '{print substr($1,length($2)+1)}'`
-  mv $i $2${EXT}
+  cp $i $2${EXT}
 done
 
 else
