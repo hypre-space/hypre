@@ -60,7 +60,8 @@ FILES =\
  par_amg_solve.c\
  par_cycle.c\
  par_interp.c\
- coarsen.c\
+ par_coarsen.c\
+ par_relax.c\
  indepset.c\
  par_laplace.c\
  par_rap.c\
