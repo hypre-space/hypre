@@ -15,10 +15,10 @@
 
 #include "utilities/utilities.h"
 #ifndef NOFEI
-#include "base/Data.h"
-#include "base/basicTypes.h"
-#include "base/Lookup.h"
-#include "base/LinearSystemCore.2.0.h"
+#include "Data.h"
+#include "basicTypes.h"
+#include "Lookup.h"
+#include "LinearSystemCore.2.0.h"
 #endif
 #include "HYPRE.h"
 #include "../../IJ_matrix_vector/HYPRE_IJ_mv.h"

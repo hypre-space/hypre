@@ -5,7 +5,7 @@
 //Files that need to be included before the compiler
 //reaches this header:
 //
-//#include "src/Data.h"
+//#include "Data.h"
 //#include <mpi.h>
 
 class LSC : public LinearSystemCore {
