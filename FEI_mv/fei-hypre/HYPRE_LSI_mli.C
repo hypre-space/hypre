@@ -14,11 +14,17 @@
  *        HYPRE_LSI_MLIDestroy
  *        HYPRE_LSI_MLISetup
  *        HYPRE_LSI_MLISolve
+ *        HYPRE_LSI_MLISetParams
+ *--------------------------------------------------------------------------
  *        HYPRE_LSI_MLISetStrengthThreshold
  *        HYPRE_LSI_MLISetMethod
  *        HYPRE_LSI_MLISetSmoother
  *        HYPRE_LSI_MLISetCoarseSolver
  ****************************************************************************/
+
+/****************************************************************************/ 
+/* system include files                                                     */
+/*--------------------------------------------------------------------------*/
 
 #include <string.h>
 #include <iostream.h>
@@ -26,6 +32,10 @@
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
+
+/****************************************************************************/ 
+/* MLI include files                                                        */
+/*--------------------------------------------------------------------------*/
 
 #ifdef HAVE_MLI
 #include "base/mli_defs.h"
@@ -38,20 +48,18 @@
 #define MLI_SOLVER_PARASAILS_ID 3 
 #define MLI_SOLVER_SCHWARZ_ID   4 
 #define MLI_SOLVER_MLS_ID       5 
-#define MLI_SOLVER_SUPERLU      6 
+#define MLI_SOLVER_SUPERLU_ID   6 
 #define MLI_METHOD_AMGSA_ID     7
 #endif
-#include "HYPRE_LSI_mli.h"
 
-//******************************************************************************
-//******************************************************************************
-// C-Interface data structure 
-//------------------------------------------------------------------------------
+/****************************************************************************/ 
+/* HYPRE_LSI_MLI data structure                                             */
+/*--------------------------------------------------------------------------*/
 
 typedef struct HYPRE_LSI_MLI_Struct
 {
 #ifdef HAVE_MLI
-   MLI *mli_;
+   MLI      *mli_;
 #endif
    MPI_Comm mpiComm_;
    int      nLevels_;             /* max number of levels */
@@ -98,7 +106,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->mli_                 = NULL;
    return 0;
 #else
-   cout << "MLI not available.\n";
+   printf("MLI not available.\n");
    return -1;
 #endif
 }
@@ -125,10 +133,9 @@ int HYPRE_LSI_MLIDestroy( HYPRE_Solver solver )
 #ifdef HAVE_MLI
    return 0;
 #else
-   cout << "MLI not available.\n";
+   printf("MLI not available.\n");
    return -1;
 #endif
-
 }
 
 /****************************************************************************/
@@ -280,7 +287,7 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 
    return 0;
 #else
-   cout << "MLI not available.\n";
+   printf("MLI not available.\n");
    return -1;
 #endif
 }
@@ -293,11 +300,13 @@ int HYPRE_LSI_MLISolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b, HYPRE_ParVector x )
 {
 #ifdef HAVE_MLI
-   MLI_Vector *sol, *rhs;
+   HYPRE_LSI_MLI *mli_object;
+   MLI_Vector    *sol, *rhs;
 
    sol = new MLI_Vector( (void *) x, "HYPRE_ParVector", NULL);
    rhs = new MLI_Vector( (void *) b, "HYPRE_ParVector", NULL);
 
+   mli_object = (HYPRE_LSI_MLI *) solver;
    mli_object->solve( sol, rhs);
 
    delete [] sol;
@@ -305,9 +314,112 @@ int HYPRE_LSI_MLISolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 
    return 0;
 #else
-   cout << "MLI not available.\n";
+   printf("MLI not available.\n");
    return -1;
 #endif
+}
+
+/****************************************************************************/
+/* HYPRE_LSI_MLISetParams                                                   */
+/*--------------------------------------------------------------------------*/
+
+int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
+{
+   HYPRE_LSI_MLI *mli_object;
+   char          param1[256], param2[256], param3[256];
+
+   mli_object = (HYPRE_LSI_MLI *) solver;
+   sscanf(params,"%s", param1);
+   if ( strcmp(param1, "MLI") )
+   {
+      printf("HYPRE_LSI_MLI::parameters not for me.\n");
+      return 1;
+   }
+   sscanf(params,"%s %s", param1, param2);
+   if ( !strcmp(param2, "strengthThreshold") )
+   {
+      sscanf(params,"%s %s %lg",param1,param2,&(mli_object->strengthThreshold_));
+      if ( mli_object->strengthThreshold_ < 0.0 )
+         mli_object->strengthThreshold_ = 0.0;
+   }
+   else if ( !strcmp(param2, "method") )
+   {
+      sscanf(params,"%s %s %s", param1, param2, param3);
+      if ( ! strcmp( param3, "AMGSA" ) )
+         mli_object->method_ = MLI_METHOD_AMGSA_ID;
+   }
+   else if ( !strcmp(param2, "smoother") )
+   {
+      sscanf(params,"%s %s %s", param1, param2, param3);
+      if ( ! strcmp( param3, "Jacobi" ) )
+      {
+         mli_object->preSmoother_  = MLI_METHOD_JACOBI_ID;
+         mli_object->postSmoother_ = MLI_METHOD_JACOBI_ID;
+      }
+      else if ( ! strcmp( param3, "GS" ) )
+      {
+         mli_object->preSmoother_  = MLI_SOLVER_GS_ID;
+         mli_object->postSmoother_ = MLI_SOLVER_GS_ID;
+      }
+      else if ( ! strcmp( param3, "SGS" ) )
+      {
+         mli_object->preSmoother_  = MLI_SOLVER_SGS_ID;
+         mli_object->postSmoother_ = MLI_SOLVER_SGS_ID;
+      }
+      else if ( ! strcmp( param3, "ParaSails" ) )
+      {
+         mli_object->preSmoother_  = MLI_SOLVER_PARASAILS_ID;
+         mli_object->postSmoother_ = MLI_SOLVER_PARASAILS_ID;
+      }
+      else if ( ! strcmp( param3, "Schwarz" ) )
+      {
+         mli_object->preSmoother_  = MLI_SOLVER_SCHWARZ_ID;
+         mli_object->postSmoother_ = MLI_SOLVER_SCHWARZ_ID;
+      }
+      else if ( ! strcmp( param3, "MLS" ) )
+      {
+         mli_object->preSmoother_  = MLI_SOLVER_MLS_ID;
+         mli_object->postSmoother_ = MLI_SOLVER_MLS_ID;
+      }
+      else 
+      {
+         printf("HYPRE_LSI_MLISetParams ERROR : unrecognized smoother.\n");
+         exit(1);
+      }
+   }
+   else if ( !strcmp(param2, "coarseSolver") )
+   {
+      sscanf(params,"%s %s %s", param1, param2, param3);
+      if ( ! strcmp( param3, "Jacobi" ) )
+         mli_object->coarseSolver_ = MLI_METHOD_JACOBI_ID;
+      else if ( ! strcmp( param3, "GS" ) )
+         mli_object->coarseSolver_ = MLI_SOLVER_GS_ID;
+      else if ( ! strcmp( param3, "SGS" ) )
+         mli_object->coarseSolver_ = MLI_SOLVER_SGS_ID;
+      else if ( ! strcmp( param3, "ParaSails" ) )
+         mli_object->coarseSolver_ = MLI_SOLVER_PARASAILS_ID;
+      else if ( ! strcmp( param3, "Schwarz" ) )
+         mli_object->coarseSolver_ = MLI_SOLVER_SCHWARZ_ID;
+      else if ( ! strcmp( param3, "MLS" ) )
+         mli_object->coarseSolver_ = MLI_SOLVER_MLS_ID;
+      else 
+      {
+         printf("HYPRE_LSI_MLISetParams ERROR : unrecognized coarseSolver.\n");
+         exit(1);
+      }
+   }
+   else if ( !strcmp(param2, "numSweeps") )
+   {
+      sscanf(params,"%s %s %d",param1,param2,&(mli_object->preNSweeps_));
+      if ( mli_object->preNSweeps_ <= 0 ) mli_object->preNSweeps_ = 1;
+      mli_object->postNSweeps_ = mli_object->preNSweeps_; 
+   }
+   else 
+   {
+      printf("HYPRE_LSI_MLISetParams ERROR : unrecognized request.\n");
+      exit(1);
+   }
+   return 0;
 }
 
 /****************************************************************************/
@@ -321,11 +433,11 @@ int HYPRE_LSI_MLISetStrengthThreshold(HYPRE_Solver solver,
   
    if ( strengthThreshold < 0.0 )
    {
-      cout << "HYPRE_LSI_MLISetStrengthThreshold ERROR : reset to 0.\n";
+      printf("HYPRE_LSI_MLISetStrengthThreshold ERROR : reset to 0.\n");
       mli_object->strengthThreshold_ = 0.0;
    } 
    else mli_object->strengthThreshold_ = strengthThreshold;
-   return( 0 );
+   return 0;
 }
 
 /****************************************************************************/
@@ -340,10 +452,10 @@ int HYPRE_LSI_MLI_SetMethod( HYPRE_Solver solver, char *paramString )
       mli_object->method_ = MLI_METHOD_AMGSA_ID;
    else
    {
-      cout << "HYPRE_LSI_MLISetMethod ERROR : method unrecognized.\n";
+      printf("HYPRE_LSI_MLISetMethod ERROR : method unrecognized.\n");
       exit(1);
    }
-   return( 0 );
+   return 0;
 }
 
 /****************************************************************************/
@@ -356,7 +468,7 @@ int HYPRE_LSI_MLISetNumPDEs( HYPRE_Solver solver, int numPDE )
 
    if ( numPDE > 1 ) mli_object->numPDEs_ = numPDE;
    else              mli_object->numPDEs_ = 1;
-   return( 0 );
+   return 0;
 }
 
 /****************************************************************************/
@@ -457,7 +569,7 @@ int HYPRE_LSI_MLISetSmoother( HYPRE_Solver solver, int pre_post,
                } 
                break;
    }
-   return( 0 );
+   return 0;
 }
 
 /****************************************************************************/
@@ -476,7 +588,7 @@ int HYPRE_LSI_MLISetCoarseSolver( HYPRE_Solver solver, int solver_id,
    stype = solver_id;
    if ( stype < 0 || stype > 6 )
    {
-      cout << ("HYPRE_LSI_MLISetCoarseSolver WARNING : set to Jacobi.\n");
+      printf("HYPRE_LSI_MLISetCoarseSolver WARNING : set to Jacobi.\n";
       stype = 0;
    } 
    stype += MLI_SOLVER_JACOBI_ID;

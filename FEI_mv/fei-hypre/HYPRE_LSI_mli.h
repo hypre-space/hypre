@@ -12,17 +12,28 @@
  *
  *****************************************************************************/
 
-#ifndef __HYPRE_MLI__
-#define __HYPRE_MLI__
+#ifndef __HYPRE_LSI_MLI__
+#define __HYPRE_LSI_MLI__
+
+/******************************************************************************
+ * system includes
+ *---------------------------------------------------------------------------*/
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <math.h>
+
+/******************************************************************************
+ * HYPRE internal libraries
+ *---------------------------------------------------------------------------*/
 
 #include "utilities/utilities.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 #include "parcsr_mv/parcsr_mv.h"
+
+/******************************************************************************
+ * Functions to access this data structure
+ *---------------------------------------------------------------------------*/
 
 #ifdef __cplusplus
 extern "C"
@@ -35,6 +46,7 @@ extern int HYPRE_LSI_MLISetup( HYPRE_Solver, HYPRE_ParCSRMatrix,
                                HYPRE_ParVector,   HYPRE_ParVector );
 extern int HYPRE_LSI_MLISolve( HYPRE_Solver, HYPRE_ParCSRMatrix,
                                HYPRE_ParVector,   HYPRE_ParVector);
+extern int HYPRE_LSI_SetParams( HYPRE_Solver, char ** );
 extern int HYPRE_LSI_MLISetStrengthThreshold( HYPRE_Solver, double );
 extern int HYPRE_LSI_MLISetMethod( HYPRE_Solver, char * );
 extern int HYPRE_LSI_MLISetNumPDEs( HYPRE_Solver, int );
