@@ -1437,7 +1437,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartC(int *ProcNRows,
                 //qsort1(colInd, colVal, 0, rowSize-1);
                 for ( j = 0; j < rowSize; j++ )
                    if ( colVal[j] != 0.0 )
-                      printf("%4d %4d %20.13e\n", i+1, colInd[j]+1, colVal[j]);
+                      printf("%4d %4d %20.13e\n", i, colInd[j], colVal[j]);
                 HYPRE_ParCSRMatrixRestoreRow(reducedA_csr,i,&rowSize,&colInd,
                                              &colVal);
              }
@@ -1747,12 +1747,12 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartC(int *ProcNRows,
              printf("====================================================\n");
              for (i=A12StartRow;i<A12StartRow+A12NRows;i++)
              {
-                printf("%d : A12 ROW %d\n", mypid_, i+1);
+                printf("%d : A12 ROW %d\n", mypid_, i);
                 HYPRE_ParCSRMatrixGetRow(A12_csr,i,&rowSize,&colInd,&colVal);
                 //qsort1(colInd, colVal, 0, rowSize-1);
                 for ( j = 0; j < rowSize; j++ )
                    if ( colVal[j] != 0.0 )
-                      printf(" A12 %d %d %20.13e\n", i+1, colInd[j]+1, colVal[j]);
+                      printf(" A12 %d %d %20.13e\n", i, colInd[j], colVal[j]);
                 HYPRE_ParCSRMatrixRestoreRow(A12_csr,i,&rowSize,&colInd,
                                              &colVal);
              }
