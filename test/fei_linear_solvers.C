@@ -29,12 +29,10 @@ int main( int   argc, char *argv[] )
    int                 arg_index;
    int                 print_usage;
    int                 build_matrix_arg_index;
-   int                 solver_id;
    int                 debug_flag;
+   int                 solver_id;
    int                 ierr,i,j; 
-   int                 max_levels = 25;
    int                 num_iterations; 
-   double              norm;
 
    HYPRE_ParCSRMatrix  parcsr_A;
    int                 num_procs, myid;
@@ -51,10 +49,6 @@ int main( int   argc, char *argv[] )
    double              strong_threshold;
    int                 num_grid_sweeps;  
    double              relax_weight; 
-
-   /* parameters for PILUT */
-   double              drop_tol = 0.01;
-   int                 nonzeros_to_keep = 0;
 
    /* parameters for GMRES */
    int	               k_dim;
