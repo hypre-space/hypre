@@ -33,12 +33,12 @@ Collective.
 @param MPI_Comm comm: a single MPI_Communicator that contains exactly the MPI processes that are to
 participate in any collective operations.
 @param int global_n: the dimensions of the entire, global vector.
-@param int local_n: the dimensions of the locally stored vector.
 */
 /*---------------------------------------------------------------------- */
 
-int HYPRE_NewIJVector( MPI_Comm comm, HYPRE_IJVector *in_vector_ptr, 
-          int global_n)
+int HYPRE_NewIJVector( MPI_Comm comm,
+                       HYPRE_IJVector *in_vector_ptr, 
+                       int global_n)
 
 {
    int ierr=0;
@@ -72,17 +72,17 @@ HYPRE_FreeIJVector( HYPRE_IJVector IJvector )
 
    if (vector)
    {
-      hypre_IJVectorReferenceCount( vector ) --;
+      hypre_IJVectorReferenceCount(vector) --;
    
-      if ( hypre_IJVectorReferenceCount( vector ) <= 0 )
+      if ( hypre_IJVectorReferenceCount(vector) <= 0 )
       {
 	/*
-         if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC_VECTOR )
-            ierr = hypre_FreeIJVectorPETSc( vector );
-         else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS_VECTOR )
-            ierr = hypre_FreeIJVectorISIS( vector );
-         else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PAR_VECTOR )
-            ierr = hypre_FreeIJVectorPar( vector );
+         if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
+            ierr = hypre_FreeIJVectorPETSc(vector);
+         else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
+            ierr = hypre_FreeIJVectorISIS(vector);
+         else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+            ierr = hypre_FreeIJVectorPar(vector);
          else
             ierr = -1;
 
@@ -107,37 +107,12 @@ HYPRE_InitializeIJVector( HYPRE_IJVector IJvector )
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
-   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC_VECTOR )
-      ierr = hypre_InitializeIJVectorPETSc( vector );
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS_VECTOR )
-      ierr = hypre_InitializeIJVectorISIS( vector );
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PAR_VECTOR )
-      ierr = hypre_InitializeIJVectorPar( vector );
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_AssembleIJVector
- *--------------------------------------------------------------------------*/
-
-int 
-HYPRE_AssembleIJVector( HYPRE_IJVector IJvector )
-{
-   int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
-
-   if( hypre_IJVectorN(vector) < 0 )
-      return(-1);
-
-   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC_VECTOR )
-      ierr = hypre_AssembleIJVectorPETSc( vector );
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS_VECTOR )
-      ierr = hypre_AssembleIJVectorISIS( vector );
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PAR_VECTOR )
-      ierr = hypre_AssembleIJVectorPar( vector );
+   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
+      ierr = hypre_InitializeIJVectorPETSc(vector);
+   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
+      ierr = hypre_InitializeIJVectorISIS(vector);
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+      ierr = hypre_InitializeIJVectorPar(vector);
    else
       ierr = -1;
 
@@ -149,13 +124,13 @@ HYPRE_AssembleIJVector( HYPRE_IJVector IJvector )
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_DistributeIJVector( HYPRE_IJVector IJvector, int *row_starts )
+HYPRE_DistributeIJVector( HYPRE_IJVector IJvector, int *vec_starts )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
-   if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PAR_VECTOR )
-      ierr = hypre_DistributeIJVectorPar( vector, row_starts );
+   if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+      ierr = hypre_DistributeIJVectorPar(vector, vec_starts);
    else
       ierr = -1;
 
@@ -209,7 +184,7 @@ Tells "vector" local size
 @param HYPRE_IJVector &vector [IN]
  the vector to be operated on. 
 @param int local_n [IN]
- local number of rows
+ local number of components
 HYPRE_SetIJVectorLocalStorageType needs to be called before this routine
 */
 
@@ -219,13 +194,13 @@ HYPRE_SetIJVectorLocalSize( HYPRE_IJVector IJvector, int local_n )
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
-   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC_VECTOR )
-      ierr = hypre_SetIJVectorLocalSizePETSC (vector, local_n);
-   if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS_VECTOR )
-      ierr = hypre_SetIJVectorLocalSizeISIS (vector, local_n);
+   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
+      ierr = hypre_SetIJVectorLocalSizePETSC(vector, local_n);
+   if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
+      ierr = hypre_SetIJVectorLocalSizeISIS(vector, local_n);
       */
-   if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PAR_VECTOR )
-      ierr = hypre_SetIJVectorLocalSizePar (vector, local_n);
+   if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+      ierr = hypre_SetIJVectorLocalSizePar(vector, local_n);
    else
       ierr = -1;
 
@@ -233,52 +208,7 @@ HYPRE_SetIJVectorLocalSize( HYPRE_IJVector IJvector, int local_n )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_QueryIJVectorInsertionSemantics
- *--------------------------------------------------------------------------*/
-
-/** 
-{\bf Note:} It is probably best to ignore  HYPRE_QueryIJVectorInsertionSemantics for the time being as it is really
-planned as a possible future contingency and is confusing as it is now. -AJC, 6/99
-
-There are three possible semantic "levels" in the integer parameter "row" used in Set and Add
-functions, and each implementation supports one of them. This function returns a value indicating
-the semantics supported by the instantiated IJVector. 
-level = -1: processors may include values for "row" for any row number in the global vector.
-level = 0: processors may only include values for row representing locally stored rows.
-level = > 0: in addition to the above, processors may also include values for "row" representing
-rows within the set of locally stored rows plus the next "level" levels of nearest neighbors, 
-also known as "level sets" or "nearest neighbors".
-Since level 0 is the most restrictive, it is also the easiest to implement, and the safest to use, as
-all IJ matrices MUST support level 0.
-In contrast, level 1 is the most general and most difficult to implement, least safe to use, and
-potentially least efficient.
-Levels greater than 0 represent a compromise that is appropriate for many engineering applications,
-like finite element applications, where contributions to a particular vector row may be made from
-more than one processor, typically in some small neighborhood around that row. 
-
-Not collective.
-
-@return integer error code
-@param HYPRE_IJVector &vector [IN]
-the vector to be initialized.
-@param int *level [OUT]
-level of off-processor value-setting that this implementation supports
-*/
-
-int 
-HYPRE_QueryIJVectorInsertionSemantics( HYPRE_IJVector IJvector, int *level )
-{
-   int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
-
-   *level = hypre_IJVectorInsertionSemantics(vector);
-
-   return(ierr);
-
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_InsertIJVectorRows
+ * HYPRE_SetIJVectorLocalComponents
  *--------------------------------------------------------------------------*/
 
 /** 
@@ -290,33 +220,34 @@ Not collective.
 @return integer error code
 @param HYPRE_IJVector &vector [IN]
 the vector to be operated on.
-@param int m, n [IN]
-the size of the block of values to be added.
-@param int *rows [IN]
-an integer vector of length m giving the indices in the global vector
-corresponding to the rows in "values".
-@param int *cols [IN]
-an integer vector of length n giving the indices in the global vector
-corresponding to the columns in "values".
-@param double *values {IN]
-The values to be inserted into the vector, stored in a dense, row-major
-block of size n X 1.
+@param int *glob_vec_indices [IN]
+pointer to indices of local vector to be set 
+@param double value {IN]
+value to which the local vector values are set
 
 */
 
 int 
-HYPRE_InsertIJVectorRows( HYPRE_IJVector IJvector, int n,
-                          int *rows, double *values)
+HYPRE_SetIJVectorLocalComponents( HYPRE_IJVector  IJvector,
+                                  int             num_values,
+                                  int            *glob_vec_indices,
+                                  double          value)
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
-   /*  if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC_VECTOR )
-      ierr = hypre_InsertIJVectorRowsPETSc( vector, n, rows, values );
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS_VECTOR )
-      ierr = hypre_InsertIJVectorRowsISIS( vector, n, rows, values );
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PAR_VECTOR )
-      ierr = hypre_InsertIJVectorRowsPar( vector, n, rows, values );
+   /*  if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
+      ierr = hypre_SetIJVectorPETScLocalComponents(vector,
+                                                   glob_vec_indices,
+                                                   value);
+   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
+      ierr = hypre_SetIJVectorISISLocalComponents(vector,
+                                                  glob_vec_indices,
+                                                  value);
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+      ierr = hypre_SetIJVectorParLocalComponents(vector,
+                                                 glob_vec_indices,
+                                                 value);
    else
       ierr = -1;
 
@@ -324,7 +255,172 @@ HYPRE_InsertIJVectorRows( HYPRE_IJVector IJvector, int n,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_AddRowsToIJVector
+ * HYPRE_SetIJVectorLocalComponentsInBlock
+ *--------------------------------------------------------------------------*/
+
+/** 
+Inserts a block of coefficients into an IJVector, overwriting any coefficients
+in the event of a collision.
+
+Not collective.
+
+@return integer error code
+@param HYPRE_IJVector &vector [IN]
+the vector to be operated on.
+@param int glob_vec_index_start [IN]
+global index of first vector component in block to be set 
+@param int glob_vec_index_stop [IN]
+global index of last vector component in block to be set 
+@param double value {IN]
+value to which the local vector values are set
+
+*/
+
+int 
+HYPRE_SetIJVectorLocalComponentsInBlock( HYPRE_IJVector IJvector,
+                                         int            glob_vec_index_start,
+                                         int            glob_vec_index_stop,
+                                         double         value                 )
+{
+   int ierr = 0;
+   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+
+   /*  if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
+      ierr = hypre_SetIJVectorPETScLocalComponentsInBlock(vector,
+                                                          glob_vec_index_start,
+                                                          glob_vec_index_stop,
+                                                          value);
+   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
+      ierr = hypre_SetIJVectorISISLocalComponentsInBlock(vector,
+                                                         glob_vec_index_start,
+                                                         glob_vec_index_stop,
+                                                         value);
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+      ierr = hypre_SetIJVectorParLocalComponentsInBlock(vector,
+                                                        glob_vec_index_start,
+                                                        glob_vec_index_stop,
+                                                        value);
+   else
+      ierr = -1;
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_InsertIJVectorLocalComponents
+ *--------------------------------------------------------------------------*/
+
+/** 
+Inserts indexed values of an array into indexed components of an IJVector, 
+overwriting any components in the event of a collision.
+
+Not collective.
+
+@return integer error code
+@param HYPRE_IJVector &vector [IN]
+the vector to be operated on.
+@param int *glob_vec_indices {IN]
+pointer to indices of local vector specifying which local vector components
+to be overwritten
+@param int *value_indices {IN]
+pointer to indices of values array specifying values from which to insert 
+@param double *values {IN]
+pointer to array from which vector values are inserted
+
+*/
+
+int 
+HYPRE_InsertIJVectorLocalComponents( HYPRE_IJVector  IJvector,
+                                     int             num_values,
+                                     int            *glob_vec_indices,
+                                     int            *value_indices,
+                                     double         *values            )
+{
+   int ierr = 0;
+   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+
+   /*  if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
+      ierr = hypre_InsertIJVectorPETScLocalComponents(vector,
+                                                      num_values,
+                                                      glob_vec_indices,
+                                                      value_indices,
+                                                      values);
+   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
+      ierr = hypre_InsertIJVectorISISLocalComponents(vector,
+                                                     num_values,
+                                                     glob_vec_indices,
+                                                     value_indices,
+                                                     values);
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+      ierr = hypre_InsertIJVectorParLocalComponents(vector,
+                                                    num_values,
+                                                    glob_vec_indices,
+                                                    value_indices,
+                                                    values);
+   else
+      ierr = -1;
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_InsertIJVectorLocalComponentsInBlock
+ *--------------------------------------------------------------------------*/
+
+/** 
+Inserts indexed values of an array into a block of components of an IJVector,
+overwriting any components in the event of a collision.
+
+Not collective.
+
+@return integer error code
+@param HYPRE_IJVector &vector [IN]
+the vector to be operated on.
+@param int glob_vec_index_start {IN]
+@param int glob_vec_index_stop {IN]
+@param int *value_indices {IN]
+pointer to indices of values array specifying values from which to insert 
+@param double *values {IN]
+pointer to array from which vector values are inserted
+
+*/
+
+int 
+HYPRE_InsertIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
+                                            int             glob_vec_index_start, 
+                                            int             glob_vec_index_stop,
+                                            int            *value_indices,
+                                            double         *values                )
+{
+   int ierr = 0;
+   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+
+   /*  if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
+      ierr = hypre_InsertIJVectorPETScLocalComponentsInBlock(vector,
+                                                             glob_vec_index_start,
+                                                             glob_vec_index_stop,
+                                                             value_indices,
+                                                             values);
+   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
+      ierr = hypre_InsertIJVectorISISLocalComponentsInBlock(vector,
+                                                            glob_vec_index_start,
+                                                            glob_vec_index_stop,
+                                                            value_indices,
+                                                            values);
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+      ierr = hypre_InsertIJVectorParLocalComponentsInBlock(vector,
+                                                           glob_vec_index_start,
+                                                           glob_vec_index_stop,
+                                                           value_indices,
+                                                           values);
+   else
+      ierr = -1;
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AddToIJVectorLocalComponents
  *--------------------------------------------------------------------------*/
 
 /** 
@@ -337,33 +433,199 @@ Not collective.
 @return integer error code
 @param HYPRE_IJVector &vector [IN]
 the vector to be operated on.
-@param int m, n [IN]
-the size of the block of values to be added.
-@param int *rows [IN]
-an integer vector of length m giving the indices in the global vector
-corresponding to the rows in "values".
-@param int *cols [IN]
-an integer vector of length n giving the indices in the global vector
-corresponding to the columns in "values".
 @param double *values {IN]
-The values to be inserted into the vector, stored in a dense, row-major
-block of size m X n.
 
 */
 
 int 
-HYPRE_AddRowsToIJVector( HYPRE_IJVector IJvector, int n,
-                           int *rows, double *values)
+HYPRE_AddToIJVectorLocalComponents( HYPRE_IJVector  IJvector,
+                                    int             num_values,
+                                    int            *glob_vec_indices,
+                                    int            *value_indices,
+                                    double         *values            )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
-   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC_VECTOR )
-      ierr = hypre_AddRowsToIJVectorPETSc( vector, n, rows, values );
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS_VECTOR )
-      ierr = hypre_AddRowsToIJVectorISIS( vector, n, rows, values );
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PAR_VECTOR )
-      ierr = hypre_AddRowsToIJVectorPar( vector, n, rows, values );
+   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
+      ierr = hypre_AddToIJVectorPETScLocalComponents(vector,
+                                                     num_values,
+                                                     glob_vec_indices,
+                                                     value_indices,
+                                                     values);
+   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
+      ierr = hypre_AddToIJVectorISISLocalComponents(vector,
+                                                    num_values,
+                                                    glob_vec_indices,
+                                                    value_indices,
+                                                    values);
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+      ierr = hypre_AddToIJVectorParLocalComponents(vector,
+                                                   num_values,
+                                                   glob_vec_indices,
+                                                   value_indices,
+                                                   values);
+   else
+      ierr = -1;
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AddToIJVectorLocalComponentsInBlock
+ *--------------------------------------------------------------------------*/
+
+/** 
+Adds to indexed values of an array into a block of components of an IJVector,
+overwriting any components in the event of a collision.
+
+Not collective.
+
+@return integer error code
+@param HYPRE_IJVector &vector [IN]
+the vector to be operated on.
+@param int glob_vec_index_start {IN]
+@param int glob_vec_index_stop {IN]
+@param int *value_indices {IN]
+pointer to indices of values array specifying values from which to insert 
+@param double *values {IN]
+pointer to array from which vector values are inserted
+
+*/
+
+int 
+HYPRE_AddToIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
+                                           int             glob_vec_index_start, 
+                                           int             glob_vec_index_stop,
+                                           int            *value_indices,
+                                           double         *values                )
+{
+   int ierr = 0;
+   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+
+   /*  if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
+      ierr = hypre_AddToIJVectorPETScLocalComponentsInBlock(vector,
+                                                            glob_vec_index_start,
+                                                            glob_vec_index_stop,
+                                                            value_indices,
+                                                            values);
+   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
+      ierr = hypre_AddToIJVectorISISLocalComponentsInBlock(vector,
+                                                           glob_vec_index_start,
+                                                           glob_vec_index_stop,
+                                                           value_indices,
+                                                           values);
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+      ierr = hypre_AddToIJVectorParLocalComponentsInBlock(vector,
+                                                          glob_vec_index_start,
+                                                          glob_vec_index_stop,
+                                                          value_indices,
+                                                          values);
+   else
+      ierr = -1;
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GetIJVectorLocalComponents
+ *--------------------------------------------------------------------------*/
+
+/** 
+Puts indexed components of IJVector into indexed array of values,
+overwriting any values in the event of a collision.
+
+Not collective.
+
+@return integer error code
+@param HYPRE_IJVector &vector [IN]
+the vector to be operated on.
+@param double *values {IN]
+
+*/
+
+int 
+HYPRE_GetIJVectorLocalComponents( HYPRE_IJVector  IJvector,
+                                  int             num_values,
+                                  int            *glob_vec_indices,
+                                  int            *value_indices,
+                                  double         *values            )
+{
+   int ierr = 0;
+   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+
+   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
+      ierr = hypre_GetIJVectorPETScLocalComponents(vector,
+                                                   num_values,
+                                                   glob_vec_indices,
+                                                   value_indices,
+                                                   values);
+   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
+      ierr = hypre_GetIJVectorISISLocalComponents(vector,
+                                                  num_values,
+                                                  glob_vec_indices,
+                                                  value_indices,
+                                                  values);
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+      ierr = hypre_GetIJVectorParLocalComponents(vector,
+                                                 num_values,
+                                                 glob_vec_indices,
+                                                 value_indices,
+                                                 values);
+   else
+      ierr = -1;
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GetIJVectorLocalComponentsInBlock
+ *--------------------------------------------------------------------------*/
+
+/** 
+Puts components in specified local block of IJVector into indexed array of values,
+overwriting any values in the event of a collision.
+
+Not collective.
+
+@return integer error code
+@param HYPRE_IJVector &vector [IN]
+the vector to be operated on.
+@param int glob_vec_index_start {IN]
+@param int glob_vec_index_stop {IN]
+@param int *value_indices {IN]
+@param double *values {IN]
+
+*/
+
+int 
+HYPRE_GetIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
+                                         int             glob_vec_index_start, 
+                                         int             glob_vec_index_stop,
+                                         int            *value_indices,
+                                         double         *values                )
+{
+   int ierr = 0;
+   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+
+   /*  if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC )
+      ierr = hypre_GetIJVectorPETScLocalComponentsInBlock(vector,
+                                                          glob_vec_index_start,
+                                                          glob_vec_index_stop,
+                                                          value_indices,
+                                                          values);
+   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
+      ierr = hypre_GetIJVectorISISLocalComponentsInBlock(vector,
+                                                         glob_vec_index_start,
+                                                         glob_vec_index_stop,
+                                                         value_indices,
+                                                         values);
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
+      ierr = hypre_GetIJVectorParLocalComponentsInBlock(vector,
+                                                        glob_vec_index_start,
+                                                        glob_vec_index_stop,
+                                                        value_indices,
+                                                        values);
    else
       ierr = -1;
 
@@ -421,6 +683,6 @@ hypre_GetIJVectorLocalStorage( HYPRE_IJVector IJvector )
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
-   return( hypre_IJVectorLocalStorage( vector ) );
+   return( hypre_IJVectorLocalStorage(vector) );
 
 }
