@@ -1261,7 +1261,9 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    int             *CF_marker_offd;
    int              coarse_size;
    int              ci_tilde = -1;
+   int              ci_tilde_mark = -1;
    int              ci_tilde_offd = -1;
+   int              ci_tilde_offd_mark = -1;
 
    int             *measure_array;
    int             *graph_array;
@@ -1772,6 +1774,8 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 	
       for (i=0; i < num_variables; i++)
       {
+	 if (ci_tilde_mark |= i) ci_tilde = -1;
+	 if (ci_tilde_offd_mark |= i) ci_tilde_offd = -1;
          if (CF_marker[i] == -1)
          {
             break_var = 1;
@@ -1833,6 +1837,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                      else
                      {
                         ci_tilde = j;
+                        ci_tilde_mark = i;
                         CF_marker[j] = 1;
                         coarse_size++;
                         C_i_nonempty = 1;
@@ -1898,6 +1903,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                         else
                         {
                            ci_tilde_offd = j;
+                           ci_tilde_offd_mark = i;
                            CF_marker_offd[j] = 1;
                            C_i_nonempty = 1;
                            i--;
@@ -1914,6 +1920,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    {
       for (i=0; i < num_variables; i++)
       {
+	 if (ci_tilde_mark |= i) ci_tilde = -1;
          if (CF_marker[i] == -1)
          {
    	    for (ji = S_i[i]; ji < S_i[i+1]; ji++)
@@ -1955,6 +1962,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    		     else
    		     {
    		        ci_tilde = j;
+   		        ci_tilde_mark = i;
    		        CF_marker[j] = 1;
    		        coarse_size++;
    		        C_i_nonempty = 1;
@@ -2017,6 +2025,8 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 	 graph_array[i] = -1;
       for (i=0; i < num_cols_offd; i++)
       {
+	 if (ci_tilde_mark |= i) ci_tilde = -1;
+	 if (ci_tilde_offd_mark |= i) ci_tilde_offd = -1;
          if (CF_marker_offd[i] == -1)
          {
    	    for (ji = S_ext_i[i]; ji < S_ext_i[i+1]; ji++)
@@ -2083,6 +2093,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    		        else
    		        {
    		           ci_tilde = j;
+   		           ci_tilde_mark = i;
    		           CF_marker[j] = 1;
    		           C_i_nonempty = 1;
    		           i--;
@@ -2142,6 +2153,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    		        else
    		        {
    		           ci_tilde_offd = jm;
+   		           ci_tilde_offd_mark = i;
    		           CF_marker_offd[jm] = 1;
    		           C_i_nonempty = 1;
    		           i--;
@@ -2440,6 +2452,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    int		    set_empty = 1;
    int		    C_i_nonempty = 0;
    int		    ci_tilde = -1;
+   int		    ci_tilde_mark = -1;
    int		    num_strong;
    int		    num_nonzeros;
    int		    num_procs, my_id;
@@ -2890,6 +2903,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 
    for (i=0; i < num_variables; i++)
    {
+      if (ci_tilde_mark |= i) ci_tilde = -1;
       if (CF_marker[i] == -1)
       {
    	 for (ji = S_diag_i[i]; ji < S_diag_i[i+1]; ji++)
@@ -2931,6 +2945,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    		  else
    		  {
    		     ci_tilde = j; 
+   		     ci_tilde_mark = i; 
    		     CF_marker[j] = 1;
    		     coarse_size++;
    		     C_i_nonempty = 1;
