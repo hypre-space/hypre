@@ -262,7 +262,8 @@ hypre_F90_IFACE(hypre_boomeramgsettol, HYPRE_BOOMERAMGSETTOL)( long int *solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetNumGridSweeps
+ * HYPRE_BoomerAMGSetNumSweeps
+ * DEPRECATED.  Use SetNumSweeps and SetCycleNumSweeps instead.
  *--------------------------------------------------------------------------*/
 
 void
@@ -273,6 +274,36 @@ hypre_F90_IFACE(hypre_boomeramgsetnumgridsweeps, HYPRE_BOOMERAMGSETNUMGRIDSWEEPS
    *ierr = (int) ( HYPRE_BoomerAMGSetNumGridSweeps(
                         (HYPRE_Solver) *solver,
                         (int *)        *((int **)(*num_grid_sweeps)) ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetNumSweeps
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetnumsweeps, HYPRE_BOOMERAMGSETNUMSWEEPS)( long int *solver,
+                                               int *num_sweeps,
+                                               int      *ierr             )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetNumSweeps(
+                        (HYPRE_Solver) *solver,
+                        (int)        *num_sweeps ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCycleNumSweeps
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetcyclenumsweeps, HYPRE_BOOMERAMGSETCYCLENUMSWEEPS)( long int *solver,
+                                               int *num_sweeps,
+                                               int *k,
+                                               int      *ierr             )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetCycleNumSweeps(
+                        (HYPRE_Solver) *solver,
+                        (int)        *num_sweeps,
+                        (int)        *k ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -324,6 +355,7 @@ hypre_F90_IFACE(hypre_boomeramgfingridrelaxatn,
 
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetGridRelaxType
+ * DEPRECATED.  Use SetRelaxType and SetCycleRelaxType instead.
  *--------------------------------------------------------------------------*/
 
 void
@@ -337,7 +369,38 @@ hypre_F90_IFACE(hypre_boomeramgsetgridrelaxtype, HYPRE_BOOMERAMGSETGRIDRELAXTYPE
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetRelaxType
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetrelaxtype, HYPRE_BOOMERAMGSETRELAXTYPE)( long int *solver,
+                                               int   *relax_type,
+                                               int      *ierr   )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetRelaxType(
+                       (HYPRE_Solver) *solver,
+                       (int)        *relax_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCycleRelaxType
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetcyclerelaxtype, HYPRE_BOOMERAMGSETCYCLERELAXTYPE)( long int *solver,
+                                               int   *relax_type,
+                                               int   *k,
+                                               int      *ierr   )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetCycleRelaxType(
+                       (HYPRE_Solver) *solver,
+                       (int)        *k,
+                       (int)        *relax_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetGridRelaxPoints
+ * DEPRECATED.  There is no alternative function.
  *--------------------------------------------------------------------------*/
 
 void
@@ -353,6 +416,7 @@ hypre_F90_IFACE(hypre_boomeramgsetgridrelaxpnts, HYPRE_BOOMERAMGSETGRIDRELAXPNTS
 
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetRelaxWeight
+ * DEPRECATED.  Use SetRelaxWt and SetLevelRelaxWt instead.
  *--------------------------------------------------------------------------*/
 
 void
@@ -363,6 +427,36 @@ hypre_F90_IFACE(hypre_boomeramgsetrelaxweight, HYPRE_BOOMERAMGSETRELAXWEIGHT)( l
    *ierr = (int) ( HYPRE_BoomerAMGSetRelaxWeight(
                        (HYPRE_Solver) *solver,
                        (double *)     *((double **)(*relax_weights)) ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetRelaxWt
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetrelaxwt, HYPRE_BOOMERAMGSETRELAXWT)( long int *solver,
+                                             double *relax_weight,
+                                             int      *ierr     )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetRelaxWt(
+                       (HYPRE_Solver) *solver,
+                       (double)     *relax_weight ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetLevelRelaxWt
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetlevelrelaxwt, HYPRE_BOOMERAMGSETLEVELRELAXWT)( long int *solver,
+                                             double *relax_weight,
+                                             int    *level,
+                                             int      *ierr     )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetLevelRelaxWt(
+                       (HYPRE_Solver) *solver,
+                       (double)     *relax_weight,
+                       (int)        *level ) );
 }
 
 /*--------------------------------------------------------------------------
