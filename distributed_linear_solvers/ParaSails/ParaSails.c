@@ -660,7 +660,7 @@ static void ConstructPatternForEachRow(int symmetric, PrunedRows *pruned_rows,
  *--------------------------------------------------------------------------*/
 
 static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
-  int local_beg_row, Numbering *numb)
+  int local_beg_row, Numbering *numb, int symmetric)
 {
     int *marker;
     int row, maxlen, len, *ind;
@@ -748,6 +748,27 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
             ahatp += len;
 #endif
         }
+
+	if (symmetric == 2)
+	{
+#ifdef ESSL
+            printf("Symmetric precon for nonsym problem not yet available\n");
+            printf("for ESSL version.  Please contact the author.\n");
+            PARASAILS_EXIT;
+#else
+	    int k, kk;
+	    k = 0;
+	    for (i=0; i<len; i++)
+	    {
+		for (j=0; j<len; j++)
+		{
+		    kk = j*len + i;
+		    ahat[k] = (ahat[k] + ahat[kk]) / 2.0;
+		    k++;
+		}
+	    }
+#endif
+	}
 
         time1 = MPI_Wtime();
         timea += (time1-time0);
@@ -1054,11 +1075,12 @@ static double SelectThresh(MPI_Comm comm, Matrix *A, DiagScale *diag_scale,
  *--------------------------------------------------------------------------*/
 
 static double SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
-  double param)
+  double param, int symmetric)
 {
     int row, len, *ind, i, npes;
     double *val;
     double localsum = 0.0, sum;
+    double temp = 1.0;
 
     /* Buffer for storing the values in each row when computing the 
        i-th smallest element - buffer will grow if necessary */
@@ -1077,10 +1099,13 @@ static double SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
             buffer = (double *) malloc(buflen * sizeof(double));
 	}
 
+	if (symmetric == 0)
+            temp = 1. / DiagScaleGet(diag_scale, row);
+
 	/* Copy the scaled absolute values into a work buffer */
 	for (i=0; i<len; i++)
 	{
-	    buffer[i] = ABS(val[i]) / DiagScaleGet(diag_scale, ind[i]);
+	    buffer[i] = temp * ABS(val[i]) / DiagScaleGet(diag_scale, ind[i]);
 	    if (ind[i] == row)
 	        buffer[i] = 0.0;
 	}
@@ -1108,11 +1133,11 @@ static double SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
  *--------------------------------------------------------------------------*/
 
 static void FilterValues(Matrix *M, Matrix *F, DiagScale *diag_scale, 
-  double filter)
+  double filter, int symmetric)
 {
     int i, j;
     int row, len, *ind;
-    double *val;
+    double *val, temp = 1.0;
 
     for (row=0; row<=M->end_row - M->beg_row; row++)
     {
@@ -1121,7 +1146,10 @@ static void FilterValues(Matrix *M, Matrix *F, DiagScale *diag_scale,
         j = 0;
         for (i=0; i<len; i++)
         {
-            if (ABS(val[i]) / DiagScaleGet(diag_scale, ind[i]) >= filter 
+	    if (symmetric == 0)
+                temp = 1. / DiagScaleGet(diag_scale, row);
+
+            if (temp * ABS(val[i]) / DiagScaleGet(diag_scale, ind[i]) >= filter 
 	      || row == ind[i])
 	    {
                 val[j] = val[i];
@@ -1343,13 +1371,15 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
 
     if (ps->symmetric)
     {
-        ComputeValuesSym(stored_rows, ps->M, load_bal->beg_row, ps->numb);
+        ComputeValuesSym(stored_rows, ps->M, load_bal->beg_row, ps->numb,
+	    ps->symmetric);
 
         for (i=0; i<load_bal->num_taken; i++)
         {
             ComputeValuesSym(stored_rows, 
                 load_bal->recip_data[i].mat,
-	        load_bal->recip_data[i].mat->beg_row, ps->numb);
+	        load_bal->recip_data[i].mat->beg_row, ps->numb,
+		ps->symmetric);
         }
     }
     else
@@ -1377,9 +1407,11 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
 	                                 ps->beg_row, ps->end_row);
 
 	if (ps->filter < 0.0)
-	    ps->filter = SelectFilter(ps->comm, ps->M, diag_scale, -ps->filter);
+	    ps->filter = SelectFilter(ps->comm, ps->M, diag_scale, -ps->filter,
+	        ps->symmetric);
 
-	FilterValues(ps->M, filtered_matrix, diag_scale, ps->filter);
+	FilterValues(ps->M, filtered_matrix, diag_scale, ps->filter,
+	    ps->symmetric);
 
         MatrixDestroy(ps->M);
         ps->M = filtered_matrix;
