@@ -491,7 +491,7 @@ int HYPRE_SStructMatrixSetNSSymmetric(HYPRE_SStructMatrix matrix,
 /**
  * Set the storage type of the matrix object to be constructed.
  * Currently, {\tt type} can be either {\tt HYPRE\_SSTRUCT} (the
- * default) or {\tt HYPRE\_PARCSR}.
+ * default), {\tt HYPRE\_STRUCT}, or {\tt HYPRE\_PARCSR}.
  *
  * @see HYPRE_SStructMatrixGetObject
  **/
