@@ -136,6 +136,7 @@ typedef struct
 #define hypre_ParAMGDataGridRelaxPoints(amg_data) \
 ((amg_data)->grid_relax_points)
 #define hypre_ParAMGDataRelaxWeight(amg_data) ((amg_data)->relax_weight)
+#define hypre_ParAMGDataOmega(amg_data) ((amg_data)->omega)
 
 /* problem data parameters */
 #define  hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)

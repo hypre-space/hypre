@@ -169,6 +169,12 @@ int HYPRE_BoomerAMGSetRelaxWeight(HYPRE_Solver  solver,
                                   double       *relax_weight);
 
 /**
+ * (Optional) Defines the outer relaxation weight for hybrid SOR.
+ **/
+int HYPRE_BoomerAMGSetOmega(HYPRE_Solver  solver,
+                            double       *omega);
+
+/**
  * (Optional)
  **/
 int HYPRE_BoomerAMGSetDebugFlag(HYPRE_Solver solver,

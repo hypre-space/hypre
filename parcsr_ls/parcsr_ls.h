@@ -79,6 +79,7 @@ int HYPRE_BoomerAMGInitGridRelaxation( int **num_grid_sweeps_ptr , int **grid_re
 int HYPRE_BoomerAMGSetGridRelaxType( HYPRE_Solver solver , int *grid_relax_type );
 int HYPRE_BoomerAMGSetGridRelaxPoints( HYPRE_Solver solver , int **grid_relax_points );
 int HYPRE_BoomerAMGSetRelaxWeight( HYPRE_Solver solver , double *relax_weight );
+int HYPRE_BoomerAMGSetOmega( HYPRE_Solver solver , double *omega );
 int HYPRE_BoomerAMGSetSmoothOption( HYPRE_Solver solver , int *smooth_option );
 int HYPRE_BoomerAMGSetSmoothNumSweep( HYPRE_Solver solver , int smooth_num_sweep );
 int HYPRE_BoomerAMGSetLogLevel( HYPRE_Solver solver , int log_level );
@@ -270,6 +271,7 @@ int hypre_BoomerAMGSetNumGridSweeps( void *data , int *num_grid_sweeps );
 int hypre_BoomerAMGSetGridRelaxType( void *data , int *grid_relax_type );
 int hypre_BoomerAMGSetGridRelaxPoints( void *data , int **grid_relax_points );
 int hypre_BoomerAMGSetRelaxWeight( void *data , double *relax_weight );
+int hypre_BoomerAMGSetOmega( void *data , double *omega );
 int hypre_BoomerAMGSetSmoothOption( void *data , int *smooth_option );
 int hypre_BoomerAMGSetSmoothNumSweep( void *data , int smooth_num_sweep );
 int hypre_BoomerAMGSetLogLevel( void *data , int log_level );
@@ -367,7 +369,7 @@ int hypre_GenerateSendMapAndCommPkg( MPI_Comm comm , int num_sends , int num_rec
 int hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP , hypre_ParCSRMatrix *A );
 
 /* par_relax.c */
-int hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight , hypre_ParVector *u , hypre_ParVector *Vtemp );
+int hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight , double omega , hypre_ParVector *u , hypre_ParVector *Vtemp );
 int gselim( double *A , double *x , int n );
 
 /* par_scaled_matnorm.c */

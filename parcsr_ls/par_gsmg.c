@@ -612,7 +612,8 @@ printf("Creating smooth dirs, %d sweeps, %d samples\n", num_sweeps, nsamples);
 	   {
 /**** change ****/
               ret = hypre_BoomerAMGRelax(A, Zero, NULL /*CFmarker*/,
-               rlx_type , 0 /*rel pts*/, 1.0 /*weight*/, U, Temp);
+               rlx_type , 0 /*rel pts*/, 1.0 /*weight*/, 1.0 /*omega*/,
+		U, Temp);
               assert(ret == 0);
 /**** change ****/
 	   }

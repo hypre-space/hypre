@@ -47,6 +47,7 @@ hypre_BoomerAMGCreate()
    int     *grid_relax_type;   
    int    **grid_relax_points; 
    double  *relax_weight;
+   double  *omega;
    int     *smooth_option;  
    int      smooth_num_sweep;
 
@@ -109,11 +110,13 @@ hypre_BoomerAMGCreate()
    grid_relax_type = hypre_CTAlloc(int,4);
    grid_relax_points = hypre_CTAlloc(int *,4);
    relax_weight = hypre_CTAlloc(double,max_levels);
+   omega = hypre_CTAlloc(double,max_levels);
    smooth_option = hypre_CTAlloc(int,max_levels);
 
    for (j = 0; j < max_levels; j++)
    {
       relax_weight[j] = 1.0;
+      omega[j] = 1.0;
       smooth_option[j] = -1; 
    }
 
@@ -176,6 +179,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetGridRelaxType(amg_data, grid_relax_type);
    hypre_BoomerAMGSetGridRelaxPoints(amg_data, grid_relax_points);
    hypre_BoomerAMGSetRelaxWeight(amg_data, relax_weight);
+   hypre_BoomerAMGSetOmega(amg_data, omega);
    hypre_BoomerAMGSetSmoothOption(amg_data, smooth_option);
    hypre_BoomerAMGSetSmoothNumSweep(amg_data, smooth_num_sweep);
 
@@ -231,6 +235,11 @@ hypre_BoomerAMGDestroy( void *data )
    {
       hypre_TFree (hypre_ParAMGDataRelaxWeight(amg_data));
       /* hypre_ParAMGDataRelaxWeight(amg_data) = NULL; */
+   }
+   if (hypre_ParAMGDataOmega(amg_data))
+   {
+      hypre_TFree (hypre_ParAMGDataOmega(amg_data));
+      /* hypre_ParAMGDataOmega(amg_data) = NULL; */
    }
    if (hypre_ParAMGDataGridRelaxPoints(amg_data))
    {
@@ -548,6 +557,20 @@ hypre_BoomerAMGSetRelaxWeight( void     *data,
    if (hypre_ParAMGDataRelaxWeight(amg_data))
       hypre_TFree(hypre_ParAMGDataRelaxWeight(amg_data));
    hypre_ParAMGDataRelaxWeight(amg_data) = relax_weight;
+   
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetOmega( void     *data,
+                         double   *omega )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+               
+   if (hypre_ParAMGDataOmega(amg_data))
+      hypre_TFree(hypre_ParAMGDataOmega(amg_data));
+   hypre_ParAMGDataOmega(amg_data) = omega;
    
    return (ierr);
 }

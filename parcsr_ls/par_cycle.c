@@ -67,6 +67,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    int       relax_type;
    int       relax_points;
    double   *relax_weight;
+   double   *omega;
    int       local_size;
    int      *smooth_option;
 
@@ -93,6 +94,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    grid_relax_type     = hypre_ParAMGDataGridRelaxType(amg_data);
    grid_relax_points   = hypre_ParAMGDataGridRelaxPoints(amg_data);
    relax_weight        = hypre_ParAMGDataRelaxWeight(amg_data); 
+   omega               = hypre_ParAMGDataOmega(amg_data); 
    smooth_option       = hypre_ParAMGDataSmoothOption(amg_data); 
 
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
@@ -243,6 +245,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                             relax_type,
                                             relax_points,
                                             relax_weight[level],
+                                            omega[level],
                                             U_array[level],
                                             Vtemp);
 	 }
