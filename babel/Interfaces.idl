@@ -126,10 +126,10 @@ package bHYPRE version 1.0.0
        * Not collective.
        **/
       int SetValues(in int nrows,
-                    in array<int> ncols,
-                    in array<int> rows,
-                    in array<int> cols,
-                    in array<double> values);
+                    in array<int,1,column-major> ncols,
+                    in array<int,1,column-major> rows,
+                    in array<int,1,column-major> cols,
+                    in array<double,1,column-major> values);
 
       /**
        * Adds to values for {\tt nrows} of the matrix.  Usage details
@@ -140,10 +140,10 @@ package bHYPRE version 1.0.0
        * Not collective.
        **/
       int AddToValues(in int nrows,
-                      in array<int> ncols,
-                      in array<int> rows,
-                      in array<int> cols,
-                      in array<double> values);
+                      in array<int,1,column-major> ncols,
+                      in array<int,1,column-major> rows,
+                      in array<int,1,column-major> cols,
+                      in array<double,1,column-major> values);
 
       /**
        * Gets range of rows owned by this processor and range of
@@ -160,18 +160,18 @@ package bHYPRE version 1.0.0
        * which needs to be allocated by the user.
        **/
       int GetRowCounts(in int nrows,
-                       in array<int> rows,
-                       inout array<int> ncols);
+                       in array<int,1,column-major> rows,
+                       inout array<int,1,column-major> ncols);
 
       /**
        * Gets values for {\tt nrows} rows or partial rows of the
        * matrix.  Usage details are analogous to {\tt SetValues}.
        **/
       int GetValues(in int nrows,
-                    in array<int> ncols,
-                    in array<int> rows,
-                    in array<int> cols,
-                    inout array<double> values);
+                    in array<int,1,column-major> ncols,
+                    in array<int,1,column-major> rows,
+                    in array<int,1,column-major> cols,
+                    inout array<double,1,column-major> values);
 
       /**
        * (Optional) Set the max number of nonzeros to expect in each
@@ -182,7 +182,7 @@ package bHYPRE version 1.0.0
        *
        * Not collective.
        **/
-      int SetRowSizes(in array<int> sizes);
+      int SetRowSizes(in array<int,1,column-major> sizes);
 
       /**
        * Print the matrix to file.  This is mainly for debugging
@@ -227,8 +227,8 @@ package bHYPRE version 1.0.0
        * Not collective.
        **/
       int SetValues(in int nvalues,
-                    in array<int> indices,
-                    in array<double> values);
+                    in array<int,1,column-major> indices,
+                    in array<double,1,column-major> values);
 
       /**
        * Adds to values in vector.  Usage details are analogous to
@@ -237,7 +237,7 @@ package bHYPRE version 1.0.0
        * Not collective.
        **/
       int AddToValues(in int nvalues,
-                      in array<int> indices,
+                      in array<int,1,column-major> indices,
                       in array< double> values);
 
       /**
@@ -254,8 +254,8 @@ package bHYPRE version 1.0.0
        * Not collective.
        **/
       int GetValues(in int nvalues,
-                    in array<int> indices,
-                    inout array<double> values);
+                    in array<int,1,column-major> indices,
+                    inout array<double,1,column-major> values);
 
       /**
        * Print the vector to file.  This is mainly for debugging
@@ -298,11 +298,11 @@ package bHYPRE version 1.0.0
        * complex value.
        **/
       int SetValues(in int part,
-                    in array<int> index,
+                    in array<int,1,column-major> index,
                     in int var,
                     in int nentries,
-                    in array<int> entries,
-                    in array<double> values);
+                    in array<int,1,column-major> entries,
+                    in array<double,1,column-major> values);
    
       /**
        * Set matrix coefficients a box at a time.
@@ -322,12 +322,12 @@ package bHYPRE version 1.0.0
        * complex value.
        **/
       int SetBoxValues(in int part,
-                       in array<int> ilower,
-                       in array<int> iupper,
+                       in array<int,1,column-major> ilower,
+                       in array<int,1,column-major> iupper,
                        in int var,
                        in int nentries,
-                       in array<int> entries,
-                       in array<double> values);
+                       in array<int,1,column-major> entries,
+                       in array<double,1,column-major> values);
       /**
        * Add to matrix coefficients index by index.
        *
@@ -345,11 +345,11 @@ package bHYPRE version 1.0.0
        * complex value.
        **/
       int AddToValues(in int part,
-                      in array<int> index,
+                      in array<int,1,column-major> index,
                       in int var,
                       in int nentries,
-                      in array<int> entries,
-                      in array<double> values);
+                      in array<int,1,column-major> entries,
+                      in array<double,1,column-major> values);
    
       /**
        * Add to matrix coefficients a box at a time.
@@ -367,12 +367,12 @@ package bHYPRE version 1.0.0
        * complex value.
        **/
       int AddToBoxValues(in int part,
-                         in array<int> ilower,
-                         in array<int> iupper,
+                         in array<int,1,column-major> ilower,
+                         in array<int,1,column-major> iupper,
                          in int var,
                          in int nentries,
-                         in array<int> entries,
-                         in array<double> values);
+                         in array<int,1,column-major> entries,
+                         in array<double,1,column-major> values);
    
       /**
        * Define symmetry properties for the stencil entries in the
@@ -434,9 +434,9 @@ package bHYPRE version 1.0.0
        * complex value.
        **/
       int SetValues(in int part,
-                    in array<int> index,
+                    in array<int,1,column-major> index,
                     in int var,
-                    in array<double> value);
+                    in array<double,1,column-major> value);
       
       /**
        * Set vector coefficients a box at a time.
@@ -450,10 +450,10 @@ package bHYPRE version 1.0.0
        * complex value.
        **/
       int SetBoxValues(in int part,
-                       in array<int> ilower,
-                       in array<int> iupper,
+                       in array<int,1,column-major> ilower,
+                       in array<int,1,column-major> iupper,
                        in int var,
-                       in array<double> values);
+                       in array<double,1,column-major> values);
       /**
        * Set vector coefficients index by index.
        *
@@ -466,9 +466,9 @@ package bHYPRE version 1.0.0
        * complex value.
        **/
       int AddToValues(in int part,
-                      in array<int> index,
+                      in array<int,1,column-major> index,
                       in int var,
-                      in array<double> value);
+                      in array<double,1,column-major> value);
       
       /**
        * Set vector coefficients a box at a time.
@@ -482,10 +482,10 @@ package bHYPRE version 1.0.0
        * complex value.
        **/
       int AddToBoxValues(in int part,
-                         in array<int> ilower,
-                         in array<int> iupper,
+                         in array<int,1,column-major> ilower,
+                         in array<int,1,column-major> iupper,
                          in int var,
-                         in array<double> values);
+                         in array<double,1,column-major> values);
       
       /**
        * Gather vector data before calling {\tt GetValues}.
@@ -504,7 +504,7 @@ package bHYPRE version 1.0.0
        * complex value.
        **/
       int GetValues(in int part,
-                    in array<int> index,
+                    in array<int,1,column-major> index,
                     in int var,
                     out double value);
       
@@ -519,10 +519,10 @@ package bHYPRE version 1.0.0
        * complex value.
        **/
       int GetBoxValues(in int  part,
-                       in array<int> ilower,
-                       in array<int> iupper,
+                       in array<int,1,column-major> ilower,
+                       in array<int,1,column-major> iupper,
                        in int var,
-                       inout array<double> values);
+                       inout array<double,1,column-major> values);
       
       /**
        * Set the vector to be complex.
@@ -546,18 +546,18 @@ package bHYPRE version 1.0.0
 
       int SetStencil(in StructStencil stencil);
 
-      int SetValues(in array<int> index, 
+      int SetValues(in array<int,1,column-major> index, 
                     in int num_stencil_indices,
-                    in array<int> stencil_indices,
-                    in array<double> values);
+                    in array<int,1,column-major> stencil_indices,
+                    in array<double,1,column-major> values);
 
-      int SetBoxValues(in array<int> ilower,
-                       in array<int> iupper,
+      int SetBoxValues(in array<int,1,column-major> ilower,
+                       in array<int,1,column-major> iupper,
                        in int num_stencil_indices,
-                       in array<int> stencil_indices,
-                       in array<double> values);
+                       in array<int,1,column-major> stencil_indices,
+                       in array<double,1,column-major> values);
 
-      int SetNumGhost(in array<int> num_ghost);
+      int SetNumGhost(in array<int,1,column-major> num_ghost);
 
       int SetSymmetric(in int symmetric);
    }
@@ -571,12 +571,12 @@ package bHYPRE version 1.0.0
 
       int SetStencil(in StructStencil stencil);   // really needed?
 
-      int SetValue(in array<int> grid_index,
+      int SetValue(in array<int,1,column-major> grid_index,
                    in double value);
 
-      int SetBoxValues(in array<int> ilower,
-                       in array<int> iupper,
-                       in array<double> values);
+      int SetBoxValues(in array<int,1,column-major> ilower,
+                       in array<int,1,column-major> iupper,
+                       in array<double,1,column-major> values);
    }
 
    /*----------- Interface -------------------------------------------------*/
@@ -613,16 +613,28 @@ package bHYPRE version 1.0.0
                              in string value);
 
       /**
-       * Set the int array parameter associated with {\tt name}.
+       * Set the int 1-D array parameter associated with {\tt name}.
        **/
-      int SetIntArrayParameter(in string name,
-                               in array<int> value);
+      int SetIntArray1Parameter(in string name,
+                                in array<int,1,column-major> value);
 
       /**
-       * Set the double array parameter associated with {\tt name}.
+       * Set the int 2-D array parameter associated with {\tt name}.
        **/
-      int SetDoubleArrayParameter(in string name,
-                                  in array<double> value);
+      int SetIntArray2Parameter(in string name,
+                                in array<int,2,column-major> value);
+
+      /**
+       * Set the double 1-D array parameter associated with {\tt name}.
+       **/
+      int SetDoubleArray1Parameter(in string name,
+                                  in array<double,1,column-major> value);
+
+      /**
+       * Set the double 2-D array parameter associated with {\tt name}.
+       **/
+      int SetDoubleArray2Parameter(in string name,
+                                  in array<double,2,column-major> value);
 
       /**
        * Set the int parameter associated with {\tt name}.
@@ -762,8 +774,8 @@ package bHYPRE version 1.0.0
        **/
       int GetRow(in int row, 
                  out int size, 
-                 out array<int> col_ind,
-                 out array<double> values);
+                 out array<int,1,column-major> col_ind,
+                 out array<double,1,column-major> values);
    }
 
    /*----------- Classes ---------------------------------------------------*/
@@ -790,8 +802,8 @@ package bHYPRE version 1.0.0
        *
        * Not collective.
        **/
-      int SetDiagOffdSizes(in array<int> diag_sizes,
-                           in array<int> offdiag_sizes);
+      int SetDiagOffdSizes(in array<int,1,column-major> diag_sizes,
+                           in array<int,1,column-major> offdiag_sizes);
    }
 
    /**
@@ -902,8 +914,8 @@ package bHYPRE version 1.0.0
        * Set the extents for a box on a structured part of the grid.
        **/
       int SetExtents(in int part,
-                     in array<int> ilower,
-                     in array<int> iupper);
+                     in array<int,1,column-major> ilower,
+                     in array<int,1,column-major> iupper);
    
       /**
        * Describe the variables that live on a structured part of the
@@ -920,7 +932,7 @@ package bHYPRE version 1.0.0
        * such.
        **/
       int AddVariable(in int part,
-                      in array<int> index,
+                      in array<int,1,column-major> index,
                       in int var,
                       in SStructVariable vartype);
    
@@ -949,12 +961,12 @@ package bHYPRE version 1.0.0
        * cell and node.
        **/
       int SetNeighborBox(in int part,
-                         in array<int> ilower,
-                         in array<int> iupper,
+                         in array<int,1,column-major> ilower,
+                         in array<int,1,column-major> iupper,
                          in int nbor_part,
-                         in array<int> nbor_ilower,
-                         in array<int> nbor_iupper,
-                         in array<int> index_map);
+                         in array<int,1,column-major> nbor_ilower,
+                         in array<int,1,column-major> nbor_iupper,
+                         in array<int,1,column-major> index_map);
    
       /**
        * Add an unstructured part to the grid.  The variables in the
@@ -973,12 +985,12 @@ package bHYPRE version 1.0.0
        * (Optional) Set periodic for a particular part.
        **/
       int SetPeriodic(in int  part,
-                      in array<int> periodic);
+                      in array<int,1,column-major> periodic);
 
       /**
        * Setting ghost in the sgrids.
        **/
-      int SetNumGhost(in array<int> num_ghost);
+      int SetNumGhost(in array<int,1,column-major> num_ghost);
    }
    
    /*-----------------------*/
@@ -998,7 +1010,7 @@ package bHYPRE version 1.0.0
        * Set a stencil entry.
        **/
       int SetEntry(in int entry,
-                   in array<int> offset,
+                   in array<int,1,column-major> offset,
                    in int var);
    }
    
@@ -1032,10 +1044,10 @@ package bHYPRE version 1.0.0
        * some data will be multiply defined.
        **/
       int AddEntries(in int part,
-                     in array<int> index,
+                     in array<int,1,column-major> index,
                      in int var,
                      in int to_part,
-                     in array<int> to_index,
+                     in array<int,1,column-major> to_index,
                      in int to_var);
    }
    
@@ -1078,7 +1090,7 @@ package bHYPRE version 1.0.0
       int SetDimension(in int dim);
       int SetSize(in int size);
       int SetElement(in int index,
-                     in array<int> offset);
+                     in array<int,1,column-major> offset);
    }
 
    /*-----------------------*/
@@ -1095,10 +1107,10 @@ package bHYPRE version 1.0.0
 
       int SetDimension(in int dim);
 
-      int SetExtents(in array<int> ilower,
-                     in array<int> iupper);
+      int SetExtents(in array<int,1,column-major> ilower,
+                     in array<int,1,column-major> iupper);
 
-      int SetPeriodic(in array<int> periodic);
+      int SetPeriodic(in array<int,1,column-major> periodic);
 
       int Assemble();
    }
@@ -1154,16 +1166,16 @@ package bHYPRE version 1.0.0
     * \item[CycleType] ({\tt Int}) - type of cycle used; a V-cycle
     * (default) or a W-cycle.
     *
-    * \item[NumGridSweeps] ({\tt IntArray}) - number of sweeps for
+    * \item[NumGridSweeps] ({\tt IntArray 1D}) - number of sweeps for
     * fine and coarse grid, up and down cycle.
     *
-    * \item[GridRelaxType] ({\tt IntArray}) - type of smoother used on
+    * \item[GridRelaxType] ({\tt IntArray 1D}) - type of smoother used on
     * fine and coarse grid, up and down cycle.
     *
-    * \item[GridRelaxPoints] ({\tt IntArray}) - point ordering used in
+    * \item[GridRelaxPoints] ({\tt IntArray 2D}) - point ordering used in
     * relaxation.
     *
-    * \item[RelaxWeight] ({\tt DoubleArray}) - relaxation weight for
+    * \item[RelaxWeight] ({\tt DoubleArray 1D}) - relaxation weight for
     * smoothed Jacobi and hybrid SOR.
     *
     * \item[TruncFactor] ({\tt Double}) - truncation factor for
@@ -1183,7 +1195,7 @@ package bHYPRE version 1.0.0
     * \item[NumFunctions] ({\tt Int}) - size of the system of PDEs
     * (when using the systems version).
     * 
-    * \item[DOFFunc] ({\tt IntArray}) - mapping that assigns the
+    * \item[DOFFunc] ({\tt IntArray 1D}) - mapping that assigns the
     * function to each variable (when using the systems version).
     *
     * \item[Variant] ({\tt Int}) - variant of Schwarz used.
