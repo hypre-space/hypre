@@ -105,7 +105,7 @@ clean:
 	@rm -f *.o *.dxx
 
 veryclean: clean
-	@rm -f libHYPRE_mv.a
+	@rm -f libHYPRE_*.a
 	@rm -fr Docs
 	@rm -f DevManual.tex DevManual.ps
 	@rm -f DevManual.dvi DevManual.aux DevManual.log

@@ -91,7 +91,7 @@ clean:
 	@rm -f *.o *.dxx 
 
 veryclean: clean
-	@rm -f libHYPRE_ls.a
+	@rm -f libHYPRE_*.a
 
 
 ##################################################################
