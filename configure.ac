@@ -48,6 +48,8 @@ ACX_TIMING
 
 ACX_OPENMP
 
+ACX_STRICT_CHECKING
+
 ACX_INSURE
 
 ACX_PURIFY
@@ -121,9 +123,9 @@ AM_CONDITIONAL([USE_FEI_INC_DIR_DEFAULT], [test "$FEI_INC_DIR_DEFINED" = "no"])
 
 if test "$casc_user_chose_compilers" != "yes" ; then
   if test "$casc_using_openmp" = "yes" ; then
-    AC_CHECK_PROGS(CC, guidec icc pgcc xlc cc)
-    AC_CHECK_PROGS(CXX, guidec++ icc pgCC xlC CC)
-    AC_CHECK_PROGS(F77, guidef77 ifc pgf77 xlf f77)
+    AC_CHECK_PROGS(CC, mpguidec icc pgcc xlc cc)
+    AC_CHECK_PROGS(CXX, mpguidec++ icc pgCC xlC CC)
+    AC_CHECK_PROGS(F77, mpguidef77 ifc pgf77 xlf f77)
   elif test "$casc_using_mpi" = "no" ; then
     AC_CHECK_PROGS(CC, icc pgcc xlc cc kcc c89 gcc)
     AC_CHECK_PROGS(CXX, icc pgCC xlC c++ cxx CC KCC cl g++ gcc)
@@ -146,9 +148,6 @@ AC_PROG_CXX
 AC_PROG_F77
 AC_F77_LIBRARY_LDFLAGS
 AC_EXEEXT
-
-ACX_STRICT_CHECKING
-
 
 dnl Initialize libtool
 ##AC_LIBLTDL_CONVENIENCE
