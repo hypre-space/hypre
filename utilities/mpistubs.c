@@ -504,6 +504,6 @@ hypre_MPI_Type_free( hypre_MPI_Datatype *datatype )
 #else
 
 /* this is used only to eliminate compiler warnings */
-int hypre_empty;
+int hypre_empty2;
 
 #endif

@@ -130,6 +130,6 @@ hypre_FreeDML( char *ptr,
 #else
 
 /* this is used only to eliminate compiler warnings */
-int hypre_empty;
+int hypre_empty1;
 
 #endif

@@ -686,7 +686,7 @@ int HYPRE_LSI_AMGeWriteToFile()
 #else
 
 /* this is used only to eliminate compiler warnings */
-int hypre_empty;
+int hypre_empty4;
 
 #endif
 
