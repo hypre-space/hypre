@@ -13,14 +13,19 @@ MPIRUN       = mpirun -np 4
 #PETSc; not used here, but used by objects called from here 
 PETSC_INCLUDES = -I${PETSC_DIR}/include
 # General
-HYPRE_INCLUDES = -I../.. -I../../utilities -I/home/casc/include
+HYPRE_INCLUDES = \
+ -I../..\
+ -I../../utilities\
+ -I/home/casc/include\
+ -I.\
+ -I../../distributed_matrix
+
 INCLUDES = $(HYPRE_INCLUDES) $(MPI_INCLUDES) $(PETSC_INCLUDES)
 LIBDIR   = $(MPI_LIBDIR)
 LIBS     = -L. -lHYPREpilut -lm $(MPI_LIBS) $(OTHER_LIBS)
 
 # Debugging via asserts
 DEBUGFLAGS = -DHYPRE_DEBUG -DHYPRE_MEMORY_CHECK #-DNDEBUG #-DTIME
-CFLAGS = $(OPTIMIZATION) $(INCLUDES) $(DEBUGFLAGS)
 
 HYPREFILES =\
  HYPRE_DistributedMatrixPilutSolver.c
@@ -37,9 +42,43 @@ OBJS = ${FILES:.c=.o}
 
 ${OBJS}: ${HEADERS}
 
-#include site-specific information
-include ../../bmakes/Makefile
+.SUFFIXES: .c .f .o
 
+CC = @CC@
+CXX = @CXX@
+F77 = @F77@
+
+C_COMPILE_FLAGS=@CFLAGS@
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+F77_COMPILE_FLAGS=@F77FLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CDEFS = @HYPRE_PETSCDEFS@ -DHYPRE_NO_PTHREAD_MANGLING
+
+CFLAGS = \
+ $(OPTIMIZATION)\
+ $(INCLUDES)\
+ $(DEBUGFLAGS)\
+ -I..\
+ -I../utilities\
+ -I.\
+ -I../CI_struct_matrix_vector\
+ -I../PETSc_linear_sovlers/ParILUT\
+ @PETSCINCLUDE@ \
+ ${C_COMPILE_FLAGS}\
+ ${CINCLUDES}\
+ ${CDEFS}
+
+CXXFLAGS = \
+ @PETSCINCLUDE@ \
+ ${CXX_COMPILE_FLAGS}\
+ -I../utilities\
+ -I..\
+ ${CINCLUDES}\
+ ${COPT}\
+ ${CDEBUG}\
+ ${CDEFS}
+
+RANLIB = @RANLIB@
 
 ##################################################################
 # Main rules
@@ -49,4 +88,29 @@ lib_HYPRE_DistributedMatrixPilutSolver.a: ${PROTOS} ${OBJS}
 	@echo "Building $@ ... "
 	ar -rcu $@ ${OBJS}
 	@RANLIB@ $@
+
+##################################################################
+# Targets
+##################################################################
+clean:
+	@rm -f *.o *.dxx 
+
+veryclean: clean
+	@rm -f lib*.a
+
+
+##################################################################
+# Generic rules
+##################################################################
+
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+
+.cc.o:
+	${CXX} -o $@ -c ${CFLAGS} $<
+
+.f.o:
+	${F77} -o $@ -c ${FFLAGS} $<
+
 

@@ -20,15 +20,15 @@
 
 #include "general.h"
 
-#include "../HYPRE.h"
-#include "../utilities/HYPRE_utilities.h"
+#include "HYPRE.h"
+#include "HYPRE_utilities.h"
 
 /* Prototypes for DistributedMatrix */
-#include "../distributed_matrix/HYPRE_distributed_matrix_types.h"
-#include "../distributed_matrix/HYPRE_distributed_matrix_protos.h"
+#include "HYPRE_distributed_matrix_types.h"
+#include "HYPRE_distributed_matrix_protos.h"
 
 /* Matrix prototypes for IJMatirx */
-#include "../IJ_matrix_vector/HYPRE_IJ_mv.h"
+#include "IJ_matrix_vector/HYPRE_IJ_mv.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_BuildIJMatrixFromDistributedMatrix

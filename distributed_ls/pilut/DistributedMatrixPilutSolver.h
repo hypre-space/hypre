@@ -2,21 +2,21 @@
 #ifndef _DISTRIBUTED_MATRIX_PILUT_SOLVER_HEADER
 #define _DISTRIBUTED_MATRIX_PILUT_SOLVER_HEADER
 
-#include "../../HYPRE_config.h"
-#include "../../utilities/general.h"
-#include "../../utilities/utilities.h"
+#include "HYPRE_config.h"
+#include "utilities/general.h"
+#include "utilities/utilities.h"
 #ifdef HYPRE_DEBUG
 #include <gmalloc.h>
 #endif
 
-#include "../../HYPRE.h"
+#include "HYPRE.h"
 
-#include "./HYPRE_DistributedMatrixPilutSolver_types.h"
+#include "HYPRE_DistributedMatrixPilutSolver_types.h"
 
-#include "../../distributed_matrix/HYPRE_distributed_matrix_types.h"
-#include "../../distributed_matrix/HYPRE_distributed_matrix_protos.h"
+#include "HYPRE_distributed_matrix_types.h"
+#include "HYPRE_distributed_matrix_protos.h"
 
-#include "./macros.h" /*contains some macros that are used here */
+#include "macros.h" /*contains some macros that are used here */
 
 /*--------------------------------------------------------------------------
  * Global variables for the pilut solver

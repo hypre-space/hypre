@@ -15,10 +15,10 @@
 #ifndef hypre_PETScSolverParILUT_HEADER
 #define hypre_PETScSolverParILUT_HEADER
 
-#include <../../HYPRE_config.h>
+#include <HYPRE_config.h>
 
-#include "../../utilities/general.h"
-#include "../../utilities/utilities.h"
+#include "general.h"
+#include "utilities.h"
 #ifdef HYPRE_DEBUG
 #include <gmalloc.h>
 #endif
@@ -26,14 +26,15 @@
 /* Include Petsc linear solver headers */
 #include "sles.h"
 
-#include "../../HYPRE.h"
+#include "HYPRE.h"
 
 /* type definitions from this directory */
-#include "./HYPRE_PETScSolverParILUT_types.h"
+#include "HYPRE_PETScSolverParILUT_types.h"
 
 /* type and prototype declarations for object used in this implementation */
-#include "../../PETScMat_linear_solvers/pilut/HYPRE_PETScMatPilutSolver_types.h"
-#include "../../PETScMat_linear_solvers/pilut/HYPRE_PETScMatPilutSolver_protos.h"
+#include "HYPRE_PETScMatPilutSolver_types.h"
+#include "HYPRE_PETScMatPilutSolver_protos.h
+
 
 /* type definition for member SlesOwner in ParILUTData structure */
 #define ParILUTLibrary 47

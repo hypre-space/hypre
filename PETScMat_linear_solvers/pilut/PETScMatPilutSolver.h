@@ -15,10 +15,10 @@
 #ifndef hypre_PETSC_MAT_PILUT_SOLVER_HEADER
 #define hypre_PETSC_MAT_PILUT_SOLVER_HEADER
 
-#include <../../HYPRE_config.h>
+#include <HYPRE_config.h>
 
-#include "../../utilities/general.h"
-#include "../../utilities/utilities.h"
+#include "general.h"
+#include "utilities.h"
 #ifdef HYPRE_DEBUG
 #include <gmalloc.h>
 #endif
@@ -27,17 +27,17 @@
 #include "mat.h"
 #include "vec.h"
 
-#include "../../HYPRE.h"
+#include "HYPRE.h"
 
 /* types of objects declared in this directory */
-#include "./HYPRE_PETScMatPilutSolver_types.h"
+#include "HYPRE_PETScMatPilutSolver_types.h"
 
 /* type declaration for matrix object used by the implementation in this directory */
-#include "../../distributed_matrix/HYPRE_distributed_matrix_types.h"
+#include "HYPRE_distributed_matrix_types.h"
 
 /* type declaration and prototypes for solvers used in this implementation */
-#include "../../distributed_linear_solvers/pilut/HYPRE_DistributedMatrixPilutSolver_types.h"
-#include "../../distributed_linear_solvers/pilut/HYPRE_DistributedMatrixPilutSolver_protos.h"
+#include "HYPRE_DistributedMatrixPilutSolver_types.h"
+#include "HYPRE_DistributedMatrixPilutSolver_protos.h"
 
 /*--------------------------------------------------------------------------
  * hypre_PETScMatPilutSolver

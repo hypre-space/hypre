@@ -20,12 +20,12 @@
 
 #include "general.h"
 
-#include "../HYPRE.h"
-#include "../utilities/HYPRE_utilities.h"
+#include "HYPRE.h"
+#include "HYPRE_utilities.h"
 
 /* Prototypes for DistributedMatrix */
-#include "../distributed_matrix/HYPRE_distributed_matrix_types.h"
-#include "../distributed_matrix/HYPRE_distributed_matrix_protos.h"
+#include "HYPRE_distributed_matrix_types.h"
+#include "HYPRE_distributed_matrix_protos.h"
 
 #ifdef PETSC_AVAILABLE
 

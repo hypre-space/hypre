@@ -15,8 +15,6 @@ all: lib
 
 install:all
 
-
-
 #Headers
 HEADERS =\
  PETScSolverParILUT.h
@@ -32,8 +30,37 @@ OBJS = ${FILES:.c=.o}
 
 ${OBJS}: ${HEADERS}
 
-#include site-specific information
-include ../../bmakes/Makefile
+CC = @CC@
+CXX = @CXX@
+F77 = @F77@
+
+C_COMPILE_FLAGS=@CFLAGS@
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+F77_COMPILE_FLAGS=@F77FLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CDEFS = @HYPRE_PETSCDEFS@ -DHYPRE_NO_PTHREAD_MANGLING
+
+CFLAGS = \
+ -I..\
+ -I../utilities\
+ -I.\
+ -I../../PETScMat_linear_solvers/pilut
+ @PETSCINCLUDE@ \
+ ${C_COMPILE_FLAGS}\
+ ${CINCLUDES}\
+ ${CDEFS}
+
+CXXFLAGS = \
+ @PETSCINCLUDE@ \
+ ${CXX_COMPILE_FLAGS}\
+ -I../utilities\
+ -I..\
+ ${CINCLUDES}\
+ ${COPT}\
+ ${CDEBUG}\
+ ${CDEFS}
+
+RANLIB = @RANLIB@
 
 ##################################################################
 # Main rules
@@ -51,4 +78,30 @@ lib: ${PROTOS} ${OBJS}
 	@echo  "Building $@ ... "
 	@ar -ru lib_HYPRE_PETScSolverParILUT.a ${OBJS}
 	@ranlib lib_HYPR_EPETScSolverParILUT.a 
+
+
+##################################################################
+# Targets
+##################################################################
+clean:
+	@rm -f *.o *.dxx 
+
+veryclean: clean
+	@rm -f lib*.a
+
+
+##################################################################
+# Generic rules
+##################################################################
+
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+
+.cc.o:
+	${CXX} -o $@ -c ${CFLAGS} $<
+
+.f.o:
+	${F77} -o $@ -c ${FFLAGS} $<
+
 
