@@ -232,11 +232,13 @@ static doublereal c_b72 = -1.;
 	*info = -4;
     } else if (*ncc < 0) {
 	*info = -5;
-    } else if (*ncvt == 0 && *ldvt < 1 || *ncvt > 0 && *ldvt < max(1,*n)) {
+    } else if (((*ncvt == 0) && (*ldvt < 1)) || 
+               ((*ncvt > 0) && (*ldvt < max(1,*n)))) {
 	*info = -9;
     } else if (*ldu < max(1,*nru)) {
 	*info = -11;
-    } else if (*ncc == 0 && *ldc < 1 || *ncc > 0 && *ldc < max(1,*n)) {
+    } else if (((*ncc == 0) && (*ldc < 1)) || 
+               ((*ncc > 0) && (*ldc < max(1,*n)))) {
 	*info = -13;
     }
     if (*info != 0) {
@@ -483,7 +485,7 @@ L90:
           First apply standard test to bottom of matrix */
 
 	if ((d__2 = e[m - 1], abs(d__2)) <= abs(tol) * (d__1 = d__[m], abs(
-		d__1)) || tol < 0. && (d__3 = e[m - 1], abs(d__3)) <= thresh) 
+		d__1)) || ((tol < 0.) && ((d__3 = e[m - 1], abs(d__3)) <= thresh)))
 		{
 	    e[m - 1] = 0.;
 	    goto L60;
@@ -516,7 +518,7 @@ L90:
           First apply standard test to top of matrix */
 
 	if ((d__2 = e[ll], abs(d__2)) <= abs(tol) * (d__1 = d__[ll], abs(d__1)
-		) || tol < 0. && (d__3 = e[ll], abs(d__3)) <= thresh) {
+		) || ((tol < 0.) && ((d__3 = e[ll], abs(d__3)) <= thresh))) {
 	    e[ll] = 0.;
 	    goto L60;
 	}

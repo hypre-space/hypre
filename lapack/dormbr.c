@@ -195,7 +195,8 @@
     } else /* if(complicated condition) */ {
 /* Computing MAX */
 	i__1 = 1, i__2 = min(nq,*k);
-	if (applyq && *lda < max(1,nq) || ! applyq && *lda < max(i__1,i__2)) {
+	if (((applyq) && (*lda < max(1,nq))) || 
+            ((! applyq) && (*lda < max(i__1,i__2)))) {
 	    *info = -8;
 	} else if (*ldc < max(1,*m)) {
 	    *info = -11;
