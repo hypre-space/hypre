@@ -37,12 +37,13 @@ NAMING CONVENTIONS FOR HYPRE
 
  2. Macros without parameters should be named as follows:
 
-      HYPRE_ALL_CAPS
+      HYPRE_ALL_CAPS          /* User interface macros */
+      hypre_ALL_CAPS          /* Internal non-user macros */
 
  3. Types should be named as follows:
 
-      HYPRE_MixedCase          /* User interface routines */
-      hypre_MixedCase          /* Internal non-user routines */
+      HYPRE_MixedCase          /* User interface types */
+      hypre_MixedCase          /* Internal non-user types */
 
  4. It is preferred that variables be named as follows:
 
