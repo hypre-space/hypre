@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:37 PST
- * Generated:     20050225 15:45:40 PST
+ * sidl Created:  20050317 11:17:39 PST
+ * Generated:     20050317 11:17:43 PST
  * Description:   Server-side implementation for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.9.8
- * source-line   = 1124
+ * source-line   = 1135
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -24,6 +24,10 @@
  * 
  * A single class that implements both a build interface and an
  * operator interface. It returns itself for GetConstructedObject.
+ * A StructMatrix is a matrix on a structured grid.
+ * One function unique to a StructMatrix is SetConstantEntries.
+ * This declares that matrix entries corresponding to certain stencil points
+ * (supplied as stencil element indices) will be constant throughout the grid.
  * 
  */
 
@@ -449,7 +453,7 @@ impl_bHYPRE_StructMatrix_Assemble(
 
    HA = data -> matrix;
 
-   ierr = HYPRE_StructMatrixAssemble( HA );
+   ierr += HYPRE_StructMatrixAssemble( HA );
 
    return( ierr );
 
@@ -700,4 +704,66 @@ impl_bHYPRE_StructMatrix_SetSymmetric(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetSymmetric) */
+}
+
+/*
+ * Method:  SetConstantEntries[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructMatrix_SetConstantEntries"
+
+int32_t
+impl_bHYPRE_StructMatrix_SetConstantEntries(
+  /*in*/ bHYPRE_StructMatrix self, /*in*/ int32_t num_stencil_constant_points,
+    /*in*/ struct sidl_int__array* stencil_constant_points)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetConstantEntries) */
+  /* Insert the implementation of the SetConstantEntries method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructMatrix__data * data;
+   HYPRE_StructMatrix HA;
+
+   data = bHYPRE_StructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr += HYPRE_StructMatrixSetConstantEntries
+      ( HA, num_stencil_constant_points, sidlArrayAddr1( stencil_constant_points, 0 ) );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetConstantEntries) */
+}
+
+/*
+ * Method:  SetConstantValues[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructMatrix_SetConstantValues"
+
+int32_t
+impl_bHYPRE_StructMatrix_SetConstantValues(
+  /*in*/ bHYPRE_StructMatrix self, /*in*/ int32_t num_stencil_indices,
+    /*in*/ struct sidl_int__array* stencil_indices,
+    /*in*/ struct sidl_double__array* values)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetConstantValues) */
+  /* Insert the implementation of the SetConstantValues method here... */
+
+
+   int ierr = 0;
+   struct bHYPRE_StructMatrix__data * data;
+   HYPRE_StructMatrix HA;
+   data = bHYPRE_StructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr += HYPRE_StructMatrixSetConstantValues(
+      HA, num_stencil_indices,
+      sidlArrayAddr1( stencil_indices, 0 ), sidlArrayAddr1( values, 0 ) );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetConstantValues) */
 }

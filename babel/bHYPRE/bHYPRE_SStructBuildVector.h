@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.SStructBuildVector-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:36 PST
- * Generated:     20050225 15:45:39 PST
+ * sidl Created:  20050317 11:17:39 PST
+ * Generated:     20050317 11:17:42 PST
  * Description:   Client-side glue code for bHYPRE.SStructBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost

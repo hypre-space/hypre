@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.PCG-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:37 PST
- * Generated:     20050225 15:45:40 PST
+ * sidl Created:  20050317 11:17:39 PST
+ * Generated:     20050317 11:17:44 PST
  * Description:   Server-side implementation for bHYPRE.PCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.9.8
- * source-line   = 1237
+ * source-line   = 1249
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -47,6 +47,8 @@
 #include "bHYPRE_ParCSRDiagScale_Impl.h"
 #include "bHYPRE_StructSMG.h"
 #include "bHYPRE_StructSMG_Impl.h"
+#include "bHYPRE_StructPFMG.h"
+#include "bHYPRE_StructPFMG_Impl.h"
 #include <assert.h>
 #include "mpi.h"
 
@@ -1054,6 +1056,8 @@ impl_bHYPRE_PCG_SetPreconditioner(
    bHYPRE_BoomerAMG AMG_s;
    struct bHYPRE_StructSMG__data * SMG_dataprecond;
    bHYPRE_StructSMG SMG_s;
+   struct bHYPRE_StructPFMG__data * PFMG_dataprecond;
+   bHYPRE_StructPFMG PFMG_s;
    HYPRE_PtrToSolverFcn precond, precond_setup; /* functions */
 
    dataself = bHYPRE_PCG__get_data( self );
@@ -1091,6 +1095,18 @@ impl_bHYPRE_PCG_SetPreconditioner(
       precond = (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup;
       bHYPRE_StructSMG_deleteRef( SMG_s ); /* extra reference from queryInt */
+   }
+   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructPFMG" ) )
+   {
+      /* s is a bHYPRE_StructPFMG */
+      PFMG_s = bHYPRE_StructPFMG__cast
+         ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructPFMG") );
+      PFMG_dataprecond = bHYPRE_StructPFMG__get_data( PFMG_s );
+      solverprecond = (HYPRE_Solver *) &PFMG_dataprecond->solver;
+      assert( solverprecond != NULL );
+      precond = (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve;
+      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup;
+      bHYPRE_StructPFMG_deleteRef( PFMG_s ); /* extra reference from queryInt */
    }
    /* put other preconditioner types here */
    else

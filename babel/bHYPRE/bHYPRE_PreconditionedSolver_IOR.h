@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.PreconditionedSolver-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:37 PST
- * Generated:     20050225 15:45:38 PST
+ * sidl Created:  20050317 11:17:39 PST
+ * Generated:     20050317 11:17:41 PST
  * Description:   Intermediate Object Representation for bHYPRE.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 756
+ * source-line   = 761
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 

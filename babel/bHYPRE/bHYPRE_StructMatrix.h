@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:37 PST
- * Generated:     20050225 15:45:38 PST
+ * sidl Created:  20050317 11:17:39 PST
+ * Generated:     20050317 11:17:41 PST
  * Description:   Client-side glue code for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1124
+ * source-line   = 1135
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -22,6 +22,10 @@
  * 
  * A single class that implements both a build interface and an
  * operator interface. It returns itself for GetConstructedObject.
+ * A StructMatrix is a matrix on a structured grid.
+ * One function unique to a StructMatrix is SetConstantEntries.
+ * This declares that matrix entries corresponding to certain stencil points
+ * (supplied as stencil element indices) will be constant throughout the grid.
  * 
  */
 struct bHYPRE_StructMatrix__object;
@@ -300,6 +304,25 @@ int32_t
 bHYPRE_StructMatrix_SetSymmetric(
   /*in*/ bHYPRE_StructMatrix self,
   /*in*/ int32_t symmetric);
+
+/**
+ * Method:  SetConstantEntries[]
+ */
+int32_t
+bHYPRE_StructMatrix_SetConstantEntries(
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ int32_t num_stencil_constant_points,
+  /*in*/ struct sidl_int__array* stencil_constant_points);
+
+/**
+ * Method:  SetConstantValues[]
+ */
+int32_t
+bHYPRE_StructMatrix_SetConstantValues(
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ int32_t num_stencil_indices,
+  /*in*/ struct sidl_int__array* stencil_indices,
+  /*in*/ struct sidl_double__array* values);
 
 /**
  * Cast method for interface and class type conversions.

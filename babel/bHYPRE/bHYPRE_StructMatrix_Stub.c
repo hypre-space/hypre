@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:37 PST
- * Generated:     20050225 15:45:38 PST
+ * sidl Created:  20050317 11:17:39 PST
+ * Generated:     20050317 11:17:41 PST
  * Description:   Client-side glue code for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1124
+ * source-line   = 1135
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -546,6 +546,40 @@ bHYPRE_StructMatrix_SetSymmetric(
   return (*self->d_epv->f_SetSymmetric)(
     self,
     symmetric);
+}
+
+/*
+ * Method:  SetConstantEntries[]
+ */
+
+int32_t
+bHYPRE_StructMatrix_SetConstantEntries(
+  bHYPRE_StructMatrix self,
+  /*in*/ int32_t num_stencil_constant_points,
+  /*in*/ struct sidl_int__array* stencil_constant_points)
+{
+  return (*self->d_epv->f_SetConstantEntries)(
+    self,
+    num_stencil_constant_points,
+    stencil_constant_points);
+}
+
+/*
+ * Method:  SetConstantValues[]
+ */
+
+int32_t
+bHYPRE_StructMatrix_SetConstantValues(
+  bHYPRE_StructMatrix self,
+  /*in*/ int32_t num_stencil_indices,
+  /*in*/ struct sidl_int__array* stencil_indices,
+  /*in*/ struct sidl_double__array* values)
+{
+  return (*self->d_epv->f_SetConstantValues)(
+    self,
+    num_stencil_indices,
+    stencil_indices,
+    values);
 }
 
 /*

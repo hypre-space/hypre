@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE.StructBuildMatrix-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:36 PST
- * Generated:     20050225 15:45:38 PST
+ * sidl Created:  20050317 11:17:39 PST
+ * Generated:     20050317 11:17:41 PST
  * Description:   Intermediate Object Representation for bHYPRE.StructBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -251,6 +251,33 @@ remote_bHYPRE_StructBuildMatrix_SetSymmetric(
 }
 
 /*
+ * REMOTE METHOD STUB:SetConstantEntries
+ */
+
+static int32_t
+remote_bHYPRE_StructBuildMatrix_SetConstantEntries(
+  void* self,
+  int32_t num_stencil_constant_points,
+  struct sidl_int__array* stencil_constant_points)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetConstantValues
+ */
+
+static int32_t
+remote_bHYPRE_StructBuildMatrix_SetConstantValues(
+  void* self,
+  int32_t num_stencil_indices,
+  struct sidl_int__array* stencil_indices,
+  struct sidl_double__array* values)
+{
+  return 0;
+}
+
+/*
  * REMOTE EPV: create remote entry point vectors (EPVs).
  */
 
@@ -258,24 +285,27 @@ static void bHYPRE_StructBuildMatrix__init_remote_epv(void)
 {
   struct bHYPRE_StructBuildMatrix__epv* epv = &s_rem__bhypre_structbuildmatrix;
 
-  epv->f__cast           = remote_bHYPRE_StructBuildMatrix__cast;
-  epv->f__delete         = remote_bHYPRE_StructBuildMatrix__delete;
-  epv->f_addRef          = remote_bHYPRE_StructBuildMatrix_addRef;
-  epv->f_deleteRef       = remote_bHYPRE_StructBuildMatrix_deleteRef;
-  epv->f_isSame          = remote_bHYPRE_StructBuildMatrix_isSame;
-  epv->f_queryInt        = remote_bHYPRE_StructBuildMatrix_queryInt;
-  epv->f_isType          = remote_bHYPRE_StructBuildMatrix_isType;
-  epv->f_getClassInfo    = remote_bHYPRE_StructBuildMatrix_getClassInfo;
-  epv->f_SetCommunicator = remote_bHYPRE_StructBuildMatrix_SetCommunicator;
-  epv->f_Initialize      = remote_bHYPRE_StructBuildMatrix_Initialize;
-  epv->f_Assemble        = remote_bHYPRE_StructBuildMatrix_Assemble;
-  epv->f_GetObject       = remote_bHYPRE_StructBuildMatrix_GetObject;
-  epv->f_SetGrid         = remote_bHYPRE_StructBuildMatrix_SetGrid;
-  epv->f_SetStencil      = remote_bHYPRE_StructBuildMatrix_SetStencil;
-  epv->f_SetValues       = remote_bHYPRE_StructBuildMatrix_SetValues;
-  epv->f_SetBoxValues    = remote_bHYPRE_StructBuildMatrix_SetBoxValues;
-  epv->f_SetNumGhost     = remote_bHYPRE_StructBuildMatrix_SetNumGhost;
-  epv->f_SetSymmetric    = remote_bHYPRE_StructBuildMatrix_SetSymmetric;
+  epv->f__cast              = remote_bHYPRE_StructBuildMatrix__cast;
+  epv->f__delete            = remote_bHYPRE_StructBuildMatrix__delete;
+  epv->f_addRef             = remote_bHYPRE_StructBuildMatrix_addRef;
+  epv->f_deleteRef          = remote_bHYPRE_StructBuildMatrix_deleteRef;
+  epv->f_isSame             = remote_bHYPRE_StructBuildMatrix_isSame;
+  epv->f_queryInt           = remote_bHYPRE_StructBuildMatrix_queryInt;
+  epv->f_isType             = remote_bHYPRE_StructBuildMatrix_isType;
+  epv->f_getClassInfo       = remote_bHYPRE_StructBuildMatrix_getClassInfo;
+  epv->f_SetCommunicator    = remote_bHYPRE_StructBuildMatrix_SetCommunicator;
+  epv->f_Initialize         = remote_bHYPRE_StructBuildMatrix_Initialize;
+  epv->f_Assemble           = remote_bHYPRE_StructBuildMatrix_Assemble;
+  epv->f_GetObject          = remote_bHYPRE_StructBuildMatrix_GetObject;
+  epv->f_SetGrid            = remote_bHYPRE_StructBuildMatrix_SetGrid;
+  epv->f_SetStencil         = remote_bHYPRE_StructBuildMatrix_SetStencil;
+  epv->f_SetValues          = remote_bHYPRE_StructBuildMatrix_SetValues;
+  epv->f_SetBoxValues       = remote_bHYPRE_StructBuildMatrix_SetBoxValues;
+  epv->f_SetNumGhost        = remote_bHYPRE_StructBuildMatrix_SetNumGhost;
+  epv->f_SetSymmetric       = remote_bHYPRE_StructBuildMatrix_SetSymmetric;
+  epv->f_SetConstantEntries = 
+    remote_bHYPRE_StructBuildMatrix_SetConstantEntries;
+  epv->f_SetConstantValues  = remote_bHYPRE_StructBuildMatrix_SetConstantValues;
   s_remote_initialized = 1;
 }
 

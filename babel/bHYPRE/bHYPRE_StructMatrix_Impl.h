@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:37 PST
- * Generated:     20050225 15:45:40 PST
+ * sidl Created:  20050317 11:17:39 PST
+ * Generated:     20050317 11:17:43 PST
  * Description:   Server-side implementation for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.9.8
- * source-line   = 1124
+ * source-line   = 1135
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -204,6 +204,19 @@ extern int32_t
 impl_bHYPRE_StructMatrix_SetSymmetric(
   bHYPRE_StructMatrix,
   int32_t);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_SetConstantEntries(
+  bHYPRE_StructMatrix,
+  int32_t,
+  struct sidl_int__array*);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_SetConstantValues(
+  bHYPRE_StructMatrix,
+  int32_t,
+  struct sidl_int__array*,
+  struct sidl_double__array*);
 
 #ifdef __cplusplus
 }

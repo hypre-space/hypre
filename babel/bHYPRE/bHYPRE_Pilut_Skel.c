@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.Pilut-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:37 PST
- * Generated:     20050225 15:45:40 PST
+ * sidl Created:  20050317 11:17:39 PST
+ * Generated:     20050317 11:17:43 PST
  * Description:   Server-side glue code for bHYPRE.Pilut
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1227
+ * source-line   = 1239
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 

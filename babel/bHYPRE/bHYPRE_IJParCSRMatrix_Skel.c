@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:37 PST
- * Generated:     20050225 15:45:40 PST
+ * sidl Created:  20050317 11:17:39 PST
+ * Generated:     20050317 11:17:44 PST
  * Description:   Server-side glue code for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 789
+ * source-line   = 794
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 

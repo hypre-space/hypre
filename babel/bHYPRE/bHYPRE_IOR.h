@@ -3,8 +3,8 @@
  * Symbol:        bHYPRE-v1.0.0
  * Symbol Type:   package
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:35 PST
- * Generated:     20050225 15:45:38 PST
+ * sidl Created:  20050317 11:17:38 PST
+ * Generated:     20050317 11:17:41 PST
  * Description:   Intermediate Object Representation for bHYPRE
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -107,6 +107,9 @@
 #endif
 #ifndef included_bHYPRE_StructMatrix_IOR_h
 #include "bHYPRE_StructMatrix_IOR.h"
+#endif
+#ifndef included_bHYPRE_StructPFMG_IOR_h
+#include "bHYPRE_StructPFMG_IOR.h"
 #endif
 #ifndef included_bHYPRE_StructSMG_IOR_h
 #include "bHYPRE_StructSMG_IOR.h"

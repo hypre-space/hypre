@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050225 15:45:37 PST
- * Generated:     20050225 15:45:40 PST
+ * sidl Created:  20050317 11:17:39 PST
+ * Generated:     20050317 11:17:43 PST
  * Description:   Server-side glue code for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1124
+ * source-line   = 1135
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -146,6 +146,19 @@ extern int32_t
 impl_bHYPRE_StructMatrix_SetSymmetric(
   bHYPRE_StructMatrix,
   int32_t);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_SetConstantEntries(
+  bHYPRE_StructMatrix,
+  int32_t,
+  struct sidl_int__array*);
+
+extern int32_t
+impl_bHYPRE_StructMatrix_SetConstantValues(
+  bHYPRE_StructMatrix,
+  int32_t,
+  struct sidl_int__array*,
+  struct sidl_double__array*);
 
 static int32_t
 skel_bHYPRE_StructMatrix_SetIntArray1Parameter(
@@ -296,6 +309,47 @@ skel_bHYPRE_StructMatrix_SetNumGhost(
   return _return;
 }
 
+static int32_t
+skel_bHYPRE_StructMatrix_SetConstantEntries(
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ int32_t num_stencil_constant_points,
+  /*in*/ struct sidl_int__array* stencil_constant_points)
+{
+  int32_t _return;
+  struct sidl_int__array* stencil_constant_points_proxy = 
+    sidl_int__array_ensure(stencil_constant_points, 1, sidl_column_major_order);
+  _return =
+    impl_bHYPRE_StructMatrix_SetConstantEntries(
+      self,
+      num_stencil_constant_points,
+      stencil_constant_points_proxy);
+  sidl_int__array_deleteRef(stencil_constant_points_proxy);
+  return _return;
+}
+
+static int32_t
+skel_bHYPRE_StructMatrix_SetConstantValues(
+  /*in*/ bHYPRE_StructMatrix self,
+  /*in*/ int32_t num_stencil_indices,
+  /*in*/ struct sidl_int__array* stencil_indices,
+  /*in*/ struct sidl_double__array* values)
+{
+  int32_t _return;
+  struct sidl_int__array* stencil_indices_proxy = 
+    sidl_int__array_ensure(stencil_indices, 1, sidl_column_major_order);
+  struct sidl_double__array* values_proxy = sidl_double__array_ensure(values, 1,
+    sidl_column_major_order);
+  _return =
+    impl_bHYPRE_StructMatrix_SetConstantValues(
+      self,
+      num_stencil_indices,
+      stencil_indices_proxy,
+      values_proxy);
+  sidl_int__array_deleteRef(stencil_indices_proxy);
+  sidl_double__array_deleteRef(values_proxy);
+  return _return;
+}
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -328,6 +382,8 @@ bHYPRE_StructMatrix__set_epv(struct bHYPRE_StructMatrix__epv *epv)
   epv->f_SetBoxValues = skel_bHYPRE_StructMatrix_SetBoxValues;
   epv->f_SetNumGhost = skel_bHYPRE_StructMatrix_SetNumGhost;
   epv->f_SetSymmetric = impl_bHYPRE_StructMatrix_SetSymmetric;
+  epv->f_SetConstantEntries = skel_bHYPRE_StructMatrix_SetConstantEntries;
+  epv->f_SetConstantValues = skel_bHYPRE_StructMatrix_SetConstantValues;
 }
 #ifdef __cplusplus
 }

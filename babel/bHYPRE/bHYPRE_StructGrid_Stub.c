@@ -3,14 +3,14 @@
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050311 14:16:31 PST
- * Generated:     20050311 14:16:33 PST
+ * sidl Created:  20050317 11:17:39 PST
+ * Generated:     20050317 11:17:41 PST
  * Description:   Client-side glue code for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1101
+ * source-line   = 1106
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
