@@ -35,10 +35,10 @@ MLI_ParCSRBooleanMatrix *MLI_ParBooleanMatmul
    int             *B_offd_i = MLI_CSRBooleanMatrix_Get_I(B_offd);
    int             *B_offd_j = MLI_CSRBooleanMatrix_Get_J(B_offd);
 
-   int	first_col_diag_B = MLI_ParCSRBoolean_Get_MatrixFirstColDiag(B);
+   int	first_col_diag_B = MLI_ParCSRBooleanMatrix_Get_FirstColDiag(B);
    int *col_starts_B = MLI_ParCSRBooleanMatrix_Get_ColStarts(B);
-   int	num_cols_diag_B = MLI_CSRBooleanMatrix_Get_NumCols(B_diag);
-   int	num_cols_offd_B = MLI_CSRBooleanMatrix_Get_NumCols(B_offd);
+   int	num_cols_diag_B = MLI_CSRBooleanMatrix_Get_NCols(B_diag);
+   int	num_cols_offd_B = MLI_CSRBooleanMatrix_Get_NCols(B_offd);
 
    MLI_ParCSRBooleanMatrix *C;
    int		      *col_map_offd_C;
@@ -73,9 +73,6 @@ MLI_ParCSRBooleanMatrix *MLI_ParBooleanMatmul
    int		    n_rows_A, n_cols_A;
    int		    n_rows_B, n_cols_B;
 
-   double           a_entry;
-   double           a_b_product;
-   
 
    n_rows_A = MLI_ParCSRBooleanMatrix_Get_GlobalNRows(A);
    n_cols_A = MLI_ParCSRBooleanMatrix_Get_GlobalNCols(A);
@@ -98,7 +95,7 @@ MLI_ParCSRBooleanMatrix *MLI_ParBooleanMatmul
     	* If there exists no CommPkg for A, a CommPkg is generated using
     	* equally load balanced partitionings
     	*--------------------------------------------------------------------*/
-   	if (!MLI_ParCSRBooleanMatrixCommPkg(A))
+   	if (!MLI_ParCSRBooleanMatrix_Get_CommPkg(A))
    	{
         	hypre_MatvecCommPkgCreate(A);
    	}
@@ -381,7 +378,7 @@ MLI_ParCSRBooleanMatrixExtractBExt
    int *B_ext_i;
    int *B_ext_j;
 
-   int *B_ext_data, *diag_data, *offd_data;
+   int *B_ext_data, *diag_data=NULL, *offd_data=NULL;
    /* ... not referenced, but needed for function call */
  
    num_cols_B = MLI_ParCSRBooleanMatrix_Get_GlobalNCols(B);
