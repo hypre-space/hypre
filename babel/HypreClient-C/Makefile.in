@@ -1,0 +1,59 @@
+include babel.make
+
+.SUFFIXES: .c .o
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+
+CC = @CC@
+RANLIB= @RANLIB@
+
+C_COMPILE_FLAGS=@CFLAGS@
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@ @BABEL_HYPRE_INCLUDES@
+
+CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I..\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../seq_mv\
+ ${CINCLUDES}\
+ ${CDEFS}
+ 
+
+HEADERS = ${STUBHDRS} ${IORHDRS} ${IMPLHDRS}
+
+FILES = ${IMPLSRCS} ${IORSRCS} ${SKELSRCS} ${STUBSRCS}
+
+OBJS = ${FILES:.c=.o}
+
+##################################################################
+# Rules
+##################################################################
+
+libHypreBabelClient-C.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
+
+${OBJS}: ${HEADERS}
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+
+##################################################################
+# Standard Targets
+##################################################################
+
+clean:
+	@rm -f *.o
+
+veryclean: clean
+	@rm -f libHypreBabelClient-C.a
