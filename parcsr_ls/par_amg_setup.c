@@ -438,13 +438,54 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
          else if (coarsen_type == 8)
          {
-	    hypre_BoomerAMGCoarsenMIS(S, A_array[level], 0,
-                             debug_flag, &CF_marker);
+           if (nodal < 0)
+           {
+             hypre_BoomerAMGCoarsenPMIS(SN, SN, 0,
+                                    debug_flag, &CF_marker);
+           }
+           else if (nodal > 0)
+           {
+             hypre_BoomerAMGCoarsenPMIS(SN, SN, 0,
+                                    debug_flag, &CFN_marker);
+             hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
+                             num_functions, nodal, 0, NULL, &CF_marker, &S);
+             hypre_TFree(CFN_marker);
+             hypre_ParCSRMatrixDestroy(AN);
+             hypre_ParCSRMatrixDestroy(SN);
+           }
+           else
+           {
+             hypre_BoomerAMGCoarsenPMIS(S, A_array[level], 0,
+                                    debug_flag, &CF_marker);
+           }
          }
          else if (coarsen_type == 9)
          {
-	    hypre_BoomerAMGCoarsenMIS(S, A_array[level], 1,
+	    hypre_BoomerAMGCoarsenPMIS(S, A_array[level], 2,
                              debug_flag, &CF_marker);
+         }
+         else if (coarsen_type == 10)
+         {
+           if (nodal < 0)
+           {
+             hypre_BoomerAMGCoarsenHMIS(SN, SN, measure_type,
+                                    debug_flag, &CF_marker);
+           }
+           else if (nodal > 0)
+           {
+             hypre_BoomerAMGCoarsenHMIS(SN, SN, measure_type,
+                                    debug_flag, &CFN_marker);
+             hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
+                             num_functions, nodal, 0, NULL, &CF_marker, &S);
+             hypre_TFree(CFN_marker);
+             hypre_ParCSRMatrixDestroy(AN);
+             hypre_ParCSRMatrixDestroy(SN);
+           }
+           else
+           {
+             hypre_BoomerAMGCoarsenHMIS(S, A_array[level], measure_type,
+                                    debug_flag, &CF_marker);
+           }
          }
          else if (coarsen_type)
          {

@@ -1013,8 +1013,13 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       f_pnt = Z_PT;
       coarsen_type = 1;
    }
+   if (coarsen_type == 11)
+   {
+      f_pnt = Z_PT;
+   }
 
-   if ((measure_type || coarsen_type != 1) && num_procs > 1)
+   if ((measure_type || coarsen_type != 1 || coarsen_type != 11) 
+		&& num_procs > 1)
    {
       S_ext      = hypre_ParCSRMatrixExtractBExt(S,A,0);
       S_ext_i    = hypre_CSRMatrixI(S_ext);
@@ -1218,6 +1223,12 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    hypre_TFree(where);
    hypre_TFree(LoL_head);
    hypre_TFree(LoL_tail);
+
+   if (coarsen_type == 11)
+   {
+      *CF_marker_ptr = CF_marker;
+      return 0;
+   }
 
    /* second pass, check fine points for coarse neighbors 
       for coarsen_type = 2, the second pass includes
@@ -1875,6 +1886,28 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *S,
    return (ierr);
 }
 
+int
+hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
+                            hypre_ParCSRMatrix    *A,
+                            int                    measure_type,
+                            int                    debug_flag,
+                            int                  **CF_marker_ptr)
+{
+   int              ierr = 0;
+
+   /*-------------------------------------------------------
+    * Perform Ruge coarsening followed by CLJP coarsening
+    *-------------------------------------------------------*/
+
+   ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 11, debug_flag,
+                                CF_marker_ptr);
+
+   ierr += hypre_BoomerAMGCoarsenPMIS (S, A, 1, debug_flag,
+                                CF_marker_ptr);
+
+   return (ierr);
+}
+
 /*--------------------------------------------------------------------------*/
 
 #define C_PT  1
@@ -1892,8 +1925,8 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *S,
  *
  **************************************************************/
 int
-hypre_BoomerAMGCoarsenMIS( hypre_ParCSRMatrix    *S,
-			   hypre_ParCSRMatrix    *A,
+hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
+			    hypre_ParCSRMatrix    *A,
                         int                    CF_init,
                         int                    debug_flag,
                         int                  **CF_marker_ptr)
@@ -2067,25 +2100,54 @@ hypre_BoomerAMGCoarsenMIS( hypre_ParCSRMatrix    *S,
 
    /* now the local part of the graph array, and the local CF_marker array */
    graph_array = hypre_CTAlloc(int, num_variables);
-   CF_marker = hypre_CTAlloc(int, num_variables);
 
-   cnt = 0;
-   for (i=0; i < num_variables; i++)
-     {
-       CF_marker[i] = 0;
-
-       /* make points that are not influenced by any other point, F points, and do not
-          include them into the local graph */
-       /* I THINK THAT THIS IS NOT NECESSARY; COMMENTED OUT */
-       /* if ( (S_diag_i[i+1]-S_diag_i[i]) == 0 
-	    && (S_offd_i[i+1]-S_offd_i[i]) == 0)
+   if (CF_init==1)
+   { 
+      CF_marker = *CF_marker_ptr;
+      cnt = 0;
+      for (i=0; i < num_variables; i++)
+      {
+         if ( (S_offd_i[i+1]-S_offd_i[i]) > 0 || CF_marker[i] == -1)
 	 {
-	   CF_marker[i] = SF_PT;
-	   measure_array[i] = 0;
+	   CF_marker[i] = 0;
 	 }
-	 else*/
-	 graph_array[cnt++] = i;
-     }
+         if ( CF_marker[i] == Z_PT)
+         {
+            if (measure_array[i] >= 1.0 ||
+                (S_diag_i[i+1]-S_diag_i[i]) > 0)
+            {
+               CF_marker[i] = 0;
+               graph_array[cnt++] = i;
+            }
+            else
+            {
+               graph_size--;
+               CF_marker[i] = F_PT;
+            }
+         }
+         else if (CF_marker[i] == SF_PT)
+            measure_array[i] = 0;
+         else
+            graph_array[cnt++] = i;
+      }
+   }
+   else
+   {
+      CF_marker = hypre_CTAlloc(int, num_variables);
+      cnt = 0;
+      for (i=0; i < num_variables; i++)
+      {
+         CF_marker[i] = 0;
+         if ( (S_diag_i[i+1]-S_diag_i[i]) == 0
+                && (S_offd_i[i+1]-S_offd_i[i]) == 0)
+         {
+            CF_marker[i] = SF_PT;
+            measure_array[i] = 0;
+         }
+         else
+            graph_array[cnt++] = i;
+      }
+   }
    graph_size = cnt;
 
    /* now the off-diagonal part of CF_marker */
@@ -2191,11 +2253,12 @@ hypre_BoomerAMGCoarsenMIS( hypre_ParCSRMatrix    *S,
         At the end, CF_marker is complete, but still needs to be
         communicated to CF_marker_offd
       *------------------------------------------------*/
-       hypre_BoomerAMGIndepSet(S, measure_array, graph_array, 
+      if (!CF_init || iter)
+      {
+          hypre_BoomerAMGIndepSet(S, measure_array, graph_array, 
 				graph_size, 
 				graph_array_offd, graph_offd_size, 
 				CF_marker, CF_marker_offd);
-      iter++;
 
       /*------------------------------------------------
        * Exchange boundary data for CF_marker: send internal
@@ -2236,7 +2299,9 @@ hypre_BoomerAMGCoarsenMIS( hypre_ParCSRMatrix    *S,
  
          hypre_ParCSRCommHandleDestroy(comm_handle);   
       }
+      }
 
+      iter++;
      /*------------------------------------------------
       * Set C-pts and F-pts.
       *------------------------------------------------*/
