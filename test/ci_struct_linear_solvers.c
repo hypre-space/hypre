@@ -79,7 +79,16 @@ main( int   argc,
 
  
    /* Initialize MPI */
-   MPI_Init(&argc, &argv);
+   MPI_Init(&argc, &argv); 
+
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+
+#ifdef HYPRE_DEBUG
+   cegdb(&argc, &argv, myid);
+#endif
+   MPI_Initialized( &ix );
 
    /* Initialize Petsc */ /* In regular code should not be done here */
    PetscInitialize( NULL, NULL, NULL, NULL);
