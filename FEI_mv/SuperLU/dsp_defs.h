@@ -15,6 +15,7 @@
  * Purpose:             Sparse matrix types and function prototypes
  * History:
  */
+#include <HYPRE_config.h>
 #include <fortran.h>
 #ifdef _CRAY
 #include <string.h>
