@@ -17,12 +17,12 @@
 
 
 /*--------------------------------------------------------------------------
- * WriteYSMP
+ * hypre_WriteYSMP
  *--------------------------------------------------------------------------*/
 
-void     WriteYSMP(file_name, matrix)
+void     hypre_WriteYSMP(file_name, matrix)
 char    *file_name;
-Matrix  *matrix;
+hypre_Matrix  *matrix;
 {
    FILE    *fp;
 
@@ -38,10 +38,10 @@ Matrix  *matrix;
     * Write the matrix data
     *----------------------------------------------------------*/
 
-   data = MatrixData(matrix);
-   ia   = MatrixIA(matrix);
-   ja   = MatrixJA(matrix);
-   size = MatrixSize(matrix);
+   data = hypre_MatrixData(matrix);
+   ia   = hypre_MatrixIA(matrix);
+   ja   = hypre_MatrixJA(matrix);
+   size = hypre_MatrixSize(matrix);
 
    fp = fopen(file_name, "w");
 
@@ -62,12 +62,12 @@ Matrix  *matrix;
 }
 
 /*--------------------------------------------------------------------------
- * WriteVec
+ * hypre_WriteVec
  *--------------------------------------------------------------------------*/
 
-void     WriteVec(file_name, vector)
+void     hypre_WriteVec(file_name, vector)
 char    *file_name;
-Vector  *vector;
+hypre_Vector  *vector;
 {
    FILE    *fp;
 
@@ -81,8 +81,8 @@ Vector  *vector;
     * Write in the data
     *----------------------------------------------------------*/
 
-   data = VectorData(vector);
-   size = VectorSize(vector);
+   data = hypre_VectorData(vector);
+   size = hypre_VectorSize(vector);
 
    fp = fopen(file_name, "w");
 
@@ -98,12 +98,12 @@ Vector  *vector;
 
 
 /*--------------------------------------------------------------------------
- * WriteVecInt
+ * hypre_WriteVecInt
  *--------------------------------------------------------------------------*/
 
-void     WriteVecInt(file_name, vector)
+void     hypre_WriteVecInt(file_name, vector)
 char    *file_name;
-VectorInt  *vector;
+hypre_VectorInt  *vector;
 {
    FILE    *fp;
 
@@ -117,8 +117,8 @@ VectorInt  *vector;
     * Write the data
     *----------------------------------------------------------*/
 
-   data = VectorIntData(vector);
-   size = VectorIntSize(vector);
+   data = hypre_VectorIntData(vector);
+   size = hypre_VectorIntSize(vector);
 
    fp = fopen(file_name, "w");
 
@@ -133,18 +133,18 @@ VectorInt  *vector;
 }
 
 /*---------------------------------------------------------------
- * WriteSetupParams
+ * hypre_WriteSetupParams
  *---------------------------------------------------------------*/
 
 
-void     WriteSetupParams(data)
+void     hypre_WriteSetupParams(data)
 void    *data;
 
 {
    FILE    *fp;
    char    *file_name;
 
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
 
 
    int      type;
@@ -168,17 +168,17 @@ void    *data;
     * Get the amg_data data
     *----------------------------------------------------------*/
 
-   file_name = AMGDataLogFileName(amg_data);
+   file_name = hypre_AMGDataLogFileName(amg_data);
 
 
-   amg_levmax  = AMGDataLevMax(amg_data);
-   amg_ncg     = AMGDataNCG(amg_data);
-   amg_ecg     = AMGDataECG(amg_data);
-   amg_nwt     = AMGDataNWT(amg_data);
-   amg_ewt     = AMGDataEWT(amg_data);
-   amg_nstr    = AMGDataNSTR(amg_data);
+   amg_levmax  = hypre_AMGDataLevMax(amg_data);
+   amg_ncg     = hypre_AMGDataNCG(amg_data);
+   amg_ecg     = hypre_AMGDataECG(amg_data);
+   amg_nwt     = hypre_AMGDataNWT(amg_data);
+   amg_ewt     = hypre_AMGDataEWT(amg_data);
+   amg_nstr    = hypre_AMGDataNSTR(amg_data);
 
-   amg_ioutdat = AMGDataIOutDat(amg_data);
+   amg_ioutdat = hypre_AMGDataIOutDat(amg_data);
 
    /*----------------------------------------------------------
     * Open the output file
@@ -216,11 +216,11 @@ void    *data;
 
 
 /*---------------------------------------------------------------
- * WriteSolverParams
+ * hypre_WriteSolverParams
  *---------------------------------------------------------------*/
 
 
-void     WriteSolverParams(tol,data)
+void     hypre_WriteSolverParams(tol,data)
 void    *data;
 double   tol;
 
@@ -228,7 +228,7 @@ double   tol;
    FILE    *fp;
    char    *file_name;
 
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
 
 
    int      type;
@@ -253,18 +253,18 @@ double   tol;
     * Get the amg_data data
     *----------------------------------------------------------*/
 
-   file_name = AMGDataLogFileName(amg_data);
+   file_name = hypre_AMGDataLogFileName(amg_data);
 
    stop_tolerance = tol;
 
 
-   amg_ncyc    = AMGDataNCyc(amg_data);
-   amg_levmax  = AMGDataLevMax(amg_data);
-   amg_mu      = AMGDataMU(amg_data);
-   amg_ntrlx   = AMGDataNTRLX(amg_data);
-   amg_iprlx   = AMGDataIPRLX(amg_data);
+   amg_ncyc    = hypre_AMGDataNCyc(amg_data);
+   amg_levmax  = hypre_AMGDataLevMax(amg_data);
+   amg_mu      = hypre_AMGDataMU(amg_data);
+   amg_ntrlx   = hypre_AMGDataNTRLX(amg_data);
+   amg_iprlx   = hypre_AMGDataIPRLX(amg_data);
 
-   amg_ioutdat = AMGDataIOutDat(amg_data);
+   amg_ioutdat = hypre_AMGDataIOutDat(amg_data);
 
    /*----------------------------------------------------------
     * Open the output file

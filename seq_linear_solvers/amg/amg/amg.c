@@ -17,13 +17,13 @@
 
 
 /*--------------------------------------------------------------------------
- * amg_Initialize
+ * HYPRE_AMGInitialize
  *--------------------------------------------------------------------------*/
 
-void  *amg_Initialize(port_data)
+void  *HYPRE_AMGInitialize(port_data)
 void  *port_data;
 {
-   AMGData  *amg_data;
+   hypre_AMGData  *amg_data;
    FILE     *fp;
 
    /* setup params */
@@ -64,15 +64,15 @@ void  *port_data;
 
    /* solve params */
    ncyc  = 1020;
-   mu = ctalloc(int, levmax);
+   mu = hypre_CTAlloc(int, levmax);
    for (i = 0; i < levmax; i++)
       mu[i] = 1;
-   ntrlx = ctalloc(int, 4);
+   ntrlx = hypre_CTAlloc(int, 4);
    ntrlx[0] = 133;
    ntrlx[1] = 133;
    ntrlx[2] = 133;
    ntrlx[3] = 19;
-   iprlx = ctalloc(int, 4);
+   iprlx = hypre_CTAlloc(int, 4);
    iprlx[0] = 31;
    iprlx[1] = 31;
    iprlx[2] = 13;
@@ -84,10 +84,10 @@ void  *port_data;
 
 
    /*-----------------------------------------------------------------------
-    * Create the AMGData structure and return
+    * Create the hypre_AMGData structure and return
     *-----------------------------------------------------------------------*/
 
-   amg_data = amg_NewData(levmax, ncg, ecg, nwt, ewt, nstr,
+   amg_data = hypre_AMGNewData(levmax, ncg, ecg, nwt, ewt, nstr,
 			  ncyc, mu, ntrlx, iprlx, 
 			  ioutdat, cycle_op_count,
 			  "amg.out.log"); 
@@ -97,15 +97,15 @@ void  *port_data;
 }
 
 /*--------------------------------------------------------------------------
- * amg_Finalize
+ * HYPRE_AMGFinalize
  *--------------------------------------------------------------------------*/
 
-void   amg_Finalize(data)
+void   HYPRE_AMGFinalize(data)
 void  *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
 
 
-   amg_FreeData(amg_data);
+   hypre_AMGFreeData(amg_data);
 }
 

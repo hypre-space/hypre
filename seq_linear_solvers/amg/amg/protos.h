@@ -1,6 +1,6 @@
 
-#ifndef _PROTOS_HEADER
-#define _PROTOS_HEADER
+#ifndef HYPRE_PROTOS_HEADER
+#define HYPRE_PROTOS_HEADER
 
 #ifdef __STDC__
 # define	P(s) s
@@ -10,77 +10,77 @@
 
 
 /* amg.c */
-void *amg_Initialize P((void *port_data ));
-void amg_Finalize P((void *data ));
+void *HYPRE_AMGInitialize P((void *port_data ));
+void HYPRE_AMGFinalize P((void *data ));
 
 /* amg_cycle.c */
-int amg_Cycle P((Vector **U_array , Vector **F_array , double tol , void *data ));
+int hypre_AMGCycle P((hypre_Vector **U_array , hypre_Vector **F_array , double tol , void *data ));
 
 /* amg_params.c */
-void amg_SetLevMax P((int levmax , void *data ));
-void amg_SetNCG P((int ncg , void *data ));
-void amg_SetECG P((double ecg , void *data ));
-void amg_SetNWT P((int nwt , void *data ));
-void amg_SetEWT P((double ewt , void *data ));
-void amg_SetNSTR P((int nstr , void *data ));
-void amg_SetNCyc P((int ncyc , void *data ));
-void amg_SetMU P((int *mu , void *data ));
-void amg_SetNTRLX P((int *ntrlx , void *data ));
-void amg_SetIPRLX P((int *iprlx , void *data ));
-void amg_SetLogging P((int ioutdat , char *log_file_name , void *data ));
-void amg_SetNumUnknowns P((int num_unknowns , void *data ));
-void amg_SetNumPoints P((int num_points , void *data ));
-void amg_SetIU P((int *iu , void *data ));
-void amg_SetIP P((int *ip , void *data ));
-void amg_SetIV P((int *iv , void *data ));
-void amg_SetXP P((double *xp , void *data ));
-void amg_SetYP P((double *yp , void *data ));
-void amg_SetZP P((double *zp , void *data ));
+void HYPRE_AMGSetLevMax P((int levmax , void *data ));
+void HYPRE_AMGSetNCG P((int ncg , void *data ));
+void HYPRE_AMGSetECG P((double ecg , void *data ));
+void HYPRE_AMGSetNWT P((int nwt , void *data ));
+void HYPRE_AMGSetEWT P((double ewt , void *data ));
+void HYPRE_AMGSetNSTR P((int nstr , void *data ));
+void HYPRE_AMGSetNCyc P((int ncyc , void *data ));
+void HYPRE_AMGSetMU P((int *mu , void *data ));
+void HYPRE_AMGSetNTRLX P((int *ntrlx , void *data ));
+void HYPRE_AMGSetIPRLX P((int *iprlx , void *data ));
+void HYPRE_AMGSetLogging P((int ioutdat , char *log_file_name , void *data ));
+void HYPRE_AMGSetNumUnknowns P((int num_unknowns , void *data ));
+void HYPRE_AMGSetNumPoints P((int num_points , void *data ));
+void HYPRE_AMGSetIU P((int *iu , void *data ));
+void HYPRE_AMGSetIP P((int *ip , void *data ));
+void HYPRE_AMGSetIV P((int *iv , void *data ));
+void HYPRE_AMGSetXP P((double *xp , void *data ));
+void HYPRE_AMGSetYP P((double *yp , void *data ));
+void HYPRE_AMGSetZP P((double *zp , void *data ));
 
 /* amg_relax.c */
-int amg_Relax P((Vector *u , Vector *f , Matrix *A , VectorInt *ICG , VectorInt *IV , int min_point , int max_point , int point_type , int relax_type , double *D_mat , double *S_vec ));
+int hypre_AMGRelax P((hypre_Vector *u , hypre_Vector *f , hypre_Matrix *A , hypre_VectorInt *ICG , hypre_VectorInt *IV , int min_point , int max_point , int point_type , int relax_type , double *D_mat , double *S_vec ));
 int gselim P((double *A , double *x , int n ));
 
 /* amg_setup.c */
-int amg_Setup P((Matrix *A , void *data ));
+int HYPRE_AMGSetup P((hypre_Matrix *A , void *data ));
 
 /* amg_solve.c */
-int amg_Solve P((Vector *u , Vector *f , double tol , void *data ));
+int HYPRE_AMGSolve P((hypre_Vector *u , hypre_Vector *f , double tol , void *data ));
 
 /* config.cygwin32 */
 
 /* data.c */
-AMGData *amg_NewData P((int levmax , int ncg , double ecg , int nwt , double ewt , int nstr , int ncyc , int *mu , int *ntrlx , int *iprlx , int ioutdat , int cycle_op_count , char *log_file_name ));
-void amg_FreeData P((AMGData *amg_data ));
+hypre_AMGData *hypre_AMGNewData P((int levmax , int ncg , double ecg , int nwt , double ewt , int nstr , int ncyc , int *mu , int *ntrlx , int *iprlx , int ioutdat , int cycle_op_count , char *log_file_name ));
+void hypre_AMGFreeData P((hypre_AMGData *amg_data ));
 
 /* matrix.c */
-Matrix *NewMatrix P((double *data , int *ia , int *ja , int size ));
-void FreeMatrix P((Matrix *matrix ));
-void Matvec P((double alpha , Matrix *A , Vector *x , double beta , Vector *y ));
-void MatvecT P((double alpha , Matrix *A , Vector *x , double beta , Vector *y ));
+hypre_Matrix *hypre_NewMatrix P((double *data , int *ia , int *ja , int size ));
+void hypre_FreeMatrix P((hypre_Matrix *matrix ));
+void hypre_Matvec P((double alpha , hypre_Matrix *A , hypre_Vector *x , double beta , hypre_Vector *y ));
+void hypre_MatvecT P((double alpha , hypre_Matrix *A , hypre_Vector *x , double beta , hypre_Vector *y ));
 
 /* random.c */
-void SeedRand P((int seed ));
-double Rand P((void ));
+void hypre_SeedRand P((int seed ));
+double hypre_Rand P((void ));
 
 /* vector.c */
-Vector *NewVector P((double *data , int size ));
-void FreeVector P((Vector *vector ));
-VectorInt *NewVectorInt P((int *data , int size ));
-void FreeVectorInt P((VectorInt *vector ));
-void InitVector P((Vector *v , double value ));
-void InitVectorRandom P((Vector *v ));
-void CopyVector P((Vector *x , Vector *y ));
-void ScaleVector P((double alpha , Vector *y ));
-void Axpy P((double alpha , Vector *x , Vector *y ));
-double InnerProd P((Vector *x , Vector *y ));
+hypre_Vector *hypre_NewVector P((double *data , int size ));
+void hypre_FreeVector P((hypre_Vector *vector ));
+hypre_VectorInt *hypre_NewVectorInt P((int *data , int size ));
+void hypre_FreeVectorInt P((hypre_VectorInt *vector ));
+void hypre_InitVector P((hypre_Vector *v , double value ));
+void hypre_InitVectorRandom P((hypre_Vector *v ));
+void hypre_CopyVector P((hypre_Vector *x , hypre_Vector *y ));
+void hypre_ScaleVector P((double alpha , hypre_Vector *y ));
+void hypre_Axpy P((double alpha , hypre_Vector *x , hypre_Vector *y ));
+double hypre_InnerProd P((hypre_Vector *x , hypre_Vector *y ));
 
 /* write.c */
-void WriteYSMP P((char *file_name , Matrix *matrix ));
-void WriteVec P((char *file_name , Vector *vector ));
-void WriteVecInt P((char *file_name , VectorInt *vector ));
-void WriteSetupParams P((void *data ));
-void WriteSolverParams P((double tol , void *data ));
+void hypre_WriteYSMP P((char *file_name , hypre_Matrix *matrix ));
+void hypre_WriteVec P((char *file_name , hypre_Vector *vector ));
+void hypre_WriteVecInt P((char *file_name , hypre_VectorInt *vector ));
+void hypre_WriteSetupParams P((void *data ));
+void hypre_WriteSolverParams P((double tol , void *data ));
 
 #undef P
 

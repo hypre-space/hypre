@@ -13,8 +13,8 @@
  *
  *****************************************************************************/
 
-#ifndef _HEADERS_HEADER
-#define _HEADERS_HEADER
+#ifndef HYPRE_HEADERS_HEADER
+#define HYPRE_HEADERS_HEADER
 
 
 #include <stdio.h>

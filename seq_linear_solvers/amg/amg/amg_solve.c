@@ -17,12 +17,12 @@
 
 
 /*--------------------------------------------------------------------------
- * amg_Solve
+ * HYPRE_AMGSolve
  *--------------------------------------------------------------------------*/
 
-int         amg_Solve(u, f, tol, data)
-Vector      *u;
-Vector      *f;
+int         HYPRE_AMGSolve(u, f, tol, data)
+hypre_Vector      *u;
+hypre_Vector      *f;
 double       tol;
 void        *data;
 {
@@ -40,7 +40,7 @@ void        *data;
    int      num_levels;
    int      num_unknowns;
    char    *file_name;
-   Matrix **A_array;
+   hypre_Matrix **A_array;
 
 /*  Local variables  */
 
@@ -73,49 +73,49 @@ void        *data;
    double   old_energy;
    double   old_resid;
 
-   Vector **F_array;
-   Vector **U_array;
-   Vector  *Vtemp;
+   hypre_Vector **F_array;
+   hypre_Vector **U_array;
+   hypre_Vector  *Vtemp;
 
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
 
-   amg_ioutdat   = AMGDataIOutDat(amg_data);
-   cycle_control = AMGDataNCyc(amg_data);
-   file_name     = AMGDataLogFileName(amg_data);
-   num_unknowns  = AMGDataNumUnknowns(amg_data);
-   num_levels    = AMGDataNumLevels(amg_data);
-   A_array       = AMGDataAArray(amg_data);
-   num_coeffs    = AMGDataNumA(amg_data);
-   num_variables = AMGDataNumV(amg_data);
-   levv          = AMGDataLevV(amg_data);
+   amg_ioutdat   = hypre_AMGDataIOutDat(amg_data);
+   cycle_control = hypre_AMGDataNCyc(amg_data);
+   file_name     = hypre_AMGDataLogFileName(amg_data);
+   num_unknowns  = hypre_AMGDataNumUnknowns(amg_data);
+   num_levels    = hypre_AMGDataNumLevels(amg_data);
+   A_array       = hypre_AMGDataAArray(amg_data);
+   num_coeffs    = hypre_AMGDataNumA(amg_data);
+   num_variables = hypre_AMGDataNumV(amg_data);
+   levv          = hypre_AMGDataLevV(amg_data);
    
-   iarr = ctalloc(int, 10);
-   resv = ctalloc(double, num_unknowns);
+   iarr = hypre_CTAlloc(int, 10);
+   resv = hypre_CTAlloc(double, num_unknowns);
 
-   F_array = talloc(Vector*, num_levels);
-   U_array = talloc(Vector*, num_levels);
+   F_array = hypre_TAlloc(hypre_Vector*, num_levels);
+   U_array = hypre_TAlloc(hypre_Vector*, num_levels);
  
    F_array[0] = f;
    U_array[0] = u;
 
 
-   Vtemp = AMGDataVtemp(amg_data);
+   Vtemp = hypre_AMGDataVtemp(amg_data);
 
    for (j = 1; j < num_levels; j++)
    {
-       F_array[j] = NewVector(&(f->data[levv[j]-1]), num_variables[j]);
-       U_array[j] = NewVector(&(u->data[levv[j]-1]), num_variables[j]);
+       F_array[j] = hypre_NewVector(&(f->data[levv[j]-1]), num_variables[j]);
+       U_array[j] = hypre_NewVector(&(u->data[levv[j]-1]), num_variables[j]);
    }
 
 /*********  the following does not work at this time 
 
    for (j = 1; j < num_levels; j++)
    {
-       tmpvec = ctalloc(double, num_variables[j]);
-       F_array[j] = NewVector(tmpvec, num_variables[j]);
+       tmpvec = hypre_CTAlloc(double, num_variables[j]);
+       F_array[j] = hypre_NewVector(tmpvec, num_variables[j]);
 
-       tmpvec = ctalloc(double, num_variables[j]);
-       U_array[j] = NewVector(tmpvec, num_variables[j]);
+       tmpvec = hypre_CTAlloc(double, num_variables[j]);
+       U_array[j] = hypre_NewVector(tmpvec, num_variables[j]);
    }
 
 *************/ 
@@ -125,7 +125,7 @@ void        *data;
  *    Write the solver parameters
  *--------------------------------------------------------------------------*/
 
-   WriteSolverParams(tol, amg_data);
+   hypre_WriteSolverParams(tol, amg_data);
 
 
 /*--------------------------------------------------------------------------
@@ -163,20 +163,20 @@ void        *data;
     Fcycle_flag = iarr[1];
     num_Vcycles = iarr[2];
 
-    AMGDataFcycleFlag(amg_data) = Fcycle_flag;
-    AMGDataVstarFlag(amg_data) = Vstar_flag;
+    hypre_AMGDataFcycleFlag(amg_data) = Fcycle_flag;
+    hypre_AMGDataVstarFlag(amg_data) = Vstar_flag;
 
 
 /*--------------------------------------------------------------------------
  *    Compute initial fine-grid residual and print to logfile
  *--------------------------------------------------------------------------*/
 
-   CopyVector(F_array[0],Vtemp);
-   Matvec(alpha,A_array[0],U_array[0],beta,Vtemp);
-   resid_nrm = sqrt(InnerProd(Vtemp,Vtemp));
+   hypre_CopyVector(F_array[0],Vtemp);
+   hypre_Matvec(alpha,A_array[0],U_array[0],beta,Vtemp);
+   resid_nrm = sqrt(hypre_InnerProd(Vtemp,Vtemp));
 
    resid_nrm_init = resid_nrm;
-   rhs_norm = sqrt(InnerProd(f,f));
+   rhs_norm = sqrt(hypre_InnerProd(f,f));
    relative_resid = resid_nrm_init / rhs_norm;
 
    if (amg_ioutdat == 1 || amg_ioutdat == 3)
@@ -195,10 +195,10 @@ void        *data;
    while (relative_resid >= tol && cycle_count < num_Vcycles 
                                 && Solve_err_flag == 0)
    {
-         AMGDataCycleOpCount(amg_data) = 0;   
+         hypre_AMGDataCycleOpCount(amg_data) = 0;   
                         /* Op count only needed for one cycle */
 
-         Solve_err_flag = amg_Cycle(U_array,F_array,tol,amg_data);
+         Solve_err_flag = hypre_AMGCycle(U_array,F_array,tol,amg_data);
 
          old_energy = energy;
          old_resid = resid_nrm;
@@ -207,9 +207,9 @@ void        *data;
           *    Compute  fine-grid residual and residual norm
           *----------------------------------------------------------------*/
 
-         CopyVector(F_array[0],Vtemp);
-         Matvec(alpha,A_array[0],U_array[0],beta,Vtemp);
-         resid_nrm = sqrt(InnerProd(Vtemp,Vtemp));
+         hypre_CopyVector(F_array[0],Vtemp);
+         hypre_Matvec(alpha,A_array[0],U_array[0],beta,Vtemp);
+         resid_nrm = sqrt(hypre_InnerProd(Vtemp,Vtemp));
 
          conv_factor = resid_nrm / old_resid;
          relative_resid = resid_nrm / rhs_norm;
@@ -232,13 +232,13 @@ void        *data;
    conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/((double) cycle_count)));
 
 
-   for (j=0;j<AMGDataNumLevels(amg_data);j++)
+   for (j=0;j<hypre_AMGDataNumLevels(amg_data);j++)
    {
        total_coeffs += num_coeffs[j];
        total_variables += num_variables[j];
    }
 
-   cycle_op_count = AMGDataCycleOpCount(amg_data);
+   cycle_op_count = hypre_AMGDataCycleOpCount(amg_data);
 
    grid_cmplxty = ((double) total_variables) / ((double) num_variables[0]);
    operat_cmplxty = ((double) total_coeffs) / ((double) num_coeffs[0]);

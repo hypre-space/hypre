@@ -17,52 +17,52 @@
 
 
 /*--------------------------------------------------------------------------
- * NewVector
+ * hypre_NewVector
  *--------------------------------------------------------------------------*/
 
-Vector  *NewVector(data, size)
+hypre_Vector  *hypre_NewVector(data, size)
 double  *data;
 int      size;
 {
-   Vector     *new;
+   hypre_Vector     *new;
 
 
-   new = ctalloc(Vector, 1);
+   new = hypre_CTAlloc(hypre_Vector, 1);
 
-   VectorData(new) = data;
-   VectorSize(new) = size;
+   hypre_VectorData(new) = data;
+   hypre_VectorSize(new) = size;
 
    return new;
 }
 
 /*--------------------------------------------------------------------------
- * FreeVector
+ * hypre_FreeVector
  *--------------------------------------------------------------------------*/
 
-void     FreeVector(vector)
-Vector  *vector;
+void     hypre_FreeVector(vector)
+hypre_Vector  *vector;
 {
    if (vector)
    {
-      tfree(VectorData(vector));
-      tfree(vector);
+      hypre_TFree(hypre_VectorData(vector));
+      hypre_TFree(vector);
    }
 }
 
 /*---------------------------------------------------------------------------
- *    NewVectorInt
+ *    hypre_NewVectorInt
  *--------------------------------------------------------------------------*/
 
-VectorInt  *NewVectorInt(data, size)
+hypre_VectorInt  *hypre_NewVectorInt(data, size)
 int     *data;
 int      size;
 {
-   VectorInt     *new;
+   hypre_VectorInt     *new;
 
-   new = ctalloc(VectorInt, 1);
+   new = hypre_CTAlloc(hypre_VectorInt, 1);
 
-   VectorIntData(new) = data;
-   VectorIntSize(new) = size;
+   hypre_VectorIntData(new) = data;
+   hypre_VectorIntSize(new) = size;
 
    return new;
 
@@ -70,29 +70,29 @@ int      size;
 
 
 /*--------------------------------------------------------------------------
- * FreeVectorInt
+ * hypre_FreeVectorInt
  *--------------------------------------------------------------------------*/
 
-void     FreeVectorInt(vector)
-VectorInt  *vector;
+void     hypre_FreeVectorInt(vector)
+hypre_VectorInt  *vector;
 {
    if (vector)
    {
-      tfree(VectorIntData(vector));
-      tfree(vector);
+      hypre_TFree(hypre_VectorIntData(vector));
+      hypre_TFree(vector);
    }
 }
 
 /*--------------------------------------------------------------------------
- * InitVector
+ * hypre_InitVector
  *--------------------------------------------------------------------------*/
 
-void    InitVector(v, value)
-Vector *v;
+void    hypre_InitVector(v, value)
+hypre_Vector *v;
 double  value;
 {
-   double     *vp = VectorData(v);
-   int         n  = VectorSize(v);
+   double     *vp = hypre_VectorData(v);
+   int         n  = hypre_VectorSize(v);
 
    int         i;
 
@@ -102,33 +102,33 @@ double  value;
 }
 
 /*--------------------------------------------------------------------------
- * InitVectorRandom
+ * hypre_InitVectorRandom
  *--------------------------------------------------------------------------*/
 
-void    InitVectorRandom(v)
-Vector *v;
+void    hypre_InitVectorRandom(v)
+hypre_Vector *v;
 {
-   double     *vp = VectorData(v);
-   int         n  = VectorSize(v);
+   double     *vp = hypre_VectorData(v);
+   int         n  = hypre_VectorSize(v);
 
    int         i;
 
 
    for (i = 0; i < n; i++)
-      vp[i] = Rand();
+      vp[i] = hypre_Rand();
 }
 
 /*--------------------------------------------------------------------------
- * CopyVector
+ * hypre_CopyVector
  *--------------------------------------------------------------------------*/
 
-void     CopyVector(x, y)
-Vector  *x;
-Vector  *y;
+void     hypre_CopyVector(x, y)
+hypre_Vector  *x;
+hypre_Vector  *y;
 {
-   double     *xp = VectorData(x);
-   double     *yp = VectorData(y);
-   int         n  = VectorSize(x);
+   double     *xp = hypre_VectorData(x);
+   double     *yp = hypre_VectorData(y);
+   int         n  = hypre_VectorSize(x);
 
    int         i;
 
@@ -138,15 +138,15 @@ Vector  *y;
 }
 
 /*--------------------------------------------------------------------------
- * ScaleVector
+ * hypre_ScaleVector
  *--------------------------------------------------------------------------*/
 
-void     ScaleVector(alpha, y)
+void     hypre_ScaleVector(alpha, y)
 double   alpha;
-Vector  *y;
+hypre_Vector  *y;
 {
-   double     *yp = VectorData(y);
-   int         n  = VectorSize(y);
+   double     *yp = hypre_VectorData(y);
+   int         n  = hypre_VectorSize(y);
 
    int         i;
 
@@ -156,17 +156,17 @@ Vector  *y;
 }
 
 /*--------------------------------------------------------------------------
- * Axpy
+ * hypre_Axpy
  *--------------------------------------------------------------------------*/
 
-void     Axpy(alpha, x, y)
+void     hypre_Axpy(alpha, x, y)
 double   alpha;
-Vector  *x;
-Vector  *y;
+hypre_Vector  *x;
+hypre_Vector  *y;
 {
-   double     *xp = VectorData(x);
-   double     *yp = VectorData(y);
-   int         n  = VectorSize(x);
+   double     *xp = hypre_VectorData(x);
+   double     *yp = hypre_VectorData(y);
+   int         n  = hypre_VectorSize(x);
 
    int         i;
 
@@ -176,16 +176,16 @@ Vector  *y;
 }
 
 /*--------------------------------------------------------------------------
- * InnerProd
+ * hypre_InnerProd
  *--------------------------------------------------------------------------*/
 
-double   InnerProd(x, y)
-Vector  *x;
-Vector  *y;
+double   hypre_InnerProd(x, y)
+hypre_Vector  *x;
+hypre_Vector  *y;
 {
-   double     *xp = VectorData(x);
-   double     *yp = VectorData(y);
-   int         n  = VectorSize(x);
+   double     *xp = hypre_VectorData(x);
+   double     *yp = hypre_VectorData(y);
+   int         n  = hypre_VectorSize(x);
 
    int         i;
 

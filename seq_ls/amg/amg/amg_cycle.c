@@ -17,26 +17,26 @@
 
 
 /*--------------------------------------------------------------------------
- * amg_Cycle
+ * hypre_AMGCycle
  *--------------------------------------------------------------------------*/
 
-int         amg_Cycle(U_array,F_array, tol, data)
+int         hypre_AMGCycle(U_array,F_array, tol, data)
 
-Vector      **U_array;
-Vector      **F_array;
+hypre_Vector      **U_array;
+hypre_Vector      **F_array;
 double       tol;
 void        *data; 
 {
 
 /* Data Structure variables */
 
-   Matrix    **A_array;
-   Matrix    **P_array;
-   VectorInt **IU_array;
-   VectorInt **IP_array;
-   VectorInt **IV_array;
-   VectorInt **ICG_array;
-   Vector    *Vtemp;
+   hypre_Matrix    **A_array;
+   hypre_Matrix    **P_array;
+   hypre_VectorInt **IU_array;
+   hypre_VectorInt **IP_array;
+   hypre_VectorInt **IV_array;
+   hypre_VectorInt **ICG_array;
+   hypre_Vector    *Vtemp;
 
    int       Fcycle_flag;
    int       Vstar_flag;
@@ -50,10 +50,6 @@ void        *data;
    int      *iprlx;
    int      *num_coeffs;
    int      *numv;
-   int      *leva;
-   int      *levv;
-   int      *levi;
-   int      *levp;
    int       num_levels;
    int       num_unknowns;
 
@@ -61,7 +57,7 @@ void        *data;
 /* Local variables  */
 
    int      *iarr;
-   int      *ity, *iun, *ieq, *ipt;
+   int      *ity, *ipt;
    int      *lev_counter;
    int       Solve_err_flag;
    int       k;
@@ -84,45 +80,39 @@ void        *data;
    
 /* Acquire data and allocate storage */
 
-   AMGData  *amg_data = data; 
+   hypre_AMGData  *amg_data = data; 
 
-   A_array = AMGDataAArray(amg_data);
-   P_array = AMGDataPArray(amg_data);
-   IU_array = AMGDataIUArray(amg_data);
-   IP_array = AMGDataIPArray(amg_data);
-   IV_array = AMGDataIVArray(amg_data);
-   ICG_array = AMGDataICGArray(amg_data);
-   Vtemp = AMGDataVtemp(amg_data);
+   A_array = hypre_AMGDataAArray(amg_data);
+   P_array = hypre_AMGDataPArray(amg_data);
+   IU_array = hypre_AMGDataIUArray(amg_data);
+   IP_array = hypre_AMGDataIPArray(amg_data);
+   IV_array = hypre_AMGDataIVArray(amg_data);
+   ICG_array = hypre_AMGDataICGArray(amg_data);
+   Vtemp = hypre_AMGDataVtemp(amg_data);
 
-   imin = AMGDataIMin(amg_data);
-   imax = AMGDataIMax(amg_data);
-   ipmn = AMGDataIPMN(amg_data);
-   ipmx =  AMGDataIPMX(amg_data);
-   num_levels  = AMGDataNumLevels(amg_data);
-   mu = AMGDataMU(amg_data);
-   ntrlx = AMGDataNTRLX(amg_data);
-   iprlx = AMGDataIPRLX(amg_data);
-   leva = AMGDataLevA(amg_data);
-   levv = AMGDataLevV(amg_data);
-   levp = AMGDataLevP(amg_data);
-   levi = AMGDataLevI(amg_data);
-   num_coeffs = AMGDataNumA(amg_data);
-   num_unknowns = AMGDataNumUnknowns(amg_data);
-   numv = AMGDataNumV(amg_data);
-   cycle_op_count = AMGDataCycleOpCount(amg_data);
+   imin = hypre_AMGDataIMin(amg_data);
+   imax = hypre_AMGDataIMax(amg_data);
+   ipmn = hypre_AMGDataIPMN(amg_data);
+   ipmx =  hypre_AMGDataIPMX(amg_data);
+   num_levels  = hypre_AMGDataNumLevels(amg_data);
+   mu = hypre_AMGDataMU(amg_data);
+   ntrlx = hypre_AMGDataNTRLX(amg_data);
+   iprlx = hypre_AMGDataIPRLX(amg_data);
+   num_coeffs = hypre_AMGDataNumA(amg_data);
+   num_unknowns = hypre_AMGDataNumUnknowns(amg_data);
+   numv = hypre_AMGDataNumV(amg_data);
+   cycle_op_count = hypre_AMGDataCycleOpCount(amg_data);
 
-   Fcycle_flag = AMGDataFcycleFlag(amg_data);
-   Vstar_flag = AMGDataVstarFlag(amg_data);
+   Fcycle_flag = hypre_AMGDataFcycleFlag(amg_data);
+   Vstar_flag = hypre_AMGDataVstarFlag(amg_data);
 
-   lev_counter = ctalloc(int, num_levels);
-   iarr = ctalloc(int, 10);
-   ity  = ctalloc(int, 10);
-   ieq  = ctalloc(int, 10);
-   iun  = ctalloc(int, 10);
-   ipt  = ctalloc(int, 10);
+   lev_counter = hypre_CTAlloc(int, num_levels);
+   iarr = hypre_CTAlloc(int, 10);
+   ity  = hypre_CTAlloc(int, 10);
+   ipt  = hypre_CTAlloc(int, 10);
 
-   D_mat = ctalloc(double, num_unknowns * num_unknowns);
-   S_vec = ctalloc(double, num_unknowns);
+   D_mat = hypre_CTAlloc(double, num_unknowns * num_unknowns);
+   S_vec = hypre_CTAlloc(double, num_unknowns);
 
 /* Initialize */
 
@@ -214,7 +204,7 @@ void        *data;
 
              for (k = 0; k < ii; k++) 
              {
-               Solve_err_flag = amg_Relax(U_array[level],F_array[level],
+               Solve_err_flag = hypre_AMGRelax(U_array[level],F_array[level],
                                           A_array[level], ICG_array[level],
                                           IV_array[level],ipmn[level],
                                           ipmx[level],ipt[k],ity[k],
@@ -238,25 +228,25 @@ void        *data;
       {
                                
 /*------------------------------------------------------------------------
- * Visit coarser level next.  Compute residual using Matvec.
- * Perform restriction using MatvecT.
+ * Visit coarser level next.  Compute residual using hypre_Matvec.
+ * Perform restriction using hypre_MatvecT.
  * Reset counters and cycling parameters for coarse level
  *-----------------------------------------------------------------------*/
 
           fine_grid = level;
           coarse_grid = level + 1;
 
-          InitVector(U_array[coarse_grid],0.0);
+          hypre_InitVector(U_array[coarse_grid],0.0);
           
-          CopyVector(F_array[fine_grid],Vtemp);
+          hypre_CopyVector(F_array[fine_grid],Vtemp);
           alpha = -1.0;
           beta = 1.0;
-          Matvec(alpha, A_array[fine_grid], U_array[fine_grid],
+          hypre_Matvec(alpha, A_array[fine_grid], U_array[fine_grid],
                  beta, Vtemp);
 
           alpha = 1.0;
           beta = 0.0;
-          MatvecT(alpha,P_array[fine_grid],Vtemp,
+          hypre_MatvecT(alpha,P_array[fine_grid],Vtemp,
                   beta,F_array[coarse_grid]);
 
           ++level;
@@ -269,7 +259,7 @@ void        *data;
       {
                             
 /*------------------------------------------------------------------------
- * Visit finer level next.  Interpolate and add correction using Matvec.
+ * Visit finer level next.  Interpolate and add correction using hypre_Matvec.
  * Reset counters and cycling parameters for finer level.
  *-----------------------------------------------------------------------*/
 
@@ -278,7 +268,7 @@ void        *data;
           alpha = 1.0;
           beta = 1.0;
 
-          Matvec(alpha, P_array[fine_grid], U_array[coarse_grid],
+          hypre_Matvec(alpha, P_array[fine_grid], U_array[coarse_grid],
                  beta, U_array[fine_grid]);            
 
           --level;
@@ -291,6 +281,15 @@ void        *data;
       }
    }
 
-   AMGDataCycleOpCount(amg_data) = cycle_op_count;
+   hypre_AMGDataCycleOpCount(amg_data) = cycle_op_count;
+
+   hypre_TFree(lev_counter);
+   hypre_TFree(iarr); 
+   hypre_TFree(ity);  
+   hypre_TFree(ipt); 
+
+   hypre_TFree(D_mat);
+   hypre_TFree(S_vec); 
+
    return(Solve_err_flag);
 }

@@ -20,58 +20,58 @@
  * Routines to set the setup phase parameters
  *--------------------------------------------------------------------------*/
 
-void      amg_SetLevMax(levmax, data)
+void      HYPRE_AMGSetLevMax(levmax, data)
 int       levmax;
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   AMGDataLevMax(amg_data) = levmax;
+   hypre_AMGDataLevMax(amg_data) = levmax;
 }
 
-void      amg_SetNCG(ncg, data)
+void      HYPRE_AMGSetNCG(ncg, data)
 int       ncg;
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   AMGDataNCG(amg_data) = ncg;
+   hypre_AMGDataNCG(amg_data) = ncg;
 }
 
-void      amg_SetECG(ecg, data)
+void      HYPRE_AMGSetECG(ecg, data)
 double    ecg;
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   AMGDataECG(amg_data) = ecg;
+   hypre_AMGDataECG(amg_data) = ecg;
 }
 
-void      amg_SetNWT(nwt, data)
+void      HYPRE_AMGSetNWT(nwt, data)
 int       nwt;
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   AMGDataNWT(amg_data) = nwt;
+   hypre_AMGDataNWT(amg_data) = nwt;
 }
 
-void      amg_SetEWT(ewt, data)
+void      HYPRE_AMGSetEWT(ewt, data)
 double    ewt;
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   AMGDataEWT(amg_data) = ewt;
+   hypre_AMGDataEWT(amg_data) = ewt;
 }
 
-void      amg_SetNSTR(nstr, data)
+void      HYPRE_AMGSetNSTR(nstr, data)
 int       nstr;
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   AMGDataNSTR(amg_data) = nstr;
+   hypre_AMGDataNSTR(amg_data) = nstr;
 }
 
 		  		      
@@ -79,43 +79,43 @@ void     *data;
  * Routines to set the solve phase parameters
  *--------------------------------------------------------------------------*/
 
-void      amg_SetNCyc(ncyc, data)
+void      HYPRE_AMGSetNCyc(ncyc, data)
 int       ncyc;
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   AMGDataNCyc(amg_data) = ncyc;
+   hypre_AMGDataNCyc(amg_data) = ncyc;
 }
 
-void      amg_SetMU(mu, data)
+void      HYPRE_AMGSetMU(mu, data)
 int      *mu;
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   tfree(AMGDataMU(amg_data));
-   AMGDataMU(amg_data) = mu;
+   hypre_TFree(hypre_AMGDataMU(amg_data));
+   hypre_AMGDataMU(amg_data) = mu;
 }
 
-void      amg_SetNTRLX(ntrlx, data)
+void      HYPRE_AMGSetNTRLX(ntrlx, data)
 int      *ntrlx;
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   tfree(AMGDataNTRLX(amg_data));
-   AMGDataNTRLX(amg_data) = ntrlx;
+   hypre_TFree(hypre_AMGDataNTRLX(amg_data));
+   hypre_AMGDataNTRLX(amg_data) = ntrlx;
 }
 
-void      amg_SetIPRLX(iprlx, data)
+void      HYPRE_AMGSetIPRLX(iprlx, data)
 int      *iprlx;
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   tfree(AMGDataIPRLX(amg_data));
-   AMGDataIPRLX(amg_data) = iprlx;
+   hypre_TFree(hypre_AMGDataIPRLX(amg_data));
+   hypre_AMGDataIPRLX(amg_data) = iprlx;
 }
 
 
@@ -123,24 +123,24 @@ void     *data;
  * Routine to set up logging 
  *--------------------------------------------------------------------------*/
 
-void      amg_SetLogging(ioutdat, log_file_name, data)
+void      HYPRE_AMGSetLogging(ioutdat, log_file_name, data)
 int       ioutdat;
 char     *log_file_name;
 void     *data;
 {
    FILE *fp;
 
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   AMGDataIOutDat(amg_data) = ioutdat;
+   hypre_AMGDataIOutDat(amg_data) = ioutdat;
    if (ioutdat > 0)
    {
       if (*log_file_name == 0)  
-         sprintf(AMGDataLogFileName(amg_data), "%s", "amg.out.log");
+         sprintf(hypre_AMGDataLogFileName(amg_data), "%s", "amg.out.log");
       else
-         sprintf(AMGDataLogFileName(amg_data), "%s", log_file_name); 
+         sprintf(hypre_AMGDataLogFileName(amg_data), "%s", log_file_name); 
        
-   fp = fopen(AMGDataLogFileName(amg_data),"w");
+   fp = fopen(hypre_AMGDataLogFileName(amg_data),"w");
    fclose(fp);
    }
 }
@@ -150,81 +150,81 @@ void     *data;
  * Routines to set the problem data parameters
  *--------------------------------------------------------------------------*/
 
-void      amg_SetNumUnknowns(num_unknowns, data)
+void      HYPRE_AMGSetNumUnknowns(num_unknowns, data)
 int       num_unknowns;  
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   AMGDataNumUnknowns(amg_data) = num_unknowns;
+   hypre_AMGDataNumUnknowns(amg_data) = num_unknowns;
 }
 
-void      amg_SetNumPoints(num_points, data)
+void      HYPRE_AMGSetNumPoints(num_points, data)
 int       num_points;    
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   AMGDataNumPoints(amg_data) = num_points;
+   hypre_AMGDataNumPoints(amg_data) = num_points;
 }
 
-void      amg_SetIU(iu, data)
+void      HYPRE_AMGSetIU(iu, data)
 int      *iu;            
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   tfree(AMGDataIU(amg_data));
-   AMGDataIU(amg_data) = iu;
+   hypre_TFree(hypre_AMGDataIU(amg_data));
+   hypre_AMGDataIU(amg_data) = iu;
 }
 
-void      amg_SetIP(ip, data)
+void      HYPRE_AMGSetIP(ip, data)
 int      *ip;            
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   tfree(AMGDataIP(amg_data));
-   AMGDataIP(amg_data) = ip;
+   hypre_TFree(hypre_AMGDataIP(amg_data));
+   hypre_AMGDataIP(amg_data) = ip;
 }
 
-void      amg_SetIV(iv, data)
+void      HYPRE_AMGSetIV(iv, data)
 int      *iv;            
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   tfree(AMGDataIV(amg_data));
-   AMGDataIV(amg_data) = iv;
+   hypre_TFree(hypre_AMGDataIV(amg_data));
+   hypre_AMGDataIV(amg_data) = iv;
 }
 
-void      amg_SetXP(xp, data)
+void      HYPRE_AMGSetXP(xp, data)
 double   *xp;            
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   tfree(AMGDataXP(amg_data));
-   AMGDataXP(amg_data) = xp;
+   hypre_TFree(hypre_AMGDataXP(amg_data));
+   hypre_AMGDataXP(amg_data) = xp;
 }
 
-void      amg_SetYP(yp, data)
+void      HYPRE_AMGSetYP(yp, data)
 double   *yp;            
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   tfree(AMGDataYP(amg_data));
-   AMGDataYP(amg_data) = yp;
+   hypre_TFree(hypre_AMGDataYP(amg_data));
+   hypre_AMGDataYP(amg_data) = yp;
 }
 
-void      amg_SetZP(zp, data)
+void      HYPRE_AMGSetZP(zp, data)
 double   *zp;            
 void     *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
  
-   tfree(AMGDataZP(amg_data));
-   AMGDataZP(amg_data) = zp;
+   hypre_TFree(hypre_AMGDataZP(amg_data));
+   hypre_AMGDataZP(amg_data) = zp;
 }
 

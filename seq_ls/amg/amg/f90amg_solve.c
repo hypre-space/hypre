@@ -17,10 +17,10 @@
 
 
 /*--------------------------------------------------------------------------
- * amg_Solve
+ * HYPRE_AMGSolve
  *--------------------------------------------------------------------------*/
 
-void      NAME_C_FOR_FORTRAN(amg_solve)(Solve_err_flag, u_data, f_data,
+void      hypre_NAME_C_FOR_FORTRAN(amg_solve)(Solve_err_flag, u_data, f_data,
 					n, tol, data)
 int      *Solve_err_flag;
 double   *u_data;
@@ -29,13 +29,13 @@ int      *n;
 double   *tol;
 int      *data;
 {
-   Vector   *u;
-   Vector   *f;
+   hypre_Vector   *u;
+   hypre_Vector   *f;
 
 
-   u = NewVector(u_data, *n);
-   f = NewVector(f_data, *n);
+   u = hypre_NewVector(u_data, *n);
+   f = hypre_NewVector(f_data, *n);
 
-   *Solve_err_flag =  amg_Solve(u, f, *tol, (void *) *data);
+   *Solve_err_flag =  HYPRE_AMGSolve(u, f, *tol, (void *) *data);
 }
 

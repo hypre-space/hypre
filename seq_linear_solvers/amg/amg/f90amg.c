@@ -17,23 +17,23 @@
 
 
 /*--------------------------------------------------------------------------
- * amg_Initialize
+ * HYPRE_AMGInitialize
  *--------------------------------------------------------------------------*/
 
-void   NAME_C_FOR_FORTRAN(amg_initialize)(data, port_data)
+void   hypre_NAME_C_FOR_FORTRAN(amg_initialize)(data, port_data)
 int   *data;
 int   *port_data;
 {
-   *data = (int) amg_Initialize((void *) *port_data);
+   *data = (int) HYPRE_AMGInitialize((void *) *port_data);
 }
 
 /*--------------------------------------------------------------------------
- * amg_Finalize
+ * HYPRE_AMGFinalize
  *--------------------------------------------------------------------------*/
 
-void   NAME_C_FOR_FORTRAN(amg_finalize)(data)
+void   hypre_NAME_C_FOR_FORTRAN(amg_finalize)(data)
 int   *data;
 {
-   amg_Finalize((void *) *data);
+   HYPRE_AMGFinalize((void *) *data);
 }
 

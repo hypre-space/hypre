@@ -13,55 +13,55 @@
  *
  *****************************************************************************/
 
-#ifndef _AMG_FORTRAN_HEADER
-#define _AMG_FORTRAN_HEADER
+#ifndef HYPRE_AMG_FORTRAN_HEADER
+#define HYPRE_AMG_FORTRAN_HEADER
 
 
 #if defined(IRIX) || defined(DEC)
-#define NAME_C_FOR_FORTRAN(name) name##_
-#define NAME_FORTRAN_FOR_C(name) name##_
+#define hypre_NAME_C_FOR_FORTRAN(name) name##_
+#define hypre_NAME_FORTRAN_FOR_C(name) name##_
 #else
-#define NAME_C_FOR_FORTRAN(name) name##__
-#define NAME_FORTRAN_FOR_C(name) name##_
+#define hypre_NAME_C_FOR_FORTRAN(name) name##__
+#define hypre_NAME_FORTRAN_FOR_C(name) name##_
 #endif
 
 /* setup */
-#define CALL_SETUP(Setup_err_flag, A, amg_data) \
-NAME_FORTRAN_FOR_C(setup)(&Setup_err_flag,\
-			  &AMGDataNumLevels(amg_data),\
-			  &AMGDataNSTR(amg_data),\
-			  &AMGDataECG(amg_data),\
-			  &AMGDataNCG(amg_data),\
-			  &AMGDataEWT(amg_data),\
-			  &AMGDataNWT(amg_data),\
-			  AMGDataICDep(amg_data),\
-			  &AMGDataIOutDat(amg_data),\
-			  &AMGDataNumUnknowns(amg_data),\
-			  AMGDataIMin(amg_data),\
-			  AMGDataIMax(amg_data),\
-			  MatrixData(A),\
-			  MatrixIA(A),\
-			  MatrixJA(A),\
-			  AMGDataIU(amg_data),\
-			  AMGDataIP(amg_data),\
-			  AMGDataICG(amg_data),\
-			  AMGDataIFG(amg_data),\
-			  MatrixData(AMGDataP(amg_data)),\
-			  MatrixIA(AMGDataP(amg_data)),\
-			  MatrixJA(AMGDataP(amg_data)),\
-			  AMGDataIPMN(amg_data),\
-			  AMGDataIPMX(amg_data),\
-			  AMGDataIV(amg_data),\
-			  AMGDataXP(amg_data),\
-			  AMGDataYP(amg_data),\
-			  &AMGDataNDIMU(amg_data),\
-			  &AMGDataNDIMP(amg_data),\
-			  &AMGDataNDIMA(amg_data),\
-			  &AMGDataNDIMB(amg_data),\
-			  AMGDataLogFileName(amg_data),\
-			  strlen(AMGDataLogFileName(amg_data)))
+#define hypre_CALL_SETUP(Setup_err_flag, A, amg_data) \
+hypre_NAME_FORTRAN_FOR_C(setup)(&Setup_err_flag,\
+			  &hypre_AMGDataNumLevels(amg_data),\
+			  &hypre_AMGDataNSTR(amg_data),\
+			  &hypre_AMGDataECG(amg_data),\
+			  &hypre_AMGDataNCG(amg_data),\
+			  &hypre_AMGDataEWT(amg_data),\
+			  &hypre_AMGDataNWT(amg_data),\
+			  hypre_AMGDataICDep(amg_data),\
+			  &hypre_AMGDataIOutDat(amg_data),\
+			  &hypre_AMGDataNumUnknowns(amg_data),\
+			  hypre_AMGDataIMin(amg_data),\
+			  hypre_AMGDataIMax(amg_data),\
+			  hypre_MatrixData(A),\
+			  hypre_MatrixIA(A),\
+			  hypre_MatrixJA(A),\
+			  hypre_AMGDataIU(amg_data),\
+			  hypre_AMGDataIP(amg_data),\
+			  hypre_AMGDataICG(amg_data),\
+			  hypre_AMGDataIFG(amg_data),\
+			  hypre_MatrixData(hypre_AMGDataP(amg_data)),\
+			  hypre_MatrixIA(hypre_AMGDataP(amg_data)),\
+			  hypre_MatrixJA(hypre_AMGDataP(amg_data)),\
+			  hypre_AMGDataIPMN(amg_data),\
+			  hypre_AMGDataIPMX(amg_data),\
+			  hypre_AMGDataIV(amg_data),\
+			  hypre_AMGDataXP(amg_data),\
+			  hypre_AMGDataYP(amg_data),\
+			  &hypre_AMGDataNDIMU(amg_data),\
+			  &hypre_AMGDataNDIMP(amg_data),\
+			  &hypre_AMGDataNDIMA(amg_data),\
+			  &hypre_AMGDataNDIMB(amg_data),\
+			  hypre_AMGDataLogFileName(amg_data),\
+			  strlen(hypre_AMGDataLogFileName(amg_data)))
 
-void NAME_FORTRAN_FOR_C(setup)(int *, int *, int *,
+void hypre_NAME_FORTRAN_FOR_C(setup)(int *, int *, int *,
 			       double *, int *, double *, int *,
 			       int *, int *, int *, int *, int *,
 			       double *, int *, int *,
@@ -74,7 +74,7 @@ void NAME_FORTRAN_FOR_C(setup)(int *, int *, int *,
 
 
 /* idec */
-void NAME_FORTRAN_FOR_C(idec)(int *, int *, int *, int *);
+void hypre_NAME_FORTRAN_FOR_C(idec)(int *, int *, int *, int *);
 
 #endif
 

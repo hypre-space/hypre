@@ -12,21 +12,21 @@
  * amg_Clock_init
  *--------------------------------------------------------------------------*/
  
-void     NAME_C_FOR_FORTRAN(amg_clock_init)()
+void     hypre_NAME_C_FOR_FORTRAN(amg_clock_init)()
 {
  
-   amg_Clock_init();
+   HYPRE_AMGClock_init();
 }
  
 /*--------------------------------------------------------------------------
  * amg_Clock
  *--------------------------------------------------------------------------*/
  
-void NAME_C_FOR_FORTRAN(amg_clock)(time_ticks)
+void hypre_NAME_C_FOR_FORTRAN(amg_clock)(time_ticks)
 long *time_ticks;
 {
  
- *time_ticks = amg_Clock();
+ *time_ticks = HYPRE_AMGClock();
  
 }
  
@@ -34,11 +34,11 @@ long *time_ticks;
  * amg_CPUClock__
  *--------------------------------------------------------------------------*/
  
-void NAME_C_FOR_FORTRAN(amg_cpuclock)(cpu_ticks)
+void hypre_NAME_C_FOR_FORTRAN(amg_cpuclock)(cpu_ticks)
 long *cpu_ticks;
 {
  
-   *cpu_ticks = amg_CPUClock();
+   *cpu_ticks = HYPRE_AMGCPUClock();
 }
  
  
@@ -46,12 +46,12 @@ long *cpu_ticks;
  * PrintTiming__
  *--------------------------------------------------------------------------*/
 
-void  NAME_C_FOR_FORTRAN(amg_printtiming)(time_ticks, cpu_ticks)
+void  hypre_NAME_C_FOR_FORTRAN(amg_printtiming)(time_ticks, cpu_ticks)
 double *time_ticks;
 double *cpu_ticks;
 {
  
-   PrintTiming(*time_ticks, *cpu_ticks);
+   HYPRE_AMGPrintTiming(*time_ticks, *cpu_ticks);
  
 }
  

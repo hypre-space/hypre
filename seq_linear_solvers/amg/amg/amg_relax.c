@@ -20,14 +20,14 @@
  * Relax
  *--------------------------------------------------------------------------*/
 
-int    	 amg_Relax(u,f,A,ICG,IV,
+int    	 hypre_AMGRelax(u,f,A,ICG,IV,
                    min_point,max_point,point_type,relax_type,
                    D_mat, S_vec)
-Vector 	     *u;
-Vector 	     *f;
-Matrix       *A;
-VectorInt    *ICG;
-VectorInt    *IV;
+hypre_Vector 	     *u;
+hypre_Vector 	     *f;
+hypre_Matrix       *A;
+hypre_VectorInt    *ICG;
+hypre_VectorInt    *IV;
 int          min_point;
 int          max_point;
 int          point_type;
@@ -35,15 +35,15 @@ int          relax_type;
 double       *D_mat;
 double       *S_vec;
 {
-   double         *a  = MatrixData(A);
-   int            *ia = MatrixIA(A);
-   int            *ja = MatrixJA(A);
-   int             n  = MatrixSize(A);
+   double         *a  = hypre_MatrixData(A);
+   int            *ia = hypre_MatrixIA(A);
+   int            *ja = hypre_MatrixJA(A);
+   int             n  = hypre_MatrixSize(A);
 	          
-   double         *up = VectorData(u);
-   double         *fp = VectorData(f);
-   int            *icg = VectorIntData(ICG);
-   int            *iv = VectorIntData(IV);
+   double         *up = hypre_VectorData(u);
+   double         *fp = hypre_VectorData(f);
+   int            *icg = hypre_VectorIntData(ICG);
+   int            *iv = hypre_VectorIntData(IV);
    double          res;
 	          
    int             i, idx, i_start, i_end;
@@ -160,8 +160,8 @@ double       *S_vec;
       break;
    case 9:                           /* Direct solve: use gaussian 
                                         elimination */
-      A_mat = ctalloc(double, max_point*max_point);
-      b_vec = ctalloc(double, max_point);
+      A_mat = hypre_CTAlloc(double, max_point*max_point);
+      b_vec = hypre_CTAlloc(double, max_point);
 
                                     /* Load CSR matrix into A_mat */
      for (j = 0; j < max_point; ++j)
@@ -178,7 +178,10 @@ double       *S_vec;
      {
          up[j] = b_vec[j];
      }
-     /*    tfree(A_mat); */
+
+     hypre_TFree(A_mat); 
+     hypre_TFree(b_vec);
+
      return(relax_error); 
    }
 }

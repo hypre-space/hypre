@@ -17,10 +17,10 @@
 
 
 /*--------------------------------------------------------------------------
- * amg_Setup
+ * HYPRE_AMGSetup
  *--------------------------------------------------------------------------*/
 
-void     NAME_C_FOR_FORTRAN(amg_setup)(Setup_err_flag, a_data, ia, ja, n, data)
+void     hypre_NAME_C_FOR_FORTRAN(amg_setup)(Setup_err_flag, a_data, ia, ja, n, data)
 int     *Setup_err_flag;
 double  *a_data;
 int     *ia;
@@ -28,13 +28,13 @@ int     *ja;
 int     *n;
 int     *data;
 {
-   Matrix  *A;
+   hypre_Matrix  *A;
 
 
-   tfree(AMGDataA((AMGData *) *data));
-   A = NewMatrix(a_data, ia, ja, *n);
+   hypre_TFree(hypre_AMGDataA((hypre_AMGData *) *data));
+   A = hypre_NewMatrix(a_data, ia, ja, *n);
 
-   *Setup_err_flag = amg_Setup(A, (void *) *data);
+   *Setup_err_flag = HYPRE_AMGSetup(A, (void *) *data);
 }
 
 

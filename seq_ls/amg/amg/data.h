@@ -7,12 +7,12 @@
  * $Revision$
  *********************************************************************EHEADER*/
 
-#ifndef _AMG_DATA_HEADER
-#define _AMG_DATA_HEADER
+#ifndef HYPRE_AMG_DATA_HEADER
+#define HYPRE_AMG_DATA_HEADER
 
 
 /*--------------------------------------------------------------------------
- * AMGData
+ * hypre_AMGData
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -40,7 +40,7 @@ typedef struct
    char     log_file_name[256];
 
    /* problem data */
-   Matrix  *A;             
+   hypre_Matrix  *A;             
    int      num_variables; 
    int      num_unknowns;  
    int      num_points;    
@@ -57,7 +57,7 @@ typedef struct
    int      ndimp;
    int      ndima;
    int      ndimb;
-   Matrix  *P;                 /* this is temporary */
+   hypre_Matrix  *P;                 /* this is temporary */
    int     *icdep;
    int     *imin;
    int     *imax;
@@ -65,12 +65,12 @@ typedef struct
    int     *ipmx;
    int     *icg;
    int     *ifg;
-   Matrix **A_array;
-   Matrix **P_array;
-   VectorInt **IU_array;
-   VectorInt **IP_array;
-   VectorInt **IV_array;
-   VectorInt **ICG_array;    
+   hypre_Matrix **A_array;
+   hypre_Matrix **P_array;
+   hypre_VectorInt **IU_array;
+   hypre_VectorInt **IP_array;
+   hypre_VectorInt **IV_array;
+   hypre_VectorInt **ICG_array;    
    int     *leva;
    int     *levb;
    int     *levv;
@@ -83,84 +83,84 @@ typedef struct
    int     *nump;
 
    /* data generated in the solve phase */
-   Vector   *Vtemp;
+   hypre_Vector   *Vtemp;
    double   *vtmp;
    int       cycle_op_count;
 
-} AMGData;
+} hypre_AMGData;
 
 /*--------------------------------------------------------------------------
- * Accessor functions for the AMGData structure
+ * Accessor functions for the hypre_AMGData structure
  *--------------------------------------------------------------------------*/
 
 /* setup params */
-#define AMGDataLevMax(amg_data)       ((amg_data) -> levmax)
-#define AMGDataNCG(amg_data)          ((amg_data) -> ncg)
-#define AMGDataECG(amg_data)          ((amg_data) -> ecg)
-#define AMGDataNWT(amg_data)          ((amg_data) -> nwt)
-#define AMGDataEWT(amg_data)          ((amg_data) -> ewt)
-#define AMGDataNSTR(amg_data)         ((amg_data) -> nstr)
+#define hypre_AMGDataLevMax(amg_data)       ((amg_data) -> levmax)
+#define hypre_AMGDataNCG(amg_data)          ((amg_data) -> ncg)
+#define hypre_AMGDataECG(amg_data)          ((amg_data) -> ecg)
+#define hypre_AMGDataNWT(amg_data)          ((amg_data) -> nwt)
+#define hypre_AMGDataEWT(amg_data)          ((amg_data) -> ewt)
+#define hypre_AMGDataNSTR(amg_data)         ((amg_data) -> nstr)
 		  		      
 /* solve params */
-#define AMGDataNCyc(amg_data)         ((amg_data) -> ncyc)
-#define AMGDataFcycleFlag(amg_data)   ((amg_data) -> Fcycle_flag)
-#define AMGDataVstarFlag(amg_data)    ((amg_data) -> Vstar_flag)
-#define AMGDataMU(amg_data)           ((amg_data) -> mu)
-#define AMGDataNTRLX(amg_data)        ((amg_data) -> ntrlx)
-#define AMGDataIPRLX(amg_data)        ((amg_data) -> iprlx)
+#define hypre_AMGDataNCyc(amg_data)         ((amg_data) -> ncyc)
+#define hypre_AMGDataFcycleFlag(amg_data)   ((amg_data) -> Fcycle_flag)
+#define hypre_AMGDataVstarFlag(amg_data)    ((amg_data) -> Vstar_flag)
+#define hypre_AMGDataMU(amg_data)           ((amg_data) -> mu)
+#define hypre_AMGDataNTRLX(amg_data)        ((amg_data) -> ntrlx)
+#define hypre_AMGDataIPRLX(amg_data)        ((amg_data) -> iprlx)
 		  		      
 /* output params */
-#define AMGDataIOutDat(amg_data)      ((amg_data) -> ioutdat)
+#define hypre_AMGDataIOutDat(amg_data)      ((amg_data) -> ioutdat)
 				      
 /* log file name */
-#define AMGDataLogFileName(amg_data)  ((amg_data) -> log_file_name)
+#define hypre_AMGDataLogFileName(amg_data)  ((amg_data) -> log_file_name)
 
 /* problem data */
-#define AMGDataA(amg_data)            ((amg_data) -> A)
-#define AMGDataNumVariables(amg_data) ((amg_data) -> num_variables)
-#define AMGDataNumUnknowns(amg_data)  ((amg_data) -> num_unknowns)
-#define AMGDataNumPoints(amg_data)    ((amg_data) -> num_points)
-#define AMGDataIU(amg_data)           ((amg_data) -> iu)
-#define AMGDataIP(amg_data)           ((amg_data) -> ip)
-#define AMGDataIV(amg_data)           ((amg_data) -> iv)
-#define AMGDataXP(amg_data)           ((amg_data) -> xp)
-#define AMGDataYP(amg_data)           ((amg_data) -> yp)
-#define AMGDataZP(amg_data)           ((amg_data) -> zp)
+#define hypre_AMGDataA(amg_data)            ((amg_data) -> A)
+#define hypre_AMGDataNumVariables(amg_data) ((amg_data) -> num_variables)
+#define hypre_AMGDataNumUnknowns(amg_data)  ((amg_data) -> num_unknowns)
+#define hypre_AMGDataNumPoints(amg_data)    ((amg_data) -> num_points)
+#define hypre_AMGDataIU(amg_data)           ((amg_data) -> iu)
+#define hypre_AMGDataIP(amg_data)           ((amg_data) -> ip)
+#define hypre_AMGDataIV(amg_data)           ((amg_data) -> iv)
+#define hypre_AMGDataXP(amg_data)           ((amg_data) -> xp)
+#define hypre_AMGDataYP(amg_data)           ((amg_data) -> yp)
+#define hypre_AMGDataZP(amg_data)           ((amg_data) -> zp)
 				      
 /* data generated by the setup phase */
-#define AMGDataP(amg_data)            ((amg_data) -> P)
-#define AMGDataNumLevels(amg_data)    ((amg_data) -> num_levels)
-#define AMGDataNDIMU(amg_data)        ((amg_data) -> ndimu)
-#define AMGDataNDIMP(amg_data)        ((amg_data) -> ndimp)
-#define AMGDataNDIMA(amg_data)        ((amg_data) -> ndima)
-#define AMGDataNDIMB(amg_data)        ((amg_data) -> ndimb)
-#define AMGDataICDep(amg_data)        ((amg_data) -> icdep)
-#define AMGDataIMin(amg_data)         ((amg_data) -> imin)
-#define AMGDataIMax(amg_data)         ((amg_data) -> imax)
-#define AMGDataIPMN(amg_data)         ((amg_data) -> ipmn)
-#define AMGDataIPMX(amg_data)         ((amg_data) -> ipmx)
-#define AMGDataICG(amg_data)          ((amg_data) -> icg)
-#define AMGDataIFG(amg_data)          ((amg_data) -> ifg)
-#define AMGDataAArray(amg_data)       ((amg_data) -> A_array)
-#define AMGDataPArray(amg_data)       ((amg_data) -> P_array)
-#define AMGDataIUArray(amg_data)      ((amg_data) -> IU_array)
-#define AMGDataIPArray(amg_data)      ((amg_data) -> IP_array)  
-#define AMGDataIVArray(amg_data)      ((amg_data) -> IV_array)  
-#define AMGDataICGArray(amg_data)     ((amg_data) -> ICG_array)  
-#define AMGDataLevA(amg_data)         ((amg_data) -> leva)
-#define AMGDataLevB(amg_data)         ((amg_data) -> levb)
-#define AMGDataLevV(amg_data)         ((amg_data) -> levv)
-#define AMGDataLevP(amg_data)         ((amg_data) -> levp)
-#define AMGDataLevPI(amg_data)        ((amg_data) -> levpi)
-#define AMGDataLevI(amg_data)         ((amg_data) -> levi)
-#define AMGDataNumA(amg_data)         ((amg_data) -> numa)
-#define AMGDataNumB(amg_data)         ((amg_data) -> numb)
-#define AMGDataNumV(amg_data)         ((amg_data) -> numv)
-#define AMGDataNumP(amg_data)         ((amg_data) -> nump)
+#define hypre_AMGDataP(amg_data)            ((amg_data) -> P)
+#define hypre_AMGDataNumLevels(amg_data)    ((amg_data) -> num_levels)
+#define hypre_AMGDataNDIMU(amg_data)        ((amg_data) -> ndimu)
+#define hypre_AMGDataNDIMP(amg_data)        ((amg_data) -> ndimp)
+#define hypre_AMGDataNDIMA(amg_data)        ((amg_data) -> ndima)
+#define hypre_AMGDataNDIMB(amg_data)        ((amg_data) -> ndimb)
+#define hypre_AMGDataICDep(amg_data)        ((amg_data) -> icdep)
+#define hypre_AMGDataIMin(amg_data)         ((amg_data) -> imin)
+#define hypre_AMGDataIMax(amg_data)         ((amg_data) -> imax)
+#define hypre_AMGDataIPMN(amg_data)         ((amg_data) -> ipmn)
+#define hypre_AMGDataIPMX(amg_data)         ((amg_data) -> ipmx)
+#define hypre_AMGDataICG(amg_data)          ((amg_data) -> icg)
+#define hypre_AMGDataIFG(amg_data)          ((amg_data) -> ifg)
+#define hypre_AMGDataAArray(amg_data)       ((amg_data) -> A_array)
+#define hypre_AMGDataPArray(amg_data)       ((amg_data) -> P_array)
+#define hypre_AMGDataIUArray(amg_data)      ((amg_data) -> IU_array)
+#define hypre_AMGDataIPArray(amg_data)      ((amg_data) -> IP_array)  
+#define hypre_AMGDataIVArray(amg_data)      ((amg_data) -> IV_array)  
+#define hypre_AMGDataICGArray(amg_data)     ((amg_data) -> ICG_array)  
+#define hypre_AMGDataLevA(amg_data)         ((amg_data) -> leva)
+#define hypre_AMGDataLevB(amg_data)         ((amg_data) -> levb)
+#define hypre_AMGDataLevV(amg_data)         ((amg_data) -> levv)
+#define hypre_AMGDataLevP(amg_data)         ((amg_data) -> levp)
+#define hypre_AMGDataLevPI(amg_data)        ((amg_data) -> levpi)
+#define hypre_AMGDataLevI(amg_data)         ((amg_data) -> levi)
+#define hypre_AMGDataNumA(amg_data)         ((amg_data) -> numa)
+#define hypre_AMGDataNumB(amg_data)         ((amg_data) -> numb)
+#define hypre_AMGDataNumV(amg_data)         ((amg_data) -> numv)
+#define hypre_AMGDataNumP(amg_data)         ((amg_data) -> nump)
 				      
 /* data generated in the solve phase */
-#define AMGDataVecTemp(amg_data)      ((amg_data) -> vtmp)
-#define AMGDataVtemp(amg_data)        ((amg_data) -> Vtemp)
-#define AMGDataCycleOpCount(amg_data) ((amg_data) -> cycle_op_count)  
+#define hypre_AMGDataVecTemp(amg_data)      ((amg_data) -> vtmp)
+#define hypre_AMGDataVtemp(amg_data)        ((amg_data) -> Vtemp)
+#define hypre_AMGDataCycleOpCount(amg_data) ((amg_data) -> cycle_op_count)  
 
 #endif

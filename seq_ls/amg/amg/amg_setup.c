@@ -16,14 +16,14 @@
 
 
 /*--------------------------------------------------------------------------
- * amg_Setup
+ * HYPRE_AMGSetup
  *--------------------------------------------------------------------------*/
 
-int      amg_Setup(A, data)
-Matrix  *A;
+int      HYPRE_AMGSetup(A, data)
+hypre_Matrix  *A;
 void    *data;
 {
-   AMGData  *amg_data = data;
+   hypre_AMGData  *amg_data = data;
 
    int      num_variables;
    int      num_unknowns;
@@ -40,7 +40,7 @@ void    *data;
    int      ndimp;
    int      ndima;
    int      ndimb;
-   Matrix  *P;
+   hypre_Matrix  *P;
    int     *icdep;
    int     *imin;
    int     *imax;
@@ -48,12 +48,12 @@ void    *data;
    int     *ipmx;
    int     *icg;
    int     *ifg;
-   Matrix **A_array;
-   Matrix **P_array;
-   VectorInt **IU_array;
-   VectorInt **IP_array;
-   VectorInt **IV_array;
-   VectorInt **ICG_array;
+   hypre_Matrix **A_array;
+   hypre_Matrix **P_array;
+   hypre_VectorInt **IU_array;
+   hypre_VectorInt **IP_array;
+   hypre_VectorInt **IV_array;
+   hypre_VectorInt **ICG_array;
    int     *leva;
    int     *levb;
    int     *levv;
@@ -77,25 +77,25 @@ void    *data;
    int      decr;
 
    double  *vtmp;
-   Vector  *Vtemp;
+   hypre_Vector  *Vtemp;
 
    char     fnam[255];
    int Setup_err_flag;
    
    
    /*----------------------------------------------------------
-    * Initialize problem part of AMGData
+    * Initialize problem part of hypre_AMGData
     *----------------------------------------------------------*/
 
-   num_variables = MatrixSize(A);
-   num_unknowns  = AMGDataNumUnknowns(amg_data);
-   num_points    = AMGDataNumPoints(amg_data);
-   iu   	 = AMGDataIU(amg_data);
-   ip   	 = AMGDataIP(amg_data);
-   iv   	 = AMGDataIV(amg_data);
-   xp   	 = AMGDataXP(amg_data);
-   yp   	 = AMGDataYP(amg_data);
-   zp   	 = AMGDataZP(amg_data);
+   num_variables = hypre_MatrixSize(A);
+   num_unknowns  = hypre_AMGDataNumUnknowns(amg_data);
+   num_points    = hypre_AMGDataNumPoints(amg_data);
+   iu   	 = hypre_AMGDataIU(amg_data);
+   ip   	 = hypre_AMGDataIP(amg_data);
+   iv   	 = hypre_AMGDataIV(amg_data);
+   xp   	 = hypre_AMGDataXP(amg_data);
+   yp   	 = hypre_AMGDataYP(amg_data);
+   zp   	 = hypre_AMGDataZP(amg_data);
 
    /* set default number of unknowns */
    if (!num_unknowns)
@@ -122,9 +122,9 @@ void    *data;
 	 exit(1);
       }
 
-      iu = ctalloc(int, NDIMU(num_variables));
-      ip = ctalloc(int, NDIMU(num_variables));
-      iv = ctalloc(int, NDIMP(num_points+1));
+      iu = hypre_CTAlloc(int, hypre_NDIMU(num_variables));
+      ip = hypre_CTAlloc(int, hypre_NDIMU(num_variables));
+      iv = hypre_CTAlloc(int, hypre_NDIMP(num_points+1));
 
       k = 0;
       for (i = 1; i <= num_points; i++)
@@ -144,47 +144,47 @@ void    *data;
 
    if (!xp || !yp || !zp)
    {
-      xp = ctalloc(double, NDIMP(num_points));
-      yp = ctalloc(double, NDIMP(num_points));
-      zp = ctalloc(double, NDIMP(num_points));
+      xp = hypre_CTAlloc(double, hypre_NDIMP(num_points));
+      yp = hypre_CTAlloc(double, hypre_NDIMP(num_points));
+      zp = hypre_CTAlloc(double, hypre_NDIMP(num_points));
    }
 
-   AMGDataA(amg_data)            = A;
-   AMGDataNumVariables(amg_data) = num_variables;
-   AMGDataNumUnknowns(amg_data)  = num_unknowns;
-   AMGDataNumPoints(amg_data)    = num_points;
-   AMGDataIU(amg_data)    	 = iu;
-   AMGDataIP(amg_data)    	 = ip;
-   AMGDataIV(amg_data)    	 = iv;
-   AMGDataXP(amg_data)    	 = xp;
-   AMGDataYP(amg_data)    	 = yp;
-   AMGDataZP(amg_data)    	 = zp;
+   hypre_AMGDataA(amg_data)            = A;
+   hypre_AMGDataNumVariables(amg_data) = num_variables;
+   hypre_AMGDataNumUnknowns(amg_data)  = num_unknowns;
+   hypre_AMGDataNumPoints(amg_data)    = num_points;
+   hypre_AMGDataIU(amg_data)    	 = iu;
+   hypre_AMGDataIP(amg_data)    	 = ip;
+   hypre_AMGDataIV(amg_data)    	 = iv;
+   hypre_AMGDataXP(amg_data)    	 = xp;
+   hypre_AMGDataYP(amg_data)    	 = yp;
+   hypre_AMGDataZP(amg_data)    	 = zp;
 
    /*----------------------------------------------------------
-    * Initialize remainder of AMGData
+    * Initialize remainder of hypre_AMGData
     *----------------------------------------------------------*/
 
-   num_levels = AMGDataLevMax(amg_data);
+   num_levels = hypre_AMGDataLevMax(amg_data);
    
-   ndimu = NDIMU(num_variables);
-   ndimp = NDIMP(num_points);
-   ndima = NDIMA(MatrixIA(A)[num_variables]-1);
-   ndimb = NDIMB(MatrixIA(A)[num_variables]-1);
+   ndimu = hypre_NDIMU(num_variables);
+   ndimp = hypre_NDIMP(num_points);
+   ndima = hypre_NDIMA(hypre_MatrixIA(A)[num_variables]-1);
+   ndimb = hypre_NDIMB(hypre_MatrixIA(A)[num_variables]-1);
 
-   b  = ctalloc(double, ndimb);
-   ib = ctalloc(int, ndimu);
-   jb = ctalloc(int, ndimb);
-   P  = NewMatrix(b, ib, jb, num_variables);
+   b  = hypre_CTAlloc(double, ndimb);
+   ib = hypre_CTAlloc(int, ndimu);
+   jb = hypre_CTAlloc(int, ndimb);
+   P  = hypre_NewMatrix(b, ib, jb, num_variables);
    
-   icdep = ctalloc(int, num_levels*num_levels);
-   imin  = ctalloc(int, num_levels);
-   imax  = ctalloc(int, num_levels);
-   ipmn  = ctalloc(int, num_levels);
-   ipmx  = ctalloc(int, num_levels);
-   icg   = ctalloc(int, ndimu);
-   ifg   = ctalloc(int, ndimu);
-   vtmp  = ctalloc(double, num_variables);
-   Vtemp = NewVector(vtmp,num_variables);
+   icdep = hypre_CTAlloc(int, num_levels*num_levels);
+   imin  = hypre_CTAlloc(int, num_levels);
+   imax  = hypre_CTAlloc(int, num_levels);
+   ipmn  = hypre_CTAlloc(int, num_levels);
+   ipmx  = hypre_CTAlloc(int, num_levels);
+   icg   = hypre_CTAlloc(int, ndimu);
+   ifg   = hypre_CTAlloc(int, ndimu);
+   vtmp  = hypre_CTAlloc(double, num_variables);
+   Vtemp = hypre_NewVector(vtmp,num_variables);
    
    /* set fine level point and variable bounds */
    ipmn[0] = 1;
@@ -192,29 +192,29 @@ void    *data;
    imin[0] = 1;
    imax[0] = num_variables;
    
-   AMGDataNumLevels(amg_data) = num_levels;
-   AMGDataNDIMU(amg_data)     = ndimu;
-   AMGDataNDIMP(amg_data)     = ndimp;
-   AMGDataNDIMA(amg_data)     = ndima;
-   AMGDataNDIMB(amg_data)     = ndimb;   
-   AMGDataP(amg_data)         = P;   
-   AMGDataICDep(amg_data)     = icdep;
-   AMGDataIMin(amg_data)      = imin;
-   AMGDataIMax(amg_data)      = imax;
-   AMGDataIPMN(amg_data)      = ipmn;
-   AMGDataIPMX(amg_data)      = ipmx;
-   AMGDataICG(amg_data)       = icg;
-   AMGDataIFG(amg_data)       = ifg;
+   hypre_AMGDataNumLevels(amg_data) = num_levels;
+   hypre_AMGDataNDIMU(amg_data)     = ndimu;
+   hypre_AMGDataNDIMP(amg_data)     = ndimp;
+   hypre_AMGDataNDIMA(amg_data)     = ndima;
+   hypre_AMGDataNDIMB(amg_data)     = ndimb;   
+   hypre_AMGDataP(amg_data)         = P;   
+   hypre_AMGDataICDep(amg_data)     = icdep;
+   hypre_AMGDataIMin(amg_data)      = imin;
+   hypre_AMGDataIMax(amg_data)      = imax;
+   hypre_AMGDataIPMN(amg_data)      = ipmn;
+   hypre_AMGDataIPMX(amg_data)      = ipmx;
+   hypre_AMGDataICG(amg_data)       = icg;
+   hypre_AMGDataIFG(amg_data)       = ifg;
 
-   AMGDataVecTemp(amg_data)   = vtmp;
-   AMGDataVtemp(amg_data)     = Vtemp;
+   hypre_AMGDataVecTemp(amg_data)   = vtmp;
+   hypre_AMGDataVtemp(amg_data)     = Vtemp;
    
    /*----------------------------------------------------------
     * Call the setup phase code
     *----------------------------------------------------------*/
 
-   WriteSetupParams(amg_data);   
-   CALL_SETUP(Setup_err_flag, A, amg_data);
+   hypre_WriteSetupParams(amg_data);   
+   hypre_CALL_SETUP(Setup_err_flag, A, amg_data);
    if (Setup_err_flag != 0)
    {
       return(Setup_err_flag);
@@ -224,29 +224,29 @@ void    *data;
     * Set some local variables
     *----------------------------------------------------------*/
    
-   num_levels = AMGDataNumLevels(amg_data);
+   num_levels = hypre_AMGDataNumLevels(amg_data);
    
-   a  = MatrixData(A);
-   ia = MatrixIA(A);
-   ja = MatrixJA(A);
-   b  = MatrixData(P);
-   ib = MatrixIA(P);
-   jb = MatrixJA(P);
+   a  = hypre_MatrixData(A);
+   ia = hypre_MatrixIA(A);
+   ja = hypre_MatrixJA(A);
+   b  = hypre_MatrixData(P);
+   ib = hypre_MatrixIA(P);
+   jb = hypre_MatrixJA(P);
    
    /*----------------------------------------------------------
     * Create `lev' and `num' arrays
     *----------------------------------------------------------*/
    
-   leva       = ctalloc(int, num_levels);
-   levb       = ctalloc(int, num_levels);
-   levv       = ctalloc(int, num_levels);
-   levp       = ctalloc(int, num_levels);
-   levpi      = ctalloc(int, num_levels);
-   levi       = ctalloc(int, num_levels);
-   numa       = ctalloc(int, num_levels);
-   numb       = ctalloc(int, num_levels);
-   numv       = ctalloc(int, num_levels);
-   nump       = ctalloc(int, num_levels);
+   leva       = hypre_CTAlloc(int, num_levels);
+   levb       = hypre_CTAlloc(int, num_levels);
+   levv       = hypre_CTAlloc(int, num_levels);
+   levp       = hypre_CTAlloc(int, num_levels);
+   levpi      = hypre_CTAlloc(int, num_levels);
+   levi       = hypre_CTAlloc(int, num_levels);
+   numa       = hypre_CTAlloc(int, num_levels);
+   numb       = hypre_CTAlloc(int, num_levels);
+   numv       = hypre_CTAlloc(int, num_levels);
+   nump       = hypre_CTAlloc(int, num_levels);
    for (j = 0; j < num_levels; j++)
    {
       leva[j]  = ia[imin[j]-1];
@@ -261,22 +261,22 @@ void    *data;
       nump[j]  = ipmx[j] - ipmn[j] + 1;
    }
 
-   AMGDataAArray(amg_data) = A_array;
-   AMGDataPArray(amg_data) = P_array;
-   AMGDataIUArray(amg_data) = IU_array;
-   AMGDataIPArray(amg_data) = IP_array;
-   AMGDataIVArray(amg_data) = IV_array;
-   AMGDataICGArray(amg_data) = ICG_array;
-   AMGDataLevA(amg_data)   = leva;
-   AMGDataLevB(amg_data)   = levb;
-   AMGDataLevV(amg_data)   = levv;
-   AMGDataLevP(amg_data)   = levp;   
-   AMGDataLevPI(amg_data)  = levpi;   
-   AMGDataLevI(amg_data)   = levi;
-   AMGDataNumA(amg_data)   = numa;
-   AMGDataNumB(amg_data)   = numb;
-   AMGDataNumV(amg_data)   = numv;
-   AMGDataNumP(amg_data)   = nump;
+   hypre_AMGDataAArray(amg_data) = A_array;
+   hypre_AMGDataPArray(amg_data) = P_array;
+   hypre_AMGDataIUArray(amg_data) = IU_array;
+   hypre_AMGDataIPArray(amg_data) = IP_array;
+   hypre_AMGDataIVArray(amg_data) = IV_array;
+   hypre_AMGDataICGArray(amg_data) = ICG_array;
+   hypre_AMGDataLevA(amg_data)   = leva;
+   hypre_AMGDataLevB(amg_data)   = levb;
+   hypre_AMGDataLevV(amg_data)   = levv;
+   hypre_AMGDataLevP(amg_data)   = levp;   
+   hypre_AMGDataLevPI(amg_data)  = levpi;   
+   hypre_AMGDataLevI(amg_data)   = levi;
+   hypre_AMGDataNumA(amg_data)   = numa;
+   hypre_AMGDataNumB(amg_data)   = numb;
+   hypre_AMGDataNumV(amg_data)   = numv;
+   hypre_AMGDataNumP(amg_data)   = nump;
 
    /*----------------------------------------------------------
     * Shift index arrays
@@ -406,8 +406,8 @@ void    *data;
     * Set up A_array and P_array
     *----------------------------------------------------------*/
    
-   A_array = talloc(Matrix*, num_levels);
-   P_array = talloc(Matrix*, num_levels-1);
+   A_array = hypre_TAlloc(hypre_Matrix*, num_levels);
+   P_array = hypre_TAlloc(hypre_Matrix*, num_levels-1);
    
    A_array[0] = A;
    P_array[0] = P;
@@ -415,66 +415,66 @@ void    *data;
    for (j = 1; j < num_levels; j++)
    {
       A_array[j] =
-	 NewMatrix(&a[leva[j]-1], &ia[levi[j]-1], &ja[leva[j]-1], numv[j]);
+	 hypre_NewMatrix(&a[leva[j]-1], &ia[levi[j]-1], &ja[leva[j]-1], numv[j]);
    }
    
    for (j = 1; j < num_levels-1; j++)
    {
       P_array[j] =
-	 NewMatrix(&b[levb[j]-1], &ib[levi[j]-1], &jb[levb[j]-1], numv[j]);
+	 hypre_NewMatrix(&b[levb[j]-1], &ib[levi[j]-1], &jb[levb[j]-1], numv[j]);
    }
    
-   AMGDataAArray(amg_data) = A_array;
-   AMGDataPArray(amg_data) = P_array;   
+   hypre_AMGDataAArray(amg_data) = A_array;
+   hypre_AMGDataPArray(amg_data) = P_array;   
    
 
    /*----------------------------------------------------------
     * Set up  IU_array, IP_array, IV_array, and ICG_array
     *----------------------------------------------------------*/
    
-   IU_array = talloc(VectorInt*, num_levels);
-   IP_array = talloc(VectorInt*, num_levels);
-   IV_array = talloc(VectorInt*, num_levels);
-   ICG_array = talloc(VectorInt*, num_levels);
+   IU_array = hypre_TAlloc(hypre_VectorInt*, num_levels);
+   IP_array = hypre_TAlloc(hypre_VectorInt*, num_levels);
+   IV_array = hypre_TAlloc(hypre_VectorInt*, num_levels);
+   ICG_array = hypre_TAlloc(hypre_VectorInt*, num_levels);
    
    for (j = 0; j < num_levels; j++)
    {
-      IU_array[j] = NewVectorInt(&iu[levv[j]-1], numv[j]);
-      IP_array[j] = NewVectorInt(&ip[levv[j]-1], numv[j]);
-      IV_array[j] = NewVectorInt(&iv[levpi[j]-1],nump[j]+1);
-      ICG_array[j] = NewVectorInt(&icg[levv[j]-1], numv[j]);
+      IU_array[j] = hypre_NewVectorInt(&iu[levv[j]-1], numv[j]);
+      IP_array[j] = hypre_NewVectorInt(&ip[levv[j]-1], numv[j]);
+      IV_array[j] = hypre_NewVectorInt(&iv[levpi[j]-1],nump[j]+1);
+      ICG_array[j] = hypre_NewVectorInt(&icg[levv[j]-1], numv[j]);
    }
    
-   AMGDataIUArray(amg_data) = IU_array;
-   AMGDataIPArray(amg_data) = IP_array;
-   AMGDataIVArray(amg_data) = IV_array;
-   AMGDataICGArray(amg_data) = ICG_array;
+   hypre_AMGDataIUArray(amg_data) = IU_array;
+   hypre_AMGDataIPArray(amg_data) = IP_array;
+   hypre_AMGDataIVArray(amg_data) = IV_array;
+   hypre_AMGDataICGArray(amg_data) = ICG_array;
 
-   if (AMGDataIOutDat(amg_data) == -1)
+   if (hypre_AMGDataIOutDat(amg_data) == -1)
    {
       for (j = 1; j < num_levels; j++)
       {
          sprintf(fnam,"A_%d.ysmp",j);
-         WriteYSMP(fnam, A_array[j]);
+         hypre_WriteYSMP(fnam, A_array[j]);
       }
     }
 
 
-   if (AMGDataIOutDat(amg_data) == -2)
+   if (hypre_AMGDataIOutDat(amg_data) == -2)
    {
       for (j=0; j < num_levels-1; j++)
       {
          sprintf(fnam,"P_%d.ysmp",j);
-         WriteYSMP(fnam, P_array[j]);
+         hypre_WriteYSMP(fnam, P_array[j]);
       }
    }
 
-   if (AMGDataIOutDat(amg_data) == -3)
+   if (hypre_AMGDataIOutDat(amg_data) == -3)
    {
       for (j=0; j < num_levels-1; j++)
       {
          sprintf(fnam,"ICG_%d.vec",j);
-         WriteVecInt(fnam, ICG_array[j]);
+         hypre_WriteVecInt(fnam, ICG_array[j]);
       }
    }
    

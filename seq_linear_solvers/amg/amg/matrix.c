@@ -17,62 +17,62 @@
 
 
 /*--------------------------------------------------------------------------
- * NewMatrix
+ * hypre_NewMatrix
  *--------------------------------------------------------------------------*/
 
-Matrix  *NewMatrix(data, ia, ja, size)
+hypre_Matrix  *hypre_NewMatrix(data, ia, ja, size)
 double  *data;
 int     *ia;
 int     *ja;
 int      size;
 {
-   Matrix     *new;
+   hypre_Matrix     *new;
 
 
-   new = ctalloc(Matrix, 1);
+   new = hypre_CTAlloc(hypre_Matrix, 1);
 
-   MatrixData(new) = data;
-   MatrixIA(new)   = ia;
-   MatrixJA(new)   = ja;
-   MatrixSize(new) = size;
+   hypre_MatrixData(new) = data;
+   hypre_MatrixIA(new)   = ia;
+   hypre_MatrixJA(new)   = ja;
+   hypre_MatrixSize(new) = size;
 
    return new;
 }
 
 /*--------------------------------------------------------------------------
- * FreeMatrix
+ * hypre_FreeMatrix
  *--------------------------------------------------------------------------*/
 
-void     FreeMatrix(matrix)
-Matrix  *matrix;
+void     hypre_FreeMatrix(matrix)
+hypre_Matrix  *matrix;
 {
    if (matrix)
    {
-      tfree(MatrixData(matrix));
-      tfree(MatrixIA(matrix));
-      tfree(MatrixJA(matrix));
-      tfree(matrix);
+      hypre_TFree(hypre_MatrixData(matrix));
+      hypre_TFree(hypre_MatrixIA(matrix));
+      hypre_TFree(hypre_MatrixJA(matrix));
+      hypre_TFree(matrix);
    }
 }
 
 /*--------------------------------------------------------------------------
- * Matvec
+ * hypre_Matvec
  *--------------------------------------------------------------------------*/
 
-void            Matvec(alpha, A, x, beta, y)
+void            hypre_Matvec(alpha, A, x, beta, y)
 double          alpha;
-Matrix         *A;
-Vector         *x;
+hypre_Matrix         *A;
+hypre_Vector         *x;
 double          beta;
-Vector         *y;
+hypre_Vector         *y;
 {
-   double     *a  = MatrixData(A);
-   int        *ia = MatrixIA(A);
-   int        *ja = MatrixJA(A);
-   int         n  = MatrixSize(A);
+   double     *a  = hypre_MatrixData(A);
+   int        *ia = hypre_MatrixIA(A);
+   int        *ja = hypre_MatrixJA(A);
+   int         n  = hypre_MatrixSize(A);
 
-   double     *xp = VectorData(x);
-   double     *yp = VectorData(y);
+   double     *xp = hypre_VectorData(x);
+   double     *yp = hypre_VectorData(y);
 
    double      temp;
 
@@ -144,28 +144,28 @@ Vector         *y;
 
 
 /*--------------------------------------------------------------------------
- * MatvecT
+ * hypre_MatvecT
  *
  *             Performs y <- alpha * A^T * x + beta * y
  *
- *             Modified from Matvec, Jan 7 1998, by Van Henson
+ *             Modified from hypre_Matvec, Jan 7 1998, by Van Henson
  *
  *--------------------------------------------------------------------------*/
 
-void            MatvecT(alpha, A, x, beta, y)
+void            hypre_MatvecT(alpha, A, x, beta, y)
 double          alpha;
-Matrix         *A;
-Vector         *x;
+hypre_Matrix         *A;
+hypre_Vector         *x;
 double          beta;
-Vector         *y;
+hypre_Vector         *y;
 {
-   double     *a  = MatrixData(A);
-   int        *ia = MatrixIA(A);
-   int        *ja = MatrixJA(A);
-   int         n  = MatrixSize(A);
+   double     *a  = hypre_MatrixData(A);
+   int        *ia = hypre_MatrixIA(A);
+   int        *ja = hypre_MatrixJA(A);
+   int         n  = hypre_MatrixSize(A);
 
-   double     *xp = VectorData(x);
-   double     *yp = VectorData(y);
+   double     *xp = hypre_VectorData(x);
+   double     *yp = hypre_VectorData(y);
 
    double      temp;
 
