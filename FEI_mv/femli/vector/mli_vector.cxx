@@ -53,9 +53,9 @@ char *MLI_Vector::getName()
  * get vector 
  *---------------------------------------------------------------------------*/
 
-void *MLI_Vector:getVector()
+void *MLI_Vector::getVector()
 {
-   return vector_;
+   return (void *) vector_;
 }
 
 /******************************************************************************
