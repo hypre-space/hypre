@@ -11,7 +11,6 @@
 #include <strings.h>
 #include <stdio.h>
 
-#include "base/mli_defs.h"
 #include "util/mli_utils.h"
 #include "solver/mli_solver_jacobi.h"
 

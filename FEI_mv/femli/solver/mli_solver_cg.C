@@ -8,7 +8,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "base/mli_defs.h"
 #include "solver/mli_solver_cg.h"
 #include "solver/mli_solver_jacobi.h"
 #include "solver/mli_solver_bjacobi.h"

@@ -16,7 +16,6 @@
 
 #include <string.h>
 #include <strings.h>
-#include "base/mli_defs.h"
 #include "mli_solver_superlu.h"
 
 /* ****************************************************************************

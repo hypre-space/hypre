@@ -9,7 +9,6 @@
 #include <string.h>
 #include <strings.h>
 #include "solver/mli_solver_gs.h"
-#include "base/mli_defs.h"
 #include "parcsr_mv/parcsr_mv.h"
 
 /******************************************************************************
