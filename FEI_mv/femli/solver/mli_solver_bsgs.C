@@ -24,19 +24,20 @@
 MLI_Solver_BSGS::MLI_Solver_BSGS() : MLI_Solver(MLI_SOLVER_BSGS_ID)
 {
    Amat_             = NULL;
-   nBlocks_          = 0;
+   nBlocks_          = 50;
    blockLengths_     = NULL;
    blockIndices_     = NULL;
    blockInverses_    = NULL;
    relaxWeights_     = NULL;
    nSweeps_          = 1;
    zeroInitialGuess_ = 0;
-   useOverlap_       = 1;
+   useOverlap_       = 0;
    offNRows_         = 0;
    offRowIndices_    = NULL;
    offRowLengths_    = NULL;
    offCols_          = NULL;
    offVals_          = NULL;
+   diagonal_         = NULL;
 }
 
 /******************************************************************************
@@ -67,6 +68,7 @@ MLI_Solver_BSGS::~MLI_Solver_BSGS()
    if ( offRowLengths_ != NULL ) delete [] offRowLengths_;
    if ( offCols_       != NULL ) delete [] offCols_;
    if ( offVals_       != NULL ) delete [] offVals_;
+   if ( diagonal_      != NULL ) delete [] diagonal_;
 }
 
 /******************************************************************************
@@ -110,8 +112,8 @@ int MLI_Solver_BSGS::setup(MLI_Matrix *Amat_in)
 
 int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 {
-   int     ip, nRecvs, *recvProcs, *recvStarts, nRecvBefore;
-   int     blockStartRow, ib, is, js, blockSize, blockEndRow, blkLeng;
+   int     ip, jp, nRecvs, *recvProcs, *recvStarts, nRecvBefore;
+   int     blockStartRow, ib, is, blockSize, blockEndRow, blkLeng;
    int     localNRows, iStart, iEnd, irow, jcol, colIndex, index, mypid;
    int     nSends, numColsOffd, start, relaxError=0, maxBlkLeng;
    int     nprocs, *partition, startRow, endRow, offOffset, *tmpJ;
@@ -126,7 +128,7 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    hypre_ParVector        *f, *u;
 
    /*-----------------------------------------------------------------
-    * fetch machine and smoother parameters
+    * fetch machine and matrix parameters
     *-----------------------------------------------------------------*/
 
    A           = (hypre_ParCSRMatrix *) Amat_->getMatrix();
@@ -151,7 +153,6 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    MPI_Comm_size(comm,&nprocs);  
    startRow    = partition[mypid];
    endRow      = partition[mypid+1] - 1;
-   free( partition );
    nRecvBefore = 0;
    totalOffNNZ = 0;
    if ( nprocs > 1 )
@@ -165,13 +166,11 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
             if ( recvProcs[ip] > mypid ) break;
          nRecvBefore = recvStarts[ip];
          offNRows_   = recvStarts[nRecvs];
-         totalOffNNZ = 0;
          for ( ip = 0; ip < offNRows_; ip++ )
             totalOffNNZ += offRowLengths_[ip];
       } 
    }
    blockSize = ( localNRows + offNRows_ ) / nBlocks_;
-printf("%d : nRecvBefore = %d\n", mypid, nRecvBefore);
 
    /*-----------------------------------------------------------------
     * setting up for interprocessor communication
@@ -183,12 +182,7 @@ printf("%d : nRecvBefore = %d\n", mypid, nRecvBefore);
       vBufData = new double[hypre_ParCSRCommPkgSendMapStart(commPkg,nSends)];
       vExtData = new double[numColsOffd];
       fExtData = new double[numColsOffd];
-
-      if (numColsOffd)
-      {
-         AOffdJ = hypre_CSRMatrixJ(AOffd);
-         AOffdA = hypre_CSRMatrixData(AOffd);
-      }
+      for ( irow = 0; irow < numColsOffd; irow++ ) vExtData[irow] = 0.0;
    }
 
    /*--------------------------------------------------------------------
@@ -198,12 +192,15 @@ printf("%d : nRecvBefore = %d\n", mypid, nRecvBefore);
    if (nprocs > 1 && useOverlap_)
    {
       index = 0;
-      for (is = 0; is < nSends; is++)
+      for (ip = 0; ip < nSends; ip++)
       {
-         start = hypre_ParCSRCommPkgSendMapStart(commPkg, is);
-         for (js=start;js<hypre_ParCSRCommPkgSendMapStart(commPkg,is+1);js++)
+         start = hypre_ParCSRCommPkgSendMapStart(commPkg, ip);
+         for (jp=start;jp<hypre_ParCSRCommPkgSendMapStart(commPkg,ip+1);jp++)
+         {
             vBufData[index++]
-                      = fData[hypre_ParCSRCommPkgSendMapElmt(commPkg,js)];
+                      = 0.5 * fData[hypre_ParCSRCommPkgSendMapElmt(commPkg,jp)];
+            fData[hypre_ParCSRCommPkgSendMapElmt(commPkg,jp)] *= 0.5;
+         }
       }
       commHandle = hypre_ParCSRCommHandleCreate(1,commPkg,vBufData,
                                                 fExtData);
@@ -211,7 +208,6 @@ printf("%d : nRecvBefore = %d\n", mypid, nRecvBefore);
       commHandle = NULL;
    }
 
-printf("%d : %d %d \n", mypid, startRow, endRow);
    /*-----------------------------------------------------------------
     * perform block SGS sweeps
     *-----------------------------------------------------------------*/
@@ -239,13 +235,13 @@ printf("%d : %d %d \n", mypid, startRow, endRow);
          if ( ! zeroInitialGuess_)
          {
             index = 0;
-            for (is = 0; is < nSends; is++)
+            for (ip = 0; ip < nSends; ip++)
             {
-               start = hypre_ParCSRCommPkgSendMapStart(commPkg, is);
-               for (js=start;js<hypre_ParCSRCommPkgSendMapStart(commPkg,is+1);
-                    js++)
+               start = hypre_ParCSRCommPkgSendMapStart(commPkg, ip);
+               for (jp=start;jp<hypre_ParCSRCommPkgSendMapStart(commPkg,ip+1);
+                    jp++)
                   vBufData[index++]
-                      = uData[hypre_ParCSRCommPkgSendMapElmt(commPkg,js)];
+                      = uData[hypre_ParCSRCommPkgSendMapElmt(commPkg,jp)];
             }
             commHandle = hypre_ParCSRCommHandleCreate(1,commPkg,vBufData,
                                                       vExtData);
@@ -254,13 +250,16 @@ printf("%d : %d %d \n", mypid, startRow, endRow);
          }
       }
 
-printf("%d : %d %d \n", mypid, startRow, endRow);
       /*-----------------------------------------------------------------
        * process each block forward
        *-----------------------------------------------------------------*/
 
-      offOffset = 0;
-      offIRow   = 0;
+      offOffset = offIRow = 0;
+      if ( offRowLengths_ != NULL ) 
+      {
+         offOffset = 0;
+         offIRow--;
+      }
       for ( ib = 0; ib < nBlocks_; ib++ )
       {
          if ( blockLengths_ != NULL ) blkLeng = blockLengths_[ib];
@@ -273,12 +272,13 @@ printf("%d : %d %d \n", mypid, startRow, endRow);
             index  = irow - startRow;
             if ( irow < startRow )
             {
+               offIRow++;
                iStart = 0;
                iEnd   = offRowLengths_[offIRow];
                tmpA   = &(offVals_[offOffset]);
                tmpJ   = &(offCols_[offOffset]);
-               res    = fExtData[offIRow++];
-               ddiag  = 1.0 / tmpA[0];
+               res    = fExtData[offIRow];
+               if (diagonal_ != NULL) ddiag = diagonal_[offIRow+localNRows];
                for (jcol = iStart; jcol < iEnd; jcol++)
                {
                   colIndex = *tmpJ++;
@@ -298,6 +298,7 @@ printf("%d : %d %d \n", mypid, startRow, endRow);
                tmpJ   = &(ADiagJ[iStart]);
                tmpA   = &(ADiagA[iStart]);
                res    = fData[index];
+               if (diagonal_ != NULL) ddiag = diagonal_[index];
                for (jcol = iStart; jcol < iEnd; jcol++)
                   res -= *tmpA++ * uData[*tmpJ++];
                if ( ! zeroInitialGuess_)
@@ -310,16 +311,16 @@ printf("%d : %d %d \n", mypid, startRow, endRow);
                      res -= *tmpA++ * vExtData[*tmpJ++];
                }
                blkX[irow-blockStartRow] = res;
-               ddiag = 1.0 / ADiagA[ADiagI[index]];
             } 
             else if ( irow > endRow )
             {
+               offIRow++;
                iStart = 0;
                iEnd   = offRowLengths_[offIRow];
                tmpA   = &(offVals_[offOffset]);
                tmpJ   = &(offCols_[offOffset]);
-               res    = fExtData[offIRow++];
-               ddiag  = 1.0 / tmpA[0];
+               res    = fExtData[offIRow];
+               if (diagonal_ != NULL) ddiag = diagonal_[offIRow+localNRows];
                for (jcol = iStart; jcol < iEnd; jcol++)
                {
                   colIndex = *tmpJ++;
@@ -341,19 +342,13 @@ printf("%d : %d %d \n", mypid, startRow, endRow);
          for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
          {
             if ( irow < startRow )
-            {
-               vExtData[offIRow-blockSize+irow-blockStartRow] += 
+               vExtData[offIRow-blockSize+irow-blockStartRow+1] += 
                                relaxWeight * blkAX[irow-blockStartRow];
-            }
             else if ( irow <= endRow )
-            { 
                uData[irow-startRow] += relaxWeight * blkAX[irow-blockStartRow];
-            }
             else 
-            {
-               vExtData[offIRow-blockSize+irow-blockStartRow] += 
+               vExtData[offIRow-blockSize+irow-blockStartRow+1] += 
                                relaxWeight * blkAX[irow-blockStartRow];
-            }
          }
       }
 
@@ -361,12 +356,8 @@ printf("%d : %d %d \n", mypid, startRow, endRow);
        * process each block backward
        *-----------------------------------------------------------------*/
 
-      offOffset = offIRow = 0;
-      if ( offRowLengths_ != NULL ) 
-      {
-         offOffset = totalOffNNZ - offRowLengths_[offNRows_-1];
-         offIRow   = offNRows_ - 1;
-      }
+      offOffset = totalOffNNZ;
+      offIRow   = offNRows_;
       for ( ib = nBlocks_-1; ib >= 0; ib-- )
       {
          if ( blockLengths_ != NULL ) blkLeng = blockLengths_[ib];
@@ -379,12 +370,14 @@ printf("%d : %d %d \n", mypid, startRow, endRow);
             index  = irow - startRow;
             if ( irow < startRow )
             {
-               iStart = 0;
-               iEnd   = offRowLengths_[offIRow];
-               tmpA   = &(offVals_[offOffset]);
-               tmpJ   = &(offCols_[offOffset]);
-               res    = fExtData[offIRow--];
-               ddiag  = 1.0 / tmpA[0];
+               offIRow--;
+               iStart     = 0;
+               iEnd       = offRowLengths_[offIRow];
+               offOffset -= iEnd;
+               tmpA       = &(offVals_[offOffset]);
+               tmpJ       = &(offCols_[offOffset]);
+               res        = fExtData[offIRow];
+               if (diagonal_ != NULL) ddiag = diagonal_[offIRow+localNRows];
                for (jcol = iStart; jcol < iEnd; jcol++)
                {
                   colIndex = *tmpJ++;
@@ -394,16 +387,16 @@ printf("%d : %d %d \n", mypid, startRow, endRow);
                      res -= *tmpA++ * uData[colIndex];
                   else tmpA++;
                }
-               offOffset -= iEnd;
                blkX[irow-blockStartRow] = res;
             }
             else if ( irow <= endRow )
             {
                iStart = ADiagI[index];
                iEnd   = ADiagI[index+1];
-               res    = fData[index];
                tmpJ   = &(ADiagJ[iStart]);
                tmpA   = &(ADiagA[iStart]);
+               res    = fData[index];
+               if (diagonal_ != NULL) ddiag = diagonal_[index];
                for (jcol = iStart; jcol < iEnd; jcol++)
                   res -= *tmpA++ * uData[*tmpJ++];
                if ( ! zeroInitialGuess_ )
@@ -416,16 +409,17 @@ printf("%d : %d %d \n", mypid, startRow, endRow);
                      res -= *tmpA++ * vExtData[*tmpJ++];
                }
                blkX[irow-blockStartRow] = res;
-               ddiag = 1.0 / ADiagA[ADiagI[index]];
             } 
             else if ( irow > endRow )
             {
-               iStart = 0;
-               iEnd   = offRowLengths_[offIRow];
-               tmpA   = &(offVals_[offOffset]);
-               tmpJ   = &(offCols_[offOffset]);
-               res    = fExtData[offIRow--];
-               ddiag  = 1.0 / tmpA[0];
+               offIRow--;
+               iStart    = 0;
+               iEnd      = offRowLengths_[offIRow];
+               offOffset -= iEnd;
+               tmpA      = &(offVals_[offOffset]);
+               tmpJ      = &(offCols_[offOffset]);
+               res       = fExtData[offIRow];
+               if (diagonal_ != NULL) ddiag = diagonal_[offIRow+localNRows];
                for (jcol = iStart; jcol < iEnd; jcol++)
                {
                   colIndex = *tmpJ++;
@@ -435,7 +429,6 @@ printf("%d : %d %d \n", mypid, startRow, endRow);
                      res -= *tmpA++ * uData[colIndex];
                   else tmpA++;
                }
-               offOffset -= iEnd;
                blkX[irow-blockStartRow] = res;
             }
          }
@@ -447,22 +440,39 @@ printf("%d : %d %d \n", mypid, startRow, endRow);
          for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
          {
             if ( irow < startRow )
-            {
-               vExtData[offIRow-blockSize+irow-blockStartRow] += 
+               vExtData[offIRow+irow-blockStartRow] += 
                                relaxWeight * blkAX[irow-blockStartRow];
-            }
             else if ( irow <= endRow )
-            { 
-               uData[irow-startRow] += relaxWeight * blkAX[irow-blockStartRow];
-            }
+               uData[irow-startRow] += relaxWeight*blkAX[irow-blockStartRow];
             else 
-            {
-               vExtData[offIRow-blockSize+irow-blockStartRow] += 
+               vExtData[offIRow+irow-blockStartRow] += 
                                relaxWeight * blkAX[irow-blockStartRow];
-            }
          }
       }
       zeroInitialGuess_ = 0;
+   }
+
+   /*-----------------------------------------------------------------
+    * symmetrize
+    *-----------------------------------------------------------------*/
+
+   if (nprocs > 1 && useOverlap_)
+   {
+      commHandle = hypre_ParCSRCommHandleCreate(2,commPkg,vExtData,
+                                                vBufData);
+      hypre_ParCSRCommHandleDestroy(commHandle);
+      commHandle = NULL;
+      index = 0;
+      for (ip = 0; ip < nSends; ip++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(commPkg, ip);
+         for (jp=start;jp<hypre_ParCSRCommPkgSendMapStart(commPkg,ip+1);jp++)
+         {
+            is = hypre_ParCSRCommPkgSendMapElmt(commPkg,jp); 
+            uData[is] = (uData[is] + vBufData[index++]) * 0.5; 
+            fData[is] *= 2.0;
+         }
+      }
    }
 
    /*-----------------------------------------------------------------
@@ -779,6 +789,7 @@ int MLI_Solver_BSGS::buildBlocks()
    startRow   = partition[mypid];
    endRow     = partition[mypid+1] - 1;
    localNRows = endRow - startRow + 1;
+   free( partition );
    if ( nprocs > 1 && useOverlap_ )
    {
       commPkg     = hypre_ParCSRMatrixCommPkg(A);
@@ -801,6 +812,39 @@ int MLI_Solver_BSGS::buildBlocks()
    if ( nBlocks_ >= (localNRows+offNRows_) ) 
    {
       nBlocks_ = localNRows + offNRows_;
+      diagonal_ = new double[nBlocks_];
+      for ( irow = startRow; irow <= endRow; irow++ )
+      {
+         hypre_ParCSRMatrixGetRow(A, irow, &rowSize, &colInd, &colVal);
+         for ( jcol = 0; jcol < rowSize; jcol++ )
+         {
+            colIndex = colInd[jcol];
+            if (colIndex == irow) 
+            {
+               if ( colVal[jcol] == 0.0 ) diagonal_[irow-startRow] = 1.0;
+               else diagonal_[irow-startRow] = 1.0 /colVal[jcol];
+               break;
+            }
+         }
+         hypre_ParCSRMatrixRestoreRow(A,irow,&rowSize,&colInd,&colVal);
+      }
+      nnzOffset = 0;
+      for ( irow = 0; irow < offNRows_; irow++ )
+      {
+         rowSize = offRowLengths_[irow];
+         for ( jcol = 0; jcol < rowSize; jcol++ )
+         {
+            if ( offCols_[nnzOffset+jcol] == offRowIndices_[irow] )
+            {
+               if ( offVals_[nnzOffset+jcol] == 0.0 ) 
+                  diagonal_[irow+localNRows] = 1.0;
+               else 
+                  diagonal_[irow+localNRows] = 1.0 / offVals_[nnzOffset+jcol];
+               break;
+            }
+         }
+         nnzOffset += rowSize;
+      }
       return 0;
    }
    else blockSize = (localNRows + offNRows_) / nBlocks_;
@@ -905,7 +949,7 @@ int MLI_Solver_BSGS::buildBlocks()
 
 int MLI_Solver_BSGS::adjustOffColIndices()
 {
-   int                mypid, *partition, startRow, endRow;
+   int                mypid, *partition, startRow, endRow, localNRows;
    int                offset, index, colIndex, irow, jcol;
    hypre_ParCSRMatrix *A;
    MPI_Comm           comm;
@@ -920,6 +964,7 @@ int MLI_Solver_BSGS::adjustOffColIndices()
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    startRow   = partition[mypid];
    endRow     = partition[mypid+1] - 1;
+   localNRows = endRow - startRow + 1;
    free( partition );
 
    /*-----------------------------------------------------------------
@@ -937,7 +982,7 @@ int MLI_Solver_BSGS::adjustOffColIndices()
          else
          {
             index = MLI_Utils_BinarySearch(colIndex,offRowIndices_,offNRows_);
-            if ( index >= 0 ) offCols_[offset] = index;
+            if ( index >= 0 ) offCols_[offset] = localNRows + index;
             else              offCols_[offset] = -1;
          }
          offset++;

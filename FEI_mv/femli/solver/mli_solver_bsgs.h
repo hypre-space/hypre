@@ -34,6 +34,7 @@ class MLI_Solver_BSGS : public MLI_Solver
    int        *offRowLengths_;
    int        *offCols_;
    double     *offVals_;
+   double     *diagonal_;
 
 public :
 
