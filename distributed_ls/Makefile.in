@@ -1,0 +1,58 @@
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+SHELL = /bin/sh
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+#These are the directories for the IJ interface
+HYPRE_IJ_DIRS =\
+ pilut\
+ ParaSails\
+ Euclid
+
+all:
+	@ \
+	for i in ${HYPRE_IJ_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make install); \
+	    echo ""; \
+	  fi; \
+	done
+
+install: all
+	@ \
+	echo ""
+
+clean:
+	@ \
+	for i in ${HYPRE_IJ_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Cleaning $$i ..."; \
+	    (cd $$i; make clean); \
+	  fi; \
+	done; \
+
+veryclean:
+	@ \
+	for i in ${HYPRE_IJ_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Very-cleaning $$i ..."; \
+	    (cd $$i; make veryclean); \
+	  fi; \
+	done; \
+

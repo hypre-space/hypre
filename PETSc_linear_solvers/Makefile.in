@@ -1,0 +1,57 @@
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+SHELL = /bin/sh
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+# These are directories that are not yet officially in HYPRE
+HYPRE_EXTRA_DIRS =\
+ ParILUT
+
+all: 
+	@ \
+	for i in ${HYPRE_EXTRA_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make install); \
+	    echo ""; \
+	  fi; \
+	done; \
+	echo ""
+
+install: all
+	@ \
+	echo ""
+
+clean:
+	@ \
+	for i in ${HYPRE_EXTRA_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Cleaning $$i ..."; \
+	    (cd $$i; make clean); \
+	  fi; \
+	done; \
+
+veryclean:
+	@ \
+	for i in ${HYPRE_EXTRA_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Very-cleaning $$i ..."; \
+	    (cd $$i; make veryclean); \
+	  fi; \
+	done; \
+
