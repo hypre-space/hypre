@@ -1,0 +1,19 @@
+#!/usr/local/bin/tcsh
+#PSUB -r smg
+#PSUB -eo
+#PSUB -mb
+#PSUB -me
+#PSUB -b a_casc
+#PSUB -tM 29
+#PSUB -o smg.log
+#PSUB -lt 20
+#PSUB -c pbatch
+#PSUB -ln 6
+
+cd /g/g18/pnbrown/linear_solvers/struct_matrix_vector
+setenv MP_LABELIO yes
+setenv MP_NEWJOB yes
+setenv MP_EUILIB us
+
+poe ./driver_internal 
+
