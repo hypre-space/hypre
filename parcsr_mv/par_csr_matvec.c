@@ -26,7 +26,7 @@ hypre_ParCSRMatrixMatvec( double           alpha,
                  double           beta,
                  hypre_ParVector    *y     )
 {
-   hypre_ParCSRCommHandle	*comm_handle;
+   hypre_ParCSRCommHandle	**comm_handle;
    hypre_ParCSRCommPkg	*comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_CSRMatrix      *diag   = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix      *offd   = hypre_ParCSRMatrixOffd(A);
@@ -82,6 +82,8 @@ hypre_ParCSRMatrixMatvec( double           alpha,
    hypre_SeqVectorInitialize(x_tmp);
    x_tmp_data = hypre_VectorData(x_tmp);
    
+   comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle*,num_vectors);
+
    /*---------------------------------------------------------------------
     * If there exists no CommPkg for A, a CommPkg is generated using
     * equally load balanced partitionings
@@ -134,18 +136,24 @@ hypre_ParCSRMatrixMatvec( double           alpha,
    */
    for ( jv=0; jv<num_vectors; ++jv )
    {
-      comm_handle = hypre_ParCSRCommHandleCreate
+      comm_handle[jv] = hypre_ParCSRCommHandleCreate
          ( 1, comm_pkg, x_buf_data[jv], &(x_tmp_data[jv*num_cols_offd]) );
-      hypre_ParCSRCommHandleDestroy(comm_handle);
-      comm_handle = NULL;
    }
 
    hypre_CSRMatrixMatvec( alpha, diag, x_local, beta, y_local);
    
+   for ( jv=0; jv<num_vectors; ++jv )
+   {
+      hypre_ParCSRCommHandleDestroy(comm_handle[jv]);
+      comm_handle[jv] = NULL;
+   }
+   hypre_TFree(comm_handle);
+
    if (num_cols_offd) hypre_CSRMatrixMatvec( alpha, offd, x_tmp, 1.0, y_local);    
 
    hypre_SeqVectorDestroy(x_tmp);
    x_tmp = NULL;
+   for ( jv=0; jv<num_vectors; ++jv ) hypre_TFree(x_buf_data[jv]);
    hypre_TFree(x_buf_data);
   
    return ierr;
@@ -165,7 +173,7 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
                   double           beta,
                   hypre_ParVector    *y     )
 {
-   hypre_ParCSRCommHandle	*comm_handle;
+   hypre_ParCSRCommHandle	**comm_handle;
    hypre_ParCSRCommPkg	*comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(A);
@@ -210,6 +218,7 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
    /*-----------------------------------------------------------------------
     *-----------------------------------------------------------------------*/
 
+    comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle*,num_vectors);
 
     if ( num_vectors==1 )
     {
@@ -246,13 +255,18 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
    for ( jv=0; jv<num_vectors; ++jv )
    {
       /* >>> this is where we assume multivectors are 'column' storage */
-      comm_handle = hypre_ParCSRCommHandleCreate
+      comm_handle[jv] = hypre_ParCSRCommHandleCreate
          ( 2, comm_pkg, &(y_tmp_data[jv*num_cols_offd]), y_buf_data[jv] );
-      hypre_ParCSRCommHandleDestroy(comm_handle);   
-      comm_handle = NULL;
    }
 
    hypre_CSRMatrixMatvecT(alpha, diag, x_local, beta, y_local);
+
+   for ( jv=0; jv<num_vectors; ++jv )
+   {
+      hypre_ParCSRCommHandleDestroy(comm_handle[jv]);
+      comm_handle[jv] = NULL;
+   }
+   hypre_TFree(comm_handle);
 
    if ( num_vectors==1 )
    {
@@ -281,6 +295,7 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
 	
    hypre_SeqVectorDestroy(y_tmp);
    y_tmp = NULL;
+   for ( jv=0; jv<num_vectors; ++jv ) hypre_TFree(y_buf_data[jv]);
    hypre_TFree(y_buf_data);
 
    return ierr;
