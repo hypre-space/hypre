@@ -17,4 +17,6 @@
 02/20/01    still version 1.5.0R3
             - fix memory leaks with reusing selectedList_
             - change isis option to hypre in cfei-hypre.h
+02/21/01    still version 1.5.0R4
+            - major debug for minResProjection, interface change also
 
