@@ -695,10 +695,6 @@ then
       
      CASC_SET_CXXOPT(-O)
      CASC_SET_CXXDEBUG(-g)
-     if test -z "$casc_using_blas"
-     then
-       casc_using_blas=yes
-     fi
    ;;
 
    rs6000)
@@ -759,10 +755,6 @@ then
      CASC_SET_CXXOPT(-O3 -qstrict)
      CASC_SET_CXXDEBUG(-g)
      CFLAGS="$CFLAGS -qmaxmem=8192 -DHYPRE_COMM_SIMPLE"
-     if test -z "$casc_using_blas"
-     then
-       casc_using_blas=yes
-     fi
    ;;
 
    IRIX64)
@@ -828,9 +820,17 @@ case $ARCH in
   ;;
   alpha)
     AC_DEFINE(HYPRE_ALPHA)
+    if test -z "$casc_using_blas"
+    then
+      casc_using_blas=yes
+    fi
   ;;
   rs6000)
     AC_DEFINE(HYPRE_RS6000)
+    if test -z "$casc_using_blas"
+    then
+      casc_using_blas=yes
+    fi
   ;;
   IRIX64)
     AC_DEFINE(HYPRE_IRIX64)
