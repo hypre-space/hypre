@@ -12,7 +12,7 @@
 
 #if HAVE_SUPERLU
 #include "dsp_defs.h"
-#include "util.h"
+#include "slu_util.h"
 #endif
 
 /*-------------------------------------------------------------------------
