@@ -4,7 +4,11 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
+<<<<<<< HYPRE_LinSysCore.C
  * $Revision$
+=======
+ * $Revision$
+>>>>>>> 1.30
  *********************************************************************EHEADER*/
 
 #include <stdlib.h>
@@ -86,6 +90,7 @@ extern "C" {
 #endif
 #ifdef HAVE_AMGE
     int HYPRE_LSI_AMGeSolve( double *rhs, double *sol ); 
+    int HYPRE_LSI_AMGeSetBoundary( int leng, int *colInd );
 #endif
 }
 
@@ -1163,9 +1168,9 @@ void HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
 
     MPI_Allreduce(&maxSize, &pilutMaxNnzPerRow_,1,MPI_INT,MPI_MAX,comm_);
 
-    ierr = HYPRE_IJMatrixSetRowSizes(HYA_, rowLengths_);
-    ierr = HYPRE_IJMatrixInitialize(HYA_);
-    assert(!ierr);
+    //ierr = HYPRE_IJMatrixSetRowSizes(HYA_, rowLengths_);
+    //ierr = HYPRE_IJMatrixInitialize(HYA_);
+    //assert(!ierr);
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
@@ -1352,12 +1357,20 @@ void HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
 
 void HYPRE_LinSysCore::matrixLoadComplete()
 {
-    int i, j, numLocalEqns, leng, eqnNum, nnz;
+    int i, j, ierr, numLocalEqns, leng, eqnNum, nnz;
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering matrixLoadComplete.\n",mypid_);
     }
+
+    //-------------------------------------------------------------------
+    // set system matrix initialization parameters 
+    //-------------------------------------------------------------------
+
+    ierr = HYPRE_IJMatrixSetRowSizes(HYA_, rowLengths_);
+    ierr = HYPRE_IJMatrixInitialize(HYA_);
+    assert(!ierr);
 
     //-------------------------------------------------------------------
     // load the matrix stored locally to a HYPRE matrix
@@ -3869,4 +3882,66 @@ void HYPRE_LinSysCore::createMapFromSoln()
     }
 }
 
+//***************************************************************************
+// add extra nonzero entries into the matrix data structure
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
+                  const double* values, const int* scatterIndices)
+{
+    int    i, index, colIndex, localRow, mappedRow, mappedCol, newLeng;
+    int    *tempInd;
+    double *tempVal;
+
+    //-------------------------------------------------------------------
+    // error checking
+    //-------------------------------------------------------------------
+
+    if ( systemAssembled_ == 1 )
+    {
+       printf("putIntoMappedMatrix ERROR : matrix already assembled\n");
+       exit(1);
+    }
+    if ( row < localStartRow_ || row > localEndRow_ )
+    {
+       printf("putIntoMappedMatrix ERROR : invalid row number %d.\n",row);
+       exit(1);
+    }
+    if ( node2EqnMap != NULL ) mappedRow = node2EqnMap[row];
+    else                       mappedRow = row;
+    localRow = mappedRow - localStartRow_;
+
+    //-------------------------------------------------------------------
+    // load the local matrix
+    //-------------------------------------------------------------------
+
+    newLeng = rowLengths_[localRow] + numValues;
+    tempInd = new int[newLeng];
+    tempVal = new double[newLeng];
+    for ( i = 0; i < rowLengths_[localRow]; i++ ) 
+    {
+       tempVal[i] = colValues_[localRow][i];
+       tempInd[i] = colIndices_[localRow][i];
+    }
+    delete [] colValues_[localRow];
+    delete [] colIndices_[localRow];
+    colValues_[localRow] = tempVal;
+    colIndices_[localRow] = tempInd;
+
+    index = rowLengths_[localRow];
+
+    for ( i = 0; i < numValues; i++ ) 
+    {
+       colIndex = scatterIndices[i];
+
+       // this only works in serial for now
+       if ( node2EqnMap != NULL ) mappedCol = node2EqnMap[colIndex];
+       else                       mappedCol = colIndex;
+
+       colIndices_[localRow][index] = mappedCol;
+       colValues_[localRow][index++] = values[i];
+    }
+
+    rowLengths_[localRow] = newLeng;
+}
 
