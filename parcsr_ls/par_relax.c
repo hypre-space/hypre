@@ -56,6 +56,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
    double         *Vtemp_data = hypre_VectorData(Vtemp_local);
    double 	  *Vext_data;
    double 	  *v_buf_data;
+   double 	  *tmp_data;
 
    hypre_CSRMatrix *A_CSR;
    int		   *A_CSR_i;   
@@ -67,6 +68,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
 
    int             i, j, jr;
    int             ii, jj;
+   int             ns, ne;
    int             column;
    int             relax_error = 0;
    int		   num_sends;
@@ -84,6 +86,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
 
    double          zero = 0.0;
    double	   res;
+   double	   size, rest;
    double          one_minus_weight;
 
    one_minus_weight = 1.0 - relax_weight;
@@ -97,6 +100,8 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
     *     relax_type = 3 -> hybrid: GS-J mix off-processor, GS on-processor
     *     relax_type = 4 -> Gauss_Seidel: interior points in parallel ,
     *			 	   	  boundary sequential 
+    *     relax_type = 5 -> hybrid: GS-J mix off-processor, chaotic GS on-node
+    *     relax_type = 6 -> hybrid: SGS-J mix off-processor, SGS on-processor
     *     relax_type = 9 -> Direct Solve
     *-----------------------------------------------------------------------*/
    
@@ -256,7 +261,118 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
       }
       break;
       
-      
+      case 5: /* Hybrid: Jacobi off-processor, 
+                         chaotic Gauss-Seidel on-processor       */
+      {
+	if (num_procs > 1)
+	{
+   	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+
+   	v_buf_data = hypre_CTAlloc(double, 
+			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+
+	Vext_data = hypre_CTAlloc(double,num_cols_offd);
+        
+	if (num_cols_offd)
+	{
+		A_offd_j = hypre_CSRMatrixJ(A_offd);
+		A_offd_data = hypre_CSRMatrixData(A_offd);
+	}
+ 
+   	index = 0;
+   	for (i = 0; i < num_sends; i++)
+   	{
+        	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+        	for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
+                	v_buf_data[index++] 
+                 	= u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+   	}
+ 
+   	comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data, 
+        	Vext_data);
+
+         /*-----------------------------------------------------------------
+          * Copy current approximation into temporary vector.
+          *-----------------------------------------------------------------*/
+   	 hypre_ParCSRCommHandleDestroy(comm_handle);
+         comm_handle = NULL;
+	}
+
+         /*-----------------------------------------------------------------
+          * Relax all points.
+          *-----------------------------------------------------------------*/
+
+         if (relax_points == 0)
+         {
+#define HYPRE_SMP_PRIVATE i,ii,jj,res
+#include "../utilities/hypre_smp_forloop.h"
+            for (i = 0; i < n; i++)	/* interior points first */
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if ( A_diag_data[A_diag_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res -= A_diag_data[jj] * u_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] = res / A_diag_data[A_diag_i[i]];
+               }
+            }
+         }
+
+         /*-----------------------------------------------------------------
+          * Relax only C or F points as determined by relax_points.
+          *-----------------------------------------------------------------*/
+
+         else
+         {
+#define HYPRE_SMP_PRIVATE i,ii,jj,res
+#include "../utilities/hypre_smp_forloop.h"
+            for (i = 0; i < n; i++) /* relax interior points */
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if (cf_marker[i] == relax_points 
+				&& A_diag_data[A_diag_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res -= A_diag_data[jj] * u_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] = res / A_diag_data[A_diag_i[i]];
+               }
+            }     
+         }
+         if (num_procs > 1)
+         {
+	   hypre_TFree(Vext_data);
+	   hypre_TFree(v_buf_data);
+         }
+      }
+      break;
+
       case 3: /* Hybrid: Jacobi off-processor, 
                          Gauss-Seidel on-processor       */
       {
@@ -300,9 +416,60 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
 
          if (relax_points == 0)
          {
-/* RDF: This is doable.  Add an additional outer loop that manually
- * breaks up the i-loop into NumThreads parts.  Do the interior
- * of each one of these with GS, and the boundary with Jacobi */
+	  if (hypre_NumThreads > 1)
+          {
+	   tmp_data = hypre_CTAlloc(double,n);
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
+           for (i = 0; i < n; i++)
+	      tmp_data[i] = u_data[i];
+#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
+#include "../utilities/hypre_smp_forloop.h"
+           for (j = 0; j < hypre_NumThreads; j++)
+	   {
+	    size = n/hypre_NumThreads;
+	    rest = n - size*hypre_NumThreads;
+	    if (j < rest)
+	    {
+	       ns = j*size+j;
+	       ne = (j+1)*size+j+1;
+	    }
+	    else
+	    {
+	       ns = j*size+rest;
+	       ne = (j+1)*size+rest;
+	    }
+            for (i = ns; i < ne; i++)	/* interior points first */
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if ( A_diag_data[A_diag_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+		     if (ii >= ns && ii < ne)
+                        res -= A_diag_data[jj] * u_data[ii];
+		     else
+                        res -= A_diag_data[jj] * tmp_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] = res / A_diag_data[A_diag_i[i]];
+               }
+            }
+           }
+           hypre_TFree(tmp_data);
+          }
+	  else
+          {
             for (i = 0; i < n; i++)	/* interior points first */
             {
 
@@ -326,6 +493,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                   u_data[i] = res / A_diag_data[A_diag_i[i]];
                }
             }
+          }
          }
 
          /*-----------------------------------------------------------------
@@ -334,14 +502,68 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
 
          else
          {
-/* RDF: This is doable.  Add an additional outer loop that manually
- * breaks up the i-loop into NumThreads parts.  Do the interior
- * of each one of these with GS, and the boundary with Jacobi */
+	  if (hypre_NumThreads > 1)
+	  {
+	   tmp_data = hypre_CTAlloc(double,n);
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
+           for (i = 0; i < n; i++)
+	      tmp_data[i] = u_data[i];
+#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
+#include "../utilities/hypre_smp_forloop.h"
+           for (j = 0; j < hypre_NumThreads; j++)
+	   {
+	    size = n/hypre_NumThreads;
+	    rest = n - size*hypre_NumThreads;
+	    if (j < rest)
+	    {
+	       ns = j*size+j;
+	       ne = (j+1)*size+j+1;
+	    }
+	    else
+	    {
+	       ns = j*size+rest;
+	       ne = (j+1)*size+rest;
+	    }
+            for (i = ns; i < ne; i++) /* relax interior points */
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if (cf_marker[i] == relax_points 
+				&& A_diag_data[A_diag_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+		     if (ii >= ns && ii < ne)
+                        res -= A_diag_data[jj] * u_data[ii];
+		     else
+                        res -= A_diag_data[jj] * tmp_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] = res / A_diag_data[A_diag_i[i]];
+               }
+            }     
+           }     
+	  hypre_TFree(tmp_data);
+	  }
+	  else
+	  {
             for (i = 0; i < n; i++) /* relax interior points */
             {
 
                /*-----------------------------------------------------------
                 * If i is of the right type ( C or F ) and diagonal is
+      
                 * nonzero, relax point i; otherwise, skip it.
                 *-----------------------------------------------------------*/
              
@@ -362,11 +584,12 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                   u_data[i] = res / A_diag_data[A_diag_i[i]];
                }
             }     
+	  }
          }
          if (num_procs > 1)
          {
-	 hypre_TFree(Vext_data);
-	 hypre_TFree(v_buf_data);
+	   hypre_TFree(Vext_data);
+	   hypre_TFree(v_buf_data);
          }
       }
       break;
@@ -550,9 +773,6 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
           *-----------------------------------------------------------------*/
           if (relax_points == 0)
           {
-/* RDF: This is doable.  Add an additional outer loop that manually
- * breaks up the i-loop into NumThreads parts.  Do the interior
- * of each one of these with GS, and the boundary with Jacobi */
             for (i = 0; i < n; i++)	
             {
 
@@ -707,7 +927,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
       }
       break;
 
-      case 5: /* Hybrid: Jacobi off-processor, 
+      case 6: /* Hybrid: Jacobi off-processor, 
                          Symm. Gauss-Seidel on-processor       */
       {
 	if (num_procs > 1)
