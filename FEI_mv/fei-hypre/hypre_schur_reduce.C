@@ -1069,7 +1069,7 @@ void HYPRE_LinSysCore::buildSchurReducedRHS()
     HYPRE_IJVectorCreate(comm_, &f1, CTGlobalNRows);
     HYPRE_IJVectorSetLocalStorageType(f1, HYPRE_PARCSR);
     HYPRE_IJVectorSetLocalPartitioning(f1,CTStartRow,CTStartRow+CTNRows);
-    ierr += HYPRE_IJVectorAssemble(f1);
+    ierr  = HYPRE_IJVectorAssemble(f1);
     ierr += HYPRE_IJVectorInitialize(f1);
     assert(!ierr);
 
