@@ -1,7 +1,7 @@
 \chapter{Interoperability with Fortran}
 
 %==========================================================================
-\section{Calls to {\itshape hypre} from Fortran source code}
+\section{Calls to {\slshape hypre} from Fortran source code}
 
 Fortran 77 subroutine arguments always pass copies of the argument addresses
 on execution of the call.  This is referred to as call-by-address, or
@@ -31,14 +31,14 @@ achieved with the specific Fortran-calling-C mapping:
 \underline{calling Fortran argument type} & &
 \underline{called C function parameter type} \\
                               &                   &   \\
-\hspace{0.1in} (addr of) integer*8        & $\longrightarrow$ &
-\hspace{0.3in} long int * \\
-\hspace{0.1in} (addr of) integer          & $\longrightarrow$ &
-\hspace{0.3in} int * \\
-\hspace{0.1in} (addr of) character        & $\longrightarrow$ &
-\hspace{0.3in} char * \\
-\hspace{0.1in} (addr of) double precision & $\longrightarrow$ &
-\hspace{0.3in} double * \\
+\hspace{0.1in} (addr of) \verb+integer*8+        & $\longrightarrow$ &
+\hspace{0.5in} \verb+long int *+ \\
+\hspace{0.1in} (addr of) \verb+integer+          & $\longrightarrow$ &
+\hspace{0.5in} \verb+int *+ \\
+\hspace{0.1in} (addr of) \verb+character+        & $\longrightarrow$ &
+\hspace{0.5in} \verb+char *+ \\
+\hspace{0.1in} (addr of) \verb+double precision+ & $\longrightarrow$ &
+\hspace{0.5in} \verb+double *+ \\
 
 \end{tabular}
 
@@ -46,21 +46,21 @@ achieved with the specific Fortran-calling-C mapping:
 
 
 In particular, on DEC Compass, DEC Tera, and IBM ASCI-Blue, C-type
-(long int *) points to a space that can hold an address, a space which
-happens to be the size of that allocated by a Fortran integer*8 declaration.
-In orther words, C can hold an address to anything in a (long int) and
-assign that address to a Fortran integer*8 memory space (using (long int *)
-call-by-value).
+\verb+long int *+ points to a space that can hold an address, a space
+which happens to be the size of that allocated by a Fortran
+\verb+integer*8+ declaration.
+In orther words, C can hold an address to anything in a \verb+long int+ and
+assign that address to a Fortran integer*8 memory space (using \verb+long int *+ call-by-value).
 
-So, on the above platforms, Fortran can carry addresses in integer*8
+So, on the above platforms, Fortran can carry addresses in \verb+integer*8+
 variables.  These addresses might not have originated in any Fortran call,
 and if they are addresses to inhomogeneously typed collections of data
 (e.g. C structures), Fortran might not have enough information to dereference
 the addresses.  But Fortran can still carry around such addresses, and in
 particular hand them back and forth between various C functions.  The
-{\itshape hypre} Fortran interface makes extensive use of this technique.
+{\slshape hypre} Fortran interface makes extensive use of this technique.
 
-\vspace{0.2in}
+\vspace{0.1in}
 
 \noindent Example:
 
@@ -84,9 +84,9 @@ particular hand them back and forth between various C functions.  The
                                      int       *ierr          )
 \end{verbatim}
 
-\section{Fortran subroutine calls in {\itshape hypre} source code}
+\section{Fortran subroutine calls in {\slshape hypre} source code}
 
-\vspace{0.2in}
+\vspace{0.1in}
 
 \noindent Example:
 
@@ -94,20 +94,20 @@ particular hand them back and forth between various C functions.  The
 
   C calling:
 \begin{verbatim}
-      long int struct_addr;
+      long int long_intg;
       int      intg, ierr;
       char     charact;
       double   double_prec;
 
-      hypre_F90_NAME(sub_name)( &struct_addr, &intg, &charact,
+      hypre_F90_NAME(sub_name)( &long_intg, &intg, &charact,
                                 &double_prec, &ierr )
 \end{verbatim}
 
   Fortran called:
 \begin{verbatim}
-      subroutine sub_name(struct_addr, intg, charact, double_prec, ierr)
+      subroutine sub_name(long_intg, intg, charact, double_prec, ierr)
 
-      integer*8        struct_addr
+      integer*8        long_intg
       integer          intg, ierr
       character        charact
       double precision double_prec
