@@ -190,7 +190,7 @@ sharedstatedir = @sharedstatedir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-SUBDIRS = .  amgs base matrix solver vector cintface util fedata mapper lib
+SUBDIRS = . lib
 DIST_SUBDIRS = .  amgs base matrix solver vector \
  cintface util fedata mapper lib blas test
 
