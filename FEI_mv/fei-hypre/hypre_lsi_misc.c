@@ -272,15 +272,17 @@ void HYPRE_LSI_qsort1a( int *ilist, int *ilist2, int left, int right)
    ilist2[mid]  = itemp;
    last         = left;
    for (i = left+1; i <= right; i++)
-   if (ilist[i] < ilist[left])
    {
-      last++;
-      itemp        = ilist[last];
-      ilist[last]  = ilist[i];
-      ilist[i]     = itemp;
-      itemp        = ilist2[last];
-      ilist2[last] = ilist2[i];
-      ilist2[i]    = itemp;
+      if (ilist[i] < ilist[left])
+      {
+         last++;
+         itemp        = ilist[last];
+         ilist[last]  = ilist[i];
+         ilist[i]     = itemp;
+         itemp        = ilist2[last];
+         ilist2[last] = ilist2[i];
+         ilist2[i]    = itemp;
+      }
    }
    itemp        = ilist[left];
    ilist[left]  = ilist[last];
