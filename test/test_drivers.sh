@@ -99,6 +99,7 @@ then
 
     [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
     [ -x /usr/bin/mailx ] && HYPRE_MAIL=/usr/bin/mailx
+    [ -x /usr/sbin/mailx ] && HYPRE_MAIL=/usr/sbin/mailx
 
     for i in $HYPRE_TEST_DRIVERS
     do
