@@ -618,8 +618,6 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
    hypre_Index          *shape   = hypre_SStructStencilShape(stencil);
    int                   size    = hypre_SStructStencilSize(stencil);
    hypre_IndexRef        offset;
-   hypre_Index           to_index;
-   hypre_SStructUVEntry *Uventry;
    hypre_BoxMap         *map;
    hypre_BoxMapEntry   **map_entries;
    int                   nmap_entries;
