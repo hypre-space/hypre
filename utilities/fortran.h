@@ -54,13 +54,23 @@
 #ifdef HYPRE_USING_HYPRE_BLAS
 #define hypre_F90_NAME_BLAS(name,NAME)  name##_
 #else
-#define hypre_F90_NAME_BLAS(name,NAME)  hypre_NAME_C_CALLING_FORT(name,NAME)
+#if defined(F77_FUNC)
+/* F77_FUNC macro assumes NO underscores exist in name */
+#define hypre_F90_NAME_BLAS(name,NAME) F77_FUNC(name,NAME)
+#else
+#define hypre_F90_NAME_BLAS(name,NAME) hypre_NAME_C_CALLING_FORT(name,NAME)
+#endif
 #endif
 
 #ifdef HYPRE_USING_HYPRE_LAPACK
 #define hypre_F90_NAME_LAPACK(name,NAME)  name##_
 #else
-#define hypre_F90_NAME_LAPACK(name,NAME)  hypre_NAME_C_CALLING_FORT(name,NAME)
+#if defined(F77_FUNC)
+/* F77_FUNC macro assumes NO underscores exist in name */
+#define hypre_F90_NAME_LAPACK(name,NAME) F77_FUNC(name,NAME)
+#else
+#define hypre_F90_NAME_LAPACK(name,NAME) hypre_NAME_C_CALLING_FORT(name,NAME)
+#endif
 #endif
 
 #endif
