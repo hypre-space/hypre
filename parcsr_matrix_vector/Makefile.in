@@ -49,7 +49,7 @@ HEADERS =\
  headers.h\
  par_csr_matrix.h\
  par_vector.h\
- parcsr_mv.h\
+ parcsr_matrix_vector.h\
  HYPRE_parcsr_mv.h
 
 FILES =\
