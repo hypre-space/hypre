@@ -75,12 +75,12 @@ hypre_SetStructInterfaceVectorCoeffs( hypre_StructInterfaceVector *vector,
 			    hypre_Index         grid_index,
 			    double            *coeffs     )
 {
-   int    ierr;
+   int ierr = 0;
 
    if ( hypre_StructInterfaceVectorStorageType(vector) == HYPRE_PETSC )
       return( hypre_SetStructInterfaceVectorPETScCoeffs( vector, grid_index, coeffs ) );
    else
-      return(-1);
+      return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -186,7 +186,7 @@ hypre_RetrievalOnStructInterfaceVector( hypre_StructInterfaceVector *vector )
    if ( hypre_StructInterfaceVectorStorageType(vector) == HYPRE_PETSC )
       return( hypre_RetrievalOnStructInterfaceVectorPETSc( vector ) );
    else
-      return(-1);
+      return ierr;
 
 }
 
@@ -204,7 +204,7 @@ hypre_RetrievalOffStructInterfaceVector( hypre_StructInterfaceVector *vector )
    if ( hypre_StructInterfaceVectorStorageType(vector) == HYPRE_PETSC )
       return( hypre_RetrievalOffStructInterfaceVectorPETSc( vector ) );
    else
-      return(-1);
+      return ierr;
 
 }
 

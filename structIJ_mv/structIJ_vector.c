@@ -19,7 +19,6 @@ hypre_StructIJVectorCreate( MPI_Comm             comm,
                             hypre_StructGrid    *grid,
                             hypre_StructStencil *stencil )
 {
-   int                  ierr;
    HYPRE_IJVector       ij_vector;
    hypre_StructIJVector *vector;
 
@@ -30,9 +29,9 @@ hypre_StructIJVectorCreate( MPI_Comm             comm,
    hypre_StructIJVectorStencil(vector)   = hypre_StructStencilRef(stencil);
    hypre_StructIJVectorRefCount(vector)  = 1;
 
-   ierr = HYPRE_IJVectorCreate (comm, &ij_vector,
-                                hypre_StructGridGlobalSize(grid));
-
+   HYPRE_IJVectorCreate (comm, &ij_vector,
+                         hypre_StructGridGlobalSize(grid));
+   
    hypre_StructIJVectorIJVector(vector) = ij_vector;
 
    return vector;
@@ -145,7 +144,6 @@ hypre_StructIJVectorSetValue( hypre_StructIJVector *vector,
                                double               value )
 {
    int  ierr=0; 
-   int  i;
    int  vec_index;
    int  val_index;
 

@@ -26,7 +26,6 @@ hypre_StructIJMatrixCreate( MPI_Comm             comm,
                             hypre_StructGrid    *grid,
                             hypre_StructStencil *stencil )
 {
-   int                  ierr;
    HYPRE_IJMatrix       ij_matrix;
    hypre_StructIJMatrix *matrix;
 
@@ -38,9 +37,9 @@ hypre_StructIJMatrixCreate( MPI_Comm             comm,
    hypre_StructIJMatrixSymmetric(matrix) = 0;
    hypre_StructIJMatrixRefCount(matrix)  = 1;
 
-   ierr = HYPRE_IJMatrixCreate (comm, &ij_matrix,
-                                hypre_StructGridGlobalSize(grid),
-                                hypre_StructGridGlobalSize(grid));
+   HYPRE_IJMatrixCreate (comm, &ij_matrix,
+                         hypre_StructGridGlobalSize(grid),
+                         hypre_StructGridGlobalSize(grid));
 
    hypre_StructIJMatrixIJMatrix(matrix) = ij_matrix;
 
@@ -152,8 +151,7 @@ hypre_StructIJMatrixSetBoxValues( hypre_StructIJMatrix *matrix,
    int  ierr=0;
    int  i, j, k, coeffs_index;
 
-   hypre_Index          grid_index;
-   hypre_StructStencil *stencil;
+   hypre_Index grid_index;
 
    /* Insert coefficients one grid point at a time */
 

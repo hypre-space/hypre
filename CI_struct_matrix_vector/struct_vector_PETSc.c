@@ -37,7 +37,7 @@ hypre_FreeStructInterfaceVectorPETSc( hypre_StructInterfaceVector *struct_vector
 
    VecDestroy(PETSc_vector );
 #endif
-   return(0);
+   return ierr;
 }
 
 

@@ -161,8 +161,6 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
    int                  (***ssolver_solve)();
    int                  (***ssolver_destroy)();
    void                  ***ssolver_data;
-   int                      max_iter         = (solver -> max_iter);
-   int                      zero_guess       = (solver -> zero_guess);
    int                      ssolver          = (solver -> ssolver);
 
    MPI_Comm                 comm;

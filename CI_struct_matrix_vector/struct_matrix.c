@@ -79,7 +79,7 @@ hypre_SetStructInterfaceMatrixCoeffs( hypre_StructInterfaceMatrix *matrix,
 			    hypre_Index         grid_index,
 			    double            *coeffs     )
 {
-   int    ierr;
+   int ierr = 0;
 
    if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC )
       return( hypre_SetStructInterfaceMatrixPETScCoeffs( matrix, grid_index, coeffs ) );
@@ -89,7 +89,7 @@ hypre_SetStructInterfaceMatrixCoeffs( hypre_StructInterfaceMatrix *matrix,
       return( hypre_SetStructInterfaceMatrixParCSRCoeffs( matrix, grid_index, coeffs ) );
 */
    else
-      return(-1);
+      return ierr;
 }
 
 /*--------------------------------------------------------------------------
