@@ -234,8 +234,10 @@ int MH_GetRow(void *obj, int N_requested_rows, int requested_rows[],
     for ( i = 0; i < N_requested_rows; i++ )
     {
        rowindex = requested_rows[i];
+       if ( rowindex < 0 || rowindex >= nRows )
+          printf("Invalid row request in GetRow : %d (%d)\n",rowindex, nRows);
        rowLeng = rowptr[rowindex+1] - rowptr[rowindex];
-       if ( ncnt+rowLeng > allocated_space ) return 0;
+       if ( ncnt+rowLeng > allocated_space ) {row_lengths[i]=-9; return 0;}
        row_lengths[i] = rowLeng;
        colindex = rowptr[rowindex];
        for ( j = 0; j < rowLeng; j++ )
@@ -974,7 +976,6 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
 
        free( tempCnt );
     }
-
     return 0;
 }
 

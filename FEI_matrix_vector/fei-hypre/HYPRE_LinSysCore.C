@@ -28,6 +28,7 @@
 //---------------------------------------------------------------------------
 
 #include "parcsr_matrix_vector/parcsr_matrix_vector.h"
+#include "hypre_lsi_ddilut.h"
 
 #ifdef SUPERLU
 #include "dsp_defs.h"
@@ -59,6 +60,7 @@ extern "C" {
    int HYPRE_ParCSRMLSetDampingFactor( HYPRE_Solver, double );
 #endif
 
+   int HYPRE_LSI_DDIlutSetOutputLevel(HYPRE_Solver, int);
    int hypre_ParAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix*,
@@ -68,6 +70,10 @@ extern "C" {
    int  HYPRE_DummyFunction(HYPRE_Solver, HYPRE_ParCSRMatrix,
                             HYPRE_ParVector, HYPRE_ParVector) {return 0;}
 
+   int   getMatrixCSR(HYPRE_IJMatrix,int nrows,int nnz,int*,int*,double*);
+   int   HYPRE_LSI_Search(int*, int, int);
+   void  HYPRE_LSI_Get_IJAMatrixFromFile(double **val, int **ia, int **ja, 
+                  int *N, double **rhs, char *matfile, char *rhsfile);
 
 #ifdef Y12M
    void y12maf_(int*,int*,double*,int*,int*,int*,int*,double*,
@@ -80,6 +86,9 @@ extern "C" {
 //---------------------------------------------------------------------------
 
 HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) : 
+#ifdef FEI_V12
+                  LinearSystemCore(comm),
+#endif
                   comm_(comm),
                   HYA_(NULL),
                   HYA21_(NULL),
@@ -104,10 +113,10 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   nConstraints_(0),
                   constrList_(NULL),
                   maxIterations_(1000),
-                  tolerance_(1.0e-12),
+                  tolerance_(1.0e-6),
                   normAbsRel_(0),
                   systemAssembled_(0),
-                  systemReduced_(0),
+                  slideReduction_(0),
                   schurReduction_(0),
                   finalResNorm_(0.0),
                   rowLengths_(NULL),
@@ -149,10 +158,10 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     //-------------------------------------------------------------------
 
     amgCoarsenType_     = 0;    // default coarsening
-    amgNumSweeps_[0]    = 2;    // no. of sweeps for fine grid
-    amgNumSweeps_[1]    = 2;    // no. of presmoothing sweeps 
-    amgNumSweeps_[2]    = 2;    // no. of postsmoothing sweeps 
-    amgNumSweeps_[3]    = 2;    // no. of sweeps for coarsest grid
+    amgNumSweeps_[0]    = 1;    // no. of sweeps for fine grid
+    amgNumSweeps_[1]    = 1;    // no. of presmoothing sweeps 
+    amgNumSweeps_[2]    = 1;    // no. of postsmoothing sweeps 
+    amgNumSweeps_[3]    = 1;    // no. of sweeps for coarsest grid
     amgRelaxType_[0]    = 3;    // hybrid for the fine grid
     amgRelaxType_[1]    = 3;    // hybrid for presmoothing 
     amgRelaxType_[2]    = 3;    // hybrid for postsmoothing
@@ -164,25 +173,30 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     pilutDropTol_       = 0.0;
     pilutMaxNnzPerRow_  = 0;    // register the max NNZ/per in matrix A
 
-    parasailsSym_       = 1;
+    ddilutFillin_       = 1.0;  // additional fillin other than A
+    ddilutDropTol_      = 0.0;
+
+    parasailsSym_       = 0;    // default is nonsymmetric
     parasailsThreshold_ = 0.1;
     parasailsNlevels_   = 1;
-    parasailsFilter_    = 0.1;
+    parasailsFilter_    = 0.05;
     parasailsLoadbal_   = 0.0;
     parasailsReuse_     = 0;    // reuse pattern if nonzero
 
     superluOrdering_    = 0;    // natural ordering in SuperLU
     superluScale_[0]    = 'N';  // no scaling in SuperLUX
-    gmresDim_           = 200;  // restart size in GMRES
-    mlNumPreSweeps_     = 2;
-    mlNumPostSweeps_    = 2;
-    mlPresmootherType_  = 1;    // default symmetric Gauss-Seidel
-    mlPostsmootherType_ = 1;    // default symmetric Gauss-Seidel
+    gmresDim_           = 100;  // restart size in GMRES
+    mlNumPreSweeps_     = 1;
+    mlNumPostSweeps_    = 1;
+    mlPresmootherType_  = 1;    // default Gauss-Seidel
+    mlPostsmootherType_ = 1;    // default Gauss-Seidel
     mlRelaxWeight_      = 0.5;
     mlStrongThreshold_  = 0.08; // one suggested by Vanek/Brezina/Mandel
 
     rhsIDs_             = new int[1];
     rhsIDs_[0]          = 0;
+
+    strcpy(version_,"HYPRE FEI 1.3.1");
 
 #ifdef DEBUG
     printf("%4d : HYPRE_LinSysCore::leaving  constructor.\n",mypid_);
@@ -196,7 +210,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
 
 HYPRE_LinSysCore::~HYPRE_LinSysCore() 
 {
-    if ( HYOutputLevel_ > 1 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering destructor.\n",mypid_);
     }
@@ -301,9 +315,9 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
        delete [] selectedListAux_; 
        selectedListAux_ = NULL;
     }
-    if ( HYOutputLevel_ > 1 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
-       printf("%4d : HYPRE_LinSysCore::leaving  destructor - BYEBYE.\n",mypid_);
+       printf("%4d : HYPRE_LinSysCore::leaving  destructor.\n",mypid_);
     }
 }
 
@@ -327,7 +341,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     double weight;
     char   param[256], param2[80];
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering parameters function.\n",mypid_);
        if ( mypid_ == 0 )
@@ -344,17 +358,48 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     nParamsFound = 0;
 
     //-------------------------------------------------------------------
+    // output version 
+    //-------------------------------------------------------------------
+
+    if ( Utils::getParam("version",numParams,params,param) == 1)
+    {
+       printf("HYPRE_LinSysCore::current version = %s\n", version_);
+    }
+
+    //-------------------------------------------------------------------
     // output level
     //-------------------------------------------------------------------
 
     if ( Utils::getParam("outputLevel",numParams,params,param) == 1)
     {
        sscanf(param,"%d", &HYOutputLevel_);
+       if ( HYOutputLevel_ < 0 ) HYOutputLevel_ = 0;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters outputLevel = %d\n",
                  HYOutputLevel_);
+       }
+    }
+
+    //-------------------------------------------------------------------
+    // special output level
+    //-------------------------------------------------------------------
+
+    if ( Utils::getParam("setDebug",numParams,params,param) == 1)
+    {
+       sscanf(param,"%s", &param2);
+       if (!strcmp(param2, "reduce1")) HYOutputLevel_ |= HYFEI_SLIDEREDUCE1;
+       if (!strcmp(param2, "reduce2")) HYOutputLevel_ |= HYFEI_SLIDEREDUCE2;
+       if (!strcmp(param2, "reduce3")) HYOutputLevel_ |= HYFEI_SLIDEREDUCE3;
+       if (!strcmp(param2, "printmat")) HYOutputLevel_ |= HYFEI_PRINTMAT;
+       if (!strcmp(param2, "printsol")) HYOutputLevel_ |= HYFEI_PRINTSOL;
+       if (!strcmp(param2, "printredmat")) HYOutputLevel_ |= HYFEI_PRINTREDMAT;
+       if (!strcmp(param2, "ddilut")) HYOutputLevel_ |= HYFEI_DDILUT;
+       nParamsFound++;
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+       {
+          printf("HYPRE_LinSysCore::parameters setDebug.\n");
        }
     }
 
@@ -366,7 +411,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     {
        schurReduction_ = 1;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters - schur reduction enabled.\n");
        }
@@ -380,7 +425,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     {
        sscanf(param,"%d", &nConstraints_);
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters - set nConstraints.\n");
        }
@@ -395,7 +440,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        sscanf(param,"%s",HYSolverName_);
        selectSolver(HYSolverName_);
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters solver = %s\n",HYSolverName_);
        }
@@ -408,9 +453,9 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     if ( Utils::getParam("gmresDim",numParams,params,param) == 1)
     {
        sscanf(param,"%d", &gmresDim_);
-       if ( gmresDim_ < 1 ) gmresDim_ = 200;
+       if ( gmresDim_ < 1 ) gmresDim_ = 100;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters gmresDim = %d\n",gmresDim_);
        }
@@ -430,7 +475,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
           selectPreconditioner(HYPreconName_);
        }
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters preconditioner = %s\n",
                  HYPreconName_);
@@ -445,7 +490,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     {
        sscanf(param,"%d", &maxIterations_);
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters maxIterations = %d\n",
                  maxIterations_);
@@ -460,7 +505,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     {
        sscanf(param,"%lg", &tolerance_);
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters tolerance = %e\n",
                  tolerance_);
@@ -476,7 +521,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        sscanf(param,"%d", &pilutRowSize_);
        if ( pilutRowSize_ < 1 ) pilutRowSize_ = 50;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters pilutRowSize = %d\n",
                  pilutRowSize_);
@@ -492,10 +537,42 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        sscanf(param,"%lg", &pilutDropTol_);
        if (pilutDropTol_<0.0 || pilutDropTol_ >=1.0) pilutDropTol_ = 0.0;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters pilutDropTol = %e\n",
                  pilutDropTol_);
+       }
+    }
+
+    //-------------------------------------------------------------------
+    // DDILUT preconditioner : amount of fillin (0 == same as A)
+    //-------------------------------------------------------------------
+
+    if (Utils::getParam("ddilutFillin",numParams,params,param) == 1)
+    {
+       sscanf(param,"%lg", &ddilutFillin_);
+       if ( ddilutFillin_ < 0.0 ) ddilutFillin_ = 0.0;
+       nParamsFound++;
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+       {
+          printf("HYPRE_LinSysCore::parameters ddilutFillin = %d\n",
+                 ddilutFillin_);
+       }
+    }
+
+    //-------------------------------------------------------------------
+    // DDILUT preconditioner : threshold to drop small nonzeros
+    //-------------------------------------------------------------------
+
+    if (Utils::getParam("ddilutDropTol",numParams,params,param) == 1)
+    {
+       sscanf(param,"%lg", &ddilutDropTol_);
+       if (ddilutDropTol_<0.0 || ddilutDropTol_ >=1.0) ddilutDropTol_ = 0.0;
+       nParamsFound++;
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+       {
+          printf("HYPRE_LinSysCore::parameters ddilutDropTol = %e\n",
+                 ddilutDropTol_);
        }
     }
 
@@ -510,7 +587,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        else if ( !strcmp(param2, "mmd") )      superluOrdering_ = 2;
        else                                    superluOrdering_ = 0;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters superluOrdering = %s\n",
                  param2);
@@ -527,7 +604,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        if      ( !strcmp(param2, "y" ) ) superluScale_[0] = 'B';
        else                              superluScale_[0] = 'N';
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters superluScale = %s\n",
                  params);
@@ -545,7 +622,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        else if ( !strcmp(param2, "falgout" ) ) amgCoarsenType_ = 6;
        else if ( !strcmp(param2, "default" ) ) amgCoarsenType_ = 0;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters amgCoarsenType = %s\n",
                  param2);
@@ -562,7 +639,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        if ( nsweeps < 1 ) nsweeps = 1;
        for ( i = 0; i < 3; i++ ) amgNumSweeps_[i] = nsweeps;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters amgNumSweeps = %d\n",
                  nsweeps);
@@ -584,7 +661,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        else                                   rtype = 4;
        for ( i = 0; i < 3; i++ ) amgRelaxType_[i] = rtype;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters amgRelaxType = %s\n",
                  params);
@@ -598,10 +675,10 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     if (Utils::getParam("amgRelaxWeight",numParams,params,param) == 1)
     {
        sscanf(param,"%lg", &weight);
-       if ( weight < 0.0 || weight > 1.0 ) weight = 1.0;
+       if ( weight < 0.0 || weight > 1.0 ) weight = 0.5;
        for ( i = 0; i < 25; i++ ) amgRelaxWeight_[i] = weight;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters amgRelaxWeight = %e\n",
                  weight);
@@ -618,7 +695,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        if ( amgStrongThreshold_ < 0.0 || amgStrongThreshold_ > 1.0 )
           amgStrongThreshold_ = 0.25;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters amgStrongThreshold = %e\n",
                  amgStrongThreshold_);
@@ -632,9 +709,9 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     if (Utils::getParam("parasailsThreshold",numParams,params,param) == 1)
     {
        sscanf(param,"%lg", &parasailsThreshold_);
-       if ( parasailsThreshold_ < 0.0 ) parasailsThreshold_ = 0.0;
+       if ( parasailsThreshold_ < 0.0 ) parasailsThreshold_ = 0.1;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters parasailsThreshold = %e\n",
                  parasailsThreshold_);
@@ -648,9 +725,9 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     if (Utils::getParam("parasailsNlevels",numParams,params,param) == 1)
     {
        sscanf(param,"%d", &parasailsNlevels_);
-       if ( parasailsNlevels_ < 0 ) parasailsNlevels_ = 0;
+       if ( parasailsNlevels_ < 0 ) parasailsNlevels_ = 1;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters parasailsNlevels = %d\n",
                  parasailsNlevels_);
@@ -666,7 +743,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        sscanf(param,"%lg", &parasailsFilter_);
 
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters parasailsFilter = %e\n",
                  parasailsFilter_);
@@ -682,7 +759,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        sscanf(param,"%lg", &parasailsLoadbal_);
 
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters parasailsLoadbal = %e\n",
                  parasailsLoadbal_);
@@ -697,7 +774,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     {
        parasailsSym_ = 1;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters parasailsSym = %d\n",
                  parasailsSym_);
@@ -707,7 +784,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     {
        parasailsSym_ = 0;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters parasailsSym = %d\n",
                  parasailsSym_);
@@ -722,7 +799,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     {
        sscanf(param,"%d", &parasailsReuse_);
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters parasailsReuse = %d\n",
                  parasailsReuse_);
@@ -739,7 +816,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        if ( nsweeps < 1 ) nsweeps = 1;
        mlNumPreSweeps_ = nsweeps;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters mlNumPresweeps = %d\n",
                  nsweeps);
@@ -751,7 +828,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        if ( nsweeps < 1 ) nsweeps = 1;
        mlNumPostSweeps_ = nsweeps;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters mlNumPostsweeps = %d\n",
                  nsweeps);
@@ -764,7 +841,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        mlNumPreSweeps_  = nsweeps;
        mlNumPostSweeps_ = nsweeps;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters mlNumSweeps = %d\n",
                  nsweeps);
@@ -788,7 +865,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        else if ( !strcmp(param2, "ilut") )    rtype = 6;
        mlPresmootherType_  = rtype;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters mlPresmootherType = %s\n",
                  param2);
@@ -806,7 +883,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        else if ( !strcmp(param2, "vbsgsseq")) rtype = 5;
        mlPostsmootherType_  = rtype;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters mlPostsmootherType = %s\n",
                  param2);
@@ -827,7 +904,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        mlPostsmootherType_ = rtype;
        if ( rtype == 6 ) mlPostsmootherType_ = 1;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters mlRelaxType = %s\n",
                  param2);
@@ -841,10 +918,10 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     if (Utils::getParam("mlRelaxWeight",numParams,params,param) == 1)
     {
        sscanf(param,"%lg", &weight);
-       if ( weight < 0.0 || weight > 1.0 ) weight = 1.0;
+       if ( weight < 0.0 || weight > 1.0 ) weight = 0.5;
        mlRelaxWeight_ = weight;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters mlRelaxWeight = %e\n",
                  weight);
@@ -859,9 +936,9 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     {
        sscanf(param,"%lg", &mlStrongThreshold_);
        if ( mlStrongThreshold_ < 0.0 || mlStrongThreshold_ > 1.0 )
-          mlStrongThreshold_ = 0.0;
+          mlStrongThreshold_ = 0.08;
        nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
           printf("HYPRE_LinSysCore::parameters mlStrongThreshold = %e\n",
                  mlStrongThreshold_);
@@ -877,7 +954,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        printf("HYPRE_LinSysCore::parameters WARNING - some param invalid.\n");
     }
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  parameters function.\n",mypid_);
     }
@@ -901,7 +978,7 @@ void HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
     // diagnostic message
     //-------------------------------------------------------------------
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering createMatricesAndVectors.\n", 
                      mypid_);
@@ -996,7 +1073,7 @@ void HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
     assert(!ierr);
     matrixVectorsCreated_ = 1;
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  createMatricesAndVectors.\n", 
                      mypid_);
@@ -1013,7 +1090,7 @@ void HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
 {
     int i, j, ierr, nsize, *indices, maxSize, minSize;
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering allocateMatrix.\n", mypid_);
     }
@@ -1056,7 +1133,7 @@ void HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
        for ( j = 0; j < rowLengths[i]; j++ ) colValues_[i][j] = 0.0;
     }
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : allocateMatrix : max/min nnz/row = %d %d\n", mypid_, 
                      maxSize, minSize);
@@ -1068,7 +1145,7 @@ void HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
     ierr = HYPRE_IJMatrixInitialize(HYA_);
     assert(!ierr);
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  allocateMatrix.\n", mypid_);
     }
@@ -1083,7 +1160,7 @@ void HYPRE_LinSysCore::resetMatrixAndVector(double s)
 {
     int  i, j, ierr, size;
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering resetMatrixAndVector.\n",mypid_);
     }
@@ -1122,9 +1199,10 @@ void HYPRE_LinSysCore::resetMatrixAndVector(double s)
        for ( j = 0; j < rowLengths_[i]; j++ ) colValues_[i][j] = 0.0;
     }
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
-       printf("%4d : HYPRE_LinSysCore::leaving  resetMatrixAndVector.\n",mypid_);
+       printf("%4d : HYPRE_LinSysCore::leaving  resetMatrixAndVector.\n",
+              mypid_);
     }
 }
 
@@ -1141,7 +1219,7 @@ void HYPRE_LinSysCore::sumIntoSystemMatrix(int row, int numValues,
     // diagnostic message for high output level only
     //-------------------------------------------------------------------
 
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LinSysCore::entering sumIntoSystemMatrix.\n",mypid_);
        printf("%4d : row number = %d.\n", mypid_, row);
@@ -1192,7 +1270,7 @@ void HYPRE_LinSysCore::sumIntoSystemMatrix(int row, int numValues,
        colValues_[localRow][index] += values[i];
     }
 
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  sumIntoSystemMatrix.\n",mypid_);
     }
@@ -1207,7 +1285,7 @@ void HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
 {
     int    i, ierr, *local_ind;
 
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%d : HYPRE_LinSysCore::entering sumIntoRHSVector.\n", mypid_);
        if ( HYOutputLevel_ > 4 )
@@ -1240,7 +1318,7 @@ void HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
 
     delete [] local_ind;
 
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%d : HYPRE_LinSysCore::leaving  sumIntoRHSVector.\n", mypid_);
     }
@@ -1254,7 +1332,7 @@ void HYPRE_LinSysCore::matrixLoadComplete()
 {
     int i, j, numLocalEqns, leng, eqnNum, nnz;
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
     {
        printf("%4d : HYPRE_LinSysCore::entering matrixLoadComplete.\n",mypid_);
     }
@@ -1264,7 +1342,7 @@ void HYPRE_LinSysCore::matrixLoadComplete()
     //-------------------------------------------------------------------
 
     numLocalEqns = localEndRow_ - localStartRow_ + 1;
-    if ( HYOutputLevel_ > 1 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
     {
        printf("%4d : HYPRE_LinSysCore::matrixLoadComplete - NEqns = %d.\n",
                mypid_, numLocalEqns);
@@ -1280,7 +1358,7 @@ void HYPRE_LinSysCore::matrixLoadComplete()
        for ( j = 0; j < leng; j++ ) colIndices_[i][j]++;
        delete [] colValues_[i];
     }
-    if ( HYOutputLevel_ > 1 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
     {
        printf("%4d : HYPRE_LinSysCore::matrixLoadComplete - nnz = %d.\n",
                mypid_, nnz);
@@ -1295,7 +1373,7 @@ void HYPRE_LinSysCore::matrixLoadComplete()
     currX_ = HYx_;
     currR_ = HYr_;
 
-    if ( HYOutputLevel_ == -9 )
+    if ( HYOutputLevel_ & HYFEI_PRINTMAT )
     {
        int    rowSize, *colInd, nnz, nrows;
        double *colVal, value;
@@ -1333,10 +1411,9 @@ void HYPRE_LinSysCore::matrixLoadComplete()
        }
        fclose(fp);
        MPI_Barrier(MPI_COMM_WORLD);
-       exit(1);
     }
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  matrixLoadComplete.\n",mypid_);
     }
@@ -1364,7 +1441,7 @@ void HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
     int    numLocalRows, eqnNum, rowSize2, *colInd2;
     double rhs_term, val, *colVal2, *colVal;
 
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LinSysCore::entering enforceEssentialBC.\n",mypid_);
     }
@@ -1433,7 +1510,7 @@ void HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
           HYPRE_IJVectorSetLocalComponents(HYb_,1,&eqnNum,NULL,&rhs_term);
        }
     }
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  enforceEssentialBC.\n",mypid_);
     }
@@ -1450,7 +1527,7 @@ void HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
     int    i, j, k, numLocalRows, localEqnNum, rowLen, *colInd, eqnNum;
     double bval, *colVal;
 
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LinSysCore::entering enforceRemoteEssBC.\n",mypid_);
     }
@@ -1499,7 +1576,7 @@ void HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
        }
     }
 
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  enforceRemoteEssBC.\n",mypid_);
     }
@@ -1520,7 +1597,7 @@ void HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
     int    i, j, numLocalRows, localEqnNum, *colInd, rowSize, eqnNum;
     double val, *colVal;
 
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LinSysCore::entering enforceOtherBC.\n",mypid_);
     }
@@ -1571,7 +1648,7 @@ void HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
        HYPRE_IJVectorSetLocalComponents(HYb_,1,&eqnNum,NULL,&val);
     }
 
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  enforceOtherBC.\n",mypid_);
     }
@@ -1631,7 +1708,7 @@ void HYPRE_LinSysCore::sumInMatrix(double scalar, const Data& data)
 
 void HYPRE_LinSysCore::getRHSVectorPtr(Data& data) 
 {
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering getRHSVectorPtr.\n",mypid_);
     }
@@ -1639,7 +1716,7 @@ void HYPRE_LinSysCore::getRHSVectorPtr(Data& data)
     data.setTypeName("IJ_Vector");
     data.setDataPtr((void*) HYb_);
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  getRHSVectorPtr.\n",mypid_);
     }
@@ -1649,7 +1726,7 @@ void HYPRE_LinSysCore::getRHSVectorPtr(Data& data)
 
 void HYPRE_LinSysCore::copyInRHSVector(double scalar, const Data& data) 
 {
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering copyInRHSVector.\n",mypid_);
     }
@@ -1672,7 +1749,7 @@ void HYPRE_LinSysCore::copyInRHSVector(double scalar, const Data& data)
     if ( scalar != 1.0 ) HYPRE_ParVectorScale( scalar, destVec);
     HYPRE_IJVectorDestroy(inVec);
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  copyInRHSVector.\n",mypid_);
     }
@@ -1684,7 +1761,7 @@ void HYPRE_LinSysCore::copyOutRHSVector(double scalar, Data& data)
 {
     int ierr;
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering copyOutRHSVector.\n",mypid_);
     }
@@ -1709,7 +1786,7 @@ void HYPRE_LinSysCore::copyOutRHSVector(double scalar, Data& data)
     data.setTypeName("IJ_Vector");
     data.setDataPtr((void*) Vec2);
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  copyOutRHSVector.\n",mypid_);
     }
@@ -1719,7 +1796,7 @@ void HYPRE_LinSysCore::copyOutRHSVector(double scalar, Data& data)
 
 void HYPRE_LinSysCore::sumInRHSVector(double scalar, const Data& data) 
 {
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering sumInRHSVector.\n",mypid_);
     }
@@ -1738,7 +1815,7 @@ void HYPRE_LinSysCore::sumInRHSVector(double scalar, const Data& data)
  
     hypre_ParVectorAxpy(scalar,(hypre_ParVector*)xVec,(hypre_ParVector*)yVec);
  
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  sumInRHSVector.\n",mypid_);
     }
@@ -1748,7 +1825,7 @@ void HYPRE_LinSysCore::sumInRHSVector(double scalar, const Data& data)
 
 void HYPRE_LinSysCore::destroyMatrixData(Data& data) 
 {
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering destroyMatrixData.\n",mypid_);
     }
@@ -1761,7 +1838,7 @@ void HYPRE_LinSysCore::destroyMatrixData(Data& data)
     HYPRE_IJMatrix mat = (HYPRE_IJMatrix) data.getDataPtr();
     HYPRE_IJMatrixDestroy(mat);
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  destroyMatrixData.\n",mypid_);
     }
@@ -1771,7 +1848,7 @@ void HYPRE_LinSysCore::destroyMatrixData(Data& data)
 
 void HYPRE_LinSysCore::destroyVectorData(Data& data) 
 {
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering destroyVectorData.\n",mypid_);
     }
@@ -1785,7 +1862,7 @@ void HYPRE_LinSysCore::destroyVectorData(Data& data)
     HYPRE_IJVector vec = (HYPRE_IJVector) data.getDataPtr();
     if ( vec != NULL ) HYPRE_IJVectorDestroy(vec);
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  destroyVectorData.\n",mypid_);
     }
@@ -1795,7 +1872,7 @@ void HYPRE_LinSysCore::destroyVectorData(Data& data)
 
 void HYPRE_LinSysCore::setNumRHSVectors(int numRHSs, const int* rhsIDs) 
 {
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering setNumRHSVectors.\n",mypid_);
        printf("%4d : HYPRE_LinSysCore::incoming numRHSs = %d\n",mypid_,numRHSs);
@@ -1822,7 +1899,7 @@ void HYPRE_LinSysCore::setNumRHSVectors(int numRHSs, const int* rhsIDs)
  
     for ( int i = 0; i < numRHSs; i++ ) rhsIDs_[i] = rhsIDs[i];
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  setNumRHSVectors.\n",mypid_);
     }
@@ -1832,7 +1909,7 @@ void HYPRE_LinSysCore::setNumRHSVectors(int numRHSs, const int* rhsIDs)
 
 void HYPRE_LinSysCore::setRHSID(int rhsID) 
 {
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering setRHSID.\n",mypid_);
     }
@@ -1850,7 +1927,7 @@ void HYPRE_LinSysCore::setRHSID(int rhsID)
     printf("setRHSID ERROR : rhsID not found.\n");
     exit(1);
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  setRHSID.\n",mypid_);
     }
@@ -1865,7 +1942,7 @@ void HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
 {
     int i, ierr, *local_ind;
 
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LinSysCore::entering putInitalGuess.\n",mypid_);
     }
@@ -1888,7 +1965,7 @@ void HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
 
     delete [] local_ind;
 
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  putInitalGuess.\n",mypid_);
     }
@@ -1902,7 +1979,7 @@ void HYPRE_LinSysCore::getSolution(int* eqnNumbers, double* answers,int leng)
 {
     int    i, ierr, *equations;
 
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LinSysCore::entering getSolution.\n",mypid_);
     }
@@ -1923,7 +2000,7 @@ void HYPRE_LinSysCore::getSolution(int* eqnNumbers, double* answers,int leng)
     assert(!ierr);
     delete [] equations;
 
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  getSolution.\n",mypid_);
     }
@@ -1938,7 +2015,7 @@ void HYPRE_LinSysCore::getSolnEntry(int eqnNumber, double& answer)
     double val;
     int    ierr, equation;
 
-    if ( HYOutputLevel_ > 4 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LinSysCore::entering getSolnEntry.\n",mypid_);
     }
@@ -1955,7 +2032,7 @@ void HYPRE_LinSysCore::getSolnEntry(int eqnNumber, double& answer)
     assert(!ierr);
     answer = val;
 
-    if ( HYOutputLevel_ > 4 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  getSolnEntry.\n",mypid_);
     }
@@ -1967,7 +2044,7 @@ void HYPRE_LinSysCore::getSolnEntry(int eqnNumber, double& answer)
 
 void HYPRE_LinSysCore::selectSolver(char* name) 
 {
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering selectSolver.\n",mypid_);
        printf("%4d : HYPRE_LinSysCore::solver name = %s.\n",mypid_,name);
@@ -2038,7 +2115,7 @@ void HYPRE_LinSysCore::selectSolver(char* name)
             break;
     }
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  selectSolver.\n",mypid_);
     }
@@ -2053,7 +2130,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 {
     int ierr;
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering selectPreconditioner = %s.\n",
               mypid_, name);
@@ -2074,6 +2151,9 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 
        else if ( HYPreconID_ == HYBOOMERAMG )
           HYPRE_ParAMGDestroy( HYPrecon_ );
+
+       else if ( HYPreconID_ == HYBOOMERAMG )
+          HYPRE_LSI_DDIlutDestroy( HYPrecon_ );
 
 #ifdef MLPACK
        else if ( HYPreconID_ == HYML )
@@ -2109,6 +2189,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
     {
        strcpy( HYPreconName_, name );
        HYPreconID_ = HYBOOMERAMG;
+    }
+    else if ( !strcmp(name, "ddilut") )
+    {
+       strcpy( HYPreconName_, name );
+       HYPreconID_ = HYDDILUT;
     }
     else if ( !strcmp(name, "ml") )
     {
@@ -2168,6 +2253,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
             HYPRE_ParAMGSetMeasureType(HYPrecon_, 0);
             break;
 
+       case HYDDILUT :
+            ierr = HYPRE_LSI_DDIlutCreate( comm_, &HYPrecon_ );
+            assert( !ierr );
+            break;
+
 #ifdef MLPACK
        case HYML :
             ierr = HYPRE_ParCSRMLCreate( comm_, &HYPrecon_ );
@@ -2175,7 +2265,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 #endif
     }
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  selectPreconditioner.\n",mypid_);
     }
@@ -2188,11 +2278,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 {
     int                i, j, num_iterations, status, *num_sweeps, *relax_type;
-    int                ierr, localNRows, rowNum, index, x2NRows, x2GlobalNRows;
+    int                ierr, localNRows, rowNum, index, x2NRows;
     int                startRow, *int_array, *gint_array, startRow2;
     int                globalNConstrs, rowSize, *colInd, nnz, nrows;
     double             rnorm, *relax_wt, ddata, *colVal, value;
-    double             stime, etime;
+    double             stime, etime, ptime, rtime1, rtime2;
     char               fname[40];
     FILE               *fp;
     HYPRE_ParCSRMatrix A_csr;
@@ -2200,7 +2290,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
     HYPRE_ParVector    b_csr;
     HYPRE_ParVector    r_csr;
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::entering launchSolver.\n", mypid_);
     }
@@ -2209,16 +2299,19 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
     // temporary kludge before FEI adds functions to address this
     //-------------------------------------------------------------------
 
+    MPI_Barrier(MPI_COMM_WORLD);
+    rtime1  = MPI_Wtime();
+
     if ( schurReduction_ == 1 )
     {
-       buildSchurSystem();
+       buildSchurReducedSystem();
     }
 
     MPI_Allreduce(&nConstraints_, &globalNConstrs,1,MPI_INT,MPI_SUM,comm_);
     
     if ( schurReduction_ == 0 && globalNConstrs != 0 )
     {
-       if ( HYOutputLevel_ > 0 && mypid_ == 0 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
        {
           printf("%4d : HYPRE_LinSysCore::launchSolver - currently force",
                   mypid_);
@@ -2226,8 +2319,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
        }
        if ( constrList_ != NULL ) delete [] constrList_;
        constrList_ = NULL;
-       buildReducedSystem();
+       buildSlideReducedSystem();
     }
+    MPI_Barrier(MPI_COMM_WORLD);
+    rtime2  = MPI_Wtime();
     
     //*******************************************************************
     // fetch matrix and vector pointers
@@ -2239,15 +2334,14 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
     r_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(currR_);
 
     //*******************************************************************
-    // program segment for diagnostics
+    // diagnostics (print the reduced matrix to a file)
     //-------------------------------------------------------------------
 
-    if ( HYOutputLevel_ == -8 )
+    if ( HYOutputLevel_ & HYFEI_PRINTREDMAT )
     {
        if ( schurReduction_ == 1 )
        {
           x2NRows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
-          MPI_Allreduce(&x2NRows, &x2GlobalNRows,1,MPI_INT,MPI_SUM,comm_);
           int_array = new int[numProcs_];
           gint_array = new int[numProcs_];
           for ( i = 0; i < numProcs_; i++ ) int_array[i] = 0;
@@ -2260,21 +2354,19 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           delete [] gint_array;
           nrows = x2NRows;
        }
-       else if ( systemReduced_ == 1 )
+       else if ( slideReduction_ == 1 )
        {
-          x2NRows = 2 * nConstraints_;
-          MPI_Allreduce(&x2NRows, &x2GlobalNRows,1,MPI_INT,MPI_SUM,comm_);
           int_array = new int[numProcs_];
           gint_array = new int[numProcs_];
           for ( i = 0; i < numProcs_; i++ ) int_array[i] = 0;
-          int_array[mypid_] = 2 * nConstraints_;
+          int_array[mypid_] = nConstraints_;
           MPI_Allreduce(int_array,gint_array,numProcs_,MPI_INT,MPI_SUM,comm_);
           rowNum = 0;
           for ( i = 0; i < mypid_; i++ ) rowNum += gint_array[i];
           startRow = localStartRow_ - 1 - rowNum;
           delete [] int_array;
           delete [] gint_array;
-          nrows = localEndRow_ - localStartRow_ + 1 - 2 * nConstraints_;
+          nrows = localEndRow_ - localStartRow_ + 1 - nConstraints_;
        }
        else
        {
@@ -2296,7 +2388,8 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
        {
           HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
           for (j = 0; j < rowSize; j++)
-             fprintf(fp, "%6d  %6d  %e \n", i+1, colInd[j]+1, colVal[j]);
+             if ( colVal[j] != 0.0 )
+                fprintf(fp, "%6d  %6d  %e \n", i+1, colInd[j]+1, colVal[j]);
           HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
        }
        fclose(fp);
@@ -2310,15 +2403,15 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
        }
        fclose(fp);
        MPI_Barrier(MPI_COMM_WORLD);
-       exit(0);
     }
 
     //*******************************************************************
     // choose PCG, GMRES or direct solver
     //-------------------------------------------------------------------
 
-    stime = MPI_Wtime();
+    MPI_Barrier(MPI_COMM_WORLD);
     status = 1;
+    stime  = MPI_Wtime();
 
     switch ( HYSolverID_ )
     {
@@ -2329,10 +2422,13 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
        case HYPCG :
 
-          if (HYOutputLevel_ >= 0 && mypid_ == 0) 
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
           {
              printf("***************************************************\n");
-             printf("lauchSolver(PCG) \n");
+             printf("* Preconditioned Conjugate Gradient solver \n");
+             printf("* maximum no. of iterations = %d\n", maxIterations_);
+             printf("* convergence tolerance     = %e\n", tolerance_);
+             printf("*--------------------------------------------------\n");
           }
 
           switch ( HYPreconID_ )
@@ -2342,52 +2438,75 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,
                                     HYPRE_ParCSRDiagScale,
-                                    HYPRE_DummyFunction,
-                                    HYPrecon_);
+                                    HYPRE_DummyFunction,HYPrecon_);
                   }
                   else
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,
                                     HYPRE_ParCSRDiagScale,
-                                    HYPRE_ParCSRDiagScaleSetup,
-                                    HYPrecon_);
+                                    HYPRE_ParCSRDiagScaleSetup,HYPrecon_);
                   }
                   break;
 
              case HYPILUT :
-                  if ( pilutRowSize_ == 0 )
+                  if ( pilutRowSize_ == 0 ) pilutRowSize_ = pilutMaxNnzPerRow_;
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
-                     pilutRowSize_ = (int) (1.2 * pilutMaxNnzPerRow_);
-                     if ( HYOutputLevel_ > 0 )
-                     {
-                        printf("PILUT - row size = %d\n", pilutRowSize_);
-                        printf("PILUT - drop tol = %e\n", pilutDropTol_);
-                     }
+                     printf("PILUT - row size = %d\n", pilutRowSize_);
+                     printf("PILUT - drop tol = %e\n", pilutDropTol_);
                   }
                   HYPRE_ParCSRPilutSetFactorRowSize(HYPrecon_,pilutRowSize_);
                   HYPRE_ParCSRPilutSetDropTolerance(HYPrecon_,pilutDropTol_);
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,
-                                               HYPRE_ParCSRPilutSolve,
-                                               HYPRE_DummyFunction,
-                                               HYPrecon_);
+                                    HYPRE_ParCSRPilutSolve,
+                                    HYPRE_DummyFunction,HYPrecon_);
                   }
                   else
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,
-                                               HYPRE_ParCSRPilutSolve,
-                                               HYPRE_ParCSRPilutSetup,
-                                               HYPrecon_);
+                                    HYPRE_ParCSRPilutSolve,
+                                    HYPRE_ParCSRPilutSetup, HYPrecon_);
+                  }
+                  break;
+
+             case HYDDILUT :
+                  if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && 
+                        mypid_ == 0 )
+                  {
+                     printf("DDILUT - fillin   = %e\n", ddilutFillin_);
+                     printf("DDILUT - drop tol = %e\n", ddilutDropTol_);
+                  }
+                  HYPRE_LSI_DDIlutSetFillin(HYPrecon_,ddilutFillin_);
+                  HYPRE_LSI_DDIlutSetDropTolerance(HYPrecon_,ddilutDropTol_);
+                  if ( HYOutputLevel_ & HYFEI_DDILUT )
+                     HYPRE_LSI_DDIlutSetOutputLevel(HYPrecon_,2);
+
+                  if ( HYPreconReuse_ == 1 )
+                  {
+                     HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_DDIlutSolve,
+                                    HYPRE_DummyFunction, HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_LSI_DDIlutSolve,
+                                    HYPRE_LSI_DDIlutSetup, HYPrecon_);
                   }
                   break;
 
              case HYPARASAILS :
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+                  {
+                     printf("ParaSails - nlevels   = %d\n",parasailsNlevels_);
+                     printf("ParaSails - threshold = %e\n",parasailsThreshold_);
+                     printf("ParaSails - filter    = %e\n",parasailsFilter_);
+                     printf("ParaSails - sym       = %d\n",parasailsSym_);
+                     printf("ParaSails - loadbal   = %d\n",parasailsLoadbal_);
+                  }
                   HYPRE_ParCSRParaSailsSetSym(HYPrecon_,parasailsSym_);
-                  HYPRE_ParCSRParaSailsSetParams(HYPrecon_,
-                                                 parasailsThreshold_,
+                  HYPRE_ParCSRParaSailsSetParams(HYPrecon_,parasailsThreshold_, 
                                                  parasailsNlevels_);
-
                   HYPRE_ParCSRParaSailsSetFilter(HYPrecon_,parasailsFilter_);
                   HYPRE_ParCSRParaSailsSetLoadbal(HYPrecon_,parasailsLoadbal_);
                   HYPRE_ParCSRParaSailsSetReuse(HYPrecon_,parasailsReuse_);
@@ -2395,23 +2514,20 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,
-                                               HYPRE_ParCSRParaSailsSolve,
-                                               HYPRE_DummyFunction,
-                                               HYPrecon_);
+                                    HYPRE_ParCSRParaSailsSolve,
+                                    HYPRE_DummyFunction, HYPrecon_);
                   }
                   else
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,
-                                               HYPRE_ParCSRParaSailsSolve,
-                                               HYPRE_ParCSRParaSailsSetup,
-                                               HYPrecon_);
+                                    HYPRE_ParCSRParaSailsSolve,
+                                    HYPRE_ParCSRParaSailsSetup, HYPrecon_);
                   }
                   break;
 
              case HYBOOMERAMG :
                   HYPRE_ParAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
-                  HYPRE_ParAMGSetStrongThreshold(HYPrecon_,
-                                                 amgStrongThreshold_);
+                  HYPRE_ParAMGSetStrongThreshold(HYPrecon_,amgStrongThreshold_);
                   num_sweeps = hypre_CTAlloc(int,4);
                   for ( i = 0; i < 4; i++ ) num_sweeps[i] = amgNumSweeps_[i];
 
@@ -2423,7 +2539,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   relax_wt = hypre_CTAlloc(double,25);
                   for ( i = 0; i < 25; i++ ) relax_wt[i] = amgRelaxWeight_[i];
                   HYPRE_ParAMGSetRelaxWeight(HYPrecon_, relax_wt);
-                  if ( HYOutputLevel_ > 0 && mypid_ == 0 )
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
                      printf("AMG coarsen type = %d\n", amgCoarsenType_);
                      printf("AMG threshold    = %e\n", amgStrongThreshold_);
@@ -2431,51 +2547,43 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
+                  {
                      HYPRE_ParAMGSetIOutDat(HYPrecon_, 2);
+                  }
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParAMGSolve,
-                                      HYPRE_DummyFunction, HYPrecon_);
+                                    HYPRE_DummyFunction, HYPrecon_);
                   }
                   else
                   {
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParAMGSolve,
-                                      HYPRE_ParAMGSetup, HYPrecon_);
+                                    HYPRE_ParAMGSetup, HYPrecon_);
                   }
-
                   break;
 
 #ifdef MLPACK
              case HYML :
 
-                  HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,
-                                                   mlStrongThreshold_);
-                  HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,
-                                                    mlNumPreSweeps_);
-                  HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,
-                                                     mlNumPostSweeps_);
-                  HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,
-                                               mlPresmootherType_);
-                  HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,
-                                                mlPostsmootherType_);
-                  HYPRE_ParCSRMLSetDampingFactor(HYPrecon_, mlRelaxWeight_);
+                  HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
+                  HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
+                  HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
+                  HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
+                  HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
+                  HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
                   if ( HYPreconReuse_ == 1 )
                   {
-                     HYPRE_ParCSRPCGSetPrecond(HYSolver_,
-                                               HYPRE_ParCSRMLSolve,
-                                               HYPRE_DummyFunction,
-                                               HYPrecon_);
+                     HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParCSRMLSolve,
+                                    HYPRE_DummyFunction, HYPrecon_);
                   }
                   else
                   {
-                     HYPRE_ParCSRPCGSetPrecond(HYSolver_,
-                                               HYPRE_ParCSRMLSolve,
-                                               HYPRE_ParCSRMLSetup,
-                                               HYPrecon_);
+                     HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_ParCSRMLSolve,
+                                    HYPRE_ParCSRMLSetup, HYPrecon_);
                   }
 
-                  if ( HYOutputLevel_ > 0 && mypid_ == 0 )
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
                   {
                      printf("ML strong threshold = %e\n", mlStrongThreshold_);
                      printf("ML numsweeps(pre)   = %d\n", mlNumPreSweeps_);
@@ -2487,12 +2595,14 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   break;
 #endif
           }
+
           HYPRE_ParCSRPCGSetMaxIter(HYSolver_, maxIterations_);
           HYPRE_ParCSRPCGSetTol(HYSolver_, tolerance_);
           HYPRE_ParCSRPCGSetRelChange(HYSolver_, 0);
           HYPRE_ParCSRPCGSetTwoNorm(HYSolver_, 1);
           HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
-          if (HYOutputLevel_ >= 0 && mypid_ == 0) 
+          ptime  = MPI_Wtime();
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
           {
              printf("***************************************************\n");
           }
@@ -2503,11 +2613,6 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
           rnorm = sqrt( rnorm );
           iterations = num_iterations;
-          if ( mypid_ == 0 )
-          {
-             printf("launchSolver(PCG) - NO. ITERATION = %d\n",num_iterations);
-             printf("launchSolver(PCG) - FINAL NORM    = %e.\n", rnorm);
-          }
           if ( num_iterations >= maxIterations_ ) status = 0;
           break;
 
@@ -2517,10 +2622,14 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
        case HYGMRES :
 
-          if (HYOutputLevel_ >= 0 && mypid_ == 0) 
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
           {
              printf("***************************************************\n");
-             printf("lauchSolver(GMRES) \n");
+             printf("* Generalized Minimal Residual (GMRES) solver \n");
+             printf("* restart size              = %d\n", gmresDim_);
+             printf("* maximum no. of iterations = %d\n", maxIterations_);
+             printf("* convergence tolerance     = %e\n", tolerance_);
+             printf("*--------------------------------------------------\n");
           }
 
           switch ( HYPreconID_ )
@@ -2529,25 +2638,20 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,
-                                    HYPRE_ParCSRDiagScale,
-                                    HYPRE_DummyFunction,
-                                    HYPrecon_);
+                                      HYPRE_ParCSRDiagScale,
+                                      HYPRE_DummyFunction, HYPrecon_);
                   }
                   else
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,
-                                    HYPRE_ParCSRDiagScale,
-                                    HYPRE_ParCSRDiagScaleSetup,
-                                    HYPrecon_);
+                                      HYPRE_ParCSRDiagScale,
+                                      HYPRE_ParCSRDiagScaleSetup, HYPrecon_);
                   }
                   break;
 
              case HYPILUT :
-                  if ( pilutRowSize_ == 0 )
-                  {
-                     pilutRowSize_ = (int) (1.2 * pilutMaxNnzPerRow_);
-                  }
-                  if ( HYOutputLevel_ > 0 && mypid_ == 0 )
+                  if (pilutRowSize_ == 0) pilutRowSize_ = pilutMaxNnzPerRow_;
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
                      printf("PILUT - row size = %d\n", pilutRowSize_);
                      printf("PILUT - drop tol = %e\n", pilutDropTol_);
@@ -2557,25 +2661,53 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,
-                                               HYPRE_ParCSRPilutSolve,
-                                               HYPRE_DummyFunction,
-                                               HYPrecon_);
+                                      HYPRE_ParCSRPilutSolve,
+                                      HYPRE_DummyFunction, HYPrecon_);
                   }
                   else
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,
-                                               HYPRE_ParCSRPilutSolve,
-                                               HYPRE_ParCSRPilutSetup,
-                                               HYPrecon_);
+                                      HYPRE_ParCSRPilutSolve,
+                                      HYPRE_ParCSRPilutSetup, HYPrecon_);
+                  }
+                  break;
+
+             case HYDDILUT :
+                  if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && 
+                        mypid_ == 0 )
+                  {
+                     printf("DDILUT - fillin   = %e\n", ddilutFillin_);
+                     printf("DDILUT - drop tol = %e\n", ddilutDropTol_);
+                  }
+                  HYPRE_LSI_DDIlutSetFillin(HYPrecon_,ddilutFillin_);
+                  HYPRE_LSI_DDIlutSetDropTolerance(HYPrecon_,ddilutDropTol_);
+                  if ( HYOutputLevel_ & HYFEI_DDILUT )
+                     HYPRE_LSI_DDIlutSetOutputLevel(HYPrecon_,2);
+
+                  if ( HYPreconReuse_ == 1 )
+                  {
+                     HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_DDIlutSolve,
+                                      HYPRE_DummyFunction, HYPrecon_);
+                  }
+                  else
+                  {
+                     HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_DDIlutSolve,
+                                      HYPRE_LSI_DDIlutSetup, HYPrecon_);
                   }
                   break;
 
              case HYPARASAILS :
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+                  {
+                     printf("ParaSails - nlevels   = %d\n",parasailsNlevels_);
+                     printf("ParaSails - threshold = %e\n",parasailsThreshold_);
+                     printf("ParaSails - filter    = %e\n",parasailsFilter_);
+                     printf("ParaSails - sym       = %d\n",parasailsSym_);
+                     printf("ParaSails - loadbal   = %d\n",parasailsLoadbal_);
+                  }
                   HYPRE_ParCSRParaSailsSetSym(HYPrecon_,parasailsSym_);
-                  HYPRE_ParCSRParaSailsSetParams(HYPrecon_,
-                                                 parasailsThreshold_,
+                  HYPRE_ParCSRParaSailsSetParams(HYPrecon_,parasailsThreshold_,
                                                  parasailsNlevels_);
-
                   HYPRE_ParCSRParaSailsSetFilter(HYPrecon_,parasailsFilter_);
                   HYPRE_ParCSRParaSailsSetLoadbal(HYPrecon_,parasailsLoadbal_);
                   HYPRE_ParCSRParaSailsSetReuse(HYPrecon_,parasailsReuse_);
@@ -2583,23 +2715,20 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,
-                                               HYPRE_ParCSRParaSailsSolve,
-                                               HYPRE_DummyFunction,
-                                               HYPrecon_);
+                                      HYPRE_ParCSRParaSailsSolve,
+                                      HYPRE_DummyFunction, HYPrecon_);
                   }
                   else
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,
-                                               HYPRE_ParCSRParaSailsSolve,
-                                               HYPRE_ParCSRParaSailsSetup,
-                                               HYPrecon_);
+                                      HYPRE_ParCSRParaSailsSolve,
+                                      HYPRE_ParCSRParaSailsSetup, HYPrecon_);
                   }
                   break;
 
              case HYBOOMERAMG :
                   HYPRE_ParAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
-                  HYPRE_ParAMGSetStrongThreshold(HYPrecon_,
-                                                 amgStrongThreshold_);
+                  HYPRE_ParAMGSetStrongThreshold(HYPrecon_,amgStrongThreshold_);
                   num_sweeps = hypre_CTAlloc(int,4);
                   for ( i = 0; i < 4; i++ ) num_sweeps[i] = amgNumSweeps_[i];
 
@@ -2611,7 +2740,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   relax_wt = hypre_CTAlloc(double,25);
                   for ( i = 0; i < 25; i++ ) relax_wt[i] = amgRelaxWeight_[i];
                   HYPRE_ParAMGSetRelaxWeight(HYPrecon_, relax_wt);
-                  if ( HYOutputLevel_ > 0 && mypid_ == 0 )
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
                      printf("AMG coarsen type = %d\n", amgCoarsenType_);
                      printf("AMG threshold    = %e\n", amgStrongThreshold_);
@@ -2619,8 +2748,9 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
                      HYPRE_ParAMGSetIOutDat(HYPrecon_, 2);
+
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_ParAMGSolve,
@@ -2636,33 +2766,24 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #ifdef MLPACK
              case HYML :
 
-                  HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,
-                                                   mlStrongThreshold_);
-                  HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,
-                                                    mlNumPreSweeps_);
-                  HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,
-                                                     mlNumPostSweeps_);
-                  HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,
-                                               mlPresmootherType_);
-                  HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,
-                                                mlPostsmootherType_);
+                  HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
+                  HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
+                  HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
+                  HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
+                  HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
                   HYPRE_ParCSRMLSetDampingFactor(HYPrecon_, mlRelaxWeight_);
                   if ( HYPreconReuse_ == 1 )
                   {
-                     HYPRE_ParCSRGMRESSetPrecond(HYSolver_,
-                                               HYPRE_ParCSRMLSolve,
-                                               HYPRE_DummyFunction,
-                                               HYPrecon_);
+                     HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
+                                      HYPRE_DummyFunction, HYPrecon_);
                   }
                   else
                   {
-                     HYPRE_ParCSRGMRESSetPrecond(HYSolver_,
-                                               HYPRE_ParCSRMLSolve,
-                                               HYPRE_ParCSRMLSetup,
-                                               HYPrecon_);
+                     HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
+                                      HYPRE_ParCSRMLSetup, HYPrecon_);
                   }
 
-                  if ( HYOutputLevel_ > 0 && mypid_ == 0 )
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                   {
                      printf("ML strong threshold = %e\n", mlStrongThreshold_);
                      printf("ML numsweeps(pre)   = %d\n", mlNumPreSweeps_);
@@ -2674,13 +2795,15 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   break;
 #endif
           }
+
           HYPRE_ParCSRGMRESSetKDim(HYSolver_, gmresDim_);
           HYPRE_ParCSRGMRESSetMaxIter(HYSolver_, maxIterations_);
           HYPRE_ParCSRGMRESSetTol(HYSolver_, tolerance_);
           //if ( normAbsRel_ == 0 ) HYPRE_ParCSRGMRESSetStopCrit(HYsolver_,0);
           //else                    HYPRE_ParCSRGMRESSetStopCrit(HYsolver_,1);
           HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
-          if (HYOutputLevel_ >= 0 && mypid_ == 0) 
+          ptime  = MPI_Wtime();
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
           {
              printf("***************************************************\n");
           }
@@ -2691,12 +2814,6 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
           iterations = num_iterations;
           rnorm = sqrt( rnorm );
-          if ( mypid_ == 0 )
-          {
-             printf("launchSolver(GMRES) - NO. ITERATION = %d\n",
-                                 num_iterations);
-             printf("launchSolver(GMRES) - FINAL NORM    = %e\n", rnorm);
-          }
           if ( num_iterations >= maxIterations_ ) status = 0;
           break;
 
@@ -2706,7 +2823,8 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
        case HYSUPERLU :
 
-          if (HYOutputLevel_ > 0) printf("%4d : launchSolver(SuperLU)\n",mypid_);
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
+             printf("%4d : launchSolver(SuperLU)\n",mypid_);
           solveUsingSuperLU(status);
           iterations = 1;
           //printf("SuperLU solver - return status = %d\n",status);
@@ -2718,7 +2836,8 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
        case HYSUPERLUX :
 
-          if (HYOutputLevel_ > 0) printf("%4d : launchSolver(SuperLUX)\n",mypid_);
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
+             printf("%4d : launchSolver(SuperLUX)\n",mypid_);
           solveUsingSuperLUX(status);
           iterations = 1;
           //printf("SuperLUX solver - return status = %d\n",status);
@@ -2731,7 +2850,8 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
        case HYY12M :
 
 #ifdef Y12M
-          if (HYOutputLevel_ > 0) printf("%4d : launchSolver(Y12M)\n",mypid_);
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
+             printf("%4d : launchSolver(Y12M)\n",mypid_);
           solveUsingY12M(status);
           iterations = 1;
           //printf("Y12M solver - return status = %d\n",status);
@@ -2744,298 +2864,49 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
     }
 
     //*******************************************************************
-    // register solver return information
+    // register solver return information and print timing information
     //-------------------------------------------------------------------
 
     solveStatus = status;
     iterations = num_iterations;
+
+    MPI_Barrier(MPI_COMM_WORLD);
     etime = MPI_Wtime();
     if ( mypid_ == 0 )
-       printf("HYPRE solve time = %e\n", etime - stime);
+    {
+       printf("***************************************************\n");
+       printf("*                Solver Statistics                *\n");
+       printf("*-------------------------------------------------*\n");
+       if ( schurReduction_ )
+          printf("** HYPRE Schur reduction time      = %e\n",rtime2-rtime1);
+       if ( slideReduction_ )
+          printf("** HYPRE slide reduction time      = %e\n",rtime2-rtime1);
+       printf("** HYPRE preconditioner setup time = %e\n", ptime - stime);
+       printf("** HYPRE solution time             = %e\n", etime - ptime);
+       printf("** HYPRE total time                = %e\n", etime - stime);
+       printf("** HYPRE number of iterations      = %d\n", num_iterations);
+       printf("** HYPRE final residual norm       = %e\n", rnorm);
+       printf("***************************************************\n");
+    }
 
     //*******************************************************************
     // recover solution for reduced system
     //-------------------------------------------------------------------
 
-    HYPRE_ParCSRMatrix A21_csr, A22_csr;
-    HYPRE_IJVector     R1, x2;
-    HYPRE_ParVector    x2_csr;
-
-    if ( systemReduced_ == 1 )
+    if ( slideReduction_ == 1 )
     {
-       if ( HYA21_ == NULL || HYinvA22_ == NULL )
-       {
-          printf("launchSolver ERROR : A21 or A22 absent.\n");
-          exit(1);
-       }
-       else
-       {
-          //-------------------------------------------------------------
-          // compute A21 * sol
-          //-------------------------------------------------------------
-
-          int_array = new int[numProcs_];
-          gint_array = new int[numProcs_];
-          x2NRows = 2 * nConstraints_;
-          for ( i = 0; i < numProcs_; i++ ) int_array[i] = 0;
-          int_array[mypid_] = x2NRows;
-          MPI_Allreduce(int_array,gint_array,numProcs_,MPI_INT,MPI_SUM,comm_);
-          x2GlobalNRows = 0;
-          for ( i = 0; i < numProcs_; i++ ) x2GlobalNRows += gint_array[i];
-          rowNum = 0;
-          for ( i = 0; i < mypid_; i++ ) rowNum += gint_array[i];
-          startRow = rowNum;
-          startRow2 = localStartRow_ - 1 - rowNum;
-          delete [] int_array;
-          delete [] gint_array;
-  
-          ierr = HYPRE_IJVectorCreate(comm_, &R1, x2GlobalNRows);
-          ierr = HYPRE_IJVectorSetLocalStorageType(R1, HYPRE_PARCSR);
-          HYPRE_IJVectorSetLocalPartitioning(R1,startRow,startRow+x2NRows);
-          ierr = HYPRE_IJVectorAssemble(R1);
-          ierr = HYPRE_IJVectorInitialize(R1);
-          ierr = HYPRE_IJVectorZeroLocalComponents(R1);
-          assert(!ierr);
-
-          A21_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(HYA21_);
-          x_csr   = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(currX_);
-          r_csr   = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(R1);
-
-          HYPRE_ParCSRMatrixMatvec( -1.0, A21_csr, x_csr, 0.0, r_csr );
-
-          //-------------------------------------------------------------
-          // f2 - A21 * sol
-          //-------------------------------------------------------------
-
-          for ( i = 0; i < nConstraints_; i++ )
-          {
-             for ( j = 0; j < nConstraints_; j++ ) 
-             {
-                if ( selectedListAux_[j] == i ) 
-                {
-                   index = selectedList_[j]; 
-                   break;
-                }
-             }
-             HYPRE_IJVectorGetLocalComponents(HYb_, 1, &index, NULL, &ddata);
-             HYPRE_IJVectorAddToLocalComponents(R1,1,&rowNum,NULL,&ddata);
-             rowNum++;
-          }
-          for ( i = localEndRow_-nConstraints_; i < localEndRow_; i++ )
-          {
-             HYPRE_IJVectorGetLocalComponents(HYb_, 1, &i, NULL, &ddata);
-             HYPRE_IJVectorAddToLocalComponents(R1,1,&rowNum,NULL,&ddata);
-             rowNum++;
-          } 
-
-          //-------------------------------------------------------------
-          // inv(A22) * (f2 - A21 * sol)
-          //-------------------------------------------------------------
-
-          ierr = HYPRE_IJVectorCreate(comm_, &x2, x2GlobalNRows);
-          ierr = HYPRE_IJVectorSetLocalStorageType(x2, HYPRE_PARCSR);
-          HYPRE_IJVectorSetLocalPartitioning(x2,startRow,startRow+x2NRows);
-          ierr = HYPRE_IJVectorAssemble(x2);
-          ierr = HYPRE_IJVectorInitialize(x2);
-          ierr = HYPRE_IJVectorZeroLocalComponents(x2);
-          assert(!ierr);
-          A22_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(HYinvA22_);
-          r_csr   = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(R1);
-          x2_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(x2);
-          HYPRE_ParCSRMatrixMatvec( 1.0, A22_csr, r_csr, 0.0, x2_csr );
-
-          //-------------------------------------------------------------
-          // inject final solution to the solution vector
-          //-------------------------------------------------------------
-
-          localNRows = localEndRow_ - localStartRow_ + 1 - 2 * nConstraints_;
-          rowNum = localStartRow_ - 1;
-          for ( i = startRow2; i < startRow2+localNRows; i++ )
-          {
-             HYPRE_IJVectorGetLocalComponents(reducedX_, 1, &i, NULL, &ddata);
-             while (HYFEI_BinarySearch(selectedList_,rowNum,nConstraints_)>=0)
-                rowNum++;
-             HYPRE_IJVectorSetLocalComponents(HYx_,1,&rowNum,NULL,&ddata);
-             rowNum++;
-          }
-          for ( i = 0; i < nConstraints_; i++ )
-          {
-             for ( j = 0; j < nConstraints_; j++ ) 
-             {
-                if ( selectedListAux_[j] == i ) 
-                {
-                   index = selectedList_[j]; 
-                   break;
-                }
-             }
-             j = i + startRow; 
-             HYPRE_IJVectorGetLocalComponents(x2, 1, &j, NULL, &ddata);
-             HYPRE_IJVectorSetLocalComponents(HYx_,1,&index,NULL,&ddata);
-          }
-          for ( i = nConstraints_; i < 2*nConstraints_; i++ )
-          {
-             j = startRow + i;
-             HYPRE_IJVectorGetLocalComponents(x2, 1, &j, NULL, &ddata);
-             index = localEndRow_ - 2 * nConstraints_ + i;
-             HYPRE_IJVectorSetLocalComponents(HYx_,1,&index,NULL,&ddata);
-          } 
-
-          //-------------------------------------------------------------
-          // residual norm check 
-          //-------------------------------------------------------------
-
-          A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(HYA_);
-          x_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(HYx_);
-          b_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(HYb_);
-          r_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(HYr_);
-          HYPRE_ParVectorCopy( b_csr, r_csr );
-          HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-          HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-          rnorm = sqrt( rnorm );
-          if ( mypid_ == 0 )
-             printf("launchSolver::reduced sytem final norm = %e\n", rnorm);
-       } 
-       currX_ = HYx_;
-
-       //****************************************************************
-       // clean up
-       //----------------------------------------------------------------
-
-       HYPRE_IJMatrixDestroy(HYA21_); 
-       HYA21_ = NULL;
-       HYPRE_IJMatrixDestroy(HYinvA22_); 
-       HYinvA22_ = NULL;
-       HYPRE_IJVectorDestroy(R1); 
-       HYPRE_IJVectorDestroy(x2); 
+       buildSlideReducedSoln();
     }
     else if ( schurReduction_ == 1 )
     {
-       if ( HYA21_ == NULL || HYinvA22_ == NULL )
-       {
-          printf("launchSolver ERROR : A21 or A22 absent.\n");
-          exit(1);
-       }
-       else
-       {
-          //-------------------------------------------------------------
-          // compute A21 * sol
-          //-------------------------------------------------------------
-
-          int_array  = new int[numProcs_];
-          gint_array = new int[numProcs_];
-          x2NRows    = A21NRows_;
-          for ( i = 0; i < numProcs_; i++ ) int_array[i] = 0;
-          int_array[mypid_] = x2NRows;
-          MPI_Allreduce(int_array,gint_array,numProcs_,MPI_INT,MPI_SUM,comm_);
-          x2GlobalNRows = 0;
-          for ( i = 0; i < numProcs_; i++ ) x2GlobalNRows += gint_array[i];
-          rowNum = 0;
-          for ( i = 0; i < mypid_; i++ ) rowNum += gint_array[i];
-          startRow = rowNum;
-          startRow2 = localStartRow_ - 1 - rowNum;
-          delete [] int_array;
-          delete [] gint_array;
-          localNRows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
-
-          ierr = HYPRE_IJVectorCreate(comm_, &R1, x2GlobalNRows);
-          ierr = HYPRE_IJVectorSetLocalStorageType(R1, HYPRE_PARCSR);
-          HYPRE_IJVectorSetLocalPartitioning(R1,startRow,startRow+x2NRows);
-          ierr = HYPRE_IJVectorAssemble(R1);
-          ierr = HYPRE_IJVectorInitialize(R1);
-          ierr = HYPRE_IJVectorZeroLocalComponents(R1);
-          assert(!ierr);
-
-          A21_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(HYA21_);
-          x_csr   = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(currX_);
-          r_csr   = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(R1);
-
-          HYPRE_ParCSRMatrixMatvec( -1.0, A21_csr, x_csr, 0.0, r_csr );
-
-          //-------------------------------------------------------------
-          // f2 - A21 * sol
-          //-------------------------------------------------------------
-
-          rowNum = startRow;
-          for ( i = localStartRow_-1; i < localEndRow_; i++ )
-          {
-             if (HYFEI_BinarySearch(selectedList_,i,localNRows)<0)
-             {
-                HYPRE_IJVectorGetLocalComponents(HYb_, 1, &i, NULL, &ddata);
-                HYPRE_IJVectorAddToLocalComponents(R1,1,&rowNum,NULL,&ddata);
-                rowNum++;
-             } 
-          } 
-
-          //-------------------------------------------------------------
-          // inv(A22) * (f2 - A21 * sol)
-          //-------------------------------------------------------------
-
-          ierr = HYPRE_IJVectorCreate(comm_, &x2, x2GlobalNRows);
-          ierr = HYPRE_IJVectorSetLocalStorageType(x2, HYPRE_PARCSR);
-          HYPRE_IJVectorSetLocalPartitioning(x2,startRow,startRow+x2NRows);
-          ierr = HYPRE_IJVectorAssemble(x2);
-          ierr = HYPRE_IJVectorInitialize(x2);
-          ierr = HYPRE_IJVectorZeroLocalComponents(x2);
-          assert(!ierr);
-          A22_csr = (HYPRE_ParCSRMatrix)HYPRE_IJMatrixGetLocalStorage(HYinvA22_);
-          r_csr   = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(R1);
-          x2_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(x2);
-          HYPRE_ParCSRMatrixMatvec( 1.0, A22_csr, r_csr, 0.0, x2_csr );
-
-          //-------------------------------------------------------------
-          // inject final solution to the solution vector
-          //-------------------------------------------------------------
-
-          for ( i = startRow2; i < startRow2+localNRows; i++ )
-          {
-             HYPRE_IJVectorGetLocalComponents(reducedX_, 1, &i, NULL, &ddata);
-             index = selectedList_[i-startRow2];
-             HYPRE_IJVectorSetLocalComponents(HYx_,1,&index,NULL,&ddata);
-          }
-          rowNum = localStartRow_ - 1;
-          for ( i = startRow; i < startRow+A21NRows_; i++ )
-          {
-             HYPRE_IJVectorGetLocalComponents(x2, 1, &i, NULL, &ddata);
-             while (HYFEI_BinarySearch(selectedList_,rowNum,localNRows)>=0)
-                rowNum++;
-             HYPRE_IJVectorSetLocalComponents(HYx_,1,&rowNum,NULL,&ddata);
-             rowNum++;
-          } 
-
-          //-------------------------------------------------------------
-          // residual norm check 
-          //-------------------------------------------------------------
-
-          A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(HYA_);
-          x_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(HYx_);
-          b_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(HYb_);
-          r_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(HYr_);
-          HYPRE_ParVectorCopy( b_csr, r_csr );
-          HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-          HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-          rnorm = sqrt( rnorm );
-          if ( mypid_ == 0 )
-             printf("launchSolver::Schur sytem final norm = %e\n", rnorm);
-       } 
-       currX_ = HYx_;
-
-       //****************************************************************
-       // clean up
-       //----------------------------------------------------------------
-
-       HYPRE_IJMatrixDestroy(HYA21_); 
-       HYA21_ = NULL;
-       HYPRE_IJMatrixDestroy(HYinvA22_); 
-       HYinvA22_ = NULL;
-       HYPRE_IJVectorDestroy(R1); 
-       HYPRE_IJVectorDestroy(x2); 
+       buildSchurReducedSoln();
     }
 
     //*******************************************************************
     // diagnostic information
     //-------------------------------------------------------------------
 
-    if ( HYOutputLevel_ == -7 )
+    if ( HYOutputLevel_ & HYFEI_PRINTSOL )
     {
        nrows = localEndRow_ - localStartRow_ + 1;
        startRow = localStartRow_ - 1;
@@ -3052,7 +2923,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
        exit(0);
     }
 
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  launchSolver.\n", mypid_);
     }
@@ -3111,7 +2982,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
        status = -1;
        return;
     }
-    if (systemReduced_  == 1) 
+    if (slideReduction_  == 1) 
          nrows = localEndRow_ - 2 * nConstraints_;
     else if (schurReduction_ == 1) 
          nrows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
@@ -3125,7 +2996,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     new_a  = new double[nnz];
     A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(HYA_);
 
-    nz_ptr = getMatrixCSR(nrows, nnz, new_ia, new_ja, new_a);
+    nz_ptr = getMatrixCSR(HYA_, nrows, nnz, new_ia, new_ja, new_a);
 
     nnz = nz_ptr;
 
@@ -3214,9 +3085,9 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     delete [] rhs; 
     delete [] perm_c; 
     delete [] perm_r; 
-    delete [] new_ia; 
-    delete [] new_ja; 
-    delete [] new_a; 
+    free( new_ia ); 
+    free( new_ja ); 
+    free( new_a ); 
     Destroy_SuperMatrix_Store(&B);
     Destroy_SuperNode_Matrix(&L);
     SUPERLU_FREE( ((NRformat *) A2.Store)->colind);
@@ -3292,7 +3163,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
        status = -1;
        return;
     }
-    if (systemReduced_  == 1) 
+    if (slideReduction_  == 1) 
          nrows = localEndRow_ - 2 * nConstraints_;
     else if (schurReduction_ == 1) 
          nrows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
@@ -3318,7 +3189,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     new_ja = new int[nnz];
     new_a  = new double[nnz];
 
-    nz_ptr = getMatrixCSR(nrows, nnz, new_ia, new_ja, new_a);
+    nz_ptr = getMatrixCSR(HYA_, nrows, nnz, new_ia, new_ja, new_a);
 
     nnz = nz_ptr;
 
@@ -3425,13 +3296,13 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     //------------------------------------------------------------------
 
     delete [] ind_array; 
-    delete [] rhs; 
     delete [] perm_c; 
     delete [] perm_r; 
     delete [] etree; 
-    delete [] new_ia; 
-    delete [] new_ja; 
-    delete [] new_a; 
+    delete [] rhs; 
+    free( new_ia );
+    free( new_ja );
+    free( new_a );
     delete [] soln;
     delete [] colLengths;
     Destroy_SuperMatrix_Store(&B);
@@ -3502,7 +3373,7 @@ void HYPRE_LinSysCore::solveUsingY12M(int& status)
        status = -1;
        return;
     }
-    if (systemReduced_  == 1) 
+    if (slideReduction_  == 1) 
          nrows = localEndRow_ - 2 * nConstraints_;
     else if (schurReduction_ == 1) 
          nrows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
@@ -3627,7 +3498,7 @@ void HYPRE_LinSysCore::solveUsingY12M(int& status)
 
 void HYPRE_LinSysCore::loadConstraintNumbers(int nConstr, int *constrList)
 {
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::loadConstraintNumbers - size = %d\n", 
                      mypid_, nConstr);
@@ -3656,84 +3527,11 @@ void HYPRE_LinSysCore::loadConstraintNumbers(int nConstr, int *constrList)
     //      }
     //   }
     //}
-    if ( HYOutputLevel_ > 0 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  loadConstraintNumbers\n",
               mypid_);
     }
-}
-
-//***************************************************************************
-// this function extracts the matrix in a CSR format
-//---------------------------------------------------------------------------
-
-int HYPRE_LinSysCore::getMatrixCSR(int nrows, int nnz, int *ia_ptr, 
-                                   int *ja_ptr, double *a_ptr) 
-{
-    int                nz, i, j, ierr, rowSize, *colInd, nz_ptr, *colInd2;
-    int                firstNnz;
-    double             *colVal, *colVal2;
-    HYPRE_ParCSRMatrix A_csr;
-
-    nz        = 0;
-    nz_ptr    = 0;
-    ia_ptr[0] = nz_ptr;
-    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(HYA_);
-    for ( i = 0; i < nrows; i++ )
-    {
-       ierr = HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
-       assert(!ierr);
-       colInd2 = new int[rowSize];
-       colVal2 = new double[rowSize];
-       for ( j = 0; j < rowSize; j++ )
-       {
-          colInd2[j] = colInd[j];
-          colVal2[j] = colVal[j];
-       }
-       if ( rowSize > rowLengths_[i] )
-          printf("getMatrixCSR warning at row %d - %d %d\n", i,rowSize,
-                   rowLengths_[i]);
-       qsort1(colInd2, colVal2, 0, rowSize-1);
-       for ( j = 0; j < rowSize-1; j++ )
-          if ( colInd2[j] == colInd2[j+1] )
-             printf("getMatrixCSR - duplicate colind at row %d \n",i);
-
-       firstNnz = 0;
-       for ( j = 0; j < rowSize; j++ )
-       {
-          if ( colVal2[j] != 0.0 )
-          {
-             if (nz_ptr > 0 && firstNnz > 0 && colInd2[j] == ja_ptr[nz_ptr-1]) 
-             {
-                a_ptr[nz_ptr-1] += colVal2[j];
-                printf("getMatrixCSR :: repeated col in row %d\n", i);
-             }
-             else
-             { 
-                ja_ptr[nz_ptr] = colInd2[j];
-                a_ptr[nz_ptr++]  = colVal2[j];
-                if ( nz_ptr > nnz )
-                {
-                   printf("getMatrixCSR error (1) - %d %d.\n",i, nrows);
-                   exit(1);
-                }
-                firstNnz++;
-             }
-          } else nz++;
-       }
-       delete [] colInd2;
-       delete [] colVal2;
-       ia_ptr[i+1] = nz_ptr;
-       ierr = HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
-       assert(!ierr);
-    }   
-    if ( nnz != nz_ptr )
-    {
-       printf("getMatrixCSR note : matrix sparsity has been changed since\n");
-       printf("             matConfigure - %d > %d ?\n", nnz, nz_ptr);
-       printf("             number of zeros            = %d \n", nz );
-    }
-    return nz_ptr;
 }
 
 //***************************************************************************
@@ -3758,7 +3556,7 @@ void fei_hypre_test(int argc, char *argv[])
 {
     int    i, j, k, my_rank, num_procs, nrows, nnz, mybegin, myend, status;
     int    *ia, *ja, ncnt, index, chunksize, iterations, local_nrows;
-    int    *rowLengths, **colIndices, blksize=3, *list, prec;
+    int    *rowLengths, **colIndices, blksize=1, *list, prec;
     double *val, *rhs, ddata, ddata_max;
 
     //------------------------------------------------------------------
@@ -3776,7 +3574,7 @@ void fei_hypre_test(int argc, char *argv[])
     //------------------------------------------------------------------
 
     if ( my_rank == 0 ) {
-       H.HYFEI_Get_IJAMatrixFromFile(&val, &ia, &ja, &nrows,
+       HYPRE_LSI_Get_IJAMatrixFromFile(&val, &ia, &ja, &nrows,
                                 &rhs, "matrix.data", "rhs.data");
        nnz = ia[nrows];
        MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -3848,9 +3646,9 @@ void fei_hypre_test(int argc, char *argv[])
        H.sumIntoSystemMatrix(index, ncnt, &val[ia[i]], &ja[ia[i]]);
     }
     H.matrixLoadComplete();
-    delete [] ia;
-    delete [] ja;
-    delete [] val;
+    free( ia );
+    free( ja );
+    free( val );
     
     //------------------------------------------------------------------
     // load the right hand side 
@@ -3861,7 +3659,7 @@ void fei_hypre_test(int argc, char *argv[])
        index = i + 1;
        H.sumIntoRHSVector(1, &rhs[i], &index);
     }
-    delete [] rhs;
+    free( rhs );
 
     //------------------------------------------------------------------
     // set other parameters
@@ -3869,7 +3667,9 @@ void fei_hypre_test(int argc, char *argv[])
 
     char *paramString = new char[100];
 
-    strcpy(paramString, "solver cg");
+    strcpy(paramString, "version");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "solver gmres");
     H.parameters(1, &paramString);
     strcpy(paramString, "relativeNorm");
     H.parameters(1, &paramString);
@@ -3877,7 +3677,7 @@ void fei_hypre_test(int argc, char *argv[])
     H.parameters(1, &paramString);
     if ( my_rank == 0 )
     {
-       printf("preconditioner (diagonal,parasails,boomeramg,ml,pilut) : ");
+       printf("preconditioner (diagonal,parasails,boomeramg,ml,pilut,ddilut) : ");
        scanf("%d", &prec);
     }
     MPI_Bcast(&prec,  1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -3893,12 +3693,17 @@ void fei_hypre_test(int argc, char *argv[])
                 break;
        case 4 : strcpy(paramString, "preconditioner pilut");
                 break;
+       case 5 : strcpy(paramString, "preconditioner ddilut");
+                break;
        default : strcpy(paramString, "preconditioner parasails");
                 break;
     }
 
     H.parameters(1, &paramString);
     strcpy(paramString, "gmresDim 300");
+    H.parameters(1, &paramString);
+
+    strcpy(paramString, "ddilutFillin 0.0");
     H.parameters(1, &paramString);
 
     strcpy(paramString, "amgRelaxType hybrid");
@@ -3962,8 +3767,8 @@ void fei_hypre_test(int argc, char *argv[])
     } 
     else if ( my_rank == 0 )
     {
-       printf("%4d : HYPRE_LinSysCore : solve successful.\n", my_rank);
-       printf("                  iteration count = %4d\n", iterations);
+       printf("HYPRE_LinSysCore : solve successful.\n", my_rank);
+       printf("              iteration count = %4d\n", iterations);
     }
 
     if ( my_rank == 0 )

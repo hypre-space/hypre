@@ -13,6 +13,10 @@
 #ifndef _MHMAT_
 #define _MHMAT_
 
+#ifdef MLPACK
+#include "ml_struct.h"
+#endif
+
 typedef struct
 {
     int      Nrows;
@@ -42,14 +46,18 @@ MH_Context;
 typedef struct
 {
     MPI_Comm     comm;
+#ifdef MLPACK
     ML           *ml_ptr;
+#endif
     int          nlevels;
     int          pre, post;
     int          pre_sweeps, post_sweeps;
     int          BGS_blocksize;
     double       jacobi_wt;
     double       ag_threshold;
+#ifdef MLPACK
     ML_Aggregate *ml_ag;
+#endif
     MH_Context   *contxt;
 } 
 MH_Link;

@@ -25,8 +25,10 @@ C_COMPILE_FLAGS=@CFLAGS@
 CXX_COMPILE_FLAGS=@CXXFLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@
-CDEFS = -DHYPRE_NO_PTHREAD_MANGLING -DSUPERLU -DMLPACK
-CXXDEFS = -DHYPRE_NO_PTHREAD_MANGLING -DSUPERLU -DMLPACK
+#CDEFS = -DHYPRE_NO_PTHREAD_MANGLING -DSUPERLU -DMLPACK
+#CXXDEFS = -DHYPRE_NO_PTHREAD_MANGLING -DSUPERLU -DMLPACK
+CDEFS = -DHYPRE_NO_PTHREAD_MANGLING 
+CXXDEFS = -DHYPRE_NO_PTHREAD_MANGLING 
 
 CFLAGS = -w ${C_COMPILE_FLAGS} \
  ${CDEFS}\
@@ -85,11 +87,19 @@ LFLAGS =\
  ${MPILIBFLAGS} ${MPI_LIBS} ${LIBFLAGS} ${LDLIBFLAGS}\
  -ldxml -lm
 
-FILES = HYPRE_LinSysCore.C cfei_hypre.C hypre_fei_reduce.C hypre_fei_schur.C \
-        hypre_fei_misc.C hypre_fei_ddamg.C HYPRE_parcsr_ml.c
+FILES = HYPRE_LinSysCore.C cfei_hypre.C hypre_slide_reduce.C \
+        hypre_schur_reduce.C hypre_lsi_misc.c hypre_lsi_ddamg.C \
+        HYPRE_parcsr_ml.c hypre_lsi_ddilut.c
 
 TEMP = ${FILES:.c=.o}
 OBJS = ${TEMP:.C=.o}
+
+FILESV12 = HYPRE_LinSysCore.C hypre_slide_reduce.C \
+           hypre_schur_reduce.C hypre_lsi_misc.c hypre_lsi_ddamg.C \
+           HYPRE_parcsr_ml.c hypre_lsi_ddilut.c
+
+TEMPV12 = ${FILESV12:.c=.o}
+OBJSV12 = ${TEMPV12:.C=.o}
 
 ##################################################################
 # Main rules
@@ -110,6 +120,12 @@ driver: driver.o libHYPRE_FEI.a
 libHYPRE_FEI.a: ${OBJS}
 	@echo  "Building $@ ... "
 	@ar -rcu libHYPRE_FEI.a ${OBJS}
+	${RANLIB} $@
+
+libHYPRE_FEI_V12.a: ${OBJSV12}
+	@echo  "Building $@ ... "
+	${CXX} -o $@ -c ${CXXFLAGS} -DFEI_V1.2 HYPRE_LinSysCore.C
+	@ar -rcu libHYPRE_FEI_V12.a ${OBJSV12}
 	${RANLIB} $@
 
 ##################################################################
