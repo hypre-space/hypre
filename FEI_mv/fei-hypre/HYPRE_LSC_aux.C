@@ -3257,6 +3257,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    start_row = partition[0];
    end_row   = partition[1] - 1;
    nrows     = end_row - start_row + 1;
+   free( partition );
 
    nnz = 0;
    for ( i = start_row; i <= end_row; i++ )
@@ -3443,6 +3444,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    start_row = partition[0];
    end_row   = partition[1] - 1;
    nrows     = end_row - start_row + 1;
+   free( partition );
 
    colLengths = new int[nrows];
    for ( i = 0; i < nrows; i++ ) colLengths[i] = 0;
@@ -4175,6 +4177,7 @@ void HYPRE_LinSysCore::addToMinResProjectionSpace(HYPRE_IJVector xvec,
       start_row = partition[mypid_];
       end_row   = partition[mypid_+1] - 1;
       nrows     = end_row - start_row + 1;
+      free( partition );
       HYpxs_    = new HYPRE_IJVector[projectSize_+1];
       HYpbs_    = new HYPRE_IJVector[projectSize_+1];
 
@@ -4419,6 +4422,7 @@ void HYPRE_LinSysCore::addToAConjProjectionSpace(HYPRE_IJVector xvec,
       start_row = partition[mypid_];
       end_row   = partition[mypid_+1] - 1;
       nrows     = end_row - start_row + 1;
+      free( partition );
       HYpxs_    = new HYPRE_IJVector[projectSize_+1];
       HYpbs_    = new HYPRE_IJVector[projectSize_+1];
 
