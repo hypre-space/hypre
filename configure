@@ -923,18 +923,16 @@ if test "${with_purify+set}" = set; then
   withval="$with_purify"
   if test "$casc_user_chose_compilers" = "no"
  then
-   CC="insure -Zoi \"report_file insure.log\""
-   CXX="insure -Zoi \"report_file insure.log\""
+   CC=cc
+   CXX=CC
    CFLAGS="$CFLAGS -g"
    CXXFLAGS="$CXXFLAGS -g"
    casc_user_chose_compilers=yes
  fi
  case "${withval}" in
-   yes) PREPEND="" ;;
+   yes) PREPEND="purify" ;;
    no)  PREPEND="" ;;
-   *)   PREPEND="" 
-      CC="$CC $withval"
-      CXX="$CXX $withval"
+   *)   PREPEND="purify $withval" 
       ;;
  esac
 else
@@ -955,9 +953,12 @@ if test "${with_insure_to_file+set}" = set; then
    casc_user_chose_compilers=yes
  fi
  case "${withval}" in
-   yes) PREPEND="insure -Zoi \"report_file insure.log\"";;
+   yes) PREPEND="";;
    no)  PREPEND="" ;;
-   *)   PREPEND="insure $withval" ;;
+   *)   PREPEND=""
+     CC="$CC $withval"
+     CXX="$CXX $withval"
+     ;;
  esac
 
 fi
