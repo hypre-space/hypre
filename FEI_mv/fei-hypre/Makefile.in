@@ -7,7 +7,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-.SUFFIXES: .cc .c .f .o
+.SUFFIXES: .C .c .f .o
 
 HYPRE_ARCH = @ARCH@
 
@@ -33,7 +33,6 @@ CXXDEFS = -DHYPRE_NO_PTHREAD_MANGLING -DSUPERLU -DMLPACK
 CFLAGS = -w ${C_COMPILE_FLAGS} \
  ${CDEFS}\
  -I../..\
- -I../isis-mv\
  -I../../IJ_matrix_vector\
  -I../../utilities\
  -I../../parcsr_matrix_vector\
@@ -50,7 +49,6 @@ MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
 CXXFLAGS = -w ${CXX_COMPILE_FLAGS} \
  ${CXXDEFS}\
  -I../..\
- -I../isis-mv\
  -I../../IJ_matrix_vector\
  -I../../utilities\
  -I../../parcsr_matrix_vector\
@@ -89,11 +87,10 @@ LFLAGS =\
  ${MPILIBFLAGS} ${MPI_LIBS} ${LIBFLAGS} ${LDLIBFLAGS}\
  -ldxml -lm
 
-FILES = HYPRE_LinSysCore.cc cfei.cc hypre_fei_reduce.cc hypre_fei_schur.cc \
-        hypre_fei_misc.cc hypre_fei_ddamg.cc HYPRE_parcsr_ml.c
+FILES = HYPRE_LinSysCore.C cfei_hypre.C hypre_fei_reduce.C hypre_fei_schur.C \
+        hypre_fei_misc.C hypre_fei_ddamg.C HYPRE_parcsr_ml.c
 
-OBJS = HYPRE_LinSysCore.o cfei.o hypre_fei_reduce.o hypre_fei_schur.o \
-        hypre_fei_misc.o hypre_fei_ddamg.o HYPRE_parcsr_ml.o
+OBJS = ${FILES:.c=.o} ${FILES:.C=.o}
 
 ##################################################################
 # Main rules
@@ -133,7 +130,7 @@ veryclean: clean
 # Generic rules
 ##################################################################
 
-.cc.o:
+.C.o:
 	${CXX} -o $@ -c ${CXXFLAGS} $<
 
 .c.o:
