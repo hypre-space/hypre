@@ -96,7 +96,7 @@ parse_arguments () {
       h) usage; exit 2;;
       m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail";;
      +m) HYPRE_SEND_MAIL="no"; MailOpt="";;
-      n) confbuildtest $Build   "--without-MPI" "no_mip"    1 1 0 1 1 0;;
+      n) confbuildtest $Build   "--without-MPI" "no_mpi"    1 1 0 1 1 0;;
       o) confbuildtest $OPTARG  "--with-openmp" "openmp"    0 0 0 0 1 0;;
       p) confbuildtest $OPTARG  "--with-petac"  "petac"     0 0 0 1 0 0;;
       q) confbuildtest $OPTARG  "--with-purify-to-file" \
