@@ -228,7 +228,7 @@ do
         HYPRE_RUN_MACHINE="blue"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/powerpc-ibm-aix5.1.0.0/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -ne 1 -a 1 -cfo 1 -l 2"
+	  HYPRE_MACHINE_COMMANDS="-mne 1 -a 1 -cfo 1 -l 2"
           HYPRE_MESSAGE='TEST[automake-ASCI-Blue]'
         elif [ "$1" = "-bluemp" ] ; then
           SUBMSG="from OpenMP"
@@ -250,8 +250,8 @@ do
         HYPRE_RUN_MACHINE="frost"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/powerpcll-ibm-aix5.1.0.0/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-##	  HYPRE_MACHINE_COMMANDS="-mb 1 -nse 1 -a 1 -cfo 1 -l 2"
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -ne 1 -a 1 -cfo 1 -l 2"
+##	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfo 1 -l 2"
+	  HYPRE_MACHINE_COMMANDS="-mne 1 -a 1 -cfo 1 -l 2"
           HYPRE_MESSAGE='TEST[automake-ASCI-White]'
         elif [ "$1" = "-frostmp" ] ; then
           SUBMSG="from OpenMP"
@@ -271,7 +271,7 @@ do
         HYPRE_RUN_MACHINE="sunup"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -ne 1 -a 1 -cfl 2"
+	  HYPRE_MACHINE_COMMANDS="-mne 1 -a 1 -cfl 2"
           HYPRE_MESSAGE='TEST[autotest-Solaris8]'
         else
 	  HYPRE_MACHINE_COMMANDS="-mb 1 -ne 1 -a 2 -cf"
@@ -381,7 +381,7 @@ do
         HYPRE_RUN_MACHINE="perrin"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.7/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nse 1 -a 1 -cfl 2"
+	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfl 2"
           HYPRE_MESSAGE='TEST[automake-cc-5.0]'
         else
 	  HYPRE_MACHINE_COMMANDS="-mb 1 -nrse 1 -a 2 -cf"
@@ -395,7 +395,7 @@ do
         HYPRE_RUN_MACHINE="poincare"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.7/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nse 1 -a 1 -cfl 2"
+	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfl 2"
           HYPRE_MESSAGE='TEST[autotest-Solaris7]'
         else
 	  HYPRE_MACHINE_COMMANDS="-mb 1 -nse 1 -a 2 -cf"
@@ -487,7 +487,7 @@ do
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nsde 1 -a 1 -cfl 2"
+	  HYPRE_MACHINE_COMMANDS="-mnsde 1 -a 1 -cfl 2"
           HYPRE_MESSAGE='TEST[autotest-gcc-2.96]'
         else
 	  HYPRE_MACHINE_COMMANDS="-mb 1 -nsde 1 -a 2 -cf"
@@ -503,7 +503,7 @@ do
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
           HYPRE_MESSAGE='TEST[automake-gcc-2.95.3]'
         else
 	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
@@ -519,7 +519,7 @@ do
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
           HYPRE_MESSAGE='TEST[automake-gcc-3.0.4]'
         else
 	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
@@ -535,7 +535,7 @@ do
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
           HYPRE_MESSAGE='TEST[automake-gcc-3.1.1]'
         else
 	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
@@ -551,7 +551,7 @@ do
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
           HYPRE_MESSAGE='TEST[automake-gcc-3.2.2]'
         else
 	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
@@ -567,7 +567,7 @@ do
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
           HYPRE_MESSAGE='TEST[automake-gcc-3.3.x]'
         else
 	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
@@ -599,7 +599,7 @@ do
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
           HYPRE_MESSAGE='TEST[automake-Absoft-Pro8.0]'
         else
 	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
@@ -615,7 +615,7 @@ do
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
           HYPRE_MESSAGE='TEST[automake-lahey]'
         else
 	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
@@ -631,7 +631,7 @@ do
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
           HYPRE_MESSAGE='TEST[automake-Intel-7.0]'
         else
 	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
@@ -647,7 +647,7 @@ do
         HYPRE_REMOTE_DIR="/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfl 2"
           HYPRE_MESSAGE='TEST[automake-KCC-4.0f]'
         else
 	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
