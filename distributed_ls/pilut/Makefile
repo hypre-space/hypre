@@ -13,10 +13,6 @@ ARGS  = 5 1e-4 1 20 10 1e-8
 
 # Gnu gcc
 # OPTIMIZATION = -O3
-OPTIMIZATION = -g
-CC = gcc
-LD = gcc
-AR       = ar
 OTHER_LIBS = /home/casc/lib/blas_solaris.a -R/opt/SUNWspro/lib \
              -L/opt/SUNWspro/lib -lF77 -lM77 -lsunmath
 
@@ -65,6 +61,9 @@ OBJS = ${FILES:.c=.o}
 
 ${OBJS}: ${HEADERS}
 
+#include site-specific information
+include ../../bmakes/base
+
 ##################################################################
 # Generic rules
 ##################################################################
@@ -79,22 +78,5 @@ ${OBJS}: ${HEADERS}
 ##################################################################
 
 lib:    $(PROTOS) $(OBJS)
-	$(AR) -r libHYPREDistributedMatrixPilutSolver.a $(OBJS)
+	ar -r libHYPREDistributedMatrixPilutSolver.a $(OBJS)
 
-pilut5: main.o lib
-	$(LD)  -o $@ $(LIBDIR) main.o $(LIBS)
-	chmod 744 $@
-
-clean:
-	/bin/rm -f *.o pilut5
-
-wang4: pilut5
-	mpirun -np 4 pilut5 $(WANG) $(ARGS)
-
-#	./pilut5 -npes 4  $(WANG) $(ARGS)
-
-ale0: pilut5
-	./pilut5 -npes 4 $(ALE0) $(ARGS)
-
-ale1: pilut5
-	./pilut5 -npes 4 $(ALE1) $(ARGS)
