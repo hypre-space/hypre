@@ -128,6 +128,22 @@ typedef int (*hypre_PtrToStructSolverFcn)(HYPRE_StructSolver,
 #define HYPRE_StructSMGSetLogging HYPRE_StructSMGSetLoggingPush
 #define HYPRE_StructSMGGetNumIterations HYPRE_StructSMGGetNumIterationsPush
 #define HYPRE_StructSMGGetFinalRelativeResidualNorm HYPRE_StructSMGGetFinalRelativeResidualNormPush
+#define HYPRE_StructSparseMSGInitialize HYPRE_StructSparseMSGInitializePush
+#define HYPRE_StructSparseMSGFinalize HYPRE_StructSparseMSGFinalizePush
+#define HYPRE_StructSparseMSGSetup HYPRE_StructSparseMSGSetupPush
+#define HYPRE_StructSparseMSGSolve HYPRE_StructSparseMSGSolvePush
+#define HYPRE_StructSparseMSGSetTol HYPRE_StructSparseMSGSetTolPush
+#define HYPRE_StructSparseMSGSetMaxIter HYPRE_StructSparseMSGSetMaxIterPush
+#define HYPRE_StructSparseMSGSetJump HYPRE_StructSparseMSGSetJumpPush
+#define HYPRE_StructSparseMSGSetRelChange HYPRE_StructSparseMSGSetRelChangePush
+#define HYPRE_StructSparseMSGSetZeroGuess HYPRE_StructSparseMSGSetZeroGuessPush
+#define HYPRE_StructSparseMSGSetNonZeroGuess HYPRE_StructSparseMSGSetNonZeroGuessPush
+#define HYPRE_StructSparseMSGSetRelaxType HYPRE_StructSparseMSGSetRelaxTypePush
+#define HYPRE_StructSparseMSGSetNumPreRelax HYPRE_StructSparseMSGSetNumPreRelaxPush
+#define HYPRE_StructSparseMSGSetNumPostRelax HYPRE_StructSparseMSGSetNumPostRelaxPush
+#define HYPRE_StructSparseMSGSetLogging HYPRE_StructSparseMSGSetLoggingPush
+#define HYPRE_StructSparseMSGGetNumIterations HYPRE_StructSparseMSGGetNumIterationsPush
+#define HYPRE_StructSparseMSGGetFinalRelativeResidualNorm HYPRE_StructSparseMSGGetFinalRelativeResidualNormPush
 
 #endif
 
@@ -214,6 +230,24 @@ int HYPRE_StructSMGSetNumPostRelax P((HYPRE_StructSolver solver , int num_post_r
 int HYPRE_StructSMGSetLogging P((HYPRE_StructSolver solver , int logging ));
 int HYPRE_StructSMGGetNumIterations P((HYPRE_StructSolver solver , int *num_iterations ));
 int HYPRE_StructSMGGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));
+
+/* HYPRE_struct_sparse_msg.c */
+int HYPRE_StructSparseMSGInitialize P((MPI_Comm comm , HYPRE_StructSolver *solver ));
+int HYPRE_StructSparseMSGFinalize P((HYPRE_StructSolver solver ));
+int HYPRE_StructSparseMSGSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
+int HYPRE_StructSparseMSGSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
+int HYPRE_StructSparseMSGSetTol P((HYPRE_StructSolver solver , double tol ));
+int HYPRE_StructSparseMSGSetMaxIter P((HYPRE_StructSolver solver , int max_iter ));
+int HYPRE_StructSparseMSGSetJump P((HYPRE_StructSolver solver , int jump ));
+int HYPRE_StructSparseMSGSetRelChange P((HYPRE_StructSolver solver , int rel_change ));
+int HYPRE_StructSparseMSGSetZeroGuess P((HYPRE_StructSolver solver ));
+int HYPRE_StructSparseMSGSetNonZeroGuess P((HYPRE_StructSolver solver ));
+int HYPRE_StructSparseMSGSetRelaxType P((HYPRE_StructSolver solver , int relax_type ));
+int HYPRE_StructSparseMSGSetNumPreRelax P((HYPRE_StructSolver solver , int num_pre_relax ));
+int HYPRE_StructSparseMSGSetNumPostRelax P((HYPRE_StructSolver solver , int num_post_relax ));
+int HYPRE_StructSparseMSGSetLogging P((HYPRE_StructSolver solver , int logging ));
+int HYPRE_StructSparseMSGGetNumIterations P((HYPRE_StructSolver solver , int *num_iterations ));
+int HYPRE_StructSparseMSGGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));
 
 #undef P
 

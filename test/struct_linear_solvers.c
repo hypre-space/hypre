@@ -226,13 +226,16 @@ main( int   argc,
       printf("  -solver <ID>         : solver ID (default = 0)\n");
       printf("                         0  - SMG\n");
       printf("                         1  - PFMG\n");
+      printf("                         2  - SparseMSG\n");
       printf("                         10 - CG with SMG precond\n");
       printf("                         11 - CG with PFMG precond\n");
+      printf("                         12 - CG with SparseMSG precond\n");
       printf("                         17 - CG with 2-step Jacobi\n");
       printf("                         18 - CG with diagonal scaling\n");
       printf("                         19 - CG\n");
       printf("                         20 - Hybrid with SMG precond\n");
       printf("                         21 - Hybrid with PFMG precond\n");
+      printf("                         22 - Hybrid with SparseMSG precond\n");
       printf("\n");
 
       exit(1);
@@ -660,6 +663,47 @@ main( int   argc,
    }
 
    /*-----------------------------------------------------------
+    * Solve the system using SparseMSG
+    *-----------------------------------------------------------*/
+
+   else if (solver_id == 2)
+   {
+      time_index = hypre_InitializeTiming("SparseMSG Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructSparseMSGInitialize(MPI_COMM_WORLD, &solver);
+      HYPRE_StructSparseMSGSetMaxIter(solver, 50);
+      HYPRE_StructSparseMSGSetTol(solver, 1.0e-06);
+      HYPRE_StructSparseMSGSetRelChange(solver, 0);
+      /* weighted Jacobi = 1; red-black GS = 2 */
+      HYPRE_StructSparseMSGSetRelaxType(solver, 1);
+      HYPRE_StructSparseMSGSetNumPreRelax(solver, n_pre);
+      HYPRE_StructSparseMSGSetNumPostRelax(solver, n_post);
+      HYPRE_StructSparseMSGSetLogging(solver, 1);
+      HYPRE_StructSparseMSGSetup(solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("SparseMSG Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructSparseMSGSolve(solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      HYPRE_StructSparseMSGGetNumIterations(solver, &num_iterations);
+      HYPRE_StructSparseMSGGetFinalRelativeResidualNorm(solver,
+                                                        &final_res_norm);
+      HYPRE_StructSparseMSGFinalize(solver);
+   }
+
+   /*-----------------------------------------------------------
     * Solve the system using CG
     *-----------------------------------------------------------*/
 
@@ -709,6 +753,24 @@ main( int   argc,
          HYPRE_StructPCGSetPrecond(solver,
                                    HYPRE_StructPFMGSolve,
                                    HYPRE_StructPFMGSetup,
+                                   precond);
+      }
+
+      else if (solver_id == 12)
+      {
+         /* use symmetric SparseMSG as preconditioner */
+         HYPRE_StructSparseMSGInitialize(MPI_COMM_WORLD, &precond);
+         HYPRE_StructSparseMSGSetMaxIter(precond, 1);
+         HYPRE_StructSparseMSGSetTol(precond, 0.0);
+         HYPRE_StructSparseMSGSetZeroGuess(precond);
+         /* weighted Jacobi = 1; red-black GS = 2 */
+         HYPRE_StructSparseMSGSetRelaxType(precond, 1);
+         HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
+         HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
+         HYPRE_StructSparseMSGSetLogging(precond, 0);
+         HYPRE_StructPCGSetPrecond(solver,
+                                   HYPRE_StructSparseMSGSolve,
+                                   HYPRE_StructSparseMSGSetup,
                                    precond);
       }
 
@@ -771,6 +833,10 @@ main( int   argc,
       {
          HYPRE_StructPFMGFinalize(precond);
       }
+      else if (solver_id == 12)
+      {
+         HYPRE_StructSparseMSGFinalize(precond);
+      }
       else if (solver_id == 17)
       {
          HYPRE_StructJacobiFinalize(precond);
@@ -823,11 +889,30 @@ main( int   argc,
          HYPRE_StructPFMGSetRelaxType(precond, 1);
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
+         HYPRE_StructPFMGSetSkipRelax(precond, skip);
          /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
          HYPRE_StructPFMGSetLogging(precond, 0);
          HYPRE_StructHybridSetPrecond(solver,
                                       HYPRE_StructPFMGSolve,
                                       HYPRE_StructPFMGSetup,
+                                      precond);
+      }
+
+      else if (solver_id == 22)
+      {
+         /* use symmetric SparseMSG as preconditioner */
+         HYPRE_StructSparseMSGInitialize(MPI_COMM_WORLD, &precond);
+         HYPRE_StructSparseMSGSetMaxIter(precond, 1);
+         HYPRE_StructSparseMSGSetTol(precond, 0.0);
+         HYPRE_StructSparseMSGSetZeroGuess(precond);
+         /* weighted Jacobi = 1; red-black GS = 2 */
+         HYPRE_StructSparseMSGSetRelaxType(precond, 1);
+         HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
+         HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
+         HYPRE_StructSparseMSGSetLogging(precond, 0);
+         HYPRE_StructHybridSetPrecond(solver,
+                                      HYPRE_StructSparseMSGSolve,
+                                      HYPRE_StructSparseMSGSetup,
                                       precond);
       }
 
@@ -859,6 +944,10 @@ main( int   argc,
       else if (solver_id == 21)
       {
          HYPRE_StructPFMGFinalize(precond);
+      }
+      else if (solver_id == 22)
+      {
+         HYPRE_StructSparseMSGFinalize(precond);
       }
    }
 
