@@ -123,6 +123,8 @@ typedef struct HYPRE_LSI_MLI_Struct
    int      symmetric_;
    int      injectionForR_;
    HYPRE_ParCSRMatrix correctionMatrix_; /* for nullspace correction */
+   int      numSmoothVecs_;
+   int      smoothVecSteps_;
 } 
 HYPRE_LSI_MLI;
 
@@ -205,6 +207,8 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->printNullSpace_      = 0;
    mli_object->symmetric_           = 1;
    mli_object->injectionForR_       = 0;
+   mli_object->numSmoothVecs_       = 0;
+   mli_object->smoothVecSteps_      = 0;
 #ifdef HAVE_MLI
    mli_object->mli_                 = NULL;
    mli_object->sfei_                = NULL;
@@ -336,6 +340,17 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    if ( mli_object->smootherFindOmega_ == 1 )
    {
       strcpy(paramString, "setSmootherFindOmega");
+      method->setParams( paramString, 0, NULL );
+   }
+   if ( mli_object->numSmoothVecs_ > 0 )
+   {
+      sprintf(paramString, "setSmoothVec %d", mli_object->numSmoothVecs_);
+      method->setParams( paramString, 0, NULL );
+      if ( mli_object->smoothVecSteps_ > 0 )
+         sprintf(paramString, "setSmoothVecSteps %d", 
+                 mli_object->smoothVecSteps_);
+      else
+         sprintf(paramString, "setSmoothVecSteps 5"); 
       method->setParams( paramString, 0, NULL );
    }
 
@@ -685,6 +700,8 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      printElemNodeList \n");
          printf("\t      printNodalCoord \n");
          printf("\t      paramFile <s> \n");
+         printf("\t      numSmoothVecs <d> \n");
+         printf("\t      smoothVecSteps <d> \n");
       }
    }
    else if ( !strcmp(param2, "outputLevel") )
@@ -738,7 +755,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
    }
    else if ( !strcmp(param2, "coarseSolverNumSweeps") )
    {
-      sscanf(paramString,"%s %s %d", param1, param2, 
+      sscanf(paramString,"%s %s %d", param1, param2,
              &(mli_object->coarseSolverNSweeps_));
       if ( mli_object->coarseSolverNSweeps_ < 1 )
          mli_object->coarseSolverNSweeps_ = 1;
@@ -855,6 +872,18 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
    {
       sscanf(paramString,"%s %s %s",param1,param2,mli_object->paramFile_);
    }
+   else if ( !strcmp(param2, "numSmoothVecs") )
+   {
+      sscanf(paramString,"%s %s %d",param1,param2,
+             &(mli_object->numSmoothVecs_));
+      if ( mli_object->numSmoothVecs_ < 0 ) mli_object->numSmoothVecs_ = 0; 
+   }
+   else if ( !strcmp(param2, "smoothVecSteps") )
+   {
+      sscanf(paramString,"%s %s %d",param1,param2,
+             &(mli_object->smoothVecSteps_));
+      if ( mli_object->smoothVecSteps_ < 0 ) mli_object->smoothVecSteps_ = 0; 
+   }
    else 
    {
       if ( mypid == 0 )
@@ -887,6 +916,8 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      printElemNodeList\n");
          printf("\t      printNodalCoord\n");
          printf("\t      paramFile <s> \n");
+         printf("\t      numSmoothVecs <d> \n");
+         printf("\t      smoothVecSteps <d> \n");
          exit(1);
       }
    }
