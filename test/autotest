@@ -178,6 +178,43 @@ echo "$HYPRE_BETA_EMAIL" > $0.beta_no_mpi.err.email
 #./test_drivers.sh -mail
 
 #=============================================================================
+# Make libraries using kcc for more verbose C compiler syntax messages
+#=============================================================================
+
+if [ -x $(whence kcc) ]
+then
+
+cd $HYPRE_AUTOTEST_DIR/linear_solvers
+./configure --with-CFLAGS="--c --strict" --with-CC="kcc" --without-MPI \
+  1> $0.configure_strict_ansi_c.log 2> $0.configure_strict_ansi_c.err
+echo "$HYPRE_CONFIGURE_EMAIL" > $0.configure_strict_ansi_c.err.email 
+
+$MAKE veryclean
+
+$MAKE -i struct 1> $0.struct_strict_ansi_c.log 2> $0.struct_strict_ansi_c.err
+#echo "$HYPRE_STRUCT_EMAIL" > $0.struct_strict_ansi_c.err.email 
+echo "$HYPRE_CONFIGURE_EMAIL" > $0.struct_strict_ansi_c.err.email 
+
+$MAKE -i IJ 1> $0.IJ_strict_ansi_c.log 2> $0.IJ_strict_ansi_c.err
+#echo "$HYPRE_IJ_EMAIL" > $0.IJ_strict_ansi_c.err.email 
+echo "$HYPRE_CONFIGURE_EMAIL" > $0.IJ_strict_ansi_c.err.email 
+
+$MAKE -i
+
+$MAKE -i beta 1> $0.beta_strict_ansi_c.log 2> $0.beta_strict_ansi_c.err
+#echo "$HYPRE_BETA_EMAIL" > $0.beta_strict_ansi_c.err.email 
+echo "$HYPRE_CONFIGURE_EMAIL" > $0.beta_strict_ansi_c.err.email 
+
+fi
+
+#==============================
+# Run test suites
+#==============================
+
+#cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+#./test_drivers.sh -mail
+
+#=============================================================================
 # Clean up
 #=============================================================================
 
@@ -198,7 +235,7 @@ chmod -fR a+rX,ug+w $HYPRE_AUTOTEST_DIR
 # NOTE: HYPRE_MAIL must support `-s' subject option
 #===========================================================================
 
-HYPRE_MAIL=/usr/ucb/Mail
+HYPRE_MAIL=mailx
 
 cd $HYPRE_AUTOTEST_DIR
 for i in *.err linear_solvers/*.err linear_solvers/test/*.err
@@ -263,7 +300,7 @@ ssh ${HYPRE_COMPILE_MACHINE} "\
         cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
 	. test/env.${HYPRE_ARCH};\
         ./configure ;\
-        /usr/ccs/bin/make -k beta;\
+        make -k beta;\
         cd ${HYPRE_REMOTE_DIR}/linear_solvers/test; make fei++; \
     )"
 
@@ -280,8 +317,8 @@ ssh ${HYPRE_COMPILE_MACHINE} "\
         cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
 	. test/env.${HYPRE_ARCH};\
         ./configure --with-openmp;\
-	/usr/ccs/bin/make veryclean;\
-        /usr/ccs/bin/make -k beta;\
+	make veryclean;\
+        make -k beta;\
     )"
 
 
@@ -300,7 +337,7 @@ ssh ${HYPRE_COMPILE_MACHINE} "\
          rm -fR ${HYPRE_REMOTE_DIR}\
     )"
 
-done
+echo "done"
 
 #==============================================================================
 # Autotest completion check: create "autotest finished" file
