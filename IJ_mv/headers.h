@@ -1,4 +1,3 @@
-
 /*BHEADER**********************************************************************
  * (c) 1998   The Regents of the University of California
  *
@@ -13,4 +12,4 @@
 #include <math.h>
 
 #include "IJ_matrix_vector.h"
-#include "HYPRE_IJMatrix.h"
+#include "HYPRE_IJ_mv.h"
