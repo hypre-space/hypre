@@ -13,6 +13,9 @@
  *
  *****************************************************************************/
 
+#ifndef hypre_PAR_VECTOR_HEADER
+#define hypre_PAR_VECTOR_HEADER
+
 /*--------------------------------------------------------------------------
  * hypre_ParVector
  *--------------------------------------------------------------------------*/
@@ -43,3 +46,4 @@ typedef struct
 #define hypre_ParVectorCommPkg(vector)     ((vector) -> vector_comm_pkg)
 #define hypre_ParVectorOwnsData(vector)    ((vector) -> owns_data)
 
+#endif
