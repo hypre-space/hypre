@@ -209,7 +209,7 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
 * This function sets-up the communication parameters for the forward
 * and backward substitution, and relabels the L and U matrices 
 **************************************************************************/
-void SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
+int SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
                    hypre_PilutSolverGlobals *globals )
 {
   int i, maxsend;
@@ -234,6 +234,8 @@ void SetUpLUFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   ldu->gatherbuf = fp_malloc(maxsend, "SetUpLUFactor: ldu->gatherbuf");
 
   free_multi(petotal, rind, imap, -1);
+
+  return(0);
 }
 
 /*************************************************************************

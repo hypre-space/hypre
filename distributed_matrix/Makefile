@@ -25,7 +25,10 @@ LOCALFILES =\
 FILES = $(HYPREFILES) $(LOCALFILES)
 
 
-OBJS = ${FILES:.c=.o} ${FILES:.cc=.o}
+OBJS = HYPRE_distributed_matrix.o \
+ distributed_matrix.o\
+ distributed_matrix_PETSc.o\
+ distributed_matrix_ISIS.o
 
 ${OBJS}: ${HEADERS}
 

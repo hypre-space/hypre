@@ -99,7 +99,7 @@ void SetUpFactor P((DataDistType *ddist, FactorMatType *ldu, int maxnz, int *pet
 
 /* trifactor.c */
 void LDUSolve P((DataDistType *ddist , FactorMatType *ldu , double *x , double *b , hypre_PilutSolverGlobals *globals ));
-void SetUpLUFactor P((DataDistType *ddist , FactorMatType *ldu , int maxnz , hypre_PilutSolverGlobals *globals ));
+int SetUpLUFactor P((DataDistType *ddist , FactorMatType *ldu , int maxnz , hypre_PilutSolverGlobals *globals ));
 /* util.c */
 int ExtractMinLR P((hypre_PilutSolverGlobals *globals ));
 void IdxIncSort P((int n , int *idx , double *val ));

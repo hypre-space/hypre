@@ -65,6 +65,10 @@ char *argv[];
    int         num_procs, myid;
    int         P, Q, p, q;
 
+   printf("Entering main driver.\n");
+
+   MPI_Initialize();
+
    /* Initialize Petsc */ /* In regular code should not be done here */
    PetscInitialize(&argc, &argv, (char *)0, NULL);
 
@@ -97,7 +101,7 @@ char *argv[];
      {
 
    /* set up the grid structure */
-   grid = HYPRE_NewStructGrid(2);
+   grid = HYPRE_NewStructGrid(MPI_COMM_WORLD, 2);
    HYPRE_SetStructGridExtents(grid, ilower, iupper);
       printf("Proc %d setting grid extents (%d, %d) to (%d, %d)\n",
               myid, ilower[0], ilower[1], iupper[0], iupper[1]);
