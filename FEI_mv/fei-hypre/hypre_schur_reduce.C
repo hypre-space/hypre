@@ -1451,8 +1451,8 @@ void HYPRE_LinSysCore::buildSchurReducedRHS()
     //---new_IJ---------------------------------------------------------
     HYPRE_IJVectorCreate(comm_, CTStartRow, CTStartRow+CTNRows-1, &f1);
     HYPRE_IJVectorSetObjectType(f1, HYPRE_PARCSR);
-    ierr += HYPRE_IJVectorInitialize(f1);
-    ierr  = HYPRE_IJVectorAssemble(f1);
+    ierr = HYPRE_IJVectorInitialize(f1);
+    ierr = HYPRE_IJVectorAssemble(f1);
     //------------------------------------------------------------------
     assert(!ierr);
 

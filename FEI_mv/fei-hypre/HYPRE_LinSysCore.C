@@ -1075,6 +1075,7 @@ int HYPRE_LinSysCore::resetMatrix(double s)
     // ierr = HYPRE_IJMatrixSetLocalSize(HYA_, size, size);
     //--new_IJ----------------------------------------------------------------
     if ( HYA_ != NULL ) HYPRE_IJMatrixDestroy(HYA_);
+    size = localEndRow_ - localStartRow_ + 1;
     ierr = HYPRE_IJMatrixCreate(comm_,
 				localStartRow_-1, localEndRow_-1,
 				localStartRow_-1, localEndRow_-1,
