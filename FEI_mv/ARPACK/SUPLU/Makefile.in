@@ -9,7 +9,7 @@
 FORTRAN = @F77@
 FFLAGS  = @F77FLAGS@
 CC      = @CC@
-CFLAGS  = %CFLAGS%
+CFLAGS  = @CFLAGS@
 
 #files =	dmvm.o \
 #Dinterface.o \
