@@ -42,7 +42,7 @@ fi
 
 cd $HYPRE_AUTOTEST_DIR
 rm -fR linear_solvers
-cvs checkout -P linear_solvers 1> $0.checkout.log 2> $0.checkout.err
+cvs -q checkout -P linear_solvers 1> $0.checkout.log 2> $0.checkout.err
 echo "dwalker@llnl.gov rfalgout@llnl.gov" > $0.checkout.err.email 
 
 #=============================================================================
