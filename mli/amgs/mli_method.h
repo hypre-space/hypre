@@ -38,7 +38,7 @@ class MLI_Method
 public :
 
    MLI_Method( MPI_Comm comm ) 
-            { printf("CHECK\n");mpi_comm = comm; method_id = -1; 
+            { mpi_comm = comm; method_id = -1; 
               strcpy(method_name, "MLI_NONE");}
    virtual ~MLI_Method()                                      { }
 
