@@ -205,7 +205,7 @@ hypre_AMGCoarsenCR( hypre_CSRMatrix    *A,
       {
          if (CF_marker[i] == 0) 
          {
-   	    CF_marker[i] = -2; 
+   	    CF_marker[i] = -2;  
    	    measure_array[i] = 1.0;
          }
       }
@@ -235,6 +235,8 @@ hypre_AMGCoarsenCR( hypre_CSRMatrix    *A,
 	    graph_array[ig] = graph_array[graph_size];
    	    ig--;
          }
+	 else
+	    CF_marker[i] = 0;
       }
    }
 
