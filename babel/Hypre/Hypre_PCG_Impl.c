@@ -383,48 +383,7 @@ impl_Hypre_PCG_GetPreconditionedResidual(
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.GetPreconditionedResidual) */
   /* Insert the implementation of the GetPreconditionedResidual method here... 
     */
-   /* This is all wrong, and the whole function is not needed.
-      >>> Delete this entire implementation soon. <<< */
-   /* The preconditioned residual is s = C*r in the file krylov/pcg.c, pcg.h.
-      (r is the residual b-A*x, C the preconditioner, an approx. inverse of A) */
-   int ierr = 0;
-   void * objectr;
-   char *vector_type;
-   HYPRE_Solver solver;
-   struct Hypre_PCG__data * data;
-
-   /* declarations for ParCSR matrix/vector type: */
-   struct Hypre_ParCSRVector__data * datar;
-   Hypre_ParCSRVector HypreP_r;
-   HYPRE_ParVector rr;
-   HYPRE_ParVector rr2;
-   HYPRE_ParVector * prr = &rr2;
-   HYPRE_IJVector ij_r;
-
-   data = Hypre_PCG__get_data( self );
-   solver = data->solver;
-   vector_type = data -> vector_type;
-
-   if ( vector_type=="ParVector" ) {
-      HypreP_r = Hypre_Vector__cast2
-         ( Hypre_Vector_queryInterface( *r, "Hypre.ParCSRVector"),
-           "Hypre.ParCSRVector" );
-      assert( HypreP_r!=NULL );
-      datar = Hypre_ParCSRVector__get_data( HypreP_r );
-      ij_r = datar -> ij_b;
-      ierr += HYPRE_IJVectorGetObject( ij_r, &objectr );
-      rr = (HYPRE_ParVector) objectr;
-
-      ierr += HYPRE_PCGGetPreconditionedResidual( solver, (void **) prr );
-      HYPRE_ParVectorCopy( *prr, rr );
-   }
-   else {
-      /* Unsupported vector type */
-      ++ierr;
-      return ierr;
-   }
-
-   return ierr;
+   return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.GetPreconditionedResidual) */
 }
 
