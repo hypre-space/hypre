@@ -14,6 +14,10 @@
 #include "Hypre_MPI_Com_Skel.h" 
 #include "Hypre_MPI_Com_Data.h" 
 #include "HYPRE_IJ_mv.h"
+#include "IJ_matrix_vector.h"
+#include "Hypre_Partition_Skel.h"
+#include "Hypre_PartitionBuilder_Skel.h"
+#include "Hypre_Map_Stub.h"
 
 /* *************************************************
  * Constructor
@@ -218,6 +222,51 @@ int  impl_Hypre_ParCSRMatrixBuilder_GetRowPartitioning
 } /* end impl_Hypre_ParCSRMatrixBuilderGetRowPartitioning */
 
 /* ********************************************************
+ * impl_Hypre_ParCSRMatrixBuilder_SetMap
+ * WARNING: This function will change the hypre internal partitioning data RowStarts
+ * represented by the provided map, but does not change any related data distribution
+ * parameters (if any exist), nor does it redistribute the data itself. This should
+ * be ok only if called sufficiently early in matrix construction.
+ **********************************************************/
+int  impl_Hypre_ParCSRMatrixBuilder_SetMap
+( Hypre_ParCSRMatrixBuilder this, Hypre_Map map ) {
+   Hypre_ParCSRMatrix mat = this->Hypre_ParCSRMatrixBuilder_data->newmat;
+   HYPRE_IJMatrix * Hmat = mat->Hypre_ParCSRMatrix_data->Hmat;
+   hypre_IJMatrix * Mij = (hypre_IJMatrix *) (*Hmat);
+   hypre_ParCSRMatrix *parM = hypre_IJMatrixLocalStorage(Mij);
+   int * partition_data ;
+   Hypre_Partition part = (Hypre_Partition) Hypre_Map_castTo( map, "Hypre.Partition" );
+   if ( part==NULL ) {
+      printf( "wrong kind of map for Hypre_ParCSRMatrixBuilder_SetMap\n" );
+      return 1;
+   };
+   partition_data = part->Hypre_Partition_data->partition;
+   if (this->Hypre_ParCSRMatrixBuilder_data->matgood==1) {
+      /* ... error to set partitioning on a fully built matrix */
+      /* This check would better be done by a design-by-contract style "Require"
+         There are many such cases in this code. */
+      return 1;
+   }
+   else {
+      hypre_ParCSRMatrixRowStarts(parM) = partition_data;
+      return 0;
+      /* I'd rather pass the buck, but the following function doesn't exist... */
+      /*    return HYPRE_IJMatrixSetPartitioning( *Hmat, partition_data );*/
+   }
+
+   return 1;
+} /* end impl_Hypre_ParCSRMatrixBuilder_SetMap */
+
+/* ********************************************************
+ * impl_Hypre_ParCSRMatrixBuilder_GetMap
+ **********************************************************/
+int  impl_Hypre_ParCSRMatrixBuilder_GetMap
+( Hypre_ParCSRMatrixBuilder this, Hypre_Map* map ) {
+   Hypre_ParCSRMatrix mat = this->Hypre_ParCSRMatrixBuilder_data->newmat;
+   return Hypre_ParCSRVector_GetMap( mat, map );
+} /* end impl_Hypre_ParCSRMatrixBuilder_GetMap */
+
+/* ********************************************************
  * impl_Hypre_ParCSRMatrixBuilderSetup
  **********************************************************/
 int  impl_Hypre_ParCSRMatrixBuilder_Setup(Hypre_ParCSRMatrixBuilder this) {
@@ -300,4 +349,17 @@ int Hypre_ParCSRMatrixBuilder_New_fromHYPRE
    return ierr;
 
 } /* end impl_Hypre_ParCSRMatrixBuilder_New_fromHYPRE */
+
+/* will appear in next Babel run, probably... */
+impl_Hypre_ParCSRMatrixBuilder_GetLocalRange
+( Hypre_ParCSRMatrixBuilder this,
+  int* row_start,
+  int* row_end,
+  int* col_start,
+  int* col_end
+   )
+{
+      printf( "Hypre_ParCSRMatrixBuilder_GetLocalRange doesn't work. TO DO: implement this\n" );
+      return 1;
+}
 

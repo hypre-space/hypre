@@ -12,6 +12,9 @@
 #include "Hypre_ParCSRVector_Skel.h" 
 #include "Hypre_ParCSRVector_Data.h" 
 #include "IJ_matrix_vector.h"
+#include "Hypre_Partition_Skel.h"
+#include "Hypre_PartitionBuilder_Skel.h"
+#include "Hypre_Map_Stub.h"
 
 /* *************************************************
  * Constructor
@@ -188,4 +191,68 @@ int  impl_Hypre_ParCSRMatrix_RestoreRow
    return ierr;
 } /* end impl_Hypre_ParCSRMatrixRestoreRow */
 
+
+/* ********************************************************
+ * impl_Hypre_ParCSRMatrix_GetMap
+ **********************************************************/
+int  impl_Hypre_ParCSRMatrix_GetMap(Hypre_ParCSRMatrix this, Hypre_Map* map) {
+
+/* ********************************************************
+ * The data array in map will be replaced, i.e.
+ * the pointer int* map->Hypre_Partition_Data->data will get a different value.
+ * This is a potential memory leak.  As we don't know how or whether
+ * this data pointer was allocated, we can't free it here.
+ * That will be the user's job.  The best practice is to not allocate
+ * space in the first place, just provide a dummy pointer.
+ * >>>>> TO DO: decide whether to copy the data instead. <<<<<
+ **********************************************************/
+   Hypre_Partition part;
+   Hypre_PartitionBuilder partBldr;
+   array1int* partitioning;
+   array1int partarray;
+   int ierr = 0;
+   struct Hypre_ParCSRMatrix_private_type * Mp = this->Hypre_ParCSRMatrix_data;
+   HYPRE_IJMatrix * M = Mp->Hmat;
+   int * new_data_p;
+   int ** new_data = &new_data_p;
+
+   int ** const_partitioning_data_1 = &(partitioning->data);
+   const int ** const_partitioning_data_2 = (const int **) &(partitioning->data);
+
+   int num_procs = 1;
+/* The following would give a correct size for num_procs and hence the partition
+   array, if a Hypre_MPI_Com object were available.  It's not, but in most cases
+   we can get by because only the data pointer in the map object is looked at
+   later.  This is a potential bug. */
+/*
+   MPI_Comm * MCp = comm->Hypre_MPI_Com_data->hcom;
+   int num_procs;
+   MPI_Comm_size( *MCp, &num_procs );
+*/
+
+   if ( (*map)==NULL ) { /* make one ... */
+      partarray.lower[0] = 0;
+      partarray.upper[0] = num_procs;
+      partarray.data = *new_data;
+      partBldr = Hypre_PartitionBuilder_New();
+      ierr += Hypre_PartitionBuilder_Start( partBldr, partarray );
+      ierr += Hypre_PartitionBuilder_Setup( partBldr );
+      ierr += Hypre_PartitionBuilder_GetConstructedObject( partBldr, map );
+      Hypre_Map_addReference( (*map) );
+      Hypre_PartitionBuilder_deleteReference( partBldr );
+   }
+
+   part = (Hypre_Partition) Hypre_Map_castTo( *map, "Hypre.Partition" );
+   if ( part==NULL ) {
+      printf( "wrong kind of map for Hypre_ParCSRVectorBuilder_SetMap\n" );
+      return 1;
+   };
+   (partitioning->lower)[0] = part->Hypre_Partition_data->lower;
+   (partitioning->upper)[0] = part->Hypre_Partition_data->upper;
+   (partitioning->data) = part->Hypre_Partition_data->partition;
+   const_partitioning_data_2 = (const int **) &(partitioning->data);
+
+   ierr += HYPRE_IJMatrixGetRowPartitioning( *M, const_partitioning_data_2 );
+
+} /* end impl_Hypre_ParCSRMatrix_GetMap */
 
