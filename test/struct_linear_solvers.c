@@ -188,7 +188,6 @@ main( int   argc,
       }
       else
       {
-         print_usage = 1;
          break;
       }
    }
