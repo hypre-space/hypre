@@ -163,7 +163,7 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
    if ((bicgstab_data -> v) == NULL)
       (bicgstab_data -> v) = (*(bicgstab_functions->CreateVector))(b);
  
-   if ((bicgstab_data -> matvec_data) == NULL)
+   if ((bicgstab_data -> matvec_data) == NULL) 
       (bicgstab_data -> matvec_data) =
          (*(bicgstab_functions->MatvecCreate))(A, x);
  
@@ -200,6 +200,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    int 		     max_iter     = (bicgstab_data -> max_iter);
    int 		     stop_crit    = (bicgstab_data -> stop_crit);
    double 	     accuracy     = (bicgstab_data -> tol);
+   double 	     cf_tol       = (bicgstab_data -> cf_tol);
    void             *matvec_data  = (bicgstab_data -> matvec_data);
 
    void             *r            = (bicgstab_data -> r);
@@ -224,6 +225,10 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    double     alpha, beta, gamma, epsilon, temp, res, r_norm, b_norm;
    double     epsmac = 1.e-16; 
    double     ieee_check = 0.;
+   double     cf_ave_0 = 0.0;
+   double     cf_ave_1 = 0.0;
+   double     weight;
+   double     r_norm_0;
 
    (*(bicgstab_functions->CommInfo))(A,&my_id,&num_procs);
    if (logging > 0)
@@ -268,7 +273,8 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 
    res = (*(bicgstab_functions->InnerProd))(r0,r0);
    r_norm = sqrt(res);
-
+   r_norm_0 = r_norm;
+ 
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
    if (r_norm != 0.) ieee_check = r_norm/r_norm; /* INF -> NaN conversion */
@@ -340,7 +346,6 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       (bicgstab_data -> rel_residual_norm) = r_norm/b_norm;
    while (iter < max_iter)
    {
-   /* initialize first term of hessenberg system */
 
         if (r_norm == 0.0)
         {
@@ -361,6 +366,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
                  printf("\n\n");
                  printf("Final L2 norm of residual: %e\n\n", r_norm);
               }
+              (bicgstab_data -> converged) = 1;
               break;
            }
 	   else
@@ -368,6 +374,29 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 	      (*(bicgstab_functions->CopyVector))(r,p);
 	   }
 	}
+
+      /*--------------------------------------------------------------------
+       * Optional test to see if adequate progress is being made.
+       * The average convergence factor is recorded and compared
+       * against the tolerance 'cf_tol'. The weighting factor is
+       * intended to pay more attention to the test when an accurate
+       * estimate for average convergence factor is available.
+       *--------------------------------------------------------------------*/
+
+        if (cf_tol > 0.0)
+        {
+           cf_ave_0 = cf_ave_1;
+           cf_ave_1 = pow( r_norm / r_norm_0, 1.0/(2.0*iter));
+
+           weight   = fabs(cf_ave_1 - cf_ave_0);
+           weight   = weight / max(cf_ave_1, cf_ave_0);
+           weight   = 1.0 - weight;
+#if 0
+           printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
+                i, cf_ave_1, cf_ave_0, weight );
+#endif
+           if (weight * cf_ave_1 > cf_tol) break;
+        }
 
         iter++;
 
@@ -453,6 +482,22 @@ hypre_BiCGSTABSetTol( void   *bicgstab_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_BiCGSTABSetConvergenceFactorTol
+ *--------------------------------------------------------------------------*/
+ 
+int
+hypre_BiCGSTABSetConvergenceFactorTol( void   *bicgstab_vdata,
+                   double  cf_tol       )
+{
+   hypre_BiCGSTABData *bicgstab_data = bicgstab_vdata;
+   int            ierr = 0;
+ 
+   (bicgstab_data -> cf_tol) = cf_tol;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_BiCGSTABSetMinIter
  *--------------------------------------------------------------------------*/
  
@@ -490,7 +535,7 @@ hypre_BiCGSTABSetMaxIter( void *bicgstab_vdata,
  
 int
 hypre_BiCGSTABSetStopCrit( void   *bicgstab_vdata,
-                        double  stop_crit       )
+                        int  stop_crit       )
 {
    hypre_BiCGSTABData *bicgstab_data = bicgstab_vdata;
    int            ierr = 0;
@@ -554,6 +599,22 @@ hypre_BiCGSTABSetLogging( void *bicgstab_vdata,
    return ierr;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_BiCGSTABGetConverged
+ *--------------------------------------------------------------------------*/
+ 
+int
+hypre_BiCGSTABGetConverged( void *bicgstab_vdata,
+                             int  *converged )
+{
+   hypre_BiCGSTABData *bicgstab_data = bicgstab_vdata;
+   int              ierr = 0;
+ 
+   *converged = (bicgstab_data -> converged);
+ 
+   return ierr;
+}
+ 
 /*--------------------------------------------------------------------------
  * hypre_BiCGSTABGetNumIterations
  *--------------------------------------------------------------------------*/

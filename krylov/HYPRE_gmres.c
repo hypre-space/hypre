@@ -81,6 +81,17 @@ HYPRE_GMRESSetTol( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_GMRESSetConvergenceFactorTol
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_GMRESSetConvergenceFactorTol( HYPRE_Solver solver,
+                         double             cf_tol    )
+{
+   return( hypre_GMRESSetConvergenceFactorTol( (void *) solver, cf_tol ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_GMRESSetMinIter
  *--------------------------------------------------------------------------*/
 

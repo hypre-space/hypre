@@ -80,10 +80,12 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions )
    /* set defaults */
    (gmres_data -> k_dim)          = 5;
    (gmres_data -> tol)            = 1.0e-06;
+   (gmres_data -> cf_tol)         = 0.0;
    (gmres_data -> min_iter)       = 0;
    (gmres_data -> max_iter)       = 1000;
    (gmres_data -> rel_change)     = 0;
    (gmres_data -> stop_crit)      = 0; /* rel. residual norm */
+   (gmres_data -> converged)      = 0;
    (gmres_data -> precond_data)   = NULL;
    (gmres_data -> printlevel)     = 0;
    (gmres_data -> log_level)      = 0;
@@ -218,6 +220,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    int               rel_change   = (gmres_data -> rel_change);
    int 		     stop_crit    = (gmres_data -> stop_crit);
    double 	     accuracy     = (gmres_data -> tol);
+   double 	     cf_tol       = (gmres_data -> cf_tol);
    void             *matvec_data  = (gmres_data -> matvec_data);
 
    void             *r            = (gmres_data -> r);
@@ -235,6 +238,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 /*   FILE           *fp; */
    
    int        ierr = 0;
+   int        break_value = 0;
    int	      i, j, k;
    double     *rs, **hh, *c, *s;
    int        iter; 
@@ -244,6 +248,10 @@ hypre_GMRESSolve(void  *gmres_vdata,
    double     ieee_check = 0.;
 
    double     guard_zero_residual; 
+   double     cf_ave_0 = 0.0;
+   double     cf_ave_1 = 0.0;
+   double     weight;
+   double     r_norm_0;
 
    /*-----------------------------------------------------------------------
     * With relative change convergence test on, it is possible to attempt
@@ -302,6 +310,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    }
 
    r_norm = sqrt((*(gmres_functions->InnerProd))(p[0],p[0]));
+   r_norm_0 = r_norm;
 
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
@@ -453,9 +462,29 @@ hypre_GMRESSolve(void  *gmres_vdata,
 				norms[iter]/norms[iter-1]);
    		   }
 		}
+                if (cf_tol > 0.0)
+                {
+                   cf_ave_0 = cf_ave_1;
+           	   cf_ave_1 = pow( r_norm / r_norm_0, 1.0/(2.0*iter));
+
+           	   weight   = fabs(cf_ave_1 - cf_ave_0);
+           	   weight   = weight / max(cf_ave_1, cf_ave_0);
+           	   weight   = 1.0 - weight;
+#if 0
+           	   printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
+                	i, cf_ave_1, cf_ave_0, weight );
+#endif
+           	   if (weight * cf_ave_1 > cf_tol) 
+		   {
+		      break_value = 1;
+		      break;
+		   }
+        	}
 
 	}
 	/* now compute solution, first solve upper triangular system */
+
+	if (break_value) break;
 	
 	rs[i-1] = rs[i-1]/hh[i-1][i-1];
 	for (k = i-2; k >= 0; k--)
@@ -498,10 +527,14 @@ hypre_GMRESSolve(void  *gmres_vdata,
                       x_norm = sqrt( (*(gmres_functions->InnerProd))(x,x) );
                       if ( x_norm<=guard_zero_residual ) break; /* don't divide by 0 */
                       if ( r_norm/x_norm < epsilon )
+                      {
+                         (gmres_data -> converged) = 1;
                          break;
+                      }
                    }
                    else
                    {
+                      (gmres_data -> converged) = 1;
                       break;
                    }
                 }
@@ -582,6 +615,22 @@ hypre_GMRESSetTol( void   *gmres_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_GMRESSetConvergenceFactorTol
+ *--------------------------------------------------------------------------*/
+ 
+int
+hypre_GMRESSetConvergenceFactorTol( void   *gmres_vdata,
+                   double  cf_tol       )
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+   int            ierr = 0;
+ 
+   (gmres_data -> cf_tol) = cf_tol;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_GMRESSetMinIter
  *--------------------------------------------------------------------------*/
  
@@ -635,7 +684,7 @@ hypre_GMRESSetRelChange( void *gmres_vdata,
  
 int
 hypre_GMRESSetStopCrit( void   *gmres_vdata,
-                        double  stop_crit       )
+                        int  stop_crit       )
 {
    hypre_GMRESData *gmres_data = gmres_vdata;
    int            ierr = 0;
@@ -726,6 +775,22 @@ hypre_GMRESGetNumIterations( void *gmres_vdata,
    int              ierr = 0;
  
    *num_iterations = (gmres_data -> num_iterations);
+ 
+   return ierr;
+}
+ 
+/*--------------------------------------------------------------------------
+ * hypre_GMRESGetConverged
+ *--------------------------------------------------------------------------*/
+ 
+int
+hypre_GMRESGetConverged( void *gmres_vdata,
+                             int  *converged )
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+   int              ierr = 0;
+ 
+   *converged = (gmres_data -> converged);
  
    return ierr;
 }

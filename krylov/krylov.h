@@ -152,7 +152,9 @@ typedef struct
    int      min_iter;
    int      max_iter;
    int      stop_crit;
+   int      converged;
    double   tol;
+   double   cf_tol;
    double   rel_residual_norm;
 
    void  *A;
@@ -477,7 +479,9 @@ typedef struct
    int      max_iter;
    int      rel_change;
    int      stop_crit;
+   int      converged;
    double   tol;
+   double   cf_tol;
    double   rel_residual_norm;
 
    void  *A;
@@ -744,12 +748,14 @@ int hypre_BiCGSTABDestroy( void *bicgstab_vdata );
 int hypre_BiCGSTABSetup( void *bicgstab_vdata , void *A , void *b , void *x );
 int hypre_BiCGSTABSolve( void *bicgstab_vdata , void *A , void *b , void *x );
 int hypre_BiCGSTABSetTol( void *bicgstab_vdata , double tol );
+int hypre_BiCGSTABSetConvergenceFactorTol( void *bicgstab_vdata, double cf_tol);
 int hypre_BiCGSTABSetMinIter( void *bicgstab_vdata , int min_iter );
 int hypre_BiCGSTABSetMaxIter( void *bicgstab_vdata , int max_iter );
-int hypre_BiCGSTABSetStopCrit( void *bicgstab_vdata , double stop_crit );
+int hypre_BiCGSTABSetStopCrit( void *bicgstab_vdata , int stop_crit );
 int hypre_BiCGSTABSetPrecond( void *bicgstab_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data );
 int hypre_BiCGSTABGetPrecond( void *bicgstab_vdata , HYPRE_Solver *precond_data_ptr );
 int hypre_BiCGSTABSetLogging( void *bicgstab_vdata , int logging );
+int hypre_BiCGSTABGetConverged( void *bicgstab_vdata , int *converged );
 int hypre_BiCGSTABGetNumIterations( void *bicgstab_vdata , int *num_iterations );
 int hypre_BiCGSTABGetFinalRelativeResidualNorm( void *bicgstab_vdata , double *relative_residual_norm );
 
@@ -778,14 +784,17 @@ int hypre_GMRESSetup( void *gmres_vdata , void *A , void *b , void *x );
 int hypre_GMRESSolve( void *gmres_vdata , void *A , void *b , void *x );
 int hypre_GMRESSetKDim( void *gmres_vdata , int k_dim );
 int hypre_GMRESSetTol( void *gmres_vdata , double tol );
+int hypre_GMRESSetConvergenceFactorTol( void *gmres_vdata , double cf_tol );
+int hypre_GMRESSetMinIter( void *gmres_vdata , int min_iter );
 int hypre_GMRESSetMinIter( void *gmres_vdata , int min_iter );
 int hypre_GMRESSetMaxIter( void *gmres_vdata , int max_iter );
 int hypre_GMRESSetRelChange( void *gmres_vdata , int rel_change );
-int hypre_GMRESSetStopCrit( void *gmres_vdata , double stop_crit );
+int hypre_GMRESSetStopCrit( void *gmres_vdata , int stop_crit );
 int hypre_GMRESSetPrecond( void *gmres_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data );
 int hypre_GMRESGetPrecond( void *gmres_vdata , HYPRE_Solver *precond_data_ptr );
 int hypre_GMRESSetPrintLevel( void *gmres_vdata , int level );
 int hypre_GMRESSetLogLevel( void *gmres_vdata , int level );
+int hypre_GMRESGetConverged( void *gmres_vdata , int *converged );
 int hypre_GMRESGetNumIterations( void *gmres_vdata , int *num_iterations );
 int hypre_GMRESGetFinalRelativeResidualNorm( void *gmres_vdata , double *relative_residual_norm );
 
@@ -794,6 +803,7 @@ int HYPRE_BiCGSTABDestroy( HYPRE_Solver solver );
 int HYPRE_BiCGSTABSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
 int HYPRE_BiCGSTABSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
 int HYPRE_BiCGSTABSetTol( HYPRE_Solver solver , double tol );
+int HYPRE_BiCGSTABSetConvergenceFactorTol( HYPRE_Solver solver, double cf_tol );
 int HYPRE_BiCGSTABSetMinIter( HYPRE_Solver solver , int min_iter );
 int HYPRE_BiCGSTABSetMaxIter( HYPRE_Solver solver , int max_iter );
 int HYPRE_BiCGSTABSetStopCrit( HYPRE_Solver solver , int stop_crit );
@@ -822,6 +832,7 @@ int HYPRE_GMRESSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HY
 int HYPRE_GMRESSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
 int HYPRE_GMRESSetKDim( HYPRE_Solver solver , int k_dim );
 int HYPRE_GMRESSetTol( HYPRE_Solver solver , double tol );
+int HYPRE_GMRESSetConvergenceFactorTolTol( HYPRE_Solver solver, double cf_tol);
 int HYPRE_GMRESSetMinIter( HYPRE_Solver solver , int min_iter );
 int HYPRE_GMRESSetMaxIter( HYPRE_Solver solver , int max_iter );
 int HYPRE_GMRESSetStopCrit( HYPRE_Solver solver , int stop_crit );

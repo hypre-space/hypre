@@ -73,6 +73,17 @@ HYPRE_BiCGSTABSetTol( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BiCGSTABSetConvergenceFactorTol
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BiCGSTABSetConvergenceFactorTol( HYPRE_Solver solver,
+                         double             cf_tol    )
+{
+   return( hypre_BiCGSTABSetConvergenceFactorTol( (void *) solver, cf_tol ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BiCGSTABSetMinIter
  *--------------------------------------------------------------------------*/
 
