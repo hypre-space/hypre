@@ -46,6 +46,7 @@ LFLAGS =\
 
 
 HEADERS =\
+ fortran.h\
  headers.h\
  pfmg.h\
  smg.h\
@@ -85,7 +86,11 @@ FILES =\
  HYPRE_struct_hybrid.c\
  HYPRE_struct_pfmg.c\
  HYPRE_struct_smg.c\
- HYPRE_struct_pcg.c
+ HYPRE_struct_pcg.c\
+ F90_HYPRE_struct_hybrid.c\
+ F90_HYPRE_struct_pcg.c\
+ F90_HYPRE_struct_pfmg.c\
+ F90_HYPRE_struct_smg.c
 
 OBJS = ${FILES:.c=.o}
 

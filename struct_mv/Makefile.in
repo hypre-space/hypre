@@ -46,6 +46,7 @@ HEADERS =\
  box_neighbors.h\
  communication.h\
  computation.h\
+ fortran.h\
  headers.h\
  struct_grid.h\
  struct_matrix.h\
@@ -80,7 +81,11 @@ FILES =\
  HYPRE_struct_grid.c\
  HYPRE_struct_matrix.c\
  HYPRE_struct_stencil.c\
- HYPRE_struct_vector.c
+ HYPRE_struct_vector.c\
+ F90_HYPRE_struct_grid.c\
+ F90_HYPRE_struct_matrix.c\
+ F90_HYPRE_struct_stencil.c\
+ F90_HYPRE_struct_vector.c
 
 OBJS = ${FILES:.c=.o}
 
