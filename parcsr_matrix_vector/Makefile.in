@@ -77,7 +77,7 @@ clean:
 
 veryclean: clean
 	@rm -f libHYPRE_parmv.a
-	@rm -f test test_matvec driver.o driver_matvec.o
+	@rm -f test test_matvec test_matmul
 
 ##################################################################
 # Rules
