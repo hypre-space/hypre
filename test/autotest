@@ -93,7 +93,7 @@ do
         HYPRE_COMPILE_MACHINE="perrin"
         HYPRE_RUN_MACHINE="perrin"
         HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
-	HYPRE_MACHINE_COMMANDS="-md -a 2 -cxfy -t 1 -ns"
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
         ./autotest_test $HYPRE_MACHINE_COMMANDS
         shift;;
     -compass)
@@ -117,7 +117,7 @@ do
         HYPRE_COMPILE_MACHINE="perrin"
         HYPRE_RUN_MACHINE="perrin"
         HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
-	HYPRE_MACHINE_COMMANDS="-md -q 2 -a 1 -cxfy -t 1 -ns"
+	HYPRE_MACHINE_COMMANDS="-m -q 2 -da 1 -cxfy -t 1 -ns"
         ./autotest_test $HYPRE_MACHINE_COMMANDS
         shift;;
     -red)
