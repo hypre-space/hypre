@@ -765,7 +765,7 @@ main( int   argc,
       HYPRE_IJVectorInitialize(ij_b);
       values = hypre_CTAlloc(double, part_x[myid+1] - part_x[myid]);
 
-      hypre_SeedRand( (double) myid );
+      hypre_SeedRand(myid);
       for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
          values[i] = hypre_Rand()/dt;
 
@@ -861,7 +861,7 @@ main( int   argc,
       HYPRE_IJVectorInitialize(ij_b);
       values = hypre_CTAlloc(double, part_x[myid+1] - part_x[myid]);
 
-      hypre_SeedRand( (double) myid );
+      hypre_SeedRand(myid);
       for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
          values[i] = hypre_Rand();
 
