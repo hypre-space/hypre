@@ -54,6 +54,7 @@ DIRS="$DIRS \
   amg_fdrive \
   amgdriver \
   config \
+  docs \
   tools"
 
 # add this later
