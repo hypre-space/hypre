@@ -10,9 +10,12 @@
 
 help ()
 {
-  printf "$0: [-help] | VersionId\n"
-  printf "  where: VersionId is the desired version identification\n"
-  printf "  (e.g., hypre-VersionId.tar.gz, hypre-1.00.00.tar.gz).\n"
+  printf "$0: [-help] | [-display] | VersionId\n"
+  printf " where:\n"
+  printf " -help displays this message.\n"
+  printf " -display will report the cvs rtag history.\n"
+  printf " VersionId, is the desired version identification\n"
+  printf "  (e.g., hypre-VersionId.tar.gz, hypre-1.2.0.tar.gz).\n"
   printf "  By convension, VersionId use the following syntax \"M.mm.rr\".\n"
   printf "  The \"M\" is the major release number, \"mm\" is the minor\n"
   printf "  relases number, and the \"rr\" an update number. VersionId\n"
@@ -24,13 +27,22 @@ help ()
   printf "  \"V\" and the version number separated with \"-\" replacing\n"
   printf "  the \".\"s. If the VersionId can not be mapped to a current\n"
   printf "  rtag id, then an error message is generated.\n"
-  printf "  The version will be derived from the main trunk archive\n"
-  printf "  using utilites/HYPRE_utilites.h information.\n"
+  printf "  The version information during the install will be derived\n"
+  printf "  from the main trunk archive using the information in the\n"
+  printf "  file utilites/HYPRE_utilites.h. Alpha, and Beta releases\n"
+  printf "  are denoted by the following sytanx \"VM-nn-rr-a\" for alpha\n"
+  printf "  releases, and \"VM-nn-rr-b\" for beta releases.\n"
 }
 
 usage ()
 {
   printf "usage: $0 VersionId\n"
+}
+
+display ()
+{
+  printf "valid cvs rtags:\n"
+  cvs history -T -a | grep linear_solvers
 }
 
 #=============================================================================
@@ -50,13 +62,15 @@ case $1 in
     -h|-help) 
         help
         exit;;
+    -d|-disp|-display) 
+        display
+        exit;;
 esac
 
 if [ $# -gt 0 ]
 then
   VersionId=$1
   RtagVersionId="`echo ${VersionId} | tr '.' '-'`"
-  RtagVersionId="V${RtagVersionId}"
 else
   usage
   exit
@@ -85,6 +99,7 @@ mkdir $HYPRE_INSTALL_DIR/src
   if [  $? -ne 0 ]
   then
     echo "Error: Rtag Version=${RtagVersionId} not found in CVS repository"
+    display
     exit
   fi
 )
@@ -110,10 +125,8 @@ HYPRE_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
     
 (       # store version info
   cd $HYPRE_INSTALL_DIR
-  src/linear_solvers/utilities/version > VERSION
-  # store version name with syntax VX.XX.XX (for sorting purposes)
-  src/linear_solvers/utilities/version -number | \
-  awk 'BEGIN {FS="."} {printf "V%d.%02d.%02d\n",$1,$2,$3}' > VERSION_NAME
+  cp src/linear_solvers/COPYRIGHT_and_DISCLAIMER .
+  cp src/linear_solvers/CHANGELOG .
 )
 
 # pop 'linear_solvers' directory to 'src'
@@ -123,7 +136,8 @@ rmdir $HYPRE_DIR/src/linear_solvers
 # create the hypre-${VersionId}.tar file
 echo "creating $HYPRE_DIR.tar file ..."
 tar cf $HYPRE_DIR.tar \
-    $HYPRE_DIR/VER* \
+    $HYPRE_DIR/CHANGELOG \
+    $HYPRE_DIR/COPYRIGHT_and_DISCLAIMER \
     $HYPRE_DIR/docs \
     $HYPRE_DIR/bin \
     $HYPRE_DIR/src/configure \
