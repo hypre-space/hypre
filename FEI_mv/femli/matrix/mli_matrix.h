@@ -43,11 +43,10 @@ public :
    MLI_Matrix( void *, char *, MLI_Function *func);
    ~MLI_Matrix();
    void       setSubMatrixEqnList(int leng, int *list);
-   void       *getMatrix()                          { return matrix_; }
-   void	      *takeMatrix()                         { destroyFunc_ = NULL;
-                                                      return matrix_; }
-   char       *getName()                            { return name_; }
-   int        apply( double, MLI_Vector *, double, MLI_Vector *, MLI_Vector * );
+   void       *getMatrix();
+   void	      *takeMatrix();
+   char       *getName();
+   int        apply(double, MLI_Vector *, double, MLI_Vector *, MLI_Vector *);
    MLI_Vector *createVector();
    int        getMatrixInfo(char *, int &, double &);
    int        print(char *);
