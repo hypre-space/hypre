@@ -58,6 +58,7 @@ FILES =\
  hypre_mpi_comm_f2c.c\
  hypre_error.c\
  F90_HYPRE_error.c\
+ hypre_prefix_sum.c\
  hypre_map.cc
 
 OBJS = $(patsubst %.c,%.o,$(patsubst %.cc,%.o,$(FILES)))

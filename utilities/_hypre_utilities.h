@@ -858,6 +858,16 @@ HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYP
 void hypre_SeedRand ( HYPRE_Int seed );
 HYPRE_Real hypre_Rand ( void );
 
+/* hypre_prefix_sum.c */
+/**
+ * Assumed to be called within an omp region.
+ * Let x_i be the input of ith thread.
+ * The output of ith thread y_i = x_0 + x_1 + ... + x_{i-1}
+ * Additionally, sum = x_0 + x_1 + ... + x_{nthreads - 1}
+ * Note that always y_0 = 0
+ */
+void hypre_prefix_sum(HYPRE_Int *in_out, HYPRE_Int *sum);
+
 /* hypre_map.cc */
 typedef struct HYPRE_IntSet HYPRE_IntSet;
   // wrapper of std::set<HYPRE_Int>
