@@ -135,8 +135,13 @@ MLI_Method_AMGSA::~MLI_Method_AMGSA()
    if ( ARPACKSuperLUExists_ ) 
    {
       strcpy( paramString, "destroy" );
+#ifdef MLI_ARPACK
       dnstev_(NULL, NULL, paramString, NULL, NULL, NULL, NULL, NULL, NULL, 
               NULL, NULL, NULL, &info);
+#else
+   printf("FATAL ERROR : ARPACK not installed.\n");
+   exit(1);
+#endif
    }
 }
 
