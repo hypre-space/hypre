@@ -15,6 +15,7 @@ HEADERS =\
  protos.h
 
 FILES =\
+ par_laplace.c\
  coarsen.c\
  indepset.c\
  par_rap.c\
@@ -58,9 +59,16 @@ LFLAGS =\
 # Main rules
 ##################################################################
 
+test: driver.o libParamg.a
+	@echo  "Linking" $@ "... "
+	${CC} -o test driver.o libParamg.a ${LFLAGS} 
+
 test_rap: driver_rap.o libParamg.a
 	@echo  "Linking" $@ "... "
 	${CC} -o test_rap driver_rap.o libParamg.a ${LFLAGS} 
+
+driver.o: driver.c
+	${CC} -c driver.c ${CFLAGS}
 
 driver_rap.o: driver_rap.c
 	${CC} -c driver_rap.c ${CFLAGS}
@@ -88,7 +96,7 @@ libParamg.a: ${OBJS}
 
 veryclean: clean
 	@rm -f libParamg.a
-	@rm -f test_rap driver_rap.o
+	@rm -f test driver.o test_rap driver_rap.o
 
 clean:
 	@rm -f *.o
