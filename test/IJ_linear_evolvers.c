@@ -100,6 +100,7 @@ main( int   argc,
 
    /* parameters for ParaSAILS */
    double   sai_threshold;
+   double   sai_filter;
 
    /* parameters for PILUT */
    double   drop_tol = -1;
@@ -310,7 +311,11 @@ main( int   argc,
       implemented, i.e. Jacobi relaxation with Matvec */
    if (solver_id == 5) relax_default = 2;
 
-   if (solver_id == 18) sai_threshold = 0.1;
+   if (solver_id == 18)
+   { 
+     sai_threshold = 0.1;
+     sai_filter = 0.1;
+   }
 
    /* defaults for BoomerAMG */
    if (solver_id == 0 || solver_id == 1 || solver_id == 3 || solver_id == 5
@@ -434,10 +439,15 @@ main( int   argc,
          arg_index++;
          max_row_sum  = atof(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-saith") == 0 )
+      else if ( strcmp(argv[arg_index], "-sai_th") == 0 )
       {
          arg_index++;
          sai_threshold  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-sai_filt") == 0 )
+      {
+         arg_index++;
+         sai_filter  = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-drop_tol") == 0 )
       {
@@ -537,7 +547,8 @@ main( int   argc,
       printf("  -w   <val>             : set Jacobi relax weight = val\n");
       printf("  -k   <val>             : dimension Krylov space for GMRES\n");
       printf("\n");  
-      printf("  -saith   <val>         : set ParaSAILS threshold = val \n");
+      printf("  -sai_th   <val>        : set ParaSAILS threshold = val \n");
+      printf("  -sai_filt <val>        : set ParaSAILS filter = val \n");
       printf("\n");  
       printf("  -drop_tol  <val>       : set threshold for dropping in PILUT\n");
       printf("  -nonzeros_to_keep <val>: number of nonzeros in each row to keep\n");
@@ -1038,6 +1049,7 @@ main( int   argc,
 
 	 HYPRE_ParCSRParaSailsCreate(MPI_COMM_WORLD, &pcg_precond);
 	 HYPRE_ParCSRParaSailsSetParams(pcg_precond, sai_threshold, max_levels);
+	 HYPRE_ParCSRParaSailsSetFilter(pcg_precond, sai_filter);
 	 HYPRE_ParCSRParaSailsSetLogging(pcg_precond, ioutdat);
 
          HYPRE_ParCSRPCGSetPrecond(pcg_solver,
@@ -1186,6 +1198,7 @@ main( int   argc,
 
 	 HYPRE_ParCSRParaSailsCreate(MPI_COMM_WORLD, &pcg_precond);
 	 HYPRE_ParCSRParaSailsSetParams(pcg_precond, sai_threshold, max_levels);
+	 HYPRE_ParCSRParaSailsSetFilter(pcg_precond, sai_filter);
 	 HYPRE_ParCSRParaSailsSetLogging(pcg_precond, ioutdat);
 	 HYPRE_ParCSRParaSailsSetSym(pcg_precond, 0);
 
