@@ -127,35 +127,35 @@ void hypre_ParAat_RowSizes
                      }
                   }
                }
-            }
 
-            /* offd*offd */
-            /*-----------------------------------------------------------
-             *  Loop over entries (columns) i3 in row i2 of A^T
-             *  That is, rows i3 having a column i2 of A (local part).
-             *  For now, for each row i3 of A we crudely check _all_
-             *  columns to see whether one matches i2.
-             *  This i3-loop is for the local off-diagonal part of A.
-             *  For each entry (i2,i3) of A^T, mark C(i1,i3)
-             *  as a potential nonzero.
-             *-----------------------------------------------------------*/
+               /* offd*offd */
+               /*-----------------------------------------------------------
+                *  Loop over entries (columns) i3 in row i2 of A^T
+                *  That is, rows i3 having a column i2 of A (local part).
+                *  For now, for each row i3 of A we crudely check _all_
+                *  columns to see whether one matches i2.
+                *  This i3-loop is for the local off-diagonal part of A.
+                *  For each entry (i2,i3) of A^T, mark C(i1,i3)
+                *  as a potential nonzero.
+                *-----------------------------------------------------------*/
 
-            for ( i3=0; i3<num_rows_diag_A; i3++ ) {
-               /* ... note that num_rows_diag_A == num_rows_offd_A */
-               for ( jj3=A_offd_i[i3]; jj3<A_offd_i[i3+1]; jj3++ ) {
-                  if ( A_col_map_offd[ A_offd_j[jj3] ]==i2 ) {
-                     /* row i3, column i2 of A; or,
-                        row i2, column i3 of A^T */
-                     /*--------------------------------------------------------
-                      *  Check B_marker to see that C_{i1,i3} has not already
-                      *  been accounted for. If it has not, mark it and increment
-                      *  counter.
-                      *--------------------------------------------------------*/
+               for ( i3=0; i3<num_rows_diag_A; i3++ ) {
+                  /* ... note that num_rows_diag_A == num_rows_offd_A */
+                  for ( jj3=A_offd_i[i3]; jj3<A_offd_i[i3+1]; jj3++ ) {
+                     if ( A_col_map_offd[ A_offd_j[jj3] ]==i2 ) {
+                        /* row i3, column i2 of A; or,
+                           row i2, column i3 of A^T */
+                        /*--------------------------------------------------------
+                         *  Check B_marker to see that C_{i1,i3} has not already
+                         *  been accounted for. If it has not, mark it and increment
+                         *  counter.
+                         *--------------------------------------------------------*/
  
-                     if (B_marker[i3] < jj_row_begin_diag)
-                     {
-                        B_marker[i3] = jj_count_diag;
-                        jj_count_diag++;
+                        if (B_marker[i3] < jj_row_begin_diag)
+                        {
+                           B_marker[i3] = jj_count_diag;
+                           jj_count_diag++;
+                        }
                      }
                   }
                }
@@ -747,7 +747,10 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
 
    if (num_cols_offd_C) {
       col_map_offd_C = hypre_CTAlloc(int,num_cols_offd_C);
-      new_C_offd_j = hypre_CTAlloc(int,num_cols_offd_C);
+      new_C_offd_j = hypre_CTAlloc(int,C_offd_size);
+      /* ... a bit big, but num_cols_offd_C is too small.  It might be worth
+         computing the correct size, which is sum( no. columns in row i, over all rows i )
+      */
 
       for (i=0; i < C_offd_size; i++) {
          new_C_offd_j[i] = B_marker[C_offd_j[i]];
@@ -797,7 +800,9 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
       hypre_CSRMatrixDestroy(A_ext);
       A_ext = NULL;
    }
-   hypre_TFree(B_marker);   
+   hypre_TFree(B_marker);
+   if ( num_rows_diag_A != n_rows_A )
+      hypre_TFree(A_ext_row_map);
 
    return C;
    
