@@ -1,0 +1,56 @@
+
+\Chapter{Operators: Matrices, Solvers and Preconditioners}
+
+{\bf Operators:} Mathematically, the line between "solver" and "preconditioner" is
+somewhat blurry (discussed 
+below), and \hypre{} takes advantage of that to call them both of type "Operator".
+We can unify much of 
+the discussion of solvers and preconditioners under the heading of Operators,
+and then specialize those 
+discussions.
+
+The defining characteristics of Operators are that they take a vector as input
+and return another vector as 
+output. Thus, this generalization also includes matrices, as well as nonlinear
+operators, transpose matrices, 
+etc. The fundamental "use" function of an Operator is the \code{Apply} function. For
+components that 
+encapsulate "matrices", the \code{Apply} function corresponds to the traditional
+matrix-vector multiplication. For 
+solvers, \code{Apply} is the traditional "solve" function. Preconditioners are also
+referred to as being "applied", 
+and the \code{Apply} function quite naturally corresponds to this application. Thus,
+use of matrices, solvers, and 
+preconditioners are done through the \code{Apply} function.
+
+\section{Preconditioners are Solvers}
+
+Users of \hypre{} will quickly notice that there is
+no class or interface called 
+"preconditioner". Instead, we have chosen to interpret preconditioners as
+"solvers", based on the fact that 
+both traditional solvers and preconditioners are in some senses "approximations
+to the inverse" of the linear 
+operator defining the system to be solved. The difference between them is one
+of degrees, in that 
+preconditioners generally are very crude and very easy to compute
+approximations to the inverse, while 
+solvers are more accurate, i.e. within the desired convergence tolerance. By
+treating solvers and 
+preconditioners uniformly within \hypre{}, we make their use uniform for users and
+reduce the complexity 
+of \hypre{}'s object model. We also enable novel algorithmic possibilities such as
+using what are 
+traditionally "solvers" as preconditioners. In fact, since Operators include
+solvers and matrices, it is 
+straightforward to use matrices as preconditioners, should a direct
+approximation to the inverse exist. 
+
+\section{Setup}
+Most components that correspond to the traditional "matrix", as well as
+some solvers in which the 
+construction of the underlying matrix is handled by the solver for the user,
+are set up through one or more 
+of the conceptual interfaces discussed in a later chapter. Here we will
+concentrate on other ways to 
+construct Operators.
