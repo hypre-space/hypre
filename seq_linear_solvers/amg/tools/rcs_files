@@ -3,6 +3,7 @@ amgcpio
 amgmvio
 amgstrip
 build
+config.dec
 config.defaults
 config.irix
 config.solaris
@@ -31,5 +32,4 @@ truncysmp.m
 writevec.m
 writexy.m
 writexyz.m
-
 writeysmp.m
