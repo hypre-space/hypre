@@ -45,6 +45,7 @@ CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS = @HYPRE_PETSCDEFS@
 
 CFLAGS = \
+ -I..\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
@@ -60,6 +61,7 @@ CFLAGS = \
 CXXFLAGS = \
  @PETSCINCLUDE@ \
  ${CXX_COMPILE_FLAGS}\
+ -I..\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\

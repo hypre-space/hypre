@@ -28,6 +28,7 @@ MPIRUN       = mpirun -np 4
 PETSC_INCLUDES = -I${PETSC_DIR}/include
 # General
 HYPRE_INCLUDES = \
+ -I../..\
  -I$(srcdir)\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
@@ -76,6 +77,7 @@ CFLAGS = \
 CXXFLAGS = \
  @PETSCINCLUDE@ \
  ${CXX_COMPILE_FLAGS}\
+ -I../..\
  -I$(srcdir)\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
