@@ -35,7 +35,7 @@ TOOLS =
 ## We need `.' in SUBDIRS because we want `check' to build `.' before
 ## tests.
 SUBDIRS = . config\
- blas utilities\
+ blas lapack utilities\
  krylov\
  struct_mv struct_ls\
  sstruct_mv sstruct_ls\
@@ -44,7 +44,7 @@ SUBDIRS = . config\
  FEI_mv $(SEQLS) $(TOOLS) $(BABELDIR) lib
 
 DIST_SUBDIRS = . config\
- blas utilities\
+ blas lapack utilities\
  krylov\
  struct_mv struct_ls\
  sstruct_mv sstruct_ls\

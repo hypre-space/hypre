@@ -58,6 +58,10 @@
 #undef HYPRE_USING_HYPRE_BLAS
 #endif
 
+#ifndef HYPRE_USING_HYPRE_LAPACK
+#undef HYPRE_USING_HYPRE_LAPACK
+#endif
+
 #ifndef HYPRE_USING_ESSL
 #undef HYPRE_USING_ESSL
 #endif

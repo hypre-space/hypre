@@ -18,6 +18,7 @@ FEI_INC_DIR = @FEI_INC_DIR@
 
 HYPRE_BASIC_DIRS =\
  blas\
+ lapack\
  utilities
 
 # These are the directories for the generic Krylov solvers

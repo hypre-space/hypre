@@ -407,11 +407,21 @@ AC_ARG_WITH(openmp,
 AC_ARG_WITH(blas,
 [  --with-blas             search for and use the BLAS], 
 [case "${withval}" in
-   yes) casc_using_blas="" ;;
-   no)  casc_using_blas="" ;;
+   yes) casc_using_blas="yes" ;;
+   no)  casc_using_blas="no" ;;
    *)   casc_using_blas=$withval ;;
  esac],
-[casc_using_blas=""]
+[casc_using_blas="yes"]
+)
+
+AC_ARG_WITH(lapack,
+[  --with-lapack           search for and use the LAPACK], 
+[case "${withval}" in
+   yes) casc_using_lapack="yes" ;;
+   no)  casc_using_lapack="no" ;;
+   *)   casc_using_lapack=$withval ;;
+ esac],
+[casc_using_lapack="yes"]
 )
 
 dnl top level source directory
@@ -507,10 +517,6 @@ case $HOSTNAME in
      CASC_SET_CXXDEBUG(-g) 
      CASC_SET_FOPT(-O)
      CASC_SET_FDEBUG(-g)
-     if test -z "$casc_using_blas"
-     then
-       casc_using_blas=yes
-     fi
 
    ;;
 
@@ -542,10 +548,6 @@ case $HOSTNAME in
      CASC_SET_CXXDEBUG(-g) 
      CASC_SET_FOPT(-O)
      CASC_SET_FDEBUG(-g)
-     if test -z "$casc_using_blas"
-     then
-       casc_using_blas=yes
-     fi
       
    ;;
 
@@ -573,10 +575,6 @@ case $HOSTNAME in
      CASC_SET_CXXDEBUG(-g)
      CASC_SET_FOPT(-O)
      CASC_SET_FDEBUG(-g)
-     if test -z "$casc_using_blas"
-     then
-       casc_using_blas=yes
-     fi
       
    ;;
 
@@ -605,10 +603,6 @@ case $HOSTNAME in
      CASC_SET_FOPT(-O -64)
      CASC_SET_FDEBUG(-g -64)
      [LDFLAGS="-O -64 ${LDFLAGS}"]
-     if test -z "$casc_using_blas"
-     then
-       casc_using_blas=yes
-     fi
       
    ;;
         
@@ -1204,23 +1198,14 @@ case $ARCH in
   hpux | HPUX | hppa | HPPA )
     AC_DEFINE(HYPRE_HPPA)
     CSUPERLUFLAGS=-DNoChange
-    if test -z "$casc_using_blas" ; then
-      casc_using_blas=yes
-    fi
   ;;
   alpha)
     AC_DEFINE(HYPRE_ALPHA)
     CSUPERLUFLAGS=-DAdd_
-    if test -z "$casc_using_blas" ; then
-      casc_using_blas=yes
-    fi
   ;;
   rs6000)
     AC_DEFINE(HYPRE_RS6000)
     CSUPERLUFLAGS=-DNoChange
-    if test -z "$casc_using_blas" ; then
-      casc_using_blas=yes
-    fi
   ;;
   IRIX64)
     AC_DEFINE(HYPRE_IRIX64)
@@ -1374,12 +1359,39 @@ then
  else
    casc_using_blas=no
  fi
-elif test "$casc_using_blas" = "no"
+fi
+if test "$casc_using_blas" = "no"
 then
  BLASLIBFLAGS=-lHYPRE_blas
  AC_DEFINE(HYPRE_USING_HYPRE_BLAS)
 else
  BLASLIBFLAGS=$casc_using_blas
+fi
+if test -z "$casc_using_lapack"
+then
+  casc_using_lapack=no
+fi
+if test "$casc_using_lapack" = "yes"
+then
+ if test "$ARCH" = "rs6000"
+ then
+   LAPACKLIBFLAGS=""
+ elif test "$ARCH" = "alpha"
+ then
+   LAPACKLIBFLAGS=""
+ elif test "$ARCH" = "hpux"
+ then
+   LAPACKLIBFLAGS=""
+ else
+   casc_using_lapack=no
+ fi
+fi
+if test "$casc_using_lapack" = "no"
+then
+ LAPACKLIBFLAGS=-lHYPRE_lapack
+ AC_DEFINE(HYPRE_USING_HYPRE_LAPACK)
+else
+ LAPACKLIBFLAGS=$casc_using_lapack
 fi
 
 dnl *********************************************************************
@@ -1460,6 +1472,7 @@ AC_SUBST(HYPRE_TOP_SRC_DIR)
 
 AC_SUBST(CSUPERLUFLAGS)
 AC_SUBST(BLASLIBFLAGS)
+AC_SUBST(LAPACKLIBFLAGS)
 
 dnl Configure Babel runtime if needed...
 if test "$casc_using_babel" = "yes"
@@ -1549,6 +1562,7 @@ CASC_CONFIG_OUTPUT_LIST(\
  FEI_mv/femli/lib\
  IJ_mv\
  krylov\
+ lapack\
  matrix_matrix\
  parcsr_ls\
  parcsr_es\
