@@ -89,7 +89,7 @@ do
         HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -b 2 -cf -o 1"
 	perform_test
-	CASC_BUILD_OPT=2
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
         shift;;
     -blue)
         HYPRE_ARCH="blue"
@@ -98,7 +98,7 @@ do
         HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -b 2 -cf -o 1"
 	perform_test
-	CASC_BUILD_OPT=2
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
         shift;;
     -red)
         HYPRE_ARCH="red"
@@ -107,19 +107,13 @@ do
         HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -b 2 -cf -o 1"
 	perform_test
-	CASC_BUILD_OPT=2
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
         shift;;
     -casc)
-	CASC_BUILD_OPT=2
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
         shift;;
     -purify)
-        HYPRE_ARCH="casc"
-        HYPRE_COMPILE_MACHINE="perrin"
-        HYPRE_RUN_MACHINE="perrin"
-        HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
-	HYPRE_MACHINE_COMMANDS="+m -q 2"
-	./autotest_test $HYPRE_MACHINE_COMMANDS
-	CASC_BUILD_OPT=1
+	HYPRE_MACHINE_COMMANDS="-m -q 2 -a 1 -dcxfy -t 1 -ns"
         shift;;
   esac
 
@@ -127,7 +121,6 @@ do
   HYPRE_COMPILE_MACHINE="perrin"
   HYPRE_RUN_MACHINE="perrin"
   HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
-  HYPRE_MACHINE_COMMANDS="-m -a $CASC_BUILD_OPT -dcxfy -t 1 -ns"
   ./autotest_test $HYPRE_MACHINE_COMMANDS
 
 done
