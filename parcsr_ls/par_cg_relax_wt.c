@@ -32,11 +32,11 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    HYPRE_Solver *smoother;
    /* Data Structure variables */
 
-   hypre_ParCSRMatrix **A_array = hypre_ParAMGDataAArray(amg_data);
-   hypre_ParCSRMatrix **R_array = hypre_ParAMGDataRArray(amg_data);
+   /* hypre_ParCSRMatrix **A_array = hypre_ParAMGDataAArray(amg_data); */
+   /* hypre_ParCSRMatrix **R_array = hypre_ParAMGDataRArray(amg_data); */
    hypre_ParCSRMatrix *A = hypre_ParAMGDataAArray(amg_data)[level];
-   hypre_ParVector    **F_array = hypre_ParAMGDataFArray(amg_data);
-   hypre_ParVector    **U_array = hypre_ParAMGDataUArray(amg_data);
+   /* hypre_ParVector    **F_array = hypre_ParAMGDataFArray(amg_data); */
+   /* hypre_ParVector    **U_array = hypre_ParAMGDataUArray(amg_data); */
    hypre_ParVector    *Utemp;
    hypre_ParVector    *Vtemp;
    hypre_ParVector    *Ptemp;
@@ -78,8 +78,8 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    double    max_row_sum = 0;
    double    rlx_wt = 0;
    double    rlx_wt_old = 0;
-   double    lambda_min, lambda_max;
-   double    lambda_min_old, lambda_max_old;
+   double    lambda_max, lambda_max_old;
+   /* double    lambda_min, lambda_min_old; */
 
 #if 0
    double   *D_mat;
@@ -262,7 +262,7 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
 	 row_sum = fabs(tridiag[jj-1]) + fabs(trioffd[jj-1])
 				+ fabs(trioffd[jj]);
          if (row_sum > max_row_sum) max_row_sum = row_sum;
-	 lambda_min_old = lambda_min;
+	 /* lambda_min_old = lambda_min; */
 	 lambda_max_old = lambda_max;
          rlx_wt_old = rlx_wt;
          hypre_Bisection(jj+1, tridiag, trioffd, lambda_max_old, 
@@ -279,7 +279,7 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
       }
       else
       {
-	 lambda_min = tridiag[0];
+	 /* lambda_min = tridiag[0]; */
 	 lambda_max = tridiag[0];
       }
 
