@@ -101,13 +101,22 @@ MLI_Method *MLI_Method_CreateFromID( int method_id, MPI_Comm mpi_comm )
            method_ptr->setParams(paramString, 0, NULL);
            break;
       default :
-           cout << "MLI_Method_Create ERROR : method " << method_id 
-                << " not defined\n";
+           cout << "MLI_Method_Create ERROR : method ";
+           cout << method_id; 
+           cout << " not defined\n";
            cout << "    valid ones are : " << endl;
-           cout << "              " << MLI_METHOD_AMGSA_ID  << " (AMGSA)\n"; 
-           cout << "              " << MLI_METHOD_AMGSAE_ID << " (AMGSAe)\n"; 
-           cout << "              " << MLI_METHOD_AMGSADD_ID << " (AMGSAe)\n"; 
-           cout << "              " << MLI_METHOD_AMGSADDE_ID << " (AMGSAe)\n"; 
+           cout << "              ";
+           cout << MLI_METHOD_AMGSA_ID;
+           cout << " (AMGSA)\n"; 
+           cout << "              ";
+           cout << MLI_METHOD_AMGSAE_ID;
+           cout << " (AMGSAe)\n"; 
+           cout << "              ";
+           cout << MLI_METHOD_AMGSADD_ID;
+           cout << " (AMGSAe)\n"; 
+           cout << "              ";
+           cout << MLI_METHOD_AMGSADDE_ID;
+           cout << " (AMGSAe)\n"; 
            cout.flush();
            exit(1);
    }

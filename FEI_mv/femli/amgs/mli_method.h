@@ -44,9 +44,11 @@ public :
               strcpy(method_name, "MLI_NONE");}
    virtual ~MLI_Method()                                      { }
 
-   virtual int setup( MLI *mli )                              {return -1;}
-   virtual int setParams(char *name, int argc, char *argv[])  {return -1;}
-   virtual int getParams(char *name, int *argc, char *argv[]) {return -1;}
+   virtual int setup( MLI *mli ) {(void) mli; return -1;}
+   virtual int setParams(char *name, int argc, char *argv[])
+               {(void) name; (void) argc; (void) argv; return -1;}
+   virtual int getParams(char *name, int *argc, char *argv[])
+               {(void) name; (void) argc; (void) argv; return -1;}
 
    char     *getName()                    {return method_name;}
    int      setName( char *in_name )                                      
