@@ -264,6 +264,7 @@ class HYPRE_LinSysCore: public LinearSystemCore {
    char            superluScale_[1];
 
 friend void fei_hypre_test(int argc, char *argv[]);
+friend void fei_hypre_dd(int argc, char *argv[]);
 
 };
 

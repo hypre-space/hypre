@@ -109,7 +109,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   colValues_(NULL),
                   selectedList_(NULL),
                   selectedListAux_(NULL),
-                  HYOutputLevel_(1)
+                  HYOutputLevel_(2)
 {
     //-------------------------------------------------------------------
     // find my processor ID 
@@ -143,10 +143,10 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     //-------------------------------------------------------------------
 
     amgCoarsenType_     = 0;    // default coarsening
-    amgNumSweeps_[0]    = 2;    // no. of sweeps for fine grid
-    amgNumSweeps_[1]    = 2;    // no. of presmoothing sweeps 
-    amgNumSweeps_[2]    = 2;    // no. of postsmoothing sweeps 
-    amgNumSweeps_[3]    = 2;    // no. of sweeps for coarsest grid
+    amgNumSweeps_[0]    = 3;    // no. of sweeps for fine grid
+    amgNumSweeps_[1]    = 3;    // no. of presmoothing sweeps 
+    amgNumSweeps_[2]    = 3;    // no. of postsmoothing sweeps 
+    amgNumSweeps_[3]    = 3;    // no. of sweeps for coarsest grid
     amgRelaxType_[0]    = 3;    // hybrid for the fine grid
     amgRelaxType_[1]    = 3;    // hybrid for presmoothing 
     amgRelaxType_[2]    = 3;    // hybrid for postsmoothing
@@ -163,9 +163,9 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
 
     superluOrdering_    = 0;    // natural ordering in SuperLU
     superluScale_[0]    = 'N';  // no scaling in SuperLUX
-    gmresDim_           = 100;  // restart size in GMRES
-    mlNumPreSweeps_     = 2;
-    mlNumPostSweeps_    = 2;
+    gmresDim_           = 200;  // restart size in GMRES
+    mlNumPreSweeps_     = 3;
+    mlNumPostSweeps_    = 3;
     mlPresmootherType_  = 2;    // default symmetric Gauss-Seidel
     mlPostsmootherType_ = 2;    // default symmetric Gauss-Seidel
     mlRelaxWeight_      = 0.5;
@@ -370,7 +370,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     if ( Utils::getParam("gmresDim",numParams,params,param) == 1)
     {
        sscanf(param,"%d", &gmresDim_);
-       if ( gmresDim_ < 1 ) gmresDim_ = 50;
+       if ( gmresDim_ < 1 ) gmresDim_ = 200;
        nParamsFound++;
 #ifdef DEBUG
        if ( mypid_ == 0 )
@@ -1316,7 +1316,7 @@ void HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
     double rhs_term, val, *colVal2, *colVal;
 
 #ifdef DEBUG
-    if ( HYOutputLevel_ > 3 )
+    if ( HYOutputLevel_ > 0 )
     {
        printf("%4d : HYPRE_LinSysCore::entering enforceEssentialBC.\n",mypid_);
     }
@@ -1387,7 +1387,7 @@ void HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
        }
     }
 #ifdef DEBUG
-    if ( HYOutputLevel_ > 3 )
+    if ( HYOutputLevel_ > 0 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  enforceEssentialBC.\n",mypid_);
     }
@@ -1406,7 +1406,7 @@ void HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
     double bval, *colVal;
 
 #ifdef DEBUG
-    if ( HYOutputLevel_ > 3 )
+    if ( HYOutputLevel_ > 0 )
     {
        printf("%4d : HYPRE_LinSysCore::entering enforceRemoteEssBC.\n",mypid_);
     }
@@ -1457,7 +1457,7 @@ void HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
     }
 
 #ifdef DEBUG
-    if ( HYOutputLevel_ > 3 )
+    if ( HYOutputLevel_ > 0 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  enforceRemoteEssBC.\n",mypid_);
     }
@@ -1480,7 +1480,7 @@ void HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
     double val, *colVal;
 
 #ifdef DEBUG
-    if ( HYOutputLevel_ > 3 )
+    if ( HYOutputLevel_ > 0 )
     {
        printf("%4d : HYPRE_LinSysCore::entering enforceOtherBC.\n",mypid_);
     }
@@ -1533,7 +1533,7 @@ void HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
    }
 
 #ifdef DEBUG
-    if ( HYOutputLevel_ > 3 )
+    if ( HYOutputLevel_ > 0 )
     {
        printf("%4d : HYPRE_LinSysCore::leaving  enforceOtherBC.\n",mypid_);
     }
@@ -1759,6 +1759,7 @@ void HYPRE_LinSysCore::setNumRHSVectors(int numRHSs, const int* rhsIDs)
     if ( HYOutputLevel_ > 0 )
     {
        printf("%4d : HYPRE_LinSysCore::entering setNumRHSVectors.\n",mypid_);
+       printf("%4d : HYPRE_LinSysCore::incoming numRHSs = %d\n",mypid_,numRHSs);
        printf("%4d : setNumRHSVectors - hardwired to 1 rhs.\n",mypid_);
     }
 
@@ -2318,6 +2319,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   HYPRE_ParCSRParaSailsSetParams(HYPrecon_,
                                                  parasailsThreshold_,
                                                  parasailsNlevels_);
+                  if ( parasailsThreshold_ == 0.0 ) 
+                  {
+                     HYPRE_ParCSRParaSailsSelectThresh(HYPrecon_, 0.9);
+                  }
                   HYPRE_ParCSRPCGSetPrecond(HYSolver_,
                                             HYPRE_ParCSRParaSailsSolve,
                                             HYPRE_ParCSRParaSailsSetup,
@@ -2442,9 +2447,14 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("ParaSails - nlevels   = %d\n", parasailsNlevels_);
                      printf("ParaSails - threshold = %e\n", parasailsThreshold_);
                   }
+                  HYPRE_ParCSRParaSailsSetSym(HYPrecon_,0);
                   HYPRE_ParCSRParaSailsSetParams(HYPrecon_,
                                                  parasailsThreshold_,
                                                  parasailsNlevels_);
+                  if ( parasailsThreshold_ == 0.0 ) 
+                  {
+                     HYPRE_ParCSRParaSailsSelectThresh(HYPrecon_, 0.9);
+                  }
                   HYPRE_ParCSRGMRESSetPrecond(HYSolver_,
                                             HYPRE_ParCSRParaSailsSolve,
                                             HYPRE_ParCSRParaSailsSetup,
@@ -2569,9 +2579,9 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           //printf("Y12M solver - return status = %d\n",status);
           break;
 
-else
+#else
           printf("HYPRE_LinSysCore : Y12M not available. \n");
- 
+          break; 
 #endif
     }
 
@@ -2860,8 +2870,8 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     // postprocessing of the return status information
     //------------------------------------------------------------------
 
-    if ( info == 0 ) {
-
+    if ( info == 0 ) 
+    {
         status = 1;
         Lstore = (SCformat *) L.Store;
         Ustore = (NRformat *) U.Store;
@@ -2874,9 +2884,11 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
         //       mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
         //       mem_usage.expansions);
 
-    } else {
+    } 
+    else 
+    {
         status = 0;
-        printf("HYPRE_LinSysCore::solveUsingSuperLU - dgssv error code = %d\n",info);
+        printf("HYPRE_LinSysCore::solveUsingSuperLU - dgssv error = %d\n",info);
         //if ( info <= nrows ) { /* factorization completes */
         //    dQuerySpace(&L, &U, panel_size, &mem_usage);
         //    printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
@@ -2904,7 +2916,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
        ierr = HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
        assert(!ierr);
        rnorm = sqrt( rnorm );
-       printf("HYPRE_LinSysCore::solveUsingSuperLU - FINAL NORM = %e.\n", rnorm);
+       printf("HYPRE_LinSysCore::solveUsingSuperLU - FINAL NORM = %e.\n",rnorm);
     }
 
     //------------------------------------------------------------------
@@ -3113,7 +3125,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
        ierr = HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
        assert(!ierr);
        rnorm = sqrt( rnorm );
-       printf("HYPRE_LinSysCore::solveUsingSuperLUX - FINAL NORM = %e.\n", rnorm);
+       printf("HYPRE_LinSysCore::solveUsingSuperLUX - FINAL NORM = %e.\n",rnorm);
     }
 
     //------------------------------------------------------------------
@@ -3313,6 +3325,7 @@ void HYPRE_LinSysCore::solveUsingY12M(int& status)
 
 //***************************************************************************
 // this function loads in the constraint numbers for reduction
+// (to activate automatic slave search, constrList should be NULL)
 //---------------------------------------------------------------------------
 
 void HYPRE_LinSysCore::loadConstraintNumbers(int nConstr, int *constrList)
@@ -3321,6 +3334,9 @@ void HYPRE_LinSysCore::loadConstraintNumbers(int nConstr, int *constrList)
     {
        printf("%4d : HYPRE_LinSysCore::loadSConstraintNumbers - size = %d\n", 
                      mypid_, nConstr);
+       if ( mypid_ == 0 )
+          printf("%4d loadSConstraintNumbers : DOF=3, NODE#=EQN# assumed.\n",
+                 mypid_); 
     }
 
     nConstraints_ = nConstr;
@@ -3328,14 +3344,25 @@ void HYPRE_LinSysCore::loadConstraintNumbers(int nConstr, int *constrList)
     {
        if ( constrList != NULL ) 
        {
-          constrList_ = new int[nConstr];
-          for (int i = 0; i < nConstr; i++) constrList_[i] = constrList[i];
-          if ( HYOutputLevel_ > 1 )
+          constrList_ = new int[3 * nConstr];
+          for (int i = 0; i < nConstr; i++) 
           {
-             for (int j = 0; j < nConstr; j++) 
-                printf("Constraint %5d(%5d) = %d\n",j,nConstr,constrList_[j]);
+             constrList_[3*i] = constrList[i] * 3;
+             constrList_[3*i+1] = constrList[i] * 3 + 1;
+             constrList_[3*i+2] = constrList[i] * 3 + 2;
+          }
+          if ( HYOutputLevel_ > 2 )
+          {
+             for (int j = 0; j < 3 * nConstraints_; j++) 
+                printf("Constraint %5d(%5d) = %d\n",j,nConstraints_,
+                                                    constrList_[j]);
           }
        }
+    }
+    if ( HYOutputLevel_ > 0 )
+    {
+       printf("%4d : HYPRE_LinSysCore::leaving  loadSConstraintNumbers\n",
+              mypid_);
     }
 }
 
@@ -3504,12 +3531,13 @@ void HYPRE_LinSysCore::buildReducedSystem()
     // initial set up 
     //------------------------------------------------------------------
 
+    if ( mypid_ == 0 ) printf("%4d buildReducedSystem activated.\n",mypid_);
     StartRow = localStartRow_ - 1;
     EndRow   = localEndRow_ - 1;
     if ( HYOutputLevel_ > 0 )
     {
-       printf("buildReducedSystem %d : StartRow/EndRow = %d %d\n",mypid_,
-                                       StartRow,EndRow);
+       printf("%4d buildReducedSystem : StartRow/EndRow = %d %d\n",mypid_,
+                                        StartRow,EndRow);
     }
 
     //******************************************************************
@@ -3528,7 +3556,8 @@ void HYPRE_LinSysCore::buildReducedSystem()
     // equations are, if not already given
     //------------------------------------------------------------------
     
-    if ( nConstraints_ == 0 )
+    MPI_Allreduce(&nConstraints_,&globalNConstr,1,MPI_INT,MPI_SUM,comm_);
+    if ( globalNConstr == 0 )
     {
        for ( i = EndRow; i >= StartRow; i-- ) 
        {
@@ -3546,7 +3575,7 @@ void HYPRE_LinSysCore::buildReducedSystem()
     }
     if ( HYOutputLevel_ > 0 )
     {
-       printf("buildReducedSystem %d : no. constr = %d\n", mypid_,nConstraints_);
+       printf("%4d buildReducedSystem : no. constr = %d\n",mypid_,nConstraints_);
     }
 
     MPI_Allreduce(&nConstraints_, &globalNConstr, 1, MPI_INT, MPI_SUM, comm_);
@@ -3565,7 +3594,7 @@ void HYPRE_LinSysCore::buildReducedSystem()
     delete [] tempList;
     if ( HYOutputLevel_ > 0 )
     {
-       printf("buildReducedSystem %d : localNRows = %d\n", mypid_, nRows);
+       printf("%4d buildReducedSystem : localNRows = %d\n", mypid_, nRows);
     }
 
     //------------------------------------------------------------------
@@ -3670,7 +3699,10 @@ void HYPRE_LinSysCore::buildReducedSystem()
              else                          
                 ubound = ProcNRows[procIndex] - (ProcNConstr[procIndex] - 
                                                  ProcNConstr[procIndex-1]); 
-             if ( colIndex >= ubound && colVal[j] != 0.0 ) 
+
+             //Note : include structural zeros by not checking for nonzero
+             //if ( colIndex >= ubound && colVal[j] != 0.0 ) 
+             if ( colIndex >= ubound ) 
              {
                 ncnt++;
                 searchIndex = colIndex;
@@ -3683,27 +3715,77 @@ void HYPRE_LinSysCore::buildReducedSystem()
              constrListAux[nSlaves] = searchIndex;
              constrList_[nSlaves++] = i;
           }
-          if ( HYOutputLevel_ > 1 )
+          if ( HYOutputLevel_ > 2 )
           {
              if ( j == rowSize && ncnt == 1 ) 
-                printf("%d : slave candidate %d = %d(%d)\n", mypid_, nSlaves-1, 
-                             i, constrListAux[nSlaves-1]);
+                printf("%d buildReducedSystem : slave candidate %d = %d(%d)\n", 
+                        mypid_, nSlaves-1, i, constrListAux[nSlaves-1]);
           }
        }
-       if ( HYOutputLevel_ > 0 )
+       if ( HYOutputLevel_ > 1 )
        {
-          printf("%d : nSlave Candidate, nConstr = %d %d\n",mypid_,nSlaves,
-                 nConstraints_);
+          printf("%d buildReducedSystem : nSlave Candidate, nConstr = %d %d\n",
+                 mypid_,nSlaves, nConstraints_);
        }
     }
     else
     {
-       nSlaves = nConstraints_;;
+       if ( mypid_ == 0 )
+          printf("%4d buildReducedSystem WARNING : HARDWIRED TO 3 DOF/NODE.\n",
+                  mypid_);
+       constrListAux = new int[EndRow-nConstraints_-StartRow+1];
+       nSlaves = 3 * nConstraints_;;
+       for ( i = 0; i < 3*nConstraints_; i++ ) 
+       {
+          rowIndex = constrList_[i]; 
+          if ( rowIndex < localStartRow_-1 || rowIndex >= localEndRow_)
+          {
+             printf("%4d buildReducedSystem : slave %d not on my proc\n",
+                    mypid_, rowIndex, localStartRow_-1, localEndRow_);
+             exit(1);
+          }
+          ierr = HYPRE_ParCSRMatrixGetRow(A_csr,rowIndex,&rowSize,&colInd,&colVal);
+          assert(!ierr);
+          ncnt = 0;
+          for (j = 0; j < rowSize; j++) 
+          {
+             colIndex = colInd[j];
+             for (procIndex=0; procIndex < numProcs_; procIndex++ )
+                if ( colIndex < ProcNRows[procIndex] ) break;
+             if ( procIndex == numProcs_ ) 
+                ubound = globalNRows - 
+                         (globalNConstr-ProcNConstr[procIndex-1]);
+             else                          
+                ubound = ProcNRows[procIndex] - (ProcNConstr[procIndex] - 
+                                                 ProcNConstr[procIndex-1]); 
+             if ( colIndex >= ubound && colVal[j] != 0.0 ) 
+             {
+                ncnt++;
+                searchIndex = colIndex;
+             }
+             if ( ncnt > 1 ) break;
+          }
+          HYPRE_ParCSRMatrixRestoreRow(A_csr,rowIndex,&rowSize,&colInd,&colVal);
+          if ( j == rowSize && ncnt == 1 ) constrListAux[i] = searchIndex;
+          else                             constrListAux[i] = -1;
+          if ( HYOutputLevel_ > 1 )
+          {
+             if ( j == rowSize && ncnt == 1 ) 
+                printf("%4d buildReducedSystem : slave,constr pair = %d %d\n",
+                        mypid_, constrList_[i], constrListAux[i]);
+          }
+       }
     }   
+    if ( HYOutputLevel_ > 1 )
+    {
+       printf("%d buildReducedSystem : nSlave Candidate, nConstr = %d %d\n",
+              mypid_,nSlaves, nConstraints_);
+    }
     MPI_Barrier(MPI_COMM_WORLD);
 
     //---------------------------------------------------------------------
     // search the constraint equations for the selected nodes
+    // (search for candidates column index with maximum magnitude)
     //---------------------------------------------------------------------
     
     nSelected = 0;
@@ -3721,14 +3803,14 @@ void HYPRE_LinSysCore::buildReducedSystem()
                                && colInd[j] <= (EndRow-nConstraints_)) 
           {
              colIndex = hypre_BinarySearch(constrList_,colInd[j],nSlaves);
-             if ( colIndex >= 0 ) 
+             if ( colIndex >= 0 && constrListAux[colIndex] != -1) 
              {
                  if ( abs(colVal[j]) > searchValue )
                  {
                     if (i != constrListAux[colIndex]) 
                     {
-                       printf("buildReducedSystem %4d WARNING : slave %d",
-                               mypid_);
+                       printf("%4d buildReducedSystem WARNING : slave %d",
+                               mypid_, colInd[j]);
                        printf(" candidate does not have constr %d\n", i);
                     }
                     searchValue = abs(colVal[j]);
@@ -3742,10 +3824,13 @@ void HYPRE_LinSysCore::buildReducedSystem()
           selectedList[nSelected++] = searchIndex;
           if ( HYOutputLevel_ > 1 )
           {
-             printf("constraint %4d : slave node found = %d\n",i,searchIndex);
+             printf("%4d buildReducedSystem : constraint %4d <=> slave %d\n",
+                    mypid_,i,searchIndex);
           }
        } else 
        {
+          // get ready for error processing
+
           colInd2 = new int[rowSize];
           colVal2 = new double[rowSize];
           for ( j = 0; j < rowSize; j++ )
@@ -3776,7 +3861,7 @@ void HYPRE_LinSysCore::buildReducedSystem()
        { 
           if ( ncnt2 == mypid_ && rowIndex >= 0 )
           {
-             printf("buildReducedSystem %d::ERROR - constraint number",mypid_);
+             printf("%4d buildReducedSystem ERROR : constraint number",mypid_);
              printf(" cannot be found for row %d\n", rowIndex);
              for (j = 0; j < rowSize; j++) 
              {
@@ -3785,11 +3870,14 @@ void HYPRE_LinSysCore::buildReducedSystem()
                                      && colInd[j] <= (EndRow-nConstraints_)) 
                 {
                    colIndex = colInd[j];
-                   HYPRE_ParCSRMatrixGetRow(A_csr,colIndex,&rowSize2,&colInd2,&colVal2);
+                   HYPRE_ParCSRMatrixGetRow(A_csr,colIndex,&rowSize2,&colInd2,
+                                            &colVal2);
                    printf("      row %4d (%d) : \n",colIndex, rowSize2);
                    for (k = 0; k < rowSize2; k++) 
-                      printf("    row %4d col = %d val = %e\n",colIndex,colInd2[k],colVal2[k]);
-                   HYPRE_ParCSRMatrixRestoreRow(A_csr,colIndex,&rowSize2,&colInd2,&colVal2);
+                      printf("    row %4d col = %d val = %e\n",colIndex,
+                                            colInd2[k],colVal2[k]);
+                   HYPRE_ParCSRMatrixRestoreRow(A_csr,colIndex,&rowSize2,
+                                            &colInd2,&colVal2);
                 }
              }
              printf("===================================================\n");
@@ -3815,7 +3903,8 @@ void HYPRE_LinSysCore::buildReducedSystem()
     {
        if ( selectedList[i] == selectedList[i-1] )
        {
-          printf("ERROR : repeated selected nodes %d \n", selectedList[i]);
+          printf("%4d buildReducedSystem : repeated selected nodes %d \n", 
+                 mypid_, selectedList[i]);
           exit(1);
        }
     }
@@ -3842,7 +3931,7 @@ void HYPRE_LinSysCore::buildReducedSystem()
     if ( HYOutputLevel_ > 1 )
     {
        for ( i = 0; i < nSelected; i++ )
-          printf("buildReducedSystem %d : selectedList %d = %d(%d)\n",mypid_,
+          printf("%4d buildReducedSystem : selectedList %d = %d(%d)\n",mypid_,
                  i,selectedList[i],selectedListAux[i]);
     }
  
@@ -3862,11 +3951,11 @@ void HYPRE_LinSysCore::buildReducedSystem()
 
     if ( HYOutputLevel_ > 0 )
     {
-       printf("buildReducedSystem %d : A21StartRow  = %d\n",mypid_,A21StartRow);
-       printf("buildReducedSystem %d : A21GlobalDim = %d %d\n", mypid_, 
-                                       A21GlobalNRows, A21GlobalNCols);
-       printf("buildReducedSystem %d : A21LocalDim  = %d %d\n",mypid_,
-                                       A21NRows, A21NCols);
+       printf("%4d buildReducedSystem : A21StartRow  = %d\n",mypid_,A21StartRow);
+       printf("%4d buildReducedSystem : A21GlobalDim = %d %d\n", mypid_, 
+                                        A21GlobalNRows, A21GlobalNCols);
+       printf("%4d buildReducedSystem : A21LocalDim  = %d %d\n",mypid_,
+                                        A21NRows, A21NCols);
     }
 
     //------------------------------------------------------------------
@@ -3997,18 +4086,25 @@ void HYPRE_LinSysCore::buildReducedSystem()
                    newColVal[newRowSize++] = colVal[j];
                    if ( colIndex < 0 || colIndex >= A21GlobalNCols )
                    {
-                      printf("buildReducedSystem WARNING : A21 out of range %d - %d (%d)\n", 
-                             rowCount, colIndex, A21GlobalNCols);
+                      printf("%4d buildReducedSystem WARNING : A21 ", mypid_);
+                      printf("out of range %d - %d (%d)\n", rowCount, colIndex, 
+                              A21GlobalNCols);
                    } 
                    if ( newRowSize > maxRowSize+1 ) 
-                      printf("#### : passing array boundary.\n");
+                   {
+                      printf("%4d buildReducedSystem : WARNING - ",mypid_);
+                      printf("passing array boundary(1).\n");
+                   }
                 }
              }
              else if ( colIndex > newEndRow && colIndex <= EndRow ) 
              {
                 if ( colVal[j] != 0.0 ) diagonal[diagCount++] = colVal[j];
                 if ( abs(colVal[j]) < 1.0E-8 )
-                   printf("%d : buildReducedSystem WARNING : large entry in invA22\n");
+                {
+                   printf("%4d buildReducedSystem WARNING : large entry ",mypid_);
+                   printf("in invA22\n");
+                }
              }
           } 
        }
@@ -4017,7 +4113,8 @@ void HYPRE_LinSysCore::buildReducedSystem()
        HYPRE_ParCSRMatrixRestoreRow(A_csr,rowIndex,&rowSize,&colInd,&colVal);
        if ( diagCount != (i+1) )
        {
-          printf("buildReducedSystem:: ERROR (3) - %d %d.\n",diagCount,i+1);
+          printf("%4d buildReducedSystem ERROR (3) : %d %d.\n", mypid_,
+                  diagCount,i+1);
           exit(1);
        }
        rowCount++;
@@ -4067,11 +4164,14 @@ void HYPRE_LinSysCore::buildReducedSystem()
              newColVal[newRowSize++] = colVal[j];
              if ( colIndex < 0 || colIndex >= A21GlobalNCols )
              {
-                printf("buildReducedSystem WARNING : A21 out of range %d - %d (%d)\n", 
-                       rowCount, colIndex, A21GlobalNCols);
+                printf("%4d buildReducedSystem WARNING : A21(%d,%d) out of range\n",
+                       mypid_, rowCount, colIndex, A21GlobalNCols);
              } 
              if ( newRowSize > maxRowSize+1 ) 
-                printf("#### : passing array boundary.\n");
+             {
+                printf("%4d : buildReducedSystem WARNING : ",mypid_);
+                printf("passing array boundary(2).\n");
+             }
           } 
        }
        HYPRE_IJMatrixInsertRow(A21,newRowSize,rowCount,newColInd,newColVal);
@@ -4098,7 +4198,7 @@ void HYPRE_LinSysCore::buildReducedSystem()
           if ( mypid_ == ncnt ) 
           {
              printf("====================================================\n");
-             printf("buildReducedSystem %d : matrix A21 assembled %d.\n",
+             printf("%4d buildReducedSystem : matrix A21 assembled %d.\n",
                                         mypid_,A21StartRow);
              fflush(stdout);
              for ( i = A21StartRow; i < A21StartRow+2*nConstraints_; i++ ) 
@@ -4130,9 +4230,9 @@ void HYPRE_LinSysCore::buildReducedSystem()
     invA22GlobalNCols = invA22GlobalNRows;
     if ( HYOutputLevel_ > 0 )
     {
-       printf("buildReducedSystem %d : A22GlobalDim = %d %d\n", mypid_, 
+       printf("%4d buildReducedSystem : A22GlobalDim = %d %d\n", mypid_, 
                         invA22GlobalNRows, invA22GlobalNCols);
-       printf("buildReducedSystem %d : A22LocalDim  = %d %d\n", mypid_, 
+       printf("%4d buildReducedSystem : A22LocalDim  = %d %d\n", mypid_, 
                         invA22NRows, invA22NCols);
     }
 
@@ -4222,8 +4322,8 @@ void HYPRE_LinSysCore::buildReducedSystem()
        rowIndex     = A21StartRow + i;
        if ( newColInd[0] < 0 || newColInd[0] >= invA22GlobalNCols )
        {
-          printf("buildReducedSystem WARNING : A22 out of range %d - %d (%d)\n", 
-                 rowIndex, newColInd[0], invA22GlobalNCols);
+          printf("%4d buildReducedSystem WARNING : A22 out of range %d, %d (%d)\n", 
+                 mypid_, rowIndex, newColInd[0], invA22GlobalNCols);
        } 
        newColVal[0] = extDiagonal[A21StartRow/2+i];
        ierr = HYPRE_IJMatrixInsertRow(invA22,1,rowIndex,newColInd,newColVal);
@@ -4269,15 +4369,21 @@ void HYPRE_LinSysCore::buildReducedSystem()
                    newColInd[newRowSize] = searchIndex + 
                                            ProcNConstr[procIndex]; 
                 }
-                if ( newColInd[newRowSize] < 0 || newColInd[newRowSize] >= invA22GlobalNCols )
+                if ( newColInd[newRowSize] < 0 || 
+                     newColInd[newRowSize] >= invA22GlobalNCols )
                 {
-                   printf("buildReducedSystem WARNING : A22 out of range %d - %d (%d)\n", 
-                          rowCount, newColInd[newRowSize], invA22GlobalNCols);
+                   printf("%4d buildReducedSystem WARNING : A22 out of range",
+                          mypid_);
+                   printf(" %d - %d (%d)\n", rowCount, newColInd[newRowSize], 
+                          invA22GlobalNCols);
                 } 
                 newColVal[newRowSize++] = - extDiagonal[A21StartRow/2+i] * 
                                         colVal[j] * extDiagonal[searchIndex];
                 if ( newRowSize > maxRowSize )
-                    printf("##### : pass array boundary.\n");
+                {
+                   printf("%4d buildReducedSystem : WARNING - ",mypid_);
+                   printf("passing array boundary(3).\n");
+                }
       	     } 
 	  } 
        }
@@ -4308,6 +4414,7 @@ void HYPRE_LinSysCore::buildReducedSystem()
           if ( mypid_ == ncnt ) 
           {
              printf("====================================================\n");
+             printf("%4d buildReducedSystem : invA22 \n", mypid_);
              for ( i = A21StartRow; i < A21StartRow+2*nConstraints_; i++ ) 
              {
                 HYPRE_ParCSRMatrixGetRow(invA22_csr,i,&rowSize,&colInd,&colVal);
@@ -4332,7 +4439,7 @@ void HYPRE_LinSysCore::buildReducedSystem()
     invA22_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(invA22);
     if ( HYOutputLevel_ > 0 )
     {
-       printf("buildReducedSystem %d : Triple matrix product starts\n", mypid_);
+       printf("%4d buildReducedSystem : Triple matrix product starts\n",mypid_);
     }
     hypre_ParAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) A21_csr,
                                      (hypre_ParCSRMatrix *) invA22_csr,
@@ -4340,7 +4447,7 @@ void HYPRE_LinSysCore::buildReducedSystem()
                                      (hypre_ParCSRMatrix **) &RAP_csr);
     if ( HYOutputLevel_ > 0 )
     {
-    printf("buildReducedSystem %d : Triple matrix product ends\n", mypid_);
+       printf("%4d buildReducedSystem : Triple matrix product ends\n", mypid_);
     }
 
     if ( HYOutputLevel_ > 3 )
@@ -4514,7 +4621,7 @@ void HYPRE_LinSysCore::buildReducedSystem()
     HYPRE_IJMatrixAssemble(reducedA);
     if ( HYOutputLevel_ > 0 )
     {
-       printf("buildReducedSystem %d : FINAL - reducedAStartRow = %d\n", 
+       printf("%4d buildReducedSystem : FINAL - reducedAStartRow = %d\n", 
                                        mypid_, reducedAStartRow);
     }
 
@@ -4560,15 +4667,15 @@ void HYPRE_LinSysCore::buildReducedSystem()
     HYPRE_IJVectorSetLocalStorageType(f2, HYPRE_PARCSR);
     if ( HYOutputLevel_ > 0 )
     {
-       printf("%d : A21 dims = %d %d %d\n", mypid_, A21StartRow, A21NRows, 
-                    A21GlobalNRows);
+       printf("%4d buildReducedSystem : A21 dims = %d %d %d\n", mypid_, 
+               A21StartRow, A21NRows, A21GlobalNRows);
     }
     ierr =  HYPRE_IJVectorSetLocalPartitioning(f2,A21StartRow,
                                                A21StartRow+A21NRows);
     ierr += HYPRE_IJVectorAssemble(f2);
     ierr += HYPRE_IJVectorInitialize(f2);
     ierr += HYPRE_IJVectorZeroLocalComponents(f2);
-    assert(!ierr);
+    //assert(!ierr);
 
     HYPRE_IJVectorCreate(comm_, &f2hat, A21GlobalNRows);
     HYPRE_IJVectorSetLocalStorageType(f2hat, HYPRE_PARCSR);
@@ -4577,7 +4684,7 @@ void HYPRE_LinSysCore::buildReducedSystem()
     ierr += HYPRE_IJVectorAssemble(f2hat);
     ierr += HYPRE_IJVectorInitialize(f2hat);
     ierr += HYPRE_IJVectorZeroLocalComponents(f2hat);
-    assert(!ierr);
+    //assert(!ierr);
 
     colInd = new int[nSelected*2];
     colVal = new double[nSelected*2];
@@ -4594,7 +4701,8 @@ void HYPRE_LinSysCore::buildReducedSystem()
        }
        if ( colInd[i] < 0 )
        {
-          printf("buildReducedSystem ERROR : out of range %d\n", colInd[i]);
+          printf("%4d buildReducedSystem ERROR : out of range %d\n", mypid_,
+                  colInd[i]);
           exit(1);
        }
     }
@@ -4630,9 +4738,9 @@ void HYPRE_LinSysCore::buildReducedSystem()
     A12StartRow    = ProcNRows[mypid_] - 2 * ProcNConstr[mypid_];
     if ( HYOutputLevel_ > 0 )
     {
-       printf("buildReducedSystem %d : A12GlobalDim = %d %d\n", mypid_, 
+       printf("%4d buildReducedSystem : A12GlobalDim = %d %d\n", mypid_, 
                         A12GlobalNRows, A12GlobalNCols);
-       printf("buildReducedSystem %d : A12LocalDim  = %d %d\n", mypid_, 
+       printf("%4d buildReducedSystem : A12LocalDim  = %d %d\n", mypid_, 
                         A12NRows, A12NCols);
     }
 
@@ -4732,10 +4840,14 @@ void HYPRE_LinSysCore::buildReducedSystem()
                                            ProcNConstr[procIndex] +
                                            globalNConstr;
                 }
-                if ( newColInd[newRowSize] < 0 || newColInd[newRowSize] >= A12GlobalNCols )
-                   printf("buildReducedSystem %4d WARNING : A12 col index out of range %d %d(%d)\n",
-                          mypid_, i, newColInd[newRowSize], A12GlobalNCols);
-
+                if ( newColInd[newRowSize] < 0 || 
+                     newColInd[newRowSize] >= A12GlobalNCols )
+                {
+                   printf("%4d buildReducedSystem WARNING : A12 col index out ",
+                          mypid_);
+                   printf("of range %d %d(%d)\n", mypid_, i, 
+                           newColInd[newRowSize], A12GlobalNCols);
+                }
                 newColVal[newRowSize++] = colVal[j];
              } else
              {
@@ -4746,9 +4858,14 @@ void HYPRE_LinSysCore::buildReducedSystem()
                    searchIndex = globalSelectedListAux[searchIndex];
                    newColInd[newRowSize] = searchIndex + 
                                            ProcNConstr[procIndex]; 
-                   if ( newColInd[newRowSize] < 0 || newColInd[newRowSize] >= A12GlobalNCols )
-                      printf("buildReducedSystem %4d WARNING : A12 col index out of range %d %d(%d)\n",
-                             mypid_, i, newColInd[newRowSize], A12GlobalNCols);
+                   if ( newColInd[newRowSize] < 0 || 
+                        newColInd[newRowSize] >= A12GlobalNCols )
+                   {
+                      printf("%4d buildReducedSystem WARNING : A12 col index ",
+                             mypid_);
+                      printf("out of range %d %d(%d)\n", mypid_, i, 
+                             newColInd[newRowSize], A12GlobalNCols);
+                   }
                    newColVal[newRowSize++] = colVal[j];
                 }
              }
@@ -4917,6 +5034,8 @@ void HYPRE_LinSysCore::buildReducedSystem()
 }
 
 //***************************************************************************
+//***************************************************************************
+//***************************************************************************
 // reading a matrix from a file in ija format (first row : nrows, nnz)
 // (read by a single processor)
 //---------------------------------------------------------------------------
@@ -4960,10 +5079,10 @@ void HYPRE_LinSysCore::HYFEI_Get_IJAMatrixFromFile(double **val, int **ia,
           printf("Error reading row %d (curr_row = %d)\n", rowindex, curr_row);
        if ( colindex < 0 || colindex >= Nrows )
           printf("Error reading col %d (rowindex = %d)\n", colindex, rowindex);
-         if ( value != 0.0 ) {
+         //if ( value != 0.0 ) {
           mat_ja[icount] = colindex;
           mat_a[icount++]  = value;
-         }
+         //}
     }
     fclose(fp);
     for ( i = curr_row+1; i <= Nrows; i++ ) mat_ia[i] = icount;
@@ -5019,8 +5138,8 @@ void fei_hypre_test(int argc, char *argv[])
 {
     int    i, j, k, my_rank, num_procs, nrows, nnz, mybegin, myend, status;
     int    *ia, *ja, ncnt, index, chunksize, iterations, local_nrows;
-    int    *rowLengths, **colIndices, blksize=1;
-    double *val, *rhs, *diag, ddata, ddata_max;
+    int    *rowLengths, **colIndices, blksize=1, *list;
+    double *val, *rhs, ddata, ddata_max;
 
     //------------------------------------------------------------------
     // initialize parallel platform
@@ -5061,30 +5180,7 @@ void fei_hypre_test(int argc, char *argv[])
        MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
        MPI_Bcast(rhs, nrows,   MPI_DOUBLE, 0, MPI_COMM_WORLD);
     }
-    /*
-    diag = new double[Nrows];
-    for ( i = 0; i < nrows; i++ ) {
-       for ( j = ia[i]; j < ia[i+1]; j++ ) {
-          if ( (ja[j]-1) == i ) diag[i] = 1.0 / sqrt(val[j]);
-       }
-    }
 
-    for ( i = 0; i < nrows; i++ ) {
-       for ( j = ia[i]; j < ia[i+1]; j++ ) {
-          val[j] = diag[i] * val[j] * diag[ja[j]-1];
-       }
-       rhs[i] *= diag[i];
-    }
-    delete [] diag;
-    */
-    //if (my_rank == 0 )
-    //{
-    //   for ( i = 0; i < 5; i++ ) {
-    //      for ( j = ia[i]; j < ia[i+1]; j++ ) {
-    //         printf("ROW %4d, COL = %5d, data = %e\n", i+1, ja[j],val[j]);
-    //      }
-    //   }
-    //}
     chunksize = nrows / blksize;
     if ( chunksize * blksize != nrows )
     {
@@ -5155,7 +5251,7 @@ void fei_hypre_test(int argc, char *argv[])
 
     strcpy(paramString, "solver gmres");
     H.parameters(1, &paramString);
-    strcpy(paramString, "preconditioner boomeramg");
+    strcpy(paramString, "preconditioner ml");
     H.parameters(1, &paramString);
     strcpy(paramString, "gmresDim 300");
     H.parameters(1, &paramString);
@@ -5169,7 +5265,7 @@ void fei_hypre_test(int argc, char *argv[])
     strcpy(paramString, "amgStrongThreshold 0.25");
     H.parameters(1, &paramString);
 
-    strcpy(paramString, "mlNumPresweeps 3");
+    strcpy(paramString, "mlNumPresweeps 2");
     H.parameters(1, &paramString);
     strcpy(paramString, "mlNumPostsweeps 2");
     H.parameters(1, &paramString);
@@ -5179,46 +5275,11 @@ void fei_hypre_test(int argc, char *argv[])
     H.parameters(1, &paramString);
     strcpy(paramString, "mlRelaxWeight 0.5");
     H.parameters(1, &paramString);
-    strcpy(paramString, "mlStrongThreshold 0.08");
+    strcpy(paramString, "mlStrongThreshold 0.25");
     H.parameters(1, &paramString);
 
     strcpy(paramString, "parasailsNlevels 1");
     H.parameters(1, &paramString);
-
-    //-------------------------------------------------------------------
-    // #### force solution to be all 1 (for debugging)            
-    //-------------------------------------------------------------------
-
-    HYPRE_ParCSRMatrix A_csr;
-    HYPRE_ParVector    x_csr;
-    HYPRE_ParVector    b_csr;
-    HYPRE_ParVector    r_csr;
-    //A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(H.currA_);
-    //x_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(H.currX_);
-    //b_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(H.currB_);
-    //r_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(H.currR_);
-    //ddata = 1.0;
-    //for ( i = H.localStartRow_-1; i < H.localEndRow_; i++ )
-    //   HYPRE_IJVectorSetLocalComponents(H.HYx_,1,&i, NULL, &ddata);
-    //HYPRE_ParCSRMatrixMatvec( 1.0, A_csr, x_csr, 0.0, b_csr );
-    //HYPRE_ParVectorInnerProd( b_csr, b_csr, &ddata);
-    //printf("(1) Inner product = %e\n", ddata);
-    //ddata = 0.0;
-    //for ( i = H.localStartRow_-1; i < H.localEndRow_; i++ )
-    //   HYPRE_IJVectorSetLocalComponents(H.HYx_,1,&i, NULL, &ddata);
-
-    H.buildReducedSystem();
-    //b_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(H.currB_);
-    //HYPRE_ParVectorInnerProd( b_csr, b_csr, &ddata);
-    //printf("(2) Inner product = %e\n", ddata);
-    //ddata_max = 0.0;
-    //for ( i = H.localStartRow_-1; i < H.localEndRow_-H.nConstraints_*2; i++ )
-    //{
-    //   HYPRE_IJVectorGetLocalComponents(H.currB_,1,&i, NULL, &ddata);
-    //   printf("currB_ %5d = %e\n", i, ddata);
-    //   if ( abs(ddata) > ddata_max ) ddata_max = ddata;
-    //}
-    //printf("currB_ max = %e\n", ddata_max);
 
     //------------------------------------------------------------------
     // solve the system
@@ -5238,14 +5299,320 @@ void fei_hypre_test(int argc, char *argv[])
 
     if ( my_rank == 0 )
     {
-       for ( i = 1; i <= 3094; i++ )
+       for ( i = H.localStartRow_-1; i < H.localEndRow_; i++ )
        {
           HYPRE_IJVectorGetLocalComponents(H.currX_,1,&i, NULL, &ddata);
           //H.getSolnEntry(i, ddata);
-          if ( abs(ddata - 0.0 ) > 1.0E-8)
           printf("sol(%d): %e\n", i, ddata);
        }
     }
+
+    //------------------------------------------------------------------
+    // clean up 
+    //------------------------------------------------------------------
+
+    MPI_Finalize();
+}
+
+//***************************************************************************
+//***************************************************************************
+// This section investigates the use of domain decomposition preconditioner
+// using AMG.  
+//***************************************************************************
+//***************************************************************************
+
+HYPRE_IJMatrix localA;
+HYPRE_IJVector localb;
+HYPRE_IJVector localx;
+int            myBegin, myEnd, myRank;
+
+int HYPRE_SeqAMGSolve( HYPRE_Solver solver,
+                       HYPRE_ParCSRMatrix A,
+                       HYPRE_ParVector b,
+                       HYPRE_ParVector x      )
+{
+   int                i, local_nrows, *indlist;
+   hypre_ParCSRMatrix *A2 = (hypre_ParCSRMatrix *) A;
+   hypre_ParVector    *b2 = (hypre_ParVector *) b;
+   hypre_ParVector    *x2 = (hypre_ParVector *) x;
+   hypre_Vector       *x_local = hypre_ParVectorLocalVector(x2);
+   double             *x_data  = hypre_VectorData(x_local);
+   hypre_Vector       *b_local = hypre_ParVectorLocalVector(b2);
+   double             *b_data  = hypre_VectorData(b_local);
+   HYPRE_ParCSRMatrix A_csr;
+   HYPRE_ParVector    x_csr;
+   HYPRE_ParVector    b_csr;
+
+   local_nrows = myEnd - myBegin + 1;
+   indlist = new int[local_nrows];
+   for (i=0; i<local_nrows; i++) indlist[i] = i;
+   HYPRE_IJVectorSetLocalComponents(localb,local_nrows,indlist, NULL, b_data);
+   HYPRE_IJVectorSetLocalComponents(localx,local_nrows,indlist, NULL, x_data);
+   A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
+   x_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);
+   b_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);
+   HYPRE_ParAMGSolve( solver, A_csr, b_csr, x_csr );
+   hypre_ParVector    *u = (hypre_ParVector *) x_csr;
+   hypre_Vector       *u_local = hypre_ParVectorLocalVector(u);
+   double             *u_data  = hypre_VectorData(u_local);
+   for (i=0; i<local_nrows; i++) x_data[i] = u_data[i];
+   delete [] indlist;
+
+   int    j, rowSize, *colInd;
+   double *colVal;
+   if ( myRank == 10 )
+   {
+      for ( i = 0; i < local_nrows; i++ )
+      {
+         HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
+         for ( j = 0; j < rowSize; j++ )
+            printf("A(%d,%d) = %e;\n", i+1, colInd[j]+1, colVal[j]);
+         HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
+      }
+      for ( i = 0; i < local_nrows; i++ )
+      {
+         printf("x(%d) = %e;\n", i+1, u_data[i]);
+      }
+      for ( i = 0; i < local_nrows; i++ )
+      {
+         printf("b(%d) = %e;\n", i+1, b_data[i]);
+      }
+   }
+   return 0;
+}
+
+//***************************************************************************
+//***************************************************************************
+
+void fei_hypre_dd(int argc, char *argv[])
+{
+    int                i, j, k, nrows, nnz;
+    int                num_procs, status;
+    int                *ia, *ja, ncnt, index, chunksize, iterations;
+    int                local_nrows, eqnNum, *rowLengths, **colIndices;
+    int                blksize=1, *list, *colInd, *newColInd;
+    int                rowSize, newRowSize, maxRowSize;
+    double             *val, *rhs, ddata, ddata_max, *colVal, *newColVal;
+    MPI_Comm           newComm, dummyComm;
+
+    HYPRE_Solver       SeqPrecon;
+    HYPRE_Solver       PSolver;
+    HYPRE_ParCSRMatrix A_csr;
+    HYPRE_ParVector    x_csr;
+    HYPRE_ParVector    b_csr;
+    HYPRE_ParVector    r_csr;
+
+    //******************************************************************
+    // initialize parallel platform
+    //------------------------------------------------------------------
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+
+    HYPRE_LinSysCore H(MPI_COMM_WORLD);
+
+    //******************************************************************
+    // read the matrix and rhs and broadcast
+    //------------------------------------------------------------------
+
+    if ( myRank == 0 ) {
+       H.HYFEI_Get_IJAMatrixFromFile(&val, &ia, &ja, &nrows,
+                                &rhs, "matrix.data", "rhs.data");
+       nnz = ia[nrows];
+       MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
+       MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
+
+       MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
+       MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
+       MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
+       MPI_Bcast(rhs, nrows,   MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+    } else {
+       MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
+       MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
+       ia  = new int[nrows+1];
+       ja  = new int[nnz];
+       val = new double[nnz];
+       rhs = new double[nrows];
+
+       MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
+       MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
+       MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
+       MPI_Bcast(rhs, nrows,   MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    }
+    chunksize = nrows / blksize;
+    if ( chunksize * blksize != nrows )
+    {
+       printf("Cannot put into matrix blocks with block size 3\n");
+       exit(1);
+    }
+    chunksize = chunksize / num_procs;
+    myBegin = chunksize * myRank * blksize;
+    myEnd   = chunksize * (myRank + 1) * blksize - 1;
+    if ( myRank == num_procs-1 ) myEnd = nrows - 1;
+    printf("Processor %d : begin/end = %d %d\n", myRank, myBegin, myEnd);
+    fflush(stdout);
+
+    //******************************************************************
+    // create and load the global matrix in the HYPRE context
+    //------------------------------------------------------------------
+
+    local_nrows = myEnd - myBegin + 1;
+    H.createMatricesAndVectors(nrows, myBegin+1, local_nrows);
+
+    rowLengths = new int[local_nrows];
+    colIndices = new int*[local_nrows];
+    for ( i = myBegin; i < myEnd+1; i++ ) 
+    {
+       ncnt = ia[i+1] - ia[i];
+       rowLengths[i-myBegin] = ncnt;
+       colIndices[i-myBegin] = new int[ncnt];
+       k = 0;
+       for (j = ia[i]; j < ia[i+1]; j++) colIndices[i-myBegin][k++] = ja[j];
+    }
+
+    H.allocateMatrix(colIndices, rowLengths);
+
+    for ( i = myBegin; i < myEnd+1; i++ ) delete [] colIndices[i-myBegin];
+    delete [] colIndices;
+    delete [] rowLengths;
+
+    for ( i = myBegin; i <= myEnd; i++ ) 
+    {
+       ncnt = ia[i+1] - ia[i];
+       index = i + 1;
+       H.sumIntoSystemMatrix(index, ncnt, &val[ia[i]], &ja[ia[i]]);
+    }
+    H.matrixLoadComplete();
+    delete [] ia;
+    delete [] ja;
+    delete [] val;
+    
+    //******************************************************************
+    // load the right hand side 
+    //------------------------------------------------------------------
+
+    for ( i = myBegin; i <= myEnd; i++ ) 
+    {
+       index = i + 1;
+       H.sumIntoRHSVector(1, &rhs[i], &index);
+    }
+    delete [] rhs;
+
+    //******************************************************************
+    // create and load a local matrix 
+    //------------------------------------------------------------------
+
+    local_nrows = myEnd - myBegin + 1;
+    for ( i = 0; i < num_procs; i++ )
+    {
+       if ( myRank == i )
+          MPI_Comm_split(MPI_COMM_WORLD, i+1, 0, &newComm);
+       else
+          MPI_Comm_split(MPI_COMM_WORLD, MPI_UNDEFINED, 1, &dummyComm);
+    }
+    printf("%d : newComm = %d\n", H.mypid_, (int) newComm);
+    MPI_Comm_rank(newComm, &i);
+    MPI_Comm_size(newComm, &j);
+    printf("%d : my new rank %d = %d(%d)\n", H.mypid_, (int) newComm, i,j);
+    HYPRE_IJMatrixCreate(newComm,&localA,local_nrows,local_nrows);
+    HYPRE_IJMatrixSetLocalStorageType(localA, HYPRE_PARCSR);
+    HYPRE_IJMatrixSetLocalSize(localA, local_nrows, local_nrows);
+    rowLengths = new int[local_nrows];
+    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(H.HYA_);
+    maxRowSize = 0;
+    for ( i = myBegin; i <= myEnd; i++ )
+    {
+       rowLengths[i-myBegin] = 0;
+       HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
+       for ( j = 0; j < rowSize; j++ )
+          if ( colInd[j] >= myBegin && colInd[j] <= myEnd ) 
+             rowLengths[i-myBegin]++;
+       nnz += rowLengths[i-myBegin];
+       maxRowSize = (rowLengths[i-myBegin] > maxRowSize) ? 
+                            rowLengths[i-myBegin] : maxRowSize;
+       HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
+    }
+    HYPRE_IJMatrixSetRowSizes(localA, rowLengths);
+    HYPRE_IJMatrixInitialize(localA);
+    newColInd = new int[maxRowSize];
+    newColVal = new double[maxRowSize];
+    for ( i = 0; i < local_nrows; i++ )
+    {
+       eqnNum = myBegin + i;
+       HYPRE_ParCSRMatrixGetRow(A_csr,eqnNum,&rowSize,&colInd,&colVal);
+       nnz = 0;
+       for ( j = 0; j < rowSize; j++ )
+          if ( colInd[j] >= myBegin && colInd[j] <= myEnd ) 
+          {
+             newColInd[nnz] = colInd[j] - myBegin;
+             newColVal[nnz++] = colVal[j];
+          }
+       HYPRE_ParCSRMatrixRestoreRow(A_csr,eqnNum,&rowSize,&colInd,&colVal);
+       HYPRE_IJMatrixInsertRow(localA,nnz,i,newColInd,newColVal);
+    }
+    delete [] newColInd;
+    delete [] newColVal;
+    HYPRE_IJMatrixAssemble(localA);
+
+    //******************************************************************
+    // create and load local vectors 
+    //------------------------------------------------------------------
+
+    HYPRE_IJVectorCreate(newComm, &localx, local_nrows);
+    HYPRE_IJVectorSetLocalStorageType(localx, HYPRE_PARCSR);
+    HYPRE_IJVectorSetLocalPartitioning(localx, 0, local_nrows);
+    HYPRE_IJVectorAssemble(localx);
+    HYPRE_IJVectorInitialize(localx);
+    HYPRE_IJVectorZeroLocalComponents(localx);
+    HYPRE_IJVectorCreate(newComm, &localb, local_nrows);
+    HYPRE_IJVectorSetLocalStorageType(localb, HYPRE_PARCSR);
+    HYPRE_IJVectorSetLocalPartitioning(localb, 0, local_nrows);
+    HYPRE_IJVectorAssemble(localb);
+    HYPRE_IJVectorInitialize(localb);
+    HYPRE_IJVectorZeroLocalComponents(localb);
+
+    //******************************************************************
+    // create a GMRES context
+    //------------------------------------------------------------------
+
+    printf("%d : creating GMRES \n", H.mypid_);
+    HYPRE_ParCSRGMRESCreate(MPI_COMM_WORLD, &PSolver);
+    HYPRE_ParCSRGMRESSetKDim(PSolver, 100);
+    HYPRE_ParCSRGMRESSetMaxIter(PSolver, 1000);
+    HYPRE_ParCSRGMRESSetTol(PSolver, 1.0E-8);
+    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(H.HYA_);
+    x_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(H.HYx_);
+    b_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(H.HYb_);
+    HYPRE_ParCSRGMRESSetup(PSolver, A_csr, b_csr, x_csr);
+
+    //******************************************************************
+    // create an AMG context
+    //------------------------------------------------------------------
+
+    HYPRE_ParAMGCreate(&SeqPrecon);
+    HYPRE_ParAMGSetMaxIter(SeqPrecon, 1);
+    HYPRE_ParAMGSetCycleType(SeqPrecon, 1);
+    HYPRE_ParAMGSetMaxLevels(SeqPrecon, 25);
+    HYPRE_ParAMGSetTol(SeqPrecon, 1.0E-16);
+    HYPRE_ParAMGSetMeasureType(SeqPrecon, 0);
+    HYPRE_ParCSRGMRESSetPrecond(PSolver, HYPRE_SeqAMGSolve, 
+                                HYPRE_ParAMGSetup, SeqPrecon);
+    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
+    //HYPRE_ParAMGSetIOutDat(SeqPrecon, 2);
+    //HYPRE_ParAMGSetDebugFlag(SeqPrecon, 1);
+    HYPRE_ParAMGSetup( SeqPrecon, A_csr, NULL, NULL);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    //******************************************************************
+    // solve 
+    //------------------------------------------------------------------
+
+    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(H.HYA_);
+    x_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(H.HYx_);
+    b_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(H.HYb_);
+    HYPRE_ParCSRGMRESSolve(PSolver, A_csr, b_csr, x_csr);
 
     //------------------------------------------------------------------
     // clean up 
