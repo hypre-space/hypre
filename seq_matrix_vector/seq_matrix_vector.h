@@ -1,5 +1,5 @@
 
-#include "HYPRE_mv.h"
+#include "HYPRE_seq_mv.h"
 
 #ifndef hypre_MV_HEADER
 #define hypre_MV_HEADER

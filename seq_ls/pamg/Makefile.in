@@ -39,7 +39,7 @@ LFLAGS =\
  -L../../seq_matrix_vector\
  -L../../utilities\
  -lHYPRE_ls\
- -lHYPRE_mv\
+ -lHYPRE_seq_mv\
  -lHYPRE_utilities\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
  
@@ -80,7 +80,7 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_ls.a driver
+all: libHYPRE_amg_ls.a driver
 
 install: all
 
@@ -89,17 +89,17 @@ clean:
 
 veryclean: clean
 	@rm -f driver
-	@rm -f libHYPRE_ls.a
+	@rm -f libHYPRE_amg_ls.a
 
 ##################################################################
 # Rules
 ##################################################################
 
-driver: driver.o libHYPRE_ls.a
+driver: driver.o libHYPRE_amg_ls.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS}
 
-libHYPRE_ls.a: ${OBJS}
+libHYPRE_amg_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -rcu $@ ${OBJS}
 	${RANLIB} $@

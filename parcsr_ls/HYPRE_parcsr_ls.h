@@ -16,7 +16,7 @@
 #define HYPRE_LS_HEADER
 
 #include "HYPRE_utilities.h"
-#include "HYPRE_mv.h"
+#include "HYPRE_seq_mv.h"
 #include "HYPRE_parcsr_mv.h"
 
 #ifdef __cplusplus

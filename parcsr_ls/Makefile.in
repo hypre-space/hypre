@@ -62,7 +62,7 @@ LFLAGS =\
  -lHYPRE_parcsr_ls\
  $(PILUT_LIBFLAGS)\
  -lHYPRE_parcsr_mv\
- -lHYPRE_mv\
+ -lHYPRE_seq_mv\
  -lHYPRE_utilities\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
  

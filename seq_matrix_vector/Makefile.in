@@ -42,7 +42,7 @@ LFLAGS =\
 
 
 HEADERS =\
- HYPRE_mv.h\
+ HYPRE_seq_mv.h\
  seq_matrix_vector.h\
  csr_matrix.h\
  headers.h\
@@ -69,7 +69,7 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
  
-all: libHYPRE_mv.a
+all: libHYPRE_seq_mv.a
  
 install: all
  
@@ -77,14 +77,14 @@ clean:
 	@rm -f *.o
  
 veryclean: clean
-	@rm -f libHYPRE_mv.a
+	@rm -f libHYPRE_seq_mv.a
  
 
 ##################################################################
 # Main rules
 ##################################################################
 
-libHYPRE_mv.a: ${OBJS}
+libHYPRE_seq_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -rcu $@ ${OBJS}
 	${RANLIB} $@

@@ -14,7 +14,7 @@
 
 #include "headers.h"
 
-#include "../seq_matrix_vector/HYPRE_mv.h"
+#include "../seq_matrix_vector/HYPRE_seq_mv.h"
 /* In addition to publically accessible interface in HYPRE_mv.h, the implementation
    in this file uses accessor macros into the sequential matrix structure, and
    so includes the .h that defines that structure. Should those accessor functions
