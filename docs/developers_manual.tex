@@ -1,121 +1,313 @@
-\documentstyle[12pt]{article}
-
-\textwidth 16cm
-\textheight 21cm
-\topmargin -0.5cm
-\oddsidemargin 0.5cm
-\evensidemargin 0.5cm
-\setlength{\headsep}{0.5cm} 
-\catcode`\_=\active \global\let_=\_
-\catcode`\$=\active \global\let$=\$
-
-
+\documentclass{article}
+\usepackage{docxx}
 \begin{document}
-\title{hypre Developer's Manual}
-\newpage
-\tableofcontents
+\pagebreak
+\sloppy
+\begin{cxxContents}
+\cxxContentsEntry{1}{Hypre Developer's Manual}{}
+\begin{cxxContents}
+\cxxContentsEntry{1.1}{Hypre Requirements}{}
+\begin{cxxContents}
+\cxxContentsEntry{1.1.1}{Functional Requirements}{}
+\cxxContentsEntry{1.1.2}{Non-Functional Requirements}{}
+\end{cxxContents}
+\cxxContentsEntry{1.2}{Hypre Design}{}
+\begin{cxxContents}
+\end{cxxContents}
+\cxxContentsEntry{1.3}{Makefile Standards}{}
+\cxxContentsEntry{1.4}{Documentation Standards}{}
+\cxxContentsEntry{1.5}{Coding Standards}{}
+\end{cxxContents}
+\cxxContentsEntry{2}{Quaility Assurance Issues}{}
+\cxxContentsEntry{3}{Installation Procedures}{}
+\cxxContentsEntry{4}{Code Reference}{}
+\end{cxxContents}
+\begin{cxxentry}
+{}
+        {Hypre Developer's Manual}
+        {}
+        {}
+        {1}
+\cxxVersion{
+1.0
+\begin{center}
+Linear Solvers Group
+\end{center}
+\begin{center}
+Center for Applied Scientific Computing
+\end{center}
+\begin{center}
+Lawrence Livermore National Laboratory
+\end{center}
+\begin{center}
+\today
+\end{center}
+\strut}
+\begin{cxxdoc}
 
-\date{October 09, 1998}
-\newpage
+\end{cxxdoc}
+\begin{cxxnames}
+\cxxitem{}
+        {Hypre Requirements}
+        {}
+        {}
+        {1.1}
+\cxxitem{}
+        {Hypre Design}
+        {}
+        {}
+        {1.2}
+\cxxitem{}
+        {Error Handling}
+        {}
+        {}
+        {}
+\label{cxx.1.6}
+\cxxitem{}
+        {Makefile Standards}
+        {}
+        {}
+        {1.3}
+\cxxitem{}
+        {Documentation Standards}
+        {}
+        {}
+        {1.4}
+\cxxitem{}
+        {Coding Standards}
+        {(...)}
+        {}
+        {1.5}
+\end{cxxnames}
+\begin{cxxentry}
+{}
+        {Hypre Requirements}
+        {}
+        {}
+        {1.1}
+\begin{cxxnames}
+\cxxitem{}
+        {Functional Requirements}
+        {}
+        {}
+        {1.1.1}
+\cxxitem{}
+        {Non-Functional Requirements}
+        {}
+        {}
+        {1.1.2}
+\end{cxxnames}
+\begin{cxxentry}
+{}
+        {Functional Requirements}
+        {}
+        {}
+        {1.1.1}
+\begin{cxxdoc}
 
-\section{Purpose of this document}
-
-\pagenumbering{arabic}
-This Developer's Manual is intended to serve as a repository for any and all
-information regarding the development of hypre.  It is a useful resource for
-the developers of hypre to document their own work as well as become 
-acquainted with other aspects of the project, including project guidelines and
-standards.
-
-\section{Requirements Analysis for hypre}
-
-\subsection{The Functional Requirements of hypre}
 R1.	Hypre will consist of a set of linear solvers, preconditioners,
-	libraries of linear solvers, and an interface that allows various 
-	applications to use these libraries and linear solvers in various ways.
+libraries of linear solvers, and an interface that allows various 
+applications to use these libraries and linear solvers in various ways.
 
-	R1.1: Current linear solver include ILUT, AMG, EBE, PILUT, SMG, and
-	
+R1.1: Current linear solver include ILUT, AMG, EBE, PILUT, SMG, and
 
-	R1.2: Current libraries of linear solvers include PetsC, ISIS, and
-	
+
+R1.2: Current libraries of linear solvers include PetsC, ISIS, and
+
 
 
 R2.	Hypre must allow access to other libraries of linear solvers
-	directly through the hypre interface and allow hypre's other linear
-	solvers and preconditioners to be accesses via the standard interface 
-	for the other libraries of linear solvers.
+directly through the hypre interface and allow hypre's other linear
+solvers and preconditioners to be accesses via the standard interface 
+for the other libraries of linear solvers.
 
 
 R3.	New linear solvers, preconditioners, and libraries of linear solvers 
-	should be able to be added to hypre and accessed through the hypre
-	interface any time without much modification.
+should be able to be added to hypre and accessed through the hypre
+interface any time without much modification.
 
-	R3.1: A degree of modularity and loose coupling should exist to 
-	ensure modification and enhancements are simple.
+R3.1: A degree of modularity and loose coupling should exist to 
+ensure modification and enhancements are simple.
 
-	R3.2 (related to R2 also): every linear solver and preconditioner
-	should exist independently of the hypre interface.
+R3.2 (related to R2 also): every linear solver and preconditioner
+should exist independently of the hypre interface.
 
-	
+
 R4.	The applications that will use hypre may provide data in a variety
-	of forms.  Hyper should allow new forms of data to be input
-	without much modification.
-	
-	R4.1: Currently application data may consist of linear algebra, 
-	finite elements, stencils, and
+of forms.  Hyper should allow new forms of data to be input
+without much modification.
 
-	R4.2: The hypre interface should be modular to the extent that adding
-	new valid application data forms will be simple.
+R4.1: Currently application data may consist of linear algebra, 
+finite elements, stencils, and
+
+R4.2: The hypre interface should be modular to the extent that adding
+new valid application data forms will be simple.
 
 
 R5.	Hypre should provide mechanisms to maximize the number of linear
-	solvers and preconditioners avialable to an application regardless of 
-	the format of that data provided by those applications.  
+solvers and preconditioners avialable to an application regardless of 
+the format of that data provided by those applications.  
 
-	R5.1: The user will choose which linear solver or preconditioner
-	to apply to the data. (A set of valid choices will be provided).
-	
-	R5.1: This should be accomplished primarily by "translating" the 
-	application data into the storage schema required by the solver or
-	preconditioner or by applting the coefficient access method 
-	required by the solver or preconditioner.
+R5.1: The user will choose which linear solver or preconditioner
+to apply to the data. (A set of valid choices will be provided).
 
-\subsection{Non-Functional Requirements of hypre}
+R5.1: This should be accomplished primarily by "translating" the 
+application data into the storage schema required by the solver or
+preconditioner or by applting the coefficient access method 
+required by the solver or preconditioner.
+\end{cxxdoc}
+\end{cxxentry}
+\begin{cxxentry}
+{}
+        {Non-Functional Requirements}
+        {}
+        {}
+        {1.1.2}
+\begin{cxxdoc}
 
 R6.	Hypre should be portable across these platforms: Sun, DEC, BLue, and
-	
+
 R7.	Hypre should work with applications written in C, C++, FORTRAN77, and
-	
+
 R8.	Hypre should should be easy to compile, configure, and install.
 
 R9.	Hypre should be scalable.
 
-R10.	Hypre should be work with applications that utilize the MPI standard
-	as well as those incorporating both MPI and OpenMP or MPI and Pthreads.
+R10.	Hypre should work with applications that utilize the MPI standard
+as well as those incorporating both MPI and OpenMP or MPI and Pthreads.
 
-\section{The Design of hypre}
+\end{cxxdoc}
+\end{cxxentry}
+\end{cxxentry}
+\begin{cxxentry}
+{}
+        {Hypre Design}
+        {}
+        {}
+        {1.2}
+\begin{cxxnames}
+\cxxitem{}
+        {Software Architecture}
+        {}
+        {}
+        {}
+\label{cxx.1.2.1}
+\cxxitem{}
+        {Object Model}
+        {}
+        {}
+        {}
+\label{cxx.1.2.2}
+\end{cxxnames}
+\end{cxxentry}
+\begin{cxxentry}
+{}
+        {Makefile Standards}
+        {}
+        {}
+        {1.3}
+\begin{cxxdoc}
 
-\subsection{Software Architecture}
-block diagram will be shown here
+Hypre is using Autoconf for installation.  (See Installation Procedures section).  This requires that a file called Makefile.in be created in each directory.  These files will generate Makefiles when the configure script is run at the top-level directory.  See example Makefile.in to see how it difeers from a conventional MAkefile.
 
-\subsection{Object Model}
-plenty more diagram and class descriptions and discussion of ESI standards.
+\end{cxxdoc}
+\end{cxxentry}
+\begin{cxxentry}
+{}
+        {Documentation Standards}
+        {}
+        {}
+        {1.4}
+\begin{cxxdoc}
+DOC++ is to be used for documentation.
 
-\section{The Implementation of hypre}
+Example documentation for C routines can be found in the directory
+`struct_matrix_vector' in the files:
 
-\subsection{Error Handling}
+DevManual.dxx
+communication.c
 
-\subsection{Makefile Standards}
+Initial user's and developer's manuals need to be constructed in
+DOC++ to get things started.
 
-   		 Using Autoconfig in hypre
-   		 -------------------------
+The above `.dxx' file could serve as a beginning developer's manual.
+
+\end{cxxdoc}
+\end{cxxentry}
+\begin{cxxentry}
+{}
+        {Coding Standards}
+        {(...)}
+        {}
+        {1.5}
+\begin{cxxdoc}
+These guidelines are based on those provided by the ISE project in CASC.
+See `file:/home/casc/software_development/html/index.html' for more info.
+
+--------------------------------------------------------------------------
+
+GENERAL GUIDELINES
+
+The guidelines given in the ISE project document `coding_style.ps'
+should be followed.  There are a few additions/changes that should
+be made here:
+
+1. The "order of parameters" section should be modified so that
+opaque object names always appear first in the argument list.
+For example, a routine for setting the coefficients of a matrix
+object should look like
+
+HYPRE_SetMatrixCoeffs(matrix_object, ...)
+
+even though the matrix_object is an I/O parameter.  This is
+just to provide some consistency.
+
+2. Guidelines for indentation are given below.
+
+3. Guidelines for documentation are given below.
+
+--------------------------------------------------------------------------
+
+NAMING CONVENTIONS FOR HYPRE
+
+
+1. Functions and macros with parameters should be named as follows:
+
+HYPRE_MixedCase(...)          /* User interface routines 
+\end{cxxdoc}
+\end{cxxentry}
+\end{cxxentry}
+\begin{cxxentry}
+{}
+        {Quaility Assurance Issues}
+        {}
+        {}
+        {2}
+\end{cxxentry}
+\begin{cxxentry}
+{}
+        {Installation Procedures}
+        {}
+        {}
+        {3}
+\begin{cxxdoc}
+
+
+Using Autoconfig in hypre
+-------------------------
 
 NOTE: These procedures currently only apply to the following directories:
 
-  utilities
-  struct_matrix_vector
-  struct_linear_solvers
+utilities
+\newline
+struct_matrix_vector
+\newline
+struct_linear_solvers
+\newline
+test
+\newline
+
+In the top level linear_solvers directory type 'autoconf'.  This will use the file, configure.in, to create the file, configure.  This step only needs to be done when configure.in is changed.  
 
 To automatically generate machine specific makefiles, type `configure'
 in the `linear_solvers' directory.  The configure script is a portable
@@ -132,594 +324,78 @@ way that will get different results, you should remove `config.cache'.
 
 This configure script primarily does the following things:
 
-  - selects a C compiler
-  - provides either optimization or debugging options for the C compiler
-  - finds the headers and libraries for MPI
+- selects a C compiler
+- provides either optimization or debugging options for the C compiler
+- finds the headers and libraries for MPI
 
 The configure script has some command-line options that can give you
 some control over the choices it will make.  You can type
 
-  configure --help
+configure --help
 
 to see the list of all of the command-line options to configure, but
 the most significant options are at the bottom of the list, after the
 line that reads "--enable and --with options recognized:"
 
 --with-CC=ARG		
-			This option allows you to choose the C compiler
-			you wish to use.  The default compiler that
-			configure chooses is gcc, if it is available.
+This option allows you to choose the C compiler
+you wish to use.  The default compiler that
+configure chooses is gcc, if it is available.
 
 --enable-opt-debug=ARG  
-			Choose whether you want the C compiler to have
-			optimization or debugging flags.  For debugging,
-			replace `ARG' with `debug'.  For optimization,
-			replace `ARG' with `opt'.  If you want both sets
-			of flags, replace `ARG' with `both'.  The default
-			is optimization
+Choose whether you want the C compiler to have
+optimization or debugging flags.  For debugging,
+replace `ARG' with `debug'.  For optimization,
+replace `ARG' with `opt'.  If you want both sets
+of flags, replace `ARG' with `both'.  The default
+is optimization
 
 --without-MPI		
-			This flag suppresses the use of MPI.  It produces
-			makefiles that serve the same purpose as the
-			files `Makefile.seq'
+This flag suppresses the use of MPI.  It produces
+makefiles that serve the same purpose as the
+files `Makefile.seq'
 
 --with-mpi-include=DIR
 --with-mpi-libs=LIBS
 --with-mpi-lib-dirs=DIRS
-			These three flags are to be used if you want to
-			override the automatic search for MPI.  If you use
-			one of these flags, you must use all three.
-			Replace `DIR' with the path of the directory that
-			contains mpi.h, replace `LIBS' with a list of the
-			stub names of all the libraries needed for MPI, and
-			replace `DIRS' with a list of the directory paths
-			containing the libraries specified by `LIBS'
-			NOTE:  The lists `LIBS' and `DIRS' should be
-			space-separated and contained in quotes, e.g.
-			--with-mpi-libs="nsl socket mpi" and
-			--with-mpi-lib-dirs="/usr/lib /usr/local/mpi/lib"
+These three flags are to be used if you want to
+override the automatic search for MPI.  If you use
+one of these flags, you must use all three.
+Replace `DIR' with the path of the directory that
+contains mpi.h, replace `LIBS' with a list of the
+stub names of all the libraries needed for MPI, and
+replace `DIRS' with a list of the directory paths
+containing the libraries specified by `LIBS'
+NOTE:  The lists `LIBS' and `DIRS' should be
+space-separated and contained in quotes, e.g.
+--with-mpi-libs="nsl socket mpi" and
+--with-mpi-lib-dirs="/usr/lib /usr/local/mpi/lib"
 
 --with-mpi-flags=FLAGS	
-			Sometimes other compiler flags are needed for
-			certain MPI implementations to work.  Replace
-			`FLAGS' with a space-separated list of whatever
-			flags are necessary.  This option does not
-			override the automatic search for MPI.  It can be
-			used to add to the results of the automatic search,
-			or it can be used along with the three previous
-			flags.
+Sometimes other compiler flags are needed for
+certain MPI implementations to work.  Replace
+`FLAGS' with a space-separated list of whatever
+flags are necessary.  This option does not
+override the automatic search for MPI.  It can be
+used to add to the results of the automatic search,
+or it can be used along with the three previous
+flags.
 
 --with-MPICC=ARG	
-			The automatic search for the MPI stuff is based on
-			a tool such as `mpicc' that configure finds in
-			your $PATH.  If there is an implementation of MPI
-			that you wish to use, you can replace `ARG' with
-			the name of that MPI version's C compiler wrapper,
-			if it has one.  (MPICH has mpicc, IBM MPI has
-			mpcc, other MPIs use other names.)  configure will
-			then automatically find the necessary libraries
-			and headers.
+The automatic search for the MPI stuff is based on
+a tool such as `mpicc' that configure finds in
+your $PATH.  If there is an implementation of MPI
+that you wish to use, you can replace `ARG' with
+the name of that MPI version's C compiler wrapper,
+if it has one.  (MPICH has mpicc, IBM MPI has
+mpcc, other MPIs use other names.)  configure will
+then automatically find the necessary libraries
+and headers.
 
 
 
-\subsection{Documentation Standards}
 
-DOCUMENTATION
-
-  DOC++ is to be used for documentation.
-
-  Example documentation for C routines can be found in the directory
-  `struct_matrix_vector' in the files:
-
-     DevManual.dxx
-     communication.c
-
-  Initial user's and developer's manuals need to be constructed in
-  DOC++ to get things started.
-
-  The above `.dxx' file could serve as a beginning developer's manual.
-
---------------------------------------------------------------------------
-
-
-
-\subsection{Coding Standards}
-These guidelines are based on those provided by the ISE project in CASC.
-See `file:/home/casc/software_development/html/index.html' for more info.
-
---------------------------------------------------------------------------
-
-GENERAL GUIDELINES
-
-The guidelines given in the ISE project document `coding_style.ps'
-should be followed.  There are a few additions/changes that should
-be made here:
-
-  1. The "order of parameters" section should be modified so that
-  opaque object names always appear first in the argument list.
-  For example, a routine for setting the coefficients of a matrix
-  object should look like
-
-     HYPRE_SetMatrixCoeffs(matrix_object, ...)
-
-  even though the matrix_object is an I/O parameter.  This is
-  just to provide some consistency.
-
-  2. Guidelines for indentation are given below.
-
-  3. Guidelines for documentation are given below.
-
---------------------------------------------------------------------------
-
-NAMING CONVENTIONS FOR HYPRE
-
-
- 1. Functions and macros with parameters should be named as follows:
-
-      HYPRE_MixedCase(...)          /* User interface routines */
-      hypre_MixedCase(...)          /* Internal non-user routines */
-
- 2. Macros without parameters should be named as follows:
-
-      HYPRE_ALL_CAPS          /* User interface macros */
-      hypre_ALL_CAPS          /* Internal non-user macros */
-
- 3. Types should be named as follows:
-
-      HYPRE_MixedCase          /* User interface types */
-      hypre_MixedCase          /* Internal non-user types */
-
- 4. It is preferred that variables be named as follows:
-
-      lower_case_with_underscores
-
-    This is not a strict rule, but in general one should try
-    to adhere to this so that it is easy to distinguish variables
-    from functions and macros.
- 
---------------------------------------------------------------------------
-
-User interface vs. internal code
-
-The term "user" here refers to someone who wants to solve linear systems,
-but is not developing linear solvers.  The term "internal code" refers to
-code that is not part of the user interface.
-
-NOTE: It is important to clearly distinguish between supported
-routines and everything else in the library.  The mechanism described
-below is one way of making this explicit.
-
-The following convention has been used to some degree already in hypre
-for separating the two above notions.  Files containing internal
-routines are given names *without* the `hypre_' prefix and include
-only *one* internal header file with some name that is unique in the
-hypre library (Note: The SMG code currently uses the convention of
-giving this header file the same name as the user header file, but
-with a lower-case `hypre_' prefix.  See the below example).  All user
-interface routines are defined in files beginning with the prefix
-`HYPRE_'.  One user interface header file is defined that contains
-prototypes, etc., for the interface routines.
-
-By doing this, it is easy to create prototypes for internal routines and
-user interface routines.  For example,
-
-  mkproto *.c >> hypre_lib.h
-  mkproto HYPRE_*.c >> HYPRE_lib.h
-
-We should continue this convention for now.  It is possible that this
-may be changed to some other convention in the future, but if we have
-a common way of doing it now, it will be easier to change later.
-
-Note that NT does not distinguish between lower and upper case file
-names, so we will need to change the naming convention slightly.
-Suggestions?
-
---------------------------------------------------------------------------
-
-INDENTATION
-
-  The ISE project file `sample.emacs' should be used to provide a
-  common indentation style for the library.  If you don't use emacs
-  as your editor, you can use the scripts written by Rob Falgout
-  to indent files from the shell command line.  See the README file
-  in `~falgout/tools'.
-
-  The files `sample_c_code.c' and `sample_f77_code.c' have been
-  provided as examples of indentation style for Hypre.  They are
-  modifications of those provided by the ISE project.
-
-  NOTE: the fortran source file and the fortran mode defined in
-  the `sample.emacs' file do not agree.  The fortran part of this
-  document needs work.  Volunteers?
-
---------------------------------------------------------------------------
-
-\subsection{Language Interoperability}
-
-       Zero-based vs. One-based Indexing in HYPRE Matrices
-
-
-Some definitions:
-
-0-based indexing.  Row and column indices are numbered starting at 0.
-1-based indexing.  Row and column indices are numbered starting at 1.
-0-based storage.   Natural for C, possible in Fortran.
-1-based storage.   Natural for Fortran, sometimes used in C.
-
-
-I. The issues and a suggested decision
-
-The issues are as follows:
-
- 1. We want the code to be natural to write.
- 2. We want to interoperate with other codes as much as possible.
- 3. We want the code to be as efficient as possible.
-
-Section III below contains 4 different ways to write 1 sample code in C.
-The sample code does a simple matvec, allocates an int array that will
-mark the coarse grid variables in a multigrid scheme, directly calls
-a fortran subroutine to fill in the coarse grid array (we might
-typically have a C wrapper around the fortran subroutine, but the
-intention here is to explicitely demonstrate the parameter translation
-required to interface with the routine), then de-allocates the coarse
-grid array.
-
-The A and B examples use 0-based and 1-based indexing with no pointer
-tricks.  Example C uses 1-based indexing with a pointer trick that is
-left fully exposed for illustrative purposes.  Example D supports both 0
-and 1-based indexing and uses a hypre_BaseArray "class" (see section II
-below for details on this class) to hide the tricks illustrated in
-example C.  In these examples, it is assumed that the fortran subroutine
-provides the same indexing support as the calling C-routines.
-
-Issue 1:  Example A is the most straightforward and least confusing
-of all the examples.  That is, 0-based indexing is the most natural for
-C programming.  However, examples C and D are not all that bad either.
-Example B is horribly confusing.  The most natural style for fortran is
-1-based, but a fortran variant of examples C and D for 0-based indexing
-would also be fairly natural.  Arrays would be declared like this:
-
-     integer  Ai(base:An+base)
-
-and the iiA loop would look like this:
-
-     do iiA = base, An-1+base
-
-Issue 2:  We cannot dictate what other code groups support regarding
-indexing.  So, if we want to interoperate with other codes, we need to
-support both 0-based and 1-based indexing as in example D below.
-
-Issue 3:  To keep efficiency high, we do *not* want to have to modify
-the data in the A_i and A_j arrays.  That is, we want to use the pointer
-tricks below to interoperate with other codes.  However, this means that
-the whole code does *either* 0-based *or* 1-based indexing during any single
-run, and *not* both.
-
-Suggested decision: Support both 0-based and 1-based indexing.
-
-
-II. Hiding the details
-
-Although code for supporting both 0-based and 1-based indexing is not
-too ugly even when the tricks are exposed, it is easier to make mistakes
-and/or get confused during code development and debugging.  In an attempt
-to minimize this, we introduce a hypre_BaseArray "class" in subsection II.1,
-and a set of coding rules and guidelines in subsection II.2.
-
-II.1. The BaseArray class
-
-Types:
-  hypre_IntBaseArray, hypre_DoubleBaseArray, ...
-
-  Note: These types are just typedefs for `int' and `double', so
-  compilers will not treat them at distinct types (strong typing).
-  It would be nice to have compilers do strong typing on them
-  to help reduce mistakes, but it is apparantly not possible to
-  do this in C *and* retain the ability to use the `[]' operators
-  and do casting.
-
-Constructor/destructor macros:
-  base_array = hypre_AllocBaseArray(type, size, base)
-  hypre_FreeBaseArray(base_array, base)
-
-Macro that returns a pointer to the real data:
-  base_array_data = hypre_BaseArrayData(base_array, base)
-
-Macro that converts from 1 base index to another
-  new_index = hypre_ConvertBaseIndex(index, base, new_base)
-
-Function that converts from 1 base to another (This function actually
-modifies the data in the array, so it should be used only when necessary):
-  hypre_ConvertBaseArray(&base_array, base, new_base)
-
-II.2. Coding Rules and Guidelines
-
-- All arrays with array indices that refer to either rows/columns of
-  matrices or elements of vectors must be hypre_BaseArray types.
-  This reduces the possibility of making coding errors.
-
-- All hypre_BaseArray types in the same routine should use the same base.
-  It is recommended that only one `base' variable be defined for each
-  routine in an attempt to enforce this.
-
-- Care must be taken when calling other codes that depend on the matrix
-  and vector base to convert (if necessary) to a base that the called
-  code supports.
-
-
-III. Sample code
-
-/*--------------------------------------------------------------------------
- * Indexing example code:
- *--------------------------------------------------------------------------*/
-
-/*-----------------------------------------------
- * A) 0-based indexing
- *-----------------------------------------------*/
-
-int
-hypre_SampleA( hypre_Matrix *A,
-               hypre_Vector *x,
-               hypre_Vector *y )
-{
-   double  *A_data = hypre_MatrixData(A);
-   int     *A_i    = hypre_MatrixI(A);
-   int     *A_j    = hypre_MatrixJ(A);
-   int     *A_n    = hypre_MatrixN(A);
-
-   double  *x_data = hypre_VectorData(x);
-   double  *y_data = hypre_VectorData(y);
-
-   int      iiA, jjA;
-
-   int     *coarse_grid;
-
-   /* ... */
-
-   /* matvec */
-   for (iiA = 0; iiA < A_n; iiA++ )
-   {
-      for (jjA = A_i[iiA]; jjA < A_i[iiA+1]; jjA++)
-      {
-         y_data[iiA] += A_data[jjA] * x_data[A_j[jjA]];
-      }
-   }
-
-   /* coarse-grid allocation */
-   coarse_grid = hypre_TAlloc(int, A_n);
-
-   /* coarse-grid selection function call */
-   hypre_coarsen_( ..., coarse_grid);
-
-   /* coarse-grid de-allocation */
-   hypre_TFree(coarse_grid);
-
-   return 0;
-}
-
-/*-----------------------------------------------
- * B) 1-based indexing (no tricks)
- *-----------------------------------------------*/
-
-int
-hypre_SampleB( hypre_Matrix *A,
-               hypre_Vector *x,
-               hypre_Vector *y )
-{
-   double  *A_data = hypre_MatrixData(A);
-   int     *A_i    = hypre_MatrixI(A);
-   int     *A_j    = hypre_MatrixJ(A);
-   int     *A_n    = hypre_MatrixN(A);
-
-   double  *x_data = hypre_VectorData(x);
-   double  *y_data = hypre_VectorData(y);
-
-   int      iiA, jjA;
-
-   int     *coarse_grid;
-
-   /* ... */
-
-   /* matvec */
-   for (iiA = 1; iiA <= A_n; iiA++ )
-   {
-      for (jjA = A_i[iiA-1]; jjA < A_i[iiA]; jjA++)
-      {
-         y_data[iiA-1] += A_data[jjA-1] * x_data[A_j[jjA-1]-1];
-      }
-   }
-
-   /* coarse-grid allocation */
-   coarse_grid = hypre_TAlloc(int, A_n);
-
-   /* coarse-grid selection function call */
-   hypre_coarsen_( ..., coarse_grid);
-
-   /* coarse-grid de-allocation */
-   hypre_TFree(coarse_grid);
-
-   return 0;
-}
-
-/*-----------------------------------------------
- * C) 1-based indexing (with tricks):
- *-----------------------------------------------*/
-
-int
-hypre_SampleC( hypre_Matrix *A,
-               hypre_Vector *x,
-               hypre_Vector *y )
-{
-   double  *A_data = hypre_MatrixData(A) - 1;
-   int     *A_i    = hypre_MatrixI(A) - 1;
-   int     *A_j    = hypre_MatrixJ(A) - 1;
-   int     *A_n    = hypre_MatrixN(A);
-
-   double  *x_data = hypre_VectorData(x) - 1;
-   double  *y_data = hypre_VectorData(y) - 1;
-
-   int      iiA, jjA;
-
-   int     *coarse_grid;
-
-   /* ... */
-
-   /* matvec */
-   for (iiA = 1; iiA < A_n+1; iiA++ )
-   {
-      for (jjA = A_i[iiA]; jjA < A_i[iiA+1]; jjA++)
-      {
-         y_data[iiA] += A_data[jjA] * x_data[A_j[jjA]];
-      }
-   }
-
-   /* coarse-grid allocation */
-   coarse_grid = hypre_TAlloc(int, A_n) - 1;
-
-   /* coarse-grid selection function call */
-   hypre_coarsen_( ..., coarse_grid + 1);
-
-   /* coarse-grid de-allocation */
-   hypre_TFree(coarse_grid + 1);
-
-   return 0;
-}
-
-/*-----------------------------------------------
- * D) 0 & 1-based indexing:
- *
- * We use the same tricks as in example C, except
- * that we "hide" most of them in the following
- * macros and functions:
- *
- * hypre_MatrixData, hypre_MatrixI, hypre_MatrixJ
- * hypre_VectorData
- * hypre_AllocBaseArray
- * hypre_FreeBaseArray
- * hypre_BaseArrayData
- *
- * The integer `base' is either a 0 or a 1 depending
- * on whether the storage is 0 or 1-based.
- *
- * We also use the following types so that the
- * code is more explicit about which variables
- * we are applying "tricks" to.
- *-----------------------------------------------*/
-
-int
-hypre_SampleD( hypre_Matrix *A,
-               hypre_Vector *x,
-               hypre_Vector *y )
-{
-   hypre_DoubleBaseArray  *A_data = hypre_MatrixData(A);
-   hypre_IntBaseArray     *A_i    = hypre_MatrixI(A);
-   hypre_IntBaseArray     *A_j    = hypre_MatrixJ(A);
-   hypre_IntBaseArray     *A_n    = hypre_MatrixN(A);
-
-   hypre_DoubleBaseArray  *x_data = hypre_VectorData(x);
-   hypre_DoubleBaseArray  *y_data = hypre_VectorData(y);
-
-   hypre_IntBaseArray     *coarse_grid;
-
-   int                     iiA, jjA;
-
-   /* ... */
-
-   /* matvec */
-   for (iiA = base; iiA < A_n+base; iiA++ )
-   {
-      for (jjA = A_i[iiA]; jjA < A_i[iiA+1]; jjA++)
-      {
-         y_data[iiA] += A_data[jjA] * x_data[A_j[jjA]];
-      }
-   }
-
-   /* coarse-grid allocation ( = hypre_TAlloc(int, A_n) - base ) */
-   coarse_grid = hypre_AllocBaseArray(int, A_n, base);
-
-   /* coarse-grid selection function call */
-   hypre_coarsen_( ..., &base,
-                   hypre_BaseArrayData(coarse_grid, base);
-
-   /* coarse-grid de-allocation ( = hypre_TFree(coarse_grid + base) ) */
-   hypre_FreeBaseArray(coarse_grid, base);
-   return 0;
-}
-
-\section{Testing and Releasing hypre}
-
-\subsection{Autotest Procedures}
-What is autotest?
-\newline
-----------------------------------------------------------------------------
-\newline
-Autotest is a set of driver programs and scripts set up as a cron job to test daily code changes.
-
-How is autotest structured?
-\newline
-----------------------------------------------------------------------------
-
-\newline
-The /linear_solvers/test/ subdirectory (in the repository) contain
-1.) various driver programs (.c files)
-2.) bourne shell scripts to run the driver programs
-3.) test_drivers.sh script calls all other scripts and writes their results to a file autotest.log.
-4.) the autotest script-- this copy is not used by the cron job however.
-
-The /home/casc/software/hypre/autotest directory contains
-1.) the autotest script which is used by the cron job.
-2.) the linear_solvers directory which autotest checks out of the repository
-3.) Autotest script checks out the repository, configures, makes the library,
-calls the test_drivers.sh script in the newly checked out directory structure, 
-and sets permissions.  This file should seldom change.
-
-Features of autotest
-\newline
-----------------------------------------------------------------------------
-\newline
-1.) works with the autoconfig infrastructure.
-2.) test suites can be added/removed easily.
-3.) identify failure/success of a test (future feature)
-4.) email code developers of test failure (future feature)
-5.) test on all target platforms (future feature)
-
-How to modify autotest
-\newline
-----------------------------------------------------------------------------
-\newline
-1.) create and test a driver program -- somedriver.c
-2.) create and test a Bourne shell script to run the driver -- somedriver.sh
-3.) append the following to the test_drivers.sh file
-HYPRE_SOMEDRIVER_LOG_FILE=''somedriver.log''
-./somedriver.sh >> $HYPRE_SOMEDRIVER_LOG_FILE
-4.) modify the Makefile.in file in the test subdirectory as follows:
-add the necessary information to LFLAGS = \ section
-add the necessary target information to the TARGETS section
-add the necessary rules to the RULES section
-5.) modify the /linear_solvers/ Makefile.in file as follows:
-add the necessary information to the HYPRE_DIRS =\ section
-6.) modify the /linear_solvers/ configure.in file as follows
-add information to the AC_OUTPUT section (first one)
-add information to the CASC_CONFIG_OUTPUT_LIST section
-add information to the final AC_OUTPUT section
-7.) To test the changes 
-in linear_solvers directory type 
->autoconf
->configure
->make
->cd test
->test_driver.sh
->cd /home/casc/software/hypre/autotest/linear_solvers/test/
-look at somedriver.log for correct output.
-8.)if everything went well commit all added and modified files.  There is no need to modify autotest or the crontab file.
-
-
-
-\subsection{Quality Assurance Issues}
-
-\subsection{Installation Procedures}
-
-    Instructions for updating and maintaining installations of hypre
+Instructions for updating and maintaining installations of hypre
 
 ----------------------------------------------------------------------------
 
@@ -728,27 +404,27 @@ GENERAL COMMENTS:
 There are two types of hypre installations that are updated and
 maintained by members of the Scalable Linear Solvers project:
 
-  1. The "internal" installation:
+1. The "internal" installation:
 
-    - intended to give users access to relatively recent changes.
-    - updated somewhat frequently (about once a week).
-    - may be relatively unstable.
-    - one old installation is retained.
-    - installed on:
-        CASC Sun workstation cluster
+- intended to give users access to relatively recent changes.
+- updated somewhat frequently (about once a week).
+- may be relatively unstable.
+- one old installation is retained.
+- installed on:
+CASC Sun workstation cluster
 
-  2. The "external" installation:
+2. The "external" installation:
 
-    - intended to give users consistent access across several platforms.
-    - updated less frequently than internal installation.
-    - should be relatively stable.
-    - a few old installations are retained.
-    - installed on:
-        CASC Sun workstation cluster
-        Compass DEC cluster
-        Blue-Pacific
-        Forest DEC cluster  (classified)
-        Blue(Sky)-Pacific   (classified)
+- intended to give users consistent access across several platforms.
+- updated less frequently than internal installation.
+- should be relatively stable.
+- a few old installations are retained.
+- installed on:
+CASC Sun workstation cluster
+Compass DEC cluster
+Blue-Pacific
+Forest DEC cluster  (classified)
+Blue(Sky)-Pacific   (classified)
 
 Rob Falgout is maintaining two lists of users who want to receive
 notification of installation updates: one for "internal" updates and
@@ -765,45 +441,50 @@ get general usage info, do `update -help'.
 
 Internal installation:
 
-  (on CASC cluster only)
+(on CASC cluster only)
 
-  1. Do `update internal' - this checks out the current version of the
-     repository, tags it with a date (file `VERSION_DATE'), compiles it,
-     temporarily installs it, and sets the permissions of the temporary
-     installation to appropriate values.  This also creates the tar file
-     `UPDATE.tar', currently only used in the external installation.
+1. Do `update internal' - this checks out the current version of the
+repository, tags it with a date (file `VERSION_DATE'), compiles it,
+temporarily installs it, and sets the permissions of the temporary
+installation to appropriate values.  This also creates the tar file
+`UPDATE.tar', currently only used in the external installation.
 
-  2. Do `update internal install' - this saves the previously
-     installed version, moves the temporary installation into its
-     correct location, and possibly deletes some older installations.
+2. Do `update internal install' - this saves the previously
+installed version, moves the temporary installation into its
+correct location, and possibly deletes some older installations.
 
-     Note that step 1 is not actually needed, but is recommended in case
-     something doesn't work as planned (e.g., failed checkout, failed
-     compile, ...).  Also, step 1 provides the opportunity to test the
-     library in non-CASC codes such as ARES or ALE3D via the temporary
-     installation in the `UPDATE' subdirectory.
+Note that step 1 is not actually needed, but is recommended in case
+something doesn't work as planned (e.g., failed checkout, failed
+compile, ...).  Also, step 1 provides the opportunity to test the
+library in non-CASC codes such as ARES or ALE3D via the temporary
+installation in the `UPDATE' subdirectory.
 
-  3. Send email to appropriate users indicating the update.
+3. Send email to appropriate users indicating the update.
 
 External installation:
 
-  (on CASC cluster)
+(on CASC cluster)
 
-  1. Do `update external'
-  2. Do `update external install'
+1. Do `update external'
+2. Do `update external install'
 
-  (on all other supported machines, e.g. the Compass cluster)
+(on all other supported machines, e.g. the Compass cluster)
 
-  1. FTP the file `UPDATE.tar' to west (for example), and put it
-     in the install directory (do `update -dirs' for a list).
-  2. Do `tar xf UPDATE.tar'
-  3. Do `update external -dec '
-  4. Do `update external -dec install'
+1. FTP the file `UPDATE.tar' to west (for example), and put it
+in the install directory (do `update -dirs' for a list).
+2. Do `tar xf UPDATE.tar'
+3. Do `update external -dec '
+4. Do `update external -dec install'
 
 ----------------------------------------------------------------------------
 
-
-\section{Code Reference}
-All the DOC++ stuff goes here
-   
+\end{cxxdoc}
+\end{cxxentry}
+\begin{cxxentry}
+{}
+        {Code Reference}
+        {}
+        {}
+        {4}
+\end{cxxentry}
 \end{document}
