@@ -171,16 +171,6 @@ int HYPRE_SchwarzSetNumFunctions( HYPRE_Solver solver , int num_functions );
 int HYPRE_SchwarzSetRelaxWeight( HYPRE_Solver solver , double relax_weight );
 int HYPRE_SchwarzSetDofFunc( HYPRE_Solver solver , int *dof_func );
 
-/* driver.c */
-int main( int argc , char *argv []);
-int BuildParFromFile( int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-int BuildParLaplacian( int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-int BuildParDifConv( int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-int BuildParFromOneFile( int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-int BuildRhsParFromOneFile( int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , HYPRE_ParVector *b_ptr );
-int BuildParLaplacian9pt( int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-int BuildParLaplacian27pt( int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-
 /* par_amg.c */
 void *hypre_BoomerAMGCreate( void );
 int hypre_BoomerAMGDestroy( void *data );
