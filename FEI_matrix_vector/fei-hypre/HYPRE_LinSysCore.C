@@ -5221,7 +5221,7 @@ void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
        if ( mapFromSolnList_ != NULL ) mappedCol = mapFromSolnList2_[ind2];
        else                            mappedCol = colIndex;
 
-       colIndices_[localRow][index] = mappedCol;
+       colIndices_[localRow][index] = mappedCol + 1;
        colValues_[localRow][index++] = values[i];
        if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
           printf("%4d : putIntoMappedMatrix : row, col = %8d %8d %e\n",
