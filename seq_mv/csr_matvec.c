@@ -108,11 +108,10 @@ hypre_CSRMatrixMatvec( double           alpha,
 #include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < num_rows; i++)
    {
+      temp = y_data[i];
       for (jj = A_i[i]; jj < A_i[i+1]; jj++)
-      {
-	 j = A_j[jj];
-         y_data[i] += A_data[jj] * x_data[j];
-      }
+         temp += A_data[jj] * x_data[A_j[jj]];
+      y_data[i] = temp;
    }
 
    /*-----------------------------------------------------------------
