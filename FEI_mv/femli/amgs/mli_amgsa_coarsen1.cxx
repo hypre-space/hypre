@@ -1380,6 +1380,7 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
                localLabels[i] = 0;
             if ( currNodeDofs_ > 6 ) nullspaceDim_ = currNodeDofs_ = 6;
          }
+         delete [] partition;
       }
    }
 #endif
