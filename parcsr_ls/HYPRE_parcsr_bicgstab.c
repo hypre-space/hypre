@@ -56,10 +56,10 @@ HYPRE_ParCSRBiCGSTABSetup( HYPRE_Solver solver,
                         HYPRE_ParVector b,
                         HYPRE_ParVector x      )
 {
-   return( hypre_BiCGSTABSetup( (void *) solver,
-                             (void *) A,
-                             (void *) b,
-                             (void *) x ) );
+   return( HYPRE_BiCGSTABSetup( solver,
+                             (HYPRE_Matrix) A,
+                             (HYPRE_Vector) b,
+                             (HYPRE_Vector) x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -72,10 +72,10 @@ HYPRE_ParCSRBiCGSTABSolve( HYPRE_Solver solver,
                         HYPRE_ParVector b,
                         HYPRE_ParVector x      )
 {
-   return( hypre_BiCGSTABSolve( (void *) solver,
-                             (void *) A,
-                             (void *) b,
-                             (void *) x ) );
+   return( HYPRE_BiCGSTABSolve( solver,
+                             (HYPRE_Matrix) A,
+                             (HYPRE_Vector) b,
+                             (HYPRE_Vector) x ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -58,10 +58,10 @@ HYPRE_ParCSRGMRESSetup( HYPRE_Solver solver,
                         HYPRE_ParVector b,
                         HYPRE_ParVector x      )
 {
-   return( hypre_GMRESSetup( (void *) solver,
-                             (void *) A,
-                             (void *) b,
-                             (void *) x ) );
+   return( HYPRE_GMRESSetup( solver,
+                             (HYPRE_Matrix) A,
+                             (HYPRE_Vector) b,
+                             (HYPRE_Vector) x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -74,10 +74,10 @@ HYPRE_ParCSRGMRESSolve( HYPRE_Solver solver,
                         HYPRE_ParVector b,
                         HYPRE_ParVector x      )
 {
-   return( hypre_GMRESSolve( (void *) solver,
-                             (void *) A,
-                             (void *) b,
-                             (void *) x ) );
+   return( HYPRE_GMRESSolve( solver,
+                             (HYPRE_Matrix) A,
+                             (HYPRE_Vector) b,
+                             (HYPRE_Vector) x ) );
 }
 
 /*--------------------------------------------------------------------------
