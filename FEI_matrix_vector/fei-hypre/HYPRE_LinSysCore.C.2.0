@@ -18,7 +18,7 @@
 #include "Data.h"
 #include "basicTypes.h"
 #include "Lookup.h"
-#include "LinearSystemCore.2.0.h"
+#include "LinearSystemCore.h"
 #endif
 #include "HYPRE.h"
 #include "../../IJ_matrix_vector/HYPRE_IJ_mv.h"
@@ -2041,49 +2041,75 @@ int HYPRE_LinSysCore::putIntoSystemMatrix(int numPtRows, const int* ptRows,
 }
 
 //***************************************************************************
-// get nonzero entries from the matrix data structure
+// get the length of the local row
 //---------------------------------------------------------------------------
 
-int HYPRE_LinSysCore::getFromSystemMatrix(int numPtRows, const int* ptRows,
-                            int numPtCols, const int* ptCols,
-                            double** values)
+int HYPRE_LinSysCore::getMatrixRowLength(int row, int& length)
 {
-    int                i, j, row, rowIndex, rowLeng, *colInd;
-    double             *colVal;
+    int    *colInd, rowLeng;
+    double *colVal;
     HYPRE_ParCSRMatrix A_csr;
 
+    if ((row+1) < localStartRow_ || (row+1) > localEndRow_) return (-1);
     if ( systemAssembled_ == 0 )
     {
-       for( row = 0; row < numPtRows; row++ ) 
-       {
-          rowIndex = ptRows[row] + 1;
-          if (rowIndex < localStartRow_ || rowIndex > localEndRow_) continue;
-          rowLeng = rowLengths_[rowIndex];
-          colInd  = colIndices_[rowIndex];
-          colVal  = colValues_[rowIndex];
-          for( i = 0; i < numPtCols; i++ ) 
-          {
-             for( j = 0; j < rowLeng; j++ ) 
-                if (colInd[j] == ptCols[i]+1) values[row][i] = colVal[j];
-          }
-       }
+       if ( rowLengths_ == NULL ) return (-1);
+       length = rowLengths_[row+1];
     }
     else
     {
        A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
-       for( row = 0; row < numPtRows; row++ ) 
+       HYPRE_ParCSRMatrixGetRow(A_csr,row,&rowLeng,&colInd,&colVal);
+       length = rowLeng;
+       HYPRE_ParCSRMatrixRestoreRow(A_csr,row,&rowLeng,&colInd,&colVal);
+    }
+    return(0);
+}
+
+//***************************************************************************
+// get the data of a local row
+//---------------------------------------------------------------------------
+
+int HYPRE_LinSysCore::getMatrixRow(int row, double* coefs, int* indices,
+				  int len, int& rowLength)
+{
+    int    i, rowIndex, rowLeng, *colInd, minLeng;
+    double *colVal;
+    HYPRE_ParCSRMatrix A_csr;
+
+    if ( systemAssembled_ == 0 )
+    {
+       rowIndex = row + 1;
+       if (rowIndex < localStartRow_ || rowIndex > localEndRow_) return (-1);
+       if ( rowLengths_ == NULL || colIndices_ == NULL ) return (-1);
+       rowLeng = rowLengths_[rowIndex];
+       colInd  = colIndices_[rowIndex];
+       colVal  = colValues_[rowIndex];
+       minLeng = len;
+       if ( minLeng > rowLeng ) minLeng = rowLeng;
+       for( i = 0; i < minLeng; i++ ) 
        {
-          rowIndex = ptRows[row] + 1;
-          if (rowIndex < localStartRow_ || rowIndex > localEndRow_) continue;
-          rowIndex--;
-          HYPRE_ParCSRMatrixGetRow(A_csr,rowIndex,&rowLeng,&colInd,&colVal);
-          for( i = 0; i < numPtCols; i++ ) 
-          {
-             for( j = 0; j < rowLeng; j++ ) 
-                if (colInd[j] == ptCols[i]) values[row][i] = colVal[j];
-          }
-          HYPRE_ParCSRMatrixRestoreRow(A_csr,rowIndex,&rowLeng,&colInd,&colVal);
+          coefs[i] = colVal[i];
+          indices[i] = colInd[i];
        }
+       rowLength = rowLeng;
+    }
+    else
+    {
+       A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
+       rowIndex = row + 1;
+       if (rowIndex < localStartRow_ || rowIndex > localEndRow_) return (-1);
+       rowIndex--;
+       HYPRE_ParCSRMatrixGetRow(A_csr,rowIndex,&rowLeng,&colInd,&colVal);
+       minLeng = len;
+       if ( minLeng > rowLeng ) minLeng = rowLeng;
+       for( i = 0; i < minLeng; i++ ) 
+       {
+          coefs[i] = colVal[i];
+          indices[i] = colInd[i];
+       }
+       HYPRE_ParCSRMatrixRestoreRow(A_csr,rowIndex,&rowLeng,&colInd,&colVal);
+       rowLength = rowLeng;
     }
     return(0);
 }
@@ -2820,7 +2846,8 @@ int HYPRE_LinSysCore::setNumRHSVectors(int numRHSs, const int* rhsIDs)
     {
        printf("%4d : HYPRE_LSC::entering setNumRHSVectors.\n",mypid_);
        printf("%4d : HYPRE_LSC::incoming numRHSs = %d\n",mypid_,numRHSs);
-       printf("%4d : setNumRHSVectors - hardwired to 1 rhs.\n",mypid_);
+       for ( i = 0; i < numRHSs_; i++ ) 
+          printf("%4d : HYPRE_LSC::incoming RHSIDs  = %d\n",mypid_,rhsIDs[i]);
     }
 
     if ( matrixVectorsCreated_ )
@@ -2874,7 +2901,7 @@ int HYPRE_LinSysCore::setRHSID(int rhsID)
        }
     }
 
-    printf("setRHSID ERROR : rhsID not found.\n");
+    printf("setRHSID ERROR : rhsID %d not found.\n", rhsID);
     exit(1);
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )

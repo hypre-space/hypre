@@ -162,15 +162,17 @@ class HYPRE_LinSysCore
                            const int* ptCols, const double* const* values);
 
    // ----------------------------------------------------------------------
-   // Point-entry equation data to be extracted from the matrix. i.e., the
-   // FEI implementation is requesting a copy of these previously assembled
-   // coefficients. Note that this is different from a typical matrix "get-row"
-   // operation, in that the column-indices are input here -- the caller is
-   // requesting SPECIFIC coefficients.
-   // ---------------------------------------------------------------------
+   // Get the length of a row of the matrix.
+   // ----------------------------------------------------------------------
 
-   int getFromSystemMatrix(int numPtRows, const int* ptRows, int numPtCols, 
-                           const int* ptCols, double** values);
+   int getMatrixRowLength(int row, int& length);
+
+   // ----------------------------------------------------------------------
+   // Obtain the coefficients and indices for a row of the matrix.
+   // ----------------------------------------------------------------------
+
+   int getMatrixRow(int row, double* coefs, int* indices, int len, 
+                    int& rowLength);
 
    // ----------------------------------------------------------------------
    // sumIntoRHSVector:
