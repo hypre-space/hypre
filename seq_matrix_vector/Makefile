@@ -13,8 +13,10 @@
 HEADERS =\
  HYPRE_mv.h\
  csr_matrix.h\
+ headers.h\
  mapped_matrix.h\
  multiblock_matrix.h\
+ protos.h\
  vector.h
 
 FILES =\
@@ -36,6 +38,7 @@ F77 = /home/casc/g77/bin/g77
 CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
+ -I/usr/local/mpi/mpich/include\
  -I..\
  -g -Wall -DHYPRE_MEMORY_DMALLOC
 
@@ -45,9 +48,10 @@ LFLAGS =\
  -L/usr/local/lib\
  -L/home/casc/lib\
  -L/home/casc/g77/lib\
+ -L/usr/local/mpi/mpich/lib/solaris/ch_p4\
  -L.\
  -L../utilities\
- -lHYPRE_memory\
+ -lHYPRE_utilities\
  -lf2c\
  -lcegdb\
  -ldmalloc\
