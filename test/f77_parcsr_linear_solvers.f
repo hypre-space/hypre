@@ -9,7 +9,11 @@ c-----------------------------------------------------------------------
 
       program test
 
+      implicit none
+
       include 'mpif.h'
+
+      integer maxzons, maxblks, maxdim
 
       parameter (MAXZONS=4194304)
       parameter (MAXBLKS=32)
@@ -26,16 +30,22 @@ c-----------------------------------------------------------------------
       integer             solver_id
       integer             precond_id
 
+      integer             hybrid, coarsen_type, measure_type
+      integer             ioutdat, cycle_type, num_grid_sweeps
+      integer             grid_relax_type, max_levels
+      integer             num_rows
+
       integer             zero, one
       integer             maxiter, dscgmaxiter, pcgmaxiter
       double precision    tol, convtol
 
       integer             num_iterations
-      double precision    final_res_norm
+      double precision    final_res_norm, relax_weight
+      double precision    strong_threshold, drop_tol
                      
 c     HYPRE_ParCSRMatrix  A
-c     HYPRE_ParVector  b
-c     HYPRE_ParVector  x
+c     HYPRE_ParVector     b
+c     HYPRE_ParVector     x
 
       integer*8           A
       integer*8           b
@@ -46,11 +56,12 @@ c     HYPRE_Solver        precond
 
       integer*8           solver
       integer*8           precond
+      integer*8           row_starts
+      integer*8           grid_relax_points
 
       double precision    values(3)
 
       integer             p, q, r
-
       integer             ierr
 
       data zero          / 0 /
@@ -167,8 +178,8 @@ c----------------------------------------------------------------------
 c     Set up the matrix
 c-----------------------------------------------------------------------
 
-      call hypre_GenerateLaplacian(comm, nx, ny, nz, Px, Py, Pz,
-     &                             p, q, r, values, A, ierr)
+      call hypre_GenerateLaplacian(MPI_COMM_WORLD, nx, ny, nz,
+     &                             Px, Py, Pz, p, q, r, values, A, ierr)
 
 c     call HYPRE_NewParCSRMatrix(MPI_COMM_WORLD, gnrows, gncols,
 c    &   rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg, A, ierr)
@@ -183,17 +194,18 @@ c-----------------------------------------------------------------------
       values(2) = -cy
       values(3) = -cz
 
-      call HYPRE_NewParVector(MPI_COMM_WORLD, 
-     &                        hypre_ParCSRMatrixGlobalNumRows(A),
-     &                        hypre_ParCSRMatrixRowStarts(A), b, ierr)
+      call hypre_ParCSRMatrixGlobalNumRows(A, num_rows, ierr)
+      call hypre_ParCSRMatrixRowStarts(A, row_starts, ierr)
+
+      call HYPRE_NewParVector(MPI_COMM_WORLD, num_rows, row_starts,
+     &                        b, ierr)
       call hypre_SetParVectorPartitioningO(b, 0, ierr)
       call HYPRE_InitializeParVector(b, ierr)
       call hypre_SetParVectorConstantValue(b, 0.0, ierr)
 c     call HYPRE_PrintParVector("driver.out.b", b, zero, ierr)
 
-      call HYPRE_NewParVector(MPI_COMM_WORLD, 
-     &                        hypre_ParCSRMatrixGlobalNumRows(A),
-     &                        hypre_ParCSRMatrixRowStarts(A), x, ierr)
+      call HYPRE_NewParVector(MPI_COMM_WORLD, num_rows, row_starts,
+     &                        x, ierr)
       call hypre_SetParVectorPartitioningO(x, 0, ierr)
       call HYPRE_InitializeParVector(x, ierr)
       call hypre_SetParVectorConstantValue(x, 1.0, ierr)
@@ -222,69 +234,63 @@ c       Solve the system using preconditioned GMRES
 
         if (solver_id .eq. 3) then
 c         Use BoomerAMG as preconditioner
+          precond_id = 2
 
-          call HYPRE_ParAMGInitialize(gmres_precond, ierr)
+          call HYPRE_ParAMGInitialize(precond, ierr)
 
-          call HYPRE_ParAMGSetCoarsenType(gmres_precond,
+          call HYPRE_ParAMGSetCoarsenType(precond,
      &                                    (hybrid*coarsen_type), ierr)
 
-          call HYPRE_ParAMGSetMeasureType(gmres_precond,
-     &                                    measure_type, ierr)
+          call HYPRE_ParAMGSetMeasureType(precond, measure_type, ierr)
 
-          call HYPRE_ParAMGSetStrongThreshold(amg_precond,
+          call HYPRE_ParAMGSetStrongThreshold(precond,
      &                                        strong_threshold, ierr)
 
-          call HYPRE_ParAMGSetLogging(gmres_precond,
-     &                                ioutdat,
+          call HYPRE_ParAMGSetLogging(precond, ioutdat,
      &                                "test.out.log", ierr)
 
-          call HYPRE_ParAMGSetMaxIter(gmres_precond, 1, ierr)
+          call HYPRE_ParAMGSetMaxIter(precond, 1, ierr)
 
-          call HYPRE_ParAMGSetCycleType(gmres_precond,
-     &                                  cycle_type, ierr)
+          call HYPRE_ParAMGSetCycleType(precond, cycle_type, ierr)
 
-          call HYPRE_ParAMGSetNumGridSweeps(gmres_precond,
+          call HYPRE_ParAMGSetNumGridSweeps(precond,
      &                                      num_grid_sweeps, ierr)
 
-          call HYPRE_ParAMGSetGridRelaxType(gmres_precond,
+          call HYPRE_ParAMGSetGridRelaxType(precond,
      &                                      grid_relax_type, ierr)
 
-          call HYPRE_ParAMGSetRelaxWeight(gmres_precond,
+          call HYPRE_ParAMGSetRelaxWeight(precond,
      &                                    relax_weight, ierr)
 
-          call HYPRE_ParAMGSetGridRelaxPoints(gmres_precond,
+          call HYPRE_ParAMGSetGridRelaxPoints(precond,
      &                                        grid_relax_points, ierr)
 
-          call HYPRE_ParAMGSetMaxLevels(gmres_precond,
+          call HYPRE_ParAMGSetMaxLevels(precond,
      &                                  max_levels, ierr)
 
-          call HYPRE_ParCSRPCGSetPrecond(solver,
-     &                                   HYPRE_ParAMGSolve,
-     &                                   HYPRE_ParAMGSetup,
-     &                                   gmres_precond, ierr)
+          call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
+     &                                     precond, ierr)
 
         else if (solver_id .eq. 4) then
-          pcg_precond = 0
+          precond_id = 8
 
-          call HYPRE_ParCSRGMRESSetPrecond(solver,
-     &                                     HYPRE_ParCSRDiagScale,
-     &                                     HYPRE_ParCSRDiagScaleSetup,
-     &                                     gmres_precond, ierr)
+          call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
+     &                                     precond, ierr)
 
         else if (solver_id .eq. 7) then
 
+          precond_id = 7
+
           call HYPRE_ParCSRPilutInitialize(MPI_COMM_WORLD,
-     &                                     gmres_precond, ierr) 
+     &                                     precond, ierr) 
 
           if (ierr .ne. 0) write(6,*) 'ParCSRPilutInitialize error'
 
-          call HYPRE_ParCSRGMRESSetPrecond(solver,
-     &                                     HYPRE_ParCSRPilutSolve,
-     &                                     HYPRE_ParCSRPilutSetup,
-     &                                     gmres_precond, ierr)
+          call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
+     &                                     precond, ierr)
 
            if (drop_tol .ge. 0.)
-     &         call HYPRE_ParCSRPilutSetDropToleran(gmres_precond,
+     &         call HYPRE_ParCSRPilutSetDropToleran(precond,
      &                                              drop_tol, ierr)
 
         endif
