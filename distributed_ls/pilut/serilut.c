@@ -634,6 +634,7 @@ void hypre_SecondDropUpdate(int maxnz, int maxnzkeep, double tol, int row,
   int max, nz, lrow, rrow;
   int last, first, itmp;
   double dtmp;
+  int ierr=0;
 
 
   /* Reset the jr array, it is not needed any more */
@@ -710,6 +711,17 @@ void hypre_SecondDropUpdate(int maxnz, int maxnzkeep, double tol, int row,
 
 
   /* Keep large maxnz elements of L */
+  ierr = hypre_DoubleQuickSplit( w+1, jw+1, last-1, maxnz ); 
+  if (ierr) exit;
+  for ( j= hypre_max(1,last-maxnz); j< last; j++ ) 
+  {
+     ldu->lcolind[ldu->lerowptr[lrow]] = jw[ j ];
+     ldu->lvalues[ldu->lerowptr[lrow]++] = w[ j ];
+  }
+
+
+  /* This was the previous insertion sort that was replaced with
+     the QuickSplit routine above. AJC, 5/00 
   for (nz=0; nz<maxnz && last>1; nz++) {
     for (max=1, j=2; j<last; j++) {
       if (fabs(w[j]) > fabs(w[max]))
@@ -723,6 +735,7 @@ void hypre_SecondDropUpdate(int maxnz, int maxnzkeep, double tol, int row,
     jw[max] = jw[--last];
     w[max] = w[last];
   }
+  */
 
   /* Allocate appropriate amount of memory for the reduced row */
   nl = MIN(lastjr-first+1, maxnzkeep);
