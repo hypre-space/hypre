@@ -27,8 +27,19 @@
 #include "HYPRE_distributed_matrix_types.h"
 #include "HYPRE_distributed_matrix_protos.h"
 
-/* Matrix prototypes for IJMatirx */
+/* Matrix prototypes for IJMatrix */
 #include "IJ_mv/HYPRE_IJ_mv.h"
+
+/* Local routine prototypes */
+int HYPRE_IJMatrixSetLocalStorageType(HYPRE_IJMatrix ij_matrix, 
+                                      int local_storage_type );
+
+int HYPRE_IJMatrixSetLocalSize(HYPRE_IJMatrix ij_matrix, 
+                               int row, int col );
+
+int HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix ij_matrix, 
+                             int size, int i, int *col_ind,
+                             double *values );
 
 /*--------------------------------------------------------------------------
  * HYPRE_BuildIJMatrixFromDistributedMatrix
