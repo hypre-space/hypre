@@ -906,7 +906,7 @@ PrintUsage( char *progname,
       printf("  -r <rx> <ry> <rz>   : refine part(s)\n");
       printf("  -P <Px> <Py> <Pz>   : refine and distribute part(s)\n");
       printf("  -b <bx> <by> <bz>   : refine and block part(s)\n");
-      printf("  -solver <ID>        : solver ID (default = 0)\n");
+      printf("  -solver <ID>        : solver ID (default = 39)\n");
       printf("                        28 - PCG with diagonal scaling\n");
       printf("                        29 - PCG\n");
       printf("                        30 - GMRES with SMG split precond\n");
