@@ -216,6 +216,21 @@ package Hypre {
      Solver GetConstructedObject();
   };
 
+  class StructSMG extends StructSolver implements Solver, SolverBuilder {
+     void Apply( in StructVector b, out StructVector x );
+     StructMatrix GetSystemOperator();
+     StructVector GetResidual();
+     void GetConvergenceInfo( in string name, out double value );
+
+     void SetSystemOperator( in StructMatrix op );
+     double GetParameter( in string name );
+     void SetParameter( in string name, in double value );
+     void New( in MPI_Com comm );
+     void Setup( in StructMatrix A, in StructVector b, in StructVector x );
+     static StructSMG Constructor( in MPI_Com comm );
+     Solver GetConstructedObject();
+  };
+
   class PCG extends StructSolver implements PreconditionedSolver, PreconditionedSolverBuilder {
      // Preconditioned Conjugant Gradient
      void Apply( in StructVector b, out StructVector x );
