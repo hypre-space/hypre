@@ -53,7 +53,7 @@ main( int   argc,
    fine_partitioning = hypre_ParCSRMatrixRowStarts(P);
    A = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, A_in, fine_partitioning,
 	fine_partitioning);
-   hypre_SetParCSRMatrixPartitioningOwner(A,0);
+   hypre_SetParCSRMatrixRowStartsOwner(A,0);
    printf(" A converted\n");
 
    hypre_GenerateMatvecCommunicationInfo(A);
@@ -63,7 +63,7 @@ main( int   argc,
    printf(" generated P_CommPkg \n");
 
    hypre_ParAMGBuildCoarseOperator(P,A,P,&RAP);
-   hypre_SetParCSRMatrixPartitioningOwner(RAP,0);
+   hypre_SetParCSRMatrixRowStartsOwner(RAP,0);
    printf(" did rap\n");
 
    hypre_PrintParCSRMatrix(RAP, "rap"); 
