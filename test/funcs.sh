@@ -153,12 +153,18 @@ function CheckPath
     -np) EXECFILE=$3
       if [[ ! -x $EXECFILE ]]
       then
-        if [[ ! -x ../$EXECFILE ]]
+        if [[ ! -x $StartDir/$EXECFILE ]]
         then
           print "Can not find executable!!!"
           return 1
         else
-          cp ../$EXECFILE $EXECFILE
+          cp $StartDir/$EXECFILE $EXECFILE
+          return 0
+        fi
+      else
+        if [[ ! $EXECFILE -ef $StartDir/$EXECFILE ]]
+        then
+          cp $StartDir/$EXECFILE $EXECFILE
           return 0
         fi
       fi
@@ -177,7 +183,7 @@ function PsubCmdStub
   NumNodes=$?
   CalcProcs "$@"
   NumProcs=$?
-  typeset -L4 HOST=$(hostname)
+  typeset HOST=$(hostname|cut -c1-4)
   HOST=${HOST%%.*}              # remove possible ".llnl.gov"
   case $HOST in
     fros*) PsubCmd="psub -c frost,pbatch -b a_casc -nettype css0 -r $RunName"
@@ -203,19 +209,20 @@ function PsubCmdStub
 }
 function ExecuteJobs
 { # read job file line by line saving arguments
-  WorkingDir=$1
-  InputFile=$2
+  StartDir=$1
+  WorkingDir=$2
+  InputFile=$3
   if (( DebugMode > 0 ))
   then print "In function ParseJobFile: WorkingDir=$WorkingDir InputFile=$InputFile" ; fi
-  integer ReturnFlag=0                  # error return flag
-  integer BatchFlag=0                   # #Batch option detected flag 
-  integer BatchCount=0                  # different numbering for #Batch option
-  integer PrevPid=0
+  typeset -i ReturnFlag=0              # error return flag
+  typeset -i BatchFlag=0               # #Batch option detected flag 
+  typeset -i BatchCount=0              # different numbering for #Batch option
+  typeset -i PrevPid=0
   typeset RunName
   SavePWD=$(pwd)
   cd $WorkingDir
-  exec 3< $InputFile.jobs               # open *.jobs file for reading
-  while read -u3 InputLine
+  exec 0< $InputFile.jobs              # open *.jobs file for reading
+  while read InputLine
   do
     if (( DebugMode > 0 )) ; then print $InputLine ; fi
     case $InputLine in
@@ -319,8 +326,9 @@ function ExecuteJobs
 function ExecuteTest
 { #   
   if (( DebugMode > 0 )) ; then print "In function ExecuteTest" ; fi
-  WorkingDir=$1
-  InputFile=$2
+  StartDir=$1
+  WorkingDir=$2
+  InputFile=$3
   SavePWD=$(pwd)
   cd $WorkingDir
   if (( DebugMode > 0 )) ; then print "./$InputFile.sh  $InputFile.err " ; fi
@@ -330,8 +338,9 @@ function ExecuteTest
 function PostProcess
 { #   
   if (( DebugMode > 0 )) ; then print "In function PostProcess" ; fi
-  WorkingDir=$1
-  InputFile=$2
+  StartDir=$1
+  WorkingDir=$2
+  InputFile=$3
   SavePWD=$(pwd)
   cd $WorkingDir
   if (( BatchMode == 0 ))

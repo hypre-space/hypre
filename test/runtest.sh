@@ -39,12 +39,12 @@ typeset -fx StartCrunch ParseJobFile
 typeset -fx ExecuteJobs ExecuteTest
 typeset -fx MpirunString CheckBatch
 typeset -fx CalcNodes CalcProcs PsubCmdStub
-integer BatchMode=0
-integer SendMail=0
-integer DebugMode=0
-integer NoRun=0
-integer JobCheckInterval=10             # sleep time between jobs finished check
-integer GiveUpOnJob=10                  # number of hours to wait for job finish
+typeset -i BatchMode=0
+typeset -i SendMail=0
+typeset -i DebugMode=0
+typeset -i NoRun=0
+typeset -i JobCheckInterval=10      # sleep time between jobs finished check
+typeset -i GiveUpOnJob=10           # number of hours to wait for job finish
 InputString=""
 RunString=""
 . ./AUTOTEST/hypre_arch.sh
@@ -69,6 +69,7 @@ do case $1 in
         if [[ -f $InputString ]] && [[ -r $InputString ]]
         then FilePart=$(basename $InputString .sh)
           DirPart=$(dirname $InputString)
+          CurDir=$(pwd)
           if (( BatchMode == 0 ))       # machine DCSP capable
           then
             CheckBatch
@@ -77,7 +78,7 @@ do case $1 in
           if (( DebugMode > 0 ))
           then print "FilePart:$FilePart DirPart:$DirPart" ; fi
           if [[ -f $DirPart/$FilePart.jobs ]] && [[ -r $DirPart/$FilePart.jobs ]]
-          then StartCrunch $DirPart $FilePart # strict serial execution
+          then StartCrunch $CurDir $DirPart $FilePart # strict serial execution
           else print "$0: test command file $DirPart/$FilePart.jobs does not exist"
             exit 1
           fi

@@ -7,21 +7,34 @@
 abs_top_srcdir = @abs_top_srcdir@
 abs_srcdir = @abs_srcdir@
 
-DIST_SUBDIRS = \
+SUBDIRS = \
+ .\
  AUTOTEST\
  TEST_fei\
  TEST_ij\
  TEST_sstruct\
  TEST_struct\
- TEST_timing\
- .
+ TEST_timing
 
-bin_PROGRAMS = \
+EXTRA_PROGRAMS = \
  ij\
  ij_mv\
  new_ij\
  sstruct\
- struct
+ struct\
+ f77_ij\
+ f77_ij_b\
+ f77_ij_mv\
+ f77_struct\
+ fei\
+ ij_b\
+ ij.C++\
+ new_ij.C++\
+ ij_mv.C++\
+ struct.C++\
+ sstruct.C++
+# f77_struct_b\
+# struct_b
 
 AM_CPPFLAGS = \
  -DHYPRE_TIMING\
@@ -152,21 +165,6 @@ struct_LDADD = \
 #struct_LDFLAGS = -no-undefined -rpath $(libdir)
 
 EXTRA_bindir = $(bindir)
-
-EXTRA_PROGRAMS = \
- f77_ij\
- f77_ij_b\
- f77_ij_mv\
- f77_struct\
- fei\
- ij_b\
- ij.C++\
- new_ij.C++\
- ij_mv.C++\
- struct.C++\
- sstruct.C++
-# f77_struct_b\
-# struct_b
 
 f77_ij_SOURCES = f77_ij.f
 f77_ij_b_SOURCES = f77_ij_b.f
@@ -461,6 +459,7 @@ EXTRA_DIST = \
  funcs.sh\
  runtest.sh
 
+all: ij ij_mv new_ij struct sstruct
 
 fei++: fei
 
@@ -490,7 +489,8 @@ struct.C++.cxx:
 
 clean-local:
 	@ \
-	for i in fei f77_ij f77_ij_mv f77_struct \
+	for i in ij ij_mv new_ij sstruct struct \
+		fei f77_ij f77_ij_mv f77_struct \
 		f77_ij_b ij_b *.C++* driver.out.* ; \
 	do \
 	  if [ -e $$i ] ; \
@@ -499,16 +499,29 @@ clean-local:
 	  fi; \
 	done
 
-install-exec-hook:
+install-exec-hook: all
 	@ \
 	for i in fei ij sstruct struct ; \
 	do \
-	if [ -x $$i$(EXEEXT) ] ; \
+	if test -x $$i$(EXEEXT) ; \
 	  then \
-	    if [ -d $(abs_srcdir)/TEST_$$i ] ; \
+	    if test -d $(abs_builddir)/TEST_$$i ; \
 	    then \
-	      echo $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(binPROGRAMS_INSTALL) $$i$(EXEEXT) $(abs_srcdir)/TEST_$$i/$$i$(EXEEXT); \
-	      $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(binPROGRAMS_INSTALL) $$i$(EXEEXT) $(abs_srcdir)/TEST_$$i/$$i$(EXEEXT); \
+	      echo $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(binPROGRAMS_INSTALL) $$i$(EXEEXT) $(abs_builddir)/TEST_$$i/$$i$(EXEEXT); \
+	      $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(binPROGRAMS_INSTALL) $$i$(EXEEXT) $(abs_builddir)/TEST_$$i/$$i$(EXEEXT); \
 	    fi; \
 	  fi; \
+	done
+
+uninstall-hook:
+	@ \
+	for i in fei ij sstruct struct ; \
+	do \
+	    if test -d $(abs_builddir)/TEST_$$i ; \
+	    then \
+	      if test -x $(abs_builddir)/TEST_$$i/$$i$(EXEEXT) ; \
+	      then \
+		rm -f $(abs_builddir)/TEST_$$i/$$i$(EXEEXT); \
+	      fi; \
+	    fi; \
 	done
