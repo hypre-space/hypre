@@ -16,6 +16,7 @@ noinst_HEADERS = \
  hypre_blas.h
 dependent_includes = $(noinst_HEADERS)
 
+EXTRA_DIST = README
 #
 FILES = \
  dasum.c\
