@@ -7,111 +7,67 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-default: lib
-
-all: default
-
-install:all
-
 .SUFFIXES:
-.SUFFIXES: .c .f .o
-
-
-HEADERS =\
- struct_solver.h
- 
-LOCALFILES =\
- struct_solver.c\
- struct_solver_PETSc.c
-
-HYPREFILES =\
- HYPRE_struct_solver.c
-
-FILES = $(HYPREFILES) $(LOCALFILES)
-
-OBJS = ${FILES:.c=.o}
-
-
-${OBJS}: ${HEADERS}
-
+.SUFFIXES: .c .o
 
 CC = @CC@
-CXX = @CXX@
-F77 = @F77@
 
 C_COMPILE_FLAGS=@CFLAGS@
-CXX_COMPILE_FLAGS=@CXXFLAGS@
-F77_COMPILE_FLAGS=@F77FLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS = @HYPRE_PETSCDEFS@ -DHYPRE_NO_PTHREAD_MANGLING
 
 CFLAGS = \
+ ${C_COMPILE_FLAGS}\
  -I..\
  -I../utilities\
- -I.\
  -I../CI_struct_matrix_vector\
  -I../PETSc_linear_solvers/ParILUT\
  @PETSCINCLUDE@ \
- ${C_COMPILE_FLAGS}\
  ${CINCLUDES}\
- ${CDEFS}
-
-CXXFLAGS = \
- @PETSCINCLUDE@ \
- ${CXX_COMPILE_FLAGS}\
- -I../utilities\
- -I..\
- ${CINCLUDES}\
- ${COPT}\
- ${CDEBUG}\
  ${CDEFS}
 
 RANLIB = @RANLIB@
 
+HEADERS =\
+ headers.h\
+ CI_struct_linear_solvers.h\
+ HYPRE_CI_ls.h
+ 
+FILES =\
+ HYPRE_struct_solver.c\
+ struct_solver.c\
+ struct_solver_PETSc.c
 
-##################################################################
-# Main rules
-##################################################################
-
-lib: $(PROTOS) ${OBJS}
-	@echo  "Building $@ ... "
-	ar -rcu lib_HYPRE_CI_ls.a ${OBJS}
-	@RANLIB@ lib_HYPRE_CI_ls.a
-
-driver: driver.o lib_HYPRE.a
-	@echo  "Linking" $@ "... "
-	${CC} -o driver driver.o ${LFLAGS}
-
-link:
-	rm driver
-	make driver
-
-${OBJS}: ${HEADERS}
-
-
+OBJS = ${FILES:.c=.o}
 
 ##################################################################
 # Targets
 ##################################################################
+
+all: libHYPRE_CI_ls.a
+
+install:all
+
 clean:
 	@rm -f *.o *.dxx 
 
 veryclean: clean
 	@rm -f lib*.a
 
+##################################################################
+# Rules
+##################################################################
+
+libHYPRE_CI_ls.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
+
+${OBJS}: ${HEADERS}
 
 ##################################################################
 # Generic rules
 ##################################################################
 
-
 .c.o:
 	${CC} -o $@ -c ${CFLAGS} $<
-
-.cc.o:
-	${CXX} -o $@ -c ${CFLAGS} $<
-
-.f.o:
-	${F77} -o $@ -c ${FFLAGS} $<
-
-

@@ -12,31 +12,33 @@
  *
  *****************************************************************************/
 
-#include "./headers.h"
+#include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewStructInterfaceSolver
- *--------------------------------------------------------------------------*/
-
-HYPRE_StructInterfaceSolver 
-HYPRE_NewStructInterfaceSolver( MPI_Comm     context,
-		      HYPRE_StructGrid    grid,
-		      HYPRE_StructStencil stencil )
-{
-   return ( (HYPRE_StructInterfaceSolver)
-	    hypre_NewStructInterfaceSolver( context,
-				  grid,
-				  stencil ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_FreeStructInterfaceSolver
+ * HYPRE_StructInterfaceSolverCreate
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_FreeStructInterfaceSolver( HYPRE_StructInterfaceSolver struct_solver )
+HYPRE_StructInterfaceSolverCreate( MPI_Comm     context,
+		      HYPRE_StructGrid    grid,
+		      HYPRE_StructStencil stencil,
+                      HYPRE_StructInterfaceSolver *solver )
 {
-   return( hypre_FreeStructInterfaceSolver( (hypre_StructInterfaceSolver *) struct_solver ) );
+   *solver = ( (HYPRE_StructInterfaceSolver)
+	    hypre_NewStructInterfaceSolver( context,
+				  grid,
+				  stencil ) );
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructInterfaceSolverDestroy
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_StructInterfaceSolverDestroy( HYPRE_StructInterfaceSolver solver )
+{
+   return( hypre_FreeStructInterfaceSolver( (hypre_StructInterfaceSolver *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
