@@ -390,6 +390,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          
          if (num_procs > 1)
          {
+            hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
+
             num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
             
 #ifdef HYPRE_USING_PERSISTENT_COMM
@@ -420,6 +422,9 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                   = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
             }
             
+            hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
+            hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
+
 #ifdef HYPRE_USING_PERSISTENT_COMM
             hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle);
 #else
@@ -436,11 +441,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             hypre_ParCSRCommHandleDestroy(comm_handle);
 #endif
             comm_handle = NULL;
+
+            hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
          }
 
         /*-----------------------------------------------------------------
          * Relax all points.
          *-----------------------------------------------------------------*/
+        hypre_profile_times[HYPRE_TIMER_ID_RELAX] -= hypre_MPI_Wtime();
 
 	if (relax_weight == 1 && omega == 1)
         {
@@ -849,6 +857,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	   hypre_TFree(v_buf_data);
         }
 #endif
+        hypre_profile_times[HYPRE_TIMER_ID_RELAX] += hypre_MPI_Wtime();
       }
       break;
 
@@ -4171,6 +4180,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
 HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYPRE_Int relax_type)
 {
+   hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SETUP] -= hypre_MPI_Wtime();
+
    /* Par Data Structure variables */
    hypre_ParCSRMatrix *A = hypre_ParAMGDataAArray(amg_data)[level];
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -4253,6 +4264,8 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       hypre_TFree(mat_displs);
       hypre_TFree(A_mat_local);
    }
+
+   hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SETUP] += hypre_MPI_Wtime();
    
    return hypre_error_flag;
 }
@@ -4260,6 +4273,8 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
 HYPRE_Int hypre_GaussElimSolve (void *amg_vdata, HYPRE_Int level, HYPRE_Int relax_type)
 {
+   hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SOLVE] -= hypre_MPI_Wtime();
+
    hypre_ParAMGData *amg_data = amg_vdata;
    hypre_ParCSRMatrix *A = hypre_ParAMGDataAArray(amg_data)[level];
    HYPRE_Int  n        = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
@@ -4331,6 +4346,8 @@ HYPRE_Int hypre_GaussElimSolve (void *amg_vdata, HYPRE_Int level, HYPRE_Int rela
       hypre_TFree(A_tmp);
    }
    if (error_flag) hypre_error(HYPRE_ERROR_GENERIC);
+
+   hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SOLVE] += hypre_MPI_Wtime();
 
    return hypre_error_flag;
 }

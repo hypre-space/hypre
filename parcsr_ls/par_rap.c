@@ -207,6 +207,8 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
                                     hypre_ParCSRMatrix **RAP_ptr )
 
 {
+   hypre_profile_times[HYPRE_TIMER_ID_RAP] -= hypre_MPI_Wtime();
+
    MPI_Comm        comm = hypre_ParCSRMatrixComm(A);
 
    hypre_CSRMatrix *RT_diag = hypre_ParCSRMatrixDiag(RT);
@@ -1885,6 +1887,8 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
       hypre_TFree(RA_offd_j_array);
    }
    hypre_Int2IntSetDestroy(send_map_elmts_RT_reverse_map);
+
+   hypre_profile_times[HYPRE_TIMER_ID_RAP] += hypre_MPI_Wtime();
 
    return(0);
    

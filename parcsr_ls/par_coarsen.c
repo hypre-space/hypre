@@ -1974,6 +1974,8 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
                         HYPRE_Int                    debug_flag,
                         HYPRE_Int                  **CF_marker_ptr)
 {
+   hypre_profile_times[HYPRE_TIMER_ID_PMIS] -= hypre_MPI_Wtime();
+
    MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle   *comm_handle;
@@ -2509,6 +2511,8 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
    /*if (num_procs > 1) hypre_CSRMatrixDestroy(S_ext);*/
 
    *CF_marker_ptr   = CF_marker;
+
+   hypre_profile_times[HYPRE_TIMER_ID_PMIS] += hypre_MPI_Wtime();
 
    return (ierr);
 }

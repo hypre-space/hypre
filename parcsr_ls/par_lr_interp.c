@@ -1095,6 +1095,8 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                   HYPRE_Int *col_offd_S_to_A,
                   hypre_ParCSRMatrix  **P_ptr)
 {
+  hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] -= hypre_MPI_Wtime();
+
   /* Communication Variables */
   MPI_Comm                     comm = hypre_ParCSRMatrixComm(A);   
   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -1249,7 +1251,10 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
      if(newoff >= 0)
        full_off_procNodes = newoff + num_cols_A_offd;
      else
+     {
+       hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] += hypre_MPI_Wtime();
        return hypre_error_flag;
+     }
 
      /* Possibly add new points and new processors to the comm_pkg, all
       * processors need new_comm_pkg */
@@ -2083,6 +2088,8 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    
 
    }
+
+   hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] += hypre_MPI_Wtime();
    
    return hypre_error_flag;  
 }

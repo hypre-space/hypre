@@ -33,6 +33,8 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
                                  hypre_Vector    *y,
                                  HYPRE_Int        offset     )
 {
+   HYPRE_Real time_begin = hypre_MPI_Wtime();
+
    HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A) + offset;
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
@@ -102,6 +104,8 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
 #endif
       for (i = 0; i < num_rows*num_vectors; i++)
          y_data[i] *= beta;
+
+      hypre_profile_times[HYPRE_TIMER_ID_MATVEC] += hypre_MPI_Wtime() - time_begin;
 
       return ierr;
    }
@@ -389,6 +393,7 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
       } // omp parallel
    }
 
+   hypre_profile_times[HYPRE_TIMER_ID_MATVEC] += hypre_MPI_Wtime() - time_begin;
    return ierr;
 }
 

@@ -419,8 +419,10 @@ hypre_ParVectorInnerProd( hypre_ParVector *x,
    HYPRE_Real result = 0.0;
    HYPRE_Real local_result = hypre_SeqVectorInnerProd(x_local, y_local);
    
+   hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] -= hypre_MPI_Wtime();
    hypre_MPI_Allreduce(&local_result, &result, 1, HYPRE_MPI_REAL,
                        hypre_MPI_SUM, comm);
+   hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] += hypre_MPI_Wtime();
    
    return result;
 }

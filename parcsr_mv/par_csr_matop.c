@@ -312,6 +312,8 @@ void hypre_ParMatmul_RowSizes(
 hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
                                      hypre_ParCSRMatrix  *B )
 {
+   hypre_profile_times[HYPRE_TIMER_ID_MATMUL] -= hypre_MPI_Wtime();
+
    MPI_Comm         comm = hypre_ParCSRMatrixComm(A);
 
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -874,6 +876,8 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
       hypre_TFree(B_ext_offd_data);
    }
    if (num_cols_offd_B) hypre_TFree(map_B_to_C);
+
+   hypre_profile_times[HYPRE_TIMER_ID_MATMUL] += hypre_MPI_Wtime();
 
    return C;
 }            

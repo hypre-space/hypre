@@ -2658,6 +2658,8 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
                  HYPRE_Real trunc_factor,        
                  HYPRE_Int max_elmts)        
 {
+   hypre_profile_times[HYPRE_TIMER_ID_INTERP_TRUNC] -= hypre_MPI_Wtime();
+
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
    HYPRE_Int *P_diag_i = hypre_CSRMatrixI(P_diag);
    HYPRE_Int *P_diag_j = hypre_CSRMatrixJ(P_diag);
@@ -3153,6 +3155,8 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
    hypre_TFree(cum_lost_per_thread);
    hypre_TFree(num_lost_per_thread);
    hypre_TFree(num_lost_offd_per_thread);
+
+   hypre_profile_times[HYPRE_TIMER_ID_INTERP_TRUNC] += hypre_MPI_Wtime();
 
    return ierr;
 }
