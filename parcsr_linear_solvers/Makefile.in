@@ -43,6 +43,7 @@ PILUT_LIBFLAGS =\
 
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
+ -I..\
  -I../distributed_linear_solvers/Euclid/include\
  -I$(srcdir)\
  -I$(srcdir)/..\

@@ -36,6 +36,7 @@ CDEFS = -DBOOL_NOT_SUPPORTED
 CXXDEFS = -DBOOL_NOT_SUPPORTED
 
 CFLAGS = -w ${C_COMPILE_FLAGS} ${CDEFS}\
+ -I../..\
  -I$(srcdir)\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../IJ_matrix_vector\
@@ -53,6 +54,7 @@ CFLAGS = -w ${C_COMPILE_FLAGS} ${CDEFS}\
 
 MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
 CXXFLAGS = -w ${CXX_COMPILE_FLAGS} ${CXXDEFS}\
+ -I../..\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../IJ_matrix_vector\
  -I$(srcdir)/../../utilities\
