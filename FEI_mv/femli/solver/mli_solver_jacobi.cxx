@@ -375,6 +375,7 @@ int MLI_Solver_Jacobi::setParams( int ntimes, double *weights )
 {
    int i, nsweeps;
 
+   nsweeps = ntimes;
    if ( ntimes <= 0 )
    {
       printf("MLI_Solver_Jacobi::setParams WARNING : nSweeps set to 1.\n");
