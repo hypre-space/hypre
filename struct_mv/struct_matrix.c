@@ -263,59 +263,102 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
       constant_coefficient = hypre_StructMatrixConstantCoefficient(matrix);
 
       data_size = 0;
-      hypre_ForBoxI(i, data_space)
-         {
-            data_box = hypre_BoxArrayBox(data_space, i);
-            data_box_volume  = hypre_BoxVolume(data_box);
-
-            data_indices[i] = hypre_CTAlloc(int, stencil_size);
-
-            /* set pointers for "stored" coefficients */
-            for (j = 0; j < stencil_size; j++)
+      if ( constant_coefficient==0 )
+      {
+         hypre_ForBoxI(i, data_space)
             {
-               if (symm_elements[j] < 0)
+               data_box = hypre_BoxArrayBox(data_space, i);
+               data_box_volume  = hypre_BoxVolume(data_box);
+
+               data_indices[i] = hypre_CTAlloc(int, stencil_size);
+
+               /* set pointers for "stored" coefficients */
+               for (j = 0; j < stencil_size; j++)
                {
-                  data_indices[i][j] = data_size;
-                  if ( constant_coefficient==1 )
+                  if (symm_elements[j] < 0)
                   {
-                     ++data_size;
-                  }
-                  else if ( constant_coefficient==0 )
-                  {
+                     data_indices[i][j] = data_size;
                      data_size += data_box_volume;
                   }
-                  else
+               }
+
+               /* set pointers for "symmetric" coefficients */
+               for (j = 0; j < stencil_size; j++)
+               {
+                  if (symm_elements[j] >= 0)
                   {
-                     assert( constant_coefficient==2 );
+                     data_indices[i][j] = data_indices[i][symm_elements[j]] +
+                        hypre_BoxOffsetDistance(data_box, stencil_shape[j]);
+                  }
+               }
+            }
+      }
+      else if ( constant_coefficient==1 )
+      {
+      
+         hypre_ForBoxI(i, data_space)
+            {
+               data_box = hypre_BoxArrayBox(data_space, i);
+               data_box_volume  = hypre_BoxVolume(data_box);
+
+               data_indices[i] = hypre_CTAlloc(int, stencil_size);
+
+               /* set pointers for "stored" coefficients */
+               for (j = 0; j < stencil_size; j++)
+               {
+                  if (symm_elements[j] < 0)
+                  {
+                     data_indices[i][j] = data_size;
+                     ++data_size;
+                  }
+               }
+
+               /* set pointers for "symmetric" coefficients */
+               for (j = 0; j < stencil_size; j++)
+               {
+                  if (symm_elements[j] >= 0)
+                  {
+                     data_indices[i][j] = data_indices[i][symm_elements[j]];
+                  }
+               }
+            }
+      }
+      else
+      {
+         assert( constant_coefficient == 2 );
+         data_size += stencil_size;  /* all constant coefficients at the beginning */
+         /* ... this allocates a little more space than is absolutely necessary */
+         hypre_ForBoxI(i, data_space)
+            {
+               data_box = hypre_BoxArrayBox(data_space, i);
+               data_box_volume  = hypre_BoxVolume(data_box);
+
+               data_indices[i] = hypre_CTAlloc(int, stencil_size);
+
+               /* set pointers for "stored" coefficients */
+               for (j = 0; j < stencil_size; j++)
+               {
+                  if (symm_elements[j] < 0)
+                  {
                      if (
                         hypre_IndexX(stencil_shape[j])==0 &&
                         hypre_IndexY(stencil_shape[j])==0 &&
                         hypre_IndexZ(stencil_shape[j])==0 )  /* diagonal, variable coefficient */
                      {
+                        data_indices[i][j] = data_size;
                         data_size += data_box_volume;
                      }
                      else /* off-diagonal, constant coefficient */
                      {
-                        ++data_size;
+                        data_indices[i][j] = j;
                      }
                   }
                }
-            }
 
-            /* set pointers for "symmetric" coefficients */
-            for (j = 0; j < stencil_size; j++)
-            {
-               if (symm_elements[j] >= 0)
+               /* set pointers for "symmetric" coefficients */
+               for (j = 0; j < stencil_size; j++)
                {
-                  if ( constant_coefficient==1 ) {
-                     data_indices[i][j] = data_indices[i][symm_elements[j]];
-                  }
-                  else if ( constant_coefficient==0 )
-                  {
-                     data_indices[i][j] = data_indices[i][symm_elements[j]] +
-                        hypre_BoxOffsetDistance(data_box, stencil_shape[j]);
-                  }
-                  else
+                  if (symm_elements[j] >= 0)
                   {
                      if (
                         hypre_IndexX(stencil_shape[j])==0 &&
@@ -332,7 +375,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
                   }
                }
             }
-         }
+      }
 
       hypre_StructMatrixDataIndices(matrix) = data_indices;
       hypre_StructMatrixDataSize(matrix)    = data_size;
@@ -1003,18 +1046,16 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 {
    int    ierr = 0;
 
-   int                   *num_ghost = hypre_StructMatrixNumGhost(matrix);
-   int                    comm_num_values, mat_num_values, constant_coefficient;
-   int    i, diag_rank = 0;
+   int   *num_ghost = hypre_StructMatrixNumGhost(matrix);
+   int    comm_num_values, mat_num_values, constant_coefficient;
+   int    stencil_size;
    hypre_StructStencil   *stencil;
-   hypre_Index            diag_index;
 
    hypre_CommInfo        *comm_info;
    hypre_CommPkg         *comm_pkg;
 
    hypre_CommHandle      *comm_handle;
-   int                    data_skip;
-
+   int                    data_initial_offset = 0;
    /*-----------------------------------------------------------------------
     * If the CommPkg has not been set up, set it up
     *-----------------------------------------------------------------------*/
@@ -1023,7 +1064,6 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 
    mat_num_values = hypre_StructMatrixNumValues(matrix);
 
-   data_skip= 0;
    if ( constant_coefficient==0 ) 
    {
        comm_num_values = mat_num_values;
@@ -1034,15 +1074,10 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    }
    else /* constant_coefficient==2 */
    {
-       comm_num_values = 1;
-       data_skip= mat_num_values-1;
-   }
-
-   if ( constant_coefficient==2 )
-   {
+      comm_num_values = 1;
       stencil = hypre_StructMatrixStencil(matrix);
-      hypre_SetIndex(diag_index, 0, 0, 0);
-      diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
+      stencil_size  = hypre_StructStencilSize(stencil);
+      data_initial_offset = stencil_size;
    }
 
    comm_pkg = hypre_StructMatrixCommPkg(matrix);
@@ -1054,7 +1089,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
       hypre_CommPkgCreate(comm_info,
                           hypre_StructMatrixDataSpace(matrix),
                           hypre_StructMatrixDataSpace(matrix),
-                          comm_num_values, diag_rank, data_skip,
+                          comm_num_values, data_initial_offset,
                           hypre_StructMatrixComm(matrix), &comm_pkg);
 
       hypre_StructMatrixCommPkg(matrix) = comm_pkg;
@@ -1197,6 +1232,7 @@ hypre_StructMatrixPrint( const char         *filename,
 
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
+   int                   stencil_size;
    hypre_Index           center_index;
 
    int                   num_values;
@@ -1254,8 +1290,9 @@ hypre_StructMatrixPrint( const char         *filename,
    num_values = hypre_StructMatrixNumValues(matrix);
    symm_elements = hypre_StructMatrixSymmElements(matrix);
    fprintf(file, "%d\n", num_values);
+   stencil_size = hypre_StructStencilSize(stencil);
    j = 0;
-   for (i = 0; i < hypre_StructStencilSize(stencil); i++)
+   for (i=0; i<stencil_size; i++)
    {
       if (symm_elements[i] < 0)
       {
@@ -1287,8 +1324,11 @@ hypre_StructMatrixPrint( const char         *filename,
    {
       hypre_SetIndex(center_index, 0, 0, 0);
       center_rank = hypre_StructStencilElementRank( stencil, center_index );
+      stencil = hypre_StructMatrixStencil(matrix);
+      stencil_size  = hypre_StructStencilSize(stencil);
+
       hypre_PrintCCVDBoxArrayData(file, boxes, data_space, num_values,
-                                  center_rank,
+                                  center_rank, stencil_size, symm_elements,
                                   hypre_StructMatrixData(matrix));
    }
    else
@@ -1320,11 +1360,11 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
    hypre_CommHandle      *comm_handle;
 
    int                    ierr = 0;
-   int                    diag_rank = 0;
-   int                    constant_coefficient, diag_rank1, comm_num_values, mat_num_values;
+   int                    constant_coefficient, comm_num_values;
+   int                    stencil_size, mat_num_values;
    hypre_StructStencil   *stencil;
    hypre_Index            diag_index;
-   int                    data_skip;
+   int                    data_initial_offset = 0;
 
    /*------------------------------------------------------
     * Set up hypre_CommPkg
@@ -1334,8 +1374,8 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
    assert( constant_coefficient == hypre_StructMatrixConstantCoefficient( to_matrix ) );
 
    mat_num_values = hypre_StructMatrixNumValues(from_matrix);
+   assert( mat_num_values = hypre_StructMatrixNumValues(to_matrix) );
 
-   data_skip= 0;
    if ( constant_coefficient==0 ) 
    {
        comm_num_values = mat_num_values;
@@ -1346,21 +1386,12 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
    }
    else /* constant_coefficient==2 */ 
    {
-       comm_num_values = 1;
-       data_skip= mat_num_values-1;
-   }
-
-   if ( constant_coefficient==2 )
-   {
+      comm_num_values = 1;
       stencil = hypre_StructMatrixStencil(from_matrix);
-      hypre_SetIndex(diag_index, 0, 0, 0);
-      diag_rank1 = hypre_StructStencilElementRank(stencil, diag_index);
-      stencil = hypre_StructMatrixStencil(to_matrix);
-      diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
-      assert( diag_rank==diag_rank1 );
-      /* if we really need to do it, we could let diag_rank!=diag_rank1,
-         but they would both have to be passed through the argument list,
-         complexifying hypre_CommPkgCreate */
+      stencil_size = hypre_StructStencilSize(stencil);
+      assert(stencil_size ==
+             hypre_StructStencilSize( hypre_StructMatrixStencil(to_matrix) ) );
+      data_initial_offset = stencil_size;
    }
 
    hypre_CreateCommInfoFromGrids(hypre_StructMatrixGrid(from_matrix),
@@ -1369,7 +1400,7 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
    hypre_CommPkgCreate(comm_info,
                        hypre_StructMatrixDataSpace(from_matrix),
                        hypre_StructMatrixDataSpace(to_matrix),
-                       comm_num_values, diag_rank, data_skip,
+                       comm_num_values, data_initial_offset,
                        hypre_StructMatrixComm(from_matrix), &comm_pkg);
    /* is this correct for periodic? */
 

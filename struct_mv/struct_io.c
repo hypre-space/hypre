@@ -94,19 +94,20 @@ hypre_PrintBoxArrayData( FILE            *file,
 
 int
 hypre_PrintCCVDBoxArrayData( FILE            *file,
-                         hypre_BoxArray  *box_array,
-                         hypre_BoxArray  *data_space,
-                         int              num_values,
+                             hypre_BoxArray  *box_array,
+                             hypre_BoxArray  *data_space,
+                             int              num_values,
                              int              center_rank,
-                         double          *data       )
+                             int              stencil_size,
+                             int             *symm_elements,
+                             double          *data       )
 {
    int              ierr = 0;
 
    hypre_Box       *box;
    hypre_Box       *data_box;
                    
-   int              data_box_volume;
-   int              datai;
+   int              data_box_volume, datai;
                    
    hypre_Index      loop_size;
    hypre_IndexRef   start;
@@ -121,6 +122,19 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
 
    hypre_SetIndex(stride, 1, 1, 1);
 
+   /* First is the constant, off-diagonal, part of the matrix: */
+   for (  j=0; j<stencil_size; ++j )
+   {
+      if (symm_elements[j] < 0 && j!=center_rank )
+      {
+         fprintf( file, "*: (*, *, *; %d) %e\n",
+                  j, data[0] );
+         ++data;
+      }
+   }
+   
+
+   /* Then each box has a variable, diagonal, part of the matrix: */
    hypre_ForBoxI(i, box_array)
       {
          box      = hypre_BoxArrayBox(box_array, i);
@@ -131,40 +145,22 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
 
          hypre_BoxGetSize(box, loop_size);
 
-         for (j = 0; j < num_values; j++)
-         {
-            if ( j!=center_rank )
-            {
-               datai = hypre_CCBoxIndexRank_noargs();
-               fprintf(file, "%d: (%d, %d, %d; %d) %e\n",
-                       i,
-                       hypre_IndexX(start),
-                       hypre_IndexY(start),
-                       hypre_IndexZ(start),
-                       j,
-                       data[datai]);
-               ++data;
-            }
-            else
-            {
-               hypre_BoxLoop1Begin(loop_size,
-                                   data_box, start, stride, datai);
+         hypre_BoxLoop1Begin(loop_size,
+                             data_box, start, stride, datai);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
 #include "hypre_box_smp_forloop.h"
-               hypre_BoxLoop1For(loopi, loopj, loopk, datai)
-                  {
-                     fprintf(file, "%d: (%d, %d, %d; %d) %e\n",
-                             i,
-                             hypre_IndexX(start) + loopi,
-                             hypre_IndexY(start) + loopj,
-                             hypre_IndexZ(start) + loopk,
-                             j,
-                             data[datai]);
-                  }
-               hypre_BoxLoop1End(datai);
-               data += data_box_volume;
+         hypre_BoxLoop1For(loopi, loopj, loopk, datai)
+            {
+               fprintf(file, "%d: (%d, %d, %d; %d) %e\n",
+                       i,
+                       hypre_IndexX(start) + loopi,
+                       hypre_IndexY(start) + loopj,
+                       hypre_IndexZ(start) + loopk,
+                       center_rank,
+                       data[datai]);
             }
-         }
+         hypre_BoxLoop1End(datai);
+         data += data_box_volume;
       }
 
    return ierr;

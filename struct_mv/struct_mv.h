@@ -1803,7 +1803,7 @@ int hypre_ProjectBoxArrayArray( hypre_BoxArrayArray *box_array_array , hypre_Ind
 int hypre_StructAxpy( double alpha , hypre_StructVector *x , hypre_StructVector *y );
 
 /* struct_communication.c */
-int hypre_CommPkgCreate( hypre_CommInfo *comm_info , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , int num_values , int data_initial_offset , int data_skip , MPI_Comm comm , hypre_CommPkg **comm_pkg_ptr );
+int hypre_CommPkgCreate( hypre_CommInfo *comm_info , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , int num_values , int data_initial_offset , MPI_Comm comm , hypre_CommPkg **comm_pkg_ptr );
 int hypre_CommTypeSetEntries( hypre_CommType *comm_type , int *boxnums , hypre_Box *boxes , hypre_Index stride , int num_values , hypre_BoxArray *data_space , int *data_offsets );
 int hypre_CommTypeSetEntry( hypre_Box *box , hypre_Index stride , hypre_Box *data_box , int num_values , int data_box_offset , hypre_CommEntryType *comm_entry );
 int hypre_InitializeCommunication( hypre_CommPkg *comm_pkg , double *send_data , double *recv_data , hypre_CommHandle **comm_handle_ptr );
@@ -1836,7 +1836,7 @@ double hypre_StructInnerProd( hypre_StructVector *x , hypre_StructVector *y );
 
 /* struct_io.c */
 int hypre_PrintBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , double *data );
-int hypre_PrintCCVDBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , int center_rank , double *data );
+int hypre_PrintCCVDBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , int center_rank , int stencil_size , int *symm_elements , double *data );
 int hypre_PrintCCBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , double *data );
 int hypre_ReadBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , double *data );
 
