@@ -135,6 +135,39 @@ then
 fi
 
 #=============================================================================
+# Periodic SMG: Run base 3d case
+#=============================================================================
+
+$MPIRUN -np 1 $SLS -n 8 8 8 -p 0 8 8 -solver 0
+tail -3 $SLS.log > $SLS.testdata
+
+#=============================================================================
+# Periodic SMG: Test parallel and blocking by diffing against base 3d case
+#=============================================================================
+
+$MPIRUN -np 1 $SLS -n 2 2 2 -P 1 1 1  -p 0 8 8 -b 4 4 4 -solver 0
+tail -3 $SLS.log > $SLS.testdata.temp
+diff $SLS.testdata $SLS.testdata.temp >&2
+
+$MPIRUN -np 4 $SLS -n 2 8 8 -P 4 1 1  -p 0 8 8 -solver 0
+tail -3 $SLS.log > $SLS.testdata.temp
+diff $SLS.testdata $SLS.testdata.temp >&2
+
+$MPIRUN -np 4 $SLS -n 8 2 8 -P 1 4 1  -p 0 8 8 -solver 0
+tail -3 $SLS.log > $SLS.testdata.temp
+diff $SLS.testdata $SLS.testdata.temp >&2
+
+$MPIRUN -np 4 $SLS -n 8 8 2 -P 1 1 4  -p 0 8 8 -solver 0
+tail -3 $SLS.log > $SLS.testdata.temp
+diff $SLS.testdata $SLS.testdata.temp >&2
+
+$MPIRUN -np 8 $SLS -n 2 2 2 -P 2 2 2  -p 0 8 8 -b 2 2 2 -solver 0
+tail -3 $SLS.log > $SLS.testdata.temp
+diff $SLS.testdata $SLS.testdata.temp >&2
+
+rm -f $SLS.testdata $SLS.testdata.temp
+
+#=============================================================================
 # PFMG: Run base 3d case
 #=============================================================================
 

@@ -27,6 +27,7 @@ main( int   argc,
    int                 nx, ny, nz;
    int                 P, Q, R;
    int                 bx, by, bz;
+   int                 px, py, pz;
    double              cx, cy, cz;
    int                 solver_id;
 
@@ -55,6 +56,7 @@ main( int   argc,
    int               **ilower;
 
    int                 istart[3];
+   int                 periodic[3];
 
    int               **offsets;
 
@@ -66,6 +68,8 @@ main( int   argc,
 
    int                 i, s, d;
    int                 ix, iy, iz, ib;
+
+   int                 periodic_error = 0;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -120,6 +124,10 @@ main( int   argc,
    istart[1] = -3;
    istart[2] = -3;
 
+   px = 0;
+   py = 0;
+   pz = 0;
+
    /*-----------------------------------------------------------
     * Parse command line
     *-----------------------------------------------------------*/
@@ -148,6 +156,13 @@ main( int   argc,
          bx = atoi(argv[arg_index++]);
          by = atoi(argv[arg_index++]);
          bz = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-p") == 0 )
+      {
+         arg_index++;
+         px = atoi(argv[arg_index++]);
+         py = atoi(argv[arg_index++]);
+         pz = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-c") == 0 )
       {
@@ -195,6 +210,7 @@ main( int   argc,
       printf("  -n <nx> <ny> <nz>    : problem size per block\n");
       printf("  -P <Px> <Py> <Pz>    : processor topology\n");
       printf("  -b <bx> <by> <bz>    : blocking per processor\n");
+      printf("  -p <px> <py> <pz>    : periodicity in each dimension\n");
       printf("  -c <cx> <cy> <cz>    : diffusion coefficients\n");
       printf("  -v <n_pre> <n_post>  : number of pre and post relaxations\n");
       printf("  -d <dim>             : problem dimension (2 or 3)\n");
@@ -222,6 +238,22 @@ main( int   argc,
       exit(1);
    }
 
+   if (px != 0)
+   {
+      printf("Error: Periodic in x not implemented \n");
+      periodic_error++;
+   }
+   if ((px+py) != 0 && solver_id != 0 )
+   {
+      printf("Error: Periodic implemented only for solver 0, SMG \n");
+      periodic_error++;
+   }
+   if (periodic_error != 0)
+   {
+      exit(1);
+   }
+
+
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
@@ -232,10 +264,24 @@ main( int   argc,
       printf("  (nx, ny, nz)    = (%d, %d, %d)\n", nx, ny, nz);
       printf("  (Px, Py, Pz)    = (%d, %d, %d)\n", P,  Q,  R);
       printf("  (bx, by, bz)    = (%d, %d, %d)\n", bx, by, bz);
+      printf("  (px, py, pz)    = (%d, %d, %d)\n", px, py, pz);
       printf("  (cx, cy, cz)    = (%f, %f, %f)\n", cx, cy, cz);
       printf("  (n_pre, n_post) = (%d, %d)\n", n_pre, n_post);
       printf("  dim             = %d\n", dim);
       printf("  solver ID       = %d\n", solver_id);
+   }
+
+   /*-----------------------------------------------------------
+    * Set up periodic flags and set istart = 0 for periodic dims
+    *-----------------------------------------------------------*/
+
+   periodic[0] = px;
+   periodic[1] = py;
+   periodic[2] = pz;
+   for (i = 0; i < dim; i++)
+   {
+      if (periodic[i] != 0)
+         istart[i] = 0;
    }
 
    /*-----------------------------------------------------------
@@ -380,6 +426,7 @@ main( int   argc,
    {
       HYPRE_SetStructGridExtents(grid, ilower[ib], iupper[ib]);
    }
+   HYPRE_SetStructGridPeriodic(grid, periodic);
    HYPRE_AssembleStructGrid(grid);
 
    /*-----------------------------------------------------------
@@ -447,7 +494,7 @@ main( int   argc,
    {
       for (ib = 0; ib < nblocks; ib++)
       {
-         if( ilower[ib][d] == istart[d] )
+         if( ilower[ib][d] == istart[d] && periodic[d] == 0 )
          {
             i = iupper[ib][d];
             iupper[ib][d] = istart[d];
