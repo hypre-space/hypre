@@ -1636,6 +1636,7 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
 {
     int    i, *num_sweeps, *relax_type;
     double *relax_wt;
+    HYPRE_Lookup *newLookup;
 
     switch ( HYPreconID_ )
     {
@@ -1874,8 +1875,7 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
             break;
 
        case HYBLOCK :
-            HYPRE_Lookup *newLookup = (HYPRE_Lookup *) 
-                                      malloc(sizeof(HYPRE_Lookup));
+            newLookup = (HYPRE_Lookup *) malloc(sizeof(HYPRE_Lookup));
             newLookup->object = (void *) lookup_;
             HYPRE_LSI_BlockPrecondSetLookup( HYPrecon_, newLookup );
             free( newLookup );
@@ -3100,6 +3100,7 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
 {
     int    i, *num_sweeps, *relax_type;
     double *relax_wt;
+    HYPRE_Lookup *newLookup;
 
     switch ( HYPreconID_ )
     {
@@ -3268,8 +3269,7 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
             break;
 
        case HYBLOCK :
-            HYPRE_Lookup *newLookup = (HYPRE_Lookup *) 
-                                      malloc(sizeof(HYPRE_Lookup));
+            newLookup = (HYPRE_Lookup *) malloc(sizeof(HYPRE_Lookup));
             newLookup->object = (void *) lookup_;
             HYPRE_LSI_BlockPrecondSetLookup( HYPrecon_, newLookup );
             free( newLookup );
