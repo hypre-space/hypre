@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "Vec_dh.h"
 #include "Mem_dh.h"
 #include "SubdomainGraph_dh.h"
