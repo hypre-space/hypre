@@ -264,7 +264,8 @@ void MatrixPrint(Matrix *mat, char *filename)
 
                 for (i=0; i<len; i++)
                     fprintf(file, "%d %d %.14e\n", 
-			row + mat->beg_row, ind[i], val[i]);
+			row + mat->beg_row, 
+			mat->numb->local_to_global[ind[i]], val[i]);
             }
 	}
 
