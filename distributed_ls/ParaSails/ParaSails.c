@@ -690,7 +690,6 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
     double time0, time1, timet = 0.0, timea = 0.0;
 
     double ahatcost = 0.0;
-    double ahatcost2 = 0.0;
 
 #ifndef ESSL
     char uplo = 'L';
@@ -771,7 +770,6 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         time1 = MPI_Wtime();
         timea += (time1-time0);
 	ahatcost += (double) (len*len2);
-	ahatcost2 += (double) (len*len);
 
         /* Set the right-hand side */
         bzero((char *) val, len*sizeof(double));
@@ -829,8 +827,8 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
     printf("%d: Time for ahat: %f, for local solves: %f\n", mype, timea, timet);
-    printf("%d: ahatcost: %f, cost2: %f, numrows: %d, maxlen: %d\n", 
-        mype, ahatcost, ahatcost2, mat->end_row-local_beg_row+1, maxlen);
+    printf("%d: ahatcost: %7.1e, numrows: %d, maxlen: %d\n", 
+        mype, ahatcost, mat->end_row-local_beg_row+1, maxlen);
     fflush(NULL);
     }
 #endif
