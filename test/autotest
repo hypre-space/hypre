@@ -272,6 +272,18 @@ scp -r linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
 ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
         cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
+	setenv PATH /usr/local.aix43/bin:/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/bin/X11:/usr/local/totalview/bin:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/g/g19/dwalker:.:/lib:/usr/local/mpi/include:/usr/lpp/ppe.poe/include:/g/g19/dwalker/mkproto:/g/g19/dwalker/mkproto:/usr/bin:/usr/ccs/bin:/usr/bin/X11:/usr/lbin:/usr/local/apps/bin:/usr/local/apps/basis/bin:/usr/local/apps/meshtv/bin:/usr/local/apps/mpi/bin:/usr/local/lib/NCAR/4.0.1/bin:/usr/local/apps/yorick/bin:/usr/local/forge/bin:/usr/local/totalview/bin:/opt/flexlm/bin-totalview:/usr/lib/cmplrs/atom/Atom:/usr/local/bin:/sbin:/usr/sbin:/usr/local/DX/3.1.4/bin:/usr/local/parasoft/bin.alpha4:/lib:/usr/kits/GKR620/usr/shlib:/usr/include:/usr/lib:/usr/local/apps/cog:/usr/local/parasoft/bin.alpha4:/usr/include:.:/lib:/usr/kits/GKR620/usr/shlib:/usr/include:/usr/lib:/usr/local/apps/cog:/usr/local/parasoft/bin.alpha4:/usr/include;\
+	setenv MP_RMPOOL 0;\
+	setenv MP_CPU_USE unique;\
+	setenv MP_EUIDEVICE css0;\
+	setenv MP_EUILIB us;\
+	setenv MP_RESD yes;\
+	setenv MP_HOSTFILE NULL;\
+	setenv MP_LABELIO yes;\
+	setenv MP_INFOLEVEL 1;\
+	setenv MP_TMPDIR /var/tmp;\
+	setenv MP_NOPOECFG YES
+	setenv MP_REMOTEDIR /admin/scripts/mpautofix;\
         ./configure ;\
         make beta;\
     )"
@@ -287,6 +299,16 @@ ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
 	setenv PATH /usr/local.aix43/bin:/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/bin/X11:/usr/local/totalview/bin:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/g/g19/dwalker:.:/lib:/usr/local/mpi/include:/usr/lpp/ppe.poe/include:/g/g19/dwalker/mkproto:/g/g19/dwalker/mkproto:/usr/bin:/usr/ccs/bin:/usr/bin/X11:/usr/lbin:/usr/local/apps/bin:/usr/local/apps/basis/bin:/usr/local/apps/meshtv/bin:/usr/local/apps/mpi/bin:/usr/local/lib/NCAR/4.0.1/bin:/usr/local/apps/yorick/bin:/usr/local/forge/bin:/usr/local/totalview/bin:/opt/flexlm/bin-totalview:/usr/lib/cmplrs/atom/Atom:/usr/local/bin:/sbin:/usr/sbin:/usr/local/DX/3.1.4/bin:/usr/local/parasoft/bin.alpha4:/lib:/usr/kits/GKR620/usr/shlib:/usr/include:/usr/lib:/usr/local/apps/cog:/usr/local/parasoft/bin.alpha4:/usr/include:.:/lib:/usr/kits/GKR620/usr/shlib:/usr/include:/usr/lib:/usr/local/apps/cog:/usr/local/parasoft/bin.alpha4:/usr/include;\
 	setenv MP_RMPOOL 0;\
+	setenv MP_CPU_USE unique;\
+	setenv MP_EUIDEVICE css0;\
+	setenv MP_EUILIB us;\
+	setenv MP_RESD yes;\
+	setenv MP_HOSTFILE NULL;\
+	setenv MP_LABELIO yes;\
+	setenv MP_INFOLEVEL 1;\
+	setenv MP_TMPDIR /var/tmp;\
+	setenv MP_NOPOECFG YES
+	setenv MP_REMOTEDIR /admin/scripts/mpautofix;\
         cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
         ./configure --with-openmp;\
 	make veryclean;\
