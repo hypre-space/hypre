@@ -1,0 +1,25 @@
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+#
+# This file chronicles user-level changes/additions to hypre.  This text
+# will be used to construct email notices for installation and distribution
+# updates of hypre.
+#
+#=============================================================================
+
+
+New internal installation: V2000-01-14
+
+- First new user-level change goes here.
+
+- Second new user-level change goes here.
+
+...
