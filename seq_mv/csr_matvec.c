@@ -41,7 +41,7 @@ hypre_CSRMatrixMatvec( double           alpha,
 
    double      temp, tempx;
 
-   int         i, j, jj;
+   int         i, jj;
 
    int         m;
 
