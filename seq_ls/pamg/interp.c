@@ -264,6 +264,8 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
                   }
                }
                
+               if (sum != 0)
+               {
                distribute = A_data[jj] / sum;
                
                /*-----------------------------------------------------------
@@ -278,6 +280,12 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
                   {
                      P_data[P_marker[i2]] += distribute * A_data[jj1];
                   }
+               }
+               }
+               else
+               {
+               if( dof_func[i] == dof_func[i1])
+                  diagonal += A_data[jj];
                }
             }
    
