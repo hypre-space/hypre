@@ -52,7 +52,7 @@ typedef struct HYPRE_LSI_DDIlut_Struct
 }
 HYPRE_LSI_DDIlut;
 
-extern HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix,MH_Matrix *,
+extern int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix,MH_Matrix *,
                                      MPI_Comm, int *, MH_Context *);
 extern int HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *, int *, 
                  int **recv_lengths, int **int_buf, double **dble_buf, 
@@ -71,6 +71,11 @@ extern int HYPRE_LSI_DDIlutDecompose2(HYPRE_LSI_DDIlut *ilut_ptr,
 extern void HYPRE_LSI_qsort1a(int *, int *, int, int);
 extern void qsort0(int *, int, int);
 extern int  HYPRE_LSI_SplitDSort(double*,int,int*,int);
+extern int  MH_ExchBdry(double *, void *);
+extern int  MH_ExchBdryBack(double *, void *, int *, double **, int **);
+extern int  MH_GetRow(void *, int, int *, int, int *, double *, int *);
+extern int  HYPRE_LSI_Cuthill(int, int *, int *, double *, int *, int *);
+extern int  HYPRE_LSI_Search(int *, int, int);
 
 #define habs(x) ((x) > 0 ? (x) : -(x))
 
@@ -495,7 +500,7 @@ int HYPRE_LSI_DDIlutGetOffProcRows(MH_Matrix *Amat, int leng, int *recv_leng,
                            int Noffset, int *map, int *map2, int **int_buf,
                            double **dble_buf, MPI_Comm mpi_comm)
 {
-   int         i, j, k, m, *temp_list, length, offset, allocated_space, proc_id;
+   int         i, j, k, m, length, offset, allocated_space, proc_id;
    int         nRecv, nSend, *recvProc, *sendProc, total_recv, mtype, msgtype;
    int         *sendLeng, *recvLeng, **sendList, *cols, *isend_buf, Nrows;
    int         nnz, nnz_offset, index, mypid;
@@ -691,7 +696,7 @@ int HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *mh_mat,
               double **dble_buf, int **sindex_array, int **sindex_array2, 
               int *offset, MPI_Comm mpi_comm)
 {
-   int        i, j, nprocs, mypid, Nrows, *proc_array, *proc_array2;
+   int        i, nprocs, mypid, Nrows, *proc_array, *proc_array2;
    int        extNrows, NrowsOffset, *index_array, *index_array2;
    int        nRecv, *recvLeng;
    double     *dble_array;
@@ -786,12 +791,12 @@ int HYPRE_LSI_DDIlutDecompose(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
            int *map, int *map2, int Noffset)
 {
    int          *mat_ia, *mat_ja, i, m, allocated_space, *cols, mypid;
-   int          index, first, Lcount, Ucount, ncnt, j, k, total_nnz;
+   int          index, first, Lcount, Ucount, j, k, total_nnz;
    int          sortcnt, colIndex, offset, nnz, nnz_count, Nrows, extNrows;
    int          *track_array, track_leng, num_small_pivot, printstep, nnz_row;
    int          *sortcols, *Amat_ia, *Amat_ja, *order_list, *reorder_list;
    int          max_nnz_row, touch_cnt=0, order_flag;
-   double       *vals, ddata, thresh, *mat_aa, *diagonal, *rowNorms, *Norm2;
+   double       *vals, ddata, *mat_aa, *diagonal, *rowNorms, *Norm2;
    double       *dble_buf, fillin, tau, rel_tau, *sortvals, *Amat_aa;
    MH_Context   *context;
 
@@ -1311,7 +1316,7 @@ int HYPRE_LSI_DDIlutDecompose2(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
    int          sortcnt, colIndex, offset, nnz, nnz_count, Nrows, extNrows;
    int          *track_array, track_leng, num_small_pivot, printstep, ndisc;
    int          *sortcols;
-   double       *vals, ddata, thresh, *mat_aa, *diagonal, *rowNorms;
+   double       *vals, ddata, *mat_aa, *diagonal, *rowNorms;
    double       *dble_buf, fillin, tau, rel_tau, *sortvals, absval;
    MH_Context   *context;
 
@@ -1711,10 +1716,10 @@ int HYPRE_LSI_DDIlutDecompose3(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
            int *map, int *map2, int Noffset)
 {
    int          *mat_ia, *mat_ja, i, m, allocated_space, *cols, mypid;
-   int          index, first, Lcount, Ucount, ncnt, j, k, total_nnz;
+   int          index, first, Lcount, Ucount, j, k, total_nnz;
    int          sortcnt, colIndex, offset, nnz, nnz_count, Nrows, extNrows;
    int          *track_array, track_leng, num_small_pivot;
-   double       *vals, ddata, thresh, *mat_aa, *diagonal, *rowNorms;
+   double       *vals, ddata, *mat_aa, *diagonal, *rowNorms;
    double       *dble_buf, fillin, tau, rel_tau;
    MH_Context   *context;
 
@@ -2119,7 +2124,7 @@ int HYPRE_LSI_DDIlutDecomposeNew(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
    int          colIndex, offset, nnz_count, Nrows, extNrows;
    int          *track_array, track_leng, num_small_pivot, printstep;
    int          fillin, *mat_ia2, *mat_ja2, *iarray;
-   double       *vals, ddata, thresh, *mat_aa, *diagonal, *rowNorms, *darray;
+   double       *vals, ddata, *mat_aa, *diagonal, *rowNorms;
    double       *dble_buf, tau, rel_tau, *mat_aa2;
    MH_Context   *context;
 
