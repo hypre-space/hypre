@@ -14,15 +14,53 @@
  *****************************************************************************/
 
 #include "headers.h"
+#include "threading.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructPCGInitialize
  *--------------------------------------------------------------------------*/
 
+typedef struct {
+   MPI_Comm             comm;
+   HYPRE_StructSolver  *returnvalue;
+} HYPRE_StructPCGInitializeArgs;
+
 HYPRE_StructSolver
 HYPRE_StructPCGInitialize( MPI_Comm comm )
 {
    return ( (HYPRE_StructSolver) hypre_PCGInitialize( ) );
+}
+
+void
+HYPRE_StructPCGInitializeVoidPtr( void *argptr )
+{
+   HYPRE_StructPCGInitializeArgs *localargs =
+                                (HYPRE_StructPCGInitializeArgs *) argptr;
+
+   *(localargs->returnvalue) = HYPRE_StructPCGInitialize( localargs->comm );
+}
+
+HYPRE_StructSolver
+HYPRE_StructPCGInitializePush( MPI_Comm comm )
+{
+   HYPRE_StructPCGInitializeArgs  pushargs;
+   int                            i;
+   HYPRE_StructSolver             returnvalue;
+
+   pushargs.comm = comm;
+   pushargs.returnvalue = 
+                  (HYPRE_StructSolver*) malloc(sizeof(HYPRE_StructSolver));
+
+   for (i=0; i<NUM_THREADS; i++)
+      hypre_work_put( HYPRE_StructPCGInitializeVoidPtr, (void*)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = *(pushargs.returnvalue);
+
+   free( pushargs.returnvalue );
+
+   return returnvalue;
 }
 
 /*--------------------------------------------------------------------------
@@ -55,6 +93,14 @@ HYPRE_StructPCGSetup( HYPRE_StructSolver solver,
  * HYPRE_StructPCGSolve
  *--------------------------------------------------------------------------*/
 
+typedef struct {
+   HYPRE_StructSolver  solver;
+   HYPRE_StructMatrix  A;
+   HYPRE_StructVector  b;
+   HYPRE_StructVector  x;
+   int                *returnvalue;
+} HYPRE_StructPCGSolveArgs;
+
 int 
 HYPRE_StructPCGSolve( HYPRE_StructSolver solver,
                       HYPRE_StructMatrix A,
@@ -65,6 +111,45 @@ HYPRE_StructPCGSolve( HYPRE_StructSolver solver,
                            (void *) A,
                            (void *) b,
                            (void *) x ) );
+}
+
+void
+HYPRE_StructPCGSolveVoidPtr( void *argptr )
+{
+   HYPRE_StructPCGSolveArgs *localargs = (HYPRE_StructPCGSolveArgs *) argptr;
+
+   *(localargs->returnvalue) = HYPRE_StructPCGSolve( localargs->solver,
+                                                     localargs->A,
+                                                     localargs->b,
+                                                     localargs->x );
+}
+
+int 
+HYPRE_StructPCGSolvePush( HYPRE_StructSolver solver,
+                          HYPRE_StructMatrix A,
+                          HYPRE_StructVector b,
+                          HYPRE_StructVector x      )
+{
+   HYPRE_StructPCGSolveArgs  pushargs;
+   int                       i;
+   int                       returnvalue;
+   
+   pushargs.solver = solver;
+   pushargs.A      = A;
+   pushargs.b      = b;
+   pushargs.b      = b;
+   pushargs.returnvalue = (int *) malloc(sizeof(int)); 
+ 
+   for (i=0; i<NUM_THREADS; i++)
+      hypre_work_put( HYPRE_StructPCGSolveVoidPtr, (void*)&pushargs );
+   
+   hypre_work_wait();
+                      
+   returnvalue = *(pushargs.returnvalue);  
+                      
+   free( pushargs.returnvalue );
+   
+   return returnvalue;
 }
 
 /*--------------------------------------------------------------------------
@@ -175,6 +260,14 @@ HYPRE_StructDiagScaleSetup( HYPRE_StructSolver solver,
  * HYPRE_StructDiagScale
  *--------------------------------------------------------------------------*/
 
+typedef struct {
+   HYPRE_StructSolver  solver;
+   HYPRE_StructMatrix  HA;
+   HYPRE_StructVector  Hy;
+   HYPRE_StructVector  Hx;
+   int                *returnvalue;
+} HYPRE_StructDiagScaleArgs;
+
 int 
 HYPRE_StructDiagScale( HYPRE_StructSolver solver,
                        HYPRE_StructMatrix HA,
@@ -241,3 +334,42 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
    return ierr;
 }
 
+void
+HYPRE_StructDiagScaleVoidPtr ( void *argptr )
+{
+
+   HYPRE_StructDiagScaleArgs *localargs = (HYPRE_StructDiagScaleArgs *) argptr;
+
+   *(localargs->returnvalue) = HYPRE_StructDiagScale( localargs->solver,
+                                                       localargs->HA,
+                                                       localargs->Hy,
+                                                       localargs->Hx );
+}
+
+int 
+HYPRE_StructDiagScalePush( HYPRE_StructSolver solver,
+                           HYPRE_StructMatrix HA,
+                           HYPRE_StructVector Hy,
+                           HYPRE_StructVector Hx      )
+{
+   HYPRE_StructDiagScaleArgs  pushargs;
+   int                        i;
+   int                        returnvalue;
+
+   pushargs.solver = solver;
+   pushargs.HA     = HA;
+   pushargs.Hy     = Hy;
+   pushargs.Hx     = Hx;
+   pushargs.returnvalue = (int *) malloc(sizeof(int));
+
+   for (i=0; i<NUM_THREADS; i++)
+      hypre_work_put( HYPRE_StructDiagScaleVoidPtr, (void *)&pushargs);
+
+   hypre_work_wait();
+
+   returnvalue = *(pushargs.returnvalue);
+
+   free( pushargs.returnvalue );
+
+   return returnvalue;
+}

@@ -22,6 +22,8 @@
 extern "C" {
 #endif
 
+#define NO_PTHREAD_MANGLING
+
 /*--------------------------------------------------------------------------
  * Structures
  *--------------------------------------------------------------------------*/
@@ -41,9 +43,13 @@ typedef struct {int opaque;} *HYPRE_StructSolver;
 
 /* HYPRE_struct_pcg.c */
 HYPRE_StructSolver HYPRE_StructPCGInitialize P((MPI_Comm comm ));
+void HYPRE_StructPCGInitializeVoidPtr P((void *argptr ));
+HYPRE_StructSolver HYPRE_StructPCGInitializePush P((MPI_Comm comm ));
 int HYPRE_StructPCGFinalize P((HYPRE_StructSolver solver ));
 int HYPRE_StructPCGSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructPCGSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
+void HYPRE_StructPCGSolveVoidPtr P((void *argptr ));
+int HYPRE_StructPCGSolvePush P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructPCGSetTol P((HYPRE_StructSolver solver , double tol ));
 int HYPRE_StructPCGSetMaxIter P((HYPRE_StructSolver solver , int max_iter ));
 int HYPRE_StructPCGSetTwoNorm P((HYPRE_StructSolver solver , int two_norm ));
@@ -54,12 +60,24 @@ int HYPRE_StructPCGGetNumIterations P((HYPRE_StructSolver solver , int *num_iter
 int HYPRE_StructPCGGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));
 int HYPRE_StructDiagScaleSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector y , HYPRE_StructVector x ));
 int HYPRE_StructDiagScale P((HYPRE_StructSolver solver , HYPRE_StructMatrix HA , HYPRE_StructVector Hy , HYPRE_StructVector Hx ));
+void HYPRE_StructDiagScaleVoidPtr P((void *argptr ));
+int HYPRE_StructDiagScalePush P((HYPRE_StructSolver solver , HYPRE_StructMatrix HA , HYPRE_StructVector Hy , HYPRE_StructVector Hx ));
+
+#ifndef NO_PTHREAD_MANGLING
+#define HYPRE_StructPCGInitialize HYPRE_StructPCGInitializePush
+#define HYPRE_StructPCGSolve HYPRE_StructPCGSolvePush
+#define HYPRE_StructDiagScale HYPRE_StructDiagScalePush
+#endif
 
 /* HYPRE_struct_smg.c */
 HYPRE_StructSolver HYPRE_StructSMGInitialize P((MPI_Comm comm ));
 int HYPRE_StructSMGFinalize P((HYPRE_StructSolver solver ));
 int HYPRE_StructSMGSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
+void HYPRE_StructSMGSetupVoidPtr P((void *argptr ));
+int HYPRE_StructSMGSetupPush P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructSMGSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
+void HYPRE_StructSMGSolveVoidPtr P((void *argptr ));
+int HYPRE_StructSMGSolvePush P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
 int HYPRE_StructSMGSetMemoryUse P((HYPRE_StructSolver solver , int memory_use ));
 int HYPRE_StructSMGSetTol P((HYPRE_StructSolver solver , double tol ));
 int HYPRE_StructSMGSetMaxIter P((HYPRE_StructSolver solver , int max_iter ));
