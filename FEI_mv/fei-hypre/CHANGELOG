@@ -79,4 +79,6 @@
             - fix SuperLU problems for HP machines
 10/25/01    2.0.1R8
             - major reorganization of the block preconditioning module
+12/05/01    2.0.1R9
+            - fix several memory leaks
  
