@@ -18,7 +18,7 @@
 #ifdef MAX_DEPTH
 #undef MAX_DEPTH
 #endif
-#define MAX_DEPTH 1
+#define MAX_DEPTH 7
 
 /*--------------------------------------------------------------------------
  * hypre_StructMatvecData data structure
