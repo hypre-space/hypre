@@ -13,7 +13,9 @@
  * hypre_GeneratePartitioning:
  * generates load balanced partitioning of a 1-d array
  *--------------------------------------------------------------------------*/
- 
+/* for multivectors, length should be the (global) length of a single vector.
+ Thus each of the vectors of the multivector will get the same data distribution. */
+
 int
 hypre_GeneratePartitioning(int length, int num_procs, int **part_ptr)
 {

@@ -13,6 +13,7 @@
  *****************************************************************************/
 
 #include "headers.h"
+#include <assert.h>
 
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorCreate
@@ -28,9 +29,24 @@ hypre_SeqVectorCreate( int size )
    hypre_VectorData(vector) = NULL;
    hypre_VectorSize(vector) = size;
 
+   hypre_VectorNumVectors(vector) = 1;
+   hypre_VectorMultiVecStorageMethod(vector) = 0;
+
    /* set defaults */
    hypre_VectorOwnsData(vector) = 1;
 
+   return vector;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqMultiVectorCreate
+ *--------------------------------------------------------------------------*/
+
+hypre_Vector *
+hypre_SeqMultiVectorCreate( int size, int num_vectors )
+{
+   hypre_Vector *vector = hypre_SeqVectorCreate(size);
+   hypre_VectorNumVectors(vector) = num_vectors;
    return vector;
 }
 
@@ -64,9 +80,25 @@ hypre_SeqVectorInitialize( hypre_Vector *vector )
 {
    int  size = hypre_VectorSize(vector);
    int  ierr = 0;
+   int  num_vectors = hypre_VectorNumVectors(vector);
+   int  multivec_storage_method = hypre_VectorMultiVecStorageMethod(vector);
 
    if ( ! hypre_VectorData(vector) )
-      hypre_VectorData(vector) = hypre_CTAlloc(double, size);
+      hypre_VectorData(vector) = hypre_CTAlloc(double, num_vectors*size);
+
+   if ( multivec_storage_method == 0 )
+   {
+      hypre_VectorVectorStride(vector) = size;
+      hypre_VectorIndexStride(vector) = 1;
+   }
+   else if ( multivec_storage_method == 1 )
+   {
+      hypre_VectorVectorStride(vector) = 1;
+      hypre_VectorIndexStride(vector) = num_vectors;
+   }
+   else
+      ++ierr;
+
 
    return ierr;
 }
@@ -121,6 +153,9 @@ hypre_SeqVectorRead( char *file_name )
 
    fclose(fp);
 
+   /* multivector code not written yet >>> */
+   assert( hypre_VectorNumVectors(vector) == 1 );
+
    return vector;
 }
 
@@ -135,11 +170,15 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
    FILE    *fp;
 
    double  *data;
-   int      size;
+   int      size, num_vectors, vecstride, idxstride;
    
-   int      j;
+   int      i, j;
 
    int      ierr = 0;
+
+   num_vectors = hypre_VectorNumVectors(vector);
+   vecstride = hypre_VectorVectorStride(vector);
+   idxstride = hypre_VectorIndexStride(vector);
 
    /*----------------------------------------------------------
     * Print in the data
@@ -150,11 +189,32 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
 
    fp = fopen(file_name, "w");
 
-   fprintf(fp, "%d\n", size);
-
-   for (j = 0; j < size; j++)
+   if ( hypre_VectorNumVectors(vector) == 1 )
    {
-      fprintf(fp, "%e\n", data[j]);
+      fprintf(fp, "%d\n", size);
+   }
+   else
+   {
+      fprintf(fp, "%d vectors of size %d\n", num_vectors, size );
+   }
+
+   if ( num_vectors>1 )
+   {
+      for ( j=0; j<num_vectors; ++j )
+      {
+         fprintf(fp, "vector %d\n", j );
+         for (i = 0; i < size; i++)
+         {
+            fprintf(fp, "%e\n",  data[ j*vecstride + i*idxstride ] );
+         }
+      }
+   }
+   else
+   {
+      for (i = 0; i < size; i++)
+      {
+         fprintf(fp, "%e\n", data[i]);
+      }
    }
 
    fclose(fp);
@@ -177,6 +237,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
            
    int      ierr  = 0;
 
+   size *=hypre_VectorNumVectors(v);
 
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
@@ -204,6 +265,8 @@ hypre_SeqVectorSetRandomValues( hypre_Vector *v,
    int      ierr  = 0;
    hypre_SeedRand(seed);
 
+   size *=hypre_VectorNumVectors(v);
+
 /* RDF: threading this loop may cause problems because of hypre_Rand() */
    for (i = 0; i < size; i++)
       vector_data[i] = 2.0 * hypre_Rand() - 1.0;
@@ -213,6 +276,8 @@ hypre_SeqVectorSetRandomValues( hypre_Vector *v,
 
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorCopy
+ * copies data from x to y
+ * y should have already been initialized at the same size as x
  *--------------------------------------------------------------------------*/
 
 int
@@ -226,6 +291,8 @@ hypre_SeqVectorCopy( hypre_Vector *x,
    int      i;
            
    int      ierr = 0;
+
+   size *=hypre_VectorNumVectors(x);
 
    for (i = 0; i < size; i++)
       y_data[i] = x_data[i];
@@ -247,6 +314,8 @@ hypre_SeqVectorScale( double        alpha,
    int      i;
            
    int      ierr = 0;
+
+   size *=hypre_VectorNumVectors(y);
 
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
@@ -273,6 +342,8 @@ hypre_SeqVectorAxpy( double        alpha,
            
    int      ierr = 0;
 
+   size *=hypre_VectorNumVectors(x);
+
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
    for (i = 0; i < size; i++)
@@ -295,6 +366,8 @@ double   hypre_SeqVectorInnerProd( hypre_Vector *x,
    int      i;
 
    double      result = 0.0;
+
+   size *=hypre_VectorNumVectors(x);
 
 #define HYPRE_SMP_PRIVATE i
 #define HYPRE_SMP_REDUCTION_OP +

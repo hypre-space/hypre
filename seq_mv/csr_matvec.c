@@ -13,6 +13,7 @@
  *****************************************************************************/
 
 #include "headers.h"
+#include <assert.h>
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatvec
@@ -38,10 +39,15 @@ hypre_CSRMatrixMatvec( double           alpha,
    double     *y_data = hypre_VectorData(y);
    int         x_size = hypre_VectorSize(x);
    int         y_size = hypre_VectorSize(y);
+   int         num_vectors = hypre_VectorNumVectors(x);
+   int         idxstride_y = hypre_VectorIndexStride(y);
+   int         vecstride_y = hypre_VectorVectorStride(y);
+   int         idxstride_x = hypre_VectorIndexStride(x);
+   int         vecstride_x = hypre_VectorVectorStride(x);
 
    double      temp, tempx;
 
-   int         i, jj;
+   int         i, j, jj;
 
    int         m;
 
@@ -61,6 +67,8 @@ hypre_CSRMatrixMatvec( double           alpha,
     *  is informational only.
     *--------------------------------------------------------------------*/
  
+    assert( num_vectors == hypre_VectorNumVectors(y) );
+
     if (num_cols != x_size)
               ierr = 1;
 
@@ -74,15 +82,15 @@ hypre_CSRMatrixMatvec( double           alpha,
     * Do (alpha == 0.0) computation - RDF: USE MACHINE EPS
     *-----------------------------------------------------------------------*/
 
-   if (alpha == 0.0)
-   {
+    if (alpha == 0.0)
+    {
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
-      for (i = 0; i < num_rows; i++)
-	 y_data[i] *= beta;
+       for (i = 0; i < num_rows*num_vectors; i++)
+          y_data[i] *= beta;
 
-      return ierr;
-   }
+       return ierr;
+    }
 
    /*-----------------------------------------------------------------------
     * y = (beta/alpha)*y
@@ -96,14 +104,14 @@ hypre_CSRMatrixMatvec( double           alpha,
       {
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
-	 for (i = 0; i < num_rows; i++)
+	 for (i = 0; i < num_rows*num_vectors; i++)
 	    y_data[i] = 0.0;
       }
       else
       {
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
-	 for (i = 0; i < num_rows; i++)
+	 for (i = 0; i < num_rows*num_vectors; i++)
 	    y_data[i] *= temp;
       }
    }
@@ -119,32 +127,56 @@ hypre_CSRMatrixMatvec( double           alpha,
 
    if (num_rownnz < xpar*(num_rows))
    {
-       for (i = 0; i < num_rownnz; i++)
-       {
+      for (i = 0; i < num_rownnz; i++)
+      {
          m = A_rownnz[i];
-         tempx = y_data[m];
 
-	 /*
-	  * for (jj = A_i[m]; jj < A_i[m+1]; jj++)
-	  * {
-	  *         j = A_j[jj];   
-	  *  y_data[m] += A_data[jj] * x_data[j];
+         /*
+          * for (jj = A_i[m]; jj < A_i[m+1]; jj++)
+          * {
+          *         j = A_j[jj];   
+          *  y_data[m] += A_data[jj] * x_data[j];
           * } */
-         for (jj = A_i[m]; jj < A_i[m+1]; jj++) 
-	   tempx +=  A_data[jj] * x_data[A_j[jj]];
-         y_data[m] = tempx;
-       }
+         if ( num_vectors==1 )
+         {
+            tempx = y_data[m];
+            for (jj = A_i[m]; jj < A_i[m+1]; jj++) 
+               tempx +=  A_data[jj] * x_data[A_j[jj]];
+            y_data[m] = tempx;
+         }
+         else
+            for ( j=0; j<num_vectors; ++j )
+            {
+               tempx = y_data[ j*vecstride_y + m*idxstride_y ];
+               for (jj = A_i[m]; jj < A_i[m+1]; jj++) 
+                  tempx +=  A_data[jj] * x_data[ j*vecstride_x + A_j[jj]*idxstride_x ];
+               y_data[ j*vecstride_y + m*idxstride_y] = tempx;
+            }
+      }
 
    }
    else
    {
-       for (i = 0; i < num_rows; i++)
-       {
-          temp = y_data[i];
-          for (jj = A_i[i]; jj < A_i[i+1]; jj++)
-             temp += A_data[jj] * x_data[A_j[jj]];
-          y_data[i] = temp;
-       }
+      for (i = 0; i < num_rows; i++)
+      {
+         if ( num_vectors==1 )
+         {
+            temp = y_data[i];
+            for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+               temp += A_data[jj] * x_data[A_j[jj]];
+            y_data[i] = temp;
+         }
+         else
+            for ( j=0; j<num_vectors; ++j )
+            {
+               temp = y_data[ j*vecstride_y + i*idxstride_y ];
+               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+               {
+                  temp += A_data[jj] * x_data[ j*vecstride_x + A_j[jj]*idxstride_x ];
+               }
+               y_data[ j*vecstride_y + i*idxstride_y ] = temp;
+            }
+      }
    }
 
 
@@ -156,7 +188,7 @@ hypre_CSRMatrixMatvec( double           alpha,
    {
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
-      for (i = 0; i < num_rows; i++)
+      for (i = 0; i < num_rows*num_vectors; i++)
 	 y_data[i] *= alpha;
    }
 
@@ -188,10 +220,15 @@ hypre_CSRMatrixMatvecT( double           alpha,
    double     *y_data = hypre_VectorData(y);
    int         x_size = hypre_VectorSize(x);
    int         y_size = hypre_VectorSize(y);
+   int         num_vectors = hypre_VectorNumVectors(x);
+   int         idxstride_y = hypre_VectorIndexStride(y);
+   int         vecstride_y = hypre_VectorVectorStride(y);
+   int         idxstride_x = hypre_VectorIndexStride(x);
+   int         vecstride_x = hypre_VectorVectorStride(x);
 
    double      temp;
 
-   int         i, i1, j, jj, ns, ne, size, rest;
+   int         i, i1, j, jv, jj, ns, ne, size, rest;
    int         num_threads;
 
    int         ierr  = 0;
@@ -206,6 +243,8 @@ hypre_CSRMatrixMatvecT( double           alpha,
     *  these conditions terminates processing, and the ierr flag
     *  is informational only.
     *--------------------------------------------------------------------*/
+
+    assert( num_vectors == hypre_VectorNumVectors(y) );
  
     if (num_rows != x_size)
               ierr = 1;
@@ -223,7 +262,7 @@ hypre_CSRMatrixMatvecT( double           alpha,
    {
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
-      for (i = 0; i < num_cols; i++)
+      for (i = 0; i < num_cols*num_vectors; i++)
 	 y_data[i] *= beta;
 
       return ierr;
@@ -241,14 +280,14 @@ hypre_CSRMatrixMatvecT( double           alpha,
       {
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
-	 for (i = 0; i < num_cols; i++)
+	 for (i = 0; i < num_cols*num_vectors; i++)
 	    y_data[i] = 0.0;
       }
       else
       {
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
-	 for (i = 0; i < num_cols; i++)
+	 for (i = 0; i < num_cols*num_vectors; i++)
 	    y_data[i] *= temp;
       }
    }
@@ -276,25 +315,60 @@ hypre_CSRMatrixMatvecT( double           alpha,
             ns = i1*size+rest-1;
             ne = (i1+1)*size+rest;
          }
-         for (i = 0; i < num_rows; i++)
+         if ( num_vectors==1 )
          {
-            for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+            for (i = 0; i < num_rows; i++)
             {
-   	       j = A_j[jj];
-   	       if (j > ns && j < ne)
-                  y_data[j] += A_data[jj] * x_data[i];
+               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+               {
+                  j = A_j[jj];
+                  if (j > ns && j < ne)
+                     y_data[j] += A_data[jj] * x_data[i];
+               }
             }
          }
+         else
+         {
+            for (i = 0; i < num_rows; i++)
+            {
+               for ( jv=0; jv<num_vectors; ++jv )
+               {
+                  for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+                  {
+                     j = A_j[jj];
+                     if (j > ns && j < ne)
+                        y_data[ j*idxstride_y + jv*vecstride_y ] +=
+                           A_data[jj] * x_data[ i*idxstride_x + jv*vecstride_x];
+                  }
+               }
+            }
+         }
+
       }
    }
    else 
    {
       for (i = 0; i < num_rows; i++)
       {
-         for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+         if ( num_vectors==1 )
          {
-	    j = A_j[jj];
-            y_data[j] += A_data[jj] * x_data[i];
+            for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+            {
+               j = A_j[jj];
+               y_data[j] += A_data[jj] * x_data[i];
+            }
+         }
+         else
+         {
+            for ( jv=0; jv<num_vectors; ++jv )
+            {
+               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+               {
+                  j = A_j[jj];
+                  y_data[ j*idxstride_y + jv*vecstride_y ] +=
+                     A_data[jj] * x_data[ i*idxstride_x + jv*vecstride_x ];
+               }
+            }
          }
       }
    }
@@ -306,7 +380,7 @@ hypre_CSRMatrixMatvecT( double           alpha,
    {
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
-      for (i = 0; i < num_cols; i++)
+      for (i = 0; i < num_cols*num_vectors; i++)
 	 y_data[i] *= alpha;
    }
 
