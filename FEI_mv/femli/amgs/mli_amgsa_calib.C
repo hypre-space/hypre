@@ -95,6 +95,7 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
       dble_array = nullspace_store;
       nullspace_store = new double[nrows*(n_null+calibration_size)];
       for (i = 0; i < nrows*n_null; i++) nullspace_store[i] = dble_array[i]; 
+      delete [] dble_array;
    }
    else
    {
@@ -215,4 +216,167 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
 #endif
    return level;
 }
+
+/***********************************************************************
+ * generate multilevel structure using an adaptive method (not done yet)
+ * --------------------------------------------------------------------- */
+#if 0
+int MLI_Method_AMGSA::setupCalibration( MLI *mli ) 
+{
+   int          mypid, nprocs, *partition, ndofs, nrows, n_null;
+   int          i, j, k, level, local_nrows, relax_num, targc, calib_size_tmp;
+   double       *dble_array, *relax_wts, start_time;
+   double       *sol_data, *nullspace_store, dtime, *Q_array, *R_array;
+   char         param_string[100], **targv;
+   MLI_Matrix   *mli_Amat;
+   MLI_Vector   *mli_rhs, *mli_sol;
+   MLI          *new_mli;
+   MPI_Comm     comm;
+   MLI_Method         *new_amgsa;
+   hypre_Vector       *sol_local;
+   hypre_ParVector    *trial_sol, *zero_rhs;
+   hypre_ParCSRMatrix *hypreA;
+
+#ifdef MLI_DEBUG_DETAILED
+   printf("MLI_Method_AMGSA::setupCalibration begins...\n");
+#endif
+
+   /* --------------------------------------------------------------- */
+   /* fetch machine and matrix information                            */
+   /* --------------------------------------------------------------- */
+
+   comm = getComm();
+   MPI_Comm_rank( comm, &mypid );
+   MPI_Comm_size( comm, &nprocs );
+   mli_Amat = mli->getSystemMatrix( 0 );
+   hypreA   = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
+   targv    = new char*[4];
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA, 
+                                        &partition);
+   local_nrows = partition[mypid+1] - partition[mypid];
+   free( partition );
+
+   /* --------------------------------------------------------------- */
+   /* fetch initial set of null space                                 */
+   /* --------------------------------------------------------------- */
+
+   getNullSpace(ndofs, n_null, nullspace_store, nrows);
+   if ( nullspace_store != NULL ) delete [] nullspace_store;
+   n_null = 0;
+   nrows  = local_nrows;
+
+   /* --------------------------------------------------------------- */
+   /* create trial vectors for calibration (trial_sol, zero_rhs)      */
+   /* --------------------------------------------------------------- */
+
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA, 
+                                        &partition);
+   trial_sol = hypre_ParVectorCreate(comm, partition[nprocs], partition);
+   hypre_ParVectorInitialize( trial_sol );
+   hypre_ParVectorSetRandomValues( trial_sol, (int) dtime );
+
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA, 
+                                        &partition);
+   zero_rhs = hypre_ParVectorCreate(comm, partition[nprocs], partition);
+   hypre_ParVectorInitialize( zero_rhs );
+   hypre_ParVectorSetConstantValues( zero_rhs, 0.0 );
+
+   sol_data  = hypre_VectorData(hypre_ParVectorLocalVector(trial_sol));
+
+   sprintf(param_string, "HYPRE_ParVector");
+   mli_sol = new MLI_Vector( (void*) trial_sol, param_string, NULL );
+   mli_rhs = new MLI_Vector( (void*) zero_rhs, param_string, NULL );
+
+   /* --------------------------------------------------------------- */
+   /* compute approximate null vectors                                */
+   /* --------------------------------------------------------------- */
+
+   start_time = MLI_Utils_WTime();
+
+   new_mli = NULL;
+
+   for ( i = 0; i < calibration_size; i++ )
+   {
+      dtime = time_getWallclockSeconds();
+      hypre_ParVectorSetRandomValues( trial_sol, (int) dtime );
+
+      if ( i ==  0 ) 
+      {
+         smoother_ptr->solve(mli_rhs, mli_sol);
+      }
+      else
+      {
+         new_mli->cycle( mli_sol, mli_rhs );
+         if (new_amgsa != NULL) delete new_amgsa;
+         if (new_mli   != NULL) delete new_mli;
+         delete mli_sol;
+         delete mli_rhs;
+      }
+
+      /* ------------------------------------------------------------ */
+      /* clone new amgsa and mli                                      */
+      /* ------------------------------------------------------------ */
+
+      new_amgsa = MLI_Method_CreateFromID( MLI_METHOD_AMGSA_ID, comm );
+      copy( new_amgsa );
+      new_amgsa->setNumLevels(2);
+      new_mli = new MLI( comm );
+      new_mli->setMaxIterations(2);
+      new_mli->setMethod( new_amgsa );
+      new_mli->setSystemMatrix( 0, mli_Amat );
+
+      /* ------------------------------------------------------------ */
+      /* construct and initialize the new null space                  */
+      /* ------------------------------------------------------------ */
+
+      offset = local_nrows * n_null;
+      for (i = offset; i < offset+local_nrows; i++) 
+         nullspace_store[i] = sol_data[i-offset]; 
+      n_null++;
+
+      sprintf( param_string, "setNullSpace" );
+      targc = 4;
+      targv[0] = (char *) &ndofs;  
+      targv[1] = (char *) &n_null;  
+      targv[2] = (char *) nullspace_store;  
+      targv[3] = (char *) &nrows;  
+      new_amgsa->setParams( param_string, targc, targv );
+
+      if ( i < calibration_size-1 ) new_mli->setup();
+   }
+   delete new_amgsa;
+   delete new_mli;
+
+   total_time += ( MLI_Utils_WTime() - start_time );
+
+   /* --------------------------------------------------------------- */
+   /* store the new set of null space vectors, and call mli setup     */
+   /* --------------------------------------------------------------- */
+
+   setNullSpace(ndofs, n_null, nullspace_store, nrows);
+   calib_size_tmp = calibration_size;
+   calibration_size = 0;
+   level = setup( mli );
+   calibration_size = calib_size_tmp;
+
+   /* --------------------------------------------------------------- */
+   /* clean up                                                        */
+   /* --------------------------------------------------------------- */
+
+   new_mli->resetSystemMatrix(0);
+   delete new_mli;
+   delete [] Q_array;
+   delete [] R_array;
+   delete [] relax_wts;
+   delete [] targv;
+   delete [] nullspace_store;
+   hypre_ParVectorDestroy( trial_sol );
+   hypre_ParVectorDestroy( zero_rhs );
+
+#ifdef MLI_DEBUG_DETAILED
+   printf("MLI_Method_AMGSA::setupCalibration ends.\n");
+#endif
+   return level;
+}
+#endif
 
