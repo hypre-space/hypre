@@ -280,7 +280,7 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
       hypre_DistributedMatrixPilutSolverMatrix(solver), &start, &end, &col0, &coln);
 
    DataDistTypeLnrows(hypre_DistributedMatrixPilutSolverDataDist( solver )) = 
-      end - start;
+      end - start + 1;
 
    /* Set up DataDist entry in distributed_solver */
    /* This requires that each processor know which rows are owned by each proc */
