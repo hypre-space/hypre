@@ -2012,6 +2012,7 @@ int HYPRE_LSI_BlockP::solveBTSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       HYPRE_ParCSRPCGSolve(A11Solver_, A11mat_csr, f1_csr, x1_csr);
    else if ( A11Params_.SolverID_ == 1 )
       HYPRE_ParCSRGMRESSolve(A11Solver_, A11mat_csr, f1_csr, x1_csr);
+   else
    {
       printf("HYPRE_LSI_BlockP ERROR : invalid A11 solver.\n");
       exit(1);
