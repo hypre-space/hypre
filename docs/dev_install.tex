@@ -476,3 +476,23 @@ libkrylov.a\linebreak
 \$ \linebreak
 \end{mdseries}
 \end{ttfamily}
+
+Variations of mklib include:
+\begin{enumerate}
+   \item \textit{name}          \textit{Purpose}
+   \begin{itemize}
+   \item  \kbd{mklibs}        does default, debug, serial, and opt. threaded
+   \item  \kbd{mklibs.aix}    build 32 and 64 bit libraries on white & frost
+   \item  \kbd{mklibs.babel}  does the default plus builds babel libraries
+   \item  \kbd{mklibs.tc2k}   build for tc2k
+   \end{itemize}
+\end{enumerate}
+\begin{enumerate}
+   \item \textit{name}          \textit{Supported host}
+   \begin{itemize}
+   \item  \kbd{mklibs}        riptide, gps, sc, Q
+   \item  \kbd{mklibs.aix}    frost & white
+   \item  \kbd{mklibs.babel}  Solaris, Linux, blue, SKY (AIX<Power 3)
+   \item  \kbd{mklibs.tc2k}   tc2k
+   \end{itemize}
+\end{enumerate}
