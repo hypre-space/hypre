@@ -23,17 +23,17 @@
 /*--------------------------------------------------------------------------
  * hypre_JacobiData data structure copied from jacobi.c
  *--------------------------------------------------------------------------*/
-
+/*
 typedef struct
 {
    void  *relax_data;
 
 } hypre_JacobiData;
-
+*/
 /*--------------------------------------------------------------------------
  * hypre_PointRelaxData data structure copied from point_relax.c
  *--------------------------------------------------------------------------*/
-
+/*
 typedef struct
 {
    MPI_Comm                comm;
@@ -59,14 +59,15 @@ typedef struct
    int                     diag_rank;
 
    hypre_ComputePkg      **compute_pkgs;
-
+/*
    /* log info (always logged) */
+/*
    int                     num_iterations;
    int                     time_index;
    int                     flops;
 
 } hypre_PointRelaxData;
-
+*/
 
 /*#************************************************
 #	Constructor
@@ -117,10 +118,16 @@ void  impl__Hypre_StructJacobi_Apply(
    is passed via some void* function arguments and saved in a struct defined only
    in a .c file.  Maybe instead I should save my own pointer to the Hypre_StructMatrix
    object in Hypre_StructJacobi_Data.h ... */
-   hypre_JacobiData *jacobi_data =  (void *) *S; /* as in jacobi.c */
-   hypre_PointRelaxData *relax_data = jacobi_data -> relax_data; /* as in point_relax.c */
+/* jfp 19jan2000: changed to save a pointer to the matrix, c.f.
+   Hypre_StructJacobi_Data.h.  Reason: email from Falgout makes me think I can't
+   count on Hypre's data structures having the matrix, if he changes it later. */
+/*
+   hypre_JacobiData *jacobi_data =  (void *) *S; / * as in jacobi.c * /
+   hypre_PointRelaxData *relax_data = jacobi_data -> relax_data; / * as in point_relax.c * /
    hypre_StructMatrix * hA = hypre_StructMatrixRef( relax_data -> A );
    HYPRE_StructMatrix HA = (HYPRE_StructMatrix) hA;
+*/
+   HYPRE_StructMatrix HA = *(this->d_table->hsmatrix) ;
 
    Hypre_StructVector_Private SVbP = b->d_table;
    struct Hypre_StructVector_private *SVbp = SVbP;
@@ -132,6 +139,9 @@ void  impl__Hypre_StructJacobi_Apply(
 
    HYPRE_StructJacobiSolve( *S, HA, *Vb, *Vx );
 
+   /* The above hypre_StructMatrixRef call upped the reference count to *hA;
+      so we have to decrement it when hA goes out of scope... */
+/*   hypre_StructMatrixDestroy( hA );*/
 }
 
 Hypre_StructMatrix  impl__Hypre_StructJacobi_GetSystemOperator(Hypre_StructJacobi this) {
@@ -225,6 +235,8 @@ void  impl__Hypre_StructJacobi_Setup(
    Hypre_StructVector_Private SVxP = x->d_table;
    struct Hypre_StructVector_private *SVxp = SVxP;
    HYPRE_StructVector *Vx = SVxp->hsvec;
+
+   this->d_table->hsmatrix = MA;
 
    HYPRE_StructJacobiSetup( *S, *MA, *Vb, *Vx );
 

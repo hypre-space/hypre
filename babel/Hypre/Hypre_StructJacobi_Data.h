@@ -13,8 +13,8 @@
 struct Hypre_StructJacobi_private
 {
    HYPRE_StructSolver * hssolver;
-}
-;
+   HYPRE_StructMatrix * hsmatrix;
+};
 
 #endif
 
