@@ -33,6 +33,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    hypre_ParVector    **U_array;
    hypre_ParCSRMatrix **P_array;
    int                **CF_marker_array;   
+   double              *relax_weight;
    double               strong_threshold;
    double               trunc_factor;
 
@@ -69,6 +70,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
    debug_flag = hypre_ParAMGDataDebugFlag(amg_data);
+   relax_weight = hypre_ParAMGDataRelaxWeight(amg_data);
    
    A_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_levels);
    P_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_levels-1);
@@ -110,6 +112,14 @@ hypre_ParAMGSetup( void               *amg_vdata,
                         my_id, level);
           fflush(NULL);
       }
+      if (relax_weight[level] == 0.0)
+      {
+	 relax_weight[level] = hypre_ParScaledMatNorm(A_array[level]);
+	 if (relax_weight[level] != 0.0)
+	    relax_weight[level] = 1.0/relax_weight[level];
+	 else
+	   printf (" Warning ! Matrix norm is zero !!!");
+      }
       if (coarsen_type == 6)
       {
 	 hypre_ParAMGCoarsenFalgout(A_array[level], strong_threshold,
@@ -126,6 +136,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
 	 hypre_ParAMGCoarsen(A_array[level], strong_threshold,
                              debug_flag, &S, &CF_marker, &coarse_size); 
       }
+ 
       if (debug_flag==1)
       {
          wall_time = time_getWallclockSeconds() - wall_time;
