@@ -868,6 +868,7 @@ int HYPRE_LSI_MLIFEDataInit( void *object, Lookup *lookup )
    if ( hypre_fedata == NULL ) return 1;
    fedata = (MLI_FEData *) hypre_fedata->fedata_;
    if ( fedata == NULL ) return 1;
+   printf("HYPRE_LSI_MLIFEDataInit called.\n");
 
    /* -------------------------------------------------------- */ 
    /* get and load field and element block information         */
@@ -922,6 +923,8 @@ int HYPRE_LSI_MLIFEDataInitElemNodeList( void *object, int nElems,
    if ( hypre_fedata == NULL ) return 1;
    fedata = (MLI_FEData *) hypre_fedata->fedata_;
    if ( fedata == NULL ) return 1;
+   if ( hypre_fedata->fedataElemCnt_ == 0 )
+      printf("HYPRE_LSI_MLIFEDataInitElemNodeList called.\n");
    for ( i = 0; i < nElems; i++ )
    {
       fedata->initElemNodeList(elemIDs[i],nNodesPerElem,elemNodeList[i],3,NULL);
@@ -959,6 +962,7 @@ int HYPRE_LSI_MLIFEDataInitComplete( void *object )
    hypre_fedata->fedataMatDim_  = 0;
    fedata = (MLI_FEData *) hypre_fedata->fedata_;
    if ( fedata == NULL ) return 1;
+   printf("HYPRE_LSI_MLIFEDataInitComplete called.\n");
 
    /* -------------------------------------------------------- */ 
    /* get and load shared node information (if nprocs > 1)     */
@@ -1040,6 +1044,7 @@ int HYPRE_LSI_MLIFEDataLoadElemMatrix(void *object, int nrows, int ncols,
       if ( hypre_fedata->fedataValues_ != NULL )
          delete [] hypre_fedata->fedataValues_;
       hypre_fedata->fedataValues_ = new double[ncols*ncols];
+      printf("HYPRE_LSI_MLIFEDataLoadElemMatrix called.\n");
    }
 
    /* -------------------------------------------------------- */ 
@@ -1169,6 +1174,7 @@ int HYPRE_LSI_MLIFEDataConstructNullSpace( void *object )
       /*printf("HYPRE_LSI_MLIFEDataConstructNullSpace ERROR : no kernel.\n");*/
       return 1;
    }
+   printf("HYPRE_LSI_MLIFEDataConstructNullSpace called.\n");
 
    /* -------------------------------------------------------- */ 
    /* adjust the kernel (since overlapped data have been       */
