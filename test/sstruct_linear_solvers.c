@@ -340,6 +340,10 @@ ReadData( char         *filename,
                               pdata.glue_nbor_iuppers[pdata.glue_nboxes]);
             SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim,
                           pdata.glue_index_maps[pdata.glue_nboxes]);
+            for (i = data.ndim; i < 3; i++)
+            {
+               pdata.glue_index_maps[pdata.glue_nboxes][i] = i;
+            }
             pdata.glue_nboxes++;
             data.pdata[part] = pdata;
          }
@@ -348,6 +352,10 @@ ReadData( char         *filename,
             part = strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
             SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim, pdata.periodic);
+            for (i = data.ndim; i < 3; i++)
+            {
+               pdata.periodic[i] = 0;
+            }
             data.pdata[part] = pdata;
          }
          else if ( strcmp(key, "StencilCreate:") == 0 )
@@ -375,6 +383,10 @@ ReadData( char         *filename,
             entry = strtol(sdata_ptr, &sdata_ptr, 10);
             SScanIntArray(sdata_ptr, &sdata_ptr,
                           data.ndim, data.stencil_offsets[s][entry]);
+            for (i = data.ndim; i < 3; i++)
+            {
+               data.stencil_offsets[s][entry][i] = 0;
+            }
             data.stencil_vars[s][entry] = strtol(sdata_ptr, &sdata_ptr, 10);
             data.stencil_values[s][entry] = strtod(sdata_ptr, &sdata_ptr);
          }
