@@ -46,6 +46,7 @@
 #include "HYPRE_LSI_ddict.h"
 #include "HYPRE_LSI_poly.h"
 #include "HYPRE_LSI_block.h"
+#include "HYPRE_LSI_Uzawa.h"
 
 //---------------------------------------------------------------------------
 // FEI include files
@@ -956,6 +957,16 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
 #endif
       }
 
+      //----------------------------------------------------------------
+      // for Uzawa, the various parameters 
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "Uzawa") )
+      {
+         if ( HYPreconID_ == HYUZAWA )
+            HYPRE_LSI_UzawaSetParams(HYPrecon_, params[i]); 
+      }
+
       //---------------------------------------------------------------
       // mlpack preconditoner : no of relaxation sweeps per level
       //---------------------------------------------------------------
@@ -1403,6 +1414,11 @@ void HYPRE_LinSysCore::setupPCGPrecon()
            }
            break;
 #endif
+
+      case HYUZAWA :
+           printf("CG : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
    }
    return;
 }
@@ -1688,6 +1704,12 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
            }
            break;
 #endif
+
+      case HYUZAWA :
+           printf("GMRES : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
+
    }
    return;
 }
@@ -1987,6 +2009,20 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
            }
            break;
 #endif
+
+      case HYUZAWA :
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("Uzawa preconditioning \n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRFGMRESSetPrecond(HYSolver_, HYPRE_LSI_UzawaSolve,
+                                           HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              HYPRE_ParCSRFGMRESSetPrecond(HYSolver_,HYPRE_LSI_UzawaSolve,
+                                           HYPRE_LSI_UzawaSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+           break;
    }
    return;
 }
@@ -2273,6 +2309,10 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
            }
            break;
 #endif
+      case HYUZAWA :
+           printf("BiCGSTAB : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
    }
    return;
 }
@@ -2560,6 +2600,10 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
            }
            break;
 #endif
+      case HYUZAWA :
+           printf("BiCGSTABL : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
    }
    return;
 }
@@ -2843,6 +2887,10 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
            }
            break;
 #endif
+      case HYUZAWA :
+           printf("TFQMR : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
    }
    return;
 }
@@ -3126,6 +3174,10 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
            }
            break;
 #endif
+      case HYUZAWA :
+           printf("BiCGS : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
    }
    return;
 }
@@ -3367,6 +3419,10 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
            }
            break;
 #endif
+      case HYUZAWA :
+           printf("SymQMR : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
    }
    return;
 }
