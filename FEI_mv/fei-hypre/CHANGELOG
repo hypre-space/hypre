@@ -196,5 +196,8 @@
             - change the blas/lapack problem in superlu one more time
             - add gmres smoother
             - add one more coarsening in AMGSA
-
+12/17/03    2.5.4R2
+            - add a few more options in HYPRE_LSI_mli.cxx
+            - perfect the global coarsening in AMGSA
+            - smooth vector AMGSA capability by Edmond
 
