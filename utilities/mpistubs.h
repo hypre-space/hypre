@@ -113,7 +113,7 @@ typedef int hypre_MPI_Group;
 typedef int hypre_MPI_Request;
 typedef int hypre_MPI_Datatype;
 
-typedef struct { int MPI_SOURCE; } hypre_MPI_Status;
+typedef struct { int MPI_SOURCE; int MPI_TAG; } hypre_MPI_Status;
 typedef int  hypre_MPI_Op;
 typedef int  hypre_MPI_Aint;
 
