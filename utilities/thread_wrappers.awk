@@ -15,12 +15,7 @@
 #===========================================================================
 
 BEGIN {
-  special_types = "\
-HYPRE_StructGrid \
-HYPRE_StructMatrix \
-HYPRE_StructStencil \
-HYPRE_StructVector \
-HYPRE_StructSolver"
+  prefix = "HYPRE_"
 }
 
 / P\(\(/ {
@@ -85,8 +80,7 @@ HYPRE_StructSolver"
 	  endline = " );";
 	}
       m = match(arg_type[i], "[^A-Za-z_0-9]");
-      base_type = substr(arg_type[i], 1, m-1);
-      if (special_types ~ base_type)
+      if (arg_type[i] ~ prefix)
 	{
 	  base_pointer = substr(arg_type[i], m);
 	  if (base_pointer ~ "\*")

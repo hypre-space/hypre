@@ -400,8 +400,8 @@ HYPRE_StructPCGSetPrecondVoidPtr( void *argptr )
    (localargs -> returnvalue[threadid]) =
       HYPRE_StructPCGSetPrecond(
          (localargs -> solver)[threadid],
-         (localargs -> )[threadid],
-         (localargs -> )[threadid],
+         localargs -> ,
+         localargs -> ,
          localargs -> precond_data );
 }
 

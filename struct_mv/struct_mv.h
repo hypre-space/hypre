@@ -974,7 +974,7 @@ int HYPRE_AssembleStructVector P((HYPRE_StructVector vector ));
 int HYPRE_PrintStructVector P((char *filename , HYPRE_StructVector vector , int all ));
 int HYPRE_SetStructVectorNumGhost P((HYPRE_StructVector vector , int *num_ghost ));
 int HYPRE_SetStructVectorConstantValues P((HYPRE_StructVector vector , double values ));
-HYPRE_CommPkg HYPRE_GetMigrateStructVectorCommPkg P((HYPRE_StructVector from_vector , HYPRE_StructVector to_vector ));
+int HYPRE_GetMigrateStructVectorCommPkg P((HYPRE_StructVector from_vector , HYPRE_StructVector to_vector , HYPRE_CommPkg *comm_pkg ));
 int HYPRE_MigrateStructVector P((HYPRE_CommPkg comm_pkg , HYPRE_StructVector from_vector , HYPRE_StructVector to_vector ));
 int HYPRE_FreeCommPkg P((HYPRE_CommPkg comm_pkg ));
 
@@ -1208,7 +1208,7 @@ int HYPRE_SetStructVectorNumGhostPush P((HYPRE_StructVector vector , int *num_gh
 void HYPRE_SetStructVectorConstantValuesVoidPtr P((void *argptr ));
 int HYPRE_SetStructVectorConstantValuesPush P((HYPRE_StructVector vector , double values ));
 void HYPRE_GetMigrateStructVectorCommPkgVoidPtr P((void *argptr ));
-HYPRE_CommPkg HYPRE_GetMigrateStructVectorCommPkgPush P((HYPRE_StructVector from_vector , HYPRE_StructVector to_vector ));
+int HYPRE_GetMigrateStructVectorCommPkgPush P((HYPRE_StructVector from_vector , HYPRE_StructVector to_vector , HYPRE_CommPkg *comm_pkg ));
 void HYPRE_MigrateStructVectorVoidPtr P((void *argptr ));
 int HYPRE_MigrateStructVectorPush P((HYPRE_CommPkg comm_pkg , HYPRE_StructVector from_vector , HYPRE_StructVector to_vector ));
 void HYPRE_FreeCommPkgVoidPtr P((void *argptr ));

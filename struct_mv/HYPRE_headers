@@ -40,14 +40,22 @@ cat >> $TWRAPPER_FILE <<@
 @
 
 #===========================================================================
-# Create thread wrapper prototypes
-#===========================================================================
-
-mkproto $TWRAPPER_FILE >> $TEMP_FILE
-
-#===========================================================================
 # Echo prototypes to stdout and clean up
 #===========================================================================
+
+cat <<@
+
+#ifndef NO_PTHREAD_MANGLING
+
+@
+
+/usr/xpg4/bin/awk -f ../utilities/thread_protos.awk < $TEMP_FILE
+
+cat <<@
+
+#endif
+
+@
 
 cat $TEMP_FILE
 rm -f $TEMP_FILE

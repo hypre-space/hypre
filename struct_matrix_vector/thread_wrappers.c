@@ -1324,7 +1324,8 @@ HYPRE_SetStructVectorConstantValuesPush(
 typedef struct {
    HYPRE_StructVector from_vector;
    HYPRE_StructVector to_vector;
-   HYPRE_CommPkg  returnvalue[hypre_MAX_THREADS];
+   HYPRE_CommPkg *comm_pkg;
+   int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_GetMigrateStructVectorCommPkgArgs;
 
 void
@@ -1338,20 +1339,23 @@ HYPRE_GetMigrateStructVectorCommPkgVoidPtr( void *argptr )
    (localargs -> returnvalue[threadid]) =
       HYPRE_GetMigrateStructVectorCommPkg(
          (localargs -> from_vector)[threadid],
-         (localargs -> to_vector)[threadid] );
+         (localargs -> to_vector)[threadid],
+         &(*(localargs -> comm_pkg))[threadid] );
 }
 
-HYPRE_CommPkg 
+int 
 HYPRE_GetMigrateStructVectorCommPkgPush(
    HYPRE_StructVector from_vector,
-   HYPRE_StructVector to_vector )
+   HYPRE_StructVector to_vector,
+   HYPRE_CommPkg *comm_pkg )
 {
    HYPRE_GetMigrateStructVectorCommPkgArgs pushargs;
    int i;
-   HYPRE_CommPkg  returnvalue;
+   int  returnvalue;
 
    pushargs.from_vector = from_vector;
    pushargs.to_vector = to_vector;
+   pushargs.comm_pkg = comm_pkg;
    for (i = 0; i < NUM_THREADS; i++)
       hypre_work_put( HYPRE_GetMigrateStructVectorCommPkgVoidPtr, (void *)&pushargs );
 
@@ -1383,7 +1387,7 @@ HYPRE_MigrateStructVectorVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_MigrateStructVector(
-         localargs -> comm_pkg,
+         (localargs -> comm_pkg)[threadid],
          (localargs -> from_vector)[threadid],
          (localargs -> to_vector)[threadid] );
 }
@@ -1430,7 +1434,7 @@ HYPRE_FreeCommPkgVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_FreeCommPkg(
-         localargs -> comm_pkg );
+         (localargs -> comm_pkg)[threadid] );
 }
 
 int 

@@ -31,11 +31,13 @@ HYPRE_NewStructVector( MPI_Comm             comm,
                        HYPRE_StructStencil  stencil,
                        HYPRE_StructVector  *vector )
 {
-   *vector = ( (HYPRE_StructVector)
-              hypre_NewStructVector( comm,
-                                     (hypre_StructGrid *) grid ) );
+   int ierr = 0;
 
-   return 0;
+   *vector = ( (HYPRE_StructVector)
+               hypre_NewStructVector( comm,
+                                      (hypre_StructGrid *) grid ) );
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -239,14 +241,19 @@ HYPRE_SetStructVectorConstantValues( HYPRE_StructVector  vector,
  * HYPRE_GetMigrateStructVectorCommPkg
  *--------------------------------------------------------------------------*/
 
-HYPRE_CommPkg
-HYPRE_GetMigrateStructVectorCommPkg( HYPRE_StructVector from_vector,
-				     HYPRE_StructVector to_vector   )
+int
+HYPRE_GetMigrateStructVectorCommPkg( HYPRE_StructVector  from_vector,
+				     HYPRE_StructVector  to_vector,
+                                     HYPRE_CommPkg      *comm_pkg    )
 {
-   return( (HYPRE_CommPkg) 
-	   hypre_GetMigrateStructVectorCommPkg( 
-                		(hypre_StructVector *)from_vector, 
-				(hypre_StructVector *)to_vector ) );
+   int ierr;
+
+   *comm_pkg = ( (HYPRE_CommPkg) 
+                 hypre_GetMigrateStructVectorCommPkg( 
+                    (hypre_StructVector *)from_vector, 
+                    (hypre_StructVector *)to_vector ) );
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
