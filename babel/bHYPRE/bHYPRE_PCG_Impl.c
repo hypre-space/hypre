@@ -37,6 +37,10 @@
 #include "bHYPRE_IJParCSRMatrix_Impl.h"
 #include "bHYPRE_IJParCSRVector.h"
 #include "bHYPRE_IJParCSRVector_Impl.h"
+#include "bHYPRE_StructMatrix.h"
+#include "bHYPRE_StructMatrix_Impl.h"
+#include "bHYPRE_StructVector.h"
+#include "bHYPRE_StructVector_Impl.h"
 #include "bHYPRE_BoomerAMG.h"
 #include "bHYPRE_BoomerAMG_Impl.h"
 #include "bHYPRE_ParCSRDiagScale.h"
@@ -184,6 +188,10 @@ impl_bHYPRE_PCG__dtor(
    {
       ierr += HYPRE_ParCSRPCGDestroy( data->solver );
    }
+   else if ( data->vector_type == "StructVector" )
+   {
+      ierr += HYPRE_StructPCGDestroy( (HYPRE_StructSolver) data->solver );
+   }
    /* To Do: support more vector types */
    else
    {
@@ -248,13 +256,21 @@ impl_bHYPRE_PCG_SetIntParameter(
    struct bHYPRE_PCG__data * data;
    data = bHYPRE_PCG__get_data( self );
 
-   if ( strcmp(name,"TwoNorm")==0 )
+   if ( strcmp(name,"TwoNorm")==0 || strcmp(name,"2-norm")==0 )
    {
       data -> twonorm = value;
    }
-   else if ( strcmp(name,"RelChange")==0 )
+   else if ( strcmp(name,"MaxIter")==0 || strcmp(name,"max iter")==0 )
+   {
+      data -> maxiter = value;
+   }
+   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"relative change test")==0 )
    {
       data -> relchange = value;
+   }
+   else if ( strcmp(name,"log")==0 )
+   {
+      data -> log_level = value;
    }
    else
    {
@@ -300,6 +316,10 @@ impl_bHYPRE_PCG_SetDoubleParameter(
    {
       /* tolerance for special test for slow convergence */
       data -> cf_tol = value;
+   }
+   else if ( strcmp(name,"tol")==0 )
+   {
+      data -> tol = value;
    }
    else
    {
@@ -507,14 +527,20 @@ impl_bHYPRE_PCG_Setup(
    bHYPRE_Operator mat;
    HYPRE_Matrix HYPRE_A;
    bHYPRE_IJParCSRMatrix bHYPREP_A;
+   bHYPRE_StructMatrix bHYPRES_A;
    HYPRE_ParCSRMatrix AA;
    HYPRE_IJMatrix ij_A;
+   HYPRE_StructMatrix HS_A;
    HYPRE_Vector HYPRE_x, HYPRE_b;
    bHYPRE_IJParCSRVector bHYPREP_b, bHYPREP_x;
+   bHYPRE_StructVector bHYPRES_b, bHYPRES_x;
    HYPRE_ParVector bb, xx;
    HYPRE_IJVector ij_b, ij_x;
+   HYPRE_StructVector HS_b, HS_x;
    struct bHYPRE_IJParCSRMatrix__data * dataA;
+   struct bHYPRE_StructMatrix__data * dataA_S;
    struct bHYPRE_IJParCSRVector__data * datab, * datax;
+   struct bHYPRE_StructVector__data * datab_S, * datax_S;
    void * objectA, * objectb, * objectx;
 
    data = bHYPRE_PCG__get_data( self );
@@ -534,6 +560,14 @@ impl_bHYPRE_PCG_Setup(
          bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
          data -> vector_type = "ParVector";
          HYPRE_ParCSRPCGCreate( comm, psolver );
+         assert( solver != NULL );
+         data -> solver = *psolver;
+      }
+      else if ( bHYPRE_Vector_queryInt( b, "bHYPRE.StructVector") )
+      {
+         bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
+         data -> vector_type = "StructVector";
+         HYPRE_StructPCGCreate( comm, (HYPRE_StructSolver *) psolver );
          assert( solver != NULL );
          data -> solver = *psolver;
       }
@@ -585,9 +619,33 @@ impl_bHYPRE_PCG_Setup(
       AA = (HYPRE_ParCSRMatrix) objectA;
       HYPRE_A = (HYPRE_Matrix) AA;
    }
+   else if ( data->vector_type == "StructVector" )
+   {
+      bHYPRES_b = bHYPRE_StructVector__cast
+         ( bHYPRE_Vector_queryInt( b, "bHYPRE.StructVector") );
+      datab_S = bHYPRE_StructVector__get_data( bHYPRES_b );
+      bHYPRE_StructVector_deleteRef( bHYPRES_b ); /* extra reference from queryInt */
+      HS_b = datab_S -> vec;
+      HYPRE_b = (HYPRE_Vector) HS_b;
+
+      bHYPRES_x = bHYPRE_StructVector__cast
+         ( bHYPRE_Vector_queryInt( x, "bHYPRE.StructVector") );
+      datax_S = bHYPRE_StructVector__get_data( bHYPRES_x );
+      bHYPRE_StructVector_deleteRef( bHYPRES_x ); /* extra reference from queryInt */
+      HS_x = datax_S -> vec;
+      HYPRE_x = (HYPRE_Vector) HS_x;
+
+      bHYPRES_A = bHYPRE_StructMatrix__cast
+         ( bHYPRE_Operator_queryInt( mat, "bHYPRE.StructMatrix") );
+      assert( bHYPRES_A != NULL );
+      dataA_S = bHYPRE_StructMatrix__get_data( bHYPRES_A );
+      bHYPRE_StructMatrix_deleteRef( bHYPRES_A ); /* extra reference from queryInt */
+      HS_A = dataA_S -> matrix;
+      HYPRE_A = (HYPRE_Matrix) HS_A;
+   }
    else
    {
-      assert( "only IJParCSRVector supported by PCG"==0 );
+      assert( "PCG supports only IJParCSRVector and StructVector"==0 );
    }
       
    ierr += HYPRE_PCGSetPrecond( solver, data->precond, data->precond_setup,
@@ -629,13 +687,19 @@ impl_bHYPRE_PCG_Apply(
    bHYPRE_Operator mat;
    HYPRE_Matrix HYPRE_A;
    bHYPRE_IJParCSRMatrix bHYPREP_A;
+   bHYPRE_StructMatrix bHYPRES_A;
    HYPRE_ParCSRMatrix AA;
    HYPRE_IJMatrix ij_A;
+   HYPRE_StructMatrix HS_A;
    HYPRE_Vector HYPRE_x, HYPRE_b;
    bHYPRE_IJParCSRVector bHYPREP_b, bHYPREP_x;
+   bHYPRE_StructVector bHYPRES_b, bHYPRES_x;
    HYPRE_ParVector bb, xx;
    HYPRE_IJVector ij_b, ij_x;
+   HYPRE_StructVector HS_b, HS_x;
    struct bHYPRE_IJParCSRMatrix__data * dataA;
+   struct bHYPRE_StructMatrix__data * dataA_S;
+   struct bHYPRE_StructVector__data * datab_S, * datax_S;
    struct bHYPRE_IJParCSRVector__data * datab, * datax;
    void * objectA, * objectb, * objectx;
 
@@ -659,10 +723,18 @@ impl_bHYPRE_PCG_Apply(
          assert( solver != NULL );
          data -> solver = *psolver;
       }
+      else if ( bHYPRE_Vector_queryInt( b, "bHYPRE.StructVector") )
+      {
+         bHYPRE_Vector_deleteRef( b ); /* extra ref created by queryInt */
+         data -> vector_type = "StructVector";
+         HYPRE_StructPCGCreate( comm, (HYPRE_StructSolver *) psolver );
+         assert( solver != NULL );
+         data -> solver = *psolver;
+      }
       /* Add more vector types here */
       else
       {
-         assert( "only IJParCSRVector supported by PCG"==0 );
+         assert( "PCG supports only IJParCSRVector and StructVector"==0 );
       }
       bHYPRE_PCG__set_data( self, data );
    }
@@ -706,6 +778,30 @@ impl_bHYPRE_PCG_Apply(
       ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
       AA = (HYPRE_ParCSRMatrix) objectA;
       HYPRE_A = (HYPRE_Matrix) AA;
+   }
+   else if ( data->vector_type == "StructVector" )
+   {
+      bHYPRES_b = bHYPRE_StructVector__cast
+         ( bHYPRE_Vector_queryInt( b, "bHYPRE.StructVector") );
+      datab_S = bHYPRE_StructVector__get_data( bHYPRES_b );
+      bHYPRE_StructVector_deleteRef( bHYPRES_b ); /* extra ref created by queryInt */
+      HS_b = datab_S -> vec;
+      HYPRE_b = (HYPRE_Vector) HS_b;
+
+      bHYPRES_x = bHYPRE_StructVector__cast
+         ( bHYPRE_Vector_queryInt( *x, "bHYPRE.StructVector") );
+      datax_S = bHYPRE_StructVector__get_data( bHYPRES_x );
+      bHYPRE_StructVector_deleteRef( bHYPRES_x ); /* extra ref created by queryInt */
+      HS_x = datax_S -> vec;
+      HYPRE_x = (HYPRE_Vector) HS_x;
+
+      bHYPRES_A = bHYPRE_StructMatrix__cast
+         ( bHYPRE_Operator_queryInt( mat, "bHYPRE.StructMatrix") );
+      assert( bHYPRES_A != NULL );
+      dataA_S = bHYPRE_StructMatrix__get_data( bHYPRES_A );
+      bHYPRE_StructMatrix_deleteRef( bHYPRES_A ); /* extra ref created by queryInt */
+      HS_A = dataA_S -> matrix;
+      HYPRE_A = (HYPRE_Matrix) HS_A;
    }
    else
    {
@@ -990,7 +1086,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
       SMG_s = bHYPRE_StructSMG__cast
          ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructSMG") );
       SMG_dataprecond = bHYPRE_StructSMG__get_data( SMG_s );
-      solverprecond = &SMG_dataprecond->solver;
+      solverprecond = (HYPRE_Solver *) &SMG_dataprecond->solver;
       assert( solverprecond != NULL );
       precond = (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup;
