@@ -6,7 +6,6 @@
 #include <string.h>
 #include <malloc.h>
 #include <assert.h>
-#include "fortran.h"
 
 /* Macros */
 #ifndef USER_ABORT
