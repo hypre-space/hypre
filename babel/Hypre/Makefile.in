@@ -1,402 +1,50 @@
-# Makefile.in generated automatically by automake 1.4 from Makefile.am
+INCLUDE "babel.make"
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
-# This Makefile.in is free software; the Free Software Foundation
-# gives unlimited permission to copy and/or distribute it,
-# with or without modifications, as long as this notice is preserved.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
-# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-# PARTICULAR PURPOSE.
-
-
-SHELL = @SHELL@
+.SUFFIXES: .c .o
 
 srcdir = @srcdir@
-top_srcdir = @top_srcdir@
 VPATH = @srcdir@
-exec_prefix = @exec_prefix@
 
-bindir = @bindir@
-sbindir = @sbindir@
-libexecdir = @libexecdir@
-datadir = @datadir@
-sysconfdir = @sysconfdir@
-sharedstatedir = @sharedstatedir@
-localstatedir = @localstatedir@
-libdir = @libdir@
-infodir = @infodir@
-mandir = @mandir@
-includedir = @includedir@
-oldincludedir = /usr/include
 
-DESTDIR =
-
-pkgdatadir = $(datadir)/@PACKAGE@
-pkglibdir = $(libdir)/@PACKAGE@
-pkgincludedir = $(includedir)/@PACKAGE@
-
-top_builddir = ../..
-
-ACLOCAL = @ACLOCAL@
-AUTOCONF = @AUTOCONF@
-AUTOMAKE = @AUTOMAKE@
-AUTOHEADER = @AUTOHEADER@
-
-INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
-INSTALL_DATA = @INSTALL_DATA@
-INSTALL_SCRIPT = @INSTALL_SCRIPT@
-transform = @program_transform_name@
-
-NORMAL_INSTALL = :
-PRE_INSTALL = :
-POST_INSTALL = :
-NORMAL_UNINSTALL = :
-PRE_UNINSTALL = :
-POST_UNINSTALL = :
-ARCH = @ARCH@
-BABELLIBFLAGS = @BABELLIBFLAGS@
-BABEL_DIR = @BABEL_DIR@
-BABEL_HYPRE_INCLUDES = @BABEL_HYPRE_INCLUDES@
-BLASLIBFLAGS = @BLASLIBFLAGS@
-CAPCRULE = @CAPCRULE@
 CC = @CC@
-CCRULE = @CCRULE@
-CDEBUG = @CDEBUG@
-CFLAGS = @CFLAGS@
-COPT = @COPT@
-CPP = @CPP@
-CPPRULE = @CPPRULE@
-CRULE = @CRULE@
-CXX = @CXX@
-CXXCPP = @CXXCPP@
-CXXDEBUG = @CXXDEBUG@
-CXXFLAGS = @CXXFLAGS@
-CXXOPT = @CXXOPT@
-CXXRULE = @CXXRULE@
-F77 = @F77@
-F77FLAGS = @F77FLAGS@
-F77LIBFLAGS = @F77LIBFLAGS@
-F77NEEDSPP = @F77NEEDSPP@
-F77RULE = @F77RULE@
-FDEBUG = @FDEBUG@
-FFLAGS = @FFLAGS@
-FOPT = @FOPT@
-FPP = @FPP@
-HOSTNAME = @HOSTNAME@
-HYPRE_BABELLIBDIR = @HYPRE_BABELLIBDIR@
-HYPRE_PETSCDEFS = @HYPRE_PETSCDEFS@
-HYPRE_PETSCLIBDIRS = @HYPRE_PETSCLIBDIRS@
-HYPRE_PETSCLIBS = @HYPRE_PETSCLIBS@
-HYPRE_TOP_SRC_DIR = @HYPRE_TOP_SRC_DIR@
-LDFLAGS = @LDFLAGS@
-LDLIBDIRS = @LDLIBDIRS@
-LDLIBS = @LDLIBS@
-LIBDIRS = @LIBDIRS@
-LIBS = @LIBS@
-MAKEINFO = @MAKEINFO@
-MPICC = @MPICC@
-MPICXX = @MPICXX@
-MPIF77 = @MPIF77@
-MPIF77NEEDSPP = @MPIF77NEEDSPP@
-MPIFLAGS = @MPIFLAGS@
-MPIINCLUDE = @MPIINCLUDE@
-MPILIBDIRS = @MPILIBDIRS@
-MPILIBS = @MPILIBS@
-OPTCHOICE = @OPTCHOICE@
-PACKAGE = @PACKAGE@
-PETSCINCLUDE = @PETSCINCLUDE@
-PETSCLIBDIRS = @PETSCLIBDIRS@
-PETSCLIBS = @PETSCLIBS@
-PREPEND = @PREPEND@
-RANLIB = @RANLIB@
-TIMERDEFS = @TIMERDEFS@
-VERSION = @VERSION@
-babeldir = @babeldir@
+RANLIB= @RANLIB@
 
-AUTOMAKE_OPTIONS = foreign no-dependencies
+C_COMPILE_FLAGS=@CFLAGS@
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@ @BABEL_HYPRE_INCLUDES@
 
-prefix = $$HYPRE_INSTALL_DIR
+CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I..\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../seq_mv\
+ ${CINCLUDES}\
+ ${CDEFS}
+ 
 
-BABELDIR = @babeldir@
+HEADERS = ${STUBHDRS} ${IORHDRS} ${IMPLHDRS}
 
-# noinst_LIBRARIES = libhypre_class.a
-lib_LIBRARIES = libhypre_class.a
+FILES = ${IMPLSRCS} ${IORSRCS} ${SKELSRCS} ${STUBSRCS}
 
-libhypre_class_a_SOURCES = ${PREBUILT_SRCS} ${GENERATED_SRCS} ${PREBUILT_HDRS} ${GENERATED_HDRS}
-#libhypre_class_a_HEADERS = 
+OBJS = ${FILES:.c=.o}
 
-HYPRE_INCLUDES = -I../../hypre/include -I../../struct_mv -I../babel_stubs_c -I../babel
-# BABEL_INCLUDES  = -I${BABELDIR}/include -I${BABELDIR}/include/babel
-BABEL_INCLUDES = -I${BABELDIR}/babel-0.4.1/source/runtime/  -I${BABELDIR}/babel-0.4.1/source/runtime/babel
-INCLUDES = -I.. ${HYPRE_INCLUDES} ${BABEL_INCLUDES} 
+##################################################################
+# Rules
+##################################################################
 
-# these are implementations of the babel objects.
-PREBUILT_SRCS = Hypre_Box.c 	Hypre_MPI_Com.c 	Hypre_PCG.c 	Hypre_StructSMG.c 	Hypre_StructJacobi.c 	Hypre_StructMatrix.c 	Hypre_StructMatrixBuilder.c 	Hypre_StructStencil.c 	Hypre_StructVector.c 	Hypre_StructVectorBuilder.c 	Hypre_StructGrid.c 	Hypre_Pilut.c 	Hypre_GMRES.c 	Hypre_ParAMG.c 	Hypre_ParCSRVector.c 	Hypre_ParCSRMatrix.c 	Hypre_ParCSRVectorBuilder.c 	Hypre_ParCSRMatrixBuilder.c 	Hypre_Partition.c 	Hypre_PartitionBuilder.c 	Hypre_MapStructVector.c 	Hypre_MapStructVectorBuilder.c
+libHypreBabel.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
 
+${OBJS}: ${HEADERS}
 
-PREBUILT_HDRS = Hypre_Box_Data.h 	Hypre_MPI_Com_Data.h 	Hypre_PCG_Data.h 	Hypre_StructSMG_Data.h 	Hypre_StructJacobi_Data.h 	Hypre_StructMatrix_Data.h 	Hypre_StructMatrixBuilder_Data.h 	Hypre_StructStencil_Data.h 	Hypre_StructVector_Data.h 	Hypre_StructVectorBuilder_Data.h 	Hypre_StructGrid_Data.h 	Hypre_Pilut_Data.h 	Hypre_GMRES_Data.h 	Hypre_ParAMG_Data.h 	Hypre_ParCSRVector_Data.h 	Hypre_ParCSRMatrix_Data.h 	Hypre_ParCSRVectorBuilder_Data.h 	Hypre_ParCSRMatrixBuilder_Data.h 	Hypre_Partition_Data.h 	Hypre_PartitionBuilder_Data.h 	Hypre_MapStructVector_Data.h 	Hypre_MapStructVectorBuilder_Data.h
-
-
-# these are generated by the babel compiler
-GENERATED_SRCS = Hypre_Box_Skel.c 	Hypre_MPI_Com_Skel.c 	Hypre_PCG_Skel.c 	Hypre_StructSMG_Skel.c 	Hypre_StructJacobi_Skel.c 	Hypre_StructMatrix_Skel.c 	Hypre_StructMatrixBuilder_Skel.c 	Hypre_StructStencil_Skel.c 	Hypre_StructVector_Skel.c 	Hypre_StructVectorBuilder_Skel.c 	Hypre_StructGrid_Skel.c 	Hypre_Pilut_Skel.c 	Hypre_GMRES_Skel.c 	Hypre_ParAMG_Skel.c 	Hypre_ParCSRVector_Skel.c 	Hypre_ParCSRMatrix_Skel.c 	Hypre_ParCSRVectorBuilder_Skel.c 	Hypre_ParCSRMatrixBuilder_Skel.c 	Hypre_Partition_Skel.c 	Hypre_PartitionBuilder_Skel.c 	Hypre_MapStructVector_Skel.c 	Hypre_MapStructVectorBuilder_Skel.c 	Hypre_Box_Stub.c 	Hypre_MPI_Com_Stub.c 	Hypre_PCG_Stub.c 	Hypre_StructSMG_Stub.c 	Hypre_StructJacobi_Stub.c 	Hypre_StructMatrix_Stub.c 	Hypre_StructMatrixBuilder_Stub.c 	Hypre_StructStencil_Stub.c 	Hypre_StructVector_Stub.c 	Hypre_StructVectorBuilder_Stub.c 	Hypre_StructGrid_Stub.c 	Hypre_Pilut_Stub.c 	Hypre_GMRES_Stub.c 	Hypre_ParAMG_Stub.c 	Hypre_ParCSRVector_Stub.c 	Hypre_ParCSRMatrix_Stub.c 	Hypre_ParCSRVectorBuilder_Stub.c 	Hypre_ParCSRMatrixBuilder_Stub.c 	Hypre_IJMatrixBuilder_Stub.c 	Hypre_IJVectorBuilder_Stub.c 	Hypre_LinearOperator_Stub.c 	Hypre_Operator_Stub.c 	Hypre_PreconditionedSolverBuilder_Stub.c 	Hypre_PreconditionedSolver_Stub.c 	Hypre_RowAccess_Stub.c 	Hypre_SolverBuilder_Stub.c 	Hypre_Solver_Stub.c 	Hypre_Stencil_Stub.c 	Hypre_StructuredGridBuilder_Stub.c 	Hypre_StructuredGridMatrixBuilder_Stub.c 	Hypre_StructuredGridVectorBuilder_Stub.c 	Hypre_StructuredGrid_Stub.c 	Hypre_Vector_Stub.c 	Hypre_Partition_Stub.c 	Hypre_PartitionBuilder_Stub.c 	Hypre_MapStructVector_Stub.c 	Hypre_MapStructVectorBuilder_Stub.c 	Hypre_MapPartitioned_Stub.c 	Hypre_MapPartitionedBuilder_Stub.c 	Hypre_MapStructuredVector_Stub.c 	Hypre_MapStructuredVectorBuilder_Stub.c 	Hypre_Map_Stub.c
-
-
-GENERATED_HDRS = Hypre.h 	Hypre_Box_IOR.h 	Hypre_Box_Skel.h 	Hypre_LinearOperator_IOR.h 	Hypre_RowAccess_IOR.h 	Hypre_MPI_Com_IOR.h 	Hypre_MPI_Com_Skel.h 	Hypre_Operator_IOR.h 	Hypre_PCG_IOR.h 	Hypre_PCG_Skel.h 	Hypre_StructSMG_IOR.h 	Hypre_StructSMG_Skel.h 	Hypre_StructJacobi_IOR.h 	Hypre_StructJacobi_Skel.h 	Hypre_PreconditionedSolver_IOR.h 	Hypre_PreconditionedSolverBuilder_IOR.h 	Hypre_Solver_IOR.h 	Hypre_SolverBuilder_IOR.h 	Hypre_Pilut_IOR.h 	Hypre_Pilut_Skel.h 	Hypre_GMRES_IOR.h 	Hypre_GMRES_Skel.h 	Hypre_ParAMG_IOR.h 	Hypre_ParAMG_Skel.h 	Hypre_ParCSRVector_IOR.h 	Hypre_ParCSRVector_Skel.h 	Hypre_ParCSRMatrix_IOR.h 	Hypre_ParCSRMatrix_Skel.h 	Hypre_ParCSRVectorBuilder_IOR.h 	Hypre_ParCSRVectorBuilder_Skel.h 	Hypre_ParCSRMatrixBuilder_IOR.h 	Hypre_ParCSRMatrixBuilder_Skel.h 	Hypre_Stencil_IOR.h 	Hypre_Stencil_Skel.h 	Hypre_StructMatrix_IOR.h 	Hypre_StructMatrix_Skel.h 	Hypre_StructMatrixBuilder_IOR.h 	Hypre_StructMatrixBuilder_Skel.h 	Hypre_StructStencil_IOR.h 	Hypre_StructStencil_Skel.h 	Hypre_StructGrid_IOR.h 	Hypre_StructGrid_Skel.h 	Hypre_StructGridBuilder_IOR.h 	Hypre_StructuredGrid_IOR.h 	Hypre_StructuredGridBuilder_IOR.h 	Hypre_StructuredGridMatrixBuilder_IOR.h 	Hypre_StructuredGridMatrixBuilder_IOR.h 	Hypre_StructuredGridVectorBuilder_IOR.h 	Hypre_Vector_IOR.h 	Hypre_StructVector_IOR.h 	Hypre_StructVector_Skel.h 	Hypre_StructVectorBuilder_IOR.h 	Hypre_StructVectorBuilder_Skel.h 	Hypre_IJMatrixBuilder_IOR.h 	Hypre_IJVectorBuilder_IOR.h 	Hypre_IJMatrixBuilder_IOR.h 	Hypre_IJVectorBuilder_IOR.h 	Hypre_Partition_IOR.h 	Hypre_PartitionBuilder_IOR.h 	Hypre_Partition_Skel.h 	Hypre_PartitionBuilder_Skel.h 	Hypre_MapStructVector_Stub_IOR.h 	Hypre_MapStructVectorBuilder_IOR.h 	Hypre_MapStructVector_Stub_Skel.h 	Hypre_MapStructVectorBuilder_Skel.h 	Hypre_Map_IOR.h 	Hypre_MapPartitioned_IOR.h 	Hypre_MapPartitionedBuilder_IOR.h 	Hypre_MapPartitioned_Stub.h 	Hypre_MapPartitionedBuilder_Stub.h 	Hypre_MapStructuredVector_Stub_IOR.h 	Hypre_MapStructuredVectorBuilder_IOR.h 	Hypre_MapStructuredVector_Stub_Skel.h 	Hypre_MapStructuredVectorBuilder_Skel.h 	Hypre_Map_Stub.h
-
-mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
-CONFIG_HEADER = ../../HYPRE_config.h
-CONFIG_CLEAN_FILES = 
-LIBRARIES =  $(lib_LIBRARIES)
-
-
-DEFS = @DEFS@ -I. -I$(srcdir) -I../..
-CPPFLAGS = @CPPFLAGS@
-libhypre_class_a_LIBADD = 
-libhypre_class_a_OBJECTS =  Hypre_Box.o Hypre_MPI_Com.o Hypre_PCG.o \
-Hypre_StructSMG.o Hypre_StructJacobi.o Hypre_StructMatrix.o \
-Hypre_StructMatrixBuilder.o Hypre_StructStencil.o Hypre_StructVector.o \
-Hypre_StructVectorBuilder.o Hypre_StructGrid.o Hypre_Pilut.o \
-Hypre_GMRES.o Hypre_ParAMG.o Hypre_ParCSRVector.o Hypre_ParCSRMatrix.o \
-Hypre_ParCSRVectorBuilder.o Hypre_ParCSRMatrixBuilder.o \
-Hypre_Partition.o Hypre_PartitionBuilder.o Hypre_MapStructVector.o \
-Hypre_MapStructVectorBuilder.o Hypre_Box_Skel.o Hypre_MPI_Com_Skel.o \
-Hypre_PCG_Skel.o Hypre_StructSMG_Skel.o Hypre_StructJacobi_Skel.o \
-Hypre_StructMatrix_Skel.o Hypre_StructMatrixBuilder_Skel.o \
-Hypre_StructStencil_Skel.o Hypre_StructVector_Skel.o \
-Hypre_StructVectorBuilder_Skel.o Hypre_StructGrid_Skel.o \
-Hypre_Pilut_Skel.o Hypre_GMRES_Skel.o Hypre_ParAMG_Skel.o \
-Hypre_ParCSRVector_Skel.o Hypre_ParCSRMatrix_Skel.o \
-Hypre_ParCSRVectorBuilder_Skel.o Hypre_ParCSRMatrixBuilder_Skel.o \
-Hypre_Partition_Skel.o Hypre_PartitionBuilder_Skel.o \
-Hypre_MapStructVector_Skel.o Hypre_MapStructVectorBuilder_Skel.o \
-Hypre_Box_Stub.o Hypre_MPI_Com_Stub.o Hypre_PCG_Stub.o \
-Hypre_StructSMG_Stub.o Hypre_StructJacobi_Stub.o \
-Hypre_StructMatrix_Stub.o Hypre_StructMatrixBuilder_Stub.o \
-Hypre_StructStencil_Stub.o Hypre_StructVector_Stub.o \
-Hypre_StructVectorBuilder_Stub.o Hypre_StructGrid_Stub.o \
-Hypre_Pilut_Stub.o Hypre_GMRES_Stub.o Hypre_ParAMG_Stub.o \
-Hypre_ParCSRVector_Stub.o Hypre_ParCSRMatrix_Stub.o \
-Hypre_ParCSRVectorBuilder_Stub.o Hypre_ParCSRMatrixBuilder_Stub.o \
-Hypre_IJMatrixBuilder_Stub.o Hypre_IJVectorBuilder_Stub.o \
-Hypre_LinearOperator_Stub.o Hypre_Operator_Stub.o \
-Hypre_PreconditionedSolverBuilder_Stub.o \
-Hypre_PreconditionedSolver_Stub.o Hypre_RowAccess_Stub.o \
-Hypre_SolverBuilder_Stub.o Hypre_Solver_Stub.o Hypre_Stencil_Stub.o \
-Hypre_StructuredGridBuilder_Stub.o \
-Hypre_StructuredGridMatrixBuilder_Stub.o \
-Hypre_StructuredGridVectorBuilder_Stub.o Hypre_StructuredGrid_Stub.o \
-Hypre_Vector_Stub.o Hypre_Partition_Stub.o \
-Hypre_PartitionBuilder_Stub.o Hypre_MapStructVector_Stub.o \
-Hypre_MapStructVectorBuilder_Stub.o Hypre_MapPartitioned_Stub.o \
-Hypre_MapPartitionedBuilder_Stub.o Hypre_MapStructuredVector_Stub.o \
-Hypre_MapStructuredVectorBuilder_Stub.o Hypre_Map_Stub.o
-AR = ar
-COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
-DIST_COMMON =  Makefile.am Makefile.in
-
-
-DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
-
-TAR = gtar
-GZIP_ENV = --best
-SOURCES = $(libhypre_class_a_SOURCES)
-OBJECTS = $(libhypre_class_a_OBJECTS)
-
-all: all-redirect
-.SUFFIXES:
-.SUFFIXES: .S .c .o .s
-$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
-	cd $(top_srcdir) && $(AUTOMAKE) --foreign babel/Hypre/Makefile
-
-Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
-	cd $(top_builddir) \
-	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
-
-
-mostlyclean-libLIBRARIES:
-
-clean-libLIBRARIES:
-	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
-
-distclean-libLIBRARIES:
-
-maintainer-clean-libLIBRARIES:
-
-install-libLIBRARIES: $(lib_LIBRARIES)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(libdir)
-	@list='$(lib_LIBRARIES)'; for p in $$list; do \
-	  if test -f $$p; then \
-	    echo " $(INSTALL_DATA) $$p $(DESTDIR)$(libdir)/$$p"; \
-	    $(INSTALL_DATA) $$p $(DESTDIR)$(libdir)/$$p; \
-	  else :; fi; \
-	done
-	@$(POST_INSTALL)
-	@list='$(lib_LIBRARIES)'; for p in $$list; do \
-	  if test -f $$p; then \
-	    echo " $(RANLIB) $(DESTDIR)$(libdir)/$$p"; \
-	    $(RANLIB) $(DESTDIR)$(libdir)/$$p; \
-	  else :; fi; \
-	done
-
-uninstall-libLIBRARIES:
-	@$(NORMAL_UNINSTALL)
-	list='$(lib_LIBRARIES)'; for p in $$list; do \
-	  rm -f $(DESTDIR)$(libdir)/$$p; \
-	done
+##################################################################
+# Generic rules
+##################################################################
 
 .c.o:
-	$(COMPILE) -c $<
+	${CC} -o $@ -c ${CFLAGS} $<
 
-.s.o:
-	$(COMPILE) -c $<
-
-.S.o:
-	$(COMPILE) -c $<
-
-mostlyclean-compile:
-	-rm -f *.o core *.core
-
-clean-compile:
-
-distclean-compile:
-	-rm -f *.tab.c
-
-maintainer-clean-compile:
-
-libhypre_class.a: $(libhypre_class_a_OBJECTS) $(libhypre_class_a_DEPENDENCIES)
-	-rm -f libhypre_class.a
-	$(AR) cru libhypre_class.a $(libhypre_class_a_OBJECTS) $(libhypre_class_a_LIBADD)
-	$(RANLIB) libhypre_class.a
-
-tags: TAGS
-
-ID: $(HEADERS) $(SOURCES) $(LISP)
-	list='$(SOURCES) $(HEADERS)'; \
-	unique=`for i in $$list; do echo $$i; done | \
-	  awk '    { files[$$0] = 1; } \
-	       END { for (i in files) print i; }'`; \
-	here=`pwd` && cd $(srcdir) \
-	  && mkid -f$$here/ID $$unique $(LISP)
-
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
-	tags=; \
-	here=`pwd`; \
-	list='$(SOURCES) $(HEADERS)'; \
-	unique=`for i in $$list; do echo $$i; done | \
-	  awk '    { files[$$0] = 1; } \
-	       END { for (i in files) print i; }'`; \
-	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
-	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $$unique $(LISP) -o $$here/TAGS)
-
-mostlyclean-tags:
-
-clean-tags:
-
-distclean-tags:
-	-rm -f TAGS ID
-
-maintainer-clean-tags:
-
-distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
-
-subdir = babel/Hypre
-
-distdir: $(DISTFILES)
-	@for file in $(DISTFILES); do \
-	  d=$(srcdir); \
-	  if test -d $$d/$$file; then \
-	    cp -pr $$/$$file $(distdir)/$$file; \
-	  else \
-	    test -f $(distdir)/$$file \
-	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
-	    || cp -p $$d/$$file $(distdir)/$$file || :; \
-	  fi; \
-	done
-info-am:
-info: info-am
-dvi-am:
-dvi: dvi-am
-check-am: all-am
-check: check-am
-installcheck-am:
-installcheck: installcheck-am
-install-exec-am: install-libLIBRARIES
-install-exec: install-exec-am
-
-install-data-am:
-install-data: install-data-am
-
-install-am: all-am
-	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
-install: install-am
-uninstall-am: uninstall-libLIBRARIES
-uninstall: uninstall-am
-all-am: Makefile $(LIBRARIES)
-all-redirect: all-am
-install-strip:
-	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
-installdirs:
-	$(mkinstalldirs)  $(DESTDIR)$(libdir)
-
-
-mostlyclean-generic:
-
-clean-generic:
-
-distclean-generic:
-	-rm -f Makefile $(CONFIG_CLEAN_FILES)
-	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
-
-maintainer-clean-generic:
-mostlyclean-am:  mostlyclean-libLIBRARIES mostlyclean-compile \
-		mostlyclean-tags mostlyclean-generic
-
-mostlyclean: mostlyclean-am
-
-clean-am:  clean-libLIBRARIES clean-compile clean-tags clean-generic \
-		mostlyclean-am
-
-clean: clean-am
-
-distclean-am:  distclean-libLIBRARIES distclean-compile distclean-tags \
-		distclean-generic clean-am
-
-distclean: distclean-am
-
-maintainer-clean-am:  maintainer-clean-libLIBRARIES \
-		maintainer-clean-compile maintainer-clean-tags \
-		maintainer-clean-generic distclean-am
-	@echo "This command is intended for maintainers to use;"
-	@echo "it deletes files that may require special tools to rebuild."
-
-maintainer-clean: maintainer-clean-am
-
-.PHONY: mostlyclean-libLIBRARIES distclean-libLIBRARIES \
-clean-libLIBRARIES maintainer-clean-libLIBRARIES uninstall-libLIBRARIES \
-install-libLIBRARIES mostlyclean-compile distclean-compile \
-clean-compile maintainer-clean-compile tags mostlyclean-tags \
-distclean-tags clean-tags maintainer-clean-tags distdir info-am info \
-dvi-am dvi check check-am installcheck-am installcheck install-exec-am \
-install-exec install-data-am install-data install-am install \
-uninstall-am uninstall all-redirect all-am all installdirs \
-mostlyclean-generic distclean-generic clean-generic \
-maintainer-clean-generic clean mostlyclean distclean maintainer-clean
-
-
-clean:  mostlyclean-am
-# ... doesn't work; the Automake clean overrides this with clean-am
-
-veryclean:  clean-am
-
-squeeky-clean: clean-am
-	rm -f $(GENERATED_HDRS) $(GENERATED_SRCS)
-
-# Tell versions [3.59,3.63) of GNU make to not export all variables.
-# Otherwise a system limit (for SysV at least) may be exceeded.
-.NOEXPORT:
