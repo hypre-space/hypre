@@ -564,7 +564,7 @@ int HYPRE_SStructSplitGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
 /**
  * Create a FAC solver object.
  **/
-int HYPRE_SStructtFACCreate( MPI_Comm             comm,
+int HYPRE_SStructFACCreate( MPI_Comm             comm,
                              HYPRE_SStructSolver *solver );
 /**
  * Destroy a FAC solver object.
@@ -593,7 +593,19 @@ int HYPRE_SStructFACSolve3(HYPRE_SStructSolver solver,
 int HYPRE_SStructFACSetPLevels(HYPRE_SStructSolver solver,
                                int                 nparts,
                                int                *plevels);
+/**
+ * Set up amr refinement factors
+ **/
+int HYPRE_SStructFACSetPRefinements(HYPRE_SStructSolver  solver,
+                                    int                  nparts,
+                                    int                (*rfactors)[3] );
+
                                                                                                             
+/**
+ * (Optional) Set max FAC levels.
+ **/
+int HYPRE_SStructFACSetMaxLevels( HYPRE_SStructSolver solver , 
+                                  int                 max_levels );
 /**
  * (Optional) Set the convergence tolerance.
  **/
