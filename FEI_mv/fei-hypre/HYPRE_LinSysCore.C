@@ -223,7 +223,16 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amgRelaxType_[1]    = 3;    // hybrid for presmoothing 
    amgRelaxType_[2]    = 3;    // hybrid for postsmoothing
    amgRelaxType_[3]    = 9;    // direct for the coarsest level
+   amgGridRlxType_     = 0;    // smoothes all points
    amgStrongThreshold_ = 0.25;
+   amgSmoothType_      = 0;    // default non point smoother, none
+   amgSmoothNumLevels_ = 0;    // no. of levels for non point smoothers
+   amgSmoothNumSweeps_ = 1;    // no. of sweeps for non point smoothers
+   amgCGSmoothNumSweeps_ = 0;  // no. of sweeps for preconditioned CG smoother
+   amgSchwarzRelaxWt_  = 1.0;  // relaxation weight for Schwarz smoother
+   amgSchwarzVariant_  = 0;    // hybrid multiplicative Schwarz no overlap across processor boundaries
+   amgSchwarzOverlap_  = 1;    // minimal overlap
+   amgSchwarzDomainType_ = 2;  // domain through agglomeration
    amgUseGSMG_         = 0;
    amgGSMGNSamples_    = 0;
    for (int i = 0; i < 25; i++) amgRelaxWeight_[i] = 1.0; 

@@ -261,6 +261,13 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          printf("    - amgStrongThreshold <f>\n");
          printf("    - amgSystemSize <d>\n");
          printf("    - amgMaxIterations <d>\n");
+         printf("    - amgSmoothType <d>\n");
+         printf("    - amgSmoothNumLevels <d>\n");
+         printf("    - amgSmoothNumSweeps <d>\n");
+         printf("    - amgSchwarzRelaxWt <d>\n");
+         printf("    - amgSchwarzVariant <d>\n");
+         printf("    - amgSchwarzOverlap <d>\n");
+         printf("    - amgSchwarzDomainType <d>\n");
          printf("    - amgUseGSMG\n");
          printf("    - amgGSMGNumSamples\n");
          printf("    - parasailsThreshold <f>\n");
@@ -313,7 +320,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       }
 
       //----------------------------------------------------------------
-      // set matrix trunction threshold 
+      // set matrix trunction threshold
       //----------------------------------------------------------------
 
       else if ( !strcasecmp(param1, "setTruncationThreshold") )
@@ -855,10 +862,16 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       {
          sscanf(params[i],"%s %s", param, param2);
          if      ( !strcasecmp(param2, "jacobi" ) ) rtype = 0;
+         else if ( !strcasecmp(param2, "CFjacobi" ) ) 
+		{rtype = 0; amgGridRlxType_ = 1;}
          else if ( !strcasecmp(param2, "gsSlow") )  rtype = 1;
          else if ( !strcasecmp(param2, "gsFast") )  rtype = 4;
          else if ( !strcasecmp(param2, "hybrid" ) ) rtype = 3;
+         else if ( !strcasecmp(param2, "CFhybrid" ) ) 
+		{rtype = 3; amgGridRlxType_ = 1;}
          else if ( !strcasecmp(param2, "hybridsym" ) ) rtype = 6;
+         else if ( !strcasecmp(param2, "CFhybridsym" ) ) 
+		{rtype = 6; amgGridRlxType_ = 1;}
          else                                   rtype = 4;
          for ( k = 0; k < 3; k++ ) amgRelaxType_[k] = rtype;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
@@ -873,7 +886,6 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       else if ( !strcasecmp(param1, "amgRelaxWeight") )
       {
          sscanf(params[i],"%s %lg", param, &weight);
-         if ( weight < 0.0 || weight > 1.0 ) weight = 0.5;
          for ( k = 0; k < 25; k++ ) amgRelaxWeight_[k] = weight;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters amgRelaxWeight = %e\n",
@@ -887,7 +899,6 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       else if ( !strcasecmp(param1, "amgRelaxOmega") )
       {
          sscanf(params[i],"%s %lg", param, &weight);
-         if ( weight < 0.0 || weight > 1.0 ) weight = 0.9;
          for ( k = 0; k < 25; k++ ) amgRelaxOmega_[k] = weight;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters amgRelaxOmega = %e\n",
@@ -934,6 +945,95 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
                    amgMaxIter_);
       }
 
+      //---------------------------------------------------------------
+      // amg preconditoner : choose more complex smoother
+      //---------------------------------------------------------------
+
+      else if ( !strcasecmp(param1, "amgSmoothType") )
+      {
+         sscanf(params[i],"%s %d", param, &amgSmoothType_);
+         if ( amgSmoothType_ < 0 ) amgSmoothType_ = 0;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amgSmoothType = %d\n",
+                   amgSmoothType_);
+      }
+
+      //---------------------------------------------------------------
+      // amg preconditoner : choose no. of levels for complex smoother
+      //---------------------------------------------------------------
+
+      else if ( !strcasecmp(param1, "amgSmoothNumLevels") )
+      {
+         sscanf(params[i],"%s %d", param, &amgSmoothNumLevels_);
+         if ( amgSmoothNumLevels_ < 0 ) amgSmoothNumLevels_ = 0;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amgSmoothNumLevels = %d\n",
+                   amgSmoothNumLevels_);
+      }
+
+      //---------------------------------------------------------------
+      // amg preconditoner : choose no. of sweeps for complex smoother
+      //---------------------------------------------------------------
+
+      else if ( !strcasecmp(param1, "amgSmoothNumSweeps") )
+      {
+         sscanf(params[i],"%s %d", param, &amgSmoothNumSweeps_);
+         if ( amgSmoothNumSweeps_ < 0 ) amgSmoothNumSweeps_ = 1;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amgSmoothNumSweeps = %d\n",
+                   amgSmoothNumSweeps_);
+      }
+
+      //---------------------------------------------------------------
+      // amg preconditoner : choose relaxation weight for Schwarz smoother
+      //---------------------------------------------------------------
+
+      else if ( !strcasecmp(param1, "amgSchwarzRelaxWt") )
+      {
+         sscanf(params[i],"%s %lg", param, &amgSchwarzRelaxWt_);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amgSchwarzRelaxWt = %e\n",
+                   amgSchwarzRelaxWt_);
+      }
+
+      //---------------------------------------------------------------
+      // amg preconditoner : choose Schwarz smoother variant
+      //---------------------------------------------------------------
+
+      else if ( !strcasecmp(param1, "amgSchwarzVariant") )
+      {
+         sscanf(params[i],"%s %d", param, &amgSchwarzVariant_);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amgSchwarzVariant = %d\n",
+                   amgSchwarzVariant_);
+      }
+
+      //---------------------------------------------------------------
+      // amg preconditoner : choose Schwarz smoother overlap
+      //---------------------------------------------------------------
+
+      else if ( !strcasecmp(param1, "amgSchwarzOverlap") )
+      {
+         sscanf(params[i],"%s %d", param, &amgSchwarzOverlap_);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amgSchwarzOverlap = %d\n",
+                   amgSchwarzOverlap_);
+      }
+
+      //----------------------------------------------------------------
+      //---------------------------------------------------------------
+      // amg preconditoner : choose Schwarz smoother domain type
+      //---------------------------------------------------------------
+
+      else if ( !strcasecmp(param1, "amgSchwarzDomainType") )
+      {
+         sscanf(params[i],"%s %d", param, &amgSchwarzDomainType_);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amgSchwarzDomainType = %d\n",
+                   amgSchwarzDomainType_);
+      }
+
+      //----------------------------------------------------------------
       //----------------------------------------------------------------
       // amg preconditoner : use gsmg
       //----------------------------------------------------------------
@@ -2949,6 +3049,7 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
 void HYPRE_LinSysCore::setupPreconBoomerAMG()
 {
    int          i, j, *num_sweeps, *relax_type, **relax_points;
+   int          max_levels = 25;
    double       *relax_wt, *relax_omega;
 
    if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -2958,14 +3059,22 @@ void HYPRE_LinSysCore::setupPreconBoomerAMG()
       printf("AMG threshold    = %e\n", amgStrongThreshold_);
       printf("AMG numsweeps    = %d\n", amgNumSweeps_[0]);
       printf("AMG relax type   = %d\n", amgRelaxType_[0]);
+      if (amgGridRlxType_) printf("AMG CF smoothing \n");
       printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
       printf("AMG relax omega  = %e\n", amgRelaxOmega_[0]);
       printf("AMG system size  = %d\n", amgSystemSize_);
+      printf("AMG smooth type  = %d\n", amgSmoothType_);
+      printf("AMG smooth numlevels  = %d\n", amgSmoothNumLevels_);
+      printf("AMG smooth numsweeps  = %d\n", amgSmoothNumSweeps_);
+      printf("AMG Schwarz variant = %d\n", amgSchwarzVariant_);
+      printf("AMG Schwarz overlap = %d\n", amgSchwarzOverlap_);
+      printf("AMG Schwarz domain type = %d\n", amgSchwarzDomainType_);
+      printf("AMG Schwarz relax weight = %e\n", amgSchwarzRelaxWt_);
    }
    if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
    {
       HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
-      HYPRE_BoomerAMGSetPrintLevel(HYPrecon_, 3);
+      HYPRE_BoomerAMGSetPrintLevel(HYPrecon_, 1);
    }
    if ( amgSystemSize_ > 1 )
       HYPRE_BoomerAMGSetNumFunctions(HYPrecon_, amgSystemSize_);
@@ -2980,21 +3089,50 @@ void HYPRE_LinSysCore::setupPreconBoomerAMG()
    for ( i = 0; i < 4; i++ ) relax_type[i] = amgRelaxType_[i];
 
    HYPRE_BoomerAMGSetGridRelaxType(HYPrecon_, relax_type);
-   relax_wt = hypre_CTAlloc(double,25);
-   for ( i = 0; i < 25; i++ ) relax_wt[i] = amgRelaxWeight_[i];
+   HYPRE_BoomerAMGSetMaxLevels(HYPrecon_, max_levels);
+   relax_wt = hypre_CTAlloc(double,max_levels);
+   for ( i = 0; i < max_levels; i++ ) relax_wt[i] = amgRelaxWeight_[i];
    HYPRE_BoomerAMGSetRelaxWeight(HYPrecon_, relax_wt);
 
-   relax_omega = hypre_CTAlloc(double,25);
-   for ( i = 0; i < 25; i++ ) relax_omega[i] = amgRelaxOmega_[i];
+   relax_omega = hypre_CTAlloc(double,max_levels);
+   for ( i = 0; i < max_levels; i++ ) relax_omega[i] = amgRelaxOmega_[i];
    HYPRE_BoomerAMGSetOmega(HYPrecon_, relax_omega);
 
-   relax_points = hypre_CTAlloc(int*,4);
-   for ( i = 0; i < 4; i++ ) 
+   if (amgGridRlxType_) 
    {
-      relax_points[i] = hypre_CTAlloc(int,num_sweeps[i]);
-      for ( j = 0; j < num_sweeps[i]; j++ ) relax_points[i][j] = 0;
+      relax_points = hypre_CTAlloc(int*,4);
+      relax_points[0] = hypre_CTAlloc(int,num_sweeps[0]);
+      for ( j = 0; j < num_sweeps[0]; j++ ) relax_points[0][j] = 0;
+      relax_points[1] = hypre_CTAlloc(int,2*num_sweeps[1]);
+      for ( j = 0; j < num_sweeps[1]; j+=2 ) 
+	 {relax_points[1][j] = -1;relax_points[1][j+1] =  1;}
+      relax_points[2] = hypre_CTAlloc(int,2*num_sweeps[2]);
+      for ( j = 0; j < num_sweeps[2]; j+=2 ) 
+	 {relax_points[2][j] = -1;relax_points[2][j+1] =  1;}
+      relax_points[3] = hypre_CTAlloc(int,num_sweeps[3]);
+      for ( j = 0; j < num_sweeps[3]; j++ ) relax_points[3][j] = 0;
+   }
+   else
+   {
+      relax_points = hypre_CTAlloc(int*,4);
+      for ( i = 0; i < 4; i++ ) 
+      {
+         relax_points[i] = hypre_CTAlloc(int,num_sweeps[i]);
+         for ( j = 0; j < num_sweeps[i]; j++ ) relax_points[i][j] = 0;
+      }
    }
    HYPRE_BoomerAMGSetGridRelaxPoints(HYPrecon_, relax_points);
+
+   if ( amgSmoothNumLevels_ > 0 )
+   {
+      HYPRE_BoomerAMGSetSmoothType(HYPrecon_, amgSmoothType_);
+      HYPRE_BoomerAMGSetSmoothNumLevels(HYPrecon_, amgSmoothNumLevels_);
+      HYPRE_BoomerAMGSetSmoothNumSweeps(HYPrecon_, amgSmoothNumSweeps_);
+      HYPRE_BoomerAMGSetSchwarzRlxWeight(HYPrecon_, amgSchwarzRelaxWt_);
+      HYPRE_BoomerAMGSetVariant(HYPrecon_, amgSchwarzVariant_);
+      HYPRE_BoomerAMGSetOverlap(HYPrecon_, amgSchwarzOverlap_);
+      HYPRE_BoomerAMGSetDomainType(HYPrecon_, amgSchwarzDomainType_);
+   }
 
    if ( amgUseGSMG_ == 1 )
    {
@@ -3176,6 +3314,7 @@ void HYPRE_LinSysCore::setupPreconBlock()
 void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
 {
    int                i, j, *relax_type, *num_sweeps, **relax_points;
+   int                max_levels = 25;
    double             *relax_wt, *relax_omega;
    HYPRE_ParCSRMatrix A_csr;
    HYPRE_ParVector    b_csr;
@@ -3205,12 +3344,13 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
    for ( i = 0; i < 4; i++ ) relax_type[i] = amgRelaxType_[i];
    HYPRE_BoomerAMGSetGridRelaxType(HYSolver_, relax_type);
 
-   relax_wt = hypre_CTAlloc(double,25);
-   for ( i = 0; i < 25; i++ ) relax_wt[i] = amgRelaxWeight_[i];
+   HYPRE_BoomerAMGSetMaxLevels(HYSolver_, max_levels);
+   relax_wt = hypre_CTAlloc(double,max_levels);
+   for ( i = 0; i < max_levels; i++ ) relax_wt[i] = amgRelaxWeight_[i];
    HYPRE_BoomerAMGSetRelaxWeight(HYSolver_, relax_wt);
 
-   relax_omega = hypre_CTAlloc(double,25);
-   for ( i = 0; i < 25; i++ ) relax_omega[i] = amgRelaxOmega_[i];
+   relax_omega = hypre_CTAlloc(double,max_levels);
+   for ( i = 0; i < max_levels; i++ ) relax_omega[i] = amgRelaxOmega_[i];
    HYPRE_BoomerAMGSetOmega(HYPrecon_, relax_omega);
 
    relax_points = hypre_CTAlloc(int*,4);
@@ -3220,6 +3360,17 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
       for ( j = 0; j < num_sweeps[i]; j++ ) relax_points[i][j] = 0;
    }
    HYPRE_BoomerAMGSetGridRelaxPoints(HYPrecon_, relax_points);
+   if ( amgSmoothNumLevels_ > 0 )
+   {
+      HYPRE_BoomerAMGSetSmoothType(HYPrecon_, amgSmoothType_);
+      HYPRE_BoomerAMGSetSmoothNumLevels(HYPrecon_, amgSmoothNumLevels_);
+      HYPRE_BoomerAMGSetSmoothNumSweeps(HYPrecon_, amgSmoothNumSweeps_);
+      HYPRE_BoomerAMGSetSchwarzRlxWeight(HYPrecon_, amgSchwarzRelaxWt_);
+      HYPRE_BoomerAMGSetVariant(HYPrecon_, amgSchwarzVariant_);
+      HYPRE_BoomerAMGSetOverlap(HYPrecon_, amgSchwarzOverlap_);
+      HYPRE_BoomerAMGSetDomainType(HYPrecon_, amgSchwarzDomainType_);
+   }
+
    if ( amgUseGSMG_ == 1 )
    {
       HYPRE_BoomerAMGSetGSMG(HYPrecon_, 4);
@@ -3236,13 +3387,20 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
       printf("* relax type            = %d\n", amgRelaxType_[0]);
       printf("* relax weight          = %e\n", amgRelaxWeight_[0]);
       printf("* maximum iterations    = %d\n", maxIterations_);
+      printf("* smooth type  = %d\n", amgSmoothType_);
+      printf("* smooth numlevels  = %d\n", amgSmoothNumLevels_);
+      printf("* smooth numsweeps  = %d\n", amgSmoothNumSweeps_);
+      printf("* Schwarz variant = %d\n", amgSchwarzVariant_);
+      printf("* Schwarz overlap = %d\n", amgSchwarzOverlap_);
+      printf("* Schwarz domain type = %d\n", amgSchwarzDomainType_);
+      printf("* Schwarz relax weight = %e\n", amgSchwarzRelaxWt_);
       printf("* convergence tolerance = %e\n", tolerance_);
       printf("*--------------------------------------------------\n");
    }
    if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
    {
       HYPRE_BoomerAMGSetDebugFlag(HYSolver_, 0);
-      HYPRE_BoomerAMGSetPrintLevel(HYSolver_, 3);
+      HYPRE_BoomerAMGSetPrintLevel(HYSolver_, 1);
    }
    HYPRE_BoomerAMGSetMaxIter(HYSolver_, maxIterations_);
    HYPRE_BoomerAMGSetMeasureType(HYSolver_, 0);
