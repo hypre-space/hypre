@@ -671,7 +671,7 @@ int HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix );
 int HYPRE_SStructMatrixSetSymmetric( HYPRE_SStructMatrix matrix , int symmetric );
 int HYPRE_SStructMatrixSetObjectType( HYPRE_SStructMatrix matrix , int type );
 int HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix matrix , void **object );
-int HYPRE_SStructMatrixPrint( char *filename , HYPRE_SStructMatrix matrix , int all );
+int HYPRE_SStructMatrixPrint( const char *filename , HYPRE_SStructMatrix matrix , int all );
 
 /* HYPRE_sstruct_stencil.c */
 int HYPRE_SStructStencilCreate( int ndim , int size , HYPRE_SStructStencil *stencil_ptr );
@@ -692,7 +692,7 @@ int HYPRE_SStructVectorGetValues( HYPRE_SStructVector vector , int part , int *i
 int HYPRE_SStructVectorGetBoxValues( HYPRE_SStructVector vector , int part , int *ilower , int *iupper , int var , double *values );
 int HYPRE_SStructVectorSetObjectType( HYPRE_SStructVector vector , int type );
 int HYPRE_SStructVectorGetObject( HYPRE_SStructVector vector , void **object );
-int HYPRE_SStructVectorPrint( char *filename , HYPRE_SStructVector vector , int all );
+int HYPRE_SStructVectorPrint( const char *filename , HYPRE_SStructVector vector , int all );
 
 /* box_map.c */
 int hypre_BoxMapEntrySetInfo( hypre_BoxMapEntry *entry , void *info );
@@ -741,7 +741,7 @@ int hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix );
 int hypre_SStructPMatrixSetValues( hypre_SStructPMatrix *pmatrix , hypre_Index index , int var , int nentries , int *entries , double *values , int add_to );
 int hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix , hypre_Index ilower , hypre_Index iupper , int var , int nentries , int *entries , double *values , int add_to );
 int hypre_SStructPMatrixAssemble( hypre_SStructPMatrix *pmatrix );
-int hypre_SStructPMatrixPrint( char *filename , hypre_SStructPMatrix *pmatrix , int all );
+int hypre_SStructPMatrixPrint( const char *filename , hypre_SStructPMatrix *pmatrix , int all );
 int hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix );
 int hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix , int part , hypre_Index index , int var , int nentries , int *entries , double *values , int add_to );
 int hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix , int part , hypre_Index ilower , hypre_Index iupper , int var , int nentries , int *entries , double *values , int add_to );
@@ -780,7 +780,7 @@ int hypre_SStructPVectorGather( hypre_SStructPVector *pvector );
 int hypre_SStructPVectorGetValues( hypre_SStructPVector *pvector , hypre_Index index , int var , double *value );
 int hypre_SStructPVectorGetBoxValues( hypre_SStructPVector *pvector , hypre_Index ilower , hypre_Index iupper , int var , double *values );
 int hypre_SStructPVectorSetConstantValues( hypre_SStructPVector *pvector , double value );
-int hypre_SStructPVectorPrint( char *filename , hypre_SStructPVector *pvector , int all );
+int hypre_SStructPVectorPrint( const char *filename , hypre_SStructPVector *pvector , int all );
 int hypre_SStructVectorRef( hypre_SStructVector *vector , hypre_SStructVector **vector_ref );
 int hypre_SStructVectorSetConstantValues( hypre_SStructVector *vector , double value );
 int hypre_SStructVectorConvert( hypre_SStructVector *vector , hypre_ParVector **parvector_ptr );

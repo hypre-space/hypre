@@ -351,7 +351,7 @@ hypre_SStructPVectorSetConstantValues( hypre_SStructPVector *pvector,
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SStructPVectorPrint( char                 *filename,
+hypre_SStructPVectorPrint( const char           *filename,
                            hypre_SStructPVector *pvector,
                            int                   all )
 {

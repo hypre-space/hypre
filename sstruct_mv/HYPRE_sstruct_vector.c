@@ -366,7 +366,7 @@ HYPRE_SStructVectorGetObject( HYPRE_SStructVector   vector,
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructVectorPrint( char                *filename,
+HYPRE_SStructVectorPrint( const char          *filename,
                           HYPRE_SStructVector  vector,
                           int                  all )
 {

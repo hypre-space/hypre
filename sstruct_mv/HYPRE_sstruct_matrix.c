@@ -509,7 +509,7 @@ HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix   matrix,
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructMatrixPrint( char                *filename,
+HYPRE_SStructMatrixPrint( const char          *filename,
                           HYPRE_SStructMatrix  matrix,
                           int                  all )
 {

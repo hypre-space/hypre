@@ -347,7 +347,7 @@ hypre_SStructPMatrixAssemble( hypre_SStructPMatrix *pmatrix )
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SStructPMatrixPrint( char                 *filename,
+hypre_SStructPMatrixPrint( const char           *filename,
                            hypre_SStructPMatrix *pmatrix,
                            int                   all )
 {

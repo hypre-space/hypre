@@ -477,7 +477,7 @@ int HYPRE_SStructMatrixSetComplex(HYPRE_SStructMatrix matrix);
 /**
  * Print the matrix to file.  This is mainly for debugging purposes.
  **/
-int HYPRE_SStructMatrixPrint(char                *filename,
+int HYPRE_SStructMatrixPrint(const char          *filename,
                              HYPRE_SStructMatrix  matrix,
                              int                  all);
 
@@ -666,7 +666,7 @@ int HYPRE_SStructVectorSetComplex(HYPRE_SStructVector vector);
 /**
  * Print the vector to file.  This is mainly for debugging purposes.
  **/
-int HYPRE_SStructVectorPrint(char                *filename,
+int HYPRE_SStructVectorPrint(const char          *filename,
                              HYPRE_SStructVector  vector,
                              int                  all);
 
