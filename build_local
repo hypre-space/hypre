@@ -18,7 +18,7 @@ if [ ! -d $DIR/src.new ]
 then
 
   mkdir $DIR/src.new
-  chmod 700 src.new
+  chmod 700 $DIR/src.new
 
   cd $DIR/src.new
   cvs checkout linear_solvers
@@ -32,13 +32,15 @@ fi
 # Build the libraries
 #===========================================================================
 
-cd $DIR/src.new/utilities
+TMPDIR=$DIR/src.new/linear_solvers
+
+cd $TMPDIR/utilities
 make -f Makefile.opt
 
-cd $DIR/src.new/struct_matrix_vector
+cd $TMPDIR/struct_matrix_vector
 make -f Makefile.opt
 
-cd $DIR/src.new/struct_linear_solvers
+cd $TMPDIR/struct_linear_solvers
 make -f Makefile.opt
 
 #===========================================================================
@@ -48,23 +50,27 @@ make -f Makefile.opt
 if [ "$1" = "install" ]
 then
 
+  mv -f $DIR/src $DIR/src.old
   mv -f $DIR/src.new $DIR/src
+  rm -fr $DIR/src.old
 
-  cd $DIR/src/utilities
+  TMPDIR=$DIR/src/linear_solvers
+
+  cd $TMPDIR/utilities
   cp -f memory.h timer.h timing.h $DIR/include
   cp -f *.a $DIR/lib
   
-  cd $DIR/src/struct_matrix_vector
+  cd $TMPDIR/struct_matrix_vector
   cp -f HYPRE_mv.h hypre_mv.h $DIR/include
   cp -f *.a $DIR/lib
   
-  cd $DIR/src/struct_linear_solvers
+  cd $TMPDIR/struct_linear_solvers
   cp -f HYPRE_ls.h hypre_ls.h $DIR/include
   cp -f *.a $DIR/lib
 
-  # Set permissions: give everybody `rx', and give group `w'
+  # Set permissions: give everybody `rx', and give user/group `w'
   cd $DIR
-  chmod -fR a+rX,g+w .
+  chmod -fR a+rX,ug+w .
 
 fi
 
