@@ -1160,6 +1160,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 {
    MPI_Comm         comm          = hypre_ParCSRMatrixComm(A);
    hypre_CommPkg   *comm_pkg      = hypre_ParCSRMatrixCommPkg(A);
+   hypre_CommHandle   *comm_handle;
    int		   *row_starts    = hypre_ParCSRMatrixRowStarts(A);
    int		   *col_map_offd_A= hypre_ParCSRMatrixColMapOffd(A);
    hypre_CSRMatrix *A_diag        = hypre_ParCSRMatrixDiag(A);
@@ -1173,6 +1174,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    int              num_variables = hypre_CSRMatrixNumRows(A_diag);
    int              num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
    int		    global_num_vars = hypre_ParCSRMatrixGlobalNumCols(A);
+   int 	           *col_map_offd    = hypre_ParCSRMatrixColMapOffd(A);
                   
    hypre_ParCSRMatrix *S;
    hypre_CSRMatrix *S_diag;
@@ -1199,18 +1201,23 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    int             *graph_array;
    int             *graph_ptr;
    int              graph_size;
+   int 	           *int_buf_data;
+   int 	           *ci_array, *citilde_array;
 
    double           diag, row_scale;
    int              measure, max_measure;
    int              i, j, k, jA, jS, jS_offd, kS, ig;
-   int		    ic, ji, jj, jl, index;
+   int		    ic, ji, jj, jk, jl, jm, index;
    int		    max_ci_size, ci_size, ci_tilde_size;
+   int		    ci_size_offd, ci_tilde_size_offd;
    int		    set_empty = 1;
    int		    C_i_nonempty = 0;
    int		    num_strong;
    int		    num_nonzeros;
    int		    num_procs;
-   int		    first_col;
+   int		    num_sends = 0;
+   int		    first_col, start;
+   int		    col_0, col_n;
 
    int              ierr = 0;
 
@@ -1242,6 +1249,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
         comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
+   num_sends = hypre_CommPkgNumSends(comm_pkg);
    num_strong = A_i[num_variables] - num_variables;
 
    S = hypre_CreateParCSRMatrix(comm, global_num_vars, global_num_vars,
@@ -1449,7 +1457,6 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       measure_array[i] = ST_i[i+1]-ST_i[i];
    }
 
-
    if (num_procs > 1)
    {
       S_ext      = hypre_ExtractBExt(S,A,0);
@@ -1457,12 +1464,14 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       S_ext_j    = hypre_CSRMatrixJ(S_ext);
       num_nonzeros = S_ext_i[num_cols_offd];
       first_col = hypre_ParCSRMatrixFirstColDiag(A);
+      col_0 = first_col-1;
+      col_n = col_0+num_variables;
       for (i=0; i < num_nonzeros; i++)
       {
 	 index = S_ext_j[i] - first_col;
 	 if (index > -1 && index < num_variables)
 		measure_array[index]++;
-      }
+      } 
    }
 
    /*---------------------------------------------------
@@ -1553,6 +1562,9 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       }
    } 
 
+   hypre_TFree(measure_array);
+   hypre_DestroyCSRMatrix(ST);
+
    /* second pass, check fine points for coarse neighbors */
 
    for (i=0; i < num_variables; i++)
@@ -1618,80 +1630,223 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 
    /* third pass, check boundary fine points for coarse neighbors */
 
-/*   CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
-   for (i=0; i < num_cols_offd; i++)
-	CF_marker_offd[i] = 0;
+   CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+   int_buf_data = hypre_CTAlloc(int, hypre_CommPkgSendMapStart(comm_pkg,
+                                                num_sends));
 
+   /*------------------------------------------------
+    * Exchange boundary data for CF_marker
+    *------------------------------------------------*/
+
+   index = 0;
+   for (i = 0; i < num_sends; i++)
+   {
+     start = hypre_CommPkgSendMapStart(comm_pkg, i);
+     for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
+             int_buf_data[index++] 
+              = CF_marker[hypre_CommPkgSendMapElmt(comm_pkg,j)];
+   }
+ 
+   comm_handle = hypre_InitializeCommunication(11, comm_pkg, int_buf_data, 
+     CF_marker_offd);
+ 
+   hypre_FinalizeCommunication(comm_handle);   
+
+   ci_array = hypre_CTAlloc(int,num_cols_offd);
+   citilde_array = hypre_CTAlloc(int,num_cols_offd);
+ 
    for (i=0; i < num_cols_offd; i++)
    {
       if (CF_marker_offd[i] == -1)
       {
-	 max_ci_size = S_ext_i[i+1]-S_ext_i[i];
-	 ci_tilde_size = max_ci_size;
+	 ci_tilde_size = 0;
+	 ci_tilde_size_offd = 0;
 	 ci_size = 0;
+	 ci_size_offd = 0;
 	 for (ji = S_ext_i[i]; ji < S_ext_i[i+1]; ji++)
 	 {
 	    j = S_ext_j[ji];
-	    if (CF_marker[j] > 0)
-	       graph_array[ci_size++] = j;
+	    if (j > col_0 && j < col_n)
+	    {
+	       j = j - first_col;
+	       if (CF_marker[j] > 0)
+	          graph_array[ci_size++] = j;
+	    }
+	    else
+	    {
+	       for (jj = 0; jj < num_cols_offd; jj++)
+	       {
+		  if (col_map_offd[jj] == j && CF_marker_offd[jj] > 0)
+	             ci_array[ci_size_offd++] = jj;
+ 	       }	
+ 	    }	
  	 }
 	 for (ji = S_ext_i[i]; ji < S_ext_i[i+1]; ji++)
 	 {
 	    j = S_ext_j[ji];
-	    if (CF_marker_offd[j] == -1)
+	    if (j > col_0 && j < col_n)
 	    {
-	       set_empty = 1;
-	       for (jj = S_ext_i[j]; jj < S_ext_i[j+1]; jj++)
+	       j = j - first_col;
+	       if ( CF_marker[j] == -1)
 	       {
-		  index = S_ext_j[jj];
-		  for (jl=0; jl < ci_size; jl++)
-		  {
-		     if (graph_array[jl] == index)
+	          set_empty = 1;
+	          for (jj = S_i[j]; jj < S_i[j+1]; jj++)
+	          {
+		     index = S_j[jj];
+		     for (jl=0; jl < ci_size; jl++)
 		     {
-		        set_empty = 0;
+		        if (graph_array[jl] == index)
+		        {
+		           set_empty = 0;
+		           break;
+		        }
+	             }
+	             if (!set_empty) break;
+	          }
+	          for (jj = S_offd_i[j]; jj < S_offd_i[j+1]; jj++)
+	          {
+		     index = S_offd_j[jj];
+		     for (jl=0; jl < ci_size_offd; jl++)
+		     {
+		        if (ci_array[jl] == index)
+		        {
+		           set_empty = 0;
+		           break;
+		        }
+	             }
+	             if (!set_empty) break;
+	          }
+	          if (set_empty)
+	          {
+		     if (C_i_nonempty)
+		     {
+		        CF_marker_offd[i] = 1;
+		        for (jj=0 ; jj < ci_tilde_size; jj++)
+		        {
+			   CF_marker[graph_ptr[jj]] = -1;
+		        }
+		        for (jj=0 ; jj < ci_tilde_size_offd; jj++)
+		        {
+			   CF_marker_offd[citilde_array[jj]] = -1;
+		        }
+		        ci_tilde_size = 0;
+		        ci_tilde_size_offd = 0;
+		        break;
+		     }
+		     else
+		     {
+		        graph_ptr[ci_tilde_size++] = j;
+		        CF_marker[j] = 1;
+		        C_i_nonempty = 1;
+		        i--;
 		        break;
 		     }
 	          }
-	          if (!set_empty) break;
 	       }
-	       if (set_empty)
+	    }
+	    else
+	    {
+	       for (jm = 0; jm < num_cols_offd; jm++)
 	       {
-		  if (C_i_nonempty)
-		  {
-		     CF_marker_offd[i] = 1;
-		     coarse_size++;
-		     for (jj=max_ci_size ; jj < ci_tilde_size; jj++)
-		     {
-			CF_marker_offd[graph_array[jj]] = -1;
-		        coarse_size--;
+		  if (col_map_offd[jm] == j && CF_marker_offd[jm] == -1)
+	          {
+	             set_empty = 1;
+	             for (jj = S_ext_i[jm]; jj < S_ext_i[jm+1]; jj++)
+	             {
+		        index = S_ext_j[jj];
+		        if (index > col_0 && index < col_n) /* index interior */
+			{
+			   for (jl=0; jl < ci_size; jl++)
+		           {
+		              if (graph_array[jl] == index)
+		              {
+		                 set_empty = 0;
+		                 break;
+		              }
+	             	   }
+	              	   if (!set_empty) break;
+	                }
+			else
+			{
+			   for (jk = 0; jk < num_cols_offd; jk++)
+			   {
+			      if (col_map_offd[jk] == index)
+			      {
+				 for (jl=0; jl < ci_size_offd; jl++)
+		           	 {
+		              	    if (ci_array[jl] == jk)
+		              	    {
+		                       set_empty = 0;
+		                       break;
+		                    }
+		                 }
+		              }
+	              	      if (!set_empty) break;
+	             	   }
+	              	   if (!set_empty) break;
+	                }
+	             }
+	             if (set_empty)
+	             {
+		        if (C_i_nonempty)
+		        {
+		           CF_marker_offd[i] = 1;
+		           for (jj=0 ; jj < ci_tilde_size; jj++)
+		           {
+			      CF_marker[graph_ptr[jj]] = -1;
+		           }
+		           for (jj=0 ; jj < ci_tilde_size_offd; jj++)
+		           {
+			      CF_marker_offd[citilde_array[jj]] = -1;
+		           }
+		           ci_tilde_size = 0;
+		           ci_tilde_size_offd = 0;
+		           break;
+		        }
+		        else
+		        {
+		           citilde_array[ci_tilde_size_offd++] = jm;
+		           CF_marker_offd[jm] = 1;
+		           C_i_nonempty = 1;
+		           i--;
+		           break;
+		        }
 		     }
-		     ci_tilde_size = max_ci_size;
-		     break;
-		  }
-		  else
-		  {
-		     graph_array[ci_tilde_size++] = j;
-		     CF_marker_offd[j] = 1;
-		     coarse_size++;
-		     C_i_nonempty = 1;
-		     i--;
-		     break;
-		  }
+	          }
 	       }
 	    }
 	 }
       }
    }
+   /*------------------------------------------------
+    * Send boundary data for CF_marker back
+    *------------------------------------------------*/
+
+   comm_handle = hypre_InitializeCommunication(12, comm_pkg, CF_marker_offd, 
+			int_buf_data);
+ 
+   hypre_FinalizeCommunication(comm_handle);   
+ 
+   index = 0;
+   for (i = 0; i < num_sends; i++)
+   {
+     start = hypre_CommPkgSendMapStart(comm_pkg, i);
+     for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
+             CF_marker[hypre_CommPkgSendMapElmt(comm_pkg,j)] =
+                int_buf_data[index++]; 
+   }
+ 
    hypre_TFree(CF_marker_offd);
-*/
+
    /*---------------------------------------------------
     * Clean up and return
     *---------------------------------------------------*/
 
-   hypre_TFree(measure_array);
+   hypre_TFree(int_buf_data);
+   hypre_TFree(ci_array);
+   hypre_TFree(citilde_array);
    hypre_TFree(graph_array);
    hypre_TFree(graph_ptr);
-   hypre_DestroyCSRMatrix(ST);
    if (num_procs > 1) hypre_DestroyCSRMatrix(S_ext); 
 
    *S_ptr           = S;
