@@ -9401,6 +9401,7 @@ CXX="$PREPEND $CXX"
  mli/solver\
  mli/util\
  mli/vector\
+ mli/test\
  parcsr_ls\
  parcsr_mv\
  PETSc_ls\
