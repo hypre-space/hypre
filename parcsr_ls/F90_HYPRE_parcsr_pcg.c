@@ -195,16 +195,16 @@ hypre_F90_IFACE(hypre_parcsrpcggetprecond, HYPRE_PARCSRPCGGETPRECOND)( long int 
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRPCGSetLogging
+ * HYPRE_ParCSRPCGSetPrintLevel
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrpcgsetlogging, HYPRE_PARCSRPCGSETLOGGING)( long int *solver,
-                                            int      *logging,
+hypre_F90_IFACE(hypre_parcsrpcgsetprintlevel, HYPRE_PARCSRPCGSETPRINTLEVEL)( long int *solver,
+                                            int      *level,
                                             int      *ierr     )
 {
-   *ierr = (int) ( HYPRE_ParCSRPCGSetLogging( (HYPRE_Solver) *solver,
-                                              (int)          *logging ) );
+   *ierr = (int) ( HYPRE_ParCSRPCGSetPrintLevel( (HYPRE_Solver) *solver,
+                                                 (int)       *level ) );
 }
 
 /*--------------------------------------------------------------------------

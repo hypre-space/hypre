@@ -167,14 +167,14 @@ HYPRE_ParCSRPCGGetPrecond( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRPCGSetLogging
+ * HYPRE_ParCSRPCGSetPrintLevel
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_ParCSRPCGSetLogging( HYPRE_Solver solver,
-                           int                logging )
+HYPRE_ParCSRPCGSetPrintLevel( HYPRE_Solver solver,
+                              int level )
 {
-   return( HYPRE_PCGSetLogging( solver, logging ) );
+   return( HYPRE_PCGSetPrintLevel( solver, level ) );
 }
 
 /*--------------------------------------------------------------------------

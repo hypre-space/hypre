@@ -589,7 +589,7 @@ main( int   argc,
       HYPRE_ParCSRPCGSetTol(pcg_solver, tol);
       HYPRE_ParCSRPCGSetTwoNorm(pcg_solver, 1);
       HYPRE_ParCSRPCGSetRelChange(pcg_solver, 0);
-      HYPRE_ParCSRPCGSetLogging(pcg_solver, 1);
+      HYPRE_ParCSRPCGSetPrintLevel(pcg_solver, 1);
  
       if (solver_id == 1)
       {
