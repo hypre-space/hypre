@@ -65,7 +65,8 @@ BABELIBFLAGS =\
  -L${HYPRE_BUILD_DIR}/lib\
  -lbHYPRE\
  -lbHYPREClient-C\
- -lbHYPREClient-F
+ -lbHYPREClient-F\
+ -lsidl
 
 ###########################################
 # Commpkg definitions
