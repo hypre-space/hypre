@@ -831,8 +831,8 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
     double time0, time1, timet = 0.0, timea = 0.0;
 
     int npat;
-    /* int *patt; */
-    int patt[100000];
+    int *patt;
+    int pattsize;
 
     int info;
 
@@ -873,6 +873,12 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
                 if (loc == -1)
 		{
 		    marker[ind2[j]] = npat;
+		    if (npat > pattsize)
+		    {
+			free(patt);
+			pattsize = npat + 1000;
+			patt = (int *) malloc(pattsize*sizeof(int));
+		    }
 		    patt[npat++] = ind2[j];
 		}
             }
@@ -952,6 +958,7 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
         timet += (time1-time0);
     }
 
+    free(patt);
     free(marker);
     free(bhat);
     free(ahat);
