@@ -19,12 +19,10 @@ int hypre_SetParVectorConstantValues P((hypre_ParVector *v , double value ));
 int hypre_CopyParVector P((hypre_ParVector *x , hypre_ParVector *y ));
 int hypre_ScaleParVector P((double alpha , hypre_ParVector *y ));
 int hypre_ParAxpy P((double alpha , hypre_ParVector *x , hypre_ParVector *y ));
-double hypre_ParInnerProd P((MPI_Comm comm, hypre_ParVector *x , 
-   	hypre_ParVector *y ));
+double hypre_ParInnerProd P((hypre_ParVector *x , hypre_ParVector *y ));
 hypre_ParVector *hypre_VectorToParVector P((MPI_Comm comm, hypre_Vector *v,
 	int *vec_starts));
-hypre_Vector *hypre_ParVectorToVectorAll P((MPI_Comm comm, 
-	hypre_ParVector *par_v));
+hypre_Vector *hypre_ParVectorToVectorAll P((hypre_ParVector *par_v));
 
 /* communication.c */
 hypre_CommHandle *hypre_InitializeCommunication P((int job,
