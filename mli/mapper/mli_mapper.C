@@ -62,7 +62,7 @@ int MLI_Mapper::setMap(int nItems, int *itemList, int *mapList)
 
 int MLI_Mapper::getMap(int nItems, int *itemList, int *mapList)
 {
-   int i, *itemTemp, *tokenAux, counter;
+   int i, *itemTemp, *itemAux, counter;
 
    if ( nItems <= 0 ) return -1;
    itemTemp = new int[nItems];
@@ -94,6 +94,38 @@ int MLI_Mapper::getMap(int nItems, int *itemList, int *mapList)
          printf("MLI_Mapper::getMap - item not found %d.\n", itemList[i]);
          exit(1);
       } 
+   }
+   return 0;
+}
+
+/***************************************************************************
+ * setParams 
+ *--------------------------------------------------------------------------*/
+
+int MLI_Mapper::setParams(char *param_string, int argc, char **argv)
+{
+   int nItems, *itemList, *mapList;
+
+   if ( !strcmp(param_string, "setMap") )
+   {
+      if ( argc == 3 )
+      {
+         nItems   = *(int *) argv[0];
+         itemList = (int *) argv[1];
+         mapList  = (int *) argv[2];
+         setMap(nItems, itemList, mapList);
+      }
+      else
+      {
+         printf("MLI_Mapper::setParams : setMap requires 3 arguments.\n");
+         exit(1);
+      }
+   }
+   else
+   {
+      printf("MLI_Mapper::setParams : command not recognized %s.\n",
+             param_string);
+      return 1;
    }
    return 0;
 }

@@ -38,6 +38,8 @@ public :
 
    int   setMap(int nItems, int *itemList, int *mapList);
    int   getMap(int nItems, int *itemList, int *mapList);
+   int   setParams(char *param_string, int argc, char **argv);
+ 
 };
 
 #endif
