@@ -6,8 +6,8 @@ function A = readij(filename)
 
 fid=fopen(filename,'r');
 
-nrows = fscanf(fid,'%d',1); % number of rows (nrows)
-[Adata, count] = fscanf(fid,'%d,%d,%e', [3, inf]);
+[ijlohi, count] = fscanf(fid,'%d %d %d %d', 4);
+[Adata, count]  = fscanf(fid,'%d %d %e', [3, inf]);
 fclose(fid);
 
 Adata(1,:) = Adata(1,:) + 1;
