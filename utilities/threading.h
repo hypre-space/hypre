@@ -12,15 +12,12 @@
 
 #ifdef HYPRE_USE_PTHREADS
 
-#ifndef hypre_MAX_THREADS
-#define hypre_MAX_THREADS 128
-#endif
 #ifndef MAX_QUEUE
 #define MAX_QUEUE 256
 #endif
 
 #include<pthread.h>
-#include "mpi.h"
+#include "utilities.h"
 
 /* hypre_work_proc_t typedef'd to be a pointer to a function with a void*
    argument and a void return type */

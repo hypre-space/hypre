@@ -23,6 +23,12 @@
 extern "C" {
 #endif
 
+#ifdef HYPRE_USE_PTHREADS
+#ifndef hypre_MAX_THREADS
+#define hypre_MAX_THREADS 128
+#endif
+#endif
+
 /*--------------------------------------------------------------------------
  * Structures
  *--------------------------------------------------------------------------*/

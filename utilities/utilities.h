@@ -441,9 +441,6 @@ int hypre_thread_MPI_Type_commit P((MPI_Datatype *datatype ));
 
 #ifdef HYPRE_USE_PTHREADS
 
-#ifndef hypre_MAX_THREADS
-#define hypre_MAX_THREADS 128
-#endif
 #ifndef MAX_QUEUE
 #define MAX_QUEUE 256
 #endif
@@ -635,10 +632,6 @@ int hypre_BeginTiming P((int time_index ));
 int hypre_EndTiming P((int time_index ));
 int hypre_ClearTiming P((void ));
 int hypre_PrintTiming P((char *heading , MPI_Comm comm ));
-
-/* random.c */
-void hypre_SeedRand P((int seed));
-double hypre_Rand P(());
 
 #undef P
 
