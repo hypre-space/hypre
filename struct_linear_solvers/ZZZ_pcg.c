@@ -70,8 +70,8 @@ ZZZ_PCG( Vector *x,
     * Initialize some logging variables
     *-----------------------------------------------------------------------*/
 
-   norm_log     = zzz_CTAlloc(double, max_iter);
-   rel_norm_log = zzz_CTAlloc(double, max_iter);
+   norm_log     = zzz_CTAlloc(double, max_iter+1);
+   rel_norm_log = zzz_CTAlloc(double, max_iter+1);
    conv_rate    = zzz_CTAlloc(double, max_iter+1);
 
  
