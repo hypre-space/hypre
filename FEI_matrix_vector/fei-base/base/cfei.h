@@ -156,6 +156,8 @@ int FEI_initComplete(CFEI* cfei);
 
 /* set a value (usually zeros) througout the linear system.....*/
 int FEI_resetSystem(CFEI* cfei, double s);
+int FEI_resetMatrix(CFEI* cfei, double s);
+int FEI_resetRHSVector(CFEI* cfei, double s);
 
 /* begin node-set data load step.............................*/
 int FEI_beginLoadNodeSets(CFEI* cfei, int numBCNodeSets);

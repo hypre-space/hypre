@@ -1,0 +1,5 @@
+7/21/00
+
+In terms of the FEI interface, only 2 functions were added in 1.5 versus
+1.4 - resetMatrix and resetRHS.
+

@@ -116,6 +116,11 @@ class FEI_Implementation : public FEI {
     // set a value (usually zeros) throughout the linear system
     int resetSystem(double s);
 
+    // set a value (usually zeros) throughout the matrix or rhs-vector
+    // separately
+    int resetMatrix(double s);
+    int resetRHSVector(double s);
+
     // begin node-set data load step.............................
     int beginLoadNodeSets(int numBCNodeSets);
 
@@ -214,6 +219,9 @@ class FEI_Implementation : public FEI {
                       double* scalars,
                       int numScalars);
     
+    //get residual norms
+    int residualNorm(int whichNorm, int numFields,
+                                     int* fieldIDs, double* norms);
 
     // start iterative solution
     int iterateToSolve(int& status);
@@ -341,18 +349,27 @@ class FEI_Implementation : public FEI {
     //  return the number of elements eqns for elems w/ this blockID
     int getNumBlockElemEqns(GlobalID blockID) const;
 
-  private:
-
-//==============================================================================
-//below are the private functions and variable declarations for
-//this implementation of the FEI.
-//==============================================================================
+  //============================================================================
+  private: //functions
 
     void allocateInternalFEIs();
     void allocateInternalFEIs(int numMatrices, int* matrixIDs,
                               int* numRHSs, int** rhsIDs);
     void debugOut(const char* msg);
     void debugOut(const char* msg, int whichFEI);
+
+    void buildLinearSystem();
+    void aggregateSystem();
+
+    void messageAbort(const char* msg);
+    void notAllocatedAbort(const char* name);
+    void needParametersAbort(const char* name);
+    void badParametersAbort(const char* name);
+
+    void setDebugOutput(const char* path, const char* name);
+
+  //============================================================================
+  private: //member variables
 
     LinearSystemCore* constructorLinSysCore_;
     LinearSystemCore** linSysCore_;
@@ -382,9 +399,9 @@ class FEI_Implementation : public FEI {
     bool initSolveStepCalled_;
     bool initPhaseIsComplete_;
 
-    void buildLinearSystem();
-    void aggregateSystem();
     bool aggregateSystemFormed_;
+    bool newMatrixDataLoaded_;
+    bool linearSystemFinalized_;
 
     Data *soln_fei_matrix_;
     Data *soln_fei_vector_;
@@ -394,15 +411,8 @@ class FEI_Implementation : public FEI {
     int localRank_;
     int numProcs_;
 
-    void messageAbort(const char* msg);
-    void notAllocatedAbort(const char* name);
-    void needParametersAbort(const char* name);
-    void badParametersAbort(const char* name);
-
-  private:
     int outputLevel_;
 
-    void setDebugOutput(const char* path, const char* name);
     char* debugPath_;
     char* debugFileName_;
     int solveCounter_;

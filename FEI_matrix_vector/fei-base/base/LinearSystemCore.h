@@ -10,104 +10,208 @@
 //This is the class that holds and manipulates all solver-library-specific
 //stuff, such as matrices/vectors, solvers/preconditioners, etc. An
 //instance of this class is owned and used by the class that implements
-//the FEI spec. i.e., when element contributions, etc., are received from
-//the application, the data is ultimately passed to this class for 
-//assembly into the sparse matrix and associated vectors. This class
+//the public FEI spec. i.e., when element contributions, etc., are received
+//from the finite-element application, the data is ultimately passed to this
+//class for assembly into the sparse matrix and associated vectors. This class
 //will also be asked to launch any underlying solver, and finally to
 //return the solution.
 //
-//See the file LinearSystemCore.README for descriptions of required
-//behavior and semantics for each of the member functions.
-//
+//See the file LinearSystemCore.README for some general descriptions, etc.
 //
 
-//Files that need to be included before the compiler
+//Files that should to be included before the compiler
 //reaches this header:
 //
-//#include "src/Data.h"
-//#include <mpi.h>
+//#include "src/Data.h"        //for the declaration of the 'Data' class.
+//#include "base/basicTypes.h" //for the definition of the 'GlobalID' type.
+//
+
+class Lookup;
 
 class LinearSystemCore {
  public:
    LinearSystemCore(){};
    virtual ~LinearSystemCore() {};
 
+
+   //clone
    //for cloning a LinearSystemCore instance.
    virtual LinearSystemCore* clone() = 0;
 
-   //void parameters:
+
+   //parameters
    //for setting generic argc/argv style parameters.
 
    virtual void parameters(int numParams, char** params) = 0;
 
+
+   //setLookup
+   //for providing an object to use for looking up an equation, given a
+   //node or node/field pair, and vice-versa, etc.
+
+   virtual void setLookup(Lookup& lookup) = 0;
+
+
+   //setGlobalOffsets
+   //for providing three lists, of length numProcs+1. Those lists are:
+   //nodeOffsets - first local nodeNumber for each processor
+   //eqnOffsets - first local equation-number for each processor
+   //blkEqnOffsets - first local block-equation-number for each processor.
    //
-   //Functions for creating, allocating, filling matrix/vector
-   //structures.
+   //These numbers are all 0-based.
+   //
+   //len is numProcs+1
+   //
+   //From this information, LinearSystemCore implementations may trivially
+   //obtain local and global number-of-nodes, number-of-eqns, and
+   //number-of-block-eqns.
+
+   virtual void setGlobalOffsets(int len, int* nodeOffsets,
+                                 int* eqnOffsets, int* blkEqnOffsets) = 0;
+
+
+   //setConnectivities
+   //for providing element connectivity lists -- lists of nodes
+   //connected to each element, on an elem-block-by-elem-block basis.
+                                 
+   virtual void setConnectivities(GlobalID elemBlock,
+                                  int numElements,
+                                  int numNodesPerElem,
+                                  const GlobalID* elemIDs,
+                                  const int* const* connNodes) = 0;
+
+
+   //setStiffnessMatrices
+   //for providing un-modified, direct-from-the-application, element-wise
+   //stiffness matrices
+
+   virtual void setStiffnessMatrices(GlobalID elemBlock,
+                                     int numElems,
+                                     const GlobalID* elemIDs,
+                                     const double *const *const *stiff,
+                                     int numEqnsPerElem,
+                                     const int *const * eqnIndices) = 0;
+
+
+   //setLoadVectors
+   //for providing un-modified, direct-from-the-application, element-wise
+   //load vectors
+
+   virtual void setLoadVectors(GlobalID elemBlock,
+                               int numElems,
+                               const GlobalID* elemIDs,
+                               const double *const * load,
+                               int numEqnsPerElem,
+                               const int *const * eqnIndices) = 0;
+
+
+   //setMatrixStructure
+   //for providing the information necessary to allocate the matrix/vectors
+
+   virtual void setMatrixStructure(int** ptColIndices,
+                                   int* ptRrowLengths,
+                                   int** blkColIndices,
+                                   int* blkRowLengths,
+                                   int* ptRowsPerBlkRow) = 0;
+
+
+   //setMultCREqns/setPenCREqns
+   //identify which nodes and equations are associated with constraint-equations
+   //
+   //these functions each provide info for a 'constraint-relation-set'. There
+   //may be many CR-sets. Each CR-set contains 'numCRs' constraint-relations,
+   //and each constraint-relation applies to 'numNodesPerCR' nodes. Thus,
+   //'nodeNumbers' and 'eqnNumbers' are 2-D arrays with 'numCRs' rows, and
+   //'numNodesPerCR' columns. The 'nodeNumbers' table contains the nodes that
+   //are involved in each constraint, and the 'eqnNumbers' table contains the
+   //constrained global equation-number at each node (actually it contains the
+   //first equation-number of the constrained field on the node; that field may
+   //have more than one equation).
+   //The 'fieldIDs' list is of length 'numNodesPerCR', and contains the
+   //constrained field at each node. All constraints in a constraint-set are
+   //homogeneous on the constrained field at each node. By this I mean, each
+   //constraint in the set constrains fieldIds[j] at nodeNumbers[i][j].
+   //
+   //Finally, the argument 'multiplierEqnNumbers' is a list of length 'numCRs',
+   //and contains the equation number for each of the lagrange multipliers.
+
+   virtual void setMultCREqns(int multCRSetID,
+                              int numCRs, int numNodesPerCR,
+                              int** nodeNumbers, int** eqnNumbers,
+                              int* fieldIDs,
+                              int* multiplierEqnNumbers) = 0;
+
+   virtual void setPenCREqns(int penCRSetID,
+                              int numCRs, int numNodesPerCR,
+                              int** nodeNumbers, int** eqnNumbers,
+                              int* fieldIDs) = 0;
+
+
+   //sumIntoSystemMatrix, provides point-entry data, as well as
+   //block-entry data. This is the primary assembly function, used for
+   //providing the local portions of element contributions.
+
+   virtual void sumIntoSystemMatrix(int numPtRows, const int* ptRows,
+                                    int numPtCols, const int* ptCols,
+                                    int numBlkRows, const int* blkRows,
+                                    int numBlkCols, const int* blkCols,
+                                    const double* const* values) = 0;
+
+   //sumIntoSystemMatrix, purely point-entry version
+   //for accumulating coefficient data into the matrix,
+   //This will be called when a matrix contribution fills only part of a
+   //block-equation. e.g., when a penalty constraint is being applied to a
+   //single solution field on a node that has several solution fields.
+   //(A block-equation contains all solution field equations at a node.)
    //
 
-   virtual void createMatricesAndVectors(int numGlobalEqns,
-                                         int firstLocalEqn,
-                                         int numLocalEqns);
+   virtual void sumIntoSystemMatrix(int numPtRows, const int* ptRows,
+                                    int numPtCols, const int* ptCols,
+                                    const double* const* values) = 0;
 
-   virtual void createBlockMatricesAndVectors(int numGlobalEqns, 
-                                         int firstLocalEqn,
-                                         int numLocalEqns,
-                                         int numGlobalEqnBlks,
-                                         int firstLocalEqnBlk,
-                                         int numLocalEqnBlks);
-
-   virtual void allocateMatrix(int** colIndices, int* rowLengths);
-
-   virtual void allocateBlockMatrix(int** ptColIndices,
-                               int* ptRowLengths,
-                               int** blkColIndices,
-                               int* blkRowLengths,
-                               int* ptRowsPerBlkRow);
-
-   virtual void sumIntoSystemMatrix(int row, int numValues,
-                                    const double* values,
-                                    const int* scatterIndices);
-
-   virtual void sumIntoSystemBlockMatrix(int numPtRows,
-                                    int* ptRows,
-                                    int numPtCols,
-                                    const double* const* values,
-                                    const int* ptColIndices,
-                                    int numBlkRows,
-                                    int* blkRows,
-                                    int numBlkCols,
-                                    int* blkCols);
+   //sumIntoRHSVector
+   //for accumulating coefficients into the rhs vector
 
    virtual void sumIntoRHSVector(int num, const double* values,
                                  const int* indices) = 0;
 
+   //matrixLoadComplete
+   //for signalling the linsyscore object that data-loading is finished.
+
    virtual void matrixLoadComplete() = 0;
-   
+
+   //putNodalFieldData
+   //for providing nodal data associated with a particular fieldID.
+   //nodeNumbers is a list of length numNodes.
+   //offsets is a list of length numNodes+1.
+   //data contains the incoming data. data for the ith node lies in the
+   //locations data[offsets[i]] ... data[offsets[i+1] -1 ]
+   //
+   //incoming data may include non-local nodes. These should simply be
+   //skipped by the linsyscore object.
+
+   virtual void putNodalFieldData(int fieldID, int fieldSize,
+                                  int* nodeNumbers, int numNodes,
+                                  const double* data) = 0;
+
+
+   //resetMatrixAndVector
+   //for setting the scalar 's' throughout the matrix and/or rhs vector.
+
    virtual void resetMatrixAndVector(double s) = 0;
+   virtual void resetMatrix(double s) = 0;
+   virtual void resetRHSVector(double s) = 0;
 
    //functions for enforcing boundary conditions.
    virtual void enforceEssentialBC(int* globalEqn, double* alpha,
-                                   double* gamma, int len);
-
-   virtual void enforceBlkEssentialBC(int* blkEqn, int* blkOffset,
-                                      double* alpha, double* gamma,
-                                      int len);
+                                   double* gamma, int len) = 0;
 
    virtual void enforceRemoteEssBCs(int numEqns, int* globalEqns,
                                           int** colIndices, int* colIndLen,
-                                          double** coefs);
-
-   virtual void enforceBlkRemoteEssBCs(int numEqns, int* blkEqns,
-                                       int** blkColInds, int** blkColOffsets,
-                                       int* blkColLens,
-                                       double** remEssBCCoefs);
+                                          double** coefs) = 0;
 
    virtual void enforceOtherBC(int* globalEqn, double* alpha,
-                               double* beta, double* gamma, int len);
-
-   virtual void enforceBlkOtherBC(int* blkEqn, int* blkOffset,
-                                  double* alpha, double* beta,
-                                  double* gamma, int len);
+                               double* beta, double* gamma, int len) = 0;
 
    //functions for getting/setting matrix or rhs vector(s), or pointers to them.
 
@@ -139,19 +243,16 @@ class LinearSystemCore {
    virtual void putInitialGuess(const int* eqnNumbers, const double* values,
                                 int len) = 0;
 
-   virtual void getSolution(int* eqnNumbers, double* answers, int len) = 0;
+   virtual void getSolution(double* answers, int len) = 0;
 
    virtual void getSolnEntry(int eqnNumber, double& answer) = 0;
 
-   virtual void formResidual(int* eqnNumbers, double* values, int len) = 0;
+   virtual void formResidual(double* values, int len) = 0;
 
    //function for launching the linear solver
    virtual void launchSolver(int& solveStatus, int& iterations) = 0;
 
    virtual void writeSystem(const char* name) = 0;
-
- private:
-   void LSCmessageAbort(const char* name);
 };
 
 #endif

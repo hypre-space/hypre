@@ -15,8 +15,6 @@ class Utils {
    static int sortedGlobalIDListFind(GlobalID item, GlobalID* list, int len,
                                      int* insert);
 
-   static int GlobalIDListFind(GlobalID key, const GlobalID list[], int length);
-
    static int sortedIntListInsert(int item, int*& list, int& len,
                                   int& allocatedLength);
 
@@ -32,6 +30,10 @@ class Utils {
    static void GlobalIDListInsert(GlobalID item, int index, GlobalID*& list,
                                   int& len, int& allocatedLength);
 
+   static void doubleArrayListInsert(int index, doubleArray**& daList, int& len);
+
+   static void intArrayListInsert(int index, intArray**& iaList, int& len);
+
    static void intTableInsertRow(int* newRow, int whichRow,
                                  int**& table, int& numRows);
 
@@ -39,8 +41,6 @@ class Utils {
                                     double**& table, int& numRows);
 
    static void appendIntList(int newItem, int*& list, int& lenList);
-
-   static void appendGlobalIDList(GlobalID **list, int* lenList, GlobalID newItem);
 
    static bool inList(int* list, int lenList, int item);
 };
