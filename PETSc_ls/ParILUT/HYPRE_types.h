@@ -1,0 +1,28 @@
+
+
+/*BHEADER**********************************************************************
+ * (c) 1997   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+/******************************************************************************
+ *
+ * Header info for the hypre_DistributedMatrix structures
+ *
+ *****************************************************************************/
+
+#ifndef HYPRE_PETSC_SOLVER_PARILUT_TYPES_HEADER
+#define HYPRE_PETSC_SOLVER_PARILUT_TYPES_HEADER
+
+typedef void *HYPRE_PETScSolverParILUT;
+
+/* Have to include MPI since MPI types appear in prototypes */
+#include "mpi.h"
+
+/* Have to include PETSc since PETSc types appear in prototypes */
+#include "sles.h"
+
+#endif
