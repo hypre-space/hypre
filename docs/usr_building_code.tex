@@ -58,3 +58,4 @@ A program linking with {\slshape hypre} must be compiled with
 When using a formal {\slshape hypre} installation, \verb+$HYPRE_DIR+ is
 \verb+/usr/apps/hypre+.
 When using a private installation, the installer sets \verb+$HYPRE_DIR+.
+Additionally, any other libraries to which {\slshape hypre} is linked must also be linked to by the users application e.g. the BLAS library or PETSc library are often (but not always) linked in by {\slshape hypre} and must therefore be linked in by the users application as well.  It may be useful to reference the Makefile in the test subdirectory.  This Makefile is designed to build a test application that links with and calls {\slshape hypre}.  All include and linking flags that are used by {\slshape hypre} and needed by the application get exported to this file by the configure script.  
