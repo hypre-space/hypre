@@ -88,7 +88,11 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
   double *AE;
 
+#ifdef ESSL
+#else
   char uplo = 'L';
+#endif
+
   int cnt;
 
   /* PCG arrays: --------------------------------------------------- 
@@ -485,8 +489,12 @@ int hypre_SchwarzSolve(hypre_CSRMatrix *A,
   double *x;
   double *rhs;
   double *aux;
+
+#ifdef ESSL
+#else
   char uplo = 'L';
   int one = 1;
+#endif
 
   int jj,i,j,k; /*, j_loc, k_loc;*/
 
@@ -895,8 +903,11 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 
   double *AE;
 
+#ifdef ESSL
+#else
   char uplo = 'L';
   int cnt;
+#endif
 
   /* --------------------------------------------------------------------- */
 
