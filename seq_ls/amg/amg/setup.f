@@ -1,12 +1,10 @@
-C###  filename: ST.FOR
-c     
-c==== FILE ST.FOR ====================================================
+c=====================================================================
 c     
 c     SETUP: setup for systems
 c     
 c=====================================================================
 c     
-      subroutine setup(levels,nstr,ecg,ncg,ewt,nwt,icdep,idump,
+      subroutine setup(levels,nstr,ecg,ncg,ewt,nwt,icdep,ioutdat,
      *     nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
      *     b,ib,jb,ipmn,ipmx,iv,xp,yp,
      *     ndimu,ndimp,ndima,ndimb,lfname)
@@ -47,9 +45,10 @@ c---------------------------------------------------------------------
 c     open the log file and write some initial info
 c---------------------------------------------------------------------
 
-      open(6,file=lfname,access='append')
-
-      write(6,9000)
+      if (ioutdat .ge. 2) then
+         open(6,file=lfname,access='append')
+         write(6,9000)
+      endif
  9000 format(/'AMG SETUP INFO:'/)
 
 c     
@@ -67,7 +66,7 @@ c
       call symm(1,1,imin,imax,a,ia,ja,icg,ifg)
 c     
       if(levels.le.1) then
-         close(6)
+         if (ioutdat .ne. 0) close(6)
          return
       endif
 c     
@@ -102,12 +101,14 @@ c
  30   continue
 c     
 c     compute & print statistics after coarsening
+    
+      if (ioutdat .ge. 2) then
+         call fstats(k-1,levels,
+     *        nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
+     *        b,ib,jb,ipmn,ipmx,iv,xp,yp)
 
-      call fstats(k-1,levels,idump,
-     *     nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
-     *     b,ib,jb,ipmn,ipmx,iv,xp,yp)
-
-      close(6)
+          close(6)
+      endif
 
       return
       end

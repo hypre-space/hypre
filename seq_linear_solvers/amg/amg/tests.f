@@ -6,7 +6,7 @@ c
 c=====================================================================
 c     
 c---------------------------------------------------------------------
-      subroutine fstats(nl,levels,idump,
+      subroutine fstats(nl,levels,
      *     nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
      *     b,ib,jb,ipmn,ipmx,iv,xp,yp)
 c     
@@ -35,19 +35,8 @@ c
       dimension b  (*)
       dimension jb (*)
 c     
-      dimension iarr(10)
-c     
 c---------------------------------------------------------------------
 c     
-c===  > decode idump
-c     
-      call idec(idump,3,ndig,iarr)
-c     
-      iout  = iarr(1)
-      kdump = iarr(2)
-      ndump = iarr(3)
-
-      if(iout.eq.0) return
 
 c     
 c     print matrix/interpolation info
@@ -64,15 +53,8 @@ c
       do 30, k=1,nl
          call testb(k,nun,imin,imax,b,ib,jb,iu,icg)
  30   continue
-
-      do 40 k=1,nl
-         if(k.eq.levels) iout=min0(iout,3)
-         if(k.ge.kdump.and.k.le.kdump+ndump)
-     *        call outa(k,iout,
-     *        imin,imax,a,ia,ja,iu,ip,icg,ifg,
-     *        b,ib,jb,ipmn,ipmx,iv,xp,yp)
- 40   continue
       return
+
  4000 format(3x,' matrix    block     sizes',
      *     6 x,'   entries per row        block row sums'/
      *     3x,' k  i  j    rows   entries  sparse  ',
@@ -103,8 +85,7 @@ c
 c     
 c---------------------------------------------------------------------
 c     
-c     write(6,9876) k,imin(k),imax(k)
- 9876 format('  testsy - k,imin,imax=',3i5)
+
       do 20 n1=1,nun
          npts(n1)=0
          do 10 n2=1,nun
@@ -120,6 +101,7 @@ c     write(6,9876) k,imin(k),imax(k)
       do 60 i=ilo,ihi
          n1=iu(i)
          if(n1.le.0.or.n1.gt.nun) then
+CVEH   NEEDS TO BE REPLACED BY FLAG
             write(6,'(/''  ERROR IN TESTSY -- IU('',i5,'')='',i5)') i,n1
             stop
          endif
@@ -134,10 +116,10 @@ c     write(6,9876) k,imin(k),imax(k)
          do 40 j=jlo,jhi
             ii=ja(j)
             if(j.eq.jlo.or.ii.ne.i) go to 39
+CVEH   NEEDS TO BE REPLACED BY FLAG
             write(6,3900) i
  3900       format(/' ERROR: row ',i4,' contains duplicate entries')
  39         n2=iu(ii)
- 9872       format('  snafu -- i,j,ii,iu(ii)=',4i4)
             rs(n2)=rs(n2)+a(j)
             nnze(n1,n2)=nnze(n1,n2)+1
             nc(n2)=nc(n2)+1
@@ -218,6 +200,7 @@ c
          npts(n1)=npts(n1)+1
          if(n1.gt.nmax) nmax=n1
          if(n1.le.0.or.n1.gt.nun) then
+CVEH NEEDS TO BE REPLACED BY A FLAG
             write(6,'(/''  ERROR IN TESTB -- IU('',i5,'')='',i5)') i,n1
             stop
          endif

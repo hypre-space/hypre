@@ -26,7 +26,7 @@ setup_(&AMGDataNumLevels(amg_data),\
        &AMGDataEWT(amg_data),\
        &AMGDataNWT(amg_data),\
        AMGDataICDep(amg_data),\
-       &AMGDataIOutMat(amg_data),\
+       &AMGDataIOutDat(amg_data),\
        &AMGDataNumUnknowns(amg_data),\
        AMGDataIMin(amg_data),\
        AMGDataIMax(amg_data),\
@@ -64,14 +64,15 @@ void setup_(int *, int *, double *, int *, double *, int *,
 
 /* solve */
 #define CALL_SOLVE(u, f, tol, amg_data) \
-solve_(&AMGDataNumLevels(amg_data),\
+solve_(&tol,\
+       &AMGDataNumLevels(amg_data),\
        &AMGDataNCyc(amg_data),\
        AMGDataMU(amg_data),\
        AMGDataNTRLX(amg_data),\
        AMGDataIPRLX(amg_data),\
        AMGDataIERLX(amg_data),\
        AMGDataIURLX(amg_data),\
-       &AMGDataIOutRes(amg_data),\
+       &AMGDataIOutDat(amg_data),\
        &AMGDataNumUnknowns(amg_data),\
        AMGDataIMin(amg_data),\
        AMGDataIMax(amg_data),\
@@ -108,7 +109,7 @@ solve_(&AMGDataNumLevels(amg_data),\
        AMGDataLogFileName(amg_data),\
        strlen(AMGDataLogFileName(amg_data)));
 
-void solve_(int *, int *, int *, int *, int *, int *, int *,
+void solve_(double *, int *, int *, int *, int *, int *, int *, int *,
 	    int *, int *, int *, int *,
 	    double *, double *, double *,
 	    double *, int *, int *,

@@ -3,7 +3,8 @@ c=====================================================================
 c     main solver routine
 c=====================================================================
 
-      subroutine solve(levels,ncyc,mu,ntrlx,iprlx,ierlx,iurlx,iprtc,
+      subroutine solve(stoptol,levels,ncyc,mu,ntrlx,iprlx,
+     *     ierlx,iurlx,ioutdat,
      *     nun,imin,imax,u,f,vtmp,a,ia,ja,iu,icg,b,ib,jb,
      *     ipmn,ipmx,iv,ip,xp,yp,
      *     ndimu,ndimp,ndima,ndimb,
@@ -73,11 +74,12 @@ c---------------------------------------------------------------------
 c     open the log file and write some initial info
 c---------------------------------------------------------------------
 
-      open(6,file=lfname,access='append')
-
-      write(6,9000)
- 9000 format(/'AMG SOLUTION INFO:'/)
-
+      if (ioutdat .ne. 0) then
+         open(6,file=lfname,access='append')
+         write(6,9000)
+ 9000 format(//'AMG SOLUTION INFO:'/)
+      endif
+c
 c---------------------------------------------------------------------
 
 c===  > decode ncyc
@@ -93,17 +95,16 @@ c===  > decode ncyc
 
 c===  > find initial residual
 
-      if(iprtc.ge.0) then
-         call rsdl(1,enrg,res,resv,vtmp,
+      call rsdl(1,enrg,res,resv,vtmp,
      *        imin,imax,u,f,a,ia,ja,iu)
          resi = res
+      if((ioutdat .eq.1) .or. (ioutdat .eq. 3)) then
          write(6,1000)
          write(6,1100) res,enrg
       endif
 
-c     veh ------------------------------------------------------------
-c     veh  test: compute 2-norm of rhs for relative residual
-c     veh
+c===  > veh: compute 2-norm of rhs for relative residual
+
       nv = numv(1)
       fnorm = 0.0
       do 11, i=1,nv
@@ -111,9 +112,6 @@ c     veh
  11   continue
       fnorm = sqrt(fnorm)
       relres = res/fnorm
-c     veh
-c     veh  end test: compute 2-norm of rhs for relative residual
-c     veh ------------------------------------------------------------
 
 c===  > cycling
 
@@ -123,16 +121,12 @@ c===  > cycling
          icycmp=0
 
          call cycle(levels,mu,ifcycl,ivstar,
-     *        ntrlx,iprlx,ierlx,iurlx,iprtc,icycmp,
+     *        ntrlx,iprlx,ierlx,iurlx,icycmp,
      *        nun,imin,imax,u,f,vtmp,a,ia,ja,iu,icg,
      *        b,ib,jb,ipmn,ipmx,iv,ip,xp,yp,
      *        ndimu,ndimp,ndima,ndimb,
      *        leva, levb, levv, levp, levi,
      *        numa, numb, numv, nump)
-
-         if(iprtc.ge.0) then
-
-c     veh relative residual temporarily added: relres,
 
             engold = enrg
             resold=res
@@ -141,28 +135,34 @@ c     veh relative residual temporarily added: relres,
             factor=res/resold
             relres = res/fnorm
             delteng=enrg-engold
-            write(6,1200) ncy,res,enrg,factor,relres
-         endif
+            if((ioutdat .eq.1) .or. (ioutdat .eq. 3)) then
+               write(6,1200) ncy,res,enrg,factor,relres
+            endif
+            if (relres .lt. stoptol) go to 101
+         
 
  100  continue
 
-      afactor=(res/resi)**(1.e0/float(ncycle))
-      write(6,1300) afactor
-      call ctime(tnew)
-      ttot=ttot+tnew-told
-      tcyc=float(ttot)/float(ncycle)
-      write(6,2000) tcyc,ttot
-      ntotv=0
-      ntota=0
-      do 500 k=1,levels
-         ntotv=ntotv+numv(k)
-         ntota=ntota+numa(k)
- 500  continue
-      cmpgr=float(ntotv)/numv(1)
-      cmpop=float(ntota)/numa(1)
-      cmpcy=float(icycmp)/numa(1)
-      write(6,3000) cmpgr,cmpop,cmpcy
+ 101  if (ncy .gt. ncycle) ncy = ncycle
 
+      afactor=(res/resi)**(1.e0/float(ncy))
+      if (ioutdat .ne. 0) then
+         write(6,1300) afactor
+         call ctime(tnew)
+         ttot=ttot+tnew-told
+         tcyc=float(ttot)/float(ncy)
+         write(6,2000) tcyc,ttot
+         ntotv=0
+         ntota=0
+         do 500 k=1,levels
+            ntotv=ntotv+numv(k)
+            ntota=ntota+numa(k)
+ 500     continue
+         cmpgr=float(ntotv)/numv(1)
+         cmpop=float(ntota)/numa(1)
+         cmpcy=float(icycmp)/numa(1)
+         write(6,3000) cmpgr,cmpop,cmpcy
+      endif
       close(6)
 
       return
@@ -213,7 +213,7 @@ c     nc(k) is set to max0(nc(k),mu(k-1))
 c=====================================================================
 
       subroutine cycle(levels,mu,ifcycl,ivstar,
-     *     ntrlx,iprlx,ierlx,iurlx,iprtc,icomp,
+     *     ntrlx,iprlx,ierlx,iurlx,icomp,
      *     nun,imin,imax,u,f,vtmp,a,ia,ja,iu,icg,
      *     b,ib,jb,ipmn,ipmx,iv,ip,xp,yp,
      *     ndimu,ndimp,ndima,ndimb,
@@ -267,8 +267,8 @@ c     =>   solution parameters (u/d/f/c)
 
 c     storage for convergence/output data
 
-      dimension resv(20),enrgf(20)
-      dimension ll(45),nc(25),ity(10),ipt(10),ieq(10),iun(10)
+      dimension enrgf(20)
+      dimension nc(25),ity(10),ipt(10),ieq(10),iun(10)
 
       dimension iarr(10)
 
@@ -312,7 +312,7 @@ c     initialize output quantities
 
       nun1=min0(nun,4)
       lltop=0
-      if(iprtc.gt.0) write(6,3999)
+
 
 c     set initial cycling parameters
 
@@ -357,24 +357,6 @@ c===  > decode and test additional relaxation parameters
       call idec(ipts,9,ndig,ipt)
       if(ndig.lt.ii) stop 'ipts'
 
-c     compute & print residuals
-
-      if(iprtc.ge.k) then
-
-         if(lltop.ne.0) then
-            write(6,5000) (ll(kk),kk=1,lltop)
-            lltop=0
-         endif
-
-         call rsdl(1,enrg,res,resv,vtmp,
-     *        imin(k),imax(k),
-     *        u(levv(k)),f(levv(k)),
-     *        a(leva(k)),ia(levi(k)),ja(leva(k)),iu(levv(k)))
-         enrgt=enrg+enrgf(k)
-         write(6,6001) k,res,enrgt,(resv(i),i=1,nun)
-
-      endif
-
 c===  > relaxation
 
       do 130 n=1,nrelax
@@ -391,31 +373,9 @@ c     perform partial sweeps
      *           icg(levv(k)),
      *           ipmn(k),ipmx(k),
      *           iv(levp(k)))
-
-c     compute & print residuals
-
-            if(iprtc.ge.k) then
-               call rsdl(1,enrg,res,resv,vtmp,
-     *              imin(k),imax(k),
-     *              u(levv(k)),f(levv(k)),
-     *              a(leva(k)),ia(levi(k)),ja(leva(k)),iu(levv(k)))
-               enrgt=enrg+enrgf(k)
-               write(6,6000) k,ity(i),ipt(i),ieq(i),iun(i),res,enrgt,
-     *              (resv(iii),iii=1,nun)
-            endif
-
  120     continue
 
  130  continue
-
-      if(iprtc.gt.0.and.iprtc.lt.k) then
-         lltop=lltop+1
-         ll(lltop)=k
-         if(lltop.ge.25) then
-            write(6,5000) (ll(kk),kk=1,25)
-            lltop=0
-         endif
-      endif
 
  140  nc(k)=nc(k)-1
       if(nc(k).ge.0.and.k.ne.m) go to 300
@@ -484,11 +444,6 @@ c     set cycling parameters
       go to 100
 
  400  continue
-
- 3999 format(/'    k  tpeu  residual    energy  res 1,2,...')
- 5000 format(26(1x,i2))
- 6000 format(3x,i2,2x,4i1,1p,6(1x,e9.2):/31x,4(1x,e9.2))
- 6001 format(3x,i2,6x,1p,6(1x,e9.2):/31x,4(1x,e9.2))
 
       return
       end

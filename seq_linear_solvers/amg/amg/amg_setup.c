@@ -74,6 +74,8 @@ void    *data;
    int      decr;
 
    double  *vtmp;
+
+   char     fnam[255];
    
    
    /*----------------------------------------------------------
@@ -409,27 +411,25 @@ void    *data;
    AMGDataAArray(amg_data) = A_array;
    AMGDataPArray(amg_data) = P_array;   
    
-#if 0
-{
-   char     fnam[255];
 
-   for (j = 1; j < num_levels; j++)
+   if (AMGDataIOutDat(amg_data) == -1)
    {
-      sprintf(fnam,"level_%d.ysmp",j);
-      WriteYSMP(fnam, A_array[j]);
+      for (j = 1; j < num_levels; j++)
+      {
+         sprintf(fnam,"A_%d.ysmp",j);
+         WriteYSMP(fnam, A_array[j]);
+      }
+    }
+
+
+   if (AMGDataIOutDat(amg_data) == -2)
+   {
+      for (j=0; j < num_levels-1; j++)
+      {
+         sprintf(fnam,"P_%d.ysmp",j);
+         WriteYSMP(fnam, P_array[j]);
+      }
    }
-}
-#endif
-
-#if 1
-{
-   char     fnam[255];
-
-   sprintf(fnam,"P_0.ysmp",j);
-   WriteYSMP(fnam, P_array[0]);
-}
-#endif
-
 }
 
 
