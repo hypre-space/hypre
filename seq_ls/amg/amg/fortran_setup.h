@@ -63,5 +63,3 @@ void hypre_NAME_FORTRAN_FOR_C(setup)(int *, int *, int *,
 /* idec */
 void hypre_NAME_FORTRAN_FOR_C(idec)(int *, int *, int *, int *);
 
-#endif
-
