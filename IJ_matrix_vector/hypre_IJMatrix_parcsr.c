@@ -882,6 +882,8 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
 
    hypre_AuxParCSRMatrixDestroy(aux_matrix);
 
+   hypre_IJMatrixTranslator(matrix) = NULL;
+
    return ierr;
 }
 
