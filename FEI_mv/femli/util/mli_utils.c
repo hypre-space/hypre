@@ -37,6 +37,7 @@ extern
 #endif
 int hypre_BoomerAMGBuildCoarseOperator(hypre_ParCSRMatrix*,hypre_ParCSRMatrix*,
                                     hypre_ParCSRMatrix *,hypre_ParCSRMatrix **);
+void qsort0(int *, int, int);
 void qsort1(int *, double *, int, int);
 int  MLI_Utils_IntTreeUpdate(int treeLeng, int *tree,int *treeInd);
 
