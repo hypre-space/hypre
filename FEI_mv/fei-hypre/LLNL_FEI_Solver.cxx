@@ -226,7 +226,7 @@ int LLNL_FEI_Solver::solve(int *status)
  -------------------------------------------------------------------------*/
 int LLNL_FEI_Solver::solveUsingCG()
 {
-   int    irow, iterations, converged=0, localNRows, extNRows, totalNRows;
+   int    irow, iter, converged=0, localNRows, extNRows, totalNRows;
    int    numTrials, innerIteration;
    double alpha, beta, rho=0.0, rhom1, rnorm0, rnorm, sigma, eps1;
    double *rVec, *pVec, *apVec, *zVec, dArray[2], dArray2[2], *diagonal;
@@ -271,7 +271,7 @@ int LLNL_FEI_Solver::solveUsingCG()
     * initialization
     * -----------------------------------------------------------------*/
 
-   iterations = 0;
+   iter       = 0;
    numTrials  = 0;
    pVec       = new double[totalNRows];
    apVec      = new double[totalNRows];
@@ -288,9 +288,9 @@ int LLNL_FEI_Solver::solveUsingCG()
    while ( converged == 0 && numTrials < 1 ) 
    {
       innerIteration = 0;
-      while ( rnorm >= eps1 && iterations < krylovMaxIterations_ ) 
+      while ( rnorm >= eps1 && iter < krylovMaxIterations_ ) 
       {
-         iterations++;
+         iter++;
          innerIteration++;
          if ( innerIteration == 1 )
          {
@@ -345,9 +345,9 @@ int LLNL_FEI_Solver::solveUsingCG()
          MPI_Allreduce(dArray, dArray2, 2, MPI_DOUBLE, MPI_SUM, mpiComm_);
          rho = dArray2[1]; 
          rnorm = sqrt( dArray2[0] );
-         if ( outputLevel_ >= 2 && iterations % 1 == 0 && mypid_ == 0 )
+         if ( outputLevel_ >= 2 && iter % 1 == 0 && mypid_ == 0 )
             printf("\tLLNL_FEI_Solver_CG : iteration %d - rnorm = %e (%e)\n",
-                   iterations, rnorm, eps1);
+                   iter, rnorm, eps1);
       }
       matPtr_->matvec( solnVector_, rVec ); 
       for ( irow = 0; irow < localNRows; irow++ ) 
@@ -361,11 +361,11 @@ int LLNL_FEI_Solver::solveUsingCG()
       if ( outputLevel_ >= 2 && mypid_ == 0 )
          printf("\tLLNL_FEI_Solver_CG actual rnorm = %e \n",rnorm);
       if ( (rnorm < eps1 || rnorm < 1.0e-16) || 
-            iterations >= krylovMaxIterations_ ) converged = 1;
+            iter >= krylovMaxIterations_ ) converged = 1;
       numTrials++;
    }
 
-   krylovIterations_   = iterations;
+   krylovIterations_   = iter;
    krylovResidualNorm_ = rnorm;
 
    /* -----------------------------------------------------------------
@@ -384,7 +384,7 @@ int LLNL_FEI_Solver::solveUsingCG()
  -------------------------------------------------------------------------*/
 int LLNL_FEI_Solver::solveUsingGMRES()
 {
-   int    irow, iterations, converged=0, localNRows, extNRows, totalNRows;
+   int    irow, iter, converged=0, localNRows, extNRows, totalNRows;
    int    innerIterations, iV, iV2, kStep, kp1, jV;
    double rnorm0, rnorm, eps1, epsmac=1.0e-16, gam;
    double **kVectors, **HH, *RS, *C, *S, *dArray, *dArray2;
@@ -450,9 +450,9 @@ int LLNL_FEI_Solver::solveUsingGMRES()
     * loop until convergence is achieved
     * -----------------------------------------------------------------*/
 
-   iterations = 0;
+   iter = 0;
 
-   while ( rnorm >= eps1 && iterations < krylovMaxIterations_ ) 
+   while ( rnorm >= eps1 && iter < krylovMaxIterations_ ) 
    {
       dtemp = 1.0 / rnorm;
       tVector = kVectors[1];
@@ -461,10 +461,10 @@ int LLNL_FEI_Solver::solveUsingGMRES()
       innerIterations = 0;
 
       while ( innerIterations < gmresDim_ && rnorm >= eps1 && 
-              iterations < krylovMaxIterations_ ) 
+              iter < krylovMaxIterations_ ) 
       {
          innerIterations++;
-         iterations++;
+         iter++;
          kStep = innerIterations;
          kp1   = innerIterations + 1;
          v1   = kVectors[kStep];
@@ -544,7 +544,7 @@ int LLNL_FEI_Solver::solveUsingGMRES()
          rnorm = fabs(RS[kp1]);
          if ( outputLevel_ >= 2 && mypid_ == 0 )
             printf("\tLLNL_FEI_Solver_GMRES : iteration %d - rnorm = %e\n",
-                   iterations, rnorm);
+                   iter, rnorm);
       }
       RS[kStep] = RS[kStep] / HH[kStep][kStep];
       for ( iV = 2; iV <= kStep; iV++ ) 
@@ -586,7 +586,7 @@ int LLNL_FEI_Solver::solveUsingGMRES()
    if ( outputLevel_ >= 2 && mypid_ == 0 )
       printf("\tLLNL_FEI_Solver_GMRES : final rnorm = %e\n", rnorm);
 
-   krylovIterations_   = iterations;
+   krylovIterations_   = iter;
    krylovResidualNorm_ = rnorm;
 
    /* -----------------------------------------------------------------
@@ -610,7 +610,7 @@ int LLNL_FEI_Solver::solveUsingGMRES()
  -------------------------------------------------------------------------*/
 int LLNL_FEI_Solver::solveUsingCGS()
 {
-   int    irow, iterations, converged=0, localNRows, extNRows, totalNRows;
+   int    irow, iter, converged=0, localNRows, extNRows, totalNRows;
    int    numTrials, innerIteration;
    double *rVec, *rhVec, *vVec, *pVec, *qVec, *uVec, *tVec;
    double rho1, rho2, sigma, alpha, dtemp, dtemp2, rnorm, rnorm0;
@@ -666,7 +666,7 @@ int LLNL_FEI_Solver::solveUsingCGS()
    for (irow = 0; irow < totalNRows; irow++) pVec[irow] = qVec[irow] = 0.0;
    rho2 = rnorm * rnorm;
    beta = rho2;
-   iterations = 0;
+   iter = 0;
    numTrials  = 0;
    if ( krylovAbsRel_ == 0 ) eps1 = krylovTolerance_ * rnorm0;
    else                      eps1 = krylovTolerance_;
@@ -679,9 +679,9 @@ int LLNL_FEI_Solver::solveUsingCGS()
    while ( converged == 0 && numTrials < 1 ) 
    {
       innerIteration = 0;
-      while ( rnorm >= eps1 && iterations < krylovMaxIterations_ ) 
+      while ( rnorm >= eps1 && iter < krylovMaxIterations_ ) 
       {
-         iterations++;
+         iter++;
          innerIteration++;
          rho1 = rho2;
          beta2 = beta * beta;
@@ -745,9 +745,9 @@ int LLNL_FEI_Solver::solveUsingCGS()
          rho2 = dArray2[0];
          beta = rho2 / rho1;
          rnorm = sqrt(dArray2[1]);
-         if ( outputLevel_ >= 2 && iterations % 1 == 0 && mypid_ == 0 )
+         if ( outputLevel_ >= 2 && iter % 1 == 0 && mypid_ == 0 )
             printf("\tLLNL_FEI_Solver_CGS : iteration %d - rnorm = %e (%e)\n",
-                   iterations, rnorm, eps1);
+                   iter, rnorm, eps1);
       }
       matPtr_->matvec( solnVector_, rVec ); 
       for ( irow = 0; irow < localNRows; irow++ ) 
@@ -759,12 +759,12 @@ int LLNL_FEI_Solver::solveUsingCGS()
       rnorm = sqrt( dArray[0] );
       if ( outputLevel_ >= 2 && mypid_ == 0 )
          printf("\tLLNL_FEI_Solver_CGS actual rnorm = %e \n",rnorm);
-      if ( rnorm < eps1 || iterations >= krylovMaxIterations_ ) break;
+      if ( rnorm < eps1 || iter >= krylovMaxIterations_ ) break;
       numTrials++;
    }
    if ( rnorm < eps1 ) converged = 1;
 
-   krylovIterations_   = iterations;
+   krylovIterations_   = iter;
    krylovResidualNorm_ = rnorm;
 
    /* -----------------------------------------------------------------
@@ -785,7 +785,7 @@ int LLNL_FEI_Solver::solveUsingCGS()
  -------------------------------------------------------------------------*/
 int LLNL_FEI_Solver::solveUsingBicgstab()
 {
-   int    irow, iterations, converged=0, localNRows, extNRows, totalNRows;
+   int    irow, iter, converged=0, localNRows, extNRows, totalNRows;
    int    iM, jM, numTrials, innerIteration, blen=2;
    double *rVec, *rhVec, *xhVec, *tVec, **utVec, **rtVec, *ut2, *rt2;
    double rho, rho1, alpha, dtemp, dtemp2, rnorm, rnorm0, *ut1, *rt1;
@@ -858,7 +858,7 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
       utVec[iM] = new double[totalNRows];
       rtVec[iM] = new double[totalNRows];
    }
-   iterations = 0;
+   iter = 0;
    numTrials  = 0;
 
    /* -----------------------------------------------------------------
@@ -876,9 +876,9 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
       }
       omega = rho = 1.0;
       alpha = 0.0;
-      while ( rnorm >= eps1 && iterations < krylovMaxIterations_ ) 
+      while ( rnorm >= eps1 && iter < krylovMaxIterations_ ) 
       {
-         iterations += blen;
+         iter += blen;
          innerIteration += blen;
          ut1 = utVec[0];
          ut2 = utVec[1];
@@ -1020,9 +1020,9 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
             dtemp += (rtVec[1][irow] * rtVec[1][irow]);
          MPI_Allreduce(&dtemp, &rnorm, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
          rnorm = sqrt( rnorm );
-         if ( outputLevel_ >= 2 && iterations % 1 == 0 && mypid_ == 0 )
+         if ( outputLevel_ >= 2 && iter % 1 == 0 && mypid_ == 0 )
             printf("\tLLNL_FEI_Solver_Bicgstab : iteration %d - rnorm = %e (%e)\n",
-                   iterations, rnorm, eps1);
+                   iter, rnorm, eps1);
       }
       if ( diagonal != NULL )
       {
@@ -1039,12 +1039,12 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
       rnorm = sqrt( dArray[0] );
       if ( outputLevel_ >= 2 && mypid_ == 0 )
          printf("\tLLNL_FEI_Solver_Bicgstab actual rnorm = %e \n",rnorm);
-      if ( rnorm < eps1 || iterations >= krylovMaxIterations_ ) break;
+      if ( rnorm < eps1 || iter >= krylovMaxIterations_ ) break;
       numTrials++;
    }
    if ( rnorm < eps1 ) converged = 1;
 
-   krylovIterations_   = iterations;
+   krylovIterations_   = iter;
    krylovResidualNorm_ = rnorm;
 
    /* -----------------------------------------------------------------
