@@ -843,7 +843,7 @@ hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A, int data,
    double *offd_data = hypre_CSRMatrixData(offd);
 
    int num_cols_A, num_nonzeros;
-   int num_rows_A_ext, i1;
+   int num_rows_A_ext;
 
    hypre_CSRMatrix *A_ext;
 
