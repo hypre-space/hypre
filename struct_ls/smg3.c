@@ -12,21 +12,22 @@
  *****************************************************************************/
 
 #include "headers.h"
+#include "smg3.h"
 
 /*--------------------------------------------------------------------------
  * zzz_SMG3Initialize
  *--------------------------------------------------------------------------*/
 
-zzz_SMG3Struct *
+zzz_SMG3Data *
 zzz_SMG3Initialize( MPI_Comm *context )
 {
-   zzz_SMG3Struct *smg3_struct;
+   zzz_SMG3Data *smg3_data;
 
-   smg3_struct = ctalloc(zzz_SMG3Struct, 1);
+   smg3_data = ctalloc(zzz_SMG3Data, 1);
 
    /* set default parameters ... */
 
-   return smg3_struct;
+   return smg3_data;
 }
 
 /*--------------------------------------------------------------------------
@@ -42,7 +43,7 @@ zzz_SMG3Initialize( MPI_Comm *context )
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMG3Finalize( zzz_SMG3Struct *smg3_struct )
+zzz_SMG3Finalize( zzz_SMG3Data *smg3_data )
 {
    int  ierr;
 
