@@ -1,12 +1,6 @@
-#BHEADER***********************************************************************
-# (c) 1998   The Regents of the University of California
-#
-# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
-# notice, contact person, and disclaimer.
-#
-# $Revision$
-#EHEADER***********************************************************************
+## Process this file with automake to create Makefile.in
 
+# hopefully these will be auto-generated with >automake-1.8.0
 abs_top_srcdir = @abs_top_srcdir@
 abs_srcdir = @abs_srcdir@
 
