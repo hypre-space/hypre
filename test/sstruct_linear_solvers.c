@@ -76,6 +76,8 @@ typedef struct
    int                   *matrix_entries;
    double                *matrix_values;
 
+   Index                  periodic;
+
 } ProblemPartData;
  
 typedef struct
@@ -311,6 +313,13 @@ ReadData( char         *filename,
             /* TODO */
             printf("GridSetNeighborBox not yet implemented!\n");
             exit(1);
+         }
+         else if ( strcmp(key, "GridSetPeriodic:") == 0 )
+         {
+            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata = data.pdata[part];
+            SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim, pdata.periodic);
+            data.pdata[part] = pdata;
          }
          else if ( strcmp(key, "StencilCreate:") == 0 )
          {
@@ -1315,6 +1324,8 @@ main( int   argc,
 
       /* GridAddVariabes */
       /* GridSetNeighborBox */
+
+      HYPRE_SStructGridSetPeriodic(grid, part, pdata.periodic);
    }
    HYPRE_SStructGridAssemble(grid);
 

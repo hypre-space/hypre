@@ -26,6 +26,8 @@ GridSetVariables: 1 2 [0 1]
 #                     nbor_part nbor_ilower(ndim) nbor_iupper(ndim) \
 #                     index_map[ndim]
 
+# GridSetPeriodic: part periodic[ndim]
+
 ###########################################################
 
 # StencilCreate: nstencils sizes[nstencils]
