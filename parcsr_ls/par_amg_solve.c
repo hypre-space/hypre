@@ -218,7 +218,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       }
    }
 
-   if (cycle_count == max_iter) Solve_err_flag = 1;
+   if (cycle_count == max_iter && tol > 0.) Solve_err_flag = 1;
 
    /*-----------------------------------------------------------------------
     *    Compute closing statistics
@@ -255,7 +255,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
          printf("      within the allowed %d V-cycles\n",max_iter);
          printf("==============================================");
       }
-      printf("\n\n Average Convergence Factor = %f",conv_factor);
+      if (tol > 0.)
+        printf("\n\n Average Convergence Factor = %f",conv_factor);
       printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
       printf("                operator = %f\n",operat_cmplxty);
       printf("                   cycle = %f\n\n\n\n",cycle_cmplxty);
