@@ -24993,7 +24993,16 @@ LIBS="$acx_blas_save_LIBS"
 if test x"$acx_blas_ok" = xyes; then
         casc_user_chose_blas=yes;BLASLIBFLAGS=$BLAS_LIBS
         :
+elif test x"$acx_blas_ok" = xdisable; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HYPRE_USING_HYPRE_BLAS 0
+_ACEOF
+
 else
+    if test x"$acx_blas_ok" = xdisabled; then
+        :
+    else
         acx_blas_ok=no
 
 cat >>confdefs.h <<\_ACEOF
@@ -25001,6 +25010,7 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
         casc_user_chose_blas=no;BLASLIBFLAGS="-lHYPRE_blas"
+    fi
 fi
 
 
@@ -25332,8 +25342,115 @@ done
 # Finally, execute ACTION-IF-FOUND/ACTION-IF-NOT-FOUND:
 if test x"$acx_lapack_ok" = xyes; then
         casc_user_chose_lapack=yes;LAPACKLIBFLAGS=$LAPACK_LIBS
-        :
+   ac_ext=f
+ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
+ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_f77_compiler_gnu
+case $ac_cv_f77_mangling in
+  upper*) ac_val="LSAME" ;;
+  lower*) ac_val="lsame" ;;
+  *)      ac_val="unknown" ;;
+esac
+case $ac_cv_f77_mangling in *," underscore"*) ac_val="$ac_val"_ ;; esac
+
+lsame="$ac_val"
+
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+   acx_lsame_ok=no
+   save_LIBS="$LIBS"; LIBS="$LAPACK_LIBS $BLAS_LIBS $LIBS $FLIBS"
+   echo "$as_me:$LINENO: checking for $lsame in Blas and Lapack libraries" >&5
+echo $ECHO_N "checking for $lsame in Blas and Lapack libraries... $ECHO_C" >&6
+   cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char $dsygv ();
+#ifdef F77_DUMMY_MAIN
+
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+
+#endif
+int
+main ()
+{
+$dsygv ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  acx_lsame_ok=yes
 else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+LAPACK_LIBS=""
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+   echo "$as_me:$LINENO: result: $acx_lsame_ok" >&5
+echo "${ECHO_T}$acx_lsame_ok" >&6
+   LIBS="$save_LIBS"
+
+   if test acx_lsame_ok = no; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HYPRE_USING_BLAS_WRAPPERS 1
+_ACEOF
+
+   fi
+else
+   if test x"$acx_lapack_ok" = xdisable; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HYPRE_USING_HYPRE_LAPACK 0
+_ACEOF
+
+   elif test x"$acx_lapack_ok" = xnoblas; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HYPRE_USING_HYPRE_LAPACK 0
+_ACEOF
+
+   else
         acx_lapack_ok=no
 
 cat >>confdefs.h <<\_ACEOF
@@ -25341,9 +25458,8 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
         casc_user_chose_lapack=no;LAPACKLIBFLAGS="-lHYPRE_lapack"
+   fi
 fi
-
-
 
 if test "$acx_lapack_ok" != disable && test "$casc_user_chose_lapack" = no; then
   LAPACKNEEDED_TRUE=
