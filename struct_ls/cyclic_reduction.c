@@ -548,8 +548,19 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
          hypre_ProjectBoxArray(hypre_StructGridBoxes(grid_l[l]),
                                cindex, stride);
    }
-   coarsest_boxes = hypre_DuplicateBoxArray(hypre_StructGridBoxes(grid_l[l]));
-   fine_points_l[l] = hypre_ConvertToSBoxArray(coarsest_boxes);
+  
+   if (num_levels == 1)
+   {
+      fine_points_l[l]   =
+         hypre_ProjectBoxArray(hypre_StructGridBoxes(grid_l[l]),
+                               base_index, base_stride);
+   }
+   else
+   {
+      coarsest_boxes = 
+         hypre_DuplicateBoxArray(hypre_StructGridBoxes(grid_l[l]));
+      fine_points_l[l] = hypre_ConvertToSBoxArray(coarsest_boxes);
+   }
 
    (cyc_red_data -> fine_points_l)   = fine_points_l;
    (cyc_red_data -> coarse_points_l) = coarse_points_l;
@@ -683,7 +694,13 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       (cyc_red_data -> solve_flops) +=
          10*hypre_StructVectorGlobalSize(x_l[l])/2;
    }
-   (cyc_red_data -> solve_flops) += hypre_StructVectorGlobalSize(x_l[l])/2;
+
+   if (num_levels > 1)
+   {
+      (cyc_red_data -> solve_flops) +=  
+          hypre_StructVectorGlobalSize(x_l[l])/2;
+   }
+   
 
    /*-----------------------------------------------------
     * Finalize some things
