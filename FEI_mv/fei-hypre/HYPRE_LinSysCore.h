@@ -13,7 +13,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R5"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R6"
 
 // *************************************************************************
 // system libraries used
@@ -37,8 +37,8 @@ class Lookup
 // local enumerations and defines
 // -------------------------------------------------------------------------
 
-enum HYsolverID {HYPCG,HYGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,HYBICGS,HYAMG,
-                 HYSUPERLU,HYSUPERLUX,HYY12M,HYAMGE};
+enum HYsolverID {HYPCG,HYGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,HYBICGS,HYSYMQMR,
+                 HYAMG, HYSUPERLU,HYSUPERLUX,HYY12M,HYAMGE};
 enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
                  HYDDILUT, HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID,HYBLOCK};
 
@@ -418,6 +418,7 @@ class HYPRE_LinSysCore
    void  setupBiCGSTABLPrecon();
    void  setupTFQmrPrecon();
    void  setupBiCGSPrecon();
+   void  setupSymQMRPrecon();
    void  solveUsingBoomeramg(int&);
    void  solveUsingSuperLU(int&);
    void  solveUsingSuperLUX(int&);

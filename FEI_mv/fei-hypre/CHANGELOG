@@ -72,4 +72,6 @@
             - get rid of the HYPRE_LSI_Sort function
             - add identity preconditioner
             - add incompressible flow block preconditioners
+09/21/01    2.0.1R6
+            - add Symmetric QMR
  

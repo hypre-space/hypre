@@ -30,6 +30,7 @@
 #include "HYPRE_parcsr_bicgstabl.h"
 #include "HYPRE_parcsr_TFQmr.h"
 #include "HYPRE_parcsr_bicgs.h"
+#include "HYPRE_parcsr_symqmr.h"
 #include "HYPRE_LinSysCore.h"
 #include "fegridinfo.h"
 
@@ -2704,6 +2705,218 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
                HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
                HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
                                            HYPRE_ParCSRMLSetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+#endif
+    }
+    return;
+}
+
+//***************************************************************************
+// set up preconditioners for Symmetric QMR
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::setupSymQMRPrecon()
+{
+    int    i, *num_sweeps, *relax_type;
+    double *relax_wt;
+
+    switch ( HYPreconID_ )
+    {
+       case HYIDENTITY :
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+               printf("No preconditioning \n");
+            HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_LSI_SolveIdentity,
+                                         HYPRE_DummyFunction, HYPrecon_);
+            break;
+
+       case HYDIAGONAL :
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+               printf("Diagonal preconditioning \n");
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+            {
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_ParCSRDiagScale,
+                                            HYPRE_DummyFunction, HYPrecon_);
+            }
+            else
+            {
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_ParCSRDiagScale,
+                                            HYPRE_ParCSRDiagScaleSetup,HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+
+       case HYPILUT :
+            printf("ERROR : PILUT does not match SymQMR in general.\n");
+            exit(1);
+            break;
+
+       case HYDDILUT :
+            printf("ERROR : DDILUT does not match SymQMR in general.\n");
+            exit(1);
+            break;
+
+       case HYDDICT :
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+            {
+               printf("DDICT - fillin   = %e\n", ddictFillin_);
+               printf("DDICT - drop tol = %e\n", ddictDropTol_);
+            }
+            if ( HYOutputLevel_ & HYFEI_DDILUT )
+            {
+               HYPRE_LSI_DDICTSetOutputLevel(HYPrecon_,2);
+            }
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+            {
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_LSI_DDICTSolve,
+                                            HYPRE_DummyFunction, HYPrecon_);
+            }
+            else
+            {
+               HYPRE_LSI_DDICTSetFillin(HYPrecon_,ddictFillin_);
+               HYPRE_LSI_DDICTSetDropTolerance(HYPrecon_,ddictDropTol_);
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_LSI_DDICTSolve,
+                                            HYPRE_LSI_DDICTSetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+
+       case HYSCHWARZ :
+            printf("ERROR : Schwarz does not match SymQMR in general.\n");
+            exit(1);
+            break;
+
+       case HYPOLY :
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+            {
+               printf("Polynomial preconditioning - order = %d\n",polyOrder_);
+            }
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+            {
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_LSI_PolySolve,
+                                            HYPRE_DummyFunction, HYPrecon_);
+            }
+            else
+            {
+               HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_LSI_PolySolve,
+                                            HYPRE_LSI_PolySetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+
+       case HYPARASAILS :
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+            {
+               printf("ParaSails - nlevels   = %d\n",parasailsNlevels_);
+               printf("ParaSails - threshold = %e\n",parasailsThreshold_);
+               printf("ParaSails - filter    = %e\n",parasailsFilter_);
+               printf("ParaSails - sym       = 1\n");
+               printf("ParaSails - loadbal   = %e\n",parasailsLoadbal_);
+            }
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+            {
+               HYPRE_ParCSRParaSailsSetLogging(HYPrecon_, 1);
+            }
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+            {
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_ParCSRParaSailsSolve,
+                                            HYPRE_DummyFunction, HYPrecon_);
+            }
+            else
+            {
+               HYPRE_ParCSRParaSailsSetSym(HYPrecon_, 1);
+               HYPRE_ParCSRParaSailsSetParams(HYPrecon_, parasailsThreshold_,
+                                              parasailsNlevels_);
+               HYPRE_ParCSRParaSailsSetFilter(HYPrecon_, parasailsFilter_);
+               HYPRE_ParCSRParaSailsSetLoadbal(HYPrecon_, parasailsLoadbal_);
+               HYPRE_ParCSRParaSailsSetReuse(HYPrecon_, parasailsReuse_);
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_ParCSRParaSailsSolve,
+                                            HYPRE_ParCSRParaSailsSetup,HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+
+       case HYBOOMERAMG :
+            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+            {
+               printf("AMG coarsen type = %d\n", amgCoarsenType_);
+               printf("AMG measure type = %d\n", amgMeasureType_);
+               printf("AMG threshold    = %e\n", amgStrongThreshold_);
+               printf("AMG numsweeps    = %d\n", amgNumSweeps_[0]);
+               printf("AMG relax type   = %d\n", amgRelaxType_[0]);
+               printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
+               printf("AMG system size  = %d\n", amgSystemSize_);
+            }
+            if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
+            {
+               HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
+               HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
+            }
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+            {
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_,HYPRE_BoomerAMGSolve,
+                                            HYPRE_DummyFunction, HYPrecon_);
+            }
+            else
+            {
+               if ( amgSystemSize_ > 1 )
+                  HYPRE_BoomerAMGSetNumFunctions(HYPrecon_, amgSystemSize_);
+               HYPRE_BoomerAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
+               HYPRE_BoomerAMGSetMeasureType(HYPrecon_, amgMeasureType_);
+               HYPRE_BoomerAMGSetStrongThreshold(HYPrecon_, amgStrongThreshold_);
+               num_sweeps = hypre_CTAlloc(int,4);
+               for ( i = 0; i < 4; i++ ) num_sweeps[i] = amgNumSweeps_[i];
+
+               HYPRE_BoomerAMGSetNumGridSweeps(HYPrecon_, num_sweeps);
+               relax_type = hypre_CTAlloc(int,4);
+               for ( i = 0; i < 4; i++ ) relax_type[i] = amgRelaxType_[i];
+
+               HYPRE_BoomerAMGSetGridRelaxType(HYPrecon_, relax_type);
+               relax_wt = hypre_CTAlloc(double,25);
+               for ( i = 0; i < 25; i++ ) relax_wt[i] = amgRelaxWeight_[i];
+               HYPRE_BoomerAMGSetRelaxWeight(HYPrecon_, relax_wt);
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_BoomerAMGSolve,
+                                            HYPRE_BoomerAMGSetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+
+       case HYEUCLID :
+            printf("ERROR : Euclid does not match SymQMR in general.\n");
+            exit(1);
+            break;
+
+#ifdef MLPACK
+       case HYML :
+            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+            {
+               printf("ML strong threshold = %e\n", mlStrongThreshold_);
+               printf("ML numsweeps(pre)   = %d\n", mlNumPreSweeps_);
+               printf("ML numsweeps(post)  = %d\n", mlNumPostSweeps_);
+               printf("ML smoother (pre)   = %d\n", mlPresmootherType_);
+               printf("ML smoother (post)  = %d\n", mlPostsmootherType_);
+               printf("ML relax weight     = %e\n", mlRelaxWeight_);
+            }
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+            {
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_ParCSRMLSolve,
+                                            HYPRE_DummyFunction, HYPrecon_);
+            }
+            else
+            {
+               HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
+               HYPRE_ParCSRMLSetCoarseSolver(HYPrecon_,mlCoarseSolver_);
+               HYPRE_ParCSRMLSetCoarsenScheme(HYPrecon_,mlCoarsenScheme_);
+               HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
+               HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
+               HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
+               HYPRE_ParCSRMLSetPreSmoother(HYPrecon_,mlPresmootherType_);
+               HYPRE_ParCSRMLSetPostSmoother(HYPrecon_,mlPostsmootherType_);
+               HYPRE_ParCSRMLSetDampingFactor(HYPrecon_,mlRelaxWeight_);
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_,HYPRE_ParCSRMLSolve,
+                                            HYPRE_ParCSRMLSetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;

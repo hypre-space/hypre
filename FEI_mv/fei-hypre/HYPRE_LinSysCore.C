@@ -30,6 +30,7 @@
 #include "HYPRE_parcsr_bicgstabl.h"
 #include "HYPRE_parcsr_TFQmr.h"
 #include "HYPRE_parcsr_bicgs.h"
+#include "HYPRE_parcsr_symqmr.h"
 #include "HYPRE_LinSysCore.h"
 #include "fegridinfo.h"
 
@@ -2591,6 +2592,7 @@ void HYPRE_LinSysCore::selectSolver(char* name)
        if ( HYSolverID_ == HYAMG)     HYPRE_BoomerAMGDestroy(HYSolver_);
        if ( HYSolverID_ == HYTFQMR)   HYPRE_ParCSRTFQmrDestroy(HYSolver_);
        if ( HYSolverID_ == HYBICGS)   HYPRE_ParCSRBiCGSDestroy(HYSolver_);
+       if ( HYSolverID_ == HYSYMQMR)  HYPRE_ParCSRSymQMRDestroy(HYSolver_);
     }
 
     //-------------------------------------------------------------------
@@ -2626,6 +2628,11 @@ void HYPRE_LinSysCore::selectSolver(char* name)
     {
        strcpy( HYSolverName_, name );
        HYSolverID_ = HYBICGS;
+    }
+    else if ( !strcmp(name, "symqmr") )
+    {
+       strcpy( HYSolverName_, name );
+       HYSolverID_ = HYSYMQMR;
     }
     else if ( !strcmp(name, "boomeramg") )
     {
@@ -2685,6 +2692,9 @@ void HYPRE_LinSysCore::selectSolver(char* name)
             break;
        case HYBICGS :
             HYPRE_ParCSRBiCGSCreate(comm_, &HYSolver_);
+            break;
+       case HYSYMQMR :
+            HYPRE_ParCSRSymQMRCreate(comm_, &HYSolver_);
             break;
        case HYAMG :
             HYPRE_BoomerAMGCreate( &HYSolver_);
@@ -3416,6 +3426,47 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
             ptime  = LSC_Wtime();
             HYPRE_ParCSRBiCGSSolve(HYSolver_, A_csr, b_csr, x_csr);
             HYPRE_ParCSRBiCGSGetNumIterations(HYSolver_, &num_iterations);
+            HYPRE_ParVectorCopy( b_csr, r_csr );
+            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+            HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+            rnorm = sqrt( rnorm );
+            switch ( projectionScheme_ )
+            {
+               case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
+               case 2 : addToMinResProjectionSpace(currX_,currB_); break;
+            }
+            if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
+            break;
+
+       //----------------------------------------------------------------
+       // choose Symmetric QMR 
+       //----------------------------------------------------------------
+
+       case HYSYMQMR :
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+            {
+               printf("***************************************************\n");
+               printf("* SymQMR solver (for symmetric matrices and precond) \n");
+               printf("* maximum no. of iterations = %d\n", maxIterations_);
+               printf("* convergence tolerance     = %e\n", tolerance_);
+               printf("*--------------------------------------------------\n");
+            }
+            setupSymQMRPrecon();
+            HYPRE_ParCSRSymQMRSetMaxIter(HYSolver_, maxIterations_);
+            HYPRE_ParCSRSymQMRSetTol(HYSolver_, tolerance_);
+            if ( normAbsRel_ == 0 ) HYPRE_ParCSRSymQMRSetStopCrit(HYSolver_,0);
+            else                    HYPRE_ParCSRSymQMRSetStopCrit(HYSolver_,1);
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+            {
+               if ( mypid_ == 0 )
+                 printf("***************************************************\n");
+               HYPRE_ParCSRSymQMRSetLogging(HYSolver_, 1);
+            }
+            HYPRE_ParCSRSymQMRSetup(HYSolver_, A_csr, b_csr, x_csr);
+            MPI_Barrier( comm_ );
+            ptime  = LSC_Wtime();
+            HYPRE_ParCSRSymQMRSolve(HYSolver_, A_csr, b_csr, x_csr);
+            HYPRE_ParCSRSymQMRGetNumIterations(HYSolver_, &num_iterations);
             HYPRE_ParVectorCopy( b_csr, r_csr );
             HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
             HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
