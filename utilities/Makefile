@@ -167,6 +167,7 @@ OBJS = ${FILES:.c=.o}
 all: libHYPRE_utilities.a 
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/utilities.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
 	cp -fp ${BLAS_HEADERS} $(HYPRE_BUILD_DIR)/include
 	cp -fp ${LAPACK_HEADERS} $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
@@ -179,6 +180,7 @@ all: libHYPRE_utilities.a
 install: libHYPRE_utilities.a 
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/utilities.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/fortran*.h $(HYPRE_INC_INSTALL)
 	cp -fp ${BLAS_HEADERS} $(HYPRE_INC_INSTALL)
 	cp -fp ${LAPACK_HEADERS} $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
