@@ -47,7 +47,7 @@ int hypre_InitializeParCSRMatrix P(( hypre_ParCSRMatrix *matrix));
 hypre_ParCSRMatrix *hypre_ReadParCSRMatrix P(( MPI_Comm comm, char *file_name));
 int hypre_PrintParCSRMatrix P(( hypre_ParCSRMatrix *matrix, char *file_name));
 hypre_ParCSRMatrix *hypre_CSRMatrixToParCSRMatrix P((MPI_Comm comm,
-		hypre_CSRMatrix *A, int *row_starts, int * col_starts));
+	hypre_CSRMatrix *A, int **row_starts_ptr, int **col_starts_ptr));
 int GenerateDiagAndOffd P((hypre_CSRMatrix *A, hypre_ParCSRMatrix *matrix,
 	int first_col_diag, int last_col_diag));
 
