@@ -104,6 +104,7 @@ void        *data;
    levi = AMGDataLevI(amg_data);
    num_coeffs = AMGDataNumA(amg_data);
    numv = AMGDataNumV(amg_data);
+   cycle_op_count = AMGDataCycleOpCount(amg_data);
 
    Fcycle_flag = AMGDataFcycleFlag(amg_data);
    Vstar_flag = AMGDataVstarFlag(amg_data);
@@ -219,8 +220,8 @@ void        *data;
              for (k = 0; k < ii; k++) 
              {
 
-               CALL_RELAX(Solve_err_flag, u, f, tol, amg_data); 
-
+               CALL_RELAX(Solve_err_flag, u, f, tol, amg_data);
+ 
                if (Solve_err_flag != 0) return(Solve_err_flag);
 
              }
