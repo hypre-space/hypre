@@ -1568,7 +1568,7 @@ int HYPRE_SlideReduction::buildReducedSolnVector(HYPRE_IJVector x,
    HYPRE_ParVector R_csr;
 
    ierr  = HYPRE_IJVectorCreate(mpiComm_, procNRows[mypid], 
-                                procNRows[mypid+1], &R);
+                                procNRows[mypid+1]-1, &R);
    ierr += HYPRE_IJVectorSetObjectType(R, HYPRE_PARCSR);
    ierr += HYPRE_IJVectorInitialize(R);
    ierr += HYPRE_IJVectorAssemble(R);
