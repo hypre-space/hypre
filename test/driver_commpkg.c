@@ -22,7 +22,8 @@
 #define   mydebug 0
 #define   mpip_on 0
 
-/*time an allgather in addition to the current commpkg */
+/*time an allgather in addition to the current commpkg - 
+  since the allgather happens outside of the communication package.*/
 #define   time_gather 1
 
 /* for timing multiple commpkg setup (if you want the time to be larger in the
@@ -30,8 +31,8 @@
 #define   LOOP2  1
 
 
-int myBuildParLaplacian (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-int myBuildParLaplacian27pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
+int myBuildParLaplacian (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr, int parmprint );
+int myBuildParLaplacian27pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr, int parmprint );
 
 
 void stats_mo(double*, int, double *,double *);
@@ -50,8 +51,9 @@ void stats_mo(double*, int, double *,double *);
  *         -commpkg <int>          1 = new comm. package
  *                                 2  =old
  *                                 3 = both (default)
- *         -loop <int>             number of times to loop
+ *         -loop <int>             number of times to loop (default is 0)
  *         -verbose                print more error checking   
+ *         -noparmprint            don't print the parameters 
  *-------------------------------------------------------------------*/
 
 
@@ -69,7 +71,7 @@ main( int   argc,
    int        col_start, col_end, global_num_rows;
    int       *row_part, *col_part; 
    char      *csrfilename;
-   int        preload = 0, loop = 1, loop2 = LOOP2;   
+   int        preload = 0, loop = 0, loop2 = LOOP2;   
    int        bcast_rows[2], *info;
    
 
@@ -92,7 +94,8 @@ main( int   argc,
    double              start_time, end_time, total_time, *loop_times;
    double              T_avg, T_std;
    
-
+   int                   noparmprint = 0;
+ 
 #if mydebug   
    int  j, tmp_int;
 #endif
@@ -114,8 +117,8 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
     
-    build_matrix_type = 2;
-    matrix_arg_index = argc;
+   build_matrix_type = 2;
+   matrix_arg_index = argc;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -163,18 +166,20 @@ main( int   argc,
       {
          index++;  
          loop = atoi(argv[index++]);
-         if (loop < 1) loop = 1;
-         
-
       }
-
+      else if  ( strcmp(argv[index], "-noparmprint") == 0 )
+      {
+         index++;  
+         noparmprint = 1;
+         
+      }
       else  
       {
 	 index++;
          /*printf("Warning: Unrecogized option '%s'\n",argv[index++] );*/
       }
    }
-
+   
    
   
    /*-----------------------------------------------------------
@@ -214,13 +219,13 @@ main( int   argc,
    else if (build_matrix_type ==2)
    {
       
-     myBuildParLaplacian(argc, argv, matrix_arg_index,  &A_temp);
+      myBuildParLaplacian(argc, argv, matrix_arg_index,  &A_temp, !noparmprint);
      parcsr_A = (hypre_ParCSRMatrix *) A_temp;      
  
    }
    else if (build_matrix_type ==4)
    {
-     myBuildParLaplacian27pt(argc, argv, matrix_arg_index, &A_temp);
+      myBuildParLaplacian27pt(argc, argv, matrix_arg_index, &A_temp, !noparmprint);
      parcsr_A = (hypre_ParCSRMatrix *) A_temp;
    }
 
@@ -269,10 +274,6 @@ main( int   argc,
    }
 
 
-   /* instead of preloading, let's not time the first one*/
-
-   loop += 1;
-   
 
 
 
@@ -280,7 +281,23 @@ main( int   argc,
     *  Prepare for timing
     *-----------------------------------------------------------*/
 
+   /* instead of preloading, let's not time the first one if more than one*/
 
+    
+   if (!loop)
+   {
+      loop = 1;
+      /* and don't do any timings */
+      
+   }
+   else
+   {
+      
+      loop +=1;
+      if (loop < 2) loop = 2;
+   }
+      
+   
    loop_times = hypre_CTAlloc(double, loop);
    
 
@@ -308,21 +325,21 @@ main( int   argc,
          {
          
             MPI_Barrier(MPI_COMM_WORLD);
-
+            
             start_time = MPI_Wtime();
 
 #if mpip_on
-             if (i==(loop-1)) MPI_Pcontrol(1); 
+            if (i==(loop-1)) MPI_Pcontrol(1); 
 #endif
      
             hypre_NewCommPkgCreate(parcsr_A);
 
 #if mpip_on
-             if (i==(loop-1)) MPI_Pcontrol(0); 
+            if (i==(loop-1)) MPI_Pcontrol(0); 
 #endif  
   
             end_time = MPI_Wtime();
-      
+            
             end_time = end_time - start_time;
         
             MPI_Allreduce(&end_time, &total_time, 1,
@@ -332,21 +349,41 @@ main( int   argc,
 
             if (  !((i+1)== loop  &&  (k+1) == loop2)) hypre_NewCommPkgDestroy(parcsr_A); 
             
-      }
+         }/*end of loop2 */
       
-         if (!myid ) printf("....loop[%d] (%d total) =  %f seconds\n", i, loop2, loop_times[i]);  
+        
+      } /*end of loop*/
+      
 
-      }
-      
 
       /* calculate the avg and std. */
-      stats_mo(loop_times, loop, &T_avg, &T_std);
-          
-      if (!myid) printf(" NewCommPkgCreate:  AVG. wall clock time =  %f seconds\n", T_avg);  
-      if (!myid) printf("                    STD. for %d  runs     =  %f\n", loop-1, T_std);  
-      if (!myid) printf("                    (Note: avg./std. timings exclude run 0.)\n");
-       if (!myid) printf("********************************************************\n" );  
-      /*-----------------------------------------------------------
+      if (loop > 1)
+      {
+         
+         /* calculate the avg and std. */
+         stats_mo(loop_times, loop, &T_avg, &T_std);
+      
+         if (!myid) printf(" NewCommPkgCreate:  AVG. wall clock time =  %f seconds\n", T_avg);  
+         if (!myid) printf("                    STD. for %d  runs     =  %f\n", loop-1, T_std);  
+         if (!myid) printf("                    (Note: avg./std. timings exclude run 0.)\n");
+         if (!myid) printf("********************************************************\n" );  
+         for (i=0; i< loop; i++) 
+         {
+            if (!myid) printf("      run %d  =  %f sec.\n", i, loop_times[i]);  
+         }
+         if (!myid) printf("********************************************************\n" );  
+   
+       }
+       else 
+       {
+         if (!myid) printf("********************************************************\n" );  
+         if (!myid) printf(" NewCommPkgCreate:\n");  
+         if (!myid) printf("      run time =  %f sec.\n", loop_times[0]);  
+         if (!myid) printf("********************************************************\n" );  
+       }
+
+
+     /*-----------------------------------------------------------
        *  Verbose printing
        *-----------------------------------------------------------*/
 
@@ -412,20 +449,20 @@ main( int   argc,
        if (commpkg_flag == 3 ) 
        {
           /*do a matvec - we are assuming a square matrix */
-	 row_starts = hypre_ParCSRMatrixRowStarts(parcsr_A);
+          row_starts = hypre_ParCSRMatrixRowStarts(parcsr_A);
    
-	 x_new = hypre_ParVectorCreate(MPI_COMM_WORLD, global_num_rows, row_starts);
-	 hypre_ParVectorSetPartitioningOwner(x_new, 0);
-	 hypre_ParVectorInitialize(x_new);
-	 hypre_ParVectorSetConstantValues(x_new, 1.0);    
-
-	 y_new = hypre_ParVectorCreate(MPI_COMM_WORLD, global_num_rows, row_starts);
-	 hypre_ParVectorSetPartitioningOwner(y_new, 0);
-	 hypre_ParVectorInitialize(y_new);
-	 hypre_ParVectorSetConstantValues(y_new, 0.0);
-
-         /*y = 1.0*A*x+1.0*y */
-	 hypre_ParCSRMatrixMatvec (1.0, parcsr_A, x_new, 1.0, y_new);
+          x_new = hypre_ParVectorCreate(MPI_COMM_WORLD, global_num_rows, row_starts);
+          hypre_ParVectorSetPartitioningOwner(x_new, 0);
+          hypre_ParVectorInitialize(x_new);
+          hypre_ParVectorSetConstantValues(x_new, 1.0);    
+          
+          y_new = hypre_ParVectorCreate(MPI_COMM_WORLD, global_num_rows, row_starts);
+          hypre_ParVectorSetPartitioningOwner(y_new, 0);
+          hypre_ParVectorInitialize(y_new);
+          hypre_ParVectorSetConstantValues(y_new, 0.0);
+          
+          /*y = 1.0*A*x+1.0*y */
+          hypre_ParCSRMatrixMatvec (1.0, parcsr_A, x_new, 1.0, y_new);
        }
    
    /*-----------------------------------------------------------
@@ -438,6 +475,10 @@ main( int   argc,
    }
 
   
+
+
+
+
 /******************************************************************************************/
 /******************************************************************************************/
 
@@ -492,20 +533,38 @@ main( int   argc,
        
          if (  !((i+1)== loop  &&  (k+1) == loop2))   hypre_MatvecCommPkgDestroy(hypre_ParCSRMatrixCommPkg(parcsr_A));
                
-        }
+         }/* end of loop 2*/
          
         
-         if (!myid) printf("....loop[%d] (%d total)=  %f seconds\n", i, loop2, loop_times[i]);  
-       
-         
-            
-      }
+      } /*end of loop*/
       
-      stats_mo(loop_times, loop, &T_avg, &T_std);      
-      if (!myid) printf("Current CommPkgCreate:  AVG. wall clock time =  %f seconds\n", T_avg);  
-      if (!myid) printf("                        STD. for %d  runs     =  %f\n", loop-1, T_std);  
-      if (!myid) printf("                        (Note: avg./std. timings exclude run 0.)\n");
-      if (!myid) printf("********************************************************\n" );  
+      /* calculate the avg and std. */
+      if (loop > 1)
+      {
+         
+         stats_mo(loop_times, loop, &T_avg, &T_std);      
+         if (!myid) printf("Current CommPkgCreate:  AVG. wall clock time =  %f seconds\n", T_avg);  
+         if (!myid) printf("                        STD. for %d  runs     =  %f\n", loop-1, T_std);  
+         if (!myid) printf("                        (Note: avg./std. timings exclude run 0.)\n");
+         if (!myid) printf("********************************************************\n" );  
+         for (i=0; i< loop; i++) 
+         {
+            if (!myid) printf("      run %d  =  %f sec.\n", i, loop_times[i]);  
+         }
+         if (!myid) printf("********************************************************\n" );  
+         
+      }
+      else 
+      {
+         if (!myid) printf("********************************************************\n" );  
+         if (!myid) printf(" Current CommPkgCreate:\n");  
+         if (!myid) printf("      run time =  %f sec.\n", loop_times[0]);  
+         if (!myid) printf("********************************************************\n" );  
+      }
+
+
+
+
 
       /*-----------------------------------------------------------
        * Verbose printing
@@ -590,6 +649,7 @@ main( int   argc,
        }
 
    }
+
 
 
 
@@ -703,7 +763,7 @@ int
 myBuildParLaplacian27pt( int                  argc,
                        char                *argv[],
                        int                  arg_index,
-                       HYPRE_ParCSRMatrix  *A_ptr     )
+                         HYPRE_ParCSRMatrix  *A_ptr  , int parmprint  )
 {
    int                 nx, ny, nz;
    int                 P, Q, R;
@@ -773,7 +833,7 @@ myBuildParLaplacian27pt( int                  argc,
     * Print driver parameters
     *-----------------------------------------------------------*/
  
-   if (myid == 0)
+   if (myid == 0 && parmprint)
    {
       printf("  Laplacian_27pt:\n");
       printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
@@ -823,7 +883,7 @@ int
 myBuildParLaplacian( int                  argc,
                    char                *argv[],
                    int                  arg_index,
-                   HYPRE_ParCSRMatrix  *A_ptr     )
+                     HYPRE_ParCSRMatrix  *A_ptr , int parmprint    )
 {
    int                 nx, ny, nz;
    int                 P, Q, R;
@@ -905,7 +965,7 @@ myBuildParLaplacian( int                  argc,
     * Print driver parameters
     *-----------------------------------------------------------*/
  
-   if (myid == 0)
+   if (myid == 0 && parmprint)
    {
       printf("  Laplacian:\n");
       printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
