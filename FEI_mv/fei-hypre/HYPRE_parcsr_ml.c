@@ -563,7 +563,19 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                                   ML_PRESMOOTHER, sweeps, 1.0, Nblocks, blockList);
              break;
           case 6 :
-             ML_Gen_Smoother_OverlappedDomainDecomp(ml,level, ML_PRESMOOTHER); 
+             ML_Gen_Smoother_OverlappedDDILUT(ml,level, ML_PRESMOOTHER); 
+             break;
+          case 7 :
+             ML_Gen_Smoother_VBlockAdditiveSchwarz(ml,level,ML_PRESMOOTHER,sweeps,
+                                                   0, NULL);
+             break;
+          case 8 :
+             ML_Gen_Smoother_VBlockMultiplicativeSchwarz(ml,level,ML_PRESMOOTHER,
+                                                         sweeps, 0, NULL);
+          default :
+             if ( my_id == 0 )
+                printf("ML Presmoother : set to default (SGS)\n");
+             ML_Gen_Smoother_SymGaussSeidel(ml,level,ML_PRESMOOTHER,sweeps,1.0);
              break;
        }
 
@@ -596,6 +608,11 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
              ML_Aggregate_Get_AggrMap( link->ml_ag, level, &blockList );
              ML_Gen_Smoother_VBlockSymGaussSeidelSequential(ml,level,
                                   ML_POSTSMOOTHER, sweeps, 1.0, Nblocks, blockList);
+             break;
+          default :
+             if ( my_id == 0 )
+                printf("ML Postsmoother : set to default (SGS)\n");
+             ML_Gen_Smoother_SymGaussSeidel(ml,level,ML_POSTSMOOTHER,sweeps,1.0);
              break;
        }
     }
