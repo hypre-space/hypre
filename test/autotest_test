@@ -172,8 +172,8 @@ mail_errors () {
         if test -r "${i}.email"
         then
           RECIPIENTS=`cat ${i}.email` 
-        else
-          RECIPIENTS=$HYPRE_DEFAULT_EMAIL
+#       else
+#         RECIPIENTS=$HYPRE_DEFAULT_EMAIL
         fi
         SUBJECT="Autotest error: ${i} ($HYPRE_ARCH)"
         ${HYPRE_MAIL} -s "$SUBJECT" $RECIPIENTS < $i 
