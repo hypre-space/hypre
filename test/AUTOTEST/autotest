@@ -42,10 +42,6 @@ perform_test()
     )" >/dev/null 2>&1
   echo "returning to autotest...."
   
-  if [ "HYPRE_MESSAGE" = "TEST[AutoMake]" ]
-  then
-    HYPRE_MESSAGE=""
-  fi
 }
 
 #=============================================================================
@@ -160,8 +156,9 @@ chgrp -fR hypre linear_solvers
 
 SUBMSG=""
 export SUBMSG
+AUTOMAKEMODE=""
 HYPRE_MESSAGE=""
-export HYPRE_MESSAGE
+export AUTOMAKEMODE HYPRE_MESSAGE
 # OpenSSH to F-Secure communication for RSA authentication
 SSH_COMMAND="ssh -1"
 SCP_COMMAND="scp -q -oProtocol=1"
@@ -178,7 +175,7 @@ do
 	  (PATH=$HOME/mnt/`/usr/casc/hypre/config.guess`/bin:$PATH;\
           cd linear_solvers;\
           config/bootstrap)
-          HYPRE_MESSAGE='TEST[AutoMake]'
+          AUTOMAKEMODE=yes
         fi
         shift;;
     -blue | -bluemp)
@@ -186,13 +183,16 @@ do
         HYPRE_COMPILE_MACHINE="blue"
         HYPRE_RUN_MACHINE="blue"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/powerpc-ibm-aix5.1.0.0/AUTOTEST"
-        if [ "$1" = "-blue" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-m -b 1 -o 1 -a 2 -cf"
-          HYPRE_MESSAGE=${HYPRE_MESSAGE:-'SECONDARY[ASCI-Blue]'}
-        else
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-m -b 1 -o 1 -l 2 -cf"
+          HYPRE_MESSAGE='TEST[automake-ASCI-Blue]'
+        ielif [ "$1" = "-bluemp" ] ; then
           SUBMSG="from OpenMP"
 	  HYPRE_MACHINE_COMMANDS="-m -o 2"
           HYPRE_MESSAGE='SECONDARY[OpenMP-ASCI-Blue]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-m -b 1 -o 1 -a 2 -cf"
+          HYPRE_MESSAGE='SECONDARY[ASCI-Blue]'
         fi
 	perform_test
         shift;;
@@ -201,13 +201,16 @@ do
         HYPRE_COMPILE_MACHINE="frost"
         HYPRE_RUN_MACHINE="frost"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/powerpcll-ibm-aix5.1.0.0/AUTOTEST"
-        if [ "$1" = "-frost" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-m -b 1 -o 1 -a 2 -cf"
-          HYPRE_MESSAGE=${HYPRE_MESSAGE:-'SECONDARY[ASCI-White]'}
-        else
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-m -b 1 -o 1 -l 2 -cf"
+          HYPRE_MESSAGE='TEST[automake-ASCI-Blue]'
+        elif [ "$1" = "-frostmp" ] ; then
           SUBMSG="from OpenMP"
 	  HYPRE_MACHINE_COMMANDS="-m -o 2"
           HYPRE_MESSAGE='SECONDARY[OpenMP-ASCI-White]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-m -b 1 -o 1 -a 2 -cf"
+          HYPRE_MESSAGE='SECONDARY[ASCI-White]'
         fi
 	perform_test
         shift;;
@@ -216,8 +219,13 @@ do
         HYPRE_COMPILE_MACHINE="sunup"
         HYPRE_RUN_MACHINE="sunup"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-mns -b 1 -a 2 -cf"
-        HYPRE_MESSAGE=${HYPRE_MESSAGE:-'SECONDARY[cc-5.3]'}
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-mns -b 1 -l 2 -cf"
+          HYPRE_MESSAGE='TEST[autotest-Solaris8]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-mns -b 1 -a 2 -cf"
+          HYPRE_MESSAGE='SECONDARY[cc-5.3]'
+        fi
    	print_header
         ./autotest_test $HYPRE_MACHINE_COMMANDS
 ##	perform_test
@@ -308,8 +316,13 @@ do
         HYPRE_COMPILE_MACHINE="poincare"
         HYPRE_RUN_MACHINE="poincare"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.7/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-mns -b 1 -a 2 -cf"
-        HYPRE_MESSAGE=${HYPRE_MESSAGE:-'SECONDARY[cc-5.0]'}
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-mns -b 1 -l 2 -cf"
+          HYPRE_MESSAGE='TEST[autotest-Solaris7]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-mns -b 1 -a 2 -cf"
+          HYPRE_MESSAGE='SECONDARY[cc-5.0]'
+        fi
 	perform_test
         shift;;
     -purify)
@@ -386,8 +399,13 @@ do
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-mns -b 1 -a 2 -dcf"
-        HYPRE_MESSAGE=${HYPRE_MESSAGE:-'PRIMARY[gcc-2.96]'}
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-mns -b 1 -l 2 -dcf"
+          HYPRE_MESSAGE='TEST[autotest-gcc-2.96]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-mns -b 1 -a 2 -dcf"
+          HYPRE_MESSAGE='PRIMARY[gcc-2.96]'
+        fi
 ##      ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
 	perform_test
         shift;;
@@ -396,8 +414,13 @@ do
         HYPRE_COMPILE_MACHINE="tux71"
         HYPRE_RUN_MACHINE="tux71"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS=${HYPRE_MESSAGE:-"-mn -b 1 -a 2 -dcf"}
-        HYPRE_MESSAGE='SECONDARY[gcc-3.2]'
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-mn -b 1 -l 2 -dcf"
+          HYPRE_MESSAGE='TEST[automake-gcc-3.2]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-mn -b 1 -a 2 -dcf"
+          HYPRE_MESSAGE='SECONDARY[gcc-3.2]'
+        fi
 	perform_test
         shift;;
     -tux)
@@ -405,8 +428,13 @@ do
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi3.3/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-mns -a 2 -dcf"
-        HYPRE_MESSAGE=${HYPRE_MESSAGE:-'SECONDARY[pgi-3.3]'}
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-mns -l 2 -dcf"
+          HYPRE_MESSAGE='TEST[automake-pgi-3.3]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-mns -a 2 -dcf"
+          HYPRE_MESSAGE='SECONDARY[pgi-3.3]'
+        fi
 ##      ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
 	perform_test
         shift;;

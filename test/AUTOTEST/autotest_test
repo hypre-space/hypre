@@ -104,7 +104,7 @@ parse_arguments () {
 # probably implement the obsolute getopt) then
 # getopts(1) will be used.
 #
-  while getopts :a:b:cDdfhi:mno:q:r:sv:xy arg
+  while getopts :a:b:cDde:fhi:l:mno:q:r:sv:xy arg
   do
     argcur=$arg
     case $arg in
@@ -120,6 +120,7 @@ parse_arguments () {
          confbuildtest $OPTARG  "--with-insure" "insure"    0 0 0 0 1 0 1;;
      +i) confbuildtest $OPTARG  "--with-insure-to-file" \
                                                 "insure"    0 0 0 0 1 0 1;;
+      l) confbuildtest $OPTARG  "--enable-shared" "shared"  0 0 0 0 1 0 1;;
       m) HYPRE_SEND_MAIL="no"; MailOpt=""; MailCmd="yes";;
      +m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail"; MailCmd="yes";;
       n) confbuildtest $Build   "--without-MPI" "no_mpi"    0 0 0 0 1 0 0;;
@@ -143,8 +144,9 @@ parse_arguments () {
 # Function for display of help/usage
 #=============================================================================
 usage () {
-  printf "Usage: %s [-cDdfhmnsxy] [-a opt] [-b opt] [-i opt]\n" $0
-  printf "       [-o opt] [-q opt] [-r host] [-v text]\n"
+  printf "Usage: %s [-cDdfhmnsxy] [-a opt] [-b opt] [-e opt]\n" $0
+  printf "       [-i opt] [-l opt] [-o opt]\n"
+  printf "       [-q opt] [-r host] [-v text]\n"
   printf "\n"
   printf "Hypre autotest (Note: all options are positional dependent\n"
   printf "i.e., options are sequentially executed in left-to-right order).\n"
@@ -157,18 +159,19 @@ usage () {
   printf "%s\n" "-a opt   All; the (default) configure, make, and execute. Also"
   printf "         performs make struct, IJ, fei, all, nofei, and\n"
   printf "         fei++, followed by the runtest script (when opt=2).\n"
-  printf "%s\n" "-b       Babel; configure --with-babel, make, and execute)."
+  printf "%s\n" "-b opt   Babel; configure --with-babel, make, and execute)."
   printf "%s\n" "-c       C++; make all++ (no configure, or execute)."
   printf "%s\n" "-D       Turn on debug messages."
   printf "%s\n" "-d       Docs; make the documentation directory."
-  printf "%s\n" "-e       Debug; configure --enable-debug, make, and execute)."
+  printf "%s\n" "-e opt   Debug; configure --enable-debug, make, and execute)."
   printf "%s\n" "-f       F77; make all77 (no configure, or execute)."
+  printf "%s\n" "-h       Help; display this help message."
   printf "%s\n" "-i opt   Insure++; perform configure --with-insure. Output"
   printf "         is appended to a file called insure.log.\n"
-  printf "%s\n" "-h       Help; display this help message."
+  printf "%s\n" "-l opt   Shared; configure --enable-shared, make, and execute)."
   printf "%s\n" "-m       Mail; mail error summary to developers."
   printf "%s\n" "+m       Mail+; mail error logs to developers."
-  printf "%s\n" "-n       NoMPI; configure --without-MPI, make struct, IJ,"
+  printf "%s\n" "-n opt   NoMPI; configure --without-MPI, make struct, IJ,"
   printf "         and all (no execute option).\n"
   printf "%s\n" "-o opt   openMP; configure --with-openmp, make."
   printf "%s\n" "-q opt   Purify; perform configure --with-purify-to-file."
@@ -270,7 +273,7 @@ mail_summary () {
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
   printf "Compile summary: Status: Warnings: Errors\n" >> $SUMFILE
   for ConfOpt in babel debug default no_mpi openmp \
-           insure purify strict_checking \
+           insure purify shared strict_checking \
            docs all++ all77
   do
     printf "%-15s: " $ConfOpt >> $SUMFILE
