@@ -43,6 +43,7 @@
 #include "HYPRE_LSI_ddilut.h"
 #include "HYPRE_LSI_ddict.h"
 #include "HYPRE_LSI_poly.h"
+#include "HYPRE_LSI_block.h"
 
 #ifdef SUPERLU
 #include "dsp_defs.h"
@@ -397,6 +398,9 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
 
        else if ( HYPreconID_ == HYEUCLID )
           HYPRE_EuclidDestroy( HYPrecon_ );
+
+       else if ( HYPreconID_ == HYBLOCK )
+          HYPRE_LSI_BlockPrecondDestroy( HYPrecon_ );
 
 #ifdef MLPACK
        else if ( HYPreconID_ == HYML )
@@ -2742,6 +2746,9 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
        else if ( HYPreconID_ == HYEUCLID )
           HYPRE_EuclidDestroy( HYPrecon_ );
 
+       else if ( HYPreconID_ == HYBLOCK )
+          HYPRE_LSI_BlockPrecondDestroy( HYPrecon_ );
+
 #ifdef MLPACK
        else if ( HYPreconID_ == HYML )
           HYPRE_ParCSRMLDestroy( HYPrecon_ );
@@ -2801,6 +2808,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
     {
        strcpy( HYPreconName_, name );
        HYPreconID_ = HYEUCLID;
+    }
+    else if ( !strcmp(name, "block") )
+    {
+       strcpy( HYPreconName_, name );
+       HYPreconID_ = HYBLOCK;
     }
     else if ( !strcmp(name, "ml") )
     {
@@ -2883,6 +2895,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 
        case HYEUCLID :
             ierr = HYPRE_EuclidCreate( comm_, &HYPrecon_ );
+            assert( !ierr );
+            break;
+
+       case HYBLOCK :
+            ierr = HYPRE_LSI_BlockPrecondCreate( comm_, &HYPrecon_ );
             assert( !ierr );
             break;
 

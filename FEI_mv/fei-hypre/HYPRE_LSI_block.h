@@ -30,11 +30,11 @@ extern "C"
 #endif
 
 extern int HYPRE_LSI_BlockPrecondCreate(MPI_Comm comm, HYPRE_Solver *solver);
-extern int HYPRE_LSI_BlockPrecondDestroy(HYPRE_Solver *solver);
-extern int HYPRE_LSI_BlockPrecondSetLumpedMasses(HYPRE_Solver *solver,int,double *);
-extern int HYPRE_LSI_BlockPrecondSetSchemeBDiag(HYPRE_Solver *solver);
-extern int HYPRE_LSI_BlockPrecondSetSchemeBTri(HYPRE_Solver *solver);
-extern int HYPRE_LSI_BlockPrecondSetSchemeBInv(HYPRE_Solver *solver);
+extern int HYPRE_LSI_BlockPrecondDestroy(HYPRE_Solver solver);
+extern int HYPRE_LSI_BlockPrecondSetLumpedMasses(HYPRE_Solver solver,int,double *);
+extern int HYPRE_LSI_BlockPrecondSetSchemeBDiag(HYPRE_Solver solver);
+extern int HYPRE_LSI_BlockPrecondSetSchemeBTri(HYPRE_Solver solver);
+extern int HYPRE_LSI_BlockPrecondSetSchemeBInv(HYPRE_Solver solver);
 extern int HYPRE_LSI_BlockPrecondSetup(HYPRE_Solver solver,HYPRE_ParCSRMatrix A,
                                        HYPRE_ParVector b,HYPRE_ParVector x);
 extern int HYPRE_LSI_BlockPrecondSolve(HYPRE_Solver solver,HYPRE_ParCSRMatrix A,

@@ -43,6 +43,7 @@
 #include "HYPRE_LSI_ddilut.h"
 #include "HYPRE_LSI_ddict.h"
 #include "HYPRE_LSI_poly.h"
+#include "HYPRE_LSI_block.h"
 
 #ifdef SUPERLU
 #include "dsp_defs.h"
@@ -1546,6 +1547,23 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
                HYPRE_EuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
                HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_EuclidSolve,
                                            HYPRE_EuclidSetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+
+       case HYBLOCK :
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+            {
+               HYPRE_ParCSRGMRESSetPrecond(HYSolver_, 
+                     HYPRE_LSI_BlockPrecondSolve, HYPRE_DummyFunction, 
+                     HYPrecon_);
+            }
+            else
+            {
+               HYPRE_EuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
+               HYPRE_ParCSRGMRESSetPrecond(HYSolver_, 
+                     HYPRE_LSI_BlockPrecondSolve, 
+                     HYPRE_LSI_BlockPrecondSetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
