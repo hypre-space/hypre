@@ -31,6 +31,7 @@ typedef struct CMLI_Vector_Struct CMLI_Vector;
 typedef struct CMLI_Solver_Struct CMLI_Solver;
 typedef struct CMLI_FEData_Struct CMLI_FEData;
 typedef struct CMLI_Method_Struct CMLI_Method;
+typedef struct CMLI_Mapper_Struct CMLI_Mapper;
 
 #include "util/mli_utils.h"
 
@@ -44,6 +45,7 @@ struct CMLI_Vector_Struct { void* vector_; int owner_; };
 struct CMLI_Solver_Struct { void* solver_; int owner_; };
 struct CMLI_FEData_Struct { void* fedata_; int owner_; };
 struct CMLI_Method_Struct { void* method_; int owner_; };
+struct CMLI_Mapper_Struct { void* mapper_; int owner_; };
 
 /* **************************************************************** */
 /* functions for the top level "C" MLI object                       */
@@ -79,7 +81,7 @@ int MLI_SetRestriction(CMLI *cmli, int level, CMLI_Matrix *Rmat);
 
 int MLI_SetProlongation(CMLI *cmli, int level, CMLI_Matrix *Pmat);
 
-int MLI_SetFEData(CMLI *cmli, int level, CMLI_FEData *fedata);
+int MLI_SetFEData(CMLI *cmli, int level, CMLI_FEData *fedata, CMLI_Mapper *);
 
 int MLI_SetSmoother(CMLI *cmli,int level,int side,CMLI_Solver *solver);
 
@@ -161,6 +163,17 @@ CMLI_Solver *MLI_SolverCreate(char *name);
 int MLI_SolverDestroy(CMLI_Solver *solver);
 
 int MLI_SolverSetParams(CMLI_Solver *solver, char *param_string,
+                        int argc, char **argv);
+
+/* **************************************************************** */
+/* functions for the "C" MLI mapper object                          */
+/* ---------------------------------------------------------------- */
+
+CMLI_Mapper *MLI_MapperCreate();
+
+int MLI_MapperDestroy(CMLI_Mapper *mapper);
+
+int MLI_MapperSetParams(CMLI_Mapper *solver, char *param_string,
                         int argc, char **argv);
 
 /* **************************************************************** */

@@ -24,6 +24,7 @@
 #include "amgs/mli_method.h"
 #include "fedata/mli_fedata.h"
 #include "fedata/mli_fedata_utils.h"
+#include "mapper/mli_mapper.h"
 
 /*****************************************************************************
  * CMLI : constructor 
@@ -210,19 +211,22 @@ extern "C" int MLI_SetProlongation( CMLI *cmli, int level, CMLI_Matrix *CPmat )
  * CMLI : set finite element information object 
  *---------------------------------------------------------------------------*/
 
-extern "C" int MLI_SetFEData( CMLI *cmli, int level, CMLI_FEData *cfedata )
+extern "C" int MLI_SetFEData( CMLI *cmli, int level, CMLI_FEData *cfedata,
+                              CMLI_Mapper *cmapper )
 {
    int        err=0;
    MLI        *mli;
    MLI_FEData *fedata;
+   MLI_Mapper *mapper;
 
    if ( cmli == NULL || cfedata == NULL ) err = 1;
    else
    {
       mli    = (MLI *) cmli->mli_;
       fedata = (MLI_FEData *) cfedata->fedata_;
+      mapper = (MLI_Mapper *) cmapper->mapper_;
       if (mli == NULL || fedata == NULL) err = 1;
-      else                               mli->setFEData( level, fedata );
+      else                               mli->setFEData(level,fedata,mapper);
       cfedata->owner_ = 0;
    }
    if ( err ) printf("MLI_SetFEData ERROR !!\n");
@@ -743,6 +747,62 @@ extern "C" int MLI_SolverSetParams(CMLI_Solver *solver, char *param_string,
       else                      mli_solver->setParams(param_string,argc,argv);
    }
    if ( err ) printf("MLI_SolverSetParams ERROR !!\n");
+   return err;
+}
+
+/*****************************************************************************
+ * create a "C" mapper object
+ *---------------------------------------------------------------------------*/
+
+extern "C" CMLI_Mapper *MLI_MapperCreate()
+{
+   MLI_Mapper  *mli_mapper;
+   CMLI_Mapper *cmli_mapper = (CMLI_Mapper *) calloc(1,sizeof(CMLI_Mapper));
+
+   mli_mapper = new MLI_Mapper();
+   cmli_mapper->mapper_ = (void *) mli_mapper;
+   cmli_mapper->owner_  = 1;
+   return cmli_mapper;
+}
+
+/*****************************************************************************
+ * destroy a "C" mapper object
+ *---------------------------------------------------------------------------*/
+
+extern "C" int MLI_MapperDestroy( CMLI_Mapper *cmapper )
+{
+   int        err=0;
+   MLI_Mapper *mli_mapper;
+
+   if ( cmapper == NULL ) err = 1;
+   else
+   {
+      mli_mapper = (MLI_Mapper *) cmapper->mapper_;
+      if ( mli_mapper == NULL ) err = 1;
+      else if ( cmapper->owner_ ) delete mli_mapper;
+      free( cmapper );
+   }
+   return err;
+}
+
+/*****************************************************************************
+ * set mapper parameters
+ *---------------------------------------------------------------------------*/
+
+extern "C" int MLI_MapperSetParams(CMLI_Mapper *mapper, char *param_string,
+                                   int argc, char **argv)
+{
+   int        err=0;
+   MLI_Mapper *mli_mapper;
+
+   if ( mapper == NULL ) err = 1;
+   else
+   {
+      mli_mapper = (MLI_Mapper *) mapper->mapper_;
+      if ( mli_mapper == NULL ) err = 1;
+      else                      mli_mapper->setParams(param_string,argc,argv);
+   }
+   if ( err ) printf("MLI_MapperSetParams ERROR !!\n");
    return err;
 }
 
