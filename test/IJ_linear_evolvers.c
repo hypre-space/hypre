@@ -39,8 +39,8 @@ main( int   argc,
    int                 generate_matrix = 0;
    int                 build_matrix_type;
    int                 build_matrix_arg_index;
-   int                 build_rhs_type;
-   int                 build_rhs_arg_index;
+   int                 build_src_type;
+   int                 build_src_arg_index;
    int                 solver_id;
    int                 ioutdat;
    int                 debug_flag;
@@ -49,7 +49,6 @@ main( int   argc,
    int                 num_iterations; 
    int                 num_sweep = 1;
    double              max_row_sum = 1.0;
-   double              norm;
    double              final_res_norm;
 
    HYPRE_IJMatrix      ij_matrix;
@@ -124,8 +123,8 @@ main( int   argc,
  
    build_matrix_type      = 1;
    build_matrix_arg_index = argc;
-   build_rhs_type = 0;
-   build_rhs_arg_index = argc;
+   build_src_type = 0;
+   build_src_arg_index = argc;
    relax_default = 3;
    debug_flag = 0;
 
@@ -199,23 +198,29 @@ main( int   argc,
          arg_index++;
          solver_id = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-rhsfromfile") == 0 )
+      else if ( strcmp(argv[arg_index], "-srcfromfile") == 0 )
       {
          arg_index++;
-         build_rhs_type      = 1;
-         build_rhs_arg_index = arg_index;
+         build_src_type      = 1;
+         build_src_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-rhsfromonefile") == 0 )
+      else if ( strcmp(argv[arg_index], "-srcfromonefile") == 0 )
       {
          arg_index++;
-         build_rhs_type      = 2;
-         build_rhs_arg_index = arg_index;
+         build_src_type      = 2;
+         build_src_arg_index = arg_index;
       }      
-      else if ( strcmp(argv[arg_index], "-rhsrand") == 0 )
+      else if ( strcmp(argv[arg_index], "-srcrand") == 0 )
       {
          arg_index++;
-         build_rhs_type      = 3;
-         build_rhs_arg_index = arg_index;
+         build_src_type      = 3;
+         build_src_arg_index = arg_index;
+      }    
+      else if ( strcmp(argv[arg_index], "-xisone") == 0 )
+      {
+         arg_index++;
+         build_src_type      = 4;
+         build_src_arg_index = arg_index;
       }    
       else if ( strcmp(argv[arg_index], "-cljp") == 0 )
       {
@@ -261,12 +266,6 @@ main( int   argc,
       {
          arg_index++;
          measure_type      = 1;
-      }    
-      else if ( strcmp(argv[arg_index], "-xisone") == 0 )
-      {
-         arg_index++;
-         build_rhs_type      = 4;
-         build_rhs_arg_index = arg_index;
       }    
       else if ( strcmp(argv[arg_index], "-rlx") == 0 )
       {
@@ -486,9 +485,9 @@ main( int   argc,
       printf("   -storage_low          : allocates not enough storage for aux struct\n");
       printf("   -concrete_parcsr      : use parcsr matrix type as concrete type\n");
       printf("\n");
-      printf("   -rhsfromfile          : from distributed file (NOT YET)\n");
-      printf("   -rhsfromonefile       : from vector file \n");
-      printf("   -rhsrand              : rhs is random vector\n");
+      printf("   -srcfromfile          : from distributed file (NOT YET)\n");
+      printf("   -srcfromonefile       : from vector file \n");
+      printf("   -srcrand              : src is random vector\n");
       printf("   -xisone               : solution of all ones\n");
       printf("\n");
       printf("  -solver <ID>           : solver ID\n");
@@ -564,7 +563,7 @@ main( int   argc,
 
    if (myid == 0)
    {
-     printf("  Backward Euler time step with dt = %f\n",dt);
+     printf("  Backward Euler time step with dt = %e\n",dt);
      printf("  Dirichlet 0 BCs are implicit in the spatial operator\n");
    }
 
@@ -752,72 +751,12 @@ main( int   argc,
    /* HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning); */
    HYPRE_ParCSRMatrixGetDims(A, &global_n, &global_n);
 
-   if (build_rhs_type == 1)
-   {
-      /* BuildRHSParFromFile(argc, argv, build_rhs_arg_index, &b); */
-      printf("Rhs from file not yet implemented.  Defaults to b=0\n");
-      HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_b, global_n);
-      HYPRE_IJVectorSetLocalStorageType(ij_b,ij_vector_storage_type );
-      HYPRE_IJVectorSetPartitioning(ij_b, (const int *) part_b);
-      HYPRE_IJVectorInitialize(ij_b);
-      HYPRE_IJVectorZeroLocalComponents(ij_b); 
-
-      HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_x, global_n);
-      HYPRE_IJVectorSetLocalStorageType(ij_x,ij_vector_storage_type );
-      HYPRE_IJVectorSetPartitioning(ij_x, (const int *) part_x);
-      HYPRE_IJVectorInitialize(ij_x);
-      HYPRE_IJVectorZeroLocalComponents(ij_b);
-      values = hypre_CTAlloc(double, part_x[myid+1] - part_x[myid]);
-
-      for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
-         values[i] = 1.0;
-
-      HYPRE_IJVectorSetLocalComponentsInBlock(ij_x, 
-					      part_x[myid], 
-					      part_x[myid+1]-1,
-                                              NULL,
-					      values);
-      hypre_TFree(values);
-
-   /*-----------------------------------------------------------
-    * Fetch the resulting underlying vectors out
-    *-----------------------------------------------------------*/
-
-      b = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_b );
-      x = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_x );
-
-   }
-   else if ( build_rhs_type == 2 )
-   {
-      BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, A, &b);
-
-      HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_x, global_n);
-      HYPRE_IJVectorSetLocalStorageType(ij_x,ij_vector_storage_type );
-      HYPRE_IJVectorSetPartitioning(ij_x, (const int *) part_x);
-      HYPRE_IJVectorInitialize(ij_x);
-      HYPRE_IJVectorZeroLocalComponents(ij_x); 
-      x = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_x );
-
-   }
-   else if ( build_rhs_type == 4 )
-   {
-
-      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_x, &x);
-      HYPRE_ParVectorInitialize(x);
-      HYPRE_ParVectorSetConstantValues(x, 1.0);
-
-      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_b, &b);
-      HYPRE_ParVectorInitialize(b);
-      HYPRE_ParCSRMatrixMatvec(1.0,A,x,0.0,b);
-
-      HYPRE_ParVectorSetConstantValues(x, 0.0);
-   }
-   else
+   if (build_src_type == 0)
    {
       if (myid == 0)
       {
-        printf("  Initial unknown is random in the range 0 - 1\n");
-        printf("  Initial unknown used in the linear system initial guess\n");
+        printf("  Source vector is 0 \n");
+        printf("  Initial unknown vector has random components in range 0 - 1\n");
       }
 
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_b, global_n);
@@ -841,11 +780,8 @@ main( int   argc,
       HYPRE_IJVectorSetPartitioning(ij_x, (const int *) part_x);
       HYPRE_IJVectorInitialize(ij_x);
 
-/* For backward Euler the previous backward Euler iterate is usually
-   used in the initial guess, but a zero initial guess can be
-   instructive */
-/*    HYPRE_IJVectorZeroLocalComponents(ij_x);  */
-
+/* For backward Euler the previous backward Euler iterate (assumed
+   random in 0 - 1 here) is usually used as the initial guess */
       for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
          values[i] *= dt;
 
@@ -856,8 +792,118 @@ main( int   argc,
                                               values);
       hypre_TFree(values);
 
+   /*-----------------------------------------------------------
+    * Fetch the resulting underlying vectors out
+    *-----------------------------------------------------------*/
+
       b = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_b );
       x = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_x );
+
+   }
+   else if (build_src_type == 1)
+   {
+      /* BuildRHSParFromFile(argc, argv, build_src_arg_index, &b); */
+      printf("Rhs from file not yet implemented.  Defaults to b=0\n");
+      HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_b, global_n);
+      HYPRE_IJVectorSetLocalStorageType(ij_b,ij_vector_storage_type );
+      HYPRE_IJVectorSetPartitioning(ij_b, (const int *) part_b);
+      HYPRE_IJVectorInitialize(ij_b);
+      HYPRE_IJVectorZeroLocalComponents(ij_b); 
+
+      HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_x, global_n);
+      HYPRE_IJVectorSetLocalStorageType(ij_x,ij_vector_storage_type );
+      HYPRE_IJVectorSetPartitioning(ij_x, (const int *) part_x);
+      HYPRE_IJVectorInitialize(ij_x);
+      HYPRE_IJVectorZeroLocalComponents(ij_x);
+      values = hypre_CTAlloc(double, part_x[myid+1] - part_x[myid]);
+
+      for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+         values[i] = 1.0;
+
+      HYPRE_IJVectorSetLocalComponentsInBlock(ij_x, 
+					      part_x[myid], 
+					      part_x[myid+1]-1,
+                                              NULL,
+					      values);
+      hypre_TFree(values);
+
+   /*-----------------------------------------------------------
+    * Fetch the resulting underlying vectors out
+    *-----------------------------------------------------------*/
+
+      b = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_b );
+      x = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_x );
+
+   }
+   else if ( build_src_type == 2 )
+   {
+      BuildRhsParFromOneFile(argc, argv, build_src_arg_index, A, &b);
+
+      HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_x, global_n);
+      HYPRE_IJVectorSetLocalStorageType(ij_x,ij_vector_storage_type );
+      HYPRE_IJVectorSetPartitioning(ij_x, (const int *) part_x);
+      HYPRE_IJVectorInitialize(ij_x);
+      HYPRE_IJVectorZeroLocalComponents(ij_x); 
+      x = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_x );
+
+   }
+   else if ( build_src_type == 3)
+   {
+      if (myid == 0)
+      {
+        printf("  Source vector has random components in range 0 - 1\n");
+        printf("  Initial unknown vector in evolution is 0\n");
+      }
+
+      HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_b, global_n);
+      HYPRE_IJVectorSetLocalStorageType(ij_b,ij_vector_storage_type );
+      HYPRE_IJVectorSetPartitioning(ij_b, (const int *) part_b);
+      HYPRE_IJVectorInitialize(ij_b);
+      values = hypre_CTAlloc(double, part_x[myid+1] - part_x[myid]);
+
+      hypre_SeedRand( (double) myid );
+      for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+         values[i] = hypre_Rand();
+
+      HYPRE_IJVectorSetLocalComponentsInBlock(ij_b,
+                                              part_x[myid],
+                                              part_x[myid+1]-1,
+                                              NULL,
+                                              values);
+      hypre_TFree(values);
+
+      HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_x, global_n);
+      HYPRE_IJVectorSetLocalStorageType(ij_x,ij_vector_storage_type );
+      HYPRE_IJVectorSetPartitioning(ij_x, (const int *) part_x);
+      HYPRE_IJVectorInitialize(ij_x);
+
+/* For backward Euler the previous backward Euler iterate (assumed
+   0 here) is usually used as the initial guess */
+      HYPRE_IJVectorZeroLocalComponents(ij_x);
+
+      b = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_b );
+      x = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_x );
+   }
+   else if ( build_src_type == 4 )
+   {
+
+      if (myid == 0)
+      {
+        printf("  Source vector yields steady-state solution of 1 on interior\n");
+        printf("  Initial unknown vector in evolution is 0\n");
+      }
+
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_x, &x);
+      HYPRE_ParVectorInitialize(x);
+      HYPRE_ParVectorSetConstantValues(x, 1.0);
+
+      HYPRE_ParVectorCreate(MPI_COMM_WORLD, global_n, part_b, &b);
+      HYPRE_ParVectorInitialize(b);
+      HYPRE_ParCSRMatrixMatvec(1.0,A,x,0.0,b);
+
+/* For backward Euler the previous backward Euler iterate (assumed
+   0 here) is usually used as the initial guess */
+      HYPRE_ParVectorSetConstantValues(x, 0.0);
    }
 
    hypre_EndTiming(time_index);
@@ -1062,6 +1108,9 @@ main( int   argc,
       {
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-GMRES\n");
+
+         trunc_factor = 0.95;
+         max_row_sum  = 0.05;
 
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
@@ -1429,11 +1478,11 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    HYPRE_IJMatrixDestroy(ij_matrix);
-   if (build_rhs_type == 1)
+   if (build_src_type == 1)
       HYPRE_IJVectorDestroy(ij_b);
    else
       HYPRE_ParVectorDestroy(b);
-   if (build_rhs_type > -1 && build_rhs_type < 4)
+   if (build_src_type > -1 && build_src_type < 4)
       HYPRE_IJVectorDestroy(ij_x);
    else
       HYPRE_ParVectorDestroy(x);
