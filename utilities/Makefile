@@ -17,7 +17,9 @@ CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I/usr/local/mpi/mpich/include\
- -g -Wall -DHYPRE_TIMING -DUSE_MPI_TIMER
+ -g -Wall\
+ -DHYPRE_MEMORY_DMALLOC\
+ -DHYPRE_TIMING -DUSE_MPI_TIMER
 
 FFLAGS = -g
 
@@ -36,7 +38,8 @@ MEMORY_HEADERS =\
  memory.h
 
 MEMORY_FILES =\
- memory.c
+ memory.c\
+ memory_dmalloc.c
 
 MEMORY_OBJS = ${MEMORY_FILES:.c=.o}
 

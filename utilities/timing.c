@@ -45,6 +45,7 @@ hypre_InitializeTiming( char *name )
    int     *old_state;
    int     *old_num_regs;
 
+   int      new_name;
    int      i;
 
    /*-------------------------------------------------------
@@ -60,67 +61,130 @@ hypre_InitializeTiming( char *name )
     * Check to see if name has already been registered
     *-------------------------------------------------------*/
 
+   new_name = 1;
    for (i = 0; i < (hypre_global_timing -> size); i++)
    {
-      if (strcmp(name, hypre_TimingName(i)) == 0)
+      if (hypre_TimingNumRegs(i) > 0)
       {
-         hypre_TimingNumRegs(i) ++;
-         break;
+         if (strcmp(name, hypre_TimingName(i)) == 0)
+         {
+            new_name = 0;
+            time_index = i;
+            hypre_TimingNumRegs(time_index) ++;
+            break;
+         }
       }
    }
-   time_index = i;
+
+   if (new_name)
+   {
+      for (i = 0; i < (hypre_global_timing -> size); i++)
+      {
+         if (hypre_TimingNumRegs(i) == 0)
+         {
+            break;
+         }
+      }
+      time_index = i;
+   }
 
    /*-------------------------------------------------------
     * Register the new timing name
     *-------------------------------------------------------*/
 
-   if (time_index == (hypre_global_timing -> size))
+   if (new_name)
    {
-      old_wall_time = (hypre_global_timing -> wall_time);
-      old_cpu_time  = (hypre_global_timing -> cpu_time);
-      old_flops     = (hypre_global_timing -> flops);
-      old_name      = (hypre_global_timing -> name);
-      old_state     = (hypre_global_timing -> state);
-      old_num_regs  = (hypre_global_timing -> num_regs);
-
-      (hypre_global_timing -> wall_time) =
-         hypre_CTAlloc(double, (time_index+1));
-      (hypre_global_timing -> cpu_time)  =
-         hypre_CTAlloc(double, (time_index+1));
-      (hypre_global_timing -> flops)     =
-         hypre_CTAlloc(double, (time_index+1));
-      (hypre_global_timing -> name)      =
-         hypre_CTAlloc(char *, (time_index+1));
-      (hypre_global_timing -> state)     =
-         hypre_CTAlloc(int,    (time_index+1));
-      (hypre_global_timing -> num_regs)  =
-         hypre_CTAlloc(int,    (time_index+1));
-      (hypre_global_timing -> size) ++;
-
-      for (i = 0; i < time_index; i++)
+      if (time_index == (hypre_global_timing -> size))
       {
-         hypre_TimingWallTime(i) = old_wall_time[i];
-         hypre_TimingCPUTime(i)  = old_cpu_time[i];
-         hypre_TimingFLOPS(i)    = old_flops[i];
-         hypre_TimingName(i)     = old_name[i];
-         hypre_TimingState(i)    = old_state[i];
-         hypre_TimingNumRegs(i)  = old_num_regs[i];
-      }
+         old_wall_time = (hypre_global_timing -> wall_time);
+         old_cpu_time  = (hypre_global_timing -> cpu_time);
+         old_flops     = (hypre_global_timing -> flops);
+         old_name      = (hypre_global_timing -> name);
+         old_state     = (hypre_global_timing -> state);
+         old_num_regs  = (hypre_global_timing -> num_regs);
 
-      hypre_TFree(old_wall_time);
-      hypre_TFree(old_cpu_time);
-      hypre_TFree(old_flops);
-      hypre_TFree(old_name);
-      hypre_TFree(old_state);
-      hypre_TFree(old_num_regs);
+         (hypre_global_timing -> wall_time) =
+            hypre_CTAlloc(double, (time_index+1));
+         (hypre_global_timing -> cpu_time)  =
+            hypre_CTAlloc(double, (time_index+1));
+         (hypre_global_timing -> flops)     =
+            hypre_CTAlloc(double, (time_index+1));
+         (hypre_global_timing -> name)      =
+            hypre_CTAlloc(char *, (time_index+1));
+         (hypre_global_timing -> state)     =
+            hypre_CTAlloc(int,    (time_index+1));
+         (hypre_global_timing -> num_regs)  =
+            hypre_CTAlloc(int,    (time_index+1));
+         (hypre_global_timing -> size) ++;
+
+         for (i = 0; i < time_index; i++)
+         {
+            hypre_TimingWallTime(i) = old_wall_time[i];
+            hypre_TimingCPUTime(i)  = old_cpu_time[i];
+            hypre_TimingFLOPS(i)    = old_flops[i];
+            hypre_TimingName(i)     = old_name[i];
+            hypre_TimingState(i)    = old_state[i];
+            hypre_TimingNumRegs(i)  = old_num_regs[i];
+         }
+
+         hypre_TFree(old_wall_time);
+         hypre_TFree(old_cpu_time);
+         hypre_TFree(old_flops);
+         hypre_TFree(old_name);
+         hypre_TFree(old_state);
+         hypre_TFree(old_num_regs);
+      }
 
       hypre_TimingName(time_index) = hypre_CTAlloc(char, 80);
       strncpy(hypre_TimingName(time_index), name, 79);
       hypre_TimingState(time_index)   = 0;
       hypre_TimingNumRegs(time_index) = 1;
+      (hypre_global_timing -> num_names) ++;
    }
 
    return time_index;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_FinalizeTiming
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_FinalizeTiming( int time_index )
+{
+   int  i;
+
+   if (hypre_global_timing == NULL)
+      return;
+
+   if (time_index < (hypre_global_timing -> size))
+   {
+      if (hypre_TimingNumRegs(time_index) > 0)
+      {
+         hypre_TimingNumRegs(time_index) --;
+      }
+
+      if (hypre_TimingNumRegs(time_index) == 0)
+      {
+         hypre_TFree(hypre_TimingName(time_index));
+         (hypre_global_timing -> num_names) --;
+      }
+   }
+
+   if ((hypre_global_timing -> num_names) == 0)
+   {
+      for (i = 0; i < (hypre_global_timing -> size); i++)
+      {
+         hypre_TFree(hypre_global_timing -> wall_time);
+         hypre_TFree(hypre_global_timing -> cpu_time);
+         hypre_TFree(hypre_global_timing -> flops);
+         hypre_TFree(hypre_global_timing -> name);
+         hypre_TFree(hypre_global_timing -> state);
+         hypre_TFree(hypre_global_timing -> num_regs);
+      }
+      hypre_TFree(hypre_global_timing);
+      hypre_global_timing = NULL;
+   }
 }
 
 /*--------------------------------------------------------------------------
@@ -179,11 +243,32 @@ hypre_EndTiming( int time_index )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ClearTiming
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_ClearTiming( )
+{
+   int  i;
+
+   if (hypre_global_timing == NULL)
+      return;
+
+   for (i = 0; i < (hypre_global_timing -> size); i++)
+   {
+      hypre_TimingWallTime(i) = 0.0;
+      hypre_TimingCPUTime(i)  = 0.0;
+      hypre_TimingFLOPS(i)    = 0.0;
+   }
+}
+
+/*--------------------------------------------------------------------------
  * hypre_PrintTiming
  *--------------------------------------------------------------------------*/
 
 void
-hypre_PrintTiming( MPI_Comm *comm )
+hypre_PrintTiming( char     *heading,
+                   MPI_Comm  comm  )
 {
    double  local_wall_time;
    double  local_cpu_time;
@@ -197,82 +282,47 @@ hypre_PrintTiming( MPI_Comm *comm )
    if (hypre_global_timing == NULL)
       return;
 
-   MPI_Comm_rank(*comm, &myrank );
+   MPI_Comm_rank(comm, &myrank );
+
+   /* print heading */
+   if (myrank == 0)
+   {
+      printf("=============================================\n");
+      printf("%s:\n", heading);
+      printf("=============================================\n");
+   }
 
    for (i = 0; i < (hypre_global_timing -> size); i++)
    {
-      local_wall_time = hypre_TimingWallTime(i);
-      local_cpu_time  = hypre_TimingCPUTime(i);
-      MPI_Allreduce(&local_wall_time, &wall_time, 1,
-                    MPI_DOUBLE, MPI_MAX, *comm);
-      MPI_Allreduce(&local_cpu_time, &cpu_time, 1,
-                    MPI_DOUBLE, MPI_MAX, *comm);
-
-      if (myrank == 0)
+      if (hypre_TimingNumRegs(i) > 0)
       {
-	 printf("%s:\n", hypre_TimingName(i));
+         local_wall_time = hypre_TimingWallTime(i);
+         local_cpu_time  = hypre_TimingCPUTime(i);
+         MPI_Allreduce(&local_wall_time, &wall_time, 1,
+                       MPI_DOUBLE, MPI_MAX, comm);
+         MPI_Allreduce(&local_cpu_time, &cpu_time, 1,
+                       MPI_DOUBLE, MPI_MAX, comm);
 
-         /* print wall clock info */
-	 printf("  wall clock time = %f seconds\n", wall_time);
-         if (wall_time)
-            wall_mflops = hypre_TimingFLOPS(i) / wall_time / 1.0E6;
-         else
-            wall_mflops = 0.0;
-	 printf("  wall MFLOPS     = %f\n", wall_mflops);
-
-         /* print CPU clock info */
-	 printf("  cpu clock time  = %f seconds\n", cpu_time);
-         if (cpu_time)
-            cpu_mflops = hypre_TimingFLOPS(i) / cpu_time / 1.0E6;
-         else
-            cpu_mflops = 0.0;
-	 printf("  cpu MFLOPS      = %f\n", cpu_mflops);
-      }
-   }
-}
-
-/*--------------------------------------------------------------------------
- * hypre_FinalizeTiming
- *--------------------------------------------------------------------------*/
-
-void
-hypre_FinalizeTiming( int time_index )
-{
-   int  i;
-
-   if (hypre_global_timing == NULL)
-      return;
-
-   if (time_index < (hypre_global_timing -> size))
-   {
-      if (hypre_TimingNumRegs(time_index) == 1)
-      {
-         hypre_TFree(hypre_TimingName(time_index));
-         (hypre_global_timing -> size) --;
-         for (i = time_index; i < (hypre_global_timing -> size); i++)
+         if (myrank == 0)
          {
-            hypre_TimingWallTime(i) = hypre_TimingWallTime(i+1);
-            hypre_TimingCPUTime(i)  = hypre_TimingCPUTime(i+1);
-            hypre_TimingFLOPS(i)    = hypre_TimingFLOPS(i+1);
-            hypre_TimingName(i)     = hypre_TimingName(i+1);
-            hypre_TimingState(i)    = hypre_TimingState(i+1);
-            hypre_TimingNumRegs(i)  = hypre_TimingNumRegs(i+1);
-         }
+            printf("%s:\n", hypre_TimingName(i));
 
-         if ((hypre_global_timing -> size) == 0)
-         {
-            hypre_TFree(hypre_global_timing -> wall_time);
-            hypre_TFree(hypre_global_timing -> cpu_time);
-            hypre_TFree(hypre_global_timing -> flops);
-            hypre_TFree(hypre_global_timing -> name);
-            hypre_TFree(hypre_global_timing -> state);
-            hypre_TFree(hypre_global_timing);
-            hypre_global_timing = NULL;
+            /* print wall clock info */
+            printf("  wall clock time = %f seconds\n", wall_time);
+            if (wall_time)
+               wall_mflops = hypre_TimingFLOPS(i) / wall_time / 1.0E6;
+            else
+               wall_mflops = 0.0;
+            printf("  wall MFLOPS     = %f\n", wall_mflops);
+
+            /* print CPU clock info */
+            printf("  cpu clock time  = %f seconds\n", cpu_time);
+            if (cpu_time)
+               cpu_mflops = hypre_TimingFLOPS(i) / cpu_time / 1.0E6;
+            else
+               cpu_mflops = 0.0;
+            printf("  cpu MFLOPS      = %f\n", cpu_mflops);
          }
-      }
-      else
-      {
-         hypre_TimingNumRegs(time_index) --;
       }
    }
 }

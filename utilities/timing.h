@@ -54,6 +54,7 @@ typedef struct
    int     *state;     /* boolean flag to allow for recursive timing */
    int     *num_regs;  /* count of how many times a name is registered */
 
+   int      num_names;
    int      size;
 
    double   wall_count;
@@ -87,20 +88,21 @@ extern hypre_TimingType *hypre_global_timing;
  *-------------------------------------------------------*/
 
 #ifdef __STDC__
-# define        P(s) s
+# define	P(s) s
 #else
 # define P(s) ()
 #endif
- 
- 
+
+
 /* timing.c */
 int hypre_InitializeTiming P((char *name ));
+void hypre_FinalizeTiming P((int time_index ));
 void hypre_IncFLOPCount P((int inc ));
 void hypre_BeginTiming P((int time_index ));
 void hypre_EndTiming P((int time_index ));
-void hypre_PrintTiming P((MPI_Comm *comm ));
-void hypre_FinalizeTiming P((int time_index ));
- 
+void hypre_ClearTiming P((void ));
+void hypre_PrintTiming P((char *heading , MPI_Comm comm ));
+
 #undef P
 
 #endif
