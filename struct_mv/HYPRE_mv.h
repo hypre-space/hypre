@@ -17,6 +17,10 @@
 
 #include "mpi.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*--------------------------------------------------------------------------
  * Structures
  *--------------------------------------------------------------------------*/
@@ -78,5 +82,9 @@ int HYPRE_MigrateStructVector P((HYPRE_CommPkg comm_pkg , HYPRE_StructVector fro
 void HYPRE_FreeCommPkg P((HYPRE_CommPkg comm_pkg ));
 
 #undef P
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

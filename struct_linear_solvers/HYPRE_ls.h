@@ -20,6 +20,10 @@
 #include "HYPRE_struct_pcg.h"
 #include "HYPRE_pcg.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*--------------------------------------------------------------------------
  * Structures
  *--------------------------------------------------------------------------*/
@@ -52,5 +56,9 @@ int HYPRE_SMGGetNumIterations P((HYPRE_StructSolver solver , int *num_iterations
 int HYPRE_SMGGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));
 
 #undef P
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

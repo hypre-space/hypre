@@ -18,6 +18,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*--------------------------------------------------------------------------
  * Use "Debug Malloc Library", dmalloc
  *--------------------------------------------------------------------------*/
@@ -91,5 +95,9 @@ char *hypre_ReAlloc P((char *ptr , int size ));
 void hypre_Free P((char *ptr ));
 
 #undef P
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

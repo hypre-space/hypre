@@ -22,6 +22,10 @@
 #include "mpi.h"
 #include "timer.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*--------------------------------------------------------------------------
  * With timing off
  *--------------------------------------------------------------------------*/
@@ -105,6 +109,10 @@ void hypre_PrintTiming P((char *heading , MPI_Comm comm ));
 
 #undef P
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif
