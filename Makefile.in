@@ -16,8 +16,7 @@ VPATH = @srcdir@
 HYPRE_DIRS =\
  utilities\
  struct_matrix_vector\
- struct_linear_solvers\
- test
+ struct_linear_solvers
 
 # These are directories that are not yet officially in HYPRE
 HYPRE_EXTRA_DIRS =\
@@ -26,10 +25,6 @@ HYPRE_EXTRA_DIRS =\
  parcsr_linear_solvers\
  seq_linear_solvers/pamg\
 # bmakes
-
-#This is the documentation directory not yet offivially in HYPRE
-HYPRE_DOCS =\
- docs
 
 #These are the directories for structured matrices
 HYPRE_STRUCT_DIRS =\
@@ -80,14 +75,14 @@ install:
 	fi; \
 	( \
 	   cd $$HYPRE_INSTALL_DIR; \
-	   DIRS="bin docs include lib"; \
+	   DIRS="bin include lib"; \
 	   for i in $$DIRS; \
 	   do \
 	      rm -fr $$i; \
 	      mkdir $$i; \
 	   done \
 	); \
-	for i in ${HYPRE_DIRS} ${HYPRE_DOCS}; \
+	for i in ${HYPRE_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -99,7 +94,7 @@ install:
 
 clean:
 	@ \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_DOCS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -110,7 +105,7 @@ clean:
 
 veryclean:
 	@ \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_DOCS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -122,18 +117,6 @@ veryclean:
 beta:
 	@ \
 	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; make); \
-	    echo ""; \
-	  fi; \
-	done
-
-docs: docs/Makefile
-	@ \
-	for i in ${HYPRE_DOCS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
