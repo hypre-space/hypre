@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #BHEADER***********************************************************************
 # (c) 1998   The Regents of the University of California
 #
@@ -39,7 +39,7 @@ perform_test()
           ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE};\
   chmod -fR a+rX,u+w,go-w linear_solvers;\
   chgrp -fR hypre linear_solvers;\
-    )" >/dev/null 2>&1
+    )" 
   echo "returning to autotest...."
   
 }
@@ -161,8 +161,8 @@ HYPRE_MESSAGE=""
 export AUTOMAKEMODE HYPRE_MESSAGE
 # OpenSSH to F-Secure communication for RSA authentication
 SSH_COMMAND="ssh -1"
-SCP_COMMAND="scp -q -oProtocol=1"
-###SCP_COMMAND="cp"
+##SCP_COMMAND="scp -q -oProtocol=1"
+SCP_COMMAND="cp"
 #==============================================================================
 # Run test suites on remote machines
 #==============================================================================
@@ -445,7 +445,9 @@ do
         HYPRE_REMOTE_DIR="vivid:/usr/gapps/hypre/i686-pc-linux-gnu-vivid/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf"
         HYPRE_MESSAGE='OTHER'
+        SCP_COMMAND="scp -q -oProtocol=1"
 	perform_test
+        SCP_COMMAND="cp"
         shift;;
     *)
         shift;;
