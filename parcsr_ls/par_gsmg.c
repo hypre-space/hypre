@@ -493,23 +493,13 @@ hypre_BoomerAMGCreateSmoothDirs(void         *data,
    int ret;
    double *datax, *bp, *p;
    double minimax;
+   double rlx_wt, omega;
 
    int rlx_type;
    int *smooth_option;
    HYPRE_Solver *smoother;
 
    int debug_flag = hypre_ParAMGDataDebugFlag(amg_data);
-
-#if 0
-    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-    double          *A_diag_data = hypre_CSRMatrixData(A_diag);
-    int             *A_diag_i = hypre_CSRMatrixI(A_diag);
-    int             *A_diag_j = hypre_CSRMatrixJ(A_diag);
-    int j;
-    for (i=0; i<n; i++)
-        for (j=A_diag_i[i]; j<A_diag_i[i+1]; j++)
-            printf("%d %d %f\n", i+1, A_diag_j[j]+1, A_diag_data[j]);
-#endif
 
    if (!comm_pkg)
    {
@@ -529,6 +519,8 @@ hypre_BoomerAMGCreateSmoothDirs(void         *data,
 	 num_sweeps = hypre_ParAMGDataSmoothNumSweep(amg_data);
    }
    rlx_type = hypre_ParAMGDataGridRelaxType(amg_data)[0];
+   rlx_wt = hypre_ParAMGDataRelaxWeight(amg_data)[level];
+   omega = hypre_ParAMGDataOmega(amg_data)[level];
 
    /* generate par vectors */
 
@@ -573,8 +565,8 @@ hypre_BoomerAMGCreateSmoothDirs(void         *data,
 	   else
 	   {
               ret = hypre_BoomerAMGRelax(A, Zero, NULL /*CFmarker*/,
-               rlx_type , 0 /*rel pts*/, 1.0 /*weight*/, 1.0 /*omega*/,
-		U, Temp);
+                rlx_type , 0 /*rel pts*/, rlx_wt /*weight*/, 
+		omega /*omega*/, U, Temp);
               assert(ret == 0);
 	   }
        }
