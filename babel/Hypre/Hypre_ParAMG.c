@@ -39,7 +39,7 @@ void Hypre_ParAMG_destructor(Hypre_ParAMG this) {
    struct Hypre_ParAMG_private_type *HSp = this->d_table;
    HYPRE_Solver *S = HSp->Hsolver;
 
-   HYPRE_ParAMGDestroy( *S );
+   HYPRE_BoomerAMGDestroy( *S );
    free(this->d_table);
 } /* end destructor */
 
@@ -73,16 +73,16 @@ int  impl_Hypre_ParAMG_SetParameterDouble
    HYPRE_Solver *S = HSp->Hsolver;
 
    if ( !strcmp(name,"tol") ) {
-      return HYPRE_ParAMGSetTol( *S, value );
+      return HYPRE_BoomerAMGSetTol( *S, value );
    }
    else if ( !strcmp(name,"strong threshold") ) {
-      return HYPRE_ParAMGSetStrongThreshold( *S, value );
+      return HYPRE_BoomerAMGSetStrongThreshold( *S, value );
    }
    else if ( !strcmp(name,"trunc factor") ) {
-      return HYPRE_ParAMGSetTruncFactor( *S, value );
+      return HYPRE_BoomerAMGSetTruncFactor( *S, value );
    }
    else if ( !strcmp(name,"max row sum") ) {
-      return HYPRE_ParAMGSetMaxRowSum( *S, value );
+      return HYPRE_BoomerAMGSetMaxRowSum( *S, value );
    }
    else
       printf( "Hypre_ParAMG_SetParameterDouble does not recognize name %s\n", name );
@@ -99,7 +99,7 @@ int impl_Hypre_ParAMG_SetParameterDoubleArray
    HYPRE_Solver *S = HSp->Hsolver;
 
    if ( !strcmp(name,"relax weight") ) {
-      return HYPRE_ParAMGSetRelaxWeight( *S, value.data );
+      return HYPRE_BoomerAMGSetRelaxWeight( *S, value.data );
    }
    else
       printf(
@@ -126,37 +126,37 @@ int  impl_Hypre_ParAMG_SetParameterInt(Hypre_ParAMG this, char* name, int value)
    HYPRE_Solver *S = HSp->Hsolver;
 
    if ( !strcmp(name,"restriction") ) {
-      return HYPRE_ParAMGSetRestriction( *S, value );
+      return HYPRE_BoomerAMGSetRestriction( *S, value );
    }
    else if ( !strcmp(name,"max levels") ) {
-      return HYPRE_ParAMGSetMaxLevels( *S, value );
+      return HYPRE_BoomerAMGSetMaxLevels( *S, value );
    }
    else if ( !strcmp(name,"interp type") ) {
-      return HYPRE_ParAMGSetInterpType( *S, value );
+      return HYPRE_BoomerAMGSetInterpType( *S, value );
    }
    else if ( !strcmp(name,"min iter") ) {
-      return HYPRE_ParAMGSetMinIter( *S, value );
+      return HYPRE_BoomerAMGSetMinIter( *S, value );
    }
    else if ( !strcmp(name,"max iter") ) {
-      return HYPRE_ParAMGSetMaxIter( *S, value );
+      return HYPRE_BoomerAMGSetMaxIter( *S, value );
    }
    else if ( !strcmp(name,"coarsen type") ) {
-      return HYPRE_ParAMGSetCoarsenType( *S, value );
+      return HYPRE_BoomerAMGSetCoarsenType( *S, value );
    }
    else if ( !strcmp(name,"measure type") ) {
-      return HYPRE_ParAMGSetMeasureType( *S, value );
+      return HYPRE_BoomerAMGSetMeasureType( *S, value );
    }
    else if ( !strcmp(name,"cycle type") ) {
-      return HYPRE_ParAMGSetCycleType( *S, value );
+      return HYPRE_BoomerAMGSetCycleType( *S, value );
    }
    else if ( !strcmp(name,"ioutdat") ) {
-      return HYPRE_ParAMGSetIOutDat( *S, value );
+      return HYPRE_BoomerAMGSetIOutDat( *S, value );
    }
    else if ( !strcmp(name,"debug") ) {
-      return HYPRE_ParAMGSetDebugFlag( *S, value );
+      return HYPRE_BoomerAMGSetDebugFlag( *S, value );
    }
    else if ( !strcmp(name,"logging") ) {
-      return HYPRE_ParAMGSetLogging( *S, value, "Hypre_log_file" );
+      return HYPRE_BoomerAMGSetLogging( *S, value, "Hypre_log_file" );
    }
    else
       printf( "Hypre_ParAMG_SetParameterInt does not recognize name %s\n", name );
@@ -174,10 +174,10 @@ int  impl_Hypre_ParAMG_SetParameterIntArray
    HYPRE_Solver *S = HSp->Hsolver;
 
    if ( !strcmp(name,"num grid sweeps") ) {
-      return HYPRE_ParAMGSetNumGridSweeps( *S, value.data );
+      return HYPRE_BoomerAMGSetNumGridSweeps( *S, value.data );
    }
    else if ( !strcmp(name,"grid relax type") ) {
-      return HYPRE_ParAMGSetGridRelaxType( *S, value.data );
+      return HYPRE_BoomerAMGSetGridRelaxType( *S, value.data );
    }
    else
       printf(
@@ -216,7 +216,7 @@ int  impl_Hypre_ParAMG_SetParameterIntArray2
          /* ... I'm guessing that the Babel standard index ordering is Fortran-
             like, as the array has to be passable to Fortran code */
       };
-      return HYPRE_ParAMGSetGridRelaxPoints( *S, valuepp );
+      return HYPRE_BoomerAMGSetGridRelaxPoints( *S, valuepp );
    }
    else
       printf(
@@ -233,7 +233,7 @@ int  impl_Hypre_ParAMG_SetParameterString
    HYPRE_Solver *S = HSp->Hsolver;
 
    if ( !strcmp(name,"log file name") ) {
-      return HYPRE_ParAMGSetLogFileName( *S, value );
+      return HYPRE_BoomerAMGSetLogFileName( *S, value );
    }
    else
       printf( "Hypre_ParAMG_SetParameterString does not recognize name %s\n", name );
@@ -248,7 +248,7 @@ int  impl_Hypre_ParAMG_New(Hypre_ParAMG this, Hypre_MPI_Com comm) {
    struct Hypre_ParAMG_private_type *HSp = this->d_table;
    HYPRE_Solver *S = HSp->Hsolver;
 
-   return HYPRE_ParAMGCreate( S );
+   return HYPRE_BoomerAMGCreate( S );
 } /* end impl_Hypre_ParAMGNew */
 
 /* ********************************************************
@@ -311,8 +311,8 @@ int  impl_Hypre_ParAMG_Setup
 
 /* it's easier to create the hypre_ParCSR* objects than the HYPRE_ParCSR* objects,
    so we go directly to the hypre-level solver ... 
-   return HYPRE_ParAMGSetup( *S, *MA, *Vb, *Vx ); */
-   return hypre_ParAMGSetup( *S, parM, b_par, x_par );
+   return HYPRE_BoomerAMGSetup( *S, *MA, *Vb, *Vx ); */
+   return hypre_BoomerAMGSetup( *S, parM, b_par, x_par );
 
 } /* end impl_Hypre_ParAMGSetup */
 
@@ -378,7 +378,7 @@ int  impl_Hypre_ParAMG_Apply(Hypre_ParAMG this, Hypre_Vector b, Hypre_Vector* x)
    x_par = hypre_IJVectorLocalStorage(vx);
 
 
-   return hypre_ParAMGSolve( *S, parM, b_par, x_par );
+   return hypre_BoomerAMGSolve( *S, parM, b_par, x_par );
 
 } /* end impl_Hypre_ParAMGApply */
 
@@ -415,12 +415,12 @@ int  impl_Hypre_ParAMG_GetConvergenceInfo(Hypre_ParAMG this, char* name, double*
    HYPRE_Solver *S = HSp->Hsolver;
 
    if ( !strcmp(name,"num iterations") ) {
-      ierr = HYPRE_ParAMGGetNumIterations( *S, &ivalue );
+      ierr = HYPRE_BoomerAMGGetNumIterations( *S, &ivalue );
       *value = ivalue;
       return ierr;
    }
    else if ( !strcmp(name,"final relative residual norm") ) {
-      ierr = HYPRE_ParAMGGetFinalRelativeResidualNorm( *S, value );
+      ierr = HYPRE_BoomerAMGGetFinalRelativeResidualNorm( *S, value );
       return ierr;
    }
    else
