@@ -10,27 +10,27 @@
 include ../config/Makefile.config
 
  
- BLASFILES =\
- $(top_srcdir)/blas/dasum.o\
- $(top_srcdir)/blas/daxpy.o\
- $(top_srcdir)/blas/dcopy.o\
- $(top_srcdir)/blas/ddot.o\
- $(top_srcdir)/blas/dgemm.o\
- $(top_srcdir)/blas/dgemv.o\
- $(top_srcdir)/blas/dger.o\
- $(top_srcdir)/blas/dnrm2.o\
- $(top_srcdir)/blas/drot.o\
- $(top_srcdir)/blas/dscal.o\
- $(top_srcdir)/blas/dsymv.o\
- $(top_srcdir)/blas/dsyr2.o\
- $(top_srcdir)/blas/dsyr2k.o\
- $(top_srcdir)/blas/dsyrk.o\
- $(top_srcdir)/blas/dtrmm.o\
- $(top_srcdir)/blas/dtrmv.o\
- $(top_srcdir)/blas/dtrsm.o\
- $(top_srcdir)/blas/dtrsv.o\
- $(top_srcdir)/blas/idamax.o\
- $(top_srcdir)/blas/blas_utils.o
+#BLASFILES =\
+#$(top_srcdir)/blas/dasum.o\
+#$(top_srcdir)/blas/daxpy.o\
+#$(top_srcdir)/blas/dcopy.o\
+#$(top_srcdir)/blas/ddot.o\
+#$(top_srcdir)/blas/dgemm.o\
+#$(top_srcdir)/blas/dgemv.o\
+#$(top_srcdir)/blas/dger.o\
+#$(top_srcdir)/blas/dnrm2.o\
+#$(top_srcdir)/blas/drot.o\
+#$(top_srcdir)/blas/dscal.o\
+#$(top_srcdir)/blas/dsymv.o\
+#$(top_srcdir)/blas/dsyr2.o\
+#$(top_srcdir)/blas/dsyr2k.o\
+#$(top_srcdir)/blas/dsyrk.o\
+#$(top_srcdir)/blas/dtrmm.o\
+#$(top_srcdir)/blas/dtrmv.o\
+#$(top_srcdir)/blas/dtrsm.o\
+#$(top_srcdir)/blas/dtrsv.o\
+#$(top_srcdir)/blas/idamax.o\
+#$(top_srcdir)/blas/blas_utils.o
 
 
 #LAPACKFILES = \

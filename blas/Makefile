@@ -9,7 +9,7 @@
 
 ###  This is the template file for the blas sub-directory.  When configure
 ###  determines whether or not these files are needed, a macro will be
-###  automatically run to replace the   variable with a comment
+###  automatically run to replace the # variable with a comment
 ###  symbol or a space and create the appropriate file named Makefile.
 ###
 ###
@@ -21,30 +21,30 @@
 include ../config/Makefile.config
 
 
- BLAS_HEADERS =  f2c.h  hypre_blas.h
- BLAS_FILES = \
- blas_utils.c\
- dasum.c\
- daxpy.c\
- dcopy.c\
- ddot.c\
- dgemm.c\
- dgemv.c\
- dger.c\
- dnrm2.c\
- drot.c\
- dscal.c\
- dswap.c\
- dsymm.c\
- dsymv.c\
- dsyr2.c\
- dsyr2k.c\
- dsyrk.c\
- dtrmm.c\
- dtrmv.c\
- dtrsm.c\
- dtrsv.c\
- idamax.c
+#BLAS_HEADERS =  f2c.h  hypre_blas.h
+#BLAS_FILES = \
+#blas_utils.c\
+#dasum.c\
+#daxpy.c\
+#dcopy.c\
+#ddot.c\
+#dgemm.c\
+#dgemv.c\
+#dger.c\
+#dnrm2.c\
+#drot.c\
+#dscal.c\
+#dswap.c\
+#dsymm.c\
+#dsymv.c\
+#dsyr2.c\
+#dsyr2k.c\
+#dsyrk.c\
+#dtrmm.c\
+#dtrmv.c\
+#dtrsm.c\
+#dtrsv.c\
+#idamax.c
 
 OBJS = ${BLAS_FILES:.c=.o}
 
@@ -54,11 +54,11 @@ OBJS = ${BLAS_FILES:.c=.o}
 
 all: ${OBJS}
 	@\
-	 for file in ${OBJS}; \
-	 do \
-	   (cp -fp $$file ../utilities); \
-	 done
-	 cp -fp ${BLAS_HEADERS} ../utilities
+	#for file in ${OBJS}; \
+	#do \
+	#  (cp -fp $$file ../utilities); \
+	#done
+	#cp -fp ${BLAS_HEADERS} ../utilities
 
 install: all
 
