@@ -203,9 +203,11 @@ that must be handled on the processor, ...
    ierr = HYPRE_IJVectorInitialize(ij_x);
 \end{verbatim}
 
-\noindent Vector components can be placed into underlying
-{\slshape hypre} formats either in contiguous subsets or in
-indexed subsets (shown for \verb+ij_b+ only) ...
+\noindent As in Figure \ref{loc_comps_blk} vector components
+can be placed into underlying {\slshape hypre} formats either
+in contiguous subsets Figure \ref{loc_comps_blk}) or in
+indexed subsets (Figure \ref{loc_comps}). For \verb+ij_b+ only,
+one can use either of the following:
 
 \begin{verbatim}
    ierr = HYPRE_IJVectorSetLocalComponentsInBlock(ij_b,
@@ -223,23 +225,38 @@ indexed subsets (shown for \verb+ij_b+ only) ...
 choose \verb+glob_vec_index_start+ \verb+=+ \verb+domain_pt_start+,
 and \verb+glob_vec_index_stop+ \verb+=+\verb+next_domain_pt_start-1+.
 
+\begin{figure}
+\label{loc_comps_blk}
+\centerline{\epsfig{figure=loc_cmps_blk.eps,height=2.5in}}
+\parbox{6in}{\hspace{1in}
+             {\tt ierr = HYPRE\_IJVectorSetLocalComponentsInBlock(ij\_vec,}}
+\parbox{6in}{\hspace{2.5in}
+             {\tt glob\_vec\_index\_start, glob\_vec\_index\_stop,}}
+\parbox{6in}{\hspace{2.5in}
+             {\tt value\_indices, values);}}
+\caption{Mapping between external array values and
+    internal vector data for
+    {\tt HYPRE\_IJVectorSet\linebreak[0]LocalComponentsInBlock}
+    (rightward arrows) and
+    {\tt HYPRE\_IJVectorGet\linebreak[0]LocalComponentsInBlock}
+    (leftward arrows)}
+\end{figure}
+
 \begin{figure}[b]
-\label{loc_comps_map}
-\centerline{\epsfig{figure=loc_comps.eps,height=2.5in}}
+\label{loc_comps}
+\centerline{\epsfig{figure=loc_cmps.eps,height=2.4in}}
 \parbox{6in}{\hspace{1in}
              {\tt ierr = HYPRE\_IJVectorSetLocalComponents(ij\_vec,}}
-\parbox{6in}{\hspace{4.15in}
-             {\tt num\_values,}}
-\parbox{6in}{\hspace{4.15in}
-             {\tt glob\_vec\_indices,}}
-\parbox{6in}{\hspace{4.15in}
-             {\tt value\_indices,}}
-\parbox{6in}{\hspace{4.15in}
-             {\tt values);}}
-\caption{Mapping between underlying vector data and external
-    array values for {\tt HYPRE\_IJVectorSetLocalComponents} (rightward
-    arrows) and {\tt HYPRE\_IJVectorGetLocalComponents} (leftward
-    arrows)}
+\parbox{6in}{\hspace{2.5in}
+             {\tt num\_values, glob\_vec\_indices,}}
+\parbox{6in}{\hspace{2.5in}
+             {\tt value\_indices, values);}}
+\caption{Mapping between external array values and
+    internal vector data for
+    {\tt HYPRE\_IJVectorSet\linebreak[0]LocalComponents}
+    (rightward arrows) and
+    {\tt HYPRE\_IJVectorGet\linebreak[0]LocalComponents}
+    (leftward arrows)}
 \end{figure}
 
 One can also add to vector components that are already set, in
