@@ -79,6 +79,7 @@ AC_SUBST([HYPRE_RELEASEVERSION])
 AC_SUBST([HYPRE_RELEASEDATE])
 AC_SUBST([HYPRE_RELEASETIME])
 AC_SUBST([HYPRE_RELEASEDATETIME])
+
 dnl *********************************************************************
 dnl * Define optional features
 dnl *********************************************************************
@@ -105,6 +106,48 @@ AC_ARG_ENABLE(shared,
 )
 
 dnl *********************************************************************
+dnl * Determine if user provided compiler or compiler flags
+dnl *********************************************************************
+if test "x$CC" != "x"   || 
+   test "x$CXX" != "x"  ||
+   test "x$F77" != "x"
+then
+   casc_user_chose_compilers=yes
+else
+   casc_user_chose_compilers=no
+fi
+
+if test "x$CFLAGS" != "x"
+then
+   casc_user_chose_cflags=yes
+else
+   casc_user_chose_cflags=no
+fi
+
+if test "x$CXXFLAGS" != "x"
+then
+   casc_user_chose_cxxflags=yes
+else
+   casc_user_chose_cxxflags=no
+fi
+
+if test "x$FFLAGS" != "x" || 
+   test "x$F77FLAGS" != "x"
+then
+   casc_user_chose_fflags=yes
+else
+   casc_user_chose_fflags=no
+fi
+
+dnl *********************************************************************
+dnl * Set default AR value if not defined by the user
+dnl *********************************************************************
+if test "x$AR" = "x"  
+then
+   AR="ar -rcu"
+fi
+
+dnl *********************************************************************
 dnl * If the user has specified a c, c++, or fortran compiler on the 
 dnl * command line, that compiler will be used.  No checks are done
 dnl * to assure this compiler is present or working.  Additionally,
@@ -112,10 +155,6 @@ dnl * if the user indicated any MPI include, library, or directory
 dnl * to use with the chosen compiler those options are identified
 dnl * and the appropriate macros are assigned values.
 dnl *********************************************************************
-casc_user_chose_compilers=no
-casc_user_chose_cflags=no
-casc_user_chose_cxxflags=no
-casc_user_chose_fflags=no
 casc_user_chose_mpi=no
 casc_user_chose_blas=no
 casc_user_chose_lapack=no
@@ -127,79 +166,11 @@ casc_using_insure=no
 casc_using_purify=no
 
 
-AC_ARG_WITH(CC,
-  AS_HELP_STRING([  --with-CC=ARG],
-                 [ User can manually set C compiler to ARG.  The
-                   environment variables 'CC' will be overridden by
-                   the configure script.]),
-[case "${withval}" in
-   yes) casc_user_chose_compilers=no ;;
-   no)  casc_user_chose_compilers=no ;;
-   *)   casc_user_chose_compilers=yes
-        CC=$withval ;;
- esac],
-[casc_user_chose_compilers=no]
-)
-
-AC_ARG_WITH(CXX,
-  AS_HELP_STRING([  --with-CXX=ARG],
-                 [ User can manually set C++ compiler to ARG.  The
-                   environment variables 'CXX' will be overridden by
-                   the configure script.]),
-[case "${withval}" in
-   yes) casc_user_chose_compilers=no ;;
-   no)  casc_user_chose_compilers=no ;;
-   *)   casc_user_chose_compilers=yes
-        CXX=$withval ;;
- esac]
-)
-
-AC_ARG_WITH(F77,
-  AS_HELP_STRING([  --with-F77=ARG],
-                 [ User can manually set f77 compiler to ARG.  The
-                   environment variable 'F77' will be overridden.]),
-[case "${withval}" in
-   yes) casc_user_chose_compilers=no ;;
-   no)  casc_user_chose_compilers=no ;;
-   *)   casc_user_chose_compilers=yes
-        F77=$withval ;;
- esac]
-)
-
 AC_ARG_WITH(LD,
   AS_HELP_STRING([  --with-LD=ARG],
-                 [ User can manually set linker to ARG.  The
-                   environment variable 'LD' will be overridden.]),
-[case "${withval}" in
-   yes) casc_user_chose_compilers=no ;;
-   no)  casc_user_chose_compilers=no ;;
-   *)   casc_user_chose_compilers=yes
-        LD=$withval ;;
- esac]
-)
-
-AC_ARG_WITH(CFLAGS,
-  AS_HELP_STRING([  --with-CFLAGS=ARG],
-                 [ User can manually set c compiler flags.  The 'CFLAGS'
-                   environment variable will be overridden.]),
-[CFLAGS=$withval
- casc_user_chose_cflags=yes]
-)
-
-AC_ARG_WITH(CXXFLAGS,
-  AS_HELP_STRING([  --with-CXXFLAGS=ARG],
-                 [ User can manually set c++ compiler flags. The 'CXXFLAGS'
-                   environment variable will be overridden.]),
-[CXXFLAGS=$withval
- casc_user_chose_cxxflags=yes]
-)
-
-AC_ARG_WITH(F77FLAGS,
-  AS_HELP_STRING([  --with-F77FLAGS=ARG],
-                 [ User can manually set f77 compiler flags. The 'F77FLAGS'
-                   environment variable will be overridden.]),
-[F77FLAGS=$withval
- casc_user_chose_fflags=yes]
+                 [ Set linker to ARG.  The environment variable 'LD'
+                   will be overridden.]),
+[LD=$withval]
 )
 
 AC_ARG_WITH(LDFLAGS,
@@ -929,6 +900,33 @@ case $HYPRE_ARCH in
 esac
 
 dnl *********************************************************************
+dnl * Set flags for building shared libraries
+dnl *********************************************************************
+if test "$casc_using_shared" = "yes"
+then
+   case $HYPRE_ARCH in
+      Linux | LINUX | linux)
+         CFLAGS="-fPIC $CFLAGS"
+         CXXFLAGS="-fPIC $CXXFLAGS"
+         LDFLAGS="-shared $LDFLAGS"
+         HYPRE_LIBSUFFIX=.so
+         ;;
+      rs6000)
+         LDFLAGS="-G $LDFLAGS -binitfini:poe_remote_main"
+         HYPRE_LIBSUFFIX=.so
+         ;;
+      *)
+         CFLAGS="-KPIC $CFLAGS"
+         CXXFLAGS="-KPIC $CXXFLAGS"
+         LDFLAGS="-shared $LDFLAGS"
+         HYPRE_LIBSUFFIX=.so
+         ;;
+   esac
+else
+   HYPRE_LIBSUFFIX=.a
+fi
+
+dnl *********************************************************************
 dnl * AC_SUBST performs the variable substitutions
 dnl * Some macros call AC_SUBST for some variables, but it does no damage
 dnl * to call it again.
@@ -937,8 +935,17 @@ dnl ********************************************************************
 dnl * The following macros are exported and may be used in Makefile.in's
 dnl ********************************************************************
 
+
+dnl *********************************************************************
+dnl * compilers and load flags
+dnl *********************************************************************
 AC_SUBST(CC)
 AC_SUBST(CXX)
+AC_SUBST(F77)
+AC_SUBST(CFLAGS)
+AC_SUBST(CXXFLAGS)
+AC_SUBST(F77FLAGS)
+AC_SUBST(LDFLAGS)
 
 dnl *********************************************************************
 dnl * Installation Directories
@@ -948,13 +955,19 @@ AC_SUBST(HYPRE_LIBINSTALL)
 AC_SUBST(HYPRE_INCINSTALL)
 
 dnl *********************************************************************
-dnl * General purpose header files and libraries and directories for
-dnl * those libraries.  
+dnl * General purpose header files, libraries and directories
 dnl *********************************************************************
 AC_SUBST(INCLUDES)
 AC_SUBST(LIBS)
 AC_SUBST(FLIBS)
 AC_SUBST(LIBDIRS)
+AC_SUBST(LDLIBS)
+AC_SUBST(LDLIBDIRS)
+
+dnl *********************************************************************
+dnl * suffix for hypre libraries
+dnl *********************************************************************
+AC_SUBST(HYPRE_LIBSUFFIX)
 
 dnl *********************************************************************
 dnl * MPI-related header files and libraries and directories for
@@ -969,26 +982,6 @@ dnl *********************************************************************
 dnl * macro definitions that should be included on compile line
 dnl *********************************************************************
 AC_SUBST(TIMERDEFS)
-
-dnl *********************************************************************
-dnl *Libraries and their directories that must be used at compile time 
-dnl *********************************************************************
-AC_SUBST(LDLIBS)
-AC_SUBST(LDLIBDIRS)
-
-dnl *********************************************************************
-dnl * contains compiler flags such as optimization or debugging flags
-dnl *********************************************************************
-AC_SUBST(CFLAGS)
-AC_SUBST(CXXFLAGS)
-AC_SUBST(F77FLAGS)
-AC_SUBST(LDFLAGS)
-
-dnl *********************************************************************
-dnl *needed when compiling with another command prior to the compiler command
-dnl * for example: purify cc ....
-dnl *********************************************************************
-AC_SUBST(PREPEND)
 
 dnl *********************************************************************
 dnl *BABEL-related files, libraries and directories
@@ -1020,21 +1013,14 @@ AC_SUBST(LAPACKLIBDIRS)
 AC_SUBST(LAPACKLIBS)
 
 dnl *********************************************************************
-dnl * ranlib substitution
+dnl * ar & ranlib substitution
 dnl *********************************************************************
+AC_SUBST(AR)
 AC_SUBST(RANLIB)
 
 dnl *********************************************************************
 dnl * Define the files to be configured and made 
 dnl *********************************************************************
-
-if test -d babel || test "$casc_using_babel" = "yes"; then
-   AC_CONFIG_FILES([
-                    babel/Makefile
-                    babel/bHYPRE/Makefile
-                    babel/bHYPREClient-C/Makefile
-                    babel/bHYPREClient-F/Makefile])
-fi
 
 if test -d tools; then
    AC_DEFINE(TOOLSDIR)

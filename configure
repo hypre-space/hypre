@@ -322,7 +322,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS LDLIBS LDLIBDIRS F77FLAGS PREPEND FEILIBS FEILIBDIRS FEIINCLUDE MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS LAPACKLIBDIRS LAPACKLIBS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME F77FLAGS HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS LAPACKLIBDIRS LAPACKLIBS AR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -885,22 +885,8 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-    --with-CC=ARG         User can manually set C compiler to ARG. The
-                          environment variables 'CC' will be overridden by the
-                          configure script.
-    --with-CXX=ARG        User can manually set C++ compiler to ARG. The
-                          environment variables 'CXX' will be overridden by
-                          the configure script.
-    --with-F77=ARG        User can manually set f77 compiler to ARG. The
-                          environment variable 'F77' will be overridden.
-    --with-LD=ARG         User can manually set linker to ARG. The environment
-                          variable 'LD' will be overridden.
-    --with-CFLAGS=ARG     User can manually set c compiler flags. The 'CFLAGS'
-                          environment variable will be overridden.
-    --with-CXXFLAGS=ARG   User can manually set c++ compiler flags. The
-                          'CXXFLAGS' environment variable will be overridden.
-    --with-F77FLAGS=ARG   User can manually set f77 compiler flags. The
-                          'F77FLAGS' environment variable will be overridden.
+    --with-LD=ARG         Set linker to ARG. The environment variable 'LD'
+                          will be overridden.
     --with-LDFLAGS=ARG    User can manually set linker flags. The 'LDFLAGS'
                           environment variable will be overridden.
     --with-extra-incpath=PATH
@@ -1594,6 +1580,7 @@ HYPRE_RELEASEDATETIME="2005/02/09 09:25:00"
 
 
 
+
 # Check whether --enable-debug or --disable-debug was given.
 if test "${enable_debug+set}" = set; then
   enableval="$enable_debug"
@@ -1624,10 +1611,42 @@ else
 
 fi;
 
-casc_user_chose_compilers=no
-casc_user_chose_cflags=no
-casc_user_chose_cxxflags=no
-casc_user_chose_fflags=no
+if test "x$CC" != "x"   ||
+   test "x$CXX" != "x"  ||
+   test "x$F77" != "x"
+then
+   casc_user_chose_compilers=yes
+else
+   casc_user_chose_compilers=no
+fi
+
+if test "x$CFLAGS" != "x"
+then
+   casc_user_chose_cflags=yes
+else
+   casc_user_chose_cflags=no
+fi
+
+if test "x$CXXFLAGS" != "x"
+then
+   casc_user_chose_cxxflags=yes
+else
+   casc_user_chose_cxxflags=no
+fi
+
+if test "x$FFLAGS" != "x" ||
+   test "x$F77FLAGS" != "x"
+then
+   casc_user_chose_fflags=yes
+else
+   casc_user_chose_fflags=no
+fi
+
+if test "x$AR" = "x"
+then
+   AR="ar -rcu"
+fi
+
 casc_user_chose_mpi=no
 casc_user_chose_blas=no
 casc_user_chose_lapack=no
@@ -1640,83 +1659,10 @@ casc_using_purify=no
 
 
 
-# Check whether --with-CC or --without-CC was given.
-if test "${with_CC+set}" = set; then
-  withval="$with_CC"
-  case "${withval}" in
-   yes) casc_user_chose_compilers=no ;;
-   no)  casc_user_chose_compilers=no ;;
-   *)   casc_user_chose_compilers=yes
-        CC=$withval ;;
- esac
-else
-  casc_user_chose_compilers=no
-
-fi;
-
-
-# Check whether --with-CXX or --without-CXX was given.
-if test "${with_CXX+set}" = set; then
-  withval="$with_CXX"
-  case "${withval}" in
-   yes) casc_user_chose_compilers=no ;;
-   no)  casc_user_chose_compilers=no ;;
-   *)   casc_user_chose_compilers=yes
-        CXX=$withval ;;
- esac
-
-fi;
-
-
-# Check whether --with-F77 or --without-F77 was given.
-if test "${with_F77+set}" = set; then
-  withval="$with_F77"
-  case "${withval}" in
-   yes) casc_user_chose_compilers=no ;;
-   no)  casc_user_chose_compilers=no ;;
-   *)   casc_user_chose_compilers=yes
-        F77=$withval ;;
- esac
-
-fi;
-
-
 # Check whether --with-LD or --without-LD was given.
 if test "${with_LD+set}" = set; then
   withval="$with_LD"
-  case "${withval}" in
-   yes) casc_user_chose_compilers=no ;;
-   no)  casc_user_chose_compilers=no ;;
-   *)   casc_user_chose_compilers=yes
-        LD=$withval ;;
- esac
-
-fi;
-
-
-# Check whether --with-CFLAGS or --without-CFLAGS was given.
-if test "${with_CFLAGS+set}" = set; then
-  withval="$with_CFLAGS"
-  CFLAGS=$withval
- casc_user_chose_cflags=yes
-
-fi;
-
-
-# Check whether --with-CXXFLAGS or --without-CXXFLAGS was given.
-if test "${with_CXXFLAGS+set}" = set; then
-  withval="$with_CXXFLAGS"
-  CXXFLAGS=$withval
- casc_user_chose_cxxflags=yes
-
-fi;
-
-
-# Check whether --with-F77FLAGS or --without-F77FLAGS was given.
-if test "${with_F77FLAGS+set}" = set; then
-  withval="$with_F77FLAGS"
-  F77FLAGS=$withval
- casc_user_chose_fflags=yes
+  LD=$withval
 
 fi;
 
@@ -5208,7 +5154,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5211:" \
+echo "$as_me:5157:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -5404,7 +5350,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:5407: \"$ac_link\") >&5
+(eval echo $as_me:5353: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -5482,7 +5428,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:5485: \"$ac_link\") >&5
+(eval echo $as_me:5431: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -8485,7 +8431,11 @@ fi;
 #***************************************************************
   hypre_save_LIBS="$LIBS"
   hypre_save_LDFLGS="$LDFLAGS"
-  LIBS="$LIBS $FLIBS"
+
+#***************************************************************
+# Set LIBS to include all extra libraries
+#***************************************************************
+  LIBS="$BLASLIBS $LIBS $FLIBS"
 
 #***************************************************************
 # Get fortran linker name of LAPACK function to check for.
@@ -8518,7 +8468,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 #***************************************************************
 #   Set search paths for LAPACK library
 #***************************************************************
-  temp_FLAGS="-L/usr/lib -L/usr/local/lib -L/lib"
+  temp_FLAGS="-L/usr/lib -L/usr/local/lib -L/lib $BLASLIBDIRS"
   LDFLAGS="$temp_FLAGS $LDFLAGS"
 
 #***************************************************************
@@ -8533,7 +8483,7 @@ if eval "test \"\${$as_ac_Lib+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-l$lib -lblas $LIBS"
+LIBS="-l$lib  $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -9326,59 +9276,79 @@ _ACEOF
        ;;
 esac
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-if test -d babel || test "$casc_using_babel" = "yes"; then
-                                           ac_config_files="$ac_config_files babel/Makefile babel/bHYPRE/Makefile babel/bHYPREClient-C/Makefile babel/bHYPREClient-F/Makefile"
-
+if test "$casc_using_shared" = "yes"
+then
+   case $HYPRE_ARCH in
+      Linux | LINUX | linux)
+         CFLAGS="-fPIC $CFLAGS"
+         CXXFLAGS="-fPIC $CXXFLAGS"
+         LDFLAGS="-shared $LDFLAGS"
+         HYPRE_LIBSUFFIX=.so
+         ;;
+      rs6000)
+         LDFLAGS="-G $LDFLAGS -binitfini:poe_remote_main"
+         HYPRE_LIBSUFFIX=.so
+         ;;
+      *)
+         CFLAGS="-KPIC $CFLAGS"
+         CXXFLAGS="-KPIC $CXXFLAGS"
+         LDFLAGS="-shared $LDFLAGS"
+         HYPRE_LIBSUFFIX=.so
+         ;;
+   esac
+else
+   HYPRE_LIBSUFFIX=.a
 fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if test -d tools; then
    cat >>confdefs.h <<\_ACEOF
@@ -9915,10 +9885,6 @@ for ac_config_target in $ac_config_targets
 do
   case "$ac_config_target" in
   # Handling of arguments.
-  "babel/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/Makefile" ;;
-  "babel/bHYPRE/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPRE/Makefile" ;;
-  "babel/bHYPREClient-C/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPREClient-C/Makefile" ;;
-  "babel/bHYPREClient-F/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPREClient-F/Makefile" ;;
   "config/Makefile.config" ) CONFIG_FILES="$CONFIG_FILES config/Makefile.config" ;;
   "HYPRE_config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS HYPRE_config.h:config/HYPRE_config.h.in" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
@@ -10052,19 +10018,19 @@ s,@subdirs@,$subdirs,;t t
 s,@BABELDIR@,$BABELDIR,;t t
 s,@HYPRE_ARCH@,$HYPRE_ARCH,;t t
 s,@HOSTNAME@,$HOSTNAME,;t t
+s,@F77FLAGS@,$F77FLAGS,;t t
 s,@HYPRE_INSTALLDIR@,$HYPRE_INSTALLDIR,;t t
 s,@HYPRE_LIBINSTALL@,$HYPRE_LIBINSTALL,;t t
 s,@HYPRE_INCINSTALL@,$HYPRE_INCINSTALL,;t t
 s,@INCLUDES@,$INCLUDES,;t t
 s,@LIBDIRS@,$LIBDIRS,;t t
+s,@LDLIBS@,$LDLIBS,;t t
+s,@LDLIBDIRS@,$LDLIBDIRS,;t t
+s,@HYPRE_LIBSUFFIX@,$HYPRE_LIBSUFFIX,;t t
 s,@MPIINCLUDE@,$MPIINCLUDE,;t t
 s,@MPILIBDIRS@,$MPILIBDIRS,;t t
 s,@MPIFLAGS@,$MPIFLAGS,;t t
 s,@TIMERDEFS@,$TIMERDEFS,;t t
-s,@LDLIBS@,$LDLIBS,;t t
-s,@LDLIBDIRS@,$LDLIBDIRS,;t t
-s,@F77FLAGS@,$F77FLAGS,;t t
-s,@PREPEND@,$PREPEND,;t t
 s,@FEILIBS@,$FEILIBS,;t t
 s,@FEILIBDIRS@,$FEILIBDIRS,;t t
 s,@FEIINCLUDE@,$FEIINCLUDE,;t t
@@ -10076,6 +10042,7 @@ s,@BLASLIBDIRS@,$BLASLIBDIRS,;t t
 s,@BLASLIBS@,$BLASLIBS,;t t
 s,@LAPACKLIBDIRS@,$LAPACKLIBDIRS,;t t
 s,@LAPACKLIBS@,$LAPACKLIBS,;t t
+s,@AR@,$AR,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF
 
