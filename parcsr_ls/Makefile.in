@@ -84,6 +84,7 @@ HEADERS =\
  HYPRE_parcsr_ls.h
 
 FILES =\
+ amg_hybrid.c\
  par_amg.c\
  par_amg_setup.c\
  par_amg_solve.c\
@@ -111,6 +112,7 @@ FILES =\
  HYPRE_parcsr_bicgstab.c\
  HYPRE_parcsr_cgnr.c\
  HYPRE_parcsr_gmres.c\
+ HYPRE_parcsr_hybrid.c\
  HYPRE_parcsr_pcg.c\
  HYPRE_parcsr_pilut.c\
  HYPRE_parcsr_schwarz.c\
