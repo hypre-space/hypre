@@ -256,7 +256,7 @@ int HYPRE_DistributedMatrixPilutSolverSetMaxIts(
 int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver in_ptr )
 {
    int ierr=0;
-   int m, n, nprocs, start, end, *rowdist;
+   int m, n, nprocs, start, end, *rowdist, col0, coln;
    hypre_DistributedMatrixPilutSolver *solver = 
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
    hypre_PilutSolverGlobals *globals = hypre_DistributedMatrixPilutSolverGlobals(solver);
@@ -277,7 +277,7 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
    DataDistTypeNrows( hypre_DistributedMatrixPilutSolverDataDist( solver ) ) = m;
 
    HYPRE_GetDistributedMatrixLocalRange(
-      hypre_DistributedMatrixPilutSolverMatrix(solver), &start, &end);
+      hypre_DistributedMatrixPilutSolverMatrix(solver), &start, &end, &col0, &coln);
 
    DataDistTypeLnrows(hypre_DistributedMatrixPilutSolverDataDist( solver )) = 
       end - start;
