@@ -222,16 +222,23 @@ main( int   argc,
       printf("\n");
       printf("Usage: %s [<options>]\n", argv[0]);
       printf("\n");
-      printf("  -fromfile <filename>   : build matrix from file\n");
+      printf("  -fromfile <filename>   : matrix from distributed file\n");
+      printf("\n");
+      printf("  -fromonefile <filename>: matrix from standard CSR file\n");
       printf("\n");
       printf("  -laplacian [<options>] : build laplacian matrix\n");
+      printf("  -laplacian9pt [<opts>] : build 9pt 2D laplacian matrix\n");
       printf("    -n <nx> <ny> <nz>    : problem size per processor\n");
       printf("    -P <Px> <Py> <Pz>    : processor topology\n");
       printf("    -c <cx> <cy> <cz>    : diffusion coefficients\n");
       printf("\n");
       printf("  -solver <ID>           : solver ID\n");
+      printf("    1=AMG-PCG    2=DS-PCG   \n");
+      printf("    3=AMG-GMRES  4=DS-GMRES  \n");     
       printf("\n");
-
+      printf("  -th <val>              : set AMG threshold Theta = val \n");
+      printf("\n");
+      printf("  -w  <val>              : set Jacobi relax weight = val\n");
       exit(1);
    }
 
@@ -298,21 +305,14 @@ main( int   argc,
    }
    else if ( build_rhs_type == 2 )
    {
-      /*BuildRHSParFromOneFile(argc, argv, build_rhs_arg_index, &b); */
-      printf("Rhs from one file not yet implemented.  Defaults to b=0\n");           b = hypre_CreateParVector(MPI_COMM_WORLD,
-                                hypre_ParCSRMatrixGlobalNumRows(A),
-                                hypre_ParCSRMatrixRowStarts(A));
-      hypre_SetParVectorPartitioningOwner(b, 0);
-      hypre_InitializeParVector(b);
-      hypre_SetParVectorConstantValues(b, 0.0);
+      BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, A, &b);
 
       x = hypre_CreateParVector(MPI_COMM_WORLD,
                                 hypre_ParCSRMatrixGlobalNumRows(A),
                                 hypre_ParCSRMatrixRowStarts(A));
       hypre_SetParVectorPartitioningOwner(x, 0);
       hypre_InitializeParVector(x);
-      hypre_SetParVectorConstantValues(x, 1.0);
-
+      hypre_SetParVectorConstantValues(x, 0.0);      
    }
    else if ( build_rhs_type == 3 )
    {
@@ -396,7 +396,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
  
       HYPRE_ParCSRPCGInitialize(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_ParCSRPCGSetMaxIter(pcg_solver, 50);
+      HYPRE_ParCSRPCGSetMaxIter(pcg_solver, 500);
       HYPRE_ParCSRPCGSetTol(pcg_solver, 1.0e-08);
       HYPRE_ParCSRPCGSetTwoNorm(pcg_solver, 1);
       HYPRE_ParCSRPCGSetRelChange(pcg_solver, 0);
@@ -832,6 +832,69 @@ BuildParFromOneFile( int                  argc,
    *A_ptr = A;
 
    hypre_DestroyCSRMatrix(A_CSR);
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
+ * Build Rhs from one file on Proc. 0. Distributes vector across processors 
+ * giving each about using the distribution of the matrix A.
+ *----------------------------------------------------------------------*/
+
+int
+BuildRhsParFromOneFile( int                  argc,
+                        char                *argv[],
+                        int                  arg_index,
+                        hypre_ParCSRMatrix  *A,
+                        hypre_ParVector    **b_ptr     )
+{
+   char               *filename;
+
+   hypre_ParVector *b;
+   hypre_Vector    *b_CSR;
+
+   int                 myid;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+
+   if (arg_index < argc)
+   {
+      filename = argv[arg_index];
+   }
+   else
+   {
+      printf("Error: No filename specified \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("  Rhs FromFile: %s\n", filename);
+
+      /*-----------------------------------------------------------
+       * Generate the matrix 
+       *-----------------------------------------------------------*/
+ 
+      b_CSR = hypre_ReadVector(filename);
+   }
+   b = hypre_VectorToParVector(MPI_COMM_WORLD, b_CSR, 
+                               hypre_ParCSRMatrixRowStarts(A));
+
+   *b_ptr = b;
+
+   hypre_DestroyVector(b_CSR);
 
    return (0);
 }
