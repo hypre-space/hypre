@@ -8,11 +8,11 @@ C     reads initial approximation from: AMG2.in.initu.
 C
 C@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 C
-      IMPLICIT REAL*8 (A-H,O-Z)
+      implicit real*8 (a-h,o-z)
 C
       parameter(ndima=600000,ndimu=250000)
-      DIMENSION A(ndima),JA(ndima),IA(ndimu),U(ndimu),F(ndimu)
-      CHARACTER*15 FYSMP,FRHS,FINITU
+      dimension a(ndima),ja(ndima),ia(ndimu),u(ndimu),f(ndimu)
+      character*15 FYSMP,FRHS,FINITU
 
       integer data
 C
@@ -70,20 +70,20 @@ CVEH
 
       tol = 1.0e-7
 
-      call amg_Initialize(data,0)
+      call amg_initialize(data,0)
 
 
-      call amg_SetLogging(3, "AMG.runlog", data)
+      call amg_setlogging(3, "AMG.runlog", data)
 
-      call amg_Setup(isterr,a,ia,ja,nv,data)
+      call amg_setup(isterr,a,ia,ja,nv,data)
       print *, 'Setup error flag = ', isterr
 
-      call amg_Solve(isverr,u,f,nv,tol,data)
+      call amg_solve(isverr,u,f,nv,tol,data)
       print *, 'Solve error flag = ', isverr
 
-      call amg_Finalize(data)
+      call amg_finalize(data)
 
-      STOP
+      stop
 
-      END
+      end
 

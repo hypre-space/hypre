@@ -8,11 +8,11 @@ C     reads initial approximation from: AMG2.in.initu.
 C
 C@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 C
-      IMPLICIT REAL*8 (A-H,O-Z)
+      implicit real*8 (a-h,o-z)
 C
 
       parameter(ndima=600000,ndimu=250000)
-      DIMENSION A(ndima),JA(ndima),IA(ndimu),U(ndimu),F(ndimu)
+      dimension a(ndima),ja(ndima),ia(ndimu),u(ndimu),f(ndimu)
       CHARACTER*15 FYSMP,FRHS,FINITU,FCONT
 
       dimension mu(10), iprlx(4), ntrlx(4),ierlx(4),iurlx(4)
@@ -90,31 +90,29 @@ CVEH
       read (8,*) (u(j), j=1,nv)
       close (8)
 
-      call amg_Initialize(data,0)
+      call amg_initialize(data,0)
 
-      call amg_SetNumUnknowns(numu,data)
-      call amg_SetNumPoints(nump,data)
+      call amg_setnumunknowns(numu,data)
+      call amg_setnumpoints(nump,data)
 
-      call amg_SetLogging(ioutdat, "AMG2.runlog", data)
-      call amg_SetLevMax(levmax, data)
-      call amg_SetEWT(ewt,data)
-      call amg_SetNWT(nwt,data)
-      call amg_SetNCG(ncg, data)
-      call amg_SetECG(ecg, data)
-      call amg_SetNWT(nwt, data)
-      call amg_SetEWT(ewt, data)
-      call amg_SetNSTR(nstr, data)
-      call amg_SetNCyc(ncyc, data)
+      call amg_setlogging(ioutdat, "AMG2.runlog", data)
+      call amg_setlevmax(levmax, data)
+      call amg_setewt(ewt,data)
+      call amg_setnwt(nwt,data)
+      call amg_setncg(ncg, data)
+      call amg_setecg(ecg, data)
+      call amg_setnstr(nstr, data)
+      call amg_setncyc(ncyc, data)
 
-      call amg_Setup(isterr,a,ia,ja,nv,data)
+      call amg_setup(isterr,a,ia,ja,nv,data)
       print *, 'Setup error flag = ', isterr
 
-      call amg_Solve(isverr,u,f,nv,tol,data)
+      call amg_solve(isverr,u,f,nv,tol,data)
       print *, 'Solve error flag = ', isverr
 
-      call amg_Finalize(data)
+      call amg_finalize(data)
 
-      STOP
+      stop
 
-      END
+      end
 
