@@ -196,7 +196,7 @@ cd \$PSUB_WORKDIR
 for i in $PidList
 do [[ -r ./$RunName.o\$i ]] && cat ./$RunName.o\$i >> $DRIVER.log
 done
-rm -f ./$RunName.\*
+rm -f ./$RunName.*
 EOF
 chmod +x $TmpLFile 
 PrevPid=${CmdPid[((loop-1))]}
