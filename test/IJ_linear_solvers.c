@@ -772,10 +772,6 @@ main( int   argc,
       return(-1);
    }
 
-   /*-----------------------------------------------------------
-    * Copy the parcsr matrix into the IJMatrix through interface calls
-    *-----------------------------------------------------------*/
-
    time_index = hypre_InitializeTiming("IJ Matrix Setup");
    hypre_BeginTiming(time_index);
 
@@ -788,15 +784,25 @@ main( int   argc,
                &first_local_row, &last_local_row ,
                &first_local_col, &last_local_col );
 
+     local_num_rows = last_local_row - first_local_row + 1;
+     local_num_cols = last_local_col - first_local_col + 1;
+
      ierr = HYPRE_IJMatrixInitialize( ij_A );
 
    }
-
-   if (build_matrix_type > 1)
+   else
    {
+
+     /*-----------------------------------------------------------
+      * Copy the parcsr matrix into the IJMatrix through interface calls
+      *-----------------------------------------------------------*/
+ 
      ierr = HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
                &first_local_row, &last_local_row ,
                &first_local_col, &last_local_col );
+
+     local_num_rows = last_local_row - first_local_row + 1;
+     local_num_cols = last_local_col - first_local_col + 1;
 
      ierr += HYPRE_ParCSRMatrixGetDims( parcsr_A, &M, &N );
 
@@ -813,8 +819,8 @@ main( int   argc,
      {   
 /*  build IJMatrix using exact row_sizes for diag and offdiag */
 
-       diag_sizes = hypre_CTAlloc(int, last_local_row - first_local_row + 1);
-       offdiag_sizes = hypre_CTAlloc(int, last_local_row - first_local_row + 1);
+       diag_sizes = hypre_CTAlloc(int, local_num_rows);
+       offdiag_sizes = hypre_CTAlloc(int, local_num_rows);
        local_row = 0;
        for (i=first_local_row; i<= last_local_row; i++)
        {
@@ -855,7 +861,7 @@ main( int   argc,
      }
      else
      {
-       row_sizes = hypre_CTAlloc(int, last_local_row - first_local_row + 1);
+       row_sizes = hypre_CTAlloc(int, local_num_rows);
 
        size = 5; /* this is in general too low, and supposed to test
                     the capability of the reallocation of the interface */ 
@@ -868,7 +874,7 @@ main( int   argc,
          if (build_matrix_type == 4) size = 27;
        }
 
-       for (i=0; i < last_local_row - first_local_row + 1; i++)
+       for (i=0; i < local_num_rows; i++)
          row_sizes[i] = size;
 
        ierr = HYPRE_IJMatrixSetRowSizes ( ij_A, (const int *) row_sizes );
@@ -901,6 +907,12 @@ main( int   argc,
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
    
+   if (ierr)
+   {
+     printf("Error in driver building IJMatrix from parcsr matrix. \n");
+     return(-1);
+   }
+
    /* This is to emphasize that one can IJMatrixAddToValues after an
       IJMatrixRead or an IJMatrixAssemble.  After an IJMatrixRead,
       assembly is unnecessary if the sparsity pattern of the matrix is
@@ -929,7 +941,7 @@ main( int   argc,
    for (i = first_local_row; i <= last_local_row; i++)
    {
       ierr += HYPRE_IJMatrixAddToValues( ij_A,
-                                         last_local_row - first_local_row + 1,
+                                         local_num_rows,
                                          ncols, rows,
                                          (const int *) col_inds,
                                          (const double *) values );
@@ -944,12 +956,6 @@ main( int   argc,
       this should be a no-op */
 
    ierr += HYPRE_IJMatrixAssemble( ij_A );
-
-   if (ierr)
-   {
-     printf("Error in driver building IJMatrix from parcsr matrix. \n");
-     return(-1);
-   }
 
    /*-----------------------------------------------------------
     * Fetch the resulting underlying matrix out
@@ -967,9 +973,6 @@ main( int   argc,
 
    time_index = hypre_InitializeTiming("IJ Vector Setup");
    hypre_BeginTiming(time_index);
-
-   local_num_rows = last_local_row - first_local_row + 1;
-   local_num_cols = last_local_col - first_local_col + 1;
 
    if ( build_rhs_type == 0 )
    {
@@ -1341,7 +1344,7 @@ main( int   argc,
       }
       else
       {
-         local_num_vars = last_local_row -first_local_row+1;
+         local_num_vars = local_num_rows;
          dof_func = hypre_CTAlloc(int,local_num_vars);
          if (myid == 0)
 	    printf (" Number of unknown functions = %d \n", num_functions);
@@ -2088,7 +2091,6 @@ main( int   argc,
    hypre_FinalizeMemoryDebug();
 */
 
-   /* Finalize MPI */
    MPI_Finalize();
 
    return (0);
