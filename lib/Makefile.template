@@ -10,97 +10,97 @@
 include ../config/Makefile.config
 
  
- BLASFILES =\
- $(top_srcdir)/blas/dasum.o\
- $(top_srcdir)/blas/daxpy.o\
- $(top_srcdir)/blas/dcopy.o\
- $(top_srcdir)/blas/ddot.o\
- $(top_srcdir)/blas/dgemm.o\
- $(top_srcdir)/blas/dgemv.o\
- $(top_srcdir)/blas/dger.o\
- $(top_srcdir)/blas/dnrm2.o\
- $(top_srcdir)/blas/drot.o\
- $(top_srcdir)/blas/dscal.o\
- $(top_srcdir)/blas/dsymv.o\
- $(top_srcdir)/blas/dsyr2.o\
- $(top_srcdir)/blas/dsyr2k.o\
- $(top_srcdir)/blas/dsyrk.o\
- $(top_srcdir)/blas/dtrmm.o\
- $(top_srcdir)/blas/dtrmv.o\
- $(top_srcdir)/blas/dtrsm.o\
- $(top_srcdir)/blas/dtrsv.o\
- $(top_srcdir)/blas/idamax.o\
- $(top_srcdir)/blas/blas_utils.o
+${BLASINTERNAL}BLASFILES =\
+${BLASINTERNAL}$(top_srcdir)/blas/dasum.o\
+${BLASINTERNAL}$(top_srcdir)/blas/daxpy.o\
+${BLASINTERNAL}$(top_srcdir)/blas/dcopy.o\
+${BLASINTERNAL}$(top_srcdir)/blas/ddot.o\
+${BLASINTERNAL}$(top_srcdir)/blas/dgemm.o\
+${BLASINTERNAL}$(top_srcdir)/blas/dgemv.o\
+${BLASINTERNAL}$(top_srcdir)/blas/dger.o\
+${BLASINTERNAL}$(top_srcdir)/blas/dnrm2.o\
+${BLASINTERNAL}$(top_srcdir)/blas/drot.o\
+${BLASINTERNAL}$(top_srcdir)/blas/dscal.o\
+${BLASINTERNAL}$(top_srcdir)/blas/dsymv.o\
+${BLASINTERNAL}$(top_srcdir)/blas/dsyr2.o\
+${BLASINTERNAL}$(top_srcdir)/blas/dsyr2k.o\
+${BLASINTERNAL}$(top_srcdir)/blas/dsyrk.o\
+${BLASINTERNAL}$(top_srcdir)/blas/dtrmm.o\
+${BLASINTERNAL}$(top_srcdir)/blas/dtrmv.o\
+${BLASINTERNAL}$(top_srcdir)/blas/dtrsm.o\
+${BLASINTERNAL}$(top_srcdir)/blas/dtrsv.o\
+${BLASINTERNAL}$(top_srcdir)/blas/idamax.o\
+${BLASINTERNAL}$(top_srcdir)/blas/blas_utils.o
 
 
-#LAPACKFILES = \
-#$(top_srcdir)/lapack/dbdsqr.o\
-#$(top_srcdir)/lapack/dgebd2.o\
-#$(top_srcdir)/lapack/dgebrd.o\
-#$(top_srcdir)/lapack/dgelq2.o\
-#$(top_srcdir)/lapack/dgelqf.o\
-#$(top_srcdir)/lapack/dgels.o\
-#$(top_srcdir)/lapack/dgeqr2.o\
-#$(top_srcdir)/lapack/dgeqrf.o\
-#$(top_srcdir)/lapack/dgesvd.o\
-#$(top_srcdir)/lapack/dlabad.o\
-#$(top_srcdir)/lapack/dlabrd.o\
-#$(top_srcdir)/lapack/dlacpy.o\
-#$(top_srcdir)/lapack/dlae2.o\
-#$(top_srcdir)/lapack/dlaev2.o\
-#$(top_srcdir)/lapack/dlamch.o\
-#$(top_srcdir)/lapack/dlange.o\
-#$(top_srcdir)/lapack/dlanst.o\
-#$(top_srcdir)/lapack/dlansy.o\
-#$(top_srcdir)/lapack/dlapy2.o\
-#$(top_srcdir)/lapack/dlarf.o\
-#$(top_srcdir)/lapack/dlarfb.o\
-#$(top_srcdir)/lapack/dlarfg.o\
-#$(top_srcdir)/lapack/dlarft.o\
-#$(top_srcdir)/lapack/dlartg.o\
-#$(top_srcdir)/lapack/dlas2.o\
-#$(top_srcdir)/lapack/dlascl.o\
-#$(top_srcdir)/lapack/dlaset.o\
-#$(top_srcdir)/lapack/dlasq1.o\
-#$(top_srcdir)/lapack/dlasq2.o\
-#$(top_srcdir)/lapack/dlasq3.o\
-#$(top_srcdir)/lapack/dlasq4.o\
-#$(top_srcdir)/lapack/dlasq5.o\
-#$(top_srcdir)/lapack/dlasq6.o\
-#$(top_srcdir)/lapack/dlasr.o\
-#$(top_srcdir)/lapack/dlasrt.o\
-#$(top_srcdir)/lapack/dlassq.o\
-#$(top_srcdir)/lapack/dlasv2.o\
-#$(top_srcdir)/lapack/dlatrd.o\
-#$(top_srcdir)/lapack/dorg2l.o\
-#$(top_srcdir)/lapack/dorg2r.o\
-#$(top_srcdir)/lapack/dorgbr.o\
-#$(top_srcdir)/lapack/dorgl2.o\
-#$(top_srcdir)/lapack/dorglq.o\
-#$(top_srcdir)/lapack/dorgql.o\
-#$(top_srcdir)/lapack/dorgqr.o\
-#$(top_srcdir)/lapack/dorgtr.o\
-#$(top_srcdir)/lapack/dorm2r.o\
-#$(top_srcdir)/lapack/dormbr.o\
-#$(top_srcdir)/lapack/dorml2.o\
-#$(top_srcdir)/lapack/dormlq.o\
-#$(top_srcdir)/lapack/dormqr.o\
-#$(top_srcdir)/lapack/dpotf2.o\
-#$(top_srcdir)/lapack/dpotrf.o\
-#$(top_srcdir)/lapack/dpotrs.o\
-#$(top_srcdir)/lapack/dsteqr.o\
-#$(top_srcdir)/lapack/dsterf.o\
-#$(top_srcdir)/lapack/dsyev.o\
-#$(top_srcdir)/lapack/dsygs2.o\
-#$(top_srcdir)/lapack/dsygst.o\
-#$(top_srcdir)/lapack/dsygv.o\
-#$(top_srcdir)/lapack/dsytd2.o\
-#$(top_srcdir)/lapack/dsytrd.o\
-#$(top_srcdir)/lapack/ieeeck.o\
-#$(top_srcdir)/lapack/ilaenv.o\
-#$(top_srcdir)/lapack/lapack_utils.o\
-#$(top_srcdir)/lapack/lsame.o\
-#$(top_srcdir)/lapack/xerbla.o
+${LAPACKINTERNAL}LAPACKFILES = \
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dbdsqr.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dgebd2.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dgebrd.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dgelq2.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dgelqf.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dgels.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dgeqr2.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dgeqrf.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dgesvd.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlabad.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlabrd.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlacpy.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlae2.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlaev2.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlamch.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlange.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlanst.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlansy.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlapy2.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlarf.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlarfb.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlarfg.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlarft.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlartg.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlas2.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlascl.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlaset.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlasq1.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlasq2.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlasq3.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlasq4.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlasq5.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlasq6.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlasr.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlasrt.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlassq.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlasv2.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dlatrd.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dorg2l.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dorg2r.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dorgbr.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dorgl2.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dorglq.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dorgql.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dorgqr.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dorgtr.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dorm2r.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dormbr.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dorml2.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dormlq.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dormqr.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dpotf2.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dpotrf.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dpotrs.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dsteqr.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dsterf.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dsyev.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dsygs2.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dsygst.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dsygv.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dsytd2.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/dsytrd.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/ieeeck.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/ilaenv.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/lapack_utils.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/lsame.o\
+${LAPACKINTERNAL}$(top_srcdir)/lapack/xerbla.o
 
 SUPERLUFILES = \
  $(top_srcdir)/FEI_mv/SuperLU/colamd.o\

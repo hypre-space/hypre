@@ -76,14 +76,12 @@ FLIBS = @FLIBS@
 ##################################################################
 ##  LAPACK Library Flags 
 ##################################################################
-LAPACKNEED = @LAPACKNEEDED@
 LAPACKLIBS = @LAPACKLIBS@
 LAPACKLIBDIRS = @LAPACKLIBDIRS@
 
 ##################################################################
 ##  BLAS Library Flags 
 ##################################################################
-BLASNEED = @BLASNEEDED@
 BLASLIBS = @BLASLIBS@
 BLASLIBDIRS = @BLASLIBDIRS@
 
@@ -98,7 +96,6 @@ MPIFLAGS = @MPIFLAGS@
 ##################################################################
 ##  FEI options
 ##################################################################
-FEINEED = @FEINEEDED@
 FEIINCLUDE = @FEIINCLUDE@
 FEILIBS = @FEILIBS@
 FEILIBDIRS = @FEILIBDIRS@
