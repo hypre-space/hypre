@@ -20,7 +20,8 @@
 #include "memory.h"
 #include <dmalloc.h>
 
-char dmalloc_logpath_memory[256];
+char *dmalloc_logpath;
+char  dmalloc_logpath_memory[256];
 
 /*--------------------------------------------------------------------------
  * hypre_InitMemoryDebugDML
