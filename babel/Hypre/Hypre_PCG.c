@@ -8,14 +8,12 @@
 #include "Hypre_PCG_Skel.h" 
 #include "Hypre_PCG_Data.h" 
 
-#include "Hypre_StructMatrix_Skel.h"
-#include "Hypre_StructVector_Skel.h"
-#include "Hypre_StructVector_Data.h"
-#include "Hypre_MPI_Com_Skel.h"
-#include "Hypre_MPI_Com_Data.h"
-#include "Hypre_StructJacobi.h"
-#include "Hypre_StructSMG.h"
 #include "math.h"
+
+/* this is in utilities/memory.h .  TO DO: #include the file ... */
+#define hypre_CTAlloc(type, count) \
+( (type *)hypre_CAllocDML((unsigned int)(count), (unsigned int)sizeof(type),\
+                          __FILE__, __LINE__) )
 
 /* *************************************************
  * Constructor
@@ -23,7 +21,9 @@
  *    and initialize here
  ***************************************************/
 void Hypre_PCG_constructor(Hypre_PCG this) {
-   int size;
+
+/*
+  int size;
 
    size = sizeof( struct Hypre_PCG_private_type );
    this->d_table = (struct Hypre_PCG_private_type *) malloc( size );
@@ -31,312 +31,548 @@ void Hypre_PCG_constructor(Hypre_PCG this) {
       hypre_OutOfMemory( size );
       return;
    };
+*/
+   this->d_table = hypre_CTAlloc( struct Hypre_PCG_private_type, 1 );
 
-   size = sizeof( HYPRE_StructSolver );
-   this->d_table->hssolver = (HYPRE_StructSolver *) malloc( size );
-   if ( this->d_table==NULL ) {
-      hypre_OutOfMemory( size );
-      return;
-   };
+   /* Space for the contained data is allocated through Setup (p,s,r,norms,
+      relnorms).  Space for matvec will have been allocated by the function
+      calling Setup, and space for preconditioner will have been allocated by
+      the function calling SetPreconditioner.*/
 
 } /* end constructor */
 
 /* *************************************************
  *  Destructor
  *      deallocate memory for private data here.
+ *   This frees memory which had been allocated in constructor or Setup.
  ***************************************************/
 void Hypre_PCG_destructor(Hypre_PCG this) {
 
-   struct Hypre_PCG_private_type *HSJp = this->d_table;
-   HYPRE_StructSolver *S = HSJp->hssolver;
+   Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate(this);
 
-   HYPRE_StructPCGDestroy( *S );
-   free(this->d_table);
+   Hypre_Vector_destructor( pcg_data->p );
+   Hypre_Vector_destructor( pcg_data->s );
+   Hypre_Vector_destructor( pcg_data->r );
+
+   if ((pcg_data -> logging) > 0)
+   {
+      hypre_TFree( pcg_data->norms );
+      hypre_TFree( pcg_data->rel_norms );
+   };
+
+   hypre_TFree( pcg_data );
 
    return;
 
 } /* end destructor */
 
+
 /* ********************************************************
- * impl_Hypre_PCGApply
+ * impl_Hypre_PCG_Apply
+ *
+ * This code is a generic version based on 
+ * hypre_PCGSolve and hypre_KrylovSolve, functions that
+ * were written specifically for struct{matrix,vector} and
+ * parcsr{matrix,vector}, respectively.
+ *
+ * We use the following convergence test as the default (see Ashby, Holst,
+ * Manteuffel, and Saylor):
+ *
+ *       ||e||_A                           ||r||_C
+ *       -------  <=  [kappa_A(C*A)]^(1/2) -------  < tol
+ *       ||x||_A                           ||b||_C
+ *
+ * where we let (for the time being) kappa_A(CA) = 1.
+ * We implement the test as:
+ *
+ *       gamma = <C*r,r>  <  (tol^2)*<C*b,b> = eps
+ *
  **********************************************************/
-int  impl_Hypre_PCG_Apply
-(Hypre_PCG this, Hypre_StructVector b, Hypre_StructVector* x) {
 
-   struct Hypre_PCG_private_type *HPCGp = this->d_table;
-   HYPRE_StructSolver *S = HPCGp->hssolver;
+int
+impl_Hypre_PCG_Apply(Hypre_PCG this, Hypre_Vector b, Hypre_Vector* xp)
+{
+   Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
 
-   Hypre_StructMatrix A = this->d_table->hsmatrix;
-   struct Hypre_StructMatrix_private_type *SMp = A->d_table;
-   HYPRE_StructMatrix *MA = SMp->hsmat;
+   Hypre_Vector x = *xp;
 
-   struct Hypre_StructVector_private_type *SVbp = b->d_table;
-   HYPRE_StructVector *Vb = SVbp->hsvec;
+   double          tol          = (pcg_data -> tol);
+   double          cf_tol       = (pcg_data -> cf_tol);
+   int             max_iter     = (pcg_data -> max_iter);
+   int             two_norm     = (pcg_data -> two_norm);
+   int             rel_change   = (pcg_data -> rel_change);
 
-   struct Hypre_StructVector_private_type *SVxp = (*x)->d_table;
-   HYPRE_StructVector *Vx = SVxp->hsvec;
+   Hypre_Vector    p            = (pcg_data -> p);
+   Hypre_Vector    s            = (pcg_data -> s);
+   Hypre_Vector    r            = (pcg_data -> r);
+   Hypre_LinearOperator  matvec = (pcg_data -> matvec);
+   Hypre_Solver    precond      = (pcg_data -> preconditioner);
+   Hypre_LinearOperator precond_solver = Hypre_Solver_castTo( precond,
+                                                              "Hypre_LinearOperator" );
 
-   return HYPRE_StructPCGSolve( *S, *MA, *Vb, *Vx );
+   int             logging      = (pcg_data -> logging);
+   double         *norms        = (pcg_data -> norms);
+   double         *rel_norms    = (pcg_data -> rel_norms);
+                
+   double          alpha, beta;
+   double          gamma, gamma_old;
+   double          bi_prod, i_prod, eps;
+   double          pi_prod, xi_prod;
+                
+   double          i_prod_0;
+   double          cf_ave_0 = 0.0;
+   double          cf_ave_1 = 0.0;
+   double          weight;
+
+   double          guard_zero_residual; 
+
+   int             i = 0;
+   int             ierr = 0;
+
+   /*-----------------------------------------------------------------------
+    * With relative change convergence test on, it is possible to attempt
+    * another iteration with a zero residual. This causes the parameter
+    * alpha to go NaN. The guard_zero_residual parameter is to circumvent
+    * this. Perhaps it should be set to something non-zero (but small).
+    *-----------------------------------------------------------------------*/
+
+   guard_zero_residual = 0.0;
+
+   /*-----------------------------------------------------------------------
+    * Start pcg solve
+    *-----------------------------------------------------------------------*/
+
+   /* compute eps */
+   if (two_norm)
+   {
+      /* bi_prod = <b,b> */
+      ierr += Hypre_Vector_Dot (b, b, &bi_prod);
+   }
+   else
+   {
+      /* bi_prod = <C*b,b> */
+      ierr += Hypre_Vector_Clear (p);
+      ierr += Hypre_Solver_Apply (precond, b, &p);
+      ierr += Hypre_Vector_Dot (p, b, &bi_prod);
+   }
+   eps = (tol*tol)*bi_prod;
+
+   /* Check to see if the rhs vector b is zero */
+   if (bi_prod == 0.0)
+   {
+      /* Set x equal to zero and return */
+      ierr += Hypre_Vector_Copy (x, b);
+      if (logging > 0)
+      {
+         norms[0]     = 0.0;
+         rel_norms[i] = 0.0;
+      }
+      ierr = 0;
+      return ierr;
+   }
+
+   /* r = b - Ax */
+   ierr += Hypre_LinearOperator_Apply (matvec, x, &r);
+   ierr += Hypre_Vector_Scale (r, -1.0);
+   ierr += Hypre_Vector_Axpy (r, 1.0, b);
+ 
+   /* Set initial residual norm */
+   if (logging > 0 || cf_tol > 0.0)
+   {
+      ierr += Hypre_Vector_Dot (r, r, &i_prod_0);
+      if (logging > 0) norms[0] = sqrt(i_prod_0);
+   }
+
+   /* p = C*r */
+   ierr += Hypre_Vector_Clear (p);
+   ierr += Hypre_Solver_Apply (precond, r, &p);
+
+   /* gamma = <r,p> */
+   ierr += Hypre_Vector_Dot (r, p, &gamma);
+
+   while ((i+1) <= max_iter)
+   {
+      i++;
+
+      /* s = A*p */
+      ierr += Hypre_LinearOperator_Apply (matvec, p, &s);
+
+      /* alpha = gamma / <s,p> */
+      ierr += Hypre_Vector_Dot (s, p, &alpha);
+      alpha = gamma / alpha;
+
+      gamma_old = gamma;
+
+      /* x = x + alpha*p */
+      ierr += Hypre_Vector_Axpy (x, alpha, p);
+
+      /* r = r - alpha*s */
+      ierr += Hypre_Vector_Axpy (r, -alpha, s);
+         
+      /* s = C*r */
+      ierr += Hypre_Vector_Clear (s);
+      ierr += Hypre_LinearOperator_Apply (precond_solver, r, &s);
+
+      /* gamma = <r,s> */
+      ierr += Hypre_Vector_Dot (r, s, &gamma);
+
+      /* set i_prod for convergence test */
+      if (two_norm)
+         ierr += Hypre_Vector_Dot (r, r, &i_prod);
+      else
+         i_prod = gamma;
+
+#if 0
+      if (two_norm)
+         printf("Iter (%d): ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
+                i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
+      else
+         printf("Iter (%d): ||r||_C = %e, ||r||_C/||b||_C = %e\n",
+                i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
+#endif
+ 
+      /* log norm info */
+      if (logging > 0)
+      {
+         norms[i]     = sqrt(i_prod);
+         rel_norms[i] = bi_prod ? sqrt(i_prod/bi_prod) : 0;
+      }
+
+      /* check for convergence */
+      if (i_prod < eps)
+      {
+         if (rel_change && i_prod > guard_zero_residual)
+         {
+            ierr += Hypre_Vector_Dot (p, p, &pi_prod);
+            ierr += Hypre_Vector_Dot (x, x, &xi_prod);
+            if ((alpha*alpha*pi_prod/xi_prod) < (eps/bi_prod))
+               break;
+         }
+         else
+         {
+            break;
+         }
+      }
+
+      /*--------------------------------------------------------------------
+       * Optional test to see if adequate progress is being made.
+       * The average convergence factor is recorded and compared
+       * against the tolerance 'cf_tol'. The weighting factor is  
+       * intended to pay more attention to the test when an accurate
+       * estimate for average convergence factor is available.  
+       *--------------------------------------------------------------------*/
+
+      if (cf_tol > 0.0)
+      {
+         cf_ave_0 = cf_ave_1;
+         cf_ave_1 = pow( i_prod / i_prod_0, 1.0/(2.0*i)); 
+
+         weight   = fabs(cf_ave_1 - cf_ave_0);
+         weight   = weight / max(cf_ave_1, cf_ave_0);
+         weight   = 1.0 - weight;
+#if 0
+         printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
+                i, cf_ave_1, cf_ave_0, weight );
+#endif
+         if (weight * cf_ave_1 > cf_tol) break;
+      }
+
+      /* beta = gamma / gamma_old */
+      beta = gamma / gamma_old;
+
+      /* p = s + beta p */
+      ierr += Hypre_Vector_Scale (p, beta);   
+      ierr += Hypre_Vector_Axpy (p, 1.0, s);
+   }
+
+#if 0
+   if (two_norm)
+      printf("Iterations = %d: ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
+             i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
+   else
+      printf("Iterations = %d: ||r||_C = %e, ||r||_C/||b||_C = %e\n",
+             i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
+#endif
+
+   /*-----------------------------------------------------------------------
+    * Print log
+    *-----------------------------------------------------------------------*/
+
+#if 0
+   if (logging > 0)
+   {
+      if (two_norm)
+      {
+         printf("Iters       ||r||_2    ||r||_2/||b||_2\n");
+         printf("-----    ------------    ------------ \n");
+      }
+      else
+      {
+         printf("Iters       ||r||_C    ||r||_C/||b||_C\n");
+         printf("-----    ------------    ------------ \n");
+      }
+      for (j = 1; j <= i; j++)
+      {
+         printf("% 5d    %e    %e\n", j, norms[j], rel_norms[j]);
+      }
+   }
+#endif
+
+   (pcg_data -> num_iterations) = i;
+
+   return ierr;
 
 } /* end impl_Hypre_PCGApply */
 
-/* ********************************************************
- * impl_Hypre_PCGGetSystemOperator
- **********************************************************/
-Hypre_StructMatrix  impl_Hypre_PCG_GetSystemOperator(Hypre_PCG this) {
 
-   return this->d_table->hsmatrix;
+/* ********************************************************
+ * impl_Hypre_PCG_GetSystemOperator
+ **********************************************************/
+Hypre_LinearOperator  
+impl_Hypre_PCG_GetSystemOperator(Hypre_PCG this) 
+{
+
+   Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate(this);
+
+   return (pcg_data->matvec);
 
 } /* end impl_Hypre_PCGGetSystemOperator */
+
 
 /* ********************************************************
  * impl_Hypre_PCGGetResidual
  **********************************************************/
-Hypre_StructVector  impl_Hypre_PCG_GetResidual(Hypre_PCG this) {
-  /* ******* MORE TO DO *****
-    There is no residual function at the HYPRE level; I haven't looked lower yet.
-    There is a HYPRE_StructPCGGetFinalRelativeResidualNorm which provides a
-    double*.
-
-    For now, all we do is make a dummy object and return it.  It can't even be
-    of the right size because the grid information is quite buried and it's not
-    worthwhile to store a StructuredGrid object just to support a function that
-    doesn't work.
-  */
-
-   Hypre_StructVector vec = Hypre_StructVector_new();
-
-   printf( "called Hypre_PCG_GetResidual, which doesn't work!\n");
-
-   return vec;
-
+Hypre_Vector  impl_Hypre_PCG_GetResidual(Hypre_PCG this) {
+   Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
+   return pcg_data->r;
 } /* end impl_Hypre_PCGGetResidual */
 
 /* ********************************************************
  * impl_Hypre_PCGGetConvergenceInfo
  **********************************************************/
 int  impl_Hypre_PCG_GetConvergenceInfo(Hypre_PCG this, char* name, double* value) {
-   int ivalue, ierr;
-
-   struct Hypre_PCG_private_type *HSp = this->d_table;
-   HYPRE_StructSolver *S = HSp->hssolver;
+   int ivalue;
+   Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
 
    if ( !strcmp(name,"number of iterations") ) {
-      ivalue = -1;
-      ierr = HYPRE_StructPCGGetNumIterations( *S, &ivalue );
-      *value = ivalue;
-      return ierr;
+      *value = pcg_data->num_iterations;
+      return 0;
    }
    else if ( !strcmp(name,"residual norm") ) {
-      ierr = HYPRE_StructPCGGetFinalRelativeResidualNorm( *S, value );
-      return ierr;
+      if (pcg_data->logging > 0) {
+         *value = pcg_data->rel_norms[pcg_data->num_iterations];
+         return 0;
+      }
+      else {
+         *value = -1;
+         return -1;
+      }
    }
    else {
       printf(
          "Don't understand keyword %s to Hypre_PCG_GetConvergenceInfo\n",
          name );
       *value = 0;
-      return 1;
+      return -1;
    }
-
 } /* end impl_Hypre_PCGGetConvergenceInfo */
 
 /* ********************************************************
  * impl_Hypre_PCGGetPreconditioner
  **********************************************************/
 Hypre_Solver  impl_Hypre_PCG_GetPreconditioner(Hypre_PCG this) {
-/* ******* MORE TO DO ******
- this doesn't exist at HYPRE level, I haven't looked lower yet;
- obviously the information exists.
-*/
+   Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
+   return pcg_data->preconditioner;
 } /* end impl_Hypre_PCGGetPreconditioner */
 
 /* ********************************************************
  * impl_Hypre_PCGGetDoubleParameter
  **********************************************************/
 double  impl_Hypre_PCG_GetDoubleParameter(Hypre_PCG this, char* name) {
-/* The parameters exist, but there are no HYPRE-level Get functions.
-   I'll implement pieces of this when needed. */
+   Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
 
-   printf( "Hypre_PCG_GetDoubleParameter does not recognize name ~s\n", name );
-   return 0;
-
+   if ( !strcmp( name, "tol" ) ) {
+      return pcg_data->tol;
+   }
+   else if ( !strcmp( name, "cf_tol" ) ) {
+      return pcg_data->cf_tol;
+   }
+   else {
+      printf( "Don't understand keyword %s to Hypre_PCG_GetDoubleParameter\n",
+              name );
+      return -1;
+   }
 } /* end impl_Hypre_PCGGetDoubleParameter */
 
 /* ********************************************************
  * impl_Hypre_PCGGetIntParameter
  **********************************************************/
 int  impl_Hypre_PCG_GetIntParameter(Hypre_PCG this, char* name) {
-/* The parameters exist, but there are no HYPRE-level Get functions.
-   I'll implement pieces of this when needed. */
+   Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
 
-   printf( "Hypre_PCG_GetIntParameter does not recognize name ~s\n", name );
-   return 0;
-
+   if ( !strcmp( name, "max_iter" ) ) {
+      return pcg_data->max_iter;
+   }
+   else if ( !strcmp( name, "two_norm" ) ) {
+      return pcg_data->two_norm;
+   }
+   else if ( !strcmp( name, "rel_change" ) ) {
+      return pcg_data->rel_change;
+   }
+   else if ( !strcmp( name, "num_iterations" ) ) {
+      return pcg_data->num_iterations;
+   }
+   else if ( !strcmp( name, "logging" ) ) {
+      return pcg_data->logging;
+   }
+   else {
+      printf( "Don't understand keyword %s to Hypre_PCG_GetIntParameter\n",
+              name );
+      return -1;
+   }
 } /* end impl_Hypre_PCGGetIntParameter */
 
 /* ********************************************************
  * impl_Hypre_PCGSetDoubleParameter
  **********************************************************/
-int impl_Hypre_PCG_SetDoubleParameter(Hypre_PCG this, char* name, double value) {
-/* JFP: This function just dispatches to the parameter's set function. */
-   int ierr;
-
-   struct Hypre_PCG_private_type *HSp = this->d_table;
-   HYPRE_StructSolver *S = HSp->hssolver;
-
-   if ( !strcmp(name,"tol") ) {
-      ierr = HYPRE_StructPCGSetTol( *S, value );
-      return ierr;
+int  impl_Hypre_PCG_SetDoubleParameter(Hypre_PCG this, char* name, double value) {
+   Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
+   if ( !strcmp( name, "tol" ) ) {
+      pcg_data->tol = value;
+      return 0;
+   }
+   else if ( !strcmp( name, "cf_tol" ) ) {
+      pcg_data->cf_tol = value;
+      return 0;
    }
    else {
-      printf( "Hypre_PCG_SetDoubleParameter does not recognize name ~s\n", name );
-      return 1;
-   };
+      printf( "Don't understand keyword %s to Hypre_PCG_GetDoubleParameter\n",
+              name );
+      return -1;
+   }
 } /* end impl_Hypre_PCGSetDoubleParameter */
 
 /* ********************************************************
  * impl_Hypre_PCGSetIntParameter
  **********************************************************/
-int  impl_Hypre_PCG_SetIntParameter(Hypre_PCG this, char* name, int value) {
-/* JFP: This function just dispatches to the parameter's set function. */
+int  impl_Hypre_PCG_SetIntParameter(Hypre_PCG this, char* name, int value)
+{
+   Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
 
-   struct Hypre_PCG_private_type *HSp = this->d_table;
-   HYPRE_StructSolver *S = HSp->hssolver;
-
-   if ( !strcmp(name,"max_iter" )) {
-      return HYPRE_StructPCGSetMaxIter( *S, value );
+   if ( !strcmp( name, "max_iter" ) ) {
+      pcg_data->max_iter = value;
+      return 0;
    }
-   else if ( !strcmp(name, "2-norm" ) ) {
-      return HYPRE_StructPCGSetTwoNorm( *S, value );
+   else if ( !strcmp( name, "two_norm" ) ) {
+      pcg_data->two_norm = value;
+      return 0;
    }
-   else if ( !strcmp(name,"relative change test") ) {
-      return HYPRE_StructPCGSetRelChange( *S, value );
+   else if ( !strcmp( name, "rel_change" ) ) {
+      pcg_data->rel_change = value;;
+      return 0;
    }
-   else if (  !strcmp(name,"log") ) {
-      return HYPRE_StructPCGSetLogging( *S, value );
+   else if ( !strcmp( name, "logging" ) ) {
+      pcg_data->logging = value;
+      return 0;
    }
    else {
-      printf( "Hypre_PCG_SetIntParameter does not recognize name ~s\n", name );
-      return 1;
-   };
+      printf( "Don't understand keyword %s to Hypre_PCG_GetIntParameter\n",
+              name );
+      return -1;
+   }
 } /* end impl_Hypre_PCGSetIntParameter */
 
 /* ********************************************************
  * impl_Hypre_PCGNew
  **********************************************************/
-int impl_Hypre_PCG_New(Hypre_PCG this, Hypre_MPI_Com comm) {
+int  impl_Hypre_PCG_New(Hypre_PCG this, Hypre_MPI_Com comm) {
 
-   struct Hypre_PCG_private_type *HSPCGp = this->d_table;
-   HYPRE_StructSolver *S = HSPCGp->hssolver;
+   Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
 
-   struct Hypre_MPI_Com_private_type * HMCp = comm->d_table;
-   MPI_Comm *C = HMCp->hcom;
+   (pcg_data -> tol)          = 1.0e-06;
+   (pcg_data -> cf_tol)      = 0.0;
+   (pcg_data -> max_iter)     = 1000;
+   (pcg_data -> two_norm)     = 0;
+   (pcg_data -> rel_change)   = 0;
+   (pcg_data -> logging)      = 0;
+   (pcg_data -> norms)        = NULL;
+   (pcg_data -> rel_norms)    = NULL;
 
-/* the StructSolver this inherits from keeps its own pointer to the
-   underlying HYPRE object.  Make sure they are the same.
-*/
-   Hypre_StructSolver HSS = Hypre_PCG_castTo( this, "Hypre_StructSolver" );
-   struct Hypre_StructSolver_private_type *HSSp = HSS->d_table;
-   HSSp->hssolver = S;
-
-   return HYPRE_StructPCGCreate( *C, S );
+   return 0;
 } /* end impl_Hypre_PCGNew */
 
 /* ********************************************************
  * impl_Hypre_PCGConstructor
  **********************************************************/
 Hypre_PCG  impl_Hypre_PCG_Constructor(Hypre_MPI_Com comm) {
-   /* declared static; just combines the new and New functions */
-   Hypre_PCG SPCG = Hypre_PCG_new();
-   Hypre_PCG_New( SPCG, comm );
-   return SPCG;
+/* Hypre_PCG_new calls Hypre_PCG_constructor and does a whole lot more ... */
+   Hypre_PCG pcg = Hypre_PCG_new();
+   Hypre_PCG_New( pcg, comm );
+   return pcg;
 } /* end impl_Hypre_PCGConstructor */
 
+
 /* ********************************************************
- * impl_Hypre_PCGSetup
+ * impl_Hypre_PCG_Setup
  **********************************************************/
-int impl_Hypre_PCG_Setup
-(Hypre_PCG this, Hypre_StructMatrix A, Hypre_StructVector b, Hypre_StructVector x) {
-   struct Hypre_PCG_private_type *HSp = this->d_table;
-   HYPRE_StructSolver *S = HSp->hssolver;
+int
+impl_Hypre_PCG_Setup(Hypre_PCG this, 
+                     Hypre_LinearOperator A, 
+                     Hypre_Vector b, 
+                     Hypre_Vector x) 
+{
 
-   struct Hypre_StructMatrix_private_type *SMp = A->d_table;
-   HYPRE_StructMatrix *MA = SMp->hsmat;
+   Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
+   Hypre_Vector *vp;
+   int ierr = 0;
+   int max_iter = (pcg_data -> max_iter);
 
-   struct Hypre_StructVector_private_type *SVbp = b->d_table;
-   HYPRE_StructVector *Vb = SVbp->hsvec;
+   /* Save LinearOperator */
 
-   struct Hypre_StructVector_private_type *SVxp = x->d_table;
-   HYPRE_StructVector *Vx = SVxp->hsvec;
+   pcg_data->matvec = A;
 
-   this->d_table->hsmatrix = A;
+   /* Create temporary vectors */
 
-   return HYPRE_StructPCGSetup( *S, *MA, *Vb, *Vx );
+   ierr += Hypre_Vector_Clone (x, vp);
+   pcg_data->p = *vp;
+   ierr += Hypre_Vector_Clone (x, vp);
+   pcg_data->s = *vp;
+   ierr += Hypre_Vector_Clone (b, vp);
+   pcg_data->r = *vp;
+
+   /* Allocate space for log info */
+
+   if ((pcg_data -> logging) > 0)
+   {
+      (pcg_data -> norms)     =
+         hypre_CTAlloc(double, max_iter + 1);
+      (pcg_data -> rel_norms) = hypre_CTAlloc(double, max_iter + 1);
+   }
+
+   return ierr;
 
 } /* end impl_Hypre_PCGSetup */
 
+
 /* ********************************************************
  * impl_Hypre_PCGGetConstructedObject
- *       insert the library code below
  **********************************************************/
-Hypre_Solver impl_Hypre_PCG_GetConstructedObject(Hypre_PCG this) {
-
-   return (Hypre_Solver) this;
-
+Hypre_Solver  impl_Hypre_PCG_GetConstructedObject(Hypre_PCG this) {
+   return (Hypre_Solver) Hypre_PCG_castTo( this, "Hypre_Solver" );
 } /* end impl_Hypre_PCGGetConstructedObject */
+
 
 /* ********************************************************
  * impl_Hypre_PCGSetPreconditioner
- *       insert the library code below
  **********************************************************/
-int impl_Hypre_PCG_SetPreconditioner
-(Hypre_PCG this, Hypre_StructSolver precond) {
-
-   struct Hypre_PCG_private_type *HSPCGp = this->d_table;
-   HYPRE_StructSolver *S = HSPCGp->hssolver;
-
-   struct Hypre_StructSolver_private_type *HSSPp = precond->d_table;
-   HYPRE_StructSolver * precond_solver = HSSPp->hssolver;
-
-/* attempt to cast to the supported preconditioners ... */
-   Hypre_StructJacobi precond_SJ = (Hypre_StructJacobi)
-      Hypre_StructSolver_castTo( precond, "Hypre_StructJacobi" );
-   Hypre_StructSMG precond_SMG = (Hypre_StructSMG)
-      Hypre_StructSolver_castTo( precond, "Hypre_StructSMG" );
-/* call the SetPrecond function for whichever preconditioner we could cast to ... */
-   if ( precond_SJ != 0 ) {
-      return HYPRE_StructPCGSetPrecond( *S,
-                                        HYPRE_StructJacobiSolve,
-                                        HYPRE_StructJacobiSetup,
-                                        *precond_solver );
-   }
-   else if ( precond_SMG != 0 ) {
-      return HYPRE_StructPCGSetPrecond( *S,
-                                        HYPRE_StructSMGSolve,
-                                        HYPRE_StructSMGSetup,
-                                        *precond_solver );
-   }
-   else {
-      printf( "Hypre_PCG_SetPreconditioner does not recognize preconditioner!\n" );
-      return 1;
-   };
-
-} /* end impl_Hypre_PCGSetPreconditioner */
-
-
-/* Print Logging; not in the SIDL file */
-
-int
-HYPRE_StructPCG_PrintLogging( HYPRE_StructSolver  solver )
+int  
+impl_Hypre_PCG_SetPreconditioner(Hypre_PCG this, Hypre_Solver precond) 
 {
-   return hypre_PCGPrintLogging( (void *) solver, 0 ) ;
-}
 
-int  Hypre_PCG_PrintLogging( Hypre_PCG this ) {
+   Hypre_PCG_Private pcg_data = Hypre_PCG_getPrivate (this);
 
-   struct Hypre_PCG_private_type *HSPCGp = this->d_table;
-   HYPRE_StructSolver *S = HSPCGp->hssolver;
-   return HYPRE_StructPCG_PrintLogging( *S );
-}
-;
+   pcg_data->preconditioner = precond;
+
+   return 0;
+   
+} /* end impl_Hypre_PCGSetPreconditioner */
