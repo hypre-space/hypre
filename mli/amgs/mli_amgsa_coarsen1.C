@@ -102,7 +102,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
     * reduce Amat based on the block size information (if node_dofs > 1)
     *-----------------------------------------------------------------*/
 
-   if ( init_aggr != NULL )
+   if ( init_aggr == NULL )
    {
       blk_size = curr_node_dofs;
       if (blk_size > 1) MLI_Matrix_Compress(mli_Amat, blk_size, &mli_A2mat);
@@ -114,7 +114,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
     * form aggregation graph by taking out weak edges
     *-----------------------------------------------------------------*/
 
-   if ( init_aggr != NULL ) formLocalGraph(A2mat, &Gmat);
+   if ( init_aggr == NULL ) formLocalGraph(A2mat, &Gmat);
 
    /*-----------------------------------------------------------------
     * perform coarsening
@@ -133,7 +133,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
     * clean up graph and clean up duplicate matrix if block size > 1
     *-----------------------------------------------------------------*/
 
-   if ( init_aggr != NULL )
+   if ( init_aggr == NULL )
    {
       if ( blk_size > 1 ) delete mli_A2mat;
       ierr = hypre_ParCSRMatrixDestroy(Gmat);
