@@ -332,9 +332,6 @@ int HYPRE_LSI_MLISolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    }
    mli_object->mli_->solve( sol, rhs);
 
-   delete [] sol;
-   delete [] rhs;
-
    return 0;
 #else
    printf("MLI not available.\n");
