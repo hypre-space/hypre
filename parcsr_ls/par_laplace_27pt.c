@@ -67,7 +67,7 @@ hypre_GenerateLaplacian27pt(MPI_Comm comm,
 
    hypre_GeneratePartitioning(nx,P,&nx_part);
    hypre_GeneratePartitioning(ny,Q,&ny_part);
-   hypre_GeneratePartitioning(ny,R,&nz_part);
+   hypre_GeneratePartitioning(nz,R,&nz_part);
 
    global_part = hypre_CTAlloc(int,P*Q*R+1);
 
@@ -123,13 +123,13 @@ hypre_GenerateLaplacian27pt(MPI_Comm comm,
    if (q < Q_busy-1 && r ) num_cols_offd += nx_local;
    if (q < Q_busy-1 && r < R_busy-1 ) num_cols_offd += nx_local;
    if (p && q && r) num_cols_offd++;
-   if (p && q && R_busy-1) num_cols_offd++;
+   if (p && q && r < R_busy-1) num_cols_offd++;
    if (p && q < Q_busy-1 && r) num_cols_offd++;
-   if (p && q < Q_busy-1 && R_busy-1) num_cols_offd++;
+   if (p && q < Q_busy-1 && r < R_busy-1) num_cols_offd++;
    if (p < P_busy-1 && q && r) num_cols_offd++;
-   if (p < P_busy-1 && q && R_busy-1 ) num_cols_offd++;
+   if (p < P_busy-1 && q && r < R_busy-1 ) num_cols_offd++;
    if (p < P_busy-1 && q < Q_busy-1 && r ) num_cols_offd++;
-   if (p < P_busy-1 && q < Q_busy-1 && R_busy-1) num_cols_offd++;
+   if (p < P_busy-1 && q < Q_busy-1 && r < R_busy-1) num_cols_offd++;
 
    if (!local_num_rows) num_cols_offd = 0;
 
