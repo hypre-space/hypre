@@ -101,6 +101,27 @@ hypre_BoxMapCreate( int            max_nentries,
  *--------------------------------------------------------------------------*/
 
 int
+hypre_BoxMapIncSize( hypre_BoxMap *map,
+                     int           inc_nentries )
+{
+   int ierr = 0;
+
+   int                 max_nentries = hypre_BoxMapMaxNEntries(map);
+   hypre_BoxMapEntry  *entries      = hypre_BoxMapEntries(map);
+
+   max_nentries += inc_nentries;
+   entries = hypre_TReAlloc(entries, hypre_BoxMapEntry, max_nentries);
+
+   hypre_BoxMapMaxNEntries(map) = max_nentries;
+   hypre_BoxMapEntries(map)     = entries;
+      
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
 hypre_BoxMapAddEntry( hypre_BoxMap *map,
                       hypre_Index   imin,
                       hypre_Index   imax,
@@ -317,7 +338,7 @@ hypre_BoxMapFindEntry( hypre_BoxMap       *map,
       map_indexes_d = hypre_BoxMapIndexesD(map, d);
       map_size_d    = hypre_BoxMapSizeD(map, d);
 
-      /* Find location of dimension d of index in map */
+      /* Find location of index[d] in map */
       index_d = hypre_IndexD(index, d);
 
       /* Start looking in place indicated by last_index stored in map */
@@ -348,7 +369,7 @@ hypre_BoxMapFindEntry( hypre_BoxMap       *map,
       }
    }
 
-   /* If code reaches this point, then the entry was succesfully found */
+   /* If code reaches this point, then the entry was successfully found */
    *entry_ptr = hypre_BoxMapTableEntry(map,
                                        map_index[0],
                                        map_index[1],
@@ -362,4 +383,153 @@ hypre_BoxMapFindEntry( hypre_BoxMap       *map,
 
    return ierr;
 }
+
+/*--------------------------------------------------------------------------
+ * This routine returns NULL for 'entries' if none are found
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoxMapIntersect( hypre_BoxMap        *map,
+                       hypre_Index          ilower,
+                       hypre_Index          iupper,
+                       hypre_BoxMapEntry ***entries_ptr,
+                       int                 *nentries_ptr )
+{
+   int ierr = 0;
+
+   hypre_BoxMapEntry **entries;
+   int                 nentries;
+
+   int  index_d;
+   int  map_ilower[3] = {0, 0, 0};
+   int  map_iupper[3] = {0, 0, 0};
+   int *map_indexes_d;
+   int  map_index_d;
+   int  map_size_d;
+   int  d, i, j, k;
+  
+   for (d = 0; d < 3; d++)
+   {
+      map_indexes_d = hypre_BoxMapIndexesD(map, d);
+      map_size_d    = hypre_BoxMapSizeD(map, d);
+
+      /*------------------------------------------
+       * Find location of ilower[d] in map
+       *------------------------------------------*/
+
+      index_d = hypre_IndexD(ilower, d);
+
+      /* Start looking in place indicated by last_index stored in map */
+      map_index_d = hypre_BoxMapLastIndexD(map, d);
+
+      /* Loop downward if target index is less than current location */
+      while ( (map_index_d >= 0 ) &&
+              (index_d < map_indexes_d[map_index_d]) )
+      {
+         map_index_d --;
+      }
+
+      /* Loop upward if target index is greater than current location */
+      while ( (map_index_d <= (map_size_d-1)) &&
+              (index_d >= map_indexes_d[map_index_d+1]) )
+      {
+         map_index_d ++;
+      }
+
+      if( map_index_d > (map_size_d-1) )
+      {
+         *entries_ptr  = NULL;
+         *nentries_ptr = 0;
+         return ierr;
+      }
+      else
+      {
+         map_ilower[d] = hypre_max(map_index_d, 0);
+      }
+
+      /*------------------------------------------
+       * Find location of iupper[d] in map
+       *------------------------------------------*/
+
+      index_d = hypre_IndexD(iupper, d);
+
+      /* Loop upward if target index is greater than current location */
+      while ( (map_index_d <= (map_size_d-1)) &&
+              (index_d >= map_indexes_d[map_index_d+1]) )
+      {
+         map_index_d ++;
+      }
+
+      if( map_index_d < 0 )
+      {
+         *entries_ptr  = NULL;
+         *nentries_ptr = 0;
+         return ierr;
+      }
+      else
+      {
+         map_iupper[d] = hypre_min(map_index_d, (map_size_d-1)) + 1;
+      }
+   }
+
+   /*---------------------------------------------
+    * If code reaches this point, then set up the
+    * entries array and eliminate duplicates.
+    *---------------------------------------------*/
+
+   nentries = ((map_iupper[0] - map_ilower[0]) *
+               (map_iupper[1] - map_ilower[1]) *
+               (map_iupper[2] - map_ilower[2]));
+   entries  = hypre_CTAlloc(hypre_BoxMapEntry *, nentries);
+
+   nentries = 0;
+   for (k = map_ilower[2]; k < map_iupper[2]; k++)
+   {
+      for (j = map_ilower[1]; j < map_iupper[1]; j++)
+      {
+         for (i = map_ilower[0]; i < map_iupper[0]; i++)
+         {
+            if (k > map_ilower[2])
+            {
+               if ( hypre_BoxMapTableEntry(map, i, j, k) ==
+                    hypre_BoxMapTableEntry(map, i, j, (k-1)) )
+               {
+                  continue;
+               }
+            }
+            if (j > map_ilower[1])
+            {
+               if ( hypre_BoxMapTableEntry(map, i, j, k) ==
+                    hypre_BoxMapTableEntry(map, i, (j-1), k) )
+               {
+                  continue;
+               }
+            }
+            if (i > map_ilower[0])
+            {
+               if ( hypre_BoxMapTableEntry(map, i, j, k) ==
+                    hypre_BoxMapTableEntry(map, (i-1), j, k) )
+               {
+                  continue;
+               }
+            }
+
+            entries[nentries] = hypre_BoxMapTableEntry(map, i, j, k);
+            nentries++;
+         }
+      }
+   }
+
+   /* Reset the last index in the map */
+   for (d = 0; d < 3; d++)
+   {
+      hypre_BoxMapLastIndexD(map, d) = map_ilower[d];
+   }
+
+   *entries_ptr  = entries;
+   *nentries_ptr = nentries;
+
+   return ierr;
+}
+
 

@@ -746,10 +746,12 @@ int hypre_BoxMapEntrySetInfo( hypre_BoxMapEntry *entry , void *info );
 int hypre_BoxMapEntryGetInfo( hypre_BoxMapEntry *entry , void **info_ptr );
 int hypre_BoxMapEntryGetExtents( hypre_BoxMapEntry *entry , hypre_Index imin , hypre_Index imax );
 int hypre_BoxMapCreate( int max_nentries , hypre_Index global_imin , hypre_Index global_imax , hypre_BoxMap **map_ptr );
+int hypre_BoxMapIncSize( hypre_BoxMap *map , int inc_nentries );
 int hypre_BoxMapAddEntry( hypre_BoxMap *map , hypre_Index imin , hypre_Index imax , void *info );
 int hypre_BoxMapAssemble( hypre_BoxMap *map );
 int hypre_BoxMapDestroy( hypre_BoxMap *map );
 int hypre_BoxMapFindEntry( hypre_BoxMap *map , hypre_Index index , hypre_BoxMapEntry **entry_ptr );
+int hypre_BoxMapIntersect( hypre_BoxMap *map , hypre_Index ilower , hypre_Index iupper , hypre_BoxMapEntry ***entries_ptr , int *nentries_ptr );
 
 /* sstruct_axpy.c */
 int hypre_SStructPAxpy( double alpha , hypre_SStructPVector *px , hypre_SStructPVector *py );
@@ -773,9 +775,12 @@ int hypre_SStructPGridSetPNeighbor( hypre_SStructPGrid *pgrid , hypre_Box *pneig
 int hypre_SStructPGridAssemble( hypre_SStructPGrid *pgrid );
 int hypre_SStructGridRef( hypre_SStructGrid *grid , hypre_SStructGrid **grid_ref );
 int hypre_SStructGridAssembleMaps( hypre_SStructGrid *grid );
+int hypre_SStructGridAssembleNBorMaps( hypre_SStructGrid *grid );
 int hypre_SStructGridFindMapEntry( hypre_SStructGrid *grid , int part , hypre_Index index , int var , hypre_BoxMapEntry **entry_ptr );
 int hypre_SStructMapEntryGetGlobalRank( hypre_BoxMapEntry *entry , hypre_Index index , int *rank_ptr );
 int hypre_SStructMapEntryGetProcess( hypre_BoxMapEntry *entry , int *proc_ptr );
+int hypre_SStructBoxToNBorBox( hypre_Box *box , hypre_Index index , hypre_Index nbor_index , hypre_Index coord , hypre_Index dir );
+int hypre_SStructNBorBoxToBox( hypre_Box *nbor_box , hypre_Index index , hypre_Index nbor_index , hypre_Index coord , hypre_Index dir );
 
 /* sstruct_innerprod.c */
 int hypre_SStructPInnerProd( hypre_SStructPVector *px , hypre_SStructPVector *py , double *presult_ptr );

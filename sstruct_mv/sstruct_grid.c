@@ -400,12 +400,8 @@ hypre_SStructGridAssembleMaps( hypre_SStructGrid *grid )
    MPI_Comm                   comm        = hypre_SStructGridComm(grid);
    int                        nparts      = hypre_SStructGridNParts(grid);
    int                        local_size  = hypre_SStructGridLocalSize(grid);
-   int                      **nvneighbors = hypre_SStructGridNVNeighbors(grid);
-   hypre_SStructNeighbor   ***vneighbors  = hypre_SStructGridVNeighbors(grid);
-   hypre_SStructNeighbor     *vneighbor;
    hypre_BoxMap            ***maps;
    hypre_SStructMapInfo    ***info;
-   hypre_SStructNMapInfo   ***ninfo;
    hypre_SStructPGrid        *pgrid;
    int                        nvars;
    hypre_StructGrid          *sgrid;
@@ -413,18 +409,10 @@ hypre_SStructGridAssembleMaps( hypre_SStructGrid *grid )
 
    int                       *offsets;
    hypre_SStructMapInfo      *entry_info;
-   hypre_SStructNMapInfo     *entry_ninfo;
    hypre_BoxArray            *boxes;
    hypre_Box                 *box;
    int                       *procs;
    int                        first_local;
-
-   hypre_BoxMapEntry         *map_entry;
-   hypre_Box                 *nbor_box;
-   int                        nbor_part;
-   hypre_Index                nbor_ilower;
-   int                        nbor_offset;
-   int                        nbor_proc;
 
    int                        nprocs, myproc;
    int                        proc, part, var, b;
@@ -462,7 +450,7 @@ hypre_SStructGridAssembleMaps( hypre_SStructGrid *grid )
                               &boxes, &procs, &first_local);
          bounding_box = hypre_StructGridBoundingBox(sgrid);
 
-         hypre_BoxMapCreate(hypre_BoxArraySize(boxes) + nvneighbors[part][var],
+         hypre_BoxMapCreate(hypre_BoxArraySize(boxes),
                             hypre_BoxIMin(bounding_box),
                             hypre_BoxIMax(bounding_box),
                             &maps[part][var]);
@@ -499,6 +487,37 @@ hypre_SStructGridAssembleMaps( hypre_SStructGrid *grid )
    hypre_SStructGridMaps(grid) = maps;
    hypre_SStructGridInfo(grid) = info;
 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SStructGridAssembleNBorMaps( hypre_SStructGrid *grid )
+{
+   int ierr = 0;
+
+   int                        nparts      = hypre_SStructGridNParts(grid);
+   int                      **nvneighbors = hypre_SStructGridNVNeighbors(grid);
+   hypre_SStructNeighbor   ***vneighbors  = hypre_SStructGridVNeighbors(grid);
+   hypre_SStructNeighbor     *vneighbor;
+   hypre_BoxMap            ***maps        = hypre_SStructGridMaps(grid);
+   hypre_SStructNMapInfo   ***ninfo;
+   hypre_SStructPGrid        *pgrid;
+   int                        nvars;
+
+   hypre_SStructNMapInfo     *entry_ninfo;
+
+   hypre_BoxMapEntry         *map_entry;
+   hypre_Box                 *nbor_box;
+   int                        nbor_part;
+   hypre_Index                nbor_ilower;
+   int                        nbor_offset;
+   int                        nbor_proc;
+
+   int                        part, var, b;
+
    /*------------------------------------------------------
     * Add neighbor boxes to maps and re-assemble
     *------------------------------------------------------*/
@@ -512,6 +531,7 @@ hypre_SStructGridAssembleMaps( hypre_SStructGrid *grid )
 
       for (var = 0; var < nvars; var++)
       {
+         hypre_BoxMapIncSize(maps[part][var], nvneighbors[part][var]);
          ninfo[part][var] = hypre_TAlloc(hypre_SStructNMapInfo,
                                          nvneighbors[part][var]);
 
@@ -522,6 +542,11 @@ hypre_SStructGridAssembleMaps( hypre_SStructGrid *grid )
             nbor_part = hypre_SStructNeighborPart(vneighbor);
             hypre_CopyIndex(hypre_SStructNeighborILower(vneighbor),
                             nbor_ilower);
+            /*
+             * Note that this assumes that the entire neighbor box
+             * actually lives on the global grid.  This was insured by
+             * intersecting the neighbor boxes with the global grid.
+             */
             hypre_SStructGridFindMapEntry(grid, nbor_part, nbor_ilower, var,
                                           &map_entry);
             hypre_SStructMapEntryGetProcess(map_entry, &nbor_proc);
@@ -643,4 +668,77 @@ hypre_SStructMapEntryGetProcess( hypre_BoxMapEntry *entry,
 
    return ierr;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SStructBoxToNBorBox( hypre_Box   *box,
+                           hypre_Index  index,
+                           hypre_Index  nbor_index,
+                           hypre_Index  coord,
+                           hypre_Index  dir )
+{
+   int ierr = 0;
+
+   int *imin = hypre_BoxIMin(box);
+   int *imax = hypre_BoxIMax(box);
+   int  nbor_imin[3];
+   int  nbor_imax[3];
+
+   int  d;
+
+   for (d = 0; d < 3; d++)
+   {
+      nbor_imin[d] = nbor_index[d] +
+         (imin[coord[d]] - index[coord[d]]) * dir[d];
+      nbor_imax[d] = nbor_index[d] +
+         (imax[coord[d]] - index[coord[d]]) * dir[d];
+   }
+
+   for (d = 0; d < 3; d++)
+   {
+      imin[d] = hypre_min(nbor_imin[d], nbor_imax[d]);
+      imax[d] = hypre_max(nbor_imin[d], nbor_imax[d]);
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SStructNBorBoxToBox( hypre_Box   *nbor_box,
+                           hypre_Index  index,
+                           hypre_Index  nbor_index,
+                           hypre_Index  coord,
+                           hypre_Index  dir )
+{
+   int ierr = 0;
+
+   int *nbor_imin = hypre_BoxIMin(nbor_box);
+   int *nbor_imax = hypre_BoxIMax(nbor_box);
+   int  imin[3];
+   int  imax[3];
+
+   int  d;
+
+   for (d = 0; d < 3; d++)
+   {
+      imin[coord[d]] = index[coord[d]] +
+         (nbor_imin[d] - nbor_index[d]) * dir[d];
+      imax[coord[d]] = index[coord[d]] +
+         (nbor_imax[d] - nbor_index[d]) * dir[d];
+   }
+
+   for (d = 0; d < 3; d++)
+   {
+      nbor_imin[d] = hypre_min(imin[d], imax[d]);
+      nbor_imax[d] = hypre_max(imin[d], imax[d]);
+   }
+
+   return ierr;
+}
+
 
