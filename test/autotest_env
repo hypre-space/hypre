@@ -40,9 +40,11 @@ HYPRE_CHECKOUT_EMAIL="$HYPRE_DEFAULT_EMAIL"
 HYPRE_CONFIGURE_EMAIL="$HYPRE_DEFAULT_EMAIL"
 
 HYPRE_STRUCT_EMAIL="$HYPRE_DEFAULT_EMAIL\
+ painter1@llnl.gov\
  jones97@llnl.gov"
 
 HYPRE_IJ_EMAIL="$HYPRE_DEFAULT_EMAIL\
+ painter1@llnl.gov\
  jones97@llnl.gov\
  yang11@llnl.gov\
  vhenson@llnl.gov\
