@@ -115,8 +115,6 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    if (my_id == 0 && amg_ioutdat > 1)
       hypre_BoomerAMGWriteSolverParams(amg_data); 
 
-
-
    /*-----------------------------------------------------------------------
     *    Initialize the solver error flag and assorted bookkeeping variables
     *-----------------------------------------------------------------------*/
@@ -157,13 +155,6 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
        relative_resid = resid_nrm_init;
      }
    }
-   else
-   {
-     resid_nrm = 0.9*tol;
-     resid_nrm_init = resid_nrm;
-     relative_resid = 1.;
-     rhs_norm = 1.;
-   }
 
    if (my_id == 0 && amg_ioutdat > 1 && tol > 0.)
    {     
@@ -187,14 +178,14 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
       Solve_err_flag = hypre_BoomerAMGCycle(amg_data, F_array, U_array); 
 
-      old_resid = resid_nrm;
-
       /*---------------------------------------------------------------
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
 
       if (tol > 0.)
       {
+        old_resid = resid_nrm;
+
         hypre_ParVectorCopy(F_array[0], Vtemp);
         hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
         resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
@@ -208,18 +199,13 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
         {
            relative_resid = resid_nrm;
         }
-      }
-      else
-      {
-        resid_nrm = 0.9*tol;
-        conv_factor = resid_nrm / old_resid;
-        relative_resid = 1.;
+
+        hypre_ParAMGDataRelativeResidualNorm(amg_data) = relative_resid;
       }
 
       ++cycle_count;
 
       hypre_ParAMGDataNumIterations(amg_data) = cycle_count;
-      hypre_ParAMGDataRelativeResidualNorm(amg_data) = relative_resid;
 
       if (my_id == 0 && amg_ioutdat > 1 && tol > 0.)
       { 
@@ -256,7 +242,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       cycle_cmplxty = ((double) cycle_op_count) / ((double) num_coeffs[0]);
    }
 
-   if (my_id == 0 && amg_ioutdat > 1 && tol > 0.)
+   if (my_id == 0 && amg_ioutdat > 1)
    {
       if (Solve_err_flag == 1)
       {
