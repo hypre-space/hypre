@@ -1,0 +1,93 @@
+#BHEADER***********************************************************************
+# (c) 1997   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .c .f .o
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+CC = @CC@
+ 
+C_COMPILE_FLAGS=@CFLAGS@
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+F77_COMPILE_FLAGS=@F77FLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CDEFS =
+ 
+#Pilut flags and definitions
+
+HYPRE_DIR = @HYPRE_TOP_SRC_DIR@
+
+# FC_LIB contains the libraries for a CLINKER to use for code containing
+# FORTRAN code (such as I/O or special Fortran runtimes).
+#
+FC_LIB         = -L/opt/SUNWspro/SC4.2/lib -lF77 -lM77 -lsunmath
+BLAS_LIB       =  @BLASLIBFLAGS@
+
+CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I..\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../seq_mv\
+ -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../parcsr_mv\
+ ${CINCLUDES}\
+ ${CDEFS}
+ 
+RANLIB= @RANLIB@
+ 
+MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
+LIBFLAGS = @LIBDIRS@ @LIBS@
+LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
+ 
+HEADERS =\
+ headers.h\
+ mli_pcsr_bool_mat.h
+
+FILES =\
+ mli_pcsr_bool_mat.c
+
+OBJS = ${FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: libHYPRE_mli.a 
+ 
+install: all
+	@cp -f $(srcdir)/*.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+ 
+clean:
+	@rm -f *.o
+
+veryclean: clean
+	@rm -f libHYPRE_parcsr_ls.a
+	@rm -f driver 
+
+##################################################################
+# Rules
+##################################################################
+
+libHYPRE_mli.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	@RANLIB@ $@
+ 
+${OBJS}: ${HEADERS}
+ 
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+
