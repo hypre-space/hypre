@@ -22,6 +22,7 @@ void zzz_DeleteBox P((zzz_BoxArray *box_array , int index ));
 void zzz_AppendBoxArray P((zzz_BoxArray *box_array_0 , zzz_BoxArray *box_array_1 ));
 void zzz_AppendBoxArrayArray P((zzz_BoxArrayArray *box_array_array_0 , zzz_BoxArrayArray *box_array_array_1 ));
 void zzz_CopyBoxArrayData P((zzz_BoxArray *box_array_in , zzz_BoxArray *data_space_in , int num_values_in , double *data_in , zzz_BoxArray *box_array_out , zzz_BoxArray *data_space_out , int num_values_out , double *data_out ));
+void zzz_CopyBoxArrayData P((zzz_BoxArray *box_array_in , zzz_BoxArray *data_space_in , int num_values_in , double *data_in , zzz_BoxArray *box_array_out , zzz_BoxArray *data_space_out , int num_values_out , double *data_out ));
 
 /* box_algebra.c */
 zzz_Box *zzz_IntersectBoxes P((zzz_Box *box1 , zzz_Box *box2 ));
