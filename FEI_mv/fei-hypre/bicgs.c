@@ -72,8 +72,8 @@ void * hypre_BiCGSCreate( )
    (bicgs_data -> tol)            = 1.0e-06;
    (bicgs_data -> max_iter)       = 1000;
    (bicgs_data -> stop_crit)      = 0; /* rel. residual norm */
-   (bicgs_data -> precond)        = hypre_KrylovIdentity;
-   (bicgs_data -> precond_setup)  = hypre_KrylovIdentitySetup;
+   (bicgs_data -> precond)        = hypre_ParKrylovIdentity;
+   (bicgs_data -> precond_setup)  = hypre_ParKrylovIdentitySetup;
    (bicgs_data -> precond_data)   = NULL;
    (bicgs_data -> logging)        = 0;
    (bicgs_data -> r)              = NULL;
@@ -107,16 +107,16 @@ int hypre_BiCGSDestroy( void *bicgs_vdata )
          hypre_TFree(bicgs_data -> norms);
       }
  
-      hypre_KrylovMatvecDestroy(bicgs_data -> matvec_data);
+      hypre_ParKrylovMatvecDestroy(bicgs_data -> matvec_data);
  
-      hypre_KrylovDestroyVector(bicgs_data -> r);
-      hypre_KrylovDestroyVector(bicgs_data -> rh);
-      hypre_KrylovDestroyVector(bicgs_data -> v);
-      hypre_KrylovDestroyVector(bicgs_data -> p);
-      hypre_KrylovDestroyVector(bicgs_data -> q);
-      hypre_KrylovDestroyVector(bicgs_data -> u);
-      hypre_KrylovDestroyVector(bicgs_data -> t1);
-      hypre_KrylovDestroyVector(bicgs_data -> t2);
+      hypre_ParKrylovDestroyVector(bicgs_data -> r);
+      hypre_ParKrylovDestroyVector(bicgs_data -> rh);
+      hypre_ParKrylovDestroyVector(bicgs_data -> v);
+      hypre_ParKrylovDestroyVector(bicgs_data -> p);
+      hypre_ParKrylovDestroyVector(bicgs_data -> q);
+      hypre_ParKrylovDestroyVector(bicgs_data -> u);
+      hypre_ParKrylovDestroyVector(bicgs_data -> t1);
+      hypre_ParKrylovDestroyVector(bicgs_data -> t2);
  
       hypre_TFree(bicgs_data);
    }
@@ -145,23 +145,23 @@ int hypre_BiCGSSetup( void *bicgs_vdata, void *A, void *b, void *x         )
     *--------------------------------------------------*/
  
    if ((bicgs_data -> r) == NULL)
-      (bicgs_data -> r) = hypre_KrylovCreateVector(b);
+      (bicgs_data -> r) = hypre_ParKrylovCreateVector(b);
    if ((bicgs_data -> rh) == NULL)
-      (bicgs_data -> rh) = hypre_KrylovCreateVector(b);
+      (bicgs_data -> rh) = hypre_ParKrylovCreateVector(b);
    if ((bicgs_data -> v) == NULL)
-      (bicgs_data -> v) = hypre_KrylovCreateVector(b);
+      (bicgs_data -> v) = hypre_ParKrylovCreateVector(b);
    if ((bicgs_data -> p) == NULL)
-      (bicgs_data -> p) = hypre_KrylovCreateVector(b);
+      (bicgs_data -> p) = hypre_ParKrylovCreateVector(b);
    if ((bicgs_data -> q) == NULL)
-      (bicgs_data -> q) = hypre_KrylovCreateVector(b);
+      (bicgs_data -> q) = hypre_ParKrylovCreateVector(b);
    if ((bicgs_data -> u) == NULL)
-      (bicgs_data -> u) = hypre_KrylovCreateVector(b);
+      (bicgs_data -> u) = hypre_ParKrylovCreateVector(b);
    if ((bicgs_data -> t1) == NULL)
-      (bicgs_data -> t1) = hypre_KrylovCreateVector(b);
+      (bicgs_data -> t1) = hypre_ParKrylovCreateVector(b);
    if ((bicgs_data -> t2) == NULL)
-      (bicgs_data -> t2) = hypre_KrylovCreateVector(b);
+      (bicgs_data -> t2) = hypre_ParKrylovCreateVector(b);
    if ((bicgs_data -> matvec_data) == NULL)
-      (bicgs_data -> matvec_data) = hypre_KrylovMatvecCreate(A, x);
+      (bicgs_data -> matvec_data) = hypre_ParKrylovMatvecCreate(A, x);
  
    precond_setup(precond_data, A, b, x);
  
@@ -212,7 +212,7 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
    double            rho1, rho2, sigma, alpha, dtmp, r_norm, b_norm;
    double            beta, epsmac = 1.e-16, epsilon; 
 
-   hypre_KrylovCommInfo(A,&my_id,&num_procs);
+   hypre_ParKrylovCommInfo(A,&my_id,&num_procs);
    if (logging > 0)
    {
       norms          = (bicgs_data -> norms);
@@ -221,13 +221,13 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
 
    /* initialize work arrays */
 
-   hypre_KrylovCopyVector(b,r);
+   hypre_ParKrylovCopyVector(b,r);
 
    /* compute initial residual */
 
-   hypre_KrylovMatvec(matvec_data,-1.0, A, x, 1.0, r);
-   r_norm = sqrt(hypre_KrylovInnerProd(r,r));
-   b_norm = sqrt(hypre_KrylovInnerProd(b,b));
+   hypre_ParKrylovMatvec(matvec_data,-1.0, A, x, 1.0, r);
+   r_norm = sqrt(hypre_ParKrylovInnerProd(r,r));
+   b_norm = sqrt(hypre_ParKrylovInnerProd(b,b));
    if (logging > 0)
    {
       norms[0] = r_norm;
@@ -256,9 +256,9 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
    /* convergence criterion |r_i| <= accuracy , absolute residual norm*/
    if (stop_crit) epsilon = accuracy;
 
-   hypre_KrylovCopyVector(r,rh);
-   hypre_KrylovClearVector(p);
-   hypre_KrylovClearVector(q);
+   hypre_ParKrylovCopyVector(r,rh);
+   hypre_ParKrylovClearVector(p);
+   hypre_ParKrylovClearVector(q);
    rho2 = r_norm * r_norm;
    beta = rho2;
 
@@ -267,44 +267,44 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
       iter++;
 
       rho1 = rho2;
-      hypre_KrylovCopyVector(r,u);
-      hypre_KrylovAxpy(beta,q,u);
+      hypre_ParKrylovCopyVector(r,u);
+      hypre_ParKrylovAxpy(beta,q,u);
 
-      hypre_KrylovCopyVector(q,t1);
-      hypre_KrylovAxpy(beta,p,t1);
-      hypre_KrylovCopyVector(u,p);
-      hypre_KrylovAxpy(beta,t1,p);
+      hypre_ParKrylovCopyVector(q,t1);
+      hypre_ParKrylovAxpy(beta,p,t1);
+      hypre_ParKrylovCopyVector(u,p);
+      hypre_ParKrylovAxpy(beta,t1,p);
 
       precond(precond_data, A, p, t1);
-      hypre_KrylovMatvec(matvec_data,1.0,A,t1,0.0,v);
+      hypre_ParKrylovMatvec(matvec_data,1.0,A,t1,0.0,v);
 
-      sigma = hypre_KrylovInnerProd(rh,v);
+      sigma = hypre_ParKrylovInnerProd(rh,v);
       alpha = rho1 / sigma;
 
-      hypre_KrylovCopyVector(u,q);
+      hypre_ParKrylovCopyVector(u,q);
       dtmp = - alpha;
-      hypre_KrylovAxpy(dtmp,v,q);
+      hypre_ParKrylovAxpy(dtmp,v,q);
 
       dtmp = 1.0;
-      hypre_KrylovAxpy(dtmp,q,u);
-      hypre_KrylovAxpy(alpha,u,x);
+      hypre_ParKrylovAxpy(dtmp,q,u);
+      hypre_ParKrylovAxpy(alpha,u,x);
 
       precond(precond_data, A, u, t1);
-      hypre_KrylovMatvec(matvec_data,1.0,A,t1,0.0,t2);
+      hypre_ParKrylovMatvec(matvec_data,1.0,A,t1,0.0,t2);
 
       dtmp = - alpha;
-      hypre_KrylovAxpy(dtmp,t2,r);
+      hypre_ParKrylovAxpy(dtmp,t2,r);
 
-      rho2 = hypre_KrylovInnerProd(r,rh);
+      rho2 = hypre_ParKrylovInnerProd(r,rh);
       beta = rho2 / rho1;
 
-      r_norm = sqrt(hypre_KrylovInnerProd(r,r));
+      r_norm = sqrt(hypre_ParKrylovInnerProd(r,r));
 
       if ( my_id == 0 && logging )
          printf(" BiCGS : iter %4d - res. norm = %e \n", iter, r_norm);
    }
    precond(precond_data, A, x, t1);
-   hypre_KrylovCopyVector(t1,x);
+   hypre_ParKrylovCopyVector(t1,x);
 
    (bicgs_data -> num_iterations) = iter;
    if (b_norm > 0.0)

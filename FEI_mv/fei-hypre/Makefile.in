@@ -38,6 +38,7 @@ CFLAGS = -w ${C_COMPILE_FLAGS} ${CDEFS}\
  -I../..\
  -I../../IJ_matrix_vector\
  -I../../utilities\
+ -I../../krylov\
  -I../../parcsr_matrix_vector\
  -I../../parcsr_linear_solvers\
  -I../../seq_matrix_vector\
@@ -53,6 +54,7 @@ CXXFLAGS = -w ${CXX_COMPILE_FLAGS} ${CXXDEFS}\
  -I../..\
  -I../../IJ_matrix_vector\
  -I../../utilities\
+ -I../../krylov\
  -I../../parcsr_matrix_vector\
  -I../../parcsr_linear_solvers\
  -I../../seq_matrix_vector\

@@ -74,8 +74,8 @@ void * hypre_TFQmrCreate( )
    (tfqmr_data -> tol)            = 1.0e-06;
    (tfqmr_data -> max_iter)       = 1000;
    (tfqmr_data -> stop_crit)      = 0; /* rel. residual norm */
-   (tfqmr_data -> precond)        = hypre_KrylovIdentity;
-   (tfqmr_data -> precond_setup)  = hypre_KrylovIdentitySetup;
+   (tfqmr_data -> precond)        = hypre_ParKrylovIdentity;
+   (tfqmr_data -> precond_setup)  = hypre_ParKrylovIdentitySetup;
    (tfqmr_data -> precond_data)   = NULL;
    (tfqmr_data -> logging)        = 0;
    (tfqmr_data -> r)              = NULL;
@@ -111,18 +111,18 @@ int hypre_TFQmrDestroy( void *tfqmr_vdata )
          hypre_TFree(tfqmr_data -> norms);
       }
  
-      hypre_KrylovMatvecDestroy(tfqmr_data -> matvec_data);
+      hypre_ParKrylovMatvecDestroy(tfqmr_data -> matvec_data);
  
-      hypre_KrylovDestroyVector(tfqmr_data -> r);
-      hypre_KrylovDestroyVector(tfqmr_data -> tr);
-      hypre_KrylovDestroyVector(tfqmr_data -> yo);
-      hypre_KrylovDestroyVector(tfqmr_data -> ye);
-      hypre_KrylovDestroyVector(tfqmr_data -> t1);
-      hypre_KrylovDestroyVector(tfqmr_data -> t2);
-      hypre_KrylovDestroyVector(tfqmr_data -> w);
-      hypre_KrylovDestroyVector(tfqmr_data -> v);
-      hypre_KrylovDestroyVector(tfqmr_data -> d);
-      hypre_KrylovDestroyVector(tfqmr_data -> t3);
+      hypre_ParKrylovDestroyVector(tfqmr_data -> r);
+      hypre_ParKrylovDestroyVector(tfqmr_data -> tr);
+      hypre_ParKrylovDestroyVector(tfqmr_data -> yo);
+      hypre_ParKrylovDestroyVector(tfqmr_data -> ye);
+      hypre_ParKrylovDestroyVector(tfqmr_data -> t1);
+      hypre_ParKrylovDestroyVector(tfqmr_data -> t2);
+      hypre_ParKrylovDestroyVector(tfqmr_data -> w);
+      hypre_ParKrylovDestroyVector(tfqmr_data -> v);
+      hypre_ParKrylovDestroyVector(tfqmr_data -> d);
+      hypre_ParKrylovDestroyVector(tfqmr_data -> t3);
  
       hypre_TFree(tfqmr_data);
    }
@@ -151,27 +151,27 @@ int hypre_TFQmrSetup( void *tfqmr_vdata, void *A, void *b, void *x         )
     *--------------------------------------------------*/
  
    if ((tfqmr_data -> r) == NULL)
-      (tfqmr_data -> r) = hypre_KrylovCreateVector(b);
+      (tfqmr_data -> r) = hypre_ParKrylovCreateVector(b);
    if ((tfqmr_data -> tr) == NULL)
-      (tfqmr_data -> tr) = hypre_KrylovCreateVector(b);
+      (tfqmr_data -> tr) = hypre_ParKrylovCreateVector(b);
    if ((tfqmr_data -> yo) == NULL)
-      (tfqmr_data -> yo) = hypre_KrylovCreateVector(b);
+      (tfqmr_data -> yo) = hypre_ParKrylovCreateVector(b);
    if ((tfqmr_data -> ye) == NULL)
-      (tfqmr_data -> ye) = hypre_KrylovCreateVector(b);
+      (tfqmr_data -> ye) = hypre_ParKrylovCreateVector(b);
    if ((tfqmr_data -> t1) == NULL)
-      (tfqmr_data -> t1) = hypre_KrylovCreateVector(b);
+      (tfqmr_data -> t1) = hypre_ParKrylovCreateVector(b);
    if ((tfqmr_data -> t2) == NULL)
-      (tfqmr_data -> t2) = hypre_KrylovCreateVector(b);
+      (tfqmr_data -> t2) = hypre_ParKrylovCreateVector(b);
    if ((tfqmr_data -> w) == NULL)
-      (tfqmr_data -> w) = hypre_KrylovCreateVector(b);
+      (tfqmr_data -> w) = hypre_ParKrylovCreateVector(b);
    if ((tfqmr_data -> v) == NULL)
-      (tfqmr_data -> v) = hypre_KrylovCreateVector(b);
+      (tfqmr_data -> v) = hypre_ParKrylovCreateVector(b);
    if ((tfqmr_data -> d) == NULL)
-      (tfqmr_data -> d) = hypre_KrylovCreateVector(b);
+      (tfqmr_data -> d) = hypre_ParKrylovCreateVector(b);
    if ((tfqmr_data -> t3) == NULL)
-      (tfqmr_data -> t3) = hypre_KrylovCreateVector(b);
+      (tfqmr_data -> t3) = hypre_ParKrylovCreateVector(b);
    if ((tfqmr_data -> matvec_data) == NULL)
-      (tfqmr_data -> matvec_data) = hypre_KrylovMatvecCreate(A, x);
+      (tfqmr_data -> matvec_data) = hypre_ParKrylovMatvecCreate(A, x);
  
    precond_setup(precond_data, A, b, x);
  
@@ -225,7 +225,7 @@ int hypre_TFQmrSolve(void  *tfqmr_vdata, void  *A, void  *b, void  *x)
    double            rnbnd, etam1, thetam1, c, epsmac = 1.e-16, epsilon; 
    double            sigma, alpha, beta;
 
-   hypre_KrylovCommInfo(A,&my_id,&num_procs);
+   hypre_ParKrylovCommInfo(A,&my_id,&num_procs);
    if (logging > 0)
    {
       norms          = (tfqmr_data -> norms);
@@ -234,13 +234,13 @@ int hypre_TFQmrSolve(void  *tfqmr_vdata, void  *A, void  *b, void  *x)
 
    /* initialize work arrays */
 
-   hypre_KrylovCopyVector(b,r);
+   hypre_ParKrylovCopyVector(b,r);
 
    /* compute initial residual */
 
-   hypre_KrylovMatvec(matvec_data,-1.0, A, x, 1.0, r);
-   r_norm = sqrt(hypre_KrylovInnerProd(r,r));
-   b_norm = sqrt(hypre_KrylovInnerProd(b,b));
+   hypre_ParKrylovMatvec(matvec_data,-1.0, A, x, 1.0, r);
+   r_norm = sqrt(hypre_ParKrylovInnerProd(r,r));
+   b_norm = sqrt(hypre_ParKrylovInnerProd(b,b));
    if (logging > 0)
    {
       norms[0] = r_norm;
@@ -269,14 +269,14 @@ int hypre_TFQmrSolve(void  *tfqmr_vdata, void  *A, void  *b, void  *x)
    /* convergence criterion |r_i| <= accuracy , absolute residual norm*/
    if (stop_crit) epsilon = accuracy;
 
-   hypre_KrylovCopyVector(r,tr);
-   hypre_KrylovCopyVector(r,yo);
-   hypre_KrylovCopyVector(r,w);
-   hypre_KrylovClearVector(d);
-   hypre_KrylovClearVector(v);
+   hypre_ParKrylovCopyVector(r,tr);
+   hypre_ParKrylovCopyVector(r,yo);
+   hypre_ParKrylovCopyVector(r,w);
+   hypre_ParKrylovClearVector(d);
+   hypre_ParKrylovClearVector(v);
    precond(precond_data, A, yo, t3);
-   hypre_KrylovMatvec(matvec_data,1.0,A,t3,0.0,v);
-   hypre_KrylovCopyVector(v,t1);
+   hypre_ParKrylovMatvec(matvec_data,1.0,A,t3,0.0,v);
+   hypre_ParKrylovCopyVector(v,t1);
 
    tau   = r_norm;
    theta = 0.0;
@@ -287,47 +287,47 @@ int hypre_TFQmrSolve(void  *tfqmr_vdata, void  *A, void  *b, void  *x)
    {
       iter++;
 
-      sigma = hypre_KrylovInnerProd(tr,v);
+      sigma = hypre_ParKrylovInnerProd(tr,v);
       alpha = rho / sigma;
-      hypre_KrylovCopyVector(yo,ye);
+      hypre_ParKrylovCopyVector(yo,ye);
       dtmp = - alpha;
-      hypre_KrylovAxpy(dtmp,v,ye);
-      hypre_KrylovAxpy(dtmp,t1,w);
+      hypre_ParKrylovAxpy(dtmp,v,ye);
+      hypre_ParKrylovAxpy(dtmp,t1,w);
 
       thetam1 = theta;
-      theta = sqrt(hypre_KrylovInnerProd(w,w)) / tau;
+      theta = sqrt(hypre_ParKrylovInnerProd(w,w)) / tau;
       c = 1.0 / sqrt(1.0 + theta * theta );
       tau = tau * theta * c;
       etam1 = eta;
       eta = c * c * alpha;
 
       dtmp = thetam1 * thetam1 * etam1 / alpha;
-      hypre_KrylovCopyVector(d,t3);
-      hypre_KrylovCopyVector(yo,d);
-      hypre_KrylovAxpy(dtmp,t3,d);
+      hypre_ParKrylovCopyVector(d,t3);
+      hypre_ParKrylovCopyVector(yo,d);
+      hypre_ParKrylovAxpy(dtmp,t3,d);
 
-      hypre_KrylovAxpy(eta,d,x);
+      hypre_ParKrylovAxpy(eta,d,x);
       dtmp = 2.0 * iter;
       rnbnd = tau * sqrt( dtmp );
 
       precond(precond_data, A, ye, t3);
-      hypre_KrylovMatvec(matvec_data,1.0,A,t3,0.0,t2);
+      hypre_ParKrylovMatvec(matvec_data,1.0,A,t3,0.0,t2);
       dtmp = - alpha;
-      hypre_KrylovAxpy(dtmp,t2,w);
+      hypre_ParKrylovAxpy(dtmp,t2,w);
 
       thetam1 = theta;
-      theta = sqrt(hypre_KrylovInnerProd(w,w)) / tau;
+      theta = sqrt(hypre_ParKrylovInnerProd(w,w)) / tau;
       c = 1.0 / sqrt(1.0 + theta * theta );
       tau = tau * theta * c;
       etam1 = eta;
       eta = c * c * alpha;
   
       dtmp = thetam1 * thetam1 * etam1 / alpha;
-      hypre_KrylovCopyVector(d,t3);
-      hypre_KrylovCopyVector(ye,d);
-      hypre_KrylovAxpy(dtmp,t3,d);
+      hypre_ParKrylovCopyVector(d,t3);
+      hypre_ParKrylovCopyVector(ye,d);
+      hypre_ParKrylovAxpy(dtmp,t3,d);
 
-      hypre_KrylovAxpy(eta,d,x);
+      hypre_ParKrylovAxpy(eta,d,x);
       dtmp = 2.0 * iter + 1.0;
       rnbnd = tau * sqrt( dtmp );
 
@@ -338,21 +338,21 @@ int hypre_TFQmrSolve(void  *tfqmr_vdata, void  *A, void  *b, void  *x)
          printf(" TFQmr : iter %4d - res. norm = %e \n", iter, r_norm);
 
       rhom1 = rho;
-      rho = hypre_KrylovInnerProd(tr,w);
+      rho = hypre_ParKrylovInnerProd(tr,w);
       beta = rho / rhom1;
 
-      hypre_KrylovCopyVector(w,yo);
-      hypre_KrylovAxpy(beta,ye,yo);
+      hypre_ParKrylovCopyVector(w,yo);
+      hypre_ParKrylovAxpy(beta,ye,yo);
      
       precond(precond_data, A, yo, t3);
-      hypre_KrylovMatvec(matvec_data,1.0,A,t3,0.0,t1);
-      hypre_KrylovCopyVector(t2,t3);
-      hypre_KrylovAxpy(beta,v,t3);
-      hypre_KrylovCopyVector(t1,v);
-      hypre_KrylovAxpy(beta,t3,v);
+      hypre_ParKrylovMatvec(matvec_data,1.0,A,t3,0.0,t1);
+      hypre_ParKrylovCopyVector(t2,t3);
+      hypre_ParKrylovAxpy(beta,v,t3);
+      hypre_ParKrylovCopyVector(t1,v);
+      hypre_ParKrylovAxpy(beta,t3,v);
    }
    precond(precond_data, A, x, t3);
-   hypre_KrylovCopyVector(t3,x);
+   hypre_ParKrylovCopyVector(t3,x);
 
    (tfqmr_data -> num_iterations) = iter;
    if (b_norm > 0.0)

@@ -80,8 +80,8 @@ void * hypre_BiCGSTABLCreate( )
    (bicgstab_data -> size)           = 2;
    (bicgstab_data -> max_iter)       = 1000;
    (bicgstab_data -> stop_crit)      = 0; /* rel. residual norm */
-   (bicgstab_data -> precond)        = hypre_KrylovIdentity;
-   (bicgstab_data -> precond_setup)  = hypre_KrylovIdentitySetup;
+   (bicgstab_data -> precond)        = hypre_ParKrylovIdentity;
+   (bicgstab_data -> precond_setup)  = hypre_ParKrylovIdentitySetup;
    (bicgstab_data -> precond_data)   = NULL;
    (bicgstab_data -> logging)        = 0;
    (bicgstab_data -> s)              = NULL;
@@ -120,22 +120,22 @@ int hypre_BiCGSTABLDestroy( void *bicgstab_vdata )
          hypre_TFree(bicgstab_data -> norms);
       }
  
-      hypre_KrylovMatvecDestroy(bicgstab_data -> matvec_data);
+      hypre_ParKrylovMatvecDestroy(bicgstab_data -> matvec_data);
  
-      hypre_KrylovDestroyVector(bicgstab_data -> r);
-      hypre_KrylovDestroyVector(bicgstab_data -> s);
-      hypre_KrylovDestroyVector(bicgstab_data -> y);
-      hypre_KrylovDestroyVector(bicgstab_data -> t);
-      hypre_KrylovDestroyVector(bicgstab_data -> tt);
-      hypre_KrylovDestroyVector(bicgstab_data -> st);
-      hypre_KrylovDestroyVector(bicgstab_data -> as);
-      hypre_KrylovDestroyVector(bicgstab_data -> asm1);
-      hypre_KrylovDestroyVector(bicgstab_data -> awt);
-      hypre_KrylovDestroyVector(bicgstab_data -> wt);
-      hypre_KrylovDestroyVector(bicgstab_data -> wh);
-      hypre_KrylovDestroyVector(bicgstab_data -> at);
-      hypre_KrylovDestroyVector(bicgstab_data -> xt);
-      hypre_KrylovDestroyVector(bicgstab_data -> t2);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> r);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> s);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> y);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> t);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> tt);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> st);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> as);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> asm1);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> awt);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> wt);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> wh);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> at);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> xt);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> t2);
  
       hypre_TFree(bicgstab_data);
    }
@@ -164,36 +164,36 @@ int hypre_BiCGSTABLSetup( void *bicgstab_vdata, void *A, void *b, void *x       
     *--------------------------------------------------*/
  
    if ((bicgstab_data -> r) == NULL)
-      (bicgstab_data -> r) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> r) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> s) == NULL)
-      (bicgstab_data -> s) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> s) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> y) == NULL)
-      (bicgstab_data -> y) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> y) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> t) == NULL)
-      (bicgstab_data -> t) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> t) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> tt) == NULL)
-      (bicgstab_data -> tt) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> tt) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> st) == NULL)
-      (bicgstab_data -> st) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> st) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> asm1) == NULL)
-      (bicgstab_data -> asm1) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> asm1) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> as) == NULL)
-      (bicgstab_data -> as) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> as) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> awt) == NULL)
-      (bicgstab_data -> awt) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> awt) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> wt) == NULL)
-      (bicgstab_data -> wt) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> wt) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> wh) == NULL)
-      (bicgstab_data -> wh) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> wh) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> at) == NULL)
-      (bicgstab_data -> at) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> at) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> xt) == NULL)
-      (bicgstab_data -> xt) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> xt) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> t2) == NULL)
-      (bicgstab_data -> t2) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> t2) = hypre_ParKrylovCreateVector(b);
  
    if ((bicgstab_data -> matvec_data) == NULL)
-      (bicgstab_data -> matvec_data) = hypre_KrylovMatvecCreate(A, x);
+      (bicgstab_data -> matvec_data) = hypre_ParKrylovMatvecCreate(A, x);
  
    precond_setup(precond_data, A, b, x);
  
@@ -255,7 +255,7 @@ int hypre_BiCGSTABLSolve(void  *bicgstab_vdata, void  *A, void  *b, void  *x)
    double     A11, A12, A21, A22, B1, B2, omega, epsmac = 1.e-16; 
    double     epsilon, phi, delta, deltam1, omegam1;
 
-   hypre_KrylovCommInfo(A,&my_id,&num_procs);
+   hypre_ParKrylovCommInfo(A,&my_id,&num_procs);
    if (logging > 0)
    {
       norms          = (bicgstab_data -> norms);
@@ -263,14 +263,14 @@ int hypre_BiCGSTABLSolve(void  *bicgstab_vdata, void  *A, void  *b, void  *x)
    }
 
    /* initialize work arrays */
-hypre_KrylovClearVector(x);
-   hypre_KrylovCopyVector(b,r);
+hypre_ParKrylovClearVector(x);
+   hypre_ParKrylovCopyVector(b,r);
 
    /* compute initial residual */
 
-   hypre_KrylovMatvec(matvec_data,-1.0, A, x, 1.0, r);
-   r_norm = sqrt(hypre_KrylovInnerProd(r,r));
-   b_norm = sqrt(hypre_KrylovInnerProd(b,b));
+   hypre_ParKrylovMatvec(matvec_data,-1.0, A, x, 1.0, r);
+   r_norm = sqrt(hypre_ParKrylovInnerProd(r,r));
+   b_norm = sqrt(hypre_ParKrylovInnerProd(b,b));
    if (logging > 0)
    {
       norms[0] = r_norm;
@@ -299,12 +299,12 @@ hypre_KrylovClearVector(x);
    /* convergence criterion |r_i| <= accuracy , absolute residual norm*/
    if (stop_crit) epsilon = accuracy;
 
-   hypre_KrylovCopyVector(r,s);
-   hypre_KrylovCopyVector(r,y);
-   delta = hypre_KrylovInnerProd(r,y);
+   hypre_ParKrylovCopyVector(r,s);
+   hypre_ParKrylovCopyVector(r,y);
+   delta = hypre_ParKrylovInnerProd(r,y);
    precond(precond_data, A, s, t);
-   hypre_KrylovMatvec(matvec_data,1.0,A,t,0.0,as);
-   phi = hypre_KrylovInnerProd(y,as) / delta;
+   hypre_ParKrylovMatvec(matvec_data,1.0,A,t,0.0,as);
+   phi = hypre_ParKrylovInnerProd(y,as) / delta;
    omega = 0.0;
    
    while ( iter < max_iter && r_norm > epsilon )
@@ -316,57 +316,57 @@ hypre_KrylovClearVector(x);
 
       if ( iter >= 2 ) 
       {
-         hypre_KrylovCopyVector(awt,at);
+         hypre_ParKrylovCopyVector(awt,at);
          dtmp = - psi;
-         hypre_KrylovAxpy(dtmp,asm1,at);
-         hypre_KrylovCopyVector(wt,wh);
+         hypre_ParKrylovAxpy(dtmp,asm1,at);
+         hypre_ParKrylovCopyVector(wt,wh);
          dtmp = - omega;
-         hypre_KrylovAxpy(dtmp,at,wh);
+         hypre_ParKrylovAxpy(dtmp,at,wh);
       }
 
-      hypre_KrylovCopyVector(r,wt);
+      hypre_ParKrylovCopyVector(r,wt);
       dtmp = - omega;
-      hypre_KrylovAxpy(dtmp,as,wt);
+      hypre_ParKrylovAxpy(dtmp,as,wt);
 
       if ( iter % 2 == 1 )
       {
          m = ( iter - 1 ) / 2;
          precond(precond_data, A, wt, t);
-         hypre_KrylovMatvec(matvec_data,1.0,A,t,0.0,awt);
-         dtmp = hypre_KrylovInnerProd(wt,awt);
-         dtmp2 = hypre_KrylovInnerProd(awt,awt);
+         hypre_ParKrylovMatvec(matvec_data,1.0,A,t,0.0,awt);
+         dtmp = hypre_ParKrylovInnerProd(wt,awt);
+         dtmp2 = hypre_ParKrylovInnerProd(awt,awt);
          chi = dtmp / dtmp2;
-         hypre_KrylovCopyVector(wt,r);
+         hypre_ParKrylovCopyVector(wt,r);
          dtmp = - chi;
-         hypre_KrylovAxpy(dtmp,awt,r);
-         hypre_KrylovCopyVector(x,xt);
-         hypre_KrylovAxpy(omega,s,x);
-         hypre_KrylovAxpy(chi,wt,x);
+         hypre_ParKrylovAxpy(dtmp,awt,r);
+         hypre_ParKrylovCopyVector(x,xt);
+         hypre_ParKrylovAxpy(omega,s,x);
+         hypre_ParKrylovAxpy(chi,wt,x);
          deltam1 = delta;
-         delta = hypre_KrylovInnerProd(r,y);
+         delta = hypre_ParKrylovInnerProd(r,y);
          psi = - omega * delta / ( deltam1 * chi);
-         hypre_KrylovCopyVector(s,st);
-         hypre_KrylovCopyVector(s,t);
+         hypre_ParKrylovCopyVector(s,st);
+         hypre_ParKrylovCopyVector(s,t);
          dtmp = - chi;
-         hypre_KrylovAxpy(dtmp,as,t);
-         hypre_KrylovCopyVector(r,s);
+         hypre_ParKrylovAxpy(dtmp,as,t);
+         hypre_ParKrylovCopyVector(r,s);
          dtmp = - psi;
-         hypre_KrylovAxpy(dtmp,t,s);
+         hypre_ParKrylovAxpy(dtmp,t,s);
       }
       else
       {
          m = ( iter - 2 ) / 2;
          dtmp = - 1.0;
-         hypre_KrylovCopyVector(wt,t2);
-         hypre_KrylovAxpy(dtmp,wh,t2);
+         hypre_ParKrylovCopyVector(wt,t2);
+         hypre_ParKrylovAxpy(dtmp,wh,t2);
          precond(precond_data, A, wt, t);
-         hypre_KrylovMatvec(matvec_data,1.0,A,t,0.0,awt);
-         A11 = hypre_KrylovInnerProd(t2,t2);
-         A12 = hypre_KrylovInnerProd(t2,awt);
+         hypre_ParKrylovMatvec(matvec_data,1.0,A,t,0.0,awt);
+         A11 = hypre_ParKrylovInnerProd(t2,t2);
+         A12 = hypre_ParKrylovInnerProd(t2,awt);
          A21 = A12;
-         A22 = hypre_KrylovInnerProd(awt,awt);
-         B1  = hypre_KrylovInnerProd(t2,wh);
-         B2  = hypre_KrylovInnerProd(awt,wh);
+         A22 = hypre_ParKrylovInnerProd(awt,awt);
+         B1  = hypre_ParKrylovInnerProd(t2,wh);
+         B2  = hypre_ParKrylovInnerProd(awt,wh);
          flag = 0;
          if ( A21 > A11 )
          {
@@ -384,49 +384,49 @@ hypre_KrylovClearVector(x);
          eta = -eta;
          if ( flag == 1 ) { dtmp = eta; eta = xi; xi = dtmp;}
          dtmp = 1.0 - xi;
-         hypre_KrylovCopyVector(wh,r);
-         hypre_KrylovScaleVector(dtmp,r);
-         hypre_KrylovAxpy(xi,wt,r);
-         hypre_KrylovAxpy(eta,awt,r);
-         hypre_KrylovCopyVector(x,t);
-         hypre_KrylovAxpy(omega,s,t);
-         hypre_KrylovCopyVector(xt,x);
-         hypre_KrylovAxpy(omegam1,st,x);
-         hypre_KrylovAxpy(omega,tt,x);
+         hypre_ParKrylovCopyVector(wh,r);
+         hypre_ParKrylovScaleVector(dtmp,r);
+         hypre_ParKrylovAxpy(xi,wt,r);
+         hypre_ParKrylovAxpy(eta,awt,r);
+         hypre_ParKrylovCopyVector(x,t);
+         hypre_ParKrylovAxpy(omega,s,t);
+         hypre_ParKrylovCopyVector(xt,x);
+         hypre_ParKrylovAxpy(omegam1,st,x);
+         hypre_ParKrylovAxpy(omega,tt,x);
          dtmp = 1.0 - xi;
-         hypre_KrylovScaleVector(dtmp,x);
-         hypre_KrylovAxpy(xi,t,x);
+         hypre_ParKrylovScaleVector(dtmp,x);
+         hypre_ParKrylovAxpy(xi,t,x);
          dtmp = - eta;
-         hypre_KrylovAxpy(dtmp,wt,x);
+         hypre_ParKrylovAxpy(dtmp,wt,x);
          deltam1 = delta;
-         delta  = hypre_KrylovInnerProd(r,y);
+         delta  = hypre_ParKrylovInnerProd(r,y);
          psi = omega * delta / ( deltam1 * eta);
-         hypre_KrylovCopyVector(s,st);
+         hypre_ParKrylovCopyVector(s,st);
          dtmp = 1.0 - xi;
-         hypre_KrylovCopyVector(tt,t);
-         hypre_KrylovAxpy(xi,s,t);
-         hypre_KrylovAxpy(eta,as,t);
-         hypre_KrylovCopyVector(r,s);
+         hypre_ParKrylovCopyVector(tt,t);
+         hypre_ParKrylovAxpy(xi,s,t);
+         hypre_ParKrylovAxpy(eta,as,t);
+         hypre_ParKrylovCopyVector(r,s);
          dtmp = - psi;
-         hypre_KrylovAxpy(dtmp,t,s);
+         hypre_ParKrylovAxpy(dtmp,t,s);
       }
 
-      hypre_KrylovCopyVector(wt,tt);
+      hypre_ParKrylovCopyVector(wt,tt);
       dtmp = - psi;
-      hypre_KrylovAxpy(dtmp,st,tt);
-      hypre_KrylovCopyVector(as,asm1);
+      hypre_ParKrylovAxpy(dtmp,st,tt);
+      hypre_ParKrylovCopyVector(as,asm1);
       precond(precond_data, A, s, t);
-      hypre_KrylovMatvec(matvec_data,1.0,A,t,0.0,as);
-      phi = hypre_KrylovInnerProd(as,y) / delta;
+      hypre_ParKrylovMatvec(matvec_data,1.0,A,t,0.0,as);
+      phi = hypre_ParKrylovInnerProd(as,y) / delta;
         
       precond(precond_data, A, x, t);
-      hypre_KrylovMatvec(matvec_data,-1.0, A, t, 1.0, r);
-      r_norm = hypre_KrylovInnerProd(r,r);
+      hypre_ParKrylovMatvec(matvec_data,-1.0, A, t, 1.0, r);
+      r_norm = hypre_ParKrylovInnerProd(r,r);
       if ( my_id == 0 && logging )
          printf(" BiCGSTAB2 : iter %4d - res. norm = %e \n", iter, r_norm);
    }
    precond(precond_data, A, x, t);
-   hypre_KrylovCopyVector(t,x);
+   hypre_ParKrylovCopyVector(t,x);
 
    (bicgstab_data -> num_iterations) = iter;
    if (b_norm > 0.0)
@@ -635,8 +635,8 @@ void * hypre_BiCGSTABLCreate( )
    (bicgstab_data -> size)           = 2;
    (bicgstab_data -> max_iter)       = 1000;
    (bicgstab_data -> stop_crit)      = 0; /* rel. residual norm */
-   (bicgstab_data -> precond)        = hypre_KrylovIdentity;
-   (bicgstab_data -> precond_setup)  = hypre_KrylovIdentitySetup;
+   (bicgstab_data -> precond)        = hypre_ParKrylovIdentity;
+   (bicgstab_data -> precond_setup)  = hypre_ParKrylovIdentitySetup;
    (bicgstab_data -> precond_data)   = NULL;
    (bicgstab_data -> logging)        = 0;
    (bicgstab_data -> r)              = NULL;
@@ -674,20 +674,20 @@ int hypre_BiCGSTABLDestroy( void *bicgstab_vdata )
          hypre_TFree(bicgstab_data -> norms);
       }
  
-      hypre_KrylovMatvecDestroy(bicgstab_data -> matvec_data);
+      hypre_ParKrylovMatvecDestroy(bicgstab_data -> matvec_data);
  
-      hypre_KrylovDestroyVector(bicgstab_data -> r);
-      hypre_KrylovDestroyVector(bicgstab_data -> rh);
-      hypre_KrylovDestroyVector(bicgstab_data -> rt);
-      hypre_KrylovDestroyVector(bicgstab_data -> rt1);
-      hypre_KrylovDestroyVector(bicgstab_data -> rt2);
-      hypre_KrylovDestroyVector(bicgstab_data -> rt3);
-      hypre_KrylovDestroyVector(bicgstab_data -> ut);
-      hypre_KrylovDestroyVector(bicgstab_data -> ut1);
-      hypre_KrylovDestroyVector(bicgstab_data -> ut2);
-      hypre_KrylovDestroyVector(bicgstab_data -> ut3);
-      hypre_KrylovDestroyVector(bicgstab_data -> xh);
-      hypre_KrylovDestroyVector(bicgstab_data -> t);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> r);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> rh);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> rt);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> rt1);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> rt2);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> rt3);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> ut);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> ut1);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> ut2);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> ut3);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> xh);
+      hypre_ParKrylovDestroyVector(bicgstab_data -> t);
  
       hypre_TFree(bicgstab_data);
    }
@@ -716,32 +716,32 @@ int hypre_BiCGSTABLSetup( void *bicgstab_vdata, void *A, void *b, void *x       
     *--------------------------------------------------*/
  
    if ((bicgstab_data -> r) == NULL)
-      (bicgstab_data -> r) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> r) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> rh) == NULL)
-      (bicgstab_data -> rh) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> rh) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> rt) == NULL)
-      (bicgstab_data -> rt) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> rt) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> rt1) == NULL)
-      (bicgstab_data -> rt1) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> rt1) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> rt2) == NULL)
-      (bicgstab_data -> rt2) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> rt2) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> rt3) == NULL)
-      (bicgstab_data -> rt3) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> rt3) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> ut) == NULL)
-      (bicgstab_data -> ut) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> ut) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> ut1) == NULL)
-      (bicgstab_data -> ut1) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> ut1) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> ut2) == NULL)
-      (bicgstab_data -> ut2) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> ut2) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> ut3) == NULL)
-      (bicgstab_data -> ut3) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> ut3) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> xh) == NULL)
-      (bicgstab_data -> xh) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> xh) = hypre_ParKrylovCreateVector(b);
    if ((bicgstab_data -> t) == NULL)
-      (bicgstab_data -> t) = hypre_KrylovCreateVector(b);
+      (bicgstab_data -> t) = hypre_ParKrylovCreateVector(b);
  
    if ((bicgstab_data -> matvec_data) == NULL)
-      (bicgstab_data -> matvec_data) = hypre_KrylovMatvecCreate(A, x);
+      (bicgstab_data -> matvec_data) = hypre_ParKrylovMatvecCreate(A, x);
  
    precond_setup(precond_data, A, b, x);
  
@@ -802,7 +802,7 @@ int hypre_BiCGSTABLSolve(void  *bicgstab_vdata, void  *A, void  *b, void  *x)
    double     alpha, beta, gamma, epsilon, rho, rho1, dtmp, r_norm, b_norm;
    double     gammapp[2], darray[2], epsmac = 1.e-16, omega; 
 
-   hypre_KrylovCommInfo(A,&my_id,&num_procs);
+   hypre_ParKrylovCommInfo(A,&my_id,&num_procs);
    if (logging > 0)
    {
       norms          = (bicgstab_data -> norms);
@@ -810,14 +810,14 @@ int hypre_BiCGSTABLSolve(void  *bicgstab_vdata, void  *A, void  *b, void  *x)
    }
 
    /* initialize work arrays */
-hypre_KrylovClearVector(x);
-   hypre_KrylovCopyVector(b,r);
+hypre_ParKrylovClearVector(x);
+   hypre_ParKrylovCopyVector(b,r);
 
    /* compute initial residual */
 
-   hypre_KrylovMatvec(matvec_data,-1.0, A, x, 1.0, r);
-   r_norm = sqrt(hypre_KrylovInnerProd(r,r));
-   b_norm = sqrt(hypre_KrylovInnerProd(b,b));
+   hypre_ParKrylovMatvec(matvec_data,-1.0, A, x, 1.0, r);
+   r_norm = sqrt(hypre_ParKrylovInnerProd(r,r));
+   b_norm = sqrt(hypre_ParKrylovInnerProd(b,b));
    if (logging > 0)
    {
       norms[0] = r_norm;
@@ -846,72 +846,72 @@ hypre_KrylovClearVector(x);
    /* convergence criterion |r_i| <= accuracy , absolute residual norm*/
    if (stop_crit) epsilon = accuracy;
 
-   hypre_KrylovCopyVector(r,rh);
-   hypre_KrylovCopyVector(r,rt);
-   hypre_KrylovCopyVector(x,xh);
-   hypre_KrylovClearVector(ut);
+   hypre_ParKrylovCopyVector(r,rh);
+   hypre_ParKrylovCopyVector(r,rt);
+   hypre_ParKrylovCopyVector(x,xh);
+   hypre_ParKrylovClearVector(ut);
    omega = rho = 1.0; alpha = 0.0;
 
    while ( iter < max_iter && r_norm > epsilon )
    {
       iter += size;
 
-      hypre_KrylovCopyVector(ut,ut1);
-      hypre_KrylovCopyVector(rt,rt1);
+      hypre_ParKrylovCopyVector(ut,ut1);
+      hypre_ParKrylovCopyVector(rt,rt1);
     
       rho = - omega * rho;    
 
-      rho1 = hypre_KrylovInnerProd(rh,rt1);
+      rho1 = hypre_ParKrylovInnerProd(rh,rt1);
       beta = alpha * rho1 / rho;
       rho = rho1;
       dtmp = -beta;
-      hypre_KrylovScaleVector(dtmp,ut1);
-      hypre_KrylovAxpy(1.0,rt1,ut1);
+      hypre_ParKrylovScaleVector(dtmp,ut1);
+      hypre_ParKrylovAxpy(1.0,rt1,ut1);
       precond(precond_data, A, ut1, t);
-      hypre_KrylovMatvec(matvec_data,1.0,A,t,0.0,ut2);
-      gamma = hypre_KrylovInnerProd(rh,ut2);
+      hypre_ParKrylovMatvec(matvec_data,1.0,A,t,0.0,ut2);
+      gamma = hypre_ParKrylovInnerProd(rh,ut2);
       alpha = rho / gamma; dtmp = -alpha;
-      hypre_KrylovAxpy(dtmp,ut2,rt1);
+      hypre_ParKrylovAxpy(dtmp,ut2,rt1);
       precond(precond_data, A, rt1, t);
-      hypre_KrylovMatvec(matvec_data,1.0,A,t,0.0,rt2);
-      hypre_KrylovAxpy(alpha,ut1,xh);
+      hypre_ParKrylovMatvec(matvec_data,1.0,A,t,0.0,rt2);
+      hypre_ParKrylovAxpy(alpha,ut1,xh);
 
-      rho1 = hypre_KrylovInnerProd(rh,rt2);
+      rho1 = hypre_ParKrylovInnerProd(rh,rt2);
       beta = alpha * rho1 / rho;
       rho = rho1;
       dtmp = -beta;
-      hypre_KrylovScaleVector(dtmp,ut1);
-      hypre_KrylovAxpy(1.0,rt1,ut1);
-      hypre_KrylovScaleVector(dtmp,ut2);
-      hypre_KrylovAxpy(1.0,rt2,ut2);
+      hypre_ParKrylovScaleVector(dtmp,ut1);
+      hypre_ParKrylovAxpy(1.0,rt1,ut1);
+      hypre_ParKrylovScaleVector(dtmp,ut2);
+      hypre_ParKrylovAxpy(1.0,rt2,ut2);
       precond(precond_data, A, ut2, t);
-      hypre_KrylovMatvec(matvec_data,1.0,A,t,0.0,ut3);
-      gamma = hypre_KrylovInnerProd(rh,ut3);
+      hypre_ParKrylovMatvec(matvec_data,1.0,A,t,0.0,ut3);
+      gamma = hypre_ParKrylovInnerProd(rh,ut3);
       alpha = rho / gamma; dtmp = -alpha;
-      hypre_KrylovAxpy(dtmp,ut2,rt1);
-      hypre_KrylovAxpy(dtmp,ut3,rt2);
+      hypre_ParKrylovAxpy(dtmp,ut2,rt1);
+      hypre_ParKrylovAxpy(dtmp,ut3,rt2);
       precond(precond_data, A, rt2, t);
-      hypre_KrylovMatvec(matvec_data,1.0,A,t,0.0,rt3);
-      hypre_KrylovAxpy(alpha,ut1,xh);
+      hypre_ParKrylovMatvec(matvec_data,1.0,A,t,0.0,rt3);
+      hypre_ParKrylovAxpy(alpha,ut1,xh);
 
       mat[0][0] = 0.0;
       mat[0][1] = 0.0;
       mat[1][0] = 0.0;
       mat[1][1] = 0.0;
 
-      darray[0] = hypre_KrylovInnerProd(rt2,rt2);
-      darray[1] = hypre_KrylovInnerProd(rt1,rt2);
+      darray[0] = hypre_ParKrylovInnerProd(rt2,rt2);
+      darray[1] = hypre_ParKrylovInnerProd(rt1,rt2);
       sigma[0]  = darray[0];
       mat[0][0] = sigma[0];
       gammap[0] = darray[1] / sigma[0];
 
-      dtmp = hypre_KrylovInnerProd(rt2,rt3);
+      dtmp = hypre_ParKrylovInnerProd(rt2,rt3);
       tau[0][1] = dtmp / sigma[0];
       mat[0][1] = tau[0][1] * sigma[0];
       dtmp = -tau[0][1];
-      hypre_KrylovAxpy(dtmp,rt2,rt3);
-      darray[0] = hypre_KrylovInnerProd(rt3,rt3);
-      darray[1] = hypre_KrylovInnerProd(rt1,rt3);
+      hypre_ParKrylovAxpy(dtmp,rt2,rt3);
+      darray[0] = hypre_ParKrylovInnerProd(rt3,rt3);
+      darray[1] = hypre_ParKrylovInnerProd(rt1,rt3);
       sigma[1]  = darray[0];
       mat[1][1] = sigma[1];
       gammap[1] = darray[1] / sigma[1];
@@ -923,30 +923,30 @@ hypre_KrylovClearVector(x);
       gammapp[0] = gammanp[1];
 
       dtmp = gammanp[0];
-      hypre_KrylovAxpy(dtmp,rt1,xh);
+      hypre_ParKrylovAxpy(dtmp,rt1,xh);
       dtmp = - gammap[1];
-      hypre_KrylovAxpy(dtmp,rt3,rt1);
+      hypre_ParKrylovAxpy(dtmp,rt3,rt1);
       dtmp = - gammanp[1];
-      hypre_KrylovAxpy(dtmp,ut3,ut1);
+      hypre_ParKrylovAxpy(dtmp,ut3,ut1);
       dtmp = - gammanp[0];
-      hypre_KrylovAxpy(dtmp,ut2,ut1);
+      hypre_ParKrylovAxpy(dtmp,ut2,ut1);
       dtmp = gammapp[0];
-      hypre_KrylovAxpy(dtmp,rt2,xh);
+      hypre_ParKrylovAxpy(dtmp,rt2,xh);
       dtmp = - gammap[0];
-      hypre_KrylovAxpy(dtmp,rt2,rt1);
+      hypre_ParKrylovAxpy(dtmp,rt2,rt1);
 
-      hypre_KrylovCopyVector(ut1,ut);
-      hypre_KrylovCopyVector(rt1,rt);
-      hypre_KrylovCopyVector(xh,x);
+      hypre_ParKrylovCopyVector(ut1,ut);
+      hypre_ParKrylovCopyVector(rt1,rt);
+      hypre_ParKrylovCopyVector(xh,x);
 
       precond(precond_data, A, x, t);
-      hypre_KrylovMatvec(matvec_data,-1.0, A, t, 1.0, r);
-      r_norm = hypre_KrylovInnerProd(r,r);
+      hypre_ParKrylovMatvec(matvec_data,-1.0, A, t, 1.0, r);
+      r_norm = hypre_ParKrylovInnerProd(r,r);
       if ( my_id == 0 && logging )
          printf(" BiCGSTABL : iter %4d - res. norm = %e \n", iter, r_norm);
    }
    precond(precond_data, A, x, t);
-   hypre_KrylovCopyVector(t,x);
+   hypre_ParKrylovCopyVector(t,x);
 
    (bicgstab_data -> num_iterations) = iter;
    if (b_norm > 0.0)
