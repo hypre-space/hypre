@@ -1,0 +1,185 @@
+#!/bin/sh
+
+##################################################################
+# To use:
+#
+#   1) Make a backup of your source files
+#
+#        mkdir BACKUP
+#        cp * BACKUP
+#
+#   2) Type 'hypre_convert <files>'
+#
+##################################################################
+
+INFILE=hypre_convert.in
+SEDFILE=hypre_convert.sed
+
+##################################################################
+# Create conversion input files
+##################################################################
+
+########################
+# BoomerAMG
+########################
+
+cat > $INFILE <<EOF
+hypre_boomeramgcreate      hypre_paramgcreate 
+hypre_boomeramgdestroy      hypre_paramgdestroy 
+hypre_boomeramgsetup      hypre_paramgsetup 
+hypre_boomeramgsolve      hypre_paramgsolve 
+hypre_boomeramgsolvet      hypre_paramgsolvet 
+hypre_boomeramgsetrestriction      hypre_paramgsetrestriction 
+hypre_boomeramgsetmaxlevels      hypre_paramgsetmaxlevels 
+hypre_boomeramgsetstrongthrshld      hypre_paramgsetstrongthreshold 
+hypre_boomeramgsetmaxrowsum      hypre_paramgsetmaxrowsum 
+hypre_boomeramgsettruncfactor      hypre_paramgsettruncfactor 
+hypre_boomeramgsetinterptype      hypre_paramgsetinterptype 
+hypre_boomeramgsetminiter      hypre_paramgsetminiter 
+hypre_boomeramgsetmaxiter      hypre_paramgsetmaxiter 
+hypre_boomeramgsetcoarsentype      hypre_paramgsetcoarsentype 
+hypre_boomeramgsetmeasuretype      hypre_paramgsetmeasuretype 
+hypre_boomeramgsetcycletype      hypre_paramgsetcycletype 
+hypre_boomeramgsettol      hypre_paramgsettol 
+hypre_boomeramgsetnumgridsweeps      hypre_paramgsetnumgridsweeps 
+hypre_boomeramginitgridrelaxatn      hypre_paramginitgridrelaxation 
+hypre_boomeramgsetgridrelaxtype      hypre_paramgsetgridrelaxtype 
+hypre_boomeramgsetgridrelaxpnts      hypre_paramgsetgridrelaxpoints 
+hypre_boomeramgsetrelaxweight      hypre_paramgsetrelaxweight 
+hypre_boomeramgsetioutdat      hypre_paramgsetioutdat 
+hypre_boomeramgsetlogfilename      hypre_paramgsetlogfilename 
+hypre_boomeramgsetlogging      hypre_paramgsetlogging 
+hypre_boomeramgsetdebugflag      hypre_paramgsetdebugflag 
+hypre_boomeramggetnumiterations      hypre_paramggetnumiterations 
+hypre_boomeramggetfinalreltvres      hypre_paramggetfinalrelativeres 
+HYPRE_BoomerAMGCreate   HYPRE_ParAMGCreate 
+HYPRE_BoomerAMGDestroy   HYPRE_ParAMGDestroy
+HYPRE_BoomerAMGSetup   HYPRE_ParAMGSetup
+HYPRE_BoomerAMGSolve   HYPRE_ParAMGSolve
+HYPRE_BoomerAMGSolveT   HYPRE_ParAMGSolveT
+HYPRE_BoomerAMGSetRestriction   HYPRE_ParAMGSetRestriction 
+HYPRE_BoomerAMGSetMaxLevels   HYPRE_ParAMGSetMaxLevels
+HYPRE_BoomerAMGSetStrongThreshold   HYPRE_ParAMGSetStrongThreshold
+HYPRE_BoomerAMGSetMaxRowSum   HYPRE_ParAMGSetMaxRowSum
+HYPRE_BoomerAMGSetTruncFactor   HYPRE_ParAMGSetTruncFactor
+HYPRE_BoomerAMGSetInterpType   HYPRE_ParAMGSetInterpType
+HYPRE_BoomerAMGSetMinIter   HYPRE_ParAMGSetMinIter
+HYPRE_BoomerAMGSetMaxIter   HYPRE_ParAMGSetMaxIter
+HYPRE_BoomerAMGSetCoarsenType   HYPRE_ParAMGSetCoarsenType
+HYPRE_BoomerAMGSetMeasureType   HYPRE_ParAMGSetMeasureType
+HYPRE_BoomerAMGSetCycleType   HYPRE_ParAMGSetCycleType
+HYPRE_BoomerAMGSetTol   HYPRE_ParAMGSetTol
+HYPRE_BoomerAMGSetNumGridSweeps   HYPRE_ParAMGSetNumGridSweeps
+HYPRE_BoomerAMGInitGridRelaxation  HYPRE_ParAMGInitGridRelaxation
+HYPRE_BoomerAMGSetGridRelaxType   HYPRE_ParAMGSetGridRelaxType 
+HYPRE_BoomerAMGSetGridRelaxPoints   HYPRE_ParAMGSetGridRelaxPoints
+HYPRE_BoomerAMGSetRelaxWeight   HYPRE_ParAMGSetRelaxWeight
+HYPRE_BoomerAMGSetIOutDat   HYPRE_ParAMGSetIOutDat
+HYPRE_BoomerAMGSetLogFileName   HYPRE_ParAMGSetLogFileName
+HYPRE_BoomerAMGSetLogging   HYPRE_ParAMGSetLogging
+HYPRE_BoomerAMGSetDebugFlag   HYPRE_ParAMGSetDebugFlag
+HYPRE_BoomerAMGGetNumIterations   HYPRE_ParAMGGetNumIterations 
+HYPRE_BoomerAMGGetFinalRelativeResidualNorm   HYPRE_ParAMGGetFinalRelativeResidualNorm
+hypre_BoomerAMGCreate  hypre_ParAMGCreate
+hypre_BoomerAMGDestroy  hypre_ParAMGDestroy
+hypre_BoomerAMGSetRestriction  hypre_ParAMGSetRestriction
+hypre_BoomerAMGSetMaxLevels   hypre_ParAMGSetMaxLevels
+hypre_BoomerAMGSetStrongThreshold    hypre_ParAMGSetStrongThreshold
+hypre_BoomerAMGSetMaxRowSum    hypre_ParAMGSetMaxRowSum
+hypre_BoomerAMGSetTruncFactor    hypre_ParAMGSetTruncFactor
+hypre_BoomerAMGSetInterpType    hypre_ParAMGSetInterpType
+hypre_BoomerAMGSetMinIter   hypre_ParAMGSetMinIter
+hypre_BoomerAMGSetMaxIter   hypre_ParAMGSetMaxIter
+hypre_BoomerAMGSetCoarsenType    hypre_ParAMGSetCoarsenType
+hypre_BoomerAMGSetMeasureType    hypre_ParAMGSetMeasureType
+hypre_BoomerAMGSetCycleType    hypre_ParAMGSetCycleType
+hypre_BoomerAMGSetTol    hypre_ParAMGSetTol
+hypre_BoomerAMGSetNumGridSweeps    hypre_ParAMGSetNumGridSweeps
+hypre_BoomerAMGSetGridRelaxType    hypre_ParAMGSetGridRelaxType
+hypre_BoomerAMGSetGridRelaxPoints    hypre_ParAMGSetGridRelaxPoints
+hypre_BoomerAMGSetRelaxWeight    hypre_ParAMGSetRelaxWeight
+hypre_BoomerAMGSetIOutDat    hypre_ParAMGSetIOutDat
+hypre_BoomerAMGSetLogFileName    hypre_ParAMGSetLogFileName
+hypre_BoomerAMGSetNumIterations    hypre_ParAMGSetNumIterations
+hypre_BoomerAMGSetLogging   hypre_ParAMGSetLogging
+hypre_BoomerAMGSetDebugFlag    hypre_ParAMGSetDebugFlag
+hypre_BoomerAMGSetNumUnknowns      hypre_ParAMGSetNumUnknowns
+hypre_BoomerAMGSetNumPoints    hypre_ParAMGSetNumPoints
+hypre_BoomerAMGSetUnknownMap    hypre_ParAMGSetUnknownMap
+hypre_BoomerAMGSetPointMap     hypre_ParAMGSetPointMap
+hypre_BoomerAMGSetVatPoint    hypre_ParAMGSetVatPoint
+hypre_BoomerAMGGetNumIterations    hypre_ParAMGGetNumIterations
+hypre_BoomerAMGGetRelResidualNorm    hypre_ParAMGGetRelativeResidualNorm
+hypre_BoomerAMGSetup   hypre_ParAMGSetup
+hypre_BoomerAMGSolve    hypre_ParAMGSolve
+hypre_BoomerAMGSolveT     hypre_ParAMGSolveT
+hypre_BoomerAMGCycleT     hypre_ParAMGCycleT
+hypre_BoomerAMGRelaxT     hypre_ParAMGRelaxT
+hypre_BoomerAMGCoarsen    hypre_ParAMGCoarsen
+hypre_BoomerAMGCoarsenRuge    hypre_ParAMGCoarsenRuge
+hypre_BoomerAMGCoarsenFalgout    hypre_ParAMGCoarsenFalgout
+hypre_BoomerAMGCycle      hypre_ParAMGCycle
+hypre_BoomerAMGIndepSetInit      hypre_InitParAMGIndepSet
+hypre_BoomerAMGIndepSet    hypre_ParAMGIndepSet
+hypre_BoomerAMGBuildInterp     hypre_ParAMGBuildInterp
+hypre_BoomerAMGBuildCoarseOperator    hypre_ParAMGBuildCoarseOperator
+hypre_BoomerAMGRelax     hypre_ParAMGRelax
+hypre_BoomerAMGSetupStats     hypre_ParAMGSetupStats
+hypre_BoomerAMGWriteSolverParams     hypre_ParAMGWriteSolverParams
+EOF
+
+##################################################################
+# Find files that need to be converted, and make backups
+##################################################################
+
+cat $INFILE | `
+  while read REPLACE MATCH
+  do
+    grep -l $MATCH $* >> hypre_convert.tmp
+  done
+`
+
+FILES=`cat hypre_convert.tmp | sort | uniq`
+rm -f hypre_convert.tmp
+
+for i in $FILES
+do
+  cp $i $i.bak
+done
+
+##################################################################
+# Convert files
+##################################################################
+
+cat $INFILE | `
+  while read REPLACE MATCH
+  do
+
+    rm -f $SEDFILE
+
+    echo "s/\([^a-zA-Z_0-9]\)$MATCH\([^a-zA-Z_0-9]\)/\1$REPLACE\2/g" >> $SEDFILE
+    echo "s/^$MATCH\([^a-zA-Z_0-9]\)/$REPLACE\1/g" >> $SEDFILE
+    echo "s/\([^a-zA-Z_0-9]\)$MATCH$/\1$REPLACE/g" >> $SEDFILE
+    echo "s/^$MATCH$/$REPLACE/g" >> $SEDFILE
+
+    for i in $FILES
+    do
+      cp $i $i.tmp
+      /usr/bin/sed -f $SEDFILE $i.tmp > $i
+    done
+
+  done
+`
+
+##################################################################
+# Clean up
+##################################################################
+
+for i in $FILES
+do
+  rm -f $i.tmp
+done
+
+rm -f $INFILE
+rm -f $SEDFILE
+
