@@ -51,6 +51,7 @@ int MLI_Solver_Jacobi::setup(MLI_Matrix *Amat)
    int                i, globalNRows, *partition, *ADiagI, *ADiagJ;
    int                j, localNRows, status;
    double             *ADiagA, *ritzValues;
+   char               *paramString;
    MPI_Comm           comm;
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix    *ADiag;
@@ -98,7 +99,10 @@ int MLI_Solver_Jacobi::setup(MLI_Matrix *Amat)
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    hypreVec = hypre_ParVectorCreate(comm, globalNRows, partition);
    hypre_ParVectorInitialize(hypreVec);
-   auxVec_ = new MLI_Vector(hypreVec, "HYPRE_ParVector", funcPtr);
+   paramString = new char[20];
+   strcpy( paramString, "HYPRE_ParVector" );
+   auxVec_ = new MLI_Vector(hypreVec, paramString, funcPtr);
+   delete [] paramString;
    free( funcPtr );
 
    /*-----------------------------------------------------------------
