@@ -53,7 +53,7 @@ LFLAGS =\
  -L../../seq_mv\
  -L../../parcsr_mv\
  -L../../utilities\
- -lHYPRE_mli\
+ -lHYPRE_mli_mat\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_utilities\
@@ -81,7 +81,7 @@ DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
 all: libHYPRE_mli_mat.a 
  
-driver_matmul: driver_matmul.o libHYPRE_mli.a
+driver_matmul: driver_matmul.o libHYPRE_mli_mat.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_matmul driver_matmul.o ${LFLAGS} 
 
