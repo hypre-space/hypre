@@ -90,7 +90,6 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
 
 MLI_Method_AMGSA::~MLI_Method_AMGSA()
 {
-   int  info;
    char paramString[20];
 
    if ( nullspace_vec != NULL ) delete [] nullspace_vec;
@@ -136,6 +135,7 @@ MLI_Method_AMGSA::~MLI_Method_AMGSA()
    {
       strcpy( paramString, "destroy" );
 #ifdef MLI_ARPACK
+      int  info;
       dnstev_(NULL, NULL, paramString, NULL, NULL, NULL, NULL, NULL, NULL, 
               NULL, NULL, NULL, &info);
 #else
@@ -426,7 +426,7 @@ int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
 
 int MLI_Method_AMGSA::setup( MLI *mli ) 
 {
-   int             level, nSweeps, mypid;
+   int             level, mypid;
    double          start_time, elapsed_time, max_eigen;
    char            param_string[100], *targv[10];
    MLI_Matrix      *mli_Pmat, *mli_Rmat, *mli_Amat, *mli_cAmat;
