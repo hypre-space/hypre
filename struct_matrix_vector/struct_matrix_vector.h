@@ -565,6 +565,8 @@ typedef struct
    hypre_BoxNeighbors  *neighbors;    /* neighbors of boxes */
    int                  max_distance;
 
+   hypre_Index          periodic;     /* indicates if grid is periodic */
+
    /* keep this for now to (hopefully) improve SMG setup performance */
    hypre_BoxArray      *all_boxes;      /* valid only before Assemble */
    int                 *processes;
@@ -587,6 +589,7 @@ typedef struct
 #define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)
 #define hypre_StructGridNeighbors(grid)     ((grid) -> neighbors)
 #define hypre_StructGridMaxDistance(grid)   ((grid) -> max_distance)
+#define hypre_StructGridPeriodic(grid)      ((grid) -> periodic)
 #define hypre_StructGridAllBoxes(grid)      ((grid) -> all_boxes)
 #define hypre_StructGridProcesses(grid)     ((grid) -> processes)
 #define hypre_StructGridBoxRanks(grid)      ((grid) -> box_ranks)
@@ -608,6 +611,7 @@ typedef struct
 hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
 
 #endif
+
 /*BHEADER**********************************************************************
  * (c) 1997   The Regents of the University of California
  *
@@ -968,6 +972,7 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
 int HYPRE_NewStructGrid P((MPI_Comm comm , int dim , HYPRE_StructGrid *grid ));
 int HYPRE_FreeStructGrid P((HYPRE_StructGrid grid ));
 int HYPRE_SetStructGridExtents P((HYPRE_StructGrid grid , int *ilower , int *iupper ));
+int HYPRE_SetStructGridPeriodic P((HYPRE_StructGrid grid , int *periodic ));
 int HYPRE_AssembleStructGrid P((HYPRE_StructGrid grid ));
 
 /* HYPRE_struct_matrix.c */
@@ -1104,6 +1109,7 @@ int hypre_StructCopy P((hypre_StructVector *x , hypre_StructVector *y ));
 /* struct_grid.c */
 hypre_StructGrid *hypre_NewStructGrid P((MPI_Comm comm , int dim ));
 int hypre_FreeStructGrid P((hypre_StructGrid *grid ));
+int hypre_SetStructGridPeriodic P((hypre_StructGrid *grid , hypre_Index periodic ));
 int hypre_SetStructGridExtents P((hypre_StructGrid *grid , hypre_Index ilower , hypre_Index iupper ));
 int hypre_SetStructGridBoxes P((hypre_StructGrid *grid , hypre_BoxArray *boxes ));
 int hypre_SetStructGridGlobalInfo P((hypre_StructGrid *grid , hypre_BoxArray *all_boxes , int *processes , int *box_ranks , hypre_BoxArray *base_all_boxes , hypre_Index pindex , hypre_Index pstride ));
