@@ -187,7 +187,7 @@ hypre_AMGSetup( void            *amg_vdata,
 
       int j;
 
-      for (j = 1; j < level+1; j++)
+      for (j = 0; j < level+1; j++)
       {
          sprintf(fnam,"SP_A_%d.ysmp",j);
          hypre_PrintCSRMatrix(A_array[j],fnam);
