@@ -565,10 +565,9 @@ void HYPRE_LSI_Sort(int list[], int N, int list2[], double list3[])
 
 /* ******************************************************************** */
 /* sort a given list in increasing order                                */
-/* taken from ML                                                        */
 /* -------------------------------------------------------------------- */
 
-int HYPRE_LSI_SplitDSort(double *dlist, int nlist, int *ilist, int limit)
+int HYPRE_LSI_SplitDSort2(double *dlist, int nlist, int *ilist, int limit)
 {
    int    itemp, *iarray1, *iarray2, count1, count2, i;
    double dtemp, *darray1, *darray2;
@@ -632,4 +631,60 @@ int HYPRE_LSI_SplitDSort(double *dlist, int nlist, int *ilist, int limit)
       HYPRE_LSI_SplitDSort( dlist, count1, ilist, limit );
    return 0;
 }
+
+/* ******************************************************************** */
+/* sort a given list in increasing order                                */
+/* -------------------------------------------------------------------- */
+
+int HYPRE_LSI_SplitDSort(double *dlist, int nlist, int *ilist, int limit)
+{
+   int    i, first, last, itemp, cur_index;
+   double dtemp, cur_val;
+
+   if ( nlist <= 1 ) return 0;
+   if ( nlist == 2 )
+   {
+      if ( dlist[0] < dlist[1] )
+      {
+         dtemp = dlist[0]; dlist[0] = dlist[1]; dlist[1] = dtemp;
+         itemp = ilist[0]; ilist[0] = ilist[1]; ilist[1] = itemp;
+      }
+      return 0;
+   }
+
+   first = 0;
+   last  = nlist - 1;
+
+   do 
+   { 
+      cur_index = first;
+      cur_val = dlist[cur_index];
+
+      for ( i = first+1; i <= last; i++ )
+      {
+         if ( dlist[i] > cur_val )
+         {
+            cur_index++;
+            itemp = ilist[cur_index];
+            ilist[cur_index] = ilist[i];
+            ilist[i] = itemp;
+            dtemp = dlist[cur_index];
+            dlist[cur_index] = dlist[i];
+            dlist[i] = dtemp;
+         }
+      } 
+      itemp = ilist[cur_index];
+      ilist[cur_index] = ilist[first];
+      ilist[first] = itemp;
+      dtemp = dlist[cur_index];
+      dlist[cur_index] = dlist[first];
+      dlist[first] = dtemp;
+
+      if ( cur_index > limit ) last = cur_index - 1; 
+      else if ( cur_index < limit ) first = cur_index + 1; 
+   } while ( cur_index != limit );
+
+   return 0;
+}
+
 

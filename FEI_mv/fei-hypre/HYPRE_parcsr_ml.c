@@ -188,6 +188,96 @@ int MH_ExchBdry(double *vec, void *obj)
 }
 
 /****************************************************************************/ 
+/* wrapper function for interprocessor communication for matvec and getrow  */
+/*--------------------------------------------------------------------------*/
+
+int MH_ExchBdryBack(double *vec, void *obj, int *length, double **outvec, 
+                    int **outindices)
+{
+#ifdef HYPRE_SEQUENTIAL
+   (*outvec) = NULL;
+   (*outindices) = NULL;
+   (*length) = 0;
+   return 0;
+#else
+   int         i, j, msgid, leng, src, dest, offset, *tempList;
+   double      *dbuf;
+   MH_Context  *context;
+   MH_Matrix   *Amat;
+   MPI_Comm    comm;
+   MPI_Request *request; 
+
+   int sendProcCnt, recvProcCnt;
+   int *sendProc, *recvProc;
+   int *sendLeng, *recvLeng;
+   int **sendList, nRows;
+
+   context     = (MH_Context *) obj;
+   Amat        = (MH_Matrix  *) context->Amat;
+   comm        = context->comm;
+   sendProcCnt = Amat->sendProcCnt;
+   recvProcCnt = Amat->recvProcCnt;
+   sendProc    = Amat->sendProc;
+   recvProc    = Amat->recvProc;
+   sendLeng    = Amat->sendLeng;
+   recvLeng    = Amat->recvLeng;
+   sendList    = Amat->sendList;
+   nRows       = Amat->Nrows;
+
+   if ( sendProcCnt > 0 )
+   {
+      request = (MPI_Request *) malloc( sendProcCnt * sizeof( MPI_Request ));
+      leng = 0;
+      for ( i = 0; i < sendProcCnt; i++ ) leng += sendLeng[i];
+      (*outvec) = (double *) malloc(leng * sizeof(double));
+      (*outindices) = (int *) malloc(leng * sizeof(int));
+      (*length) = leng;
+      offset = 0;
+      for ( i = 0; i < sendProcCnt; i++ ) 
+      {
+         for ( j = 0; j < sendLeng[i]; j++ ) 
+            (*outindices)[offset+j] = sendList[i][j];
+         offset += sendLeng[i];
+      } 
+   } 
+   else
+   {
+      (*outvec) = NULL;
+      (*outindices) = NULL;
+      (*length) = 0;
+   }
+   msgid = 8234;
+   offset = 0;
+   for ( i = 0; i < sendProcCnt; i++ )
+   {
+      leng = sendLeng[i] * sizeof( double );
+      src  = sendProc[i];
+      MH_Irecv((void*) &((*outvec)[offset]), leng, &src, &msgid, comm, &request[i]);
+      offset += sendLeng[i];
+   }
+   msgid = 8234;
+   offset = nRows;
+   for ( i = 0; i < recvProcCnt; i++ )
+   {
+      dest = recvProc[i];
+      leng = recvLeng[i] * sizeof( double );
+      MH_Send((void*) &(vec[offset]), leng, dest, msgid, comm);
+      offset += recvLeng[i];
+   }
+   offset = 0;
+   for ( i = 0; i < sendProcCnt; i++ )
+   {
+      leng = sendLeng[i] * sizeof( double );
+      src  = sendProc[i];
+      MH_Wait((void*) &((*outvec)[offset]), leng, &src, &msgid, comm, &request[i]);
+      offset += sendLeng[i];
+   }
+   if ( sendProcCnt > 0 ) free ( request );
+   return 1;
+#endif
+}
+
+/****************************************************************************/ 
 /* matvec function for local matrix structure MH_Matrix                     */
 /*--------------------------------------------------------------------------*/
 
