@@ -27,10 +27,10 @@ hypre_ParMatvec( double           alpha,
 {
    hypre_CommHandle	*comm_handle;
    hypre_CommPkg	*comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   hypre_CSRMatrix     *diag   = hypre_ParCSRMatrixDiag(A);
-   hypre_CSRMatrix     *offd   = hypre_ParCSRMatrixOffd(A);
-   hypre_Vector        *x_local  = hypre_ParVectorLocalVector(x);   
-   hypre_Vector        *y_local  = hypre_ParVectorLocalVector(y);   
+   hypre_CSRMatrix      *diag   = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix      *offd   = hypre_ParCSRMatrixOffd(A);
+   hypre_Vector         *x_local  = hypre_ParVectorLocalVector(x);   
+   hypre_Vector         *y_local  = hypre_ParVectorLocalVector(y);   
    int         num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
    int         num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
 
@@ -67,6 +67,10 @@ hypre_ParMatvec( double           alpha,
    hypre_InitializeVector(x_tmp);
    x_tmp_data = hypre_VectorData(x_tmp);
    
+   /*---------------------------------------------------------------------
+    * If there exists no CommPkg for A, a CommPkg is generated using
+    * equally load balanced partitionings
+    *--------------------------------------------------------------------*/
    if (!comm_pkg)
    {
 	hypre_GenerateMatvecCommunicationInfo(A, NULL, NULL);
@@ -160,6 +164,10 @@ hypre_ParMatvecT( double           alpha,
    y_tmp = hypre_CreateVector(num_cols_offd);
    hypre_InitializeVector(y_tmp);
 
+   /*---------------------------------------------------------------------
+    * If there exists no CommPkg for A, a CommPkg is generated using
+    * equally load balanced partitionings
+    *--------------------------------------------------------------------*/
    if (!comm_pkg)
    {
 	hypre_GenerateMatvecCommunicationInfo(A, NULL, NULL);
