@@ -22,9 +22,6 @@
  * include files 
  *--------------------------------------------------------------------------*/
 
-/*
-#include <mpi.h>
-*/
 #include "utilities/utilities.h"
 
 #include "base/mli_defs.h"
@@ -33,6 +30,7 @@
 #include "matrix/mli_matrix.h"
 #include "vector/mli_vector.h"
 #include "fedata/mli_fedata.h"
+#include "fedata/mli_sfei.h"
 #include "mapper/mli_mapper.h"
 #include "base/mli_oneLevel.h"
 
@@ -45,34 +43,35 @@ class MLI_Method;
 
 class MLI
 {
-   MPI_Comm       mpi_comm;         /* MPI communicator                   */
-   int            max_levels;       /* maximum number of levels           */
-   int            num_levels;       /* number of levels requested by user */
-   int            coarsest_level;   /* indicate the coarsest level number */
-   int            output_level;     /* for diagnostics                    */
-   double         tolerance;        /* for convergence check              */
-   int            max_iterations;   /* termination criterion              */
-   int            curr_iter;        /* current iteration (within ML)      */
-   MLI_OneLevel   **one_levels;     /* store information for each level   */
-   MLI_Solver     *coarse_solver;   /* temporarily store the coarse solver*/
-   MLI_Method     *method_ptr;      /* data object for a given method     */
-   int            assembled;        /* indicate MG hierarchy is assembled */
-   double         solve_time;
-   double         build_time;
+   MPI_Comm       mpiComm_;         /* MPI communicator                   */
+   int            maxLevels_;       /* maximum number of levels           */
+   int            numLevels_;       /* number of levels requested by user */
+   int            coarsestLevel_;   /* indicate the coarsest level number */
+   int            outputLevel_;     /* for diagnostics                    */
+   double         tolerance_;       /* for convergence check              */
+   int            maxIterations_;   /* termination criterion              */
+   int            currIter_;        /* current iteration (within ML)      */
+   MLI_OneLevel   **oneLevels_;     /* store information for each level   */
+   MLI_Solver     *coarseSolver_;   /* temporarily store the coarse solver*/
+   MLI_Method     *methodPtr_;      /* data object for a given method     */
+   int            assembled_;       /* indicate MG hierarchy is assembled */
+   double         solveTime_;
+   double         buildTime_;
 
 public :
 
-   MLI( MPI_Comm mpi_comm);
+   MLI( MPI_Comm mpiComm);
    ~MLI();
-   int  setOutputLevel( int level )    { output_level = level; return 0;}
-   int  setTolerance( double tol )     { tolerance = tol; return 0;}
-   int  setMaxIterations( int iter )   { max_iterations = iter; return 0;}
-   int  setNumLevels(int levels)       { num_levels = levels; return 0;}
+   int  setOutputLevel( int level )    { outputLevel_ = level; return 0;}
+   int  setTolerance( double tol )     { tolerance_ = tol; return 0;}
+   int  setMaxIterations( int iter )   { maxIterations_ = iter; return 0;}
+   int  setNumLevels(int levels)       { numLevels_ = levels; return 0;}
    int  setSystemMatrix( int level, MLI_Matrix *Amat );
    int  setRestriction(  int level, MLI_Matrix *Rmat );
    int  setProlongation( int level, MLI_Matrix *Pmat );
-   int  setSmoother( int level , int pre_post, MLI_Solver *solver );
+   int  setSmoother( int level , int prePost, MLI_Solver *solver );
    int  setFEData( int level, MLI_FEData *fedata, MLI_Mapper *map );
+   int  setSFEI( int level, MLI_SFEI *sfei );
    int  setCoarseSolve( MLI_Solver *solver );
    int  setCyclesAtLevel(int level, int cycles);
    int  setMethod( MLI_Method *method_data );
@@ -88,10 +87,11 @@ public :
    MLI_Matrix   *getRestriction( int level );
    MLI_Solver   *getSmoother( int level, int pre_post );
    MLI_FEData   *getFEData( int level );
+   MLI_SFEI     *getSFEI( int level );
    MLI_Mapper   *getNodeEqnMap( int level );
    int          resetSystemMatrix( int level );
-   int          getNumLevels()         { return num_levels; }
-   MLI_Method   *getMethod()           { return method_ptr; }
+   int          getNumLevels()         { return numLevels_; }
+   MLI_Method   *getMethod()           { return methodPtr_; }
 };
 
 #endif

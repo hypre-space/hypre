@@ -26,22 +26,23 @@ MLI_OneLevel::MLI_OneLevel( MLI *mli )
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_OneLevel::MLI_OneLevel\n");
 #endif
-   mli_object    = mli;
-   level_num     = -1;
-   fedata        = NULL;
-   nodeEqnMap    = NULL;
-   Amat          = NULL;
-   Rmat          = NULL;
-   Pmat          = NULL;
-   vec_sol       = NULL;
-   vec_rhs       = NULL;
-   vec_res       = NULL;
-   pre_smoother  = NULL;
-   postsmoother  = NULL;
-   coarse_solver = NULL;
-   next_level    = NULL;
-   prev_level    = NULL;
-   ncycles       = 1;
+   mliObject_    = mli;
+   levelNum_     = -1;
+   fedata_       = NULL;
+   sfei_         = NULL;
+   nodeEqnMap_   = NULL;
+   Amat_         = NULL;
+   Rmat_         = NULL;
+   Pmat_         = NULL;
+   vecSol_       = NULL;
+   vecRhs_       = NULL;
+   vecRes_       = NULL;
+   preSmoother_  = NULL;
+   postSmoother_ = NULL;
+   coarseSolver_ = NULL;
+   nextLevel_    = NULL;
+   prevLevel_    = NULL;
+   ncycles_      = 1;
 }
 
 /*****************************************************************************
@@ -53,17 +54,18 @@ MLI_OneLevel::~MLI_OneLevel()
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_OneLevel::~MLI_OneLevel\n");
 #endif
-   if ( fedata != NULL ) delete fedata;
-   if ( Amat   != NULL ) delete Amat;
-   if ( Rmat   != NULL ) delete Rmat;
-   if ( Pmat   != NULL ) delete Pmat;
-   if ( vec_sol != NULL ) delete vec_sol;
-   if ( vec_rhs != NULL ) delete vec_rhs;
-   if ( vec_res != NULL ) delete vec_res;
-   if ( pre_smoother == postsmoother ) postsmoother = NULL; 
-   if ( pre_smoother != NULL ) delete pre_smoother;
-   if ( postsmoother != NULL ) delete postsmoother;
-   if ( coarse_solver != NULL ) delete coarse_solver;
+   if ( fedata_ != NULL ) delete fedata_;
+   if ( sfei_   != NULL ) delete sfei_;
+   if ( Amat_   != NULL ) delete Amat_;
+   if ( Rmat_   != NULL ) delete Rmat_;
+   if ( Pmat_   != NULL ) delete Pmat_;
+   if ( vecSol_ != NULL ) delete vecSol_;
+   if ( vecRhs_ != NULL ) delete vecRhs_;
+   if ( vecRes_ != NULL ) delete vecRes_;
+   if ( preSmoother_  == postSmoother_ ) postSmoother_ = NULL; 
+   if ( preSmoother_  != NULL ) delete preSmoother_;
+   if ( postSmoother_ != NULL ) delete postSmoother_;
+   if ( coarseSolver_ != NULL ) delete coarseSolver_;
 }
 
 /*****************************************************************************
@@ -75,8 +77,8 @@ int MLI_OneLevel::setAmat( MLI_Matrix *A )
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_OneLevel::setAmat\n");
 #endif
-   if ( Amat != NULL ) delete Amat;
-   Amat = A;
+   if ( Amat_ != NULL ) delete Amat_;
+   Amat_ = A;
    return 0;
 }
 
@@ -87,10 +89,10 @@ int MLI_OneLevel::setAmat( MLI_Matrix *A )
 int MLI_OneLevel::setRmat( MLI_Matrix *R )
 {
 #ifdef MLI_DEBUG_DETAILED
-   printf("MLI_OneLevel::setRmat at level %d\n", level_num);
+   printf("MLI_OneLevel::setRmat at level %d\n", levelNum_);
 #endif
-   if ( Rmat != NULL ) delete Rmat;
-   Rmat = R;
+   if ( Rmat_ != NULL ) delete Rmat_;
+   Rmat_ = R;
    return 0;
 }
 
@@ -101,10 +103,10 @@ int MLI_OneLevel::setRmat( MLI_Matrix *R )
 int MLI_OneLevel::setPmat( MLI_Matrix *P )
 {
 #ifdef MLI_DEBUG_DETAILED
-   printf("MLI_OneLevel::setPmat at level %d\n", level_num);
+   printf("MLI_OneLevel::setPmat at level %d\n", levelNum_);
 #endif
-   if ( Pmat != NULL ) delete Pmat;
-   Pmat = P;
+   if ( Pmat_ != NULL ) delete Pmat_;
+   Pmat_ = P;
    return 0;
 }
 
@@ -117,8 +119,8 @@ int MLI_OneLevel::setSolutionVector( MLI_Vector *sol )
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_OneLevel::setSolutionVector\n");
 #endif
-   if ( vec_sol != NULL ) delete vec_sol;
-   vec_sol = sol;
+   if ( vecSol_ != NULL ) delete vecSol_;
+   vecSol_ = sol;
    return 0;
 }
 
@@ -131,8 +133,8 @@ int MLI_OneLevel::setRHSVector( MLI_Vector *rhs )
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_OneLevel::setRHSVector\n");
 #endif
-   if ( vec_rhs != NULL ) delete vec_rhs;
-   vec_rhs = rhs;
+   if ( vecRhs_ != NULL ) delete vecRhs_;
+   vecRhs_ = rhs;
    return 0;
 }
 
@@ -145,8 +147,8 @@ int MLI_OneLevel::setResidualVector( MLI_Vector *res )
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_OneLevel::setResidualVector\n");
 #endif
-   if ( vec_res != NULL ) delete vec_res;
-   vec_res = res;
+   if ( vecRes_ != NULL ) delete vecRes_;
+   vecRes_ = res;
    return 0;
 }
 
@@ -159,12 +161,12 @@ int MLI_OneLevel::setSmoother( int pre_post, MLI_Solver *smoother )
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_OneLevel::setSmoother, pre_post = %d\n", pre_post);
 #endif
-   if      ( pre_post == MLI_SMOOTHER_PRE  ) pre_smoother = smoother;
-   else if ( pre_post == MLI_SMOOTHER_POST ) postsmoother = smoother;
+   if      ( pre_post == MLI_SMOOTHER_PRE  ) preSmoother_  = smoother;
+   else if ( pre_post == MLI_SMOOTHER_POST ) postSmoother_ = smoother;
    else if ( pre_post == MLI_SMOOTHER_BOTH )
    {
-      pre_smoother = smoother;
-      postsmoother = smoother;
+      preSmoother_  = smoother;
+      postSmoother_ = smoother;
    }
    return 0;
 }
@@ -178,8 +180,8 @@ int MLI_OneLevel::setCoarseSolve( MLI_Solver *solver )
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_OneLevel::setCoarseSolve\n");
 #endif
-   if ( coarse_solver != NULL ) delete coarse_solver;
-   coarse_solver = solver;
+   if ( coarseSolver_ != NULL ) delete coarseSolver_;
+   coarseSolver_ = solver;
    return 0;
 }
 
@@ -192,10 +194,24 @@ int MLI_OneLevel::setFEData( MLI_FEData *data, MLI_Mapper *map )
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_OneLevel::setFEData\n");
 #endif
-   if ( fedata != NULL ) delete fedata;
-   fedata = data;
-   if ( nodeEqnMap != NULL ) delete nodeEqnMap;
-   nodeEqnMap = map;
+   if ( fedata_ != NULL ) delete fedata_;
+   fedata_ = data;
+   if ( nodeEqnMap_ != NULL ) delete nodeEqnMap_;
+   nodeEqnMap_ = map;
+   return 0;
+}
+
+/*****************************************************************************
+ * set finite element information object 
+ *--------------------------------------------------------------------------*/
+
+int MLI_OneLevel::setSFEI( MLI_SFEI *data )
+{
+#ifdef MLI_DEBUG_DETAILED
+   printf("MLI_OneLevel::setSFEI\n");
+#endif
+   if ( sfei_ != NULL ) delete sfei_;
+   sfei_ = data;
    return 0;
 }
 
@@ -206,32 +222,32 @@ int MLI_OneLevel::setFEData( MLI_FEData *data, MLI_Mapper *map )
 int MLI_OneLevel::setup()
 {
 #ifdef MLI_DEBUG_DETAILED
-   printf("MLI_OneLevel::setup at level %d\n", level_num);
+   printf("MLI_OneLevel::setup at level %d\n", levelNum_);
 #endif
-   if ( Amat == NULL )
+   if ( Amat_ == NULL )
    {
-      printf("MLI_OneLevel::setup at level %d\n", level_num);
+      printf("MLI_OneLevel::setup at level %d\n", levelNum_);
       exit(1);
    } 
-   if ( level_num != 0 && Pmat == NULL )
+   if ( levelNum_ != 0 && Pmat_ == NULL )
    {
-      printf("MLI_OneLevel::setup at level %d - no Pmat\n", level_num);
+      printf("MLI_OneLevel::setup at level %d - no Pmat\n", levelNum_);
       exit(1);
    } 
-   if ( !strcmp(Amat->getName(),"HYPRE_ParCSR") && 
-        !strcmp(Amat->getName(),"HYPRE_ParCSRT"))
+   if ( !strcmp(Amat_->getName(),"HYPRE_ParCSR") && 
+        !strcmp(Amat_->getName(),"HYPRE_ParCSRT"))
    {
       printf("MLI_OneLevel::setup ERROR : Amat not HYPRE_ParCSR.\n");
       exit(1);
    }
-   if ( vec_res != NULL ) delete vec_res;
-   vec_res = Amat->createVector();
-   if ( level_num > 0 )
+   if ( vecRes_ != NULL ) delete vecRes_;
+   vecRes_ = Amat_->createVector();
+   if ( levelNum_ > 0 )
    {
-      if ( level_num > 0 && vec_rhs != NULL ) delete vec_rhs;
-      if ( level_num > 0 && vec_sol != NULL ) delete vec_sol;
-      vec_sol = vec_res->clone();
-      vec_rhs = vec_res->clone();
+      if ( levelNum_ > 0 && vecRhs_ != NULL ) delete vecRhs_;
+      if ( levelNum_ > 0 && vecSol_ != NULL ) delete vecSol_;
+      vecSol_ = vecRes_->clone();
+      vecRhs_ = vecRes_->clone();
    }
    return 0;
 }
@@ -248,50 +264,50 @@ int MLI_OneLevel::solve1Cycle()
    printf("MLI_OneLevel::solve1Cycle\n");
 #endif
 
-   sol = vec_sol;
-   rhs = vec_rhs;
-   res = vec_res;
+   sol = vecSol_;
+   rhs = vecRhs_;
+   res = vecRes_;
 
-   if ( Rmat == NULL )
+   if ( Rmat_ == NULL )
    {
       /* ---------------------------------------------------------------- */
       /* coarsest level - perform coarse solve                            */
       /* ---------------------------------------------------------------- */
 
-      if ( coarse_solver != NULL ) 
+      if ( coarseSolver_ != NULL ) 
       {
 #ifdef MLI_DEBUG_DETAILED
          printf("MLI_OneLevel::solve1Cycle - coarse solve at level %d\n",
-                level_num);
+                levelNum_);
 #endif
-         coarse_solver->solve( rhs, sol );
+         coarseSolver_->solve( rhs, sol );
       }
       else 
       {
-         if      ( pre_smoother != NULL ) pre_smoother->solve( rhs, sol );
-         else if ( postsmoother != NULL ) postsmoother->solve( rhs, sol );
-         else                             rhs->copy(sol);
+         if      (preSmoother_  != NULL) preSmoother_->solve(rhs, sol);
+         else if (postSmoother_ != NULL) postSmoother_->solve(rhs, sol);
+         else                            rhs->copy(sol);
       }
       return 0;
    }
    else
    {
-      for ( i = 0; i < ncycles; i++ )
+      for ( i = 0; i < ncycles_; i++ )
       {
          /* ------------------------------------------------------------- */
          /* smooth and compute residual                                   */
          /* ------------------------------------------------------------- */
 
-         if ( pre_smoother != NULL ) 
+         if ( preSmoother_ != NULL ) 
          {
 #ifdef MLI_DEBUG_DETAILED
          printf("MLI_OneLevel::solve1Cycle - presmoothing at level %d\n",
-                level_num);
+                levelNum_);
 #endif
-            pre_smoother->solve( rhs, sol );
+            preSmoother_->solve( rhs, sol );
          }
 
-         Amat->apply( -1.0, sol, 1.0, rhs, res );
+         Amat_->apply( -1.0, sol, 1.0, rhs, res );
  
          /* ------------------------------------------------------------- */
          /* transfer to coarse level                                      */
@@ -299,11 +315,11 @@ int MLI_OneLevel::solve1Cycle()
 
 #ifdef MLI_DEBUG_DETAILED
          printf("MLI_OneLevel::solve1Cycle - restriction to level %d\n",
-                level_num+1);
+                levelNum_+1);
 #endif
-         Rmat->apply(1.0, res, 0.0, NULL, next_level->vec_rhs);
-         next_level->vec_sol->setConstantValue(0.0e0);
-         next_level->solve1Cycle();
+         Rmat_->apply(1.0, res, 0.0, NULL, nextLevel_->vecRhs_);
+         nextLevel_->vecSol_->setConstantValue(0.0e0);
+         nextLevel_->solve1Cycle();
 
          /* ------------------------------------------------------------- */
          /* transfer solution back to fine level                          */
@@ -311,20 +327,20 @@ int MLI_OneLevel::solve1Cycle()
 
 #ifdef MLI_DEBUG_DETAILED
          printf("MLI_OneLevel::solve1Cycle - interpolate to level %d\n",
-                level_num);
+                levelNum_);
 #endif
-         next_level->Pmat->apply(1.0, next_level->vec_sol, 1.0, sol, sol);
+         nextLevel_->Pmat_->apply(1.0, nextLevel_->vecSol_, 1.0, sol, sol);
 
          /* ------------------------------------------------------------- */
          /* postsmoothing                                                 */
          /* ------------------------------------------------------------- */
 
-         if ( postsmoother != NULL ) 
+         if ( postSmoother_ != NULL ) 
          {
-            postsmoother->solve( rhs, sol );
+            postSmoother_->solve( rhs, sol );
 #ifdef MLI_DEBUG_DETAILED
             printf("MLI_OneLevel::solve1Cycle - postsmoothing at level %d\n",
-                   level_num);
+                   levelNum_);
 #endif
          }
       }
@@ -341,7 +357,7 @@ int MLI_OneLevel::resetAmat()
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_OneLevel::resetAmat\n");
 #endif
-   Amat = NULL;
+   Amat_ = NULL;
    return 0;
 }
 
@@ -354,7 +370,7 @@ int MLI_OneLevel::resetSolutionVector()
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_OneLevel::resetSolutionVector\n");
 #endif
-   vec_sol = NULL;
+   vecSol_ = NULL;
    return 0;
 }
 
@@ -367,7 +383,7 @@ int MLI_OneLevel::resetRHSVector()
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_OneLevel::resetRHSVector\n");
 #endif
-   vec_rhs = NULL;
+   vecRhs_ = NULL;
    return 0;
 }
 
