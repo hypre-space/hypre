@@ -120,7 +120,7 @@ int MLI_Solver_HSchwarz::setParams( char *paramString, int argc, char **argv )
    }
    else if ( !strcmp(param1, "blkSize") )
    {
-      sscanf(paramString, "%s %ld", param1, &blkSize_);
+      sscanf(paramString, "%s %d", param1, &blkSize_);
       if ( blkSize_ < 1 ) blkSize_ = 1;
    }
    else
