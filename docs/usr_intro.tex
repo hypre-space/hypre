@@ -215,7 +215,7 @@ headers) in the form
 of type information.
 
 \item 
-{\bf Choose a matrix class that is compatible with all of your operators and your
+{\bf Choose a matrix class that is compatible with your solvers/preconditioners and your
 conceptual 
 interface.} This can be done by inspecting the documentation, or alternatively,
 by running a small 
@@ -226,8 +226,8 @@ incompatible.
 
 \end{enumerate}
 
-Once the previous set of decisions have been made, it is time to put code into
-your application.
+Once the previous set of decisions have been made, it is time to code your application 
+to call HYRPE:
 
 \begin{itemize}
 
@@ -262,70 +262,6 @@ iterations is typically available, though it may differ from solver to solver.
 
 \end{itemize}
 
-
-\subsection{More detail on the programming model}
-
-The previous example illustrates not only the general "menu" of typical usage
-for \hypre{}, but also the 
-"programming model" that \hypre{} is built around. \hypre{} is more than just a
-library of solver routines: it 
-is actually a collection of pieces that can be "programmed" in different ways.
-Technically speaking, 
-\hypre{} is a "component model." It is not necessary to have any formal training
-in "components" to be able 
-to use \hypre{}, however. In our experience, looking at some examples and
-programming a simple example 
-or two quickly gives users an intuitive feel for how this model works. In
-brief, the major "mental shift" 
-necessary is to accept that \hypre{} represents all of the parts of a linear
-solver library as "encapsulated 
-objects", called "components". This includes the obvious candidates such as
-matrices, but also the less 
-obvious things such as the algorithms used to implement preconditioning. Each
-object is opaque and can be 
-used only through the advertised "services" that it supports. All function
-calls within \hypre{} are 
-considered to be a function "on some object/component", and the functions that
-work on a particular 
-component are exactly the set of "services" that that component provides. In C
-language, that component is 
-always the first parameter in the function call, for example. Other parameters
-in a function call are normal 
-parameters, but the first one is always the component that the function call is
-"acting on". The list of 
-services provided by each component are easily discovered by looking at the
-header files for each 
-component, as well as other centralized documentation. 
-
-Besides for the services that a component provides, there is only one other use
-of a given component within 
-\hypre{}, and that is as an input to other components. For example, \hypre{} provides
-several components 
-that implement preconditioning algorithms. A user may very well set up a
-preconditioner but never call any 
-services from the preconditioner directly. Instead, the preconditioner is
-handed to a solver within \hypre{} 
-and the solver uses that preconditioner. Thus, the way to decide if you want to
-use a particular component 
-is to ask "do I want to use any of its services" and "do I need it as input to
-another component that I want to 
-use?" If the answer to either question is "yes", then you need that component.
-
-The components are then put together as inputs to each other to collaborate on
-performing the desired 
-action. The "desired action" is typically the solution of a single linear
-system of equations and \hypre{} is 
-specialized to make that extremely easy, but one of the benefits of \hypre{}'s
-programming model is that 
-the parts can be combined together in different ways to perform different
-actions. Examples might be: 
-reusing preconditioners over several timesteps of a time-dependent calculation,
-using a solver as a 
-preconditioner, or providing user-defined matrices or preconditioners for use
-within \hypre{}. Generally, 
-these more complex usages are performed by more expert users, including
-developers of other solver 
-components.
 
 {\bf Note on capitalization:} We use \code{HYPRE} and \code{hypre }
 to divide \hypre{}'s function
@@ -553,86 +489,4 @@ code without worrying about
 whether it is still being used by some other objects that are still alive.
 
 \end{enumerate}
-
-\subsection{Construction versus Use}
-
-All of the \hypre{} interfaces (or sets of services) can be divided into two
-categories: {\bf construction} 
-interfaces or {\bf use} interfaces. Every concrete component in \hypre{} 
-(designated by
-\code{hypre}) must support at 
-least one construction interface (note: if a component supports more than one
-construction interface, you 
-cannot mix and match calls from those interfaces. One and only one interface
-must be chosen and called, or 
-else errors may occur) and may support any number of use interfaces. In terms
-of the lifecycle given above, 
-"construction" is steps 2-6, and "use" is step 7. Thus, for a given concrete
-component, to figure out how to 
-perform steps 2-6 on it, you must look up the \hypre{} construction interface that
-it supports, and to see 
-which operations you may call on it in step 7, you must look up the use
-interfaces that that component 
-supports.
-
-\subsubsection{Motivation} The motivation for separate construction and use interfaces in
-\hypre{} is flexibility, both for 
-users and the algorithm developers that contribute algorithms to both \hypre{} and
-libraries that are 
-compatible with \hypre{} (i.e. "ESI compliant" libraries). The separation is
-motivated by the observation 
-that different objects might be constructed through the same construction
-process and thus it is not possible 
-to mandate, for example, that all objects built through the StructuredGrid
-interface should necessarily be of 
-a particular type. Indeed, there is a good example: the StructuredGrid's most
-natural function is to produce 
-a matrix that then can be input to solvers, but there are also solver writers
-who would like to produce 
-solvers directly from the StructuredGrid interface because this allows them to
-control construction of the 
-matrix in a way that is optimized for their solver. In the second case, then,
-the component implements not only the 
-\code{StructuredGrid} construction interface, but also the \code{Solver} use interface.
-
-\subsubsection{Construction Components}
-
-There is a subset of components within \hypre{} whose main function is simply to
-build other components. 
-We call these "construction" components. These components are easily
-recognizable: they are the 
-components that provide the \code{Build} service whose major function is
-\code{GetConstructedObject}. They are 
-also easily explainable in the context of the component lifecycle:
-a construction component A 
-handles steps 2-6 for component B, and the "use" of component A (i.e. step 7)
-is to return component B (in 
-a state where it is ready to be used). Thus, if component B is built through a
-construction component A, 
-steps 2-6 of B are done by A and the user does not have to do them explicitly.
-An example speaks a 
-thousand words:
-
-\hypre{} has several components that build matrices, such as the
-\code{hypre_StructGridStructMatrix} builder 
-component. This component implements the \code{HYPRE_StructGridInput} interface, but
-its only "use" function 
-is the Builder interface with the \code{GetConstructedObject} function. Clients use
-this component in the normal 
-way in steps 1-6. However, when step 7 is reached, the user calls
-\code{GetConstructedObject} and is returned a 
-second component B. For the component B, the user still has to perform step 1,
-the declaration of the 
-handle to B. Steps 2-6 are performed by the \code{hypre_StructGridStructMatrix}
-component for B, however. 
-When B is returned from the component, it is ready to be used. In this case,
-the returned object is of type 
-\code{hypre_StructMatrix}, and by looking up its headers we see that it supports the
-matrix-vector multiplication 
-use. It can also be passed as a parameter into various solvers such as
-\code{hypre_StructSMG} and 
-\code{hypre_StructPFMG}.
-
-
-\section{User-defined components (experts only)}
 

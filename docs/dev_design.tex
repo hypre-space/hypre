@@ -6,6 +6,395 @@
 \section{Software Architecture}
 \label{Software Architecture}
 
+\subsection{More detail on the programming model}
+
+
+\hypre{} is more than just a
+library of solver routines: it 
+is actually a collection of pieces that can be "programmed" in different ways.
+Technically speaking, 
+\hypre{} is a "component model." It is not necessary to have any formal training
+in "components" to be able 
+to use \hypre{}, however. In our experience, looking at some examples and
+programming a simple example 
+or two quickly gives users an intuitive feel for how this model works. In
+brief, the major "mental shift" 
+necessary is to accept that \hypre{} represents all of the parts of a linear
+solver library as "encapsulated 
+objects", called "components". This includes the obvious candidates such as
+matrices, but also the less 
+obvious things such as the algorithms used to implement preconditioning. Each
+object is opaque and can be 
+used only through the advertised "services" that it supports. All function
+calls within \hypre{} are 
+considered to be a function "of some object/component", and the functions that
+work on a particular 
+component are exactly the set of "services" that that component provides. In C
+language, that component is 
+always the first parameter in the function call, for example. Other parameters
+in a function call are normal 
+parameters, but the first one is always the component that the function call is
+"acting on". The list of 
+services provided by each component are easily discovered by looking at the
+header files for each 
+component, as well as other centralized documentation. 
+
+In many ways, the ``component design'' of HYPRE is simpler than object-oriented
+design, and it can be explained in an analogy to traditional subroutine
+libraries.
+As mentioned above, there are two entities in HYPRE: lists of services, and
+pieces of software that implement some subset of those services.
+This is a direct analog of old-fashioned procedural libraries, for example,
+the Basic Linear Algebra Subroutine (BLAS): the ``lists of
+services'' are the functions that a library might implement, and the pieces
+of software that implement the services are the specific library implementations.
+The BLAS are not an exact fit to this analogy, because typically a library
+that implements part of the BLAS implements it all.
+Imagine, though, that different BLAS libraries implemented only the portion
+of the BLAS that the developers chose to implement, either due to manpower,
+area of expertise, interest, need, etc.
+As a user, the way you would use such a system would be to figure out which
+functions you want to call (i.e. which services you would like to use), make
+a call to that routine in your program, and then look at all of the available
+BLAS implementations to find the ones that have implemented the call that you
+made and choose one.
+One way to think about HYPRE is exactly analagous: the BLAS functions are 
+the analog of the abstract interfaces within HYPRE, and the analog of a BLAS
+library is a particular HYPRE component.
+
+Besides for the services that a component provides, there is only one other use
+of a given component within 
+\hypre{}, and that is as an input to other components. For example, \hypre{} provides
+several components 
+that implement preconditioning algorithms. A user may very well set up a
+preconditioner but never call any 
+services from the preconditioner directly. Instead, the preconditioner is
+handed to a solver within \hypre{} 
+and the solver uses that preconditioner. Thus, the way to decide if you want to
+use a particular component 
+is to ask "do I want to use any of its services" and "do I need it as input to
+another component that I want to 
+use?" If the answer to either question is "yes", then you need that component.
+
+The components are then put together as inputs to each other to collaborate on
+performing the desired 
+action. The "desired action" is typically the solution of a single linear
+system of equations and \hypre{} is 
+specialized to make that extremely easy, but one of the benefits of \hypre{}'s
+programming model is that 
+the parts can be combined together in different ways to perform different
+actions. Examples might be: 
+reusing preconditioners over several timesteps of a time-dependent calculation,
+using a solver as a 
+preconditioner, or providing user-defined matrices or preconditioners for use
+within \hypre{}. Generally, 
+these more complex usages are performed by more expert users, including
+developers of other solver 
+components.
+
+
 %==========================================================================
 \section{Object Model}
 \label{Object Model}
+
+
+{\bf Abstract versus concrete types:} 
+
+In the current version of HYPRE, we use a capitalization scheme
+to differentiate types in 
+\hypre{}: capital \code{HYPRE} refers to abstract classes, that is, services,
+while lower \code{hypre} refers to concrete classes. 
+If you
+declare something to be of 
+type \code{HYPRE_Solver}, for instance (see declaration of components below), it is
+equivalent to stating that you 
+will be using a component that supports the services listed in the 
+\code{HYPRE_Solver}
+class. On the other hand, 
+lowercase \code{hypre} indicates a specific component, that is, a "concrete class".
+The \code{hypre_StructSMGSolve}r, 
+for instance, is a particular component. Just as in object-oriented libraries,
+"upcasting" is always allowed. 
+This means that in the bulk of your program code, you can refer to components
+as if they were the abstract 
+types. Only in the declaration of the component is the concrete class
+mentioned. This technique is 
+invaluable for promoting plug and play. In this example, then, you could
+declare 
+
+\begin{display}
+\begin{verbatim}
+
+HYPRE_Solver A; 
+hypre_StructSMGSolver a; 
+A = (HYPRE_Solver) a; 
+
+\end{verbatim}
+\end{display}
+
+Everywhere else in the code, you
+can refer to \code{a} as if it 
+was an \code{HYPRE_Solver}. Then, should you decide you would like to, say, 
+use the PFMG solver
+instead of SMG (these 
+algorithms are described in more detail in the "Solvers Available" section),
+the only line of code that needs 
+to change is 
+
+\begin{display}
+\begin{verbatim}
+
+hypre_StructPFMGSolver a;
+
+\end{verbatim}
+\end{display}
+
+In this way, users can isolate any
+potential changes to a single 
+place in their code.
+
+\subsection{The life cycle of a component}
+
+Every encapsulated object or component in \hypre{} has the same basic "life
+cycle", and many user 
+problems can be prevented simply by understanding this cycle and making sure
+that each component has 
+had all of the proper steps taken in the user code.
+
+\begin{display}
+\begin{verbatim}
+
+Add an example here to use for illustration of the exact sequence and syntax of
+steps.
+
+\end{verbatim}
+\end{display}
+
+\begin{enumerate}
+
+\item
+{\bf Declaration of the "handle" to the component.}  Each \hypre{} component is
+represented by a 
+"handle", and users must declare these handles just like any other data. They
+can either be declared
+statically or through dynamic memory mechanism such as \code{MALLOC} in C language,
+and the same 
+scope rules apply to \hypre{} components as to other data types (though see the
+note below on 
+reference counting). Though this information is technically "opaque" to users,
+generally \hypre{} 
+handles are either pointers or integers, and thus, these handles are safe to be
+passed around by users in 
+parameter lists without worrying about excessive copying going on underneath. 
+The handles are all of the form
+\code{HYPRE_Service}, where 
+\code{Service} is replaced by the name of the family of services that you want your
+\hypre{} object to 
+provide. For example, a \code{HYPRE_Solve}r is a component that provides solver
+services.
+
+\item
+{\bf Binding the handle to a concrete type.} Declaration of the handle by
+
+\begin{display}
+\begin{verbatim}
+
+HYPRE_Solver solver; 
+
+\end{verbatim}
+\end{display}
+
+says the 
+following to \hypre{}: "I will be using a \hypre{} component that provides the Solver
+service, and I will 
+be calling that component "solver"". It does not, however, tell \hypre{} exactly
+which component that 
+provides the Solver service "solver" should refer to. The most common way for
+this information to be 
+declared is to set the handle equal to the handle of a specific component. For
+example, 
+
+\begin{display}
+\begin{verbatim}
+
+HYPRE_Solver solver = (HYPRE_Solver) hypre_StructSMGSolver;
+
+\end{verbatim}
+\end{display}
+
+In the OO world, this is the
+same thing as 
+"instantiating the concrete type", while the service is the "abstract
+type". The benefit of this 
+system is that the choice of concrete type appears exactly once in the user's
+code, and that everywhere 
+else, the component is accessed knowing only the services it provides. This is
+the mechanism that 
+enables "plug and play": a user can switch solvers (or other components) by
+changing a single line of 
+their code (in fact, mechanisms can be set up to allow runtime switching; this
+will be discussed later) 
+because everywhere else in the code the components are used through the "common
+interfaces" 
+defined by the appropriate \hypre{} service.
+
+\item
+{\bf Bring the component "to life" through a "new" call.} The first call that must
+be made on every 
+\hypre{} component is a \code{new} call (though see the section on "Construction
+Components" below), as 
+in 
+
+\begin{display}
+\begin{verbatim}
+
+return_code = HYPRE_New( solver );
+
+\end{verbatim}
+\end{display}
+
+Essentially, these routines allocate
+space for the object and 
+set up defaults.
+
+\item
+{\bf Set parameters.  Important note:} all parameters have reasonable defaults
+that will be used if not 
+explicitly set by the user.
+
+\item
+{\bf Pass in needed information for construction of the component.} The
+information required depends 
+on the component. Matrices need the coefficients that define the matrix; these
+are passed in through 
+repeated calls to the chosen conceptual interface. Preconditioners need a
+"matrix" that provides the 
+necessary access pattern service. Preconditioned solvers need a preconditioner.
+
+\item
+{\bf Construct the object.} After the necessary construction information has been
+passed in, \hypre{} must 
+be instructed to construct the object, currently through the Setup call as in
+
+\begin{display}
+\begin{verbatim}
+
+HYPRE_Setup (solver);
+
+\end{verbatim}
+\end{display}
+
+\item
+{\bf Use the object.} After construction, the object is ready to be used through
+its advertised services, or to 
+be handed to other components as parameters. Matrices can be used to do
+matrix-vector multiplication, 
+or be given to solvers/preconditioners (for their construction); solvers can be
+used to solve systems, or 
+handed to other solvers as preconditioners; etc.
+
+\item
+{\bf "Kill" the object.} This is the opposite of the "bringing to life" phase.
+Here, the call is to "Free" the 
+object as in 
+
+\begin{display}
+\begin{verbatim}
+
+HYPRE_Free( solver );
+
+\end{verbatim}
+\end{display}
+
+NOTE: \hypre{} uses reference counting to
+manage memory, and 
+thus \code{HYPRE_Free} does not actually deallocate the object unless this was the
+last remaining reference 
+to the object. This allows users to safely free an object in one part of the
+code without worrying about 
+whether it is still being used by some other objects that are still alive.
+
+\end{enumerate}
+
+\subsection{Construction versus Use}
+
+All of the \hypre{} interfaces (or sets of services) can be divided into two
+categories: {\bf construction} 
+interfaces or {\bf use} interfaces. Every concrete component in \hypre{} 
+(designated by
+\code{hypre}) must support at 
+least one construction interface (note: if a component supports more than one
+construction interface, you 
+cannot mix and match calls from those interfaces. One and only one interface
+must be chosen and called, or 
+else errors may occur) and may support any number of use interfaces. In terms
+of the lifecycle given above, 
+"construction" is steps 2-6, and "use" is step 7. Thus, for a given concrete
+component, to figure out how to 
+perform steps 2-6 on it, you must look up the \hypre{} construction interface that
+it supports, and to see 
+which operations you may call on it in step 7, you must look up the use
+interfaces that that component 
+supports.
+
+\subsubsection{Motivation} The motivation for separate construction and use interfaces in
+\hypre{} is flexibility, both for 
+users and the algorithm developers that contribute algorithms to both \hypre{} and
+libraries that are 
+compatible with \hypre{} (i.e. "ESI compliant" libraries). The separation is
+motivated by the observation 
+that different objects might be constructed through the same construction
+process and thus it is not possible 
+to mandate, for example, that all objects built through the StructuredGrid
+interface should necessarily be of 
+a particular type. Indeed, there is a good example: the StructuredGrid's most
+natural function is to produce 
+a matrix that then can be input to solvers, but there are also solver writers
+who would like to produce 
+solvers directly from the StructuredGrid interface because this allows them to
+control construction of the 
+matrix in a way that is optimized for their solver. In the second case, then,
+the component implements not only the 
+\code{StructuredGrid} construction interface, but also the \code{Solver} use interface.
+
+\subsubsection{Construction Components}
+
+There is a subset of components within \hypre{} whose main function is simply to
+build other components. 
+We call these "construction" components. These components are easily
+recognizable: they are the 
+components that provide the \code{Build} service whose major function is
+\code{GetConstructedObject}. They are 
+also easily explainable in the context of the component lifecycle:
+a construction component A 
+handles steps 2-6 for component B, and the "use" of component A (i.e. step 7)
+is to return component B (in 
+a state where it is ready to be used). Thus, if component B is built through a
+construction component A, 
+steps 2-6 of B are done by A and the user does not have to do them explicitly.
+An example speaks a 
+thousand words:
+
+\hypre{} has several components that build matrices, such as the
+\code{hypre_StructGridStructMatrix} builder 
+component. This component implements the \code{HYPRE_StructGridInput} interface, but
+its only "use" function 
+is the Builder interface with the \code{GetConstructedObject} function. Clients use
+this component in the normal 
+way in steps 1-6. However, when step 7 is reached, the user calls
+\code{GetConstructedObject} and is returned a 
+second component B. For the component B, the user still has to perform step 1,
+the declaration of the 
+handle to B. Steps 2-6 are performed by the \code{hypre_StructGridStructMatrix}
+component for B, however. 
+When B is returned from the component, it is ready to be used. In this case,
+the returned object is of type 
+\code{hypre_StructMatrix}, and by looking up its headers we see that it supports the
+matrix-vector multiplication 
+use. It can also be passed as a parameter into various solvers such as
+\code{hypre_StructSMG} and 
+\code{hypre_StructPFMG}.
+
+
+\section{User-defined components (experts only)}
+

@@ -11,20 +11,18 @@ and then consider special characteristics of each separately.
 
 The defining characteristics of Operators are that they take a vector as input
 and return another vector as 
-output. Thus, this generalization also includes matrices, as well as nonlinear
+output. Thus, this generalization also includes matrices, solvers, and preconditioners,
+as well as nonlinear
 operators, transpose matrices, 
-etc. 
-The fundamental "use" function of an Operator is the \code{Apply} function. For
-components that 
-encapsulate "matrices", the \code{Apply} function corresponds to the traditional
+and other less common operators. 
+The fundamental "use" function of an Operator is the \code{Apply} function, which
+is the function that transforms an input vector to an output vector. 
+For traditional "matrices", the \code{Apply} function corresponds to
 matrix-vector multiplication. For 
 solvers, \code{Apply} is the traditional "solve" function. 
 Preconditioners are traditionally
 referred to as being "applied", 
-and the \code{Apply} function quite naturally corresponds to this application. 
-Thus,
-use of matrices, solvers, and 
-preconditioners is done through the \code{Apply} function.
+and the \code{Apply} function quite naturally corresponds to this functionality. 
 
 Operators also have auxiliary uses that are available for more
 expert users.
