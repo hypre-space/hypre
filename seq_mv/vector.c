@@ -185,6 +185,30 @@ hypre_SetVectorConstantValues( hypre_Vector *v,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SetVectorRandomValues
+ *
+ *     returns vector of values randomly distributed between -1.0 and +1.0
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SetVectorRandomValues( hypre_Vector *v,
+                             int           seed )
+{
+   double  *vector_data = hypre_VectorData(v);
+   int      size        = hypre_VectorSize(v);
+           
+   int      i;
+           
+   int      ierr  = 0;
+   hypre_SeedRand(seed);
+
+   for (i = 0; i < size; i++)
+      vector_data[i] = 2.0 * hypre_Rand() - 1.0;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_CopyVector
  *--------------------------------------------------------------------------*/
 
