@@ -44,7 +44,6 @@ hypre_ParCSRMatrixLocalScale(hypre_ParCSRMatrix *S)
 {
    hypre_CSRMatrix    *S_diag          = hypre_ParCSRMatrixDiag(S);
    int                *S_diag_i        = hypre_CSRMatrixI(S_diag);
-   int                *S_diag_j        = hypre_CSRMatrixJ(S_diag);
    double             *S_diag_data     = hypre_CSRMatrixData(S_diag);
    int                 n               = hypre_CSRMatrixNumRows(S_diag);
    int i, j;
@@ -175,11 +174,10 @@ static void dscal(int n, double a, double *x)
 }
 
 int
-hypre_ParCSRMatrixFillSmooth(void *data, int nsamples, double *samples, 
-  hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A)
+hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples, 
+  hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A,
+  int num_functions, int *dof_func)
 {
-   hypre_ParAMGData   *amg_data = data;
-
    hypre_CSRMatrix    *S_diag          = hypre_ParCSRMatrixDiag(S);
    int                *S_diag_i        = hypre_CSRMatrixI(S_diag);
    int                *S_diag_j        = hypre_CSRMatrixJ(S_diag);
@@ -207,7 +205,14 @@ hypre_ParCSRMatrixFillSmooth(void *data, int nsamples, double *samples,
        {
            ii = S_diag_j[j];
 
-#if 0 /* edmond */
+           /* only interpolate between like functions */
+           if (num_functions > 1 && dof_func[i] != dof_func[ii])
+           {
+               S_diag_data[j] = 0.;
+               continue;
+           }
+
+#if 0
            if (amg_data->gsi_map1[i] % 3 != amg_data->gsi_map1[ii] % 3)
            {
                S_diag_data[j] = 0.; /* unlike variables */
@@ -220,7 +225,7 @@ hypre_ParCSRMatrixFillSmooth(void *data, int nsamples, double *samples,
                continue;
            }
 
-/* fixed: Aug 31,2001 explicit zeros in matrix need to be handled */
+           /* explicit zeros */
            if (A_diag_data[j] == 0.)
            {
                S_diag_data[j] = 0.;
@@ -257,11 +262,9 @@ printf("MIN, MAX: %f %f\n", my, mx);
 /* assumes that FillSmooth has already been run, and a threshold is known */
 
 int
-hypre_ParCSRMatrixFillSmoothIncrementally(void *data, int nsamples, 
+hypre_ParCSRMatrixFillSmoothIncrementally(int nsamples, 
   double *samples, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, double thresh)
 {
-   hypre_ParAMGData   *amg_data = data;
-
    hypre_CSRMatrix    *S_diag          = hypre_ParCSRMatrixDiag(S);
    int                *S_diag_i        = hypre_CSRMatrixI(S_diag);
    int                *S_diag_j        = hypre_CSRMatrixJ(S_diag);
@@ -273,7 +276,6 @@ hypre_ParCSRMatrixFillSmoothIncrementally(void *data, int nsamples,
    double temp;
    double *p;
    double nm;
-   double mx = 0., my = 1.e+10;
 
    double new, old;
    int count1, count2;
@@ -394,7 +396,6 @@ hypre_ParCSRMatrixChooseThresh(hypre_ParCSRMatrix *S)
 {
    hypre_CSRMatrix    *S_diag          = hypre_ParCSRMatrixDiag(S);
    int                *S_diag_i        = hypre_CSRMatrixI(S_diag);
-   int                *S_diag_j        = hypre_CSRMatrixJ(S_diag);
    double             *S_diag_data     = hypre_CSRMatrixData(S_diag);
    int                 n               = hypre_CSRMatrixNumRows(S_diag);
    int i, j;
@@ -423,14 +424,11 @@ hypre_ParCSRMatrixChooseThresh(hypre_ParCSRMatrix *S)
 int
 hypre_ParCSRMatrixThreshold(hypre_ParCSRMatrix *A, double thresh)
 {
-   MPI_Comm            comm            = hypre_ParCSRMatrixComm(A);
-
    hypre_CSRMatrix    *A_diag          = hypre_ParCSRMatrixDiag(A);
    int                *A_diag_i        = hypre_CSRMatrixI(A_diag);
    int                *A_diag_j        = hypre_CSRMatrixJ(A_diag);
    double             *A_diag_data     = hypre_CSRMatrixData(A_diag);
 
-   int                *row_starts      = hypre_ParCSRMatrixRowStarts(A);
    int                 n               = hypre_CSRMatrixNumRows(A_diag);
 
    int                 num_nonzeros_diag = A_diag_i[n];
@@ -489,6 +487,8 @@ hypre_BoomerAMGCreateSmoothDirs(void *datay,
                        hypre_ParCSRMatrix *A,
                        int                    num_sweeps,
                        double                 thresh,
+                       int                    num_functions, 
+                       int                   *dof_func,
                        hypre_ParCSRMatrix   **S_ptr)
 {
    hypre_ParAMGData   *amg_data = datay;
@@ -597,7 +597,8 @@ printf("Creating smooth dirs, %d sweeps, %d samples\n", num_sweeps, nsamples);
    hypre_ParCSRMatrixClone(A, &S, 0);
 
    /* Traverse S and fill in differences */
-   hypre_ParCSRMatrixFillSmooth(datay, nsamples, bp, S, A);
+   hypre_ParCSRMatrixFillSmooth(nsamples, bp, S, A, num_functions,
+       dof_func);
 
    /* hypre_TFree(bp);  moved below */
 
@@ -634,6 +635,8 @@ hypre_ParCSRMatrixFillSmoothIncrementally(nsamples, bp, S, A, thresh*minimax);
    hypre_ParCSRMatrixThreshold(S, thresh*minimax);
 
    *S_ptr = S;
+
+   return 0;
 }
 
 /*--------------------------------------------------------------------------
@@ -693,9 +696,10 @@ hypre_BoomerAMGBuildInterpLinear(void *data,
         for (j=P_diag_i[i]; j<P_diag_i[i+1]; j++)
         {
             jj = amg_data->gsi_map2[P_diag_j[j]];
-            dist = 1. / sqrt( (centerx - amg_data->gsi_x[jj])*(centerx - amg_data->gsi_x[jj])
-                       + (centery - amg_data->gsi_y[jj])*(centery - amg_data->gsi_y[jj])
-                       + (centerz - amg_data->gsi_z[jj])*(centerz - amg_data->gsi_z[jj]));
+            dist = 1. / sqrt( 
+	      (centerx - amg_data->gsi_x[jj])* (centerx - amg_data->gsi_x[jj]) +
+              (centery - amg_data->gsi_y[jj])* (centery - amg_data->gsi_y[jj]) +
+              (centerz - amg_data->gsi_z[jj])* (centerz - amg_data->gsi_z[jj]));
             denom = denom + dist;
 
             assert(dist > 0.);
@@ -717,6 +721,7 @@ hypre_BoomerAMGBuildInterpLinear(void *data,
             printf("%d %d %f\n", i+1, P_diag_j[j]+1, P_diag_data[j]);
 #endif
 
+    return 0;
 }
 
 /*--------------------------------------------------------------------------
@@ -724,11 +729,11 @@ hypre_BoomerAMGBuildInterpLinear(void *data,
  *  - can comment out indirect part for direct interpolation only
  *--------------------------------------------------------------------------*/
 
-/* edmond */
 #define DISTRECIP(i,j) \
 1. / sqrt( (amg_data->gsi_x[i] - amg_data->gsi_x[j])*(amg_data->gsi_x[i] - amg_data->gsi_x[j]) \
          + (amg_data->gsi_y[i] - amg_data->gsi_y[j])*(amg_data->gsi_y[i] - amg_data->gsi_y[j]) \
          + (amg_data->gsi_z[i] - amg_data->gsi_z[j])*(amg_data->gsi_z[i] - amg_data->gsi_z[j]))
+
 #define XDISTRECIP(i,j) \
 1. / sqrt( (amg_data->gsi_x[i/3] - amg_data->gsi_x[j/3])*(amg_data->gsi_x[i/3] - amg_data->gsi_x[j/3]) \
          + (amg_data->gsi_y[i/3] - amg_data->gsi_y[j/3])*(amg_data->gsi_y[i/3] - amg_data->gsi_y[j/3]) \
@@ -778,15 +783,12 @@ hypre_BoomerAMGBuildInterpLinearIndirect(void *data,
 
     /* extract the parts of A */
     hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-    double          *A_diag_data = hypre_CSRMatrixData(A_diag);
     int             *A_diag_i = hypre_CSRMatrixI(A_diag);
     int             *A_diag_j = hypre_CSRMatrixJ(A_diag);
 
     /* extract the parts of S */
     hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
-    double          *S_diag_data = hypre_CSRMatrixData(S_diag);
     int             *S_diag_i = hypre_CSRMatrixI(S_diag);
-    int             *S_diag_j = hypre_CSRMatrixJ(S_diag);
 
     /* extract the parts of P */
     hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
@@ -846,16 +848,19 @@ hypre_BoomerAMGBuildInterpLinearIndirect(void *data,
                 {
                     if (CF_marker[col] >= 0) /* fine-coarse connection */
                     {
-                        dist = DISTRECIP(amg_data->gsi_map1[i], amg_data->gsi_map1[col]);
+                        dist = DISTRECIP(amg_data->gsi_map1[i], 
+			  amg_data->gsi_map1[col]);
 
                         assert(dist > 0.); /* may fail if bad tgo file */
 
-                        P_diag_data[amg_data->p_index[amg_data->gsi_f2c[col]]] += dist;
+                        P_diag_data[amg_data->p_index[amg_data->gsi_f2c[col]]] 
+			  += dist;
                     }
 #if 1
                     else /* fine-fine connection between i and col */
                     {
-                        dist = DISTRECIP(amg_data->gsi_map1[i], amg_data->gsi_map1[col]);
+                        dist = DISTRECIP(amg_data->gsi_map1[i], 
+			  amg_data->gsi_map1[col]);
 
                         /* find common strongly connected c-points */
                         /* do this by examining rows i and col of P */
@@ -868,8 +873,8 @@ hypre_BoomerAMGBuildInterpLinearIndirect(void *data,
 			    colcol = P_diag_j[k];
                             if (amg_data->p_index[colcol] != -1)
                             {
-                                denom += 
-                                  DISTRECIP(amg_data->gsi_map1[col], amg_data->gsi_map2[colcol]);
+                                denom += DISTRECIP(amg_data->gsi_map1[col], 
+				  amg_data->gsi_map2[colcol]);
                             }
                         }
 
@@ -881,8 +886,8 @@ hypre_BoomerAMGBuildInterpLinearIndirect(void *data,
                             if (amg_data->p_index[colcol] != -1)
                             {
                                 P_diag_data[amg_data->p_index[colcol]] += dist
-                                  * DISTRECIP(amg_data->gsi_map1[col], amg_data->gsi_map2[colcol])
-                                  / denom;
+                                  * DISTRECIP(amg_data->gsi_map1[col], 
+				  amg_data->gsi_map2[colcol]) / denom;
                             }
                         }
                     }
@@ -911,8 +916,10 @@ hypre_BoomerAMGBuildInterpLinearIndirect(void *data,
     for (i=0; i<n; i++)
         for (j=P_diag_i[i]; j<P_diag_i[i+1]; j++)
 	{
-            printf("(%d %d) ", (amg_data->gsi_map1[i]+1) % 3, (amg_data->gsi_map2[P_diag_j[j]]+1) % 3);
-            printf("%4d %4d %f", amg_data->gsi_map1[i]+1, amg_data->gsi_map2[P_diag_j[j]]+1, P_diag_data[j]);
+            printf("(%d %d) ", (amg_data->gsi_map1[i]+1) % 3, 
+	      (amg_data->gsi_map2[P_diag_j[j]]+1) % 3);
+            printf("%4d %4d %f", amg_data->gsi_map1[i]+1, 
+	      amg_data->gsi_map2[P_diag_j[j]]+1, P_diag_data[j]);
             if (CF_marker[i] >= 0)
 	        printf(" x\n");
 	    else
@@ -928,6 +935,8 @@ hypre_BoomerAMGBuildInterpLinearIndirect(void *data,
         for (j=P_diag_i[i]; j<P_diag_i[i+1]; j++)
             printf("%d %d %f\n", i+1, P_diag_j[j]+1, P_diag_data[j]);
 #endif
+
+    return 0;
 }
 
 /*--------------------------------------------------------------------------
@@ -950,15 +959,12 @@ hypre_BoomerAMGBuildInterpWithSmoothnessFactor(void *data,
 
     /* extract the parts of A */
     hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-    double          *A_diag_data = hypre_CSRMatrixData(A_diag);
     int             *A_diag_i = hypre_CSRMatrixI(A_diag);
     int             *A_diag_j = hypre_CSRMatrixJ(A_diag);
 
     /* extract the parts of S */
     hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
-    double          *S_diag_data = hypre_CSRMatrixData(S_diag);
     int             *S_diag_i = hypre_CSRMatrixI(S_diag);
-    int             *S_diag_j = hypre_CSRMatrixJ(S_diag);
 
     /* extract the parts of P */
     hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
@@ -1036,7 +1042,8 @@ hypre_BoomerAMGBuildInterpWithSmoothnessFactor(void *data,
                         assert(dist != 0.); /* may fail if bad tgo file */
                         assert(dist > 0.); /* may fail if bad tgo file */
 
-                        P_diag_data[amg_data->p_index[amg_data->gsi_f2c[col]]] += dist;
+                        P_diag_data[amg_data->p_index[amg_data->gsi_f2c[col]]] 
+			  += dist;
                     }
 #if 1
                     else /* fine-fine connection between i and col */
@@ -1054,7 +1061,8 @@ hypre_BoomerAMGBuildInterpWithSmoothnessFactor(void *data,
 			    colcol = P_diag_j[k];
                             if (amg_data->p_index[colcol] != -1)
                             {
-                                denom += mat_entry(amg_data->Sfactors, col, map[colcol]);
+                                denom += mat_entry(amg_data->Sfactors, col, 
+				  map[colcol]);
                             }
                         }
 
@@ -1066,8 +1074,8 @@ hypre_BoomerAMGBuildInterpWithSmoothnessFactor(void *data,
                             if (amg_data->p_index[colcol] != -1)
                             {
                                 P_diag_data[amg_data->p_index[colcol]] += dist
-                                  * mat_entry(amg_data->Sfactors, col, map[colcol])
-                                  / denom;
+                                  * mat_entry(amg_data->Sfactors, col, 
+				  map[colcol]) / denom;
                             }
                         }
                     }
@@ -1096,8 +1104,10 @@ hypre_BoomerAMGBuildInterpWithSmoothnessFactor(void *data,
     for (i=0; i<n; i++)
         for (j=P_diag_i[i]; j<P_diag_i[i+1]; j++)
 	{
-            printf("(%d %d) ", (amg_data->gsi_map1[i]+1) % 3, (amg_data->gsi_map2[P_diag_j[j]]+1) % 3);
-            printf("%4d %4d %f", amg_data->gsi_map1[i]+1, amg_data->gsi_map2[P_diag_j[j]]+1, P_diag_data[j]);
+            printf("(%d %d) ", (amg_data->gsi_map1[i]+1) % 3, 
+	      (amg_data->gsi_map2[P_diag_j[j]]+1) % 3);
+            printf("%4d %4d %f", amg_data->gsi_map1[i]+1, 
+	      amg_data->gsi_map2[P_diag_j[j]]+1, P_diag_data[j]);
             if (CF_marker[i] >= 0)
 	        printf(" x\n");
 	    else
@@ -1118,4 +1128,5 @@ hypre_BoomerAMGBuildInterpWithSmoothnessFactor(void *data,
             printf("%d %d %f\n", i+1, P_diag_j[j]+1, P_diag_data[j]);
 #endif
 
+    return 0;
 }
