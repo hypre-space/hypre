@@ -104,7 +104,7 @@ parse_arguments () {
       m) HYPRE_SEND_MAIL="no"; MailOpt="";;
      +m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail";;
       n) confbuildtest $Build   "--without-MPI" "no_mpi"    1 0 1 1 1 1 0;;
-      o) confbuildtest $OPTARG  "--with-openmp" "openmp"    0 0 0 0 0 1 0;;
+      o) confbuildtest $OPTARG  "--with-openmp" "openmp"    1 1 1 1 1 1 1;;
       p) confbuildtest $OPTARG  "--with-petac"  "petac"     0 0 0 0 1 0 0;;
       q) confbuildtest $OPTARG  "--with-purify-to-file" \
                                                 "purify"    0 0 0 0 1 0 1;;
@@ -243,6 +243,8 @@ mail_summary () {
     printf "${CLIST}" >> $SUMFILE
   fi
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
+# currently only a single instance of opt=2 (configure, make, and run)
+# can be processed (actually earlier information gets overwritten).
   printf "Execute summary:\n" >> $SUMFILE
   for i in IJ fei sstruct struct ; do
     LFILE=${SRC}/test/${i}_linear_solvers.log
