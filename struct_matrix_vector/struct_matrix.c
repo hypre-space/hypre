@@ -87,7 +87,7 @@ zzz_FreeStructMatrix( zzz_StructMatrix *matrix )
 
       zzz_FreeBoxArray(zzz_StructMatrixDataSpace(matrix));
 
-      zzz_TFree(zzz_StructMatrixSymmCoeff(matrix));
+      zzz_TFree(zzz_StructMatrixSymmElements(matrix));
       zzz_FreeStructStencil(zzz_StructMatrixUserStencil(matrix));
       zzz_FreeStructStencil(zzz_StructMatrixStencil(matrix));
 
@@ -108,15 +108,12 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
 
    zzz_StructGrid     *grid;
 
+   zzz_StructStencil  *user_stencil;
    zzz_StructStencil  *stencil;
    zzz_Index         **stencil_shape;
    int                 stencil_size;
-   zzz_StructStencil  *user_stencil;
-   zzz_Index         **user_stencil_shape;
-   int                 user_stencil_size;
    int                 num_values;
-   int                *symm_coeff;
-   int                 no_symmetric_stencil_element;
+   int                *symm_elements;
 
    int                *num_ghost;
  
@@ -134,111 +131,37 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
    grid = zzz_StructMatrixGrid(matrix);
 
    /*-----------------------------------------------------------------------
-    * Set up stencil:
-    *    An array called `symm_coeff' is also set up.  A value != -1
-    *    of `symm_coeff[i]' indicates that the `i'th stencil element
-    *    is a "symmetric element".  That is, the data associated with
-    *    stencil element `i' is not explicitely stored, but is instead
+    * Set up stencil and num_values:
+    *    The stencil is a "symmetrized" version of the user's stencil
+    *    as computed by zzz_SymmetrizeStructStencil.
+    *
+    *    The `symm_elements' array is used to determine what data is
+    *    explicitely stored (symm_elements[i] < 0) and what data does is
+    *    not explicitely stored (symm_elements[i] >= 0), but is instead
     *    stored as the transpose coefficient at a neighboring grid point.
-    *    The value of `symm_coeff[i]' is also the index of the transpose
-    *    stencil element.
-    *
-    *------------------
-    * Non-symmetric case:
-    *    Copy the user's stencil elements into a new stencil.
-    *    Set up the `symm_coeff' array with zero values.
-    *
-    *------------------
-    * Symmetric case:
-    *    Copy the user's stencil elements into a new stencil, and
-    *    create symmetric stencil elements if needed.
-    *    Set up the `symm_coeff' array with appropriate values.
     *-----------------------------------------------------------------------*/
 
-   user_stencil       = zzz_StructMatrixUserStencil(matrix);
-   user_stencil_shape = zzz_StructStencilShape(user_stencil);
-   user_stencil_size  = zzz_StructStencilSize(user_stencil);
+   user_stencil = zzz_StructMatrixUserStencil(matrix);
 
-   /* non-symmetric case */
+   zzz_SymmetrizeStructStencil(user_stencil, &stencil, &symm_elements);
+
+   stencil_shape = zzz_StructStencilShape(stencil);
+   stencil_size  = zzz_StructStencilSize(stencil);
+
    if (!zzz_StructMatrixSymmetric(matrix))
    {
-      /* copy user's stencil elements into `stencil_shape' */
-      stencil_shape = zzz_CTAlloc(zzz_Index *, user_stencil_size);
-      for (i = 0; i < user_stencil_size; i++)
-      {
-         stencil_shape[i] = zzz_NewIndex();
-         zzz_CopyIndex(user_stencil_shape[i], stencil_shape[i]);
-      }
-      stencil_size = user_stencil_size;
-
-      symm_coeff = zzz_CTAlloc(int, stencil_size);
+      /* store all element data */
       for (i = 0; i < stencil_size; i++)
-         symm_coeff[i] = -1;
+         symm_elements[i] = -1;
       num_values = stencil_size;
    }
-
-   /* symmetric case */
    else
    {
-      /* copy user's stencil elements into `stencil_shape' */
-      stencil_shape = zzz_CTAlloc(zzz_Index *, 2*user_stencil_size);
-      for (i = 0; i < user_stencil_size; i++)
-      {
-         stencil_shape[i] = zzz_NewIndex();
-         zzz_CopyIndex(user_stencil_shape[i], stencil_shape[i]);
-      }
-
-      /* create symmetric stencil elements and `symm_coeff' */
-      symm_coeff = zzz_CTAlloc(int, 2*user_stencil_size);
-      for (i = 0; i < 2*user_stencil_size; i++)
-         symm_coeff[i] = -1;
-      stencil_size = user_stencil_size;
-      for (i = 0; i < user_stencil_size; i++)
-      {
-	 if (symm_coeff[i] == -1)
-	 {
-            /* note: start at i to handle "center" element correctly */
-            no_symmetric_stencil_element = 1;
-            for (j = i; j < user_stencil_size; j++)
-            {
-	       if ( (zzz_IndexX(stencil_shape[j]) ==
-                     -zzz_IndexX(stencil_shape[i])  ) &&
-                    (zzz_IndexY(stencil_shape[j]) ==
-                     -zzz_IndexY(stencil_shape[i])  ) &&
-                    (zzz_IndexZ(stencil_shape[j]) ==
-                     -zzz_IndexZ(stencil_shape[i])  )   )
-	       {
-                  /* only "off-center" elements have symmetric entries */
-                  if (i != j)
-                     symm_coeff[j] = i;
-                  no_symmetric_stencil_element = 0;
-	       }
-            }
-
-            if (no_symmetric_stencil_element)
-            {
-               /* add symmetric stencil element to `stencil' */
-               stencil_shape[stencil_size] = zzz_NewIndex();
-               for (d = 0; d < 3; d++)
-               {
-                  zzz_IndexD(stencil_shape[stencil_size], d) =
-                     -zzz_IndexD(stencil_shape[i], d);
-               }
-	       
-               symm_coeff[stencil_size] = i;
-               stencil_size++;
-	    }
-	 }
-      }
-
       num_values = (stencil_size + 1) / 2;
    }
 
-   stencil = zzz_NewStructStencil(zzz_StructStencilDim(user_stencil),
-                                  stencil_size, stencil_shape);
-   zzz_StructMatrixStencil(matrix) = stencil;
-
-   zzz_StructMatrixSymmCoeff(matrix) = symm_coeff;
+   zzz_StructMatrixStencil(matrix)   = stencil;
+   zzz_StructMatrixSymmElements(matrix) = symm_elements;
    zzz_StructMatrixNumValues(matrix) = num_values;
 
    /*-----------------------------------------------------------------------
@@ -249,7 +172,7 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
 
    for (i = 0; i < stencil_size; i++)
    {
-      if (symm_coeff[i] != -1)
+      if (symm_elements[i] >= 0)
       {
          j = 0;
          for (d = 0; d < 3; d++)
@@ -306,7 +229,7 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
       /* set pointers for "stored" coefficients */
       for (j = 0; j < stencil_size; j++)
       {
-         if (symm_coeff[j] == -1)
+         if (symm_elements[j] < 0)
          {
             data_indices[i][j] = data_size;
             data_size += data_box_volume;
@@ -316,9 +239,9 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
       /* set pointers for "symmetric" coefficients */
       for (j = 0; j < stencil_size; j++)
       {
-         if (symm_coeff[j] != -1)
+         if (symm_elements[j] >= 0)
          {
-            data_indices[i][j] = data_indices[i][symm_coeff[j]] +
+            data_indices[i][j] = data_indices[i][symm_elements[j]] +
                zzz_BoxOffsetDistance(data_box, stencil_shape[j]);
          }
       }
@@ -601,6 +524,7 @@ zzz_AssembleStructMatrix( zzz_StructMatrix *matrix )
    zzz_SBoxArrayArray  *send_sboxes;
    zzz_SBoxArrayArray  *recv_sboxes;
    int                **send_box_ranks;
+
    int                **recv_box_ranks;
    zzz_CommPkg         *comm_pkg;
 
@@ -702,7 +626,7 @@ zzz_PrintStructMatrix( char             *filename,
 
    zzz_BoxArray       *data_space;
 
-   int                *symm_coeff;
+   int                *symm_elements;
 
    int                 i, j;
 
@@ -741,12 +665,12 @@ zzz_PrintStructMatrix( char             *filename,
    stencil_shape = zzz_StructStencilShape(stencil);
 
    num_values = zzz_StructMatrixNumValues(matrix);
-   symm_coeff = zzz_StructMatrixSymmCoeff(matrix);
+   symm_elements = zzz_StructMatrixSymmElements(matrix);
    fprintf(file, "%d\n", num_values);
    j = 0;
    for (i = 0; i < zzz_StructStencilSize(stencil); i++)
    {
-      if (symm_coeff[i] == -1)
+      if (symm_elements[i] < 0)
       {
          fprintf(file, "%d: %d %d %d\n", j++,
                  zzz_IndexX(stencil_shape[i]),

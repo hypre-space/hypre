@@ -40,7 +40,7 @@ typedef struct
                                         to box b and stencil coefficient s. */
 
    int                 symmetric;    /* Is the matrix symmetric */
-   int                *symm_coeff;   /* Which coeffs are "symmetric" */
+   int                *symm_elements;/* Which elements are "symmetric" */
    int                 num_ghost[6]; /* Num ghost layers in each direction */
 
    int                 global_size;  /* Total number of nonzero coefficients */
@@ -63,7 +63,7 @@ typedef struct
 #define zzz_StructMatrixDataSize(matrix)      ((matrix) -> data_size)
 #define zzz_StructMatrixDataIndices(matrix)   ((matrix) -> data_indices)
 #define zzz_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
-#define zzz_StructMatrixSymmCoeff(matrix)     ((matrix) -> symm_coeff)
+#define zzz_StructMatrixSymmElements(matrix)  ((matrix) -> symm_elements)
 #define zzz_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
 #define zzz_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
 #define zzz_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)

@@ -158,6 +158,7 @@ int zzz_StructScale P((double alpha , zzz_StructVector *y ));
 zzz_StructStencil *zzz_NewStructStencil P((int dim , int size , zzz_Index **shape ));
 void zzz_FreeStructStencil P((zzz_StructStencil *stencil ));
 int zzz_StructStencilElementRank P((zzz_StructStencil *stencil , zzz_Index *stencil_element ));
+int zzz_SymmetrizeStructStencil P((zzz_StructStencil *stencil , zzz_StructStencil **symm_stencil_ptr , zzz_Index **symm_elements_ptr ));
 
 /* struct_vector.c */
 zzz_StructVector *zzz_NewStructVector P((MPI_Comm *comm , zzz_StructGrid *grid ));

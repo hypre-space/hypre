@@ -51,18 +51,18 @@ zzz_NewStructMatrixMask( zzz_StructMatrix *matrix,
 
    mask = zzz_CTAlloc(zzz_StructMatrix, 1);
 
-   zzz_StructMatrixComm(mask)        = zzz_StructMatrixComm(matrix);
-   zzz_StructMatrixGrid(mask)        = zzz_StructMatrixGrid(matrix);
-   zzz_StructMatrixUserStencil(mask) = zzz_StructMatrixUserStencil(matrix);
-   zzz_StructMatrixNumValues(mask)   = zzz_StructMatrixNumValues(matrix);
-   zzz_StructMatrixDataSpace(mask)   = zzz_StructMatrixDataSpace(matrix);
-   zzz_StructMatrixData(mask)        = zzz_StructMatrixData(matrix);
-   zzz_StructMatrixDataSize(mask)    = zzz_StructMatrixDataSize(matrix);
-   zzz_StructMatrixSymmetric(mask)   = zzz_StructMatrixSymmetric(matrix);
-   zzz_StructMatrixSymmCoeff(mask)   = zzz_StructMatrixSymmCoeff(matrix);
+   zzz_StructMatrixComm(mask)         = zzz_StructMatrixComm(matrix);
+   zzz_StructMatrixGrid(mask)         = zzz_StructMatrixGrid(matrix);
+   zzz_StructMatrixUserStencil(mask)  = zzz_StructMatrixUserStencil(matrix);
+   zzz_StructMatrixNumValues(mask)    = zzz_StructMatrixNumValues(matrix);
+   zzz_StructMatrixDataSpace(mask)    = zzz_StructMatrixDataSpace(matrix);
+   zzz_StructMatrixData(mask)         = zzz_StructMatrixData(matrix);
+   zzz_StructMatrixDataSize(mask)     = zzz_StructMatrixDataSize(matrix);
+   zzz_StructMatrixSymmetric(mask)    = zzz_StructMatrixSymmetric(matrix);
+   zzz_StructMatrixSymmElements(mask) = zzz_StructMatrixSymmElements(matrix);
    for (i = 0; i < 6; i++)
       zzz_StructMatrixNumGhost(mask)[i] = zzz_StructMatrixNumGhost(matrix)[i];
-   zzz_StructMatrixCommPkg(mask)     = zzz_StructMatrixCommPkg(matrix);
+   zzz_StructMatrixCommPkg(mask) = zzz_StructMatrixCommPkg(matrix);
 
    /* create mask_stencil */
    stencil       = zzz_StructMatrixStencil(matrix);
