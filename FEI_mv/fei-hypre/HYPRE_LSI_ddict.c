@@ -45,7 +45,7 @@ typedef struct HYPRE_LSI_DDICT_Struct
 }
 HYPRE_LSI_DDICT;
 
-extern HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix,MH_Matrix *,
+extern int  HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix,MH_Matrix *,
                                      MPI_Comm, int *, MH_Context *);
 extern int  HYPRE_LSI_DDICTComposeOverlappedMatrix(MH_Matrix *, int *, 
                  int **recv_lengths, int **int_buf, double **dble_buf, 
@@ -61,6 +61,10 @@ extern void HYPRE_LSI_qsort1a(int *, int *, int, int);
 
 extern int  HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa, 
                  int *mat_ja, int *mat_ia, double *rowNorms);
+
+extern int  MH_ExchBdry(double *, void *);
+extern int  MH_ExchBdryBack(double *, void *, int *, double **, int **);
+extern int  MH_GetRow(void *, int, int *, int, int *, double *, int *);
 
 #define habs(x) ((x) > 0 ? (x) : -(x))
 
@@ -422,7 +426,7 @@ int HYPRE_LSI_DDICTGetOffProcRows(MH_Matrix *Amat, int leng, int *recv_leng,
                            int Noffset, int *map, int *map2, int **int_buf,
                            double **dble_buf)
 {
-   int         i, j, k, m, *temp_list, length, offset, allocated_space, proc_id;
+   int         i, j, k, m, length, offset, allocated_space, proc_id;
    int         nRecv, nSend, *recvProc, *sendProc, total_recv, mtype, msgtype;
    int         *sendLeng, *recvLeng, **sendList, *cols, *isend_buf, Nrows;
    int         nnz, nnz_offset, index, mypid;
@@ -618,7 +622,7 @@ int HYPRE_LSI_DDICTComposeOverlappedMatrix(MH_Matrix *mh_mat,
               double **dble_buf, int **sindex_array, int **sindex_array2, 
               int *offset)
 {
-   int        i, j, nprocs, mypid, Nrows, *proc_array, *proc_array2;
+   int        i, nprocs, mypid, Nrows, *proc_array, *proc_array2;
    int        extNrows, NrowsOffset, *index_array, *index_array2;
    int        nRecv, *recvLeng;
    double     *dble_array;
