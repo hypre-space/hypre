@@ -9368,8 +9368,6 @@ CXX="$PREPEND $CXX"
  babel\
  babel/Hypre\
  blas\
- CI_struct_ls\
- CI_struct_mv\
  distributed_ls\
  distributed_ls/Euclid\
  distributed_ls/pilut\
