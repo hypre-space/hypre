@@ -320,9 +320,10 @@ apply_error_filters () {
           '1500-010:\ \(W\)\ WARNING\ in'\
           ':\ 1506-068\ \(W\)\ Operation\ between\ types'\
           '^No\ begin\ line'\
-          'autoconf has been disabled'\
-          'automake has been disabled'\
-          'autoheader has been disabled'\
+          'autoconf\ has\ been\ disabled'\
+          'automake\ has\ been\ disabled'\
+          'autoheader\ has\ been\ disabled'\
+          'babel_config.h.in:\ No\ such\ file\ or\ directory'\
           'configure:\ WARNING:\ '
         do process_filter $ErrorFile "${ii}"
         done
@@ -384,6 +385,7 @@ apply_error_filters () {
         for ii in \
           '(autoconf|automake|autoheader)\ has\ been\ disabled'\
           'configure:\ WARNING:\ Configuration\ for'\
+          'babel_config.h.in:\ No\ such\ file\ or\ directory'\
           'Insure\ messages\ will\ be\ written\ to\ insure'\
           'TCA\ log\ data\ will\ be\ merged\ with\ tca'\
           'sed:\ Couldn.t\ close\ '
@@ -400,6 +402,7 @@ apply_error_filters () {
         for ii in \
           'Option -fexceptions passed to ld'\
           '(autoconf|automake|autoheader) has been disabled'\
+          'babel_config.h.in: No such file or directory'\
           'xauth:  error in locking authority file '\
           '^No begin line'\
           '^configure: WARNING: '
@@ -414,6 +417,7 @@ apply_error_filters () {
         for ii in \
           '(autoconf|automake|autoheader) has been disabled'\
           'python: fatal: '\
+          'babel_config.h.in: No such file or directory'\
           'xauth:  error in locking authority file '\
           'Xauthority not writable, changes will be ignored'\
           '^No begin line'\
