@@ -15,11 +15,12 @@
 
 #include <stdio.h>
 
-#if 0 /* HYPRE */
+#if 1 /* HYPRE */
 #include "HYPRE_config.h"
 #include "utilities.h"
 #include "fortran.h"
 #define ESSL HYPRE_USING_ESSL
+#undef  ESSL
 #else
 #include "mpi.h"
 #define hypre_F90_NAME(name) name##_
