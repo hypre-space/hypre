@@ -30,7 +30,7 @@
 #include "../../parcsr_linear_solvers/HYPRE_parcsr_ls.h"
 #include "HYPRE_LinSysCore.h"
 
-#define abs(x) (((x) > 0.0) ? x : -(x))
+#define dabs(x) (((x) > 0.0) ? x : -(x))
 
 //---------------------------------------------------------------------------
 // parcsr_matrix_vector.h is put here instead of in HYPRE_LinSysCore.h 
@@ -375,7 +375,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem()
              colIndex = hypre_BinarySearch(constrList_,colInd[j],nSlaves);
              if ( colIndex >= 0 && constrListAux[colIndex] != -1) 
              {
-                 if ( abs(colVal[j]) > searchValue )
+                 if ( dabs(colVal[j]) > searchValue )
                  {
                     if (i != constrListAux[colIndex]) 
                     {
@@ -386,7 +386,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem()
                           printf(" candidate does not have constr %d\n", i);
                        }
                     }
-                    searchValue = abs(colVal[j]);
+                    searchValue = dabs(colVal[j]);
                     searchIndex = colInd[j];
                  }
              }
@@ -685,7 +685,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem()
              else if ( colIndex > newEndRow && colIndex <= EndRow ) 
              {
                 if ( colVal[j] != 0.0 ) diagonal[diagCount++] = colVal[j];
-                if ( abs(colVal[j]) < 1.0E-8 )
+                if ( dabs(colVal[j]) < 1.0E-8 )
                 {
                    if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE1 )
                    {
@@ -1957,7 +1957,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
              colIndex = hypre_BinarySearch(constrList_,colInd[j],nSlaves);
              if ( colIndex >= 0 && constrListAux[colIndex] != -1) 
              {
-                 if ( abs(colVal[j]) > searchValue )
+                 if ( dabs(colVal[j]) > searchValue )
                  {
                     if (i != constrListAux[colIndex]) 
                     {
@@ -1968,7 +1968,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
                           printf(" candidate does not have constr %d\n", i);
                        }
                     }
-                    searchValue = abs(colVal[j]);
+                    searchValue = dabs(colVal[j]);
                     searchIndex = colInd[j];
                  }
              }
@@ -2477,7 +2477,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
              else if ( colIndex > newEndRow && colIndex <= EndRow ) 
              {
                 if ( colVal[j] != 0.0 ) diagonal[diagCount++] = colVal[j];
-                if ( abs(colVal[j]) < 1.0E-8 )
+                if ( dabs(colVal[j]) < 1.0E-8 )
                 {
                    if (HYOutputLevel_ & HYFEI_SLIDEREDUCE1)
                    {
