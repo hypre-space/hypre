@@ -1332,7 +1332,10 @@ int HYPRE_LSI_BlockP::solve(HYPRE_ParVector fvec, HYPRE_ParVector xvec)
    // solve them according to the requested scheme 
    //------------------------------------------------------------------
 
-   HYPRE_ParCSRPCGSetTol( A11Solver_, A11Params_.Tol_ );
+   if ( A11Params_.SolverID_ == 0 )
+      HYPRE_ParCSRPCGSetTol( A11Solver_, A11Params_.Tol_ );
+   else if ( A11Params_.SolverID_ == 1 )
+      HYPRE_ParCSRGMRESSetTol( A11Solver_, A11Params_.Tol_);
 
    switch (scheme_)
    {
