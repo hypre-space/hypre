@@ -46,8 +46,9 @@ double       *S_vec;
    int            *iv = hypre_VectorIntData(IV);
    double          res;
 	          
-   int             i, idx, i_start, i_end;
+   int             i, idx, i_start, i_start_next, i_end;
    int             j, jj, j_low, j_high, nn;
+   int             C_point_flag, F_point_flag;
    int             column;
    int             num_vars;
    int             relax_error = 0;
@@ -96,9 +97,18 @@ double       *S_vec;
       for (i = 0; i < max_point; ++i)
       {
           i_start = iv[i]-1;
+          i_start_next = iv[i+1]-1;
+          C_point_flag = 0;
+          F_point_flag = 0;
+
+          for (jj = i_start; jj < i_start_next; ++jj)
+	  {
+             if (icg[jj] <= 0) F_point_flag = 1;
+             if (icg[jj] > 0) C_point_flag = 1;
+          }
           if ( point_type==2  ||
-              (point_type==1&&icg[i_start]<=0)  ||
-              (point_type==3&&icg[i_start]>0) ) 
+              (point_type==1 && F_point_flag)  ||
+              (point_type==3 && C_point_flag) ) 
 	  {
               i_end = iv[i+1]-2;       /* iv[i+1]-1 is start of next point */
               if ((i_end == i_start) && a[ia[i_start]-1] != 0.0)
@@ -160,21 +170,28 @@ double       *S_vec;
       break;
    case 9:                           /* Direct solve: use gaussian 
                                         elimination */
-      A_mat = hypre_CTAlloc(double, max_point*max_point);
-      b_vec = hypre_CTAlloc(double, max_point);
+
+      num_vars = hypre_MatrixSize(A);
+
+      A_mat = hypre_CTAlloc(double, num_vars*num_vars);
+      b_vec = hypre_CTAlloc(double, num_vars);    
+
 
                                     /* Load CSR matrix into A_mat */
-     for (j = 0; j < max_point; ++j)
+
+     for (j = 0; j < num_vars; ++j)
      {
        for (i = ia[j]-1; i < ia[j+1]-1; i++)
        {
            column = ja[i]-1;
-           A_mat[j*max_point+column] = a[i];
+           A_mat[j*num_vars+column] = a[i];
        }
        b_vec[j] = fp[j];
      }
-     relax_error = gselim(A_mat,b_vec,max_point);
-     for (j = 0; j < max_point; j++)
+
+     relax_error = gselim(A_mat,b_vec,num_vars);
+
+     for (j = 0; j < num_vars; j++)
      {
          up[j] = b_vec[j];
      }
