@@ -77,6 +77,9 @@ AC_DEFUN(CASC_CHECK_F77_PP,
 
    AC_MSG_CHECKING(whether $FPP needs to be called before $F77)
 
+   # This is a dumb little fortran program with C preprocessor calls
+   # It will compile only if $F77 has a built-in preprocessor
+
    cat > testpp.F << EOF
 #define FOO 3
 	program testpp
@@ -91,6 +94,7 @@ AC_DEFUN(CASC_CHECK_F77_PP,
         end 
 EOF
 
+   # Compile the program and set $F77NEEDSPP appropriately
    $F77 -DBAR -c testpp.F 
    if test -f testpp.o; then 
       F77NEEDSPP=no 
@@ -98,7 +102,7 @@ EOF
       F77NEEDSPP=yes 
    fi
 
-   echo $F77NEEDSPP
+   AC_MSG_RESULT($F77NEEDSPP)
    rm -f testpp.o testpp.F
 
    AC_SUBST(F77NEEDSPP)
@@ -120,6 +124,9 @@ AC_DEFUN(CASC_CHECK_MPIF77_PP,
    rm -f testppmp.o
 
    AC_MSG_CHECKING(whether $FPP needs to be called before $MPIF77)
+
+   # This follows the same procedur as CASC_CHECK_F77_PP, except it tests
+   # $MPIF77 using a test program that includes MPI functions.
 
    cat > testppmp.F <<EOF
 #define FOO 3
@@ -170,6 +177,7 @@ dnl **********************************************************************
 
 AC_DEFUN(CASC_CHECK_LIB_FORTRAN,
 [
+   # This macro needs a f77 compiler and knowledge of the name-mangling scheme
    AC_REQUIRE([CASC_PROG_F77])
    AC_REQUIRE([PAC_GET_FORTNAMES])
 
@@ -179,6 +187,7 @@ AC_DEFUN(CASC_CHECK_LIB_FORTRAN,
       NAMESTYLE=$FORTRANNAMES
    fi
 
+   # This is a little subroutine to be called later by a C main function
    cat > testflib_.f << EOF
         subroutine testflib(i)
         integer i
@@ -189,6 +198,7 @@ EOF
 
    $F77 -c testflib_.f
 
+   # Mangle testflib's name appropriatiately
    case $NAMESTYLE in
       FORTRANDOUBLEUNDERSCORE)
          THIS_FUNCTION=testflib_;;
@@ -204,6 +214,8 @@ EOF
 
    esac
 
+   # Checks if the LIBRARY from the argument list can be used to link
+   # a C test program with testflib
    CASC_CHECK_LIB($1, $THIS_FUNCTION, $2, $3, testflib_.o $4)
 
    rm -f testflib_.o testflib_.f
@@ -236,8 +248,12 @@ dnl **********************************************************************
 
 AC_DEFUN(CASC_ADD_LIB,
 [
+   # define some macros to hopefully improve readability
    define([m_THESE_LIBS],[$4LIBS])
    define([m_THESE_LIBDIRS],[$4LIBDIRS])
+
+   # check for the library from first argument.  If linking is successful
+   # the first time, the job is done, otherwise loop through DIRECTORY-LIST
    CASC_CHECK_LIB($1, $2, m_THESE_LIBS="$m_THESE_LIBS -l$1"
                           casc_lib_found=yes 
                           ifelse([$5], , , [$5]),
@@ -257,6 +273,7 @@ AC_DEFUN(CASC_ADD_LIB,
       , $m_THESE_LIBDIRS $m_THESE_LIBS, no)  dnl * last two arguments for
                                              dnl * first check
 
+   # ACTION-IF-NOT_FOUND for when the library is found nowhere
    ifelse([$6], , ,
       if test "$casc_lib_found" != "yes"; then
          [$6]
@@ -416,13 +433,15 @@ AC_DEFUN(CASC_FIND_F77LIBS,
          esac
       done
 
+      # if this macro didn't work call CASC_SET_F77LIBS
       if test -z "$F77LIBFLAGS"; then
          CASC_SET_F77LIBS
       fi        
 
-      dnl * This deals with -L/lib causing the wrong libc.a to be
-      dnl * used when using IBM MPI.  Only appears in configure
-      dnl * when CASC_FIND_MPI is called first.
+      dnl * IBM MPI uses /usr/lpp/ppe.poe/libc.a instead of /lib/libc.a
+      dnl * so we need to make sure that -L/lib is not part of the 
+      dnl * linking line when we use IBM MPI.  This only appears in
+      dnl * configure when CASC_FIND_MPI is called first.
       ifdef([AC_PROVIDE_CASC_FIND_MPI], 
          if test -n "`echo $F77LIBFLAGS | grep '\-L/lib '`"; then
             if test -n "`echo $F77LIBFLAGS | grep xlf`"; then
@@ -452,7 +471,7 @@ dnl * by --with-mpi-lib-dirs.  Any number of libraries can be specified
 dnl * with --with-mpi-libs, and the libraries must be referred to by their 
 dnl * base names, so libmpi.a is just mpi.  It is adviseable to use all 
 dnl * three --with flags whenever one is used, because it is likely that
-dnl * when one is chosen is will mess up the automatic choices for the
+dnl * when one is chosen it will mess up the automatic choices for the
 dnl * other two.  If the architecture is unknown, or if the needed MPI
 dnl * settings for the current architecture are not known, then the naive
 dnl * settings of MPILIBS="-lmpi" and MPILIBDIRS="-L/usr/local/mpi/lib"
@@ -464,6 +483,8 @@ dnl **********************************************************************
 AC_DEFUN(CASC_SET_MPI,
 [
 
+   dnl * If called from within CASC_FIND_MPI, then the configure-line
+   dnl * options will already exist.  This ifdef creates them otherwise.
    ifdef([AC_PROVIDE_CASC_FIND_MPI], ,
       AC_ARG_WITH(mpi-include, [  --with-mpi-include=DIR  mpi.h is in DIR],
                   casc_mpi_include_dir=$withval)
@@ -484,6 +505,7 @@ AC_DEFUN(CASC_SET_MPI,
    if test -z "$casc_mpi_libs"; then
       AC_REQUIRE([CASC_GUESS_ARCH])
 
+      dnl * Set everything to known values
       case $ARCH in
 
          sun4 | solaris)
@@ -502,7 +524,8 @@ AC_DEFUN(CASC_SET_MPI,
                *)
 
                   if test -z "$casc_mpi_include_dir"; then
-                     casc_mpi_include_dir=/usr/local/mpi/mpich/include
+                     MPIINCLUDE="-I/usr/local/mpi/mpich/include \
+                                 -I/usr/local/mpi/mpich/lib/solaris/ch_p4"
                   fi
 
                   if test -z "$casc_mpi_lib_dirs"; then
@@ -513,9 +536,11 @@ AC_DEFUN(CASC_SET_MPI,
                casc_mpi_libs="nsl socket mpi";;
                esac
 
-            AC_CHECK_HEADER($casc_mpi_include_dir/mpi.h,
-                               MPIINCLUDE="-I$casc_mpi_include_dir") ;;
-
+            if test -z "$MPIINCLUDE"; then
+               AC_CHECK_HEADER($casc_mpi_include_dir/mpi.h,
+                               MPIINCLUDE="-I$casc_mpi_include_dir")
+            fi
+         ;;
 
          alpha)
             if test -z "$casc_mpi_include_dir"; then
@@ -604,10 +629,11 @@ dnl * CASC_FIND_MPI will determine the libraries, directories, and other
 dnl * flags needed to compile and link programs with MPI function calls.
 dnl * This macro runs tests on the script found by the CASC_PROG_MPICC
 dnl * macro.  If there is no such mpicc-type script in the PATH and
-dnl * MPICC is not set manually, then this macro will not work.  One may
-dnl * question why these settings would need to be determined if there
-dnl * already is mpicc available, and that is a valid question.  I can
-dnl * think of a couple of reasons one may want to use these settings 
+dnl * MPICC is not set manually, then this macro will not work.
+dnl *
+dnl * One may question why these settings would need to be determined if
+dnl * there already is mpicc available, and that is a valid question.  I
+dnl * can think of a couple of reasons one may want to use these settings 
 dnl * rather than using mpicc directly.  First, these settings allow you
 dnl * to choose the C compiler you wish to use rather than using whatever
 dnl * compiler is written into mpicc.  Also, the settings determined by
@@ -617,6 +643,7 @@ dnl * especially helpful on systems that don't have mpiCC.  The advantage
 dnl * of this macro over CASC_SET_MPI is that this one doesn't require
 dnl * a test of the machine type and thus will hopefully work on unknown
 dnl * architectures.  The main disadvantage is that it relies on mpicc.
+dnl *
 dnl * --with-mpi-include, --with-mpi-libs, and --with-mpi-lib-dirs can be
 dnl * used to manually override the automatic test, just as with
 dnl * CASC_SET_MPI.  If any one of these three options are used, the
@@ -641,7 +668,9 @@ AC_DEFUN(CASC_FIND_MPI,
 
    casc_user_chose_mpi=no
    AC_ARG_WITH(mpi-include, [  --with-mpi-include=DIR  mpi.h is in DIR],
-               MPIINCLUDE=-I$withval; casc_user_chose_mpi=yes)
+               for mpi_dir in $withval; do
+                  MPIINCLUDE="$MPIINCLUDE -I$withval"
+               done; casc_user_chose_mpi=yes)
 
    AC_ARG_WITH(mpi-libs,
 [  --with-mpi-libs=LIBS    LIBS is space-separated list of library names 
@@ -687,6 +716,7 @@ AC_DEFUN(CASC_FIND_MPI,
          fi
 
       dnl * When $MPICC is there, run the automatic test
+      dnl * here begins the hairy stuff
 
       else      
 
@@ -694,8 +724,9 @@ AC_DEFUN(CASC_FIND_MPI,
 
          AC_MSG_CHECKING(for location of mpi.h)
 
+         dnl * Create a minimal MPI program.  It will be compiled using
+         dnl * $MPICC with verbose output.
          cat > mpconftest.c << EOF
-#include <stdio.h>
 #include "mpi.h"
 
 main(int argc, char **argv)
@@ -715,6 +746,7 @@ EOF
          casc_lmpi_exists=no
 
          dnl * These are various ways to produce verbose output from $MPICC
+         dnl * All of their outputs are stuffed into variable $casc_mpoutput
 
          for casc_command in "$MPICC -show" "$MPICC -v" "$MPICC -#" "$MPICC"; do
 
@@ -739,7 +771,17 @@ EOF
 
          rm -rf mpconftest*
 
-         dnl * Add -lmpi if it was never found
+         dnl * little test to identify $CC as IBM's xlc
+         echo "main() {}" > cc_conftest.c
+         cc_output=`${CC-cc} -v -o cc_conftest cc_conftest.c 2>&1`
+         xlc_p=`echo $cc_output | grep xlcentry`
+         if test -n "$xlc_p"; then
+            casc_compiler_is_xlc=yes
+         fi 
+         rm -rf cc_conftest*
+
+         dnl * $MPICC might not produce '-lmpi', but we still need it.
+         dnl * Add -lmpi to $casc_mplibs if it was never found
          if test "$casc_lmpi_exists" = "no"; then
             casc_mplibs="-lmpi"
          else
@@ -748,8 +790,21 @@ EOF
 
          casc_want_arg=
 
-         dnl * check every word in output to find possible flags
+         dnl * Loop through every word in output to find possible flags.
+         dnl * If the word is the absolute path of a library, it is added
+         dnl * to $casc_flags.  Any "-llib", "-L/dir", "-R/dir" and
+         dnl * "-I/dir" is kept.  If '-l', '-L', '-R', '-I', '-u', or '-Y'
+         dnl * appears alone, then the next word is checked.  If the next
+         dnl * word is another flag beginning with '-', then the first
+         dnl * word is discarded.  If the next word is anything else, then
+         dnl * the two words are coupled in the $casc_arg variable.
+         dnl * "-binitfini:poe_remote_main" is a flag needed especially
+         dnl * for IBM MPI, and it is added to kept if it is found.
+         dnl * Any other word is discarded.  Also, after a word is found
+         dnl * and kept once, it is discarded if it appears again
+
          for casc_arg in $casc_mpoutput; do
+
             casc_old_want_arg=$casc_want_arg
             casc_want_arg=  
 
@@ -765,6 +820,19 @@ EOF
             '')
                case $casc_arg in
                /*.a)
+                  exists=false
+                  for f in $casc_flags; do
+                     if test x$casc_arg = x$f; then
+                        exists=true
+                     fi
+                  done
+                  if $exists; then
+                     casc_arg=
+                  else
+                     casc_flags="$casc_flags $casc_arg"
+                  fi
+               ;;
+               -binitfini:poe_remote_main)
                   exists=false
                   for f in $casc_flags; do
                      if test x$casc_arg = x$f; then
@@ -829,7 +897,7 @@ EOF
 
             ;;
             -[lLRI])
-               casc_arg="casc_old_want_arg $arg"
+               casc_arg="casc_old_want_arg $casc_arg"
             ;;
             -u)
                casc_arg="-u $casc_arg"
@@ -847,36 +915,55 @@ EOF
             ;;
             esac
 
-            dnl * separate found flags into includes, libdirs, libs, flags
+            dnl * Still inside the big for loop, we separate each flag
+            dnl * into includes, libdirs, libs, flags
             if test -n "$casc_arg"; then
                case $casc_arg in
                -I*)
 
+                  dnl * if the directory given in this flag contains mpi.h
+                  dnl * then the flag is assigned to $MPIINCLUDE
                   if test -z "$MPIINCLUDE"; then
+                     casc_cppflags="$casc_cppflags $casc_arg"
                      casc_include_dir=`echo "$casc_arg" | sed 's/-I//g'`
 
-                     if test -f "$casc_include_dir/mpi.h"; then
-                        MPIINCLUDE=$casc_arg
-                     else
-                        casc_arg=
-                     fi
+                     SAVE_CPPFLAGS="$CPPFLAGS"
+                     CPPFLAGS="$casc_cppflags"
+                     changequote([, ])dnl
+
+                     unset ac_cv_header_mpi_h
+                     AC_CHECK_HEADER(mpi.h,
+                                     MPIINCLUDE="$casc_cppflags")
+
+                     changequote(, )dnl
+                     CPPFLAGS="$SAVE_CPPFLAGS"
+
                   else
                      casc_arg=
                   fi
                ;;
                -[LR]*)
 
+                  dnl * These are the lib directory flags
                   casc_mplibdirs="$casc_mplibdirs $casc_arg"
                ;;
                -l* | /*)
 
+                  dnl * These are the libraries
                   casc_mplibs="$casc_mplibs $casc_arg"
                ;;
+               -binitfini:poe_remote_main)
+                  if test "$casc_compiler_is_xlc" = "yes"; then
+                     casc_mpflags="$casc_mpflags $casc_arg"
+                  fi
+               ;;
                *)
+                  dnl * any other flag that has been kept goes here
                   casc_mpflags="$casc_mpflags $casc_arg"
                ;;
                esac
 
+               dnl * Upcoming test needs $LIBS to contain the flags we've found
                LIBS_SAVE=$LIBS
                LIBS="$MPIINCLUDE $casc_mpflags $casc_mplibdirs $casc_mplibs"
 
@@ -893,8 +980,7 @@ EOF
 extern "C"
 #endif
 ])dnl
-[#include <stdio.h>
-#include "mpi.h"
+[#include "mpi.h"
 ], [int rank, size;
    int argc;
    char **argv;
@@ -919,9 +1005,10 @@ extern "C"
          MPILIBDIRS=$casc_mplibdirs
          MPIFLAGS="$MPIFLAGS $casc_mpflags"
 
-         dnl * This deals with -L/lib causing the wrong libc.a to be
-         dnl * used when using IBM MPI.  Only appears in configure
-         dnl * when CASC_FIND_F77LIBS is called first.
+         dnl * IBM MPI uses /usr/lpp/ppe.poe/libc.a instead of /lib/libc.a
+         dnl * so we need to make sure that -L/lib is not part of the 
+         dnl * linking line when we use IBM MPI.  This only appears in
+         dnl * configure when CASC_FIND_MPI is called first.
          ifdef([AC_PROVIDE_CASC_FIND_F77LIBS], 
             if test -n "`echo $F77LIBFLAGS | grep '\-L/lib '`"; then
                if test -n "`echo $F77LIBFLAGS | grep xlf`"; then
@@ -1106,9 +1193,103 @@ AC_DEFUN(CASC_SET_FDEBUG,
    AC_SUBST(FDEBUG)
 ])dnl
 
+dnl **********************************************************************
+dnl * CASC_OPT_DEBUG_CHOICES replaces the obsolete macro
+dnl * CASC_CHOOSE_OPT_OR_DEBUG, which still remains for older configure.in
+dnl * files which still use it. 
+dnl *
+dnl * Before this macro is called in configure.in, the macros
+dnl * CASC_SET_COPT and CASC_SET_CDEBUG and/or their C++ and Fortran
+dnl * counterparts should be invoked to set both optimization and
+dnl * debugging flags.  The effect of this macro is to turn off one set of
+dnl * flags when the other is selected by the user.  This macro invokes
+dnl * the macro AC_ARG_ENABLE to give the configure script the 
+dnl * command-line options `--enable-opt' and `--enable-debug'.  When 
+dnl * `--enable-opt' appears on the command line, all of the previously
+dnl * set debugging flags are turned off, and when `--enable-debug' is
+dnl * used, all of the previously set optimization flags are turned off.
+dnl * If both flags are used, then none of the previously set flags are
+dnl * turned off.   
+dnl *
+dnl * Also, the variable OPTCHOICE is set to `O' for optimization and `g'
+dnl * for debugging.  OPTCHOICE was added because PETSc libraries are
+dnl * installed in mirrored directories called 'libO'and `libg'.  So
+dnl * OPTCHOICE can be used later on in configure.in or in Makefile.in to
+dnl * reference these PETSc libraries, and it also can be used as a simple
+dnl * flag to signal whether debugging or optimization has been chosen.
+dnl *
+dnl * If neither of the options created by this macro are used, the
+dnl * default is that configure behaves as if `--enable-opt' was used, and
+dnl * OPTCHOICE is set to `O'.  If both options are used, then OPTCHOICE
+dnl * is again set to `O'.
+dnl **********************************************************************
+
+AC_DEFUN(CASC_OPT_DEBUG_CHOICES,
+[
+   dnl *  These are the default settings.  They keep these values when
+   dnl *  --enable-opt and --enable-debug are both not chosen.
+   casc_opt=yes
+   casc_debug=no
+   casc_both=no
+
+   dnl * when --enable-opt is chosen, casc_opt is assigned "yes", and
+   dnl * casc_enable_opt_called is assigned "yes".  Otherwise,
+   dnl * casc_enable_opt_called gets "no".
+   AC_ARG_ENABLE(opt,
+[  --enable-opt            Sets up compiler flags for optimization], 
+                casc_opt=yes; casc_enable_opt_called=yes; ,
+                casc_enable_opt_called=no )
+
+   dnl * when --enable-debug is chosen, casc_debug is changed to "yes",
+   dnl * and then we check whether --enable-opt was also chosen.  If not
+   dnl * casc_opt is assigned "no".  Otherwise casc_opt keeps its default
+   dnl * value of "yes" and casc_both is assigned "yes".  No action is
+   dnl * take if --enable-debug is not invoked, because casc_debug is
+   dnl * already "no" by default.
+   AC_ARG_ENABLE(debug,
+[  --enable-debug          Sets up compiler flags for debugging],
+                 casc_debug=yes
+                 if test "$casc_enable_opt_called" = "no"; then
+                    casc_opt=no
+                 else
+                    casc_both=yes
+                 fi , )
+
+   dnl * If the choice is optimization, then all of the debug variables
+   dnl * are given empty values.  If the choice is debugging, then all of
+   dnl * the optimization variables are given empty values.  If both are
+   dnl * chosen, then the optimization and debug variables are not
+   dnl * touched.  OPTCHOICE is set to 'O' for opt and 'g' for debug.  In
+   dnl * the both case, OPTCHOICE is given 'O', which was basically an
+   dnl * arbitrary decision.
+   if test "$casc_both" = "no"; then
+      if test "$casc_opt" = "yes"; then
+         CDEBUG=
+         CXXDEBUG=
+         FDEBUG=
+         OPTCHOICE=O
+      else
+         COPT=
+         CXXOPT=
+         FOPT=  
+         OPTCHOICE=g
+      fi
+   else
+      OPTCHOICE=O
+   fi
+
+   AC_SUBST(OPTCHOICE)
+
+])dnl
+
 
 dnl **********************************************************************
 dnl * CASC_CHOOSE_OPT_OR_DEBUG
+dnl *
+dnl * This macro is obsolete.  CASC_OPT_DEBUG_CHOICES provides a better
+dnl * framework for optimization/debugging flags.  This macro is kept for
+dnl * backward compatibility.
+dnl *
 dnl * Before this macro is called in configure.in, the macros
 dnl * CASC_SET_COPT and CASC_SET_CDEBUG and/or their C++ and Fortran
 dnl * counterparts should be invoked to set both optimization and
@@ -1118,9 +1299,7 @@ dnl * the macro AC_ARG_ENABLE to give the configure script the
 dnl * command-line option "--enable-opt-debug=ARG", where ARG can equal
 dnl * 'opt', 'debug', or 'both'.  If 'opt' then all debugging compiler
 dnl * flags are turned off, and if 'debug' then all optimization compiler
-dnl * flags are turned off.  Also, the variable OPTCHOICE is set to 'O'
-dnl * for optimization and 'g' for debugging.  OPTCHOICE was added because
-dnl * PetSc libraries are installed in mirrored directories called 'libO'
+dnl * flags are turned off. 
 dnl * and 'libg'.  If ARG is 'both', then neither are turned off.  If an
 dnl * invalid value of ARG is given, then neither are turned off, and a
 dnl * warning message is printed.  If --enable-opt-debug=ARG is not 
@@ -1226,17 +1405,22 @@ dnl *********************************************************************
 
 AC_DEFUN(CASC_CONFIG_OUTPUT_LIST,
 [
+   dnl * m_OUTPUT_LIST is a macro to store the name of the variable
+   dnl * which will contain the list of output files
    define([m_OUTPUT_LIST], ifelse([$2], , Makefile_list, [$2_list]))
 
    if test -z "$srcdir"; then
       srcdir=.
    fi
+
+   dnl * use "Makefile" if second argument not given
    if test -n "$2"; then
       casc_output_file=$2
    else   
       casc_output_file=Makefile
    fi   
       
+   dnl * Add a file to the output list if its ".in" file exists.
    for casc_dir in $1; do
       if test -f $srcdir/$casc_dir/$casc_output_file.in; then
          m_OUTPUT_LIST="$m_OUTPUT_LIST $casc_dir/$casc_output_file"
@@ -1257,12 +1441,17 @@ dnl *********************************************************************
 
 AC_DEFUN(CASC_CHECK_HEADER,
 [
+   dnl * loop through the directory list.  The first iteration leaves the
+   dnl * casc_dir variable empty to check if the header can be #included
+   dnl * without specifying a directory.
    for casc_dir in '' $2 ; do
       if test -n "$casc_dir"; then
          casc_header=$casc_dir/$1
       else
          casc_header=$1
       fi
+
+      dnl * Check for the header.  Add the necessary -I flag to INCLUDES
       AC_CHECK_HEADER( $casc_header, 
          if test -n "$casc_dir"; then
             INCLUDES="$INCLUDES -I$casc_dir"
@@ -1273,6 +1462,7 @@ AC_DEFUN(CASC_CHECK_HEADER,
 
    done
 
+   dnl * This takes care of the action if not found
    ifelse([$4], , ,
       if test "$casc_header_found" != "yes"; then
          [$4]
@@ -1285,19 +1475,26 @@ AC_DEFUN(CASC_CHECK_HEADER,
 
 dnl **********************************************************************
 dnl * CASC_GUESS_ARCH
-dnl * Guesses the current architecture, unless ARCH has been preset.
-dnl * Uses the utility 'tarch', which is a Bourne shell script that should
-dnl * be in the same directory as the configure script.  If tarch is not
-dnl * present or if it fails, ARCH is set to the value, if any of shell
-dnl * variable HOSTTYPE, otherwise ARCH is set to "unknown".
+dnl * Guesses a one-word name for the current architecture, unless ARCH
+dnl * has been preset.  This is an alternative to the built-in macro
+dnl * AC_CANONICAL_HOST, which gives a three-word name.  Uses the utility
+dnl * 'tarch', which is a Bourne shell script that should be in the same  
+dnl * directory as the configure script.  If tarch is not present or if it
+dnl * fails, ARCH is set to the value, if any, of shell variable HOSTTYPE,
+dnl * otherwise ARCH is set to "unknown".
 dnl **********************************************************************
 
 AC_DEFUN(CASC_GUESS_ARCH,
 [
    AC_MSG_CHECKING(the architecture)
 
+   dnl * $ARCH could already be set in the environment or earlier in configure
+   dnl * Use the preset value if it exists, otherwise go throug the procedure
    if test -z "$ARCH"; then
 
+      dnl * configure searches for the tool "tarch".  It should be in the
+      dnl * same directory as configure.in, but a couple of other places
+      dnl * will be checked.  casc_tarch stores a relative path for "tarch".
       casc_tarch_dir=
       for casc_dir in $srcdir $srcdir/.. $srcdir/../..; do
          if test -f $casc_dir/tarch; then
@@ -1307,25 +1504,28 @@ AC_DEFUN(CASC_GUESS_ARCH,
          fi
       done
 
+      dnl * if tarch was not found or doesn't work, try using env variable
+      dnl * $HOSTTYPE
       if test -z "$casc_tarch_dir"; then
-         echo "cannot find tarch, using \$HOSTTYPE as the architecture"
+         AC_MSG_WARN(cannot find tarch, using \$HOSTTYPE as the architecture)
          ARCH=$HOSTTYPE
       else
          ARCH="`$casc_tarch`"
 
-         if test -z "$ARCH" -o "$ARCH" = "unknown"; then
+         if test -z "$ARCH" || test -z "$ARCH" = "unknown"; then
             ARCH=$HOSTTYPE
          fi
       fi
 
+      dnl * if $ARCH is still empty, give it the value "unknown".
       if test -z "$ARCH"; then
          ARCH=unknown
-         echo "architecture is unknown"
+         AC_MSG_WARN(architecture is unknown)
       else
-         echo $ARCH
+         AC_MSG_RESULT($ARCH)
       fi    
    else
-      echo $ARCH
+      AC_MSG_RESULT($ARCH)
    fi
 
    AC_SUBST(ARCH)
@@ -1342,6 +1542,13 @@ dnl **********************************************************************
 
 AC_DEFUN(CASC_CXX_NAMESPACE,
 [
+
+   dnl * This macro mimics the actions that AC_TRY_LINK uses to test if a
+   dnl * given code fragment is acceptable to the compiler.  The format by
+   dnl * which AC_TRY_LINK allows you to give a code fragment to be
+   dnl * doesn't work to test the keywords "namespace" and "using", since
+   dnl * those words usually appear outside of a function body.  So a full
+   dnl * test program has been written here.
    AC_REQUIRE([AC_PROG_CXX])
    AC_MSG_CHECKING(whether ${CXX} supports namespace)
    AC_CACHE_VAL(casc_cv_have_namespace,
@@ -1364,9 +1571,12 @@ EOF
 
       if { (eval echo configure:__oline__: \"$ac_link\") 1>&5; (eval $ac_link) \
                                                        2>&5; }; then
+
+         dnl * here the program was successfully compiled and linked
          rm -rf conftest*
          casc_cv_have_namespace=yes
       else
+         dnl * here the compilation or linking failed
          rm -rf conftest*
          casc_cv_have_namespace=no
       fi
@@ -1377,10 +1587,295 @@ EOF
    ])
 
    AC_MSG_RESULT($casc_cv_have_namespace)
+
+   dnl * preprocessor macro HAVE_NAMESPACE is defined if test is successful
    if test "$casc_cv_have_namespace" = yes; then
       AC_DEFINE(HAVE_NAMESPACE)
    fi
 ])dnl 
+
+dnl **********************************************************************
+dnl * CASC_CREATE_PACKAGE_OPTION(PACKAGE-NAME[, DIR-LIST[, FILE]])
+dnl * This is a general macro that creates a configure command-line option
+dnl * called `--with-PACKAGE-NAME-dir' which will allow the user to
+dnl * specify the location of the installation of an outside software
+dnl * package, such as PETSc or ISIS++.  After a check to make sure the
+dnl * given directory is valid (see below for discussion of validity), the
+dnl * directory's path is stored in the shell variable PACKAGE-NAME_DIR.
+dnl * For example, to allow the user to specify the location of PETSc,
+dnl * place `CASC_CREATE_PACKAGE_OPTION(PETSC)' in configure.in.  Then the
+dnl * user, if configuring on the CASC Sun cluster, would type `configure
+dnl * --with-PETSC-dir=/home/casc/petsc', and the directory's path would
+dnl * be stored in PETSC_DIR.  With this macro, the user is also permitted
+dnl * to set the variable PACKAGE-NAME_DIR in the environment before
+dnl * running configure, but any choice made on the command line would
+dnl * override any preset values.  
+dnl *
+dnl * This macro takes an optional second argument, DIR-LIST, which is a
+dnl * whitespace-separated list of directories where the developer thinks
+dnl * PACKAGE-NAME might be installed.  If DIR-LIST is given, and the user
+dnl * does not use the `--with' option to give the location of
+dnl * PACKAGE-NAME (or if the directory given by the user does not exist),
+dnl * then configure will assign to PACKAGE-NAME_DIR the path of the first
+dnl * directory in DIR-LIST that is valid.
+dnl *
+dnl * Validity:  The optional third argument to this macro is FILE, which
+dnl * should be either the name of a file in the top directory of the
+dnl * package in question or the relative path of a file in a subdirectory
+dnl * of the package.  If the argument FILE is given, then configure will
+dnl * consider a user specified directory or a directory from DIR-LIST 
+dnl * valid only if FILE exists in the directory.  If this argument is not
+dnl * given, then configure will consider a directory valid simply if it
+dnl * is indeed a directory.  FILE should be a file with a unique name
+dnl * that can be expected to exist in the same location in any 
+dnl * installation of the package in question.  If you know of no such
+dnl * file, do not include a third argument when invoking this macro.
+dnl * 
+dnl * This macro also gives the user the command-line option
+dnl * `--without-PACKAGE-NAME-dir', which, when invoked, will leave the
+dnl * variable PACKAGE-NAME_DIR empty.  This option should be invoked when
+dnl * the user wants to exclude a package from the configuration.
+dnl * 
+dnl * NOTE:  Since PACKAGE-NAME is used as part of both a command-line
+dnl * option and a variable name, it MUST consist of only alphanumeric
+dnl * characters.  PACKAGE-NAME is only a label, so it need not conform to
+dnl * any existing directory or file name.  I would recommend that it be
+dnl * all caps, as it becomes part of the name of a variable that is
+dnl * substituted into the Makefile.
+dnl **********************************************************************
+
+AC_DEFUN(CASC_CREATE_PACKAGE_OPTION,
+[
+   AC_MSG_CHECKING([for $1 directory])
+
+   dnl * $1 stands for the PACKAGE-NAME.  If [$1]_DIR has been set in the
+   dnl * environment, give its value to casc_env_[$1]_dir, and clear
+   dnl * [$1]_DIR.  The environmental value will ultimately be reassigned
+   dnl * to [$1]_DIR if it is valid and no command-line options are able
+   dnl * to change [$1]_DIR to a valid directory.  The environmental value
+   dnl * will also be used even if it is invalid, if the command-line
+   dnl * options and the DIRECTORY-LIST are both unable to generate a
+   dnl * valid value.
+   casc_result=
+   casc_env_[$1]_dir=$[$1]_DIR
+   [$1]_DIR=
+
+   AC_ARG_WITH($1-dir, 
+[  --with-$1-dir=DIR    $1 is installed in directory DIR
+  --without-$1-dir     do not look for $1],
+
+               if test "$withval" = "no"; then
+                  casc_result="configuring without [$1]"
+                  [$1]_DIR=
+               fi
+               , )
+
+   dnl * If "--without-$1-dir" was given, then [$1]_DIR is left blank.
+   dnl * Otherwise there is the following procedure to try to give
+   dnl * [$1]_DIR a valid value:
+   dnl *
+   dnl * if "--with-$1-dir" was given
+   dnl *    if the argument to "--with-$1-dir" is valid
+   dnl *       assign the argument to [$1]_DIR
+   dnl *    endif
+   dnl * endif
+   dnl *
+   dnl * if a value for [$1]_DIR has not yet been found
+   dnl *    if [$1]_DIR from the environment exists and is valid
+   dnl *       assign the environmental value to [$1]_DIR
+   dnl *    endif
+   dnl * endif
+   dnl *
+   dnl * if [$1]_DIR still has no value
+   dnl *    if the macro was given a DIRECTORY-LIST argument
+   dnl *       for each directory in the list
+   dnl *          if the directory is valid
+   dnl *             assign the directory to [$1]_DIR
+   dnl *             break loop
+   dnl *          else
+   dnl *             continue loop
+   dnl *          endif
+   dnl *       end loop
+   dnl *       if [$1]_DIR still doesn't have a value
+   dnl *          casc_result="none"
+   dnl *       else
+   dnl *          casc_result=$[$1]_DIR
+   dnl *       endif
+   dnl *    else
+   dnl *       casc_result="none"
+   dnl *    endif
+   dnl * endif
+
+   if test "$with_[$1]_dir" != "no"; then
+
+      if test -d "$with_[$1]_dir"; then
+
+         ifelse([$3], , ,
+            if test -f $with_[$1]_dir/[$3]; then)
+
+               casc_result="$with_[$1]_dir"
+               [$1]_DIR="$casc_result"
+
+         ifelse([$3], , ,
+            fi)
+      fi
+
+      if test -z "$casc_result"; then
+
+         if test -d "$casc_env_[$1]_dir"; then
+
+            ifelse([$3], , ,
+               if test -f $casc_env_[$1]_dir/[$3]; then)
+
+                  casc_result="$casc_env_[$1]_dir"
+                  [$1]_DIR="$casc_result"
+
+            ifelse([$3], , ,
+               fi)
+         fi
+      fi
+
+
+
+      if test -z "$casc_result"; then
+         [$1]_DIR=
+   
+         ifelse([$2], ,
+            casc_result="none" ,
+
+            for casc_dir in $2; do
+
+               if test -d "$casc_dir"; then
+
+                  ifelse([$3], , ,
+                     if test -f $casc_dir/[$3]; then)
+
+                        $1_DIR=$casc_dir
+
+                  ifelse([$3], , ,
+                     fi)
+
+                  break
+               fi
+            done
+
+            if test -z "$[$1]_DIR"; then
+               casc_result="none"
+
+            else
+               casc_result="$[$1]_DIR"
+            fi
+         )
+      fi
+   fi
+
+   dnl * $casc_result either is a valid value for [$1]_DIR or "none".
+   dnl * if none, then assign the original environmental value of
+   dnl * [$1]_DIR, whatever it may be, to casc_result and [$1]_DIR.  If
+   dnl * there was no environmental value, then $casc_result remains
+   dnl * "none" and [$1]_DIR is left empty.
+
+   if test "$casc_result" = "none"; then
+
+      if test -n "$casc_env_[$1]_dir"; then
+
+         casc_result="$casc_env_[$1]_dir"
+         [$1]_DIR="$casc_result"
+      fi
+   fi
+
+   AC_MSG_RESULT($casc_result)
+   AC_SUBST([$1]_DIR)
+
+])
+
+dnl **********************************************************************
+dnl * CASC_SET_SUFFIX_RULES is not like the other macros in aclocal.m4
+dnl * because it does not run any kind of test on the system on which it
+dnl * is running.  All it does is create several variables which contain
+dnl * the text of some simple implicit suffix rules that can be
+dnl * substituted into Makefile.in.  The suffix rules that come from the
+dnl * macro all deal with compiling a source file into an object file.  If
+dnl * this macro is called in configure.in, then if `@CRULE@' is placed in
+dnl * Makefile.in, the following will appear in the generated Makefile:
+dnl *
+dnl * .c.o:
+dnl *         @echo "Making (c) " $@ 
+dnl *         @${CC} -o $@ -c ${CFLAGS} $<	
+dnl *
+dnl * The following is a list of the variables created by this macro and
+dnl * the corresponding suffixes of the files that each implicit rule 
+dnl * deals with.
+dnl *
+dnl * CRULE       --   .c
+dnl * CXXRULE     --   .cxx
+dnl * CPPRULE     --   .cpp
+dnl * CCRULE      --   .cc
+dnl * CAPCRULE    --   .C
+dnl * F77RULE     --   .f
+dnl *
+dnl * There are four suffix rules for C++ files because of the different
+dnl * suffixes that can be used for C++.  Only use the one which
+dnl * corresponds to the suffix you use for your C++ files.
+dnl *
+dnl * The rules created by this macro require you to use the following
+dnl * conventions for Makefile variables:
+dnl *
+dnl * CC        = C compiler
+dnl * CXX       = C++ compiler
+dnl * F77       = Fortran 77 compiler
+dnl * CFLAGS    = C compiler flags
+dnl * CXXFLAGS  = C++ compiler flags
+dnl * FFLAGS    = Fortran 77 compiler flags
+dnl **********************************************************************
+
+AC_DEFUN(CASC_SET_SUFFIX_RULES,
+[
+   dnl * Things weren't working whenever "$@" showed up in the script, so
+   dnl * I made the symbol $at_sign to signify '@'
+   at_sign=@
+
+   dnl * All of the backslashes are used to handle the $'s and the
+   dnl * newlines which get passed through echo and sed.
+
+   CRULE=`echo ".c.o:\\\\
+\t@echo \"Making (c) \" \\$$at_sign \\\\
+\t@\\${CC} -o \\$$at_sign -c \\${CFLAGS} \$<"`
+
+   AC_SUBST(CRULE)
+
+   CXXRULE=`echo ".cxx.o:\\\\
+\t@echo \"Making (c++) \" \\$$at_sign \\\\
+\t@\\${CXX} -o \\$$at_sign -c \\${CXXFLAGS} \$<"`
+
+   AC_SUBST(CXXRULE)
+
+   CPPRULE=`echo ".cpp.o:\\\\
+\t@echo \"Making (c++) \" \\$$at_sign \\\\
+\t@\\${CXX} -o \\$$at_sign -c \\${CXXFLAGS} \$<"`
+
+   AC_SUBST(CPPRULE)
+
+   CCRULE=`echo ".cc.o:\\\\
+\t@echo \"Making (c++) \" \\$$at_sign \\\\
+\t@\\${CXX} -o \\$$at_sign -c \\${CXXFLAGS} \$<"`
+
+   AC_SUBST(CCRULE)
+
+   CAPCRULE=`echo ".C.o:\\\\
+\t@echo \"Making (c++) \" \\$$at_sign \\\\
+\t@\\${CXX} -o \\$$at_sign -c \\${CXXFLAGS} \$<"`
+
+   AC_SUBST(CAPCRULE)
+
+   F77RULE=`echo ".f.o:\\\\
+\t@echo \"Making (f) \" \\$$at_sign \\\\
+\t@\\${F77} -o \\$$at_sign -c \\${FFLAGS} \$<"`
+
+   AC_SUBST(F77RULE)
+
+])
+
 
 
 dnl * The following are macros copied from outside sources
@@ -1724,3 +2219,182 @@ fi
 ])dnl
 
 
+
+
+dnl smr_ARG_WITHLIB from FVWM by S. Robbins 
+dnl Allow argument for optional libraries; wraps AC_ARG_WITH, to
+dnl provide a "--with-foo-lib" option in the configure script, where foo
+dnl is presumed to be a library name.  The argument given by the user
+dnl (i.e. "bar" in ./configure --with-foo-lib=bar) may be one of four 
+dnl things:
+dnl     * boolean (no, yes or blank): whether to use library or not
+dnl     * file: assumed to be the name of the library
+dnl     * directory: assumed to *contain* the library
+dnl     * a quoted, space-separated list of linker flags needed to link
+dnl       with this library.  (To be used if this library requires
+dnl       linker flags other than the normal `-L' and `-l' flags.)
+dnl 
+dnl The argument is sanity-checked.  If all is well, two variables are
+dnl set: "with_foo" (value is yes, no, or maybe), and "foo_LIBFLAGS" (value
+dnl is either blank, a file, -lfoo, '-L/some/dir -lfoo', or whatever 
+dnl linker flags the user gives). The idea is: the first tells you whether
+dnl the library is to be used or not (or the user didn't specify one way
+dnl or the other) and the second to put on the command line for linking
+dnl with the library.
+dnl
+dnl Usage:
+dnl smr_ARG_WITHLIB(name, libname, description)
+dnl 
+dnl name                name for --with argument ("foo" for libfoo)
+dnl libname             (optional) actual name of library,
+dnl                     if different from name
+dnl description         (optional) used to construct help string
+dnl 
+dnl Changes:  Changed some identifier names.
+dnl           --with-foo-library is now --with-foo-lib
+dnl           foo_LIBS is now foo_LIBFLAGS
+dnl           Fourth posibility for argument to --with-foo-lib added
+dnl           Documentation above changed to reflect these changes
+dnl           Noah Elliott, October 1998
+
+AC_DEFUN(smr_ARG_WITHLIB, [
+
+ifelse($2, , smr_lib=[$1], smr_lib=[$2]) 
+    
+AC_ARG_WITH([$1]-lib,
+ifelse($3, ,
+[  --with-$1-lib[=PATH]       use $1 library], 
+[  --with-$1-lib[=PATH]       use $1 library ($3)]),
+[
+    if test "$withval" = yes; then
+        with_[$1]=yes
+        [$1]_LIBFLAGS="-l${smr_lib}"
+    elif test "$withval" = no; then
+        with_[$1]=no
+        [$1]_LIBFLAGS=
+    else
+        with_[$1]=yes
+        if test -f "$withval"; then
+            [$1]_LIBFLAGS=$withval
+        elif test -d "$withval"; then
+            [$1]_LIBFLAGS="-L$withval -l${smr_lib}"
+        else
+            case $withval in
+            -*)
+               [$1]_LIBFLAGS="$withval"
+            ;;
+            *)
+               AC_MSG_ERROR(
+                  [argument must be boolean, file, directory, or compiler flags]
+                           )
+            ;;
+            esac
+        fi
+    fi
+], [
+    with_[$1]=maybe
+    [$1]_LIBFLAGS="-l${smr_lib}"
+])])
+
+    
+dnl smr_ARG_WITHINCLUDES from FVWM by S. Robbins
+dnl Check if the include files for a library are accessible, and
+dnl define the variable "name_INCLUDE" with the proper "-I" flag for
+dnl the compiler.  The user has a chance to specify the includes
+dnl location, using "--with-foo-include".
+dnl 
+dnl This should be used *after* smr_ARG_WITHLIB *and* AC_CHECK_LIB are
+dnl successful.
+dnl 
+dnl Usage:
+dnl smr_ARG_WITHINCLUDES(name, header, extra-flags)
+dnl 
+dnl name                library name, MUST same as used with smr_ARG_WITHLIB
+dnl header              a header file required for using the lib
+dnl extra-flags         (optional) flags required when compiling the
+dnl                     header, typically more includes; for ex. X_CFLAGS
+dnl
+dnl Changes:  Changed some identifier names.
+dnl           --with-foo-includes is now --with-foo-include
+dnl           name_CFLAGS is now name_INCLUDE
+dnl           Documentation above changed to reflect these changes
+dnl           Noah Elliott, October 1998
+AC_DEFUN(smr_ARG_WITHINCLUDES, [
+
+AC_ARG_WITH([$1]-include,
+[  --with-$1-include=DIR  set directory for $1 headers],
+[
+    if test -d "$withval"; then
+        [$1]_INCLUDE="-I${withval}"
+    else
+        AC_MSG_ERROR(argument must be a directory)
+    fi])
+
+dnl This bit of logic comes from autoconf's AC_PROG_CC macro.  We need
+dnl to put the given include directory into CPPFLAGS temporarily, but
+dnl then restore CPPFLAGS to its old value.
+dnl 
+smr_test_CPPFLAGS="${CPPFLAGS+set}"
+smr_save_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS ${[$1]_CFLAGS}"
+
+    ifelse($3, , , CPPFLAGS="$CPPFLAGS [$3]")
+    AC_CHECK_HEADERS($2)
+   
+if test "$smr_test_CPPFLAGS" = set; then
+    CPPFLAGS=$smr_save_CPPFLAGS
+else
+    unset CPPFLAGS
+fi
+])
+    
+        
+dnl smr_CHECK_LIB from FVWM by S. Robbins
+dnl Probe for an optional library.  This macro creates both
+dnl --with-foo-lib and --with-foo-include options for the configure
+dnl script.  If --with-foo-lib is *not* specified, the default is to
+dnl probe for the library, and use it if found.
+dnl
+dnl Usage:
+dnl smr_CHECK_LIB(name, libname, desc, func, header, x-libs, x-flags)
+dnl 
+dnl name        name for --with options
+dnl libname     (optional) real name of library, if different from
+dnl             above
+dnl desc        (optional) short descr. of library, for help string
+dnl func        function of library, to probe for
+dnl header      (optional) header required for using library
+dnl x-libs      (optional) extra libraries, if needed to link with lib
+dnl x-flags     (optional) extra flags, if needed to include header files
+dnl
+dnl Changes:  identifier names and documentation modified to reflect
+dnl           changes to smr_ARG_WITHLIB and smr_ARG_WITHINCLUDES
+dnl           Noah Elliott, October 1998
+AC_DEFUN(smr_CHECK_LIB,
+[   
+ifelse($2, , smr_lib=[$1], smr_lib=[$2])
+ifelse($5, , , smr_header=[$5])
+smr_ARG_WITHLIB($1,$2,$3)
+if test "$with_$1" != no; then
+    AC_CHECK_LIB($smr_lib, $4,
+        smr_havelib=yes, smr_havelib=no,
+        ifelse($6, , ${$1_LIBFLAGS}, [${$1_LIBFLAGS} $6]))
+    if test "$smr_havelib" = yes -a "$smr_header" != ""; then
+        smr_ARG_WITHINCLUDES($1, $smr_header, $7)
+        smr_safe=`echo "$smr_header" | sed 'y%./+-%__p_%'`
+        if eval "test \"`echo '$ac_cv_header_'$smr_safe`\" != yes"; then
+            smr_havelib=no
+        fi
+    fi
+    if test "$smr_havelib" = yes; then
+        AC_MSG_RESULT(Using $1 library)
+    else
+        $1_LIBFLAGS=
+        $1_INCLUDE=
+        if test "$with_$1" = maybe; then
+            AC_MSG_RESULT(Not using $1 library)
+        else
+            AC_MSG_WARN(Requested $1 library not found!)
+        fi
+    fi
+fi])
