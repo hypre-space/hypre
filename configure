@@ -25351,7 +25351,7 @@ else
   LAPACKNEEDED_FALSE=
 fi
 
-if test "$casc_user_chose_blas" = no && test "$casc_user_chose_lapack" = yes
+if test "$casc_user_chose_blas" = "yes" && test "$casc_user_chose_lapack" = "no"
 then
   LAPACKLIBFLAGS="$LAPACKLIBFLAGS $FLIBS"
 fi
