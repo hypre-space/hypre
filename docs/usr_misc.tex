@@ -177,11 +177,13 @@ libraries\linebreak
 to \$HOME\linebreak
 \end{mdseries}
 \end{ttfamily}
-To build 64-bit static libraries on AIX, use the following: 
+To build 64-bit static libraries on AIX (Note: configure will need to
+execute compiled code for its test, so configure needs to be run so
+that the default AIX poe scheduling is disabled), use the following: 
 \begin{ttfamily}
 \begin{mdseries}
 \linebreak
-\$ \textbf{./configure CC=mpcc CXX=mpCC F77=mpxlf $\backslash$}\linebreak
+\$ \textbf{./nopoe ./configure CC=mpcc CXX=mpCC F77=mpxlf $\backslash$}\linebreak
 \textbf{CFLAGS="-q64 -qmaxmem=8192 -DHYPRE\_COMM\_SIMPLE -O3 
 -qstrict"$\backslash$}\linebreak
 \textbf{CXXFLAGS="-q64 -qmaxmem=8192 -DHYPRE\_COMM\_SIMPLE -O3 
@@ -234,6 +236,13 @@ confusion for configure and allow you to conveniently tune the
 compiler flags and libraries to your particular system. If MPI 
 is enables mpicc will be the preferred compiler for C, while 
 mpiCC or mpicxx will be used for C++, and mpif77 for Fortran.
+
+If when running \kbd{./configure} on AIX you get the error:
+checking for C compiler default output file name... a.out
+checking whether the C compiler works... configure: error: cannot run C compiled programs.
+If you meant to cross compile, use `--host'.
+See `config.log' for more details.
+Rerun configure using \kbd{./nopoe ./configure}.
 
 %==========================================================================
 
