@@ -244,20 +244,26 @@ void Mat_dhMatVec(Mat_dh mat, double *x, double *b)
   double *recvbuf = mat->recvbuf;
 
   /* Put components of x into the right outgoing buffers */
+  #ifdef USING_OPENMP_DH
   #pragma omp parallel  for schedule(runtime) 
+  #endif
   for (i=0; i<sendlen; i++) sendbuf[i] = x[sendind[i]]; 
 
   MPI_Startall(mat->num_recv, mat->recv_req);
   MPI_Startall(mat->num_send, mat->send_req);
 
   /* Copy local part of x into top part of recvbuf */
+  #ifdef USING_OPENMP_DH
   #pragma omp parallel  for schedule(runtime) 
+  #endif
   for (i=0; i<m; i++) recvbuf[i] = x[i];
 
   MPI_Waitall(mat->num_recv, mat->recv_req, mat->status);
 
   /* do the multiply */
+  #ifdef USING_OPENMP_DH
   #pragma omp parallel  for schedule(runtime) 
+  #endif
     for (row=0; row<m; row++) {
         int len = rp[row+1] - rp[row];
         int * ind = cval+rp[row];

@@ -111,20 +111,29 @@ void apply_blockJacobi_private(Euclid_dh ctx, double *xx, double *yy)
   workD = ctx->workD;
   part = ctx->block;
 
+  #ifdef USING_OPENMP_DH
   #pragma omp parallel 
+  #endif
   {
 
     /* if matrix was scaled, must scale the rhs */
     if (scaleF != NULL && scaleD != NULL) {
-      #pragma omp for schedule(static)
       if (isSingle) {
+        #ifdef USING_OPENMP_DH
+        #pragma omp for schedule(static)
+        #endif
         for (i=0; i<m; ++i) { xx[i] *= scaleF[i]; }
       } else {
+        #ifdef USING_OPENMP_DH
+        #pragma omp for schedule(static)
+        #endif
         for (i=0; i<m; ++i) { xx[i] *= scaleD[i]; }
       }
     }
 
-   #pragma omp for schedule(static) private(v,vi,nz,sum,i)
+   #ifdef USING_OPENMP_DH
+   #pragma omp for schedule(static) private(vF,vD,vi,nz,sumF,sumD,i)
+   #endif
     for (h=0; h<pn; ++h) {    /* fwd solve diagonal block h */
       int from = part[h].beg_row;
       int to = part[h].end_row;
@@ -175,10 +184,15 @@ void apply_blockJacobi_private(Euclid_dh ctx, double *xx, double *yy)
 
     /* put rhs back the way it was */
     if (scaleF != NULL && scaleD != NULL) {
-      #pragma omp for schedule(static)
       if (isSingle) {
+        #ifdef USING_OPENMP_DH
+        #pragma omp for schedule(static)
+        #endif
         for (i=0; i<m; ++i) { xx[i] /= scaleF[i]; }
       } else {
+        #ifdef USING_OPENMP_DH
+        #pragma omp for schedule(static)
+        #endif
         for (i=0; i<m; ++i) { xx[i] /= scaleD[i]; }
       }
     }
@@ -215,15 +229,21 @@ void Euclid_dhApplyPermuted_private(Euclid_dh ctx, double *xx, double *yy)
   scale = ctx->scale;
   work = ctx->work;
 
+  #ifdef USING_OPENMP_DH
   #pragma omp parallel 
+  #endif
   {
     /* if matrix was scaled, must scale the rhs */
     if (scale != NULL) {
+      #ifdef USING_OPENMP_DH
       #pragma omp for schedule(static)
+       #endif
         for (i=0; i<n; ++i) { xx[i] *= scale[i]; }
-    } 
+    }
 
+   #ifdef USING_OPENMP_DH
    #pragma omp for schedule(static) private(v,vi,nz,sum,i)
+   #endif
     for (h=0; h<pn; ++h) {    /* fwd solve diagonal block h */
       int from = part[h].beg_row;
       int to = part[h].end_row;
@@ -252,7 +272,9 @@ void Euclid_dhApplyPermuted_private(Euclid_dh ctx, double *xx, double *yy)
 
     /* put rhs back the way it was */
     if (scale != NULL) {
+      #ifdef USING_OPENMP_DH
       #pragma omp for schedule(static) 
+      #endif
       for (i=0; i<n; ++i) { xx[i] /= scale[i]; }
     } 
 
@@ -301,12 +323,16 @@ void apply_pilu_seq_private(Euclid_dh ctx, double *xx, double *yy)
 
   /* if matrix was scaled, must scale the rhs */
   if (scale != NULL) {
+    #ifdef USING_OPENMP_DH
     #pragma omp for schedule(static)
+    #endif
     for (i=0; i<n; ++i) { xx[i] *= scale[i]; }
   } 
 
     /* forward solve lower triangle interiors (parallel) */
+   #ifdef USING_OPENMP_DH
    #pragma omp for schedule(static) private(from,to,v,vi,nz,sum,i)
+   #endif
     for (h=0; h<pn; ++h) { 
       from = part[h].beg_row;
       to = part[h].first_bdry;
@@ -351,7 +377,9 @@ void apply_pilu_seq_private(Euclid_dh ctx, double *xx, double *yy)
     }
 
     /* backward solve upper triangular interiors (parallel) */
+   #ifdef USING_OPENMP_DH
    #pragma omp for schedule(static) private(from,to,v,vi,nz,sum,i)
+   #endif
     for (h=pn-1; h>=0; --h) { 
       from = part[h].first_bdry - 1;
       to   = part[h].beg_row;
@@ -367,7 +395,9 @@ void apply_pilu_seq_private(Euclid_dh ctx, double *xx, double *yy)
 
   /* put rhs back the way it was */
   if (scale != NULL) {
+    #ifdef USING_OPENMP_DH
     #pragma omp for schedule(static) 
+    #endif
     for (i=0; i<n; ++i) { xx[i] /= scale[i]; }
   } 
 
