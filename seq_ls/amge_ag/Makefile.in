@@ -108,7 +108,7 @@ veryclean: clean
 
 driver: driver_amge_ag_Schwarz.o libHYPRE_amge_ls.a
 	@echo  "Linking" $@ "... "
-	${CC} -o driver driver_amge_ag_Schwarz.o ${LFLAGS}
+	${CC} -o driver driver_amge_ag_Schwarz.o ${LFLAGS} $(EISPACK)
 
 
 

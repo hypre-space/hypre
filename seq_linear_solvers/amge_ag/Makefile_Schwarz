@@ -1,3 +1,4 @@
+# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
 # (c) 1998   The Regents of the University of California
 #
@@ -10,15 +11,14 @@
 .SUFFIXES:
 .SUFFIXES: .c .f .o
 
-srcdir = @srcdir@
-VPATH = @srcdir@
+srcdir = .
  
-CC = @CC@
+CC =  mpicc
 
-C_COMPILE_FLAGS=@CFLAGS@
-CXX_COMPILE_FLAGS=@CXXFLAGS@
-F77_COMPILE_FLAGS=@F77FLAGS@ 
-CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+C_COMPILE_FLAGS= -O 
+CXX_COMPILE_FLAGS= -O 
+F77_COMPILE_FLAGS= -O -silent  
+CINCLUDES= 
 CDEFS =
 
 CFLAGS =\
@@ -29,11 +29,11 @@ CFLAGS =\
  ${CINCLUDES}\
  ${CDEFS}
  
-RANLIB= @RANLIB@
+RANLIB= ranlib
  
-MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
-LIBFLAGS = @LIBDIRS@ @LIBS@
-LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
+MPILIBFLAGS =   
+LIBFLAGS =   -lm
+LDLIBFLAGS =  
  
 LFLAGS =\
  -L.\
@@ -44,9 +44,10 @@ LFLAGS =\
  -lHYPRE_seq_mv\
  -lHYPRE_utilities\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
- 
+
 EISPACK = /home/panayot/eispack/eispack/rs.o /home/panayot/eispack/eispack/tql1.o /home/panayot/eispack/eispack/tql2.o /home/panayot/eispack/eispack/tred1.o /home/panayot/eispack/eispack/tred2.o /home/panayot/eispack/eispack/pythag.o
  
+
 HEADERS =\
  headers.h\
  AMGe_matrix_topology.h\
