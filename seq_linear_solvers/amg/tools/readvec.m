@@ -15,6 +15,6 @@ fid=fopen(filename,'r');
 junk = fscanf(fid,'%d',2);
 
 nv = fscanf(fid,'%d',1); % number of variables (nv)
-[v, count] = fscanf(fid,'%d ',nv);
+[v, count] = fscanf(fid,'%f ',nv);
 fclose(fid);
 
