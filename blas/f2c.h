@@ -9,7 +9,11 @@
 
 /* F2C_INTEGER will normally be `int' but would be `long' on 16-bit systems */
 /* we assume short, float are OK */
-typedef long int /* long int */ integer;
+
+/* integer changed to int - edmond 1/12/00 */
+/* typedef long int /* long int */ integer; */
+
+typedef int integer;
 typedef unsigned long int /* long */ uinteger;
 typedef char *address;
 typedef short int shortint;
