@@ -54,6 +54,8 @@ int HYPRE_ParaSailsCreate(MPI_Comm comm, HYPRE_DistributedMatrix *distmat,
 	HYPRE_DistributedMatrixRestoreRow(distmat, row, &len, &ind, &val);
     }
 
+    MatrixComplete(internal->A);
+
     /* Call the native code */
 
     internal->ps = ParaSailsCreate(internal->A);
