@@ -234,6 +234,17 @@ HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixSetConstantCoefficient
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructMatrixSetConstantCoefficient( HYPRE_StructMatrix matrix,
+                                          int                constant_coefficient )
+{
+   return( hypre_StructMatrixSetConstantCoefficient( matrix, constant_coefficient ));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructMatrixPrint
  *--------------------------------------------------------------------------*/
 

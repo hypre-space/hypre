@@ -87,6 +87,64 @@ hypre_PrintBoxArrayData( FILE            *file,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PrintCCBoxArrayData
+ * same as hypre_PrintBoxArrayData but for constant coefficients
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PrintCCBoxArrayData( FILE            *file,
+                         hypre_BoxArray  *box_array,
+                         hypre_BoxArray  *data_space,
+                         int              num_values,
+                         double          *data       )
+{
+   int              ierr = 0;
+
+   hypre_Box       *box;
+   hypre_Box       *data_box;
+                   
+   int              datai;
+                   
+   hypre_Index      loop_size;
+   hypre_IndexRef   start;
+   hypre_Index      stride;
+                   
+   int              i, j;
+   int              loopi, loopj, loopk;
+
+   /*----------------------------------------
+    * Print data
+    *----------------------------------------*/
+
+   hypre_SetIndex(stride, 1, 1, 1);
+
+   hypre_ForBoxI(i, box_array)
+      {
+         box      = hypre_BoxArrayBox(box_array, i);
+         data_box = hypre_BoxArrayBox(data_space, i);
+
+         start = hypre_BoxIMin(box);
+
+         datai = hypre_CCBoxIndexRank(data_box,start);
+
+         for (j = 0; j < num_values; j++)
+         {
+            fprintf(file, "%d: (%d, %d, %d; %d) %e\n",
+                    i,
+                    hypre_IndexX(start),
+                    hypre_IndexY(start),
+                    hypre_IndexZ(start),
+                    j,
+                    data[datai + j]);
+         }
+
+         data += num_values;
+      }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ReadBoxArrayData
  *--------------------------------------------------------------------------*/
 

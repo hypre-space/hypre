@@ -146,12 +146,16 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
     hypre_BoxSizeY(box))) * \
   hypre_BoxSizeX(box))
 
+#define hypre_CCBoxIndexRank(box, index) 0
+
 #define hypre_BoxOffsetDistance(box, index) \
 (hypre_IndexX(index) + \
  (hypre_IndexY(index) + \
   (hypre_IndexZ(index) * \
    hypre_BoxSizeY(box))) * \
  hypre_BoxSizeX(box))
+
+#define hypre_CCBoxOffsetDistance(box, index) 0
   
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_BoxArray

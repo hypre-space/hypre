@@ -15,6 +15,8 @@
 #ifndef hypre_STRUCT_MATRIX_HEADER
 #define hypre_STRUCT_MATRIX_HEADER
 
+#include <assert.h>
+
 /*--------------------------------------------------------------------------
  * hypre_StructMatrix:
  *--------------------------------------------------------------------------*/
@@ -38,6 +40,8 @@ typedef struct hypre_StructMatrix_struct
                                           data_indices[b][s] is the starting
                                           index of matrix data corresponding
                                           to box b and stencil coefficient s */
+   int                   constant_coefficient;  /* normally 0; set to 1 for
+                                                   constant coefficient matrices */
                       
    int                   symmetric;    /* Is the matrix symmetric */
    int                  *symm_elements;/* Which elements are "symmetric" */
@@ -65,6 +69,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixDataAlloced(matrix)   ((matrix) -> data_alloced)
 #define hypre_StructMatrixDataSize(matrix)      ((matrix) -> data_size)
 #define hypre_StructMatrixDataIndices(matrix)   ((matrix) -> data_indices)
+#define hypre_StructMatrixConstantCoefficient(matrix) ((matrix) -> constant_coefficient)
 #define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
 #define hypre_StructMatrixSymmElements(matrix)  ((matrix) -> symm_elements)
 #define hypre_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
@@ -81,5 +86,9 @@ hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
 #define hypre_StructMatrixBoxDataValue(matrix, b, s, index) \
 (hypre_StructMatrixBoxData(matrix, b, s) + \
  hypre_BoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
+
+#define hypre_CCStructMatrixBoxDataValue(matrix, b, s, index) \
+(hypre_StructMatrixBoxData(matrix, b, s) + \
+ hypre_CCBoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
 
 #endif

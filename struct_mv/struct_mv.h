@@ -160,12 +160,16 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
     hypre_BoxSizeY(box))) * \
   hypre_BoxSizeX(box))
 
+#define hypre_CCBoxIndexRank(box, index) 0
+
 #define hypre_BoxOffsetDistance(box, index) \
 (hypre_IndexX(index) + \
  (hypre_IndexY(index) + \
   (hypre_IndexZ(index) * \
    hypre_BoxSizeY(box))) * \
  hypre_BoxSizeX(box))
+
+#define hypre_CCBoxOffsetDistance(box, index) 0
   
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_BoxArray
@@ -1324,6 +1328,8 @@ typedef struct hypre_ComputePkg_struct
 #ifndef hypre_STRUCT_MATRIX_HEADER
 #define hypre_STRUCT_MATRIX_HEADER
 
+#include <assert.h>
+
 /*--------------------------------------------------------------------------
  * hypre_StructMatrix:
  *--------------------------------------------------------------------------*/
@@ -1347,6 +1353,8 @@ typedef struct hypre_StructMatrix_struct
                                           data_indices[b][s] is the starting
                                           index of matrix data corresponding
                                           to box b and stencil coefficient s */
+   int                   constant_coefficient;  /* normally 0; set to 1 for
+                                                   constant coefficient matrices */
                       
    int                   symmetric;    /* Is the matrix symmetric */
    int                  *symm_elements;/* Which elements are "symmetric" */
@@ -1374,6 +1382,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixDataAlloced(matrix)   ((matrix) -> data_alloced)
 #define hypre_StructMatrixDataSize(matrix)      ((matrix) -> data_size)
 #define hypre_StructMatrixDataIndices(matrix)   ((matrix) -> data_indices)
+#define hypre_StructMatrixConstantCoefficient(matrix) ((matrix) -> constant_coefficient)
 #define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
 #define hypre_StructMatrixSymmElements(matrix)  ((matrix) -> symm_elements)
 #define hypre_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
@@ -1390,6 +1399,10 @@ hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
 #define hypre_StructMatrixBoxDataValue(matrix, b, s, index) \
 (hypre_StructMatrixBoxData(matrix, b, s) + \
  hypre_BoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
+
+#define hypre_CCStructMatrixBoxDataValue(matrix, b, s, index) \
+(hypre_StructMatrixBoxData(matrix, b, s) + \
+ hypre_CCBoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
 
 #endif
 /*BHEADER**********************************************************************
@@ -1538,6 +1551,7 @@ int HYPRE_StructMatrixAssemble( HYPRE_StructMatrix matrix );
 int HYPRE_StructMatrixSetNumGhost( HYPRE_StructMatrix matrix , int *num_ghost );
 int HYPRE_StructMatrixGetGrid( HYPRE_StructMatrix matrix , HYPRE_StructGrid *grid );
 int HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix matrix , int symmetric );
+int HYPRE_StructMatrixSetConstantCoefficient( HYPRE_StructMatrix matrix , int constant_coefficient );
 int HYPRE_StructMatrixPrint( const char *filename , HYPRE_StructMatrix matrix , int all );
 
 /* HYPRE_struct_stencil.c */
@@ -1584,15 +1598,10 @@ int hypre_CommTypeDestroy( hypre_CommType *comm_type );
 hypre_CommTypeEntry *hypre_CommTypeEntryCreate( hypre_Box *box , hypre_Index stride , hypre_Box *data_box , int num_values , int data_box_offset );
 int hypre_CommTypeEntryDestroy( hypre_CommTypeEntry *comm_entry );
 int hypre_CommPkgCreateInfo( hypre_BoxArrayArray *boxes , hypre_Index stride , hypre_BoxArray *data_space , int **processes , int *order , int num_values , MPI_Comm comm , hypre_Index periodic , int *num_comms_ptr , int **comm_processes_ptr , hypre_CommType ***comm_types_ptr , hypre_CommType **copy_type_ptr );
-int hypre_CommTypeSort( hypre_CommType *comm_type , hypre_Index periodic );
 int hypre_CommPkgCommit( hypre_CommPkg *comm_pkg );
 int hypre_CommPkgUnCommit( hypre_CommPkg *comm_pkg );
 int hypre_CommTypeBuildMPI( int num_comms , int *comm_procs , hypre_CommType **comm_types , MPI_Datatype *comm_mpi_types );
 int hypre_CommTypeEntryBuildMPI( hypre_CommTypeEntry *comm_entry , MPI_Datatype *comm_entry_mpi_type );
-int hypre_IModPeriod( int i , int period );
-int hypre_IModPeriodX( hypre_Index index , hypre_Index periodic );
-int hypre_IModPeriodY( hypre_Index index , hypre_Index periodic );
-int hypre_IModPeriodZ( hypre_Index index , hypre_Index periodic );
 
 /* struct_copy.c */
 int hypre_StructCopy( hypre_StructVector *x , hypre_StructVector *y );
@@ -1617,6 +1626,7 @@ double hypre_StructInnerProd( hypre_StructVector *x , hypre_StructVector *y );
 
 /* struct_io.c */
 int hypre_PrintBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , double *data );
+int hypre_PrintCCBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , double *data );
 int hypre_ReadBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , double *data );
 
 /* struct_matrix.c */
@@ -1631,6 +1641,7 @@ int hypre_StructMatrixSetValues( hypre_StructMatrix *matrix , hypre_Index grid_i
 int hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix , hypre_Box *value_box , int num_stencil_indices , int *stencil_indices , double *values , int action );
 int hypre_StructMatrixAssemble( hypre_StructMatrix *matrix );
 int hypre_StructMatrixSetNumGhost( hypre_StructMatrix *matrix , int *num_ghost );
+int hypre_StructMatrixSetConstantCoefficient( hypre_StructMatrix *matrix , int constant_coefficient );
 int hypre_StructMatrixPrint( const char *filename , hypre_StructMatrix *matrix , int all );
 int hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix , hypre_StructMatrix *to_matrix );
 hypre_StructMatrix *hypre_StructMatrixRead( MPI_Comm comm , const char *filename , int *num_ghost );
