@@ -86,7 +86,7 @@ libHYPRE_blas.a: ${OBJS}
 ${OBJS}: ${HEADERS}
 
 dgels_all.o: dgels_all.c
-	${CC} -o $@ -c ${CFLAGS} -O $<
+	${CC} -o $@ -c $< ${CFLAGS} -O1
 
 ##################################################################
 # Generic rules
