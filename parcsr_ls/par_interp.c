@@ -9,7 +9,7 @@
 *********************************************************************EHEADER*/
 #include "headers.h"
 
-/*----------------]----------------------------------------------------------
+/*---------------------------------------------------------------------------
  * hypre_ParAMGBuildInterp
  *--------------------------------------------------------------------------*/
 
@@ -479,8 +479,10 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                   }
                } 
 
-               distribute = A_diag_data[jj] / sum;
-               
+               if (sum != 0)
+	       {
+	       distribute = A_diag_data[jj] / sum;
+ 
                /*-----------------------------------------------------------
                 * Loop over row of A for point i1 and do the distribution.
                 *-----------------------------------------------------------*/
@@ -508,6 +510,11 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                                   += distribute * A_offd_data[jj1]; 
                      }
                   }
+               }
+               }
+               else
+               {
+               diagonal += A_diag_data[jj];
                }
             }
             
@@ -591,8 +598,9 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
                   }
 
-                  distribute = A_offd_data[jj] / sum;   
-         
+                  if (sum != 0)
+		  {
+		  distribute = A_offd_data[jj] / sum;   
                   /*---------------------------------------------------------
                    * Loop over row of A_ext for point i1 and do 
                    * the distribution.
@@ -625,6 +633,11 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                             }
                         }
                      }
+                  }
+                  }
+		  else
+                  {
+                    diagonal += A_offd_data[jj];
                   }
                }
             
