@@ -18,6 +18,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifdef HYPRE_SEQUENTIAL
+#include "mpistubs.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

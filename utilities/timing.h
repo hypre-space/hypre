@@ -19,7 +19,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifndef HYPRE_SEQUENTIAL
 #include "mpi.h"
+#endif
 #include "timer.h"
 
 #ifdef __cplusplus

@@ -1,7 +1,23 @@
-/*  Fake mpi stubs to generate serial codes without mpi */
+/*BHEADER**********************************************************************
+ * (c) 1998   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+/******************************************************************************
+ *
+ *  Fake mpi stubs to generate serial codes without mpi
+ *
+ *****************************************************************************/
 
-#ifndef MPISTUBS_H
-#define MPISTUBS_H
+#ifndef hypre_MPISTUBS
+#define hypre_MPISTUBS
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef int MPI_Status ;
 typedef int MPI_Request ;
@@ -27,9 +43,6 @@ MPI_Op MPI_SUM  ;
 MPI_Op MPI_MIN  ;
 MPI_Op MPI_MAX  ;
 #define MPI_UNDEFINED -32766
-
-#endif
-
 
 /* defines for communication */
 
@@ -76,5 +89,8 @@ extern int num_procs; /* HH_INIT 1 */
 /* define return value for failure to find MPI */
 #define NO_MPI 		     -999    /* can't be valid return value in mpi.h */
 
+#ifdef __cplusplus
+}
+#endif
 
-
+#endif

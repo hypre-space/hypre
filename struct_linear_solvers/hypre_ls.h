@@ -2,7 +2,9 @@
 #ifndef hypre_LS_HEADER
 #define hypre_LS_HEADER
 
+#ifndef HYPRE_SEQUENTIAL
 #include "mpi.h"
+#endif
 #include "HYPRE_ls.h"
 
 #ifdef __cplusplus

@@ -21,7 +21,7 @@ while [ "$*" != "" ]
 do
 case $1 in
   -h|-help) 
-	echo "$0 [-opt|-dec|-blue|-red] [install|clean|veryclean] "
+	echo "$0 [-opt|-dec|-blue|-red|-seq] [install|clean|veryclean] "
 	echo 
 	echo "Where:"
 	echo "-opt            CASC Sun cluster with optimization"
@@ -43,6 +43,9 @@ case $1 in
 	shift;;
   -red)
 	HYPRE_ARCH="red"
+	shift;;
+  -seq)
+	HYPRE_ARCH="seq"
 	shift;;
   install) 
 	HYPRE_INSTALL_FLAG=1

@@ -1,0 +1,29 @@
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+CC = cc
+F77 = f77
+
+CFLAGS = -O -DHYPRE_SEQUENTIAL
+# CFLAGS = -O -DHYPRE_TIMING -DHYPRE_SEQUENTIAL
+# CFLAGS = -g -DHYPRE_TIMING -DHYPRE_SEQUENTIAL
+
+FFLAGS = -O
+
+LFLAGS =\
+ -L/usr/local/lib\
+ -L.\
+ -L../utilities\
+ -lHYPRE_mv\
+ -lHYPRE_timing\
+ -lHYPRE_memory\
+ -lm
+
+include Makefile.generic
+

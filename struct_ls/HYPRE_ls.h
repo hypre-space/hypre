@@ -15,7 +15,9 @@
 #ifndef HYPRE_LS_HEADER
 #define HYPRE_LS_HEADER
 
+#ifndef HYPRE_SEQUENTIAL
 #include "mpi.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {

@@ -2,7 +2,9 @@
 #ifndef hypre_MV_HEADER
 #define hypre_MV_HEADER
 
+#ifndef HYPRE_SEQUENTIAL
 #include "mpi.h"
+#endif
 #include "HYPRE_mv.h"
 
 #ifdef __cplusplus
