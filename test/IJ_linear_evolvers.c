@@ -846,6 +846,9 @@ main( int   argc,
    instructive */
 /*    HYPRE_IJVectorZeroLocalComponents(ij_x);  */
 
+      for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+         values[i] *= dt;
+
       HYPRE_IJVectorSetLocalComponentsInBlock(ij_x,
                                               part_x[myid],
                                               part_x[myid+1]-1,
