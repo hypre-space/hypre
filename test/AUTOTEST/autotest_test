@@ -749,11 +749,11 @@ MailGroup=$3
 if [ "$MessageStr" = "purify" ]
 then				# don't need extra purify status messages
   PurifySelected=1
-  $MAKE $MakeStr 1>> ${Hdr}.${MessageStr}.${MakeStr}.log 2>>&1
+  $MAKE $MakeStr 1>> ${Hdr}.${MessageStr}.${MakeStr}.log 2>&1
 elif [ "$MessageStr" = "insure" ]
 then				# don't need extra insure status messages
   InsureSelected=1
-  $MAKE $MakeStr 1>> ${Hdr}.${MessageStr}.${MakeStr}.log 2>>&1
+  $MAKE $MakeStr 1>> ${Hdr}.${MessageStr}.${MakeStr}.log 2>&1
 else
   $MAKE $MakeStr 1>> ${Hdr}.${MessageStr}.${MakeStr}.log \
         2>> ${Hdr}.${MessageStr}.${MakeStr}.err
