@@ -32,9 +32,9 @@
  * constructor 
  *--------------------------------------------------------------------------*/
 
-MLI_Solver::MLI_Solver( int solver_id )
+MLI_Solver::MLI_Solver( int sid )
 {
-   switch ( solver_id )
+   switch ( sid )
    {
       case MLI_SOLVER_JACOBI_ID :
            strcpy( solver_name, "Jacobi" );
