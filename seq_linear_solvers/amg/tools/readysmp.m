@@ -1,4 +1,4 @@
-function [A] = readysmp(filename)
+function [A,ia,ja,a] = readysmp(filename)
 %-----------------------------------------------------------------------------
 % [A] = readysmp('filename'):
 %   Reads from file 'filename' a matrix A in YSMP format.
