@@ -34,6 +34,7 @@ c-----------------------------------------------------------------------
       integer             precond_id
 
       integer             hybrid, coarsen_type, measure_type
+      integer             setup_type
       integer             debug_flag, ioutdat, cycle_type, k_dim
       integer             num_rows, nlevels
 
@@ -59,6 +60,7 @@ c     HYPRE_Solver        precond
 
       integer*8           solver
       integer*8           precond
+      integer*8           precond_gotten
       integer*8           num_grid_sweeps
       integer*8           grid_relax_type
       integer*8           grid_relax_points
@@ -390,6 +392,7 @@ c Set defaults for BoomerAMG
           coarsen_type = 0
           hybrid = 1
           measure_type = 0
+          setup_type = 1
           strong_threshold = 0.25
           trunc_factor = 0.0
           cycle_type = 1
@@ -425,6 +428,16 @@ c         call HYPRE_BoomerAMGSetTruncFactor(precond, trunc_factor, ierr)
           call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
      &                                     precond, ierr)
 
+          call HYPRE_ParCSRGMRESGetPrecond(solver,precond_gotten,ierr)
+
+          if (precond_gotten .ne. precond) then
+            print *, 'HYPRE_ParCSRGMRESGetPrecond got bad precond'
+          else
+            print *, 'HYPRE_ParCSRGMRESGetPrecond got good precond'
+          endif
+
+          call HYPRE_BoomerAMGSetSetupType(precond,setup_type,ierr)
+          
         else if (solver_id .eq. 4) then
 
           print *, 'diagonally scaled GMRES'
