@@ -311,12 +311,6 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
 
-   if (nrows < 0)
-   {
-      printf("Error! nrows negative! HYPRE_IJMatrixGetValues\n");
-      exit(1);
-   }
-
    if (assemble_flag == 0)
    {
       printf("Error! Matrix not assembled yet! HYPRE_IJMatrixGetValues\n");
@@ -492,6 +486,12 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
    col_partitioning = hypre_IJMatrixColPartitioning(matrix);
    col_0 = col_partitioning[my_id];
    col_n = col_partitioning[my_id+1]-1;
+
+   if (nrows < 0)
+   {
+      printf("Error! nrows negative! HYPRE_IJMatrixSetValues\n");
+      exit(1);
+   }
 
    if (hypre_IJMatrixAssembleFlag(matrix))
    {
