@@ -97,10 +97,10 @@ install: all
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib
 
 clean:
-	@rm -f *.o
+	@rm -f *.o *.dxx
 
 veryclean: clean
-	@rm -f libHYPRE_mv.a
+	@rm -f libHYPRE_mv.a *.tex
 	@rm -fr Docs
 	@rm -f DevManual.tex DevManual.ps
 	@rm -f DevManual.dvi DevManual.aux DevManual.log
