@@ -75,6 +75,7 @@ class MLI_Method_AMGSA : public MLI_Method
    int      postSmootherNum_;        /* number of postsmoother sweeps    */
    double   *preSmootherWgt_;        /* weight used in pre-smoother      */
    double   *postSmootherWgt_;       /* weight used in postsmoother      */
+   int	    smootherPrintRNorm_;     /* tell smoother to print rnorm     */
    char     coarseSolver_[20];       /* denote which coarse solver to use*/
    int      coarseSolverNum_;        /* number of coarse solver sweeps   */
    double   *coarseSolverWgt_;       /* weight used in coarse solver     */

@@ -72,6 +72,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    postSmootherWgt_  = new double[2];
    preSmootherWgt_[0] = preSmootherWgt_[1] = 0.667;
    postSmootherWgt_[0] = postSmootherWgt_[1] = 0.667;
+   smootherPrintRNorm_ = 0;
    strcpy(coarseSolver_, "SGS");
    coarseSolverNum_    = 20;
    coarseSolverWgt_    = new double[20];
@@ -262,6 +263,11 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       nSweeps = *(int *)   argv[0];
       weights = (double *) argv[1];
       return ( setSmoother(prePost, param2, nSweeps, weights) );
+   }
+   else if ( !strcasecmp(param1, "setSmootherPrintRNorm" ))
+   {
+      smootherPrintRNorm_ = 1;
+      return 0;
    }
    else if ( !strcasecmp(param1, "setCoarseSolver" ))
    {
@@ -583,6 +589,11 @@ int MLI_Method_AMGSA::setup( MLI *mli )
          targv[0] = (char *) &max_eigen;
          smoother_ptr->setParams(param_string, 1, targv);
       }
+      if ( smootherPrintRNorm_ == 1 )
+      {
+         sprintf( param_string, "printRNorm" );
+         smoother_ptr->setParams(param_string, 0, NULL);
+      }
       smoother_ptr->setup(mli_Amat);
       mli->setSmoother( level, MLI_SMOOTHER_PRE, smoother_ptr );
 
@@ -598,6 +609,11 @@ int MLI_Method_AMGSA::setup( MLI *mli )
             sprintf( param_string, "maxEigen" );
             targv[0] = (char *) &max_eigen;
             smoother_ptr->setParams(param_string, 1, targv);
+         }
+         if ( smootherPrintRNorm_ == 1 )
+         {
+            sprintf( param_string, "printRNorm" );
+            smoother_ptr->setParams(param_string, 0, NULL);
          }
          smoother_ptr->setup(mli_Amat);
       }
