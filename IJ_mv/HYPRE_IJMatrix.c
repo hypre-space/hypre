@@ -12,7 +12,7 @@
  *
  *****************************************************************************/
 
-#include "./IJ_matrix.h"
+#include "headers.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_NewIJMatrix
@@ -36,7 +36,7 @@ participate in any collective operations.
 */
 /*---------------------------------------------------------------------- */
 
-int HYPRE_NewIJMatrix( HYPRE_IJMatrix &in_matrix_ptr, MPI_Comm comm, 
+int HYPRE_NewIJMatrix( HYPRE_IJMatrix *in_matrix_ptr, MPI_Comm comm, 
           int global_m, int global_n)
 
 {
@@ -51,9 +51,9 @@ int HYPRE_NewIJMatrix( HYPRE_IJMatrix &in_matrix_ptr, MPI_Comm comm,
    hypre_IJMatrixN(matrix)    = global_n;
    hypre_IJMatrixLocalStorage(matrix) = NULL;
    hypre_IJMatrixTranslator(matrix) = NULL;
-   hypre_IJMatrixLocalStorageType(matrix) = HYPRE_UNINITIALIZED;
-   hypre_IJMatrixInsertionSemantics = 0;
-   hypre_IJMatrixReferenceCount = 1;
+   hypre_IJMatrixLocalStorageType(matrix) = HYPRE_UNITIALIZED;
+   hypre_IJMatrixInsertionSemantics(matrix) = 0;
+   hypre_IJMatrixReferenceCount(matrix) = 1;
 
    *in_matrix_ptr = (HYPRE_IJMatrix) matrix;
   
@@ -138,6 +138,24 @@ HYPRE_AssembleIJMatrix( HYPRE_IJMatrix IJmatrix )
       ierr = hypre_AssembleIJMatrixISIS( matrix );
    else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
       ierr = hypre_AssembleIJMatrixParcsr( matrix );
+   else
+      ierr = -1;
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_DistributeIJMatrix
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_DistributeIJMatrix( HYPRE_IJMatrix IJmatrix, int *row_starts , int *col_starts )
+{
+   int ierr = 0;
+   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+
+   if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+      ierr = hypre_DistributeIJMatrixParcsr( matrix, row_starts, col_starts );
    else
       ierr = -1;
 
@@ -532,7 +550,7 @@ The matrix to be pointed to.
 @param reference [OUT]
 The pointer to be set to point to IJMatrix.
 */
-
+/*
 int 
 hypre_RefIJMatrix( HYPRE_IJMatrix IJmatrix, HYPRE_IJMatrix *reference )
 {
@@ -545,4 +563,4 @@ hypre_RefIJMatrix( HYPRE_IJMatrix IJmatrix, HYPRE_IJMatrix *reference )
 
    return(ierr);
 }
-
+*/
