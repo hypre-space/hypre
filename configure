@@ -8431,11 +8431,7 @@ fi;
 #***************************************************************
   hypre_save_LIBS="$LIBS"
   hypre_save_LDFLGS="$LDFLAGS"
-
-#***************************************************************
-# Set LIBS to include all extra libraries
-#***************************************************************
-  LIBS="$BLASLIBS $LIBS $FLIBS"
+  LIBS="$LIBS $FLIBS"
 
 #***************************************************************
 # Get fortran linker name of LAPACK function to check for.
@@ -8468,7 +8464,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 #***************************************************************
 #   Set search paths for LAPACK library
 #***************************************************************
-  temp_FLAGS="-L/usr/lib -L/usr/local/lib -L/lib $BLASLIBDIRS"
+  temp_FLAGS="-L/usr/lib -L/usr/local/lib -L/lib"
   LDFLAGS="$temp_FLAGS $LDFLAGS"
 
 #***************************************************************
@@ -8483,7 +8479,7 @@ if eval "test \"\${$as_ac_Lib+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-l$lib  $LIBS"
+LIBS="-l$lib -lblas $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -9275,32 +9271,6 @@ _ACEOF
 
        ;;
 esac
-
-if test "$casc_using_shared" = "yes"
-then
-   case $HYPRE_ARCH in
-      Linux | LINUX | linux)
-         CFLAGS="-fPIC $CFLAGS"
-         CXXFLAGS="-fPIC $CXXFLAGS"
-         LDFLAGS="-shared $LDFLAGS"
-         HYPRE_LIBSUFFIX=.so
-         ;;
-      rs6000)
-         LDFLAGS="-G $LDFLAGS -binitfini:poe_remote_main"
-         HYPRE_LIBSUFFIX=.so
-         ;;
-      *)
-         CFLAGS="-KPIC $CFLAGS"
-         CXXFLAGS="-KPIC $CXXFLAGS"
-         LDFLAGS="-shared $LDFLAGS"
-         HYPRE_LIBSUFFIX=.so
-         ;;
-   esac
-else
-   HYPRE_LIBSUFFIX=.a
-fi
-
-
 
 
 

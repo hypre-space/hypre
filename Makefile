@@ -82,7 +82,7 @@ all:
 	mkdir -p ${HYPRE_BUILD_DIR}/lib; \
 	cp -fp HYPRE_config.h ${HYPRE_BUILD_DIR}/include/.; \
 	cp -fp $(srcdir)/HYPRE.h ${HYPRE_BUILD_DIR}/include/.; \
-	for i in ${HYPRE_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_BABEL_DIRS}; \
 	do \
 	  echo "Making $$i ..."; \
 	  (cd $$i && $(MAKE) $@); \
@@ -156,7 +156,7 @@ uninstall:
 
 clean:
 	@ \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_BABEL_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -168,7 +168,7 @@ clean:
 distclean:
 	@ \
 	rm -Rf hypre; \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_BABEL_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
