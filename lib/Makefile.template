@@ -214,6 +214,7 @@ FEMLIFILES = \
  mli_solver_kaczmarz.o\
  mli_solver_mls.o\
  mli_solver_mli.o\
+ mli_solver_amg.o\
  mli_solver_parasails.o\
  mli_solver_seqsuperlu.o\
  mli_solver_sgs.o\
