@@ -197,6 +197,8 @@ for i in $PidList
 do [[ -r ./$RunName.o\$i ]] && cat ./$RunName.o\$i >> $DRIVER.log
 done
 rm -f ./$RunName.*
+chmod -R a+rX,ug+w .
+chgrp -fR hypre .
 EOF
 chmod +x $TmpLFile 
 PrevPid=${CmdPid[((loop-1))]}

@@ -15,7 +15,7 @@
 #=============================================================================
 
 
-Version 1.7.8b, work in progress.
+Version 1.7.8b released, 2002/09/25.
 
 - SStruct: Changed the MatrixSetSymmetric interface (this was actually
   not implemented before anyway).  The new interface allows much more
