@@ -470,7 +470,7 @@ int HYPRE_ParCSREuclidSolve(HYPRE_Solver       solver,
  * database. All Euclid options (e.g, level, ILU method,
  * parallelization algorithm) are internally selected by
  * this database.  To insert values from a file instead
- * of the command line, use HYPRE_ParCSREuclidSetParamsFromFile().
+ * of the command line, use HYPRE\_ParCSREuclidSetParamsFromFile().
  * If a (flag, value) pair already exists, this call updates
  * its value.
  *
@@ -494,7 +494,7 @@ int HYPRE_ParCSREuclidSetParams(HYPRE_Solver solver,
  * -blockJacobi 3
  * -matFile     /home/hysom/myfile.euclid
  * -doSomething true
- * -xx_coeff -1.0
+ * -xx\_coeff -1.0
  *
  * See Euclid documentation for comprehensive listing
  * of settable parameters.
@@ -524,7 +524,7 @@ int HYPRE_ParCSREuclidReadRho(HYPRE_Solver solver, double *rho);
 /**
  * Prints settings used during factorization; also
  * prints info on preconditioner size, etc.  Best if called
- * after HYPRE_ParCSRPilutSetup -- else, data may be incorrect.
+ * after HYPRE\_ParCSRPilutSetup -- else, data may be incorrect.
  *
  **/
 int HYPRE_ParCSREuclidPrintParams(HYPRE_Solver solver);
