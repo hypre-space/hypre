@@ -356,15 +356,32 @@ impl_Hypre_ParCSRMatrix_GetRow(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.GetRow) */
   /* Insert the implementation of the GetRow method here... */
    int ierr=0;
+   void * object;
    struct Hypre_ParCSRMatrix__data * data;
    HYPRE_IJMatrix ij_A;
+   HYPRE_ParCSRMatrix HypreP_A;
+   int * iindices[1];
+   double * dvalues[1];
+   int lower[1];
+   lower[0] = 0;
 
    data = Hypre_ParCSRMatrix__get_data( self );
 
    ij_A = data -> ij_A;
+   ierr += HYPRE_IJMatrixGetObject( ij_A, &object );
+   HypreP_A = (HYPRE_ParCSRMatrix) object;
 
-   printf("impl_Hypre_ParCSRMatrix_GetRow\n");
-   printf( "Stub\n");
+   *col_ind = SIDL_int__array_create( 1, lower, size );
+   *values = SIDL_double__array_create( 1, lower, size );
+
+   *iindices = SIDLArrayAddr1( *col_ind, 0 );
+   *dvalues = SIDLArrayAddr1( *values, 0 );
+
+   /* RestoreRow doesn't do anything but reset a parameter.  Its function is to
+      make sure the user who calls GetRow is aware that the data in the output
+      arrays will be changed. */
+   HYPRE_ParCSRMatrixRestoreRow( HypreP_A, row, size, iindices, dvalues );
+   ierr += HYPRE_ParCSRMatrixGetRow( HypreP_A, row, size, iindices, dvalues );
 
    return( ierr );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.GetRow) */

@@ -204,7 +204,7 @@ impl_Hypre_ParCSRVector_Axpy(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Axpy) */
   /* Insert the implementation of the Axpy method here... */
    int ierr = 0;
-   int * type;
+   int type[0];
    void * object;
    struct Hypre_ParCSRVector__data * data, * data_x;
    Hypre_ParCSRVector HypreP_x;
@@ -290,8 +290,9 @@ impl_Hypre_ParCSRVector_Clone(
   /* Insert the implementation of the Clone method here... */
    /* Set x to a clone of self. */
    int ierr = 0;
-   int * type, * partitioning, jlower, jupper, my_id;
-   void * object;
+   int type[0];
+   int * partitioning, jlower, jupper, my_id;
+   void * objectx, * objecty;
    struct Hypre_ParCSRVector__data * data_y, * data_x;
    HYPRE_IJVector ij_y, ij_x;
    hypre_IJVector * hypre_ij_y;
@@ -319,7 +320,18 @@ impl_Hypre_ParCSRVector_Clone(
    ij_x = data_x->ij_b;
    ierr = HYPRE_IJVectorCreate( *(data_x->comm), jlower, jupper, &ij_x );
    ierr += HYPRE_IJVectorSetObjectType( ij_x, HYPRE_PARCSR );
+   ierr += HYPRE_IJVectorInitialize( ij_x );
    data_x->ij_b = ij_x;
+
+   ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
+   assert( *type == HYPRE_PARCSR );  /* ... don't know how to deal with other types */
+   ierr += HYPRE_IJVectorGetObject( ij_y, &objecty );
+   yy = (HYPRE_ParVector) objecty;
+
+   ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
+   assert( *type == HYPRE_PARCSR );  /* ... don't know how to deal with other types */
+   ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
+   xx = (HYPRE_ParVector) objectx;
 
    /* Copy data in y to x... */
    HYPRE_ParVectorCopy( yy, xx );
@@ -355,8 +367,8 @@ impl_Hypre_ParCSRVector_Copy(
       This is a deep copy, ultimately done by hypre_SeqVectorCopy.
    */
    int ierr = 0;
-   int * type;
-   void * object;
+   int type[0];
+   void * objectx, * objecty;
    struct Hypre_ParCSRVector__data * data_y, * data_x;
    HYPRE_IJVector ij_y, ij_x;
    Hypre_ParCSRVector HypreP_x;
@@ -382,15 +394,13 @@ impl_Hypre_ParCSRVector_Copy(
 
    ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
    assert( *type == HYPRE_PARCSR );  /* ... don't know how to deal with other types */
-   ierr += HYPRE_IJVectorGetObject( ij_y, &object );
-   yy = (HYPRE_ParVector) object;
+   ierr += HYPRE_IJVectorGetObject( ij_y, &objecty );
+   yy = (HYPRE_ParVector) objecty;
 
-   ij_x = data_x->ij_b;
    ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
    assert( *type == HYPRE_PARCSR );  /* ... don't know how to deal with other types */
-   /* ... don't know how to deal with other types */
-   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
-   xx = (HYPRE_ParVector) object;
+   ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
+   xx = (HYPRE_ParVector) objectx;
 
    ierr += HYPRE_ParVectorCopy( xx, yy );
 
@@ -623,8 +633,12 @@ impl_Hypre_ParCSRVector_Read(
    data = Hypre_ParCSRVector__get_data( self );
    ij_b = data->ij_b;
 
+   printf("impl_Hypre_ParCSRVector_Read\n");
    ierr = HYPRE_IJVectorRead( filename, *(data->comm),
                               HYPRE_PARCSR, &ij_b );
+   data->ij_b = ij_b;
+   Hypre_ParCSRVector__set_data( self, data );
+
    return( ierr );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Read) */
 }
