@@ -199,9 +199,9 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
       gcsc_ja[icol] = nnz;
    }
    delete [] cnt_array;
-   free( gcsr_ia );
-   free( gcsr_ja );
-   free( gcsr_aa );
+   delete [] gcsr_ia;
+   delete [] gcsr_ja;
+   delete [] gcsr_aa;
 
    /* ---------------------------------------------------------------
     * make SuperMatrix 
