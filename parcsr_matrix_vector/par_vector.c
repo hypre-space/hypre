@@ -25,7 +25,6 @@ hypre_CreateParVector(  MPI_Comm comm,
 {
    hypre_ParVector  *vector;
    int num_procs, my_id;
-   int start, i;
 
    vector = hypre_CTAlloc(hypre_ParVector, 1);
    MPI_Comm_rank(comm,&my_id);
@@ -33,10 +32,7 @@ hypre_CreateParVector(  MPI_Comm comm,
    if (!partitioning)
    {
 	MPI_Comm_size(comm,&num_procs);
-	partitioning = hypre_CTAlloc(int,num_procs+1);
-	partitioning[0] = 0;
-	for (i=0; i < num_procs; i++)
-	   MPE_Decomp1d(global_size,num_procs,i,&start,&partitioning[i+1]);
+	hypre_GeneratePartitioning(global_size, num_procs, &partitioning);
    }
 	
    hypre_ParVectorComm(vector) = comm;
