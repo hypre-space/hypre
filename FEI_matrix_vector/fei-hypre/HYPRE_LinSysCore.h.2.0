@@ -525,6 +525,7 @@ class HYPRE_LinSysCore
    double          parasailsFilter_;
    double          parasailsLoadbal_;
    int             parasailsReuse_;
+   int             mlMethod_;
    int             mlNumPreSweeps_;
    int             mlNumPostSweeps_;
    int             mlPresmootherType_;

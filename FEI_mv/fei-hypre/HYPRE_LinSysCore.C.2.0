@@ -65,6 +65,7 @@ extern "C" {
    int HYPRE_ParCSRMLSetPreSmoother( HYPRE_Solver, int );
    int HYPRE_ParCSRMLSetPostSmoother( HYPRE_Solver, int );
    int HYPRE_ParCSRMLSetDampingFactor( HYPRE_Solver, double );
+   int HYPRE_ParCSRMLSetMethod( HYPRE_Solver, int );
 #endif
 
    int hypre_BoomerAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
@@ -225,6 +226,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     superluOrdering_    = 0;    // natural ordering in SuperLU
     superluScale_[0]    = 'N';  // no scaling in SuperLUX
 
+    mlMethod_           = 1;
     mlNumPreSweeps_     = 1;
     mlNumPostSweeps_    = 1;
     mlPresmootherType_  = 1;    // default Gauss-Seidel
@@ -1139,8 +1141,8 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
           sscanf(params[i],"%s %s", param, param2);
           rtype = 1;
           if      ( !strcmp(param2, "jacobi" ) )  rtype = 0;
-          else if ( !strcmp(param2, "gs") )       rtype = 1;
-          else if ( !strcmp(param2, "sgs") )      rtype = 2;
+          else if ( !strcmp(param2, "sgs") )      rtype = 1;
+          else if ( !strcmp(param2, "sgsseq") )   rtype = 2;
           else if ( !strcmp(param2, "vbjacobi"))  rtype = 3;
           else if ( !strcmp(param2, "vbsgs") )    rtype = 4;
           else if ( !strcmp(param2, "vbsgsseq"))  rtype = 5;
@@ -1159,8 +1161,8 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
           sscanf(params[i],"%s %s", param, param2);
           rtype = 1;
           if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
-          else if ( !strcmp(param2, "gs") )      rtype = 1;
-          else if ( !strcmp(param2, "sgs") )     rtype = 2;
+          else if ( !strcmp(param2, "sgs") )     rtype = 1;
+          else if ( !strcmp(param2, "sgsseq") )  rtype = 2;
           else if ( !strcmp(param2, "vbjacobi")) rtype = 3;
           else if ( !strcmp(param2, "vbsgs") )   rtype = 4;
           else if ( !strcmp(param2, "vbsgsseq")) rtype = 5;
@@ -1220,6 +1222,21 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
           {
              printf("       HYPRE_LSC::parameters mlStrongThreshold = %e\n",
                     mlStrongThreshold_);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // mlpack preconditoner : method to use
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "mlMethod") )
+       {
+          sscanf(params[i],"%s %s", param, param2);
+          if      ( !strcmp(param2, "amg" ) ) mlMethod_ = 0;
+          else                                mlMethod_ = 1;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LSC::parameters mlMethod = %d\n",mlMethod_);
           }
        }
 
@@ -3629,7 +3646,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
              case HYPOLY :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
-                     printf("Polynomial preconditioning - order = %d\n", polyOrder_);
+                     printf("Polynomial preconditioning - order = %d\n",polyOrder_);
                   HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
                   if ( HYPreconReuse_ == 1 )
                   {
@@ -3721,6 +3738,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #ifdef MLPACK
              case HYML :
 
+                  HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
@@ -3757,9 +3775,10 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRPCGSetTwoNorm(HYSolver_, 1);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRPCGSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRPCGSetStopCrit(HYSolver_,1);
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
           {
-             printf("***************************************************\n");
+             if ( mypid_ == 0 )
+                printf("***************************************************\n");
              HYPRE_ParCSRPCGSetLogging(HYSolver_, 1);
           }
           HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
@@ -3894,7 +3913,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
              case HYPOLY :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
-                     printf("Polynomial preconditioning - order = %d\n", polyOrder_);
+                     printf("Polynomial preconditioning - order = %d\n",polyOrder_);
                   HYPRE_LSI_PolySetOrder(HYPrecon_, polyOrder_);
                   if ( HYPreconReuse_ == 1 )
                   {
@@ -3987,6 +4006,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #ifdef MLPACK
              case HYML :
 
+                  HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
@@ -4022,9 +4042,10 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRGMRESSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRGMRESSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRGMRESSetStopCrit(HYSolver_,1);
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
           {
-             printf("***************************************************\n");
+             if ( mypid_ == 0 )
+                printf("***************************************************\n");
              HYPRE_ParCSRGMRESSetLogging(HYSolver_, 1);
           }
           HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
@@ -4249,6 +4270,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #ifdef MLPACK
              case HYML :
 
+                  HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
@@ -4283,9 +4305,10 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRBiCGSTABSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRBiCGSTABSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRBiCGSTABSetStopCrit(HYSolver_,1);
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
           {
-             printf("***************************************************\n");
+             if ( mypid_ == 0 )
+                printf("***************************************************\n");
              HYPRE_ParCSRBiCGSTABSetLogging(HYSolver_, 1);
           }
           HYPRE_ParCSRBiCGSTABSetup(HYSolver_, A_csr, b_csr, x_csr);
@@ -4510,6 +4533,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #ifdef MLPACK
              case HYML :
 
+                  HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
@@ -4544,9 +4568,10 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRBiCGSTABLSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRBiCGSTABLSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRBiCGSTABLSetStopCrit(HYSolver_,1);
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
           {
-             printf("***************************************************\n");
+             if ( mypid_ == 0 )
+                printf("***************************************************\n");
              HYPRE_ParCSRBiCGSTABLSetLogging(HYSolver_, 1);
           }
           HYPRE_ParCSRBiCGSTABLSetup(HYSolver_, A_csr, b_csr, x_csr);
@@ -4766,6 +4791,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #ifdef MLPACK
              case HYML :
 
+                  HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
@@ -4800,9 +4826,10 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRTFQmrSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRTFQmrSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRTFQmrSetStopCrit(HYSolver_,1);
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
           {
-             printf("***************************************************\n");
+             if ( mypid_ == 0 )
+                printf("***************************************************\n");
              HYPRE_ParCSRTFQmrSetLogging(HYSolver_, 1);
           }
           HYPRE_ParCSRTFQmrSetup(HYSolver_, A_csr, b_csr, x_csr);
@@ -5022,6 +5049,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #ifdef MLPACK
              case HYML :
 
+                  HYPRE_ParCSRMLSetMethod(HYPrecon_,mlMethod_);
                   HYPRE_ParCSRMLSetStrongThreshold(HYPrecon_,mlStrongThreshold_);
                   HYPRE_ParCSRMLSetNumPreSmoothings(HYPrecon_,mlNumPreSweeps_);
                   HYPRE_ParCSRMLSetNumPostSmoothings(HYPrecon_,mlNumPostSweeps_);
@@ -5056,9 +5084,10 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRBiCGSSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRBiCGSSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRBiCGSSetStopCrit(HYSolver_,1);
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
           {
-             printf("***************************************************\n");
+             if ( mypid_ == 0 )
+                printf("***************************************************\n");
              HYPRE_ParCSRBiCGSSetLogging(HYSolver_, 1);
           }
           HYPRE_ParCSRBiCGSSetup(HYSolver_, A_csr, b_csr, x_csr);
