@@ -8,36 +8,18 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-.SUFFIXES:
-.SUFFIXES: .c .f .o
+include ../../config/Makefile.config
 
-srcdir = .
- 
-CC =  mpicc
+CINCLUDES = ${INCLUDES} ${MPIINCLUDES}
 
-C_COMPILE_FLAGS=  -g
-CXX_COMPILE_FLAGS=  -g
-F77_COMPILE_FLAGS=  -g -silent 
-LD_LINK_FLAGS=
-CINCLUDES= 
-CDEFS =
-
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
+C_COMPILE_FLAGS =\
  -I../..\
  -I$(srcdir)\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../krylov\
  -I$(srcdir)/../../seq_mv\
- ${CINCLUDES}\
- ${CDEFS}
- 
-RANLIB= ranlib
- 
-MPILIBFLAGS =   
-LIBFLAGS =   -lm
-LDLIBFLAGS =  
+ ${CINCLUDES}
  
 LFLAGS =\
  ${LD_LINK_FLAGS}\
@@ -81,15 +63,11 @@ FILES =\
  relax.c\
  schwarz.c\
  scaled_matnorm.c\
- transpose.c\
  HYPRE_amg.c\
  HYPRE_csr_pcg.c\
  HYPRE_csr_gmres.c
 
 OBJS = ${FILES:.c=.o}
-
-
-
 
 ##################################################################
 # Targets
@@ -100,11 +78,10 @@ all: libHYPRE_amg_ls.a driver
 install: all
 
 clean:
-	@rm -f *.o
+	rm -f *.o lib*
 
-veryclean: clean
-	@rm -f driver
-	@rm -f libHYPRE_amg_ls.a
+distclean: clean
+	rm -f driver
 
 ##################################################################
 # Rules
@@ -116,15 +93,7 @@ driver: driver.o libHYPRE_amg_ls.a
 
 libHYPRE_amg_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
-
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-
