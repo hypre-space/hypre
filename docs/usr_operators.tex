@@ -1,13 +1,7 @@
 
 \section{Operators: Matrices, Solvers and Preconditioners}
 
-{\bf Operators:} Mathematically, the line between "solver" and "preconditioner" is
-somewhat blurry (discussed 
-below), and \hypre{} takes advantage of this property
-to unify them into a single type: "Operator".
-We will discuss the common aspects of
-solvers and preconditioners under the heading of Operators,
-and then consider special characteristics of each separately.
+I'm going to rewrite this whole section someday... Andy, 3/1 2000.
 
 The defining characteristics of Operators are that they take a vector as input
 and return another vector as 
@@ -15,18 +9,18 @@ output. Thus, this generalization also includes matrices, solvers, and precondit
 as well as nonlinear
 operators, transpose matrices, 
 and other less common operators. 
-The fundamental "use" function of an Operator is the \code{Apply} function, which
+The fundamental use function of an Operator is the \code{Apply} function, which
 is the function that transforms an input vector to an output vector. 
-For traditional "matrices", the \code{Apply} function corresponds to
+For traditional matrices, the \code{Apply} function corresponds to
 matrix-vector multiplication. For 
-solvers, \code{Apply} is the traditional "solve" function. 
+solvers, \code{Apply} is the traditional solve function. 
 Preconditioners are traditionally
-referred to as being "applied", 
+referred to as being applied, 
 and the \code{Apply} function quite naturally corresponds to this functionality. 
 
 Operators also have auxiliary uses that are available for more
 expert users.
-Operators can be "multiplied" or "composed" to form a new operator.
+Operators can be multiplied or composed to form a new operator.
 For example, given Operator A and Operator B, the result of composing
 them is an operator C whose action on a vector x is equivalent to
 applying B to x, and then applying A to the result, i.e. C(x)=A(B(x)).
@@ -42,17 +36,17 @@ The Split function returns two Operators whose composition is equal to
 the original Operator.
 Typically, Operators that are formed through a Compose function are Splittable.
 The other major use of Splittable Operators is for preconditioners that can be 
-used as ``split preconditioners'', such as incomplete factorization methods and
+used as split preconditioners, such as incomplete factorization methods and
 factorized sparse approximate inverse functions.
 
 \section{Preconditioners are Solvers}
 
 Users of \hypre{} will quickly notice that there is
 no class or interface called 
-"preconditioner". Instead, we have chosen to interpret preconditioners as
-"solvers", based on the fact that 
-both traditional solvers and preconditioners are in some senses "approximations
-to the inverse" of the linear 
+preconditioner. Instead, we have chosen to interpret preconditioners as
+solvers, based on the fact that 
+both traditional solvers and preconditioners are in some senses approximations
+to the inverse of the linear 
 operator defining the system to be solved. The difference between them is one
 of degrees more than a fundamental distinction, in that 
 preconditioners generally are very crude and very easy to compute
@@ -63,14 +57,14 @@ preconditioners uniformly within \hypre{}, we make their use uniform for users a
 reduce the complexity 
 of \hypre{}'s object model. We also enable novel algorithmic possibilities such as
 using what are 
-traditionally "solvers" as preconditioners. In fact, since Operators include
+traditionally solvers as preconditioners. In fact, since Operators include
 solvers and matrices, it is 
 straightforward to use matrices as preconditioners, should a direct
 approximation to the inverse exist. 
 
 \section{Setup of Solvers}
 
-Most components that correspond to the traditional "matrix", as well as
+Most components that correspond to the traditional matrix, as well as
 some solvers in which the 
 construction of the underlying matrix is handled by the solver for the user,
 are set up through one or more 
