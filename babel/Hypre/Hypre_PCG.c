@@ -542,7 +542,7 @@ int impl_Hypre_PCG_Start( Hypre_PCG this, Hypre_MPI_Com comm ) {
    (pcg_data -> rel_norms)    = NULL;
 
    return 0;
-} /* end impl_Hypre_PCG_Start
+} /* end impl_Hypre_PCG_Start */
 
 /* ********************************************************
  * impl_Hypre_PCGConstructor
