@@ -27,7 +27,6 @@
 #include "../../parcsr_mv/HYPRE_parcsr_mv.h"
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
 #include "HYPRE_LinSysCore.h"
-#include "fegridinfo.h"
 
 /******************************************************************************/
 /* Create function for a HYPRE_LinSysCore object.                             */
@@ -140,15 +139,10 @@ extern "C" char *HYPRE_LSC_GetVersion(LinSysCore* lsc)
 }
 
 /******************************************************************************/
-/******************************************************************************/
-/* functions for interfacing to a finite element object                       */
-/******************************************************************************/
-
-/******************************************************************************/
 /* get the finite element grid object                                         */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_LSC_GetFEGridObject(LinSysCore* lsc, void **object)
+extern "C" int HYPRE_LSC_GetFEDataObject(LinSysCore* lsc, void **object)
 {
    if (lsc == NULL) return(1);
 
@@ -156,7 +150,7 @@ extern "C" int HYPRE_LSC_GetFEGridObject(LinSysCore* lsc, void **object)
 
    if (linSys == NULL) return(1);
 
-   linSys->getFEGridObject(object);
+   linSys->getFEDataObject(object);
 
    return(0);
 }
@@ -165,135 +159,27 @@ extern "C" int HYPRE_LSC_GetFEGridObject(LinSysCore* lsc, void **object)
 /* begin initializing the element set                                         */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_FEGrid_beginInitElemSet(void *grid, int nElems, int *gid)
+extern "C" int HYPRE_LSC_FEDataLoadElemMatrix(LinSysCore *lsc, int elemID,
+                    int nNodesPerElem, int *elemConn, int matDim, 
+                    double **elemStiff)
 {
-   if (grid == NULL) return(1);
+   if (lsc == NULL) return(1);
 
-   FEGridInfo* fegrid = (FEGridInfo*) grid;
+   HYPRE_LinSysCore* linSys = (HYPRE_LinSysCore*)(lsc->lsc_);
 
-   fegrid->beginInitElemSet(nElems, gid);
+   if ( linSys == NULL ) return(1);
+
+   linSys->FE_loadElemMatrix(elemID,nNodesPerElem,elemConn,matDim,elemStiff);
 
    return(0);
 }
-
-/******************************************************************************/
-/* terminate initializing the element set                                     */
-/*----------------------------------------------------------------------------*/
-
-extern "C" int HYPRE_FEGrid_endInitElemSet(void *grid)
-{
-   if (grid == NULL) return(1);
-
-   FEGridInfo* fegrid = (FEGridInfo*) grid;
-
-   fegrid->endInitElemSet();
-
-   return(0);
-}
-
-/******************************************************************************/
-/* load element connectivity information                                      */
-/*----------------------------------------------------------------------------*/
-
-extern "C" int HYPRE_FEGrid_loadElemSet(void *grid, int elemID, int nNodes,
-                            int *nList, int sDim, double **sMat)
-{
-   if (grid == NULL) return(1);
-
-   FEGridInfo* fegrid = (FEGridInfo*) grid;
-
-   fegrid->loadElemSet(elemID, nNodes, nList, sDim, sMat);
-
-   return(0);
-}
-
-/******************************************************************************/
-/* begin loading the node information                                         */
-/*----------------------------------------------------------------------------*/
-
-extern "C" int HYPRE_FEGrid_beginInitNodeSet(void *grid)
-{
-   if (grid == NULL) return(1);
-
-   FEGridInfo* fegrid = (FEGridInfo*) grid;
-
-   fegrid->beginInitNodeSet();
-
-   return(0);
-}
-
-/******************************************************************************/
-/* terminate loading the node information                                     */
-/*----------------------------------------------------------------------------*/
-
-extern "C" int HYPRE_FEGrid_endInitNodeSet(void *grid)
-{
-   if (grid == NULL) return(1);
-
-   FEGridInfo* fegrid = (FEGridInfo*) grid;
-
-   fegrid->endInitNodeSet();
-
-   return(0);
-}
-
-/******************************************************************************/
-/* set the node degree of freedom                                             */
-/*----------------------------------------------------------------------------*/
-
-extern "C" int HYPRE_FEGrid_loadNodeDOF(void *grid, int nodeID, int dof)
-{
-   if (grid == NULL) return(1);
-
-   FEGridInfo* fegrid = (FEGridInfo*) grid;
-
-   fegrid->loadNodeDOF(nodeID, dof);
-
-   return(0);
-}
-
-/******************************************************************************/
-/* load node essential boundary conditions                                    */
-/*----------------------------------------------------------------------------*/
-
-extern "C" int HYPRE_FEGrid_loadNodeEssBCs(void *grid, int nNodes, int *nList,
-                            int *dofList, double *val)
-{
-   if (grid == NULL) return(1);
-
-   FEGridInfo* fegrid = (FEGridInfo*) grid;
-
-   fegrid->loadNodeEssBCs(nNodes, nList, dofList, val);
-
-   return(0);
-}
-
-/******************************************************************************/
-/* load shared nodes                                                          */
-/*----------------------------------------------------------------------------*/
-
-extern "C" int HYPRE_FEGrid_loadSharedNodes(void *grid, int nNodes, int *nList,
-                            int *procLeng, int **nodeProc)
-{
-   if (grid == NULL) return(1);
-
-   FEGridInfo* fegrid = (FEGridInfo*) grid;
-
-   fegrid->loadSharedNodes(nNodes, nList, procLeng, nodeProc);
-
-   return(0);
-}
-
-/******************************************************************************/
-/******************************************************************************/
-/* Wrapper functions for the HYPRE LSI                                        */
-/******************************************************************************/
 
 /******************************************************************************/
 /* the parameter function (to set parameter values)                           */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_parameters(LinSysCore* lsc, int numParams, char **params) 
+extern "C" int HYPRE_LSC_parameters(LinSysCore* lsc, int numParams, 
+                                    char **params) 
 {
    if (lsc == NULL) return(1);
 
@@ -310,8 +196,8 @@ extern "C" int HYPRE_parameters(LinSysCore* lsc, int numParams, char **params)
 /* This function sets up the equation offset on each processor                */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_setGlobalOffsets(LinSysCore* lsc, int leng, int* nodeOffsets, 
-                                      int* eqnOffsets, int* blkEqnOffsets)
+extern "C" int HYPRE_LSC_setGlobalOffsets(LinSysCore* lsc, int leng, 
+                    int* nodeOffsets, int* eqnOffsets, int* blkEqnOffsets)
 {
    if (lsc == NULL) return(1);
 
@@ -328,7 +214,7 @@ extern "C" int HYPRE_setGlobalOffsets(LinSysCore* lsc, int leng, int* nodeOffset
 /* set up the matrix sparsity pattern                                         */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_setMatrixStructure(LinSysCore *lsc, int** ptColIndices, 
+extern "C" int HYPRE_LSC_setMatrixStructure(LinSysCore *lsc, int** ptColIndices, 
                      int* ptRowLengths, int** blkColIndices, int* blkRowLengths, 
                      int* ptRowsPerBlkRow)
 {
@@ -348,7 +234,7 @@ extern "C" int HYPRE_setMatrixStructure(LinSysCore *lsc, int** ptColIndices,
 /* reset the matrix but keep the sparsity pattern                             */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_resetMatrixAndVector(LinSysCore *lsc, double val)
+extern "C" int HYPRE_LSC_resetMatrixAndVector(LinSysCore *lsc, double val)
 {
    if (lsc == NULL) return(1);
 
@@ -365,7 +251,7 @@ extern "C" int HYPRE_resetMatrixAndVector(LinSysCore *lsc, double val)
 /* reset the matrix but keep the sparsity pattern                             */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_resetMatrix(LinSysCore *lsc, double val)
+extern "C" int HYPRE_LSC_resetMatrix(LinSysCore *lsc, double val)
 {
    if (lsc == NULL) return(1);
 
@@ -382,7 +268,7 @@ extern "C" int HYPRE_resetMatrix(LinSysCore *lsc, double val)
 /* reset the right hand side vector                                           */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_resetRHSVector(LinSysCore *lsc, double val)
+extern "C" int HYPRE_LSC_resetRHSVector(LinSysCore *lsc, double val)
 {
    if (lsc == NULL) return(1);
 
@@ -399,7 +285,7 @@ extern "C" int HYPRE_resetRHSVector(LinSysCore *lsc, double val)
 /* load the matrix                                                            */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_sumIntoSystemMatrix(LinSysCore *lsc, int numPtRows, 
+extern "C" int HYPRE_LSC_sumIntoSystemMatrix(LinSysCore *lsc, int numPtRows, 
                      const int* ptRows, int numPtCols, const int* ptCols, 
                      int numBlkRows, const int* blkRows, int numBlkCols, 
                      const int* blkCols, const double* const* values)
@@ -420,8 +306,8 @@ extern "C" int HYPRE_sumIntoSystemMatrix(LinSysCore *lsc, int numPtRows,
 /* load the right hand side vector                                            */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_sumIntoRHSVector(LinSysCore *lsc, int num, const double* 
-                                      values, const int* indices)
+extern "C" int HYPRE_LSC_sumIntoRHSVector(LinSysCore *lsc, int num, 
+                    const double* values, const int* indices)
 {
    if (lsc == NULL) return(1);
 
@@ -438,7 +324,7 @@ extern "C" int HYPRE_sumIntoRHSVector(LinSysCore *lsc, int num, const double*
 /* matrix loading completed                                                   */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_matrixLoadComplete(LinSysCore *lsc)
+extern "C" int HYPRE_LSC_matrixLoadComplete(LinSysCore *lsc)
 {
    if (lsc == NULL) return(1);
 
@@ -455,7 +341,7 @@ extern "C" int HYPRE_matrixLoadComplete(LinSysCore *lsc)
 /* enforce essential boundary condition                                       */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_enforceEssentialBC(LinSysCore *lsc, int* globalEqn,
+extern "C" int HYPRE_LSC_enforceEssentialBC(LinSysCore *lsc, int* globalEqn,
                      double* alpha, double* gamma, int leng)
 {
    if (lsc == NULL) return(1);
@@ -473,8 +359,9 @@ extern "C" int HYPRE_enforceEssentialBC(LinSysCore *lsc, int* globalEqn,
 /* enforce essential boundary condition (cross processor boundary)            */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_enforceRemoteEssBCs(LinSysCore *lsc,int numEqns,int* globalEqns,
-                             int** colIndices, int* colIndLen, double** coefs)
+extern "C" int HYPRE_LSC_enforceRemoteEssBCs(LinSysCore *lsc,int numEqns,
+                    int* globalEqns, int** colIndices, int* colIndLen, 
+                    double** coefs)
 {
    if (lsc == NULL) return(1);
 
@@ -482,7 +369,7 @@ extern "C" int HYPRE_enforceRemoteEssBCs(LinSysCore *lsc,int numEqns,int* global
 
    if (linSys == NULL) return(1);
 
-   linSys->enforceRemoteEssBCs(numEqns, globalEqns, colIndices, colIndLen, coefs);
+   linSys->enforceRemoteEssBCs(numEqns,globalEqns,colIndices,colIndLen,coefs);
 
    return(0);
 }
@@ -491,7 +378,7 @@ extern "C" int HYPRE_enforceRemoteEssBCs(LinSysCore *lsc,int numEqns,int* global
 /* enforce natural boundary condition                                         */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_enforceOtherBC(LinSysCore *lsc, int* globalEqn, 
+extern "C" int HYPRE_LSC_enforceOtherBC(LinSysCore *lsc, int* globalEqn, 
                      double* alpha, double* beta, double* gamma, int leng)
 {
    if (lsc == NULL) return(1);
@@ -509,7 +396,7 @@ extern "C" int HYPRE_enforceOtherBC(LinSysCore *lsc, int* globalEqn,
 /* put initial guess into HYPRE                                               */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_putInitialGuess(LinSysCore *lsc, const int* eqnNumbers, 
+extern "C" int HYPRE_LSC_putInitialGuess(LinSysCore *lsc, const int* eqnNumbers, 
                                      const double* values, int leng)
 {
    if (lsc == NULL) return(1);
@@ -527,7 +414,7 @@ extern "C" int HYPRE_putInitialGuess(LinSysCore *lsc, const int* eqnNumbers,
 /* get the whole solution vector                                              */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_getSolution(LinSysCore *lsc, double *answers, int leng)
+extern "C" int HYPRE_LSC_getSolution(LinSysCore *lsc, double *answers, int leng)
 {
    if (lsc == NULL) return(1);
 
@@ -544,7 +431,8 @@ extern "C" int HYPRE_getSolution(LinSysCore *lsc, double *answers, int leng)
 /* get a solution entry                                                       */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_getSolnEntry(LinSysCore *lsc, int eqnNumber, double *answer)
+extern "C" int HYPRE_LSC_getSolnEntry(LinSysCore *lsc, int eqnNumber, 
+                                      double *answer)
 {
    if (lsc == NULL) return(1);
 
@@ -561,7 +449,7 @@ extern "C" int HYPRE_getSolnEntry(LinSysCore *lsc, int eqnNumber, double *answer
 /* form and fetch the residual vector                                         */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_formResidual(LinSysCore *lsc, double *values, int leng)
+extern "C" int HYPRE_LSC_formResidual(LinSysCore *lsc, double *values, int leng)
 {
    if (lsc == NULL) return(1);
 
@@ -578,7 +466,8 @@ extern "C" int HYPRE_formResidual(LinSysCore *lsc, double *values, int leng)
 /* start iterating                                                            */
 /*----------------------------------------------------------------------------*/
 
-extern "C" int HYPRE_launchSolver(LinSysCore *lsc, int *solveStatus, int *iter)
+extern "C" int HYPRE_LSC_launchSolver(LinSysCore *lsc, int *solveStatus, 
+                                      int *iter)
 {
    if (lsc == NULL) return(1);
 

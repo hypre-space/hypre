@@ -83,4 +83,8 @@
             - fix several memory leaks
 12/19/01    2.0.1R10
             - add links to MLI
+01/02/02    2.0.1R11
+            - add functions to get element matrices from FEI
+            - renovate the parameters function
+            - get rid of FEGridInfo module.
  

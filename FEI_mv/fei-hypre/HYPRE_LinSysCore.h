@@ -13,7 +13,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R10"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R11"
 
 // *************************************************************************
 // system libraries used
@@ -371,27 +371,12 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
    void   loadConstraintNumbers(int length, int *list);
-   void   buildSlideReducedSystem();
-   void   buildSlideReducedSystem2();
-   double buildSlideReducedSoln();
-   double buildSlideReducedSoln2();
-   void   buildSchurReducedSystem();
-   void   buildSchurReducedSystem2();
-   int    HYPRE_Schur_Search(int,int,int*,int*,int,int);
-   void   buildSchurReducedRHS();
-   double buildSchurReducedSoln();
-   void   computeAConjProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x, 
-                                 HYPRE_ParVector b);
-   void   computeMinResProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x, 
-                                  HYPRE_ParVector b);
-   void   addToAConjProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
-   void   addToMinResProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
    char  *getVersion();
    void   beginCreateMapFromSoln();
    void   endCreateMapFromSoln();
    void   putIntoMappedMatrix(int row, int numValues, const double* values,
                               const int* scatterIndices);
-   void   getFEGridObject(void **object) { (*object) = feGrid_; }
+   void   getFEDataObject(void **object) { (*object) = feData_; }
 
    // ----------------------------------------------------------------------
    // MLI-specific public functions
@@ -402,39 +387,54 @@ class HYPRE_LinSysCore
    void   FE_loadElemMatrix(int elemID, int nNodes, int *elemNodeList, 
                             int matDim, double **elemMat);
 
- private:        //functions
-
-   // ----------------------------------------------------------------------
-   // functions for selecting solver/preconditioner
-   // ----------------------------------------------------------------------
-
-   void selectSolver(char* name);
-   void selectPreconditioner(char* name);
+ private: //functions
 
    // ----------------------------------------------------------------------
    // HYPRE specific private functions
    // ----------------------------------------------------------------------
 
-   void  setupPCGPrecon();
-   void  setupGMRESPrecon();
-   void  setupFGMRESPrecon();
-   void  setupBiCGSTABPrecon();
-   void  setupBiCGSTABLPrecon();
-   void  setupTFQmrPrecon();
-   void  setupBiCGSPrecon();
-   void  setupSymQMRPrecon();
-   void  solveUsingBoomeramg(int&);
-   void  solveUsingSuperLU(int&);
-   void  solveUsingSuperLUX(int&);
-   void  solveUsingY12M(int&);
-   void  solveUsingAMGe(int&);
-   void  buildSlideReducedSystemPartA(int*,int*,int,int,int*,int*);
-   void  buildSlideReducedSystemPartB(int*,int*,int,int,int*,int*,
-                                      HYPRE_ParCSRMatrix *);
-   void  buildSlideReducedSystemPartC(int*,int*,int,int,int*,int*,
-                                      HYPRE_ParCSRMatrix);
+   void   setupPCGPrecon();
+   void   setupGMRESPrecon();
+   void   setupFGMRESPrecon();
+   void   setupBiCGSTABPrecon();
+   void   setupBiCGSTABLPrecon();
+   void   setupTFQmrPrecon();
+   void   setupBiCGSPrecon();
+   void   setupSymQMRPrecon();
+   void   solveUsingBoomeramg(int&);
+   void   solveUsingSuperLU(int&);
+   void   solveUsingSuperLUX(int&);
+   void   solveUsingY12M(int&);
+   void   solveUsingAMGe(int&);
+   void   buildSlideReducedSystem();
+   void   buildSlideReducedSystem2();
+   double buildSlideReducedSoln();
+   double buildSlideReducedSoln2();
+   void   buildSchurReducedSystem();
+   void   buildSchurReducedSystem2();
+   void   buildSlideReducedSystemPartA(int*,int*,int,int,int*,int*);
+   void   buildSlideReducedSystemPartB(int*,int*,int,int,int*,int*,
+                                       HYPRE_ParCSRMatrix *);
+   void   buildSlideReducedSystemPartC(int*,int*,int,int,int*,int*,
+                                       HYPRE_ParCSRMatrix);
+   void   buildSchurReducedRHS();
+   double buildSchurReducedSoln();
+   void   computeAConjProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x, 
+                                 HYPRE_ParVector b);
+   void   computeMinResProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x, 
+                                  HYPRE_ParVector b);
+   void   addToAConjProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
+   void   addToMinResProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
+   int    HYPRE_Schur_Search(int,int,int*,int*,int,int);
 
- private:        //variables
+   // ----------------------------------------------------------------------
+   // private functions for selecting solver/preconditioner
+   // ----------------------------------------------------------------------
+
+   void   selectSolver(char* name);
+   void   selectPreconditioner(char* name);
+
+ private: //variables
 
    // ----------------------------------------------------------------------
    // parallel communication information and output levels
@@ -446,7 +446,7 @@ class HYPRE_LinSysCore
    int             HYOutputLevel_;      // control print information
 
    // ----------------------------------------------------------------------
-   // for storing information about how to load matrix directly
+   // for storing information about how to load matrix directly (bypass FEI)
    // ----------------------------------------------------------------------
 
    int             mapFromSolnFlag_;
@@ -501,7 +501,7 @@ class HYPRE_LinSysCore
    int             numRHSs_;
 
    // ----------------------------------------------------------------------
-   // various flags
+   // flags for matrix assembly, various reductions, and projections
    // ----------------------------------------------------------------------
 
    int             matrixVectorsCreated_;
@@ -512,9 +512,10 @@ class HYPRE_LinSysCore
    int             projectionScheme_;
    int             projectSize_;
    int             projectCurrSize_;
+   double          **projectionMatrix_; 
 
    // ----------------------------------------------------------------------
-   // variables for slide reduction
+   // variables for slide and Schur reduction
    // ----------------------------------------------------------------------
 
    int             *selectedList_;
@@ -587,14 +588,13 @@ class HYPRE_LinSysCore
    char            **euclidargv_;
 
    // ----------------------------------------------------------------------
-   // map and others
+   // FEI and MLI variables
    // ----------------------------------------------------------------------
 
-   void            *feGrid_;
-   int             haveFEGrid_;
+   void            *feData_;
+   int             haveFEData_;
    Lookup          *lookup_;
    int             haveLookup_;
-   double          **projectionMatrix_; 
 
    // ----------------------------------------------------------------------
    // temporary functions for testing purposes
