@@ -7,17 +7,16 @@
 #include "mli_amg_sa.h"
  
 /* ********************************************************************* *
- * Function   : MLI_AMG_SA_Create                                        *
+ * Function   : MLI_AggrAMGCreate                                        *
  * --------------------------------------------------------------------- */
 
-MLI_AMG_SA *ML_AMG_SA_Create( MPI_Comm mpi_comm )
+MLI_AggrAMG *MLI_AggrAMGCreate()
 {
-   MLI_AMG_SA *object;
+   MLI_AggrAMG *object;
 
-   strcpy(method_name, "smoothed aggregation");
-   object = (MLI_AMG_SA *) calloc( MLI_AMG_SA, 1);
-   if ( max_levels < 0 ) object->max_levels = 40;
-   else                  object->max_levels = max_levels;
+   strcpy(method_name, "aggregation");
+   object = (MLI_AggrAMG *) calloc( MLI_AMG_SA, 1);
+   object->max_levels        = 1;
    object->debug_level       = 0;
    object->node_dofs         = 1;
    object->threshold         = 0.08;
@@ -30,7 +29,7 @@ MLI_AMG_SA *ML_AMG_SA_Create( MPI_Comm mpi_comm )
    object->spectral_norms    = NULL;           /* calculated max eigen   */
    object->calc_norm_scheme  = 0;              /* use matrix rowsum norm */
    object->min_coarse_size   = 100;            /* smallest coarse grid   */
-   object->coarsen_scheme    = MLI_AMG_SA_LOCAL;
+   object->coarsen_scheme    = MLI_AGGRAMG_LOCAL;
    object->mat_complexity    = NULL;
    object->oper_complexity   = NULL;
    object->pre_smoothers     = 0;
@@ -42,15 +41,15 @@ MLI_AMG_SA *ML_AMG_SA_Create( MPI_Comm mpi_comm )
    object->coarse_solver     = 0;
    object->coarse_solver_num = 1;
    object->coarse_solver_wgt = 1.0;
-   object->mpi_comm          = mpi_comm;
+   object->mpi_comm          = (MPI_Comm) 0;
    return object;
 }
 
 /* ********************************************************************* *
- * Function   : MLI_AMG_SA_Destroy                                       *
+ * Function   : MLI_AggrAMGDestroy                                       *
  * --------------------------------------------------------------------- */
 
-int MLI_AMG_SA_Destroy( MLI_AMG_SA *object )
+int MLI_AggrAMGDestroy( MLI_AMG_SA *object )
 {
    if ( object->nullspace_vec != NULL )
    {
@@ -89,50 +88,40 @@ int MLI_AMG_SA_Destroy( MLI_AMG_SA *object )
 }
 
 /* ********************************************************************* *
- * Function   : MLI_AMG_SA_Destroy                                       *
+ * Function   : MLI_AggrAMGSetDebugLevel                                 *
  * --------------------------------------------------------------------- */
 
-int MLI_AMG_SA_Set_DebugLevel( MLI_AMG_SA *object, int debug_level )
+int MLI_AggrAMGSetDebugLevel( MLI_AggrAMG *object, int debug_level )
 {
    object->debug_level = debug_level;
    return 0;
 }
 
 /* ********************************************************************* *
- * Function   : MLI_AMG_SA_Set_DebugLevel                                *
+ * Function   : MLI_AggrAMGSetMinCoarseSize                              *
  * --------------------------------------------------------------------- */
 
-int MLI_AMG_SA_Set_DebugLevel( MLI_AMG_SA *object, int debug_level )
-{
-   object->debug_level = debug_level;
-   return 0;
-}
-
-/* ********************************************************************* *
- * Function   : MLI_AMG_SA_Set_MinCoarseSize                             *
- * --------------------------------------------------------------------- */
-
-int MLI_AMG_SA_Set_MinCoarseSize( MLI_AMG_SA *object, int coarse_size  )
+int MLI_AggrAMGSetMinCoarseSize( MLI_AggrAMG *object, int coarse_size  )
 {
    object->min_coarse_size = size;
    return 0;
 }
 
 /* ********************************************************************* *
- * Function   : MLI_AMG_SA_Set_CoarsenScheme_Local                       *
+ * Function   : MLI_AggrAMGSetCoarsenSchemeLocal                         *
  * --------------------------------------------------------------------- */
 
-int MLI_AMG_SA_Set_CoarsenScheme_Local( MLI_AMG_SA *object )
+int MLI_AggrAMGSetCoarsenSchemeLocal( MLI_AggrAMG *object )
 {
-   object->coarsen_scheme = MLI_AMG_SA_LOCAL;
+   object->coarsen_scheme = MLI_AGGRAMG_LOCAL;
    return 0;
 }
 
 /* ********************************************************************* *
- * Function   : MLI_AMG_SA_Set_Threshold                                 *
+ * Function   : MLI_AggrAMGSetThreshold                                  *
  * --------------------------------------------------------------------- */
 
-int MLI_AMG_SA_Set_Threshold( MLI_AMG_SA *object, double thresh )
+int MLI_AggrAMGSetThreshold( MLI_AggrAMG *object, double thresh )
 {
    if ( thresh > 0.0 ) object->threshold = thresh;
    else                object->threshold = 0.0;
@@ -140,31 +129,31 @@ int MLI_AMG_SA_Set_Threshold( MLI_AMG_SA *object, double thresh )
 }
 
 /* ********************************************************************* *
- * Function   : MLI_AMG_SA_Set_Pweight                                   *
+ * Function   : MLI_AggrAMGSetPweight                                    *
  * --------------------------------------------------------------------- */
 
-int MLI_AMG_SA_Set_Pweight( MLI_AMG_SA *object, double weight )
+int MLI_AggrAMGSetPweight( MLI_AggrAMG *object, double weight )
 {
    if ( weight >= 0.0 && weight <= 2.0 ) object->P_weight = weight;
    return 0;
 }
 
 /* ********************************************************************* *
- * Function   : MLI_AMG_SA_Set_CalcSpectralNorm                          *
+ * Function   : MLI_AggrAMGSetCalcSpectralNorm                           *
  * --------------------------------------------------------------------- */
 
-int ML_AMG_SA_Set_CalcSpectralNorm( MLI_AMG_SA *object )
+int ML_AggrAMGSetCalcSpectralNorm( MLI_AggrAMG *object )
 {
    object->spectral_radius_scheme = 1;
    return 0;
 }
 
 /* ********************************************************************* *
- * Function   : MLI_AMG_SA_Set_NullSpace                                 *
+ * Function   : MLI_AggrAMGSetNullSpace                                  *
  * --------------------------------------------------------------------- */
 
-int ML_AMG_SA_Set_NullSpace( MLI_AMG_SA *object, int node_dofs,
-                             int null_dim, double *null_vec, int leng )
+int ML_AggrAMGSetNullSpace( MLI_AggrAMG *object, int node_dofs,
+                            int null_dim, double *null_vec, int leng )
 {
    int i;
 
@@ -188,14 +177,14 @@ int ML_AMG_SA_Set_NullSpace( MLI_AMG_SA *object, int node_dofs,
 }
 
 /***********************************************************************
- * Function  : MLI_AMG_SA_Gen_Prolongators
+ * Function  : MLI_AggrAMGGenProlongators
  * Purpose   : create a prolongator matrix from Amat 
  * Inputs    : Amat (in Amat_array)
  **********************************************************************/
 
-int MLI_AMG_SA_Gen_Prolongators(MLI_AMG_SA *mli_aggr, 
-                                MLI_Matrix **Amat_array)
-                                MLI_Matrix **Pmat_array)
+int MLI_AggrAMGGenProlongators(MLI_AggrAMG *mli_aggr, 
+                               MLI_Matrix **Amat_array)
+                               MLI_Matrix **Pmat_array)
 {
    hypre_ParCSRMatrix *curr_Amat;
    int                coarsen_scheme;
