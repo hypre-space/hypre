@@ -298,7 +298,7 @@ main( int   argc,
    relax_weight      = hypre_CTAlloc(double, max_levels);
 
    for (i=0; i < max_levels; i++)
-	relax_weight[i] = 0.0;
+	relax_weight[i] = 1.0;
 
    if (coarsen_type == 5)
    {
