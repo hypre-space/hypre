@@ -111,12 +111,13 @@ do
         shift;;
     -casc)
 	CASC_BUILD_OPT=2
+        shift;;
     -purify)
         HYPRE_ARCH="casc"
         HYPRE_COMPILE_MACHINE="perrin"
         HYPRE_RUN_MACHINE="perrin"
         HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
-	HYPRE_MACHINE_COMMANDS="+m -q 2"
+	HYPRE_MACHINE_COMMANDS="-m -q 2"
 	./autotest_test $HYPRE_MACHINE_COMMANDS
 	CASC_BUILD_OPT=1
         shift;;
@@ -128,7 +129,6 @@ do
   HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
   HYPRE_MACHINE_COMMANDS="-m -a $CASC_BUILD_OPT -dcxfy -t 1 -n"
   ./autotest_test $HYPRE_MACHINE_COMMANDS
-  shift;;
 
 done
 
