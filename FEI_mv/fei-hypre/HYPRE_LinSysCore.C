@@ -370,7 +370,7 @@ LinearSystemCore* HYPRE_LinSysCore::clone()
 
 void HYPRE_LinSysCore::parameters(int numParams, char **params)
 {
-    int    i, nsweeps, rtype, nParamsFound;
+    int    i, nsweeps, rtype, olevel, nParamsFound;
     double weight;
     char   param[256], param2[80];
 
@@ -396,8 +396,10 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
 
     if ( getParam("outputLevel",numParams,params,param) == 1)
     {
-       sscanf(param,"%d", &HYOutputLevel_);
-       if ( HYOutputLevel_ < 0 ) HYOutputLevel_ = 0;
+       sscanf(param,"%d", &olevel);
+       if ( olevel < 0 ) olevel = 0;
+       if ( olevel > 4 ) olevel = 4;
+       HYOutputLevel_ = ( HYOutputLevel_ & HYFEI_HIGHMASK ) + olevel;
        nParamsFound++;
        if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
@@ -413,12 +415,15 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     if ( getParam("setDebug",numParams,params,param) == 1)
     {
        sscanf(param,"%s", &param2);
-       if (!strcmp(param2, "reduce1")) HYOutputLevel_ |= HYFEI_SLIDEREDUCE1;
-       if (!strcmp(param2, "reduce2")) HYOutputLevel_ |= HYFEI_SLIDEREDUCE2;
-       if (!strcmp(param2, "reduce3")) HYOutputLevel_ |= HYFEI_SLIDEREDUCE3;
-       if (!strcmp(param2, "printmat")) HYOutputLevel_ |= HYFEI_PRINTMAT;
-       if (!strcmp(param2, "printsol")) HYOutputLevel_ |= HYFEI_PRINTSOL;
-       if (!strcmp(param2, "printredmat")) HYOutputLevel_ |= HYFEI_PRINTREDMAT;
+       if (!strcmp(param2, "slideReduction1")) 
+          HYOutputLevel_ |= HYFEI_SLIDEREDUCE1;
+       if (!strcmp(param2, "slideReduction2")) 
+          HYOutputLevel_ |= HYFEI_SLIDEREDUCE2;
+       if (!strcmp(param2, "slideReduction3")) 
+          HYOutputLevel_ |= HYFEI_SLIDEREDUCE3;
+       if (!strcmp(param2, "printMat")) HYOutputLevel_ |= HYFEI_PRINTMAT;
+       if (!strcmp(param2, "printSol")) HYOutputLevel_ |= HYFEI_PRINTSOL;
+       if (!strcmp(param2, "printReducedMat")) HYOutputLevel_ |= HYFEI_PRINTREDMAT;
        if (!strcmp(param2, "ddilut")) HYOutputLevel_ |= HYFEI_DDILUT;
        nParamsFound++;
        if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )

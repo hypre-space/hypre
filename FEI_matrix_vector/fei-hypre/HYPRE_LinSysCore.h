@@ -32,14 +32,15 @@ enum HYsolverID {HYPCG,HYGMRES,HYSUPERLU,HYSUPERLUX,HYY12M};
 enum HYpreconID {HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYNONE,HYML,
                  HYDDILUT};
 
-#define HYFEI_SPECIALMASK    255
-#define HYFEI_SLIDEREDUCE1   256
-#define HYFEI_SLIDEREDUCE2   512
-#define HYFEI_SLIDEREDUCE3  1024
-#define HYFEI_PRINTMAT      2048
-#define HYFEI_PRINTREDMAT   4096
-#define HYFEI_PRINTSOL      8192
-#define HYFEI_DDILUT       16384
+#define HYFEI_HIGHMASK      2147483647-255
+#define HYFEI_SPECIALMASK          255
+#define HYFEI_SLIDEREDUCE1         256
+#define HYFEI_SLIDEREDUCE2         768
+#define HYFEI_SLIDEREDUCE3        1792
+#define HYFEI_PRINTMAT            2048
+#define HYFEI_PRINTREDMAT         4096
+#define HYFEI_PRINTSOL            8192
+#define HYFEI_DDILUT             16384
 
 // *************************************************************************
 // class definition
