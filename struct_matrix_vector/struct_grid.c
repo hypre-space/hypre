@@ -29,7 +29,7 @@ hypre_StructGridCreate( MPI_Comm           comm,
 
    hypre_StructGridComm(grid)        = comm;
    hypre_StructGridDim(grid)         = dim;
-   hypre_StructGridBoxes(grid)       = NULL;
+   hypre_StructGridBoxes(grid)       = hypre_BoxArrayCreate(0);
    hypre_StructGridIDs(grid)         = NULL;
    hypre_StructGridNeighbors(grid)   = NULL;
    hypre_StructGridMaxDistance(grid) = 2;
@@ -124,11 +124,6 @@ hypre_StructGridSetExtents( hypre_StructGrid  *grid,
 {
    int          ierr = 0;
    hypre_Box   *box;
-
-   if (hypre_StructGridBoxes(grid) == NULL)
-   {
-      hypre_StructGridBoxes(grid) = hypre_BoxArrayCreate(0);
-   }
 
    box = hypre_BoxCreate();
    hypre_BoxSetExtents(box, ilower, iupper);
@@ -225,16 +220,6 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    hypre_Box           *box;
    int                  size;
    int                  i;
-
-   /* If I don't own any boxes, need to add a "zero-sized" */
-   if (hypre_StructGridBoxes(grid) == NULL)
-   {
-      hypre_Index  ilower, iupper;
-
-      hypre_SetIndex(ilower,  99,  99,  99);
-      hypre_SetIndex(iupper, -99, -99, -99);
-      hypre_StructGridSetExtents(grid, ilower, iupper);
-   }
 
    boxes = hypre_StructGridBoxes(grid);
 
