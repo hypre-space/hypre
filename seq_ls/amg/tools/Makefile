@@ -17,7 +17,7 @@ F77="f77"
 # All
 ##################################################################
 
-all: convert_icf3d
+all: convert_icf3d convert_ale3d
 
 ##################################################################
 # convert_icf3d
@@ -28,6 +28,17 @@ CONVERT_ICF3D_HDRS = general.h matrix.h io.h
 CONVERT_ICF3D_OBJS = convert_icf3d.o matrix.o write.o
 
 convert_icf3d: Makefile ${CONVERT_ICF3D_HDRS} ${CONVERT_ICF3D_OBJS}
+	@${CC} -o $@ ${LFLAGS} ${CONVERT_ICF3D_OBJS}
+
+##################################################################
+# convert_ale3d
+##################################################################
+
+CONVERT_ALE3D_HDRS = general.h matrix.h io.h
+
+CONVERT_ALE3D_OBJS = convert_ale3d.o matrix.o write.o
+
+convert_ale3d: Makefile ${CONVERT_ALE3D_HDRS} ${CONVERT_ALE3D_OBJS}
 	@${CC} -o $@ ${LFLAGS} ${CONVERT_ICF3D_OBJS}
 
 ##################################################################
