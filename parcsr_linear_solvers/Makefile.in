@@ -59,16 +59,16 @@ LFLAGS =\
  -L../parcsr_matrix_vector\
  -L../seq_matrix_vector\
  -L../utilities\
- -lHYPRE_parcsr_ls\
  $(PILUT_LIBFLAGS)\
+ -lHYPRE_parcsr_ls\
  -lHYPRE_parcsr_mv\
  -lHYPRE_mv\
  -lHYPRE_utilities\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
  
 HEADERS =\
- headers.h\
  fortran.h\
+ headers.h\
  par_amg.h\
  parcsr_linear_solvers.h\
  HYPRE_parcsr_ls.h
