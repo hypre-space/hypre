@@ -23,7 +23,7 @@ int
 HYPRE_SStructGMRESCreate( MPI_Comm             comm,
                           HYPRE_SStructSolver *solver )
 {
-   *solver = ( (HYPRE_SStructSolver) hypre_GMRESCreate( ) );
+   *solver = ( (HYPRE_SStructSolver) hypre_XGMRESCreate( ) );
 
    return 0;
 }
@@ -35,7 +35,7 @@ HYPRE_SStructGMRESCreate( MPI_Comm             comm,
 int 
 HYPRE_SStructGMRESDestroy( HYPRE_SStructSolver solver )
 {
-   return( hypre_GMRESDestroy( (void *) solver ) );
+   return( hypre_XGMRESDestroy( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -48,7 +48,7 @@ HYPRE_SStructGMRESSetup( HYPRE_SStructSolver solver,
                          HYPRE_SStructVector b,
                          HYPRE_SStructVector x )
 {
-   return( hypre_GMRESSetup( (void *) solver,
+   return( hypre_XGMRESSetup( (void *) solver,
                              (void *) A,
                              (void *) b,
                              (void *) x ) );
@@ -64,7 +64,7 @@ HYPRE_SStructGMRESSolve( HYPRE_SStructSolver solver,
                          HYPRE_SStructVector b,
                          HYPRE_SStructVector x )
 {
-   return( hypre_GMRESSolve( (void *) solver,
+   return( hypre_XGMRESSolve( (void *) solver,
                              (void *) A,
                              (void *) b,
                              (void *) x ) );
@@ -78,7 +78,7 @@ int
 HYPRE_SStructGMRESSetKDim( HYPRE_SStructSolver solver,
                            int                 k_dim )
 {
-   return( hypre_GMRESSetKDim( (void *) solver, k_dim ) );
+   return( hypre_XGMRESSetKDim( (void *) solver, k_dim ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -89,7 +89,7 @@ int
 HYPRE_SStructGMRESSetTol( HYPRE_SStructSolver solver,
                           double              tol )
 {
-   return( hypre_GMRESSetTol( (void *) solver, tol ) );
+   return( hypre_XGMRESSetTol( (void *) solver, tol ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -100,7 +100,7 @@ int
 HYPRE_SStructGMRESSetMinIter( HYPRE_SStructSolver solver,
                               int                 min_iter )
 {
-   return( hypre_GMRESSetMinIter( (void *) solver, min_iter ) );
+   return( hypre_XGMRESSetMinIter( (void *) solver, min_iter ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -111,7 +111,7 @@ int
 HYPRE_SStructGMRESSetMaxIter( HYPRE_SStructSolver solver,
                               int                 max_iter )
 {
-   return( hypre_GMRESSetMaxIter( (void *) solver, max_iter ) );
+   return( hypre_XGMRESSetMaxIter( (void *) solver, max_iter ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -122,7 +122,7 @@ int
 HYPRE_SStructGMRESSetStopCrit( HYPRE_SStructSolver solver,
                                int                 stop_crit )
 {
-   return( hypre_GMRESSetStopCrit( (void *) solver, stop_crit ) );
+   return( hypre_XGMRESSetStopCrit( (void *) solver, stop_crit ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -135,7 +135,7 @@ HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver          solver,
                               HYPRE_PtrToSStructSolverFcn  precond_setup,
                               void                        *precond_data )
 {
-   return( hypre_GMRESSetPrecond( (void *) solver,
+   return( hypre_XGMRESSetPrecond( (void *) solver,
                                   precond, precond_setup, precond_data ) );
 }
 
@@ -147,7 +147,7 @@ int
 HYPRE_SStructGMRESSetLogging( HYPRE_SStructSolver solver,
                               int                 logging )
 {
-   return( hypre_GMRESSetLogging( (void *) solver, logging ) );
+   return( hypre_XGMRESSetLogging( (void *) solver, logging ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -158,7 +158,7 @@ int
 HYPRE_SStructGMRESGetNumIterations( HYPRE_SStructSolver  solver,
                                     int                 *num_iterations )
 {
-   return( hypre_GMRESGetNumIterations( (void *) solver, num_iterations ) );
+   return( hypre_XGMRESGetNumIterations( (void *) solver, num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -169,5 +169,5 @@ int
 HYPRE_SStructGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
                                                 double              *norm )
 {
-   return( hypre_GMRESGetFinalRelativeResidualNorm( (void *) solver, norm ) );
+   return( hypre_XGMRESGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }

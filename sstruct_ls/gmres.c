@@ -15,7 +15,7 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_GMRESData
+ * hypre_XGMRESData
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -46,18 +46,18 @@ typedef struct
    double  *norms;
    char    *log_file_name;
 
-} hypre_GMRESData;
+} hypre_XGMRESData;
 
 /*--------------------------------------------------------------------------
- * hypre_GMRESCreate
+ * hypre_XGMRESCreate
  *--------------------------------------------------------------------------*/
  
 void *
-hypre_GMRESCreate( )
+hypre_XGMRESCreate( )
 {
-   hypre_GMRESData *gmres_data;
+   hypre_XGMRESData *gmres_data;
  
-   gmres_data = hypre_CTAlloc(hypre_GMRESData, 1);
+   gmres_data = hypre_CTAlloc(hypre_XGMRESData, 1);
  
    /* set defaults */
    (gmres_data -> k_dim)          = 5;
@@ -65,8 +65,8 @@ hypre_GMRESCreate( )
    (gmres_data -> min_iter)       = 0;
    (gmres_data -> max_iter)       = 1000;
    (gmres_data -> stop_crit)      = 0; /* rel. residual norm */
-   (gmres_data -> precond)        = hypre_KrylovIdentity;
-   (gmres_data -> precond_setup)  = hypre_KrylovIdentitySetup;
+   (gmres_data -> precond)        = hypre_SStructKrylovIdentity;
+   (gmres_data -> precond_setup)  = hypre_SStructKrylovIdentitySetup;
    (gmres_data -> precond_data)   = NULL;
    (gmres_data -> logging)        = 0;
    (gmres_data -> p)              = NULL;
@@ -80,13 +80,13 @@ hypre_GMRESCreate( )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GMRESDestroy
+ * hypre_XGMRESDestroy
  *--------------------------------------------------------------------------*/
  
 int
-hypre_GMRESDestroy( void *gmres_vdata )
+hypre_XGMRESDestroy( void *gmres_vdata )
 {
-   hypre_GMRESData *gmres_data = gmres_vdata;
+   hypre_XGMRESData *gmres_data = gmres_vdata;
    int i, ierr = 0;
  
    if (gmres_data)
@@ -96,13 +96,13 @@ hypre_GMRESDestroy( void *gmres_vdata )
          hypre_TFree(gmres_data -> norms);
       }
  
-      hypre_KrylovMatvecDestroy(gmres_data -> matvec_data);
+      hypre_SStructKrylovMatvecDestroy(gmres_data -> matvec_data);
  
-      hypre_KrylovDestroyVector(gmres_data -> r);
-      hypre_KrylovDestroyVector(gmres_data -> w);
+      hypre_SStructKrylovDestroyVector(gmres_data -> r);
+      hypre_SStructKrylovDestroyVector(gmres_data -> w);
       for (i = 0; i < (gmres_data -> k_dim+1); i++)
       {
-	 hypre_KrylovDestroyVector( (gmres_data -> p) [i]);
+	 hypre_SStructKrylovDestroyVector( (gmres_data -> p) [i]);
       }
       hypre_TFree(gmres_data -> p);
  
@@ -113,16 +113,16 @@ hypre_GMRESDestroy( void *gmres_vdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetup
+ * hypre_XGMRESSetup
  *--------------------------------------------------------------------------*/
  
 int
-hypre_GMRESSetup( void *gmres_vdata,
+hypre_XGMRESSetup( void *gmres_vdata,
                   void *A,
                   void *b,
                   void *x         )
 {
-   hypre_GMRESData *gmres_data     = gmres_vdata;
+   hypre_XGMRESData *gmres_data     = gmres_vdata;
    int            k_dim            = (gmres_data -> k_dim);
    int            max_iter         = (gmres_data -> max_iter);
    int          (*precond_setup)() = (gmres_data -> precond_setup);
@@ -138,14 +138,14 @@ hypre_GMRESSetup( void *gmres_vdata,
     *--------------------------------------------------*/
  
    if ((gmres_data -> p) == NULL)
-      (gmres_data -> p) = hypre_KrylovCreateVectorArray(k_dim+1,x);
+      (gmres_data -> p) = hypre_SStructKrylovCreateVectorArray(k_dim+1,x);
    if ((gmres_data -> r) == NULL)
-      (gmres_data -> r) = hypre_KrylovCreateVector(b);
+      (gmres_data -> r) = hypre_SStructKrylovCreateVector(b);
    if ((gmres_data -> w) == NULL)
-      (gmres_data -> w) = hypre_KrylovCreateVector(b);
+      (gmres_data -> w) = hypre_SStructKrylovCreateVector(b);
  
    if ((gmres_data -> matvec_data) == NULL)
-      (gmres_data -> matvec_data) = hypre_KrylovMatvecCreate(A, x);
+      (gmres_data -> matvec_data) = hypre_SStructKrylovMatvecCreate(A, x);
  
    precond_setup(precond_data, A, b, x);
  
@@ -165,16 +165,16 @@ hypre_GMRESSetup( void *gmres_vdata,
 }
  
 /*--------------------------------------------------------------------------
- * hypre_GMRESSolve
+ * hypre_XGMRESSolve
  *-------------------------------------------------------------------------*/
 
 int
-hypre_GMRESSolve(void  *gmres_vdata,
+hypre_XGMRESSolve(void  *gmres_vdata,
                  void  *A,
                  void  *b,
 		 void  *x)
 {
-   hypre_GMRESData  *gmres_data   = gmres_vdata;
+   hypre_XGMRESData  *gmres_data   = gmres_vdata;
    int 		     k_dim        = (gmres_data -> k_dim);
    int               min_iter     = (gmres_data -> min_iter);
    int 		     max_iter     = (gmres_data -> max_iter);
@@ -203,7 +203,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    double     epsilon, gamma, t, r_norm, b_norm;
    double     epsmac = 1.e-16; 
 
-   hypre_KrylovCommInfo(A,&my_id,&num_procs);
+   hypre_SStructKrylovCommInfo(A,&my_id,&num_procs);
    if (logging > 0)
    {
       norms          = (gmres_data -> norms);
@@ -222,13 +222,13 @@ hypre_GMRESSolve(void  *gmres_vdata,
    	hh[i] = hypre_CTAlloc(double,k_dim); 
    }
 
-   hypre_KrylovCopyVector(b,p[0]);
+   hypre_SStructKrylovCopyVector(b,p[0]);
 
 /* compute initial residual */
 
-   hypre_KrylovMatvec(matvec_data,-1.0, A, x, 1.0, p[0]);
-   r_norm = sqrt(hypre_KrylovInnerProd(p[0],p[0]));
-   b_norm = sqrt(hypre_KrylovInnerProd(b,b));
+   hypre_SStructKrylovMatvec(matvec_data,-1.0, A, x, 1.0, p[0]);
+   r_norm = sqrt(hypre_SStructKrylovInnerProd(p[0],p[0]));
+   b_norm = sqrt(hypre_SStructKrylovInnerProd(b,b));
    if (logging > 0)
    {
       norms[0] = r_norm;
@@ -271,9 +271,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
 	if (r_norm <= epsilon && iter >= min_iter) 
         {
-		hypre_KrylovCopyVector(b,r);
-          	hypre_KrylovMatvec(matvec_data,-1.0,A,x,1.0,r);
-		r_norm = sqrt(hypre_KrylovInnerProd(r,r));
+		hypre_SStructKrylovCopyVector(b,r);
+          	hypre_SStructKrylovMatvec(matvec_data,-1.0,A,x,1.0,r);
+		r_norm = sqrt(hypre_SStructKrylovInnerProd(r,r));
 		if (r_norm <= epsilon)
                 {
                   if (logging > 0 && my_id == 0)
@@ -283,28 +283,28 @@ hypre_GMRESSolve(void  *gmres_vdata,
 	}
 
       	t = 1.0 / r_norm;
-	hypre_KrylovScaleVector(t,p[0]);
+	hypre_SStructKrylovScaleVector(t,p[0]);
 	i = 0;
 	while (i < k_dim && (r_norm > epsilon || iter < min_iter)
                          && iter < max_iter)
 	{
 		i++;
 		iter++;
-		hypre_KrylovClearVector(r);
+		hypre_SStructKrylovClearVector(r);
 		precond(precond_data, A, p[i-1], r);
-		hypre_KrylovMatvec(matvec_data, 1.0, A, r, 0.0, p[i]);
+		hypre_SStructKrylovMatvec(matvec_data, 1.0, A, r, 0.0, p[i]);
 		/* modified Gram_Schmidt */
 		for (j=0; j < i; j++)
 		{
-			hh[j][i-1] = hypre_KrylovInnerProd(p[j],p[i]);
-			hypre_KrylovAxpy(-hh[j][i-1],p[j],p[i]);
+			hh[j][i-1] = hypre_SStructKrylovInnerProd(p[j],p[i]);
+			hypre_SStructKrylovAxpy(-hh[j][i-1],p[j],p[i]);
 		}
-		t = sqrt(hypre_KrylovInnerProd(p[i],p[i]));
+		t = sqrt(hypre_SStructKrylovInnerProd(p[i],p[i]));
 		hh[i][i-1] = t;	
 		if (t != 0.0)
 		{
 			t = 1.0/t;
-			hypre_KrylovScaleVector(t,p[i]);
+			hypre_SStructKrylovScaleVector(t,p[i]);
 		}
 		/* done with modified Gram_schmidt and Arnoldi step.
 		   update factorization of hh */
@@ -342,22 +342,22 @@ hypre_GMRESSolve(void  *gmres_vdata,
 	}
 	/* form linear combination of p's to get solution */
 	
-	hypre_KrylovCopyVector(p[0],w);
-	hypre_KrylovScaleVector(rs[0],w);
+	hypre_SStructKrylovCopyVector(p[0],w);
+	hypre_SStructKrylovScaleVector(rs[0],w);
 	for (j = 1; j < i; j++)
-		hypre_KrylovAxpy(rs[j], p[j], w);
+		hypre_SStructKrylovAxpy(rs[j], p[j], w);
 
-	hypre_KrylovClearVector(r);
+	hypre_SStructKrylovClearVector(r);
 	precond(precond_data, A, w, r);
 
-	hypre_KrylovAxpy(1.0,r,x);
+	hypre_SStructKrylovAxpy(1.0,r,x);
 
 /* check for convergence, evaluate actual residual */
 	if (r_norm <= epsilon && iter >= min_iter) 
         {
-		hypre_KrylovCopyVector(b,r);
-          	hypre_KrylovMatvec(matvec_data,-1.0,A,x,1.0,r);
-		r_norm = sqrt(hypre_KrylovInnerProd(r,r));
+		hypre_SStructKrylovCopyVector(b,r);
+          	hypre_SStructKrylovMatvec(matvec_data,-1.0,A,x,1.0,r);
+		r_norm = sqrt(hypre_SStructKrylovInnerProd(r,r));
 		if (r_norm <= epsilon)
                 {
                   if (logging > 0 && my_id == 0)
@@ -366,7 +366,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
                 }
 		else
 		{
-		   hypre_KrylovCopyVector(r,p[0]);
+		   hypre_SStructKrylovCopyVector(r,p[0]);
 		   i = 0;
 		}
 	}
@@ -379,9 +379,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
 		rs[j] = c[j-1]*rs[j];
 	}
 
-	if (i) hypre_KrylovAxpy(rs[0]-1.0,p[0],p[0]);
+	if (i) hypre_SStructKrylovAxpy(rs[0]-1.0,p[0],p[0]);
 	for (j=1; j < i+1; j++)
-		hypre_KrylovAxpy(rs[j],p[j],p[0]);	
+		hypre_SStructKrylovAxpy(rs[j],p[j],p[0]);	
    }
 
    if (logging > 0 && my_id == 0)
@@ -432,14 +432,14 @@ hypre_GMRESSolve(void  *gmres_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetKDim
+ * hypre_XGMRESSetKDim
  *--------------------------------------------------------------------------*/
  
 int
-hypre_GMRESSetKDim( void   *gmres_vdata,
+hypre_XGMRESSetKDim( void   *gmres_vdata,
                     int   k_dim )
 {
-   hypre_GMRESData *gmres_data = gmres_vdata;
+   hypre_XGMRESData *gmres_data = gmres_vdata;
    int            ierr = 0;
  
    (gmres_data -> k_dim) = k_dim;
@@ -448,14 +448,14 @@ hypre_GMRESSetKDim( void   *gmres_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetTol
+ * hypre_XGMRESSetTol
  *--------------------------------------------------------------------------*/
  
 int
-hypre_GMRESSetTol( void   *gmres_vdata,
+hypre_XGMRESSetTol( void   *gmres_vdata,
                    double  tol       )
 {
-   hypre_GMRESData *gmres_data = gmres_vdata;
+   hypre_XGMRESData *gmres_data = gmres_vdata;
    int            ierr = 0;
  
    (gmres_data -> tol) = tol;
@@ -464,14 +464,14 @@ hypre_GMRESSetTol( void   *gmres_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetMinIter
+ * hypre_XGMRESSetMinIter
  *--------------------------------------------------------------------------*/
  
 int
-hypre_GMRESSetMinIter( void *gmres_vdata,
+hypre_XGMRESSetMinIter( void *gmres_vdata,
                        int   min_iter  )
 {
-   hypre_GMRESData *gmres_data = gmres_vdata;
+   hypre_XGMRESData *gmres_data = gmres_vdata;
    int              ierr = 0;
  
    (gmres_data -> min_iter) = min_iter;
@@ -480,14 +480,14 @@ hypre_GMRESSetMinIter( void *gmres_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetMaxIter
+ * hypre_XGMRESSetMaxIter
  *--------------------------------------------------------------------------*/
  
 int
-hypre_GMRESSetMaxIter( void *gmres_vdata,
+hypre_XGMRESSetMaxIter( void *gmres_vdata,
                        int   max_iter  )
 {
-   hypre_GMRESData *gmres_data = gmres_vdata;
+   hypre_XGMRESData *gmres_data = gmres_vdata;
    int              ierr = 0;
  
    (gmres_data -> max_iter) = max_iter;
@@ -496,14 +496,14 @@ hypre_GMRESSetMaxIter( void *gmres_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetStopCrit
+ * hypre_XGMRESSetStopCrit
  *--------------------------------------------------------------------------*/
  
 int
-hypre_GMRESSetStopCrit( void   *gmres_vdata,
+hypre_XGMRESSetStopCrit( void   *gmres_vdata,
                         double  stop_crit       )
 {
-   hypre_GMRESData *gmres_data = gmres_vdata;
+   hypre_XGMRESData *gmres_data = gmres_vdata;
    int            ierr = 0;
  
    (gmres_data -> stop_crit) = stop_crit;
@@ -512,16 +512,16 @@ hypre_GMRESSetStopCrit( void   *gmres_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetPrecond
+ * hypre_XGMRESSetPrecond
  *--------------------------------------------------------------------------*/
  
 int
-hypre_GMRESSetPrecond( void  *gmres_vdata,
+hypre_XGMRESSetPrecond( void  *gmres_vdata,
                        int  (*precond)(),
                        int  (*precond_setup)(),
                        void  *precond_data )
 {
-   hypre_GMRESData *gmres_data = gmres_vdata;
+   hypre_XGMRESData *gmres_data = gmres_vdata;
    int              ierr = 0;
  
    (gmres_data -> precond)        = precond;
@@ -532,14 +532,14 @@ hypre_GMRESSetPrecond( void  *gmres_vdata,
 }
  
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetLogging
+ * hypre_XGMRESSetLogging
  *--------------------------------------------------------------------------*/
  
 int
-hypre_GMRESSetLogging( void *gmres_vdata,
+hypre_XGMRESSetLogging( void *gmres_vdata,
                        int   logging)
 {
-   hypre_GMRESData *gmres_data = gmres_vdata;
+   hypre_XGMRESData *gmres_data = gmres_vdata;
    int              ierr = 0;
  
    (gmres_data -> logging) = logging;
@@ -548,14 +548,14 @@ hypre_GMRESSetLogging( void *gmres_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GMRESGetNumIterations
+ * hypre_XGMRESGetNumIterations
  *--------------------------------------------------------------------------*/
  
 int
-hypre_GMRESGetNumIterations( void *gmres_vdata,
+hypre_XGMRESGetNumIterations( void *gmres_vdata,
                              int  *num_iterations )
 {
-   hypre_GMRESData *gmres_data = gmres_vdata;
+   hypre_XGMRESData *gmres_data = gmres_vdata;
    int              ierr = 0;
  
    *num_iterations = (gmres_data -> num_iterations);
@@ -564,14 +564,14 @@ hypre_GMRESGetNumIterations( void *gmres_vdata,
 }
  
 /*--------------------------------------------------------------------------
- * hypre_GMRESGetFinalRelativeResidualNorm
+ * hypre_XGMRESGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
  
 int
-hypre_GMRESGetFinalRelativeResidualNorm( void   *gmres_vdata,
+hypre_XGMRESGetFinalRelativeResidualNorm( void   *gmres_vdata,
                                          double *relative_residual_norm )
 {
-   hypre_GMRESData *gmres_data = gmres_vdata;
+   hypre_XGMRESData *gmres_data = gmres_vdata;
    int 		ierr = 0;
  
    *relative_residual_norm = (gmres_data -> rel_residual_norm);

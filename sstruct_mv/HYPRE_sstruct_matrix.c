@@ -15,7 +15,6 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixCreate
  *--------------------------------------------------------------------------*/
 
 int
@@ -137,7 +136,6 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixDestroy
  *--------------------------------------------------------------------------*/
 
 int 
@@ -187,7 +185,6 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixInitialize
  *--------------------------------------------------------------------------*/
 
 int
@@ -210,7 +207,6 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixSetValues
  *--------------------------------------------------------------------------*/
 
 int
@@ -255,7 +251,6 @@ HYPRE_SStructMatrixSetValues( HYPRE_SStructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixSetBoxValues
  *--------------------------------------------------------------------------*/
 
 int
@@ -303,7 +298,6 @@ HYPRE_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixAddToValues
  *--------------------------------------------------------------------------*/
 
 int 
@@ -348,7 +342,6 @@ HYPRE_SStructMatrixAddToValues( HYPRE_SStructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixAddToBoxValues
  *--------------------------------------------------------------------------*/
 
 int 
@@ -396,7 +389,6 @@ HYPRE_SStructMatrixAddToBoxValues( HYPRE_SStructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixAssemble
  *--------------------------------------------------------------------------*/
 
 int 
@@ -418,7 +410,7 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixSetSymmetric TODO
+ * TODO
  *--------------------------------------------------------------------------*/
  
 int
@@ -431,7 +423,57 @@ HYPRE_SStructMatrixSetSymmetric( HYPRE_SStructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixPrint: For now, just print multiple files
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructMatrixSetObjectType( HYPRE_SStructMatrix  matrix,
+                                  int                  type )
+{
+   int ierr = 0;
+
+   hypre_SStructGraph     *graph    = hypre_SStructMatrixGraph(matrix);
+   int                  ***splits   = hypre_SStructMatrixSplits(matrix);
+   int                     nparts   = hypre_SStructMatrixNParts(matrix);
+   hypre_SStructStencil ***stencils = hypre_SStructGraphStencils(graph);
+
+   hypre_SStructPGrid     *pgrid;
+   int                     nvars;
+   int                     stencil_size;
+   int                     part, var, i;
+
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGraphPGrid(graph, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      for (var = 0; var < nvars; var++)
+      {
+         stencil_size = hypre_SStructStencilSize(stencils[part][var]);
+         for (i = 0; i < stencil_size; i++)
+         {
+            splits[part][var][i] = -1;
+         }
+      }
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix   matrix,
+                              void                **object )
+{
+   int ierr = 0;
+   HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
+
+   *object = HYPRE_IJMatrixGetLocalStorage(ijmatrix);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 int

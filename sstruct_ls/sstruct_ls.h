@@ -43,39 +43,39 @@ int HYPRE_SStructSplitGetNumIterations( HYPRE_SStructSolver solver , int *num_it
 int HYPRE_SStructSplitGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver , double *norm );
 
 /* gmres.c */
-void *hypre_GMRESCreate( void );
-int hypre_GMRESDestroy( void *gmres_vdata );
-int hypre_GMRESSetup( void *gmres_vdata , void *A , void *b , void *x );
-int hypre_GMRESSolve( void *gmres_vdata , void *A , void *b , void *x );
-int hypre_GMRESSetKDim( void *gmres_vdata , int k_dim );
-int hypre_GMRESSetTol( void *gmres_vdata , double tol );
-int hypre_GMRESSetMinIter( void *gmres_vdata , int min_iter );
-int hypre_GMRESSetMaxIter( void *gmres_vdata , int max_iter );
-int hypre_GMRESSetStopCrit( void *gmres_vdata , double stop_crit );
-int hypre_GMRESSetPrecond( void *gmres_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data );
-int hypre_GMRESSetLogging( void *gmres_vdata , int logging );
-int hypre_GMRESGetNumIterations( void *gmres_vdata , int *num_iterations );
-int hypre_GMRESGetFinalRelativeResidualNorm( void *gmres_vdata , double *relative_residual_norm );
+void *hypre_XGMRESCreate( void );
+int hypre_XGMRESDestroy( void *gmres_vdata );
+int hypre_XGMRESSetup( void *gmres_vdata , void *A , void *b , void *x );
+int hypre_XGMRESSolve( void *gmres_vdata , void *A , void *b , void *x );
+int hypre_XGMRESSetKDim( void *gmres_vdata , int k_dim );
+int hypre_XGMRESSetTol( void *gmres_vdata , double tol );
+int hypre_XGMRESSetMinIter( void *gmres_vdata , int min_iter );
+int hypre_XGMRESSetMaxIter( void *gmres_vdata , int max_iter );
+int hypre_XGMRESSetStopCrit( void *gmres_vdata , double stop_crit );
+int hypre_XGMRESSetPrecond( void *gmres_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data );
+int hypre_XGMRESSetLogging( void *gmres_vdata , int logging );
+int hypre_XGMRESGetNumIterations( void *gmres_vdata , int *num_iterations );
+int hypre_XGMRESGetFinalRelativeResidualNorm( void *gmres_vdata , double *relative_residual_norm );
 
 /* krylov.c */
-int hypre_KrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
-int hypre_KrylovIdentity( void *vdata , void *A , void *b , void *x );
+int hypre_SStructKrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
+int hypre_SStructKrylovIdentity( void *vdata , void *A , void *b , void *x );
 
 /* krylov_sstruct.c */
-char *hypre_KrylovCAlloc( int count , int elt_size );
-int hypre_KrylovFree( char *ptr );
-void *hypre_KrylovCreateVector( void *vvector );
-void *hypre_KrylovCreateVectorArray( int n , void *vvector );
-int hypre_KrylovDestroyVector( void *vvector );
-void *hypre_KrylovMatvecCreate( void *A , void *x );
-int hypre_KrylovMatvec( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
-int hypre_KrylovMatvecDestroy( void *matvec_data );
-double hypre_KrylovInnerProd( void *x , void *y );
-int hypre_KrylovCopyVector( void *x , void *y );
-int hypre_KrylovClearVector( void *x );
-int hypre_KrylovScaleVector( double alpha , void *x );
-int hypre_KrylovAxpy( double alpha , void *x , void *y );
-int hypre_KrylovCommInfo( void *A , int *my_id , int *num_procs );
+char *hypre_SStructKrylovCAlloc( int count , int elt_size );
+int hypre_SStructKrylovFree( char *ptr );
+void *hypre_SStructKrylovCreateVector( void *vvector );
+void *hypre_SStructKrylovCreateVectorArray( int n , void *vvector );
+int hypre_SStructKrylovDestroyVector( void *vvector );
+void *hypre_SStructKrylovMatvecCreate( void *A , void *x );
+int hypre_SStructKrylovMatvec( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
+int hypre_SStructKrylovMatvecDestroy( void *matvec_data );
+double hypre_SStructKrylovInnerProd( void *x , void *y );
+int hypre_SStructKrylovCopyVector( void *x , void *y );
+int hypre_SStructKrylovClearVector( void *x );
+int hypre_SStructKrylovScaleVector( double alpha , void *x );
+int hypre_SStructKrylovAxpy( double alpha , void *x , void *y );
+int hypre_SStructKrylovCommInfo( void *A , int *my_id , int *num_procs );
 
 
 #ifdef __cplusplus

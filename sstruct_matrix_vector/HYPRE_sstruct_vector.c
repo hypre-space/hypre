@@ -15,7 +15,6 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructVectorCreate
  *--------------------------------------------------------------------------*/
 
 int
@@ -60,7 +59,6 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructVectorDestroy
  *--------------------------------------------------------------------------*/
 
 int 
@@ -94,7 +92,6 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructVectorInitialize
  *--------------------------------------------------------------------------*/
 
 int
@@ -118,7 +115,6 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructVectorSetValues
  *--------------------------------------------------------------------------*/
 
 int
@@ -148,7 +144,6 @@ HYPRE_SStructVectorSetValues( HYPRE_SStructVector  vector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructVectorSetBoxValues
  *--------------------------------------------------------------------------*/
 
 int
@@ -175,7 +170,6 @@ HYPRE_SStructVectorSetBoxValues( HYPRE_SStructVector  vector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructVectorAddToValues
  *--------------------------------------------------------------------------*/
 
 int
@@ -205,7 +199,6 @@ HYPRE_SStructVectorAddToValues( HYPRE_SStructVector  vector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructVectorAddToBoxValues
  *--------------------------------------------------------------------------*/
 
 int
@@ -232,7 +225,6 @@ HYPRE_SStructVectorAddToBoxValues( HYPRE_SStructVector  vector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructVectorAssemble
  *--------------------------------------------------------------------------*/
 
 int 
@@ -257,7 +249,6 @@ HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructVectorGather
  *--------------------------------------------------------------------------*/
 
 int 
@@ -278,7 +269,6 @@ HYPRE_SStructVectorGather( HYPRE_SStructVector vector )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructVectorGetValues
  *--------------------------------------------------------------------------*/
 
 int
@@ -310,7 +300,6 @@ HYPRE_SStructVectorGetValues( HYPRE_SStructVector  vector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructVectorGetBoxValues
  *--------------------------------------------------------------------------*/
 
 int
@@ -339,7 +328,34 @@ HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructVectorPrint: For now, just print multiple files
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructVectorSetObjectType( HYPRE_SStructVector  vector,
+                                  int                  type )
+{
+   int ierr = 0;
+
+   /* this implements only HYPRE_PARCSR, which is always available */
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructVectorGetObject( HYPRE_SStructVector   vector,
+                              void                **object )
+{
+   int ierr = 0;
+
+   hypre_SStructVectorConvert(vector, (hypre_ParVector **) object);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 int

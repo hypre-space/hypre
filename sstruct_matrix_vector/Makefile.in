@@ -34,6 +34,7 @@ RANLIB= @RANLIB@
 
 HEADERS =\
  HYPRE_sstruct_mv.h\
+ sstruct_matrix_vector.h\
  headers.h\
  sstruct_graph.h\
  sstruct_grid.h\

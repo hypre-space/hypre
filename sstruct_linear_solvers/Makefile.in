@@ -30,12 +30,14 @@ CFLAGS =\
  -I../IJ_matrix_vector\
  -I../sstruct_matrix_vector\
  -I../struct_linear_solvers\
+ -I../parcsr_linear_solvers\
  ${CINCLUDES}
 
 RANLIB= @RANLIB@
 
 HEADERS =\
  HYPRE_sstruct_ls.h\
+ sstruct_linear_solvers.h\
  headers.h
 
 FILES =\

@@ -12,8 +12,10 @@
 
 #include "HYPRE_config.h"
 #include "HYPRE_utilities.h"
+#include "HYPRE.h"
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE_struct_ls.h"
+#include "HYPRE_parcsr_ls.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -12,14 +12,14 @@
  *
  *****************************************************************************/
 
-int hypre_KrylovCopyVector( void *x, void *y );
+int hypre_SStructKrylovCopyVector( void *x, void *y );
 
 /*--------------------------------------------------------------------------
- * hypre_KrylovIdentitySetup
+ * hypre_SStructKrylovIdentitySetup
  *--------------------------------------------------------------------------*/
 
 int
-hypre_KrylovIdentitySetup( void *vdata,
+hypre_SStructKrylovIdentitySetup( void *vdata,
                            void *A,
                            void *b,
                            void *x )
@@ -29,16 +29,16 @@ hypre_KrylovIdentitySetup( void *vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_KrylovIdentity
+ * hypre_SStructKrylovIdentity
  *--------------------------------------------------------------------------*/
 
 int
-hypre_KrylovIdentity( void *vdata,
+hypre_SStructKrylovIdentity( void *vdata,
                       void *A,
                       void *b,
                       void *x )
 
 {
-   return( hypre_KrylovCopyVector(b, x) );
+   return( hypre_SStructKrylovCopyVector(b, x) );
 }
 

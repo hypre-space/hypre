@@ -34,82 +34,89 @@ main( int   argc,
    int                   P, Q, R;
    int                   bx, by, bz;
    int                   solver_id;
+                        
+   HYPRE_SStructMatrix   A;
+   HYPRE_SStructVector   b;
+   HYPRE_SStructVector   x;
+   HYPRE_SStructSolver   solver;
+   HYPRE_SStructSolver   precond;
+                         
+   HYPRE_ParCSRMatrix    par_A;
+   HYPRE_ParVector       par_b;
+   HYPRE_ParVector       par_x;
+   HYPRE_Solver          par_solver;
+   HYPRE_Solver          par_precond;
+                         
+   int                   num_iterations;
+   int                   time_index;
+   double                final_res_norm;
+                         
+   int                   num_procs, myid;
+                         
+   int                   p, q, r;
+   int                   dim;
+   int                   nblocks;
+
    HYPRE_SStructVariable vtypes[2] = {HYPRE_SSTRUCT_VARIABLE_CELL,
                                       HYPRE_SSTRUCT_VARIABLE_NODE};
+
+   int                   on_part[2] = {1, 1};
+   int                   partP[2] = {1, 1};
+                     
+   int                   Cvolume, Nvolume;
+   int                 **Cilower;
+   int                 **Ciupper;
+   int                 **Nilower;
+   int                 **Niupper;
+                     
+   int                  *index0, index0_mem[3];
+   int                  *index1, index1_mem[3];
+   int                   Cistart[3];
+                     
+   int                   offsets[7][3] = {{ 0, 0, 0},
+                                          {-1, 0, 0},
+                                          { 1, 0, 0},
+                                          { 0,-1, 0},
+                                          { 0, 1, 0},
+                                          { 0, 0,-1},
+                                          { 0, 0, 1}};
+   int                   CNoffsets[8][3] = {{-1,-1,-1},
+                                            { 0,-1,-1},
+                                            {-1, 0,-1},
+                                            { 0, 0,-1},
+                                            {-1, 0, 0},
+                                            { 0,-1, 0},
+                                            {-1, 0, 0},
+                                            { 0,-1, 0}};
+   int                   NCoffsets[8][3] = {{ 0, 0, 0},
+                                            { 1, 0, 0},
+                                            { 0, 1, 0},
+                                            { 1, 1, 0},
+                                            { 0, 0, 1},
+                                            { 1, 0, 1},
+                                            { 0, 1, 1},
+                                            { 1, 1, 1}};
+
+   HYPRE_SStructGrid     grid;
+   HYPRE_SStructGraph    graph;
+   HYPRE_SStructStencil  Cstencil,             Nstencil;
+   int                   Cstencil_size,        Nstencil_size;
+   int                   CCstencil_size,       NNstencil_size;
+   int                   CNstencil_size,       NCstencil_size;
+   int                   CCstencil_indexes[7], NNstencil_indexes[7];
+   int                   CNstencil_indexes[8], NCstencil_indexes[8];
+   double               *CCvalues,            *NNvalues;
+   double               *CNvalues,            *NCvalues;
+   int                   CAstencil_index;
+   double               *CAvalues;
                         
-   HYPRE_SStructMatrix  A;
-   HYPRE_SStructVector  b;
-   HYPRE_SStructVector  x;
-
-   HYPRE_SStructSolver  solver;
-   HYPRE_SStructSolver  precond;
-   int                  num_iterations;
-   int                  time_index;
-   double               final_res_norm;
+   int                   i, j, k, s, part;
+   int                   jb, kb, block;
+   int                   ix, iy, iz;
                         
-   int                  num_procs, myid;
-                        
-   int                  p, q, r;
-   int                  dim;
-   int                  nblocks;
-
-   int                  on_part[2] = {1, 1};
-   int                  partP[2] = {1, 1};
-
-   int                  Cvolume, Nvolume;
-   int                **Cilower;
-   int                **Ciupper;
-   int                **Nilower;
-   int                **Niupper;
-
-   int                 *index0, index0_mem[3];
-   int                 *index1, index1_mem[3];
-   int                  Cistart[3];
-
-   int                  offsets[7][3] = {{ 0, 0, 0},
-                                         {-1, 0, 0},
-                                         { 1, 0, 0},
-                                         { 0,-1, 0},
-                                         { 0, 1, 0},
-                                         { 0, 0,-1},
-                                         { 0, 0, 1}};
-   int                  CNoffsets[8][3] = {{-1,-1,-1},
-                                           { 0,-1,-1},
-                                           {-1, 0,-1},
-                                           { 0, 0,-1},
-                                           {-1, 0, 0},
-                                           { 0,-1, 0},
-                                           {-1, 0, 0},
-                                           { 0,-1, 0}};
-   int                  NCoffsets[8][3] = {{ 0, 0, 0},
-                                           { 1, 0, 0},
-                                           { 0, 1, 0},
-                                           { 1, 1, 0},
-                                           { 0, 0, 1},
-                                           { 1, 0, 1},
-                                           { 0, 1, 1},
-                                           { 1, 1, 1}};
-
-   HYPRE_SStructGrid    grid;
-   HYPRE_SStructGraph   graph;
-   HYPRE_SStructStencil Cstencil,             Nstencil;
-   int                  Cstencil_size,        Nstencil_size;
-   int                  CCstencil_size,       NNstencil_size;
-   int                  CNstencil_size,       NCstencil_size;
-   int                  CCstencil_indexes[7], NNstencil_indexes[7];
-   int                  CNstencil_indexes[8], NCstencil_indexes[8];
-   double              *CCvalues,            *NNvalues;
-   double              *CNvalues,            *NCvalues;
-   int                  CAstencil_index;
-   double              *CAvalues;
-                       
-   int                  i, j, k, s, part;
-   int                  jb, kb, block;
-   int                  ix, iy, iz;
-
-#if DEBUG
-   FILE                *file;
-   char                 filename[255];
+#if DEBUG               
+   FILE                 *file;
+   char                  filename[255];
 #endif
                        
    /*-----------------------------------------------------------
@@ -221,6 +228,7 @@ main( int   argc,
       printf("                         31 - GMRES with PFMG split precond\n");
       printf("                         38 - GMRES with diagonal scaling\n");
       printf("                         39 - GMRES\n");
+      printf("                         40 - GMRES with BoomerAMG precond\n");
       printf("\n");
 
       exit(1);
@@ -537,6 +545,10 @@ main( int   argc,
  
    HYPRE_SStructMatrixCreate(MPI_COMM_WORLD, graph, &A);
    /* TODO HYPRE_SStructMatrixSetSymmetric(A, 1); */
+   if (solver_id >= 40)
+   {
+      HYPRE_SStructMatrixSetObjectType(A, HYPRE_PARCSR);
+   }
    HYPRE_SStructMatrixInitialize(A);
 
    /*-----------------------------------------------------------
@@ -715,6 +727,10 @@ main( int   argc,
    }
 
    HYPRE_SStructMatrixAssemble(A);
+   if (solver_id >= 40)
+   {
+      HYPRE_SStructMatrixGetObject(A, (void **) &par_A);
+   }
 #if DEBUG
    HYPRE_SStructMatrixPrint("driver.out.A", A, 0);
 #endif
@@ -724,6 +740,10 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &b);
+   if (solver_id >= 40)
+   {
+      HYPRE_SStructVectorSetObjectType(b, HYPRE_PARCSR);
+   }
    HYPRE_SStructVectorInitialize(b);
    for (i = 0; i < Cvolume; i++)
    {
@@ -749,11 +769,19 @@ main( int   argc,
       }
    }
    HYPRE_SStructVectorAssemble(b);
+   if (solver_id >= 40)
+   {
+      HYPRE_SStructVectorGetObject(b, (void **) &par_b);
+   }
 #if DEBUG
    HYPRE_SStructVectorPrint("driver.out.b", b, 0);
 #endif
 
    HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
+   if (solver_id >= 40)
+   {
+      HYPRE_SStructVectorSetObjectType(x, HYPRE_PARCSR);
+   }
    HYPRE_SStructVectorInitialize(x);
    for (i = 0; i < Cvolume; i++)
    {
@@ -779,6 +807,10 @@ main( int   argc,
       }
    }
    HYPRE_SStructVectorAssemble(x);
+   if (solver_id >= 40)
+   {
+      HYPRE_SStructVectorGetObject(x, (void **) &par_x);
+   }
 #if DEBUG
    HYPRE_SStructVectorPrint("driver.out.x0", x, 0);
 #endif
@@ -884,7 +916,7 @@ main( int   argc,
     * Solve the system using GMRES
     *-----------------------------------------------------------*/
 
-   if ((solver_id > 29) && (solver_id < 40))
+   if ((solver_id >= 30) && (solver_id < 40))
    {
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
@@ -952,6 +984,63 @@ main( int   argc,
       if ((solver_id == 30) || (solver_id == 31))
       {
          HYPRE_SStructSplitDestroy(precond);
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Solve the system using ParCSR version of GMRES
+    *-----------------------------------------------------------*/
+
+   if ((solver_id >= 40) && (solver_id < 50))
+   {
+      time_index = hypre_InitializeTiming("GMRES Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_ParCSRGMRESCreate(MPI_COMM_WORLD, &par_solver);
+      HYPRE_ParCSRGMRESSetKDim(par_solver, 5);
+      HYPRE_ParCSRGMRESSetMaxIter(par_solver, 100);
+      HYPRE_ParCSRGMRESSetTol(par_solver, 1.0e-06);
+      HYPRE_ParCSRGMRESSetLogging(par_solver, 1);
+
+      if (solver_id == 40)
+      {
+         /* use BoomerAMG as preconditioner */
+         HYPRE_BoomerAMGCreate(&par_precond); 
+         HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
+         HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
+         HYPRE_BoomerAMGSetLogging(par_precond, 3, "driver.out.log");
+         HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
+         HYPRE_ParCSRGMRESSetPrecond(par_solver,
+                                     HYPRE_BoomerAMGSolve,
+                                     HYPRE_BoomerAMGSetup,
+                                     par_precond);
+      }
+
+      HYPRE_ParCSRGMRESSetup(par_solver, par_A, par_b, par_x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("GMRES Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_ParCSRGMRESSolve(par_solver, par_A, par_b, par_x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_ParCSRGMRESGetNumIterations(par_solver, &num_iterations);
+      HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(par_solver,
+                                                    &final_res_norm);
+      HYPRE_ParCSRGMRESDestroy(par_solver);
+
+      if (solver_id == 40)
+      {
+         HYPRE_BoomerAMGDestroy(par_precond);
       }
    }
 

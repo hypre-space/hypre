@@ -12,6 +12,7 @@
 
 #include "HYPRE_config.h"
 #include "HYPRE_utilities.h"
+#include "HYPRE.h"
 #include "HYPRE_struct_mv.h"
 #include "HYPRE_IJ_mv.h"
 
@@ -484,6 +485,22 @@ int HYPRE_SStructMatrixSetSymmetric(HYPRE_SStructMatrix  matrix,
                                     int                  symmetric);
 
 /**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+int HYPRE_SStructMatrixSetObjectType(HYPRE_SStructMatrix  matrix,
+                                     int                  type);
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+int HYPRE_SStructMatrixGetObject(HYPRE_SStructMatrix   matrix,
+                                 void                **object);
+
+/**
  * Set the matrix to be complex.
  *
  * @param param [IN] ...
@@ -714,6 +731,22 @@ int HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
                                     int                 *iupper,
                                     int                  var,
                                     double              *values);
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+int HYPRE_SStructVectorSetObjectType(HYPRE_SStructVector  vector,
+                                     int                  type);
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+int HYPRE_SStructVectorGetObject(HYPRE_SStructVector   vector,
+                                 void                **object);
 
 /**
  * Set the vector to be complex.
