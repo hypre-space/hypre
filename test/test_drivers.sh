@@ -43,9 +43,9 @@ then
     HYPRE_MAIL=/usr/ucb/Mail
     case $HYPRE_ARCH in
 	dec)
-	    HYPRE_MAIL=/usr/ucb/Mail;;
+	    HYPRE_MAIL=/usr/bin/Mail;;
 	blue)
-	    HYPRE_MAIL=/usr/ucb/Mail;;
+	    HYPRE_MAIL=/usr/bin/Mail;;
 	red)
 	    HYPRE_MAIL=/usr/ucb/Mail;;
     esac
