@@ -56,6 +56,7 @@ int    MLI_Utils_HypreMatrixPrint(void *, char *);
 int    MLI_Utils_HypreMatrixGetInfo(void *, int *, double *);
 int    MLI_Utils_HypreMatrixComputeRAP(void *P, void *A, void **RAP);
 int    MLI_Utils_HypreMatrixCompress(void *A, int blksize, void **A2);
+int    MLI_Utils_HypreBoolMatrixDecompress(void *S, int, void **S2, void *A);
 int    MLI_Utils_QR(double *Q, double *R, int nrows, int ncols);
 int    MLI_Utils_HypreMatrixReadTuminFormat(char *filename, MPI_Comm comm, 
                  int blksize, void **mat, int flag, double **scaleVec);

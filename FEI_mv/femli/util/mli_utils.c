@@ -702,10 +702,10 @@ int MLI_Utils_HypreMatrixGetInfo(void *Amat, int *matInfo, double *valInfo)
 int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2) 
 {
    int                mypid, *partition, startRow, localNRows;
-   int                newLNRows, newStartRow;
+   int                newLNRows, newStartRow, blksize2;
    int                ierr, *rowLengths, irow, rowNum, rowSize, *colInd;
    int                *newInd, newSize, j, k, nprocs;
-   double             *colVal, *newVal;
+   double             *colVal, *newVal, *newVal2;
    MPI_Comm           mpiComm;
    hypre_ParCSRMatrix *hypreA, *hypreA2;
    HYPRE_IJMatrix     IJAmat2;
@@ -722,10 +722,12 @@ int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2)
    startRow    = partition[mypid];
    localNRows  = partition[mypid+1] - startRow;
    free( partition );
-   if ( localNRows % blksize != 0 )
+   if ( blksize < 0 ) blksize2 = - blksize;
+   else               blksize2 = blksize;
+   if ( localNRows % blksize2 != 0 )
    {
       printf("MLI_CompressMatrix ERROR : nrows not divisible by blksize.\n");
-      printf("                nrows, blksize = %d %d\n",localNRows,blksize);
+      printf("                nrows, blksize = %d %d\n",localNRows,blksize2);
       exit(1);
    }
 
@@ -733,8 +735,8 @@ int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2)
     * compute size of new matrix and create the new matrix
     * ----------------------------------------------------------------*/
 
-   newLNRows   = localNRows / blksize;
-   newStartRow = startRow / blksize;
+   newLNRows   = localNRows / blksize2;
+   newStartRow = startRow / blksize2;
    ierr =  HYPRE_IJMatrixCreate(mpiComm, newStartRow, 
                   newStartRow+newLNRows-1, newStartRow,
                   newStartRow+newLNRows-1, &IJAmat2);
@@ -751,9 +753,9 @@ int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2)
    for ( irow = 0; irow < newLNRows; irow++ )
    {
       rowLengths[irow] = 0;
-      for ( j = 0; j < blksize; j++)
+      for ( j = 0; j < blksize2; j++)
       {
-         rowNum = startRow + irow * blksize + j;
+         rowNum = startRow + irow * blksize2 + j;
          hypre_ParCSRMatrixGetRow(hypreA,rowNum,&rowSize,&colInd,NULL);
          rowLengths[irow] += rowSize;
          hypre_ParCSRMatrixRestoreRow(hypreA,rowNum,&rowSize,&colInd,NULL);
@@ -771,14 +773,15 @@ int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2)
    {
       newInd  = (int *)    malloc( rowLengths[irow] * sizeof(int) );
       newVal  = (double *) malloc( rowLengths[irow] * sizeof(double) );
+      newVal2 = (double *) malloc( rowLengths[irow] * sizeof(double) );
       newSize = 0;
-      for ( j = 0; j < blksize; j++)
+      for ( j = 0; j < blksize2; j++)
       {
-         rowNum = startRow + irow * blksize + j;
+         rowNum = startRow + irow * blksize2 + j;
          hypre_ParCSRMatrixGetRow(hypreA,rowNum,&rowSize,&colInd,&colVal);
          for ( k = 0; k < rowSize; k++ )
          {
-            newInd[newSize] = colInd[k] / blksize;
+            newInd[newSize] = colInd[k] / blksize2;
             newVal[newSize++] = colVal[k];
          }
          hypre_ParCSRMatrixRestoreRow(hypreA,rowNum,&rowSize,
@@ -787,25 +790,64 @@ int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2)
       if ( newSize > 0 )
       {
          qsort1(newInd, newVal, 0, newSize-1);
-         k = 0;
-         newVal[k] = newVal[k] * newVal[k];
-         for ( j = 1; j < newSize; j++ )
+         if ( blksize > 0 )
          {
-            if (newInd[j] == newInd[k]) 
-               newVal[k] += (newVal[j] * newVal[j]);
-            else
+            k = 0;
+            newVal[k] = newVal[k] * newVal[k];
+            for ( j = 1; j < newSize; j++ )
             {
-               newInd[++k] = newInd[j];
-               newVal[k]   = newVal[j] * newVal[j];
+               if (newInd[j] == newInd[k]) 
+                  newVal[k] += (newVal[j] * newVal[j]);
+               else
+               {
+                  newInd[++k] = newInd[j];
+                  newVal[k]   = newVal[j] * newVal[j];
+               }
+            }
+            newSize = k + 1;
+         }
+         else
+         {
+            k = 0;
+            newVal[k] = newVal[k];
+            newVal2[k] = newVal[k];
+            for ( j = 1; j < newSize; j++ )
+            {
+               if (newInd[j] == newInd[k]) 
+               {
+                  newVal2[k] += newVal[j];
+                  if ( habs(newVal[j]) > habs(newVal[k]) )
+                     newVal[k] = newVal[j];
+               }
+               else
+               {
+                  newInd[++k] = newInd[j];
+                  newVal2[k]  = newVal[j];
+                  newVal[k]   = newVal[j];
+               }
+            }
+            newSize = k + 1;
+            for ( j = 0; j < newSize; j++ )
+            {
+               if ( newInd[j] == newStartRow+irow ) 
+                    newVal[j] = (newVal[j])/((double) blksize2);
+               else
+                  newVal[j] = (newVal[j])/((double) blksize2);
+/*
+               else if ( newVal2[j] >= 0.0 )
+                  newVal[j] = (newVal[j])/((double) blksize2);
+               else
+                  newVal[j] = -(newVal[j])/((double) blksize2);
+*/
             }
          }
-         newSize = k + 1;
       }
       rowNum = newStartRow + irow;
       HYPRE_IJMatrixSetValues(IJAmat2, 1, &newSize,(const int *) &rowNum,
                 (const int *) newInd, (const double *) newVal);
       free( newInd );
       free( newVal );
+      free( newVal2 );
    }
    ierr = HYPRE_IJMatrixAssemble(IJAmat2);
    assert( !ierr );
@@ -815,6 +857,125 @@ int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2)
    HYPRE_IJMatrixDestroy( IJAmat2 );
    if ( rowLengths != NULL ) free( rowLengths );
    (*Amat2) = (void *) hypreA2;
+   return 0;
+}
+
+/***************************************************************************
+ * Given a Hypre ParCSR matrix, compress it
+ *--------------------------------------------------------------------------*/
+ 
+int MLI_Utils_HypreBoolMatrixDecompress(void *Smat, int blkSize, 
+                                        void **Smat2, void *Amat) 
+{
+   int                mypid, *partition, startRow, localNRows, newLNRows; 
+   int                newStartRow, maxRowLeng, index, ierr, irow, sRowNum;
+   int                *rowLengths=NULL, rowNum, rowSize, *colInd, *sInd=NULL;
+   int                *newInd=NULL, newSize, j, k, nprocs, searchInd;
+   int                sRowSize;
+   double             *newVal=NULL;
+   MPI_Comm           mpiComm;
+   hypre_ParCSRMatrix *hypreA, *hypreS, *hypreS2;
+   HYPRE_IJMatrix     IJSmat2;
+
+   /* ----------------------------------------------------------------
+    * fetch information about incoming matrix
+    * ----------------------------------------------------------------*/
+   
+   hypreS  = (hypre_ParCSRMatrix *) Smat;
+   hypreA  = (hypre_ParCSRMatrix *) Amat;
+   mpiComm = hypre_ParCSRMatrixComm(hypreA);
+   MPI_Comm_rank(mpiComm, &mypid);
+   MPI_Comm_size(mpiComm, &nprocs);
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA,&partition);
+   startRow    = partition[mypid];
+   localNRows  = partition[mypid+1] - startRow;
+   free( partition );
+   if ( localNRows % blkSize != 0 )
+   {
+      printf("MLI_DecompressMatrix ERROR : nrows not divisible by blksize.\n");
+      printf("                nrows, blksize = %d %d\n",localNRows,blkSize);
+      exit(1);
+   }
+
+   /* ----------------------------------------------------------------
+    * compute size of new matrix and create the new matrix
+    * ----------------------------------------------------------------*/
+
+   newLNRows   = localNRows / blkSize;
+   newStartRow = startRow / blkSize;
+   ierr =  HYPRE_IJMatrixCreate(mpiComm, startRow, 
+                  startRow+localNRows-1, startRow,
+                  startRow+localNRows-1, &IJSmat2);
+   ierr += HYPRE_IJMatrixSetObjectType(IJSmat2, HYPRE_PARCSR);
+   assert(!ierr);
+
+   /* ----------------------------------------------------------------
+    * compute the row lengths of the new matrix
+    * ----------------------------------------------------------------*/
+
+   if (localNRows > 0) rowLengths = (int *) malloc(localNRows*sizeof(int));
+
+   maxRowLeng = 0;
+   for ( irow = 0; irow < localNRows; irow++ )
+   {
+      rowNum = startRow + irow;
+      hypre_ParCSRMatrixGetRow(hypreA,rowNum,&rowSize,&colInd,NULL);
+      rowLengths[irow] = rowSize;
+      if ( rowSize > maxRowLeng ) maxRowLeng = rowSize;
+      hypre_ParCSRMatrixRestoreRow(hypreA,rowNum,&rowSize,&colInd,NULL);
+   }
+   ierr =  HYPRE_IJMatrixSetRowSizes(IJSmat2, rowLengths);
+   ierr += HYPRE_IJMatrixInitialize(IJSmat2);
+   assert(!ierr);
+   if ( rowLengths != NULL ) free( rowLengths );
+
+   /* ----------------------------------------------------------------
+    * load the decompressed matrix
+    * ----------------------------------------------------------------*/
+
+   if ( maxRowLeng > 0 )
+   {
+      newInd  = (int *)    malloc( maxRowLeng * sizeof(int) );
+      newVal  = (double *) malloc( maxRowLeng * sizeof(double) );
+      sInd    = (int *)    malloc( maxRowLeng * sizeof(int) );
+      for ( irow = 0; irow < maxRowLeng; irow++ ) newVal[irow] = 1.0;
+   }
+   for ( irow = 0; irow < newLNRows; irow++ )
+   {
+      sRowNum = newStartRow + irow;
+      hypre_ParCSRMatrixGetRow(hypreS,sRowNum,&sRowSize,&colInd,NULL);
+      for ( k = 0; k < sRowSize; k++ ) sInd[k] = colInd[k];
+      hypre_ParCSRMatrixRestoreRow(hypreS,sRowNum,&sRowSize,&colInd,NULL);
+      qsort0(sInd, 0, sRowSize-1);
+      for ( j = 0; j < blkSize; j++)
+      {
+         rowNum = startRow + irow * blkSize + j;
+         hypre_ParCSRMatrixGetRow(hypreA,rowNum,&rowSize,&colInd,NULL);
+         for ( k = 0; k < rowSize; k++ )
+         {
+            index = colInd[k] / blkSize;
+            searchInd = MLI_Utils_BinarySearch(index, sInd, sRowSize);
+            if ( searchInd >= 0 && colInd[k] == index*blkSize+j ) 
+                 newInd[k] = colInd[k];
+            else newInd[k] = -1;
+         } 
+         newSize = 0;
+         for ( k = 0; k < rowSize; k++ )
+            if ( newInd[k] >= 0 ) newInd[newSize++] = newInd[k];
+         hypre_ParCSRMatrixRestoreRow(hypreA,rowNum,&rowSize,&colInd,NULL);
+         HYPRE_IJMatrixSetValues(IJSmat2, 1, &newSize,(const int *) &rowNum,
+                (const int *) newInd, (const double *) newVal);
+      }
+   }
+   if ( newInd != NULL ) free( newInd );
+   if ( newVal != NULL ) free( newVal );
+   if ( sInd   != NULL ) free( sInd );
+   ierr = HYPRE_IJMatrixAssemble(IJSmat2);
+   assert( !ierr );
+   HYPRE_IJMatrixGetObject(IJSmat2, (void **) &hypreS2);
+   HYPRE_IJMatrixSetObjectType( IJSmat2, -1 );
+   HYPRE_IJMatrixDestroy( IJSmat2 );
+   (*Smat2) = (void *) hypreS2;
    return 0;
 }
 
