@@ -86,6 +86,7 @@ typedef struct
    int  type;
    int  proc;
    int  offset;
+   int  box;
   /* GEC0902 ghost offset   */
    int  ghoffset;
 
@@ -96,6 +97,7 @@ typedef struct
    int          type;
    int          proc;
    int          offset;  /* minimum offset for this box */
+   int          box;
    int          ghoffset;  /* GEC0902 minimum offset ghost for this box */
    int          part;    /* part the box lives on */
    hypre_Index  ilower;  /* local ilower on neighbor index-space */
@@ -207,18 +209,20 @@ typedef struct hypre_SStructGrid_struct
  * Accessor macros: hypre_SStructMapInfo
  *--------------------------------------------------------------------------*/
 
-#define hypre_SStructMapInfoType(info)    ((info) -> type)
-#define hypre_SStructMapInfoProc(info)    ((info) -> proc)
-#define hypre_SStructMapInfoOffset(info)  ((info) -> offset)
-#define hypre_SStructMapInfoGhoffset(info) ((info) -> ghoffset)
+#define hypre_SStructMapInfoType(info)            ((info) -> type)
+#define hypre_SStructMapInfoProc(info)            ((info) -> proc)
+#define hypre_SStructMapInfoOffset(info)          ((info) -> offset)
+#define hypre_SStructMapInfoBox(info)             ((info) -> box)
+#define hypre_SStructMapInfoGhoffset(info)        ((info) -> ghoffset)
 
 /*--------------------------------------------------------------------------
- * Accessor macros: hypre_SStructMapInfo
+ * Accessor macros: hypre_SStructNMapInfo
  *--------------------------------------------------------------------------*/
 
 #define hypre_SStructNMapInfoType(info)    ((info) -> type)
 #define hypre_SStructNMapInfoProc(info)    ((info) -> proc)
 #define hypre_SStructNMapInfoOffset(info)  ((info) -> offset)
+#define hypre_SStructNMapInfoBox(info)     ((info) -> box)
 #define hypre_SStructNMapInfoGhoffset(info) ((info) -> ghoffset)
 #define hypre_SStructNMapInfoPart(info)    ((info) -> part)
 #define hypre_SStructNMapInfoILower(info)  ((info) -> ilower)
