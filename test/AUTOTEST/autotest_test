@@ -489,13 +489,21 @@ if [ ${BuildOpt} -ne $Skip ] ; then
     fi
     if test ! "${HYPRE_RUN_MACHINE}" ; then
       cd $HYPRE_AUTOTEST_DIR/${SRC}/test
-      ./runtest.sh $BatchOpt $MailOpt $STD_TEST_DIRS
+      if [ "$DEBUG_MODE" = "yes" ] ; then
+        ./runtest.sh -debug $BatchOpt $MailOpt $STD_TEST_DIRS
+      else
+        ./runtest.sh $BatchOpt $MailOpt $STD_TEST_DIRS
+      fi
     else
       ssh ${HYPRE_RUN_MACHINE} "\
       (\
         cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test;\
         [ -r ./env.${HYPRE_ARCH} ] && . ./env.${HYPRE_ARCH};\
-        ./runtest.sh $BatchOpt $MailOpt $STD_TEST_DIRS \
+        if [ "$DEBUG_MODE" = "yes" ] ; then
+          ./runtest.sh -debug $BatchOpt $MailOpt $STD_TEST_DIRS \
+        else
+          ./runtest.sh $BatchOpt $MailOpt $STD_TEST_DIRS \
+        fi
     )"
     fi
   fi
