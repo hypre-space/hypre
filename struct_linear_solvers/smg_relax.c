@@ -898,7 +898,7 @@ hypre_SMGRelaxSetNumPreRelax( void *relax_vdata,
    hypre_SMGRelaxData *relax_data = relax_vdata;
    int                 ierr = 0;
 
-   (relax_data -> num_pre_relax) = max(num_pre_relax,1);
+   (relax_data -> num_pre_relax) = hypre_max(num_pre_relax,1);
 
    return ierr;
 }

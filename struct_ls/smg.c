@@ -220,7 +220,7 @@ hypre_SMGSetNumPreRelax( void *smg_vdata,
    hypre_SMGData *smg_data = smg_vdata;
    int            ierr = 0;
  
-   (smg_data -> num_pre_relax) = max(num_pre_relax,1);
+   (smg_data -> num_pre_relax) = hypre_max(num_pre_relax,1);
  
    return ierr;
 }

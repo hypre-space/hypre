@@ -19,15 +19,15 @@
  * Define various functions
  *--------------------------------------------------------------------------*/
 
-#ifndef max
-#define max(a,b)  (((a)<(b)) ? (b) : (a))
+#ifndef hypre_max
+#define hypre_max(a,b)  (((a)<(b)) ? (b) : (a))
 #endif
-#ifndef min
-#define min(a,b)  (((a)<(b)) ? (a) : (b))
+#ifndef hypre_min
+#define hypre_min(a,b)  (((a)<(b)) ? (a) : (b))
 #endif
 
-#ifndef round
-#define round(x)  ( ((x) < 0.0) ? ((int)(x - 0.5)) : ((int)(x + 0.5)) )
+#ifndef hypre_round
+#define hypre_round(x)  ( ((x) < 0.0) ? ((int)(x - 0.5)) : ((int)(x + 0.5)) )
 #endif
 
 #endif
