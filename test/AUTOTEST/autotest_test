@@ -478,7 +478,11 @@ mail_summary () {
   AutotestFailureCount=0
   CLIST=""; ELIST=""
   DWRNCNT=0; DERRCNT=0
-  cd $HYPRE_AUTOTEST_DIR
+  if test "${HYPRE_DST_DIR}" ; then
+    cd $HYPRE_DST_DIR
+  else
+    cd $HYPRE_AUTOTEST_DIR
+  fi
   SUMFILE="autotest.$HYPRE_ARCH.`date '+%Y%m%d'`"
   if [ -z "$HYPRE_COMPILE_MACHINE" -o "$HYPRE_COMPILE_MACHINE" = "" ] ; then
     HYPRE_COMPILE_MACHINE=`hostname`
