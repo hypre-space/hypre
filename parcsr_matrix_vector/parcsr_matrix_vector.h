@@ -312,7 +312,7 @@ int HYPRE_InitializeParCSRMatrix P((HYPRE_ParCSRMatrix matrix ));
 void HYPRE_PrintParCSRMatrix P((HYPRE_ParCSRMatrix matrix , char *file_name ));
 int HYPRE_GetCommParCSR P((HYPRE_ParCSRMatrix matrix , MPI_Comm *comm ));
 int HYPRE_GetDimsParCSR P((HYPRE_ParCSRMatrix matrix , int *M , int *N ));
-int HYPRE_GetLocalRangeParcsr P((HYPRE_ParCSRMatrix matrix , int *start , int *end ));
+int HYPRE_GetLocalRangeParcsr P((HYPRE_ParCSRMatrix matrix , int *row_start , int *row_end , int *col_start , int *col_end ));
 int HYPRE_GetRowParCSRMatrix P((HYPRE_ParCSRMatrix matrix , int row , int *size , int **col_ind , double **values ));
 int HYPRE_RestoreRowParCSRMatrix P((HYPRE_ParCSRMatrix matrix , int row , int *size , int **col_ind , double **values ));
 
@@ -353,7 +353,7 @@ int hypre_SetParCSRMatrixRowStartsOwner P((hypre_ParCSRMatrix *matrix , int owns
 int hypre_SetParCSRMatrixColStartsOwner P((hypre_ParCSRMatrix *matrix , int owns_col_starts ));
 hypre_ParCSRMatrix *hypre_ReadParCSRMatrix P((MPI_Comm comm , char *file_name ));
 int hypre_PrintParCSRMatrix P((hypre_ParCSRMatrix *matrix , char *file_name ));
-int hypre_GetLocalRangeParCSRMatrix P((hypre_ParCSRMatrix *matrix , int *start , int *end ));
+int hypre_GetLocalRangeParCSRMatrix P((hypre_ParCSRMatrix *matrix , int *row_start , int *row_end , int *col_start , int *col_end ));
 int hypre_GetRowParCSRMatrix P((hypre_ParCSRMatrix *mat , int row , int *size , int **col_ind , double **values ));
 int hypre_RestoreRowParCSRMatrix P((hypre_ParCSRMatrix *matrix , int row , int *size , int **col_ind , double **values ));
 hypre_ParCSRMatrix *hypre_CSRMatrixToParCSRMatrix P((MPI_Comm comm , hypre_CSRMatrix *A , int *row_starts , int *col_starts ));

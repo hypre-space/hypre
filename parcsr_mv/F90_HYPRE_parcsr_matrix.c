@@ -115,13 +115,17 @@ hypre_F90_IFACE(hypre_getdimsparcsr)( long int *matrix,
 
 void 
 hypre_F90_IFACE(hypre_getlocalrangeparcsr)( long int *matrix,
-                                            int      *start,
-                                            int      *end,
+                                            int      *row_start,
+                                            int      *row_end,
+                                            int      *col_start,
+                                            int      *col_end,
                                             int      *ierr    )
 {
    *ierr = (int) ( HYPRE_GetLocalRangeParcsr( (HYPRE_ParCSRMatrix) *matrix,
-                                              (int *)               start,
-                                              (int *)               end     ) );
+                                              (int *)               row_start,
+                                              (int *)               row_end,
+                                              (int *)               col_start,
+                                              (int *)               col_end) );
 }
 
 /*--------------------------------------------------------------------------

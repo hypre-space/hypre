@@ -367,16 +367,20 @@ hypre_PrintParCSRMatrix( hypre_ParCSRMatrix *matrix,
 
 int 
 hypre_GetLocalRangeParCSRMatrix( hypre_ParCSRMatrix *matrix,
-                         int               *start,
-                         int               *end )
+                         int               *row_start,
+                         int               *row_end,
+                         int               *col_start,
+                         int               *col_end )
 {  
    int ierr=0;
    int my_id;
 
    MPI_Comm_rank( hypre_ParCSRMatrixComm(matrix), &my_id );
 
-   *start = hypre_ParCSRMatrixRowStarts(matrix)[ my_id ];
-   *end = hypre_ParCSRMatrixRowStarts(matrix)[ my_id + 1 ]-1;
+   *row_start = hypre_ParCSRMatrixRowStarts(matrix)[ my_id ];
+   *row_end = hypre_ParCSRMatrixRowStarts(matrix)[ my_id + 1 ]-1;
+   *col_start = hypre_ParCSRMatrixColStarts(matrix)[ my_id ];
+   *col_end = hypre_ParCSRMatrixColStarts(matrix)[ my_id + 1 ]-1;
 
    return( ierr );
 }

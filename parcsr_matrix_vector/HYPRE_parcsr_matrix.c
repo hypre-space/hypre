@@ -107,13 +107,15 @@ HYPRE_GetDimsParCSR( HYPRE_ParCSRMatrix  matrix,
 
 int
 HYPRE_GetLocalRangeParcsr( HYPRE_ParCSRMatrix  matrix,
-                         int               *start,
-                         int               *end )
+                         int               *row_start,
+                         int               *row_end,
+                         int               *col_start,
+                         int               *col_end )
 {  
    int ierr = 0;
 
    ierr = hypre_GetLocalRangeParCSRMatrix( (hypre_ParCSRMatrix *) matrix,
-                            start, end );
+                            row_start, row_end, col_start, col_end );
    return( ierr );
 }
 
