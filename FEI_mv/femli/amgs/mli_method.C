@@ -16,6 +16,10 @@
  * include files 
  *--------------------------------------------------------------------------*/
 
+#ifdef WIN32
+#define strcasecmp _stricmp
+#endif
+
 #include <string.h>
 #include "amgs/mli_method.h"
 #include "amgs/mli_method_amgsa.h"

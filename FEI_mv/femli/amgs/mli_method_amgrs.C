@@ -6,6 +6,10 @@
  *
  *********************************************************************EHEADER*/
 
+#ifdef WIN32
+#define strcasecmp _stricmp
+#endif
+
 #include <string.h>
 #include <assert.h>
 #include "HYPRE.h"
