@@ -215,3 +215,8 @@
 07/31/04    2.5.5R3
             - add error flag return to satisfy Al Nichols' need
               (include changes to krylov, fei-hypre, and ParaSails)
+10/11/04    2.6.1R1
+            - change semantics for with-blas and with-lapack
+            - add domain decomposition algorithm, mli smoothing
+            - add tolerance for arpack
+
