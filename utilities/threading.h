@@ -24,6 +24,12 @@
 #include "mpi.h"
 
 
+#define hypre_TimingThreadWrapper(body)\
+   if (pthread_equal(pthread_self(), initial_thread) ||\
+       pthread_equal(pthread_self(), hypre_thread[0])) {\
+      body;\
+   }
+
 /* hypre_work_proc_t typedef'd to be a pointer to a function with a void*
    argument and a void return type */
 typedef void (*hypre_work_proc_t)(void *);

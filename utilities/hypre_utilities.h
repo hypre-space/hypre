@@ -121,7 +121,8 @@ extern "C" {
  * Types, etc.
  *--------------------------------------------------------------------------*/
 
-typedef int hypre_MPI_Comm;
+typedef struct {int dummy;} hypre_MPI_Comm;
+
 typedef int hypre_MPI_Status;
 typedef int hypre_MPI_Request;
 typedef int hypre_MPI_Op;
@@ -420,6 +421,12 @@ int hypre_thread_MPI_Type_commit P((MPI_Datatype *datatype ));
 #include<pthread.h>
 #include "mpi.h"
 
+
+#define hypre_TimingThreadWrapper(body)\
+   if (pthread_equal(pthread_self(), initial_thread) ||\
+       pthread_equal(pthread_self(), hypre_thread[0])) {\
+      body;\
+   }
 
 /* hypre_work_proc_t typedef'd to be a pointer to a function with a void*
    argument and a void return type */
