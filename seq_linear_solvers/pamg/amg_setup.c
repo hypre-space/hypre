@@ -58,11 +58,16 @@ hypre_AMGSetup( void            *amg_vdata,
    int       not_finished_coarsening = 1;
    int       Setup_err_flag;
    int       coarse_threshold = 9;
-   int       j;
+   int       i, j;
    int	     coarsen_type;
    int	    *grid_relax_type;
    int	     relax_type;
    int	     num_relax_steps;
+   int	    *schwarz_option;
+   int       num_domains;
+   int      *i_domain_dof;
+   int      *j_domain_dof;
+   double   *domain_matrixinverse;
 
    relax_weight = hypre_AMGDataRelaxWeight(amg_data);
    num_relax_steps = hypre_AMGDataNumRelaxSteps(amg_data);
@@ -72,6 +77,7 @@ hypre_AMGSetup( void            *amg_vdata,
    interp_type = hypre_AMGDataInterpType(amg_data);
    num_functions = hypre_AMGDataNumFunctions(amg_data);
    relax_type = grid_relax_type[0];
+   schwarz_option = hypre_AMGDataSchwarzOption(amg_data);
  
    dof_func = hypre_AMGDataDofFunc(amg_data);
    coarse_dof_func = NULL;
@@ -81,6 +87,21 @@ hypre_AMGSetup( void            *amg_vdata,
    CF_marker_array = hypre_CTAlloc(int*, max_levels-1);
    dof_func_array = hypre_CTAlloc(int*, max_levels);
 
+   if (schwarz_option[0] > -1)
+   {
+      hypre_AMGDataNumDomains(amg_data) = hypre_CTAlloc(int, max_levels);
+      hypre_AMGDataIDomainDof(amg_data) = hypre_CTAlloc(int*, max_levels);
+      hypre_AMGDataJDomainDof(amg_data) = hypre_CTAlloc(int*, max_levels);
+      hypre_AMGDataDomainMatrixInverse(amg_data) = 
+				hypre_CTAlloc(double*, max_levels);
+      for (i=0; i < max_levels; i++)
+      {
+         hypre_AMGDataIDomainDof(amg_data)[i] = NULL;
+         hypre_AMGDataJDomainDof(amg_data)[i] = NULL;
+         hypre_AMGDataDomainMatrixInverse(amg_data)[i] = NULL;
+      }
+   }
+      
    if (num_functions > 0) dof_func_array[0] = dof_func;
 
    A_array[0] = A;
@@ -121,6 +142,20 @@ hypre_AMGSetup( void            *amg_vdata,
             relax_weight[level] = (4.0/3.0)/relax_weight[level];
          else
            printf (" Warning ! Matrix norm is zero !!!");
+      }
+
+      if (schwarz_option[level] > -1)
+      {
+      hypre_AMGNodalSchwarzSmoother (A_array[level], dof_func_array[level],
+				    	num_functions,
+					schwarz_option[level],
+					&i_domain_dof, &j_domain_dof,
+					&domain_matrixinverse,
+					&num_domains);
+      hypre_AMGDataIDomainDof(amg_data)[level] = i_domain_dof;
+      hypre_AMGDataJDomainDof(amg_data)[level] = j_domain_dof;
+      hypre_AMGDataNumDomains(amg_data)[level] = num_domains;
+      hypre_AMGDataDomainMatrixInverse(amg_data)[level] = domain_matrixinverse;
       }
 
       if (coarsen_type == 1)

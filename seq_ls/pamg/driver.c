@@ -62,6 +62,8 @@ main( int   argc,
       int    **grid_relax_points; 
       double  *relax_weight;
       double   final_res_norm;
+      int     *schwarz_option;
+      int      schwarz_lev;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -260,6 +262,7 @@ main( int   argc,
       printf("  -rlx <rlxtype>         : rlxtype = 0 Jacobi relaxation \n");
       printf("                                     1 Gauss-Seidel relaxation \n");
       printf("  -w <rlxweight>         : defines relaxation weight for Jacobi\n");
+      printf("  -schwarz <numlev>      : defines number of levels of Schwarz used \n");
       printf("  -ns <val>              : Use <val> sweeps on each level\n");
       printf("                           (default C/F down, F/C up, F/C fine\n");
       printf("  -mu <val>              : sets cycle type, 1=V, 2=W, etc\n");
@@ -392,13 +395,12 @@ main( int   argc,
       grid_relax_type = hypre_CTAlloc(int,4);
       grid_relax_points = hypre_CTAlloc(int *,4);
       relax_weight = hypre_CTAlloc(double,max_levels);
+      schwarz_option = hypre_CTAlloc(int,max_levels);
       for (i=0; i < max_levels; i++)
+      {
 	 relax_weight[i] = 1.0;
-
-
-
-
-
+	 schwarz_option[i] = -1;
+      }
 
       arg_index = 0;
       while (arg_index < argc)
@@ -409,6 +411,13 @@ main( int   argc,
             relax_weight[0] = atof(argv[arg_index++]);
 	    for (i=1; i < max_levels; i++)
 		relax_weight[i] = relax_weight[0];
+         }
+         if ( strcmp(argv[arg_index], "-schwarz") == 0 )
+         {
+            arg_index++;
+            schwarz_lev = atoi(argv[arg_index++]);
+	    for (i=0; i < schwarz_lev; i++)
+		schwarz_option[i] = 1;
          }
          else if ( strcmp(argv[arg_index], "-th") == 0 )
          {
@@ -500,6 +509,7 @@ main( int   argc,
       HYPRE_AMGSetGridRelaxType(amg_solver, grid_relax_type);
       HYPRE_AMGSetGridRelaxPoints(amg_solver, grid_relax_points);
       HYPRE_AMGSetRelaxWeight(amg_solver, relax_weight);
+      HYPRE_AMGSetSchwarzOption(amg_solver, schwarz_option);
       HYPRE_AMGSetMaxLevels(amg_solver, max_levels);
       HYPRE_AMGSetInterpType(amg_solver, interp_type);
       HYPRE_AMGSetNumFunctions(amg_solver, num_functions);
@@ -557,6 +567,7 @@ main( int   argc,
          HYPRE_AMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_AMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_AMGSetRelaxWeight(pcg_precond, relax_weight);
+         HYPRE_AMGSetSchwarzOption(pcg_precond, schwarz_option);
          HYPRE_AMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_AMGSetInterpType(pcg_precond, interp_type);
          HYPRE_AMGSetNumFunctions(pcg_precond, num_functions);
@@ -637,6 +648,7 @@ main( int   argc,
          HYPRE_AMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_AMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_AMGSetRelaxWeight(pcg_precond, relax_weight);
+         HYPRE_AMGSetSchwarzOption(pcg_precond, schwarz_option);
          HYPRE_AMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_AMGSetInterpType(pcg_precond, interp_type);
          HYPRE_AMGSetNumFunctions(pcg_precond, num_functions);

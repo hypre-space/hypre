@@ -201,6 +201,17 @@ HYPRE_AMGSetRelaxWeight( HYPRE_Solver   solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_AMGSetSchwarzOption
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetSchwarzOption( HYPRE_Solver   solver,
+                         int        *schwarz_option  )
+{
+   return( hypre_AMGSetSchwarzOption( (void *) solver, schwarz_option ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_AMGSetIOutDat
  *--------------------------------------------------------------------------*/
 

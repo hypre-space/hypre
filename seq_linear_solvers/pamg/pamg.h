@@ -31,6 +31,7 @@ int HYPRE_AMGSetNumGridSweeps( HYPRE_Solver solver , int *num_grid_sweeps );
 int HYPRE_AMGSetGridRelaxType( HYPRE_Solver solver , int *grid_relax_type );
 int HYPRE_AMGSetGridRelaxPoints( HYPRE_Solver solver , int **grid_relax_points );
 int HYPRE_AMGSetRelaxWeight( HYPRE_Solver solver , double *relax_weight );
+int HYPRE_AMGSetSchwarzOption( HYPRE_Solver solver , int *schwarz_option );
 int HYPRE_AMGSetIOutDat( HYPRE_Solver solver , int ioutdat );
 int HYPRE_AMGSetLogFileName( HYPRE_Solver solver , char *log_file_name );
 int HYPRE_AMGSetLogging( HYPRE_Solver solver , int ioutdat , char *log_file_name );
@@ -89,6 +90,7 @@ int hypre_AMGSetNumGridSweeps( void *data , int *num_grid_sweeps );
 int hypre_AMGSetGridRelaxType( void *data , int *grid_relax_type );
 int hypre_AMGSetGridRelaxPoints( void *data , int **grid_relax_points );
 int hypre_AMGSetRelaxWeight( void *data , double *relax_weight );
+int hypre_AMGSetSchwarzOption( void *data , int *schwarz_option );
 int hypre_AMGSetIOutDat( void *data , int ioutdat );
 int hypre_AMGSetLogFileName( void *data , char *log_file_name );
 int hypre_AMGSetLogging( void *data , int ioutdat , char *log_file_name );
@@ -150,11 +152,6 @@ int hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix *A , double strength_threshold , in
 
 /* coarsenCR.c */
 int hypre_AMGCoarsenCR( hypre_CSRMatrix *A , double strength_threshold , double relax_weight , int relax_type , int num_relax_steps , int **CF_marker_ptr , int *coarse_size_ptr );
-
-/* coarsen_new.c */
-int hypre_AMGCoarsen( hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
-int hypre_AMGCoarsenRuge( hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
-int hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix *A , double strength_threshold , int *dof_func , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
 
 /* cycle.c */
 int hypre_AMGCycle( void *amg_vdata , hypre_Vector **F_array , hypre_Vector **U_array );
@@ -232,6 +229,12 @@ int gselim( double *A , double *x , int n );
 
 /* scaled_matnorm.c */
 int hypre_CSRMatrixScaledNorm( hypre_CSRMatrix *A , double *scnorm );
+
+/* schwarz.c */
+int matrix_matrix_product( int **i_element_edge_pointer , int **j_element_edge_pointer , int *i_element_face , int *j_element_face , int *i_face_edge , int *j_face_edge , int num_elements , int num_faces , int num_edges );
+int hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix *A , int *dof_func , int num_functions , int option , int **i_domain_dof_pointer , int **j_domain_dof_pointer , double **domain_matrixinverse_pointer , int *num_domains_pointer );
+int hypre_SchwarzSolve( hypre_CSRMatrix *A , hypre_Vector *rhs_vector , int num_domains , int *i_domain_dof , int *j_domain_dof , double *domain_matrixinverse , hypre_Vector *x_vector , hypre_Vector *aux_vector );
+int transpose_matrix_create( int **i_face_element_pointer , int **j_face_element_pointer , int *i_element_face , int *j_element_face , int num_elements , int num_faces );
 
 /* transpose.c */
 int hypre_CSRMatrixTranspose( hypre_CSRMatrix *A , hypre_CSRMatrix **AT );

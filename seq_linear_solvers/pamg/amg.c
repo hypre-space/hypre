@@ -43,6 +43,7 @@ hypre_AMGInitialize()
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
    int    **grid_relax_points; 
+   int     *schwarz_option;
 
 
    /* output params */
@@ -68,8 +69,12 @@ hypre_AMGInitialize()
    cycle_type = 1;
    tol = 1.0e-7;
    relax_weight = hypre_CTAlloc(double, max_levels);
+   schwarz_option = hypre_CTAlloc(int, max_levels);
    for (j = 0; j < max_levels; j++)
+   {
       relax_weight[j] = 1.0;
+      schwarz_option[j] = -1;
+   }
 
    num_grid_sweeps = hypre_CTAlloc(int,4);
    grid_relax_type = hypre_CTAlloc(int,4);
@@ -112,6 +117,7 @@ hypre_AMGInitialize()
    hypre_AMGSetGridRelaxType(amg_data, grid_relax_type);
    hypre_AMGSetGridRelaxPoints(amg_data, grid_relax_points);
    hypre_AMGSetRelaxWeight(amg_data, relax_weight);
+   hypre_AMGSetSchwarzOption(amg_data, schwarz_option);
 
    hypre_AMGSetIOutDat(amg_data, ioutdat);
    hypre_AMGSetLogFileName(amg_data, log_file_name); 
@@ -137,6 +143,21 @@ hypre_AMGFinalize( void *data )
       hypre_TFree (hypre_AMGDataGridRelaxType(amg_data));
    if (hypre_AMGDataRelaxWeight(amg_data))
       hypre_TFree (hypre_AMGDataRelaxWeight(amg_data));
+   if (hypre_AMGDataSchwarzOption(amg_data)[0] > -1)
+   {
+      hypre_TFree (hypre_AMGDataNumDomains(amg_data));
+      for (i=0; i < num_levels; i++)
+      {
+         hypre_TFree (hypre_AMGDataIDomainDof(amg_data)[i]);
+         hypre_TFree (hypre_AMGDataJDomainDof(amg_data)[i]);
+         hypre_TFree (hypre_AMGDataDomainMatrixInverse(amg_data)[i]);
+      }
+      hypre_TFree (hypre_AMGDataIDomainDof(amg_data));
+      hypre_TFree (hypre_AMGDataJDomainDof(amg_data));
+      hypre_TFree (hypre_AMGDataDomainMatrixInverse(amg_data));
+   }
+   if (hypre_AMGDataSchwarzOption(amg_data))
+      hypre_TFree (hypre_AMGDataSchwarzOption(amg_data));
    if (hypre_AMGDataGridRelaxPoints(amg_data))
    {
       for (i=0; i < 4; i++)
@@ -318,6 +339,19 @@ hypre_AMGSetRelaxWeight( void     *data,
 
    hypre_TFree(hypre_AMGDataRelaxWeight(amg_data));
    hypre_AMGDataRelaxWeight(amg_data) = relax_weight; 
+
+   return (ierr);
+}
+
+int
+hypre_AMGSetSchwarzOption( void     *data,
+                         int   *schwarz_option )
+{
+   int ierr = 0;
+   hypre_AMGData  *amg_data = data;
+
+   hypre_TFree(hypre_AMGDataSchwarzOption(amg_data));
+   hypre_AMGDataSchwarzOption(amg_data) = schwarz_option;
 
    return (ierr);
 }

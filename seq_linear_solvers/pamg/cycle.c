@@ -171,7 +171,20 @@ hypre_AMGCycle( void           *amg_vdata,
             cycle_op_count += num_coeffs[level]; 
          }
 
-         Solve_err_flag = hypre_AMGRelax(A_array[level], 
+	 if (hypre_AMGDataSchwarzOption(amg_data)[level] >= 0)
+	 {
+            Solve_err_flag = hypre_SchwarzSolve(A_array[level],
+                              F_array[level],
+                              hypre_AMGDataNumDomains(amg_data)[level],
+                              hypre_AMGDataIDomainDof(amg_data)[level],
+                              hypre_AMGDataJDomainDof(amg_data)[level],
+                              hypre_AMGDataDomainMatrixInverse(amg_data)[level],
+                              U_array[level],
+                              Vtemp);
+	 }
+	 else
+	 {
+            Solve_err_flag = hypre_AMGRelax(A_array[level], 
                                          F_array[level],
                                          CF_marker_array[level],
                                          relax_type,
@@ -179,6 +192,7 @@ hypre_AMGCycle( void           *amg_vdata,
                                          relax_weight[level],
                                          U_array[level],
                                          Vtemp);
+	 }
  
          if (Solve_err_flag != 0)
             return(Solve_err_flag);

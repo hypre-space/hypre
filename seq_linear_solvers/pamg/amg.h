@@ -32,7 +32,6 @@ typedef struct
    int    **grid_relax_points; 
    double  *relax_weight;
    double   tol;
-
    /* problem data */
    hypre_CSRMatrix  *A;
    int      num_variables;
@@ -52,6 +51,12 @@ typedef struct
    int             **dof_point_array;
    int             **point_dof_map_array;
    int               num_levels;
+   int      	    *schwarz_option;
+   int      	    *num_domains;
+   int     	   **i_domain_dof;
+   int     	   **j_domain_dof;
+   double  	   **domain_matrixinverse;
+
 
    /* data generated in the solve phase */
    hypre_Vector   *Vtemp;
@@ -103,7 +108,13 @@ typedef struct
 #define hypre_AMGDataDofFuncArray(amg_data) ((amg_data)->dof_func_array) 
 #define hypre_AMGDataDofPointArray(amg_data) ((amg_data)->dof_point_array) 
 #define hypre_AMGDataPointDofMapArray(amg_data) ((amg_data)->point_dof_map_array)
-#define hypre_AMGDataNumLevels(amg_data) ((amg_data)->num_levels)				      
+#define hypre_AMGDataNumLevels(amg_data) ((amg_data)->num_levels)
+#define hypre_AMGDataSchwarzOption(amg_data) ((amg_data)->schwarz_option)
+#define hypre_AMGDataNumDomains(amg_data) ((amg_data)->num_domains)
+#define hypre_AMGDataIDomainDof(amg_data) ((amg_data)->i_domain_dof)
+#define hypre_AMGDataJDomainDof(amg_data) ((amg_data)->j_domain_dof)
+#define hypre_AMGDataDomainMatrixInverse(amg_data) ((amg_data)->domain_matrixinverse)
+
 /* data generated in the solve phase */
 #define hypre_AMGDataVtemp(amg_data) ((amg_data)->Vtemp)
 #define hypre_AMGDataCycleOpCount(amg_data) ((amg_data)->cycle_op_count)

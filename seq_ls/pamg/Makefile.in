@@ -75,6 +75,7 @@ FILES =\
  random.c\
  rap.c \
  relax.c\
+ schwarz.c\
  scaled_matnorm.c\
  transpose.c\
  HYPRE_amg.c\
