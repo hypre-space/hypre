@@ -21,8 +21,8 @@
  *--------------------------------------------------------------------------*/
 
 int         hypre_AMGCycle(hypre_AMGData *amg_data, 
-                           hypre_Vector  **U_array,
-                           hypre_Vector  **F_array)
+                           hypre_Vector  **F_array,
+                           hypre_Vector  **U_array)
 
 {
 
