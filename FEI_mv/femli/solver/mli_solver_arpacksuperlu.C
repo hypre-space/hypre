@@ -6,7 +6,16 @@
  *
  *********************************************************************EHEADER*/
 
+#ifdef MLI_ARPACK
 #ifdef MLI_SUPERLU
+
+/* ****************************************************************************
+ * This module takes advantage of the use of SuperLU for computing the null
+ * spaces in each substructure.  The factored matrix can be used as a
+ * domain-decomposed smoother.  The solve function assumes that a call
+ * to dnstev has been performed before to set up the SuperLU factors.  Thus
+ * this module is to be used with caution. (experimental)
+ * ***************************************************************************/
 
 /* ****************************************************************************
  * system libraries 
@@ -45,7 +54,7 @@ MLI_Solver_ARPACKSuperLU::MLI_Solver_ARPACKSuperLU( ) :
    sendLengs_    = NULL;
    sendProcs_    = NULL;
    sendMap_      = NULL;
-   nSendMap_     = NULL;
+   nSendMap_     = 0;
    nNodes_       = 0;
    ANodeEqnList_ = NULL;
    SNodeEqnList_ = NULL;
@@ -261,5 +270,10 @@ int MLI_Solver_ARPACKSuperLU::setParams( char *paramString, int argc,
    return 0;
 }
 
+#else
+int bogus1;
+#endif
+#else
+int bogus2;
 #endif
 
