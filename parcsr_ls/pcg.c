@@ -249,7 +249,7 @@ hypre_KrylovSolve( void *pcg_vdata,
                 
    double          alpha, beta;
    double          gamma, gamma_old;
-   double          bi_prod, i_prod, eps;
+   double          bi_prod, i_prod, eps, tmp_norm;
    double          pi_prod, xi_prod;
                 
    int             i = 0, j;
@@ -309,9 +309,10 @@ hypre_KrylovSolve( void *pcg_vdata,
    hypre_KrylovMatvec(matvec_data, -1.0, A, x, 1.0, r);
  
    /* Set initial residual norm */
+   tmp_norm = sqrt(hypre_KrylovInnerProd(r,r));
    if (logging > 0)
    {
-      norms[0] = sqrt(hypre_KrylovInnerProd(r,r));
+      norms[0] = tmp_norm;
    }
 
    /* p = C*r */
