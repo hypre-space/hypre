@@ -460,8 +460,8 @@ mail_summary () {
   printf "Execute machine:    %s\n" $HYPRE_RUN_MACHINE >> $SUMFILE
   printf "Operating system:   `uname -a`\n" >> $SUMFILE
   if test "${HYPRE_DST_DIR}" ; then
-    printf "Local Directory:    %s\n" $HYPRE_DST_DIR >> $SUMFILE
-    printf "Directory:          %s\n" $HYPRE_AUTOTEST_DIR >> $SUMFILE
+    printf "Local Directory:    %s\n" $HYPRE_AUTOTEST_DIR >> $SUMFILE
+    printf "Directory:          %s\n" $HYPRE_DST_DIR >> $SUMFILE
   else
     printf "Directory:          %s\n" $HYPRE_AUTOTEST_DIR >> $SUMFILE
   fi
