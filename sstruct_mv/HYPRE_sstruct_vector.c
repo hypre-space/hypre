@@ -102,7 +102,6 @@ int
 HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 {
    int ierr = 0;
-   MPI_Comm        comm     = hypre_SStructVectorComm(vector);
    int             nparts   = hypre_SStructVectorNParts(vector);
    HYPRE_IJVector  ijvector = hypre_SStructVectorIJVector(vector);
    int             part;

@@ -400,7 +400,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    hypre_SStructStencil   *stencil;
    int                    *split;
    int                     nvars;
-   int                     nrows, ncols, nnzs;
+   int                     nrows, nnzs;
    int                     part, var, entry, i, j;
    int                    *row_sizes;
    int                     max_row_size;
@@ -408,7 +408,6 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    ierr = HYPRE_IJMatrixSetObjectType(ijmatrix, HYPRE_PARCSR);
 
    nrows = hypre_SStructGridLocalSize(grid); 
-   ncols = hypre_SStructGridLocalSize(grid); 
 
    /* set row sizes */
    i = 0;
