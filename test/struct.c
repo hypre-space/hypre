@@ -75,6 +75,7 @@ main( int   argc,
    int                 n_pre, n_post;
    int                 nblocks ;
    int                 skip;
+   int                 rap;
    int                 relax;
    int                 jump;
 
@@ -133,6 +134,7 @@ main( int   argc,
    dim = 3;
 
    skip  = 0;
+   rap = 0;
    relax = 1;
    jump  = 0;
 
@@ -264,6 +266,11 @@ main( int   argc,
          n_pre = atoi(argv[arg_index++]);
          n_post = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-rap") == 0 )
+      {
+         arg_index++;
+         rap = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-relax") == 0 )
       {
          arg_index++;
@@ -351,6 +358,10 @@ main( int   argc,
       printf("                        48 - BiCGSTAB with diagonal scaling\n");
       printf("                        49 - BiCGSTAB\n");
       printf("  -v <n_pre> <n_post> : number of pre and post relaxations\n");
+      printf("  -rap <r>            : coarse grid operator type\n");
+      printf("                        0 - Galerkin (default)\n");
+      printf("                        1 - non-Galerkin ParFlow operators\n");
+      printf("                        2 - Galerkin, general operators\n");
       printf("  -relax <r>          : relaxation type\n");
       printf("                        0 - Jacobi\n");
       printf("                        1 - Weighted Jacobi (default)\n");
@@ -401,6 +412,8 @@ main( int   argc,
       printf("  (n_pre, n_post) = (%d, %d)\n", n_pre, n_post);
       printf("  dim             = %d\n", dim);
       printf("  skip            = %d\n", skip);
+      printf("  rap             = %d\n", rap);
+      printf("  relax           = %d\n", relax);
       printf("  jump            = %d\n", jump);
       printf("  solver ID       = %d\n", solver_id);
    }
@@ -412,6 +425,8 @@ main( int   argc,
       printf("  (n_pre, n_post) = (%d, %d)\n", n_pre, n_post);
       printf("  dim             = %d\n", dim);
       printf("  skip            = %d\n", skip);
+      printf("  rap             = %d\n", rap);
+      printf("  relax           = %d\n", relax);
       printf("  jump            = %d\n", jump);
       printf("  solver ID       = %d\n", solver_id);
       printf("  the grid is read from  file \n");
@@ -999,6 +1014,7 @@ main( int   argc,
       HYPRE_StructPFMGSetMaxIter(solver, 50);
       HYPRE_StructPFMGSetTol(solver, 1.0e-06);
       HYPRE_StructPFMGSetRelChange(solver, 0);
+      HYPRE_StructPFMGSetRAPType(solver, rap);
       HYPRE_StructPFMGSetRelaxType(solver, relax);
       HYPRE_StructPFMGSetNumPreRelax(solver, n_pre);
       HYPRE_StructPFMGSetNumPostRelax(solver, n_post);
@@ -1111,6 +1127,7 @@ main( int   argc,
          HYPRE_StructPFMGSetMaxIter(precond, 1);
          HYPRE_StructPFMGSetTol(precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(precond);
+         HYPRE_StructPFMGSetRAPType(precond, rap);
          HYPRE_StructPFMGSetRelaxType(precond, relax);
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
@@ -1264,6 +1281,7 @@ main( int   argc,
          HYPRE_StructPFMGSetMaxIter(precond, 1);
          HYPRE_StructPFMGSetTol(precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(precond);
+         HYPRE_StructPFMGSetRAPType(precond, rap);
          HYPRE_StructPFMGSetRelaxType(precond, relax);
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
@@ -1372,6 +1390,7 @@ main( int   argc,
          HYPRE_StructPFMGSetMaxIter(precond, 1);
          HYPRE_StructPFMGSetTol(precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(precond);
+         HYPRE_StructPFMGSetRAPType(precond, rap);
          HYPRE_StructPFMGSetRelaxType(precond, relax);
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
@@ -1515,6 +1534,7 @@ main( int   argc,
          HYPRE_StructPFMGSetMaxIter(precond, 1);
          HYPRE_StructPFMGSetTol(precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(precond);
+         HYPRE_StructPFMGSetRAPType(precond, rap);
          HYPRE_StructPFMGSetRelaxType(precond, relax);
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
