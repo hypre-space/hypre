@@ -1,0 +1,14 @@
+/**
+@name {\it hypre} Reference Manual
+@version HYPREVersion
+*/
+/*@version \TEX{\input{version}\HYPREVersion{}}*/
+
+//@{
+	//@Include: /home/hill66/linear_solvers/docs/../struct_mv/HYPRE_struct_mv.h
+	//@Include: /home/hill66/linear_solvers/docs/../sstruct_mv/HYPRE_sstruct_mv.h
+	//@Include: /home/hill66/linear_solvers/docs/../IJ_mv/HYPRE_IJ_mv.h
+	//@Include: /home/hill66/linear_solvers/docs/../struct_ls/HYPRE_struct_ls.h
+	//@Include: /home/hill66/linear_solvers/docs/../sstruct_ls/HYPRE_sstruct_ls.h
+	//@Include: /home/hill66/linear_solvers/docs/../parcsr_ls/HYPRE_parcsr_ls.h
+//@}

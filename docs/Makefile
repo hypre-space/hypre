@@ -1,4 +1,3 @@
-# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
 # (c) 1998   The Regents of the University of California
 #
@@ -7,6 +6,8 @@
 #
 # $Revision$
 #EHEADER***********************************************************************
+
+include ../config/Makefile.config
 
 .SUFFIXES:
 .SUFFIXES: .c .dxx .html .tex
@@ -60,14 +61,14 @@ DEV_FILES =\
 # Targets
 ##################################################################
 
-all: html ps
+all: html ps pdf
 
 install: all
-	@cp -fr HYPRE_usr_manual    $$HYPRE_INSTALL_DIR/docs/.
-	@cp -f  HYPRE_usr_manual.p* $$HYPRE_INSTALL_DIR/docs/.
-	@cp -fr HYPRE_ref_manual    $$HYPRE_INSTALL_DIR/docs/.
-	@cp -f  HYPRE_ref_manual.p* $$HYPRE_INSTALL_DIR/docs/.
-	@cp -f  V[1-9]* $$HYPRE_INSTALL_DIR/docs/.
+	@cp -fr HYPRE_usr_manual    ${HYPRE_INSTALL_DIR}/docs/.
+	@cp -f  HYPRE_usr_manual.p* ${HYPRE_INSTALL_DIR}/docs/.
+	@cp -fr HYPRE_ref_manual    ${HYPRE_INSTALL_DIR}/docs/.
+	@cp -f  HYPRE_ref_manual.p* ${HYPRE_INSTALL_DIR}/docs/.
+	@cp -f  V[1-9]* ${HYPRE_INSTALL_DIR}/docs/.
 
 clean:
 	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
@@ -90,17 +91,22 @@ html: usr_html dev_html ref_html
 
 ps: usr_ps dev_ps ref_ps
 
-usr: usr_html usr_ps
+pdf: usr_pdf dev_pdf ref_pdf
+
+usr: usr_html usr_ps usr_pdf
 usr_html: HYPRE_usr_manual/usr_manual.html
 usr_ps: HYPRE_usr_manual.ps
+usr_pdf: HYPRE_usr_manual.pdf
 
-dev: dev_html dev_ps
+dev: dev_html dev_ps dev_pdf
 dev_html: HYPRE_dev_manual/dev_manual.html
 dev_ps: HYPRE_dev_manual.ps
+dev_pdf: HYPRE_dev_manual.pdf
 
-ref: ref_html ref_ps
+ref: ref_html ref_ps ref_pdf
 ref_html: HYPRE_ref_manual/index.html
 ref_ps: HYPRE_ref_manual.ps
+ref_pdf: HYPRE_ref_manual.pdf
 
 ##########
 
@@ -111,6 +117,8 @@ HYPRE_usr_manual/usr_manual.html: usr_manual.dvi
 
 HYPRE_usr_manual.ps: usr_manual.dvi
 	${DVIPS} -o HYPRE_usr_manual.ps usr_manual
+
+HYPRE_usr_manual.pdf: HYPRE_usr_manual.ps
 	${PSPDF} HYPRE_usr_manual.ps
 
 usr_manual.dvi: version.tex usr_manual.idx
@@ -131,6 +139,8 @@ HYPRE_dev_manual/dev_manual.html: dev_manual.dvi
 
 HYPRE_dev_manual.ps: dev_manual.dvi
 	${DVIPS} -o HYPRE_dev_manual.ps dev_manual
+
+HYPRE_dev_manual.pdf: HYPRE_dev_manual.ps
 	${PSPDF} HYPRE_dev_manual.ps
 
 dev_manual.dvi: version.tex dev_manual.idx
@@ -151,6 +161,8 @@ HYPRE_ref_manual/index.html: vref_manual.dxx
 
 HYPRE_ref_manual.ps: vref_manual.dvi
 	${DVIPS} -o HYPRE_ref_manual.ps vref_manual.dvi 		
+
+HYPRE_ref_manual.pdf: HYPRE_ref_manual.ps
 	${PSPDF} HYPRE_ref_manual.ps
 
 vref_manual.dvi: version.tex vref_manual.tex
@@ -168,14 +180,31 @@ vref_manual.dxx: ref_manual.dxx
 
 ##########
 
+bHYPRE_ref_manual/index.html: vbref_manual.dxx 
+	mkdir -p bHYPRE_ref_manual
+	doc++ -d bHYPRE_ref_manual -B hypre_wiw.html vbref_manual.dxx 2>&1
+	cp -f hypre_wiw.gif bHYPRE_ref_manual
+
+bHYPRE_ref_manual.ps: vbref_manual.dvi
+	${DVIPS} -o bHYPRE_ref_manual.ps vbref_manual.dvi 		
+
+bHYPRE_ref_manual.pdf: bHYPRE_ref_manual.ps
+	${PSPDF} bHYPRE_ref_manual.ps
+
+vbref_manual.dvi: version.tex vbref_manual.tex
+	${LATEX} vbref_manual
+	${LATEX} vbref_manual
+
+vbref_manual.tex: vbref_manual.dxx
+	doc++ -t -o vbref_manual.tex vbref_manual.dxx
+
+vbref_manual.dxx: ref_manual.dxx
+	@ \
+	sed "s/HYPREVersion/$(HYPRE_RELEASE_VERSION)/g" ref_manual.dxx > vbref_manual.dxx
+
+##########
+
 version.tex:
 	@ \
-	VNUM=`$(srcdir)/../utilities/version -number`; \
-	VDATE=`$(srcdir)/../utilities/version -date`; \
-	echo "\def\HYPREVersion{$$VNUM}" > version.tex; \
-	echo "\def\HYPREVersionDate{$$VDATE}" >> version.tex
-
-##################################################################
-# Generic rules
-##################################################################
-
+	echo "\def\HYPREVersion{$(HYPRE_RELEASE_VERSION)}" > version.tex; \
+	echo "\def\HYPREVersionDate{$(HYPRE_RELEASE_DATETIME)}" >> version.tex
