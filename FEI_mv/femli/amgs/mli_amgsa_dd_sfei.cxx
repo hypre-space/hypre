@@ -213,7 +213,7 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
       /* -------------------------------------------------------- */
 
       eMatDim  = elemNNodes;
-      rowSize  = elemNNodes * 8;
+      rowSize  = elemNNodes * 16;
       csrNrows = newNNodes;
       csrIA    = new int[csrNrows+1];
       csrJA    = new int[csrNrows*rowSize];
