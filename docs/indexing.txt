@@ -86,8 +86,8 @@ modifies the data in the array, so it should be used only when necessary):
 
 II.2. Coding Rules and Guidelines
 
-- All arrays such that either the array indices or the array contents
-  refer to rows and/or columns of matrices must be hypre_BaseArray types.
+- All arrays with array indices that refer to either rows/columns of
+  matrices or elements of vectors must be hypre_BaseArray types.
   This reduces the possibility of making coding errors.
 
 - All hypre_BaseArray types in the same routine should use the same base.
