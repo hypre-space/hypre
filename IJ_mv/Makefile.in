@@ -57,8 +57,9 @@ HEADERS =\
  HYPRE_IJMatrix.h
 
 FILES =\
+ aux_parcsr.c\
  IJMatrix_parcsr.c\
- HYPRE_IJMatrix.c\
+ hypre_IJMatrix_parcsr.c\
  HYPRE_IJMatrix.c\
  F90_HYPRE_IJMatrix.c
 

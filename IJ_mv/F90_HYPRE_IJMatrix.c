@@ -20,14 +20,14 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_newijmatrix)( long int *matrix,
-                                    int      *comm,
+hypre_F90_IFACE(hypre_newijmatrix)( int      *comm,
+                                    long int *matrix,
                                     int      *global_m,
                                     int      *global_n,
                                     int      *ierr      )
 {
-   *ierr = (int) ( HYPRE_NewIJMatrix( (HYPRE_IJMatrix *)  matrix,
-                                      (MPI_Comm)         *comm,
+   *ierr = (int) ( HYPRE_NewIJMatrix( (MPI_Comm)         *comm,
+                                      (HYPRE_IJMatrix *)  matrix,
                                       (int)              *global_m,
                                       (int)              *global_n  ) );
 }

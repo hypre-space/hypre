@@ -16,9 +16,9 @@ srcdir = .
 
 CC =  mpicc
 
-C_COMPILE_FLAGS= -O 
-CXX_COMPILE_FLAGS= -O 
-F77_COMPILE_FLAGS= -O -silent 
+C_COMPILE_FLAGS=  -g
+CXX_COMPILE_FLAGS=  -g
+F77_COMPILE_FLAGS=  -g -silent
 CINCLUDES= 
 CDEFS =  -DHYPRE_NO_PTHREAD_MANGLING
 
@@ -57,9 +57,10 @@ HEADERS =\
  HYPRE_IJMatrix.h
 
 FILES =\
+ aux_parcsr_matrix.c\
+ hypre_IJMatrix_parcsr.c\
+ HYPRE_IJMatrix.c\
  IJMatrix_parcsr.c\
- HYPRE_IJMatrix.c\
- HYPRE_IJMatrix.c\
  F90_HYPRE_IJMatrix.c
 
 OBJS = ${FILES:.c=.o}

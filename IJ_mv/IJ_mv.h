@@ -170,7 +170,7 @@ void hypre_F90_IFACE P((int hypre_addblocktoijmatrix ));
 void hypre_F90_IFACE P((int hypre_insertijmatrixrow ));
 
 /* HYPRE_IJMatrix.c */
-int HYPRE_NewIJMatrix P((HYPRE_IJMatrix *in_matrix_ptr , MPI_Comm comm , int global_m , int global_n ));
+int HYPRE_NewIJMatrix P((MPI_Comm comm , HYPRE_IJMatrix *in_matrix_ptr , int global_m , int global_n ));
 int HYPRE_FreeIJMatrix P((HYPRE_IJMatrix IJmatrix ));
 int HYPRE_InitializeIJMatrix P((HYPRE_IJMatrix IJmatrix ));
 int HYPRE_AssembleIJMatrix P((HYPRE_IJMatrix IJmatrix ));

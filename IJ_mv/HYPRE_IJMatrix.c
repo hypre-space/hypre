@@ -36,7 +36,7 @@ participate in any collective operations.
 */
 /*---------------------------------------------------------------------- */
 
-int HYPRE_NewIJMatrix( HYPRE_IJMatrix *in_matrix_ptr, MPI_Comm comm, 
+int HYPRE_NewIJMatrix( MPI_Comm comm, HYPRE_IJMatrix *in_matrix_ptr, 
           int global_m, int global_n)
 
 {
