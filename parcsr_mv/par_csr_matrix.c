@@ -137,6 +137,29 @@ hypre_InitializeParCSRMatrix( hypre_ParCSRMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SetParCSRMatrixNumNonzeros
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_SetParCSRMatrixNumNonzeros( hypre_ParCSRMatrix *matrix)
+{
+   MPI_Comm comm = hypre_ParCSRMatrixComm(matrix);
+   hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(matrix);
+   int *diag_i = hypre_CSRMatrixI(diag);
+   int local_num_rows = hypre_CSRMatrixNumRows(diag);
+   int num_procs, my_id;
+   total_num_nonzeros;
+
+   MPI_Comm_size(comm, &num_procs);
+   MPI_Comm_rank(comm, &my_id);
+
+   MPI_Allreduce(&diag_i[local_num_rows], &total_num_nonzeros, 1, MPI_INT,
+	MPI_SUM, comm);
+   hypre_ParCSRMatrixNumNonzeros(matrix) = total_num_nonzeros;
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SetParCSRMatrixDataOwner
  *--------------------------------------------------------------------------*/
 
@@ -830,3 +853,31 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    return matrix;
 }
     
+/*--------------------------------------------------------------------------
+ * hypre_CopyParCSRMatrix,
+ * copies B to A,
+ * if copy_data = 0, only the structure of A is copied to B
+ * the routine does not check whether the dimensions of A and B are compatible
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_CopyParCSRMatrix( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, 
+			int copy_data )
+{
+   int  ierr=0;
+   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+   int *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
+   hypre_CSRMatrix *B_diag = hypre_ParCSRMatrixDiag(B);
+   hypre_CSRMatrix *B_offd = hypre_ParCSRMatrixOffd(B);
+   int *col_map_offd_B = hypre_ParCSRMatrixColMapOffd(B);
+   int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+   int i;
+
+   hypre_CopyCSRMatrix(A_diag, B_diag, copy_data);
+   hypre_CopyCSRMatrix(A_offd, B_offd, copy_data);
+   for (i = 0; i < num_cols_offd; i++)
+	col_map_offd_B[i] = col_map_offd_A[i];
+	
+   return ierr;
+}
