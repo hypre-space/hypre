@@ -227,7 +227,6 @@ hypre_PCGSolve( void *pcg_vdata,
    int           (*precond)()   = (pcg_functions -> precond);
    void           *precond_data = (pcg_data -> precond_data);
    int             logging      = (pcg_data -> logging);
-   double          rel_res_norm = (pcg_data -> rel_residual_norm);
    double         *norms        = (pcg_data -> norms);
    double         *rel_norms    = (pcg_data -> rel_norms);
                 
