@@ -671,8 +671,9 @@ hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
-hypre_ParCSRMatrixToCSRMatrixAll(MPI_Comm comm, hypre_ParCSRMatrix *par_matrix)
+hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
 {
+   MPI_Comm comm = hypre_ParCSRMatrixComm(par_matrix);
    hypre_CSRMatrix *matrix;
    hypre_CSRMatrix *local_matrix;
    int num_rows = hypre_ParCSRMatrixGlobalNumRows(par_matrix);

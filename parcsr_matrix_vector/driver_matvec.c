@@ -59,7 +59,7 @@ main( int   argc,
 		row_starts, col_starts);
    printf(" converted\n");
 
-   matrix1 = hypre_ParCSRMatrixToCSRMatrixAll(MPI_COMM_WORLD,par_matrix);
+   matrix1 = hypre_ParCSRMatrixToCSRMatrixAll(par_matrix);
 
    sprintf(file_name,"matrix1.%d",my_id);
 
