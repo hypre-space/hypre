@@ -4,7 +4,9 @@ c     AMGS01 :  main driver routine for AMGS01
 c
 c=====================================================================
 c
-      subroutine amgs01(u,f,a,ia,ja,iu,ip,iv,xp,yp,ifc,nu,nv,np,isw)
+      subroutine amgs01(u, f, a, ia, ja,
+     *                  nv, nu, np, iu, ip, iv, xp, yp, zp,
+     *                  ifc, isw, lfname)
 c
 c---------------------------------------------------------------------
 c
@@ -46,6 +48,8 @@ c
 c---------------------------------------------------------------------
 c
       implicit real*8 (a-h,o-z)
+      integer TOLD,TNEW,TAMG
+      CHARACTER*24 DT
 c
 c=>   parameter statement
 c
@@ -80,10 +84,13 @@ c=>   point-oriented arrays (2-D)
 c
       real*8 xp (*)
       real*8 yp (*)
+      real*8 zp (*)
 c
 c=>   forced coarse grid information
 c
       dimension ifc(*)
+c
+      character*(*)  lfname
 c
 c---- LOCAL ARRAYS ---------------------------------------------------
 c
@@ -116,11 +123,25 @@ c
       dimension iurlx(4)
 c
       SAVE
-c
+
 c---------------------------------------------------------------------
-c
-c     set fine level point & variable bounds
-c
+c open the log file and write some initial info
+c---------------------------------------------------------------------
+
+      open(6,file=lfname,status='UNKNOWN')
+
+      CALL FDATE(DT)
+      WRITE(6,1559) lfname,DT
+1559  FORMAT(' FILE:',A15,10X,'DATE:',A24)
+      write(6,1550)
+1550  format(/'  NEW VERSION'/)
+      write(6,1553)
+1553  format(/'  AMG OUTPUT:'/)
+
+c---------------------------------------------------------------------
+c write some debugging info
+c---------------------------------------------------------------------
+
 CVEH
       write (6,*) ('in AMGs01')
       write (6,*) nu,np,nv,'    nu, np, nv'
@@ -136,6 +157,18 @@ CVEH
       write (6,*) yp(1), yp(nv), '  yp(1, nv)'
       write(6,'(1x)')
 CVEH
+
+c---------------------------------------------------------------------
+c start timing
+c---------------------------------------------------------------------
+
+      CALL CTIME(TOLD)
+
+c
+c---------------------------------------------------------------------
+c
+c     set fine level point & variable bounds
+c
       nun=nu
       ipmn(1)=1
       ipmx(1)=np
@@ -234,6 +267,23 @@ c
 c       output routine here
         call splot(imin,imax,u,iu,ip,ipmn,ipmx,iv,xp,yp)
       endif
+
+c---------------------------------------------------------------------
+c end timing
+c---------------------------------------------------------------------
+
+      CALL CTIME(TNEW)
+      TAMG=TNEW-TOLD
+
+c---------------------------------------------------------------------
+c write some info and close the log file
+c---------------------------------------------------------------------
+
+      WRITE (6,9000) TAMG
+9000  FORMAT(///'***** Running TIME (TAMG) :',I10,' SEC *****'/)
+
+      CLOSE(6)
+
 c
       return
       end

@@ -1,0 +1,30 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1996   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+################################################################################
+#
+# Shell script that uses `mkproto' and `rcs_files' to create a prototype
+# header file.
+#
+################################################################################
+
+mkproto -s `cat rcs_files | \
+awk '
+   BEGIN {STR = " "}
+   {
+      for (i = 1; i <= NF; i++) {
+         if (($i  ~ /[^\ ]*\.c/) && \
+             ($i !~ /amg\.c/)       )
+            STR = STR $i " "
+      }
+   }
+   END {print STR}
+'` > amg_proto.h
+

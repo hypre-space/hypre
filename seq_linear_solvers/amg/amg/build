@@ -1,4 +1,12 @@
 #!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1996   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
 
 #===========================================================================
 # This script builds the AMG code
@@ -20,14 +28,12 @@ if [ "$AMG_OPTIMIZE_FLAG" ]
 then
    CFLAGS="$CFLAGS $AMG_CC_OPT"
    FFLAGS="$FFLAGS $AMG_F77_OPT"
-   LFLAGS="$LFLAGS $AMG_LINK_OPT"
 fi
 
 if [ "$AMG_DEBUG_FLAG" ]
 then
    CFLAGS="$CFLAGS $AMG_CC_DEBUG"
    FFLAGS="$FFLAGS $AMG_F77_DEBUG"
-   LFLAGS="$LFLAGS $AMG_LINK_DEBUG"
 fi
 
 export AMG_PROGRAM CFLAGS FFLAGS LFLAGS
@@ -43,6 +49,22 @@ then
    echo "       Arch:                   $AMG_ARCH"
    echo "       CC Options:             $CFLAGS"
    echo "       F77 Options:            $FFLAGS"
+
+   # define AMG_FILES
+   AMG_FILES=`cat rcs_files | \
+      awk '
+         BEGIN {STR = " "}
+         {
+           for (i = 1; i <= NF; i++) {
+             if (($i ~ /[^\ ]*\.c/) || \
+                 ($i ~ /[^\ ]*\.f/)    )
+               STR = STR $i " "
+           }
+         }
+         END {print STR}
+      '`
+
+   export AMG_FILES
 
    $AMG_MAKE $AMG_PROGRAM.$AMG_ARCH
 
@@ -63,7 +85,7 @@ then
    fi
 
    $AMG_INSTALL $AMG_SRC/amg/$AMG_PROGRAM.$AMG_ARCH $AMG_BIN/$AMG_PROGRAM
-   $AMG_INSTALL $AMG_SRC/amg/lx $AMG_BIN/.
+   $AMG_INSTALL $AMG_SRC/amg/amgrun $AMG_BIN/.
 fi
 
 #=============================================================================
