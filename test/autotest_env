@@ -16,9 +16,14 @@
 CVSROOT=/home/casc/repository
 export CVSROOT
 
-PATH=/home/casc/bin:/opt/SUNWspro/bin:/usr/ccs/bin:/usr/local/bin
-PATH=${PATH}:/usr/bin:/usr/ucb:/usr/local/scripts:/usr/local/mpi/mpich/bin
+PATH=/usr/xpg4/bin:/opt/SUNWspro/bin:/usr/ccs/bin:/usr/bin:/bin
+PATH=${PATH}:/usr/sbin:/usr/ucb:/usr/local/bin:/usr/local/scripts
+PATH=${PATH}:/usr/local/mpi/mpich/bin:/home/casc/bin
 export PATH
+
+MPICH_CCLINKER=CC
+MPICH_CCC=CC
+export MPICH_CCLINKER MPICH_CCC
 
 #==============================================================================
 # Set autotest directory to current directory
