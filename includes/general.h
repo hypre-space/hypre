@@ -1,7 +1,11 @@
 
 #include <stdlib.h>
 
+#ifdef HYPRE_DEBUG
+#ifdef SOLARIS
 #include <gmalloc.h>
+#endif
+#endif
 
 /* Bring in CASC utilities */
 #include "../utilities/memory.h"
