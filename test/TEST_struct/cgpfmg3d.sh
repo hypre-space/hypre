@@ -18,5 +18,4 @@ tail -3 cgpfmg3d.out.0 > cgpfmg3d.testdata
 tail -3 cgpfmg3d.out.1 > cgpfmg3d.testdata.temp
 diff cgpfmg3d.testdata cgpfmg3d.testdata.temp >&2
 
-#rm -f cgpfmg3d.out.0 cgpfmg3d.out.1
-#rm -f cgpfmg3d.testdata cgpfmg3d.testdata.temp
+rm -f cgpfmg3d.testdata cgpfmg3d.testdata.temp

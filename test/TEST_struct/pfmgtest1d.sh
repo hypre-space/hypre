@@ -12,4 +12,3 @@
 # struct: no test
 #=============================================================================
 
-#rm -f pfmgtest1d.out.0 pfmgtest1d.out.1 pfmgtest1d.out.2

@@ -20,5 +20,4 @@ diff pfmgorient.testdata pfmgorient.testdata.temp  >&2
 tail -3 pfmgorient.out.2 > pfmgorient.testdata.temp
 diff pfmgorient.testdata pfmgorient.testdata.temp  >&2
 
-#rm -f pfmgorient.out.0 pfmgorient.out.1 pfmgorient.out.2
-#rm -f pfmgorient.testdata pfmgorient.testdata.temp
+rm -f pfmgorient.testdata pfmgorient.testdata.temp

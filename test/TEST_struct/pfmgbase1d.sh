@@ -17,5 +17,4 @@ tail -3 pfmgbase1d.out.0 > pfmgbase1d.testdata
 tail -3 pfmgbase1d.out.1 > pfmgbase1d.testdata.temp
 diff pfmgbase1d.testdata pfmgbase1d.testdata.temp  >&2
 
-#rm -f pfmgbase1d.out.0 pfmgbase1d.out.1
-#rm -f pfmgbase1d.testdata pfmgbase1d.testdata.temp
+rm -f pfmgbase1d.testdata pfmgbase1d.testdata.temp

@@ -12,4 +12,3 @@
 # IJ: no test
 #=============================================================================
 
-#rm -f coarsening.out.0 coarsening.out.1 coarsening.out.2 coarsening.out.3

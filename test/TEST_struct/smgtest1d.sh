@@ -12,4 +12,3 @@
 # struct: no test
 #=============================================================================
 
-#rm -f smgtest1d.out.0 smgtest1d.out.1 smgtest1d.out.2

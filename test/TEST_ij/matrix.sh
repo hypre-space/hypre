@@ -23,5 +23,4 @@ tail -21 matrix.out.2 > matrix.testdata.tmp0
 head matrix.testdata.tmp0 > matrix.testdata.temp
 diff matrix.testdata matrix.testdata.temp >&2
 
-#rm -f matrix.out.0 matrix.out.1 matrix.out.2
-#rm -f matrix.testdata matrix.testdata.tmp0 matrix.testdata.temp
+rm -f matrix.testdata matrix.testdata.tmp0 matrix.testdata.temp

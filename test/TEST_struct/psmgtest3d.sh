@@ -21,5 +21,4 @@ tail -3 psmgtest3d.out.0 > psmgtest3d.testdata
 tail -3 psmgtest3d.out.1 > psmgtest3d.testdata.temp
 diff psmgtest3d.testdata psmgtest3d.testdata.temp >&2
 
-#rm -f psmgtest3d.out.0 psmgtest3d.out.1 psmgtest3d.out.2
-#rm -f psmgtest3d.testdata psmgtest3d.testdata.temp
+rm -f psmgtest3d.testdata psmgtest3d.testdata.temp

@@ -12,5 +12,3 @@
 # struct: no test
 #=============================================================================
 
-#rm -f solvers.out.0 solvers.out.1 solvers.out.2 
-#rm -f solvers.out.3 solvers.out.4

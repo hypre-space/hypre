@@ -12,6 +12,3 @@
 # IJ: no test
 #=============================================================================
 
-#rm -f solvers.out.0 solvers.out.1 solvers.out.2 solvers.out.3
-#rm -f solvers.out.4 solvers.out.5 solvers.out.6 solvers.out.7
-#rm -f solvers.out.8 solvers.out.9

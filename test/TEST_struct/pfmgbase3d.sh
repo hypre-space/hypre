@@ -32,6 +32,4 @@ diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
 tail -3 pfmgbase3d.out.6 > pfmgbase3d.testdata.temp
 diff pfmgbase3d.testdata pfmgbase3d.testdata.temp >&2
 
-#rm -f pfmgbase3d.out.0 pfmgbase3d.out.1 pfmgbase3d.out.2 pfmgbase3d.out.3
-#rm -f pfmgbase3d.out.4 pfmgbase3d.out.5 pfmgbase3d.out.6
-#rm -f pfmgbase3d.testdata pfmgbase3d.testdata.temp
+rm -f pfmgbase3d.testdata pfmgbase3d.testdata.temp

@@ -17,5 +17,4 @@ tail -3 smgbase1d.out.0 > smgbase1d.testdata
 tail -3 smgbase1d.out.1 > smgbase1d.testdata.temp
 diff smgbase1d.testdata smgbase1d.testdata.temp  >&2
 
-#rm -f smgbase1d.out.0 smgbase1d.out.1
-#rm -f smgbase1d.testdata smgbase1d.testdata.temp
+rm -f smgbase1d.testdata smgbase1d.testdata.temp

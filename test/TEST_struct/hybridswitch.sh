@@ -12,6 +12,3 @@
 # struct: no test
 #=============================================================================
 
-#rm -f hybridswitch.out.0 hybridswitch.out.1 hybridswitch.out.2
-#rm -f hybridswitch.out.3 hybridswitch.out.4 hybridswitch.out.5
-#rm -f hybridswitch.out.6 hybridswitch.out.7 
