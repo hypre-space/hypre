@@ -27,7 +27,8 @@ struct_linear_solvers \
 
 for i in $TEST_DRIVERS
 do
-  ./${i}.sh 1> ${i}.log 2> ${i}.err
+    echo "running ${i} test suite..."
+    ./${i}.sh 1> ${i}.log 2> ${i}.err
 done
 
 #===========================================================================
@@ -37,6 +38,8 @@ done
 
 if [ "$1" = "-mail" ]
 then
+    echo "checking for errors..."
+
     HYPRE_MAIL=/usr/ucb/Mail
     case $HYPRE_ARCH in
 	dec)

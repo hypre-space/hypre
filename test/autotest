@@ -48,21 +48,22 @@ cvs checkout -P linear_solvers
 # Make libraries and test drivers
 #=============================================================================
 
-cd linear_solvers
+cd $HYPRE_AUTOTEST_DIR/linear_solvers
 ./configure
 make
 
 #=============================================================================
-# Run script to test all driver programs 
+# Run test suites
 #=============================================================================
 
-cd test
+cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 ./test_drivers.sh -mail
 
 #=============================================================================
 # Clean up
 #=============================================================================
 
+cd $HYPRE_AUTOTEST_DIR/linear_solvers
 make veryclean
 
 #==============================================================================
@@ -86,40 +87,56 @@ do
 case $1 in
     -dec)
         HYPRE_COMPILE_MACHINE="west"
-        HYPRE_RUN_MACHINE="northwest"
-        HYPRE_REMOTE_DIR=AUTOTEST
+        HYPRE_RUN_MACHINE="west"
+        HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
         shift;;
     -blue)
         HYPRE_COMPILE_MACHINE="blue"
         HYPRE_RUN_MACHINE="blue"
-        HYPRE_REMOTE_DIR=AUTOTEST
+        HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
         shift;;
     -red)
         HYPRE_COMPILE_MACHINE="sasn100"
         HYPRE_RUN_MACHINE="janus"
-        HYPRE_REMOTE_DIR=AUTOTEST
+        HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
         shift;;
 esac
 
-# remove old source
-ssh ${HYPRE_COMPILE_MACHINE} '(cd ${HYPRE_REMOTE_DIR}; rm -fr *)'
+echo ""
+echo "======================================================================"
+echo "Running tests on $HYPRE_RUN_MACHINE"
+echo "======================================================================"
+echo ""
 
-# copy source over
-scp -r * ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
+echo "creating new AUTOTEST directory...."
+ssh ${HYPRE_COMPILE_MACHINE} "\
+    (\
+	rm -fR ${HYPRE_REMOTE_DIR};\
+	mkdir ${HYPRE_REMOTE_DIR}\
+    )"
+
+echo "copying new source...."
+scp -r linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
 
 # compile
-ssh ${HYPRE_COMPILE_MACHINE} '\
+ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
 	cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
 	./configure;\
 	make\
-    )'
+    )"
 
 # run test suite
-ssh ${HYPRE_RUN_MACHINE} '\
+ssh ${HYPRE_RUN_MACHINE} "\
     (\
 	cd ${HYPRE_REMOTE_DIR}/linear_solvers/test;\
 	./test_drivers.sh -mail\
-    )'
+    )"
+
+echo "cleaning up...."
+ssh ${HYPRE_COMPILE_MACHINE} "
+    (\
+	 rm -fR ${HYPRE_REMOTE_DIR}\
+    )"
 
 done
