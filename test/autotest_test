@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 #BHEADER***********************************************************************
 # (c) 2000   The Regents of the University of California
 #
@@ -172,11 +172,9 @@ mail_errors () {
         if test -r "${i}.email"
         then
           RECIPIENTS=`cat ${i}.email` 
-#       else
-#         RECIPIENTS=$HYPRE_DEFAULT_EMAIL
+          SUBJECT="Autotest error: ${i} ($HYPRE_ARCH)"
+          ${HYPRE_MAIL} -s "$SUBJECT" $RECIPIENTS < $i 
         fi
-        SUBJECT="Autotest error: ${i} ($HYPRE_ARCH)"
-        ${HYPRE_MAIL} -s "$SUBJECT" $RECIPIENTS < $i 
       fi 
     done 
     echo "Autotest mail sent"
