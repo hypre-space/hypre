@@ -224,7 +224,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    /* initialize first term of hessenberg system */
 
 	rs[0] = r_norm;
-        if (r_norm == 0.0)
+        if (r_norm == 0.0 || b_norm == 0)
 	{
 	   hypre_PCGCopyVector(b,x);
 	   ierr = 0;
