@@ -45,6 +45,8 @@ CXXFLAGS =\
  -I$(srcdir)/../../../parcsr_mv\
  -I$(srcdir)/../../../seq_mv\
  -I$(srcdir)/../../../IJ_mv\
+ -I$(srcdir)/../../../parcsr_ls\
+ -I$(srcdir)/../../../krylov\
  ${CXXINCLUDES}\
  ${CXXDEFS}
  

@@ -73,13 +73,13 @@ class MLI_Method_AMGSA : public MLI_Method
    int      calc_norm_scheme;        /* method to estimate matrix norm   */
    int      min_coarse_size;         /* tell when to stop aggregation    */
    int      coarsen_scheme;          /* different aggregation schemes    */
-   int      pre_smoother;            /* denote which pre-smoother to use */
-   int      postsmoother;            /* denote which postsmoother to use */
+   char     pre_smoother[20];        /* denote which pre-smoother to use */
+   char     postsmoother[20];        /* denote which postsmoother to use */
    int      pre_smoother_num;        /* number of pre-smoother sweeps    */
    int      postsmoother_num;        /* number of postsmoother sweeps    */
    double   *pre_smoother_wgt;       /* weight used in pre-smoother      */
    double   *postsmoother_wgt;       /* weight used in postsmoother      */
-   int      coarse_solver;           /* denote which coarse solver to use*/
+   char     coarse_solver[20];       /* denote which coarse solver to use*/
    int      coarse_solver_num;       /* number of coarse solver sweeps   */
    double   *coarse_solver_wgt;      /* weight used in coarse solver     */
    int      calibration_size;        /* for calibration AMG method       */
@@ -101,8 +101,8 @@ public :
 
    int    setOutputLevel( int outputLevel );
    int    setNumLevels( int nlevels );
-   int    setSmoother( int prePost, int setID, int num, double *wgt );
-   int    setCoarseSolver( int setID, int num, double *wgt );
+   int    setSmoother( int prePost, char *stype, int num, double *wgt );
+   int    setCoarseSolver( char *stype, int num, double *wgt );
    int    setCoarsenScheme( int scheme );
    int    setMinCoarseSize( int minSize );
    int    setStrengthThreshold( double thresh );
@@ -110,6 +110,8 @@ public :
    int    setCalcSpectralNorm();
    int    setAggregateInfo(int level, int naggr, int leng, int *aggrInfo);
    int    setNullSpace(int nodeDOF, int numNS, double *nullVec, int length);
+   int    resetNullSpaceComponents(int length, int start, int *indices);
+   int    adjustNullSpace(double *vecAdjust);
    int    setNodalCoordinates(int nNodes,int nDOF,double *coor,double *scale);
    int    setCalibrationSize(int size);
    int    setupCalibration( MLI *mli );
@@ -120,6 +122,7 @@ public :
    int    printStatistics(MLI *mli);
    int    getNullSpace(int &nodeDOF,int &numNS,double *&nullVec, int &leng);
    int    copy( MLI_Method * );
+   int    relaxNullSpaces(MLI_Matrix *mat);
 
 private :
 

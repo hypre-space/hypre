@@ -16,7 +16,7 @@
 #include "solver/mli_solver.h"
 #include "base/mli_defs.h"
 #include "amgs/mli_method_amgsa.h"
- 
+
 /* ********************************************************************* *
  * functions external to MLI 
  * --------------------------------------------------------------------- */
@@ -65,15 +65,15 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    calc_norm_scheme  = 0;              /* use matrix rowsum norm */
    min_coarse_size   = 5;              /* smallest coarse grid   */
    coarsen_scheme    = MLI_METHOD_AMGSA_LOCAL;
-   pre_smoother      = MLI_SOLVER_JACOBI_ID;
-   postsmoother      = MLI_SOLVER_JACOBI_ID;
-   pre_smoother_num  = 10;
-   postsmoother_num  = 10;
+   strcpy(pre_smoother, "Jacobi");
+   strcpy(postsmoother, "Jacobi");
+   pre_smoother_num  = 2;
+   postsmoother_num  = 2;
    pre_smoother_wgt  = new double[2];
    postsmoother_wgt  = new double[2];
    pre_smoother_wgt[0] = pre_smoother_wgt[1] = 0.667;
    postsmoother_wgt[0] = postsmoother_wgt[1] = 0.667;
-   coarse_solver       = MLI_SOLVER_GS_ID;
+   strcpy(coarse_solver, "SGS");
    coarse_solver_num   = 20;
    coarse_solver_wgt   = new double[20];
    for ( int j = 0; j < 20; j++ ) coarse_solver_wgt[j] = 1.0;
@@ -155,9 +155,10 @@ MLI_Method_AMGSA::~MLI_Method_AMGSA()
 
 int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
 {
-   int        level, size, nDOF, numNS, length, nSweeps=1, set_id;
-   int        prePost, nnodes, nAggr, *aggrInfo, *labels, is;
+   int        level, size, nDOF, numNS, length, nSweeps=1, offset;
+   int        prePost, nnodes, nAggr, *aggrInfo, *labels, is, *indices;
    double     thresh, pweight, *nullspace, *weights=NULL, *coords, *scales;
+   double     *nsAdjust;
    char       param1[256], param2[256], *param3;
 
    sscanf(in_name, "%s", param1);
@@ -238,32 +239,6 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
    else if ( !strcasecmp(param1, "setPreSmoother" ))
    {
       sscanf(in_name,"%s %s", param1, param2);
-      if (!strcasecmp(param2, "Jacobi")) 
-           set_id = MLI_SOLVER_JACOBI_ID;
-      else if (!strcasecmp(param2, "GS")) 
-           set_id = MLI_SOLVER_GS_ID;
-      else if (!strcasecmp(param2, "SGS"))       
-           set_id = MLI_SOLVER_SGS_ID;
-      else if (!strcasecmp(param2, "BSGS"))   
-           set_id = MLI_SOLVER_BSGS_ID;
-      else if (!strcasecmp(param2, "MLS"))       
-           set_id = MLI_SOLVER_MLS_ID;
-      else if (!strcasecmp(param2, "ParaSails")) 
-           set_id = MLI_SOLVER_PARASAILS_ID;
-      else if (!strcasecmp(param2, "ArpackSLU")) 
-           set_id = MLI_SOLVER_ARPACKSUPERLU_ID;
-      else if (!strcasecmp(param2, "Chebyshev")) 
-           set_id = MLI_SOLVER_CHEBYSHEV_ID;
-      else if (!strcasecmp(param2, "CG")) 
-           set_id = MLI_SOLVER_CG_ID;
-      else 
-      {
-         printf("MLI_Method_AMGSA::setParams ERROR - setPreSmoother (%s) -\n",
-                param2);
-         printf("invalid smoother. Valid options are : Jacobi, GS, SGS,");
-         printf(" BSGS, MLS, ParaSails, Chebyshev, CG\n");
-         return 1;
-      } 
       if ( argc != 2 )
       {
          printf("MLI_Method_AMGSA::setParams ERROR - setPreSmoother needs");
@@ -275,36 +250,11 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       prePost = MLI_SMOOTHER_PRE;
       nSweeps = *(int *)   argv[0];
       weights = (double *) argv[1];
-      return ( setSmoother(prePost,set_id,nSweeps,weights) );
+      return ( setSmoother(prePost, param2, nSweeps, weights) );
    }
    else if ( !strcasecmp(param1, "setPostSmoother" ))
    {
       sscanf(in_name,"%s %s", param1, param2);
-      if (!strcasecmp(param2, "Jacobi"))    
-           set_id = MLI_SOLVER_JACOBI_ID;
-      else if (!strcasecmp(param2, "GS"))        
-           set_id = MLI_SOLVER_GS_ID;
-      else if (!strcasecmp(param2, "SGS"))       
-           set_id = MLI_SOLVER_SGS_ID;
-      else if (!strcasecmp(param2, "BSGS"))   
-           set_id = MLI_SOLVER_BSGS_ID;
-      else if (!strcasecmp(param2, "MLS"))       
-           set_id = MLI_SOLVER_MLS_ID;
-      else if (!strcasecmp(param2, "ParaSails")) 
-           set_id = MLI_SOLVER_PARASAILS_ID;
-      else if (!strcasecmp(param2, "ArpackSLU")) 
-           set_id = MLI_SOLVER_ARPACKSUPERLU_ID;
-      else if (!strcasecmp(param2, "Chebyshev")) 
-           set_id = MLI_SOLVER_CHEBYSHEV_ID;
-      else if (!strcasecmp(param2, "CG")) 
-           set_id = MLI_SOLVER_CG_ID;
-      else 
-      {
-         printf("MLI_Method_AMGSA::setParams ERROR - setPostSmoother - \n");
-         printf("invalid smoother. Valid options are : Jacobi, GS, SGS,");
-         printf(" BSGS, MLS, ParaSails, CG\n");
-         return 1;
-      } 
       if ( argc != 2 )
       {
          printf("MLI_Method_AMGSA::setParams ERROR - setPostSmoother needs");
@@ -316,35 +266,12 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       prePost = MLI_SMOOTHER_POST;
       nSweeps = *(int *)   argv[0];
       weights = (double *) argv[1];
-      return ( setSmoother(prePost,set_id,nSweeps,weights) );
+      return ( setSmoother(prePost, param2, nSweeps, weights) );
    }
    else if ( !strcasecmp(param1, "setCoarseSolver" ))
    {
       sscanf(in_name,"%s %s", param1, param2);
-      if (!strcasecmp(param2, "Jacobi"))    
-           set_id = MLI_SOLVER_JACOBI_ID;
-      else if (!strcasecmp(param2, "GS"))        
-           set_id = MLI_SOLVER_GS_ID;
-      else if (!strcasecmp(param2, "SGS"))       
-           set_id = MLI_SOLVER_SGS_ID;
-      else if (!strcasecmp(param2, "BSGS"))   
-           set_id = MLI_SOLVER_BSGS_ID;
-      else if (!strcasecmp(param2, "ParaSails")) 
-           set_id = MLI_SOLVER_PARASAILS_ID;
-      else if (!strcasecmp(param2, "Chebyshev")) 
-           set_id = MLI_SOLVER_CHEBYSHEV_ID;
-      else if (!strcasecmp(param2, "CG"))   
-           set_id = MLI_SOLVER_CG_ID;
-      else if (!strcasecmp(param2, "SuperLU"))   
-           set_id = MLI_SOLVER_SUPERLU_ID;
-      else 
-      {
-         printf("MLI_Method_AMGSA::setParams ERROR - setCoarseSolver - \n");
-         printf("invalid solver. Valid options are : Jacobi, GS, SGS,");
-         printf(" BSGS, ParaSails, SuperLU, CG.\n");
-         return 1;
-      } 
-      if ( set_id != MLI_SOLVER_SUPERLU_ID && argc != 2 )
+      if ( strcmp(param2, "SuperLU") && argc != 2 )
       {
          printf("MLI_Method_AMGSA::setParams ERROR - setCoarseSolver needs");
          printf(" 2 arguments.\n");
@@ -352,17 +279,17 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
          printf("     argument[1] : relaxation weights\n");
          return 1;
       } 
-      else if ( set_id != MLI_SOLVER_SUPERLU_ID )
+      else if ( strcmp(param2, "SuperLU") )
       {
          nSweeps   = *(int *)   argv[0];
          weights   = (double *) argv[1];
       }
-      else if ( set_id == MLI_SOLVER_SUPERLU_ID )
+      else if ( !strcmp(param2, "SuperLU") )
       {
          nSweeps = 1;
          weights = NULL;
       }
-      return ( setCoarseSolver(set_id,nSweeps,weights) );
+      return ( setCoarseSolver(param2, nSweeps, weights) );
    }
    else if ( !strcasecmp(param1, "setNullSpace" ))
    {
@@ -381,6 +308,34 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       nullspace = (double *) argv[2];
       length    = *(int *)   argv[3];
       return ( setNullSpace(nDOF,numNS,nullspace,length) );
+   }
+   else if ( !strcasecmp(param1, "adjustNullSpace" ))
+   {
+      if ( argc != 1 )
+      {
+         printf("MLI_Method_AMGSA::setParams ERROR - adjustNullSpace needs");
+         printf(" 1 argument.\n");
+         printf("     argument[0] : adjustment vectors \n");
+         return 1;
+      } 
+      nsAdjust = (double *) argv[0];
+      return ( adjustNullSpace( nsAdjust ) );
+   }
+   else if ( !strcasecmp(param1, "resetNullSpaceComponents" ))
+   {
+      if ( argc != 3 )
+      {
+         printf("MLI_Method_AMGSA::setParams ERROR - resetNSComponents needs");
+         printf(" 2 arguments.\n");
+         printf("     argument[0] : number of equations \n");
+         printf("     argument[1] : equation number offset \n");
+         printf("     argument[2] : list of equation numbers \n");
+         return 1;
+      } 
+      length  = *(int *) argv[0];
+      offset  = *(int *) argv[1];
+      indices =  (int *) argv[2];
+      return ( resetNullSpaceComponents(length, offset, indices) );
    }
    else if ( !strcasecmp(param1, "setNodalCoord" ))
    {
@@ -531,6 +486,10 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    if ( nullspace_dim != node_dofs && nullspace_vec == NULL )
       nullspace_dim = node_dofs;
 
+#if HAVE_LOBPCG
+   relaxNullSpaces(mli_Amat);
+#endif
+   
    for (level = 0; level < num_levels; level++ )
    {
       if ( mypid == 0 && output_level > 0 )
@@ -592,29 +551,29 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       /* ------set the smoothers---------------------------------------- */
 
       if ( useSAMGDDFlag_ && num_levels == 2 && 
-           pre_smoother == MLI_SOLVER_ARPACKSUPERLU_ID) 
+           !strcmp(pre_smoother, "ARPACKSuperLU") )
       {
          setupDDSuperLUSmoother(mli, level);
-         smoother_ptr = MLI_Solver_CreateFromID(MLI_SOLVER_ARPACKSUPERLU_ID);
+         smoother_ptr = MLI_Solver_CreateFromName(pre_smoother);
          targv[0] = (char *) ddObj;
          sprintf( param_string, "ARPACKSuperLUObject" );
          smoother_ptr->setParams(param_string, 1, targv);
          smoother_ptr->setup(mli_Amat);
          mli->setSmoother( level, MLI_SMOOTHER_PRE, smoother_ptr );
 #if 0
-         smoother_ptr = MLI_Solver_CreateFromID(MLI_SOLVER_ARPACKSUPERLU_ID);
+         smoother_ptr = MLI_Solver_CreateFromName(pre_smoother);
          smoother_ptr->setParams(param_string, 1, targv);
          smoother_ptr->setup(mli_Amat);
          mli->setSmoother( level, MLI_SMOOTHER_POST, smoother_ptr );
 #endif
          continue;
       }
-      smoother_ptr = MLI_Solver_CreateFromID( pre_smoother );
+      smoother_ptr = MLI_Solver_CreateFromName( pre_smoother );
       targv[0] = (char *) &pre_smoother_num;
       targv[1] = (char *) pre_smoother_wgt;
       sprintf( param_string, "relaxWeight" );
       smoother_ptr->setParams(param_string, 2, targv);
-      if ( pre_smoother == MLI_SOLVER_MLS_ID ) 
+      if ( !strcmp(pre_smoother, "MLS") ) 
       {
          sprintf( param_string, "maxEigen" );
          targv[0] = (char *) &max_eigen;
@@ -623,14 +582,14 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       smoother_ptr->setup(mli_Amat);
       mli->setSmoother( level, MLI_SMOOTHER_PRE, smoother_ptr );
 
-      if ( pre_smoother != postsmoother ) 
+      if ( strcmp(pre_smoother, postsmoother) )
       {
-         smoother_ptr = MLI_Solver_CreateFromID( postsmoother );
+         smoother_ptr = MLI_Solver_CreateFromName( postsmoother );
          targv[0] = (char *) &postsmoother_num;
          targv[1] = (char *) postsmoother_wgt;
          sprintf( param_string, "relaxWeight" );
          smoother_ptr->setParams(param_string, 2, targv);
-         if ( postsmoother == MLI_SOLVER_MLS_ID ) 
+         if ( !strcmp(postsmoother, "MLS") ) 
          {
             sprintf( param_string, "maxEigen" );
             targv[0] = (char *) &max_eigen;
@@ -644,14 +603,14 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    /* ------set the coarse grid solver---------------------------------- */
 
    if (mypid == 0 && output_level > 0) printf("\tCoarse level = %d\n",level);
-   csolve_ptr = MLI_Solver_CreateFromID( coarse_solver );
-   if (coarse_solver != MLI_SOLVER_SUPERLU_ID) 
+   csolve_ptr = MLI_Solver_CreateFromName( coarse_solver );
+   if ( strcmp(coarse_solver, "SuperLU") )
    {
       targv[0] = (char *) &coarse_solver_num;
       targv[1] = (char *) coarse_solver_wgt;
       sprintf( param_string, "relaxWeight" );
       csolve_ptr->setParams(param_string, 2, targv);
-      if (coarse_solver == MLI_SOLVER_MLS_ID) 
+      if ( !strcmp(coarse_solver, "MLS") )
       {
          sprintf( param_string, "maxEigen" );
          targv[0] = (char *) &max_eigen;
@@ -699,9 +658,14 @@ int MLI_Method_AMGSA::setNumLevels( int nlevels )
  * set smoother
  * --------------------------------------------------------------------- */
 
-int MLI_Method_AMGSA::setSmoother(int prePost,int set_id,int num,double *wgt)
+int MLI_Method_AMGSA::setSmoother(int prePost, char *stype, int num, 
+                                  double *wgt)
 {
    int i;
+
+#ifdef MLI_DEBUG_DETAILED
+   printf("MLI_Method_AMGSA::setSmoother - type = %s.\n", stype);
+#endif
 
    if ( prePost != MLI_SMOOTHER_PRE && prePost != MLI_SMOOTHER_BOTH &&
         prePost != MLI_SMOOTHER_POST )
@@ -709,32 +673,9 @@ int MLI_Method_AMGSA::setSmoother(int prePost,int set_id,int num,double *wgt)
       printf("MLI_Method_AMGSA::setSmoother ERROR - invalid info (1).\n");
       return 1;
    }
-   if ( prePost == MLI_SMOOTHER_PRE || prePost == MLI_SMOOTHER_BOTH )
+   if ( prePost == MLI_SMOOTHER_PRE || prePost != MLI_SMOOTHER_BOTH )
    {
-      switch ( set_id )
-      {
-         case MLI_SOLVER_JACOBI_ID    : pre_smoother = MLI_SOLVER_JACOBI_ID;
-                                        break;
-         case MLI_SOLVER_GS_ID        : pre_smoother = MLI_SOLVER_GS_ID;
-                                        break;
-         case MLI_SOLVER_SGS_ID       : pre_smoother = MLI_SOLVER_SGS_ID;
-                                        break;
-         case MLI_SOLVER_PARASAILS_ID : pre_smoother = MLI_SOLVER_PARASAILS_ID;
-                                        break;
-         case MLI_SOLVER_BSGS_ID      : pre_smoother = MLI_SOLVER_BSGS_ID;
-                                        break;
-         case MLI_SOLVER_MLS_ID       : pre_smoother = MLI_SOLVER_MLS_ID;
-                                        break;
-         case MLI_SOLVER_ARPACKSUPERLU_ID : 
-                                    pre_smoother = MLI_SOLVER_ARPACKSUPERLU_ID;
-                                    break;
-         case MLI_SOLVER_CHEBYSHEV_ID : pre_smoother = MLI_SOLVER_CHEBYSHEV_ID;
-                                        break;
-         case MLI_SOLVER_CG_ID        : pre_smoother = MLI_SOLVER_CG_ID;
-                                        break;
-         default : printf("MLI_Method_AMGSA::setSmoother ERROR(2)\n");
-                   exit(1);
-      }
+      strcpy( pre_smoother, stype );
       if ( num > 0 ) pre_smoother_num = num; else pre_smoother_num = 1;
       delete [] pre_smoother_wgt;
       pre_smoother_wgt = new double[pre_smoother_num];
@@ -745,30 +686,7 @@ int MLI_Method_AMGSA::setSmoother(int prePost,int set_id,int num,double *wgt)
    }
    if ( prePost == MLI_SMOOTHER_POST || prePost == MLI_SMOOTHER_BOTH )
    {
-      switch ( set_id )
-      {
-         case MLI_SOLVER_JACOBI_ID    : postsmoother = MLI_SOLVER_JACOBI_ID;
-                                        break;
-         case MLI_SOLVER_GS_ID        : postsmoother = MLI_SOLVER_GS_ID;
-                                        break;
-         case MLI_SOLVER_SGS_ID       : postsmoother = MLI_SOLVER_SGS_ID;
-                                        break;
-         case MLI_SOLVER_PARASAILS_ID : postsmoother = MLI_SOLVER_PARASAILS_ID;
-                                        break;
-         case MLI_SOLVER_BSGS_ID      : postsmoother = MLI_SOLVER_BSGS_ID;
-                                        break;
-         case MLI_SOLVER_MLS_ID       : postsmoother = MLI_SOLVER_MLS_ID;
-                                        break;
-         case MLI_SOLVER_ARPACKSUPERLU_ID : 
-                                    postsmoother = MLI_SOLVER_ARPACKSUPERLU_ID;
-                                    break;
-         case MLI_SOLVER_CHEBYSHEV_ID : postsmoother = MLI_SOLVER_CHEBYSHEV_ID;
-                                        break;
-         case MLI_SOLVER_CG_ID        : postsmoother = MLI_SOLVER_CG_ID;
-                                        break;
-         default : printf("MLI_Method_AMGSA::setSmoother ERROR(3)\n");
-                   exit(1);
-      }
+      strcpy( postsmoother, stype );
       if ( num > 0 ) postsmoother_num = num; else postsmoother_num = 1;
       delete [] postsmoother_wgt;
       postsmoother_wgt = new double[postsmoother_num];
@@ -784,37 +702,18 @@ int MLI_Method_AMGSA::setSmoother(int prePost,int set_id,int num,double *wgt)
  * set coarse solver 
  * --------------------------------------------------------------------- */
 
-int MLI_Method_AMGSA::setCoarseSolver( int set_id, int num, double *wgt )
+int MLI_Method_AMGSA::setCoarseSolver( char *stype, int num, double *wgt )
 {
    int i;
 
-   switch ( set_id )
-   {
-      case MLI_SOLVER_JACOBI_ID    : coarse_solver = MLI_SOLVER_JACOBI_ID;
-                                     break;
-      case MLI_SOLVER_GS_ID        : coarse_solver = MLI_SOLVER_GS_ID;
-                                     break;
-      case MLI_SOLVER_SGS_ID       : coarse_solver = MLI_SOLVER_SGS_ID;
-                                     break;
-      case MLI_SOLVER_PARASAILS_ID : coarse_solver = MLI_SOLVER_PARASAILS_ID;
-                                     break;
-      case MLI_SOLVER_BSGS_ID      : coarse_solver = MLI_SOLVER_BSGS_ID;
-                                     break;
-      case MLI_SOLVER_MLS_ID       : coarse_solver = MLI_SOLVER_MLS_ID;
-                                     break;
-      case MLI_SOLVER_SUPERLU_ID   : coarse_solver = MLI_SOLVER_SUPERLU_ID;
-                                     break;
-      case MLI_SOLVER_CHEBYSHEV_ID : coarse_solver = MLI_SOLVER_CHEBYSHEV_ID;
-                                     break;
-      case MLI_SOLVER_CG_ID        : coarse_solver = MLI_SOLVER_CG_ID;
-                                     break;
-      default : printf("MLI_Method_AMGSA::setCoarseSolver ERROR - invalid");
-                printf(" solver = %d\n", set_id);
-                exit(1);
-   }
+#ifdef MLI_DEBUG_DETAILED
+   printf("MLI_Method_AMGSA::setCoarseSolver - type = %s.\n", stype);
+#endif
+
+   strcpy( coarse_solver, stype );
    if ( num > 0 ) coarse_solver_num = num; else coarse_solver_num = 1;
    delete [] coarse_solver_wgt;
-   if ( wgt != NULL && coarse_solver != MLI_SOLVER_SUPERLU_ID ) 
+   if ( wgt != NULL && strcmp(coarse_solver, "SuperLU") )
    {
       coarse_solver_wgt = new double[coarse_solver_num]; 
       for (i = 0; i < coarse_solver_num; i++) coarse_solver_wgt[i] = wgt[i];
@@ -934,6 +833,42 @@ int MLI_Method_AMGSA::setNullSpace( int nDOF, int ndim, double *nullvec,
 }
 
 /* ********************************************************************* *
+ * adjust null space vectors
+ * --------------------------------------------------------------------- */
+
+int MLI_Method_AMGSA::adjustNullSpace(double *vecAdjust)
+{
+   int i;
+
+   if ( useSAMGeFlag_ ) return 0;
+
+   for ( i = 0; i < nullspace_len*nullspace_dim; i++ )
+      nullspace_vec[i] += vecAdjust[i];
+
+   return 0;
+}
+
+/* ********************************************************************* *
+ * reset some entry in the null space vectors
+ * --------------------------------------------------------------------- */
+
+int MLI_Method_AMGSA::resetNullSpaceComponents(int length, int start,
+                                               int *eqnIndices)
+{
+   int i, j, index;
+
+   if ( useSAMGeFlag_ ) return 0;
+
+   for ( i = 0; i < length; i++ )
+   {
+      index = eqnIndices[i] - start;
+      for ( j = 0; j < nullspace_dim; j++ )
+         nullspace_vec[j*nullspace_len+index] = 0.;
+   }
+   return 0;
+}
+
+/* ********************************************************************* *
  * load nodal coordinates (translates into rigid body modes)
  * (abridged from similar function in ML)
  * --------------------------------------------------------------------- */
@@ -1049,98 +984,11 @@ int MLI_Method_AMGSA::print()
       printf("\t*** drop tolerance for P    = %e\n", drop_tol_for_P);
       printf("\t*** calc_norm_scheme        = %d\n", calc_norm_scheme);
       printf("\t*** minimum coarse size     = %d\n", min_coarse_size);
-      switch ( pre_smoother )
-      {
-         case MLI_SOLVER_JACOBI_ID :
-              printf("\t*** pre  smoother type      = Jacobi\n"); 
-              break;
-         case MLI_SOLVER_GS_ID :
-              printf("\t*** pre  smoother type      = Gauss Seidel\n"); 
-              break;
-         case MLI_SOLVER_SGS_ID :
-              printf("\t*** pre  smoother type      = symm Gauss Seidel\n"); 
-              break;
-         case MLI_SOLVER_PARASAILS_ID :
-              printf("\t*** pre  smoother type      = ParaSails\n"); 
-              break; 
-         case MLI_SOLVER_BSGS_ID :
-              printf("\t*** pre  smoother type      = BSGS\n"); 
-              break; 
-         case MLI_SOLVER_MLS_ID :
-              printf("\t*** pre  smoother type      = MLS\n"); 
-              break; 
-         case MLI_SOLVER_SUPERLU_ID :
-              printf("\t*** pre  smoother type      = SuperLU\n"); 
-              break; 
-         case MLI_SOLVER_CHEBYSHEV_ID :
-              printf("\t*** pre  smoother type      = Chebyshev\n"); 
-              break; 
-         case MLI_SOLVER_CG_ID :
-              printf("\t*** pre  smoother type      = CG\n"); 
-              break; 
-      }
+      printf("\t*** pre  smoother type      = %s\n", pre_smoother); 
       printf("\t*** pre  smoother nsweeps   = %d\n", pre_smoother_num);
-      switch ( postsmoother )
-      {
-         case MLI_SOLVER_JACOBI_ID :
-              printf("\t*** post smoother type      = Jacobi\n"); 
-              break;
-         case MLI_SOLVER_GS_ID :
-              printf("\t*** post smoother type      = Gauss Seidel\n"); 
-              break;
-         case MLI_SOLVER_SGS_ID :
-              printf("\t*** post smoother type      = symm Gauss Seidel\n"); 
-              break;
-         case MLI_SOLVER_PARASAILS_ID :
-              printf("\t*** post smoother type      = ParaSails\n"); 
-              break; 
-         case MLI_SOLVER_BSGS_ID :
-              printf("\t*** post smoother type      = BSGS\n"); 
-              break; 
-         case MLI_SOLVER_MLS_ID :
-              printf("\t*** post smoother type      = MLS\n"); 
-              break; 
-         case MLI_SOLVER_SUPERLU_ID :
-              printf("\t*** post smoother type      = SuperLU\n"); 
-              break; 
-         case MLI_SOLVER_CHEBYSHEV_ID :
-              printf("\t*** post smoother type      = Chebyshev\n"); 
-              break; 
-         case MLI_SOLVER_CG_ID :
-              printf("\t*** post smoother type      = CG\n"); 
-              break; 
-      }
+      printf("\t*** post smoother type      = %s\n", postsmoother); 
       printf("\t*** post smoother nsweeps   = %d\n", postsmoother_num);
-      switch ( coarse_solver )
-      {
-         case MLI_SOLVER_JACOBI_ID :
-              printf("\t*** coarse solver type      = Jacobi\n"); 
-              break;
-         case MLI_SOLVER_GS_ID :
-              printf("\t*** coarse solver type      = Gauss Seidel\n"); 
-              break;
-         case MLI_SOLVER_SGS_ID :
-              printf("\t*** coarse solver type      = symm Gauss Seidel\n"); 
-              break;
-         case MLI_SOLVER_PARASAILS_ID :
-              printf("\t*** coarse solver type      = ParaSails\n"); 
-              break; 
-         case MLI_SOLVER_BSGS_ID :
-              printf("\t*** coarse solver type      = BSGS\n"); 
-              break; 
-         case MLI_SOLVER_MLS_ID :
-              printf("\t*** coarse solver type      = MLS\n"); 
-              break; 
-         case MLI_SOLVER_SUPERLU_ID :
-              printf("\t*** coarse solver type      = SuperLU\n"); 
-              break; 
-         case MLI_SOLVER_CHEBYSHEV_ID :
-              printf("\t*** coarse solver type      = Chebyshev\n"); 
-              break; 
-         case MLI_SOLVER_CG_ID :
-              printf("\t*** coarse solver type      = CG\n"); 
-              break; 
-      }
+      printf("\t*** coarse solver type      = %s\n", coarse_solver); 
       printf("\t*** coarse solver nsweeps   = %d\n", coarse_solver_num);  
       printf("\t*** calibration size        = %d\n", calibration_size);
       printf("\t********************************************************\n");
@@ -1309,6 +1157,118 @@ int MLI_Method_AMGSA::copy( MLI_Method *new_obj )
       printf("MLI_Method_AMGSA::copy ERROR - incoming object not AMGSA.\n");
       exit(1);
    }
+   return 0;
+}
+
+/* ********************************************************************* *
+ * LOBPCG subroutine calls
+ * ********************************************************************* */
+
+#ifdef HAVE_LOBPCG
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "../../../eigen/lobpcg/lobpcg.h"
+#include "../../../IJ_mv/IJ_mv.h"
+#include "../../../parcsr_mv/parcsr_mv.h"
+#include "../../../seq_mv/seq_mv.h"
+#include "../../../parcsr_ls/parcsr_ls.h"
+HYPRE_Solver	   lobHYPRESolver;
+HYPRE_ParCSRMatrix lobHYPREA;
+
+int Funct_Solve(HYPRE_ParVector b,HYPRE_ParVector x)
+{
+   int ierr=0;
+   ierr=HYPRE_ParCSRPCGSolve(lobHYPRESolver,lobHYPREA,b,x);assert2(ierr);
+   return 0;
+}
+int Func_Matvec(HYPRE_ParVector x,HYPRE_ParVector y)
+{
+   int ierr=0;
+   ierr=HYPRE_ParCSRMatrixMatvec(1.0,lobHYPREA,x,0.0,y);assert2(ierr);
+   return 0;
+}
+#ifdef __cplusplus
+}
+#endif
+#endif
+
+/* ********************************************************************* *
+ * relax null spaces 
+ * --------------------------------------------------------------------- */
+
+int MLI_Method_AMGSA::relaxNullSpaces(MLI_Matrix *mli_Amat)
+{
+#ifdef HAVE_LOBPCG
+   int                mypid, *partitioning, startRow, endRow, localNRows;
+   int                iV, i, offset, *cols;
+   double             *eigval, *uData;
+   MPI_Comm           comm;
+   HYPRE_IJVector     tempIJ;
+   hypre_ParVector    **lobVecs = new hypre_ParVector*[nullspace_dim];
+   hypre_ParCSRMatrix *hypreA;
+   HYPRE_Solver       HYPrecon=NULL;
+   HYPRE_LobpcgData   lobpcgdata;
+   int (*FuncT)(HYPRE_ParVector x,HYPRE_ParVector y);
+
+   comm     = getComm();
+   MPI_Comm_rank( comm, &mypid );
+   hypreA = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA, 
+                                        &partitioning );
+   startRow   = partitioning[mypid];
+   endRow     = partitioning[mypid+1] - 1;
+   localNRows = endRow - startRow + 1;
+   cols       = new int[localNRows];
+   for ( i = startRow; i <= endRow; i++ ) cols[i] = startRow + i;
+
+   for ( iV = 0; iV < nullspace_dim; iV++ )
+   {
+      HYPRE_IJVectorCreate(comm, startRow, endRow, &tempIJ);
+      HYPRE_IJVectorSetObjectType(tempIJ, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(tempIJ);
+      HYPRE_IJVectorAssemble(tempIJ);
+      offset = nullspace_len * iV ;
+      HYPRE_IJVectorSetValues(tempIJ, localNRows, (const int *) cols,
+                              (const double *) &(nullspace_vec[offset]));
+      HYPRE_IJVectorGetObject(tempIJ, (void **) &(lobVecs[iV]));
+//HYPRE_ParVectorSetRandomValues( (HYPRE_ParVector) lobVecs[iV], 9001*iV*7901 );
+      HYPRE_IJVectorSetObjectType(tempIJ, -1);
+      HYPRE_IJVectorDestroy(tempIJ);
+   }
+   delete [] cols;
+   free(partitioning);
+
+   printf("LOBPCG Solve\n");
+   HYPRE_LobpcgCreate(&lobpcgdata);
+   HYPRE_LobpcgSetVerbose(lobpcgdata);
+   HYPRE_LobpcgSetBlocksize(lobpcgdata, nullspace_dim);
+   FuncT = Funct_Solve;
+   HYPRE_LobpcgSetSolverFunction(lobpcgdata,FuncT);
+   HYPRE_LobpcgSetup(lobpcgdata);
+   lobHYPREA      = (HYPRE_ParCSRMatrix) hypreA;
+   HYPRE_ParCSRPCGCreate(comm, &lobHYPRESolver);
+   HYPRE_ParCSRPCGSetMaxIter(lobHYPRESolver, 10);
+   HYPRE_ParCSRPCGSetTol(lobHYPRESolver, 1.0e-1);
+   HYPRE_ParCSRPCGSetup(lobHYPRESolver, lobHYPREA, 
+          (HYPRE_ParVector) lobVecs[0], (HYPRE_ParVector) lobVecs[1]);
+   HYPRE_ParCSRPCGSetPrecond(lobHYPRESolver, HYPRE_ParCSRDiagScale,
+                             HYPRE_ParCSRDiagScaleSetup, HYPrecon);
+   HYPRE_LobpcgSetTolerance(lobpcgdata, 1.0e-1);
+
+   HYPRE_LobpcgSolve(lobpcgdata,Func_Matvec,(HYPRE_ParVector*)lobVecs,&eigval);
+   for ( iV = 0; iV < nullspace_dim; iV++ )
+   {
+      uData = hypre_VectorData(
+                 hypre_ParVectorLocalVector((hypre_ParVector *)lobVecs[iV]));
+      offset = nullspace_len * iV;
+      for ( i = 0; i < nullspace_len; i++ )
+         nullspace_vec[offset+i] = uData[i];
+      hypre_ParVectorDestroy(lobVecs[iV]);
+   }
+   HYPRE_LobpcgDestroy(lobpcgdata);
+#endif
    return 0;
 }
 
