@@ -178,7 +178,9 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   HYPreconReuse_(0), 
                   HYPreconSetup_(0),
                   lookup_(NULL),
-                  haveLookup_(0)
+                  haveLookup_(0),
+                  localStartCol_(-1),
+                  localEndCol_(-1)
 {
    //-------------------------------------------------------------------
    // find my processor ID 
@@ -641,11 +643,15 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    }
 
    //-------------------------------------------------------------------
-   // instantiate the matrix
+   // instantiate the matrix (can also handle rectangular matrix)
    //-------------------------------------------------------------------
    
-   ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,localEndRow_-1,
-                               localStartRow_-1,localEndRow_-1, &HYA_);
+   if (localStartCol_ == -1)
+      ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,localEndRow_-1,
+                                  localStartRow_-1,localEndRow_-1, &HYA_);
+   else
+      ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,localEndRow_-1,
+                                  localStartCol_,localEndCol_, &HYA_);
    ierr = HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
    assert(!ierr);
 
@@ -669,7 +675,10 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    // instantiate the solution vector
    //-------------------------------------------------------------------
 
-   ierr = HYPRE_IJVectorCreate(comm_, localStartRow_-1, localEndRow_-1, &HYx_);
+   if (localStartCol_ == -1)
+      ierr = HYPRE_IJVectorCreate(comm_,localStartRow_-1,localEndRow_-1,&HYx_);
+   else
+      ierr = HYPRE_IJVectorCreate(comm_,localStartCol_,localEndCol_,&HYx_);
    ierr = HYPRE_IJVectorSetObjectType(HYx_, HYPRE_PARCSR);
    ierr = HYPRE_IJVectorInitialize(HYx_);
    ierr = HYPRE_IJVectorAssemble(HYx_);
@@ -1199,8 +1208,12 @@ int HYPRE_LinSysCore::resetMatrix(double setValue)
 
    if ( HYA_ != NULL ) HYPRE_IJMatrixDestroy(HYA_);
    size = localEndRow_ - localStartRow_ + 1;
-   ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
-                               localStartRow_-1, localEndRow_-1, &HYA_);
+   if (localStartCol_ == -1)
+      ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
+                                  localStartRow_-1, localEndRow_-1, &HYA_);
+   else
+      ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
+                                  localStartCol_, localEndCol_, &HYA_);
    ierr = HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
    assert(!ierr);
 
@@ -1280,11 +1293,6 @@ int HYPRE_LinSysCore::resetRHSVector(double setValue)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering resetRHSVector.\n",mypid_);
-   if ( setValue != 0.0 && mypid_ == 0 )
-   {
-      printf("resetRHSVector ERROR : cannot take nonzeros.\n");
-      exit(1);
-   }
 
    //-------------------------------------------------------------------
    // reset right hand side vectors
@@ -1298,7 +1306,7 @@ int HYPRE_LinSysCore::resetRHSVector(double setValue)
       for (i = 0; i < localNRows; i++)
       {
          cols[i] = localStartRow_ + i - 1;
-         vals[i] = 0.0;
+         vals[i] = setValue;
       }    
       for (i = 0; i < numRHSs_; i++) 
          if ( HYbs_[i] != NULL ) 
@@ -3037,7 +3045,7 @@ int HYPRE_LinSysCore::getSolution(double* answers,int leng)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       printf("%4d : HYPRE_LSC::entering getSolution.\n",mypid_);
-   if (leng != (localEndRow_-localStartRow_+1))
+   if (localStartCol_ == -1 && leng != (localEndRow_-localStartRow_+1))
    {
       printf("%4d : HYPRE_LSC ERROR : getSolution: leng != numLocalRows.\n",
              mypid_);
@@ -3049,7 +3057,10 @@ int HYPRE_LinSysCore::getSolution(double* answers,int leng)
    //-------------------------------------------------------------------
 
    equations = new int[leng];
-   for ( i = 0; i < leng; i++ ) equations[i] = localStartRow_ + i - 1;
+   if (localStartCol_ == -1)
+      for ( i = 0; i < leng; i++ ) equations[i] = localStartRow_ + i - 1;
+   else
+      for ( i = 0; i < leng; i++ ) equations[i] = localStartCol_ + i;
 
    ierr = HYPRE_IJVectorGetValues(HYx_,leng,equations,answers);
    assert(!ierr);
@@ -3087,7 +3098,8 @@ int HYPRE_LinSysCore::getSolnEntry(int eqnNumber, double& answer)
 
    equation = eqnNumber; // incoming 0-based index
 
-   if ( equation < localStartRow_-1 && equation > localEndRow_ )
+   if (localStartCol_ == -1 &&  equation < localStartRow_-1 && 
+       equation > localEndRow_ )
    {
       printf("%d : getSolnEntry ERROR - index out of range = %d.\n", mypid_, 
                    eqnNumber);
@@ -4892,11 +4904,12 @@ int HYPRE_LinSysCore::writeSystem(const char *name)
 // this function computes matrix vector product
 //---------------------------------------------------------------------------
 
-int HYPRE_LinSysCore::HYPRE_LSC_Matvec(void *mat, void *x, void *y)
+int HYPRE_LinSysCore::HYPRE_LSC_Matvec(void *x, void *y)
 {
-   HYPRE_ParCSRMatrix A_csr = (HYPRE_ParCSRMatrix) mat;
+   HYPRE_ParCSRMatrix A_csr;
    HYPRE_ParVector    x_csr = (HYPRE_ParVector)    x;
    HYPRE_ParVector    y_csr = (HYPRE_ParVector)    y;
+   HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
    HYPRE_ParCSRMatrixMatvec(1.0, A_csr, x_csr, 0.0, y_csr);
    return (0);
 }
@@ -4912,5 +4925,62 @@ int HYPRE_LinSysCore::HYPRE_LSC_Axpby(double a, void *x, double b, void *y)
    if ( b != 1.0 ) HYPRE_ParVectorScale( b, y_csr);
    hypre_ParVectorAxpy(a, (hypre_ParVector*) x_csr, (hypre_ParVector*) y_csr);
    return (0);
+}
+
+//***************************************************************************
+// this function fetches the right hand side vector
+//---------------------------------------------------------------------------
+
+void *HYPRE_LinSysCore::HYPRE_LSC_GetRHSVector()
+{
+   HYPRE_ParVector b_csr;
+   HYPRE_IJVectorGetObject(HYb_, (void **) &b_csr);
+   return (void *) b_csr;
+}
+
+//***************************************************************************
+// this function fetches the solution vector
+//---------------------------------------------------------------------------
+
+void *HYPRE_LinSysCore::HYPRE_LSC_GetSolVector()
+{
+   HYPRE_ParVector x_csr;
+   HYPRE_IJVectorGetObject(HYx_, (void **) &x_csr);
+   return (void *) x_csr;
+}
+
+//***************************************************************************
+// this function fetches the matrix 
+//---------------------------------------------------------------------------
+
+void *HYPRE_LinSysCore::HYPRE_LSC_GetMatrix()
+{
+   HYPRE_ParCSRMatrix A_csr;
+   HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
+   return (void *) A_csr;
+}
+
+//***************************************************************************
+// this function set column ranges
+//---------------------------------------------------------------------------
+
+void *HYPRE_LinSysCore::HYPRE_LSC_SetColMap(int start, int end)
+{
+   localStartCol_ = start;
+   localEndCol_ = end;
+}
+
+//***************************************************************************
+// this function set column ranges
+//---------------------------------------------------------------------------
+
+void *HYPRE_LinSysCore::HYPRE_LSC_MatMatMult(void *inMat)
+{
+   HYPRE_ParCSRMatrix A_csr;
+   hypre_ParCSRMatrix *B_csr, *C_csr;
+   HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
+   B_csr = (hypre_ParCSRMatrix *) inMat;
+   C_csr = hypre_ParMatmul((hypre_ParCSRMatrix *)A_csr,B_csr);
+   return (void *) C_csr;
 }
 

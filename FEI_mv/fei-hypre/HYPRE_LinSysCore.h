@@ -390,8 +390,13 @@ class HYPRE_LinSysCore
    void   putIntoMappedMatrix(int row, int numValues, const double* values,
                               const int* scatterIndices);
    void   getFEDataObject(void **object) { (*object) = feData_; }
-   int    HYPRE_LSC_Matvec(void *mat, void *x, void *y);
+   int    HYPRE_LSC_Matvec(void *x, void *y);
    int    HYPRE_LSC_Axpby(double, void *, double, void *);
+   void   *HYPRE_LSC_GetRHSVector();
+   void   *HYPRE_LSC_GetSolVector();
+   void   *HYPRE_LSC_GetMatrix();
+   void   *HYPRE_LSC_SetColMap(int, int);
+   void   *HYPRE_LSC_MatMatMult(void *);
 
    // ----------------------------------------------------------------------
    // MLI-specific public functions
@@ -505,6 +510,8 @@ class HYPRE_LinSysCore
    int             numGlobalRows_;
    int             localStartRow_;
    int             localEndRow_;
+   int             localStartCol_;
+   int             localEndCol_;
    int             *rowLengths_;
    int             **colIndices_;
    double          **colValues_;
