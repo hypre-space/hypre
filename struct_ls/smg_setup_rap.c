@@ -127,7 +127,7 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 
    }
 
-   hypre_AssembleStructMatrix(Ac);
+   hypre_StructMatrixAssemble(Ac);
 
    return ierr;
 }

@@ -150,7 +150,7 @@ hypre_SMGSetup( void               *smg_vdata,
    (smg_data -> max_levels) = max_levels;
 
    grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
-   grid_l[0] = hypre_RefStructGrid(grid);
+   grid_l[0] = hypre_StructGridRef(grid);
    for (l = 0; ; l++)
    {
       /* set cindex and stride */
@@ -185,22 +185,22 @@ hypre_SMGSetup( void               *smg_vdata,
       }
 
       /* compute local boxes */
-      boxes = hypre_CreateBoxArray(num_boxes);
+      boxes = hypre_BoxArrayCreate(num_boxes);
       for (i = 0; i < num_boxes; i++)
       {
          hypre_CopyBox(hypre_BoxArrayBox(all_boxes, box_ranks[i]),
                        hypre_BoxArrayBox(boxes, i));
       }
 
-      grid_l[l+1] = hypre_CreateStructGrid(comm, hypre_StructGridDim(grid_l[l]));
+      grid_l[l+1] = hypre_StructGridCreate(comm, hypre_StructGridDim(grid_l[l]));
       for (d = 0; d < 3; d++)
       {
          hypre_IndexD(pindex, d) +=
             hypre_IndexD(cindex, d) * hypre_IndexD(pstride, d);
          hypre_IndexD(pstride, d) *= hypre_IndexD(stride, d);
       }
-      hypre_SetStructGridBoxes(grid_l[l+1], boxes);
-      hypre_SetStructGridGlobalInfo(grid_l[l+1],
+      hypre_StructGridSetBoxes(grid_l[l+1], boxes);
+      hypre_StructGridSetGlobalInfo(grid_l[l+1],
                                     all_boxes, processes, box_ranks,
                                     base_all_boxes, pindex, pstride);
 
@@ -208,9 +208,9 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_CopyIndex(hypre_StructGridPeriodic(grid_l[l]), periodic);
       hypre_IndexD(periodic, cdir) =
          (hypre_IndexD(periodic, cdir) + 1)/2;
-      hypre_SetStructGridPeriodic(grid_l[l+1], periodic);
+      hypre_StructGridSetPeriodic(grid_l[l+1], periodic);
 
-      hypre_AssembleStructGrid(grid_l[l+1]);
+      hypre_StructGridAssemble(grid_l[l+1]);
    }
    num_levels = l + 1;
 
@@ -231,9 +231,9 @@ hypre_SMGSetup( void               *smg_vdata,
    r_l  = tx_l;
    e_l  = tx_l;
 
-   A_l[0] = hypre_RefStructMatrix(A);
-   b_l[0] = hypre_RefStructVector(b);
-   x_l[0] = hypre_RefStructVector(x);
+   A_l[0] = hypre_StructMatrixRef(A);
+   b_l[0] = hypre_StructVectorRef(b);
+   x_l[0] = hypre_StructVectorRef(x);
 
    for (i = 0; i <= cdir; i++)
    {
@@ -241,20 +241,20 @@ hypre_SMGSetup( void               *smg_vdata,
       x_num_ghost[2*i + 1] = 1;
    }
 
-   tb_l[0] = hypre_CreateStructVector(comm, grid_l[0]);
-   hypre_SetStructVectorNumGhost(tb_l[0], hypre_StructVectorNumGhost(b));
-   hypre_InitializeStructVectorShell(tb_l[0]);
+   tb_l[0] = hypre_StructVectorCreate(comm, grid_l[0]);
+   hypre_StructVectorSetNumGhost(tb_l[0], hypre_StructVectorNumGhost(b));
+   hypre_StructVectorInitializeShell(tb_l[0]);
    data_size += hypre_StructVectorDataSize(tb_l[0]);
 
-   tx_l[0] = hypre_CreateStructVector(comm, grid_l[0]);
-   hypre_SetStructVectorNumGhost(tx_l[0], hypre_StructVectorNumGhost(x));
-   hypre_InitializeStructVectorShell(tx_l[0]);
+   tx_l[0] = hypre_StructVectorCreate(comm, grid_l[0]);
+   hypre_StructVectorSetNumGhost(tx_l[0], hypre_StructVectorNumGhost(x));
+   hypre_StructVectorInitializeShell(tx_l[0]);
    data_size += hypre_StructVectorDataSize(tx_l[0]);
 
    for (l = 0; l < (num_levels - 1); l++)
    {
       PT_l[l]  = hypre_SMGCreateInterpOp(A_l[l], grid_l[l+1], cdir);
-      hypre_InitializeStructMatrixShell(PT_l[l]);
+      hypre_StructMatrixInitializeShell(PT_l[l]);
       data_size += hypre_StructMatrixDataSize(PT_l[l]);
 
       if (hypre_StructMatrixSymmetric(A))
@@ -267,77 +267,77 @@ hypre_SMGSetup( void               *smg_vdata,
 #if 0
          /* Allow R != PT for non symmetric case */
          R_l[l]   = hypre_SMGCreateRestrictOp(A_l[l], grid_l[l+1], cdir);
-         hypre_InitializeStructMatrixShell(R_l[l]);
+         hypre_StructMatrixInitializeShell(R_l[l]);
          data_size += hypre_StructMatrixDataSize(R_l[l]);
 #endif
       }
 
       A_l[l+1] = hypre_SMGCreateRAPOp(R_l[l], A_l[l], PT_l[l]);
-      hypre_InitializeStructMatrixShell(A_l[l+1]);
+      hypre_StructMatrixInitializeShell(A_l[l+1]);
       data_size += hypre_StructMatrixDataSize(A_l[l+1]);
 
-      b_l[l+1] = hypre_CreateStructVector(comm, grid_l[l+1]);
-      hypre_SetStructVectorNumGhost(b_l[l+1], b_num_ghost);
-      hypre_InitializeStructVectorShell(b_l[l+1]);
+      b_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
+      hypre_StructVectorSetNumGhost(b_l[l+1], b_num_ghost);
+      hypre_StructVectorInitializeShell(b_l[l+1]);
       data_size += hypre_StructVectorDataSize(b_l[l+1]);
 
-      x_l[l+1] = hypre_CreateStructVector(comm, grid_l[l+1]);
-      hypre_SetStructVectorNumGhost(x_l[l+1], x_num_ghost);
-      hypre_InitializeStructVectorShell(x_l[l+1]);
+      x_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
+      hypre_StructVectorSetNumGhost(x_l[l+1], x_num_ghost);
+      hypre_StructVectorInitializeShell(x_l[l+1]);
       data_size += hypre_StructVectorDataSize(x_l[l+1]);
 
-      tb_l[l+1] = hypre_CreateStructVector(comm, grid_l[l+1]);
-      hypre_SetStructVectorNumGhost(tb_l[l+1], hypre_StructVectorNumGhost(b));
-      hypre_InitializeStructVectorShell(tb_l[l+1]);
+      tb_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
+      hypre_StructVectorSetNumGhost(tb_l[l+1], hypre_StructVectorNumGhost(b));
+      hypre_StructVectorInitializeShell(tb_l[l+1]);
 
-      tx_l[l+1] = hypre_CreateStructVector(comm, grid_l[l+1]);
-      hypre_SetStructVectorNumGhost(tx_l[l+1], hypre_StructVectorNumGhost(x));
-      hypre_InitializeStructVectorShell(tx_l[l+1]);
+      tx_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
+      hypre_StructVectorSetNumGhost(tx_l[l+1], hypre_StructVectorNumGhost(x));
+      hypre_StructVectorInitializeShell(tx_l[l+1]);
    }
 
    data = hypre_SharedCTAlloc(double, data_size);
    (smg_data -> data) = data;
 
-   hypre_InitializeStructVectorData(tb_l[0], data);
-   hypre_AssembleStructVector(tb_l[0]);
+   hypre_StructVectorInitializeData(tb_l[0], data);
+   hypre_StructVectorAssemble(tb_l[0]);
    data += hypre_StructVectorDataSize(tb_l[0]);
 
-   hypre_InitializeStructVectorData(tx_l[0], data);
-   hypre_AssembleStructVector(tx_l[0]);
+   hypre_StructVectorInitializeData(tx_l[0], data);
+   hypre_StructVectorAssemble(tx_l[0]);
    data += hypre_StructVectorDataSize(tx_l[0]);
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      hypre_InitializeStructMatrixData(PT_l[l], data);
+      hypre_StructMatrixInitializeData(PT_l[l], data);
       data += hypre_StructMatrixDataSize(PT_l[l]);
 
 #if 0
       /* Allow R != PT for non symmetric case */
       if (!hypre_StructMatrixSymmetric(A))
       {
-         hypre_InitializeStructMatrixData(R_l[l], data);
+         hypre_StructMatrixInitializeData(R_l[l], data);
          data += hypre_StructMatrixDataSize(R_l[l]);
       }
 #endif
 
-      hypre_InitializeStructMatrixData(A_l[l+1], data);
+      hypre_StructMatrixInitializeData(A_l[l+1], data);
       data += hypre_StructMatrixDataSize(A_l[l+1]);
 
-      hypre_InitializeStructVectorData(b_l[l+1], data);
-      hypre_AssembleStructVector(b_l[l+1]);
+      hypre_StructVectorInitializeData(b_l[l+1], data);
+      hypre_StructVectorAssemble(b_l[l+1]);
       data += hypre_StructVectorDataSize(b_l[l+1]);
 
-      hypre_InitializeStructVectorData(x_l[l+1], data);
-      hypre_AssembleStructVector(x_l[l+1]);
+      hypre_StructVectorInitializeData(x_l[l+1], data);
+      hypre_StructVectorAssemble(x_l[l+1]);
       data += hypre_StructVectorDataSize(x_l[l+1]);
 
-      hypre_InitializeStructVectorData(tb_l[l+1],
+      hypre_StructVectorInitializeData(tb_l[l+1],
                                        hypre_StructVectorData(tb_l[0]));
-      hypre_AssembleStructVector(tb_l[l+1]);
+      hypre_StructVectorAssemble(tb_l[l+1]);
 
-      hypre_InitializeStructVectorData(tx_l[l+1],
+      hypre_StructVectorInitializeData(tx_l[l+1],
                                        hypre_StructVectorData(tx_l[0]));
-      hypre_AssembleStructVector(tx_l[l+1]);
+      hypre_StructVectorAssemble(tx_l[l+1]);
    }
 
    (smg_data -> A_l)  = A_l;
@@ -370,10 +370,10 @@ hypre_SMGSetup( void               *smg_vdata,
    b_data_alloced = hypre_StructVectorDataAlloced(b_l[0]);
    x_data = hypre_StructVectorData(x_l[0]);
    x_data_alloced = hypre_StructVectorDataAlloced(x_l[0]);
-   hypre_InitializeStructVectorData(b_l[0], hypre_StructVectorData(tb_l[0]));
-   hypre_InitializeStructVectorData(x_l[0], hypre_StructVectorData(tx_l[0]));
-   hypre_AssembleStructVector(b_l[0]);
-   hypre_AssembleStructVector(x_l[0]);
+   hypre_StructVectorInitializeData(b_l[0], hypre_StructVectorData(tb_l[0]));
+   hypre_StructVectorInitializeData(x_l[0], hypre_StructVectorData(tx_l[0]));
+   hypre_StructVectorAssemble(b_l[0]);
+   hypre_StructVectorAssemble(x_l[0]);
 
    for (l = 0; l < (num_levels - 1); l++)
    {
@@ -458,12 +458,12 @@ hypre_SMGSetup( void               *smg_vdata,
    }
 
    /* set the data for x_l[0] and b_l[0] the way they were */
-   hypre_InitializeStructVectorData(b_l[0], b_data);
+   hypre_StructVectorInitializeData(b_l[0], b_data);
    hypre_StructVectorDataAlloced(b_l[0]) = b_data_alloced;
-   hypre_InitializeStructVectorData(x_l[0], x_data);
+   hypre_StructVectorInitializeData(x_l[0], x_data);
    hypre_StructVectorDataAlloced(x_l[0]) = x_data_alloced;
-   hypre_AssembleStructVector(b_l[0]);
-   hypre_AssembleStructVector(x_l[0]);
+   hypre_StructVectorAssemble(b_l[0]);
+   hypre_StructVectorAssemble(x_l[0]);
 
    (smg_data -> relax_data_l)      = relax_data_l;
    (smg_data -> residual_data_l)   = residual_data_l;
@@ -487,12 +487,12 @@ hypre_SMGSetup( void               *smg_vdata,
       for (l = 0; l < (num_levels - 1); l++)
       {
          sprintf(filename, "zout_A.%02d", l);
-         hypre_PrintStructMatrix(filename, A_l[l], 0);
+         hypre_StructMatrixPrint(filename, A_l[l], 0);
          sprintf(filename, "zout_PT.%02d", l);
-         hypre_PrintStructMatrix(filename, PT_l[l], 0);
+         hypre_StructMatrixPrint(filename, PT_l[l], 0);
       }
       sprintf(filename, "zout_A.%02d", l);
-      hypre_PrintStructMatrix(filename, A_l[l], 0);
+      hypre_StructMatrixPrint(filename, A_l[l], 0);
    }
 #endif
 

@@ -57,7 +57,7 @@ hypre_StructAxpy( double              alpha,
          xp = hypre_StructVectorBoxData(x, i);
          yp = hypre_StructVectorBoxData(y, i);
 
-         hypre_GetBoxSize(box, loop_size);
+         hypre_BoxGetSize(box, loop_size);
 
          hypre_BoxLoop2Begin(loop_size,
                              x_data_box, start, unit_stride, xi,

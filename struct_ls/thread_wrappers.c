@@ -1,7 +1,7 @@
 
+#ifdef HYPRE_USE_PTHREADS
 #include "HYPRE_ls.h"
 #include "utilities.h"
-#ifdef HYPRE_USE_PTHREADS
 
 
 /*----------------------------------------------------------------

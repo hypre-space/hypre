@@ -45,13 +45,13 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    hypre_IndexD(stencil_shape[0], cdir) = -1;
    hypre_IndexD(stencil_shape[1], cdir) =  1;
    stencil =
-      hypre_CreateStructStencil(stencil_dim, stencil_size, stencil_shape);
+      hypre_StructStencilCreate(stencil_dim, stencil_size, stencil_shape);
 
    /* set up matrix */
-   P = hypre_CreateStructMatrix(hypre_StructMatrixComm(A), cgrid, stencil);
-   hypre_SetStructMatrixNumGhost(P, num_ghost);
+   P = hypre_StructMatrixCreate(hypre_StructMatrixComm(A), cgrid, stencil);
+   hypre_StructMatrixSetNumGhost(P, num_ghost);
 
-   hypre_DestroyStructStencil(stencil);
+   hypre_StructStencilDestroy(stencil);
  
    return P;
 }
@@ -133,7 +133,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
          startc  = hypre_BoxIMin(compute_box);
          hypre_PFMGMapCoarseToFine(startc, findex, stride, start);
 
-         hypre_GetStrideBoxSize(compute_box, stridec, loop_size);
+         hypre_BoxGetStrideSize(compute_box, stridec, loop_size);
 
          hypre_BoxLoop2Begin(loop_size,
                              A_data_box, start, stride, Ai,
@@ -171,7 +171,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
          hypre_BoxLoop2End(Ai, Pi);
       }
 
-   hypre_AssembleStructMatrix(P);
+   hypre_StructMatrixAssemble(P);
 
    /*-----------------------------------------------------------------------
     * Return

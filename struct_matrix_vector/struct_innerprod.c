@@ -71,7 +71,7 @@ hypre_StructInnerProd(  hypre_StructVector *x,
          xp = hypre_StructVectorBoxData(x, i);
          yp = hypre_StructVectorBoxData(y, i);
 
-         hypre_GetBoxSize(box, loop_size);
+         hypre_BoxGetSize(box, loop_size);
 
 #ifdef HYPRE_USE_PTHREADS
    local_result_ref[threadid] = &local_result;

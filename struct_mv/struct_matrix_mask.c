@@ -15,7 +15,7 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_CreateStructMatrixMask
+ * hypre_StructMatrixCreateMask
  *    This routine returns the matrix, `mask', containing pointers to
  *    some of the data in the input matrix `matrix'.  This can be useful,
  *    for example, to construct "splittings" of a matrix for use in
@@ -31,7 +31,7 @@
  *--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *
-hypre_CreateStructMatrixMask( hypre_StructMatrix *matrix,
+hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
                               int                 num_stencil_indices,
                               int                *stencil_indices     )
 {
@@ -58,10 +58,10 @@ hypre_CreateStructMatrixMask( hypre_StructMatrix *matrix,
    hypre_StructMatrixComm(mask) = hypre_StructMatrixComm(matrix);
 
    hypre_StructMatrixGrid(mask) =
-      hypre_RefStructGrid(hypre_StructMatrixGrid(matrix));
+      hypre_StructGridRef(hypre_StructMatrixGrid(matrix));
 
    hypre_StructMatrixUserStencil(mask) =
-      hypre_RefStructStencil(hypre_StructMatrixUserStencil(matrix));
+      hypre_StructStencilRef(hypre_StructMatrixUserStencil(matrix));
 
    mask_stencil_size  = num_stencil_indices;
    mask_stencil_shape = hypre_CTAlloc(hypre_Index, num_stencil_indices);
@@ -71,14 +71,14 @@ hypre_CreateStructMatrixMask( hypre_StructMatrix *matrix,
                       mask_stencil_shape[i]);
    }
    hypre_StructMatrixStencil(mask) =
-      hypre_CreateStructStencil(hypre_StructStencilDim(stencil),
+      hypre_StructStencilCreate(hypre_StructStencilDim(stencil),
                                 mask_stencil_size,
                                 mask_stencil_shape);
 
    hypre_StructMatrixNumValues(mask) = hypre_StructMatrixNumValues(matrix);
 
    hypre_StructMatrixDataSpace(mask) =
-      hypre_DuplicateBoxArray(hypre_StructMatrixDataSpace(matrix));
+      hypre_BoxArrayDuplicate(hypre_StructMatrixDataSpace(matrix));
 
    hypre_StructMatrixData(mask) = hypre_StructMatrixData(matrix);
    hypre_StructMatrixDataAlloced(mask) = 0;

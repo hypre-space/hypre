@@ -49,7 +49,7 @@ hypre_StructScale( double              alpha,
          y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
          yp = hypre_StructVectorBoxData(y, i);
 
-         hypre_GetBoxSize(box, loop_size);
+         hypre_BoxGetSize(box, loop_size);
 
 	 hypre_BoxLoop1Begin(loop_size,
                              y_data_box, start, unit_stride, yi);

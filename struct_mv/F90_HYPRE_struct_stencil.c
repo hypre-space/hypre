@@ -16,7 +16,7 @@
 #include "fortran.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_CreateStructStencil
+ * HYPRE_StructStencilCreate
  *--------------------------------------------------------------------------*/
 
 void
@@ -26,13 +26,13 @@ hypre_F90_IFACE(hypre_createstructstencil)( int      *dim,
                                             int      *ierr    )
 {
    *ierr = (int)
-      ( HYPRE_CreateStructStencil( (int)                   *dim,
+      ( HYPRE_StructStencilCreate( (int)                   *dim,
                                    (int)                   *size,
                                    (HYPRE_StructStencil *)  stencil ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetStructStencilElement
+ * HYPRE_StructStencilSetElement
  *--------------------------------------------------------------------------*/
 
 void
@@ -42,13 +42,13 @@ hypre_F90_IFACE(hypre_setstructstencilelement)( long int *stencil,
                                                 int      *ierr          )
 {
    *ierr = (int)
-      ( HYPRE_SetStructStencilElement( (HYPRE_StructStencil) *stencil,
+      ( HYPRE_StructStencilSetElement( (HYPRE_StructStencil) *stencil,
                                        (int)                 *element_index,
                                        (int *)                offset       ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_DestroyStructStencil
+ * HYPRE_StructStencilDestroy
  *--------------------------------------------------------------------------*/
 
 void
@@ -56,5 +56,5 @@ hypre_F90_IFACE(hypre_destroystructstencil)( long int *stencil,
                                              int      *ierr    )
 {
    *ierr = (int)
-      ( HYPRE_DestroyStructStencil( (HYPRE_StructStencil) *stencil ) );
+      ( HYPRE_StructStencilDestroy( (HYPRE_StructStencil) *stencil ) );
 }

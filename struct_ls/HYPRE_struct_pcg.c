@@ -437,7 +437,7 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
 
          start  = hypre_BoxIMin(box);
 
-         hypre_GetBoxSize(box, loop_size);
+         hypre_BoxGetSize(box, loop_size);
 
          hypre_BoxLoop3Begin(loop_size,
                              A_data_box, start, stride, Ai,

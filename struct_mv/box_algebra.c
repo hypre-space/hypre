@@ -62,7 +62,7 @@ hypre_SubtractBoxes( hypre_Box      *box1,
     * plus one, to have space for the remainder box.
     *------------------------------------------------------*/
 
-   hypre_SetBoxArraySize(box_array, 7);
+   hypre_BoxArraySetSize(box_array, 7);
 
    /*------------------------------------------------------
     * Subtract the boxes by cutting box1 in x, y, then z
@@ -104,13 +104,13 @@ hypre_SubtractBoxes( hypre_Box      *box1,
          }
       }
    }
-   hypre_SetBoxArraySize(box_array, size);
+   hypre_BoxArraySetSize(box_array, size);
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_UnionBoxArray:
+ * hypre_UnionBoxes:
  *   Compute the union of all boxes.
  *
  * To compute the union, we first construct a logically rectangular,
@@ -150,7 +150,7 @@ hypre_SubtractBoxes( hypre_Box      *box1,
  *--------------------------------------------------------------------------*/
 
 int
-hypre_UnionBoxArray( hypre_BoxArray *boxes )
+hypre_UnionBoxes( hypre_BoxArray *boxes )
 {
    int              ierr = 0;
 
@@ -353,7 +353,7 @@ hypre_UnionBoxArray( hypre_BoxArray *boxes )
       if (block[index])
          size++;
    }
-   hypre_SetBoxArraySize(boxes, size);
+   hypre_BoxArraySetSize(boxes, size);
 
    index = 0;
    size = 0;

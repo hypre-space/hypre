@@ -102,21 +102,21 @@ hypre_SMGIntAddSetup( void               *intadd_vdata,
    stencil_dim = hypre_StructStencilDim(stencil_PT);
    stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
    hypre_CopyIndex(stencil_PT_shape[1], stencil_shape[0]);
-   stencil = hypre_CreateStructStencil(stencil_dim, stencil_size, stencil_shape);
+   stencil = hypre_StructStencilCreate(stencil_dim, stencil_size, stencil_shape);
 
-   hypre_GetComputeInfo(grid, stencil,
+   hypre_CreateComputeInfo(grid, stencil,
                         &send_boxes, &recv_boxes,
                         &temp_send_processes, &temp_recv_processes,
                         &indt_boxes, &dept_boxes);
 
-   hypre_DestroyStructStencil(stencil);
+   hypre_StructStencilDestroy(stencil);
 
    /*----------------------------------------------------------
     * Project sends and recieves to fine and coarse points
     *----------------------------------------------------------*/
 
-   f_send_boxes = hypre_DuplicateBoxArrayArray(send_boxes);
-   f_recv_boxes = hypre_DuplicateBoxArrayArray(recv_boxes);
+   f_send_boxes = hypre_BoxArrayArrayDuplicate(send_boxes);
+   f_recv_boxes = hypre_BoxArrayArrayDuplicate(recv_boxes);
    hypre_ProjectBoxArrayArray(f_send_boxes, findex, stride);
    hypre_ProjectBoxArrayArray(f_recv_boxes, findex, stride);
    hypre_ProjectBoxArrayArray(send_boxes, cindex, stride);
@@ -138,15 +138,15 @@ hypre_SMGIntAddSetup( void               *intadd_vdata,
 
    hypre_ForBoxArrayI(i, f_send_boxes)
       hypre_TFree(temp_send_processes[i]);
-   hypre_DestroyBoxArrayArray(f_send_boxes);
+   hypre_BoxArrayArrayDestroy(f_send_boxes);
    hypre_TFree(temp_send_processes);
 
    hypre_ForBoxArrayI(i, f_recv_boxes)
       hypre_TFree(temp_recv_processes[i]);
-   hypre_DestroyBoxArrayArray(f_recv_boxes);
+   hypre_BoxArrayArrayDestroy(f_recv_boxes);
    hypre_TFree(temp_recv_processes);
 
-   hypre_CreateComputePkg(send_boxes, recv_boxes,
+   hypre_ComputePkgCreate(send_boxes, recv_boxes,
                        stride, stride,
                        send_processes, recv_processes,
                        indt_boxes, dept_boxes,
@@ -158,14 +158,14 @@ hypre_SMGIntAddSetup( void               *intadd_vdata,
     * Set up the coarse points BoxArray
     *----------------------------------------------------------*/
 
-   coarse_points = hypre_DuplicateBoxArray(hypre_StructGridBoxes(grid));
+   coarse_points = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid));
    hypre_ProjectBoxArray(coarse_points, cindex, stride);
 
    /*----------------------------------------------------------
     * Set up the intadd data structure
     *----------------------------------------------------------*/
 
-   (intadd_data -> PT)            = hypre_RefStructMatrix(PT);
+   (intadd_data -> PT)            = hypre_StructMatrixRef(PT);
    (intadd_data -> compute_pkg)   = compute_pkg;
    (intadd_data -> coarse_points) = coarse_points;
    hypre_CopyIndex(cindex, (intadd_data -> cindex));
@@ -264,7 +264,7 @@ hypre_SMGIntAdd( void               *intadd_vdata,
     * off-diagonal coefficients of P^T.  Interleave the results.
     *--------------------------------------------------------------------*/
 
-   hypre_ClearStructVectorAllValues(e);
+   hypre_StructVectorClearAllValues(e);
 
    compute_box_a = coarse_points;
    hypre_ForBoxI(i, compute_box_a)
@@ -285,7 +285,7 @@ hypre_SMGIntAdd( void               *intadd_vdata,
          PTp1 = hypre_StructMatrixBoxData(PT, i, 1);
          xcp = hypre_StructVectorBoxData(xc, i);
 
-         hypre_GetStrideBoxSize(compute_box, stride, loop_size);
+         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
          hypre_BoxLoop3Begin(loop_size,
                              e_data_box,  start,  stride,  ei,
                              PT_data_box, startc, stridec, PTi,
@@ -346,7 +346,7 @@ hypre_SMGIntAdd( void               *intadd_vdata,
                xp = hypre_StructVectorBoxData(x, i);
                xcp = hypre_StructVectorBoxData(xc, i);
 
-               hypre_GetStrideBoxSize(compute_box, stride, loop_size);
+               hypre_BoxGetStrideSize(compute_box, stride, loop_size);
                hypre_BoxLoop2Begin(loop_size,
                                    x_data_box,  start,  stride,  xi,
                                    xc_data_box, startc, stridec, xci);
@@ -382,7 +382,7 @@ hypre_SMGIntAdd( void               *intadd_vdata,
 
                   start  = hypre_BoxIMin(compute_box);
 
-                  hypre_GetStrideBoxSize(compute_box, stride, loop_size);
+                  hypre_BoxGetStrideSize(compute_box, stride, loop_size);
                   hypre_BoxLoop2Begin(loop_size,
                                       x_data_box, start, stride, xi,
                                       e_data_box, start, stride, ei);
@@ -420,9 +420,9 @@ hypre_SMGIntAddDestroy( void *intadd_vdata )
 
    if (intadd_data)
    {
-      hypre_DestroyStructMatrix(intadd_data -> PT);
-      hypre_DestroyBoxArray(intadd_data -> coarse_points);
-      hypre_DestroyComputePkg(intadd_data -> compute_pkg);
+      hypre_StructMatrixDestroy(intadd_data -> PT);
+      hypre_BoxArrayDestroy(intadd_data -> coarse_points);
+      hypre_ComputePkgDestroy(intadd_data -> compute_pkg);
       hypre_FinalizeTiming(intadd_data -> time_index);
       hypre_TFree(intadd_data);
    }

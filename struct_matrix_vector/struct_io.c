@@ -59,7 +59,7 @@ hypre_PrintBoxArrayData( FILE            *file,
          start = hypre_BoxIMin(box);
          data_box_volume = hypre_BoxVolume(data_box);
 
-         hypre_GetBoxSize(box, loop_size);
+         hypre_BoxGetSize(box, loop_size);
 
 	 hypre_BoxLoop1Begin(loop_size,
                              data_box, start, stride, datai);
@@ -126,7 +126,7 @@ hypre_ReadBoxArrayData( FILE            *file,
          start = hypre_BoxIMin(box);
          data_box_volume = hypre_BoxVolume(data_box);
 
-         hypre_GetBoxSize(box, loop_size);
+         hypre_BoxGetSize(box, loop_size);
 
 	 hypre_BoxLoop1Begin(loop_size,
                              data_box, start, stride, datai);

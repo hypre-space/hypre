@@ -188,13 +188,13 @@ hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A,
       }
    }
 
-   Ac_stencil = hypre_CreateStructStencil(Ac_stencil_dim, Ac_stencil_size,
+   Ac_stencil = hypre_StructStencilCreate(Ac_stencil_dim, Ac_stencil_size,
                                        Ac_stencil_shape);
 
-   Ac = hypre_CreateStructMatrix(hypre_StructMatrixComm(A),
+   Ac = hypre_StructMatrixCreate(hypre_StructMatrixComm(A),
                               coarse_grid, Ac_stencil);
 
-   hypre_DestroyStructStencil(Ac_stencil);
+   hypre_StructStencilDestroy(Ac_stencil);
 
    /*-----------------------------------------------
     * Coarse operator in symmetric iff fine operator is
@@ -211,9 +211,9 @@ hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A,
    {
      Ac_num_ghost[2*cdir + 1] = 1;
    }
-   hypre_SetStructMatrixNumGhost(Ac, Ac_num_ghost);
+   hypre_StructMatrixSetNumGhost(Ac, Ac_num_ghost);
 
-   hypre_InitializeStructMatrixShell(Ac);
+   hypre_StructMatrixInitializeShell(Ac);
  
    return Ac;
 }
@@ -329,7 +329,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
          if(!hypre_StructMatrixSymmetric(A))
          {
-            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxGetSize(cgrid_box, loop_size);
 
             hypre_BoxLoop2Begin(loop_size,
                                 A_data_box, fstart, stridef, iA,
@@ -359,7 +359,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
          else
          {
-            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxGetSize(cgrid_box, loop_size);
 
             hypre_BoxLoop2Begin(loop_size,
                                 A_data_box, fstart, stridef, iA,
@@ -382,7 +382,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
       } /* end ForBoxI */
 
-   hypre_AssembleStructMatrix(Ac);
+   hypre_StructMatrixAssemble(Ac);
 
    /*-----------------------------------------------------------------------
     * Collapse stencil in periodic direction on coarsest grid.
@@ -426,7 +426,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
          if(!hypre_StructMatrixSymmetric(A))
          {
-            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxGetSize(cgrid_box, loop_size);
 
             hypre_BoxLoop1Begin(loop_size,
                                 Ac_data_box, cstart, stridec, iAc);
@@ -447,7 +447,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
          else
          {
-            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxGetSize(cgrid_box, loop_size);
 
             hypre_BoxLoop1Begin(loop_size,
                                 Ac_data_box, cstart, stridec, iAc);
@@ -465,7 +465,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
    }
 
-   hypre_AssembleStructMatrix(Ac);
+   hypre_StructMatrixAssemble(Ac);
 
    return ierr;
 }
@@ -574,7 +574,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    num_levels = hypre_Log2(idmax - idmin + 1) + 2;
 
    grid_l    = hypre_TAlloc(hypre_StructGrid *, num_levels);
-   grid_l[0] = hypre_RefStructGrid(grid);
+   grid_l[0] = hypre_StructGridRef(grid);
    for (l = 0; ; l++)
    {
       /* set cindex and stride */
@@ -609,22 +609,22 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       }
 
       /* compute local boxes */
-      boxes = hypre_CreateBoxArray(num_boxes);
+      boxes = hypre_BoxArrayCreate(num_boxes);
       for (i = 0; i < num_boxes; i++)
       {
          hypre_CopyBox(hypre_BoxArrayBox(all_boxes, box_ranks[i]),
                        hypre_BoxArrayBox(boxes, i));
       }
 
-      grid_l[l+1] = hypre_CreateStructGrid(comm, hypre_StructGridDim(grid_l[l]));
+      grid_l[l+1] = hypre_StructGridCreate(comm, hypre_StructGridDim(grid_l[l]));
       for (d = 0; d < 3; d++)
       {
          hypre_IndexD(pindex, d) +=
             hypre_IndexD(cindex, d) * hypre_IndexD(pstride, d);
          hypre_IndexD(pstride, d) *= hypre_IndexD(stride, d);
       }
-      hypre_SetStructGridBoxes(grid_l[l+1], boxes);
-      hypre_SetStructGridGlobalInfo(grid_l[l+1],
+      hypre_StructGridSetBoxes(grid_l[l+1], boxes);
+      hypre_StructGridSetGlobalInfo(grid_l[l+1],
                                     all_boxes, processes, box_ranks,
                                     base_all_boxes, pindex, pstride);
 
@@ -632,9 +632,9 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_CopyIndex(hypre_StructGridPeriodic(grid_l[l]), periodic);
       hypre_IndexD(periodic, cdir) =
             (hypre_IndexD(periodic, cdir) + 1)/2;
-      hypre_SetStructGridPeriodic(grid_l[l+1], periodic);
+      hypre_StructGridSetPeriodic(grid_l[l+1], periodic);
 
-      hypre_AssembleStructGrid(grid_l[l+1]);
+      hypre_StructGridAssemble(grid_l[l+1]);
    }
    num_levels = l + 1;
 
@@ -645,7 +645,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
     * Set up base points
     *-----------------------------------------------------*/
 
-   base_points = hypre_DuplicateBoxArray(hypre_StructGridBoxes(grid_l[0]));
+   base_points = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid_l[0]));
    hypre_ProjectBoxArray(base_points, base_index, base_stride);
 
    (cyc_red_data -> base_points) = base_points;
@@ -664,15 +664,15 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
 
       fine_points_l[l] =
-         hypre_DuplicateBoxArray(hypre_StructGridBoxes(grid_l[l]));
+         hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid_l[l]));
       hypre_ProjectBoxArray(fine_points_l[l], findex, stride);
       coarse_points_l[l] =
-         hypre_DuplicateBoxArray(hypre_StructGridBoxes(grid_l[l]));
+         hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid_l[l]));
       hypre_ProjectBoxArray(coarse_points_l[l], cindex, stride);
    }
   
    fine_points_l[l] =
-      hypre_DuplicateBoxArray(hypre_StructGridBoxes(grid_l[l]));
+      hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid_l[l]));
    if (num_levels == 1)
    {
       hypre_ProjectBoxArray(fine_points_l[l], base_index, base_stride);
@@ -688,8 +688,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    A_l  = hypre_TAlloc(hypre_StructMatrix *, num_levels);
    x_l  = hypre_TAlloc(hypre_StructVector *, num_levels);
 
-   A_l[0] = hypre_RefStructMatrix(A);
-   x_l[0] = hypre_RefStructVector(x);
+   A_l[0] = hypre_StructMatrixRef(A);
+   x_l[0] = hypre_StructVectorRef(x);
 
    x_num_ghost[2*cdir]     = 1;
    x_num_ghost[2*cdir + 1] = 1;
@@ -699,9 +699,9 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       A_l[l+1] = hypre_CycRedCreateCoarseOp(A_l[l], grid_l[l+1], cdir);
       data_size += hypre_StructMatrixDataSize(A_l[l+1]);
 
-      x_l[l+1] = hypre_CreateStructVector(comm, grid_l[l+1]);
-      hypre_SetStructVectorNumGhost(x_l[l+1], x_num_ghost);
-      hypre_InitializeStructVectorShell(x_l[l+1]);
+      x_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
+      hypre_StructVectorSetNumGhost(x_l[l+1], x_num_ghost);
+      hypre_StructVectorInitializeShell(x_l[l+1]);
       data_size += hypre_StructVectorDataSize(x_l[l+1]);
    }
 
@@ -711,10 +711,10 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      hypre_InitializeStructMatrixData(A_l[l+1], data);
+      hypre_StructMatrixInitializeData(A_l[l+1], data);
       data += hypre_StructMatrixDataSize(A_l[l+1]);
-      hypre_InitializeStructVectorData(x_l[l+1], data);
-      hypre_AssembleStructVector(x_l[l+1]);
+      hypre_StructVectorInitializeData(x_l[l+1], data);
+      hypre_StructVectorAssemble(x_l[l+1]);
       data += hypre_StructVectorDataSize(x_l[l+1]);
    }
 
@@ -746,7 +746,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_CycRedSetFIndex(base_index, base_stride, l, cdir, findex);
       hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
 
-      hypre_GetComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]),
+      hypre_CreateComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]),
                            &send_boxes, &recv_boxes,
                            &send_processes, &recv_processes,
                            &indt_boxes, &dept_boxes);
@@ -756,7 +756,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_ProjectBoxArrayArray(recv_boxes, findex, stride);
       hypre_ProjectBoxArrayArray(indt_boxes, cindex, stride);
       hypre_ProjectBoxArrayArray(dept_boxes, cindex, stride);
-      hypre_CreateComputePkg(send_boxes, recv_boxes,
+      hypre_ComputePkgCreate(send_boxes, recv_boxes,
                           stride, stride,
                           send_processes, recv_processes,
                           indt_boxes, dept_boxes,
@@ -764,7 +764,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
                           hypre_StructVectorDataSpace(x_l[l]), 1,
                           &down_compute_pkg_l[l]);
 
-      hypre_GetComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]),
+      hypre_CreateComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]),
                            &send_boxes, &recv_boxes,
                            &send_processes, &recv_processes,
                            &indt_boxes, &dept_boxes);
@@ -774,7 +774,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_ProjectBoxArrayArray(recv_boxes, cindex, stride);
       hypre_ProjectBoxArrayArray(indt_boxes, findex, stride);
       hypre_ProjectBoxArrayArray(dept_boxes, findex, stride);
-      hypre_CreateComputePkg(send_boxes, recv_boxes,
+      hypre_ComputePkgCreate(send_boxes, recv_boxes,
                           stride, stride,
                           send_processes, recv_processes,
                           indt_boxes, dept_boxes,
@@ -822,7 +822,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       for (l = 0; l < num_levels; l++)
       {
          sprintf(filename, "yout_A.%02d", l);
-         hypre_PrintStructMatrix(filename, A_l[l], 0);
+         hypre_StructMatrixPrint(filename, A_l[l], 0);
       }
    }
 #endif
@@ -905,10 +905,10 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
    hypre_SetIndex(stridec, 1, 1, 1);
 
-   hypre_DestroyStructMatrix(A_l[0]);
-   hypre_DestroyStructVector(x_l[0]);
-   A_l[0] = hypre_RefStructMatrix(A);
-   x_l[0] = hypre_RefStructVector(x);
+   hypre_StructMatrixDestroy(A_l[0]);
+   hypre_StructVectorDestroy(x_l[0]);
+   A_l[0] = hypre_StructMatrixRef(A);
+   x_l[0] = hypre_StructVectorRef(x);
 
    /*--------------------------------------------------
     * Copy b into x
@@ -929,7 +929,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
          start  = hypre_BoxIMin(compute_box);
 
-         hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+         hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
 
          hypre_BoxLoop2Begin(loop_size,
                                 x_data_box, start, base_stride, xi,
@@ -987,7 +987,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
             start  = hypre_BoxIMin(compute_box);
 
-            hypre_GetStrideBoxSize(compute_box, stride, loop_size);
+            hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
             hypre_BoxLoop2Begin(loop_size,
                                 A_data_box, start, stride, Ai,
@@ -1061,7 +1061,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                      hypre_CycRedMapFineToCoarse(start, startc,
                                                  cindex, stride);
 
-                     hypre_GetStrideBoxSize(compute_box, stride, loop_size);
+                     hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
                      hypre_BoxLoop3Begin(loop_size,
                                          A_data_box, start, stride, Ai,
@@ -1115,7 +1115,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             start  = hypre_BoxIMin(compute_box);
             hypre_CycRedMapFineToCoarse(start, startc, cindex, stride);
 
-            hypre_GetStrideBoxSize(compute_box, stride, loop_size);
+            hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
             hypre_BoxLoop2Begin(loop_size,
                                 x_data_box, start, stride, xi,
@@ -1183,7 +1183,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
                      start  = hypre_BoxIMin(compute_box);
 
-                     hypre_GetStrideBoxSize(compute_box, stride, loop_size);
+                     hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
                      hypre_BoxLoop2Begin(loop_size,
                                          A_data_box, start, stride, Ai,
@@ -1249,21 +1249,21 @@ hypre_CyclicReductionDestroy( void *cyc_red_vdata )
 
    if (cyc_red_data)
    {
-      hypre_DestroyBoxArray(cyc_red_data -> base_points);
-      hypre_DestroyStructGrid(cyc_red_data -> grid_l[0]);
-      hypre_DestroyStructMatrix(cyc_red_data -> A_l[0]);
-      hypre_DestroyStructVector(cyc_red_data -> x_l[0]);
+      hypre_BoxArrayDestroy(cyc_red_data -> base_points);
+      hypre_StructGridDestroy(cyc_red_data -> grid_l[0]);
+      hypre_StructMatrixDestroy(cyc_red_data -> A_l[0]);
+      hypre_StructVectorDestroy(cyc_red_data -> x_l[0]);
       for (l = 0; l < ((cyc_red_data -> num_levels) - 1); l++)
       {
-         hypre_DestroyStructGrid(cyc_red_data -> grid_l[l+1]);
-         hypre_DestroyBoxArray(cyc_red_data -> fine_points_l[l]);
-         hypre_DestroyBoxArray(cyc_red_data -> coarse_points_l[l]);
-         hypre_DestroyStructMatrix(cyc_red_data -> A_l[l+1]);
-         hypre_DestroyStructVector(cyc_red_data -> x_l[l+1]);
-         hypre_DestroyComputePkg(cyc_red_data -> down_compute_pkg_l[l]);
-         hypre_DestroyComputePkg(cyc_red_data -> up_compute_pkg_l[l]);
+         hypre_StructGridDestroy(cyc_red_data -> grid_l[l+1]);
+         hypre_BoxArrayDestroy(cyc_red_data -> fine_points_l[l]);
+         hypre_BoxArrayDestroy(cyc_red_data -> coarse_points_l[l]);
+         hypre_StructMatrixDestroy(cyc_red_data -> A_l[l+1]);
+         hypre_StructVectorDestroy(cyc_red_data -> x_l[l+1]);
+         hypre_ComputePkgDestroy(cyc_red_data -> down_compute_pkg_l[l]);
+         hypre_ComputePkgDestroy(cyc_red_data -> up_compute_pkg_l[l]);
       }
-      hypre_DestroyBoxArray(cyc_red_data -> fine_points_l[l]);
+      hypre_BoxArrayDestroy(cyc_red_data -> fine_points_l[l]);
       hypre_SharedTFree(cyc_red_data -> data); 
       hypre_TFree(cyc_red_data -> grid_l);
       hypre_TFree(cyc_red_data -> fine_points_l);

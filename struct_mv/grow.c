@@ -36,8 +36,8 @@ hypre_GrowBoxByStencil( hypre_Box           *box,
 
    stencil_shape = hypre_StructStencilShape(stencil);
 
-   shift_box_array = hypre_CreateBoxArray(hypre_StructStencilSize(stencil));
-   shift_box = hypre_CreateBox();
+   shift_box_array = hypre_BoxArrayCreate(hypre_StructStencilSize(stencil));
+   shift_box = hypre_BoxCreate();
    for (s = 0; s < hypre_StructStencilSize(stencil); s++)
    {
       if (transpose)
@@ -59,9 +59,9 @@ hypre_GrowBoxByStencil( hypre_Box           *box,
 
       hypre_CopyBox(shift_box, hypre_BoxArrayBox(shift_box_array, s));
    }
-   hypre_DestroyBox(shift_box);
+   hypre_BoxDestroy(shift_box);
 
-   hypre_UnionBoxArray(shift_box_array);
+   hypre_UnionBoxes(shift_box_array);
    grow_box_array = shift_box_array;
 
    return grow_box_array;
@@ -81,11 +81,11 @@ hypre_GrowBoxArrayByStencil( hypre_BoxArray      *box_array,
    int                      i;
 
    grow_box_array_array =
-      hypre_CreateBoxArrayArray(hypre_BoxArraySize(box_array));
+      hypre_BoxArrayArrayCreate(hypre_BoxArraySize(box_array));
 
    hypre_ForBoxI(i, box_array)
       {
-         hypre_DestroyBoxArray(
+         hypre_BoxArrayDestroy(
             hypre_BoxArrayArrayBoxArray(grow_box_array_array, i));
          hypre_BoxArrayArrayBoxArray(grow_box_array_array, i) =
             hypre_GrowBoxByStencil(hypre_BoxArrayBox(box_array, i),

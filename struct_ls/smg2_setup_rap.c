@@ -111,13 +111,13 @@ hypre_SMG2CreateRAPOp( hypre_StructMatrix *R,
       }
    }
 
-   RAP_stencil = hypre_CreateStructStencil(RAP_stencil_dim, RAP_stencil_size,
+   RAP_stencil = hypre_StructStencilCreate(RAP_stencil_dim, RAP_stencil_size,
                                         RAP_stencil_shape);
 
-   RAP = hypre_CreateStructMatrix(hypre_StructMatrixComm(A),
+   RAP = hypre_StructMatrixCreate(hypre_StructMatrixComm(A),
                                coarse_grid, RAP_stencil);
 
-   hypre_DestroyStructStencil(RAP_stencil);
+   hypre_StructStencilDestroy(RAP_stencil);
 
    /*-----------------------------------------------------------------------
     * Coarse operator in symmetric iff fine operator is
@@ -132,7 +132,7 @@ hypre_SMG2CreateRAPOp( hypre_StructMatrix *R,
       RAP_num_ghost[1] = 0;
       RAP_num_ghost[3] = 0;
    }
-   hypre_SetStructMatrixNumGhost(RAP, RAP_num_ghost);
+   hypre_StructMatrixSetNumGhost(RAP, RAP_num_ghost);
 
    return RAP;
 }
@@ -354,7 +354,7 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
 
             case 5:
 
-            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxGetSize(cgrid_box, loop_size);
             hypre_BoxLoop4Begin(loop_size,
                                 PT_data_box,  cstart, stridec, iP,
                                 R_data_box,   cstart, stridec, iR,
@@ -405,7 +405,7 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
 
             default:
 
-            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxGetSize(cgrid_box, loop_size);
             hypre_BoxLoop4Begin(loop_size,
                                 PT_data_box,  cstart, stridec, iP,
                                 R_data_box,   cstart, stridec, iR,
@@ -662,7 +662,7 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
 
             case 5:
 
-            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxGetSize(cgrid_box, loop_size);
             hypre_BoxLoop4Begin(loop_size,
                                 PT_data_box,  cstart, stridec, iP,
                                 R_data_box,   cstart, stridec, iR,
@@ -704,7 +704,7 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
 
             default:
 
-            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxGetSize(cgrid_box, loop_size);
             hypre_BoxLoop4Begin(loop_size,
                                 PT_data_box,  cstart, stridec, iP,
                                 R_data_box,   cstart, stridec, iR,
@@ -802,7 +802,7 @@ hypre_SMG2RAPPeriodicSym( hypre_StructMatrix *RAP,
 
    if (hypre_IndexY(hypre_StructGridPeriodic(cgrid)) == 1)
    {
-      hypre_AssembleStructMatrix(RAP);
+      hypre_StructMatrixAssemble(RAP);
       hypre_ForBoxI(i, cgrid_boxes)
       {
          cgrid_box = hypre_BoxArrayBox(cgrid_boxes, i);
@@ -833,7 +833,7 @@ hypre_SMG2RAPPeriodicSym( hypre_StructMatrix *RAP,
          hypre_SetIndex(index_temp,1,-1,0);
          rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-         hypre_GetBoxSize(cgrid_box, loop_size);
+         hypre_BoxGetSize(cgrid_box, loop_size);
 
 
          hypre_BoxLoop1Begin(loop_size,
@@ -950,7 +950,7 @@ hypre_SMG2RAPPeriodicNoSym( hypre_StructMatrix *RAP,
          rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
 
-         hypre_GetBoxSize(cgrid_box, loop_size);
+         hypre_BoxGetSize(cgrid_box, loop_size);
 
          hypre_BoxLoop1Begin(loop_size,
                              RAP_data_box, cstart, stridec, iAc);

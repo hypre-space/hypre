@@ -96,10 +96,10 @@ hypre_SMGResidualSetup( void               *residual_vdata,
 
    hypre_SetIndex(unit_stride, 1, 1, 1);
 
-   base_points = hypre_DuplicateBoxArray(hypre_StructGridBoxes(grid));
+   base_points = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid));
    hypre_ProjectBoxArray(base_points, base_index, base_stride);
 
-   hypre_GetComputeInfo(grid, stencil,
+   hypre_CreateComputeInfo(grid, stencil,
                         &send_boxes, &recv_boxes,
                         &send_processes, &recv_processes,
                         &indt_boxes, &dept_boxes);
@@ -107,7 +107,7 @@ hypre_SMGResidualSetup( void               *residual_vdata,
    hypre_ProjectBoxArrayArray(indt_boxes, base_index, base_stride);
    hypre_ProjectBoxArrayArray(dept_boxes, base_index, base_stride);
 
-   hypre_CreateComputePkg(send_boxes, recv_boxes,
+   hypre_ComputePkgCreate(send_boxes, recv_boxes,
                        unit_stride, unit_stride,
                        send_processes, recv_processes,
                        indt_boxes, dept_boxes,
@@ -119,10 +119,10 @@ hypre_SMGResidualSetup( void               *residual_vdata,
     * Set up the residual data structure
     *----------------------------------------------------------*/
 
-   (residual_data -> A)           = hypre_RefStructMatrix(A);
-   (residual_data -> x)           = hypre_RefStructVector(x);
-   (residual_data -> b)           = hypre_RefStructVector(b);
-   (residual_data -> r)           = hypre_RefStructVector(r);
+   (residual_data -> A)           = hypre_StructMatrixRef(A);
+   (residual_data -> x)           = hypre_StructVectorRef(x);
+   (residual_data -> b)           = hypre_StructVectorRef(b);
+   (residual_data -> r)           = hypre_StructVectorRef(r);
    (residual_data -> base_points) = base_points;
    (residual_data -> compute_pkg) = compute_pkg;
 
@@ -242,7 +242,7 @@ hypre_SMGResidual( void               *residual_vdata,
                   bp = hypre_StructVectorBoxData(b, i);
                   rp = hypre_StructVectorBoxData(r, i);
 
-                  hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                  hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
                   hypre_BoxLoop2Begin(loop_size,
                                       b_data_box, start, base_stride, bi,
                                       r_data_box, start, base_stride, ri);
@@ -611,7 +611,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                      case 1:
    
-                     hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                     hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
                      hypre_BoxLoop3Begin(loop_size,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
@@ -631,7 +631,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                      case 3:
 
-                     hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                     hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
                      hypre_BoxLoop3Begin(loop_size,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
@@ -653,7 +653,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                      case 5:
 
-                     hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                     hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
                      hypre_BoxLoop3Begin(loop_size,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
@@ -677,7 +677,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                      case 7:
 
-                     hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                     hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
                      hypre_BoxLoop3Begin(loop_size,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
@@ -703,7 +703,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                      case 9:
 
-                     hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                     hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
                      hypre_BoxLoop3Begin(loop_size,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
@@ -731,7 +731,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                      case 15:
 
-                     hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                     hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
                      hypre_BoxLoop3Begin(loop_size,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
@@ -765,7 +765,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                      case 19:
 
-                     hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                     hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
                      hypre_BoxLoop3Begin(loop_size,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
@@ -803,7 +803,7 @@ hypre_SMGResidual( void               *residual_vdata,
    
                      case 27:
 
-                     hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                     hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
                      hypre_BoxLoop3Begin(loop_size,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
@@ -855,7 +855,7 @@ hypre_SMGResidual( void               *residual_vdata,
                         xp0 = hypre_StructVectorBoxData(x, i) +
                            hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
 
-                        hypre_GetStrideBoxSize(compute_box, base_stride,
+                        hypre_BoxGetStrideSize(compute_box, base_stride,
                                                loop_size);
                         hypre_BoxLoop3Begin(loop_size,
                                             A_data_box, start, base_stride, Ai,
@@ -921,12 +921,12 @@ hypre_SMGResidualDestroy( void *residual_vdata )
 
    if (residual_data)
    {
-      hypre_DestroyStructMatrix(residual_data -> A);
-      hypre_DestroyStructVector(residual_data -> x);
-      hypre_DestroyStructVector(residual_data -> b);
-      hypre_DestroyStructVector(residual_data -> r);
-      hypre_DestroyBoxArray(residual_data -> base_points);
-      hypre_DestroyComputePkg(residual_data -> compute_pkg );
+      hypre_StructMatrixDestroy(residual_data -> A);
+      hypre_StructVectorDestroy(residual_data -> x);
+      hypre_StructVectorDestroy(residual_data -> b);
+      hypre_StructVectorDestroy(residual_data -> r);
+      hypre_BoxArrayDestroy(residual_data -> base_points);
+      hypre_ComputePkgDestroy(residual_data -> compute_pkg );
       hypre_FinalizeTiming(residual_data -> time_index);
       hypre_TFree(residual_data);
    }

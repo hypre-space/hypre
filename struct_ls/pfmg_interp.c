@@ -84,7 +84,7 @@ hypre_PFMGInterpSetup( void               *interp_vdata,
    grid    = hypre_StructVectorGrid(e);
    stencil = hypre_StructMatrixStencil(P);
 
-   hypre_GetComputeInfo(grid, stencil,
+   hypre_CreateComputeInfo(grid, stencil,
                         &send_boxes, &recv_boxes,
                         &send_processes, &recv_processes,
                         &indt_boxes, &dept_boxes);
@@ -94,7 +94,7 @@ hypre_PFMGInterpSetup( void               *interp_vdata,
    hypre_ProjectBoxArrayArray(indt_boxes, findex, stride);
    hypre_ProjectBoxArrayArray(dept_boxes, findex, stride);
 
-   hypre_CreateComputePkg(send_boxes, recv_boxes,
+   hypre_ComputePkgCreate(send_boxes, recv_boxes,
                        stride, stride,
                        send_processes, recv_processes,
                        indt_boxes, dept_boxes,
@@ -106,14 +106,14 @@ hypre_PFMGInterpSetup( void               *interp_vdata,
     * Set up the coarse points BoxArray
     *----------------------------------------------------------*/
 
-   coarse_points = hypre_DuplicateBoxArray(hypre_StructGridBoxes(grid));
+   coarse_points = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid));
    hypre_ProjectBoxArray(coarse_points, cindex, stride);
 
    /*----------------------------------------------------------
     * Set up the interp data structure
     *----------------------------------------------------------*/
 
-   (interp_data -> P)             = hypre_RefStructMatrix(P);
+   (interp_data -> P)             = hypre_StructMatrixRef(P);
    (interp_data -> compute_pkg)   = compute_pkg;
    (interp_data -> coarse_points) = coarse_points;
    hypre_CopyIndex(cindex, (interp_data -> cindex));
@@ -209,7 +209,7 @@ hypre_PFMGInterp( void               *interp_vdata,
          ep  = hypre_StructVectorBoxData(e, i);
          xcp = hypre_StructVectorBoxData(xc, i);
 
-         hypre_GetStrideBoxSize(compute_box, stride, loop_size);
+         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
          hypre_BoxLoop2Begin(loop_size,
                              e_data_box, start, stride, ei,
@@ -267,7 +267,7 @@ hypre_PFMGInterp( void               *interp_vdata,
                   start  = hypre_BoxIMin(compute_box);
                   hypre_PFMGMapFineToCoarse(start, findex, stride, startc);
 
-                  hypre_GetStrideBoxSize(compute_box, stride, loop_size);
+                  hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
                   hypre_BoxLoop2Begin(loop_size,
                                       P_data_box, startc, stridec, Pi,
@@ -307,9 +307,9 @@ hypre_PFMGInterpDestroy( void *interp_vdata )
 
    if (interp_data)
    {
-      hypre_DestroyStructMatrix(interp_data -> P);
-      hypre_DestroyBoxArray(interp_data -> coarse_points);
-      hypre_DestroyComputePkg(interp_data -> compute_pkg);
+      hypre_StructMatrixDestroy(interp_data -> P);
+      hypre_BoxArrayDestroy(interp_data -> coarse_points);
+      hypre_ComputePkgDestroy(interp_data -> compute_pkg);
       hypre_FinalizeTiming(interp_data -> time_index);
       hypre_TFree(interp_data);
    }

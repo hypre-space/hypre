@@ -47,7 +47,7 @@ headers.h
 /*--------------------------------------------------------------------------*/
 
   int
-  hypre_GetComputeInfo( hypre_StructGrid      *grid,
+  hypre_CreateComputeInfo( hypre_StructGrid      *grid,
                         hypre_StructStencil   *stencil,
                         hypre_BoxArrayArray  **send_boxes_ptr,
                         hypre_BoxArrayArray  **recv_boxes_ptr,
@@ -123,13 +123,13 @@ headers.h
     * Set up the dependent boxes
     *------------------------------------------------------*/
 
-   dept_boxes = hypre_CreateBoxArrayArray(hypre_BoxArraySize(boxes));
+   dept_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes));
 
-   rembox = hypre_CreateBox();
+   rembox = hypre_BoxCreate();
    hypre_ForBoxI(i, boxes)
       {
          cbox_array = hypre_BoxArrayArrayBoxArray(dept_boxes, i);
-         hypre_SetBoxArraySize(cbox_array, 6);
+         hypre_BoxArraySetSize(cbox_array, 6);
 
          hypre_CopyBox(hypre_BoxArrayBox(boxes, i), rembox);
          cbox_array_size = 0;
@@ -156,20 +156,20 @@ headers.h
                cbox_array_size++;
             }
          }
-         hypre_SetBoxArraySize(cbox_array, cbox_array_size);
+         hypre_BoxArraySetSize(cbox_array, cbox_array_size);
       }
-   hypre_DestroyBox(rembox);
+   hypre_BoxDestroy(rembox);
 
    /*------------------------------------------------------
     * Set up the independent boxes
     *------------------------------------------------------*/
 
-   indt_boxes = hypre_CreateBoxArrayArray(hypre_BoxArraySize(boxes));
+   indt_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes));
 
    hypre_ForBoxI(i, boxes)
       {
          cbox_array = hypre_BoxArrayArrayBoxArray(indt_boxes, i);
-         hypre_SetBoxArraySize(cbox_array, 1);
+         hypre_BoxArraySetSize(cbox_array, 1);
          cbox = hypre_BoxArrayBox(cbox_array, 0);
          hypre_CopyBox(hypre_BoxArrayBox(boxes, i), cbox);
 
@@ -192,18 +192,18 @@ headers.h
     * Set up the independent boxes
     *------------------------------------------------------*/
 
-   indt_boxes = hypre_CreateBoxArrayArray(hypre_BoxArraySize(boxes));
+   indt_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes));
 
    /*------------------------------------------------------
     * Set up the dependent boxes
     *------------------------------------------------------*/
 
-   dept_boxes = hypre_CreateBoxArrayArray(hypre_BoxArraySize(boxes));
+   dept_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes));
 
    hypre_ForBoxI(i, boxes)
       {
          cbox_array = hypre_BoxArrayArrayBoxArray(dept_boxes, i);
-         hypre_SetBoxArraySize(cbox_array, 1);
+         hypre_BoxArraySetSize(cbox_array, 1);
          cbox = hypre_BoxArrayBox(cbox_array, 0);
          hypre_CopyBox(hypre_BoxArrayBox(boxes, i), cbox);
       }
@@ -264,11 +264,11 @@ headers.h
 @param compute_pkg_ptr [OUT]
   pointer to a computation package
 
-@see hypre_CreateCommPkg, hypre_DestroyComputePkg */
+@see hypre_CommPkgCreate, hypre_ComputePkgDestroy */
 /*--------------------------------------------------------------------------*/
 
   int
-  hypre_CreateComputePkg( hypre_BoxArrayArray   *send_boxes,
+  hypre_ComputePkgCreate( hypre_BoxArrayArray   *send_boxes,
                           hypre_BoxArrayArray   *recv_boxes,
                           hypre_Index            send_stride,
                           hypre_Index            recv_stride,
@@ -288,7 +288,7 @@ headers.h
    compute_pkg = hypre_CTAlloc(hypre_ComputePkg, 1);
 
    hypre_ComputePkgCommPkg(compute_pkg)     =
-      hypre_CreateCommPkg(send_boxes, recv_boxes,
+      hypre_CommPkgCreate(send_boxes, recv_boxes,
                           send_stride, recv_stride,
                           data_space, data_space,
                           send_processes, recv_processes,
@@ -299,7 +299,7 @@ headers.h
    hypre_ComputePkgDeptBoxes(compute_pkg)   = dept_boxes;
    hypre_CopyIndex(stride, hypre_ComputePkgStride(compute_pkg));
 
-   hypre_ComputePkgGrid(compute_pkg)        = hypre_RefStructGrid(grid);
+   hypre_ComputePkgGrid(compute_pkg)        = hypre_StructGridRef(grid);
    hypre_ComputePkgDataSpace(compute_pkg)   = data_space;
    hypre_ComputePkgNumValues(compute_pkg)   = num_values;
 
@@ -320,22 +320,22 @@ headers.h
 @param compute_pkg [IN/OUT]
   computation package.
 
-@see hypre_CreateComputePkg */
+@see hypre_ComputePkgCreate */
 /*--------------------------------------------------------------------------*/
 
 int
-hypre_DestroyComputePkg( hypre_ComputePkg *compute_pkg )
+hypre_ComputePkgDestroy( hypre_ComputePkg *compute_pkg )
 {
    int ierr = 0;
 
    if (compute_pkg)
    {
-      hypre_DestroyCommPkg(hypre_ComputePkgCommPkg(compute_pkg));
+      hypre_CommPkgDestroy(hypre_ComputePkgCommPkg(compute_pkg));
 
-      hypre_DestroyBoxArrayArray(hypre_ComputePkgIndtBoxes(compute_pkg));
-      hypre_DestroyBoxArrayArray(hypre_ComputePkgDeptBoxes(compute_pkg));
+      hypre_BoxArrayArrayDestroy(hypre_ComputePkgIndtBoxes(compute_pkg));
+      hypre_BoxArrayArrayDestroy(hypre_ComputePkgDeptBoxes(compute_pkg));
 
-      hypre_DestroyStructGrid(hypre_ComputePkgGrid(compute_pkg));
+      hypre_StructGridDestroy(hypre_ComputePkgGrid(compute_pkg));
 
       hypre_TFree(compute_pkg);
    }
@@ -361,7 +361,7 @@ headers.h
 @param comm_handle [OUT]
   communication handle.
 
-@see hypre_FinalizeIndtComputations, hypre_CreateComputePkg,
+@see hypre_FinalizeIndtComputations, hypre_ComputePkgCreate,
 hypre_InitializeCommunication */
 /*--------------------------------------------------------------------------*/
 

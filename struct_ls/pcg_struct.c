@@ -50,10 +50,10 @@ hypre_PCGCreateVector( void *vvector )
    hypre_StructVector *vector = vvector;
    hypre_StructVector *new_vector;
 
-   new_vector = hypre_CreateStructVector( hypre_StructVectorComm(vector),
+   new_vector = hypre_StructVectorCreate( hypre_StructVectorComm(vector),
                                           hypre_StructVectorGrid(vector) );
-   hypre_InitializeStructVector(new_vector);
-   hypre_AssembleStructVector(new_vector);
+   hypre_StructVectorInitialize(new_vector);
+   hypre_StructVectorAssemble(new_vector);
 
    return ( (void *) new_vector );
 }
@@ -67,7 +67,7 @@ hypre_PCGDestroyVector( void *vvector )
 {
    hypre_StructVector *vector = vvector;
 
-   return( hypre_DestroyStructVector( vector ) );
+   return( hypre_StructVectorDestroy( vector ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -148,7 +148,7 @@ hypre_PCGCopyVector( void *x,
 int
 hypre_PCGClearVector( void *x )
 {
-   return ( hypre_SetStructVectorConstantValues( (hypre_StructVector *) x,
+   return ( hypre_StructVectorSetConstantValues( (hypre_StructVector *) x,
                                                  0.0 ) );
 }
 

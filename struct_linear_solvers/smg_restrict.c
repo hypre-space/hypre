@@ -81,7 +81,7 @@ hypre_SMGRestrictSetup( void               *restrict_vdata,
    grid    = hypre_StructVectorGrid(r);
    stencil = hypre_StructMatrixStencil(R);
 
-   hypre_GetComputeInfo(grid, stencil,
+   hypre_CreateComputeInfo(grid, stencil,
                         &send_boxes, &recv_boxes,
                         &send_processes, &recv_processes,
                         &indt_boxes, &dept_boxes);
@@ -91,7 +91,7 @@ hypre_SMGRestrictSetup( void               *restrict_vdata,
    hypre_ProjectBoxArrayArray(indt_boxes, cindex, stride);
    hypre_ProjectBoxArrayArray(dept_boxes, cindex, stride);
 
-   hypre_CreateComputePkg(send_boxes, recv_boxes,
+   hypre_ComputePkgCreate(send_boxes, recv_boxes,
                           stride, stride,
                           send_processes, recv_processes,
                           indt_boxes, dept_boxes,
@@ -103,7 +103,7 @@ hypre_SMGRestrictSetup( void               *restrict_vdata,
     * Set up the intadd data structure
     *----------------------------------------------------------*/
 
-   (restrict_data -> R)           = hypre_RefStructMatrix(R);
+   (restrict_data -> R)           = hypre_StructMatrixRef(R);
    (restrict_data -> compute_pkg) = compute_pkg;
    hypre_CopyIndex(cindex ,(restrict_data -> cindex));
    hypre_CopyIndex(stride ,(restrict_data -> stride));
@@ -224,7 +224,7 @@ hypre_SMGRestrict( void               *restrict_vdata,
                   start  = hypre_BoxIMin(compute_box);
                   hypre_SMGMapFineToCoarse(start, startc, cindex, stride);
 
-                  hypre_GetStrideBoxSize(compute_box, stride, loop_size);
+                  hypre_BoxGetStrideSize(compute_box, stride, loop_size);
                   hypre_BoxLoop3Begin(loop_size,
                                       R_data_box,  startc, stridec, Ri,
                                       r_data_box,  start,  stride,  ri,
@@ -264,8 +264,8 @@ hypre_SMGRestrictDestroy( void *restrict_vdata )
 
    if (restrict_data)
    {
-      hypre_DestroyStructMatrix(restrict_data -> R);
-      hypre_DestroyComputePkg(restrict_data -> compute_pkg);
+      hypre_StructMatrixDestroy(restrict_data -> R);
+      hypre_ComputePkgDestroy(restrict_data -> compute_pkg);
       hypre_FinalizeTiming(restrict_data -> time_index);
       hypre_TFree(restrict_data);
    }

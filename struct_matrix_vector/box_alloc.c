@@ -34,7 +34,7 @@ static int               s_count     = 0;
 /*--------------------------------------------------------------------------
  * Allocate a new block of memory and thread it into the free list.  The
  * first block will always be put on the finalize list to be freed by
- * the hypre_FinalizeBoxMemory() routine to remove memory leaks.
+ * the hypre_BoxFinalizeMemory() routine to remove memory leaks.
  *--------------------------------------------------------------------------*/
 
 static int
@@ -62,7 +62,7 @@ hypre_AllocateBoxBlock()
  *--------------------------------------------------------------------------*/
 
 int
-hypre_InitializeBoxMemory( const int at_a_time )
+hypre_BoxInitializeMemory( const int at_a_time )
 {
    int ierr = 0;
 
@@ -81,7 +81,7 @@ hypre_InitializeBoxMemory( const int at_a_time )
  *--------------------------------------------------------------------------*/
 
 int
-hypre_FinalizeBoxMemory()
+hypre_BoxFinalizeMemory()
 {
    int               ierr = 0;
    union box_memory *byebye;
@@ -135,7 +135,7 @@ hypre_BoxFree( hypre_Box *box )
 
    if (!s_count)
    {
-      hypre_FinalizeBoxMemory();
+      hypre_BoxFinalizeMemory();
    }
 
    return ierr;

@@ -80,13 +80,13 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    grid    = hypre_StructMatrixGrid(A);
    stencil = hypre_StructMatrixStencil(A);
 
-   hypre_GetComputeInfo(grid, stencil,
+   hypre_CreateComputeInfo(grid, stencil,
                         &send_boxes, &recv_boxes,
                         &send_processes, &recv_processes,
                         &indt_boxes, &dept_boxes);
 
    hypre_SetIndex(unit_stride, 1, 1, 1);
-   hypre_CreateComputePkg(send_boxes, recv_boxes,
+   hypre_ComputePkgCreate(send_boxes, recv_boxes,
                           unit_stride, unit_stride,
                           send_processes, recv_processes,
                           indt_boxes, dept_boxes,
@@ -98,8 +98,8 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
     * Set up the matvec data structure
     *----------------------------------------------------------*/
 
-   (matvec_data -> A)           = hypre_RefStructMatrix(A);
-   (matvec_data -> x)           = hypre_RefStructVector(x);
+   (matvec_data -> A)           = hypre_StructMatrixRef(A);
+   (matvec_data -> x)           = hypre_StructVectorRef(x);
    (matvec_data -> compute_pkg) = compute_pkg;
 
    return ierr;
@@ -192,7 +192,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
             yp = hypre_StructVectorBoxData(y, i);
 
-            hypre_GetBoxSize(box, loop_size);
+            hypre_BoxGetSize(box, loop_size);
 
             hypre_BoxLoop1Begin(loop_size,
                                 y_data_box, start, stride, yi);
@@ -245,7 +245,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
                      if (temp == 0.0)
                      {
-                        hypre_GetBoxSize(box, loop_size);
+                        hypre_BoxGetSize(box, loop_size);
 
                         hypre_BoxLoop1Begin(loop_size,
                                             y_data_box, start, stride, yi);
@@ -259,7 +259,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                      }
                      else
                      {
-                        hypre_GetBoxSize(box, loop_size);
+                        hypre_BoxGetSize(box, loop_size);
 
                         hypre_BoxLoop1Begin(loop_size,
                                             y_data_box, start, stride, yi);
@@ -303,7 +303,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                {
                   compute_box = hypre_BoxArrayBox(compute_box_a, j);
 
-                  hypre_GetBoxSize(compute_box, loop_size);
+                  hypre_BoxGetSize(compute_box, loop_size);
                   start  = hypre_BoxIMin(compute_box);
 
                   /* unroll up to depth MAX_DEPTH */
@@ -577,9 +577,9 @@ hypre_StructMatvecDestroy( void *matvec_vdata )
 
    if (matvec_data)
    {
-      hypre_DestroyStructMatrix(matvec_data -> A);
-      hypre_DestroyStructVector(matvec_data -> x);
-      hypre_DestroyComputePkg(matvec_data -> compute_pkg );
+      hypre_StructMatrixDestroy(matvec_data -> A);
+      hypre_StructVectorDestroy(matvec_data -> x);
+      hypre_ComputePkgDestroy(matvec_data -> compute_pkg );
       hypre_TFree(matvec_data);
    }
 

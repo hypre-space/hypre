@@ -104,7 +104,7 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
 
    }
 
-   hypre_AssembleStructMatrix(Ac);
+   hypre_StructMatrixAssemble(Ac);
 
    return ierr;
 }

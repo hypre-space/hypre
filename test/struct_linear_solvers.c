@@ -439,32 +439,32 @@ main( int   argc,
          break;
    } 
 
-   HYPRE_CreateStructGrid(MPI_COMM_WORLD, dim, &grid);
+   HYPRE_StructGridCreate(MPI_COMM_WORLD, dim, &grid);
    for (ib = 0; ib < nblocks; ib++)
    {
-      HYPRE_SetStructGridExtents(grid, ilower[ib], iupper[ib]);
+      HYPRE_StructGridSetExtents(grid, ilower[ib], iupper[ib]);
    }
-   HYPRE_SetStructGridPeriodic(grid, periodic);
-   HYPRE_AssembleStructGrid(grid);
+   HYPRE_StructGridSetPeriodic(grid, periodic);
+   HYPRE_StructGridAssemble(grid);
 
    /*-----------------------------------------------------------
     * Set up the stencil structure
     *-----------------------------------------------------------*/
  
-   HYPRE_CreateStructStencil(dim, dim + 1, &stencil);
+   HYPRE_StructStencilCreate(dim, dim + 1, &stencil);
    for (s = 0; s < dim + 1; s++)
    {
-      HYPRE_SetStructStencilElement(stencil, s, offsets[s]);
+      HYPRE_StructStencilSetElement(stencil, s, offsets[s]);
    }
 
    /*-----------------------------------------------------------
     * Set up the matrix structure
     *-----------------------------------------------------------*/
  
-   HYPRE_CreateStructMatrix(MPI_COMM_WORLD, grid, stencil, &A);
-   HYPRE_SetStructMatrixSymmetric(A, 1);
-   HYPRE_SetStructMatrixNumGhost(A, A_num_ghost);
-   HYPRE_InitializeStructMatrix(A);
+   HYPRE_StructMatrixCreate(MPI_COMM_WORLD, grid, stencil, &A);
+   HYPRE_StructMatrixSetSymmetric(A, 1);
+   HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
+   HYPRE_StructMatrixInitialize(A);
    /*-----------------------------------------------------------
     * Fill in the matrix elements
     *-----------------------------------------------------------*/
@@ -499,7 +499,7 @@ main( int   argc,
    }
    for (ib = 0; ib < nblocks; ib++)
    {
-      HYPRE_SetStructMatrixBoxValues(A, ilower[ib], iupper[ib], (dim+1),
+      HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib], (dim+1),
                                      stencil_indices, values);
    }
 
@@ -517,16 +517,16 @@ main( int   argc,
             i = iupper[ib][d];
             iupper[ib][d] = istart[d];
             stencil_indices[0] = d;
-            HYPRE_SetStructMatrixBoxValues(A, ilower[ib], iupper[ib],
+            HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
                                            1, stencil_indices, values);
             iupper[ib][d] = i;
          }
       }
    }
 
-   HYPRE_AssembleStructMatrix(A);
+   HYPRE_StructMatrixAssemble(A);
 #if 0
-   HYPRE_PrintStructMatrix("driver.out.A", A, 0);
+   HYPRE_StructMatrixPrint("driver.out.A", A, 0);
 #endif
 
    hypre_TFree(values);
@@ -537,8 +537,8 @@ main( int   argc,
 
    values = hypre_CTAlloc(double, volume);
 
-   HYPRE_CreateStructVector(MPI_COMM_WORLD, grid, stencil, &b);
-   HYPRE_InitializeStructVector(b);
+   HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil, &b);
+   HYPRE_StructVectorInitialize(b);
 
    /*-----------------------------------------------------------
     * For periodic b.c. in all directions, need rhs to satisfy 
@@ -566,26 +566,26 @@ main( int   argc,
 
    for (ib = 0; ib < nblocks; ib++)
    {
-      HYPRE_SetStructVectorBoxValues(b, ilower[ib], iupper[ib], values);
+      HYPRE_StructVectorSetBoxValues(b, ilower[ib], iupper[ib], values);
    }
-   HYPRE_AssembleStructVector(b);
+   HYPRE_StructVectorAssemble(b);
 #if 0
-   HYPRE_PrintStructVector("driver.out.b", b, 0);
+   HYPRE_StructVectorPrint("driver.out.b", b, 0);
 #endif
 
-   HYPRE_CreateStructVector(MPI_COMM_WORLD, grid, stencil, &x);
-   HYPRE_InitializeStructVector(x);
+   HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil, &x);
+   HYPRE_StructVectorInitialize(x);
    for (i = 0; i < volume; i++)
    {
       values[i] = 0.0;
    }
    for (ib = 0; ib < nblocks; ib++)
    {
-      HYPRE_SetStructVectorBoxValues(x, ilower[ib], iupper[ib], values);
+      HYPRE_StructVectorSetBoxValues(x, ilower[ib], iupper[ib], values);
    }
-   HYPRE_AssembleStructVector(x);
+   HYPRE_StructVectorAssemble(x);
 #if 0
-   HYPRE_PrintStructVector("driver.out.x0", x, 0);
+   HYPRE_StructVectorPrint("driver.out.x0", x, 0);
 #endif
  
    hypre_TFree(values);
@@ -968,7 +968,7 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
 #if 0
-   HYPRE_PrintStructVector("driver.out.x", x, 0);
+   HYPRE_StructVectorPrint("driver.out.x", x, 0);
 #endif
 
    if (myid == 0)
@@ -983,11 +983,11 @@ main( int   argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
-   HYPRE_DestroyStructGrid(grid);
-   HYPRE_DestroyStructStencil(stencil);
-   HYPRE_DestroyStructMatrix(A);
-   HYPRE_DestroyStructVector(b);
-   HYPRE_DestroyStructVector(x);
+   HYPRE_StructGridDestroy(grid);
+   HYPRE_StructStencilDestroy(stencil);
+   HYPRE_StructMatrixDestroy(A);
+   HYPRE_StructVectorDestroy(b);
+   HYPRE_StructVectorDestroy(x);
 
    for (i = 0; i < nblocks; i++)
    {

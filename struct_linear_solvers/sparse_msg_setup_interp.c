@@ -74,7 +74,7 @@ hypre_SparseMSGSetupInterpOp( hypre_StructMatrix *Q,
          startc  = hypre_BoxIMin(compute_box);
          hypre_SparseMSGMapCoarseToFine(startc, findex, stride, start);
 
-         hypre_GetStrideBoxSize(compute_box, stridec, loop_size);
+         hypre_BoxGetStrideSize(compute_box, stridec, loop_size);
 
          hypre_BoxLoop2Begin(loop_size,
                              Q_data_box, start,  stride,  Qi,
@@ -89,7 +89,7 @@ hypre_SparseMSGSetupInterpOp( hypre_StructMatrix *Q,
          hypre_BoxLoop2End(Qi, Pi);
       }
 
-   hypre_AssembleStructMatrix(Q);
+   hypre_StructMatrixAssemble(Q);
 
    /*-----------------------------------------------------------------------
     * Return

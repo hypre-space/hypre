@@ -16,7 +16,7 @@
 #include "fortran.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_CreateStructMatrix
+ * HYPRE_StructMatrixCreate
  *--------------------------------------------------------------------------*/
 
 void
@@ -27,14 +27,14 @@ hypre_F90_IFACE(hypre_createstructmatrix)( int      *comm,
                                            int      *ierr    )
 {
    *ierr = (int)
-      ( HYPRE_CreateStructMatrix( (MPI_Comm)             *comm,
+      ( HYPRE_StructMatrixCreate( (MPI_Comm)             *comm,
                                   (HYPRE_StructGrid)     *grid,
                                   (HYPRE_StructStencil)  *stencil,
                                   (HYPRE_StructMatrix *) matrix   ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_DestroyStructMatrix
+ * HYPRE_StructMatrixDestroy
  *--------------------------------------------------------------------------*/
 
 void 
@@ -42,11 +42,11 @@ hypre_F90_IFACE(hypre_destroystructmatrix)( long int *matrix,
                                             int      *ierr   )
 {
    *ierr = (int)
-      ( HYPRE_DestroyStructMatrix( (HYPRE_StructMatrix) *matrix ) );
+      ( HYPRE_StructMatrixDestroy( (HYPRE_StructMatrix) *matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_InitializeStructMatrix
+ * HYPRE_StructMatrixInitialize
  *--------------------------------------------------------------------------*/
 
 void
@@ -54,11 +54,11 @@ hypre_F90_IFACE(hypre_initializestructmatrix)( long int *matrix,
                                                int      *ierr   )
 {
    *ierr = (int)
-      ( HYPRE_InitializeStructMatrix( (HYPRE_StructMatrix) *matrix ) );
+      ( HYPRE_StructMatrixInitialize( (HYPRE_StructMatrix) *matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetStructMatrixValues
+ * HYPRE_StructMatrixSetValues
  *--------------------------------------------------------------------------*/
 
 void 
@@ -70,7 +70,7 @@ hypre_F90_IFACE(hypre_setstructmatrixvalues)( long int *matrix,
                                               int      *ierr                )
 {
    *ierr = (int)
-      ( HYPRE_SetStructMatrixValues( (HYPRE_StructMatrix) *matrix,
+      ( HYPRE_StructMatrixSetValues( (HYPRE_StructMatrix) *matrix,
                                      (int *)              grid_index,
                                      (int)                *num_stencil_indices,
                                      (int *)              stencil_indices,
@@ -78,7 +78,7 @@ hypre_F90_IFACE(hypre_setstructmatrixvalues)( long int *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetStructMatrixBoxValues
+ * HYPRE_StructMatrixSetBoxValues
  *--------------------------------------------------------------------------*/
 
 void 
@@ -91,7 +91,7 @@ hypre_F90_IFACE(hypre_setstructmatrixboxvalues)( long int *matrix,
                                                  int      *ierr              )
 {
    *ierr = (int)
-      ( HYPRE_SetStructMatrixBoxValues( (HYPRE_StructMatrix) *matrix,
+      ( HYPRE_StructMatrixSetBoxValues( (HYPRE_StructMatrix) *matrix,
                                         (int *)              ilower,
                                         (int *)              iupper,
                                         (int)                *num_stencil_indices,
@@ -100,7 +100,7 @@ hypre_F90_IFACE(hypre_setstructmatrixboxvalues)( long int *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_AssembleStructMatrix
+ * HYPRE_StructMatrixAssemble
  *--------------------------------------------------------------------------*/
 
 void 
@@ -108,11 +108,11 @@ hypre_F90_IFACE(hypre_assemblestructmatrix)( long int *matrix,
                                              int      *ierr   )
 {
    *ierr = (int)
-      ( HYPRE_AssembleStructMatrix( (HYPRE_StructMatrix) *matrix ) );
+      ( HYPRE_StructMatrixAssemble( (HYPRE_StructMatrix) *matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetStructMatrixNumGhost
+ * HYPRE_StructMatrixSetNumGhost
  *--------------------------------------------------------------------------*/
  
 void
@@ -121,12 +121,12 @@ hypre_F90_IFACE(hypre_setstructmatrixnumghost)( long int *matrix,
                                                 int      *ierr      )
 {
    *ierr = (int)
-      ( HYPRE_SetStructMatrixNumGhost( (HYPRE_StructMatrix) *matrix,
+      ( HYPRE_StructMatrixSetNumGhost( (HYPRE_StructMatrix) *matrix,
                                        (int *)               num_ghost ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixGrid
+ * HYPRE_StructMatrixGetGrid
  *--------------------------------------------------------------------------*/
 
 void
@@ -135,12 +135,12 @@ hypre_F90_IFACE(hypre_structmatrixgrid)( long int *matrix,
                                          int      *ierr   )
 {
    *ierr = (int)
-      ( HYPRE_StructMatrixGrid( (HYPRE_StructMatrix) *matrix,
+      ( HYPRE_StructMatrixGetGrid( (HYPRE_StructMatrix) *matrix,
                                 (HYPRE_StructGrid *) grid ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetStructMatrixSymmetric
+ * HYPRE_StructMatrixSetSymmetric
  *--------------------------------------------------------------------------*/
  
 void
@@ -149,6 +149,6 @@ hypre_F90_IFACE(hypre_setstructmatrixsymmetric)( long int *matrix,
                                                  int      *ierr      )
 {
    *ierr = (int)
-      ( HYPRE_SetStructMatrixSymmetric( (HYPRE_StructMatrix) *matrix,
+      ( HYPRE_StructMatrixSetSymmetric( (HYPRE_StructMatrix) *matrix,
                                         (int)                *symmetric ) );
 }

@@ -141,12 +141,12 @@ hypre_PFMG3CreateRAPOp( hypre_StructMatrix *R,
       }
    }
 
-   RAP_stencil = hypre_CreateStructStencil(RAP_stencil_dim, RAP_stencil_size,
+   RAP_stencil = hypre_StructStencilCreate(RAP_stencil_dim, RAP_stencil_size,
                                         RAP_stencil_shape);
-   RAP = hypre_CreateStructMatrix(hypre_StructMatrixComm(A),
+   RAP = hypre_StructMatrixCreate(hypre_StructMatrixComm(A),
                                coarse_grid, RAP_stencil);
 
-   hypre_DestroyStructStencil(RAP_stencil);
+   hypre_StructStencilDestroy(RAP_stencil);
 
    /*-----------------------------------------------------------------------
     * Coarse operator in symmetric iff fine operator is
@@ -156,7 +156,7 @@ hypre_PFMG3CreateRAPOp( hypre_StructMatrix *R,
    /*-----------------------------------------------------------------------
     * Set number of ghost points - one one each boundary
     *-----------------------------------------------------------------------*/
-   hypre_SetStructMatrixNumGhost(RAP, RAP_num_ghost);
+   hypre_StructMatrixSetNumGhost(RAP, RAP_num_ghost);
 
    return RAP;
 }
@@ -559,7 +559,7 @@ hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A,
 
             case 7:
 
-            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxGetSize(cgrid_box, loop_size);
 
             hypre_BoxLoop4Begin(loop_size,
                                 P_data_box, cstart, stridec, iP,
@@ -628,7 +628,7 @@ hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A,
 
             case 19:
 
-            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxGetSize(cgrid_box, loop_size);
 
             hypre_BoxLoop4Begin(loop_size,
                                 P_data_box, cstart, stridec, iP,
@@ -731,7 +731,7 @@ hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A,
 
             default:
 
-            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxGetSize(cgrid_box, loop_size);
 
             hypre_BoxLoop4Begin(loop_size,
                                 P_data_box, cstart, stridec, iP,
@@ -1227,7 +1227,7 @@ hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A,
 
             case 7:
 
-            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxGetSize(cgrid_box, loop_size);
 
             hypre_BoxLoop4Begin(loop_size,
                                 P_data_box, cstart, stridec, iP,
@@ -1287,7 +1287,7 @@ hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A,
 
             case 19:
 
-            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxGetSize(cgrid_box, loop_size);
 
             hypre_BoxLoop4Begin(loop_size,
                                 P_data_box, cstart, stridec, iP,
@@ -1382,7 +1382,7 @@ hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A,
 
             default:
 
-            hypre_GetBoxSize(cgrid_box, loop_size);
+            hypre_BoxGetSize(cgrid_box, loop_size);
 
             hypre_BoxLoop4Begin(loop_size,
                                 P_data_box, cstart, stridec, iP,

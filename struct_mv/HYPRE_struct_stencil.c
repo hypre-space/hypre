@@ -15,11 +15,11 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_CreateStructStencil
+ * HYPRE_StructStencilCreate
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_CreateStructStencil( int                  dim,
+HYPRE_StructStencilCreate( int                  dim,
                            int                  size,
                            HYPRE_StructStencil *stencil )
 {
@@ -28,17 +28,17 @@ HYPRE_CreateStructStencil( int                  dim,
    shape = hypre_CTAlloc(hypre_Index, size);
  
    *stencil =
-      ((HYPRE_StructStencil) hypre_CreateStructStencil(dim, size,shape));
+      ((HYPRE_StructStencil) hypre_StructStencilCreate(dim, size,shape));
 
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetStructStencilElement
+ * HYPRE_StructStencilSetElement
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SetStructStencilElement( HYPRE_StructStencil  stencil,
+HYPRE_StructStencilSetElement( HYPRE_StructStencil  stencil,
                                int                  element_index,
                                int                 *offset        )
 {
@@ -59,12 +59,12 @@ HYPRE_SetStructStencilElement( HYPRE_StructStencil  stencil,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_DestroyStructStencil
+ * HYPRE_StructStencilDestroy
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_DestroyStructStencil( HYPRE_StructStencil stencil )
+HYPRE_StructStencilDestroy( HYPRE_StructStencil stencil )
 {
-   return ( hypre_DestroyStructStencil( (hypre_StructStencil *) stencil ) );
+   return ( hypre_StructStencilDestroy( (hypre_StructStencil *) stencil ) );
 }
 

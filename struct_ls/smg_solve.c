@@ -97,12 +97,12 @@ hypre_SMGSolve( void               *smg_vdata,
 
    hypre_BeginTiming(smg_data -> time_index);
 
-   hypre_DestroyStructMatrix(A_l[0]);
-   hypre_DestroyStructVector(b_l[0]);
-   hypre_DestroyStructVector(x_l[0]);
-   A_l[0] = hypre_RefStructMatrix(A);
-   b_l[0] = hypre_RefStructVector(b);
-   x_l[0] = hypre_RefStructVector(x);
+   hypre_StructMatrixDestroy(A_l[0]);
+   hypre_StructVectorDestroy(b_l[0]);
+   hypre_StructVectorDestroy(x_l[0]);
+   A_l[0] = hypre_StructMatrixRef(A);
+   b_l[0] = hypre_StructVectorRef(b);
+   x_l[0] = hypre_StructVectorRef(x);
 
    (smg_data -> num_iterations) = 0;
 
@@ -112,7 +112,7 @@ hypre_SMGSolve( void               *smg_vdata,
       /* if using a zero initial guess, return zero */
       if (zero_guess)
       {
-         hypre_SetStructVectorConstantValues(x, 0.0);
+         hypre_StructVectorSetConstantValues(x, 0.0);
       }
 
       hypre_EndTiming(smg_data -> time_index);
@@ -129,7 +129,7 @@ hypre_SMGSolve( void               *smg_vdata,
       /* if rhs is zero, return a zero solution */
       if (b_dot_b == 0.0)
       {
-         hypre_SetStructVectorConstantValues(x, 0.0);
+         hypre_StructVectorSetConstantValues(x, 0.0);
          if (logging > 0)
          {
             norms[0]     = 0.0;
@@ -239,9 +239,9 @@ hypre_SMGSolve( void               *smg_vdata,
          if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
          {
             sprintf(filename, "zout_xbefore.%02d", l);
-            hypre_PrintStructVector(filename, x_l[l], 0);
+            hypre_StructVectorPrint(filename, x_l[l], 0);
             sprintf(filename, "zout_b.%02d", l+1);
-            hypre_PrintStructVector(filename, b_l[l+1], 0);
+            hypre_StructVectorPrint(filename, b_l[l+1], 0);
          }
 #endif
       }
@@ -281,7 +281,7 @@ hypre_SMGSolve( void               *smg_vdata,
          if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
          {
             sprintf(filename, "zout_xafter.%02d", l);
-            hypre_PrintStructVector(filename, x_l[l], 0);
+            hypre_StructVectorPrint(filename, x_l[l], 0);
          }
 #endif
          hypre_SMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);

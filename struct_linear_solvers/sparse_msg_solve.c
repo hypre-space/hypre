@@ -82,12 +82,12 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
 
    hypre_BeginTiming(SparseMSG_data -> time_index);
 
-   hypre_DestroyStructMatrix(A_array[0]);
-   hypre_DestroyStructVector(b_array[0]);
-   hypre_DestroyStructVector(x_array[0]);
-   A_array[0] = hypre_RefStructMatrix(A);
-   b_array[0] = hypre_RefStructVector(b);
-   x_array[0] = hypre_RefStructVector(x);
+   hypre_StructMatrixDestroy(A_array[0]);
+   hypre_StructVectorDestroy(b_array[0]);
+   hypre_StructVectorDestroy(x_array[0]);
+   A_array[0] = hypre_StructMatrixRef(A);
+   b_array[0] = hypre_StructVectorRef(b);
+   x_array[0] = hypre_StructVectorRef(x);
 
    (SparseMSG_data -> num_iterations) = 0;
 
@@ -97,7 +97,7 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
       /* if using a zero initial guess, return zero */
       if (zero_guess)
       {
-         hypre_SetStructVectorConstantValues(x, 0.0);
+         hypre_StructVectorSetConstantValues(x, 0.0);
       }
 
       hypre_EndTiming(SparseMSG_data -> time_index);
@@ -114,7 +114,7 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
       /* if rhs is zero, return a zero solution */
       if (b_dot_b == 0.0)
       {
-         hypre_SetStructVectorConstantValues(x, 0.0);
+         hypre_StructVectorSetConstantValues(x, 0.0);
          if (logging > 0)
          {
             norms[0]     = 0.0;
@@ -203,7 +203,7 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                         lx,ly,lz,num_levels[0],num_levels[1],index);
 
                      /* initialize b_array */
-                     hypre_SetStructVectorConstantValues(b_array[index], 0.0);
+                     hypre_StructVectorSetConstantValues(b_array[index], 0.0);
                         
                      if (lx > 0)
                      {
@@ -219,13 +219,13 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
 #if DEBUG
                         sprintf(filename, "zoutSMSG_xdown.%02d_%02d",
                                 index2, 0);
-                        hypre_PrintStructVector(filename, x_array[index2], 0);
+                        hypre_StructVectorPrint(filename, x_array[index2], 0);
                         sprintf(filename, "zoutSMSG_rdown.%02d_%02d",
                                 index2, 0);
-                        hypre_PrintStructVector(filename, r_array[index2], 0);
+                        hypre_StructVectorPrint(filename, r_array[index2], 0);
                         sprintf(filename, "zoutSMSG_txdown.%02d_%02d",
                                 index, 0);
-                        hypre_PrintStructVector(filename, tx_array[index], 0);
+                        hypre_StructVectorPrint(filename, tx_array[index], 0);
 #endif
                      }
                      if (ly > 0)
@@ -242,13 +242,13 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
 #if DEBUG
                         sprintf(filename, "zoutSMSG_xdown.%02d_%02d",
                                 index2, 1);
-                        hypre_PrintStructVector(filename, x_array[index2], 0);
+                        hypre_StructVectorPrint(filename, x_array[index2], 0);
                         sprintf(filename, "zoutSMSG_rdown.%02d_%02d",
                                 index2, 1);
-                        hypre_PrintStructVector(filename, r_array[index2], 0);
+                        hypre_StructVectorPrint(filename, r_array[index2], 0);
                         sprintf(filename, "zoutSMSG_txdown.%02d_%02d",
                                 index, 1);
-                        hypre_PrintStructVector(filename, tx_array[index], 0);
+                        hypre_StructVectorPrint(filename, tx_array[index], 0);
 #endif
                      }
                      if (lz > 0)
@@ -265,18 +265,18 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
 #if DEBUG
                         sprintf(filename, "zoutSMSG_xdown.%02d_%02d",
                                 index2, 2);
-                        hypre_PrintStructVector(filename, x_array[index2], 0);
+                        hypre_StructVectorPrint(filename, x_array[index2], 0);
                         sprintf(filename, "zoutSMSG_rdown.%02d_%02d",
                                 index2, 2);
-                        hypre_PrintStructVector(filename, r_array[index2], 0);
+                        hypre_StructVectorPrint(filename, r_array[index2], 0);
                         sprintf(filename, "zoutSMSG_txdown.%02d_%02d",
                                 index, 2);
-                        hypre_PrintStructVector(filename, tx_array[index], 0);
+                        hypre_StructVectorPrint(filename, tx_array[index], 0);
 #endif
                      }
 #if DEBUG
                      sprintf(filename, "zoutSMSG_b.%02d", index);
-                     hypre_PrintStructVector(filename, b_array[index], 0);
+                     hypre_StructVectorPrint(filename, b_array[index], 0);
 #endif
                         
                      if (l == (jump+1))
@@ -299,7 +299,7 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                      else
                      {
                         /* set x = 0, so r = (b-Ax) = b */
-                        hypre_SetStructVectorConstantValues(
+                        hypre_StructVectorSetConstantValues(
                            x_array[index], 0.0);
                         hypre_StructCopy(b_array[index], r_array[index]);
                      }
@@ -326,7 +326,7 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                         lx,ly,lz,num_levels[0],num_levels[1],index);   
 
                      /* initialize b_array */
-                     hypre_SetStructVectorConstantValues(b_array[index], 0.0);
+                     hypre_StructVectorSetConstantValues(b_array[index], 0.0);
                      
                      if (lx > 0)
                      {
@@ -342,13 +342,13 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
 #if DEBUG
                         sprintf(filename, "zoutSMSG_xdown.%02d_%02d",
                                 index2, 0);
-                        hypre_PrintStructVector(filename, x_array[index2], 0);
+                        hypre_StructVectorPrint(filename, x_array[index2], 0);
                         sprintf(filename, "zoutSMSG_rdown.%02d_%02d",
                                 index2, 0);
-                        hypre_PrintStructVector(filename, r_array[index2], 0);
+                        hypre_StructVectorPrint(filename, r_array[index2], 0);
                         sprintf(filename, "zoutSMSG_txdown.%02d_%02d",
                                 index, 0);
-                        hypre_PrintStructVector(filename, tx_array[index], 0);
+                        hypre_StructVectorPrint(filename, tx_array[index], 0);
 #endif
                      }
                      if (ly > 0)
@@ -365,13 +365,13 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
 #if DEBUG
                         sprintf(filename, "zoutSMSG_xdown.%02d_%02d",
                                 index2, 1);
-                        hypre_PrintStructVector(filename, x_array[index2], 0);
+                        hypre_StructVectorPrint(filename, x_array[index2], 0);
                         sprintf(filename, "zoutSMSG_rdown.%02d_%02d",
                                 index2, 1);
-                        hypre_PrintStructVector(filename, r_array[index2], 0);
+                        hypre_StructVectorPrint(filename, r_array[index2], 0);
                         sprintf(filename, "zoutSMSG_txdown.%02d_%02d",
                                 index, 1);
-                        hypre_PrintStructVector(filename, tx_array[index], 0);
+                        hypre_StructVectorPrint(filename, tx_array[index], 0);
 #endif
                      }
                      if (lz > 0)
@@ -388,19 +388,19 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
 #if DEBUG
                         sprintf(filename, "zoutSMSG_xdown.%02d_%02d",
                                 index2, 2);
-                        hypre_PrintStructVector(filename, x_array[index2], 0);
+                        hypre_StructVectorPrint(filename, x_array[index2], 0);
                         sprintf(filename, "zoutSMSG_rdown.%02d_%02d",
                                 index2, 2);
-                        hypre_PrintStructVector(filename, r_array[index2], 0);
+                        hypre_StructVectorPrint(filename, r_array[index2], 0);
                         sprintf(filename, "zoutSMSG_txdown.%02d_%02d",
                                 index, 2);
-                        hypre_PrintStructVector(filename, tx_array[index], 0);
+                        hypre_StructVectorPrint(filename, tx_array[index], 0);
 #endif
                      }
 
 #if DEBUG
                      sprintf(filename, "zoutSMSG_b.%02d", index);
-                     hypre_PrintStructVector(filename, b_array[index], 0);
+                     hypre_StructVectorPrint(filename, b_array[index], 0);
 #endif
                      if (l < (total_num_levels-1))
                      {
@@ -434,7 +434,7 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
 
 #if DEBUG
          sprintf(filename, "zoutSMSG_xbottom.%02d", index);
-         hypre_PrintStructVector(filename, x_array[index], 0);
+         hypre_StructVectorPrint(filename, x_array[index], 0);
 #endif
 
          /*--------------------------------------------------
@@ -468,7 +468,7 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                                          e_array[index], x_array[index]);
 #if DEBUG
                         sprintf(filename, "zoutSMSG_eup.%02d_%02d", index, 0);
-                        hypre_PrintStructVector(filename, e_array[index], 0);
+                        hypre_StructVectorPrint(filename, e_array[index], 0);
 #endif
                      }
                      if (ly < (num_levels[1]-1))
@@ -484,7 +484,7 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                                          e_array[index], x_array[index]);
 #if DEBUG
                         sprintf(filename, "zoutSMSG_eup.%02d_%02d", index, 1);
-                        hypre_PrintStructVector(filename, e_array[index], 0);
+                        hypre_StructVectorPrint(filename, e_array[index], 0);
 #endif
                      }
                      if (lz < (num_levels[2]-1))
@@ -500,12 +500,12 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                                          e_array[index], x_array[index]);
 #if DEBUG
                         sprintf(filename, "zoutSMSG_eup.%02d_%02d", index, 2);
-                        hypre_PrintStructVector(filename, e_array[index], 0);
+                        hypre_StructVectorPrint(filename, e_array[index], 0);
 #endif
                      }               
 #if DEBUG
                      sprintf(filename, "zoutSMSG_xup.%02d", index);
-                     hypre_PrintStructVector(filename, x_array[index], 0);
+                     hypre_StructVectorPrint(filename, x_array[index], 0);
 #endif
                      /* post-relaxation */
                      hypre_PFMGRelaxSetPostRelax(relax_data_array[index]);
@@ -548,7 +548,7 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                                          e_array[index], x_array[index]);
 #if DEBUG
                         sprintf(filename, "zoutSMSG_eup.%02d_%02d", index, 0);
-                        hypre_PrintStructVector(filename, e_array[index], 0);
+                        hypre_StructVectorPrint(filename, e_array[index], 0);
 #endif
                      }
                      if (ly < (num_levels[1]-1))
@@ -564,7 +564,7 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                                          e_array[index], x_array[index]);
 #if DEBUG
                         sprintf(filename, "zoutSMSG_eup.%02d_%02d", index, 1);
-                        hypre_PrintStructVector(filename, e_array[index], 0);
+                        hypre_StructVectorPrint(filename, e_array[index], 0);
 #endif
                      }
                      if (lz < (num_levels[2]-1))
@@ -580,12 +580,12 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                                          e_array[index], x_array[index]);
 #if DEBUG
                         sprintf(filename, "zoutSMSG_eup.%02d_%02d", index, 2);
-                        hypre_PrintStructVector(filename, e_array[index], 0);
+                        hypre_StructVectorPrint(filename, e_array[index], 0);
 #endif
                      }
 #if DEBUG
                      sprintf(filename, "zoutSMSG_xup.%02d", index);
-                     hypre_PrintStructVector(filename, x_array[index], 0);
+                     hypre_StructVectorPrint(filename, x_array[index], 0);
 #endif
                   }
                }

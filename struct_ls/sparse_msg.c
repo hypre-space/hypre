@@ -90,18 +90,18 @@ hypre_SparseMSGDestroy( void *SparseMSG_vdata )
          
          for (l = 0; l < SparseMSG_data -> num_grids; l++)
          {
-            hypre_DestroyStructGrid(SparseMSG_data -> grid_array[l]);
-            hypre_DestroyStructMatrix(SparseMSG_data -> A_array[l]);
-            hypre_DestroyStructVector(SparseMSG_data -> b_array[l]);
-            hypre_DestroyStructVector(SparseMSG_data -> x_array[l]);
-            hypre_DestroyStructVector(SparseMSG_data -> tx_array[l]);
-            hypre_DestroyStructVector(SparseMSG_data -> r_array[l]);
+            hypre_StructGridDestroy(SparseMSG_data -> grid_array[l]);
+            hypre_StructMatrixDestroy(SparseMSG_data -> A_array[l]);
+            hypre_StructVectorDestroy(SparseMSG_data -> b_array[l]);
+            hypre_StructVectorDestroy(SparseMSG_data -> x_array[l]);
+            hypre_StructVectorDestroy(SparseMSG_data -> tx_array[l]);
+            hypre_StructVectorDestroy(SparseMSG_data -> r_array[l]);
          }
 
          for (l = 0; l < (3*(SparseMSG_data -> num_grids)); l++)
          {
-            hypre_DestroyStructMatrix(SparseMSG_data -> P_array[l]);
-            hypre_DestroyStructGrid(SparseMSG_data -> P_grid_array[l]); 
+            hypre_StructMatrixDestroy(SparseMSG_data -> P_array[l]);
+            hypre_StructGridDestroy(SparseMSG_data -> P_grid_array[l]); 
          }
 
          hypre_TFree(SparseMSG_data -> grid_array);

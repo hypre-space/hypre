@@ -15,11 +15,11 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_CreateStructVector
+ * hypre_StructVectorCreate
  *--------------------------------------------------------------------------*/
 
 hypre_StructVector *
-hypre_CreateStructVector( MPI_Comm          comm,
+hypre_StructVectorCreate( MPI_Comm          comm,
                           hypre_StructGrid *grid )
 {
    hypre_StructVector  *vector;
@@ -29,7 +29,7 @@ hypre_CreateStructVector( MPI_Comm          comm,
    vector = hypre_CTAlloc(hypre_StructVector, 1);
 
    hypre_StructVectorComm(vector)        = comm;
-   hypre_StructVectorGrid(vector)        = hypre_RefStructGrid(grid);
+   hypre_StructVectorGrid(vector)        = hypre_StructGridRef(grid);
    hypre_StructVectorDataAlloced(vector) = 1;
    hypre_StructVectorRefCount(vector)    = 1;
 
@@ -41,11 +41,11 @@ hypre_CreateStructVector( MPI_Comm          comm,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_RefStructVector
+ * hypre_StructVectorRef
  *--------------------------------------------------------------------------*/
 
 hypre_StructVector *
-hypre_RefStructVector( hypre_StructVector *vector )
+hypre_StructVectorRef( hypre_StructVector *vector )
 {
    hypre_StructVectorRefCount(vector) ++;
 
@@ -53,11 +53,11 @@ hypre_RefStructVector( hypre_StructVector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_DestroyStructVector
+ * hypre_StructVectorDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_DestroyStructVector( hypre_StructVector *vector )
+hypre_StructVectorDestroy( hypre_StructVector *vector )
 {
    int  ierr = 0;
 
@@ -71,8 +71,8 @@ hypre_DestroyStructVector( hypre_StructVector *vector )
             hypre_SharedTFree(hypre_StructVectorData(vector));
          }
          hypre_TFree(hypre_StructVectorDataIndices(vector));
-         hypre_DestroyBoxArray(hypre_StructVectorDataSpace(vector));
-         hypre_DestroyStructGrid(hypre_StructVectorGrid(vector));
+         hypre_BoxArrayDestroy(hypre_StructVectorDataSpace(vector));
+         hypre_StructGridDestroy(hypre_StructVectorGrid(vector));
          hypre_TFree(vector);
       }
    }
@@ -81,11 +81,11 @@ hypre_DestroyStructVector( hypre_StructVector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_InitializeStructVectorShell
+ * hypre_StructVectorInitializeShell
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_InitializeStructVectorShell( hypre_StructVector *vector )
+hypre_StructVectorInitializeShell( hypre_StructVector *vector )
 {
    int    ierr = 0;
 
@@ -114,7 +114,7 @@ hypre_InitializeStructVectorShell( hypre_StructVector *vector )
       num_ghost = hypre_StructVectorNumGhost(vector);
 
       boxes = hypre_StructGridBoxes(grid);
-      data_space = hypre_CreateBoxArray(hypre_BoxArraySize(boxes));
+      data_space = hypre_BoxArrayCreate(hypre_BoxArraySize(boxes));
 
       hypre_ForBoxI(i, boxes)
          {
@@ -164,11 +164,11 @@ hypre_InitializeStructVectorShell( hypre_StructVector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_InitializeStructVectorData
+ * hypre_StructVectorInitializeData
  *--------------------------------------------------------------------------*/
 
 int
-hypre_InitializeStructVectorData( hypre_StructVector *vector,
+hypre_StructVectorInitializeData( hypre_StructVector *vector,
                                   double             *data   )
 {
    int ierr = 0;
@@ -180,31 +180,31 @@ hypre_InitializeStructVectorData( hypre_StructVector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_InitializeStructVector
+ * hypre_StructVectorInitialize
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_InitializeStructVector( hypre_StructVector *vector )
+hypre_StructVectorInitialize( hypre_StructVector *vector )
 {
    int    ierr = 0;
 
    double *data;
 
-   ierr = hypre_InitializeStructVectorShell(vector);
+   ierr = hypre_StructVectorInitializeShell(vector);
 
    data = hypre_SharedCTAlloc(double, hypre_StructVectorDataSize(vector));
-   hypre_InitializeStructVectorData(vector, data);
+   hypre_StructVectorInitializeData(vector, data);
    hypre_StructVectorDataAlloced(vector) = 1;
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetStructVectorValues
+ * hypre_StructVectorSetValues
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_SetStructVectorValues( hypre_StructVector *vector,
+hypre_StructVectorSetValues( hypre_StructVector *vector,
                              hypre_Index         grid_index,
                              double              values     )
 {
@@ -239,11 +239,11 @@ hypre_SetStructVectorValues( hypre_StructVector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GetStructVectorValues
+ * hypre_StructVectorGetValues
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_GetStructVectorValues( hypre_StructVector *vector,
+hypre_StructVectorGetValues( hypre_StructVector *vector,
                              hypre_Index         grid_index,
                              double             *values_ptr )
 {
@@ -282,11 +282,11 @@ hypre_GetStructVectorValues( hypre_StructVector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetStructVectorBoxValues
+ * hypre_StructVectorSetBoxValues
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_SetStructVectorBoxValues( hypre_StructVector *vector,
+hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
                                 hypre_Box          *value_box,
                                 double             *values     )
 {
@@ -319,15 +319,15 @@ hypre_SetStructVectorBoxValues( hypre_StructVector *vector,
     *-----------------------------------------------------------------------*/
 
    grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
-   box_array = hypre_CreateBoxArray(hypre_BoxArraySize(grid_boxes));
-   box = hypre_CreateBox();
+   box_array = hypre_BoxArrayCreate(hypre_BoxArraySize(grid_boxes));
+   box = hypre_BoxCreate();
    hypre_ForBoxI(i, grid_boxes)
       {
          grid_box = hypre_BoxArrayBox(grid_boxes, i);
          hypre_IntersectBoxes(value_box, grid_box, box);
          hypre_CopyBox(box, hypre_BoxArrayBox(box_array, i));
       }
-   hypre_DestroyBox(box);
+   hypre_BoxDestroy(box);
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -338,7 +338,7 @@ hypre_SetStructVectorBoxValues( hypre_StructVector *vector,
       data_space = hypre_StructVectorDataSpace(vector);
       hypre_SetIndex(data_stride, 1, 1, 1);
  
-      dval_box = hypre_DuplicateBox(value_box);
+      dval_box = hypre_BoxDuplicate(value_box);
       hypre_SetIndex(dval_stride, 1, 1, 1);
  
       hypre_ForBoxI(i, box_array)
@@ -354,7 +354,7 @@ hypre_SetStructVectorBoxValues( hypre_StructVector *vector,
  
                datap = hypre_StructVectorBoxData(vector, i);
  
-               hypre_GetBoxSize(box, loop_size);
+               hypre_BoxGetSize(box, loop_size);
 
                hypre_BoxLoop2Begin(loop_size,
                                    data_box, data_start, data_stride, datai,
@@ -369,20 +369,20 @@ hypre_SetStructVectorBoxValues( hypre_StructVector *vector,
             }
          }
 
-      hypre_DestroyBox(dval_box);
+      hypre_BoxDestroy(dval_box);
    }
  
-   hypre_DestroyBoxArray(box_array);
+   hypre_BoxArrayDestroy(box_array);
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GetStructVectorBoxValues
+ * hypre_StructVectorGetBoxValues
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_GetStructVectorBoxValues( hypre_StructVector *vector,
+hypre_StructVectorGetBoxValues( hypre_StructVector *vector,
                                 hypre_Box          *value_box,
                                 double             *values    )
 {
@@ -415,15 +415,15 @@ hypre_GetStructVectorBoxValues( hypre_StructVector *vector,
     *-----------------------------------------------------------------------*/
 
    grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
-   box_array = hypre_CreateBoxArray(hypre_BoxArraySize(grid_boxes));
-   box = hypre_CreateBox();
+   box_array = hypre_BoxArrayCreate(hypre_BoxArraySize(grid_boxes));
+   box = hypre_BoxCreate();
    hypre_ForBoxI(i, grid_boxes)
       {
          grid_box = hypre_BoxArrayBox(grid_boxes, i);
          hypre_IntersectBoxes(value_box, grid_box, box);
          hypre_CopyBox(box, hypre_BoxArrayBox(box_array, i));
       }
-   hypre_DestroyBox(box);
+   hypre_BoxDestroy(box);
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -434,7 +434,7 @@ hypre_GetStructVectorBoxValues( hypre_StructVector *vector,
       data_space = hypre_StructVectorDataSpace(vector);
       hypre_SetIndex(data_stride, 1, 1, 1);
  
-      dval_box = hypre_DuplicateBox(value_box);
+      dval_box = hypre_BoxDuplicate(value_box);
       hypre_SetIndex(dval_stride, 1, 1, 1);
  
       hypre_ForBoxI(i, box_array)
@@ -450,7 +450,7 @@ hypre_GetStructVectorBoxValues( hypre_StructVector *vector,
  
                datap = hypre_StructVectorBoxData(vector, i);
  
-               hypre_GetBoxSize(box, loop_size);
+               hypre_BoxGetSize(box, loop_size);
 
                hypre_BoxLoop2Begin(loop_size,
                                    data_box, data_start, data_stride, datai,
@@ -465,20 +465,20 @@ hypre_GetStructVectorBoxValues( hypre_StructVector *vector,
             }
          }
 
-      hypre_DestroyBox(dval_box);
+      hypre_BoxDestroy(dval_box);
    }
  
-   hypre_DestroyBoxArray(box_array);
+   hypre_BoxArrayDestroy(box_array);
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetStructVectorNumGhost
+ * hypre_StructVectorSetNumGhost
  *--------------------------------------------------------------------------*/
  
 int
-hypre_SetStructVectorNumGhost( hypre_StructVector *vector,
+hypre_StructVectorSetNumGhost( hypre_StructVector *vector,
                                int                *num_ghost )
 {
    int  ierr = 0;
@@ -491,11 +491,11 @@ hypre_SetStructVectorNumGhost( hypre_StructVector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_AssembleStructVector
+ * hypre_StructVectorAssemble
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_AssembleStructVector( hypre_StructVector *vector )
+hypre_StructVectorAssemble( hypre_StructVector *vector )
 {
    int  ierr = 0;
 
@@ -503,11 +503,11 @@ hypre_AssembleStructVector( hypre_StructVector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetStructVectorConstantValues
+ * hypre_StructVectorSetConstantValues
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_SetStructVectorConstantValues( hypre_StructVector *vector,
+hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
                                      double              values )
 {
    int    ierr = 0;
@@ -542,7 +542,7 @@ hypre_SetStructVectorConstantValues( hypre_StructVector *vector,
             hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
          vp = hypre_StructVectorBoxData(vector, i);
  
-         hypre_GetBoxSize(box, loop_size);
+         hypre_BoxGetSize(box, loop_size);
 
          hypre_BoxLoop1Begin(loop_size,
                              v_data_box, start, unit_stride, vi);
@@ -559,11 +559,11 @@ hypre_SetStructVectorConstantValues( hypre_StructVector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ClearStructVectorGhostValues
+ * hypre_StructVectorClearGhostValues
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_ClearStructVectorGhostValues( hypre_StructVector *vector )
+hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
 {
    int    ierr = 0;
 
@@ -590,7 +590,7 @@ hypre_ClearStructVectorGhostValues( hypre_StructVector *vector )
    hypre_SetIndex(unit_stride, 1, 1, 1);
  
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
-   diff_boxes = hypre_CreateBoxArray(0);
+   diff_boxes = hypre_BoxArrayCreate(0);
    hypre_ForBoxI(i, boxes)
       {
          box        = hypre_BoxArrayBox(boxes, i);
@@ -605,7 +605,7 @@ hypre_ClearStructVectorGhostValues( hypre_StructVector *vector )
                diff_box = hypre_BoxArrayBox(diff_boxes, j);
                start = hypre_BoxIMin(diff_box);
 
-               hypre_GetBoxSize(diff_box, loop_size);
+               hypre_BoxGetSize(diff_box, loop_size);
 
                hypre_BoxLoop1Begin(loop_size,
                                    v_data_box, start, unit_stride, vi);
@@ -618,17 +618,17 @@ hypre_ClearStructVectorGhostValues( hypre_StructVector *vector )
                hypre_BoxLoop1End(vi);
             }
       }
-   hypre_DestroyBoxArray(diff_boxes);
+   hypre_BoxArrayDestroy(diff_boxes);
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ClearStructVectorAllValues
+ * hypre_StructVectorClearAllValues
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_ClearStructVectorAllValues( hypre_StructVector *vector )
+hypre_StructVectorClearAllValues( hypre_StructVector *vector )
 {
    int               ierr = 0;
 
@@ -646,12 +646,12 @@ hypre_ClearStructVectorAllValues( hypre_StructVector *vector )
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
 
-   box = hypre_CreateBox();
+   box = hypre_BoxCreate();
    hypre_SetIndex(imin, 1, 1, 1);
    hypre_SetIndex(imax, hypre_StructVectorDataSize(vector), 1, 1);
-   hypre_SetBoxExtents(box, imin, imax);
+   hypre_BoxSetExtents(box, imin, imax);
    data = hypre_StructVectorData(vector);
-   hypre_GetBoxSize(box, loop_size);
+   hypre_BoxGetSize(box, loop_size);
 
    hypre_BoxLoop1Begin(loop_size,
                        box, imin, imin, datai);
@@ -663,17 +663,17 @@ hypre_ClearStructVectorAllValues( hypre_StructVector *vector )
       }
    hypre_BoxLoop1End(datai);
 
-   hypre_DestroyBox(box);
+   hypre_BoxDestroy(box);
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GetMigrateStructVectorCommPkg
+ * hypre_StructVectorGetMigrateCommPkg
  *--------------------------------------------------------------------------*/
 
 hypre_CommPkg *
-hypre_GetMigrateStructVectorCommPkg( hypre_StructVector *from_vector,
+hypre_StructVectorGetMigrateCommPkg( hypre_StructVector *from_vector,
                                      hypre_StructVector *to_vector   )
 {
    hypre_BoxArrayArray   *send_boxes;
@@ -698,7 +698,7 @@ hypre_GetMigrateStructVectorCommPkg( hypre_StructVector *from_vector,
                                  &send_boxes, &recv_boxes,
                                  &send_processes, &recv_processes);
 
-   comm_pkg = hypre_CreateCommPkg(send_boxes, recv_boxes,
+   comm_pkg = hypre_CommPkgCreate(send_boxes, recv_boxes,
                                   unit_stride, unit_stride,
                                   hypre_StructVectorDataSpace(from_vector),
                                   hypre_StructVectorDataSpace(to_vector),
@@ -713,11 +713,11 @@ hypre_GetMigrateStructVectorCommPkg( hypre_StructVector *from_vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MigrateStructVector
+ * hypre_StructVectorMigrate
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_MigrateStructVector( hypre_CommPkg      *comm_pkg,
+hypre_StructVectorMigrate( hypre_CommPkg      *comm_pkg,
                            hypre_StructVector *from_vector,
                            hypre_StructVector *to_vector   )
 {
@@ -739,11 +739,11 @@ hypre_MigrateStructVector( hypre_CommPkg      *comm_pkg,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PrintStructVector
+ * hypre_StructVectorPrint
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PrintStructVector( char               *filename,
+hypre_StructVectorPrint( char               *filename,
                          hypre_StructVector *vector,
                          int                 all      )
 {
@@ -782,7 +782,7 @@ hypre_PrintStructVector( char               *filename,
    /* print grid info */
    fprintf(file, "\nGrid:\n");
    grid = hypre_StructVectorGrid(vector);
-   hypre_PrintStructGrid(file, grid);
+   hypre_StructGridPrint(file, grid);
 
    /*----------------------------------------
     * Print data
@@ -810,11 +810,11 @@ hypre_PrintStructVector( char               *filename,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ReadStructVector
+ * hypre_StructVectorRead
  *--------------------------------------------------------------------------*/
 
 hypre_StructVector *
-hypre_ReadStructVector( MPI_Comm   comm,
+hypre_StructVectorRead( MPI_Comm   comm,
                         char      *filename,
                         int       *num_ghost )
 {
@@ -858,15 +858,15 @@ hypre_ReadStructVector( MPI_Comm   comm,
 
    /* read grid info */
    fscanf(file, "\nGrid:\n");
-   grid = hypre_ReadStructGrid(comm,file);
+   grid = hypre_StructGridRead(comm,file);
 
    /*----------------------------------------
     * Initialize the vector
     *----------------------------------------*/
 
-   vector = hypre_CreateStructVector(comm, grid);
-   hypre_SetStructVectorNumGhost(vector, num_ghost);
-   hypre_InitializeStructVector(vector);
+   vector = hypre_StructVectorCreate(comm, grid);
+   hypre_StructVectorSetNumGhost(vector, num_ghost);
+   hypre_StructVectorInitialize(vector);
 
    /*----------------------------------------
     * Read data
@@ -883,7 +883,7 @@ hypre_ReadStructVector( MPI_Comm   comm,
     * Assemble the vector
     *----------------------------------------*/
 
-   hypre_AssembleStructVector(vector);
+   hypre_StructVectorAssemble(vector);
 
    /*----------------------------------------
     * Close file
