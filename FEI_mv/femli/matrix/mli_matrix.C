@@ -7,6 +7,7 @@
  *********************************************************************EHEADER*/
 
 #include <string.h>
+#include <stdio.h>
 #include <assert.h>
 #include "utilities/utilities.h"
 #include "HYPRE.h"
@@ -22,11 +23,11 @@
 MLI_Matrix::MLI_Matrix(void *in_matrix,char *in_name, MLI_Function *func)
 {
 #ifdef MLI_DEBUG_DETAILED
-   printf("MLI_Matrix::MLI_Matrix : %s \n", in_name);
+   printf("MLI_Matrix::MLI_Matrix : %s\n", in_name);
 #endif
    matrix = in_matrix;
    if ( func != NULL ) destroy_func = (int (*)(void *)) func->func_;
-   else                    destroy_func = NULL;
+   else                destroy_func = NULL;
    strncpy(name, in_name, 100);
    g_nrows_ = -1;
    max_nnz_ = -1;
@@ -62,7 +63,7 @@ int MLI_Matrix::apply(double alpha, MLI_Vector *vec1, double beta,
    hypre_ParVector    *hypreV1, *hypreV2, *hypreV3;
    hypre_ParCSRMatrix *hypreA = (hypre_ParCSRMatrix *) matrix;
 
-#ifdef MLI_DEBUG
+#ifdef MLI_DEBUG_DETAILED
    printf("MLI_Matrix::apply : %s\n", name);
 #endif
 
@@ -164,7 +165,7 @@ MLI_Vector *MLI_Matrix::createVector()
    HYPRE_ParVectorSetConstantValues( new_vec, 0.0 );
    sprintf( param_string, "HYPRE_ParVector" );
    func_ptr = new MLI_Function();
-   MLI_Utils_HypreVectorGetDestroyFunc(func_ptr); 
+   MLI_Utils_HypreParVectorGetDestroyFunc(func_ptr); 
    mli_vec = new MLI_Vector((void*) new_vec, param_string, func_ptr);
    delete func_ptr;
    return mli_vec;

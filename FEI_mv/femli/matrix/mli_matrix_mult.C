@@ -7,6 +7,7 @@
  *********************************************************************EHEADER*/
 
 #include <string.h>
+#include <stdio.h>
 #include <assert.h>
 #include "utilities/utilities.h"
 #include "HYPRE.h"
@@ -578,7 +579,7 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
 
    sprintf(paramString, "HYPRE_ParCSR");
    funcPtr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
    (*Cmat) = new MLI_Matrix((void *) hypreC, paramString, funcPtr);
    delete funcPtr;
 }

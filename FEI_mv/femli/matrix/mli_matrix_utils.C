@@ -7,6 +7,7 @@
  *********************************************************************EHEADER*/
 
 #include <string.h>
+#include <stdio.h>
 #include <assert.h>
 #include "HYPRE.h"
 #include "utilities/utilities.h"
@@ -44,7 +45,7 @@ int MLI_Matrix_ComputePtAP(MLI_Matrix *Pmat, MLI_Matrix *Amat,
    if ( ierr ) printf("ERROR in MLI_Matrix_ComputePtAP\n");
    sprintf(paramString, "HYPRE_ParCSR");
    funcPtr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
    RAPmat = new MLI_Matrix(RAPmat2,paramString,funcPtr);
    delete funcPtr;
    (*RAPmat_out) = RAPmat;
@@ -72,7 +73,7 @@ int MLI_Matrix_FormJacobi(MLI_Matrix *Amat, double alpha, MLI_Matrix **Jmat)
    if ( ierr ) printf("ERROR in MLI_Matrix_FormJacobi\n");
    sprintf(paramString, "HYPRE_ParCSR");
    funcPtr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
    (*Jmat) = new MLI_Matrix(J,paramString,funcPtr);
    delete funcPtr;
    return ierr;
@@ -105,7 +106,7 @@ int MLI_Matrix_Compress(MLI_Matrix *Amat, int blksize, MLI_Matrix **Amat2)
    if ( ierr ) printf("ERROR in MLI_Matrix_Compress\n");
    sprintf(paramString, "HYPRE_ParCSR");
    funcPtr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
    (*Amat2) = new MLI_Matrix(A2,paramString,funcPtr);
    delete funcPtr;
    return ierr;
