@@ -16,7 +16,7 @@
 #\SCCS Information: @(#)
 # FILE: Makefile   SID: 2.3   DATE OF SID: 9/24/96   RELEASE: 2
  
-include ../ARmake.inc
+#include ../ARmake.inc
  
 ############################################################################
 #  To create or add to the library, enter make followed by one or
