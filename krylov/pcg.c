@@ -32,6 +32,7 @@ hypre_PCGFunctions *
 hypre_PCGFunctionsCreate(
    char * (*CAlloc)        ( int count, int elt_size ),
    int    (*Free)          ( char *ptr ),
+   int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs ),
    void * (*CreateVector)  ( void *vector ),
    int    (*DestroyVector) ( void *vector ),
    void * (*MatvecCreate)  ( void *A, void *x ),
@@ -53,6 +54,7 @@ hypre_PCGFunctionsCreate(
 
    pcg_functions->CAlloc = CAlloc;
    pcg_functions->Free = Free;
+   pcg_functions->CommInfo = CommInfo;
    pcg_functions->CreateVector = CreateVector;
    pcg_functions->DestroyVector = DestroyVector;
    pcg_functions->MatvecCreate = MatvecCreate;
@@ -243,6 +245,9 @@ hypre_PCGSolve( void *pcg_vdata,
    int             i = 0;
    int             j = 0;
    int             ierr = 0;
+   int              my_id, num_procs;
+
+   (*(pcg_functions->CommInfo))(A,&my_id,&num_procs);
 
    /*-----------------------------------------------------------------------
     * With relative change convergence test on, it is possible to attempt
@@ -262,6 +267,8 @@ hypre_PCGSolve( void *pcg_vdata,
    {
       /* bi_prod = <b,b> */
       bi_prod = (*(pcg_functions->InnerProd))(b, b);
+      if (logging > 0 && my_id == 0) /* formerly for par_csr only */
+          printf("<b,b>: %e\n",bi_prod);
    }
    else
    {
@@ -269,6 +276,8 @@ hypre_PCGSolve( void *pcg_vdata,
       (*(pcg_functions->ClearVector))(p);
       precond(precond_data, A, b, p);
       bi_prod = (*(pcg_functions->InnerProd))(p, b);
+      if (logging > 0 && my_id == 0) /* formerly for par_csr only */
+          printf("<C*b,b>: %e\n",bi_prod);
    };
 
    eps = tol*tol;
@@ -288,6 +297,8 @@ hypre_PCGSolve( void *pcg_vdata,
       }
       ierr = 0;
       return ierr;
+      /* In this case, for the original parcsr pcg, the code would take special
+         action to force iterations even though the exact value was known. */
    };
 
    /* r = b - Ax */
@@ -403,6 +414,8 @@ hypre_PCGSolve( void *pcg_vdata,
    }
 
 #if 0
+  /* old code, should delete on next revision.
+     Following logging code does the same thing, but better */
    if (two_norm)
       printf("Iterations = %d: ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
              i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
@@ -415,22 +428,39 @@ hypre_PCGSolve( void *pcg_vdata,
     * Print log
     *-----------------------------------------------------------------------*/
 
-   if (logging > 0)
+   if ( logging > 0 && my_id==0 )  /* formerly for par_csr only */
    {
+      printf("\n\n");
       if (two_norm)
       {
-         printf("Iters       ||r||_2    ||r||_2/||b||_2\n");
-         printf("-----    ------------    ------------ \n");
+         if ( stop_crit && !rel_change ) {  /* absolute tolerance */
+            printf("Iters       ||r||_2     conv.rate\n");
+            printf("-----    ------------   ---------\n");
+            for (j = 1; j <= i; j++) {
+               printf("% 5d    %e    %f    %e\n", j, norms[j],
+                      norms[j]/norms[j-1] );
+            }
+         }
+         else {
+            
+            printf("Iters       ||r||_2     conv.rate  ||r||_2/||b||_2\n");
+            printf("-----    ------------   ---------  ------------ \n");
+            for (j = 1; j <= i; j++) {
+               printf("% 5d    %e    %f    %e\n", j, norms[j],
+                      norms[j]/norms[j-1], rel_norms[j] );
+            }
+         }
       }
-      else
+      else  /* !two_norm */
       {
-         printf("Iters       ||r||_C    ||r||_C/||b||_C\n");
+         printf("Iters       ||r||_C      ||r||_C/||b||_C\n");
          printf("-----    ------------    ------------ \n");
+         for (j = 1; j <= i; j++) {
+            printf("% 5d    %e    %f    %e\n", j, norms[j],
+                   norms[j]/norms[j-1], rel_norms[j] );
+         }
       }
-      for (j = 1; j <= i; j++)
-      {
-         printf("% 5d    %e    %e\n", j, norms[j], rel_norms[j]);
-      }
+      printf("\n\n");
    }
 
    (pcg_data -> num_iterations) = i;

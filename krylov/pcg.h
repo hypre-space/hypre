@@ -53,6 +53,7 @@ typedef struct
 {
    char * (*CAlloc)        ( int count, int elt_size );
    int    (*Free)          ( char *ptr );
+   int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs );
    void * (*CreateVector)  ( void *vector );
    int    (*DestroyVector) ( void *vector );
    void * (*MatvecCreate)  ( void *A, void *x );
@@ -131,6 +132,7 @@ hypre_PCGFunctions *
 hypre_PCGFunctionsCreate(
    char * (*CAlloc)        ( int count, int elt_size ),
    int    (*Free)          ( char *ptr ),
+   int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs ),
    void * (*CreateVector)  ( void *vector ),
    int    (*DestroyVector) ( void *vector ),
    void * (*MatvecCreate)  ( void *A, void *x ),
