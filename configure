@@ -1364,7 +1364,7 @@ if test "${with_strict_checking+set}" = set; then
   withval="$with_strict_checking"
   CC=gcc
  CXX=g++
- CFLAGS="$CFLAGS -Wall -ansi -pedantic"
+ CFLAGS="$CFLAGS -Wall -pedantic"
  CXXFLAGS="$CXXFLAGS -Wall -Wshadow -fno-implicit-templates"
  CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
  casc_users_chose_compilers=yes
@@ -8850,9 +8850,6 @@ subdirs="$config_babel_runtime"
  distributed_matrix\
  docs\
  FEI_mv\
- FEI_mv/ARPACK/SUPLU\
- FEI_mv/ARPACK/ARPACK\
- FEI_mv/SuperLU\
  FEI_mv/SuperLU\
  FEI_mv/fei-hypre\
  FEI_mv/femli\

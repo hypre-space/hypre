@@ -254,7 +254,7 @@ AC_ARG_WITH(strict-checking,
 			  assigns gcc and g++ as the c and c++ compilers.],
 [CC=gcc
  CXX=g++
- CFLAGS="$CFLAGS -Wall -ansi -pedantic"
+ CFLAGS="$CFLAGS -Wall -pedantic"
  CXXFLAGS="$CXXFLAGS -Wall -Wshadow -fno-implicit-templates"
  CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
  casc_users_chose_compilers=yes
