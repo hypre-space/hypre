@@ -611,7 +611,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    hypre_TFree(send_buffers);
    hypre_TFree(recv_buffers);
 
-   hypre_TFree(hypre_CommHandleRequests(comm_handle));
+   hypre_SharedTFree(hypre_CommHandleRequests(comm_handle));
    hypre_TFree(comm_handle);
 
    return ierr;
@@ -639,7 +639,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    }
 
    /* free up comm_handle */
-   hypre_TFree(hypre_CommHandleRequests(comm_handle));
+   hypre_SharedTFree(hypre_CommHandleRequests(comm_handle));
    hypre_TFree(comm_handle);
 
    return ierr;
