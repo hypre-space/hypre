@@ -224,6 +224,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          printf("    - schurReduction\n");
          printf("    - slideReduction, slideReduction2, slideReduction3\n");
          printf("    - slideReductionMinNorm <f>\n");
+         printf("    - matrixPartition\n");
          printf("    - AConjugateProjection <dsize>\n");
          printf("    - minResProjection <dsize>\n");
          printf("    - solver <cg,gmres,bicgstab,boomeramg,superlux,..>\n");
@@ -409,6 +410,12 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          sscanf(params[i],"%s %lg", param, &slideReductionMinNorm_);
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters - slideReductionMinNorm.\n");
+      }
+      else if ( !strcasecmp(param1, "matrixPartition") )
+      {
+         matrixPartition_ = 1;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters - matrixPartition.\n");
       }
 
       //----------------------------------------------------------------

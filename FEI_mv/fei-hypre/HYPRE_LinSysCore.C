@@ -68,6 +68,9 @@ extern "C"
 #endif
 extern "C" {
    int HYPRE_LSI_qsort1a( int *, int *, int, int );
+   int HYPRE_LSI_PartitionMatrix(int, int, int*, int**, double**, int*, int**);
+   int HYPRE_LSI_GetMatrixDiagonal(int, int, int *, int **, double **, int *, 
+                                   int *, double *);
 }
 
 //***************************************************************************
@@ -169,6 +172,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   mapFromSolnList_(NULL),
                   mapFromSolnList2_(NULL),
                   memOptimizerFlag_(0),
+                  matrixPartition_(0),
                   HYpbs_(NULL)
 {
    //-------------------------------------------------------------------
@@ -716,10 +720,11 @@ int HYPRE_LinSysCore::setGlobalOffsets(int leng, int* nodeOffsets,
    //-------------------------------------------------------------------
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   {
       printf("%4d : HYPRE_LSC::startrow, endrow = %d %d\n",mypid_,
                     localStartRow_, localEndRow_);
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
       printf("%4d : HYPRE_LSC::leaving  setGlobalOffsets.\n",mypid_);
+   }
    return (0);
 }
 
@@ -1746,6 +1751,8 @@ int HYPRE_LinSysCore::matrixLoadComplete()
    }
 #endif
 
+   if ( matrixPartition_ == 2 ) matrixPartition_ = 1;
+
    //-------------------------------------------------------------------
    // if the matrix has not been assembled or it has been reset
    //-------------------------------------------------------------------
@@ -1988,7 +1995,7 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
    {
       printf("%4d : HYPRE_LSC::entering putNodalFieldData.\n",mypid_);
-      if ( mypid_ == 0 )
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
       {
          printf("      putNodalFieldData : fieldSize = %d\n", fieldSize);
          printf("      putNodalFieldData : fieldID   = %d\n", fieldID);
@@ -2006,8 +2013,6 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
    {
       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       {
-         printf("putNodalFieldData : fieldSize = %d\n", fieldSize);
-         printf("putNodalFieldData : numNodes  = %d\n", numNodes);
          for ( int i = 0; i < numNodes; i++ )
             for ( int j = 0; j < fieldSize; j++ )
                printf("putNodalFieldData : %4d %2d = %e\n",i,j,
@@ -2070,6 +2075,8 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
          delete [] aleNodeNumbers;
       } 
    } 
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+      printf("%4d : HYPRE_LSC::leaving  putNodalFieldData.\n",mypid_);
    return (0);
 }
 
@@ -2092,7 +2099,7 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
                                           double* gamma, int leng)
 {
    int    i, j, k, localEqnNum, colIndex, rowSize, *colInd;
-   int    numLocalRows, eqnNum, rowSize2, *colInd2;
+   int    numLocalRows, eqnNum, rowSize2, *colInd2, numLabels, *labels;
    double rhs_term, val, *colVal2, *colVal;
 
    //-------------------------------------------------------------------
@@ -2100,7 +2107,7 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
    // (this function should be called before matrixLoadComplete)
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       printf("%4d : HYPRE_LSC::entering enforceEssentialBC.\n",mypid_);
    if ( systemAssembled_ )
    {
@@ -2109,10 +2116,22 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
    }
 
    //-------------------------------------------------------------------
-   // examine each row individually
+   // if matrix partitioning is requested, do it.
    //-------------------------------------------------------------------
 
    numLocalRows = localEndRow_ - localStartRow_ + 1;
+   if ( matrixPartition_ == 1 && HYPreconID_ == HYMLI )
+   {
+      HYPRE_LSI_PartitionMatrix(numLocalRows,localStartRow_,rowLengths_, 
+                                colIndices_,colValues_, &numLabels, &labels); 
+      HYPRE_LSI_MLILoadMaterialLabels(HYPrecon_, numLabels, labels);
+      free( labels );
+      matrixPartition_ = 2;
+   }
+      
+   //-------------------------------------------------------------------
+   // examine each row individually
+   //-------------------------------------------------------------------
 
    for( i = 0; i < leng; i++ ) 
    {
@@ -2177,7 +2196,7 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
    // diagnostic message 
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       printf("%4d : HYPRE_LSC::leaving  enforceEssentialBC.\n",mypid_);
    return (0);
 }

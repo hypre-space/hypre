@@ -23,6 +23,8 @@
  *        HYPRE_LSI_MLISetStrengthThreshold
  *        HYPRE_LSI_MLISetMethod
  *        HYPRE_LSI_MLILoadNodalCoordinates
+ *        HYPRE_LSI_MLILoadMatrixScalings
+ *        HYPRE_LSI_MLILoadMaterialLabels
  *--------------------------------------------------------------------------
  *        HYPRE_LSI_MLIFEDataCreate
  *        HYPRE_LSI_MLIFEDataDestroy
@@ -99,6 +101,9 @@ typedef struct HYPRE_LSI_MLI_Struct
    int      numResetNull_;
    int      *resetNullIndices_;
    HYPRE_ParCSRMatrix correctionMatrix_;
+   int      numMatLabels_;        /* for controlling aggregation */
+   int      *matLabels_;
+   int      printNullSpace_;
 } 
 HYPRE_LSI_MLI;
 
@@ -146,10 +151,10 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->minCoarseSize_       = 1;
    mli_object->nodeDOF_             = 1;
    mli_object->spaceDim_            = 3;
-   mli_object->nSpaceDim_           = 4;
+   mli_object->nSpaceDim_           = 1;
    mli_object->localNEqns_          = 0;
    mli_object->nCoordinates_        = NULL;
-   mli_object->nCoordAccept_        = 1;
+   mli_object->nCoordAccept_        = 0;
    mli_object->nullScales_          = NULL;
    mli_object->calibrationSize_     = 0;
    mli_object->Pweight_             = 1.33;
@@ -158,6 +163,9 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->resetNullIndices_    = NULL;
    mli_object->correctionMatrix_    = NULL;
    strcpy(mli_object->paramFile_, "empty");
+   mli_object->numMatLabels_        = 0;
+   mli_object->matLabels_           = NULL;
+   mli_object->printNullSpace_      = 0;
 #ifdef HAVE_MLI
    mli_object->mli_                 = NULL;
    mli_object->feData_              = NULL;
@@ -193,6 +201,7 @@ int HYPRE_LSI_MLIDestroy( HYPRE_Solver solver )
       delete [] mli_object->resetNullIndices_;
    if ( mli_object->correctionMatrix_ != NULL ) 
       HYPRE_ParCSRMatrixDestroy(mli_object->correctionMatrix_); 
+   if ( mli_object->matLabels_ != NULL ) delete [] mli_object->matLabels_; 
 #ifdef HAVE_MLI
    if ( mli_object->feData_ != NULL ) delete mli_object->feData_;
    if ( mli_object->mli_ != NULL ) delete mli_object->mli_;
@@ -422,6 +431,30 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    }
 
    /* -------------------------------------------------------- */ 
+   /* load material labels, if there is any                    */
+   /* -------------------------------------------------------- */ 
+   
+   if ( mli_object->matLabels_ != NULL )
+   {
+      strcpy( paramString, "setLabels" );
+      targc = 3;
+      targv[0] = (char *) &(mli_object->numMatLabels_);
+      targv[1] = (char *) &iZero;
+      targv[2] = (char *) mli_object->matLabels_;
+      method->setParams( paramString, targc, targv );
+   }
+
+   /* -------------------------------------------------------- */ 
+   /* set parameter file                                       */
+   /* -------------------------------------------------------- */ 
+   
+   if ( mli_object->printNullSpace_ == 1 )
+   {
+      strcpy( paramString, "printNullSpace" );
+      method->setParams( paramString, 0, NULL );
+   }
+
+   /* -------------------------------------------------------- */ 
    /* set parameter file                                       */
    /* -------------------------------------------------------- */ 
    
@@ -616,6 +649,10 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
       if ( mli_object->calibrationSize_ < 0 ) 
          mli_object->calibrationSize_ = 0; 
    }
+   else if ( !strcasecmp(param2, "printNullSpace") )
+   {
+      mli_object->printNullSpace_ = 1;
+   }
    else if ( !strcasecmp(param2, "paramFile") )
    {
       sscanf(paramString,"%s %s %s",param1,param2,mli_object->paramFile_);
@@ -642,6 +679,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      useNodalCoord <on,off> \n");
          printf("\t      saAMGCalibrationSize <d> \n");
          printf("\t      paramFile <s> \n");
+         printf("\t      printNullSpace\n");
          exit(1);
       }
    }
@@ -1222,6 +1260,25 @@ int HYPRE_LSI_MLILoadMatrixScalings(HYPRE_Solver solver, int nEqns,
       mli_object->nullScales_ = new double[nEqns];
       for ( int i = 0; i < nEqns; i++ )  
          mli_object->nullScales_[i] = scalings[i];
+   }
+   return 0;
+}
+
+/****************************************************************************/
+/* HYPRE_LSI_MLILoadMaterialLabels                                          */
+/*--------------------------------------------------------------------------*/
+
+extern "C"
+int HYPRE_LSI_MLILoadMaterialLabels(HYPRE_Solver solver, int nLabels,
+                                    int *labels)
+{
+   HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
+   if ( labels != NULL )
+   {
+      mli_object->matLabels_ = new int[nLabels];
+      for ( int i = 0; i < nLabels; i++ )  
+         mli_object->matLabels_[i] = labels[i];
+      mli_object->numMatLabels_ = nLabels;
    }
    return 0;
 }

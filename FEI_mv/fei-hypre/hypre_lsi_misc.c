@@ -22,6 +22,7 @@
 #include "util.h"
 #endif
 
+extern void qsort0(int*, int, int);
 extern void qsort1(int*, double*, int, int);
 
 #define habs(x) ((x) > 0.0 ? x : -(x))
@@ -761,4 +762,96 @@ int HYPRE_LSI_MatrixInverse( double **Amat, int ndim, double ***Cmat )
    }
    return -1;
 }
+
+/* ******************************************************************** */
+/* find the separators of a matrix                                      */
+/* -------------------------------------------------------------------- */
+
+int HYPRE_LSI_PartitionMatrix( int nRows, int startRow, int *rowLengths,
+                               int **colIndices, double **colValues,
+                               int *nLabels, int **labels)
+{
+   int irow, rowCnt, labelNum, *localLabels, actualNRows;
+   int jcol, root, indHead, indTail, *indSet, index; 
+
+   /*----------------------------------------------------------------*/
+   /* search for constraint rows                                     */
+   /*----------------------------------------------------------------*/
+
+   for ( irow = nRows-1; irow >= 0; irow-- ) 
+   {
+      index = irow + startRow;
+      for ( jcol = 0; jcol < rowLengths[irow]; jcol++ ) 
+         if (colIndices[irow][jcol] == index && colValues[irow][jcol] != 0.0)
+            break;
+      if ( jcol != rowLengths[irow] ) break;
+   }
+   (*nLabels) = actualNRows = irow + 1;
+ 
+   /*----------------------------------------------------------------*/
+   /* search for constraint rows                                     */
+   /*----------------------------------------------------------------*/
+
+   localLabels = (int *) malloc( actualNRows * sizeof(int) );
+   for ( irow = 0; irow < actualNRows; irow++ ) localLabels[irow] = -1;
+   indSet = (int *) malloc( actualNRows * sizeof(int) );
+   
+   labelNum = 0;
+   rowCnt   = actualNRows;
+
+   while ( rowCnt > 0 )
+   {
+      root = -1;
+      for ( irow = 0; irow < actualNRows; irow++ )
+         if ( localLabels[irow] == -1 ) {root = irow; break;}
+      if ( root == -1 )
+      {
+         printf("HYPRE_LSI_PartitionMatrix : something wrong.\n");
+         exit(1);
+      }
+      indHead = indTail = 0;
+      localLabels[root] = labelNum; 
+      rowCnt--;
+      for ( jcol = 0; jcol < rowLengths[root]; jcol++ )
+      {
+         index = colIndices[root][jcol] - startRow;
+         if ( index >= 0 && index < actualNRows && localLabels[index] < 0 ) 
+         {
+            indSet[indTail++] = index;
+            localLabels[index] = labelNum; 
+         }
+      }
+      while ( (indTail - indHead) > 0 )
+      {
+         root = indSet[indHead++];
+         rowCnt--;
+         for ( jcol = 0; jcol < rowLengths[root]; jcol++ )
+         {
+            index = colIndices[root][jcol] - startRow;
+            if ( index >= 0 && index < actualNRows && localLabels[index] < 0 ) 
+            {
+               indSet[indTail++] = index;
+               localLabels[index] = labelNum; 
+            }
+         }
+      }
+      labelNum++;
+   }
+   if ( labelNum > 4 )       
+   {
+      printf("HYPRE_LSI_PartitionMatrix : number of labels %d too large.\n",
+             labelNum+1);
+      free( localLabels );
+      (*nLabels) = 0; 
+      (*labels)  = NULL; 
+   }
+   else
+   {
+      printf("HYPRE_LSI_PartitionMatrix : number of labels = %d.\n",
+             labelNum);
+      (*labels)  = localLabels; 
+   }
+   free( indSet );
+   return 0;
+} 
 
