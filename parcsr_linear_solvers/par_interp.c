@@ -36,6 +36,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int             *A_offd_i = hypre_CSRMatrixI(A_offd);
    int             *A_offd_j = hypre_CSRMatrixJ(A_offd);
    int              num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
+   int             *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
 
    hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
    int             *S_diag_i = hypre_CSRMatrixI(S_diag);
@@ -49,7 +50,6 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int		      *col_map_offd_P;
 
    int             *CF_marker_offd;
-   int             *CF_marker_cols;
 
    hypre_CSRMatrix *A_ext;
    
@@ -129,14 +129,6 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-   CF_marker_cols = hypre_CTAlloc(int, hypre_CSRMatrixNumRows(A_diag));
-   for (i = 0; i < n_fine; i++)
-   {
-      CF_marker_cols[i] = CF_marker[i]*(i+col_1);
-   }
-   /* Case where point 0 is fine */
-   if (local_numrows && col_1==0 && CF_marker[0]<0) CF_marker_cols[0] = -1;
- 
    CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
 
    if (!comm_pkg)
@@ -155,7 +147,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 	start = hypre_CommPkgSendMapStart(comm_pkg, i);
 	for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
 		int_buf_data[index++] 
-		 = CF_marker_cols[hypre_CommPkgSendMapElmt(comm_pkg,j)];
+		 = CF_marker[hypre_CommPkgSendMapElmt(comm_pkg,j)];
    }
 	
    comm_handle = hypre_InitializeCommunication( 11, comm_pkg, int_buf_data, 
@@ -643,7 +635,15 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                      else                       
                      {                          
                                            /* in the off_diagonal block  */
-                        for (j = 0; j < num_cols_A_offd; j++)
+                        j = hypre_BinarySearch(col_map_offd,i2,num_cols_A_offd);
+                        if (j != -1)
+                        { 
+                           if (P_marker_offd[j] >= jj_begin_row_offd)
+                           {
+			      sum += A_ext_data[jj1];
+                           }
+                        }
+			/* for (j = 0; j < num_cols_A_offd; j++)
                         {
                             if (i2 == abs(CF_marker_offd[j]) )
                             { 
@@ -653,7 +653,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                                 }
 				break;
                             }
-                        }
+                        } */
  
                      }
 
@@ -684,7 +684,14 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                      else
                      {
                         /* check to see if it is in the off_diagonal block  */
-                        for (j = 0; j < num_cols_A_offd; j++)
+                        j = hypre_BinarySearch(col_map_offd,i2,num_cols_A_offd);
+                        if (j != -1)
+                        { 
+                           if (P_marker_offd[j] >= jj_begin_row_offd)
+                                  P_offd_data[P_marker_offd[j]]
+                                     += distribute * A_ext_data[jj1];
+                        }
+                        /* for (j = 0; j < num_cols_A_offd; j++)
                         {
                             if (i2 == abs(CF_marker_offd[j])) 
                             { 
@@ -693,7 +700,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                                      += distribute * A_ext_data[jj1];
                                break;
                             }
-                        }
+                        } */
                      }
                   }
                   }
@@ -888,7 +895,6 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    *P_ptr = P;
 
-   hypre_TFree(CF_marker_cols);
    hypre_TFree(CF_marker_offd);
    hypre_TFree(int_buf_data);
    hypre_TFree(fine_to_coarse);
