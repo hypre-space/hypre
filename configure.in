@@ -822,7 +822,7 @@ case $ARCH in
         if test "$casc_using_pthreads" = "no" &&
           test "$casc_using_openmp" = "no"
         then
-          AC_CHECK_PROGS(CXX,mpCC mpiCC)
+          AC_CHECK_PROGS(CXX,mpCC mpKCC mpiCC)
           AC_PROG_CPP
         else
           if test "$casc_using_pthreads" = "yes" ; then
@@ -877,6 +877,9 @@ case $ARCH in
     if test -z "$CXXFLAGS"; then
       if test "$CXX" = "g++" ; then
         CASC_SET_CXXOPT(-O)
+      elif test "$CXX" = "KCC" ||
+           test "$CXX" = "mpKCC" ; then
+        CASC_SET_COPT(+K2)
       else
         CASC_SET_CXXOPT(-O3 -qstrict)
         if test "$casc_using_openmp" = "yes" ; then
