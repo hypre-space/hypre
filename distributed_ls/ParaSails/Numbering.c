@@ -45,7 +45,6 @@ Numbering *NumberingCreate(Matrix *mat, int size)
     int row, i, len, *ind;
     double *val;
     int num_external = 0;
-    int *local_to_global; /* temp pointer */
 
     numb->size    = size;
     numb->beg_row = mat->beg_row;
@@ -60,9 +59,6 @@ Numbering *NumberingCreate(Matrix *mat, int size)
     for (i=0; i<numb->num_loc; i++)
         numb->local_to_global[i] = mat->beg_row + i;
 
-    /* Set up pointer to external part of local_to_global array */
-    local_to_global = &numb->local_to_global[numb->num_loc];
-
     /* Fill local_to_global array */
     for (row=0; row<=mat->end_row - mat->beg_row; row++)
     {
@@ -75,8 +71,23 @@ Numbering *NumberingCreate(Matrix *mat, int size)
             {
 		if (HashLookup(numb->hash, ind[i]) == HASH_NOTFOUND)
 		{
+                    if (num_external >= numb->size)
+		    {
+		        Hash *new;
+
+		        /* allocate more space for numbering */
+		        numb->size *= 2;
+		        numb->local_to_global = (int *) 
+			    realloc(numb->local_to_global, 
+			    (numb->num_loc+numb->size)*sizeof(int));
+                        new = HashCreate(2*numb->size+1);
+		        HashRehash(numb->hash, new);
+		        HashDestroy(numb->hash);
+		        numb->hash = new;
+		    }
+
                     HashInsert(numb->hash, ind[i], num_external);
-                    local_to_global[num_external] = ind[i];
+                    numb->local_to_global[numb->num_loc+num_external] = ind[i];
 		    num_external++;
 		}
             }
@@ -84,13 +95,14 @@ Numbering *NumberingCreate(Matrix *mat, int size)
     }
 
     /* Sort the indices */
-    shell_sort(num_external, local_to_global);
+    shell_sort(num_external, &numb->local_to_global[numb->num_loc]);
 
     /* Redo the hash table for the sorted indices */
     HashReset(numb->hash);
 
     for (i=0; i<num_external; i++)
-        HashInsert(numb->hash, local_to_global[i], i + numb->num_loc);
+        HashInsert(numb->hash, 
+	    numb->local_to_global[i+numb->num_loc], i+numb->num_loc);
 
     numb->num_ind += num_external;
 
@@ -172,7 +184,8 @@ void NumberingGlobalToLocal(Numbering *numb, int len, int *global, int *local)
 		    /* allocate more space for numbering */
 		    numb->size *= 2;
 		    numb->local_to_global = (int *) 
-			realloc(numb->local_to_global, numb->size*sizeof(int));
+			realloc(numb->local_to_global, 
+			(numb->num_loc+numb->size)*sizeof(int));
                     new = HashCreate(2*numb->size+1);
 		    HashRehash(numb->hash, new);
 		    HashDestroy(numb->hash);
