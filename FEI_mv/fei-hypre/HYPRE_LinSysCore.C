@@ -26,6 +26,7 @@
 #include "HYPRE_parcsr_TFQmr.h"
 #include "HYPRE_parcsr_bicgs.h"
 #include "HYPRE_parcsr_symqmr.h"
+#include "HYPRE_parcsr_fgmres.h"
 #include "LinearSystemCore.h"
 #include "fegridinfo.h"
 #include "HYPRE_LinSysCore.h"
@@ -2585,6 +2586,7 @@ void HYPRE_LinSysCore::selectSolver(char* name)
     {
        if ( HYSolverID_ == HYPCG )    HYPRE_ParCSRPCGDestroy(HYSolver_);
        if ( HYSolverID_ == HYGMRES )  HYPRE_ParCSRGMRESDestroy(HYSolver_);
+       if ( HYSolverID_ == HYFGMRES)  HYPRE_ParCSRFGMRESDestroy(HYSolver_);
        if ( HYSolverID_ == HYCGSTAB)  HYPRE_ParCSRBiCGSTABDestroy(HYSolver_);
        if ( HYSolverID_ == HYCGSTABL) HYPRE_ParCSRBiCGSTABLDestroy(HYSolver_);
        if ( HYSolverID_ == HYAMG)     HYPRE_BoomerAMGDestroy(HYSolver_);
@@ -2606,6 +2608,11 @@ void HYPRE_LinSysCore::selectSolver(char* name)
     {
        strcpy( HYSolverName_, name );
        HYSolverID_ = HYGMRES;
+    }
+    else if ( !strcmp(name, "fgmres") )
+    {
+       strcpy( HYSolverName_, name );
+       HYSolverID_ = HYFGMRES;
     }
     else if ( !strcmp(name, "bicgstab") )
     {
@@ -2674,11 +2681,12 @@ void HYPRE_LinSysCore::selectSolver(char* name)
        case HYPCG :
             HYPRE_ParCSRPCGCreate(comm_, &HYSolver_);
             break;
-
        case HYGMRES :
             HYPRE_ParCSRGMRESCreate(comm_, &HYSolver_);
             break;
-
+       case HYFGMRES :
+            HYPRE_ParCSRFGMRESCreate(comm_, &HYSolver_);
+            break;
        case HYCGSTAB :
             HYPRE_ParCSRBiCGSTABCreate(comm_, &HYSolver_);
             break;
@@ -3273,6 +3281,49 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
             ptime  = LSC_Wtime();
             HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
             HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &num_iterations);
+            HYPRE_ParVectorCopy( b_csr, r_csr );
+            HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+            HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+            rnorm = sqrt( rnorm );
+            switch ( projectionScheme_ )
+            {
+               case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
+               case 2 : addToMinResProjectionSpace(currX_,currB_); break;
+            }
+            if ( num_iterations >= maxIterations_ ) status = 1; else status = 0;
+            break;
+
+       //----------------------------------------------------------------
+       // choose flexible GMRES 
+       //----------------------------------------------------------------
+
+       case HYFGMRES :
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+            {
+               printf("***************************************************\n");
+               printf("* Flexible GMRES solver \n");
+               printf("* restart size              = %d\n", gmresDim_);
+               printf("* maximum no. of iterations = %d\n", maxIterations_);
+               printf("* convergence tolerance     = %e\n", tolerance_);
+               printf("*--------------------------------------------------\n");
+            }
+            setupFGMRESPrecon();
+            HYPRE_ParCSRFGMRESSetKDim(HYSolver_, gmresDim_);
+            HYPRE_ParCSRFGMRESSetMaxIter(HYSolver_, maxIterations_);
+            HYPRE_ParCSRFGMRESSetTol(HYSolver_, tolerance_);
+            if ( normAbsRel_ == 0 ) HYPRE_ParCSRFGMRESSetStopCrit(HYSolver_,0);
+            else                    HYPRE_ParCSRFGMRESSetStopCrit(HYSolver_,1);
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+            {
+               if ( mypid_ == 0 )
+                 printf("***************************************************\n");
+               HYPRE_ParCSRFGMRESSetLogging(HYSolver_, 1);
+            }
+            HYPRE_ParCSRFGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
+            MPI_Barrier( comm_ );
+            ptime  = LSC_Wtime();
+            HYPRE_ParCSRFGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
+            HYPRE_ParCSRFGMRESGetNumIterations(HYSolver_, &num_iterations);
             HYPRE_ParVectorCopy( b_csr, r_csr );
             HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
             HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);

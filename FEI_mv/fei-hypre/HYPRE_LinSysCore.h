@@ -31,8 +31,8 @@
 // local enumerations and defines
 // -------------------------------------------------------------------------
 
-enum HYsolverID {HYPCG,HYGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,HYBICGS,HYSYMQMR,
-                 HYAMG, HYSUPERLU,HYSUPERLUX,HYY12M,HYAMGE};
+enum HYsolverID {HYPCG,HYGMRES,HYFGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,HYBICGS,
+                 HYSYMQMR,HYAMG,HYSUPERLU,HYSUPERLUX,HYY12M,HYAMGE};
 enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
                  HYDDILUT, HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID,HYBLOCK};
 
@@ -408,6 +408,7 @@ class HYPRE_LinSysCore
 
    void  setupPCGPrecon();
    void  setupGMRESPrecon();
+   void  setupFGMRESPrecon();
    void  setupBiCGSTABPrecon();
    void  setupBiCGSTABLPrecon();
    void  setupTFQmrPrecon();
