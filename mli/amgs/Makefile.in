@@ -52,7 +52,8 @@ FILES =\
  mli_method.C\
  mli_method_amgsa.C\
  mli_amgsa_coarsen1.C\
- mli_amgsa_calib.C
+ mli_amgsa_calib.C\
+ mli_amgsa_elem.C
 
 TEMP = ${FILES:.c=.o}
 OBJS = ${TEMP:.C=.o}
