@@ -434,6 +434,7 @@ hypre_SStructVectorConvert( hypre_SStructVector  *vector,
    double               *yp;
    hypre_BoxArray       *boxes;
    hypre_Box            *box;
+   int                   bi;
    hypre_Index           loop_size;
    hypre_IndexRef        start;
    hypre_Index           stride;
@@ -467,14 +468,20 @@ hypre_SStructVectorConvert( hypre_SStructVector  *vector,
                yp = hypre_StructVectorBoxData(y, i);
 
                hypre_BoxGetSize(box, loop_size);
-               hypre_BoxLoop1Begin(loop_size, y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
+               hypre_BoxLoop2Begin(loop_size,
+                                   y_data_box, start, stride, yi,
+                                   box,        start, stride, bi);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,bi
 #include "hypre_box_smp_forloop.h"
-               hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+               hypre_BoxLoop2For(loopi, loopj, loopk, yi, bi)
                   {
-                     pardata[pari++] = yp[yi];
+                     pardata[pari+bi] = yp[yi];
                   }
-               hypre_BoxLoop1End(yi);
+               hypre_BoxLoop2End(yi, bi);
+               pari +=
+                  hypre_IndexX(loop_size)*
+                  hypre_IndexY(loop_size)*
+                  hypre_IndexZ(loop_size);
             }
       }
    }
@@ -506,6 +513,7 @@ hypre_SStructVectorRestore( hypre_SStructVector *vector,
    double               *yp;
    hypre_BoxArray       *boxes;
    hypre_Box            *box;
+   int                   bi;
    hypre_Index           loop_size;
    hypre_IndexRef        start;
    hypre_Index           stride;
@@ -541,14 +549,20 @@ hypre_SStructVectorRestore( hypre_SStructVector *vector,
                   yp = hypre_StructVectorBoxData(y, i);
 
                   hypre_BoxGetSize(box, loop_size);
-                  hypre_BoxLoop1Begin(loop_size, y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
+                  hypre_BoxLoop2Begin(loop_size,
+                                      y_data_box, start, stride, yi,
+                                      box,        start, stride, bi);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,bi
 #include "hypre_box_smp_forloop.h"
-                  hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+                  hypre_BoxLoop2For(loopi, loopj, loopk, yi, bi)
                      {
-                        yp[yi] = pardata[pari++];
+                        yp[yi] = pardata[pari+bi];
                      }
-                  hypre_BoxLoop1End(yi);
+                  hypre_BoxLoop2End(yi, bi);
+                  pari +=
+                     hypre_IndexX(loop_size)*
+                     hypre_IndexY(loop_size)*
+                     hypre_IndexZ(loop_size);
                }
          }
       }
