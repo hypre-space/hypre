@@ -88,7 +88,7 @@ echo "Creating the repository links ..."
 
 # top level directory link
 if [ -d "$AMG_REP/src/RCS" ]; then
-  if [ ! -d "$AMG_SRC/RCS" ]; then
+  if [ ! -h "$AMG_SRC/RCS" ]; then
     ln -s $AMG_REP/src/RCS $AMG_SRC/RCS
   fi
 fi
@@ -97,7 +97,7 @@ fi
 for i in $DIRS
 do
   if [ -d "$AMG_REP/src/$i/RCS" ]; then
-    if [ ! -d "$AMG_SRC/$i/RCS" ]; then
+    if [ ! -h "$AMG_SRC/$i/RCS" ]; then
       ln -s $AMG_REP/src/$i/RCS $AMG_SRC/$i/RCS
     fi
   fi
