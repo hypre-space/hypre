@@ -59,6 +59,29 @@ hypre_PCGNewVector( void *vvector )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PCGNewVectorArray
+ *--------------------------------------------------------------------------*/
+
+void *
+hypre_PCGNewVectorArray(int n, void *vvector )
+{
+   hypre_ParVector *vector = vvector;
+   hypre_ParVector **new_vector;
+   int i;
+
+   new_vector = hypre_CTAlloc(hypre_ParVector*,n);
+   for (i=0; i < n; i++)
+   {
+      new_vector[i] = hypre_CreateParVector( hypre_ParVectorComm(vector),
+				       hypre_ParVectorGlobalSize(vector),	
+                                       hypre_ParVectorPartitioning(vector) );
+      hypre_InitializeParVector(new_vector[i]);
+   }
+
+   return ( (void *) new_vector );
+}
+
+/*--------------------------------------------------------------------------
  * hypre_PCGFreeVector
  *--------------------------------------------------------------------------*/
 
