@@ -217,6 +217,22 @@ int HYPRE_IJMatrixSetDiagOffdSizes(HYPRE_IJMatrix  matrix,
                                    const int      *offdiag_sizes);
 
 /**
+ * (Optional) Sets the maximum number of elements that are expected to be set
+ * (or added) on other processors from this processor
+ * max_off_procs_elmts_set defines the stash size for coefficients
+ * to be set on other processors
+ * max_off_procs_elmts_add defines stash size for off processor elements
+ * to be added to coefficients located on other processors
+ * This routine can significantly improve the efficiency of matrix
+ * construction, and should always be utilized if possible.
+ *
+ * Not collective.
+ **/
+int HYPRE_IJMatrixSetMaxOffProcElmts(HYPRE_IJMatrix  matrix,
+                                     int max_off_proc_elmts_set,
+                                     int max_off_proc_elmts_add);
+
+/**
  * Read the matrix from file.  This is mainly for debugging purposes.
  **/
 int HYPRE_IJMatrixRead(const char     *filename,
@@ -279,6 +295,22 @@ int HYPRE_IJVectorDestroy(HYPRE_IJVector vector);
  * allowing users to modify coefficient values.
  **/
 int HYPRE_IJVectorInitialize(HYPRE_IJVector vector);
+
+/**
+ * (Optional) Sets the maximum number of elements that are expected to be set
+ * (or added) on other processors from this processor
+ * max_off_procs_elmts_set defines the stash size for coefficients
+ * to be set on other processors
+ * max_off_procs_elmts_add defines stash size for off processor elements
+ * to be added to coefficients located on other processors
+ * This routine can significantly improve the efficiency of matrix
+ * construction, and should always be utilized if possible.
+ *
+ * Not collective.
+ **/
+int HYPRE_IJVectorSetMaxOffProcElmts(HYPRE_IJVector  vector,
+                                     int max_off_proc_elmts_set,
+                                     int max_off_proc_elmts_add);
 
 /**
  * Sets values in vector.  The arrays {\tt values} and {\tt indices}

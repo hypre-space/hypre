@@ -16,6 +16,7 @@ noinst_HEADERS = \
  IJ_matrix.h\
  IJ_vector.h\
  aux_parcsr_matrix.h\
+ aux_par_vector.h\
  headers.h
 dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 
@@ -41,7 +42,8 @@ FILES = \
  IJMatrix_parcsr.c\
  IJVector.c\
  IJVector_parcsr.c\
- aux_parcsr_matrix.c
+ aux_parcsr_matrix.c\
+ aux_par_vector.c
 
 $(OBJECTS): $(dependent_includes)
 

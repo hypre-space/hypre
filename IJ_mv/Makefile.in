@@ -61,13 +61,13 @@ libHYPRE_IJ_mv_a_LIBADD =
 am__libHYPRE_IJ_mv_a_SOURCES_DIST = F90_HYPRE_IJMatrix.c \
 	F90_HYPRE_IJVector.c F90_IJMatrix.c HYPRE_IJMatrix.c \
 	HYPRE_IJVector.c IJMatrix.c IJMatrix_parcsr.c IJVector.c \
-	IJVector_parcsr.c aux_parcsr_matrix.c
+	IJVector_parcsr.c aux_parcsr_matrix.c aux_par_vector.c
 am__objects_1 = F90_HYPRE_IJMatrix.$(OBJEXT) \
 	F90_HYPRE_IJVector.$(OBJEXT) F90_IJMatrix.$(OBJEXT) \
 	HYPRE_IJMatrix.$(OBJEXT) HYPRE_IJVector.$(OBJEXT) \
 	IJMatrix.$(OBJEXT) IJMatrix_parcsr.$(OBJEXT) \
 	IJVector.$(OBJEXT) IJVector_parcsr.$(OBJEXT) \
-	aux_parcsr_matrix.$(OBJEXT)
+	aux_parcsr_matrix.$(OBJEXT) aux_par_vector.$(OBJEXT)
 @STATICONLY_TRUE@am_libHYPRE_IJ_mv_a_OBJECTS = $(am__objects_1)
 libHYPRE_IJ_mv_a_OBJECTS = $(am_libHYPRE_IJ_mv_a_OBJECTS)
 libLTLIBRARIES_INSTALL = $(INSTALL)
@@ -76,11 +76,11 @@ libHYPRE_IJ_mv_la_LIBADD =
 am__libHYPRE_IJ_mv_la_SOURCES_DIST = F90_HYPRE_IJMatrix.c \
 	F90_HYPRE_IJVector.c F90_IJMatrix.c HYPRE_IJMatrix.c \
 	HYPRE_IJVector.c IJMatrix.c IJMatrix_parcsr.c IJVector.c \
-	IJVector_parcsr.c aux_parcsr_matrix.c
+	IJVector_parcsr.c aux_parcsr_matrix.c aux_par_vector.c
 am__objects_2 = F90_HYPRE_IJMatrix.lo F90_HYPRE_IJVector.lo \
 	F90_IJMatrix.lo HYPRE_IJMatrix.lo HYPRE_IJVector.lo \
 	IJMatrix.lo IJMatrix_parcsr.lo IJVector.lo IJVector_parcsr.lo \
-	aux_parcsr_matrix.lo
+	aux_parcsr_matrix.lo aux_par_vector.lo
 @STATICONLY_FALSE@am_libHYPRE_IJ_mv_la_OBJECTS = $(am__objects_2)
 libHYPRE_IJ_mv_la_OBJECTS = $(am_libHYPRE_IJ_mv_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -151,7 +151,6 @@ LAPACK_LIBS = @LAPACK_LIBS@
 LDFLAGS = @LDFLAGS@
 LIBDIRNEEDED_FALSE = @LIBDIRNEEDED_FALSE@
 LIBDIRNEEDED_TRUE = @LIBDIRNEEDED_TRUE@
-LIBG2C = @LIBG2C@
 LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
@@ -245,6 +244,7 @@ noinst_HEADERS = \
  IJ_matrix.h\
  IJ_vector.h\
  aux_parcsr_matrix.h\
+ aux_par_vector.h\
  headers.h
 
 dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
@@ -271,7 +271,8 @@ FILES = \
  IJMatrix_parcsr.c\
  IJVector.c\
  IJVector_parcsr.c\
- aux_parcsr_matrix.c
+ aux_parcsr_matrix.c\
+ aux_par_vector.c
 
 all: all-am
 

@@ -44,6 +44,24 @@ typedef struct
 			 in diag_j , diag_data assigned to row i */  
    int     *indx_offd; /* indx_offd[i] points to first empty space of portion
 			 in offd_j , offd_data assigned to row i */  
+   int	    max_off_proc_elmts_set; /* length of off processor stash for
+					SetValues */
+   int	    current_num_elmts_set; /* current no. of elements stored in stash */
+   int	    off_proc_i_indx_set; /* pointer to first empty space in 
+				set_off_proc_i_set */
+   int     *off_proc_i_set; /* length 2*num_off_procs_elmts, contains info pairs
+			(row no., no. of elmts) */
+   int     *off_proc_j_set; /* contains column indices */
+   double  *off_proc_data_set; /* contains corresponding data */
+   int	    max_off_proc_elmts_add; /* length of off processor stash for
+					SetValues */
+   int	    current_num_elmts_add; /* current no. of elements stored in stash */
+   int	    off_proc_i_indx_add; /* pointer to first empty space in 
+				off_proc_i_add */
+   int     *off_proc_i_add; /* length 2*num_off_procs_elmts, contains info pairs
+			(row no., no. of elmts) */
+   int     *off_proc_j_add; /* contains column indices */
+   double  *off_proc_data_add; /* contains corresponding data */
 } hypre_AuxParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -61,5 +79,18 @@ typedef struct
 
 #define hypre_AuxParCSRMatrixIndxDiag(matrix)  ((matrix) -> indx_diag)
 #define hypre_AuxParCSRMatrixIndxOffd(matrix)  ((matrix) -> indx_offd)
+
+#define hypre_AuxParCSRMatrixMaxOffProcElmtsSet(matrix)  ((matrix) -> max_off_proc_elmts_set)
+#define hypre_AuxParCSRMatrixCurrentNumElmtsSet(matrix)  ((matrix) -> current_num_elmts_set)
+#define hypre_AuxParCSRMatrixOffProcIIndxSet(matrix)  ((matrix) -> off_proc_i_indx_set)
+#define hypre_AuxParCSRMatrixOffProcISet(matrix)  ((matrix) -> off_proc_i_set)
+#define hypre_AuxParCSRMatrixOffProcJSet(matrix)  ((matrix) -> off_proc_j_set)
+#define hypre_AuxParCSRMatrixOffProcDataSet(matrix)  ((matrix) -> off_proc_data_set)
+#define hypre_AuxParCSRMatrixMaxOffProcElmtsAdd(matrix)  ((matrix) -> max_off_proc_elmts_add)
+#define hypre_AuxParCSRMatrixCurrentNumElmtsAdd(matrix)  ((matrix) -> current_num_elmts_add)
+#define hypre_AuxParCSRMatrixOffProcIIndxAdd(matrix)  ((matrix) -> off_proc_i_indx_add)
+#define hypre_AuxParCSRMatrixOffProcIAdd(matrix)  ((matrix) -> off_proc_i_add)
+#define hypre_AuxParCSRMatrixOffProcJAdd(matrix)  ((matrix) -> off_proc_j_add)
+#define hypre_AuxParCSRMatrixOffProcDataAdd(matrix)  ((matrix) -> off_proc_data_add)
 
 #endif

@@ -29,6 +29,9 @@ typedef struct hypre_IJVector_struct
 
    void         *object;            /* Structure for storing local portion */
 
+   void         *translator;        /* Structure for storing off processor
+				       information */
+
 } hypre_IJVector;
 
 /*--------------------------------------------------------------------------
@@ -42,6 +45,8 @@ typedef struct hypre_IJVector_struct
 #define hypre_IJVectorObjectType(vector)     ((vector) -> object_type)
 
 #define hypre_IJVectorObject(vector)         ((vector) -> object)
+
+#define hypre_IJVectorTranslator(vector)     ((vector) -> translator)
 
 /*--------------------------------------------------------------------------
  * prototypes for operations on local objects

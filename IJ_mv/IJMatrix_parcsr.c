@@ -160,6 +160,39 @@ hypre_IJMatrixSetDiagOffdSizesParCSR(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
+ * hypre_IJMatrixSetMaxOffProcElmtsParCSR
+ *
+ *****************************************************************************/
+
+int
+hypre_IJMatrixSetMaxOffProcElmtsParCSR(hypre_IJMatrix *matrix,
+			      	       int max_off_proc_elmts_set, 
+			      	       int max_off_proc_elmts_add)
+{
+   int ierr = 0;
+   hypre_AuxParCSRMatrix *aux_matrix;
+   int local_num_rows, local_num_cols, my_id;
+   int *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
+   int *col_partitioning = hypre_IJMatrixColPartitioning(matrix);
+   MPI_Comm comm = hypre_IJMatrixComm(matrix);
+
+   MPI_Comm_rank(comm,&my_id);
+   aux_matrix = hypre_IJMatrixTranslator(matrix);
+   if (!aux_matrix)
+   {
+      local_num_rows = row_partitioning[my_id+1]-row_partitioning[my_id];
+      local_num_cols = col_partitioning[my_id+1]-col_partitioning[my_id];
+      ierr = hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows, 
+				local_num_cols, NULL);
+      hypre_IJMatrixTranslator(matrix) = aux_matrix;
+   }
+   hypre_AuxParCSRMatrixMaxOffProcElmtsSet(aux_matrix) = max_off_proc_elmts_set;
+   hypre_AuxParCSRMatrixMaxOffProcElmtsAdd(aux_matrix) = max_off_proc_elmts_add;
+   return ierr;
+}
+
+/******************************************************************************
+ *
  * hypre_IJMatrixInitializeParCSR
  *
  * initializes AuxParCSRMatrix and ParCSRMatrix as necessary
@@ -474,6 +507,12 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
    int *offd_j;
    double *offd_data;
    int first;
+   int current_num_elmts;
+   int max_off_proc_elmts;
+   int off_proc_i_indx;
+   int *off_proc_i;
+   int *off_proc_j;
+   double *off_proc_data;
 
    MPI_Comm_size(comm, &num_procs);
    MPI_Comm_rank(comm, &my_id);
@@ -775,10 +814,53 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
          }
          else
 	 {
-	    printf("Warning!!! Row %d is not inside proc. %d's partitioning!\n",
-			row, my_id);
-	    printf("Input data have been ignored!!\n");
-	    indx += n;
+   	    current_num_elmts 
+		= hypre_AuxParCSRMatrixCurrentNumElmtsSet(aux_matrix);
+   	    max_off_proc_elmts
+		= hypre_AuxParCSRMatrixMaxOffProcElmtsSet(aux_matrix);
+   	    off_proc_i_indx = hypre_AuxParCSRMatrixOffProcIIndxSet(aux_matrix);
+   	    off_proc_i = hypre_AuxParCSRMatrixOffProcISet(aux_matrix);
+   	    off_proc_j = hypre_AuxParCSRMatrixOffProcJSet(aux_matrix);
+   	    off_proc_data = hypre_AuxParCSRMatrixOffProcDataSet(aux_matrix);
+   	    
+	    if (!max_off_proc_elmts)
+	    {
+	       max_off_proc_elmts = hypre_max(n,1000);
+	       hypre_AuxParCSRMatrixMaxOffProcElmtsSet(aux_matrix) =
+	       		max_off_proc_elmts;
+   	       hypre_AuxParCSRMatrixOffProcISet(aux_matrix)
+			= hypre_CTAlloc(int,2*max_off_proc_elmts);
+   	       hypre_AuxParCSRMatrixOffProcJSet(aux_matrix)
+			= hypre_CTAlloc(int,max_off_proc_elmts);
+   	       hypre_AuxParCSRMatrixOffProcDataSet(aux_matrix)
+			= hypre_CTAlloc(double,max_off_proc_elmts);
+   	       off_proc_i = hypre_AuxParCSRMatrixOffProcISet(aux_matrix);
+   	       off_proc_j = hypre_AuxParCSRMatrixOffProcJSet(aux_matrix);
+   	       off_proc_data = hypre_AuxParCSRMatrixOffProcDataSet(aux_matrix);
+	    }
+            else if (current_num_elmts + n > max_off_proc_elmts)
+            {
+               max_off_proc_elmts += 3*n;
+               off_proc_i = hypre_TReAlloc(off_proc_i,int,2*max_off_proc_elmts);
+               off_proc_j = hypre_TReAlloc(off_proc_j,int,max_off_proc_elmts);
+               off_proc_data = hypre_TReAlloc(off_proc_data,double,
+				max_off_proc_elmts);
+	       hypre_AuxParCSRMatrixMaxOffProcElmtsSet(aux_matrix)
+   	    		= max_off_proc_elmts;
+	       hypre_AuxParCSRMatrixOffProcISet(aux_matrix) = off_proc_i;
+	       hypre_AuxParCSRMatrixOffProcJSet(aux_matrix) = off_proc_j;
+	       hypre_AuxParCSRMatrixOffProcDataSet(aux_matrix) = off_proc_data;
+	    }
+            off_proc_i[off_proc_i_indx++] = row; 
+            off_proc_i[off_proc_i_indx++] = n; 
+	    for (i=0; i < n; i++)
+	    {
+	       off_proc_j[current_num_elmts] = cols[indx];
+	       off_proc_data[current_num_elmts++] = values[indx++];
+	    }
+	    hypre_AuxParCSRMatrixOffProcIIndxSet(aux_matrix) = off_proc_i_indx; 
+	    hypre_AuxParCSRMatrixCurrentNumElmtsSet(aux_matrix)
+   	    	= current_num_elmts; 
 	 }
       }
    }
@@ -833,6 +915,12 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
    int *offd_i;
    int *offd_j;
    double *offd_data;
+   int current_num_elmts;
+   int max_off_proc_elmts;
+   int off_proc_i_indx;
+   int *off_proc_i;
+   int *off_proc_j;
+   double *off_proc_data;
 
    MPI_Comm_size(comm, &num_procs);
    MPI_Comm_rank(comm, &my_id);
@@ -1126,6 +1214,56 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
 
             }
          }
+         else
+         {
+   	    current_num_elmts 
+		= hypre_AuxParCSRMatrixCurrentNumElmtsAdd(aux_matrix);
+   	    max_off_proc_elmts
+		= hypre_AuxParCSRMatrixMaxOffProcElmtsAdd(aux_matrix);
+   	    off_proc_i_indx = hypre_AuxParCSRMatrixOffProcIIndxAdd(aux_matrix);
+   	    off_proc_i = hypre_AuxParCSRMatrixOffProcIAdd(aux_matrix);
+   	    off_proc_j = hypre_AuxParCSRMatrixOffProcJAdd(aux_matrix);
+   	    off_proc_data = hypre_AuxParCSRMatrixOffProcDataAdd(aux_matrix);
+   	    
+	    if (!max_off_proc_elmts)
+	    {
+	       max_off_proc_elmts = hypre_max(n,1000);
+	       hypre_AuxParCSRMatrixMaxOffProcElmtsAdd(aux_matrix) =
+	       		max_off_proc_elmts;
+   	       hypre_AuxParCSRMatrixOffProcIAdd(aux_matrix)
+			= hypre_CTAlloc(int,2*max_off_proc_elmts);
+   	       hypre_AuxParCSRMatrixOffProcJAdd(aux_matrix)
+			= hypre_CTAlloc(int,max_off_proc_elmts);
+   	       hypre_AuxParCSRMatrixOffProcDataAdd(aux_matrix)
+			= hypre_CTAlloc(double,max_off_proc_elmts);
+   	       off_proc_i = hypre_AuxParCSRMatrixOffProcIAdd(aux_matrix);
+   	       off_proc_j = hypre_AuxParCSRMatrixOffProcJAdd(aux_matrix);
+   	       off_proc_data = hypre_AuxParCSRMatrixOffProcDataAdd(aux_matrix);
+	    }
+            else if (current_num_elmts + n > max_off_proc_elmts)
+            {
+               max_off_proc_elmts += 3*n;
+               off_proc_i = hypre_TReAlloc(off_proc_i,int,2*max_off_proc_elmts);
+               off_proc_j = hypre_TReAlloc(off_proc_j,int,max_off_proc_elmts);
+               off_proc_data = hypre_TReAlloc(off_proc_data,double,
+				max_off_proc_elmts);
+	       hypre_AuxParCSRMatrixMaxOffProcElmtsAdd(aux_matrix)
+   	    		= max_off_proc_elmts;
+	       hypre_AuxParCSRMatrixOffProcIAdd(aux_matrix) = off_proc_i;
+	       hypre_AuxParCSRMatrixOffProcJAdd(aux_matrix) = off_proc_j;
+	       hypre_AuxParCSRMatrixOffProcDataAdd(aux_matrix) = off_proc_data;
+	    }
+            off_proc_i[off_proc_i_indx++] = row; 
+            off_proc_i[off_proc_i_indx++] = n; 
+	    for (i=0; i < n; i++)
+	    {
+	       off_proc_j[current_num_elmts] = cols[indx];
+	       off_proc_data[current_num_elmts++] = values[indx++];
+	    }
+	    hypre_AuxParCSRMatrixOffProcIIndxAdd(aux_matrix) = off_proc_i_indx; 
+	    hypre_AuxParCSRMatrixCurrentNumElmtsAdd(aux_matrix)
+   	    	= current_num_elmts; 
+         }
       }
    }
    return ierr;
@@ -1172,6 +1310,42 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    int *aux_offd_j;
    double temp; 
    int base = col_partitioning[0];
+   int off_proc_i_indx;
+   int max_off_proc_elmts;
+   int current_num_elmts;
+   int *off_proc_i;
+   int *off_proc_j;
+   double *off_proc_data;
+   int offd_proc_elmts;
+
+   off_proc_i_indx = hypre_AuxParCSRMatrixOffProcIIndxSet(aux_matrix);
+   MPI_Allreduce(&off_proc_i_indx,&offd_proc_elmts,1,MPI_INT, MPI_SUM,comm);
+   if (offd_proc_elmts)
+   {
+       max_off_proc_elmts=hypre_AuxParCSRMatrixMaxOffProcElmtsSet(aux_matrix);
+       current_num_elmts=hypre_AuxParCSRMatrixCurrentNumElmtsSet(aux_matrix);
+       off_proc_i=hypre_AuxParCSRMatrixOffProcISet(aux_matrix);
+       off_proc_j=hypre_AuxParCSRMatrixOffProcJSet(aux_matrix);
+       off_proc_data=hypre_AuxParCSRMatrixOffProcDataSet(aux_matrix);
+       hypre_IJMatrixAssembleOffProcValsParCSR(matrix,off_proc_i_indx,
+		max_off_proc_elmts, current_num_elmts, off_proc_i,
+		off_proc_j, off_proc_data, 0);
+   }
+
+   off_proc_i_indx = hypre_AuxParCSRMatrixOffProcIIndxAdd(aux_matrix);
+   MPI_Allreduce(&off_proc_i_indx,&offd_proc_elmts,1,MPI_INT,
+		MPI_SUM,comm);
+   if (offd_proc_elmts)
+   {
+       max_off_proc_elmts=hypre_AuxParCSRMatrixMaxOffProcElmtsAdd(aux_matrix);
+       current_num_elmts=hypre_AuxParCSRMatrixCurrentNumElmtsAdd(aux_matrix);
+       off_proc_i=hypre_AuxParCSRMatrixOffProcIAdd(aux_matrix);
+       off_proc_j=hypre_AuxParCSRMatrixOffProcJAdd(aux_matrix);
+       off_proc_data=hypre_AuxParCSRMatrixOffProcDataAdd(aux_matrix);
+       hypre_IJMatrixAssembleOffProcValsParCSR(matrix,off_proc_i_indx,
+		max_off_proc_elmts, current_num_elmts, off_proc_i,
+		off_proc_j, off_proc_data, 1);
+   }
 
    if (hypre_IJMatrixAssembleFlag(matrix) == 0)
    {
@@ -1350,3 +1524,314 @@ hypre_IJMatrixDestroyParCSR(hypre_IJMatrix *matrix)
    ierr += hypre_AuxParCSRMatrixDestroy(hypre_IJMatrixTranslator(matrix));
    return ierr;
 }
+
+
+int
+hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix, 
+   					 int off_proc_i_indx,
+   					 int max_off_proc_elmts,
+   					 int current_num_elmts,
+   					 int *off_proc_i,
+   					 int *off_proc_j,
+   					 double *off_proc_data,
+   					 int job)
+{
+   int ierr = 0;
+   MPI_Comm comm = hypre_IJMatrixComm(matrix);
+   MPI_Request *requests;
+   MPI_Status *status;
+   int i, ii, j, j2, jj, n, row;
+   int iii, iid, indx, ip;
+   int proc_id, num_procs, my_id;
+   int num_sends, num_sends3;
+   int num_recvs;
+   int num_requests;
+   int vec_start, vec_len;
+   int *send_procs;
+   int *chunks;
+   int *send_i;
+   int *send_map_starts;
+   int *dbl_send_map_starts;
+   int *recv_procs;
+   int *recv_chunks;
+   int *recv_i;
+   int *recv_vec_starts;
+   int *dbl_recv_vec_starts;
+   int *info;
+   int *int_buffer;
+   int *proc_id_mem;
+   int *partitioning;
+   int *displs;
+   int *recv_buf;
+   double *send_data;
+   double *recv_data;
+
+   MPI_Comm_size(comm,&num_procs);
+   MPI_Comm_rank(comm, &my_id);
+   partitioning = hypre_IJMatrixRowPartitioning(matrix);
+
+   info = hypre_CTAlloc(int,num_procs);  
+   chunks = hypre_CTAlloc(int,num_procs);  
+   proc_id_mem = hypre_CTAlloc(int,off_proc_i_indx/2);
+   j=0;
+   for (i=0; i < off_proc_i_indx; i++)
+   {
+      row = off_proc_i[i++]; 
+      n = off_proc_i[i];
+      proc_id = hypre_FindProc(partitioning,row,num_procs);
+      proc_id_mem[j++] = proc_id; 
+      info[proc_id] += n;
+      chunks[proc_id]++;
+   }
+
+   /* determine send_procs and amount of data to be sent */   
+   num_sends = 0;
+   for (i=0; i < num_procs; i++)
+   {
+      if (info[i])
+      {
+         num_sends++;
+      }
+   }
+   send_procs =  hypre_CTAlloc(int,num_sends);
+   send_map_starts =  hypre_CTAlloc(int,num_sends+1);
+   dbl_send_map_starts =  hypre_CTAlloc(int,num_sends+1);
+   num_sends3 = 3*num_sends;
+   int_buffer =  hypre_CTAlloc(int,3*num_sends);
+   j = 0;
+   j2 = 0;
+   send_map_starts[0] = 0;
+   dbl_send_map_starts[0] = 0;
+   for (i=0; i < num_procs; i++)
+   {
+      if (info[i])
+      {
+         send_procs[j++] = i;
+         send_map_starts[j] = send_map_starts[j-1]+2*chunks[i]+info[i];
+         dbl_send_map_starts[j] = dbl_send_map_starts[j-1]+info[i];
+         int_buffer[j2++] = i;
+	 int_buffer[j2++] = chunks[i];
+	 int_buffer[j2++] = info[i];
+      }
+   }
+
+   hypre_TFree(chunks);
+
+   MPI_Allgather(&num_sends3,1,MPI_INT,info,1,MPI_INT,comm);
+
+   displs = hypre_CTAlloc(int, num_procs+1);
+   displs[0] = 0;
+   for (i=1; i < num_procs+1; i++)
+        displs[i] = displs[i-1]+info[i-1];
+   recv_buf = hypre_CTAlloc(int, displs[num_procs]);
+
+   MPI_Allgatherv(int_buffer,num_sends3,MPI_INT,recv_buf,info,displs,
+			MPI_INT,comm);
+
+   hypre_TFree(int_buffer);
+   hypre_TFree(info);
+
+   /* determine recv procs and amount of data to be received */
+   num_recvs = 0;
+   for (j=0; j < displs[num_procs]; j+=3)
+   {
+      if (recv_buf[j] == my_id)
+	 num_recvs++;
+   }
+
+   recv_procs = hypre_CTAlloc(int,num_recvs);
+   recv_chunks = hypre_CTAlloc(int,num_recvs);
+   recv_vec_starts = hypre_CTAlloc(int,num_recvs+1);
+   dbl_recv_vec_starts = hypre_CTAlloc(int,num_recvs+1);
+
+   j2 = 0;
+   recv_vec_starts[0] = 0;
+   dbl_recv_vec_starts[0] = 0;
+   for (i=0; i < num_procs; i++)
+   {
+      for (j=displs[i]; j < displs[i+1]; j+=3)
+      {
+         if (recv_buf[j] == my_id)
+         {
+	    recv_procs[j2] = i;
+	    recv_chunks[j2++] = recv_buf[j+1];
+	    recv_vec_starts[j2] = recv_vec_starts[j2-1]+2*recv_buf[j+1]
+			+recv_buf[j+2];
+	    dbl_recv_vec_starts[j2] = dbl_recv_vec_starts[j2-1]+recv_buf[j+2];
+         }
+         if (j2 == num_recvs) break;
+      }
+   }
+   hypre_TFree(recv_buf);
+   hypre_TFree(displs);
+
+   /* set up data to be sent to send procs */
+   /* send_i contains for each send proc : row no., no. of elmts and column
+      indices, send_data contains corresponding values */
+      
+   send_i = hypre_CTAlloc(int,send_map_starts[num_sends]);
+   send_data = hypre_CTAlloc(double,dbl_send_map_starts[num_sends]);
+   recv_i = hypre_CTAlloc(int,recv_vec_starts[num_recvs]);
+   recv_data = hypre_CTAlloc(double,dbl_recv_vec_starts[num_recvs]);
+    
+   j=0;
+   jj=0;
+   for (i=0; i < off_proc_i_indx; i++)
+   {
+      row = off_proc_i[i++]; 
+      n = off_proc_i[i];
+      proc_id = proc_id_mem[i/2];
+      indx = hypre_BinarySearch(send_procs,proc_id,num_sends);
+      iii = send_map_starts[indx];
+      iid = dbl_send_map_starts[indx];
+      send_i[iii++] = row;
+      send_i[iii++] = n;
+      for (ii = 0; ii < n; ii++)
+      {
+          send_i[iii++] = off_proc_j[jj];
+          send_data[iid++] = off_proc_data[jj++];
+      }
+      send_map_starts[indx] = iii;
+      dbl_send_map_starts[indx] = iid;
+   }
+
+   hypre_TFree(proc_id_mem);
+
+   for (i=num_sends; i > 0; i--)
+   {
+      send_map_starts[i] = send_map_starts[i-1];
+      dbl_send_map_starts[i] = dbl_send_map_starts[i-1];
+   }
+   send_map_starts[0] = 0;
+   dbl_send_map_starts[0] = 0;
+
+   num_requests = num_recvs+num_sends;
+
+   requests = hypre_CTAlloc(MPI_Request, num_requests);
+   status = hypre_CTAlloc(MPI_Status, num_requests);
+
+   j=0; 
+   for (i=0; i < num_recvs; i++)
+   {
+       vec_start = recv_vec_starts[i];
+       vec_len = recv_vec_starts[i+1] - vec_start;
+       ip = recv_procs[i];
+       MPI_Irecv(&recv_i[vec_start], vec_len, MPI_INT, ip, 0, comm, 
+			&requests[j++]);
+   }
+
+   for (i=0; i < num_sends; i++)
+   {
+       vec_start = send_map_starts[i];
+       vec_len = send_map_starts[i+1] - vec_start;
+       ip = send_procs[i];
+       MPI_Isend(&send_i[vec_start], vec_len, MPI_INT, ip, 0, comm, 
+			&requests[j++]);
+   }
+  
+   if (num_requests)
+   {
+      MPI_Waitall(num_requests, requests, status);
+   }
+
+   j=0;
+   for (i=0; i < num_recvs; i++)
+   {
+       vec_start = dbl_recv_vec_starts[i];
+       vec_len = dbl_recv_vec_starts[i+1] - vec_start;
+       ip = recv_procs[i];
+       MPI_Irecv(&recv_data[vec_start], vec_len, MPI_DOUBLE, ip, 0, comm, 
+			&requests[j++]);
+   }
+
+   for (i=0; i < num_sends; i++)
+   {
+       vec_start = dbl_send_map_starts[i];
+       vec_len = dbl_send_map_starts[i+1] - vec_start;
+       ip = send_procs[i];
+       MPI_Isend(&send_data[vec_start], vec_len, MPI_DOUBLE, ip, 0, comm, 
+			&requests[j++]);
+   }
+  
+   if (num_requests)
+   {
+      MPI_Waitall(num_requests, requests, status);
+      hypre_TFree(requests);
+      hypre_TFree(status);
+   }
+
+   hypre_TFree(send_i);
+   hypre_TFree(send_data);
+   hypre_TFree(send_procs);
+   hypre_TFree(send_map_starts);
+   hypre_TFree(dbl_send_map_starts);
+   hypre_TFree(recv_procs);
+   hypre_TFree(recv_vec_starts);
+   hypre_TFree(dbl_recv_vec_starts);
+
+   if (job == 0)
+   {
+      j = 0;
+      j2 = 0;
+      for (i=0; i < num_recvs; i++)
+      {
+         for (ii=0; ii < recv_chunks[i]; ii++)
+         {
+ 	    hypre_IJMatrixSetValuesParCSR(matrix,1,&recv_i[j+1],&recv_i[j],
+		&recv_i[j+2],&recv_data[j2]);
+	    j2 += recv_i[j+1]; 
+	    j += recv_i[j+1]+2; 
+         }
+      }
+   }
+   else
+   {
+      j = 0;
+      j2 = 0;
+      for (i=0; i < num_recvs; i++)
+      {
+         for (ii=0; ii < recv_chunks[i]; ii++)
+         {
+ 	    hypre_IJMatrixAddToValuesParCSR(matrix,1,&recv_i[j+1],&recv_i[j],
+		&recv_i[j+2],&recv_data[j2]);
+	    j2 += recv_i[j+1]; 
+	    j += recv_i[j+1]+2; 
+         }
+      }
+   }
+
+   hypre_TFree(recv_chunks);
+   hypre_TFree(recv_i);
+   hypre_TFree(recv_data);
+
+   return ierr;
+}
+
+
+int hypre_FindProc(int *list, int value, int list_length)
+{
+   int low, high, m;
+   int not_found = 1;
+
+   low = 0;
+   high = list_length;
+   if (value >= list[high] || value < list[low])
+      return -1;
+   else
+   {
+      while (low+1 < high)
+      {
+         m = (low + high) / 2;
+         if (value < list[m])
+         {
+            high = m;
+         }
+         else if (value >= list[m])
+         {
+            low = m;
+         }
+      }
+      return low;
+   }
+}
+ 

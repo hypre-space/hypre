@@ -54,6 +54,18 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
    info[2] = jlower;
    info[3] = jupper;
 
+   if (ilower > iupper)
+   {
+      ierr = -11;
+      printf("Warning! ilower larger than iupper!\n");
+   }
+
+   if (jlower > jupper)
+   {
+      ierr = -12;
+      printf("Warning! jlower larger than jupper!\n");
+   }
+
    /* Generate row- and column-partitioning through information exchange
       across all processors, check whether the matrix is square, and
       if the partitionings match. i.e. no overlaps or gaps,
@@ -549,6 +561,43 @@ HYPRE_IJMatrixSetDiagOffdSizes( HYPRE_IJMatrix matrix,
    }
 
    return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixSetMaxOffProcElmts
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJMatrixSetMaxOffProcElmts( HYPRE_IJMatrix matrix, 
+				  int max_off_proc_elmts_set,
+				  int max_off_proc_elmts_add)
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixSetMaxOffProcElmts\n");
+      exit(1);
+   }
+
+   /* if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
+      return( hypre_IJMatrixSetMaxOffProcElmtsPETSc( ijmatrix , 
+			max_off_proc_elmts_set, max_off_proc_elmts_add ) );
+   else if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_ISIS )
+      return( hypre_IJMatrixSetMaxOffProcElmtsISIS( ijmatrix , 
+			max_off_proc_elmts_set, max_off_proc_elmts_add ) );
+   else */
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      return( hypre_IJMatrixSetMaxOffProcElmtsParCSR( ijmatrix , 
+			max_off_proc_elmts_set, max_off_proc_elmts_add ) );
+   else
+   {
+      printf("Unrecognized object type -- HYPRE_IJMatrixSetMaxOffProcElmts\n");
+      exit(1);
+   }
+
+   return -99;
 }
 
 /*--------------------------------------------------------------------------

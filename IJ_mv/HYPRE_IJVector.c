@@ -72,8 +72,9 @@ int HYPRE_IJVectorCreate( MPI_Comm comm,
 
    hypre_IJVectorComm(vec)         = comm;
    hypre_IJVectorPartitioning(vec) = partitioning;
-   hypre_IJVectorObject(vec)       = NULL;
    hypre_IJVectorObjectType(vec)   = HYPRE_UNITIALIZED;
+   hypre_IJVectorObject(vec)       = NULL;
+   hypre_IJVectorTranslator(vec)   = NULL;
 
    *vector = (HYPRE_IJVector) vec;
   
@@ -110,9 +111,14 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
    else */
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
-
+   {
       ierr = hypre_IJVectorDestroyPar(vec) ;
-
+      if (hypre_IJVectorTranslator(vec))
+      {
+         ierr = hypre_AuxParVectorDestroy((hypre_AuxParVector *)
+		(hypre_IJVectorTranslator(vec)));
+      }
+   }
    else if ( hypre_IJVectorObjectType(vec) != -1 )
    {
       printf("Unrecognized object type -- HYPRE_IJVectorDestroy\n");
@@ -314,6 +320,45 @@ HYPRE_IJVectorGetValues( HYPRE_IJVector  vector,
    else */ if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
 
       return( hypre_IJVectorGetValuesPar(vec, nvalues, indices, values) );
+
+   else
+   {
+      printf("Unrecognized object type -- HYPRE_IJVectorGetValues\n");
+      exit(1);
+   }
+
+   return -99;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorSetMaxOffProcElmts
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJVectorSetMaxOffProcElmts( HYPRE_IJVector vector, 
+				  int max_off_proc_elmts_set,
+				  int max_off_proc_elmts_add)
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+     printf("Variable vec is NULL -- HYPRE_IJVectorSetObjectType\n");
+     exit(1);
+   } 
+
+   /* if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
+
+      return( hypre_IJVectorSetMaxOffProcElmtsPETSc(vec, 
+		max_off_proc_elmts_set, max_off_proc_elmts_add);
+
+   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
+      return( hypre_IJVectorSetMaxOffProcElmtsISIS(vec, 
+		max_off_proc_elmts_set, max_off_proc_elmts_add);
+
+   else */ if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+      return( hypre_IJVectorSetMaxOffProcElmtsPar(vec, 
+		max_off_proc_elmts_set, max_off_proc_elmts_add));
 
    else
    {
