@@ -911,9 +911,8 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
 		    marker[ind2[j]] = npat;
 		    if (npat >= pattsize)
 		    {
-			free(patt);
 			pattsize = npat + 1000;
-			patt = (int *) malloc(pattsize*sizeof(int));
+			patt = (int *) realloc(patt, pattsize*sizeof(int));
 		    }
 		    patt[npat++] = ind2[j];
 		}
