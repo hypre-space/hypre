@@ -19,11 +19,11 @@
 static int mem_size = 0;
 
 /*--------------------------------------------------------------------------
- * zzz_MAlloc
+ * hypre_MAlloc
  *--------------------------------------------------------------------------*/
 
 char *
-zzz_MAlloc( int size )
+hypre_MAlloc( int size )
 {
    char *ptr;
 
@@ -36,11 +36,11 @@ zzz_MAlloc( int size )
 }
 
 /*--------------------------------------------------------------------------
- * zzz_CAlloc
+ * hypre_CAlloc
  *--------------------------------------------------------------------------*/
 
 char *
-zzz_CAlloc( int count,
+hypre_CAlloc( int count,
             int elt_size )
 {
    char *ptr;
@@ -60,11 +60,11 @@ zzz_CAlloc( int count,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_ReAlloc
+ * hypre_ReAlloc
  *--------------------------------------------------------------------------*/
 
 char *
-zzz_ReAlloc( char *ptr,
+hypre_ReAlloc( char *ptr,
              int   size )
 {
    ptr = realloc(ptr, size);
@@ -73,11 +73,11 @@ zzz_ReAlloc( char *ptr,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_Free
+ * hypre_Free
  *--------------------------------------------------------------------------*/
 
 void
-zzz_Free( char *ptr )
+hypre_Free( char *ptr )
 {
    if (ptr)
    {
@@ -86,11 +86,11 @@ zzz_Free( char *ptr )
 }
 
 /*--------------------------------------------------------------------------
- * zzz_MAllocCheck
+ * hypre_MAllocCheck
  *--------------------------------------------------------------------------*/
 
 char *
-zzz_MAllocCheck( int   size,
+hypre_MAllocCheck( int   size,
                  char *file,
                  int   line )
 {
@@ -106,7 +106,7 @@ zzz_MAllocCheck( int   size,
 	 printf("Error: out of memory in %s at line %d\n", file, line);
       }
 
-      if (size > ZZZ_MEMORY_CHECK_SIZE)
+      if (size > HYPRE_MEMORY_CHECK_SIZE)
       {
 	 printf("In %s at line %d, memory alloc = %d, total = %d\n",
                 file, line, size, mem_size);
@@ -122,11 +122,11 @@ zzz_MAllocCheck( int   size,
 
 
 /*--------------------------------------------------------------------------
- * zzz_CAllocCheck
+ * hypre_CAllocCheck
  *--------------------------------------------------------------------------*/
 
 char *
-zzz_CAllocCheck( int   count,
+hypre_CAllocCheck( int   count,
                  int   elt_size,
                  char *file,
                  int   line    )
@@ -145,7 +145,7 @@ zzz_CAllocCheck( int   count,
 	 printf("Error: out of memory in %s at line %d\n", file, line);
       }
 
-      if (size > ZZZ_MEMORY_CHECK_SIZE)
+      if (size > HYPRE_MEMORY_CHECK_SIZE)
       {
 	 printf("In %s at line %d, memory alloc = %d, total = %d\n",
                 file, line, size, mem_size);
@@ -160,11 +160,11 @@ zzz_CAllocCheck( int   count,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_ReAllocCheck
+ * hypre_ReAllocCheck
  *--------------------------------------------------------------------------*/
 
 char *
-zzz_ReAllocCheck( char *ptr,
+hypre_ReAllocCheck( char *ptr,
                   int   size,
                   char *file,
                   int   line )
@@ -176,7 +176,7 @@ zzz_ReAllocCheck( char *ptr,
       printf("Error: memory problem in %s at line %d\n", file, line);
    }
 
-   if (size > ZZZ_MEMORY_CHECK_SIZE)
+   if (size > HYPRE_MEMORY_CHECK_SIZE)
    {
       printf("In %s at line %d, memory alloc = %d, total = %d\n",
              file, line, size, mem_size);

@@ -8,26 +8,26 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Header info for the zzz_StructGrid structures
+ * Header info for the hypre_StructGrid structures
  *
  *****************************************************************************/
 
-#ifndef zzz_STRUCT_GRID_HEADER
-#define zzz_STRUCT_GRID_HEADER
+#ifndef hypre_STRUCT_GRID_HEADER
+#define hypre_STRUCT_GRID_HEADER
 
 
 /*--------------------------------------------------------------------------
- * zzz_StructGrid:
+ * hypre_StructGrid:
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
    MPI_Comm      *comm;
 
-   zzz_BoxArray  *all_boxes;    /* Array of all grid boxes in the grid */
+   hypre_BoxArray  *all_boxes;    /* Array of all grid boxes in the grid */
    int           *processes;    /* Processes corresponding to grid boxes */
 
-   zzz_BoxArray  *boxes;        /* Array of grid boxes in this process */
+   hypre_BoxArray  *boxes;        /* Array of grid boxes in this process */
    int           *box_ranks;    /* Ranks of grid boxes in this process */
 
    int            dim;          /* Number of grid dimensions */
@@ -35,36 +35,36 @@ typedef struct
    int            global_size;  /* Total number of grid points */
    int            local_size;   /* Total number of points locally */
 
-} zzz_StructGrid;
+} hypre_StructGrid;
 
 /*--------------------------------------------------------------------------
- * Accessor macros: zzz_StructGrid
+ * Accessor macros: hypre_StructGrid
  *--------------------------------------------------------------------------*/
 
-#define zzz_StructGridComm(grid)          ((grid) -> comm)
-#define zzz_StructGridAllBoxes(grid)      ((grid) -> all_boxes)
-#define zzz_StructGridProcesses(grid)     ((grid) -> processes)
-#define zzz_StructGridBoxes(grid)         ((grid) -> boxes)
-#define zzz_StructGridBoxRanks(grid)      ((grid) -> box_ranks)
-#define zzz_StructGridDim(grid)           ((grid) -> dim)
-#define zzz_StructGridGlobalSize(grid)    ((grid) -> global_size)
-#define zzz_StructGridLocalSize(grid)     ((grid) -> local_size)
+#define hypre_StructGridComm(grid)          ((grid) -> comm)
+#define hypre_StructGridAllBoxes(grid)      ((grid) -> all_boxes)
+#define hypre_StructGridProcesses(grid)     ((grid) -> processes)
+#define hypre_StructGridBoxes(grid)         ((grid) -> boxes)
+#define hypre_StructGridBoxRanks(grid)      ((grid) -> box_ranks)
+#define hypre_StructGridDim(grid)           ((grid) -> dim)
+#define hypre_StructGridGlobalSize(grid)    ((grid) -> global_size)
+#define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)
 
-#define zzz_StructGridProcess(grid, i) \
-(zzz_StructGridProcesses(grid)[i])
-#define zzz_StructGridBox(grid, i) \
-(zzz_BoxArrayBox(zzz_StructGridBoxes(grid), i))
-#define zzz_StructGridNumBoxes(grid) \
-(zzz_BoxArraySize(zzz_StructGridBoxes(grid)))
-#define zzz_StructGridBoxRank(grid, i) \
-(zzz_StructGridBoxRanks(grid)[i])
+#define hypre_StructGridProcess(grid, i) \
+(hypre_StructGridProcesses(grid)[i])
+#define hypre_StructGridBox(grid, i) \
+(hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))
+#define hypre_StructGridNumBoxes(grid) \
+(hypre_BoxArraySize(hypre_StructGridBoxes(grid)))
+#define hypre_StructGridBoxRank(grid, i) \
+(hypre_StructGridBoxRanks(grid)[i])
 
 /*--------------------------------------------------------------------------
  * Looping macros:
  *--------------------------------------------------------------------------*/
  
-#define zzz_ForStructGridBoxI(i, grid) \
-zzz_ForBoxI(i, zzz_StructGridBoxes(grid))
+#define hypre_ForStructGridBoxI(i, grid) \
+hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
 
 
 #endif

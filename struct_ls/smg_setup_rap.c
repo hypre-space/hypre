@@ -15,30 +15,30 @@
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
- * zzz_SMGNewRAPOp
+ * hypre_SMGNewRAPOp
  *
  *   Wrapper for 2 and 3d NewRAPOp routines which set up new coarse
  *   grid structures.
  *--------------------------------------------------------------------------*/
  
-zzz_StructMatrix *
-zzz_SMGNewRAPOp( zzz_StructMatrix *R,
-                 zzz_StructMatrix *A,
-                 zzz_StructMatrix *PT )
+hypre_StructMatrix *
+hypre_SMGNewRAPOp( hypre_StructMatrix *R,
+                 hypre_StructMatrix *A,
+                 hypre_StructMatrix *PT )
 {
-   zzz_StructMatrix    *RAP;
-   zzz_StructStencil   *stencil;
+   hypre_StructMatrix    *RAP;
+   hypre_StructStencil   *stencil;
 
-   stencil = zzz_StructMatrixStencil(A);
+   stencil = hypre_StructMatrixStencil(A);
 
-   switch (zzz_StructStencilDim(stencil)) 
+   switch (hypre_StructStencilDim(stencil)) 
    {
       case 2:
-      RAP = zzz_SMG2NewRAPOp(R ,A, PT);
+      RAP = hypre_SMG2NewRAPOp(R ,A, PT);
       break;
     
       case 3:
-      RAP = zzz_SMG3NewRAPOp(R ,A, PT);
+      RAP = hypre_SMG3NewRAPOp(R ,A, PT);
       break;
    } 
 
@@ -46,27 +46,27 @@ zzz_SMGNewRAPOp( zzz_StructMatrix *R,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGSetupRAPOp
+ * hypre_SMGSetupRAPOp
  *
  * Wrapper for 2 and 3d, symmetric and non-symmetric routines to calculate
  * entries in RAP. Incomplete error handling at the moment. 
  *--------------------------------------------------------------------------*/
  
 int
-zzz_SMGSetupRAPOp( zzz_StructMatrix *R,
-                   zzz_StructMatrix *A,
-                   zzz_StructMatrix *PT,
-                   zzz_StructMatrix *Ac,
-                   zzz_Index         cindex,
-                   zzz_Index         cstride )
+hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
+                   hypre_StructMatrix *A,
+                   hypre_StructMatrix *PT,
+                   hypre_StructMatrix *Ac,
+                   hypre_Index         cindex,
+                   hypre_Index         cstride )
 {
    int ierr;
  
-   zzz_StructStencil   *stencil;
+   hypre_StructStencil   *stencil;
 
-   stencil = zzz_StructMatrixStencil(A);
+   stencil = hypre_StructMatrixStencil(A);
 
-   switch (zzz_StructStencilDim(stencil)) 
+   switch (hypre_StructStencilDim(stencil)) 
    {
 
       case 2:
@@ -74,13 +74,13 @@ zzz_SMGSetupRAPOp( zzz_StructMatrix *R,
 /*--------------------------------------------------------------------------
  *    Set lower triangular (+ diagonal) coefficients
  *--------------------------------------------------------------------------*/
-      ierr = zzz_SMG2BuildRAPSym(A, PT, R, Ac, cindex, cstride);
+      ierr = hypre_SMG2BuildRAPSym(A, PT, R, Ac, cindex, cstride);
 
 /*--------------------------------------------------------------------------
  *    For non-symmetric A, set upper triangular coefficients as well
  *--------------------------------------------------------------------------*/
-      if(!zzz_StructMatrixSymmetric(A))
-         ierr += zzz_SMG2BuildRAPNoSym(A, PT, R, Ac, cindex, cstride);
+      if(!hypre_StructMatrixSymmetric(A))
+         ierr += hypre_SMG2BuildRAPNoSym(A, PT, R, Ac, cindex, cstride);
 
       break;
 
@@ -89,19 +89,19 @@ zzz_SMGSetupRAPOp( zzz_StructMatrix *R,
 /*--------------------------------------------------------------------------
  *    Set lower triangular (+ diagonal) coefficients
  *--------------------------------------------------------------------------*/
-      ierr = zzz_SMG3BuildRAPSym(A, PT, R, Ac, cindex, cstride);
+      ierr = hypre_SMG3BuildRAPSym(A, PT, R, Ac, cindex, cstride);
 
 /*--------------------------------------------------------------------------
  *    For non-symmetric A, set upper triangular coefficients as well
  *--------------------------------------------------------------------------*/
-      if(!zzz_StructMatrixSymmetric(A))
-         ierr += zzz_SMG3BuildRAPNoSym(A, PT, R, Ac, cindex, cstride);
+      if(!hypre_StructMatrixSymmetric(A))
+         ierr += hypre_SMG3BuildRAPNoSym(A, PT, R, Ac, cindex, cstride);
 
       break;
 
    }
 
-   zzz_AssembleStructMatrix(Ac);
+   hypre_AssembleStructMatrix(Ac);
 
    return ierr;
 }

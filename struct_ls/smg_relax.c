@@ -14,7 +14,7 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxData data structure
+ * hypre_SMGRelaxData data structure
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -39,21 +39,21 @@ typedef struct
    int                  *pre_space_ranks;
    int                  *reg_space_ranks;
 
-   zzz_Index             base_index;
-   zzz_Index             base_stride;
-   zzz_SBoxArray        *base_sbox_array;
+   hypre_Index             base_index;
+   hypre_Index             base_stride;
+   hypre_SBoxArray        *base_sbox_array;
 
    int                   stencil_dim;
                        
-   zzz_StructMatrix     *A;
-   zzz_StructVector     *b;
-   zzz_StructVector     *x;
+   hypre_StructMatrix     *A;
+   hypre_StructVector     *b;
+   hypre_StructVector     *x;
 
-   zzz_StructVector     *temp_vec;
+   hypre_StructVector     *temp_vec;
    int                   temp_vec_allocated;
-   zzz_StructMatrix     *A_sol;       /* Coefficients of A that make up
+   hypre_StructMatrix     *A_sol;       /* Coefficients of A that make up
                                          the (sol)ve part of the relaxation */
-   zzz_StructMatrix     *A_rem;       /* Coefficients of A (rem)aining:
+   hypre_StructMatrix     *A_rem;       /* Coefficients of A (rem)aining:
                                          A_rem = A - A_sol                  */
    void                **residual_data;  /* Array of size `num_spaces' */
    void                **solve_data;     /* Array of size `num_spaces' */
@@ -65,25 +65,25 @@ typedef struct
    int                   num_pre_relax;
    int                   num_post_relax;
 
-} zzz_SMGRelaxData;
+} hypre_SMGRelaxData;
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxInitialize
+ * hypre_SMGRelaxInitialize
  *--------------------------------------------------------------------------*/
 
 void *
-zzz_SMGRelaxInitialize( MPI_Comm *comm )
+hypre_SMGRelaxInitialize( MPI_Comm *comm )
 {
-   zzz_SMGRelaxData *relax_data;
+   hypre_SMGRelaxData *relax_data;
 
-   relax_data = zzz_CTAlloc(zzz_SMGRelaxData, 1);
+   relax_data = hypre_CTAlloc(hypre_SMGRelaxData, 1);
 
    (relax_data -> setup_temp_vec) = 1;
    (relax_data -> setup_a_rem)    = 1;
    (relax_data -> setup_a_sol)    = 1;
    (relax_data -> comm)           = comm;
    (relax_data -> base_sbox_array)= NULL;
-   (relax_data -> time_index)     = zzz_InitializeTiming("SMGRelax");
+   (relax_data -> time_index)     = hypre_InitializeTiming("SMGRelax");
 
    /* set defaults */
    (relax_data -> memory_use)         = 0;
@@ -91,17 +91,17 @@ zzz_SMGRelaxInitialize( MPI_Comm *comm )
    (relax_data -> max_iter)           = 1000;
    (relax_data -> zero_guess)         = 0;
    (relax_data -> num_spaces)         = 1;
-   (relax_data -> space_indices)      = zzz_TAlloc(int, 1);
-   (relax_data -> space_strides)      = zzz_TAlloc(int, 1);
+   (relax_data -> space_indices)      = hypre_TAlloc(int, 1);
+   (relax_data -> space_strides)      = hypre_TAlloc(int, 1);
    (relax_data -> space_indices[0])   = 0;
    (relax_data -> space_strides[0])   = 1;
    (relax_data -> num_pre_spaces)     = 0;
    (relax_data -> num_reg_spaces)     = 1;
    (relax_data -> pre_space_ranks)    = NULL;
-   (relax_data -> reg_space_ranks)    = zzz_TAlloc(int, 1);
+   (relax_data -> reg_space_ranks)    = hypre_TAlloc(int, 1);
    (relax_data -> reg_space_ranks[0]) = 0;
-   zzz_SetIndex((relax_data -> base_index), 0, 0, 0);
-   zzz_SetIndex((relax_data -> base_stride), 1, 1, 1);
+   hypre_SetIndex((relax_data -> base_index), 0, 0, 0);
+   hypre_SetIndex((relax_data -> base_stride), 1, 1, 1);
    (relax_data -> temp_vec)           = NULL;
    (relax_data -> temp_vec_allocated) = 1;
 
@@ -112,18 +112,18 @@ zzz_SMGRelaxInitialize( MPI_Comm *comm )
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxFreeTempVec
+ * hypre_SMGRelaxFreeTempVec
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxFreeTempVec( void *relax_vdata )
+hypre_SMGRelaxFreeTempVec( void *relax_vdata )
 {
-   zzz_SMGRelaxData     *relax_data = relax_vdata;
+   hypre_SMGRelaxData     *relax_data = relax_vdata;
    int                   ierr;
 
    if (relax_data -> temp_vec_allocated)
    {
-      zzz_FreeStructVector(relax_data -> temp_vec);
+      hypre_FreeStructVector(relax_data -> temp_vec);
    }
    (relax_data -> setup_temp_vec) = 1;
 
@@ -131,25 +131,25 @@ zzz_SMGRelaxFreeTempVec( void *relax_vdata )
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxFreeARem
+ * hypre_SMGRelaxFreeARem
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxFreeARem( void *relax_vdata )
+hypre_SMGRelaxFreeARem( void *relax_vdata )
 {
-   zzz_SMGRelaxData     *relax_data = relax_vdata;
+   hypre_SMGRelaxData     *relax_data = relax_vdata;
    int                   i;
    int                   ierr;
 
    if (relax_data -> A_rem)
    {
-      zzz_FreeStructMatrixMask(relax_data -> A_rem);
+      hypre_FreeStructMatrixMask(relax_data -> A_rem);
       (relax_data -> A_rem) = NULL;
       for (i = 0; i < (relax_data -> num_spaces); i++)
       {
-         zzz_SMGResidualFinalize(relax_data -> residual_data[i]);
+         hypre_SMGResidualFinalize(relax_data -> residual_data[i]);
       }
-      zzz_TFree(relax_data -> residual_data);
+      hypre_TFree(relax_data -> residual_data);
    }
    (relax_data -> setup_a_rem) = 1;
 
@@ -157,13 +157,13 @@ zzz_SMGRelaxFreeARem( void *relax_vdata )
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxFreeASol
+ * hypre_SMGRelaxFreeASol
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxFreeASol( void *relax_vdata )
+hypre_SMGRelaxFreeASol( void *relax_vdata )
 {
-   zzz_SMGRelaxData     *relax_data = relax_vdata;
+   hypre_SMGRelaxData     *relax_data = relax_vdata;
    int                   stencil_dim;
    int                   i;
    int                   ierr;
@@ -171,16 +171,16 @@ zzz_SMGRelaxFreeASol( void *relax_vdata )
    if (relax_data -> A_sol)
    {
       stencil_dim = (relax_data -> stencil_dim);
-      zzz_FreeStructMatrixMask(relax_data -> A_sol);
+      hypre_FreeStructMatrixMask(relax_data -> A_sol);
       (relax_data -> A_sol) = NULL;
       for (i = 0; i < (relax_data -> num_spaces); i++)
       {
          if (stencil_dim > 2)
-            zzz_SMGFinalize(relax_data -> solve_data[i]);
+            hypre_SMGFinalize(relax_data -> solve_data[i]);
          else
-            zzz_CyclicReductionFinalize(relax_data -> solve_data[i]);
+            hypre_CyclicReductionFinalize(relax_data -> solve_data[i]);
       }
-      zzz_TFree(relax_data -> solve_data);
+      hypre_TFree(relax_data -> solve_data);
    }
    (relax_data -> setup_a_sol) = 1;
 
@@ -188,55 +188,55 @@ zzz_SMGRelaxFreeASol( void *relax_vdata )
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxFinalize
+ * hypre_SMGRelaxFinalize
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxFinalize( void *relax_vdata )
+hypre_SMGRelaxFinalize( void *relax_vdata )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
    int               ierr;
 
    if (relax_data)
    {
-      zzz_TFree(relax_data -> space_indices);
-      zzz_TFree(relax_data -> space_strides);
-      zzz_TFree(relax_data -> pre_space_ranks);
-      zzz_TFree(relax_data -> reg_space_ranks);
-      zzz_FreeSBoxArray(relax_data -> base_sbox_array);
+      hypre_TFree(relax_data -> space_indices);
+      hypre_TFree(relax_data -> space_strides);
+      hypre_TFree(relax_data -> pre_space_ranks);
+      hypre_TFree(relax_data -> reg_space_ranks);
+      hypre_FreeSBoxArray(relax_data -> base_sbox_array);
 
-      zzz_SMGRelaxFreeTempVec(relax_vdata);
-      zzz_SMGRelaxFreeARem(relax_vdata);
-      zzz_SMGRelaxFreeASol(relax_vdata);
+      hypre_SMGRelaxFreeTempVec(relax_vdata);
+      hypre_SMGRelaxFreeARem(relax_vdata);
+      hypre_SMGRelaxFreeASol(relax_vdata);
 
-      zzz_FinalizeTiming(relax_data -> time_index);
-      zzz_TFree(relax_data);
+      hypre_FinalizeTiming(relax_data -> time_index);
+      hypre_TFree(relax_data);
    }
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelax
+ * hypre_SMGRelax
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelax( void             *relax_vdata,
-              zzz_StructMatrix *A,
-              zzz_StructVector *b,
-              zzz_StructVector *x               )
+hypre_SMGRelax( void             *relax_vdata,
+              hypre_StructMatrix *A,
+              hypre_StructVector *b,
+              hypre_StructVector *x               )
 {
-   zzz_SMGRelaxData   *relax_data = relax_vdata;
+   hypre_SMGRelaxData   *relax_data = relax_vdata;
 
    int                 zero_guess;
    int                 stencil_dim;
-   zzz_StructVector   *temp_vec;
-   zzz_StructMatrix   *A_sol;
-   zzz_StructMatrix   *A_rem;
+   hypre_StructVector   *temp_vec;
+   hypre_StructMatrix   *A_sol;
+   hypre_StructMatrix   *A_rem;
    void              **residual_data;
    void              **solve_data;
 
-   zzz_SBoxArray      *base_sbox_a;
+   hypre_SBoxArray      *base_sbox_a;
    double              zero = 0.0;
 
    int                 max_iter;
@@ -254,7 +254,7 @@ zzz_SMGRelax( void             *relax_vdata,
     * relaxation.
     *----------------------------------------------------------*/
 
-   zzz_BeginTiming(relax_data -> time_index);
+   hypre_BeginTiming(relax_data -> time_index);
 
    /*----------------------------------------------------------
     * Set up the solver
@@ -266,7 +266,7 @@ zzz_SMGRelax( void             *relax_vdata,
       (relax_data -> setup_a_sol) = 2;
    }
 
-   zzz_SMGRelaxSetup(relax_vdata, A, b, x);
+   hypre_SMGRelaxSetup(relax_vdata, A, b, x);
 
    zero_guess      = (relax_data -> zero_guess);
    stencil_dim     = (relax_data -> stencil_dim);
@@ -284,7 +284,7 @@ zzz_SMGRelax( void             *relax_vdata,
    if (zero_guess)
    {
       base_sbox_a = (relax_data -> base_sbox_array);
-      ierr = zzz_SMGSetStructVectorConstantValues(x, zero, base_sbox_a); 
+      ierr = hypre_SMGSetStructVectorConstantValues(x, zero, base_sbox_a); 
    }
 
    /*----------------------------------------------------------
@@ -316,12 +316,12 @@ zzz_SMGRelax( void             *relax_vdata,
          {
             is = space_ranks[j];
 
-            zzz_SMGResidual(residual_data[is], A_rem, x, b, temp_vec);
+            hypre_SMGResidual(residual_data[is], A_rem, x, b, temp_vec);
 
             if (stencil_dim > 2)
-               zzz_SMGSolve(solve_data[is], A_sol, temp_vec, x);
+               hypre_SMGSolve(solve_data[is], A_sol, temp_vec, x);
             else
-               zzz_CyclicReduction(solve_data[is], A_sol, temp_vec, x);
+               hypre_CyclicReduction(solve_data[is], A_sol, temp_vec, x);
          }
 
          (relax_data -> num_iterations) = (i + 1);
@@ -334,30 +334,30 @@ zzz_SMGRelax( void             *relax_vdata,
 
    if ((stencil_dim - 1) <= (relax_data -> memory_use))
    {
-      zzz_SMGRelaxFreeASol(relax_vdata);
+      hypre_SMGRelaxFreeASol(relax_vdata);
    }
 
-   zzz_EndTiming(relax_data -> time_index);
+   hypre_EndTiming(relax_data -> time_index);
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetup
+ * hypre_SMGRelaxSetup
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetup( void             *relax_vdata,
-                   zzz_StructMatrix *A,
-                   zzz_StructVector *b,
-                   zzz_StructVector *x           )
+hypre_SMGRelaxSetup( void             *relax_vdata,
+                   hypre_StructMatrix *A,
+                   hypre_StructVector *b,
+                   hypre_StructVector *x           )
 {
-   zzz_SMGRelaxData     *relax_data = relax_vdata;
+   hypre_SMGRelaxData     *relax_data = relax_vdata;
    int                   stencil_dim;
    int                   a_sol_test;
    int                   ierr;
 
-   stencil_dim = zzz_StructStencilDim(zzz_StructMatrixStencil(A));
+   stencil_dim = hypre_StructStencilDim(hypre_StructMatrixStencil(A));
    (relax_data -> stencil_dim) = stencil_dim;
    (relax_data -> A)           = A;
    (relax_data -> b)           = b;
@@ -386,22 +386,22 @@ zzz_SMGRelaxSetup( void             *relax_vdata,
 
    if ((relax_data -> setup_temp_vec) > 0)
    {
-      ierr = zzz_SMGRelaxSetupTempVec(relax_vdata, A, b, x);
+      ierr = hypre_SMGRelaxSetupTempVec(relax_vdata, A, b, x);
    }
 
    if ((relax_data -> setup_a_rem) > 0)
    {
-      ierr = zzz_SMGRelaxSetupARem(relax_vdata, A, b, x);
+      ierr = hypre_SMGRelaxSetupARem(relax_vdata, A, b, x);
    }
 
    if ((relax_data -> setup_a_sol) > a_sol_test)
    {
-      ierr = zzz_SMGRelaxSetupASol(relax_vdata, A, b, x);
+      ierr = hypre_SMGRelaxSetupASol(relax_vdata, A, b, x);
    }
 
    if ((relax_data -> base_sbox_array) == NULL)
    {
-      ierr = zzz_SMGRelaxSetupBaseSBoxArray(relax_vdata, A, b, x);
+      ierr = hypre_SMGRelaxSetupBaseSBoxArray(relax_vdata, A, b, x);
    }
    
 
@@ -409,17 +409,17 @@ zzz_SMGRelaxSetup( void             *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetupTempVec
+ * hypre_SMGRelaxSetupTempVec
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetupTempVec( void             *relax_vdata,
-                          zzz_StructMatrix *A,
-                          zzz_StructVector *b,
-                          zzz_StructVector *x           )
+hypre_SMGRelaxSetupTempVec( void             *relax_vdata,
+                          hypre_StructMatrix *A,
+                          hypre_StructVector *b,
+                          hypre_StructVector *x           )
 {
-   zzz_SMGRelaxData     *relax_data = relax_vdata;
-   zzz_StructVector     *temp_vec      = (relax_data -> temp_vec);
+   hypre_SMGRelaxData     *relax_data = relax_vdata;
+   hypre_StructVector     *temp_vec      = (relax_data -> temp_vec);
    int                   ierr;
 
    /*----------------------------------------------------------
@@ -428,11 +428,11 @@ zzz_SMGRelaxSetupTempVec( void             *relax_vdata,
 
    if (relax_data -> temp_vec_allocated)
    {
-      temp_vec = zzz_NewStructVector(zzz_StructVectorComm(b),
-                                     zzz_StructVectorGrid(b));
-      zzz_SetStructVectorNumGhost(temp_vec, zzz_StructVectorNumGhost(b));
-      zzz_InitializeStructVector(temp_vec);
-      zzz_AssembleStructVector(temp_vec);
+      temp_vec = hypre_NewStructVector(hypre_StructVectorComm(b),
+                                     hypre_StructVectorGrid(b));
+      hypre_SetStructVectorNumGhost(temp_vec, hypre_StructVectorNumGhost(b));
+      hypre_InitializeStructVector(temp_vec);
+      hypre_AssembleStructVector(temp_vec);
       (relax_data -> temp_vec)           = temp_vec;
       (relax_data -> temp_vec_allocated) = 1;
    }
@@ -442,32 +442,32 @@ zzz_SMGRelaxSetupTempVec( void             *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetupARem
+ * hypre_SMGRelaxSetupARem
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetupARem( void             *relax_vdata,
-                       zzz_StructMatrix *A,
-                       zzz_StructVector *b,
-                       zzz_StructVector *x           )
+hypre_SMGRelaxSetupARem( void             *relax_vdata,
+                       hypre_StructMatrix *A,
+                       hypre_StructVector *b,
+                       hypre_StructVector *x           )
 {
-   zzz_SMGRelaxData     *relax_data = relax_vdata;
+   hypre_SMGRelaxData     *relax_data = relax_vdata;
 
    int                   num_spaces    = (relax_data -> num_spaces);
    int                  *space_indices = (relax_data -> space_indices);
    int                  *space_strides = (relax_data -> space_strides);
-   zzz_StructVector     *temp_vec      = (relax_data -> temp_vec);
+   hypre_StructVector     *temp_vec      = (relax_data -> temp_vec);
 
-   zzz_StructStencil    *stencil       = zzz_StructMatrixStencil(A);     
-   zzz_Index            *stencil_shape = zzz_StructStencilShape(stencil);
-   int                   stencil_size  = zzz_StructStencilSize(stencil); 
-   int                   stencil_dim   = zzz_StructStencilDim(stencil);
+   hypre_StructStencil    *stencil       = hypre_StructMatrixStencil(A);     
+   hypre_Index            *stencil_shape = hypre_StructStencilShape(stencil);
+   int                   stencil_size  = hypre_StructStencilSize(stencil); 
+   int                   stencil_dim   = hypre_StructStencilDim(stencil);
                        
-   zzz_StructMatrix     *A_rem;
+   hypre_StructMatrix     *A_rem;
    void                **residual_data;
 
-   zzz_Index             base_index;
-   zzz_Index             base_stride;
+   hypre_Index             base_index;
+   hypre_Index             base_stride;
 
    int                   num_stencil_indices;
    int                  *stencil_indices;
@@ -480,38 +480,38 @@ zzz_SMGRelaxSetupARem( void             *relax_vdata,
     * Free up old data before putting new data into structure
     *----------------------------------------------------------*/
 
-   zzz_SMGRelaxFreeARem(relax_vdata);
+   hypre_SMGRelaxFreeARem(relax_vdata);
 
    /*----------------------------------------------------------
     * Set up data
     *----------------------------------------------------------*/
 
-   zzz_CopyIndex((relax_data -> base_index),  base_index);
-   zzz_CopyIndex((relax_data -> base_stride), base_stride);
+   hypre_CopyIndex((relax_data -> base_index),  base_index);
+   hypre_CopyIndex((relax_data -> base_stride), base_stride);
 
-   stencil_indices = zzz_TAlloc(int, stencil_size);
+   stencil_indices = hypre_TAlloc(int, stencil_size);
    num_stencil_indices = 0;
    for (i = 0; i < stencil_size; i++)
    {
-      if (zzz_IndexD(stencil_shape[i], (stencil_dim - 1)) != 0)
+      if (hypre_IndexD(stencil_shape[i], (stencil_dim - 1)) != 0)
       {
          stencil_indices[num_stencil_indices] = i;
          num_stencil_indices++;
       }
    }
-   A_rem = zzz_NewStructMatrixMask(A, num_stencil_indices, stencil_indices);
-   zzz_TFree(stencil_indices);
+   A_rem = hypre_NewStructMatrixMask(A, num_stencil_indices, stencil_indices);
+   hypre_TFree(stencil_indices);
 
    /* Set up residual_data */
-   residual_data = zzz_TAlloc(void *, num_spaces);
+   residual_data = hypre_TAlloc(void *, num_spaces);
    for (i = 0; i < num_spaces; i++)
    {
-      zzz_IndexD(base_index,  (stencil_dim - 1)) = space_indices[i];
-      zzz_IndexD(base_stride, (stencil_dim - 1)) = space_strides[i];
+      hypre_IndexD(base_index,  (stencil_dim - 1)) = space_indices[i];
+      hypre_IndexD(base_stride, (stencil_dim - 1)) = space_strides[i];
 
-      residual_data[i] = zzz_SMGResidualInitialize();
-      zzz_SMGResidualSetBase(residual_data[i], base_index, base_stride);
-      zzz_SMGResidualSetup(residual_data[i], A_rem, x, b, temp_vec);
+      residual_data[i] = hypre_SMGResidualInitialize();
+      hypre_SMGResidualSetBase(residual_data[i], base_index, base_stride);
+      hypre_SMGResidualSetup(residual_data[i], A_rem, x, b, temp_vec);
    }
 
    (relax_data -> A_rem)         = A_rem;
@@ -523,35 +523,35 @@ zzz_SMGRelaxSetupARem( void             *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetupASol
+ * hypre_SMGRelaxSetupASol
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetupASol( void             *relax_vdata,
-                       zzz_StructMatrix *A,
-                       zzz_StructVector *b,
-                       zzz_StructVector *x           )
+hypre_SMGRelaxSetupASol( void             *relax_vdata,
+                       hypre_StructMatrix *A,
+                       hypre_StructVector *b,
+                       hypre_StructVector *x           )
 {
-   zzz_SMGRelaxData     *relax_data = relax_vdata;
+   hypre_SMGRelaxData     *relax_data = relax_vdata;
 
    int                   num_spaces    = (relax_data -> num_spaces);
    int                  *space_indices = (relax_data -> space_indices);
    int                  *space_strides = (relax_data -> space_strides);
-   zzz_StructVector     *temp_vec      = (relax_data -> temp_vec);
+   hypre_StructVector     *temp_vec      = (relax_data -> temp_vec);
 
    int                   num_pre_relax   = (relax_data -> num_pre_relax);
    int                   num_post_relax  = (relax_data -> num_post_relax);
 
-   zzz_StructStencil    *stencil       = zzz_StructMatrixStencil(A);     
-   zzz_Index            *stencil_shape = zzz_StructStencilShape(stencil);
-   int                   stencil_size  = zzz_StructStencilSize(stencil); 
-   int                   stencil_dim   = zzz_StructStencilDim(stencil);
+   hypre_StructStencil    *stencil       = hypre_StructMatrixStencil(A);     
+   hypre_Index            *stencil_shape = hypre_StructStencilShape(stencil);
+   int                   stencil_size  = hypre_StructStencilSize(stencil); 
+   int                   stencil_dim   = hypre_StructStencilDim(stencil);
                        
-   zzz_StructMatrix     *A_sol;
+   hypre_StructMatrix     *A_sol;
    void                **solve_data;
 
-   zzz_Index             base_index;
-   zzz_Index             base_stride;
+   hypre_Index             base_index;
+   hypre_Index             base_stride;
 
    int                   num_stencil_indices;
    int                  *stencil_indices;
@@ -564,52 +564,52 @@ zzz_SMGRelaxSetupASol( void             *relax_vdata,
     * Free up old data before putting new data into structure
     *----------------------------------------------------------*/
 
-   zzz_SMGRelaxFreeASol(relax_vdata);
+   hypre_SMGRelaxFreeASol(relax_vdata);
 
    /*----------------------------------------------------------
     * Set up data
     *----------------------------------------------------------*/
 
-   zzz_CopyIndex((relax_data -> base_index),  base_index);
-   zzz_CopyIndex((relax_data -> base_stride), base_stride);
+   hypre_CopyIndex((relax_data -> base_index),  base_index);
+   hypre_CopyIndex((relax_data -> base_stride), base_stride);
 
-   stencil_indices = zzz_TAlloc(int, stencil_size);
+   stencil_indices = hypre_TAlloc(int, stencil_size);
    num_stencil_indices = 0;
    for (i = 0; i < stencil_size; i++)
    {
-      if (zzz_IndexD(stencil_shape[i], (stencil_dim - 1)) == 0)
+      if (hypre_IndexD(stencil_shape[i], (stencil_dim - 1)) == 0)
       {
          stencil_indices[num_stencil_indices] = i;
          num_stencil_indices++;
       }
    }
-   A_sol = zzz_NewStructMatrixMask(A, num_stencil_indices, stencil_indices);
-   zzz_StructStencilDim(zzz_StructMatrixStencil(A_sol)) = stencil_dim - 1;
-   zzz_TFree(stencil_indices);
+   A_sol = hypre_NewStructMatrixMask(A, num_stencil_indices, stencil_indices);
+   hypre_StructStencilDim(hypre_StructMatrixStencil(A_sol)) = stencil_dim - 1;
+   hypre_TFree(stencil_indices);
 
    /* Set up solve_data */
-   solve_data    = zzz_TAlloc(void *, num_spaces);
+   solve_data    = hypre_TAlloc(void *, num_spaces);
    for (i = 0; i < num_spaces; i++)
    {
-      zzz_IndexD(base_index,  (stencil_dim - 1)) = space_indices[i];
-      zzz_IndexD(base_stride, (stencil_dim - 1)) = space_strides[i];
+      hypre_IndexD(base_index,  (stencil_dim - 1)) = space_indices[i];
+      hypre_IndexD(base_stride, (stencil_dim - 1)) = space_strides[i];
 
       if (stencil_dim > 2)
       {
-         solve_data[i] = zzz_SMGInitialize(relax_data -> comm);
-         zzz_SMGSetNumPreRelax( solve_data[i], num_pre_relax);
-         zzz_SMGSetNumPostRelax( solve_data[i], num_post_relax);
-         zzz_SMGSetBase(solve_data[i], base_index, base_stride);
-         zzz_SMGSetMemoryUse(solve_data[i], (relax_data -> memory_use));
-         zzz_SMGSetTol(solve_data[i], 0.0);
-         zzz_SMGSetMaxIter(solve_data[i], 1);
-         zzz_SMGSetup(solve_data[i], A_sol, temp_vec, x);
+         solve_data[i] = hypre_SMGInitialize(relax_data -> comm);
+         hypre_SMGSetNumPreRelax( solve_data[i], num_pre_relax);
+         hypre_SMGSetNumPostRelax( solve_data[i], num_post_relax);
+         hypre_SMGSetBase(solve_data[i], base_index, base_stride);
+         hypre_SMGSetMemoryUse(solve_data[i], (relax_data -> memory_use));
+         hypre_SMGSetTol(solve_data[i], 0.0);
+         hypre_SMGSetMaxIter(solve_data[i], 1);
+         hypre_SMGSetup(solve_data[i], A_sol, temp_vec, x);
       }
       else
       {
-         solve_data[i] = zzz_CyclicReductionInitialize(relax_data -> comm);
-         zzz_CyclicReductionSetBase(solve_data[i], base_index, base_stride);
-         zzz_CyclicReductionSetup(solve_data[i], A_sol, temp_vec, x);
+         solve_data[i] = hypre_CyclicReductionInitialize(relax_data -> comm);
+         hypre_CyclicReductionSetBase(solve_data[i], base_index, base_stride);
+         hypre_CyclicReductionSetup(solve_data[i], A_sol, temp_vec, x);
       }
    }
 
@@ -622,17 +622,17 @@ zzz_SMGRelaxSetupASol( void             *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetTempVec
+ * hypre_SMGRelaxSetTempVec
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetTempVec( void             *relax_vdata,
-                        zzz_StructVector *temp_vec    )
+hypre_SMGRelaxSetTempVec( void             *relax_vdata,
+                        hypre_StructVector *temp_vec    )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
    int               ierr = 0;
 
-   zzz_SMGRelaxFreeTempVec(relax_vdata);
+   hypre_SMGRelaxFreeTempVec(relax_vdata);
    (relax_data -> temp_vec)           = temp_vec;
    (relax_data -> temp_vec_allocated) = 0;
 
@@ -644,14 +644,14 @@ zzz_SMGRelaxSetTempVec( void             *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetMemoryUse
+ * hypre_SMGRelaxSetMemoryUse
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetMemoryUse( void *relax_vdata,
+hypre_SMGRelaxSetMemoryUse( void *relax_vdata,
                           int   memory_use  )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
    int               ierr = 0;
 
    (relax_data -> memory_use) = memory_use;
@@ -660,14 +660,14 @@ zzz_SMGRelaxSetMemoryUse( void *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetTol
+ * hypre_SMGRelaxSetTol
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetTol( void   *relax_vdata,
+hypre_SMGRelaxSetTol( void   *relax_vdata,
                     double  tol             )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
    int               ierr = 0;
 
    (relax_data -> tol) = tol;
@@ -676,14 +676,14 @@ zzz_SMGRelaxSetTol( void   *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetMaxIter
+ * hypre_SMGRelaxSetMaxIter
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetMaxIter( void *relax_vdata,
+hypre_SMGRelaxSetMaxIter( void *relax_vdata,
                         int   max_iter        )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
    int               ierr = 0;
 
    (relax_data -> max_iter) = max_iter;
@@ -692,13 +692,13 @@ zzz_SMGRelaxSetMaxIter( void *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetNonZeroGuess
+ * hypre_SMGRelaxSetNonZeroGuess
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetNonZeroGuess( void *relax_vdata )
+hypre_SMGRelaxSetNonZeroGuess( void *relax_vdata )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
    int               ierr = 0;
 
    (relax_data -> zero_guess) = 0;
@@ -707,13 +707,13 @@ zzz_SMGRelaxSetNonZeroGuess( void *relax_vdata )
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetZeroGuess
+ * hypre_SMGRelaxSetZeroGuess
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetZeroGuess( void *relax_vdata )
+hypre_SMGRelaxSetZeroGuess( void *relax_vdata )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
    int               ierr = 0;
 
    (relax_data -> zero_guess) = 1;
@@ -722,29 +722,29 @@ zzz_SMGRelaxSetZeroGuess( void *relax_vdata )
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetNumSpaces
+ * hypre_SMGRelaxSetNumSpaces
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetNumSpaces( void *relax_vdata,
+hypre_SMGRelaxSetNumSpaces( void *relax_vdata,
                           int   num_spaces      )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
    int               i;
    int               ierr = 0;
 
    (relax_data -> num_spaces) = num_spaces;
 
-   zzz_TFree(relax_data -> space_indices);
-   zzz_TFree(relax_data -> space_strides);
-   zzz_TFree(relax_data -> pre_space_ranks);
-   zzz_TFree(relax_data -> reg_space_ranks);
-   (relax_data -> space_indices)   = zzz_TAlloc(int, num_spaces);
-   (relax_data -> space_strides)   = zzz_TAlloc(int, num_spaces);
+   hypre_TFree(relax_data -> space_indices);
+   hypre_TFree(relax_data -> space_strides);
+   hypre_TFree(relax_data -> pre_space_ranks);
+   hypre_TFree(relax_data -> reg_space_ranks);
+   (relax_data -> space_indices)   = hypre_TAlloc(int, num_spaces);
+   (relax_data -> space_strides)   = hypre_TAlloc(int, num_spaces);
    (relax_data -> num_pre_spaces)  = 0;
    (relax_data -> num_reg_spaces)  = num_spaces;
    (relax_data -> pre_space_ranks) = NULL;
-   (relax_data -> reg_space_ranks) = zzz_TAlloc(int, num_spaces);
+   (relax_data -> reg_space_ranks) = hypre_TAlloc(int, num_spaces);
 
    for (i = 0; i < num_spaces; i++)
    {
@@ -761,21 +761,21 @@ zzz_SMGRelaxSetNumSpaces( void *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetNumPreSpaces
+ * hypre_SMGRelaxSetNumPreSpaces
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetNumPreSpaces( void *relax_vdata,
+hypre_SMGRelaxSetNumPreSpaces( void *relax_vdata,
                              int   num_pre_spaces )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
    int               i;
    int               ierr = 0;
 
    (relax_data -> num_pre_spaces) = num_pre_spaces;
 
-   zzz_TFree(relax_data -> pre_space_ranks);
-   (relax_data -> pre_space_ranks) = zzz_TAlloc(int, num_pre_spaces);
+   hypre_TFree(relax_data -> pre_space_ranks);
+   (relax_data -> pre_space_ranks) = hypre_TAlloc(int, num_pre_spaces);
 
    for (i = 0; i < num_pre_spaces; i++)
       (relax_data -> pre_space_ranks[i]) = 0;
@@ -784,21 +784,21 @@ zzz_SMGRelaxSetNumPreSpaces( void *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetNumRegSpaces
+ * hypre_SMGRelaxSetNumRegSpaces
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetNumRegSpaces( void *relax_vdata,
+hypre_SMGRelaxSetNumRegSpaces( void *relax_vdata,
                              int   num_reg_spaces )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
    int               i;
    int               ierr = 0;
 
    (relax_data -> num_reg_spaces) = num_reg_spaces;
 
-   zzz_TFree(relax_data -> reg_space_ranks);
-   (relax_data -> reg_space_ranks) = zzz_TAlloc(int, num_reg_spaces);
+   hypre_TFree(relax_data -> reg_space_ranks);
+   (relax_data -> reg_space_ranks) = hypre_TAlloc(int, num_reg_spaces);
 
    for (i = 0; i < num_reg_spaces; i++)
       (relax_data -> reg_space_ranks[i]) = 0;
@@ -807,16 +807,16 @@ zzz_SMGRelaxSetNumRegSpaces( void *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetSpace
+ * hypre_SMGRelaxSetSpace
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetSpace( void *relax_vdata,
+hypre_SMGRelaxSetSpace( void *relax_vdata,
                       int   i,
                       int   space_index,
                       int   space_stride    )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
    int               ierr = 0;
 
    (relax_data -> space_indices[i]) = space_index;
@@ -830,15 +830,15 @@ zzz_SMGRelaxSetSpace( void *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetRegSpaceRank
+ * hypre_SMGRelaxSetRegSpaceRank
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetRegSpaceRank( void *relax_vdata,
+hypre_SMGRelaxSetRegSpaceRank( void *relax_vdata,
                              int   i,
                              int   reg_space_rank )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
    int               ierr = 0;
 
    (relax_data -> reg_space_ranks[i]) = reg_space_rank;
@@ -847,15 +847,15 @@ zzz_SMGRelaxSetRegSpaceRank( void *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetPreSpaceRank
+ * hypre_SMGRelaxSetPreSpaceRank
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetPreSpaceRank( void *relax_vdata,
+hypre_SMGRelaxSetPreSpaceRank( void *relax_vdata,
                              int   i,
                              int   pre_space_rank  )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
    int               ierr = 0;
 
    (relax_data -> pre_space_ranks[i]) = pre_space_rank;
@@ -864,29 +864,29 @@ zzz_SMGRelaxSetPreSpaceRank( void *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetBase
+ * hypre_SMGRelaxSetBase
  *--------------------------------------------------------------------------*/
  
 int
-zzz_SMGRelaxSetBase( void      *relax_vdata,
-                     zzz_Index  base_index,
-                     zzz_Index  base_stride )
+hypre_SMGRelaxSetBase( void      *relax_vdata,
+                     hypre_Index  base_index,
+                     hypre_Index  base_stride )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
    int               d;
    int               ierr = 0;
  
    for (d = 0; d < 3; d++)
    {
-      zzz_IndexD((relax_data -> base_index),  d) =
-         zzz_IndexD(base_index,  d);
-      zzz_IndexD((relax_data -> base_stride), d) =
-         zzz_IndexD(base_stride, d);
+      hypre_IndexD((relax_data -> base_index),  d) =
+         hypre_IndexD(base_index,  d);
+      hypre_IndexD((relax_data -> base_stride), d) =
+         hypre_IndexD(base_stride, d);
    }
  
    if ((relax_data -> base_sbox_array) != NULL)
    {
-      zzz_FreeSBoxArray((relax_data -> base_sbox_array));
+      hypre_FreeSBoxArray((relax_data -> base_sbox_array));
       (relax_data -> base_sbox_array) = NULL;
    }
 
@@ -898,15 +898,15 @@ zzz_SMGRelaxSetBase( void      *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetNumPreRelax
+ * hypre_SMGRelaxSetNumPreRelax
  * Note that we require at least 1 pre-relax sweep.
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetNumPreRelax( void *relax_vdata,
+hypre_SMGRelaxSetNumPreRelax( void *relax_vdata,
                             int   num_pre_relax )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
    int               ierr = 0;
 
    (relax_data -> num_pre_relax) = max(num_pre_relax,1);
@@ -915,14 +915,14 @@ zzz_SMGRelaxSetNumPreRelax( void *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetNumPostRelax
+ * hypre_SMGRelaxSetNumPostRelax
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetNumPostRelax( void *relax_vdata,
+hypre_SMGRelaxSetNumPostRelax( void *relax_vdata,
                              int   num_post_relax )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
    int          ierr = 0;
 
    (relax_data -> num_post_relax) = num_post_relax;
@@ -931,18 +931,18 @@ zzz_SMGRelaxSetNumPostRelax( void *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetNewMatrixStencil
+ * hypre_SMGRelaxSetNewMatrixStencil
  *--------------------------------------------------------------------------*/
  
 int
-zzz_SMGRelaxSetNewMatrixStencil( void              *relax_vdata,
-                                 zzz_StructStencil *diff_stencil )
+hypre_SMGRelaxSetNewMatrixStencil( void              *relax_vdata,
+                                 hypre_StructStencil *diff_stencil )
 {
-   zzz_SMGRelaxData *relax_data = relax_vdata;
+   hypre_SMGRelaxData *relax_data = relax_vdata;
 
-   zzz_Index        *stencil_shape = zzz_StructStencilShape(diff_stencil);
-   int               stencil_size  = zzz_StructStencilSize(diff_stencil); 
-   int               stencil_dim   = zzz_StructStencilDim(diff_stencil);
+   hypre_Index        *stencil_shape = hypre_StructStencilShape(diff_stencil);
+   int               stencil_size  = hypre_StructStencilSize(diff_stencil); 
+   int               stencil_dim   = hypre_StructStencilDim(diff_stencil);
                        
    int               i;
 
@@ -950,7 +950,7 @@ zzz_SMGRelaxSetNewMatrixStencil( void              *relax_vdata,
 
    for (i = 0; i < stencil_size; i++)
    {
-      if (zzz_IndexD(stencil_shape[i], (stencil_dim - 1)) != 0)
+      if (hypre_IndexD(stencil_shape[i], (stencil_dim - 1)) != 0)
       {
          (relax_data -> setup_a_rem) = 1;
       }
@@ -965,27 +965,27 @@ zzz_SMGRelaxSetNewMatrixStencil( void              *relax_vdata,
 
 
 /*--------------------------------------------------------------------------
- * zzz_SMGRelaxSetupBaseSBoxArray
+ * hypre_SMGRelaxSetupBaseSBoxArray
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRelaxSetupBaseSBoxArray( void             *relax_vdata,
-                                zzz_StructMatrix *A,
-                                zzz_StructVector *b,
-                                zzz_StructVector *x           )
+hypre_SMGRelaxSetupBaseSBoxArray( void             *relax_vdata,
+                                hypre_StructMatrix *A,
+                                hypre_StructVector *b,
+                                hypre_StructVector *x           )
 {
-   zzz_SMGRelaxData     *relax_data = relax_vdata;
+   hypre_SMGRelaxData     *relax_data = relax_vdata;
 
-   zzz_StructGrid       *grid;
-   zzz_BoxArray         *boxes;
-   zzz_SBoxArray        *sboxes;
+   hypre_StructGrid       *grid;
+   hypre_BoxArray         *boxes;
+   hypre_SBoxArray        *sboxes;
 
    int                   ierr;
 
-   grid  = zzz_StructVectorGrid(x);
-   boxes = zzz_StructGridBoxes(grid);
+   grid  = hypre_StructVectorGrid(x);
+   boxes = hypre_StructGridBoxes(grid);
 
-   sboxes = zzz_ProjectBoxArray( boxes, 
+   sboxes = hypre_ProjectBoxArray( boxes, 
                                  (relax_data -> base_index),
                                  (relax_data -> base_stride) );
 

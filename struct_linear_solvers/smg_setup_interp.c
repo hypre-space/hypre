@@ -15,18 +15,18 @@
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
- * zzz_SMGNewInterpOp
+ * hypre_SMGNewInterpOp
  *--------------------------------------------------------------------------*/
 
-zzz_StructMatrix *
-zzz_SMGNewInterpOp( zzz_StructMatrix *A,
-                    zzz_StructGrid   *cgrid,
+hypre_StructMatrix *
+hypre_SMGNewInterpOp( hypre_StructMatrix *A,
+                    hypre_StructGrid   *cgrid,
                     int               cdir  )
 {
-   zzz_StructMatrix   *PT;
+   hypre_StructMatrix   *PT;
 
-   zzz_StructStencil  *stencil;
-   zzz_Index          *stencil_shape;
+   hypre_StructStencil  *stencil;
+   hypre_Index          *stencil_shape;
    int                 stencil_size;
    int                 stencil_dim;
 
@@ -36,26 +36,26 @@ zzz_SMGNewInterpOp( zzz_StructMatrix *A,
 
    /* set up stencil */
    stencil_size = 2;
-   stencil_dim = zzz_StructStencilDim(zzz_StructMatrixStencil(A));
-   stencil_shape = zzz_CTAlloc(zzz_Index, stencil_size);
+   stencil_dim = hypre_StructStencilDim(hypre_StructMatrixStencil(A));
+   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
    for (i = 0; i < stencil_size; i++)
    {
-      zzz_SetIndex(stencil_shape[i], 0, 0, 0);
+      hypre_SetIndex(stencil_shape[i], 0, 0, 0);
    }
-   zzz_IndexD(stencil_shape[0], cdir) = -1;
-   zzz_IndexD(stencil_shape[1], cdir) =  1;
-   stencil = zzz_NewStructStencil(stencil_dim, stencil_size, stencil_shape);
+   hypre_IndexD(stencil_shape[0], cdir) = -1;
+   hypre_IndexD(stencil_shape[1], cdir) =  1;
+   stencil = hypre_NewStructStencil(stencil_dim, stencil_size, stencil_shape);
 
    /* set up matrix */
-   PT = zzz_NewStructMatrix(zzz_StructMatrixComm(A), cgrid, stencil);
-   zzz_SetStructMatrixNumGhost(PT, num_ghost);
-   zzz_InitializeStructMatrix(PT);
+   PT = hypre_NewStructMatrix(hypre_StructMatrixComm(A), cgrid, stencil);
+   hypre_SetStructMatrixNumGhost(PT, num_ghost);
+   hypre_InitializeStructMatrix(PT);
  
    return PT;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGSetupInterpOp
+ * hypre_SMGSetupInterpOp
  *
  *    This routine uses SMGRelax to set up the interpolation operator.
  *
@@ -74,67 +74,67 @@ zzz_SMGNewInterpOp( zzz_StructMatrix *A,
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGSetupInterpOp( void             *relax_data,
-                      zzz_StructMatrix *A,
-                      zzz_StructVector *b,
-                      zzz_StructVector *x,
-                      zzz_StructMatrix *PT,
+hypre_SMGSetupInterpOp( void             *relax_data,
+                      hypre_StructMatrix *A,
+                      hypre_StructVector *b,
+                      hypre_StructVector *x,
+                      hypre_StructMatrix *PT,
                       int               cdir,
-                      zzz_Index         cindex,
-                      zzz_Index         cstride,
-                      zzz_Index         findex,
-                      zzz_Index         fstride    )
+                      hypre_Index         cindex,
+                      hypre_Index         cstride,
+                      hypre_Index         findex,
+                      hypre_Index         fstride    )
 {
-   zzz_StructMatrix   *A_mask;
+   hypre_StructMatrix   *A_mask;
 
-   zzz_StructStencil  *A_stencil;
-   zzz_Index          *A_stencil_shape;
+   hypre_StructStencil  *A_stencil;
+   hypre_Index          *A_stencil_shape;
    int                 A_stencil_size;
-   zzz_StructStencil  *PT_stencil;
-   zzz_Index          *PT_stencil_shape;
+   hypre_StructStencil  *PT_stencil;
+   hypre_Index          *PT_stencil_shape;
    int                 PT_stencil_size;
 
    int                *stencil_indices;
    int                 num_stencil_indices;
 
-   zzz_StructGrid     *fgrid;
+   hypre_StructGrid     *fgrid;
 
-   zzz_StructStencil  *compute_pkg_stencil;
-   zzz_Index          *compute_pkg_stencil_shape;
+   hypre_StructStencil  *compute_pkg_stencil;
+   hypre_Index          *compute_pkg_stencil_shape;
    int                 compute_pkg_stencil_size = 1;
    int                 compute_pkg_stencil_dim = 1;
-   zzz_ComputePkg     *compute_pkg;
+   hypre_ComputePkg     *compute_pkg;
  
-   zzz_BoxArrayArray  *send_boxes;
-   zzz_BoxArrayArray  *recv_boxes;
+   hypre_BoxArrayArray  *send_boxes;
+   hypre_BoxArrayArray  *recv_boxes;
    int               **send_box_ranks;
    int               **recv_box_ranks;
-   zzz_BoxArrayArray  *indt_boxes;
-   zzz_BoxArrayArray  *dept_boxes;
+   hypre_BoxArrayArray  *indt_boxes;
+   hypre_BoxArrayArray  *dept_boxes;
                      
-   zzz_SBoxArrayArray *send_sboxes;
-   zzz_SBoxArrayArray *recv_sboxes;
-   zzz_SBoxArrayArray *indt_sboxes;
-   zzz_SBoxArrayArray *dept_sboxes;
+   hypre_SBoxArrayArray *send_sboxes;
+   hypre_SBoxArrayArray *recv_sboxes;
+   hypre_SBoxArrayArray *indt_sboxes;
+   hypre_SBoxArrayArray *dept_sboxes;
 
-   zzz_CommHandle     *comm_handle;
+   hypre_CommHandle     *comm_handle;
                      
-   zzz_SBoxArrayArray *compute_sbox_aa;
-   zzz_SBoxArray      *compute_sbox_a;
-   zzz_SBox           *compute_sbox;
+   hypre_SBoxArrayArray *compute_sbox_aa;
+   hypre_SBoxArray      *compute_sbox_a;
+   hypre_SBox           *compute_sbox;
                      
-   zzz_Box            *PT_data_box;
-   zzz_Box            *x_data_box;
+   hypre_Box            *PT_data_box;
+   hypre_Box            *x_data_box;
    double             *PTp;
    double             *xp;
    int                 PTi;
    int                 xi;
 
-   zzz_Index           loop_size;
-   zzz_Index           start;
-   zzz_Index           startc;
-   zzz_IndexRef        stride;
-   zzz_Index           stridec;
+   hypre_Index           loop_size;
+   hypre_Index           start;
+   hypre_Index           startc;
+   hypre_IndexRef        stride;
+   hypre_Index           stridec;
                       
    int                 si, sj, d;
    int                 compute_i, i, j;
@@ -146,26 +146,26 @@ zzz_SMGSetupInterpOp( void             *relax_data,
     * Initialize some things
     *--------------------------------------------------------*/
 
-   zzz_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex(stridec, 1, 1, 1);
 
-   fgrid = zzz_StructMatrixGrid(A);
+   fgrid = hypre_StructMatrixGrid(A);
    
-   A_stencil = zzz_StructMatrixStencil(A);
-   A_stencil_shape = zzz_StructStencilShape(A_stencil);
-   A_stencil_size  = zzz_StructStencilSize(A_stencil);
-   PT_stencil = zzz_StructMatrixStencil(PT);
-   PT_stencil_shape = zzz_StructStencilShape(PT_stencil);
-   PT_stencil_size  = zzz_StructStencilSize(PT_stencil);
+   A_stencil = hypre_StructMatrixStencil(A);
+   A_stencil_shape = hypre_StructStencilShape(A_stencil);
+   A_stencil_size  = hypre_StructStencilSize(A_stencil);
+   PT_stencil = hypre_StructMatrixStencil(PT);
+   PT_stencil_shape = hypre_StructStencilShape(PT_stencil);
+   PT_stencil_size  = hypre_StructStencilSize(PT_stencil);
 
    /* Set up relaxation parameters */
-   zzz_SMGRelaxSetMaxIter(relax_data, 1);
-   zzz_SMGRelaxSetNumPreSpaces(relax_data, 0);
-   zzz_SMGRelaxSetNumRegSpaces(relax_data, 1);
-   zzz_SMGRelaxSetRegSpaceRank(relax_data, 0, 1);
+   hypre_SMGRelaxSetMaxIter(relax_data, 1);
+   hypre_SMGRelaxSetNumPreSpaces(relax_data, 0);
+   hypre_SMGRelaxSetNumRegSpaces(relax_data, 1);
+   hypre_SMGRelaxSetRegSpaceRank(relax_data, 0, 1);
 
    compute_pkg_stencil_shape =
-      zzz_CTAlloc(zzz_Index, compute_pkg_stencil_size);
-   compute_pkg_stencil = zzz_NewStructStencil(compute_pkg_stencil_dim,
+      hypre_CTAlloc(hypre_Index, compute_pkg_stencil_size);
+   compute_pkg_stencil = hypre_NewStructStencil(compute_pkg_stencil_dim,
                                               compute_pkg_stencil_size,
                                               compute_pkg_stencil_shape);
 
@@ -178,37 +178,37 @@ zzz_SMGSetupInterpOp( void             *relax_data,
        * coefficient being computed (same direction for P^T).
        *-----------------------------------------------------*/
 
-      stencil_indices = zzz_TAlloc(int, A_stencil_size);
+      stencil_indices = hypre_TAlloc(int, A_stencil_size);
       num_stencil_indices = 0;
       for (sj = 0; sj < A_stencil_size; sj++)
       {
-         if (zzz_IndexD(A_stencil_shape[sj],  cdir) !=
-             zzz_IndexD(PT_stencil_shape[si], cdir)   )
+         if (hypre_IndexD(A_stencil_shape[sj],  cdir) !=
+             hypre_IndexD(PT_stencil_shape[si], cdir)   )
          {
             stencil_indices[num_stencil_indices] = sj;
             num_stencil_indices++;
          }
       }
       A_mask =
-         zzz_NewStructMatrixMask(A, num_stencil_indices, stencil_indices);
-      zzz_TFree(stencil_indices);
+         hypre_NewStructMatrixMask(A, num_stencil_indices, stencil_indices);
+      hypre_TFree(stencil_indices);
 
       /*-----------------------------------------------------
        * Do relaxation sweep to compute coefficients
        *-----------------------------------------------------*/
 
-      zzz_ClearStructVectorGhostValues(x);
-      zzz_SetStructVectorConstantValues(x, 1.0);
-      zzz_SetStructVectorConstantValues(b, 0.0);
-      zzz_SMGRelaxSetNewMatrixStencil(relax_data, PT_stencil);
-      zzz_SMGRelaxSetup(relax_data, A_mask, b, x);
-      zzz_SMGRelax(relax_data, A_mask, b, x);
+      hypre_ClearStructVectorGhostValues(x);
+      hypre_SetStructVectorConstantValues(x, 1.0);
+      hypre_SetStructVectorConstantValues(b, 0.0);
+      hypre_SMGRelaxSetNewMatrixStencil(relax_data, PT_stencil);
+      hypre_SMGRelaxSetup(relax_data, A_mask, b, x);
+      hypre_SMGRelax(relax_data, A_mask, b, x);
 
       /*-----------------------------------------------------
        * Free up A_mask matrix
        *-----------------------------------------------------*/
 
-      zzz_FreeStructMatrixMask(A_mask);
+      hypre_FreeStructMatrixMask(A_mask);
 
       /*-----------------------------------------------------
        * Set up compute package for communication of 
@@ -216,26 +216,26 @@ zzz_SMGSetupInterpOp( void             *relax_data,
        * boundaries.
        *-----------------------------------------------------*/
 
-      zzz_CopyIndex(PT_stencil_shape[si], compute_pkg_stencil_shape[0]);
-      zzz_GetComputeInfo(&send_boxes, &recv_boxes,
+      hypre_CopyIndex(PT_stencil_shape[si], compute_pkg_stencil_shape[0]);
+      hypre_GetComputeInfo(&send_boxes, &recv_boxes,
                          &send_box_ranks, &recv_box_ranks,
                          &indt_boxes, &dept_boxes,
                          fgrid, compute_pkg_stencil);
  
-      send_sboxes = zzz_ProjectBoxArrayArray(send_boxes, findex, fstride);
-      recv_sboxes = zzz_ProjectBoxArrayArray(recv_boxes, findex, fstride);
-      indt_sboxes = zzz_ProjectBoxArrayArray(indt_boxes, cindex, cstride);
-      dept_sboxes = zzz_ProjectBoxArrayArray(dept_boxes, cindex, cstride);
+      send_sboxes = hypre_ProjectBoxArrayArray(send_boxes, findex, fstride);
+      recv_sboxes = hypre_ProjectBoxArrayArray(recv_boxes, findex, fstride);
+      indt_sboxes = hypre_ProjectBoxArrayArray(indt_boxes, cindex, cstride);
+      dept_sboxes = hypre_ProjectBoxArrayArray(dept_boxes, cindex, cstride);
       compute_pkg =
-         zzz_NewComputePkg(send_sboxes, recv_sboxes,
+         hypre_NewComputePkg(send_sboxes, recv_sboxes,
                            send_box_ranks, recv_box_ranks,
                            indt_sboxes, dept_sboxes,
-                           fgrid, zzz_StructVectorDataSpace(x), 1);
+                           fgrid, hypre_StructVectorDataSpace(x), 1);
 
-      zzz_FreeBoxArrayArray(send_boxes);
-      zzz_FreeBoxArrayArray(recv_boxes);
-      zzz_FreeBoxArrayArray(indt_boxes);
-      zzz_FreeBoxArrayArray(dept_boxes);
+      hypre_FreeBoxArrayArray(send_boxes);
+      hypre_FreeBoxArrayArray(recv_boxes);
+      hypre_FreeBoxArrayArray(indt_boxes);
+      hypre_FreeBoxArrayArray(dept_boxes);
 
       /*-----------------------------------------------------
        * Copy coefficients from x into P^T
@@ -247,48 +247,48 @@ zzz_SMGSetupInterpOp( void             *relax_data,
          {
             case 0:
             {
-               xp = zzz_StructVectorData(x);
-               comm_handle = zzz_InitializeIndtComputations(compute_pkg, xp);
-               compute_sbox_aa = zzz_ComputePkgIndtSBoxes(compute_pkg);
+               xp = hypre_StructVectorData(x);
+               comm_handle = hypre_InitializeIndtComputations(compute_pkg, xp);
+               compute_sbox_aa = hypre_ComputePkgIndtSBoxes(compute_pkg);
             }
             break;
 
             case 1:
             {
-               zzz_FinalizeIndtComputations(comm_handle);
-               compute_sbox_aa = zzz_ComputePkgDeptSBoxes(compute_pkg);
+               hypre_FinalizeIndtComputations(comm_handle);
+               compute_sbox_aa = hypre_ComputePkgDeptSBoxes(compute_pkg);
             }
             break;
          }
 
-         zzz_ForSBoxArrayI(i, compute_sbox_aa)
+         hypre_ForSBoxArrayI(i, compute_sbox_aa)
          {
-            compute_sbox_a = zzz_SBoxArrayArraySBoxArray(compute_sbox_aa, i);
+            compute_sbox_a = hypre_SBoxArrayArraySBoxArray(compute_sbox_aa, i);
 
-            x_data_box  = zzz_BoxArrayBox(zzz_StructVectorDataSpace(x), i);
-            PT_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(PT), i);
+            x_data_box  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+            PT_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), i);
  
-            xp  = zzz_StructVectorBoxData(x, i);
-            PTp = zzz_StructMatrixBoxData(PT, i, si);
+            xp  = hypre_StructVectorBoxData(x, i);
+            PTp = hypre_StructMatrixBoxData(PT, i, si);
 
-            zzz_ForSBoxI(j, compute_sbox_a)
+            hypre_ForSBoxI(j, compute_sbox_a)
             {
-               compute_sbox = zzz_SBoxArraySBox(compute_sbox_a, j);
+               compute_sbox = hypre_SBoxArraySBox(compute_sbox_a, j);
 
-               zzz_CopyIndex(zzz_SBoxIMin(compute_sbox), start);
-               zzz_SMGMapFineToCoarse(start, startc, cindex, cstride);
+               hypre_CopyIndex(hypre_SBoxIMin(compute_sbox), start);
+               hypre_SMGMapFineToCoarse(start, startc, cindex, cstride);
 
                /* shift start index to appropriate F-point */
                for (d = 0; d < 3; d++)
                {
-                  zzz_IndexD(start, d) +=
-                     zzz_IndexD(PT_stencil_shape[si], d);
+                  hypre_IndexD(start, d) +=
+                     hypre_IndexD(PT_stencil_shape[si], d);
                }
 
-               stride = zzz_SBoxStride(compute_sbox);
+               stride = hypre_SBoxStride(compute_sbox);
  
-               zzz_GetSBoxSize(compute_sbox, loop_size);
-               zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
+               hypre_GetSBoxSize(compute_sbox, loop_size);
+               hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
                             x_data_box,  start,  stride,  xi,
                             PT_data_box, startc, stridec, PTi,
                             {
@@ -302,15 +302,15 @@ zzz_SMGSetupInterpOp( void             *relax_data,
        * Free up compute package info
        *-----------------------------------------------------*/
 
-      zzz_FreeComputePkg(compute_pkg);
+      hypre_FreeComputePkg(compute_pkg);
    }
 
    /* Tell SMGRelax that the stencil has changed */
-   zzz_SMGRelaxSetNewMatrixStencil(relax_data, PT_stencil);
+   hypre_SMGRelaxSetNewMatrixStencil(relax_data, PT_stencil);
 
-   zzz_FreeStructStencil(compute_pkg_stencil);
+   hypre_FreeStructStencil(compute_pkg_stencil);
 
-   zzz_AssembleStructMatrix(PT);
+   hypre_AssembleStructMatrix(PT);
 
    return ierr;
 }

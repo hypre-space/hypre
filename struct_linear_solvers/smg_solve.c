@@ -15,11 +15,11 @@
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
- * zzz_SMGSolve
+ * hypre_SMGSolve
  *    This is the main solve routine for the Schaffer multigrid method.
  *    This solver works for 1D, 2D, or 3D linear systems.  The dimension
- *    is determined by the zzz_StructStencilDim argument of the matrix
- *    stencil.  The zzz_StructGridDim argument of the matrix grid is
+ *    is determined by the hypre_StructStencilDim argument of the matrix
+ *    stencil.  The hypre_StructGridDim argument of the matrix grid is
  *    allowed to be larger than the dimension of the solver, and in fact,
  *    this feature is used in the smaller-dimensional solves required
  *    in the relaxation method for both the 2D and 3D algorithms.  This
@@ -36,37 +36,37 @@
  *   of iterations is reached, the last extra pre-relaxation is not done.
  *   This allows one to use the solver as a preconditioner for conjugate
  *   gradient and insure symmetry.
- * - zzz_SMGRelax is the relaxation routine.  There are different "data"
+ * - hypre_SMGRelax is the relaxation routine.  There are different "data"
  *   structures for each call to reflect different arguments and parameters.
  *   One important parameter sets whether or not an initial guess of zero
  *   is to be used in the relaxation.
- * - zzz_SMGResidual computes the residual, b - Ax.
- * - zzz_SMGRestrict restricts the residual to the coarse grid.
- * - zzz_SMGIntAdd interpolates the coarse error and adds it to the
+ * - hypre_SMGResidual computes the residual, b - Ax.
+ * - hypre_SMGRestrict restricts the residual to the coarse grid.
+ * - hypre_SMGIntAdd interpolates the coarse error and adds it to the
  *   fine grid solution.
  *
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGSolve( void             *smg_vdata,
-              zzz_StructMatrix *A,
-              zzz_StructVector *b,
-              zzz_StructVector *x         )
+hypre_SMGSolve( void             *smg_vdata,
+              hypre_StructMatrix *A,
+              hypre_StructVector *b,
+              hypre_StructVector *x         )
 {
-   zzz_SMGData        *smg_data = smg_vdata;
+   hypre_SMGData        *smg_data = smg_vdata;
 
    double              tol             = (smg_data -> tol);
    int                 max_iter        = (smg_data -> max_iter);
    int                 num_levels      = (smg_data -> num_levels);
    int                 num_pre_relax   = (smg_data -> num_pre_relax);
    int                 num_post_relax  = (smg_data -> num_post_relax);
-   zzz_StructMatrix  **A_l             = (smg_data -> A_l);
-   zzz_StructMatrix  **PT_l            = (smg_data -> PT_l);
-   zzz_StructMatrix  **R_l             = (smg_data -> R_l);
-   zzz_StructVector  **b_l             = (smg_data -> b_l);
-   zzz_StructVector  **x_l             = (smg_data -> x_l);
-   zzz_StructVector  **r_l             = (smg_data -> r_l);
-   zzz_StructVector  **e_l             = (smg_data -> e_l);
+   hypre_StructMatrix  **A_l             = (smg_data -> A_l);
+   hypre_StructMatrix  **PT_l            = (smg_data -> PT_l);
+   hypre_StructMatrix  **R_l             = (smg_data -> R_l);
+   hypre_StructVector  **b_l             = (smg_data -> b_l);
+   hypre_StructVector  **x_l             = (smg_data -> x_l);
+   hypre_StructVector  **r_l             = (smg_data -> r_l);
+   hypre_StructVector  **e_l             = (smg_data -> e_l);
    void              **relax_data_l    = (smg_data -> relax_data_l);
    void              **residual_data_l = (smg_data -> residual_data_l);
    void              **restrict_data_l = (smg_data -> restrict_data_l);
@@ -81,7 +81,7 @@ zzz_SMGSolve( void             *smg_vdata,
 
    int                 ierr;
 
-   zzz_BeginTiming(smg_data -> time_index);
+   hypre_BeginTiming(smg_data -> time_index);
 
    /*-----------------------------------------------------
     * Do V-cycles:
@@ -91,7 +91,7 @@ zzz_SMGSolve( void             *smg_vdata,
    if (tol > 0.0)
    {
       /* eps = (tol^2)*<b,b> */
-      b_dot_b = zzz_StructInnerProd(b_l[0], b_l[0]);
+      b_dot_b = hypre_StructInnerProd(b_l[0], b_l[0]);
       eps = (tol*tol)*b_dot_b;
    }
 
@@ -101,27 +101,27 @@ zzz_SMGSolve( void             *smg_vdata,
        * Down cycle
        *--------------------------------------------------*/
 
-      zzz_SMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
-      zzz_SMGRelaxSetRegSpaceRank(relax_data_l[0], 0, 0);
-      zzz_SMGRelaxSetRegSpaceRank(relax_data_l[0], 1, 1);
+      hypre_SMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
+      hypre_SMGRelaxSetRegSpaceRank(relax_data_l[0], 0, 0);
+      hypre_SMGRelaxSetRegSpaceRank(relax_data_l[0], 1, 1);
       if (i == 0)
       {
          if (smg_data -> zero_guess)
-            zzz_SMGRelaxSetZeroGuess(relax_data_l[0]);
+            hypre_SMGRelaxSetZeroGuess(relax_data_l[0]);
          else
-            zzz_SMGRelaxSetNonZeroGuess(relax_data_l[0]);
+            hypre_SMGRelaxSetNonZeroGuess(relax_data_l[0]);
       }
       else
       {
-         zzz_SMGRelaxSetNonZeroGuess(relax_data_l[0]);
+         hypre_SMGRelaxSetNonZeroGuess(relax_data_l[0]);
       }
-      zzz_SMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
-      zzz_SMGResidual(residual_data_l[0], A_l[0], x_l[0], b_l[0], r_l[0]);
+      hypre_SMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
+      hypre_SMGResidual(residual_data_l[0], A_l[0], x_l[0], b_l[0], r_l[0]);
 
       /* convergence check */
       if (tol > 0.0)
       {
-         r_dot_r = zzz_StructInnerProd(r_l[0], r_l[0]);
+         r_dot_r = hypre_StructInnerProd(r_l[0], r_l[0]);
 
          if (logging > 0)
          {
@@ -140,25 +140,25 @@ zzz_SMGSolve( void             *smg_vdata,
       {
          if (l > 0)
          {
-            zzz_SMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
-            zzz_SMGRelaxSetRegSpaceRank(relax_data_l[l], 0, 0);
-            zzz_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 1);
-            zzz_SMGRelaxSetZeroGuess(relax_data_l[l]);
-            zzz_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
-            zzz_SMGResidual(residual_data_l[l],
+            hypre_SMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
+            hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 0, 0);
+            hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 1);
+            hypre_SMGRelaxSetZeroGuess(relax_data_l[l]);
+            hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+            hypre_SMGResidual(residual_data_l[l],
                             A_l[l], x_l[l], b_l[l], r_l[l]);
          }
-         zzz_SMGRestrict(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1]);
+         hypre_SMGRestrict(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1]);
 #if 0
          /* for debugging purposes */
-         if(zzz_StructStencilDim(zzz_StructMatrixStencil(A)) == 3)
+         if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
          {
             char  filename[255];
 
             sprintf(filename, "zout_xbefore.%02d", l);
-            zzz_PrintStructVector(filename, x_l[l], 0);
+            hypre_PrintStructVector(filename, x_l[l], 0);
             sprintf(filename, "zout_b.%02d", l+1);
-            zzz_PrintStructVector(filename, b_l[l+1], 0);
+            hypre_PrintStructVector(filename, b_l[l+1], 0);
          }
 #endif
       }
@@ -169,8 +169,8 @@ zzz_SMGSolve( void             *smg_vdata,
 
       if (num_levels > 1)
       {
-         zzz_SMGRelaxSetZeroGuess(relax_data_l[l]);
-         zzz_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+         hypre_SMGRelaxSetZeroGuess(relax_data_l[l]);
+         hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
       }
 
       /*--------------------------------------------------
@@ -179,28 +179,28 @@ zzz_SMGSolve( void             *smg_vdata,
 
       for (l = (num_levels - 2); l >= 0; l--)
       {
-         zzz_SMGIntAdd(intadd_data_l[l], PT_l[l], x_l[l+1], e_l[l], x_l[l]);
+         hypre_SMGIntAdd(intadd_data_l[l], PT_l[l], x_l[l+1], e_l[l], x_l[l]);
 #if 0
          /* for debugging purposes */
-         if(zzz_StructStencilDim(zzz_StructMatrixStencil(A)) == 3)
+         if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
          {
             char  filename[255];
 
             sprintf(filename, "zout_xafter.%02d", l);
-            zzz_PrintStructVector(filename, x_l[l], 0);
+            hypre_PrintStructVector(filename, x_l[l], 0);
          }
 #endif
-         zzz_SMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
-         zzz_SMGRelaxSetRegSpaceRank(relax_data_l[l], 0, 1);
-         zzz_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 0);
-         zzz_SMGRelaxSetNonZeroGuess(relax_data_l[l]);
-         zzz_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+         hypre_SMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
+         hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 0, 1);
+         hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 0);
+         hypre_SMGRelaxSetNonZeroGuess(relax_data_l[l]);
+         hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
       }
 
       (smg_data -> num_iterations) = (i + 1);
    }
 
-   zzz_EndTiming(smg_data -> time_index);
+   hypre_EndTiming(smg_data -> time_index);
 
    return ierr;
 }

@@ -8,50 +8,50 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Member functions for zzz_StructGrid class.
+ * Member functions for hypre_StructGrid class.
  *
  *****************************************************************************/
 
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * zzz_NewStructGrid
+ * hypre_NewStructGrid
  *--------------------------------------------------------------------------*/
 
-zzz_StructGrid *
-zzz_NewStructGrid( MPI_Comm *comm,
+hypre_StructGrid *
+hypre_NewStructGrid( MPI_Comm *comm,
 		   int       dim  )
 {
-   zzz_StructGrid    *grid;
+   hypre_StructGrid    *grid;
 
-   grid = zzz_TAlloc(zzz_StructGrid, 1);
+   grid = hypre_TAlloc(hypre_StructGrid, 1);
 
-   zzz_StructGridComm(grid)      = comm;
-   zzz_StructGridAllBoxes(grid)  = NULL;
-   zzz_StructGridProcesses(grid) = NULL;
-   zzz_StructGridBoxes(grid)     = zzz_NewBoxArray();
-   zzz_StructGridBoxRanks(grid)  = NULL;
-   zzz_StructGridDim(grid)       = dim;
-   zzz_StructGridGlobalSize(grid)= 0;
-   zzz_StructGridLocalSize(grid) = 0;
+   hypre_StructGridComm(grid)      = comm;
+   hypre_StructGridAllBoxes(grid)  = NULL;
+   hypre_StructGridProcesses(grid) = NULL;
+   hypre_StructGridBoxes(grid)     = hypre_NewBoxArray();
+   hypre_StructGridBoxRanks(grid)  = NULL;
+   hypre_StructGridDim(grid)       = dim;
+   hypre_StructGridGlobalSize(grid)= 0;
+   hypre_StructGridLocalSize(grid) = 0;
 
    return grid;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_NewAssembledStructGrid
+ * hypre_NewAssembledStructGrid
  *--------------------------------------------------------------------------*/
 
-zzz_StructGrid *
-zzz_NewAssembledStructGrid( MPI_Comm      *comm,
+hypre_StructGrid *
+hypre_NewAssembledStructGrid( MPI_Comm      *comm,
                             int            dim,
-                            zzz_BoxArray  *all_boxes,
+                            hypre_BoxArray  *all_boxes,
                             int           *processes )
 {
-   zzz_StructGrid    *grid;
+   hypre_StructGrid    *grid;
 
-   zzz_BoxArray      *boxes;
-   zzz_Box           *box;
+   hypre_BoxArray      *boxes;
+   hypre_Box           *box;
    int               *box_ranks;
    int                box_volume;
    int                global_size;
@@ -59,95 +59,95 @@ zzz_NewAssembledStructGrid( MPI_Comm      *comm,
 
    int                i, j, my_rank;
 
-   grid = zzz_TAlloc(zzz_StructGrid, 1);
+   grid = hypre_TAlloc(hypre_StructGrid, 1);
 
    MPI_Comm_rank(*comm, &my_rank);
 
    global_size = 0;
    local_size = 0;
-   boxes = zzz_NewBoxArray();
-   box_ranks = zzz_TAlloc(int, zzz_BoxArraySize(all_boxes));
+   boxes = hypre_NewBoxArray();
+   box_ranks = hypre_TAlloc(int, hypre_BoxArraySize(all_boxes));
 
    j = 0;
-   zzz_ForBoxI(i, all_boxes)
+   hypre_ForBoxI(i, all_boxes)
    {
-      box = zzz_BoxArrayBox(all_boxes, i);
-      box_volume = zzz_BoxVolume(box);
+      box = hypre_BoxArrayBox(all_boxes, i);
+      box_volume = hypre_BoxVolume(box);
 
       if (processes[i] == my_rank)
       {
-	 zzz_AppendBox(box, boxes);
+	 hypre_AppendBox(box, boxes);
 	 box_ranks[j++] = i;
          local_size += box_volume;
       }
 
       global_size += box_volume;
    }
-   box_ranks = zzz_TReAlloc(box_ranks, int, zzz_BoxArraySize(boxes));
+   box_ranks = hypre_TReAlloc(box_ranks, int, hypre_BoxArraySize(boxes));
 
-   zzz_StructGridAllBoxes(grid)  = all_boxes;
-   zzz_StructGridProcesses(grid) = processes;
-   zzz_StructGridBoxes(grid)     = boxes;
-   zzz_StructGridBoxRanks(grid)  = box_ranks;
-   zzz_StructGridDim(grid)       = dim;
-   zzz_StructGridGlobalSize(grid)= global_size;
-   zzz_StructGridLocalSize(grid) = local_size;
-   zzz_StructGridComm(grid)      = comm;
+   hypre_StructGridAllBoxes(grid)  = all_boxes;
+   hypre_StructGridProcesses(grid) = processes;
+   hypre_StructGridBoxes(grid)     = boxes;
+   hypre_StructGridBoxRanks(grid)  = box_ranks;
+   hypre_StructGridDim(grid)       = dim;
+   hypre_StructGridGlobalSize(grid)= global_size;
+   hypre_StructGridLocalSize(grid) = local_size;
+   hypre_StructGridComm(grid)      = comm;
 
    return grid;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_FreeStructGrid
+ * hypre_FreeStructGrid
  *--------------------------------------------------------------------------*/
 
 void 
-zzz_FreeStructGrid( zzz_StructGrid *grid )
+hypre_FreeStructGrid( hypre_StructGrid *grid )
 {
-   zzz_FreeBoxArray(zzz_StructGridAllBoxes(grid));
-   zzz_TFree(zzz_StructGridProcesses(grid));
+   hypre_FreeBoxArray(hypre_StructGridAllBoxes(grid));
+   hypre_TFree(hypre_StructGridProcesses(grid));
 
    /* this box array points to grid boxes in all_boxes */
-   zzz_FreeBoxArrayShell(zzz_StructGridBoxes(grid));
+   hypre_FreeBoxArrayShell(hypre_StructGridBoxes(grid));
 
-   zzz_TFree(zzz_StructGridBoxRanks(grid));
+   hypre_TFree(hypre_StructGridBoxRanks(grid));
 
-   zzz_TFree(grid);
+   hypre_TFree(grid);
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SetStructGridExtents
+ * hypre_SetStructGridExtents
  *--------------------------------------------------------------------------*/
 
 void 
-zzz_SetStructGridExtents( zzz_StructGrid  *grid,
-			  zzz_Index        ilower,
-			  zzz_Index        iupper )
+hypre_SetStructGridExtents( hypre_StructGrid  *grid,
+			  hypre_Index        ilower,
+			  hypre_Index        iupper )
 {
-   zzz_Box   *box;
+   hypre_Box   *box;
 
-   box = zzz_NewBox(ilower, iupper);
+   box = hypre_NewBox(ilower, iupper);
 
-   zzz_AppendBox(box, zzz_StructGridBoxes(grid));
+   hypre_AppendBox(box, hypre_StructGridBoxes(grid));
 }
 
 /*--------------------------------------------------------------------------
- * zzz_AssembleStructGrid
+ * hypre_AssembleStructGrid
  *--------------------------------------------------------------------------*/
 
 void 
-zzz_AssembleStructGrid( zzz_StructGrid *grid )
+hypre_AssembleStructGrid( hypre_StructGrid *grid )
 {
-   MPI_Comm       *comm = zzz_StructGridComm(grid);
+   MPI_Comm       *comm = hypre_StructGridComm(grid);
 
-   zzz_StructGrid *new_grid;
-   zzz_BoxArray   *all_boxes;
+   hypre_StructGrid *new_grid;
+   hypre_BoxArray   *all_boxes;
    int            *processes;
-   zzz_BoxArray   *boxes;
-   zzz_Box        *box;
+   hypre_BoxArray   *boxes;
+   hypre_Box        *box;
                   
-   zzz_Index       imin;
-   zzz_Index       imax;
+   hypre_Index       imin;
+   hypre_Index       imax;
                   
    int             num_procs, my_rank;
                   
@@ -160,18 +160,18 @@ zzz_AssembleStructGrid( zzz_StructGrid *grid )
                   
    int             i, j, b, d;
 
-   boxes = zzz_StructGridBoxes(grid);
+   boxes = hypre_StructGridBoxes(grid);
 
    MPI_Comm_size(*comm, &num_procs);
    MPI_Comm_rank(*comm, &my_rank);
 
    /* allocate sendbuf */
-   sendcount = 7*zzz_BoxArraySize(boxes);
-   sendbuf = zzz_TAlloc(int, sendcount);
+   sendcount = 7*hypre_BoxArraySize(boxes);
+   sendbuf = hypre_TAlloc(int, sendcount);
 
    /* compute recvcounts and displs */
-   recvcounts = zzz_TAlloc(int, num_procs);
-   displs = zzz_TAlloc(int, num_procs);
+   recvcounts = hypre_TAlloc(int, num_procs);
+   displs = hypre_TAlloc(int, num_procs);
    MPI_Allgather(&sendcount, 1, MPI_INT,
 		 recvcounts, 1, MPI_INT, *comm);
    displs[0] = 0;
@@ -183,19 +183,19 @@ zzz_AssembleStructGrid( zzz_StructGrid *grid )
    }
 
    /* allocate recvbuf */
-   recvbuf = zzz_TAlloc(int, recvbuf_size);
+   recvbuf = hypre_TAlloc(int, recvbuf_size);
 
    /* put local box extents and process number into sendbuf */
    i = 0;
-   for (b = 0; b < zzz_BoxArraySize(boxes); b++)
+   for (b = 0; b < hypre_BoxArraySize(boxes); b++)
    {
       sendbuf[i++] = my_rank;
 
-      box = zzz_BoxArrayBox(boxes, b);
+      box = hypre_BoxArrayBox(boxes, b);
       for (d = 0; d < 3; d++)
       {
-	 sendbuf[i++] = zzz_BoxIMinD(box, d);
-	 sendbuf[i++] = zzz_BoxIMaxD(box, d);
+	 sendbuf[i++] = hypre_BoxIMinD(box, d);
+	 sendbuf[i++] = hypre_BoxIMaxD(box, d);
       }
    }
 
@@ -206,8 +206,8 @@ zzz_AssembleStructGrid( zzz_StructGrid *grid )
    /* sort recvbuf by process rank? */
 
    /* unpack recvbuf grid info */
-   all_boxes = zzz_NewBoxArray();
-   processes = zzz_TAlloc(int, (recvbuf_size / 7));
+   all_boxes = hypre_NewBoxArray();
+   processes = hypre_TAlloc(int, (recvbuf_size / 7));
    i = 0;
    j = 0;
    while (i < recvbuf_size)
@@ -216,70 +216,70 @@ zzz_AssembleStructGrid( zzz_StructGrid *grid )
 
       for (d = 0; d < 3; d++)
       {
-	 zzz_IndexD(imin, d) = recvbuf[i++];
-	 zzz_IndexD(imax, d) = recvbuf[i++];
+	 hypre_IndexD(imin, d) = recvbuf[i++];
+	 hypre_IndexD(imax, d) = recvbuf[i++];
       }
 
-      box = zzz_NewBox(imin, imax);
-      zzz_AppendBox(box, all_boxes);
+      box = hypre_NewBox(imin, imax);
+      hypre_AppendBox(box, all_boxes);
    }
 
-   zzz_FreeBoxArray(boxes);
-   zzz_TFree(sendbuf);
-   zzz_TFree(recvcounts);
-   zzz_TFree(displs);
-   zzz_TFree(recvbuf);
+   hypre_FreeBoxArray(boxes);
+   hypre_TFree(sendbuf);
+   hypre_TFree(recvcounts);
+   hypre_TFree(displs);
+   hypre_TFree(recvbuf);
 
    /* complete the grid structure */
-   new_grid = zzz_NewAssembledStructGrid(zzz_StructGridComm(grid),
-                                         zzz_StructGridDim(grid),
+   new_grid = hypre_NewAssembledStructGrid(hypre_StructGridComm(grid),
+                                         hypre_StructGridDim(grid),
                                          all_boxes, processes);
-   zzz_StructGridAllBoxes(grid)  = zzz_StructGridAllBoxes(new_grid);
-   zzz_StructGridProcesses(grid) = zzz_StructGridProcesses(new_grid);
-   zzz_StructGridBoxes(grid)     = zzz_StructGridBoxes(new_grid);
-   zzz_StructGridBoxRanks(grid)  = zzz_StructGridBoxRanks(new_grid);
-   zzz_StructGridGlobalSize(grid)= zzz_StructGridGlobalSize(new_grid);
-   zzz_StructGridLocalSize(grid) = zzz_StructGridLocalSize(new_grid);
-   zzz_TFree(new_grid);
+   hypre_StructGridAllBoxes(grid)  = hypre_StructGridAllBoxes(new_grid);
+   hypre_StructGridProcesses(grid) = hypre_StructGridProcesses(new_grid);
+   hypre_StructGridBoxes(grid)     = hypre_StructGridBoxes(new_grid);
+   hypre_StructGridBoxRanks(grid)  = hypre_StructGridBoxRanks(new_grid);
+   hypre_StructGridGlobalSize(grid)= hypre_StructGridGlobalSize(new_grid);
+   hypre_StructGridLocalSize(grid) = hypre_StructGridLocalSize(new_grid);
+   hypre_TFree(new_grid);
 }
 
 /*--------------------------------------------------------------------------
- * zzz_PrintStructGrid
+ * hypre_PrintStructGrid
  *--------------------------------------------------------------------------*/
  
 void
-zzz_PrintStructGrid( FILE           *file,
-                     zzz_StructGrid *grid )
+hypre_PrintStructGrid( FILE           *file,
+                     hypre_StructGrid *grid )
 {
-   zzz_BoxArray    *boxes;
-   zzz_Box         *box;
+   hypre_BoxArray    *boxes;
+   hypre_Box         *box;
 
    int              i;
 
-   fprintf(file, "%d\n", zzz_StructGridDim(grid));
+   fprintf(file, "%d\n", hypre_StructGridDim(grid));
 
-   boxes = zzz_StructGridBoxes(grid);
-   fprintf(file, "%d\n", zzz_BoxArraySize(boxes));
-   zzz_ForBoxI(i, boxes)
+   boxes = hypre_StructGridBoxes(grid);
+   fprintf(file, "%d\n", hypre_BoxArraySize(boxes));
+   hypre_ForBoxI(i, boxes)
    {
-      box = zzz_BoxArrayBox(boxes, i);
+      box = hypre_BoxArrayBox(boxes, i);
       fprintf(file, "%d:  (%d, %d, %d)  x  (%d, %d, %d)\n", i,
-              zzz_BoxIMinX(box), zzz_BoxIMinY(box), zzz_BoxIMinZ(box),
-              zzz_BoxIMaxX(box), zzz_BoxIMaxY(box), zzz_BoxIMaxZ(box));
+              hypre_BoxIMinX(box), hypre_BoxIMinY(box), hypre_BoxIMinZ(box),
+              hypre_BoxIMaxX(box), hypre_BoxIMaxY(box), hypre_BoxIMaxZ(box));
    }
 }
 
 /*--------------------------------------------------------------------------
- * zzz_ReadStructGrid
+ * hypre_ReadStructGrid
  *--------------------------------------------------------------------------*/
  
-zzz_StructGrid *
-zzz_ReadStructGrid( MPI_Comm *comm, FILE *file )
+hypre_StructGrid *
+hypre_ReadStructGrid( MPI_Comm *comm, FILE *file )
 {
-   zzz_StructGrid *grid;
+   hypre_StructGrid *grid;
 
-   zzz_Index       ilower;
-   zzz_Index       iupper;
+   hypre_Index       ilower;
+   hypre_Index       iupper;
 
    int             dim;
    int             num_boxes;
@@ -287,19 +287,19 @@ zzz_ReadStructGrid( MPI_Comm *comm, FILE *file )
    int             i, idummy;
 
    fscanf(file, "%d\n", &dim);
-   grid = zzz_NewStructGrid(comm, dim);
+   grid = hypre_NewStructGrid(comm, dim);
 
    fscanf(file, "%d\n", &num_boxes);
    for (i = 0; i < num_boxes; i++)
    {
       fscanf(file, "%d:  (%d, %d, %d)  x  (%d, %d, %d)\n", &idummy,
-             &zzz_IndexX(ilower), &zzz_IndexY(ilower), &zzz_IndexZ(ilower),
-             &zzz_IndexX(iupper), &zzz_IndexY(iupper), &zzz_IndexZ(iupper));
+             &hypre_IndexX(ilower), &hypre_IndexY(ilower), &hypre_IndexZ(ilower),
+             &hypre_IndexX(iupper), &hypre_IndexY(iupper), &hypre_IndexZ(iupper));
 
-      zzz_SetStructGridExtents(grid, ilower, iupper);
+      hypre_SetStructGridExtents(grid, ilower, iupper);
    }
 
-   zzz_AssembleStructGrid(grid);
+   hypre_AssembleStructGrid(grid);
 
    return grid;
 }

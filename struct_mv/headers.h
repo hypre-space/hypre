@@ -14,7 +14,7 @@
 #include "mpi.h"
 #include "../utilities/memory.h"
 #include "../utilities/timing.h"
-#include "ZZZ_mv.h"
+#include "HYPRE_mv.h"
 
 #include "general.h"
 
@@ -32,7 +32,7 @@
 
 #include "protos.h"
 
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
 #include <gmalloc.h>
 #endif
 

@@ -13,52 +13,52 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * zzz_GetCommInfo:
+ * hypre_GetCommInfo:
  *--------------------------------------------------------------------------*/
 
 void
-zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
-                 zzz_BoxArrayArray  **recv_boxes_ptr,
+hypre_GetCommInfo( hypre_BoxArrayArray  **send_boxes_ptr,
+                 hypre_BoxArrayArray  **recv_boxes_ptr,
                  int               ***send_box_ranks_ptr,
                  int               ***recv_box_ranks_ptr,
-                 zzz_StructGrid      *grid,
-                 zzz_StructStencil   *stencil            )
+                 hypre_StructGrid      *grid,
+                 hypre_StructStencil   *stencil            )
 {
    /* output variables */
-   zzz_BoxArrayArray     *send_boxes;
-   zzz_BoxArrayArray     *recv_boxes;
+   hypre_BoxArrayArray     *send_boxes;
+   hypre_BoxArrayArray     *recv_boxes;
    int                  **send_box_ranks;
    int                  **recv_box_ranks;
 
    /* internal variables */
-   zzz_BoxArray          *boxes;
-   zzz_BoxArray          *all_boxes;
+   hypre_BoxArray          *boxes;
+   hypre_BoxArray          *all_boxes;
    int                   *processes;
 
-   zzz_StructStencil     *symm_stencil;
+   hypre_StructStencil     *symm_stencil;
    int                   *symm_elements;
 
-   zzz_BoxArray          *neighbors;
+   hypre_BoxArray          *neighbors;
    int                   *neighbor_ranks;
    int                    num_neighbors;
                          
-   zzz_BoxArrayArray     *shift_boxes;
-   zzz_BoxArrayArray     *shift_neighbors;
+   hypre_BoxArrayArray     *shift_boxes;
+   hypre_BoxArrayArray     *shift_neighbors;
                           
    int                    r, n, i, j, k;
 
    /* temporary work variables */
-   zzz_BoxArrayArray     *box_aa0;
-   zzz_BoxArrayArray     *box_aa1;
+   hypre_BoxArrayArray     *box_aa0;
+   hypre_BoxArrayArray     *box_aa1;
                          
-   zzz_BoxArray          *box_a0;
-   zzz_BoxArray          *box_a1;
-   zzz_BoxArray          *box_a2;
-   zzz_BoxArray          *box_a3;
+   hypre_BoxArray          *box_a0;
+   hypre_BoxArray          *box_a1;
+   hypre_BoxArray          *box_a2;
+   hypre_BoxArray          *box_a3;
                          
-   zzz_Box               *box0;
-   zzz_Box               *box1;
-   zzz_Box               *box2;
+   hypre_Box               *box0;
+   hypre_Box               *box1;
+   hypre_Box               *box2;
 
    int                  **box_ranks;
    int                   *box_array_sizes;
@@ -67,22 +67,22 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
     * Extract needed grid info
     *------------------------------------------------------*/
 
-   boxes     = zzz_StructGridBoxes(grid);
-   all_boxes = zzz_StructGridAllBoxes(grid);
-   processes = zzz_StructGridProcesses(grid);
+   boxes     = hypre_StructGridBoxes(grid);
+   all_boxes = hypre_StructGridAllBoxes(grid);
+   processes = hypre_StructGridProcesses(grid);
 
    /*------------------------------------------------------
     * Determine neighbors:
     *    Use a "symmetrized" stencil
     *------------------------------------------------------*/
 
-   zzz_SymmetrizeStructStencil(stencil, &symm_stencil, &symm_elements);
+   hypre_SymmetrizeStructStencil(stencil, &symm_stencil, &symm_elements);
 
-   zzz_FindBoxNeighbors(boxes, all_boxes, symm_stencil, 0,
+   hypre_FindBoxNeighbors(boxes, all_boxes, symm_stencil, 0,
                         &neighbors, &neighbor_ranks);
 
-   zzz_FreeStructStencil(symm_stencil);
-   zzz_TFree(symm_elements);
+   hypre_FreeStructStencil(symm_stencil);
+   hypre_TFree(symm_elements);
 
    /*------------------------------------------------------
     * Determine shift_boxes and shift_neighbors
@@ -101,24 +101,24 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
          break;
       }
 
-      box_aa0 = zzz_GrowBoxArrayByStencil(box_a0, stencil, 0);
-      box_aa1 = zzz_NewBoxArrayArray(zzz_BoxArraySize(box_a0));
+      box_aa0 = hypre_GrowBoxArrayByStencil(box_a0, stencil, 0);
+      box_aa1 = hypre_NewBoxArrayArray(hypre_BoxArraySize(box_a0));
 
-      zzz_ForBoxArrayI(i, box_aa0)
+      hypre_ForBoxArrayI(i, box_aa0)
       {
-         box_a1 = zzz_BoxArrayArrayBoxArray(box_aa0, i);
+         box_a1 = hypre_BoxArrayArrayBoxArray(box_aa0, i);
 
-         zzz_ForBoxI(j, box_a1)
+         hypre_ForBoxI(j, box_a1)
          {
-            box_a2 = zzz_SubtractBoxes(zzz_BoxArrayBox(box_a1, j),
-                                       zzz_BoxArrayBox(box_a0, i));
-            zzz_AppendBoxArray(box_a2,
-                               zzz_BoxArrayArrayBoxArray(box_aa1, i));
-            zzz_FreeBoxArrayShell(box_a2);
+            box_a2 = hypre_SubtractBoxes(hypre_BoxArrayBox(box_a1, j),
+                                       hypre_BoxArrayBox(box_a0, i));
+            hypre_AppendBoxArray(box_a2,
+                               hypre_BoxArrayArrayBoxArray(box_aa1, i));
+            hypre_FreeBoxArrayShell(box_a2);
          }
       }
 
-      zzz_FreeBoxArrayArray(box_aa0);
+      hypre_FreeBoxArrayArray(box_aa0);
 
       switch(r)
       {
@@ -152,40 +152,40 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
          break;
       }
 
-      box_aa1 = zzz_NewBoxArrayArray(zzz_BoxArraySize(boxes));
-      box_ranks = zzz_CTAlloc(int *, zzz_BoxArraySize(boxes));
-      zzz_ForBoxI(i, boxes)
-         box_ranks[i] = zzz_CTAlloc(int, zzz_BoxArraySize(neighbors));
+      box_aa1 = hypre_NewBoxArrayArray(hypre_BoxArraySize(boxes));
+      box_ranks = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
+      hypre_ForBoxI(i, boxes)
+         box_ranks[i] = hypre_CTAlloc(int, hypre_BoxArraySize(neighbors));
 
-      zzz_ForBoxI(i, box_a0)
+      hypre_ForBoxI(i, box_a0)
       {
-         box0 = zzz_BoxArrayBox(box_a0, i);
+         box0 = hypre_BoxArrayBox(box_a0, i);
 
-         zzz_ForBoxArrayI(j, box_aa0)
+         hypre_ForBoxArrayI(j, box_aa0)
          {
-            box_a2 = zzz_BoxArrayArrayBoxArray(box_aa0, j);
+            box_a2 = hypre_BoxArrayArrayBoxArray(box_aa0, j);
 
-            zzz_ForBoxI(k, box_a2)
+            hypre_ForBoxI(k, box_a2)
             {
-               box1 = zzz_BoxArrayBox(box_a2, k);
+               box1 = hypre_BoxArrayBox(box_a2, k);
 
-               box2 = zzz_IntersectBoxes(box0, box1);
+               box2 = hypre_IntersectBoxes(box0, box1);
                if (box2)
                {
                   switch(r)
                   {
                      case 0:
-                     box_a3 = zzz_BoxArrayArrayBoxArray(box_aa1, j);
-                     box_ranks[j][zzz_BoxArraySize(box_a3)] =
+                     box_a3 = hypre_BoxArrayArrayBoxArray(box_aa1, j);
+                     box_ranks[j][hypre_BoxArraySize(box_a3)] =
                         neighbor_ranks[i];
-                     zzz_AppendBox(box2, box_a3);
+                     hypre_AppendBox(box2, box_a3);
                      break;
 
                      case 1:
-                     box_a3 = zzz_BoxArrayArrayBoxArray(box_aa1, i);
-                     box_ranks[i][zzz_BoxArraySize(box_a3)] =
+                     box_a3 = hypre_BoxArrayArrayBoxArray(box_aa1, i);
+                     box_ranks[i][hypre_BoxArraySize(box_a3)] =
                         neighbor_ranks[j];
-                     zzz_AppendBox(box2, box_a3);
+                     hypre_AppendBox(box2, box_a3);
                      break;
                   }
                }
@@ -207,16 +207,16 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
       }
    }
 
-   zzz_FreeBoxArrayArray(shift_boxes);
-   zzz_FreeBoxArrayArray(shift_neighbors);
+   hypre_FreeBoxArrayArray(shift_boxes);
+   hypre_FreeBoxArrayArray(shift_neighbors);
 
    /*------------------------------------------------------
     * Union the send_boxes and recv_boxes by communication
     * box ranks.
     *------------------------------------------------------*/
 
-   num_neighbors = zzz_BoxArraySize(neighbors);
-   box_array_sizes = zzz_CTAlloc(int, num_neighbors);
+   num_neighbors = hypre_BoxArraySize(neighbors);
+   box_array_sizes = hypre_CTAlloc(int, num_neighbors);
 
    for (r = 0; r < 2; r++)
    {
@@ -233,33 +233,33 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
          break;
       }
 
-      box_aa1 = zzz_NewBoxArrayArray(zzz_BoxArrayArraySize(box_aa0));
+      box_aa1 = hypre_NewBoxArrayArray(hypre_BoxArrayArraySize(box_aa0));
 
-      zzz_ForBoxArrayI(i, box_aa0)
+      hypre_ForBoxArrayI(i, box_aa0)
       {
-         box_a0 = zzz_BoxArrayArrayBoxArray(box_aa0, i);
-         box_a1 = zzz_BoxArrayArrayBoxArray(box_aa1, i);
+         box_a0 = hypre_BoxArrayArrayBoxArray(box_aa0, i);
+         box_a1 = hypre_BoxArrayArrayBoxArray(box_aa1, i);
 
          for (n = 0; n < num_neighbors; n++)
          {
-            box_a2 = zzz_NewBoxArray();
-            zzz_ForBoxI(j, box_a0)
+            box_a2 = hypre_NewBoxArray();
+            hypre_ForBoxI(j, box_a0)
             {
                if (box_ranks[i][j] == neighbor_ranks[n])
-                  zzz_AppendBox(zzz_BoxArrayBox(box_a0, j), box_a2);
+                  hypre_AppendBox(hypre_BoxArrayBox(box_a0, j), box_a2);
             }
 
-            box_a3 = zzz_UnionBoxArray(box_a2);
-            zzz_AppendBoxArray(box_a3, box_a1);
-            box_array_sizes[n] = zzz_BoxArraySize(box_a3);
+            box_a3 = hypre_UnionBoxArray(box_a2);
+            hypre_AppendBoxArray(box_a3, box_a1);
+            box_array_sizes[n] = hypre_BoxArraySize(box_a3);
 
-            zzz_FreeBoxArrayShell(box_a2);
-            zzz_FreeBoxArrayShell(box_a3);
+            hypre_FreeBoxArrayShell(box_a2);
+            hypre_FreeBoxArrayShell(box_a3);
          }
 
          /* fix box rank info */
-         zzz_TFree(box_ranks[i]);
-         box_ranks[i] = zzz_CTAlloc(int, zzz_BoxArraySize(box_a1));
+         hypre_TFree(box_ranks[i]);
+         box_ranks[i] = hypre_CTAlloc(int, hypre_BoxArraySize(box_a1));
          j = 0;
          for (n = 0; n < num_neighbors; n++)
          {
@@ -271,7 +271,7 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
          }
       }
 
-      zzz_FreeBoxArrayArray(box_aa0);
+      hypre_FreeBoxArrayArray(box_aa0);
 
       switch(r)
       {
@@ -285,14 +285,14 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
       }
    }
 
-   zzz_TFree(box_array_sizes);
+   hypre_TFree(box_array_sizes);
 
    /*------------------------------------------------------
     * Return
     *------------------------------------------------------*/
 
-   zzz_TFree(neighbor_ranks);
-   zzz_FreeBoxArrayShell(neighbors);
+   hypre_TFree(neighbor_ranks);
+   hypre_FreeBoxArrayShell(neighbors);
 
    *send_boxes_ptr = send_boxes;
    *recv_boxes_ptr = recv_boxes;
@@ -301,14 +301,14 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_GetSBoxType:
+ * hypre_GetSBoxType:
  *   Computes the MPI derived datatype for a communication SBox, `comm_box',
  *   imbedded in a data space Box, `data_box'.
  *--------------------------------------------------------------------------*/
 
 void
-zzz_GetSBoxType( zzz_SBox     *comm_sbox,
-                 zzz_Box      *data_box,
+hypre_GetSBoxType( hypre_SBox     *comm_sbox,
+                 hypre_Box      *data_box,
                  int           num_values,
                  MPI_Datatype *comm_sbox_type                      )
 {
@@ -327,17 +327,17 @@ zzz_GetSBoxType( zzz_SBox     *comm_sbox,
 
    /* initialize length_array */
    for (i = 0; i < 3; i++)
-      length_array[i] = zzz_SBoxSizeD(comm_sbox, i);
+      length_array[i] = hypre_SBoxSizeD(comm_sbox, i);
    length_array[3] = num_values;
 
    /* initialize stride_array */
    for (i = 0; i < 3; i++)
    {
-      stride_array[i] = zzz_SBoxStrideD(comm_sbox, i);
+      stride_array[i] = hypre_SBoxStrideD(comm_sbox, i);
       for (j = 0; j < i; j++)
-         stride_array[i] *= zzz_BoxSizeD(data_box, j);
+         stride_array[i] *= hypre_BoxSizeD(data_box, j);
    }
-   stride_array[3] = zzz_BoxVolume(data_box);
+   stride_array[3] = hypre_BoxVolume(data_box);
 
    /* eliminate dimensions with length_array = 1 */
    dim = 4;
@@ -386,8 +386,8 @@ zzz_GetSBoxType( zzz_SBox     *comm_sbox,
    }
    else
    {
-      old_type = zzz_CTAlloc(MPI_Datatype, 1);
-      new_type = zzz_CTAlloc(MPI_Datatype, 1);
+      old_type = hypre_CTAlloc(MPI_Datatype, 1);
+      new_type = hypre_CTAlloc(MPI_Datatype, 1);
 
       MPI_Type_hvector(length_array[0], 1,
                        (MPI_Aint)(stride_array[0]*sizeof(double)),
@@ -409,28 +409,28 @@ zzz_GetSBoxType( zzz_SBox     *comm_sbox,
                        *old_type, comm_sbox_type);
       MPI_Type_free(old_type);
 
-      zzz_TFree(old_type);
-      zzz_TFree(new_type);
+      hypre_TFree(old_type);
+      hypre_TFree(new_type);
    }
 }
 
 /*--------------------------------------------------------------------------
- * zzz_NewCommPkg:
+ * hypre_NewCommPkg:
  *--------------------------------------------------------------------------*/
 
-zzz_CommPkg *
-zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
-                zzz_SBoxArrayArray  *recv_sboxes,
+hypre_CommPkg *
+hypre_NewCommPkg( hypre_SBoxArrayArray  *send_sboxes,
+                hypre_SBoxArrayArray  *recv_sboxes,
                 int                **send_box_ranks,
                 int                **recv_box_ranks,
-                zzz_StructGrid      *grid,
-                zzz_BoxArray        *data_space,
+                hypre_StructGrid      *grid,
+                hypre_BoxArray        *data_space,
                 int                  num_values     )
 {
-   MPI_Comm            *comm = zzz_StructGridComm(grid);
+   MPI_Comm            *comm = hypre_StructGridComm(grid);
 
    /* output variables */
-   zzz_CommPkg         *comm_pkg;
+   hypre_CommPkg         *comm_pkg;
                        
    int                  pkg_num_sends;
    int                  pkg_num_recvs;
@@ -449,19 +449,19 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
    int                 *box_ranks;
    int                 *processes;
 
-   zzz_SBoxArrayArray  *comm_sboxes;
-   zzz_SBoxArray       *comm_sbox_array;
-   zzz_SBox            *comm_sbox;
+   hypre_SBoxArrayArray  *comm_sboxes;
+   hypre_SBoxArray       *comm_sbox_array;
+   hypre_SBox            *comm_sbox;
    int                **comm_box_ranks;
 
-   zzz_Box             *data_box;
+   hypre_Box             *data_box;
    int                  data_box_offset;
 
    int                 *comm_process_flags;
    struct CommStruct
    {
-      zzz_SBox         *comm_sbox;
-      zzz_Box          *data_box;
+      hypre_SBox         *comm_sbox;
+      hypre_Box          *data_box;
       int               data_box_offset;
       int               orig;
       int               dest;
@@ -488,8 +488,8 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
 
    MPI_Comm_size(*comm, &num_procs );
 
-   box_ranks = zzz_StructGridBoxRanks(grid);
-   processes = zzz_StructGridProcesses(grid);
+   box_ranks = hypre_StructGridBoxRanks(grid);
+   processes = hypre_StructGridProcesses(grid);
 
    for (r = 0; r < 2; r++)
    {
@@ -510,19 +510,19 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
        * Loop over `comm_sboxes' and compute `comm_process_flags'.
        *------------------------------------------------------*/
 
-      comm_process_flags = zzz_CTAlloc(int, num_procs);
+      comm_process_flags = hypre_CTAlloc(int, num_procs);
 
       pkg_num_comms = 0;
-      zzz_ForSBoxArrayI(i, comm_sboxes)
+      hypre_ForSBoxArrayI(i, comm_sboxes)
       {
-         comm_sbox_array = zzz_SBoxArrayArraySBoxArray(comm_sboxes, i);
+         comm_sbox_array = hypre_SBoxArrayArraySBoxArray(comm_sboxes, i);
 
-         zzz_ForSBoxI(j, comm_sbox_array)
+         hypre_ForSBoxI(j, comm_sbox_array)
          {
-            comm_sbox = zzz_SBoxArraySBox(comm_sbox_array, j);
+            comm_sbox = hypre_SBoxArraySBox(comm_sbox_array, j);
             p = processes[comm_box_ranks[i][j]];
 
-            if (zzz_SBoxVolume(comm_sbox) != 0)
+            if (hypre_SBoxVolume(comm_sbox) != 0)
             {
                comm_process_flags[p]++;
                if (comm_process_flags[p] == 1)
@@ -535,26 +535,26 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
        * Loop over `comm_sboxes' and compute `comm_structs'.
        *------------------------------------------------------*/
 
-      comm_structs = zzz_CTAlloc(struct CommStruct *, num_procs);
+      comm_structs = hypre_CTAlloc(struct CommStruct *, num_procs);
 
       data_box_offset = 0;
-      zzz_ForSBoxArrayI(i, comm_sboxes)
+      hypre_ForSBoxArrayI(i, comm_sboxes)
       {
-         comm_sbox_array = zzz_SBoxArrayArraySBoxArray(comm_sboxes, i);
-         data_box = zzz_BoxArrayBox(data_space, i);
+         comm_sbox_array = hypre_SBoxArrayArraySBoxArray(comm_sboxes, i);
+         data_box = hypre_BoxArrayBox(data_space, i);
 
-         zzz_ForSBoxI(j, comm_sbox_array)
+         hypre_ForSBoxI(j, comm_sbox_array)
          {
-            comm_sbox = zzz_SBoxArraySBox(comm_sbox_array, j);
+            comm_sbox = hypre_SBoxArraySBox(comm_sbox_array, j);
             p = processes[comm_box_ranks[i][j]];
 
-            if (zzz_SBoxVolume(comm_sbox) != 0)
+            if (hypre_SBoxVolume(comm_sbox) != 0)
             {
                /* allocate CommStruct pointer */
                if (comm_structs[p] == NULL)
                {
                   comm_structs[p] =
-                     zzz_CTAlloc(struct CommStruct, comm_process_flags[p]);
+                     hypre_CTAlloc(struct CommStruct, comm_process_flags[p]);
                   comm_process_flags[p] = 0;
                }
 
@@ -580,15 +580,15 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
             }
          }
 
-         data_box_offset += zzz_BoxVolume(data_box) * num_values;
+         data_box_offset += hypre_BoxVolume(data_box) * num_values;
       }
 
       /*------------------------------------------------------
        * Loop over comm_structs and build package info
        *------------------------------------------------------*/
 
-      pkg_comm_processes = zzz_TAlloc(int, pkg_num_comms);
-      pkg_comm_types     = zzz_TAlloc(MPI_Datatype, pkg_num_comms);
+      pkg_comm_processes = hypre_TAlloc(int, pkg_num_comms);
+      pkg_comm_types     = hypre_TAlloc(MPI_Datatype, pkg_num_comms);
 
       pkg_num_comms = 0;
       for (p = 0; p < num_procs; p++)
@@ -603,9 +603,9 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
             /* sort the comm_struct data                               */
             /* note: this bubble sort will maintain the original order */
             /*       for data with the same `orig' and `dest'          */
-            comm_origs = zzz_TAlloc(int, num_comms);
-            comm_dests = zzz_TAlloc(int, num_comms);
-            comm_sort  = zzz_TAlloc(int, num_comms);
+            comm_origs = hypre_TAlloc(int, num_comms);
+            comm_dests = hypre_TAlloc(int, num_comms);
+            comm_sort  = hypre_TAlloc(int, num_comms);
             for (i = 0; i < num_comms; i++)
             {
                comm_origs[i] = comm_structs[p][i].orig;
@@ -636,9 +636,9 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
             }
 
             /* compute arguments for MPI_Type_struct routine */
-            comm_block_lengths = zzz_TAlloc(int, num_comms);
-            comm_displacements = zzz_TAlloc(MPI_Aint, num_comms);
-            comm_types         = zzz_TAlloc(MPI_Datatype, num_comms);
+            comm_block_lengths = hypre_TAlloc(int, num_comms);
+            comm_displacements = hypre_TAlloc(MPI_Aint, num_comms);
+            comm_types         = hypre_TAlloc(MPI_Datatype, num_comms);
             for (i = 0; i < num_comms; i++)
             {
                /* extract data from comm_struct */
@@ -652,11 +652,11 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
 
                /* compute displacements */
                comm_displacements[i] = 
-                  (zzz_BoxIndexRank(data_box, zzz_SBoxIMin(comm_sbox)) +
+                  (hypre_BoxIndexRank(data_box, hypre_SBoxIMin(comm_sbox)) +
                    data_box_offset) * sizeof(double);
 
                /* compute types */
-               zzz_GetSBoxType(comm_sbox, data_box, num_values,
+               hypre_GetSBoxType(comm_sbox, data_box, num_values,
                                &comm_types[i]);
             }
 
@@ -671,18 +671,18 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
             /* free up memory */
             for (i = 0; i < num_comms; i++)
                MPI_Type_free(&comm_types[i]);
-            zzz_TFree(comm_block_lengths);
-            zzz_TFree(comm_displacements);
-            zzz_TFree(comm_types);
-            zzz_TFree(comm_origs);
-            zzz_TFree(comm_dests);
-            zzz_TFree(comm_sort);
-            zzz_TFree(comm_structs[p]);
+            hypre_TFree(comm_block_lengths);
+            hypre_TFree(comm_displacements);
+            hypre_TFree(comm_types);
+            hypre_TFree(comm_origs);
+            hypre_TFree(comm_dests);
+            hypre_TFree(comm_sort);
+            hypre_TFree(comm_structs[p]);
          }
       }
 
-      zzz_TFree(comm_structs);
-      zzz_TFree(comm_process_flags);
+      hypre_TFree(comm_structs);
+      hypre_TFree(comm_process_flags);
 
       switch(r)
       {
@@ -701,109 +701,109 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
    }
 
    /*------------------------------------------------------
-    * Set up zzz_CommPkg
+    * Set up hypre_CommPkg
     *------------------------------------------------------*/
 
-   comm_pkg = zzz_CTAlloc(zzz_CommPkg, 1);
+   comm_pkg = hypre_CTAlloc(hypre_CommPkg, 1);
 
-   zzz_CommPkgSendSBoxes(comm_pkg)    = send_sboxes;
-   zzz_CommPkgRecvSBoxes(comm_pkg)    = recv_sboxes;
+   hypre_CommPkgSendSBoxes(comm_pkg)    = send_sboxes;
+   hypre_CommPkgRecvSBoxes(comm_pkg)    = recv_sboxes;
                                       
-   zzz_CommPkgSendBoxRanks(comm_pkg)  = send_box_ranks;
-   zzz_CommPkgRecvBoxRanks(comm_pkg)  = recv_box_ranks;
+   hypre_CommPkgSendBoxRanks(comm_pkg)  = send_box_ranks;
+   hypre_CommPkgRecvBoxRanks(comm_pkg)  = recv_box_ranks;
 
-   zzz_CommPkgComm(comm_pkg)          = comm;
+   hypre_CommPkgComm(comm_pkg)          = comm;
 
-   zzz_CommPkgNumSends(comm_pkg)      = pkg_num_sends;
-   zzz_CommPkgSendProcesses(comm_pkg) = pkg_send_processes;
-   zzz_CommPkgSendTypes(comm_pkg)     = pkg_send_types;
+   hypre_CommPkgNumSends(comm_pkg)      = pkg_num_sends;
+   hypre_CommPkgSendProcesses(comm_pkg) = pkg_send_processes;
+   hypre_CommPkgSendTypes(comm_pkg)     = pkg_send_types;
 
-   zzz_CommPkgNumRecvs(comm_pkg)      = pkg_num_recvs;
-   zzz_CommPkgRecvProcesses(comm_pkg) = pkg_recv_processes;
-   zzz_CommPkgRecvTypes(comm_pkg)     = pkg_recv_types;
+   hypre_CommPkgNumRecvs(comm_pkg)      = pkg_num_recvs;
+   hypre_CommPkgRecvProcesses(comm_pkg) = pkg_recv_processes;
+   hypre_CommPkgRecvTypes(comm_pkg)     = pkg_recv_types;
 
    return comm_pkg;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_FreeCommPkg:
+ * hypre_FreeCommPkg:
  *--------------------------------------------------------------------------*/
 
 void
-zzz_FreeCommPkg( zzz_CommPkg *comm_pkg )
+hypre_FreeCommPkg( hypre_CommPkg *comm_pkg )
 {
    MPI_Datatype  *types;
    int            i;
 
    if (comm_pkg)
    {
-      zzz_ForSBoxArrayI(i, zzz_CommPkgSendSBoxes(comm_pkg))
-         zzz_TFree(zzz_CommPkgSendBoxRanks(comm_pkg)[i]);
-      zzz_ForSBoxArrayI(i, zzz_CommPkgRecvSBoxes(comm_pkg))
-         zzz_TFree(zzz_CommPkgRecvBoxRanks(comm_pkg)[i]);
-      zzz_TFree(zzz_CommPkgSendBoxRanks(comm_pkg));
-      zzz_TFree(zzz_CommPkgRecvBoxRanks(comm_pkg));
+      hypre_ForSBoxArrayI(i, hypre_CommPkgSendSBoxes(comm_pkg))
+         hypre_TFree(hypre_CommPkgSendBoxRanks(comm_pkg)[i]);
+      hypre_ForSBoxArrayI(i, hypre_CommPkgRecvSBoxes(comm_pkg))
+         hypre_TFree(hypre_CommPkgRecvBoxRanks(comm_pkg)[i]);
+      hypre_TFree(hypre_CommPkgSendBoxRanks(comm_pkg));
+      hypre_TFree(hypre_CommPkgRecvBoxRanks(comm_pkg));
 
-      zzz_FreeSBoxArrayArray(zzz_CommPkgSendSBoxes(comm_pkg));
-      zzz_FreeSBoxArrayArray(zzz_CommPkgRecvSBoxes(comm_pkg));
+      hypre_FreeSBoxArrayArray(hypre_CommPkgSendSBoxes(comm_pkg));
+      hypre_FreeSBoxArrayArray(hypre_CommPkgRecvSBoxes(comm_pkg));
 
-      zzz_TFree(zzz_CommPkgSendProcesses(comm_pkg));
-      types = zzz_CommPkgSendTypes(comm_pkg);
-      for (i = 0; i < zzz_CommPkgNumSends(comm_pkg); i++)
+      hypre_TFree(hypre_CommPkgSendProcesses(comm_pkg));
+      types = hypre_CommPkgSendTypes(comm_pkg);
+      for (i = 0; i < hypre_CommPkgNumSends(comm_pkg); i++)
          MPI_Type_free(&types[i]);
-      zzz_TFree(types);
+      hypre_TFree(types);
      
-      zzz_TFree(zzz_CommPkgRecvProcesses(comm_pkg));
-      types = zzz_CommPkgRecvTypes(comm_pkg);
-      for (i = 0; i < zzz_CommPkgNumRecvs(comm_pkg); i++)
+      hypre_TFree(hypre_CommPkgRecvProcesses(comm_pkg));
+      types = hypre_CommPkgRecvTypes(comm_pkg);
+      for (i = 0; i < hypre_CommPkgNumRecvs(comm_pkg); i++)
          MPI_Type_free(&types[i]);
-      zzz_TFree(types);
+      hypre_TFree(types);
 
-      zzz_TFree(comm_pkg);
+      hypre_TFree(comm_pkg);
    }
 }
 
 /*--------------------------------------------------------------------------
- * zzz_NewCommHandle:
+ * hypre_NewCommHandle:
  *--------------------------------------------------------------------------*/
 
-zzz_CommHandle *
-zzz_NewCommHandle( int          num_requests,
+hypre_CommHandle *
+hypre_NewCommHandle( int          num_requests,
                    MPI_Request *requests     )
 {
-   zzz_CommHandle *comm_handle;
+   hypre_CommHandle *comm_handle;
 
-   comm_handle = zzz_CTAlloc(zzz_CommHandle, 1);
+   comm_handle = hypre_CTAlloc(hypre_CommHandle, 1);
 
-   zzz_CommHandleNumRequests(comm_handle) = num_requests;
-   zzz_CommHandleRequests(comm_handle)    = requests;
+   hypre_CommHandleNumRequests(comm_handle) = num_requests;
+   hypre_CommHandleRequests(comm_handle)    = requests;
 
    return comm_handle;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_FreeCommHandle:
+ * hypre_FreeCommHandle:
  *--------------------------------------------------------------------------*/
 
 void
-zzz_FreeCommHandle( zzz_CommHandle *comm_handle )
+hypre_FreeCommHandle( hypre_CommHandle *comm_handle )
 {
    if (comm_handle)
    {
-      zzz_TFree(zzz_CommHandleRequests(comm_handle));
-      zzz_TFree(comm_handle);
+      hypre_TFree(hypre_CommHandleRequests(comm_handle));
+      hypre_TFree(comm_handle);
    }
 }
 
 /*--------------------------------------------------------------------------
- * zzz_InitializeCommunication:
+ * hypre_InitializeCommunication:
  *--------------------------------------------------------------------------*/
 
-zzz_CommHandle *
-zzz_InitializeCommunication( zzz_CommPkg *comm_pkg,
+hypre_CommHandle *
+hypre_InitializeCommunication( hypre_CommPkg *comm_pkg,
                              double      *data     )
 {
-   MPI_Comm        *comm = zzz_CommPkgComm(comm_pkg);
+   MPI_Comm        *comm = hypre_CommPkgComm(comm_pkg);
    int              num_requests;
    MPI_Request     *requests;
 
@@ -817,55 +817,55 @@ zzz_InitializeCommunication( zzz_CommPkg *comm_pkg,
     *--------------------------------------------------------------------*/
 
    num_requests  =
-      zzz_CommPkgNumSends(comm_pkg) +
-      zzz_CommPkgNumRecvs(comm_pkg);
-   requests = zzz_CTAlloc(MPI_Request, num_requests);
+      hypre_CommPkgNumSends(comm_pkg) +
+      hypre_CommPkgNumRecvs(comm_pkg);
+   requests = hypre_CTAlloc(MPI_Request, num_requests);
 
    j = 0;
 
-   for(i = 0; i < zzz_CommPkgNumRecvs(comm_pkg); i++)
+   for(i = 0; i < hypre_CommPkgNumRecvs(comm_pkg); i++)
    {
       MPI_Irecv(vdata, 1,
-                zzz_CommPkgRecvType(comm_pkg, i), 
-                zzz_CommPkgRecvProcess(comm_pkg, i), 
+                hypre_CommPkgRecvType(comm_pkg, i), 
+                hypre_CommPkgRecvProcess(comm_pkg, i), 
 		0, *comm, &requests[j++]);
    }
 
-   for(i = 0; i < zzz_CommPkgNumSends(comm_pkg); i++)
+   for(i = 0; i < hypre_CommPkgNumSends(comm_pkg); i++)
    {
       MPI_Isend(vdata, 1,
-                zzz_CommPkgSendType(comm_pkg, i), 
-                zzz_CommPkgSendProcess(comm_pkg, i), 
+                hypre_CommPkgSendType(comm_pkg, i), 
+                hypre_CommPkgSendProcess(comm_pkg, i), 
 		0, *comm, &requests[j++]);
    }
 
-   return ( zzz_NewCommHandle(num_requests, requests) );
+   return ( hypre_NewCommHandle(num_requests, requests) );
 }
 
 /*--------------------------------------------------------------------------
- * zzz_FinalizeCommunication:
+ * hypre_FinalizeCommunication:
  *--------------------------------------------------------------------------*/
 
 void
-zzz_FinalizeCommunication( zzz_CommHandle *comm_handle )
+hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 {
    MPI_Status *status;
 
    if (comm_handle)
    {
-      if (zzz_CommHandleNumRequests(comm_handle))
+      if (hypre_CommHandleNumRequests(comm_handle))
       {
          status =
-            zzz_CTAlloc(MPI_Status, zzz_CommHandleNumRequests(comm_handle));
+            hypre_CTAlloc(MPI_Status, hypre_CommHandleNumRequests(comm_handle));
 
-         MPI_Waitall(zzz_CommHandleNumRequests(comm_handle),
-                     zzz_CommHandleRequests(comm_handle),
+         MPI_Waitall(hypre_CommHandleNumRequests(comm_handle),
+                     hypre_CommHandleRequests(comm_handle),
                      status);
 
-         zzz_TFree(status);
+         hypre_TFree(status);
       }
  
-      zzz_FreeCommHandle(comm_handle);
+      hypre_FreeCommHandle(comm_handle);
    }
 }
 

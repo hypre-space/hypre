@@ -8,7 +8,7 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Member functions for zzz_Box class:
+ * Member functions for hypre_Box class:
  *   Box algebra functions.
  *
  *****************************************************************************/
@@ -16,75 +16,75 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * zzz_IntersectBoxes:
+ * hypre_IntersectBoxes:
  *   Intersect box1 and box2.
  *   If no intersection, return NULL.
  *--------------------------------------------------------------------------*/
 
-zzz_Box *
-zzz_IntersectBoxes( zzz_Box *box1,
-		    zzz_Box *box2 )
+hypre_Box *
+hypre_IntersectBoxes( hypre_Box *box1,
+		    hypre_Box *box2 )
 {
-   zzz_Box   *box;
+   hypre_Box   *box;
 
-   zzz_Index  imin;
-   zzz_Index  imax;
+   hypre_Index  imin;
+   hypre_Index  imax;
 
    int        d;
 
    /* find x, y, and z bounds */
    for (d = 0; d < 3; d++)
    {
-      zzz_IndexD(imin, d) = max(zzz_BoxIMinD(box1, d), zzz_BoxIMinD(box2, d));
-      zzz_IndexD(imax, d) = min(zzz_BoxIMaxD(box1, d), zzz_BoxIMaxD(box2, d));
-      if (zzz_IndexD(imax, d) < zzz_IndexD(imin, d))
+      hypre_IndexD(imin, d) = max(hypre_BoxIMinD(box1, d), hypre_BoxIMinD(box2, d));
+      hypre_IndexD(imax, d) = min(hypre_BoxIMaxD(box1, d), hypre_BoxIMaxD(box2, d));
+      if (hypre_IndexD(imax, d) < hypre_IndexD(imin, d))
       {
 	 return NULL;
       }
    }
 
    /* return intersection */
-   box = zzz_NewBox(imin, imax);
+   box = hypre_NewBox(imin, imax);
    return box;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_IntersectBoxArrays:
+ * hypre_IntersectBoxArrays:
  *   Intersect box_array1 and box_array2.
  *   If no intersection, return NULL.
  *--------------------------------------------------------------------------*/
 
-zzz_BoxArray *
-zzz_IntersectBoxArrays( zzz_BoxArray *box_array1,
-			zzz_BoxArray *box_array2 )
+hypre_BoxArray *
+hypre_IntersectBoxArrays( hypre_BoxArray *box_array1,
+			hypre_BoxArray *box_array2 )
 {
-   zzz_BoxArray  *box_array;
-   zzz_Box       *box;
+   hypre_BoxArray  *box_array;
+   hypre_Box       *box;
 
-   zzz_Box       *box1;
-   zzz_Box       *box2;
+   hypre_Box       *box1;
+   hypre_Box       *box2;
 
    int            i1, i2;
 
-   box_array = zzz_NewBoxArray();
+   box_array = hypre_NewBoxArray();
 
-   zzz_ForBoxI(i1, box_array1)
+   hypre_ForBoxI(i1, box_array1)
    {
-      box1 = zzz_BoxArrayBox(box_array1, i1);
+      box1 = hypre_BoxArrayBox(box_array1, i1);
 
-      zzz_ForBoxI(i2, box_array2)
+      hypre_ForBoxI(i2, box_array2)
       {
-	 box2 = zzz_BoxArrayBox(box_array2, i2);
+	 box2 = hypre_BoxArrayBox(box_array2, i2);
 
-	 box = zzz_IntersectBoxes(box1, box2);
+	 box = hypre_IntersectBoxes(box1, box2);
 	 if (box)
-	    zzz_AppendBox(box, box_array);
+	    hypre_AppendBox(box, box_array);
       }
    }
 
-   if (zzz_BoxArraySize(box_array) == 0)
+   if (hypre_BoxArraySize(box_array) == 0)
    {
-      zzz_FreeBoxArray(box_array);
+      hypre_FreeBoxArray(box_array);
       return NULL;
    }
    else
@@ -92,18 +92,18 @@ zzz_IntersectBoxArrays( zzz_BoxArray *box_array1,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SubtractBoxes:
+ * hypre_SubtractBoxes:
  *   Compute box1 - box2.
  *--------------------------------------------------------------------------*/
 
-zzz_BoxArray *
-zzz_SubtractBoxes( zzz_Box *box1,
-		   zzz_Box *box2 )
+hypre_BoxArray *
+hypre_SubtractBoxes( hypre_Box *box1,
+		   hypre_Box *box2 )
 {
-   zzz_BoxArray  *box_array;
-   zzz_Box       *box;
+   hypre_BoxArray  *box_array;
+   hypre_Box       *box;
 
-   zzz_Box       *cutbox;
+   hypre_Box       *cutbox;
 
    int            d;
 
@@ -114,11 +114,11 @@ zzz_SubtractBoxes( zzz_Box *box1,
 
    for (d = 0; d < 3; d++)
    {
-      if ( (zzz_BoxIMinD(box2, d) > zzz_BoxIMaxD(box1, d)) ||
-	   (zzz_BoxIMaxD(box2, d) < zzz_BoxIMinD(box1, d)) )
+      if ( (hypre_BoxIMinD(box2, d) > hypre_BoxIMaxD(box1, d)) ||
+	   (hypre_BoxIMaxD(box2, d) < hypre_BoxIMinD(box1, d)) )
       {
-	 box_array = zzz_NewBoxArray();
-	 zzz_AppendBox(zzz_DuplicateBox(box1), box_array);
+	 box_array = hypre_NewBoxArray();
+	 hypre_AppendBox(hypre_DuplicateBox(box1), box_array);
 	 return box_array;
       }
    }
@@ -127,38 +127,38 @@ zzz_SubtractBoxes( zzz_Box *box1,
     * create BoxArray
     *------------------------------------------------------*/
 
-   box_array = zzz_NewBoxArray();
-   cutbox = zzz_DuplicateBox(box1);
+   box_array = hypre_NewBoxArray();
+   cutbox = hypre_DuplicateBox(box1);
 
    /* cut cutbox in x, then y, then z */
    for (d = 0; d < 3; d++)
    {
-      if ( (zzz_BoxIMinD(box2, d) >  zzz_BoxIMinD(cutbox, d)) &&
-	   (zzz_BoxIMinD(box2, d) <= zzz_BoxIMaxD(cutbox, d)) )
+      if ( (hypre_BoxIMinD(box2, d) >  hypre_BoxIMinD(cutbox, d)) &&
+	   (hypre_BoxIMinD(box2, d) <= hypre_BoxIMaxD(cutbox, d)) )
       {
-	 box = zzz_DuplicateBox(cutbox);
-	 zzz_BoxIMaxD(box, d) = zzz_BoxIMinD(box2, d) - 1;
-	 zzz_AppendBox(box, box_array);
+	 box = hypre_DuplicateBox(cutbox);
+	 hypre_BoxIMaxD(box, d) = hypre_BoxIMinD(box2, d) - 1;
+	 hypre_AppendBox(box, box_array);
 
-	 zzz_BoxIMinD(cutbox, d) = zzz_BoxIMinD(box2, d);
+	 hypre_BoxIMinD(cutbox, d) = hypre_BoxIMinD(box2, d);
       }
-      if ( (zzz_BoxIMaxD(box2, d) >= zzz_BoxIMinD(cutbox, d)) &&
-	   (zzz_BoxIMaxD(box2, d) <  zzz_BoxIMaxD(cutbox, d)) )
+      if ( (hypre_BoxIMaxD(box2, d) >= hypre_BoxIMinD(cutbox, d)) &&
+	   (hypre_BoxIMaxD(box2, d) <  hypre_BoxIMaxD(cutbox, d)) )
       {
-	 box = zzz_DuplicateBox(cutbox);
-	 zzz_BoxIMinD(box, d) = zzz_BoxIMaxD(box2, d) + 1;
-	 zzz_AppendBox(box, box_array);
+	 box = hypre_DuplicateBox(cutbox);
+	 hypre_BoxIMinD(box, d) = hypre_BoxIMaxD(box2, d) + 1;
+	 hypre_AppendBox(box, box_array);
 
-	 zzz_BoxIMaxD(cutbox, d) = zzz_BoxIMaxD(box2, d);
+	 hypre_BoxIMaxD(cutbox, d) = hypre_BoxIMaxD(box2, d);
       }
    }
 
-   zzz_FreeBox(cutbox);
+   hypre_FreeBox(cutbox);
    return box_array;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_UnionBoxArray:
+ * hypre_UnionBoxArray:
  *   Compute the union of all boxes.
  *
  * To compute the union, we first construct a logically rectangular,
@@ -197,14 +197,14 @@ zzz_SubtractBoxes( zzz_Box *box1,
  *
  *--------------------------------------------------------------------------*/
 
-zzz_BoxArray *
-zzz_UnionBoxArray( zzz_BoxArray *boxes )
+hypre_BoxArray *
+hypre_UnionBoxArray( hypre_BoxArray *boxes )
 {
-   zzz_BoxArray  *box_union;
+   hypre_BoxArray  *box_union;
 
-   zzz_Box       *box;
-   zzz_Index      imin;
-   zzz_Index      imax;
+   hypre_Box       *box;
+   hypre_Index      imin;
+   hypre_Index      imax;
 
    int     	 *block_index[3];
    int     	  block_sz[3];
@@ -225,9 +225,9 @@ zzz_UnionBoxArray( zzz_BoxArray *boxes )
     * If the size of boxes is 0, return an empty union
     *------------------------------------------------------*/
 
-   if (zzz_BoxArraySize(boxes) == 0)
+   if (hypre_BoxArraySize(boxes) == 0)
    {
-      box_union = zzz_NewBoxArray();
+      box_union = hypre_NewBoxArray();
       return box_union;
    }
       
@@ -237,18 +237,18 @@ zzz_UnionBoxArray( zzz_BoxArray *boxes )
       
    for (d = 0; d < 3; d++)
    {
-      block_index[d] = zzz_TAlloc(int, 2 * zzz_BoxArraySize(boxes));
+      block_index[d] = hypre_TAlloc(int, 2 * hypre_BoxArraySize(boxes));
       block_sz[d] = 0;
    }
       
-   zzz_ForBoxI(bi, boxes)
+   hypre_ForBoxI(bi, boxes)
    {
-      box = zzz_BoxArrayBox(boxes, bi);
+      box = hypre_BoxArrayBox(boxes, bi);
 
       for (d = 0; d < 3; d++)
       {
-	 iminmax[0] = zzz_BoxIMinD(box, d);
-	 iminmax[1] = zzz_BoxIMaxD(box, d) + 1;
+	 iminmax[0] = hypre_BoxIMinD(box, d);
+	 iminmax[1] = hypre_BoxIMaxD(box, d) + 1;
 
 	 for (i = 0; i < 2; i++)
 	 {
@@ -291,32 +291,32 @@ zzz_UnionBoxArray( zzz_BoxArray *boxes )
     * Set up the block array
     *------------------------------------------------------*/
       
-   block = zzz_CTAlloc(int, (block_sz[0] * block_sz[1] * block_sz[2]));
+   block = hypre_CTAlloc(int, (block_sz[0] * block_sz[1] * block_sz[2]));
       
-   zzz_ForBoxI(bi, boxes)
+   hypre_ForBoxI(bi, boxes)
    {
-      box = zzz_BoxArrayBox(boxes, bi);
+      box = hypre_BoxArrayBox(boxes, bi);
 
       /* find the block_index indices corresponding to the current box */
       for (d = 0; d < 3; d++)
       {
 	 j = 0;
 
-	 while (zzz_BoxIMinD(box, d) != block_index[d][j])
+	 while (hypre_BoxIMinD(box, d) != block_index[d][j])
 	    j++;
-	 zzz_IndexD(imin, d) = j;
+	 hypre_IndexD(imin, d) = j;
 
-	 while (zzz_BoxIMaxD(box, d) + 1 != block_index[d][j])
+	 while (hypre_BoxIMaxD(box, d) + 1 != block_index[d][j])
 	    j++;
-	 zzz_IndexD(imax, d) = j;
+	 hypre_IndexD(imax, d) = j;
       }
 
       /* note: boxes of size zero will not be added to block */
-      for (k = zzz_IndexD(imin, 2); k < zzz_IndexD(imax, 2); k++)
+      for (k = hypre_IndexD(imin, 2); k < hypre_IndexD(imax, 2); k++)
       {
-	 for (j = zzz_IndexD(imin, 1); j < zzz_IndexD(imax, 1); j++)
+	 for (j = hypre_IndexD(imin, 1); j < hypre_IndexD(imax, 1); j++)
 	 {
-	    for (i = zzz_IndexD(imin, 0); i < zzz_IndexD(imax, 0); i++)
+	    for (i = hypre_IndexD(imin, 0); i < hypre_IndexD(imax, 0); i++)
 	    {
 	       index = ((k) * block_sz[1] + j) * block_sz[0] + i;
 
@@ -393,7 +393,7 @@ zzz_UnionBoxArray( zzz_BoxArray *boxes )
     * Set up the box_union BoxArray
     *------------------------------------------------------*/
 
-   box_union = zzz_NewBoxArray();
+   box_union = hypre_NewBoxArray();
 
    index = 0;
    for (k = 0; k < block_sz[2]; k++)
@@ -408,16 +408,16 @@ zzz_UnionBoxArray( zzz_BoxArray *boxes )
 	       joff = (block[index] % factor[2]) / factor[1];
 	       koff = (block[index]            ) / factor[2];
 
-	       zzz_IndexD(imin, 0) = block_index[0][i];
-	       zzz_IndexD(imin, 1) = block_index[1][j];
-	       zzz_IndexD(imin, 2) = block_index[2][k];
-	       zzz_IndexD(imax, 0) = block_index[0][i + ioff] - 1;
-	       zzz_IndexD(imax, 1) = block_index[1][j + joff] - 1;
-	       zzz_IndexD(imax, 2) = block_index[2][k + koff] - 1;
+	       hypre_IndexD(imin, 0) = block_index[0][i];
+	       hypre_IndexD(imin, 1) = block_index[1][j];
+	       hypre_IndexD(imin, 2) = block_index[2][k];
+	       hypre_IndexD(imax, 0) = block_index[0][i + ioff] - 1;
+	       hypre_IndexD(imax, 1) = block_index[1][j + joff] - 1;
+	       hypre_IndexD(imax, 2) = block_index[2][k + koff] - 1;
 
-	       box = zzz_NewBox(imin, imax);
+	       box = hypre_NewBox(imin, imax);
 
-	       zzz_AppendBox(box, box_union);
+	       hypre_AppendBox(box, box_union);
 	    }
 	       
 	    index++;
@@ -430,9 +430,9 @@ zzz_UnionBoxArray( zzz_BoxArray *boxes )
     *------------------------------------------------------*/
 
    for (d = 0; d < 3; d++)
-      zzz_TFree(block_index[d]);
+      hypre_TFree(block_index[d]);
 
-   zzz_TFree(block);
+   hypre_TFree(block);
    
    /*---------------------------------------------------------
     * Return box_union

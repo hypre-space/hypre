@@ -22,7 +22,7 @@ HEADERS =\
  struct_matrix.h\
  struct_stencil.h\
  struct_vector.h\
- ZZZ_mv.h
+ HYPRE_mv.h
 
 FILES =\
  box.c\
@@ -44,10 +44,10 @@ FILES =\
  struct_scale.c\
  struct_stencil.c\
  struct_vector.c\
- ZZZ_struct_grid.c\
- ZZZ_struct_matrix.c\
- ZZZ_struct_stencil.c\
- ZZZ_struct_vector.c
+ HYPRE_struct_grid.c\
+ HYPRE_struct_matrix.c\
+ HYPRE_struct_stencil.c\
+ HYPRE_struct_vector.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -58,7 +58,7 @@ CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I/usr/local/mpi/mpich/include\
- -g -Wall -DZZZ_DEBUG -DZZZ_TIMING
+ -g -Wall -DHYPRE_DEBUG -DHYPRE_TIMING
 
 FFLAGS = -g
 
@@ -69,9 +69,9 @@ LFLAGS =\
  -L/usr/local/mpi/mpich/lib/solaris/ch_p4\
  -L.\
  -L../utilities\
- -lZZZ_mv\
- -lZZZ_timing\
- -lZZZ_memory\
+ -lHYPRE_mv\
+ -lHYPRE_timing\
+ -lHYPRE_memory\
  -lnsl -lsocket -lmpi\
  -lf2c\
  -lcegdb\
@@ -83,27 +83,27 @@ LFLAGS =\
 # Main rules
 ##################################################################
 
-driver_internal: driver_internal.o libZZZ_mv.a
+driver_internal: driver_internal.o libHYPRE_mv.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_internal driver_internal.o ${LFLAGS}
 
-one_to_many: one_to_many.o libZZZ_mv.a
+one_to_many: one_to_many.o libHYPRE_mv.a
 	@echo  "Linking" $@ "... "
 	${CC} -o one_to_many one_to_many.o ${LFLAGS}
 
-one_to_many_vector: one_to_many_vector.o libZZZ_mv.a
+one_to_many_vector: one_to_many_vector.o libHYPRE_mv.a
 	@echo  "Linking" $@ "... "
 	${CC} -o one_to_many_vector one_to_many_vector.o ${LFLAGS}
 
-create_2d_laplacian: create_2d_laplacian.o libZZZ_mv.a
+create_2d_laplacian: create_2d_laplacian.o libHYPRE_mv.a
 	@echo  "Linking" $@ "... "
 	${CC} -o create_2d_laplacian create_2d_laplacian.o ${LFLAGS}
 
-create_3d_laplacian: create_3d_laplacian.o libZZZ_mv.a
+create_3d_laplacian: create_3d_laplacian.o libHYPRE_mv.a
 	@echo  "Linking" $@ "... "
 	${CC} -o create_3d_laplacian create_3d_laplacian.o ${LFLAGS}
 
-libZZZ_mv.a: ${OBJS}
+libHYPRE_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -ru $@ ${OBJS}
 	ranlib $@
@@ -127,7 +127,7 @@ ${OBJS}: ${HEADERS}
 ##################################################################
 
 veryclean: clean
-	@rm -f libZZZ_mv.a
+	@rm -f libHYPRE_mv.a
 	@rm -f driver driver_internal
 
 clean:

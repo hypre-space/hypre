@@ -8,69 +8,69 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * ZZZ_StructGrid interface
+ * HYPRE_StructGrid interface
  *
  *****************************************************************************/
 
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * ZZZ_NewStructGrid
+ * HYPRE_NewStructGrid
  *--------------------------------------------------------------------------*/
 
-ZZZ_StructGrid
-ZZZ_NewStructGrid( MPI_Comm *comm,
+HYPRE_StructGrid
+HYPRE_NewStructGrid( MPI_Comm *comm,
                    int       dim )
 {
-   return ( (ZZZ_StructGrid) zzz_NewStructGrid( comm, dim ) );
+   return ( (HYPRE_StructGrid) hypre_NewStructGrid( comm, dim ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_FreeStructGrid
+ * HYPRE_FreeStructGrid
  *--------------------------------------------------------------------------*/
 
 void 
-ZZZ_FreeStructGrid( ZZZ_StructGrid grid )
+HYPRE_FreeStructGrid( HYPRE_StructGrid grid )
 {
-   zzz_FreeStructGrid( (zzz_StructGrid *) grid );
+   hypre_FreeStructGrid( (hypre_StructGrid *) grid );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SetStructGridExtents
+ * HYPRE_SetStructGridExtents
  *--------------------------------------------------------------------------*/
 
 void 
-ZZZ_SetStructGridExtents( ZZZ_StructGrid  grid,
+HYPRE_SetStructGridExtents( HYPRE_StructGrid  grid,
                           int            *ilower,
                           int            *iupper )
 {
-   zzz_Index  new_ilower;
-   zzz_Index  new_iupper;
+   hypre_Index  new_ilower;
+   hypre_Index  new_iupper;
 
    int        d;
 
-   for (d = 0; d < zzz_StructGridDim((zzz_StructGrid *) grid); d++)
+   for (d = 0; d < hypre_StructGridDim((hypre_StructGrid *) grid); d++)
    {
-      zzz_IndexD(new_ilower, d) = ilower[d];
-      zzz_IndexD(new_iupper, d) = iupper[d];
+      hypre_IndexD(new_ilower, d) = ilower[d];
+      hypre_IndexD(new_iupper, d) = iupper[d];
    }
-   for (d = zzz_StructGridDim((zzz_StructGrid *) grid); d < 3; d++)
+   for (d = hypre_StructGridDim((hypre_StructGrid *) grid); d < 3; d++)
    {
-      zzz_IndexD(new_ilower, d) = 0;
-      zzz_IndexD(new_iupper, d) = 0;
+      hypre_IndexD(new_ilower, d) = 0;
+      hypre_IndexD(new_iupper, d) = 0;
    }
 
-   zzz_SetStructGridExtents( (zzz_StructGrid *) grid, new_ilower, new_iupper );
+   hypre_SetStructGridExtents( (hypre_StructGrid *) grid, new_ilower, new_iupper );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_AssembleStructGrid
+ * HYPRE_AssembleStructGrid
  *--------------------------------------------------------------------------*/
 
 void 
-ZZZ_AssembleStructGrid( ZZZ_StructGrid grid )
+HYPRE_AssembleStructGrid( HYPRE_StructGrid grid )
 {
-   zzz_AssembleStructGrid( (zzz_StructGrid *) grid );
+   hypre_AssembleStructGrid( (hypre_StructGrid *) grid );
 }
 
 

@@ -9,16 +9,16 @@
 
 /******************************************************************************
  *
- * Header for ZZZ_PCG
+ * Header for HYPRE_PCG
  *
  *****************************************************************************/
 
-#ifndef _ZZZ_PCG_HEADER
-#define _ZZZ_PCG_HEADER
+#ifndef HYPRE_PCG_HEADER
+#define HYPRE_PCG_HEADER
 
 
 /*--------------------------------------------------------------------------
- * ZZZ_PCGData
+ * HYPRE_PCGData
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -38,26 +38,26 @@ typedef struct
    double   norm;
    double   rel_norm;
 
-} ZZZ_PCGData;
+} HYPRE_PCGData;
 
 /*--------------------------------------------------------------------------
- * Accessor functions for the ZZZ_PCGData structure
+ * Accessor functions for the HYPRE_PCGData structure
  *--------------------------------------------------------------------------*/
 
-#define ZZZ_PCGDataMaxIter(pcg_data)       ((pcg_data) -> max_iter)
-#define ZZZ_PCGDataTwoNorm(pcg_data)       ((pcg_data) -> two_norm)
+#define HYPRE_PCGDataMaxIter(pcg_data)       ((pcg_data) -> max_iter)
+#define HYPRE_PCGDataTwoNorm(pcg_data)       ((pcg_data) -> two_norm)
 
-#define ZZZ_PCGDataA(pcg_data)             ((pcg_data) -> A)
-#define ZZZ_PCGDataP(pcg_data)             ((pcg_data) -> p)
-#define ZZZ_PCGDataS(pcg_data)             ((pcg_data) -> s)
-#define ZZZ_PCGDataR(pcg_data)             ((pcg_data) -> r)
+#define HYPRE_PCGDataA(pcg_data)             ((pcg_data) -> A)
+#define HYPRE_PCGDataP(pcg_data)             ((pcg_data) -> p)
+#define HYPRE_PCGDataS(pcg_data)             ((pcg_data) -> s)
+#define HYPRE_PCGDataR(pcg_data)             ((pcg_data) -> r)
 
-#define ZZZ_PCGDataPrecond(pcg_data)       ((pcg_data) -> precond)
-#define ZZZ_PCGDataPrecondData(pcg_data)   ((pcg_data) -> precond_data)
+#define HYPRE_PCGDataPrecond(pcg_data)       ((pcg_data) -> precond)
+#define HYPRE_PCGDataPrecondData(pcg_data)   ((pcg_data) -> precond_data)
 
-#define ZZZ_PCGDataNumIterations(pcg_data) ((pcg_data) -> num_iterations)
-#define ZZZ_PCGDataNorm(pcg_data)          ((pcg_data) -> norm)
-#define ZZZ_PCGDataRelNorm(pcg_data)       ((pcg_data) -> rel_norm)
+#define HYPRE_PCGDataNumIterations(pcg_data) ((pcg_data) -> num_iterations)
+#define HYPRE_PCGDataNorm(pcg_data)          ((pcg_data) -> norm)
+#define HYPRE_PCGDataRelNorm(pcg_data)       ((pcg_data) -> rel_norm)
 
 #endif
 
@@ -65,4 +65,4 @@ typedef struct
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-void ZZZ_PCG( Vector *x, Vector *b, double  tol, void *data );
+void HYPRE_PCG( Vector *x, Vector *b, double  tol, void *data );

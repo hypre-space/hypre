@@ -8,37 +8,37 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Header info for zzz_StructStencil data structures
+ * Header info for hypre_StructStencil data structures
  *
  *****************************************************************************/
 
-#ifndef zzz_STRUCT_STENCIL_HEADER
-#define zzz_STRUCT_STENCIL_HEADER
+#ifndef hypre_STRUCT_STENCIL_HEADER
+#define hypre_STRUCT_STENCIL_HEADER
 
 
 /*--------------------------------------------------------------------------
- * zzz_StructStencil
+ * hypre_StructStencil
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
-   zzz_Index   *shape;   /* Description of a stencil's shape */
+   hypre_Index   *shape;   /* Description of a stencil's shape */
    int          size;    /* Number of stencil coefficients */
                 
    int          dim;     /* Number of dimensions */
 
-} zzz_StructStencil;
+} hypre_StructStencil;
 
 /*--------------------------------------------------------------------------
- * Accessor functions for the zzz_StructStencil structure
+ * Accessor functions for the hypre_StructStencil structure
  *--------------------------------------------------------------------------*/
 
-#define zzz_StructStencilShape(stencil) ((stencil) -> shape)
-#define zzz_StructStencilSize(stencil)  ((stencil) -> size)
+#define hypre_StructStencilShape(stencil) ((stencil) -> shape)
+#define hypre_StructStencilSize(stencil)  ((stencil) -> size)
 
-#define zzz_StructStencilDim(stencil)   ((stencil) -> dim)
+#define hypre_StructStencilDim(stencil)   ((stencil) -> dim)
 
-#define zzz_StructStencilElement(stencil, i) \
-zzz_StructStencilShape(stencil)[i]
+#define hypre_StructStencilElement(stencil, i) \
+hypre_StructStencilShape(stencil)[i]
 
 #endif

@@ -12,8 +12,8 @@
  *
  *****************************************************************************/
 
-#ifndef zzz_GENERAL_HEADER
-#define zzz_GENERAL_HEADER
+#ifndef hypre_GENERAL_HEADER
+#define hypre_GENERAL_HEADER
 
 /*--------------------------------------------------------------------------
  * Define various functions

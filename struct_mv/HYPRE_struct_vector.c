@@ -8,172 +8,172 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * ZZZ_StructVector interface
+ * HYPRE_StructVector interface
  *
  *****************************************************************************/
 
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * ZZZ_NewStructVector
+ * HYPRE_NewStructVector
  *--------------------------------------------------------------------------*/
 
-ZZZ_StructVector
-ZZZ_NewStructVector( MPI_Comm          *comm,
-                     ZZZ_StructGrid     grid,
-                     ZZZ_StructStencil  stencil )
+HYPRE_StructVector
+HYPRE_NewStructVector( MPI_Comm          *comm,
+                     HYPRE_StructGrid     grid,
+                     HYPRE_StructStencil  stencil )
 {
-   return ( (ZZZ_StructVector)
-            zzz_NewStructVector( comm,
-                                 (zzz_StructGrid *) grid ) );
+   return ( (HYPRE_StructVector)
+            hypre_NewStructVector( comm,
+                                 (hypre_StructGrid *) grid ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_FreeStructVector
+ * HYPRE_FreeStructVector
  *--------------------------------------------------------------------------*/
 
 int 
-ZZZ_FreeStructVector( ZZZ_StructVector struct_vector )
+HYPRE_FreeStructVector( HYPRE_StructVector struct_vector )
 {
-   return( zzz_FreeStructVector( (zzz_StructVector *) struct_vector ) );
+   return( hypre_FreeStructVector( (hypre_StructVector *) struct_vector ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_InitializeStructVector
+ * HYPRE_InitializeStructVector
  *--------------------------------------------------------------------------*/
 
 int
-ZZZ_InitializeStructVector( ZZZ_StructVector vector )
+HYPRE_InitializeStructVector( HYPRE_StructVector vector )
 {
-   return ( zzz_InitializeStructVector( (zzz_StructVector *) vector ) );
+   return ( hypre_InitializeStructVector( (hypre_StructVector *) vector ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SetStructVectorValues
+ * HYPRE_SetStructVectorValues
  *--------------------------------------------------------------------------*/
 
 int 
-ZZZ_SetStructVectorValues( ZZZ_StructVector  vector,
+HYPRE_SetStructVectorValues( HYPRE_StructVector  vector,
                            int              *grid_index,
                            double            values     )
 {
-   zzz_StructVector *new_vector = (zzz_StructVector *) vector;
-   zzz_Index         new_grid_index;
+   hypre_StructVector *new_vector = (hypre_StructVector *) vector;
+   hypre_Index         new_grid_index;
 
    int               d;
    int               ierr;
 
-   for (d = 0;d < zzz_StructGridDim(zzz_StructVectorGrid(new_vector)); d++)
+   for (d = 0;d < hypre_StructGridDim(hypre_StructVectorGrid(new_vector)); d++)
    {
-      zzz_IndexD(new_grid_index, d) = grid_index[d];
+      hypre_IndexD(new_grid_index, d) = grid_index[d];
    }
 
-   ierr = zzz_SetStructVectorValues( new_vector, new_grid_index, values );
+   ierr = hypre_SetStructVectorValues( new_vector, new_grid_index, values );
 
    return (ierr);
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_GetStructVectorValues
+ * HYPRE_GetStructVectorValues
  *--------------------------------------------------------------------------*/
 
 int 
-ZZZ_GetStructVectorValues( ZZZ_StructVector  vector,
+HYPRE_GetStructVectorValues( HYPRE_StructVector  vector,
                            int              *grid_index,
                            double           *values     )
 {
-   zzz_StructVector *new_vector = (zzz_StructVector *) vector;
-   zzz_Index         new_grid_index;
+   hypre_StructVector *new_vector = (hypre_StructVector *) vector;
+   hypre_Index         new_grid_index;
 
    int               d;
    int               ierr;
 
-   for (d = 0;d < zzz_StructGridDim(zzz_StructVectorGrid(new_vector)); d++)
+   for (d = 0;d < hypre_StructGridDim(hypre_StructVectorGrid(new_vector)); d++)
    {
-      zzz_IndexD(new_grid_index, d) = grid_index[d];
+      hypre_IndexD(new_grid_index, d) = grid_index[d];
    }
 
-   ierr = zzz_GetStructVectorValues( new_vector, new_grid_index, values );
+   ierr = hypre_GetStructVectorValues( new_vector, new_grid_index, values );
 
    return (ierr);
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SetStructVectorBoxValues
+ * HYPRE_SetStructVectorBoxValues
  *--------------------------------------------------------------------------*/
 
 int 
-ZZZ_SetStructVectorBoxValues( ZZZ_StructVector  vector,
+HYPRE_SetStructVectorBoxValues( HYPRE_StructVector  vector,
                               int              *ilower,
                               int              *iupper,
                               int               num_stencil_indices,
                               int              *stencil_indices,
                               double           *values              )
 {
-   zzz_StructVector *new_vector = (zzz_StructVector *) vector;
-   zzz_Index         new_ilower;
-   zzz_Index         new_iupper;
-   zzz_Box          *new_value_box;
+   hypre_StructVector *new_vector = (hypre_StructVector *) vector;
+   hypre_Index         new_ilower;
+   hypre_Index         new_iupper;
+   hypre_Box          *new_value_box;
                     
    int               d;
    int               ierr;
 
-   for (d = 0;d < zzz_StructGridDim(zzz_StructVectorGrid(new_vector)); d++)
+   for (d = 0;d < hypre_StructGridDim(hypre_StructVectorGrid(new_vector)); d++)
    {
-      zzz_IndexD(new_ilower, d) = ilower[d];
-      zzz_IndexD(new_iupper, d) = iupper[d];
+      hypre_IndexD(new_ilower, d) = ilower[d];
+      hypre_IndexD(new_iupper, d) = iupper[d];
    }
-   new_value_box = zzz_NewBox(new_ilower, new_iupper);
+   new_value_box = hypre_NewBox(new_ilower, new_iupper);
 
-   ierr = zzz_SetStructVectorBoxValues( new_vector, new_value_box, values );
+   ierr = hypre_SetStructVectorBoxValues( new_vector, new_value_box, values );
 
-   zzz_FreeBox(new_value_box);
+   hypre_FreeBox(new_value_box);
 
    return (ierr);
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_AssembleStructVector
+ * HYPRE_AssembleStructVector
  *--------------------------------------------------------------------------*/
 
 int 
-ZZZ_AssembleStructVector( ZZZ_StructVector vector )
+HYPRE_AssembleStructVector( HYPRE_StructVector vector )
 {
-   return( zzz_AssembleStructVector( (zzz_StructVector *) vector ) );
+   return( hypre_AssembleStructVector( (hypre_StructVector *) vector ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_PrintStructVector
+ * HYPRE_PrintStructVector
  *--------------------------------------------------------------------------*/
 
 void
-ZZZ_PrintStructVector( char            *filename,
-                       ZZZ_StructVector vector,
+HYPRE_PrintStructVector( char            *filename,
+                       HYPRE_StructVector vector,
                        int              all )
 {
-   zzz_PrintStructVector( filename,
-			  (zzz_StructVector *) vector, 
+   hypre_PrintStructVector( filename,
+			  (hypre_StructVector *) vector, 
 			  all );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SetStructVectorNumGhost
+ * HYPRE_SetStructVectorNumGhost
  *--------------------------------------------------------------------------*/
  
 void
-ZZZ_SetStructVectorNumGhost( ZZZ_StructMatrix  vector,
+HYPRE_SetStructVectorNumGhost( HYPRE_StructMatrix  vector,
                              int              *num_ghost )
 {
-   zzz_SetStructVectorNumGhost( (zzz_StructVector *) vector, num_ghost);
+   hypre_SetStructVectorNumGhost( (hypre_StructVector *) vector, num_ghost);
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SetStructVectorConstantValues
+ * HYPRE_SetStructVectorConstantValues
  *--------------------------------------------------------------------------*/
  
 int
-ZZZ_SetStructVectorConstantValues( ZZZ_StructMatrix  vector,
+HYPRE_SetStructVectorConstantValues( HYPRE_StructMatrix  vector,
 				   double            values )
 {
-   return( zzz_SetStructVectorConstantValues( (zzz_StructVector *) vector, values) );
+   return( hypre_SetStructVectorConstantValues( (hypre_StructVector *) vector, values) );
 }

@@ -15,42 +15,42 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * zzz_StructScale
+ * hypre_StructScale
  *--------------------------------------------------------------------------*/
 
 int
-zzz_StructScale( double            alpha,
-                 zzz_StructVector *y     )
+hypre_StructScale( double            alpha,
+                 hypre_StructVector *y     )
 {
    int ierr;
 
-   zzz_Box              *y_data_box;
+   hypre_Box              *y_data_box;
 
    int                   yi;
    double               *yp;
 
-   zzz_BoxArray         *boxes;
-   zzz_Box              *box;
-   zzz_Index             loop_size;
-   zzz_IndexRef          start;
-   zzz_Index             unit_stride;
+   hypre_BoxArray         *boxes;
+   hypre_Box              *box;
+   hypre_Index             loop_size;
+   hypre_IndexRef          start;
+   hypre_Index             unit_stride;
 
    int                   i;
    int                   loopi, loopj, loopk;
 
-   zzz_SetIndex(unit_stride, 1, 1, 1);
+   hypre_SetIndex(unit_stride, 1, 1, 1);
 
-   boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(y));
-   zzz_ForBoxI(i, boxes)
+   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
+   hypre_ForBoxI(i, boxes)
    {
-      box   = zzz_BoxArrayBox(boxes, i);
-      start = zzz_BoxIMin(box);
+      box   = hypre_BoxArrayBox(boxes, i);
+      start = hypre_BoxIMin(box);
 
-      y_data_box = zzz_BoxArrayBox(zzz_StructVectorDataSpace(y), i);
-      yp = zzz_StructVectorBoxData(y, i);
+      y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+      yp = hypre_StructVectorBoxData(y, i);
 
-      zzz_GetBoxSize(box, loop_size);
-      zzz_BoxLoop1(loopi, loopj, loopk, loop_size,
+      hypre_GetBoxSize(box, loop_size);
+      hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
                    y_data_box, start, unit_stride, yi,
                    {
                       yp[yi] *= alpha;

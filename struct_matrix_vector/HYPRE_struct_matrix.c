@@ -8,70 +8,70 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * ZZZ_StructMatrix interface
+ * HYPRE_StructMatrix interface
  *
  *****************************************************************************/
 
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * ZZZ_NewStructMatrix
+ * HYPRE_NewStructMatrix
  *--------------------------------------------------------------------------*/
 
-ZZZ_StructMatrix 
-ZZZ_NewStructMatrix( MPI_Comm          *comm,
-                     ZZZ_StructGrid     grid,
-                     ZZZ_StructStencil  stencil )
+HYPRE_StructMatrix 
+HYPRE_NewStructMatrix( MPI_Comm          *comm,
+                     HYPRE_StructGrid     grid,
+                     HYPRE_StructStencil  stencil )
 {
-   return ( (ZZZ_StructMatrix)
-            zzz_NewStructMatrix( comm,
-                                 (zzz_StructGrid *) grid,
-                                 (zzz_StructStencil *) stencil ) );
+   return ( (HYPRE_StructMatrix)
+            hypre_NewStructMatrix( comm,
+                                 (hypre_StructGrid *) grid,
+                                 (hypre_StructStencil *) stencil ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_FreeStructMatrix
+ * HYPRE_FreeStructMatrix
  *--------------------------------------------------------------------------*/
 
 int 
-ZZZ_FreeStructMatrix( ZZZ_StructMatrix matrix )
+HYPRE_FreeStructMatrix( HYPRE_StructMatrix matrix )
 {
-   return( zzz_FreeStructMatrix( (zzz_StructMatrix *) matrix ) );
+   return( hypre_FreeStructMatrix( (hypre_StructMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_InitializeStructMatrix
+ * HYPRE_InitializeStructMatrix
  *--------------------------------------------------------------------------*/
 
 int
-ZZZ_InitializeStructMatrix( ZZZ_StructMatrix matrix )
+HYPRE_InitializeStructMatrix( HYPRE_StructMatrix matrix )
 {
-   return ( zzz_InitializeStructMatrix( (zzz_StructMatrix *) matrix ) );
+   return ( hypre_InitializeStructMatrix( (hypre_StructMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SetStructMatrixValues
+ * HYPRE_SetStructMatrixValues
  *--------------------------------------------------------------------------*/
 
 int 
-ZZZ_SetStructMatrixValues( ZZZ_StructMatrix  matrix,
+HYPRE_SetStructMatrixValues( HYPRE_StructMatrix  matrix,
                            int              *grid_index,
                            int               num_stencil_indices,
                            int              *stencil_indices,
                            double           *values              )
 {
-   zzz_StructMatrix *new_matrix = (zzz_StructMatrix *) matrix;
-   zzz_Index         new_grid_index;
+   hypre_StructMatrix *new_matrix = (hypre_StructMatrix *) matrix;
+   hypre_Index         new_grid_index;
 
    int               d;
    int               ierr;
 
-   for (d = 0; d < zzz_StructGridDim(zzz_StructMatrixGrid(new_matrix)); d++)
+   for (d = 0; d < hypre_StructGridDim(hypre_StructMatrixGrid(new_matrix)); d++)
    {
-      zzz_IndexD(new_grid_index, d) = grid_index[d];
+      hypre_IndexD(new_grid_index, d) = grid_index[d];
    }
 
-   ierr = zzz_SetStructMatrixValues( new_matrix,
+   ierr = hypre_SetStructMatrixValues( new_matrix,
                                      new_grid_index,
                                      num_stencil_indices, stencil_indices,
                                      values );
@@ -80,136 +80,136 @@ ZZZ_SetStructMatrixValues( ZZZ_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SetStructMatrixCoeffs
+ * HYPRE_SetStructMatrixCoeffs
  *--------------------------------------------------------------------------*/
 
 int 
-ZZZ_SetStructMatrixCoeffs( ZZZ_StructMatrix  matrix,
+HYPRE_SetStructMatrixCoeffs( HYPRE_StructMatrix  matrix,
                            int              *grid_index,
                            double           *values              )
 {
-   zzz_StructMatrix *new_matrix = (zzz_StructMatrix *) matrix;
-   zzz_Index         new_grid_index;
+   hypre_StructMatrix *new_matrix = (hypre_StructMatrix *) matrix;
+   hypre_Index         new_grid_index;
 
    int                 d;
    int                 s;
    int                 ierr;
    int                 stencil_size;
-   zzz_StructStencil  *stencil;
+   hypre_StructStencil  *stencil;
    int                *stencil_indicies;
 
-   stencil = zzz_StructMatrixStencil(new_matrix);
-   stencil_size = zzz_StructStencilSize(stencil);
-   stencil_indicies = zzz_CTAlloc(int, stencil_size);
+   stencil = hypre_StructMatrixStencil(new_matrix);
+   stencil_size = hypre_StructStencilSize(stencil);
+   stencil_indicies = hypre_CTAlloc(int, stencil_size);
    for (s = 0; s < stencil_size; s++)
      {
        stencil_indicies[s] = s;
      }
 
-   for (d = 0; d < zzz_StructGridDim(zzz_StructMatrixGrid(new_matrix)); d++)
+   for (d = 0; d < hypre_StructGridDim(hypre_StructMatrixGrid(new_matrix)); d++)
    {
-      zzz_IndexD(new_grid_index, d) = grid_index[d];
+      hypre_IndexD(new_grid_index, d) = grid_index[d];
    }
 
-   ierr = zzz_SetStructMatrixValues( new_matrix,
+   ierr = hypre_SetStructMatrixValues( new_matrix,
                                      new_grid_index,
                                      stencil_size, stencil_indicies,
                                      values );
 
-   zzz_TFree(stencil_indicies);
+   hypre_TFree(stencil_indicies);
 
    return (ierr);
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SetStructMatrixBoxValues
+ * HYPRE_SetStructMatrixBoxValues
  *--------------------------------------------------------------------------*/
 
 int 
-ZZZ_SetStructMatrixBoxValues( ZZZ_StructMatrix  matrix,
+HYPRE_SetStructMatrixBoxValues( HYPRE_StructMatrix  matrix,
                               int              *ilower,
                               int              *iupper,
                               int               num_stencil_indices,
                               int              *stencil_indices,
                               double           *values              )
 {
-   zzz_StructMatrix *new_matrix = (zzz_StructMatrix *) matrix;
-   zzz_Index         new_ilower;
-   zzz_Index         new_iupper;
-   zzz_Box          *new_value_box;
+   hypre_StructMatrix *new_matrix = (hypre_StructMatrix *) matrix;
+   hypre_Index         new_ilower;
+   hypre_Index         new_iupper;
+   hypre_Box          *new_value_box;
                     
    int               d;
    int               ierr;
 
-   for (d = 0; d < zzz_StructGridDim(zzz_StructMatrixGrid(new_matrix)); d++)
+   for (d = 0; d < hypre_StructGridDim(hypre_StructMatrixGrid(new_matrix)); d++)
    {
-      zzz_IndexD(new_ilower, d) = ilower[d];
-      zzz_IndexD(new_iupper, d) = iupper[d];
+      hypre_IndexD(new_ilower, d) = ilower[d];
+      hypre_IndexD(new_iupper, d) = iupper[d];
    }
-   new_value_box = zzz_NewBox(new_ilower, new_iupper);
+   new_value_box = hypre_NewBox(new_ilower, new_iupper);
 
-   ierr = zzz_SetStructMatrixBoxValues( new_matrix,
+   ierr = hypre_SetStructMatrixBoxValues( new_matrix,
                                         new_value_box,
                                         num_stencil_indices, stencil_indices,
                                         values );
 
-   zzz_FreeBox(new_value_box);
+   hypre_FreeBox(new_value_box);
 
    return (ierr);
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_AssembleStructMatrix
+ * HYPRE_AssembleStructMatrix
  *--------------------------------------------------------------------------*/
 
 int 
-ZZZ_AssembleStructMatrix( ZZZ_StructMatrix matrix )
+HYPRE_AssembleStructMatrix( HYPRE_StructMatrix matrix )
 {
-   return( zzz_AssembleStructMatrix( (zzz_StructMatrix *) matrix ) );
+   return( hypre_AssembleStructMatrix( (hypre_StructMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SetStructMatrixNumGhost
+ * HYPRE_SetStructMatrixNumGhost
  *--------------------------------------------------------------------------*/
  
 void
-ZZZ_SetStructMatrixNumGhost( ZZZ_StructMatrix  matrix,
+HYPRE_SetStructMatrixNumGhost( HYPRE_StructMatrix  matrix,
                              int              *num_ghost )
 {
-   zzz_SetStructMatrixNumGhost( (zzz_StructMatrix *) matrix, num_ghost);
+   hypre_SetStructMatrixNumGhost( (hypre_StructMatrix *) matrix, num_ghost);
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_StructMatrixGrid
+ * HYPRE_StructMatrixGrid
  *--------------------------------------------------------------------------*/
 
-ZZZ_StructGrid
-ZZZ_StructMatrixGrid( ZZZ_StructMatrix matrix )
+HYPRE_StructGrid
+HYPRE_StructMatrixGrid( HYPRE_StructMatrix matrix )
 {
-   return ( (ZZZ_StructGrid) (zzz_StructMatrixGrid( (zzz_StructMatrix *) matrix) ) );
+   return ( (HYPRE_StructGrid) (hypre_StructMatrixGrid( (hypre_StructMatrix *) matrix) ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SetStructMatrixSymmetric
+ * HYPRE_SetStructMatrixSymmetric
  *--------------------------------------------------------------------------*/
  
 void
-ZZZ_SetStructMatrixSymmetric( ZZZ_StructMatrix  matrix,
+HYPRE_SetStructMatrixSymmetric( HYPRE_StructMatrix  matrix,
                               int               symmetric )
 {
-   zzz_StructMatrixSymmetric( (zzz_StructMatrix *) matrix ) = symmetric;
+   hypre_StructMatrixSymmetric( (hypre_StructMatrix *) matrix ) = symmetric;
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_PrintStructMatrix
+ * HYPRE_PrintStructMatrix
  *--------------------------------------------------------------------------*/
 
 void 
-ZZZ_PrintStructMatrix( char            *filename,
-                       ZZZ_StructMatrix matrix,
+HYPRE_PrintStructMatrix( char            *filename,
+                       HYPRE_StructMatrix matrix,
                        int              all )
 {
-   zzz_PrintStructMatrix( filename,
-                          (zzz_StructMatrix *) matrix,
+   hypre_PrintStructMatrix( filename,
+                          (hypre_StructMatrix *) matrix,
                           all );
 }

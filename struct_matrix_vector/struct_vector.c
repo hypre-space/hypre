@@ -8,90 +8,90 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Member functions for zzz_StructVector class.
+ * Member functions for hypre_StructVector class.
  *
  *****************************************************************************/
 
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * zzz_NewStructVector
+ * hypre_NewStructVector
  *--------------------------------------------------------------------------*/
 
-zzz_StructVector *
-zzz_NewStructVector( MPI_Comm       *comm,
-                     zzz_StructGrid *grid )
+hypre_StructVector *
+hypre_NewStructVector( MPI_Comm       *comm,
+                     hypre_StructGrid *grid )
 {
-   zzz_StructVector  *vector;
+   hypre_StructVector  *vector;
 
    int                i;
 
-   vector = zzz_CTAlloc(zzz_StructVector, 1);
+   vector = hypre_CTAlloc(hypre_StructVector, 1);
 
-   zzz_StructVectorComm(vector) = comm;
-   zzz_StructVectorGrid(vector) = grid;
+   hypre_StructVectorComm(vector) = comm;
+   hypre_StructVectorGrid(vector) = grid;
 
    /* set defaults */
    for (i = 0; i < 6; i++)
-      zzz_StructVectorNumGhost(vector)[i] = 1;
+      hypre_StructVectorNumGhost(vector)[i] = 1;
 
    return vector;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_FreeStructVectorShell
+ * hypre_FreeStructVectorShell
  *--------------------------------------------------------------------------*/
 
 int 
-zzz_FreeStructVectorShell( zzz_StructVector *vector )
+hypre_FreeStructVectorShell( hypre_StructVector *vector )
 {
    int  ierr;
 
    if (vector)
    {
-      zzz_TFree(zzz_StructVectorDataIndices(vector));
-      zzz_FreeBoxArray(zzz_StructVectorDataSpace(vector));
-      zzz_TFree(vector);
+      hypre_TFree(hypre_StructVectorDataIndices(vector));
+      hypre_FreeBoxArray(hypre_StructVectorDataSpace(vector));
+      hypre_TFree(vector);
    }
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_FreeStructVector
+ * hypre_FreeStructVector
  *--------------------------------------------------------------------------*/
 
 int 
-zzz_FreeStructVector( zzz_StructVector *vector )
+hypre_FreeStructVector( hypre_StructVector *vector )
 {
    int  ierr;
 
    if (vector)
    {
-      zzz_TFree(zzz_StructVectorData(vector));
-      zzz_FreeStructVectorShell(vector);
+      hypre_TFree(hypre_StructVectorData(vector));
+      hypre_FreeStructVectorShell(vector);
    }
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_InitializeStructVectorShell
+ * hypre_InitializeStructVectorShell
  *--------------------------------------------------------------------------*/
 
 int 
-zzz_InitializeStructVectorShell( zzz_StructVector *vector )
+hypre_InitializeStructVectorShell( hypre_StructVector *vector )
 {
    int    ierr;
 
-   zzz_StructGrid     *grid;
+   hypre_StructGrid     *grid;
 
    int                *num_ghost;
  
-   zzz_BoxArray       *data_space;
-   zzz_BoxArray       *boxes;
-   zzz_Box            *box;
-   zzz_Box            *data_box;
+   hypre_BoxArray       *data_space;
+   hypre_BoxArray       *boxes;
+   hypre_Box            *box;
+   hypre_Box            *data_box;
 
    int                *data_indices;
    int                 data_size;
@@ -102,120 +102,120 @@ zzz_InitializeStructVectorShell( zzz_StructVector *vector )
     * Set up data_space
     *-----------------------------------------------------------------------*/
 
-   grid = zzz_StructVectorGrid(vector);
-   num_ghost = zzz_StructVectorNumGhost(vector);
+   grid = hypre_StructVectorGrid(vector);
+   num_ghost = hypre_StructVectorNumGhost(vector);
 
-   boxes = zzz_StructGridBoxes(grid);
-   data_space = zzz_NewBoxArray();
+   boxes = hypre_StructGridBoxes(grid);
+   data_space = hypre_NewBoxArray();
 
-   zzz_ForBoxI(i, boxes)
+   hypre_ForBoxI(i, boxes)
    {
-      box = zzz_BoxArrayBox(boxes, i);
+      box = hypre_BoxArrayBox(boxes, i);
 
-      data_box = zzz_DuplicateBox(box);
-      if (zzz_BoxVolume(data_box))
+      data_box = hypre_DuplicateBox(box);
+      if (hypre_BoxVolume(data_box))
       {
          for (d = 0; d < 3; d++)
          {
-            zzz_BoxIMinD(data_box, d) -= num_ghost[2*d];
-            zzz_BoxIMaxD(data_box, d) += num_ghost[2*d + 1];
+            hypre_BoxIMinD(data_box, d) -= num_ghost[2*d];
+            hypre_BoxIMaxD(data_box, d) += num_ghost[2*d + 1];
          }
       }
 
-      zzz_AppendBox(data_box, data_space);
+      hypre_AppendBox(data_box, data_space);
    }
 
-   zzz_StructVectorDataSpace(vector) = data_space;
+   hypre_StructVectorDataSpace(vector) = data_space;
 
    /*-----------------------------------------------------------------------
     * Set up data_indices array and data_size
     *-----------------------------------------------------------------------*/
 
-   data_indices = zzz_CTAlloc(int, zzz_BoxArraySize(data_space));
+   data_indices = hypre_CTAlloc(int, hypre_BoxArraySize(data_space));
 
    data_size = 0;
-   zzz_ForBoxI(i, data_space)
+   hypre_ForBoxI(i, data_space)
    {
-      data_box = zzz_BoxArrayBox(data_space, i);
+      data_box = hypre_BoxArrayBox(data_space, i);
 
       data_indices[i] = data_size;
-      data_size += zzz_BoxVolume(data_box);
+      data_size += hypre_BoxVolume(data_box);
    }
 
-   zzz_StructVectorDataIndices(vector) = data_indices;
-   zzz_StructVectorDataSize(vector)    = data_size;
+   hypre_StructVectorDataIndices(vector) = data_indices;
+   hypre_StructVectorDataSize(vector)    = data_size;
 
    /*-----------------------------------------------------------------------
     * Set total number of nonzero coefficients
     *-----------------------------------------------------------------------*/
 
-   zzz_StructVectorGlobalSize(vector) = zzz_StructGridGlobalSize(grid);
+   hypre_StructVectorGlobalSize(vector) = hypre_StructGridGlobalSize(grid);
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_InitializeStructVectorData
+ * hypre_InitializeStructVectorData
  *--------------------------------------------------------------------------*/
 
 void
-zzz_InitializeStructVectorData( zzz_StructVector *vector,
+hypre_InitializeStructVectorData( hypre_StructVector *vector,
                                 double           *data   )
 {
-   zzz_StructVectorData(vector) = data;
+   hypre_StructVectorData(vector) = data;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_InitializeStructVector
+ * hypre_InitializeStructVector
  *--------------------------------------------------------------------------*/
 
 int 
-zzz_InitializeStructVector( zzz_StructVector *vector )
+hypre_InitializeStructVector( hypre_StructVector *vector )
 {
    int    ierr;
 
    double *data;
 
-   ierr = zzz_InitializeStructVectorShell(vector);
+   ierr = hypre_InitializeStructVectorShell(vector);
 
-   data = zzz_CTAlloc(double, zzz_StructVectorDataSize(vector));
-   zzz_InitializeStructVectorData(vector, data);
+   data = hypre_CTAlloc(double, hypre_StructVectorDataSize(vector));
+   hypre_InitializeStructVectorData(vector, data);
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SetStructVectorValues
+ * hypre_SetStructVectorValues
  *--------------------------------------------------------------------------*/
 
 int 
-zzz_SetStructVectorValues( zzz_StructVector *vector,
-                           zzz_Index         grid_index,
+hypre_SetStructVectorValues( hypre_StructVector *vector,
+                           hypre_Index         grid_index,
                            double            values     )
 {
    int    ierr;
 
-   zzz_BoxArray     *boxes;
-   zzz_Box          *box;
+   hypre_BoxArray     *boxes;
+   hypre_Box          *box;
 
    double           *vecp;
 
    int               i;
 
-   boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(vector));
+   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
 
-   zzz_ForBoxI(i, boxes)
+   hypre_ForBoxI(i, boxes)
    {
-      box = zzz_BoxArrayBox(boxes, i);
+      box = hypre_BoxArrayBox(boxes, i);
 
-      if ((zzz_IndexX(grid_index) >= zzz_BoxIMinX(box)) &&
-          (zzz_IndexX(grid_index) <= zzz_BoxIMaxX(box)) &&
-          (zzz_IndexY(grid_index) >= zzz_BoxIMinY(box)) &&
-          (zzz_IndexY(grid_index) <= zzz_BoxIMaxY(box)) &&
-          (zzz_IndexZ(grid_index) >= zzz_BoxIMinZ(box)) &&
-          (zzz_IndexZ(grid_index) <= zzz_BoxIMaxZ(box))   )
+      if ((hypre_IndexX(grid_index) >= hypre_BoxIMinX(box)) &&
+          (hypre_IndexX(grid_index) <= hypre_BoxIMaxX(box)) &&
+          (hypre_IndexY(grid_index) >= hypre_BoxIMinY(box)) &&
+          (hypre_IndexY(grid_index) <= hypre_BoxIMaxY(box)) &&
+          (hypre_IndexZ(grid_index) >= hypre_BoxIMinZ(box)) &&
+          (hypre_IndexZ(grid_index) <= hypre_BoxIMaxZ(box))   )
       {
-         vecp = zzz_StructVectorBoxDataValue(vector, i, grid_index);
+         vecp = hypre_StructVectorBoxDataValue(vector, i, grid_index);
          *vecp = values;
       }
    }
@@ -224,37 +224,37 @@ zzz_SetStructVectorValues( zzz_StructVector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_GetStructVectorValues
+ * hypre_GetStructVectorValues
  *--------------------------------------------------------------------------*/
 
 int 
-zzz_GetStructVectorValues( zzz_StructVector *vector,
-                           zzz_Index         grid_index,
+hypre_GetStructVectorValues( hypre_StructVector *vector,
+                           hypre_Index         grid_index,
                            double           *values     )
 {
    int    ierr;
 
-   zzz_BoxArray     *boxes;
-   zzz_Box          *box;
+   hypre_BoxArray     *boxes;
+   hypre_Box          *box;
 
    double           *vecp;
 
    int               i;
 
-   boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(vector));
+   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
 
-   zzz_ForBoxI(i, boxes)
+   hypre_ForBoxI(i, boxes)
    {
-      box = zzz_BoxArrayBox(boxes, i);
+      box = hypre_BoxArrayBox(boxes, i);
 
-      if ((zzz_IndexX(grid_index) >= zzz_BoxIMinX(box)) &&
-          (zzz_IndexX(grid_index) <= zzz_BoxIMaxX(box)) &&
-          (zzz_IndexY(grid_index) >= zzz_BoxIMinY(box)) &&
-          (zzz_IndexY(grid_index) <= zzz_BoxIMaxY(box)) &&
-          (zzz_IndexZ(grid_index) >= zzz_BoxIMinZ(box)) &&
-          (zzz_IndexZ(grid_index) <= zzz_BoxIMaxZ(box))   )
+      if ((hypre_IndexX(grid_index) >= hypre_BoxIMinX(box)) &&
+          (hypre_IndexX(grid_index) <= hypre_BoxIMaxX(box)) &&
+          (hypre_IndexY(grid_index) >= hypre_BoxIMinY(box)) &&
+          (hypre_IndexY(grid_index) <= hypre_BoxIMaxY(box)) &&
+          (hypre_IndexZ(grid_index) >= hypre_BoxIMinZ(box)) &&
+          (hypre_IndexZ(grid_index) <= hypre_BoxIMaxZ(box))   )
       {
-         vecp = zzz_StructVectorBoxDataValue(vector, i, grid_index);
+         vecp = hypre_StructVectorBoxDataValue(vector, i, grid_index);
          *values = *vecp;
       }
    }
@@ -263,34 +263,34 @@ zzz_GetStructVectorValues( zzz_StructVector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SetStructVectorBoxValues
+ * hypre_SetStructVectorBoxValues
  *--------------------------------------------------------------------------*/
 
 int 
-zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
-                              zzz_Box          *value_box,
+hypre_SetStructVectorBoxValues( hypre_StructVector *vector,
+                              hypre_Box          *value_box,
                               double           *values     )
 {
    int    ierr;
 
-   zzz_BoxArray     *grid_boxes;
-   zzz_Box          *grid_box;
-   zzz_BoxArray     *box_array;
-   zzz_Box          *box;
+   hypre_BoxArray     *grid_boxes;
+   hypre_Box          *grid_box;
+   hypre_BoxArray     *box_array;
+   hypre_Box          *box;
 
-   zzz_BoxArray     *data_space;
-   zzz_Box          *data_box;
-   zzz_IndexRef      data_start;
-   zzz_Index         data_stride;
+   hypre_BoxArray     *data_space;
+   hypre_Box          *data_box;
+   hypre_IndexRef      data_start;
+   hypre_Index         data_stride;
    int               datai;
    double           *datap;
 
-   zzz_Box          *dval_box;
-   zzz_Index         dval_start;
-   zzz_Index         dval_stride;
+   hypre_Box          *dval_box;
+   hypre_Index         dval_start;
+   hypre_Index         dval_stride;
    int               dvali;
 
-   zzz_Index         loop_size;
+   hypre_Index         loop_size;
 
    int               i;
    int               loopi, loopj, loopk;
@@ -299,13 +299,13 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
     * Set up `box_array' by intersecting `box' with the grid boxes
     *-----------------------------------------------------------------------*/
 
-   box_array = zzz_NewBoxArray();
-   grid_boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(vector));
-   zzz_ForBoxI(i, grid_boxes)
+   box_array = hypre_NewBoxArray();
+   grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
+   hypre_ForBoxI(i, grid_boxes)
    {
-      grid_box = zzz_BoxArrayBox(grid_boxes, i);
-      box = zzz_IntersectBoxes(value_box, grid_box);
-      zzz_AppendBox(box, box_array);
+      grid_box = hypre_BoxArrayBox(grid_boxes, i);
+      box = hypre_IntersectBoxes(value_box, grid_box);
+      hypre_AppendBox(box, box_array);
    }
 
    /*-----------------------------------------------------------------------
@@ -314,27 +314,27 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
 
    if (box_array)
    {
-      data_space = zzz_StructVectorDataSpace(vector);
-      zzz_SetIndex(data_stride, 1, 1, 1);
+      data_space = hypre_StructVectorDataSpace(vector);
+      hypre_SetIndex(data_stride, 1, 1, 1);
  
-      dval_box = zzz_DuplicateBox(value_box);
-      zzz_SetIndex(dval_stride, 1, 1, 1);
+      dval_box = hypre_DuplicateBox(value_box);
+      hypre_SetIndex(dval_stride, 1, 1, 1);
  
-      zzz_ForBoxI(i, box_array)
+      hypre_ForBoxI(i, box_array)
       {
-         box      = zzz_BoxArrayBox(box_array, i);
-         data_box = zzz_BoxArrayBox(data_space, i);
+         box      = hypre_BoxArrayBox(box_array, i);
+         data_box = hypre_BoxArrayBox(data_space, i);
  
          /* if there was an intersection */
          if (box)
          {
-            data_start = zzz_BoxIMin(box);
-            zzz_CopyIndex(data_start, dval_start);
+            data_start = hypre_BoxIMin(box);
+            hypre_CopyIndex(data_start, dval_start);
  
-            datap = zzz_StructVectorBoxData(vector, i);
+            datap = hypre_StructVectorBoxData(vector, i);
  
-            zzz_GetBoxSize(box, loop_size);
-            zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
+            hypre_GetBoxSize(box, loop_size);
+            hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
                          data_box, data_start, data_stride, datai,
                          dval_box, dval_start, dval_stride, dvali,
                          {
@@ -343,34 +343,34 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
          }
       }
 
-      zzz_FreeBox(dval_box);
+      hypre_FreeBox(dval_box);
    }
  
-   zzz_FreeBoxArray(box_array);
+   hypre_FreeBoxArray(box_array);
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SetStructVectorConstantValues
+ * hypre_SetStructVectorConstantValues
  *--------------------------------------------------------------------------*/
 
 int 
-zzz_SetStructVectorConstantValues( zzz_StructVector *vector,
+hypre_SetStructVectorConstantValues( hypre_StructVector *vector,
                                    double            values )
 {
    int    ierr;
 
-   zzz_Box          *v_data_box;
+   hypre_Box          *v_data_box;
                     
    int               vi;
    double           *vp;
 
-   zzz_BoxArray     *boxes;
-   zzz_Box          *box;
-   zzz_Index         loop_size;
-   zzz_IndexRef      start;
-   zzz_Index         unit_stride;
+   hypre_BoxArray     *boxes;
+   hypre_Box          *box;
+   hypre_Index         loop_size;
+   hypre_IndexRef      start;
+   hypre_Index         unit_stride;
 
    int               i;
    int               loopi, loopj, loopk;
@@ -379,19 +379,19 @@ zzz_SetStructVectorConstantValues( zzz_StructVector *vector,
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
 
-   zzz_SetIndex(unit_stride, 1, 1, 1);
+   hypre_SetIndex(unit_stride, 1, 1, 1);
  
-   boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(vector));
-   zzz_ForBoxI(i, boxes)
+   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
+   hypre_ForBoxI(i, boxes)
    {
-      box      = zzz_BoxArrayBox(boxes, i);
-      start = zzz_BoxIMin(box);
+      box      = hypre_BoxArrayBox(boxes, i);
+      start = hypre_BoxIMin(box);
 
-      v_data_box = zzz_BoxArrayBox(zzz_StructVectorDataSpace(vector), i);
-      vp = zzz_StructVectorBoxData(vector, i);
+      v_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
+      vp = hypre_StructVectorBoxData(vector, i);
  
-      zzz_GetBoxSize(box, loop_size);
-      zzz_BoxLoop1(loopi, loopj, loopk, loop_size,
+      hypre_GetBoxSize(box, loop_size);
+      hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
                    v_data_box, start, unit_stride, vi,
                    {
                       vp[vi] = values;
@@ -402,26 +402,26 @@ zzz_SetStructVectorConstantValues( zzz_StructVector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_ClearStructVectorGhostValues
+ * hypre_ClearStructVectorGhostValues
  *--------------------------------------------------------------------------*/
 
 int 
-zzz_ClearStructVectorGhostValues( zzz_StructVector *vector )
+hypre_ClearStructVectorGhostValues( hypre_StructVector *vector )
 {
    int    ierr;
 
-   zzz_Box          *v_data_box;
+   hypre_Box          *v_data_box;
                     
    int               vi;
    double           *vp;
 
-   zzz_BoxArray     *boxes;
-   zzz_Box          *box;
-   zzz_BoxArray     *diff_boxes;
-   zzz_Box          *diff_box;
-   zzz_Index         loop_size;
-   zzz_IndexRef      start;
-   zzz_Index         unit_stride;
+   hypre_BoxArray     *boxes;
+   hypre_Box          *box;
+   hypre_BoxArray     *diff_boxes;
+   hypre_Box          *diff_box;
+   hypre_Index         loop_size;
+   hypre_IndexRef      start;
+   hypre_Index         unit_stride;
 
    int               i, j;
    int               loopi, loopj, loopk;
@@ -430,41 +430,41 @@ zzz_ClearStructVectorGhostValues( zzz_StructVector *vector )
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
 
-   zzz_SetIndex(unit_stride, 1, 1, 1);
+   hypre_SetIndex(unit_stride, 1, 1, 1);
  
-   boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(vector));
-   zzz_ForBoxI(i, boxes)
+   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
+   hypre_ForBoxI(i, boxes)
    {
-      box        = zzz_BoxArrayBox(boxes, i);
+      box        = hypre_BoxArrayBox(boxes, i);
 
-      v_data_box = zzz_BoxArrayBox(zzz_StructVectorDataSpace(vector), i);
-      vp = zzz_StructVectorBoxData(vector, i);
+      v_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
+      vp = hypre_StructVectorBoxData(vector, i);
 
-      diff_boxes = zzz_SubtractBoxes(v_data_box, box);
-      zzz_ForBoxI(j, diff_boxes)
+      diff_boxes = hypre_SubtractBoxes(v_data_box, box);
+      hypre_ForBoxI(j, diff_boxes)
       {
-         diff_box = zzz_BoxArrayBox(diff_boxes, j);
-         start = zzz_BoxIMin(diff_box);
+         diff_box = hypre_BoxArrayBox(diff_boxes, j);
+         start = hypre_BoxIMin(diff_box);
 
-         zzz_GetBoxSize(diff_box, loop_size);
-         zzz_BoxLoop1(loopi, loopj, loopk, loop_size,
+         hypre_GetBoxSize(diff_box, loop_size);
+         hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
                       v_data_box, start, unit_stride, vi,
                       {
                          vp[vi] = 0.0;
                       });
       }
-      zzz_FreeBoxArray(diff_boxes);
+      hypre_FreeBoxArray(diff_boxes);
    }
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_ClearStructVectorAllValues
+ * hypre_ClearStructVectorAllValues
  *--------------------------------------------------------------------------*/
 
 int 
-zzz_ClearStructVectorAllValues( zzz_StructVector *vector )
+hypre_ClearStructVectorAllValues( hypre_StructVector *vector )
 {
    int               ierr;
 
@@ -477,8 +477,8 @@ zzz_ClearStructVectorAllValues( zzz_StructVector *vector )
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
 
-   data_size = zzz_StructVectorDataSize(vector);
-   data      = zzz_StructVectorData(vector);
+   data_size = hypre_StructVectorDataSize(vector);
+   data      = hypre_StructVectorData(vector);
 
    for ( i=0; i < data_size; i++)
       data[i] = 0.0;
@@ -487,11 +487,11 @@ zzz_ClearStructVectorAllValues( zzz_StructVector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * zzz_AssembleStructVector
+ * hypre_AssembleStructVector
  *--------------------------------------------------------------------------*/
 
 int 
-zzz_AssembleStructVector( zzz_StructVector *vector )
+hypre_AssembleStructVector( hypre_StructVector *vector )
 {
    int  ierr;
 
@@ -499,35 +499,35 @@ zzz_AssembleStructVector( zzz_StructVector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SetStructVectorNumGhost
+ * hypre_SetStructVectorNumGhost
  *--------------------------------------------------------------------------*/
  
 void
-zzz_SetStructVectorNumGhost( zzz_StructVector *vector,
+hypre_SetStructVectorNumGhost( hypre_StructVector *vector,
                              int              *num_ghost )
 {
    int  i;
  
    for (i = 0; i < 6; i++)
-      zzz_StructVectorNumGhost(vector)[i] = num_ghost[i];
+      hypre_StructVectorNumGhost(vector)[i] = num_ghost[i];
 }
 
 /*--------------------------------------------------------------------------
- * zzz_PrintStructVector
+ * hypre_PrintStructVector
  *--------------------------------------------------------------------------*/
 
 void
-zzz_PrintStructVector( char             *filename,
-                       zzz_StructVector *vector,
+hypre_PrintStructVector( char             *filename,
+                       hypre_StructVector *vector,
                        int               all      )
 {
    FILE            *file;
    char             new_filename[255];
 
-   zzz_StructGrid  *grid;
-   zzz_BoxArray    *boxes;
+   hypre_StructGrid  *grid;
+   hypre_BoxArray    *boxes;
 
-   zzz_BoxArray    *data_space;
+   hypre_BoxArray    *data_space;
 
    int              myid;
 
@@ -535,7 +535,7 @@ zzz_PrintStructVector( char             *filename,
     * Open file
     *----------------------------------------*/
  
-   MPI_Comm_rank(*zzz_StructVectorComm(vector), &myid );
+   MPI_Comm_rank(*hypre_StructVectorComm(vector), &myid );
    sprintf(new_filename, "%s.%05d", filename, myid);
  
    if ((file = fopen(new_filename, "w")) == NULL)
@@ -552,23 +552,23 @@ zzz_PrintStructVector( char             *filename,
 
    /* print grid info */
    fprintf(file, "\nGrid:\n");
-   grid = zzz_StructVectorGrid(vector);
-   zzz_PrintStructGrid(file, grid);
+   grid = hypre_StructVectorGrid(vector);
+   hypre_PrintStructGrid(file, grid);
 
    /*----------------------------------------
     * Print data
     *----------------------------------------*/
 
-   data_space = zzz_StructVectorDataSpace(vector);
+   data_space = hypre_StructVectorDataSpace(vector);
 
    if (all)
       boxes = data_space;
    else
-      boxes = zzz_StructGridBoxes(grid);
+      boxes = hypre_StructGridBoxes(grid);
 
    fprintf(file, "\nData:\n");
-   zzz_PrintBoxArrayData(file, boxes, data_space, 1,
-                         zzz_StructVectorData(vector));
+   hypre_PrintBoxArrayData(file, boxes, data_space, 1,
+                         hypre_StructVectorData(vector));
  
    /*----------------------------------------
     * Close file
@@ -579,23 +579,23 @@ zzz_PrintStructVector( char             *filename,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_ReadStructVector
+ * hypre_ReadStructVector
  *--------------------------------------------------------------------------*/
 
-zzz_StructVector *
-zzz_ReadStructVector( MPI_Comm *comm,
+hypre_StructVector *
+hypre_ReadStructVector( MPI_Comm *comm,
 		      char *filename,
                       int  *num_ghost )
 {
    FILE               *file;
    char                new_filename[255];
                       
-   zzz_StructVector   *vector;
+   hypre_StructVector   *vector;
 
-   zzz_StructGrid     *grid;
-   zzz_BoxArray       *boxes;
+   hypre_StructGrid     *grid;
+   hypre_BoxArray       *boxes;
 
-   zzz_BoxArray       *data_space;
+   hypre_BoxArray       *data_space;
 
    int                 myid;
  
@@ -620,32 +620,32 @@ zzz_ReadStructVector( MPI_Comm *comm,
 
    /* read grid info */
    fscanf(file, "\nGrid:\n");
-   grid = zzz_ReadStructGrid(comm,file);
+   grid = hypre_ReadStructGrid(comm,file);
 
    /*----------------------------------------
     * Initialize the vector
     *----------------------------------------*/
 
-   vector = zzz_NewStructVector(comm, grid);
-   zzz_SetStructVectorNumGhost(vector, num_ghost);
-   zzz_InitializeStructVector(vector);
+   vector = hypre_NewStructVector(comm, grid);
+   hypre_SetStructVectorNumGhost(vector, num_ghost);
+   hypre_InitializeStructVector(vector);
 
    /*----------------------------------------
     * Read data
     *----------------------------------------*/
 
-   boxes      = zzz_StructGridBoxes(grid);
-   data_space = zzz_StructVectorDataSpace(vector);
+   boxes      = hypre_StructGridBoxes(grid);
+   data_space = hypre_StructVectorDataSpace(vector);
  
    fscanf(file, "\nData:\n");
-   zzz_ReadBoxArrayData(file, boxes, data_space, 1,
-                        zzz_StructVectorData(vector));
+   hypre_ReadBoxArrayData(file, boxes, data_space, 1,
+                        hypre_StructVectorData(vector));
 
    /*----------------------------------------
     * Assemble the vector
     *----------------------------------------*/
 
-   zzz_AssembleStructVector(vector);
+   hypre_AssembleStructVector(vector);
 
    /*----------------------------------------
     * Close file

@@ -15,25 +15,25 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * zzz_PrintBoxArrayData
+ * hypre_PrintBoxArrayData
  *--------------------------------------------------------------------------*/
 
 void
-zzz_PrintBoxArrayData( FILE             *file,
-                       zzz_BoxArray     *box_array,
-                       zzz_BoxArray     *data_space,
+hypre_PrintBoxArrayData( FILE             *file,
+                       hypre_BoxArray     *box_array,
+                       hypre_BoxArray     *data_space,
                        int               num_values,
                        double           *data       )
 {
-   zzz_Box         *box;
-   zzz_Box         *data_box;
+   hypre_Box         *box;
+   hypre_Box         *data_box;
 
    int              data_box_volume;
    int              datai;
 
-   zzz_Index        loop_size;
-   zzz_IndexRef     start;
-   zzz_Index        stride;
+   hypre_Index        loop_size;
+   hypre_IndexRef     start;
+   hypre_Index        stride;
 
    int              i, j;
    int              loopi, loopj, loopk;
@@ -42,26 +42,26 @@ zzz_PrintBoxArrayData( FILE             *file,
     * Print data
     *----------------------------------------*/
 
-   zzz_SetIndex(stride, 1, 1, 1);
+   hypre_SetIndex(stride, 1, 1, 1);
 
-   zzz_ForBoxI(i, box_array)
+   hypre_ForBoxI(i, box_array)
    {
-      box      = zzz_BoxArrayBox(box_array, i);
-      data_box = zzz_BoxArrayBox(data_space, i);
+      box      = hypre_BoxArrayBox(box_array, i);
+      data_box = hypre_BoxArrayBox(data_space, i);
 
-      start = zzz_BoxIMin(box);
-      data_box_volume = zzz_BoxVolume(data_box);
+      start = hypre_BoxIMin(box);
+      data_box_volume = hypre_BoxVolume(data_box);
 
-      zzz_GetBoxSize(box, loop_size);
-      zzz_BoxLoop1(loopi, loopj, loopk, loop_size,
+      hypre_GetBoxSize(box, loop_size);
+      hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
                    data_box, start, stride, datai,
                    {
                       for (j = 0; j < num_values; j++)
                       {
                          fprintf(file, "%d: (%d, %d, %d; %d) %e\n", i,
-                                 zzz_IndexX(start) + loopi,
-                                 zzz_IndexY(start) + loopj,
-                                 zzz_IndexZ(start) + loopk,
+                                 hypre_IndexX(start) + loopi,
+                                 hypre_IndexY(start) + loopj,
+                                 hypre_IndexZ(start) + loopk,
                                  j, data[datai + j*data_box_volume]);
                       }
                    });
@@ -71,25 +71,25 @@ zzz_PrintBoxArrayData( FILE             *file,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_ReadBoxArrayData
+ * hypre_ReadBoxArrayData
  *--------------------------------------------------------------------------*/
 
 void
-zzz_ReadBoxArrayData( FILE             *file,
-                      zzz_BoxArray     *box_array,
-                      zzz_BoxArray     *data_space,
+hypre_ReadBoxArrayData( FILE             *file,
+                      hypre_BoxArray     *box_array,
+                      hypre_BoxArray     *data_space,
                       int               num_values,
                       double           *data       )
 {
-   zzz_Box         *box;
-   zzz_Box         *data_box;
+   hypre_Box         *box;
+   hypre_Box         *data_box;
 
    int              data_box_volume;
    int              datai;
 
-   zzz_Index        loop_size;
-   zzz_IndexRef     start;
-   zzz_Index        stride;
+   hypre_Index        loop_size;
+   hypre_IndexRef     start;
+   hypre_Index        stride;
 
    int              i, j, idummy;
    int              loopi, loopj, loopk;
@@ -98,18 +98,18 @@ zzz_ReadBoxArrayData( FILE             *file,
     * Read data
     *----------------------------------------*/
 
-   zzz_SetIndex(stride, 1, 1, 1);
+   hypre_SetIndex(stride, 1, 1, 1);
 
-   zzz_ForBoxI(i, box_array)
+   hypre_ForBoxI(i, box_array)
    {
-      box      = zzz_BoxArrayBox(box_array, i);
-      data_box = zzz_BoxArrayBox(data_space, i);
+      box      = hypre_BoxArrayBox(box_array, i);
+      data_box = hypre_BoxArrayBox(data_space, i);
 
-      start = zzz_BoxIMin(box);
-      data_box_volume = zzz_BoxVolume(data_box);
+      start = hypre_BoxIMin(box);
+      data_box_volume = hypre_BoxVolume(data_box);
 
-      zzz_GetBoxSize(box, loop_size);
-      zzz_BoxLoop1(loopi, loopj, loopk, loop_size,
+      hypre_GetBoxSize(box, loop_size);
+      hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
                    data_box, start, stride, datai,
                    {
                       for (j = 0; j < num_values; j++)

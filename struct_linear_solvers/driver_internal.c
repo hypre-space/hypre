@@ -1,11 +1,11 @@
 
 #include "headers.h"
  
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
 #include <cegdb.h>
 #endif
 
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
 char malloc_logpath_memory[256];
 #endif
  
@@ -30,9 +30,9 @@ char *argv[];
    int                 b_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
    int                 x_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
                      
-   zzz_StructMatrix   *A;
-   zzz_StructVector   *b;
-   zzz_StructVector   *x;
+   hypre_StructMatrix   *A;
+   hypre_StructVector   *b;
+   hypre_StructVector   *x;
 
    void               *smg_data;
    int                 num_iterations;
@@ -49,16 +49,16 @@ char *argv[];
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
-   comm = zzz_TAlloc(MPI_Comm, 1);
+   comm = hypre_TAlloc(MPI_Comm, 1);
    MPI_Comm_dup(MPI_COMM_WORLD, comm);
    MPI_Comm_size(*comm, &num_procs );
    MPI_Comm_rank(*comm, &myid );
 
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
 #endif
 
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
    malloc_logpath = malloc_logpath_memory;
    sprintf(malloc_logpath, "malloc.log.%04d", myid);
 #endif
@@ -78,67 +78,67 @@ char *argv[];
     * Set up the linear system
     *-----------------------------------------------------------*/
 
-   A = zzz_ReadStructMatrix(comm, filename, A_num_ghost);
+   A = hypre_ReadStructMatrix(comm, filename, A_num_ghost);
 
-   b = zzz_NewStructVector(comm, zzz_StructMatrixGrid(A));
-   zzz_SetStructVectorNumGhost(b, b_num_ghost);
-   zzz_InitializeStructVector(b);
-   zzz_AssembleStructVector(b);
-   zzz_SetStructVectorConstantValues(b, 1.0);
+   b = hypre_NewStructVector(comm, hypre_StructMatrixGrid(A));
+   hypre_SetStructVectorNumGhost(b, b_num_ghost);
+   hypre_InitializeStructVector(b);
+   hypre_AssembleStructVector(b);
+   hypre_SetStructVectorConstantValues(b, 1.0);
 
-   x = zzz_NewStructVector(comm, zzz_StructMatrixGrid(A));
-   zzz_SetStructVectorNumGhost(x, x_num_ghost);
-   zzz_InitializeStructVector(x);
-   zzz_AssembleStructVector(x);
-   zzz_SetStructVectorConstantValues(x, 0.0);
+   x = hypre_NewStructVector(comm, hypre_StructMatrixGrid(A));
+   hypre_SetStructVectorNumGhost(x, x_num_ghost);
+   hypre_InitializeStructVector(x);
+   hypre_AssembleStructVector(x);
+   hypre_SetStructVectorConstantValues(x, 0.0);
  
    /*-----------------------------------------------------------
     * Solve the system
     *-----------------------------------------------------------*/
 
-   smg_data = zzz_SMGInitialize(comm);
-   zzz_SMGSetMemoryUse(smg_data, 0);
-   zzz_SMGSetMaxIter(smg_data, 50);
-   zzz_SMGSetTol(smg_data, 1.0e-06);
-   zzz_SMGSetNumPreRelax(smg_data, 1);
-   zzz_SMGSetNumPostRelax(smg_data, 1);
-   zzz_SMGSetLogging(smg_data, 0);
-   zzz_SMGSetup(smg_data, A, b, x);
+   smg_data = hypre_SMGInitialize(comm);
+   hypre_SMGSetMemoryUse(smg_data, 0);
+   hypre_SMGSetMaxIter(smg_data, 50);
+   hypre_SMGSetTol(smg_data, 1.0e-06);
+   hypre_SMGSetNumPreRelax(smg_data, 1);
+   hypre_SMGSetNumPostRelax(smg_data, 1);
+   hypre_SMGSetLogging(smg_data, 0);
+   hypre_SMGSetup(smg_data, A, b, x);
 
-   time_index = zzz_InitializeTiming("Driver");
-   zzz_BeginTiming(time_index);
-   zzz_SMGSolve(smg_data, A, b, x);
-   zzz_EndTiming(time_index);
+   time_index = hypre_InitializeTiming("Driver");
+   hypre_BeginTiming(time_index);
+   hypre_SMGSolve(smg_data, A, b, x);
+   hypre_EndTiming(time_index);
 
    /*-----------------------------------------------------------
     * Print the solution and other info
     *-----------------------------------------------------------*/
 
-   zzz_PrintStructVector("zout_x", x, 0);
+   hypre_PrintStructVector("zout_x", x, 0);
 
-   zzz_SMGGetNumIterations(smg_data, &num_iterations);
+   hypre_SMGGetNumIterations(smg_data, &num_iterations);
    if (myid == 0)
    {
       printf("Iterations = %d\n", num_iterations);
    }
 
-   zzz_PrintTiming(comm);
+   hypre_PrintTiming(comm);
    
-   zzz_SMGPrintLogging(smg_data, myid);
+   hypre_SMGPrintLogging(smg_data, myid);
 
    /*-----------------------------------------------------------
     * Finalize things
     *-----------------------------------------------------------*/
 
-   zzz_FinalizeTiming(time_index);
-   zzz_SMGFinalize(smg_data);
-   zzz_FreeStructGrid(zzz_StructMatrixGrid(A));
-   zzz_FreeStructMatrix(A);
-   zzz_FreeStructVector(b);
-   zzz_FreeStructVector(x);
-   zzz_TFree(comm);
+   hypre_FinalizeTiming(time_index);
+   hypre_SMGFinalize(smg_data);
+   hypre_FreeStructGrid(hypre_StructMatrixGrid(A));
+   hypre_FreeStructMatrix(A);
+   hypre_FreeStructVector(b);
+   hypre_FreeStructVector(x);
+   hypre_TFree(comm);
 
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
    malloc_verify(0);
    malloc_shutdown();
 #endif

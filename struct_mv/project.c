@@ -15,7 +15,7 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * zzz_ProjectBox:
+ * hypre_ProjectBox:
  *   Projects a box onto a strided index space that contains the
  *   index `index' and has stride `stride'.
  *
@@ -23,14 +23,14 @@
  *   projection.  So, it is possible to return an SBox with volume 0.
  *--------------------------------------------------------------------------*/
 
-zzz_SBox *
-zzz_ProjectBox( zzz_Box    *box,
-                zzz_Index   index,
-                zzz_Index   stride )
+hypre_SBox *
+hypre_ProjectBox( hypre_Box    *box,
+                hypre_Index   index,
+                hypre_Index   stride )
 {
-   zzz_SBox  *new_sbox;
-   zzz_Box   *new_box;
-   zzz_Index  new_stride;
+   hypre_SBox  *new_sbox;
+   hypre_Box   *new_box;
+   hypre_Index  new_stride;
 
    int        il, iu, i, s, d;
 
@@ -38,96 +38,96 @@ zzz_ProjectBox( zzz_Box    *box,
     * project in all 3 dimensions
     *------------------------------------------------------*/
 
-   new_box = zzz_DuplicateBox(box);
+   new_box = hypre_DuplicateBox(box);
 
    for (d = 0; d < 3; d++)
    {
-      i = zzz_IndexD(index, d);
-      s = zzz_IndexD(stride, d);
+      i = hypre_IndexD(index, d);
+      s = hypre_IndexD(stride, d);
 
-      il = zzz_BoxIMinD(new_box, d) + i;
-      iu = zzz_BoxIMaxD(new_box, d) + i + 1;
+      il = hypre_BoxIMinD(new_box, d) + i;
+      iu = hypre_BoxIMaxD(new_box, d) + i + 1;
 
       il = ((int) ((il + (s-1)) / s)) * s - i;
       iu = ((int) ((iu + (s-1)) / s)) * s - i;
 
-      zzz_BoxIMinD(new_box, d) = il;
-      zzz_BoxIMaxD(new_box, d) = iu - s;
+      hypre_BoxIMinD(new_box, d) = il;
+      hypre_BoxIMaxD(new_box, d) = iu - s;
    }
 
    /*------------------------------------------------------
     * set the strides
     *------------------------------------------------------*/
 
-   zzz_CopyIndex(stride, new_stride);
+   hypre_CopyIndex(stride, new_stride);
 
-   new_sbox = zzz_NewSBox(new_box, new_stride);
+   new_sbox = hypre_NewSBox(new_box, new_stride);
 
    return new_sbox;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_ProjectBoxArray:
+ * hypre_ProjectBoxArray:
  *
  *   Note: The dimensions of the returned SBoxArray are the same as
  *   the input argument `box_array'.  So, it is possible for the
  *   returned SBoxArray to contain SBoxes with volume 0.
  *--------------------------------------------------------------------------*/
 
-zzz_SBoxArray *
-zzz_ProjectBoxArray( zzz_BoxArray  *box_array,
-                     zzz_Index      index,
-                     zzz_Index      stride    )
+hypre_SBoxArray *
+hypre_ProjectBoxArray( hypre_BoxArray  *box_array,
+                     hypre_Index      index,
+                     hypre_Index      stride    )
 {
-   zzz_SBoxArray       *new_sbox_array;
-   zzz_SBox            *new_sbox;
+   hypre_SBoxArray       *new_sbox_array;
+   hypre_SBox            *new_sbox;
 
-   zzz_Box             *box;
+   hypre_Box             *box;
 
    int                  i;
 
-   new_sbox_array = zzz_NewSBoxArray();
+   new_sbox_array = hypre_NewSBoxArray();
 
-   zzz_ForBoxI(i, box_array)
+   hypre_ForBoxI(i, box_array)
    {
-      box      = zzz_BoxArrayBox(box_array, i);
-      new_sbox = zzz_ProjectBox(box, index, stride);
-      zzz_AppendSBox(new_sbox, new_sbox_array);
+      box      = hypre_BoxArrayBox(box_array, i);
+      new_sbox = hypre_ProjectBox(box, index, stride);
+      hypre_AppendSBox(new_sbox, new_sbox_array);
    }
 
    return new_sbox_array;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_ProjectBoxArrayArray:
+ * hypre_ProjectBoxArrayArray:
  *
  *   Note: The dimensions of the returned SBoxArrayArray are the same as
  *   the input argument `box_array_array'.  So, it is possible for the
  *   returned SBoxArrayArray to contain SBoxes with volume 0.
  *--------------------------------------------------------------------------*/
 
-zzz_SBoxArrayArray *
-zzz_ProjectBoxArrayArray( zzz_BoxArrayArray  *box_array_array,
-                          zzz_Index           index,
-                          zzz_Index           stride          )
+hypre_SBoxArrayArray *
+hypre_ProjectBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
+                          hypre_Index           index,
+                          hypre_Index           stride          )
 {
-   zzz_SBoxArrayArray  *new_sbox_array_array;
-   zzz_SBoxArray       *new_sbox_array;
+   hypre_SBoxArrayArray  *new_sbox_array_array;
+   hypre_SBoxArray       *new_sbox_array;
 
-   zzz_BoxArray        *box_array;
+   hypre_BoxArray        *box_array;
 
    int                  i;
 
    new_sbox_array_array =
-      zzz_NewSBoxArrayArray(zzz_BoxArrayArraySize(box_array_array));
+      hypre_NewSBoxArrayArray(hypre_BoxArrayArraySize(box_array_array));
 
-   zzz_ForBoxArrayI(i, box_array_array)
+   hypre_ForBoxArrayI(i, box_array_array)
    {
-      box_array      = zzz_BoxArrayArrayBoxArray(box_array_array, i);
-      new_sbox_array = zzz_ProjectBoxArray(box_array, index, stride);
+      box_array      = hypre_BoxArrayArrayBoxArray(box_array_array, i);
+      new_sbox_array = hypre_ProjectBoxArray(box_array, index, stride);
 
-      zzz_FreeSBoxArray(zzz_SBoxArrayArraySBoxArray(new_sbox_array_array, i));
-      zzz_SBoxArrayArraySBoxArray(new_sbox_array_array, i) = new_sbox_array;
+      hypre_FreeSBoxArray(hypre_SBoxArrayArraySBoxArray(new_sbox_array_array, i));
+      hypre_SBoxArrayArraySBoxArray(new_sbox_array_array, i) = new_sbox_array;
    }
 
    return new_sbox_array_array;
@@ -140,28 +140,28 @@ zzz_ProjectBoxArrayArray( zzz_BoxArrayArray  *box_array_array,
  *   Project a box_array_array onto a red or black set of indices.
  *--------------------------------------------------------------------------*/
 
-zzz_SBoxArrayArray *
-zzz_ProjectRBPoint( zzz_BoxArrayArray *box_array_array,
-                    zzz_Index          rb[4]           )
+hypre_SBoxArrayArray *
+hypre_ProjectRBPoint( hypre_BoxArrayArray *box_array_array,
+                    hypre_Index          rb[4]           )
 {
-   zzz_SBoxArrayArray *new_sbox_array_array;
-   zzz_SBoxArrayArray *tmp_sbox_array_array;
+   hypre_SBoxArrayArray *new_sbox_array_array;
+   hypre_SBoxArrayArray *tmp_sbox_array_array;
 
-   zzz_Index           stride;
+   hypre_Index           stride;
 
    int                 i;
 
-   zzz_SetIndex(stride, 2, 2, 2);
+   hypre_SetIndex(stride, 2, 2, 2);
 
    new_sbox_array_array =
-      zzz_NewSBoxArrayArray(zzz_BoxArrayArraySize(box_array_array));
+      hypre_NewSBoxArrayArray(hypre_BoxArrayArraySize(box_array_array));
 
    for (i = 0; i < 4; i++)
    {
       tmp_sbox_array_array =
-         zzz_ProjectBoxArrayArray(box_array_array, rb[i], stride);
-      zzz_AppendSBoxArrayArray(tmp_sbox_array_array, new_sbox_array_array);
-      zzz_FreeSBoxArrayArrayShell(tmp_sbox_array_array);
+         hypre_ProjectBoxArrayArray(box_array_array, rb[i], stride);
+      hypre_AppendSBoxArrayArray(tmp_sbox_array_array, new_sbox_array_array);
+      hypre_FreeSBoxArrayArrayShell(tmp_sbox_array_array);
    }
    
    return new_sbox_array_array;

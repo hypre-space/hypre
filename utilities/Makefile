@@ -17,7 +17,7 @@ CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I/usr/local/mpi/mpich/include\
- -g -Wall -DZZZ_TIMING -DUSE_MPI_TIMER
+ -g -Wall -DHYPRE_TIMING -DUSE_MPI_TIMER
 
 FFLAGS = -g
 
@@ -26,7 +26,7 @@ FFLAGS = -g
 # Make all utilities
 ##################################################################
 
-all: libZZZ_memory.a libZZZ_timing.a 
+all: libHYPRE_memory.a libHYPRE_timing.a 
 
 ##################################################################
 # Memory rules
@@ -40,7 +40,7 @@ MEMORY_FILES =\
 
 MEMORY_OBJS = ${MEMORY_FILES:.c=.o}
 
-libZZZ_memory.a: ${MEMORY_OBJS}
+libHYPRE_memory.a: ${MEMORY_OBJS}
 	@echo  "Building $@ ... "
 	ar -ru $@ ${MEMORY_OBJS}
 	ranlib $@
@@ -60,7 +60,7 @@ TIMING_FILES =\
 
 TIMING_OBJS = ${TIMING_FILES:.c=.o}
 
-libZZZ_timing.a: ${TIMING_OBJS}
+libHYPRE_timing.a: ${TIMING_OBJS}
 	@echo  "Building $@ ... "
 	ar -ru $@ ${TIMING_OBJS}
 	ranlib $@
@@ -83,8 +83,8 @@ ${TIMING_OBJS}: ${TIMING_HEADERS}
 ##################################################################
 
 veryclean: clean
-	@rm -f libZZZ_timing.a
-	@rm -f libZZZ_memory.a
+	@rm -f libHYPRE_timing.a
+	@rm -f libHYPRE_memory.a
 
 clean:
 	@rm -f *.o

@@ -148,9 +148,9 @@ main( int   argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
-   /* zzz_FreeStructGrid(zzz_StructVectorGrid(vector)); */
-   /* zzz_FreeStructVector(vector); */
-   /* zzz_FreeStructVector(tmp_vector); */
+   /* hypre_FreeStructGrid(hypre_StructVectorGrid(vector)); */
+   /* hypre_FreeStructVector(vector); */
+   /* hypre_FreeStructVector(tmp_vector); */
 
    /* malloc debug stuff */
    malloc_verify(0);

@@ -12,12 +12,12 @@
  *
  *****************************************************************************/
 
-#ifndef zzz_SMG_HEADER
-#define zzz_SMG_HEADER
+#ifndef hypre_SMG_HEADER
+#define hypre_SMG_HEADER
 
 
 /*--------------------------------------------------------------------------
- * zzz_SMGData:
+ * hypre_SMGData:
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -43,33 +43,33 @@ typedef struct
    int                 fs;      /* fine index stride */
 
    /* base index space info */
-   zzz_Index           base_index;
-   zzz_Index           base_stride;
+   hypre_Index           base_index;
+   hypre_Index           base_stride;
 
    /* base index space info for each grid level */
-   zzz_Index          *base_index_l;
-   zzz_Index          *base_stride_l;
+   hypre_Index          *base_index_l;
+   hypre_Index          *base_stride_l;
 
    /* coarsening info for each grid level */
-   zzz_Index          *cindex_l;
-   zzz_Index          *findex_l;
-   zzz_Index          *cstride_l;
-   zzz_Index          *fstride_l;
+   hypre_Index          *cindex_l;
+   hypre_Index          *findex_l;
+   hypre_Index          *cstride_l;
+   hypre_Index          *fstride_l;
 
-   zzz_StructGrid    **grid_l;
+   hypre_StructGrid    **grid_l;
                     
-   zzz_StructMatrix  **A_l;
-   zzz_StructMatrix  **PT_l;
-   zzz_StructMatrix  **R_l;
+   hypre_StructMatrix  **A_l;
+   hypre_StructMatrix  **PT_l;
+   hypre_StructMatrix  **R_l;
                     
-   zzz_StructVector  **b_l;
-   zzz_StructVector  **x_l;
+   hypre_StructVector  **b_l;
+   hypre_StructVector  **x_l;
 
    /* temp vectors */
-   zzz_StructVector  **tb_l;
-   zzz_StructVector  **tx_l;
-   zzz_StructVector  **r_l;
-   zzz_StructVector  **e_l;
+   hypre_StructVector  **tb_l;
+   hypre_StructVector  **tx_l;
+   hypre_StructVector  **r_l;
+   hypre_StructVector  **e_l;
 
    void              **relax_data_l;
    void              **residual_data_l;
@@ -85,30 +85,30 @@ typedef struct
    double             *norms;
    double             *rel_norms;
 
-} zzz_SMGData;
+} hypre_SMGData;
 
 /*--------------------------------------------------------------------------
  * Utility routines:
  *--------------------------------------------------------------------------*/
 
-#define zzz_SMGMapFineToCoarse(index1, index2, cindex, cstride) \
+#define hypre_SMGMapFineToCoarse(index1, index2, cindex, cstride) \
 {\
-   zzz_IndexX(index2) =\
-      (zzz_IndexX(index1) - zzz_IndexX(cindex)) / zzz_IndexX(cstride);\
-   zzz_IndexY(index2) =\
-      (zzz_IndexY(index1) - zzz_IndexY(cindex)) / zzz_IndexY(cstride);\
-   zzz_IndexZ(index2) =\
-      (zzz_IndexZ(index1) - zzz_IndexZ(cindex)) / zzz_IndexZ(cstride);\
+   hypre_IndexX(index2) =\
+      (hypre_IndexX(index1) - hypre_IndexX(cindex)) / hypre_IndexX(cstride);\
+   hypre_IndexY(index2) =\
+      (hypre_IndexY(index1) - hypre_IndexY(cindex)) / hypre_IndexY(cstride);\
+   hypre_IndexZ(index2) =\
+      (hypre_IndexZ(index1) - hypre_IndexZ(cindex)) / hypre_IndexZ(cstride);\
 }
 
-#define zzz_SMGMapCoarseToFine(index1, index2, cindex, cstride) \
+#define hypre_SMGMapCoarseToFine(index1, index2, cindex, cstride) \
 {\
-   zzz_IndexX(index2) =\
-      zzz_IndexX(index1) * zzz_IndexX(cstride) + zzz_IndexX(cindex);\
-   zzz_IndexY(index2) =\
-      zzz_IndexY(index1) * zzz_IndexY(cstride) + zzz_IndexY(cindex);\
-   zzz_IndexZ(index2) =\
-      zzz_IndexZ(index1) * zzz_IndexZ(cstride) + zzz_IndexZ(cindex);\
+   hypre_IndexX(index2) =\
+      hypre_IndexX(index1) * hypre_IndexX(cstride) + hypre_IndexX(cindex);\
+   hypre_IndexY(index2) =\
+      hypre_IndexY(index1) * hypre_IndexY(cstride) + hypre_IndexY(cindex);\
+   hypre_IndexZ(index2) =\
+      hypre_IndexZ(index1) * hypre_IndexZ(cstride) + hypre_IndexZ(cindex);\
 }
 
 #endif

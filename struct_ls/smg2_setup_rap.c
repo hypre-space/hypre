@@ -15,26 +15,26 @@
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
- * zzz_SMG2NewRAPOp 
+ * hypre_SMG2NewRAPOp 
  *    Sets up new coarse grid operator stucture.
  *--------------------------------------------------------------------------*/
  
-zzz_StructMatrix *
-zzz_SMG2NewRAPOp( zzz_StructMatrix *R,
-                  zzz_StructMatrix *A,
-                  zzz_StructMatrix *PT )
+hypre_StructMatrix *
+hypre_SMG2NewRAPOp( hypre_StructMatrix *R,
+                  hypre_StructMatrix *A,
+                  hypre_StructMatrix *PT )
 {
-   zzz_StructMatrix    *RAP;
+   hypre_StructMatrix    *RAP;
 
-   zzz_StructGrid      *coarse_grid;
+   hypre_StructGrid      *coarse_grid;
 
-   zzz_Index           *RAP_stencil_shape;
-   zzz_StructStencil   *RAP_stencil;
+   hypre_Index           *RAP_stencil_shape;
+   hypre_StructStencil   *RAP_stencil;
    int                  RAP_stencil_size;
    int                  RAP_stencil_dim;
    int                  RAP_num_ghost[] = {1, 1, 1, 1, 0, 0};
 
-   zzz_StructStencil   *A_stencil;
+   hypre_StructStencil   *A_stencil;
    int                  A_stencil_size;
 
    int                  j, i;
@@ -42,10 +42,10 @@ zzz_SMG2NewRAPOp( zzz_StructMatrix *R,
  
    RAP_stencil_dim = 2;
 
-   coarse_grid = zzz_StructMatrixGrid(R);
+   coarse_grid = hypre_StructMatrixGrid(R);
 
-   A_stencil = zzz_StructMatrixStencil(A);
-   A_stencil_size = zzz_StructStencilSize(A_stencil);
+   A_stencil = hypre_StructMatrixStencil(A);
+   A_stencil_size = hypre_StructStencilSize(A_stencil);
  
 /*--------------------------------------------------------------------------
  * Define RAP_stencil
@@ -57,14 +57,14 @@ zzz_SMG2NewRAPOp( zzz_StructMatrix *R,
  * non-symmetric case
  *--------------------------------------------------------------------------*/
 
-   if (!zzz_StructMatrixSymmetric(A))
+   if (!hypre_StructMatrixSymmetric(A))
    {
 
 /*--------------------------------------------------------------------------
  *    5 or 9 point fine grid stencil produces 9 point RAP
  *--------------------------------------------------------------------------*/
       RAP_stencil_size = 9;
-      RAP_stencil_shape = zzz_CTAlloc(zzz_Index, RAP_stencil_size);
+      RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
       for (j = -1; j < 2; j++)
       {
           for (i = -1; i < 2; i++)
@@ -73,7 +73,7 @@ zzz_SMG2NewRAPOp( zzz_StructMatrix *R,
 /*--------------------------------------------------------------------------
  *           Storage for 9 elements (c,w,e,n,s,sw,se,nw,se)
  *--------------------------------------------------------------------------*/
-             zzz_SetIndex(RAP_stencil_shape[stencil_rank],i,j,0);
+             hypre_SetIndex(RAP_stencil_shape[stencil_rank],i,j,0);
              stencil_rank++;
           }
       }
@@ -93,7 +93,7 @@ zzz_SMG2NewRAPOp( zzz_StructMatrix *R,
  *    in the standard lexicalgraphic ordering.
  *--------------------------------------------------------------------------*/
       RAP_stencil_size = 5;
-      RAP_stencil_shape = zzz_CTAlloc(zzz_Index, RAP_stencil_size);
+      RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
       for (j = -1; j < 1; j++)
       {
           for (i = -1; i < 2; i++)
@@ -104,30 +104,30 @@ zzz_SMG2NewRAPOp( zzz_StructMatrix *R,
  *--------------------------------------------------------------------------*/
              if( i+j <=0 )
              {
-                zzz_SetIndex(RAP_stencil_shape[stencil_rank],i,j,0);
+                hypre_SetIndex(RAP_stencil_shape[stencil_rank],i,j,0);
                 stencil_rank++;
              }
           }
       }
    }
 
-   RAP_stencil = zzz_NewStructStencil(RAP_stencil_dim, RAP_stencil_size,
+   RAP_stencil = hypre_NewStructStencil(RAP_stencil_dim, RAP_stencil_size,
                                       RAP_stencil_shape);
 
-   RAP = zzz_NewStructMatrix(zzz_StructMatrixComm(A),
+   RAP = hypre_NewStructMatrix(hypre_StructMatrixComm(A),
                              coarse_grid, RAP_stencil);
 
 /*--------------------------------------------------------------------------
  * Coarse operator in symmetric iff fine operator is
  *--------------------------------------------------------------------------*/
-   zzz_StructMatrixSymmetric(RAP) = zzz_StructMatrixSymmetric(A);
+   hypre_StructMatrixSymmetric(RAP) = hypre_StructMatrixSymmetric(A);
 
 /*--------------------------------------------------------------------------
  * Set number of ghost points - one one each boundary
  *--------------------------------------------------------------------------*/
-   zzz_SetStructMatrixNumGhost(RAP, RAP_num_ghost);
+   hypre_SetStructMatrixNumGhost(RAP, RAP_num_ghost);
 
-   zzz_InitializeStructMatrix(RAP);
+   hypre_InitializeStructMatrix(RAP);
  
    return RAP;
 }
@@ -140,45 +140,45 @@ zzz_SMG2NewRAPOp( zzz_StructMatrix *R,
  *
  * I am, however, assuming that the c-to-c interpolation is the identity.
  *
- * I've written a two routines - zzz_SMG2BuildRAPSym to build the lower
+ * I've written a two routines - hypre_SMG2BuildRAPSym to build the lower
  * triangular part of RAP (including the diagonal) and
- * zzz_SMG2BuildRAPNoSym to build the upper triangular part of RAP
+ * hypre_SMG2BuildRAPNoSym to build the upper triangular part of RAP
  * (excluding the diagonal). So using symmetric storage, only the first
  * routine would be called. With full storage both would need to be called.
  *
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
-                     zzz_StructMatrix *PT,
-                     zzz_StructMatrix *R,
-                     zzz_StructMatrix *RAP,
-                     zzz_Index         cindex,
-                     zzz_Index         cstride )
+hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
+                     hypre_StructMatrix *PT,
+                     hypre_StructMatrix *R,
+                     hypre_StructMatrix *RAP,
+                     hypre_Index         cindex,
+                     hypre_Index         cstride )
 
 {
 
-   zzz_Index             index_temp;
+   hypre_Index             index_temp;
 
-   zzz_StructStencil    *fine_stencil;
+   hypre_StructStencil    *fine_stencil;
    int                   fine_stencil_size;
 
-   zzz_StructGrid       *cgrid;
-   zzz_BoxArray         *cgrid_boxes;
-   zzz_Box              *cgrid_box;
-   zzz_IndexRef          cstart;
-   zzz_Index             stridec;
-   zzz_Index             fstart;
-   zzz_IndexRef          stridef;
-   zzz_Index             loop_size;
+   hypre_StructGrid       *cgrid;
+   hypre_BoxArray         *cgrid_boxes;
+   hypre_Box              *cgrid_box;
+   hypre_IndexRef          cstart;
+   hypre_Index             stridec;
+   hypre_Index             fstart;
+   hypre_IndexRef          stridef;
+   hypre_Index             loop_size;
 
    int                  i;
    int                  loopi, loopj, loopk;
 
-   zzz_Box              *A_data_box;
-   zzz_Box              *PT_data_box;
-   zzz_Box              *R_data_box;
-   zzz_Box              *RAP_data_box;
+   hypre_Box              *A_data_box;
+   hypre_Box              *PT_data_box;
+   hypre_Box              *R_data_box;
+   hypre_Box              *RAP_data_box;
 
    double               *pa, *pb;
    double               *ra, *rb;
@@ -200,26 +200,26 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
 
    int                  ierr;
 
-   fine_stencil = zzz_StructMatrixStencil(A);
-   fine_stencil_size = zzz_StructStencilSize(fine_stencil);
+   fine_stencil = hypre_StructMatrixStencil(A);
+   fine_stencil_size = hypre_StructStencilSize(fine_stencil);
 
    stridef = cstride;
-   zzz_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex(stridec, 1, 1, 1);
 
-   cgrid = zzz_StructMatrixGrid(RAP);
-   cgrid_boxes = zzz_StructGridBoxes(cgrid);
+   cgrid = hypre_StructMatrixGrid(RAP);
+   cgrid_boxes = hypre_StructGridBoxes(cgrid);
 
-   zzz_ForBoxI(i, cgrid_boxes)
+   hypre_ForBoxI(i, cgrid_boxes)
    {
-      cgrid_box = zzz_BoxArrayBox(cgrid_boxes, i);
+      cgrid_box = hypre_BoxArrayBox(cgrid_boxes, i);
 
-      cstart = zzz_BoxIMin(cgrid_box);
-      zzz_SMGMapCoarseToFine(cstart, fstart, cindex, cstride) 
+      cstart = hypre_BoxIMin(cgrid_box);
+      hypre_SMGMapCoarseToFine(cstart, fstart, cindex, cstride) 
 
-      A_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(A), i);
-      PT_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(PT), i);
-      R_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(R), i);
-      RAP_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(RAP), i);
+      A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+      PT_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), i);
+      R_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), i);
+      RAP_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), i);
 
 /*--------------------------------------------------------------------------
  * Extract pointers for interpolation operator:
@@ -227,11 +227,11 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
  * pb is pointer for weight for f-point below c-point 
  *--------------------------------------------------------------------------*/
 
-      zzz_SetIndex(index_temp,0,1,0);
-      pa = zzz_StructMatrixExtractPointerByIndex(PT, i, index_temp);
+      hypre_SetIndex(index_temp,0,1,0);
+      pa = hypre_StructMatrixExtractPointerByIndex(PT, i, index_temp);
 
-      zzz_SetIndex(index_temp,0,-1,0);
-      pb = zzz_StructMatrixExtractPointerByIndex(PT, i, index_temp);
+      hypre_SetIndex(index_temp,0,-1,0);
+      pb = hypre_StructMatrixExtractPointerByIndex(PT, i, index_temp);
  
 /*--------------------------------------------------------------------------
  * Extract pointers for restriction operator:
@@ -239,11 +239,11 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
  * rb is pointer for weight for f-point below c-point 
  *--------------------------------------------------------------------------*/
 
-      zzz_SetIndex(index_temp,0,1,0);
-      ra = zzz_StructMatrixExtractPointerByIndex(R, i, index_temp);
+      hypre_SetIndex(index_temp,0,1,0);
+      ra = hypre_StructMatrixExtractPointerByIndex(R, i, index_temp);
 
-      zzz_SetIndex(index_temp,0,-1,0);
-      rb = zzz_StructMatrixExtractPointerByIndex(R, i, index_temp);
+      hypre_SetIndex(index_temp,0,-1,0);
+      rb = hypre_StructMatrixExtractPointerByIndex(R, i, index_temp);
  
 /*--------------------------------------------------------------------------
  * Extract pointers for 5-point fine grid operator:
@@ -255,20 +255,20 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
  * a_cn is pointer for north coefficient
  *--------------------------------------------------------------------------*/
 
-      zzz_SetIndex(index_temp,0,0,0);
-      a_cc = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+      hypre_SetIndex(index_temp,0,0,0);
+      a_cc = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
-      zzz_SetIndex(index_temp,-1,0,0);
-      a_cw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+      hypre_SetIndex(index_temp,-1,0,0);
+      a_cw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
-      zzz_SetIndex(index_temp,1,0,0);
-      a_ce = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+      hypre_SetIndex(index_temp,1,0,0);
+      a_ce = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
-      zzz_SetIndex(index_temp,0,-1,0);
-      a_cs = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+      hypre_SetIndex(index_temp,0,-1,0);
+      a_cs = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
-      zzz_SetIndex(index_temp,0,1,0);
-      a_cn = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+      hypre_SetIndex(index_temp,0,1,0);
+      a_cn = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
 /*--------------------------------------------------------------------------
  * Extract additional pointers for 9-point fine grid operator:
@@ -281,17 +281,17 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
 
       if(fine_stencil_size > 5)
       {
-         zzz_SetIndex(index_temp,-1,-1,0);
-         a_csw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+         hypre_SetIndex(index_temp,-1,-1,0);
+         a_csw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
-         zzz_SetIndex(index_temp,1,-1,0);
-         a_cse = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+         hypre_SetIndex(index_temp,1,-1,0);
+         a_cse = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
-         zzz_SetIndex(index_temp,-1,1,0);
-         a_cnw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+         hypre_SetIndex(index_temp,-1,1,0);
+         a_cnw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
-         zzz_SetIndex(index_temp,1,1,0);
-         a_cne = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+         hypre_SetIndex(index_temp,1,1,0);
+         a_cne = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       }
 
@@ -303,20 +303,20 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
  * rap_cc is pointer for center coefficient (etc.)
  *--------------------------------------------------------------------------*/
 
-      zzz_SetIndex(index_temp,0,0,0);
-      rap_cc = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+      hypre_SetIndex(index_temp,0,0,0);
+      rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-      zzz_SetIndex(index_temp,-1,0,0);
-      rap_cw = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+      hypre_SetIndex(index_temp,-1,0,0);
+      rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-      zzz_SetIndex(index_temp,0,-1,0);
-      rap_cs = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+      hypre_SetIndex(index_temp,0,-1,0);
+      rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-      zzz_SetIndex(index_temp,-1,-1,0);
-      rap_csw = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+      hypre_SetIndex(index_temp,-1,-1,0);
+      rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-      zzz_SetIndex(index_temp,1,-1,0);
-      rap_cse = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+      hypre_SetIndex(index_temp,1,-1,0);
+      rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
 /*--------------------------------------------------------------------------
  * Define offsets for fine grid stencil and interpolation
@@ -326,11 +326,11 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
  * Offsets are used in refering to data associated with other points. 
  *--------------------------------------------------------------------------*/
 
-      zzz_SetIndex(index_temp,0,1,0);
-      yOffsetA = zzz_BoxOffsetDistance(A_data_box,index_temp); 
-      yOffsetP = zzz_BoxOffsetDistance(PT_data_box,index_temp); 
-      zzz_SetIndex(index_temp,1,0,0);
-      xOffsetP = zzz_BoxOffsetDistance(PT_data_box,index_temp); 
+      hypre_SetIndex(index_temp,0,1,0);
+      yOffsetA = hypre_BoxOffsetDistance(A_data_box,index_temp); 
+      yOffsetP = hypre_BoxOffsetDistance(PT_data_box,index_temp); 
+      hypre_SetIndex(index_temp,1,0,0);
+      xOffsetP = hypre_BoxOffsetDistance(PT_data_box,index_temp); 
 
 /*--------------------------------------------------------------------------
  * Switch statement to direct control to apropriate BoxLoop depending
@@ -349,8 +349,8 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
 
               case 5:
 
-              zzz_GetBoxSize(cgrid_box, loop_size);
-              zzz_BoxLoop4(loopi, loopj, loopk, loop_size,
+              hypre_GetBoxSize(cgrid_box, loop_size);
+              hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
                            PT_data_box, cstart, stridec, iP,
                            R_data_box, cstart, stridec, iR,
                            A_data_box, fstart, stridef, iA,
@@ -397,8 +397,8 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
 
               default:
 
-              zzz_GetBoxSize(cgrid_box, loop_size);
-              zzz_BoxLoop4(loopi, loopj, loopk, loop_size,
+              hypre_GetBoxSize(cgrid_box, loop_size);
+              hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
                            PT_data_box, cstart, stridec, iP,
                            R_data_box, cstart, stridec, iR,
                            A_data_box, fstart, stridef, iA,
@@ -454,36 +454,36 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
-                       zzz_StructMatrix *PT,
-                       zzz_StructMatrix *R,
-                       zzz_StructMatrix *RAP,
-                       zzz_Index         cindex,
-                       zzz_Index         cstride )
+hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
+                       hypre_StructMatrix *PT,
+                       hypre_StructMatrix *R,
+                       hypre_StructMatrix *RAP,
+                       hypre_Index         cindex,
+                       hypre_Index         cstride )
 
 {
 
-   zzz_Index             index_temp;
+   hypre_Index             index_temp;
 
-   zzz_StructStencil    *fine_stencil;
+   hypre_StructStencil    *fine_stencil;
    int                   fine_stencil_size;
 
-   zzz_StructGrid       *cgrid;
-   zzz_BoxArray         *cgrid_boxes;
-   zzz_Box              *cgrid_box;
-   zzz_IndexRef          cstart;
-   zzz_Index             stridec;
-   zzz_Index             fstart;
-   zzz_IndexRef          stridef;
-   zzz_Index             loop_size;
+   hypre_StructGrid       *cgrid;
+   hypre_BoxArray         *cgrid_boxes;
+   hypre_Box              *cgrid_box;
+   hypre_IndexRef          cstart;
+   hypre_Index             stridec;
+   hypre_Index             fstart;
+   hypre_IndexRef          stridef;
+   hypre_Index             loop_size;
 
    int                  i;
    int                  loopi, loopj, loopk;
 
-   zzz_Box              *A_data_box;
-   zzz_Box              *PT_data_box;
-   zzz_Box              *R_data_box;
-   zzz_Box              *RAP_data_box;
+   hypre_Box              *A_data_box;
+   hypre_Box              *PT_data_box;
+   hypre_Box              *R_data_box;
+   hypre_Box              *RAP_data_box;
 
    double               *pa, *pb;
    double               *ra, *rb;
@@ -505,26 +505,26 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
 
    int                  ierr;
 
-   fine_stencil = zzz_StructMatrixStencil(A);
-   fine_stencil_size = zzz_StructStencilSize(fine_stencil);
+   fine_stencil = hypre_StructMatrixStencil(A);
+   fine_stencil_size = hypre_StructStencilSize(fine_stencil);
 
    stridef = cstride;
-   zzz_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex(stridec, 1, 1, 1);
 
-   cgrid = zzz_StructMatrixGrid(RAP);
-   cgrid_boxes = zzz_StructGridBoxes(cgrid);
+   cgrid = hypre_StructMatrixGrid(RAP);
+   cgrid_boxes = hypre_StructGridBoxes(cgrid);
 
-   zzz_ForBoxI(i, cgrid_boxes)
+   hypre_ForBoxI(i, cgrid_boxes)
    {
-      cgrid_box = zzz_BoxArrayBox(cgrid_boxes, i);
+      cgrid_box = hypre_BoxArrayBox(cgrid_boxes, i);
 
-      cstart = zzz_BoxIMin(cgrid_box);
-      zzz_SMGMapCoarseToFine(cstart, fstart, cindex, cstride)
+      cstart = hypre_BoxIMin(cgrid_box);
+      hypre_SMGMapCoarseToFine(cstart, fstart, cindex, cstride)
 
-      A_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(A), i);
-      PT_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(PT), i);
-      R_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(R), i);
-      RAP_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(RAP), i);
+      A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+      PT_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), i);
+      R_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), i);
+      RAP_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), i);
 
 /*--------------------------------------------------------------------------
  * Extract pointers for interpolation operator:
@@ -532,11 +532,11 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
  * pb is pointer for weight for f-point below c-point 
  *--------------------------------------------------------------------------*/
 
-      zzz_SetIndex(index_temp,0,1,0);
-      pa = zzz_StructMatrixExtractPointerByIndex(PT, i, index_temp);
+      hypre_SetIndex(index_temp,0,1,0);
+      pa = hypre_StructMatrixExtractPointerByIndex(PT, i, index_temp);
 
-      zzz_SetIndex(index_temp,0,-1,0);
-      pb = zzz_StructMatrixExtractPointerByIndex(PT, i, index_temp);
+      hypre_SetIndex(index_temp,0,-1,0);
+      pb = hypre_StructMatrixExtractPointerByIndex(PT, i, index_temp);
  
 /*--------------------------------------------------------------------------
  * Extract pointers for restriction operator:
@@ -544,11 +544,11 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
  * rb is pointer for weight for f-point below c-point 
  *--------------------------------------------------------------------------*/
 
-      zzz_SetIndex(index_temp,0,1,0);
-      ra = zzz_StructMatrixExtractPointerByIndex(R, i, index_temp);
+      hypre_SetIndex(index_temp,0,1,0);
+      ra = hypre_StructMatrixExtractPointerByIndex(R, i, index_temp);
 
-      zzz_SetIndex(index_temp,0,-1,0);
-      rb = zzz_StructMatrixExtractPointerByIndex(R, i, index_temp);
+      hypre_SetIndex(index_temp,0,-1,0);
+      rb = hypre_StructMatrixExtractPointerByIndex(R, i, index_temp);
  
 /*--------------------------------------------------------------------------
  * Extract pointers for 5-point fine grid operator:
@@ -560,20 +560,20 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
  * a_cn is pointer for north coefficient
  *--------------------------------------------------------------------------*/
 
-      zzz_SetIndex(index_temp,0,0,0);
-      a_cc = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+      hypre_SetIndex(index_temp,0,0,0);
+      a_cc = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
-      zzz_SetIndex(index_temp,-1,0,0);
-      a_cw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+      hypre_SetIndex(index_temp,-1,0,0);
+      a_cw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
-      zzz_SetIndex(index_temp,1,0,0);
-      a_ce = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+      hypre_SetIndex(index_temp,1,0,0);
+      a_ce = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
-      zzz_SetIndex(index_temp,0,-1,0);
-      a_cs = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+      hypre_SetIndex(index_temp,0,-1,0);
+      a_cs = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
-      zzz_SetIndex(index_temp,0,1,0);
-      a_cn = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+      hypre_SetIndex(index_temp,0,1,0);
+      a_cn = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
 /*--------------------------------------------------------------------------
  * Extract additional pointers for 9-point fine grid operator:
@@ -586,17 +586,17 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
 
       if(fine_stencil_size > 5)
       {
-         zzz_SetIndex(index_temp,-1,-1,0);
-         a_csw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+         hypre_SetIndex(index_temp,-1,-1,0);
+         a_csw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
-         zzz_SetIndex(index_temp,1,-1,0);
-         a_cse = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+         hypre_SetIndex(index_temp,1,-1,0);
+         a_cse = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
-         zzz_SetIndex(index_temp,-1,1,0);
-         a_cnw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+         hypre_SetIndex(index_temp,-1,1,0);
+         a_cnw = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
-         zzz_SetIndex(index_temp,1,1,0);
-         a_cne = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
+         hypre_SetIndex(index_temp,1,1,0);
+         a_cne = hypre_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       }
 
@@ -608,17 +608,17 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
  * rap_ce is pointer for east coefficient (etc.)
  *--------------------------------------------------------------------------*/
 
-      zzz_SetIndex(index_temp,1,0,0);
-      rap_ce = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+      hypre_SetIndex(index_temp,1,0,0);
+      rap_ce = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-      zzz_SetIndex(index_temp,0,1,0);
-      rap_cn = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+      hypre_SetIndex(index_temp,0,1,0);
+      rap_cn = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-      zzz_SetIndex(index_temp,1,1,0);
-      rap_cne = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+      hypre_SetIndex(index_temp,1,1,0);
+      rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
-      zzz_SetIndex(index_temp,-1,1,0);
-      rap_cnw = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
+      hypre_SetIndex(index_temp,-1,1,0);
+      rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
 /*--------------------------------------------------------------------------
  * Define offsets for fine grid stencil and interpolation
@@ -628,11 +628,11 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
  * Offsets are used in refering to data associated with other points. 
  *--------------------------------------------------------------------------*/
 
-      zzz_SetIndex(index_temp,0,1,0);
-      yOffsetA = zzz_BoxOffsetDistance(A_data_box,index_temp); 
-      yOffsetP = zzz_BoxOffsetDistance(PT_data_box,index_temp); 
-      zzz_SetIndex(index_temp,1,0,0);
-      xOffsetP = zzz_BoxOffsetDistance(PT_data_box,index_temp); 
+      hypre_SetIndex(index_temp,0,1,0);
+      yOffsetA = hypre_BoxOffsetDistance(A_data_box,index_temp); 
+      yOffsetP = hypre_BoxOffsetDistance(PT_data_box,index_temp); 
+      hypre_SetIndex(index_temp,1,0,0);
+      xOffsetP = hypre_BoxOffsetDistance(PT_data_box,index_temp); 
 
 /*--------------------------------------------------------------------------
  * Switch statement to direct control to apropriate BoxLoop depending
@@ -650,8 +650,8 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
 
               case 5:
 
-              zzz_GetBoxSize(cgrid_box, loop_size);
-              zzz_BoxLoop4(loopi, loopj, loopk, loop_size,
+              hypre_GetBoxSize(cgrid_box, loop_size);
+              hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
                            PT_data_box, cstart, stridec, iP,
                            R_data_box, cstart, stridec, iR,
                            A_data_box, fstart, stridef, iA,
@@ -688,8 +688,8 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
 
               default:
 
-              zzz_GetBoxSize(cgrid_box, loop_size);
-              zzz_BoxLoop4(loopi, loopj, loopk, loop_size,
+              hypre_GetBoxSize(cgrid_box, loop_size);
+              hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
                            PT_data_box, cstart, stridec, iP,
                            R_data_box, cstart, stridec, iR,
                            A_data_box, fstart, stridef, iA,

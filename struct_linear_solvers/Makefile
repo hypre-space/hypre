@@ -15,7 +15,7 @@ HEADERS =\
  headers.h\
  protos.h\
  smg.h\
- ZZZ_ls.h
+ HYPRE_ls.h
 
 FILES =\
  cyclic_reduction.c\
@@ -32,9 +32,9 @@ FILES =\
  smg_setup_rap.c\
  smg_setup_restrict.c\
  smg_solve.c\
- ZZZ_struct_smg.c \
- ZZZ_pcg.c \
- ZZZ_struct_pcg.c 
+ HYPRE_struct_smg.c \
+ HYPRE_pcg.c \
+ HYPRE_struct_pcg.c 
 
 #smg1_setup_rap.c\
 
@@ -47,7 +47,7 @@ CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I/usr/local/mpi/mpich/include\
- -g -Wall -DZZZ_DEBUG -DZZZ_TIMING
+ -g -Wall -DHYPRE_DEBUG -DHYPRE_TIMING
 
 FFLAGS = -g
 
@@ -59,10 +59,10 @@ LFLAGS =\
  -L.\
  -L../struct_matrix_vector\
  -L../utilities\
- -lZZZ_ls\
- -lZZZ_mv\
- -lZZZ_timing\
- -lZZZ_memory\
+ -lHYPRE_ls\
+ -lHYPRE_mv\
+ -lHYPRE_timing\
+ -lHYPRE_memory\
  -lnsl -lsocket -lmpi\
  -lf2c\
  -lcegdb\
@@ -74,15 +74,15 @@ LFLAGS =\
 # Main rules
 ##################################################################
 
-driver_internal: driver_internal.o libZZZ_ls.a
+driver_internal: driver_internal.o libHYPRE_ls.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_internal driver_internal.o ${LFLAGS}
 
-driver_internal_cgsmg: driver_internal_cgsmg.o libZZZ_ls.a
+driver_internal_cgsmg: driver_internal_cgsmg.o libHYPRE_ls.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_internal_cgsmg driver_internal_cgsmg.o ${LFLAGS}
 
-libZZZ_ls.a: ${OBJS}
+libHYPRE_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -ru $@ ${OBJS}
 	ranlib $@
@@ -106,7 +106,7 @@ ${OBJS}: ${HEADERS}
 ##################################################################
 
 veryclean: clean
-	@rm -f libZZZ_ls.a
+	@rm -f libHYPRE_ls.a
 	@rm -f driver driver_internal
 
 clean:

@@ -8,54 +8,54 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * ZZZ_StructStencil interface
+ * HYPRE_StructStencil interface
  *
  *****************************************************************************/
 
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * ZZZ_NewStructStencil
+ * HYPRE_NewStructStencil
  *--------------------------------------------------------------------------*/
 
-ZZZ_StructStencil
-ZZZ_NewStructStencil( int dim,
+HYPRE_StructStencil
+HYPRE_NewStructStencil( int dim,
                       int size )
 {
-   zzz_Index  *shape;
+   hypre_Index  *shape;
  
-   shape = zzz_CTAlloc(zzz_Index, size);
+   shape = hypre_CTAlloc(hypre_Index, size);
  
-   return ( (ZZZ_StructStencil) zzz_NewStructStencil( dim, size, shape ) );
+   return ( (HYPRE_StructStencil) hypre_NewStructStencil( dim, size, shape ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SetStructStencilElement
+ * HYPRE_SetStructStencilElement
  *--------------------------------------------------------------------------*/
 
 void 
-ZZZ_SetStructStencilElement( ZZZ_StructStencil  stencil,
+HYPRE_SetStructStencilElement( HYPRE_StructStencil  stencil,
                              int                element_index,
                              int               *offset        )
 {
-   zzz_StructStencil  *new_stencil = (zzz_StructStencil *) stencil;
-   zzz_Index          *shape;
+   hypre_StructStencil  *new_stencil = (hypre_StructStencil *) stencil;
+   hypre_Index          *shape;
    int                 d;
  
-   shape = zzz_StructStencilShape(new_stencil);
-   for (d = 0; d < zzz_StructStencilDim(new_stencil); d++)
+   shape = hypre_StructStencilShape(new_stencil);
+   for (d = 0; d < hypre_StructStencilDim(new_stencil); d++)
    {
-      zzz_IndexD(shape[element_index], d) = offset[d];
+      hypre_IndexD(shape[element_index], d) = offset[d];
    }
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_FreeStructStencil
+ * HYPRE_FreeStructStencil
  *--------------------------------------------------------------------------*/
 
 void 
-ZZZ_FreeStructStencil( ZZZ_StructStencil stencil )
+HYPRE_FreeStructStencil( HYPRE_StructStencil stencil )
 {
-   zzz_FreeStructStencil( (zzz_StructStencil *) stencil );
+   hypre_FreeStructStencil( (hypre_StructStencil *) stencil );
 }
 

@@ -15,18 +15,18 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * zzz_StructInnerProd
+ * hypre_StructInnerProd
  *--------------------------------------------------------------------------*/
 
 double
-zzz_StructInnerProd(  zzz_StructVector *x,
-                      zzz_StructVector *y )
+hypre_StructInnerProd(  hypre_StructVector *x,
+                      hypre_StructVector *y )
 {
    double                result;
    double                local_result;
 
-   zzz_Box              *x_data_box;
-   zzz_Box              *y_data_box;
+   hypre_Box              *x_data_box;
+   hypre_Box              *y_data_box;
 
    int                   xi;
    int                   yi;
@@ -34,33 +34,33 @@ zzz_StructInnerProd(  zzz_StructVector *x,
    double               *xp;
    double               *yp;
 
-   zzz_BoxArray         *boxes;
-   zzz_Box              *box;
-   zzz_Index             loop_size;
-   zzz_IndexRef          start;
-   zzz_Index             unit_stride;
+   hypre_BoxArray         *boxes;
+   hypre_Box              *box;
+   hypre_Index             loop_size;
+   hypre_IndexRef          start;
+   hypre_Index             unit_stride;
 
    int                   i;
    int                   loopi, loopj, loopk;
 
    local_result = 0.0;
 
-   zzz_SetIndex(unit_stride, 1, 1, 1);
+   hypre_SetIndex(unit_stride, 1, 1, 1);
 
-   boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(y));
-   zzz_ForBoxI(i, boxes)
+   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
+   hypre_ForBoxI(i, boxes)
    {
-      box   = zzz_BoxArrayBox(boxes, i);
-      start = zzz_BoxIMin(box);
+      box   = hypre_BoxArrayBox(boxes, i);
+      start = hypre_BoxIMin(box);
 
-      x_data_box = zzz_BoxArrayBox(zzz_StructVectorDataSpace(x), i);
-      y_data_box = zzz_BoxArrayBox(zzz_StructVectorDataSpace(y), i);
+      x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+      y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
 
-      xp = zzz_StructVectorBoxData(x, i);
-      yp = zzz_StructVectorBoxData(y, i);
+      xp = hypre_StructVectorBoxData(x, i);
+      yp = hypre_StructVectorBoxData(y, i);
 
-      zzz_GetBoxSize(box, loop_size);
-      zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
+      hypre_GetBoxSize(box, loop_size);
+      hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
                    x_data_box, start, unit_stride, xi,
                    y_data_box, start, unit_stride, yi,
                    {
@@ -69,9 +69,9 @@ zzz_StructInnerProd(  zzz_StructVector *x,
    }
 
    MPI_Allreduce(&local_result, &result, 1,
-                 MPI_DOUBLE, MPI_SUM, *zzz_StructVectorComm(x));
+                 MPI_DOUBLE, MPI_SUM, *hypre_StructVectorComm(x));
 
-   zzz_IncFLOPCount(2*zzz_StructVectorGlobalSize(x));
+   hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
 
    return result;
 }

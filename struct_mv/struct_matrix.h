@@ -8,28 +8,28 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Header info for the zzz_StructMatrix structures
+ * Header info for the hypre_StructMatrix structures
  *
  *****************************************************************************/
 
-#ifndef zzz_STRUCT_MATRIX_HEADER
-#define zzz_STRUCT_MATRIX_HEADER
+#ifndef hypre_STRUCT_MATRIX_HEADER
+#define hypre_STRUCT_MATRIX_HEADER
 
 
 /*--------------------------------------------------------------------------
- * zzz_StructMatrix:
+ * hypre_StructMatrix:
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
    MPI_Comm           *comm;
 
-   zzz_StructGrid     *grid;
-   zzz_StructStencil  *user_stencil;
-   zzz_StructStencil  *stencil;
+   hypre_StructGrid     *grid;
+   hypre_StructStencil  *user_stencil;
+   hypre_StructStencil  *stencil;
    int                 num_values;   /* Number of "stored" coefficients */
 
-   zzz_BoxArray       *data_space;
+   hypre_BoxArray       *data_space;
 
    double             *data;         /* Pointer to matrix data */
    int                 data_size;    /* Size of matrix data */
@@ -45,38 +45,38 @@ typedef struct
 
    int                 global_size;  /* Total number of nonzero coefficients */
 
-   zzz_CommPkg        *comm_pkg;     /* Info on how to update ghost data */
+   hypre_CommPkg        *comm_pkg;     /* Info on how to update ghost data */
 
-} zzz_StructMatrix;
+} hypre_StructMatrix;
 
 /*--------------------------------------------------------------------------
- * Accessor macros: zzz_StructMatrix
+ * Accessor macros: hypre_StructMatrix
  *--------------------------------------------------------------------------*/
 
-#define zzz_StructMatrixComm(matrix)          ((matrix) -> comm)
-#define zzz_StructMatrixGrid(matrix)          ((matrix) -> grid)
-#define zzz_StructMatrixUserStencil(matrix)   ((matrix) -> user_stencil)
-#define zzz_StructMatrixStencil(matrix)       ((matrix) -> stencil)
-#define zzz_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
-#define zzz_StructMatrixDataSpace(matrix)     ((matrix) -> data_space)
-#define zzz_StructMatrixData(matrix)          ((matrix) -> data)
-#define zzz_StructMatrixDataSize(matrix)      ((matrix) -> data_size)
-#define zzz_StructMatrixDataIndices(matrix)   ((matrix) -> data_indices)
-#define zzz_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
-#define zzz_StructMatrixSymmElements(matrix)  ((matrix) -> symm_elements)
-#define zzz_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
-#define zzz_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
-#define zzz_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
+#define hypre_StructMatrixComm(matrix)          ((matrix) -> comm)
+#define hypre_StructMatrixGrid(matrix)          ((matrix) -> grid)
+#define hypre_StructMatrixUserStencil(matrix)   ((matrix) -> user_stencil)
+#define hypre_StructMatrixStencil(matrix)       ((matrix) -> stencil)
+#define hypre_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
+#define hypre_StructMatrixDataSpace(matrix)     ((matrix) -> data_space)
+#define hypre_StructMatrixData(matrix)          ((matrix) -> data)
+#define hypre_StructMatrixDataSize(matrix)      ((matrix) -> data_size)
+#define hypre_StructMatrixDataIndices(matrix)   ((matrix) -> data_indices)
+#define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
+#define hypre_StructMatrixSymmElements(matrix)  ((matrix) -> symm_elements)
+#define hypre_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
+#define hypre_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
+#define hypre_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
 
-#define zzz_StructMatrixBox(matrix, b) \
-zzz_BoxArrayBox(zzz_StructMatrixDataSpace(matrix), b)
+#define hypre_StructMatrixBox(matrix, b) \
+hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
 
-#define zzz_StructMatrixBoxData(matrix, b, s) \
-(zzz_StructMatrixData(matrix) + zzz_StructMatrixDataIndices(matrix)[b][s])
+#define hypre_StructMatrixBoxData(matrix, b, s) \
+(hypre_StructMatrixData(matrix) + hypre_StructMatrixDataIndices(matrix)[b][s])
 
-#define zzz_StructMatrixBoxDataValue(matrix, b, s, index) \
-(zzz_StructMatrixBoxData(matrix, b, s) + \
- zzz_BoxIndexRank(zzz_StructMatrixBox(matrix, b), index))
+#define hypre_StructMatrixBoxDataValue(matrix, b, s, index) \
+(hypre_StructMatrixBoxData(matrix, b, s) + \
+ hypre_BoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
 
 
 #endif

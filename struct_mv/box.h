@@ -12,159 +12,159 @@
  *
  *****************************************************************************/
 
-#ifndef zzz_BOX_HEADER
-#define zzz_BOX_HEADER
+#ifndef hypre_BOX_HEADER
+#define hypre_BOX_HEADER
 
 /*--------------------------------------------------------------------------
- * zzz_Index:
+ * hypre_Index:
  *   This is used to define indices in index space, or dimension
  *   sizes of boxes.
  *
  *   The spatial dimensions x, y, and z may be specified by the
- *   integers 0, 1, and 2, respectively (see the zzz_IndexD macro below).
- *   This simplifies the code in the zzz_Box class by reducing code
+ *   integers 0, 1, and 2, respectively (see the hypre_IndexD macro below).
+ *   This simplifies the code in the hypre_Box class by reducing code
  *   replication.
  *--------------------------------------------------------------------------*/
 
-typedef int zzz_Index[3];
-typedef int *zzz_IndexRef;
+typedef int hypre_Index[3];
+typedef int *hypre_IndexRef;
 
 /*--------------------------------------------------------------------------
- * zzz_Box:
+ * hypre_Box:
  *   Structure describing a cartesian region of some index space.
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
-   zzz_Index imin;           /* min bounding indices */
-   zzz_Index imax;           /* max bounding indices */
+   hypre_Index imin;           /* min bounding indices */
+   hypre_Index imax;           /* max bounding indices */
 
-} zzz_Box;
+} hypre_Box;
 
 /*--------------------------------------------------------------------------
- * zzz_BoxArray:
+ * hypre_BoxArray:
  *   An array of boxes.
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
-   zzz_Box  **boxes;         /* Array of pointers to boxes */
+   hypre_Box  **boxes;         /* Array of pointers to boxes */
    int        size;          /* Size of box array */
 
-} zzz_BoxArray;
+} hypre_BoxArray;
 
-#define zzz_BoxArrayBlocksize 10
+#define hypre_BoxArrayBlocksize 10
 
 /*--------------------------------------------------------------------------
- * zzz_BoxArrayArray:
+ * hypre_BoxArrayArray:
  *   An array of box arrays.
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
-   zzz_BoxArray  **box_arrays;    /* Array of pointers to box arrays */
+   hypre_BoxArray  **box_arrays;    /* Array of pointers to box arrays */
    int             size;          /* Size of box array array */
 
-} zzz_BoxArrayArray;
+} hypre_BoxArrayArray;
 
 
 /*--------------------------------------------------------------------------
- * Accessor macros: zzz_Index
+ * Accessor macros: hypre_Index
  *--------------------------------------------------------------------------*/
 
-#define zzz_IndexD(index, d)  (index[d])
+#define hypre_IndexD(index, d)  (index[d])
 
-#define zzz_IndexX(index)     zzz_IndexD(index, 0)
-#define zzz_IndexY(index)     zzz_IndexD(index, 1)
-#define zzz_IndexZ(index)     zzz_IndexD(index, 2)
+#define hypre_IndexX(index)     hypre_IndexD(index, 0)
+#define hypre_IndexY(index)     hypre_IndexD(index, 1)
+#define hypre_IndexZ(index)     hypre_IndexD(index, 2)
 
 /*--------------------------------------------------------------------------
- * Accessor macros: zzz_Box
+ * Accessor macros: hypre_Box
  *--------------------------------------------------------------------------*/
 
-#define zzz_BoxIMin(box)     ((box) -> imin)
-#define zzz_BoxIMax(box)     ((box) -> imax)
+#define hypre_BoxIMin(box)     ((box) -> imin)
+#define hypre_BoxIMax(box)     ((box) -> imax)
 
-#define zzz_BoxIMinD(box, d) (zzz_IndexD(zzz_BoxIMin(box), d))
-#define zzz_BoxIMaxD(box, d) (zzz_IndexD(zzz_BoxIMax(box), d))
-#define zzz_BoxSizeD(box, d) (zzz_BoxIMaxD(box, d) - zzz_BoxIMinD(box, d) + 1)
+#define hypre_BoxIMinD(box, d) (hypre_IndexD(hypre_BoxIMin(box), d))
+#define hypre_BoxIMaxD(box, d) (hypre_IndexD(hypre_BoxIMax(box), d))
+#define hypre_BoxSizeD(box, d) (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1)
 
-#define zzz_BoxIMinX(box)    zzz_BoxIMinD(box, 0)
-#define zzz_BoxIMinY(box)    zzz_BoxIMinD(box, 1)
-#define zzz_BoxIMinZ(box)    zzz_BoxIMinD(box, 2)
+#define hypre_BoxIMinX(box)    hypre_BoxIMinD(box, 0)
+#define hypre_BoxIMinY(box)    hypre_BoxIMinD(box, 1)
+#define hypre_BoxIMinZ(box)    hypre_BoxIMinD(box, 2)
 
-#define zzz_BoxIMaxX(box)    zzz_BoxIMaxD(box, 0)
-#define zzz_BoxIMaxY(box)    zzz_BoxIMaxD(box, 1)
-#define zzz_BoxIMaxZ(box)    zzz_BoxIMaxD(box, 2)
+#define hypre_BoxIMaxX(box)    hypre_BoxIMaxD(box, 0)
+#define hypre_BoxIMaxY(box)    hypre_BoxIMaxD(box, 1)
+#define hypre_BoxIMaxZ(box)    hypre_BoxIMaxD(box, 2)
 
-#define zzz_BoxSizeX(box)    zzz_BoxSizeD(box, 0)
-#define zzz_BoxSizeY(box)    zzz_BoxSizeD(box, 1)
-#define zzz_BoxSizeZ(box)    zzz_BoxSizeD(box, 2)
+#define hypre_BoxSizeX(box)    hypre_BoxSizeD(box, 0)
+#define hypre_BoxSizeY(box)    hypre_BoxSizeD(box, 1)
+#define hypre_BoxSizeZ(box)    hypre_BoxSizeD(box, 2)
 
-#define zzz_BoxVolume(box) \
-(zzz_BoxSizeX(box) * zzz_BoxSizeY(box) * zzz_BoxSizeZ(box))
+#define hypre_BoxVolume(box) \
+(hypre_BoxSizeX(box) * hypre_BoxSizeY(box) * hypre_BoxSizeZ(box))
 
-#define zzz_BoxIndexRank(box, index) \
-((zzz_IndexX(index) - zzz_BoxIMinX(box)) + \
- ((zzz_IndexY(index) - zzz_BoxIMinY(box)) + \
-   ((zzz_IndexZ(index) - zzz_BoxIMinZ(box)) * \
-    zzz_BoxSizeY(box))) * \
-  zzz_BoxSizeX(box))
+#define hypre_BoxIndexRank(box, index) \
+((hypre_IndexX(index) - hypre_BoxIMinX(box)) + \
+ ((hypre_IndexY(index) - hypre_BoxIMinY(box)) + \
+   ((hypre_IndexZ(index) - hypre_BoxIMinZ(box)) * \
+    hypre_BoxSizeY(box))) * \
+  hypre_BoxSizeX(box))
 
-#define zzz_BoxOffsetDistance(box, index) \
-(zzz_IndexX(index) + \
- (zzz_IndexY(index) + \
-  (zzz_IndexZ(index) * \
-   zzz_BoxSizeY(box))) * \
- zzz_BoxSizeX(box))
+#define hypre_BoxOffsetDistance(box, index) \
+(hypre_IndexX(index) + \
+ (hypre_IndexY(index) + \
+  (hypre_IndexZ(index) * \
+   hypre_BoxSizeY(box))) * \
+ hypre_BoxSizeX(box))
   
 /*--------------------------------------------------------------------------
- * Accessor macros: zzz_BoxArray
+ * Accessor macros: hypre_BoxArray
  *--------------------------------------------------------------------------*/
 
-#define zzz_BoxArrayBoxes(box_array)  ((box_array) -> boxes)
-#define zzz_BoxArrayBox(box_array, i) ((box_array) -> boxes[(i)])
-#define zzz_BoxArraySize(box_array)   ((box_array) -> size)
+#define hypre_BoxArrayBoxes(box_array)  ((box_array) -> boxes)
+#define hypre_BoxArrayBox(box_array, i) ((box_array) -> boxes[(i)])
+#define hypre_BoxArraySize(box_array)   ((box_array) -> size)
 
 /*--------------------------------------------------------------------------
- * Accessor macros: zzz_BoxArrayArray
+ * Accessor macros: hypre_BoxArrayArray
  *--------------------------------------------------------------------------*/
 
-#define zzz_BoxArrayArrayBoxArrays(box_array_array) \
+#define hypre_BoxArrayArrayBoxArrays(box_array_array) \
 ((box_array_array) -> box_arrays)
-#define zzz_BoxArrayArrayBoxArray(box_array_array, i) \
+#define hypre_BoxArrayArrayBoxArray(box_array_array, i) \
 ((box_array_array) -> box_arrays[(i)])
-#define zzz_BoxArrayArraySize(box_array_array) \
+#define hypre_BoxArrayArraySize(box_array_array) \
 ((box_array_array) -> size)
 
 /*--------------------------------------------------------------------------
  * Looping macros:
  *--------------------------------------------------------------------------*/
 
-#define zzz_ForBoxI(i, box_array) \
-for (i = 0; i < zzz_BoxArraySize(box_array); i++)
+#define hypre_ForBoxI(i, box_array) \
+for (i = 0; i < hypre_BoxArraySize(box_array); i++)
 
-#define zzz_ForBoxArrayI(i, box_array_array) \
-for (i = 0; i < zzz_BoxArrayArraySize(box_array_array); i++)
+#define hypre_ForBoxArrayI(i, box_array_array) \
+for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 
-#define zzz_BoxLoopDeclare(loop_size, data_box, stride, iinc, jinc, kinc) \
-int  iinc = (zzz_IndexX(stride));\
-int  jinc = (zzz_IndexY(stride)*zzz_BoxSizeX(data_box)\
-             - zzz_IndexX(loop_size)*zzz_IndexX(stride));\
-int  kinc = (zzz_IndexZ(stride)*zzz_BoxSizeX(data_box)*zzz_BoxSizeY(data_box)\
-             - zzz_IndexY(loop_size)*zzz_IndexY(stride)*zzz_BoxSizeX(data_box))
+#define hypre_BoxLoopDeclare(loop_size, data_box, stride, iinc, jinc, kinc) \
+int  iinc = (hypre_IndexX(stride));\
+int  jinc = (hypre_IndexY(stride)*hypre_BoxSizeX(data_box)\
+             - hypre_IndexX(loop_size)*hypre_IndexX(stride));\
+int  kinc = (hypre_IndexZ(stride)*hypre_BoxSizeX(data_box)*hypre_BoxSizeY(data_box)\
+             - hypre_IndexY(loop_size)*hypre_IndexY(stride)*hypre_BoxSizeX(data_box))
 
-#define zzz_BoxLoop0(i, j, k, loop_size,\
+#define hypre_BoxLoop0(i, j, k, loop_size,\
                      body)\
 {\
-   int zzz__nx = zzz_IndexX(loop_size);\
-   int zzz__ny = zzz_IndexY(loop_size);\
-   int zzz__nz = zzz_IndexZ(loop_size);\
-   for (k = 0; k < zzz__nz; k++ )\
+   int hypre__nx = hypre_IndexX(loop_size);\
+   int hypre__ny = hypre_IndexY(loop_size);\
+   int hypre__nz = hypre_IndexZ(loop_size);\
+   for (k = 0; k < hypre__nz; k++ )\
    {\
-      for (j = 0; j < zzz__ny; j++ )\
+      for (j = 0; j < hypre__ny; j++ )\
       {\
-         for (i = 0; i < zzz__nx; i++ )\
+         for (i = 0; i < hypre__nx; i++ )\
          {\
             body;\
          }\
@@ -172,145 +172,145 @@ int  kinc = (zzz_IndexZ(stride)*zzz_BoxSizeX(data_box)*zzz_BoxSizeY(data_box)\
    }\
 }
 
-#define zzz_BoxLoop1(i, j, k, loop_size,\
+#define hypre_BoxLoop1(i, j, k, loop_size,\
                      data_box1, start1, stride1, i1,\
                      body)\
 {\
-   zzz_BoxLoopDeclare(loop_size, data_box1, stride1,\
-                      zzz__iinc1, zzz__jinc1, zzz__kinc1);\
-   int zzz__nx = zzz_IndexX(loop_size);\
-   int zzz__ny = zzz_IndexY(loop_size);\
-   int zzz__nz = zzz_IndexZ(loop_size);\
-   i1 = zzz_BoxIndexRank(data_box1, start1);\
-   for (k = 0; k < zzz__nz; k++ )\
+   hypre_BoxLoopDeclare(loop_size, data_box1, stride1,\
+                      hypre__iinc1, hypre__jinc1, hypre__kinc1);\
+   int hypre__nx = hypre_IndexX(loop_size);\
+   int hypre__ny = hypre_IndexY(loop_size);\
+   int hypre__nz = hypre_IndexZ(loop_size);\
+   i1 = hypre_BoxIndexRank(data_box1, start1);\
+   for (k = 0; k < hypre__nz; k++ )\
    {\
-      for (j = 0; j < zzz__ny; j++ )\
+      for (j = 0; j < hypre__ny; j++ )\
       {\
-         for (i = 0; i < zzz__nx; i++ )\
+         for (i = 0; i < hypre__nx; i++ )\
          {\
             body;\
-            i1 += zzz__iinc1;\
+            i1 += hypre__iinc1;\
          }\
-         i1 += zzz__jinc1;\
+         i1 += hypre__jinc1;\
       }\
-      i1 += zzz__kinc1;\
+      i1 += hypre__kinc1;\
    }\
 }
 
-#define zzz_BoxLoop2(i, j, k, loop_size,\
+#define hypre_BoxLoop2(i, j, k, loop_size,\
                      data_box1, start1, stride1, i1,\
                      data_box2, start2, stride2, i2,\
                      body)\
 {\
-   zzz_BoxLoopDeclare(loop_size, data_box1, stride1,\
-                      zzz__iinc1, zzz__jinc1, zzz__kinc1);\
-   zzz_BoxLoopDeclare(loop_size, data_box2, stride2,\
-                      zzz__iinc2, zzz__jinc2, zzz__kinc2);\
-   int zzz__nx = zzz_IndexX(loop_size);\
-   int zzz__ny = zzz_IndexY(loop_size);\
-   int zzz__nz = zzz_IndexZ(loop_size);\
-   i1 = zzz_BoxIndexRank(data_box1, start1);\
-   i2 = zzz_BoxIndexRank(data_box2, start2);\
-   for (k = 0; k < zzz__nz; k++ )\
+   hypre_BoxLoopDeclare(loop_size, data_box1, stride1,\
+                      hypre__iinc1, hypre__jinc1, hypre__kinc1);\
+   hypre_BoxLoopDeclare(loop_size, data_box2, stride2,\
+                      hypre__iinc2, hypre__jinc2, hypre__kinc2);\
+   int hypre__nx = hypre_IndexX(loop_size);\
+   int hypre__ny = hypre_IndexY(loop_size);\
+   int hypre__nz = hypre_IndexZ(loop_size);\
+   i1 = hypre_BoxIndexRank(data_box1, start1);\
+   i2 = hypre_BoxIndexRank(data_box2, start2);\
+   for (k = 0; k < hypre__nz; k++ )\
    {\
-      for (j = 0; j < zzz__ny; j++ )\
+      for (j = 0; j < hypre__ny; j++ )\
       {\
-         for (i = 0; i < zzz__nx; i++ )\
+         for (i = 0; i < hypre__nx; i++ )\
          {\
             body;\
-            i1 += zzz__iinc1;\
-            i2 += zzz__iinc2;\
+            i1 += hypre__iinc1;\
+            i2 += hypre__iinc2;\
          }\
-         i1 += zzz__jinc1;\
-         i2 += zzz__jinc2;\
+         i1 += hypre__jinc1;\
+         i2 += hypre__jinc2;\
       }\
-      i1 += zzz__kinc1;\
-      i2 += zzz__kinc2;\
+      i1 += hypre__kinc1;\
+      i2 += hypre__kinc2;\
    }\
 }
 
-#define zzz_BoxLoop3(i, j, k, loop_size,\
+#define hypre_BoxLoop3(i, j, k, loop_size,\
                      data_box1, start1, stride1, i1,\
                      data_box2, start2, stride2, i2,\
                      data_box3, start3, stride3, i3,\
                      body)\
 {\
-   zzz_BoxLoopDeclare(loop_size, data_box1, stride1,\
-                      zzz__iinc1, zzz__jinc1, zzz__kinc1);\
-   zzz_BoxLoopDeclare(loop_size, data_box2, stride2,\
-                      zzz__iinc2, zzz__jinc2, zzz__kinc2);\
-   zzz_BoxLoopDeclare(loop_size, data_box3, stride3,\
-                      zzz__iinc3, zzz__jinc3, zzz__kinc3);\
-   int zzz__nx = zzz_IndexX(loop_size);\
-   int zzz__ny = zzz_IndexY(loop_size);\
-   int zzz__nz = zzz_IndexZ(loop_size);\
-   i1 = zzz_BoxIndexRank(data_box1, start1);\
-   i2 = zzz_BoxIndexRank(data_box2, start2);\
-   i3 = zzz_BoxIndexRank(data_box3, start3);\
-   for (k = 0; k < zzz__nz; k++ )\
+   hypre_BoxLoopDeclare(loop_size, data_box1, stride1,\
+                      hypre__iinc1, hypre__jinc1, hypre__kinc1);\
+   hypre_BoxLoopDeclare(loop_size, data_box2, stride2,\
+                      hypre__iinc2, hypre__jinc2, hypre__kinc2);\
+   hypre_BoxLoopDeclare(loop_size, data_box3, stride3,\
+                      hypre__iinc3, hypre__jinc3, hypre__kinc3);\
+   int hypre__nx = hypre_IndexX(loop_size);\
+   int hypre__ny = hypre_IndexY(loop_size);\
+   int hypre__nz = hypre_IndexZ(loop_size);\
+   i1 = hypre_BoxIndexRank(data_box1, start1);\
+   i2 = hypre_BoxIndexRank(data_box2, start2);\
+   i3 = hypre_BoxIndexRank(data_box3, start3);\
+   for (k = 0; k < hypre__nz; k++ )\
    {\
-      for (j = 0; j < zzz__ny; j++ )\
+      for (j = 0; j < hypre__ny; j++ )\
       {\
-         for (i = 0; i < zzz__nx; i++ )\
+         for (i = 0; i < hypre__nx; i++ )\
          {\
             body;\
-            i1 += zzz__iinc1;\
-            i2 += zzz__iinc2;\
-            i3 += zzz__iinc3;\
+            i1 += hypre__iinc1;\
+            i2 += hypre__iinc2;\
+            i3 += hypre__iinc3;\
          }\
-         i1 += zzz__jinc1;\
-         i2 += zzz__jinc2;\
-         i3 += zzz__jinc3;\
+         i1 += hypre__jinc1;\
+         i2 += hypre__jinc2;\
+         i3 += hypre__jinc3;\
       }\
-      i1 += zzz__kinc1;\
-      i2 += zzz__kinc2;\
-      i3 += zzz__kinc3;\
+      i1 += hypre__kinc1;\
+      i2 += hypre__kinc2;\
+      i3 += hypre__kinc3;\
    }\
 }
 
-#define zzz_BoxLoop4(i, j, k, loop_size,\
+#define hypre_BoxLoop4(i, j, k, loop_size,\
                      data_box1, start1, stride1, i1,\
                      data_box2, start2, stride2, i2,\
                      data_box3, start3, stride3, i3,\
                      data_box4, start4, stride4, i4,\
                      body)\
 {\
-   zzz_BoxLoopDeclare(loop_size, data_box1, stride1,\
-                      zzz__iinc1, zzz__jinc1, zzz__kinc1);\
-   zzz_BoxLoopDeclare(loop_size, data_box2, stride2,\
-                      zzz__iinc2, zzz__jinc2, zzz__kinc2);\
-   zzz_BoxLoopDeclare(loop_size, data_box3, stride3,\
-                      zzz__iinc3, zzz__jinc3, zzz__kinc3);\
-   zzz_BoxLoopDeclare(loop_size, data_box4, stride4,\
-                      zzz__iinc4, zzz__jinc4, zzz__kinc4);\
-   int zzz__nx = zzz_IndexX(loop_size);\
-   int zzz__ny = zzz_IndexY(loop_size);\
-   int zzz__nz = zzz_IndexZ(loop_size);\
-   i1 = zzz_BoxIndexRank(data_box1, start1);\
-   i2 = zzz_BoxIndexRank(data_box2, start2);\
-   i3 = zzz_BoxIndexRank(data_box3, start3);\
-   i4 = zzz_BoxIndexRank(data_box4, start4);\
-   for (k = 0; k < zzz__nz; k++ )\
+   hypre_BoxLoopDeclare(loop_size, data_box1, stride1,\
+                      hypre__iinc1, hypre__jinc1, hypre__kinc1);\
+   hypre_BoxLoopDeclare(loop_size, data_box2, stride2,\
+                      hypre__iinc2, hypre__jinc2, hypre__kinc2);\
+   hypre_BoxLoopDeclare(loop_size, data_box3, stride3,\
+                      hypre__iinc3, hypre__jinc3, hypre__kinc3);\
+   hypre_BoxLoopDeclare(loop_size, data_box4, stride4,\
+                      hypre__iinc4, hypre__jinc4, hypre__kinc4);\
+   int hypre__nx = hypre_IndexX(loop_size);\
+   int hypre__ny = hypre_IndexY(loop_size);\
+   int hypre__nz = hypre_IndexZ(loop_size);\
+   i1 = hypre_BoxIndexRank(data_box1, start1);\
+   i2 = hypre_BoxIndexRank(data_box2, start2);\
+   i3 = hypre_BoxIndexRank(data_box3, start3);\
+   i4 = hypre_BoxIndexRank(data_box4, start4);\
+   for (k = 0; k < hypre__nz; k++ )\
    {\
-      for (j = 0; j < zzz__ny; j++ )\
+      for (j = 0; j < hypre__ny; j++ )\
       {\
-         for (i = 0; i < zzz__nx; i++ )\
+         for (i = 0; i < hypre__nx; i++ )\
          {\
             body;\
-            i1 += zzz__iinc1;\
-            i2 += zzz__iinc2;\
-            i3 += zzz__iinc3;\
-            i4 += zzz__iinc4;\
+            i1 += hypre__iinc1;\
+            i2 += hypre__iinc2;\
+            i3 += hypre__iinc3;\
+            i4 += hypre__iinc4;\
          }\
-         i1 += zzz__jinc1;\
-         i2 += zzz__jinc2;\
-         i3 += zzz__jinc3;\
-         i4 += zzz__jinc4;\
+         i1 += hypre__jinc1;\
+         i2 += hypre__jinc2;\
+         i3 += hypre__jinc3;\
+         i4 += hypre__jinc4;\
       }\
-      i1 += zzz__kinc1;\
-      i2 += zzz__kinc2;\
-      i3 += zzz__kinc3;\
-      i4 += zzz__kinc4;\
+      i1 += hypre__kinc1;\
+      i2 += hypre__kinc2;\
+      i3 += hypre__kinc3;\
+      i4 += hypre__kinc4;\
    }\
 }
 

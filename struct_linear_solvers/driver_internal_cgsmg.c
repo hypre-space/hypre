@@ -1,11 +1,11 @@
 
 #include "headers.h"
  
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
 #include <cegdb.h>
 #endif
 
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
 char malloc_logpath_memory[256];
 #endif
  
@@ -31,15 +31,15 @@ char *argv[];
    int                 b_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
    int                 x_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
                      
-   zzz_StructMatrix   *A;
-   zzz_StructVector   *b;
-   zzz_StructVector   *b_l;
-   zzz_StructVector   *x;
-   zzz_StructVector   *x_l;
+   hypre_StructMatrix   *A;
+   hypre_StructVector   *b;
+   hypre_StructVector   *b_l;
+   hypre_StructVector   *x;
+   hypre_StructVector   *x_l;
 
 
-   ZZZ_PCGData        *pcg_data;
-   ZZZ_PCGPrecondData *precond_data;
+   HYPRE_PCGData        *pcg_data;
+   HYPRE_PCGPrecondData *precond_data;
    int                 num_iterations;
    int                 num_procs, myid;
 
@@ -54,16 +54,16 @@ char *argv[];
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
-   comm = zzz_TAlloc(MPI_Comm, 1);
+   comm = hypre_TAlloc(MPI_Comm, 1);
    MPI_Comm_dup(MPI_COMM_WORLD, comm);
    MPI_Comm_size(*comm, &num_procs );
    MPI_Comm_rank(*comm, &myid );
 
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
 #endif
 
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
    malloc_logpath = malloc_logpath_memory;
    sprintf(malloc_logpath, "malloc.log.%04d", myid);
 #endif
@@ -83,71 +83,71 @@ char *argv[];
     * Set up the linear system
     *-----------------------------------------------------------*/
 
-   /* A = zzz_ReadStructMatrix(comm, "Ares_Matrix", A_num_ghost); */
+   /* A = hypre_ReadStructMatrix(comm, "Ares_Matrix", A_num_ghost); */
 
-   /* b = zzz_ReadStructVector(comm, "Ares_Rhs", b_num_ghost); */
+   /* b = hypre_ReadStructVector(comm, "Ares_Rhs", b_num_ghost); */
 
-   /* x = zzz_ReadStructVector(comm, "Ares_InitialGuess", x_num_ghost); */
+   /* x = hypre_ReadStructVector(comm, "Ares_InitialGuess", x_num_ghost); */
  
-   A = zzz_ReadStructMatrix(comm, filename, A_num_ghost);
+   A = hypre_ReadStructMatrix(comm, filename, A_num_ghost);
 
-   b = zzz_NewStructVector(comm, zzz_StructMatrixGrid(A));
-   zzz_SetStructVectorNumGhost(b, b_num_ghost);
-   zzz_InitializeStructVector(b);
-   zzz_AssembleStructVector(b);
-   zzz_SetStructVectorConstantValues(b, 1.0);
+   b = hypre_NewStructVector(comm, hypre_StructMatrixGrid(A));
+   hypre_SetStructVectorNumGhost(b, b_num_ghost);
+   hypre_InitializeStructVector(b);
+   hypre_AssembleStructVector(b);
+   hypre_SetStructVectorConstantValues(b, 1.0);
 
-   x = zzz_NewStructVector(comm, zzz_StructMatrixGrid(A));
-   zzz_SetStructVectorNumGhost(x, x_num_ghost);
-   zzz_InitializeStructVector(x);
-   zzz_AssembleStructVector(x);
-   zzz_SetStructVectorConstantValues(x, 0.0);
+   x = hypre_NewStructVector(comm, hypre_StructMatrixGrid(A));
+   hypre_SetStructVectorNumGhost(x, x_num_ghost);
+   hypre_InitializeStructVector(x);
+   hypre_AssembleStructVector(x);
+   hypre_SetStructVectorConstantValues(x, 0.0);
  
    /*-----------------------------------------------------------
     * Allocate work vectors for preconditioner
     *-----------------------------------------------------------*/
 
-   b_l = zzz_NewStructVector(comm, zzz_StructMatrixGrid(A));
-   zzz_SetStructVectorNumGhost(b_l, b_num_ghost);
-   zzz_InitializeStructVector(b_l);
-   zzz_AssembleStructVector(b_l);
-   zzz_SetStructVectorConstantValues(b_l, 1.0);
+   b_l = hypre_NewStructVector(comm, hypre_StructMatrixGrid(A));
+   hypre_SetStructVectorNumGhost(b_l, b_num_ghost);
+   hypre_InitializeStructVector(b_l);
+   hypre_AssembleStructVector(b_l);
+   hypre_SetStructVectorConstantValues(b_l, 1.0);
 
-   x_l = zzz_NewStructVector(comm, zzz_StructMatrixGrid(A));
-   zzz_SetStructVectorNumGhost(x_l, x_num_ghost);
-   zzz_InitializeStructVector(x_l);
-   zzz_AssembleStructVector(x_l);
-   zzz_SetStructVectorConstantValues(x_l, 0.0);
+   x_l = hypre_NewStructVector(comm, hypre_StructMatrixGrid(A));
+   hypre_SetStructVectorNumGhost(x_l, x_num_ghost);
+   hypre_InitializeStructVector(x_l);
+   hypre_AssembleStructVector(x_l);
+   hypre_SetStructVectorConstantValues(x_l, 0.0);
  
    /*-----------------------------------------------------------
     * Solve the system
     *-----------------------------------------------------------*/
 
-   pcg_data = zzz_TAlloc(ZZZ_PCGData, 1);
-   precond_data = zzz_TAlloc(ZZZ_PCGPrecondData, 1);
+   pcg_data = hypre_TAlloc(HYPRE_PCGData, 1);
+   precond_data = hypre_TAlloc(HYPRE_PCGPrecondData, 1);
 
-   ZZZ_PCGDataMaxIter(pcg_data) = 20;
-   ZZZ_PCGDataTwoNorm(pcg_data) = 1;
+   HYPRE_PCGDataMaxIter(pcg_data) = 20;
+   HYPRE_PCGDataTwoNorm(pcg_data) = 1;
 
 #if 0
-   ZZZ_PCGSMGPrecondSetup( A, b_l, x_l, precond_data );
-   ZZZ_PCGSetup( A, ZZZ_PCGSMGPrecond, precond_data, pcg_data );
+   HYPRE_PCGSMGPrecondSetup( A, b_l, x_l, precond_data );
+   HYPRE_PCGSetup( A, HYPRE_PCGSMGPrecond, precond_data, pcg_data );
 #endif
 #if 1
-   ZZZ_PCGDiagScalePrecondSetup( A, b_l, x_l, precond_data );
-   ZZZ_PCGSetup( A, ZZZ_PCGDiagScalePrecond, precond_data, pcg_data );
+   HYPRE_PCGDiagScalePrecondSetup( A, b_l, x_l, precond_data );
+   HYPRE_PCGSetup( A, HYPRE_PCGDiagScalePrecond, precond_data, pcg_data );
 #endif
 
-   ZZZ_PCG( x, b, 1.e-6, pcg_data );
-   num_iterations = ZZZ_PCGDataNumIterations(pcg_data);
-   norm = ZZZ_PCGDataNorm(pcg_data);
-   rel_norm = ZZZ_PCGDataRelNorm(pcg_data);
+   HYPRE_PCG( x, b, 1.e-6, pcg_data );
+   num_iterations = HYPRE_PCGDataNumIterations(pcg_data);
+   norm = HYPRE_PCGDataNorm(pcg_data);
+   rel_norm = HYPRE_PCGDataRelNorm(pcg_data);
 
    /*-----------------------------------------------------------
     * Print the solution and other info
     *-----------------------------------------------------------*/
 
-   zzz_PrintStructVector("zout_x", x, 0);
+   hypre_PrintStructVector("zout_x", x, 0);
 
    if (myid == 0)
    {
@@ -160,17 +160,17 @@ char *argv[];
     * Finalize things
     *-----------------------------------------------------------*/
 
-   ZZZ_FreePCGSMGData(pcg_data);
-   zzz_FreeStructGrid(zzz_StructMatrixGrid(A));
-   zzz_FreeStructMatrix(A);
-   zzz_FreeStructVector(b);
-   zzz_FreeStructVector(x);
-   /* Already freed in ZZZ_FreePCGSMGData call */
-   /* zzz_FreeStructVector(b_l); */
-   /* zzz_FreeStructVector(x_l); */
-   zzz_TFree(comm);
+   HYPRE_FreePCGSMGData(pcg_data);
+   hypre_FreeStructGrid(hypre_StructMatrixGrid(A));
+   hypre_FreeStructMatrix(A);
+   hypre_FreeStructVector(b);
+   hypre_FreeStructVector(x);
+   /* Already freed in HYPRE_FreePCGSMGData call */
+   /* hypre_FreeStructVector(b_l); */
+   /* hypre_FreeStructVector(x_l); */
+   hypre_TFree(comm);
 
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
    malloc_verify(0);
    malloc_shutdown();
 #endif

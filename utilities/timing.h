@@ -13,8 +13,8 @@
  *
  *****************************************************************************/
 
-#ifndef ZZZ_TIMING_HEADER
-#define ZZZ_TIMING_HEADER
+#ifndef HYPRE_TIMING_HEADER
+#define HYPRE_TIMING_HEADER
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,14 +26,14 @@
  * With timing off
  *--------------------------------------------------------------------------*/
 
-#ifndef ZZZ_TIMING
+#ifndef HYPRE_TIMING
 
-#define zzz_InitializeTiming(name) (int)(name)
-#define zzz_IncFLOPCount(inc)
-#define zzz_BeginTiming(i)
-#define zzz_EndTiming(i)
-#define zzz_PrintTiming(comm)
-#define zzz_FinalizeTiming(index)
+#define hypre_InitializeTiming(name) (int)(name)
+#define hypre_IncFLOPCount(inc)
+#define hypre_BeginTiming(i)
+#define hypre_EndTiming(i)
+#define hypre_PrintTiming(comm)
+#define hypre_FinalizeTiming(index)
 
 /*--------------------------------------------------------------------------
  * With timing on
@@ -60,27 +60,27 @@ typedef struct
    double   CPU_count;
    double   FLOP_count;
 
-} zzz_TimingType;
+} hypre_TimingType;
 
-#ifdef ZZZ_TIMING_GLOBALS
-zzz_TimingType *zzz_global_timing = NULL;
+#ifdef HYPRE_TIMING_GLOBALS
+hypre_TimingType *hypre_global_timing = NULL;
 #else
-extern zzz_TimingType *zzz_global_timing;
+extern hypre_TimingType *hypre_global_timing;
 #endif
 
 /*-------------------------------------------------------
  * Accessor functions
  *-------------------------------------------------------*/
 
-#define zzz_TimingWallTime(i) (zzz_global_timing -> wall_time[(i)])
-#define zzz_TimingCPUTime(i)  (zzz_global_timing -> cpu_time[(i)])
-#define zzz_TimingFLOPS(i)    (zzz_global_timing -> flops[(i)])
-#define zzz_TimingName(i)     (zzz_global_timing -> name[(i)])
-#define zzz_TimingState(i)    (zzz_global_timing -> state[(i)])
-#define zzz_TimingNumRegs(i)  (zzz_global_timing -> num_regs[(i)])
-#define zzz_TimingWallCount   (zzz_global_timing -> wall_count)
-#define zzz_TimingCPUCount    (zzz_global_timing -> CPU_count)
-#define zzz_TimingFLOPCount   (zzz_global_timing -> FLOP_count)
+#define hypre_TimingWallTime(i) (hypre_global_timing -> wall_time[(i)])
+#define hypre_TimingCPUTime(i)  (hypre_global_timing -> cpu_time[(i)])
+#define hypre_TimingFLOPS(i)    (hypre_global_timing -> flops[(i)])
+#define hypre_TimingName(i)     (hypre_global_timing -> name[(i)])
+#define hypre_TimingState(i)    (hypre_global_timing -> state[(i)])
+#define hypre_TimingNumRegs(i)  (hypre_global_timing -> num_regs[(i)])
+#define hypre_TimingWallCount   (hypre_global_timing -> wall_count)
+#define hypre_TimingCPUCount    (hypre_global_timing -> CPU_count)
+#define hypre_TimingFLOPCount   (hypre_global_timing -> FLOP_count)
 
 /*-------------------------------------------------------
  * Prototypes
@@ -94,12 +94,12 @@ extern zzz_TimingType *zzz_global_timing;
  
  
 /* timing.c */
-int zzz_InitializeTiming P((char *name ));
-void zzz_IncFLOPCount P((int inc ));
-void zzz_BeginTiming P((int time_index ));
-void zzz_EndTiming P((int time_index ));
-void zzz_PrintTiming P((MPI_Comm *comm ));
-void zzz_FinalizeTiming P((int time_index ));
+int hypre_InitializeTiming P((char *name ));
+void hypre_IncFLOPCount P((int inc ));
+void hypre_BeginTiming P((int time_index ));
+void hypre_EndTiming P((int time_index ));
+void hypre_PrintTiming P((MPI_Comm *comm ));
+void hypre_FinalizeTiming P((int time_index ));
  
 #undef P
 

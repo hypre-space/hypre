@@ -15,30 +15,30 @@
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
- * zzz_SMGNewRestrictOp
+ * hypre_SMGNewRestrictOp
  *--------------------------------------------------------------------------*/
 
-zzz_StructMatrix *
-zzz_SMGNewRestrictOp( zzz_StructMatrix *A,
-                      zzz_StructGrid   *cgrid,
+hypre_StructMatrix *
+hypre_SMGNewRestrictOp( hypre_StructMatrix *A,
+                      hypre_StructGrid   *cgrid,
                       int               cdir  )
 {
-   zzz_StructMatrix *R;
+   hypre_StructMatrix *R;
 
    return R;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGSetupRestrictOp
+ * hypre_SMGSetupRestrictOp
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGSetupRestrictOp( zzz_StructMatrix *A,
-                        zzz_StructMatrix *R,
-                        zzz_StructVector *temp_vec,
+hypre_SMGSetupRestrictOp( hypre_StructMatrix *A,
+                        hypre_StructMatrix *R,
+                        hypre_StructVector *temp_vec,
                         int               cdir,
-                        zzz_Index         cindex,
-                        zzz_Index         cstride  )
+                        hypre_Index         cindex,
+                        hypre_Index         cstride  )
 {
    int ierr;
 

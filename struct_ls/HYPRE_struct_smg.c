@@ -8,126 +8,126 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * ZZZ_StructSMG interface
+ * HYPRE_StructSMG interface
  *
  *****************************************************************************/
 
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * ZZZ_StructSMGInitialize
+ * HYPRE_StructSMGInitialize
  *--------------------------------------------------------------------------*/
 
-ZZZ_StructSolver
-ZZZ_StructSMGInitialize( MPI_Comm *comm )
+HYPRE_StructSolver
+HYPRE_StructSMGInitialize( MPI_Comm *comm )
 {
-   return ( (ZZZ_StructSolver) zzz_SMGInitialize( comm ) );
+   return ( (HYPRE_StructSolver) hypre_SMGInitialize( comm ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_StructSMGFinalize
- *--------------------------------------------------------------------------*/
-
-int 
-ZZZ_StructSMGFinalize( ZZZ_StructSolver solver )
-{
-   return( zzz_SMGFinalize( (void *) solver ) );
-}
-
-/*--------------------------------------------------------------------------
- * ZZZ_StructSMGSetup
+ * HYPRE_StructSMGFinalize
  *--------------------------------------------------------------------------*/
 
 int 
-ZZZ_StructSMGSetup( ZZZ_StructSolver solver,
-                    ZZZ_StructMatrix A,
-                    ZZZ_StructVector b,
-                    ZZZ_StructVector x      )
+HYPRE_StructSMGFinalize( HYPRE_StructSolver solver )
 {
-   return( zzz_SMGSetup( (void *) solver,
-                         (zzz_StructMatrix *) A,
-                         (zzz_StructVector *) b,
-                         (zzz_StructVector *) x ) );
+   return( hypre_SMGFinalize( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_StructSMGSolve
+ * HYPRE_StructSMGSetup
  *--------------------------------------------------------------------------*/
 
 int 
-ZZZ_StructSMGSolve( ZZZ_StructSolver solver,
-                    ZZZ_StructMatrix A,
-                    ZZZ_StructVector b,
-                    ZZZ_StructVector x      )
+HYPRE_StructSMGSetup( HYPRE_StructSolver solver,
+                    HYPRE_StructMatrix A,
+                    HYPRE_StructVector b,
+                    HYPRE_StructVector x      )
 {
-   return( zzz_SMGSolve( (void *) solver,
-                         (zzz_StructMatrix *) A,
-                         (zzz_StructVector *) b,
-                         (zzz_StructVector *) x ) );
+   return( hypre_SMGSetup( (void *) solver,
+                         (hypre_StructMatrix *) A,
+                         (hypre_StructVector *) b,
+                         (hypre_StructVector *) x ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SMGSetMemoryUse
+ * HYPRE_StructSMGSolve
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_StructSMGSolve( HYPRE_StructSolver solver,
+                    HYPRE_StructMatrix A,
+                    HYPRE_StructVector b,
+                    HYPRE_StructVector x      )
+{
+   return( hypre_SMGSolve( (void *) solver,
+                         (hypre_StructMatrix *) A,
+                         (hypre_StructVector *) b,
+                         (hypre_StructVector *) x ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SMGSetMemoryUse
  *--------------------------------------------------------------------------*/
 
 int
-ZZZ_SMGSetMemoryUse( ZZZ_StructSolver solver,
+HYPRE_SMGSetMemoryUse( HYPRE_StructSolver solver,
                      int              memory_use )
 {
-   return( zzz_SMGSetMemoryUse( (void *) solver, memory_use ) );
+   return( hypre_SMGSetMemoryUse( (void *) solver, memory_use ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SMGSetTol
+ * HYPRE_SMGSetTol
  *--------------------------------------------------------------------------*/
 
 int
-ZZZ_SMGSetTol( ZZZ_StructSolver solver,
+HYPRE_SMGSetTol( HYPRE_StructSolver solver,
                double           tol    )
 {
-   return( zzz_SMGSetTol( (void *) solver, tol ) );
+   return( hypre_SMGSetTol( (void *) solver, tol ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SMGSetMaxIter
+ * HYPRE_SMGSetMaxIter
  *--------------------------------------------------------------------------*/
 
 int
-ZZZ_SMGSetMaxIter( ZZZ_StructSolver solver,
+HYPRE_SMGSetMaxIter( HYPRE_StructSolver solver,
                    int              max_iter  )
 {
-   return( zzz_SMGSetMaxIter( (void *) solver, max_iter ) );
+   return( hypre_SMGSetMaxIter( (void *) solver, max_iter ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SMGSetZeroGuess
+ * HYPRE_SMGSetZeroGuess
  *--------------------------------------------------------------------------*/
  
 int
-ZZZ_SMGSetZeroGuess( ZZZ_StructSolver solver )
+HYPRE_SMGSetZeroGuess( HYPRE_StructSolver solver )
 {
-   return( zzz_SMGSetZeroGuess( (void *) solver ) );
+   return( hypre_SMGSetZeroGuess( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SMGGetNumIterations
+ * HYPRE_SMGGetNumIterations
  *--------------------------------------------------------------------------*/
 
 int
-ZZZ_SMGGetNumIterations( ZZZ_StructSolver  solver,
+HYPRE_SMGGetNumIterations( HYPRE_StructSolver  solver,
                          int              *num_iterations )
 {
-   return( zzz_SMGGetNumIterations( (void *) solver, num_iterations ) );
+   return( hypre_SMGGetNumIterations( (void *) solver, num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_SMGGetFinalRelativeResidualNorm
+ * HYPRE_SMGGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 int
-ZZZ_SMGGetFinalRelativeResidualNorm( ZZZ_StructSolver  solver,
+HYPRE_SMGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
                                      double           *relative_residual_norm )
 {
-   return( zzz_SMGGetFinalRelativeResidualNorm( (void *) solver, relative_residual_norm ) );
+   return( hypre_SMGGetFinalRelativeResidualNorm( (void *) solver, relative_residual_norm ) );
 }
 

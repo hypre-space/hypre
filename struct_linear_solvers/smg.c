@@ -15,18 +15,18 @@
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
- * zzz_SMGInitialize
+ * hypre_SMGInitialize
  *--------------------------------------------------------------------------*/
 
 void *
-zzz_SMGInitialize( MPI_Comm *comm )
+hypre_SMGInitialize( MPI_Comm *comm )
 {
-   zzz_SMGData *smg_data;
+   hypre_SMGData *smg_data;
 
-   smg_data = zzz_CTAlloc(zzz_SMGData, 1);
+   smg_data = hypre_CTAlloc(hypre_SMGData, 1);
 
    (smg_data -> comm)        = comm;
-   (smg_data -> time_index)  = zzz_InitializeTiming("SMG");
+   (smg_data -> time_index)  = hypre_InitializeTiming("SMG");
 
    /* set defaults */
    (smg_data -> memory_use) = 0;
@@ -41,20 +41,20 @@ zzz_SMGInitialize( MPI_Comm *comm )
    (smg_data -> fi) = 1;
    (smg_data -> cs) = 2;
    (smg_data -> fs) = 2;
-   zzz_SetIndex((smg_data -> base_index), 0, 0, 0);
-   zzz_SetIndex((smg_data -> base_stride), 1, 1, 1);
+   hypre_SetIndex((smg_data -> base_index), 0, 0, 0);
+   hypre_SetIndex((smg_data -> base_stride), 1, 1, 1);
 
    return (void *) smg_data;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGFinalize
+ * hypre_SMGFinalize
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGFinalize( void *smg_vdata )
+hypre_SMGFinalize( void *smg_vdata )
 {
-   zzz_SMGData *smg_data = smg_vdata;
+   hypre_SMGData *smg_data = smg_vdata;
 
    int l;
    int ierr;
@@ -63,68 +63,68 @@ zzz_SMGFinalize( void *smg_vdata )
    {
       if ((smg_data -> logging) > 0)
       {
-         zzz_TFree(smg_data -> norms);
-         zzz_TFree(smg_data -> rel_norms);
+         hypre_TFree(smg_data -> norms);
+         hypre_TFree(smg_data -> rel_norms);
       }
 
       for (l = 0; l < ((smg_data -> num_levels) - 1); l++)
       {
-         zzz_SMGRelaxFinalize(smg_data -> relax_data_l[l]);
-         zzz_SMGResidualFinalize(smg_data -> residual_data_l[l]);
-         zzz_SMGRestrictFinalize(smg_data -> restrict_data_l[l]);
-         zzz_SMGIntAddFinalize(smg_data -> intadd_data_l[l]);
+         hypre_SMGRelaxFinalize(smg_data -> relax_data_l[l]);
+         hypre_SMGResidualFinalize(smg_data -> residual_data_l[l]);
+         hypre_SMGRestrictFinalize(smg_data -> restrict_data_l[l]);
+         hypre_SMGIntAddFinalize(smg_data -> intadd_data_l[l]);
       }
-      zzz_SMGRelaxFinalize(smg_data -> relax_data_l[l]);
-      zzz_TFree(smg_data -> relax_data_l);
-      zzz_TFree(smg_data -> residual_data_l);
-      zzz_TFree(smg_data -> restrict_data_l);
-      zzz_TFree(smg_data -> intadd_data_l);
+      hypre_SMGRelaxFinalize(smg_data -> relax_data_l[l]);
+      hypre_TFree(smg_data -> relax_data_l);
+      hypre_TFree(smg_data -> residual_data_l);
+      hypre_TFree(smg_data -> restrict_data_l);
+      hypre_TFree(smg_data -> intadd_data_l);
  
-      zzz_FreeStructVector(smg_data -> tb_l[0]);
-      zzz_FreeStructVector(smg_data -> tx_l[0]);
+      hypre_FreeStructVector(smg_data -> tb_l[0]);
+      hypre_FreeStructVector(smg_data -> tx_l[0]);
       for (l = 0; l < ((smg_data -> num_levels) - 1); l++)
       {
-         zzz_FreeStructGrid(smg_data -> grid_l[l+1]);
-         zzz_FreeStructMatrix(smg_data -> A_l[l+1]);
-         zzz_FreeStructMatrix(smg_data -> PT_l[l]);
-         if (!zzz_StructMatrixSymmetric(smg_data -> A_l[0]))
-            zzz_FreeStructMatrix(smg_data -> R_l[l]);
-         zzz_FreeStructVector(smg_data -> b_l[l+1]);
-         zzz_FreeStructVector(smg_data -> x_l[l+1]);
-         zzz_FreeStructVectorShell(smg_data -> r_l[l+1]);
+         hypre_FreeStructGrid(smg_data -> grid_l[l+1]);
+         hypre_FreeStructMatrix(smg_data -> A_l[l+1]);
+         hypre_FreeStructMatrix(smg_data -> PT_l[l]);
+         if (!hypre_StructMatrixSymmetric(smg_data -> A_l[0]))
+            hypre_FreeStructMatrix(smg_data -> R_l[l]);
+         hypre_FreeStructVector(smg_data -> b_l[l+1]);
+         hypre_FreeStructVector(smg_data -> x_l[l+1]);
+         hypre_FreeStructVectorShell(smg_data -> r_l[l+1]);
       }
-      zzz_TFree(smg_data -> grid_l);
-      zzz_TFree(smg_data -> A_l);
-      zzz_TFree(smg_data -> PT_l);
-      zzz_TFree(smg_data -> R_l);
-      zzz_TFree(smg_data -> b_l);
-      zzz_TFree(smg_data -> x_l);
-      zzz_TFree(smg_data -> tb_l);
-      zzz_TFree(smg_data -> tx_l);
+      hypre_TFree(smg_data -> grid_l);
+      hypre_TFree(smg_data -> A_l);
+      hypre_TFree(smg_data -> PT_l);
+      hypre_TFree(smg_data -> R_l);
+      hypre_TFree(smg_data -> b_l);
+      hypre_TFree(smg_data -> x_l);
+      hypre_TFree(smg_data -> tb_l);
+      hypre_TFree(smg_data -> tx_l);
  
-      zzz_TFree(smg_data -> base_index_l);
-      zzz_TFree(smg_data -> cindex_l);
-      zzz_TFree(smg_data -> findex_l);
-      zzz_TFree(smg_data -> base_stride_l);
-      zzz_TFree(smg_data -> cstride_l);
-      zzz_TFree(smg_data -> fstride_l);
+      hypre_TFree(smg_data -> base_index_l);
+      hypre_TFree(smg_data -> cindex_l);
+      hypre_TFree(smg_data -> findex_l);
+      hypre_TFree(smg_data -> base_stride_l);
+      hypre_TFree(smg_data -> cstride_l);
+      hypre_TFree(smg_data -> fstride_l);
 
-      zzz_FinalizeTiming(smg_data -> time_index);
-      zzz_TFree(smg_data);
+      hypre_FinalizeTiming(smg_data -> time_index);
+      hypre_TFree(smg_data);
    }
 
    return(ierr);
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGSetMemoryUse
+ * hypre_SMGSetMemoryUse
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGSetMemoryUse( void *smg_vdata,
+hypre_SMGSetMemoryUse( void *smg_vdata,
                      int   memory_use )
 {
-   zzz_SMGData *smg_data = smg_vdata;
+   hypre_SMGData *smg_data = smg_vdata;
    int          ierr = 0;
  
    (smg_data -> memory_use) = memory_use;
@@ -133,14 +133,14 @@ zzz_SMGSetMemoryUse( void *smg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGSetTol
+ * hypre_SMGSetTol
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGSetTol( void   *smg_vdata,
+hypre_SMGSetTol( void   *smg_vdata,
                double  tol       )
 {
-   zzz_SMGData *smg_data = smg_vdata;
+   hypre_SMGData *smg_data = smg_vdata;
    int          ierr = 0;
  
    (smg_data -> tol) = tol;
@@ -149,14 +149,14 @@ zzz_SMGSetTol( void   *smg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGSetMaxIter
+ * hypre_SMGSetMaxIter
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGSetMaxIter( void *smg_vdata,
+hypre_SMGSetMaxIter( void *smg_vdata,
                    int   max_iter  )
 {
-   zzz_SMGData *smg_data = smg_vdata;
+   hypre_SMGData *smg_data = smg_vdata;
    int          ierr = 0;
  
    (smg_data -> max_iter) = max_iter;
@@ -165,13 +165,13 @@ zzz_SMGSetMaxIter( void *smg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGSetZeroGuess
+ * hypre_SMGSetZeroGuess
  *--------------------------------------------------------------------------*/
  
 int
-zzz_SMGSetZeroGuess( void *smg_vdata )
+hypre_SMGSetZeroGuess( void *smg_vdata )
 {
-   zzz_SMGData *smg_data = smg_vdata;
+   hypre_SMGData *smg_data = smg_vdata;
    int          ierr = 0;
  
    (smg_data -> zero_guess) = 1;
@@ -180,15 +180,15 @@ zzz_SMGSetZeroGuess( void *smg_vdata )
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGSetNumPreRelax
+ * hypre_SMGSetNumPreRelax
  * Note that we require at least 1 pre-relax sweep. 
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGSetNumPreRelax( void *smg_vdata,
+hypre_SMGSetNumPreRelax( void *smg_vdata,
                     int   num_pre_relax )
 {
-   zzz_SMGData *smg_data = smg_vdata;
+   hypre_SMGData *smg_data = smg_vdata;
    int          ierr = 0;
  
    (smg_data -> num_pre_relax) = max(num_pre_relax,1);
@@ -197,14 +197,14 @@ zzz_SMGSetNumPreRelax( void *smg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGSetNumPostRelax
+ * hypre_SMGSetNumPostRelax
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGSetNumPostRelax( void *smg_vdata,
+hypre_SMGSetNumPostRelax( void *smg_vdata,
                      int   num_post_relax )
 {
-   zzz_SMGData *smg_data = smg_vdata;
+   hypre_SMGData *smg_data = smg_vdata;
    int          ierr = 0;
  
    (smg_data -> num_post_relax) = num_post_relax;
@@ -213,36 +213,36 @@ zzz_SMGSetNumPostRelax( void *smg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGSetBase
+ * hypre_SMGSetBase
  *--------------------------------------------------------------------------*/
  
 int
-zzz_SMGSetBase( void      *smg_vdata,
-                zzz_Index  base_index,
-                zzz_Index  base_stride )
+hypre_SMGSetBase( void      *smg_vdata,
+                hypre_Index  base_index,
+                hypre_Index  base_stride )
 {
-   zzz_SMGData *smg_data = smg_vdata;
+   hypre_SMGData *smg_data = smg_vdata;
    int          d;
    int          ierr = 0;
  
    for (d = 0; d < 3; d++)
    {
-      zzz_IndexD((smg_data -> base_index),  d) = zzz_IndexD(base_index,  d);
-      zzz_IndexD((smg_data -> base_stride), d) = zzz_IndexD(base_stride, d);
+      hypre_IndexD((smg_data -> base_index),  d) = hypre_IndexD(base_index,  d);
+      hypre_IndexD((smg_data -> base_stride), d) = hypre_IndexD(base_stride, d);
    }
  
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGSetLogging
+ * hypre_SMGSetLogging
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGSetLogging( void *smg_vdata,
+hypre_SMGSetLogging( void *smg_vdata,
 		   int   logging)
 {
-   zzz_SMGData *smg_data = smg_vdata;
+   hypre_SMGData *smg_data = smg_vdata;
    int          ierr = 0;
  
    (smg_data -> logging) = logging;
@@ -251,14 +251,14 @@ zzz_SMGSetLogging( void *smg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGGetNumIterations
+ * hypre_SMGGetNumIterations
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGGetNumIterations( void *smg_vdata,
+hypre_SMGGetNumIterations( void *smg_vdata,
                          int  *num_iterations )
 {
-   zzz_SMGData *smg_data = smg_vdata;
+   hypre_SMGData *smg_data = smg_vdata;
    int ierr;
 
    *num_iterations = (smg_data -> num_iterations);
@@ -267,14 +267,14 @@ zzz_SMGGetNumIterations( void *smg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGPrintLogging
+ * hypre_SMGPrintLogging
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGPrintLogging( void *smg_vdata,
+hypre_SMGPrintLogging( void *smg_vdata,
                       int  myid)
 {
-   zzz_SMGData *smg_data = smg_vdata;
+   hypre_SMGData *smg_data = smg_vdata;
    int          ierr = 0;
    int          i;
    int          num_iterations  = (smg_data -> num_iterations);
@@ -299,14 +299,14 @@ zzz_SMGPrintLogging( void *smg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGGetFinalRelativeResidualNorm
+ * hypre_SMGGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
+hypre_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
                                      double *relative_residual_norm )
 {
-   zzz_SMGData *smg_data = smg_vdata;
+   hypre_SMGData *smg_data = smg_vdata;
    int          ierr = -1;
    int          num_iterations  = (smg_data -> num_iterations);
    int          logging   = (smg_data -> logging);
@@ -323,25 +323,25 @@ zzz_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * zzz_SMGSetStructVectorConstantValues
+ * hypre_SMGSetStructVectorConstantValues
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGSetStructVectorConstantValues( zzz_StructVector *vector,
+hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
                                       double            values,
-                                      zzz_SBoxArray    *sbox_array )
+                                      hypre_SBoxArray    *sbox_array )
 {
    int    ierr;
 
-   zzz_Box          *v_data_box;
+   hypre_Box          *v_data_box;
 
    int               vi;
    double           *vp;
 
-   zzz_SBox         *sbox;
-   zzz_Index         loop_size;
-   zzz_IndexRef      start;
-   zzz_IndexRef      stride;
+   hypre_SBox         *sbox;
+   hypre_Index         loop_size;
+   hypre_IndexRef      start;
+   hypre_IndexRef      stride;
 
    int               loopi, loopj, loopk;
    int               i;
@@ -350,17 +350,17 @@ zzz_SMGSetStructVectorConstantValues( zzz_StructVector *vector,
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
 
-   zzz_ForSBoxI(i, sbox_array)
+   hypre_ForSBoxI(i, sbox_array)
    {
-      sbox  = zzz_SBoxArraySBox(sbox_array, i);
-      start = zzz_SBoxIMin(sbox);
-      stride = zzz_SBoxStride(sbox);
+      sbox  = hypre_SBoxArraySBox(sbox_array, i);
+      start = hypre_SBoxIMin(sbox);
+      stride = hypre_SBoxStride(sbox);
 
-      v_data_box = zzz_BoxArrayBox(zzz_StructVectorDataSpace(vector), i);
-      vp = zzz_StructVectorBoxData(vector, i);
+      v_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
+      vp = hypre_StructVectorBoxData(vector, i);
 
-      zzz_GetSBoxSize(sbox, loop_size);
-      zzz_BoxLoop1(loopi, loopj, loopk, loop_size,
+      hypre_GetSBoxSize(sbox, loop_size);
+      hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
                    v_data_box, start, stride, vi,
                    {
                       vp[vi] = values;

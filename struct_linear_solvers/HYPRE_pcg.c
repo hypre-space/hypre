@@ -14,11 +14,11 @@
  *****************************************************************************/
 
 #include "headers.h"
-#include "ZZZ_struct_pcg.h"
-#include "ZZZ_pcg.h"
+#include "HYPRE_struct_pcg.h"
+#include "HYPRE_pcg.h"
 
 /*--------------------------------------------------------------------------
- * ZZZ_PCG
+ * HYPRE_PCG
  *--------------------------------------------------------------------------
  *
  * We use the following convergence test as the default (see Ashby, Holst,
@@ -36,23 +36,23 @@
  *--------------------------------------------------------------------------*/
 
 void
-ZZZ_PCG( Vector *x, 
+HYPRE_PCG( Vector *x, 
 	 Vector *b,
 	 double  tol,
 	 void   *data )
 {
-   ZZZ_PCGData  *pcg_data      = data;
+   HYPRE_PCGData  *pcg_data      = data;
 
-   int        max_iter     = ZZZ_PCGDataMaxIter(pcg_data);
-   int        two_norm     = ZZZ_PCGDataTwoNorm(pcg_data);
+   int        max_iter     = HYPRE_PCGDataMaxIter(pcg_data);
+   int        two_norm     = HYPRE_PCGDataTwoNorm(pcg_data);
 
-   Matrix    *A            = ZZZ_PCGDataA(pcg_data);
-   Vector    *p            = ZZZ_PCGDataP(pcg_data);
-   Vector    *s            = ZZZ_PCGDataS(pcg_data);
-   Vector    *r            = ZZZ_PCGDataR(pcg_data);
+   Matrix    *A            = HYPRE_PCGDataA(pcg_data);
+   Vector    *p            = HYPRE_PCGDataP(pcg_data);
+   Vector    *s            = HYPRE_PCGDataS(pcg_data);
+   Vector    *r            = HYPRE_PCGDataR(pcg_data);
 
-   int      (*ZZZ_PCGPrecond)()   = ZZZ_PCGDataPrecond(pcg_data);
-   void      *precond_data = ZZZ_PCGDataPrecondData(pcg_data);
+   int      (*HYPRE_PCGPrecond)()   = HYPRE_PCGDataPrecond(pcg_data);
+   void      *precond_data = HYPRE_PCGDataPrecondData(pcg_data);
 
    double     alpha, beta;
    double     gamma, gamma_old;
@@ -70,16 +70,16 @@ ZZZ_PCG( Vector *x,
     * Initialize some logging variables
     *-----------------------------------------------------------------------*/
 
-   norm_log     = zzz_CTAlloc(double, max_iter+1);
-   rel_norm_log = zzz_CTAlloc(double, max_iter+1);
-   conv_rate    = zzz_CTAlloc(double, max_iter+1);
+   norm_log     = hypre_CTAlloc(double, max_iter+1);
+   rel_norm_log = hypre_CTAlloc(double, max_iter+1);
+   conv_rate    = hypre_CTAlloc(double, max_iter+1);
 
  
    /*-----------------------------------------------------------------------
     * Uncomment to print logging information
     *-----------------------------------------------------------------------*/
 
-   /* printf("\nZZZ_PCG INFO:\n\n"); */
+   /* printf("\nHYPRE_PCG INFO:\n\n"); */
 
 
    /*-----------------------------------------------------------------------
@@ -89,62 +89,62 @@ ZZZ_PCG( Vector *x,
    if (two_norm)
    {
       /* eps = (tol^2)*<b,b> */
-      bi_prod = ZZZ_InnerProd(b, b);
+      bi_prod = HYPRE_InnerProd(b, b);
       eps = (tol*tol)*bi_prod;
    }
    else
    {
       /* eps = (tol^2)*<C*b,b> */
-      ZZZ_InitVector(p, 0.0);
-      ZZZ_PCGPrecond(p, b, 0.0, precond_data);
-      bi_prod = ZZZ_InnerProd(p, b);
+      HYPRE_InitVector(p, 0.0);
+      HYPRE_PCGPrecond(p, b, 0.0, precond_data);
+      bi_prod = HYPRE_InnerProd(p, b);
       eps = (tol*tol)*bi_prod;
    }
 
    /* r = b - Ax */
-   ZZZ_CopyVector(b, r);
-   ZZZ_Matvec(-1.0, A, x, 1.0, r);
+   HYPRE_CopyVector(b, r);
+   HYPRE_Matvec(-1.0, A, x, 1.0, r);
  
    /* Set initial residual norm, print to log */
-   norm_log[0] = sqrt(ZZZ_InnerProd(r,r));
+   norm_log[0] = sqrt(HYPRE_InnerProd(r,r));
    /* printf("\nInitial residual norm:    %e\n\n", norm_log[0]); */
 
 
    /* p = C*r */
-   ZZZ_InitVector(p, 0.0);
-   ZZZ_PCGPrecond(p, r, 0.0, precond_data);
+   HYPRE_InitVector(p, 0.0);
+   HYPRE_PCGPrecond(p, r, 0.0, precond_data);
 
    /* gamma = <r,p> */
-   gamma = ZZZ_InnerProd(r,p);
+   gamma = HYPRE_InnerProd(r,p);
 
    while ((i+1) <= max_iter)
    {
       i++;
 
       /* s = A*p */
-      ZZZ_Matvec(1.0, A, p, 0.0, s);
+      HYPRE_Matvec(1.0, A, p, 0.0, s);
 
       /* alpha = gamma / <s,p> */
-      alpha = gamma / ZZZ_InnerProd(s, p);
+      alpha = gamma / HYPRE_InnerProd(s, p);
 
       gamma_old = gamma;
 
       /* x = x + alpha*p */
-      ZZZ_Axpy(alpha, p, x);
+      HYPRE_Axpy(alpha, p, x);
 
       /* r = r - alpha*s */
-      ZZZ_Axpy(-alpha, s, r);
+      HYPRE_Axpy(-alpha, s, r);
 	 
       /* s = C*r */
-      ZZZ_InitVector(s, 0.0);
-      ZZZ_PCGPrecond(s, r, 0.0, precond_data);
+      HYPRE_InitVector(s, 0.0);
+      HYPRE_PCGPrecond(s, r, 0.0, precond_data);
 
       /* gamma = <r,s> */
-      gamma = ZZZ_InnerProd(r, s);
+      gamma = HYPRE_InnerProd(r, s);
 
       /* set i_prod for convergence test */
       if (two_norm)
-	 i_prod = ZZZ_InnerProd(r,r);
+	 i_prod = HYPRE_InnerProd(r,r);
       else
 	 i_prod = gamma;
 
@@ -169,8 +169,8 @@ ZZZ_PCG( Vector *x,
       beta = gamma / gamma_old;
 
       /* p = s + beta p */
-      ZZZ_ScaleVector(beta, p);   
-      ZZZ_Axpy(1.0, s, p);
+      HYPRE_ScaleVector(beta, p);   
+      HYPRE_Axpy(1.0, s, p);
    }
 
 #if 0
@@ -211,13 +211,13 @@ ZZZ_PCG( Vector *x,
     * Load logging information
     *-----------------------------------------------------------------------*/
 
-   ZZZ_PCGDataNumIterations(pcg_data) = i;
-   ZZZ_PCGDataNorm(pcg_data)          = norm_log[i];
-   ZZZ_PCGDataRelNorm(pcg_data)       = rel_norm_log[i];
+   HYPRE_PCGDataNumIterations(pcg_data) = i;
+   HYPRE_PCGDataNorm(pcg_data)          = norm_log[i];
+   HYPRE_PCGDataRelNorm(pcg_data)       = rel_norm_log[i];
 
-   zzz_TFree(norm_log);
-   zzz_TFree(rel_norm_log);
-   zzz_TFree(conv_rate);
+   hypre_TFree(norm_log);
+   hypre_TFree(rel_norm_log);
+   hypre_TFree(conv_rate);
 }
 
 

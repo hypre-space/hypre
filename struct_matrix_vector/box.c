@@ -8,7 +8,7 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * Member functions for zzz_Box class:
+ * Member functions for hypre_Box class:
  *   Basic class functions.
  *
  *****************************************************************************/
@@ -16,260 +16,260 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * zzz_SetIndex
+ * hypre_SetIndex
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SetIndex( zzz_Index index,
+hypre_SetIndex( hypre_Index index,
               int       ix,
               int       iy,
               int       iz    )
 {
-   zzz_IndexX(index) = ix;
-   zzz_IndexY(index) = iy;
-   zzz_IndexZ(index) = iz;
+   hypre_IndexX(index) = ix;
+   hypre_IndexY(index) = iy;
+   hypre_IndexZ(index) = iz;
 
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_CopyIndex
+ * hypre_CopyIndex
  *--------------------------------------------------------------------------*/
 
 int
-zzz_CopyIndex( zzz_Index index1,
-               zzz_Index index2 )
+hypre_CopyIndex( hypre_Index index1,
+               hypre_Index index2 )
 {
-   zzz_IndexX(index2) = zzz_IndexX(index1);
-   zzz_IndexY(index2) = zzz_IndexY(index1);
-   zzz_IndexZ(index2) = zzz_IndexZ(index1);
+   hypre_IndexX(index2) = hypre_IndexX(index1);
+   hypre_IndexY(index2) = hypre_IndexY(index1);
+   hypre_IndexZ(index2) = hypre_IndexZ(index1);
 
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_NewBox
+ * hypre_NewBox
  *--------------------------------------------------------------------------*/
 
-zzz_Box *
-zzz_NewBox( zzz_Index imin,
-	    zzz_Index imax )
+hypre_Box *
+hypre_NewBox( hypre_Index imin,
+	    hypre_Index imax )
 {
-   zzz_Box *box;
+   hypre_Box *box;
    int      d;
 
-   box = zzz_TAlloc(zzz_Box, 1);
+   box = hypre_TAlloc(hypre_Box, 1);
 
    for (d = 0; d < 3; d++)
    {
-      zzz_BoxIMinD(box, d) = zzz_IndexD(imin, d);
-      zzz_BoxIMaxD(box, d) = zzz_IndexD(imax, d);
+      hypre_BoxIMinD(box, d) = hypre_IndexD(imin, d);
+      hypre_BoxIMaxD(box, d) = hypre_IndexD(imax, d);
    }
 
    return box;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_NewBoxArray
+ * hypre_NewBoxArray
  *--------------------------------------------------------------------------*/
 
-zzz_BoxArray *
-zzz_NewBoxArray( )
+hypre_BoxArray *
+hypre_NewBoxArray( )
 {
-   zzz_BoxArray *box_array;
+   hypre_BoxArray *box_array;
 
-   box_array = zzz_TAlloc(zzz_BoxArray, 1);
+   box_array = hypre_TAlloc(hypre_BoxArray, 1);
 
-   zzz_BoxArrayBoxes(box_array) = NULL;
-   zzz_BoxArraySize(box_array)  = 0;
+   hypre_BoxArrayBoxes(box_array) = NULL;
+   hypre_BoxArraySize(box_array)  = 0;
 
    return box_array;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_NewBoxArrayArray
+ * hypre_NewBoxArrayArray
  *--------------------------------------------------------------------------*/
 
-zzz_BoxArrayArray *
-zzz_NewBoxArrayArray( int size )
+hypre_BoxArrayArray *
+hypre_NewBoxArrayArray( int size )
 {
-   zzz_BoxArrayArray  *box_array_array;
+   hypre_BoxArrayArray  *box_array_array;
    int                 i;
  
-   box_array_array = zzz_CTAlloc(zzz_BoxArrayArray, 1);
+   box_array_array = hypre_CTAlloc(hypre_BoxArrayArray, 1);
  
-   zzz_BoxArrayArrayBoxArrays(box_array_array) =
-      zzz_CTAlloc(zzz_BoxArray *, size);
+   hypre_BoxArrayArrayBoxArrays(box_array_array) =
+      hypre_CTAlloc(hypre_BoxArray *, size);
  
    for (i = 0; i < size; i++)
-      zzz_BoxArrayArrayBoxArray(box_array_array, i) = zzz_NewBoxArray();
-   zzz_BoxArrayArraySize(box_array_array) = size;
+      hypre_BoxArrayArrayBoxArray(box_array_array, i) = hypre_NewBoxArray();
+   hypre_BoxArrayArraySize(box_array_array) = size;
  
    return box_array_array;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_FreeBox
+ * hypre_FreeBox
  *--------------------------------------------------------------------------*/
 
 void 
-zzz_FreeBox( zzz_Box *box )
+hypre_FreeBox( hypre_Box *box )
 {
    if (box)
    {
-      zzz_TFree(box);
+      hypre_TFree(box);
    }
 }
 
 /*--------------------------------------------------------------------------
- * zzz_FreeBoxArrayShell:
+ * hypre_FreeBoxArrayShell:
  *   Frees everything but the boxes.
  *--------------------------------------------------------------------------*/
 
 void 
-zzz_FreeBoxArrayShell( zzz_BoxArray *box_array )
+hypre_FreeBoxArrayShell( hypre_BoxArray *box_array )
 {
    if (box_array)
    {
-      zzz_TFree(zzz_BoxArrayBoxes(box_array));
-      zzz_TFree(box_array);
+      hypre_TFree(hypre_BoxArrayBoxes(box_array));
+      hypre_TFree(box_array);
    }
 }
 
 /*--------------------------------------------------------------------------
- * zzz_FreeBoxArray
+ * hypre_FreeBoxArray
  *--------------------------------------------------------------------------*/
 
 void 
-zzz_FreeBoxArray( zzz_BoxArray *box_array )
+hypre_FreeBoxArray( hypre_BoxArray *box_array )
 {
    int  i;
 
    if (box_array)
    {
-      if ( zzz_BoxArrayBoxes(box_array)!= NULL )
+      if ( hypre_BoxArrayBoxes(box_array)!= NULL )
       {
-         zzz_ForBoxI(i, box_array)
-            zzz_FreeBox(zzz_BoxArrayBox(box_array, i));
+         hypre_ForBoxI(i, box_array)
+            hypre_FreeBox(hypre_BoxArrayBox(box_array, i));
       }
 
-      zzz_FreeBoxArrayShell(box_array);
+      hypre_FreeBoxArrayShell(box_array);
    }
 }
 
 /*--------------------------------------------------------------------------
- * zzz_FreeBoxArrayArrayShell:
+ * hypre_FreeBoxArrayArrayShell:
  *   Frees everything but the box_arrays.
  *--------------------------------------------------------------------------*/
 
 void 
-zzz_FreeBoxArrayArrayShell( zzz_BoxArrayArray *box_array_array )
+hypre_FreeBoxArrayArrayShell( hypre_BoxArrayArray *box_array_array )
 {
    if (box_array_array)
    {
-      zzz_TFree(zzz_BoxArrayArrayBoxArrays(box_array_array));
-      zzz_TFree(box_array_array);
+      hypre_TFree(hypre_BoxArrayArrayBoxArrays(box_array_array));
+      hypre_TFree(box_array_array);
    }
 }
 
 /*--------------------------------------------------------------------------
- * zzz_FreeBoxArrayArray
+ * hypre_FreeBoxArrayArray
  *--------------------------------------------------------------------------*/
 
 void
-zzz_FreeBoxArrayArray( zzz_BoxArrayArray *box_array_array )
+hypre_FreeBoxArrayArray( hypre_BoxArrayArray *box_array_array )
 {
    int  i;
  
    if (box_array_array)
    {
-      zzz_ForBoxArrayI(i, box_array_array)
-         zzz_FreeBoxArray(zzz_BoxArrayArrayBoxArray(box_array_array, i));
+      hypre_ForBoxArrayI(i, box_array_array)
+         hypre_FreeBoxArray(hypre_BoxArrayArrayBoxArray(box_array_array, i));
 
-      zzz_FreeBoxArrayArrayShell(box_array_array);
+      hypre_FreeBoxArrayArrayShell(box_array_array);
    }
 }
 
 /*--------------------------------------------------------------------------
- * zzz_DuplicateBox:
+ * hypre_DuplicateBox:
  *   Return a duplicate box.
  *--------------------------------------------------------------------------*/
 
-zzz_Box *
-zzz_DuplicateBox( zzz_Box *box )
+hypre_Box *
+hypre_DuplicateBox( hypre_Box *box )
 {
-   zzz_Box    *new_box;
+   hypre_Box    *new_box;
 
-   new_box = zzz_NewBox(zzz_BoxIMin(box), zzz_BoxIMax(box));
+   new_box = hypre_NewBox(hypre_BoxIMin(box), hypre_BoxIMax(box));
 
    return new_box;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_DuplicateBoxArray:
+ * hypre_DuplicateBoxArray:
  *   Return a duplicate box_array.
  *--------------------------------------------------------------------------*/
 
-zzz_BoxArray *
-zzz_DuplicateBoxArray( zzz_BoxArray *box_array )
+hypre_BoxArray *
+hypre_DuplicateBoxArray( hypre_BoxArray *box_array )
 {
-   zzz_BoxArray  *new_box_array;
-   zzz_Box      **new_boxes;
+   hypre_BoxArray  *new_box_array;
+   hypre_Box      **new_boxes;
    int            new_size;
 
-   zzz_Box      **boxes;
+   hypre_Box      **boxes;
    int            i, data_sz;
 
-   new_box_array = zzz_NewBoxArray();
+   new_box_array = hypre_NewBoxArray();
    new_boxes = NULL;
-   new_size = zzz_BoxArraySize(box_array);
+   new_size = hypre_BoxArraySize(box_array);
 
    if (new_size)
    {
-      data_sz = ((((new_size - 1) / zzz_BoxArrayBlocksize) + 1) *
-		 zzz_BoxArrayBlocksize);
-      new_boxes = zzz_CTAlloc(zzz_Box *, data_sz);
+      data_sz = ((((new_size - 1) / hypre_BoxArrayBlocksize) + 1) *
+		 hypre_BoxArrayBlocksize);
+      new_boxes = hypre_CTAlloc(hypre_Box *, data_sz);
 
-      boxes = zzz_BoxArrayBoxes(box_array);
+      boxes = hypre_BoxArrayBoxes(box_array);
 
       for (i = 0; i < new_size; i++)
-	 new_boxes[i] = zzz_DuplicateBox(boxes[i]);
+	 new_boxes[i] = hypre_DuplicateBox(boxes[i]);
    }
 
-   zzz_BoxArrayBoxes(new_box_array) = new_boxes;
-   zzz_BoxArraySize(new_box_array)  = new_size;
+   hypre_BoxArrayBoxes(new_box_array) = new_boxes;
+   hypre_BoxArraySize(new_box_array)  = new_size;
 
    return new_box_array;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_DuplicateBoxArrayArray:
+ * hypre_DuplicateBoxArrayArray:
  *   Return a duplicate box_array_array.
  *--------------------------------------------------------------------------*/
 
-zzz_BoxArrayArray *
-zzz_DuplicateBoxArrayArray( zzz_BoxArrayArray *box_array_array )
+hypre_BoxArrayArray *
+hypre_DuplicateBoxArrayArray( hypre_BoxArrayArray *box_array_array )
 {
-   zzz_BoxArrayArray  *new_box_array_array;
-   zzz_BoxArray      **new_box_arrays;
+   hypre_BoxArrayArray  *new_box_array_array;
+   hypre_BoxArray      **new_box_arrays;
    int                 new_size;
  
-   zzz_BoxArray      **box_arrays;
+   hypre_BoxArray      **box_arrays;
    int                 i;
  
-   new_size = zzz_BoxArrayArraySize(box_array_array);
-   new_box_array_array = zzz_NewBoxArrayArray(new_size);
+   new_size = hypre_BoxArrayArraySize(box_array_array);
+   new_box_array_array = hypre_NewBoxArrayArray(new_size);
  
    if (new_size)
    {
-      new_box_arrays = zzz_BoxArrayArrayBoxArrays(new_box_array_array);
-      box_arrays     = zzz_BoxArrayArrayBoxArrays(box_array_array);
+      new_box_arrays = hypre_BoxArrayArrayBoxArrays(new_box_array_array);
+      box_arrays     = hypre_BoxArrayArrayBoxArrays(box_array_array);
  
       for (i = 0; i < new_size; i++)
       {
-         zzz_FreeBoxArray(new_box_arrays[i]);
+         hypre_FreeBoxArray(new_box_arrays[i]);
          new_box_arrays[i] =
-            zzz_DuplicateBoxArray(box_arrays[i]);
+            hypre_DuplicateBoxArray(box_arrays[i]);
       }
    }
  
@@ -277,111 +277,111 @@ zzz_DuplicateBoxArrayArray( zzz_BoxArrayArray *box_array_array )
 }
 
 /*--------------------------------------------------------------------------
- * zzz_AppendBox:
+ * hypre_AppendBox:
  *   Append box to the end of box_array.
  *   The box_array may be empty.
  *--------------------------------------------------------------------------*/
 
 void 
-zzz_AppendBox( zzz_Box      *box,
-	       zzz_BoxArray *box_array )
+hypre_AppendBox( hypre_Box      *box,
+	       hypre_BoxArray *box_array )
 {
-   zzz_Box  **boxes;
+   hypre_Box  **boxes;
    int        size;
 
-   zzz_Box  **old_boxes;
+   hypre_Box  **old_boxes;
    int        i;
 
-   size = zzz_BoxArraySize(box_array);
-   if (!(size % zzz_BoxArrayBlocksize))
+   size = hypre_BoxArraySize(box_array);
+   if (!(size % hypre_BoxArrayBlocksize))
    {
-      boxes = zzz_CTAlloc(zzz_Box *, size + zzz_BoxArrayBlocksize);
-      old_boxes = zzz_BoxArrayBoxes(box_array);
+      boxes = hypre_CTAlloc(hypre_Box *, size + hypre_BoxArrayBlocksize);
+      old_boxes = hypre_BoxArrayBoxes(box_array);
 
       for (i = 0; i < size; i++)
 	 boxes[i] = old_boxes[i];
 
-      zzz_BoxArrayBoxes(box_array) = boxes;
+      hypre_BoxArrayBoxes(box_array) = boxes;
 
-      zzz_TFree(old_boxes);
+      hypre_TFree(old_boxes);
    }
 
-   zzz_BoxArrayBox(box_array, size) = box;
-   zzz_BoxArraySize(box_array) ++;
+   hypre_BoxArrayBox(box_array, size) = box;
+   hypre_BoxArraySize(box_array) ++;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_DeleteBox:
+ * hypre_DeleteBox:
  *   Delete box from box_array.
  *--------------------------------------------------------------------------*/
 
 void 
-zzz_DeleteBox( zzz_BoxArray *box_array,
+hypre_DeleteBox( hypre_BoxArray *box_array,
 	       int           index     )
 {
-   zzz_Box  **boxes;
+   hypre_Box  **boxes;
 
    int        i;
 
-   boxes = zzz_BoxArrayBoxes(box_array);
+   boxes = hypre_BoxArrayBoxes(box_array);
 
-   zzz_FreeBox(boxes[index]);
-   for (i = index; i < zzz_BoxArraySize(box_array) - 1; i++)
+   hypre_FreeBox(boxes[index]);
+   for (i = index; i < hypre_BoxArraySize(box_array) - 1; i++)
       boxes[i] = boxes[i+1];
 
-   zzz_BoxArraySize(box_array) --;
+   hypre_BoxArraySize(box_array) --;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_AppendBoxArray:
+ * hypre_AppendBoxArray:
  *   Append box_array_0 to the end of box_array_1.
  *   The box_array_1 may be empty.
  *--------------------------------------------------------------------------*/
 
 void 
-zzz_AppendBoxArray( zzz_BoxArray *box_array_0,
-		    zzz_BoxArray *box_array_1 )
+hypre_AppendBoxArray( hypre_BoxArray *box_array_0,
+		    hypre_BoxArray *box_array_1 )
 {
    int  i;
 
-   zzz_ForBoxI(i, box_array_0)
-      zzz_AppendBox(zzz_BoxArrayBox(box_array_0, i), box_array_1);
+   hypre_ForBoxI(i, box_array_0)
+      hypre_AppendBox(hypre_BoxArrayBox(box_array_0, i), box_array_1);
 }
 
 /*--------------------------------------------------------------------------
- * zzz_AppendBoxArrayArray:
+ * hypre_AppendBoxArrayArray:
  *   Append box_array_array_0 to box_array_array_1.
  *   The two BoxArrayArrays must be the same length.
  *--------------------------------------------------------------------------*/
 
 void 
-zzz_AppendBoxArrayArray( zzz_BoxArrayArray *box_array_array_0,
-                         zzz_BoxArrayArray *box_array_array_1 )
+hypre_AppendBoxArrayArray( hypre_BoxArrayArray *box_array_array_0,
+                         hypre_BoxArrayArray *box_array_array_1 )
 {
    int  i;
 
-   zzz_ForBoxArrayI(i, box_array_array_0)
-      zzz_AppendBoxArray(zzz_BoxArrayArrayBoxArray(box_array_array_0, i),
-                         zzz_BoxArrayArrayBoxArray(box_array_array_1, i));
+   hypre_ForBoxArrayI(i, box_array_array_0)
+      hypre_AppendBoxArray(hypre_BoxArrayArrayBoxArray(box_array_array_0, i),
+                         hypre_BoxArrayArrayBoxArray(box_array_array_1, i));
 }
 
 /*--------------------------------------------------------------------------
- * zzz_GetBoxSize:
+ * hypre_GetBoxSize:
  *--------------------------------------------------------------------------*/
 
 int
-zzz_GetBoxSize( zzz_Box   *box,
-                zzz_Index  size )
+hypre_GetBoxSize( hypre_Box   *box,
+                hypre_Index  size )
 {
-   zzz_IndexX(size) = zzz_BoxSizeX(box);
-   zzz_IndexY(size) = zzz_BoxSizeY(box);
-   zzz_IndexZ(size) = zzz_BoxSizeZ(box);
+   hypre_IndexX(size) = hypre_BoxSizeX(box);
+   hypre_IndexY(size) = hypre_BoxSizeY(box);
+   hypre_IndexZ(size) = hypre_BoxSizeZ(box);
 
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * zzz_CopyBoxArrayData
+ * hypre_CopyBoxArrayData
  *  This function assumes only one box in box_array_in and
  *  that box_array_out consists of a sub_grid to that in box_array_in.
  *  This routine then copies data values from box_array_in to box_array_out.
@@ -389,23 +389,23 @@ zzz_GetBoxSize( zzz_Box   *box,
  *--------------------------------------------------------------------------*/
 
 void
-zzz_CopyBoxArrayData( zzz_BoxArray     *box_array_in,
-                      zzz_BoxArray     *data_space_in,
+hypre_CopyBoxArrayData( hypre_BoxArray     *box_array_in,
+                      hypre_BoxArray     *data_space_in,
                       int               num_values_in,
                       double           *data_in,
-		      zzz_BoxArray     *box_array_out,
-                      zzz_BoxArray     *data_space_out,
+		      hypre_BoxArray     *box_array_out,
+                      hypre_BoxArray     *data_space_out,
                       int               num_values_out,
                       double           *data_out       )
 {
-   zzz_Box         *box_in, *box_out;
-   zzz_Box         *data_box_in, *data_box_out;
+   hypre_Box         *box_in, *box_out;
+   hypre_Box         *data_box_in, *data_box_out;
 
    int              data_box_volume_in, data_box_volume_out;
    int              datai_in, datai_out;
 
-   zzz_Index        loop_size;
-   zzz_Index        stride;
+   hypre_Index        loop_size;
+   hypre_Index        stride;
 
    int              j;
    int              loopi, loopj, loopk;
@@ -414,22 +414,22 @@ zzz_CopyBoxArrayData( zzz_BoxArray     *box_array_in,
     * Read data
     *----------------------------------------*/
 
-   zzz_SetIndex(stride, 1, 1, 1);
+   hypre_SetIndex(stride, 1, 1, 1);
 
-   box_in      = zzz_BoxArrayBox(box_array_in, 0);
-   data_box_in = zzz_BoxArrayBox(data_space_in, 0);
+   box_in      = hypre_BoxArrayBox(box_array_in, 0);
+   data_box_in = hypre_BoxArrayBox(data_space_in, 0);
    
-   data_box_volume_in = zzz_BoxVolume(data_box_in);
+   data_box_volume_in = hypre_BoxVolume(data_box_in);
    
-   box_out      = zzz_BoxArrayBox(box_array_out, 0);
-   data_box_out = zzz_BoxArrayBox(data_space_out, 0);
+   box_out      = hypre_BoxArrayBox(box_array_out, 0);
+   data_box_out = hypre_BoxArrayBox(data_space_out, 0);
    
-   data_box_volume_out = zzz_BoxVolume(data_box_out);
+   data_box_volume_out = hypre_BoxVolume(data_box_out);
 
-   zzz_GetBoxSize(box_out, loop_size);
-   zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
-		data_box_in, zzz_BoxIMin(box_out), stride, datai_in,
-		data_box_out, zzz_BoxIMin(box_out), stride, datai_out,\
+   hypre_GetBoxSize(box_out, loop_size);
+   hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
+		data_box_in, hypre_BoxIMin(box_out), stride, datai_in,
+		data_box_out, hypre_BoxIMin(box_out), stride, datai_out,\
 		for (j = 0; j < num_values_out; j++)
 		{
 		  data_out[datai_out + j*data_box_volume_out] =

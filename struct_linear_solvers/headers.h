@@ -15,13 +15,13 @@
 #include "../utilities/timing.h"
 #include "../struct_matrix_vector/headers.h"
 
-#include "ZZZ_ls.h"
+#include "HYPRE_ls.h"
 
 #include "general.h"
 
 #include "protos.h"
 
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
 #include <gmalloc.h>
 #endif
 

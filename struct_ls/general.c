@@ -14,13 +14,13 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * zzz_Log2:
+ * hypre_Log2:
  *   This routine returns the integer, floor(log_2(p)).
  *   If p <= 0, it returns a -1.
  *--------------------------------------------------------------------------*/
 
 int
-zzz_Log2(int p)
+hypre_Log2(int p)
 {
    int  e;
 

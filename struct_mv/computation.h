@@ -12,48 +12,48 @@
  *
  *****************************************************************************/
 
-#ifndef zzz_COMPUTATION_HEADER
-#define zzz_COMPUTATION_HEADER
+#ifndef hypre_COMPUTATION_HEADER
+#define hypre_COMPUTATION_HEADER
 
 /*--------------------------------------------------------------------------
- * zzz_ComputePkg:
+ * hypre_ComputePkg:
  *   Structure containing information for doing computations.
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
-   zzz_CommPkg         *comm_pkg;
+   hypre_CommPkg         *comm_pkg;
 
-   zzz_SBoxArrayArray  *indt_sboxes;
-   zzz_SBoxArrayArray  *dept_sboxes;
+   hypre_SBoxArrayArray  *indt_sboxes;
+   hypre_SBoxArrayArray  *dept_sboxes;
 
-   zzz_StructGrid      *grid;
-   zzz_BoxArray        *data_space;
+   hypre_StructGrid      *grid;
+   hypre_BoxArray        *data_space;
    int                  num_values;
 
-} zzz_ComputePkg;
+} hypre_ComputePkg;
 
 /*--------------------------------------------------------------------------
- * Accessor macros: zzz_ComputePkg
+ * Accessor macros: hypre_ComputePkg
  *--------------------------------------------------------------------------*/
  
-#define zzz_ComputePkgCommPkg(compute_pkg)      (compute_pkg -> comm_pkg)
+#define hypre_ComputePkgCommPkg(compute_pkg)      (compute_pkg -> comm_pkg)
 
-#define zzz_ComputePkgSendSBoxes(compute_pkg) \
-zzz_CommPkgSendSBoxes(zzz_ComputePkgCommPkg(compute_pkg))
-#define zzz_ComputePkgRecvSBoxes(compute_pkg) \
-zzz_CommPkgRecvSBoxes(zzz_ComputePkgCommPkg(compute_pkg))
+#define hypre_ComputePkgSendSBoxes(compute_pkg) \
+hypre_CommPkgSendSBoxes(hypre_ComputePkgCommPkg(compute_pkg))
+#define hypre_ComputePkgRecvSBoxes(compute_pkg) \
+hypre_CommPkgRecvSBoxes(hypre_ComputePkgCommPkg(compute_pkg))
 
-#define zzz_ComputePkgSendBoxRanks(compute_pkg) \
-zzz_CommPkgSendBoxRanks(zzz_ComputePkgCommPkg(compute_pkg))
-#define zzz_ComputePkgRecvBoxRanks(compute_pkg) \
-zzz_CommPkgRecvBoxRanks(zzz_ComputePkgCommPkg(compute_pkg))
+#define hypre_ComputePkgSendBoxRanks(compute_pkg) \
+hypre_CommPkgSendBoxRanks(hypre_ComputePkgCommPkg(compute_pkg))
+#define hypre_ComputePkgRecvBoxRanks(compute_pkg) \
+hypre_CommPkgRecvBoxRanks(hypre_ComputePkgCommPkg(compute_pkg))
 
-#define zzz_ComputePkgIndtSBoxes(compute_pkg)   (compute_pkg -> indt_sboxes)
-#define zzz_ComputePkgDeptSBoxes(compute_pkg)   (compute_pkg -> dept_sboxes)
+#define hypre_ComputePkgIndtSBoxes(compute_pkg)   (compute_pkg -> indt_sboxes)
+#define hypre_ComputePkgDeptSBoxes(compute_pkg)   (compute_pkg -> dept_sboxes)
 
-#define zzz_ComputePkgGrid(compute_pkg)         (compute_pkg -> grid)
-#define zzz_ComputePkgDataSpace(compute_pkg)    (compute_pkg -> data_space)
-#define zzz_ComputePkgNumValues(compute_pkg)    (compute_pkg -> num_values)
+#define hypre_ComputePkgGrid(compute_pkg)         (compute_pkg -> grid)
+#define hypre_ComputePkgDataSpace(compute_pkg)    (compute_pkg -> data_space)
+#define hypre_ComputePkgNumValues(compute_pkg)    (compute_pkg -> num_values)
 
 #endif

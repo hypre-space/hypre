@@ -1,11 +1,11 @@
  
 #include "headers.h"
  
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
 #include <cegdb.h>
 #endif
 
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
 char malloc_logpath_memory[256];
 #endif
  
@@ -30,19 +30,19 @@ main( int   argc,
    MPI_Comm           *comm;
    int                 matrix_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
 
-   zzz_StructMatrix   *matrix_root, **sub_matrices;
+   hypre_StructMatrix   *matrix_root, **sub_matrices;
 
-   zzz_StructGrid     **sub_grids, *grid_root;
-   zzz_BoxArray       *boxes, *boxes_2;
-   zzz_Box            *box;
+   hypre_StructGrid     **sub_grids, *grid_root;
+   hypre_BoxArray       *boxes, *boxes_2;
+   hypre_Box            *box;
    int                 dim;
 
-   zzz_StructStencil  *stencil, **stencils;
-   zzz_Index          *stencil_shape, **stencil_shapes;
-   zzz_Index           ilower, iupper;
+   hypre_StructStencil  *stencil, **stencils;
+   hypre_Index          *stencil_shape, **stencil_shapes;
+   hypre_Index           ilower, iupper;
    int                 stencil_size;
 
-   zzz_BoxArray       *data_space, *data_space_2;
+   hypre_BoxArray       *data_space, *data_space_2;
 
    FILE               *file, *file_root;
    int                 sub_i, sub_j, sub_k; 
@@ -66,16 +66,16 @@ main( int   argc,
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
-   comm = zzz_TAlloc(MPI_Comm, 1);
+   comm = hypre_TAlloc(MPI_Comm, 1);
    MPI_Comm_dup(MPI_COMM_WORLD, comm);
    MPI_Comm_size(*comm, &num_procs );
    MPI_Comm_rank(*comm, &myid );
 
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
 #endif
 
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
    malloc_logpath = malloc_logpath_memory;
    sprintf(malloc_logpath, "malloc.log.%04d", myid);
 #endif
@@ -124,43 +124,43 @@ main( int   argc,
 
    /* read grid info */
    fscanf(file_root, "\nGrid:\n");
-   grid_root = zzz_ReadStructGrid(comm, file_root);
+   grid_root = hypre_ReadStructGrid(comm, file_root);
 
    /* read stencil info */
    fscanf(file_root, "\nStencil:\n");
-   dim = zzz_StructGridDim(grid_root);
+   dim = hypre_StructGridDim(grid_root);
    fscanf(file_root, "%d\n", &stencil_size);
-   stencil_shape = zzz_CTAlloc(zzz_Index, stencil_size);
+   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
    for (i = 0; i < stencil_size; i++)
      {
        fscanf(file_root, "%d: %d %d %d\n", &idummy,
-	      &zzz_IndexX(stencil_shape[i]),
-	      &zzz_IndexY(stencil_shape[i]),
-	      &zzz_IndexZ(stencil_shape[i]));
+	      &hypre_IndexX(stencil_shape[i]),
+	      &hypre_IndexY(stencil_shape[i]),
+	      &hypre_IndexZ(stencil_shape[i]));
      }
-   stencil = zzz_NewStructStencil(dim, stencil_size, stencil_shape);
+   stencil = hypre_NewStructStencil(dim, stencil_size, stencil_shape);
 
    /*----------------------------------------
     * Initialize the matrix
     *----------------------------------------*/
 
-   matrix_root = zzz_NewStructMatrix(comm, grid_root, stencil);
-   zzz_StructMatrixSymmetric(matrix_root) = symmetric;
-   zzz_SetStructMatrixNumGhost(matrix_root, matrix_num_ghost);
-   zzz_InitializeStructMatrix(matrix_root);
+   matrix_root = hypre_NewStructMatrix(comm, grid_root, stencil);
+   hypre_StructMatrixSymmetric(matrix_root) = symmetric;
+   hypre_SetStructMatrixNumGhost(matrix_root, matrix_num_ghost);
+   hypre_InitializeStructMatrix(matrix_root);
 
    /*----------------------------------------
     * Read data
     *----------------------------------------*/
 
-   boxes      = zzz_StructGridBoxes(grid_root);
-   data_space = zzz_StructMatrixDataSpace(matrix_root);
-   num_values = zzz_StructMatrixNumValues(matrix_root);
+   boxes      = hypre_StructGridBoxes(grid_root);
+   data_space = hypre_StructMatrixDataSpace(matrix_root);
+   num_values = hypre_StructMatrixNumValues(matrix_root);
  
    fscanf(file_root, "\nData:\n");
-   zzz_ReadBoxArrayData(file_root, boxes, data_space, num_values,
-                        zzz_StructMatrixData(matrix_root));
-   zzz_AssembleStructMatrix(matrix_root);
+   hypre_ReadBoxArrayData(file_root, boxes, data_space, num_values,
+                        hypre_StructMatrixData(matrix_root));
+   hypre_AssembleStructMatrix(matrix_root);
 
    /*----------------------------------------
     * Close input file
@@ -169,23 +169,23 @@ main( int   argc,
    fclose(file_root);
 
    /* Write data read in to output file for testing */
-   /* zzz_PrintStructMatrix("zout_matrix_test", matrix_root, 0); */
+   /* hypre_PrintStructMatrix("zout_matrix_test", matrix_root, 0); */
 
    /* Get min and max values for box in this file */
    /* Assume only one box in the input file for now */
-   box = zzz_BoxArrayBox(boxes, 0);
-   imin = zzz_BoxIMinX(box);
-   jmin = zzz_BoxIMinY(box);
-   kmin = zzz_BoxIMinZ(box);
+   box = hypre_BoxArrayBox(boxes, 0);
+   imin = hypre_BoxIMinX(box);
+   jmin = hypre_BoxIMinY(box);
+   kmin = hypre_BoxIMinZ(box);
  
-   imax = zzz_BoxIMaxX(box);
-   jmax = zzz_BoxIMaxY(box);
-   kmax = zzz_BoxIMaxZ(box);
+   imax = hypre_BoxIMaxX(box);
+   jmax = hypre_BoxIMaxY(box);
+   kmax = hypre_BoxIMaxZ(box);
 
-   sub_grids = zzz_CTAlloc(zzz_StructGrid *, num_files);
-   sub_matrices = zzz_CTAlloc(zzz_StructMatrix *, num_files);
-   stencils = zzz_CTAlloc(zzz_StructStencil *, num_files);
-   stencil_shapes = zzz_CTAlloc(zzz_Index *, num_files);
+   sub_grids = hypre_CTAlloc(hypre_StructGrid *, num_files);
+   sub_matrices = hypre_CTAlloc(hypre_StructMatrix *, num_files);
+   stencils = hypre_CTAlloc(hypre_StructStencil *, num_files);
+   stencil_shapes = hypre_CTAlloc(hypre_Index *, num_files);
 
    del_i = (imax - imin + 1)/sub_i;
    del_j = (jmax - jmin + 1)/sub_j;
@@ -213,74 +213,74 @@ main( int   argc,
 	   for (i = 0; i < sub_i; i++)
 	     {
 	       i_file += 1;
-	       sub_grids[i_file] = zzz_NewStructGrid(comm, dim);
-	       stencil_shapes[i_file] = zzz_CTAlloc(zzz_Index, stencil_size);
+	       sub_grids[i_file] = hypre_NewStructGrid(comm, dim);
+	       stencil_shapes[i_file] = hypre_CTAlloc(hypre_Index, stencil_size);
 	       for (ii = 0; ii < stencil_size; ii++)
 		 {
-		   zzz_IndexX(stencil_shapes[i_file][ii]) = 
-		     zzz_IndexX(stencil_shape[ii]);
-		   zzz_IndexY(stencil_shapes[i_file][ii]) = 
-		     zzz_IndexY(stencil_shape[ii]);
-		   zzz_IndexZ(stencil_shapes[i_file][ii]) = 
-		     zzz_IndexZ(stencil_shape[ii]);
+		   hypre_IndexX(stencil_shapes[i_file][ii]) = 
+		     hypre_IndexX(stencil_shape[ii]);
+		   hypre_IndexY(stencil_shapes[i_file][ii]) = 
+		     hypre_IndexY(stencil_shape[ii]);
+		   hypre_IndexZ(stencil_shapes[i_file][ii]) = 
+		     hypre_IndexZ(stencil_shape[ii]);
 		 }
-	       stencils[i_file] = zzz_NewStructStencil(dim, stencil_size,
+	       stencils[i_file] = hypre_NewStructStencil(dim, stencil_size,
 						       stencil_shapes[i_file]);
 
-	       zzz_IndexX(ilower) = imin + i*del_i;
-	       zzz_IndexY(ilower) = jmin + j*del_j;
-	       zzz_IndexZ(ilower) = kmin + k*del_k;
+	       hypre_IndexX(ilower) = imin + i*del_i;
+	       hypre_IndexY(ilower) = jmin + j*del_j;
+	       hypre_IndexZ(ilower) = kmin + k*del_k;
 	       /* Coding to handle an odd number of points in i,j,k */
 	       if (i+1 == sub_i)
 		 {
-		   zzz_IndexX(iupper) = imax;
+		   hypre_IndexX(iupper) = imax;
 		 }
 	       else
 		 {
-		   zzz_IndexX(iupper) = imin + (i+1)*del_i - 1;
+		   hypre_IndexX(iupper) = imin + (i+1)*del_i - 1;
 		 }
 	       if (j+1 == sub_j)
 		 {
-		   zzz_IndexY(iupper) = jmax;
+		   hypre_IndexY(iupper) = jmax;
 		 }
 	       else
 		 {
-		   zzz_IndexY(iupper) = jmin + (j+1)*del_j - 1;
+		   hypre_IndexY(iupper) = jmin + (j+1)*del_j - 1;
 		 }
 	       if (k+1 == sub_k)
 		 {
-		   zzz_IndexZ(iupper) = kmax;
+		   hypre_IndexZ(iupper) = kmax;
 		 }
 	       else
 		 {
-		   zzz_IndexZ(iupper) = kmin + (k+1)*del_k - 1;
+		   hypre_IndexZ(iupper) = kmin + (k+1)*del_k - 1;
 		 }
 
-	       zzz_SetStructGridExtents(sub_grids[i_file], ilower, iupper);
-	       zzz_AssembleStructGrid(sub_grids[i_file]);
+	       hypre_SetStructGridExtents(sub_grids[i_file], ilower, iupper);
+	       hypre_AssembleStructGrid(sub_grids[i_file]);
 
 	       sub_matrices[i_file] = 
-		 zzz_NewStructMatrix(comm, sub_grids[i_file],
+		 hypre_NewStructMatrix(comm, sub_grids[i_file],
 				     stencils[i_file]); 
-	       zzz_StructMatrixSymmetric(sub_matrices[i_file]) = symmetric;
-	       zzz_SetStructMatrixNumGhost(sub_matrices[i_file], 
+	       hypre_StructMatrixSymmetric(sub_matrices[i_file]) = symmetric;
+	       hypre_SetStructMatrixNumGhost(sub_matrices[i_file], 
 					   matrix_num_ghost); 
-	       zzz_InitializeStructMatrix(sub_matrices[i_file]);
+	       hypre_InitializeStructMatrix(sub_matrices[i_file]);
 
 	       /*----------------------------------------------
 		* Load data from root matrix into sub_matrices
 		*----------------------------------------------*/
 
-	       boxes_2      = zzz_StructGridBoxes(sub_grids[i_file]);
-	       data_space_2 = zzz_StructMatrixDataSpace(sub_matrices[i_file]);
-	       num_values_2 = zzz_StructMatrixNumValues(sub_matrices[i_file]);
+	       boxes_2      = hypre_StructGridBoxes(sub_grids[i_file]);
+	       data_space_2 = hypre_StructMatrixDataSpace(sub_matrices[i_file]);
+	       num_values_2 = hypre_StructMatrixNumValues(sub_matrices[i_file]);
  
-	       zzz_CopyBoxArrayData(boxes, data_space, num_values,
-				    zzz_StructMatrixData(matrix_root),
+	       hypre_CopyBoxArrayData(boxes, data_space, num_values,
+				    hypre_StructMatrixData(matrix_root),
 				    boxes_2, data_space_2, num_values_2,
-				    zzz_StructMatrixData(sub_matrices[i_file]));
+				    hypre_StructMatrixData(sub_matrices[i_file]));
 
-	       zzz_AssembleStructMatrix(sub_matrices[i_file]);
+	       hypre_AssembleStructMatrix(sub_matrices[i_file]);
 	     }
 	 }
      }
@@ -301,7 +301,7 @@ main( int   argc,
 
        /* write grid info */
        fprintf(file, "\nGrid:\n");
-       zzz_PrintStructGrid(file, sub_grids[i_file]);
+       hypre_PrintStructGrid(file, sub_grids[i_file]);
 
        /* write stencil info */
        fprintf(file, "\nStencil:\n");
@@ -309,19 +309,19 @@ main( int   argc,
        for (i = 0; i < stencil_size; i++)
 	 {
 	   fprintf(file, "%d: %d %d %d\n", i,
-		  zzz_IndexX(stencil_shape[i]),
-		  zzz_IndexY(stencil_shape[i]),
-		  zzz_IndexZ(stencil_shape[i]));
+		  hypre_IndexX(stencil_shape[i]),
+		  hypre_IndexY(stencil_shape[i]),
+		  hypre_IndexZ(stencil_shape[i]));
 	 }
 
        /* write data info */
        fprintf(file, "\nData:\n");
-       boxes_2      = zzz_StructGridBoxes(sub_grids[i_file]);
-       data_space_2 = zzz_StructMatrixDataSpace(sub_matrices[i_file]);
-       num_values_2 = zzz_StructMatrixNumValues(sub_matrices[i_file]);
+       boxes_2      = hypre_StructGridBoxes(sub_grids[i_file]);
+       data_space_2 = hypre_StructMatrixDataSpace(sub_matrices[i_file]);
+       num_values_2 = hypre_StructMatrixNumValues(sub_matrices[i_file]);
        
-       zzz_PrintBoxArrayData(file, boxes_2, data_space_2, num_values_2,
-			     zzz_StructMatrixData(sub_matrices[i_file]));
+       hypre_PrintBoxArrayData(file, boxes_2, data_space_2, num_values_2,
+			     hypre_StructMatrixData(sub_matrices[i_file]));
 
        fclose(file);
      }
@@ -331,21 +331,21 @@ main( int   argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
-   zzz_FreeStructGrid(zzz_StructMatrixGrid(matrix_root));
-   zzz_FreeStructMatrix(matrix_root);
+   hypre_FreeStructGrid(hypre_StructMatrixGrid(matrix_root));
+   hypre_FreeStructMatrix(matrix_root);
    for (i_file = 0; i_file < num_files; i_file++)
      {
-       zzz_FreeStructGrid(zzz_StructMatrixGrid(sub_matrices[i_file]));
-       zzz_FreeStructMatrix(sub_matrices[i_file]);
+       hypre_FreeStructGrid(hypre_StructMatrixGrid(sub_matrices[i_file]));
+       hypre_FreeStructMatrix(sub_matrices[i_file]);
      }
 
-   zzz_TFree(sub_grids);
-   zzz_TFree(sub_matrices);
-   zzz_TFree(stencils);
-   zzz_TFree(stencil_shapes);
-   zzz_TFree(comm);
+   hypre_TFree(sub_grids);
+   hypre_TFree(sub_matrices);
+   hypre_TFree(stencils);
+   hypre_TFree(stencil_shapes);
+   hypre_TFree(comm);
 
-#ifdef ZZZ_DEBUG
+#ifdef HYPRE_DEBUG
    malloc_verify(0);
    malloc_shutdown();
 #endif

@@ -1,11 +1,11 @@
 /******************************************************************************
  *
- * Header for ZZZ_struct_pcg
+ * Header for HYPRE_struct_pcg
  *
  *****************************************************************************/
 
-#ifndef _ZZZ_STRUCT_PCG_HEADER
-#define _ZZZ_STRUCT_PCG_HEADER
+#ifndef HYPRE_STRUCT_PCG_HEADER
+#define HYPRE_STRUCT_PCG_HEADER
 
 /*--------------------------------------------------------------------------
  * Structures
@@ -17,15 +17,15 @@ typedef void Vector;
 typedef struct
 {
   void             *pc_data;
-  zzz_StructMatrix *A;
-} ZZZ_PCGPrecondData;
+  hypre_StructMatrix *A;
+} HYPRE_PCGPrecondData;
 
 /*--------------------------------------------------------------------------
- * Accessor functions for the ZZZ_PCGPrecondData structure
+ * Accessor functions for the HYPRE_PCGPrecondData structure
  *--------------------------------------------------------------------------*/
 
-#define ZZZ_PCGPrecondDataPCData(precond_data) ((precond_data) -> pc_data)
-#define ZZZ_PCGPrecondDataMatrix(precond_data) ((precond_data) -> A)
+#define HYPRE_PCGPrecondDataPCData(precond_data) ((precond_data) -> pc_data)
+#define HYPRE_PCGPrecondDataMatrix(precond_data) ((precond_data) -> A)
 
 #endif
 
