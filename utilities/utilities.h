@@ -464,6 +464,7 @@ int hypre_thread_MPI_Type_commit P((MPI_Datatype *datatype ));
 #endif
 
 #include<pthread.h>
+#include "utilities.h"
 
 /* hypre_work_proc_t typedef'd to be a pointer to a function with a void*
    argument and a void return type */
