@@ -46,7 +46,7 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 #ifdef HYPRE_SEQUENTIAL
-typedef struct hypre_MPI_Comm *MPI_Comm;
+typedef int MPI_Comm;
 #endif
 
 /*--------------------------------------------------------------------------
