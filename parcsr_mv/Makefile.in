@@ -49,6 +49,8 @@ LFLAGS =\
 HEADERS =\
  communication.h\
  headers.h\
+ numbers.h\
+ par_chord_matrix.h\
  par_csr_matrix.h\
  par_vector.h\
  parcsr_mv.h\
@@ -56,18 +58,21 @@ HEADERS =\
 
 FILES =\
  communication.c\
+ numbers.c\
  par_csr_matop.c\
  par_csr_matrix.c\
  par_csr_matvec.c\
  par_vector.c\
  par_csr_bool_matrix.c\
  par_csr_bool_matop.c\
+ parchord_to_parcsr.c\
  HYPRE_parcsr_matrix.c\
  HYPRE_parcsr_vector.c\
  F90_parcsr_matrix.c\
  F90_par_vector.c\
  F90_HYPRE_parcsr_matrix.c\
  F90_HYPRE_parcsr_vector.c\
+ par_csr_at.c\
  par_csr_aat.c\
  communicationT.c
 
@@ -75,8 +80,10 @@ FILES =\
 DRIVER_FILES =\
  driver.c\
  driver_matmul.c\
+ driver_ab.c\
  driver_matvec.c\
  driver_aat.c\
+ driver_aat2.c\
  driver_boolmatmul.c\
  driver_boolaat.c
 
@@ -101,6 +108,10 @@ driver_matmul: driver_matmul.o libHYPRE_parcsr_mv.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_matmul driver_matmul.o ${LFLAGS} 
 
+driver_ab: driver_ab.o libHYPRE_parcsr_mv.a
+	@echo  "Linking" $@ "... "
+	${CC} -o driver_ab driver_ab.o ${LFLAGS} 
+
 driver_boolmatmul: driver_boolmatmul.o libHYPRE_parcsr_mv.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_boolmatmul driver_boolmatmul.o ${LFLAGS} 
@@ -108,6 +119,10 @@ driver_boolmatmul: driver_boolmatmul.o libHYPRE_parcsr_mv.a
 driver_aat: driver_aat.o libHYPRE_parcsr_mv.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_aat driver_aat.o ${LFLAGS} 
+
+driver_aat2: driver_aat2.o libHYPRE_parcsr_mv.a
+	@echo  "Linking" $@ "... "
+	${CC} -o driver_aat2 driver_aat2.o ${LFLAGS} 
 
 driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv.a
 	@echo  "Linking" $@ "... "
@@ -123,7 +138,8 @@ clean:
 
 veryclean: clean
 	@rm -f libHYPRE_parcsr_mv.a
-	@rm -f driver driver_matvec driver_matmul
+	@rm -f driver driver_matvec driver_matmul driver_ab driver_aat driver_aat2
+	@rm -f driver_boolmatmul driver_boolaat
 
 ##################################################################
 # Rules

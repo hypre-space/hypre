@@ -292,6 +292,169 @@ typedef struct
 #define hypre_ParCSRBooleanMatrix_Get_Getrowactive(matrix)  ((matrix)->getrowactive)
 
 #endif
+/*BHEADER**********************************************************************
+ * (c) 2002   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+/******************************************************************************
+ *
+ * Tree structure for keeping track of numbers (e.g. column numbers) -
+ * when you get them one at a time, in no particular order, possibly very
+ * sparse.  In a scalable manner you want to be able to store them and find
+ * out whether a number has been stored.
+ * All decimal numbers will fit in a tree with 10 branches (digits)
+ * off each node.  We also have a terminal "digit" to indicate that the entire
+ * number has been seen.  E.g., 1234 would be entered in a tree as:
+ * (numbering the digits off a node as 0 1 2 3 4 5 6 7 8 9 TERM )
+ *                          root
+ *                           |
+ *                   - - - - 4 - - - - - -
+ *                           |
+ *                     - - - 3 - - - - - - -
+ *                           |
+ *                       - - 2 - - - - - - - -
+ *                           |
+ *                         - 1 - - - - - - - - -
+ *                           |
+ *       - - - - - - - - - - T
+ *
+ *
+ * This tree represents a number through its decimal expansion, but if needed
+ * this code can be changed to a different base, e.g. binary.  The appropriate
+ * base depends on how the numbers encountered are distributed.  Totally
+ * random (independent, equally likely in a large range) calls for binary.
+ * The more clustered, the larger the base should be in my judgement.
+ *
+ *****************************************************************************/
+
+#ifndef hypre_NUMBERS_HEADER
+#define hypre_NUMBERS_HEADER
+
+struct hypre_NumbersNode;
+
+typedef struct {
+   void * digit[11];
+/* ... should be   hypre_NumbersNode * digit[11]; */
+} hypre_NumbersNode;
+
+#endif
+
+
+hypre_NumbersNode * hypre_NumbersNewNode();
+void hypre_NumbersDeleteNode( hypre_NumbersNode * node );
+int hypre_NumbersEnter( hypre_NumbersNode * node, const int n );
+int hypre_NumbersNEntered( hypre_NumbersNode * node );
+int hypre_NumbersQuery( hypre_NumbersNode * node, const int n );
+int * hypre_NumbersArray( hypre_NumbersNode * node );
+
+
+/*BHEADER**********************************************************************
+ * (c) 1996   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+/******************************************************************************
+ *
+ * Header info for Parallel Chord Matrix data structures
+ *
+ *
+ *****************************************************************************/
+#include <HYPRE_config.h>
+
+
+
+#ifndef hypre_PAR_CHORD_MATRIX_HEADER
+#define hypre_PAR_CHORD_MATRIX_HEADER
+
+#include "utilities.h"
+#include "seq_mv.h"
+
+/*--------------------------------------------------------------------------
+ * Parallel Chord Matrix
+ *--------------------------------------------------------------------------*/
+
+typedef struct
+{
+   MPI_Comm comm;
+
+  /*  A structure: -------------------------------------------------------- */
+  int num_inprocessors;
+  int *inprocessor;
+
+  /* receiving in idof from different (in)processors; ---------------------- */
+  int *num_idofs_inprocessor; 
+  int **idof_inprocessor; 
+
+
+  /* symmetric information: ----------------------------------------------- */
+  /* this can be replaces by CSR format: ---------------------------------- */
+  int *num_inchords;
+  int **inchord_idof;
+  int **inchord_rdof;
+  double **inchord_data;
+
+  int num_idofs;
+  int num_rdofs;
+
+  int *firstindex_idof; /* not owned by my_id; ----------------------------- */
+  int *firstindex_rdof; /* not owned by my_id; ----------------------------- */
+
+  /* --------------------------- mirror information: ---------------------- */
+  /* participation of rdof in different processors; ------------------------ */
+
+  int num_toprocessors;
+  int *toprocessor;
+
+  /* rdofs to be sentto toprocessors; --------------------------------------
+     ----------------------------------------------------------------------- */
+  int *num_rdofs_toprocessor;
+  int **rdof_toprocessor;
+
+
+} hypre_ParChordMatrix;
+
+/*--------------------------------------------------------------------------
+ * Accessor functions for the Parallel CSR Matrix structure
+ *--------------------------------------------------------------------------*/
+
+#define hypre_ParChordMatrixComm(matrix)		  ((matrix) -> comm)
+
+/*  matrix structure: ----------------------------------------------------- */
+
+#define hypre_ParChordMatrixNumInprocessors(matrix)  ((matrix) -> num_inprocessors)
+#define hypre_ParChordMatrixInprocessor(matrix) ((matrix) -> inprocessor)
+#define hypre_ParChordMatrixNumIdofsInprocessor(matrix) ((matrix) -> num_idofs_inprocessor)
+#define hypre_ParChordMatrixIdofInprocessor(matrix) ((matrix) -> idof_inprocessor)
+
+
+#define hypre_ParChordMatrixNumInchords(matrix) ((matrix) -> num_inchords)
+
+#define hypre_ParChordMatrixInchordIdof(matrix) ((matrix) -> inchord_idof)
+#define hypre_ParChordMatrixInchordRdof(matrix) ((matrix) -> inchord_rdof)
+#define hypre_ParChordMatrixInchordData(matrix) ((matrix) -> inchord_data)
+#define hypre_ParChordMatrixNumIdofs(matrix)    ((matrix) -> num_idofs)
+#define hypre_ParChordMatrixNumRdofs(matrix)    ((matrix) -> num_rdofs)
+
+#define hypre_ParChordMatrixFirstindexIdof(matrix) ((matrix) -> firstindex_idof)
+#define hypre_ParChordMatrixFirstindexRdof(matrix) ((matrix) -> firstindex_rdof) 
+
+/* participation of rdof in different processors; ---------- */
+
+
+#define hypre_ParChordMatrixNumToprocessors(matrix) ((matrix) -> num_toprocessors)
+#define hypre_ParChordMatrixToprocessor(matrix)  ((matrix) -> toprocessor)
+#define hypre_ParChordMatrixNumRdofsToprocessor(matrix) ((matrix) -> num_rdofs_toprocessor)
+#define hypre_ParChordMatrixRdofToprocessor(matrix) ((matrix) -> rdof_toprocessor)
+
+
+#endif
 
 /* HYPRE_parcsr_matrix.c */
 int HYPRE_ParCSRMatrixCreate( MPI_Comm comm , int global_num_rows , int global_num_cols , int *row_starts , int *col_starts , int num_cols_offd , int num_nonzeros_diag , int num_nonzeros_offd , HYPRE_ParCSRMatrix *matrix );
@@ -338,10 +501,39 @@ void RowsWithColumn( int *rowmin , int *rowmax , int column , int num_rows_diag 
 void hypre_MatTCommPkgCreate_core( MPI_Comm comm , int *col_map_offd , int first_col_diag , int *col_starts , int num_rows_diag , int num_cols_diag , int num_cols_offd , int *row_starts , int firstColDiag , int *colMapOffd , int *mat_i_diag , int *mat_j_diag , int *mat_i_offd , int *mat_j_offd , int data , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elmts );
 int hypre_MatTCommPkgCreate( hypre_ParCSRMatrix *A );
 
+/* driver.c */
+
+/* driver_aat.c */
+
+/* driver_aat2.c */
+
+/* driver_ab.c */
+
+/* driver_boolaat.c */
+
+/* driver_boolmatmul.c */
+
+/* driver_matmul.c */
+
+/* driver_matvec.c */
+
+/* numbers.c */
+hypre_NumbersNode *hypre_NumbersNewNode( void );
+void hypre_NumbersDeleteNode( hypre_NumbersNode *node );
+int hypre_NumbersEnter( hypre_NumbersNode *node , const int n );
+int hypre_NumbersNEntered( hypre_NumbersNode *node );
+int hypre_NumbersQuery( hypre_NumbersNode *node , const int n );
+int *hypre_NumbersArray( hypre_NumbersNode *node );
+
 /* par_csr_aat.c */
 void hypre_ParAat_RowSizes( int **C_diag_i , int **C_offd_i , int *B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *A_col_map_offd , int *A_ext_i , int *A_ext_j , int *A_ext_row_map , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int num_rows_A_ext , int first_col_diag_A , int first_row_index_A );
 hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix *A );
 hypre_CSRMatrix *hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A , int data , int **pA_ext_row_map );
+
+/* par_csr_at.c */
+int proc_of_col( int col , int num_cols_diag , int num_procs , int *col_starts );
+int pushnew( int item , int *stack , int *stacklen );
+hypre_ParCSRMatrix *hypre_ParCSRAt( hypre_ParCSRMatrix *A );
 
 /* par_csr_bool_matop.c */
 hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul( hypre_ParCSRBooleanMatrix *A , hypre_ParCSRBooleanMatrix *B );
@@ -376,7 +568,7 @@ hypre_ParCSRBooleanMatrix *hypre_CSRBooleanMatrixToParCSRBooleanMatrix( MPI_Comm
 int BooleanGenerateDiagAndOffd( hypre_CSRBooleanMatrix *A , hypre_ParCSRBooleanMatrix *matrix , int first_col_diag , int last_col_diag );
 
 /* par_csr_matop.c */
-void hypre_ParMatmul_RowSizes( int **C_diag_i , int **C_offd_i , int **B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *B_diag_i , int *B_diag_j , int *B_offd_i , int *B_offd_j , int *B_ext_diag_i , int *B_ext_diag_j , int *B_ext_offd_i, int *B_ext_offd_j, int *map_B_to_C , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int allsquare , int num_cols_diag_B , int num_cols_offd_B , int num_cols_offd_C );
+void hypre_ParMatmul_RowSizes( int **C_diag_i , int **C_offd_i , int **B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *B_diag_i , int *B_diag_j , int *B_offd_i , int *B_offd_j , int *B_ext_diag_i , int *B_ext_diag_j , int *B_ext_offd_i , int *B_ext_offd_j , int *map_B_to_C , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int allsquare , int num_cols_diag_B , int num_cols_offd_B , int num_cols_offd_C );
 hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
 void hypre_ParCSRMatrixExtractBExt_Arrays( int **pB_ext_i , int **pB_ext_j , double **pB_ext_data , int **pB_ext_row_map , int *num_nonzeros , int data , int find_row_map , MPI_Comm comm , hypre_ParCSRCommPkg *comm_pkg , int num_cols_B , int num_recvs , int num_sends , int first_col_diag , int first_row_index , int *recv_vec_starts , int *send_map_starts , int *send_map_elmts , int *diag_i , int *diag_j , int *offd_i , int *offd_j , int *col_map_offd , double *diag_data , double *offd_data );
 hypre_CSRMatrix *hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B , hypre_ParCSRMatrix *A , int data );
@@ -425,6 +617,11 @@ hypre_ParVector *hypre_VectorToParVector( MPI_Comm comm , hypre_Vector *v , int 
 hypre_Vector *hypre_ParVectorToVectorAll( hypre_ParVector *par_v );
 int hypre_ParVectorPrintIJ( hypre_ParVector *vector , int base_j , const char *filename );
 int hypre_ParVectorReadIJ( MPI_Comm comm , const char *filename , int *base_j_ptr , hypre_ParVector **vector_ptr );
+
+/* parchord_to_parcsr.c */
+void hypre_ParChordMatrix_RowStarts( hypre_ParChordMatrix *Ac , MPI_Comm comm , int **row_starts , int *global_num_cols );
+int hypre_ParChordMatrixToParCSRMatrix( hypre_ParChordMatrix *Ac , MPI_Comm comm , hypre_ParCSRMatrix **pAp );
+int hypre_ParCSRMatrixToParChordMatrix( hypre_ParCSRMatrix *Ap , MPI_Comm comm , hypre_ParChordMatrix **pAc );
 
 
 #ifdef __cplusplus

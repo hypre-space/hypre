@@ -39,6 +39,8 @@ extern "C" {
 cat communication.h           >> $INTERNAL_HEADER	
 cat par_vector.h              >> $INTERNAL_HEADER	
 cat par_csr_matrix.h          >> $INTERNAL_HEADER	
+cat numbers.h                 >> $INTERNAL_HEADER	
+cat par_chord_matrix.h          >> $INTERNAL_HEADER	
 
 ../utilities/protos [!F]*.c                   >> $INTERNAL_HEADER
 
