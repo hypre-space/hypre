@@ -59,11 +59,14 @@ HEADERS =\
  IJ_matrix.h
 
 FILES =\
- hypre_IJMatrix_parcsr.c\
- HYPRE_IJMatrix.c\
- F90_HYPRE_IJMatrix.c\
+ qsort.c\
  aux_parcsr_matrix.c\
- qsort.c
+ hypre_IJMatrix_parcsr.c\
+ hypre_IJVector_parcsr.c\
+ HYPRE_IJMatrix.c\
+ HYPRE_IJVector.c\
+ F90_HYPRE_IJMatrix.c\
+ F90_HYPRE_IJVector.c
 
 OBJS = ${FILES:.c=.o}
 
