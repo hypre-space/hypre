@@ -36,12 +36,15 @@ install: all
 	@cp -fr HYPRE_ref_manual     $$HYPRE_INSTALL_DIR/docs/.
 	@cp -f  HYPRE_ref_manual.ps  $$HYPRE_INSTALL_DIR/docs/.
 	@cp -f  HYPRE_ref_manual.pdf $$HYPRE_INSTALL_DIR/docs/.
+	@cp -fr bHYPRE_ref_manual     $$HYPRE_INSTALL_DIR/docs/.
+	@cp -f  bHYPRE_ref_manual.ps  $$HYPRE_INSTALL_DIR/docs/.
+	@cp -f  bHYPRE_ref_manual.pdf $$HYPRE_INSTALL_DIR/docs/.
 	@cp -f  V[1-9]* $$HYPRE_INSTALL_DIR/docs/.
 
 clean:
 	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
 	@/bin/rm -f *.idx *.ilg *.ind 
-	@/bin/rm -f vref_manual.* version.tex
+	@/bin/rm -f vref_manual.* vbref_manual.* version.tex
 
 veryclean: clean
 	@/bin/rm -fr HYPRE_usr_manual
@@ -53,16 +56,19 @@ veryclean: clean
 	@/bin/rm -fr HYPRE_ref_manual
 	@/bin/rm -f  HYPRE_ref_manual.tex HYPRE_ref_manual.ps
 	@/bin/rm -f  HYPRE_ref_manual.pdf
+	@/bin/rm -fr bHYPRE_ref_manual
+	@/bin/rm -f  bHYPRE_ref_manual.tex bHYPRE_ref_manual.ps
+	@/bin/rm -f  bHYPRE_ref_manual.pdf
 
 ##################################################################
 # Rules
 ##################################################################
 
-html: usr_html dev_html ref_html
+html: usr_html dev_html ref_html bref_html
 
-ps: usr_ps dev_ps ref_ps
+ps: usr_ps dev_ps ref_ps bref_ps
 
-pdf: usr_pdf dev_pdf ref_pdf
+pdf: usr_pdf dev_pdf ref_pdf bref_pdf
 
 usr: usr_html usr_ps usr_pdf
 usr_html: HYPRE_usr_manual/usr_manual.html
@@ -78,6 +84,11 @@ ref: ref_html ref_ps ref_pdf
 ref_html: HYPRE_ref_manual/index.html
 ref_ps: HYPRE_ref_manual.ps
 ref_pdf: HYPRE_ref_manual.pdf
+
+bref: bref_html bref_ps bref_pdf
+bref_html: bHYPRE_ref_manual/index.html
+bref_ps: bHYPRE_ref_manual.ps
+bref_pdf: bHYPRE_ref_manual.pdf
 
 ##########
 
@@ -177,6 +188,32 @@ vref_manual.dxx: ref_manual.dxx
 	VNUM=`$(srcdir)/../utilities/version -number`; \
 	VDATE=`$(srcdir)/../utilities/version -date`; \
 	sed "s/HYPREVersion/$$VNUM/g" ref_manual.dxx > vref_manual.dxx
+
+##########
+
+bHYPRE_ref_manual/index.html: vbref_manual.dxx 
+	mkdir -p bHYPRE_ref_manual
+	doc++ -d bHYPRE_ref_manual -B hypre_wiw.html vbref_manual.dxx 2>&1
+	cp -f hypre_wiw.gif bHYPRE_ref_manual
+
+bHYPRE_ref_manual.ps: vbref_manual.dvi
+	${DVIPS} -o bHYPRE_ref_manual.ps vbref_manual.dvi 		
+
+bHYPRE_ref_manual.pdf: bHYPRE_ref_manual.ps
+	${PSPDF} bHYPRE_ref_manual.ps
+
+vbref_manual.dvi: version.tex vbref_manual.tex
+	${LATEX} vbref_manual
+	${LATEX} vbref_manual
+
+vbref_manual.tex: vbref_manual.dxx
+	doc++ -t -o vbref_manual.tex vbref_manual.dxx
+
+vbref_manual.dxx: bref_manual.dxx
+	@ \
+	VNUM=`$(srcdir)/../utilities/version -number`; \
+	VDATE=`$(srcdir)/../utilities/version -date`; \
+	sed "s/HYPREVersion/$$VNUM/g" bref_manual.dxx > vbref_manual.dxx
 
 ##########
 

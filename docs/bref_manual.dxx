@@ -1,0 +1,152 @@
+/**
+@name {\it hypre} Reference Manual
+@version HYPREVersion
+*/
+/*@version \TEX{\input{version}\HYPREVersion{}}*/
+
+//@{
+
+/*--------------------------------------------------------------------------*/
+
+/**
+ * @name Matrix and Vector Building Interfaces (Conceptual Interfaces)
+ **/
+//@{
+
+/**
+ * @name IJ Matrix Builder
+ **/
+//@{
+//@Include: ../babel/bHYPREClient-C/bHYPRE_IJBuildMatrix.h
+//@}
+
+/**
+ * @name IJ Vector Builder
+ **/
+//@{
+//@Include: ../babel/bHYPREClient-C/bHYPRE_IJBuildVector.h
+//@}
+
+/*@}*/
+
+/*--------------------------------------------------------------------------*/
+
+/**
+ * @name Operator Interface
+ **/
+//@{
+
+//@Include: ../babel/bHYPREClient-C/bHYPRE_Operator.h
+
+//@}
+
+/*--------------------------------------------------------------------------*/
+
+/**
+ * @name Vector Interface
+ **/
+//@{
+
+//@Include: ../babel/bHYPREClient-C/bHYPRE_Vector.h
+
+//@}
+
+/*--------------------------------------------------------------------------*/
+
+/**
+ * @name Matrices and Vectors
+ **/
+//@{
+
+/**
+ * @name IJParCSR Matrix
+ **/
+//@{
+//@Include: ../babel/bHYPREClient-C/bHYPRE_IJParCSRMatrix.h
+//@}
+
+/**
+ * @name IJParCSR Vector
+ **/
+//@{
+//@Include: ../babel/bHYPREClient-C/bHYPRE_IJParCSRVector.h
+//@}
+
+//@}
+
+/*--------------------------------------------------------------------------*/
+
+/**
+ * @name Solver Interface
+ **/
+//@{
+
+//@Include: ../babel/bHYPREClient-C/bHYPRE_Solver.h
+
+//@}
+
+/*--------------------------------------------------------------------------*/
+
+/**
+ * @name ParCSR Solvers
+ *
+ * These solvers use matrix/vector storage schemes that are taylored
+ * for general sparse matrix systems.
+ *
+ * @memo Linear solvers for sparse matrix systems
+ **/
+//@{
+
+/**
+ * @name ParCSRDiagScale Solver
+ **/
+//@{
+//@Include: ../babel/bHYPREClient-C/bHYPRE_ParCSRDiagScale.h
+//@}
+
+/**
+ * @name ParCSR BoomerAMG Solver
+ **/
+//@{
+//@Include: ../babel/bHYPREClient-C/bHYPRE_BoomerAMG.h
+//@}
+
+/*@}*/
+
+/*--------------------------------------------------------------------------*/
+
+/**
+ * @name PreconditionedSolver Interface
+ **/
+//@{
+
+//@Include: ../babel/bHYPREClient-C/bHYPRE_PreconditionedSolver.h
+
+//@}
+
+/*--------------------------------------------------------------------------*/
+
+/**
+ * @name Preconditioned Solvers
+ **/
+//@{
+
+/**
+ * @name PCG Preconditioned Solver
+ **/
+//@{
+//@Include: ../babel/bHYPREClient-C/bHYPRE_PCG.h
+//@}
+
+/**
+ * @name GMRES Preconditioned Solver
+ **/
+//@{
+//@Include: ../babel/bHYPREClient-C/bHYPRE_GMRES.h
+//@}
+
+//@}
+
+/*--------------------------------------------------------------------------*/
+
+//@}
