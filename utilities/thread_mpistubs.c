@@ -17,7 +17,7 @@
 #define HYPRE_USING_THREAD_MPISTUBS 
 
 #include "hypre_utilities.h"
-
+#include <mpi.h>
 
 int
 hypre_thread_MPI_Init( int    *argc,
