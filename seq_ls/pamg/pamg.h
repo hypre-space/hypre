@@ -158,6 +158,7 @@ hypre_CSRMatrix *hypre_GenerateDifConv( int nx , int ny , int nz , int P , int Q
 int main( int argc , char *argv []);
 int BuildFromFile( int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr );
 int BuildLaplacian( int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr );
+int BuildStencilMatrix( int argc, char *argv[], int arg_index, hypre_CSRMatrix **A_ptr );
 int BuildLaplacian9pt( int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr );
 int BuildLaplacian27pt( int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr );
 int BuildDifConv( int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr );
