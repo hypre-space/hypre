@@ -1126,6 +1126,9 @@ void HYPRE_LinSysCore::setupPCGPrecon()
     int    i, *num_sweeps, *relax_type;
     double *relax_wt;
 
+    if ( HYPreconReuse_ == 0 && HYPreconSetup_ == 1 )
+       selectPreconditioner( HYPreconName_ );
+
     switch ( HYPreconID_ )
     {
        case HYIDENTITY :
@@ -1377,6 +1380,9 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
     int    i, *num_sweeps, *relax_type;
     double *relax_wt;
 
+    if ( HYPreconReuse_ == 0 && HYPreconSetup_ == 1 )
+       selectPreconditioner( HYPreconName_ );
+
     switch ( HYPreconID_ )
     {
        case HYIDENTITY :
@@ -1414,8 +1420,9 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
                HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_ParCSRPilutSolve,
                                            HYPRE_DummyFunction, HYPrecon_);
             }
-            else
+            else if ( HYPreconReuse_ == 0 && HYPreconSetup_ == 1 )
             {
+               HYPRE_ParCSRPilutCreate( comm_, &HYPrecon_ );
                HYPRE_ParCSRPilutSetFactorRowSize(HYPrecon_,pilutFillin_);
                HYPRE_ParCSRPilutSetDropTolerance(HYPrecon_,pilutDropTol_);
                HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_ParCSRPilutSolve,
@@ -1664,6 +1671,9 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
     int    i, *num_sweeps, *relax_type;
     double *relax_wt;
     HYPRE_Lookup *newLookup;
+
+    if ( HYPreconReuse_ == 0 && HYPreconSetup_ == 1 )
+       selectPreconditioner( HYPreconName_ );
 
     switch ( HYPreconID_ )
     {
@@ -1967,6 +1977,9 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
     int    i, *num_sweeps, *relax_type;
     double *relax_wt;
 
+    if ( HYPreconReuse_ == 0 && HYPreconSetup_ == 1 )
+       selectPreconditioner( HYPreconName_ );
+
     switch ( HYPreconID_ )
     {
        case HYIDENTITY :
@@ -2256,6 +2269,9 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
 {
     int    i, *num_sweeps, *relax_type;
     double *relax_wt;
+
+    if ( HYPreconReuse_ == 0 && HYPreconSetup_ == 1 )
+       selectPreconditioner( HYPreconName_ );
 
     switch ( HYPreconID_ )
     {
@@ -2548,6 +2564,9 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
     int    i, *num_sweeps, *relax_type;
     double *relax_wt;
 
+    if ( HYPreconReuse_ == 0 && HYPreconSetup_ == 1 )
+       selectPreconditioner( HYPreconName_ );
+
     switch ( HYPreconID_ )
     {
        case HYIDENTITY :
@@ -2834,6 +2853,9 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
 {
     int    i, *num_sweeps, *relax_type;
     double *relax_wt;
+
+    if ( HYPreconReuse_ == 0 && HYPreconSetup_ == 1 )
+       selectPreconditioner( HYPreconName_ );
 
     switch ( HYPreconID_ )
     {
@@ -3122,6 +3144,9 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
     int    i, *num_sweeps, *relax_type;
     double *relax_wt;
     HYPRE_Lookup *newLookup;
+
+    if ( HYPreconReuse_ == 0 && HYPreconSetup_ == 1 )
+       selectPreconditioner( HYPreconName_ );
 
     switch ( HYPreconID_ )
     {
