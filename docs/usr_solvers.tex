@@ -1,0 +1,49 @@
+\chapter{Solvers}
+
+%==========================================================================
+\section{ParaSails}
+
+The ParaSails (Parallel Sparse Approximate Inverse, Least Squares) 
+preconditioner is a sparse approximation to the inverse of the 
+coefficient matrix.  It is applicable to symmetric positive definite
+problems.  
+
+\begin{display}
+\begin{verbatim}
+int HYPRE_ParCSRParaSailsCreate(MPI_Comm comm, HYPRE_Solver *solver);
+int HYPRE_ParCSRParaSailsDestroy(HYPRE_Solver solver);
+int HYPRE_ParCSRParaSailsSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+  HYPRE_ParVector b, HYPRE_ParVector x);
+int HYPRE_ParCSRParaSailsSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+  HYPRE_ParVector b, HYPRE_ParVector x);
+int HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver, 
+  double thresh, int nlevels);
+\end{verbatim}
+\end{display}
+
+The accuracy and cost of ParaSails are parameterized by the real {\em thresh}
+and integer {\em nlevels} parameters, 
+$0 \le {\it thresh} \le 1$, $0 \le {\it nlevels}$.  
+Lower values of {\em thresh}
+and higher values of {\em nlevels} lead to more accurate, but more expensive
+preconditioners.  More accurate preconditioners are also more expensive
+per iteration.  The default values are ${\it thresh} = 0.1$
+and ${\it nlevels} = 1$.  The parameters are set using 
+{\tt HYPRE\_ParCSRParaSailsSetParams}.
+
+Mathematically, given a symmetric matrix $A$, the pattern of the 
+approximate inverse is the pattern of $\tilde{A}^l$ where $\tilde{A}$
+is a matrix that has been sparsified from $A$.  The sparsification 
+is performed by dropping all entries in a symmetrically Jacobi scaled $A$
+whose values are less than {\em thresh} in magnitude.  The parameter
+{\em nlevels} is equivalent to $l+1$.
+For more details about the algorithm, see \cite{Chow:1999:APS}.
+
+The storage required for the ParaSails preconditioner depends on 
+the parameters {\em thresh} and {\em nlevels}.  The default parameters
+often produce a preconditioner that can be stored in less than the 
+space required to store the original matrix.
+ParaSails does not need a large amount of intermediate storage in 
+order to construct the preconditioner.
+
+%==========================================================================

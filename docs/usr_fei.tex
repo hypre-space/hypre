@@ -1,0 +1,208 @@
+\chapter{Finite Element Interface}
+\label{chapter-FEI}
+
+Charles Tong deserves credit for writing this.  Thanks, Charles!
+
+\section{Introduction}
+
+The finite element interface (FEI) describes a suite of function interfaces 
+that permits finite element application developers to use various linear system
+solvers with little change in the user code.  The actual implementation of
+the FEI, however, depends on the underlying linear solver package.  For example,
+FEI implementations for ISIS++ and Aztec have already been been developed.
+To allow application users (e.g. ALE3D) access to the suite of high performance
+preconditioners in \hypre{}, an HYPRE-FEI has also been implemented, and its
+capabilities and usage are described in this document.
+
+\section{HYPRE-FEI Capabilities}
+
+By providing an FEI link to \hypre{}, FEI users can access the Krylov solvers and
+preconditioners available in \hypre{}.  Several direct and iterative solvers are
+currently available to users :
+
+\begin{enumerate}
+\item conjugate gradient (CG), 
+\item generalized minimal residual (GMRES) methods,
+\item SuperLU direct solver,
+\item SuperLU direct solver with iterative refinement, and
+\item Y12M direct solver.
+\end{enumerate}
+
+The \hypre{} preconditioners available via the FEI currently are :
+
+\begin{enumerate}
+\item diagonal, 
+\item parallel incomplete LU with threshold (PILUT),
+\item parallel algebraic multigrid (BOOMERAMG),
+\item parallel sparse approximate inverse (ParaSails).
+\end{enumerate}
+
+To choose between these options as well as the parameters specific to a
+particular method, users are only required to call the FEI {\sf parameters}
+functions with the corresponding settings.  (Refer to later sections on   
+a list of parameter options.)
+
+Capabilities under development are :
+\begin{enumerate}
+\item to form and solve a reduced linear system (in view of constraints), and
+\item a link to the ML's parallel smoothed aggregation method.
+\end{enumerate}
+
+\section{HYPRE-FEI Installation}
+
+The ultimate objective is for users to obtain a copy of \hypre{}, configure, and
+compile it.  However, at this stage the most convenient way for COMPASS and
+Pacific Blue users to obtain a collection of library functions and link them
+to the application code.  In this section, detailed description of this linking
+will be described.
+
+\subsection{Obtaining the library files}
+
+Upon request, users will obtain a collection of library files for \hypre{}.  The
+files are :
+
+\begin{enumerate}
+\item {\sf libHYPRE\_FEI\_BASE.a}
+\item {\sf libHYPRE\_FEI.a}
+\item {\sf libHYPRE\_parcsr\_ls.a}
+\item {\sf libHYPRE\_ParaSails.a}
+\item {\sf libHYPRE\_FEI\_isismv.a}
+\item {\sf libHYPRE\_IJ\_mv.a}
+\item {\sf libHYPRE\_utilities.a}
+\item {\sf libHYPRE\_parcsr\_mv.a}
+\item {\sf libHYPRE\_MatrixMatrix.a}
+\item {\sf libHYPRE\_DistributedMatrix.a}
+\item {\sf libHYPRE\_DistributedMatrixPilut.a}
+\item {\sf libsuperlu\_alpha.a}
+\item {\sf libHYPRE\_seq\_mv.a}
+\end{enumerate}
+
+\subsection{Linking with the library files}
+
+It is recommended that these library files are linked in this given order.
+(For example, it these files are stored in the /usr/tmp directory, then
+one way is to link them with
+
+\begin{tabbing}
+\hspace{0.5in} \= -L/usr/tmp -lHYPRE\_FEI\_BASE -lHYPRE\_FEI -lHYPRE\_parcsr\_ls \\
+\> -lHYPRE\_ParaSails -lHYPRE\_FEI\_isismv -lHYPRE\_IJ\_mv -lHYPRE\_utilities \\
+\> -lHYPRE\_parcsr\_mv -lHYPRE\_MatrixMatrix -lHYPRE\_DistributedMatrix \\
+\> -lHYPRE\_DistributedMatrixPilut -lsuperlu\_alpha -lHYPRE\_seq\_mv
+\end{tabbing}
+
+along with all the other libraries.  
+
+Since some of these library files make calls to LAPACK and BLAS functions, 
+the corresponding libraries need to be linked along with (placed after) these 
+library files.  For example, on the DEC Compass system, it suffices to link
+with the {\sf dxml} library. (So {\sf -ldxml} is placed after the above link
+sequence, with {\sf -lm} placed after {\sf -ldxml}).
+
+\subsection{Some more caveats especially for ALE3D developers}
+
+Building an application executable often requires linking with many different
+software packages, and many software packages use some LAPACK and/or BLAS
+functions.  In order to alleviate the problem of multiply defined functions
+at link time, it is recommended that all software libraries are stripped of
+all LAPACK and BLAS function definitions.  These LAPACK and BLAS functions 
+should then be resolved at link time by linking with the system LAPACK and
+BLAS libraries (e.g. dxml on DEC Compass).  Both \hypre{} and SuperLU were
+built with this in mind.  However, some other software library files needed
+by ALE3D may have the BLAS functions defined in them (notably libchaco.a
+in /usr/apps/bdivport/lib).  To avoid the problem of multiply defined functions,
+it is recommended that the libchaco.a file be stripped of the BLAS functions.
+Stripping can be achieved by calling the following Unix command
+
+\begin{tabbing}
+\hspace{0.5in} \= {\sf ar -d libchaco.a symmlqblas.o}
+\end{tabbing}
+
+ 
+\section{HYPRE-FEI Usage}
+
+Again, the HYPRE-FEI users interact directly with \hypre{} only via the {\sf parameters}
+function.  In this section we list all parameters recognized by the HYPRE-FEI.
+
+\begin{description}
+\item[solver XXX] - where XXX specifies one of {\sf cg}, {\sf gmres},
+                    {\sf superlu}, or {\sf superlux}.  The default is {\sf gmres}.
+\item[preconditioner XXX] - where XXX is one of {\sf diagonal}, {\sf pilut},
+                    {\sf parasails}, or {\sf boomeramg}. The default 
+                    is {\sf diagonal}.
+\item[gmres-dim XXX] - where XXX is an integer specifying the value of m in
+                       restarted GMRES(m).  The default value is 50.
+\item[maxIterations XXX] - where XXX is an integer specifying the maximum number
+                           of iterations permitted for CG or GMRES.
+                           The default value is 1000.
+\item[tolerance XXX] - where XXX is a floating point number specifying the 
+                       termination criterion for CG or GMRES.  The default value is
+                       1.0E-10.
+\item[pilut-row-size XXX] - where XXX is an integer specifying the maximum
+                       number of nonzeros kept in the formation of imcomplete L
+                       and U).  If this is not called, a value will be selected
+                       based on the sparsity of the matrix.
+\item[pilut-drop-tol XXX] - where XXX is a floating point number specifying the 
+                       threshold to drop small entries in L and U.  The default
+                       value is 0.0.
+\item[superlu-ordering XXX] - where XXX specifies on of {\sf natural} or
+                       {\sf mmd} (minimum degree ordering).  This ordering
+                       is used to minimize the number of nonzeros generated
+                       in the LU decomposition.  The default is natural ordering.
+\item[superlu-scale XXX] - where XXX specifies on of {\sf y} (perform row
+                       and column scalings before decomposition) or {\sf n}.
+                       The default is no scaling.
+\item[amg-coarsen-type XXX] - where XXX specifies on of {\sf falgout},
+                       {\sf ruge}, or {\sf default} coarsening for BOOMERAMG.
+\item[amg-num-sweeps XXX] - where XXX is an integer specifying the number of
+                       pre- and post-smoothing at each level of BOOMERAMG.
+                       The default is one pre- and one post-smoothings.
+\item[amg-relax-type XXX] - where XXX is one of {\sf jacobi} (Damped Jacobi),
+                       {\sf gs-slow} (sequential Gauss-Seidel), {\sf gs-fast}
+                       (Gauss-Seidel on interior nodes), {\sf hybrid},
+                       or {\sf direct}. The default is {\sf hybrid}.
+\item[amg-relax-weight XXX] - where XXX is a floating point number between 0 and 1
+                       specifying the damping factor for BOOMERAMG's damped
+                       Jacobi smoother.  The default value is 0.5.
+\item[amg-strong-threshold XXX] - where XXX is a floating point number between 0 
+                       and 1 specifying the threshold used to determine
+                       strong coupling in BOOMERAMG's coasening.  The default 
+                       value is 0.25.
+\item[parasails-threshold XXX] - where XXX is a floating point number between 0 
+                       and 1 specifying the threshold used to prune small entries
+                       in setting up the sparse approximate inverse.  The default
+                       value is 0.0.
+\item[parasails-nlevels XXX] - where XXX is an integer larger than 0 specifying 
+                       the desired sparsity of the approximate inverse.  The
+                       default value is 1.
+\end{description}
+
+
+\section{HYPRE-FEI Extensions}
+
+In order to support the reduced system formulation for ALE3D applications
+with slide surfaces, two additional functions are provided via HYPRE-FEI
+on top of the base FEI specification :
+
+\begin{description}
+\item[loadSlaveList(int,int*)] - this function is used to load information
+                        about which unknowns are the slave nodes in the
+                        slide surfaces.  This information is useful for
+                        the construction of reduced linear system.
+\item[buildReducedSystem() ] - this function can be called to reduced a linear
+                        system with constraints to a better-conditioned reduced
+                        form.
+\end{description}
+
+\section{HYPRE-FEI Status}
+
+All the solvers and preconditioners have been tested with a few ALE3D test
+problem on the DEC Compass clusters with 1 processor.  The reduced system
+function has been tested on 1 and 2 processors for a toy test problem.  We
+are in the process of testing them on multiple processors and on real test
+problems with ALE3D.
+
+\section{HYPRE-FEI Comments and Contacts}
+
+Any comments about this HYPRE-FEI interface can be directed to Charles Tong
+(X23411 or chtong@llnl.gov) or Edmond Chow (X31915 or chow8@llnl.gov).
+

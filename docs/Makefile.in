@@ -84,7 +84,7 @@ usr_manual.dvi: version.tex usr_manual.idx
 
 usr_manual.idx: ${USR_FILES} 
 	latex usr_manual
-	#bibtex usr_manual
+	bibtex usr_manual
 	makeindex usr_manual.idx
 
 ##########
