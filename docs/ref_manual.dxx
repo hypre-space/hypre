@@ -4,8 +4,9 @@
 
 //@{
 	//@Include: ../struct_matrix_vector/HYPRE_struct_mv.h
-	//@Include: ../struct_linear_solvers/HYPRE_struct_ls.h
 	//@Include: ../sstruct_matrix_vector/HYPRE_sstruct_mv.h
-	//@Include: ../sstruct_linear_solvers/HYPRE_sstruct_ls.h
 	//@Include: ../IJ_matrix_vector/HYPRE_IJ_mv.h
+	//@Include: ../struct_linear_solvers/HYPRE_struct_ls.h
+	//@Include: ../sstruct_linear_solvers/HYPRE_sstruct_ls.h
+	//@Include: ../parcsr_linear_solvers/HYPRE_parcsr_ls.h
 //@}
