@@ -31,7 +31,7 @@ main( int   argc,
    double              cx, cy, cz;
    int                 solver_id;
 
-   int                 A_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
+   int                 A_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
                      
    HYPRE_StructMatrix  A;
    HYPRE_StructVector  b;
@@ -42,25 +42,26 @@ main( int   argc,
    HYPRE_StructSolver  pcg_precond;
    int                 num_iterations;
    int                 time_index;
+   double              final_res_norm;
 
    int                 num_procs, myid;
 
    int                 p, q, r;
-   int                 ilower[50][3];
-   int                 iupper[50][3];
-   int                 istart[3] = {-17, 0, 32};
+   int                 dim;
+   int                 n_pre, n_post;
    int                 nblocks, volume;
 
-   int                 dim = 3;
-   int                 offsets[4][3] = {{-1,  0,  0},
-                                        { 0, -1,  0},
-                                        { 0,  0, -1},
-                                        { 0,  0,  0}};
-                     
+   int               **iupper;
+   int               **ilower;
+
+   int                *istart;
+
+   int               **offsets;
+
    HYPRE_StructGrid    grid;
    HYPRE_StructStencil stencil;
 
-   int                 stencil_indices[4];
+   int                *stencil_indices;
    double             *values;
 
    int                 i, s, d;
@@ -86,6 +87,8 @@ main( int   argc,
     * Set defaults
     *-----------------------------------------------------------*/
  
+   dim = 3;
+
    nx = 10;
    ny = 10;
    nz = 10;
@@ -101,6 +104,9 @@ main( int   argc,
    cx = 1.0;
    cy = 1.0;
    cz = 1.0;
+
+   n_pre  = 1;
+   n_post = 1;
 
    solver_id = 0;
 
@@ -140,6 +146,17 @@ main( int   argc,
          cy = atof(argv[arg_index++]);
          cz = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-v") == 0 )
+      {
+         arg_index++;
+         n_pre = atoi(argv[arg_index++]);
+         n_post = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-d") == 0 )
+      {
+         arg_index++;
+         dim = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-solver") == 0 )
       {
          arg_index++;
@@ -166,10 +183,12 @@ main( int   argc,
       printf("\n");
       printf("Usage: %s [<options>]\n", argv[0]);
       printf("\n");
-      printf("  -n <nx> <ny> <nz>    : problem size per processor\n");
+      printf("  -n <nx> <ny> <nz>    : problem size per block\n");
       printf("  -P <Px> <Py> <Pz>    : processor topology\n");
       printf("  -b <bx> <by> <bz>    : blocking per processor\n");
       printf("  -c <cx> <cy> <cz>    : diffusion coefficients\n");
+      printf("  -v <n_pre> <n_post>  : number of pre and post relaxations\n");
+      printf("  -d <dim>             : problem dimension (2 or 3)\n");
       printf("  -solver <ID>         : solver ID\n");
       printf("\n");
 
@@ -186,12 +205,6 @@ main( int   argc,
       exit(1);
    }
 
-   if (bx*by*bz > 50)
-   {
-      printf("Error: Maximum number of blocks allowed per processor is 50\n");
-      exit(1);
-   }
-
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
@@ -199,39 +212,139 @@ main( int   argc,
    if (myid == 0)
    {
       printf("Running with these driver parameters:\n");
-      printf("  (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
-      printf("  (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
-      printf("  (bx, by, bz) = (%d, %d, %d)\n", bx, by, bz);
-      printf("  (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
-      printf("  solver ID    = %d\n", solver_id);
+      printf("  (nx, ny, nz)    = (%d, %d, %d)\n", nx, ny, nz);
+      printf("  (Px, Py, Pz)    = (%d, %d, %d)\n", P,  Q,  R);
+      printf("  (bx, by, bz)    = (%d, %d, %d)\n", bx, by, bz);
+      printf("  (cx, cy, cz)    = (%f, %f, %f)\n", cx, cy, cz);
+      printf("  (n_pre, n_post) = (%d, %d)\n", n_pre, n_post);
+      printf("  dim             = %d\n", dim);
+      printf("  solver ID       = %d\n", solver_id);
    }
 
    /*-----------------------------------------------------------
     * Set up the grid structure
     *-----------------------------------------------------------*/
 
-   volume  = nx*ny*nz;
-   nblocks = bx*by*bz;
+   istart = hypre_CTAlloc(int, dim);
 
-   /* compute p,q,r from P,Q,R and myid */
-   p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   switch (dim)
+   {
+      case 1:
+         volume  = nx;
+         nblocks = bx;
+         istart[0] = -17;
+         stencil_indices = hypre_CTAlloc(int, 2);
+         offsets = hypre_CTAlloc(int*, 2);
+         offsets[0] = hypre_CTAlloc(int, 1);
+         offsets[0][0] = -1; 
+         offsets[1] = hypre_CTAlloc(int, 1);
+         offsets[1][0] = 0; 
+         /* compute p from P and myid */
+         p = myid % P;
+         break;
+      case 2:
+         volume  = nx*ny;
+         nblocks = bx*by;
+         istart[0] = -17;
+         istart[1] = 0;
+         stencil_indices = hypre_CTAlloc(int, 3);
+         offsets = hypre_CTAlloc(int*, 3);
+         offsets[0] = hypre_CTAlloc(int, 2);
+         offsets[0][0] = -1; 
+         offsets[0][1] = 0; 
+         offsets[1] = hypre_CTAlloc(int, 2);
+         offsets[1][0] = 0; 
+         offsets[1][1] = -1; 
+         offsets[2] = hypre_CTAlloc(int, 2);
+         offsets[2][0] = 0; 
+         offsets[2][1] = 0; 
+         /* compute p,q from P,Q and myid */
+         p = myid % P;
+         q = (( myid - p)/P) % Q;
+         break;
+      case 3:
+         volume  = nx*ny*nz;
+         nblocks = bx*by*bz;
+         istart[0] = -17;
+         istart[1] = 0;
+         istart[2] = 32;
+         stencil_indices = hypre_CTAlloc(int, 4);
+         offsets = hypre_CTAlloc(int*, 4);
+         offsets[0] = hypre_CTAlloc(int, 3);
+         offsets[0][0] = -1; 
+         offsets[0][1] = 0; 
+         offsets[0][2] = 0; 
+         offsets[1] = hypre_CTAlloc(int, 3);
+         offsets[1][0] = 0; 
+         offsets[1][1] = -1; 
+         offsets[1][2] = 0; 
+         offsets[2] = hypre_CTAlloc(int, 3);
+         offsets[2][0] = 0; 
+         offsets[2][1] = 0; 
+         offsets[2][2] = -1; 
+         offsets[3] = hypre_CTAlloc(int, 3);
+         offsets[3][0] = 0; 
+         offsets[3][1] = 0; 
+         offsets[3][2] = 0; 
+         /* compute p,q,r from P,Q,R and myid */
+         p = myid % P;
+         q = (( myid - p)/P) % Q;
+         r = ( myid - p - P*q)/( P*Q );
+         break;
+   }
+
+   ilower = hypre_CTAlloc(int*, nblocks);
+   iupper = hypre_CTAlloc(int*, nblocks);
+   for (i = 0; i < nblocks; i++)
+   {
+      ilower[i] = hypre_CTAlloc(int, dim);
+      iupper[i] = hypre_CTAlloc(int, dim);
+   }
+
+   for (i = 0; i < dim; i++)
+   {
+      A_num_ghost[2*i] = 1;
+      A_num_ghost[2*i + 1] = 1;
+   }
 
    /* compute ilower and iupper from (p,q,r), (bx,by,bz), and (nx,ny,nz) */
    ib = 0;
-   for (iz = 0; iz < bz; iz++)
-      for (iy = 0; iy < by; iy++)
+   switch (dim)
+   {
+      case 1:
          for (ix = 0; ix < bx; ix++)
          {
             ilower[ib][0] = istart[0]+ nx*(bx*p+ix);
             iupper[ib][0] = istart[0]+ nx*(bx*p+ix+1) - 1;
-            ilower[ib][1] = istart[1]+ ny*(by*q+iy);
-            iupper[ib][1] = istart[1]+ ny*(by*q+iy+1) - 1;
-            ilower[ib][2] = istart[2]+ nz*(bz*r+iz);
-            iupper[ib][2] = istart[2]+ nz*(bz*r+iz+1) - 1;
             ib++;
          }
+         break;
+      case 2:
+         for (iy = 0; iy < by; iy++)
+            for (ix = 0; ix < bx; ix++)
+            {
+               ilower[ib][0] = istart[0]+ nx*(bx*p+ix);
+               iupper[ib][0] = istart[0]+ nx*(bx*p+ix+1) - 1;
+               ilower[ib][1] = istart[1]+ ny*(by*q+iy);
+               iupper[ib][1] = istart[1]+ ny*(by*q+iy+1) - 1;
+               ib++;
+            }
+         break;
+      case 3:
+         for (iz = 0; iz < bz; iz++)
+            for (iy = 0; iy < by; iy++)
+               for (ix = 0; ix < bx; ix++)
+               {
+                  ilower[ib][0] = istart[0]+ nx*(bx*p+ix);
+                  iupper[ib][0] = istart[0]+ nx*(bx*p+ix+1) - 1;
+                  ilower[ib][1] = istart[1]+ ny*(by*q+iy);
+                  iupper[ib][1] = istart[1]+ ny*(by*q+iy+1) - 1;
+                  ilower[ib][2] = istart[2]+ nz*(bz*r+iz);
+                  iupper[ib][2] = istart[2]+ nz*(bz*r+iz+1) - 1;
+                  ib++;
+               }
+         break;
+   } 
 
    grid = HYPRE_NewStructGrid(MPI_COMM_WORLD, dim);
    for (ib = 0; ib < nblocks; ib++)
@@ -244,8 +357,8 @@ main( int   argc,
     * Set up the stencil structure
     *-----------------------------------------------------------*/
  
-   stencil = HYPRE_NewStructStencil(dim, 4);
-   for (s = 0; s < 4; s++)
+   stencil = HYPRE_NewStructStencil(dim, dim + 1);
+   for (s = 0; s < dim + 1; s++)
    {
       HYPRE_SetStructStencilElement(stencil, s, offsets[s]);
    }
@@ -263,23 +376,37 @@ main( int   argc,
     * Fill in the matrix elements
     *-----------------------------------------------------------*/
 
-   values = hypre_CTAlloc(double, 4*volume);
+   values = hypre_CTAlloc(double, (dim +1)*volume);
 
    /* Set the coefficients for the grid */
-   for (i = 0; i < 4*volume; i += 4)
+   for (i = 0; i < (dim + 1)*volume; i += (dim + 1))
    {
-      for (s = 0; s < 4; s++)
+      for (s = 0; s < (dim + 1); s++)
       {
          stencil_indices[s] = s;
-         values[i  ] = -cx;
-         values[i+1] = -cy;
-         values[i+2] = -cz;
-         values[i+3] = 2.0*(cx+cy+cz);
+         switch (dim)
+         {
+            case 1:
+               values[i  ] = -cx;
+               values[i+1] = 2.0*(cx);
+               break;
+            case 2:
+               values[i  ] = -cx;
+               values[i+1] = -cy;
+               values[i+2] = 2.0*(cx+cy);
+               break;
+            case 3:
+               values[i  ] = -cx;
+               values[i+1] = -cy;
+               values[i+2] = -cz;
+               values[i+3] = 2.0*(cx+cy+cz);
+               break;
+         }
       }
    }
    for (ib = 0; ib < nblocks; ib++)
    {
-      HYPRE_SetStructMatrixBoxValues(A, ilower[ib], iupper[ib], 4,
+      HYPRE_SetStructMatrixBoxValues(A, ilower[ib], iupper[ib], (dim+1),
                                      stencil_indices, values);
    }
 
@@ -288,7 +415,7 @@ main( int   argc,
    {
       values[i] = 0.0;
    }
-   for (d = 0; d < 3; d++)
+   for (d = 0; d < dim; d++)
    {
       for (ib = 0; ib < nblocks; ib++)
       {
@@ -363,9 +490,9 @@ main( int   argc,
       HYPRE_StructSMGSetMaxIter(smg_solver, 50);
       HYPRE_StructSMGSetRelChange(smg_solver, 0);
       HYPRE_StructSMGSetTol(smg_solver, 1.0e-06);
-      HYPRE_StructSMGSetNumPreRelax(smg_solver, 1);
-      HYPRE_StructSMGSetNumPostRelax(smg_solver, 1);
-      HYPRE_StructSMGSetLogging(smg_solver, 0);
+      HYPRE_StructSMGSetNumPreRelax(smg_solver, n_pre);
+      HYPRE_StructSMGSetNumPostRelax(smg_solver, n_post);
+      HYPRE_StructSMGSetLogging(smg_solver, 1);
       HYPRE_StructSMGSetup(smg_solver, A, b, x);
 
       hypre_EndTiming(time_index);
@@ -384,6 +511,7 @@ main( int   argc,
       hypre_ClearTiming();
    
       HYPRE_StructSMGGetNumIterations(smg_solver, &num_iterations);
+      HYPRE_StructSMGGetFinalRelativeResidualNorm(smg_solver, &final_res_norm);
       HYPRE_StructSMGFinalize(smg_solver);
    }
 
@@ -401,7 +529,7 @@ main( int   argc,
       HYPRE_StructPCGSetTol(pcg_solver, 1.0e-06);
       HYPRE_StructPCGSetTwoNorm(pcg_solver, 1);
       HYPRE_StructPCGSetRelChange(pcg_solver, 0);
-      HYPRE_StructPCGSetLogging(pcg_solver, 0);
+      HYPRE_StructPCGSetLogging(pcg_solver, 1);
 
       if (solver_id == 1)
       {
@@ -410,8 +538,8 @@ main( int   argc,
          HYPRE_StructSMGSetMemoryUse(pcg_precond, 0);
          HYPRE_StructSMGSetMaxIter(pcg_precond, 1);
          HYPRE_StructSMGSetTol(pcg_precond, 0.0);
-         HYPRE_StructSMGSetNumPreRelax(pcg_precond, 1);
-         HYPRE_StructSMGSetNumPostRelax(pcg_precond, 1);
+         HYPRE_StructSMGSetNumPreRelax(pcg_precond, n_pre);
+         HYPRE_StructSMGSetNumPostRelax(pcg_precond, n_post);
          HYPRE_StructSMGSetLogging(pcg_precond, 0);
          HYPRE_StructPCGSetPrecond(pcg_solver,
                                    HYPRE_StructSMGSolve,
@@ -446,6 +574,7 @@ main( int   argc,
       hypre_ClearTiming();
 
       HYPRE_StructPCGGetNumIterations(pcg_solver, &num_iterations);
+      HYPRE_StructPCGGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
       HYPRE_StructPCGFinalize(pcg_solver);
 
       if (solver_id == 1)
@@ -466,6 +595,7 @@ main( int   argc,
    {
       printf("\n");
       printf("Iterations = %d\n", num_iterations);
+      printf("Final Relative Residual Norm = %e\n", final_res_norm);
       printf("\n");
    }
 
@@ -477,6 +607,20 @@ main( int   argc,
    HYPRE_FreeStructMatrix(A);
    HYPRE_FreeStructVector(b);
    HYPRE_FreeStructVector(x);
+
+   for (i = 0; i < nblocks; i++)
+   {
+      hypre_TFree(iupper[i]);
+      hypre_TFree(ilower[i]);
+   }
+   hypre_TFree(ilower);
+   hypre_TFree(iupper);
+   hypre_TFree(stencil_indices);
+   hypre_TFree(istart);
+
+   for ( i = 0; i < (dim + 1); i++)
+      hypre_TFree(offsets[i]);
+   hypre_TFree(offsets);
 
    hypre_FinalizeMemoryDebug();
 
