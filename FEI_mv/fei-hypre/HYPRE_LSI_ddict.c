@@ -1,5 +1,5 @@
 /*BHEADER**********************************************************************
- * (c) 1999   The Regents of the University of California
+ * (c) 2001   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
@@ -59,7 +59,7 @@ extern int  HYPRE_LIS_DDICTGetOffProcRows(MH_Matrix *Amat, int leng, int *,
 extern int  HYPRE_LSI_DDICTDecompose(HYPRE_LSI_DDICT *ict_ptr,MH_Matrix *Amat,
                  int total_recv_leng, int *recv_lengths, int *ext_ja, 
                  double *ext_aa, int *map, int *map2, int Noffset);
-extern void HYPRE_LSI_Sort(int *, int, int *, double *);
+extern void HYPRE_LSI_qsort1a(int *, int *, int, int);
 
 extern int  HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa, 
                  int *mat_ja, int *mat_ia, double *rowNorms);
@@ -698,7 +698,7 @@ int HYPRE_LSI_DDICTComposeOverlappedMatrix(MH_Matrix *mh_mat,
               NrowsOffset,index_array,index_array2,int_buf, dble_buf);
 
    free(proc_array);
-   HYPRE_LSI_Sort(index_array, extNrows-Nrows, index_array2, NULL);
+   HYPRE_LSI_qsort1a(index_array, index_array2, 0, extNrows-Nrows-1);
    (*sindex_array) = index_array;
    (*sindex_array2) = index_array2;
    (*offset) = NrowsOffset;
