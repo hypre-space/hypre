@@ -129,7 +129,7 @@ main( int   argc,
    double   strong_threshold;
    double   trunc_factor;
    int      cycle_type;
-   int      coarsen_type = 0;
+   int      coarsen_type = 6;
    int      hybrid = 1;
    int      measure_type = 0;
    int     *num_grid_sweeps;  
@@ -265,6 +265,11 @@ main( int   argc,
          arg_index++;
          build_rhs_type      = 3;
          build_rhs_arg_index = arg_index;
+      }    
+      else if ( strcmp(argv[arg_index], "-cljp") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 0;
       }    
       else if ( strcmp(argv[arg_index], "-ruge") == 0 )
       {
@@ -525,6 +530,7 @@ main( int   argc,
       printf("       6=DS-CGNR     7=PILUT-GMRES   \n");     
       printf("       8=ParaSails-PCG \n");     
       printf("\n");
+      printf("   -cljp                 : CLJP coarsening \n");
       printf("   -ruge                 : Ruge coarsening (local)\n");
       printf("   -ruge3                : third pass on boundary\n");
       printf("   -ruge3c               : third pass on boundary, keep c-points\n");
