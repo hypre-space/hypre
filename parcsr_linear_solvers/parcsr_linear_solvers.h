@@ -22,17 +22,20 @@ void hypre_F90_IFACE P((int hypre_parcsrparasailsdestroy ));
 void hypre_F90_IFACE P((int hypre_parcsrparasailssetup ));
 void hypre_F90_IFACE P((int hypre_parcsrparasailssolve ));
 void hypre_F90_IFACE P((int hypre_parcsrparasailssetparams ));
+void hypre_F90_IFACE P((int hypre_parcsrparasailssetfilter ));
+void hypre_F90_IFACE P((int hypre_parcsrparasailssetsym ));
 
 /* F90_HYPRE_parcsr_amg.c */
 void hypre_F90_IFACE P((int hypre_paramgcreate ));
 void hypre_F90_IFACE P((int hypre_paramgdestroy ));
 void hypre_F90_IFACE P((int hypre_paramgsetup ));
+void hypre_F90_IFACE P((int hypre_paramgreinit ));
 void hypre_F90_IFACE P((int hypre_paramgsolve ));
 void hypre_F90_IFACE P((int hypre_paramgsolvet ));
 void hypre_F90_IFACE P((int hypre_paramgsetrestriction ));
 void hypre_F90_IFACE P((int hypre_paramgsetmaxlevels ));
 void hypre_F90_IFACE P((int hypre_paramgsetstrongthreshold ));
-void hypre_F90_IFACE P((int hypre_paramgsetMaxRowSum ));
+void hypre_F90_IFACE P((int hypre_paramgsetmaxrowsum ));
 void hypre_F90_IFACE P((int hypre_paramgsettruncfactor ));
 void hypre_F90_IFACE P((int hypre_paramgsetinterptype ));
 void hypre_F90_IFACE P((int hypre_paramgsetminiter ));
@@ -75,6 +78,7 @@ void hypre_F90_IFACE P((int hypre_parcsrgmressettol ));
 void hypre_F90_IFACE P((int hypre_parcsrgmressetminiter ));
 void hypre_F90_IFACE P((int hypre_parcsrgmressetmaxiter ));
 void hypre_F90_IFACE P((int hypre_parcsrgmressetprecond ));
+void hypre_F90_IFACE P((int hypre_parcsrgmresreinitprecond ));
 void hypre_F90_IFACE P((int hypre_parcsrgmressetlogging ));
 void hypre_F90_IFACE P((int hypre_parcsrgmresgetnumiteratio ));
 void hypre_F90_IFACE P((int hypre_parcsrgmresgetfinalrelati ));
@@ -113,11 +117,15 @@ int HYPRE_ParCSRParaSailsDestroy P((HYPRE_Solver solver ));
 int HYPRE_ParCSRParaSailsSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParCSRParaSailsSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParCSRParaSailsSetParams P((HYPRE_Solver solver , double thresh , int nlevels ));
+int HYPRE_ParCSRParaSailsSelectThresh P((HYPRE_Solver solver , double tparam ));
+int HYPRE_ParCSRParaSailsSetFilter P((HYPRE_Solver solver , double filter ));
+int HYPRE_ParCSRParaSailsSetSym P((HYPRE_Solver solver , int sym ));
 
 /* HYPRE_parcsr_amg.c */
 int HYPRE_ParAMGCreate P((HYPRE_Solver *solver ));
 int HYPRE_ParAMGDestroy P((HYPRE_Solver solver ));
 int HYPRE_ParAMGSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParAMGReinit P((HYPRE_Solver solver ));
 int HYPRE_ParAMGSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParAMGSolveT P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParAMGSetRestriction P((HYPRE_Solver solver , int restr_par ));
@@ -168,7 +176,8 @@ int HYPRE_ParCSRGMRESSetTol P((HYPRE_Solver solver , double tol ));
 int HYPRE_ParCSRGMRESSetMinIter P((HYPRE_Solver solver , int min_iter ));
 int HYPRE_ParCSRGMRESSetMaxIter P((HYPRE_Solver solver , int max_iter ));
 int HYPRE_ParCSRGMRESSetStopCrit P((HYPRE_Solver solver , int stop_crit ));
-int HYPRE_ParCSRGMRESSetPrecond P((HYPRE_Solver solver , int (*precond )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precond_setup )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), void *precond_data ));
+int HYPRE_ParCSRGMRESSetPrecond P((HYPRE_Solver solver , int (*precond )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precond_setup )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precond_reinit )(HYPRE_Solver sol ), void *precond_data ));
+int HYPRE_ParCSRGMRESReinitPrecond P((HYPRE_Solver solver ));
 int HYPRE_ParCSRGMRESSetLogging P((HYPRE_Solver solver , int logging ));
 int HYPRE_ParCSRGMRESGetNumIterations P((HYPRE_Solver solver , int *num_iterations ));
 int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
@@ -232,7 +241,8 @@ int hypre_GMRESSetTol P((void *gmres_vdata , double tol ));
 int hypre_GMRESSetMinIter P((void *gmres_vdata , int min_iter ));
 int hypre_GMRESSetMaxIter P((void *gmres_vdata , int max_iter ));
 int hypre_GMRESSetStopCrit P((void *gmres_vdata , double stop_crit ));
-int hypre_GMRESSetPrecond P((void *gmres_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data ));
+int hypre_GMRESSetPrecond P((void *gmres_vdata , int (*precond )(), int (*precond_setup )(), int (*precond_reinit )(), void *precond_data ));
+int hypre_GMRESReinitPrecond P((void *gmres_vdata ));
 int hypre_GMRESSetLogging P((void *gmres_vdata , int logging ));
 int hypre_GMRESGetNumIterations P((void *gmres_vdata , int *num_iterations ));
 int hypre_GMRESGetFinalRelativeResidualNorm P((void *gmres_vdata , double *relative_residual_norm ));
@@ -271,6 +281,7 @@ int hypre_ParAMGGetRelativeResidualNorm P((void *data , double *rel_resid_norm )
 
 /* par_amg_setup.c */
 int hypre_ParAMGSetup P((void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u ));
+int hypre_ParAMGReinit P((void *amg_vdata ));
 
 /* par_amg_solve.c */
 int hypre_ParAMGSolve P((void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u ));
