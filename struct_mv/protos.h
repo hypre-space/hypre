@@ -86,6 +86,12 @@ void zzz_DeleteSBox P((zzz_SBoxArray *sbox_array , int index ));
 void zzz_AppendSBoxArray P((zzz_SBoxArray *sbox_array_0 , zzz_SBoxArray *sbox_array_1 ));
 void zzz_AppendSBoxArrayArray P((zzz_SBoxArrayArray *sbox_array_array_0 , zzz_SBoxArrayArray *sbox_array_array_1 ));
 
+/* struct_axpy.c */
+int zzz_StructAxpy P((double alpha , zzz_StructVector *x , zzz_StructVector *y ));
+
+/* struct_copy.c */
+int zzz_StructCopy P((zzz_StructVector *x , zzz_StructVector *y ));
+
 /* struct_grid.c */
 zzz_StructGrid *zzz_NewStructGrid P((MPI_Comm context , int dim ));
 void zzz_FreeStructGrid P((zzz_StructGrid *grid ));
@@ -117,6 +123,9 @@ int zzz_StructMatvecSetup P((void *matvec_vdata , zzz_StructMatrix *A , zzz_Stru
 int zzz_StructMatvecCompute P((void *matvec_vdata , double alpha , double beta , zzz_StructVector *y ));
 int zzz_StructMatvecFinalize P((void *matvec_vdata ));
 int zzz_StructMatvec P((double alpha , zzz_StructMatrix *A , zzz_StructVector *x , double beta , zzz_StructVector *y ));
+
+/* struct_scale.c */
+int zzz_StructScale P((double alpha , zzz_StructVector *y ));
 
 /* struct_stencil.c */
 zzz_StructStencil *zzz_NewStructStencil P((int dim , int size , zzz_Index **shape ));

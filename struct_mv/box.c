@@ -169,15 +169,11 @@ zzz_DuplicateBox( zzz_Box *box )
    zzz_Index  *imin;
    zzz_Index  *imax;
 
-   int         d;
-
    imin = zzz_NewIndex();
    imax = zzz_NewIndex();
-   for (d = 0; d < 3; d++)
-   {
-      zzz_IndexD(imin, d) = zzz_BoxIMinD(box, d);
-      zzz_IndexD(imax, d) = zzz_BoxIMaxD(box, d);
-   }
+
+   zzz_CopyIndex(zzz_BoxIMin(box), imin);
+   zzz_CopyIndex(zzz_BoxIMax(box), imax);
 
    new_box = zzz_NewBox(imin, imax);
 

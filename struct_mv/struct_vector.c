@@ -185,7 +185,7 @@ zzz_SetStructVectorValues( zzz_StructVector *vector,
 
    double           *vecp;
 
-   int               i, s;
+   int               i;
 
    boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(vector));
 
@@ -240,7 +240,7 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
 
    zzz_Index        *index;
 
-   int               i, s, d;
+   int               i;
 
    /*-----------------------------------------------------------------------
     * Set up `box_array' by intersecting `box' with the grid boxes
@@ -265,15 +265,11 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
  
       data_space = zzz_StructVectorDataSpace(vector);
       data_stride = zzz_NewIndex();
-      zzz_IndexD(data_stride, 0) = 1;
-      zzz_IndexD(data_stride, 1) = 1;
-      zzz_IndexD(data_stride, 2) = 1;
+      zzz_SetIndex(data_stride, 1, 1, 1);
  
       dval_box = zzz_DuplicateBox(value_box);
       dval_stride = zzz_NewIndex();
-      zzz_IndexD(dval_stride, 0) = 1;
-      zzz_IndexD(dval_stride, 1) = 1;
-      zzz_IndexD(dval_stride, 2) = 1;
+      zzz_SetIndex(dval_stride, 1, 1, 1);
       dval_start = zzz_NewIndex();
  
       zzz_ForBoxI(i, box_array)
@@ -285,8 +281,7 @@ zzz_SetStructVectorBoxValues( zzz_StructVector *vector,
          if (box)
          {
             data_start = zzz_BoxIMin(box);
-            for (d = 0; d < 3; d++)
-               zzz_IndexD(dval_start, d) = zzz_IndexD(data_start, d);
+            zzz_CopyIndex(data_start, dval_start);
  
             datap = zzz_StructVectorBoxData(vector, i);
  

@@ -60,8 +60,7 @@ zzz_ProjectBox( zzz_Box    *box,
     *------------------------------------------------------*/
 
    new_stride = zzz_NewIndex();
-   for (d = 0; d < 3; d++)
-      zzz_IndexD(new_stride, d) = zzz_IndexD(stride, d);
+   zzz_CopyIndex(stride, new_stride);
 
    new_sbox = zzz_NewSBox(new_box, new_stride);
 
@@ -130,11 +129,10 @@ zzz_ProjectRBPoint( zzz_BoxArrayArray *box_array_array,
 
    zzz_Index          *stride;
 
-   int                 i, j, d;
+   int                 i;
 
    stride = zzz_NewIndex();
-   for (d = 0; d < 3; d++)
-      zzz_IndexD(stride, d) = 2;
+   zzz_SetIndex(stride, 2, 2, 2);
 
    new_sbox_array_array =
       zzz_NewSBoxArrayArray(zzz_BoxArrayArraySize(box_array_array));

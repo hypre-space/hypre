@@ -28,14 +28,13 @@ zzz_PrintBoxArrayData( FILE             *file,
    zzz_Box         *box;
    zzz_Box         *data_box;
 
-   double          *data_ptr;
    int              data_box_volume;
    int              datai;
 
    zzz_Index       *index;
    zzz_Index       *stride;
 
-   int              i, j, d;
+   int              i, j;
 
    /*----------------------------------------
     * Print data
@@ -43,8 +42,7 @@ zzz_PrintBoxArrayData( FILE             *file,
 
    index = zzz_NewIndex();
    stride = zzz_NewIndex();
-   for (d = 0; d < 3; d++)
-      zzz_IndexD(stride, d) = 1;
+   zzz_SetIndex(stride, 1, 1, 1);
 
    zzz_ForBoxI(i, box_array)
    {
@@ -87,14 +85,13 @@ zzz_ReadBoxArrayData( FILE             *file,
    zzz_Box         *box;
    zzz_Box         *data_box;
 
-   double          *data_ptr;
    int              data_box_volume;
    int              datai;
 
    zzz_Index       *index;
    zzz_Index       *stride;
 
-   int              i, j, d, idummy;
+   int              i, j, idummy;
 
    /*----------------------------------------
     * Read data
@@ -102,8 +99,7 @@ zzz_ReadBoxArrayData( FILE             *file,
 
    index = zzz_NewIndex();
    stride = zzz_NewIndex();
-   for (d = 0; d < 3; d++)
-      zzz_IndexD(stride, d) = 1;
+   zzz_SetIndex(stride, 1, 1, 1);
 
    zzz_ForBoxI(i, box_array)
    {

@@ -35,23 +35,25 @@ zzz_GetComputeInfo( zzz_BoxArrayArray  **send_boxes_ptr,
    zzz_BoxArrayArray     *dept_boxes;
 
    /* internal variables */
+   zzz_BoxArray          *boxes;
+   zzz_BoxArray          *all_boxes;
+
+   zzz_Box               *box0;
+
+   int                    i;
+
+#ifdef OVERLAP_COMM_COMP
    zzz_BoxArray          *send_box_a;
    zzz_BoxArray          *recv_box_a;
    zzz_BoxArray          *indt_box_a;
    zzz_BoxArray          *dept_box_a;
 
-   zzz_BoxArray          *boxes;
-   zzz_BoxArray          *all_boxes;
-
-   int                    i, j, k;
-
-   /* temporary work variables */
    zzz_BoxArrayArray     *box_aa0;
-                         
    zzz_BoxArray          *box_a0;
    zzz_BoxArray          *box_a1;
                          
-   zzz_Box               *box0;
+   int                    j, k;
+#endif
 
    /*------------------------------------------------------
     * Extract needed grid info
@@ -220,8 +222,6 @@ zzz_NewComputePkg( zzz_SBoxArrayArray  *send_sboxes,
 void
 zzz_FreeComputePkg( zzz_ComputePkg *compute_pkg )
 {
-   int i;
-
    if (compute_pkg)
    {
       zzz_FreeCommPkg(zzz_ComputePkgCommPkg(compute_pkg));

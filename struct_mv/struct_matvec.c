@@ -151,7 +151,7 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
    int                   stencil_size;
 
    double                temp;
-   int                   compute_i, i, j, si, d;
+   int                   compute_i, i, j, si;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -164,8 +164,7 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
    index = zzz_NewIndex();
 
    unit_stride = zzz_NewIndex();
-   for (d = 0; d < 3; d++)
-      zzz_IndexD(unit_stride, d) = 1;
+   zzz_SetIndex(unit_stride, 1, 1, 1);
 
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation
@@ -189,7 +188,7 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
                       });
       }
 
-      return;
+      return ierr;
    }
 
    /*-----------------------------------------------------------------------

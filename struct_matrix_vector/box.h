@@ -68,13 +68,6 @@ typedef struct
 
 
 /*--------------------------------------------------------------------------
- * Member macros: zzz_Index
- *--------------------------------------------------------------------------*/
-
-#define zzz_NewIndex()       ctalloc(zzz_Index, 3)
-#define zzz_FreeIndex(index) tfree(index)
-
-/*--------------------------------------------------------------------------
  * Accessor macros: zzz_Index
  *--------------------------------------------------------------------------*/
 
@@ -83,6 +76,27 @@ typedef struct
 #define zzz_IndexX(index)     zzz_IndexD(index, 0)
 #define zzz_IndexY(index)     zzz_IndexD(index, 1)
 #define zzz_IndexZ(index)     zzz_IndexD(index, 2)
+
+/*--------------------------------------------------------------------------
+ * Member macros: zzz_Index
+ *--------------------------------------------------------------------------*/
+
+#define zzz_NewIndex()       ctalloc(zzz_Index, 3)
+#define zzz_FreeIndex(index) tfree(index)
+
+#define zzz_SetIndex(index, ix, iy, iz) \
+{\
+   zzz_IndexX(index) = ix;\
+   zzz_IndexY(index) = iy;\
+   zzz_IndexZ(index) = iz;\
+}
+
+#define zzz_CopyIndex(index1, index2) \
+{\
+   zzz_IndexX(index2) = zzz_IndexX(index1);\
+   zzz_IndexY(index2) = zzz_IndexY(index1);\
+   zzz_IndexZ(index2) = zzz_IndexZ(index1);\
+}
 
 /*--------------------------------------------------------------------------
  * Accessor macros: zzz_Box

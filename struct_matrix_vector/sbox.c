@@ -265,11 +265,8 @@ zzz_ConvertToSBox( zzz_Box *box )
    zzz_SBox  *sbox;
    zzz_Index *stride;
 
-   int        d;
-
    stride = zzz_NewIndex();
-   for (d = 0; d < 3; d++)
-      zzz_IndexD(stride, d) = 1;
+   zzz_SetIndex(stride, 1, 1, 1);
 
    sbox = zzz_NewSBox(box, stride);
 

@@ -24,8 +24,6 @@ zzz_NewStructGrid( MPI_Comm context,
 {
    zzz_StructGrid    *grid;
 
-   int                i, size;
-
    grid = talloc(zzz_StructGrid, 1);
 
    zzz_StructGridAllBoxes(grid)  = NULL;

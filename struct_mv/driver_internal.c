@@ -12,20 +12,17 @@ char malloc_logpath_memory[256];
  *--------------------------------------------------------------------------*/
  
 /*----------------------------------------------------------------------
- * Example 2: (symmetric storage)
+ * Example 3:
  *
- *    Standard 5-point laplacian in 2D on a 10 x 7 grid,
- *    ignoring boundary conditions for simplicity.
+ *    Read matrix and vector from disk.
  *----------------------------------------------------------------------*/
-
-int   main(argc, argv)
-int   argc;
-char *argv[];
+int
+main( int   argc,
+      char *argv[] )
 {
    int                 matrix_num_ghost[6] = { 1, 1, 0, 0, 0, 0};
    int                 vector_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
                      
-   zzz_StructGrid     *grid;
    zzz_StructMatrix   *matrix;
    zzz_StructVector   *vector;
    zzz_StructVector   *tmp_vector;
@@ -117,5 +114,7 @@ char *argv[];
 
    /* Finalize MPI */
    MPI_Finalize();
+
+   return 0;
 }
 

@@ -51,7 +51,7 @@ CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I//usr/local/mpi/mpich/include\
- -g
+ -g -Wall
 
 FFLAGS = -g
 
@@ -61,7 +61,7 @@ LFLAGS =\
  -L/home/casc/g77/lib\
  -L/usr/local/mpi/mpich/lib/solaris/ch_p4\
  -L.\
- -lZZZ\
+ -lZZZ_mv\
  -lnsl -lsocket -lmpi\
  -lf2c\
  -lcegdb\
@@ -73,11 +73,11 @@ LFLAGS =\
 # Main rules
 ##################################################################
 
-driver_internal: driver_internal.o libZZZ.a
+driver_internal: driver_internal.o libZZZ_mv.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_internal driver_internal.o ${LFLAGS}
 
-libZZZ.a: ${OBJS}
+libZZZ_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -ru $@ ${OBJS}
 	ranlib $@
@@ -101,7 +101,7 @@ ${OBJS}: ${HEADERS}
 ##################################################################
 
 veryclean: clean
-	@rm -f libZZZ.a
+	@rm -f libZZZ_mv.a
 	@rm -f driver driver_internal
 
 clean:

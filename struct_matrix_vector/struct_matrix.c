@@ -153,11 +153,7 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
       for (i = 0; i < user_stencil_size; i++)
       {
          stencil_shape[i] = zzz_NewIndex();
-         for (d = 0; d < 3; d++)
-         {
-            zzz_IndexD(stencil_shape[i], d) =
-               zzz_IndexD(user_stencil_shape[i], d);
-         }
+         zzz_CopyIndex(user_stencil_shape[i], stencil_shape[i]);
       }
 
       /* create symmetric stencil elements and `symm_coeff' */
@@ -439,7 +435,7 @@ zzz_SetStructMatrixBoxValues( zzz_StructMatrix *matrix,
 
    zzz_Index        *index;
 
-   int               i, s, d;
+   int               i, s;
 
    /*-----------------------------------------------------------------------
     * Set up `box_array' by intersecting `box' with the grid boxes
@@ -464,17 +460,13 @@ zzz_SetStructMatrixBoxValues( zzz_StructMatrix *matrix,
 
       data_space = zzz_StructMatrixDataSpace(matrix);
       data_stride = zzz_NewIndex();
-      zzz_IndexD(data_stride, 0) = 1;
-      zzz_IndexD(data_stride, 1) = 1;
-      zzz_IndexD(data_stride, 2) = 1;
+      zzz_SetIndex(data_stride, 1, 1, 1);
 
       dval_box = zzz_DuplicateBox(value_box);
       zzz_BoxIMaxD(dval_box, 0) +=
          (num_stencil_indices - 1)*zzz_BoxSizeD(dval_box, 0);
       dval_stride = zzz_NewIndex();
-      zzz_IndexD(dval_stride, 0) = num_stencil_indices;
-      zzz_IndexD(dval_stride, 1) = 1;
-      zzz_IndexD(dval_stride, 2) = 1;
+      zzz_SetIndex(dval_stride, num_stencil_indices, 1, 1);
       dval_start = zzz_NewIndex();
 
       zzz_ForBoxI(i, box_array)
@@ -486,8 +478,7 @@ zzz_SetStructMatrixBoxValues( zzz_StructMatrix *matrix,
          if (box)
          {
             data_start = zzz_BoxIMin(box);
-            for (d = 0; d < 3; d++)
-               zzz_IndexD(dval_start, d) = zzz_IndexD(data_start, d);
+            zzz_CopyIndex(data_start, dval_start);
 
             for (s = 0; s < num_stencil_indices; s++)
             {
@@ -573,9 +564,7 @@ zzz_AssembleStructMatrix( zzz_StructMatrix *matrix )
       zzz_BoxLoop0(box, index,
                    {
                       comm_stencil_shape[i] = zzz_NewIndex();
-                      for (d = 0; d < 3; d++)
-                         zzz_IndexD(comm_stencil_shape[i], d) =
-                            zzz_IndexD(index, d);
+                      zzz_CopyIndex(index, comm_stencil_shape[i]);
                       i++;
                    });
       comm_stencil = zzz_NewStructStencil(3, zzz_BoxVolume(box),
@@ -769,9 +758,8 @@ zzz_ReadStructMatrix( char *filename,
    zzz_BoxArray       *data_space;
 
    int                 symmetric;
-   int                *symm_coeff;
 
-   int                 i, j, idummy;
+   int                 i, idummy;
 
    int                 myid;
  

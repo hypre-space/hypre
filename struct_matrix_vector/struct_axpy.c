@@ -40,13 +40,12 @@ zzz_StructAxpy( double            alpha,
    zzz_Index            *start;
    zzz_Index            *unit_stride;
 
-   int                   i, d;
+   int                   i;
 
    index = zzz_NewIndex();
 
    unit_stride = zzz_NewIndex();
-   for (d = 0; d < 3; d++)
-      zzz_IndexD(unit_stride, d) = 1;
+   zzz_SetIndex(unit_stride, 1, 1, 1);
 
    boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(y));
    zzz_ForBoxI(i, boxes)
