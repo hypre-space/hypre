@@ -65,8 +65,8 @@ hypre_F90_IFACE(hypre_setijvectorlocalpartition)( long int *vector,
                                                   int      *ierr    )
 {
    *ierr = (int) ( HYPRE_SetIJVectorLocalPartitioning( (HYPRE_IJVector) *vector,
-                                                       (int)             vec_start_this_proc,
-                                                       (int)             vec_start_next_proc ) );
+                                                       (int)            *vec_start_this_proc,
+                                                       (int)            *vec_start_next_proc ) );
 }
 
 /*--------------------------------------------------------------------------
