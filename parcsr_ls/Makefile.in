@@ -13,7 +13,6 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
  
- 
 CC = @CC@
  
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
@@ -41,26 +40,34 @@ LFLAGS =\
  -L../parcsr_matrix_vector\
  -L../seq_matrix_vector\
  -L../utilities\
- -lHYPRE_paramg\
- -lHYPRE_parmv\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_parcsr_mv\
  -lHYPRE_mv\
- -lmpe\
  -lHYPRE_utilities\
+ -lmpe\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
  
 HEADERS =\
  headers.h\
- protos.h
+ par_amg.h\
+ hypre_parcsr_ls.h\
+ HYPRE_parcsr_ls.h
 
 FILES =\
+ driver.c\
+ par_amg.c\
+ par_amg_setup.c\
+ par_amg_solve.c\
+ par_cycle.c\
  par_interp.c\
- par_laplace.c\
  coarsen.c\
  indepset.c\
+ par_laplace.c\
  par_rap.c\
  par_rap_communication.c\
  random.c\
- transpose.c
+ transpose.c\
+ HYPRE_parcsr_amg.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -68,36 +75,34 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_paramg.a
+all: libHYPRE_parcsr_ls.a driver
  
 install: all
-	@cp -f HYPRE_*.h hypre_*.h $$HYPRE_INSTALL_DIR/include
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib
  
 clean:
 	@rm -f *.o
 
 veryclean: clean
-	@rm -f libHYPRE_paramg.a
-	@rm -f test test_rap test_interp
+	@rm -f driver driver_interp driver_rap
+	@rm -f libHYPRE_parcsr_ls.a
 
 ##################################################################
 # Rules
 ##################################################################
 
-test: driver.o libHYPRE_paramg.a
+driver: driver.o libHYPRE_parcsr_ls.a
 	@echo  "Linking" $@ "... "
-	${CC} -o test driver.o ${LFLAGS} 
+	${CC} -o driver driver.o ${LFLAGS} 
 
-test_interp: driver_interp.o libHYPRE_paramg.a
+driver_interp: driver_interp.o libHYPRE_parcsr_ls.a
 	@echo  "Linking" $@ "... "
-	${CC} -o test_interp driver_interp.o ${LFLAGS} 
+	${CC} -o driver_interp driver_interp.o ${LFLAGS} 
 
-test_rap: driver_rap.o libHYPRE_paramg.a
+driver_rap: driver_rap.o libHYPRE_parcsr_ls.a
 	@echo  "Linking" $@ "... "
-	${CC} -o test_rap driver_rap.o ${LFLAGS} 
+	${CC} -o driver_rap driver_rap.o ${LFLAGS} 
 
-libHYPRE_paramg.a: ${OBJS}
+libHYPRE_parcsr_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -ru $@ ${OBJS}
 	ranlib $@
@@ -111,8 +116,4 @@ ${OBJS}: ${HEADERS}
 .c.o:
 	@echo "Making (c) " $@
 	@${CC} -o $@ -c ${CFLAGS} $<
-
-.f.${AMG_ARCH}.o:
-	@echo "Making (f) " $@
-	@${F77} -o $@ -c ${FFLAGS} $<
 

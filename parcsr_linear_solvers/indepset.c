@@ -31,12 +31,13 @@
 /*--------------------------------------------------------------------------*/
 
 int
-hypre_InitAMGIndepSet( hypre_CSRMatrix *S,
-                       double          *measure_array )
+hypre_InitParAMGIndepSet( hypre_ParCSRMatrix *parS,
+                          double             *measure_array )
 {
-   int     S_num_nodes = hypre_CSRMatrixNumRows(S);
-   int     i;
-   int     ierr = 0;
+   hypre_CSRMatrix *S = hypre_ParCSRMatrixDiag(parS);
+   int              S_num_nodes = hypre_CSRMatrixNumRows(S);
+   int              i;
+   int              ierr = 0;
 
    hypre_SeedRand(2747);
    for (i = 0; i < S_num_nodes; i++)
@@ -86,19 +87,20 @@ hypre_InitAMGIndepSet( hypre_CSRMatrix *S,
 /*--------------------------------------------------------------------------*/
 
 int
-hypre_AMGIndepSet( hypre_CSRMatrix *S,
-                   double          *measure_array,
-                   int             *graph_array,
-                   int              graph_array_size,
-                   int             *IS_marker        )
+hypre_ParAMGIndepSet( hypre_ParCSRMatrix *parS,
+                      double             *measure_array,
+                      int                *graph_array,
+                      int                 graph_array_size,
+                      int                *IS_marker        )
 {
-   int    *S_i         = hypre_CSRMatrixI(S);
-   int    *S_j         = hypre_CSRMatrixJ(S);
-   double *S_data      = hypre_CSRMatrixData(S);
-         
-   int     i, j, ig, jS;
-
-   int     ierr = 0;
+   hypre_CSRMatrix *S      = hypre_ParCSRMatrixDiag(parS);
+   int             *S_i    = hypre_CSRMatrixI(S);
+   int             *S_j    = hypre_CSRMatrixJ(S);
+   double          *S_data = hypre_CSRMatrixData(S);
+                   
+   int              i, j, ig, jS;
+                   
+   int              ierr = 0;
 
    /*-------------------------------------------------------
     * Initialize IS_marker by putting all nodes in
@@ -108,7 +110,10 @@ hypre_AMGIndepSet( hypre_CSRMatrix *S,
    for (ig = 0; ig < graph_array_size; ig++)
    {
       i = graph_array[ig];
-      IS_marker[i] = 1;
+      if (measure_array[i] > 1)
+      {
+         IS_marker[i] = 1;
+      }
    }
 
    /*-------------------------------------------------------
@@ -119,21 +124,23 @@ hypre_AMGIndepSet( hypre_CSRMatrix *S,
    {
       i = graph_array[ig];
 
-      for (jS = S_i[i]; jS < S_i[i+1]; jS++)
+      if (measure_array[i] > 1)
       {
-         j = S_j[jS];
-                  
-         /* only consider valid graph edges */
-         if ( S_data[jS] && measure_array[j] )
+         for (jS = S_i[i]; jS < S_i[i+1]; jS++)
          {
-            if (measure_array[i] > measure_array[j])
+            j = S_j[jS];
+            
+            /* only consider valid graph edges */
+            if ( (measure_array[j] > 1) && (S_data[jS]) )
             {
-               IS_marker[j] = 0;
-            }
-            else if (measure_array[j] > measure_array[i])
-            {
-               IS_marker[i] = 0;
-               break;
+               if (measure_array[i] > measure_array[j])
+               {
+                  IS_marker[j] = 0;
+               }
+               else if (measure_array[j] > measure_array[i])
+               {
+                  IS_marker[i] = 0;
+               }
             }
          }
       }

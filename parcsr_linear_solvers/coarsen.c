@@ -19,10 +19,10 @@
 
   Notes:
   \begin{itemize}
-  \item The underlying matrix storage scheme is a hypre_CSR matrix.
+  \item The underlying matrix storage scheme is a hypre_ParCSR matrix.
   \item The routine returns the following:
   \begin{itemize}
-  \item S - a CSR matrix representing the "strength matrix".  This is
+  \item S - a ParCSR matrix representing the "strength matrix".  This is
   used in the "build interpolation" routine.
   \item CF\_marker - an array indicating both C-pts (value = 1) and
   F-pts (value = -1)
@@ -88,33 +88,35 @@
 #define COMMON_C_PT  2
 
 int
-hypre_AMGCoarsen( hypre_CSRMatrix    *A,
-                  double              strength_threshold,
-                  hypre_CSRMatrix   **S_ptr,
-                  int               **CF_marker_ptr,
-                  int                *coarse_size_ptr     )
+hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *parA,
+                     double                 strength_threshold,
+                     hypre_ParCSRMatrix   **parS_ptr,
+                     int                  **CF_marker_ptr,
+                     int                   *coarse_size_ptr     )
 {
-   int             *A_i           = hypre_CSRMatrixI(A);
-   int             *A_j           = hypre_CSRMatrixJ(A);
-   double          *A_data        = hypre_CSRMatrixData(A);
-   int              num_variables = hypre_CSRMatrixNumRows(A);
+   hypre_CSRMatrix    *A             = hypre_ParCSRMatrixDiag(parA);
+   int                *A_i           = hypre_CSRMatrixI(A);
+   int                *A_j           = hypre_CSRMatrixJ(A);
+   double             *A_data        = hypre_CSRMatrixData(A);
+   int                 num_variables = hypre_CSRMatrixNumRows(A);
                   
-   hypre_CSRMatrix *S;
-   int             *S_i;
-   int             *S_j;
-   double          *S_data;
+   hypre_ParCSRMatrix *parS;
+   hypre_CSRMatrix    *S;
+   int                *S_i;
+   int                *S_j;
+   double             *S_data;
                  
-   int             *CF_marker;
-   int              coarse_size;
-
-   double          *measure_array;
-   int             *graph_array;
-   int              graph_size;
-
-   double           diag, row_scale;
-   int              i, j, k, jA, jS, kS, ig;
-
-   int              ierr = 0;
+   int                *CF_marker;
+   int                 coarse_size;
+                      
+   double             *measure_array;
+   int                *graph_array;
+   int                 graph_size;
+                      
+   double              diag, row_scale;
+   int                 i, j, k, jA, jS, kS, ig;
+                      
+   int                 ierr = 0;
 
 #if 0 /* debugging */
    char  filename[256];
@@ -252,7 +254,7 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
    }
 
    /* this augments the measures */
-   hypre_InitAMGIndepSet(S, measure_array);
+   hypre_InitParAMGIndepSet(parS, measure_array);
 
    /*---------------------------------------------------
     * Initialize the graph array
@@ -280,51 +282,6 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
    graph_size = num_variables;
    while (1)
    {
-      /*------------------------------------------------
-       * Compute the subgraph used to pick the
-       * next independent set.
-       *
-       * Take marked points out of the subgraph,
-       * and set to be C-pts.
-       *
-       * Take points with measure less than 1 out of the
-       * subgraph, and set to be F-pts.
-       *
-       * To take points out of the subgraph, they are
-       * simply moved to the end of the graph array.
-       *------------------------------------------------*/
-
-      for (ig = 0; ig < graph_size; ig++)
-      {
-         i = graph_array[ig];
-
-         /* marked */
-         if (CF_marker[i])
-         {
-            /* set to be a C-pt */
-            CF_marker[i] = C_PT;
-            measure_array[i] = 0;
-            coarse_size++;
-         }
-
-         /* not marked */
-         else if (measure_array[i] < 1)
-         {
-            /* set to be an F-pt */
-            CF_marker[i] = F_PT;
-            measure_array[i] = 0;
-         }
-
-         /* take point out of the subgraph */
-         if ( (CF_marker[i] == C_PT) || (CF_marker[i] == F_PT) )
-         {
-            graph_size--;
-            graph_array[ig] = graph_array[graph_size];
-            graph_array[graph_size] = i;
-            ig--;
-         }
-      }
-
       /*------------------------------------------------
        * Debugging:
        *
@@ -372,8 +329,8 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
        * maximal measure.
        *------------------------------------------------*/
 
-      hypre_AMGIndepSet(S, measure_array,
-                        graph_array, graph_size, CF_marker);
+      hypre_ParAMGIndepSet(parS, measure_array,
+                           graph_array, graph_size, CF_marker);
 
       /*------------------------------------------------
        * Apply heuristics.
@@ -384,32 +341,26 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
          i = graph_array[ig];
 
          /*---------------------------------------------
-          * Heuristic 1: C-pts don't interpolate from
-          * neighbors they depend on.
+          * Set to be a C-pt
           *---------------------------------------------*/
 
-         if (CF_marker[i])
+         if (CF_marker[i] > 0)
          {
-            for (jS = S_i[i]; jS < S_i[i+1]; jS++)
-            {
-               if (S_data[jS] < 0)
-               {
-                  j = S_j[jS];
-               
-                  /* "remove" edge from S */
-                  S_data[jS] = -S_data[jS];
-               
-                  /* decrement measures of unmarked neighbors */
-                  if (!CF_marker[j])
-                  {
-                     measure_array[j]--;
-                  }
-               }
-            }
+            CF_marker[i] = C_PT;
+            coarse_size++;
          }
 
          /*---------------------------------------------
-          * Heuristic 2: points that interpolate from a
+          * Set to be an F-pt
+          *---------------------------------------------*/
+
+         else if (measure_array[i] < 1)
+         {
+            CF_marker[i] = F_PT;
+         }
+
+         /*---------------------------------------------
+          * Heuristic: points that interpolate from a
           * common C-pt are less dependent on each other.
           *
           * NOTE: CF_marker is used to help check for
@@ -423,7 +374,7 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
             {
                j = S_j[jS];
 
-               if (CF_marker[j])
+               if (CF_marker[j] > 0)
                {
                   if (S_data[jS] < 0)
                   {
@@ -478,6 +429,40 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
                }
             }
          }
+
+         /*---------------------------------------------
+          * Heuristic: C-pts don't interpolate from
+          * neighbors that influence them, and F-pts
+          * don't interpolate to neighbors they influence.
+          *---------------------------------------------*/
+
+         if ( (CF_marker[i] == C_PT) || (CF_marker[i] == F_PT) )
+         {
+            measure_array[i] = 0;
+
+            for (jS = S_i[i]; jS < S_i[i+1]; jS++)
+            {
+               if (S_data[jS] < 0)
+               {
+                  j = S_j[jS];
+               
+                  /* "remove" edge from S */
+                  S_data[jS] = -S_data[jS];
+               
+                  /* decrement measures of unmarked neighbors */
+                  if (!CF_marker[j])
+                  {
+                     measure_array[j]--;
+                  }
+               }
+            }
+
+            /* take point out of the subgraph */
+            graph_size--;
+            graph_array[ig] = graph_array[graph_size];
+            graph_array[graph_size] = i;
+            ig--;
+         }
       }
    }
 
@@ -488,7 +473,7 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
    hypre_TFree(measure_array);
    hypre_TFree(graph_array);
 
-   *S_ptr           = S;
+   *parS_ptr        = parS;
    *CF_marker_ptr   = CF_marker;
    *coarse_size_ptr = coarse_size;
 
