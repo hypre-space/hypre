@@ -3,7 +3,7 @@ c
       subroutine crsgd(ierr,k,nstr,ecg,ncg,ewt,nwt,mmax,icdep,
      *     nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
      *     b,ib,jb,ipmn,ipmx,iv,xp,yp,
-     *     ndimu,ndimp,ndima,ndimb)
+     *     ndimu,ndimp,ndima,ndimb,coarsen_cpu,RPdef_cpu)
 c     
 c---------------------------------------------------------------------
 c     
@@ -210,6 +210,11 @@ c
       dimension iarr(10)
 c     
       dimension icdep(10,10)
+
+      integer*4 coarsen_cpu
+      integer*4 cpu_ticks
+      integer*4 cpu_old
+      integer*4 RPdef_cpu
 c     
 c---------------------------------------------------------------------
 c     
@@ -229,6 +234,11 @@ c
 
       call idec(nwt,5,ndigit,iarr)
       iwts   =iarr(1)
+cveh
+c     test of timing routine
+cveh
+      call amg_cpuclock(cpu_ticks)
+      cpu_old = cpu_ticks
 c     
 c===  > set array for coupled/dependent coarsening
 c     
@@ -284,6 +294,10 @@ c===  > test for grid coarse enough
 c     
       call gtest(k,mmax,imin,imax,icg,ifg,
      *     ndimu,ndimp,ndima,ndimb)
+cveh
+      call amg_cpuclock(cpu_ticks)
+      coarsen_cpu = coarsen_cpu + (cpu_ticks-cpu_old)
+cveh
 c     
 c===  > return if coarsest level
 c     
@@ -291,6 +305,9 @@ c
 c     
 c===  > load f-rows of b with strong c-connections
 c     
+      call amg_cpuclock(cpu_ticks)
+      cpu_old = cpu_ticks
+
       call bloadf(ierr,k,imin,imax,a,ia,ja,icg,b,ib,jb,
      *     ndimu,ndimp,ndima,ndimb)
       if (ierr .ne. 0) return
@@ -311,5 +328,7 @@ c
       call rstdf0(k,imin,imax,icg,b,ib,jb,
      *     ndimu,ndimp,ndima,ndimb)
 c     
+      call amg_cpuclock(cpu_ticks)
+      RPdef_cpu = RPdef_cpu + (cpu_ticks-cpu_old)
       return
       end
