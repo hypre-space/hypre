@@ -32,6 +32,7 @@
 #include "../matrix/mli_matrix.h"
 #include "../vector/mli_vector.h"
 #include "../fedata/mli_fedata.h"
+#include "../mapper/mli_mapper.h"
 
 class MLI_OneLevel;
 class MLI_Method;
@@ -69,7 +70,7 @@ public :
    int  setRestriction(  int level, MLI_Matrix *Rmat );
    int  setProlongation( int level, MLI_Matrix *Pmat );
    int  setSmoother( int level , int pre_post, MLI_Solver *solver );
-   int  setFEData( int level, MLI_FEData *fedata );
+   int  setFEData( int level, MLI_FEData *fedata, MLI_Mapper *map );
    int  setCoarseSolve( MLI_Solver *solver );
    int  setCyclesAtLevel(int level, int cycles);
    int  setMethod( MLI_Method *method_data );

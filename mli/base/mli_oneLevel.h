@@ -16,11 +16,6 @@
 #define __MLIONELEVELH__
 
 #include "utilities/utilities.h"
-#include "../solver/mli_solver.h"
-#include "../amgs/mli_method.h"
-#include "../matrix/mli_matrix.h"
-#include "../vector/mli_vector.h"
-#include "../fedata/mli_fedata.h"
 #include "mli.h"
 
 class MLI;
@@ -33,6 +28,7 @@ class MLI_OneLevel
 {
    MLI            *mli_object;      /* pointer to the top level structure */
    MLI_FEData     *fedata;          /* pointer to finite element data     */
+   MLI_Mapper     *nodeEqnMap;      /* pointer to node to equation map    */
    MLI_Matrix     *Amat;            /* pointer to Amat                    */
    MLI_Matrix     *Rmat;            /* pointer to Rmat                    */
    MLI_Matrix     *Pmat;            /* pointer to Pmat                    */
@@ -61,7 +57,7 @@ public :
    int  setResidualVector( MLI_Vector *res );
    int  setSmoother( int pre_post, MLI_Solver *solver );
    int  setCoarseSolve( MLI_Solver *solver );
-   int  setFEData( MLI_FEData *data );
+   int  setFEData( MLI_FEData *data, MLI_Mapper *map );
    int  setNextLevel( MLI_OneLevel *next )   { next_level = next; return 0; }
    int  setPrevLevel( MLI_OneLevel *prev )   { prev_level = prev; return 0; }
    int  setup();
@@ -75,6 +71,8 @@ public :
    MLI_Vector *getRHSVector()                { return vec_rhs; }
    MLI_Vector *getResidualVector()           { return vec_res; }
    MLI_Vector *getSolutionVector()           { return vec_sol; }
+   MLI_FEData *getFEData()                   { return fedata; }
+   MLI_Mapper *getNodeEqnMap()               { return nodeEqnMap; }
 };
 
 #endif

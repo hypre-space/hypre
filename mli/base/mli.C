@@ -166,7 +166,7 @@ int MLI::setCoarseSolve( MLI_Solver *solver )
  * set finite element data information 
  *---------------------------------------------------------------------------*/
 
-int MLI::setFEData( int level, MLI_FEData *fedata )
+int MLI::setFEData( int level, MLI_FEData *fedata, MLI_Mapper *map )
 {
 #ifdef MLI_DEBUG_DETAILED
    cout << "MLI::setFEData" << endl;
@@ -174,7 +174,7 @@ int MLI::setFEData( int level, MLI_FEData *fedata )
 #endif
    if ( level >= 0 && level < max_levels )
    {
-      one_levels[level]->setFEData( fedata );
+      one_levels[level]->setFEData( fedata, map );
    }
    else
    {

@@ -197,7 +197,7 @@ int MLI_OneLevel::setCoarseSolve( MLI_Solver *solver )
  * set finite element information object 
  *--------------------------------------------------------------------------*/
 
-int MLI_OneLevel::setFEData( MLI_FEData *data )
+int MLI_OneLevel::setFEData( MLI_FEData *data, MLI_Mapper *map )
 {
 #ifdef MLI_DEBUG_DETAILED
    cout << "MLI_OneLevel::setFEData" << endl;
@@ -205,6 +205,8 @@ int MLI_OneLevel::setFEData( MLI_FEData *data )
 #endif
    if ( fedata != NULL ) delete fedata;
    fedata = data;
+   if ( nodeEqnMap != NULL ) delete nodeEqnMap;
+   nodeEqnMap = map;
    return 0;
 }
 
