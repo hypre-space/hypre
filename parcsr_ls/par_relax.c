@@ -86,9 +86,11 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
    double          zero = 0.0;
    double	   res, res0, res2;
    double          one_minus_weight;
+   double          one_minus_omega;
    double          prod;
 
    one_minus_weight = 1.0 - relax_weight;
+   one_minus_omega = 1.0 - omega;
    MPI_Comm_size(comm,&num_procs);  
    MPI_Comm_rank(comm,&my_id);  
    num_threads = hypre_NumThreads();
@@ -624,8 +626,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
                   u_data[i] *= prod;
-                  u_data[i] += omega*(relax_weight*res + res0 +
-			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];
+                  u_data[i] += relax_weight*(omega*res + res0 +
+			one_minus_omega*res2) / A_diag_data[A_diag_i[i]];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];*/
                }
             }
            }
@@ -657,8 +661,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
                   u_data[i] *= prod;
-                  u_data[i] += omega*(relax_weight*res + res0 +
-			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];
+                  u_data[i] += relax_weight*(omega*res + res0 +
+			one_minus_omega*res2) / A_diag_data[A_diag_i[i]];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];*/
                }
             }
           }
@@ -724,8 +730,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
                   u_data[i] *= prod;
-                  u_data[i] += omega*(relax_weight*res + res0 +
-			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];
+                  u_data[i] += relax_weight*(omega*res + res0 +
+			one_minus_omega*res2) / A_diag_data[A_diag_i[i]];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];*/
                }
             }     
            }     
@@ -760,8 +768,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
                   u_data[i] *= prod;
-                  u_data[i] += omega*(relax_weight*res + res0 +
-			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];
+                  u_data[i] += relax_weight*(omega*res + res0 +
+			one_minus_omega*res2) / A_diag_data[A_diag_i[i]];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];*/
                }
             }     
 	  }
@@ -1388,8 +1398,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
                   u_data[i] *= prod;
-                  u_data[i] += omega*(relax_weight*res + res0 +
-			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];
+                  u_data[i] += relax_weight*(omega*res + res0 +
+			one_minus_omega*res2) / A_diag_data[A_diag_i[i]];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];*/
                }
             }
            }
@@ -1421,8 +1433,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
                   u_data[i] *= prod;
-                  u_data[i] += omega*(relax_weight*res + res0 +
-			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];
+                  u_data[i] += relax_weight*(omega*res + res0 +
+			one_minus_omega*res2) / A_diag_data[A_diag_i[i]];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];*/
                }
             }
           }
@@ -1488,8 +1502,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
                   u_data[i] *= prod;
-                  u_data[i] += omega*(relax_weight*res + res0 +
-			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];
+                  u_data[i] += relax_weight*(omega*res + res0 +
+			one_minus_omega*res2) / A_diag_data[A_diag_i[i]];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];*/
                }
             }     
            }     
@@ -1524,8 +1540,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
                   u_data[i] *= prod;
-                  u_data[i] += omega*(relax_weight*res + res0 +
-			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];
+                  u_data[i] += relax_weight*(omega*res + res0 +
+			one_minus_omega*res2) / A_diag_data[A_diag_i[i]];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];*/
                }
             }     
 	  }
@@ -1546,7 +1564,6 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          /*-----------------------------------------------------------------
           * Copy current approximation into temporary vector.
           *-----------------------------------------------------------------*/
-         
 	if (num_procs > 1)
 	{
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -1934,8 +1951,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
                   u_data[i] *= prod;
-                  u_data[i] += (omega*(relax_weight*res + res0 +
-			one_minus_weight*res2) / A_diag_data[A_diag_i[i]]);
+                  u_data[i] += relax_weight*(omega*res + res0 +
+			one_minus_omega*res2) / A_diag_data[A_diag_i[i]];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];*/
                }
             }
             for (i = ne-1; i > ns-1; i--)	/* interior points first */
@@ -1967,8 +1986,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
                   u_data[i] *= prod;
-                  u_data[i] += (omega*(relax_weight*res + res0 +
-			one_minus_weight*res2) / A_diag_data[A_diag_i[i]]);
+                  u_data[i] += relax_weight*(omega*res + res0 +
+			one_minus_omega*res2) / A_diag_data[A_diag_i[i]];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];*/
                }
             }
            }
@@ -2000,8 +2021,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
                   u_data[i] *= prod;
-                  u_data[i] += (omega*(relax_weight*res + res0 +
-			one_minus_weight*res2) / A_diag_data[A_diag_i[i]]);
+                  u_data[i] += relax_weight*(omega*res + res0 +
+			one_minus_omega*res2) / A_diag_data[A_diag_i[i]];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];*/
                }
             }
             for (i = n-1; i > -1; i--)	/* interior points first */
@@ -2028,8 +2051,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
                   u_data[i] *= prod;
-                  u_data[i] += (omega*(relax_weight*res + res0 +
-			one_minus_weight*res2) / A_diag_data[A_diag_i[i]]);
+                  u_data[i] += relax_weight*(omega*res + res0 +
+			one_minus_omega*res2) / A_diag_data[A_diag_i[i]];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];*/
                }
             }
           }
@@ -2095,8 +2120,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
                   u_data[i] *= prod;
-                  u_data[i] += (omega*(relax_weight*res + res0 +
-			one_minus_weight*res2) / A_diag_data[A_diag_i[i]]);
+                  u_data[i] += relax_weight*(omega*res + res0 +
+			one_minus_omega*res2) / A_diag_data[A_diag_i[i]];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];*/
                }
             }     
             for (i = ne-1; i > ns-1; i--) /* relax interior points */
@@ -2130,8 +2157,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
                   u_data[i] *= prod;
-                  u_data[i] += (omega*(relax_weight*res + res0 +
-			one_minus_weight*res2) / A_diag_data[A_diag_i[i]]);
+                  u_data[i] += relax_weight*(omega*res + res0 +
+			one_minus_omega*res2) / A_diag_data[A_diag_i[i]];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];*/
                }
             }     
            }     
@@ -2166,8 +2195,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
                   u_data[i] *= prod;
-                  u_data[i] += (omega*(relax_weight*res + res0 +
-			one_minus_weight*res2) / A_diag_data[A_diag_i[i]]);
+                  u_data[i] += relax_weight*(omega*res + res0 +
+			one_minus_omega*res2) / A_diag_data[A_diag_i[i]];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];*/
                }
             }     
             for (i = n-1; i > -1; i--) /* relax interior points */
@@ -2197,8 +2228,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
                   u_data[i] *= prod;
-                  u_data[i] += (omega*(relax_weight*res + res0 +
-			one_minus_weight*res2) / A_diag_data[A_diag_i[i]]);
+                  u_data[i] += relax_weight*(omega*res + res0 +
+			one_minus_omega*res2) / A_diag_data[A_diag_i[i]];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+			one_minus_weight*res2) / A_diag_data[A_diag_i[i]];*/
                }
             }     
 	  }
