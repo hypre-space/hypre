@@ -14,9 +14,7 @@
 #
 ############################################################################
 
-include ARmake.inc
-
-PRECISIONS = double  ddrv
+PRECISIONS = double  
 #PRECISIONS = single double complex complex16
 #PRECISIONS = double ddrv
 #  If LAPACK and BLAS are not installed on you system, and you are going 
@@ -48,11 +46,27 @@ PRECISIONS = double  ddrv
 #
 ############################################################################
 
-all: lib 
+.SUFFIXES:      .f      .o
 
-lib: arpacklib
+home      = .
+BLASdir   = $(home)/BLAS
+LAPACKdir = $(home)/LAPACK
+UTILdir   = $(home)/UTIL
+SRCdir    = $(home)/SRC
+DIRS      = $(BLASdir) $(LAPACKdir) $(UTILdir) $(SRCdir)
+ARPACKLIB = $(home)/../libarpack.a
+FC        = @F77@
+FFLAGS    = @F77FLAGS@
+CD        = cd
+ECHO      = echo
+MAKE      = make
+RANLIB    = ranlib
+AR        = ar
+ARFLAGS   = ruv
 
-clean: cleanlib
+############################################################################
+
+all: arpacklib 
 
 arpacklib:
 	@( \
@@ -60,18 +74,23 @@ arpacklib:
 	do \
 		$(CD) $$f; \
 		$(ECHO) Making lib in $$f; \
-		$(MAKE) $(PRECISIONS); \
+		$(MAKE) $(PRECISIONS) FC=$(FC) FFLAGS=$(FFLAGS) AR=$(AR) \
+                 ARFLAGS=$(ARFLAGS) RANLIB=$(RANLIB) ARPACKLIB=$(ARPACKLIB);\
 		$(CD) ..; \
 	done );
-	$(RANLIB) $(ARPACKLIB)
+	$(RANLIB) libarpack.a
 
-cleantest:
-
-cleanlib:
+clean:
 	( cd $(BLASdir); $(MAKE) clean )
 	( cd $(LAPACKdir); $(MAKE) clean )
 	( cd $(UTILdir); $(MAKE) clean )
 	( cd $(SRCdir); $(MAKE) clean )
+	rm -f libarpack.a
+
+.f.o:
+	@$(ECHO) Making $@ from $<
+	@$(FC) -c $(FFLAGS) $<
 
 help:
     @$(ECHO) "usage: make ?"
+
