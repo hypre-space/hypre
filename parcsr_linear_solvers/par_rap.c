@@ -26,10 +26,10 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    int 		   num_cols_offd_RT = hypre_CSRMatrixNumCols(RT_offd);
    int 		   num_rows_offd_RT = hypre_CSRMatrixNumRows(RT_offd);
    hypre_CommPkg   *comm_pkg_RT = hypre_ParCSRMatrixCommPkg(RT);
-   int		   num_recvs_RT = hypre_CommPkgNumRecvs(comm_pkg_RT);
-   int		   num_sends_RT = hypre_CommPkgNumSends(comm_pkg_RT);
-   int		   *send_map_starts_RT =hypre_CommPkgSendMapStarts(comm_pkg_RT);
-   int		   *send_map_elmts_RT = hypre_CommPkgSendMapElmts(comm_pkg_RT);
+   int		   num_recvs_RT = 0;
+   int		   num_sends_RT = 0;
+   int		   *send_map_starts_RT;
+   int		   *send_map_elmts_RT;
 
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    
@@ -143,6 +143,14 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
     *  to restriction .
     *-----------------------------------------------------------------------*/
 
+   if (comm_pkg_RT)
+   {
+	num_recvs_RT = hypre_CommPkgNumRecvs(comm_pkg_RT);
+      	num_sends_RT = hypre_CommPkgNumSends(comm_pkg_RT);
+      	send_map_starts_RT =hypre_CommPkgSendMapStarts(comm_pkg_RT);
+      	send_map_elmts_RT = hypre_CommPkgSendMapElmts(comm_pkg_RT);
+   }
+
    hypre_CSRMatrixTranspose(RT_diag,&R_diag); 
    if (num_cols_offd_RT) 
    {
@@ -187,7 +195,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 
    /*-----------------------------------------------------------------------
     *  First Pass: Determine size of RAP_int and set up RAP_int_i if there 
-    *  are more than one processor
+    *  are more than one processor and nonzero elements in R_offd
     *-----------------------------------------------------------------------*/
 
   if (num_cols_offd_RT)
