@@ -318,7 +318,7 @@ int MLI::solve( MLI_Vector *sol, MLI_Vector *rhs )
       Amat->apply( -1.0, sol, 1.0, rhs, res );
       old_norm2 = norm2;
       norm2 = res->norm2();
-      if ( output_level > 0 && mypid == 0 )
+      if ( output_level > 0 && mypid == 0 && max_iterations > 1 )
          printf("\tMLI iteration = %5d, rnorm = %14.6e (%14.6e)\n",curr_iter,
                 norm2, norm2/old_norm2);
    }
