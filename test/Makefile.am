@@ -116,6 +116,7 @@ EXTRA_PROGRAMS = \
  fei\
  ij_b\
  ij.C++\
+ new_ij.C++\
  ij_mv.C++\
  struct.C++\
  sstruct.C++
@@ -135,6 +136,7 @@ fei_CPPFLAGS = \
 ij_b_SOURCES = ij_b.c
 #EXTRA_struct_b_SOURCES = struct_b.c
 nodist_ij_C___SOURCES = ij.C++.cxx
+nodist_new_ij_C___SOURCES = new_ij.C++.cxx
 nodist_ij_mv_C___SOURCES = ij_mv.C++.cxx
 nodist_struct_C___SOURCES = struct.C++.cxx
 nodist_sstruct_C___SOURCES = sstruct.C++.cxx
@@ -184,6 +186,7 @@ f77_ij_mv_LDADD = \
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
+ $(BLASLIBFLAGS)\
  @FLIBS@\
  $(LIBM)
 f77_struct_LDADD = \
@@ -230,6 +233,77 @@ ij_b_LDADD = \
 # -lHYPRE_krylov\
 # -lHYPRE_utilities\
 # $(LIBM)
+ij_C___LDADD = \
+ -L$(libdir)\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_DistributedMatrixPilutSolver \
+ -lHYPRE_ParaSails \
+ -lHYPRE_Euclid \
+ -lHYPRE_IJ_mv\
+ -lHYPRE_MatrixMatrix \
+ -lHYPRE_DistributedMatrix \
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_krylov\
+ -lHYPRE_utilities\
+ $(BLASLIBFLAGS)\
+ $(LIBM)
+ij_mv_C___LDADD = \
+ -L$(libdir)\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_DistributedMatrixPilutSolver \
+ -lHYPRE_ParaSails \
+ -lHYPRE_Euclid \
+ -lHYPRE_IJ_mv\
+ -lHYPRE_MatrixMatrix \
+ -lHYPRE_DistributedMatrix \
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_krylov\
+ -lHYPRE_utilities\
+ $(BLASLIBFLAGS)\
+ $(LIBM)
+new_ij_C___LDADD = \
+ -L$(libdir)\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_DistributedMatrixPilutSolver \
+ -lHYPRE_ParaSails \
+ -lHYPRE_Euclid \
+ -lHYPRE_IJ_mv\
+ -lHYPRE_MatrixMatrix \
+ -lHYPRE_DistributedMatrix \
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_krylov\
+ -lHYPRE_utilities\
+ $(BLASLIBFLAGS)\
+ $(LIBM)
+sstruct_C___LDADD = \
+ -L$(libdir)\
+ -lHYPRE_sstruct_ls\
+ -lHYPRE_sstruct_mv\
+ -lHYPRE_struct_ls\
+ -lHYPRE_struct_mv\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_DistributedMatrixPilutSolver \
+ -lHYPRE_ParaSails \
+ -lHYPRE_Euclid \
+ -lHYPRE_MatrixMatrix \
+ -lHYPRE_DistributedMatrix \
+ -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_krylov\
+ -lHYPRE_utilities\
+ $(BLASLIBFLAGS)\
+ $(LIBM)
+struct_C___LDADD = \
+ -L$(libdir)\
+ -lHYPRE_struct_ls\
+ -lHYPRE_struct_mv\
+ -lHYPRE_krylov\
+ -lHYPRE_utilities\
+ $(LIBM)
 #f77_ij_LDFLAGS = -static
 #f77_ij_b_LDFLAGS = -static
 #f77_ij_mv_LDFLAGS = -static
