@@ -27,6 +27,7 @@
 #include "fortran_matrix.h"
 #include "HYPRE_lobpcg.h"
 #include "HYPRE_interpreter.h"
+#include "HYPRE_parcsr_int.h"
 
 int
 BuildParIsoLaplacian( int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr );
@@ -36,10 +37,10 @@ BuildParIsoLaplacian( int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr );
 int BuildParFromFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParDifConv (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-int BuildParFromOneFile (int argc , char *argv [], int arg_index , int num_functions , HYPRE_ParCSRMatrix *A_ptr );
+int BuildParFromOneFile2(int argc , char *argv [], int arg_index , int num_functions , HYPRE_ParCSRMatrix *A_ptr );
 int BuildFuncsFromFiles (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , int **dof_func_ptr );
 int BuildFuncsFromOneFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , int **dof_func_ptr );
-int BuildRhsParFromOneFile (int argc , char *argv [], int arg_index , int *partitioning , HYPRE_ParVector *b_ptr );
+int BuildRhsParFromOneFile2(int argc , char *argv [], int arg_index , int *partitioning , HYPRE_ParVector *b_ptr );
 int BuildParLaplacian9pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian27pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 
@@ -1077,7 +1078,7 @@ main( int   argc,
    }
    else if ( build_matrix_type == 1 )
    {
-      BuildParFromOneFile(argc, argv, build_matrix_arg_index, num_functions,
+      BuildParFromOneFile2(argc, argv, build_matrix_arg_index, num_functions,
 	&parcsr_A);
    }
    else if ( build_matrix_type == 2 )
@@ -1320,7 +1321,7 @@ main( int   argc,
 
 #if 0
 /* RHS */
-      BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, part_b, &b);
+      BuildRhsParFromOneFile2(argc, argv, build_rhs_arg_index, part_b, &b);
 #endif
    }
    else if ( build_rhs_type == 2 )
@@ -1512,7 +1513,7 @@ main( int   argc,
       return(-1);
 
 #if 0
-      BuildRhsParFromOneFile(argc, argv, build_src_arg_index, part_b, &b);
+      BuildRhsParFromOneFile2(argc, argv, build_src_arg_index, part_b, &b);
 #endif
    }
    else if ( build_src_type == 2 )
@@ -4036,7 +4037,7 @@ BuildParDifConv( int                  argc,
  *----------------------------------------------------------------------*/
 
 int
-BuildParFromOneFile( int                  argc,
+BuildParFromOneFile2( int                  argc,
                      char                *argv[],
                      int                  arg_index,
                      int                  num_functions,
@@ -4247,7 +4248,7 @@ BuildFuncsFromOneFile(  int                  argc,
  *----------------------------------------------------------------------*/
 
 int
-BuildRhsParFromOneFile( int                  argc,
+BuildRhsParFromOneFile2( int                  argc,
                         char                *argv[],
                         int                  arg_index,
                         int                 *partitioning,
