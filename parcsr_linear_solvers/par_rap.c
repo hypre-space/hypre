@@ -16,8 +16,7 @@
 int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 					hypre_ParCSRMatrix  *A,
 					hypre_ParCSRMatrix  *P,
-					hypre_ParCSRMatrix **RAP_ptr,
-					int *coarse_partitioning)
+					hypre_ParCSRMatrix **RAP_ptr)
 
 {
    MPI_Comm 	   comm = hypre_ParCSRMatrixComm(A);
@@ -62,6 +61,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    int	first_col_diag_P = hypre_ParCSRMatrixFirstColDiag(P);
    int	num_cols_diag_P = hypre_CSRMatrixNumCols(P_diag);
    int	num_cols_offd_P = hypre_CSRMatrixNumCols(P_offd);
+   int *coarse_partitioning = hypre_ParCSRMatrixColStarts(P);
 
    hypre_ParCSRMatrix *RAP;
    int		      *col_map_offd_RAP;
@@ -152,19 +152,6 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    }
 
    /*-----------------------------------------------------------------------
-    *  Generate P_ext, i.e. portion of P that is stored on neighbor procs
-    *  and needed locally for triple matrix product 
-    *-----------------------------------------------------------------------*/
-
-   if (num_cols_offd_A) 
-   {
-   	P_ext = hypre_GeneratePExt(P,A);
-   	P_ext_data = hypre_CSRMatrixData(P_ext);
-   	P_ext_i    = hypre_CSRMatrixI(P_ext);
-   	P_ext_j    = hypre_CSRMatrixJ(P_ext);
-   }
-
-   /*-----------------------------------------------------------------------
     *  Access the CSR vectors for R. Also get sizes of fine and
     *  coarse grids.
     *-----------------------------------------------------------------------*/
@@ -176,6 +163,19 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    n_fine   = hypre_ParCSRMatrixGlobalNumRows(A);
    n_coarse = hypre_ParCSRMatrixGlobalNumCols(P);
    num_nz_cols_A = num_cols_diag_A + num_cols_offd_A;
+
+   /*-----------------------------------------------------------------------
+    *  Generate P_ext, i.e. portion of P that is stored on neighbor procs
+    *  and needed locally for triple matrix product 
+    *-----------------------------------------------------------------------*/
+
+   if (num_cols_diag_A != n_fine) 
+   {
+   	P_ext = hypre_ExtractBExt(P,A);
+   	P_ext_data = hypre_CSRMatrixData(P_ext);
+   	P_ext_i    = hypre_CSRMatrixI(P_ext);
+   	P_ext_j    = hypre_CSRMatrixJ(P_ext);
+   }
 
    /*-----------------------------------------------------------------------
     *  Allocate marker arrays.
@@ -1104,8 +1104,8 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    for (i=0; i < RAP_offd_size; i++)
 	RAP_offd_j[i] = P_marker[RAP_offd_j[i]];
 
-   RAP = hypre_CreateParCSRMatrix(comm, n_coarse, n_coarse, first_col_diag_RAP,
-	first_col_diag_RAP, num_cols_diag_P, num_cols_diag_P, 
+   RAP = hypre_CreateParCSRMatrix(comm, n_coarse, n_coarse, 
+	coarse_partitioning, coarse_partitioning,
 	num_cols_offd_RAP, RAP_diag_size, RAP_offd_size);
 
    RAP_diag = hypre_ParCSRMatrixDiag(RAP);
@@ -1121,7 +1121,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    	hypre_CSRMatrixJ(RAP_offd) = RAP_offd_j; 
    	hypre_ParCSRMatrixOffd(RAP) = RAP_offd;
    	hypre_ParCSRMatrixColMapOffd(RAP) = col_map_offd_RAP;
-   	hypre_GenerateRAPCommPkg(RAP, A, coarse_partitioning);
+   	hypre_GenerateRAPCommPkg(RAP, A);
 
    }
    else
@@ -1140,7 +1140,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    if (num_sends_RT) 
 	hypre_DestroyCSRMatrix(RAP_ext);
 
-   if (num_cols_offd_A) hypre_DestroyCSRMatrix(P_ext);
+   if (num_cols_diag_A != n_fine) hypre_DestroyCSRMatrix(P_ext);
    hypre_TFree(P_marker);   
    hypre_TFree(A_marker);
 
