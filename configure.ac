@@ -368,13 +368,6 @@ AC_CONFIG_FILES([Makefile
   test/TEST_struct/Makefile
   test/TEST_timing/Makefile
   utilities/Makefile])
-#if test -d PETScMat_ls && test -d PETSc_ls; then
-#  AC_CONFIG_FILES([PETScMat_ls/Makefile
-#    PETScMat_ls/pilut/Makefile
-#    PETSc_ls/Makefile
-#    PETSc_ls/ParILUT/Makefile])
-#fi
-#AM_CONDITIONAL(PETSCDIR, test -d PETScMat_ls && test -d PETSc_ls)
 if test "$casc_using_babel" = "yes"; then
   if test -d babel; then
     AC_CONFIG_FILES([babel/Makefile

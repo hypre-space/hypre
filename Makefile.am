@@ -14,12 +14,7 @@ MAINTAINERCLEANFILES = Makefile.in\
  configure
 
 # this is really ulgy, but there are different directory structures
-# babel PETSc_ls PETScMat_ls seq_ls tools are not in the distribution
-#if PETSCDIR
-#PETSC = "PETSc_ls PETScMat_ls"
-#else !PETSCDIR
-PETSC =
-#endif !PETSCDIR
+# babel seq_ls tools are not in the distribution
 #if PARCHORDLSDIR
 #PARCHORDLS = "parchord_ls"
 #else !PARCHORDLSDIR
@@ -36,7 +31,7 @@ SEQLS =
 TOOLS =
 #endif !TOOLSDIR
 
-#EXTRA_DIRS = $(BABELDIR) $(PETSC) $(SEQLS) $(TOOLS) test
+#EXTRA_DIRS = $(BABELDIR) $(SEQLS) $(TOOLS) test
 ## We need `.' in SUBDIRS because we want `check' to build `.' before
 ## tests.
 SUBDIRS = . config\
@@ -46,7 +41,7 @@ SUBDIRS = . config\
  sstruct_mv sstruct_ls\
  seq_mv parcsr_mv distributed_matrix matrix_matrix\
  IJ_mv distributed_ls parcsr_ls parcsr_es\
- FEI_mv $(PETSC) $(SEQLS) $(TOOLS) $(BABELDIR) lib
+ FEI_mv $(SEQLS) $(TOOLS) $(BABELDIR) lib
 
 DIST_SUBDIRS = . config\
  blas utilities\
@@ -55,8 +50,7 @@ DIST_SUBDIRS = . config\
  sstruct_mv sstruct_ls\
  seq_mv parcsr_mv distributed_matrix matrix_matrix\
  IJ_mv distributed_ls parcsr_ls parcsr_es\
- FEI_mv test lib docs
-#FEI_mv babel babel-runtime test lib docs
+ FEI_mv babel babel-runtime test lib docs
 
 docs: docs/HYPRE_usr_manual.ps
 	@ (cd docs && $(MAKE) $(AM_MAKEFLAGS) $@)
