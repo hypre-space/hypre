@@ -13,6 +13,9 @@
 extern "C" {
 #endif
 
+#ifndef HYPRE_PAR_CSR_COMMUNICATION_HEADER
+#define HYPRE_PAR_CSR_COMMUNICATION_HEADER
+
 /*--------------------------------------------------------------------------
  * hypre_ParCSRCommPkg:
  *   Structure containing information for doing communications
@@ -89,6 +92,7 @@ typedef struct
 #define hypre_ParCSRCommHandleRequests(comm_handle)    (comm_handle -> requests)
 #define hypre_ParCSRCommHandleRequest(comm_handle, i)  (comm_handle -> requests[i])
 
+#endif /* HYPRE_PAR_CSR_COMMUNICATION_HEADER */
 /*BHEADER**********************************************************************
  * (c) 1998   The Regents of the University of California
  *
@@ -280,7 +284,9 @@ int main( int argc , char *argv []);
 int main( int argc , char *argv []);
 
 /* par_csr_matop.c */
+void hypre_ParMatmul_RowSizes( int **C_diag_i , int **C_offd_i , int **B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *B_diag_i , int *B_diag_j , int *B_offd_i , int *B_offd_j , int *B_ext_i , int *B_ext_j , int *col_map_offd_B , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int first_col_diag_B , int n_cols_B , int num_cols_offd_B , int num_cols_diag_B );
 hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
+void hypre_ParCSRMatrixExtractBExt_Arrays( int **pB_ext_i , int **pB_ext_j , double **pB_ext_data , int *num_nonzeros , int data , MPI_Comm comm , hypre_ParCSRCommPkg *comm_pkg , int num_cols_B , int num_recvs , int num_sends , int first_col_diag , int *recv_vec_starts , int *send_map_starts , int *send_map_elmts , int *diag_i , int *diag_j , int *offd_i , int *offd_j , int *col_map_offd , double *diag_data , double *offd_data );
 hypre_CSRMatrix *hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B , hypre_ParCSRMatrix *A , int data );
 
 /* par_csr_matrix.c */
