@@ -161,7 +161,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
       for (j = 0; j < num_sweep; j++)
       {
-         relax_points =   grid_relax_points[cycle_param][j];
+         if (num_levels == 1 && max_levels > 1)
+           relax_points = 0;
+         else
+           relax_points = grid_relax_points[cycle_param][j];
 
          /*-----------------------------------------------
           * VERY sloppy approximation to cycle complexity
