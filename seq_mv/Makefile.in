@@ -83,7 +83,8 @@ clean:
  
 veryclean: clean
 	@rm -f libHYPRE_seq_mv.a
- 
+
+distclean: veryclean 
 
 ##################################################################
 # Main rules

@@ -299,5 +299,25 @@ veryclean:
 	echo "Very-cleaning test ..."; \
 	(cd test; $(MAKE) veryclean)
 
-distclean: veryclean
-	rm -f HYPRE_config.h
+distclean:
+	@ \
+        rm -Rf hypre; \
+        for i in ${HYPRE_DIRS} ; \
+        do \
+          if [ -d $$i ]; \
+          then \
+            (cd $$i; $(MAKE) veryclean); \
+          fi; \
+        done; \
+        (cd test; $(MAKE) veryclean); \
+        for i in ${HYPRE_EXTRA_DIRS}; \
+        do \
+
+        for i in ${HYPRE_EXTRA_DIRS}; \
+        do \
+          if [ -d $$i ]; \
+          then \
+            (cd $$i; $(MAKE) distclean); \
+          fi; \
+        done; \
+        rm -f HYPRE_config.h config.cache
