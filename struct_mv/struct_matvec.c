@@ -110,6 +110,8 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
 int
 hypre_StructMatvecCompute( void               *matvec_vdata,
                            double              alpha,
+                           hypre_StructMatrix *A,
+                           hypre_StructVector *x,
                            double              beta,
                            hypre_StructVector *y            )
 {
@@ -117,8 +119,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
    hypre_StructMatvecData  *matvec_data = matvec_vdata;
                           
-   hypre_StructMatrix      *A;
-   hypre_StructVector      *x;
    hypre_ComputePkg        *compute_pkg;
                           
    hypre_CommHandle        *comm_handle;
@@ -158,8 +158,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
     * Initialize some things
     *-----------------------------------------------------------------------*/
 
-   A           = (matvec_data -> A);
-   x           = (matvec_data -> x);
    compute_pkg = (matvec_data -> compute_pkg);
 
    hypre_SetIndex(unit_stride, 1, 1, 1);
@@ -347,7 +345,7 @@ hypre_StructMatvec( double              alpha,
 
    matvec_data = hypre_StructMatvecInitialize();
    ierr = hypre_StructMatvecSetup(matvec_data, A, x);
-   ierr = hypre_StructMatvecCompute(matvec_data, alpha, beta, y);
+   ierr = hypre_StructMatvecCompute(matvec_data, alpha, A, x, beta, y);
    ierr = hypre_StructMatvecFinalize(matvec_data);
 
    return ierr;

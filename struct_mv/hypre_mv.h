@@ -1285,7 +1285,7 @@ int hypre_FreeStructMatrixMask P((hypre_StructMatrix *mask ));
 /* struct_matvec.c */
 void *hypre_StructMatvecInitialize P((void ));
 int hypre_StructMatvecSetup P((void *matvec_vdata , hypre_StructMatrix *A , hypre_StructVector *x ));
-int hypre_StructMatvecCompute P((void *matvec_vdata , double alpha , double beta , hypre_StructVector *y ));
+int hypre_StructMatvecCompute P((void *matvec_vdata , double alpha , hypre_StructMatrix *A , hypre_StructVector *x , double beta , hypre_StructVector *y ));
 int hypre_StructMatvecFinalize P((void *matvec_vdata ));
 int hypre_StructMatvec P((double alpha , hypre_StructMatrix *A , hypre_StructVector *x , double beta , hypre_StructVector *y ));
 

@@ -779,6 +779,9 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
    hypre_SetIndex(stridec, 1, 1, 1);
 
+   A_l[0] = A;
+   x_l[0] = x;
+
    /*--------------------------------------------------
     * Copy b into x
     *--------------------------------------------------*/

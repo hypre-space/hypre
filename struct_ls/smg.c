@@ -39,6 +39,7 @@ hypre_SMGInitialize( MPI_Comm  comm )
    (smg_data -> cdir) = 2;
    hypre_SetIndex((smg_data -> base_index), 0, 0, 0);
    hypre_SetIndex((smg_data -> base_stride), 1, 1, 1);
+   (smg_data -> logging) = 0;
 
    return (void *) smg_data;
 }

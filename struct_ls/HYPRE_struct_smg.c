@@ -67,90 +67,101 @@ HYPRE_StructSMGSolve( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SMGSetMemoryUse
+ * HYPRE_StructSMGSetMemoryUse
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SMGSetMemoryUse( HYPRE_StructSolver solver,
-                       int              memory_use )
+HYPRE_StructSMGSetMemoryUse( HYPRE_StructSolver solver,
+                             int              memory_use )
 {
    return( hypre_SMGSetMemoryUse( (void *) solver, memory_use ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SMGSetTol
+ * HYPRE_StructSMGSetTol
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SMGSetTol( HYPRE_StructSolver solver,
-                 double           tol    )
+HYPRE_StructSMGSetTol( HYPRE_StructSolver solver,
+                       double           tol    )
 {
    return( hypre_SMGSetTol( (void *) solver, tol ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SMGSetMaxIter
+ * HYPRE_StructSMGSetMaxIter
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SMGSetMaxIter( HYPRE_StructSolver solver,
-                     int              max_iter  )
+HYPRE_StructSMGSetMaxIter( HYPRE_StructSolver solver,
+                           int              max_iter  )
 {
    return( hypre_SMGSetMaxIter( (void *) solver, max_iter ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SMGSetZeroGuess
+ * HYPRE_StructSMGSetZeroGuess
  *--------------------------------------------------------------------------*/
  
 int
-HYPRE_SMGSetZeroGuess( HYPRE_StructSolver solver )
+HYPRE_StructSMGSetZeroGuess( HYPRE_StructSolver solver )
 {
    return( hypre_SMGSetZeroGuess( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SMGSetNumPreRelax
+ * HYPRE_StructSMGSetNumPreRelax
  *
  * Note that we require at least 1 pre-relax sweep. 
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SMGSetNumPreRelax( HYPRE_StructSolver solver,
-                         int                num_pre_relax )
+HYPRE_StructSMGSetNumPreRelax( HYPRE_StructSolver solver,
+                               int                num_pre_relax )
 {
    return( hypre_SMGSetNumPreRelax( (void *) solver, num_pre_relax) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SMGSetNumPostRelax
+ * HYPRE_StructSMGSetNumPostRelax
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SMGSetNumPostRelax( HYPRE_StructSolver solver,
-                          int                num_post_relax )
+HYPRE_StructSMGSetNumPostRelax( HYPRE_StructSolver solver,
+                                int                num_post_relax )
 {
    return( hypre_SMGSetNumPostRelax( (void *) solver, num_post_relax) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SMGGetNumIterations
+ * HYPRE_StructSMGSetLogging
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SMGGetNumIterations( HYPRE_StructSolver  solver,
-                           int                *num_iterations )
+HYPRE_StructSMGSetLogging( HYPRE_StructSolver solver,
+                           int                logging )
+{
+   return( hypre_SMGSetLogging( (void *) solver, logging) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructSMGGetNumIterations
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructSMGGetNumIterations( HYPRE_StructSolver  solver,
+                                 int                *num_iterations )
 {
    return( hypre_SMGGetNumIterations( (void *) solver, num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SMGGetFinalRelativeResidualNorm
+ * HYPRE_StructSMGGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SMGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
-                                       double             *norm   )
+HYPRE_StructSMGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
+                                             double             *norm   )
 {
    return( hypre_SMGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }

@@ -88,6 +88,10 @@ hypre_SMGSolve( void               *smg_vdata,
     *   For each index l, "fine" = l, "coarse" = (l+1)
     *-----------------------------------------------------*/
 
+   A_l[0] = A;
+   b_l[0] = b;
+   x_l[0] = x;
+
    if (tol > 0.0)
    {
       /* eps = (tol^2)*<b,b> */

@@ -20,6 +20,8 @@ HEADERS =\
 FILES =\
  cyclic_reduction.c\
  general.c\
+ pcg.c\
+ pcg_struct.c\
  smg2_setup_rap.c\
  smg3_setup_rap.c\
  smg.c\
@@ -33,7 +35,6 @@ FILES =\
  smg_setup_restrict.c\
  smg_solve.c\
  HYPRE_struct_smg.c\
- HYPRE_pcg.c\
  HYPRE_struct_pcg.c 
 
 OBJS = ${FILES:.c=.o}
