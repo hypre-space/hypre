@@ -873,7 +873,7 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
 
     bhat = (double *) malloc(bhat_size * sizeof(double));
     ahat = (double *) malloc(ahat_size * sizeof(double));
-    work = (double *) malloc(work_size * sizeof(double));
+    work = (double *) calloc(work_size,  sizeof(double));
 
     /* Compute values for row "row" of approximate inverse */
     for (row=local_beg_row; row<=mat->end_row; row++)
