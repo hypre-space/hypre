@@ -15,7 +15,6 @@
 // ---------------------------------------------------------------------
 
 #include <string.h>
-#include <iostream.h>
 #include <assert.h>
 #include "HYPRE.h"
 #include "utilities/utilities.h"
@@ -68,28 +67,10 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
    int       P_local_nrows, P_start_row, *row_lengths, row_num;
    int       k, irow, *col_ind, *P_cols, index;
    int       blk_size, max_agg_size, *agg_cnt_array, **agg_ind_array;
-   int       agg_size, info, nzcnt, *local_labels;
+   int       agg_size, info, nzcnt, *local_labels, A_global_nrows;
    double    *col_val, **P_vecs, max_eigen=0, alpha;
    double    *q_array, *new_null, *r_array;
    char      param_string[200];
-
-#if 0
-hypre_CSRMatrix        *A_offd, *J_diag, *J_offd;
-hypre_ParCSRCommHandle *comm_handle;
-int    send_leng, *send_ibuf, row_leng, *cols;
-int    map_start_i, map_start_ip1, J_ncols_ext;
-int    *J_diag_i, *J_diag_j, *J_offd_i, *J_offd_j, J_offd_ncols;
-int    *K_diag_j, *K_offd_j, row_size, row_num, J_start_row, nnz_cnt;
-int    J_local_nrows, cindex, max_nnz, max_nnz_diag, max_nnz_offd;
-int    *new_col_ind, *K_diag_i, *K_offd_i, old_index, old_offset;
-int    A_offd_ncols, *P_cols_ext, **P_vecs_ext, offset, num_sends;
-double *J_diag_data, *J_offd_data, *K_diag_data, *K_offd_data, cvalue;
-double *send_buf, *new_col_val, *new_col_itmp;
-MLI_Vector      *mli_vecP, *mli_vecP2;
-hypre_ParVector *hypreP, *hypreP2;
-hypre_Vector    *hyprePLocal, *hyprePLocal2;
-double          *hyprePData, *hyprePData2;
-#endif
 
    /*-----------------------------------------------------------------
     * fetch matrix and machine information
@@ -107,8 +88,15 @@ double          *hyprePData, *hyprePData2;
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) Amat,&partition);
    A_start_row    = partition[mypid];
    A_end_row      = partition[mypid+1] - 1;
+   A_global_nrows = partition[num_procs];
+   A_local_nrows  = A_end_row - A_start_row + 1;
    free( partition );
-   A_local_nrows = A_end_row - A_start_row + 1;
+   if ( A_global_nrows/curr_node_dofs <= min_coarse_size || 
+        A_global_nrows/curr_node_dofs <= num_procs ) 
+   {
+      (*Pmat_out) = NULL;
+      return 0.0;
+   }
 
    /*-----------------------------------------------------------------
     * reduce Amat based on the block size information (if node_dofs > 1)
@@ -184,8 +172,8 @@ double          *hyprePData, *hyprePData2;
    P_start_col    = partition[mypid];
    P_global_ncols = partition[num_procs];
    free( partition );
-   if ( P_global_ncols/nullspace_dim < min_coarse_size || 
-        P_global_ncols/nullspace_dim < num_procs ) 
+   if ( P_global_ncols/nullspace_dim <= min_coarse_size || 
+        P_global_ncols/nullspace_dim <= num_procs ) 
    {
       (*Pmat_out) = NULL;
       delete [] node2aggr;
@@ -350,10 +338,10 @@ double          *hyprePData, *hyprePData2;
 
          if ( agg_size < nullspace_dim )
          {
-            cout << "Aggregation ERROR : underdetermined system in QR.\n";
-            cout << "            error on Proc " << mypid << endl;
-            cout << "            error on aggr " << i << " (" << naggr << ")\n";
-            cout << "            aggr size is  " << agg_size << endl;
+            printf("Aggregation ERROR : underdetermined system in QR.\n");
+            printf("            error on Proc %d\n", mypid);
+            printf("            error on aggr %d (%d)\n", i, naggr);
+            printf("            aggr size is %d\n", agg_size);
             exit(1);
          }
           
@@ -382,8 +370,9 @@ double          *hyprePData, *hyprePData2;
          info = MLI_Utils_QR(q_array, r_array, agg_size, nullspace_dim); 
          if (info != 0)
          {
-            cout << mypid << "Aggregation WARNING : QR returned a non-zero " 
-                 << i << " size = " << agg_size << ", info = " << info << endl;
+            printf("%4d : Aggregation WARNING : QR returned a non-zero for\n",
+                   mypid);
+            printf("  aggregate %d, size = %d, info = %d\n",i,agg_size,info);
 #if 0
             for ( j = 0; j < agg_size; j++ ) 
             {
@@ -496,322 +485,6 @@ double          *hyprePData, *hyprePData2;
 
    else
    {
-#if 0
-      /* ================================================================*/
-      /* ================= old version (before Matmul debugged) ==========
-       *--------------------------------------------------------------
-       * fetch communication pattern of A and set up communication buffer 
-       *--------------------------------------------------------------*
-
-      comm_pkg = hypre_ParCSRMatrixCommPkg(Amat);
-      if (!comm_pkg)
-      {
-         hypre_MatvecCommPkgCreate(Amat);
-         comm_pkg = hypre_ParCSRMatrixCommPkg(Amat);
-      }
-      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      send_leng = hypre_ParCSRCommPkgSendMapStart(comm_pkg,num_sends);
-      if ( num_sends > 0 )
-      {
-         send_ibuf    = new int[send_leng];
-         send_buf     = new double[send_leng];
-         A_offd       = hypre_ParCSRMatrixOffd(Amat);
-         A_offd_ncols = hypre_CSRMatrixNumCols(A_offd);
-         P_cols_ext   = new int[A_offd_ncols];
-         P_vecs_ext   = new double*[nullspace_dim];
-         for (i = 0; i < nullspace_dim; i++) 
-            P_vecs_ext[i] = new double[A_offd_ncols];
-      }
-      else
-      {
-         send_ibuf    = NULL;
-         send_buf     = NULL;
-         A_offd_ncols = 0;
-         P_cols_ext   = NULL;
-         P_vecs_ext   = NULL;
-      }
-
-      *-----------------------------------------------------------------
-       * load communication buffer and send/receive
-       * (to fetch the off-diagonal part of P_vecs)
-       *-----------------------------------------------------------------*
-
-      if ( num_sends > 0 )
-      {
-         index = 0;
-         for (i = 0; i < num_sends; i++)
-         {
-            map_start_i   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-            map_start_ip1 = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1);
-            for ( j = map_start_i; j < map_start_ip1; j++ )
-               send_ibuf[index++]
-                 = P_cols[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-         }
-         comm_handle = hypre_ParCSRCommHandleCreate(11,comm_pkg,send_ibuf,
-                                                    P_cols_ext);
-         hypre_ParCSRCommHandleDestroy(comm_handle);
-         comm_handle = NULL;
-         for (k = 0; k < nullspace_dim; k++) 
-         {
-            index = 0;
-            for (i = 0; i < num_sends; i++)
-            {
-               map_start_i   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-               map_start_ip1 = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1);
-               for ( j = map_start_i; j < map_start_ip1; j++ )
-                  send_buf[index++]
-                    = P_vecs[k][hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-            }
-            comm_handle = hypre_ParCSRCommHandleCreate(1,comm_pkg,send_buf,
-                                                       P_vecs_ext[k]);
-            hypre_ParCSRCommHandleDestroy(comm_handle);
-            comm_handle = NULL;
-         }
-      }
-
-       *-----------------------------------------------------------------
-       * compute the Jacobi matrix (I - alpha A) 
-       *-----------------------------------------------------------------*
-
-      MLI_Matrix_FormJacobi(mli_Amat, alpha, &mli_Jmat);
-      Jmat = (hypre_ParCSRMatrix *) mli_Jmat->getMatrix();
-
-       *-----------------------------------------------------------------
-       * compute the smoothed prolongator (J * P)
-       * Now :
-       *  - P_vecs, P_cols has column numbers and values of tentative P
-       *  - P_vecs_ext and P_cols_ext has column numbers and values of
-       *    tentative P from external processors
-       *  - P_cols and P_cols_ext have global column numbers
-       *-----------------------------------------------------------------*
-
-       * ----- fetch diagonal and off-diagonal blocks of J ----- *
-
-      J_diag        = hypre_ParCSRMatrixDiag(Jmat);
-      J_offd        = hypre_ParCSRMatrixOffd(Jmat);
-      J_diag_i      = hypre_CSRMatrixI(J_diag);
-      J_diag_j      = hypre_CSRMatrixJ(J_diag);
-      J_diag_data   = hypre_CSRMatrixData(J_diag);
-      J_offd_ncols  = hypre_CSRMatrixNumCols(J_offd);
-      J_offd_i      = hypre_CSRMatrixI(J_offd);
-      J_offd_j      = hypre_CSRMatrixJ(J_offd);
-      J_offd_data   = hypre_CSRMatrixData(J_offd);
-      J_start_row   = A_start_row;
-      J_local_nrows = A_local_nrows;
-      K_offd_i      = new int[J_local_nrows+1];
-      K_offd_j      = new int[J_offd_i[J_local_nrows]];
-      K_offd_data   = new double[J_offd_i[J_local_nrows]*nullspace_dim];
-      K_diag_i      = new int[J_local_nrows+1];
-      K_diag_j      = new int[J_diag_i[J_local_nrows]];
-      K_diag_data   = new double[J_diag_i[J_local_nrows]*nullspace_dim];
-
-       * ----- loop all rows of the J matrix ----- *
-
-      max_nnz = 0;
-      for ( irow = 0; irow < J_local_nrows; irow++ )
-      {
-         for ( i = J_diag_i[irow]; i < J_diag_i[irow+1]; i++ )
-         {
-            cindex      = J_diag_j[i];
-            cvalue      = J_diag_data[i];
-            K_diag_j[i] = P_cols[cindex]; 
-            offset      = i * nullspace_dim;
-            for ( j = 0; j < nullspace_dim; j++ )
-               K_diag_data[offset+j] = cvalue * P_vecs[j][cindex]; 
-         }
-         max_nnz_diag = J_diag_i[irow+1] - J_diag_i[irow];
-         for ( i = J_offd_i[irow]; i < J_offd_i[irow+1]; i++ )
-         {
-            cindex      = J_offd_j[i];
-            cvalue      = J_offd_data[i];
-            K_offd_j[i] = P_cols_ext[cindex]; 
-            offset      = i * nullspace_dim;
-            for ( j = 0; j < nullspace_dim; j++ )
-               K_offd_data[offset+j] = cvalue * P_vecs_ext[j][cindex]; 
-         }
-         max_nnz_offd  = J_offd_i[irow+1] - J_offd_i[irow];
-         if ( (max_nnz_diag + max_nnz_offd) > max_nnz )
-            max_nnz = max_nnz_diag + max_nnz_offd;
-      }
-
-       * ----- allocate temporary storage space ----- *
-
-      max_nnz = max_nnz * nullspace_dim;
-      new_col_ind  = new int[max_nnz];
-      new_col_itmp = new double[max_nnz];
-      new_col_val  = new double[max_nnz];
-      row_lengths  = new int[P_local_nrows];
-
-       * ----- sum up each row to remove duplicate column indices ----- *
-
-      K_diag_i[0] = 0;
-      K_offd_i[0] = 0;
-      for ( irow = 0; irow < J_local_nrows; irow++ )
-      {
-         * ----- handle the diagonal part ----- *
-
-         k = 0;
-         for ( i = J_diag_i[irow]; i < J_diag_i[irow+1]; i++ )
-            new_col_ind[k++] = K_diag_j[i];
-         for ( i = 0; i < k; i++ ) new_col_itmp[i] = (double) i;
-         qsort1(new_col_ind, new_col_itmp, 0, k-1);
-         for ( i = 0; i < k; i++ )
-         {
-            offset = (int) new_col_itmp[i];
-            offset = ( J_diag_i[irow] + offset ) * nullspace_dim;
-            for ( j = 0; j < nullspace_dim; j++ )
-               new_col_val[i*nullspace_dim+j] = K_diag_data[offset+j];
-         }
-         old_index  = 0;
-         old_offset = 0;
-         for ( i = 1; i < k; i++ )
-         {
-            if ( new_col_ind[i] == new_col_ind[old_index] )
-            {
-               offset = i * nullspace_dim;
-               for ( j = 0; j < nullspace_dim; j++ )
-                  new_col_val[old_offset+j] += new_col_val[offset+j];
-               new_col_ind[i] = -1;
-            }
-            else 
-            {
-               old_index = i;
-               old_offset = old_index * nullspace_dim;
-            }
-         }
-         nnz_cnt = K_diag_i[irow];
-         for ( i = 0; i < k; i++ )
-         {
-            if ( new_col_ind[i] >= 0 )
-            {
-               K_diag_j[nnz_cnt] = new_col_ind[i];
-               for ( j = 0; j < nullspace_dim; j++ )
-                  K_diag_data[nnz_cnt*nullspace_dim+j] = 
-                     new_col_val[i*nullspace_dim+j];
-               nnz_cnt++;
-            }
-         }
-         row_lengths[irow] = nnz_cnt - K_diag_i[irow];
-         K_diag_i[irow+1] = nnz_cnt;
- 
-         * ----- handle the off-diagonal part ----- *
-
-         k = 0; 
-         for ( i = J_offd_i[irow]; i < J_offd_i[irow+1]; i++ )
-            new_col_ind[k++] = K_offd_j[i];
-         for ( i = 0; i < k; i++ ) new_col_itmp[i] = (double) i;
-         qsort1(new_col_ind, new_col_itmp, 0, k-1);
-         for ( i = 0; i < k; i++ )
-         {
-            offset = (int) new_col_itmp[i];
-            offset = ( J_offd_i[irow] + offset ) * nullspace_dim;
-            for ( j = 0; j < nullspace_dim; j++ )
-               new_col_val[i*nullspace_dim+j] = K_offd_data[offset+j];
-         }
-         old_offset = 0;
-         old_index  = 0;
-         for ( i = 1; i < k; i++ )
-         {
-            if ( new_col_ind[i] == new_col_ind[old_index] )
-            {
-               offset = (int) new_col_itmp[i];
-               for ( j = 0; j < nullspace_dim; j++ )
-                  new_col_val[old_offset+j] += new_col_val[offset+j];
-               new_col_ind[i] = -1;
-            }
-            else 
-            {
-               old_index = i;
-               old_offset = old_index * nullspace_dim;
-            }
-         }
-         nnz_cnt = K_offd_i[irow];
-         for ( i = 0; i < k; i++ )
-         {
-            if ( new_col_ind[i] >= 0 )
-            {
-               K_offd_j[nnz_cnt] = new_col_ind[i];
-               for ( j = 0; j < nullspace_dim; j++ )
-                  K_offd_data[nnz_cnt*nullspace_dim+j] = 
-                     new_col_val[i*nullspace_dim+j];
-               nnz_cnt++;
-            }
-         }
-         row_lengths[irow] += (nnz_cnt - K_offd_i[irow]);
-         row_lengths[irow] *= nullspace_dim;
-         K_offd_i[irow+1] = nnz_cnt;
-      }
-
-      * set up the row sizes of the P matrix *
-
-      ierr = HYPRE_IJMatrixSetRowSizes(IJPmat, row_lengths);
-      ierr = HYPRE_IJMatrixInitialize(IJPmat);
-      assert(!ierr);
-      delete [] row_lengths;
-      delete [] new_col_itmp;
-
-      * ----- now load the smoothed prolongator ----- *
-
-      for ( irow = 0; irow < J_local_nrows; irow++ )
-      {
-         k = 0;
-         for ( i = K_diag_i[irow]; i < K_diag_i[irow+1]; i++ )
-         {
-            for ( j = 0; j < nullspace_dim; j++ )
-            {
-               new_col_ind[k] = K_diag_j[i] + j;
-               new_col_val[k++] = K_diag_data[i*nullspace_dim+j];
-            }
-         }
-         for ( i = K_offd_i[irow]; i < K_offd_i[irow+1]; i++ )
-         {
-            for ( j = 0; j < nullspace_dim; j++ )
-            {
-               new_col_ind[k] = K_offd_j[i] + j;
-               new_col_val[k++] = K_offd_data[i*nullspace_dim+j];
-            }
-         }
-         row_num = P_start_row + irow;
-         HYPRE_IJMatrixSetValues(IJPmat, 1, &k, (const int *) &row_num, 
-                  (const int *) new_col_ind, (const double *) new_col_val);
-      }
-      ierr = HYPRE_IJMatrixAssemble(IJPmat);
-      assert( !ierr );
-      HYPRE_IJMatrixGetObject(IJPmat, (void **) &Pmat);
-      hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) Pmat);
-      comm_pkg = hypre_ParCSRMatrixCommPkg(Amat);
-      if (!comm_pkg) hypre_MatvecCommPkgCreate(Amat);
-      HYPRE_IJMatrixSetObjectType(IJPmat, -1);
-      HYPRE_IJMatrixDestroy( IJPmat );
-      //sprintf( param_string, "Pmat" );
-      //MLI_Utils_HypreMatrixPrint(Pmat, param_string);
-
-       *-----------------------------------------------------------------
-       * clean up 
-       *-----------------------------------------------------------------*
-
-      delete [] new_col_ind;
-      delete [] new_col_val;
-      delete [] send_ibuf;
-      delete [] send_buf;
-      if ( P_cols_ext != NULL ) delete [] P_cols_ext;
-      if ( P_vecs_ext != NULL ) 
-      {
-         for (i = 0; i < nullspace_dim; i++) 
-            if ( P_vecs_ext[i] != NULL ) delete [] P_vecs_ext[i];
-         delete [] P_vecs_ext;
-      }
-      delete [] K_diag_i;
-      delete [] K_diag_j;
-      delete [] K_diag_data;
-      delete [] K_offd_i;
-      delete [] K_offd_j;
-      delete [] K_offd_data;
-
-       * ================= old version (before Matmul debugged) =========*/
-      /* ================================================================*/
-#endif
-
       MLI_Matrix_FormJacobi(mli_Amat, alpha, &mli_Jmat);
       Jmat = (hypre_ParCSRMatrix *) mli_Jmat->getMatrix();
       row_lengths = new int[P_local_nrows];
@@ -982,7 +655,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
    }
    itmp[0] = naggr;
    itmp[1] = nselected;
-   MPI_Allreduce(itmp, ibuf, 2, MPI_INT, MPI_SUM, comm);
+   if (output_level > 1) MPI_Allreduce(itmp, ibuf, 2, MPI_INT, MPI_SUM, comm);
    if ( mypid == 0 && output_level > 1 )
    {
       printf("\t*** Aggregation(U) P1 : no. of aggregates     = %d\n",ibuf[0]);
@@ -993,7 +666,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
     * Phase 2 : put the rest into one of the existing aggregates
     *-----------------------------------------------------------------*/
 
-   if ( ibuf[1] < global_nrows )
+   if ( nselected < local_nrows )
    {
       for ( irow = 0; irow < local_nrows; irow++ )
       {
@@ -1028,21 +701,21 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
             nselected++;
          }
       } 
-      itmp[0] = naggr;
-      itmp[1] = nselected;
-      MPI_Allreduce(itmp, ibuf, 2, MPI_INT, MPI_SUM, comm);
-      if ( mypid == 0 && output_level > 1 )
-      {
-         printf("\t*** Aggregation(U) P2 : no. of aggregates     = %d\n",ibuf[0]);
-         printf("\t*** Aggregation(U) P2 : no. nodes aggregated  = %d\n",ibuf[1]);
-      }
+   }
+   itmp[0] = naggr;
+   itmp[1] = nselected;
+   if (output_level > 1) MPI_Allreduce(itmp,ibuf,2,MPI_INT,MPI_SUM,comm);
+   if ( mypid == 0 && output_level > 1 )
+   {
+      printf("\t*** Aggregation(U) P2 : no. of aggregates     = %d\n",ibuf[0]);
+      printf("\t*** Aggregation(U) P2 : no. nodes aggregated  = %d\n",ibuf[1]);
    }
 
    /*-----------------------------------------------------------------
     * Phase 3 : form aggregates for all other rows
     *-----------------------------------------------------------------*/
 
-   if ( ibuf[1] < global_nrows )
+   if ( nselected < local_nrows )
    {
       for ( irow = 0; irow < local_nrows; irow++ )
       {
@@ -1085,21 +758,21 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
                                          NULL);
          }
       }
-      itmp[0] = naggr;
-      itmp[1] = nselected;
-      MPI_Allreduce(itmp, ibuf, 2, MPI_INT, MPI_SUM, comm);
-      if ( mypid == 0 && output_level > 1 )
-      {
-         printf("\t*** Aggregation(U) P3 : no. of aggregates     = %d\n",ibuf[0]);
-         printf("\t*** Aggregation(U) P3 : no. nodes aggregated  = %d\n",ibuf[1]);
-      }
+   }
+   itmp[0] = naggr;
+   itmp[1] = nselected;
+   if (output_level > 1) MPI_Allreduce(itmp,ibuf,2,MPI_INT,MPI_SUM,comm);
+   if ( mypid == 0 && output_level > 1 )
+   {
+      printf("\t*** Aggregation(U) P3 : no. of aggregates     = %d\n",ibuf[0]);
+      printf("\t*** Aggregation(U) P3 : no. nodes aggregated  = %d\n",ibuf[1]);
    }
 
    /*-----------------------------------------------------------------
     * Phase 4 : finally put all lone rows into some neighbor aggregate
     *-----------------------------------------------------------------*/
 
-   if ( ibuf[1] < global_nrows )
+   if ( nselected < local_nrows )
    {
       for ( irow = 0; irow < local_nrows; irow++ )
       {
@@ -1126,16 +799,16 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
                                          NULL);
          }
       }
-      itmp[0] = naggr;
-      itmp[1] = nselected;
-      MPI_Allreduce(itmp, ibuf, 2, MPI_INT, MPI_SUM, comm);
-      if ( mypid == 0 && output_level > 1 )
-      {
-         printf("\t*** Aggregation(U) P4 : no. of aggregates     = %d\n",ibuf[0]);
-         printf("\t*** Aggregation(U) P4 : no. nodes aggregated  = %d\n",ibuf[1]);
-      }
    }
-   if ( ibuf[1] < global_nrows )
+   itmp[0] = naggr;
+   itmp[1] = nselected;
+   if ( output_level > 1 ) MPI_Allreduce(itmp,ibuf,2,MPI_INT,MPI_SUM,comm);
+   if ( mypid == 0 && output_level > 1 )
+   {
+      printf("\t*** Aggregation(U) P4 : no. of aggregates     = %d\n",ibuf[0]);
+      printf("\t*** Aggregation(U) P4 : no. nodes aggregated  = %d\n",ibuf[1]);
+   }
+   if ( nselected < local_nrows )
    {
       for ( irow = 0; irow < local_nrows; irow++ )
          if ( node_stat[irow] != MLI_METHOD_AMGSA_SELECTED )
@@ -1149,7 +822,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
     * diagnostics
     *-----------------------------------------------------------------*/
 
-   if ( ibuf[1] < global_nrows )
+   if ( nselected < local_nrows )
    {
       for ( irow = 0; irow < local_nrows; irow++ )
       {

@@ -22,7 +22,6 @@
 // ---------------------------------------------------------------------
 
 #include <string.h>
-#include <iostream.h>
 #include <assert.h>
 
 #include "HYPRE.h"
@@ -55,8 +54,7 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    hypre_ParCSRMatrix *hypreA;
 
 #ifdef MLI_DEBUG_DETAILED
-   cout << " MLI_Method_AMGSA::setupCalibration begins..." << endl;
-   cout.flush();
+   printf("MLI_Method_AMGSA::setupCalibration begins...\n");
 #endif
 
    /* --------------------------------------------------------------- */
@@ -179,11 +177,11 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
          nullspace_store[j] = sol_data[j-nrows*n_null];
       n_null++;
       for ( j = 0; j < nrows*n_null; j++ ) Q_array[j] = nullspace_store[j];
-/*
+#if 0
       MLI_Utils_QR( Q_array, R_array, nrows, n_null );
       for ( j = 0; j < n_null; j++ ) 
          printf("P%d : Norm of Null %d = %e\n", mypid,j,R_array[j*n_null+j]);
-*/
+#endif
    }
 
    total_time += ( MLI_Utils_WTime() - start_time );
@@ -211,6 +209,10 @@ int MLI_Method_AMGSA::setupCalibration( MLI *mli )
    delete [] nullspace_store;
    hypre_ParVectorDestroy( trial_sol );
    hypre_ParVectorDestroy( zero_rhs );
+
+#ifdef MLI_DEBUG_DETAILED
+   printf("MLI_Method_AMGSA::setupCalibration ends.\n");
+#endif
    return level;
 }
 

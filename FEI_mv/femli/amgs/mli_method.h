@@ -42,7 +42,7 @@ public :
    MLI_Method( MPI_Comm comm ) 
             { mpi_comm = comm; method_id = -1; 
               strcpy(method_name, "MLI_NONE");}
-   virtual ~MLI_Method()                                      { }
+   virtual ~MLI_Method() {}
 
    virtual int setup( MLI *mli ) {(void) mli; return -1;}
    virtual int setParams(char *name, int argc, char *argv[])
@@ -50,12 +50,12 @@ public :
    virtual int getParams(char *name, int *argc, char *argv[])
                {(void) name; (void) argc; (void) argv; return -1;}
 
-   char     *getName()                    {return method_name;}
+   char     *getName() {return method_name;}
    int      setName( char *in_name )                                      
             {strcpy( method_name, in_name); return 0;}
-   int      setID( int in_id )            {method_id = in_id; return 0;}
-   int      getID()                       {return method_id;}
-   MPI_Comm getComm()                     {return mpi_comm;}
+   int      setID( int in_id ) {method_id = in_id; return 0;}
+   int      getID()            {return method_id;}
+   MPI_Comm getComm()          {return mpi_comm;}
 };
 
 extern MLI_Method *MLI_Method_CreateFromName(char *,MPI_Comm);

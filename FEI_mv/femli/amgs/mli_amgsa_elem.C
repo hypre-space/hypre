@@ -15,7 +15,6 @@
 // ---------------------------------------------------------------------
 
 #include <string.h>
-#include <iostream.h>
 #include <assert.h>
 
 #include "HYPRE.h"
@@ -64,8 +63,7 @@ int MLI_Method_AMGSA::setupUsingFEData( MLI *mli )
    hypre_ParCSRMatrix *hypreA, *hypreEE, *hypreEN, *hypreNE;
 
 #ifdef MLI_DEBUG_DETAILED
-   cout << " MLI_Method_AMGSA::setupUsingFEData begins..." << endl;
-   cout.flush();
+   printf("MLI_Method_AMGSA::setupUsingFEData begins...\n");
 #endif
 
    /* --------------------------------------------------------------- */
@@ -74,14 +72,14 @@ int MLI_Method_AMGSA::setupUsingFEData( MLI *mli )
 
    if ( mli == NULL )
    {
-      cout << " MLI_Method_AMGSA::setupUsingFEData ERROR - no mli." << endl;
+      printf("MLI_Method_AMGSA::setupUsingFEData ERROR - no mli.");
       exit(1);
    }
    level = 0;
    fedata = mli->getFEData(level);
    if ( fedata == NULL )
    {
-      cout << " MLI_Method_AMGSA::setupUsingFEData ERROR - no fedata." << endl;
+      printf("MLI_Method_AMGSA::setupUsingFEData ERROR - no fedata.\n");
       exit(1);
    }
    nodeEqnMap = mli->getNodeEqnMap(level);
@@ -355,8 +353,7 @@ printf("setupUsingFEData : no aggregate\n");
    if ( nodeEqnList != NULL ) delete [] nodeEqnList;
 
 #ifdef MLI_DEBUG_DETAILED
-   cout << " MLI_Method_AMGSA::setupUsingFEData ends." << endl;
-   cout.flush();
+   printf("MLI_Method_AMGSA::setupUsingFEData ends.\n");
 #endif
 
    return 0;

@@ -15,7 +15,6 @@
 // ---------------------------------------------------------------------
 
 #include <string.h>
-#include <iostream.h>
 #include <assert.h>
 
 // *********************************************************************
@@ -81,8 +80,7 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
 #endif
 
 #ifdef MLI_DEBUG_DETAILED
-   cout << " MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData begins.\n";
-   cout.flush();
+   printf("MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData begins.\n");
 #endif
 
    /* --------------------------------------------------------------- */
@@ -91,16 +89,16 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
 
    if ( mli == NULL )
    {
-      cout << "MLI::AMGSA:setupSubdomainNullSpaceUsingFEData ERROR "
-           << "- no mli\n";
+      printf("MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData ERROR");
+      printf(" - no mli.\n");
       exit(1);
    }
    level = 0;
    fedata = mli->getFEData(level);
    if ( fedata == NULL )
    {
-      cout << "MLI::AMGSA:setupSubdomainNullSpaceUsingFEData ERROR "
-           << "- no fedata\n";
+      printf("MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData ERROR");
+      printf(" - no fedata.\n");
       exit(1);
    }
 
@@ -126,8 +124,8 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
    fedata->getNodeNumFields(nodeNumFields);
    if ( nodeNumFields != 1 ) 
    {
-      cout << "MLI::AMGSA:setupSubdomainNullSpaceUsingFEData - "
-           << "nodeNumFields != 1.\n";
+      printf("MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData - ");
+      printf("nodeNumFields != 1.\n");
       return 1;
    }
    fedata->getNumElements( nElems );
@@ -233,11 +231,10 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
    {
       if ( csrIA[i] > rowSize * (i+1) )
       {
-         cout << "MLI::AMGSA:setupSubdomainNullSpaceUsingFEData ERROR : "
-              << "rowSize too";
-         cout << " large (increase it). \n";
-         cout << "   => allowed = " << rowSize << " actual = " 
-              << csrIA[i]-rowSize*i << endl;
+         printf("MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData ");
+         printf("ERROR : rowSize too large (increase it). \n");
+         printf("   => allowed = %d, actual = %d\n",rowSize, 
+                csrIA[i]-rowSize*i);
          exit(1);
       }
       if ( i < csrNrows )
@@ -309,7 +306,7 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
    dnstev_(&csrNrows, &nullspace_dim, which, &sigmaR, &sigmaI, 
            csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
 #else
-   printf("FATAL ERROR : ARPACK not installed.\n");
+   printf("MLI_Method_AMGSA::FATAL ERROR : ARPACK not installed.\n");
    exit(1);
 #endif
 
@@ -321,7 +318,7 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
       dnstev_(&csrNrows, &nullspace_dim, which, &sigmaR, &sigmaI, 
               csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
 #else
-   printf("FATAL ERROR : ARPACK not installed.\n");
+   printf("MLI_Method_AMGSA::FATAL ERROR : ARPACK not installed.\n");
    exit(1);
 #endif
    }
@@ -407,8 +404,7 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
    delete [] nodeEqnList;
 
 #ifdef MLI_DEBUG_DETAILED
-   cout << " MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData ends.\n";
-   cout.flush();
+   printf("MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData ends.\n");
 #endif
 
    return 0;
@@ -422,13 +418,13 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
 int MLI_Method_AMGSA::setupDDFormSubdomainAggregate( MLI *mli ) 
 {
    int                i, level, mypid, *partition, localNRows, *aggrMap;
+   int                nprocs;
    MPI_Comm           comm;
    MLI_Matrix         *mliAmat;
    hypre_ParCSRMatrix *hypreA;
 
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI::AMGSA:setupDDFormSubdomainAggregate begins...\n";
-   cout.flush();
+   printf("MLI_Method_AMGSA:setupDDFormSubdomainAggregate begins...\n");
 #endif
 
    /* --------------------------------------------------------------- */
@@ -438,6 +434,7 @@ int MLI_Method_AMGSA::setupDDFormSubdomainAggregate( MLI *mli )
    level = 0;
    comm = getComm();
    MPI_Comm_rank( comm, &mypid );
+   MPI_Comm_size( comm, &nprocs );
    mliAmat = mli->getSystemMatrix( level );
    hypreA  = (hypre_ParCSRMatrix *) mliAmat->getMatrix();
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA, 
@@ -447,13 +444,13 @@ int MLI_Method_AMGSA::setupDDFormSubdomainAggregate( MLI *mli )
 
    aggrMap = new int[localNRows];
    for ( i = 0; i < localNRows; i++ ) aggrMap[i] = 0;
-   sa_data[0]   = aggrMap;
-   sa_counts[0] = 1;
-   num_levels   = 2;
+   sa_data[0]      = aggrMap;
+   sa_counts[0]    = 1;
+   num_levels      = 2;
+   min_coarse_size = nprocs;
 
 #ifdef MLI_DEBUG_DETAILED
-   cout << "MLI::AMGSA:setupDDFormSubdomainAggregate begins...\n";
-   cout.flush();
+   printf("MLI_Method_AMGSA::setupDDFormSubdomainAggregate ends.\n");
 #endif
 
    return 0;
@@ -489,13 +486,13 @@ int MLI_Method_AMGSA::setupDDSuperLUSmoother( MLI *mli, int level )
 
    if ( mli == NULL )
    {
-      cout << "MLI::AMGSA:setupDDSuperLUSmoother ERROR - no mli\n";
+      printf("MLI_Method_AMGSA::setupDDSuperLUSmoother ERROR - no mli\n");
       exit(1);
    }
    fedata = mli->getFEData(level);
    if ( fedata == NULL )
    {
-      cout << "MLI::AMGSA:DDSuperLUSmoother ERROR - no fedata\n";
+      printf("MLI_Method_AMGSA::setupDDSuperLUSmoother ERROR - no fedata\n");
       exit(1);
    }
 
@@ -522,7 +519,7 @@ int MLI_Method_AMGSA::setupDDSuperLUSmoother( MLI *mli, int level )
    fedata->getNodeNumFields(nodeNumFields);
    if ( nodeNumFields != 1 ) 
    {
-      cout << "MLI::AMGSA:setupDDSuperLUSmoother - nodeNumFields != 1.\n";
+      printf("MLI_Method_AMGSA::setupDDSuperLUSmoother - nodeNumFields!=1.\n");
       return 1;
    }
    fedata->getNumElements( nElems );
