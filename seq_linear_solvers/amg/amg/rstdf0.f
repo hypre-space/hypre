@@ -129,10 +129,5 @@ c
       do 100 i=ilo,ihi
       if(icg(i).gt.0) jb(ib(i))=i
   100 continue
-c
-c     set permanent memory usage
-c
-      call memacct('b',ib(ihi+1),1)
-      call memacct('jb',ib(ihi+1),1)
       return
       end

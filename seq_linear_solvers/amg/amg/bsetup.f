@@ -126,12 +126,6 @@ c
    90 continue
   100 continue
 c
-c     set temp memory usage
-c
-      call memacct('ib',i1hi+1,0)
-      call memacct('b',kb,0)
-      call memacct('jb',kb,0)
-c
       return
 c
 c===> error messages
@@ -213,11 +207,6 @@ c===> i0 is an f-variable
    60 continue
       ib(i0hi+1)=kb
       if(kb.gt.ndimb) go to 9902
-c
-c     set temp memory usage
-c
-      call memacct('b',kb,0)
-      call memacct('jb',kb,0)
       return
 c
 c===> error messages
@@ -287,11 +276,6 @@ c     call outa(k,5)
       jb(ib(ii))=jjb
    20 continue
    30 continue
-c
-c     set temp memory usage
-c
-      call memacct('b',ib(i0hi+1),0)
-      call memacct('jb',ib(i0hi+1),0)
 c
 c     compress the matrix.
 c

@@ -158,14 +158,6 @@ c
       endif
 70    continue
       imax(k)=ic
-c     write(6,9000) k
-c
-c     set temp memory usage
-c
-      call memacct('a',ka,0)
-      call memacct('ja',ka,0)
-      call memacct('ifg',ichi,0)
-
       return
 c
 c===> error messages

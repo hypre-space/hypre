@@ -376,12 +376,6 @@ c
       ja(ia(i))=i
 30    continue
 c
-c     set temp memory usage
-c
-      call memacct('a',ka,0)
-      call memacct('ja',ka,0)
-      call memacct('ia',i0hi+ishift+1,0)
-c
       return
 c
 c===> error messages

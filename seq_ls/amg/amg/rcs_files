@@ -26,9 +26,7 @@ globals.h
 iinvert.f
 matrix.c
 matrix.h
-memoryx.f
 misc.f
-ms.f
 opdfn.f
 outprt.f
 pcg.c

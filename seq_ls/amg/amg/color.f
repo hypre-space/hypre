@@ -100,12 +100,6 @@ c
       jvalxx=jvalmx+1
       nspts=0
 c
-c     set temp memory usage
-c
-      call memacct('icg',jvalxx,0)
-      call memacct('ifg',jvalxx,0)
-      call memacct('ib',ihi+ishift,0)
-c
       if(ncolor.eq.-1) then
 c
 c==>  set stacks/lists for initial coloring (ncolor=-1)

@@ -66,32 +66,6 @@ c
       ib(1)=1
       k=1
 c
-c     set array limits
-c
-      call memlimit('a',ndima)
-      call memlimit('ja',ndima)
-      call memlimit('ia',ndimu)
-      call memlimit('iu',ndimu)
-      call memlimit('ip',ndimu)
-      call memlimit('icg',ndimu)
-      call memlimit('ifg',ndimu)
-      call memlimit('ib',ndimu)
-      call memlimit('b',ndimb)
-      call memlimit('jb',ndimb)
-c
-c     set initial data usage (temporary)
-c
-      call memacct('a',ia(imax(1)+1),1)
-      call memacct('ja',ia(imax(1)+1),1)
-      call memacct('ia',imax(1)+1,1)
-      call memacct('iu',imax(1),1)
-      call memacct('ip',imax(1),1)
-      call memacct('icg',0,1)
-      call memacct('ifg',0,1)
-      call memacct('ib',0,1)
-      call memacct('b',0,1)
-      call memacct('jb',0,1)
-c
 c     load ifg into ifc
 c
 c      do 10 i=1,imax(1)
@@ -102,17 +76,6 @@ c
       call trunc(1,imin,imax,a,ia,ja)
 c
       call symm(1,1,imin,imax,a,ia,ja,icg,ifg)
-c
-c     set fine level data usage (permanent)
-c
-      call memacct('a',ia(imax(1)+1),1)
-      call memacct('ja',ia(imax(1)+1),1)
-      call memacct('ia',imax(1)+1,1)
-      call memacct('iu',imax(1),1)
-      call memacct('ip',imax(1),1)
-      call memacct('ib',imax(1)+1,1)
-c
-      call msample
 c
       if(levels.le.1) then
         close(6)
@@ -140,7 +103,6 @@ cveh  call stats(k-1,levels,idump,
 cveh *           nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
 cveh *           b,ib,jb,ipmn,ipmx,iv,xp,yp)
 
-c     call memoryx(k-1,imin,imax,ia,ib,ipmn,ipmx)
 c
 c=>   test for coarsest grid
 c
@@ -157,20 +119,6 @@ c
 
       call symm(k,isymm,imin,imax,a,ia,ja,icg,ifg)
 c
-c     set final data usage (permanent)
-c
-      call memacct('a',ia(imax(k)+1),1)
-      call memacct('ja',ia(imax(k)+1),1)
-      call memacct('ia',imax(k)+1,1)
-      call memacct('iu',imax(k),1)
-      call memacct('ip',imax(k),1)
-      call memacct('icg',imax(k-1),1)
-      call memacct('ib',imax(k)+1,1)
-      call memacct('b',ib(imax(k-1)+1),1)
-      call memacct('jb',ib(imax(k-1)+1),1)
-c
-      call msample
-c
       go to 20
 c
 30    continue
@@ -182,7 +130,6 @@ c     compute & print statistics after coarsening
      *           b,ib,jb,ipmn,ipmx,iv,xp,yp)
 
 
-      call msample
 c
 c     test operators
 c
@@ -195,7 +142,6 @@ c=>   compress unneeded entries from interpolation/restriction
 c
 c     call crushb(levels,imin,imax,icg,b,ib,jb)
 c
-      call mreport(1)
 
       close(6)
 
