@@ -303,8 +303,8 @@ int hypre_PointRelaxSetNumPointsets( void *relax_vdata , int num_pointsets );
 int hypre_PointRelaxSetPointset( void *relax_vdata , int pointset , int pointset_size , hypre_Index pointset_stride , hypre_Index *pointset_indices );
 int hypre_PointRelaxSetPointsetRank( void *relax_vdata , int pointset , int pointset_rank );
 int hypre_PointRelaxSetTempVec( void *relax_vdata , hypre_StructVector *t );
-int hypre_relax_wtx( void *relax_vdata , hypre_StructVector *t , hypre_StructVector *x );
-int hypre_relax_copy( void *relax_vdata , hypre_StructVector *t , hypre_StructVector *x );
+int hypre_relax_wtx( void *relax_vdata , int pointset , hypre_StructVector *t , hypre_StructVector *x );
+int hypre_relax_copy( void *relax_vdata , int pointset , hypre_StructVector *t , hypre_StructVector *x );
 
 /* red_black_constantcoef_gs.c */
 int hypre_RedBlackConstantCoefGS( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
