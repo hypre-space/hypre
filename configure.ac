@@ -40,73 +40,13 @@ dnl Change the default prefix (/usr/local) to ./hypre
 AC_PREFIX_DEFAULT("HYPRE_TOP_SRC_DIR/hypre")
 m4_pattern_allow([HYPRE_[A-Z_]+])
 
-AC_ARG_ENABLE(debug,
-AC_HELP_STRING([--enable-debug], [compile for debugging.]),
-[case "${enableval}" in
-  yes) casc_using_debug=yes
-    CFLAGS="-g $CFLAGS"
-    CXXFLAGS="-g $CXXFLAGS"
-    F77FLAGS="-g $F77FLAGS" ;;
-  no)  casc_using_debug=no;;
-  *) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
-esac],[casc_using_debug=no])
+ACX_DEBUG
 
-AC_ARG_WITH(MPI,
-AC_HELP_STRING([--with-MPI=DIR],
-[Compiles with MPI [default]. DIR is the top-level install directory 
-for MPI.  Selecting --without-MPI may affect which compiler is chosen]),
-[case "${withval}" in
-  yes) casc_using_mpi=yes ;;
-  no) casc_using_mpi=no ;;
-  *) casc_using_mpi=yes
-    if test -d "${withval}" ; then
-      if test -d "${withval}/include" ; then
-        MPIINCLUDE=${withval}/include
-        CPPFLAGS="$CPPFLAGS -I${withval}/include"
-      elif test -d "${withval}/h" ; then
-        MPIINCLUDE=${withval}/h
-        CPPFLAGS="$CPPFLAGS -I${withval}/h"
-      else
-        AC_MSG_ERROR(DIR=${withval}\/include does not exist for --with-MPI)
-      fi
-      if test -d "${withval}/lib" ; then
-        if test -r "${withval}/lib/libmpi.a" ; then
-          MPILIBS=mpi
-          MPILIBDIRS=${withval}/lib
-          LIBS="$LIBS -lmpi"
-          LIBDIRS="$LIBDIRS -L${withval}/lib"
-        elif test -r "${withval}/lib/libmpich.a" ; then
-          MPILIBS=mpich
-          MPILIBDIRS=${withval}/lib
-          LIBS="$LIBS -lmpich"
-          LIBDIRS="$LIBDIRS -L${withval}/lib"
-        else
-          AC_MSG_ERROR(DIR=${withval}\/lib/libmpi.a or libmpich.a does not exist for --with-MPI)
-        fi
-      else
-        AC_MSG_ERROR(DIR=${withval}\/lib does not exist for --with-MPI)
-      fi
-    else
-      AC_MSG_ERROR(DIR=${withval} does not exist for --with-MPI)
-    fi ;;
-esac],[casc_using_mpi=yes])
+ACX_MPI
 
-AC_ARG_WITH(timing,
-AC_HELP_STRING([--with-timing],[use HYPRE timing routines]),
-[if test "$withval" = "yes"; then
-  AC_DEFINE(HYPRE_TIMING,1,[HYPRE timing routines are being used])
-fi])
+ACX_TIMING
 
-AC_ARG_WITH(openmp,
-AC_HELP_STRING([--with-openmp],
-[use openMP--this may affect which compiler is chosen. 
-Supported using guidec on IBM and Compaq.]),
-[case "${withval}" in
-  yes) casc_using_openmp=yes
-    AC_DEFINE([HYPRE_USING_OPENMP], 1, [Enable OpenMP support]) ;;
-  no)  casc_using_openmp=no;;
-  *) AC_MSG_ERROR(bad value ${withval} for --with-openmp) ;;
-esac],[casc_using_openmp=no])
+ACX_OPENMP
 
 AC_ARG_WITH(babel,
 AC_HELP_STRING([--with-babel],[use babel]),
@@ -311,7 +251,7 @@ chosen for IBM, but may be selected for other platforms as well.]),
 if test "$casc_using_mpi" = "no" ; then
   AC_DEFINE(HYPRE_SEQUENTIAL, 1, [Disable MPI, enable serial codes])
 else
-  ACX_CHECK_MPI
+  ACX_CHECK_MPI(LIBS="$LIBS $MPILIBS")
 fi
 case "${host}" in
   sparc-sun-solaris2*)

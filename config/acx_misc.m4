@@ -212,20 +212,150 @@ dnl **********************************************************************
 dnl * ACX_CHECK_MPI
 dnl *
 dnl try and determine what the MPI flags should be
-dnl
-AC_DEFUN([ACX_CHECK_MPI],
-acx_mpi_ok=no
+dnl ACX_CHECK_MPI([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
+dnl ACTION-IF-FOUND is a list of shell commands to run 
+dnl   if an MPI library is found, and
+dnl ACTION-IF-NOT-FOUND is a list of commands to run it 
+dnl   if it is not found. If ACTION-IF-FOUND is not specified, 
+dnl   the default action will define HAVE_MPI. 
 
-[AC_CHECK_HEADER(mpi.h,
-  [AC_CHECK_LIB(mpi, MPI_Init,[acx_mpi_ok=yes;LIBS="$LIBS -lmpi"],
-    [AC_MSG_WARN([* Unable to find libmpi, which is kinda necessary. *])])],
-  [AC_MSG_WARN([* * * Missing "mpi.h" header file * * *])])
-if test $acx_mpi_ok = no; then
-  AC_CHECK_HEADER(mpi.h,
-    [AC_CHECK_LIB(mpich, MPI_Init,[LIBS="$LIBS -lmpich"],
-      [AC_MSG_WARN([* Unable to find libmpich, which is kinda necessary. *])])],
-    [AC_MSG_WARN([* Unable to find libmpi, which is kinda necessary. *])])
-fi 
+dnl
+AC_DEFUN([ACX_CHECK_MPI],[
+AC_PREREQ(2.50) dnl for AC_LANG_CASE
+
+if test x = x"$MPILIBS"; then
+  AC_LANG_CASE([C], [AC_CHECK_FUNC(MPI_Init, [MPILIBS=" "])],
+    [C++], [AC_CHECK_FUNC(MPI_Init, [MPILIBS=" "])],
+    [Fortran 77], [AC_MSG_CHECKING([for MPI_Init])
+      AC_TRY_LINK([],[      call MPI_Init], [MPILIBS=" "
+        AC_MSG_RESULT(yes)], [AC_MSG_RESULT(no)])])
+fi
+if test x = x"$MPILIBS"; then
+  AC_CHECK_LIB(mpi, MPI_Init, [MPILIBS="-lmpi"])
+fi
+if test x = x"$MPILIBS"; then
+  AC_CHECK_LIB(mpich, MPI_Init, [MPILIBS="-lmpich"])
+fi
+
+dnl We have to use AC_TRY_COMPILE and not AC_CHECK_HEADER because the
+dnl latter uses $CPP, not $CC (which may be mpicc).
+AC_LANG_CASE([C], [if test x != x"$MPILIBS"; then
+  AC_MSG_CHECKING([for mpi.h])
+  AC_TRY_COMPILE([#include <mpi.h>],[],[AC_MSG_RESULT(yes)], [MPILIBS=""
+                     AC_MSG_RESULT(no)])
+fi],
+[C++], [if test x != x"$MPILIBS"; then
+  AC_MSG_CHECKING([for mpi.h])
+  AC_TRY_COMPILE([#include <mpi.h>],[],[AC_MSG_RESULT(yes)], [MPILIBS=""
+                     AC_MSG_RESULT(no)])
+fi])
+
+AC_SUBST(MPILIBS)
+
+# Finally, execute ACTION-IF-FOUND/ACTION-IF-NOT-FOUND:
+if test x = x"$MPILIBS"; then
+  $2
+  :
+else
+  ifelse([$1],,[AC_DEFINE(HAVE_MPI,1,[Define if you have the MPI library.])],[$1])
+  :
+fi
+])
+
+ACX_MPI
+dnl **********************************************************************
+dnl * ACX_MPI
+dnl *
+dnl Compiles with MPI [default].
+dnl
+AC_DEFUN([ACX_MPI],
+[AC_ARG_WITH(MPI,
+AC_HELP_STRING([--with-MPI=DIR],
+[Compiles with MPI [default]. DIR is the top-level install directory
+for MPI.  Selecting --without-MPI may affect which compiler is chosen]),
+[case "${withval}" in 
+  yes) casc_using_mpi=yes ;;
+  no) casc_using_mpi=no ;;
+  *) casc_using_mpi=yes
+    if test -d "${withval}" ; then
+      if test -d "${withval}/include" ; then
+        MPIINCLUDE=${withval}/include
+        CPPFLAGS="$CPPFLAGS -I${withval}/include"
+      elif test -d "${withval}/h" ; then
+        MPIINCLUDE=${withval}/h
+        CPPFLAGS="$CPPFLAGS -I${withval}/h"
+      else
+        AC_MSG_ERROR(DIR=${withval}\/include does not exist for --with-MPI)
+      fi
+      if test -d "${withval}/lib" ; then
+        if test -r "${withval}/lib/libmpi.a" ; then
+          MPILIBS=mpi
+          MPILIBDIRS=${withval}/lib
+          LIBS="$LIBS -lmpi"
+          LIBDIRS="$LIBDIRS -L${withval}/lib"
+        elif test -r "${withval}/lib/libmpich.a" ; then
+          MPILIBS=mpich
+          MPILIBDIRS=${withval}/lib
+          LIBS="$LIBS -lmpich"
+          LIBDIRS="$LIBDIRS -L${withval}/lib"
+        else
+          AC_MSG_ERROR(DIR=${withval}\/lib/libmpi.a or libmpich.a does not exist for --with-MPI)
+        fi
+      else
+        AC_MSG_ERROR(DIR=${withval}\/lib does not exist for --with-MPI)
+      fi
+    else
+      AC_MSG_ERROR(DIR=${withval} does not exist for --with-MPI)
+    fi ;;
+esac],[casc_using_mpi=yes])
+])
+
+dnl **********************************************************************
+dnl * ACX_DEBUG
+dnl *
+dnl compile for debugging
+dnl
+AC_DEFUN([ACX_DEBUG],
+[AC_ARG_ENABLE(debug,
+AC_HELP_STRING([--enable-debug], [compile for debugging.]),
+[case "${enableval}" in
+  yes) casc_using_debug=yes
+    CFLAGS="-g $CFLAGS"
+    CXXFLAGS="-g $CXXFLAGS"
+    F77FLAGS="-g $F77FLAGS" ;;
+  no)  casc_using_debug=no;;
+  *) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
+esac],[casc_using_debug=no])
+])
+dnl **********************************************************************
+dnl * ACX_TIMING
+dnl *
+dnl determine timing routines to use
+dnl
+AC_DEFUN([ACX_TIMING],
+[AC_ARG_WITH(timing,
+AC_HELP_STRING([--with-timing],[use HYPRE timing routines]),
+[if test "$withval" = "yes"; then
+  AC_DEFINE(HYPRE_TIMING,1,[HYPRE timing routines are being used])
+fi])
+])
+
+dnl **********************************************************************
+dnl * ACX_OPENMP
+dnl *
+dnl compile with OpenMP
+dnl
+AC_DEFUN([ACX_OPENMP],
+[AC_ARG_WITH(openmp,
+AC_HELP_STRING([--with-openmp],
+[use openMP--this may affect which compiler is chosen.
+Supported using guidec on IBM and Compaq.]),
+[case "${withval}" in
+  yes) casc_using_openmp=yes
+    AC_DEFINE([HYPRE_USING_OPENMP], 1, [Enable OpenMP support]) ;;
+  no)  casc_using_openmp=no;;
+  *) AC_MSG_ERROR(bad value ${withval} for --with-openmp) ;;
+esac],[casc_using_openmp=no])
 ])
 
 dnl **********************************************************************
