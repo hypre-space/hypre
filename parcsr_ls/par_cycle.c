@@ -165,7 +165,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    {
       smoother = hypre_ParAMGDataSmoother(amg_data);
       if (smooth_type == 7 || smooth_type == 8
-          || smooth_type == 17 || smooth_type == 18)
+          || smooth_type == 17 || smooth_type == 18
+          || smooth_type == 9 || smooth_type == 19)
       {
          Utemp = hypre_ParVectorCreate(comm,hypre_ParVectorGlobalSize(Vtemp),
                         hypre_ParVectorPartitioning(Vtemp));
@@ -274,6 +275,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
             if (smooth_num_levels > level && 
 			(smooth_type == 7 || smooth_type == 8 ||
+			smooth_type == 9 || smooth_type == 19 ||
 			smooth_type == 17 || smooth_type == 18))
             {
                hypre_VectorSize(hypre_ParVectorLocalVector(Utemp)) = local_size;
@@ -289,6 +291,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                  (HYPRE_ParVector) Utemp);
                else if (smooth_type == 7 || smooth_type == 17)
                   HYPRE_ParCSRPilutSolve(smoother[level],
+                                 (HYPRE_ParCSRMatrix) A_array[level],
+                                 (HYPRE_ParVector) Vtemp,
+                                 (HYPRE_ParVector) Utemp);
+               else if (smooth_type == 9 || smooth_type == 19)
+                  HYPRE_EuclidSolve(smoother[level],
                                  (HYPRE_ParCSRMatrix) A_array[level],
                                  (HYPRE_ParVector) Vtemp,
                                  (HYPRE_ParVector) Utemp);
