@@ -83,6 +83,7 @@ main( int   argc,
    int                 rap;
    int                 relax;
    int                 jump;
+   int                 rep, reps;
 
    int               **iupper;
    int               **ilower;
@@ -90,6 +91,7 @@ main( int   argc,
    int                 istart[3];
    int                 periodic[3];
    int               **offsets;
+   int                 constant_coefficient = 0;
 
    HYPRE_StructGrid    grid;
    HYPRE_StructGrid    readgrid;
@@ -143,6 +145,7 @@ main( int   argc,
    rap = 0;
    relax = 1;
    jump  = 0;
+   reps = 1;
 
    nx = 10;
    ny = 10;
@@ -271,6 +274,11 @@ main( int   argc,
          read_x0fromfile_param = 1;
          read_x0fromfile_index = arg_index;
       }
+      else if (strcmp(argv[arg_index], "-repeats") == 0 )
+      {
+         arg_index++;
+         reps = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-solver") == 0 )
       {
          arg_index++;
@@ -354,10 +362,12 @@ main( int   argc,
       printf("  -fromfile <name>    : prefix name for matrixfiles\n");
       printf("  -rhsfromfile <name> : prefix name for rhsfiles\n");
       printf("  -x0fromfile <name>  : prefix name for firstguessfiles\n");
+      printf("  -repeats <reps>     : number of times to repeat the run, default 1.  For solver 0,1,3\n");
       printf("  -solver <ID>        : solver ID\n");
       printf("                        0  - SMG (default)\n");
       printf("                        1  - PFMG\n");
       printf("                        2  - SparseMSG\n");
+      printf("                        3  - PFMG constant coefficients\n");
       printf("                        10 - CG with SMG precond\n");
       printf("                        11 - CG with PFMG precond\n");
       printf("                        12 - CG with SparseMSG precond\n");
@@ -467,6 +477,9 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    MPI_Barrier(MPI_COMM_WORLD);
+
+   for ( rep=0; rep<reps; ++rep )
+   {
 
    time_index = hypre_InitializeTiming("Struct Interface");
    hypre_BeginTiming(time_index);
@@ -728,11 +741,13 @@ main( int   argc,
                      ib++;
                   }
             break;
-      } 
+      }
+
 
       HYPRE_StructGridCreate(MPI_COMM_WORLD, dim, &grid);
       for (ib = 0; ib < nblocks; ib++)
       {
+         /* Add to the grid a new box defined by ilower[ib], iupper[ib]...*/
          HYPRE_StructGridSetExtents(grid, ilower[ib], iupper[ib]);
       }
       HYPRE_StructGridSetPeriodic(grid, periodic);
@@ -749,6 +764,11 @@ main( int   argc,
       }
 
       HYPRE_StructMatrixCreate(MPI_COMM_WORLD, grid, stencil, &A);
+      if ( solver_id == 3 )
+      {
+         HYPRE_StructMatrixSetConstantCoefficient( A, 1 );
+         constant_coefficient = 1;
+      }
       HYPRE_StructMatrixSetSymmetric(A, sym);
       HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
       HYPRE_StructMatrixInitialize(A);
@@ -760,8 +780,9 @@ main( int   argc,
       AddValuesMatrix(A,grid,cx,cy,cz,conx,cony,conz);
 
       /* Zero out stencils reaching to real boundary */
+      /* But in constant coefficient case, no special stencils! */
 
-      SetStencilBndry(A,grid,periodic); 
+      if ( constant_coefficient == 0 ) SetStencilBndry(A,grid,periodic); 
       HYPRE_StructMatrixAssemble(A);
 
       /*-----------------------------------------------------------
@@ -769,6 +790,7 @@ main( int   argc,
        *-----------------------------------------------------------*/
 
       HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, &b);
+
       HYPRE_StructVectorInitialize(b);
 
       /*-----------------------------------------------------------
@@ -1042,9 +1064,15 @@ main( int   argc,
    /* linear system complete  */
 
    hypre_EndTiming(time_index);
-   hypre_PrintTiming("Struct Interface", MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
+   if ( reps==1 ) {
+      hypre_PrintTiming("Struct Interface", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   }
+   else if ( rep==reps-1 ) {
+      hypre_FinalizeTiming(time_index);
+   }
+
 
    /*-----------------------------------------------------------
     * Print out the system and initial guess
@@ -1080,9 +1108,14 @@ main( int   argc,
       HYPRE_StructSMGSetup(solver, A, b, x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
+      if ( reps==1 ) {
+         hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+      }
+      else if ( rep==reps-1 ) {
+         hypre_FinalizeTiming(time_index);
+      }
 
       time_index = hypre_InitializeTiming("SMG Solve");
       hypre_BeginTiming(time_index);
@@ -1090,9 +1123,16 @@ main( int   argc,
       HYPRE_StructSMGSolve(solver, A, b, x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
+      if ( reps==1 ) {
+          hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+          hypre_FinalizeTiming(time_index);
+          hypre_ClearTiming();
+      }
+      else if ( rep==reps-1 ) {
+         hypre_PrintTiming("Interface, Setup, and Solve times:", MPI_COMM_WORLD );
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+      }
    
       HYPRE_StructSMGGetNumIterations(solver, &num_iterations);
       HYPRE_StructSMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
@@ -1103,7 +1143,7 @@ main( int   argc,
     * Solve the system using PFMG
     *-----------------------------------------------------------*/
 
-   else if (solver_id == 1)
+   else if (solver_id == 1 || solver_id == 3)
    {
       time_index = hypre_InitializeTiming("PFMG Setup");
       hypre_BeginTiming(time_index);
@@ -1123,19 +1163,32 @@ main( int   argc,
       HYPRE_StructPFMGSetup(solver, A, b, x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
+      if ( reps==1 ) {
+         hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+      }
+      else if ( rep==reps-1 ) {
+         hypre_FinalizeTiming(time_index);
+      }
 
       time_index = hypre_InitializeTiming("PFMG Solve");
       hypre_BeginTiming(time_index);
 
+
       HYPRE_StructPFMGSolve(solver, A, b, x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
+      if ( reps==1 ) {
+         hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+      }
+      else if ( rep==reps-1 ) {
+         hypre_PrintTiming("Interface, Setup, and Solve times", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+      }
    
       HYPRE_StructPFMGGetNumIterations(solver, &num_iterations);
       HYPRE_StructPFMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
@@ -1745,7 +1798,7 @@ main( int   argc,
       HYPRE_StructVectorPrint("struct.out.x", x, 0);
    }
 
-   if (myid == 0)
+   if (myid == 0 && rep==reps-1)
    {
       printf("\n");
       printf("Iterations = %d\n", num_iterations);
@@ -1804,6 +1857,8 @@ main( int   argc,
    hypre_TFree(offsets);
 
    hypre_FinalizeMemoryDebug();
+
+   }
 
    /* Finalize MPI */
    MPI_Finalize();
