@@ -16,7 +16,13 @@ TEST_DRIVERS=\
 struct_linear_solvers \
 
 #===========================================================================
-# Runs test drivers and log results and errors to file
+# Define HYPRE_ARCH
+#===========================================================================
+
+. ./autotest_arch.sh
+
+#===========================================================================
+# Run test drivers and log results and errors to file
 #===========================================================================
 
 for i in $TEST_DRIVERS
@@ -26,14 +32,29 @@ done
 
 #===========================================================================
 # Check for errors and send appropriate email
+# NOTE: HYPRE_MAIL must support `-s' subject option
 #===========================================================================
 
-for i in $TEST_DRIVERS
-do
-  if [ -s "${i}.err" ]
-  then
-    RECIPIENTS=`cat ${i}.email`
-    /usr/ucb/Mail -s "Error(s) in ${i} test suite" $RECIPIENTS < ${i}.err
-  fi
-done
+if [ "$1" = "-mail" ]
+then
+    HYPRE_MAIL=/usr/ucb/Mail
+    case $HYPRE_ARCH in
+	dec)
+	    HYPRE_MAIL=/usr/ucb/Mail;;
+	blue)
+	    HYPRE_MAIL=/usr/ucb/Mail;;
+	red)
+	    HYPRE_MAIL=/usr/ucb/Mail;;
+    esac
+
+    for i in $TEST_DRIVERS
+    do
+    if [ -s "${i}.err" ]
+    then
+	RECIPIENTS=`cat ${i}.email`
+	$HYPRE_MAIL -s "Error(s) in ${i} test suite" $RECIPIENTS < ${i}.err
+    fi
+    done
+fi
+
 

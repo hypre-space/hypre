@@ -25,13 +25,13 @@ PATH=/home/casc/bin:\
 export PATH
 
 #==============================================================================
-# Set autotest directory
+# Set autotest directory (assumes CASC cluster)
 #==============================================================================
 
 HYPRE_AUTOTEST_DIR="/home/casc/software/hypre/autotest"
 
 #=============================================================================
-# Check out repository, build and install in the AUTOTEST directory
+# Check out the repository in the HYPRE_AUTOTEST_DIR directory
 #=============================================================================
 
 if [ ! -d "$CVSROOT" ]
@@ -44,6 +44,10 @@ cd $HYPRE_AUTOTEST_DIR
 rm -fR linear_solvers
 cvs checkout -P linear_solvers
 
+#=============================================================================
+# Make libraries and test drivers
+#=============================================================================
+
 cd linear_solvers
 ./configure
 make
@@ -53,7 +57,13 @@ make
 #=============================================================================
 
 cd test
-./test_drivers.sh
+./test_drivers.sh -mail
+
+#=============================================================================
+# Clean up
+#=============================================================================
+
+make veryclean
 
 #==============================================================================
 # Set permissions so that all developers can access
@@ -64,3 +74,52 @@ cd test
 echo "setting permissions...."
 chmod -fR a+rX,ug+w $HYPRE_AUTOTEST_DIR
 
+#==============================================================================
+# Run test suites on remote machines
+#==============================================================================
+
+cd $HYPRE_AUTOTEST_DIR
+
+while [ "$*" != "" ]
+do
+
+case $1 in
+    -dec)
+        HYPRE_COMPILE_MACHINE="west"
+        HYPRE_RUN_MACHINE="northwest"
+        HYPRE_REMOTE_DIR=AUTOTEST
+        shift;;
+    -blue)
+        HYPRE_COMPILE_MACHINE="blue"
+        HYPRE_RUN_MACHINE="blue"
+        HYPRE_REMOTE_DIR=AUTOTEST
+        shift;;
+    -red)
+        HYPRE_COMPILE_MACHINE="sasn100"
+        HYPRE_RUN_MACHINE="janus"
+        HYPRE_REMOTE_DIR=AUTOTEST
+        shift;;
+esac
+
+# remove old source
+ssh ${HYPRE_COMPILE_MACHINE} '(cd ${HYPRE_REMOTE_DIR}; rm -fr *)'
+
+# copy source over
+scp -r * ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
+
+# compile
+ssh ${HYPRE_COMPILE_MACHINE} '\
+    (\
+	cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
+	./configure;\
+	make\
+    )'
+
+# run test suite
+ssh ${HYPRE_RUN_MACHINE} '\
+    (\
+	cd ${HYPRE_REMOTE_DIR}/linear_solvers/test;\
+	./test_drivers.sh -mail\
+    )'
+
+done
