@@ -225,6 +225,7 @@ int HYPRE_ParCSRPCGSetRelChange( HYPRE_Solver solver , int rel_change );
 int HYPRE_ParCSRPCGSetPrecond( HYPRE_Solver solver , HYPRE_PtrToParSolverFcn precond , HYPRE_PtrToParSolverFcn precond_setup , HYPRE_Solver precond_solver );
 int HYPRE_ParCSRPCGGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
 int HYPRE_ParCSRPCGSetPrintLevel( HYPRE_Solver solver , int level );
+int HYPRE_ParCSRPCGSetLogging( HYPRE_Solver solver , int level );
 int HYPRE_ParCSRPCGGetNumIterations( HYPRE_Solver solver , int *num_iterations );
 int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
 int HYPRE_ParCSRDiagScaleSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector y , HYPRE_ParVector x );

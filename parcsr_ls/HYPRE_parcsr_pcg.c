@@ -168,6 +168,7 @@ HYPRE_ParCSRPCGGetPrecond( HYPRE_Solver  solver,
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRPCGSetPrintLevel
+ * an obsolete function; use HYPRE_PCG* functions instead
  *--------------------------------------------------------------------------*/
 
 int
@@ -175,6 +176,18 @@ HYPRE_ParCSRPCGSetPrintLevel( HYPRE_Solver solver,
                               int level )
 {
    return( HYPRE_PCGSetPrintLevel( solver, level ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRPCGSetLogging
+ * an obsolete function; use HYPRE_PCG* functions instead
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRPCGSetLogging( HYPRE_Solver solver,
+                           int level )
+{
+   return( HYPRE_PCGSetLogging( solver, level ) );
 }
 
 /*--------------------------------------------------------------------------
