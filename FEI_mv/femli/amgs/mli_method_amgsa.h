@@ -22,6 +22,7 @@
 #include "amgs/mli_method.h"
 
 #define MLI_METHOD_AMGSA_LOCAL        0
+#define MLI_METHOD_AMGSA_HYBRID       1
 
 /* ********************************************************************* *
  * internal data structure used for domain decomposition
@@ -136,10 +137,13 @@ public :
 
 private :
 
-   double genPLocal( MLI_Matrix *Amat, MLI_Matrix **Pmat, int, int * );
+   double genP( MLI_Matrix *Amat, MLI_Matrix **Pmat, int, int * );
+   double genPGlobal(hypre_ParCSRMatrix *Amat, MLI_Matrix **Pmat, int, int *);
    int    formLocalGraph( hypre_ParCSRMatrix *Amat, hypre_ParCSRMatrix **graph,
                           int *labels);
+   int    formGlobalGraph(hypre_ParCSRMatrix *Amat,hypre_ParCSRMatrix **graph);
    int    coarsenLocal( hypre_ParCSRMatrix *graph, int *nAggr, int **aggrInfo);
+   int    coarsenGlobal(hypre_ParCSRMatrix *graph, int *nAggr, int **aggrInfo);
 };
 
 #endif

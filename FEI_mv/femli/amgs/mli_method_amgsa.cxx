@@ -84,9 +84,8 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    smootherPrintRNorm_ = 0;
    smootherFindOmega_  = 0;
    strcpy(coarseSolver_, "SuperLU");
-   coarseSolverNum_    = 1;
-   coarseSolverWgt_    = new double[20];
-   for ( int j = 0; j < 20; j++ ) coarseSolverWgt_ [j] = 1.0;
+   coarseSolverNum_    = 0;
+   coarseSolverWgt_    = NULL;
    calibrationSize_    = 0;
    useSAMGeFlag_       = 0;
    RAPTime_            = 0.0;
@@ -206,6 +205,8 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       sscanf(in_name,"%s %s", param1, param2);
       if ( !strcmp(param2, "local" ) )
          return ( setCoarsenScheme( MLI_METHOD_AMGSA_LOCAL ) );
+      else if ( !strcmp(param2, "hybrid" ) )
+         return ( setCoarsenScheme( MLI_METHOD_AMGSA_HYBRID ) );
       else      
       {
          printf("MLI_Method_AMGSA::setParams ERROR : setCoarsenScheme not");
@@ -622,10 +623,16 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       {
          case MLI_METHOD_AMGSA_LOCAL :
               if (level == 0)
-                 maxEigen = genPLocal(mli_Amat, &mli_Pmat, saCounts_[0], 
-                                      saData_[0]); 
+                 maxEigen = genP(mli_Amat,&mli_Pmat,saCounts_[0],saData_[0]); 
               else
-                 maxEigen = genPLocal(mli_Amat, &mli_Pmat, 0, NULL); 
+                 maxEigen = genP(mli_Amat, &mli_Pmat, 0, NULL); 
+              break;
+
+         case MLI_METHOD_AMGSA_HYBRID :
+              if (level == 0)
+                 maxEigen = genP(mli_Amat,&mli_Pmat,saCounts_[0],saData_[0]); 
+              else
+                 maxEigen = genP(mli_Amat, &mli_Pmat, 0, NULL); 
               break;
       }
       if (maxEigen != 0.0) spectralNorms_[level] = maxEigen;
@@ -667,8 +674,15 @@ int MLI_Method_AMGSA::setup( MLI *mli )
          switch (coarsenScheme_)
          {
             case MLI_METHOD_AMGSA_LOCAL :
-                 maxEigenT = genPLocal(mli_ATmat, &mli_Rmat, saCounts_[level], 
-                                       saData_[level]); 
+                 maxEigenT = genP(mli_ATmat, &mli_Rmat, saCounts_[level], 
+                                  saData_[level]); 
+                 if ( maxEigenT < 0.0 ) 
+                    printf("MLI_Method_AMGSA::setup ERROR : maxEigenT < 0.\n");
+                 break;
+
+            case MLI_METHOD_AMGSA_HYBRID :
+                 maxEigenT = genP(mli_ATmat, &mli_Rmat, saCounts_[level], 
+                                  saData_[level]); 
                  if ( maxEigenT < 0.0 ) 
                     printf("MLI_Method_AMGSA::setup ERROR : maxEigenT < 0.\n");
                  break;
@@ -787,6 +801,12 @@ int MLI_Method_AMGSA::setup( MLI *mli )
             smootherPtr->setup(mli_Amat);
          }
          mli->setSmoother( level, MLI_SMOOTHER_POST, smootherPtr );
+      }
+      if (spectralNorms_[level] == 1.0e39) 
+      {
+         spectralNorms_[level] = 0.0;
+         level++;
+         break;
       }
    }
 
@@ -935,6 +955,11 @@ int MLI_Method_AMGSA::setCoarsenScheme( int scheme )
    if ( scheme == MLI_METHOD_AMGSA_LOCAL ) 
    {
       coarsenScheme_ = MLI_METHOD_AMGSA_LOCAL;
+      return 0;
+   }
+   else if ( scheme == MLI_METHOD_AMGSA_HYBRID ) 
+   {
+      coarsenScheme_ = MLI_METHOD_AMGSA_HYBRID;
       return 0;
    }
    else
