@@ -2,6 +2,7 @@
 
 #ifndef HYPRE_LAPACK_H
 #define HYPRE_LAPACK_H
+#include "f2c.h"
 
 /* dgels.c */
 int dgels_ ( char *trans , integer *m , integer *n , integer *nrhs , doublereal *a , integer *lda , doublereal *b , integer *ldb , doublereal *work , integer *lwork , integer *info );
@@ -13,7 +14,12 @@ int dsyev_ ( char *jobz , char *uplo , integer *n , doublereal *a , integer *lda
 int dsygv_ ( integer *itype , char *jobz , char *uplo , integer *n , doublereal *a , integer *lda , doublereal *b , integer *ldb , doublereal *w , doublereal *work , integer *lwork , integer *info );
 
 /* lapack_utils.c */
+double d_lg10 ( doublereal *x );
+double d_sign ( doublereal *a , doublereal *b );
+double pow_di ( doublereal *ap , integer *bp );
+int s_cat ( char *lp , char *rpp [], ftnlen rnp [], ftnlen *np , ftnlen ll );
 int xerbla_ ( char *srname , integer *info );
+integer ieeeck_ ( integer *ispec , real *zero , real *one );
 integer ilaenv_ ( integer *ispec , char *name__ , char *opts , integer *n1 , integer *n2 , integer *n3 , integer *n4 , ftnlen name_len , ftnlen opts_len );
 logical lsame_ ( char *ca , char *cb );
 doublereal dlamch_ ( char *cmach );
