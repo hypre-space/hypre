@@ -68,11 +68,14 @@ HYPRE_ParCSRMatrix A;
 //Instantiate the preconditioner.
 HYPRE_EuclidCreate(comm, &eu);
 
-//Optionally use either or both of the following two calls to set options.
+//Optionally use the following three calls to set runtime options.
 // 1. pass options from command line or string array.
 HYPRE_EuclidSetParams(eu, argc, argv);
 
-// 2. pass options from a configuration file.
+// 2. pass individual options from within your  code.
+HYPRE_EuclidSetParam(eu, "-level", "3");
+
+// 3. pass options from a configuration file.
 HYPRE_EuclidSetParamsFromFile(eu, "filename");
 
 //Set Euclid as the preconditioning method for some
@@ -102,6 +105,15 @@ HYPRE_EuclidDestroy(eu);
 For expositional purposes, assume you wish to set the ILU($k$)
 factorization level to the value $k = 3$.
 There are several methods of accomplishing this.
+Internal to Euclid, options are stored in a simple database that
+contains (name, value) pairs.
+Various of Euclid's internal (private) functions query this
+database to determine, at runtime, what action the user
+has requested.
+If you enter the option ``{\bf -eu\_stats 1''}, a report will
+be printed when Euclid's destructor is called; this
+report lists (among other statistics) the options that
+were in effect during the factorization phase.
 
 {\bf Method 1.}
 By default, Euclid always looks for a file titled
@@ -127,7 +139,7 @@ If you include an option name that is not recognized by Euclid,
 no harm should ensue.
 
 {\bf Method 2.}
-To pass options on the command line, you must call
+To pass options on the command line, call
 \begin{display}
 \begin{verbatim}
 HYPRE_EuclidSetParams(HYPRE_Solver solver, int argc, char *argv[]);
@@ -162,18 +174,13 @@ configuration file, either the ``1'' or ``0'' must
 stated explicitly.
 
 {\bf Method 3.}
-The preceding method can be modified to permit the setting of individual
-options within your \hypre{} code.  For example,
+Individual options can be hardcoded via calls such as the following.
 
 \begin{display}
 \begin{verbatim}
-char name[2][80];
-strcpy( name[1], "-level");
-strcpy( name[2], "3");
-HYPRE_EuclidSetParams(solver, 2, name);
+HYPRE_EuclidSetParams(solver, "-level", "3");
 \end{verbatim}
 \end{display}
-
 
 {\bf Method 4.}
 There are two ways in which you can read in options from a file
@@ -196,11 +203,12 @@ mpirun -np 2 phoo -db_filename ../myConfigFile
 \subsection{Options summary}
 
 \begin{description}
-\item[-level $\langle int \rangle$] Factorization level for ILU($k$).  Default: 1.
-                    Guidance: for 2D convection-diffusion and similar problems, 
-                    fastest solution time is typically obtained with levels 4 through
-                    8.  For 3D problems fastest solution time is typically 
-                    obtained with level 1.
+\item[-level $\langle int \rangle$] Factorization level for ILU($k$).  
+           Default: 1.
+           Guidance: for 2D convection-diffusion and similar problems, 
+           fastest solution time is typically obtained with levels 4 through
+           8.  For 3D problems fastest solution time is typically 
+           obtained with level 1.
                     
 \item[-bj] Use Block Jacobi ILU preconditioning instead of PILU.
            Default: 0 (false). Guidance: if subdomains contain
@@ -209,12 +217,12 @@ mpirun -np 2 phoo -db_filename ../myConfigFile
            may give faster solution time than PILU.
 \item[-eu\_stats] When Euclid's destructor is called a summary of
                  runtime settings and timing information is printed
-                 to stdout.  The same report is printed
-                 when {\tt HYPRE\_EuclidPrintParams()} is called.
+                 to stdout.  Default: 0 (false).
                  The timing marks in the report are the maximum over 
                  all processors in the MPI communicator.
 \item[-eu\_mem] When Euclid's destructor is called a summary of
                Euclid's memory usage is printed to stdout.
+               Default: 0 (false).
                The statistics are for the processor whose rank 
                in MPI\_COMM\_WORLD is 0.
 \item[-printTestData] This option is used in our autotest procedures,
