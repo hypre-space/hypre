@@ -87,7 +87,7 @@ install:
 	      mkdir $$i; \
 	   done \
 	); \
-	for i in ${HYPRE_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_DOCS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
