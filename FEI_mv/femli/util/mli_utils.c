@@ -97,7 +97,7 @@ int MLI_Utils_HypreMatrixFormJacobi(void *A, double alpha, void **J)
    int                localNRows, startRow, ierr, irow, *rowLengths;
    int                rownum, rowSize, *colInd, *newColInd, newRowSize;
    int                icol, maxnnz;
-   double             *colVal, *newColVal;
+   double             *colVal, *newColVal, dtemp;
    MPI_Comm           comm;
    HYPRE_IJMatrix     IJmat;
    hypre_ParCSRMatrix *Amat, *Jmat;
@@ -160,18 +160,16 @@ int MLI_Utils_HypreMatrixFormJacobi(void *A, double alpha, void **J)
    {
       rownum = startRow + irow; 
       hypre_ParCSRMatrixGetRow(Amat, rownum, &rowSize, &colInd, &colVal);
+      dtemp = 1.0;
+      for ( icol = 0; icol < rowSize; icol++ )
+         if ( colInd[icol] == rownum ) {dtemp = colVal[icol]; break;}
+      if ( habs(dtemp) > 1.0e-16 ) dtemp = 1.0 / dtemp;
+      else                         dtemp = 1.0;
       for ( icol = 0; icol < rowSize; icol++ )
       {
          newColInd[icol] = colInd[icol];
-
-         /* diagonal scaling */
-         newColVal[icol] = - alpha * colVal[icol] / colVal[0];
-         if ( colInd[icol] == rownum ) newColVal[icol] = 1.0 - alpha;
-
-#if 0 // no diagonal scaling
-         newColVal[icol] = - alpha * colVal[icol];
+         newColVal[icol] = - alpha * colVal[icol] * dtemp;
          if ( colInd[icol] == rownum ) newColVal[icol] += 1.0;
-#endif
       } 
       newRowSize = rowSize;
       if ( rowLengths[irow] == rowSize+1 ) 
