@@ -18,7 +18,6 @@
 
 #include "utilities.h"
 
-#include "HYPRE_distributed_matrix_types.h"
 
 /*--------------------------------------------------------------------------
  * hypre_DistributedMatrix:
@@ -58,6 +57,7 @@ typedef struct
 /*--------------------------------------------------------------------------
  * prototypes for operations on local objects
  *--------------------------------------------------------------------------*/
+#include "HYPRE_distributed_matrix_mv.h"
 #include "hypre_protos.h"
 #include "internal_protos.h"
 

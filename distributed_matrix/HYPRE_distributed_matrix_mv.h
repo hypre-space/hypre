@@ -1,3 +1,24 @@
+
+/*BHEADER**********************************************************************
+ * (c) 1997   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+/******************************************************************************
+ *
+ * Header info for the hypre_DistributedMatrix structures
+ *
+ *****************************************************************************/
+
+#ifndef HYPRE_DISTRIBUTED_MATRIX_MV_HEADER
+#define HYPRE_DISTRIBUTED_MATRIX_MV_HEADER
+
+
+typedef void *HYPRE_DistributedMatrix;
+
 # define	P(s) s
 
 /* HYPRE_distributed_matrix.c */
@@ -23,3 +44,4 @@ int HYPRE_DistributedMatrixGetRow P((HYPRE_DistributedMatrix matrix , int row , 
 int HYPRE_DistributedMatrixRestoreRow P((HYPRE_DistributedMatrix matrix , int row , int *size , int **col_ind , double **values ));
 
 #undef P
+#endif
