@@ -27,30 +27,11 @@ void Hypre_MPI_Com_constructor(Hypre_MPI_Com this) {
    all we have to allocate is a short chain of pointers, and maybe an
    int MPI handle. */
 
-#ifdef HYPRE_SEQUENTIAL
-   typedef struct {int dummy;}  hypre_MPI_Comm;
-   typedef struct hypre_MPI_Comm *MPI_Comm;
-   MPI_Comm * MCp;
-   hypre_MPI_Comm * MC;
-#endif
-
    this->d_table = (struct Hypre_MPI_Com_private_type *)
      malloc(sizeof(struct Hypre_MPI_Com_private_type)) ;
 
    this->d_table->hcom = (MPI_Comm *)
       (malloc(sizeof(MPI_Comm)));
-
-#ifdef HYPRE_SEQUENTIAL
-   /* initialize dummy data to please Purify */
-   MCp = this->d_table->hcom;
-   *MCp = (MPI_Comm) malloc( sizeof(hypre_MPI_Comm) );
-   MC = (hypre_MPI_Comm *) *MCp;
-   MC ->dummy = 0;
-   printf( "size of MPI_Comm=%i\n", sizeof(MPI_Comm) );
-   
-#endif
-
-
 } /* end constructor */
 
 /* *************************************************
@@ -66,4 +47,26 @@ void Hypre_MPI_Com_destructor(Hypre_MPI_Com this) {
    free(HMCp);
 
 } /* end destructor */
+
+/* ********************************************************
+ * impl_Hypre_MPI_ComNew
+ **********************************************************/
+void  impl_Hypre_MPI_Com_New(Hypre_MPI_Com this, int comm) {
+/* For multiprocessing code, the int comm should really be an
+   MPI handle such as MPI_COMM_WORLD.  For sequential code it
+   should really be the appropriate pointer to a dummy struct
+   (or, maybe, comm=0) */
+   MPI_Comm * MCp = this->d_table->hcom;
+   MCp = (MPI_Comm) comm;
+} /* end impl_Hypre_MPI_ComNew */
+
+/* ********************************************************
+ * impl_Hypre_MPI_ComConstructor
+ **********************************************************/
+Hypre_MPI_Com  impl_Hypre_MPI_Com_Constructor(int comm) {
+   /* declared static; just combines the new and New functions */
+   Hypre_MPI_Com C = Hypre_MPI_Com_new();
+   Hypre_MPI_Com_New( C, comm );
+   return C;
+} /* end impl_Hypre_MPI_ComConstructor */
 
