@@ -1,5 +1,5 @@
 #BHEADER***********************************************************************
-# (c) 1997   The Regents of the University of California
+# (c) 1999   The Regents of the University of California
 #
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
@@ -32,8 +32,10 @@ LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
 BLASLIBFLAGS = @BLASLIBFLAGS@
 
 LFLAGS =\
+ -L.\
  -L../../utilities\
  -L../../distributed_matrix\
+ -lHYPRE_ParaSails\
  ${BLASLIBFLAGS}\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
 
@@ -53,7 +55,6 @@ HEADERS =\
 
 FILES =\
  ConjGrad.c\
- Convert.c\
  DiagScale.c\
  HYPRE_ParaSails.c\
  Hash.c\
@@ -76,6 +77,9 @@ all: libHYPRE_ParaSails.a
 driver: driver.o libHYPRE_ParaSails.a
 	@echo  "Linking" $@ "... "
 	${CC} -o $@ driver.o ${LFLAGS}
+
+convert: convert.o
+	${CC} -o $@ convert.o
 
 install: all
 	@cp -f HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.

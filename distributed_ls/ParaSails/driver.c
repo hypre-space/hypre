@@ -35,35 +35,20 @@ int main(int argc, char *argv[])
     if (mype == npes-1)
         assert(end_row == n);
 
-    A = MatrixCreate(MPI_COMM_WORLD, beg_row, end_row);
-
-    MatrixRead(A, argv[1]);
-    /* MatrixPrint(A, "A"); */
-
     x = (double *) malloc((end_row-beg_row+1) * sizeof(double));
     y = (double *) malloc((end_row-beg_row+1) * sizeof(double));
     b = (double *) malloc((end_row-beg_row+1) * sizeof(double));
 
+    A = MatrixCreate(MPI_COMM_WORLD, beg_row, end_row);
+
+    MatrixRead(A, argv[1]);
+    RhsRead(b, A, argv[2]);
+    /* MatrixPrint(A, "A"); */
+
     for (i=0; i<end_row-beg_row+1; i++)
     {
-        x[i] = (double) (i+beg_row);
-        y[i] = 0.0;
-        b[i] = (double) (i+beg_row);
+        x[i] = 0.0;
     }
-
-/*
-    MatrixMatvecSetup(A);
-
-    MatrixMatvec(A, x, y);
-    for (i=0; i<end_row-beg_row+1; i++)
-        printf("%d:  %d %f\n", mype, i, y[i]);
-
-    MatrixMatvecTrans(A, x, y);
-    for (i=0; i<end_row-beg_row+1; i++)
-        printf("%d:  %d %f\n", mype, i, y[i]);
-
-    MatrixMatvecComplete(A);
-*/
 
     time0 = MPI_Wtime();
     ps = ParaSailsCreate(A);
