@@ -87,6 +87,9 @@ libHYPRE_utilities.a: ${UTILITIES_OBJS}
 
 ${UTILITIES_OBJS}: ${UTILITIES_HEADERS}
 
+timer.o: timer.c
+	${CC} -D_POSIX_SOURCE -o $@ -c ${CFLAGS} $<
+
 ##################################################################
 # Generic rules
 ##################################################################
