@@ -12,9 +12,10 @@
 # Define test driver names
 #===========================================================================
 
-TEST_DRIVERS=\
+TEST_DRIVERS="\
  struct_linear_solvers\
- IJ_linear_solvers
+ IJ_linear_solvers\
+"
 
 #===========================================================================
 # Define HYPRE_ARCH
