@@ -19,7 +19,7 @@ to be pointers.
 
 The simplicity of Fortran, and the flexibility of C, allow the languages to
 interoperate.  However, portability might introduce complexities to
-configuration of the interoperation codes.
+configuration of the interoperating codes.
 
 Portability across DEC Compass, DEC Tera, and IBM ASCI-Blue platforms is
 currently achieved with the specific Fortran-calling-C mapping: 
@@ -76,7 +76,7 @@ particular hand them back and forth between various C functions.  The
 \end{verbatim}
 
 The interface is designed so that the label \verb+subroutine_name+ is exactly
-the label of the {\slshape hypre} C-function.  The Hypre interlanguage interface
+the label of the {\slshape hypre} C-function.  The {\slshape} Hypre interlanguage interface
 accounts for related compilation/linking issues involving appended
 underscores.  Fortran variables like \verb+addr+
 are convenient for receiving, from C, pointers to arrays or other

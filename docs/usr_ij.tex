@@ -4,14 +4,14 @@
 
 The {\bf IJ linear system (IJ)} interface is the lowest common
 denominator
-for enumeration of an {\bf unaugmented} linear system of equations
+for enumeration of an {\itshape unaugmented} linear system of equations
 to be solved by {\slshape hypre} and cooperative packages.
-No underlying assumptions are made about the sparsity pattern of
-a linear system passed through the IJ interface.
-Like all Hypre interfaces, it is designed
+No {\itshape a priori} assumptions are made about the sparsity
+pattern of a linear system passed through the IJ interface.
+Like all {\slshape hypre} interfaces, it is designed
 to insulate the user from underlying implementation details.
 
-Just to define an {\bf augmented} linear system, an example would be
+Just to define an {\itshape augmented} linear system, an example would be
 a linear system plus the stiffness matrices from which the matrix
 coefficients are assembled in a finite element discretization.
 It contains more information than just the linear system
@@ -27,12 +27,12 @@ IJ matrix interface calls facilitate creation and destruction of
 matrix interface objects; enumeration, manipulation and retrieval
 of rows and blocks of linear system coefficients; and determination
 and querying of underlying linear system data structure formats.
-Hypre supports multiple underlying data structure formats in order
-to cooperate
-with packages such as PETSc and ISIS, as well as for convenience
-to the {\slshape hypre} solver developer.
-One format is abbreviated {\bf ParCSR}, meaning {\bf Par}allel
-{\bf C}ompressed {\bf S}parse {\bf R}ow.  Another format
+{\slshape Hypre} supports multiple underlying data structure formats
+in order to cooperate
+with packages such as {\slshape PETSc} and {\slshape ISIS},
+as well as for convenience to the {\slshape hypre} solver developer.
+One format is abbreviated {\itshape ParCSR}, meaning {\itshape Par}allel
+{\itshape C}ompressed {\itshape S}parse {\itshape R}ow.  Another format
 is DistributedMatrix.
 
 IJ vector interface calls facilitate creation and destruction of
@@ -41,103 +41,160 @@ of right-hand side and initial guess vector components.
 
 Currently, {\slshape hypre} solvers which operate directly on linear
 systems passing through the IJ interface have either
-ParCSR (interface) implementations, or DistributedMatrix
-implementations.
+{\itshape ParCSR} implementations, {\slshape ISIS} implementations,
+or {\slshape PETSc} implementations.
+
+A full listing of IJ linear system C-functions and Fortran
+interface names should be located in the {\slshape hypre} reference
+manual.
 
 \section{IJ Matrix Interface}
 
+\subsection{Creation and destruction of interface object}
+
+\begin{verbatim}
+      ierr = HYPRE_IJMatrixCreate(communicator, ij_matrix_ptr,
+                                  global_m, global_n);
+
+      ierr = HYPRE_IJMatrixDestroy(ij_matrix);
+\end{verbatim}
+
+\subsection{Typical implementation}
+
+\begin{verbatim}
+      ierr = HYPRE_IJMatrixCreate(communicator, ij_matrix_ptr,
+                                  global_m, global_n);
+
+      ierr = HYPRE_IJMatrixSetLocalStorageType(ij_matrix, type);
+\end{verbatim}
+
+\noindent Storage types \verb+HYPRE_PARCSR+, \verb+HYPRE_ISIS+, and
+\verb+HYPRE_PETSC+, will be allowed.  Currently, only \verb+HYPRE_PARCSR+
+has been tested. 
+
+\begin{verbatim}
+      ierr = HYPRE_IJMatrixInitialize(ij_matrix);
+      ierr = HYPRE_IJMatrixInsertRow(ij_matrix, num_cols, row,
+                                     col_indices, values);
+      ierr = HYPRE_IJMatrixAssemble(ij_matrix);
+      ierr = HYPRE_IJMatrixDestroy(ij_matrix);
+\end{verbatim}
+
 \section{IJ Vector Interface}
 
-Fortran implementation (temporarily):
+Currently in Fortran (will change to C)
+
+\subsection{Creation and destruction of interface object}
 
 \begin{verbatim}
-      call HYPRE_IJVectorCreate(rad_comm, hypre_b, global_number_pts,
+      call HYPRE_IJVectorCreate(communicator, ij_vec, global_number_pts,
      &                          ierr)
 
-      call HYPRE_IJVectorSetLocalStorageTy(hypre_b, HYPRE_PARCSR, ierr)
+      call HYPRE_IJVectorDestroy(ij_vec);
 \end{verbatim}
 
-Processors can be informed about distribution of unknowns over processors,
+\subsection{Typical implementation}
 
 \begin{verbatim}
-      call HYPRE_IJVectorSetLocalPartition(hypre_b, domain_pt_start,
+      call HYPRE_IJVectorCreate(communicator, ij_b, global_number_pts,
+     &                          ierr)
+
+      call HYPRE_IJVectorSetLocalStorageTy(ij_b, HYPRE_PARCSR, ierr)
+\end{verbatim}
+
+\noindent Storage types \verb+HYPRE_PARCSR+, \verb+HYPRE_ISIS+, and
+\verb+HYPRE_PETSC+, will be allowed.  Currently, only \verb+HYPRE_PARCSR+
+has been tested.  Processors can be informed about distribution of
+unknowns over processors,
+
+\begin{verbatim}
+      call HYPRE_IJVectorSetLocalPartition(ij_b, domain_pt_start,
      &                                     next_domain_pt_start,
      &                                     ierr)
 \end{verbatim}
 
-and then all processors must agree upon the distribution, ...
+\noindent and then all processors must agree upon the distribution, ...
 
 \begin{verbatim}
-      call HYPRE_IJVectorAssemble(hypre_b, ierr)                     .
+      call HYPRE_IJVectorAssemble(ij_b, ierr)                       .
 \end{verbatim}
 
-Memory space is then allocated for the vector components that must
-be handled on the processor, ...
+\noindent Memory space is then allocated for the vector components
+that must be handled on the processor, ...
 
 \begin{verbatim}
-      call HYPRE_IJVectorInitialize(hypre_b, ierr)                   .
+      call HYPRE_IJVectorInitialize(ij_b, ierr)          
 
-      call HYPRE_IJVectorCreate(rad_comm, hypre_x, global_number_pts,
-     &                          ierr)
+      call HYPRE_IJVectorCreate(communicator, ij_x,
+     &                          global_number_pts, ierr)
 
-      call HYPRE_IJVectorSetLocalStorageTy(hypre_x, HYPRE_PARCSR,
-     &                                     ierr)
+      call HYPRE_IJVectorSetLocalStorageTy(ij_x, HYPRE_PARCSR, ierr)
 
-      call HYPRE_IJVectorSetLocalPartition(hypre_x, domain_pt_start,
+      call HYPRE_IJVectorSetLocalPartition(ij_x, domain_pt_start,
+     &                                     next_domain_pt_start, ierr)
+
+      call HYPRE_IJVectorAssemble(ij_x, ierr)
+
+      call HYPRE_IJVectorInitialize(ij_x, ierr)                     .
+\end{verbatim}
+
+\noindent Vector components can be placed into underlying {\slshape hypre}
+formats either in contiguous subsets, ...
+
+\begin{verbatim}
+      call HYPRE_IJVectorSetLocalCompsInBl(ij_b, domain_pt_start,
+     &                                     next_domain_pt_start-1,
+     &                                     ii,b,ierr)
+
+      call HYPRE_IJVectorSetLocalCompsInBl(ij_x, domain_pt_start,
+     &                                     next_domain_pt_start-1,
+     &                                     ii,x,ierr)               ,
+\end{verbatim}
+
+\noindent or in indexed subsets
+
+\begin{verbatim}
+      call HYPRE_IJVectorSetLocalComps(ij_b, num_values,
+     &                                 ii, b_indices, b, ierr)
+
+      call HYPRE_IJVectorSetLocalComps(ij_x, num_values,
+     &                                 ii, x_indices, x, ierr)      .
+\end{verbatim}
+
+\noindent One can also add to vector components that are already set, in
+contiguous or indexed subsets of components, ...
+
+\begin{verbatim}
+      call HYPRE_IJVectorAddToLocalCompsBl(ij_b, domain_pt_start,
      &                                     next_domain_pt_start,
-     &                                     ierr)
+     &                                     ii, b, ierr) 
 
-      call HYPRE_IJVectorAssemble(hypre_x, ierr)
-
-      call HYPRE_IJVectorInitialize(hypre_x, ierr)
+      call HYPRE_IJVectorAddToLocalComps(ij_b, num_values,
+     &                                   ii, b_indices, b, ierr)    .
 \end{verbatim}
 
-Vector components can be placed into underlying Hypre formats either
-in contiguous subsets, ...
+\noindent After the solver is finished, vector components can be
+extracted from a contiguous subset of components, ...
 
 \begin{verbatim}
-      call HYPRE_IJVectorSetLocalCompsInBl(hypre_b,
-     &                                     domain_pt_start,
+      call HYPRE_IJVectorGetLocalCompsInBl(ij_x, domain_pt_start,
      &                                     next_domain_pt_start-1,
-     &                                     ii,y,ierr)
-
-      call HYPRE_IJVectorSetLocalCompsInBl(hypre_x,
-     &                                     domain_pt_start,
-     &                                     next_domain_pt_start-1,
-     &                                     ii,x,ierr)
+     &                                     ii, x, ierr)             ,
 \end{verbatim}
 
-or in indexed subsets
+\noindent or from an indexed subset of components, ...
 
 \begin{verbatim}
-      call HYPRE_IJVectorSetLocalComps(hypre_b,
-     &                                 domain_pt_start,
-     &                                 next_domain_pt_start-1,
-     &                                 ii,y,ierr)
-
-      call HYPRE_IJVectorSetLocalComps(hypre_x,
-     &                                 domain_pt_start,
-     &                                 next_domain_pt_start-1,
-     &                                 ii,x,ierr)                   .
+      call HYPRE_IJVectorGetLocalComps(ij_x, num_values,
+     &                                 ii, x_indices, x, ierr)      .
 \end{verbatim}
 
-After the solver is finished, vector components can be extracted from
-a contiguous subset of components, ...
+Then the vectors can be deallocated.
 
 \begin{verbatim}
-      call HYPRE_IJVectorGetLocalCompsInBl(hypre_x,
-     &                                     domain_pt_start,
-     &                                     next_domain_pt_start-1,
-     &                                     ii, x, ierr)
+      call HYPRE_IJVectorDestroy(ij_b)
+      call HYPRE_IJVectorDestroy(ij_x)                              .
 \end{verbatim}
 
-or from an indexed subset of components, ...
 
-\begin{verbatim}
-      call HYPRE_IJVectorGetLocalCompsInBl(hypre_x,
-     &                                     num_values,
-     &                                     ii, x_indices, x, ierr)  .
-\end{verbatim}
-
-One can also add to vector components that are already set.
 
