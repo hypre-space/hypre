@@ -195,9 +195,7 @@ vref_manual.tex: vref_manual.dxx
 
 vref_manual.dxx: ref_manual.dxx
 	@ \
-	VNUM=`$(srcdir)/../utilities/version -number`; \
-	VDATE=`$(srcdir)/../utilities/version -date`; \
-	sed "s/HYPREVersion/$$VNUM/g" ref_manual.dxx > vref_manual.dxx
+	sed "s/HYPREVersion/$(HYPRE_RELEASE_VERSION)/g" ref_manual.dxx > vref_manual.dxx
 
 ##########
 
@@ -219,9 +217,9 @@ vbref_manual.dvi: version.tex vbref_manual.tex
 vbref_manual.tex: vbref_manual.dxx
 	doc++ -t -o vbref_manual.tex vbref_manual.dxx
 
-vbref_manual.dxx: ref_manual.dxx
+vbref_manual.dxx: bref_manual.dxx
 	@ \
-	sed "s/HYPREVersion/$(HYPRE_RELEASE_VERSION)/g" ref_manual.dxx > vbref_manual.dxx
+	sed "s/HYPREVersion/$(HYPRE_RELEASE_VERSION)/g" bref_manual.dxx > vbref_manual.dxx
 
 ##########
 

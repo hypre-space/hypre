@@ -17,14 +17,14 @@
  * @name IJ Matrix Builder
  **/
 //@{
-//@Include: /home/hill66/linear_solvers/docs/../babel/bHYPREClient-C/bHYPRE_IJBuildMatrix.h
+//@Include: ../babel/bHYPREClient-C/bHYPRE_IJBuildMatrix.h
 //@}
 
 /**
  * @name IJ Vector Builder
  **/
 //@{
-//@Include: /home/hill66/linear_solvers/docs/../babel/bHYPREClient-C/bHYPRE_IJBuildVector.h
+//@Include: ../babel/bHYPREClient-C/bHYPRE_IJBuildVector.h
 //@}
 
 /*@}*/
@@ -36,7 +36,7 @@
  **/
 //@{
 
-//@Include: /home/hill66/linear_solvers/docs/../babel/bHYPREClient-C/bHYPRE_Operator.h
+//@Include: ../babel/bHYPREClient-C/bHYPRE_Operator.h
 
 //@}
 
@@ -47,7 +47,7 @@
  **/
 //@{
 
-//@Include: /home/hill66/linear_solvers/docs/../babel/bHYPREClient-C/bHYPRE_Vector.h
+//@Include: ../babel/bHYPREClient-C/bHYPRE_Vector.h
 
 //@}
 
@@ -62,14 +62,14 @@
  * @name IJParCSR Matrix
  **/
 //@{
-//@Include: /home/hill66/linear_solvers/docs/../babel/bHYPREClient-C/bHYPRE_IJParCSRMatrix.h
+//@Include: ../babel/bHYPREClient-C/bHYPRE_IJParCSRMatrix.h
 //@}
 
 /**
  * @name IJParCSR Vector
  **/
 //@{
-//@Include: /home/hill66/linear_solvers/docs/../babel/bHYPREClient-C/bHYPRE_IJParCSRVector.h
+//@Include: ../babel/bHYPREClient-C/bHYPRE_IJParCSRVector.h
 //@}
 
 //@}
@@ -81,7 +81,7 @@
  **/
 //@{
 
-//@Include: /home/hill66/linear_solvers/docs/../babel/bHYPREClient-C/bHYPRE_Solver.h
+//@Include: ../babel/bHYPREClient-C/bHYPRE_Solver.h
 
 //@}
 
@@ -101,14 +101,14 @@
  * @name ParCSRDiagScale Solver
  **/
 //@{
-//@Include: /home/hill66/linear_solvers/docs/../babel/bHYPREClient-C/bHYPRE_ParCSRDiagScale.h
+//@Include: ../babel/bHYPREClient-C/bHYPRE_ParCSRDiagScale.h
 //@}
 
 /**
  * @name ParCSR BoomerAMG Solver
  **/
 //@{
-//@Include: /home/hill66/linear_solvers/docs/../babel/bHYPREClient-C/bHYPRE_BoomerAMG.h
+//@Include: ../babel/bHYPREClient-C/bHYPRE_BoomerAMG.h
 //@}
 
 /*@}*/
@@ -120,7 +120,7 @@
  **/
 //@{
 
-//@Include: /home/hill66/linear_solvers/docs/../babel/bHYPREClient-C/bHYPRE_PreconditionedSolver.h
+//@Include: ../babel/bHYPREClient-C/bHYPRE_PreconditionedSolver.h
 
 //@}
 
@@ -135,14 +135,14 @@
  * @name PCG Preconditioned Solver
  **/
 //@{
-//@Include: /home/hill66/linear_solvers/docs/../babel/bHYPREClient-C/bHYPRE_PCG.h
+//@Include: ../babel/bHYPREClient-C/bHYPRE_PCG.h
 //@}
 
 /**
  * @name GMRES Preconditioned Solver
  **/
 //@{
-//@Include: /home/hill66/linear_solvers/docs/../babel/bHYPREClient-C/bHYPRE_GMRES.h
+//@Include: ../babel/bHYPREClient-C/bHYPRE_GMRES.h
 //@}
 
 //@}
