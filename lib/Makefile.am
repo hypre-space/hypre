@@ -3,12 +3,12 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE.a libHYPRE_LSI.a
  libHYPRE_a_SOURCES = $(FILES)
- libHYPRE_LSI_a_SOURCES = $(SUBSETFILES)
+ libHYPRE_LSI_a_SOURCES = $(FILES)
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE.la libHYPRE_LSI.la
  libHYPRE_la_SOURCES = $(FILES)
  libHYPRE_la_LDFLAGS = -avoid-version
- libHYPRE_LSI_la_SOURCES = $(SUBSETFILES)
+ libHYPRE_LSI_la_SOURCES = $(FILES)
  libHYPRE_LSI_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -25,6 +25,8 @@ BLASFILES = \
  $(top_srcdir)/blas/dnrm2.c\
  $(top_srcdir)/blas/drot.c\
  $(top_srcdir)/blas/dscal.c\
+ $(top_srcdir)/blas/dswap.c\
+ $(top_srcdir)/blas/dsymm.c\
  $(top_srcdir)/blas/dsymv.c\
  $(top_srcdir)/blas/dsyr2.c\
  $(top_srcdir)/blas/dsyr2k.c\
@@ -128,7 +130,7 @@ HYPRE_SRC_DIRS = \
  distributed_matrix\
  krylov\
  matrix_matrix\
- eigensolvers/lib\
+ parcsr_es/LOBPCG\
  parcsr_ls\
  parcsr_mv\
  seq_mv\
@@ -138,7 +140,9 @@ HYPRE_SRC_DIRS = \
  struct_mv\
  utilities
 
-SUPERLUFILES = \
+FILES = \
+ $(BLASFILES)\
+ $(LAPACKFILES)\
  $(top_srcdir)/FEI_mv/SuperLU/colamd.c\
  $(top_srcdir)/FEI_mv/SuperLU/dcolumn_bmod.c\
  $(top_srcdir)/FEI_mv/SuperLU/dcolumn_dfs.c\
@@ -173,9 +177,7 @@ SUPERLUFILES = \
  $(top_srcdir)/FEI_mv/SuperLU/sp_preorder.c\
  $(top_srcdir)/FEI_mv/SuperLU/superlu_memory.c\
  $(top_srcdir)/FEI_mv/SuperLU/superlu_timer.c\
- $(top_srcdir)/FEI_mv/SuperLU/superlu_util.c
-
-MOSTFILES = \
+ $(top_srcdir)/FEI_mv/SuperLU/superlu_util.c\
  $(top_srcdir)/FEI_mv/fei-hypre/bicgs.c\
  $(top_srcdir)/FEI_mv/fei-hypre/bicgstabl.c\
  $(top_srcdir)/FEI_mv/fei-hypre/FEI_HYPRE_Impl.cxx\
@@ -207,11 +209,6 @@ MOSTFILES = \
  $(top_srcdir)/FEI_mv/fei-hypre/hypre_schur_reduce.cxx\
  $(top_srcdir)/FEI_mv/fei-hypre/hypre_slide_reduce.cxx\
  $(top_srcdir)/FEI_mv/fei-hypre/lsicg.c\
- $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx\
- $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx\
- $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx\
- $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx\
- $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx\
  $(top_srcdir)/FEI_mv/femli/util/mli_utils.c\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_calib.cxx\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_coarsen1.cxx\
@@ -330,14 +327,9 @@ MOSTFILES = \
  $(top_srcdir)/krylov/pcg.c\
  $(top_srcdir)/matrix_matrix/HYPRE_ConvertPETScMatrixToDistributedMatrix.c\
  $(top_srcdir)/matrix_matrix/HYPRE_ConvertParCSRMatrixToDistributedMatrix.c\
- $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c\
- $(top_srcdir)/eigensolvers/krylov/lobpcg.c\
- $(top_srcdir)/eigensolvers/multivector/multivector.c\
- $(top_srcdir)/eigensolvers/multivector/temp_multivector.c\
- $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c\
- $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c\
- $(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c\
- $(top_srcdir)/eigensolvers/utilities/fortran_matrix.c\
+ $(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c\
+ $(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c\
+ $(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c\
  $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_ParaSails.c\
  $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_amg.c\
  $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_bicgstab.c\
@@ -372,7 +364,6 @@ MOSTFILES = \
  $(top_srcdir)/parcsr_ls/par_laplace.c\
  $(top_srcdir)/parcsr_ls/par_laplace_27pt.c\
  $(top_srcdir)/parcsr_ls/par_laplace_9pt.c\
- $(top_srcdir)/parcsr_ls/par_nodal_systems.c\
  $(top_srcdir)/parcsr_ls/par_rap.c\
  $(top_srcdir)/parcsr_ls/par_rap_communication.c\
  $(top_srcdir)/parcsr_ls/par_relax.c\
@@ -505,7 +496,6 @@ MOSTFILES = \
  $(top_srcdir)/struct_mv/box.c\
  $(top_srcdir)/struct_mv/box_algebra.c\
  $(top_srcdir)/struct_mv/box_alloc.c\
- $(top_srcdir)/struct_mv/box_boundary.c\
  $(top_srcdir)/struct_mv/box_neighbors.c\
  $(top_srcdir)/struct_mv/grow.c\
  $(top_srcdir)/struct_mv/communication_info.c\
@@ -537,14 +527,6 @@ MOSTFILES = \
  $(top_srcdir)/utilities/timing.c\
  $(top_srcdir)/utilities/umalloc_local.c
 
-FILES = \
- $(BLASFILES)\
- $(LAPACKFILES)\
- $(SUPERLUFILES)\
- $(MOSTFILES)
-
-SUBSETFILES = $(MOSTFILES)
-
 BUILT_SOURCES = copy-objects
 
 copy-objects:
@@ -568,4 +550,3 @@ copy-objects:
 	    done; \
 	  fi; \
 	done
-
