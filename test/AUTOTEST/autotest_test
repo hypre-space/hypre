@@ -192,8 +192,33 @@ process_filter () {
   shift
   if (egrep "$@" $ErrorFile >/dev/null)
   then          
-    mv $ErrorFile $ErrorFile.orig
-    egrep -v "$@" $ErrorFile.orig > $ErrorFile
+    mv $ErrorFile $ErrorFile.tmp
+    egrep -v "$@" $ErrorFile.tmp > $ErrorFile
+    echo "-- applied filter:$@" >> $ErrorFile.orig
+    cat $ErrorFile.tmp >> $ErrorFile.orig
+  fi
+}
+multi_line_filter () {
+  ErrorFile=$1
+  shift
+  Join=$1
+  shift
+  if (egrep "$@" $ErrorFile >/dev/null)
+  then
+    cp $ErrorFile $ErrorFile.tmp
+    while (egrep "$@" $ErrorFile.tmp >/dev/null)
+    do
+      ed $ErrorFile.tmp <<EOF >/dev/null
+/$@/
+.,+${Join}j
+d
+w
+q
+EOF
+    done
+    echo "-- applied multi-line filter:$@" >> $ErrorFile.orig
+    cat $ErrorFile >> $ErrorFile.orig
+    mv $ErrorFile.tmp $ErrorFile 
   fi
 }
 apply_error_filters () {
@@ -208,7 +233,9 @@ apply_error_filters () {
           'Compilation\ successful'\
           '^\ Guide\ \ \ '\
           ':\ 0\ errors\ in\ file'\
-          '1500-030:\ \(I\)\ INFORMATION:'
+          '1500-030:\ \(I\)\ INFORMATION:'\
+          'configure:\ WARNING:\ Configuration\ for'\
+          'configure:\ WARNING:\ I\ have\ to\ compile'
         do process_filter $ErrorFile "${ii}"
         done
 ###   fi   # blue
@@ -222,7 +249,7 @@ apply_error_filters () {
       ;;
       tckk*|tc2k*|gps*)
         for ii in \
-          '^cc:\ Info:\ '\
+          '^stty:\ tcgetattr:\ Not\ a\ typewriter'\
           'WARNING:\ \ guidef77\ has\ implied\ '
         do process_filter $ErrorFile "${ii}"
         done
@@ -242,8 +269,8 @@ apply_error_filters () {
       ;;
       achi*|sunup*)
         for ii in \
-          'Option\ -fexceptions\ passed\ to\ ld'\
-          'configure:\ WARNING:\ Configuration\ for'
+          'Option -fexceptions passed to ld'\
+          'configure: WARNING: Configuration for'
         do process_filter $ErrorFile "${ii}"
         done
       ;;
