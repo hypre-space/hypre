@@ -25,6 +25,7 @@ initialize_variables ()
   MailOpt=""
   MailCmd="no"
   DEBUG_MODE="no"
+  HYPRE_DST_DIR=""
   Skip=0
   Build=1
   Run=2
@@ -126,7 +127,7 @@ parse_arguments () {
 # probably implement the obsolute getopt) then
 # getopts(1) will be used.
 #
-  while getopts :a:b:cDde:fhi:l:mno:q:r:sv:xy arg
+  while getopts :a:b:cDde:fhi:l:mno:p:q:r:sv:xy arg
   do
     argcur=$arg
     case $arg in
@@ -147,6 +148,7 @@ parse_arguments () {
      +m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail"; MailCmd="yes";;
       n) confbuildtest $Build   "--without-MPI" "no_mpi"    0 0 0 0 1 0 0;;
       o) confbuildtest $OPTARG  "--with-openmp" "openmp"    0 0 0 0 1 0 1;;
+      p) HYPRE_DST_DIR=$OPTARG;;
       q) confbuildtest $OPTARG  "--with-purify-to-file" \
                                                 "purify"    0 0 0 0 1 0 1;;
      +q) confbuildtest $OPTARG  "--with-purify" "purify"    0 0 0 0 1 0 1;;
@@ -167,7 +169,7 @@ parse_arguments () {
 #=============================================================================
 usage () {
   printf "Usage: %s [-cDdfhmnsxy] [-a opt] [-b opt] [-e opt]\n" $0
-  printf "       [-i opt] [-l opt] [-o opt]\n"
+  printf "       [-i opt] [-l opt] [-o opt] [-p path]\n"
   printf "       [-q opt] [-r host] [-v text]\n"
   printf "\n"
   printf "Hypre autotest (Note: all options are positional dependent\n"
@@ -196,13 +198,14 @@ usage () {
   printf "%s\n" "-n       NoMPI; configure --without-MPI, make struct, IJ,"
   printf "         and all (no execute option).\n"
   printf "%s\n" "-o opt   openMP; configure --with-openmp, make."
+  printf "%s\n" "-p path  Path to test directory (copied from local test)."
   printf "%s\n" "-q opt   Purify; perform configure --with-purify-to-file."
   printf "         Output is appended to a file called purify.log.\n"
   printf "%s\n" "+q opt   Purify; no file output option (interactive)."
   printf "%s\n" "-r host  Remote; remote exection is performed on "host"."
   printf "%s\n" "-s       Strict; configure --with-strict-checking,"
   printf "         followed by make struct, IJ, all(no execute option).\n"
-  printf "%s\n" "-v text  Additional test to prefix to email subject line."
+  printf "%s\n" "-v text  Additional text to prefix to email subject line."
 }
 
 #=============================================================================
@@ -452,7 +455,11 @@ mail_summary () {
   printf "Compile machine:    %s\n" $HYPRE_COMPILE_MACHINE >> $SUMFILE
   printf "Execute machine:    %s\n" $HYPRE_RUN_MACHINE >> $SUMFILE
   printf "Operating system:   `uname -a`\n" >> $SUMFILE
-  printf "Directory:          %s\n" ${HYPRE_AUTOTEST_DIR} >> $SUMFILE
+  if test -z "$HYPRE_DST_DIR}" ; then
+    printf "Directory:          %s\n" ${HYPRE_AUTOTEST_DIR} >> $SUMFILE
+  else
+    printf "Directory:          %s\n" ${HYPRE_DST_DIR} >> $SUMFILE
+  fi
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
   printf "Compile summary: Status: Warnings: Errors\n" >> $SUMFILE
   for ConfOpt in babel debug default no_mpi openmp \
