@@ -103,7 +103,7 @@ void *hypre_FACCreate( MPI_Comm comm );
 int hypre_FACDestroy2( void *fac_vdata );
 int hypre_FACSetTol( void *fac_vdata , double tol );
 int hypre_FACSetPLevels( void *fac_vdata , int nparts , int *plevels );
-int hypre_FACSetPRefinements( void *fac_vdata , int nparts , hypre_Index *prefinements );
+int hypre_FACSetPRefinements( void *fac_vdata , int nparts , int (*prefinements )[3 ]);
 int hypre_FACSetMaxLevels( void *fac_vdata , int nparts );
 int hypre_FACSetMaxIter( void *fac_vdata , int max_iter );
 int hypre_FACSetRelChange( void *fac_vdata , int rel_change );
@@ -200,7 +200,7 @@ int HYPRE_SStructFACSetup2( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A ,
 int HYPRE_SStructFACSolve3( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
 int HYPRE_SStructFACSetTol( HYPRE_SStructSolver solver , double tol );
 int HYPRE_SStructFACSetPLevels( HYPRE_SStructSolver solver , int nparts , int *plevels );
-int HYPRE_SStructFACSetPRefinements( HYPRE_SStructSolver solver , int nparts , hypre_Index *rfactors );
+int HYPRE_SStructFACSetPRefinements( HYPRE_SStructSolver solver , int nparts , int (*rfactors )[3 ]);
 int HYPRE_SStructFACSetMaxLevels( HYPRE_SStructSolver solver , int max_levels );
 int HYPRE_SStructFACSetMaxIter( HYPRE_SStructSolver solver , int max_iter );
 int HYPRE_SStructFACSetRelChange( HYPRE_SStructSolver solver , int rel_change );
