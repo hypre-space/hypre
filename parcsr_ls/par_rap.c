@@ -26,6 +26,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    int 		   num_cols_offd_RT = hypre_CSRMatrixNumCols(RT_offd);
    int 		   num_rows_offd_RT = hypre_CSRMatrixNumRows(RT_offd);
    hypre_CommPkg   *comm_pkg_RT = hypre_ParCSRMatrixCommPkg(RT);
+   int		   num_recvs_RT = hypre_CommPkgNumRecvs(comm_pkg_RT);
    int		   num_sends_RT = hypre_CommPkgNumSends(comm_pkg_RT);
    int		   *send_map_starts_RT =hypre_CommPkgSendMapStarts(comm_pkg_RT);
    int		   *send_map_elmts_RT = hypre_CommPkgSendMapElmts(comm_pkg_RT);
@@ -561,7 +562,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    hypre_CSRMatrixData(RAP_int) = RAP_int_data;
   }
 
-   if (num_sends_RT)
+   if (num_sends_RT || num_recvs_RT)
    {
 	RAP_ext = hypre_ExchangeRAPData(RAP_int,comm_pkg_RT);
    	RAP_ext_i = hypre_CSRMatrixI(RAP_ext);
@@ -1137,7 +1138,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    if (num_cols_offd_RT) 
 	hypre_DestroyCSRMatrix(R_offd);
 
-   if (num_sends_RT) 
+   if (num_sends_RT || num_recvs_RT) 
 	hypre_DestroyCSRMatrix(RAP_ext);
 
    if (num_cols_diag_A != n_fine) hypre_DestroyCSRMatrix(P_ext);
