@@ -314,6 +314,7 @@ int HYPRE_LSI_DDICTSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    if ( map2         != NULL ) free( map2 );
    free( context->partition );
    free( context );
+   return 0;
 }
 
 /*****************************************************************************/

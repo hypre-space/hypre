@@ -834,6 +834,7 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    free(RS);
    free(S);
    free(C);
+   return 0;
 }
 
 /***************************************************************************/
@@ -1193,5 +1194,6 @@ printf("CHECK 2 = %e\n", ddata);
    HYPRE_IJVectorDestroy(localb);
    HYPRE_BoomerAMGDestroy(SeqPrecon);
    HYPRE_ParCSRGMRESDestroy( PSolver );
+   return 0;
 }
 

@@ -535,6 +535,7 @@ int HYPRE_LSI_SchwarzSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    mh_mat->colnum = NULL;
    mh_mat->values = NULL;
    mh_mat->map    = NULL;
+   return 0;
 }
 
 /**************************************************************************/

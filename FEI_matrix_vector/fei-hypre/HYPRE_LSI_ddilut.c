@@ -328,6 +328,7 @@ int HYPRE_LSI_DDIlutSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    if ( recv_lengths != NULL ) free(recv_lengths);
    free( context->partition );
    free( context );
+   return 0;
 }
 
 /*****************************************************************************/
