@@ -324,6 +324,10 @@ apply_error_filters () {
           'configure:\ WARNING:\ '
         do process_filter $ErrorFile "${ii}"
         done
+        for ii in \
+          ':\ error\ \#172:'
+        do multi_line_delete $ErrorFile 4 "${ii}"
+        done
 ###   fi   # blue
         ;;
       ilx*)
