@@ -110,11 +110,11 @@ cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 $MAKE all++ 1> $0.all++.log 2> $0.all++.err
-echo "$HYPRE_ALL_EMAIL" > $0.all++.err.email 
+echo "$HYPRE_DEFAULT_EMAIL" > $0.all++.err.email 
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 $MAKE beta++ 1> $0.beta++.log 2> $0.beta++.err
-echo "$HYPRE_BETA_EMAIL" > $0.beta++.err.email 
+echo "$HYPRE_DEFAULT_EMAIL" > $0.beta++.err.email 
 
 #==============================
 # Run test suites
@@ -129,11 +129,11 @@ echo "$HYPRE_BETA_EMAIL" > $0.beta++.err.email
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 $MAKE all77 1> $0.all77.log 2> $0.all77.err
-echo "$HYPRE_ALL_EMAIL" > $0.all77.err.email 
+echo "$HYPRE_DEFAULT_EMAIL" > $0.all77.err.email 
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 $MAKE beta77 1> $0.beta77.log 2> $0.beta77.err
-echo "$HYPRE_BETA_EMAIL" > $0.beta77.err.email 
+echo "$HYPRE_DEFAULT_EMAIL" > $0.beta77.err.email 
 
 #==============================
 # Run test suites
