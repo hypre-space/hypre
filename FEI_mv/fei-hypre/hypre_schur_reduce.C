@@ -1045,6 +1045,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
        delete [] newColVal;
     }
     HYPRE_IJMatrixAssemble(reducedA_);
+    HYPRE_ParCSRMatrixDestroy(S_csr);
 
     //------------------------------------------------------------------
     // create the reduced x, right hand side and r
