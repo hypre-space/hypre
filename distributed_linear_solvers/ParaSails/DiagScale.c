@@ -19,6 +19,7 @@
 #include "RowPatt.h"
 #include "DiagScale.h"
 #include "OrderStat.h"
+#include "Mem.h"
 
 int FindNumReplies(MPI_Comm comm, int *replies_list);
 
@@ -93,20 +94,15 @@ static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, int reqlen,
  *--------------------------------------------------------------------------*/
 
 static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat, 
-  double *local_diags, int num_requests)
+  double *local_diags, int num_requests, Mem *mem, MPI_Request *requests)
 {
-    MPI_Request request;
     MPI_Status status;
-    int *recvbuf = NULL;
-    double *sendbuf = NULL;
+    int *recvbuf;
+    double *sendbuf;
     int i, j, source, count;
-    int buflen = 0;
 
     /* recvbuf contains requested indices */
     /* sendbuf contains corresponding diagonal entries */
-
-    /* Use this request handle to check that the send buffer is clear */
-    request = MPI_REQUEST_NULL;
 
     for (i=0; i<num_requests; i++)
     {
@@ -114,21 +110,12 @@ static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat,
         source = status.MPI_SOURCE;
 	MPI_Get_count(&status, MPI_INT, &count);
 
-        if (count > buflen)
-	{
-	    free(recvbuf);
-	    free(sendbuf);
-	    buflen = count;
-            recvbuf = (int *)    malloc(buflen * sizeof(int));
-            sendbuf = (double *) malloc(buflen * sizeof(double));
-	}
+        recvbuf = (int *) MemAlloc(mem, count*sizeof(int));
+        sendbuf = (double *) MemAlloc(mem, count*sizeof(double));
 
-        MPI_Recv(recvbuf, buflen, MPI_INT, MPI_ANY_SOURCE, 
+        MPI_Recv(recvbuf, count, MPI_INT, MPI_ANY_SOURCE, 
 	    DIAG_INDS_TAG, comm, &status);
         source = status.MPI_SOURCE;
-
-	/* Wait until send buffer is clear */
-	MPI_Wait(&request, &status);
 
 	/* Construct reply message of diagonal entries in sendbuf */
         for (j=0; j<count; j++)
@@ -136,14 +123,8 @@ static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat,
 
 	/* Use ready-mode send, since receives already posted */
 	MPI_Irsend(sendbuf, count, MPI_DOUBLE, source, 
-	    DIAG_VALS_TAG, comm, &request);
+	    DIAG_VALS_TAG, comm, &requests[i]);
     }
-
-    /* Wait for final send to complete before freeing sendbuf */
-    MPI_Wait(&request, &status);
-
-    free(recvbuf);
-    free(sendbuf);
 }
 
 /*--------------------------------------------------------------------------
@@ -159,6 +140,9 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     int npes, row, j, num_requests, num_replies, *replies_list;
     int len, *ind;
     double *val, *temp;
+
+    Mem *mem;
+    MPI_Request *requests2;
 
     DiagScale *p = (DiagScale *) malloc(sizeof(DiagScale));
 
@@ -205,12 +189,15 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     num_replies = FindNumReplies(A->comm, replies_list);
     free(replies_list);
 
-    ExchangeDiagEntriesServer(A->comm, A, p->local_diags, num_replies);
+    mem = MemCreate();
+    requests2 = (MPI_Request *) malloc(num_replies * sizeof(MPI_Request));
+
+    ExchangeDiagEntriesServer(A->comm, A, p->local_diags, num_replies,
+	mem, requests2);
 
     /* Wait for all replies */
     MPI_Waitall(num_requests, requests, statuses);
     free(requests);
-    free(statuses);
 
     p->offset = A->end_row - A->beg_row + 1;
 
@@ -225,6 +212,12 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     free(p->ext_diags);
     p->ext_diags = temp;
 
+    /* Wait for all sends */
+    MPI_Waitall(num_replies, requests2, statuses);
+    free(requests2);
+    MemDestroy(mem);
+
+    free(statuses);
     return p;
 }
 
