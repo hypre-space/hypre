@@ -68,7 +68,7 @@ char *argv[];
    /*-------------------------------------------------------
     * Debugging prints
     *-------------------------------------------------------*/
-#if 1
+#if 0
    sprintf(file_name, "%s.ysmp", GlobalsOutFileName);
    WriteYSMP(file_name, ProblemA(problem));
 
@@ -128,7 +128,7 @@ char *argv[];
    /*-------------------------------------------------------
     * Debugging prints
     *-------------------------------------------------------*/
-#if 1
+#if 0
    sprintf(file_name, "%s.lastu", GlobalsOutFileName);
    WriteVec(file_name, ProblemU(problem));
 
