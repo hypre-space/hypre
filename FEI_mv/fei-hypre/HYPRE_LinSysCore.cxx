@@ -307,7 +307,7 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering destructor.\n",mypid_);
 
    //-------------------------------------------------------------------
@@ -495,7 +495,7 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  destructor.\n",mypid_);
 }
 
@@ -521,7 +521,7 @@ int HYPRE_LinSysCore::setLookup(Lookup& lookup)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering setLookup.\n",mypid_);
 
    //-------------------------------------------------------------------
@@ -536,7 +536,7 @@ int HYPRE_LinSysCore::setLookup(Lookup& lookup)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  setLookup.\n",mypid_);
    return (0);
 }
@@ -556,7 +556,7 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
    {
       printf("%4d : HYPRE_LSC::entering createMatricesAndVectors.\n",mypid_);
       printf("%4d : HYPRE_LSC::startrow, endrow = %d %d\n",mypid_,
@@ -727,7 +727,7 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  createMatricesAndVectors.\n",mypid_);
    return (0);
 }
@@ -744,7 +744,7 @@ int HYPRE_LinSysCore::setGlobalOffsets(int leng, int* nodeOffsets,
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering setGlobalOffsets.\n",mypid_);
 
    //-------------------------------------------------------------------
@@ -763,7 +763,7 @@ int HYPRE_LinSysCore::setGlobalOffsets(int leng, int* nodeOffsets,
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
    {
       printf("%4d : HYPRE_LSC::startrow, endrow = %d %d\n",mypid_,
                     localStartRow_, localEndRow_);
@@ -861,7 +861,7 @@ int HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
    // diagnoistic message and error checking 
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering allocateMatrix.\n", mypid_);
    if ( localEndRow_ < localStartRow_ ) 
    {
@@ -934,10 +934,11 @@ int HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
    //-------------------------------------------------------------------
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   {
       printf("%4d : allocateMatrix : max/min nnz/row = %d %d\n", mypid_, 
                     maxSize, minSize);
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
       printf("%4d : HYPRE_LSC::leaving  allocateMatrix.\n", mypid_);
+   }
    return (0);
 }
 
@@ -956,7 +957,7 @@ int HYPRE_LinSysCore::setMatrixStructure(int** ptColIndices, int* ptRowLengths,
    // diagnoistic message 
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering setMatrixStructure.\n",mypid_);
 
    (void) blkColIndices;
@@ -980,7 +981,7 @@ int HYPRE_LinSysCore::setMatrixStructure(int** ptColIndices, int* ptRowLengths,
    // diagnoistic message 
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  setMatrixStructure.\n",mypid_);
    return (0);
 }
@@ -1040,7 +1041,7 @@ int HYPRE_LinSysCore::resetMatrixAndVector(double setValue)
    // diagnoistic message 
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering resetMatrixAndVector.\n",mypid_);
    if ( setValue != 0.0 && mypid_ == 0 )
    {
@@ -1148,7 +1149,7 @@ int HYPRE_LinSysCore::resetMatrixAndVector(double setValue)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  resetMatrixAndVector.\n", mypid_);
    return (0);
 }
@@ -1165,7 +1166,7 @@ int HYPRE_LinSysCore::resetMatrix(double setValue)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering resetMatrix.\n",mypid_);
    if ( setValue != 0.0 && mypid_ == 0 )
    {
@@ -1254,7 +1255,7 @@ int HYPRE_LinSysCore::resetMatrix(double setValue)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  resetMatrix.\n", mypid_);
    return (0);
 }
@@ -1272,7 +1273,7 @@ int HYPRE_LinSysCore::resetRHSVector(double setValue)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering resetRHSVector.\n",mypid_);
    if ( setValue != 0.0 && mypid_ == 0 )
    {
@@ -1312,7 +1313,7 @@ int HYPRE_LinSysCore::resetRHSVector(double setValue)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  resetRHSVector.\n",mypid_);
    return (0);
 }
@@ -1330,11 +1331,11 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int row, int numValues,
    // diagnostic message for high output level only
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
    {
       printf("%4d : HYPRE_LSC::entering sumIntoSystemMatrix.\n",mypid_);
       printf("%4d : row number = %d.\n", mypid_, row);
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 6 )
          for ( i = 0; i < numValues; i++ )
             printf("  %4d : col = %d, data = %e\n", mypid_, scatterIndices[i], 
                     values[i]);
@@ -1392,7 +1393,7 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int row, int numValues,
    // diagnostic message 
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
       printf("%4d : HYPRE_LSC::leaving  sumIntoSystemMatrix.\n",mypid_);
    return (0);
 }
@@ -1413,10 +1414,10 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
    // diagnostic message for high output level only
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
    {
       printf("%4d : HYPRE_LSC::entering sumIntoSystemMatrix(2).\n",mypid_);
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 6 )
       {
          for ( i = 0; i < numPtRows; i++ )
          {
@@ -1519,7 +1520,7 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
    // diagnostic message 
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
       printf("%4d : HYPRE_LSC::leaving  sumIntoSystemMatrix(2).\n",mypid_);
    return (0);
 }
@@ -1557,7 +1558,7 @@ int HYPRE_LinSysCore::putIntoSystemMatrix(int numPtRows, const int* ptRows,
    // diagnostic message for high output level only
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
       printf("%4d : HYPRE_LSC::entering putIntoSystemMatrix.\n",mypid_);
 
    //-------------------------------------------------------------------
@@ -1675,7 +1676,7 @@ int HYPRE_LinSysCore::putIntoSystemMatrix(int numPtRows, const int* ptRows,
    // diagnostic message 
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
       printf("%4d : HYPRE_LSC::leaving  putIntoSystemMatrix.\n",mypid_);
 
    return(0);
@@ -1768,10 +1769,10 @@ int HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
    {
       printf("%4d : HYPRE_LSC::entering sumIntoRHSVector.\n", mypid_);
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 6 )
       {
          for ( i = 0; i < num; i++ )
             printf("%d : sumIntoRHSVector - %d = %e.\n", mypid_, indices[i], 
@@ -1811,7 +1812,7 @@ int HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
       printf("%4d : HYPRE_LSC::leaving  sumIntoRHSVector.\n", mypid_);
    return (0);
 }
@@ -1883,7 +1884,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering matrixLoadComplete.\n",mypid_);
 
    //-------------------------------------------------------------------
@@ -1923,7 +1924,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
       //----------------------------------------------------------------
 
       numLocalEqns = localEndRow_ - localStartRow_ + 1;
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       {
          printf("%4d : HYPRE_LSC::matrixLoadComplete - NEqns = %d.\n",
                  mypid_, numLocalEqns);
@@ -1959,7 +1960,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
          if ( memOptimizerFlag_ != 0 ) delete [] colIndices_[i];
          nnz += newLeng;
       }
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       {
          printf("%4d : HYPRE_LSC::matrixLoadComplete - nnz = %d.\n",
                  mypid_, nnz);
@@ -2046,7 +2047,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  matrixLoadComplete.\n",mypid_);
    return (0);
 }
@@ -2064,10 +2065,10 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
    int    *aleNodeNumbers, index, newNumNodes;
    double *newData;
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
    {
       printf("%4d : HYPRE_LSC::entering putNodalFieldData.\n",mypid_);
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 && mypid_ == 0 )
       {
          printf("      putNodalFieldData : fieldSize = %d\n", fieldSize);
          printf("      putNodalFieldData : fieldID   = %d\n", fieldID);
@@ -2083,7 +2084,7 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
 
    if ( fieldID == -3 || fieldID == -25333 )
    {
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
       {
          for ( i = 0; i < numNodes; i++ )
             for ( j = 0; j < fieldSize; j++ )
@@ -2181,7 +2182,7 @@ This should ultimately be taken out even for newer ale3d implementation
          delete [] aleNodeNumbers;
       } 
    } 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  putNodalFieldData.\n",mypid_);
    return (0);
 }
@@ -2314,7 +2315,7 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
    //-------------------------------------------------------------------
 
    if ( (HYOutputLevel_ & HYFEI_IMPOSENOBC) != 0 ) return 0;
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
       printf("%4d : HYPRE_LSC::entering enforceEssentialBC.\n",mypid_);
    if ( systemAssembled_ )
    {
@@ -2403,7 +2404,7 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
    // diagnostic message 
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
       printf("%4d : HYPRE_LSC::leaving  enforceEssentialBC.\n",mypid_);
    return (0);
 }
@@ -2430,7 +2431,7 @@ int HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
    //-------------------------------------------------------------------
 
    if ( (HYOutputLevel_ & HYFEI_IMPOSENOBC) != 0 ) return 0;
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
       printf("%4d : HYPRE_LSC::entering enforceRemoteEssBC.\n",mypid_);
    if ( systemAssembled_ )
    {
@@ -2476,7 +2477,7 @@ int HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
    // diagnostic message 
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
       printf("%4d : HYPRE_LSC::leaving  enforceRemoteEssBC.\n",mypid_);
    return (0);
 }
@@ -2502,7 +2503,7 @@ int HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
    //-------------------------------------------------------------------
 
    if ( (HYOutputLevel_ & HYFEI_IMPOSENOBC) != 0 ) return 0;
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
       printf("%4d : HYPRE_LSC::entering enforceOtherBC.\n",mypid_);
    if ( systemAssembled_ )
    {
@@ -2551,7 +2552,7 @@ int HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
       printf("%4d : HYPRE_LSC::leaving  enforceOtherBC.\n",mypid_);
    return (0);
 }
@@ -2627,7 +2628,7 @@ int HYPRE_LinSysCore::getRHSVectorPtr(Data& data)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering getRHSVectorPtr.\n",mypid_);
 
    //-------------------------------------------------------------------
@@ -2641,7 +2642,7 @@ int HYPRE_LinSysCore::getRHSVectorPtr(Data& data)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  getRHSVectorPtr.\n",mypid_);
    return (0);
 }
@@ -2658,7 +2659,7 @@ int HYPRE_LinSysCore::copyInRHSVector(double scalar, const Data& data)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering copyInRHSVector.\n",mypid_);
    if (strcmp("IJ_Vector", data.getTypeName()))
    {
@@ -2685,7 +2686,7 @@ int HYPRE_LinSysCore::copyInRHSVector(double scalar, const Data& data)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  copyInRHSVector.\n",mypid_);
    return (0);
 }
@@ -2704,7 +2705,7 @@ int HYPRE_LinSysCore::copyOutRHSVector(double scalar, Data& data)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering copyOutRHSVector.\n",mypid_);
 
    //-------------------------------------------------------------------
@@ -2734,7 +2735,7 @@ int HYPRE_LinSysCore::copyOutRHSVector(double scalar, Data& data)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  copyOutRHSVector.\n",mypid_);
    return (0);
 }
@@ -2751,7 +2752,7 @@ int HYPRE_LinSysCore::sumInRHSVector(double scalar, const Data& data)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering sumInRHSVector.\n",mypid_);
    if (strcmp("IJ_Vector", data.getTypeName()))
    {
@@ -2774,7 +2775,7 @@ int HYPRE_LinSysCore::sumInRHSVector(double scalar, const Data& data)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  sumInRHSVector.\n",mypid_);
    return (0);
 }
@@ -2791,7 +2792,7 @@ int HYPRE_LinSysCore::destroyMatrixData(Data& data)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering destroyMatrixData.\n",mypid_);
    if (strcmp("IJ_Matrix", data.getTypeName()))
    {
@@ -2810,7 +2811,7 @@ int HYPRE_LinSysCore::destroyMatrixData(Data& data)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  destroyMatrixData.\n",mypid_);
    return (0);
 }
@@ -2827,7 +2828,7 @@ int HYPRE_LinSysCore::destroyVectorData(Data& data)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering destroyVectorData.\n",mypid_);
    if (strcmp("IJ_Vector", data.getTypeName()))
    {
@@ -2846,7 +2847,7 @@ int HYPRE_LinSysCore::destroyVectorData(Data& data)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  destroyVectorData.\n",mypid_);
    return (0);
 }
@@ -2862,7 +2863,7 @@ int HYPRE_LinSysCore::setNumRHSVectors(int numRHSs, const int* rhsIDs)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
    {
       printf("%4d : HYPRE_LSC::entering setNumRHSVectors.\n",mypid_);
       printf("%4d : HYPRE_LSC::incoming numRHSs = %d\n",mypid_,numRHSs);
@@ -2905,7 +2906,7 @@ int HYPRE_LinSysCore::setNumRHSVectors(int numRHSs, const int* rhsIDs)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  setNumRHSVectors.\n",mypid_);
    return (0);
 }
@@ -2920,7 +2921,7 @@ int HYPRE_LinSysCore::setRHSID(int rhsID)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::setRHSID = %d.\n",mypid_,rhsID);
 
    //-------------------------------------------------------------------
@@ -2954,7 +2955,7 @@ int HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering putInitalGuess.\n",mypid_);
 
    //-------------------------------------------------------------------
@@ -3013,7 +3014,7 @@ int HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  putInitalGuess.\n",mypid_);
    return (0);
 }
@@ -3031,7 +3032,7 @@ int HYPRE_LinSysCore::getSolution(double* answers,int leng)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       printf("%4d : HYPRE_LSC::entering getSolution.\n",mypid_);
    if (leng != (localEndRow_-localStartRow_+1))
    {
@@ -3056,7 +3057,7 @@ int HYPRE_LinSysCore::getSolution(double* answers,int leng)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       printf("%4d : HYPRE_LSC::leaving  getSolution.\n",mypid_);
    return (0);
 }
@@ -3074,7 +3075,7 @@ int HYPRE_LinSysCore::getSolnEntry(int eqnNumber, double& answer)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
       printf("%4d : HYPRE_LSC::entering getSolnEntry.\n",mypid_);
 
    //-------------------------------------------------------------------
@@ -3098,7 +3099,7 @@ int HYPRE_LinSysCore::getSolnEntry(int eqnNumber, double& answer)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
       printf("%4d : HYPRE_LSC::leaving  getSolnEntry.\n",mypid_);
    return (0);
 }
@@ -3113,7 +3114,7 @@ void HYPRE_LinSysCore::selectSolver(char* name)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
    {
       printf("%4d : HYPRE_LSC::entering selectSolver.\n",mypid_);
       printf("%4d : HYPRE_LSC::solver name = %s.\n",mypid_,name);
@@ -3230,7 +3231,7 @@ void HYPRE_LinSysCore::selectSolver(char* name)
    }
    else
    {
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
          printf("HYPRE_LSC selectSolver : use default = gmres.\n");
       strcpy( HYSolverName_, "gmres" );
       HYSolverID_ = HYGMRES;
@@ -3285,7 +3286,7 @@ void HYPRE_LinSysCore::selectSolver(char* name)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  selectSolver.\n",mypid_);
    return;
 }
@@ -3302,7 +3303,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering selectPreconditioner = %s.\n",
              mypid_, name);
 
@@ -3418,7 +3419,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYML;
 #else
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       {
          printf("selectPreconditioner - MLPACK not declared.\n");
          printf("                       set default to diagonal.\n");
@@ -3433,7 +3434,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYMLI;
 #else
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       {
          printf("selectPreconditioner - MLI not declared.\n");
          printf("                       set default to diagonal.\n");
@@ -3449,7 +3450,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    }
    else
    {
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       {
          printf("selectPreconditioner error : invalid option.\n");
          printf("                     use default = diagonal.\n");
@@ -3544,7 +3545,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  selectPreconditioner.\n",mypid_);
 }
 
@@ -3564,7 +3565,7 @@ int HYPRE_LinSysCore::formResidual(double* values, int leng)
    // diagnostic message and error checking
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering formResidual.\n", mypid_);
 
    nrows = localEndRow_ - localStartRow_ + 1;
@@ -3612,7 +3613,7 @@ int HYPRE_LinSysCore::formResidual(double* values, int leng)
    // diagnostic message 
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  formResidual.\n", mypid_);
    return (0);
 }
@@ -3647,7 +3648,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    // diagnostic message 
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering launchSolver.\n", mypid_);
 
    //-------------------------------------------------------------------
@@ -4637,7 +4638,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    // diagnostic message 
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  launchSolver.\n", mypid_);
    return (0);
 }

@@ -142,7 +142,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
    double weight, dtemp;
    char   param[256], param1[256], param2[80], param3[80];
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
    {
       printf("%4d : HYPRE_LSC::entering parameters function.\n",mypid_);
       if ( mypid_ == 0 )
@@ -188,7 +188,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
    {
       sscanf(params[solver_index],"%s %s", param, HYSolverName_);
       selectSolver(HYSolverName_);
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 && mypid_ == 0 )
          printf("       HYPRE_LSC::parameters solver = %s\n",HYSolverName_);
    }
 
@@ -200,7 +200,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
    {
       sscanf(params[precon_index],"%s %s", param, param1);
       selectPreconditioner(param1);
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 && mypid_ == 0 )
          printf("       HYPRE_LSC::parameters preconditioner = %s\n",
                 param1);
    }
@@ -302,7 +302,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       {
          sscanf(params[i],"%s %d", param, &olevel);
          if ( olevel < 0 ) olevel = 0;
-         if ( olevel > 4 ) olevel = 4;
+         if ( olevel > 7 ) olevel = 7;
          HYOutputLevel_ = ( HYOutputLevel_ & HYFEI_HIGHMASK ) + olevel;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters outputLevel = %d\n",
@@ -1431,7 +1431,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
    //-------------------------------------------------------------------
 
    if ( reuse == 1 ) HYPreconReuse_ = 1; 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  parameters function.\n",mypid_);
    return(0);
 }
@@ -4195,11 +4195,11 @@ void HYPRE_LinSysCore::solveUsingAMGe(int &iterations)
 
 void HYPRE_LinSysCore::loadConstraintNumbers(int nConstr, int *constrList)
 {
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::loadConstraintNumbers - size = %d\n", 
                     mypid_, nConstr);
    nConstraints_ = nConstr;
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  loadConstraintNumbers\n", mypid_);
 }
 
@@ -4240,7 +4240,7 @@ void HYPRE_LinSysCore::endCreateMapFromSoln()
    int    i, *iarray;
    double *darray;
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering endCreateMapFromSoln.\n",mypid_);
 
    mapFromSolnFlag_ = 0;
@@ -4261,7 +4261,7 @@ void HYPRE_LinSysCore::endCreateMapFromSoln()
       printf("HYPRE_LSC::mapFromSoln %d = %d\n",mapFromSolnList_[i],
              mapFromSolnList2_[i]);
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  endCreateMapFromSoln.\n",mypid_);
 }
 
@@ -4328,7 +4328,7 @@ void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
       {
          newLeng--;
          colValues_[localRow][ind2] = values[i];
-         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
             printf("%4d : putIntoMappedMatrix (add) : row, col = %8d %8d %e \n",
                    mypid_, localRow, colIndices_[localRow][ind2]-1,
                    colValues_[localRow][ind2]);
@@ -4338,7 +4338,7 @@ void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
          ind2 = index;
          colIndices_[localRow][index] = mappedCol + 1;
          colValues_[localRow][index++] = values[i];
-         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
             printf("%4d : putIntoMappedMatrix : row, col = %8d %8d %e \n",
                    mypid_, localRow, colIndices_[localRow][ind2]-1,
                    colValues_[localRow][ind2]);
@@ -4373,7 +4373,7 @@ void HYPRE_LinSysCore::computeMinResProjection(HYPRE_ParCSRMatrix A_csr,
    // diagnostic message
    //-----------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
        printf("%4d : HYPRE_LSC::entering computeMinResProjection %d\n",mypid_,
              projectCurrSize_);
    if ( projectCurrSize_ == 0 && HYpxs_ == NULL ) return;
@@ -4419,7 +4419,7 @@ void HYPRE_LinSysCore::computeMinResProjection(HYPRE_ParCSRMatrix A_csr,
    // diagnostic message
    //-----------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       printf("%4d : HYPRE_LSC:: leaving computeMinResProjection n", mypid_);
    return;
 }
@@ -4440,7 +4440,7 @@ void HYPRE_LinSysCore::addToMinResProjectionSpace(HYPRE_IJVector xvec,
    // diagnostic message
    //-----------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       printf("%4d : HYPRE_LSC::addToProjectionSpace %d\n",mypid_,
              projectCurrSize_);
 
@@ -4568,7 +4568,7 @@ void HYPRE_LinSysCore::addToMinResProjectionSpace(HYPRE_IJVector xvec,
    // diagnostic message
    //-----------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       printf("%4d : HYPRE_LSC::leaving addToProjectionSpace %d\n",mypid_,
               projectCurrSize_);
 }
@@ -4600,7 +4600,7 @@ void HYPRE_LinSysCore::computeAConjProjection(HYPRE_ParCSRMatrix A_csr,
    // diagnostic message
    //-----------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       printf("%4d : HYPRE_LSC::entering computeAConjProjection %d\n",mypid_,
              projectCurrSize_);
    if ( projectCurrSize_ == 0 && HYpxs_ == NULL ) return;
@@ -4658,7 +4658,7 @@ void HYPRE_LinSysCore::computeAConjProjection(HYPRE_ParCSRMatrix A_csr,
    // diagnostic message
    //-----------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       printf("%4d : HYPRE_LSC:: leaving computeAConjProjection n", mypid_);
    return;
 }
@@ -4685,7 +4685,7 @@ void HYPRE_LinSysCore::addToAConjProjectionSpace(HYPRE_IJVector xvec,
    // diagnostic message
    //-----------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       printf("%4d : HYPRE_LSC::addToAConjProjectionSpace %d\n",mypid_,
              projectCurrSize_);
 
@@ -4792,7 +4792,7 @@ void HYPRE_LinSysCore::addToAConjProjectionSpace(HYPRE_IJVector xvec,
    // diagnostic message
    //-----------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       printf("%4d : HYPRE_LSC::leaving addToAConjProjectionSpace %d\n",mypid_,
               projectCurrSize_);
 }
