@@ -147,28 +147,31 @@ tar cf $HYPRE_DIR.tar \
     $HYPRE_DIR/README \
     $HYPRE_DIR/docs \
     $HYPRE_DIR/bin \
-    $HYPRE_DIR/src/configure \
-    $HYPRE_DIR/src/config \
-    $HYPRE_DIR/src/tarch \
-    $HYPRE_DIR/src/Makefile.in \
+    $HYPRE_DIR/src/FEI_mv \
     $HYPRE_DIR/src/HYPRE.h \
     $HYPRE_DIR/src/HYPRE_config.h.in \
-    $HYPRE_DIR/src/blas \
-    $HYPRE_DIR/src/utilities \
-    $HYPRE_DIR/src/krylov \
-    $HYPRE_DIR/src/struct_mv \
-    $HYPRE_DIR/src/struct_ls \
-    $HYPRE_DIR/src/seq_mv \
-    $HYPRE_DIR/src/parcsr_mv \
-    $HYPRE_DIR/src/distributed_matrix \
-    $HYPRE_DIR/src/matrix_matrix \
     $HYPRE_DIR/src/IJ_mv \
+    $HYPRE_DIR/src/Makefile.in \
+    $HYPRE_DIR/src/babel \
+    $HYPRE_DIR/src/babel-runtime \
+    $HYPRE_DIR/src/blas \
+    $HYPRE_DIR/src/config \
+    $HYPRE_DIR/src/configure \
     $HYPRE_DIR/src/distributed_ls \
+    $HYPRE_DIR/src/distributed_matrix \
+    $HYPRE_DIR/src/krylov \
+    $HYPRE_DIR/src/matrix_matrix \
+    $HYPRE_DIR/src/parcsr_es \
     $HYPRE_DIR/src/parcsr_ls \
-    $HYPRE_DIR/src/sstruct_mv \
+    $HYPRE_DIR/src/parcsr_mv \
+    $HYPRE_DIR/src/seq_mv \
     $HYPRE_DIR/src/sstruct_ls \
-    $HYPRE_DIR/src/FEI_mv \
-    $HYPRE_DIR/src/test
+    $HYPRE_DIR/src/sstruct_mv \
+    $HYPRE_DIR/src/struct_ls \
+    $HYPRE_DIR/src/struct_mv \
+    $HYPRE_DIR/src/tarch \
+    $HYPRE_DIR/src/test \
+    $HYPRE_DIR/src/utilities
 
 gzip $HYPRE_DIR.tar
 
