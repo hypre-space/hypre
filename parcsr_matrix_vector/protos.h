@@ -25,7 +25,7 @@ int hypre_BuildParVectorMPITypes P((MPI_Comm comm, int vec_len,
 
 /* communication.c */
 hypre_CommHandle *hypre_InitializeCommunication P((int job,
-	hypre_CommPkg *comm_pkg, double *send_data, double *recv_data));
+	hypre_CommPkg *comm_pkg, void *send_data, void *recv_data));
 int hypre_FinalizeCommunication P((hypre_CommHandle *comm_handle));
 int hypre_GenerateMatvecCommunicationInfo P((hypre_ParCSRMatrix *A, 
 	int *row_part_starts, int *col_part_starts));
