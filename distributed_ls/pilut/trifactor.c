@@ -78,7 +78,7 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
 
   /* Do the local first.
    * For forward substitution we do local+1st MIS == nnodes[1] (NOT [0]!) */
-  for (i=0; i<nnodes[max(0,min(1,nlevels))]; i++) {
+  for (i=0; i<nnodes[hypre_max(0,hypre_min(1,nlevels))]; i++) {
     xx = 0.0;
     for (j=rowptr[i]; j<rowptr[i+1]; j++) 
       xx += values[j]*lx[colind[j]];

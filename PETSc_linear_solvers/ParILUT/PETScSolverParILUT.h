@@ -26,6 +26,13 @@
 
 #include "../../HYPRE.h"
 
+/* type definitions from this directory */
+#include "./HYPRE_PETScSolverParILUT_types.h"
+
+/* type and prototype declarations for object used in this implementation */
+#include "../../PETScMat_linear_solvers/pilut/HYPRE_PETScMatPilutSolver_types.h"
+#include "../../PETScMat_linear_solvers/pilut/HYPRE_PETScMatPilutSolver_protos.h"
+
 /* type definition for member SlesOwner in ParILUTData structure */
 #define ParILUTLibrary 47
 #define ParILUTUser    98

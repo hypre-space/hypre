@@ -27,6 +27,16 @@
 
 #include "../../HYPRE.h"
 
+/* types of objects declared in this directory */
+#include "./HYPRE_PETScMatPilutSolver_types.h"
+
+/* type declaration for matrix object used by the implementation in this directory */
+#include "../../distributed_matrix/HYPRE_distributed_matrix_types.h"
+
+/* type declaration and prototypes for solvers used in this implementation */
+#include "../../distributed_linear_solvers/pilut/HYPRE_DistributedMatrixPilutSolver_types.h"
+#include "../../distributed_linear_solvers/pilut/HYPRE_DistributedMatrixPilutSolver_protos.h"
+
 /*--------------------------------------------------------------------------
  * hypre_PETScMatPilutSolver
  *--------------------------------------------------------------------------*/

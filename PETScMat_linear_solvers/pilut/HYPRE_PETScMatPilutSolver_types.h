@@ -17,9 +17,6 @@
 
 typedef void *HYPRE_PETScMatPilutSolver;
 
-/* Have to include MPI since MPI types appear in prototypes */
-#include "mpi.h"
-
 /* Have to include PETSc since PETSc types appear in prototypes */
 #include "sles.h"
 

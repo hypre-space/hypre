@@ -331,8 +331,8 @@ hypre_FindBoxApproxNeighborhood( hypre_BoxArray   *boxes,
    {
       for (d = 0; d < 3; d++)
       {
-	 min_offset[d] = min(min_offset[d], stencil_shape[s][d]);
-	 max_offset[d] = max(max_offset[d], stencil_shape[s][d]);
+	 min_offset[d] = hypre_min(min_offset[d], stencil_shape[s][d]);
+	 max_offset[d] = hypre_max(max_offset[d], stencil_shape[s][d]);
       }
    }
 

@@ -245,8 +245,8 @@ hypre_IntersectBoxes( hypre_Box *box1,
    /* find x, y, and z bounds */
    for (d = 0; d < 3; d++)
    {
-      hypre_IndexD(imin, d) = max(hypre_BoxIMinD(box1, d), hypre_BoxIMinD(box2, d));
-      hypre_IndexD(imax, d) = min(hypre_BoxIMaxD(box1, d), hypre_BoxIMaxD(box2, d));
+      hypre_IndexD(imin, d) = hypre_max(hypre_BoxIMinD(box1, d), hypre_BoxIMinD(box2, d));
+      hypre_IndexD(imax, d) = hypre_min(hypre_BoxIMaxD(box1, d), hypre_BoxIMaxD(box2, d));
       if (hypre_IndexD(imax, d) < hypre_IndexD(imin, d))
       {
 	 hypre_FreeIndex(imin);

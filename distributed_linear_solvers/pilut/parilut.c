@@ -1037,7 +1037,7 @@ void FormNRmat(int rrow, int first, ReduceMatType *nrmat,
   assert(in_colind[0] == jw[0]);  /* diagonal at the beginning */
 
   /* check to see if we need to reallocate space */
-  out_rowlen = min( max_rowlen, lastjr-first+1 );
+  out_rowlen = hypre_min( max_rowlen, lastjr-first+1 );
   if( out_rowlen > in_rowlen )
   {
     free_multi( in_colind, in_values, -1 );
