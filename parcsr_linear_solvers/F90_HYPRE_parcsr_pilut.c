@@ -89,13 +89,13 @@ hypre_F90_IFACE(hypre_parcsrpilutsetmaxiter)( long int *solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRPilutSetDropTol
+ * HYPRE_ParCSRPilutSetDropToleran
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrpilutsetdroptol)( long int *solver,
-                                              double   *tol,
-                                              int      *ierr    )
+hypre_F90_IFACE(hypre_parcsrpilutsetdroptoleran)( long int *solver,
+                                                  double   *tol,
+                                                  int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParCSRPilutSetDropTolerance( (HYPRE_Solver) *solver, 
                                                       (double)       *tol     ) );

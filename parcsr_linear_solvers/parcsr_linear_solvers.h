@@ -86,7 +86,7 @@ void hypre_F90_IFACE P((int hypre_parcsrpilutfinalize ));
 void hypre_F90_IFACE P((int hypre_parcsrpilutsetup ));
 void hypre_F90_IFACE P((int hypre_parcsrpilutsolve ));
 void hypre_F90_IFACE P((int hypre_parcsrpilutsetmaxiter ));
-void hypre_F90_IFACE P((int hypre_parcsrpilutsetdroptol ));
+void hypre_F90_IFACE P((int hypre_parcsrpilutsetdroptoleran ));
 void hypre_F90_IFACE P((int hypre_parcsrpilutsetfacrowsize ));
 
 /* F90_par_laplace.c */
