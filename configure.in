@@ -184,7 +184,6 @@ AC_ARG_WITH(MPI, [\
   then
     casc_using_mpi=no
     AC_DEFINE(HYPRE_SEQUENTIAL)
-    HYPREDEFS="$HYPREDEFS -DHYPRE_SEQUENTIAL"
   else
     casc_using_mpi=yes
   fi,
@@ -195,14 +194,13 @@ AC_ARG_WITH(MPI, [\
 AC_ARG_WITH(dmalloc, [\
   --with-dmalloc          use dmalloc package],
   CASC_ADD_LIB(dmalloc, malloc, /home/casc/lib /usr/local/lib,
-    LD,  AC_DEFINE(HYPRE_MEMORY_DMALLOC) HYPREDEFS="$HYPREDEFS -DHYPRE_MEMORY_DMALLOC" )
+    LD,  AC_DEFINE(HYPRE_MEMORY_DMALLOC) )
 )
 
 
 AC_ARG_WITH(timing, [\
   --with-timing           use timing routines],
   AC_DEFINE(HYPRE_TIMING)
-  HYPREDEFS="$HYPREDEFS -DHYPRE_TIMING"
 )
 
 AC_ARG_WITH(pthreads, [\
@@ -217,7 +215,6 @@ AC_ARG_WITH(pthreads, [\
        test "$ac_cv_lib_pthreads_pthread_create" = "yes"
     then
       AC_DEFINE(HYPRE_USE_PTHREADS)
-      HYPREDEFS="$HYPREDEFS -DHYPRE_USE_PTHREADS"
     fi
   fi
 )
@@ -227,28 +224,24 @@ AC_ARG_WITH(openmp,
    [  --with-openmp        use openMP],
    casc_using_openmp=yes
    AC_DEFINE(HYPRE_USING_OPENMP)
-   HYPREDEFS="$HYPREDEFS -DHYPRE_USING_OPENMP"
 )
 
 AC_ARG_WITH(IBM_smp,
    [  --with-IBM_smp          use IBM SMP],
    casc_using_ibm_smp=yes
    AC_DEFINE(HYPRE_USING_IBM_SMP)
-   HYPREDEFS="$HYPREDEFS -DHYPRE_USING_IBM_SMP"
 )
 
 AC_ARG_WITH(SGI_smp,
    [  --with-SGI_smp          use SGI SMP],
    casc_using_sgi_smp=yes
    AC_DEFINE(HYPRE_USING_SGI_SMP)
-   HYPREDEFS="$HYPREDEFS -DHYPRE_USING_SGI_SMP"
 )
 
 AC_ARG_WITH(pgcc_smp,
    [  --with-pgcc_smp          use pgcc SMP (Red)],
    casc_using_pgcc_smp=yes 
    AC_DEFINE(HYPRE_USING_PGCC_SMP)
-   HYPREDEFS="$HYPREDEFS -DHYPRE_USING_PGCC_SMP"
 )
 
 
@@ -755,7 +748,6 @@ AC_SUBST(MPILIBDIRS)
 AC_SUBST(MPIFLAGS)
 
 dnl * macro definitions that should be included on compile line
-AC_SUBST(HYPREDEFS)
 AC_SUBST(TIMERDEFS)
 
 dnl *Libraries and their directories that must be used at compile time 
