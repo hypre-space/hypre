@@ -2656,7 +2656,7 @@ int HYPRE_LinSysCore::getSolution(double* answers,int leng)
    //-------------------------------------------------------------------
 
    equations = new int[leng];
-   for ( i = 0; i < leng; i++ ) equations[i] = i;
+   for ( i = 0; i < leng; i++ ) equations[i] = localStartRow_ + i - 1;
 
    ierr = HYPRE_IJVectorGetValues(HYx_,leng,equations,answers);
    assert(!ierr);
