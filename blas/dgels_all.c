@@ -1885,6 +1885,7 @@ L30:
 
    ===================================================================== 
 */
+#include <stdio.h>
     /* Table of constant values */
     
     /* Initialized data */
