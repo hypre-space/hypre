@@ -149,10 +149,10 @@ int
 ifetchadd( int *w, pthread_mutex_t *mutex_fetchadd )
 {
    int n;
-    
    
    pthread_mutex_lock(mutex_fetchadd);
-   n = hypre_fetch_and_add(w);
+   n = *w;
+   *w += 1;                   
    pthread_mutex_unlock(mutex_fetchadd);
  
    return n;
