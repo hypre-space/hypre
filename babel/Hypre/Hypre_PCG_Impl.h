@@ -32,6 +32,10 @@
 
 /* DO-NOT-DELETE splicer.begin(Hypre.PCG._includes) */
 /* Put additional include files here... */
+#include "HYPRE.h"
+#include "utilities.h"
+#include "krylov.h"
+#include "HYPRE_parcsr_ls.h"
 /* DO-NOT-DELETE splicer.end(Hypre.PCG._includes) */
 
 /*
@@ -41,7 +45,10 @@
 struct Hypre_PCG__data {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG._data) */
   /* Put private data members here... */
-  int ignore; /* dummy to force non-empty struct; remove if you add data */
+   MPI_Comm * comm;
+   HYPRE_Solver * solver;
+   Hypre_Operator matrix;
+   char * vector_type;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG._data) */
 };
 

@@ -24,6 +24,12 @@
 
 /* DO-NOT-DELETE splicer.begin(Hypre.PCG._includes) */
 /* Put additional includes or other arbitrary code here... */
+#include "Hypre_ParCSRMatrix.h"
+#include "Hypre_ParCSRMatrix_Impl.h"
+#include "Hypre_ParCSRVector.h"
+#include "Hypre_ParCSRVector_Impl.h"
+#include "Hypre_ParAMG.h"
+#include "Hypre_ParAMG_Impl.h"
 /* DO-NOT-DELETE splicer.end(Hypre.PCG._includes) */
 
 /*
@@ -39,6 +45,20 @@ impl_Hypre_PCG__ctor(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG._ctor) */
   /* Insert the implementation of the constructor method here... */
+   struct Hypre_PCG__data * data;
+   data = hypre_CTAlloc( struct Hypre_PCG__data, 1 );
+   data -> comm = NULL;
+   data -> solver = NULL;
+   data -> matrix = NULL;
+   data -> vector_type = NULL;
+   /* We would like to call HYPRE_<vector type>PCGCreate at this point, but
+      it's impossible until we know the vector type.  That's needed because
+      the C-language Krylov solvers need to be told exactly what functions
+      to call.  If we were to switch to a Babel-based PCG solver, we would be
+      able to use generic function names; hence we could really initialize PCG
+      here. */
+   /* set any other data components here */
+   Hypre_PCG__set_data( self, data );
   /* DO-NOT-DELETE splicer.end(Hypre.PCG._ctor) */
 }
 
@@ -55,6 +75,14 @@ impl_Hypre_PCG__dtor(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG._dtor) */
   /* Insert the implementation of the destructor method here... */
+   int ierr = 0;
+   struct Hypre_PCG__data * data;
+   data = Hypre_PCG__get_data( self );
+
+   ierr += HYPRE_ParCSRPCGDestroy( *(data->solver) );
+   Hypre_Operator_deleteReference( data->matrix );
+   /* delete any nontrivial data components here */
+   hypre_TFree( data );
   /* DO-NOT-DELETE splicer.end(Hypre.PCG._dtor) */
 }
 
@@ -73,6 +101,85 @@ impl_Hypre_PCG_Apply(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.Apply) */
   /* Insert the implementation of the Apply method here... */
+   int ierr=0;
+   MPI_Comm * comm;
+   HYPRE_Solver * solver;
+   struct Hypre_PCG__data * data;
+   Hypre_Operator mat;
+   HYPRE_Matrix HYPRE_A;
+   Hypre_ParCSRMatrix HypreP_A;
+   HYPRE_ParCSRMatrix AA;
+   HYPRE_IJMatrix ij_A;
+   HYPRE_Vector HYPRE_y, HYPRE_x;
+   Hypre_ParCSRVector HypreP_x, HypreP_y;
+   HYPRE_ParVector xx, yy;
+   HYPRE_IJVector ij_x, ij_y;
+   struct Hypre_ParCSRMatrix__data * dataA;
+   struct Hypre_ParCSRVector__data * datax, * datay;
+   void * objectA, * objectx, * objecty;
+
+   data = Hypre_PCG__get_data( self );
+   comm = data->comm;
+   assert( comm != NULL ); /* SetCommunicator should have been called earlier */
+   mat = data->matrix;
+   assert( mat != NULL ); /* SetOperator should have been called earlier */
+
+   if ( data -> vector_type == NULL ) {
+      /* This is the first time this Babel PCG object has seen a vector.
+         So we are ready to create the Hypre PCG object. */
+      if ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector") ) {
+         data -> vector_type = "ParVector";
+         HYPRE_ParCSRPCGCreate( *comm, solver );
+         data -> solver = solver;
+      }
+      /* Add more vector types here */
+      else {
+         assert( "only ParCSRVector supported by PCG"==0 );
+      }
+      Hypre_PCG__set_data( self, data );
+   }
+   else {
+      solver = data->solver;
+      assert( solver != NULL );
+   };
+   if ( data->vector_type == "ParVector" ) {
+         HypreP_x = Hypre_Vector__cast2
+            ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
+              "Hypre.ParCSRVector" );
+         datax = Hypre_ParCSRVector__get_data( HypreP_x );
+         ij_x = datax -> ij_b;
+         ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
+         xx = (HYPRE_ParVector) objectx;
+         HYPRE_x = (HYPRE_Vector) xx;
+
+         HypreP_y = Hypre_Vector__cast2
+            ( Hypre_Vector_queryInterface( *y, "Hypre.ParCSRVector"),
+              "Hypre.ParCSRVector" );
+         datay = Hypre_ParCSRVector__get_data( HypreP_y );
+         ij_y = datay -> ij_b;
+         ierr += HYPRE_IJVectorGetObject( ij_y, &objecty );
+         yy = (HYPRE_ParVector) objecty;
+         HYPRE_x = (HYPRE_Vector) yy;
+
+         HypreP_A = Hypre_Operator__cast2
+            ( Hypre_Operator_queryInterface( mat, "Hypre.ParCSRVector"),
+              "Hypre.ParCSRVector" );
+         dataA = Hypre_ParCSRMatrix__get_data( HypreP_A );
+         ij_A = dataA -> ij_A;
+         ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
+         AA = (HYPRE_ParCSRMatrix) objectA;
+         HYPRE_A = (HYPRE_Matrix) AA;
+
+   }
+   else {
+         assert( "only ParCSRVector supported by PCG"==0 );
+   }
+      
+
+   HYPRE_PCGSetup( *solver, HYPRE_A, HYPRE_x, HYPRE_y );
+   HYPRE_PCGSolve( *solver, HYPRE_A, HYPRE_x, HYPRE_y );
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.Apply) */
 }
 
@@ -91,6 +198,7 @@ impl_Hypre_PCG_GetPreconditionedResidual(
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.GetPreconditionedResidual) */
   /* Insert the implementation of the GetPreconditionedResidual method here... 
     */
+   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.GetPreconditionedResidual) */
 }
 
@@ -108,6 +216,7 @@ impl_Hypre_PCG_GetResidual(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.GetResidual) */
   /* Insert the implementation of the GetResidual method here... */
+   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.GetResidual) */
 }
 
@@ -125,6 +234,13 @@ impl_Hypre_PCG_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+   int ierr = 0;
+   struct Hypre_PCG__data * data;
+   data = Hypre_PCG__get_data( self );
+   data -> comm = (MPI_Comm *) comm;
+   Hypre_PCG__set_data( self, data );
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetCommunicator) */
 }
 
@@ -143,6 +259,7 @@ impl_Hypre_PCG_SetDoubleArrayParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetDoubleArrayParameter) */
   /* Insert the implementation of the SetDoubleArrayParameter method here... */
+   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetDoubleArrayParameter) */
 }
 
@@ -161,6 +278,7 @@ impl_Hypre_PCG_SetDoubleParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
+   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetDoubleParameter) */
 }
 
@@ -179,6 +297,7 @@ impl_Hypre_PCG_SetIntArrayParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetIntArrayParameter) */
   /* Insert the implementation of the SetIntArrayParameter method here... */
+   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetIntArrayParameter) */
 }
 
@@ -197,6 +316,7 @@ impl_Hypre_PCG_SetIntParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
+   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetIntParameter) */
 }
 
@@ -214,6 +334,7 @@ impl_Hypre_PCG_SetLogging(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
+   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetLogging) */
 }
 
@@ -231,6 +352,13 @@ impl_Hypre_PCG_SetOperator(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
+   int ierr = 0;
+   struct Hypre_PCG__data * data;
+
+   data = Hypre_PCG__get_data( self );
+   data->matrix = A;
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetOperator) */
 }
 
@@ -248,6 +376,39 @@ impl_Hypre_PCG_SetPreconditioner(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetPreconditioner) */
   /* Insert the implementation of the SetPreconditioner method here... */
+   int ierr = 0;
+   HYPRE_Solver * solverself, * solverprecond;
+   struct Hypre_PCG__data * dataself;
+   struct Hypre_ParAMG__data * AMG_dataprecond;
+   Hypre_ParAMG AMG_s;
+   HYPRE_PtrToSolverFcn precond, precond_setup; /* functions */
+
+   dataself = Hypre_PCG__get_data( self );
+   solverself = dataself->solver;
+   assert( solverself != NULL );
+
+   if ( Hypre_Solver_queryInterface( s, "Hypre.ParAMG" ) ) {
+      /* s is a Hypre_PCG */
+      AMG_s = Hypre_Operator__cast2
+         ( Hypre_Solver_queryInterface( s, "Hypre.ParAMG"),
+           "Hypre.ParAMG" );
+      AMG_dataprecond = Hypre_ParAMG__get_data( AMG_s );
+      solverprecond = &AMG_dataprecond->solver;
+      assert( solverprecond != NULL );
+      precond = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve;
+      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup;
+   }
+   /* put other preconditioner types here */
+   else {
+      assert( "PCG_SetPreconditioner cannot recognice preconditioner"==0 );
+   }
+
+   /*   for example call, see test/IJ_linear_solvers.c, line 1686.
+        The four arguments  are:  self's (solver) data; and, for the preconditioner:
+        solver function, setup function, data
+   ierr += HYPRE_PCGSetPrecond( *solverself, precond, precond_setup, *solverprecond );
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetPreconditioner) */
 }
 
@@ -265,6 +426,7 @@ impl_Hypre_PCG_SetPrintLevel(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
+   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetPrintLevel) */
 }
 
@@ -283,6 +445,7 @@ impl_Hypre_PCG_SetStringParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
+   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetStringParameter) */
 }
 
@@ -299,6 +462,8 @@ impl_Hypre_PCG_Setup(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.Setup) */
   /* Insert the implementation of the Setup method here... */
+   /* Setup is not done here because it requires the entire problem.
+      It is done in Apply instead. */
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.Setup) */
 }
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetParameter) */
