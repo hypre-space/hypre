@@ -55,6 +55,7 @@ HEADERS =\
  aux_parcsr_matrix.h\
  fortran.h\
  HYPRE_IJ_mv.h \
+ IJ_matrix_vector.h \
  IJ_matrix.h
 
 FILES =\
