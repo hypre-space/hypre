@@ -66,7 +66,7 @@ void  impl_Hypre_StructStencil_print(Hypre_StructStencil this) {
  * impl_Hypre_StructStencilSetElement
  **********************************************************/
 int  impl_Hypre_StructStencil_SetElement
-(Hypre_StructStencil this, int element_index, array1int* element_offset) {
+(Hypre_StructStencil this, int element_index, array1int element_offset) {
 /* This function sets a stencil element (element_offset is an array of
    three numbers */
 
@@ -77,7 +77,7 @@ int  impl_Hypre_StructStencil_SetElement
    hypre_StructStencil *ss = (hypre_StructStencil *) *SS;
    
    ierr = HYPRE_StructStencilSetElement(
-      *SS, element_index, element_offset->data );
+      *SS, element_index, element_offset.data );
    
    return ierr;
 
