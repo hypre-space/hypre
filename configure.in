@@ -204,6 +204,7 @@ dnl *           struct_matrix_vector/Makefile \
 dnl *           struct_linear_solvers/Makefile \
 dnl *           seq_linear_solvers/pamg/Makefile \
 dnl *           test/Makefile \
+dnl *           bmakes/Makefile \
 dnl *		docs/Makefile)
 
 dnl *********************************************************************
@@ -221,6 +222,7 @@ CASC_CONFIG_OUTPUT_LIST(\
  struct_linear_solvers\
  seq_linear_solvers/pamg\
  test\
+ bmakes\
  docs)
 
 AC_OUTPUT($Makefile_list)

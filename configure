@@ -2420,6 +2420,7 @@ unset ac_cv_lib_$ac_lib_var
  struct_linear_solvers\
  seq_linear_solvers/pamg\
  test\
+ bmakes\
  docs; do
       if test -f $srcdir/$casc_dir/$casc_output_file.in; then
          Makefile_list="$Makefile_list $casc_dir/$casc_output_file"

@@ -1,0 +1,109 @@
+#BHEADER***********************************************************************
+# (c) 1997   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+
+
+CC = @CC@
+CCC = g++
+
+F77 = /home/casc/g77/bin/g77
+
+LD = ${CC}
+
+PETSC_CFLAGS =\
+ -I${PETSC_DIR}/bmake/${PETSC_ARCH}\
+ -I${PETSC_DIR}\
+ -I${PETSC_DIR}/include
+
+ISIS_DIR = /home/cleary/iter/isis
+ISIS_FLAGS =\
+ -I${ISIS_DIR}/include\
+ -DBOOL_SUPPORTED
+
+
+CFLAGS =\
+ ${PETSC_CFLAGS}\
+ ${ISIS_FLAGS}\
+ -I/usr/local/include\
+ -I/home/casc/include\
+ -I${HYPRE_DIR}\
+ -I${HYPRE_DIR}/utilities\
+ -DPETSC_AVAILABLE\
+ -DISIS_AVAILABLE\
+ -DHYPRE_MEMORY_CHECK\
+ -DHYPRE_DEBUG\
+ @INCLUDES@ \
+ @MPIINCLUDE@ \
+ -I/home/cleary/ale3d/isis/include\
+ -g
+
+
+FFLAGS = -g
+
+include ${PETSC_DIR}/bmake/${PETSC_ARCH}/base.site
+PETSC_OPT = g
+PETSC_LFLAGS =\
+ -L${PETSC_DIR}/lib/lib${PETSC_OPT}/${PETSC_ARCH}\
+ -lpetscsles\
+ -lpetscmat\
+ -lpetscvec\
+ -lpetscsys\
+ ${SUPERLU_LIB}\
+ ${BS_LIB}\
+ ${LAPACK_LIB}\
+ ${BLAS_LIB}\
+ ${X11_LIB}\
+ ${MPE_LIB}\
+ ${MPI_LIB}\
+ ${SYS_LIB}
+
+ISIS_LFLAGS =\
+ -L${ISIS_DIR}/lib/${PETSC_ARCH}\
+ -lisis_mpi
+
+MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
+LIBFLAGS = @LIBDIRS@ @LIBS@
+LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
+ 
+LFLAGS =\
+ -Wl,"-zmuldefs"\
+ -L/usr/local/lib\
+ -L/home/casc/lib\
+ -L/home/casc/g77/lib\
+ -L${HYPRE_DIR}/CI_struct_linear_solvers\
+ -L${HYPRE_DIR}/CI_struct_matrix_vector\
+ -L${HYPRE_DIR}/PETScMat_linear_solvers/pilut\
+ -L${HYPRE_DIR}/PETSc_linear_solvers/ParILUT\
+ -L${HYPRE_DIR}/distributed_linear_solvers/pilut\
+ -L${HYPRE_DIR}/distributed_matrix\
+ -L${HYPRE_DIR}/matrix_matrix\
+ -L${HYPRE_DIR}/utilities\
+ -lHYPRE_StructInterfaceSolver \
+ -lHYPREPETScSolverParILUT \
+ -lHYPREPETScMatPilutSolver \
+ -lHYPREDistributedMatrixPilutSolver \
+ -lHYPRE_StructInterfaceMatrix \
+ -lHYPREDistributedMatrix \
+ -lHYPRE_MatrixMatrix\
+ -lHYPRE_memory\
+ -lHYPRE_timing\
+ ${PETSC_LFLAGS}\
+ ${ISIS_LFLAGS}\
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}\
+ -lf2c\
+ -lmalloc\
+ -lm
+
+
+#Generic Rule
+.cc.o:
+	@@echo "Making (c++) " $@
+	${CCC} -o $@ -c ${CFLAGS} $<
+
+
