@@ -12,9 +12,7 @@
  *
  *****************************************************************************/
 
-#include "general.h"
-#include "HYPRE_seq_matrix.h"
-#include "./multiblock_matrix.h"
+#include "headers.h"
 
 /*--------------------------------------------------------------------------
  * hypre_NewMultiblockMatrix
@@ -42,9 +40,9 @@ hypre_FreeMultiblockMatrix( hypre_MultiblockMatrix *matrix )
    if (matrix)
    {
       for(i=0; i < hypre_MultiblockMatrixNumSubmatrices(matrix); i++)
-         hypre_Tfree(hypre_MultiblockMatrixSubmatrix(matrix,i));
-      hypre_Tfree(hypre_MultiblockMatrixSubmatrices(matrix));
-      hypre_Tfree(hypre_MultiblockMatrixSubmatrixTypes(matrix));
+         hypre_TFree(hypre_MultiblockMatrixSubmatrix(matrix,i));
+      hypre_TFree(hypre_MultiblockMatrixSubmatrices(matrix));
+      hypre_TFree(hypre_MultiblockMatrixSubmatrixTypes(matrix));
 
       hypre_TFree(matrix);
    }
@@ -64,8 +62,8 @@ hypre_LimitedFreeMultiblockMatrix( hypre_MultiblockMatrix *matrix )
 
    if (matrix)
    {
-      hypre_Tfree(hypre_MultiblockMatrixSubmatrices(matrix));
-      hypre_Tfree(hypre_MultiblockMatrixSubmatrixTypes(matrix));
+      hypre_TFree(hypre_MultiblockMatrixSubmatrices(matrix));
+      hypre_TFree(hypre_MultiblockMatrixSubmatrixTypes(matrix));
 
       hypre_TFree(matrix);
    }

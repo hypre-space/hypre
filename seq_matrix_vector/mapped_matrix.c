@@ -12,9 +12,7 @@
  *
  *****************************************************************************/
 
-#include "general.h"
-#include "HYPRE_seq_matrix.h"
-#include "./mapped_matrix.h"
+#include "headers.h"
 
 /*--------------------------------------------------------------------------
  * hypre_NewMappedMatrix
@@ -42,8 +40,8 @@ hypre_FreeMappedMatrix( hypre_MappedMatrix *matrix )
 
    if (matrix)
    {
-      hypre_Tfree(hypre_MappedMatrixMatrix(matrix));
-      hypre_Tfree(hypre_MappedMatrixMapData(matrix));
+      hypre_TFree(hypre_MappedMatrixMatrix(matrix));
+      hypre_TFree(hypre_MappedMatrixMapData(matrix));
 
       hypre_TFree(matrix);
    }

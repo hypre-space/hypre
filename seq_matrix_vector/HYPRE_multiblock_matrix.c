@@ -12,9 +12,7 @@
  *
  *****************************************************************************/
 
-#include "general.h"
-#include "HYPRE_seq_matrix.h"
-#include "seq_matrix_vector_internal.h"
+#include "headers.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_NewMultiblockMatrix

@@ -11,11 +11,18 @@
 .SUFFIXES: .c .f .o
 
 HEADERS =\
- ../includes/HYPRE_seq_matrix.h CSR_matrix.h mapped_matrix.h multiblock_matrix.h
- 
+ HYPRE_mv.h\
+ csr_matrix.h\
+ mapped_matrix.h\
+ multiblock_matrix.h
+
 FILES =\
- HYPRE_CSR_matrix.c HYPRE_mapped_matrix.c HYPRE_multiblock_matrix.c \
- CSR_matrix.c mapped_matrix.c multiblock_matrix.c
+ HYPRE_csr_matrix.c\
+ HYPRE_mapped_matrix.c\
+ HYPRE_multiblock_matrix.c\
+ csr_matrix.c\
+ mapped_matrix.c\
+ multiblock_matrix.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -26,9 +33,7 @@ F77 = /home/casc/g77/bin/g77
 CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
- -I../includes\
- -DHYPRE_MEMORY_CHECK\
- -g
+ -g -Wall -DHYPRE_DEBUG
 
 FFLAGS = -g
 
@@ -37,6 +42,8 @@ LFLAGS =\
  -L/home/casc/lib\
  -L/home/casc/g77/lib\
  -L.\
+ -L../utilities\
+ -lHYPRE_memory\
  -lf2c\
  -lcegdb\
  -lmalloc\
@@ -47,10 +54,12 @@ LFLAGS =\
 # Main rules
 ##################################################################
 
-${OBJS}: ${HEADERS}
+libHYPRE_mv.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -ru $@ ${OBJS}
+	ranlib $@
 
-lib: ${OBJS}
-	$(AR) -r libHYPREseq_mat_vec.a $(OBJS)
+${OBJS}: ${HEADERS}
 
 ##################################################################
 # Generic rules
@@ -58,9 +67,7 @@ lib: ${OBJS}
 
 .c.o:
 	@echo "Making (c) " $@
-	${CC} -o $@ -c ${CFLAGS} $<
-
-#	@${CC} -o $@ -c ${CFLAGS} $<
+	@${CC} -o $@ -c ${CFLAGS} $<
 
 .f.${AMG_ARCH}.o:
 	@echo "Making (f) " $@
@@ -71,7 +78,8 @@ lib: ${OBJS}
 ##################################################################
 
 veryclean: clean
-	@rm -f driver libHYPRE.a
+	@rm -f libHYPRE_mv.a
+	@rm -f driver driver_internal
 
 clean:
 	@rm -f *.o

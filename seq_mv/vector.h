@@ -1,5 +1,5 @@
 /*BHEADER**********************************************************************
- * (c) 1996   The Regents of the University of California
+ * (c) 1998   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
@@ -9,35 +9,33 @@
 
 /******************************************************************************
  *
- * Header info for CSR Matrix data structures
+ * Header info for Vector data structure
  *
  *****************************************************************************/
 
-#ifndef hypre_CSR_MATRIX_HEADER
-#define hypre_CSR_MATRIX_HEADER
+#ifndef hypre_VECTOR_HEADER
+#define hypre_VECTOR_HEADER
 
 /*--------------------------------------------------------------------------
- * CSR Matrix
+ * hypre_Vector
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
    double  *data;
-   int     *ia;
-   int     *ja;
    int      size;
 
-} hypre_CSRMatrix;
+   /* Does the Vector create/destroy `data'? */
+   int      owns_data;
+
+} hypre_Vector;
 
 /*--------------------------------------------------------------------------
- * Accessor functions for the CSR Matrix structure
+ * Accessor functions for the Vector structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_CSRMatrixData(matrix)      ((matrix) -> data)
-#define hypre_CSRMatrixIA(matrix)        ((matrix) -> ia)
-#define hypre_CSRMatrixJA(matrix)        ((matrix) -> ja)
-#define hypre_CSRMatrixSize(matrix)      ((matrix) -> size)
-#define hypre_CSRMatrixNNZ(A)            (hypre_CSRMatrixIA(A)[hypre_CSRMatrixSize(A)]-1)
-
+#define hypre_VectorData(vector)      ((vector) -> data)
+#define hypre_VectorSize(vector)      ((vector) -> size)
+#define hypre_VectorOwnsData(vector)  ((vector) -> owns_data)
 
 #endif
