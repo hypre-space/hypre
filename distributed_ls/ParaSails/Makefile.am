@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_ParaSails.a
  libHYPRE_ParaSails_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_ParaSails_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_ParaSails.la
  libHYPRE_ParaSails_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_ParaSails_la_OBJECTS
  libHYPRE_ParaSails_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -52,8 +54,6 @@ FILES = \
  RowPatt.c\
  StoredRows.c\
  hypre_ParaSails.c
-
-OBJECTS = $(FILES:.c=.o)
 
 $(OBJECTS): $(dependent_includes)
 

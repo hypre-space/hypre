@@ -246,6 +246,8 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 @STATICONLY_TRUE@lib_LIBRARIES = libHYPRE_sstruct_ls.a
 @STATICONLY_TRUE@libHYPRE_sstruct_ls_a_SOURCES = $(FILES)
+@STATICONLY_FALSE@OBJECTS = libHYPRE_sstruct_ls_la_OBJECTS
+@STATICONLY_TRUE@OBJECTS = libHYPRE_sstruct_ls_a_OBJECTS
 @STATICONLY_FALSE@lib_LTLIBRARIES = libHYPRE_sstruct_ls.la
 @STATICONLY_FALSE@libHYPRE_sstruct_ls_la_SOURCES = $(FILES)
 @STATICONLY_FALSE@libHYPRE_sstruct_ls_la_LDFLAGS = -avoid-version
@@ -288,7 +290,6 @@ FILES = \
  sys_semi_interp.c\
  sys_semi_restrict.c
 
-OBJECTS = $(FILES:.c=.o)
 all: all-am
 
 .SUFFIXES:

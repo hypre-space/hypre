@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_sstruct_ls.a
  libHYPRE_sstruct_ls_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_sstruct_ls_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_sstruct_ls.la
  libHYPRE_sstruct_ls_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_sstruct_ls_la_OBJECTS
  libHYPRE_sstruct_ls_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -46,8 +48,6 @@ FILES = \
  sys_pfmg_solve.c\
  sys_semi_interp.c\
  sys_semi_restrict.c
-
-OBJECTS = $(FILES:.c=.o)
 
 $(OBJECTS): $(dependent_includes)
 

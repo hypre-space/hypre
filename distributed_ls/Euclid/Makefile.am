@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_Euclid.a
  libHYPRE_Euclid_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_Euclid_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_Euclid.la
  libHYPRE_Euclid_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_Euclid_la_OBJECTS
  libHYPRE_Euclid_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -82,8 +84,6 @@ FILES = \
  mat_dh_private.c\
  shellSort_dh.c\
  sig_dh.c
-
-OBJECTS = $(FILES:.c=.o)
 
 $(OBJECTS): $(dependent_includes)
 

@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_mli.a
  libHYPRE_mli_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_mli_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_mli.la
  libHYPRE_mli_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_mli_la_OBJECTS
  libHYPRE_mli_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -104,6 +106,5 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_arpacksuperlu.cxx\
  $(top_srcdir)/FEI_mv/femli/vector/mli_vector.cxx
 
-$(SOURCES): $(dependent_includes)
-	touch $@
+$(OBJECTS): $(dependent_includes)
 

@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_struct_mv.a
  libHYPRE_struct_mv_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_struct_mv_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_struct_mv.la
  libHYPRE_struct_mv_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_struct_mv_la_OBJECTS
  libHYPRE_struct_mv_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -58,8 +60,6 @@ FILES = \
  struct_scale.c\
  struct_stencil.c\
  struct_vector.c
-
-OBJECTS = $(FILES:.c=.o)
 
 $(OBJECTS): $(dependent_includes)
 

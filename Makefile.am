@@ -73,7 +73,15 @@ HYPRE_SUBDIR_LIST = config\
  IJ_mv distributed_ls parcsr_ls parcsr_es\
  FEI_mv babel babel-runtime test lib 
 
-DIST_SUBDIRS = . $(HYPRE_SUBDIRS_LIST) docs
+DIST_SUBDIRS = \
+config\
+ blas lapack utilities\
+ krylov\
+ struct_mv struct_ls\
+ sstruct_mv sstruct_ls\
+ seq_mv parcsr_mv distributed_matrix matrix_matrix\
+ IJ_mv distributed_ls parcsr_ls parcsr_es\
+ FEI_mv babel babel-runtime test lib docs .
 
 test:
 	@ \

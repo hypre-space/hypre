@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_blas.a
  libHYPRE_blas_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_blas_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_blas.la
  libHYPRE_blas_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_blas_la_OBJECTS
  libHYPRE_blas_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -38,8 +40,6 @@ FILES = \
  dtrsv.c\
  idamax.c\
  blas_utils.c
-
-OBJECTS = $(FILES:.c=.o)
 
 $(OBJECTS): $(dependent_includes)
 

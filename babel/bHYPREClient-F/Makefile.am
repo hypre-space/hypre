@@ -3,6 +3,7 @@ include babel.make
 
 lib_LTLIBRARIES = libbHYPREClient-F.la
 libbHYPREClient_F_la_SOURCES = $(FILES)
+OBJECTS = libbHYPREClient_F_la_OBJECTS
 libbHYPREClient_F_la_LDFLAGS = -avoid-version
 
 C_COMPILE_FLAGS=@CFLAGS@

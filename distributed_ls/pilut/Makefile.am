@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_DistributedMatrixPilutSolver.a
  libHYPRE_DistributedMatrixPilutSolver_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_DistributedMatrixPilutSolver_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_DistributedMatrixPilutSolver.la
  libHYPRE_DistributedMatrixPilutSolver_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_DistributedMatrixPilutSolver_la_OBJECTS
  libHYPRE_DistributedMatrixPilutSolver_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -42,8 +44,6 @@ FILES = \
  serilut.c\
  trifactor.c\
  util.c
-
-OBJECTS = $(FILES:.c=.o)
 
 $(OBJECTS): $(dependent_includes)
 

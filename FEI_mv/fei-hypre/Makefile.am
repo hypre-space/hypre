@@ -9,9 +9,11 @@ endif !USE_FEI_BASE_DIR_DEFAULT
 if STATICONLY
  lib_LIBRARIES = libHYPRE_FEI.a
  libHYPRE_FEI_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_FEI_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_FEI.la
  libHYPRE_FEI_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_FEI_la_OBJECTS
  libHYPRE_FEI_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -124,9 +126,6 @@ FILES = \
  hypre_schur_reduce.cxx\
  hypre_slide_reduce.cxx\
  lsicg.c
-
-OBJECTS0 = $(FILES:.c=.o)
-OBJECTS = $(OBJECTS0:.cxx=.o)
 
 snl_LinearSystemCore.h:
 	test -f $(BASE_DIR)/LinearSystemCore.h && $(INSTALL_DATA) $(BASE_DIR)/LinearSystemCore.h snl_LinearSystemCore.h

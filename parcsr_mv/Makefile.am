@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_parcsr_mv.a
  libHYPRE_parcsr_mv_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_parcsr_mv_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_parcsr_mv.la
  libHYPRE_parcsr_mv_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_parcsr_mv_la_OBJECTS
  libHYPRE_parcsr_mv_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -51,8 +53,6 @@ FILES = \
  par_csr_matrix.c\
  par_csr_matvec.c\
  par_vector.c
-
-OBJECTS = $(FILES:.c=.o)
 
 $(OBJECTS): $(dependent_includes)
 

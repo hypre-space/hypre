@@ -233,6 +233,8 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 @STATICONLY_TRUE@lib_LIBRARIES = libHYPRE_MatrixMatrix.a
 @STATICONLY_TRUE@libHYPRE_MatrixMatrix_a_SOURCES = $(FILES)
+@STATICONLY_FALSE@OBJECTS = libHYPRE_MatrixMatrix_la_OBJECTS
+@STATICONLY_TRUE@OBJECTS = libHYPRE_MatrixMatrix_a_OBJECTS
 @STATICONLY_FALSE@lib_LTLIBRARIES = libHYPRE_MatrixMatrix.la
 @STATICONLY_FALSE@libHYPRE_MatrixMatrix_la_SOURCES = $(FILES)
 @STATICONLY_FALSE@libHYPRE_MatrixMatrix_la_LDFLAGS = -avoid-version
@@ -252,7 +254,6 @@ FILES = \
  HYPRE_ConvertPETScMatrixToDistributedMatrix.c\
  HYPRE_ConvertParCSRMatrixToDistributedMatrix.c
 
-OBJECTS = $(FILES:.c=.o)
 all: all-am
 
 .SUFFIXES:

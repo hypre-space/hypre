@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_krylov.a
  libHYPRE_krylov_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_krylov_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_krylov.la
  libHYPRE_krylov_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_krylov_la_OBJECTS
  libHYPRE_krylov_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -32,8 +34,6 @@ FILES = \
  cgnr.c\
  gmres.c\
  pcg.c
-
-OBJECTS = $(FILES:.c=.o)
 
 $(OBJECTS): $(dependent_includes)
 

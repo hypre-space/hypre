@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_lobpcg.a
  libHYPRE_lobpcg_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_lobpcg_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_lobpcg.la
  libHYPRE_lobpcg_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_lobpcg_la_OBJECTS
  libHYPRE_lobpcg_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -33,8 +35,6 @@ FILES = \
  lobpcg.c\
  lobpcg_matrix.c\
  lobpcg_utilities.c
-
-OBJECTS = $(FILES:.c=.o)
 
 $(OBJECTS): $(dependent_includes)
 

@@ -298,6 +298,8 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 @STATICONLY_TRUE@lib_LIBRARIES = libHYPRE_struct_ls.a
 @STATICONLY_TRUE@libHYPRE_struct_ls_a_SOURCES = $(FILES)
+@STATICONLY_FALSE@OBJECTS = libHYPRE_struct_ls_la_OBJECTS
+@STATICONLY_TRUE@OBJECTS = libHYPRE_struct_ls_a_OBJECTS
 @STATICONLY_FALSE@lib_LTLIBRARIES = libHYPRE_struct_ls.la
 @STATICONLY_FALSE@libHYPRE_struct_ls_la_SOURCES = $(FILES)
 @STATICONLY_FALSE@libHYPRE_struct_ls_la_LDFLAGS = -avoid-version
@@ -371,7 +373,6 @@ FILES = \
  sparse_msg_setup_rap.c\
  sparse_msg_solve.c
 
-OBJECTS = $(FILES:.c=.o)
 all: all-am
 
 .SUFFIXES:

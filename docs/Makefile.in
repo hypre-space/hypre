@@ -255,10 +255,10 @@ EXTRA_DIST = \
  $(srcdir)/usr_starting.tex\
  $(srcdir)/usr_struct.tex
 
-DISTCLEANFILES = \
- docxx.sty\
- V1.5.0b.IJ_transition_info
 
+#DISTCLEANFILES = \
+#docxx.sty\
+#V1.5.0b.IJ_transition_info
 LATEX = latex -interaction=nonstopmode
 MAKEINDEX = makeindex -q
 DVIPS = dvips -q -Ppdf
@@ -390,9 +390,6 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
-	$(MAKE) $(AM_MAKEFLAGS) \
-	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
-	  dist-hook
 check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
@@ -419,7 +416,6 @@ clean-generic:
 
 distclean-generic:
 	-rm -f $(CONFIG_CLEAN_FILES)
-	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -777,27 +773,27 @@ version.tex:
 # Generic rules
 ##################################################################
 
-dist-hook:
-	@ \
-	$(MAKE) $(AM_MAKEFLAGS); \
-	test ! -d ${distdir} && mkdir -m 755 -p ${distdir}; \
-	for file in HYPRE_usr_manual.ps HYPRE_usr_manual.pdf \
-		HYPRE_ref_manual.ps HYPRE_ref_manual.pdf \
-		bHYPRE_ref_manual.ps bHYPRE_ref_manual.pdf \
-		$(srcdir)/V[1-9]*; do \
-	  test -f $$file && $(INSTALL_DATA) $$file ${distdir}/$$file; \
-	done; \
-	test -f $(srcdir)/V1.5.0b.IJ_transition_info && \
-		$(INSTALL_DATA) $(srcdir)/V1.5.0b.IJ_transition_info \
-		${distdir}/V1.5.0b.IJ_transition_info; \
-	for dir in HYPRE_usr_manual HYPRE_ref_manual bHYPRE_ref_manual; do \
-	  if test -d $$dir; then \
-	    test ! -d ${distdir}/$$dir && mkdir -m 755 -p ${distdir}/$$dir; \
-	    for file in $$dir/*; do \
-	      $(INSTALL_DATA) $$file ${distdir}/$$file; \
-	    done; \
-	  fi; \
-	done
+#dist-hook:
+#	@ \
+#	$(MAKE) $(AM_MAKEFLAGS); \
+#	test ! -d ${distdir} && mkdir -m 755 -p ${distdir}; \
+#	for file in HYPRE_usr_manual.ps HYPRE_usr_manual.pdf \
+#		HYPRE_ref_manual.ps HYPRE_ref_manual.pdf \
+#		bHYPRE_ref_manual.ps bHYPRE_ref_manual.pdf \
+#		$(srcdir)/V[1-9]*; do \
+#	  test -f $$file && $(INSTALL_DATA) $$file ${distdir}/$$file; \
+#	done; \
+#	test -f $(srcdir)/V1.5.0b.IJ_transition_info && \
+#		$(INSTALL_DATA) $(srcdir)/V1.5.0b.IJ_transition_info \
+#		${distdir}/V1.5.0b.IJ_transition_info; \
+#	for dir in HYPRE_usr_manual HYPRE_ref_manual bHYPRE_ref_manual; do \
+#	  if test -d $$dir; then \
+#	    test ! -d ${distdir}/$$dir && mkdir -m 755 -p ${distdir}/$$dir; \
+#	    for file in $$dir/*; do \
+#	      $(INSTALL_DATA) $$file ${distdir}/$$file; \
+#	    done; \
+#	  fi; \
+#	done
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

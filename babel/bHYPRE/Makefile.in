@@ -268,6 +268,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 lib_LTLIBRARIES = libbHYPRE.la
 libbHYPRE_la_SOURCES = $(FILES)
+OBJECTS = libbHYPRE_la_OBJECTS
 libbHYPRE_la_LDFLAGS = -avoid-version
 C_COMPILE_FLAGS = @CFLAGS@
 # new configure won't fill in: CINCLUDES=@INCLUDES@ @MPIINCLUDE@ @BABEL_HYPRE_INCLUDES@
@@ -651,6 +652,8 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
 	uninstall-includeHEADERS uninstall-info-am \
 	uninstall-libLTLIBRARIES
 
+
+$(OBJECTS): $(include_HEADERS)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

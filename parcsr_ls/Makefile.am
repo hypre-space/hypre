@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_parcsr_ls.a
  libHYPRE_parcsr_ls_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_parcsr_ls_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_parcsr_ls.la
  libHYPRE_parcsr_ls_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_parcsr_ls_la_OBJECTS
  libHYPRE_parcsr_ls_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -77,8 +79,6 @@ FILES = \
  par_strength.c\
  pcg_par.c\
  schwarz.c
-
-OBJECTS = $(FILES:.c=.o)
 
 $(OBJECTS): $(dependent_includes)
 

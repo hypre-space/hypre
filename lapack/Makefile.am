@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_lapack.a
  libHYPRE_lapack_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_lapack_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_lapack.la
  libHYPRE_lapack_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_lapack_la_OBJECTS
  libHYPRE_lapack_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -83,8 +85,6 @@ FILES = \
  lapack_utils.c\
  lsame.c\
  xerbla.c
-
-OBJECTS = $(FILES:.c=.o)
 
 $(OBJECTS): $(dependent_includes)
 

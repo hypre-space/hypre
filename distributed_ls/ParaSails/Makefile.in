@@ -236,6 +236,8 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 @STATICONLY_TRUE@lib_LIBRARIES = libHYPRE_ParaSails.a
 @STATICONLY_TRUE@libHYPRE_ParaSails_a_SOURCES = $(FILES)
+@STATICONLY_FALSE@OBJECTS = libHYPRE_ParaSails_la_OBJECTS
+@STATICONLY_TRUE@OBJECTS = libHYPRE_ParaSails_a_OBJECTS
 @STATICONLY_FALSE@lib_LTLIBRARIES = libHYPRE_ParaSails.la
 @STATICONLY_FALSE@libHYPRE_ParaSails_la_SOURCES = $(FILES)
 @STATICONLY_FALSE@libHYPRE_ParaSails_la_LDFLAGS = -avoid-version
@@ -284,7 +286,6 @@ FILES = \
  StoredRows.c\
  hypre_ParaSails.c
 
-OBJECTS = $(FILES:.c=.o)
 all: all-am
 
 .SUFFIXES:

@@ -48,6 +48,7 @@ EXTRA_PROGRAMS = f77_ij$(EXEEXT) f77_ij_b$(EXEEXT) f77_ij_mv$(EXEEXT) \
 	new_ij.C++$(EXEEXT) ij_mv.C++$(EXEEXT) struct.C++$(EXEEXT) \
 	sstruct.C++$(EXEEXT)
 subdir = test
+SUBDIRS =
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/acinclude.m4 \
@@ -165,7 +166,6 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	uninstall-recursive
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -300,12 +300,14 @@ sharedstatedir = @sharedstatedir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-SUBDIRS = AUTOTEST\
+DIST_SUBDIRS = \
+ AUTOTEST\
  TEST_fei\
  TEST_ij\
  TEST_sstruct\
  TEST_struct\
- TEST_timing
+ TEST_timing\
+ .
 
 AM_CPPFLAGS = \
  -DHYPRE_TIMING\
@@ -926,7 +928,7 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
-	list='$(SUBDIRS)'; for subdir in $$list; do \
+	list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
 	  if test "$$subdir" = .; then :; else \
 	    test -d "$(distdir)/$$subdir" \
 	    || mkdir "$(distdir)/$$subdir" \
@@ -1035,6 +1037,141 @@ uninstall-info: uninstall-info-recursive
 	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
 	uninstall-binPROGRAMS uninstall-info-am
 
+
+ij_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+ij_mv_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/krylov.h
+new_ij_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+sstruct_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_sstruct_ls.h\
+ $(includedir)/krylov.h
+struct_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_struct_ls.h\
+ $(includedir)/struct_mv.h\
+ $(includedir)/krylov.h
+f77_ij_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+f77_ij_mv_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/krylov.h
+f77_new_ij_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+f77_sstruct_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_sstruct_ls.h\
+ $(includedir)/krylov.h
+f77_struct_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_struct_ls.h\
+ $(includedir)/struct_mv.h\
+ $(includedir)/krylov.h
+#f77_struct_b_OBJECTS: \
+#$(includedir)/utilities.h\
+#$(includedir)/HYPRE_struct_ls.h\
+#$(includedir)/struct_mv.h\
+#$(includedir)/krylov.h
+fei_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/HYPRE_LinSysCore.h
+ij_b_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h\
+ $(includedir)/bHYPRE.h\
+ $(includedir)/bHYPRE_IJParCSRMatrix_Impl.h\
+ $(includedir)/bHYPRE_IJParCSRVector_Impl.h\
+ $(includedir)/bHYPRE_ParCSRDiagScale_Impl.h
+#struct_b_OBJECTS: \
+#$(includedir)/utilities.h\
+#$(includedir)/HYPRE_struct_ls.h\
+#$(includedir)/Hypre_Box_Stub.h\
+#$(includedir)/Hypre_StructStencil_Stub.h\
+#$(includedir)/Hypre_StructGrid_Stub.h\
+#$(includedir)/Hypre_StructMatrix_Stub.h\
+#$(includedir)/Hypre_StructMatrixBuilder_Stub.h\
+#$(includedir)/Hypre_StructVector_Stub.h\
+#$(includedir)/Hypre_StructVectorBuilder_Stub.h\
+#$(includedir)/Hypre_MPI_Com_Stub.h\
+#$(includedir)/Hypre_StructJacobi_Stub.h\
+#$(includedir)/Hypre_StructSMG_Stub.h\
+#$(includedir)/Hypre_PCG_Stub.h
+ij_C___OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+new_ij_C___OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+ij_mv_C___OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/krylov.h
+struct_C___OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_struct_ls.h\
+ $(includedir)/struct_mv.h\
+ $(includedir)/krylov.h
+sstruct_C___OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_sstruct_ls.h\
+ $(includedir)/krylov.h
 
 fei++: fei
 

@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_DistributedMatrix.a
  libHYPRE_DistributedMatrix_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_DistributedMatrix_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_DistributedMatrix.la
  libHYPRE_DistributedMatrix_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_DistributedMatrix_la_OBJECTS
  libHYPRE_DistributedMatrix_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -31,8 +33,6 @@ FILES = \
  distributed_matrix_ISIS.c\
  distributed_matrix_PETSc.c\
  distributed_matrix_parcsr.c
-
-OBJECTS = $(FILES:.c=.o)
 
 $(OBJECTS): $(dependent_includes)
 

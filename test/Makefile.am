@@ -3,12 +3,14 @@
 #
 ## Process this file with automake to create Makefile.in
 
-SUBDIRS = AUTOTEST\
+DIST_SUBDIRS = \
+ AUTOTEST\
  TEST_fei\
  TEST_ij\
  TEST_sstruct\
  TEST_struct\
- TEST_timing
+ TEST_timing\
+ .
 
 bin_PROGRAMS = \
  ij\
@@ -332,6 +334,141 @@ struct_C___LDADD = \
 EXTRA_DIST = \
  funcs.sh\
  runtest.sh
+
+ij_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+ij_mv_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/krylov.h
+new_ij_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+sstruct_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_sstruct_ls.h\
+ $(includedir)/krylov.h
+struct_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_struct_ls.h\
+ $(includedir)/struct_mv.h\
+ $(includedir)/krylov.h
+f77_ij_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+f77_ij_mv_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/krylov.h
+f77_new_ij_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+f77_sstruct_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_sstruct_ls.h\
+ $(includedir)/krylov.h
+f77_struct_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_struct_ls.h\
+ $(includedir)/struct_mv.h\
+ $(includedir)/krylov.h
+#f77_struct_b_OBJECTS: \
+#$(includedir)/utilities.h\
+#$(includedir)/HYPRE_struct_ls.h\
+#$(includedir)/struct_mv.h\
+#$(includedir)/krylov.h
+fei_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/HYPRE_LinSysCore.h
+ij_b_OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h\
+ $(includedir)/bHYPRE.h\
+ $(includedir)/bHYPRE_IJParCSRMatrix_Impl.h\
+ $(includedir)/bHYPRE_IJParCSRVector_Impl.h\
+ $(includedir)/bHYPRE_ParCSRDiagScale_Impl.h
+#struct_b_OBJECTS: \
+#$(includedir)/utilities.h\
+#$(includedir)/HYPRE_struct_ls.h\
+#$(includedir)/Hypre_Box_Stub.h\
+#$(includedir)/Hypre_StructStencil_Stub.h\
+#$(includedir)/Hypre_StructGrid_Stub.h\
+#$(includedir)/Hypre_StructMatrix_Stub.h\
+#$(includedir)/Hypre_StructMatrixBuilder_Stub.h\
+#$(includedir)/Hypre_StructVector_Stub.h\
+#$(includedir)/Hypre_StructVectorBuilder_Stub.h\
+#$(includedir)/Hypre_MPI_Com_Stub.h\
+#$(includedir)/Hypre_StructJacobi_Stub.h\
+#$(includedir)/Hypre_StructSMG_Stub.h\
+#$(includedir)/Hypre_PCG_Stub.h
+ij_C___OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+new_ij_C___OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/krylov.h
+ij_mv_C___OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/krylov.h
+struct_C___OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_struct_ls.h\
+ $(includedir)/struct_mv.h\
+ $(includedir)/krylov.h
+sstruct_C___OBJECTS: \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE_sstruct_ls.h\
+ $(includedir)/krylov.h
 
 fei++: fei
 

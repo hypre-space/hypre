@@ -2,6 +2,7 @@
 
 lib_LTLIBRARIES = libbHYPRE.la
 libbHYPRE_la_SOURCES = $(FILES)
+OBJECTS = libbHYPRE_la_OBJECTS
 libbHYPRE_la_LDFLAGS = -avoid-version
 
 C_COMPILE_FLAGS=@CFLAGS@
@@ -32,4 +33,6 @@ include_HEADERS = ${STUBHDRS} ${IORHDRS} ${IMPLHDRS}
 
 FILES = ${IMPLSRCS} ${IORSRCS} ${SKELSRCS} ${STUBSRCS} \
  bHYPRE_Extensions.c
+
+$(OBJECTS): $(include_HEADERS)
 

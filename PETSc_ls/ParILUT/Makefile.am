@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_PETScSolverParILUT.a
  libHYPRE_PETScSolverParILUT_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_PETScSolverParILUT_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_PETScSolverParILUT.la
  libHYPRE_PETScSolverParILUT_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_PETScSolverParILUT_la_OBJECTS
  libHYPRE_PETScSolverParILUT_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -21,8 +23,6 @@ CPPFLAGS = -I..\
 #
 FILES = \
  HYPRE_PETScSolverParILUT.c HYPRE_PETScSolverParILUTSetup.c
-
-OBJECTS = $(FILES:.c=.o)
 
 $(OBJECTS): $(dependent_includes)
 

@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_seq_mv.a
  libHYPRE_seq_mv_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_seq_mv_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_seq_mv.la
  libHYPRE_seq_mv_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_seq_mv_la_OBJECTS
  libHYPRE_seq_mv_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -35,8 +37,6 @@ FILES = \
  mapped_matrix.c\
  multiblock_matrix.c\
  vector.c
-
-OBJECTS = $(FILES:.c=.o)
 
 $(OBJECTS): $(dependent_includes)
 

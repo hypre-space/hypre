@@ -264,6 +264,8 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 @STATICONLY_TRUE@lib_LIBRARIES = libHYPRE_struct_mv.a
 @STATICONLY_TRUE@libHYPRE_struct_mv_a_SOURCES = $(FILES)
+@STATICONLY_FALSE@OBJECTS = libHYPRE_struct_mv_la_OBJECTS
+@STATICONLY_TRUE@OBJECTS = libHYPRE_struct_mv_a_OBJECTS
 @STATICONLY_FALSE@lib_LTLIBRARIES = libHYPRE_struct_mv.la
 @STATICONLY_FALSE@libHYPRE_struct_mv_la_SOURCES = $(FILES)
 @STATICONLY_FALSE@libHYPRE_struct_mv_la_LDFLAGS = -avoid-version
@@ -318,7 +320,6 @@ FILES = \
  struct_stencil.c\
  struct_vector.c
 
-OBJECTS = $(FILES:.c=.o)
 all: all-am
 
 .SUFFIXES:

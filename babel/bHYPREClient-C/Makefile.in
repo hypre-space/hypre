@@ -303,6 +303,7 @@ STUBSRCS = bHYPRE_BoomerAMG_Stub.c bHYPRE_CoefficientAccess_Stub.c            \
 # ...defines: IORHDRS IORSRCS STUBHDRS STUBSRCS
 lib_LTLIBRARIES = libbHYPREClient-C.la
 libbHYPREClient_C_la_SOURCES = $(FILES)
+OBJECTS = libbHYPREClient_C_la_OBJECTS
 libbHYPREClient_C_la_LDFLAGS = -avoid-version
 C_COMPILE_FLAGS = @CFLAGS@
 # new configure won't fill in: CINCLUDES=@INCLUDES@ @MPIINCLUDE@ @BABEL_HYPRE_INCLUDES@

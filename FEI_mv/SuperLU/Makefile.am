@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_superlu.a
  libHYPRE_superlu_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_superlu_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_superlu.la
  libHYPRE_superlu_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_superlu_la_OBJECTS
  libHYPRE_superlu_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -57,8 +59,6 @@ FILES = \
  superlu_memory.c\
  superlu_timer.c\
  superlu_util.c
-
-OBJECTS = $(FILES:.c=.o)
 
 $(OBJECTS): $(dependent_includes)
 

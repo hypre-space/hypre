@@ -69,9 +69,9 @@ EXTRA_DIST = \
  $(srcdir)/usr_starting.tex\
  $(srcdir)/usr_struct.tex
 
-DISTCLEANFILES = \
- docxx.sty\
- V1.5.0b.IJ_transition_info
+#DISTCLEANFILES = \
+#docxx.sty\
+#V1.5.0b.IJ_transition_info
 
 LATEX = latex -interaction=nonstopmode
 MAKEINDEX = makeindex -q
@@ -416,25 +416,25 @@ version.tex:
 # Generic rules
 ##################################################################
 
-dist-hook:
-	@ \
-	$(MAKE) $(AM_MAKEFLAGS); \
-	test ! -d ${distdir} && mkdir -m 755 -p ${distdir}; \
-	for file in HYPRE_usr_manual.ps HYPRE_usr_manual.pdf \
-		HYPRE_ref_manual.ps HYPRE_ref_manual.pdf \
-		bHYPRE_ref_manual.ps bHYPRE_ref_manual.pdf \
-		$(srcdir)/V[1-9]*; do \
-	  test -f $$file && $(INSTALL_DATA) $$file ${distdir}/$$file; \
-	done; \
-	test -f $(srcdir)/V1.5.0b.IJ_transition_info && \
-		$(INSTALL_DATA) $(srcdir)/V1.5.0b.IJ_transition_info \
-		${distdir}/V1.5.0b.IJ_transition_info; \
-	for dir in HYPRE_usr_manual HYPRE_ref_manual bHYPRE_ref_manual; do \
-	  if test -d $$dir; then \
-	    test ! -d ${distdir}/$$dir && mkdir -m 755 -p ${distdir}/$$dir; \
-	    for file in $$dir/*; do \
-	      $(INSTALL_DATA) $$file ${distdir}/$$file; \
-	    done; \
-	  fi; \
-	done
+#dist-hook:
+#	@ \
+#	$(MAKE) $(AM_MAKEFLAGS); \
+#	test ! -d ${distdir} && mkdir -m 755 -p ${distdir}; \
+#	for file in HYPRE_usr_manual.ps HYPRE_usr_manual.pdf \
+#		HYPRE_ref_manual.ps HYPRE_ref_manual.pdf \
+#		bHYPRE_ref_manual.ps bHYPRE_ref_manual.pdf \
+#		$(srcdir)/V[1-9]*; do \
+#	  test -f $$file && $(INSTALL_DATA) $$file ${distdir}/$$file; \
+#	done; \
+#	test -f $(srcdir)/V1.5.0b.IJ_transition_info && \
+#		$(INSTALL_DATA) $(srcdir)/V1.5.0b.IJ_transition_info \
+#		${distdir}/V1.5.0b.IJ_transition_info; \
+#	for dir in HYPRE_usr_manual HYPRE_ref_manual bHYPRE_ref_manual; do \
+#	  if test -d $$dir; then \
+#	    test ! -d ${distdir}/$$dir && mkdir -m 755 -p ${distdir}/$$dir; \
+#	    for file in $$dir/*; do \
+#	      $(INSTALL_DATA) $$file ${distdir}/$$file; \
+#	    done; \
+#	  fi; \
+#	done
 	

@@ -3,9 +3,11 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE_utilities.a 
  libHYPRE_utilities_a_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_utilities_a_OBJECTS
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE_utilities.la 
  libHYPRE_utilities_la_SOURCES = $(FILES)
+ OBJECTS = libHYPRE_utilities_la_OBJECTS
  libHYPRE_utilities_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -42,8 +44,6 @@ FILES = \
  timer.c\
  timing.c\
  umalloc_local.c
-
-OBJECTS = $(FILES:.c=.o)
 
 $(OBJECTS): $(dependent_includes)
 
