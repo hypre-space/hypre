@@ -42,6 +42,7 @@ LFLAGS =\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
 
 HEADERS =\
+ fortran.h\
  HYPRE_IJ_mv.h \
  IJMatrix.h
 
