@@ -62,8 +62,8 @@ ${OBJS}: ${HEADERS}
 lib: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
 	@echo  "Building ${OBJS} ... "
-	@ar -rcu lib_HYPRE_FEI_needed.a ${OBJS}
-	@ranlib lib_HYPRE_FEI_needed.a 
+	@ar -rcu libHYPRE_FEI_needed.a ${OBJS}
+	@ranlib libHYPRE_FEI_needed.a 
 
 ##################################################################
 # Generic rules
