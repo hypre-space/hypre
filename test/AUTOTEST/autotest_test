@@ -220,6 +220,13 @@ apply_error_filters () {
         do process_filter $ErrorFile "${ii}"
         done
       ;;
+      tckk*|tc2k*)
+        for ii in \
+          '^cc:\ Info:\ '\
+          'WARNING:\ \ guidef77\ has\ implied\ '
+        do process_filter $ErrorFile "${ii}"
+        done
+      ;;
       tux*)
         for ii in \
           '(autoconf|automake|autoheader)\ has\ been\ disabled'\
