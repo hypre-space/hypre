@@ -6,6 +6,8 @@
  * Note: the timer function call is machine dependent. Use conditional
  *       compilation to choose the appropriate function.
  *
+ * Changes made to this file to add timing option on windows systems
+ * (in Nov 2003 at LLNL)
  */
 
 double SuperLU_timer_ ( void );
@@ -22,7 +24,11 @@ double SuperLU_timer_() {
 }
 
 #else
-
+#ifdef WIN32
+double SuperLU_timer_() {
+    return ( 0. );
+}
+#else
 #include <sys/types.h>
 #include <sys/times.h>
 #include <time.h>
@@ -41,6 +47,6 @@ double SuperLU_timer_()
     tmp += use.tms_stime;
     return (double)(tmp) / CLK_TCK;
 }
-
+#endif
 #endif
 
