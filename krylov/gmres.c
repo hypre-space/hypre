@@ -398,7 +398,8 @@ hypre_GMRESSolve(void  *gmres_vdata,
                       /* Also test on relative change of iterates, x_i - x_(i-1) */
                    {  /* At this point r = x_i - x_(i-1) */
                       x_norm = sqrt( (*(gmres_functions->InnerProd))(x,x) );
-                      if ( r_norm/x_norm < epsilon || x_norm<=guard_zero_residual )
+                      if ( x_norm<=guard_zero_residual ) break; /* don't divide by 0 */
+                      if ( r_norm/x_norm < epsilon )
                          break;
                    }
                    else
