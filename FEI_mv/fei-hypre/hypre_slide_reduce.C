@@ -26,6 +26,7 @@
 #include "../../parcsr_mv/HYPRE_parcsr_mv.h"
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
 #include "HYPRE_LinSysCore.h"
+#include "HYPRE_LSI_mli.h"
 
 #define dabs(x) (((x) > 0.0) ? x : -(x))
 
@@ -1800,6 +1801,10 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
        ProcNConstr[i] = ncnt;
        ncnt          += ncnt2;
     }
+#ifdef HAVE_MLI
+    if ( HYPreconID_ == HYMLI )
+       HYPRE_LSI_MLIAdjustNodeEqnMap(HYPrecon_, ProcNRows, ProcNConstr);
+#endif
    
     //******************************************************************
     // compose the local and global selected node lists
@@ -2309,6 +2314,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
                                               colIndex,globalNSelected);
              if ( searchIndex >= 0 ) 
              {
+                searchIndex = globalSelectedListAux[searchIndex];
                 for ( procIndex = 0; procIndex < numProcs_; procIndex++ )
                    if ( ProcNRows[procIndex] > colIndex ) break;
                 if ( procIndex == numProcs_ )
