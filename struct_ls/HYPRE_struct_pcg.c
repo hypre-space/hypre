@@ -14,7 +14,6 @@
 #endif
 
 /*==========================================================================*/
-/*==========================================================================*/
 /** Returns a default PCG solver structure.
 
 {\bf Input files:}
@@ -40,7 +39,7 @@ HYPRE_StructPCGInitialize( MPI_Comm comm, HYPRE_StructSolver *solver )
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Free a PCG solver structure
+/** Free a PCG solver structure.
 
 {\bf Input files:}
 headers.h
@@ -96,7 +95,7 @@ HYPRE_StructPCGSetup( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Performs the PCG linear solve
+/** Performs the PCG linear solve.
 
 {\bf Input files:}
 headers.h
@@ -129,7 +128,7 @@ HYPRE_StructPCGSolve( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** An optional call to set the PCG solver tolerance
+/** An optional call to set the PCG solver tolerance.
 
 {\bf Input files:}
 headers.h
@@ -153,7 +152,7 @@ HYPRE_StructPCGSetTol( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** An optional call to set the PCG solver maximum number of iterations
+/** An optional call to set the PCG solver maximum number of iterations.
 
 {\bf Input files:}
 headers.h
@@ -162,7 +161,7 @@ headers.h
 
 @param solver []
   solver structure
-#param max_iter
+@param max_iter
   PCG solver maximum number of iterations
 
 @see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
@@ -177,7 +176,7 @@ HYPRE_StructPCGSetMaxIter( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Optional call to set the PCG solver ????
+/** Optional call to set the PCG solver ???? .
 
 {\bf Input files:}
 headers.h
@@ -201,7 +200,7 @@ HYPRE_StructPCGSetTwoNorm( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Optional call to set the PCG solver relative change parameter
+/** Optional call to set the PCG solver relative change parameter.
 
 {\bf Input files:}
 headers.h
@@ -225,7 +224,7 @@ HYPRE_StructPCGSetRelChange( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Optional call to apply a precondioner prior to the solve
+/** Optional call to apply a precondioner prior to the solve.
 
 {\bf Input files:}
 headers.h
@@ -256,7 +255,7 @@ HYPRE_StructPCGSetPrecond( HYPRE_StructSolver  solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Optional call to ????
+/** Optional call to ???? .
 
 {\bf Input files:}
 headers.h
@@ -280,7 +279,7 @@ HYPRE_StructPCGSetLogging( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** Optional call to get the number of ierations of the PCG solve
+/** Optional call to get the number of ierations of the PCG solve.
 
 {\bf Input files:}
 headers.h
@@ -305,7 +304,7 @@ HYPRE_StructPCGGetNumIterations( HYPRE_StructSolver  solver,
 /*==========================================================================*/
 /*==========================================================================*/
 /** Optional call to retrieve the final relative residual norms of the
-    PCG solve
+    PCG solve.
 
 {\bf Input files:}
 headers.h
@@ -330,7 +329,7 @@ HYPRE_StructPCGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
 /*==========================================================================*/
 /*==========================================================================*/
 /** Gets the matrix data.  Completes any remaining tasks needed for the
-    DiagScale such as ????  
+    DiagScale such as ????. 
 
 {\bf Input files:}
 headers.h
@@ -360,7 +359,7 @@ HYPRE_StructDiagScaleSetup( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/** ????
+/** ????.
 
 {\bf Input files:}
 headers.h
