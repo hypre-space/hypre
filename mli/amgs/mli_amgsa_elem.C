@@ -47,7 +47,7 @@ int MLI_Method_AMGSA::setupUsingFEData( MLI *mli )
    int          nodeFieldID, elemNNodes, **elemNodeLists, *elemNodeList1D;
    int          blockSize=3, nNodes, *nodeEqnList, *sortArray, elemIndex;
    int          eqnIndex, *aggrMap, currMacroNumber, elemStart, elemCount;
-   int          *macroNumbers, eMatDim, ierr, matz=1, *partition;
+   int          *macroNumbers, eMatDim, ierr, matz=1, *partition, aggrSize;
    int          localStartRow, localNRows, nMacros, *macroSizes, macroMax;
    int          j1, k1, *macroNodeEqnList, nodeIndex, eqnInd1, eqnInd2;
    int          eqnNumber, colOffset1, colOffset2, *nodeNodeMap, elemID;
@@ -99,6 +99,7 @@ nullspace_dim = 6;
                                         &partition);
    localStartRow = partition[mypid];
    localNRows    = partition[mypid+1] - localStartRow;
+   free( partition );
 
    /* --------------------------------------------------------------- */
    /* fetch FEData information                                        */
@@ -139,7 +140,7 @@ nullspace_dim = 6;
    MLI_Utils_HypreMatrixGetDestroyFunc(funcPtr);
    sprintf(paramString, "HYPRE_ParCSR" );
    mliEEMat = new MLI_Matrix( (void *) hypreEE, paramString, funcPtr );
-   MLI_FEDataAgglomerateElemsLocal(mliEEMat, &macroNumbers);
+   MLI_FEDataAgglomerateElemsLocalOld(mliEEMat, &macroNumbers);
    delete mliENMat;
    delete mliNEMat;
    delete mliEEMat;
@@ -180,12 +181,14 @@ nullspace_dim = 6;
       elemIndex = sortArray[i];
       for ( j = 0; j < elemNNodes; j++ ) 
       {
-         eqnIndex = nodeEqnList[elemIndex*elemNNodes+j];
-         if ( aggrMap[eqnIndex] < 0 )
+         eqnIndex = nodeEqnList[elemIndex*elemNNodes+j] - localStartRow;
+         if ( eqnIndex >= 0 && eqnIndex < localNRows &&
+              aggrMap[eqnIndex] < 0 )
             for ( k = 0; k < blockSize; k++ ) 
                aggrMap[eqnIndex+k] = currMacroNumber;
       }
    }
+
    sa_data[0] = aggrMap;
    sa_counts[0] = nMacros;
    macroSizes = new int[nMacros];
@@ -200,9 +203,6 @@ nullspace_dim = 6;
    if ( nullspace_vec != NULL ) delete [] nullspace_vec;
    nullspace_len = localNRows;
    nullspace_vec = new double[nullspace_len*nullspace_dim];
-   evalues  = new double[macroMax];
-   dAux1    = new double[macroMax];
-   dAux2    = new double[macroMax];
    eMatDim  = elemNNodes * blockSize;
    elemMat  = new double[eMatDim*eMatDim];
    evectors = NULL;
@@ -232,9 +232,13 @@ nullspace_dim = 6;
       for ( i = 1; i < macroNumNodes; i++ )
          if ( macroNodeList[i] != macroNodeList[k-1] ) 
             macroNodeList[k++] = macroNodeList[i]; 
+
       macroNumNodes = k;
       macroMatDim = macroNumNodes * blockSize;
       evectors = new double[macroMatDim*macroMatDim];
+      evalues  = new double[macroMatDim];
+      dAux1    = new double[macroMatDim];
+      dAux2    = new double[macroMatDim];
       elemMats = new double[macroMatDim*macroMatDim];
       nodeNodeMap = new int[elemNNodes];
       for ( i = 0; i < macroMatDim*macroMatDim; i++ ) elemMats[i] = 0.0;
@@ -247,7 +251,7 @@ nullspace_dim = 6;
          {
             nodeIndex = elemNodeLists[elemIndex][j];
             nodeNodeMap[j] = 
-               MLI_Utils_BinarySearch(nodeIndex, macroNodeList, macroNumNodes );
+               MLI_Utils_BinarySearch(nodeIndex, macroNodeList, macroNumNodes);
          }
          for ( j = 0; j < elemNNodes; j++ )
          {
@@ -271,12 +275,39 @@ nullspace_dim = 6;
 
       macroNodeEqnList = new int[macroNumNodes];
       nodeEqnMap->getMap(macroNumNodes, macroNodeList, macroNodeEqnList);
+
+      aggrSize = 0;
+      for ( j = 0; j < macroNumNodes; j++ )
+      {
+         eqnNumber = macroNodeEqnList[j] - localStartRow;
+         if ( eqnNumber >= 0 && eqnNumber < localNRows &&
+              aggrMap[eqnNumber] == macroNumbers[elemStart] )
+            aggrSize += blockSize;
+      } 
+/*
+      if ( aggrSize > 0 && aggrSize <= nullspace_dim )
+      {
+         for ( j = 0; j < macroNumNodes; j++ )
+         {
+            eqnNumber = macroNodeEqnList[j] - localStartRow;
+            if ( eqnNumber >= 0 && eqnNumber < localNRows &&
+                 aggrMap[eqnNumber] != macroNumbers[elemStart] )
+            {
+               for ( k = 0; k < blockSize; k++ )
+                  aggrMap[eqnNumber+k] = macroNumbers[elemStart];
+               aggrSize += blockSize;
+               if ( aggrSize > nullspace_dim ) break;
+            } 
+         } 
+      } 
+*/
       for ( i = 0; i < nullspace_dim; i++ )
       {
          for ( j = 0; j < macroNumNodes; j++ )
          {
-            eqnNumber = macroNodeEqnList[j];
-            if ( aggrMap[eqnNumber] == macroNumbers[elemStart] )
+            eqnNumber = macroNodeEqnList[j] - localStartRow;
+            if ( eqnNumber >= 0 && eqnNumber < localNRows &&
+                 aggrMap[eqnNumber] == macroNumbers[elemStart] )
             {
                for ( k = 0; k < blockSize; k++ )
                   nullspace_vec[eqnNumber+k+i*nullspace_len] =
@@ -289,22 +320,40 @@ nullspace_dim = 6;
       delete [] macroNodeList;
       delete [] evectors;
       delete [] elemMats;
+      delete [] evalues;
+      delete [] dAux1;
+      delete [] dAux2;
       elemStart = elemCount;
    }
- 
+   for ( i = 0; i < nMacros; i++ ) macroNumbers[i] = 0; 
+   for ( i = 0; i < localNRows; i++ ) macroNumbers[aggrMap[i]]++;
+   for ( i = 0; i < nMacros; i++ ) 
+      if ( macroNumbers[i] > 0 ) macroNumbers[i] = 1;
+      else                       macroNumbers[i] = -1;
+   k = 0;
+   for ( i = 0; i < nMacros; i++ ) 
+   {
+      if ( macroNumbers[i] > 0 )
+      {
+         j = macroNumbers[i];
+         macroNumbers[i] = k;
+         k = k + j;
+      }
+   }
+   for ( i = 0; i < localNRows; i++ ) 
+      aggrMap[i] = macroNumbers[aggrMap[i]];
+
    /* --------------------------------------------------------------- */
    /* clean up                                                        */
    /* --------------------------------------------------------------- */
 
-   delete [] evalues;
    delete [] elemMat;
-   delete [] dAux1;
-   delete [] dAux2;
    delete [] elemNodeList1D;
    delete [] elemNodeLists;
    delete [] elemIDs;
    delete [] sortArray;
    delete [] macroSizes;
+   free( macroNumbers );
    if ( nodeEqnList != NULL ) delete [] nodeEqnList;
    return 0;
 }
