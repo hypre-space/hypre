@@ -575,8 +575,6 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 {
    hypre_AMGHybridData  *AMGhybrid_data    = AMGhybrid_vdata;
 
-   MPI_Comm           comm           = hypre_ParCSRMatrixComm(A);
-
    double             tol            = (AMGhybrid_data -> tol);
    double             cf_tol         = (AMGhybrid_data -> cf_tol);
    int                dscg_max_its   = (AMGhybrid_data -> dscg_max_its);
@@ -616,7 +614,6 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    int                pcg_num_its;
 
    double             res_norm;
-   int                myid;
 
    int                ierr = 0;
    int                i, j;
