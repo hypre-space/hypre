@@ -215,13 +215,21 @@ impl_Hypre_ParCSRVector_Axpy(
 
    /*  A Hypre_Vector is just an interface, we have no knowledge of its contents.
        Check whether it's something we know how to handle.  If not, die. */
-   HypreP_x = Hypre_Vector__cast2
-      ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
-        "Hypre.ParCSRVector" );
-   assert( HypreP_x!=NULL );
-   /* ... Without the cast, we could also have done (I think)
-      assert( Hypre_Vector_isInstanceOf( x, "ParCSRVector" ) );
+   if ( Hypre_Vector_queryInterface(x, "Hypre.ParCSRVector" ) ) {
+      /* perhaps Hypre_Vector_isInstanceOf( x, "ParCSRVector" ) might do the same job */
+      HypreP_x = Hypre_Vector__cast2( x, "Hypre.ParCSRVector" );
+   }
+   else {
+      assert( "Unrecognized vector type."==(char *)x );
+   }
+   /* This is the old code for the above.  It seems that queryInterface has been
+      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+      HypreP_x = Hypre_Vector__cast2
+         ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
+           "Hypre.ParCSRVector" );
+      assert( HypreP_x!=NULL );
    */
+
    data_x = Hypre_ParCSRVector__get_data( HypreP_x );
    ij_x = data_x->ij_b;
    ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
@@ -282,7 +290,7 @@ impl_Hypre_ParCSRVector_Clone(
   /* Insert the implementation of the Clone method here... */
    /* Set x to a clone of self. */
    int ierr = 0;
-   int type[0];
+   int type[1];  /* type[0] produces silly error messages on Sun */
    int * partitioning, jlower, jupper, my_id;
    void * objectx, * objecty;
    struct Hypre_ParCSRVector__data * data_y, * data_x;
@@ -359,7 +367,7 @@ impl_Hypre_ParCSRVector_Copy(
       This is a deep copy, ultimately done by hypre_SeqVectorCopy.
    */
    int ierr = 0;
-   int type[0];
+   int type[1]; /* type[0] produces silly error messages on Sun */
    void * objectx, * objecty;
    struct Hypre_ParCSRVector__data * data_y, * data_x;
    HYPRE_IJVector ij_y, ij_x;
@@ -368,12 +376,19 @@ impl_Hypre_ParCSRVector_Copy(
    
    /*  A Hypre_Vector is just an interface, we have no knowledge of its contents.
        Check whether it's something we know how to handle.  If not, die. */
-   HypreP_x = Hypre_Vector__cast2
-      ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
-        "Hypre.ParCSRVector" );
-   assert( HypreP_x!=NULL );
-   /* ... Without the cast, we could also have done (I think)
-      assert( Hypre_Vector_isInstanceOf( x, "ParCSRVector" ) );
+   if ( Hypre_Vector_queryInterface(x, "Hypre.ParCSRVector" ) ) {
+      /* perhaps Hypre_Vector_isInstanceOf( x, "ParCSRVector" ) might do the same job */
+      HypreP_x = Hypre_Vector__cast2( x, "Hypre.ParCSRVector" );
+   }
+   else {
+      assert( "Unrecognized vector type."==(char *)x );
+   }
+   /* This is the old code for the above.  It seems that queryInterface has been
+      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+      HypreP_x = Hypre_Vector__cast2
+         ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
+           "Hypre.ParCSRVector" );
+      assert( HypreP_x!=NULL );
    */
 
    data_y = Hypre_ParCSRVector__get_data( self );
@@ -467,10 +482,20 @@ impl_Hypre_ParCSRVector_Dot(
 
    /*  A Hypre_Vector is just an interface, we have no knowledge of its contents.
        Check whether it's something we know how to handle.  If not, die. */
-   HypreP_x = Hypre_Vector__cast2
-      ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
-        "Hypre.ParCSRVector" );
-   assert( HypreP_x!=NULL );
+   if ( Hypre_Vector_queryInterface(x, "Hypre.ParCSRVector" ) ) {
+      /* perhaps Hypre_Vector_isInstanceOf( x, "ParCSRVector" ) might do the same job */
+      HypreP_x = Hypre_Vector__cast2( x, "Hypre.ParCSRVector" );
+   }
+   else {
+      assert( "Unrecognized vector type."==(char *)x );
+   }
+   /* This is the old code for the above.  It seems that queryInterface has been
+      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+      HypreP_x = Hypre_Vector__cast2
+         ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
+           "Hypre.ParCSRVector" );
+      assert( HypreP_x!=NULL );
+   */
 
    data = Hypre_ParCSRVector__get_data( self );
    ij_y = data -> ij_b;

@@ -114,17 +114,38 @@ impl_Hypre_ParAMG_Apply(
    ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
    HypreP_A = (HYPRE_ParCSRMatrix) objectA;
 
-   HypreP_x = Hypre_Vector__cast2
-      ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
-   assert( HypreP_x!=NULL );
+   if ( Hypre_Vector_queryInterface(x, "Hypre.ParCSRVector" ) ) {
+      /* perhaps Hypre_Vector_isInstanceOf( x, "ParCSRVector" ) might do the same job */
+      HypreP_x = Hypre_Vector__cast2( x, "Hypre.ParCSRVector" );
+   }
+   else {
+      assert( "Unrecognized vector type."==(char *)x );
+   }
+   /* This is the old code for the above.  It seems that queryInterface has been
+      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+      HypreP_x = Hypre_Vector__cast2
+         ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
+      assert( HypreP_x!=NULL );
+   */
+
    datax = Hypre_ParCSRVector__get_data( HypreP_x );
    ij_x = datax -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
    xx = (HYPRE_ParVector) objectx;
 
-   HypreP_y = Hypre_Vector__cast2
-      ( Hypre_Vector_queryInterface( *y, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
-   assert( HypreP_y!=NULL );
+   if ( Hypre_Vector_queryInterface( *y, "Hypre.ParCSRVector" ) ) {
+      HypreP_y = Hypre_Vector__cast2( *y, "Hypre.ParCSRVector" );
+   }
+   else {
+      assert( "Unrecognized vector type."==(char *)(*y) );
+   }
+   /* This is the old code for the above.  It seems that queryInterface has been
+      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+      HypreP_y = Hypre_Vector__cast2
+         ( Hypre_Vector_queryInterface( *y, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
+      assert( HypreP_y!=NULL );
+   */
+
    datay = Hypre_ParCSRVector__get_data( HypreP_y );
    ij_y = datay -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_y, &objecty );
@@ -205,9 +226,19 @@ impl_Hypre_ParAMG_GetResidual(
    data = Hypre_ParAMG__get_data( self );
    solver = data->solver;
 
-   HypreP_r = Hypre_Vector__cast2
-      ( Hypre_Vector_queryInterface( *r, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
-   assert( HypreP_r!=NULL );
+   if ( Hypre_Vector_queryInterface( *r, "Hypre.ParCSRVector" ) ) {
+      HypreP_r = Hypre_Vector__cast2( *r, "Hypre.ParCSRVector" );
+   }
+   else {
+      assert( "Unrecognized vector type."==(char *)(*r) );
+   }
+   /* This is the old code for the above.  It seems that queryInterface has been
+      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+      HypreP_r = Hypre_Vector__cast2
+         ( Hypre_Vector_queryInterface( *r, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
+      assert( HypreP_r!=NULL );
+   */
+
    datar = Hypre_ParCSRVector__get_data( HypreP_r );
    ij_r = datar -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_r, &objectr );
@@ -510,9 +541,18 @@ impl_Hypre_ParAMG_SetOperator(
    struct Hypre_ParAMG__data * data;
    Hypre_ParCSRMatrix Amat;
 
-   Amat = Hypre_Operator__cast2
-      ( Hypre_Operator_queryInterface( A, "Hypre.ParCSRMatrix"), "Hypre.ParCSRMatrix" );
-   assert( Amat!=NULL );
+   if ( Hypre_Operator_queryInterface( A, "Hypre.ParCSRMatrix" ) ) {
+      Amat = Hypre_Operator__cast2( A, "Hypre.ParCSRMatrix" );
+   }
+   else {
+      assert( "Unrecognized operator type."==(char *)A );
+   }
+   /* This is the old code for the above.  It seems that queryInterface has been
+      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+      Amat = Hypre_Operator__cast2
+         ( Hypre_Operator_queryInterface( A, "Hypre.ParCSRMatrix"), "Hypre.ParCSRMatrix" );
+      assert( Amat!=NULL );
+   */
 
    data = Hypre_ParAMG__get_data( self );
    data->matrix = Amat;

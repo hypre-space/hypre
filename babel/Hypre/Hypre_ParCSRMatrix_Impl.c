@@ -174,13 +174,31 @@ impl_Hypre_ParCSRMatrix_Apply(
 
    /*  A Hypre_Vector is just an interface, we have no knowledge of its contents.
        Check whether it's something we know how to handle.  If not, die. */
-   HypreP_x = Hypre_Vector__cast2( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
-                                  "Hypre.ParCSRVector" );
-   assert( HypreP_x!=NULL );
+   if ( Hypre_Vector_queryInterface(x, "Hypre.ParCSRVector" ) ) {
+      HypreP_x = Hypre_Vector__cast2( x, "Hypre.ParCSRVector" );
+   }
+   else {
+      assert( "Unrecognized vector type."==(char *)x );
+   }
+   /* This is the old code for the above.  It seems that queryInterface has been
+      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+      HypreP_x = Hypre_Vector__cast2( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
+                                     "Hypre.ParCSRVector" );
+      assert( HypreP_x!=NULL );
+   */
 
-   HypreP_y = Hypre_Vector__cast2( Hypre_Vector_queryInterface( *y, "Hypre.ParCSRVector"),
-                                  "Hypre.ParCSRVector" );
-   assert( HypreP_y!=NULL );
+   if ( Hypre_Vector_queryInterface( *y, "Hypre.ParCSRVector" ) ) {
+      HypreP_y = Hypre_Vector__cast2( *y, "Hypre.ParCSRVector" );
+   }
+   else {
+      assert( "Unrecognized vector type."==(char *)y );
+   }
+   /* This is the old code for the above.  It seems that queryInterface has been
+      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+      HypreP_y = Hypre_Vector__cast2( Hypre_Vector_queryInterface( *y, "Hypre.ParCSRVector"),
+                                     "Hypre.ParCSRVector" );
+      assert( HypreP_y!=NULL );
+   */
 
    data_y = Hypre_ParCSRVector__get_data( HypreP_y );
    ij_y = data_y -> ij_b;
@@ -407,8 +425,8 @@ impl_Hypre_ParCSRMatrix_GetRow(
    ierr += HYPRE_IJMatrixGetObject( ij_A, &object );
    HypreP_A = (HYPRE_ParCSRMatrix) object;
 
-   *col_ind = SIDL_int__array_create( 1, lower, size );
-   *values = SIDL_double__array_create( 1, lower, size );
+   *col_ind = SIDL_int__array_create1d( size[0] );
+   *values = SIDL_double__array_create1d( size[0] );
 
    *iindices = SIDLArrayAddr1( *col_ind, 0 );
    *dvalues = SIDLArrayAddr1( *values, 0 );

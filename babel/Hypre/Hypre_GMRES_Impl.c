@@ -406,8 +406,8 @@ impl_Hypre_GMRES_GetResidual(
    else {
       /* Unsupported vector type */
       ++ierr;
-      return ierr;
    }
+   return ierr;
 
   /* DO-NOT-DELETE splicer.end(Hypre.GMRES.GetResidual) */
 }
@@ -639,8 +639,8 @@ impl_Hypre_GMRES_SetPreconditioner(
    struct Hypre_GMRES__data * dataself;
    struct Hypre_ParAMG__data * AMG_dataprecond;
    Hypre_ParAMG AMG_s;
-   struct Hypre_ParDiagScale__data * DiagScale_dataprecond;
-   Hypre_ParDiagScale DiagScale_s;
+/* not used   struct Hypre_ParDiagScale__data * DiagScale_dataprecond;*/
+/* not used   Hypre_ParDiagScale DiagScale_s;*/
    HYPRE_PtrToSolverFcn precond, precond_setup; /* functions */
 
    dataself = Hypre_GMRES__get_data( self );
@@ -660,10 +660,10 @@ impl_Hypre_GMRES_SetPreconditioner(
    }
    else if ( Hypre_Solver_queryInterface( s, "Hypre.ParDiagScale" ) ) {
       /* s is a Hypre_ParDiagScale */
-      DiagScale_s = Hypre_Operator__cast2
+/* not used      DiagScale_s = Hypre_Operator__cast2
          ( Hypre_Solver_queryInterface( s, "Hypre.ParDiagScale"),
-           "Hypre.ParDiagScale" );
-      DiagScale_dataprecond = Hypre_ParDiagScale__get_data( DiagScale_s );
+         "Hypre.ParDiagScale" );*/
+/* not used      DiagScale_dataprecond = Hypre_ParDiagScale__get_data( DiagScale_s );*/
       solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );
       /* ... HYPRE diagonal scaling needs no solver object, but we must provide a
          HYPRE_Solver object.  It will be totally ignored. */
@@ -760,4 +760,5 @@ impl_Hypre_GMRES_Setup(
    /* Setup is not done here because it requires the entire problem.
       It is done in Apply instead. */
   /* DO-NOT-DELETE splicer.end(Hypre.GMRES.Setup) */
+   return 0;
 }
