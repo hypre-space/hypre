@@ -2,6 +2,14 @@
        Zero-based vs. One-based Indexing in HYPRE Matrices
 
 
+Some definitions:
+
+0-based indexing.  Row and column indices are numbered starting at 0.
+1-based indexing.  Row and column indices are numbered starting at 1.
+0-based storage.   Natural for C, possible in Fortran.
+1-based storage.   Natural for Fortran, sometimes used in C.
+
+
 I. The issues and a suggested decision
 
 The issues are as follows:
@@ -80,9 +88,12 @@ Constructor/destructor macros:
 Macro that returns a pointer to the real data:
   base_array_data = hypre_BaseArrayData(base_array, base)
 
+Macro that converts from 1 base index to another
+  new_index = hypre_ConvertBaseIndex(index, base, new_base)
+
 Function that converts from 1 base to another (This function actually
 modifies the data in the array, so it should be used only when necessary):
-  converted_base_array = hypre_ConvertBaseArray(base_array, base, new_base)
+  hypre_ConvertBaseArray(&base_array, base, new_base)
 
 II.2. Coding Rules and Guidelines
 
@@ -93,6 +104,10 @@ II.2. Coding Rules and Guidelines
 - All hypre_BaseArray types in the same routine should use the same base.
   It is recommended that only one `base' variable be defined for each
   routine in an attempt to enforce this.
+
+- Care must be taken when calling other codes that depend on the matrix
+  and vector base to convert (if necessary) to a base that the called
+  code supports.
 
 
 III. Sample code
