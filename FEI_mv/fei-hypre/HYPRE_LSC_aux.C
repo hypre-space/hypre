@@ -725,7 +725,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
 
        else if ( !strcmp(param1, "amgSystemSize") )
        {
-          sscanf(params[i],"%s %lg", param, &amgSystemSize_);
+          sscanf(params[i],"%s %d", param, &amgSystemSize_);
           if ( amgSystemSize_ <= 0 ) amgSystemSize_ = 1;
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
           {
