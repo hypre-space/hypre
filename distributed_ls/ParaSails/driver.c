@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <assert.h>
 #include "mpi.h"
 #include "Matrix.h"
@@ -16,6 +17,8 @@ int main(int argc, char *argv[])
     double *x, *y, *b;
     int i;
     double thresh;
+    double selparam;
+    int nlevels;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
@@ -36,35 +39,64 @@ int main(int argc, char *argv[])
         assert(end_row == n);
 
     x = (double *) malloc((end_row-beg_row+1) * sizeof(double));
-    y = (double *) malloc((end_row-beg_row+1) * sizeof(double));
     b = (double *) malloc((end_row-beg_row+1) * sizeof(double));
 
     A = MatrixCreate(MPI_COMM_WORLD, beg_row, end_row);
 
     MatrixRead(A, argv[1]);
-    RhsRead(b, A, argv[2]);
     /* MatrixPrint(A, "A"); */
 
-    for (i=0; i<end_row-beg_row+1; i++)
+    /* Right-hand side */
+    if (argc > 2)
+        RhsRead(b, A, argv[2]);
+    else
+        for (i=0; i<end_row-beg_row+1; i++)
+            b[i] = (double) (2*rand()) / (double) RAND_MAX - 1.0;
+
+    while (1)
     {
-        x[i] = 0.0;
+        /* Initial guess */
+        for (i=0; i<end_row-beg_row+1; i++)
+            x[i] = 0.0;
+
+        if (mype == 0)
+        {
+	    fflush(stdout);
+            printf("Enter parameters selparam (0.75), nlevels (1): ");
+            scanf("%lf %d", &selparam, &nlevels);
+            printf("selparam %f, nlevels %d\n", selparam, nlevels);
+            fflush(stdout);
+	}
+
+	MPI_Bcast(&selparam, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&nlevels,  1, MPI_INT,    0, MPI_COMM_WORLD);
+
+        if (nlevels < 0)
+            break;
+
+        time0 = MPI_Wtime();
+        ps = ParaSailsCreate(A);
+        thresh = ParaSailsSelectThresh(ps, selparam);
+        ParaSailsSetupPattern(ps, thresh, nlevels);
+        ParaSailsSetupValues(ps, A);
+        time1 = MPI_Wtime();
+        printf("%d: Total time for ParaSails: %f\n", mype, time1-time0);
+        i = MatrixNnz(ps->M);
+        if (mype == 0) printf("number of nonzeros: %d\n", i);
+        /*MatrixPrint(ps->M, "M");*/
+
+        time0 = MPI_Wtime();
+        PCG_ParaSails(A, ps, b, x, 1.e-9, 1500);
+        time1 = MPI_Wtime();
+        printf("%d: Total time for it sol: %f\n", mype, time1-time0);
+
+        MatrixMatvecComplete(A); /* convert matrix back to global numbering */
+        MatrixPrint(A, "Ax");
+        ParaSailsDestroy(ps);
     }
 
-    time0 = MPI_Wtime();
-    ps = ParaSailsCreate(A);
-    thresh = ParaSailsSelectThresh(ps, 0.75);
-    ParaSailsSetupPattern(ps, thresh, 1);
-    ParaSailsSetupValues(ps, A);
-    time1 = MPI_Wtime();
-    printf("%d: Total time for ParaSails: %f\n", mype, time1-time0);
-    /*MatrixPrint(ps->M, "M");*/
-
-    time0 = MPI_Wtime();
-    PCG_ParaSails(A, ps, b, y, 1.e-8, 500);
-    time1 = MPI_Wtime();
-    printf("%d: Total time for it sol: %f\n", mype, time1-time0);
-
-    ParaSailsDestroy(ps);
+    free(x);
+    free(b);
 
     MatrixDestroy(A);
     MPI_Finalize();

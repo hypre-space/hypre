@@ -88,8 +88,10 @@ int  MatrixRowPe(Matrix *mat, int row);
 void MatrixPrint(Matrix *mat, char *filename);
 void MatrixRead(Matrix *mat, char *filename);
 void RhsRead(double *rhs, Matrix *mat, char *filename);
+int  MatrixNnz(Matrix *mat);
 
 void MatrixMatvec(Matrix *mat, double *x, double *y);
 void MatrixMatvecTrans(Matrix *mat, double *x, double *y);
+void MatrixMatvecComplete(Matrix *mat);
 
 #endif /* _MATRIX_H */

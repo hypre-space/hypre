@@ -27,7 +27,6 @@
 
 /* prototypes for some static functions used in this file */
 static void MatrixMatvecSetup(Matrix *mat);
-static void MatrixMatvecComplete(Matrix *mat);
 
 
 /*--------------------------------------------------------------------------
@@ -155,6 +154,25 @@ int MatrixRowPe(Matrix *mat, int row)
 }
 
 /*--------------------------------------------------------------------------
+ * MatrixNnz - Return total number of nonzeros in preconditioner.
+ *--------------------------------------------------------------------------*/
+
+int MatrixNnz(Matrix *mat)
+{
+    int num_local, i, total, alltotal;
+
+    num_local = mat->end_row - mat->beg_row + 1;
+
+    total = 0;
+    for (i=0; i<num_local; i++)
+	total += mat->lens[i];
+
+    MPI_Allreduce(&total, &alltotal, 1, MPI_INT, MPI_SUM, mat->comm);
+
+    return alltotal;
+}
+
+/*--------------------------------------------------------------------------
  * MatrixPrint - Print a matrix to a file "filename".  Each processor 
  * appends to the file in order, but the file is overwritten if it exists.
  *--------------------------------------------------------------------------*/
@@ -211,6 +229,7 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
     int len;
     int ind[10000];
     double val[10000];
+    int dummy;
 
     MPI_Request request;
     MPI_Status  status;
@@ -221,8 +240,8 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
     file = fopen(filename, "r");
     assert(file != NULL);
 
-    ret = fscanf(file, "%d\n", &num_rows);
-    assert(ret == 1);
+    ret = fscanf(file, "%d %d %d\n", &num_rows, &dummy, &dummy);
+    assert(ret == 3);
 
     offset = ftell(file);
     fscanf(file, "%d %d %lf\n", &row, &col, &value);
@@ -244,7 +263,7 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 
     /* Now read our own part */
     rewind(file);
-    fscanf(file, "%d\n", &num_rows);
+    fscanf(file, "%d %d %d\n", &num_rows, &dummy, &dummy);
 
     ret = fscanf(file, "%d %d %lf\n", &row, &col, &value);
     curr_row = row;
@@ -521,7 +540,7 @@ static void ConvertToGlobalIndices(Matrix *mat, Hash *hash, int *local_to_global
         {
 	    if (ind[i] >= num_local)
 	    {
-		ind[i] = mat->local_to_global[ind[i]];
+		ind[i] = mat->local_to_global[ind[i] - num_local];
 	    }
 	    else
 	    {
@@ -685,7 +704,7 @@ static void MatrixMatvecSetup(Matrix *mat)
 }
 
 
-static void MatrixMatvecComplete(Matrix *mat)
+void MatrixMatvecComplete(Matrix *mat)
 {
     int i;
 
