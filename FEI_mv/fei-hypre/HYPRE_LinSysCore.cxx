@@ -4530,7 +4530,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       newnorm = rnorm;
       rnorm   = buildSlideReducedSoln2();
    }
-   else if ( slideReduction_ == 3 )
+   else if ( slideReduction_ == 3 || slideReduction_ == 4 )
    {
       newnorm = rnorm;
       currA_ = TempA;
@@ -4541,7 +4541,9 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       HYPRE_IJVectorGetObject(currX_, (void **) &x_csr);
       HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
       HYPRE_IJVectorGetObject(currR_, (void **) &r_csr);
-      slideObj->buildReducedSolnVector(currX_, currB_);
+      if ( slideReduction_ == 3 )
+           slideObj->buildReducedSolnVector(currX_, currB_);
+      else slideObj->buildModifiedSolnVector(currX_);
       delete slideObj;
       HYPRE_ParVectorCopy( b_csr, r_csr );
       HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );

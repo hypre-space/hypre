@@ -1657,6 +1657,57 @@ int HYPRE_SlideReduction::buildModifiedRHSVector(HYPRE_IJVector x,
    return 0;
 }
 
+//*****************************************************************************
+// given the solution vector, copy the actual solution
+//-----------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::buildModifiedSolnVector(HYPRE_IJVector x) 
+{
+   int    mypid, nprocs, *procNRows, startRow, endRow, localNRows;
+   int    nConstraints, irow;
+   double *x_data, *rx_data;
+   HYPRE_ParCSRMatrix A_csr;
+   HYPRE_ParVector    x_csr, rx_csr;
+   hypre_Vector       *x_local, *rx_local;
+       
+   //------------------------------------------------------------------
+   // get machine and matrix information
+   //------------------------------------------------------------------
+
+   if ( reducedXvec_ == NULL ) return -1;
+   MPI_Comm_rank( mpiComm_, &mypid );
+   MPI_Comm_size( mpiComm_, &nprocs );
+   HYPRE_IJMatrixGetObject(Amat_, (void **) &A_csr);
+   HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &procNRows );
+   startRow     = procNRows[mypid];
+   endRow       = procNRows[mypid+1] - 1;
+   localNRows   = endRow - startRow + 1;
+   nConstraints = procNConstr_[mypid+1] - procNConstr_[mypid];
+   free( procNRows );
+   if (( outputLevel_ & HYPRE_BITMASK2 ) >= 1 && 
+       (procNConstr_==NULL || procNConstr_[nprocs]==0))
+   {
+      printf("%4d : buildModifiedSolnVector WARNING - no local entry.\n",
+             mypid);
+      return 1;
+   }
+
+   //------------------------------------------------------------------
+   // compute b2 - A21 * sol  (v1 = b2 + v1)
+   //------------------------------------------------------------------
+
+   HYPRE_IJVectorGetObject(x, (void **) &x_csr);
+   x_local  = hypre_ParVectorLocalVector((hypre_ParVector *) x_csr);
+   x_data   = (double *) hypre_VectorData(x_local);
+   HYPRE_IJVectorGetObject(reducedXvec_, (void **) &rx_csr);
+   rx_local = hypre_ParVectorLocalVector((hypre_ParVector *) rx_csr);
+   rx_data  = (double *) hypre_VectorData(rx_local);
+   for ( irow = 0; irow < localNRows-nConstraints; irow++ )
+      x_data[irow] = rx_data[irow];
+
+   return 0;
+}
+
 //****************************************************************************
 // build the reduced matrix
 //----------------------------------------------------------------------------

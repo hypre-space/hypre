@@ -72,6 +72,7 @@ class HYPRE_SlideReduction
    int    getPerturbationMatrix(HYPRE_ParCSRMatrix *matrix);
    int    setup(HYPRE_IJMatrix , HYPRE_IJVector , HYPRE_IJVector );
    int    buildReducedSolnVector(HYPRE_IJVector x, HYPRE_IJVector b);
+   int    buildModifiedSolnVector(HYPRE_IJVector x);
 
  private:
 
