@@ -180,4 +180,7 @@
             - add slide reduction option 4 to handle ALE3D's constraint
               problems
             - clean up a little bit for HYPRE_SlideReduction
+10/30/03    2.5.2R2
+            - add compatible relaxation to femli/amgrs
+            - clean up some compiler complaints
 
