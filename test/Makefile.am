@@ -6,6 +6,7 @@
 # hopefully these will be auto-generated with >automake-1.8.0
 abs_top_srcdir = @abs_top_srcdir@
 abs_srcdir = @abs_srcdir@
+abs_builddir = @abs_builddir@
 
 SUBDIRS = \
  .\
@@ -16,12 +17,13 @@ SUBDIRS = \
  TEST_struct\
  TEST_timing
 
-EXTRA_PROGRAMS = \
+bin_PROGRAMS = \
  ij\
  ij_mv\
  new_ij\
  sstruct\
- struct\
+ struct
+EXTRA_PROGRAMS = \
  f77_ij\
  f77_ij_b\
  f77_ij_mv\

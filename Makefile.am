@@ -3,8 +3,6 @@
 #
 ## Process this file with automake to create Makefile.in
 
-.PHONY: test
-
 ACLOCAL_AMFLAGS = -I config
 
 include_HEADERS = HYPRE.h HYPRE_config.h
@@ -92,12 +90,7 @@ config\
 test:
 	@ \
 	$(MAKE) $(AM_MAKEFLAGS) install; \
-	(cd test && $(MAKE) $(AM_MAKEFLAGS) install)
-
-tests:
-	@ \
-	$(MAKE) $(AM_MAKEFLAGS) install; \
-	(cd test && $(MAKE) $(AM_MAKEFLAGS) install)
+	(cd test && $(MAKE) $(AM_MAKEFLAGS))
 
 docs: dvi ps pdf html
 
@@ -178,3 +171,5 @@ clean-local:
 #	    cp -f $$i $(distdir); \
 #	  fi; \
 #	done
+
+.PHONY: test
