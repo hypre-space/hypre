@@ -55,6 +55,8 @@ cat amg_linklist.h             >> $INTERNAL_HEADER
 		          
 ./protos qsplit.c              >> $INTERNAL_HEADER
 		          
+./protos hypre_qsort.c         >> $INTERNAL_HEADER
+		          
 #===========================================================================
 # Include guards
 #===========================================================================

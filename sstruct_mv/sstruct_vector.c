@@ -210,6 +210,8 @@ hypre_SStructPVectorAssemble( hypre_SStructPVector *pvector )
    hypre_BoxArrayArray   *recv_boxes;
    int                  **send_processes;
    int                  **recv_processes;
+   int                   *send_order;
+   int                   *recv_order;
    hypre_Index            unit_stride;
    int                    var, d;
 
@@ -231,7 +233,8 @@ hypre_SStructPVectorAssemble( hypre_SStructPVector *pvector )
          
          hypre_CreateCommInfoFromNumGhost(sgrid, num_ghost,
                                           &send_boxes, &recv_boxes,
-                                          &send_processes, &recv_processes);
+                                          &send_processes, &recv_processes,
+                                          &send_order, &recv_order);
          
          hypre_CommPkgDestroy(comm_pkgs[var]);
          comm_pkgs[var] =
@@ -239,8 +242,9 @@ hypre_SStructPVectorAssemble( hypre_SStructPVector *pvector )
                                 unit_stride, unit_stride,
                                 hypre_StructVectorDataSpace(svectors[var]),
                                 hypre_StructVectorDataSpace(svectors[var]),
-                                send_processes, recv_processes, 1,
-                                hypre_StructVectorComm(svectors[var]),
+                                send_processes, recv_processes,
+                                send_order, recv_order,
+                                1, hypre_StructVectorComm(svectors[var]),
                                 hypre_StructGridPeriodic(sgrid));
       }
    }

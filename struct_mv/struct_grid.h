@@ -71,6 +71,9 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridNumBoxes(grid) \
 (hypre_BoxArraySize(hypre_StructGridBoxes(grid)))
 
+#define hypre_StructGridIDPeriod(grid) \
+hypre_BoxNeighborsIDPeriod(hypre_StructGridNeighbors(grid))
+
 /*--------------------------------------------------------------------------
  * Looping macros:
  *--------------------------------------------------------------------------*/

@@ -150,7 +150,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    int                *hood_ids;
    int                 first_local;
    int                 num_local;
-   int                 num_periodic;
+   int                 id_period;
+   int                 num_periods;
    int                 max_distance;
    hypre_Box          *bounding_box;
    hypre_Index         periodic;
@@ -165,35 +166,29 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    int                *recv_sizes;
    int                 my_rank;
 
-   int                *send_procs;
-   int                *recv_procs;
-   int                 num_sends;
-   int                 num_recvs;
+   int                *comm_procs;
+   int                 num_comms;
                       
+   int               **arrays;
+   int                *sizes;
+   int                 size;
+   int                *mergei;
+   int                *mergej;
+
    hypre_BoxArray     *new_hood_boxes;
    int                 new_num_hood;
    int                *new_hood_procs;
    int                *new_hood_ids;
    int                 new_first_local;
    int                 new_num_local;
-   int                 new_num_periodic;
 
    hypre_Box          *box;
-   hypre_Box          *local_box;
-   hypre_Box          *neighbor_box;
-   hypre_Box          *local_cbox;
-   hypre_Box          *neighbor_cbox;
    hypre_Index         imin;
    hypre_Index         imax;
    int                 alloc_size;
 
-   double              perimeter_count, cperimeter_count;
-   /*double              diff, distance, perimeter_count, cperimeter_count;*/
-                      
-   int                *iarray;
-   int                *jrecv;
-   int                 i, j, d, ilocal;
-   int                 data_id, min_id, jj;
+   int                 i, j, d;
+   int                 jj;
 
    /*-----------------------------------------
     * Copy needed info from fgrid
@@ -202,26 +197,33 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    comm         = hypre_StructGridComm(fgrid);
    dim          = hypre_StructGridDim(fgrid);
    neighbors    = hypre_StructGridNeighbors(fgrid);
-   hood_boxes   = hypre_BoxArrayDuplicate(hypre_BoxNeighborsBoxes(neighbors));
+   hood_boxes   = hypre_BoxNeighborsBoxes(neighbors);
+   hood_procs   = hypre_BoxNeighborsProcs(neighbors);
+   hood_ids     = hypre_BoxNeighborsIDs(neighbors);
    num_hood     = hypre_BoxArraySize(hood_boxes);
+   id_period    = hypre_BoxNeighborsIDPeriod(neighbors);
+   num_periods  = hypre_BoxNeighborsNumPeriods(neighbors);
 
-   iarray  = hypre_BoxNeighborsProcs(neighbors);
-   hood_procs = hypre_TAlloc(int, num_hood);
+   /* adjust num_hood to focus only on non-periodic boxes */
+   num_hood /= num_periods;
+
+   /* make a copy of hood_boxes, hood_procs, and hood_ids */
+   new_hood_boxes = hypre_BoxArrayCreate(num_hood);
+   new_hood_procs = hypre_TAlloc(int, num_hood);
+   new_hood_ids   = hypre_TAlloc(int, num_hood);
    for (i = 0; i < num_hood; i++)
    {
-      hood_procs[i] = iarray[i];
+      hypre_CopyBox(hypre_BoxArrayBox(hood_boxes, i),
+                    hypre_BoxArrayBox(new_hood_boxes, i));
+      new_hood_procs[i] = hood_procs[i];
+      new_hood_ids[i] = hood_ids[i];
    }
-
-   iarray = hypre_BoxNeighborsIDs(neighbors);
-   hood_ids  = hypre_TAlloc(int, num_hood);
-   for (i = 0; i < num_hood; i++)
-   {
-      hood_ids[i] = iarray[i];
-   }
+   hood_boxes = new_hood_boxes;
+   hood_procs = new_hood_procs;
+   hood_ids   = new_hood_ids;
 
    first_local  = hypre_BoxNeighborsFirstLocal(neighbors);
    num_local    = hypre_BoxNeighborsNumLocal(neighbors);
-   num_periodic = hypre_BoxNeighborsNumPeriodic(neighbors);
 
    max_distance = hypre_StructGridMaxDistance(fgrid);
    bounding_box = hypre_BoxDuplicate(hypre_StructGridBoundingBox(fgrid));
@@ -251,7 +253,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    }
    fprintf(file, "first_local  = %d\n", first_local);
    fprintf(file, "num_local    = %d\n", num_local);
-   fprintf(file, "num_periodic = %d\n", num_periodic);
 #endif
 
    /*-----------------------------------------
@@ -261,191 +262,55 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    hypre_StructCoarsenBox(bounding_box, index, stride);
 
    /*-----------------------------------------
-    * Coarsen neighborhood boxes & determine
-    * send / recv procs
-    *
-    * NOTE: Currently, this always communicates
-    * with all neighboring processes.
+    * Coarsen neighborhood boxes
     *-----------------------------------------*/
 
-   local_cbox = hypre_BoxCreate();
-   neighbor_cbox = hypre_BoxCreate();
-
-   num_recvs = 0;
-   num_sends = 0;
-   recv_procs = NULL;
-   send_procs = NULL;
-   for (i = 0; i < num_hood; i++)
-   {
-      if (hood_procs[i] != my_rank)
-      {
-         for (j = 0; j < num_local; j++)
-         {
-            ilocal = first_local + j;
-
-            local_box    = hypre_BoxArrayBox(hood_boxes, ilocal);
-            neighbor_box = hypre_BoxArrayBox(hood_boxes, i);
-
-            /* coarsen boxes being considered */
-            hypre_CopyBox(local_box, local_cbox);
-            hypre_StructCoarsenBox(local_cbox, index, stride);
-            hypre_CopyBox(neighbor_box, neighbor_cbox);
-            hypre_StructCoarsenBox(neighbor_cbox, index, stride);
-
-            /*-----------------------
-             * Receive info?
-             *-----------------------*/
-
-/* always communicate */
-#if 0
-            perimeter_count = 0;
-            cperimeter_count = 0;
-            for (d = 0; d < 3; d++)
-            {
-               distance = max_distance;
-               diff = hypre_BoxIMaxD(neighbor_box, d) -
-                  hypre_BoxIMaxD(local_box, d);
-               if (diff > 0)
-               {
-                  distance = hypre_min(distance, diff);
-               }
-               diff = hypre_BoxIMinD(local_box, d) -
-                  hypre_BoxIMinD(neighbor_box, d);
-               if (diff > 0)
-               {
-                  distance = hypre_min(distance, diff);
-               }
-               if (distance < max_distance)
-               {
-                  perimeter_count++;
-               }
-
-               distance = max_distance;
-               diff = hypre_BoxIMaxD(neighbor_cbox, d) -
-                  hypre_BoxIMaxD(local_cbox, d);
-               if (diff > 0)
-               {
-                  distance = hypre_min(distance, diff);
-               }
-               diff = hypre_BoxIMinD(local_cbox, d) -
-                  hypre_BoxIMinD(neighbor_cbox, d);
-               if (diff > 0)
-               {
-                  distance = hypre_min(distance, diff);
-               }
-               if (distance < max_distance)
-               {
-                  cperimeter_count++;
-               }
-            }
-#else
-            perimeter_count = 0;
-            cperimeter_count = 1;
-#endif
-            if (cperimeter_count > perimeter_count)
-            {
-               if (num_recvs == 0)
-               {
-                  recv_procs = hypre_TAlloc(int, num_hood);
-                  recv_procs[num_recvs] = hood_procs[i];
-                  num_recvs++;
-               }
-               else if (hood_procs[i] != recv_procs[num_recvs-1])
-               {
-                  recv_procs[num_recvs] = hood_procs[i];
-                  num_recvs++;
-               }
-            }
-
-            /*-----------------------
-             * Send info?
-             *-----------------------*/
-
-/* always communicate */
-#if 0
-            perimeter_count = 0;
-            cperimeter_count = 0;
-            for (d = 0; d < 3; d++)
-            {
-               distance = max_distance;
-               diff = hypre_BoxIMaxD(local_box, d) -
-                  hypre_BoxIMaxD(neighbor_box, d);
-               if (diff > 0)
-               {
-                  distance = hypre_min(distance, diff);
-               }
-               diff = hypre_BoxIMinD(neighbor_box, d) -
-                  hypre_BoxIMinD(local_box, d);
-               if (diff > 0)
-               {
-                  distance = hypre_min(distance, diff);
-               }
-               if (distance < max_distance)
-               {
-                  perimeter_count++;
-               }
-
-               distance = max_distance;
-               diff = hypre_BoxIMaxD(local_cbox, d) -
-                  hypre_BoxIMaxD(neighbor_cbox, d);
-               if (diff > 0)
-               {
-                  distance = hypre_min(distance, diff);
-               }
-               diff = hypre_BoxIMinD(neighbor_cbox, d) -
-                  hypre_BoxIMinD(local_cbox, d);
-               if (diff > 0)
-               {
-                  distance = hypre_min(distance, diff);
-               }
-               if (distance < max_distance)
-               {
-                  cperimeter_count++;
-               }
-            }
-#else
-            perimeter_count = 0;
-            cperimeter_count = 1;
-#endif
-            if (cperimeter_count > perimeter_count)
-            {
-               if (num_sends == 0)
-               {
-                  send_procs = hypre_TAlloc(int, num_hood);
-                  send_procs[num_sends] = hood_procs[i];
-                  num_sends++;
-               }
-               else if (hood_procs[i] != send_procs[num_sends-1])
-               {
-                  send_procs[num_sends] = hood_procs[i];
-                  num_sends++;
-               }
-            }
-         }
-      }
-   }
-
-   hypre_BoxDestroy(local_cbox);
-   hypre_BoxDestroy(neighbor_cbox);
-
-   /* coarsen neighborhood boxes */
    for (i = 0; i < num_hood; i++)
    {
       box = hypre_BoxArrayBox(hood_boxes, i);
       hypre_StructCoarsenBox(box, index, stride);
    }
 
-#if DEBUG
-   fprintf(file, "num_recvs = %d\n", num_recvs);
-   for (i = 0; i < num_recvs; i++)
+   /*-----------------------------------------
+    * Determine send and receive procs.
+    *
+    * NOTE: We communicate with all neighbor
+    * processes, hence comm_procs is used for
+    * both sends and receives.
+    *
+    * NOTE: This relies on the fact that for
+    * each box in the hood, all of its periodic
+    * boxes are also in the hood.  It also
+    * relies on the fact that within each box
+    * set period the process numbers are in
+    * non-decreasing order.
+    *-----------------------------------------*/
+
+   comm_procs = NULL;
+   num_comms  = 0;
+   for (i = 0; i < num_hood; i++)
    {
-      fprintf(file, "%d ", recv_procs[i]);
+      if (hood_procs[i] != my_rank)
+      {
+         if (num_comms == 0)
+         {
+            comm_procs = hypre_TAlloc(int, num_hood);
+            comm_procs[num_comms] = hood_procs[i];
+            num_comms++;
+         }
+         else if (hood_procs[i] > hood_procs[i-1])
+         {
+            comm_procs[num_comms] = hood_procs[i];
+            num_comms++;
+         }
+      }
    }
-   fprintf(file, "\n");
-   fprintf(file, "num_sends = %d\n", num_sends);
-   for (i = 0; i < num_sends; i++)
+
+#if DEBUG
+   fprintf(file, "num_comms = %d\n", num_comms);
+   for (i = 0; i < num_comms; i++)
    {
-      fprintf(file, "%d ", send_procs[i]);
+      fprintf(file, "%d ", comm_procs[i]);
    }
    fprintf(file, "\n");
 
@@ -457,98 +322,84 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
     * Exchange neighbor info with other procs
     *-----------------------------------------*/
 
-   /* neighbor size info - post receives */
-   if (num_recvs)
+   if (num_comms)
    {
-      recv_requests = hypre_TAlloc(MPI_Request, num_recvs);
-      recv_status   = hypre_TAlloc(MPI_Status, num_recvs);
+      /* neighbor size info - post receives */
 
-      recv_sizes = hypre_TAlloc(int, num_recvs);
-      for (i = 0; i < num_recvs; i++)
+      recv_requests = hypre_TAlloc(MPI_Request, num_comms);
+      recv_status   = hypre_TAlloc(MPI_Status, num_comms);
+
+      recv_sizes = hypre_TAlloc(int, num_comms);
+      for (i = 0; i < num_comms; i++)
       {
          MPI_Irecv(&recv_sizes[i], 1, MPI_INT,
-                   recv_procs[i], 0, comm, &recv_requests[i]);
+                   comm_procs[i], 0, comm, &recv_requests[i]);
       }
-   }
 
-   /* neighbor size info - post sends */
-   if (num_sends)
-   {
-      send_requests = hypre_TAlloc(MPI_Request, num_sends);
-      send_status   = hypre_TAlloc(MPI_Status, num_sends);
+      /* neighbor size info - post sends */
 
-      send_size = 8 * hypre_BoxArraySize(hood_boxes);
-      for (i = 0; i < num_sends; i++)
+      send_requests = hypre_TAlloc(MPI_Request, num_comms);
+      send_status   = hypre_TAlloc(MPI_Status, num_comms);
+
+      send_size = 8 * num_hood;
+      for (i = 0; i < num_comms; i++)
       {
          MPI_Isend(&send_size, 1, MPI_INT,
-                   send_procs[i], 0, comm, &send_requests[i]);
+                   comm_procs[i], 0, comm, &send_requests[i]);
       }
-   }
 
-   /* neighbor size info - complete receives */
-   if (num_recvs)
-   {
-      MPI_Waitall(num_recvs, recv_requests, recv_status);
-   }
+      /* neighbor size info - complete receives */
+      MPI_Waitall(num_comms, recv_requests, recv_status);
 
-   /* neighbor size info - complete sends */
-   if (num_sends)
-   {
-      MPI_Waitall(num_sends, send_requests, send_status);
+      /* neighbor size info - complete sends */
+      MPI_Waitall(num_comms, send_requests, send_status);
    }
 
    /*-----------------------------------------*/
 
-   /* neighbor info - post receives */
-   if (num_recvs)
+   if (num_comms)
    {
-      recv_buffers = hypre_TAlloc(int *, num_recvs);
-      for (i = 0; i < num_recvs; i++)
+      /* neighbor info - post receives */
+
+      recv_buffers = hypre_TAlloc(int *, num_comms);
+      for (i = 0; i < num_comms; i++)
       {
          recv_buffers[i] = hypre_SharedTAlloc(int, recv_sizes[i]);
          MPI_Irecv(recv_buffers[i], recv_sizes[i], MPI_INT,
-                   recv_procs[i], 0, comm, &recv_requests[i]);
+                   comm_procs[i], 0, comm, &recv_requests[i]);
       }
-   }
 
-   /* neighbor info - post sends */
-   if (num_sends)
-   {
+      /* neighbor info - post sends */
+
       /* pack the send buffer */
       send_buffer = hypre_SharedTAlloc(int, send_size);
-      j = 0;
-      for (i = 0; i < num_hood; i++)
+      for (j = 0; j < num_hood; j++)
       {
-         send_buffer[j++] = hood_ids[i];
-         send_buffer[j++] = hood_procs[i];
-         box = hypre_BoxArrayBox(hood_boxes, i);
+         send_buffer[j] = hood_ids[j];
+         jj = num_hood + 7*j;
+         send_buffer[jj++] = hood_procs[j];
+         box = hypre_BoxArrayBox(hood_boxes, j);
          for (d = 0; d < 3; d++)
          {
-            send_buffer[j++] = hypre_BoxIMinD(box, d);
-            send_buffer[j++] = hypre_BoxIMaxD(box, d);
+            send_buffer[jj++] = hypre_BoxIMinD(box, d);
+            send_buffer[jj++] = hypre_BoxIMaxD(box, d);
          }
       }
 
-      for (i = 0; i < num_sends; i++)
+      for (i = 0; i < num_comms; i++)
       {
          MPI_Isend(send_buffer, send_size, MPI_INT,
-                   send_procs[i], 0, comm, &send_requests[i]);
+                   comm_procs[i], 0, comm, &send_requests[i]);
       }
-   }
 
-   /* neighbor info - complete receives */
-   if (num_recvs)
-   {
-      MPI_Waitall(num_recvs, recv_requests, recv_status);
+      /* neighbor info - complete receives */
+      MPI_Waitall(num_comms, recv_requests, recv_status);
 
       hypre_TFree(recv_requests);
       hypre_TFree(recv_status);
-   }
 
-   /* neighbor info - complete sends */
-   if (num_sends)
-   {
-      MPI_Waitall(num_sends, send_requests, send_status);
+      /* neighbor info - complete sends */
+      MPI_Waitall(num_comms, send_requests, send_status);
 
       hypre_TFree(send_requests);
       hypre_TFree(send_status);
@@ -560,8 +411,22 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
     * new neighborhood info
     *-----------------------------------------*/
 
-   if (num_recvs)
+   if (num_comms)
    {
+      /* merge the buffers according to ID */
+      size   = num_comms + 1;
+      arrays = hypre_TAlloc(int *, size);
+      sizes  = hypre_TAlloc(int, size);
+      for (i = 0; i < num_comms; i++)
+      {
+         arrays[i] = recv_buffers[i];
+         sizes[i]  = recv_sizes[i] / 8;
+      }
+      arrays[num_comms] = hood_ids;
+      sizes[num_comms]  = num_hood;
+
+      hypre_Merge(arrays, sizes, size, &mergei, &mergej);
+
       alloc_size = num_hood;
       new_hood_boxes = hypre_BoxArrayCreate(alloc_size);
       hypre_BoxArraySetSize(new_hood_boxes, 0);
@@ -570,106 +435,56 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
       box = hypre_BoxCreate();
 
-      j = 0;
-      jrecv = hypre_CTAlloc(int, num_recvs);
       new_num_hood = 0;
-      while (1)
+      while (mergei[new_num_hood] > -1)
       {
-         data_id = -2;
+         i = mergei[new_num_hood];
+         j = mergej[new_num_hood];
 
-         /* inspect neighborhood */
-         if (j < num_hood)
+         if (new_num_hood == alloc_size)
          {
-            if (data_id == -2)
-            {
-               min_id  = hood_ids[j];
-               data_id = -1;
-            }
-            else if (hood_ids[j] < min_id)
-            {
-               min_id = hood_ids[j];
-               data_id = -1;
-            }
-            else if (hood_ids[j] == min_id)
-            {
-               j++;
-            }
+            alloc_size += num_hood;
+            new_hood_procs = hypre_TReAlloc(new_hood_procs, int, alloc_size);
+            new_hood_ids   = hypre_TReAlloc(new_hood_ids,   int, alloc_size);
          }
 
-         /* inspect recv buffer neighborhoods */
-         for (i = 0; i < num_recvs; i++)
+         if (i == num_comms)
          {
-            jj = jrecv[i];
-            if (jj < recv_sizes[i])
-            {
-               if (data_id == -2)
-               {
-                  min_id  = recv_buffers[i][jj];
-                  data_id = i;
-               }
-               else if (recv_buffers[i][jj] < min_id)
-               {
-                  min_id = recv_buffers[i][jj];
-                  data_id = i;
-               }
-               else if (recv_buffers[i][jj] == min_id)
-               {
-                  jrecv[i] += 8;
-               }
-            }
-         }
-
-         /* put data into new neighborhood structures */
-         if (data_id > -2)
-         {
-            if (new_num_hood == alloc_size)
-            {
-               alloc_size += num_hood;
-               new_hood_procs =
-                  hypre_TReAlloc(new_hood_procs, int, alloc_size);
-               new_hood_ids =
-                  hypre_TReAlloc(new_hood_ids,   int, alloc_size);
-            }
-
-            if (data_id == -1)
-            {
-               /* get data from neighborhood */
-               new_hood_procs[new_num_hood] = hood_procs[j];
-               new_hood_ids[new_num_hood]   = hood_ids[j];
-               hypre_AppendBox(hypre_BoxArrayBox(hood_boxes, j),
-                               new_hood_boxes);
-               if (j == first_local)
-               {
-                  new_first_local = new_num_hood;
-               }
-
-               j++;
-            }
-            else
-            {
-               /* get data from recv buffer neighborhoods */
-               jj = jrecv[data_id];
-               new_hood_ids[new_num_hood]   = recv_buffers[data_id][jj++];
-               new_hood_procs[new_num_hood] = recv_buffers[data_id][jj++];
-               for (d = 0; d < 3; d++)
-               {
-                  hypre_IndexD(imin, d) = recv_buffers[data_id][jj++];
-                  hypre_IndexD(imax, d) = recv_buffers[data_id][jj++];
-               }
-               hypre_BoxSetExtents(box, imin, imax);
-               hypre_AppendBox(box, new_hood_boxes);
-               jrecv[data_id] = jj;
-            }
-
-            new_num_hood++;
+            /* get data from my neighborhood */
+            new_hood_procs[new_num_hood] = hood_procs[j];
+            new_hood_ids[new_num_hood]   = hood_ids[j];
+            hypre_AppendBox(hypre_BoxArrayBox(hood_boxes, j),
+                            new_hood_boxes);
          }
          else
          {
-            break;
+            /* get data from recv buffer neighborhoods */
+            new_hood_ids[new_num_hood] = recv_buffers[i][j];
+            jj = sizes[i] + 7*j;
+            new_hood_procs[new_num_hood] = recv_buffers[i][jj++];
+            for (d = 0; d < 3; d++)
+            {
+               hypre_IndexD(imin, d) = recv_buffers[i][jj++];
+               hypre_IndexD(imax, d) = recv_buffers[i][jj++];
+            }
+            hypre_BoxSetExtents(box, imin, imax);
+            hypre_AppendBox(box, new_hood_boxes);
          }
+
+         if (new_hood_ids[new_num_hood] == hood_ids[first_local])
+         {
+            new_first_local = new_num_hood;
+         }
+
+         new_num_hood++;
       }
 
-      for (i = 0; i < num_recvs; i++)
+      hypre_TFree(arrays);
+      hypre_TFree(sizes);
+      hypre_TFree(mergei);
+      hypre_TFree(mergej);
+
+      for (i = 0; i < num_comms; i++)
       {
          hypre_TFree(recv_buffers[i]);
       }
@@ -677,7 +492,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       hypre_TFree(recv_sizes);
 
       hypre_BoxDestroy(box);
-      hypre_TFree(jrecv);
 
       hypre_BoxArrayDestroy(hood_boxes);
       hypre_TFree(hood_procs);
@@ -690,8 +504,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       first_local = new_first_local;
    }
 
-   hypre_TFree(send_procs);
-   hypre_TFree(recv_procs);
+   hypre_TFree(comm_procs);
 
    /*-----------------------------------------
     * Eliminate boxes of size zero
@@ -702,7 +515,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       j = 0;
       new_first_local = -1;
       new_num_local = 0;
-      new_num_periodic = 0;
       for (i = 0; i < num_hood; i++)
       {
          box = hypre_BoxArrayBox(hood_boxes, i);
@@ -720,11 +532,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
                }
                new_num_local++;
             }
-            else if ((i >= first_local + num_local) &&
-                     (i <  first_local + num_local + num_periodic))
-            {
-               new_num_periodic++;
-            }
             j++;
          }
       }
@@ -732,7 +539,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       hypre_BoxArraySetSize(hood_boxes, num_hood);
       first_local  = new_first_local;
       num_local    = new_num_local;
-      num_periodic = new_num_periodic;
    }
 
    /*-----------------------------------------
@@ -743,7 +549,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
    /* set neighborhood */
    hypre_StructGridSetHood(cgrid, hood_boxes, hood_procs, hood_ids,
-                           first_local, num_local, num_periodic, bounding_box);
+                           first_local, num_local, id_period, bounding_box);
 
    hypre_StructGridSetHoodInfo(cgrid, max_distance);
 
@@ -810,3 +616,140 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 }
 
 #endif
+
+
+/*--------------------------------------------------------------------------
+ * hypre_Merge
+ *
+ * Merge the integers in the sorted 'arrays'.  The routine returns the
+ * (array, array_index) pairs for each entry in the merged list.  The
+ * end of the pairs is indicated by the first '-1' entry in 'mergei'.
+ *
+ * Note: The routine assumes that each of the arrays has nonzero size.
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_Merge( int   **arrays,
+             int    *sizes,
+             int     size,
+             int   **mergei_ptr,
+             int   **mergej_ptr )
+{
+   int ierr = 0;
+
+   int  *mergei;
+   int  *mergej;
+
+   int   num, i;
+   int   lastval;
+
+   struct linkstruct
+   {
+      int  i;
+      int  j;
+      struct linkstruct  *next;
+
+   } *list, *first, *link, *next;
+
+   num = 0;
+   for (i = 0; i < size; i++)
+   {
+      num += sizes[i];
+   }
+   mergei = hypre_TAlloc(int, num+1);
+   mergej = hypre_TAlloc(int, num+1);
+
+   if (num > 0)
+   {
+      /* Create the sorted linked list (temporarily use merge arrays) */
+
+      num = 0;
+      for (i = 0; i < size; i++)
+      {
+         if (sizes[i] > 0)
+         {
+            mergei[num] = arrays[i][0];
+            mergej[num] = i;
+            num++;
+         }
+      }
+
+      hypre_qsort2i(mergei, mergej, 0, (num-1));
+
+      list = hypre_TAlloc(struct linkstruct, num);
+      first = list;
+      link = &first[0];
+      link->i = mergej[0];
+      link->j = 0;
+      for (i = 1; i < num; i++)
+      {
+         link->next = &first[i];
+         link       = (link -> next);
+         link->i    = mergej[i];
+         link->j    = 0;
+      }
+      link->next = NULL;
+
+      /* merge the arrays using the sorted linked list */
+
+      num = 0;
+      lastval = arrays[first->i][first->j] - 1;
+      while (first != NULL)
+      {
+         /* put unique values in the merged list */
+         if ( arrays[first->i][first->j] > lastval )
+         {
+            mergei[num] = first->i;
+            mergej[num] = first->j;
+            lastval = arrays[first->i][first->j];
+            num++;
+         }
+
+         /* find the next value, while keeping the list sorted */
+         first->j += 1;
+         next = first->next;
+         if ( !((first->j) < sizes[first->i]) )
+         {
+            /* pop 'first' from the list */
+            first = first->next;
+         }
+         else if (next != NULL)
+         {
+            if ( arrays[first->i][first->j] > 
+                 arrays[next ->i][next ->j] )
+            {
+               /* find new place in the list for 'first' */
+               link = next;
+               next = link->next;
+               while (next != NULL)
+               {
+                  if ( arrays[first->i][first->j] <
+                       arrays[next ->i][next ->j] )
+                  {
+                     break;
+                  }
+                  link = next;
+                  next = link->next;
+               }
+
+               /* put 'first' after 'link' and reset 'first' */
+               next = first;
+               first = first->next;
+               next->next = link->next;
+               link->next = next;
+            }
+         }
+      }
+   }
+
+   mergei[num] = -1;
+   mergej[num] = -1;
+
+   hypre_TFree(list);
+   
+   *mergei_ptr = mergei;
+   *mergej_ptr = mergej;
+
+   return ierr;
+}
+

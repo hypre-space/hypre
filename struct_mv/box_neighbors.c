@@ -30,14 +30,16 @@ static int debug_count = 0;
 
 int
 hypre_RankLinkCreate( int              rank,
+                      int              prank,
                       hypre_RankLink **rank_link_ptr)
 {
    hypre_RankLink  *rank_link;
 
    rank_link = hypre_TAlloc(hypre_RankLink, 1);
 
-   hypre_RankLinkRank(rank_link) = rank;
-   hypre_RankLinkNext(rank_link) = NULL;
+   hypre_RankLinkRank(rank_link)  = rank;
+   hypre_RankLinkPRank(rank_link) = prank;
+   hypre_RankLinkNext(rank_link)  = NULL;
 
    *rank_link_ptr = rank_link;
 
@@ -71,22 +73,22 @@ hypre_BoxNeighborsCreate( hypre_BoxArray      *boxes,
                           int                 *ids,
                           int                  first_local,
                           int                  num_local,
-                          int                  num_periodic,
+                          int                  id_period,
                           hypre_BoxNeighbors **neighbors_ptr )
 {
    hypre_BoxNeighbors  *neighbors;
 
    neighbors = hypre_CTAlloc(hypre_BoxNeighbors, 1);
    hypre_BoxNeighborsRankLinks(neighbors) =
-      hypre_CTAlloc(hypre_RankLinkArray, num_local);
+      hypre_CTAlloc(hypre_RankLink *, num_local);
 
-   hypre_BoxNeighborsBoxes(neighbors)           = boxes;
-   hypre_BoxNeighborsProcs(neighbors)           = procs;
-   hypre_BoxNeighborsIDs(neighbors)             = ids;
-   hypre_BoxNeighborsFirstLocal(neighbors)      = first_local;
-   hypre_BoxNeighborsNumLocal(neighbors)        = num_local;
-   hypre_BoxNeighborsNumPeriodic(neighbors)     = num_periodic;
-   
+   hypre_BoxNeighborsBoxes(neighbors)      = boxes;
+   hypre_BoxNeighborsProcs(neighbors)      = procs;
+   hypre_BoxNeighborsIDs(neighbors)        = ids;
+   hypre_BoxNeighborsFirstLocal(neighbors) = first_local;
+   hypre_BoxNeighborsNumLocal(neighbors)   = num_local;
+   hypre_BoxNeighborsIDPeriod(neighbors)   = id_period;
+
    *neighbors_ptr = neighbors;
 
    return 0;
@@ -102,15 +104,13 @@ hypre_BoxNeighborsCreate( hypre_BoxArray      *boxes,
  * in the `boxes' BoxArray.
  *
  * Note: The box ids remain in increasing order, and the box procs
- * remain in non-decreasing order.
- *
- * Note: All boxes on my processor remain in the neighborhood.  However,
- * they may not be a neighbor of any local box.
+ * remain in non-decreasing order for the non-periodic boxes.
  *
  *--------------------------------------------------------------------------*/
 
 int
 hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
+                            hypre_Index         periodic,
                             int                 max_distance,
                             int                 prune )
 {
@@ -119,70 +119,153 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
    int                 *ids;
    int                  first_local;
    int                  num_local;
-   int                  num_periodic;
+   int                  id_period;
+   int                  num_periods;
+   int                  period;
 
    int                  keep_box;
    int                  num_boxes;
-   int                  num_saved_boxes;
-   int                  initial_num_boxes;
 
+   hypre_RankLink     **rank_links;
+   hypre_RankLink     **last_links;
    hypre_RankLink      *rank_link;
 
    hypre_Box           *local_box;
    hypre_Box           *neighbor_box;
 
    int                  distance;
-   int                  distance_index[3];
+   int                  diff, firstproc, firstproci;
+   int                  i, j, p, d, ilocal, inew, ii;
 
-   int                  diff;
-   int                  i, j, d, ilocal, inew, ii , inear;
-
-   int                  proc_zero_done = 0;
+   int                  px = hypre_IndexX(periodic);
+   int                  py = hypre_IndexY(periodic);
+   int                  pz = hypre_IndexZ(periodic);
+                        
+   int                  i_periodic = px ? 1 : 0;
+   int                  j_periodic = py ? 1 : 0;
+   int                  k_periodic = pz ? 1 : 0;
 
    int                  ierr = 0;
 
-   /*---------------------------------------------
-    * Find neighboring boxes
-    *---------------------------------------------*/
+   /*--------------------------------------------------
+    * Create periodic boxes
+    *--------------------------------------------------*/
 
-   boxes             = hypre_BoxNeighborsBoxes(neighbors);
-   procs             = hypre_BoxNeighborsProcs(neighbors);
-   ids               = hypre_BoxNeighborsIDs(neighbors);
-   first_local       = hypre_BoxNeighborsFirstLocal(neighbors);
-   num_local         = hypre_BoxNeighborsNumLocal(neighbors);
-   num_periodic      = hypre_BoxNeighborsNumPeriodic(neighbors);
-   initial_num_boxes = hypre_BoxArraySize(boxes);
+   boxes = hypre_BoxNeighborsBoxes(neighbors);
+   procs = hypre_BoxNeighborsProcs(neighbors);
+   ids   = hypre_BoxNeighborsIDs(neighbors);
+   id_period = hypre_BoxNeighborsIDPeriod(neighbors);
+   num_boxes = hypre_BoxArraySize(boxes);
 
-   /*---------------------------------------------
-    * Find neighboring boxes
-    *---------------------------------------------*/
+   num_periods = (1+2*i_periodic) * (1+2*j_periodic) * (1+2*k_periodic);
+
+   if( num_periods > 1 )
+   {
+      int  ip, jp, kp;
+
+      hypre_BoxArraySetSize(boxes,       num_periods*num_boxes);
+      procs = hypre_TReAlloc(procs, int, num_periods*num_boxes);
+      ids   = hypre_TReAlloc(ids,   int, num_periods*num_boxes);
+
+      p = 1;
+      for (ip = -i_periodic; ip <= i_periodic; ip++)
+      {
+         for (jp = -j_periodic; jp <= j_periodic; jp++)
+         {
+            for (kp = -k_periodic; kp <= k_periodic; kp++)
+            {
+               if( !(ip == 0 && jp == 0 && kp == 0) )
+               {
+                  for (i = 0; i < num_boxes; i++)
+                  {
+                     inew = i + p*num_boxes;
+                     local_box = hypre_BoxArrayBox(boxes, inew);
+                     hypre_CopyBox(hypre_BoxArrayBox(boxes, i), local_box);
+                        
+                     /* shift box */
+                     hypre_BoxIMinD(local_box, 0) =
+                        hypre_BoxIMinD(local_box, 0) + (ip * px);
+                     hypre_BoxIMinD(local_box, 1) =
+                        hypre_BoxIMinD(local_box, 1) + (jp * py);
+                     hypre_BoxIMinD(local_box, 2) =
+                        hypre_BoxIMinD(local_box, 2) + (kp * pz);
+                     hypre_BoxIMaxD(local_box, 0) =
+                        hypre_BoxIMaxD(local_box, 0) + (ip * px);
+                     hypre_BoxIMaxD(local_box, 1) =
+                        hypre_BoxIMaxD(local_box, 1) + (jp * py);
+                     hypre_BoxIMaxD(local_box, 2) =
+                        hypre_BoxIMaxD(local_box, 2) + (kp * pz);
+
+                     procs[inew] = procs[i];
+                     ids[inew]   = ids[i] + p*id_period;
+                  }
+
+                  p++;
+               }
+            }
+         }
+      }
+   }
+   
+   hypre_BoxNeighborsBoxes(neighbors)      = boxes;
+   hypre_BoxNeighborsProcs(neighbors)      = procs;
+   hypre_BoxNeighborsIDs(neighbors)        = ids;
+   hypre_CopyIndex(periodic, hypre_BoxNeighborsPeriodic(neighbors));
+   hypre_BoxNeighborsNumPeriods(neighbors) = num_periods;
+
+   /*-----------------------------------------------------------------
+    * Find neighboring boxes:
+    *
+    * Keep boxes that are nearby plus all other boxes on the same
+    * processor as the nearby boxes.
+    *-----------------------------------------------------------------*/
+
+   period      = num_boxes;
+   first_local = hypre_BoxNeighborsFirstLocal(neighbors);
+   num_local   = hypre_BoxNeighborsNumLocal(neighbors);
+
+   rank_links = hypre_BoxNeighborsRankLinks(neighbors);
+   last_links = hypre_CTAlloc(hypre_RankLink *, num_local);
 
    inew = 0;
-   inear = 0;
    num_boxes = 0;
-   num_saved_boxes = 0;
-   hypre_ForBoxI(i, boxes)
+   firstproc = -1;
+   for (i = 0; i < period; i++)
+   {
+      /* keep all boxes with same process number as nearby boxes */
+      if (procs[i] > firstproc)
       {
-         keep_box = 0;
-         for (j = 0; j < num_local + num_periodic; j++)
+         firstproci = i;
+         firstproc  = procs[i];
+         keep_box  = 0;
+      }
+
+      /* loop over box i and its periodic boxes; use ii */
+      for (p = 0; p < num_periods; p++)
+      {
+         ii = i + p*period;
+
+         for (j = 0; j < num_local; j++, ilocal++)
          {
             ilocal = first_local + j;
-            if (i != ilocal)
+
+            if (ii == ilocal)
+            {
+               keep_box = 1;
+            }
+            else
             {
                local_box = hypre_BoxArrayBox(boxes, ilocal);
-               neighbor_box = hypre_BoxArrayBox(boxes, i);
+               neighbor_box = hypre_BoxArrayBox(boxes, ii);
 
                /* compute distance info */
                distance = 0;
                for (d = 0; d < 3; d++)
                {
-                  distance_index[d] = 0;
-
                   diff = hypre_BoxIMinD(neighbor_box, d) -
                      hypre_BoxIMaxD(local_box, d);
                   if (diff > 0)
                   {
-                     distance_index[d] = 1;
                      distance = hypre_max(distance, diff);
                   }
 
@@ -190,188 +273,93 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
                      hypre_BoxIMaxD(neighbor_box, d);
                   if (diff > 0)
                   {
-                     distance_index[d] = -1;
                      distance = hypre_max(distance, diff);
                   }
                }
 
-               /* create new rank_link */
+               /* if close enough, keep the box */
                if (distance <= max_distance)
                {
-                  keep_box = 1;
-
-                  if (j < num_local)
+                  /* adjust for earlier boxes with same process number */
+                  if (!keep_box)
                   {
-                     hypre_RankLinkCreate(num_boxes, &rank_link);
-                     hypre_RankLinkNext(rank_link) =
-                        hypre_BoxNeighborsRankLink(neighbors, j,
-                                                   distance_index[0],
-                                                   distance_index[1],
-                                                   distance_index[2]);
-                     hypre_BoxNeighborsRankLink(neighbors, j,
-                                                distance_index[0],
-                                                distance_index[1],
-                                                distance_index[2]) = rank_link;
+                     num_boxes += (i - firstproci);
+                     keep_box = 1;
+                  }
+
+                  /* create new rank_link */
+                  hypre_RankLinkCreate(num_boxes, p, &rank_link);
+                  if (rank_links[j] == NULL)
+                  {
+                     rank_links[j] = rank_link;
+                     last_links[j] = rank_links[j];
+                  }
+                  else
+                  {
+                     hypre_RankLinkNext(last_links[j]) = rank_link;
+                     last_links[j] = rank_link;
                   }
                }
             }
-            else
-            {
-               keep_box = 1;
-            }
-         }
-
-#if 1
-         /*-----------------------------------------------------------------
-          * Here, if pruning is on, we keep boxes that are nearby and
-          * all other boxes on the same processor as the nearby box.
-          *-----------------------------------------------------------------*/
-
-         if (prune)
-         {
-            if (keep_box)
-            {
-               /*-----------------------------------------------------------
-                * If this is the first box on processor P that is nearby,
-                * we mark all boxes (also on processor P) to be saved by
-                * setting procs = -procs. We create a linked list structure
-                * in the procs array. If nonpositive, box is saved, and a
-                * positive entry following a nonpositive points to next
-                * saved box. 
-                *-----------------------------------------------------------*/
-               if (procs[i] > 0 || (procs[i] == 0 && !proc_zero_done))
-               {
-                  num_boxes = num_saved_boxes;
-                  /* save all boxes up to i that are on same proc as i  */
-                  ii = i-1;
-                  while (ii > -1 && procs[ii] == procs[i])
-                  {
-                     procs[ii] = -procs[ii];
-                     num_saved_boxes++;
-                     num_boxes++;
-                     ii--;
-                  }
-                  /* update pointer to saved boxes */
-                  if (inew < ii+1)
-                  {
-                     procs[inew] = ii+1;
-                  }
-                  /* save  box i */
-                  procs[i] = -procs[i];
-                  num_saved_boxes++;
-                  /* save all boxes after i  that are on same proc as i */
-                  ii = i+1;
-                  while (ii < initial_num_boxes && procs[ii] == -procs[i])
-                  {
-                     procs[ii] = -procs[ii];
-                     num_saved_boxes++;
-                     ii++;
-                  }
-                  /* update location for pointer to saved boxes */ 
-                  inew = ii;
-                  /* processor zero's boxes can only be the first execution */
-                  proc_zero_done = 1;
-               }
-
-               /*-----------------------------------------------------------
-                * This is a box on processor P that is nearby. Already we
-                * had a nearby box on processor P. Here we just update
-                * num_boxes used to reset RankLinkRanks. This is done by
-                * comparing current box (i) to last nearby box (inear).
-                *-----------------------------------------------------------*/
-               else
-               {
-                  num_boxes =  num_boxes + (i - inear);
-               }
-              
-               /*-----------------------------------------------------------
-                * Reset RankLinkRanks to reflect final ordering of
-                * boxes. Currently implemented by looping over local
-                * boxes a second time.
-                *-----------------------------------------------------------*/
-               for (j = 0; j < num_local + num_periodic; j++)
-               {
-                  ilocal = first_local + j;
-                  if (i != ilocal)
-                  {
-                     local_box = hypre_BoxArrayBox(boxes, ilocal);
-                     neighbor_box = hypre_BoxArrayBox(boxes, i);
-
-                     /* compute distance info */
-                     distance = 0;
-                     for (d = 0; d < 3; d++)
-                     {
-                        distance_index[d] = 0;
-      
-                        diff = hypre_BoxIMinD(neighbor_box, d) -
-                           hypre_BoxIMaxD(local_box, d);
-                        if (diff > 0)
-                        {
-                           distance_index[d] = 1;
-                           distance = hypre_max(distance, diff);
-                        }
-
-                        diff = hypre_BoxIMinD(local_box, d) -
-                           hypre_BoxIMaxD(neighbor_box, d);
-                        if (diff > 0)
-                        {
-                           distance_index[d] = -1;
-                           distance = hypre_max(distance, diff);
-                        }
-                     }
-
-                     /*  reset rank_link_rank */
-                     if (distance <= max_distance)
-                     {
-                        if (j < num_local)
-                        {
-                           hypre_RankLinkRank(
-                           hypre_BoxNeighborsRankLink(neighbors, j,
-                                                      distance_index[0],
-                                                      distance_index[1],
-                                                      distance_index[2]))
-                                                    = num_boxes;
-                        }
-                     }
-                  }
-               }
-
-               /* update last nearby box */
-               inear = i;
-            }
-         }
-#else
-         /*-----------------------------------------------------------------
-          * Here, if pruning is on, we keep only  boxes that are nearby.
-          *-----------------------------------------------------------------*/
-
-         if (prune)
-         {
-            /* use procs array to store which boxes to keep */
-            if (keep_box)
-            {
-               procs[i] = -procs[i];
-               if (inew < i)
-               {
-                  procs[inew] = i;
-               }
-               inew = i + 1;
-               
-               num_boxes++;
-            }
-         }
-#endif
-         else
-         {
-            /* keep all of the boxes */
-            num_boxes++;
          }
       }
 
-   num_boxes = hypre_max(num_boxes, num_saved_boxes);
+      /*-----------------------------------------------------------------
+       * If pruning is on, use procs array to mark the boxes to keep
+       *-----------------------------------------------------------------*/
+
+      if (prune)
+      {
+         /* use procs array to store which boxes to keep */
+         if (keep_box)
+         {
+            if (inew < firstproci)
+            {
+               procs[inew] = firstproci;
+            }
+            inew = i + 1;
+
+            for (ii = firstproci; ii < inew; ii++)
+            {
+               procs[ii] = -procs[ii];
+            }
+            firstproci = inew;
+               
+            num_boxes++;
+         }
+      }
+      else
+      {
+         /* keep all of the boxes */
+         num_boxes++;
+      }
+   }
+
+   hypre_TFree(last_links);
+
+   /*-----------------------------------------------------------------
+    * Prune the array of neighbor boxes
+    *-----------------------------------------------------------------*/
 
    if (prune)
    {
+      for (p = 0; p < num_periods; p++)
+      {
+         i = 0;
+         for (inew = 0; inew < num_boxes; inew++)
+         {
+            if (procs[i] > 0)
+            {
+               i = procs[i];
+            }
+            hypre_CopyBox(hypre_BoxArrayBox(boxes, i + p*period),
+                          hypre_BoxArrayBox(boxes, inew + p*num_boxes));
+            ids[inew + p*num_boxes] = ids[i + p*period];
+            
+            i++;
+         }
+      }
+
       i = 0;
       for (inew = 0; inew < num_boxes; inew++)
       {
@@ -379,23 +367,31 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
          {
             i = procs[i];
          }
-         hypre_CopyBox(hypre_BoxArrayBox(boxes, i),
-                       hypre_BoxArrayBox(boxes, inew));
          procs[inew] = -procs[i];
-         ids[inew]   = ids[i];
          if (i == first_local)
          {
             first_local = inew;
          }
-
+         
          i++;
+      }
+      for (p = 1; p < num_periods; p++)
+      {
+         for (inew = 0; inew < num_boxes; inew++)
+         {
+            procs[inew + p*num_boxes] = procs[inew];
+         }
       }
    }
 
+   num_boxes *= num_periods;
    hypre_BoxArraySetSize(boxes, num_boxes);
    hypre_BoxNeighborsFirstLocal(neighbors) = first_local;
 
 #if DEBUG
+{
+   int  b, k, n;
+
    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
    sprintf(filename, "zneighbors.%05d", my_rank);
@@ -419,13 +415,43 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
    }
    fprintf(file, "first_local  = %d\n", first_local);
    fprintf(file, "num_local    = %d\n", num_local);
-   fprintf(file, "num_periodic = %d\n", num_periodic);
+   fprintf(file, "periodic     = %d %d %d\n",
+           periodic[0], periodic[1], periodic[2]);
+   fprintf(file, "id_period    = %d\n", id_period);
+   fprintf(file, "num_periods  = %d\n", num_periods);
    fprintf(file, "max_distance = %d\n", max_distance);
+   fprintf(file, "prune        = %d\n", prune);
+
+   fprintf(file, "rank_links:\n");
+   num_boxes /= num_periods;
+   for (b = 0; b < hypre_BoxNeighborsNumLocal(neighbors); b++)
+   {
+      for (k = -1; k <= 1; k++)
+      {
+         for (j = -1; j <= 1; j++)
+         {
+            for (i = -1; i <= 1; i++)
+            {
+               rank_link = hypre_BoxNeighborsRankLink(neighbors, b, i, j, k);
+               while (rank_link)
+               {
+                  n = hypre_RankLinkRank(rank_link) +
+                     hypre_RankLinkPRank(rank_link)*num_boxes;
+                  fprintf(file, "(%d : %d, %d, %d) = %d\n",
+                          b, i, j, k, n);
+                  
+                  rank_link = hypre_RankLinkNext(rank_link);
+               }
+            }
+         }
+      }
+   }
 
    fprintf(file, "\n");
 
    fflush(file);
    fclose(file);
+}
 #endif
    
    return ierr;
@@ -441,7 +467,7 @@ hypre_BoxNeighborsDestroy( hypre_BoxNeighbors  *neighbors )
    hypre_RankLink  *rank_link;
    hypre_RankLink  *next_rank_link;
 
-   int              b, i, j, k;
+   int              b;
 
    int              ierr = 0;
 
@@ -449,22 +475,12 @@ hypre_BoxNeighborsDestroy( hypre_BoxNeighbors  *neighbors )
    {
       for (b = 0; b < hypre_BoxNeighborsNumLocal(neighbors); b++)
       {
-         for (k = -1; k <= 1; k++)
+         rank_link = hypre_BoxNeighborsRankLink(neighbors, b);
+         while (rank_link)
          {
-            for (j = -1; j <= 1; j++)
-            {
-               for (i = -1; i <= 1; i++)
-               {
-                  rank_link =
-                     hypre_BoxNeighborsRankLink(neighbors, b, i, j, k);
-                  while (rank_link)
-                  {
-                     next_rank_link = hypre_RankLinkNext(rank_link);
-                     hypre_RankLinkDestroy(rank_link);
-                     rank_link = next_rank_link;
-                  }
-               }
-            }
+            next_rank_link = hypre_RankLinkNext(rank_link);
+            hypre_RankLinkDestroy(rank_link);
+            rank_link = next_rank_link;
          }
       }
       hypre_BoxArrayDestroy(hypre_BoxNeighborsBoxes(neighbors));

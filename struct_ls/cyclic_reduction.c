@@ -499,6 +499,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    hypre_BoxArrayArray    *recv_boxes;
    int                   **send_processes;
    int                   **recv_processes;
+   int                    *send_order;
+   int                    *recv_order;
    hypre_BoxArrayArray    *indt_boxes;
    hypre_BoxArrayArray    *dept_boxes;
                        
@@ -659,6 +661,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_CreateComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]),
                               &send_boxes, &recv_boxes,
                               &send_processes, &recv_processes,
+                              &send_order, &recv_order,
                               &indt_boxes, &dept_boxes);
  
       /* down-cycle */
@@ -669,6 +672,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_ComputePkgCreate(send_boxes, recv_boxes,
                              stride, stride,
                              send_processes, recv_processes,
+                             send_order, recv_order,
                              indt_boxes, dept_boxes,
                              stride, grid_l[l],
                              hypre_StructVectorDataSpace(x_l[l]), 1,
@@ -677,6 +681,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_CreateComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]),
                               &send_boxes, &recv_boxes,
                               &send_processes, &recv_processes,
+                              &send_order, &recv_order,
                               &indt_boxes, &dept_boxes);
 
       /* up-cycle */
@@ -687,6 +692,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_ComputePkgCreate(send_boxes, recv_boxes,
                              stride, stride,
                              send_processes, recv_processes,
+                             send_order, recv_order,
                              indt_boxes, dept_boxes,
                              stride, grid_l[l],
                              hypre_StructVectorDataSpace(x_l[l]), 1,

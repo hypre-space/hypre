@@ -155,6 +155,8 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    hypre_BoxArrayArray   *recv_boxes;
    int                  **send_processes;
    int                  **recv_processes;
+   int                   *send_order;
+   int                   *recv_order;
    hypre_BoxArrayArray   *indt_boxes;
    hypre_BoxArrayArray   *dept_boxes;
 
@@ -210,9 +212,10 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    for (p = 0; p < num_pointsets; p++)
    {
       hypre_CreateComputeInfo(grid, stencil,
-                           &send_boxes, &recv_boxes,
-                           &send_processes, &recv_processes,
-                           &orig_indt_boxes, &orig_dept_boxes);
+                              &send_boxes, &recv_boxes,
+                              &send_processes, &recv_processes,
+                              &send_order, &recv_order,
+                              &orig_indt_boxes, &orig_dept_boxes);
 
       stride = pointset_strides[p];
 
@@ -271,6 +274,7 @@ hypre_PointRelaxSetup( void               *relax_vdata,
       hypre_ComputePkgCreate(send_boxes, recv_boxes,
                              unit_stride, unit_stride,
                              send_processes, recv_processes,
+                             send_order, recv_order,
                              indt_boxes, dept_boxes,
                              stride, grid,
                              hypre_StructVectorDataSpace(x), 1,

@@ -33,51 +33,116 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
                                  hypre_BoxArrayArray  **send_boxes_ptr,
                                  hypre_BoxArrayArray  **recv_boxes_ptr,
                                  int                 ***send_procs_ptr,
-                                 int                 ***recv_procs_ptr )
+                                 int                 ***recv_procs_ptr,
+                                 int                  **send_order_ptr,
+                                 int                  **recv_order_ptr )
 {
-   int                      ierr = 0;
+   int                    ierr = 0;
 
-   /* output variables */
-   hypre_BoxArrayArray     *send_boxes;
-   hypre_BoxArrayArray     *recv_boxes;
-   int                    **send_procs;
-   int                    **recv_procs;
+   hypre_BoxArrayArray   *send_boxes;
+   hypre_BoxArrayArray   *recv_boxes;
+   int                  **send_procs;
+   int                  **recv_procs;
+   int                   *send_order;
+   int                   *recv_order;
+                       
+   hypre_BoxArray        *boxes     = hypre_StructGridBoxes(grid);
+   int                    num_boxes = hypre_BoxArraySize(boxes);
+                       
+   hypre_BoxNeighbors    *neighbors      = hypre_StructGridNeighbors(grid);
+   hypre_BoxArray        *neighbor_boxes = hypre_BoxNeighborsBoxes(neighbors);
+   int                   *neighbor_procs = hypre_BoxNeighborsProcs(neighbors);
+   int                    num_hood;
+                       
+   hypre_Index           *stencil_shape;
+   hypre_IndexRef         stencil_offset;
+                       
+   hypre_Box             *box;
+   hypre_Box             *neighbor_box;
+   hypre_Box             *grow_box;
+   hypre_Box             *int_box;
 
-   /* internal variables */
-   hypre_BoxArray          *boxes = hypre_StructGridBoxes(grid);
-
-   hypre_BoxNeighbors      *neighbors;
-   hypre_BoxArray          *neighbor_boxes;
-   int                     *neighbor_procs;
-   hypre_Box               *neighbor_box;
-
-   hypre_Index             *stencil_shape;
-   hypre_IndexRef           stencil_offset;
-
-   hypre_Box               *box;
-   hypre_Box               *shift_box;
-                         
-   hypre_BoxArray          *send_box_array;
-   hypre_BoxArray          *recv_box_array;
-   int                      send_box_array_size;
-   int                      recv_box_array_size;
-
-   hypre_BoxArray         **cbox_arrays;
-   int                     *cbox_arrays_i;
-   int                      num_cbox_arrays;
-
-   int                      i, j, k, m, n;
-   int                      s, d;
-
-   /* temporary work variables */
-   hypre_Box               *box0;
-
+   int                    stencil_grid[3][3][3];
+   int                    grow[3][2];
+                       
+   hypre_BoxArray        *send_box_array;
+   hypre_BoxArray        *recv_box_array;
+   int                    send_box_array_size;
+   int                    recv_box_array_size;
+   int                    send_order_size;
+   int                    recv_order_size;
+                       
+   hypre_Box            **cboxes;
+   hypre_Box             *cboxes_mem;
+   int                   *cboxes_j;
+   int                    num_cboxes;
+   hypre_BoxArray       **cper_arrays;
+   int                    cper_array_size;
+   int                   *send_order_j;
+                       
+   int                    i, j, k, m, n;
+   int                    s, d, lastj;
+   int                    istart[3], istop[3];
+   int                    sgindex[3];
+                       
    /*------------------------------------------------------
-    * Determine neighbors:
+    * Compute the "stencil grid" and "grow" information
     *------------------------------------------------------*/
 
-   neighbors = hypre_StructGridNeighbors(grid);
+   stencil_shape = hypre_StructStencilShape(stencil);
 
+   for (k = 0; k < 3; k++)
+   {
+      for (j = 0; j < 3; j++)
+      {
+         for (i = 0; i < 3; i++)
+         {
+            stencil_grid[i][j][k] = 0;
+         }
+      }
+   }
+
+   for (d = 0; d < 3; d++)
+   {
+      grow[d][0] = 0;
+      grow[d][1] = 0;
+   }
+
+   for (s = 0; s < hypre_StructStencilSize(stencil); s++)
+   {
+      stencil_offset = stencil_shape[s];
+
+      for (d = 0; d < 3; d++)
+      {
+         m = stencil_offset[d];
+
+         istart[d] = 1;
+         istop[d]  = 1;
+
+         if (m < 0)
+         {
+            istart[d] = 0;
+            grow[d][0] = hypre_max(grow[d][0], -m);
+         }
+         else if (m > 0)
+         {
+            istop[d] = 2;
+            grow[d][1] = hypre_max(grow[d][1],  m);
+         }
+      }
+
+      for (k = istart[2]; k <= istop[2]; k++)
+      {
+         for (j = istart[1]; j <= istop[1]; j++)
+         {
+            for (i = istart[0]; i <= istop[0]; i++)
+            {
+               stencil_grid[i][j][k] = 1;
+            }
+         }
+      }
+   }
+ 
    /*------------------------------------------------------
     * Compute send/recv boxes and procs
     *------------------------------------------------------*/
@@ -87,183 +152,309 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    send_procs = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
    recv_procs = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
 
-   stencil_shape = hypre_StructStencilShape(stencil);
+   send_order_size = 0;
+   recv_order_size = 0;
 
-   neighbor_boxes = hypre_BoxNeighborsBoxes(neighbors);
-   neighbor_procs = hypre_BoxNeighborsProcs(neighbors);
+   grow_box = hypre_BoxCreate();
+   int_box  = hypre_BoxCreate();
 
-   box0 = hypre_BoxCreate();
-   shift_box = hypre_BoxCreate();
+   num_hood = hypre_BoxArraySize(neighbor_boxes) /
+      hypre_BoxNeighborsNumPeriods(neighbors);
 
-   cbox_arrays =
-      hypre_CTAlloc(hypre_BoxArray *, hypre_BoxArraySize(neighbor_boxes));
-   cbox_arrays_i =
-      hypre_CTAlloc(int, hypre_BoxArraySize(neighbor_boxes));
+   cboxes       = hypre_CTAlloc(hypre_Box *, num_hood);
+   cboxes_mem   = hypre_CTAlloc(hypre_Box, num_hood);
+   cboxes_j     = hypre_CTAlloc(int, num_hood);
+   cper_arrays  = hypre_CTAlloc(hypre_BoxArray *, num_hood);
+   send_order_j = hypre_CTAlloc(int, num_hood);
 
-   hypre_ForBoxI(i, boxes)
+   for (i = 0; i < num_boxes; i++)
+   {
+      box = hypre_BoxArrayBox(boxes, i);
+
+      /*------------------------------------------------
+       * Compute recv_box_array for box i
+       *------------------------------------------------*/
+
+      /* grow box */
+      hypre_CopyBox(box, grow_box);
+      for (d = 0; d < 3; d++)
       {
-         box = hypre_BoxArrayBox(boxes, i);
-         hypre_CopyBox(box, shift_box);
+         hypre_BoxIMinD(grow_box, d) -= grow[d][0];
+         hypre_BoxIMaxD(grow_box, d) += grow[d][1];
+      }
 
-         /*------------------------------------------------
-          * Compute recv_box_array for box i
-          *------------------------------------------------*/
-
-         num_cbox_arrays = 0;
-         for (s = 0; s < hypre_StructStencilSize(stencil); s++)
+      lastj = -1;
+      num_cboxes = 0;
+      recv_box_array_size = 0;
+      hypre_BeginBoxNeighborsLoop(k, neighbors, i)
          {
-            stencil_offset = stencil_shape[s];
+            neighbor_box = hypre_BoxArrayBox(neighbor_boxes, k);
 
-            /* shift box by stencil_offset */
             for (d = 0; d < 3; d++)
             {
-               hypre_BoxIMinD(shift_box, d) =
-                  hypre_BoxIMinD(box, d) + hypre_IndexD(stencil_offset, d);
-               hypre_BoxIMaxD(shift_box, d) =
-                  hypre_BoxIMaxD(box, d) + hypre_IndexD(stencil_offset, d);
-            }
- 
-            hypre_BeginBoxNeighborsLoop(j, neighbors, i, stencil_offset)
+               sgindex[d] = 1;
+               
+               s = hypre_BoxIMinD(neighbor_box, d) - hypre_BoxIMaxD(box, d);
+               if (s > 0)
                {
-                  neighbor_box = hypre_BoxArrayBox(neighbor_boxes, j);
+                  sgindex[d] = 2;
+               }
+               s = hypre_BoxIMinD(box, d) - hypre_BoxIMaxD(neighbor_box, d);
+               if (s > 0)
+               {
+                  sgindex[d] = 0;
+               }
+            }
 
-                  hypre_IntersectBoxes(shift_box, neighbor_box, box0);
-                  if (hypre_BoxVolume(box0))
+            if (stencil_grid[sgindex[0]][sgindex[1]][sgindex[2]])
+            {
+               /* intersect */
+               hypre_IntersectBoxes(grow_box, neighbor_box, int_box);
+               
+               if (hypre_BoxVolume(int_box))
+               {
+                  j = k % num_hood;
+                  
+                  if (j != lastj)
                   {
-                     if (cbox_arrays[j] == NULL)
+                     cboxes_j[num_cboxes] = j;
+                     num_cboxes++;
+                     lastj = j;
+                  }
+                  recv_box_array_size++;
+                  
+                  if (k < num_hood)
+                  {
+                     /* the neighbor was not periodic */
+                     cboxes[j] = &cboxes_mem[j];
+                     hypre_CopyBox(int_box, cboxes[j]);
+                  }
+                  else
+                  {
+                     /* the neighbor was periodic */
+                     if (cper_arrays[j] == NULL)
                      {
-                        cbox_arrays[j] = hypre_BoxArrayCreate(0);
-                        cbox_arrays_i[num_cbox_arrays] = j;
-                        num_cbox_arrays++;
+                        cper_arrays[j] = hypre_BoxArrayCreate(26);
+                        hypre_BoxArraySetSize(cper_arrays[j], 0);
                      }
-                     hypre_AppendBox(box0, cbox_arrays[j]);
+                     hypre_AppendBox(int_box, cper_arrays[j]);
                   }
                }
-            hypre_EndBoxNeighborsLoop;
-         }
-
-         /* union the boxes in cbox_arrays */
-         recv_box_array_size = 0;
-         for (m = 0; m < num_cbox_arrays; m++)
-         {
-            j = cbox_arrays_i[m];
-            hypre_UnionBoxes(cbox_arrays[j]);
-            recv_box_array_size += hypre_BoxArraySize(cbox_arrays[j]);
-         }
-
-         /* create recv_box_array and recv_procs */
-         recv_box_array = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
-         hypre_BoxArraySetSize(recv_box_array, recv_box_array_size);
-         recv_procs[i] = hypre_CTAlloc(int, recv_box_array_size);
-         n = 0;
-         for (m = 0; m < num_cbox_arrays; m++)
-         {
-            j = cbox_arrays_i[m];
-            hypre_ForBoxI(k, cbox_arrays[j])
-               {
-                  recv_procs[i][n] = neighbor_procs[j];
-                  hypre_CopyBox(hypre_BoxArrayBox(cbox_arrays[j], k),
-                                hypre_BoxArrayBox(recv_box_array, n));
-                  n++;
-               }
-            hypre_BoxArrayDestroy(cbox_arrays[j]);
-            cbox_arrays[j] = NULL;
-         }
-
-         /*------------------------------------------------
-          * Compute send_box_array for box i
-          *------------------------------------------------*/
-
-         num_cbox_arrays = 0;
-         for (s = 0; s < hypre_StructStencilSize(stencil); s++)
-         {
-            stencil_offset = stencil_shape[s];
-
-            /* transpose stencil_offset */
-            for (d = 0; d < 3; d++)
-            {
-               hypre_IndexD(stencil_offset, d) =
-                  -hypre_IndexD(stencil_offset, d);
-            }
-
-            /* shift box by transpose stencil_offset */
-            for (d = 0; d < 3; d++)
-            {
-               hypre_BoxIMinD(shift_box, d) =
-                  hypre_BoxIMinD(box, d) + hypre_IndexD(stencil_offset, d);
-               hypre_BoxIMaxD(shift_box, d) =
-                  hypre_BoxIMaxD(box, d) + hypre_IndexD(stencil_offset, d);
-            }
- 
-            hypre_BeginBoxNeighborsLoop(j, neighbors, i, stencil_offset)
-               {
-                  neighbor_box = hypre_BoxArrayBox(neighbor_boxes, j);
-
-                  hypre_IntersectBoxes(shift_box, neighbor_box, box0);
-                  if (hypre_BoxVolume(box0))
-                  {
-                     /* shift box0 back */
-                     for (d = 0; d < 3; d++)
-                     {
-                        hypre_BoxIMinD(box0, d) -=
-                           hypre_IndexD(stencil_offset, d);
-                        hypre_BoxIMaxD(box0, d) -=
-                           hypre_IndexD(stencil_offset, d);
-                     }
-
-                     if (cbox_arrays[j] == NULL)
-                     {
-                        cbox_arrays[j] = hypre_BoxArrayCreate(0);
-                        cbox_arrays_i[num_cbox_arrays] = j;
-                        num_cbox_arrays++;
-                     }
-                     hypre_AppendBox(box0, cbox_arrays[j]);
-                  }
-               }
-            hypre_EndBoxNeighborsLoop;
-
-            /* restore stencil_offset */
-            for (d = 0; d < 3; d++)
-            {
-               hypre_IndexD(stencil_offset, d) =
-                  -hypre_IndexD(stencil_offset, d);
             }
          }
+      hypre_EndBoxNeighborsLoop;
 
-         /* union the boxes in cbox_arrays */
-         send_box_array_size = 0;
-         for (m = 0; m < num_cbox_arrays; m++)
+      recv_order_size += recv_box_array_size;
+
+      /* create recv_box_array and recv_procs */
+      recv_box_array = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
+      hypre_BoxArraySetSize(recv_box_array, recv_box_array_size);
+      recv_procs[i] = hypre_CTAlloc(int, recv_box_array_size);
+      n = 0;
+      for (m = 0; m < num_cboxes; m++)
+      {
+         j = cboxes_j[m];
+
+         /* add the non-periodic box */
+         if (cboxes[j] != NULL)
          {
-            j = cbox_arrays_i[m];
-            hypre_UnionBoxes(cbox_arrays[j]);
-            send_box_array_size += hypre_BoxArraySize(cbox_arrays[j]);
+            recv_procs[i][n] = neighbor_procs[j];
+            hypre_CopyBox(cboxes[j], hypre_BoxArrayBox(recv_box_array, n));
+            n++;
+            cboxes[j] = NULL;
          }
 
-         /* create send_box_array and send_procs */
-         send_box_array = hypre_BoxArrayArrayBoxArray(send_boxes, i);
-         hypre_BoxArraySetSize(send_box_array, send_box_array_size);
-         send_procs[i] = hypre_CTAlloc(int, send_box_array_size);
-         n = 0;
-         for (m = 0; m < num_cbox_arrays; m++)
+         /* add the periodic boxes */
+         if (cper_arrays[j] != NULL)
          {
-            j = cbox_arrays_i[m];
-            hypre_ForBoxI(k, cbox_arrays[j])
-               {
-                  send_procs[i][n] = neighbor_procs[j];
-                  hypre_CopyBox(hypre_BoxArrayBox(cbox_arrays[j], k),
-                                hypre_BoxArrayBox(send_box_array, n));
-                  n++;
-               }
-            hypre_BoxArrayDestroy(cbox_arrays[j]);
-            cbox_arrays[j] = NULL;
+            cper_array_size = hypre_BoxArraySize(cper_arrays[j]);
+            for (k = 0; k < cper_array_size; k++)
+            {
+               recv_procs[i][n] = neighbor_procs[j];
+               hypre_CopyBox(hypre_BoxArrayBox(cper_arrays[j], k),
+                             hypre_BoxArrayBox(recv_box_array, n));
+               n++;
+            }
+            hypre_BoxArrayDestroy(cper_arrays[j]);
+            cper_arrays[j] = NULL;
          }
       }
 
-   hypre_TFree(cbox_arrays);
-   hypre_TFree(cbox_arrays_i);
+      /*------------------------------------------------
+       * Compute send_box_array for box i
+       *------------------------------------------------*/
 
-   hypre_BoxDestroy(shift_box);
-   hypre_BoxDestroy(box0);
+      lastj = -1;
+      num_cboxes = 0;
+      send_box_array_size = 0;
+      hypre_BeginBoxNeighborsLoop(k, neighbors, i)
+         {
+            neighbor_box = hypre_BoxArrayBox(neighbor_boxes, k);
+
+            for (d = 0; d < 3; d++)
+            {
+               sgindex[d] = 1;
+               
+               s = hypre_BoxIMinD(box, d) - hypre_BoxIMaxD(neighbor_box, d);
+               if (s > 0)
+               {
+                  sgindex[d] = 2;
+               }
+               s = hypre_BoxIMinD(neighbor_box, d) - hypre_BoxIMaxD(box, d);
+               if (s > 0)
+               {
+                  sgindex[d] = 0;
+               }
+            }
+
+            if (stencil_grid[sgindex[0]][sgindex[1]][sgindex[2]])
+            {
+               /* grow box and intersect */
+               hypre_CopyBox(neighbor_box, grow_box);
+               for (d = 0; d < 3; d++)
+               {
+                  hypre_BoxIMinD(grow_box, d) -= grow[d][0];
+                  hypre_BoxIMaxD(grow_box, d) += grow[d][1];
+               }
+               hypre_IntersectBoxes(box, grow_box, int_box);
+
+               if (hypre_BoxVolume(int_box))
+               {
+                  j = k % num_hood;
+
+                  if (j != lastj)
+                  {
+                     cboxes_j[num_cboxes] = j;
+                     num_cboxes++;
+                     lastj = j;
+                  }
+                  send_box_array_size++;
+                  send_order_j[j]++;
+
+                  if (k < num_hood)
+                  {
+                     /* the neighbor was not periodic */
+                     cboxes[j] = &cboxes_mem[j];
+                     hypre_CopyBox(int_box, cboxes[j]);
+                  }
+                  else
+                  {
+                     /* the neighbor was periodic */
+                     if (cper_arrays[j] == NULL)
+                     {
+                        cper_arrays[j] = hypre_BoxArrayCreate(26);
+                        hypre_BoxArraySetSize(cper_arrays[j], 0);
+                     }
+                     hypre_AppendBox(int_box, cper_arrays[j]);
+                  }
+               }
+            }
+         }
+      hypre_EndBoxNeighborsLoop;
+      
+      send_order_size += send_box_array_size;
+
+      /* create send_box_array and send_procs */
+      send_box_array = hypre_BoxArrayArrayBoxArray(send_boxes, i);
+      hypre_BoxArraySetSize(send_box_array, send_box_array_size);
+      send_procs[i] = hypre_CTAlloc(int, send_box_array_size);
+      n = 0;
+      for (m = 0; m < num_cboxes; m++)
+      {
+         j = cboxes_j[m];
+
+         /* add the non-periodic box */
+         if (cboxes[j] != NULL)
+         {
+            /* temporarily use send_procs to store j index */
+            send_procs[i][n] = j;
+            hypre_CopyBox(cboxes[j], hypre_BoxArrayBox(send_box_array, n));
+            n++;
+            cboxes[j] = NULL;
+         }
+
+         /* add the periodic boxes (in reverse order) */
+         if (cper_arrays[j] != NULL)
+         {
+            cper_array_size = hypre_BoxArraySize(cper_arrays[j]);
+            for (k = (cper_array_size-1); k > -1; k--)
+            {
+               /* temporarily use send_procs to store j index */
+               send_procs[i][n] = j;
+               hypre_CopyBox(hypre_BoxArrayBox(cper_arrays[j], k),
+                             hypre_BoxArrayBox(send_box_array, n));
+               n++;
+            }
+            hypre_BoxArrayDestroy(cper_arrays[j]);
+            cper_arrays[j] = NULL;
+         }
+      }
+   }
+
+   hypre_TFree(cboxes);
+   hypre_TFree(cboxes_mem);
+   hypre_TFree(cboxes_j);
+   hypre_TFree(cper_arrays);
+
+   hypre_BoxDestroy(grow_box);
+   hypre_BoxDestroy(int_box);
+
+   /*------------------------------------------------------
+    * Set up recv_order array
+    *------------------------------------------------------*/
+
+   recv_order = hypre_TAlloc(int, 2*recv_order_size + 1);
+   recv_order[2*recv_order_size] = -1;
+
+   k = 0;
+   hypre_ForBoxArrayI(i, recv_boxes)
+      {
+         recv_box_array = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
+         hypre_ForBoxI(n, recv_box_array)
+            {
+               recv_order[k++] = i;
+               recv_order[k++] = n;
+            }
+      }
+
+   /*------------------------------------------------------
+    * Set up send_order array
+    *------------------------------------------------------*/
+
+   send_order = hypre_TAlloc(int, 2*send_order_size + 1);
+   send_order[2*send_order_size] = -1;
+
+   k = 0;
+   for (j = 0; j < num_hood; j++)
+   {
+      if (send_order_j[j] > 0)
+      {
+         m = send_order_j[j];
+         send_order_j[j] = k;
+         k += m;
+      }
+      else
+      {
+         send_order_j[j] = -1;
+      }
+   }
+
+   hypre_ForBoxArrayI(i, send_boxes)
+      {
+         send_box_array = hypre_BoxArrayArrayBoxArray(send_boxes, i);
+         hypre_ForBoxI(n, send_box_array)
+            {
+               j = send_procs[i][n];
+               send_procs[i][n] = neighbor_procs[j];
+
+               k = 2*send_order_j[j];
+               send_order[k++] = i;
+               send_order[k++] = n;
+               send_order_j[j]++;
+            }
+      }
+
+   hypre_TFree(send_order_j);
 
    /*------------------------------------------------------
     * Return
@@ -273,6 +464,8 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    *recv_boxes_ptr = recv_boxes;
    *send_procs_ptr = send_procs;
    *recv_procs_ptr = recv_procs;
+   *send_order_ptr = send_order;
+   *recv_order_ptr = recv_order;
 
    return ierr;
 }
@@ -280,11 +473,7 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
 /*--------------------------------------------------------------------------
  * Return descriptions of communications patterns for a given grid
  * based on a specified number of "ghost zones".  These patterns are
- * defined by intersecting each box, "grown" by the number of ghost
- * zones, with its neighbor boxes.
- *
- * Note: It is assumed that the grids neighbor information is
- * sufficiently large.
+ * defined by building a stencil and calling CommInfoFromStencil.
  *--------------------------------------------------------------------------*/
 
 int
@@ -293,216 +482,51 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
                                   hypre_BoxArrayArray  **send_boxes_ptr,
                                   hypre_BoxArrayArray  **recv_boxes_ptr,
                                   int                 ***send_procs_ptr,
-                                  int                 ***recv_procs_ptr )
+                                  int                 ***recv_procs_ptr,
+                                  int                  **send_order_ptr,
+                                  int                  **recv_order_ptr )
 {
-   int                      ierr = 0;
+   int  ierr = 0;
 
-   /* output variables */
-   hypre_BoxArrayArray     *send_boxes;
-   hypre_BoxArrayArray     *recv_boxes;
-   int                    **send_procs;
-   int                    **recv_procs;
+   hypre_StructStencil  *stencil;
+   hypre_Index          *stencil_shape;
+   int                   startstop[6], ii[3], i, d, size;
 
-   /* internal variables */
-   hypre_BoxArray          *boxes = hypre_StructGridBoxes(grid);
-   int                     *ids   = hypre_StructGridIDs(grid);
-
-   hypre_BoxNeighbors      *neighbors;
-   hypre_BoxArray          *neighbor_boxes;
-   int                     *neighbor_procs;
-   int                     *neighbor_ids;
-   hypre_Box               *neighbor_box;
-
-   hypre_Box               *box;
-   hypre_Box               *grow_box;
-                         
-   hypre_BoxArray          *send_box_array;
-   hypre_BoxArray          *recv_box_array;
-   int                      send_box_array_size;
-   int                      recv_box_array_size;
-
-   hypre_BoxArray         **cbox_arrays;
-   int                     *cbox_arrays_i;
-   int                      num_cbox_arrays;
-
-   int                      i, j, k, m, n, d;
-
-   /* temporary work variables */
-   hypre_Box               *box0;
-
-   /*------------------------------------------------------
-    * Determine neighbors:
-    *------------------------------------------------------*/
-
-   neighbors = hypre_StructGridNeighbors(grid);
-
-   /*------------------------------------------------------
-    * Compute send/recv boxes and procs
-    *------------------------------------------------------*/
-
-   send_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes));
-   recv_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes));
-   send_procs = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
-   recv_procs = hypre_CTAlloc(int *, hypre_BoxArraySize(boxes));
-
-   neighbor_boxes = hypre_BoxNeighborsBoxes(neighbors);
-   neighbor_procs = hypre_BoxNeighborsProcs(neighbors);
-   neighbor_ids   = hypre_BoxNeighborsIDs(neighbors);
-
-   box0 = hypre_BoxCreate();
-   grow_box = hypre_BoxCreate();
-
-   cbox_arrays =
-      hypre_CTAlloc(hypre_BoxArray *, hypre_BoxArraySize(neighbor_boxes));
-   cbox_arrays_i =
-      hypre_CTAlloc(int, hypre_BoxArraySize(neighbor_boxes));
-
-   hypre_ForBoxI(i, boxes)
+   stencil_shape = hypre_CTAlloc(hypre_Index, 27);
+   for (i = 0; i < 6; i++)
+   {
+      startstop[i] = num_ghost[i] ? 1 : 0;
+   }
+   size = 0;
+   for (ii[2] = -startstop[4]; ii[2] <= startstop[5]; ii[2]++)
+   {
+      for (ii[1] = -startstop[2]; ii[1] <= startstop[3]; ii[1]++)
       {
-         box = hypre_BoxArrayBox(boxes, i);
-         hypre_CopyBox(box, grow_box);
-
-         /*------------------------------------------------
-          * Compute recv_box_array for box i
-          *------------------------------------------------*/
-
-         num_cbox_arrays = 0;
-
-         /* grow box by num_ghost */
-         for (d = 0; d < 3; d++)
+         for (ii[0] = -startstop[0]; ii[0] <= startstop[1]; ii[0]++)
          {
-            hypre_BoxIMinD(grow_box, d) =
-               hypre_BoxIMinD(box, d) - num_ghost[2*d];
-            hypre_BoxIMaxD(grow_box, d) =
-               hypre_BoxIMaxD(box, d) + num_ghost[2*d + 1];
-         }
- 
-         hypre_ForBoxI(j, neighbor_boxes)
+            for (d = 0; d < 3; d++)
             {
-               if (ids[i] != neighbor_ids[j])
+               if (ii[d] < 0)
                {
-                  neighbor_box = hypre_BoxArrayBox(neighbor_boxes, j);
-
-                  hypre_IntersectBoxes(grow_box, neighbor_box, box0);
-                  if (hypre_BoxVolume(box0))
-                  {
-                     if (cbox_arrays[j] == NULL)
-                     {
-                        cbox_arrays[j] = hypre_BoxArrayCreate(0);
-                        cbox_arrays_i[num_cbox_arrays] = j;
-                        num_cbox_arrays++;
-                     }
-                     hypre_AppendBox(box0, cbox_arrays[j]);
-                  }
+                  stencil_shape[size][d] = -num_ghost[2*d];
+               }
+               else if (ii[d] > 0)
+               {
+                  stencil_shape[size][d] =  num_ghost[2*d+1];
                }
             }
-
-         /* union the boxes in cbox_arrays */
-         recv_box_array_size = 0;
-         for (m = 0; m < num_cbox_arrays; m++)
-         {
-            j = cbox_arrays_i[m];
-            hypre_UnionBoxes(cbox_arrays[j]);
-            recv_box_array_size += hypre_BoxArraySize(cbox_arrays[j]);
-         }
-
-         /* create recv_box_array and recv_procs */
-         recv_box_array = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
-         hypre_BoxArraySetSize(recv_box_array, recv_box_array_size);
-         recv_procs[i] = hypre_CTAlloc(int, recv_box_array_size);
-         n = 0;
-         for (m = 0; m < num_cbox_arrays; m++)
-         {
-            j = cbox_arrays_i[m];
-            hypre_ForBoxI(k, cbox_arrays[j])
-               {
-                  recv_procs[i][n] = neighbor_procs[j];
-                  hypre_CopyBox(hypre_BoxArrayBox(cbox_arrays[j], k),
-                                hypre_BoxArrayBox(recv_box_array, n));
-                  n++;
-               }
-            hypre_BoxArrayDestroy(cbox_arrays[j]);
-            cbox_arrays[j] = NULL;
-         }
-
-         /*------------------------------------------------
-          * Compute send_box_array for box i
-          *------------------------------------------------*/
-
-         num_cbox_arrays = 0;
-
-         hypre_ForBoxI(j, neighbor_boxes)
-            {
-               if (ids[i] != neighbor_ids[j])
-               {
-                  neighbor_box = hypre_BoxArrayBox(neighbor_boxes, j);
-
-                  /* grow neighbor box by num_ghost */
-                  for (d = 0; d < 3; d++)
-                  {
-                     hypre_BoxIMinD(grow_box, d) =
-                        hypre_BoxIMinD(neighbor_box, d) - num_ghost[2*d];
-                     hypre_BoxIMaxD(grow_box, d) =
-                        hypre_BoxIMaxD(neighbor_box, d) + num_ghost[2*d + 1];
-                  }
- 
-                  hypre_IntersectBoxes(box, grow_box, box0);
-                  if (hypre_BoxVolume(box0))
-                  {
-                     if (cbox_arrays[j] == NULL)
-                     {
-                        cbox_arrays[j] = hypre_BoxArrayCreate(0);
-                        cbox_arrays_i[num_cbox_arrays] = j;
-                        num_cbox_arrays++;
-                     }
-                     hypre_AppendBox(box0, cbox_arrays[j]);
-                  }
-               }
-            }
-
-         /* union the boxes in cbox_arrays */
-         send_box_array_size = 0;
-         for (m = 0; m < num_cbox_arrays; m++)
-         {
-            j = cbox_arrays_i[m];
-            hypre_UnionBoxes(cbox_arrays[j]);
-            send_box_array_size += hypre_BoxArraySize(cbox_arrays[j]);
-         }
-
-         /* create send_box_array and send_procs */
-         send_box_array = hypre_BoxArrayArrayBoxArray(send_boxes, i);
-         hypre_BoxArraySetSize(send_box_array, send_box_array_size);
-         send_procs[i] = hypre_CTAlloc(int, send_box_array_size);
-         n = 0;
-         for (m = 0; m < num_cbox_arrays; m++)
-         {
-            j = cbox_arrays_i[m];
-            hypre_ForBoxI(k, cbox_arrays[j])
-               {
-                  send_procs[i][n] = neighbor_procs[j];
-                  hypre_CopyBox(hypre_BoxArrayBox(cbox_arrays[j], k),
-                                hypre_BoxArrayBox(send_box_array, n));
-                  n++;
-               }
-            hypre_BoxArrayDestroy(cbox_arrays[j]);
-            cbox_arrays[j] = NULL;
+            size++;
          }
       }
+   }
+   stencil = hypre_StructStencilCreate(3, size, stencil_shape);
 
-   hypre_TFree(cbox_arrays);
-   hypre_TFree(cbox_arrays_i);
-
-   hypre_BoxDestroy(grow_box);
-   hypre_BoxDestroy(box0);
-
-   /*------------------------------------------------------
-    * Return
-    *------------------------------------------------------*/
-
-   *send_boxes_ptr = send_boxes;
-   *recv_boxes_ptr = recv_boxes;
-   *send_procs_ptr = send_procs;
-   *recv_procs_ptr = recv_procs;
+   hypre_CreateCommInfoFromStencil(grid, stencil,
+                                   send_boxes_ptr, recv_boxes_ptr,
+                                   send_procs_ptr, recv_procs_ptr,
+                                   send_order_ptr, recv_order_ptr);
+   
+   hypre_StructStencilDestroy(stencil);
 
    return ierr;
 }
@@ -518,7 +542,9 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
                                hypre_BoxArrayArray  **send_boxes_ptr,
                                hypre_BoxArrayArray  **recv_boxes_ptr,
                                int                 ***send_procs_ptr,
-                               int                 ***recv_procs_ptr )
+                               int                 ***recv_procs_ptr,
+                               int                  **send_order_ptr,
+                               int                  **recv_order_ptr )
 {
    int                      ierr = 0;
 

@@ -615,6 +615,8 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    hypre_BoxArrayArray   *recv_boxes;
    int                  **send_processes;
    int                  **recv_processes;
+   int                   *send_order;
+   int                   *recv_order;
 
    hypre_Index            unit_stride;
 
@@ -635,13 +637,15 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
       hypre_CreateCommInfoFromNumGhost(hypre_StructMatrixGrid(matrix),
                                        num_ghost,
                                        &send_boxes, &recv_boxes,
-                                       &send_processes, &recv_processes);
+                                       &send_processes, &recv_processes,
+                                       &send_order, &recv_order);
 
       comm_pkg = hypre_CommPkgCreate(send_boxes, recv_boxes,
                                      unit_stride, unit_stride,
                                      hypre_StructMatrixDataSpace(matrix),
                                      hypre_StructMatrixDataSpace(matrix),
                                      send_processes, recv_processes,
+                                     send_order, recv_order,
                                      hypre_StructMatrixNumValues(matrix),
                                      hypre_StructMatrixComm(matrix),
                                      hypre_StructGridPeriodic(
@@ -800,6 +804,8 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
    hypre_BoxArrayArray   *recv_boxes;
    int                  **send_processes;
    int                  **recv_processes;
+   int                   *send_order;
+   int                   *recv_order;
 
    hypre_Index            unit_stride;
 
@@ -817,13 +823,15 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
    hypre_CreateCommInfoFromGrids(hypre_StructMatrixGrid(from_matrix),
                                  hypre_StructMatrixGrid(to_matrix),
                                  &send_boxes, &recv_boxes,
-                                 &send_processes, &recv_processes);
+                                 &send_processes, &recv_processes,
+                                 &send_order, &recv_order);
 
    comm_pkg = hypre_CommPkgCreate(send_boxes, recv_boxes,
                                   unit_stride, unit_stride,
                                   hypre_StructMatrixDataSpace(from_matrix),
                                   hypre_StructMatrixDataSpace(to_matrix),
                                   send_processes, recv_processes,
+                                  send_order, recv_order,
                                   hypre_StructMatrixNumValues(from_matrix),
                                   hypre_StructMatrixComm(from_matrix),
                                   hypre_StructGridPeriodic(

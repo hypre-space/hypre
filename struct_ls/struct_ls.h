@@ -20,6 +20,7 @@ int hypre_StructMapFineToCoarse( hypre_Index findex , hypre_Index index , hypre_
 int hypre_StructMapCoarseToFine( hypre_Index cindex , hypre_Index index , hypre_Index stride , hypre_Index findex );
 int hypre_StructCoarsen( hypre_StructGrid *fgrid , hypre_Index index , hypre_Index stride , int prune , hypre_StructGrid **cgrid_ptr );
 int hypre_StructCoarsen( hypre_StructGrid *fgrid , hypre_Index index , hypre_Index stride , int prune , hypre_StructGrid **cgrid_ptr );
+int hypre_Merge( int **arrays , int *sizes , int size , int **mergei_ptr , int **mergej_ptr );
 
 /* cyclic_reduction.c */
 void *hypre_CyclicReductionCreate( MPI_Comm comm );

@@ -45,6 +45,8 @@ hypre_CommPkgCreate( hypre_BoxArrayArray   *send_boxes,
                      hypre_BoxArray        *recv_data_space,
                      int                  **send_processes,
                      int                  **recv_processes,
+                     int                   *send_order,
+                     int                   *recv_order,
                      int                    num_values,
                      MPI_Comm               comm,
                      hypre_Index            periodic )
@@ -76,8 +78,8 @@ hypre_CommPkgCreate( hypre_BoxArrayArray   *send_boxes,
     * Set up communication information
     *------------------------------------------------------*/
 
-   hypre_CommPkgCreateInfo(send_boxes, send_stride,
-                           send_data_space, send_processes,
+   hypre_CommPkgCreateInfo(send_boxes, send_stride, send_data_space,
+                           send_processes, send_order,
                            num_values, comm, periodic,
                            &num_sends, &send_procs,
                            &send_types, &copy_from_type);
@@ -87,8 +89,8 @@ hypre_CommPkgCreate( hypre_BoxArrayArray   *send_boxes,
    hypre_CommPkgSendTypes(comm_pkg)    = send_types;
    hypre_CommPkgCopyFromType(comm_pkg) = copy_from_type;
 
-   hypre_CommPkgCreateInfo(recv_boxes, recv_stride,
-                           recv_data_space, recv_processes,
+   hypre_CommPkgCreateInfo(recv_boxes, recv_stride, recv_data_space,
+                           recv_processes, recv_order,
                            num_values, comm,  periodic,
                            &num_recvs, &recv_procs,
                            &recv_types, &copy_to_type);
@@ -106,11 +108,13 @@ hypre_CommPkgCreate( hypre_BoxArrayArray   *send_boxes,
       hypre_TFree(send_processes[i]);
    hypre_BoxArrayArrayDestroy(send_boxes);
    hypre_TFree(send_processes);
+   hypre_TFree(send_order);
 
    hypre_ForBoxArrayI(i, recv_boxes)
       hypre_TFree(recv_processes[i]);
    hypre_BoxArrayArrayDestroy(recv_boxes);
    hypre_TFree(recv_processes);
+   hypre_TFree(recv_order);
 
 #if defined(HYPRE_COMM_SIMPLE) || defined(HYPRE_COMM_VOLATILE)
 #else
@@ -873,6 +877,7 @@ hypre_CommPkgCreateInfo( hypre_BoxArrayArray   *boxes,
                          hypre_Index            stride,
                          hypre_BoxArray        *data_space,
                          int                  **processes,
+                         int                   *order,
                          int                    num_values,
                          MPI_Comm               comm,
                          hypre_Index            periodic,
@@ -892,9 +897,10 @@ hypre_CommPkgCreateInfo( hypre_BoxArrayArray   *boxes,
    hypre_BoxArray        *box_array;
    hypre_Box             *box;
    hypre_Box             *data_box;
+   int                   *data_box_offsets;
    int                    data_box_offset;
                         
-   int                    i, j, p, m;
+   int                    i, j, p, m, n;
    int                    num_procs, my_proc;
                         
    int                    ierr = 0;
@@ -913,25 +919,24 @@ hypre_CommPkgCreateInfo( hypre_BoxArrayArray   *boxes,
    num_entries = hypre_CTAlloc(int, num_procs);
 
    num_comms = 0;
-   hypre_ForBoxArrayI(i, boxes)
+   for (n = 0; order[n] > -1; n += 2)
+   {
+      i = order[n];
+      j = order[n+1];
+
+      box_array = hypre_BoxArrayArrayBoxArray(boxes, i);
+      box = hypre_BoxArrayBox(box_array, j);
+      p = processes[i][j];
+
+      if (hypre_BoxVolume(box) != 0)
       {
-         box_array = hypre_BoxArrayArrayBoxArray(boxes, i);
-
-         hypre_ForBoxI(j, box_array)
-            {
-               box = hypre_BoxArrayBox(box_array, j);
-               p = processes[i][j];
-
-               if (hypre_BoxVolume(box) != 0)
-               {
-                  num_entries[p]++;
-                  if ((num_entries[p] == 1) && (p != my_proc))
-                  {
-                     num_comms++;
-                  }
-               }
-            }
+         num_entries[p]++;
+         if ((num_entries[p] == 1) && (p != my_proc))
+         {
+            num_comms++;
+         }
       }
+   }
 
    /*------------------------------------------------------
     * Loop over boxes and compute comm_entries
@@ -941,44 +946,52 @@ hypre_CommPkgCreateInfo( hypre_BoxArrayArray   *boxes,
    comm_entries = hypre_CTAlloc(hypre_CommTypeEntry **, num_procs);
    comm_processes  = hypre_TAlloc(int, num_comms);
 
-   m = 0;
+   data_box_offsets = hypre_TAlloc(int, hypre_BoxArraySize(boxes));
    data_box_offset = 0;
    hypre_ForBoxArrayI(i, boxes)
       {
-         box_array = hypre_BoxArrayArrayBoxArray(boxes, i);
+         data_box_offsets[i] = data_box_offset;
          data_box = hypre_BoxArrayBox(data_space, i);
-
-         hypre_ForBoxI(j, box_array)
-            {
-               box = hypre_BoxArrayBox(box_array, j);
-               p = processes[i][j];
-
-               if (hypre_BoxVolume(box) != 0)
-               {
-                  /* allocate comm_entries pointer */
-                  if (comm_entries[p] == NULL)
-                  {
-                     comm_entries[p] =
-                        hypre_CTAlloc(hypre_CommTypeEntry *, num_entries[p]);
-                     num_entries[p] = 0;
-
-                     if (p != my_proc)
-                     {
-                        comm_processes[m] = p;
-                        m++;
-                     }
-                  }
-
-                  comm_entries[p][num_entries[p]] =
-                     hypre_CommTypeEntryCreate(box, stride, data_box,
-                                               num_values, data_box_offset);
-
-                  num_entries[p]++;
-               }
-            }
-
          data_box_offset += hypre_BoxVolume(data_box) * num_values;
       }
+
+   m = 0;
+   for (n = 0; order[n] > -1; n += 2)
+   {
+      i = order[n];
+      j = order[n+1];
+
+      box_array = hypre_BoxArrayArrayBoxArray(boxes, i);
+      data_box = hypre_BoxArrayBox(data_space, i);
+      box = hypre_BoxArrayBox(box_array, j);
+
+      p = processes[i][j];
+
+      if (hypre_BoxVolume(box) != 0)
+      {
+         /* allocate comm_entries pointer */
+         if (comm_entries[p] == NULL)
+         {
+            comm_entries[p] =
+               hypre_CTAlloc(hypre_CommTypeEntry *, num_entries[p]);
+            num_entries[p] = 0;
+            
+            if (p != my_proc)
+            {
+               comm_processes[m] = p;
+               m++;
+            }
+         }
+         
+         comm_entries[p][num_entries[p]] =
+            hypre_CommTypeEntryCreate(box, stride, data_box,
+                                      num_values, data_box_offsets[i]);
+         
+         num_entries[p]++;
+      }
+   }
+
+   hypre_TFree(data_box_offsets);
 
    /*------------------------------------------------------
     * Loop over comm_entries and build comm_types
@@ -990,7 +1003,6 @@ hypre_CommPkgCreateInfo( hypre_BoxArrayArray   *boxes,
    {
       p = comm_processes[m];
       comm_types[m] = hypre_CommTypeCreate(comm_entries[p], num_entries[p]);
-      hypre_CommTypeSort(comm_types[m], periodic);
    }
 
    /*------------------------------------------------------
@@ -1001,7 +1013,6 @@ hypre_CommPkgCreateInfo( hypre_BoxArrayArray   *boxes,
    {
       p = my_proc;
       copy_type = hypre_CommTypeCreate(comm_entries[p], num_entries[p]);
-      hypre_CommTypeSort(copy_type, periodic);
    }
    else
    {
@@ -1019,143 +1030,6 @@ hypre_CommPkgCreateInfo( hypre_BoxArrayArray   *boxes,
    *comm_processes_ptr = comm_processes;
    *comm_types_ptr     = comm_types;
    *copy_type_ptr      = copy_type;
-
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
- * Sort the entries of a communication type.  This routine is used to
- * maintain consistency in communications.
- *
- * NOTE: The IModPeriod routines map the box indices onto an index
- * space that is periodic with indicated period, starting at 0.  The
- * fact that the periodicity here starts at 0 does not introduce any
- * zero-based index dependencies elsewhere in the code.
- *--------------------------------------------------------------------------*/
-
-int
-hypre_CommTypeSort( hypre_CommType  *comm_type,
-                    hypre_Index      periodic )
-{
-   hypre_CommTypeEntry  **comm_entries = hypre_CommTypeCommEntries(comm_type);
-   int                    num_entries  = hypre_CommTypeNumEntries(comm_type);
-
-   hypre_CommTypeEntry   *comm_entry;
-   hypre_IndexRef         imin0, imin1;
-   hypre_IndexRef         imax0, imax1;
-   int                    swap;
-   int                    i, j, ii, jj;
-   int                    ierr = 0;
-                      
-#if 1
-   /*------------------------------------------------
-    * Sort by imin:
-    *------------------------------------------------*/
-
-   for (i = (num_entries - 1); i > 0; i--)
-   {
-      for (j = 0; j < i; j++)
-      {
-         swap = 0;
-         imin0 = hypre_CommTypeEntryIMin(comm_entries[j]);
-         imin1 = hypre_CommTypeEntryIMin(comm_entries[j+1]);
-         if ( hypre_IModPeriodZ(imin0, periodic) > 
-              hypre_IModPeriodZ(imin1, periodic) )
-         {
-            swap = 1;
-         }
-         else if ( hypre_IModPeriodZ(imin0, periodic) == 
-                   hypre_IModPeriodZ(imin1, periodic) )
-         {
-            if ( hypre_IModPeriodY(imin0, periodic) > 
-                 hypre_IModPeriodY(imin1, periodic) )
-            {
-               swap = 1;
-            }
-            else if ( hypre_IModPeriodY(imin0, periodic) == 
-                      hypre_IModPeriodY(imin1, periodic) )
-            {
-               if ( hypre_IModPeriodX(imin0, periodic) > 
-                    hypre_IModPeriodX(imin1, periodic) )
-               {
-                  swap = 1;
-               }
-            }
-         }
-
-         if (swap)
-         {
-            comm_entry        = comm_entries[j];
-            comm_entries[j]   = comm_entries[j+1];
-            comm_entries[j+1] = comm_entry;
-         }
-      }
-   }
-
-   /*------------------------------------------------
-    * Sort entries with common imin by imax:
-    *------------------------------------------------*/
-
-   for (ii = 0; ii < (num_entries - 1); ii = jj)
-   {
-      /* want jj where entries ii through jj-1 have common imin */
-      imin0 = hypre_CommTypeEntryIMin(comm_entries[ii]);
-      for (jj = (ii + 1); jj < num_entries; jj++)
-      {
-         imin1 = hypre_CommTypeEntryIMin(comm_entries[jj]);
-         if ( ( hypre_IModPeriodX(imin0, periodic) !=
-                hypre_IModPeriodX(imin1, periodic) ) ||
-              ( hypre_IModPeriodY(imin0, periodic) != 
-                hypre_IModPeriodY(imin1, periodic) ) ||
-              ( hypre_IModPeriodZ(imin0, periodic) !=
-                hypre_IModPeriodZ(imin1, periodic) ) )
-         {
-            break;
-         }
-      }
-
-      /* sort entries ii through jj-1 by imax */
-      for (i = (jj - 1); i > ii; i--)
-      {
-         for (j = ii; j < i; j++)
-         {
-            swap = 0;
-            imax0 = hypre_CommTypeEntryIMax(comm_entries[j]);
-            imax1 = hypre_CommTypeEntryIMax(comm_entries[j+1]);
-            if ( hypre_IModPeriodZ(imax0, periodic) >
-                 hypre_IModPeriodZ(imax1, periodic) )
-            {
-               swap = 1;
-            }
-            else if ( hypre_IModPeriodZ(imax0, periodic) ==
-                      hypre_IModPeriodZ(imax1, periodic) )
-            {
-               if ( hypre_IModPeriodY(imax0, periodic) >
-                    hypre_IModPeriodY(imax1, periodic) )
-               {
-                  swap = 1;
-               }
-               else if ( hypre_IModPeriodY(imax0, periodic) ==
-                         hypre_IModPeriodY(imax1, periodic) )
-               {
-                  if ( hypre_IModPeriodX(imax0, periodic) >
-                       hypre_IModPeriodX(imax1, periodic) )
-                  {
-                     swap = 1;
-                  }
-               }
-            }
-
-            if (swap)
-            {
-               comm_entry        = comm_entries[j];
-               comm_entries[j]   = comm_entries[j+1];
-               comm_entries[j+1] = comm_entry;
-            }
-         }
-      }
-   }
-#endif
 
    return ierr;
 }
@@ -1340,58 +1214,5 @@ hypre_CommTypeEntryBuildMPI( hypre_CommTypeEntry *comm_entry,
    }
 
    return ierr;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-int 
-hypre_IModPeriod( int   i,
-                  int   period )
-                        
-{
-   if (period)
-   {
-      i %= period;
-
-      if (i < 0)
-      {
-         i += period;
-      }
-   }
-
-   return i;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-int
-hypre_IModPeriodX( hypre_Index  index,
-                   hypre_Index  periodic )
-{
-   return hypre_IModPeriod(hypre_IndexX(index), hypre_IndexX(periodic));
-}
-
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-int
-hypre_IModPeriodY( hypre_Index  index,
-                   hypre_Index  periodic )
-{
-   return hypre_IModPeriod(hypre_IndexY(index), hypre_IndexY(periodic));
-}
-
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-int
-hypre_IModPeriodZ( hypre_Index  index,
-                   hypre_Index  periodic )
-{
-   return hypre_IModPeriod(hypre_IndexZ(index), hypre_IndexZ(periodic));
 }
 

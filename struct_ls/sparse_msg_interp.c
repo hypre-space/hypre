@@ -68,6 +68,8 @@ hypre_SparseMSGInterpSetup( void               *interp_vdata,
    hypre_BoxArrayArray    *recv_boxes;
    int                   **send_processes;
    int                   **recv_processes;
+   int                    *send_order;
+   int                    *recv_order;
    hypre_BoxArrayArray    *indt_boxes;
    hypre_BoxArrayArray    *dept_boxes;
                        
@@ -85,6 +87,7 @@ hypre_SparseMSGInterpSetup( void               *interp_vdata,
    hypre_CreateComputeInfo(grid, stencil,
                            &send_boxes, &recv_boxes,
                            &send_processes, &recv_processes,
+                           &send_order, &recv_order,
                            &indt_boxes, &dept_boxes);
 
    hypre_ProjectBoxArrayArray(send_boxes, cindex, stride);
@@ -95,6 +98,7 @@ hypre_SparseMSGInterpSetup( void               *interp_vdata,
    hypre_ComputePkgCreate(send_boxes, recv_boxes,
                           stride, stride,
                           send_processes, recv_processes,
+                          send_order, recv_order,
                           indt_boxes, dept_boxes,
                           stride, grid,
                           hypre_StructVectorDataSpace(e), 1,
