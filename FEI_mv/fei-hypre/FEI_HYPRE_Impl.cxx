@@ -2734,7 +2734,7 @@ int FEI_HYPRE_Impl::solveUsingGMRES()
    int    innerIterations, iV, iV2, kStep, kp1, jV;
    double rnorm0, rnorm, eps1, epsmac=1.0e-16, gam;
    double **kVectors, **HH, *RS, *C, *S, *dArray, *dArray2;
-   double *tVector, *tVector2, *v1, *v2, *diag, dtemp;
+   double *tVector, *tVector2, *v1, *v2, dtemp;
 
    /* -----------------------------------------------------------------
     * compute matrix information and allocate Krylov vectors
