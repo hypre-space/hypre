@@ -291,15 +291,6 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       hypre_StructGridGlobalSize(grid) = size;
    }
 
-   /* adjust periodicity values based on the bounding box */
-   for (d = 0; d < 3; d++)
-   {
-      if (hypre_IndexD(periodic, d))
-      {
-         hypre_IndexD(periodic, d) = hypre_BoxSizeD(bounding_box, d);
-      }
-   }
-
    if (neighbors == NULL)
    {
       /* set all_ids */

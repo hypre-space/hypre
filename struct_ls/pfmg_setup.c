@@ -110,8 +110,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
     * Set up coarse grids
     *-----------------------------------------------------*/
 
-      hypre_StructMatrixPrint("zout.A", A, 0);
-
    grid  = hypre_StructMatrixGrid(A);
    dim   = hypre_StructGridDim(grid);
 

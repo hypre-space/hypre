@@ -12,17 +12,17 @@
 # struct: Run base 3d case
 #=============================================================================
 
-mpirun -np 1 ./struct -n 16 16 16 -c 2.0 3.0 40 -solver 1 -p 1 1 0 \
+mpirun -np 1 ./struct -n 16 16 16 -c 2.0 3.0 40 -solver 1 -p 16 16 0 \
  > parflow.out.0
 
 #=============================================================================
 # struct: Run parallel and blocking 
 #=============================================================================
 
-mpirun -np 8 ./struct -n 8 8 8 -P 2 2 2  -c 2.0 3.0 40 -solver 1 -p 1 1 0 \
+mpirun -np 8 ./struct -n 8 8 8 -P 2 2 2  -c 2.0 3.0 40 -solver 1 -p 16 16 0 \
  > parflow.out.1
 mpirun -np 8 ./struct -n 4 4 4 -b 2 2 2 -P 2 2 2  -c 2.0 3.0 40 -solver 1 \
- -p 1 1 0 > parflow.out.2
+ -p 16 16 0 > parflow.out.2
 
 #=============================================================================
 # struct: Run base 2d case

@@ -208,6 +208,12 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    bounding_box = hypre_BoxDuplicate(hypre_StructGridBoundingBox(fgrid));
    hypre_CopyIndex(hypre_StructGridPeriodic(fgrid), periodic);
 
+   /* adjust periodicity */
+   for (i = 0; i < dim; i++)
+   {
+      hypre_IndexD(periodic,i) /= hypre_IndexD(stride,i);
+   } 
+
    MPI_Comm_rank(comm, &my_rank);
 
 #if DEBUG
