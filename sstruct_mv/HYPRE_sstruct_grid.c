@@ -259,8 +259,11 @@ HYPRE_SStructGridSetNeighborBox( HYPRE_SStructGrid  grid,
    hypre_CopyToCleanIndex(nbor_ilower, ndim,
                           hypre_SStructNeighborILower(neighbor));
 
-   hypre_CopyToCleanIndex(index_map, ndim,
-                          hypre_SStructNeighborCoord(neighbor));
+   hypre_CopyIndex(index_map, hypre_SStructNeighborCoord(neighbor));
+   for (d = (ndim-1); d < 3; d++)
+   {
+      hypre_IndexD(hypre_SStructNeighborCoord(neighbor), d) = d;
+   }
 
    for (d = 0; d < 3; d++)
    {
