@@ -1,0 +1,84 @@
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .c .f .o
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+
+CC = @CC@
+
+C_COMPILE_FLAGS=@CFLAGS@
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+F77_COMPILE_FLAGS=@F77FLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+ 
+CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I..\
+ -I../utilities\
+ -I../krylov\
+ ${CINCLUDES}
+
+RANLIB = @RANLIB@
+
+HEADERS =\
+ gmres.h\
+ pcg.h\
+ bicgstab.h\
+ cgnr.c
+
+FILES =\
+ gmres.c\
+ pcg.c\
+ bicgstab.c\
+ cgnr.c
+
+OBJS = ${FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: libkrylov.a 
+
+install: all
+	@cp -f *.h krylov.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f lib*.a $$HYPRE_INSTALL_DIR/lib/.
+clean:
+	@rm -f *.o *.dxx 
+	@rm -f *.prj
+	@rm -f *.kdd
+
+veryclean: clean
+	@rm -f libHYPRE_*.a
+
+
+##################################################################
+# Rules
+##################################################################
+
+libkrylov.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
+
+${OBJS}: ${HEADERS}
+
+
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+
