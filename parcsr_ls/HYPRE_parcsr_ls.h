@@ -18,6 +18,7 @@
 #include "HYPRE_utilities.h"
 #include "HYPRE_seq_mv.h"
 #include "HYPRE_parcsr_mv.h"
+#include "../IJ_mv/HYPRE_IJ_mv.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -446,6 +447,15 @@ int HYPRE_ParaSailsSetReuse(HYPRE_Solver solver,
  **/
 int HYPRE_ParaSailsSetLogging(HYPRE_Solver solver,
                               int          logging);
+
+/**
+ * Build IJ Matrix of the sparse approximate inverse (factor).
+ *
+ * @param solver [IN] Preconditioner object.
+ * @param logging [OUT] Pointer to the IJ Matrix.
+ **/
+int HYPRE_ParaSailsBuildIJMatrix(HYPRE_Solver solver, HYPRE_IJMatrix *pij_A);
+
 
 /*@}*/
 

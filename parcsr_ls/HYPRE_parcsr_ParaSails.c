@@ -26,6 +26,9 @@
 
 #include "../distributed_ls/ParaSails/hypre_ParaSails.h"
 
+/* these includes required for HYPRE_ParaSailsBuildIJMatrix */
+#include "../IJ_mv/HYPRE_IJ_mv.h"
+
 /* Must include implementation definition for ParVector since no data access
   functions are publically provided. AJC, 5/99 */
 /* Likewise for Vector. AJC, 5/99 */
@@ -467,5 +470,18 @@ HYPRE_ParaSailsSetLogging(HYPRE_Solver solver,
 
    secret->logging = logging;
 
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParaSailsBuildIJMatrix -
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_ParaSailsBuildIJMatrix(HYPRE_Solver solver, HYPRE_IJMatrix *pij_A)
+{
+   Secret *secret = (Secret *) solver;
+
+   hypre_ParaSailsBuildIJMatrix(secret->obj, pij_A);
+    
    return 0;
 }
