@@ -462,7 +462,7 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
 /*--------------------------------------------------------------------------
  * (action > 0): add-to values
  * (action = 0): set values
- * (action < 0): get values
+ * (action < 0): get values and zero out
  *--------------------------------------------------------------------------*/
 
 int 
@@ -582,6 +582,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                      hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
                         {
                            values[dvali] = datap[datai];
+                           datap[datai] = 0;
                         }
                      hypre_BoxLoop2End(datai, dvali);
                   }

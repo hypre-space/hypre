@@ -532,13 +532,6 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
                                                          hypre_BoxIMax(ibox),
                                                          var, 1, &entry,
                                                          values, 1);
-
-                        for (i = 0; i < hypre_BoxVolume(ibox); i++)
-                        {
-                           values[i] = 0;
-                        }
-                        hypre_StructMatrixSetBoxValues(smatrix, ibox,
-                                                       1, &sentry, values, 0);
                      }
                   }
             }
