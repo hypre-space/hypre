@@ -97,7 +97,7 @@ hypre_ParAMGCreate()
    num_grid_sweeps[3] = 1;
    grid_relax_type[3] = 9;
    grid_relax_points[3] = hypre_CTAlloc(int,1);
-   grid_relax_points[3][0] = 9;
+   grid_relax_points[3][0] = 0;
 
    /* log info */
    num_iterations = 0;
