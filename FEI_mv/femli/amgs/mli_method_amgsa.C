@@ -481,8 +481,8 @@ int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
 
 int MLI_Method_AMGSA::setup( MLI *mli ) 
 {
-   int             i, level, mypid;
-   double          start_time, elapsed_time, max_eigen, dtemp;
+   int             level, mypid;
+   double          start_time, elapsed_time, max_eigen;
    char            param_string[100], *targv[10];
    MLI_Matrix      *mli_Pmat, *mli_Rmat, *mli_Amat, *mli_cAmat;
    MLI_Solver      *smoother_ptr, *csolve_ptr;
