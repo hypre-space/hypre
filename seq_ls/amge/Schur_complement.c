@@ -169,10 +169,10 @@ int hypre_AMGeSchurComplement(int *i_domain_chord,
 	    A[first[j_loc]+first[i_loc]*local_dof_counter];
 
       if (first_counter > 0)
-	ierr = matinv(X_11, A_11, first_counter);
+	ierr = mat_inv(X_11, A_11, first_counter);
 
       /*
-      printf("matinv_ierr: %d, first_counter: %d\n", ierr, first_counter);
+      printf("mat_inv_ierr: %d, first_counter: %d\n", ierr, first_counter);
       */
 
       if (ierr < 0) 
