@@ -12,9 +12,9 @@
 ###  automatically run to replace the ${LAPACKINTERNAL} variable with a comment
 ###  symbol or a space and create the appropriate file named Makefile.
 ###
-###  If internal LAPACK routines are needed, compile in this sub-directory
-###  then copy the files to the utilities directory to be included in 
-###  libHYPRE_utilities.a 
+###  If internal LAPACK routines are needed, they are compiled in this sub-directory
+###  then copied to the utilities and lib directories to be included in the
+###  appropriate libHYPRE* libraries.
 ###
 
 include ../config/Makefile.config
@@ -100,6 +100,7 @@ all: ${OBJS}
 	${LAPACKINTERNAL}for file in ${OBJS}; \
 	${LAPACKINTERNAL}do \
 	${LAPACKINTERNAL}  (cp -fp $$file ../utilities); \
+	${LAPACKINTERNAL}  (cp -fp $$file ../lib); \
 	${LAPACKINTERNAL}done
 	${LAPACKINTERNAL}cp -fp ${LAPACK_HEADERS} ../utilities
 

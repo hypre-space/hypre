@@ -64,13 +64,13 @@ link:
 lib: ${PROTOS} ${OBJS}
 	@echo  "Building $@ ... "
 	@${AR} lib_HYPRE_PETScSolverParILUT.a ${OBJS}
-	@${RANLIB} lib_HYPR_EPETScSolverParILUT.a 
+	@${RANLIB} lib_HYPRE_PETScSolverParILUT.a 
 
 
 ##################################################################
 # Targets
 ##################################################################
 clean:
-	@rm -f *.o lib*.a 
+	@rm -f *.o lib_HYPRE*
 
 distclean: clean

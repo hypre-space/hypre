@@ -68,15 +68,20 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 
 all: libHYPRE_lobpcg.a 
-	cp -fp *.h $(HYPRE_BUILD_DIR)/include/.
-	cp -fp lib*.a $(HYPRE_BUILD_DIR)/lib/.
+	cp -fp *.h $(HYPRE_BUILD_DIR)/include
+	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	@\
+	for file in ${OBJS}; \
+	do \
+	   (cp -fp $$file ${HYPRE_SRC_TOP_DIR}/lib); \
+	done
 
 install: libHYPRE_lobpcg.a 
-	cp -f *.h $(HYPRE_INC_INSTALL)/.
-	cp -f lib*.a $(HYPRE_LIB_INSTALL)/.
+	cp -f *.h $(HYPRE_INC_INSTALL)
+	cp -f libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o *.h *.c lib*.a
+	rm -f *.o *.h *.c libHYPRE*
 
 distclean: clean
 

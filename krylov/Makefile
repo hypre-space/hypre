@@ -42,15 +42,20 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 
 all: libHYPRE_krylov.a 
-	cp -fp $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include/.
-	cp -fp lib*.a $(HYPRE_BUILD_DIR)/lib/.
+	cp -fp $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include
+	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	@\
+	for file in ${OBJS}; \
+	do \
+	   (cp -fp $$file ${HYPRE_SRC_TOP_DIR}/lib); \
+	done
 
 install: all
-	cp -fp $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)/.
-	cp -fp lib*.a $(HYPRE_LIB_INSTALL)/.
+	cp -fp $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)
+	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o lib*.a
+	rm -f *.o libHYPRE*
 
 distclean: clean
 

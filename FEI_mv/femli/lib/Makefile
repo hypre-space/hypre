@@ -126,15 +126,20 @@ OBJS = ${OBJSCXX:.f=.o}
 ##################################################################
 
 all: libHYPRE_mli.a 
-	cp -fp lib*.a $(HYPRE_BUILD_DIR)/lib/.
+	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 	@echo  " "
+	@\
+	for file in ${OBJS}; \
+	do \
+	   (cp -fp $$file ${HYPRE_SRC_TOP_DIR}/lib); \
+	done
 
 install: libHYPRE_mli.a 
-	cp -fp lib*.a $(HYPRE_LIB_INSTALL)/.
+	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 	@echo  " "
 
 clean:
-	rm -f *.o *.h *.c *.f *.cxx lib*
+	rm -f *.o *.h *.c *.f *.cxx libHYPRE*
 
 distclean: clean
 
