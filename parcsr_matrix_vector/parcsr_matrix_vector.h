@@ -300,7 +300,7 @@ int hypre_SetParVectorPartitioningOwner P((hypre_ParVector *vector , int owns_pa
 hypre_ParVector *hypre_ReadParVector P((MPI_Comm comm , char *file_name ));
 int hypre_PrintParVector P((hypre_ParVector *vector , char *file_name ));
 int hypre_SetParVectorConstantValues P((hypre_ParVector *v , double value ));
-int hypre_SetParVectorRandomValues P((hypre_ParVector *v , double seed ));
+int hypre_SetParVectorRandomValues P((hypre_ParVector *v , int seed ));
 int hypre_CopyParVector P((hypre_ParVector *x , hypre_ParVector *y ));
 int hypre_ScaleParVector P((double alpha , hypre_ParVector *y ));
 int hypre_ParAxpy P((double alpha , hypre_ParVector *x , hypre_ParVector *y ));

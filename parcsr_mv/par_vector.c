@@ -210,7 +210,7 @@ hypre_SetParVectorConstantValues( hypre_ParVector *v,
 
 int
 hypre_SetParVectorRandomValues( hypre_ParVector *v,
-                                double           seed )
+                                int            seed )
 {
    int my_id;
    hypre_Vector *v_local = hypre_ParVectorLocalVector(v);
