@@ -246,8 +246,8 @@ int HYPRE_SetIJVectorLocalStorageType P((HYPRE_IJVector IJvector , int type ));
 int HYPRE_SetIJVectorLocalSize P((HYPRE_IJVector IJvector , int local_n ));
 int HYPRE_SetIJVectorTotalSize P((HYPRE_IJVector IJvector , int size ));
 int HYPRE_QueryIJVectorInsertionSemantics P((HYPRE_IJVector IJvector , int *level ));
-int HYPRE_InsertIJVectorRows P((HYPRE_IJVector IJvector , int n , int *cols , double *values ));
-int HYPRE_AddRowsToIJVector P((HYPRE_IJVector IJvector , int n , int *cols , double *values ));
+int HYPRE_InsertIJVectorRows P((HYPRE_IJVector IJvector , int n , int *rows , double *values ));
+int HYPRE_AddRowsToIJVector P((HYPRE_IJVector IJvector , int n , int *rows , double *values ));
 int hypre_RefIJVector P((HYPRE_IJVector IJvector , HYPRE_IJVector *reference ));
 void *hypre_GetIJVectorLocalStorage P((HYPRE_IJVector IJvector ));
 
