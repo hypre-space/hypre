@@ -163,7 +163,9 @@ fi
 	tar cf UPDATE.tar \
 	    update \
 	    UPDATE/VER* \
-	    UPDATE/src/linear_solvers/build \
+	    UPDATE/src/linear_solvers/configure \
+	    UPDATE/src/linear_solvers/tarch \
+	    UPDATE/src/linear_solvers/Makefile.in \
 	    UPDATE/src/linear_solvers/utilities \
 	    UPDATE/src/linear_solvers/struct_matrix_vector \
 	    UPDATE/src/linear_solvers/struct_linear_solvers
@@ -191,8 +193,9 @@ if [ ! -d $HYPRE_INSTALL_DIR/lib ]
 then
     (
 	cd $HYPRE_INSTALL_DIR/src/linear_solvers
-	./build -$HYPRE_ARCH install
-	./build -$HYPRE_ARCH veryclean
+	./configure
+	make install
+	make veryclean
     )
 
     (
