@@ -532,7 +532,7 @@ then
 fi
 
 
-
+CC="$PREPEND $CC"
 
 dnl *********************************************************************
 dnl * This macro uses the values assigned to CASC_SET_COPT and 
