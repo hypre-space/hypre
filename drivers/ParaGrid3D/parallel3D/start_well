@@ -1,0 +1,5 @@
+make programa &&
+programa "/u/tomov/LLNL/Program3D/Mesh/well.out"
+# input for the well case  : 1 0.2 0.5 1.2 0 6 10
+# input for layer, no well : 1 0.2 0.5 1.2 0 6 10
+

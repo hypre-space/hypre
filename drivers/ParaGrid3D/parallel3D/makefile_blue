@@ -1,0 +1,95 @@
+#CC 			=  cxx
+#CC 			=  /usr/local/mpi/bin/mpiCC
+CC 			=  mpCC -D__STL_NO_SGI_IOSTREAMS
+
+#MPI_INCLUDE             =  /usr/local/mpi/include
+#MPI_LIBS                =  -L/usr/local/mpi/lib -lmpich
+#LIBRARIES--------------------------------------------------------------------
+
+STLSRC = /usr/apps/hypre
+INCLUDE = -I../include -I${STLSRC}/STLport-4.0/stlport/old_hp -I${STLSRC}/STLport-4.0/stlport
+
+LIBS = /usr/local/ParMetis-2.0/libmetis.a -L../LIB -lfei_none -lHYPRE_LSI \
+       -lfei_none ${MPI_LIBS} -lc -lessl -lm 
+
+# usually : -lsocket -lnsl has to be added for the linking
+#RULES------------------------------------------------------------------------
+
+.SUFFIXES		: .o .cpp
+.cpp.o			:
+			  $(CC) -c -g -DCN ${INCLUDE} $<
+
+#BUILDING --------------------------------------------------------------------
+
+Mesh_ReadNetgen.o	: Mesh_ReadNetgen.cpp
+
+Mesh.o			: Mesh.cpp Mesh.h
+
+DDMainMPI.o		: DDMainMPI.cpp
+
+Mesh_Classes.o		: Mesh_Classes.cpp
+
+Mesh_Refine.o		: Mesh_Refine.cpp
+
+functions.o		: functions.cpp functions.h
+
+Method.o		: Method.cpp Method.h pgmres.cpp
+
+Matrix.o		: Matrix.cpp Matrix.h
+
+queue.o			: queue.h queue.cpp
+
+ZZ_Local_Refine.o	: ZZ_Local_Refine.cpp
+
+Mesh_Print.o		: Mesh_Print.cpp
+
+Method_LocalM.o		: Method_LocalM.cpp
+
+Well.o			: Well.cpp Well.h
+
+##############################
+# Domain Decomposition files #
+##############################
+
+Subdomain.o		: Subdomain.cpp Subdomain.h definitions.h
+
+Subdomain_Construct.o	: Subdomain_Construct.cpp
+
+Subdomain_Refine.o	: Subdomain_Refine.cpp
+
+Subdomain_Solve.o	: Subdomain_Solve.cpp
+
+Packet.o		: Packet.cpp Packet.h
+
+extension_MPI.o		: extension_MPI.cpp extension_MPI.h
+
+##############################################################################
+client_socket.o		: client_socket.cpp
+##############################################################################
+Subdomain_HYPRE.o	: Subdomain_HYPRE.cpp
+##############################################################################
+
+#PUTTING TOGETHER FINAL TARGET------------------------------------------------
+
+SUPPORTING_OBJECTS	= Mesh.o DDMainMPI.o Mesh_ReadNetgen.o \
+			  Mesh_Classes.o Mesh_Refine.o \
+			  functions.o Method.o Matrix.o queue.o \
+			  Mesh_Print.o Well.o extension_MPI.o \
+			  ZZ_Local_Refine.o Method_LocalM.o  \
+			  Subdomain.o Subdomain_Construct.o \
+			  Subdomain_Refine.o Packet.o \
+			  client_socket.o Subdomain_HYPRE.o Subdomain_Solve.o
+
+dd			: ${SUPPORTING_OBJECTS} DDMainMPI.cpp
+			  $(CC) -g -o dd ${SUPPORTING_OBJECTS} \
+				 ${LIBS} ${INCLUDE}
+
+#-----------------------------------------------------------------------------
+# Compile with :
+#  
+# make -f makefile_dd dd
+# 
+# Run with 
+# mpirun -np 4 dd
+
+

@@ -1,0 +1,43 @@
+14                       # number of parameters passed 
+0                        # debugOutput                    
+1                        # DOF 
+2                        # output Level                             
+solver gmres             # choices  : cg, [gmres], superlu or superlux
+preconditioner ml        # choices  : [diagonal], pilut, paraseils or boomeramg
+tolerance 1.e-8          # tolerance: [1.e-10]                     
+maxIterations 200        # max number of iterations : [1000]     
+outputLevel 2
+amgRelaxType hybridsym   # pre- and post-smootings
+amgNumSweeps 2           # number of pre- and post-smootings
+mlNumSweeps 2            # number of pre- and post-smootings
+mlRelaxtype sgs          # pre- and post-smootings
+mlStrongThreshold 0.08   # threshold
+amgMeasureType global    # coarsening measure type
+
+//============================================================================
+// Only the above 7 parameters are passed. Only the order of the first 4 is 
+// important: should be as given. The order of the other arguments is not 
+// important. No blank lines are allowed in this syntax.[ ] gives the default
+// value.
+// The following is the syttax for the arguments of the different precondi-
+// tioners.
+//============================================================================
+gmres-dim 15             # value for restart of gmres : [50]
+
+pilut-row-size   XXX     # [based on matrix sparcity]
+pilut-drop-tol   XXX     # [0.0]
+
+superlu-ordering XXX     # [natural] or mmd (minimum degree ordering) 
+superlu-scale    XXX     # y (do row and column scaling before decomp) or [n]
+
+amg-coarsen-type XXX     # falgout, ruge or [default]
+amg-num-sweeps   XXX     # [1] - number of pre- and post-smootings
+amg-relax-type   XXX     # jacobi, gs-slow, gs-fast, [hybrid], or direct
+amg-relax-weight XXX     # in (0,1),[0.5] - damping for damped Jacobi smoother
+amg-strong-threshold XXX # in (0,1),[0.25] - to determine strong coupling
+                         # in BoomerAMG's coarsening 
+
+paraseils-threshold  XXX # in (0,1),[0.0] - when to prune small entries in
+                         # setting up the sparce approximate inverse
+paraseils-nlevels    XXX # int > 0, [1] - desired sparcity of the ~ inverse
+//============================================================================

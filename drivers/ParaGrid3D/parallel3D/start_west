@@ -1,0 +1,6 @@
+#!/usr/local/bin/tcsh
+set a='/usr/bin/diff $3 functions.cpp'
+if ("`$a`" != "") then
+cp -f $3 functions.cpp
+endif
+make dd && /usr/local/mpi/bin/mpirun -np $1 dd $1 $2

@@ -1,0 +1,13 @@
+#!/usr/local/bin/tcsh
+if ($# == 0) then
+  echo "start #processors file_PDE_coefficients [arguments]"
+  exit
+endif
+set a='/usr/bin/diff $2 functions.cpp'
+if ("`$a`" != "") then
+  cp -f $2 functions.cpp
+endif
+make dd && /usr/local/bin/mpirun -np $1 dd $argv
+#make dd && /usr/local/bin/mpirun -np $1 dd $1 $2
+#make dd && /usr/local/mpi/bin/mpirun -np $1 dd $1 $2
+#make dd && poe dd $2 -nodes 1 -procs $1 -rmpool 0
