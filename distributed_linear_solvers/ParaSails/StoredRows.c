@@ -49,6 +49,8 @@ StoredRows *StoredRowsCreate(Matrix *mat, int size)
     p->ind = (int **)    MemAlloc(p->mem, size * sizeof(int *));
     p->val = (double **) MemAlloc(p->mem, size * sizeof(double *));
 
+    p->count = 0;
+
     return p;
 }
 
@@ -105,6 +107,8 @@ void StoredRowsPut(StoredRows *p, int index, int len, int *ind, double *val)
     p->len[loc] = len;
     p->ind[loc] = ind;
     p->val[loc] = val;
+
+    p->count++;
 }
 
 /*--------------------------------------------------------------------------

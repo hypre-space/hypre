@@ -29,6 +29,8 @@ typedef struct
     int     *len;
     int    **ind;
     double **val;
+
+    int      count;
 }
 StoredRows;
 
