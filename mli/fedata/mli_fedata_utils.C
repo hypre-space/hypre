@@ -474,7 +474,7 @@ void MLI_FEDataConstructFaceElemMatrix(MPI_Comm comm, MLI_FEData *fedata,
    strcpy(param_string, "updateFaceElemMatrix");
    targv[0] = (char *) ncols;
    targv[1] = (char *) cols;
-   fedata.impSpecificRequests(param_string, 2, targv);
+   fedata->impSpecificRequests(param_string, 2, targv);
  
    /* ------------------------------------------------------------ */
    /* create HYPRE IJ matrix                                       */
@@ -535,20 +535,20 @@ void MLI_FEDataConstructNodeFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
    /* fetch number of faces, local nodes, and face IDs             */
    /* ------------------------------------------------------------ */
 
-   fedata.getNumNodes( nlocal );
+   fedata->getNumNodes( nlocal );
    targv[0] = (char *) &nexternal;
    strcpy(param_string, "getNumExtNodes");
-   fedata.impSpecificRequests( param_string, 1, targv );
+   fedata->impSpecificRequests( param_string, 1, targv );
    nlocal = nlocal - nexternal;
 
-   fedata.getNumFaces( nfaces );
+   fedata->getNumFaces( nfaces );
    targv[0] = (char *) &efaces;
    strcpy(param_string, "getNumExtFaces");
-   fedata.impSpecificRequests( param_string, 1, targv );
+   fedata->impSpecificRequests( param_string, 1, targv );
    nfaces = nfaces - efaces;
 
    int *gid = new int [ nfaces ];
-   fedata.getFaceBlockGlobalIDs ( nfaces, gid );
+   fedata->getFaceBlockGlobalIDs ( nfaces, gid );
 
    /* ------------------------------------------------------------ */
    /* fetch node and face offsets                                  */
@@ -556,10 +556,10 @@ void MLI_FEDataConstructNodeFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
 
    strcpy(param_string, "getFaceOffset");
    targv[0] = (char *) &face_off;
-   fedata.impSpecificRequests(param_string, 1, targv);
+   fedata->impSpecificRequests(param_string, 1, targv);
    strcpy(param_string, "getNodeOffset");
    targv[0] = (char *) &node_off;
-   fedata.impSpecificRequests(param_string, 1, targv);
+   fedata->impSpecificRequests(param_string, 1, targv);
 
    /* ------------------------------------------------------------ */
    /* Update ncols and cols for shared nodes                       */
@@ -572,11 +572,11 @@ void MLI_FEDataConstructNodeFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
    cols   = new int*[nnodes];
    for ( i = 0; i < nnodes; i++ ) ncols[i] = 0;
 
-   fedata.getFaceNumNodes(n);
+   fedata->getFaceNumNodes(n);
    for(i=0; i<nfaces; i++)
    {
-      fedata.getFaceNodeList(gid[i], n, node);
-      for ( j = 0; j < n; j++ ) ncols[fedata.searchNode(node[j])]++;
+      fedata->getFaceNodeList(gid[i], n, node);
+      for ( j = 0; j < n; j++ ) ncols[fedata->searchNode(node[j])]++;
    }
    for ( i = 0; i < nnodes; i++ )
    {
@@ -585,17 +585,17 @@ void MLI_FEDataConstructNodeFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
    }
    for ( i = 0; i < nfaces; i++ )
    {
-      fedata.getFaceNodeList(gid[i], n, node);
+      fedata->getFaceNodeList(gid[i], n, node);
       for ( j = 0; j < n; j++ )
       {
-         k = fedata.searchNode(node[j]);
+         k = fedata->searchNode(node[j]);
          cols[k][nncols[k]++] = i + face_off;
       }
    }
    strcpy(param_string, "updateNodeElemMatrix");
    targv[0] = (char *) ncols;
    targv[1] = (char *) cols;
-   fedata.impSpecificRequests(param_string, 2, targv);
+   fedata->impSpecificRequests(param_string, 2, targv);
  
    /* ------------------------------------------------------------ */
    /* create HYPRE IJ matrix                                       */
@@ -615,7 +615,6 @@ void MLI_FEDataConstructNodeFaceMatrix(MPI_Comm comm, MLI_FEData *fedata,
    }
 
    HYPRE_IJMatrixAssemble(IJMat);
-   HYPRE_IJMatrixGetObject(IJMat, (void **)node_face);
 
    delete [] gid;
    delete [] ncols;
