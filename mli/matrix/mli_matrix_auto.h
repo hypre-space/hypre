@@ -148,7 +148,8 @@ MLI_ParCSRBooleanMatrix *MLI_ParBooleanMatmul( MLI_ParCSRBooleanMatrix *A , MLI_
 MLI_CSRBooleanMatrix *MLI_ParCSRBooleanMatrixExtractBExt( MLI_ParCSRBooleanMatrix *B , MLI_ParCSRBooleanMatrix *A );
 MLI_CSRBooleanMatrix *MLI_ParCSRBooleanMatrixExtractAExt( MLI_ParCSRBooleanMatrix *A , int **pA_ext_row_map );
 MLI_ParCSRBooleanMatrix *MLI_ParBooleanAAt( MLI_ParCSRBooleanMatrix *A );
-int hypre_BooleanMatTCommPkgCreate( MLI_ParCSRBooleanMatrix *A );
+int MLI_BooleanMatTCommPkgCreate( MLI_ParCSRBooleanMatrix *A );
+int MLI_BooleanMatvecCommPkgCreate( MLI_ParCSRBooleanMatrix *A );
 
 
 #ifdef __cplusplus

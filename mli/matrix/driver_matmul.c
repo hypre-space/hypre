@@ -16,6 +16,7 @@ main( int   argc,
    MLI_CSRBooleanMatrix *Bs;
    int *row_starts, *col_starts;
    int num_procs, my_id;
+   int a_nrows, a_ncols, b_nrows, b_ncols;
 
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
@@ -28,9 +29,19 @@ main( int   argc,
    if (my_id == 0)
    {
    	As = MLI_CSRBooleanMatrixRead("inpr");
-   	printf(" read input A\n");
+        a_nrows = MLI_CSRBooleanMatrix_Get_NRows( As );
+        a_ncols = MLI_CSRBooleanMatrix_Get_NCols( As );
+   	printf(" read input A(%i,%i)\n",a_nrows,a_ncols);
    	Bs = MLI_CSRBooleanMatrixRead("input");
-   	printf(" read input B\n");
+        b_nrows = MLI_CSRBooleanMatrix_Get_NRows( Bs );
+        b_ncols = MLI_CSRBooleanMatrix_Get_NCols( Bs );
+   	printf(" read input B(%i,%i)\n",b_nrows,b_ncols);
+        if ( a_ncols != b_nrows ) {
+           printf( "incompatible matrix dimensions! (%i,%i)*(%i,%i)\n",
+                   a_nrows,a_ncols,b_nrows,b_ncols );
+           exit(1);
+        }
+        
    }
    A = MLI_CSRBooleanMatrixToParCSRBooleanMatrix
       (MPI_COMM_WORLD, As, row_starts, col_starts);
