@@ -111,7 +111,7 @@ package Hypre {
       int SetIntParameter( in string name, in int value );
       int New( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
-      Solver GetConstructedObject();    
+      PreconditionedSolver GetConstructedObject();    
 
       int SetPreconditioner( in Solver precond );
    };
@@ -291,7 +291,7 @@ package Hypre {
       int New( in MPI_Com comm );
       static PCG Constructor( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
-      Solver GetConstructedObject();    
+      PreconditionedSolver GetConstructedObject();    
 
       int SetPreconditioner( in Solver precond );
 
