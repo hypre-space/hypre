@@ -345,15 +345,6 @@ int hypre_MatvecCommPkgDestroy P((hypre_ParCSRCommPkg *comm_pkg ));
 int hypre_BuildCSRMatrixMPIDataType P((int num_nonzeros , int num_rows , double *a_data , int *a_i , int *a_j , MPI_Datatype *csr_matrix_datatype ));
 int hypre_BuildCSRJDataType P((int num_nonzeros , double *a_data , int *a_j , MPI_Datatype *csr_jdata_datatype ));
 
-/* driver.c */
-int main P((int argc , char *argv []));
-
-/* driver_matmul.c */
-int main P((int argc , char *argv []));
-
-/* driver_matvec.c */
-int main P((int argc , char *argv []));
-
 /* par_csr_matop.c */
 hypre_ParCSRMatrix *hypre_ParMatmul P((hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B ));
 hypre_CSRMatrix *hypre_ParCSRMatrixExtractBExt P((hypre_ParCSRMatrix *B , hypre_ParCSRMatrix *A , int data ));
