@@ -112,9 +112,9 @@ void scale_rhs_private(Euclid_dh ctx, double *rhs)
 
   /* if matrix was scaled, must scale the rhs */
   if (scale != NULL) {
-    #ifdef USING_OPENMP_DH
-    #pragma omp for schedule(static)
-    #endif
+#ifdef USING_OPENMP_DH
+#pragma omp for schedule(static)
+#endif
     for (i=0; i<m; ++i) { rhs[i] *= scale[i]; }
   } 
   END_FUNC_DH

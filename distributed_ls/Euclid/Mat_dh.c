@@ -392,9 +392,9 @@ void Mat_dhMatVec_omp(Mat_dh mat, double *x, double *b)
   if (timeFlag) t1 = MPI_Wtime();
 
   /* Put components of x into the right outgoing buffers */
-  #ifdef USING_OPENMP_DH
-  #pragma omp parallel  for schedule(runtime) private(i)
-  #endif
+#ifdef USING_OPENMP_DH
+#pragma omp parallel  for schedule(runtime) private(i)
+#endif
   for (i=0; i<sendlen; i++) sendbuf[i] = x[sendind[i]]; 
 
   if (timeFlag) {
@@ -413,9 +413,9 @@ void Mat_dhMatVec_omp(Mat_dh mat, double *x, double *b)
   }
 
   /* Copy local part of x into top part of recvbuf */
-  #ifdef USING_OPENMP_DH
-  #pragma omp parallel  for schedule(runtime) private(i)
-  #endif
+#ifdef USING_OPENMP_DH
+#pragma omp parallel  for schedule(runtime) private(i)
+#endif
   for (i=0; i<m; i++) recvbuf[i] = x[i];
 
   if (timeFlag) {
@@ -425,9 +425,9 @@ void Mat_dhMatVec_omp(Mat_dh mat, double *x, double *b)
 
 
   /* do the multiply */
-  #ifdef USING_OPENMP_DH
-  #pragma omp parallel  for schedule(runtime) private(row,i,len,ind,val,temp)
-  #endif
+#ifdef USING_OPENMP_DH
+#pragma omp parallel  for schedule(runtime) private(row,i,len,ind,val,temp)
+#endif
   for (row=0; row<m; row++) {
     len = rp[row+1] - rp[row];
     ind = cval+rp[row];
@@ -464,9 +464,9 @@ void Mat_dhMatVec_uni_omp(Mat_dh mat, double *x, double *b)
   if (timeFlag) { t1 = MPI_Wtime(); }
 
   /* do the multiply */
-  #ifdef USING_OPENMP_DH
-  #pragma omp parallel  for schedule(runtime) private(row,i)
-  #endif
+#ifdef USING_OPENMP_DH
+#pragma omp parallel  for schedule(runtime) private(row,i)
+#endif
   for (row=0; row<m; row++) {
     int len = rp[row+1] - rp[row];
     int * ind = cval+rp[row];

@@ -11,15 +11,15 @@ void matvec_euclid_seq(int n, int *rp, int *cval, double *aval, double *x, doubl
  
   if (np_dh > 1) SET_V_ERROR("only for sequential case!\n");
 
-  #ifdef USING_OPENMP_DH
-  #pragma omp parallel private(j, col, sum, from, to) \
+#ifdef USING_OPENMP_DH
+#pragma omp parallel private(j, col, sum, from, to) \
                 default(shared) \
                 firstprivate(n, rp, cval, aval, x, y) 
-  #endif
+#endif
   {
-    #ifdef USING_OPENMP_DH
-    #pragma omp for schedule(static)       
-    #endif
+#ifdef USING_OPENMP_DH
+#pragma omp for schedule(static)       
+#endif
       for (i=0; i<n; ++i) {
         sum = 0.0;
         from = rp[i]; 
@@ -41,10 +41,10 @@ void Axpy(int n, double alpha, double *x, double *y)
   START_FUNC_DH
   int i;
 
-  #ifdef USING_OPENMP_DH
-  #pragma omp parallel for schedule(static) firstprivate(alpha, x, y) \
+#ifdef USING_OPENMP_DH
+#pragma omp parallel for schedule(static) firstprivate(alpha, x, y) \
              private(i) 
-  #endif
+#endif
   for (i=0; i<n; ++i) {
     y[i] = alpha*x[i] + y[i];
   }
@@ -59,10 +59,10 @@ void CopyVec(int n, double *xIN, double *yOUT)
   START_FUNC_DH
   int i;
 
-  #ifdef USING_OPENMP_DH
-  #pragma omp parallel for schedule(static) firstprivate(yOUT, xIN) \
+#ifdef USING_OPENMP_DH
+#pragma omp parallel for schedule(static) firstprivate(yOUT, xIN) \
              private(i)
-  #endif
+#endif
   for (i=0; i<n; ++i) {
     yOUT[i] = xIN[i];
   }
@@ -77,10 +77,10 @@ void ScaleVec(int n, double alpha, double *x)
   START_FUNC_DH
   int i;
 
-  #ifdef USING_OPENMP_DH
-  #pragma omp parallel for schedule(static) firstprivate(alpha, x) \
+#ifdef USING_OPENMP_DH
+#pragma omp parallel for schedule(static) firstprivate(alpha, x) \
              private(i)
-  #endif
+#endif
   for (i=0; i<n; ++i) {
     x[i] *= alpha;
   }
@@ -96,11 +96,11 @@ double InnerProd(int n, double *x, double *y)
 
   int i;
 
-  #ifdef USING_OPENMP_DH
-  #pragma omp parallel for schedule(static) firstprivate(x, y) \
+#ifdef USING_OPENMP_DH
+#pragma omp parallel for schedule(static) firstprivate(x, y) \
              private(i) \
              reduction(+:local_result)
-  #endif
+#endif
     for (i=0; i<n; ++i) {
       local_result += x[i] * y[i];
     }
@@ -122,11 +122,11 @@ double Norm2(int n, double *x)
   double result, local_result = 0.0;
   int i;
 
-  #ifdef USING_OPENMP_DH
-  #pragma omp parallel for schedule(static) firstprivate(x) \
+#ifdef USING_OPENMP_DH
+#pragma omp parallel for schedule(static) firstprivate(x) \
              private(i) \
              reduction(+:local_result)
-  #endif
+#endif
   for (i=0; i<n; ++i) {
     local_result += (x[i]*x[i]);
   }
