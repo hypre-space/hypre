@@ -457,9 +457,6 @@ dnl * flags are set as needed. The supported platforms are IRIX, DEC alpha,
 dnl * sun/solaris, IBM rs6000, Intel ??, and SGI ??. 
 dnl *********************************************************************
 
-if test -z "$CC"
-then
-
 case $HOSTNAME in
    sasn100 )
 
@@ -594,237 +591,354 @@ case $HOSTNAME in
    ;;
         
 esac
-fi   
 
-if test -z "$CC"
-then
-
-  case $ARCH in
-    sun4 | solaris )
-
-      if test "$casc_user_chose_compilers" = "no"
-      then
-        if test "$casc_using_mpi" = "no"
-        then
-          AC_CHECK_PROGS(CC, cc gcc kcc)
-          AC_CHECK_PROGS(CXX, CC g++)
-          AC_CHECK_PROGS(F77, f77 g77)
-        else
-          AC_CHECK_PROGS(CC, mpicc)
-          AC_CHECK_PROGS(CXX, mpiCC)
-          AC_CHECK_PROGS(F77, mpif77)
-        fi
+case $ARCH in
+  sun4 | solaris )
+    if test -z "$CC"; then
+      if test "$casc_using_mpi" = "no" ; then
+        AC_CHECK_PROGS(CC, cc gcc kcc)
+      else
+        AC_CHECK_PROGS(CC, mpicc)
       fi
+    fi
+    if test -z "$CXX"; then
+      if test "$casc_using_mpi" = "no" ; then
+        AC_CHECK_PROGS(CXX, CC g++)
+      else
+        AC_CHECK_PROGS(CXX, mpiCC)
+      fi
+    fi
+    if test -z "$F77"; then
+      if test "$casc_using_mpi" = "no" ; then
+        AC_CHECK_PROGS(F77, f77 g77)
+      else
+        AC_CHECK_PROGS(F77, mpif77)
+      fi
+    fi
 
+    if test -z "$CFLAGS"; then
       CASC_SET_COPT(-O)
-      CASC_SET_CDEBUG(-g)
+    fi
+    if test -z "$CXXFLAGS"; then
       CASC_SET_CXXOPT(-O)
-      CASC_SET_CXXDEBUG(-g)
+    fi
+    if test -z "$F77FLAGS"; then
       CASC_SET_FOPT(-O -silent)
-      CASC_SET_FDEBUG(-g -silent)
-   ;;
+    fi
+    CASC_SET_CDEBUG(-g)
+    CASC_SET_CXXDEBUG(-g)
+    CASC_SET_FDEBUG(-g -silent)
+  ;;
 
-    LINUX | Linux )
-
-      if test "$casc_user_chose_compilers" = "no"
+  LINUX | Linux )
+    if test -z "$CC"; then
+      if test "$casc_using_mpi" = "no" &&
+        test "$casc_using_openmp" = "no"
       then
-        if test "$casc_using_mpi" = "no" &&
-	  test "$casc_using_openmp" = "no"
-        then
-          AC_CHECK_PROGS(CC, cc gcc kcc)
-          AC_CHECK_PROGS(CXX, CC g++)
-          AC_CHECK_PROGS(F77, f77 g77)
-        else
-	 if test "$casc_using_openmp" = "no"
-         then
+        AC_CHECK_PROGS(CC, cc gcc kcc)
+      else
+        if test "$casc_using_openmp" = "no" ; then
           AC_CHECK_PROGS(CC, mpicc)
-          AC_CHECK_PROGS(CXX, mpiCC)
-          AC_CHECK_PROGS(F77, mpif77)
-         else
-	   AC_CHECK_PROGS(CC,ompcc) 
-           AC_CHECK_PROGS(CXX,ompcc) 
-           AC_CHECK_PROGS(F77,ompf77)
-       CASC_CHECK_HEADER(omp.h, /usr/local/omni/lib/openmp/include)
-       CASC_CHECK_HEADER(mpi.h, /usr/local/mpich-1.2.1/include)
-       CASC_ADD_LIB(ompc, main, /usr/local/omni/lib/openmp/lib)
-         fi
+        else
+          AC_CHECK_PROGS(CC,ompcc) 
+          CASC_CHECK_HEADER(omp.h, /usr/local/omni/lib/openmp/include)
+          CASC_CHECK_HEADER(mpi.h, /usr/local/mpich-1.2.1/include)
+          CASC_ADD_LIB(ompc, main, /usr/local/omni/lib/openmp/lib)
         fi
       fi
+    fi
+    if test -z "$CXX"; then
+      if test "$casc_using_mpi" = "no" &&
+        test "$casc_using_openmp" = "no"
+      then
+        AC_CHECK_PROGS(CXX, CC g++)
+      else
+        if test "$casc_using_openmp" = "no" ; then
+          AC_CHECK_PROGS(CXX, mpiCC)
+        else
+          AC_CHECK_PROGS(CXX,ompcc) 
+        fi
+      fi
+    fi
+    if test -z "$F77"; then
+      if test "$casc_using_mpi" = "no" &&
+        test "$casc_using_openmp" = "no"
+      then
+        AC_CHECK_PROGS(F77, f77 g77)
+      else
+        if test "$casc_using_openmp" = "no" ; then
+          AC_CHECK_PROGS(F77, mpif77)
+        else
+          AC_CHECK_PROGS(F77,ompf77)
+        fi
+      fi
+    fi
 
+    if test -z "$CFLAGS"; then
       CASC_SET_COPT(-O)
-      CASC_SET_CDEBUG(-g)
+    fi
+    if test -z "$CXXFLAGS"; then
       CASC_SET_CXXOPT(-O)
-      CASC_SET_CXXDEBUG(-g)
+    fi
+    if test -z "$F77FLAGS"; then
       CASC_SET_FOPT(-O)
-      CASC_SET_FDEBUG(-g)
-   ;;
+    fi
+    CASC_SET_CDEBUG(-g)
+    CASC_SET_CXXDEBUG(-g)
+    CASC_SET_FDEBUG(-g)
+  ;;
 
-   alpha)
+  alpha)
+    if test -z "$CC"; then
+      if test "$casc_using_mpi" = "no" &&
+        test "$casc_using_openmp" = "no"
+      then
+        AC_CHECK_PROGS(CC,cc kcc gcc c89)
+      else
+        if test "$casc_using_openmp" = "no" ; then
+          AC_CHECK_PROGS(CC,mpicc cc kcc) 
+        else
+          AC_CHECK_PROGS(CC,guidec) 
+        fi
+      fi
+    fi
+    if test -z "$CXX"; then
+      if test "$casc_using_mpi" = "no" &&
+        test "$casc_using_openmp" = "no"
+      then
+        AC_CHECK_PROGS(CXX,cxx KCC g++)
+      else
+        if test "$casc_using_openmp" = "no" ; then
+          AC_CHECK_PROGS(CXX,mpiCC cxx KCC) 
+        else
+          AC_CHECK_PROGS(CXX,guidec++) 
+        fi
+      fi
+    fi
+    if test -z "$F77"; then
+      if test "$casc_using_mpi" = "no" &&
+        test "$casc_using_openmp" = "no"
+      then
+        AC_CHECK_PROGS(F77,f77 kf77 g77)
+      else
+        if test "$casc_using_openmp" = "no" ; then
+          AC_CHECK_PROGS(F77,mpif77 f77 kf77)
+        else
+          AC_CHECK_PROGS(F77,guidef77)
+        fi
+      fi
+    fi
 
-     if test "$casc_user_chose_compilers" = "no"
-     then
-       if test "$casc_using_mpi" = "no" &&
-	  test "$casc_using_openmp" = "no"
-       then
-         AC_CHECK_PROGS(CC,cc kcc gcc c89)
-         AC_CHECK_PROGS(CXX,cxx KCC g++)
-         AC_CHECK_PROGS(F77,f77 kf77 g77)
-       else
-	 if test "$casc_using_openmp" = "no"
-         then
-           AC_CHECK_PROGS(CC,mpicc cc kcc) 
-           AC_CHECK_PROGS(CXX,mpiCC cxx KCC) 
-           AC_CHECK_PROGS(F77,mpif77 f77 kf77)
-         else
-	   AC_CHECK_PROGS(CC,guidec) 
-           AC_CHECK_PROGS(CXX,guidec++) 
-           AC_CHECK_PROGS(F77,guidef77)
-         fi 
-       fi
-     fi
-
-     if test "$CC" = "cc" ||
-        test "$CC" = "kcc" ||
-	test "$CC" = "guidec" &&
-        test "$casc_user_chose_mpi" = "no" &&
+    if test "$casc_user_chose_mpi" = "no" &&
         test "$casc_using_mpi" = "yes"
-     then
-       CASC_CHECK_HEADER(mpi.h, /usr/include)
-       MPIINCLUDE="$MPIINCLUDE $INCLUDES"
-       CASC_ADD_LIB(rt, main, /usr/lib)
-       CASC_ADD_LIB(mpi, main, /usr/lib, MPI)
-       if test -z "$MPILIBS"
-       then
-         AC_MSG_WARN([MPI not found--in alpha test-must set manually using --with-flags])
-       fi
-     fi
+    then
+      CASC_CHECK_HEADER(mpi.h, /usr/include)
+      MPIINCLUDE="$MPIINCLUDE $INCLUDES"
+      CASC_ADD_LIB(rt, main, /usr/lib)
+      CASC_ADD_LIB(mpi, main, /usr/lib, MPI)
+      if test -z "$MPILIBS"
+      then
+        AC_MSG_WARN([MPI not found--in alpha test-must set manually using --with-flags])
+      fi
+    fi
 
-     if test "$CC" = "kcc" 
-     then
-       CASC_SET_COPT(-o5)
-       CASC_SET_CDEBUG()
-     elif test "$CC" = "guidec" 
-     then
-       CASC_SET_COPT(-O)
-       CASC_SET_CDEBUG()
-     elif test "$CC" = "cc" 
-     then
-       CASC_SET_COPT(-fast)
-       CASC_SET_CDEBUG(-g)
-     else 
-       CASC_SET_COPT(-O)
-       CASC_SET_CDEBUG(-g)
-     fi
+    if test -z "$CFLAGS"; then
+      if test "$CC" = "cc" ||
+        test "$CC" = "mpicc" ; then
+        CASC_SET_COPT(-fast)
+      elif test "$CC" = "kcc" ; then
+        CASC_SET_COPT(-o=5)
+      else 
+        CASC_SET_COPT(-O)
+      fi
+    fi
+    if test -z "$CXXFLAGS"; then
+      if test "$CXX" = "cxx" ||
+        test "$CXX" = "mpiCC" ; then
+        CASC_SET_CXXOPT(-fast)
+      else 
+        CASC_SET_CXXOPT(-O)
+      fi
+    fi
+    if test -z "$F77FLAGS"; then
+      if test "$F77" = "f77" ||
+        test "$F77" = "mpif77" ; then
+        CASC_SET_FOPT(-fast)
+      else 
+        CASC_SET_FOPT(-O)
+      fi
+    fi
+#   CASC_SET_CDEBUG(-g)
+#   CASC_SET_CXXDEBUG(-g)
+#   CASC_SET_FDEBUG()
+  ;;
 
-     if test "$F77" = "kf77" 
-     then
-       CASC_SET_FOPT(-o5)
-       CASC_SET_FDEBUG()
-     else 
-       CASC_SET_FOPT(-O)
-       CASC_SET_FDEBUG()
-     fi
-      
-     CASC_SET_CXXOPT(-O)
-     CASC_SET_CXXDEBUG(-g)
-   ;;
+  rs6000)
+    if test -z "$CC"; then
+      if test "$casc_using_mpi" = "no" ; then
+        if test "$casc_using_pthreads" = "no" &&
+          test "$casc_using_openmp" = "no"
+        then
+          AC_CHECK_PROGS(CC,xlc gcc cc c89)
+        else
+          if test "$casc_using_pthreads" = "yes" ; then
+            AC_CHECK_PROGS(CC,xlc_r gcc)
+          fi
+          if test "$casc_using_openmp" = "yes" ; then
+            AC_CHECK_PROGS(CC,guidec)
+          fi
+        fi
+      else
+        if test "$casc_using_pthreads" = "no" &&
+          test "$casc_using_openmp" = "no"
+        then
+          AC_CHECK_PROGS(CC,mpcc mpicc)
+        else
+          if test "$casc_using_pthreads" = "yes" ; then
+            AC_CHECK_PROGS(CC,mpxlc_r mpcc_r mpicc)
+          fi
+          if test "$casc_using_openmp" = "yes" ; then
+            AC_CHECK_PROGS(CC,mpguidec)
+          fi
+        fi
+      fi
+    fi
+    if test -z "$CXX"; then
+      if test "$casc_using_mpi" = "no" ; then
+        if test "$casc_using_pthreads" = "no" &&
+          test "$casc_using_openmp" = "no"
+        then
+          AC_CHECK_PROGS(CXX,xlC KCC g++)
+        else
+          if test "$casc_using_pthreads" = "yes" ; then
+            AC_CHECK_PROGS(CXX,xlC_r g++)
+          fi
+          if test "$casc_using_openmp" = "yes" ; then
+            AC_CHECK_PROGS(CXX,guidec++)
+          fi
+        fi
+      else
+        if test "$casc_using_pthreads" = "no" &&
+          test "$casc_using_openmp" = "no"
+        then
+          AC_CHECK_PROGS(CXX,mpCC mpiCC)
+          AC_PROG_CPP
+        else
+          if test "$casc_using_pthreads" = "yes" ; then
+            AC_CHECK_PROGS(CXX,mpxlC_r mpCC_r mpiCC)
+          fi
+          if test "$casc_using_openmp" = "yes" ; then
+            AC_CHECK_PROGS(CXX,mpguidec++)
+          fi
+        fi
+      fi
+    fi
+    if test -z "$F77"; then
+      if test "$casc_using_mpi" = "no" ; then
+        if test "$casc_using_pthreads" = "no" &&
+          test "$casc_using_openmp" = "no"
+        then
+          AC_CHECK_PROGS(F77,xlf g77)
+        else
+          if test "$casc_using_pthreads" = "yes" ; then
+            AC_CHECK_PROGS(F77,xlf_r g77)
+          fi
+          if test "$casc_using_openmp" = "yes" ; then
+            AC_CHECK_PROGS(F77,guidef77)
+          fi
+        fi
+      else
+        if test "$casc_using_pthreads" = "no" &&
+          test "$casc_using_openmp" = "no"
+        then
+          AC_CHECK_PROGS(F77,mpxlf mpif77)
+        else
+          if test "$casc_using_pthreads" = "yes" ; then
+            AC_CHECK_PROGS(F77,mpxlf_r mpif77)
+          fi
+          if test "$casc_using_openmp" = "yes" ; then
+            AC_CHECK_PROGS(F77,mpguidef77)
+          fi
+        fi
+      fi
+    fi
 
-   rs6000)
+    if test -z "$CFLAGS"; then
+      if test "$CC" = "gcc" ; then
+        CASC_SET_COPT(-O)
+      else
+        CASC_SET_COPT(-O3 -qstrict)
+      fi
+    fi
+    if test -z "$CXXFLAGS"; then
+      if test "$CXX" = "g++" ; then
+        CASC_SET_CXXOPT(-O)
+      else
+        CASC_SET_CXXOPT(-O3 -qstrict)
+      fi
+    fi
+    if test -z "$F77FLAGS"; then
+      if test "$F77" = "g77" ; then
+        CASC_SET_FOPT(-O)
+      else
+        CASC_SET_FOPT(-O3 -qstrict)
+      fi
+    fi
+    CFLAGS="$CFLAGS -qmaxmem=8192 -DHYPRE_COMM_SIMPLE"
+    CASC_SET_CDEBUG(-g)
+    CASC_SET_CXXDEBUG(-g)
+    CASC_SET_FDEBUG(-g) 
+  ;;
 
-     if test "$casc_user_chose_compilers" = "no"
-     then
-       if test "$casc_using_mpi" = "no"
-       then
-         if test "$casc_using_pthreads" = "no" &&
-	    test "$casc_using_openmp" = "no"
-         then
-           AC_CHECK_PROGS(CC,xlc gcc cc c89)
-           AC_CHECK_PROGS(CXX,xlC KCC g++)
-           AC_CHECK_PROGS(F77,xlf g77)
-         else
-	   if test "$casc_using_pthreads" = "yes"
-           then
-             AC_CHECK_PROGS(CC,xlc_r gcc)
-             AC_CHECK_PROGS(CXX,xlC_r g++)
-             AC_CHECK_PROGS(F77,xlf_r g77)  
-	   fi
-	   if test "$casc_using_openmp" = "yes"
-           then
-             AC_CHECK_PROGS(CC,guidec)
-             AC_CHECK_PROGS(CXX,guidec++)
-             AC_CHECK_PROGS(F77,guidef77)
-           fi       
-         fi  
-       else
-         if test "$casc_using_pthreads" = "no" &&
-	    test "$casc_using_openmp" = "no"
-         then
-           AC_CHECK_PROGS(CC,mpcc mpicc) 
-           AC_CHECK_PROGS(CXX,mpCC mpiCC) 
-           AC_CHECK_PROGS(F77,mpxlf mpif77)
-           AC_PROG_CPP
-         else
-	   if test "$casc_using_pthreads" = "yes"
-           then
-             AC_CHECK_PROGS(CC,mpxlc_r mpcc_r mpicc) 
-             AC_CHECK_PROGS(CXX,mpxlC_r mpCC_r mpiCC) 
-             AC_CHECK_PROGS(F77,mpxlf_r mpif77)
-	   fi
-           if test "$casc_using_openmp" = "yes"
-           then
-             AC_CHECK_PROGS(CC,mpguidec)
-             AC_CHECK_PROGS(CXX,mpguidec++)
-             AC_CHECK_PROGS(F77,mpguidef77)
-           fi        
-         fi
-       fi
-     fi
+  IRIX64)
+    if test -z "$CC"; then
+      AC_CHECK_PROGS(CC, cc gcc c89)
+    fi
+    if test -z "$CXX"; then
+      AC_CHECK_PROGS(CXX, cxx CC g++) 
+    fi
+    if test -z "$F77"; then
+      AC_CHECK_PROGS(F77, f77 g77)
+    fi
 
-     CASC_SET_COPT(-O3 -qstrict)
-     CASC_SET_CDEBUG(-g)
-     CASC_SET_FOPT(-O3 -qstrict)
-     CASC_SET_FDEBUG(-g) 
-     CASC_SET_CXXOPT(-O3 -qstrict)
-     CASC_SET_CXXDEBUG(-g)
-     CFLAGS="$CFLAGS -qmaxmem=8192 -DHYPRE_COMM_SIMPLE"
-   ;;
+    if test "$CC" = "cc" ||
+      test "$CC" = "gcc" &&
+      test "$casc_user_chose_mpi" = "no" &&
+      test "$casc_using_mpi" = "yes"
+    then
+      CASC_CHECK_HEADER(mpi.h, /usr/include)
+      MPIINCLUDE="$MPIINCLUDE $INCLUDES"
+      CASC_ADD_LIB(mpi, main, /usr/lib, MPI)
+      if test -z "$MPILIBS" ; then
+        AC_MSG_WARN([MPI not found--in IRIX64 test-must set manually using --with-flags])
+      fi
+    fi
 
-   IRIX64)
-  
-     if test "$casc_user_chose_compilers" = "no"
-     then
-         AC_CHECK_PROGS(CC, cc gcc c89)
-         AC_CHECK_PROGS(CXX, cxx CC g++) 
-         AC_CHECK_PROGS(F77, f77 g77)
-     fi
-
-     if test "$CC" = "cc" ||
-        test "$CC" = "gcc" &&
-        test "$casc_user_chose_mpi" = "no" &&
-        test "$casc_using_mpi" = "yes"
-     then
-       CASC_CHECK_HEADER(mpi.h, /usr/include)
-       MPIINCLUDE="$MPIINCLUDE $INCLUDES"
-       CASC_ADD_LIB(mpi, main, /usr/lib, MPI)
-       if test -z "$MPILIBS"
-       then
-         AC_MSG_WARN([MPI not found--in IRIX64 test-must set manually using --with-flags])
-       fi
-     fi
-
-     CFLAGS="$CFLAGS -OPT:Olimit=4096"
-     CASC_SET_COPT(-O -64)
-     CASC_SET_CDEBUG(-g)
-     CASC_SET_CXXOPT(-64)
-     CASC_SET_CXXDEBUG(-g)
-     CASC_SET_FOPT(-O -64)
-     CASC_SET_FDEBUG(-g)
-     LDFLAGS="$LDFLAGS -O -64"
-   ;;
+    if test -z "$CFLAGS"; then
+      CASC_SET_COPT(-O -64 -OPT:Olimit=0)
+      if test "$casc_using_openmp" = "yes" ; then
+        CFLAGS="$CFLAGS -mp"
+      fi
+    fi
+    if test -z "$CXXFLAGS"; then
+      CASC_SET_CXXOPT(-64)
+      if test "$casc_using_openmp" = "yes" ; then
+        CXXFLAGS="$CXXFLAGS -mp"
+      fi
+    fi
+    if test -z "$F77FLAGS"; then
+      CASC_SET_FOPT(-O -64)
+      if test "$casc_using_openmp" = "yes" ; then
+        F77FLAGS="$F77FLAGS -mp"
+      fi
+    fi
+    LDFLAGS="$LDFLAGS -O -64"
+    CASC_SET_CDEBUG(-g)
+    CASC_SET_CXXDEBUG(-g)
+    CASC_SET_FDEBUG(-g)
+  ;;
    
-  esac
-
-fi
+esac
 
 case $ARCH in
   sun4 | solaris )
@@ -835,49 +949,29 @@ case $ARCH in
   ;;
   alpha)
     AC_DEFINE(HYPRE_ALPHA)
-    if test -z "$casc_using_blas"
-    then
+    if test -z "$casc_using_blas" ; then
       casc_using_blas=yes
     fi
   ;;
   rs6000)
     AC_DEFINE(HYPRE_RS6000)
-    if test -z "$casc_using_blas"
-    then
+    if test -z "$casc_using_blas" ; then
       casc_using_blas=yes
     fi
   ;;
   IRIX64)
     AC_DEFINE(HYPRE_IRIX64)
+    if test -z "$casc_using_blas" ; then
+      casc_using_blas=yes
+    fi
   ;;
 esac
 
-if test -z "$CC"
-then
-  if  test "$casc_user_chose_compilers" = "no"
-  then
-    if test "$casc_using_mpi" = "no"
-    then
-      AC_CHECK_PROGS(CC, cc kcc gcc c89)
-      AC_CHECK_PROGS(CXX, cxx CC KCC g++) 
-      AC_CHECK_PROGS(F77, f77 kf77 g77)
-    else 
-      AC_CHECK_PROGS(CC, mpicc mpcc tmcc hcc)
-      AC_CHECK_PROGS(CXX, mpiCC)
-      AC_CHECK_PROGS(F77, mpif77)
-      if test -z "$CC"
-      then
-        AC_CHECK_PROGS(CC, cc kcc gcc)
-      fi
-      if test -z "$CXX"
-      then
-        AC_CHECK_PROGS(CXX, cxx CC g++)
-      fi
-      if test -z "$F77" 
-      then
-        AC_CHECK_PROGS(F77, f77 g77)
-      fi
-    fi
+if test -z "$CC" ; then
+  if test "$casc_using_mpi" = "no" ; then
+    AC_CHECK_PROGS(CC, cc kcc gcc c89)
+  else 
+    AC_CHECK_PROGS(CC, mpicc mpcc tmcc hcc)
   fi
 
   if test "$CC" = "cc" ||
@@ -889,29 +983,35 @@ then
     CASC_CHECK_HEADER(mpi.h, /usr/local/mpi/include)
     MPIINCLUDE="$MPIINCLUDE $INCLUDES"
     CASC_ADD_LIB(mpi, main, /usr/local/mpi/lib, MPI)
-    if test -z "$MPILIBS"
-    then
+    if test -z "$MPILIBS" ; then
       AC_MSG_WARN([MPI not found--in default test-must set manually using --with-flags])
     fi
   fi
 
-  if test "$CC" = "kcc" 
-  then
+  if test "$CC" = "kcc" ; then
     CASC_SET_COPT(-o5)
-    CASC_SET_CDEBUG()
   else 
     CASC_SET_COPT(-O)
-    CASC_SET_CDEBUG(-g)
   fi
-  if test "$F77" = "kf77" 
-  then
+fi
+if test -z "$CXX" ; then
+  if test "$casc_using_mpi" = "no" ; then
+    AC_CHECK_PROGS(CXX, cxx CC KCC g++) 
+  else 
+    AC_CHECK_PROGS(CXX, mpiCC)
+  fi
+fi
+if test -z "$F77" ; then
+  if test "$casc_using_mpi" = "no" ; then
+    AC_CHECK_PROGS(F77, f77 kf77 g77)
+  else 
+    AC_CHECK_PROGS(F77, mpif77)
+  fi
+  if test "$F77" = "kf77"  ;then
     CASC_SET_FOPT(-o5)
-    CASC_SET_FDEBUG()
   else 
     CASC_SET_FOPT(-O)
-    CASC_SET_FDEBUG()
   fi
-
 fi
 
 dnl ********************************************************************
