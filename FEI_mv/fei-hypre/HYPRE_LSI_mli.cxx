@@ -44,8 +44,13 @@
 /* system include files                                                     */
 /*--------------------------------------------------------------------------*/
 
-#include <string.h>
-#include <strings.h>
+#include "HYPRE_config.h"
+#if HAVE_STRING_H
+#  include <string.h>
+#endif /* HAVE_STRING_H */
+#if HAVE_STRINGS_H
+#  include <strings.h>
+#endif /* HAVE_STRINGS_H */
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
