@@ -1054,3 +1054,91 @@ double ParaSailsSelectThresh(ParaSails *ps, double param)
     free(buffer);
     return sum / (ps->A->end_rows[npes-1] - ps->A->beg_rows[0] + 1);
 }
+
+/*--------------------------------------------------------------------------
+ * ParaSailsSelectFilter - select a threshold for the preconditioner pattern.  
+ * The threshold attempts to be chosen such that approximately (1-param) of 
+ * all the matrix elements is larger than this threshold.  This is accomplished
+ * by finding the element in each row that is smaller than (1-param) of the 
+ * elements in that row, and averaging these elements over all rows.  The 
+ * threshold is selected on the diagonally scaled matrix.
+ *--------------------------------------------------------------------------*/
+
+double ParaSailsSelectFilter(ParaSails *ps, double param)
+{
+    int row, len, *ind, i, npes;
+    double *val;
+    double localsum = 0.0, sum;
+
+    MPI_Comm comm = ps->A->comm;
+
+    /* Buffer for storing the values in each row when computing the 
+       i-th smallest element - buffer will grow if necessary */
+    double *buffer;
+    int buflen = 10;
+    buffer = (double *) malloc(buflen * sizeof(double));
+
+    for (row=ps->M->beg_row; row<=ps->M->end_row; row++)
+    {
+        MatrixGetRow(ps->M, row, &len, &ind, &val);
+
+	if (len > buflen)
+	{
+	    free(buffer);
+	    buflen = len;
+            buffer = (double *) malloc(buflen * sizeof(double));
+	}
+
+	/* Copy the scaled absolute values into a work buffer */
+	for (i=0; i<len; i++)
+	    buffer[i] = ABS(val[i]);
+
+        /* Compute which element to select */
+	i = (int) (len * param) + 1;
+
+	/* Select the i-th smallest element */
+        localsum += randomized_select(buffer, 0, len-1, i);
+    }
+
+    /* Find the average across all processors */
+    MPI_Allreduce(&localsum, &sum, 1, MPI_DOUBLE, MPI_SUM, comm);
+    MPI_Comm_size(comm, &npes);
+
+    free(buffer);
+    return sum / (ps->A->end_rows[npes-1] - ps->A->beg_rows[0] + 1);
+}
+
+/*--------------------------------------------------------------------------
+ * ParaSailsFilterValues - constructs another matrix, free existing matrix
+ *--------------------------------------------------------------------------*/
+
+void ParaSailsFilterValues(ParaSails *ps, double filter)
+{
+    int i, j;
+    int row, len, *ind;
+    double *val;
+    Matrix *F;
+
+    F = MatrixCreate(ps->M->comm, ps->M->beg_row, ps->M->end_row);
+
+    for (row=ps->M->beg_row; row<=ps->M->end_row; row++)
+    {
+        MatrixGetRow(ps->M, row, &len, &ind, &val);
+
+        j = 0;
+        for (i=0; i<len; i++)
+        {
+            if (ABS(val[i]) >= filter || row == ind[i])
+	    {
+                val[j] = val[i];
+                ind[j] = ind[i];
+		j++;
+	    }
+        }
+
+        MatrixSetRow(F, row, j, ind, val);
+    }
+
+    MatrixDestroy(ps->M);
+    ps->M = F;
+}
