@@ -239,3 +239,19 @@ hypre_F90_IFACE(hypre_destroycommpkg, HYPRE_DESTROYCOMMPKG)( long int *comm_pkg,
    *ierr = (int)
       ( HYPRE_CommPkgDestroy( (HYPRE_CommPkg) *comm_pkg ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorPrint
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structvectorprint, HYPRE_STRUCTVECTORPRINT)(
+   long int  *vector,
+   int       *all,
+   int       *ierr )
+{
+   *ierr = (int)
+      ( HYPRE_StructVectorPrint("HYPRE_StructVector.out",
+                                (HYPRE_StructVector) *vector,
+                                (int)                *all) );
+}

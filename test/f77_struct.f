@@ -368,6 +368,7 @@ c-----------------------------------------------------------------------
       enddo
 
       call HYPRE_StructMatrixAssemble(A, ierr)
+c     call HYPRE_StructMatrixPrint(A, zero, ierr)
 c     call HYPRE_StructMatrixPrint("driver.out.A", A, zero, ierr)
 
 c-----------------------------------------------------------------------
@@ -396,6 +397,7 @@ c     call HYPRE_StructVectorPrint("driver.out.b", b, zero, ierr)
      & iupper(1,ib), values, ierr)
       enddo
       call HYPRE_StructVectorAssemble(x, ierr)
+c     call HYPRE_StructVectorPrint(x, zero, ierr)
 c     call HYPRE_StructVectorPrint("driver.out.x0", x, zero, ierr)
  
 c-----------------------------------------------------------------------

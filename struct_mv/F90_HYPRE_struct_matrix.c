@@ -194,3 +194,19 @@ hypre_F90_IFACE(hypre_structmatrixsetsymmetric, HYPRE_STRUCTMATRIXSETSYMMETRIC)(
       ( HYPRE_StructMatrixSetSymmetric( (HYPRE_StructMatrix) *matrix,
                                         (int)                *symmetric ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixPrint
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structmatrixprint, HYPRE_STRUCTMATRIXPRINT)(
+   long int  *matrix,
+   int       *all,
+   int       *ierr )
+{
+   *ierr = (int)
+      ( HYPRE_StructMatrixPrint("HYPRE_StructMatrix.out",
+                                (HYPRE_StructMatrix) *matrix,
+                                (int)                *all) );
+}
