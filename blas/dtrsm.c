@@ -13,7 +13,6 @@
 
 
     /* System generated locals */
-    integer a_dim1, a_offset, b_dim1, b_offset, i__1, i__2, i__3;
 
     /* Local variables */
     static integer info;
@@ -225,9 +224,7 @@
 /*     And when  alpha.eq.zero. */
 
     if (*alpha == 0.) {
-	i__1 = *n;
 	for (j = 1; j <= *n; ++j) {
-	    i__2 = *m;
 	    for (i = 1; i <= *m; ++i) {
 		B(i,j) = 0.;
 /* L10: */
@@ -245,10 +242,8 @@
 /*           Form  B := alpha*inv( A )*B. */
 
 	    if (upper) {
-		i__1 = *n;
 		for (j = 1; j <= *n; ++j) {
 		    if (*alpha != 1.) {
-			i__2 = *m;
 			for (i = 1; i <= *m; ++i) {
 			    B(i,j) = *alpha * B(i,j);
 /* L30: */
@@ -259,7 +254,6 @@
 			    if (nounit) {
 				B(k,j) /= A(k,k);
 			    }
-			    i__2 = k - 1;
 			    for (i = 1; i <= k-1; ++i) {
 				B(i,j) -= B(k,j) * A(i,k);
 /* L40: */
@@ -270,22 +264,18 @@
 /* L60: */
 		}
 	    } else {
-		i__1 = *n;
 		for (j = 1; j <= *n; ++j) {
 		    if (*alpha != 1.) {
-			i__2 = *m;
 			for (i = 1; i <= *m; ++i) {
 			    B(i,j) = *alpha * B(i,j);
 /* L70: */
 			}
 		    }
-		    i__2 = *m;
 		    for (k = 1; k <= *m; ++k) {
 			if (B(k,j) != 0.) {
 			    if (nounit) {
 				B(k,j) /= A(k,k);
 			    }
-			    i__3 = *m;
 			    for (i = k + 1; i <= *m; ++i) {
 				B(i,j) -= B(k,j) * A(i,k);
 /* L80: */
@@ -301,12 +291,9 @@
 /*           Form  B := alpha*inv( A' )*B. */
 
 	    if (upper) {
-		i__1 = *n;
 		for (j = 1; j <= *n; ++j) {
-		    i__2 = *m;
 		    for (i = 1; i <= *m; ++i) {
 			temp = *alpha * B(i,j);
-			i__3 = i - 1;
 			for (k = 1; k <= i-1; ++k) {
 			    temp -= A(k,i) * B(k,j);
 /* L110: */
@@ -320,11 +307,9 @@
 /* L130: */
 		}
 	    } else {
-		i__1 = *n;
 		for (j = 1; j <= *n; ++j) {
 		    for (i = *m; i >= 1; --i) {
 			temp = *alpha * B(i,j);
-			i__2 = *m;
 			for (k = i + 1; k <= *m; ++k) {
 			    temp -= A(k,i) * B(k,j);
 /* L140: */
@@ -345,19 +330,15 @@
 /*           Form  B := alpha*B*inv( A ). */
 
 	    if (upper) {
-		i__1 = *n;
 		for (j = 1; j <= *n; ++j) {
 		    if (*alpha != 1.) {
-			i__2 = *m;
 			for (i = 1; i <= *m; ++i) {
 			    B(i,j) = *alpha * B(i,j);
 /* L170: */
 			}
 		    }
-		    i__2 = j - 1;
 		    for (k = 1; k <= j-1; ++k) {
 			if (A(k,j) != 0.) {
-			    i__3 = *m;
 			    for (i = 1; i <= *m; ++i) {
 				B(i,j) -= A(k,j) * B(i,k);
 /* L180: */
@@ -367,7 +348,6 @@
 		    }
 		    if (nounit) {
 			temp = 1. / A(j,j);
-			i__2 = *m;
 			for (i = 1; i <= *m; ++i) {
 			    B(i,j) = temp * B(i,j);
 /* L200: */
@@ -378,16 +358,13 @@
 	    } else {
 		for (j = *n; j >= 1; --j) {
 		    if (*alpha != 1.) {
-			i__1 = *m;
 			for (i = 1; i <= *m; ++i) {
 			    B(i,j) = *alpha * B(i,j);
 /* L220: */
 			}
 		    }
-		    i__1 = *n;
 		    for (k = j + 1; k <= *n; ++k) {
 			if (A(k,j) != 0.) {
-			    i__2 = *m;
 			    for (i = 1; i <= *m; ++i) {
 				B(i,j) -= A(k,j) * B(i,k);
 /* L230: */
@@ -397,7 +374,6 @@
 		    }
 		    if (nounit) {
 			temp = 1. / A(j,j);
-			i__1 = *m;
 			for (i = 1; i <= *m; ++i) {
 			    B(i,j) = temp * B(i,j);
 /* L250: */
@@ -414,17 +390,14 @@
 		for (k = *n; k >= 1; --k) {
 		    if (nounit) {
 			temp = 1. / A(k,k);
-			i__1 = *m;
 			for (i = 1; i <= *m; ++i) {
 			    B(i,k) = temp * B(i,k);
 /* L270: */
 			}
 		    }
-		    i__1 = k - 1;
 		    for (j = 1; j <= k-1; ++j) {
 			if (A(j,k) != 0.) {
 			    temp = A(j,k);
-			    i__2 = *m;
 			    for (i = 1; i <= *m; ++i) {
 				B(i,j) -= temp * B(i,k);
 /* L280: */
@@ -433,7 +406,6 @@
 /* L290: */
 		    }
 		    if (*alpha != 1.) {
-			i__1 = *m;
 			for (i = 1; i <= *m; ++i) {
 			    B(i,k) = *alpha * B(i,k);
 /* L300: */
@@ -442,21 +414,17 @@
 /* L310: */
 		}
 	    } else {
-		i__1 = *n;
 		for (k = 1; k <= *n; ++k) {
 		    if (nounit) {
 			temp = 1. / A(k,k);
-			i__2 = *m;
 			for (i = 1; i <= *m; ++i) {
 			    B(i,k) = temp * B(i,k);
 /* L320: */
 			}
 		    }
-		    i__2 = *n;
 		    for (j = k + 1; j <= *n; ++j) {
 			if (A(j,k) != 0.) {
 			    temp = A(j,k);
-			    i__3 = *m;
 			    for (i = 1; i <= *m; ++i) {
 				B(i,j) -= temp * B(i,k);
 /* L330: */
@@ -465,7 +433,6 @@
 /* L340: */
 		    }
 		    if (*alpha != 1.) {
-			i__2 = *m;
 			for (i = 1; i <= *m; ++i) {
 			    B(i,k) = *alpha * B(i,k);
 /* L350: */

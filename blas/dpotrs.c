@@ -63,7 +63,7 @@
     static doublereal c_b9 = 1.;
     
     /* System generated locals */
-    integer a_dim1, a_offset, b_dim1, b_offset, i__1;
+    integer i__1;
     /* Local variables */
     extern logical lsame_(char *, char *);
     extern /* Subroutine */ int dtrsm_(char *, char *, char *, char *, 

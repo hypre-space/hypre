@@ -42,7 +42,7 @@ main( int   argc,
    HYPRE_SStructVector  x;
 
    HYPRE_SStructSolver  solver;
-   HYPRE_SStructSolver  precond;
+   /*HYPRE_SStructSolver  precond;*/
    int                  num_iterations;
    int                  time_index;
    double               final_res_norm;
@@ -101,8 +101,8 @@ main( int   argc,
    int                  CAstencil_index;
    double              *CAvalues;
                        
-   int                  i, j, k, s, d, part;
-   int                  ib, jb, kb, block;
+   int                  i, j, k, s, part;
+   int                  jb, kb, block;
    int                  ix, iy, iz;
 
 #if DEBUG
