@@ -381,7 +381,7 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       printf("      A11Solver <cg,gmres> \n");
       printf("      A11Tolerance <f> \n");
       printf("      A11MaxIterations <d> \n");
-      printf("      A11Precon <pilut,boomeramg,euclid,parasails,ddilut,ml>\n");
+      printf("      A11Precon <pilut,boomeramg,euclid,parasails,ddilut,mli>\n");
       printf("      A11PreconPSNlevels <d> \n");
       printf("      A11PreconPSThresh <f> \n");
       printf("      A11PreconPSFilter <f> \n");
@@ -404,7 +404,7 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       printf("      A22Solver <cg,gmres> \n");
       printf("      A22Tolerance <f> \n");
       printf("      A22MaxIterations <d> \n");
-      printf("      A22Precon <pilut,boomeramg,euclid,parasails,ddilut,ml>\n");
+      printf("      A22Precon <pilut,boomeramg,euclid,parasails,ddilut,mli>\n");
       printf("      A22PreconPSNlevels <d> \n");
       printf("      A22PreconPSThresh <f> \n");
       printf("      A22PreconPSFilter <f> \n");
