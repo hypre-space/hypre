@@ -39,7 +39,7 @@ STUBDOCS = bHYPRE_BoomerAMG.fif bHYPRE_CoefficientAccess.fif bHYPRE_GMRES.fif \
   bHYPRE_StructGrid.fif bHYPRE_StructMatrix.fif bHYPRE_StructStencil.fif      \
   bHYPRE_StructVector.fif bHYPRE_Vector.fif sidl_BaseClass.fif                \
   sidl_BaseException.fif sidl_BaseInterface.fif sidl_ClassInfo.fif            \
-  sidl_ClassInfoI.fif sidl_DLL.fif sidl_Loader.fif sidl_SIDLException.fif
+  sidl_ClassInfoI.fif sidl_DLL.fif sidl_Loader.fif
 STUBFORTRANINC = bHYPRE_SStructVariable.inc sidl_Resolve.inc sidl_Scope.inc
 STUBSRCS = bHYPRE_BoomerAMG_fStub.c bHYPRE_CoefficientAccess_fStub.c          \
   bHYPRE_GMRES_fStub.c bHYPRE_IJBuildMatrix_fStub.c                           \
@@ -58,7 +58,7 @@ STUBSRCS = bHYPRE_BoomerAMG_fStub.c bHYPRE_CoefficientAccess_fStub.c          \
   bHYPRE_StructVector_fStub.c bHYPRE_Vector_fStub.c sidl_BaseClass_fStub.c    \
   sidl_BaseException_fStub.c sidl_BaseInterface_fStub.c                       \
   sidl_ClassInfoI_fStub.c sidl_ClassInfo_fStub.c sidl_DLL_fStub.c             \
-  sidl_Loader_fStub.c sidl_Resolve_fStub.c sidl_SIDLException_fStub.c         \
+  sidl_Loader_fStub.c sidl_Resolve_fStub.c                                    \
   sidl_Scope_fStub.c sidl_bool_fStub.c sidl_char_fStub.c                      \
   sidl_dcomplex_fStub.c sidl_double_fStub.c sidl_fcomplex_fStub.c             \
   sidl_float_fStub.c sidl_int_fStub.c sidl_long_fStub.c sidl_opaque_fStub.c   \
