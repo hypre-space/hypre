@@ -353,13 +353,13 @@ int HYPRE_LSI_BlockP::setParams(char *params)
    char   param1[256], param2[256], param3[256];
 
    sscanf(params,"%s", param1);
-   if ( strcmp(param1, "blockP") )
+   if ( strcasecmp(param1, "blockP") )
    {
       printf("HYPRE_LSI_BlockP::parameters not for me.\n");
       return 1;
    }
    sscanf(params,"%s %s", param1, param2);
-   if ( !strcmp(param2, "help") )
+   if ( !strcasecmp(param2, "help") )
    {
       printf("Available options for blockP are : \n");
       printf("      blockD \n");
@@ -413,103 +413,103 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       printf("      A22PreconNodeDOF <d> \n");
       printf("      A22PreconNullDim <d> \n");
    }
-   else if ( !strcmp(param2, "blockD") )
+   else if ( !strcasecmp(param2, "blockD") )
    {
       scheme_ = HYPRE_INCFLOW_BDIAG;
       if ( outputLevel_ > 0 ) 
          printf("HYPRE_LSI_BlockP::select block diagonal.\n");
    }
-   else if ( !strcmp(param2, "blockT") )
+   else if ( !strcasecmp(param2, "blockT") )
    {
       scheme_ = HYPRE_INCFLOW_BTRI;
       if ( outputLevel_ > 0 ) 
          printf("HYPRE_LSI_BlockP::select block triangular.\n");
    }
-   else if ( !strcmp(param2, "blockLU") )
+   else if ( !strcasecmp(param2, "blockLU") )
    {
       scheme_ = HYPRE_INCFLOW_BLU;
       if ( outputLevel_ > 0 ) 
          printf("HYPRE_LSI_BlockP::select block LU.\n");
    }
-   else if ( !strcmp(param2, "outputLevel") )
+   else if ( !strcasecmp(param2, "outputLevel") )
    {
       sscanf(params,"%s %s %d", param1, param2, &outputLevel_);
       if ( outputLevel_ > 0 ) 
          printf("HYPRE_LSI_BlockP::outputLevel = %d.\n", outputLevel_);
    }
-   else if ( !strcmp(param2, "block1FieldID") )
+   else if ( !strcasecmp(param2, "block1FieldID") )
    {
       sscanf(params,"%s %s %d", param1, param2, &block1FieldID_);
       if ( outputLevel_ > 0 ) 
          printf("HYPRE_LSI_BlockP::block1FieldID = %d.\n", block1FieldID_);
    }
-   else if ( !strcmp(param2, "block2FieldID") )
+   else if ( !strcasecmp(param2, "block2FieldID") )
    {
       sscanf(params,"%s %s %d", param1, param2, &block2FieldID_);
       if ( outputLevel_ > 0 ) 
          printf("HYPRE_LSI_BlockP::block2FieldID = %d.\n", block2FieldID_);
    }
-   else if ( !strcmp(param2, "printInfo") )
+   else if ( !strcasecmp(param2, "printInfo") )
    {
       printFlag_ = 1;
       if ( outputLevel_ > 0 ) 
          printf("HYPRE_LSI_BlockP::set print flag.\n");
    }
-   else if ( !strcmp(param2, "invA11PSNlevels") )
+   else if ( !strcasecmp(param2, "invA11PSNlevels") )
    {
       sscanf(params,"%s %s %d", param1, param2, &lumpedMassNlevels_);
       if ( outputLevel_ > 0 ) 
-         printf("HYPRE_LSI_BlockP::invA11PSNlevels = %d.\n", lumpedMassNlevels_);
+         printf("HYPRE_LSI_BlockP::invA11PSNlevels = %d.\n",lumpedMassNlevels_);
    }
-   else if ( !strcmp(param2, "invA11PSThresh") )
+   else if ( !strcasecmp(param2, "invA11PSThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &lumpedMassThresh_);
       if ( outputLevel_ > 0 ) 
          printf("HYPRE_LSI_BlockP::invA11PSThresh = %e.\n", lumpedMassThresh_);
    }
-   else if ( !strcmp(param2, "invA11Scheme") )
+   else if ( !strcasecmp(param2, "invA11Scheme") )
    {
       sscanf(params,"%s %s %s", param1, param2, param3);
-      if ( !strcmp(param3, "diag") ) 
+      if ( !strcasecmp(param3, "diag") ) 
       {
          lumpedMassScheme_ = 0;
-         if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::invA11Scheme = diag\n");
+         if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::invA11Scheme=diag\n");
       }
-      else if ( !strcmp(param3, "ainv") ) 
+      else if ( !strcasecmp(param3, "ainv") ) 
       {
          lumpedMassScheme_ = 1;
          if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::invA11Scheme = ainv\n");
       }
    }
-   else if ( !strcmp(param2, "A11Solver") )
+   else if ( !strcasecmp(param2, "A11Solver") )
    {
       sscanf(params,"%s %s %s", param1, param2, param3);
-      if ( !strcmp(param3, "cg") ) 
+      if ( !strcasecmp(param3, "cg") ) 
       {
          A11Params_.SolverID_ = 0;
          if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11 solver = cg\n");
       }
-      else if ( !strcmp(param3, "gmres") ) 
+      else if ( !strcasecmp(param3, "gmres") ) 
       {
          A11Params_.SolverID_ = 1;
          if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11 solver = gmres\n");
       }
    }
-   else if ( !strcmp(param2, "A22Solver") )
+   else if ( !strcasecmp(param2, "A22Solver") )
    {
       sscanf(params,"%s %s %s", param1, param2, param3);
-      if ( !strcmp(param3, "cg") ) 
+      if ( !strcasecmp(param3, "cg") ) 
       {
          A22Params_.SolverID_ = 0;
          if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22 solver = cg\n");
       }
-      else if ( !strcmp(param3, "gmres") ) 
+      else if ( !strcasecmp(param3, "gmres") ) 
       {
          A22Params_.SolverID_ = 1;
          if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22 solver = gmres\n");
       }
    }
-   else if ( !strcmp(param2, "A11Tolerance") )
+   else if ( !strcasecmp(param2, "A11Tolerance") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.Tol_));
       if ( A11Params_.Tol_ >= 1.0 || A11Params_.Tol_ <= 0.0 ) 
@@ -517,7 +517,7 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       if (outputLevel_ > 0) 
          printf("HYPRE_LSI_BlockP::A11 tol = %e\n", A11Params_.Tol_);
    }
-   else if ( !strcmp(param2, "A22Tolerance") )
+   else if ( !strcasecmp(param2, "A22Tolerance") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A22Params_.Tol_));
       if ( A22Params_.Tol_ >= 1.0 || A22Params_.Tol_ <= 0.0 ) 
@@ -525,335 +525,335 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       if (outputLevel_ > 0) 
          printf("HYPRE_LSI_BlockP::A22 tol = %e\n", A22Params_.Tol_);
    }
-   else if ( !strcmp(param2, "A11MaxIterations") )
+   else if ( !strcasecmp(param2, "A11MaxIterations") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.MaxIter_));
       if ( A11Params_.MaxIter_ <= 0 ) A11Params_.MaxIter_ = 10;
       if (outputLevel_ > 0) 
          printf("HYPRE_LSI_BlockP::A11 maxiter = %d\n", A11Params_.MaxIter_);
    }
-   else if ( !strcmp(param2, "A22MaxIterations") )
+   else if ( !strcasecmp(param2, "A22MaxIterations") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A22Params_.MaxIter_));
       if ( A22Params_.MaxIter_ <= 0 ) A22Params_.MaxIter_ = 10;
       if (outputLevel_ > 0) 
          printf("HYPRE_LSI_BlockP::A22 maxiter = %d\n", A22Params_.MaxIter_);
    }
-   else if ( !strcmp(param2, "A11Precon") )
+   else if ( !strcasecmp(param2, "A11Precon") )
    {
       sscanf(params,"%s %s %s", param1, param2, param3);
-      if ( !strcmp(param3, "diagonal") ) 
+      if ( !strcasecmp(param3, "diagonal") ) 
       {
          A11Params_.PrecondID_ = 1;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_BlockP::A11 precon = diagonal\n");
       }
-      else if ( !strcmp(param3, "parasails") ) 
+      else if ( !strcasecmp(param3, "parasails") ) 
       {
          A11Params_.PrecondID_ = 2;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_BlockP::A11 precon = parasails\n");
       }
-      else if ( !strcmp(param3, "boomeramg") ) 
+      else if ( !strcasecmp(param3, "boomeramg") ) 
       {
          A11Params_.PrecondID_ = 3;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_BlockP::A11 precon = boomeramg\n");
       }
-      else if ( !strcmp(param3, "pilut") ) 
+      else if ( !strcasecmp(param3, "pilut") ) 
       {
          A11Params_.PrecondID_ = 4;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_BlockP::A11 precon = pilut\n");
       }
-      else if ( !strcmp(param3, "euclid") ) 
+      else if ( !strcasecmp(param3, "euclid") ) 
       {
          A11Params_.PrecondID_ = 5;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_BlockP::A11 precon = euclid\n");
       }
-      else if ( !strcmp(param3, "ddilut") ) 
+      else if ( !strcasecmp(param3, "ddilut") ) 
       {
          A11Params_.PrecondID_ = 6;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_BlockP::A11 precon = ddilut\n");
       }
-      else if ( !strcmp(param3, "ml") ) 
+      else if ( !strcasecmp(param3, "ml") ) 
       {
          A11Params_.PrecondID_ = 7;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_BlockP::A11 precon = ml\n");
       }
-      else if ( !strcmp(param3, "mli") ) 
+      else if ( !strcasecmp(param3, "mli") ) 
       {
          A11Params_.PrecondID_ = 8;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_BlockP::A11 precon = mli\n");
       }
    }
-   else if ( !strcmp(param2, "A22Precon") )
+   else if ( !strcasecmp(param2, "A22Precon") )
    {
       sscanf(params,"%s %s %s", param1, param2, param3);
-      if ( !strcmp(param3, "diagonal") ) 
+      if ( !strcasecmp(param3, "diagonal") ) 
       {
          A22Params_.PrecondID_ = 1;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_BlockP::A22 precon = diagonal\n");
       }
-      else if ( !strcmp(param3, "parasails") ) 
+      else if ( !strcasecmp(param3, "parasails") ) 
       {
          A22Params_.PrecondID_ = 2;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_BlockP::A22 precon = parasails\n");
       }
-      else if ( !strcmp(param3, "boomeramg") ) 
+      else if ( !strcasecmp(param3, "boomeramg") ) 
       {
          A22Params_.PrecondID_ = 3;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_BlockP::A22 precon = boomeramg\n");
       }
-      else if ( !strcmp(param3, "pilut") ) 
+      else if ( !strcasecmp(param3, "pilut") ) 
       {
          A22Params_.PrecondID_ = 4;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_BlockP::A22 precon = pilut\n");
       }
-      else if ( !strcmp(param3, "euclid") ) 
+      else if ( !strcasecmp(param3, "euclid") ) 
       {
          A22Params_.PrecondID_ = 5;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_BlockP::A22 precon = euclid\n");
       }
-      else if ( !strcmp(param3, "ddilut") ) 
+      else if ( !strcasecmp(param3, "ddilut") ) 
       {
          A22Params_.PrecondID_ = 6;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_BlockP::A22 precon = ddilut\n");
       }
-      else if ( !strcmp(param3, "ml") ) 
+      else if ( !strcasecmp(param3, "ml") ) 
       {
          A22Params_.PrecondID_ = 7;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_BlockP::A22 precon = ml\n");
       }
-      else if ( !strcmp(param3, "mli") ) 
+      else if ( !strcasecmp(param3, "mli") ) 
       {
          A22Params_.PrecondID_ = 8;
          if (outputLevel_ > 0) 
             printf("HYPRE_LSI_BlockP::A22 precon = mli\n");
       }
    }
-   else if ( !strcmp(param2, "A11PreconPSNlevels") )
+   else if ( !strcasecmp(param2, "A11PreconPSNlevels") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.PSNLevels_));
       if ( A11Params_.PSNLevels_ < 0 ) A11Params_.PSNLevels_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconPSNLevels\n");
    }
-   else if ( !strcmp(param2, "A22PreconPSNlevels") )
+   else if ( !strcasecmp(param2, "A22PreconPSNlevels") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A22Params_.PSNLevels_));
       if ( A22Params_.PSNLevels_ < 0 ) A22Params_.PSNLevels_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconPSNLevels\n");
    }
-   else if ( !strcmp(param2, "A11PreconPSThresh") )
+   else if ( !strcasecmp(param2, "A11PreconPSThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.PSThresh_));
       if ( A11Params_.PSThresh_ < 0 ) A11Params_.PSThresh_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconPSThresh\n");
    }
-   else if ( !strcmp(param2, "A22PreconPSThresh") )
+   else if ( !strcasecmp(param2, "A22PreconPSThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A22Params_.PSThresh_));
       if ( A22Params_.PSThresh_ < 0 ) A22Params_.PSThresh_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconPSThresh\n");
    }
-   else if ( !strcmp(param2, "A11PreconPSFilter") )
+   else if ( !strcasecmp(param2, "A11PreconPSFilter") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.PSFilter_));
       if ( A11Params_.PSFilter_ < 0 ) A11Params_.PSFilter_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconPSFilter\n");
    }
-   else if ( !strcmp(param2, "A22PreconPSFilter") )
+   else if ( !strcasecmp(param2, "A22PreconPSFilter") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A22Params_.PSFilter_));
       if ( A22Params_.PSFilter_ < 0 ) A22Params_.PSFilter_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconPSFilter\n");
    }
-   else if ( !strcmp(param2, "A11PreconAMGThresh") )
+   else if ( !strcasecmp(param2, "A11PreconAMGThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.AMGThresh_));
       if ( A11Params_.AMGThresh_ < 0 ) A11Params_.AMGThresh_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconAMGThresh\n");
    }
-   else if ( !strcmp(param2, "A22PreconAMGThresh") )
+   else if ( !strcasecmp(param2, "A22PreconAMGThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A22Params_.AMGThresh_));
       if ( A22Params_.AMGThresh_ < 0 ) A22Params_.AMGThresh_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconAMGThresh\n");
    }
-   else if ( !strcmp(param2, "A11PreconAMGNumSweeps") )
+   else if ( !strcasecmp(param2, "A11PreconAMGNumSweeps") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.AMGNSweeps_));
       if ( A11Params_.AMGNSweeps_ < 0 ) A11Params_.AMGNSweeps_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconAMGNSweeps\n");
    }
-   else if ( !strcmp(param2, "A22PreconAMGNumSweeps") )
+   else if ( !strcasecmp(param2, "A22PreconAMGNumSweeps") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A22Params_.AMGNSweeps_));
       if ( A22Params_.AMGNSweeps_ < 0 ) A22Params_.AMGNSweeps_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconAMGNSweeps\n");
    }
-   else if ( !strcmp(param2, "A11PreconEuclidNLevels") )
+   else if ( !strcasecmp(param2, "A11PreconEuclidNLevels") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.EuclidNLevels_));
       if ( A11Params_.EuclidNLevels_ < 0 ) A11Params_.EuclidNLevels_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconEuclidNLevels\n");
    }
-   else if ( !strcmp(param2, "A22PreconEuclidNLevels") )
+   else if ( !strcasecmp(param2, "A22PreconEuclidNLevels") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A22Params_.EuclidNLevels_));
       if ( A22Params_.EuclidNLevels_ < 0 ) A22Params_.EuclidNLevels_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconEuclidNLevels\n");
    }
-   else if ( !strcmp(param2, "A11PreconEuclidThresh") )
+   else if ( !strcasecmp(param2, "A11PreconEuclidThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.EuclidThresh_));
       if ( A11Params_.EuclidThresh_ < 0 ) A11Params_.EuclidThresh_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconEuclidThresh\n");
    }
-   else if ( !strcmp(param2, "A22PreconEuclidThresh") )
+   else if ( !strcasecmp(param2, "A22PreconEuclidThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A22Params_.EuclidThresh_));
       if ( A22Params_.EuclidThresh_ < 0 ) A22Params_.EuclidThresh_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconEuclidThresh\n");
    }
-   else if ( !strcmp(param2, "A11PreconPilutFillin") )
+   else if ( !strcasecmp(param2, "A11PreconPilutFillin") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.PilutFillin_));
       if ( A11Params_.PilutFillin_ < 0 ) A11Params_.PilutFillin_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconPilutFillin\n");
    }
-   else if ( !strcmp(param2, "A22PreconPilutFillin") )
+   else if ( !strcasecmp(param2, "A22PreconPilutFillin") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A22Params_.PilutFillin_));
       if ( A22Params_.PilutFillin_ < 0 ) A22Params_.PilutFillin_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconPilutFillin\n");
    }
-   else if ( !strcmp(param2, "A11PreconPilutDropTol") )
+   else if ( !strcasecmp(param2, "A11PreconPilutDropTol") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.PilutDropTol_));
       if ( A11Params_.PilutDropTol_ < 0 ) A11Params_.PilutDropTol_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconPilutDropTol\n");
    }
-   else if ( !strcmp(param2, "A22PreconPilutDropTol") )
+   else if ( !strcasecmp(param2, "A22PreconPilutDropTol") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A22Params_.PilutDropTol_));
       if ( A22Params_.PilutDropTol_ < 0 ) A22Params_.PilutDropTol_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconPilutDropTol\n");
    }
-   else if ( !strcmp(param2, "A11PreconDDIlutFillin") )
+   else if ( !strcasecmp(param2, "A11PreconDDIlutFillin") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.DDIlutFillin_));
       if ( A11Params_.DDIlutFillin_ < 0 ) A11Params_.DDIlutFillin_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconDDIlutFillin\n");
    }
-   else if ( !strcmp(param2, "A22PreconDDIlutFillin") )
+   else if ( !strcasecmp(param2, "A22PreconDDIlutFillin") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A22Params_.DDIlutFillin_));
       if ( A22Params_.DDIlutFillin_ < 0 ) A22Params_.DDIlutFillin_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconDDIlutFillin\n");
    }
-   else if ( !strcmp(param2, "A11PreconDDIlutDropTol") )
+   else if ( !strcasecmp(param2, "A11PreconDDIlutDropTol") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.DDIlutDropTol_));
       if ( A11Params_.DDIlutDropTol_ < 0 ) A11Params_.DDIlutDropTol_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconDDIlutDropTol\n");
    }
-   else if ( !strcmp(param2, "A22PreconDDIlutDropTol") )
+   else if ( !strcasecmp(param2, "A22PreconDDIlutDropTol") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A22Params_.DDIlutDropTol_));
       if ( A22Params_.DDIlutDropTol_ < 0 ) A22Params_.DDIlutDropTol_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconDDIlutDropTol\n");
    }
-   else if ( !strcmp(param2, "A11PreconMLThresh") )
+   else if ( !strcasecmp(param2, "A11PreconMLThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.MLThresh_));
       if ( A11Params_.MLThresh_ < 0 ) A11Params_.MLThresh_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconMLThresh\n");
    }
-   else if ( !strcmp(param2, "A22PreconMLThresh") )
+   else if ( !strcasecmp(param2, "A22PreconMLThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A22Params_.MLThresh_));
       if ( A22Params_.MLThresh_ < 0 ) A22Params_.MLThresh_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconMLThresh\n");
    }
-   else if ( !strcmp(param2, "A11PreconMLNumSweeps") )
+   else if ( !strcasecmp(param2, "A11PreconMLNumSweeps") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.MLNSweeps_));
       if ( A11Params_.MLNSweeps_ < 0 ) A11Params_.MLNSweeps_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconMLNumSweeps\n");
    }
-   else if ( !strcmp(param2, "A22PreconMLNumSweeps") )
+   else if ( !strcasecmp(param2, "A22PreconMLNumSweeps") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A22Params_.MLNSweeps_));
       if ( A22Params_.MLNSweeps_ < 0 ) A22Params_.MLNSweeps_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconMLNumSweeps\n");
    }
-   else if ( !strcmp(param2, "A11PreconMLIThresh") )
+   else if ( !strcasecmp(param2, "A11PreconMLIThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.MLIThresh_));
       if ( A11Params_.MLIThresh_ < 0.0 ) A11Params_.MLIThresh_ = 0.0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconMLIThresh\n");
    }
-   else if ( !strcmp(param2, "A22PreconMLIThresh") )
+   else if ( !strcasecmp(param2, "A22PreconMLIThresh") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A22Params_.MLIThresh_));
       if ( A22Params_.MLIThresh_ < 0.0 ) A22Params_.MLIThresh_ = 0.0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconMLIThresh\n");
    }
-   else if ( !strcmp(param2, "A11PreconMLINumSweeps") )
+   else if ( !strcasecmp(param2, "A11PreconMLINumSweeps") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.MLINSweeps_));
       if ( A11Params_.MLINSweeps_ < 0 ) A11Params_.MLINSweeps_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconMLINSweeps\n");
    }
-   else if ( !strcmp(param2, "A22PreconMLINumSweeps") )
+   else if ( !strcasecmp(param2, "A22PreconMLINumSweeps") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A22Params_.MLINSweeps_));
       if ( A22Params_.MLINSweeps_ < 0 ) A22Params_.MLINSweeps_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconMLINSweeps\n");
    }
-   else if ( !strcmp(param2, "A11PreconMLIPweight") )
+   else if ( !strcasecmp(param2, "A11PreconMLIPweight") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A11Params_.MLIPweight_));
       if ( A11Params_.MLIPweight_ < 0.0 ) A11Params_.MLIPweight_ = 0.0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconMLIPweight\n");
    }
-   else if ( !strcmp(param2, "A22PreconMLIPweight") )
+   else if ( !strcasecmp(param2, "A22PreconMLIPweight") )
    {
       sscanf(params,"%s %s %lg", param1, param2, &(A22Params_.MLIPweight_));
       if ( A22Params_.MLIPweight_ < 0.0 ) A22Params_.MLIPweight_ = 0.0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconMLIPweight\n");
    }
-   else if ( !strcmp(param2, "A11PreconMLINodeDOF") )
+   else if ( !strcasecmp(param2, "A11PreconMLINodeDOF") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.MLINodeDOF_));
       if ( A11Params_.MLINodeDOF_ < 1 ) A11Params_.MLINodeDOF_ = 1;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconMLINodeDOF\n");
    }
-   else if ( !strcmp(param2, "A22PreconMLINodeDOF") )
+   else if ( !strcasecmp(param2, "A22PreconMLINodeDOF") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A22Params_.MLINodeDOF_));
       if ( A22Params_.MLINodeDOF_ < 1 ) A22Params_.MLINodeDOF_ = 1;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconMLINodeDOF\n");
    }
-   else if ( !strcmp(param2, "A11PreconMLINullDim") )
+   else if ( !strcasecmp(param2, "A11PreconMLINullDim") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.MLINullDim_));
       if ( A11Params_.MLINullDim_ < 1 ) A11Params_.MLINullDim_ = 1;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconMLINullDim\n");
    }
-   else if ( !strcmp(param2, "A22PreconMLINullDim") )
+   else if ( !strcasecmp(param2, "A22PreconMLINullDim") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A22Params_.MLINullDim_));
       if ( A22Params_.MLINullDim_ < 1 ) A22Params_.MLINullDim_ = 1;

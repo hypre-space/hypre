@@ -1884,7 +1884,7 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
    // corresponds to the ones in the system matrix using lookup)
    //-------------------------------------------------------------------
 
-   if ( fieldID == -25333 )
+   if ( fieldID == -3 || fieldID == -25333 )
    {
       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       {
@@ -2314,7 +2314,7 @@ int HYPRE_LinSysCore::copyInRHSVector(double scalar, const Data& data)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
       printf("%4d : HYPRE_LSC::entering copyInRHSVector.\n",mypid_);
-   if (strcmp("IJ_Vector", data.getTypeName()))
+   if (strcasecmp("IJ_Vector", data.getTypeName()))
    {
       printf("copyInRHSVector: data's type string not 'IJ_Vector'.\n");
       exit(1);
@@ -2407,7 +2407,7 @@ int HYPRE_LinSysCore::sumInRHSVector(double scalar, const Data& data)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
       printf("%4d : HYPRE_LSC::entering sumInRHSVector.\n",mypid_);
-   if (strcmp("IJ_Vector", data.getTypeName()))
+   if (strcasecmp("IJ_Vector", data.getTypeName()))
    {
       printf("sumInRHSVector ERROR : data's type string not 'IJ_Vector'.\n");
       exit(1);
@@ -2447,7 +2447,7 @@ int HYPRE_LinSysCore::destroyMatrixData(Data& data)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
       printf("%4d : HYPRE_LSC::entering destroyMatrixData.\n",mypid_);
-   if (strcmp("IJ_Matrix", data.getTypeName()))
+   if (strcasecmp("IJ_Matrix", data.getTypeName()))
    {
       printf("destroyMatrixData ERROR : data doesn't contain a IJ_Matrix.\n");
       exit(1);
@@ -2483,7 +2483,7 @@ int HYPRE_LinSysCore::destroyVectorData(Data& data)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
       printf("%4d : HYPRE_LSC::entering destroyVectorData.\n",mypid_);
-   if (strcmp("IJ_Vector", data.getTypeName()))
+   if (strcasecmp("IJ_Vector", data.getTypeName()))
    {
       printf("destroyVectorData ERROR : data doesn't contain a IJ_Vector.");
       exit(1);
@@ -2789,67 +2789,67 @@ void HYPRE_LinSysCore::selectSolver(char* name)
    // check for the validity of the solver name
    //-------------------------------------------------------------------
 
-   if ( !strcmp(name, "cg" ) )
+   if ( !strcasecmp(name, "cg" ) )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYPCG;
    }
-   else if ( !strcmp(name, "hybrid") )
+   else if ( !strcasecmp(name, "hybrid") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYHYBRID;
    }
-   else if ( !strcmp(name, "gmres") )
+   else if ( !strcasecmp(name, "gmres") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYGMRES;
    }
-   else if ( !strcmp(name, "fgmres") )
+   else if ( !strcasecmp(name, "fgmres") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYFGMRES;
    }
-   else if ( !strcmp(name, "bicgstab") )
+   else if ( !strcasecmp(name, "bicgstab") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYCGSTAB;
    }
-   else if ( !strcmp(name, "bicgstabl") )
+   else if ( !strcasecmp(name, "bicgstabl") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYCGSTABL;
    }
-   else if ( !strcmp(name, "tfqmr") )
+   else if ( !strcasecmp(name, "tfqmr") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYTFQMR;
    }
-   else if ( !strcmp(name, "bicgs") )
+   else if ( !strcasecmp(name, "bicgs") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYBICGS;
    }
-   else if ( !strcmp(name, "symqmr") )
+   else if ( !strcasecmp(name, "symqmr") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYSYMQMR;
    }
-   else if ( !strcmp(name, "boomeramg") )
+   else if ( !strcasecmp(name, "boomeramg") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYAMG;
    }
-   else if ( !strcmp(name, "superlu") )
+   else if ( !strcasecmp(name, "superlu") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYSUPERLU;
    }
-   else if ( !strcmp(name, "superlux") )
+   else if ( !strcasecmp(name, "superlux") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYSUPERLUX;
    }
-   else if ( !strcmp(name, "dsuperlu") )
+   else if ( !strcasecmp(name, "dsuperlu") )
    {
       strcpy( HYSolverName_, name );
 #ifdef HAVE_DSUPERLU
@@ -2860,12 +2860,12 @@ void HYPRE_LinSysCore::selectSolver(char* name)
       HYSolverID_ = HYGMRES;
 #endif
    }
-   else if ( !strcmp(name, "y12m") )
+   else if ( !strcasecmp(name, "y12m") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYY12M;
    }
-   else if ( !strcmp(name, "amge") )
+   else if ( !strcasecmp(name, "amge") )
    {
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYAMGE;
@@ -2994,62 +2994,62 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    // check for the validity of the preconditioner name
    //-------------------------------------------------------------------
 
-   if ( !strcmp(name, "identity"  ) )
+   if ( !strcasecmp(name, "identity"  ) )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYIDENTITY;
    }
-   else if ( !strcmp(name, "diagonal"  ) )
+   else if ( !strcasecmp(name, "diagonal"  ) )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYDIAGONAL;
    }
-   else if ( !strcmp(name, "pilut") )
+   else if ( !strcasecmp(name, "pilut") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYPILUT;
    }
-   else if ( !strcmp(name, "parasails") )
+   else if ( !strcasecmp(name, "parasails") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYPARASAILS;
    }
-   else if ( !strcmp(name, "boomeramg") )
+   else if ( !strcasecmp(name, "boomeramg") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYBOOMERAMG;
    }
-   else if ( !strcmp(name, "ddilut") )
+   else if ( !strcasecmp(name, "ddilut") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYDDILUT;
    }
-   else if ( !strcmp(name, "schwarz") )
+   else if ( !strcasecmp(name, "schwarz") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYSCHWARZ;
    }
-   else if ( !strcmp(name, "ddict") )
+   else if ( !strcasecmp(name, "ddict") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYDDICT;
    }
-   else if ( !strcmp(name, "poly") )
+   else if ( !strcasecmp(name, "poly") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYPOLY;
    }
-   else if ( !strcmp(name, "euclid") )
+   else if ( !strcasecmp(name, "euclid") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYEUCLID;
    }
-   else if ( !strcmp(name, "blockP") )
+   else if ( !strcasecmp(name, "blockP") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYBLOCK;
    }
-   else if ( !strcmp(name, "ml") )
+   else if ( !strcasecmp(name, "ml") )
    {
 #ifdef HAVE_ML
       strcpy( HYPreconName_, name );
@@ -3064,7 +3064,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       HYPreconID_ = HYDIAGONAL;
 #endif
    }
-   else if ( !strcmp(name, "mli") )
+   else if ( !strcasecmp(name, "mli") )
    {
 #ifdef HAVE_MLI
       strcpy( HYPreconName_, name );
@@ -3079,7 +3079,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       HYPreconID_ = HYDIAGONAL;
 #endif
    }
-   else if ( !strcmp(name, "uzawa") )
+   else if ( !strcasecmp(name, "uzawa") )
    {
       strcpy( HYPreconName_, name );
       HYPreconID_ = HYUZAWA;
@@ -3257,8 +3257,8 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 {
    int                i, j, numIterations=0, status, ierr, localNRows;
    int                startRow, *procNRows, rowSize, *colInd, nnz, nrows;
-   int                *constrMap;
-   double             rnorm=0.0, ddata, *colVal;
+   int                *constrMap, *numSweeps, *relaxType;
+   double             rnorm=0.0, ddata, *colVal, *relaxWt;
    double             stime, etime, ptime, rtime1, rtime2, newnorm;
    char               fname[40];
    FILE               *fp;
@@ -3495,6 +3495,22 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            HYPRE_ParCSRHybridSetTol(HYSolver_, tolerance_);
            HYPRE_ParCSRHybridSetRelChange(HYSolver_, 0);
            HYPRE_ParCSRHybridSetTwoNorm(HYSolver_, 1);
+           HYPRE_ParCSRHybridSetConvergenceTol(HYSolver_, 0.9);
+           HYPRE_ParCSRHybridSetDSCGMaxIter(HYSolver_, 20);
+           if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
+              HYPRE_ParCSRHybridSetPLogging(HYSolver_, 3);
+           HYPRE_ParCSRHybridSetCoarsenType(HYSolver_, amgCoarsenType_);
+           HYPRE_ParCSRHybridSetMeasureType(HYSolver_, amgMeasureType_);
+           HYPRE_ParCSRHybridSetStrongThreshold(HYSolver_,amgStrongThreshold_);
+           numSweeps = hypre_CTAlloc(int,4);
+           for ( i = 0; i < 4; i++ ) numSweeps[i] = amgNumSweeps_[i];
+           HYPRE_ParCSRHybridSetNumGridSweeps(HYSolver_, numSweeps);
+           relaxType = hypre_CTAlloc(int,4);
+           for ( i = 0; i < 4; i++ ) relaxType[i] = amgRelaxType_[i];
+           HYPRE_ParCSRHybridSetGridRelaxType(HYSolver_, relaxType);
+           relaxWt = hypre_CTAlloc(double,25);
+           for ( i = 0; i < 25; i++ ) relaxWt[i] = amgRelaxWeight_[i];
+           HYPRE_ParCSRHybridSetRelaxWeight(HYSolver_, relaxWt);
            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
            {
               if ( mypid_ == 0 )

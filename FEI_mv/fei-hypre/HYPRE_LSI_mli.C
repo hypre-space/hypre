@@ -65,6 +65,7 @@
 #define MLI_SOLVER_SUPERLU_ID   6 
 #define MLI_METHOD_AMGSA_ID     7
 #define MLI_METHOD_AMGSAE_ID    8
+#define MLI_METHOD_AMGSADD_ID   9
 #endif
 #include "HYPRE_LSI_mli.h"
 
@@ -243,18 +244,7 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* set method specific parameters                           */
    /* -------------------------------------------------------- */ 
 
-   switch ( mli_object->method_ )
-   {
-      case MLI_METHOD_AMGSA_ID : 
-           method = MLI_Method_CreateFromID(mli_object->method_,mpiComm);
-           break;
-      case MLI_METHOD_AMGSAE_ID : 
-           method = MLI_Method_CreateFromID(mli_object->method_,mpiComm);
-           break;
-      default :
-           printf("HYPRE_LSI_MLISetup : method not valid.\n");
-           exit(1);
-   }
+   method = MLI_Method_CreateFromID(mli_object->method_,mpiComm);
    sprintf(paramString, "setNumLevels %d", mli_object->nLevels_);
    method->setParams( paramString, 0, NULL );
    sprintf(paramString, "setStrengthThreshold %f",
@@ -452,14 +442,14 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
 
    mli_object = (HYPRE_LSI_MLI *) solver;
    sscanf(paramString,"%s", param1);
-   if ( strcmp(param1, "MLI") )
+   if ( strcasecmp(param1, "MLI") )
    {
       printf("HYPRE_LSI_MLI::parameters not for me.\n");
       return 1;
    }
    MPI_Comm_rank( mli_object->mpiComm_, &mypid );
    sscanf(paramString,"%s %s", param1, param2);
-   if ( !strcmp(param2, "help") )
+   if ( !strcasecmp(param2, "help") )
    {
       if ( mypid == 0 )
       {
@@ -479,72 +469,74 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      useNodalCoord <on,off> \n");
       }
    }
-   else if ( !strcmp(param2, "outputLevel") )
+   else if ( !strcasecmp(param2, "outputLevel") )
    {
       sscanf(paramString,"%s %s %d",param1,param2,&(mli_object->outputLevel_));
    }
-   else if ( !strcmp(param2, "numLevels") )
+   else if ( !strcasecmp(param2, "numLevels") )
    {
       sscanf(paramString,"%s %s %d", param1, param2,
              &(mli_object->nLevels_));
       if ( mli_object->nLevels_ <= 0 ) mli_object->nLevels_ = 1;
    }
-   else if ( !strcmp(param2, "maxIterations") )
+   else if ( !strcasecmp(param2, "maxIterations") )
    {
       sscanf(paramString,"%s %s %d", param1, param2,
              &(mli_object->maxIterations_));
       if ( mli_object->maxIterations_ <= 0 ) mli_object->maxIterations_ = 1;
    }
-   else if ( !strcmp(param2, "cycleType") )
+   else if ( !strcasecmp(param2, "cycleType") )
    {
       sscanf(paramString,"%s %s %s", param1, param2, param3);
-      if ( ! strcmp( param3, "V" ) )      mli_object->cycleType_ = 1;
-      else if ( ! strcmp( param3, "W" ) ) mli_object->cycleType_ = 2;
+      if ( ! strcasecmp( param3, "V" ) )      mli_object->cycleType_ = 1;
+      else if ( ! strcasecmp( param3, "W" ) ) mli_object->cycleType_ = 2;
    }
-   else if ( !strcmp(param2, "strengthThreshold") )
+   else if ( !strcasecmp(param2, "strengthThreshold") )
    {
       sscanf(paramString,"%s %s %lg", param1, param2,
              &(mli_object->strengthThreshold_));
       if ( mli_object->strengthThreshold_ < 0.0 )
          mli_object->strengthThreshold_ = 0.0;
    }
-   else if ( !strcmp(param2, "method") )
+   else if ( !strcasecmp(param2, "method") )
    {
       sscanf(paramString,"%s %s %s", param1, param2, param3);
-      if ( ! strcmp( param3, "AMGSA" ) )
+      if ( ! strcasecmp( param3, "AMGSA" ) )
          mli_object->method_ = MLI_METHOD_AMGSA_ID;
-      else if ( ! strcmp( param3, "AMGSAe" ) )
+      else if ( ! strcasecmp( param3, "AMGSAe" ) )
          mli_object->method_ = MLI_METHOD_AMGSAE_ID;
+      else if ( ! strcasecmp( param3, "AMGSADD" ) )
+         mli_object->method_ = MLI_METHOD_AMGSADD_ID;
    }
-   else if ( !strcmp(param2, "smoother") )
+   else if ( !strcasecmp(param2, "smoother") )
    {
       sscanf(paramString,"%s %s %s", param1, param2, param3);
-      if ( ! strcmp( param3, "Jacobi" ) )
+      if ( ! strcasecmp( param3, "Jacobi" ) )
       {
          mli_object->preSmoother_  = MLI_SOLVER_JACOBI_ID;
          mli_object->postSmoother_ = MLI_SOLVER_JACOBI_ID;
       }
-      else if ( ! strcmp( param3, "GS" ) )
+      else if ( ! strcasecmp( param3, "GS" ) )
       {
          mli_object->preSmoother_  = MLI_SOLVER_GS_ID;
          mli_object->postSmoother_ = MLI_SOLVER_GS_ID;
       }
-      else if ( ! strcmp( param3, "SGS" ) )
+      else if ( ! strcasecmp( param3, "SGS" ) )
       {
          mli_object->preSmoother_  = MLI_SOLVER_SGS_ID;
          mli_object->postSmoother_ = MLI_SOLVER_SGS_ID;
       }
-      else if ( ! strcmp( param3, "ParaSails" ) )
+      else if ( ! strcasecmp( param3, "ParaSails" ) )
       {
          mli_object->preSmoother_  = MLI_SOLVER_PARASAILS_ID;
          mli_object->postSmoother_ = MLI_SOLVER_PARASAILS_ID;
       }
-      else if ( ! strcmp( param3, "Schwarz" ) )
+      else if ( ! strcasecmp( param3, "Schwarz" ) )
       {
          mli_object->preSmoother_  = MLI_SOLVER_SCHWARZ_ID;
          mli_object->postSmoother_ = MLI_SOLVER_SCHWARZ_ID;
       }
-      else if ( ! strcmp( param3, "MLS" ) )
+      else if ( ! strcasecmp( param3, "MLS" ) )
       {
          mli_object->preSmoother_  = MLI_SOLVER_MLS_ID;
          mli_object->postSmoother_ = MLI_SOLVER_MLS_ID;
@@ -555,20 +547,20 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          exit(1);
       }
    }
-   else if ( !strcmp(param2, "coarseSolver") )
+   else if ( !strcasecmp(param2, "coarseSolver") )
    {
       sscanf(paramString,"%s %s %s", param1, param2, param3);
-      if ( ! strcmp( param3, "Jacobi" ) )
+      if ( ! strcasecmp( param3, "Jacobi" ) )
          mli_object->coarseSolver_ = MLI_SOLVER_JACOBI_ID;
-      else if ( ! strcmp( param3, "GS" ) )
+      else if ( ! strcasecmp( param3, "GS" ) )
          mli_object->coarseSolver_ = MLI_SOLVER_GS_ID;
-      else if ( ! strcmp( param3, "SGS" ) )
+      else if ( ! strcasecmp( param3, "SGS" ) )
          mli_object->coarseSolver_ = MLI_SOLVER_SGS_ID;
-      else if ( ! strcmp( param3, "ParaSails" ) )
+      else if ( ! strcasecmp( param3, "ParaSails" ) )
          mli_object->coarseSolver_ = MLI_SOLVER_PARASAILS_ID;
-      else if ( ! strcmp( param3, "Schwarz" ) )
+      else if ( ! strcasecmp( param3, "Schwarz" ) )
          mli_object->coarseSolver_ = MLI_SOLVER_SCHWARZ_ID;
-      else if ( ! strcmp( param3, "MLS" ) )
+      else if ( ! strcasecmp( param3, "MLS" ) )
          mli_object->coarseSolver_ = MLI_SOLVER_MLS_ID;
       else 
       {
@@ -576,43 +568,43 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          exit(1);
       }
    }
-   else if ( !strcmp(param2, "numSweeps") )
+   else if ( !strcasecmp(param2, "numSweeps") )
    {
       sscanf(paramString,"%s %s %d",param1,param2,&(mli_object->preNSweeps_));
       if ( mli_object->preNSweeps_ <= 0 ) mli_object->preNSweeps_ = 1;
       mli_object->postNSweeps_ = mli_object->preNSweeps_; 
    }
-   else if ( !strcmp(param2, "minCoarseSize") )
+   else if ( !strcasecmp(param2, "minCoarseSize") )
    {
       sscanf(paramString,"%s %s %d",param1,param2,
              &(mli_object->minCoarseSize_));
       if ( mli_object->minCoarseSize_ <= 0 ) mli_object->minCoarseSize_ = 20;
    }
-   else if ( !strcmp(param2, "Pweight") )
+   else if ( !strcasecmp(param2, "Pweight") )
    {
       sscanf(paramString,"%s %s %lg",param1,param2,
              &(mli_object->Pweight_));
       if ( mli_object->Pweight_ < 0. ) mli_object->Pweight_ = 1.333;
    }
-   else if ( !strcmp(param2, "nodeDOF") )
+   else if ( !strcasecmp(param2, "nodeDOF") )
    {
       sscanf(paramString,"%s %s %d",param1,param2,
              &(mli_object->nodeDOF_));
       if ( mli_object->nodeDOF_ <= 0 ) mli_object->nodeDOF_ = 1;
    }
-   else if ( !strcmp(param2, "nullSpaceDim") )
+   else if ( !strcasecmp(param2, "nullSpaceDim") )
    {
       sscanf(paramString,"%s %s %d",param1,param2,
              &(mli_object->nSpaceDim_));
       if ( mli_object->nSpaceDim_ <= 0 ) mli_object->nSpaceDim_ = 1;
    }
-   else if ( !strcmp(param2, "useNodalCoord") )
+   else if ( !strcasecmp(param2, "useNodalCoord") )
    {
       sscanf(paramString,"%s %s %s",param1,param2,param3);
-      if ( !strcmp(param3, "on") ) mli_object->nCoordAccept_ = 1;
+      if ( !strcasecmp(param3, "on") ) mli_object->nCoordAccept_ = 1;
       else                         mli_object->nCoordAccept_ = 0;
    }
-   else if ( !strcmp(param2, "saAMGCalibrationSize") )
+   else if ( !strcasecmp(param2, "saAMGCalibrationSize") )
    {
       sscanf(paramString,"%s %s %d",param1,param2,
              &(mli_object->calibrationSize_));
@@ -913,10 +905,12 @@ int HYPRE_LSI_MLI_SetMethod( HYPRE_Solver solver, char *paramString )
 {
    HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
 
-   if ( ! strcmp( paramString, "AMGSA" ) )
+   if ( ! strcasecmp( paramString, "AMGSA" ) )
       mli_object->method_ = MLI_METHOD_AMGSA_ID;
-   else if ( ! strcmp( paramString, "AMGSAe" ) )
+   else if ( ! strcasecmp( paramString, "AMGSAe" ) )
       mli_object->method_ = MLI_METHOD_AMGSAE_ID;
+   else if ( ! strcasecmp( paramString, "AMGSADD" ) )
+      mli_object->method_ = MLI_METHOD_AMGSADD_ID;
    else
    {
       printf("HYPRE_LSI_MLISetMethod ERROR : method unrecognized.\n");
