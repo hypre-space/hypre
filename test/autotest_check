@@ -56,3 +56,4 @@ then
     ${HYPRE_MAIL} -s "Autotest error: autotest did not finish!" $RECIPIENTS
 fi
 
+rm -f $HYPRE_AUTOTEST_DIR/autotest_finished

@@ -33,12 +33,6 @@ export PATH
 HYPRE_AUTOTEST_DIR="/home/casc/software/hypre/autotest"
 
 #==============================================================================
-# Autotest completion check: first delete "autotest finished" file
-#==============================================================================
-
-rm -f $HYPRE_AUTOTEST_DIR/autotest_finished
-
-#==============================================================================
 # Email lists
 #==============================================================================
 
