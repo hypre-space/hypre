@@ -66,7 +66,7 @@ c     perform interpolation
 
  70   continue
 
-      call vcopy(u,vtmp,n)
+c      call vcopy(u,vtmp,n)
       
 c      do 101 i=1,n
 c         vtmp(i) = u(i)
@@ -75,7 +75,7 @@ c101   continue
 
       alpha = 1.0
       beta = 1.0
-      call matvec(n,u,alpha,b,ib,jb,uc,beta,vtmp,0)
+      call matvec(n,alpha,b,ib,jb,uc,beta,u,0)
 
       return
       end
@@ -115,22 +115,20 @@ c---------------------------------------------------------------------
 cveh      compute residual by using matvec
 cveh      here vtmp = f-Au
 
-c      do 11 ic=1,nv
-c         vtmp(ic)=f(ic)
-c 11   continue
 
+      call vcopy(f,vtmp,n)
  
       alpha = -1.0
       beta = 1.0
-      call matvec(n,vtmp,alpha,a,ia,ja,u,beta,f,0)
+      call matvec(n,alpha,a,ia,ja,u,beta,vtmp,0)
 
 cveh      perform restriction using matvec
 
       alpha = 1.0
       beta = 0.0
       jtrans = 1
-      call matvec(n,fc,alpha,b,ib,jb,vtmp,beta,f,jtrans)
 
+      call matvec(n,alpha,b,ib,jb,vtmp,beta,fc,jtrans)
 
       return
       end
@@ -171,9 +169,12 @@ cveh   here vtmp = Au-f
       ilo=imin(k)
       ihi=imax(k)
       nv = ihi-ilo+1
+
+      call vcopy(f,vtmp,nv)
+
       alpha = 1.0
       beta = -1.0
-      call matvec(nv,vtmp,alpha,a,ia,ja,u,beta,f,0)
+      call matvec(nv,alpha,a,ia,ja,u,beta,vtmp,0)
      
       do 31 j = 1,nv
          rtmp = vtmp(j)*vtmp(j)
@@ -186,6 +187,9 @@ cveh   here vtmp = Au-f
 
       return
       end
+
+
+
 
 
 

@@ -1,57 +1,82 @@
 c=====================================================================
 c     matvec routine:
-c     compute z = alpha*A*x + beta*y
+c     compute y = alpha*A*x + beta*y
 c
-c     if jtrans==1, computes z=alpha*A^T*x + beta*y (A transpose)
+c     if jtrans==1, computes y=alpha*A^T*x + beta*y (A transpose)
 c=====================================================================
 
-      subroutine matvec(nv, z, alpha, a, ia, ja, x, beta, y, jtrans)
+      subroutine matvec(nv, alpha, a, ia, ja, x, beta, y, jtrans)
 
       implicit real*8 (a-h,o-z)
 
       dimension x  (*)
       dimension y  (*)
-      dimension z  (*)
       dimension a  (*)
       dimension ia (*)
       dimension ja (*)
 
-c---------------------------------------------------------------------
+
+c-----------------------------------------------------------------------
+c Do (alpha == 0.0) computation 
+c-----------------------------------------------------------------------
 
       if (alpha .eq. 0.0) then
          do 20 i=1,nv
-            z(i) = beta * y(i)
+            y(i) = beta * y(i)
  20      continue
          return
-      else
-          if (jtrans .ne. 1) then
-             do 40 i = 1,nv
-                z(i)=0.e0
-                jlo =  ia(i)
-                jhi =  ia(i+1)-1
-c                if (jlo .gt. jhi) go to 40
-                do 30 j = jlo,jhi
-                   z(i) = z(i) + a(j) * x(ja(j))
- 30             continue
-                z(i) = alpha * z(i)
- 40          continue
+      endif
+
+c-----------------------------------------------------------------------
+c      y = (beta/alpha)*y
+c-----------------------------------------------------------------------
+
+      temp = beta / alpha 
+      if (temp .ne. 1.0) then
+         if (temp .eq. 0.0) then
+            do 30 i = 1,nv
+               y(i) = 0.0
+ 30         continue
+         else
+            do 40 i = 1,nv
+               y(i) = y(i) * temp
+ 40         continue
+         endif
+      endif
+ 
+c-----------------------------------------------------------------------
+c      y = y + A*x   or y = y + A^T * x
+c-----------------------------------------------------------------------
+
+      if (jtrans .ne. 1) then
+         do 60 i = 1,nv
+            jlo =  ia(i)
+            jhi =  ia(i+1)-1
+c           if (jlo .gt. jhi) go to 40
+            do 50 j = jlo,jhi
+               y(i) = y(i) + a(j) * x(ja(j))
+ 50         continue
+ 60      continue
           else
-             do 60 i = 1,nv
+             do 80 i = 1,nv
                 jlo =  ia(i)
                 jhi =  ia(i+1)-1
-                if (jlo .gt. jhi) go to 60
-                do 50 j = jlo,jhi
-                   z(ja(j)) = z(ja(j)) + a(j) * x(i)
- 50             continue
-                z(i) = alpha * z(i)
- 60          continue  
-          endif
-          if (beta .ne. 0.0) then
-             do 70 i=1,nv
-                z(i) = z(i) + beta * y(i)
- 70          continue
-          endif
-      endif 
+                if (jlo .gt. jhi) go to 80
+                do 70 j = jlo,jhi
+                   y(ja(j)) = y(ja(j)) + a(j) * x(i)
+ 70             continue
+ 80          continue
+      endif  
+
+c-----------------------------------------------------------------
+c        y = alpha*y
+c-----------------------------------------------------------------*/
+      if (alpha .ne. 1.0) then
+         do 90 i = 1,nv
+            y(i) = y(i) * alpha
+ 90   continue
+      endif
+
       return
       end
 
