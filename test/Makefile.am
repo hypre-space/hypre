@@ -17,13 +17,12 @@ SUBDIRS = \
  TEST_struct\
  TEST_timing
 
-bin_PROGRAMS = \
+EXTRA_PROGRAMS = \
  ij\
  ij_mv\
  new_ij\
  sstruct\
- struct
-EXTRA_PROGRAMS = \
+ struct\
  f77_ij\
  f77_ij_b\
  f77_ij_mv\
@@ -52,7 +51,7 @@ ij_mv_SOURCES = ij_mv.c
 new_ij_SOURCES = new_ij.c
 sstruct_SOURCES = sstruct.c
 struct_SOURCES = struct.c
-ij_DEPENDENCIES = \
+ij_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
@@ -60,14 +59,14 @@ ij_DEPENDENCIES = \
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/parcsr_mv.h\
  $(includedir)/krylov.h
-ij_mv_DEPENDENCIES = \
+ij_mv_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
  $(includedir)/HYPRE_parcsr_mv.h\
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/krylov.h
-new_ij_DEPENDENCIES = \
+new_ij_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
@@ -75,11 +74,11 @@ new_ij_DEPENDENCIES = \
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/parcsr_mv.h\
  $(includedir)/krylov.h
-sstruct_DEPENDENCIES = \
+sstruct_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE_sstruct_ls.h\
  $(includedir)/krylov.h
-struct_DEPENDENCIES = \
+struct_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE_struct_ls.h\
  $(includedir)/struct_mv.h\
@@ -185,7 +184,7 @@ nodist_new_ij_C___SOURCES = new_ij.C++.cxx
 nodist_ij_mv_C___SOURCES = ij_mv.C++.cxx
 nodist_struct_C___SOURCES = struct.C++.cxx
 nodist_sstruct_C___SOURCES = sstruct.C++.cxx
-f77_ij_DEPENDENCIES = \
+f77_ij_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
@@ -193,31 +192,31 @@ f77_ij_DEPENDENCIES = \
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/parcsr_mv.h\
  $(includedir)/krylov.h
-f77_ij_mv_DEPENDENCIES = \
+f77_ij_mv_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
  $(includedir)/HYPRE_parcsr_mv.h\
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/krylov.h
-f77_struct_DEPENDENCIES = \
+f77_struct_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE_struct_ls.h\
  $(includedir)/struct_mv.h\
  $(includedir)/krylov.h
-#f77_struct_b_DEPENDENCIES = \
+#f77_struct_b_dependencies = \
 #$(includedir)/utilities.h\
 #$(includedir)/HYPRE_struct_ls.h\
 #$(includedir)/struct_mv.h\
 #$(includedir)/krylov.h
-fei_DEPENDENCIES = \
+fei_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
  $(includedir)/HYPRE_parcsr_mv.h\
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/HYPRE_LinSysCore.h
-ij_b_DEPENDENCIES = \
+ij_b_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
@@ -229,7 +228,7 @@ ij_b_DEPENDENCIES = \
  $(includedir)/bHYPRE_IJParCSRMatrix_Impl.h\
  $(includedir)/bHYPRE_IJParCSRVector_Impl.h\
  $(includedir)/bHYPRE_ParCSRDiagScale_Impl.h
-#struct_b_DEPENDENCIES = \
+#struct_b_dependencies = \
 #$(includedir)/utilities.h\
 #$(includedir)/HYPRE_struct_ls.h\
 #$(includedir)/Hypre_Box_Stub.h\
@@ -243,7 +242,7 @@ ij_b_DEPENDENCIES = \
 #$(includedir)/Hypre_StructJacobi_Stub.h\
 #$(includedir)/Hypre_StructSMG_Stub.h\
 #$(includedir)/Hypre_PCG_Stub.h
-ij_C___DEPENDENCIES = \
+ij_C___dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
@@ -251,7 +250,7 @@ ij_C___DEPENDENCIES = \
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/parcsr_mv.h\
  $(includedir)/krylov.h
-new_ij_C___DEPENDENCIES = \
+new_ij_C___dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
@@ -259,19 +258,19 @@ new_ij_C___DEPENDENCIES = \
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/parcsr_mv.h\
  $(includedir)/krylov.h
-ij_mv_C___DEPENDENCIES = \
+ij_mv_C___dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE.h\
  $(includedir)/HYPRE_IJ_mv.h\
  $(includedir)/HYPRE_parcsr_mv.h\
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/krylov.h
-struct_C___DEPENDENCIES = \
+struct_C___dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE_struct_ls.h\
  $(includedir)/struct_mv.h\
  $(includedir)/krylov.h
-sstruct_C___DEPENDENCIES = \
+sstruct_C___dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE_sstruct_ls.h\
  $(includedir)/krylov.h
@@ -461,6 +460,8 @@ EXTRA_DIST = \
  funcs.sh\
  runtest.sh
 
+binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
+
 all: ij ij_mv new_ij struct sstruct
 
 fei++: fei
@@ -488,6 +489,23 @@ struct.C++.cxx:
 ##	cp -f $< ${@:.o=.cxx}
 ##	${CXX} -o $@ -c ${CXXFLAGS} ${@:.o=.cxx}
 ##	rm -f ${@:.o=.cxx}
+$(ij_OBJECTS): $(ij_dependencies)
+$(ij_mv_OBJECTS): $(ij_mv_dependencies)
+$(new_ij_OBJECTS): $(new_ij_dependencies)
+$(sstruct_OBJECTS): $(sstruct_dependencies)
+$(struct_OBJECTS): $(struct_dependencies)
+$(f77_ij_OBJECTS): $(f77_ij_dependencies)
+$(f77_ij_mv_OBJECTS): $(f77_ij_mv_dependencies)
+$(f77_struct_OBJECTS): $(f77_struct_dependencies)
+#$(f77_struct_b_OBJECTS): $(f77_struct_b_dependencies)
+$(fei_OBJECTS): $(fei_dependencies)
+$(ij_b_OBJECTS): $(ij_b_dependencies)
+#$(struct_b_OBJECTS): $(struct_b_dependencies)
+$(ij_C___OBJECTS): $(ij_C___dependencies)
+$(new_ij_C___OBJECTS): $(new_ij_C___dependencies)
+$(ij_mv_C___OBJECTS): $(ij_mv_C___dependencies)
+$(struct_C___OBJECTS): $(struct_C___dependencies)
+$(sstruct_C___OBJECTS): $(sstruct_C___dependencies)
 
 clean-local:
 	@ \
