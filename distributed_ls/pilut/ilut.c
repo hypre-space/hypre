@@ -22,6 +22,8 @@ int ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu
   int dummy_row_ptr[2], *col_ind, size;
   double *values;
 
+  printf("ILUT, maxnz = %d\n ", maxnz);
+
   /* Allocate memory for ldu */
   ldu->lsrowptr = idx_malloc(ddist->ddist_lnrows, "ILUT: ldu->lsrowptr");
   ldu->lerowptr = idx_malloc(ddist->ddist_lnrows, "ILUT: ldu->lerowptr");
@@ -31,10 +33,10 @@ int ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu
   ldu->usrowptr = idx_malloc(ddist->ddist_lnrows, "ILUT: ldu->usrowptr");
   ldu->uerowptr = idx_malloc(ddist->ddist_lnrows, "ILUT: ldu->uerowptr");
   ldu->ucolind  = idx_malloc_init(maxnz*ddist->ddist_lnrows, 0, "ILUT: ldu->ucolind");
-  ldu->uvalues  =  fp_malloc_init(maxnz*ddist->ddist_lnrows, 0, "ILUT: ldu->uvalues");
+  ldu->uvalues  =  fp_malloc_init(maxnz*ddist->ddist_lnrows, 0.0, "ILUT: ldu->uvalues");
 
   ldu->dvalues = fp_malloc(ddist->ddist_lnrows, "ILUT: ldu->dvalues");
-  ldu->nrm2s   = fp_malloc_init(ddist->ddist_lnrows, 0, "ILUT: ldu->nrm2s");
+  ldu->nrm2s   = fp_malloc_init(ddist->ddist_lnrows, 0.0, "ILUT: ldu->nrm2s");
 
   ldu->perm  = idx_malloc_init(ddist->ddist_lnrows, 0, "ILUT: ldu->perm");
   ldu->iperm = idx_malloc_init(ddist->ddist_lnrows, 0, "ILUT: ldu->iperm");
@@ -58,31 +60,6 @@ int ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu
     ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+i, &size,
                NULL, &values);
   }
-
-#if 0
-  /* dump out rows using GetRow */
-  {
-  char filename[80];
-  FILE *fp;
-  sprintf(filename,"mat%d", mype);
-  printf("writing %s...\n", filename);
-
-  fp = fopen(filename,"w");
-  for (i=0; i<ddist->ddist_lnrows; i++) {
-    int *cind;
-
-    ierr = HYPRE_GetDistributedMatrixRow( matrix, firstrow+i, &size,
-               &cind, &values);
-    if (ierr) return(ierr);
-    for (j=0; j<size; j++)
-        fprintf(fp,"%d %d (%f)\n", firstrow+i+1, cind[j]+1, values[j]);
-
-    ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+i, &size,
-               &cind, &values);
-  }
-  close(fp);
-  }
-#endif
 
   /* Factor the internal nodes first */
   MPI_Barrier( pilut_comm ); starttimer(SerTmr);
