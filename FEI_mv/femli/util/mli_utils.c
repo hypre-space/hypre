@@ -71,15 +71,14 @@ int MLI_Utils_HypreVectorGetDestroyFunc( MLI_Function *func_ptr )
 
 int MLI_Utils_HypreMatrixFormJacobi(void *A, double alpha, void **J)
 {
-   int                *row_part, global_nrows, mypid, nprocs;
+   int                *row_part, mypid, nprocs;
    int                local_nrows, start_row, ierr, irow, *row_lengths;
    int                rownum, rowSize, *colInd, *newColInd, newRowSize;
    int                icol, maxnnz;
    double             *colVal, *newColVal;
-   char               *mname;
    MPI_Comm           comm;
    HYPRE_IJMatrix     IJmat;
-   hypre_ParCSRMatrix *Amat, *Jmat, *newMat;
+   hypre_ParCSRMatrix *Amat, *Jmat;
 
    /* -----------------------------------------------------------------------
     * get matrix parameters
@@ -90,7 +89,6 @@ int MLI_Utils_HypreMatrixFormJacobi(void *A, double alpha, void **J)
    MPI_Comm_rank(comm, &mypid);
    MPI_Comm_size(comm, &nprocs);
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix)Amat,&row_part);
-   global_nrows = row_part[nprocs]; 
    local_nrows  = row_part[mypid+1] - row_part[mypid];
    start_row    = row_part[mypid];
 
@@ -206,7 +204,7 @@ int MLI_Utils_GenPartition(MPI_Comm comm, int nlocal, int **row_part)
 
 int MLI_Utils_ComputeSpectralRadius(hypre_ParCSRMatrix *Amat, double *max_eigen)
 {
-   int             mypid, nprocs, *partition, global_nrows, start_row, end_row;
+   int             mypid, nprocs, *partition, start_row, end_row;
    int             it, maxits=50, ierr;
    double          norm2, lambda;
    MPI_Comm        comm;
@@ -221,7 +219,6 @@ int MLI_Utils_ComputeSpectralRadius(hypre_ParCSRMatrix *Amat, double *max_eigen)
    MPI_Comm_rank( comm, &mypid );
    MPI_Comm_size( comm, &nprocs );
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix)Amat,&partition);
-   global_nrows = partition[nprocs];
    start_row    = partition[mypid];
    end_row      = partition[mypid+1];
    free( partition );
@@ -406,8 +403,8 @@ int MLI_Utils_HypreMatrixGetInfo(void *Amat, int *mat_info, double *val_info)
  
 int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2) 
 {
-   int                mypid, *partition, start_row, end_row, local_nrows;
-   int                global_nrows, new_gnrows, new_lnrows, new_start_row;
+   int                mypid, *partition, start_row, local_nrows;
+   int                global_nrows, new_lnrows, new_start_row;
    int                ierr, *row_lengths, irow, row_num, row_size, *col_ind;
    int                *new_ind, new_size, j, k, nprocs;
    double             *col_val, *new_val;
@@ -425,7 +422,6 @@ int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2)
    MPI_Comm_size(mpi_comm, &nprocs);
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA,&partition);
    start_row    = partition[mypid];
-   end_row      = partition[mypid+1] - 1;
    local_nrows  = partition[mypid+1] - start_row;
    global_nrows = partition[nprocs];
    free( partition );
@@ -440,7 +436,6 @@ int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2)
     * compute size of new matrix and create the new matrix
     * ----------------------------------------------------------------*/
 
-   new_gnrows    = global_nrows / blksize;
    new_lnrows    = local_nrows / blksize;
    new_start_row = start_row / blksize;
    ierr =  HYPRE_IJMatrixCreate(mpi_comm, new_start_row, 
@@ -752,7 +747,7 @@ int MLI_Utils_DoubleVectorRead(char *filename, MPI_Comm mpi_comm,
                                int length, int start, double *vec)
 {
    int    mypid, nprocs, curr_proc, global_nrows;
-   int    irow, row_num, k, k2, numparams=2;
+   int    irow, k, k2, numparams=2;
    double value;
    FILE   *fp;
 
@@ -857,9 +852,8 @@ int MLI_Utils_ParCSRMLISolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 int MLI_Utils_HyprePCGSolve( CMLI *cmli, HYPRE_Matrix A,
                              HYPRE_Vector b, HYPRE_Vector x )
 {
-   int          ierr, num_iterations, max_iter=500;
+   int          num_iterations, max_iter=500;
    double       tol=1.0e-6, norm, setup_time, solve_time;
-   CMLI_Vector  *csol, *crhs;
    MPI_Comm     mpi_comm;
    HYPRE_Solver pcg_solver, pcg_precond;
    HYPRE_ParCSRMatrix hypreA;
@@ -903,9 +897,8 @@ int MLI_Utils_HyprePCGSolve( CMLI *cmli, HYPRE_Matrix A,
 int MLI_Utils_HypreGMRESSolve( CMLI *cmli, HYPRE_Matrix A,
                              HYPRE_Vector b, HYPRE_Vector x )
 {
-   int          ierr, num_iterations, max_iter=500;
+   int          num_iterations, max_iter=500;
    double       tol=1.0e-6, norm, setup_time, solve_time;
-   CMLI_Vector  *csol, *crhs;
    MPI_Comm     mpi_comm;
    HYPRE_Solver gmres_solver, gmres_precond;
    HYPRE_ParCSRMatrix hypreA;
@@ -948,9 +941,8 @@ int MLI_Utils_HypreGMRESSolve( CMLI *cmli, HYPRE_Matrix A,
 int MLI_Utils_HypreBiCGSTABSolve( CMLI *cmli, HYPRE_Matrix A,
                                   HYPRE_Vector b, HYPRE_Vector x )
 {
-   int          ierr, num_iterations, max_iter=500;
+   int          num_iterations, max_iter=500;
    double       tol=1.0e-6, norm, setup_time, solve_time;
-   CMLI_Vector  *csol, *crhs;
    MPI_Comm     mpi_comm;
    HYPRE_Solver cgstab_solver, cgstab_precond;
    HYPRE_ParCSRMatrix hypreA;
@@ -1122,7 +1114,10 @@ int MLI_Utils_IntMergeSort(int nList, int *listLengs, int **lists,
                            int **lists2, int *newNListOut, int **newListOut)
 {
    int i, totalLeng, *indices, *newList, parseCnt, newListCnt, minInd;
-   int minVal, sortFlag, *tree, *treeInd;
+   int minVal, *tree, *treeInd;
+#if 0
+   int sortFlag;
+#endif
 
    totalLeng = 0;
    for ( i = 0; i < nList; i++ ) totalLeng += listLengs[i];
@@ -1141,8 +1136,6 @@ int MLI_Utils_IntMergeSort(int nList, int *listLengs, int **lists,
       if ( sortFlag == 1 )
          MLI_Utils_IntQSort2(lists[i], lists2[i], 0, listLengs[i]-1);
    }
-#else
-   sortFlag = 0;
 #endif
 
    newList  = (int *) malloc( totalLeng * sizeof(int) ); 
@@ -1206,7 +1199,7 @@ int MLI_Utils_IntMergeSort(int nList, int *listLengs, int **lists,
 
 int MLI_Utils_IntTreeUpdate(int treeLeng, int *tree, int *treeInd)
 {
-   int i, j, mid, itemp, seed, next, nextp1, ndigits, minInd, minVal;
+   int i, itemp, seed, next, nextp1, ndigits, minInd, minVal;
 
    ndigits = 0;
    if ( treeLeng > 0 ) ndigits++;
