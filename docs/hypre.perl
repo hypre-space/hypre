@@ -66,7 +66,8 @@ sub do_cmd_hypre{
 
 sub do_env_TitlePage{
     local($_) = @_;
-    $_;
+    $_ = &translate_environments($_);
+    join('',"<DIV ALIGN=\"LEFT\">\n$_</DIV>","\n");
 }
 
 #---------------------------------------------------------------------
@@ -77,7 +78,7 @@ sub do_cmd_Title{
     local($_) = @_;
     s/$next_pair_pr_rx/$text = $&; ''/eo;
     $TITLE = $text;
-    join('',"<H1>$text</H1>\n",$_);
+    join('',"<H1>$text</H1>\n<HR SIZE=4 ALIGN=\"CENTER\" NOSHADE>",$_);
 }
 
 #---------------------------------------------------------------------
@@ -87,7 +88,7 @@ sub do_cmd_Title{
 sub do_cmd_SubTitle{
     local($_) = @_;
     s/$next_pair_pr_rx/$text = $&; ''/eo;
-    join('',"<strong>$text</strong>\n",$_);
+    join('',"<H3 ALIGN=\"RIGHT\">$text</H3>\n",$_);
 }
 
 #---------------------------------------------------------------------
@@ -97,7 +98,7 @@ sub do_cmd_SubTitle{
 sub do_cmd_Author{
     local($_) = @_;
     s/$next_pair_pr_rx/$text = $&; ''/eo;
-    join('',"<strong>$text</strong>\n",$_);
+    join('',"<H3>$text</H3>\n<HR SIZE=2 ALIGN=\"CENTER\" NOSHADE>",$_);
 }
 
 #---------------------------------------------------------------------
@@ -107,6 +108,7 @@ sub do_cmd_Author{
 
 sub do_env_CopyrightPage{
     local($_) = @_;
+    $_ = &translate_environments($_);
     $_;
 }
 
