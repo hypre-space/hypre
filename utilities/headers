@@ -37,7 +37,7 @@ cat mpistubs.h                 >> $INTERNAL_HEADER
 
 cat memory.h                   >> $INTERNAL_HEADER
 
-cat random.h                   >> $INTERNAL_HEADER
+mkproto random.c               >> $INTERNAL_HEADER
 
 cat thread_mpistubs.h          >> $INTERNAL_HEADER
 
