@@ -52,6 +52,7 @@ int ZZZ_AssembleStructMatrix P((ZZZ_StructMatrix matrix ));
 void ZZZ_SetStructMatrixNumGhost P((ZZZ_StructMatrix matrix , int *num_ghost ));
 ZZZ_StructGrid ZZZ_StructMatrixGrid P(( ZZZ_StructMatrix matrix ));
 void ZZZ_SetStructMatrixSymmetric P((ZZZ_StructMatrix matrix , int symmetric ));
+void ZZZ_PrintStructMatrix P(( char *filename, ZZZ_StructMatrix matrix , int all ));
  
 /* ZZZ_struct_stencil.c */
 ZZZ_StructStencil ZZZ_NewStructStencil P((int dim , int size ));
@@ -66,6 +67,7 @@ int ZZZ_SetStructVectorValues P((ZZZ_StructVector vector , int *grid_index , dou
 int ZZZ_GetStructVectorValues P((ZZZ_StructVector vector , int *grid_index , double *values ));
 int ZZZ_SetStructVectorBoxValues P((ZZZ_StructVector vector , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values ));
 int ZZZ_AssembleStructVector P((ZZZ_StructVector vector ));
+void ZZZ_PrintStructVector P(( char *filename , ZZZ_StructVector vector , int all ));
  
 #undef P
 
