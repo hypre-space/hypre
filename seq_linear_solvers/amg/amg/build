@@ -7,12 +7,47 @@
 . $AMG_SRC/config/build_generic
 
 #=============================================================================
-# Build
+# Set various flags
 #=============================================================================
 
 AMG_PROGRAM=amg
 
-$AMG_MAKE
+CFLAGS="$AMG_CC_FLAGS -I$AMG_SRC/config"
+FFLAGS="$AMG_F77_FLAGS"
+LFLAGS="$AMG_LINK_FLAGS"
+
+if [ "$AMG_OPTIMIZE_FLAG" ]
+then
+   CFLAGS="$CFLAGS $AMG_CC_OPT"
+   FFLAGS="$FFLAGS $AMG_F77_OPT"
+   LFLAGS="$LFLAGS $AMG_LINK_OPT"
+fi
+
+if [ "$AMG_DEBUG_FLAG" ]
+then
+   CFLAGS="$CFLAGS $AMG_CC_DEBUG"
+   FFLAGS="$FFLAGS $AMG_F77_DEBUG"
+   LFLAGS="$LFLAGS $AMG_LINK_DEBUG"
+fi
+
+export AMG_PROGRAM CFLAGS FFLAGS LFLAGS
+
+#=============================================================================
+# Build
+#=============================================================================
+
+if [ "$AMG_ALL_FLAG" ]
+then
+   echo "Building"
+   echo "       Program:                $AMG_PROGRAM"
+   echo "       Arch:                   $AMG_ARCH"
+   echo "       CC Options:             $CFLAGS"
+   echo "       F77 Options:            $FFLAGS"
+
+   $AMG_MAKE $AMG_PROGRAM.$AMG_ARCH
+
+   echo "done"
+fi
 
 #=============================================================================
 # Install
@@ -27,7 +62,8 @@ then
      $AMG_MKDIR $AMG_BIN
    fi
 
-   $AMG_INSTALL $AMG_SRC/amg/$AMG_PROGRAM $AMG_BIN/.
+   $AMG_INSTALL $AMG_SRC/amg/$AMG_PROGRAM.$AMG_ARCH $AMG_BIN/$AMG_PROGRAM
+   $AMG_INSTALL $AMG_SRC/amg/lx $AMG_BIN/.
 fi
 
 #=============================================================================
@@ -36,11 +72,11 @@ fi
 
 if [ "$AMG_CLEAN_FLAG" ]
 then
-   rm -f *.o
+   rm -f *.$AMG_ARCH.o
 fi
 
 if [ "$AMG_VERYCLEAN_FLAG" ]
 then
-   rm -f $AMG_PROGRAM
+   rm -f $AMG_PROGRAM.$AMG_ARCH
 fi
 
