@@ -484,7 +484,7 @@ class HYPRE_LinSysCore
    int             slideReduction_;
    int             schurReduction_;
    int             schurReductionCreated_;
-   int             projectScheme_;
+   int             projectionScheme_;
    int             projectSize_;
    int             projectCurrSize_;
 
