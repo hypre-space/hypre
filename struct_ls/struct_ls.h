@@ -15,6 +15,18 @@ extern "C" {
 #endif
 
 
+/* HYPRE_struct_gmres.c */
+int HYPRE_StructGMRESCreate( MPI_Comm comm , HYPRE_StructSolver *solver );
+int HYPRE_StructGMRESDestroy( HYPRE_StructSolver solver );
+int HYPRE_StructGMRESSetup( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x );
+int HYPRE_StructGMRESSolve( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x );
+int HYPRE_StructGMRESSetTol( HYPRE_StructSolver solver , double tol );
+int HYPRE_StructGMRESSetMaxIter( HYPRE_StructSolver solver , int max_iter );
+int HYPRE_StructGMRESSetPrecond( HYPRE_StructSolver solver , HYPRE_PtrToStructSolverFcn precond , HYPRE_PtrToStructSolverFcn precond_setup , HYPRE_StructSolver precond_solver );
+int HYPRE_StructGMRESSetLogging( HYPRE_StructSolver solver , int logging );
+int HYPRE_StructGMRESGetNumIterations( HYPRE_StructSolver solver , int *num_iterations );
+int HYPRE_StructGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver solver , double *norm );
+
 /* HYPRE_struct_hybrid.c */
 int HYPRE_StructHybridCreate( MPI_Comm comm , HYPRE_StructSolver *solver );
 int HYPRE_StructHybridDestroy( HYPRE_StructSolver solver );
@@ -166,6 +178,7 @@ int hypre_JacobiSetTempVec( void *jacobi_vdata , hypre_StructVector *t );
 char *hypre_StructKrylovCAlloc( int count , int elt_size );
 int hypre_StructKrylovFree( char *ptr );
 void *hypre_StructKrylovCreateVector( void *vvector );
+void *hypre_StructKrylovCreateVectorArray( int n , void *vvector );
 int hypre_StructKrylovDestroyVector( void *vvector );
 void *hypre_StructKrylovMatvecCreate( void *A , void *x );
 int hypre_StructKrylovMatvec( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
@@ -177,6 +190,7 @@ int hypre_StructKrylovScaleVector( double alpha , void *x );
 int hypre_StructKrylovAxpy( double alpha , void *x , void *y );
 int hypre_StructKrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
 int hypre_StructKrylovIdentity( void *vdata , void *A , void *b , void *x );
+int hypre_StructKrylovCommInfo( void *A , int *my_id , int *num_procs );
 
 /* pfmg.c */
 void *hypre_PFMGCreate( MPI_Comm comm );

@@ -83,6 +83,7 @@ FILES =\
  HYPRE_struct_smg.c\
  HYPRE_struct_sparse_msg.c\
  HYPRE_struct_pcg.c\
+ HYPRE_struct_gmres.c\
  F90_HYPRE_struct_hybrid.c\
  F90_HYPRE_struct_pcg.c\
  F90_HYPRE_struct_pfmg.c\

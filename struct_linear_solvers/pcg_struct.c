@@ -59,6 +59,30 @@ hypre_StructKrylovCreateVector( void *vvector )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_StructKrylovCreateVectorArray
+ *--------------------------------------------------------------------------*/
+
+void *
+hypre_StructKrylovCreateVectorArray(int n, void *vvector )
+{
+   hypre_StructVector *vector = vvector;
+   hypre_StructVector **new_vector;
+   int i;
+
+   new_vector = hypre_CTAlloc(hypre_StructVector*,n);
+   for (i=0; i < n; i++)
+   {
+      HYPRE_StructVectorCreate(hypre_StructVectorComm(vector),
+                                hypre_StructVectorGrid(vector),
+                                &new_vector[i]);
+      HYPRE_StructVectorInitialize(new_vector[i]);
+      HYPRE_StructVectorAssemble(new_vector[i]);
+   }
+
+   return ( (void *) new_vector );
+}
+
+/*--------------------------------------------------------------------------
  * hypre_StructKrylovDestroyVector
  *--------------------------------------------------------------------------*/
 
@@ -202,5 +226,20 @@ hypre_StructKrylovIdentity( void *vdata,
 
 {
    return( hypre_StructKrylovCopyVector( b, x ) );
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructKrylovCommInfo
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_StructKrylovCommInfo( void  *A,
+                      int   *my_id,
+                      int   *num_procs )
+{
+   MPI_Comm comm = hypre_StructMatrixComm((hypre_StructMatrix *) A);
+   MPI_Comm_size(comm,num_procs);
+   MPI_Comm_rank(comm,my_id);
+   return 0;
 }
 
