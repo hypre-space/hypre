@@ -283,6 +283,7 @@ int hypre_SetVectorDataOwner P((hypre_Vector *vector , int owns_data ));
 hypre_Vector *hypre_ReadVector P((char *file_name ));
 int hypre_PrintVector P((hypre_Vector *vector , char *file_name ));
 int hypre_SetVectorConstantValues P((hypre_Vector *v , double value ));
+int hypre_SetVectorRandomValues P((hypre_Vector *v , int seed ));
 int hypre_CopyVector P((hypre_Vector *x , hypre_Vector *y ));
 int hypre_ScaleVector P((double alpha , hypre_Vector *y ));
 int hypre_Axpy P((double alpha , hypre_Vector *x , hypre_Vector *y ));
