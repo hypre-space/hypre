@@ -749,14 +749,14 @@ MailGroup=$3
 if [ "$MessageStr" = "purify" ]
 then				# don't need extra purify status messages
   PurifySelected=1
-  $MAKE $MakeStr 1> ${Hdr}.${MessageStr}.${MakeStr}.log 2>&1
+  $MAKE $MakeStr 1>> ${Hdr}.${MessageStr}.${MakeStr}.log 2>>&1
 elif [ "$MessageStr" = "insure" ]
 then				# don't need extra insure status messages
   InsureSelected=1
-  $MAKE $MakeStr 1> ${Hdr}.${MessageStr}.${MakeStr}.log 2>&1
+  $MAKE $MakeStr 1>> ${Hdr}.${MessageStr}.${MakeStr}.log 2>>&1
 else
-  $MAKE $MakeStr 1> ${Hdr}.${MessageStr}.${MakeStr}.log \
-        2> ${Hdr}.${MessageStr}.${MakeStr}.err
+  $MAKE $MakeStr 1>> ${Hdr}.${MessageStr}.${MakeStr}.log \
+        2>> ${Hdr}.${MessageStr}.${MakeStr}.err
 fi
 echo "$MailGroup" > ${Hdr}.${MessageStr}.${MakeStr}.err.email
 }
@@ -821,12 +821,12 @@ if [ ${BuildOpt} -ne $Skip ] ; then
   fi
   if [ ${BuildOpt} -eq $Run ] ; then
     echo "Autotest starting execution of $MessageStr"
-    make install
+    makeit "install" $MessageStr "$HYPRE_DEFAULT_EMAIL"
     cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test
-    make
+    makeit "all" $MessageStr "$HYPRE_DEFAULT_EMAIL"
     if [ $NoFeiOpt -ne $Skip ] ; then
       makeit "nofei" $MessageStr "$HYPRE_FEI_EMAIL"
-      make install
+      makeit "install" $MessageStr "$HYPRE_FEI_EMAIL"
       cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test
       makeit "fei++" $MessageStr "$HYPRE_FEI_EMAIL"
     fi
