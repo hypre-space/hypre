@@ -67,7 +67,7 @@ typedef int (*HYPRE_PtrToParSolverFcn)(HYPRE_Solver,
  *--------------------------------------------------------------------------*/
 
 /**
- * @name ParCSR BoomerAMG Solver
+ * @name ParCSR BoomerAMG Solver and Preconditioner
  * 
  * Parallel unstructured algebraic multigrid solver and preconditioner
  **/
@@ -195,8 +195,9 @@ int HYPRE_BoomerAMGSetMeasureType(HYPRE_Solver solver,
                                   int          measure_type);
 
 /**
- * (Optional) Defines whether to use a V-cycle (cycle\_type = 1) or a W-cycle
- * (cycle\_type = 2). The default is 1.
+ * (Optional) Defines the type of cycle.
+ * For a V-cycle, set cycle\_type to 1, for a W-cycle
+ *  set cycle\_type to 2. The default is 1.
  **/
 int HYPRE_BoomerAMGSetCycleType(HYPRE_Solver solver,
                                 int          cycle_type);
@@ -212,15 +213,16 @@ int HYPRE_BoomerAMGSetNumGridSweeps(HYPRE_Solver  solver,
                                     int          *num_grid_sweeps);
 
 /**
- * (Optional) Sets the number of sweeps on the finest level, the up and 
- * the down cycle to num\_sweeps and on the coarsest level to 1.
- * The default is 1.
+ * (Optional) Sets the number of sweeps. On the finest level, the up and 
+ * the down cycle the number of sweeps are set to num\_sweeps and on the 
+ * coarsest level to 1. The default is 1.
  **/
 int HYPRE_BoomerAMGSetNumSweeps(HYPRE_Solver  solver,
                                 int           num_sweeps);
 
 /**
- * (Optional) Sets the number of sweeps to num\_sweeps at
+ * (Optional) Sets the number of sweeps at a specified cycle.
+ * There are the following options for k:
  *
  * \begin{tabular} {l l}
  * the finest level &	if k=0 \\
@@ -244,7 +246,8 @@ int HYPRE_BoomerAMGSetGridRelaxType(HYPRE_Solver  solver,
                                     int          *grid_relax_type);
 
 /**
- * (Optional) Defines the smoother to be used on the fine grid, the up and 
+ * (Optional) Defines the smoother to be used. It uses the given
+ * smoother on the fine grid, the up and 
  * the down cycle and sets the solver on the coarsest level to Gaussian
  * elimination (9). The default is Gauss-Seidel (3).
  *
@@ -265,8 +268,9 @@ int HYPRE_BoomerAMGSetRelaxType(HYPRE_Solver  solver,
                                 int           relax_type);
 
 /**
- * (Optional) Defines which smoother (for options of relax\_type see
- * description of HYPRE\_BoomerAMGSetRelaxType) is used at
+ * (Optional) Defines the smoother at a given cycle.
+ * For options of relax\_type see
+ * description of HYPRE\_BoomerAMGSetRelaxType). Options for k are
  *
  * \begin{tabular} {l l}
  * the finest level &	if k=0 \\
@@ -282,7 +286,7 @@ int HYPRE_BoomerAMGSetCycleRelaxType(HYPRE_Solver  solver,
 /**
  * (Optional) Defines in which order the points are relaxed. There are
  * the following options for
- * relax\_order 
+ * relax\_order: 
  *
  * \begin{tabular}{c l}
  * 0 & the points are relaxed in natural or lexicographic
@@ -454,8 +458,9 @@ int HYPRE_BoomerAMGSetSmoothType(HYPRE_Solver  solver,
                                  int       smooth_type);
 
 /*
- * (Optional) Sets the number of levels, for which the smoothers defined
- * in HYPRE\_BoomerAMGSetSmoothType are used. The smoothers will be used
+ * (Optional) Sets the number of levels for more complex smoothers.
+ * The smoothers, 
+ * as defined by HYPRE\_BoomerAMGSetSmoothType, will be used
  * on level 0 (the finest level) through level smooth\_num_levels-1. 
  * The default is 0, i.e. no complex smoothers are used.
  **/
