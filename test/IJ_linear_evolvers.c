@@ -562,8 +562,12 @@ main( int   argc,
    time_index = hypre_InitializeTiming("IJ Interface");
    hypre_BeginTiming(time_index);
 
-   printf("  Backward Euler time step with dt = %f\n",dt);
-   printf("  Dirichlet 0 BCs are implicit in the spatial operator\n");
+   if (myid == 0)
+   {
+     printf("  Backward Euler time step with dt = %f\n",dt);
+     printf("  Dirichlet 0 BCs are implicit in the spatial operator\n");
+   }
+
    if ( build_matrix_type == 0 )
    {
       BuildParFromFile(argc, argv, build_matrix_arg_index, &parcsr_A);
@@ -810,7 +814,8 @@ main( int   argc,
    }
    else
    {
-      printf("  Initial unknown is random in the range 0 - 1\n");
+      if (myid == 0)
+        printf("  Initial unknown is random in the range 0 - 1\n");
 
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_b, global_n);
       HYPRE_IJVectorSetLocalStorageType(ij_b,ij_vector_storage_type );
