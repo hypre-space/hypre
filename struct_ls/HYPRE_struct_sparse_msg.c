@@ -188,6 +188,17 @@ HYPRE_StructSparseMSGSetLogging( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructSparseMSGSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructSparseMSGSetPrintLevel( HYPRE_StructSolver solver,
+                                    int              print_level )
+{
+   return( hypre_SparseMSGSetPrintLevel( (void *) solver, print_level) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructSparseMSGGetNumIterations
  *--------------------------------------------------------------------------*/
 

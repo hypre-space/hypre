@@ -168,6 +168,16 @@ HYPRE_StructSMGSetLogging( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructSMGSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructSMGSetPrintLevel( HYPRE_StructSolver solver,
+                           int        print_level )
+{
+   return( hypre_SMGSetPrintLevel( (void *) solver, print_level) );
+}
+/*--------------------------------------------------------------------------
  * HYPRE_StructSMGGetNumIterations
  *--------------------------------------------------------------------------*/
 

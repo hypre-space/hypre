@@ -188,6 +188,17 @@ HYPRE_StructPFMGSetLogging( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructPFMGSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructPFMGSetPrintLevel( HYPRE_StructSolver solver,
+                            int                  print_level )
+{
+   return( hypre_PFMGSetPrintLevel( (void *) solver, print_level) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructPFMGGetNumIterations
  *--------------------------------------------------------------------------*/
 
