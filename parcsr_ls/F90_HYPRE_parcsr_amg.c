@@ -135,7 +135,7 @@ hypre_F90_IFACE(hypre_paramgsetstrongthreshold)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetMaxRowSum)( long int *solver,
+hypre_F90_IFACE(hypre_paramgsetmaxrowsum)( long int *solver,
                                            double   *max_row_sum,
                                            int      *ierr              )
 {
