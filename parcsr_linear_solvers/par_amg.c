@@ -67,7 +67,7 @@ hypre_BoomerAMGCreate()
    max_row_sum = 0.9;
    trunc_factor = 0.0;
    interp_type = 200;
-   coarsen_type = 0;
+   coarsen_type = 6;
    measure_type = 0;
 
    /* solve params */
