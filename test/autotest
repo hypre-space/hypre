@@ -22,7 +22,8 @@ MAKE="make -k"
 
 HYPRE_DEFAULT_EMAIL="\
  dwalker@llnl.gov\
- rfalgout@llnl.gov"
+ rfalgout@llnl.gov\
+ cleary1@llnl.gov"
 
 HYPRE_CHECKOUT_EMAIL="$HYPRE_DEFAULT_EMAIL"
 
