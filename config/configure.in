@@ -580,6 +580,15 @@ AC_ARG_WITH(mli,
 [casc_using_mli=no]
 )
 
+AC_ARG_WITH(MPI,
+  AS_HELP_STRING([  --with-MPI],
+                 [ DEFAULT: Compile with MPI.  Selecting --without-MPI
+                   may affect which compiler is chosen.]),
+[case "$withval" in 
+   yes) casc_using_mpi=yes ;;
+    no) casc_using_mpi=no ;;
+     *) casc_using_mpi=yes ;;
+ esac], [casc_using_mpi=yes])
 
 dnl *********************************************************************
 dnl * Select compilers if not already defined by command line options 
@@ -647,24 +656,8 @@ AC_FUNC_STRTOD
 AC_CHECK_FUNCS([bzero floor gethrtime gettimeofday memset pow sqrt strcspn strdup strspn strtol])
 
 dnl *********************************************************************
-dnl * Find system MPI
-dnl * Find paths for mpicc, mpiCC, mpif77 and related programs
+dnl * For MPI, set the following:
 dnl *********************************************************************
-if test "$casc_user_chose_compilers" = "yes" &&
-   test "$casc_using_mpi" = "yes" &&
-   test "$casc_user_chose_mpi" = "no"
-then
-  AC_ARG_WITH(mpi,
-    AS_HELP_STRING([  --with-mpi],
-                   [ DEFAULT: Compile with MPI.  Selecting --without-mpi
-                     may affect which compiler is chosen.]),
-  [case "$withval" in 
-     yes) casc_using_mpi=yes ;;
-      no) casc_using_mpi=no ;;
-       *) casc_using_mpi=yes ;;
-   esac], [casc_using_mpi=yes])
-fi
-
 if test "$casc_using_mpi" = "no"
 then
    AC_DEFINE(HYPRE_SEQUENTIAL, 1, [Disable MPI, enable serial codes.])
@@ -672,7 +665,9 @@ else
    ACX_CHECK_MPI([LIBS="$LIBS $MPILIBS"])
 fi
 
-
+dnl *********************************************************************
+dnl * For Babel, set the following:
+dnl *********************************************************************
 BABELDIR=""
 if test "$casc_using_babel" = "yes"
 then
