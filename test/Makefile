@@ -108,8 +108,8 @@ STRUCT_ES_LFLAGS =\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
- -lHYPRE_utilities\
  -lHYPRE_lobpcg \
+ -lHYPRE_utilities\
  ${LAPACKLIBFLAGS} \
  ${BLASLIBFLAGS} \
  ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
@@ -157,8 +157,8 @@ SSTRUCT_ES_LFLAGS =\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
- -lHYPRE_utilities\
  -lHYPRE_lobpcg\
+ -lHYPRE_utilities\
  ${LAPACKLIBFLAGS} \
  ${BLASLIBFLAGS} \
  ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
@@ -198,8 +198,8 @@ IJ_ES_LFLAGS =\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
- -lHYPRE_utilities\
  -lHYPRE_lobpcg\
+ -lHYPRE_utilities\
  ${LAPACKLIBFLAGS} \
  ${BLASLIBFLAGS} \
  ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
