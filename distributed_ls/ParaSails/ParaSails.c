@@ -1388,6 +1388,9 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
         }
     }
 
+    time1 = MPI_Wtime();
+    ps->setup_values_time = time1 - time0;
+
     LoadBalReturn(load_bal, ps->comm, ps->M);
 
     /* Filtering */
@@ -1447,8 +1450,10 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
 
     StoredRowsDestroy(stored_rows);
 
+/*
     time1 = MPI_Wtime();
     ps->setup_values_time = time1 - time0;
+*/
 
 #ifdef PARASAILS_DEBUG
     ParaSailsStats(ps, A);
@@ -1522,8 +1527,13 @@ void ParaSailsStats(ParaSails *ps, Matrix *A)
     printf("******************* ParaSails *******************\n");
     printf("Setup times:\n");
 
+    temp = 0.0;
     for (i=0; i<npes; i++)
-        printf("%3d: %8.1f\n", setup_times[i]);
+    {
+        printf("%3d: %8.1f\n", i, setup_times[i]);
+	temp += setup_times[i];
+    }
+    printf("ave: %8.1f\n", temp / (double) npes);
 
     free(setup_times);
 
