@@ -1,0 +1,9 @@
+#!/bin/sh
+
+MPI_ROOT=/usr/local/mpi
+
+input=poisson.in
+np=4
+
+${MPI_ROOT}/bin/mpirun -np $np poisson-isis.x ${input}
+
