@@ -59,6 +59,7 @@ casc_using_openmp=no
 casc_using_ibm_smp=no
 casc_using_sgi_smp=no
 casc_using_pgcc_smp=no
+casc_using_blas=no
 
 
 AC_ARG_WITH(CC, \[
@@ -242,6 +243,11 @@ AC_ARG_WITH(pgcc_smp,
    [  --with-pgcc_smp          use pgcc SMP (Red)],
    casc_using_pgcc_smp=yes 
    AC_DEFINE(HYPRE_USING_PGCC_SMP)
+)
+
+AC_ARG_WITH(blas,
+   [  --with-blas          locate BLAS external to hypre library **THIS OPTION				 MUST BE USED FOR IJ_MATRIX_VECTOR CODE ON THE DECS], 
+   casc_using_blas=yes
 )
 
 
@@ -709,11 +715,12 @@ CFLAGS="$CFLAGS $COPT $CDEBUG"
 CXXFLAGS="$CXXFLAGS $CXXOPT $CXXDEBUG"
 F77FLAGS="$F77FLAGS $FOPT $FDEBUG"
 
-dnl *********************************************************************
-dnl * Find the BLAS libraries
-dnl *********************************************************************
-
-CASC_FIND_BLAS
+if test "$casc_using_blas" = "yes"
+then
+ CASC_FIND_BLAS
+else
+ BLASLIBFLAGS=-lHYPRE_blas
+fi
 
 dnl *********************************************************************
 dnl * Add flags to LIBS and LIBDIRS
@@ -809,7 +816,8 @@ CASC_CONFIG_OUTPUT_LIST(\
  matrix_matrix\
  test\
  tools\
- docs)
+ docs\
+ blas)
 
 AC_OUTPUT($Makefile_list)
 
