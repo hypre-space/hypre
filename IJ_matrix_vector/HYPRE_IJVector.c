@@ -630,7 +630,7 @@ HYPRE_GetIJVectorLocalComponents( HYPRE_IJVector  IJvector,
                                                  value_indices,
                                                  values);
    else
-      ierr = -1;
+      ++ierr;
 
    return(ierr);
 }
@@ -684,7 +684,25 @@ HYPRE_GetIJVectorLocalComponentsInBlock( HYPRE_IJVector  IJvector,
                                                         value_indices,
                                                         values);
    else
-      ierr = -1;
+      ++ierr;
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GetIJVectorLocalStorageType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_GetIJVectorLocalStorageType( HYPRE_IJVector IJvector, int *type )
+{
+   int ierr = 0;
+   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
+
+   if (vector)
+      *type = hypre_IJVectorLocalStorageType(vector);
+   else
+      ++ierr;
 
    return(ierr);
 }
@@ -737,9 +755,7 @@ The vector to be pointed to.
 void *
 hypre_GetIJVectorLocalStorage( HYPRE_IJVector IJvector )
 {
-   int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
    return( hypre_IJVectorLocalStorage(vector) );
-
 }
