@@ -787,6 +787,8 @@ main( int   argc,
          {
             for ( i=0; i<stencil_size; ++i ) stencil_entries[i]=i;
             hypre_StructMatrixSetConstantEntries( A, stencil_size, stencil_entries );
+            /* ... note: SetConstantEntries is where the constant_coefficient flag
+               is set in A */
             hypre_TFree( stencil_entries );
             constant_coefficient = 1;
          }
@@ -794,6 +796,9 @@ main( int   argc,
          {
             hypre_SetIndex(diag_index, 0, 0, 0);
             diag_rank = hypre_StructStencilElementRank( stencil, diag_index );
+            assert( stencil_size>=1 );
+            if ( diag_rank==0 ) stencil_entries[diag_rank]=1;
+            else stencil_entries[diag_rank]=0;
             for ( i=0; i<stencil_size; ++i )
             {
                if ( i!= diag_rank ) stencil_entries[i]=i;
@@ -907,7 +912,8 @@ main( int   argc,
            
             /* Zero out stencils reaching to real boundary */
            
-            SetStencilBndry(A,readgrid,readperiodic); 
+            if ( constant_coefficient==0 )
+               SetStencilBndry(A,readgrid,readperiodic); 
             HYPRE_StructMatrixAssemble(A);
          }   
          /* done with one case rhs=1 x0 = 0  */
@@ -954,7 +960,8 @@ main( int   argc,
 
             /* Zero out stencils reaching to real boundary */
 
-            SetStencilBndry(A,readgrid,readperiodic); 
+            if ( constant_coefficient == 0 )
+               SetStencilBndry(A,readgrid,readperiodic); 
             HYPRE_StructMatrixAssemble(A);
 	 }
          /* done with one case rhs=0 x0 = 1  */
@@ -1003,7 +1010,8 @@ main( int   argc,
 
             /* Zero out stencils reaching to real boundary */
 
-            SetStencilBndry(A,readgrid,readperiodic); 
+            if ( constant_coefficient == 0 )
+               SetStencilBndry(A,readgrid,readperiodic); 
             HYPRE_StructMatrixAssemble(A);
 	 }
          /* done with one case rhs=1 x0 = 1  */
