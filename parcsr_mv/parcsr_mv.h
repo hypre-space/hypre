@@ -90,35 +90,6 @@ typedef struct
 #define hypre_ParCSRCommHandleRequest(comm_handle, i)  (comm_handle -> requests[i])
 
 /*BHEADER**********************************************************************
- * (c) 1996   The Regents of the University of California
- *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
- *
- * $Revision$
- *********************************************************************EHEADER*/
-
-/******************************************************************************
- *
- * Fortran <-> C interface macros
- *
- *****************************************************************************/
-
-#ifndef HYPRE_FORTRAN_HEADER
-#define HYPRE_FORTRAN_HEADER
-
-#if defined(IRIX) || defined(DEC)
-#define hypre_NAME_C_FOR_FORTRAN(name) name##_
-#define hypre_NAME_FORTRAN_FOR_C(name) name##_
-#else
-#define hypre_NAME_C_FOR_FORTRAN(name) name##__
-#define hypre_NAME_FORTRAN_FOR_C(name) name##_
-#endif
-
-#define hypre_F90_IFACE(iface_name) hypre_NAME_FORTRAN_FOR_C(iface_name)
-
-#endif
-/*BHEADER**********************************************************************
  * (c) 1998   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
@@ -317,7 +288,7 @@ int HYPRE_ParCSRMatrixMatvec P((double alpha , HYPRE_ParCSRMatrix A , HYPRE_ParV
 int HYPRE_ParVectorCreate P((MPI_Comm comm , int global_size , int *partitioning , HYPRE_ParVector *vector ));
 int HYPRE_ParVectorDestroy P((HYPRE_ParVector vector ));
 int HYPRE_ParVectorInitialize P((HYPRE_ParVector vector ));
-int HYPRE_ParVectorRead P((MPI_Comm comm , char *file_name, HYPRE_ParVector *vector ));
+int HYPRE_ParVectorRead P((MPI_Comm comm , char *file_name , HYPRE_ParVector *vector ));
 int HYPRE_ParVectorPrint P((HYPRE_ParVector vector , char *file_name ));
 int HYPRE_ParVectorSetConstantValues P((HYPRE_ParVector vector , double value ));
 int HYPRE_ParVectorSetRandomValues P((HYPRE_ParVector vector , int seed ));
@@ -333,6 +304,15 @@ int hypre_MatvecCommPkgCreate P((hypre_ParCSRMatrix *A ));
 int hypre_MatvecCommPkgDestroy P((hypre_ParCSRCommPkg *comm_pkg ));
 int hypre_BuildCSRMatrixMPIDataType P((int num_nonzeros , int num_rows , double *a_data , int *a_i , int *a_j , MPI_Datatype *csr_matrix_datatype ));
 int hypre_BuildCSRJDataType P((int num_nonzeros , double *a_data , int *a_j , MPI_Datatype *csr_jdata_datatype ));
+
+/* driver.c */
+int main P((int argc , char *argv []));
+
+/* driver_matmul.c */
+int main P((int argc , char *argv []));
+
+/* driver_matvec.c */
+int main P((int argc , char *argv []));
 
 /* par_csr_matop.c */
 hypre_ParCSRMatrix *hypre_ParMatmul P((hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B ));
