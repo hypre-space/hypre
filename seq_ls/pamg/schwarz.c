@@ -189,14 +189,6 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
   double *domain_matrixinverse;
   int num_domains;
 
-  int *dof_domain;
-/*  double *domain_diagmat;
-
-  int *i_dof_dof_b, *j_dof_dof_b;
-  double *b_dof_dof;
-
-  double *v_ext, *w_ext;
-*/
 
   int *i_dof_node, *j_dof_node;
   int *i_node_dof, *j_node_dof;
@@ -219,27 +211,15 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
   int *i_local_to_global;
   int *i_global_to_local;
 
+  int *i_int;
+  int *i_int_to_local;
 
   int local_dof_counter, max_local_dof_counter=0; 
-  int int_dof_counter, ext_dof_counter;
 
   int domain_dof_counter = 0, domain_matrixinverse_counter = 0;
 
 
-  int *i_int;
-
-  int *i_int_to_local, *i_ext_to_local;
-
-  int *i_local_to_ext;
-
-/*  double *A_XX, *X, *BE; */
-
   double *AE, *XE;
-
-  /* PCG arrays: --------------------------------------------------- */
-  /* double *x, *rhs, *v, *w, *d, *aux; 
-
-  int max_iter; */
 
 
   /* build dof_node graph: ----------------------------------------- */
@@ -344,7 +324,6 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
   else
     j_domain_dof = hypre_CTAlloc(int, num_dofs);
 
-  /* domain_diagmat = hypre_CTAlloc(double, domain_dof_counter); */
 
   if (option == 1)
     domain_matrixinverse = hypre_CTAlloc(double, domain_matrixinverse_counter);
@@ -359,21 +338,12 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
   AE = hypre_CTAlloc(double, max_local_dof_counter *
 		     max_local_dof_counter);
 
-/*  BE = hypre_CTAlloc(double, max_local_dof_counter *
-		     max_local_dof_counter); */
+
 
   XE = hypre_CTAlloc(double, max_local_dof_counter *
 		     max_local_dof_counter);
 
-/*  A_XX = hypre_CTAlloc(double, max_local_dof_counter *
-		       max_local_dof_counter);
-
-  X = hypre_CTAlloc(double, max_local_dof_counter *
-		    max_local_dof_counter);
-
-  v_ext = hypre_CTAlloc(double, max_local_dof_counter);
-  w_ext = hypre_CTAlloc(double, max_local_dof_counter);
-*/  
+  i_int_to_local = hypre_CTAlloc(int, max_local_dof_counter);
   i_int_to_local = hypre_CTAlloc(int, max_local_dof_counter);
   i_ext_to_local = hypre_CTAlloc(int, max_local_dof_counter);
 
@@ -438,23 +408,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 	  int_dof_counter++;
 	}
 
-
-      ext_dof_counter = 0;
-      for (i_loc=0; i_loc < local_dof_counter; i_loc++)
-	if (i_int[i_loc] < 0)
-	  {
-	    i_ext_to_local[ext_dof_counter] = i_loc;
-	    i_local_to_ext[i_loc] = ext_dof_counter;
-	    ext_dof_counter++;
-	  }
-
-
       /* get local matrix AE: ======================================== */
-
-      /*
-      printf("int_dof_counter: %d, ext_dof_counter: %d, local_dof_counter: %d\n",
-	     int_dof_counter, ext_dof_counter, local_dof_counter);
-	     */
 
       for (i_loc=0; i_loc < local_dof_counter; i_loc++)
 	for (j_loc=0; j_loc < local_dof_counter; j_loc++)
@@ -474,77 +428,16 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 	}
 
 
-
-      /* get block--diagonal local matrix BE: ======================== */
-
-/*      for (i_loc=0; i_loc < local_dof_counter; i_loc++)
-	for (j_loc=0; j_loc < local_dof_counter; j_loc++)
-	  if (dof_func[i_local_to_global[i_loc]] ==
-	      dof_func[i_local_to_global[j_loc]])
-	    BE[i_loc + j_loc * local_dof_counter] = 
-	      AE[i_loc + j_loc * local_dof_counter];
-	  else
-	    BE[i_loc + j_loc * local_dof_counter] = 0.e0; 
-*/
-
-
       /* get block for Schwarz smoother: ============================= */
       ierr = matinv(XE, AE, local_dof_counter); 
 
       /* printf("ierr_AE_inv: %d\n", ierr); */
   
-/*
-      for (i_loc = 0; i_loc < ext_dof_counter; i_loc++)
-	for (j_loc = 0; j_loc < ext_dof_counter; j_loc++)
-	  A_XX[i_loc + j_loc * ext_dof_counter] = 
-	    BE[i_ext_to_local[i_loc] + i_ext_to_local[j_loc]
-	      * local_dof_counter];
 
-
-      
-      ierr = matinv(X, A_XX, ext_dof_counter); */
-      /*      printf("ierr_A_XX_inv: %d\n", ierr); */
-/*
-      for (i_loc = 0; i_loc < ext_dof_counter; i_loc++)
-	{
-	  w_ext[i_loc] = 0.e0;
-	  for (j_loc = 0; j_loc < int_dof_counter; j_loc++)
-	    w_ext[i_loc] += BE[i_ext_to_local[i_loc] + i_int_to_local[j_loc]
-			      * local_dof_counter];
-*/
-	  /* printf("w_ext: %e\n",  w_ext[i_loc]); */
-/*	} */
-	  
-
-      /* printf("\n\n=====================================\n"); */
-/*      for (i_loc = 0; i_loc < ext_dof_counter; i_loc++)
-	{
-	  v_ext[i_loc] = 0.e0;
-
-	  for (j_loc = 0; j_loc < ext_dof_counter; j_loc++)
-	    v_ext[i_loc] -=
-	      X[i_loc + j_loc * ext_dof_counter] * w_ext[j_loc];
-*/
-	  /* printf("v_ext: %e\n",  v_ext[i_loc]); */
-
-/*	} */
-      /* printf("\n\n=====================================\n"); */
-
-
-/*
-      for (i_loc=0; i_loc < local_dof_counter; i_loc++)
-	{
-	  if (option == 1)
-	    j_domain_dof[domain_dof_counter+i_loc] 
-	      = i_local_to_global[i_loc]; 
-
-	  if (i_int[i_loc] < -1)
-	    domain_diagmat[domain_dof_counter+i_loc]
-	      = v_ext[i_local_to_ext[i_loc]];
-	  else
-	    domain_diagmat[domain_dof_counter+i_loc] = 1.e0;
-	}
-*/
+      if (option == 1)
+	for (i_loc=0; i_loc < local_dof_counter; i_loc++)
+	  j_domain_dof[domain_dof_counter+i_loc] 
+	    = i_local_to_global[i_loc]; 
 
 
       if (option == 1)
@@ -554,31 +447,6 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 				+ i_loc + j_loc * local_dof_counter]
 	      = XE[i_loc + j_loc * local_dof_counter];
 
-/*
-      for (l_loc=0; l_loc < int_dof_counter; l_loc++)
-	{
-	  i_loc = i_int_to_local[l_loc];
-
-	  i_dof = i_local_to_global[i_loc];
-
-	  b_dof_dof[i_dof_dof[i_dof]] = XE[i_loc + i_loc * local_dof_counter]/
-	    (domain_diagmat[domain_dof_counter+i_loc] *
-	     domain_diagmat[domain_dof_counter+i_loc]);
-
-	  for (j=i_dof_dof[i_dof]+1; j < i_dof_dof[i_dof+1]; j++)
-	    {
-	      j_dof = j_dof_dof[j];
-	      j_loc = i_global_to_local[j_dof];
-
-	      if (j_loc < 0)
-		printf("wrong local index: ======================\n");
-
-	      b_dof_dof[j] = -fabs(XE[i_loc + j_loc * local_dof_counter]/
-			domain_diagmat[domain_dof_counter+i_loc])/
-		fabs(domain_diagmat[domain_dof_counter+j_loc]);
-	    }
-	}
-*/
       if (option == 0)
 	{
 
@@ -645,14 +513,10 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
   hypre_TFree(i_node_node);
   hypre_TFree(j_node_node);
 
-/*  hypre_TFree(v_ext);
-  hypre_TFree(w_ext);
-*/
   hypre_TFree(i_int);
 
 
   hypre_TFree(i_int_to_local);
-  hypre_TFree(i_ext_to_local);
   hypre_TFree(i_local_to_ext);
 
 
@@ -660,12 +524,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
 
   hypre_TFree(AE);
-/*  hypre_TFree(BE); */
   hypre_TFree(XE);
-/*
-  hypre_TFree(A_XX);
-  hypre_TFree(X);
-*/
 
    *i_domain_dof_pointer = i_domain_dof;
    *j_domain_dof_pointer = j_domain_dof;
