@@ -991,7 +991,7 @@ int MLI_Method_AMGSA::print()
    if ( mypid == 0 )
    {
       printf("\t********************************************************\n");
-      printf("\t*** method name             = %d\n", getName());
+      printf("\t*** method name             = %s\n", getName());
       printf("\t*** number of levels        = %d\n", num_levels);
       printf("\t*** coarsen_scheme          = %d\n", coarsen_scheme);
       printf("\t*** nodal degree of freedom = %d\n", node_dofs);
