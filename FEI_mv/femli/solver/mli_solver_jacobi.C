@@ -109,7 +109,7 @@ int MLI_Solver_Jacobi::setup(MLI_Matrix *Amat)
     * compute spectral radius of A
     *-----------------------------------------------------------------*/
 
-   if ( maxEigen_ == 0.0 && relaxWeights_[0] == 0.0 )
+   if (maxEigen_ == 0.0 && (relaxWeights_ == NULL || relaxWeights_[0] == 0.0))
    {
       ritzValues = new double[2];
       status = MLI_Utils_ComputeExtremeRitzValues(A, ritzValues, 1);
@@ -117,6 +117,7 @@ int MLI_Solver_Jacobi::setup(MLI_Matrix *Amat)
       maxEigen_ = ritzValues[0]; 
       delete [] ritzValues;
    }
+   if ( relaxWeights_ == NULL ) relaxWeights_ = new double[nSweeps_];
    for (i = 0; i < nSweeps_; i++) relaxWeights_[i] = 4.0 / (3.0*maxEigen_);
    return 0;
 }
