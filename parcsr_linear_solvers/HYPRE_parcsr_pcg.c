@@ -215,7 +215,7 @@ HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
                        HYPRE_ParVector Hy,
                        HYPRE_ParVector Hx      )
 {
-   HYPRE_Matrix *A = (HYPRE_Matrix *) HA;
+   hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
    hypre_ParVector    *y = (hypre_ParVector *) Hy;
    hypre_ParVector    *x = (hypre_ParVector *) Hx;
    double *x_data = hypre_VectorData(hypre_ParVectorLocalVector(x));

@@ -488,7 +488,7 @@ int hypre_SchwarzSolve(hypre_CSRMatrix *A,
   char uplo = 'L';
   int one = 1;
 
-  int jj,i,j,k, j_loc, k_loc;
+  int jj,i,j,k; /*, j_loc, k_loc;*/
 
 
   int matrix_size, matrix_size_counter = 0;
