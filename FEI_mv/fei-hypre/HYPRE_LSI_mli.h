@@ -44,15 +44,16 @@ extern "C"
 extern int  HYPRE_LSI_MLICreate( MPI_Comm, HYPRE_Solver * );
 extern int  HYPRE_LSI_MLIDestroy( HYPRE_Solver );
 extern int  HYPRE_LSI_MLISetup( HYPRE_Solver, HYPRE_ParCSRMatrix,
-                                HYPRE_ParVector, HYPRE_ParVector );
+                                HYPRE_ParVector,   HYPRE_ParVector );
 extern int  HYPRE_LSI_MLISolve( HYPRE_Solver, HYPRE_ParCSRMatrix,
-                                HYPRE_ParVector, HYPRE_ParVector);
+                                HYPRE_ParVector,   HYPRE_ParVector);
 extern int  HYPRE_LSI_MLISetParams( HYPRE_Solver, char * );
 extern int  HYPRE_LSI_MLISetStrengthThreshold( HYPRE_Solver, double );
 extern int  HYPRE_LSI_MLISetMethod( HYPRE_Solver, char * );
-extern int  HYPRE_LSI_MLISetNumPDEs( HYPRE_Solver, int );
 extern int  HYPRE_LSI_MLISetSmoother( HYPRE_Solver, int, int, int, char ** );
 extern int  HYPRE_LSI_MLISetCoarseSolver( HYPRE_Solver, int, int, char ** );
+extern int  HYPRE_LSI_MLISetNodalCoordinates( HYPRE_Solver, int, int, double *, 
+                                              double * );
 extern int  HYPRE_LSI_MLISetNullSpace( HYPRE_Solver, int, int, double *, int );
 
 extern void *HYPRE_LSI_MLIFEDataCreate( MPI_Comm );

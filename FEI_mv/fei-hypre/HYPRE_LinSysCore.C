@@ -1987,11 +1987,21 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
 {
    if ( fieldID == -4 )
    {
-      printf("putNodalFieldData : fieldSize = %d\n", fieldSize);
-      printf("putNodalFieldData : numNodes  = %d\n", numNodes);
-      for ( int i = 0; i < numNodes; i++ )
-         for ( int j = 0; j < fieldSize; j++ )
-            printf("putNodalFieldData : %4d %2d = %e\n",i,j,data[i*fieldSize+j]);
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 3 )
+      {
+         printf("putNodalFieldData : fieldSize = %d\n", fieldSize);
+         printf("putNodalFieldData : numNodes  = %d\n", numNodes);
+         for ( int i = 0; i < numNodes; i++ )
+            for ( int j = 0; j < fieldSize; j++ )
+               printf("putNodalFieldData : %4d %2d = %e\n",i,j,
+                      data[i*fieldSize+j]);
+      }    
+      if ( HYPreconID_ == HYMLI )
+      {
+printf("calling Nodal Coordinates\n");
+         HYPRE_LSI_MLISetNodalCoordinates(HYPrecon_, numNodes, fieldSize,  
+                                          (double *) data, NULL);
+      }    
    }    
    return (0);
 }
