@@ -94,6 +94,7 @@ int MLI_Solver_CG::setup(MLI_Matrix *Amat_in)
                                   numSweeps = 1;
                                   argv[0] = (char *) &numSweeps;
                                   baseSolver_->setParams(paramString,1,argv);
+                                  break;
       case MLI_SOLVER_BSGS_ID :   sprintf(paramString, "BSGS");
                                   baseSolver_ = 
                                      new MLI_Solver_BSGS(paramString);
