@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
+#include <mpi.h>
 
 /****************************************************************************/ 
 /* MLI include files                                                        */
@@ -51,6 +52,7 @@
 #define MLI_SOLVER_SUPERLU_ID   6 
 #define MLI_METHOD_AMGSA_ID     7
 #endif
+#include "HYPRE_LSI_mli.h"
 
 /****************************************************************************/ 
 /* HYPRE_LSI_MLI data structure                                             */
@@ -75,6 +77,10 @@ typedef struct HYPRE_LSI_MLI_Struct
    int      coarseSolver_;        /* default = SuperLU */
    int      coarseSolverNSweeps_;
    double   *coarseSolverWts_;
+   int      nodeDOF_;
+   int      nSpaceDim_;           /* number of null vectors */
+   double   *nSpaceVects_;
+   int      localNEqns_;
 } 
 HYPRE_LSI_MLI;
 
@@ -92,8 +98,6 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->numPDEs_             = 1;
    mli_object->preSmoother_         = MLI_SOLVER_SGS_ID;
    mli_object->postSmoother_        = MLI_SOLVER_SGS_ID;
-   mli_object->preSmoother_         = 0;
-   mli_object->postSmoother_        = 0;
    mli_object->preNSweeps_          = 2;
    mli_object->postNSweeps_         = 2;
    mli_object->preSmootherWts_      = NULL;
@@ -102,6 +106,10 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->coarseSolver_        = 0;
    mli_object->coarseSolverNSweeps_ = 0;
    mli_object->coarseSolverWts_     = NULL;
+   mli_object->nodeDOF_             = 0;
+   mli_object->nSpaceDim_           = 0;
+   mli_object->nSpaceVects_         = NULL;
+   mli_object->localNEqns_          = 0;
 #ifdef HAVE_MLI
    mli_object->mli_                 = NULL;
    return 0;
@@ -129,6 +137,8 @@ int HYPRE_LSI_MLIDestroy( HYPRE_Solver solver )
       delete [] mli_object->postSmootherWts_;
    if ( mli_object->coarseSolverWts_ != NULL ) 
       delete [] mli_object->coarseSolverWts_;
+   if ( mli_object->nSpaceVects_ != NULL ) 
+      delete [] mli_object->nSpaceVects_;
    free( mli_object );
 #ifdef HAVE_MLI
    return 0;
@@ -162,13 +172,14 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    mli_object = (HYPRE_LSI_MLI *) solver;
    mpiComm    = mli_object->mpiComm_;
    mli        = new MLI( mpiComm );
+   if ( mli_object->mli_ != NULL ) delete mli_object->mli_;
    mli_object->mli_ = mli;
 
    /* -------------------------------------------------------- */ 
    /* set general parameters                                   */
    /* -------------------------------------------------------- */ 
 
-   mli->setNumLevels( mli_object->nLevels );
+   mli->setNumLevels( mli_object->nLevels_ );
    mli->setMaxIterations( maxIterations );
    mli->setTolerance( tol );
 
@@ -179,7 +190,7 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    switch ( mli_object->method_ )
    {
       case MLI_METHOD_AMGSA_ID : 
-           method = MLI_Method_CreateFromID(mli_object->method, mpiComm );
+           method = MLI_Method_CreateFromID(mli_object->method_, mpiComm );
    }
    sprintf(paramString, "setNumLevels %d", mli_object->nLevels_);
    method->setParams( paramString, 0, NULL );
@@ -264,12 +275,12 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* load null space, if there is any                         */
    /* -------------------------------------------------------- */ 
 
-   if ( mli_object->NSpaceDim_ > 0 )
+   if ( mli_object->nSpaceDim_ > 0 )
    {
-      targv[0] = (char *) &mli_object->nodeDOF_;
-      targv[1] = (char *) &mli_object->nSpaceDim_;
-      targv[2] = (char *) nSpaceVects_;
-      targv[3] = (char *) &localNEqns_;
+      targv[0] = (char *) &(mli_object->nodeDOF_);
+      targv[1] = (char *) &(mli_object->nSpaceDim_);
+      targv[2] = (char *) mli_object->nSpaceVects_;
+      targv[3] = (char *) &(mli_object->localNEqns_);
       targc    = 4;
       strcpy( paramString, "setNullSpace" );
       method->setParams( paramString, targc, targv );
@@ -282,7 +293,6 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    mli_mat = new MLI_Matrix((void*) A, "HYPRE_ParCSR", NULL);
    mli->setMethod( method );
    mli->setSystemMatrix( 0, mli_mat );
-   free( func_ptr );
    mli->setup();
 
    return 0;
@@ -307,7 +317,12 @@ int HYPRE_LSI_MLISolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    rhs = new MLI_Vector( (void *) b, "HYPRE_ParVector", NULL);
 
    mli_object = (HYPRE_LSI_MLI *) solver;
-   mli_object->solve( sol, rhs);
+   if ( mli_object->mli_ == NULL )
+   {
+      printf("HYPRE_LSI_MLISolve ERROR : mli not instantiated.\n");
+      exit(1);
+   }
+   mli_object->mli_->solve( sol, rhs);
 
    delete [] sol;
    delete [] rhs;
@@ -329,32 +344,33 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
    char          param1[256], param2[256], param3[256];
 
    mli_object = (HYPRE_LSI_MLI *) solver;
-   sscanf(params,"%s", param1);
+   sscanf(paramString,"%s", param1);
    if ( strcmp(param1, "MLI") )
    {
       printf("HYPRE_LSI_MLI::parameters not for me.\n");
       return 1;
    }
-   sscanf(params,"%s %s", param1, param2);
+   sscanf(paramString,"%s %s", param1, param2);
    if ( !strcmp(param2, "strengthThreshold") )
    {
-      sscanf(params,"%s %s %lg",param1,param2,&(mli_object->strengthThreshold_));
+      sscanf(paramString,"%s %s %lg",param1,param2,
+             &(mli_object->strengthThreshold_));
       if ( mli_object->strengthThreshold_ < 0.0 )
          mli_object->strengthThreshold_ = 0.0;
    }
    else if ( !strcmp(param2, "method") )
    {
-      sscanf(params,"%s %s %s", param1, param2, param3);
+      sscanf(paramString,"%s %s %s", param1, param2, param3);
       if ( ! strcmp( param3, "AMGSA" ) )
          mli_object->method_ = MLI_METHOD_AMGSA_ID;
    }
    else if ( !strcmp(param2, "smoother") )
    {
-      sscanf(params,"%s %s %s", param1, param2, param3);
+      sscanf(paramString,"%s %s %s", param1, param2, param3);
       if ( ! strcmp( param3, "Jacobi" ) )
       {
-         mli_object->preSmoother_  = MLI_METHOD_JACOBI_ID;
-         mli_object->postSmoother_ = MLI_METHOD_JACOBI_ID;
+         mli_object->preSmoother_  = MLI_SOLVER_JACOBI_ID;
+         mli_object->postSmoother_ = MLI_SOLVER_JACOBI_ID;
       }
       else if ( ! strcmp( param3, "GS" ) )
       {
@@ -389,9 +405,9 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
    }
    else if ( !strcmp(param2, "coarseSolver") )
    {
-      sscanf(params,"%s %s %s", param1, param2, param3);
+      sscanf(paramString,"%s %s %s", param1, param2, param3);
       if ( ! strcmp( param3, "Jacobi" ) )
-         mli_object->coarseSolver_ = MLI_METHOD_JACOBI_ID;
+         mli_object->coarseSolver_ = MLI_SOLVER_JACOBI_ID;
       else if ( ! strcmp( param3, "GS" ) )
          mli_object->coarseSolver_ = MLI_SOLVER_GS_ID;
       else if ( ! strcmp( param3, "SGS" ) )
@@ -410,7 +426,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
    }
    else if ( !strcmp(param2, "numSweeps") )
    {
-      sscanf(params,"%s %s %d",param1,param2,&(mli_object->preNSweeps_));
+      sscanf(paramString,"%s %s %d",param1,param2,&(mli_object->preNSweeps_));
       if ( mli_object->preNSweeps_ <= 0 ) mli_object->preNSweeps_ = 1;
       mli_object->postNSweeps_ = mli_object->preNSweeps_; 
    }
@@ -578,7 +594,7 @@ int HYPRE_LSI_MLISetSmoother( HYPRE_Solver solver, int pre_post,
 /* solver ID = 1  (aggregation)                                             */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_LSI_MLISetCoarseSolver( HYPRE_Solver solver, int solver_id, 
+int HYPRE_LSI_MLISetCoarseSolver( HYPRE_Solver solver, int solver_id,
                                   int argc, char **argv )
 {
    int           i, stype, nsweeps;
@@ -588,7 +604,7 @@ int HYPRE_LSI_MLISetCoarseSolver( HYPRE_Solver solver, int solver_id,
    stype = solver_id;
    if ( stype < 0 || stype > 6 )
    {
-      printf("HYPRE_LSI_MLISetCoarseSolver WARNING : set to Jacobi.\n";
+      printf("HYPRE_LSI_MLISetCoarseSolver WARNING : set to Jacobi.\n");
       stype = 0;
    } 
    stype += MLI_SOLVER_JACOBI_ID;
@@ -616,4 +632,22 @@ int HYPRE_LSI_MLISetCoarseSolver( HYPRE_Solver solver, int solver_id,
    } 
    return 0;
 }
+
+/****************************************************************************/
+/* HYPRE_LSI_MLISetNullSpaces                                               */
+/*--------------------------------------------------------------------------*/
+
+int HYPRE_LSI_MLISetNullSpaces( HYPRE_Solver solver, int nodeDOF,
+                                int numNS, double *NSpaces, int numEqns)
+{
+   HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
+   mli_object->nodeDOF_     = nodeDOF;
+   mli_object->nSpaceDim_   = numNS;
+   mli_object->nSpaceVects_ = new double[numEqns*numNS];
+   for ( int i = 0; i < numEqns*numNS; i++ )  
+      mli_object->nSpaceVects_[i] = NSpaces[i];
+   mli_object->nSpaceVects_ = NULL;
+   mli_object->localNEqns_  = numEqns;
+   return 0;
+} 
 
