@@ -22,7 +22,7 @@ interoperate.  However, portability might introduce complexities to
 configuration of the interoperation codes.
 
 Portability across DEC Compass, DEC Tera, and IBM ASCI-Blue platforms is
-achieved with the specific Fortran-calling-C mapping: 
+currently achieved with the specific Fortran-calling-C mapping: 
 
 \vspace{0.2in}
 
@@ -43,7 +43,6 @@ achieved with the specific Fortran-calling-C mapping:
 \end{tabular}
 
 \vspace{0.2in}
-
 
 In particular, on DEC Compass, DEC Tera, and IBM ASCI-Blue, C-type
 \verb+long int *+ points to a space that can hold an address, a space
@@ -68,49 +67,66 @@ particular hand them back and forth between various C functions.  The
 
   Fortran calling:
 \begin{verbatim}
-      integer*8        struct_addr
+      integer*8        addr
       integer          intg, ierr
       character        charact
-      double precision double_prec
+      double precision double_precis
 
-      call sub_name(struct_addr, intg, charact, double_prec, ierr)
-\end{verbatim}
-  C called:
-\begin{verbatim}
-      void hypre_F90_NAME(sub_name)( long int  *struct_addr,
-                                     int       *intg,
-                                     char      *charact,
-                                     double    *double_prec,
-                                     int       *ierr          )
+      call subroutine_name(addr, intg, charact, double_precis, ierr)
 \end{verbatim}
 
-\section{Fortran subroutine calls in {\slshape hypre} source code}
+The interface is designed so that the label \verb+subroutine_name+ is exactly
+the label of the {\slshape hypre} C-function.  The Hypre interlanguage interface
+accounts for related compilation/linking issues involving appended
+underscores.  Fortran variables like \verb+addr+
+are convenient for receiving, from C, pointers to arrays or other
+collections of data.  Such pointers need not point to data allocated by Fortran.
+Fortran variable \verb+ierr+ exemplifies a convenient approach to error
+handling through the interface.
 
-\vspace{0.1in}
+The above implementation might not have the portability needed over a larger set
+of platforms.  Reliance on the previous mapping might be a weakness.
+Furthermore,
+the implementation is hand-programmed, slow, and prone to human error.
+It will probably be replaced by a more automated implementation in accordance
+with the {\slshape Babel} project. 
 
-\noindent Example:
+%  C called:
+%\begin{verbatim}
+%      void hypre_F90_NAME(sub_name)( long int  *struct_addr,
+%                                     int       *intg,
+%                                     char      *charact,
+%                                     double    *double_prec,
+%                                     int       *ierr          )
+%\end{verbatim}
 
-\vspace{0.1in}
+%\section{Fortran subroutine calls in {\slshape hypre} source code}
 
-  C calling:
-\begin{verbatim}
-      long int long_intg;
-      int      intg, ierr;
-      char     charact;
-      double   double_prec;
+%\vspace{0.1in}
 
-      hypre_F90_NAME(sub_name)( &long_intg, &intg, &charact,
-                                &double_prec, &ierr )
-\end{verbatim}
+%\noindent Example:
 
-  Fortran called:
-\begin{verbatim}
-      subroutine sub_name(long_intg, intg, charact, double_prec, ierr)
+%\vspace{0.1in}
 
-      integer*8        long_intg
-      integer          intg, ierr
-      character        charact
-      double precision double_prec
-\end{verbatim}
+%  C calling:
+%\begin{verbatim}
+%      long int long_intg;
+%      int      intg, ierr;
+%      char     charact;
+%      double   double_prec;
+
+%      hypre_F90_NAME(sub_name)( &long_intg, &intg, &charact,
+%                               &double_prec, &ierr )
+%\end{verbatim}
+
+%  Fortran called:
+%\begin{verbatim}
+%      subroutine sub_name(long_intg, intg, charact, double_prec, ierr)
+
+%      integer*8        long_intg
+%      integer          intg, ierr
+%      character        charact
+%      double precision double_prec
+%\end{verbatim}
 
 %==========================================================================
