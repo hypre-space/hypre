@@ -9,6 +9,7 @@ bsetup.f
 build
 cforce.f
 color.f
+config.dec
 config.defaults
 config.irix
 config.solaris
@@ -21,6 +22,10 @@ f90amg.c
 f90amg_params.c
 f90amg_setup.c
 f90amg_solve.c
+f90amgI.c
+f90amgI_params.c
+f90amgI_setup.c
+f90amgI_solve.c
 fortran.h
 general.h
 headers.h
