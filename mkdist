@@ -147,20 +147,19 @@ tar cf $HYPRE_DIR.tar \
     $HYPRE_DIR/src/HYPRE_config.h.in \
     $HYPRE_DIR/src/blas \
     $HYPRE_DIR/src/utilities \
-    $HYPRE_DIR/src/struct_matrix_vector \
-    $HYPRE_DIR/src/struct_linear_solvers \
-    $HYPRE_DIR/src/sstruct_matrix_vector \
-    $HYPRE_DIR/src/sstruct_linear_solvers \
-    $HYPRE_DIR/src/seq_matrix_vector \
-    $HYPRE_DIR/src/parcsr_matrix_vector \
-    $HYPRE_DIR/src/distributed_matrix \
     $HYPRE_DIR/src/krylov \
+    $HYPRE_DIR/src/struct_mv \
+    $HYPRE_DIR/src/struct_ls \
+    $HYPRE_DIR/src/seq_mv \
+    $HYPRE_DIR/src/parcsr_mv \
+    $HYPRE_DIR/src/distributed_matrix \
     $HYPRE_DIR/src/matrix_matrix \
-    $HYPRE_DIR/src/IJ_matrix_vector \
-    $HYPRE_DIR/src/distributed_linear_solvers/pilut \
-    $HYPRE_DIR/src/distributed_linear_solvers/ParaSails \
-    $HYPRE_DIR/src/parcsr_linear_solvers \
-    $HYPRE_DIR/src/FEI_matrix_vector \
+    $HYPRE_DIR/src/IJ_mv \
+    $HYPRE_DIR/src/distributed_ls \
+    $HYPRE_DIR/src/parcsr_ls \
+    $HYPRE_DIR/src/sstruct_mv \
+    $HYPRE_DIR/src/sstruct_ls \
+    $HYPRE_DIR/src/FEI_mv \
     $HYPRE_DIR/src/test
 
 gzip $HYPRE_DIR.tar
