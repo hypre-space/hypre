@@ -116,10 +116,12 @@ lib: all
 
 install: all
 	@cp -f $(srcdir)/HYPRE_LinSysCore.h $$HYPRE_INSTALL_DIR/include
+	@cp -f $(srcdir)/HYPRE_FEI_includes.h $$HYPRE_INSTALL_DIR/include
 	@cp -f $(srcdir)/../fei-base/Lookup.h $$HYPRE_INSTALL_DIR/include
-	@cp -f $(srcdir)/cfei_hypre.h $$HYPRE_FEI_INC_DIR/include
+	@cp -f $(srcdir)/cfei_hypre.h $$HYPRE_INSTALL_DIR/include
+	@cp -f $(srcdir)/cfei-hypre.h $$HYPRE_INSTALL_DIR/include
 	@cp -f $(srcdir)/cfei-hypre.h $$HYPRE_FEI_INC_DIR/include
-	@cp -f $(srcdir)/HYPRE_FEI_includes.h $$HYPRE_FEI_INC_DIR/include
+	@cp -f $(srcdir)/cfei_hypre.h $$HYPRE_FEI_INC_DIR/include
 	@cp -f libHYPRE_FEI.a $$HYPRE_INSTALL_DIR/lib
 
 driver: driver.o libHYPRE_FEI.a
