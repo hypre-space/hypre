@@ -1,0 +1,96 @@
+Lobpcg System Interface
+
+------------------------------------------------------------
+I. Create/Destroy  and Setup Functions
+int
+HYPRE_LobpcgCreate(HYPRE_LobpcgData *lobpcg);
+Create Lopbcg solver.
+
+int
+HYPRE_LobpcgDestroy(HYPRE_LobpcgData lobpcg);
+Destroy Lobpcg solver.
+
+int
+HYPRE_LobpcgSetup(HYPRE_LobpcgData lobpcg);
+Setup Lobpcg solver.
+
+int 
+HYPRE_LobpcgSetVerbose(HYPRE_LobpcgData lobpcg);
+(Optional) Set verbose mode. Displays more detail.
+
+int
+HYPRE_LobpcgSetRandom(HYPRE_LobpcgData lobpcg);
+(Optional) Set flag to randomized array of input vectors.
+
+int
+HYPRE_LobpcgSetEye(HYPRE_LobpcgData lobpcg);
+(Optional) Set flag to initialized array of input vectors to m x bsize
+identity matrix, still stored as array of vectors.
+
+int
+int HYPRE_LobpcgSetOrthCheck(HYPRE_LobpcgData lobpcg);
+(Optional) Compute Frobenius norm of V'V-I to check
+final orthogonality of eigenvectors.
+
+int 
+HYPRE_LobpcgSetMaxIterations(HYPRE_LobpcgData lobpcg,int max_iter);
+(Optional) Set maximum number of iterations. Default is 500.
+
+int 
+HYPRE_LobpcgSetTolerance(HYPRE_LobpcgData lobpcg,double tol);
+(Optional) Set tolerance for maximum residual to stop. Default is 1E-6.
+
+int 
+HYPRE_LobpcgSetBlocksize(HYPRE_LobpcgData lobpcg,int bsize);
+(Optional) Set block size for number of initial eigenvectors.
+Default is 1.
+
+int 
+HYPRE_LobpcgSetSolverFunction(HYPRE_LobpcgData lobpcg,
+	int (*FunctSolver)(HYPRE_ParVector x,HYPRE_ParVector y));
+(Optional) Set name of solver function. Solves y=inv(T)*x with user defined 
+preconditioner. If this function is not called, then no
+preconditioner is used (y=x).
+
+
+------------------------------------------------------------
+II. Lobpcg Solver
+int 
+HYPRE_LobpcgSolve(HYPRE_LobpcgData lobpcgdata,
+	int (*FunctA)(HYPRE_ParVector x,HYPRE_ParVector y),
+	HYPRE_ParVector *v,double **eigval);
+Solve the system. The parameters are defined as:
+lobpcgdata - lobpcg solve context,
+FunctA - function that computes matrix-vector multiply y=A*x (A is n x n),
+x and y are parallel vectors that must be compatible with A.
+v - pointer to array of parallel initial eigenvectors (n x bsize),
+eigval - pointer to array to store eigenvalues (bsize x 1).
+
+
+------------------------------------------------------------
+III. Output Functions
+int 
+HYPRE_LobpcgGetIterations(HYPRE_LobpcgData lobpcg,int *iterations);
+(Optional) Return the number of iterations taken.
+
+int
+int HYPRE_LobpcgGetOrthCheckNorm(HYPRE_LobpcgData lobpcg,double *orth_frob_norm);
+(Optional) Get value of Frobenius norm of V'V-I to check
+final orthogonality of eigenvectors. This must be setup using
+HYPRE_LobpcgSetOrthCheck.
+
+int 
+HYPRE_LobpcgGetEigval(HYPRE_LobpcgData lobpcg,double **eigval);
+(Optional) Return pointer to array of eigenvalues (bsize x 1).
+
+int 
+HYPRE_LobpcgGetResvec(HYPRE_LobpcgData lobpcg,double ***resvec);
+(Optional) Return pointer to array of residual vector history (bsize x iterations).
+
+int 
+HYPRE_LobpcgGetEigvalHistory(HYPRE_LobpcgData lobpcg,double ***eigvalhistory);
+(Optional) Return pointer to array of eigenvalue history (bsize x iterations).
+
+int 
+HYPRE_LobpcgGetBlocksize(HYPRE_LobpcgData lobpcg,int *bsize);
+(Optional) Return blocksize.
