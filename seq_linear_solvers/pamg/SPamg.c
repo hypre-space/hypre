@@ -41,12 +41,10 @@ main( int   argc,
    int               j;
    double           *tmp;
 
-/*----------------------------------------------------
+#if 1
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
    int    **grid_relax_points; 
-
-   int      j;
 
    num_grid_sweeps = hypre_CTAlloc(int,4);
    grid_relax_type = hypre_CTAlloc(int,4);
@@ -55,17 +53,16 @@ main( int   argc,
    for (j = 0; j < 3; j++)
    {
       num_grid_sweeps[j] = 2;
-      grid_relax_type[j] = 1; 
-      grid_relax_points[j] = hypre_CTAlloc(int,2); 
+      grid_relax_type[j] = 0; 
+      grid_relax_points[j] = hypre_CTAlloc(int, 2); 
       grid_relax_points[j][0] = 1;
       grid_relax_points[j][1] = -1;
    }
-   num_grid_sweeps[3] = 100;
-   grid_relax_type[3] = 1;
-   grid_relax_points[3] = hypre_CTAlloc(int,100);
-   for (j=0;j<100;j++)
-       grid_relax_points[3][j] = 0;
-----------------------------------------------------*/
+   num_grid_sweeps[3] = 1;
+   grid_relax_type[3] = 9;
+   grid_relax_points[3] = hypre_CTAlloc(int, 1);
+   grid_relax_points[3][0] = 0;
+#endif
 
    if (argc < 4)
    {
@@ -92,11 +89,11 @@ main( int   argc,
    hypre_AMGSetLogging(3,"amg.out.log",amg_data);
    hypre_AMGSetCycleType(cycle_type, amg_data);
 
-/*--------------  
+#if 1
    hypre_AMGSetNumGridSweeps(num_grid_sweeps, amg_data);
    hypre_AMGSetGridRelaxType(grid_relax_type, amg_data);
    hypre_AMGSetGridRelaxPoints(grid_relax_points, amg_data);
---------------*/
+#endif
 
    filename = argv[1];
    A = hypre_ReadCSRMatrix(filename);
