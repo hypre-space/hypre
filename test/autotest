@@ -70,7 +70,9 @@ echo "dwalker@llnl.gov rfalgout@llnl.gov cleary1@llnl.gov" > $0.ci_struct.err.em
 make seq 1> $0.seq.log 2> $0.seq.err
 echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.seq.err.email 
 
-make beta
+make beta 1> $0.beta.log 2> $0.beta.err
+echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov cleary1@llnl.gov mlambert@llnl.gov" > $0.beta.err.email 
+
 
 # make documentation
 (cd docs; make)
@@ -109,7 +111,7 @@ make all77 1> $0.all77.log 2> $0.all77.err
 echo "dwalker@llnl.gov rfalgout@llnl.gov baldwin5@llnl.gov" > $0.all77.err.email 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 make beta77 1> $0.beta77.log 2> $0.beta77.err
-echo "dwalker@llnl.gov rfalgout@llnl.govv baldwin5@llnl.gov" > $0.beta77.err.email 
+echo "dwalker@llnl.gov rfalgout@llnl.gov baldwin5@llnl.gov" > $0.beta77.err.email 
 
 #==============================
 # Run test suites
@@ -143,7 +145,9 @@ echo "dwalker@llnl.gov rfalgout@llnl.gov cleary1@llnl.gov" > $0.ci_struct_thread
 make seq 1> $0.seq_threads.log 2> $0.seq_threads.err
 echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.seq_threads.err.email 
 
-make beta
+make beta 1> $0.beta_threads.log 2> $0.beta_threads.err
+echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov cleary1@llnl.gov mlambert@llnl.gov" > $0.beta_threads.err.email 
+
 
 #==============================
 # Run test suites
@@ -177,7 +181,9 @@ echo "dwalker@llnl.gov rfalgout@llnl.gov cleary1@llnl.gov" > $0.ci_struct_no_mpi
 make seq 1> $0.seq_no_mpi.log 2> $0.seq_no_mpi.err
 echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.seq_no_mpi.err.email 
 
-make beta
+make beta 1> $0.beta_no_mpi.log 2> $0.beta_no_mpi.err
+echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov cleary1@llnl.gov mlambert@llnl.gov" > $0.beta_no_mpi.err.email 
+
 
 #==============================
 # Run test suites
