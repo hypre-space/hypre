@@ -56,6 +56,7 @@ hypre_GenerateLaplacian( MPI_Comm comm,
    int *nz_part;
 
    int num_procs, my_id;
+   int P_busy, Q_busy, R_busy;
 
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
@@ -96,13 +97,19 @@ hypre_GenerateLaplacian( MPI_Comm comm,
    diag_i = hypre_CTAlloc(int, local_num_rows+1);
    offd_i = hypre_CTAlloc(int, local_num_rows+1);
 
+   P_busy = min(nx,P);
+   Q_busy = min(ny,Q);
+   R_busy = min(nz,R);
+
    num_cols_offd = 0;
    if (p) num_cols_offd += ny_local*nz_local;
-   if (p < P-1) num_cols_offd += ny_local*nz_local;
+   if (p < P_busy-1) num_cols_offd += ny_local*nz_local;
    if (q) num_cols_offd += nx_local*nz_local;
-   if (q < Q-1) num_cols_offd += nx_local*nz_local;
+   if (q < Q_busy-1) num_cols_offd += nx_local*nz_local;
    if (r) num_cols_offd += nx_local*ny_local;
-   if (r < R-1) num_cols_offd += nx_local*ny_local;
+   if (r < R_busy-1) num_cols_offd += nx_local*ny_local;
+
+   if (!local_num_rows) num_cols_offd = 0;
 
    col_map_offd = hypre_CTAlloc(int, num_cols_offd);
 
