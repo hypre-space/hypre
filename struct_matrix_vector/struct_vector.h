@@ -22,6 +22,8 @@
 
 typedef struct
 {
+   MPI_Comm           *comm;
+
    zzz_StructGrid     *grid;
 
    zzz_BoxArray       *data_space;
@@ -43,16 +45,13 @@ typedef struct
  * Accessor macros: zzz_StructVector
  *--------------------------------------------------------------------------*/
 
+#define zzz_StructVectorComm(vector)          ((vector) -> comm)
 #define zzz_StructVectorGrid(vector)          ((vector) -> grid)
-
 #define zzz_StructVectorDataSpace(vector)     ((vector) -> data_space)
- 
 #define zzz_StructVectorData(vector)          ((vector) -> data)
 #define zzz_StructVectorDataSize(vector)      ((vector) -> data_size)
 #define zzz_StructVectorDataIndices(vector)   ((vector) -> data_indices)
-
 #define zzz_StructVectorNumGhost(vector)      ((vector) -> num_ghost)
- 
 #define zzz_StructVectorGlobalSize(vector)    ((vector) -> global_size)
  
 #define zzz_StructVectorBox(vector, b) \
@@ -65,8 +64,5 @@ zzz_BoxArrayBox(zzz_StructVectorDataSpace(vector), b)
 (zzz_StructVectorBoxData(vector, b) + \
  zzz_BoxIndexRank(zzz_StructVectorBox(vector, b), index))
  
-#define zzz_StructVectorContext(vector) \
-StructGridContext(StructVectorStructGrid(vector))
-
 
 #endif

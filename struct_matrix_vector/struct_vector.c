@@ -19,14 +19,16 @@
  *--------------------------------------------------------------------------*/
 
 zzz_StructVector *
-zzz_NewStructVector( zzz_StructGrid *grid )
+zzz_NewStructVector( MPI_Comm       *comm,
+                     zzz_StructGrid *grid )
 {
    zzz_StructVector  *vector;
 
    int                i;
 
-   vector = ctalloc(zzz_StructVector, 1);
+   vector = zzz_CTAlloc(zzz_StructVector, 1);
 
+   zzz_StructVectorComm(vector) = comm;
    zzz_StructVectorGrid(vector) = grid;
 
    /* set defaults */
@@ -47,12 +49,12 @@ zzz_FreeStructVector( zzz_StructVector *vector )
 
    if (vector)
    {
-      tfree(zzz_StructVectorDataIndices(vector));
-      tfree(zzz_StructVectorData(vector));
+      zzz_TFree(zzz_StructVectorDataIndices(vector));
+      zzz_TFree(zzz_StructVectorData(vector));
  
       zzz_FreeBoxArray(zzz_StructVectorDataSpace(vector));
  
-      tfree(vector);
+      zzz_TFree(vector);
    }
 
    return ierr;
@@ -114,7 +116,7 @@ zzz_InitializeStructVectorShell( zzz_StructVector *vector )
     * Set up data_indices array and data_size
     *-----------------------------------------------------------------------*/
 
-   data_indices = ctalloc(int, zzz_BoxArraySize(data_space));
+   data_indices = zzz_CTAlloc(int, zzz_BoxArraySize(data_space));
 
    data_size = 0;
    zzz_ForBoxI(i, data_space)
@@ -161,7 +163,7 @@ zzz_InitializeStructVector( zzz_StructVector *vector )
 
    ierr = zzz_InitializeStructVectorShell(vector);
 
-   data = ctalloc(double, zzz_StructVectorDataSize(vector));
+   data = zzz_CTAlloc(double, zzz_StructVectorDataSize(vector));
    zzz_InitializeStructVectorData(vector, data);
 
    return ierr;
@@ -445,7 +447,7 @@ zzz_ReadStructVector( char *filename,
     * Initialize the vector
     *----------------------------------------*/
 
-   vector = zzz_NewStructVector(grid);
+   vector = zzz_NewStructVector(&MPI_COMM_WORLD, grid);
    zzz_SetStructVectorNumGhost(vector, num_ghost);
    zzz_InitializeStructVector(vector);
 

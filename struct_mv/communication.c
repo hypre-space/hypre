@@ -144,9 +144,9 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
       }
 
       box_aa1 = zzz_NewBoxArrayArray(zzz_BoxArraySize(boxes));
-      box_ranks = ctalloc(int *, zzz_BoxArraySize(boxes));
+      box_ranks = zzz_CTAlloc(int *, zzz_BoxArraySize(boxes));
       zzz_ForBoxI(i, boxes)
-         box_ranks[i] = ctalloc(int, zzz_BoxArraySize(neighbors));
+         box_ranks[i] = zzz_CTAlloc(int, zzz_BoxArraySize(neighbors));
 
       zzz_ForBoxI(i, box_a0)
       {
@@ -207,7 +207,7 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
     *------------------------------------------------------*/
 
    num_neighbors = zzz_BoxArraySize(neighbors);
-   box_array_sizes = ctalloc(int, num_neighbors);
+   box_array_sizes = zzz_CTAlloc(int, num_neighbors);
 
    for (r = 0; r < 2; r++)
    {
@@ -249,8 +249,8 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
          }
 
          /* fix box rank info */
-         tfree(box_ranks[i]);
-         box_ranks[i] = ctalloc(int, zzz_BoxArraySize(box_a1));
+         zzz_TFree(box_ranks[i]);
+         box_ranks[i] = zzz_CTAlloc(int, zzz_BoxArraySize(box_a1));
          j = 0;
          for (n = 0; n < num_neighbors; n++)
          {
@@ -276,13 +276,13 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
       }
    }
 
-   tfree(box_array_sizes);
+   zzz_TFree(box_array_sizes);
 
    /*------------------------------------------------------
     * Return
     *------------------------------------------------------*/
 
-   tfree(neighbor_ranks);
+   zzz_TFree(neighbor_ranks);
    zzz_FreeBoxArrayShell(neighbors);
 
    *send_boxes_ptr = send_boxes;
@@ -369,8 +369,8 @@ zzz_GetSBoxType( zzz_SBox     *comm_sbox,
     * Compute comm_sbox_type
     *------------------------------------------------------*/
 
-   old_type = ctalloc(MPI_Datatype, 1);
-   new_type = ctalloc(MPI_Datatype, 1);
+   old_type = zzz_CTAlloc(MPI_Datatype, 1);
+   new_type = zzz_CTAlloc(MPI_Datatype, 1);
 
    MPI_Type_contiguous(1, MPI_DOUBLE, old_type);
    for (i = 0; i < (dim - 1); i++)
@@ -390,8 +390,8 @@ zzz_GetSBoxType( zzz_SBox     *comm_sbox,
                     *old_type, comm_sbox_type);
    MPI_Type_free(old_type);
 
-   tfree(old_type);
-   tfree(new_type);
+   zzz_TFree(old_type);
+   zzz_TFree(new_type);
 }
 
 /*--------------------------------------------------------------------------
@@ -488,7 +488,7 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
        * Loop over `comm_sboxes' and compute `comm_process_flags'.
        *------------------------------------------------------*/
 
-      comm_process_flags = ctalloc(int, num_procs);
+      comm_process_flags = zzz_CTAlloc(int, num_procs);
 
       pkg_num_comms = 0;
       zzz_ForSBoxArrayI(i, comm_sboxes)
@@ -513,7 +513,7 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
        * Loop over `comm_sboxes' and compute `comm_structs'.
        *------------------------------------------------------*/
 
-      comm_structs = ctalloc(struct CommStruct *, num_procs);
+      comm_structs = zzz_CTAlloc(struct CommStruct *, num_procs);
 
       data_box_offset = 0;
       zzz_ForSBoxArrayI(i, comm_sboxes)
@@ -532,7 +532,7 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
                if (comm_structs[p] == NULL)
                {
                   comm_structs[p] =
-                     ctalloc(struct CommStruct, comm_process_flags[p]);
+                     zzz_CTAlloc(struct CommStruct, comm_process_flags[p]);
                   comm_process_flags[p] = 0;
                }
 
@@ -565,8 +565,8 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
        * Loop over comm_structs and build package info
        *------------------------------------------------------*/
 
-      pkg_comm_processes = talloc(int, pkg_num_comms);
-      pkg_comm_types     = talloc(MPI_Datatype, pkg_num_comms);
+      pkg_comm_processes = zzz_TAlloc(int, pkg_num_comms);
+      pkg_comm_types     = zzz_TAlloc(MPI_Datatype, pkg_num_comms);
 
       pkg_num_comms = 0;
       for (p = 0; p < num_procs; p++)
@@ -581,9 +581,9 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
             /* sort the comm_struct data                               */
             /* note: this bubble sort will maintain the original order */
             /*       for data with the same `orig' and `dest'          */
-            comm_origs = talloc(int, num_comms);
-            comm_dests = talloc(int, num_comms);
-            comm_sort  = talloc(int, num_comms);
+            comm_origs = zzz_TAlloc(int, num_comms);
+            comm_dests = zzz_TAlloc(int, num_comms);
+            comm_sort  = zzz_TAlloc(int, num_comms);
             for (i = 0; i < num_comms; i++)
             {
                comm_origs[i] = comm_structs[p][i].orig;
@@ -614,9 +614,9 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
             }
 
             /* compute arguments for MPI_Type_struct routine */
-            comm_block_lengths = talloc(int, num_comms);
-            comm_displacements = talloc(MPI_Aint, num_comms);
-            comm_types         = talloc(MPI_Datatype, num_comms);
+            comm_block_lengths = zzz_TAlloc(int, num_comms);
+            comm_displacements = zzz_TAlloc(MPI_Aint, num_comms);
+            comm_types         = zzz_TAlloc(MPI_Datatype, num_comms);
             for (i = 0; i < num_comms; i++)
             {
                /* extract data from comm_struct */
@@ -649,18 +649,18 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
             /* free up memory */
             for (i = 0; i < num_comms; i++)
                MPI_Type_free(&comm_types[i]);
-            tfree(comm_block_lengths);
-            tfree(comm_displacements);
-            tfree(comm_types);
-            tfree(comm_origs);
-            tfree(comm_dests);
-            tfree(comm_sort);
-            tfree(comm_structs[p]);
+            zzz_TFree(comm_block_lengths);
+            zzz_TFree(comm_displacements);
+            zzz_TFree(comm_types);
+            zzz_TFree(comm_origs);
+            zzz_TFree(comm_dests);
+            zzz_TFree(comm_sort);
+            zzz_TFree(comm_structs[p]);
          }
       }
 
-      tfree(comm_structs);
-      tfree(comm_process_flags);
+      zzz_TFree(comm_structs);
+      zzz_TFree(comm_process_flags);
 
       switch(r)
       {
@@ -682,7 +682,7 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
     * Set up zzz_CommPkg
     *------------------------------------------------------*/
 
-   comm_pkg = ctalloc(zzz_CommPkg, 1);
+   comm_pkg = zzz_CTAlloc(zzz_CommPkg, 1);
 
    zzz_CommPkgSendSBoxes(comm_pkg)    = send_sboxes;
    zzz_CommPkgRecvSBoxes(comm_pkg)    = recv_sboxes;
@@ -714,28 +714,28 @@ zzz_FreeCommPkg( zzz_CommPkg *comm_pkg )
    if (comm_pkg)
    {
       zzz_ForSBoxArrayI(i, zzz_CommPkgSendSBoxes(comm_pkg))
-         tfree(zzz_CommPkgSendBoxRanks(comm_pkg)[i]);
+         zzz_TFree(zzz_CommPkgSendBoxRanks(comm_pkg)[i]);
       zzz_ForSBoxArrayI(i, zzz_CommPkgRecvSBoxes(comm_pkg))
-         tfree(zzz_CommPkgRecvBoxRanks(comm_pkg)[i]);
-      tfree(zzz_CommPkgSendBoxRanks(comm_pkg));
-      tfree(zzz_CommPkgRecvBoxRanks(comm_pkg));
+         zzz_TFree(zzz_CommPkgRecvBoxRanks(comm_pkg)[i]);
+      zzz_TFree(zzz_CommPkgSendBoxRanks(comm_pkg));
+      zzz_TFree(zzz_CommPkgRecvBoxRanks(comm_pkg));
 
       zzz_FreeSBoxArrayArray(zzz_CommPkgSendSBoxes(comm_pkg));
       zzz_FreeSBoxArrayArray(zzz_CommPkgRecvSBoxes(comm_pkg));
 
-      tfree(zzz_CommPkgSendProcesses(comm_pkg));
+      zzz_TFree(zzz_CommPkgSendProcesses(comm_pkg));
       types = zzz_CommPkgSendTypes(comm_pkg);
       for (i = 0; i < zzz_CommPkgNumSends(comm_pkg); i++)
          MPI_Type_free(&types[i]);
-      tfree(types);
+      zzz_TFree(types);
      
-      tfree(zzz_CommPkgRecvProcesses(comm_pkg));
+      zzz_TFree(zzz_CommPkgRecvProcesses(comm_pkg));
       types = zzz_CommPkgRecvTypes(comm_pkg);
       for (i = 0; i < zzz_CommPkgNumRecvs(comm_pkg); i++)
          MPI_Type_free(&types[i]);
-      tfree(types);
+      zzz_TFree(types);
 
-      tfree(comm_pkg);
+      zzz_TFree(comm_pkg);
    }
 }
 
@@ -749,7 +749,7 @@ zzz_NewCommHandle( int          num_requests,
 {
    zzz_CommHandle *comm_handle;
 
-   comm_handle = ctalloc(zzz_CommHandle, 1);
+   comm_handle = zzz_CTAlloc(zzz_CommHandle, 1);
 
    zzz_CommHandleNumRequests(comm_handle) = num_requests;
    zzz_CommHandleRequests(comm_handle)    = requests;
@@ -766,8 +766,8 @@ zzz_FreeCommHandle( zzz_CommHandle *comm_handle )
 {
    if (comm_handle)
    {
-      tfree(zzz_CommHandleRequests(comm_handle));
-      tfree(comm_handle);
+      zzz_TFree(zzz_CommHandleRequests(comm_handle));
+      zzz_TFree(comm_handle);
    }
 }
 
@@ -794,7 +794,7 @@ zzz_InitializeCommunication( zzz_CommPkg *comm_pkg,
    num_requests  =
       zzz_CommPkgNumSends(comm_pkg) +
       zzz_CommPkgNumRecvs(comm_pkg);
-   requests = ctalloc(MPI_Request, num_requests);
+   requests = zzz_CTAlloc(MPI_Request, num_requests);
 
    j = 0;
 
@@ -830,13 +830,14 @@ zzz_FinalizeCommunication( zzz_CommHandle *comm_handle )
    {
       if (zzz_CommHandleNumRequests(comm_handle))
       {
-         status = ctalloc(MPI_Status, zzz_CommHandleNumRequests(comm_handle));
+         status =
+            zzz_CTAlloc(MPI_Status, zzz_CommHandleNumRequests(comm_handle));
 
          MPI_Waitall(zzz_CommHandleNumRequests(comm_handle),
                      zzz_CommHandleRequests(comm_handle),
                      status);
 
-         tfree(status);
+         zzz_TFree(status);
       }
  
       zzz_FreeCommHandle(comm_handle);

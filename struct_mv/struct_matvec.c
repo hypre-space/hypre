@@ -35,7 +35,7 @@ zzz_StructMatvecInitialize( )
 {
    zzz_StructMatvecData *matvec_data;
 
-   matvec_data = ctalloc(zzz_StructMatvecData, 1);
+   matvec_data = zzz_CTAlloc(zzz_StructMatvecData, 1);
 
    return (void *) matvec_data;
 }
@@ -329,7 +329,7 @@ zzz_StructMatvecFinalize( void *matvec_vdata )
    if (matvec_data)
    {
       zzz_FreeComputePkg(matvec_data -> compute_pkg );
-      tfree(matvec_data);
+      zzz_TFree(matvec_data);
    }
 
    return ierr;

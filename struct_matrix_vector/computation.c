@@ -198,7 +198,7 @@ zzz_NewComputePkg( zzz_SBoxArrayArray  *send_sboxes,
 {
    zzz_ComputePkg  *compute_pkg;
 
-   compute_pkg = ctalloc(zzz_ComputePkg, 1);
+   compute_pkg = zzz_CTAlloc(zzz_ComputePkg, 1);
 
    zzz_ComputePkgCommPkg(compute_pkg)     =
       zzz_NewCommPkg(send_sboxes, recv_sboxes,
@@ -229,7 +229,7 @@ zzz_FreeComputePkg( zzz_ComputePkg *compute_pkg )
       zzz_FreeSBoxArrayArray(zzz_ComputePkgIndtSBoxes(compute_pkg));
       zzz_FreeSBoxArrayArray(zzz_ComputePkgDeptSBoxes(compute_pkg));
 
-      tfree(compute_pkg);
+      zzz_TFree(compute_pkg);
    }
 }
 

@@ -38,5 +38,7 @@ typedef struct
 
 #define zzz_StructStencilDim(stencil)   ((stencil) -> dim)
 
+#define zzz_StructStencilElement(stencil, i) \
+zzz_StructStencilShape(stencil)[i]
 
 #endif

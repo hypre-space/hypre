@@ -19,13 +19,14 @@
  *--------------------------------------------------------------------------*/
 
 zzz_StructGrid *
-zzz_NewStructGrid( MPI_Comm context,
-		   int dim          )
+zzz_NewStructGrid( MPI_Comm *comm,
+		   int       dim  )
 {
    zzz_StructGrid    *grid;
 
-   grid = talloc(zzz_StructGrid, 1);
+   grid = zzz_TAlloc(zzz_StructGrid, 1);
 
+   zzz_StructGridComm(grid)      = comm;
    zzz_StructGridAllBoxes(grid)  = NULL;
    zzz_StructGridProcesses(grid) = NULL;
    zzz_StructGridBoxes(grid)     = zzz_NewBoxArray();
@@ -33,7 +34,65 @@ zzz_NewStructGrid( MPI_Comm context,
    zzz_StructGridDim(grid)       = dim;
    zzz_StructGridGlobalSize(grid)= 0;
    zzz_StructGridLocalSize(grid) = 0;
-   zzz_StructGridContext(grid)   = context;
+
+   return grid;
+}
+
+/*--------------------------------------------------------------------------
+ * zzz_NewAssembledStructGrid
+ *--------------------------------------------------------------------------*/
+
+zzz_StructGrid *
+zzz_NewAssembledStructGrid( MPI_Comm      *comm,
+                            int            dim,
+                            zzz_BoxArray  *all_boxes,
+                            int           *processes )
+{
+   zzz_StructGrid    *grid;
+
+   zzz_BoxArray      *boxes;
+   zzz_Box           *box;
+   int               *box_ranks;
+   int                box_volume;
+   int                global_size;
+   int                local_size;
+
+   int                i, j, my_rank;
+
+   grid = zzz_TAlloc(zzz_StructGrid, 1);
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+
+   global_size = 0;
+   local_size = 0;
+   boxes = zzz_NewBoxArray();
+   box_ranks = zzz_TAlloc(int, zzz_BoxArraySize(boxes));
+
+   j = 0;
+   zzz_ForBoxI(i, all_boxes)
+   {
+      box = zzz_BoxArrayBox(all_boxes, i);
+      box_volume = zzz_BoxVolume(box);
+
+      if (zzz_StructGridProcess(grid, i) == my_rank)
+      {
+	 zzz_AppendBox(box, boxes);
+	 box_ranks[j++] = i;
+         local_size += box_volume;
+      }
+
+      global_size += box_volume;
+   }
+   box_ranks = zzz_TRealloc(box_ranks, int, zzz_BoxArraySize(boxes));
+
+   zzz_StructGridAllBoxes(grid)  = all_boxes;
+   zzz_StructGridProcesses(grid) = processes;
+   zzz_StructGridBoxes(grid)     = boxes;
+   zzz_StructGridBoxRanks(grid)  = box_ranks;
+   zzz_StructGridDim(grid)       = dim;
+   zzz_StructGridGlobalSize(grid)= global_size;
+   zzz_StructGridLocalSize(grid) = local_size;
+   zzz_StructGridComm(grid)      = comm;
 
    return grid;
 }
@@ -46,14 +105,14 @@ void
 zzz_FreeStructGrid( zzz_StructGrid *grid )
 {
    zzz_FreeBoxArray(zzz_StructGridAllBoxes(grid));
-   tfree(zzz_StructGridProcesses(grid));
+   zzz_TFree(zzz_StructGridProcesses(grid));
 
    /* this box array points to grid boxes in all_boxes */
    zzz_FreeBoxArrayShell(zzz_StructGridBoxes(grid));
 
-   tfree(zzz_StructGridBoxRanks(grid));
+   zzz_TFree(zzz_StructGridBoxRanks(grid));
 
-   tfree(grid);
+   zzz_TFree(grid);
 }
 
 /*--------------------------------------------------------------------------
@@ -96,22 +155,25 @@ zzz_SetStructGridExtents( zzz_StructGrid  *grid,
 void 
 zzz_AssembleStructGrid( zzz_StructGrid *grid )
 {
-   zzz_BoxArray  *boxes;
-   zzz_Box       *box;
-
-   zzz_Index     *imin;
-   zzz_Index     *imax;
-
-   int            num_procs, my_rank;
-
-   int           *sendbuf;
-   int            sendcount;
-   int           *recvbuf;
-   int           *recvcounts;
-   int           *displs;
-   int            recvbuf_size;
-
-   int            i, j, k, b, d;
+   zzz_StructGrid *new_grid;
+   zzz_BoxArray   *all_boxes;
+   int            *processes;
+   zzz_BoxArray   *boxes;
+   zzz_Box        *box;
+                  
+   zzz_Index      *imin;
+   zzz_Index      *imax;
+                  
+   int             num_procs, my_rank;
+                  
+   int            *sendbuf;
+   int             sendcount;
+   int            *recvbuf;
+   int            *recvcounts;
+   int            *displs;
+   int             recvbuf_size;
+                  
+   int             i, j, b, d;
 
    boxes = zzz_StructGridBoxes(grid);
 
@@ -120,11 +182,11 @@ zzz_AssembleStructGrid( zzz_StructGrid *grid )
 
    /* allocate sendbuf */
    sendcount = 7*zzz_BoxArraySize(boxes);
-   sendbuf = talloc(int, sendcount);
+   sendbuf = zzz_TAlloc(int, sendcount);
 
    /* compute recvcounts and displs */
-   recvcounts = talloc(int, num_procs);
-   displs = talloc(int, num_procs);
+   recvcounts = zzz_TAlloc(int, num_procs);
+   displs = zzz_TAlloc(int, num_procs);
    MPI_Allgather(&sendcount, 1, MPI_INT,
 		 recvcounts, 1, MPI_INT, MPI_COMM_WORLD);
    displs[0] = 0;
@@ -136,7 +198,7 @@ zzz_AssembleStructGrid( zzz_StructGrid *grid )
    }
 
    /* allocate recvbuf */
-   recvbuf = talloc(int, recvbuf_size);
+   recvbuf = zzz_TAlloc(int, recvbuf_size);
 
    /* put local box extents and process number into sendbuf */
    i = 0;
@@ -158,19 +220,14 @@ zzz_AssembleStructGrid( zzz_StructGrid *grid )
 
    /* sort recvbuf by process rank? */
 
-   /* use recvbuf info to set up grid structure */
-   zzz_StructGridAllBoxes(grid) = zzz_NewBoxArray();
-   zzz_StructGridProcesses(grid) = talloc(int, (recvbuf_size / 7));
-   zzz_StructGridBoxes(grid) = zzz_NewBoxArray();
-   zzz_StructGridBoxRanks(grid) = talloc(int, zzz_BoxArraySize(boxes));
-   zzz_StructGridGlobalSize(grid) = 0;
-   zzz_StructGridLocalSize(grid) = 0;
+   /* unpack recvbuf grid info */
+   all_boxes = zzz_NewBoxArray();
+   processes = zzz_TAlloc(int, (recvbuf_size / 7));
    i = 0;
    j = 0;
-   k = 0;
    while (i < recvbuf_size)
    {
-      zzz_StructGridProcess(grid, j++) = recvbuf[i++];
+      processes[j++] = recvbuf[i++];
 
       imin = zzz_NewIndex();
       imax = zzz_NewIndex();
@@ -181,23 +238,26 @@ zzz_AssembleStructGrid( zzz_StructGrid *grid )
       }
 
       box = zzz_NewBox(imin, imax);
-      zzz_AppendBox(box, zzz_StructGridAllBoxes(grid));
-      if (zzz_StructGridProcess(grid, j-1) == my_rank)
-      {
-	 zzz_AppendBox(box, zzz_StructGridBoxes(grid));
-	 zzz_StructGridBoxRank(grid, k++) = j-1;
-         zzz_StructGridLocalSize(grid) += zzz_BoxVolume(box);
-      }
-
-      zzz_StructGridGlobalSize(grid) += zzz_BoxVolume(box);
+      zzz_AppendBox(box, all_boxes);
    }
 
    zzz_FreeBoxArray(boxes);
+   zzz_TFree(sendbuf);
+   zzz_TFree(recvcounts);
+   zzz_TFree(displs);
+   zzz_TFree(recvbuf);
 
-   tfree(sendbuf);
-   tfree(recvcounts);
-   tfree(displs);
-   tfree(recvbuf);
+   /* complete the grid structure */
+   new_grid = zzz_NewAssembledStructGrid(zzz_StructGridComm(grid),
+                                         zzz_StructGridDim(grid),
+                                         all_boxes, processes);
+   zzz_StructGridAllBoxes(grid)  = zzz_StructGridAllBoxes(new_grid);
+   zzz_StructGridProcesses(grid) = zzz_StructGridProcesses(new_grid);
+   zzz_StructGridBoxes(grid)     = zzz_StructGridBoxes(new_grid);
+   zzz_StructGridBoxRanks(grid)  = zzz_StructGridBoxRanks(new_grid);
+   zzz_StructGridGlobalSize(grid)= zzz_StructGridGlobalSize(new_grid);
+   zzz_StructGridLocalSize(grid) = zzz_StructGridLocalSize(new_grid);
+   zzz_TFree(new_grid);
 }
 
 /*--------------------------------------------------------------------------
@@ -244,7 +304,7 @@ zzz_ReadStructGrid( FILE *file )
    int             i, idummy;
 
    fscanf(file, "%d\n", &dim);
-   grid = zzz_NewStructGrid(MPI_COMM_WORLD, dim);
+   grid = zzz_NewStructGrid(&MPI_COMM_WORLD, dim);
 
    fscanf(file, "%d\n", &num_boxes);
    ilower = zzz_NewIndex();

@@ -20,14 +20,19 @@
  * Define memory allocation routines
  *--------------------------------------------------------------------------*/
 
-#define talloc(type, count) \
+#define zzz_TAlloc(type, count) \
 ((count) ? (type *) malloc((unsigned int)(sizeof(type) * (count))) : NULL)
 
-#define ctalloc(type, count) \
-((count) ? (type *) calloc((unsigned int)(count), (unsigned int)sizeof(type)) : NULL)
+#define zzz_CTAlloc(type, count) \
+((count) ? (type *) calloc((unsigned int)(count),\
+                           (unsigned int)sizeof(type)) : NULL)
+
+#define zzz_TRealloc(ptr, type, count) \
+((count) ? (type *) realloc((char *)ptr,\
+                            (unsigned int)(sizeof(type) * (count))) : NULL)
 
 /* note: the `else' is required to guarantee termination of the `if' */
-#define tfree(ptr) if (ptr) free(ptr); else
+#define zzz_TFree(ptr) if (ptr) free(ptr); else
 
 /*--------------------------------------------------------------------------
  * Define various functions

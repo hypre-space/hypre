@@ -242,7 +242,7 @@ zzz_UnionBoxArray( zzz_BoxArray *boxes )
       
    for (d = 0; d < 3; d++)
    {
-      block_index[d] = talloc(int, 2 * zzz_BoxArraySize(boxes));
+      block_index[d] = zzz_TAlloc(int, 2 * zzz_BoxArraySize(boxes));
       block_sz[d] = 0;
    }
       
@@ -296,7 +296,7 @@ zzz_UnionBoxArray( zzz_BoxArray *boxes )
     * Set up the block array
     *------------------------------------------------------*/
       
-   block = ctalloc(int, (block_sz[0] * block_sz[1] * block_sz[2]));
+   block = zzz_CTAlloc(int, (block_sz[0] * block_sz[1] * block_sz[2]));
       
    imin = zzz_NewIndex();
    imax = zzz_NewIndex();
@@ -444,9 +444,9 @@ zzz_UnionBoxArray( zzz_BoxArray *boxes )
     *------------------------------------------------------*/
 
    for (d = 0; d < 3; d++)
-      tfree(block_index[d]);
+      zzz_TFree(block_index[d]);
 
-   tfree(block);
+   zzz_TFree(block);
    
    /*---------------------------------------------------------
     * Return box_union

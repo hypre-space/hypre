@@ -37,6 +37,7 @@ FILES =\
  struct_axpy.c\
  struct_copy.c\
  struct_matrix.c\
+ struct_matrix_mask.c\
  struct_matvec.c\
  struct_scale.c\
  struct_stencil.c\

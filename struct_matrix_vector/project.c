@@ -68,6 +68,38 @@ zzz_ProjectBox( zzz_Box    *box,
 }
 
 /*--------------------------------------------------------------------------
+ * zzz_ProjectBoxArray:
+ *
+ *   Note: The dimensions of the returned SBoxArray are the same as
+ *   the input argument `box_array'.  So, it is possible for the
+ *   returned SBoxArray to contain SBoxes with volume 0.
+ *--------------------------------------------------------------------------*/
+
+zzz_SBoxArray *
+zzz_ProjectBoxArray( zzz_BoxArray  *box_array,
+                     zzz_Index     *index,
+                     zzz_Index     *stride    )
+{
+   zzz_SBoxArray       *new_sbox_array;
+   zzz_SBox            *new_sbox;
+
+   zzz_Box             *box;
+
+   int                  i;
+
+   new_sbox_array = zzz_NewSBoxArray();
+
+   zzz_ForBoxI(i, box_array)
+   {
+      box      = zzz_BoxArrayBox(box_array, i);
+      new_sbox = zzz_ProjectBox(box, index, stride);
+      zzz_AppendSBox(new_sbox, new_sbox_array);
+   }
+
+   return new_sbox_array;
+}
+
+/*--------------------------------------------------------------------------
  * zzz_ProjectBoxArrayArray:
  *
  *   Note: The dimensions of the returned SBoxArrayArray are the same as
@@ -82,12 +114,10 @@ zzz_ProjectBoxArrayArray( zzz_BoxArrayArray  *box_array_array,
 {
    zzz_SBoxArrayArray  *new_sbox_array_array;
    zzz_SBoxArray       *new_sbox_array;
-   zzz_SBox            *new_sbox;
 
    zzz_BoxArray        *box_array;
-   zzz_Box             *box;
 
-   int                  i, j;
+   int                  i;
 
    new_sbox_array_array =
       zzz_NewSBoxArrayArray(zzz_BoxArrayArraySize(box_array_array));
@@ -95,26 +125,17 @@ zzz_ProjectBoxArrayArray( zzz_BoxArrayArray  *box_array_array,
    zzz_ForBoxArrayI(i, box_array_array)
    {
       box_array      = zzz_BoxArrayArrayBoxArray(box_array_array, i);
-      new_sbox_array = zzz_SBoxArrayArraySBoxArray(new_sbox_array_array, i);
+      new_sbox_array = zzz_ProjectBoxArray(box_array, index, stride);
 
-      zzz_ForBoxI(j, box_array)
-      {
-         box      = zzz_BoxArrayBox(box_array, j);
-         new_sbox = zzz_ProjectBox(box, index, stride);
-         zzz_AppendSBox(new_sbox, new_sbox_array);
-      }
+      zzz_FreeSBoxArray(zzz_SBoxArrayArraySBoxArray(new_sbox_array_array, i));
+      zzz_SBoxArrayArraySBoxArray(new_sbox_array_array, i) = new_sbox_array;
    }
 
    return new_sbox_array_array;
 }
 
 
-
-
-
-
-
-
+#if 0
 /*--------------------------------------------------------------------------
  * ProjectRBPoint:
  *   Project a box_array_array onto a red or black set of indices.
@@ -147,4 +168,4 @@ zzz_ProjectRBPoint( zzz_BoxArrayArray *box_array_array,
    
    return new_sbox_array_array;
 }
-
+#endif

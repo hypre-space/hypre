@@ -19,15 +19,17 @@
  *--------------------------------------------------------------------------*/
 
 zzz_StructMatrix *
-zzz_NewStructMatrix( zzz_StructGrid    *grid,
+zzz_NewStructMatrix( MPI_Comm          *comm,
+                     zzz_StructGrid    *grid,
                      zzz_StructStencil *user_stencil )
 {
    zzz_StructMatrix  *matrix;
 
    int                i;
 
-   matrix = ctalloc(zzz_StructMatrix, 1);
+   matrix = zzz_CTAlloc(zzz_StructMatrix, 1);
 
+   zzz_StructMatrixComm(matrix)        = comm;
    zzz_StructMatrixGrid(matrix)        = grid;
    zzz_StructMatrixUserStencil(matrix) = user_stencil;
 
@@ -55,19 +57,16 @@ zzz_FreeStructMatrix( zzz_StructMatrix *matrix )
       zzz_FreeCommPkg(zzz_StructMatrixCommPkg(matrix));
 
       zzz_ForBoxI(i, zzz_StructMatrixDataSpace(matrix))
-         tfree(zzz_StructMatrixDataIndices(matrix)[i]);
-      tfree(zzz_StructMatrixDataIndices(matrix));
-      tfree(zzz_StructMatrixData(matrix));
+         zzz_TFree(zzz_StructMatrixDataIndices(matrix)[i]);
+      zzz_TFree(zzz_StructMatrixDataIndices(matrix));
+      zzz_TFree(zzz_StructMatrixData(matrix));
 
       zzz_FreeBoxArray(zzz_StructMatrixDataSpace(matrix));
 
-      if (zzz_StructMatrixSymmetric(matrix))
-      {
-         tfree(zzz_StructMatrixSymmCoeff(matrix));
-         zzz_FreeStructStencil(zzz_StructMatrixStencil(matrix));
-      }
+      zzz_TFree(zzz_StructMatrixSymmCoeff(matrix));
+      zzz_FreeStructStencil(zzz_StructMatrixStencil(matrix));
 
-      tfree(matrix);
+      zzz_TFree(matrix);
    }
 
    return ierr;
@@ -111,45 +110,51 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
 
    /*-----------------------------------------------------------------------
     * Set up stencil:
-    *
-    *------------------
-    * Non-symmetric case:
-    *    Just set pointer to user's stencil, `user_stencil'.
-    *
-    *------------------
-    * Symmetric case:
-    *    Copy the user's stencil elements into the new stencil, and
-    *    create symmetric stencil elements if needed.
-    *
-    *    Also set up an array called `symm_coeff'.  A non-zero value
+    *    An array called `symm_coeff' is also set up.  A non-zero value
     *    of `symm_coeff[i]' indicates that the `i'th stencil element
     *    is a "symmetric element".  That is, the data associated with
     *    stencil element `i' is not explicitely stored, but is instead
     *    stored as the transpose coefficient at a neighboring grid point.
     *    The value of `symm_coeff[i]' is also the index of the transpose
     *    stencil element.
+    *
+    *------------------
+    * Non-symmetric case:
+    *    Copy the user's stencil elements into a new stencil.
+    *    Set up the `symm_coeff' array with zero values.
+    *
+    *------------------
+    * Symmetric case:
+    *    Copy the user's stencil elements into a new stencil, and
+    *    create symmetric stencil elements if needed.
+    *    Set up the `symm_coeff' array with appropriate values.
     *-----------------------------------------------------------------------*/
 
-   user_stencil = zzz_StructMatrixUserStencil(matrix);
+   user_stencil       = zzz_StructMatrixUserStencil(matrix);
+   user_stencil_shape = zzz_StructStencilShape(user_stencil);
+   user_stencil_size  = zzz_StructStencilSize(user_stencil);
 
    /* non-symmetric case */
    if (!zzz_StructMatrixSymmetric(matrix))
    {
-      stencil = user_stencil;
-      stencil_size  = zzz_StructStencilSize(stencil);
-      stencil_shape = zzz_StructStencilShape(stencil);
+      /* copy user's stencil elements into `stencil_shape' */
+      stencil_shape = zzz_CTAlloc(zzz_Index *, user_stencil_size);
+      for (i = 0; i < user_stencil_size; i++)
+      {
+         stencil_shape[i] = zzz_NewIndex();
+         zzz_CopyIndex(user_stencil_shape[i], stencil_shape[i]);
+      }
+      stencil_size = user_stencil_size;
 
+      symm_coeff = zzz_CTAlloc(int, stencil_size);
       num_values = stencil_size;
    }
 
    /* symmetric case */
    else
    {
-      user_stencil_shape = zzz_StructStencilShape(user_stencil);
-      user_stencil_size = zzz_StructStencilSize(user_stencil);
-
       /* copy user's stencil elements into `stencil_shape' */
-      stencil_shape = ctalloc(zzz_Index *, 2*user_stencil_size);
+      stencil_shape = zzz_CTAlloc(zzz_Index *, 2*user_stencil_size);
       for (i = 0; i < user_stencil_size; i++)
       {
          stencil_shape[i] = zzz_NewIndex();
@@ -157,7 +162,7 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
       }
 
       /* create symmetric stencil elements and `symm_coeff' */
-      symm_coeff = ctalloc(int, 2*user_stencil_size);
+      symm_coeff = zzz_CTAlloc(int, 2*user_stencil_size);
       stencil_size = user_stencil_size;
       for (i = 0; i < user_stencil_size; i++)
       {
@@ -197,14 +202,14 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
 	 }
       }
 
-      stencil = zzz_NewStructStencil(zzz_StructStencilDim(user_stencil),
-                                     stencil_size, stencil_shape);
-      zzz_StructMatrixSymmCoeff(matrix) = symm_coeff;
-
       num_values = (stencil_size + 1) / 2;
    }
 
+   stencil = zzz_NewStructStencil(zzz_StructStencilDim(user_stencil),
+                                  stencil_size, stencil_shape);
    zzz_StructMatrixStencil(matrix) = stencil;
+
+   zzz_StructMatrixSymmCoeff(matrix) = symm_coeff;
    zzz_StructMatrixNumValues(matrix) = num_values;
 
    /*-----------------------------------------------------------------------
@@ -213,21 +218,18 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
 
    num_ghost = zzz_StructMatrixNumGhost(matrix);
 
-   if (zzz_StructMatrixSymmetric(matrix))
+   for (i = 0; i < stencil_size; i++)
    {
-      for (i = 0; i < stencil_size; i++)
+      if (symm_coeff[i])
       {
-         if (symm_coeff[i])
+         j = 0;
+         for (d = 0; d < 3; d++)
          {
-            j = 0;
-            for (d = 0; d < 3; d++)
-            {
-               num_ghost[j] =
-                  max(num_ghost[  j], -zzz_IndexD(stencil_shape[i], d));
-               num_ghost[j+1] =
-                  max(num_ghost[j+1],  zzz_IndexD(stencil_shape[i], d));
-               j += 2;
-            }
+            num_ghost[j] =
+               max(num_ghost[  j], -zzz_IndexD(stencil_shape[i], d));
+            num_ghost[j+1] =
+               max(num_ghost[j+1],  zzz_IndexD(stencil_shape[i], d));
+            j += 2;
          }
       }
    }
@@ -262,7 +264,7 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
     * Set up data_indices array and data-size
     *-----------------------------------------------------------------------*/
 
-   data_indices = ctalloc(int *, zzz_BoxArraySize(data_space));
+   data_indices = zzz_CTAlloc(int *, zzz_BoxArraySize(data_space));
 
    data_size = 0;
    zzz_ForBoxI(i, data_space)
@@ -270,39 +272,25 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
       data_box = zzz_BoxArrayBox(data_space, i);
       data_box_volume  = zzz_BoxVolume(data_box);
 
-      data_indices[i] = ctalloc(int, stencil_size);
+      data_indices[i] = zzz_CTAlloc(int, stencil_size);
 
-      /* non-symmetric case */
-      if (!zzz_StructMatrixSymmetric(matrix))
+      /* set pointers for "stored" coefficients */
+      for (j = 0; j < stencil_size; j++)
       {
-         for (j = 0; j < stencil_size; j++)
-	 {
-	    data_indices[i][j] = data_size;
-	    data_size += data_box_volume;
-	 }
+         if (!symm_coeff[j])
+         {
+            data_indices[i][j] = data_size;
+            data_size += data_box_volume;
+         }
       }
 
-      /* symmetric case */
-      else
+      /* set pointers for "symmetric" coefficients */
+      for (j = 0; j < stencil_size; j++)
       {
-         /* set pointers for "stored" coefficients */
-         for (j = 0; j < stencil_size; j++)
+         if (symm_coeff[j])
          {
-            if (!symm_coeff[j])
-            {
-               data_indices[i][j] = data_size;
-               data_size += data_box_volume;
-            }
-         }
-
-         /* set pointers for "symmetric" coefficients */
-         for (j = 0; j < stencil_size; j++)
-         {
-            if (symm_coeff[j])
-            {
-               data_indices[i][j] = data_indices[i][symm_coeff[j]] +
-                  zzz_BoxOffsetDistance(data_box, stencil_shape[j]);
-            }
+            data_indices[i][j] = data_indices[i][symm_coeff[j]] +
+               zzz_BoxOffsetDistance(data_box, stencil_shape[j]);
          }
       }
    }
@@ -348,7 +336,7 @@ zzz_InitializeStructMatrix( zzz_StructMatrix *matrix )
 
    ierr = zzz_InitializeStructMatrixShell(matrix);
 
-   data = ctalloc(double, zzz_StructMatrixDataSize(matrix));
+   data = zzz_CTAlloc(double, zzz_StructMatrixDataSize(matrix));
    zzz_InitializeStructMatrixData(matrix, data);
 
    return ierr;
@@ -558,7 +546,7 @@ zzz_AssembleStructMatrix( zzz_StructMatrix *matrix )
       }
       box = zzz_NewBox(imin, imax);
 
-      comm_stencil_shape = ctalloc(zzz_Index *, zzz_BoxVolume(box));
+      comm_stencil_shape = zzz_CTAlloc(zzz_Index *, zzz_BoxVolume(box));
       index = zzz_NewIndex();
       i = 0;
       zzz_BoxLoop0(box, index,
@@ -678,31 +666,15 @@ zzz_PrintStructMatrix( char             *filename,
    stencil = zzz_StructMatrixStencil(matrix);
    stencil_shape = zzz_StructStencilShape(stencil);
 
-   /* symmetric case */
    num_values = zzz_StructMatrixNumValues(matrix);
+   symm_coeff = zzz_StructMatrixSymmCoeff(matrix);
    fprintf(file, "%d\n", num_values);
-   if (zzz_StructMatrixSymmetric(matrix))
+   j = 0;
+   for (i = 0; i < zzz_StructStencilSize(stencil); i++)
    {
-      j = 0;
-      symm_coeff = zzz_StructMatrixSymmCoeff(matrix);
-      for (i = 0; i < zzz_StructStencilSize(stencil); i++)
+      if (!symm_coeff[i])
       {
-         if (!symm_coeff[i])
-         {
-            fprintf(file, "%d: %d %d %d\n", j++,
-                    zzz_IndexX(stencil_shape[i]),
-                    zzz_IndexY(stencil_shape[i]),
-                    zzz_IndexZ(stencil_shape[i]));
-         }
-      }
-   }
-
-   /* non-symmetric case */
-   else
-   {
-      for (i = 0; i < zzz_StructStencilSize(stencil); i++)
-      {
-         fprintf(file, "%d: %d %d %d\n", i,
+         fprintf(file, "%d: %d %d %d\n", j++,
                  zzz_IndexX(stencil_shape[i]),
                  zzz_IndexY(stencil_shape[i]),
                  zzz_IndexZ(stencil_shape[i]));
@@ -792,7 +764,7 @@ zzz_ReadStructMatrix( char *filename,
    fscanf(file, "\nStencil:\n");
    dim = zzz_StructGridDim(grid);
    fscanf(file, "%d\n", &stencil_size);
-   stencil_shape = ctalloc(zzz_Index *, stencil_size);
+   stencil_shape = zzz_CTAlloc(zzz_Index *, stencil_size);
    for (i = 0; i < stencil_size; i++)
    {
       stencil_shape[i] = zzz_NewIndex();
@@ -807,7 +779,7 @@ zzz_ReadStructMatrix( char *filename,
     * Initialize the matrix
     *----------------------------------------*/
 
-   matrix = zzz_NewStructMatrix(grid, stencil);
+   matrix = zzz_NewStructMatrix(&MPI_COMM_WORLD, grid, stencil);
    zzz_StructMatrixSymmetric(matrix) = symmetric;
    zzz_SetStructMatrixNumGhost(matrix, num_ghost);
    zzz_InitializeStructMatrix(matrix);

@@ -81,8 +81,8 @@ typedef struct
  * Member macros: zzz_Index
  *--------------------------------------------------------------------------*/
 
-#define zzz_NewIndex()       ctalloc(zzz_Index, 3)
-#define zzz_FreeIndex(index) tfree(index)
+#define zzz_NewIndex()       zzz_CTAlloc(zzz_Index, 3)
+#define zzz_FreeIndex(index) zzz_TFree(index)
 
 #define zzz_SetIndex(index, ix, iy, iz) \
 {\

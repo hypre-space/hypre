@@ -65,7 +65,8 @@ main( int   argc,
     * Do a matvec
     *-----------------------------------------------------------*/
 
-   tmp_vector = zzz_NewStructVector(zzz_StructVectorGrid(vector));
+   tmp_vector =
+      zzz_NewStructVector(&MPI_COMM_WORLD, zzz_StructVectorGrid(vector));
    zzz_InitializeStructVector(tmp_vector);
    zzz_AssembleStructVector(tmp_vector);
 

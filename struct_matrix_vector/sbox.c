@@ -28,7 +28,7 @@ zzz_NewSBox( zzz_Box   *box,
    zzz_SBox *sbox;
    int       d;
 
-   sbox = talloc(zzz_SBox, 1);
+   sbox = zzz_TAlloc(zzz_SBox, 1);
 
    zzz_SBoxBox(sbox)    = box;
    zzz_SBoxStride(sbox) = stride;
@@ -50,7 +50,7 @@ zzz_NewSBoxArray( )
 {
    zzz_SBoxArray *sbox_array;
 
-   sbox_array = talloc(zzz_SBoxArray, 1);
+   sbox_array = zzz_TAlloc(zzz_SBoxArray, 1);
 
    zzz_SBoxArraySBoxes(sbox_array) = NULL;
    zzz_SBoxArraySize(sbox_array)   = 0;
@@ -68,10 +68,10 @@ zzz_NewSBoxArrayArray( int size )
    zzz_SBoxArrayArray  *sbox_array_array;
    int                  i;
 
-   sbox_array_array = ctalloc(zzz_SBoxArrayArray, 1);
+   sbox_array_array = zzz_CTAlloc(zzz_SBoxArrayArray, 1);
 
    zzz_SBoxArrayArraySBoxArrays(sbox_array_array) =
-      ctalloc(zzz_SBoxArray *, size);
+      zzz_CTAlloc(zzz_SBoxArray *, size);
 
    for (i = 0; i < size; i++)
       zzz_SBoxArrayArraySBoxArray(sbox_array_array, i) = zzz_NewSBoxArray();
@@ -91,7 +91,7 @@ zzz_FreeSBox( zzz_SBox *sbox )
    {
       zzz_FreeIndex(zzz_SBoxStride(sbox));
       zzz_FreeBox(zzz_SBoxBox(sbox));
-      tfree(sbox);
+      zzz_TFree(sbox);
    }
 }
 
@@ -105,8 +105,8 @@ zzz_FreeSBoxArrayShell( zzz_SBoxArray *sbox_array )
 {
    if (sbox_array)
    {
-      tfree(zzz_SBoxArraySBoxes(sbox_array));
-      tfree(sbox_array);
+      zzz_TFree(zzz_SBoxArraySBoxes(sbox_array));
+      zzz_TFree(sbox_array);
    }
 }
 
@@ -141,8 +141,8 @@ zzz_FreeSBoxArrayArrayShell( zzz_SBoxArrayArray *sbox_array_array )
 {
    if (sbox_array_array)
    {
-      tfree(zzz_SBoxArrayArraySBoxArrays(sbox_array_array));
-      tfree(sbox_array_array);
+      zzz_TFree(zzz_SBoxArrayArraySBoxArrays(sbox_array_array));
+      zzz_TFree(sbox_array_array);
    }
 }
 
@@ -206,7 +206,7 @@ zzz_DuplicateSBoxArray( zzz_SBoxArray *sbox_array )
    {
       data_sz = ((((new_size - 1) / zzz_SBoxArrayBlocksize) + 1) *
                  zzz_SBoxArrayBlocksize);
-      new_sboxes = ctalloc(zzz_SBox *, data_sz);
+      new_sboxes = zzz_CTAlloc(zzz_SBox *, data_sz);
 
       sboxes = zzz_SBoxArraySBoxes(sbox_array);
 
@@ -342,7 +342,7 @@ zzz_AppendSBox( zzz_SBox      *sbox,
    size = zzz_SBoxArraySize(sbox_array);
    if (!(size % zzz_SBoxArrayBlocksize))
    {
-      sboxes = ctalloc(zzz_SBox *, size + zzz_SBoxArrayBlocksize);
+      sboxes = zzz_CTAlloc(zzz_SBox *, size + zzz_SBoxArrayBlocksize);
       old_sboxes = zzz_SBoxArraySBoxes(sbox_array);
  
       for (i = 0; i < size; i++)
@@ -350,7 +350,7 @@ zzz_AppendSBox( zzz_SBox      *sbox,
  
       zzz_SBoxArraySBoxes(sbox_array) = sboxes;
  
-      tfree(old_sboxes);
+      zzz_TFree(old_sboxes);
    }
  
    zzz_SBoxArraySBox(sbox_array, size) = sbox;

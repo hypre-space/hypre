@@ -22,6 +22,8 @@
 
 typedef struct
 {
+   MPI_Comm      *comm;
+
    zzz_BoxArray  *all_boxes;    /* Array of all grid boxes in the grid */
    int           *processes;    /* Processes corresponding to grid boxes */
 
@@ -33,14 +35,13 @@ typedef struct
    int            global_size;  /* Total number of grid points */
    int            local_size;   /* Total number of points locally */
 
-   MPI_Comm       context;
-
 } zzz_StructGrid;
 
 /*--------------------------------------------------------------------------
  * Accessor macros: zzz_StructGrid
  *--------------------------------------------------------------------------*/
 
+#define zzz_StructGridComm(grid)          ((grid) -> comm)
 #define zzz_StructGridAllBoxes(grid)      ((grid) -> all_boxes)
 #define zzz_StructGridProcesses(grid)     ((grid) -> processes)
 #define zzz_StructGridBoxes(grid)         ((grid) -> boxes)
@@ -48,7 +49,6 @@ typedef struct
 #define zzz_StructGridDim(grid)           ((grid) -> dim)
 #define zzz_StructGridGlobalSize(grid)    ((grid) -> global_size)
 #define zzz_StructGridLocalSize(grid)     ((grid) -> local_size)
-#define zzz_StructGridContext(grid)       ((grid) -> context)
 
 #define zzz_StructGridProcess(grid, i) \
 (zzz_StructGridProcesses(grid)[i])

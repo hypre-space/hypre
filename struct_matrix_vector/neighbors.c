@@ -57,8 +57,8 @@ zzz_FindBoxNeighbors( zzz_BoxArray       *boxes,
     *-----------------------------------------------------------------------*/
 
    neighbors = zzz_NewBoxArray();
-   neighbor_ranks = ctalloc(int, zzz_BoxArraySize(all_boxes));
-   neighbor_flags = ctalloc(int, zzz_BoxArraySize(all_boxes));
+   neighbor_ranks = zzz_CTAlloc(int, zzz_BoxArraySize(all_boxes));
+   neighbor_flags = zzz_CTAlloc(int, zzz_BoxArraySize(all_boxes));
 
    zzz_ForBoxI(i, boxes)
    {
@@ -97,17 +97,17 @@ zzz_FindBoxNeighbors( zzz_BoxArray       *boxes,
       zzz_FreeBox(shift_box);
    }
 
-   tfree(neighbor_flags);
+   zzz_TFree(neighbor_flags);
 
    /*-----------------------------------------------------------------------
     * Compress size of `neighbor_ranks'
     *-----------------------------------------------------------------------*/
 
    tmp_neighbor_ranks = neighbor_ranks;
-   neighbor_ranks = ctalloc(int, zzz_BoxArraySize(neighbors));
+   neighbor_ranks = zzz_CTAlloc(int, zzz_BoxArraySize(neighbors));
    zzz_ForBoxI(i, neighbors)
       neighbor_ranks[i] = tmp_neighbor_ranks[i];
-   tfree(tmp_neighbor_ranks);
+   zzz_TFree(tmp_neighbor_ranks);
 
    *neighbors_ptr = neighbors;
    *neighbor_ranks_ptr = neighbor_ranks;
@@ -177,8 +177,8 @@ zzz_FindBoxApproxNeighbors( zzz_BoxArray       *boxes,
     *-----------------------------------------------------------------------*/
 
    neighbors = zzz_NewBoxArray();
-   neighbor_ranks = ctalloc(int, zzz_BoxArraySize(all_boxes));
-   neighbor_flags = ctalloc(int, zzz_BoxArraySize(all_boxes));
+   neighbor_ranks = zzz_CTAlloc(int, zzz_BoxArraySize(all_boxes));
+   neighbor_flags = zzz_CTAlloc(int, zzz_BoxArraySize(all_boxes));
 
    zzz_ForBoxI(i, boxes)
    {
@@ -213,17 +213,17 @@ zzz_FindBoxApproxNeighbors( zzz_BoxArray       *boxes,
       zzz_FreeBox(grow_box);
    }
 
-   tfree(neighbor_flags);
+   zzz_TFree(neighbor_flags);
 
    /*-----------------------------------------------------------------------
     * Compress size of `neighbor_ranks'
     *-----------------------------------------------------------------------*/
 
    tmp_neighbor_ranks = neighbor_ranks;
-   neighbor_ranks = ctalloc(int, zzz_BoxArraySize(neighbors));
+   neighbor_ranks = zzz_CTAlloc(int, zzz_BoxArraySize(neighbors));
    zzz_ForBoxI(i, neighbors)
       neighbor_ranks[i] = tmp_neighbor_ranks[i];
-   tfree(tmp_neighbor_ranks);
+   zzz_TFree(tmp_neighbor_ranks);
 
    *neighbors_ptr = neighbors;
    *neighbor_ranks_ptr = neighbor_ranks;
