@@ -63,41 +63,47 @@ casc_using_blas=no
 
 
 AC_ARG_WITH(CC, \[
-  --with-CC=ARG           manually set C compiler to ARG],
+  --with-CC=ARG           User can manually set C compiler to ARG],
   CC=$withval
   casc_user_chose_compilers=yes
 )
 
 AC_ARG_WITH(CXX, [\
-  --with-CXX=ARG          manually set C++ compiler to ARG],
+  --with-CXX=ARG          User can manually set C++ compiler to ARG],
   CXX=$withval
   casc_user_chose_compilers=yes
 )
 
 AC_ARG_WITH(F77, [\
-  --with-f77=ARG          manually set f77 compiler to ARG],
+  --with-f77=ARG          User can manually set f77 compiler to ARG],
   F77=$withval
   casc_user_chose_compilers=yes
 )
 
 AC_ARG_WITH(CFLAGS, [\
-  --with-CFLAGS=ARG       manually set c compiler flags],
+  --with-CFLAGS=ARG       User can manually set c compiler flags.  This option
+		          is not necessary to turn on optimization or debug
+			  flags unless you want to use an opt or debug flag
+		          that is not the default.  To choose the default
+			  use --enable-opt or --enable-debug],
   CFLAGS=$withval
 )
 
 AC_ARG_WITH(CXXFLAGS, [\
-  --with-CXXFLAGS=ARG     manually set c++ compiler flags],
+  --with-CXXFLAGS=ARG     User can manually set c++ compiler flags.],
   CXXFLAGS=$withval
 )
 
 AC_ARG_WITH(F77FLAGS, [\
-  --with-F77FLAGS=ARG     manually set f77 compiler flags],
+  --with-F77FLAGS=ARG     User can manually set f77 compiler flags],
   F77FLAGS=$withval
 )
 
 
 AC_ARG_WITH(mpi-include, [\
-  --with-mpi-include=DIR  mpi.h is in DIR],
+  --with-mpi-include=DIR  User specifies that mpi.h is in DIR.  The options
+			  --with-mpi-include --with-mpi-libs and 
+			  --with-mpi-lib-dirs must be used together.],
   for mpi_dir in $withval; do
     MPIINCLUDE="$MPIINCLUDE -I$withval"
   done; casc_user_chose_mpi=yes
@@ -105,7 +111,9 @@ AC_ARG_WITH(mpi-include, [\
 
 AC_ARG_WITH(mpi-libs, [\
   --with-mpi-libs=LIBS    LIBS is space-separated list of library names 
-                          needed for MPI, e.g. \"nsl socket mpi\"],  
+                          needed for MPI, e.g. \"nsl socket mpi\".  The 
+			  options --with-mpi-include --with-mpi-libs and 
+			  --with-mpi-lib-dirs must be used together.],  
   for mpi_lib in $withval; do
     MPILIBS="$MPILIBS -l$mpi_lib"
   done; casc_user_chose_mpi=yes
@@ -116,7 +124,9 @@ AC_ARG_WITH(mpi-lib-dirs, [\
                           DIRS is space-separated list of directories
                           containing the libraries specified by
                           \`--with-mpi-libs',
-                          e.g \"/usr/lib /usr/local/mpi/lib\"],
+                          e.g \"/usr/lib /usr/local/mpi/lib\".  The options
+			  --with-mpi-include --with-mpi-libs and 
+			  --with-mpi-lib-dirs must be used together.],
   for mpi_lib_dir in $withval; do
     MPILIBDIRS="-L$mpi_lib_dir $MPILIBDIRS"
   done; casc_user_chose_mpi=yes
@@ -126,13 +136,18 @@ AC_ARG_WITH(mpi-flags, [\
   --with-mpi-flags=FLAGS  FLAGS is a space seperated list of whatever
                        	  flags other than -l and -L are needed to link
                           with MPI libraries-- Does not de-activate auto
-                          search for other MPI information],
+                          search for other MPI information. May be used with
+			  the other three mpi options or alone in conjunction
+			  with the automatic mpi search.],
   MPIFLAGS=$withval
 )
 
 AC_ARG_WITH(purify, [\
-  --with-purify           assign gcc if not already set by user and 
-                          prepends "purify" to compile/link line],
+  --with-purify           assign gcc and g++ as the C and C++ compilers 
+			  if not already set by user and 
+                          prepends "purify" to compile/link line-- no 
+			  checking is done to ensure purify is present on 
+			  the machine],
   if test "$casc_user_chose_compilers" = "no"
   then
     CC=gcc
@@ -145,8 +160,10 @@ AC_ARG_WITH(purify, [\
 )
 
 AC_ARG_WITH(cegdb, [\
-  --with-cegdb            assign gcc and -g and link in -lcegdb and
-                          include cegdb.h],
+  --with-cegdb            assign gcc and g++ as the c and c++ compilers 
+			  and -g as the compiler flag and link in -lcegdb and
+                          include cegdb.h-- no checking is done to ensure
+			  cegdb is on the machine],
   CC=gcc
   CXX=g++
   casc_users_chose_compilers=yes
@@ -159,8 +176,10 @@ AC_ARG_WITH(cegdb, [\
 
 
 AC_ARG_WITH(gdb, [\
-  --with-gdb              assign gcc and -g and link in -lgdb and
-                          include gdb.h],
+  --with-gdb              assign gcc and g++ as the C and c++ compilers
+			  and -g and the compiler flag and link in -lgdb and
+                          include gdb.h--not checking is done to ensure
+			  gdb is on the machine],
   CC=gcc
   CXX=g++
   casc_users_chose_compilers=yes
@@ -180,7 +199,8 @@ dnl *********************************************************************
 
 
 AC_ARG_WITH(MPI, [\
-  --without-MPI           do not use MPI],
+  --without-MPI           compiles without MPI.  This option could affect
+			  which compiler is chosen],
   if test "$withval" = "no"
   then
     casc_using_mpi=no
@@ -193,19 +213,22 @@ AC_ARG_WITH(MPI, [\
 
 
 AC_ARG_WITH(dmalloc, [\
-  --with-dmalloc          use dmalloc package],
+  --with-dmalloc          use dmalloc package--no checking is done to ensure
+			  the package is on the machine],
   CASC_ADD_LIB(dmalloc, malloc, /home/casc/lib /usr/local/lib,
     LD,  AC_DEFINE(HYPRE_MEMORY_DMALLOC) )
 )
 
 
 AC_ARG_WITH(timing, [\
-  --with-timing           use timing routines],
+  --with-timing           use HYPRE timing routines],
   AC_DEFINE(HYPRE_TIMING)
 )
 
 AC_ARG_WITH(pthreads, [\
-  --with-pthreads         use pthreads],
+  --with-pthreads         use pthreads-- this may affect which compiler
+			  is chosen.  Tests are done to check for the
+			  pthread library.  Supported on IBM only.],
   if test "$withval" != "no"
   then
     casc_using_pthreads=yes
@@ -222,31 +245,34 @@ AC_ARG_WITH(pthreads, [\
 
 
 AC_ARG_WITH(openmp,
-   [  --with-openmp        use openMP],
+   [  --with-openmp           use openMP--this may affect which compiler is 
+			      chosen.  Supported on IBM and DECS only.],
    casc_using_openmp=yes
    AC_DEFINE(HYPRE_USING_OPENMP)
 )
 
 AC_ARG_WITH(IBM_smp,
-   [  --with-IBM_smp          use IBM SMP],
+   [  --with-IBM_smp          use IBM SMP--not yet supported],
    casc_using_ibm_smp=yes
    AC_DEFINE(HYPRE_USING_IBM_SMP)
 )
 
 AC_ARG_WITH(SGI_smp,
-   [  --with-SGI_smp          use SGI SMP],
+   [  --with-SGI_smp          use SGI SMP--not yet supported],
    casc_using_sgi_smp=yes
    AC_DEFINE(HYPRE_USING_SGI_SMP)
 )
 
 AC_ARG_WITH(pgcc_smp,
-   [  --with-pgcc_smp          use pgcc SMP (Red)],
+   [  --with-pgcc_smp         use pgcc SMP (Red)--not yet supported],
    casc_using_pgcc_smp=yes 
    AC_DEFINE(HYPRE_USING_PGCC_SMP)
 )
 
 AC_ARG_WITH(blas,
-   [  --with-blas          locate BLAS external to hypre library **THIS OPTION				 MUST BE USED FOR IJ_MATRIX_VECTOR CODE ON THE DECS], 
+   [  --with-blas             locate BLAS external to hypre library **THIS 
+			      OPTION MUST BE USED FOR IJ_MATRIX_VECTOR CODE 
+		 	      ON THE DECS], 
    casc_using_blas=yes
 )
 
@@ -490,7 +516,9 @@ then
    rs6000)
 
    AC_ARG_WITH(COMM_SIMPLE, [\
-   --without-COMM_SIMPLE           use MPI derived data types],
+   --without-COMM_SIMPLE  Do not use MPI derived data types.  This option
+		          is automatically chosen for IBM, but may be
+			  selected for other platforms as well.],
    if test "$withval" = "no"
    then
      CFLAGS="$CFLAGS"
