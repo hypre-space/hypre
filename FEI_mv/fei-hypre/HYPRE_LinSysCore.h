@@ -455,6 +455,7 @@ class HYPRE_LinSysCore
    int             numProcs_;           // number of processors
    int             mypid_;              // my processor ID
    int             HYOutputLevel_;      // control print information
+   int             memOptimizerFlag_;   // turn on memory optimizer
 
    // ----------------------------------------------------------------------
    // for storing information about how to load matrix directly (bypass FEI)

@@ -82,7 +82,6 @@ extern "C" {
    int qsort0(int *, int, int);
    int qsort1(int *, double *, int, int);
 }
-#define dabs(x) ((x > 0) ? x : -(x))
 
 //******************************************************************************
 //******************************************************************************
@@ -265,8 +264,8 @@ HYPRE_LSI_BlockP::HYPRE_LSI_BlockP()
    A22Params_.PrecondID_     = 1;       /* default : diagonal */
    A11Params_.Tol_           = 1.0e-2;
    A22Params_.Tol_           = 1.0e-2;
-   A11Params_.MaxIter_       = 10;
-   A22Params_.MaxIter_       = 10;
+   A11Params_.MaxIter_       = 1000;
+   A22Params_.MaxIter_       = 1000;
    A11Params_.PSNLevels_     = 1;
    A22Params_.PSNLevels_     = 1;
    A11Params_.PSThresh_      = 1.0e-1;
@@ -1201,6 +1200,7 @@ int HYPRE_LSI_BlockP::solve(HYPRE_ParVector fvec, HYPRE_ParVector xvec)
    // extract matrix and machine information
    //------------------------------------------------------------------
 
+printf("LSI_blkprec solve, P22Size = %d\n", P22Size_);
    HYPRE_ParCSRMatrixGetComm( Amat_, &mpi_comm );
    MPI_Comm_rank( mpi_comm, &mypid );
    MPI_Comm_size( mpi_comm, &nprocs );

@@ -832,7 +832,7 @@ int HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
          colIndices_[i] = new int[rowLeng];
          assert( colIndices_[i] );
       }
-      else               colIndices_[i] = NULL;
+      else colIndices_[i] = NULL;
       indPtr  = colIndices_[i];
       indPtr2 = colIndices[i];
       for ( j = 0; j < rowLeng; j++ ) indPtr[j] = indPtr2[j];
@@ -1761,7 +1761,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
          HYPRE_IJMatrixSetValues(HYA_, 1, &newLeng,(const int *) &eqnNum,
                        (const int *) newColInd, (const double *) newColVal);
          delete [] colValues_[i];
-         delete [] colIndices_[i];
+         if ( memOptimizerFlag_ ) delete [] colIndices_[i];
          nnz += newLeng;
       }
       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
@@ -1770,9 +1770,12 @@ int HYPRE_LinSysCore::matrixLoadComplete()
                  mypid_, nnz);
       }
       delete [] colValues_;
-      delete [] colIndices_;
       colValues_ = NULL;
-      colIndices_ = NULL;
+      if ( memOptimizerFlag_ ) 
+      {
+         delete [] colIndices_;
+         colIndices_ = NULL;
+      }
       if ( maxRowLeng > 0 )
       {
          delete [] newColInd;

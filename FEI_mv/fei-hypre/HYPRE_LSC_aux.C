@@ -216,6 +216,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          printf("%4d : HYPRE_LinSysCore::parameters - available ones : \n",
                 mypid_);
          printf("    - outputLevel <d> \n");
+         printf("    - optimizeMemory \n");
          printf("    - setDebug <slideReduction1,amgDebug,printFEInfo>\n");
          printf("    - haveFEData <0,1>\n");
          printf("    - schurReduction\n");
@@ -286,6 +287,17 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters outputLevel = %d\n",
                    HYOutputLevel_);
+      }
+
+      //----------------------------------------------------------------
+      // turn on memory optimizer 
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "optimizeMemory") )
+      {
+         memOptimizerFlag_ = 1;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters optimizeMemory on\n");
       }
 
       //----------------------------------------------------------------
