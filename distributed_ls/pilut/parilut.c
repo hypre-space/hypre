@@ -1167,7 +1167,9 @@ void FormNRmat(int rrow, int first, ReduceMatType *nrmat,
   /* link the reused storage to the new reduced system */
   nrmat->rmat_rnz[rrow]     = nz;
   nrmat->rmat_rrowlen[rrow] = out_rowlen;
+  if (nrmat->rmat_rcolind[rrow]) free(nrmat->rmat_rcolind[rrow]);
   nrmat->rmat_rcolind[rrow] = rcolind;
+  if (nrmat->rmat_rvalues[rrow]) free(nrmat->rmat_rvalues[rrow]);
   nrmat->rmat_rvalues[rrow] = rvalues;
 
 #ifdef HYPRE_TIMING
@@ -1307,9 +1309,13 @@ void ParINIT( ReduceMatType *nrmat, CommInfoType *cinfo, int *rowdist,
   nrmat->rmat_rvalues = (double **)  mymalloc( sizeof(double*) *ntogo, "ParILUT: nrmat->rmat_rvalues");
 
   /* Allocate work space */
+  if (jr) free(jr);
   jr = idx_malloc_init(nrows, -1, "ParILUT: jr");
+  if (lr) free(lr);
   lr = idx_malloc_init(nleft, -1, "ParILUT: lr");
+  if (jw) free(jw);
   jw = idx_malloc(nleft, "ParILUT: jw");
+  if (w) free(w);
   w  =  fp_malloc(nleft, "ParILUT: w");
 
   /* ---- ComputeCommInfo ---- */

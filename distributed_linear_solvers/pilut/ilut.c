@@ -27,20 +27,40 @@ int ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu
 #endif
 
   /* Allocate memory for ldu */
+  if (ldu->lsrowptr) hypre_TFree(ldu->lsrowptr);
   ldu->lsrowptr = idx_malloc(ddist->ddist_lnrows, "ILUT: ldu->lsrowptr");
+
+  if (ldu->lerowptr) hypre_TFree(ldu->lerowptr);
   ldu->lerowptr = idx_malloc(ddist->ddist_lnrows, "ILUT: ldu->lerowptr");
+
+  if (ldu->lcolind) hypre_TFree(ldu->lcolind);
   ldu->lcolind  = idx_malloc_init(maxnz*ddist->ddist_lnrows, 0, "ILUT: ldu->lcolind");
+
+  if (ldu->lvalues) hypre_TFree(ldu->lvalues);
   ldu->lvalues  =  fp_malloc_init(maxnz*ddist->ddist_lnrows, 0, "ILUT: ldu->lvalues");
 
+  if (ldu->usrowptr) hypre_TFree(ldu->usrowptr);
   ldu->usrowptr = idx_malloc(ddist->ddist_lnrows, "ILUT: ldu->usrowptr");
+
+  if (ldu->uerowptr) hypre_TFree(ldu->uerowptr);
   ldu->uerowptr = idx_malloc(ddist->ddist_lnrows, "ILUT: ldu->uerowptr");
+
+  if (ldu->ucolind) hypre_TFree(ldu->ucolind);
   ldu->ucolind  = idx_malloc_init(maxnz*ddist->ddist_lnrows, 0, "ILUT: ldu->ucolind");
+
+  if (ldu->uvalues) hypre_TFree(ldu->uvalues);
   ldu->uvalues  =  fp_malloc_init(maxnz*ddist->ddist_lnrows, 0.0, "ILUT: ldu->uvalues");
 
+  if (ldu->dvalues) hypre_TFree(ldu->dvalues);
   ldu->dvalues = fp_malloc(ddist->ddist_lnrows, "ILUT: ldu->dvalues");
+
+  if (ldu->nrm2s) hypre_TFree(ldu->nrm2s);
   ldu->nrm2s   = fp_malloc_init(ddist->ddist_lnrows, 0.0, "ILUT: ldu->nrm2s");
 
+  if (ldu->perm) hypre_TFree(ldu->perm);
   ldu->perm  = idx_malloc_init(ddist->ddist_lnrows, 0, "ILUT: ldu->perm");
+
+  if (ldu->iperm) hypre_TFree(ldu->iperm);
   ldu->iperm = idx_malloc_init(ddist->ddist_lnrows, 0, "ILUT: ldu->iperm");
 
   firstrow = ddist->ddist_rowdist[mype];

@@ -16,6 +16,7 @@ int  HYPRE_NewDistributedMatrixPilutSolver(
    hypre_DistributedMatrixPilutSolver     *solver;
    hypre_PilutSolverGlobals *globals;
    int            ierr=0, nprocs, myid;
+   FactorMatType *ldu;
 
    /* Allocate structure for holding solver data */
    solver = (hypre_DistributedMatrixPilutSolver *) 
@@ -30,6 +31,11 @@ int  HYPRE_NewDistributedMatrixPilutSolver(
    globals = hypre_DistributedMatrixPilutSolverGlobals(solver) = 
        (hypre_PilutSolverGlobals *) hypre_CTAlloc( hypre_PilutSolverGlobals, 1 );
 
+   jr = NULL;
+   lr = NULL;
+   jw = NULL;
+   w  = NULL;
+
    /* Set some variables in the "global variables" section */
    pilut_comm = comm;
 
@@ -40,20 +46,20 @@ int  HYPRE_NewDistributedMatrixPilutSolver(
    mype = myid;
 
 #ifdef HYPRE_TIMING
-  globals->CCI_timer = hypre_InitializeTiming( "ComputeCommInfo" );
-  globals->SS_timer = hypre_InitializeTiming( "SelectSet" );
-  globals->SFR_timer = hypre_InitializeTiming( "SendFactoredRows" );
-  globals->CR_timer = hypre_InitializeTiming( "ComputeRmat" );
-  globals->FL_timer = hypre_InitializeTiming( "FactorLocal" );
-  globals->SLUD_timer = hypre_InitializeTiming( "SeparateLU_byDIAG" );
-  globals->SLUM_timer = hypre_InitializeTiming( "SeparateLU_byMIS" );
-  globals->UL_timer = hypre_InitializeTiming( "UpdateL" );
-  globals->FNR_timer = hypre_InitializeTiming( "FormNRmat" );
+   globals->CCI_timer = hypre_InitializeTiming( "ComputeCommInfo" );
+   globals->SS_timer = hypre_InitializeTiming( "SelectSet" );
+   globals->SFR_timer = hypre_InitializeTiming( "SendFactoredRows" );
+   globals->CR_timer = hypre_InitializeTiming( "ComputeRmat" );
+   globals->FL_timer = hypre_InitializeTiming( "FactorLocal" );
+   globals->SLUD_timer = hypre_InitializeTiming( "SeparateLU_byDIAG" );
+   globals->SLUM_timer = hypre_InitializeTiming( "SeparateLU_byMIS" );
+   globals->UL_timer = hypre_InitializeTiming( "UpdateL" );
+   globals->FNR_timer = hypre_InitializeTiming( "FormNRmat" );
 
-  globals->Ll_timer = hypre_InitializeTiming( "Local part of front solve" );
-  globals->Lp_timer = hypre_InitializeTiming( "Parallel part of front solve" );
-  globals->Up_timer = hypre_InitializeTiming( "Parallel part of back solve" );
-  globals->Ul_timer = hypre_InitializeTiming( "Local part of back solve" );
+   globals->Ll_timer = hypre_InitializeTiming( "Local part of front solve" );
+   globals->Lp_timer = hypre_InitializeTiming( "Parallel part of front solve" );
+   globals->Up_timer = hypre_InitializeTiming( "Parallel part of back solve" );
+   globals->Ul_timer = hypre_InitializeTiming( "Local part of back solve" );
 #endif
 
    /* Data distribution structure */
@@ -62,6 +68,21 @@ int  HYPRE_NewDistributedMatrixPilutSolver(
 
    hypre_DistributedMatrixPilutSolverFactorMat(solver) = 
           (FactorMatType *) hypre_CTAlloc( FactorMatType, 1 );
+
+   ldu = hypre_DistributedMatrixPilutSolverFactorMat(solver);
+
+   ldu->lsrowptr = NULL;
+   ldu->lerowptr = NULL;
+   ldu->lcolind  = NULL;
+   ldu->lvalues  = NULL;
+   ldu->usrowptr = NULL;
+   ldu->uerowptr = NULL;
+   ldu->ucolind  = NULL;
+   ldu->uvalues  = NULL;
+   ldu->dvalues  = NULL;
+   ldu->nrm2s    = NULL;
+   ldu->perm     = NULL;
+   ldu->iperm    = NULL;
 
    /* Note that because we allow matrix to be NULL at this point so that it can
       be set later with a SetMatrix call, we do nothing with matrix except insert
