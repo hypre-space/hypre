@@ -62,7 +62,7 @@ install:
 	   done \
 	); \
 	# install the libraries; \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
+	for i in ${HYPRE_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
