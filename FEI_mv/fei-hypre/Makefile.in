@@ -43,7 +43,7 @@ CFLAGS = -w ${C_COMPILE_FLAGS} ${CDEFS}\
  -I$(srcdir)/../../seq_mv\
  -I$(srcdir)/../../distributed_matrix\
  -I$(srcdir)/../../distributed_ls\
- -I$(srcdir)/../../mli\
+ -I$(srcdir)/../femli\
  -I$(FEI_BASE_DIR)\
  ${SUPERLU_INCLUDE}\
  ${MLPACK_INCLUDE}\
@@ -60,7 +60,7 @@ CXXFLAGS = -w ${CXX_COMPILE_FLAGS} ${CXXDEFS}\
  -I$(srcdir)/../../parcsr_mv\
  -I$(srcdir)/../../parcsr_ls\
  -I$(srcdir)/../../seq_mv\
- -I$(srcdir)/../../mli\
+ -I$(srcdir)/../femli\
  -I$(FEI_BASE_DIR)\
  ${SUPERLU_INCLUDE}\
  ${CXXINCLUDES}
