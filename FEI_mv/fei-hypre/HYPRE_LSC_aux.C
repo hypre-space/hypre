@@ -58,7 +58,7 @@
 
 extern "C" {
 
-#ifdef MLPACK
+#ifdef HAVE_ML
    int HYPRE_LSI_MLCreate( MPI_Comm, HYPRE_Solver *);
    int HYPRE_LSI_MLDestroy( HYPRE_Solver );
    int HYPRE_LSI_MLSetup( HYPRE_Solver, HYPRE_ParCSRMatrix,
