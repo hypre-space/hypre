@@ -214,11 +214,9 @@ AC_ARG_WITH(petsc,
       casc_using_petsc=yes
       HYPRE_PETSCDEFS="$HYPRE_PETSCDEFS -DPETSC_AVAILABLE"
       HYPRE_PETSCLIBDIRS="$HYPRE_TOP_SRC_DIR/PETScMat_linear_solvers/pilut \
- $HYPRE_TOP_SRC_DIR/PETSc_linear_solvers/ParILUT \
- $HYPRE_TOP_SRC_DIR/matrix_matrix"
+ $HYPRE_TOP_SRC_DIR/PETSc_linear_solvers/ParILUT "
       HYPRE_PETSCLIBS=" -l_HYPRE_PETScSolverParILUT \
- -l_HYPRE_PETScMatPilutSolver \
- -l_HYPRE_MatrixMatrix"
+ -l_HYPRE_PETScMatPilutSolver "
    else
       HYPRE_PETSCDEFS=""
       HYPRE_PETSCLIBDIRS=""
