@@ -9,8 +9,11 @@
 
 
 CC = gcc
+CCC = g++
 
 F77 = /home/casc/g77/bin/g77
+
+LD = ${CCC}
 
 PETSC_CFLAGS =\
  -I${PETSC_DIR}/src/mat/impls/aij/mpi\
@@ -26,6 +29,7 @@ CFLAGS =\
  -I${HYPRE_DIR}/includes\
  -DHYPRE_MEMORY_CHECK\
  -DHYPRE_DEBUG\
+ -I/home/cleary/ale3d/isis/include\
  -g
 
 FFLAGS = -g
@@ -68,11 +72,9 @@ LFLAGS =\
  -lHYPREPETScSolverParILUT \
  -lHYPREPETScMatPilutSolver \
  -lHYPREDistributedMatrixPilutSolver \
- -lilu -lic -ldsparskit\
  -lHYPRE_StructMatrix \
  -lHYPREDistributedMatrix \
  -lHYPRE_MatrixMatrix\
- -lHYPREseq_mat_vec\
  -lHYPRE_memory\
  ${PETSC_LFLAGS}\
  -lf2c\
@@ -91,5 +93,10 @@ internal_protos.h: $(FILES)
         mkproto *.c > internal_protos.h
  
 PROTOS = HYPRE_protos.h hypre_protos.h internal_protos.h
+
+#Generic Rule
+.cc.o:
+	@@echo "Making (c++) " $@
+	${CCC} -o $@ -c ${CFLAGS} $<
 
 
