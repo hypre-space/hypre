@@ -363,6 +363,10 @@ f77_ij_mv: f77_ij_mv.o
 	@echo  "Building" $@ "... "
 	${F77} -o $@ $@.o ${FFLAGS} ${IJ_MV_LFLAGS}
 
+driver_commpkg: driver_commpkg.o
+	@echo  "Building" $@ "... "
+	${CC} -o $@ $@.o ${COMMPKG_LFLAGS}
+
 ##################################################################
 # Babel version of above
 ##################################################################
