@@ -187,31 +187,31 @@ then
   if [ ${BuildOpt} -eq $Build -o ${BuildOpt} -eq $Run ]
   then
     cd $StdBuildDir
-    ./configure $ConfigOption 1> ${Hdr}.configure.${MessageStr}.log \
-	2> ${Hdr}.configure.${MessageStr}.err
-    echo "$HYPRE_CONFIGURE_EMAIL" > ${Hdr}.configure.${MessageStr}.err.email
+    ./configure $ConfigOption 1> ${Hdr}.${MessageStr}.configure.log \
+	2> ${Hdr}.${MessageStr}.configure.err
+    echo "$HYPRE_CONFIGURE_EMAIL" > ${Hdr}.${MessageStr}.configure.err.email
 
     $MAKE veryclean
 
     if [ $StructOpt -ne $Skip ]
     then
-      $MAKE struct 1> ${Hdr}.struct.${MessageStr}.log \
-	2> ${Hdr}.struct.${MessageStr}.err
-      echo "$HYPRE_STRUCT_EMAIL" > ${Hdr}.struct.${MessageStr}.err.email
+      $MAKE struct 1> ${Hdr}.${MessageStr}.struct.log \
+	2> ${Hdr}.${MessageStr}.struct.err
+      echo "$HYPRE_STRUCT_EMAIL" > ${Hdr}.${MessageStr}.struct.err.email
     fi
 
     if [ $IJOpt -ne $Skip ]
     then
-      $MAKE IJ 1> ${Hdr}.IJ.${MessageStr}.log \
-	2> ${Hdr}.IJ.${MessageStr}.err
-      echo "$HYPRE_IJ_EMAIL" > ${Hdr}.IJ.${MessageStr}.err.email
+      $MAKE IJ 1> ${Hdr}.${MessageStr}.IJ.log \
+	2> ${Hdr}.${MessageStr}.IJ.err
+      echo "$HYPRE_IJ_EMAIL" > ${Hdr}.${MessageStr}.IJ.err.email
     fi
 
     if [ $FeiOpt -ne $Skip ]
     then
-      $MAKE fei 1> ${Hdr}.fei.${MessageStr}.log \
-	2> ${Hdr}.fei.${MessageStr}.err
-      echo "$HYPRE_FEI_EMAIL" > ${Hdr}.fei.${MessageStr}.err.email
+      $MAKE fei 1> ${Hdr}.${MessageStr}.fei.log \
+	2> ${Hdr}.${MessageStr}.fei.err
+      echo "$HYPRE_FEI_EMAIL" > ${Hdr}.${MessageStr}.fei.err.email
     fi
 
     if [ $MakeOpt -ne $Skip ]
@@ -221,9 +221,9 @@ then
 
     if [ $BetaOpt -ne $Skip ]
     then
-      $MAKE beta 1> ${Hdr}.beta.${MessageStr}.log \
-	2> ${Hdr}.beta.${MessageStr}.err
-      echo "$HYPRE_BETA_EMAIL" > ${Hdr}.beta.${MessageStr}.err.email
+      $MAKE beta 1> ${Hdr}.${MessageStr}.beta.log \
+	2> ${Hdr}.${MessageStr}.beta.err
+      echo "$HYPRE_BETA_EMAIL" > ${Hdr}.${MessageStr}.beta.err.email
     fi
   fi
   if [ ${BuildOpt} -eq $Run ]
