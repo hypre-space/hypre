@@ -7,7 +7,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <iostream.h>
 #include <math.h>
 
 #if HAVE_SUPERLU
