@@ -2418,12 +2418,6 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
     if ( schurReduction_ == 0 && slideReduction_ == 1 )
     {
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
-       {
-          printf("%4d : HYPRE_LinSysCore::launchSolver - currently force",
-                  mypid_);
-          printf(" reduction if loadConstraintNumbers is used.\n");
-       }
        if ( constrList_ != NULL ) delete [] constrList_;
        constrList_ = NULL;
        buildSlideReducedSystem();
