@@ -130,7 +130,7 @@ int  impl_Hypre_StructMatrix_SetValues
 /* ********************************************************
  * impl_Hypre_StructMatrixApply
  **********************************************************/
-void  impl_Hypre_StructMatrix_Apply
+int impl_Hypre_StructMatrix_Apply
 (Hypre_StructMatrix this, Hypre_StructVector b, Hypre_StructVector* x) {
    /* x = A * b   where this = A  */
 
@@ -146,7 +146,7 @@ void  impl_Hypre_StructMatrix_Apply
    HYPRE_StructVector *Vb = SVyp->hsvec;
    hypre_StructVector *hb = (hypre_StructVector *) *Vb;
 
-   hypre_StructMatvec( 1.0, hA, hb, 1.0, hx );  /* x = A*b */
+   return hypre_StructMatvec( 1.0, hA, hb, 1.0, hx );  /* x = A*b */
 
 } /* end impl_Hypre_StructMatrixApply */
 

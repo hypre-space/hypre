@@ -23,12 +23,21 @@
  *    and initialize here
  ***************************************************/
 void Hypre_PCG_constructor(Hypre_PCG this) {
+   int size;
 
-   this->d_table = (struct Hypre_PCG_private_type *)
-      malloc( sizeof( struct Hypre_PCG_private_type ) );
+   size = sizeof( struct Hypre_PCG_private_type );
+   this->d_table = (struct Hypre_PCG_private_type *) malloc( size );
+   if ( this->d_table==NULL ) {
+      hypre_OutOfMemory( size );
+      return;
+   };
 
-   this->d_table->hssolver = (HYPRE_StructSolver *)
-     malloc( sizeof( HYPRE_StructSolver ) );
+   size = sizeof( HYPRE_StructSolver );
+   this->d_table->hssolver = (HYPRE_StructSolver *) malloc( size );
+   if ( this->d_table==NULL ) {
+      hypre_OutOfMemory( size );
+      return;
+   };
 
 } /* end constructor */
 
@@ -44,12 +53,14 @@ void Hypre_PCG_destructor(Hypre_PCG this) {
    HYPRE_StructPCGDestroy( *S );
    free(this->d_table);
 
+   return;
+
 } /* end destructor */
 
 /* ********************************************************
  * impl_Hypre_PCGApply
  **********************************************************/
-void  impl_Hypre_PCG_Apply
+int  impl_Hypre_PCG_Apply
 (Hypre_PCG this, Hypre_StructVector b, Hypre_StructVector* x) {
 
    struct Hypre_PCG_private_type *HPCGp = this->d_table;
@@ -65,7 +76,7 @@ void  impl_Hypre_PCG_Apply
    struct Hypre_StructVector_private_type *SVxp = (*x)->d_table;
    HYPRE_StructVector *Vx = SVxp->hsvec;
 
-   HYPRE_StructPCGSolve( *S, *MA, *Vb, *Vx );
+   return HYPRE_StructPCGSolve( *S, *MA, *Vb, *Vx );
 
 } /* end impl_Hypre_PCGApply */
 
@@ -104,30 +115,29 @@ Hypre_StructVector  impl_Hypre_PCG_GetResidual(Hypre_PCG this) {
 /* ********************************************************
  * impl_Hypre_PCGGetConvergenceInfo
  **********************************************************/
-void  impl_Hypre_PCG_GetConvergenceInfo(Hypre_PCG this, char* name, double* value) {
-   int ivalue;
+int  impl_Hypre_PCG_GetConvergenceInfo(Hypre_PCG this, char* name, double* value) {
+   int ivalue, ierr;
 
    struct Hypre_PCG_private_type *HSp = this->d_table;
    HYPRE_StructSolver *S = HSp->hssolver;
 
    if ( !strcmp(name,"number of iterations") ) {
       ivalue = -1;
-      HYPRE_StructPCGGetNumIterations( *S, &ivalue );
+      ierr = HYPRE_StructPCGGetNumIterations( *S, &ivalue );
       *value = ivalue;
-      return;
+      return ierr;
    }
    else if ( !strcmp(name,"residual norm") ) {
-      HYPRE_StructPCGGetFinalRelativeResidualNorm( *S, value );
-      return;
+      ierr = HYPRE_StructPCGGetFinalRelativeResidualNorm( *S, value );
+      return ierr;
    }
    else {
       printf(
          "Don't understand keyword %s to Hypre_PCG_GetConvergenceInfo\n",
          name );
       *value = 0;
-      return;
+      return 1;
    }
-
 
 } /* end impl_Hypre_PCGGetConvergenceInfo */
 
@@ -168,55 +178,54 @@ int  impl_Hypre_PCG_GetIntParameter(Hypre_PCG this, char* name) {
 /* ********************************************************
  * impl_Hypre_PCGSetDoubleParameter
  **********************************************************/
-void  impl_Hypre_PCG_SetDoubleParameter(Hypre_PCG this, char* name, double value) {
+int impl_Hypre_PCG_SetDoubleParameter(Hypre_PCG this, char* name, double value) {
 /* JFP: This function just dispatches to the parameter's set function. */
+   int ierr;
 
    struct Hypre_PCG_private_type *HSp = this->d_table;
    HYPRE_StructSolver *S = HSp->hssolver;
 
    if ( !strcmp(name,"tol") ) {
-      HYPRE_StructPCGSetTol( *S, value );
-      return;
+      ierr = HYPRE_StructPCGSetTol( *S, value );
+      return ierr;
    }
    else {
       printf( "Hypre_PCG_SetDoubleParameter does not recognize name ~s\n", name );
-   } ;
+      return 1;
+   };
 } /* end impl_Hypre_PCGSetDoubleParameter */
 
 /* ********************************************************
  * impl_Hypre_PCGSetIntParameter
  **********************************************************/
-void  impl_Hypre_PCG_SetIntParameter(Hypre_PCG this, char* name, int value) {
+int  impl_Hypre_PCG_SetIntParameter(Hypre_PCG this, char* name, int value) {
 /* JFP: This function just dispatches to the parameter's set function. */
 
    struct Hypre_PCG_private_type *HSp = this->d_table;
    HYPRE_StructSolver *S = HSp->hssolver;
 
    if ( !strcmp(name,"max_iter" )) {
-      HYPRE_StructPCGSetMaxIter( *S, value );
-      return;
+      return HYPRE_StructPCGSetMaxIter( *S, value );
    }
    else if ( !strcmp(name, "2-norm" ) ) {
-      HYPRE_StructPCGSetTwoNorm( *S, value );
-      return;
+      return HYPRE_StructPCGSetTwoNorm( *S, value );
    }
    else if ( !strcmp(name,"relative change test") ) {
-      HYPRE_StructPCGSetRelChange( *S, value );
-      return;
+      return HYPRE_StructPCGSetRelChange( *S, value );
    }
    else if (  !strcmp(name,"log") ) {
-      HYPRE_StructPCGSetLogging( *S, value );
-      return;
+      return HYPRE_StructPCGSetLogging( *S, value );
    }
    else {
       printf( "Hypre_PCG_SetIntParameter does not recognize name ~s\n", name );
-   } ;
+      return 1;
+   };
 } /* end impl_Hypre_PCGSetIntParameter */
 
 /* ********************************************************
  * impl_Hypre_PCGNew
  **********************************************************/
-void  impl_Hypre_PCG_New(Hypre_PCG this, Hypre_MPI_Com comm) {
+int impl_Hypre_PCG_New(Hypre_PCG this, Hypre_MPI_Com comm) {
 
    struct Hypre_PCG_private_type *HSPCGp = this->d_table;
    HYPRE_StructSolver *S = HSPCGp->hssolver;
@@ -231,7 +240,7 @@ void  impl_Hypre_PCG_New(Hypre_PCG this, Hypre_MPI_Com comm) {
    struct Hypre_StructSolver_private_type *HSSp = HSS->d_table;
    HSSp->hssolver = S;
 
-   HYPRE_StructPCGCreate( *C, S );
+   return HYPRE_StructPCGCreate( *C, S );
 } /* end impl_Hypre_PCGNew */
 
 /* ********************************************************
@@ -247,7 +256,7 @@ Hypre_PCG  impl_Hypre_PCG_Constructor(Hypre_MPI_Com comm) {
 /* ********************************************************
  * impl_Hypre_PCGSetup
  **********************************************************/
-void  impl_Hypre_PCG_Setup
+int impl_Hypre_PCG_Setup
 (Hypre_PCG this, Hypre_StructMatrix A, Hypre_StructVector b, Hypre_StructVector x) {
    struct Hypre_PCG_private_type *HSp = this->d_table;
    HYPRE_StructSolver *S = HSp->hssolver;
@@ -263,7 +272,7 @@ void  impl_Hypre_PCG_Setup
 
    this->d_table->hsmatrix = A;
 
-   HYPRE_StructPCGSetup( *S, *MA, *Vb, *Vx );
+   return HYPRE_StructPCGSetup( *S, *MA, *Vb, *Vx );
 
 } /* end impl_Hypre_PCGSetup */
 
@@ -281,7 +290,7 @@ Hypre_Solver impl_Hypre_PCG_GetConstructedObject(Hypre_PCG this) {
  * impl_Hypre_PCGSetPreconditioner
  *       insert the library code below
  **********************************************************/
-void  impl_Hypre_PCG_SetPreconditioner
+int impl_Hypre_PCG_SetPreconditioner
 (Hypre_PCG this, Hypre_StructSolver precond) {
 
    struct Hypre_PCG_private_type *HSPCGp = this->d_table;
@@ -297,37 +306,37 @@ void  impl_Hypre_PCG_SetPreconditioner
       Hypre_StructSolver_castTo( precond, "Hypre_StructSMG" );
 /* call the SetPrecond function for whichever preconditioner we could cast to ... */
    if ( precond_SJ != 0 ) {
-      HYPRE_StructPCGSetPrecond( *S,
-                                 HYPRE_StructJacobiSolve,
-                                 HYPRE_StructJacobiSetup,
-                                 *precond_solver );
+      return HYPRE_StructPCGSetPrecond( *S,
+                                        HYPRE_StructJacobiSolve,
+                                        HYPRE_StructJacobiSetup,
+                                        *precond_solver );
    }
    else if ( precond_SMG != 0 ) {
-      HYPRE_StructPCGSetPrecond( *S,
-                                 HYPRE_StructSMGSolve,
-                                 HYPRE_StructSMGSetup,
-                                 *precond_solver );
+      return HYPRE_StructPCGSetPrecond( *S,
+                                        HYPRE_StructSMGSolve,
+                                        HYPRE_StructSMGSetup,
+                                        *precond_solver );
    }
    else {
       printf( "Hypre_PCG_SetPreconditioner does not recognize preconditioner!\n" );
-   }
-   ;
+      return 1;
+   };
 
 } /* end impl_Hypre_PCGSetPreconditioner */
 
 
 /* Print Logging; not in the SIDL file */
 
-void
+int
 HYPRE_StructPCG_PrintLogging( HYPRE_StructSolver  solver )
 {
-   hypre_PCGPrintLogging( (void *) solver, 0 ) ;
+   return hypre_PCGPrintLogging( (void *) solver, 0 ) ;
 }
 
-void  Hypre_PCG_PrintLogging( Hypre_PCG this ) {
+int  Hypre_PCG_PrintLogging( Hypre_PCG this ) {
 
    struct Hypre_PCG_private_type *HSPCGp = this->d_table;
    HYPRE_StructSolver *S = HSPCGp->hssolver;
-   HYPRE_StructPCG_PrintLogging( *S );
+   return HYPRE_StructPCG_PrintLogging( *S );
 }
 ;

@@ -45,7 +45,7 @@ void Hypre_StructSMG_destructor(Hypre_StructSMG this) {
 /* ********************************************************
  * impl_Hypre_StructSMGApply
  **********************************************************/
-void  impl_Hypre_StructSMG_Apply
+int  impl_Hypre_StructSMG_Apply
 (Hypre_StructSMG this, Hypre_StructVector b, Hypre_StructVector* x) {
    struct Hypre_StructSMG_private_type *HSMGp = this->d_table;
    HYPRE_StructSolver *S = HSMGp->hssolver;
@@ -60,7 +60,7 @@ void  impl_Hypre_StructSMG_Apply
    struct Hypre_StructVector_private_type *SVxp = (*x)->d_table;
    HYPRE_StructVector *Vx = SVxp->hsvec;
 
-   HYPRE_StructSMGSolve( *S, *MA, *Vb, *Vx );
+   return HYPRE_StructSMGSolve( *S, *MA, *Vb, *Vx );
 } /* end impl_Hypre_StructSMGApply */
 
 /* ********************************************************
@@ -98,26 +98,26 @@ Hypre_StructVector  impl_Hypre_StructSMG_GetResidual(Hypre_StructSMG this) {
 /* ********************************************************
  * impl_Hypre_StructSMGGetConvergenceInfo
  **********************************************************/
-void  impl_Hypre_StructSMG_GetConvergenceInfo
+int  impl_Hypre_StructSMG_GetConvergenceInfo
 (Hypre_StructSMG this, char* name, double* value) {
-   int ivalue;
+   int ivalue, ierr;
 
    struct Hypre_StructSMG_private_type *HSMGp = this->d_table;
    HYPRE_StructSolver *S = HSMGp->hssolver;
 
    if ( !strcmp(name,"num iterations") ) {
-      HYPRE_StructSMGGetNumIterations( *S, &ivalue );
+      ierr = HYPRE_StructSMGGetNumIterations( *S, &ivalue );
       *value = ivalue;
-      return;
+      return ierr;
    }
    if ( !strcmp(name,"final relative residual norm") ) {
-      HYPRE_StructSMGGetFinalRelativeResidualNorm( *S, value );
-      return;
+      ierr = HYPRE_StructSMGGetFinalRelativeResidualNorm( *S, value );
+      return ierr;
    }
 
    printf( "Hypre_StructJacobi_GetConvergenceInfo does not recognize name ~s\n", name );
 
-   return;
+   return 1;
 } /* end impl_Hypre_StructSMGGetConvergenceInfo */
 
 /* ********************************************************
@@ -137,13 +137,13 @@ int  impl_Hypre_StructSMG_GetIntParameter(Hypre_StructSMG this, char* name) {
    double value;
    int ivalue;
    printf( "Hypre_StructJacobi_GetIntParameter does not recognize name ~s\n", name );
-   return 0;
+   return 1;
 } /* end impl_Hypre_StructSMGGetIntParameter */
 
 /* ********************************************************
  * impl_Hypre_StructSMGSetDoubleParameter
  **********************************************************/
-void  impl_Hypre_StructSMG_SetDoubleParameter
+int  impl_Hypre_StructSMG_SetDoubleParameter
 (Hypre_StructSMG this, char* name, double value) {
 
 /* JFP: This function just dispatches to the parameter's set function. */
@@ -152,24 +152,22 @@ void  impl_Hypre_StructSMG_SetDoubleParameter
    HYPRE_StructSolver *S = HSMGp->hssolver;
 
    if ( !strcmp(name,"tol") ) {
-      HYPRE_StructSMGSetTol( *S, value );
-      return;
+      return HYPRE_StructSMGSetTol( *S, value );
    };
    if ( !strcmp(name,"zero guess") ) {
-      HYPRE_StructSMGSetZeroGuess( *S );
-      return;
+      return HYPRE_StructSMGSetZeroGuess( *S );
    };
    if (  !strcmp(name,"nonzero guess") ) {
-      HYPRE_StructSMGSetNonZeroGuess( *S );
-      return;
+      return HYPRE_StructSMGSetNonZeroGuess( *S );
    };
+   return 1;
 
 } /* end impl_Hypre_StructSMGSetDoubleParameter */
 
 /* ********************************************************
  * impl_Hypre_StructSMGSetIntParameter
  **********************************************************/
-void  impl_Hypre_StructSMG_SetIntParameter
+int impl_Hypre_StructSMG_SetIntParameter
 (Hypre_StructSMG this, char* name, int value) {
 
 /* JFP: This function just dispatches to the parameter's set function. */
@@ -178,43 +176,40 @@ void  impl_Hypre_StructSMG_SetIntParameter
    HYPRE_StructSolver *S = HSMGp->hssolver;
 
    if ( !strcmp(name,"max_iter" )) {
-      HYPRE_StructSMGSetMaxIter( *S, value );
-      return;
+      return HYPRE_StructSMGSetMaxIter( *S, value );
    };
    if ( !strcmp(name,"max iter" )) {
-      HYPRE_StructSMGSetMaxIter( *S, value );
-      return;
+      return HYPRE_StructSMGSetMaxIter( *S, value );
    };
    if ( !strcmp(name,"zero guess") ) {
-      HYPRE_StructSMGSetZeroGuess( *S );
-      return;
+      return HYPRE_StructSMGSetZeroGuess( *S );
    };
    if (  !strcmp(name,"nonzero guess") ) {
-      HYPRE_StructSMGSetNonZeroGuess( *S );
-      return;
+      return HYPRE_StructSMGSetNonZeroGuess( *S );
    };
    if ( !strcmp(name,"memory use") ) {
-      HYPRE_StructSMGSetMemoryUse( *S, value );
+      return HYPRE_StructSMGSetMemoryUse( *S, value );
    };
    if ( !strcmp(name,"rel change") ) {
-      HYPRE_StructSMGSetRelChange( *S, value );
+      return HYPRE_StructSMGSetRelChange( *S, value );
    };
    if ( !strcmp(name,"num prerelax") ) {
-      HYPRE_StructSMGSetNumPreRelax( *S, value );
+      return HYPRE_StructSMGSetNumPreRelax( *S, value );
    };
    if ( !strcmp(name,"num postrelax") ) {
-      HYPRE_StructSMGSetNumPostRelax( *S, value );
+      return HYPRE_StructSMGSetNumPostRelax( *S, value );
    };
    if ( !strcmp(name,"logging") ) {
-      HYPRE_StructSMGSetLogging( *S, value );
+      return HYPRE_StructSMGSetLogging( *S, value );
    };
+   return 1;
 
 } /* end impl_Hypre_StructSMGSetIntParameter */
 
 /* ********************************************************
  * impl_Hypre_StructSMGNew
  **********************************************************/
-void  impl_Hypre_StructSMG_New(Hypre_StructSMG this, Hypre_MPI_Com comm) {
+int impl_Hypre_StructSMG_New(Hypre_StructSMG this, Hypre_MPI_Com comm) {
 
    struct Hypre_StructSMG_private_type *HSMGp = this->d_table;
    HYPRE_StructSolver *S = HSMGp->hssolver;
@@ -230,13 +225,13 @@ void  impl_Hypre_StructSMG_New(Hypre_StructSMG this, Hypre_MPI_Com comm) {
    struct Hypre_StructSolver_private_type *HSSp = HSS->d_table;
    HSSp->hssolver = S;
 
-   HYPRE_StructSMGCreate( *C, S );
+   return HYPRE_StructSMGCreate( *C, S );
 } /* end impl_Hypre_StructSMGNew */
 
 /* ********************************************************
  * impl_Hypre_StructSMGSetup
  **********************************************************/
-void  impl_Hypre_StructSMG_Setup
+int impl_Hypre_StructSMG_Setup
 (Hypre_StructSMG this, Hypre_StructMatrix A, Hypre_StructVector b,
  Hypre_StructVector x) {
 
@@ -254,7 +249,7 @@ void  impl_Hypre_StructSMG_Setup
 
    this->d_table->hsmatrix = A;
 
-   HYPRE_StructSMGSetup( *S, *MA, *Vb, *Vx );
+   return HYPRE_StructSMGSetup( *S, *MA, *Vb, *Vx );
 } /* end impl_Hypre_StructSMGSetup */
 
 /* ********************************************************

@@ -59,7 +59,7 @@ void Hypre_StructJacobi_destructor(Hypre_StructJacobi this) {
 /* ********************************************************
  * impl_Hypre_StructJacobiApply
  **********************************************************/
-void  impl_Hypre_StructJacobi_Apply
+int  impl_Hypre_StructJacobi_Apply
 (Hypre_StructJacobi this, Hypre_StructVector b, Hypre_StructVector* x) {
 
    struct Hypre_StructJacobi_private_type *HSJp = this->d_table;
@@ -75,7 +75,7 @@ void  impl_Hypre_StructJacobi_Apply
    struct Hypre_StructVector_private_type *SVxp = (*x)->d_table;
    HYPRE_StructVector *Vx = SVxp->hsvec;
 
-   HYPRE_StructJacobiSolve( *S, *MA, *Vb, *Vx );
+   return HYPRE_StructJacobiSolve( *S, *MA, *Vb, *Vx );
 
 } /* end impl_Hypre_StructJacobiApply */
 
@@ -117,29 +117,29 @@ Hypre_StructVector  impl_Hypre_StructJacobi_GetResidual(Hypre_StructJacobi this)
 /* ********************************************************
  * impl_Hypre_StructJacobiGetConvergenceInfo
  **********************************************************/
-void  impl_Hypre_StructJacobi_GetConvergenceInfo
+int  impl_Hypre_StructJacobi_GetConvergenceInfo
 (Hypre_StructJacobi this, char* name, double* value) {
    /* As the only HYPRE function called here is an unimplemented no-op,
       this function does nothing useful except to demonstrate how I would
       write such a function. */
 
-   int ivalue;
+   int ivalue, ierr;
 
    struct Hypre_StructJacobi_private_type *HSJp = this->d_table;
    HYPRE_StructSolver *S = HSJp->hssolver;
 
    if ( !strcmp(name,"number of iterations") ) {
       ivalue = -1;
-      HYPRE_StructJacobiGetNumIterations( *S, &ivalue );
+      ierr = HYPRE_StructJacobiGetNumIterations( *S, &ivalue );
       *value = ivalue;
-      return;
+      return ierr;
    }
    else {
       printf(
          "Don't understand keyword %s to Hypre_StructJacobi_GetConvergenceInfo\n",
          name );
       *value = 0;
-      return;
+      return 1;
    }
 
 } /* end impl_Hypre_StructJacobiGetConvergenceInfo */
@@ -163,7 +163,7 @@ int  impl_Hypre_StructJacobi_GetIntParameter(Hypre_StructJacobi this, char* name
 /* ********************************************************
  * impl_Hypre_StructJacobiSetDoubleParameter
  **********************************************************/
-void  impl_Hypre_StructJacobi_SetDoubleParameter
+int impl_Hypre_StructJacobi_SetDoubleParameter
 (Hypre_StructJacobi this, char* name, double value) {
 
 /* JFP: This function just dispatches to the parameter's set function. */
@@ -172,24 +172,22 @@ void  impl_Hypre_StructJacobi_SetDoubleParameter
    HYPRE_StructSolver *S = HSJp->hssolver;
 
    if ( !strcmp(name,"tol") ) {
-      HYPRE_StructJacobiSetTol( *S, value );
-      return;
+      return HYPRE_StructJacobiSetTol( *S, value );
    };
    if ( !strcmp(name,"zero guess") ) {
-      HYPRE_StructJacobiSetZeroGuess( *S );
-      return;
+      return HYPRE_StructJacobiSetZeroGuess( *S );
    };
    if (  !strcmp(name,"nonzero guess") ) {
-      HYPRE_StructJacobiSetNonZeroGuess( *S );
-      return;
+      return HYPRE_StructJacobiSetNonZeroGuess( *S );
    };
+   return 1;
 
 } /* end impl_Hypre_StructJacobiSetDoubleParameter */
 
 /* ********************************************************
  * impl_Hypre_StructJacobiSetIntParameter
  **********************************************************/
-void  impl_Hypre_StructJacobi_SetIntParameter
+int  impl_Hypre_StructJacobi_SetIntParameter
 (Hypre_StructJacobi this, char* name, int value) {
 
 /* JFP: This function just dispatches to the parameter's set function. */
@@ -209,13 +207,14 @@ void  impl_Hypre_StructJacobi_SetIntParameter
       HYPRE_StructJacobiSetNonZeroGuess( *S );
       return;
    };
+   return 1;
 
 } /* end impl_Hypre_StructJacobiSetIntParameter */
 
 /* ********************************************************
  * impl_Hypre_StructJacobiNew
  **********************************************************/
-void  impl_Hypre_StructJacobi_New(Hypre_StructJacobi this, Hypre_MPI_Com comm) {
+int  impl_Hypre_StructJacobi_New(Hypre_StructJacobi this, Hypre_MPI_Com comm) {
 
    struct Hypre_StructJacobi_private_type *HSJp = this->d_table;
    HYPRE_StructSolver *S = HSJp->hssolver;
@@ -231,14 +230,14 @@ void  impl_Hypre_StructJacobi_New(Hypre_StructJacobi this, Hypre_MPI_Com comm) {
    struct Hypre_StructSolver_private_type *HSSp = HSS->d_table;
    HSSp->hssolver = S;
 
-   HYPRE_StructJacobiCreate( *C, S );
+   return HYPRE_StructJacobiCreate( *C, S );
 
 } /* end impl_Hypre_StructJacobiNew */
 
 /* ********************************************************
  * impl_Hypre_StructJacobiSetup
  **********************************************************/
-void  impl_Hypre_StructJacobi_Setup
+int  impl_Hypre_StructJacobi_Setup
 (Hypre_StructJacobi this, Hypre_StructMatrix A, Hypre_StructVector b,
  Hypre_StructVector x) {
 
@@ -256,7 +255,7 @@ void  impl_Hypre_StructJacobi_Setup
 
    this->d_table->hsmatrix = A;
 
-   HYPRE_StructJacobiSetup( *S, *MA, *Vb, *Vx );
+   return HYPRE_StructJacobiSetup( *S, *MA, *Vb, *Vx );
 
 } /* end impl_Hypre_StructJacobiSetup */
 
