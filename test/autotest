@@ -16,6 +16,22 @@
 
 HYPRE_AUTOTEST_PERMISSIONS="a+rX,ug+w"
 
+OPENWINHOME=/usr/openwin
+
+CVSROOT=/home/casc/repository
+export CVSROOT
+
+PATH=/home/casc/bin:\
+/opt/SUNWspro/bin:/usr/ccs/bin:/usr/local/bin:\
+/usr/sbin:/usr/bin:/usr/ucb:\
+/sbin/bin:\
+$OPENWINHOME/bin:\
+/usr/local/scripts:\
+/usr/local/mpi/mpich/bin:\
+LD_LIBRARY_PATH=$OPENWINHOME/lib:\
+/usr/dt/lib:/usr/local/lib:/opt/SUNWspro/lib
+export PATH
+
 #==============================================================================
 # Set autotest directories
 #==============================================================================
@@ -68,6 +84,7 @@ cd $HYPRE_AUTOTEST_DIR
 echo "setting permissions...."
 chmod -fR $HYPRE_AUTOTEST_PERMISSIONS *
 cd linear_solvers
+./configure
 ./build -$HYPRE_ARCH
 
 #=============================================================================
