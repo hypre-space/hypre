@@ -438,13 +438,13 @@ BuildLaplacian( int               argc,
    /*-----------------------------------------------------------
     * Check a few things
     *-----------------------------------------------------------*/
-
+/*
    if ((P*Q*R) != num_procs)
    {
       printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
    }
-
+*/
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
@@ -497,7 +497,7 @@ BuildLaplacian( int               argc,
                                nx, ny, nz, P, Q, R, p, q, r,
                                values, &global_part);
 #endif
-   A = hypre_GenerateLaplacian(nx, ny, nz, values);
+   A = hypre_GenerateLaplacian(nx, ny, nz, P, Q, R, values);
 
    hypre_TFree(values);
 
