@@ -14,6 +14,7 @@ CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 C_COMPILE_FLAGS = \
  -I..\
  -I$(srcdir)/..\
+ -I$(srcdir)/../multivector\
  -I$(srcdir)/../utilities\
  ${CINCLUDES}
 
@@ -23,7 +24,9 @@ HEADERS =\
  cgnr.h\
  gmres.h\
  krylov.h\
- pcg.h
+ pcg.h\
+ HYPRE_lobpcg.h\
+ lobpcg.h
 
 FILES =\
  bicgstab.c\
@@ -33,7 +36,9 @@ FILES =\
  HYPRE_cgnr.c\
  HYPRE_gmres.c\
  HYPRE_pcg.c\
- pcg.c
+ pcg.c\
+ HYPRE_lobpcg.c\
+ lobpcg.c
 
 OBJS = ${FILES:.c=.o}
 
