@@ -2809,7 +2809,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     // set up SuperLU CSR matrix and the corresponding rhs
     //------------------------------------------------------------------
 
-    dCreate_CompRow_Matrix(&A2,nrows,nrows,nnz,new_a,new_ja,new_ia,NR,_D,GE);
+    dCreate_CompRow_Matrix(&A2,nrows,nrows,nnz,new_a,new_ja,new_ia,NR,D_D,GE);
     ind_array = new int[nrows];
     for ( i = 0; i < nrows; i++ ) ind_array[i] = i;
     rhs = new double[nrows];
@@ -2821,7 +2821,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     //------------------------------------------------------------------
 
     assert(!ierr);
-    dCreate_Dense_Matrix(&B, nrows, 1, rhs, nrows, DN, _D, GE);
+    dCreate_Dense_Matrix(&B, nrows, 1, rhs, nrows, DN, D_D, GE);
 
     //------------------------------------------------------------------
     // set up the rest and solve (permc_spec=0 : natural ordering)
@@ -3022,7 +3022,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     // set up SuperLU CSR matrix and the corresponding rhs
     //------------------------------------------------------------------
 
-    dCreate_CompRow_Matrix(&A2,nrows,nrows,nnz,new_a,new_ja,new_ia,NR,_D,GE);
+    dCreate_CompRow_Matrix(&A2,nrows,nrows,nnz,new_a,new_ja,new_ia,NR,D_D,GE);
     ind_array = new int[nrows];
     for ( i = 0; i < nrows; i++ ) ind_array[i] = i;
     rhs = new double[nrows];
@@ -3034,10 +3034,10 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     //------------------------------------------------------------------
 
     assert(!ierr);
-    dCreate_Dense_Matrix(&B, nrows, 1, rhs, nrows, DN, _D, GE);
+    dCreate_Dense_Matrix(&B, nrows, 1, rhs, nrows, DN, D_D, GE);
     soln = new double[nrows];
     for ( i = 0; i < nrows; i++ ) soln[i] = 0.0;
-    dCreate_Dense_Matrix(&X, nrows, 1, soln, nrows, DN, _D, GE);
+    dCreate_Dense_Matrix(&X, nrows, 1, soln, nrows, DN, D_D, GE);
 
     //------------------------------------------------------------------
     // set up the other parameters (permc_spec=0 : natural ordering)
