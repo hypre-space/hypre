@@ -7930,14 +7930,20 @@ subdirs="$config_babel_runtime"
  FEI_mv\
  FEI_mv/SuperLU\
  FEI_mv/fei-hypre\
- FEI_mv/fei-isis\
- FEI_mv/fei-isis/src\
- FEI_mv/isis-mv\
+ FEI_mv/femli\
+ FEI_mv/femli/amgs\
+ FEI_mv/femli/base\
+ FEI_mv/femli/matrix\
+ FEI_mv/femli/solver\
+ FEI_mv/femli/vector\
+ FEI_mv/femli/cintface\
+ FEI_mv/femli/util\
+ FEI_mv/femli/fedata\
+ FEI_mv/femli/mapper\
+ FEI_mv/femli/lib\
  IJ_mv\
  krylov\
  matrix_matrix\
- mli\
- mli/matrix\
  parcsr_ls\
  parcsr_mv\
  PETSc_ls\
