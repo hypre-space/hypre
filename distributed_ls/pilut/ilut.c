@@ -77,6 +77,8 @@ int ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu
 
   free_multi(rmat.rmat_rnz, rmat.rmat_rrowlen, 
              rmat.rmat_rcolind, rmat.rmat_rvalues, -1);
+
+  return( ierr );
 }
 
 

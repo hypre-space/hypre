@@ -1,7 +1,7 @@
-# make sure to "setenv TARGET cray-t3d" prior to using make
-
 .SUFFIXES:
 .SUFFIXES: .c .f .o
+
+all: lib
 
 #Driver stuff; ignore if just concerned about library
 WANG  = test/wang4.bin

@@ -63,7 +63,7 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
   sptr    = ldu->lcomm.sptr;
   sind    = ldu->lcomm.sind;
   auxsptr = ldu->lcomm.auxsptr;
-  memcpy_idx(auxsptr, sptr, snbrpes+1);
+  if( sptr != NULL ) memcpy_idx(auxsptr, sptr, snbrpes+1);
 
   rnbrpes = ldu->lcomm.rnbrpes;
   raddr   = ldu->lcomm.raddr;
