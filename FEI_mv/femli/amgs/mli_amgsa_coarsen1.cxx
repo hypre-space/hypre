@@ -919,11 +919,12 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
                                    int *mliAggrLeng, int **mliAggrArray)
 {
    MPI_Comm  comm;
-   int       mypid, numProcs, *partition, startRow, endRow;
+   int       mypid, numProcs, *partition, startRow, endRow, maxInd;
    int       localNRows, naggr=0, *node2aggr, *aggrSizes, nUndone;
    int       irow, icol, colNum, rowNum, rowLeng, *cols, global_nrows;
    int       *nodeStat, selectFlag, nSelected=0, nNotSelected=0, count;
    int       ibuf[2], itmp[2];
+   double    maxVal, *vals;
 
    /*-----------------------------------------------------------------
     * fetch machine and matrix parameters
@@ -1038,7 +1039,9 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
          if ( nodeStat[irow] == MLI_METHOD_AMGSA_READY )
          {
             rowNum = startRow + irow;
-            hypre_ParCSRMatrixGetRow(hypre_graph,rowNum,&rowLeng,&cols,NULL);
+            hypre_ParCSRMatrixGetRow(hypre_graph,rowNum,&rowLeng,&cols,&vals);
+            maxInd = -1;
+            maxVal = 0.0;
             for ( icol = 0; icol < rowLeng; icol++ )
             {
                colNum = cols[icol] - startRow;
@@ -1046,15 +1049,22 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
                {
                   if ( nodeStat[colNum] == MLI_METHOD_AMGSA_SELECTED )
                   {
-                     node2aggr[irow] = node2aggr[colNum];
-                     nodeStat[irow] = MLI_METHOD_AMGSA_PENDING;
-                     aggrSizes[node2aggr[colNum]]++;
-                     break;
+                     if (vals[icol] > maxVal)
+                     {
+                        maxInd = colNum;
+                        maxVal = vals[icol];
+                     }
                   }
                }
             }
+            if ( maxInd != -1 )
+            {
+               node2aggr[irow] = node2aggr[maxInd];
+               nodeStat[irow] = MLI_METHOD_AMGSA_PENDING;
+               aggrSizes[node2aggr[maxInd]]++;
+            }
             hypre_ParCSRMatrixRestoreRow(hypre_graph,rowNum,&rowLeng,&cols,
-                                         NULL);
+                                         &vals);
          }
       }
       for ( irow = 0; irow < localNRows; irow++ )
