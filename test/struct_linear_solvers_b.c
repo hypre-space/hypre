@@ -727,16 +727,10 @@ main( int   argc,
    interface; it does not know about its relationship with the
    Hypre_StructJacobi object.
    */
-/* 27jan2000: this doesn't work with my old version of Babel, supposedly
-   fixed in the new version */
-/* 3feb2000: Babel 0.3.0, this still doesn't work: the CastTo function
-   returns solver==0 */
-      solver = (Hypre_Solver) Hypre_StructJacobi_CastTo( solver_SJ,
-                                                         "Hypre_Solver" );
-/*
+      solver = (Hypre_Solver) Hypre_StructJacobi_castTo( solver_SJ,
+                                                         "Hypre_Solver" ); 
       mat_test = Hypre_Solver_GetSystemOperator(solver);
       Hypre_StructMatrix_print(mat_test);
-      */
 
       Hypre_StructJacobi_destructor( solver_SJ );
    }
