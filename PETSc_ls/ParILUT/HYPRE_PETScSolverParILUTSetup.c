@@ -199,7 +199,7 @@ int HYPRE_PETScSolverParILUTSetup( HYPRE_PETScSolverParILUT in_ptr,
         hypre_PETScSolverParILUTPETScMatPilutSolver( solver );
 
      /* Setup Petsc to use PARILUT as preconditioner solver */
-     ierr = PCShellSetApply(pc, HYPRE_PETScMatPilutSolverSolve, PETScMatPilutSolver ); 
+     ierr = PCShellSetApply(pc, HYPRE_PETScMatPilutSolverApply, PETScMatPilutSolver ); 
      CHKERRA(ierr);
   
      /* Call the PETSc Setup function */
@@ -208,7 +208,7 @@ int HYPRE_PETScSolverParILUTSetup( HYPRE_PETScSolverParILUT in_ptr,
      ierr = HYPRE_PETScMatPilutSolverSetMatrix( PETScMatPilutSolver,
                 PreconditionerMatrix ); if(ierr) return(ierr);
 
-     /* Since we are using the parallel incompletet factorization routine as
+     /* Since we are using the parallel incomplete factorization routine as
         a preconditioner, we only want to do one iteration per "solve" */
      ierr = HYPRE_PETScMatPilutSolverSetMaxIts( PETScMatPilutSolver,
                 1 ); if(ierr) return(ierr);

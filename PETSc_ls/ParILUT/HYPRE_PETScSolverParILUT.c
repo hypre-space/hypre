@@ -214,7 +214,7 @@ int HYPRE_PETScSolverParILUTSolve( HYPRE_PETScSolverParILUT in_ptr,
 
 
    ierr = SLESSolve(
-       hypre_PETScSolverParILUTSles( solver ), x, b, 
+       hypre_PETScSolverParILUTSles( solver ), b, x, 
        &(hypre_PETScSolverParILUTNumIts(solver)) );
 
    return(ierr);
