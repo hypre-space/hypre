@@ -50,14 +50,14 @@ LFLAGS =\
 HEADERS =\
  aux_parcsr_matrix.h\
  headers.h\
+ fortran.h\
  IJ_matrix.h\
  IJ_matrix_vector.h\
  HYPRE_IJMatrix.h
 
 FILES =\
- HYPRE_IJMatrix.c\
+ F90_HYPRE_IJMatrix.c\
  aux_parcsr_matrix.c\
- IJ_par_laplace_9pt.c \
  hypre_IJMatrix_parcsr.c
 
 OBJS = ${FILES:.c=.o}
