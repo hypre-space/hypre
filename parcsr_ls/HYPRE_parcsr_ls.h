@@ -528,7 +528,7 @@ int HYPRE_EuclidSolve(HYPRE_Solver       solver,
  * All Euclid options (e.g, level, drop-tolerance) are stored in
  * this database.  
  * If a (name, value) pair already exists, this call updates the value.
- * See also: HYPRE\_EuclidSetParam, HYPRE\_EuclidSetParamsFromFile.
+ * See also: HYPRE\_EuclidSetParamsFromFile.
  *
  * @param argc [IN] Length of argv array
  * @param argv [IN] Array of strings
@@ -536,17 +536,6 @@ int HYPRE_EuclidSolve(HYPRE_Solver       solver,
 int HYPRE_EuclidSetParams(HYPRE_Solver solver,
                           int argc,
                           char *argv[]);
-
-/**
- * Insert a single (name, value) pair in Euclid's options database.
- * If the (name, value) pair already exists, this call updates the value.
- * See also: HYPRE\_EuclidSetParams, HYPRE\_EuclidSetParamsFromFile.
- *
- * @param argc [IN] Length of argv array
- * @param argv [IN] Array of strings
- **/
-int HYPRE_EuclidSetParam(HYPRE_Solver solver,
-                         char *name, char *value);
 
 /**
  * Insert (name, value) pairs in Euclid's options database.
@@ -561,7 +550,7 @@ int HYPRE_EuclidSetParam(HYPRE_Solver solver,
  * -doSomething true \\
  * -xx\_coeff -1.0
  *
- * See also: HYPRE\_EuclidSetParams, HYPRE\_EuclidSetParams.
+ * See also: HYPRE\_EuclidSetParams.
  *
  * @param filename[IN] Pathname/filename to read
  **/
