@@ -14,6 +14,83 @@ extern "C" {
 
 # define	P(s) s
 
+/* F90_HYPRE_parcsr_amg.c */
+void hypre_F90_IFACE P((int hypre_paramginitialize ));
+void hypre_F90_IFACE P((int hypre_paramgfinalize ));
+void hypre_F90_IFACE P((int hypre_paramgsetup ));
+void hypre_F90_IFACE P((int hypre_paramgsolve ));
+void hypre_F90_IFACE P((int hypre_paramgsolvet ));
+void hypre_F90_IFACE P((int hypre_paramgsetrestriction ));
+void hypre_F90_IFACE P((int hypre_paramgsetstrongthreshold ));
+void hypre_F90_IFACE P((int hypre_paramgsettruncfactor ));
+void hypre_F90_IFACE P((int hypre_paramgsetinterptype ));
+void hypre_F90_IFACE P((int hypre_paramgsetmaxiter ));
+void hypre_F90_IFACE P((int hypre_paramgsetcoarsentype ));
+void hypre_F90_IFACE P((int hypre_paramgsetmeasuretype ));
+void hypre_F90_IFACE P((int hypre_paramgsetcycletype ));
+void hypre_F90_IFACE P((int hypre_paramgsettol ));
+void hypre_F90_IFACE P((int hypre_paramgsetnumgridsweeps ));
+void hypre_F90_IFACE P((int hypre_paramgsetgridrelaxtype ));
+void hypre_F90_IFACE P((int hypre_paramgsetgridrelaxpoints ));
+void hypre_F90_IFACE P((int hypre_paramgsetrelaxweight ));
+void hypre_F90_IFACE P((int hypre_paramgsetioutdat ));
+void hypre_F90_IFACE P((int hypre_paramgsetlogfilename ));
+void hypre_F90_IFACE P((int hypre_paramgsetlogging ));
+void hypre_F90_IFACE P((int hypre_paramgsetdebugflag ));
+
+/* F90_HYPRE_parcsr_cgnr.c */
+void hypre_F90_IFACE P((int hypre_parcsrcgnrinitialize ));
+void hypre_F90_IFACE P((int hypre_parcsrcgnrfinalize ));
+void hypre_F90_IFACE P((int hypre_parcsrcgnrsetup ));
+void hypre_F90_IFACE P((int hypre_parcsrcgnrsolve ));
+void hypre_F90_IFACE P((int hypre_parcsrcgnrsettol ));
+void hypre_F90_IFACE P((int hypre_parcsrcgnrsetmaxiter ));
+void hypre_F90_IFACE P((int hypre_parcsrcgnrsetprecond ));
+void hypre_F90_IFACE P((int hypre_parcsrcgnrsetlogging ));
+void hypre_F90_IFACE P((int hypre_parcsrcgnrgetnumiter ));
+void hypre_F90_IFACE P((int hypre_parcsrcgnrgetfinalrel ));
+
+/* F90_HYPRE_parcsr_gmres.c */
+void hypre_F90_IFACE P((int hypre_parcsrgmresinitialize ));
+void hypre_F90_IFACE P((int hypre_parcsrgmresfinalize ));
+void hypre_F90_IFACE P((int hypre_parcsrgmressetup ));
+void hypre_F90_IFACE P((int hypre_parcsrgmressolve ));
+void hypre_F90_IFACE P((int hypre_parcsrgmressetkdim ));
+void hypre_F90_IFACE P((int hypre_parcsrgmressettol ));
+void hypre_F90_IFACE P((int hypre_parcsrgmressetmaxiter ));
+void hypre_F90_IFACE P((int hypre_parcsrgmressetprecond ));
+void hypre_F90_IFACE P((int hypre_parcsrgmressetlogging ));
+void hypre_F90_IFACE P((int hypre_parcsrgmresgetnumiter ));
+void hypre_F90_IFACE P((int hypre_parcsrgmresgetfinalrel ));
+
+/* F90_HYPRE_parcsr_pcg.c
+void hypre_F90_IFACE P((int hypre_parcsrpcginitialize ));
+void hypre_F90_IFACE P((int hypre_parcsrpcgfinalize ));
+void hypre_F90_IFACE P((int hypre_parcsrpcgsetup ));
+void hypre_F90_IFACE P((int hypre_parcsrpcgsolve ));
+void hypre_F90_IFACE P((int hypre_parcsrpcgsettol ));
+void hypre_F90_IFACE P((int hypre_parcsrpcgsetmaxiter ));
+void hypre_F90_IFACE P((int hypre_parcsrpcgsettwonorm ));
+void hypre_F90_IFACE P((int hypre_parcsrpcgsetrelchange ));
+void hypre_F90_IFACE P((int hypre_parcsrpcgsetprecond ));
+void hypre_F90_IFACE P((int hypre_parcsrpcgsetlogging ));
+void hypre_F90_IFACE P((int hypre_parcsrpcggetnumiterations ));
+void hypre_F90_IFACE P((int hypre_parcsrpcggetfinalrelative ));
+void hypre_F90_IFACE P((int hypre_parcsrdiagscalesetup ));
+void hypre_F90_IFACE P((int hypre_parcsrdiagscale ));
+
+/* F90_HYPRE_parcsr_pilut.c */
+void hypre_F90_IFACE P((int hypre_parcsrpilutinitialize ));
+void hypre_F90_IFACE P((int hypre_parcsrpilutfinalize ));
+void hypre_F90_IFACE P((int hypre_parcsrpilutsetup ));
+void hypre_F90_IFACE P((int hypre_parcsrpilutsolve ));
+void hypre_F90_IFACE P((int hypre_parcsrpilutsetmaxiter ));
+void hypre_F90_IFACE P((int hypre_parcsrpilutsetdroptol ));
+void hypre_F90_IFACE P((int hypre_parcsrpilutsetfacrowsize ));
+
+/* F90_par_laplace.c */
+void hypre_F90_IFACE P((int hypre_generatelaplacian ));
+
 /* HYPRE_parcsr_amg.c */
 HYPRE_Solver HYPRE_ParAMGInitialize P((void ));
 int HYPRE_ParAMGFinalize P((HYPRE_Solver solver ));
