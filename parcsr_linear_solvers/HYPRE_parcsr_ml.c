@@ -47,8 +47,8 @@
 
 #ifdef MLPACK
 
-#include "../distributed_linear_solvers/ml/src/ml_struct.h"
-#include "../distributed_linear_solvers/ml/src/ml_aggregate.h"
+#include "../../ML/ml/src/ml_struct.h"
+#include "../../ML/ml/src/ml_aggregate.h"
 
 extern void qsort0(int *, int, int);
 
@@ -332,8 +332,8 @@ int HYPRE_ParCSRMLDestroy( HYPRE_Solver solver )
     MH_Matrix *Amat;
     MH_Link   *link = (MH_Link *) solver;
 
-    ML_Destroy( &(link->ml_ptr) );
     if ( link->ml_ag  != NULL ) ML_Aggregate_Destroy( &(link->ml_ag) );
+    ML_Destroy( &(link->ml_ptr) );
     if ( link->contxt->partition != NULL ) free( link->contxt->partition );
     if ( link->contxt->Amat != NULL )
     {
@@ -438,6 +438,7 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     coarsest_level = ML_Gen_MGHierarchy_UsingAggregation(ml, nlevels-1, 
                                         ML_DECREASING, link->ml_ag);
     coarsest_level = nlevels - coarsest_level;
+    printf("nlevels, coarsest = %d %d\n", nlevels, coarsest_level);
 
     /* -------------------------------------------------------- */ 
     /* set up smoother and coarse solver                        */
@@ -450,22 +451,28 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
        switch ( link->pre )
        {
           case 0 :
-               ML_Gen_SmootherJacobi(ml, level, ML_PRESMOOTHER, sweeps, wght);
-               break;
+             ML_Gen_SmootherJacobi(ml, level, ML_PRESMOOTHER, sweeps, wght);
+             break;
           case 1 :
-               ML_Gen_SmootherGaussSeidel(ml, level, ML_PRESMOOTHER, sweeps);
-               break;
+             ML_Gen_SmootherGaussSeidel(ml, level, ML_PRESMOOTHER, sweeps);
+             break;
+          case 2 :
+             ML_Gen_SmootherSymGaussSeidel(ml,level,ML_PRESMOOTHER,sweeps,1.0);
+             break;
        }
 
        sweeps = link->post_sweeps;
        switch ( link->post )
        {
           case 0 :
-               ML_Gen_SmootherJacobi(ml, level, ML_POSTSMOOTHER, sweeps, wght);
-               break;
+             ML_Gen_SmootherJacobi(ml, level, ML_POSTSMOOTHER, sweeps, wght);
+             break;
           case 1 :
-               ML_Gen_SmootherGaussSeidel(ml, level, ML_POSTSMOOTHER, sweeps);
-               break;
+             ML_Gen_SmootherGaussSeidel(ml, level, ML_POSTSMOOTHER, sweeps);
+             break;
+          case 2 :
+             ML_Gen_SmootherSymGaussSeidel(ml,level,ML_POSTSMOOTHER,sweeps,1.0);
+             break;
        }
     }
 
@@ -564,7 +571,7 @@ int HYPRE_ParCSRMLSetPreSmoother( HYPRE_Solver solver, int smoother_type  )
 {
     MH_Link *link = (MH_Link *) solver;
 
-    if ( smoother_type < 0 || smoother_type > 1 )
+    if ( smoother_type < 0 || smoother_type > 2 )
     {
        printf("HYPRE_ParCSRMLSetPreSmoother error : set to Jacobi.\n");
        link->pre = 0;
@@ -584,7 +591,7 @@ int HYPRE_ParCSRMLSetPostSmoother( HYPRE_Solver solver, int smoother_type  )
 {
     MH_Link *link = (MH_Link *) solver;
 
-    if ( smoother_type < 0 || smoother_type > 1 )
+    if ( smoother_type < 0 || smoother_type > 2 )
     {
        printf("HYPRE_ParCSRMLSetPostSmoother error : set to Jacobi.\n");
        link->post = 0;
