@@ -3,10 +3,12 @@
 
 #include "utilities/utilities.h"
 
-//############### 1.5 includes #################
-#ifndef NOFEI 
+#include "fei_defs.h"
 #include "Data.h"
 #include "basicTypes.h"
+
+//############### 1.5 includes #################
+#ifndef NOFEI 
 #include "LinearSystemCore.h"
 #include "LSC.h"
 #endif
@@ -14,9 +16,6 @@
 
 //############### 2.0 includes #################
 //#ifndef NOFEI 
-//#include "fei_defs.h"
-//#include "Data.h"
-//#include "basicTypes.h"
 //#include "LinearSystemCore.h"
 //#endif
 //##############################################
