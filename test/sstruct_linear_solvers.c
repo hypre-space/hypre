@@ -1081,6 +1081,7 @@ PrintUsage( char *progname,
       printf("  -P <Px> <Py> <Pz>   : refine and distribute part(s)\n");
       printf("  -b <bx> <by> <bz>   : refine and block part(s)\n");
       printf("  -solver <ID>        : solver ID (default = 39)\n");
+      printf("                         1 - SysPFMG\n");
       printf("                        10 - PCG with SMG split precond\n");
       printf("                        11 - PCG with PFMG split precond\n");
       printf("                        18 - PCG with diagonal scaling\n");
@@ -1094,7 +1095,10 @@ PrintUsage( char *progname,
       printf("                        40 - GMRES with BoomerAMG precond\n");
       printf("                        41 - GMRES with PILUT precond\n");
       printf("                        42 - GMRES with ParaSails precond\n");
-      printf("  -print              : print out the system\n");
+      printf("  -print             : print out the system\n");
+      printf("  -v <n_pre> <n_post>: SysPFMG # of pre and post relax\n");
+      printf("  -skip <s>          : SysPFMG skip relaxation (0 or 1)\n");
+
       printf("\n");
    }
 
@@ -1146,6 +1150,9 @@ main( int   argc,
    int                   num_procs, myid;
    int                   time_index;
                          
+   int                   n_pre, n_post;
+   int                   skip;
+
    int                   arg_index, part, box, var, entry, s, i, j, k;
                         
    /*-----------------------------------------------------------
@@ -1202,6 +1209,10 @@ main( int   argc,
 
    solver_id = 39;
    print_system = 0;
+
+   skip = 0;
+   n_pre  = 1;
+   n_post = 1;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -1269,6 +1280,17 @@ main( int   argc,
       {
          arg_index++;
          print_system = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-skip") == 0 )
+      {
+         arg_index++;
+         skip = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-v") == 0 )
+      {
+         arg_index++;
+         n_pre = atoi(argv[arg_index++]);
+         n_post = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
@@ -1542,6 +1564,7 @@ main( int   argc,
       {
          for (box = 0; box < pdata.nboxes; box++)
          {
+ 
             GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
                            ilower, iupper);
             HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper,
@@ -1684,6 +1707,49 @@ main( int   argc,
 #endif
 
    hypre_TFree(values);
+
+   /*-----------------------------------------------------------
+    * Solve the system using SysPFMG
+    *-----------------------------------------------------------*/
+
+   if (solver_id == 1)
+   {
+      time_index = hypre_InitializeTiming("SysPFMG Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_SStructSysPFMGCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_SStructSysPFMGSetMaxIter(solver, 50);
+      HYPRE_SStructSysPFMGSetTol(solver, 1.0e-06);
+      HYPRE_SStructSysPFMGSetRelChange(solver, 0);
+      /* weighted Jacobi = 1; red-black GS = 2 */
+      HYPRE_SStructSysPFMGSetRelaxType(solver, 1);
+      HYPRE_SStructSysPFMGSetNumPreRelax(solver, n_pre);
+      HYPRE_SStructSysPFMGSetNumPostRelax(solver, n_post);
+      HYPRE_SStructSysPFMGSetSkipRelax(solver, skip);
+      /*HYPRE_StructPFMGSetDxyz(solver, dxyz);*/
+      HYPRE_SStructSysPFMGSetLogging(solver, 1);
+      HYPRE_SStructSysPFMGSetup(solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("SysPFMG Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_SStructSysPFMGSolve(solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_SStructSysPFMGGetNumIterations(solver, &num_iterations);
+      HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(
+                                           solver, &final_res_norm);
+      HYPRE_SStructSysPFMGDestroy(solver);
+   }
 
    /*-----------------------------------------------------------
     * Solve the system using PCG
