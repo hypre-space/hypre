@@ -52,8 +52,7 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
    if (matrix)
    {
       hypre_TFree(hypre_CSRMatrixI(matrix));
-      if ( hypre_CSRMatrixOwnsData(matrix) &&
-           hypre_CSRMatrixNumNonzeros(matrix) )
+      if ( hypre_CSRMatrixOwnsData(matrix) )
       {
          hypre_TFree(hypre_CSRMatrixData(matrix));
          hypre_TFree(hypre_CSRMatrixJ(matrix));
