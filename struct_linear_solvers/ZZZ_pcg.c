@@ -217,6 +217,7 @@ ZZZ_PCG( Vector *x,
 
    zzz_TFree(norm_log);
    zzz_TFree(rel_norm_log);
+   zzz_TFree(conv_rate);
 }
 
 
