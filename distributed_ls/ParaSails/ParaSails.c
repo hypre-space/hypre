@@ -45,6 +45,11 @@ void hypre_F90_NAME_BLAS(dgels, DGELS)(char *, int *, int *, int *, double *, in
   double *, int *, double *, int *, int *);
 #endif
 
+#ifdef WIN32
+static void bzero(char *a, int n) {int i: for (i=0; i<n; i++) {a[i]=0;}}
+#endif
+
+
 /******************************************************************************
  *
  * ParaSails private functions

@@ -10,8 +10,13 @@ extern void sigHandler_dh(int sig);
 /* 
   list of signals the Euclid will handle
 */
+#ifdef WIN32
+int euclid_signals_len = 2;
+int euclid_signals[] = { SIGSEGV, SIGFPE };
+#else
 int euclid_signals_len = 3;
 int euclid_signals[] = { SIGSEGV, SIGFPE, SIGBUS };
+#endif
 
 /* 
    signal names and explanatory messages 

@@ -9,20 +9,15 @@
 
 include ../../config/Makefile.config
 
-CC = @CC@
-
-C_COMPILE_FLAGS=@CFLAGS@
-CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
  
-CFLAGS = \
- ${C_COMPILE_FLAGS}\
+C_COMPILE_FLAGS = \
  -I../..\
  -I$(srcdir)\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../distributed_matrix\
- ${CINCLUDES}\
- ${CDEFS}
+ ${CINCLUDES}
 
 HEADERS =\
  Common.h\
@@ -63,18 +58,15 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 
 all: libHYPRE_ParaSails.a 
+	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
 
-convert: convert.o
-	${CC} -o $@ convert.o
-
-install: all
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+install: libHYPRE_ParaSails.a 
+	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
 
 clean:
-	@rm -f *.o 
+	rm -f *.o lib*.a
 
-veryclean: clean
-	@rm -f libHYPRE_*.a Makefile
+distclean: clean
 
 
 ##################################################################
@@ -83,7 +75,7 @@ veryclean: clean
 
 libHYPRE_ParaSails.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}

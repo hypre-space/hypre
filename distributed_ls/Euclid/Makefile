@@ -13,13 +13,10 @@ include ../../config/Makefile.config
 EUCLID_CFLAGS =  -DMPI_MODE -DMPI_TIMING -DUSING_MPI -DHYPRE_GET_ROW \
                  -DHYPRE_MODE -DOPTIMIZED_DH
 
-CC =  @CC@
-C_COMPILE_FLAGS=@CFLAGS@
-CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 
-CFLAGS = \
+C_COMPILE_FLAGS = \
  ${EUCLID_CFLAGS} \
- ${C_COMPILE_FLAGS}\
  -I../..\
  -I$(srcdir)\
  -I$(srcdir)/../..\
@@ -28,8 +25,7 @@ CFLAGS = \
  -I$(srcdir)/../../seq_mv\
  -I$(srcdir)/../../distributed_matrix\
  -I$(srcdir)/../../hypre/include\
- ${CINCLUDES}\
- ${CDEFS}
+ ${CINCLUDES}
 
 HEADERS =\
  blas_dh.h\
@@ -99,16 +95,15 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 
 all: libHYPRE_Euclid.a 
+	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
 
-install: all
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+install: libHYPRE_Euclid.a 
+	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
 
 clean:
-	@rm -f *.o
+	rm -f *.o lib*.a
 
-veryclean: clean
-	@rm -f libHYPRE_*.a
-	@rm -f Makefile
+distclean: clean
 
 
 ##################################################################
@@ -117,7 +112,7 @@ veryclean: clean
 
 libHYPRE_Euclid.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}

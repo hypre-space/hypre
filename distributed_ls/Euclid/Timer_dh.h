@@ -32,6 +32,9 @@
 /* #include <sys/types.h> 
 #include <sys/sysconfig.h>
 */
+#ifdef WIN32
+#  include <time.h>
+#endif
 #if HAVE_UNISTD_H
 #  include <unistd.h>  /* needed for sysconf(_SC_CLK_TCK) */
 #endif /* HAVE_UNISTD_H */
