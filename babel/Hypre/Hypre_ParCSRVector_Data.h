@@ -6,14 +6,16 @@
 
 #ifndef Hypre_ParCSRVector_DataMembers_
 #define Hypre_ParCSRVector_DataMembers_
+
+#include "HYPRE_IJ_mv.h"
+#include "Hypre_MPI_Com.h"
+
 struct Hypre_ParCSRVector_private_type
-/*{
-
-  *****************************************
-            Add data members here
-  *****************************************
-
-}*/
+{
+   HYPRE_IJVector *Hvec;
+   /* We need to save constructor inputs to support a Clone function: */
+   Hypre_MPI_Com *comm;
+}
 ;
 #endif
 
