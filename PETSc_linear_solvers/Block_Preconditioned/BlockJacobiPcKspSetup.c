@@ -1,6 +1,9 @@
 /* Include headers for problem and solver data structure */
 #include "BlockJacobiPcKsp.h"
 
+/* Include PETSc's externally viewable SLES header */
+#include "sles.h"
+
 /* Include Petsc implementation details so that the matrix
    structure can be dereferenced and fed into the INCFACT structure */
 #include "mpiaij.h"
@@ -8,20 +11,66 @@
 /* include solver prototypes */
 #include "incfact_protos.h"
 
+/* 
+   This routine replaces SLESSetup for a PETSc user. 
 
-int BlockJacobiINCFACTPcKspSetup(void *in_ptr, Mat A, Vec x, Vec b )
+   The user has a choice: one of the following must have been done, so that
+   the solver can access the matrix that defines the preconditioner:
+
+   1) The following PETSc
+   routines (and any of their precursors such as PETScInitialize)
+   must have been called prior to this routine:
+
+   SLESCreate
+   SLESSetOperators
+
+   and the resultant SLES context must have been set through a call to 
+
+   BlockJacobiINCFACTKspSetSLES
+
+       OR
+
+   2) The routine
+
+   BlockJacobiINCFACTKspSetSystemMatrix
+
+   must have been called.
+
+
+   The following non-PETSc routine must have been called prior to this routine:
+
+   BlockJacobiINCFACTPcKspInitialize
+
+   The PETSc routines
+
+   SLESSetFromOptions
+   SLESSetup
+
+   should not be called by the user; this routine calls them.
+
+   Author: Andrew J. Cleary
+
+   History:
+   12/10/97: Initial version. AJC
+*/
+   
+
+int BlockJacobiINCFACTPcKspSetup(void *in_ptr, Vec x, Vec b )
      /* Sets up data for INCFACT from Petsc matrix */
 {
    int         nlocal, its, first, lens;
-   Scalar      zero = 0.0, one = 1.0;
+   Scalar      zero = 0.0, one = 1.0, norm;
   
-   SLES       *sles, *subsles;
+   SLES        *sles, *subsles;
    PC          pc, subpc;
    PCType      pc_type;
    KSP         ksp, subksp;
+   Mat         *PreconditionerMatrix, *SystemMatrix, *TempMatrix;
+   MatStructure MatStructureFlag; /* Retrieved from user, determines whether
+                             we can re-use info in the preconditioner */
 
    void       *incfact_data;
-   BJData     *BJ_data;
+   BJData     *BJ_data = (BJData *) in_ptr;
    Matrix     *INCFACT_A;
    int         i, ierr, flg, size, first_row, last_row;
 
@@ -30,21 +79,137 @@ int BlockJacobiINCFACTPcKspSetup(void *in_ptr, Mat A, Vec x, Vec b )
    Mat_SeqAIJ *local_diag_block_impl;
 
 
+   sles = BJDataSles_ptr( BJ_data );
+   SystemMatrix = BJDataSystemMatrixPtr( BJ_data );
 
-   BJ_data = (BJData *) in_ptr;
+   PreconditionerMatrix = BJDataPreconditionerMatrixPtr( BJ_data );
 
-   sles = BJDataSles_ptr(BJ_data);
+   if( !sles )
+   {
+     if( !SystemMatrix )
+     {
+       printf(
+        "BlockJacobiINCFACTPcKspSetup: you must call either SetSLES or ");
+       printf("SetSystemMatrix before Setup\n");
+       ierr = -1; CHKERRA( ierr );
+     }
+     else
+     {
+       /* User has given us matrix; we must set up SLES */
 
-   ierr = SLESSetOperators(*sles,A,A,DIFFERENT_NONZERO_PATTERN);
-         CHKERRA(ierr);   
+       sles = (SLES *) talloc( SLES, 1 );
 
+       BJDataSlesOwner(BJ_data) = BJLibrary;
+
+       ierr = SLESCreate(MPI_COMM_WORLD,sles); CHKERRA(ierr);
+
+       if( PreconditionerMatrix )
+       {
+         ierr = SLESSetOperators(*sles, *SystemMatrix,
+                 *PreconditionerMatrix, DIFFERENT_NONZERO_PATTERN); 
+              CHKERRA(ierr);
+       }
+       else
+       {
+         ierr = SLESSetOperators(*sles, *SystemMatrix,
+                 *SystemMatrix, DIFFERENT_NONZERO_PATTERN); 
+              CHKERRA(ierr);
+       }
+       BJDataSles_ptr(BJ_data) = sles;
+
+     }
+   }
+   else
+   {
+     /* If user gives us both an SLES *and* one or both matrices, we assume
+        that he wants to replace his existing matrices with the new ones. If
+        he only gives us one new matrix, we will preserve the other one by
+        extracting it out and then putting it back in. AC */
+
+     BJDataSlesOwner(BJ_data) = BJUser;
+
+     ierr = SLESGetKSP(*sles,&ksp); CHKERRA(ierr);
+
+     ierr = SLESGetPC(*sles,&pc); CHKERRA(ierr);
+     
+     if( SystemMatrix  )
+     {
+       if( PreconditionerMatrix  )
+       {
+         ierr = SLESSetOperators(*sles, *SystemMatrix,
+                 *PreconditionerMatrix, DIFFERENT_NONZERO_PATTERN); 
+              CHKERRA(ierr);
+       }
+       else
+       {
+         ierr = PCGetOperators( pc, TempMatrix,
+                 PreconditionerMatrix, &MatStructureFlag ); 
+              CHKERRA(ierr);
+         ierr = SLESSetOperators(*sles, *SystemMatrix,
+                 *PreconditionerMatrix, DIFFERENT_NONZERO_PATTERN); 
+              CHKERRA(ierr);
+       }
+     }
+     else
+     {
+       if( PreconditionerMatrix != PETSC_NULL )
+       {
+         ierr = PCGetOperators( pc, SystemMatrix,
+                 TempMatrix, &MatStructureFlag ); 
+              CHKERRA(ierr);
+         ierr = SLESSetOperators(*sles, *SystemMatrix,
+                 *PreconditionerMatrix, DIFFERENT_NONZERO_PATTERN); 
+              CHKERRA(ierr);
+       }
+     }
+   }
+
+   /* Get PETSc constructs for further manipulation */
+
+   ierr = SLESGetKSP(*sles,&ksp); CHKERRA(ierr);
+
+   ierr = SLESGetPC(*sles,&pc); CHKERRA(ierr);
+
+   ierr = PCGetOperators( pc, SystemMatrix, PreconditionerMatrix, &MatStructureFlag ); 
+     CHKERRA(ierr);
+
+   if( SystemMatrix == PETSC_NULL )
+   {
+     ierr = -1; CHKERRA( ierr );
+   }
+
+   /* Set defaults that can be overridden by command line options */
+
+   /* Set preconditioner to Additive Schwarz, one block per processor. */
+   ierr = PCSetType(pc,PCASM); CHKERRA(ierr);
+
+#ifdef LocalSolverILU
+   /* Default to preconditioning on the right side */
+   ierr = KSPSetPreconditionerSide( ksp, PC_RIGHT );
+#endif
+#ifdef LocalSolverIC
+   /* Default to preconditioning on the left side */
+   ierr = KSPSetPreconditionerSide( ksp, PC_LEFT );
+#endif
+
+   /* We assume that a user that has a nonzero x wants to use that as
+      an initial guess. AC */
+   ierr = VecNorm( x, NORM_1, &norm ); CHKERRA( ierr );
+   if( norm != 0.0 ) 
+     { ierr = KSPSetInitialGuessNonzero( ksp ); CHKERRA( ierr ); }
+
+
+   /* User can change the above on the command line; import those changes */
+   ierr = SLESSetFromOptions( *sles );
+
+
+   /* From this point on, we override user choices */
+
+   /* Get the linear solver structures for the block solves... */
+   ierr = PCGetType( pc, &pc_type, PETSC_NULL ); CHKERRA(ierr);
 
    /* Note that SLESSetUp() MUST be called before PC(solver)GetSubSLES(). */
    ierr = SLESSetUp(*sles,b,x); CHKERRA(ierr);
-
-   /* Get the linear solver structures for the block solves... */
-   ierr = SLESGetPC(*sles,&pc); CHKERRA(ierr);
-   ierr = PCGetType( pc, &pc_type, PETSC_NULL ); CHKERRA(ierr);
 
    if ( pc_type == PCASM )
    {
@@ -68,14 +233,11 @@ int BlockJacobiINCFACTPcKspSetup(void *in_ptr, Mat A, Vec x, Vec b )
    ierr = SLESGetPC(subsles[0],&subpc); CHKERRA(ierr);
    ierr = PCSetType(subpc,PCSHELL); CHKERRA(ierr);
 
-   /* If we want to use INCFACT as the local block solver...*/
+   /* Choose the local block solver...*/
 
-     /* Setup Petsc to use INCFACT as local block solvers */
-     ierr = PCShellSetApply(subpc, INCFACT_Apply, BJ_data); CHKERRA(ierr);
+   /* Setup Petsc to use INCFACT as local block solvers */
+   ierr = PCShellSetApply(subpc, INCFACT_Apply, BJ_data); CHKERRA(ierr);
   
-   /* Endif */
-
-
    /* Get the matrix to be used on each processor as preconditioner */
 
    ierr = PCGetOperators( subpc, PETSC_NULL, &local_pmat, PETSC_NULL );
@@ -91,29 +253,8 @@ int BlockJacobiINCFACTPcKspSetup(void *in_ptr, Mat A, Vec x, Vec b )
                     );
 
 
-   /* Initial setup of incfact_data structure */
-   incfact_data = incfact_initialize( (void *) NULL );
-
-   /* Include any other INCFACT settings here */
-   /* This is where scaling and reordering should be decided */
-   GetINCFACTDataIpar(incfact_data)[0] = 1; /* Reordering? 1=yes*/
-   GetINCFACTDataIpar(incfact_data)[1] = 3; /* Scaling? 3 is both */
-   GetINCFACTDataIpar(incfact_data)[2] = 0; /* Output message device; default is iout=0 */
-   GetINCFACTDataIpar(incfact_data)[5] = 90;/* lfil_incfactt: # of fills per row. No Default */
-#ifdef LocalSolverILU
-   /*   GetINCFACTDataIpar(incfact_data)[6] = 30;*//* Dimension of GMRES subspace. No Default */
-   GetINCFACTDataIpar(incfact_data)[6] = 4;/* Dimension of GMRES subspace. No Default */
-   GetINCFACTDataIpar(incfact_data)[7] = 3; /* Maxits for GMRES. Default (100)*/
-#endif
-#ifdef LocalSolverIC
-   GetINCFACTDataIpar(incfact_data)[6] = 0;/* Unused */
-   GetINCFACTDataIpar(incfact_data)[7] = 4; /* Maxits for CG. Default (100)*/
-#endif
-
-   /*  GetINCFACTDataRpar(incfact_data)[0] = 0.0001;*/ /* Drop tolerance; default 0.0001 */
-   GetINCFACTDataRpar(incfact_data)[0] = 0.000001; /* Drop tolerance; default 0.0001 */
-   GetINCFACTDataRpar(incfact_data)[1] = 0.000000000001; /* Convergence criterion; default 0.00001 */
-
+   /* Get structure holding sequential solver information */
+   incfact_data = BJDataLsData(BJ_data);
 
    /* If using Schwarz... */
    if ( pc_type == PCASM )
@@ -134,19 +275,13 @@ int BlockJacobiINCFACTPcKspSetup(void *in_ptr, Mat A, Vec x, Vec b )
    if ( ierr != 0 )
    {
      printf("Error returned by incfact_setup = %d\n",ierr);
-     exit(ierr);
+     CHKERRA(ierr);
+     return( ierr );
    }
-
 
    /* Insert INCFACT information into BJ structure */
    BJDataA(BJ_data) = INCFACT_A;
-   BJDataLsData(BJ_data) = incfact_data;
 
-
-   /* Insert other information into BJ structure (if any) */
-
-
-   /* Return created BJ structure to calling routine */
    return( 0 );
 
 }

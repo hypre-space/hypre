@@ -11,8 +11,8 @@
   KSP = Ksp
   PC = BlockJacobi
   #LOCAL_SOLVER = Amg
-  #LOCAL_SOLVER = ILU
-  LOCAL_SOLVER = IC
+  LOCAL_SOLVER = ILU
+  #LOCAL_SOLVER = IC
 
   COMM = mpi
   #COMM = pvm
@@ -70,13 +70,15 @@ ILU   = -L../../seq_linear_solvers/ilut -lilu
 
 IC   = -L../../seq_linear_solvers/ict -lic
 
+SEQ_MATRIX = -L../../seq_matrix_vector -lHYPRE_seq_mat_vec
+
 SPARSKIT = -L../../seq_linear_solvers/sparskit -ldsparskit
 
 DEBUG_LIBS = -L/home/casc/lib -lcegdb
 
 
 
-LIBS = $($(LOCAL_SOLVER)) $(PETSC) $(SPARSKIT) $(DEBUG_LIBS) \
+LIBS = $($(LOCAL_SOLVER)) $(PETSC) $(SPARSKIT) $(SEQ_MATRIX) $(DEBUG_LIBS) \
        -L/home/casc/g77/lib -lf2c -lm
 
 #Some source preprocessing using SED
@@ -90,6 +92,17 @@ BlockJacobiICPcKspInitialize.c: BlockJacobiPcKspInitialize.c
 	sed -e s/incfact/ic/g < BlockJacobiPcKspInitialize.c \
         | sed -e s/INCFACT/IC/g \
         > BlockJacobiICPcKspInitialize.c
+
+#Options
+BlockJacobiILUPcKspOptional.c: BlockJacobiPcKspOptional.c
+	sed -e s/incfact/ilu/g < BlockJacobiPcKspOptional.c \
+        | sed -e s/INCFACT/ILU/g \
+        > BlockJacobiILUPcKspOptional.c
+
+BlockJacobiICPcKspOptional.c: BlockJacobiPcKspOptional.c
+	sed -e s/incfact/ic/g < BlockJacobiPcKspOptional.c \
+        | sed -e s/INCFACT/IC/g \
+        > BlockJacobiICPcKspOptional.c
 
 #Setup
 BlockJacobiILUPcKspSetup.c: BlockJacobiPcKspSetup.c
@@ -149,8 +162,8 @@ READER = ReadMPIAIJ_$(MATREAD).o ReadMPIVec.o
 
 #Tools
 AmgTOOLS = CsrConvert.o
-ILUTOOLS = matrix.o
-ICTOOLS = matrix.o
+ILUTOOLS = 
+ICTOOLS = 
 TOOLS = $($(LOCAL_SOLVER)TOOLS)
 
 #Debugging tools
@@ -161,7 +174,8 @@ DEBUG = -lmalloc
 SOLVER_NAME = $(PC)$(LOCAL_SOLVER)Pc$(KSP)
 
 SOLVER_HEADERS = $(PC)Pc$(KSP).h
-SOLVER = $(SOLVER_NAME)Initialize.o $(SOLVER_NAME)Setup.o $(SOLVER_NAME)Solve.o
+SOLVER = $(SOLVER_NAME)Initialize.o $(SOLVER_NAME)Optional.o \
+         $(SOLVER_NAME)Setup.o $(SOLVER_NAME)Solve.o
 
 
 #"Apply" routine
@@ -171,8 +185,8 @@ APPLY = $(LOCAL_SOLVER)_Apply.o
 HEADERS = $(PETSC_HEADERS) $(AMG_HEADERS) $(SOLVER_HEADERS)
 
 lib: $(SOLVER) $(APPLY) $(TOOLS)
-	$(AR) -r libZZZ$(LOCAL_SOLVER).a $(SOLVER) $(APPLY) $(TOOLS)
+	$(AR) -r libHYPRE$(LOCAL_SOLVER).a $(SOLVER) $(APPLY) $(TOOLS)
 
 exe: $(HEADERS) $(DRIVER) $(READER) lib
 	$(LINK) -o driver.$(LOCAL_SOLVER) $(DRIVER) $(READER) \
-                 libZZZ$(LOCAL_SOLVER).a $(DEBUG) $(LIBS)
+                 libHYPRE$(LOCAL_SOLVER).a $(DEBUG) $(LIBS)

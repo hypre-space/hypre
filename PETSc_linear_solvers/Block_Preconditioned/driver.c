@@ -48,6 +48,9 @@ int main(int argc,char **args)
   strcpy( file_name, problem);
   PetscPrintf(MPI_COMM_WORLD, "Finished reading in matrix\n");
 
+  /* Insert matrix into solver structure */
+  BlockJacobiAmgPcKspSetPreconditionerMatrix( bj_data, &A );
+
   /* Create vectors */
   ierr = ReadMPIVec( &b, strcat( file_name, ".rhs") ); CHKERRA( ierr );
   strcpy( file_name, problem);
@@ -73,11 +76,11 @@ int main(int argc,char **args)
 
   /* call setup of routine */
   PetscPrintf(MPI_COMM_WORLD, "calling setup routine\n");
-  ierr = BlockJacobiAmgPcKspSetup( bj_data, A, x, b ); CHKERRA( ierr );
+  ierr = BlockJacobiAmgPcKspSetup( bj_data, x, b ); CHKERRA( ierr );
 
   /* call solve routine */
   PetscPrintf(MPI_COMM_WORLD, "calling solver routine\n");
-  ierr = BlockJacobiAmgPcKspSolve( bj_data, A, x, b ); CHKERRA( ierr );
+  ierr = BlockJacobiAmgPcKspSolve( bj_data, x, b ); CHKERRA( ierr );
 
   /* Output */
   /*
@@ -130,7 +133,7 @@ int main(int argc,char **args)
   ierr = VecDestroy(error); CHKERRA(ierr);
   ierr = VecDestroy(rhs); CHKERRA(ierr);  
   ierr = VecDestroy(x); CHKERRA(ierr);
-  ierr = VecDestroy(exact_soln); CHKERRA(exact_soln);
+  ierr = VecDestroy(exact_soln); CHKERRA(ierr);
   ierr = VecDestroy(b); CHKERRA(ierr);  
   ierr = MatDestroy(A); CHKERRA(ierr);
 

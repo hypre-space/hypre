@@ -2,18 +2,16 @@
 #include "BlockJacobiPcKsp.h"
 
 
-int BlockJacobiINCFACTPcKspSolve( void *data, Mat A, Vec x, Vec b )
+int BlockJacobiINCFACTPcKspSolve( void *data, Vec x, Vec b )
      /* Uses INCFACT as an approximate linear system solver on each
         processor as the block solver in BlockJacobi Preconditioner */
 {
 
 
-  BJData   *bj_data;
+  BJData   *bj_data = (BJData *) data;
   SLES     *sles_ptr;  
   int       flg, its;
 
-
-  bj_data = (BJData *) data;
 
   sles_ptr = BJDataSles_ptr( bj_data );
 
