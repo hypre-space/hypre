@@ -12,6 +12,10 @@ crsgd.f
 data.c
 data.h
 dirslv.f
+f90amg.c
+f90amg_params.c
+f90amg_setup.c
+f90amg_solve.c
 fortran.c
 fortran.h
 general.h
