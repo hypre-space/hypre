@@ -20,13 +20,25 @@
 
 #include "utilities/utilities.h"
 #include "HYPRE.h"
+#include "seq_linear_solvers/amge/AMGe_matrix_topology.h"
+#include "seq_matrix_vector/csr_matrix.h"
+
+extern int hypre_AMGeMatrixTopologySetup(hypre_AMGeMatrixTopology ***A,
+                 int *level, int *i_element_node_0, int *j_element_node_0, 
+                 int num_elements, int num_nodes, int Max_level);
+extern int hypre_AMGeCoarsenodeSetup(hypre_AMGeMatrixTopology **A, int *level, 
+                 int **i_node_neighbor_coarsenode, int **j_node_neighbor_coarsenode, 
+                 int **i_node_coarsenode, int **j_node_coarsenode, 
+                 int **i_block_node, int **j_block_node, int *Num_blocks, 
+                 int *Num_elements, int *Num_nodes);
 
 /* ********************************************************************* */
 /* local variables to this module                                        */
 /* ********************************************************************* */
 
+int    rowLeng=0;
 int    *i_element_node_0;
-int    *i_element_node_0;
+int    *j_element_node_0;
 int    num_nodes, num_elements;
 int    *i_node_on_boundary;
 int    system_size=1, num_dofs;
@@ -150,7 +162,7 @@ int HYPRE_LSI_AMGePutRoW(int row, int length, const double *colVal,
       nbytes = length / system_size * sizeof(int);
       temp_elem_node[i] = (int *) malloc( nbytes );
       for ( i = 0; i < length; i*=system_size ) 
-         temp_elem_node[i/system_size] = rowIndices[i] / system_size;
+         temp_elem_node[i/system_size] = colInd[i] / system_size;
       nbytes = length * length * sizeof(double);
       temp_elem_data[element_count] = (double *) malloc(nbytes);
       temp_elemat_cnt = 0;
@@ -171,7 +183,10 @@ int HYPRE_LSI_AMGePutRoW(int row, int length, const double *colVal,
 
 int HYPRE_LSI_AMGESolve(double *rhs, double *x)
 {
-   int *Num_nodes, *Num_elements, *Num_dofs;
+   int    i, j, l, counter, ierr, total_length;
+   int    *Num_nodes, *Num_elements, *Num_dofs, level;
+   int    max_level, Max_level;
+   double multiplier;
 
    /* coarsenode information and coarsenode neighborhood information */
 
@@ -181,6 +196,12 @@ int HYPRE_LSI_AMGESolve(double *rhs, double *x)
    /* PDEsystem information: --------------------------------------- */
 
    int *i_dof_node_0, *j_dof_node_0;
+   int *i_node_dof_0, *j_node_dof_0;
+
+   int *i_element_dof_0, *j_element_dof_0;
+   double *element_data;
+
+   int **i_node_dof, **j_node_dof;
 
    /* Dirichlet boundary conditions information: ------------------- */
 
@@ -200,11 +221,22 @@ int HYPRE_LSI_AMGESolve(double *rhs, double *x)
        **i_ILUdof_ILUdof, **j_ILUdof_ILUdof;
    double **LD_data, **U_data;
 
+   /* -------------------------------------------------------------- */
+   /*  PCG & V_cycle arrays:                                         */
+   /* -------------------------------------------------------------- */
+
+   double *r, *v, **w, **d, *aux, *v_coarse, *w_coarse;
+   double *d_coarse, *v_fine, *w_fine, *d_fine;
+   int max_iter = 1000;
+   int coarse_level;
+   int nu = 1;  /* not used ---------------------------------------- */
+
+   double reduction_factor;
+
    /* Interpolation P and stiffness matrices Matrix; --------------- */
 
    hypre_CSRMatrix     **P;
    hypre_CSRMatrix     **Matrix;
-
    hypre_AMGeMatrixTopology **A;
 
    /* element matrices information: -------------------------------- */
@@ -213,6 +245,11 @@ int HYPRE_LSI_AMGESolve(double *rhs, double *x)
    double *a_element_chord_0;
    int *i_chord_dof_0, *j_chord_dof_0;
    int *Num_chords;
+
+   /* auxiliary arrays for enforcing Dirichlet boundary conditions:  */
+
+   int *i_dof_dof_a, *j_dof_dof_a;
+   double *a_dof_dof;
 
    /* ===============================================================*/
    /* set num_nodes, num_elements                                    */
@@ -230,7 +267,7 @@ int HYPRE_LSI_AMGESolve(double *rhs, double *x)
    for ( i = 0; i < num_elements; i++ )
    {
       multiplier = temp_elem_node_cnt[i] * system_size;
-      total_length += (multipler * multipler);
+      total_length += (multiplier * multiplier);
    }
    element_data = (double *) malloc(total_length * sizeof(double));
    counter = 0;
@@ -279,6 +316,8 @@ int HYPRE_LSI_AMGESolve(double *rhs, double *x)
 
    ierr = hypre_AMGeMatrixTopologySetup(&A, &level, i_element_node_0,
                 j_element_node_0, num_elements, num_nodes, Max_level);
+
+   max_level = level;
 
    /* -------------------------------------------------------------- */
    /* set up matrix topology for the coarse grids                    */
@@ -462,7 +501,6 @@ int HYPRE_LSI_AMGESolve(double *rhs, double *x)
    }
 
    printf("\n\n===============================================================\n");
-   printf("                      Problem: %d \n", Problem);
    printf(" ------- V_cycle & nested dissection ILU(1) smoothing: --------\n");
    printf("================================================================\n");
 
