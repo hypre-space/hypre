@@ -61,6 +61,7 @@ class MLI_Method_AMGSA : public MLI_Method
    int      nullspaceDim_;           /* null space information (changes  */
    int      nullspaceLen_;           /* length of nullspace in each dim  */
    double   *nullspaceVec_;          /* as curr_level)                   */
+   int      numSmoothVec_;           /* if nonzero, use smooth vectors   */
    double   Pweight_;                /* weight for prolongator smoother  */
    double   dropTolForP_  ;          /* tolerance for sparsifying P      */
    int      *saCounts_;              /* store aggregation information at */
@@ -110,6 +111,7 @@ public :
    int    setMinAggregateSize( int minSize );
    int    setMinCoarseSize( int minSize );
    int    setStrengthThreshold( double thresh );
+   int    setSmoothVec( int num );
    int    setPweight( double weight );
    int    setCalcSpectralNorm();
    int    setAggregateInfo(int level, int naggr, int leng, int *aggrInfo);
