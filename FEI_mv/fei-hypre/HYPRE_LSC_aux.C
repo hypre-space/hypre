@@ -2942,7 +2942,7 @@ void HYPRE_LinSysCore::setupPreconBoomerAMG()
    if ( amgUseGSMG_ == 1 )
    {
       HYPRE_BoomerAMGSetGSMG(HYPrecon_, 4);
-      HYPRE_BoomerAMGSetGSMGNumSamples(HYPrecon_,amgGSMGNSamples_);
+      HYPRE_BoomerAMGSetNumSamples(HYPrecon_,amgGSMGNSamples_);
    }
 }
 
@@ -3166,7 +3166,7 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
    if ( amgUseGSMG_ == 1 )
    {
       HYPRE_BoomerAMGSetGSMG(HYPrecon_, 4);
-      HYPRE_BoomerAMGSetGSMGNumSamples(HYPrecon_,amgGSMGNSamples_);
+      HYPRE_BoomerAMGSetNumSamples(HYPrecon_,amgGSMGNSamples_);
    }
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
    {
