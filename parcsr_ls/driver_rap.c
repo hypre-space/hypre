@@ -29,12 +29,12 @@ main( int   argc,
  
    if (my_id == 0) 
    {
-	P_in = hypre_ReadCSRMatrix("prolongation");
+	P_in = hypre_ReadCSRMatrix("../../Parrap/prolongation");
    	printf(" read prolongation\n");
-	A_in = hypre_ReadCSRMatrix("fine_op");
+	A_in = hypre_ReadCSRMatrix("../../Parrap/fine_op");
    	printf(" read fine_op\n");
    }
-   P = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, P_in);
+   P = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, P_in, NULL, NULL);
    printf(" P converted\n");
 
    fine_partitioning = NULL;
@@ -44,7 +44,8 @@ main( int   argc,
 		fine_partitioning);
    printf(" generated P_CommPkg \n");
 
-   A = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, A_in);
+   A = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, A_in, fine_partitioning,
+	fine_partitioning);
    printf(" A converted\n");
 
    hypre_GenerateMatvecCommunicationInfo(A,fine_partitioning,fine_partitioning);
