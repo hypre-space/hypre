@@ -5,6 +5,15 @@
 # won't get overwritten.  The server (-sC) directory name was chosen for
 # backwards compatibility.
 
+# Note that the version of Babel run here should be consistent with the version
+# of the runtime Babel which is used in compiled Hypre code.  Here is how I get
+# to the public version of Babel on the Casc network.  As of December 2002,
+# it is consistent with runtime version 0.7.5, which is packaged with Hypre.
+#   alias babel /usr/casc/babel/babel-0.7.4/casc-linux-gcc2.96/bin/babel
+#   setenv BABEL /usr/casc/babel/babel-0.7.4/casc-linux-gcc2.96/
+#   setenv BABEL_EXEC ${BABEL}
+#   setenv LD_LIBRARY_PATH /usr/casc/babel/babel-0.7.4/casc-linux-gcc2.96/lib:${LD_LIBRARY_PATH}
+
 babel --output-directory=Hypre -sC Interfaces.idl
 babel --output-directory=HypreClient-C -cC Interfaces.idl
 babel --output-directory=HypreClient-F -cF77 Interfaces.idl
