@@ -118,8 +118,8 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
   hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A,
   int num_functions, int *dof_func)
 {
-   MPI_Comm           comm = hypre_ParCSRMatrixComm(S);
-   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(S);
+   MPI_Comm           comm = hypre_ParCSRMatrixComm(A);
+   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
 
    hypre_CSRMatrix    *S_diag          = hypre_ParCSRMatrixDiag(S);
@@ -154,12 +154,6 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
        nm = dnrm2(n, samples+k*n);
        nm = 1./nm/nsamples;
        dscal(n, nm, samples+k*n);
-   }
-
-   if (!comm_pkg)
-   {
-        hypre_MatvecCommPkgCreate(A);
-        comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
    num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
