@@ -25,6 +25,7 @@ CDEFS =  -DHYPRE_NO_PTHREAD_MANGLING
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I../utilities\
+ -I../struct_matrix_vector\
  -I../seq_matrix_vector\
  -I../parcsr_matrix_vector\
  -I../parcsr_linear_solvers\
@@ -40,10 +41,12 @@ LDLIBFLAGS =
 LFLAGS =\
  -L.\
  -L../utilities\
+ -L../struct_matrix_vector\
  -L../seq_matrix_vector\
  -L../parcsr_matrix_vector\
  -lHYPRE_IJ_mv\
  -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
  -lHYPRE_mv\
  -lHYPRE_utilities\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
@@ -59,8 +62,12 @@ HEADERS =\
 FILES =\
  aux_parcsr_matrix.c\
  hypre_IJMatrix_parcsr.c\
- HYPRE_IJMatrix.c\
+ hypre_IJMatrix_petsc.c\
+ hypre_IJMatrix_isis.c\
  IJMatrix_parcsr.c\
+ IJMatrix_petsc.c\
+ IJMatrix_isis.c\
+ HYPRE_IJMatrix.c\
  F90_HYPRE_IJMatrix.c
 
 OBJS = ${FILES:.c=.o}
@@ -84,14 +91,14 @@ veryclean: clean
 # Rules
 ##################################################################
 
+driver: driver.o libHYPRE_IJ_mv.a
+	@echo  "Linking" $@ "... "
+	${CC} -o driver driver.o ${LFLAGS}
+
 libHYPRE_IJ_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -rcu $@ ${OBJS}
 	${RANLIB} $@
-
-driver: driver.o libHYPRE_IJ_mv.a
-	@echo  "Linking" $@ "... "
-	${CC} -o driver driver.o ${LFLAGS}
 
 ${OBJS}: ${HEADERS}
 
