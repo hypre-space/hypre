@@ -19,16 +19,17 @@ typedef void Vector;
 
 typedef struct
 {
-  zzz_SMGData      *smg_data;
+  void             *pc_data;
   zzz_StructMatrix *A;
+
 } ZZZ_PCGPrecondData;
 
 /*--------------------------------------------------------------------------
- * Accessor functions for the ZZZ_PCG_PrecondData structure
+ * Accessor functions for the ZZZ_PCGPrecondData structure
  *--------------------------------------------------------------------------*/
 
-#define ZZZ_PCGPrecondDataSMGData(precond_data) ((precond_data) -> smg_data)
-#define ZZZ_PCGPrecondDataMatrix(precond_data)  ((precond_data) -> A)
+#define ZZZ_PCGPrecondDataPCData(precond_data) ((precond_data) -> pc_data)
+#define ZZZ_PCGPrecondDataMatrix(precond_data) ((precond_data) -> A)
 
 #endif
 
@@ -36,13 +37,26 @@ typedef struct
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-int ZZZ_Matvec( double alpha, Matrix *A, Vector *x, double  beta, Vector *y );
-double ZZZ_InnerProd( Vector *x, Vector *y );
-int ZZZ_CopyVector( Vector *x, Vector *y );
-int ZZZ_InitVector( Vector *x, double value );
-int ZZZ_ScaleVector( double alpha, Vector *x );
-int ZZZ_Axpy( double alpha, Vector *x, Vector *y );
-void ZZZ_PCGSMGSetup( Matrix *vA, int (*precond)(), void *precond_data, void *data );
-void ZZZ_PCGSMGPrecondSetup( Matrix *vA, Vector *vb_l, Vector *vx_l, void *precond_vdata );
-int ZZZ_PCGSMGPrecond( Vector *x, Vector *y, double dummy, void *precond_vdata );
-void ZZZ_FreePCGSMGData( void *data );
+#ifdef __STDC__
+# define        P(s) s
+#else
+# define P(s) ()
+#endif
+ 
+ 
+/* ZZZ_struct_pcg.c */
+int ZZZ_Matvec P((double alpha , Matrix *A , Vector *x , double beta , Vector *y ));
+double ZZZ_InnerProd P((Vector *x , Vector *y ));
+int ZZZ_CopyVector P((Vector *x , Vector *y ));
+int ZZZ_InitVector P((Vector *x , double value ));
+int ZZZ_ScaleVector P((double alpha , Vector *x ));
+int ZZZ_Axpy P((double alpha , Vector *x , Vector *y ));
+void ZZZ_PCGSetup P((Matrix *vA , int (*ZZZ_PCGPrecond )(), void *precond_data , void *data ));
+void ZZZ_PCGSMGPrecondSetup P((Matrix *vA , Vector *vb_l , Vector *vx_l , void *precond_vdata ));
+int ZZZ_PCGSMGPrecond P((Vector *x , Vector *y , double dummy , void *precond_vdata ));
+void ZZZ_FreePCGSMGData P((void *data ));
+void ZZZ_PCGDiagScalePrecondSetup P((Matrix *vA , Vector *vb_l , Vector *vx_l , void *precond_vdata ));
+int ZZZ_PCGDiagScalePrecond P((Vector *x , Vector *y , double dummy , void *precond_vdata ));
+void ZZZ_FreePCGDiagScaleData P((void *data ));
+ 
+#undef P

@@ -41,8 +41,8 @@ OBJS = ${FILES:.c=.o}
 CC = mpcc
 F77 = f77
 
-CFLAGS = -O
-# CFLAGS = -O -DZZZ_TIMING
+CFLAGS = -O3 -qstrict -qarch=pwr2 -qtune=pwr2
+# CFLAGS = -O3 -qstrict -qarch=pwr2 -qtune=pwr2 -DZZZ_TIMING
 # CFLAGS = -g -DZZZ_TIMING
 
 FFLAGS = -O

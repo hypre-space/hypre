@@ -89,20 +89,20 @@ ZZZ_Axpy( double alpha,
 }
 
 /*--------------------------------------------------------------------------
- * ZZZ_PCGSMGSetup
+ * ZZZ_PCGSetup
  *--------------------------------------------------------------------------*/
 
 void
-ZZZ_PCGSMGSetup( Matrix   *vA,
-		 int     (*ZZZ_PCGPrecond)(),
-		 void     *precond_data,
-		 void     *data )
+ZZZ_PCGSetup( Matrix   *vA,
+              int     (*ZZZ_PCGPrecond)(),
+              void     *precond_data,
+              void     *data )
 {
   zzz_StructMatrix *A = vA;
   zzz_StructVector *p;
   zzz_StructVector *s;
   zzz_StructVector *r;
-  ZZZ_PCGData  *pcg_data = data;
+  ZZZ_PCGData      *pcg_data = data;
   
   ZZZ_PCGDataA(pcg_data) = A;
   
@@ -142,7 +142,7 @@ ZZZ_PCGSMGPrecondSetup( Matrix   *vA,
   zzz_StructVector     *b_l = vb_l;
   zzz_StructVector     *x_l = vx_l;
   zzz_SMGData          *smg_data;
-  ZZZ_PCGPrecondData  *precond_data = precond_vdata;
+  ZZZ_PCGPrecondData   *precond_data = precond_vdata;
   
    /*-----------------------------------------------------------
     * Setup SMG as preconditioner
@@ -151,7 +151,7 @@ ZZZ_PCGSMGPrecondSetup( Matrix   *vA,
    smg_data = zzz_SMGInitialize(zzz_StructMatrixComm(A));
    zzz_SMGSetMemoryUse(smg_data, 0);
    zzz_SMGSetMaxIter(smg_data, 1);
-   zzz_SMGSetTol(smg_data, 1.0e-12);
+   zzz_SMGSetTol(smg_data, 0.0);
    zzz_SMGSetLogging(smg_data, 1);
    zzz_SMGSetNumPreRelax(smg_data, 1);
    zzz_SMGSetNumPostRelax(smg_data, 1);
@@ -161,8 +161,8 @@ ZZZ_PCGSMGPrecondSetup( Matrix   *vA,
     * Load values into precond_data structure
     *-----------------------------------------------------------*/
 
-   ZZZ_PCGPrecondDataSMGData(precond_data) = smg_data;
-   ZZZ_PCGPrecondDataMatrix(precond_data)  = A;
+   ZZZ_PCGPrecondDataPCData(precond_data) = smg_data;
+   ZZZ_PCGPrecondDataMatrix(precond_data) = A;
 
 }
 
@@ -184,7 +184,7 @@ ZZZ_PCGSMGPrecond( Vector *x,
 
   int               ierr;
   
-  smg_data = ZZZ_PCGPrecondDataSMGData(precond_data);
+  smg_data = (zzz_SMGData *) ZZZ_PCGPrecondDataPCData(precond_data);
   A = ZZZ_PCGPrecondDataMatrix(precond_data);
   
   b_l = (smg_data -> b_l)[0];
@@ -220,9 +220,8 @@ ZZZ_PCGSMGPrecond( Vector *x,
   
 }
 
-
 /*--------------------------------------------------------------------------
- * FreeZZZ_SMGPCGData
+ * ZZZ_FreePCGSMGData
  *--------------------------------------------------------------------------*/
 
 void
@@ -238,9 +237,130 @@ ZZZ_FreePCGSMGData( void *data )
       zzz_FreeStructVector(ZZZ_PCGDataS(pcg_data));
       zzz_FreeStructVector(ZZZ_PCGDataR(pcg_data));
       precond_data = ZZZ_PCGDataPrecondData(pcg_data);
-      smg_data = ZZZ_PCGPrecondDataSMGData(precond_data);
+      smg_data = ZZZ_PCGPrecondDataPCData(precond_data);
       zzz_SMGFinalize(smg_data);
       zzz_TFree(precond_data);
       zzz_TFree(pcg_data);
     }
+}
+
+/*--------------------------------------------------------------------------
+ * ZZZ_PCGDiagScalePrecondSetup
+ *--------------------------------------------------------------------------*/
+
+void
+ZZZ_PCGDiagScalePrecondSetup( Matrix   *vA,
+                              Vector   *vb_l,
+                              Vector   *vx_l,
+                              void     *precond_vdata )
+{
+  zzz_StructMatrix    *A = vA;
+  ZZZ_PCGPrecondData  *precond_data = precond_vdata;
+  
+   /*-----------------------------------------------------------
+    * Load values into precond_data structure
+    *-----------------------------------------------------------*/
+
+   ZZZ_PCGPrecondDataPCData(precond_data) = NULL;
+   ZZZ_PCGPrecondDataMatrix(precond_data) = A;
+
+}
+
+/*--------------------------------------------------------------------------
+ * ZZZ_PCGDiagScalePrecond
+ *--------------------------------------------------------------------------*/
+
+int 
+ZZZ_PCGDiagScalePrecond( Vector *vx, 
+                         Vector *vy, 
+                         double  dummy, 
+                         void   *precond_vdata )
+{
+   ZZZ_PCGPrecondData *precond_data = precond_vdata;
+   zzz_StructVector   *x = vx;
+   zzz_StructVector   *y = vy;
+   zzz_StructMatrix   *A;
+
+   zzz_BoxArray       *boxes;
+   zzz_Box            *box;
+
+   zzz_Box            *A_data_box;
+   zzz_Box            *x_data_box;
+   zzz_Box            *y_data_box;
+                     
+   double             *Ap;
+   double             *xp;
+   double             *yp;
+                     
+   int                 Ai;
+   int                 xi;
+   int                 yi;
+                     
+   zzz_Index          *index;
+   zzz_Index          *start;
+   zzz_Index          *stride;
+   zzz_Index          *loop_size;
+                     
+   int                 i;
+   int                 loopi, loopj, loopk;
+
+   int               ierr;
+  
+   A = ZZZ_PCGPrecondDataMatrix(precond_data);
+
+   /* x = D^{-1} y */
+   index  = zzz_NewIndex();
+   stride = zzz_NewIndex();
+   zzz_SetIndex(stride, 1, 1, 1);
+   boxes = zzz_StructGridBoxes(zzz_StructMatrixGrid(A));
+   zzz_ForBoxI(i, boxes)
+   {
+      box = zzz_BoxArrayBox(boxes, i);
+
+      A_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(A), i);
+      x_data_box = zzz_BoxArrayBox(zzz_StructVectorDataSpace(x), i);
+      y_data_box = zzz_BoxArrayBox(zzz_StructVectorDataSpace(y), i);
+
+      zzz_SetIndex(index, 0, 0, 0);
+      Ap = zzz_StructMatrixExtractPointerByIndex(A, i, index);
+      xp = zzz_StructVectorBoxData(x, i);
+      yp = zzz_StructVectorBoxData(y, i);
+
+      start  = zzz_BoxIMin(box);
+
+      zzz_GetBoxSize(box, loop_size);
+      zzz_BoxLoop3(loopi, loopj, loopk, loop_size,
+                   A_data_box,  start,  stride,  Ai,
+                   x_data_box,  start,  stride,  xi,
+                   y_data_box,  start,  stride,  yi,
+                   {
+                      xp[xi] = yp[yi] / Ap[Ai];
+                   });
+   }
+   zzz_FreeIndex(index);
+   zzz_FreeIndex(stride);
+
+   return ierr;
+}
+
+
+/*--------------------------------------------------------------------------
+ * ZZZ_FreePCGDiagScaleData
+ *--------------------------------------------------------------------------*/
+
+void
+ZZZ_FreePCGDiagScaleData( void *data )
+{
+  ZZZ_PCGData        *pcg_data = data;
+  ZZZ_PCGPrecondData *precond_data;
+  
+  if (pcg_data)
+  {
+     zzz_FreeStructVector(ZZZ_PCGDataP(pcg_data));
+     zzz_FreeStructVector(ZZZ_PCGDataS(pcg_data));
+     zzz_FreeStructVector(ZZZ_PCGDataR(pcg_data));
+     precond_data = ZZZ_PCGDataPrecondData(pcg_data);
+     zzz_TFree(precond_data);
+     zzz_TFree(pcg_data);
+  }
 }

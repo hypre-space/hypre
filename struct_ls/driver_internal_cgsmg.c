@@ -131,9 +131,17 @@ char *argv[];
 
    ZZZ_PCGDataMaxIter(pcg_data) = 20;
    ZZZ_PCGDataTwoNorm(pcg_data) = 1;
+
+#if 0
    ZZZ_PCGSMGPrecondSetup( A, b_l, x_l, precond_data );
-   ZZZ_PCGSMGSetup( A, ZZZ_PCGSMGPrecond, precond_data, pcg_data );
-   ZZZ_PCG( x, b, 1.e-12, pcg_data );
+   ZZZ_PCGSetup( A, ZZZ_PCGSMGPrecond, precond_data, pcg_data );
+#endif
+#if 1
+   ZZZ_PCGDiagScalePrecondSetup( A, b_l, x_l, precond_data );
+   ZZZ_PCGSetup( A, ZZZ_PCGDiagScalePrecond, precond_data, pcg_data );
+#endif
+
+   ZZZ_PCG( x, b, 1.e-6, pcg_data );
    num_iterations = ZZZ_PCGDataNumIterations(pcg_data);
    norm = ZZZ_PCGDataNorm(pcg_data);
    rel_norm = ZZZ_PCGDataRelNorm(pcg_data);
