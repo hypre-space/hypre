@@ -247,7 +247,8 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
     * compute smoothing factor for the prolongation smoother
     *-----------------------------------------------------------------*/
 
-   if ( (curr_level > 0 && P_weight != 0.0) 
+// if ( (curr_level > 0 && P_weight != 0.0) 
+   if ( (curr_level >= 0 && P_weight != 0.0) 
         || pre_smoother == MLI_SOLVER_MLS_ID ||
         postsmoother == MLI_SOLVER_MLS_ID || init_aggr != NULL )
    {
@@ -429,7 +430,9 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
     * if damping factor for prolongator smoother = 0
     *-----------------------------------------------------------------*/
 
-   if ( curr_level == 0 || P_weight == 0.0 )
+// Charles : Note this change
+// if ( curr_level == 0 || P_weight == 0.0 )
+   if ( P_weight == 0.0 )
    {
       /*--------------------------------------------------------------
        * create and initialize Pmat 
