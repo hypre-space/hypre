@@ -67,7 +67,7 @@ int SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   w  =  fp_malloc(nrows, "SerILUT: w" );
 
   /* Find structural union of local rows */
-  ierr = FindStructuralUnion( matrix, structural_union, globals );
+  ierr = FindStructuralUnion( matrix, &structural_union, globals );
   if(ierr) return(ierr);
 
   /* Exchange structural unions with other processors */
@@ -294,7 +294,7 @@ int SelectInterior( int local_num_rows,
                &col_ind, &values);
       if (ierr) return(ierr);
 
-      for (j=0; ( j<row_size )&& (break_loop == 0); j++) 
+      for (j=0, break_loop=0; ( j<row_size )&& (break_loop == 0); j++) 
       {
         if (col_ind[j] < firstrow || col_ind[j] >= lastrow) 
         {
@@ -327,13 +327,13 @@ int SelectInterior( int local_num_rows,
 *   structure of all locally stored rows, not including locally stored columns.
 **************************************************************************/
 int FindStructuralUnion( HYPRE_DistributedMatrix matrix, 
-                    int *structural_union,
+                    int **structural_union,
                     hypre_PilutSolverGlobals *globals )
 { 
   int ierr=0, i, j, row_size, *col_ind;
 
   /* Allocate and clear structural_union vector */
-  structural_union = hypre_CTAlloc( int, nrows );
+  *structural_union = hypre_CTAlloc( int, nrows );
 
   /* Loop through rows */
   for ( i=0; i< lnrows; i++ )
@@ -348,7 +348,7 @@ int FindStructuralUnion( HYPRE_DistributedMatrix matrix,
     {
       if (col_ind[j] < firstrow || col_ind[j] >= lastrow) 
       {
-       structural_union[ col_ind[j] ] = 1;
+        (*structural_union)[ col_ind[j] ] = 1;
       }
     }
   }
@@ -382,7 +382,7 @@ int ExchangeStructuralUnions( DataDistType *ddist,
   hypre_TFree( *structural_union );
   *structural_union = hypre_TAlloc( int, lnrows );
 
-  memcpy_int( &recv_unions[firstrow], *structural_union, lnrows );
+  memcpy_int( *structural_union, &recv_unions[firstrow], lnrows );
 
   /* deallocate recv_unions */
   hypre_TFree( recv_unions );
