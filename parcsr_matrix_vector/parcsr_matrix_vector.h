@@ -239,18 +239,15 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
 
 #endif
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* HYPRE_parcsr_matrix.c */
 HYPRE_ParCSRMatrix HYPRE_CreateParCSRMatrix P((MPI_Comm comm , int global_num_rows , int global_num_cols , int *row_starts , int *col_starts , int num_cols_offd , int num_nonzeros_diag , int num_nonzeros_offd ));
 int HYPRE_DestroyParCSRMatrix P((HYPRE_ParCSRMatrix matrix ));
 int HYPRE_InitializeParCSRMatrix P((HYPRE_ParCSRMatrix matrix ));
 void HYPRE_PrintParCSRMatrix P((HYPRE_ParCSRMatrix matrix , char *file_name ));
+int HYPRE_GetCommParCSR P((HYPRE_ParCSRMatrix matrix , MPI_Comm *comm ));
+int HYPRE_GetDimsParCSR P((HYPRE_ParCSRMatrix matrix , int *M , int *N ));
 int HYPRE_GetLocalRangeParcsr P((HYPRE_ParCSRMatrix matrix , int *start , int *end ));
 int HYPRE_GetRowParCSRMatrix P((HYPRE_ParCSRMatrix matrix , int row , int *size , int **col_ind , double **values ));
 int HYPRE_RestoreRowParCSRMatrix P((HYPRE_ParCSRMatrix matrix , int row , int *size , int **col_ind , double **values ));

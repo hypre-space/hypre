@@ -32,12 +32,7 @@ typedef struct {int opaque;} *HYPRE_Solver;
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-#ifdef __STDC__
 # define        P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* HYPRE_amg.c */
 HYPRE_Solver HYPRE_AMGInitialize P((void ));

@@ -111,12 +111,7 @@ typedef int  hypre_MPI_Aint;
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-#ifdef __STDC__
 # define        P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* mpistubs.c */
 int MPI_Init P((int *argc , char ***argv ));

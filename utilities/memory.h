@@ -101,13 +101,7 @@ extern "C" {
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-#undef P
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* memory.c */
 int hypre_InitMemoryDebugDML P((int id ));
@@ -125,6 +119,7 @@ char *hypre_SharedCAlloc P((int count , int elt_size ));
 char *hypre_SharedReAlloc P((char *ptr , int size ));
 void hypre_SharedFree P((char *ptr ));
 double *hypre_IncrementSharedDataPtr P((double *ptr , int size ));
+
 #undef P
 
 #ifdef __cplusplus

@@ -28,12 +28,7 @@ extern "C" {
  * Prototypes for low-level timing routines
  *--------------------------------------------------------------------------*/
 
-#ifdef __STDC__
 # define        P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* timer.c */
 double time_getWallclockSeconds P((void ));
@@ -121,12 +116,7 @@ extern hypre_TimingType *hypre_global_timing;
  * Prototypes
  *-------------------------------------------------------*/
 
-#ifdef __STDC__
 # define        P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* timing.c */
 int hypre_InitializeTiming P((char *name ));

@@ -59,12 +59,7 @@ extern "C" {
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-#ifdef __STDC__
 # define        P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* mpistubs.c */
 int hypre_thread_MPI_Init P((int *argc , char ***argv ));

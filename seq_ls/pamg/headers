@@ -34,7 +34,7 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
-mkproto *.c               >> $INTERNAL_HEADER
+../../utilities/protos *.c               >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards

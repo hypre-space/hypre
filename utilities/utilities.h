@@ -154,12 +154,7 @@ typedef int  hypre_MPI_Aint;
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-#ifdef __STDC__
 # define        P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* mpistubs.c */
 int MPI_Init P((int *argc , char ***argv ));
@@ -305,13 +300,7 @@ extern "C" {
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-#undef P
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* memory.c */
 int hypre_InitMemoryDebugDML P((int id ));
@@ -329,6 +318,7 @@ char *hypre_SharedCAlloc P((int count , int elt_size ));
 char *hypre_SharedReAlloc P((char *ptr , int size ));
 void hypre_SharedFree P((char *ptr ));
 double *hypre_IncrementSharedDataPtr P((double *ptr , int size ));
+
 #undef P
 
 #ifdef __cplusplus
@@ -336,12 +326,7 @@ double *hypre_IncrementSharedDataPtr P((double *ptr , int size ));
 #endif
 
 #endif
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* random.c */
 void hypre_SeedRand P((int seed ));
@@ -409,12 +394,7 @@ extern "C" {
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-#ifdef __STDC__
 # define        P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* mpistubs.c */
 int hypre_thread_MPI_Init P((int *argc , char ***argv ));
@@ -548,12 +528,7 @@ extern "C" {
  * Prototypes for low-level timing routines
  *--------------------------------------------------------------------------*/
 
-#ifdef __STDC__
 # define        P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* timer.c */
 double time_getWallclockSeconds P((void ));
@@ -641,12 +616,7 @@ extern hypre_TimingType *hypre_global_timing;
  * Prototypes
  *-------------------------------------------------------*/
 
-#ifdef __STDC__
 # define        P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* timing.c */
 int hypre_InitializeTiming P((char *name ));
@@ -712,12 +682,7 @@ typedef hypre_ListElement  *hypre_LinkList;
 #endif
 
 #endif
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* amg_linklist.c */
 void dispose_elt P((hypre_LinkList element_ptr ));
@@ -726,12 +691,7 @@ hypre_LinkList create_elt P((int Item ));
 void enter_on_lists P((hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where ));
 
 #undef P
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* binsearch.c */
 int hypre_BinarySearch P((int *list , int value , int list_length ));

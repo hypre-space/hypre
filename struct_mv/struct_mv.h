@@ -1333,12 +1333,45 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
  hypre_BoxIndexRank(hypre_StructVectorBox(vector, b), index))
 
 #endif
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
 
+/* F90_HYPRE_struct_grid.c */
+void hypre_F90_IFACE P((int hypre_newstructgrid ));
+void hypre_F90_IFACE P((int hypre_freestructgrid ));
+void hypre_F90_IFACE P((int hypre_setstructgridextents ));
+void hypre_F90_IFACE P((int hypre_setstructgridperiodic ));
+void hypre_F90_IFACE P((int hypre_assemblestructgrid ));
+
+/* F90_HYPRE_struct_matrix.c */
+void hypre_F90_IFACE P((int hypre_newstructmatrix ));
+void hypre_F90_IFACE P((int hypre_freestructmatrix ));
+void hypre_F90_IFACE P((int hypre_initializestructmatrix ));
+void hypre_F90_IFACE P((int hypre_setstructmatrixvalues ));
+void hypre_F90_IFACE P((int hypre_setstructmatrixboxvalues ));
+void hypre_F90_IFACE P((int hypre_assemblestructmatrix ));
+void hypre_F90_IFACE P((int hypre_setstructmatrixnumghost ));
+void hypre_F90_IFACE P((int hypre_structmatrixgrid ));
+void hypre_F90_IFACE P((int hypre_setstructmatrixsymmetric ));
+
+/* F90_HYPRE_struct_stencil.c */
+void hypre_F90_IFACE P((int hypre_newstructstencil ));
+void hypre_F90_IFACE P((int hypre_setstructstencilelement ));
+void hypre_F90_IFACE P((int hypre_freestructstencil ));
+
+/* F90_HYPRE_struct_vector.c */
+void hypre_F90_IFACE P((int hypre_newstructvector ));
+void hypre_F90_IFACE P((int hypre_freestructvector ));
+void hypre_F90_IFACE P((int hypre_initializestructvector ));
+void hypre_F90_IFACE P((int hypre_setstructvectorvalues ));
+void hypre_F90_IFACE P((int hypre_getstructvectorvalues ));
+void hypre_F90_IFACE P((int hypre_setstructvectorboxvalues ));
+void hypre_F90_IFACE P((int hypre_getstructvectorboxvalues ));
+void hypre_F90_IFACE P((int hypre_assemblestructvector ));
+void hypre_F90_IFACE P((int hypre_setstructvectornumghost ));
+void hypre_F90_IFACE P((int hypre_setstructvectorconstantva ));
+void hypre_F90_IFACE P((int hypre_getmigratestructvectorcom ));
+void hypre_F90_IFACE P((int hypre_migratestructvector ));
+void hypre_F90_IFACE P((int hypre_freecommpkg ));
 
 /* HYPRE_struct_grid.c */
 int HYPRE_NewStructGrid P((MPI_Comm comm , int dim , HYPRE_StructGrid *grid ));

@@ -38,7 +38,7 @@ cat mapped_matrix.h       >> $INTERNAL_HEADER
 cat multiblock_matrix.h   >> $INTERNAL_HEADER	
 cat vector.h              >> $INTERNAL_HEADER	
 
-mkproto *.c               >> $INTERNAL_HEADER
+../utilities/protos *.c               >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards

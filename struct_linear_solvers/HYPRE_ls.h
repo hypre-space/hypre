@@ -114,12 +114,7 @@ typedef HYPRE_StructSolverArray HYPRE_StructSolver;
 
 #endif
 
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* HYPRE_struct_hybrid.c */
 int HYPRE_StructHybridInitialize P((MPI_Comm comm , HYPRE_StructSolver *solver ));

@@ -11,12 +11,76 @@
 extern "C" {
 #endif
 
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
 
+/* F90_HYPRE_struct_hybrid.c */
+void hypre_F90_IFACE P((int hypre_structhybridinitialize ));
+void hypre_F90_IFACE P((int hypre_structhybridfinalize ));
+void hypre_F90_IFACE P((int hypre_structhybridsetup ));
+void hypre_F90_IFACE P((int hypre_structhybridsolve ));
+void hypre_F90_IFACE P((int hypre_structhybridsettol ));
+void hypre_F90_IFACE P((int hypre_structhybridsetconvergenc ));
+void hypre_F90_IFACE P((int hypre_structhybridsetdscgmaxite ));
+void hypre_F90_IFACE P((int hypre_structhybridsetpcgmaxiter ));
+void hypre_F90_IFACE P((int hypre_structhybridsettwonorm ));
+void hypre_F90_IFACE P((int hypre_structhybridsetrelchange ));
+void hypre_F90_IFACE P((int hypre_structhybridsetprecond ));
+void hypre_F90_IFACE P((int hypre_structhybridsetlogging ));
+void hypre_F90_IFACE P((int hypre_structhybridgetnumiterati ));
+void hypre_F90_IFACE P((int hypre_structhybridgetdscgnumite ));
+void hypre_F90_IFACE P((int hypre_structhybridgetpcgnumiter ));
+void hypre_F90_IFACE P((int hypre_structhybridgetfinalrelat ));
+
+/* F90_HYPRE_struct_pcg.c */
+void hypre_F90_IFACE P((int hypre_structpcginitialize ));
+void hypre_F90_IFACE P((int hypre_structpcgfinalize ));
+void hypre_F90_IFACE P((int hypre_structpcgsetup ));
+void hypre_F90_IFACE P((int hypre_structpcgsolve ));
+void hypre_F90_IFACE P((int hypre_structpcgsettol ));
+void hypre_F90_IFACE P((int hypre_structpcgsetmaxiter ));
+void hypre_F90_IFACE P((int hypre_structpcgsettwonorm ));
+void hypre_F90_IFACE P((int hypre_structpcgsetrelchange ));
+void hypre_F90_IFACE P((int hypre_structpcgsetprecond ));
+void hypre_F90_IFACE P((int hypre_structpcgsetlogging ));
+void hypre_F90_IFACE P((int hypre_structpcggetnumiterations ));
+void hypre_F90_IFACE P((int hypre_structpcggetfinalrelative ));
+void hypre_F90_IFACE P((int hypre_structdiagscalesetup ));
+void hypre_F90_IFACE P((int hypre_structdiagscale ));
+
+/* F90_HYPRE_struct_pfmg.c */
+void hypre_F90_IFACE P((int hypre_structpfmginitialize ));
+void hypre_F90_IFACE P((int hypre_structpfmgfinalize ));
+void hypre_F90_IFACE P((int hypre_structpfmgsetup ));
+void hypre_F90_IFACE P((int hypre_structpfmgsolve ));
+void hypre_F90_IFACE P((int hypre_structpfmgsettol ));
+void hypre_F90_IFACE P((int hypre_structpfmgsetmaxiter ));
+void hypre_F90_IFACE P((int hypre_structpfmgsetrelchange ));
+void hypre_F90_IFACE P((int hypre_structpfmgsetzeroguess ));
+void hypre_F90_IFACE P((int hypre_structpfmgsetnonzeroguess ));
+void hypre_F90_IFACE P((int hypre_structpfmgsetrelaxtype ));
+void hypre_F90_IFACE P((int hypre_structpfmgsetnumprerelax ));
+void hypre_F90_IFACE P((int hypre_structpfmgsetnumpostrelax ));
+void hypre_F90_IFACE P((int hypre_structpfmgsetdxyz ));
+void hypre_F90_IFACE P((int hypre_structpfmgsetlogging ));
+void hypre_F90_IFACE P((int hypre_structpfmggetnumiteration ));
+void hypre_F90_IFACE P((int hypre_structpfmggetfinalrelativ ));
+
+/* F90_HYPRE_struct_smg.c */
+void hypre_F90_IFACE P((int hypre_structsmginitialize ));
+void hypre_F90_IFACE P((int hypre_structsmgfinalize ));
+void hypre_F90_IFACE P((int hypre_structsmgsetup ));
+void hypre_F90_IFACE P((int hypre_structsmgsolve ));
+void hypre_F90_IFACE P((int hypre_structsmgsetmemoryuse ));
+void hypre_F90_IFACE P((int hypre_structsmgsettol ));
+void hypre_F90_IFACE P((int hypre_structsmgsetmaxiter ));
+void hypre_F90_IFACE P((int hypre_structsmgsetrelchange ));
+void hypre_F90_IFACE P((int hypre_structsmgsetzeroguess ));
+void hypre_F90_IFACE P((int hypre_structsmgsetnonzeroguess ));
+void hypre_F90_IFACE P((int hypre_structsmgsetnumprerelax ));
+void hypre_F90_IFACE P((int hypre_structsmgsetnumpostrelax ));
+void hypre_F90_IFACE P((int hypre_structsmgsetlogging ));
+void hypre_F90_IFACE P((int hypre_structsmggetnumiterations ));
+void hypre_F90_IFACE P((int hypre_structsmggetfinalrelative ));
 
 /* HYPRE_struct_hybrid.c */
 int HYPRE_StructHybridInitialize P((MPI_Comm comm , HYPRE_StructSolver *solver ));

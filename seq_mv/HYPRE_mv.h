@@ -34,12 +34,7 @@ typedef void *HYPRE_Vector;
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-#ifdef __STDC__
 # define        P(s) s
-#else
-# define P(s) ()
-#endif
- 
  
 /* HYPRE_csr_matrix.c */
 HYPRE_CSRMatrix HYPRE_CreateCSRMatrix P((int num_rows , int num_cols , int *row_sizes ));

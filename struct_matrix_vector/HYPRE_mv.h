@@ -100,12 +100,7 @@ typedef HYPRE_CommPkgArray       HYPRE_CommPkg;
 
 #endif
 
-#ifdef __STDC__
 # define	P(s) s
-#else
-# define P(s) ()
-#endif
-
 
 /* HYPRE_struct_grid.c */
 int HYPRE_NewStructGrid P((MPI_Comm comm , int dim , HYPRE_StructGrid *grid ));

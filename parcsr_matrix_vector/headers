@@ -38,7 +38,7 @@ cat communication.h           >> $INTERNAL_HEADER
 cat par_vector.h              >> $INTERNAL_HEADER	
 cat par_csr_matrix.h          >> $INTERNAL_HEADER	
 
-mkproto *.c                   >> $INTERNAL_HEADER
+../utilities/protos *.c                   >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards
