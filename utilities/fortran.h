@@ -36,4 +36,10 @@
 #define hypre_F90_IFACE(iface_name) hypre_NAME_FORT_CALLING_C(iface_name)
 #define hypre_F90_NAME(iface_name)  hypre_NAME_C_CALLING_FORT(iface_name)
 
+#ifdef HYPRE_USING_HYPRE_BLAS
+#define hypre_F90_NAME_BLAS(iface_name)  iface_name##_
+#else
+#define hypre_F90_NAME_BLAS(iface_name)  hypre_NAME_C_CALLING_FORT(iface_name)
+#endif
+
 #endif
