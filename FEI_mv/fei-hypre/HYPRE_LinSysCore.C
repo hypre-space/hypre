@@ -150,6 +150,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   systemAssembled_(0),
                   HYPreconSetup_(0),
                   slideReduction_(0),
+                  slideReductionMinNorm_(-1.0),
                   schurReduction_(0),
                   schurReductionCreated_(0),
                   A21NRows_(0),
@@ -3320,6 +3321,8 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
             slideObj->setOutputLevel(2);
          if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE3 )
             slideObj->setOutputLevel(3);
+         if ( slideReductionMinNorm_ >= 0.0 )
+            slideObj->setBlockMinNorm( slideReductionMinNorm_ );
          slideObj->setup(currA_, currX_, currB_);
 #ifdef HAVE_MLI
          if ( HYPreconID_ == HYMLI )

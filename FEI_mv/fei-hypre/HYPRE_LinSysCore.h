@@ -536,6 +536,7 @@ class HYPRE_LinSysCore
    int             matrixVectorsCreated_;
    int             systemAssembled_;
    int             slideReduction_;
+   double          slideReductionMinNorm_;
    int             schurReduction_;
    int             schurReductionCreated_;
    int             projectionScheme_;

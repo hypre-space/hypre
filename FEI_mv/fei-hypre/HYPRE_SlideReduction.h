@@ -43,12 +43,14 @@ class HYPRE_SlideReduction
    int            *constrBlkInfo_;
    int            *constrBlkSizes_;
    int            *eqnStatuses_;
+   double         blockMinNorm_;
 
  public:
 
    HYPRE_SlideReduction(MPI_Comm);
    virtual ~HYPRE_SlideReduction();
    int    setOutputLevel(int level) {outputLevel_ = level; return 0;}
+   int    setBlockMinNorm(double norm) {blockMinNorm_ = norm; return 0;}
    int    setup(HYPRE_IJMatrix , HYPRE_IJVector , HYPRE_IJVector );
    int    buildReducedMatrix();
    int    buildReducedRHSVector(HYPRE_IJVector);

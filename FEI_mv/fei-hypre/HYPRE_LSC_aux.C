@@ -224,6 +224,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          printf("    - haveFEData <0,1>\n");
          printf("    - schurReduction\n");
          printf("    - slideReduction, slideReduction2, slideReduction3\n");
+         printf("    - slideReductionMinNorm <f>\n");
          printf("    - AConjugateProjection <dsize>\n");
          printf("    - minResProjection <dsize>\n");
          printf("    - solver <cg,gmres,bicgstab,boomeramg,superlux,..>\n");
@@ -379,19 +380,25 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       {
          slideReduction_ = 1;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-            printf("       HYPRE_LSC::parameters - slide reduction.\n");
+            printf("       HYPRE_LSC::parameters - slideReduction.\n");
       }
       else if ( !strcasecmp(param1, "slideReduction2") )
       {
          slideReduction_ = 2;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-            printf("       HYPRE_LSC::parameters - slide reduction.\n");
+            printf("       HYPRE_LSC::parameters - slideReduction2.\n");
       }
       else if ( !strcasecmp(param1, "slideReduction3") )
       {
          slideReduction_ = 3;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-            printf("       HYPRE_LSC::parameters - slide reduction.\n");
+            printf("       HYPRE_LSC::parameters - slideReduction3.\n");
+      }
+      else if ( !strcasecmp(param1, "slideReductionMinNorm") )
+      {
+         sscanf(params[i],"%s %lg", param, &slideReductionMinNorm_);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters - slideReductionMinNorm.\n");
       }
 
       //----------------------------------------------------------------

@@ -70,6 +70,7 @@ HYPRE_SlideReduction::HYPRE_SlideReduction(MPI_Comm comm)
    constrBlkInfo_    = NULL;
    constrBlkSizes_   = NULL;
    eqnStatuses_      = NULL;
+   blockMinNorm_     = 1.0e-4;
 }
 
 //***************************************************************************
@@ -229,6 +230,13 @@ int HYPRE_SlideReduction::findConstraints()
    // (==> nConstraints)
    //------------------------------------------------------------------
 
+#define PRINTC
+#ifdef PRINTC
+   char filename[100];
+   FILE *fp; 
+   sprintf( filename, "Constr.%d", localNRows);
+   fp = fopen( filename, "w" );
+#endif
    nConstraints = 0;
    for ( irow = endRow; irow >= startRow; irow-- ) 
    {
@@ -242,10 +250,21 @@ int HYPRE_SlideReduction::findConstraints()
             break;
          }
       }
+#ifdef PRINTC
+      if ( isAConstr ) 
+      {
+         for ( jcol = 0;  jcol < rowSize;  jcol++ ) 
+            fprintf(fp,"%8d %8d %e\n",nConstraints+1,colInd[jcol]+1,
+                    colVal[jcol]);
+      }
+#endif
       HYPRE_ParCSRMatrixRestoreRow(A_csr,irow,&rowSize,&colInd,&colVal);
       if ( isAConstr ) nConstraints++;
       else             break;
    }
+#ifdef PRINTC
+   fclose(fp);
+#endif
    if ( outputLevel_ >= 1 )
       printf("%4d : findConstraints - number of constraints = %d\n",
              mypid, nConstraints);
@@ -411,14 +430,14 @@ int HYPRE_SlideReduction::findSlaveEqns1()
          constrBlkInfo_[index]  = index;
          constrBlkSizes_[index] = 1;
          eqnStatuses_[searchIndex-startRow] = 1; 
-         if ( outputLevel_ >= 1 )
+         if ( outputLevel_ >= 2 )
             printf("%4d : findSlaveEqns1 - constr %7d <=> slave %d\n",
                    mypid, irow, searchIndex);
       } 
       else 
       {
          slaveEqnList_[irow-endRow+nConstraints-1] = -1;
-         if ( outputLevel_ >= 1 )
+         if ( outputLevel_ >= 2 )
          {
             printf("%4d : findSlaveEqns1 - constraint %4d fails",mypid,irow);
             printf(" to find a slave.\n");
@@ -589,6 +608,7 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
    HYPRE_LSI_qsort1a(tempSlaveList, tempSlaveListAux, 0, nConstraints-1);
 
    /* for each of the candidates, examine all associated constraints dof */
+
    for ( irow = 0; irow < nCandidates; irow++ ) 
    {
       for ( ic = 0; ic < blkSize; ic++ ) 
@@ -602,12 +622,13 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
 
             /* for each nonzero entry of the constraint row */
             /* - see if the column number is an already selected slave */
-            /* - if so, find the corresponding constraint number of that slave */
+            /* - if so, find the corresponding constraint no. of that slave */
             /* - add that constraint to my list */
             for ( jcol = 0; jcol < rowSize; jcol++ ) 
             {
                colIndex = colInd[jcol];
-               searchIndex = hypre_BinarySearch(tempSlaveList,colIndex,nConstraints);
+               searchIndex = hypre_BinarySearch(tempSlaveList,colIndex,
+                                                nConstraints);
                if ( searchIndex >= 0 )
                {      
                   searchInd2 = tempSlaveListAux[searchIndex] + newEndRow + 1;
@@ -619,15 +640,19 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
                   {
                      constrListAuxs[irow][ip] = searchInd2;
                      if ( outputLevel_ >= 2 )
-                        printf("Slave candiate %d adds new constr %d\n",
+                        printf("Slave candidate %d adds new constr %d\n",
                                candidateList[irow], searchInd2);
                   }
                }
             }
-            HYPRE_ParCSRMatrixRestoreRow(A_csr,constrIndex,&rowSize,&colInd,NULL);
+            HYPRE_ParCSRMatrixRestoreRow(A_csr,constrIndex,&rowSize,&colInd,
+                                         NULL);
          }
       }
    }
+
+   /* delete candidates that gives larger than expected blocksize */
+
    ncnt = 0;
    for ( irow = 0; irow < nCandidates; irow++ ) 
    {
@@ -678,7 +703,7 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
          }
          HYPRE_ParCSRMatrixRestoreRow(A_csr,irow,&rowSize2,&colInd2,&colVal2);
          searchIndex = -1;
-         searchValue = 1.0E-5;
+         searchValue = blockMinNorm_;
          for ( jcol = 0;  jcol < rowSize;  jcol++ ) 
          {
             colIndex = colInd[jcol];
@@ -713,18 +738,25 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
                            if ( ip == blkInfoCnt )
                            {
                               newBlkSize += constrBlkSizes_[constrIndex2];
-                              blkInfo[blkInfoCnt] = constrBlkInfo_[constrIndex2];
+                              blkInfo[blkInfoCnt]=constrBlkInfo_[constrIndex2];
                               blkInfoCnt++;
                            }
                         }
+/*
                         else if (constrIndex != irow ) newBlkSize++;
+*/
                      }
                   }
-                  if ( outputLevel_ >= 1 )
-                     printf("%4d : constraint %d - candidate %d (%d) gives blksize = %d\n",
-                            mypid, irow, searchInd2, candidateList[searchInd2], 
-                            newBlkSize); 
+                  if ( outputLevel_ >= 2 )
+                  {
+                     printf("%4d : constraint %d - candidate %d (%d) ", mypid,
+                            irow, searchInd2, candidateList[searchInd2]);
+                     printf("gives blksize = %d\n", newBlkSize); 
+                  }
+/*
                   if (newBlkSize > 1 && newBlkSize <= blkSize)
+*/
+                  if (newBlkSize <= blkSize)
                   {
                      retVal = matrixCondEst(irow,colIndex,blkInfo,blkInfoCnt);
                      if ( outputLevel_ >= 2 )
@@ -742,28 +774,33 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
          } 
          delete [] colInd;
          delete [] colVal;
-         if ( searchIndex >= 0 && searchValue > 1.0e-5 )
+         if ( searchIndex >= 0 && searchValue > blockMinNorm_ )
          {
-            searchInd2 = hypre_BinarySearch(candidateList,searchIndex,nCandidates);
+            searchInd2 = hypre_BinarySearch(candidateList,searchIndex,
+                                            nCandidates);
             newIndex = -9;
             for ( ic = 0;  ic < blkSize;  ic++ ) 
             {
                constrIndex  = constrListAuxs[searchInd2][ic];
-               constrIndex2 = constrIndex - endRow + nConstraints - 1;
-               if (constrIndex != irow && slaveEqnList_[constrIndex2] != -1)
+               if ( constrIndex != -1 )
                {
-                  if ( newIndex == -9 ) newIndex = constrBlkInfo_[constrIndex2];
-                  oldIndex = constrBlkInfo_[constrIndex2];
-                  for ( ii = 0;  ii < nConstraints;  ii++ ) 
+                  constrIndex2 = constrIndex - endRow + nConstraints - 1;
+                  if (constrIndex != irow && slaveEqnList_[constrIndex2] != -1)
                   {
-                     if ( constrBlkInfo_[ii] == oldIndex )
+                     if (newIndex == -9) newIndex=constrBlkInfo_[constrIndex2];
+                     oldIndex = constrBlkInfo_[constrIndex2];
+                     for ( ii = 0;  ii < nConstraints;  ii++ ) 
                      {
-                        constrBlkInfo_[ii]  = newIndex;
-                        constrBlkSizes_[ii] = searchBlkSize;
+                        if ( constrBlkInfo_[ii] == oldIndex )
+                        {
+                           constrBlkInfo_[ii]  = newIndex;
+                           constrBlkSizes_[ii] = searchBlkSize;
+                        }
                      }
                   }
                }
             }
+            if (newIndex == -9) newIndex = irowLocal;
             constrBlkInfo_[irowLocal]  = newIndex;
             constrBlkSizes_[irowLocal] = searchBlkSize;
             slaveEqnList_[irowLocal]   = searchIndex;
@@ -795,14 +832,14 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
                         {
                            constrListAuxs[searchInd3][0] = -5;
                            eqnStatuses_[colInd2[jj]-startRow] = 1;
-                           if ( outputLevel_ >= 2 )
+                           if ( outputLevel_ >= 3 )
                               printf("*Slave candidate %d disabled.\n",
                                      candidateList[searchInd3]);
                         }
                         else if ( constrListAuxs[searchInd3][ip] == -1 )
                         {
                            constrListAuxs[searchInd3][ip] = irow;
-                           if ( outputLevel_ >= 2 )
+                           if ( outputLevel_ >= 3 )
                               printf("*Slave candidate %d adds new constr %d\n",
                                      candidateList[searchInd3], irow);
                         } 
@@ -812,17 +849,32 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
                                                &colInd2,&colVal2);
                }
             }
-            if ( outputLevel_ >= 1 )
+            if ( outputLevel_ >= 2 )
                printf("%4d : findSlaveEqnsBlock - constr %d <=> slave %d (%d)\n",
                       mypid, irow, searchIndex, newIndex);
          }
          else 
          {
-            if ( outputLevel_ >= 1 )
+            if ( outputLevel_ >= 2 )
             {
-               printf("%4d : findSlaveEqnsBlock - constraint %4d fails", mypid,
-                      irow);
-               printf(" to find a slave.\n");
+               if ( searchIndex < 0 && searchValue > blockMinNorm_ )
+               {
+                  printf("%4d : findSlaveEqnsBlock - constraint %4d fails (0)",
+                         mypid, irow);
+                  printf(" to find a slave.\n");
+               }
+               else if ( searchIndex >= 0 && searchValue <= blockMinNorm_ )
+               {
+                  printf("%4d : findSlaveEqnsBlock - constraint %4d fails (1)",
+                         mypid, irow);
+                  printf(" to find a slave.\n");
+               }
+               else 
+               {
+                  printf("%4d : findSlaveEqnsBlock - constraint %4d fails (2)",
+                         mypid, irow);
+                  printf(" to find a slave.\n");
+               }
                if ( outputLevel_ >= 3 )
                {
                   HYPRE_ParCSRMatrixGetRow(A_csr,irow,&rowSize,&colInd,&colVal);
@@ -834,13 +886,14 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
                   for ( jcol = 0;  jcol < rowSize2;  jcol++ ) 
                   {
                      colIndex = colTmp[jcol];
-                     printf("%4d : row %d has col %d (%d,%d) (%d,%d)\n",mypid,irow,
-                       colIndex,jcol,rowSize,procNRows[mypid],procNRows[mypid+1]); 
+                     printf("%4d : row %d has col %d (%d,%d) (%d,%d)\n",mypid,
+                            irow,colIndex,jcol,rowSize,procNRows[mypid],
+                            procNRows[mypid+1]); 
                      if ( colIndex >= procNRows[mypid] && 
                           colIndex < procNRows[mypid+1])
                      {
-                        HYPRE_ParCSRMatrixGetRow(A_csr,colIndex,&rowSize,&colInd,
-                                                 NULL);
+                        HYPRE_ParCSRMatrixGetRow(A_csr,colIndex,&rowSize,
+                                                 &colInd,NULL);
                         for ( ii = 0; ii < rowSize;  ii++ ) 
                            printf("%4d :     col %d has col %d (%d,%d)\n",mypid,
                                   colIndex,colInd[ii],ii,rowSize);
@@ -854,7 +907,6 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
          }
       }
    }
-
    delete [] blkInfo;
    if ( nConstraints > 0 )
    {
@@ -864,6 +916,48 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
       delete [] candidateList;
    }
    free( procNRows );
+
+#if 0
+   int is, *iArray1, *iArray2;
+   if ( constrBlkInfo_ != NULL )
+   {
+      iArray1 = new int[nConstraints];
+      iArray2 = new int[nConstraints];
+      for ( is = 0; is < nConstraints; is++ )
+      {
+         iArray1[is] = constrBlkInfo_[is];
+         iArray2[is] = constrBlkSizes_[is]; 
+      }
+      HYPRE_LSI_qsort1a(iArray1, iArray2, 0, nConstraints-1);
+      ip = -1; ncnt = 0;
+      for ( is = 0; is < nConstraints; is++ )
+      {
+         if ( iArray1[is] != ip )
+         {
+            iArray1[ncnt] = iArray1[is];
+            iArray2[ncnt] = iArray2[is];
+            ncnt++;
+            ip = iArray1[is];
+         }
+      }
+      HYPRE_LSI_qsort1a(iArray2, iArray1, 0, ncnt-1);
+      ip = 1;
+      for ( is = 1; is < ncnt; is++ )
+      {
+         if ( iArray2[is] == iArray2[is-1] ) ip++;
+         else
+         {
+            printf("%4d : number of blocks with blksize %6d = %d\n", 
+                   mypid, iArray2[is-1], ip);
+            ip = 1;
+         }
+      }
+      printf("%4d : number of blocks with blksize %6d = %d\n", 
+             mypid, iArray2[ncnt-1], ip);
+      delete [] iArray1;
+      delete [] iArray2;
+   }
+#endif
 
    //---------------------------------------------------------------------
    // if not all constraint-slave pairs can be found, return -1
@@ -902,7 +996,7 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
 int HYPRE_SlideReduction::composeGlobalList()
 {
    int mypid, nprocs, nConstraints, is, ip, *recvCntArray, *displArray;
-   int globalNConstr, ierr;
+   int globalNConstr, ierr, ncnt, *iArray1, *iArray2;
 
    //------------------------------------------------------------------
    // fetch machine and constraint parameters
@@ -974,7 +1068,46 @@ int HYPRE_SlideReduction::composeGlobalList()
    delete [] recvCntArray;
    delete [] displArray;
 
-   if ( outputLevel_ >= 1 )
+   if ( constrBlkInfo_ != NULL && outputLevel_ >= 1 )
+   {
+      iArray1 = new int[nConstraints];
+      iArray2 = new int[nConstraints];
+      for ( is = 0; is < nConstraints; is++ )
+      {
+         iArray1[is] = constrBlkInfo_[is];
+         iArray2[is] = constrBlkSizes_[is]; 
+      }
+      HYPRE_LSI_qsort1a(iArray1, iArray2, 0, nConstraints-1);
+      ip = -1; ncnt = 0;
+      for ( is = 0; is < nConstraints; is++ )
+      {
+         if ( iArray1[is] != ip )
+         {
+            iArray1[ncnt] = iArray1[is];
+            iArray2[ncnt] = iArray2[is];
+            ncnt++;
+            ip = iArray1[is];
+         }
+      }
+      HYPRE_LSI_qsort1a(iArray2, iArray1, 0, ncnt-1);
+      ip = 1;
+      for ( is = 1; is < ncnt; is++ )
+      {
+         if ( iArray2[is] == iArray2[is-1] ) ip++;
+         else
+         {
+            printf("%4d : number of blocks with blksize %6d = %d\n", 
+                   mypid, iArray2[is-1], ip);
+            ip = 1;
+         }
+      }
+      printf("%4d : number of blocks with blksize %6d = %d\n", 
+             mypid, iArray2[ncnt-1], ip);
+      delete [] iArray1;
+      delete [] iArray2;
+   }
+
+   if ( outputLevel_ > 1 )
       for ( is = 0; is < nConstraints; is++ )
          printf("%4d : HYPRE_SlideReduction - slaveEqnList %d = %d(%d)\n",
                 mypid, is, slaveEqnList_[is], slaveEqnListAux_[is]);
