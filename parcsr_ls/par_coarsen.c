@@ -22,7 +22,7 @@
 
 
 #include "_hypre_parcsr_ls.h"
-
+#include <assert.h>
 
 
 /*==========================================================================*/
@@ -2093,10 +2093,27 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
    measure_array = hypre_CTAlloc(HYPRE_Real, num_variables+num_cols_offd);
 
    /* first calculate the local part of the sums for the external nodes */
+#ifdef HYPRE_USING_OPENMP
+   int *measure_array_temp = hypre_CTAlloc(int, num_variables+num_cols_offd);
+
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+   for (i=0; i < S_offd_i[num_variables]; i++)
+   {
+#pragma omp atomic
+      measure_array_temp[num_variables + S_offd_j[i]]++;
+   }
+
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+   for (i=0; i < num_cols_offd; i++)
+   {
+     measure_array[i + num_variables] = measure_array_temp[i + num_variables];
+   }
+#else
    for (i=0; i < S_offd_i[num_variables]; i++)
    { 
       measure_array[num_variables + S_offd_j[i]] += 1.0;
    }
+#endif // HYPRE_USING_OPENMP
 
    /* now send those locally calculated values for the external nodes to the neighboring processors */
    if (num_procs > 1)
@@ -2104,10 +2121,27 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
                         &measure_array[num_variables], buf_data);
 
    /* calculate the local part for the local nodes */
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+   for (i=0; i < S_diag_i[num_variables]; i++)
+   {
+#pragma omp atomic
+      measure_array_temp[S_diag_j[i]]++;
+   }
+
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+   for (i=0; i < num_variables; i++)
+   {
+     measure_array[i] = measure_array_temp[i];
+   }
+
+   hypre_TFree(measure_array_temp);
+#else
    for (i=0; i < S_diag_i[num_variables]; i++)
    { 
       measure_array[S_diag_j[i]] += 1.0;
    }
+#endif // HYPRE_USING_OPENMP
 
    /* finish the communication */
    if (num_procs > 1)
@@ -2194,7 +2228,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
          if ( (S_diag_i[i+1]-S_diag_i[i]) == 0
                 && (S_offd_i[i+1]-S_offd_i[i]) == 0)
          {
-            CF_marker[i] = SF_PT;
+            CF_marker[i] = SF_PT; /* an isolated fine grid */
             if (CF_init == 3 || CF_init == 4) CF_marker[i] = C_PT; 
             measure_array[i] = 0;
          }
@@ -2244,6 +2278,11 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
                      my_id, wall_time); 
    }
 
+   HYPRE_Int                *graph_array2 = hypre_CTAlloc(HYPRE_Int, num_variables);
+   HYPRE_Int *graph_array_offd2 = NULL;
+   if (num_cols_offd)
+     graph_array_offd2 = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
+
    /*******************************************************************************
     THE INDEPENDENT SET COARSENING LOOP:
    ******************************************************************************/      
@@ -2277,6 +2316,9 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 				graph_size, 
 				graph_array_offd, graph_offd_size, 
 				CF_marker, CF_marker_offd);*/
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ig, i) HYPRE_SMP_SCHEDULE
+#endif
         for (ig = 0; ig < graph_size; ig++)
         {
            i = graph_array[ig];
@@ -2285,6 +2327,9 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
               CF_marker[i] = 1;
            }
         }
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ig, i) HYPRE_SMP_SCHEDULE
+#endif
         for (ig = 0; ig < graph_offd_size; ig++)
         {
            i = graph_array_offd[ig];
@@ -2316,7 +2361,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
                     else if (measure_array[j] > measure_array[i])
                        CF_marker[i] = 0;
                  }
-              }
+              } /* for each local neighbor j of i */
               for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++)
               {
                  jj = S_offd_j[jS];
@@ -2329,8 +2374,8 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
                        CF_marker[i] = 0;
                  }
               }
-           }
-        }
+           } /* for each node with measure > 1 */
+        } /* for each node i */
 
 
       /*------------------------------------------------
@@ -2379,12 +2424,15 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
       * Set C-pts and F-pts.
       *------------------------------------------------*/
 
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ig, i, jS, j) HYPRE_SMP_SCHEDULE
+#endif
      for (ig = 0; ig < graph_size; ig++) {
        i = graph_array[ig];
 
        /*---------------------------------------------
 	* If the measure of i is smaller than 1, then
-        * make i an F point (because it does not influence
+        * make i and F point (because it does not influence
         * any other point)
 	*---------------------------------------------*/
 
@@ -2454,37 +2502,88 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
       * Update subgraph
       *------------------------------------------------*/
 
-     for (ig = 0; ig < graph_size; ig++) {
-       i = graph_array[ig];
-       
-       if (!CF_marker[i]==0) /* C or F point */
-	 {
-	   /* the independent set subroutine needs measure 0 for
-              removed nodes */
-	   measure_array[i] = 0;
-	   /* take point out of the subgraph */
-	   graph_size--;
-	   graph_array[ig] = graph_array[graph_size];
-	   graph_array[graph_size] = i;
-	   ig--;
-	 }
-     }
-     for (ig = 0; ig < graph_offd_size; ig++) {
-       i = graph_array_offd[ig];
-       
-       if (!CF_marker_offd[i]==0) /* C or F point */
-	 {
-	   /* the independent set subroutine needs measure 0 for
-              removed nodes */
-	   measure_array[i+num_variables] = 0;
-	   /* take point out of the subgraph */
-	   graph_offd_size--;
-	   graph_array_offd[ig] = graph_array_offd[graph_offd_size];
-	   graph_array_offd[graph_offd_size] = i;
-	   ig--;
-	 }
-     }
-     
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel private(ig,i)
+#endif
+     {
+        HYPRE_Int my_thread_num = hypre_GetThreadNum();
+        HYPRE_Int num_threads = hypre_NumActiveThreads();
+
+        HYPRE_Int private_graph_size_cnt = 0;
+        HYPRE_Int private_graph_offd_size_cnt = 0;
+
+        HYPRE_Int ig_per_thread = (graph_size + num_threads - 1)/num_threads;
+        HYPRE_Int ig_begin = hypre_min(ig_per_thread*my_thread_num, graph_size);
+        HYPRE_Int ig_end = hypre_min(ig_begin + ig_per_thread, graph_size);
+
+        HYPRE_Int ig_offd_per_thread = (graph_offd_size + num_threads - 1)/num_threads;
+        HYPRE_Int ig_offd_begin = hypre_min(ig_offd_per_thread*my_thread_num, graph_offd_size);
+        HYPRE_Int ig_offd_end = hypre_min(ig_offd_begin + ig_offd_per_thread, graph_offd_size);
+
+        for (ig = ig_begin; ig < ig_end; ig++)
+        {
+           i = graph_array[ig];
+
+           if (!CF_marker[i]==0) /* C or F point */
+           {
+              /* the independent set subroutine needs measure 0 for
+                 removed nodes */
+              measure_array[i] = 0;
+           }
+           else
+           {
+              private_graph_size_cnt++;
+           }
+        }
+
+        for (ig = ig_offd_begin; ig < ig_offd_end; ig++)
+        {
+           i = graph_array_offd[ig];
+
+           if (!CF_marker_offd[i]==0) /* C of F point */
+           {
+              /* the independent set subroutine needs measure 0 for
+                 removed nodes */
+              measure_array[i + num_variables] = 0;
+           }
+           else
+           {
+              private_graph_offd_size_cnt++;
+           }
+        }
+
+        hypre_prefix_sum(&private_graph_size_cnt, &graph_size);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
+        hypre_prefix_sum(&private_graph_offd_size_cnt, &graph_offd_size);
+
+        for (ig = ig_begin; ig < ig_end; ig++)
+        {
+           i = graph_array[ig];
+           if (CF_marker[i]==0)
+           {
+              graph_array2[private_graph_size_cnt++] = i;
+           }
+        }
+
+        for (ig = ig_offd_begin; ig < ig_offd_end; ig++)
+        {
+           i = graph_array_offd[ig];
+           if (CF_marker_offd[i]==0)
+           {
+              graph_array_offd2[private_graph_offd_size_cnt++] = i;
+           }
+        }
+     } /* omp parallel */
+
+     HYPRE_Int *temp = graph_array;
+     graph_array = graph_array2;
+     graph_array2 = temp;
+
+     temp = graph_array_offd;
+     graph_array_offd = graph_array_offd2;
+     graph_array_offd2 = temp;
    } /* end while */
 
    /*   hypre_printf("*** MIS iteration %d\n",iter);
@@ -2504,6 +2603,8 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 
    hypre_TFree(measure_array);
    hypre_TFree(graph_array);
+   hypre_TFree(graph_array2);
+   hypre_TFree(graph_array_offd2);
    if (num_cols_offd) hypre_TFree(graph_array_offd);
    hypre_TFree(buf_data);
    hypre_TFree(int_buf_data);
