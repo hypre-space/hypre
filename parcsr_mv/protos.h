@@ -1,9 +1,9 @@
 #ifdef __STDC__
-# define	P(s) s
+# define        P(s) s
 #else
 # define P(s) ()
 #endif
-
+ 
 
 /* par_vector.c */
 hypre_ParVector *hypre_CreateParVector P((MPI_Comm comm, int global_size, 
@@ -17,8 +17,9 @@ int hypre_CopyParVector P((hypre_ParVector *x , hypre_ParVector *y ));
 int hypre_ScaleParVector P((double alpha , hypre_ParVector *y ));
 int hypre_ParAxpy P((double alpha , hypre_ParVector *x , hypre_ParVector *y ));
 double hypre_ParInnerProd P((MPI_Comm comm, hypre_ParVector *x , 
-   		hypre_ParVector *y ));
-hypre_ParVector *hypre_VectorToParVector P((MPI_Comm comm, hypre_Vector *v));
+   	hypre_ParVector *y ));
+hypre_ParVector *hypre_VectorToParVector P((MPI_Comm comm, hypre_Vector *v,
+	int *vec_starts));
 int hypre_BuildParVectorMPITypes P((MPI_Comm comm, int vec_len, 
 	int *vec_starts, MPI_Datatype *vector_mpi_types));
 
@@ -28,7 +29,8 @@ hypre_CommHandle *hypre_InitializeCommunication P((int job,
 int hypre_FinalizeCommunication P((hypre_CommHandle *comm_handle));
 int hypre_GenerateMatvecCommunicationInfo P((hypre_ParCSRMatrix *A, 
 	int *row_part_starts, int *col_part_starts));
-hypre_VectorCommPkg *hypre_InitializeVectorCommPkg P((MPI_Comm comm, int vec_len));
+hypre_VectorCommPkg *hypre_InitializeVectorCommPkg P((MPI_Comm comm, 
+	int vec_len, int *vec_starts));
 int hypre_DestroyVectorCommPkg P(( hypre_VectorCommPkg *vector_comm_pkg));
 int hypre_DestroyMatvecCommPkg P(( hypre_CommPkg *comm_pkg));
 int BuildCSRMatrixMPIDataType P((int num_nonzeros, int num_rows,
@@ -45,7 +47,7 @@ int hypre_InitializeParCSRMatrix P(( hypre_ParCSRMatrix *matrix));
 hypre_ParCSRMatrix *hypre_ReadParCSRMatrix P(( MPI_Comm comm, char *file_name));
 int hypre_PrintParCSRMatrix P(( hypre_ParCSRMatrix *matrix, char *file_name));
 hypre_ParCSRMatrix *hypre_CSRMatrixToParCSRMatrix P((MPI_Comm comm,
-		hypre_CSRMatrix *A));
+		hypre_CSRMatrix *A, int *row_starts, int * col_starts));
 int GenerateDiagAndOffd P((hypre_CSRMatrix *A, hypre_ParCSRMatrix *matrix,
 	int first_col_diag, int last_col_diag));
 
@@ -54,5 +56,6 @@ int hypre_ParMatvec P((double alpha, hypre_ParCSRMatrix *A,
 	hypre_ParVector *x, double beta, hypre_ParVector *y));
 int hypre_ParMatvecT P((double alpha, hypre_ParCSRMatrix *A, 
 	hypre_ParVector *x, double beta, hypre_ParVector *y));
+
 
 #undef P
