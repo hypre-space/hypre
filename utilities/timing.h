@@ -114,7 +114,7 @@ extern hypre_TimingType *hypre_global_timing;
 #define hypre_TimingWallCount   (hypre_global_timing[threadid].wall_count)
 #define hypre_TimingCPUCount    (hypre_global_timing[threadid].CPU_count)
 #define hypre_TimingFLOPCount   (hypre_global_timing[threadid].FLOP_count)
-#define hypre_TimingAllFLOPS    (hypre_global_timing[NUM_THREADS].FLOP_count)
+#define hypre_TimingAllFLOPS    (hypre_global_timing[hypre_NumThreads].FLOP_count)
 #endif
 
 /*-------------------------------------------------------

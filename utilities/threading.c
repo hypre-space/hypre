@@ -7,6 +7,7 @@
  * $Revision$
 *********************************************************************EHEADER*/
 
+#define HYPRE_THREAD_GLOBALS
 #ifdef HYPRE_USE_PTHREADS
 
 #include <malloc.h>
@@ -36,7 +37,7 @@ int HYPRE_InitPthreads( MPI_Comm comm )
       pthread_cond_init(&hypre_qptr->finish_wait, NULL);
       hypre_qptr->n_working = hypre_qptr->n_waiting = hypre_qptr->n_queue = 0;
       hypre_qptr->inp = hypre_qptr->outp = 0;
-      for (i=0; i < NUM_THREADS; i++) {
+      for (i=0; i < hypre_NumThreads; i++) {
          err=pthread_create(&hypre_thread[i], NULL, 
                             (void *(*)(void *))hypre_pthread_worker,
                             (void *)i);
@@ -58,7 +59,7 @@ void HYPRE_DestroyPthreads( void )
 {
    int i,x;
 
-   for (i=0; i < NUM_THREADS; i++) {
+   for (i=0; i < hypre_NumThreads; i++) {
       x= pthread_cancel(hypre_thread[i]);
    }
 
@@ -166,7 +167,7 @@ void hypre_barrier(pthread_mutex_t *mtx, int unthreaded)
       pthread_mutex_lock(mtx);
       thb_count++;
 
-      if (thb_count < NUM_THREADS) {
+      if (thb_count < hypre_NumThreads) {
          pthread_mutex_unlock(mtx);
          while (!thb_release);
          pthread_mutex_lock(mtx);
@@ -174,7 +175,7 @@ void hypre_barrier(pthread_mutex_t *mtx, int unthreaded)
          pthread_mutex_unlock(mtx);
          while (thb_release);
       }
-      else if (thb_count == NUM_THREADS) {
+      else if (thb_count == hypre_NumThreads) {
          thb_count--;
          pthread_mutex_unlock(mtx);
          thb_release++;
@@ -190,9 +191,9 @@ hypre_GetThreadID( void )
    int i;
 
    if (pthread_equal(pthread_self(), initial_thread)) 
-      return NUM_THREADS;
+      return hypre_NumThreads;
 
-   for (i = 0; i < NUM_THREADS; i++)
+   for (i = 0; i < hypre_NumThreads; i++)
    {
       if (pthread_equal(pthread_self(), hypre_thread[i]))
          return i;

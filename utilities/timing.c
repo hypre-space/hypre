@@ -357,7 +357,7 @@ hypre_InitializeTiming( char *name )
 
    if (hypre_global_timing == NULL)
    {
-      hypre_global_timing = hypre_CTAlloc(hypre_TimingType, NUM_THREADS + 1);
+      hypre_global_timing = hypre_CTAlloc(hypre_TimingType, hypre_NumThreads + 1);
    }
 
    /*-------------------------------------------------------
@@ -487,7 +487,7 @@ hypre_FinalizeTiming( int time_index )
          hypre_TFree(hypre_global_timing[threadid].num_regs);
       }
 
-      hypre_barrier(&time_mtx, threadid == NUM_THREADS);
+      hypre_barrier(&time_mtx, threadid == hypre_NumThreads);
       pthread_mutex_lock(&time_mtx);
       hypre_TFree(hypre_global_timing);
       hypre_global_timing = NULL;
@@ -509,7 +509,7 @@ hypre_IncFLOPCount( int inc )
 
    hypre_TimingFLOPCount += (double) (inc);
 
-   if (threadid != NUM_THREADS)
+   if (threadid != hypre_NumThreads)
    {
       pthread_mutex_lock(&time_mtx);
       hypre_TimingAllFLOPS += (double) (inc);
@@ -534,7 +534,7 @@ hypre_BeginTiming( int time_index )
       hypre_StopTiming();
       hypre_TimingWallTime(time_index) -= hypre_TimingWallCount;
       hypre_TimingCPUTime(time_index)  -= hypre_TimingCPUCount;
-      if (threadid != NUM_THREADS)
+      if (threadid != hypre_NumThreads)
          hypre_TimingFLOPS(time_index)    -= hypre_TimingFLOPCount;
       else
          hypre_TimingFLOPS(time_index)    -= hypre_TimingAllFLOPS;
@@ -561,7 +561,7 @@ hypre_EndTiming( int time_index )
       hypre_StopTiming();
       hypre_TimingWallTime(time_index) += hypre_TimingWallCount;
       hypre_TimingCPUTime(time_index)  += hypre_TimingCPUCount;
-      if (threadid != NUM_THREADS)
+      if (threadid != hypre_NumThreads)
          hypre_TimingFLOPS(time_index)    += hypre_TimingFLOPCount;
       else
          hypre_TimingFLOPS(time_index)    += hypre_TimingAllFLOPS;
@@ -623,7 +623,7 @@ hypre_PrintTiming( char     *heading,
 
    char    target_name[32];
 
-   if (my_thread == NUM_THREADS)
+   if (my_thread == hypre_NumThreads)
    {
       if (hypre_global_timing == NULL)
          return;
@@ -692,7 +692,7 @@ hypre_PrintTiming( char     *heading,
             local_cpu_time  = 0.0;
             if (index >= 0)
             {
-               for (threadid = 0; threadid < NUM_THREADS; threadid++)
+               for (threadid = 0; threadid < hypre_NumThreads; threadid++)
                {
                   local_wall_time = 
                      max(local_wall_time, hypre_TimingWallTime(index));
@@ -724,7 +724,7 @@ hypre_PrintTiming( char     *heading,
                {
                   if (index >= 0)
                   {
-                     for (threadid = 0; threadid < NUM_THREADS; threadid++)
+                     for (threadid = 0; threadid < hypre_NumThreads; threadid++)
                      {
                         wall_mflops += 
                            hypre_TimingFLOPS(index) / wall_time / 1.0E6;
@@ -746,7 +746,7 @@ hypre_PrintTiming( char     *heading,
                {
                   if (index >= 0)
                   {
-                     for (threadid = 0; threadid < NUM_THREADS; threadid++)
+                     for (threadid = 0; threadid < hypre_NumThreads; threadid++)
                      {
                         cpu_mflops += 
                            hypre_TimingFLOPS(index) / cpu_time / 1.0E6;

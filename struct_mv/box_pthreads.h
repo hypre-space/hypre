@@ -53,7 +53,7 @@ Usage: PLOOP(increment_variable, loop_initial_value, loop_stopping value,
              index_array_name, array_index, thread_counter, mutex_object,
              cond_object, loop_body)
 
-NUM_THREADS must either be #defined as the number of threads being used or
+hypre_NumThreads must either be #defined as the number of threads being used or
 be an integer variable containing the number of threads.
 
 Arguments:  $1 -- the name of the increment variable for the loop
@@ -103,9 +103,6 @@ extern int iteration_counter;
  * Threaded Looping macros:
  *--------------------------------------------------------------------------*/
 
-#ifndef NUM_THREADS
-#define NUM_THREADS 4
-#endif
 #ifndef MAX_ISIZE
 #define MAX_ISIZE 5
 #endif
@@ -216,7 +213,34 @@ extern int iteration_counter;
             }\
          }\
       }\
+<<<<<<< box_pthreads.h
+    \
+   }\
+   if (pthread_equal(initial_thread, pthread_self())==0) {\
+      pthread_mutex_lock(&hypre_mutex_boxloops);\
+         hypre_thread_counter++;\
+      if (hypre_thread_counter < hypre_NumThreads) {\
+         pthread_mutex_unlock(&hypre_mutex_boxloops);\
+         while (!hypre_thread_release);\
+         pthread_mutex_lock(&hypre_mutex_boxloops);\
+         hypre_thread_counter--;\
+         pthread_mutex_unlock(&hypre_mutex_boxloops);\
+         while (hypre_thread_release);\
+      }\
+      else if (hypre_thread_counter == hypre_NumThreads) {\
+         hypre_thread_counter--;\
+         iteration_counter = 0;\
+         pthread_mutex_unlock(&hypre_mutex_boxloops);\
+         hypre_thread_release=1;\
+         while (hypre_thread_counter);\
+         hypre_thread_release=0;\
+      }\
+   }\
+   else\
+      iteration_counter = 0;\
+=======
    });\
+>>>>>>> 1.11
 }
 
 
@@ -251,8 +275,35 @@ extern int iteration_counter;
                body;\
             }\
          }\
+<<<<<<< box_pthreads.h
+      }\
+   }\
+   if (pthread_equal(initial_thread, pthread_self())==0) {\
+      pthread_mutex_lock(&hypre_mutex_boxloops);\
+         hypre_thread_counter++;\
+      if (hypre_thread_counter < hypre_NumThreads) {\
+         pthread_mutex_unlock(&hypre_mutex_boxloops);\
+         while (!hypre_thread_release);\
+         pthread_mutex_lock(&hypre_mutex_boxloops);\
+         hypre_thread_counter--;\
+         pthread_mutex_unlock(&hypre_mutex_boxloops);\
+         while (hypre_thread_release);\
+      }\
+      else if (hypre_thread_counter == hypre_NumThreads) {\
+         hypre_thread_counter--;\
+         iteration_counter = 0;\
+         pthread_mutex_unlock(&hypre_mutex_boxloops);\
+         hypre_thread_release=1;\
+         while (hypre_thread_counter);\
+         hypre_thread_release=0;\
+      }\
+   }\
+   else\
+      iteration_counter = 0;\
+=======
       }
    });\
+>>>>>>> 1.11
 }
 
 
@@ -303,7 +354,7 @@ extern int iteration_counter;
    if (pthread_equal(initial_thread, pthread_self())==0) {\
       pthread_mutex_lock(&hypre_mutex_boxloops);\
          hypre_thread_counter++;\
-      if (hypre_thread_counter < NUM_THREADS) {\
+      if (hypre_thread_counter < hypre_NumThreads) {\
          pthread_mutex_unlock(&hypre_mutex_boxloops);\
          while (!hypre_thread_release);\
          pthread_mutex_lock(&hypre_mutex_boxloops);\
@@ -311,7 +362,7 @@ extern int iteration_counter;
          pthread_mutex_unlock(&hypre_mutex_boxloops);\
          while (hypre_thread_release);\
       }\
-      else if (hypre_thread_counter == NUM_THREADS) {\
+      else if (hypre_thread_counter == hypre_NumThreads) {\
          hypre_thread_counter--;\
          iteration_counter = 0;\
          pthread_mutex_unlock(&hypre_mutex_boxloops);\
@@ -371,7 +422,34 @@ extern int iteration_counter;
             }\
          }\
       }\
+<<<<<<< box_pthreads.h
+    \
+   }\
+   if (pthread_equal(initial_thread, pthread_self())==0) {\
+      pthread_mutex_lock(&hypre_mutex_boxloops);\
+         hypre_thread_counter++;\
+      if (hypre_thread_counter < hypre_NumThreads) {\
+         pthread_mutex_unlock(&hypre_mutex_boxloops);\
+         while (!hypre_thread_release);\
+         pthread_mutex_lock(&hypre_mutex_boxloops);\
+         hypre_thread_counter--;\
+         pthread_mutex_unlock(&hypre_mutex_boxloops);\
+         while (hypre_thread_release);\
+      }\
+      else if (hypre_thread_counter == hypre_NumThreads) {\
+         hypre_thread_counter--;\
+         iteration_counter = 0;\
+         pthread_mutex_unlock(&hypre_mutex_boxloops);\
+         hypre_thread_release=1;\
+         while (hypre_thread_counter);\
+         hypre_thread_release=0;\
+      }\
+   }\
+   else\
+      iteration_counter = 0;\
+=======
    });
+>>>>>>> 1.11
 }
 
 
@@ -428,7 +506,34 @@ extern int iteration_counter;
             }\
          }\
       }\
+<<<<<<< box_pthreads.h
+    \
+   }\
+   if (pthread_equal(initial_thread, pthread_self())==0) {\
+      pthread_mutex_lock(&hypre_mutex_boxloops);\
+         hypre_thread_counter++;\
+      if (hypre_thread_counter < hypre_NumThreads) {\
+         pthread_mutex_unlock(&hypre_mutex_boxloops);\
+         while (!hypre_thread_release);\
+         pthread_mutex_lock(&hypre_mutex_boxloops);\
+         hypre_thread_counter--;\
+         pthread_mutex_unlock(&hypre_mutex_boxloops);\
+         while (hypre_thread_release);\
+      }\
+      else if (hypre_thread_counter == hypre_NumThreads) {\
+         hypre_thread_counter--;\
+         iteration_counter = 0;\
+         pthread_mutex_unlock(&hypre_mutex_boxloops);\
+         hypre_thread_release=1;\
+         while (hypre_thread_counter);\
+         hypre_thread_release=0;\
+      }\
+   }\
+   else\
+      iteration_counter = 0;\
+=======
    });
+>>>>>>> 1.11
 }
 
 

@@ -80,7 +80,7 @@ HYPRE_InitializeStructMatrixPush( HYPRE_StructMatrix matrix )
 
    pushargs.matrix = matrix;
    pushargs.returnvalue = (int *) malloc(sizeof(int));
-   for (i=0; i<NUM_THREADS; i++)
+   for (i=0; i<hypre_NumThreads; i++)
       hypre_work_put( HYPRE_InitializeStructMatrixVoidPtr, (void *)&pushargs);
 
    hypre_work_wait();
@@ -213,7 +213,7 @@ HYPRE_SetStructMatrixBoxValuesPush( HYPRE_StructMatrix matrix,
    pushargs.stencil_indices     = stencil_indices;
    pushargs.values              = values;
    pushargs.returnvalue = (int *) malloc(sizeof(int));
-   for (i=0; i<NUM_THREADS; i++)
+   for (i=0; i<hypre_NumThreads; i++)
       hypre_work_put( HYPRE_SetStructMatrixBoxValuesVoidPtr, (void *)&pushargs);
 
    hypre_work_wait();
@@ -312,7 +312,7 @@ HYPRE_PrintStructMatrixPush( char               *filename,
    pushargs.matrix   = matrix;
    pushargs.all      = all;
 
-   for (i = 0; i < NUM_THREADS; i++)
+   for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_PrintStructMatrixVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();

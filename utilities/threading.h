@@ -12,8 +12,8 @@
 
 #ifdef HYPRE_USE_PTHREADS
 
-#ifndef NUM_THREADS
-#define NUM_THREADS 4
+#ifndef hypre_MAX_THREADS
+#define hypre_MAX_THREADS 128
 #endif
 #ifndef MAX_QUEUE
 #define MAX_QUEUE 256
@@ -58,13 +58,19 @@ int hypre_GetThreadID( void );
 
 
 pthread_t initial_thread;
-pthread_t hypre_thread[NUM_THREADS];
+pthread_t hypre_thread[hypre_MAX_THREADS];
 pthread_mutex_t hypre_mutex_boxloops;
 pthread_mutex_t talloc_mtx;
 hypre_workqueue_t hypre_qptr;
 pthread_mutex_t mpi_mtx;
 pthread_mutex_t time_mtx;
 int hypre_thread_release;
+
+#ifdef HYPRE_THREAD_GLOBALS
+int hypre_NumThreads = 4;
+#else
+extern int hypre_NumThreads;
+#endif
 
 #endif
 

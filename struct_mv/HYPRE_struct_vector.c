@@ -186,7 +186,7 @@ HYPRE_SetStructVectorBoxValuesPush( HYPRE_StructVector  vector,
    pushargs.values = values;
    pushargs.returnvalue = (int *) malloc(sizeof(int));
 
-   for (i=0; i<NUM_THREADS; i++)
+   for (i=0; i<hypre_NumThreads; i++)
       hypre_work_put( HYPRE_SetStructVectorBoxValuesVoidPtr, (void *)&pushargs);
 
    hypre_work_wait();
@@ -274,7 +274,7 @@ HYPRE_GetStructVectorBoxValuesPush( HYPRE_StructVector  vector,
    pushargs.values_ptr = values_ptr;
    pushargs.returnvalue = (int *) malloc(sizeof(int));
 
-   for (i=0; i<NUM_THREADS; i++)
+   for (i=0; i<hypre_NumThreads; i++)
       hypre_work_put( HYPRE_GetStructVectorBoxValuesVoidPtr, (void *)&pushargs);
 
    hypre_work_wait();
@@ -362,7 +362,7 @@ HYPRE_SetStructVectorConstantValuesPush( HYPRE_StructVector  vector,
    pushargs.values = values;
    pushargs.returnvalue = (int *) malloc(sizeof(int));
 
-   for (i=0; i<NUM_THREADS; i++)
+   for (i=0; i<hypre_NumThreads; i++)
       hypre_work_put( HYPRE_SetStructVectorConstantValuesVoidPtr, 
                       (void *)&pushargs );
 

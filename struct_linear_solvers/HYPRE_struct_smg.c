@@ -93,7 +93,7 @@ HYPRE_StructSMGSetupPush( HYPRE_StructSolver solver,
    pushargs.x      = x;
    pushargs.returnvalue = (int *) malloc(sizeof(int));
 
-   for (i=0; i<NUM_THREADS; i++)
+   for (i=0; i<hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructSMGSetupVoidPtr, (void *)&pushargs);
 
    hypre_work_wait();
@@ -158,7 +158,7 @@ HYPRE_StructSMGSolvePush( HYPRE_StructSolver solver,
    pushargs.x      = x;
    pushargs.returnvalue = (int *) malloc(sizeof(int));
 
-   for (i=0; i<NUM_THREADS; i++)
+   for (i=0; i<hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructSMGSolveVoidPtr, (void *)&pushargs);
 
    hypre_work_wait();

@@ -58,7 +58,7 @@ HYPRE_StructPCGInitializePush( MPI_Comm comm )
    pushargs.returnvalue = 
                   (HYPRE_StructSolver*) malloc(sizeof(HYPRE_StructSolver));
 
-   for (i=0; i<NUM_THREADS; i++)
+   for (i=0; i<hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructPCGInitializeVoidPtr, (void*)&pushargs );
 
    hypre_work_wait();
@@ -149,7 +149,7 @@ HYPRE_StructPCGSolvePush( HYPRE_StructSolver solver,
    pushargs.b      = b;
    pushargs.returnvalue = (int *) malloc(sizeof(int)); 
  
-   for (i=0; i<NUM_THREADS; i++)
+   for (i=0; i<hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructPCGSolveVoidPtr, (void*)&pushargs );
    
    hypre_work_wait();
@@ -373,7 +373,7 @@ HYPRE_StructDiagScalePush( HYPRE_StructSolver solver,
    pushargs.Hx     = Hx;
    pushargs.returnvalue = (int *) malloc(sizeof(int));
 
-   for (i=0; i<NUM_THREADS; i++)
+   for (i=0; i<hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructDiagScaleVoidPtr, (void *)&pushargs);
 
    hypre_work_wait();

@@ -441,8 +441,8 @@ int hypre_thread_MPI_Type_commit P((MPI_Datatype *datatype ));
 
 #ifdef HYPRE_USE_PTHREADS
 
-#ifndef NUM_THREADS
-#define NUM_THREADS 4
+#ifndef hypre_MAX_THREADS
+#define hypre_MAX_THREADS 128
 #endif
 #ifndef MAX_QUEUE
 #define MAX_QUEUE 256
@@ -452,12 +452,6 @@ int hypre_thread_MPI_Type_commit P((MPI_Datatype *datatype ));
 #include<pthread.h>
 #include "mpi.h"
 
-
-#define hypre_TimingThreadWrapper(body)\
-   if (pthread_equal(pthread_self(), initial_thread) ||\
-       pthread_equal(pthread_self(), hypre_thread[0])) {\
-      body;\
-   }
 
 #define hypre_BarrierThreadWrapper(body) \
    body;\
@@ -493,13 +487,19 @@ int hypre_GetThreadID( void );
 
 
 pthread_t initial_thread;
-pthread_t hypre_thread[NUM_THREADS];
+pthread_t hypre_thread[hypre_MAX_THREADS];
 pthread_mutex_t hypre_mutex_boxloops;
 pthread_mutex_t talloc_mtx;
 hypre_workqueue_t hypre_qptr;
 pthread_mutex_t mpi_mtx;
 pthread_mutex_t time_mtx;
 int hypre_thread_release;
+
+#ifdef HYPRE_THREAD_GLOBALS
+int hypre_NumThreads = 4;
+#else
+extern int hypre_NumThreads;
+#endif
 
 #endif
 
@@ -620,7 +620,7 @@ extern hypre_TimingType *hypre_global_timing;
 #define hypre_TimingWallCount   (hypre_global_timing[threadid].wall_count)
 #define hypre_TimingCPUCount    (hypre_global_timing[threadid].CPU_count)
 #define hypre_TimingFLOPCount   (hypre_global_timing[threadid].FLOP_count)
-#define hypre_TimingAllFLOPS    (hypre_global_timing[NUM_THREADS].FLOP_count)
+#define hypre_TimingAllFLOPS    (hypre_global_timing[hypre_NumThreads].FLOP_count)
 #endif
 
 /*-------------------------------------------------------
