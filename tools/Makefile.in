@@ -1,0 +1,91 @@
+#BHEADER***********************************************************************
+# (c) 1999   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .c .f .o
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+
+CC = @CC@
+
+C_COMPILE_FLAGS=@CFLAGS@
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+F77_COMPILE_FLAGS=@F77FLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CDEFS = @HYPREDEFS@ -DHYPRE_TIMING -DHYPRE_NO_PTHREAD_MANGLING
+
+CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I../struct_matrix_vector\
+ -I../utilities\
+ ${CINCLUDES}\
+ ${CDEFS}
+
+RANLIB= @RANLIB@
+
+MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
+LIBFLAGS = @LIBDIRS@ @LIBS@
+LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
+
+LFLAGS =\
+ -L../struct_matrix_vector\
+ -L../utilities\
+ -lHYPRE_mv\
+ -lHYPRE_utilities\
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+
+##################################################################
+# Targets
+##################################################################
+
+all: 
+
+install: all
+
+clean:
+	@rm -f *.o
+
+veryclean: clean
+	@rm -f one_to_many
+	@rm -f one_to_many_vector
+	@rm -f create_2d_laplacian 
+	@rm -f create_3d_laplacian
+
+##################################################################
+# Rules
+##################################################################
+
+one_to_many: one_to_many.o
+	@echo  "Linking" $@ "... "
+	${CC} -o one_to_many one_to_many.o ${LFLAGS}
+
+one_to_many_vector: one_to_many_vector.o
+	@echo  "Linking" $@ "... "
+	${CC} -o one_to_many_vector one_to_many_vector.o ${LFLAGS}
+
+create_2d_laplacian: create_2d_laplacian.o
+	@echo  "Linking" $@ "... "
+	${CC} -o create_2d_laplacian create_2d_laplacian.o ${LFLAGS}
+
+create_3d_laplacian: create_3d_laplacian.o
+	@echo  "Linking" $@ "... "
+	${CC} -o create_3d_laplacian create_3d_laplacian.o ${LFLAGS}
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+
+.f.o:
+	${F77} -o $@ -c ${FFLAGS} $<
+

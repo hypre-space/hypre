@@ -1,0 +1,9 @@
+#!/bin/sh
+
+for i in $*
+do
+  FILE=$i
+  cat $FILE.* > $FILE.tmp
+  sed -e 's/^[0-9]*: (/(/g' $FILE.tmp | sort | uniq > $FILE
+  rm -fr $FILE.tmp
+done
