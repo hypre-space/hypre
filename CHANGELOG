@@ -41,6 +41,10 @@ Version 1.8.3a released, 2004/01/21.
   be overridden with '--with-blas=<lib>' and '--with-lapack=<lib>'.
   NOTE: This change affects your link line!
 
+- A new directory 'lib' contains a new Hypre library, 'libHYPRE.a' (and
+  'libHYPRE.so' if configured for shared libraries) which contain
+  all of the libHYPRE_*.a objects with in a single library.
+
 - Fixed the PFMG and SMG solvers to work in the case of pure Neumann
   boundary conditions.
 
