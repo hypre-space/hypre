@@ -625,7 +625,7 @@ hypre_GetIJMatrixLocalStorage( HYPRE_IJMatrix IJmatrix, void ** local_storage )
    int ierr = 0;
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
 
-   *local_storage = hypre_IJMatrixLocalStorage( IJmatrix );
+   *local_storage = hypre_IJMatrixLocalStorage( matrix );
 
    return(ierr);
 }
