@@ -59,6 +59,31 @@ int ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu
                NULL, &values);
   }
 
+#if 0
+  /* dump out rows using GetRow */
+  {
+  char filename[80];
+  FILE *fp;
+  sprintf(filename,"mat%d", mype);
+  printf("writing %s...\n", filename);
+
+  fp = fopen(filename,"w");
+  for (i=0; i<ddist->ddist_lnrows; i++) {
+    int *cind;
+
+    ierr = HYPRE_GetDistributedMatrixRow( matrix, firstrow+i, &size,
+               &cind, &values);
+    if (ierr) return(ierr);
+    for (j=0; j<size; j++)
+        fprintf(fp,"%d %d (%f)\n", firstrow+i+1, cind[j]+1, values[j]);
+
+    ierr = HYPRE_RestoreDistributedMatrixRow( matrix, firstrow+i, &size,
+               &cind, &values);
+  }
+  close(fp);
+  }
+#endif
+
   /* Factor the internal nodes first */
   MPI_Barrier( pilut_comm ); starttimer(SerTmr);
 

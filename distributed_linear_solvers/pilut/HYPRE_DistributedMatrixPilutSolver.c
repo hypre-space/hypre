@@ -51,7 +51,7 @@ HYPRE_DistributedMatrixPilutSolver  HYPRE_NewDistributedMatrixPilutSolver(
    hypre_DistributedMatrixPilutSolverMatrix(solver) = matrix;
 
    /* Defaults for Parameters controlling the incomplete factorization */
-   hypre_DistributedMatrixPilutSolverGmaxnz(solver)   = 2;     /* Maximum nonzeroes per row of factor */
+   hypre_DistributedMatrixPilutSolverGmaxnz(solver)   = 20;     /* Maximum nonzeroes per row of factor */
    hypre_DistributedMatrixPilutSolverTol(solver)   = 0.000001;  /* Drop tolerance for factor */
 
    /* Return created structure to calling routine */

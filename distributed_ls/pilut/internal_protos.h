@@ -88,7 +88,14 @@ void sdecsort_fast P((int n , int *base ));
 
 /* serilut.c */
 int SerILUT P((DataDistType *ddist , HYPRE_DistributedMatrix matrix , FactorMatType *ldu , ReduceMatType *rmat , int maxnz , double tol , hypre_PilutSolverGlobals *globals ));
+int SelectInterior( int local_num_rows, 
+                    HYPRE_DistributedMatrix matrix, 
+                    int *external_rows,
+		    int *newperm, int *newiperm, 
+                    hypre_PilutSolverGlobals *globals );
+/*
 int SelectInterior P((int local_num_rows , HYPRE_DistributedMatrix matrix , int *newperm , int *newiperm , hypre_PilutSolverGlobals *globals ));
+*/
 void SecondDrop P((int maxnz , double tol , int row , int *perm , int *iperm , FactorMatType *ldu , hypre_PilutSolverGlobals *globals ));
 void SecondDropUpdate P((int maxnz , int maxnzkeep , double tol , int row , int nlocal , int *perm , int *iperm , FactorMatType *ldu , ReduceMatType *rmat , hypre_PilutSolverGlobals *globals ));
 

@@ -91,8 +91,8 @@ void ParILUT(DataDistType *ddist, FactorMatType *ldu,
   nlevel = 0;
 
   while( nleft > 0 ) {
-    /* printf("PE %d Nlevel: %d, Nleft: %d, (%d,%d)\n",
-     * mype, nlevel, nleft, ndone, ntogo); fflush(0); */
+     printf("PE %d Nlevel: %d, Nleft: %d, (%d,%d)\n",
+     mype, nlevel, nleft, ndone, ntogo); fflush(0);
 
     ComputeCommInfo(rmats[nlevel%2], &cinfo, ddist->ddist_rowdist, globals );
     nmis = SelectSet(rmats[nlevel%2], &cinfo, perm, iperm, newperm, newiperm, globals );

@@ -12,7 +12,7 @@ ALE1  = -ysmp test/test1_full.matx
 ARGS  = 5 1e-4 1 20 10 1e-8
 
 # gcc
-# OPTIMIZATION = -O3
+OPTIMIZATION = -O3
 OPTIMIZATION = -g
 CC = gcc
 LD = gcc

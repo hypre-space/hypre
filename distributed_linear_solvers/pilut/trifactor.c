@@ -42,7 +42,7 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
   double *lx, *ux, *values, *dvalues, *gatherbuf, **raddr, xx;
   MPI_Status Status;
 
-  PrintLine("LDUSolve start", globals);
+  /* PrintLine("LDUSolve start", globals); */
 
   lnrows    = ddist->ddist_lnrows;
   perm      = ldu->perm;
