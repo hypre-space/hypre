@@ -107,7 +107,7 @@ int MLI_Solver_MLS::setup(MLI_Matrix *mat)
    if ( mlsDeg_> 1 )
    {
       gridStep = rho / (double) nSamples;
-      nGrid    = (int) hmin(rint(rho/gridStep)+1, nSamples);
+      nGrid    = (int) hmin(((int)(rho/gridStep))+1, nSamples);
 
       rho2 = 0.e0;
       for ( i = 0; i < nGrid-1; i++ ) 
