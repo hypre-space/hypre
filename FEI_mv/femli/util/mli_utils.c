@@ -1592,7 +1592,7 @@ int MLI_Utils_HypreMatrixReadHBFormat(char *filename, MPI_Comm mpiComm,
    }
    fgets(line, lineLeng, fp);
    fgets(line, lineLeng, fp);
-   sscanf(line, "%d %d %d %d %d", junk, junk, junk, junk, &rhsl );
+   sscanf(line, "%s %s %s %s %d", junk, junk, junk, junk, &rhsl );
    fgets(line, lineLeng, fp);
    sscanf(line, "%s %d %d %d", junk, &localNRows, &localNCols, &localNnz );
    printf("matrix info = %d %d %d\n", localNRows, localNCols, localNnz);
