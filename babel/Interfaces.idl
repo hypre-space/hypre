@@ -686,7 +686,7 @@ package bHYPRE version 1.0.0
       int Clone(out Vector x);
 
       /**
-       * Scale {\self} by {\tt a}.
+       * Scale {\tt self} by {\tt a}.
        **/
       int Scale(in double a);
 
