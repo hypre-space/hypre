@@ -54,7 +54,7 @@ extern int HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *, int *,
                  int **recv_lengths, int **int_buf, double **dble_buf, 
                  int **sindex_array, int **sindex_array2, int *offset);
 extern int HYPRE_LSI_DDIlutGetRowLengths(MH_Matrix *Amat, int *leng, int **);
-extern int HYPRE_LIS_DDIlutGetOffProcRows(MH_Matrix *Amat, int leng, int *,
+extern int HYPRE_LSI_DDIlutGetOffProcRows(MH_Matrix *Amat, int leng, int *,
                  int Noffset, int *map, int *map2, int **int_buf,
                  double **dble_buf);
 extern int HYPRE_LSI_DDIlutDecompose(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
