@@ -136,11 +136,14 @@ int  impl_Hypre_ParAMG_SetIntParameter(Hypre_ParAMG this, char* name, int value)
 /* >>>> TO DO: no way to call these set's with present SIDL file:
 HYPRE_ParAMGSetGridRelaxPoints( HYPRE_Solver   solver,
                                 int          **grid_relax_points  )
+ (a 2-d array would do fine.  You need intimate knowledge of the algorithm
+  for this to do anything for you)
 HYPRE_ParAMGSetLogFileName( HYPRE_Solver  solver,
                             char         *log_file_name  )
 HYPRE_ParAMGSetLogging( HYPRE_Solver  solver,
                         int           ioutdat,
                         char         *log_file_name  )
+ (note: the last arg can be dropped; reset it later)
 HYPRE_ParAMGSetRelaxWeight( HYPRE_Solver  solver,
                             double       *relax_weight  )
 HYPRE_ParAMGSetNumGridSweeps( HYPRE_Solver  solver,
