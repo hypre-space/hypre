@@ -446,6 +446,11 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *A,
                         += buf_data[index++];
    }
 
+   for (i=num_variables; i < num_variables+num_cols_offd; i++)
+   { 
+      measure_array[i] = 0;
+   }
+
    /* this augments the measures */
    hypre_BoomerAMGIndepSetInit(S, measure_array);
 
@@ -527,8 +532,29 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *A,
       printf("Proc = %d    Initialize CLJP phase = %f\n",
                      my_id, wall_time); 
    }
+
    while (1)
    {
+      /*------------------------------------------------
+       * Exchange boundary data, i.i. get measures and S_ext_data
+       *------------------------------------------------*/
+
+      if (num_procs > 1)
+   	 comm_handle = hypre_ParCSRCommHandleCreate(2, comm_pkg, 
+                        &measure_array[num_variables], buf_data);
+
+      if (num_procs > 1)
+   	 hypre_ParCSRCommHandleDestroy(comm_handle);
+      
+      index = 0;
+      for (i=0; i < num_sends; i++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+            measure_array[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)]
+                        += buf_data[index++];
+      }
+
       /*------------------------------------------------
        * Exchange boundary data, i.i. get measures and S_ext_data
        *------------------------------------------------*/
@@ -730,6 +756,11 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *A,
        * Set C_pts and apply heuristics.
        *------------------------------------------------*/
 
+      for (i=num_variables; i < num_variables+num_cols_offd; i++)
+      { 
+         measure_array[i] = 0;
+      }
+
       if (debug_flag == 3) wall_time = time_getWallclockSeconds();
       for (ig = 0; ig < graph_size; ig++)
       {
@@ -916,201 +947,6 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *A,
             }
     	 }
 
-	 else /* boundary points */
-	 {
-	    ic = i - num_variables;
-            if (CF_marker_offd[ic] > 0)
-            {  
-               /* set to be a C-pt */
-               CF_marker_offd[ic] = C_PT;
-
-               for (jS = S_ext_i[ic]; jS < S_ext_i[ic+1]; jS++)
-               {
-                  j = S_ext_j[jS];
-                  if (j > -1)
-                  {
-	       	     if (j >= col_1 && j < col_n)
-		     {
-		        jj = j-col_1;
-		     }
-		     else
-		     {
-   		        jj = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
-			if (jj != -1) jj += num_variables;
-		     }
-               
-                     /* "remove" edge from S */
-                     S_ext_j[jS] = -S_ext_j[jS]-1;
-               
-                     /* decrement measures of unmarked neighbors */
-                     if (jj < num_variables)
-		     {
-			if (jj != -1 && !CF_marker[jj])
-                        {
-                           measure_array[jj]--;
-                        }
-                     }
-		     else
-		     {
-			if (!CF_marker_offd[jj-num_variables])
-                        {
-                           measure_array[jj]--;
-                        }
-                     }
-                  }
-               }
-            }
-	    else
-
-            /*---------------------------------------------
-             * Heuristic: points that interpolate from a
-             * common C-pt are less dependent on each other.
-             *
-             * NOTE: CF_marker is used to help check for
-             * common C-pt's in the heuristic.
-             *---------------------------------------------*/
-
- 	    {
-	       ic = i - num_variables;
-               for (jS = S_ext_i[ic]; jS < S_ext_i[ic+1]; jS++)
-               {
-                  j = S_ext_j[jS];
-		  if (j < 0) j = -j-1;
-	          if (j >= col_1 && j < col_n)
-	          {
-	             jc = j - col_1;
-                     if (CF_marker[jc] > 0)
-                     {
-                        if (S_ext_j[jS] > -1)
-                        {
-                           /* "remove" edge from S */
-                           S_ext_j[jS] = -S_ext_j[jS]-1;
-                        }
-
-                        /* IMPORTANT: consider all dependencies */
-                        /* if (S_ext_data[jS]) */
-                        {
-                           /* temporarily modify CF_marker */
-                           CF_marker[jc] = COMMON_C_PT;
-                        }
-                     }
-	          }
-	          else
-	          {
-   		     jj = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
-		     if (jj != -1)
-		     {
-                        if (CF_marker_offd[jj] > 0)
-                  	{
-                     	   if (S_ext_j[jS] > -1)
-                     	   {
-                              /* "remove" edge from S */
-                       	      S_ext_j[jS] = -S_ext_j[jS]-1;
-                     	   }
-
-                     	   /* IMPORTANT: consider all dependencies */
-                     	   /* if (S_ext_data[jS]) */
-                     	   {
-                              /* temporarily modify CF_marker */
-                              CF_marker_offd[jj] = COMMON_C_PT;
-                  	   }
-                        }
-                     }
-	          }
-               }
-
-               /* unmarked dependencies */
-               for (jS = S_ext_i[ic]; jS < S_ext_i[ic+1]; jS++)
-               {
-                  j = S_ext_j[jS];
-                  if (j > -1)
-                  {
-
-                     /* check for common C-pt */
-		     if (j >= col_1 && j < col_n)
-		     {
-		        jc = j - col_1;
-		        break_var = 1;
-                        for (kS = S_diag_i[jc]; kS < S_diag_i[jc+1]; kS++)
-                        {
-                           k = S_diag_j[kS];
-                           if (k < 0) k = -k-1;
-
-                           /* IMPORTANT: consider all dependencies */
-                           /* if (S_diag_data[kS]) */
-                           {
-                              if (CF_marker[k] == COMMON_C_PT)
-                              {
-                                 /* "remove" edge from S and update measure*/
-                                 S_ext_j[jS] = -S_ext_j[jS]-1;
-                                 measure_array[jc]--;
-                                 break_var = 0;
-                                 break;
-                              }
-                           }
-                        }
-		        if (break_var)
-                        {
-                           for (kS = S_offd_i[jc]; kS < S_offd_i[jc+1]; kS++)
-                           {
-                              k = S_offd_j[kS];
-			      if (k < 0) k = -k-1;
-
-                              /* IMPORTANT: consider all dependencies */
-                              /* if (S_offd_data[kS]) */
-                              {
-                                 if (CF_marker_offd[k] == COMMON_C_PT)
-                                 {
-                                    /* "remove" edge from S and update measure*/
-                                    S_ext_j[jS] = -S_ext_j[jS]-1;
-                                    measure_array[jc]--;
-                                    break;
-                                 }
-                              }
-                           }
-                        }
-                     }
-		     else
-		     {
-   		        jc = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
-		        if (jc > -1 )
-                        {
-		           for (kS = S_ext_i[jc]; kS < S_ext_i[jc+1]; kS++)
-                           {
-                      	      k = S_ext_j[kS];
-			      if (k < 0) k = -k-1;
-
-                      	      /* IMPORTANT: consider all dependencies */
-                      	    /* if (k >= col_1 && k < col_n && S_ext_data[kS])*/
-                      	      if (k >= col_1 && k < col_n)
-                      	      {
-                                 if (CF_marker[k-col_1] == COMMON_C_PT)
-                                 {
-                                    /* "remove" edge from S and update measure*/
-                                    S_ext_j[jS] = -S_ext_j[jS]-1;
-                                    measure_array[jc+num_variables]--;
-                                    break;
-                                 }
-                              }
-			      else
-			      {
-   		                 kc = hypre_BinarySearch(col_map_offd,k,num_cols_offd);
-			         if (kc > -1 && CF_marker_offd[kc] == COMMON_C_PT)
-			         {
-                                    /* "remove" edge from S and update measure*/
-                                    S_ext_j[jS] = -S_ext_j[jS]-1;
-                                    measure_array[jc+num_variables]--;
-			            break;
-			         }
-                              }
-                           }
-                        }
-                     }
-                  }
-               }
- 	    }
-         }
-
          /* reset CF_marker */
          if (i < num_variables)
 	 {
@@ -1132,26 +968,6 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *A,
                if (CF_marker_offd[j] == COMMON_C_PT)
                {
                   CF_marker_offd[j] = C_PT;
-               }
-            }
-         }
-	 else
-	 {
-	    ic = i - num_variables;
-	    for (jS = S_ext_i[ic]; jS < S_ext_i[ic+1]; jS++)
-	    {
-               j = S_ext_j[jS];
-	       if (j < 0) j = -j-1;
-	       if (j >= col_1 && j < col_n &&
-			CF_marker[j - col_1] == COMMON_C_PT)
-               {
-                  CF_marker[j - col_1] = C_PT;
-               }
-	       else
-	       {
-   		  jj = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
-	          if (jj != -1 && CF_marker_offd[jj] == COMMON_C_PT)
-                           CF_marker_offd[jj] = C_PT;
                }
             }
          }
@@ -3125,6 +2941,10 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                         += buf_data[index++];
    }
 
+   for (i=num_variables; i < num_variables+num_cols_offd; i++)
+   {
+      measure_array[i] = 0;
+   }
 
    /* this augments the measures */
    hypre_BoomerAMGIndepSetInit(S, measure_array);
@@ -3145,8 +2965,10 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
     * C/F marker array contains interior points in elements 0 ... 
     * num_variables-1  followed by boundary values
     *---------------------------------------------------*/
-
-   CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+   if (num_cols_offd)
+      CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+   else
+      CF_marker_offd = NULL;
    for (i=0; i < num_cols_offd; i++)
 	CF_marker_offd[i] = 0;
    graph_size = num_variables+num_cols_offd;
@@ -3242,7 +3064,25 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
       /*------------------------------------------------
        * Exchange boundary data, i.i. get measures and S_ext_data
        *------------------------------------------------*/
+      if (num_procs > 1)
+         comm_handle = hypre_ParCSRCommHandleCreate(2, comm_pkg,
+                        &measure_array[num_variables], buf_data);
 
+      if (num_procs > 1)
+         hypre_ParCSRCommHandleDestroy(comm_handle);
+
+      index = 0;
+      for (i=0; i < num_sends; i++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+            measure_array[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)]
+                        += buf_data[index++];
+      }
+
+      /*------------------------------------------------
+       * Exchange boundary data, i.i. get measures and S_ext_data
+       *------------------------------------------------*/
    if (debug_flag == 3) wall_time = time_getWallclockSeconds();
       index = 0;
       index_S = 0;
@@ -3440,6 +3280,11 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
       /*------------------------------------------------
        * Set C_pts and apply heuristics.
        *------------------------------------------------*/
+
+      for (i=num_variables; i < num_variables+num_cols_offd; i++)
+      {
+         measure_array[i] = 0;
+      }
 
    if (debug_flag == 3) wall_time = time_getWallclockSeconds();
       for (ig = 0; ig < graph_size; ig++)
@@ -3640,210 +3485,6 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    if (debug_flag == 3) sum_time_ip += time_getWallclockSeconds()-wall_time_ip;
     	 }
 
-	 else /* boundary points */
-	 {
-   if (debug_flag == 3) wall_time_bp = time_getWallclockSeconds();
-	    ic = i - num_variables;
-            if (CF_marker_offd[ic] > 0)
-            {  
-               /* set to be a C-pt */
-               CF_marker_offd[ic] = C_PT;
-
-               for (jS = S_ext_i[ic]; jS < S_ext_i[ic+1]; jS++)
-               {
-                  j = S_ext_j[jS];
-                  if (j > -1)
-                  {
-	       	     if (j >= col_1 && j < col_n)
-		     {
-		        jj = j-col_1;
-		     }
-		     else
-		     {
-   		        jj = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
-			if (jj != -1) jj += num_variables;
-		     }
-               
-                     /* "remove" edge from S */
-                     S_ext_j[jS] = -S_ext_j[jS]-1;
-               
-                     /* decrement measures of unmarked neighbors */
-                     if (jj < num_variables)
-		     {
-			if (jj != -1 && !CF_marker[jj])
-                        {
-                           measure_array[jj]--;
-                        }
-                     }
-		     else
-		     {
-			if (!CF_marker_offd[jj-num_variables])
-                        {
-                           measure_array[jj]--;
-                        }
-                     }
-                  }
-               }
-            }
-	    else
-
-            /*---------------------------------------------
-             * Heuristic: points that interpolate from a
-             * common C-pt are less dependent on each other.
-             *
-             * NOTE: CF_marker is used to help check for
-             * common C-pt's in the heuristic.
-             *---------------------------------------------*/
-
- 	    {
-	       ic = i - num_variables;
-               for (jS = S_ext_i[ic]; jS < S_ext_i[ic+1]; jS++)
-               {
-                  j = S_ext_j[jS];
-		  if (j < 0) j = -j-1;
-	          if (j >= col_1 && j < col_n)
-	          {
-	             jc = j - col_1;
-                     if (CF_marker[jc] > 0)
-                     {
-                        if (S_ext_j[jS] > -1)
-                        {
-                           /* "remove" edge from S */
-                           S_ext_j[jS] = -S_ext_j[jS]-1;
-                        }
-
-                        /* IMPORTANT: consider all dependencies */
-                        /* if (S_ext_data[jS]) */
-                        {
-                           /* temporarily modify CF_marker */
-                           CF_marker[jc] = COMMON_C_PT;
-                        }
-                     }
-	          }
-	          else
-	          {
-   		     jj = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
-		     if (jj != -1)
-		     {
-                  	if (CF_marker_offd[jj] > 0)
-                  	{
-                     	   if (S_ext_j[jS] > -1)
-                     	   {
-                              /* "remove" edge from S */
-                              S_ext_j[jS] = -S_ext_j[jS]-1;
-                     	   }
-
-                     	   /* IMPORTANT: consider all dependencies */
-                     	   /* if (S_ext_data[jS]) */
-                     	   {
-                              /* temporarily modify CF_marker */
-                              CF_marker_offd[jj] = COMMON_C_PT;
-                     	   }
-                        }
-                     }
-	          }
-               }
-
-               /* unmarked dependencies */
-               for (jS = S_ext_i[ic]; jS < S_ext_i[ic+1]; jS++)
-               {
-                  j = S_ext_j[jS];
-                  if (j > -1)
-                  {
-                     /* check for common C-pt */
-		     if (j >= col_1 && j < col_n)
-		     {
-		        jc = j - col_1;
-		        break_var = 1;
-                        for (kS = S_diag_i[jc]; kS < S_diag_i[jc+1]; kS++)
-                        {
-                           k = S_diag_j[kS];
-			   if (k < 0) k = -k-1;
-                           /* IMPORTANT: consider all dependencies */
-                           /* if (S_diag_data[kS]) */
-                           {
-                              if (CF_marker[k] == COMMON_C_PT)
-                              {
-                                 /* "remove" edge from S and update measure*/
-                                 S_ext_j[jS] = -S_ext_j[jS]-1;
-                                 measure_array[jc]--;
-                                 break_var = 0;
-                                 break;
-                              }
-                           }
-                        }
-		        if (break_var)
-                        {
-                           for (kS = S_offd_i[jc]; kS < S_offd_i[jc+1]; kS++)
-                           {
-                              k = S_offd_j[kS];
-			      if (k < 0) k = -k-1;
-
-                              /* IMPORTANT: consider all dependencies */
-                              /* if (S_offd_data[kS]) */
-                              {
-                                 if (CF_marker_offd[k] == COMMON_C_PT)
-                                 {
-                                    /* "remove" edge from S and update measure*/
-                                    S_ext_j[jS] = -S_ext_j[jS]-1;
-                                    measure_array[jc]--;
-                                    break;
-                                 }
-                              }
-                           }
-                        }
-                     }
-		     else
-		     {
-   		        jc = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
-		        if (jc > -1 )
-                        {
-		           for (kS = S_ext_i[jc]; kS < S_ext_i[jc+1]; kS++)
-                           {
-                      	      k = S_ext_j[kS];
-			      if (k < 0) k = -k-1;
-
-                      	      /* IMPORTANT: consider all dependencies */
-                      	   /* if (k >= col_1 && k < col_n && S_ext_data[kS]) */
-                      	      if (k >= col_1 && k < col_n )
-                      	      {
-                                 if (CF_marker[k-col_1] == COMMON_C_PT)
-                                 {
-                                    /* "remove" edge from S and update measure*/
-                                    S_ext_j[jS] = -S_ext_j[jS]-1;
-                                    measure_array[jc+num_variables]--;
-                                    break;
-                                 }
-                              }
-			      else
-			      {
-   		                 kc = hypre_BinarySearch(col_map_offd,k,num_cols_offd);
-			         /* kc = -1;
-			         for (kk = 0; kk < num_cols_offd; kk++)
-			         {
-			            if (col_map_offd[kk] == k)
-			            {
-			               kc = kk;
-			               break;
-			            }
-			         } */
-			         if (kc > -1 && CF_marker_offd[kc] == COMMON_C_PT)
-			         {
-                                    /* "remove" edge from S and update measure*/
-                                    S_ext_j[jS] = -S_ext_j[jS]-1;
-                                    measure_array[jc+num_variables]--;
-			            break;
-			         }
-                              }
-                           }
-                        }
-                     }
-                  }
-               }
- 	    }
-   if (debug_flag == 3) sum_time_bp += time_getWallclockSeconds()-wall_time_bp;
-         }
-
    if (debug_flag == 3) wall_time_rs = time_getWallclockSeconds();
          /* reset CF_marker */
          if (i < num_variables)
@@ -3866,26 +3507,6 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                if (CF_marker_offd[j] == COMMON_C_PT)
                {
                   CF_marker_offd[j] = C_PT;
-               }
-            }
-         }
-	 else
-	 {
-	    ic = i - num_variables;
-	    for (jS = S_ext_i[ic]; jS < S_ext_i[ic+1]; jS++)
-	    {
-               j = S_ext_j[jS];
-	       if (j < 0) j = -j-1;
-	       if (j >= col_1 && j < col_n &&
-			CF_marker[j - col_1] == COMMON_C_PT)
-               {
-                  CF_marker[j - col_1] = C_PT;
-               }
-	       else
-	       {
-   		  jj = hypre_BinarySearch(col_map_offd,j,num_cols_offd);
-		  if (jj != -1 && CF_marker_offd[jj] == COMMON_C_PT)
-                      CF_marker_offd[jj] = C_PT;
                }
             }
          }
