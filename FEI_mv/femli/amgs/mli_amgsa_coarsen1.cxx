@@ -96,7 +96,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
    if ( initAggr == NULL )
    {
       blkSize = currNodeDofs_;
-      if (blkSize > 1) 
+      if (blkSize > 1 && scalar_ == 0) 
       {
          MLI_Matrix_Compress(mli_Amat, blkSize, &mli_A2mat);
          if ( saLabels_ != NULL && saLabels_[currLevel_] != NULL )
@@ -128,8 +128,13 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
     * modify minimum aggregate size, if needed
     *-----------------------------------------------------------------*/
 
-   if (minAggrSize_ < (nullspaceDim_/blkSize)) 
-      minAggrSize_ = nullspaceDim_ / blkSize;
+   if ( scalar_ == 0 )
+   {
+      minAggrSize_ = nullspaceDim_ / currNodeDofs_;
+      if ( minAggrSize_ <= 1 ) minAggrSize_ == 2;
+      if ( currLevel_ == (numLevels_-1) ) minAggrSize_ = 2;
+   }
+   else minAggrSize_ = nullspaceDim_;
 
    /*-----------------------------------------------------------------
     * perform coarsening
@@ -150,7 +155,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
 
    if ( initAggr == NULL )
    {
-      if ( blkSize > 1 ) 
+      if ( blkSize > 1 && scalar_ == 0 ) 
       {
          delete mli_A2mat;
          if ( saLabels_ != NULL && saLabels_[currLevel_] != NULL )
@@ -188,7 +193,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
     * expand the aggregation information if block size > 1 ==> eqn2aggr
     *-----------------------------------------------------------------*/
 
-   if ( blkSize > 1 && initAggr == NULL )
+   if ( blkSize > 1 && initAggr == NULL && scalar_ == 0 )
    {
       eqn2aggr = new int[ALocalNRows];
       for ( i = 0; i < ALocalNRows; i++ )
@@ -263,8 +268,8 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
          {
             for ( j = 0; j < nullspaceDim_; j++ )
             {
-               if ( irow % blkSize == j ) P_vecs[j][irow] = 1.0;
-               else                       P_vecs[j][irow] = 0.0;
+               if ( irow % nullspaceDim_ == j ) P_vecs[j][irow] = 1.0;
+               else                             P_vecs[j][irow] = 0.0;
             }
          }
       }
@@ -350,28 +355,52 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
             }
          }
 #endif
-         info = MLI_Utils_QR(qArray, rArray, aggSize, nullspaceDim_); 
-         if (info != 0)
+         if ( currLevel_ < (numLevels_-1) )
          {
-            printf("%4d : Aggregation WARNING : QR returned a non-zero for\n",
-                   mypid);
-            printf("  aggregate %d, size = %d, info = %d\n",i,aggSize,info);
+            info = MLI_Utils_QR(qArray, rArray, aggSize, nullspaceDim_); 
+            if (info != 0)
+            {
+               printf("%4d : Aggregation WARNING : QR returns non-zero for\n",
+                      mypid);
+               printf("  aggregate %d, size = %d, info = %d\n",i,aggSize,info);
 #if 1
 /*
-            for ( j = 0; j < aggSize; j++ ) 
-            {
-               for ( k = 0; k < nullspaceDim_; k++ ) 
-                  qArray[aggSize*k+j] = P_vecs[k][aggIndArray[i][j]]; 
-            }
+               for ( j = 0; j < aggSize; j++ ) 
+               {
+                  for ( k = 0; k < nullspaceDim_; k++ ) 
+                     qArray[aggSize*k+j] = P_vecs[k][aggIndArray[i][j]]; 
+               }
 */
-            for ( j = 0; j < aggSize; j++ ) 
-            {
-               printf("%5d : ", aggIndArray[i][j]);
-               for ( k = 0; k < nullspaceDim_; k++ ) 
-                  printf("%10.3e ", qArray[aggSize*k+j]);
-               printf("\n");
-            }
+               printf("PArray : \n");
+               for ( j = 0; j < aggSize; j++ ) 
+               {
+                  index = aggIndArray[i][j];;
+                  printf("%5d : ", index);
+                  for ( k = 0; k < nullspaceDim_; k++ ) 
+                     printf("%16.8e ", P_vecs[k][index]);
+                  printf("\n");
+               }
+               printf("RArray : \n");
+               for ( j = 0; j < nullspaceDim_; j++ )
+               {
+                  for ( k = 0; k < nullspaceDim_; k++ )
+                     printf("%16.8e ", rArray[j+nullspaceDim_*k]);
+                  printf("\n");
+               }
 #endif
+            }
+         }
+         else
+         {
+            for ( k = 0; k < nullspaceDim_; k++ ) 
+            {
+               alpha = 0.0;
+               for ( j = 0; j < aggSize; j++ ) 
+                  alpha += qArray[aggSize*k+j] * qArray[aggSize*k+j];
+               alpha = 1.0 / sqrt(alpha);
+               for ( j = 0; j < aggSize; j++ ) 
+                  qArray[aggSize*k+j] *= alpha;
+            }
          }
 
          /* ------ after QR, put the R into the next null space ------ */
@@ -565,8 +594,6 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
       printf("\t*** Aggregation(U) : total nodes to aggregate = %d\n",
              global_nrows);
    }
-   if ( nullspaceDim_ / currNodeDofs_ >= minAggrSize_ )
-      minAggrSize_ = nullspaceDim_ / currNodeDofs_ + 1;
 
    /*-----------------------------------------------------------------
     * this array is used to determine which row has been aggregated
@@ -796,7 +823,8 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
       printf("\t*** Aggregation(U) P4 : no. nodes aggregated  = %d\n",ibuf[1]);
    }
    nUndone = localNRows - nSelected - nNotSelected;
-   if ( nUndone > 0 )
+//if ( nUndone > 0 )
+   if ( nUndone > localNRows )
    {
       count = nUndone / minAggrSize_;
       if ( count == 0 ) count = 1;
@@ -836,14 +864,13 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
 
    if ( (nSelected+nNotSelected) < localNRows )
    {
+#ifdef MLI_DEBUG_DETAILED
       for ( irow = 0; irow < localNRows; irow++ )
       {
          if ( nodeStat[irow] == MLI_METHOD_AMGSA_READY )
          {
             rowNum = startRow + irow;
-#ifdef MLI_DEBUG_DETAILED
             printf("%5d : unaggregated node = %8d\n", mypid, rowNum);
-#endif
             hypre_ParCSRMatrixGetRow(hypre_graph,rowNum,&rowLeng,&cols,NULL);
             for ( icol = 0; icol < rowLeng; icol++ )
             {
@@ -853,6 +880,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
             }
          }
       }
+#endif
    }
 
    /*-----------------------------------------------------------------
