@@ -326,10 +326,12 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
 // clone a copy of HYPRE_LinSysCore
 //---------------------------------------------------------------------------
 
+#ifndef NOFEI
 LinearSystemCore* HYPRE_LinSysCore::clone() 
 {
     return(new HYPRE_LinSysCore(comm_));
 }
+#endif
 
 //***************************************************************************
 // this function takes parameters for setting internal things like solver
