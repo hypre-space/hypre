@@ -440,6 +440,8 @@ package Hypre {
      int SetIJVector (in IJBuildVector I);
   }
 
+  class DiagScale implements-all Solver { }
+
   class StructSMG implements-all Solver { }
 
   class ParAMG implements-all Solver { }
@@ -449,4 +451,5 @@ package Hypre {
   class PCG implements-all PreconditionedSolver { }
 
   class GMRES implements-all PreconditionedSolver { }
+
 }
