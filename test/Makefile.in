@@ -227,17 +227,17 @@ PURIFY_TO_FILE = purify \
 struct: struct.o
 	@echo  "Building" $@ "... "
 	${CC} -o $@ $@.o ${STRUCT_LFLAGS}
-	@cp $@ TEST_$@/.
+	@if test -d  "TEST_$@"; then cp $@ TEST_$@/.; fi
 
 sstruct: sstruct.o
 	@echo  "Building" $@ "... "
 	${CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
-	@cp $@ TEST_$@/.
+	@if test -d  "TEST_$@"; then cp $@ TEST_$@/.; fi
 
 ij: ij.o
 	@echo  "Building" $@ "... "
 	${CC} -o $@ $@.o ${IJ_LS_LFLAGS}
-	@cp $@ TEST_$@/.
+	@if test -d  "TEST_$@"; then cp $@ TEST_$@/.; fi
 
 ij_mv: ij_mv.o
 	@echo  "Building" $@ "... "
@@ -287,7 +287,7 @@ f77_ij_mv: f77_ij_mv.o
 ${HYPRE_FEI_DRIVER_CXX_EXECS}: ${HYPRE_FEI_DRIVER_CXX_OBJS}
 	@echo  "Building" $@ "... "
 	${CXX} -o $@ $@.o ${FEICXX_LFLAGS}
-	@cp $@ TEST_$@/.
+	@if test -d  "TEST_$@"; then cp $@ TEST_$@/.; fi
 
 ##################################################################
 # Babel version of above
