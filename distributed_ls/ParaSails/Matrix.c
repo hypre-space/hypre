@@ -749,10 +749,10 @@ static void MatrixMatvecSetup(Matrix *mat)
     outlist = (int *) calloc(npes, sizeof(int));
     inlist  = (int *) calloc(npes, sizeof(int));
 
-    mat->global_to_local = (int *) malloc(50021 * sizeof(int));
-    mat->local_to_global = (int *) malloc(20000 * sizeof(int));
+    mat->global_to_local = (int *) malloc(140001 * sizeof(int));
+    mat->local_to_global = (int *) malloc(140001 * sizeof(int));
 
-    mat->hash_numbering = HashCreate(50021);
+    mat->hash_numbering = HashCreate(140001);
 
     GetExternalIndices(mat, &len, mat->local_to_global, 
         mat->global_to_local, mat->hash_numbering);
