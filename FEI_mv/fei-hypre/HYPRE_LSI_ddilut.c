@@ -874,8 +874,8 @@ int HYPRE_LSI_DDIlutDecompose(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
    for ( i = 0; i < total_recv_leng; i++ )
    {
       rowNorms[i+Nrows] = 0.0;
-      for ( j = offset; j < offset+recv_lengths[i]; j++ )
       nnz_row = 0;
+      for ( j = offset; j < offset+recv_lengths[i]; j++ )
       {
          index = ext_ja[j];
          if ( index >= Noffset && index < Noffset+Nrows )
