@@ -1795,8 +1795,8 @@ main( int   argc,
               SIDL_int__array_set1( Hypre_dof_func, i, dof_func[i] );
 	 Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "DofFunc", Hypre_dof_func );
       }
-      log_level = 0;
-/*      Hypre_ParAMG_SetLogging( Hypre_AMG, log_level );*/
+      log_level = 3;
+      Hypre_ParAMG_SetLogging( Hypre_AMG, log_level );
 
       ierr += Hypre_ParAMG_Setup( Hypre_AMG );
       hypre_EndTiming(time_index);
@@ -1825,7 +1825,7 @@ main( int   argc,
            ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, &comm );
            ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, comm, first_local_col,last_local_col );
            ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y );
-         y = Hypre_ParCSRVector__cast2( Hypre_y, "Hypre.Vector" );
+           y = Hypre_ParCSRVector__cast2( Hypre_y, "Hypre.Vector" );
            ierr += Hypre_ParAMG_GetResidual( Hypre_AMG, &y );
            Hypre_ParCSRVector_Print( Hypre_y, "test.residual" );
            Hypre_IJBuildVector_deleteReference( Hypre_ij_y ); /* delete y */
@@ -1923,7 +1923,7 @@ main( int   argc,
       HYPRE_PCGSetTol(pcg_solver, tol);
       HYPRE_PCGSetTwoNorm(pcg_solver, 1);
       HYPRE_PCGSetRelChange(pcg_solver, 0);
-      HYPRE_PCGSetLogging(pcg_solver, 1);
+      HYPRE_PCGSetPrintLevel(pcg_solver, 1);
 #endif /* USE_BABEL_INTERFACE*/
  
       if (solver_id == 1)
@@ -2062,6 +2062,23 @@ main( int   argc,
                                      &num_iterations );
       ierr += Hypre_PCG_GetDoubleValue( Hypre_PCG, "Final Relative Residual Norm",
                                 &final_res_norm );
+
+      if ( log_level > 2 ) {
+         /* print residual... */
+           Hypre_y = Hypre_ParCSRVector__create();
+           Hypre_ij_y = (Hypre_IJBuildVector) Hypre_ParCSRVector__cast2
+              ( Hypre_y, "Hypre.IJBuildVector" );
+           /* adjust reference counting system for new data type: */
+           Hypre_IJBuildVector_addReference( Hypre_ij_y );
+           Hypre_ParCSRVector_deleteReference( Hypre_y );
+           ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, &comm );
+           ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, comm, first_local_col,last_local_col );
+           ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y );
+           y = Hypre_ParCSRVector__cast2( Hypre_y, "Hypre.Vector" );
+           ierr += Hypre_PCG_GetResidual( Hypre_PCG, &y );
+           Hypre_ParCSRVector_Print( Hypre_y, "test.residual" );
+           Hypre_IJBuildVector_deleteReference( Hypre_ij_y ); /* delete y */
+      }
 
       /* Break encapsulation so that the rest of the driver stays the same */
       temp_vecdata = Hypre_ParCSRVector__get_data( Hypre_x );
