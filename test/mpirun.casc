@@ -17,7 +17,7 @@ then
    REMOVE_MACHINES_FILE="yes"
 fi
 
-echo "mpirun -machinefile $MACHINES_FILE $*"
+echo "(mpirun -machinefile $MACHINES_FILE $*)"
 mpirun -machinefile $MACHINES_FILE $*
 
 if [ $REMOVE_MACHINES_FILE = "yes" ]

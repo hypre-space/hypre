@@ -27,5 +27,6 @@ case $1 in
 esac
 done
 
+echo "(poe $DRIVER_ARGS -procs $POE_NUM_PROCS -nodes $POE_NUM_NODES)"
 poe $DRIVER_ARGS -procs $POE_NUM_PROCS -nodes $POE_NUM_NODES
 

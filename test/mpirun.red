@@ -12,5 +12,6 @@ shift
 NP=$1
 shift
 
+echo "(yod -sz $NP $*)"
 yod -sz $NP $*
 
