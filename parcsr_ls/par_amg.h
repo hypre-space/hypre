@@ -29,6 +29,7 @@ typedef struct
 
    /* solve params */
    int      max_iter;
+   int      min_iter;
    int      cycle_type;    
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
