@@ -92,7 +92,7 @@ hypre_SysPFMGSetupInterpOp( hypre_SStructPMatrix *A,
    {
       A_s = hypre_SStructPMatrixSMatrix(A, vi, vi);
       P_s = hypre_SStructPMatrixSMatrix(P, vi, vi);
-      ierr = hypre_PFMGSetupInterpOp(A_s, cdir, findex, stride, P_s);
+      ierr = hypre_PFMGSetupInterpOp(A_s, cdir, findex, stride, P_s, 0);
    }
 
    /*-----------------------------------------------------------------------
