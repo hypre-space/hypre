@@ -207,6 +207,13 @@ apply_error_filters () {
           egrep -v "^[A-Za-z0-9_]\.[cCf]$| remark: " $ErrorFile.orig > $ErrorFile
         fi
       ;;
+      achi*)
+        if (egrep "Option -fexceptions passed to ld" $ErrorFile >/dev/null)
+        then                          # cleanup the problem with the xlf compiler
+          mv $ErrorFile $ErrorFile.orig
+          egrep -v "Option -fexceptions passed to ld" $ErrorFile.orig > $ErrorFile
+        fi
+      ;;
     esac
   fi
 }
