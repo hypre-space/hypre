@@ -90,7 +90,55 @@ For testing, you can overestimate these to avoid error conditions.
 
 -----------------------------------------------------------------
 
-II. Compiling the code
+II. Compiling and running the example drivers
+
+1. Compiling the AMG library
+
+Compiling the library may require some configuration.  First,
+cd into the `src' subdirectory.  The `config.default' file
+contains the default configuration options used to build the library.
+The remaining `config.*' files override the default configurations
+for building the library on different platforms.  Use these as
+examples for creating your own configuration file.
+
+Create a config file (say `config.mine') with no lines in it.
+Then, type:
+
+   build -arch config.mine
+
+If the library builds, then you don't need to do any configuring.
+Otherwise, use the example configuration files as guides to change
+your `config.mine' file appropriately.  Any of the variables
+defined in the `config.defaults' file may be overriden in your
+`config.mine' file.
+
+To install, type:
+
+   build -arch config.mine install
+
+This will also build the library if it hasn't already been built.
+The default is to install the library in a `lib' subdirectory
+of the `amg' directory, and to install the include files in an
+`include' subdirectory.  The `AMG_LIB_DIR' and `AMG_INCLUDE_DIR'
+configuration variables may be used to change location of the
+installation.
+
+2. Compiling the example drivers
+
+The example drivers are in the `examples' subdirectory.  Several
+example makefiles (`Makefile.*') are included as guides for
+linking to the AMG library.  Compiling the example drivers is
+the most difficult configuration challenge, mainly because the
+current version of AMG consists of both C and Fortran code.
+
+Copy one of the `Makefile.*' files to `Makefile'.  Then, say
+
+   make
+
+Modify the configuration variables in the makefile until the
+drivers compile and link correctly to the AMG library.
+
+3. Running the example drivers
 
 -----------------------------------------------------------------
 
