@@ -31,7 +31,7 @@ HYPRE_EXTRA_DIRS =\
  distributed_linear_solvers/pilut\
  distributed_matrix\
  matrix_matrix
-# bmakes
+
 
 #These are the directories for structured matrices
 HYPRE_STRUCT_DIRS =\
