@@ -7,10 +7,10 @@
  * $Revision$
 *********************************************************************EHEADER*/
 /*****************************************************************************
- * element matrices stored in format:
- *  i_element_chord,
- *  j_element_chord,
- *  a_element_chord; 
+ * AE matrices stored in format:
+ *  i_AE_chord,
+ *  j_AE_chord,
+ *  a_AE_chord; 
  *
  * here, chord = (i_dof, j_dof) directed pair of indices
  *  for which A(i_dof, j_dof) \ne 0; A is the global assembled matrix;
@@ -23,21 +23,12 @@
  * builds:
  *        hypre_CSRMatrix P;
  *        (coarseelement matrices: hypre_CSRMatrix)
- *                 coarseelement_coarsechord;
  *        graph:   coarsechord_coarsedof;
  ****************************************************************************/
 #include "headers.h" 
 
 int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
-				 int **i_coarseelement_coarsechord_pointer,
-				 int **j_coarseelement_coarsechord_pointer,
-				 double **a_coarseelement_coarsechord_pointer,
-
-				 int **i_coarsechord_coarsedof_pointer, 
-				 int **j_coarsechord_coarsedof_pointer,
-
-				 int *num_coarsechords_pointer,
 
 				 int *i_AE_dof, int *j_AE_dof,
 				 int *i_dof_AE, int *j_dof_AE,
@@ -48,14 +39,13 @@ int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 				 int *i_dof_coarsedof,
 				 int *j_dof_coarsedof,
 
-				 int *i_AE_chord,
-				 int *j_AE_chord,
-				 double *a_AE_chord,
+				 hypre_CSRMatrix  *Matrix,
 
-				 int *i_chord_dof, 
-				 int *j_chord_dof,
 
-				 int num_chords,
+				 int *dof_function, 
+				 int num_functions,
+
+				 int **coarsedof_function_pointer, 
 
 				 int num_AEs, 
 				 int num_dofs,
@@ -63,330 +53,271 @@ int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
 {
   int ierr = 0;
-  int i,j;
+  int i,j,k,l, i_dof, j_dof, i_loc, j_loc, k_loc;
 
-  int *i_AE_coarsedof, *j_AE_coarsedof;
+  int *i_dof_dof_a, *j_dof_dof_a;
+  double *a_dof_dof;
 
-  int *i_domain_AE, *j_domain_AE;
-  int *i_domain_chord, *j_domain_chord;
-  double *a_domain_chord;
 
-  int *i_domain_dof, *j_domain_dof;
-  int *i_subdomain_dof, *j_subdomain_dof;
-  int *i_Schur_dof_dof;
-  double *a_Schur_dof_dof, *P_coeff;
+  double *P_coeff;
   
   hypre_CSRMatrix  *P;
 
 
-  int *i_coarseelement_coarsechord, *j_coarseelement_coarsechord;
-				 
-  double *a_coarseelement_coarsechord;
-
-  int *i_coarsechord_coarsedof, *j_coarsechord_coarsedof;
-  int num_coarsechords;
-
-  int num_domains;
-
-  int domain_counter, 
-    domain_AE_counter, subdomain_dof_counter, Schur_dof_dof_counter,
-    dof_neighbor_coarsedof_counter, AE_coarsedof_counter;
-
-  double diag, row_sum;
-
-  int *i_dof_index; 
-
-  num_domains = num_dofs - num_coarsedofs;
-
-  i_domain_AE = hypre_CTAlloc(int, num_domains+1);
-  domain_AE_counter=0;
-  for (i=0; i < num_dofs; i++)
-    if (i_dof_coarsedof[i+1] == i_dof_coarsedof[i])
-      domain_AE_counter+= i_dof_AE[i+1] - i_dof_AE[i];
-
-  j_domain_AE =  hypre_CTAlloc(int, domain_AE_counter);
-
-  domain_AE_counter=0;
-  domain_counter= 0;
-  for (i=0; i < num_dofs; i++)
-    {
-      if (i_dof_coarsedof[i+1] == i_dof_coarsedof[i])
-	{
-	  i_domain_AE[domain_counter] = domain_AE_counter;
-	  domain_counter++;
-
-	  for (j=i_dof_AE[i]; j < i_dof_AE[i+1]; j++)
-	    {
-	      j_domain_AE[domain_AE_counter] = j_dof_AE[j];
-	    domain_AE_counter++;
-	    }
-	}
-    }
-
-  i_domain_AE[num_domains] = domain_AE_counter;
+  int *coarsedof_function;
 
 
-  i_subdomain_dof = hypre_CTAlloc(int, num_domains+1);
-  subdomain_dof_counter = 0;
-  for (i=0; i < num_dofs; i++)
-    {
-      if (i_dof_coarsedof[i+1] == i_dof_coarsedof[i])
-	subdomain_dof_counter+=1+i_dof_neighbor_coarsedof[i+1]-
-	  i_dof_neighbor_coarsedof[i];
-    }
-
-  j_subdomain_dof = hypre_CTAlloc(int, subdomain_dof_counter);
+  double delta; 
 
 
-  subdomain_dof_counter = 0;
-  domain_counter = 0;
-  for (i=0; i < num_dofs; i++)
-    {
-      if (i_dof_coarsedof[i+1] == i_dof_coarsedof[i])
-	{
-	  i_subdomain_dof[domain_counter] = subdomain_dof_counter;
-	  domain_counter++;
+  double *AE, *XE;
 
-	  j_subdomain_dof[subdomain_dof_counter]=i;
-	  subdomain_dof_counter++;
-	  for (j = i_dof_neighbor_coarsedof[i]; 
-	       j < i_dof_neighbor_coarsedof[i+1]; j++)
-	    {
-	      j_subdomain_dof[subdomain_dof_counter]=
-		j_dof_neighbor_coarsedof[j];
-	      subdomain_dof_counter++;
-	    }
-	}
-    }
+  int local_dof_counter, int_dof_counter, boundary_dof_counter;
+  int coarsedof_counter;
 
-  i_subdomain_dof[num_domains] = subdomain_dof_counter;
+  int max_local_dof_counter = 0;
+  int AE_coarsedof_counter;
+
+  int *i_global_to_local, *i_local_to_global;
 
 
-  printf("---------------------- Assembling neighborhood matrices: ------------\n");
-  ierr=hypre_AMGeDomainElementSparseAssemble(i_domain_AE, j_domain_AE,
-					     num_domains,
+  /* ------------------------------------------------------------------ */
+  /* first build P for dofs that belong to more than one AE; ---------- */
+  /* ------------------------------------------------------------------ */
+  /* then, for each AE: 
 
-					     i_AE_chord,
-					     j_AE_chord,
-					     a_AE_chord,
+           (1)   find interior dofs and boundary dofs, 
 
-					     i_chord_dof, 
-					     j_chord_dof,
+		 a dof (i_dof) in AE is boundary if it belongs to another AE,
+		 i.e., if 
 
-					     &i_domain_chord,
-					     &j_domain_chord,
-					     &a_domain_chord,
+                     i_dof_AE[i_dof+1] - i_dof_AE[i_dof] > 1;
 
-					     num_AEs, num_chords,
-					     num_dofs);
+	   (2)   partition AE into blocks:
 
-  printf("END assembling neighborhood matrices: ----------------------------\n");
-
-
-  ierr = matrix_matrix_product(&i_domain_dof, &j_domain_dof,
-
-			       i_domain_AE, j_domain_AE,
-			       i_AE_dof, j_AE_dof,
-
-			       num_domains, num_AEs, num_dofs);
-
-  hypre_TFree(i_domain_AE);
-  hypre_TFree(j_domain_AE);
-
-
-  /*
-  i_dof_index = hypre_CTAlloc(int, num_dofs);
-
-  for (i=0; i < num_domains; i++)
-    i_dof_index[i] = -1;
-
-  for (i=0; i < num_domains; i++)
-    {
-
-      printf("\n domain: %d ====================================\n", i);
-      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
-	{
-	  printf("%d ", j_domain_dof[j]);
-	  i_dof_index[j_domain_dof[j]] = 0;
-	}
-      printf("\n subdomain: %d ====================================\n", i);
+		     AE_ii  AE_ix  AE_ic   interior dofs
+		     AE_xi  AE_xx  AE_xc   boundary fine dofs
+		     AE_ci  AE_cx  AE_cc   (boundary) coarse dofs;
 
 
 
-      for (j=i_subdomain_dof[i]; j < i_subdomain_dof[i+1]; j++)
-	{
-	  printf("%d ", j_subdomain_dof[j]);	  
-	  if (i_dof_index[j_subdomain_dof[j]] < 0)
-	    printf("\nsubdomain %d contains entry %d not in domain %d\n",
-		   i, j_subdomain_dof[j], i);
-	}
-      printf("\n\n");
-      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
-	i_dof_index[j_domain_dof[j]] = -1;
+            (3)  extract P_boundarydof_coarsedof from P, already computed 
+	         based on averaging (element--free interpolation), i.e., 
+		 
+		 (P_boundarydof_coarsedof)^T = [(P_xc)^T, I];
+		
 
-    }
+	    (4) compute       
 
-  hypre_TFree(i_dof_index);
+                      X_ic = AE_ix \times  P_xc + A_ic;
 
-  */
+	    (4) compute 
 
-  printf("----------------------Computing neighborhood Schur complements: ------\n");
-  ierr =  hypre_AMGeSchurComplement(i_domain_chord,
-				    j_domain_chord,
-				    a_domain_chord,
+	              P_ic = -(AE_ii)^{-1} \times X_ic,
+		      (based on super-LU with multiple r.h.s. 
+		      -- the columns of X_ic);
 
-				    i_chord_dof, j_chord_dof,
+	    (5) then P_E (i.e., P restricted to AE) is defined as:
 
-				    i_domain_dof, j_domain_dof,
-				    i_subdomain_dof, j_subdomain_dof,
+                    P_dof_coarsedof = P_ic, for interior dofs,
 
-				    &i_Schur_dof_dof,
-				    &a_Schur_dof_dof,
-			      
-				    num_domains, num_chords, num_dofs);
+		                    = P_xc, for boundary fine dofs;
 
-  printf("END computing neighborhood Schur complements: ---------------------\n");
-
-  hypre_TFree(i_domain_dof);
-  hypre_TFree(j_domain_dof);
-
-  hypre_TFree(i_subdomain_dof);
-  hypre_TFree(j_subdomain_dof);
-
-  hypre_TFree(i_domain_chord);
-  hypre_TFree(j_domain_chord);
-  hypre_TFree(a_domain_chord);
+                                    = I for coarse dofs;
 
 
+            (6)  compute coarse element matrix:
 
-  hypre_TFree(i_Schur_dof_dof);
-  
+                 (P_E)^T AE P_E;
+		                                                        */
+  /* ------------------------------------------------------------------ */
+
+  i_dof_dof_a = hypre_CSRMatrixI(Matrix);
+  j_dof_dof_a = hypre_CSRMatrixJ(Matrix);
+  a_dof_dof   = hypre_CSRMatrixData(Matrix);
+
   P_coeff = hypre_CTAlloc(double, i_dof_neighbor_coarsedof[num_dofs]);
 
-  dof_neighbor_coarsedof_counter = 0;
-  Schur_dof_dof_counter = 0;
-  for (i=0; i < num_dofs; i++)
+  i_global_to_local = hypre_CTAlloc(int, num_dofs); 
+
+
+  for (i_dof =0; i_dof < num_dofs; i_dof++)
+     i_global_to_local[i_dof] = -1;
+
+  for (i_dof =0; i_dof < num_dofs; i_dof++)
     {
-      if (i_dof_coarsedof[i+1] > i_dof_coarsedof[i])
-	{
-	  P_coeff[dof_neighbor_coarsedof_counter] = 1.e0;
-	  dof_neighbor_coarsedof_counter++;
-	}	  
-      else
-	{
-	  row_sum = 0.e0;
-	  diag = a_Schur_dof_dof[Schur_dof_dof_counter];
-	  Schur_dof_dof_counter++;
-	  for (j=i_dof_neighbor_coarsedof[i];
-	       j<i_dof_neighbor_coarsedof[i+1]; j++)
-	    {
-	      P_coeff[dof_neighbor_coarsedof_counter] = 
-		-a_Schur_dof_dof[Schur_dof_dof_counter]/ diag;
-
-	      row_sum+=P_coeff[dof_neighbor_coarsedof_counter];
-	      Schur_dof_dof_counter++;
-
-	      dof_neighbor_coarsedof_counter++;
-	    }
-
-	  /*
-	  printf("                      row_sum: %e\n", row_sum);
-	  */
-	  Schur_dof_dof_counter+=(i_dof_neighbor_coarsedof[i+1]
-				  -i_dof_neighbor_coarsedof[i])*
-	                         (i_dof_neighbor_coarsedof[i+1]
-				  -i_dof_neighbor_coarsedof[i]+1);
-	}
-    }
-
-  /* compute coarse element matrices: --------------------------- */
-
-  hypre_TFree(a_Schur_dof_dof);
-
-
-  AE_coarsedof_counter = 0;
-  for (i=0; i < num_AEs; i++)
-    for (j=i_AE_dof[i]; j < i_AE_dof[i+1]; j++)
-      if (i_dof_coarsedof[j_AE_dof[j]+1] > i_dof_coarsedof[j_AE_dof[j]])
-	AE_coarsedof_counter++;
-
-  i_AE_coarsedof = hypre_CTAlloc(int, num_AEs+1);
-  j_AE_coarsedof = hypre_CTAlloc(int, AE_coarsedof_counter);
-
-  AE_coarsedof_counter = 0;
-  for (i=0; i < num_AEs; i++)
-    {
-      i_AE_coarsedof[i] = AE_coarsedof_counter;
-      for (j=i_AE_dof[i]; j < i_AE_dof[i+1]; j++)
-	if (i_dof_coarsedof[j_AE_dof[j]+1] > i_dof_coarsedof[j_AE_dof[j]])
+      if (i_dof_coarsedof[i_dof+1] > i_dof_coarsedof[i_dof])
+	for (j=i_dof_neighbor_coarsedof[i_dof];
+	     j<i_dof_neighbor_coarsedof[i_dof+1]; j++)
+	  P_coeff[j] = 1.e0;	
+      else 
+	if (i_dof_AE[i_dof+1] > i_dof_AE[i_dof]+1)
 	  {
-	    j_AE_coarsedof[AE_coarsedof_counter] = j_AE_dof[j];
-	    AE_coarsedof_counter++;
+	    k = dof_function[i_dof];
+
+	    /* define interpolation based on averaging: ----------------- */
+	    delta = 0.e0;
+	    for (j=i_dof_neighbor_coarsedof[i_dof];
+		 j<i_dof_neighbor_coarsedof[i_dof+1]; j++)
+	      if (dof_function[j_dof_neighbor_coarsedof[j]] == k)
+		delta++;
+
+	    for (j=i_dof_neighbor_coarsedof[i_dof];
+		 j<i_dof_neighbor_coarsedof[i_dof+1]; j++)
+	      if (dof_function[j_dof_neighbor_coarsedof[j]] == k)
+		P_coeff[j] = 1.e0/delta;
+	      else
+		P_coeff[j] = 0.e0;
 	  }
     }
 
-  i_AE_coarsedof[num_AEs] = AE_coarsedof_counter;
-
-  /* compute "non--conforming" coarse element matrices: -------------- */
-
-  printf("--------------------- Computing non--conforming coarse element matrices:\n");
-  ierr =  hypre_AMGeSchurComplement(i_AE_chord,
-				    j_AE_chord,
-				    a_AE_chord,
-
-				    i_chord_dof, j_chord_dof,
-			      
-				    i_AE_dof,
-				    j_AE_dof,
-
-				    i_AE_coarsedof,
-				    j_AE_coarsedof,
-
-				    &i_Schur_dof_dof,
-				    &a_Schur_dof_dof,
-
-				    num_AEs, num_chords, num_dofs);
-
-  printf("END computing non--conforming coarse element matrices: ==========\n");
-  hypre_TFree(i_Schur_dof_dof);
-  
-  AE_coarsedof_counter = 0;
+  max_local_dof_counter = 0;
   for (i=0; i < num_AEs; i++)
-    for (j=i_AE_dof[i]; j < i_AE_dof[i+1]; j++)
-      if (i_dof_coarsedof[j_AE_dof[j]+1] > i_dof_coarsedof[j_AE_dof[j]])
+    {
+      local_dof_counter = i_AE_dof[i+1] - i_AE_dof[i];
+	if (local_dof_counter > max_local_dof_counter)
+	  max_local_dof_counter = local_dof_counter;
+    }
+	    
+  i_local_to_global = hypre_CTAlloc(int, max_local_dof_counter);
+
+
+  AE = hypre_CTAlloc(double, max_local_dof_counter *
+		     max_local_dof_counter);
+
+  XE = hypre_CTAlloc(double, max_local_dof_counter *
+		     max_local_dof_counter);
+
+
+
+  for (i=0; i < num_AEs; i++)
+    {
+      local_dof_counter = 0;
+      for (j=i_AE_dof[i]; j < i_AE_dof[i+1]; j++)
 	{
-	  j_AE_coarsedof[AE_coarsedof_counter]=
-	    j_dof_coarsedof[i_dof_coarsedof[j_AE_dof[j]]];
-	  AE_coarsedof_counter++;
+	  if (i_dof_AE[j_AE_dof[j]+1] == i_dof_AE[j_AE_dof[j]]+1)
+	    {
+	      i_local_to_global[local_dof_counter] = j_AE_dof[j];
+	      i_global_to_local[j_AE_dof[j]] = local_dof_counter;
+	      local_dof_counter++;
+	    }
 	}
 
+      int_dof_counter = local_dof_counter;
 
-  ierr = hypre_AMGeElementMatrixDof(i_AE_coarsedof, j_AE_coarsedof,
-				    a_Schur_dof_dof,
+      for (j=i_AE_dof[i]; j < i_AE_dof[i+1]; j++)
+	{
+	  if (i_dof_AE[j_AE_dof[j]+1] > i_dof_AE[j_AE_dof[j]]+1
+	      && i_dof_coarsedof[j_AE_dof[j]+1] == i_dof_coarsedof[j_AE_dof[j]])
+	    {
+	      i_local_to_global[local_dof_counter] = j_AE_dof[j];
+	      i_global_to_local[j_AE_dof[j]] = local_dof_counter;
+	      local_dof_counter++;
+	    }
+	}
 
-				    &i_coarseelement_coarsechord,
-				    &j_coarseelement_coarsechord,
-				    &a_coarseelement_coarsechord,
+      boundary_dof_counter = local_dof_counter - int_dof_counter;
 
-				    &i_coarsechord_coarsedof,
-				    &j_coarsechord_coarsedof,
+      for (j=i_AE_dof[i]; j < i_AE_dof[i+1]; j++)
+	{
+	  if (i_dof_AE[j_AE_dof[j]+1] > i_dof_AE[j_AE_dof[j]]+1
+	      && i_dof_coarsedof[j_AE_dof[j]+1] >  i_dof_coarsedof[j_AE_dof[j]])
+	    {
+	      i_local_to_global[local_dof_counter] = j_AE_dof[j];
+	      i_global_to_local[j_AE_dof[j]] = local_dof_counter;
+	      local_dof_counter++;
+	    }
+	}
 
-				    &num_coarsechords,
+      coarsedof_counter = local_dof_counter 
+	                - boundary_dof_counter 
+	                - int_dof_counter;
 
-				    num_AEs, num_coarsedofs);
 
-  hypre_TFree(i_AE_coarsedof);
-  hypre_TFree(j_AE_coarsedof);
+      for (i_loc =0; i_loc < int_dof_counter; i_loc++)
+	  for (j_loc =0; j_loc < local_dof_counter; j_loc++)
+	    AE[i_loc + int_dof_counter * j_loc] = 0.e0;
 
-  *i_coarseelement_coarsechord_pointer = i_coarseelement_coarsechord;
-  *j_coarseelement_coarsechord_pointer = j_coarseelement_coarsechord;
-  *a_coarseelement_coarsechord_pointer = a_Schur_dof_dof;
+      /* ---------------------------------------------------------
+      for (l=i_AE_chord[i]; l < i_AE_chord[i+1]; l++)
+	{
+	  k = j_AE_chord[l];
+	  i_dof = j_chord_dof[i_chord_dof[k]];
+	  j_dof = j_chord_dof[i_chord_dof[k]+1];
 
-  *i_coarsechord_coarsedof_pointer = i_coarsechord_coarsedof;
-  *j_coarsechord_coarsedof_pointer = j_coarsechord_coarsedof;
-  *num_coarsechords_pointer = num_coarsechords;
-  
-  
+	  i_loc = i_global_to_local[i_dof];
+	  j_loc = i_global_to_local[j_dof];
+
+	  if (i_loc < int_dof_counter)
+	    AE[i_loc + int_dof_counter * j_loc] = a_AE_chord[l];
+	}
+	---------------------------------------------------------- */
+
+      for (j = i_AE_dof[i]; j < i_AE_dof[i+1]; j++)
+	{
+	  i_dof = j_AE_dof[j];
+	  i_loc = i_global_to_local[i_dof];
+	  if (i_loc < int_dof_counter)
+	    for (k=i_dof_dof_a[i_dof]; k<i_dof_dof_a[i_dof+1]; k++)
+	      {
+		j_dof = j_dof_dof_a[k];
+		j_loc = i_global_to_local[j_dof];
+		AE[i_loc + int_dof_counter * j_loc] = a_dof_dof[k];
+	      }
+	}
+
+      if (int_dof_counter > 0)
+	{
+	  ierr = matinv(XE, AE, int_dof_counter);
+	  if (ierr == -1)
+	    {
+	      printf("============= build_interpolation: ===============\n");
+	      printf("Indefinite principal submatrix AE_ii: +++++++++\n");
+	      printf("==================================================\n");
+	      return ierr;
+	    }
+	}
+
+      for (i_loc = 0; i_loc < int_dof_counter; i_loc++)
+	for (k_loc = int_dof_counter; 
+	     k_loc < int_dof_counter+boundary_dof_counter; k_loc++)
+	  {
+	    k = i_local_to_global[k_loc];
+	    for (j=i_dof_neighbor_coarsedof[k];
+		 j<i_dof_neighbor_coarsedof[k+1]; j++)
+	      {
+		j_loc = i_global_to_local[j_dof_neighbor_coarsedof[j]];
+		AE[i_loc + j_loc * int_dof_counter] +=
+		  P_coeff[j] * AE[i_loc + int_dof_counter * k_loc];
+	      }
+	  }
+      
+      for (i_loc = 0; i_loc < int_dof_counter; i_loc++)
+	{
+	  i_dof = i_local_to_global[i_loc];
+	  for (j=i_dof_neighbor_coarsedof[i_dof];
+	       j<i_dof_neighbor_coarsedof[i_dof+1]; j++)
+	    {
+	      P_coeff[j] = 0.e0;
+	      
+	      j_loc = i_global_to_local[j_dof_neighbor_coarsedof[j]];
+	      for (k_loc = 0; k_loc < int_dof_counter; k_loc++)
+		P_coeff[j] -= XE[i_loc + int_dof_counter * k_loc]
+		  * AE[k_loc + int_dof_counter * j_loc];
+	    }
+	}
+      
+      for (j=i_AE_dof[i]; j < i_AE_dof[i+1]; j++)
+	i_global_to_local[j_AE_dof[j]] = -1;
+
+    }
+
+  hypre_TFree(i_global_to_local);  
+  hypre_TFree(XE);
+  hypre_TFree(AE);
+  hypre_TFree(i_local_to_global);
+
+
   for (i=0; i < num_dofs; i++)
     for (j=i_dof_neighbor_coarsedof[i]; j<i_dof_neighbor_coarsedof[i+1]; j++)
       j_dof_neighbor_coarsedof[j] = 
@@ -403,15 +334,25 @@ int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
   *P_pointer = P;
 
+  coarsedof_function = hypre_CTAlloc(int, num_coarsedofs);
+
+  for (i=0; i < num_dofs; i++)
+    if (i_dof_coarsedof[i+1] > i_dof_coarsedof[i])
+      coarsedof_function[j_dof_coarsedof[i_dof_coarsedof[i]]]
+	    = dof_function[i];
+
+  *coarsedof_function_pointer = coarsedof_function;
+
   /*
   printf("===============================================================\n");
   printf("END Build Interpolation Matrix: ===============================\n");
   printf("===============================================================\n");
   */
 
-  return ierr;
+
+  return ierr; 
+
 }
-				 
 /*---------------------------------------------------------------------
  matinv:  X <--  A**(-1) ;  A IS POSITIVE DEFINITE (non--symmetric);
  ---------------------------------------------------------------------*/
