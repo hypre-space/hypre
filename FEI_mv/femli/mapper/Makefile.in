@@ -1,0 +1,88 @@
+#BHEADER***********************************************************************
+# (c) 2002   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .C .c .o
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+CC = @CC@
+CXX = @CXX@
+ 
+SUPERLU_INCLUDE = -I../../FEI_mv/SuperLU
+
+C_COMPILE_FLAGS=@CFLAGS@
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@ ${SUPERLU_INCLUDE}
+CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@ ${SUPERLU_INCLUDE}
+CDEFS =
+CXXDEFS =
+ 
+CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../..\
+ -I$(srcdir)/../../../utilities\
+ -I$(srcdir)/../../../parcsr_mv\
+ -I$(srcdir)/../../../seq_mv\
+ ${CINCLUDES}\
+ ${CDEFS}
+ 
+CXXFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../..\
+ -I$(srcdir)/../../../utilities\
+ -I$(srcdir)/../../../parcsr_mv\
+ -I$(srcdir)/../../../seq_mv\
+ ${CXXINCLUDES}\
+ ${CXXDEFS}
+ 
+HEADERS =\
+ mli_mapper.h
+
+FILES =\
+ mli_mapper.C
+
+OBJS = ${FILES:.C=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: ${OBJS} 
+ 
+install: all
+	@cp -f *.o ../lib
+#@cp -f $(srcdir)/*.h $$HYPRE_INSTALL_DIR/include/.
+ 
+clean:
+	@rm -f *.o
+
+veryclean: clean
+
+##################################################################
+# Rules
+##################################################################
+
+${OBJS}: ${HEADERS}
+ 
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+.C.o:
+	${CXX} -o $@ -c ${CXXFLAGS} $<
+
