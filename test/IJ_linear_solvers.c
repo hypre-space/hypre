@@ -449,10 +449,10 @@ main( int   argc,
       printf("   -xisone               : solution of all ones\n");
       printf("\n");
       printf("  -solver <ID>           : solver ID\n");
-      printf("       1=AMG-PCG    2=DS-PCG   \n");
-      printf("       3=AMG-GMRES  4=DS-GMRES  \n");     
-      printf("       5=AMG-CGNR   6=DS-CGNR  \n");     
-      printf("       7=PILUT-GMRES \n");     
+      printf("       1=AMG-PCG     2=DS-PCG        \n");
+      printf("       3=AMG-GMRES   4=DS-GMRES      \n");     
+      printf("       5=AMG-CGNR    6=DS-CGNR       \n");     
+      printf("       7=PILUT-GMRES 8=ParaSails-PCG \n");     
       printf("\n");
       printf("   -ruge                 : Ruge coarsening (local)\n");
       printf("   -ruge3                : third pass on boundary\n");
@@ -812,7 +812,7 @@ main( int   argc,
     * Solve the system using PCG 
     *-----------------------------------------------------------*/
 
-   if (solver_id == 1 || solver_id == 2)
+   if (solver_id == 1 || solver_id == 2 || solver_id == 8)
    {
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
@@ -855,6 +855,17 @@ main( int   argc,
                                    HYPRE_ParCSRDiagScaleSetup,
                                    pcg_precond);
       }
+      else if (solver_id == 8)
+      {
+         /* use ParaSails preconditioner */
+
+	 HYPRE_ParCSRParaSailsCreate(MPI_COMM_WORLD, &pcg_precond);
+
+         HYPRE_ParCSRPCGSetPrecond(pcg_solver,
+                                   HYPRE_ParCSRParaSailsSolve,
+                                   HYPRE_ParCSRParaSailsSetup,
+                                   pcg_precond);
+      }
  
       HYPRE_ParCSRPCGSetup(pcg_solver, A, b, x);
  
@@ -881,6 +892,11 @@ main( int   argc,
       {
          HYPRE_ParAMGDestroy(pcg_precond);
       }
+      else if (solver_id == 8)
+      {
+	 HYPRE_ParCSRParaSailsDestroy(pcg_precond);
+      }
+
       if (myid == 0)
       {
          printf("\n");
