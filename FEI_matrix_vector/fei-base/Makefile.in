@@ -224,7 +224,7 @@ uninstall: $(PACKAGE_DIR)
 	/bin/rm -rf $(PACKAGE_DIR)
 
 install: lib
-	@mv -f ${PLIB} $$HYPRE_INSTALL_DIR/lib
+	@cp -f ${PLIB} $$HYPRE_INSTALL_DIR/lib
 
 install.$(PACKAGE):	install-dirs.$(PACKAGE) \
 			install-header.$(PACKAGE) \
