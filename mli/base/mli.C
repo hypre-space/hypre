@@ -33,7 +33,7 @@ MLI::MLI( MPI_Comm comm )
    max_levels     = 40;
    num_levels     = 40;
    coarsest_level = 0;
-   output_level   = 1;
+   output_level   = 0;
    assembled      = MLI_FALSE;
    tolerance      = 1.0e-6;
    max_iterations = 20;
@@ -262,7 +262,7 @@ int MLI::cycle( MLI_Vector *sol, MLI_Vector *rhs )
 
 int MLI::solve( MLI_Vector *sol, MLI_Vector *rhs )
 {
-   int        iter=0;
+   int        iter=0, mypid;
    double     norm2, rel_tol, old_norm2;
    MLI_Matrix *Amat;
    MLI_Vector *res;
@@ -291,6 +291,7 @@ int MLI::solve( MLI_Vector *sol, MLI_Vector *rhs )
    /* compute initial residual norm and convergence tolerance           */
    /*-------------------------------------------------------------------*/
 
+   MPI_Comm_rank(mpi_comm, &mypid);
    res   = one_levels[0]->getResidualVector();
    Amat  = one_levels[0]->getAmat();
    Amat->apply( -1.0, sol, 1.0, rhs, res );
@@ -310,7 +311,7 @@ int MLI::solve( MLI_Vector *sol, MLI_Vector *rhs )
       Amat->apply( -1.0, sol, 1.0, rhs, res );
       old_norm2 = norm2;
       norm2 = res->norm2();
-      if ( output_level > 0 )
+      if ( output_level > 0 && mypid == 0 )
          printf("\tMLI iteration = %5d, rnorm = %14.6e (%14.6e)\n",curr_iter,
                 norm2, norm2/old_norm2);
    }
