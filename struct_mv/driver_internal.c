@@ -22,15 +22,15 @@ int
 main( int   argc,
       char *argv[] )
 {
-   MPI_Comm           *comm;
-   int                 matrix_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
-   int                 vector_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
+   MPI_Comm             *comm;
+   int                   matrix_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
+   int                   vector_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
                      
    hypre_StructMatrix   *matrix;
    hypre_StructVector   *vector;
    hypre_StructVector   *tmp_vector;
 
-   int                 num_procs, myid;
+   int                   num_procs, myid;
 
    /*-----------------------------------------------------------
     * Initialize some stuff

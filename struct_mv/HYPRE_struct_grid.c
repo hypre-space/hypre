@@ -20,7 +20,7 @@
 
 HYPRE_StructGrid
 HYPRE_NewStructGrid( MPI_Comm *comm,
-                   int       dim )
+                     int       dim )
 {
    return ( (HYPRE_StructGrid) hypre_NewStructGrid( comm, dim ) );
 }
@@ -41,13 +41,13 @@ HYPRE_FreeStructGrid( HYPRE_StructGrid grid )
 
 void 
 HYPRE_SetStructGridExtents( HYPRE_StructGrid  grid,
-                          int            *ilower,
-                          int            *iupper )
+                            int              *ilower,
+                            int              *iupper )
 {
    hypre_Index  new_ilower;
    hypre_Index  new_iupper;
 
-   int        d;
+   int          d;
 
    for (d = 0; d < hypre_StructGridDim((hypre_StructGrid *) grid); d++)
    {
@@ -60,7 +60,8 @@ HYPRE_SetStructGridExtents( HYPRE_StructGrid  grid,
       hypre_IndexD(new_iupper, d) = 0;
    }
 
-   hypre_SetStructGridExtents( (hypre_StructGrid *) grid, new_ilower, new_iupper );
+   hypre_SetStructGridExtents( (hypre_StructGrid *) grid,
+                               new_ilower, new_iupper );
 }
 
 /*--------------------------------------------------------------------------

@@ -20,7 +20,7 @@
 
 HYPRE_StructStencil
 HYPRE_NewStructStencil( int dim,
-                      int size )
+                        int size )
 {
    hypre_Index  *shape;
  
@@ -35,12 +35,12 @@ HYPRE_NewStructStencil( int dim,
 
 void 
 HYPRE_SetStructStencilElement( HYPRE_StructStencil  stencil,
-                             int                element_index,
-                             int               *offset        )
+                               int                  element_index,
+                               int                 *offset        )
 {
    hypre_StructStencil  *new_stencil = (hypre_StructStencil *) stencil;
    hypre_Index          *shape;
-   int                 d;
+   int                   d;
  
    shape = hypre_StructStencilShape(new_stencil);
    for (d = 0; d < hypre_StructStencilDim(new_stencil); d++)

@@ -15,32 +15,31 @@
 #ifndef hypre_SMG_HEADER
 #define hypre_SMG_HEADER
 
-
 /*--------------------------------------------------------------------------
  * hypre_SMGData:
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
-   MPI_Comm           *comm;
-
-   int                 memory_use;
-   double              tol;
-   int                 max_iter;
-   int                 zero_guess;
-   int                 max_levels;  /* max_level <= 0 means no limit */
-                    
-   int                 num_levels;
-
-   int                 num_pre_relax;  /* number of pre relaxation sweeps */
-   int                 num_post_relax; /* number of post relaxation sweeps */
+   MPI_Comm             *comm;
+                      
+   int                   memory_use;
+   double                tol;
+   int                   max_iter;
+   int                   zero_guess;
+   int                   max_levels;  /* max_level <= 0 means no limit */
+                      
+   int                   num_levels;
+                      
+   int                   num_pre_relax;  /* number of pre relaxation sweeps */
+   int                   num_post_relax; /* number of post relaxation sweeps */
 
    /* base coarsening info */
-   int                 cdir;    /* coarsening direction */
-   int                 ci;      /* 1st coarse index in coarsening direction */
-   int                 fi;      /* 1st fine index in coarsening direction */
-   int                 cs;      /* coarse index stride */
-   int                 fs;      /* fine index stride */
+   int                   cdir;  /* coarsening direction */
+   int                   ci;    /* 1st coarse index in coarsening direction */
+   int                   fi;    /* 1st fine index in coarsening direction */
+   int                   cs;    /* coarse index stride */
+   int                   fs;    /* fine index stride */
 
    /* base index space info */
    hypre_Index           base_index;
@@ -71,19 +70,19 @@ typedef struct
    hypre_StructVector  **r_l;
    hypre_StructVector  **e_l;
 
-   void              **relax_data_l;
-   void              **residual_data_l;
-   void              **restrict_data_l;
-   void              **intadd_data_l;
+   void                **relax_data_l;
+   void                **residual_data_l;
+   void                **restrict_data_l;
+   void                **intadd_data_l;
 
    /* log info (always logged) */
-   int                 num_iterations;
-   int                 time_index;
+   int                   num_iterations;
+   int                   time_index;
 
    /* additional log info (logged when `logging' > 0) */
-   int                 logging;
-   double             *norms;
-   double             *rel_norms;
+   int                   logging;
+   double               *norms;
+   double               *rel_norms;
 
 } hypre_SMGData;
 

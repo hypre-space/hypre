@@ -122,10 +122,10 @@ hypre_SMGFinalize( void *smg_vdata )
 
 int
 hypre_SMGSetMemoryUse( void *smg_vdata,
-                     int   memory_use )
+                       int   memory_use )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int          ierr = 0;
+   int            ierr = 0;
  
    (smg_data -> memory_use) = memory_use;
  
@@ -138,10 +138,10 @@ hypre_SMGSetMemoryUse( void *smg_vdata,
 
 int
 hypre_SMGSetTol( void   *smg_vdata,
-               double  tol       )
+                 double  tol       )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int          ierr = 0;
+   int            ierr = 0;
  
    (smg_data -> tol) = tol;
  
@@ -154,10 +154,10 @@ hypre_SMGSetTol( void   *smg_vdata,
 
 int
 hypre_SMGSetMaxIter( void *smg_vdata,
-                   int   max_iter  )
+                     int   max_iter  )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int          ierr = 0;
+   int            ierr = 0;
  
    (smg_data -> max_iter) = max_iter;
  
@@ -172,7 +172,7 @@ int
 hypre_SMGSetZeroGuess( void *smg_vdata )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int          ierr = 0;
+   int            ierr = 0;
  
    (smg_data -> zero_guess) = 1;
  
@@ -186,10 +186,10 @@ hypre_SMGSetZeroGuess( void *smg_vdata )
 
 int
 hypre_SMGSetNumPreRelax( void *smg_vdata,
-                    int   num_pre_relax )
+                         int   num_pre_relax )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int          ierr = 0;
+   int            ierr = 0;
  
    (smg_data -> num_pre_relax) = max(num_pre_relax,1);
  
@@ -202,10 +202,10 @@ hypre_SMGSetNumPreRelax( void *smg_vdata,
 
 int
 hypre_SMGSetNumPostRelax( void *smg_vdata,
-                     int   num_post_relax )
+                          int   num_post_relax )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int          ierr = 0;
+   int            ierr = 0;
  
    (smg_data -> num_post_relax) = num_post_relax;
  
@@ -217,18 +217,20 @@ hypre_SMGSetNumPostRelax( void *smg_vdata,
  *--------------------------------------------------------------------------*/
  
 int
-hypre_SMGSetBase( void      *smg_vdata,
-                hypre_Index  base_index,
-                hypre_Index  base_stride )
+hypre_SMGSetBase( void        *smg_vdata,
+                  hypre_Index  base_index,
+                  hypre_Index  base_stride )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int          d;
-   int          ierr = 0;
+   int            d;
+   int            ierr = 0;
  
    for (d = 0; d < 3; d++)
    {
-      hypre_IndexD((smg_data -> base_index),  d) = hypre_IndexD(base_index,  d);
-      hypre_IndexD((smg_data -> base_stride), d) = hypre_IndexD(base_stride, d);
+      hypre_IndexD((smg_data -> base_index),  d) =
+         hypre_IndexD(base_index,  d);
+      hypre_IndexD((smg_data -> base_stride), d) =
+         hypre_IndexD(base_stride, d);
    }
  
    return ierr;
@@ -240,10 +242,10 @@ hypre_SMGSetBase( void      *smg_vdata,
 
 int
 hypre_SMGSetLogging( void *smg_vdata,
-		   int   logging)
+                     int   logging)
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int          ierr = 0;
+   int            ierr = 0;
  
    (smg_data -> logging) = logging;
  
@@ -256,10 +258,10 @@ hypre_SMGSetLogging( void *smg_vdata,
 
 int
 hypre_SMGGetNumIterations( void *smg_vdata,
-                         int  *num_iterations )
+                           int  *num_iterations )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int ierr;
+   int            ierr;
 
    *num_iterations = (smg_data -> num_iterations);
 
@@ -272,7 +274,7 @@ hypre_SMGGetNumIterations( void *smg_vdata,
 
 int
 hypre_SMGPrintLogging( void *smg_vdata,
-                      int  myid)
+                       int   myid)
 {
    hypre_SMGData *smg_data = smg_vdata;
    int          ierr = 0;
@@ -284,16 +286,16 @@ hypre_SMGPrintLogging( void *smg_vdata,
 
    
    if (myid == 0)
-     {
-       if (logging > 0)
-	 {
-	   for (i = 0; i < num_iterations; i++)
-	     {
-	       printf("Residual norm[%d] = %e   ",i,norms[i]);
-	       printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
-	     }
-	 }
-     }
+   {
+      if (logging > 0)
+      {
+         for (i = 0; i < num_iterations; i++)
+         {
+            printf("Residual norm[%d] = %e   ",i,norms[i]);
+            printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
+         }
+      }
+   }
   
    return ierr;
 }
@@ -304,20 +306,20 @@ hypre_SMGPrintLogging( void *smg_vdata,
 
 int
 hypre_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
-                                     double *relative_residual_norm )
+                                       double *relative_residual_norm )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int          ierr = -1;
-   int          num_iterations  = (smg_data -> num_iterations);
-   int          logging   = (smg_data -> logging);
-   double      *rel_norms = (smg_data -> rel_norms);
+   int            ierr = -1;
+   int            num_iterations  = (smg_data -> num_iterations);
+   int            logging   = (smg_data -> logging);
+   double        *rel_norms = (smg_data -> rel_norms);
 
    
    if (logging > 0)
-     {
-       *relative_residual_norm = rel_norms[num_iterations-1];
-       ierr = 0;
-     }
+   {
+      *relative_residual_norm = rel_norms[num_iterations-1];
+      ierr = 0;
+   }
    
    return ierr;
 }
@@ -328,44 +330,45 @@ hypre_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
 
 int
 hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
-                                      double            values,
-                                      hypre_SBoxArray    *sbox_array )
+                                        double              values,
+                                        hypre_SBoxArray    *sbox_array )
 {
    int    ierr;
 
    hypre_Box          *v_data_box;
 
-   int               vi;
-   double           *vp;
+   int                 vi;
+   double             *vp;
 
    hypre_SBox         *sbox;
    hypre_Index         loop_size;
    hypre_IndexRef      start;
    hypre_IndexRef      stride;
 
-   int               loopi, loopj, loopk;
-   int               i;
+   int                 loopi, loopj, loopk;
+   int                 i;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
 
    hypre_ForSBoxI(i, sbox_array)
-   {
-      sbox  = hypre_SBoxArraySBox(sbox_array, i);
-      start = hypre_SBoxIMin(sbox);
-      stride = hypre_SBoxStride(sbox);
+      {
+         sbox  = hypre_SBoxArraySBox(sbox_array, i);
+         start = hypre_SBoxIMin(sbox);
+         stride = hypre_SBoxStride(sbox);
 
-      v_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
-      vp = hypre_StructVectorBoxData(vector, i);
+         v_data_box =
+            hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
+         vp = hypre_StructVectorBoxData(vector, i);
 
-      hypre_GetSBoxSize(sbox, loop_size);
-      hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                   v_data_box, start, stride, vi,
-                   {
-                      vp[vi] = values;
-                   });
-   }
+         hypre_GetSBoxSize(sbox, loop_size);
+         hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
+                        v_data_box, start, stride, vi,
+                        {
+                           vp[vi] = values;
+                        });
+      }
 
    return ierr;
 }

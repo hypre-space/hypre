@@ -48,18 +48,18 @@
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGSolve( void             *smg_vdata,
-              hypre_StructMatrix *A,
-              hypre_StructVector *b,
-              hypre_StructVector *x         )
+hypre_SMGSolve( void               *smg_vdata,
+                hypre_StructMatrix *A,
+                hypre_StructVector *b,
+                hypre_StructVector *x         )
 {
    hypre_SMGData        *smg_data = smg_vdata;
 
-   double              tol             = (smg_data -> tol);
-   int                 max_iter        = (smg_data -> max_iter);
-   int                 num_levels      = (smg_data -> num_levels);
-   int                 num_pre_relax   = (smg_data -> num_pre_relax);
-   int                 num_post_relax  = (smg_data -> num_post_relax);
+   double                tol             = (smg_data -> tol);
+   int                   max_iter        = (smg_data -> max_iter);
+   int                   num_levels      = (smg_data -> num_levels);
+   int                   num_pre_relax   = (smg_data -> num_pre_relax);
+   int                   num_post_relax  = (smg_data -> num_post_relax);
    hypre_StructMatrix  **A_l             = (smg_data -> A_l);
    hypre_StructMatrix  **PT_l            = (smg_data -> PT_l);
    hypre_StructMatrix  **R_l             = (smg_data -> R_l);
@@ -67,19 +67,19 @@ hypre_SMGSolve( void             *smg_vdata,
    hypre_StructVector  **x_l             = (smg_data -> x_l);
    hypre_StructVector  **r_l             = (smg_data -> r_l);
    hypre_StructVector  **e_l             = (smg_data -> e_l);
-   void              **relax_data_l    = (smg_data -> relax_data_l);
-   void              **residual_data_l = (smg_data -> residual_data_l);
-   void              **restrict_data_l = (smg_data -> restrict_data_l);
-   void              **intadd_data_l   = (smg_data -> intadd_data_l);
-   int                 logging         = (smg_data -> logging);
-   double             *norms           = (smg_data -> norms);
-   double             *rel_norms       = (smg_data -> rel_norms);
+   void                **relax_data_l    = (smg_data -> relax_data_l);
+   void                **residual_data_l = (smg_data -> residual_data_l);
+   void                **restrict_data_l = (smg_data -> restrict_data_l);
+   void                **intadd_data_l   = (smg_data -> intadd_data_l);
+   int                   logging         = (smg_data -> logging);
+   double               *norms           = (smg_data -> norms);
+   double               *rel_norms       = (smg_data -> rel_norms);
 
-   double              b_dot_b, r_dot_r, eps;
-
-   int                 i, l;
-
-   int                 ierr;
+   double                b_dot_b, r_dot_r, eps;
+                    
+   int                   i, l;
+                    
+   int                   ierr;
 
    hypre_BeginTiming(smg_data -> time_index);
 
@@ -146,7 +146,7 @@ hypre_SMGSolve( void             *smg_vdata,
             hypre_SMGRelaxSetZeroGuess(relax_data_l[l]);
             hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
             hypre_SMGResidual(residual_data_l[l],
-                            A_l[l], x_l[l], b_l[l], r_l[l]);
+                              A_l[l], x_l[l], b_l[l], r_l[l]);
          }
          hypre_SMGRestrict(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1]);
 #if 0

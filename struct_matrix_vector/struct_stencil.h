@@ -15,7 +15,6 @@
 #ifndef hypre_STRUCT_STENCIL_HEADER
 #define hypre_STRUCT_STENCIL_HEADER
 
-
 /*--------------------------------------------------------------------------
  * hypre_StructStencil
  *--------------------------------------------------------------------------*/
@@ -23,9 +22,9 @@
 typedef struct
 {
    hypre_Index   *shape;   /* Description of a stencil's shape */
-   int          size;    /* Number of stencil coefficients */
+   int            size;    /* Number of stencil coefficients */
                 
-   int          dim;     /* Number of dimensions */
+   int            dim;     /* Number of dimensions */
 
 } hypre_StructStencil;
 

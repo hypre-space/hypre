@@ -194,42 +194,42 @@ char *argv[];
 
    if( hypre_IndexZ(ilower) == 0 )
    {
-       stencil_indices[0] = 0;
-       hypre_CopyIndex(ilower, ilower_temp);
-       hypre_CopyIndex(iupper, iupper_temp);
-       hypre_IndexZ(iupper_temp) = 0;
-       box_temp = hypre_NewBox(ilower_temp, iupper_temp);
-       values = hypre_CTAlloc(double, hypre_BoxVolume(box_temp));
-       hypre_SetStructMatrixBoxValues(A, box_temp, 1, stencil_indices, values);
-       hypre_FreeBox(box_temp);
-       hypre_TFree(values);
-    }
+      stencil_indices[0] = 0;
+      hypre_CopyIndex(ilower, ilower_temp);
+      hypre_CopyIndex(iupper, iupper_temp);
+      hypre_IndexZ(iupper_temp) = 0;
+      box_temp = hypre_NewBox(ilower_temp, iupper_temp);
+      values = hypre_CTAlloc(double, hypre_BoxVolume(box_temp));
+      hypre_SetStructMatrixBoxValues(A, box_temp, 1, stencil_indices, values);
+      hypre_FreeBox(box_temp);
+      hypre_TFree(values);
+   }
    if( hypre_IndexY(ilower) == 0 )
    {
-       stencil_indices[0] = 1;
-       hypre_CopyIndex(ilower, ilower_temp);
-       hypre_CopyIndex(iupper, iupper_temp);
-       hypre_IndexY(iupper_temp) = 0;
-       box_temp = hypre_NewBox(ilower_temp, iupper_temp);
-       values = hypre_CTAlloc(double, hypre_BoxVolume(box_temp));
-       hypre_SetStructMatrixBoxValues(A, box_temp, 1, stencil_indices, values);
-       hypre_FreeBox(box_temp);
-       hypre_TFree(values);
-    }
+      stencil_indices[0] = 1;
+      hypre_CopyIndex(ilower, ilower_temp);
+      hypre_CopyIndex(iupper, iupper_temp);
+      hypre_IndexY(iupper_temp) = 0;
+      box_temp = hypre_NewBox(ilower_temp, iupper_temp);
+      values = hypre_CTAlloc(double, hypre_BoxVolume(box_temp));
+      hypre_SetStructMatrixBoxValues(A, box_temp, 1, stencil_indices, values);
+      hypre_FreeBox(box_temp);
+      hypre_TFree(values);
+   }
    if( hypre_IndexX(ilower) == 0 )
    {
-       stencil_indices[0] = 2;
-       hypre_CopyIndex(ilower, ilower_temp);
-       hypre_CopyIndex(iupper, iupper_temp);
-       hypre_IndexX(iupper_temp) = 0;
-       box_temp = hypre_NewBox(ilower_temp, iupper_temp);
-       values = hypre_CTAlloc(double, hypre_BoxVolume(box_temp));
-       hypre_SetStructMatrixBoxValues(A, box_temp, 1, stencil_indices, values);
-       hypre_FreeBox(box_temp);
-       hypre_TFree(values);
-    }
+      stencil_indices[0] = 2;
+      hypre_CopyIndex(ilower, ilower_temp);
+      hypre_CopyIndex(iupper, iupper_temp);
+      hypre_IndexX(iupper_temp) = 0;
+      box_temp = hypre_NewBox(ilower_temp, iupper_temp);
+      values = hypre_CTAlloc(double, hypre_BoxVolume(box_temp));
+      hypre_SetStructMatrixBoxValues(A, box_temp, 1, stencil_indices, values);
+      hypre_FreeBox(box_temp);
+      hypre_TFree(values);
+   }
 
-    hypre_FreeBox(box);
+   hypre_FreeBox(box);
 
    hypre_AssembleStructMatrix(A);
 

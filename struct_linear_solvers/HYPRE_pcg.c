@@ -37,34 +37,33 @@
 
 void
 HYPRE_PCG( Vector *x, 
-	 Vector *b,
-	 double  tol,
-	 void   *data )
+           Vector *b,
+           double  tol,
+           void   *data )
 {
    HYPRE_PCGData  *pcg_data      = data;
 
-   int        max_iter     = HYPRE_PCGDataMaxIter(pcg_data);
-   int        two_norm     = HYPRE_PCGDataTwoNorm(pcg_data);
-
-   Matrix    *A            = HYPRE_PCGDataA(pcg_data);
-   Vector    *p            = HYPRE_PCGDataP(pcg_data);
-   Vector    *s            = HYPRE_PCGDataS(pcg_data);
-   Vector    *r            = HYPRE_PCGDataR(pcg_data);
-
-   int      (*HYPRE_PCGPrecond)()   = HYPRE_PCGDataPrecond(pcg_data);
-   void      *precond_data = HYPRE_PCGDataPrecondData(pcg_data);
-
-   double     alpha, beta;
-   double     gamma, gamma_old;
-   double     bi_prod, i_prod, eps;
-   
-   int        i = 0;
+   int             max_iter     = HYPRE_PCGDataMaxIter(pcg_data);
+   int             two_norm     = HYPRE_PCGDataTwoNorm(pcg_data);
+                
+   Matrix         *A            = HYPRE_PCGDataA(pcg_data);
+   Vector         *p            = HYPRE_PCGDataP(pcg_data);
+   Vector         *s            = HYPRE_PCGDataS(pcg_data);
+   Vector         *r            = HYPRE_PCGDataR(pcg_data);
+                
+   int           (*HYPRE_PCGPrecond)()   = HYPRE_PCGDataPrecond(pcg_data);
+   void           *precond_data = HYPRE_PCGDataPrecondData(pcg_data);
+                
+   double          alpha, beta;
+   double          gamma, gamma_old;
+   double          bi_prod, i_prod, eps;
+                
+   int             i = 0;
 	     
    /* logging variables */
-   double    *norm_log;
-   double    *rel_norm_log;
-   double    *conv_rate;
-
+   double         *norm_log;
+   double         *rel_norm_log;
+   double         *conv_rate;
 
    /*-----------------------------------------------------------------------
     * Initialize some logging variables
@@ -74,13 +73,11 @@ HYPRE_PCG( Vector *x,
    rel_norm_log = hypre_CTAlloc(double, max_iter+1);
    conv_rate    = hypre_CTAlloc(double, max_iter+1);
 
- 
    /*-----------------------------------------------------------------------
     * Uncomment to print logging information
     *-----------------------------------------------------------------------*/
 
    /* printf("\nHYPRE_PCG INFO:\n\n"); */
-
 
    /*-----------------------------------------------------------------------
     * Start pcg solve
@@ -186,7 +183,7 @@ HYPRE_PCG( Vector *x,
     * Print log
     *-----------------------------------------------------------------------*/
 
-   /*
+#if 0
    if (two_norm)
    {
       printf("Iters       ||r||_2    ||r||_2/||b||_2    Conv. Factor\n");
@@ -203,9 +200,10 @@ HYPRE_PCG( Vector *x,
    {
       conv_rate[j]=norm_log[j]/norm_log[j-1];
       printf("% 5d    %e    %e    %f\n",
-	      (j), norm_log[j], rel_norm_log[j], conv_rate[j]);
+             (j), norm_log[j], rel_norm_log[j], conv_rate[j]);
    }
-   */
+#endif
+
    
    /*-----------------------------------------------------------------------
     * Load logging information

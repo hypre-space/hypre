@@ -40,14 +40,14 @@ HYPRE_StructSMGFinalize( HYPRE_StructSolver solver )
 
 int 
 HYPRE_StructSMGSetup( HYPRE_StructSolver solver,
-                    HYPRE_StructMatrix A,
-                    HYPRE_StructVector b,
-                    HYPRE_StructVector x      )
+                      HYPRE_StructMatrix A,
+                      HYPRE_StructVector b,
+                      HYPRE_StructVector x      )
 {
    return( hypre_SMGSetup( (void *) solver,
-                         (hypre_StructMatrix *) A,
-                         (hypre_StructVector *) b,
-                         (hypre_StructVector *) x ) );
+                           (hypre_StructMatrix *) A,
+                           (hypre_StructVector *) b,
+                           (hypre_StructVector *) x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -56,14 +56,14 @@ HYPRE_StructSMGSetup( HYPRE_StructSolver solver,
 
 int 
 HYPRE_StructSMGSolve( HYPRE_StructSolver solver,
-                    HYPRE_StructMatrix A,
-                    HYPRE_StructVector b,
-                    HYPRE_StructVector x      )
+                      HYPRE_StructMatrix A,
+                      HYPRE_StructVector b,
+                      HYPRE_StructVector x      )
 {
    return( hypre_SMGSolve( (void *) solver,
-                         (hypre_StructMatrix *) A,
-                         (hypre_StructVector *) b,
-                         (hypre_StructVector *) x ) );
+                           (hypre_StructMatrix *) A,
+                           (hypre_StructVector *) b,
+                           (hypre_StructVector *) x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -72,7 +72,7 @@ HYPRE_StructSMGSolve( HYPRE_StructSolver solver,
 
 int
 HYPRE_SMGSetMemoryUse( HYPRE_StructSolver solver,
-                     int              memory_use )
+                       int              memory_use )
 {
    return( hypre_SMGSetMemoryUse( (void *) solver, memory_use ) );
 }
@@ -83,7 +83,7 @@ HYPRE_SMGSetMemoryUse( HYPRE_StructSolver solver,
 
 int
 HYPRE_SMGSetTol( HYPRE_StructSolver solver,
-               double           tol    )
+                 double           tol    )
 {
    return( hypre_SMGSetTol( (void *) solver, tol ) );
 }
@@ -94,7 +94,7 @@ HYPRE_SMGSetTol( HYPRE_StructSolver solver,
 
 int
 HYPRE_SMGSetMaxIter( HYPRE_StructSolver solver,
-                   int              max_iter  )
+                     int              max_iter  )
 {
    return( hypre_SMGSetMaxIter( (void *) solver, max_iter ) );
 }
@@ -115,7 +115,7 @@ HYPRE_SMGSetZeroGuess( HYPRE_StructSolver solver )
 
 int
 HYPRE_SMGGetNumIterations( HYPRE_StructSolver  solver,
-                         int              *num_iterations )
+                           int              *num_iterations )
 {
    return( hypre_SMGGetNumIterations( (void *) solver, num_iterations ) );
 }
@@ -126,7 +126,7 @@ HYPRE_SMGGetNumIterations( HYPRE_StructSolver  solver,
 
 int
 HYPRE_SMGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
-                                     double           *relative_residual_norm )
+                                       double           *relative_residual_norm )
 {
    return( hypre_SMGGetFinalRelativeResidualNorm( (void *) solver, relative_residual_norm ) );
 }

@@ -29,17 +29,17 @@
 #ifdef HYPRE_MEMORY_CHECK
 
 #define hypre_TAlloc(type, count) \
-( (type *) hypre_MAllocCheck((unsigned int)(sizeof(type) * (count)),\
-                           __FILE__, __LINE__) )
+( (type *)hypre_MAllocCheck((unsigned int)(sizeof(type) * (count)),\
+                             __FILE__, __LINE__) )
 
 #define hypre_CTAlloc(type, count) \
-( (type *) hypre_CAllocCheck((unsigned int)(count), (unsigned int)sizeof(type),\
-                           __FILE__, __LINE__) )
+( (type *)hypre_CAllocCheck((unsigned int)(count), (unsigned int)sizeof(type),\
+                            __FILE__, __LINE__) )
 
 #define hypre_TReAlloc(ptr, type, count) \
-( (type *) hypre_ReAllocCheck((char *)ptr,\
-                            (unsigned int)(sizeof(type) * (count)),\
-                            __FILE__, __LINE__) )
+( (type *)hypre_ReAllocCheck((char *)ptr,\
+                             (unsigned int)(sizeof(type) * (count)),\
+                             __FILE__, __LINE__) )
 
 #define hypre_TFree(ptr) \
 ( hypre_Free((char *)ptr), ptr = NULL )
@@ -51,13 +51,13 @@
 #else
 
 #define hypre_TAlloc(type, count) \
-( (type *) hypre_MAlloc((unsigned int)(sizeof(type) * (count))) )
+( (type *)hypre_MAlloc((unsigned int)(sizeof(type) * (count))) )
 
 #define hypre_CTAlloc(type, count) \
-( (type *) hypre_CAlloc((unsigned int)(count), (unsigned int)sizeof(type)) )
+( (type *)hypre_CAlloc((unsigned int)(count), (unsigned int)sizeof(type)) )
 
 #define hypre_TReAlloc(ptr, type, count) \
-( (type *) hypre_ReAlloc((char *)ptr, (unsigned int)(sizeof(type) * (count))) )
+( (type *)hypre_ReAlloc((char *)ptr, (unsigned int)(sizeof(type) * (count))) )
 
 #define hypre_TFree(ptr) \
 ( hypre_Free((char *)ptr), ptr = NULL )

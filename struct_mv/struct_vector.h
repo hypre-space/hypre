@@ -15,29 +15,28 @@
 #ifndef hypre_STRUCT_VECTOR_HEADER
 #define hypre_STRUCT_VECTOR_HEADER
 
-
 /*--------------------------------------------------------------------------
  * hypre_StructVector:
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
-   MPI_Comm           *comm;
+   MPI_Comm             *comm;
 
    hypre_StructGrid     *grid;
 
    hypre_BoxArray       *data_space;
 
-   double             *data;         /* Pointer to vector data */
-   int                 data_size;    /* Size of vector data */
-   int                *data_indices; /* num-boxes array of indices into
-                                        the data array.  data_indices[b]
-                                        is the starting index of vector
-                                        data corresponding to box b. */
-
-   int                 num_ghost[6]; /* Num ghost layers in each direction */
-
-   int                 global_size;  /* Total number coefficients */
+   double               *data;         /* Pointer to vector data */
+   int                   data_size;    /* Size of vector data */
+   int                  *data_indices; /* num-boxes array of indices into
+                                          the data array.  data_indices[b]
+                                          is the starting index of vector
+                                          data corresponding to box b. */
+                      
+   int                   num_ghost[6]; /* Num ghost layers in each direction */
+                      
+   int                   global_size;  /* Total number coefficients */
 
 } hypre_StructVector;
 
@@ -63,6 +62,5 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
 #define hypre_StructVectorBoxDataValue(vector, b, index) \
 (hypre_StructVectorBoxData(vector, b) + \
  hypre_BoxIndexRank(hypre_StructVectorBox(vector, b), index))
- 
 
 #endif

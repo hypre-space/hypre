@@ -25,7 +25,7 @@ typedef struct
    hypre_Index         cindex;
    hypre_Index         cstride;
 
-   int               time_index;
+   int                 time_index;
 
 } hypre_SMGRestrictData;
 
@@ -49,14 +49,14 @@ hypre_SMGRestrictInitialize( )
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGRestrictSetup( void             *restrict_vdata,
-                      hypre_StructMatrix *R,
-                      hypre_StructVector *r,
-                      hypre_StructVector *rc,
-                      hypre_Index         cindex,
-                      hypre_Index         cstride,
-                      hypre_Index         findex,
-                      hypre_Index         fstride            )
+hypre_SMGRestrictSetup( void               *restrict_vdata,
+                        hypre_StructMatrix *R,
+                        hypre_StructVector *r,
+                        hypre_StructVector *rc,
+                        hypre_Index         cindex,
+                        hypre_Index         cstride,
+                        hypre_Index         findex,
+                        hypre_Index         fstride            )
 {
    hypre_SMGRestrictData  *restrict_data = restrict_vdata;
 
@@ -65,8 +65,8 @@ hypre_SMGRestrictSetup( void             *restrict_vdata,
                        
    hypre_BoxArrayArray    *send_boxes;
    hypre_BoxArrayArray    *recv_boxes;
-   int                 **send_box_ranks;
-   int                 **recv_box_ranks;
+   int                   **send_box_ranks;
+   int                   **recv_box_ranks;
    hypre_BoxArrayArray    *indt_boxes;
    hypre_BoxArrayArray    *dept_boxes;
                        
@@ -77,7 +77,7 @@ hypre_SMGRestrictSetup( void             *restrict_vdata,
                        
    hypre_ComputePkg       *compute_pkg;
 
-   int                   ierr;
+   int                     ierr;
 
    /*----------------------------------------------------------
     * Set up the compute package
@@ -87,9 +87,9 @@ hypre_SMGRestrictSetup( void             *restrict_vdata,
    stencil = hypre_StructMatrixStencil(R);
 
    hypre_GetComputeInfo(&send_boxes, &recv_boxes,
-                      &send_box_ranks, &recv_box_ranks,
-                      &indt_boxes, &dept_boxes,
-                      grid, stencil);
+                        &send_box_ranks, &recv_box_ranks,
+                        &indt_boxes, &dept_boxes,
+                        grid, stencil);
 
    send_sboxes = hypre_ProjectBoxArrayArray(send_boxes, findex, fstride);
    recv_sboxes = hypre_ProjectBoxArrayArray(recv_boxes, findex, fstride);
@@ -102,9 +102,9 @@ hypre_SMGRestrictSetup( void             *restrict_vdata,
    hypre_FreeBoxArrayArray(dept_boxes);
 
    compute_pkg = hypre_NewComputePkg(send_sboxes, recv_sboxes,
-                                   send_box_ranks, recv_box_ranks,
-                                   indt_sboxes, dept_sboxes,
-                                   grid, hypre_StructVectorDataSpace(r), 1);
+                                     send_box_ranks, recv_box_ranks,
+                                     indt_sboxes, dept_sboxes,
+                                     grid, hypre_StructVectorDataSpace(r), 1);
 
    /*----------------------------------------------------------
     * Set up the intadd data structure
@@ -127,10 +127,10 @@ hypre_SMGRestrictSetup( void             *restrict_vdata,
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGRestrict( void             *restrict_vdata,
-                 hypre_StructMatrix *R,
-                 hypre_StructVector *r,
-                 hypre_StructVector *rc             )
+hypre_SMGRestrict( void               *restrict_vdata,
+                   hypre_StructMatrix *R,
+                   hypre_StructVector *r,
+                   hypre_StructVector *rc             )
 {
    int ierr;
 
@@ -150,13 +150,13 @@ hypre_SMGRestrict( void             *restrict_vdata,
    hypre_Box              *r_data_box;
    hypre_Box              *rc_data_box;
                        
-   int                   Ri;
-   int                   ri;
-   int                   rci;
-                       
-   double               *Rp0, *Rp1;
-   double               *rp, *rp0, *rp1;
-   double               *rcp;
+   int                     Ri;
+   int                     ri;
+   int                     rci;
+                         
+   double                 *Rp0, *Rp1;
+   double                 *rp, *rp0, *rp1;
+   double                 *rcp;
                        
    hypre_Index             loop_size;
    hypre_IndexRef          start;
@@ -167,8 +167,8 @@ hypre_SMGRestrict( void             *restrict_vdata,
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
 
-   int                   compute_i, i, j;
-   int                   loopi, loopj, loopk;
+   int                     compute_i, i, j;
+   int                     loopi, loopj, loopk;
 
    hypre_BeginTiming(restrict_data -> time_index);
 
@@ -211,38 +211,39 @@ hypre_SMGRestrict( void             *restrict_vdata,
       }
 
       hypre_ForSBoxArrayI(i, compute_sbox_aa)
-      {
-         compute_sbox_a = hypre_SBoxArrayArraySBoxArray(compute_sbox_aa, i);
-
-         R_data_box  = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), i);
-         r_data_box  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r), i);
-         rc_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(rc), i);
-
-         Rp0 = hypre_StructMatrixBoxData(R, i, 0);
-         Rp1 = hypre_StructMatrixBoxData(R, i, 1);
-         rp  = hypre_StructVectorBoxData(r, i);
-         rp0 = rp + hypre_BoxOffsetDistance(r_data_box, stencil_shape[0]);
-         rp1 = rp + hypre_BoxOffsetDistance(r_data_box, stencil_shape[1]);
-         rcp = hypre_StructVectorBoxData(rc, i);
-
-         hypre_ForSBoxI(j, compute_sbox_a)
          {
-            compute_sbox = hypre_SBoxArraySBox(compute_sbox_a, j);
+            compute_sbox_a = hypre_SBoxArrayArraySBoxArray(compute_sbox_aa, i);
 
-            start  = hypre_SBoxIMin(compute_sbox);
-            hypre_SMGMapFineToCoarse(start, startc, cindex, cstride);
+            R_data_box  = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), i);
+            r_data_box  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r), i);
+            rc_data_box =
+               hypre_BoxArrayBox(hypre_StructVectorDataSpace(rc), i);
 
-            hypre_GetSBoxSize(compute_sbox, loop_size);
-            hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                         R_data_box,  startc, stridec, Ri,
-                         r_data_box,  start,  stride,  ri,
-                         rc_data_box, startc, stridec, rci,
-                         {
-                            rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
-                                                 Rp1[Ri] * rp1[ri]);
-                         });
+            Rp0 = hypre_StructMatrixBoxData(R, i, 0);
+            Rp1 = hypre_StructMatrixBoxData(R, i, 1);
+            rp  = hypre_StructVectorBoxData(r, i);
+            rp0 = rp + hypre_BoxOffsetDistance(r_data_box, stencil_shape[0]);
+            rp1 = rp + hypre_BoxOffsetDistance(r_data_box, stencil_shape[1]);
+            rcp = hypre_StructVectorBoxData(rc, i);
+
+            hypre_ForSBoxI(j, compute_sbox_a)
+               {
+                  compute_sbox = hypre_SBoxArraySBox(compute_sbox_a, j);
+
+                  start  = hypre_SBoxIMin(compute_sbox);
+                  hypre_SMGMapFineToCoarse(start, startc, cindex, cstride);
+
+                  hypre_GetSBoxSize(compute_sbox, loop_size);
+                  hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
+                                 R_data_box,  startc, stridec, Ri,
+                                 r_data_box,  start,  stride,  ri,
+                                 rc_data_box, startc, stridec, rci,
+                                 {
+                                    rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
+                                                         Rp1[Ri] * rp1[ri]);
+                                 });
+               }
          }
-      }
    }
 
    /*-----------------------------------------------------------------------

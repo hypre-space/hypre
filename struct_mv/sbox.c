@@ -23,10 +23,10 @@
 
 hypre_SBox *
 hypre_NewSBox( hypre_Box   *box,
-             hypre_Index  stride )
+               hypre_Index  stride )
 {
    hypre_SBox *sbox;
-   int       d;
+   int         d;
 
    sbox = hypre_TAlloc(hypre_SBox, 1);
 
@@ -69,7 +69,7 @@ hypre_SBoxArrayArray *
 hypre_NewSBoxArrayArray( int size )
 {
    hypre_SBoxArrayArray  *sbox_array_array;
-   int                  i;
+   int                    i;
 
    sbox_array_array = hypre_CTAlloc(hypre_SBoxArrayArray, 1);
 
@@ -77,7 +77,8 @@ hypre_NewSBoxArrayArray( int size )
       hypre_CTAlloc(hypre_SBoxArray *, size);
 
    for (i = 0; i < size; i++)
-      hypre_SBoxArrayArraySBoxArray(sbox_array_array, i) = hypre_NewSBoxArray();
+      hypre_SBoxArrayArraySBoxArray(sbox_array_array, i) =
+         hypre_NewSBoxArray();
    hypre_SBoxArrayArraySize(sbox_array_array) = size;
 
    return sbox_array_array;
@@ -195,10 +196,10 @@ hypre_DuplicateSBoxArray( hypre_SBoxArray *sbox_array )
 {
    hypre_SBoxArray  *new_sbox_array;
    hypre_SBox      **new_sboxes;
-   int             new_size;
+   int               new_size;
 
    hypre_SBox      **sboxes;
-   int             i, data_sz;
+   int               i, data_sz;
 
    new_sbox_array = hypre_NewSBoxArray();
    new_sboxes = NULL;
@@ -232,10 +233,10 @@ hypre_DuplicateSBoxArrayArray( hypre_SBoxArrayArray *sbox_array_array )
 {
    hypre_SBoxArrayArray  *new_sbox_array_array;
    hypre_SBoxArray      **new_sbox_arrays;
-   int                  new_size;
+   int                    new_size;
 
    hypre_SBoxArray      **sbox_arrays;
-   int                  i;
+   int                    i;
 
    new_size = hypre_SBoxArrayArraySize(sbox_array_array);
    new_sbox_array_array = hypre_NewSBoxArrayArray(new_size);
@@ -284,14 +285,14 @@ hypre_ConvertToSBoxArray( hypre_BoxArray *box_array )
 {
    hypre_SBoxArray *sbox_array;
    hypre_SBox      *sbox;
-   int            i;
+   int              i;
 
    sbox_array = hypre_NewSBoxArray();
    hypre_ForBoxI(i, box_array)
-   {
-      sbox = hypre_ConvertToSBox(hypre_BoxArrayBox(box_array, i));
-      hypre_AppendSBox(sbox, sbox_array);
-   }
+      {
+         sbox = hypre_ConvertToSBox(hypre_BoxArrayBox(box_array, i));
+         hypre_AppendSBox(sbox, sbox_array);
+      }
 
    hypre_FreeBoxArrayShell(box_array);
 
@@ -307,16 +308,17 @@ hypre_SBoxArrayArray *
 hypre_ConvertToSBoxArrayArray( hypre_BoxArrayArray *box_array_array )
 {
    hypre_SBoxArrayArray  *sbox_array_array;
-   int                  i;
+   int                    i;
 
    sbox_array_array =
       hypre_NewSBoxArrayArray(hypre_BoxArrayArraySize(box_array_array));
    hypre_ForBoxArrayI(i, box_array_array)
-   {
-      hypre_FreeSBoxArray(hypre_SBoxArrayArraySBoxArray(sbox_array_array, i));
-      hypre_SBoxArrayArraySBoxArray(sbox_array_array, i) =
-         hypre_ConvertToSBoxArray(hypre_BoxArrayArrayBoxArray(box_array_array, i));
-   }
+      {
+         hypre_FreeSBoxArray(hypre_SBoxArrayArraySBoxArray(sbox_array_array,
+                                                           i));
+         hypre_SBoxArrayArraySBoxArray(sbox_array_array, i) =
+            hypre_ConvertToSBoxArray(hypre_BoxArrayArrayBoxArray(box_array_array, i));
+      }
 
    hypre_FreeBoxArrayArrayShell(box_array_array);
 
@@ -332,13 +334,13 @@ hypre_ConvertToSBoxArrayArray( hypre_BoxArrayArray *box_array_array )
  
 void
 hypre_AppendSBox( hypre_SBox      *sbox,
-                hypre_SBoxArray *sbox_array )
+                  hypre_SBoxArray *sbox_array )
 {
    hypre_SBox  **sboxes;
-   int         size;
+   int           size;
  
    hypre_SBox  **old_sboxes;
-   int         i;
+   int           i;
  
    size = hypre_SBoxArraySize(sbox_array);
    if (!(size % hypre_SBoxArrayBlocksize))
@@ -365,11 +367,11 @@ hypre_AppendSBox( hypre_SBox      *sbox,
  
 void
 hypre_DeleteSBox( hypre_SBoxArray *sbox_array,
-                int            index      )
+                  int              index      )
 {
    hypre_SBox  **sboxes;
  
-   int         i;
+   int           i;
  
    sboxes = hypre_SBoxArraySBoxes(sbox_array);
  
@@ -388,7 +390,7 @@ hypre_DeleteSBox( hypre_SBoxArray *sbox_array,
  
 void
 hypre_AppendSBoxArray( hypre_SBoxArray *sbox_array_0,
-                     hypre_SBoxArray *sbox_array_1 )
+                       hypre_SBoxArray *sbox_array_1 )
 {
    int  i;
  
@@ -404,13 +406,15 @@ hypre_AppendSBoxArray( hypre_SBoxArray *sbox_array_0,
  
 void
 hypre_AppendSBoxArrayArray( hypre_SBoxArrayArray *sbox_array_array_0,
-                          hypre_SBoxArrayArray *sbox_array_array_1 )
+                            hypre_SBoxArrayArray *sbox_array_array_1 )
 {
    int  i;
  
    hypre_ForSBoxArrayI(i, sbox_array_array_0)
-      hypre_AppendSBoxArray(hypre_SBoxArrayArraySBoxArray(sbox_array_array_0, i),
-                          hypre_SBoxArrayArraySBoxArray(sbox_array_array_1, i));
+      hypre_AppendSBoxArray(hypre_SBoxArrayArraySBoxArray(sbox_array_array_0,
+                                                          i),
+                            hypre_SBoxArrayArraySBoxArray(sbox_array_array_1,
+                                                          i));
 }
 
 /*--------------------------------------------------------------------------
@@ -419,7 +423,7 @@ hypre_AppendSBoxArrayArray( hypre_SBoxArrayArray *sbox_array_array_0,
 
 int 
 hypre_GetSBoxSize( hypre_SBox  *sbox,
-                 hypre_Index  size )
+                   hypre_Index  size )
 {
    hypre_IndexX(size) = hypre_SBoxSizeX(sbox);
    hypre_IndexY(size) = hypre_SBoxSizeY(sbox);

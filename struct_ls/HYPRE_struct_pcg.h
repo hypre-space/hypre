@@ -16,8 +16,9 @@ typedef void Vector;
 
 typedef struct
 {
-  void             *pc_data;
+  void               *pc_data;
   hypre_StructMatrix *A;
+
 } HYPRE_PCGPrecondData;
 
 /*--------------------------------------------------------------------------

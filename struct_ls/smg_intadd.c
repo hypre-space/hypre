@@ -50,15 +50,15 @@ hypre_SMGIntAddInitialize( )
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGIntAddSetup( void             *intadd_vdata,
-                    hypre_StructMatrix *PT,
-                    hypre_StructVector *xc,
-                    hypre_StructVector *e,
-                    hypre_StructVector *x,
-                    hypre_Index         cindex,
-                    hypre_Index         cstride,
-                    hypre_Index         findex,
-                    hypre_Index         fstride      )
+hypre_SMGIntAddSetup( void               *intadd_vdata,
+                      hypre_StructMatrix *PT,
+                      hypre_StructVector *xc,
+                      hypre_StructVector *e,
+                      hypre_StructVector *x,
+                      hypre_Index         cindex,
+                      hypre_Index         cstride,
+                      hypre_Index         findex,
+                      hypre_Index         fstride      )
 {
    hypre_SMGIntAddData    *intadd_data = intadd_vdata;
 
@@ -67,15 +67,15 @@ hypre_SMGIntAddSetup( void             *intadd_vdata,
    hypre_Index            *stencil_PT_shape;
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
-   int                   stencil_size;
-   int                   stencil_dim;
+   int                     stencil_size;
+   int                     stencil_dim;
                        
    hypre_BoxArrayArray    *send_boxes;
    hypre_BoxArrayArray    *recv_boxes;
-   int                 **temp_send_box_ranks;
-   int                 **temp_recv_box_ranks;
-   int                 **send_box_ranks;
-   int                 **recv_box_ranks;
+   int                   **temp_send_box_ranks;
+   int                   **temp_recv_box_ranks;
+   int                   **send_box_ranks;
+   int                   **recv_box_ranks;
    hypre_BoxArrayArray    *indt_boxes;
    hypre_BoxArrayArray    *dept_boxes;
                        
@@ -89,7 +89,7 @@ hypre_SMGIntAddSetup( void             *intadd_vdata,
    hypre_ComputePkg       *compute_pkg;
    hypre_SBoxArray        *coarse_points;
 
-   int                   ierr;
+   int                     ierr;
 
    /*----------------------------------------------------------
     * Set up the compute package
@@ -110,9 +110,9 @@ hypre_SMGIntAddSetup( void             *intadd_vdata,
    stencil = hypre_NewStructStencil(stencil_dim, stencil_size, stencil_shape);
 
    hypre_GetComputeInfo(&send_boxes, &recv_boxes,
-                      &temp_send_box_ranks, &temp_recv_box_ranks,
-                      &indt_boxes, &dept_boxes,
-                      grid, stencil);
+                        &temp_send_box_ranks, &temp_recv_box_ranks,
+                        &indt_boxes, &dept_boxes,
+                        grid, stencil);
 
    /*----------------------------------------------------------
     * Project sends and recieves to fine and coarse points
@@ -137,11 +137,11 @@ hypre_SMGIntAddSetup( void             *intadd_vdata,
     *----------------------------------------------------------*/
 
    hypre_AppendSBoxArrayArrayAndRanks(temp_recv_box_ranks, temp_send_box_ranks,
-                                    f_recv_sboxes, send_sboxes,
-                                    &send_box_ranks);
+                                      f_recv_sboxes, send_sboxes,
+                                      &send_box_ranks);
    hypre_AppendSBoxArrayArrayAndRanks(temp_send_box_ranks, temp_recv_box_ranks,
-                                    f_send_sboxes, recv_sboxes,
-                                    &recv_box_ranks);
+                                      f_send_sboxes, recv_sboxes,
+                                      &recv_box_ranks);
 
    hypre_FreeSBoxArrayArrayShell(f_send_sboxes);
    hypre_FreeSBoxArrayArrayShell(f_recv_sboxes);
@@ -150,16 +150,16 @@ hypre_SMGIntAddSetup( void             *intadd_vdata,
    hypre_TFree(temp_recv_box_ranks);
 
    compute_pkg = hypre_NewComputePkg(send_sboxes, recv_sboxes,
-                                   send_box_ranks, recv_box_ranks,
-                                   indt_sboxes, dept_sboxes,
-                                   grid, hypre_StructVectorDataSpace(e), 1);
+                                     send_box_ranks, recv_box_ranks,
+                                     indt_sboxes, dept_sboxes,
+                                     grid, hypre_StructVectorDataSpace(e), 1);
 
    /*----------------------------------------------------------
     * Set up the coarse points SBoxArray
     *----------------------------------------------------------*/
 
    coarse_points = hypre_ProjectBoxArray(hypre_StructGridBoxes(grid),
-                                       cindex, cstride);
+                                         cindex, cstride);
 
    /*----------------------------------------------------------
     * Set up the intadd data structure
@@ -196,11 +196,11 @@ hypre_SMGIntAddSetup( void             *intadd_vdata,
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGIntAdd( void             *intadd_vdata,
-               hypre_StructMatrix *PT,
-               hypre_StructVector *xc,
-               hypre_StructVector *e,
-               hypre_StructVector *x           )
+hypre_SMGIntAdd( void               *intadd_vdata,
+                 hypre_StructMatrix *PT,
+                 hypre_StructVector *xc,
+                 hypre_StructVector *e,
+                 hypre_StructVector *x           )
 {
    int ierr;
 
@@ -222,15 +222,15 @@ hypre_SMGIntAdd( void             *intadd_vdata,
    hypre_Box              *x_data_box;
    hypre_Box              *e_data_box;
                        
-   int                   PTi;
-   int                   xci;
-   int                   xi;
-   int                   ei;
-                       
-   double               *xcp;
-   double               *PTp0, *PTp1;
-   double               *ep, *ep0, *ep1;
-   double               *xp;
+   int                     PTi;
+   int                     xci;
+   int                     xi;
+   int                     ei;
+                         
+   double                 *xcp;
+   double                 *PTp0, *PTp1;
+   double                 *ep, *ep0, *ep1;
+   double                 *xp;
                        
    hypre_Index             loop_size;
    hypre_IndexRef          start;
@@ -241,8 +241,8 @@ hypre_SMGIntAdd( void             *intadd_vdata,
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
 
-   int                   compute_i, i, j;
-   int                   loopi, loopj, loopk;
+   int                     compute_i, i, j;
+   int                     loopi, loopj, loopk;
 
    hypre_BeginTiming(intadd_data -> time_index);
 
@@ -270,33 +270,33 @@ hypre_SMGIntAdd( void             *intadd_vdata,
 
    compute_sbox_a = coarse_points;
    hypre_ForSBoxI(i, compute_sbox_a)
-   {
-      compute_sbox = hypre_SBoxArraySBox(compute_sbox_a, i);
+      {
+         compute_sbox = hypre_SBoxArraySBox(compute_sbox_a, i);
 
-      start = hypre_SBoxIMin(compute_sbox);
-      hypre_SMGMapFineToCoarse(start, startc, cindex, cstride);
+         start = hypre_SBoxIMin(compute_sbox);
+         hypre_SMGMapFineToCoarse(start, startc, cindex, cstride);
 
-      e_data_box  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(e), i);
-      PT_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), i);
-      xc_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc), i);
+         e_data_box  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(e), i);
+         PT_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), i);
+         xc_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc), i);
 
-      ep0 = hypre_StructVectorBoxData(e, i);
-      ep1 = hypre_StructVectorBoxData(e, i) +
-         hypre_BoxOffsetDistance(e_data_box, stencil_shape[1]);
-      PTp0 = hypre_StructMatrixBoxData(PT, i, 0);
-      PTp1 = hypre_StructMatrixBoxData(PT, i, 1);
-      xcp = hypre_StructVectorBoxData(xc, i);
+         ep0 = hypre_StructVectorBoxData(e, i);
+         ep1 = hypre_StructVectorBoxData(e, i) +
+            hypre_BoxOffsetDistance(e_data_box, stencil_shape[1]);
+         PTp0 = hypre_StructMatrixBoxData(PT, i, 0);
+         PTp1 = hypre_StructMatrixBoxData(PT, i, 1);
+         xcp = hypre_StructVectorBoxData(xc, i);
 
-      hypre_GetSBoxSize(compute_sbox, loop_size);
-      hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                   e_data_box,  start,  stride,  ei,
-                   PT_data_box, startc, stridec, PTi,
-                   xc_data_box, startc, stridec, xci,
-                   {
-                      ep0[ei] = PTp0[PTi]*xcp[xci];
-                      ep1[ei] = PTp1[PTi]*xcp[xci];
-                   });
-   }
+         hypre_GetSBoxSize(compute_sbox, loop_size);
+         hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
+                        e_data_box,  start,  stride,  ei,
+                        PT_data_box, startc, stridec, PTi,
+                        xc_data_box, startc, stridec, xci,
+                        {
+                           ep0[ei] = PTp0[PTi]*xcp[xci];
+                           ep1[ei] = PTp1[PTi]*xcp[xci];
+                        });
+      }
 
    /*--------------------------------------------------------------------
     * Interpolate the coarse error and add to the fine grid solution.
@@ -330,26 +330,28 @@ hypre_SMGIntAdd( void             *intadd_vdata,
       {
          compute_sbox_a = coarse_points;
          hypre_ForSBoxI(i, compute_sbox_a)
-         {
-            compute_sbox = hypre_SBoxArraySBox(compute_sbox_a, i);
+            {
+               compute_sbox = hypre_SBoxArraySBox(compute_sbox_a, i);
 
-            start = hypre_SBoxIMin(compute_sbox);
-            hypre_SMGMapFineToCoarse(start, startc, cindex, cstride);
+               start = hypre_SBoxIMin(compute_sbox);
+               hypre_SMGMapFineToCoarse(start, startc, cindex, cstride);
 
-            x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-            xc_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc), i);
+               x_data_box =
+                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+               xc_data_box =
+                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc), i);
 
-            xp = hypre_StructVectorBoxData(x, i);
-            xcp = hypre_StructVectorBoxData(xc, i);
+               xp = hypre_StructVectorBoxData(x, i);
+               xcp = hypre_StructVectorBoxData(xc, i);
 
-            hypre_GetSBoxSize(compute_sbox, loop_size);
-            hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                         x_data_box,  start,  stride,  xi,
-                         xc_data_box, startc, stridec, xci,
-                         {
-                            xp[xi] += xcp[xci];
-                         });
-         }
+               hypre_GetSBoxSize(compute_sbox, loop_size);
+               hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
+                              x_data_box,  start,  stride,  xi,
+                              xc_data_box, startc, stridec, xci,
+                              {
+                                 xp[xi] += xcp[xci];
+                              });
+            }
       }
 
       /*----------------------------------------
@@ -357,32 +359,32 @@ hypre_SMGIntAdd( void             *intadd_vdata,
        *----------------------------------------*/
 
       hypre_ForSBoxArrayI(i, compute_sbox_aa)
-      {
-         compute_sbox_a = hypre_SBoxArrayArraySBoxArray(compute_sbox_aa, i);
-
-         x_data_box  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-         e_data_box  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(e), i);
-
-         xp  = hypre_StructVectorBoxData(x, i);
-         ep0 = hypre_StructVectorBoxData(e, i);
-         ep1 = hypre_StructVectorBoxData(e, i) +
-            hypre_BoxOffsetDistance(e_data_box, stencil_shape[1]);
-
-         hypre_ForSBoxI(j, compute_sbox_a)
          {
-            compute_sbox = hypre_SBoxArraySBox(compute_sbox_a, j);
+            compute_sbox_a = hypre_SBoxArrayArraySBoxArray(compute_sbox_aa, i);
 
-            start  = hypre_SBoxIMin(compute_sbox);
+            x_data_box  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+            e_data_box  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(e), i);
 
-            hypre_GetSBoxSize(compute_sbox, loop_size);
-            hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                         x_data_box, start, stride, xi,
-                         e_data_box, start, stride, ei,
-                         {
-                            xp[xi] += ep0[ei] + ep1[ei];
-                         });
+            xp  = hypre_StructVectorBoxData(x, i);
+            ep0 = hypre_StructVectorBoxData(e, i);
+            ep1 = hypre_StructVectorBoxData(e, i) +
+               hypre_BoxOffsetDistance(e_data_box, stencil_shape[1]);
+
+            hypre_ForSBoxI(j, compute_sbox_a)
+               {
+                  compute_sbox = hypre_SBoxArraySBox(compute_sbox_a, j);
+
+                  start  = hypre_SBoxIMin(compute_sbox);
+
+                  hypre_GetSBoxSize(compute_sbox, loop_size);
+                  hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
+                                 x_data_box, start, stride, xi,
+                                 e_data_box, start, stride, ei,
+                                 {
+                                    xp[xi] += ep0[ei] + ep1[ei];
+                                 });
+               }
          }
-      }
    }
 
    /*-----------------------------------------------------------------------
@@ -426,40 +428,39 @@ hypre_SMGIntAddFinalize( void *intadd_vdata )
  *--------------------------------------------------------------------------*/
  
 void
-hypre_AppendSBoxArrayArrayAndRanks( int                **box_ranks_0,
-                                  int                **box_ranks_1,
-                                  hypre_SBoxArrayArray *sbox_array_array_0,
-                                  hypre_SBoxArrayArray *sbox_array_array_1,
-                                  int                ***box_ranks_ptr)
+hypre_AppendSBoxArrayArrayAndRanks( int                    **box_ranks_0,
+                                    int                    **box_ranks_1,
+                                    hypre_SBoxArrayArray   *sbox_array_array_0,
+                                    hypre_SBoxArrayArray   *sbox_array_array_1,
+                                    int                  ***box_ranks_ptr)
 {
-   int            **box_ranks;
-   int              sbox_array_array_size; 
+   int              **box_ranks;
+   int                sbox_array_array_size; 
    hypre_SBoxArray   *sbox_array_0;
    hypre_SBoxArray   *sbox_array_1;
-   int              sbox_array_size_0; 
-   int              sbox_array_size_1; 
-   int              i;
-   int              j;
-   int              k;
+   int                sbox_array_size_0; 
+   int                sbox_array_size_1; 
+   int                i;
+   int                j;
+   int                k;
  
    sbox_array_array_size = hypre_SBoxArrayArraySize(sbox_array_array_0);
    box_ranks = hypre_CTAlloc(int *, sbox_array_array_size);
 
    hypre_ForSBoxArrayI(i, sbox_array_array_0)
-   {
-      sbox_array_0 = hypre_SBoxArrayArraySBoxArray(sbox_array_array_0, i);  
-      sbox_array_1 = hypre_SBoxArrayArraySBoxArray(sbox_array_array_1, i);  
-      sbox_array_size_0 = hypre_SBoxArraySize(sbox_array_0);
-      sbox_array_size_1 = hypre_SBoxArraySize(sbox_array_1);
-      box_ranks[i] = hypre_CTAlloc(int, sbox_array_size_0 + sbox_array_size_1);
-      for ( j=0 ; j < sbox_array_size_1; j++)
-         box_ranks[i][j] = box_ranks_1[i][j];
-      for ( k=0 ; k < sbox_array_size_0; k++)
-         box_ranks[i][k+sbox_array_size_1] = box_ranks_0[i][k];
-      hypre_AppendSBoxArray(hypre_SBoxArrayArraySBoxArray(sbox_array_array_0, i),
-                          hypre_SBoxArrayArraySBoxArray(sbox_array_array_1, i));
-
-   }
+      {
+         sbox_array_0 = hypre_SBoxArrayArraySBoxArray(sbox_array_array_0, i);  
+         sbox_array_1 = hypre_SBoxArrayArraySBoxArray(sbox_array_array_1, i);  
+         sbox_array_size_0 = hypre_SBoxArraySize(sbox_array_0);
+         sbox_array_size_1 = hypre_SBoxArraySize(sbox_array_1);
+         box_ranks[i] =
+            hypre_CTAlloc(int, sbox_array_size_0 + sbox_array_size_1);
+         for ( j=0 ; j < sbox_array_size_1; j++)
+            box_ranks[i][j] = box_ranks_1[i][j];
+         for ( k=0 ; k < sbox_array_size_0; k++)
+            box_ranks[i][k+sbox_array_size_1] = box_ranks_0[i][k];
+         hypre_AppendSBoxArray(sbox_array_0, sbox_array_1);
+      }
 
    *box_ranks_ptr = box_ranks;
 }

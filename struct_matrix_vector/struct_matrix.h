@@ -15,35 +15,34 @@
 #ifndef hypre_STRUCT_MATRIX_HEADER
 #define hypre_STRUCT_MATRIX_HEADER
 
-
 /*--------------------------------------------------------------------------
  * hypre_StructMatrix:
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
-   MPI_Comm           *comm;
+   MPI_Comm             *comm;
 
    hypre_StructGrid     *grid;
    hypre_StructStencil  *user_stencil;
    hypre_StructStencil  *stencil;
-   int                 num_values;   /* Number of "stored" coefficients */
+   int                   num_values;   /* Number of "stored" coefficients */
 
    hypre_BoxArray       *data_space;
 
-   double             *data;         /* Pointer to matrix data */
-   int                 data_size;    /* Size of matrix data */
-   int               **data_indices; /* num-boxes by stencil-size array
-                                        of indices into the data array.
-                                        data_indices[b][s] is the starting
-                                        index of matrix data corresponding
-                                        to box b and stencil coefficient s. */
-
-   int                 symmetric;    /* Is the matrix symmetric */
-   int                *symm_elements;/* Which elements are "symmetric" */
-   int                 num_ghost[6]; /* Num ghost layers in each direction */
-
-   int                 global_size;  /* Total number of nonzero coefficients */
+   double               *data;         /* Pointer to matrix data */
+   int                   data_size;    /* Size of matrix data */
+   int                 **data_indices; /* num-boxes by stencil-size array
+                                          of indices into the data array.
+                                          data_indices[b][s] is the starting
+                                          index of matrix data corresponding
+                                          to box b and stencil coefficient s */
+                      
+   int                   symmetric;    /* Is the matrix symmetric */
+   int                  *symm_elements;/* Which elements are "symmetric" */
+   int                   num_ghost[6]; /* Num ghost layers in each direction */
+                      
+   int                   global_size;  /* Total number of nonzero coeffs */
 
    hypre_CommPkg        *comm_pkg;     /* Info on how to update ghost data */
 
@@ -77,6 +76,5 @@ hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
 #define hypre_StructMatrixBoxDataValue(matrix, b, s, index) \
 (hypre_StructMatrixBoxData(matrix, b, s) + \
  hypre_BoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
-
 
 #endif

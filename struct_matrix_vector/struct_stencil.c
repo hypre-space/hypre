@@ -19,9 +19,9 @@
  *--------------------------------------------------------------------------*/
 
 hypre_StructStencil *
-hypre_NewStructStencil( int         dim,
-                      int         size,
-                      hypre_Index  *shape )
+hypre_NewStructStencil( int           dim,
+                        int           size,
+                        hypre_Index  *shape )
 {
    hypre_StructStencil   *stencil;
 
@@ -56,11 +56,11 @@ hypre_FreeStructStencil( hypre_StructStencil *stencil )
 
 int
 hypre_StructStencilElementRank( hypre_StructStencil *stencil,
-                              hypre_Index          stencil_element )
+                                hypre_Index          stencil_element )
 {
    hypre_Index  *stencil_shape;
-   int         rank;
-   int         i;
+   int           rank;
+   int           i;
 
    rank = -1;
    stencil_shape = hypre_StructStencilShape(stencil);
@@ -90,21 +90,21 @@ hypre_StructStencilElementRank( hypre_StructStencil *stencil,
 
 int
 hypre_SymmetrizeStructStencil( hypre_StructStencil  *stencil,
-                             hypre_StructStencil **symm_stencil_ptr,
-                             int               **symm_elements_ptr )
+                               hypre_StructStencil **symm_stencil_ptr,
+                               int                 **symm_elements_ptr )
 {
    hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
-   int                 stencil_size  = hypre_StructStencilSize(stencil); 
+   int                   stencil_size  = hypre_StructStencilSize(stencil); 
 
    hypre_StructStencil  *symm_stencil;
    hypre_Index          *symm_stencil_shape;
-   int                 symm_stencil_size;
-   int                *symm_elements;
+   int                   symm_stencil_size;
+   int                  *symm_elements;
 
-   int                 no_symmetric_stencil_element;
-   int                 i, j, d;
-
-   int                 ierr = 0;
+   int                   no_symmetric_stencil_element;
+   int                   i, j, d;
+                       
+   int                   ierr = 0;
 
    /*------------------------------------------------------
     * Copy stencil elements into `symm_stencil_shape'
@@ -163,7 +163,8 @@ hypre_SymmetrizeStructStencil( hypre_StructStencil  *stencil,
    }
 
    symm_stencil = hypre_NewStructStencil(hypre_StructStencilDim(stencil),
-                                       symm_stencil_size, symm_stencil_shape);
+                                         symm_stencil_size,
+                                         symm_stencil_shape);
 
    *symm_stencil_ptr  = symm_stencil;
    *symm_elements_ptr = symm_elements;

@@ -15,25 +15,24 @@
 #ifndef hypre_STRUCT_GRID_HEADER
 #define hypre_STRUCT_GRID_HEADER
 
-
 /*--------------------------------------------------------------------------
  * hypre_StructGrid:
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
-   MPI_Comm      *comm;
+   MPI_Comm        *comm;
 
    hypre_BoxArray  *all_boxes;    /* Array of all grid boxes in the grid */
-   int           *processes;    /* Processes corresponding to grid boxes */
+   int             *processes;    /* Processes corresponding to grid boxes */
 
    hypre_BoxArray  *boxes;        /* Array of grid boxes in this process */
-   int           *box_ranks;    /* Ranks of grid boxes in this process */
+   int             *box_ranks;    /* Ranks of grid boxes in this process */
 
-   int            dim;          /* Number of grid dimensions */
+   int              dim;          /* Number of grid dimensions */
 
-   int            global_size;  /* Total number of grid points */
-   int            local_size;   /* Total number of points locally */
+   int              global_size;  /* Total number of grid points */
+   int              local_size;   /* Total number of points locally */
 
 } hypre_StructGrid;
 
@@ -65,6 +64,5 @@ typedef struct
  
 #define hypre_ForStructGridBoxI(i, grid) \
 hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
-
 
 #endif

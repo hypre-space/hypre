@@ -83,12 +83,18 @@ hypre_InitializeTiming( char *name )
       old_state     = (hypre_global_timing -> state);
       old_num_regs  = (hypre_global_timing -> num_regs);
 
-      (hypre_global_timing -> wall_time) = hypre_CTAlloc(double, (time_index+1));
-      (hypre_global_timing -> cpu_time)  = hypre_CTAlloc(double, (time_index+1));
-      (hypre_global_timing -> flops)     = hypre_CTAlloc(double, (time_index+1));
-      (hypre_global_timing -> name)      = hypre_CTAlloc(char *, (time_index+1));
-      (hypre_global_timing -> state)     = hypre_CTAlloc(int,    (time_index+1));
-      (hypre_global_timing -> num_regs)  = hypre_CTAlloc(int,    (time_index+1));
+      (hypre_global_timing -> wall_time) =
+         hypre_CTAlloc(double, (time_index+1));
+      (hypre_global_timing -> cpu_time)  =
+         hypre_CTAlloc(double, (time_index+1));
+      (hypre_global_timing -> flops)     =
+         hypre_CTAlloc(double, (time_index+1));
+      (hypre_global_timing -> name)      =
+         hypre_CTAlloc(char *, (time_index+1));
+      (hypre_global_timing -> state)     =
+         hypre_CTAlloc(int,    (time_index+1));
+      (hypre_global_timing -> num_regs)  =
+         hypre_CTAlloc(int,    (time_index+1));
       (hypre_global_timing -> size) ++;
 
       for (i = 0; i < time_index; i++)
@@ -179,12 +185,12 @@ hypre_EndTiming( int time_index )
 void
 hypre_PrintTiming( MPI_Comm *comm )
 {
-   double local_wall_time;
-   double local_cpu_time;
-   double wall_time;
-   double cpu_time;
-   double wall_mflops;
-   double cpu_mflops;
+   double  local_wall_time;
+   double  local_cpu_time;
+   double  wall_time;
+   double  cpu_time;
+   double  wall_mflops;
+   double  cpu_mflops;
 
    int     i, myrank;
 

@@ -30,8 +30,8 @@ typedef struct
    hypre_SBoxArray     *base_points;
    hypre_ComputePkg    *compute_pkg;
 
-   int                time_index;
-   int                flops;
+   int                  time_index;
+   int                  flops;
 
 } hypre_SMGResidualData;
 
@@ -60,11 +60,11 @@ hypre_SMGResidualInitialize( )
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGResidualSetup( void             *residual_vdata,
-                      hypre_StructMatrix *A,
-                      hypre_StructVector *x,
-                      hypre_StructVector *b,
-                      hypre_StructVector *r              )
+hypre_SMGResidualSetup( void               *residual_vdata,
+                        hypre_StructMatrix *A,
+                        hypre_StructVector *x,
+                        hypre_StructVector *b,
+                        hypre_StructVector *r              )
 {
    int ierr;
 
@@ -78,8 +78,8 @@ hypre_SMGResidualSetup( void             *residual_vdata,
                        
    hypre_BoxArrayArray    *send_boxes;
    hypre_BoxArrayArray    *recv_boxes;
-   int                 **send_box_ranks;
-   int                 **recv_box_ranks;
+   int                   **send_box_ranks;
+   int                   **recv_box_ranks;
    hypre_BoxArrayArray    *indt_boxes;
    hypre_BoxArrayArray    *dept_boxes;
                        
@@ -99,25 +99,27 @@ hypre_SMGResidualSetup( void             *residual_vdata,
    stencil = hypre_StructMatrixStencil(A);
 
    base_points = hypre_ProjectBoxArray(hypre_StructGridBoxes(grid),
-                                     base_index, base_stride);
+                                       base_index, base_stride);
 
    hypre_GetComputeInfo(&send_boxes, &recv_boxes,
-                      &send_box_ranks, &recv_box_ranks,
-                      &indt_boxes, &dept_boxes,
-                      grid, stencil);
+                        &send_box_ranks, &recv_box_ranks,
+                        &indt_boxes, &dept_boxes,
+                        grid, stencil);
 
    send_sboxes = hypre_ConvertToSBoxArrayArray(send_boxes);
    recv_sboxes = hypre_ConvertToSBoxArrayArray(recv_boxes);
-   indt_sboxes = hypre_ProjectBoxArrayArray(indt_boxes, base_index, base_stride);
-   dept_sboxes = hypre_ProjectBoxArrayArray(dept_boxes, base_index, base_stride);
+   indt_sboxes = hypre_ProjectBoxArrayArray(indt_boxes,
+                                            base_index, base_stride);
+   dept_sboxes = hypre_ProjectBoxArrayArray(dept_boxes,
+                                            base_index, base_stride);
 
    hypre_FreeBoxArrayArray(indt_boxes);
    hypre_FreeBoxArrayArray(dept_boxes);
 
    compute_pkg = hypre_NewComputePkg(send_sboxes, recv_sboxes,
-                                   send_box_ranks, recv_box_ranks,
-                                   indt_sboxes, dept_sboxes,
-                                   grid, hypre_StructVectorDataSpace(x), 1);
+                                     send_box_ranks, recv_box_ranks,
+                                     indt_sboxes, dept_sboxes,
+                                     grid, hypre_StructVectorDataSpace(x), 1);
 
    /*----------------------------------------------------------
     * Set up the residual data structure
@@ -148,11 +150,11 @@ hypre_SMGResidualSetup( void             *residual_vdata,
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGResidual( void             *residual_vdata,
-                 hypre_StructMatrix *A,
-                 hypre_StructVector *x,
-                 hypre_StructVector *b,
-                 hypre_StructVector *r              )
+hypre_SMGResidual( void               *residual_vdata,
+                   hypre_StructMatrix *A,
+                   hypre_StructVector *x,
+                   hypre_StructVector *b,
+                   hypre_StructVector *r              )
 {
    int ierr;
 
@@ -173,25 +175,25 @@ hypre_SMGResidual( void             *residual_vdata,
    hypre_Box              *b_data_box;
    hypre_Box              *r_data_box;
                        
-   int                   Ai;
-   int                   xi;
-   int                   bi;
-   int                   ri;
-                       
-   double               *Ap;
-   double               *xp;
-   double               *bp;
-   double               *rp;
+   int                     Ai;
+   int                     xi;
+   int                     bi;
+   int                     ri;
+                         
+   double                 *Ap;
+   double                 *xp;
+   double                 *bp;
+   double                 *rp;
                        
    hypre_Index             loop_size;
    hypre_IndexRef          start;
                        
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
-   int                   stencil_size;
+   int                     stencil_size;
 
-   int                   compute_i, i, j, si;
-   int                   loopi, loopj, loopk;
+   int                     compute_i, i, j, si;
+   int                     loopi, loopj, loopk;
 
    hypre_BeginTiming(residual_data -> time_index);
 
@@ -219,24 +221,26 @@ hypre_SMGResidual( void             *residual_vdata,
 
             compute_sbox_a = base_points;
             hypre_ForSBoxI(i, compute_sbox_a)
-            {
-               compute_sbox = hypre_SBoxArraySBox(compute_sbox_a, i);
-               start = hypre_SBoxIMin(compute_sbox);
+               {
+                  compute_sbox = hypre_SBoxArraySBox(compute_sbox_a, i);
+                  start = hypre_SBoxIMin(compute_sbox);
 
-               b_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
-               r_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r), i);
+                  b_data_box =
+                     hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
+                  r_data_box =
+                     hypre_BoxArrayBox(hypre_StructVectorDataSpace(r), i);
 
-               bp = hypre_StructVectorBoxData(b, i);
-               rp = hypre_StructVectorBoxData(r, i);
+                  bp = hypre_StructVectorBoxData(b, i);
+                  rp = hypre_StructVectorBoxData(r, i);
 
-               hypre_GetSBoxSize(compute_sbox, loop_size);
-               hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                            b_data_box, start, base_stride, bi,
-                            r_data_box, start, base_stride, ri,
-                            {
-                               rp[ri] = bp[bi];
-                            });
-            }
+                  hypre_GetSBoxSize(compute_sbox, loop_size);
+                  hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
+                                 b_data_box, start, base_stride, bi,
+                                 r_data_box, start, base_stride, ri,
+                                 {
+                                    rp[ri] = bp[bi];
+                                 });
+               }
          }
          break;
 
@@ -253,38 +257,38 @@ hypre_SMGResidual( void             *residual_vdata,
        *--------------------------------------------------------------------*/
 
       hypre_ForSBoxArrayI(i, compute_sbox_aa)
-      {
-         compute_sbox_a = hypre_SBoxArrayArraySBoxArray(compute_sbox_aa, i);
-
-         A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-         x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-         r_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r), i);
-
-         rp = hypre_StructVectorBoxData(r, i);
-
-         hypre_ForSBoxI(j, compute_sbox_a)
          {
-            compute_sbox = hypre_SBoxArraySBox(compute_sbox_a, j);
+            compute_sbox_a = hypre_SBoxArrayArraySBoxArray(compute_sbox_aa, i);
 
-            start  = hypre_SBoxIMin(compute_sbox);
+            A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+            x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+            r_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r), i);
 
-            for (si = 0; si < stencil_size; si++)
-            {
-               Ap = hypre_StructMatrixBoxData(A, i, si);
-               xp = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
+            rp = hypre_StructVectorBoxData(r, i);
 
-               hypre_GetSBoxSize(compute_sbox, loop_size);
-               hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                            A_data_box, start, base_stride, Ai,
-                            x_data_box, start, base_stride, xi,
-                            r_data_box, start, base_stride, ri,
-                            {
-                               rp[ri] -= Ap[Ai] * xp[xi];
-                            });
-            }
+            hypre_ForSBoxI(j, compute_sbox_a)
+               {
+                  compute_sbox = hypre_SBoxArraySBox(compute_sbox_a, j);
+
+                  start  = hypre_SBoxIMin(compute_sbox);
+
+                  for (si = 0; si < stencil_size; si++)
+                  {
+                     Ap = hypre_StructMatrixBoxData(A, i, si);
+                     xp = hypre_StructVectorBoxData(x, i) +
+                        hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
+
+                     hypre_GetSBoxSize(compute_sbox, loop_size);
+                     hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
+                                    A_data_box, start, base_stride, Ai,
+                                    x_data_box, start, base_stride, xi,
+                                    r_data_box, start, base_stride, ri,
+                                    {
+                                       rp[ri] -= Ap[Ai] * xp[xi];
+                                    });
+                  }
+               }
          }
-      }
    }
    
    /*-----------------------------------------------------------------------
@@ -302,13 +306,13 @@ hypre_SMGResidual( void             *residual_vdata,
  *--------------------------------------------------------------------------*/
  
 int
-hypre_SMGResidualSetBase( void      *residual_vdata,
-                        hypre_Index  base_index,
-                        hypre_Index  base_stride )
+hypre_SMGResidualSetBase( void        *residual_vdata,
+                          hypre_Index  base_index,
+                          hypre_Index  base_stride )
 {
    hypre_SMGResidualData *residual_data = residual_vdata;
-   int          d;
-   int          ierr = 0;
+   int                    d;
+   int                    ierr = 0;
  
    for (d = 0; d < 3; d++)
    {

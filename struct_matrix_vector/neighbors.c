@@ -32,24 +32,24 @@
 
 void
 hypre_FindBoxNeighbors( hypre_BoxArray       *boxes,
-                      hypre_BoxArray       *all_boxes,
-                      hypre_StructStencil  *stencil,
-                      int                 transpose,
-                      hypre_BoxArray      **neighbors_ptr,
-                      int               **neighbor_ranks_ptr )
+                        hypre_BoxArray       *all_boxes,
+                        hypre_StructStencil  *stencil,
+                        int                   transpose,
+                        hypre_BoxArray      **neighbors_ptr,
+                        int                 **neighbor_ranks_ptr )
 {
    hypre_BoxArray   *neighbors;
-   int            *neighbor_ranks;
-   int            *tmp_neighbor_ranks;
-                  
-   int            *neighbor_flags;
+   int              *neighbor_ranks;
+   int              *tmp_neighbor_ranks;
+                    
+   int              *neighbor_flags;
                   
    hypre_Box        *box;
    hypre_Box        *shift_box;
    hypre_Box        *all_box;
    hypre_Box        *tmp_box;
                   
-   int             i, j, d, s;
+   int               i, j, d, s;
                 
    hypre_Index      *stencil_shape = hypre_StructStencilShape(stencil);
 
@@ -62,54 +62,58 @@ hypre_FindBoxNeighbors( hypre_BoxArray       *boxes,
    neighbor_flags = hypre_CTAlloc(int, hypre_BoxArraySize(all_boxes));
 
    hypre_ForBoxI(i, boxes)
-   {
-      box = hypre_BoxArrayBox(boxes, i);
-      shift_box = hypre_DuplicateBox(box);
-
-      for (s = 0; s < hypre_StructStencilSize(stencil); s++)
       {
-         if (transpose)
-         {
-            for (d = 0; d < 3; d++)
-            {
-               hypre_BoxIMinD(shift_box, d) =
-                  hypre_BoxIMinD(box, d) - hypre_IndexD(stencil_shape[s], d);
-               hypre_BoxIMaxD(shift_box, d) =
-                  hypre_BoxIMaxD(box, d) - hypre_IndexD(stencil_shape[s], d);
-            }
-         }
-         else
-         {
-            for (d = 0; d < 3; d++)
-            {
-               hypre_BoxIMinD(shift_box, d) =
-                  hypre_BoxIMinD(box, d) + hypre_IndexD(stencil_shape[s], d);
-               hypre_BoxIMaxD(shift_box, d) =
-                  hypre_BoxIMaxD(box, d) + hypre_IndexD(stencil_shape[s], d);
-            }
-         }
+         box = hypre_BoxArrayBox(boxes, i);
+         shift_box = hypre_DuplicateBox(box);
 
-         hypre_ForBoxI(j, all_boxes)
+         for (s = 0; s < hypre_StructStencilSize(stencil); s++)
          {
-            all_box = hypre_BoxArrayBox(all_boxes, j);
-
-            tmp_box = hypre_IntersectBoxes(shift_box, all_box);
-            if (tmp_box)
+            if (transpose)
             {
-               if (!neighbor_flags[j])
+               for (d = 0; d < 3; d++)
                {
-                  neighbor_flags[j] = 1;
-                  neighbor_ranks[hypre_BoxArraySize(neighbors)] = j;
-                  hypre_AppendBox(all_box, neighbors);
+                  hypre_BoxIMinD(shift_box, d) =
+                     hypre_BoxIMinD(box, d) -
+                     hypre_IndexD(stencil_shape[s], d);
+                  hypre_BoxIMaxD(shift_box, d) =
+                     hypre_BoxIMaxD(box, d) -
+                     hypre_IndexD(stencil_shape[s], d);
                }
-
-               hypre_FreeBox(tmp_box);
             }
-         }
-      }
+            else
+            {
+               for (d = 0; d < 3; d++)
+               {
+                  hypre_BoxIMinD(shift_box, d) =
+                     hypre_BoxIMinD(box, d) +
+                     hypre_IndexD(stencil_shape[s], d);
+                  hypre_BoxIMaxD(shift_box, d) =
+                     hypre_BoxIMaxD(box, d) +
+                     hypre_IndexD(stencil_shape[s], d);
+               }
+            }
 
-      hypre_FreeBox(shift_box);
-   }
+            hypre_ForBoxI(j, all_boxes)
+               {
+                  all_box = hypre_BoxArrayBox(all_boxes, j);
+
+                  tmp_box = hypre_IntersectBoxes(shift_box, all_box);
+                  if (tmp_box)
+                  {
+                     if (!neighbor_flags[j])
+                     {
+                        neighbor_flags[j] = 1;
+                        neighbor_ranks[hypre_BoxArraySize(neighbors)] = j;
+                        hypre_AppendBox(all_box, neighbors);
+                     }
+
+                     hypre_FreeBox(tmp_box);
+                  }
+               }
+         }
+
+         hypre_FreeBox(shift_box);
+      }
 
    hypre_TFree(neighbor_flags);
 
@@ -145,26 +149,26 @@ hypre_FindBoxNeighbors( hypre_BoxArray       *boxes,
 
 void
 hypre_FindBoxApproxNeighbors( hypre_BoxArray       *boxes,
-                            hypre_BoxArray       *all_boxes,
-                            hypre_StructStencil  *stencil,
-                            int                 transpose,
-                            hypre_BoxArray      **neighbors_ptr,
-                            int               **neighbor_ranks_ptr )
+                              hypre_BoxArray       *all_boxes,
+                              hypre_StructStencil  *stencil,
+                              int                   transpose,
+                              hypre_BoxArray      **neighbors_ptr,
+                              int                 **neighbor_ranks_ptr )
 {
    hypre_BoxArray   *neighbors;
-   int            *neighbor_ranks;
-   int            *tmp_neighbor_ranks;
-                  
-   int            *neighbor_flags;
+   int              *neighbor_ranks;
+   int              *tmp_neighbor_ranks;
+                    
+   int              *neighbor_flags;
                   
    hypre_Box        *box;
    hypre_Box        *grow_box;
    hypre_Box        *all_box;
    hypre_Box        *tmp_box;
                   
-   int             min_offset[3], max_offset[3];
+   int               min_offset[3], max_offset[3];
                   
-   int             i, j, d, s;
+   int               i, j, d, s;
 
    hypre_Index      *stencil_shape = hypre_StructStencilShape(stencil);
 
@@ -211,37 +215,37 @@ hypre_FindBoxApproxNeighbors( hypre_BoxArray       *boxes,
    neighbor_flags = hypre_CTAlloc(int, hypre_BoxArraySize(all_boxes));
 
    hypre_ForBoxI(i, boxes)
-   {
-      box = hypre_BoxArrayBox(boxes, i);
-
-      /* grow the box */
-      grow_box = hypre_DuplicateBox(box);
-      for (d = 0; d < 3; d++)
       {
-         hypre_BoxIMinD(grow_box, d) += min_offset[d];
-         hypre_BoxIMaxD(grow_box, d) += max_offset[d];
-      }
+         box = hypre_BoxArrayBox(boxes, i);
 
-      hypre_ForBoxI(j, all_boxes)
-      {
-         all_box = hypre_BoxArrayBox(all_boxes, j);
-
-         tmp_box = hypre_IntersectBoxes(grow_box, all_box);
-         if (tmp_box)
+         /* grow the box */
+         grow_box = hypre_DuplicateBox(box);
+         for (d = 0; d < 3; d++)
          {
-            if (!neighbor_flags[j])
+            hypre_BoxIMinD(grow_box, d) += min_offset[d];
+            hypre_BoxIMaxD(grow_box, d) += max_offset[d];
+         }
+
+         hypre_ForBoxI(j, all_boxes)
             {
-               neighbor_flags[j] = 1;
-               neighbor_ranks[hypre_BoxArraySize(neighbors)] = j;
-               hypre_AppendBox(all_box, neighbors);
+               all_box = hypre_BoxArrayBox(all_boxes, j);
+
+               tmp_box = hypre_IntersectBoxes(grow_box, all_box);
+               if (tmp_box)
+               {
+                  if (!neighbor_flags[j])
+                  {
+                     neighbor_flags[j] = 1;
+                     neighbor_ranks[hypre_BoxArraySize(neighbors)] = j;
+                     hypre_AppendBox(all_box, neighbors);
+                  }
+
+                  hypre_FreeBox(tmp_box);
+               }
             }
 
-            hypre_FreeBox(tmp_box);
-         }
+         hypre_FreeBox(grow_box);
       }
-
-      hypre_FreeBox(grow_box);
-   }
 
    hypre_TFree(neighbor_flags);
 

@@ -21,9 +21,9 @@
 
 int
 hypre_SetIndex( hypre_Index index,
-              int       ix,
-              int       iy,
-              int       iz    )
+                int         ix,
+                int         iy,
+                int         iz    )
 {
    hypre_IndexX(index) = ix;
    hypre_IndexY(index) = iy;
@@ -38,7 +38,7 @@ hypre_SetIndex( hypre_Index index,
 
 int
 hypre_CopyIndex( hypre_Index index1,
-               hypre_Index index2 )
+                 hypre_Index index2 )
 {
    hypre_IndexX(index2) = hypre_IndexX(index1);
    hypre_IndexY(index2) = hypre_IndexY(index1);
@@ -53,10 +53,10 @@ hypre_CopyIndex( hypre_Index index1,
 
 hypre_Box *
 hypre_NewBox( hypre_Index imin,
-	    hypre_Index imax )
+              hypre_Index imax )
 {
    hypre_Box *box;
-   int      d;
+   int        d;
 
    box = hypre_TAlloc(hypre_Box, 1);
 
@@ -94,7 +94,7 @@ hypre_BoxArrayArray *
 hypre_NewBoxArrayArray( int size )
 {
    hypre_BoxArrayArray  *box_array_array;
-   int                 i;
+   int                   i;
  
    box_array_array = hypre_CTAlloc(hypre_BoxArrayArray, 1);
  
@@ -198,7 +198,7 @@ hypre_FreeBoxArrayArray( hypre_BoxArrayArray *box_array_array )
 hypre_Box *
 hypre_DuplicateBox( hypre_Box *box )
 {
-   hypre_Box    *new_box;
+   hypre_Box  *new_box;
 
    new_box = hypre_NewBox(hypre_BoxIMin(box), hypre_BoxIMax(box));
 
@@ -215,10 +215,10 @@ hypre_DuplicateBoxArray( hypre_BoxArray *box_array )
 {
    hypre_BoxArray  *new_box_array;
    hypre_Box      **new_boxes;
-   int            new_size;
+   int              new_size;
 
    hypre_Box      **boxes;
-   int            i, data_sz;
+   int              i, data_sz;
 
    new_box_array = hypre_NewBoxArray();
    new_boxes = NULL;
@@ -252,10 +252,10 @@ hypre_DuplicateBoxArrayArray( hypre_BoxArrayArray *box_array_array )
 {
    hypre_BoxArrayArray  *new_box_array_array;
    hypre_BoxArray      **new_box_arrays;
-   int                 new_size;
+   int                   new_size;
  
    hypre_BoxArray      **box_arrays;
-   int                 i;
+   int                   i;
  
    new_size = hypre_BoxArrayArraySize(box_array_array);
    new_box_array_array = hypre_NewBoxArrayArray(new_size);
@@ -284,13 +284,13 @@ hypre_DuplicateBoxArrayArray( hypre_BoxArrayArray *box_array_array )
 
 void 
 hypre_AppendBox( hypre_Box      *box,
-	       hypre_BoxArray *box_array )
+                 hypre_BoxArray *box_array )
 {
    hypre_Box  **boxes;
-   int        size;
+   int          size;
 
    hypre_Box  **old_boxes;
-   int        i;
+   int          i;
 
    size = hypre_BoxArraySize(box_array);
    if (!(size % hypre_BoxArrayBlocksize))
@@ -317,11 +317,11 @@ hypre_AppendBox( hypre_Box      *box,
 
 void 
 hypre_DeleteBox( hypre_BoxArray *box_array,
-	       int           index     )
+                 int             index     )
 {
    hypre_Box  **boxes;
 
-   int        i;
+   int          i;
 
    boxes = hypre_BoxArrayBoxes(box_array);
 
@@ -340,7 +340,7 @@ hypre_DeleteBox( hypre_BoxArray *box_array,
 
 void 
 hypre_AppendBoxArray( hypre_BoxArray *box_array_0,
-		    hypre_BoxArray *box_array_1 )
+                      hypre_BoxArray *box_array_1 )
 {
    int  i;
 
@@ -356,13 +356,13 @@ hypre_AppendBoxArray( hypre_BoxArray *box_array_0,
 
 void 
 hypre_AppendBoxArrayArray( hypre_BoxArrayArray *box_array_array_0,
-                         hypre_BoxArrayArray *box_array_array_1 )
+                           hypre_BoxArrayArray *box_array_array_1 )
 {
    int  i;
 
    hypre_ForBoxArrayI(i, box_array_array_0)
       hypre_AppendBoxArray(hypre_BoxArrayArrayBoxArray(box_array_array_0, i),
-                         hypre_BoxArrayArrayBoxArray(box_array_array_1, i));
+                           hypre_BoxArrayArrayBoxArray(box_array_array_1, i));
 }
 
 /*--------------------------------------------------------------------------
@@ -371,7 +371,7 @@ hypre_AppendBoxArrayArray( hypre_BoxArrayArray *box_array_array_0,
 
 int
 hypre_GetBoxSize( hypre_Box   *box,
-                hypre_Index  size )
+                  hypre_Index  size )
 {
    hypre_IndexX(size) = hypre_BoxSizeX(box);
    hypre_IndexY(size) = hypre_BoxSizeY(box);
@@ -389,26 +389,26 @@ hypre_GetBoxSize( hypre_Box   *box,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_CopyBoxArrayData( hypre_BoxArray     *box_array_in,
-                      hypre_BoxArray     *data_space_in,
-                      int               num_values_in,
-                      double           *data_in,
-		      hypre_BoxArray     *box_array_out,
-                      hypre_BoxArray     *data_space_out,
-                      int               num_values_out,
-                      double           *data_out       )
+hypre_CopyBoxArrayData( hypre_BoxArray *box_array_in,
+                        hypre_BoxArray *data_space_in,
+                        int             num_values_in,
+                        double         *data_in,
+                        hypre_BoxArray *box_array_out,
+                        hypre_BoxArray *data_space_out,
+                        int             num_values_out,
+                        double         *data_out       )
 {
-   hypre_Box         *box_in, *box_out;
-   hypre_Box         *data_box_in, *data_box_out;
-
-   int              data_box_volume_in, data_box_volume_out;
-   int              datai_in, datai_out;
-
-   hypre_Index        loop_size;
-   hypre_Index        stride;
-
-   int              j;
-   int              loopi, loopj, loopk;
+   hypre_Box    *box_in, *box_out;
+   hypre_Box    *data_box_in, *data_box_out;
+                
+   int           data_box_volume_in, data_box_volume_out;
+   int           datai_in, datai_out;
+                
+   hypre_Index   loop_size;
+   hypre_Index   stride;
+                
+   int           j;
+   int           loopi, loopj, loopk;
 
    /*----------------------------------------
     * Read data
@@ -428,12 +428,12 @@ hypre_CopyBoxArrayData( hypre_BoxArray     *box_array_in,
 
    hypre_GetBoxSize(box_out, loop_size);
    hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-		data_box_in, hypre_BoxIMin(box_out), stride, datai_in,
-		data_box_out, hypre_BoxIMin(box_out), stride, datai_out,\
-		for (j = 0; j < num_values_out; j++)
-		{
-		  data_out[datai_out + j*data_box_volume_out] =
-		    data_in[datai_in + j*data_box_volume_in];
-		})
+                  data_box_in, hypre_BoxIMin(box_out), stride, datai_in,
+                  data_box_out, hypre_BoxIMin(box_out), stride, datai_out,
+                  for (j = 0; j < num_values_out; j++)
+                  {
+                     data_out[datai_out + j*data_box_volume_out] =
+                        data_in[datai_in + j*data_box_volume_in];
+                  });
 }
 

@@ -18,34 +18,34 @@
 
 void
 hypre_GetCommInfo( hypre_BoxArrayArray  **send_boxes_ptr,
-                 hypre_BoxArrayArray  **recv_boxes_ptr,
-                 int               ***send_box_ranks_ptr,
-                 int               ***recv_box_ranks_ptr,
-                 hypre_StructGrid      *grid,
-                 hypre_StructStencil   *stencil            )
+                   hypre_BoxArrayArray  **recv_boxes_ptr,
+                   int                 ***send_box_ranks_ptr,
+                   int                 ***recv_box_ranks_ptr,
+                   hypre_StructGrid      *grid,
+                   hypre_StructStencil   *stencil            )
 {
    /* output variables */
    hypre_BoxArrayArray     *send_boxes;
    hypre_BoxArrayArray     *recv_boxes;
-   int                  **send_box_ranks;
-   int                  **recv_box_ranks;
+   int                    **send_box_ranks;
+   int                    **recv_box_ranks;
 
    /* internal variables */
    hypre_BoxArray          *boxes;
    hypre_BoxArray          *all_boxes;
-   int                   *processes;
+   int                     *processes;
 
    hypre_StructStencil     *symm_stencil;
-   int                   *symm_elements;
+   int                     *symm_elements;
 
    hypre_BoxArray          *neighbors;
-   int                   *neighbor_ranks;
-   int                    num_neighbors;
+   int                     *neighbor_ranks;
+   int                      num_neighbors;
                          
    hypre_BoxArrayArray     *shift_boxes;
    hypre_BoxArrayArray     *shift_neighbors;
                           
-   int                    r, n, i, j, k;
+   int                      r, n, i, j, k;
 
    /* temporary work variables */
    hypre_BoxArrayArray     *box_aa0;
@@ -60,8 +60,8 @@ hypre_GetCommInfo( hypre_BoxArrayArray  **send_boxes_ptr,
    hypre_Box               *box1;
    hypre_Box               *box2;
 
-   int                  **box_ranks;
-   int                   *box_array_sizes;
+   int                    **box_ranks;
+   int                     *box_array_sizes;
 
    /*------------------------------------------------------
     * Extract needed grid info
@@ -79,7 +79,7 @@ hypre_GetCommInfo( hypre_BoxArrayArray  **send_boxes_ptr,
    hypre_SymmetrizeStructStencil(stencil, &symm_stencil, &symm_elements);
 
    hypre_FindBoxNeighbors(boxes, all_boxes, symm_stencil, 0,
-                        &neighbors, &neighbor_ranks);
+                          &neighbors, &neighbor_ranks);
 
    hypre_FreeStructStencil(symm_stencil);
    hypre_TFree(symm_elements);
@@ -105,18 +105,19 @@ hypre_GetCommInfo( hypre_BoxArrayArray  **send_boxes_ptr,
       box_aa1 = hypre_NewBoxArrayArray(hypre_BoxArraySize(box_a0));
 
       hypre_ForBoxArrayI(i, box_aa0)
-      {
-         box_a1 = hypre_BoxArrayArrayBoxArray(box_aa0, i);
-
-         hypre_ForBoxI(j, box_a1)
          {
-            box_a2 = hypre_SubtractBoxes(hypre_BoxArrayBox(box_a1, j),
-                                       hypre_BoxArrayBox(box_a0, i));
-            hypre_AppendBoxArray(box_a2,
-                               hypre_BoxArrayArrayBoxArray(box_aa1, i));
-            hypre_FreeBoxArrayShell(box_a2);
+            box_a1 = hypre_BoxArrayArrayBoxArray(box_aa0, i);
+
+            hypre_ForBoxI(j, box_a1)
+               {
+                  box_a2 = hypre_SubtractBoxes(hypre_BoxArrayBox(box_a1, j),
+                                               hypre_BoxArrayBox(box_a0, i));
+                  hypre_AppendBoxArray(box_a2,
+                                       hypre_BoxArrayArrayBoxArray(box_aa1,
+                                                                   i));
+                  hypre_FreeBoxArrayShell(box_a2);
+               }
          }
-      }
 
       hypre_FreeBoxArrayArray(box_aa0);
 
@@ -158,40 +159,40 @@ hypre_GetCommInfo( hypre_BoxArrayArray  **send_boxes_ptr,
          box_ranks[i] = hypre_CTAlloc(int, hypre_BoxArraySize(neighbors));
 
       hypre_ForBoxI(i, box_a0)
-      {
-         box0 = hypre_BoxArrayBox(box_a0, i);
-
-         hypre_ForBoxArrayI(j, box_aa0)
          {
-            box_a2 = hypre_BoxArrayArrayBoxArray(box_aa0, j);
+            box0 = hypre_BoxArrayBox(box_a0, i);
 
-            hypre_ForBoxI(k, box_a2)
-            {
-               box1 = hypre_BoxArrayBox(box_a2, k);
-
-               box2 = hypre_IntersectBoxes(box0, box1);
-               if (box2)
+            hypre_ForBoxArrayI(j, box_aa0)
                {
-                  switch(r)
-                  {
-                     case 0:
-                     box_a3 = hypre_BoxArrayArrayBoxArray(box_aa1, j);
-                     box_ranks[j][hypre_BoxArraySize(box_a3)] =
-                        neighbor_ranks[i];
-                     hypre_AppendBox(box2, box_a3);
-                     break;
+                  box_a2 = hypre_BoxArrayArrayBoxArray(box_aa0, j);
 
-                     case 1:
-                     box_a3 = hypre_BoxArrayArrayBoxArray(box_aa1, i);
-                     box_ranks[i][hypre_BoxArraySize(box_a3)] =
-                        neighbor_ranks[j];
-                     hypre_AppendBox(box2, box_a3);
-                     break;
-                  }
+                  hypre_ForBoxI(k, box_a2)
+                     {
+                        box1 = hypre_BoxArrayBox(box_a2, k);
+
+                        box2 = hypre_IntersectBoxes(box0, box1);
+                        if (box2)
+                        {
+                           switch(r)
+                           {
+                              case 0:
+                              box_a3 = hypre_BoxArrayArrayBoxArray(box_aa1, j);
+                              box_ranks[j][hypre_BoxArraySize(box_a3)] =
+                                 neighbor_ranks[i];
+                              hypre_AppendBox(box2, box_a3);
+                              break;
+
+                              case 1:
+                              box_a3 = hypre_BoxArrayArrayBoxArray(box_aa1, i);
+                              box_ranks[i][hypre_BoxArraySize(box_a3)] =
+                                 neighbor_ranks[j];
+                              hypre_AppendBox(box2, box_a3);
+                              break;
+                           }
+                        }
+                     }
                }
-            }
          }
-      }
 
       switch(r)
       {
@@ -236,40 +237,40 @@ hypre_GetCommInfo( hypre_BoxArrayArray  **send_boxes_ptr,
       box_aa1 = hypre_NewBoxArrayArray(hypre_BoxArrayArraySize(box_aa0));
 
       hypre_ForBoxArrayI(i, box_aa0)
-      {
-         box_a0 = hypre_BoxArrayArrayBoxArray(box_aa0, i);
-         box_a1 = hypre_BoxArrayArrayBoxArray(box_aa1, i);
-
-         for (n = 0; n < num_neighbors; n++)
          {
-            box_a2 = hypre_NewBoxArray();
-            hypre_ForBoxI(j, box_a0)
+            box_a0 = hypre_BoxArrayArrayBoxArray(box_aa0, i);
+            box_a1 = hypre_BoxArrayArrayBoxArray(box_aa1, i);
+
+            for (n = 0; n < num_neighbors; n++)
             {
-               if (box_ranks[i][j] == neighbor_ranks[n])
-                  hypre_AppendBox(hypre_BoxArrayBox(box_a0, j), box_a2);
+               box_a2 = hypre_NewBoxArray();
+               hypre_ForBoxI(j, box_a0)
+                  {
+                     if (box_ranks[i][j] == neighbor_ranks[n])
+                        hypre_AppendBox(hypre_BoxArrayBox(box_a0, j), box_a2);
+                  }
+
+               box_a3 = hypre_UnionBoxArray(box_a2);
+               hypre_AppendBoxArray(box_a3, box_a1);
+               box_array_sizes[n] = hypre_BoxArraySize(box_a3);
+
+               hypre_FreeBoxArrayShell(box_a2);
+               hypre_FreeBoxArrayShell(box_a3);
             }
 
-            box_a3 = hypre_UnionBoxArray(box_a2);
-            hypre_AppendBoxArray(box_a3, box_a1);
-            box_array_sizes[n] = hypre_BoxArraySize(box_a3);
-
-            hypre_FreeBoxArrayShell(box_a2);
-            hypre_FreeBoxArrayShell(box_a3);
-         }
-
-         /* fix box rank info */
-         hypre_TFree(box_ranks[i]);
-         box_ranks[i] = hypre_CTAlloc(int, hypre_BoxArraySize(box_a1));
-         j = 0;
-         for (n = 0; n < num_neighbors; n++)
-         {
-            for (k = 0; k < box_array_sizes[n]; k++)
+            /* fix box rank info */
+            hypre_TFree(box_ranks[i]);
+            box_ranks[i] = hypre_CTAlloc(int, hypre_BoxArraySize(box_a1));
+            j = 0;
+            for (n = 0; n < num_neighbors; n++)
             {
-               box_ranks[i][j] = neighbor_ranks[n];
-               j++;
+               for (k = 0; k < box_array_sizes[n]; k++)
+               {
+                  box_ranks[i][j] = neighbor_ranks[n];
+                  j++;
+               }
             }
          }
-      }
 
       hypre_FreeBoxArrayArray(box_aa0);
 
@@ -308,18 +309,18 @@ hypre_GetCommInfo( hypre_BoxArrayArray  **send_boxes_ptr,
 
 void
 hypre_GetSBoxType( hypre_SBox     *comm_sbox,
-                 hypre_Box      *data_box,
-                 int           num_values,
-                 MPI_Datatype *comm_sbox_type                      )
+                   hypre_Box      *data_box,
+                   int             num_values,
+                   MPI_Datatype   *comm_sbox_type )
 {
-   int  length_array[4];
-   int  stride_array[4];
+   int           length_array[4];
+   int           stride_array[4];
 
    MPI_Datatype *old_type;
    MPI_Datatype *new_type;
    MPI_Datatype *tmp_type;
              
-   int  i, j, dim;
+   int           i, j, dim;
 
    /*------------------------------------------------------
     * Compute length_array, stride_array, and dim
@@ -420,66 +421,66 @@ hypre_GetSBoxType( hypre_SBox     *comm_sbox,
 
 hypre_CommPkg *
 hypre_NewCommPkg( hypre_SBoxArrayArray  *send_sboxes,
-                hypre_SBoxArrayArray  *recv_sboxes,
-                int                **send_box_ranks,
-                int                **recv_box_ranks,
-                hypre_StructGrid      *grid,
-                hypre_BoxArray        *data_space,
-                int                  num_values     )
+                  hypre_SBoxArrayArray  *recv_sboxes,
+                  int                  **send_box_ranks,
+                  int                  **recv_box_ranks,
+                  hypre_StructGrid      *grid,
+                  hypre_BoxArray        *data_space,
+                  int                    num_values     )
 {
-   MPI_Comm            *comm = hypre_StructGridComm(grid);
+   MPI_Comm              *comm = hypre_StructGridComm(grid);
 
    /* output variables */
    hypre_CommPkg         *comm_pkg;
                        
-   int                  pkg_num_sends;
-   int                  pkg_num_recvs;
+   int                    pkg_num_sends;
+   int                    pkg_num_recvs;
+                         
+   int                   *pkg_send_processes;
+   int                   *pkg_recv_processes;
                        
-   int                 *pkg_send_processes;
-   int                 *pkg_recv_processes;
-                       
-   MPI_Datatype        *pkg_send_types;
-   MPI_Datatype        *pkg_recv_types;
+   MPI_Datatype          *pkg_send_types;
+   MPI_Datatype          *pkg_recv_types;
 
    /* internal variables */
-   int                  pkg_num_comms;
-   int                 *pkg_comm_processes;
-   MPI_Datatype        *pkg_comm_types;
-
-   int                 *box_ranks;
-   int                 *processes;
+   int                    pkg_num_comms;
+   int                   *pkg_comm_processes;
+   MPI_Datatype          *pkg_comm_types;
+                       
+   int                   *box_ranks;
+   int                   *processes;
 
    hypre_SBoxArrayArray  *comm_sboxes;
    hypre_SBoxArray       *comm_sbox_array;
    hypre_SBox            *comm_sbox;
-   int                **comm_box_ranks;
+   int                  **comm_box_ranks;
 
    hypre_Box             *data_box;
-   int                  data_box_offset;
+   int                    data_box_offset;
 
-   int                 *comm_process_flags;
+   int                   *comm_process_flags;
    struct CommStruct
    {
       hypre_SBox         *comm_sbox;
       hypre_Box          *data_box;
-      int               data_box_offset;
-      int               orig;
-      int               dest;
-   };
-   struct CommStruct  **comm_structs;
-                     
-   int                 *comm_origs;
-   int                 *comm_dests;
-   int                 *comm_sort;
-   
-   int                  num_comms;
-   int                 *comm_block_lengths;
-   MPI_Aint            *comm_displacements;
-   MPI_Datatype        *comm_types;
-                     
-   int                  r, p, i, j;
-   int                  num_procs;
-   int                  tmp_int;
+      int                 data_box_offset;
+      int                 orig;
+      int                 dest;
+   };                 
+   struct CommStruct    **comm_structs;
+                       
+   int                   *comm_origs;
+   int                   *comm_dests;
+   int                   *comm_sort;
+                      
+   int                    num_comms;
+   int                   *comm_block_lengths;
+   MPI_Aint              *comm_displacements;
+   MPI_Datatype          *comm_types;
+                       
+   int                    r, p, i, j;
+   int                    num_procs;
+   int                    tmp_int;
                 
    /*---------------------------------------------------------
     * First time through, compute send package info.
@@ -514,22 +515,22 @@ hypre_NewCommPkg( hypre_SBoxArrayArray  *send_sboxes,
 
       pkg_num_comms = 0;
       hypre_ForSBoxArrayI(i, comm_sboxes)
-      {
-         comm_sbox_array = hypre_SBoxArrayArraySBoxArray(comm_sboxes, i);
-
-         hypre_ForSBoxI(j, comm_sbox_array)
          {
-            comm_sbox = hypre_SBoxArraySBox(comm_sbox_array, j);
-            p = processes[comm_box_ranks[i][j]];
+            comm_sbox_array = hypre_SBoxArrayArraySBoxArray(comm_sboxes, i);
 
-            if (hypre_SBoxVolume(comm_sbox) != 0)
-            {
-               comm_process_flags[p]++;
-               if (comm_process_flags[p] == 1)
-                  pkg_num_comms++;
-            }
+            hypre_ForSBoxI(j, comm_sbox_array)
+               {
+                  comm_sbox = hypre_SBoxArraySBox(comm_sbox_array, j);
+                  p = processes[comm_box_ranks[i][j]];
+
+                  if (hypre_SBoxVolume(comm_sbox) != 0)
+                  {
+                     comm_process_flags[p]++;
+                     if (comm_process_flags[p] == 1)
+                        pkg_num_comms++;
+                  }
+               }
          }
-      }
 
       /*------------------------------------------------------
        * Loop over `comm_sboxes' and compute `comm_structs'.
@@ -539,49 +540,51 @@ hypre_NewCommPkg( hypre_SBoxArrayArray  *send_sboxes,
 
       data_box_offset = 0;
       hypre_ForSBoxArrayI(i, comm_sboxes)
-      {
-         comm_sbox_array = hypre_SBoxArrayArraySBoxArray(comm_sboxes, i);
-         data_box = hypre_BoxArrayBox(data_space, i);
-
-         hypre_ForSBoxI(j, comm_sbox_array)
          {
-            comm_sbox = hypre_SBoxArraySBox(comm_sbox_array, j);
-            p = processes[comm_box_ranks[i][j]];
+            comm_sbox_array = hypre_SBoxArrayArraySBoxArray(comm_sboxes, i);
+            data_box = hypre_BoxArrayBox(data_space, i);
 
-            if (hypre_SBoxVolume(comm_sbox) != 0)
-            {
-               /* allocate CommStruct pointer */
-               if (comm_structs[p] == NULL)
+            hypre_ForSBoxI(j, comm_sbox_array)
                {
-                  comm_structs[p] =
-                     hypre_CTAlloc(struct CommStruct, comm_process_flags[p]);
-                  comm_process_flags[p] = 0;
-               }
+                  comm_sbox = hypre_SBoxArraySBox(comm_sbox_array, j);
+                  p = processes[comm_box_ranks[i][j]];
 
-               num_comms = comm_process_flags[p];
+                  if (hypre_SBoxVolume(comm_sbox) != 0)
+                  {
+                     /* allocate CommStruct pointer */
+                     if (comm_structs[p] == NULL)
+                     {
+                        comm_structs[p] =
+                           hypre_CTAlloc(struct CommStruct,
+                                         comm_process_flags[p]);
+                        comm_process_flags[p] = 0;
+                     }
 
-               comm_structs[p][num_comms].comm_sbox       = comm_sbox;
-               comm_structs[p][num_comms].data_box        = data_box;
-               comm_structs[p][num_comms].data_box_offset = data_box_offset;
-               switch(r)
-               {
-                  case 0:
-                  comm_structs[p][num_comms].orig = box_ranks[i];
-                  comm_structs[p][num_comms].dest = comm_box_ranks[i][j];
-                  break;
+                     num_comms = comm_process_flags[p];
+
+                     comm_structs[p][num_comms].comm_sbox       = comm_sbox;
+                     comm_structs[p][num_comms].data_box        = data_box;
+                     comm_structs[p][num_comms].data_box_offset =
+                        data_box_offset;
+                     switch(r)
+                     {
+                        case 0:
+                        comm_structs[p][num_comms].orig = box_ranks[i];
+                        comm_structs[p][num_comms].dest = comm_box_ranks[i][j];
+                        break;
  
-                  case 1:
-                  comm_structs[p][num_comms].orig = comm_box_ranks[i][j];
-                  comm_structs[p][num_comms].dest = box_ranks[i];
-                  break;
+                        case 1:
+                        comm_structs[p][num_comms].orig = comm_box_ranks[i][j];
+                        comm_structs[p][num_comms].dest = box_ranks[i];
+                        break;
+                     }
+
+                     comm_process_flags[p]++;
+                  }
                }
 
-               comm_process_flags[p]++;
-            }
+            data_box_offset += hypre_BoxVolume(data_box) * num_values;
          }
-
-         data_box_offset += hypre_BoxVolume(data_box) * num_values;
-      }
 
       /*------------------------------------------------------
        * Loop over comm_structs and build package info
@@ -657,7 +660,7 @@ hypre_NewCommPkg( hypre_SBoxArrayArray  *send_sboxes,
 
                /* compute types */
                hypre_GetSBoxType(comm_sbox, data_box, num_values,
-                               &comm_types[i]);
+                                 &comm_types[i]);
             }
 
             /* create `pkg_comm_types' */
@@ -769,7 +772,7 @@ hypre_FreeCommPkg( hypre_CommPkg *comm_pkg )
 
 hypre_CommHandle *
 hypre_NewCommHandle( int          num_requests,
-                   MPI_Request *requests     )
+                     MPI_Request *requests     )
 {
    hypre_CommHandle *comm_handle;
 
@@ -801,7 +804,7 @@ hypre_FreeCommHandle( hypre_CommHandle *comm_handle )
 
 hypre_CommHandle *
 hypre_InitializeCommunication( hypre_CommPkg *comm_pkg,
-                             double      *data     )
+                               double        *data     )
 {
    MPI_Comm        *comm = hypre_CommPkgComm(comm_pkg);
    int              num_requests;
@@ -856,7 +859,8 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
       if (hypre_CommHandleNumRequests(comm_handle))
       {
          status =
-            hypre_CTAlloc(MPI_Status, hypre_CommHandleNumRequests(comm_handle));
+            hypre_CTAlloc(MPI_Status,
+                          hypre_CommHandleNumRequests(comm_handle));
 
          MPI_Waitall(hypre_CommHandleNumRequests(comm_handle),
                      hypre_CommHandleRequests(comm_handle),

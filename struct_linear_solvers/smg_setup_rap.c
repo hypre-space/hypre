@@ -23,8 +23,8 @@
  
 hypre_StructMatrix *
 hypre_SMGNewRAPOp( hypre_StructMatrix *R,
-                 hypre_StructMatrix *A,
-                 hypre_StructMatrix *PT )
+                   hypre_StructMatrix *A,
+                   hypre_StructMatrix *PT )
 {
    hypre_StructMatrix    *RAP;
    hypre_StructStencil   *stencil;
@@ -54,11 +54,11 @@ hypre_SMGNewRAPOp( hypre_StructMatrix *R,
  
 int
 hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
-                   hypre_StructMatrix *A,
-                   hypre_StructMatrix *PT,
-                   hypre_StructMatrix *Ac,
-                   hypre_Index         cindex,
-                   hypre_Index         cstride )
+                     hypre_StructMatrix *A,
+                     hypre_StructMatrix *PT,
+                     hypre_StructMatrix *Ac,
+                     hypre_Index         cindex,
+                     hypre_Index         cstride )
 {
    int ierr;
  

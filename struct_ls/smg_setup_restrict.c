@@ -20,8 +20,8 @@
 
 hypre_StructMatrix *
 hypre_SMGNewRestrictOp( hypre_StructMatrix *A,
-                      hypre_StructGrid   *cgrid,
-                      int               cdir  )
+                        hypre_StructGrid   *cgrid,
+                        int                 cdir  )
 {
    hypre_StructMatrix *R;
 
@@ -34,11 +34,11 @@ hypre_SMGNewRestrictOp( hypre_StructMatrix *A,
 
 int
 hypre_SMGSetupRestrictOp( hypre_StructMatrix *A,
-                        hypre_StructMatrix *R,
-                        hypre_StructVector *temp_vec,
-                        int               cdir,
-                        hypre_Index         cindex,
-                        hypre_Index         cstride  )
+                          hypre_StructMatrix *R,
+                          hypre_StructVector *temp_vec,
+                          int                 cdir,
+                          hypre_Index         cindex,
+                          hypre_Index         cstride  )
 {
    int ierr;
 

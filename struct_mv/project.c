@@ -25,14 +25,14 @@
 
 hypre_SBox *
 hypre_ProjectBox( hypre_Box    *box,
-                hypre_Index   index,
-                hypre_Index   stride )
+                  hypre_Index   index,
+                  hypre_Index   stride )
 {
    hypre_SBox  *new_sbox;
    hypre_Box   *new_box;
    hypre_Index  new_stride;
 
-   int        il, iu, i, s, d;
+   int          il, iu, i, s, d;
 
    /*------------------------------------------------------
     * project in all 3 dimensions
@@ -76,24 +76,24 @@ hypre_ProjectBox( hypre_Box    *box,
 
 hypre_SBoxArray *
 hypre_ProjectBoxArray( hypre_BoxArray  *box_array,
-                     hypre_Index      index,
-                     hypre_Index      stride    )
+                       hypre_Index      index,
+                       hypre_Index      stride    )
 {
-   hypre_SBoxArray       *new_sbox_array;
-   hypre_SBox            *new_sbox;
-
-   hypre_Box             *box;
-
-   int                  i;
+   hypre_SBoxArray  *new_sbox_array;
+   hypre_SBox       *new_sbox;
+                  
+   hypre_Box        *box;
+                  
+   int               i;
 
    new_sbox_array = hypre_NewSBoxArray();
 
    hypre_ForBoxI(i, box_array)
-   {
-      box      = hypre_BoxArrayBox(box_array, i);
-      new_sbox = hypre_ProjectBox(box, index, stride);
-      hypre_AppendSBox(new_sbox, new_sbox_array);
-   }
+      {
+         box      = hypre_BoxArrayBox(box_array, i);
+         new_sbox = hypre_ProjectBox(box, index, stride);
+         hypre_AppendSBox(new_sbox, new_sbox_array);
+      }
 
    return new_sbox_array;
 }
@@ -108,27 +108,31 @@ hypre_ProjectBoxArray( hypre_BoxArray  *box_array,
 
 hypre_SBoxArrayArray *
 hypre_ProjectBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
-                          hypre_Index           index,
-                          hypre_Index           stride          )
+                            hypre_Index           index,
+                            hypre_Index           stride          )
 {
    hypre_SBoxArrayArray  *new_sbox_array_array;
    hypre_SBoxArray       *new_sbox_array;
 
    hypre_BoxArray        *box_array;
 
-   int                  i;
+   int                    i;
 
    new_sbox_array_array =
       hypre_NewSBoxArrayArray(hypre_BoxArrayArraySize(box_array_array));
 
    hypre_ForBoxArrayI(i, box_array_array)
-   {
-      box_array      = hypre_BoxArrayArrayBoxArray(box_array_array, i);
-      new_sbox_array = hypre_ProjectBoxArray(box_array, index, stride);
+      {
+         box_array      = hypre_BoxArrayArrayBoxArray(box_array_array, i);
 
-      hypre_FreeSBoxArray(hypre_SBoxArrayArraySBoxArray(new_sbox_array_array, i));
-      hypre_SBoxArrayArraySBoxArray(new_sbox_array_array, i) = new_sbox_array;
-   }
+         new_sbox_array =
+            hypre_SBoxArrayArraySBoxArray(new_sbox_array_array, i);
+         hypre_FreeSBoxArray(new_sbox_array);
+
+         new_sbox_array = hypre_ProjectBoxArray(box_array, index, stride);
+         hypre_SBoxArrayArraySBoxArray(new_sbox_array_array, i) =
+            new_sbox_array;
+      }
 
    return new_sbox_array_array;
 }
@@ -142,14 +146,14 @@ hypre_ProjectBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
 
 hypre_SBoxArrayArray *
 hypre_ProjectRBPoint( hypre_BoxArrayArray *box_array_array,
-                    hypre_Index          rb[4]           )
+                      hypre_Index          rb[4]           )
 {
    hypre_SBoxArrayArray *new_sbox_array_array;
    hypre_SBoxArrayArray *tmp_sbox_array_array;
 
    hypre_Index           stride;
 
-   int                 i;
+   int                   i;
 
    hypre_SetIndex(stride, 2, 2, 2);
 

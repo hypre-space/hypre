@@ -26,7 +26,7 @@
  *   replication.
  *--------------------------------------------------------------------------*/
 
-typedef int hypre_Index[3];
+typedef int  hypre_Index[3];
 typedef int *hypre_IndexRef;
 
 /*--------------------------------------------------------------------------
@@ -49,7 +49,7 @@ typedef struct
 typedef struct
 {
    hypre_Box  **boxes;         /* Array of pointers to boxes */
-   int        size;          /* Size of box array */
+   int          size;          /* Size of box array */
 
 } hypre_BoxArray;
 
@@ -63,7 +63,7 @@ typedef struct
 typedef struct
 {
    hypre_BoxArray  **box_arrays;    /* Array of pointers to box arrays */
-   int             size;          /* Size of box array array */
+   int               size;          /* Size of box array array */
 
 } hypre_BoxArrayArray;
 
@@ -87,7 +87,8 @@ typedef struct
 
 #define hypre_BoxIMinD(box, d) (hypre_IndexD(hypre_BoxIMin(box), d))
 #define hypre_BoxIMaxD(box, d) (hypre_IndexD(hypre_BoxIMax(box), d))
-#define hypre_BoxSizeD(box, d) (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1)
+#define hypre_BoxSizeD(box, d) \
+(hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1)
 
 #define hypre_BoxIMinX(box)    hypre_BoxIMinD(box, 0)
 #define hypre_BoxIMinY(box)    hypre_BoxIMinD(box, 1)
@@ -149,13 +150,15 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 
 #define hypre_BoxLoopDeclare(loop_size, data_box, stride, iinc, jinc, kinc) \
 int  iinc = (hypre_IndexX(stride));\
-int  jinc = (hypre_IndexY(stride)*hypre_BoxSizeX(data_box)\
-             - hypre_IndexX(loop_size)*hypre_IndexX(stride));\
-int  kinc = (hypre_IndexZ(stride)*hypre_BoxSizeX(data_box)*hypre_BoxSizeY(data_box)\
-             - hypre_IndexY(loop_size)*hypre_IndexY(stride)*hypre_BoxSizeX(data_box))
+int  jinc = (hypre_IndexY(stride)*hypre_BoxSizeX(data_box) -\
+             hypre_IndexX(loop_size)*hypre_IndexX(stride));\
+int  kinc = (hypre_IndexZ(stride)*\
+             hypre_BoxSizeX(data_box)*hypre_BoxSizeY(data_box) -\
+             hypre_IndexY(loop_size)*\
+             hypre_IndexY(stride)*hypre_BoxSizeX(data_box))
 
 #define hypre_BoxLoop0(i, j, k, loop_size,\
-                     body)\
+                       body)\
 {\
    int hypre__nx = hypre_IndexX(loop_size);\
    int hypre__ny = hypre_IndexY(loop_size);\
@@ -173,11 +176,11 @@ int  kinc = (hypre_IndexZ(stride)*hypre_BoxSizeX(data_box)*hypre_BoxSizeY(data_b
 }
 
 #define hypre_BoxLoop1(i, j, k, loop_size,\
-                     data_box1, start1, stride1, i1,\
-                     body)\
+                       data_box1, start1, stride1, i1,\
+                       body)\
 {\
    hypre_BoxLoopDeclare(loop_size, data_box1, stride1,\
-                      hypre__iinc1, hypre__jinc1, hypre__kinc1);\
+                        hypre__iinc1, hypre__jinc1, hypre__kinc1);\
    int hypre__nx = hypre_IndexX(loop_size);\
    int hypre__ny = hypre_IndexY(loop_size);\
    int hypre__nz = hypre_IndexZ(loop_size);\
@@ -198,14 +201,14 @@ int  kinc = (hypre_IndexZ(stride)*hypre_BoxSizeX(data_box)*hypre_BoxSizeY(data_b
 }
 
 #define hypre_BoxLoop2(i, j, k, loop_size,\
-                     data_box1, start1, stride1, i1,\
-                     data_box2, start2, stride2, i2,\
-                     body)\
+                       data_box1, start1, stride1, i1,\
+                       data_box2, start2, stride2, i2,\
+                       body)\
 {\
    hypre_BoxLoopDeclare(loop_size, data_box1, stride1,\
-                      hypre__iinc1, hypre__jinc1, hypre__kinc1);\
+                        hypre__iinc1, hypre__jinc1, hypre__kinc1);\
    hypre_BoxLoopDeclare(loop_size, data_box2, stride2,\
-                      hypre__iinc2, hypre__jinc2, hypre__kinc2);\
+                        hypre__iinc2, hypre__jinc2, hypre__kinc2);\
    int hypre__nx = hypre_IndexX(loop_size);\
    int hypre__ny = hypre_IndexY(loop_size);\
    int hypre__nz = hypre_IndexZ(loop_size);\
@@ -230,17 +233,17 @@ int  kinc = (hypre_IndexZ(stride)*hypre_BoxSizeX(data_box)*hypre_BoxSizeY(data_b
 }
 
 #define hypre_BoxLoop3(i, j, k, loop_size,\
-                     data_box1, start1, stride1, i1,\
-                     data_box2, start2, stride2, i2,\
-                     data_box3, start3, stride3, i3,\
-                     body)\
+                       data_box1, start1, stride1, i1,\
+                       data_box2, start2, stride2, i2,\
+                       data_box3, start3, stride3, i3,\
+                       body)\
 {\
    hypre_BoxLoopDeclare(loop_size, data_box1, stride1,\
-                      hypre__iinc1, hypre__jinc1, hypre__kinc1);\
+                        hypre__iinc1, hypre__jinc1, hypre__kinc1);\
    hypre_BoxLoopDeclare(loop_size, data_box2, stride2,\
-                      hypre__iinc2, hypre__jinc2, hypre__kinc2);\
+                        hypre__iinc2, hypre__jinc2, hypre__kinc2);\
    hypre_BoxLoopDeclare(loop_size, data_box3, stride3,\
-                      hypre__iinc3, hypre__jinc3, hypre__kinc3);\
+                        hypre__iinc3, hypre__jinc3, hypre__kinc3);\
    int hypre__nx = hypre_IndexX(loop_size);\
    int hypre__ny = hypre_IndexY(loop_size);\
    int hypre__nz = hypre_IndexZ(loop_size);\
@@ -269,20 +272,20 @@ int  kinc = (hypre_IndexZ(stride)*hypre_BoxSizeX(data_box)*hypre_BoxSizeY(data_b
 }
 
 #define hypre_BoxLoop4(i, j, k, loop_size,\
-                     data_box1, start1, stride1, i1,\
-                     data_box2, start2, stride2, i2,\
-                     data_box3, start3, stride3, i3,\
-                     data_box4, start4, stride4, i4,\
-                     body)\
+                       data_box1, start1, stride1, i1,\
+                       data_box2, start2, stride2, i2,\
+                       data_box3, start3, stride3, i3,\
+                       data_box4, start4, stride4, i4,\
+                       body)\
 {\
    hypre_BoxLoopDeclare(loop_size, data_box1, stride1,\
-                      hypre__iinc1, hypre__jinc1, hypre__kinc1);\
+                        hypre__iinc1, hypre__jinc1, hypre__kinc1);\
    hypre_BoxLoopDeclare(loop_size, data_box2, stride2,\
-                      hypre__iinc2, hypre__jinc2, hypre__kinc2);\
+                        hypre__iinc2, hypre__jinc2, hypre__kinc2);\
    hypre_BoxLoopDeclare(loop_size, data_box3, stride3,\
-                      hypre__iinc3, hypre__jinc3, hypre__kinc3);\
+                        hypre__iinc3, hypre__jinc3, hypre__kinc3);\
    hypre_BoxLoopDeclare(loop_size, data_box4, stride4,\
-                      hypre__iinc4, hypre__jinc4, hypre__kinc4);\
+                        hypre__iinc4, hypre__jinc4, hypre__kinc4);\
    int hypre__nx = hypre_IndexX(loop_size);\
    int hypre__ny = hypre_IndexY(loop_size);\
    int hypre__nz = hypre_IndexZ(loop_size);\

@@ -15,7 +15,6 @@
 #ifndef hypre_SBOX_HEADER
 #define hypre_SBOX_HEADER
 
-
 /*--------------------------------------------------------------------------
  * hypre_SBox:
  *   Structure describing a strided cartesian region of some index space.
@@ -36,7 +35,7 @@ typedef struct
 typedef struct
 {
    hypre_SBox  **sboxes;       /* Array of pointers to sboxes */
-   int         size;         /* Size of sbox array */
+   int           size;         /* Size of sbox array */
 
 } hypre_SBoxArray;
 
@@ -50,7 +49,7 @@ typedef struct
 typedef struct
 {
    hypre_SBoxArray  **sbox_arrays;   /* Array of pointers to sbox arrays */
-   int              size;          /* Size of sbox array array */
+   int                size;          /* Size of sbox array array */
 
 } hypre_SBoxArrayArray;
 

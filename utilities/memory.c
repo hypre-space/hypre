@@ -41,11 +41,10 @@ hypre_MAlloc( int size )
 
 char *
 hypre_CAlloc( int count,
-            int elt_size )
+              int elt_size )
 {
    char *ptr;
    int   size = count*elt_size;
-
 
    if (size > 0)
    {
@@ -65,7 +64,7 @@ hypre_CAlloc( int count,
 
 char *
 hypre_ReAlloc( char *ptr,
-             int   size )
+               int   size )
 {
    ptr = realloc(ptr, size);
 
@@ -91,8 +90,8 @@ hypre_Free( char *ptr )
 
 char *
 hypre_MAllocCheck( int   size,
-                 char *file,
-                 int   line )
+                   char *file,
+                   int   line )
 {
    char *ptr;
 
@@ -127,13 +126,12 @@ hypre_MAllocCheck( int   size,
 
 char *
 hypre_CAllocCheck( int   count,
-                 int   elt_size,
-                 char *file,
-                 int   line    )
+                   int   elt_size,
+                   char *file,
+                   int   line    )
 {
    char *ptr;
    int   size = count*elt_size;
-
 
    if (size > 0)
    {
@@ -165,9 +163,9 @@ hypre_CAllocCheck( int   count,
 
 char *
 hypre_ReAllocCheck( char *ptr,
-                  int   size,
-                  char *file,
-                  int   line )
+                    int   size,
+                    char *file,
+                    int   line )
 {
    ptr = realloc(ptr, size);
 
