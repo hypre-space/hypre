@@ -433,7 +433,7 @@ int matinv(double *x, double *a, int k)
       if (a[i+i*k] <= 1.e-20)
 	{
 	  ierr = -1; 
-
+	  printf("                        diagonal entry: %e\n", a[i+k*i]);
 	    /*	  
 	    printf("matinv: ==========================================\n");
 	    printf("size: %d, entry: %d, %f\n", k, i, a[i+i*k]);

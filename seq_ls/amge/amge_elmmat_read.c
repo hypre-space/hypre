@@ -38,6 +38,9 @@ int hypre_AMGeElmMatRead(double **element_data_pointer,
 {
   FILE *f;
 
+  FILE *g;
+
+
   int ierr = 0;
   int i,j,k, entry;
 
@@ -51,6 +54,7 @@ int hypre_AMGeElmMatRead(double **element_data_pointer,
   element_data = hypre_CTAlloc(double, num_entries);
 
   f = fopen(element_matrix_file, "r");
+  /* g = fopen("element_matrix_wrote", "w"); */
 
   entry = 0;
   for (i=0; i< num_elements; i++)
@@ -60,18 +64,19 @@ int hypre_AMGeElmMatRead(double **element_data_pointer,
 	  for (k=i_element_dof[i]; k< i_element_dof[i+1]; k++)
 	    {
 	      fscanf(f, "%le", &element_data[entry]);
-	      /* printf("%e ", element_data[entry]); */
+	      /* fprintf(g, "%e ", element_data[entry]); */
 	      entry++;
 	    }
-	  /* printf("\n"); */
+	  /* fprintf(g, "\n"); */
 	  fscanf(f, "\n");
 	}
-
-      fscanf(f, "\n");
-      /*  printf("\n"); */
+      
+      /* fprintf(g, "\n"); */
+      fscanf(f, "\n"); 
     }
 
   fclose(f);
+  /* fclose(g); */
 
   *element_data_pointer = element_data;
 
