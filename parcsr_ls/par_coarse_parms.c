@@ -41,8 +41,6 @@
   MPI Communicator
   @param local_num_variables [IN]
   number of points on local processor
-  @param local_coarse_size [IN]
-  number of coarse points on local processor
   @param dof_func [IN]
   array that contains the function numbers for all local points
   @param CF_marker [IN]
@@ -58,16 +56,16 @@
 int
 hypre_BoomerAMGCoarseParms(MPI_Comm comm,
 		           int      local_num_variables,
-		           int      local_coarse_size,
 		           int      num_functions,
 		           int     *dof_func,
 		           int     *CF_marker, 
                       	   int    **coarse_dof_func_ptr, 
                       	   int    **coarse_pnts_global_ptr) 
 {
-   int            i, cnt;
+   int            i;
    int            ierr = 0;
    int		  num_procs;
+   int            local_coarse_size = 0;
 
    int	 *coarse_dof_func;
    int	 *coarse_pnts_global;
@@ -81,13 +79,19 @@ hypre_BoomerAMGCoarseParms(MPI_Comm comm,
    {
       coarse_dof_func = hypre_CTAlloc(int,local_coarse_size);
 
-      cnt = 0;
       for (i=0; i < local_num_variables; i++)
       {
          if (CF_marker[i] == 1)
-            coarse_dof_func[cnt++] = dof_func[i];
+            coarse_dof_func[local_coarse_size++] = dof_func[i];
       }
       *coarse_dof_func_ptr    = coarse_dof_func;
+   }
+   else
+   {
+      for (i=0; i < local_num_variables; i++)
+      {
+         if (CF_marker[i] == 1) local_coarse_size++;
+      }
    }
 
    coarse_pnts_global = hypre_CTAlloc(int,num_procs+1);

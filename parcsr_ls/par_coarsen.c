@@ -82,8 +82,6 @@
   strength matrix
   @param CF_marker_ptr [OUT]
   array indicating C/F points
-  @param coarse_size_ptr [OUT]
-  size of the coarse grid
   
   @see */
 /*--------------------------------------------------------------------------*/
@@ -98,8 +96,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
                         hypre_ParCSRMatrix    *A,
                         int                    CF_init,
                         int                    debug_flag,
-                        int                  **CF_marker_ptr,
-                        int                   *coarse_size_ptr     )
+                        int                  **CF_marker_ptr)
 {
    MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(A);
@@ -129,7 +126,6 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
 
    int                *CF_marker;
    int                *CF_marker_offd;
-   int                 coarse_size;
                       
    double             *measure_array;
    int                *graph_array;
@@ -313,7 +309,6 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
     * Loop until all points are either fine or coarse.
     *---------------------------------------------------*/
 
-   coarse_size = 0;
    if (num_procs > 1)
    {
       S_ext      = hypre_ParCSRMatrixExtractBExt(S,A,0);
@@ -561,7 +556,6 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
          {  
             /* set to be a C-pt */
             CF_marker[i] = C_PT;
-	    coarse_size++;
 
             for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++)
             {
@@ -770,7 +764,6 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    if (num_procs > 1) hypre_CSRMatrixDestroy(S_ext);
 
    *CF_marker_ptr   = CF_marker;
-   *coarse_size_ptr = coarse_size;
 
    return (ierr);
 }
@@ -796,8 +789,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
                             int                    measure_type,
                             int                    coarsen_type,
                             int                    debug_flag,
-                            int                  **CF_marker_ptr,
-                            int                   *coarse_size_ptr     )
+                            int                  **CF_marker_ptr)
 {
    MPI_Comm         comm          = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg   *comm_pkg      = hypre_ParCSRMatrixCommPkg(A);
@@ -822,8 +814,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
                  
    int             *CF_marker;
    int             *CF_marker_offd;
-   int              coarse_size;
-   int              coarse_size_2;
    int              ci_tilde = -1;
    int              ci_tilde_mark = -1;
    int              ci_tilde_offd = -1;
@@ -1006,7 +996,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    *************************************************************/
 
    num_left = num_variables;
-   coarse_size = 0;
  
    for (j = 0; j < num_variables; j++) 
    {    
@@ -1068,7 +1057,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       index = LoL_head -> head;
 
       CF_marker[index] = C_PT;
-      ++coarse_size;
       measure = measure_array[index];
       measure_array[index] = 0;
       --num_left;
@@ -1165,7 +1153,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
     * Initialize the graph array
     *---------------------------------------------------*/
 
-   coarse_size_2 = 0;
    graph_array = hypre_CTAlloc(int, num_variables);
 
    for (i = 0; i < num_variables; i++)
@@ -1257,13 +1244,9 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
                      if (C_i_nonempty)
                      {
                         CF_marker[i] = 1;
-                        coarse_size++;
-                        coarse_size_2++;
                         if (ci_tilde > -1)
                         {
                            CF_marker[ci_tilde] = -1;
-                           coarse_size--;
-                           coarse_size_2--;
                            ci_tilde = -1;
                         }
                         if (ci_tilde_offd > -1)
@@ -1280,8 +1263,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
                         ci_tilde = j;
                         ci_tilde_mark = i;
                         CF_marker[j] = 1;
-                        coarse_size++;
-                        coarse_size_2++;
                         C_i_nonempty = 1;
                         i--;
                         break_var = 0;
@@ -1327,13 +1308,9 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
                         if (C_i_nonempty)
                         {
                            CF_marker[i] = 1;
-                           coarse_size++;
-                           coarse_size_2++;
                            if (ci_tilde > -1)
                            {
                               CF_marker[ci_tilde] = -1;
-                              coarse_size--;
-                              coarse_size_2--;
                               ci_tilde = -1;
                            }
                            if (ci_tilde_offd > -1)
@@ -1393,13 +1370,9 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    		     if (C_i_nonempty)
    		     {
    		        CF_marker[i] = 1;
-   		        coarse_size++;
-   		        coarse_size_2++;
    		        if (ci_tilde > -1)
    		        {
    			   CF_marker[ci_tilde] = -1;
-   		           coarse_size--;
-   		           coarse_size_2--;
    		           ci_tilde = -1;
    		        }
    	    		C_i_nonempty = 0;
@@ -1410,8 +1383,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    		        ci_tilde = j;
    		        ci_tilde_mark = i;
    		        CF_marker[j] = 1;
-   		        coarse_size++;
-   		        coarse_size_2++;
    		        C_i_nonempty = 1;
 		        i--;
 		        break;
@@ -1527,7 +1498,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    		           if (ci_tilde > -1)
    		           {
    			      CF_marker[ci_tilde] = -1;
-			      coarse_size--;
 			      ci_tilde = -1;
    		           }
    		           if (ci_tilde_offd > -1)
@@ -1543,7 +1513,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    		           ci_tilde = j;
    		           ci_tilde_mark = i;
    		           CF_marker[j] = 1;
-   		           coarse_size++;
    		           C_i_nonempty = 1;
    		           i--;
    		           break;
@@ -1589,7 +1558,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    		           if (ci_tilde > -1)
    		           {
    			      CF_marker[ci_tilde] = -1;
-   			      coarse_size--;
    			      ci_tilde = -1;
    		           }
    		           if (ci_tilde_offd > -1)
@@ -1806,7 +1774,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    	hypre_CSRMatrixDestroy(S_ext); 
    
    *CF_marker_ptr   = CF_marker;
-   *coarse_size_ptr = coarse_size;
    
    return (ierr);
 }
@@ -1817,8 +1784,7 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *S,
                                hypre_ParCSRMatrix    *A,
                                int                    measure_type,
                                int                    debug_flag,
-                               int                  **CF_marker_ptr,
-                               int                   *coarse_size_ptr     )
+                               int                  **CF_marker_ptr)
 {
    int              ierr = 0;
 
@@ -1827,10 +1793,10 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *S,
     *-------------------------------------------------------*/
 
    ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 6, debug_flag, 
-				CF_marker_ptr, coarse_size_ptr);
+				CF_marker_ptr);
 
    ierr += hypre_BoomerAMGCoarsen (S, A, 1, debug_flag, 
-				CF_marker_ptr, coarse_size_ptr);
+				CF_marker_ptr);
 
    return (ierr);
 }

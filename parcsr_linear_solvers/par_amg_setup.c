@@ -58,7 +58,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int       level;
    int       local_size, i;
    int       coarse_size;
-   int       local_coarse_size;
    int       coarsen_type;
    int       measure_type;
    int       setup_type;
@@ -187,18 +186,18 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          if (coarsen_type == 6)
          {
 	    hypre_BoomerAMGCoarsenFalgout(S, A_array[level], measure_type,
-                                    debug_flag, &CF_marker, &local_coarse_size); 
+                                    debug_flag, &CF_marker);
          }
          else if (coarsen_type)
          {
 	    hypre_BoomerAMGCoarsenRuge(S, A_array[level],
                                  measure_type, coarsen_type, debug_flag,
-                                 &CF_marker, &local_coarse_size); 
+                                 &CF_marker);
          }
          else
          {
 	    hypre_BoomerAMGCoarsen(S, A_array[level], 0,
-                             debug_flag, &CF_marker, &local_coarse_size); 
+                             debug_flag, &CF_marker);
          }
  
          if (debug_flag==1)
@@ -211,7 +210,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
 	 hypre_BoomerAMGCoarseParms(comm,
 		hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level])),
-			local_coarse_size,num_functions,dof_func_array[level],
+			num_functions,dof_func_array[level],
 			CF_marker,&coarse_dof_func,&coarse_pnts_global);
          CF_marker_array[level] = CF_marker;
          dof_func_array[level+1] = NULL;
