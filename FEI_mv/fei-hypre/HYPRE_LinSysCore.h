@@ -35,9 +35,9 @@
 // local enumerations and defines
 // -------------------------------------------------------------------------
 
-enum HYsolverID {HYPCG,HYGMRES,HYFGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,HYBICGS,
-                 HYSYMQMR,HYAMG,HYSUPERLU,HYSUPERLUX,HYDSUPERLU,HYY12M,HYAMGE,
-                 HYHYBRID};
+enum HYsolverID {HYPCG,HYLSICG,HYGMRES,HYFGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,
+                 HYBICGS,HYSYMQMR,HYAMG,HYSUPERLU,HYSUPERLUX,HYDSUPERLU,
+                 HYY12M,HYAMGE,HYHYBRID};
 enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
                  HYDDILUT,HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID,HYBLOCK,HYMLI,
                  HYUZAWA};
@@ -407,6 +407,7 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
    void   setupPCGPrecon();
+   void   setupLSICGPrecon();
    void   setupGMRESPrecon();
    void   setupFGMRESPrecon();
    void   setupBiCGSTABPrecon();
@@ -414,6 +415,16 @@ class HYPRE_LinSysCore
    void   setupTFQmrPrecon();
    void   setupBiCGSPrecon();
    void   setupSymQMRPrecon();
+   void   setupPreconBoomerAMG();
+   void   setupPreconParaSails();
+   void   setupPreconDDICT();
+   void   setupPreconDDILUT();
+   void   setupPreconPILUT();
+   void   setupPreconPoly();
+   void   setupPreconSchwarz();
+   void   setupPreconML();
+   void   setupPreconBlock();
+   void   setupPreconEuclid();
    void   solveUsingBoomeramg(int&);
    void   solveUsingSuperLU(int&);
    void   solveUsingSuperLUX(int&);
@@ -570,8 +581,11 @@ class HYPRE_LinSysCore
    int             amgNumSweeps_[4];
    int             amgRelaxType_[4];
    double          amgRelaxWeight_[25];
+   double          amgRelaxOmega_[25];
    double          amgStrongThreshold_;
    int             amgSystemSize_;
+   int             amgUseGSMG_;
+   int             amgGSMGNSamples_;
    int             pilutFillin_;
    double          pilutDropTol_;
    int             pilutMaxNnzPerRow_;
