@@ -13,6 +13,7 @@
 #include "HYPRE_config.h"
 #include "HYPRE_utilities.h"
 #include "HYPRE_sstruct_mv.h"
+#include "HYPRE_struct_ls.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,10 +49,10 @@ extern "C" {
 struct hypre_SStructSolver_struct;
 typedef struct hypre_SStructSolver_struct *HYPRE_SStructSolver;
 
-typedef int (*HYPRE_PtrToStructSolverFcn)(HYPRE_SStructSolver,
-                                          HYPRE_SStructMatrix,
-                                          HYPRE_SStructVector,
-                                          HYPRE_SStructVector);
+typedef int (*HYPRE_PtrToSStructSolverFcn)(HYPRE_SStructSolver,
+                                           HYPRE_SStructMatrix,
+                                           HYPRE_SStructVector,
+                                           HYPRE_SStructVector);
 
 /*@}*/
 
@@ -145,10 +146,10 @@ int HYPRE_SStructGMRESSetStopCrit(HYPRE_SStructSolver solver,
  *
  * @param param [IN] ...
  **/
-int HYPRE_SStructGMRESSetPrecond(HYPRE_SStructSolver         solver,
-                                 HYPRE_PtrToStructSolverFcn  precond,
-                                 HYPRE_PtrToStructSolverFcn  precond_setup,
-                                 void                       *precond_data);
+int HYPRE_SStructGMRESSetPrecond(HYPRE_SStructSolver          solver,
+                                 HYPRE_PtrToSStructSolverFcn  precond,
+                                 HYPRE_PtrToSStructSolverFcn  precond_setup,
+                                 void                        *precond_data);
 
 /**
  * Description...
@@ -172,6 +173,110 @@ int HYPRE_SStructGMRESGetNumIterations(HYPRE_SStructSolver  solver,
  * @param param [IN] ...
  **/
 int HYPRE_SStructGMRESGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
+                                                   double              *norm);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name SStruct Split Solver
+ *
+ * Description...
+ **/
+/*@{*/
+
+#define HYPRE_SMG  0
+#define HYPRE_PFMG 1
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+int HYPRE_SStructSplitCreate(MPI_Comm             comm,
+                             HYPRE_SStructSolver *solver);
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+int HYPRE_SStructSplitDestroy(HYPRE_SStructSolver solver);
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+int HYPRE_SStructSplitSetup(HYPRE_SStructSolver solver,
+                            HYPRE_SStructMatrix A,
+                            HYPRE_SStructVector b,
+                            HYPRE_SStructVector x);
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+int HYPRE_SStructSplitSolve(HYPRE_SStructSolver solver,
+                            HYPRE_SStructMatrix A,
+                            HYPRE_SStructVector b,
+                            HYPRE_SStructVector x);
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+int HYPRE_SStructSplitSetTol(HYPRE_SStructSolver solver,
+                             double              tol);
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+int HYPRE_SStructSplitSetMaxIter(HYPRE_SStructSolver solver,
+                                 int                 max_iter);
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+int HYPRE_SStructSplitSetZeroGuess(HYPRE_SStructSolver solver);
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+int HYPRE_SStructSplitSetNonZeroGuess(HYPRE_SStructSolver solver);
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+int HYPRE_SStructSplitSetStructSolver(HYPRE_SStructSolver solver,
+                                      int                 ssolver);
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+int HYPRE_SStructSplitGetNumIterations(HYPRE_SStructSolver  solver,
+                                       int                 *num_iterations);
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+int HYPRE_SStructSplitGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
                                                    double              *norm);
 
 /*@}*/

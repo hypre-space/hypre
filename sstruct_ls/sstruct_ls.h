@@ -24,10 +24,23 @@ int HYPRE_SStructGMRESSetTol( HYPRE_SStructSolver solver , double tol );
 int HYPRE_SStructGMRESSetMinIter( HYPRE_SStructSolver solver , int min_iter );
 int HYPRE_SStructGMRESSetMaxIter( HYPRE_SStructSolver solver , int max_iter );
 int HYPRE_SStructGMRESSetStopCrit( HYPRE_SStructSolver solver , int stop_crit );
-int HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver solver , HYPRE_PtrToStructSolverFcn precond , HYPRE_PtrToStructSolverFcn precond_setup , void *precond_data );
+int HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver solver , HYPRE_PtrToSStructSolverFcn precond , HYPRE_PtrToSStructSolverFcn precond_setup , void *precond_data );
 int HYPRE_SStructGMRESSetLogging( HYPRE_SStructSolver solver , int logging );
 int HYPRE_SStructGMRESGetNumIterations( HYPRE_SStructSolver solver , int *num_iterations );
 int HYPRE_SStructGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver , double *norm );
+
+/* HYPRE_sstruct_split.c */
+int HYPRE_SStructSplitCreate( MPI_Comm comm , HYPRE_SStructSolver *solver_ptr );
+int HYPRE_SStructSplitDestroy( HYPRE_SStructSolver solver );
+int HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
+int HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
+int HYPRE_SStructSplitSetTol( HYPRE_SStructSolver solver , double tol );
+int HYPRE_SStructSplitSetMaxIter( HYPRE_SStructSolver solver , int max_iter );
+int HYPRE_SStructSplitSetZeroGuess( HYPRE_SStructSolver solver );
+int HYPRE_SStructSplitSetNonZeroGuess( HYPRE_SStructSolver solver );
+int HYPRE_SStructSplitSetStructSolver( HYPRE_SStructSolver solver , int ssolver );
+int HYPRE_SStructSplitGetNumIterations( HYPRE_SStructSolver solver , int *num_iterations );
+int HYPRE_SStructSplitGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver , double *norm );
 
 /* gmres.c */
 void *hypre_GMRESCreate( void );

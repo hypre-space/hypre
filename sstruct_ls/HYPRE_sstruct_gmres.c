@@ -130,10 +130,10 @@ HYPRE_SStructGMRESSetStopCrit( HYPRE_SStructSolver solver,
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver         solver,
-                              HYPRE_PtrToStructSolverFcn  precond,
-                              HYPRE_PtrToStructSolverFcn  precond_setup,
-                              void                       *precond_data )
+HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver          solver,
+                              HYPRE_PtrToSStructSolverFcn  precond,
+                              HYPRE_PtrToSStructSolverFcn  precond_setup,
+                              void                        *precond_data )
 {
    return( hypre_GMRESSetPrecond( (void *) solver,
                                   precond, precond_setup, precond_data ) );

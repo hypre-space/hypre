@@ -42,7 +42,7 @@ main( int   argc,
    HYPRE_SStructVector  x;
 
    HYPRE_SStructSolver  solver;
-   /*HYPRE_SStructSolver  precond;*/
+   HYPRE_SStructSolver  precond;
    int                  num_iterations;
    int                  time_index;
    double               final_res_norm;
@@ -217,6 +217,8 @@ main( int   argc,
       printf("  -b <bx> <by> <bz>    : blocking per processor\n");
       printf("  -d <dim>             : problem dimension (2 or 3)\n");
       printf("  -solver <ID>         : solver ID (default = 0)\n");
+      printf("                         30 - GMRES with SMG split precond\n");
+      printf("                         31 - GMRES with PFMG split precond\n");
       printf("                         38 - GMRES with diagonal scaling\n");
       printf("                         39 - GMRES\n");
       printf("\n");
@@ -893,12 +895,25 @@ main( int   argc,
       HYPRE_SStructGMRESSetTol(solver, 1.0e-06);
       HYPRE_SStructGMRESSetLogging(solver, 1);
 
-      if (solver_id == 30)
+      if ((solver_id == 30) || (solver_id == 31))
       {
-      }
-
-      else if (solver_id == 31)
-      {
+         /* use Split solver as preconditioner */
+         HYPRE_SStructSplitCreate(MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSplitSetMaxIter(precond, 1);
+         HYPRE_SStructSplitSetTol(precond, 0.0);
+         HYPRE_SStructSplitSetZeroGuess(precond);
+         if (solver_id == 30)
+         {
+            HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);
+         }
+         else if (solver_id == 31)
+         {
+            HYPRE_SStructSplitSetStructSolver(precond, HYPRE_PFMG);
+         }
+         HYPRE_SStructGMRESSetPrecond(solver,
+                                      HYPRE_SStructSplitSolve,
+                                      HYPRE_SStructSplitSetup,
+                                      precond);
       }
 
       else if (solver_id == 38)
@@ -934,11 +949,9 @@ main( int   argc,
       HYPRE_SStructGMRESGetFinalRelativeResidualNorm(solver, &final_res_norm);
       HYPRE_SStructGMRESDestroy(solver);
 
-      if (solver_id == 30)
+      if ((solver_id == 30) || (solver_id == 31))
       {
-      }
-      else if (solver_id == 31)
-      {
+         HYPRE_SStructSplitDestroy(precond);
       }
    }
 
