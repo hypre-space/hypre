@@ -13,6 +13,7 @@
 #include "Hypre_StructVector_Data.h"
 #include "Hypre_MPI_Com_Skel.h"
 #include "Hypre_MPI_Com_Data.h"
+#include "Hypre_StructJacobi.h"
 #include "math.h"
 
 /* *************************************************
@@ -276,23 +277,20 @@ void  impl_Hypre_PCG_SetPreconditioner
    struct Hypre_StructSolver_private_type *HSSPp = precond->d_table;
    HYPRE_StructSolver * precond_solver = HSSPp->hssolver;
 
+   Hypre_StructJacobi precond_SJ = (Hypre_StructJacobi)
+      Hypre_StructSolver_castTo( precond, "Hypre_StructJacobi" );
+   if ( precond_SJ != 0 ) {
+      HYPRE_StructPCGSetPrecond( *S,
+                                 HYPRE_StructJacobiSolve,
+                                 HYPRE_StructJacobiSetup,
+                                 *precond_solver );
+   }
+   else {
+      printf( "Hypre_PCG_SetPreconditioner does not recognize preconditioner!\n" );
+   }
+   ;
 
-/*
-                           hypre_PtrToStructSolverFcn precondP,
-                           hypre_PtrToStructSolverFcn precond_setup,
-   precond_setup(precond_data, A, b, x);
-precond_data is the _same_ as *precond_solver
-*/
-
-/* ******* TO DO: ********
-   The function names passed in arguments 2 & 3 below should depend
-   on the type of precond ... */
-   HYPRE_StructPCGSetPrecond( *S,
-                              HYPRE_StructJacobiSolve,
-                              HYPRE_StructJacobiSetup,
-                              *precond_solver );
-
-    } /* end impl_Hypre_PCGSetPreconditioner */
+} /* end impl_Hypre_PCGSetPreconditioner */
 
 
 /* Print Logging; not in the SIDL file */
