@@ -433,16 +433,20 @@ void RhsRead(double *rhs, Matrix *mat, char *filename)
     free(buffer);
 }
 
-/*
-local_to_global = one simple array = ind (using base 0 for external)
-global_to_local = indexed by hash table
-*/
 
+/*--------------------------------------------------------------------------
+ * GetExternalIndices - Return the external indices in the array
+ * "local_to_global" and also construct a hash table "hash" and the array
+ * "global_to_local" which are required to convert from global indexing
+ * to local indexing.  The number of external indices is returned through
+ * "lenp".
+ *
+ * local_to_global = external indices using base 0
+ * global_to_local = indexed by hash table
+ *--------------------------------------------------------------------------*/
 
-/* input: hash table that was created, and buffer to put indices */
-/* output: external indices */
-
-static void GetExternalIndices(Matrix *mat, Hash *hash, int *lenp)
+static void GetExternalIndices(Matrix *mat, int *lenp,
+  int *local_to_global, int *global_to_local, Hash *hash)
 {
     int row, i, len, *ind, index, inserted;
     double *val;
@@ -462,34 +466,35 @@ static void GetExternalIndices(Matrix *mat, Hash *hash, int *lenp)
 
                 if (inserted)
 		{
-                    mat->local_to_global[num_external++] = ind[i];
+                    local_to_global[num_external++] = ind[i];
 		}
 	    }
 	}
     }
 
     /* sort the indices */
-    shell_sort(num_external, mat->local_to_global);
+    shell_sort(num_external, local_to_global);
 
     /* Redo the hash table for the sorted indices */
-    HashReset(hash, num_external, mat->local_to_global);
+    HashReset(hash, num_external, local_to_global);
     for (i=0; i<num_external; i++)
     {
-        index = HashInsert(hash, mat->local_to_global[i], &inserted);
-        mat->global_to_local[index] = i + num_local;
+        index = HashInsert(hash, local_to_global[i], &inserted);
+        global_to_local[index] = i + num_local;
     }
 
     *lenp = num_external;
 }
 
-/* hash table and global_to_local maps global to local */
+/*--------------------------------------------------------------------------
+ * ConvertToLocalIndices - Convert the indices in matrix "mat" from global
+ * indexing to local indexing.  This function is only called by 
+ * MatrixMatvecSetup.  Assumes the input matrix uses global indexing.
+ * "hash" and "global_to_local" contain information required to do the
+ * conversion.  The conversion of the matrix indices is performed in place.
+ *--------------------------------------------------------------------------*/
 
-/* map local indices to global indices */
-/* also return map vector for external part */
-
-/* converts in place */
-
-static void ConvertToLocalIndices(Matrix *mat, Hash *hash)
+static void ConvertToLocalIndices(Matrix *mat, Hash *hash, int *global_to_local)
 {
     int row, len, *ind, i, index;
     double *val;
@@ -503,7 +508,7 @@ static void ConvertToLocalIndices(Matrix *mat, Hash *hash)
 	    if (ind[i] < mat->beg_row || ind[i] > mat->end_row)
 	    {
 		index = HashLookup(hash, ind[i]);
-		ind[i] = mat->global_to_local[index];
+		ind[i] = global_to_local[index];
 	    }
 	    else
 	    {
@@ -513,7 +518,16 @@ static void ConvertToLocalIndices(Matrix *mat, Hash *hash)
     }
 }
 
-static void ConvertToGlobalIndices(Matrix *mat, Hash *hash, int *local_to_global)
+/*--------------------------------------------------------------------------
+ * ConvertToGlobalIndices - Convert the indices in matrix "mat" from local
+ * indexing to global indexing.  This function is only called by 
+ * MatrixMatvecComplete.  Assumes the input matrix uses local indexing.
+ * "hash" and "local_to_global" contain information required to do the
+ * conversion.
+ *--------------------------------------------------------------------------*/
+
+static void ConvertToGlobalIndices(Matrix *mat, Hash *hash, 
+  int *local_to_global)
 {
     int row, i, len, *ind;
     double *val;
@@ -528,7 +542,7 @@ static void ConvertToGlobalIndices(Matrix *mat, Hash *hash, int *local_to_global
         {
 	    if (ind[i] >= num_local)
 	    {
-		ind[i] = mat->local_to_global[ind[i] - num_local];
+		ind[i] = local_to_global[ind[i] - num_local];
 	    }
 	    else
 	    {
@@ -677,9 +691,10 @@ static void MatrixMatvecSetup(Matrix *mat)
 
     mat->hash_numbering = HashCreate(50021);
 
-    GetExternalIndices(mat, mat->hash_numbering, &len);
+    GetExternalIndices(mat, &len, mat->local_to_global, 
+        mat->global_to_local, mat->hash_numbering);
 
-    ConvertToLocalIndices(mat, mat->hash_numbering);
+    ConvertToLocalIndices(mat, mat->hash_numbering, mat->global_to_local);
 
     SetupReceives(mat, len, mat->local_to_global, outlist);
 
