@@ -86,9 +86,7 @@ parse_arguments () {
       a) confbuildtest $OPTARG  " "             "default"   1 1 1 1 1 1;;
       b) confbuildtest $OPTARG  " "             "beta"      0 0 0 0 1 1;;
       c) build $Build "all++"   "all++"         "test";;
-     +d) build $Build " "       "make.docs"     "docs";;
-      d) build $Build " "       "make.docs"     "docs";
-         build $Build "install" "install.docs"  "docs";;
+      d) build $Build " "       "docs"          "docs";;
       f) build $Build "all77"   "all77"         "test";;
       h) usage; exit 2;;
       m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail";;
@@ -131,8 +129,7 @@ usage () {
   printf "-b opt   Beta; perform the (default) configure, make beta, nofei,\n"
   printf "         fei++, followed by the test_drivers script (when opt=2).\n"
   printf "-c       C++; make all++ (no configure, or execute).\n"
-  printf "-d       Docs; make and install the documentation directory.\n"
-  printf "+d       Docs; makes the documentation directory.\n"
+  printf "-d       Docs; make the documentation directory.\n"
   printf "-f       F77; make all77 (no configure, or execute).\n"
   printf "-h       Help; display this help message.\n"
   printf "-m       Mail; mail errors to developers.\n"

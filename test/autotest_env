@@ -26,8 +26,6 @@ export PATH
 
 HYPRE_AUTOTEST_DIR=`pwd`
 export HYPRE_AUTOTEST_DIR
-HYPRE_INSTALL_DIR=/home/casc/software/hypre/internal
-export HYPRE_INSTALL_DIR
 
 #==============================================================================
 # Email lists
