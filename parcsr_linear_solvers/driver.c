@@ -44,6 +44,9 @@ main( int   argc,
    int    **grid_relax_points;
    double   relax_weight; 
 
+   /* parameters for GMRES */
+   int	    k_dim;
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -171,10 +174,19 @@ main( int   argc,
    grid_relax_points[3] = hypre_CTAlloc(int, 1);
    grid_relax_points[3][0] = 0;
 
+   /* defaults for GMRES */
+
+   k_dim = 5;
+
    arg_index = 0;
    while (arg_index < argc)
    {
-      if ( strcmp(argv[arg_index], "-w") == 0 )
+      if ( strcmp(argv[arg_index], "-k") == 0 )
+      {
+         arg_index++;
+         k_dim = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-w") == 0 )
       {
          arg_index++;
          relax_weight = atof(argv[arg_index++]);
@@ -439,16 +451,94 @@ main( int   argc,
       {
          HYPRE_ParAMGFinalize(pcg_precond);
       }
-   if (myid == 0)
-   {
-      printf("\n");
-      printf("Iterations = %d\n", num_iterations);
-      printf("Final Relative Residual Norm = %e\n", final_res_norm);
-      printf("\n");
-   }
+      if (myid == 0)
+      {
+         printf("\n");
+         printf("Iterations = %d\n", num_iterations);
+         printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         printf("\n");
+      }
  
    }
 
+   /*-----------------------------------------------------------
+    * Solve the system using GMRES 
+    *-----------------------------------------------------------*/
+
+   if (solver_id == 3 || solver_id == 4)
+   {
+      time_index = hypre_InitializeTiming("GMRES Setup");
+      hypre_BeginTiming(time_index);
+ 
+      HYPRE_ParCSRGMRESInitialize(MPI_COMM_WORLD, &pcg_solver);
+      HYPRE_ParCSRGMRESSetKDim(pcg_solver, k_dim);
+      HYPRE_ParCSRGMRESSetMaxIter(pcg_solver, 100);
+      HYPRE_ParCSRGMRESSetTol(pcg_solver, 1.0e-08);
+      HYPRE_ParCSRGMRESSetLogging(pcg_solver, 1);
+ 
+      if (solver_id == 3)
+      {
+         /* use BoomerAMG as preconditioner */
+         pcg_precond = HYPRE_ParAMGInitialize(); 
+         HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_ParAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_ParAMGSetMaxIter(pcg_precond, 1);
+         HYPRE_ParAMGSetCycleType(pcg_precond, cycle_type);
+         HYPRE_ParAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
+         HYPRE_ParAMGSetGridRelaxType(pcg_precond, grid_relax_type);
+         HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_weight);
+         HYPRE_ParAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
+         HYPRE_ParAMGSetMaxLevels(pcg_precond, 25);
+         HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
+                                   HYPRE_ParAMGSolve,
+                                   HYPRE_ParAMGSetup,
+                                   pcg_precond);
+      }
+      else if (solver_id == 4)
+      {
+         /* use diagonal scaling as preconditioner */
+
+         pcg_precond = NULL;
+
+         HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
+                                   HYPRE_ParCSRDiagScale,
+                                   HYPRE_ParCSRDiagScaleSetup,
+                                   pcg_precond);
+      }
+ 
+      HYPRE_ParCSRGMRESSetup(pcg_solver, A, b, x);
+ 
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("GMRES Solve");
+      hypre_BeginTiming(time_index);
+ 
+      HYPRE_ParCSRGMRESSolve(pcg_solver, A, b, x);
+ 
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+ 
+      HYPRE_ParCSRGMRESGetNumIterations(pcg_solver, &num_iterations);
+      HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_ParCSRGMRESFinalize(pcg_solver);
+ 
+      if (solver_id == 3)
+      {
+         HYPRE_ParAMGFinalize(pcg_precond);
+      }
+      if (myid == 0)
+      {
+         printf("\n");
+         printf("Iterations = %d\n", num_iterations);
+         printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         printf("\n");
+      }
+   }
    /*-----------------------------------------------------------
     * Print the solution and other info
     *-----------------------------------------------------------*/

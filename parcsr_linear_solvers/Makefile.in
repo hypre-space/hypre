@@ -54,6 +54,7 @@ HEADERS =\
 
 FILES =\
  driver.c\
+ gmres.c\
  par_amg.c\
  par_amg_setup.c\
  par_amg_solve.c\
@@ -71,6 +72,7 @@ FILES =\
  pcg_par.c\
  transpose.c\
  HYPRE_parcsr_amg.c\
+ HYPRE_parcsr_gmres.c\
  HYPRE_parcsr_pcg.c
 
 OBJS = ${FILES:.c=.o}
