@@ -233,6 +233,12 @@ int HYPRE_StructPFMGSetLogging(HYPRE_StructSolver solver,
                                int                logging);
 
 /**
+ * (Optional) To allow printing to the screen .
+ **/
+int HYPRE_StructPFMGSetPrintLevel(HYPRE_StructSolver solver,
+                                  int                print_level);
+
+/**
  * Return the number of iterations taken.
  **/
 int HYPRE_StructPFMGGetNumIterations(HYPRE_StructSolver  solver,
@@ -334,6 +340,12 @@ int HYPRE_StructSMGSetLogging(HYPRE_StructSolver solver,
                               int                logging);
 
 /**
+ * (Optional) To allow printing to the screen .
+ **/
+int HYPRE_StructSMGSetPrintLevel(HYPRE_StructSolver solver,
+                                  int                print_level);
+
+/**
  * Return the number of iterations taken.
  **/
 int HYPRE_StructSMGGetNumIterations(HYPRE_StructSolver  solver,
@@ -419,6 +431,7 @@ int HYPRE_StructPCGSetPrecond(HYPRE_StructSolver         solver,
  **/
 int HYPRE_StructPCGSetLogging(HYPRE_StructSolver solver,
                               int                logging);
+
 
 /**
  * (Optional) Set the print level
@@ -535,12 +548,14 @@ int
 HYPRE_StructGMRESSetLogging( HYPRE_StructSolver solver,
                              int                logging );
 
+
 /**
  * (Optional) Set the print level
  **/
 int
 HYPRE_StructGMRESSetPrintLevel( HYPRE_StructSolver solver,
                              int                level );
+
 /**
  * Return the number of iterations taken.
  **/
@@ -717,6 +732,10 @@ int HYPRE_StructSparseMSGSetNumFineRelax(HYPRE_StructSolver solver,
 int HYPRE_StructSparseMSGSetLogging(HYPRE_StructSolver solver,
                                     int                logging);
 
+int HYPRE_StructSparseMSGSetPrintLevel(HYPRE_StructSolver solver,
+                                          int         print_level);
+
+
 int HYPRE_StructSparseMSGGetNumIterations(HYPRE_StructSolver  solver,
                                           int                *num_iterations);
 
@@ -779,6 +798,9 @@ int HYPRE_StructHybridSetPrecond(HYPRE_StructSolver         solver,
 
 int HYPRE_StructHybridSetLogging(HYPRE_StructSolver solver,
                                  int                logging);
+
+int HYPRE_StructHybridSetPrintLevel(HYPRE_StructSolver solver,
+                                 int               print_level);
 
 int HYPRE_StructHybridGetNumIterations(HYPRE_StructSolver  solver,
                                        int                *num_its);

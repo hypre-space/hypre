@@ -42,9 +42,9 @@ typedef struct
    double                final_rel_res_norm;
    int                   time_index;
 
+   int                 print_level;
    /* additional information (place-holder currently used to print norms) */
    int                   logging;
-   int                   print_level;
 
 } hypre_HybridData;
 
@@ -521,6 +521,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
       hypre_GMRESSetConvergenceFactorTol(pcg_solver, cf_tol);
       hypre_GMRESSetStopCrit(pcg_solver, stop_crit);
       hypre_GMRESSetRelChange(pcg_solver, rel_change);
+      hypre_GMRESSetPrintLevel(pcg_solver, print_level);
       hypre_GMRESSetPrintLevel(pcg_solver, print_level);
       hypre_GMRESSetLogging(pcg_solver, logging);
 

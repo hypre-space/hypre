@@ -151,6 +151,7 @@ int HYPRE_StructPFMGSetNumPostRelax( HYPRE_StructSolver solver , int num_post_re
 int HYPRE_StructPFMGSetSkipRelax( HYPRE_StructSolver solver , int skip_relax );
 int HYPRE_StructPFMGSetDxyz( HYPRE_StructSolver solver , double *dxyz );
 int HYPRE_StructPFMGSetLogging( HYPRE_StructSolver solver , int logging );
+int HYPRE_StructPFMGSetPrintLevel( HYPRE_StructSolver solver , int print_level );
 int HYPRE_StructPFMGGetNumIterations( HYPRE_StructSolver solver , int *num_iterations );
 int HYPRE_StructPFMGGetFinalRelativeResidualNorm( HYPRE_StructSolver solver , double *norm );
 
@@ -168,6 +169,8 @@ int HYPRE_StructSMGSetNonZeroGuess( HYPRE_StructSolver solver );
 int HYPRE_StructSMGSetNumPreRelax( HYPRE_StructSolver solver , int num_pre_relax );
 int HYPRE_StructSMGSetNumPostRelax( HYPRE_StructSolver solver , int num_post_relax );
 int HYPRE_StructSMGSetLogging( HYPRE_StructSolver solver , int logging );
+int HYPRE_StructSMGSetPrintLevel( HYPRE_StructSolver solver , int print_level );
+
 int HYPRE_StructSMGGetNumIterations( HYPRE_StructSolver solver , int *num_iterations );
 int HYPRE_StructSMGGetFinalRelativeResidualNorm( HYPRE_StructSolver solver , double *norm );
 
@@ -187,6 +190,7 @@ int HYPRE_StructSparseMSGSetNumPreRelax( HYPRE_StructSolver solver , int num_pre
 int HYPRE_StructSparseMSGSetNumPostRelax( HYPRE_StructSolver solver , int num_post_relax );
 int HYPRE_StructSparseMSGSetNumFineRelax( HYPRE_StructSolver solver , int num_fine_relax );
 int HYPRE_StructSparseMSGSetLogging( HYPRE_StructSolver solver , int logging );
+int HYPRE_StructSparseMSGSetPrintLevel( HYPRE_StructSolver solver , int print_level );
 int HYPRE_StructSparseMSGGetNumIterations( HYPRE_StructSolver solver , int *num_iterations );
 int HYPRE_StructSparseMSGGetFinalRelativeResidualNorm( HYPRE_StructSolver solver , double *norm );
 
@@ -241,6 +245,7 @@ int hypre_PFMGSetNumPostRelax( void *pfmg_vdata , int num_post_relax );
 int hypre_PFMGSetSkipRelax( void *pfmg_vdata , int skip_relax );
 int hypre_PFMGSetDxyz( void *pfmg_vdata , double *dxyz );
 int hypre_PFMGSetLogging( void *pfmg_vdata , int logging );
+int hypre_PFMGSetPrintLevel( void *pfmg_vdata , int print_level );
 int hypre_PFMGGetNumIterations( void *pfmg_vdata , int *num_iterations );
 int hypre_PFMGPrintLogging( void *pfmg_vdata , int myid );
 int hypre_PFMGGetFinalRelativeResidualNorm( void *pfmg_vdata , double *relative_residual_norm );
@@ -332,6 +337,7 @@ int hypre_SMGSetNumPreRelax( void *smg_vdata , int num_pre_relax );
 int hypre_SMGSetNumPostRelax( void *smg_vdata , int num_post_relax );
 int hypre_SMGSetBase( void *smg_vdata , hypre_Index base_index , hypre_Index base_stride );
 int hypre_SMGSetLogging( void *smg_vdata , int logging );
+int hypre_SMGSetPrintLevel( void *smg_vdata , int print_level );
 int hypre_SMGGetNumIterations( void *smg_vdata , int *num_iterations );
 int hypre_SMGPrintLogging( void *smg_vdata , int myid );
 int hypre_SMGGetFinalRelativeResidualNorm( void *smg_vdata , double *relative_residual_norm );
@@ -420,6 +426,7 @@ int hypre_SparseMSGSetNumPreRelax( void *smsg_vdata , int num_pre_relax );
 int hypre_SparseMSGSetNumPostRelax( void *smsg_vdata , int num_post_relax );
 int hypre_SparseMSGSetNumFineRelax( void *smsg_vdata , int num_fine_relax );
 int hypre_SparseMSGSetLogging( void *smsg_vdata , int logging );
+int hypre_SparseMSGSetPrintLevel( void *smsg_vdata , int print_level );
 int hypre_SparseMSGGetNumIterations( void *smsg_vdata , int *num_iterations );
 int hypre_SparseMSGPrintLogging( void *smsg_vdata , int myid );
 int hypre_SparseMSGGetFinalRelativeResidualNorm( void *smsg_vdata , double *relative_residual_norm );
