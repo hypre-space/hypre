@@ -7405,7 +7405,7 @@ else
 echo "configure:7406: checking for Fortran libraries" >&5
             echo "      END" > conftest.f
   foutput=`${F77-f77} -v -o conftest conftest.f 2>&1`
-            xlf_p=`echo $foutput | sed -n -e '/xlfentry/p'`
+            xlf_p=`echo $foutput | grep xlfentry`
   if test -n "$xlf_p"; then
     foutput=`echo $foutput | sed 's/,/ /g'`
   fi
@@ -8698,6 +8698,7 @@ CXX="$PREPEND $CXX"
  parcsr_linear_solvers\
  seq_linear_solvers/pamg\
  seq_linear_solvers/amge\
+ seq_linear_solvers/amge_ag\
  CI_struct_linear_solvers\
  CI_struct_matrix_vector\
  structIJ_matrix_vector\

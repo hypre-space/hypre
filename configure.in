@@ -1005,6 +1005,7 @@ CASC_CONFIG_OUTPUT_LIST(\
  parcsr_linear_solvers\
  seq_linear_solvers/pamg\
  seq_linear_solvers/amge\
+ seq_linear_solvers/amge_ag\
  CI_struct_linear_solvers\
  CI_struct_matrix_vector\
  structIJ_matrix_vector\
