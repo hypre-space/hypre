@@ -503,8 +503,11 @@ int hypre_SchwarzSolve(hypre_ParCSRMatrix *par_A,
 
   int matrix_size, matrix_size_counter = 0;
 
-  int num_procs;
+  int num_procs, my_id;
+  int my_color, num_colors, ic;
+
   MPI_Comm_size(comm,&num_procs);
+  MPI_Comm_size(comm,&my_id);
 
   /* initiate:      ----------------------------------------------- */
   /* num_dofs = hypre_CSRMatrixNumRows(A); */
@@ -517,13 +520,20 @@ int hypre_SchwarzSolve(hypre_ParCSRMatrix *par_A,
   aux = hypre_VectorData(aux_vector);
   /* for (i=0; i < num_dofs; i++)
     x[i] = 0.e0; */
-  
-  /* forward solve: ----------------------------------------------- */
 
+  my_color = hypre_ParCSRMatrixMyColor(par_A);
+  num_colors = hypre_ParCSRMatrixNumColors(par_A);
+
+  for (ic = 0; ic < num_colors; ic++)
+  {
   if (num_procs > 1)
      hypre_parCorrRes(par_A,par_x,rhs_vector,&rhs);
   else 
      rhs = hypre_VectorData(rhs_vector);
+
+  if (my_color == ic)
+  {  
+  /* forward solve: ----------------------------------------------- */
 
   matrix_size_counter = 0;
   for (i=0; i < num_domains; i++)
@@ -653,6 +663,9 @@ int hypre_SchwarzSolve(hypre_ParCSRMatrix *par_A,
 	}
     }			      
 
+  }			      
+  }
+			      
   if (num_procs > 1) hypre_TFree(rhs);
 
   return ierr;
@@ -1977,12 +1990,12 @@ hypre_parCorrRes( hypre_ParCSRMatrix *A,
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    offd = hypre_ParCSRMatrixOffd(A);
    num_cols_offd = hypre_CSRMatrixNumCols(offd);
+   local_size = hypre_VectorSize(x_local);
 
    if (num_cols_offd)
    {
       x_local = hypre_ParVectorLocalVector(x);
       x_local_data = hypre_VectorData(x_local);
-      local_size = hypre_VectorSize(x_local);
 
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       x_buf_data = hypre_CTAlloc(double, 
