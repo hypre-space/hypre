@@ -117,6 +117,7 @@ main( int   argc,
    int      smooth_num_sweep = 1;
    int      num_sweep = 1;
    double  *relax_weight; 
+   double  *omega;
    double   tol = 1.e-6, pc_tol = 0.;
    double   max_row_sum = 1.;
 
@@ -165,7 +166,7 @@ main( int   argc,
 
    solver_id = 0;
 
-   ioutdat = 2;
+   ioutdat = 3;
    poutdat = 1;
 
    /*-----------------------------------------------------------
@@ -449,9 +450,13 @@ main( int   argc,
    grid_relax_type   = hypre_CTAlloc(int,4);
    grid_relax_points = hypre_CTAlloc(int *,4);
    relax_weight      = hypre_CTAlloc(double, max_levels);
+   omega      = hypre_CTAlloc(double, max_levels);
 
    for (i=0; i < max_levels; i++)
+   {
 	relax_weight[i] = 1.;
+	omega[i] = 1.;
+   }
 
    if (coarsen_type == 5)
    {
@@ -484,34 +489,54 @@ main( int   argc,
    else
    {   
       /* fine grid */
-      num_grid_sweeps[0] = 2*num_sweep;
+      num_grid_sweeps[0] = num_sweep;
       grid_relax_type[0] = relax_default; 
+      grid_relax_points[0] = hypre_CTAlloc(int, num_sweep); 
+      for (i=0; i<num_sweep; i++)
+      {
+         grid_relax_points[0][i] = 0;
+      }
+      /*num_grid_sweeps[0] = 2*num_sweep;
       grid_relax_points[0] = hypre_CTAlloc(int, 2*num_sweep); 
       for (i=0; i<2*num_sweep; i+=2)
       {
          grid_relax_points[0][i] = 1;
          grid_relax_points[0][i+1] = -1;
-      }
+      } */
 
       /* down cycle */
-      num_grid_sweeps[1] = 2*num_sweep;
+      num_grid_sweeps[1] = num_sweep;
+      grid_relax_type[1] = relax_default; 
+      grid_relax_points[1] = hypre_CTAlloc(int, num_sweep); 
+      for (i=0; i<num_sweep; i++)
+      {
+         grid_relax_points[1][i] = 0;
+      }
+      /*num_grid_sweeps[1] = 2*num_sweep;
       grid_relax_type[1] = relax_default; 
       grid_relax_points[1] = hypre_CTAlloc(int, 2*num_sweep); 
       for (i=0; i<2*num_sweep; i+=2)
       {
          grid_relax_points[1][i] = 1;
          grid_relax_points[1][i+1] = -1;
-      }
+      }*/
 
       /* up cycle */
-      num_grid_sweeps[2] = 2*num_sweep;
+      num_grid_sweeps[2] = num_sweep;
+      grid_relax_type[2] = relax_default; 
+      grid_relax_points[2] = hypre_CTAlloc(int, num_sweep); 
+      for (i=0; i<num_sweep; i++)
+      {
+         grid_relax_points[2][i] = 0;
+      }
+      /*num_grid_sweeps[2] = 2*num_sweep;
       grid_relax_type[2] = relax_default; 
       grid_relax_points[2] = hypre_CTAlloc(int, 2*num_sweep); 
       for (i=0; i<2*num_sweep; i+=2)
       {
          grid_relax_points[2][i] = -1;
          grid_relax_points[2][i+1] = 1;
-      }
+      }*/
    }
 
    /* coarsest grid */
@@ -550,6 +575,18 @@ main( int   argc,
          relax_weight[0] = atof(argv[arg_index++]);
          for (i=1; i < max_levels; i++)
 	   relax_weight[i] = relax_weight[0];
+        }
+      }
+      else if ( strcmp(argv[arg_index], "-om") == 0 )
+      {
+         arg_index++;
+        if (solver_id == 0 || solver_id == 1 || solver_id == 3 
+		|| solver_id == 5 || solver_id == 13 || solver_id == 14
+		|| solver_id == 15 || solver_id == 9 || solver_id == 20)
+        {
+         omega[0] = atof(argv[arg_index++]);
+         for (i=1; i < max_levels; i++)
+	   omega[i] = omega[0];
         }
       }
       else if ( strcmp(argv[arg_index], "-sw") == 0 )
@@ -1505,6 +1542,7 @@ main( int   argc,
       HYPRE_BoomerAMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
       HYPRE_BoomerAMGSetGridRelaxType(amg_solver, grid_relax_type);
       HYPRE_BoomerAMGSetRelaxWeight(amg_solver, relax_weight);
+      HYPRE_BoomerAMGSetOmega(amg_solver, omega);
       HYPRE_BoomerAMGSetSmoothOption(amg_solver, smooth_option);
       HYPRE_BoomerAMGSetSmoothNumSweep(amg_solver, smooth_num_sweep);
       HYPRE_BoomerAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
@@ -1604,6 +1642,7 @@ main( int   argc,
       HYPRE_BoomerAMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
       HYPRE_BoomerAMGSetGridRelaxType(amg_solver, grid_relax_type);
       HYPRE_BoomerAMGSetRelaxWeight(amg_solver, relax_weight);
+      HYPRE_BoomerAMGSetOmega(amg_solver, omega);
       HYPRE_BoomerAMGSetSmoothOption(amg_solver, smooth_option);
       HYPRE_BoomerAMGSetSmoothNumSweep(amg_solver, smooth_num_sweep);
       HYPRE_BoomerAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
@@ -1680,6 +1719,7 @@ main( int   argc,
    {
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
+      ioutdat = 2;
  
       HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_PCGSetMaxIter(pcg_solver, 500);
@@ -1705,6 +1745,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
          HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
+         HYPRE_BoomerAMGSetOmega(pcg_precond, omega);
          HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
          HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
@@ -1821,6 +1862,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
          HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
+         HYPRE_BoomerAMGSetOmega(pcg_precond, omega);
          HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
          HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
@@ -1938,6 +1980,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
  
+      ioutdat = 2;
       HYPRE_ParCSRGMRESCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_GMRESSetKDim(pcg_solver, k_dim);
       HYPRE_GMRESSetMaxIter(pcg_solver, 1000);
@@ -1962,6 +2005,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
          HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
+         HYPRE_BoomerAMGSetOmega(pcg_precond, omega);
          HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
          HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
@@ -2067,6 +2111,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
          HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
+         HYPRE_BoomerAMGSetOmega(pcg_precond, omega);
          HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
          HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
@@ -2196,6 +2241,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("BiCGSTAB Setup");
       hypre_BeginTiming(time_index);
  
+      ioutdat = 2;
       HYPRE_ParCSRBiCGSTABCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_BiCGSTABSetMaxIter(pcg_solver, 1000);
       HYPRE_BiCGSTABSetTol(pcg_solver, tol);
@@ -2218,6 +2264,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
          HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
+         HYPRE_BoomerAMGSetOmega(pcg_precond, omega);
          HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
          HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
@@ -2350,6 +2397,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("CGNR Setup");
       hypre_BeginTiming(time_index);
  
+      ioutdat = 2;
       HYPRE_ParCSRCGNRCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_CGNRSetMaxIter(pcg_solver, 1000);
       HYPRE_CGNRSetTol(pcg_solver, tol);
@@ -2372,6 +2420,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
          HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
+         HYPRE_BoomerAMGSetOmega(pcg_precond, omega);
          HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
          HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
