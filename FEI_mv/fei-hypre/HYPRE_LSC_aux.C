@@ -230,7 +230,6 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          printf("    - outputLevel <d> \n");
          printf("    - setDebug <slideReduction1,amgDebug,printFEInfo>\n");
          printf("    - haveFEData <0,1>\n");
-         printf("    - FEDataNullSize <d>\n");
          printf("    - schurReduction\n");
          printf("    - slideReduction or slideReduction2\n");
          printf("    - AConjugateProjection <dsize>\n");
@@ -348,20 +347,6 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters haveFEData = %d\n",
                    haveFEData_);
-      }
-
-      //----------------------------------------------------------------
-      // turn on MLI's FEData null space module
-      //----------------------------------------------------------------
-
-      else if ( !strcmp(param1, "FEDataNullSize") )
-      {
-         sscanf(params[i],"%s %d", param, &k);
-#ifdef HAVE_MLI
-         if (feData_ != NULL) HYPRE_LSI_MLIFEDataLoadNullSpaceInfo(feData_,k);
-         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-            printf("       HYPRE_LSC::parameters FEDataNullSize = %d\n",k);
-#endif
       }
 
       //----------------------------------------------------------------
