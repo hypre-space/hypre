@@ -21,7 +21,7 @@ TEST_DRIVERS="\
 # Define HYPRE_ARCH
 #===========================================================================
 
-. ./autotest_arch.sh
+. ./hypre_arch.sh
 
 #===========================================================================
 # Run test drivers and log results and errors to file

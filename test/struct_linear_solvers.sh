@@ -20,7 +20,7 @@
 # Define HYPRE_ARCH and MPIRUN
 #===========================================================================
 
-. ./autotest_arch.sh
+. ./hypre_arch.sh
 
 MPIRUN="./mpirun.$HYPRE_ARCH"
 DRIVER="./struct_linear_solvers"
