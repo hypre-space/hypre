@@ -104,7 +104,10 @@ void StoredRowsPut(StoredRows *p, int index, int len, int *ind, double *val)
         int j;
         int newsize;
 
-	newsize = i+1000;
+	newsize = i*2;
+#ifdef PARASAILS_DEBUG
+		    printf("StoredRows resize %d\n", newsize);
+#endif
         p->len = (int *)     realloc(p->len, newsize * sizeof(int));
         p->ind = (int **)    realloc(p->ind, newsize * sizeof(int *));
         p->val = (double **) realloc(p->val, newsize * sizeof(double *));

@@ -115,7 +115,10 @@ void PrunedRowsPut(PrunedRows *p, int index, int len, int *ind)
 {
     if (index >= p->size)
     {
-	p->size = index + 1000;
+	p->size = index*2;
+#ifdef PARASAILS_DEBUG
+	printf("StoredRows resize %d\n", p->size);
+#endif
 	p->len = (int *)  realloc(p->len, p->size * sizeof(int));
 	p->ind = (int **) realloc(p->ind, p->size * sizeof(int *));
     }

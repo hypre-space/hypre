@@ -32,6 +32,10 @@ static void resize(RowPatt *p, int newlen)
 {
     int oldlen, i;
 
+#ifdef PARASAILS_DEBUG
+    printf("RowPatt resize %d\n", newlen);
+#endif
+
     oldlen = p->maxlen;
     p->maxlen = newlen;
 
@@ -104,7 +108,7 @@ void RowPattMerge(RowPatt *p, int len, int *ind)
     for (i=0; i<len; i++)
     {
 	if (ind[i] >= p->maxlen)
-	    resize(p, ind[i]+1000);
+	    resize(p, ind[i]*2);
 
 	if (p->mark[ind[i]] == -1)
 	{
@@ -133,7 +137,7 @@ void RowPattMergeExt(RowPatt *p, int len, int *ind, int num_loc)
 	    continue;
 
 	if (ind[i] >= p->maxlen)
-	    resize(p, ind[i]+1000);
+	    resize(p, ind[i]*2);
 
 	if (p->mark[ind[i]] == -1)
 	{
