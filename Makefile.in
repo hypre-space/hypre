@@ -16,6 +16,10 @@ HYPRE_BASIC_DIRS =\
  blas\
  utilities
 
+# These are the directories for the generic Krylov solvers
+HYPRE_KRYLOV_DIRS =\
+ krylov
+
 #These are the directories for the structured interface
 HYPRE_STRUCT_DIRS =\
  struct_matrix_vector\
@@ -53,6 +57,7 @@ HYPRE_FEI_LIBFILES =\
 # These are directories that are officially in HYPRE
 HYPRE_DIRS =\
  ${HYPRE_BASIC_DIRS}\
+ ${HYPRE_KRYLOV_DIRS}\
  ${HYPRE_STRUCT_DIRS}\
  ${HYPRE_SSTRUCT_DIRS}\
  ${HYPRE_IJ_DIRS}\
@@ -63,9 +68,10 @@ HYPRE_EXTRA_DIRS =\
  seq_linear_solvers/pamg\
  structIJ_matrix_vector\
  CI_struct_matrix_vector\
- CI_struct_linear_solvers @HYPRE_PETSCLIBDIRS@
+ CI_struct_linear_solvers @HYPRE_PETSCLIBDIRS@\
+ babel/Hypre
 
-all: struct sstruct IJ fei
+all: krylov struct sstruct IJ fei
 	@ \
 	echo "Making test drivers ..."; \
 	(cd test; make veryclean; make); \
@@ -87,6 +93,20 @@ beta: all
 	echo "Making beta test drivers ..."; \
 	(cd test; make beta); \
 	echo ""
+
+krylov: base
+	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre; \
+	export HYPRE_INSTALL_DIR; \
+	for i in ${HYPRE_KRYLOV_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make install); \
+	    echo ""; \
+	  fi; \
+	done
 
 struct: base
 	@ \

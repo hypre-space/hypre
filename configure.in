@@ -843,9 +843,11 @@ dnl jfp: temporary, until Babel has been installed somewhere:
  -I${BABEL_DIR}\
  -I${BABEL_DIR}/babel"
 BABELLIBFLAGS="-L../babel/Hypre -lhypre_class -L${BABEL_DIR}/babel -lbabel"
+# jfp: ...above line is normal, following is for temporary Fortran+C work...
+#BABELLIBFLAGS="-L../babel/Hypre -lhypre_class -L../babel/Hypre_C1 -lhypre_class_C1 -L${BABEL_DIR}/babel -lbabel"
 
-dnl  babeldir="$HOME"
-dnl  AC_SUBST(babeldir)
+ babeldir="$HOME"
+ AC_SUBST(babeldir)
 dnl   CASC_FIND_BABEL
 
   AM_INIT_AUTOMAKE()
@@ -1010,6 +1012,7 @@ CASC_CONFIG_OUTPUT_LIST(\
  PETScMat_linear_solvers/pilut\
  PETSc_linear_solvers/ParILUT\
  distributed_linear_solvers/ParaSails\
+ krylov\
  test\
  tools\
  docs)
