@@ -53,6 +53,11 @@ casc_user_chose_compilers=no
 casc_user_chose_mpi=no
 casc_using_pthreads=no
 casc_using_petsc=no
+casc_using_openmp=no   
+casc_using_ibm_smp=no
+casc_using_sgi_smp=no
+casc_using_pgcc_smp=no
+
 
 AC_ARG_WITH(CC, \[
   --with-CC=ARG           manually set C compiler to ARG],
@@ -183,6 +188,17 @@ AC_ARG_WITH(MPI, [\
   casc_using_mpi=yes
 )
 
+AC_ARG_WITH(COMM_SIMPLE, [\
+  --without-MPI           do not use MPI],
+  if test "$withval" = "no"
+  then
+    CFLAGS="$CFLAGS"
+  else
+    CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
+  fi,
+    CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
+)
+
 
 
 AC_ARG_WITH(dmalloc, [\
@@ -197,6 +213,31 @@ AC_ARG_WITH(timing, [\
   --with-timing           use timing routines],
   HYPREDEFS="$HYPREDEFS -DHYPRE_TIMING"
 )
+
+AC_ARG_WITH(openmp,
+   [  --with-openmp        use openMP],
+   HYPREDEFS="$HYPREDEFS -DHYPRE_USING_OPENMP"
+   casc_using_openmp=yes
+)
+
+AC_ARG_WITH(IBM_smp,
+   [  --with-IBM_smp          use IBM SMP],
+   HYPREDEFS="$HYPREDEFS -DHYPRE_USING_IBM_SMP"
+   casc_using_ibm_smp=yes
+)
+
+AC_ARG_WITH(SGI_smp,
+   [  --with-SGI_smp          use SGI SMP],
+   HYPREDEFS="$HYPREDEFS -DHYPRE_USING_SGI_SMP"
+   casc_using_sgi_smp=yes
+)
+
+AC_ARG_WITH(pgcc_smp,
+   [  --with-pgcc_smp          use pgcc SMP (Red)],
+   HYPREDEFS="$HYPREDEFS -DHYPRE_USING_PGCC_SMP"
+   casc_using_pgcc_smp=yes 
+)
+
 
 AC_ARG_WITH(pthreads, [\
   --with-pthreads         use pthreads],
@@ -351,20 +392,29 @@ then
 
      if test "$casc_user_chose_compilers" = "no"
      then
-       if test "$casc_using_mpi" = "no"
+       if test "$casc_using_mpi" = "no" &&
+	  test "$casc_using_openmp" = "no"
        then
          AC_CHECK_PROGS(CC,cc kcc gcc c89)
          AC_CHECK_PROGS(CXX,cxx KCC g++)
          AC_CHECK_PROGS(F77,f77 kf77 g77)
        else
-         AC_CHECK_PROGS(CC,mpicc cc kcc) 
-         AC_CHECK_PROGS(CXX,mpiCC cxx KCC) 
-         AC_CHECK_PROGS(F77,mpif77 f77 kf77)
+	 if test "$casc_using_openmp" = "no"
+         then
+           AC_CHECK_PROGS(CC,mpicc cc kcc) 
+           AC_CHECK_PROGS(CXX,mpiCC cxx KCC) 
+           AC_CHECK_PROGS(F77,mpif77 f77 kf77)
+         else
+	   AC_CHECK_PROGS(CC,guidec) 
+           AC_CHECK_PROGS(CXX,guidec++) 
+           AC_CHECK_PROGS(F77,guidef77)
+         fi 
        fi
      fi
 
      if test "$CC" = "cc" ||
-        test "$CC" = "kcc" &&
+        test "$CC" = "kcc" ||
+	test "$CC" = "guidec" &&
         test "$casc_user_chose_mpi" = "no" &&
         test "$casc_using_mpi" = "yes"
      then
@@ -408,26 +458,47 @@ then
      then
        if test "$casc_using_mpi" = "no"
        then
-         if test "$casc_using_pthreads" = "no"
+         if test "$casc_using_pthreads" = "no" &&
+	    test "$casc_using_openmp" = "no"
          then
            AC_CHECK_PROGS(CC,xlc gcc cc c89)
            AC_CHECK_PROGS(CXX,xlC KCC g++)
            AC_CHECK_PROGS(F77,xlf g77)
          else
-           AC_CHECK_PROGS(CC,xlc_r gcc)
-           AC_CHECK_PROGS(CXX,xlC_r g++)
-           AC_CHECK_PROGS(F77,xlf_r g77)        
-         fi
+	   if test "$casc_using_pthreads" = "yes"
+           then
+             AC_CHECK_PROGS(CC,xlc_r gcc)
+             AC_CHECK_PROGS(CXX,xlC_r g++)
+             AC_CHECK_PROGS(F77,xlf_r g77)  
+	   fi
+	   if test "$casc_using_openmp" = "yes"
+           then
+             AC_CHECK_PROGS(CC,guidec)
+             AC_CHECK_PROGS(CXX,guidec++)
+             AC_CHECK_PROGS(F77,guidef77)
+           fi       
+         fi  
        else
-         if test "$casc_using_pthreads" = "no"
+         if test "$casc_using_pthreads" = "no" &&
+	    test "$casc_using_openmp" = "no"
          then
            AC_CHECK_PROGS(CC,mpcc mpicc) 
            AC_CHECK_PROGS(CXX,mpCC mpiCC) 
            AC_CHECK_PROGS(F77,mpxlf mpif77)
+AC_PROG_CPP
          else
-           AC_CHECK_PROGS(CC,mpxlc_r mpcc_r mpicc) 
-           AC_CHECK_PROGS(CXX,mpxlC_r mpCC_r mpiCC) 
-           AC_CHECK_PROGS(F77,mpxlf_r mpif77)
+	   if test "$casc_using_pthreads" = "yes"
+           then
+             AC_CHECK_PROGS(CC,mpxlc_r mpcc_r mpicc) 
+             AC_CHECK_PROGS(CXX,mpxlC_r mpCC_r mpiCC) 
+             AC_CHECK_PROGS(F77,mpxlf_r mpif77)
+	   fi
+           if test "$casc_using_openmp" = "yes"
+           then
+             AC_CHECK_PROGS(CC,mpguidec)
+             AC_CHECK_PROGS(CXX,mpguidec++)
+             AC_CHECK_PROGS(F77,mpguidef77)
+           fi        
          fi
        fi
      fi
@@ -622,8 +693,6 @@ dnl *********************************************************************
 dnl ********************************************************************
 dnl * The following macros are exported and may be used in Makefile.in's
 dnl ********************************************************************
-
-
 
 dnl * General purpose header files and libraries and directories for
 dnl * those libraries.  
