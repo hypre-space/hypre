@@ -263,7 +263,15 @@ int  impl_Hypre_ParCSRMatrixBuilder_SetMap
 int  impl_Hypre_ParCSRMatrixBuilder_GetMap
 ( Hypre_ParCSRMatrixBuilder this, Hypre_Map* map ) {
    Hypre_ParCSRMatrix mat = this->Hypre_ParCSRMatrixBuilder_data->newmat;
-   return Hypre_ParCSRMatrix_GetMap( mat, map );
+   if ( mat==NULL ) {
+      printf(
+         "Hypre.ParCSRMatrixBuilder.GetMap: object not constructed yet\n"
+         );
+      return 1;
+   }
+   else {
+      return Hypre_ParCSRMatrix_GetMap( mat, map );
+   }
 } /* end impl_Hypre_ParCSRMatrixBuilder_GetMap */
 
 /* ********************************************************
@@ -359,7 +367,16 @@ impl_Hypre_ParCSRMatrixBuilder_GetLocalRange
   int* col_end
    )
 {
-      printf( "Hypre_ParCSRMatrixBuilder_GetLocalRange doesn't work. TO DO: implement this\n" );
+   Hypre_ParCSRMatrix mat = this->Hypre_ParCSRMatrixBuilder_data->newmat;
+   if ( mat==NULL ) {
+      printf(
+         "Hypre.ParCSRMatrixBuilder.GetLocalRange: object not constructed yet\n"
+         );
       return 1;
+   }
+   else {
+      return Hypre_ParCSRMatrix_GetLocalRange( mat, row_start, row_end,
+                                               col_start, col_end );
+   }
 }
 

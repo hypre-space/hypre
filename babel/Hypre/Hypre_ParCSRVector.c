@@ -318,7 +318,7 @@ hypre_IJVectorScalePar( hypre_IJVector *vector, double ascale )
 
 /*     HYPRE_IJVectorGetPartitioning( *Hvec, new_data ); */
 
-  /* >>>> TO DO: Is this right with nonzero lower index ?? >>>> */
+  /* >>>> Is this right with nonzero lower index ?? >>>> */
 /*     (*partitioning).data = *new_data; */
 /*     return 0; */
 /*  } end impl_Hypre_ParCSRVectorGetPartitioning */
@@ -327,8 +327,11 @@ hypre_IJVectorScalePar( hypre_IJVector *vector, double ascale )
  * impl_Hypre_ParCSRVector_GetGlobalSize
  **********************************************************/
 int  impl_Hypre_ParCSRVector_GetGlobalSize(Hypre_ParCSRVector this, int* size) {
-   printf( "Hypre_ParCSRVector_GetGlobalSize doesn't work. TO DO (URGENT): implement this\n" );
-   return 1;
+   struct Hypre_ParCSRVector_private_type *HPv = this->Hypre_ParCSRVector_data;
+   HYPRE_IJVector *Hv = HPv->Hvec;
+   hypre_IJVector *hv = (hypre_IJVector *) *Hv;
+   *size = hypre_IJVectorN(hv); 
+   return 0;
 } /* end impl_Hypre_ParCSRVector_GetGlobalSize */
 
 /* ********************************************************
