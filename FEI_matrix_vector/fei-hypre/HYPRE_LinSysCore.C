@@ -41,10 +41,10 @@
 //---------------------------------------------------------------------------
 
 #include "parcsr_matrix_vector/parcsr_matrix_vector.h"
+#include "HYPRE_LSI_schwarz.h"
 #include "HYPRE_LSI_ddilut.h"
 #include "HYPRE_LSI_ddict.h"
 #include "HYPRE_LSI_poly.h"
-#include "HYPRE_LSI_ssor.h"
 
 #ifdef SUPERLU
 #include "dsp_defs.h"
@@ -213,6 +213,10 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     ddictFillin_        = 1.0;  // additional fillin other than A
     ddictDropTol_       = 1.0e-8;
 
+    schwarzFillin_      = 1.0;  // additional fillin other than A
+    schwarzNblocks_     = 1;
+    schwarzBlksize_     = 0;
+
     polyOrder_          = 8;    // order of polynomial preconditioner
 
     parasailsSym_       = 0;    // default is nonsymmetric
@@ -370,11 +374,11 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
        else if ( HYPreconID_ == HYDDILUT )
           HYPRE_LSI_DDIlutDestroy( HYPrecon_ );
 
+       else if ( HYPreconID_ == HYSCHWARZ )
+          HYPRE_LSI_SchwarzDestroy( HYPrecon_ );
+
        else if ( HYPreconID_ == HYPOLY )
           HYPRE_LSI_PolyDestroy( HYPrecon_ );
-
-       else if ( HYPreconID_ == HYSSOR )
-          HYPRE_LSI_SSORDestroy( HYPrecon_ );
 
 #ifdef MLPACK
        else if ( HYPreconID_ == HYML )
@@ -794,6 +798,51 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
           {
              printf("       HYPRE_LSC::parameters ddictDropTol = %e\n",
                     ddictDropTol_);
+          }
+       }
+
+       //----------------------------------------------------------------
+       // Schwarz preconditioner : Fillin 
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "schwarzFillin") )
+       {
+          sscanf(params[i],"%s %lg", param, &schwarzFillin_);
+          if ( schwarzFillin_ < 0.0 ) schwarzFillin_ = 0.0;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LSC::parameters schwarzFillin = %e\n",
+                    schwarzFillin_);
+          }
+       }
+
+       //----------------------------------------------------------------
+       // Schwarz preconditioner : block size 
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "schwarzNBlocks") )
+       {
+          sscanf(params[i],"%s %d", param, &schwarzNblocks_);
+          if ( schwarzNblocks_ <= 0 ) schwarzNblocks_ = 1;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LSC::parameters schwarzNblocks = %d\n",
+                    schwarzNblocks_);
+          }
+       }
+
+       //----------------------------------------------------------------
+       // Schwarz preconditioner : block size 
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "schwarzBlockSize") )
+       {
+          sscanf(params[i],"%s %d", param, &schwarzBlksize_);
+          if ( schwarzBlksize_ <= 0 ) schwarzBlksize_ = 1000;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LSC::parameters schwarzBlockSize = %d\n",
+                    schwarzBlksize_);
           }
        }
 
@@ -1373,8 +1422,6 @@ void HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
 void HYPRE_LinSysCore::setGlobalOffsets(int leng, int* nodeOffsets,
                        int* eqnOffsets, int* blkEqnOffsets)
 {
-    int i, nRows;
-
     //-------------------------------------------------------------------
     // diagnostic message
     //-------------------------------------------------------------------
@@ -1382,31 +1429,6 @@ void HYPRE_LinSysCore::setGlobalOffsets(int leng, int* nodeOffsets,
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LSC::entering setGlobalOffsets.\n",mypid_);
-    }
-
-    //-------------------------------------------------------------------
-    // clean up previous data
-    //-------------------------------------------------------------------
-
-    nRows = localEndRow_ - localStartRow_ + 1;
-    if ( rowLengths_ != NULL )
-    {
-       delete [] rowLengths_;
-       rowLengths_ = NULL;
-    }
-    if ( colIndices_ != NULL )
-    {
-       for ( i = 0; i < nRows; i++ )
-          if ( colIndices_[i] != NULL ) delete [] colIndices_[i];
-       delete [] colIndices_;
-       colIndices_ = NULL;
-    }
-    if ( colValues_ != NULL )
-    {
-       for ( i = 0; i < nRows; i++ )
-          if ( colValues_[i] != NULL ) delete [] colValues_[i];
-       delete [] colValues_;
-       colValues_ = NULL;
     }
 
     //-------------------------------------------------------------------
@@ -2727,7 +2749,7 @@ void HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
 {
     int i, ierr, *local_ind, *iarray, *iarray2;
 
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
     {
        printf("%4d : HYPRE_LSC::entering putInitalGuess.\n",mypid_);
     }
@@ -2780,7 +2802,7 @@ void HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
 
     delete [] local_ind;
 
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
     {
        printf("%4d : HYPRE_LSC::leaving  putInitalGuess.\n",mypid_);
     }
@@ -3061,14 +3083,14 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
        else if ( HYPreconID_ == HYDDILUT )
           HYPRE_LSI_DDIlutDestroy( HYPrecon_ );
 
+       else if ( HYPreconID_ == HYSCHWARZ )
+          HYPRE_LSI_SchwarzDestroy( HYPrecon_ );
+
        else if ( HYPreconID_ == HYDDICT )
           HYPRE_LSI_DDICTDestroy( HYPrecon_ );
 
        else if ( HYPreconID_ == HYPOLY )
           HYPRE_LSI_PolyDestroy( HYPrecon_ );
-
-       else if ( HYPreconID_ == HYSSOR )
-          HYPRE_LSI_SSORDestroy( HYPrecon_ );
 
 #ifdef MLPACK
        else if ( HYPreconID_ == HYML )
@@ -3105,6 +3127,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
        strcpy( HYPreconName_, name );
        HYPreconID_ = HYDDILUT;
     }
+    else if ( !strcmp(name, "schwarz") )
+    {
+       strcpy( HYPreconName_, name );
+       HYPreconID_ = HYSCHWARZ;
+    }
     else if ( !strcmp(name, "ddict") )
     {
        strcpy( HYPreconName_, name );
@@ -3114,11 +3141,6 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
     {
        strcpy( HYPreconName_, name );
        HYPreconID_ = HYPOLY;
-    }
-    else if ( !strcmp(name, "ssor") )
-    {
-       strcpy( HYPreconName_, name );
-       HYPreconID_ = HYSSOR;
     }
     else if ( !strcmp(name, "ml") )
     {
@@ -3180,6 +3202,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
             assert( !ierr );
             break;
 
+       case HYSCHWARZ :
+            ierr = HYPRE_LSI_SchwarzCreate( comm_, &HYPrecon_ );
+            assert( !ierr );
+            break;
+
        case HYDDICT :
             ierr = HYPRE_LSI_DDICTCreate( comm_, &HYPrecon_ );
             assert( !ierr );
@@ -3187,11 +3214,6 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 
        case HYPOLY :
             ierr = HYPRE_LSI_PolyCreate( comm_, &HYPrecon_ );
-            assert( !ierr );
-            break;
-
-       case HYSSOR :
-            ierr = HYPRE_LSI_SSORCreate( comm_, &HYPrecon_ );
             assert( !ierr );
             break;
 
@@ -3587,6 +3609,17 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   break;
 
+             case HYSCHWARZ :
+                  if ( HYOutputLevel_ & HYFEI_DDILUT )
+                     HYPRE_LSI_SchwarzSetOutputLevel(HYPrecon_,2);
+
+                  HYPRE_LSI_SchwarzSetILUTFillin(HYPrecon_,schwarzFillin_);
+                  HYPRE_LSI_SchwarzSetNBlocks(HYPrecon_, schwarzNblocks_);
+                  HYPRE_LSI_SchwarzSetBlockSize(HYPrecon_, schwarzBlksize_);
+                  HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                            HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                  break;
+
              case HYPOLY :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Polynomial preconditioning - order = %d\n", polyOrder_);
@@ -3601,13 +3634,6 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_LSI_PolySetup, HYPrecon_);
                   }
-                  break;
-
-             case HYSSOR :
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
-                     printf("SSOR preconditioning \n");
-                  HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_SSORSolve,
-                                      HYPRE_DummyFunction, HYPrecon_);
                   break;
 
              case HYPARASAILS :
@@ -3850,6 +3876,17 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   break;
 
+             case HYSCHWARZ :
+                  if ( HYOutputLevel_ & HYFEI_DDILUT )
+                     HYPRE_LSI_SchwarzSetOutputLevel(HYPrecon_,2);
+
+                  HYPRE_LSI_SchwarzSetILUTFillin(HYPrecon_,schwarzFillin_);
+                  HYPRE_LSI_SchwarzSetNBlocks(HYPrecon_, schwarzNblocks_);
+                  HYPRE_LSI_SchwarzSetBlockSize(HYPrecon_, schwarzBlksize_);
+                  HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                              HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                  break;
+
              case HYPOLY :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Polynomial preconditioning - order = %d\n", polyOrder_);
@@ -3864,13 +3901,6 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_LSI_PolySetup, HYPrecon_);
                   }
-                  break;
-
-             case HYSSOR :
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
-                     printf("SSOR preconditioning \n");
-                  HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_SSORSolve,
-                                      HYPRE_DummyFunction, HYPrecon_);
                   break;
 
              case HYPARASAILS :
@@ -4112,6 +4142,17 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   break;
 
+             case HYSCHWARZ :
+                  if ( HYOutputLevel_ & HYFEI_DDILUT )
+                     HYPRE_LSI_SchwarzSetOutputLevel(HYPrecon_,2);
+
+                  HYPRE_LSI_SchwarzSetILUTFillin(HYPrecon_,schwarzFillin_);
+                  HYPRE_LSI_SchwarzSetNBlocks(HYPrecon_, schwarzNblocks_);
+                  HYPRE_LSI_SchwarzSetBlockSize(HYPrecon_, schwarzBlksize_);
+                  HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                              HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                  break;
+
              case HYPOLY :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Polynomial preconditioning - order = %d\n", polyOrder_);
@@ -4126,13 +4167,6 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_LSI_PolySetup, HYPrecon_);
                   }
-                  break;
-
-             case HYSSOR :
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
-                     printf("SSOR preconditioning \n");
-                  HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_LSI_SSORSolve,
-                                      HYPRE_DummyFunction, HYPrecon_);
                   break;
 
              case HYPARASAILS :
@@ -4371,6 +4405,17 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   break;
 
+             case HYSCHWARZ :
+                  if ( HYOutputLevel_ & HYFEI_DDILUT )
+                     HYPRE_LSI_SchwarzSetOutputLevel(HYPrecon_,2);
+
+                  HYPRE_LSI_SchwarzSetILUTFillin(HYPrecon_,schwarzFillin_);
+                  HYPRE_LSI_SchwarzSetNBlocks(HYPrecon_, schwarzNblocks_);
+                  HYPRE_LSI_SchwarzSetBlockSize(HYPrecon_, schwarzBlksize_);
+                  HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                              HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                  break;
+
              case HYPOLY :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Polynomial preconditioning - order = %d\n", polyOrder_);
@@ -4385,13 +4430,6 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_LSI_PolySetup, HYPrecon_);
                   }
-                  break;
-
-             case HYSSOR :
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
-                     printf("SSOR preconditioning \n");
-                  HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_LSI_SSORSolve,
-                                      HYPRE_DummyFunction, HYPrecon_);
                   break;
 
              case HYPARASAILS :
@@ -4625,6 +4663,17 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   break;
 
+             case HYSCHWARZ :
+                  if ( HYOutputLevel_ & HYFEI_DDILUT )
+                     HYPRE_LSI_SchwarzSetOutputLevel(HYPrecon_,2);
+
+                  HYPRE_LSI_SchwarzSetILUTFillin(HYPrecon_,schwarzFillin_);
+                  HYPRE_LSI_SchwarzSetNBlocks(HYPrecon_, schwarzNblocks_);
+                  HYPRE_LSI_SchwarzSetBlockSize(HYPrecon_, schwarzBlksize_);
+                  HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                              HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                  break;
+
              case HYPOLY :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Polynomial preconditioning - order = %d\n", polyOrder_);
@@ -4639,13 +4688,6 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_LSI_PolySetup, HYPrecon_);
                   }
-                  break;
-
-             case HYSSOR :
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
-                     printf("SSOR preconditioning \n");
-                  HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_LSI_SSORSolve,
-                                      HYPRE_DummyFunction, HYPrecon_);
                   break;
 
              case HYPARASAILS :
@@ -4879,6 +4921,17 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                   }
                   break;
 
+             case HYSCHWARZ :
+                  if ( HYOutputLevel_ & HYFEI_DDILUT )
+                     HYPRE_LSI_SchwarzSetOutputLevel(HYPrecon_,2);
+
+                  HYPRE_LSI_SchwarzSetILUTFillin(HYPrecon_,schwarzFillin_);
+                  HYPRE_LSI_SchwarzSetNBlocks(HYPrecon_, schwarzNblocks_);
+                  HYPRE_LSI_SchwarzSetBlockSize(HYPrecon_, schwarzBlksize_);
+                  HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_LSI_SchwarzSolve,
+                                              HYPRE_LSI_SchwarzSetup, HYPrecon_);
+                  break;
+
              case HYPOLY :
                   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
                      printf("Polynomial preconditioning - order = %d\n", polyOrder_);
@@ -4893,13 +4946,6 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_LSI_PolySolve,
                                       HYPRE_LSI_PolySetup, HYPrecon_);
                   }
-                  break;
-
-             case HYSSOR :
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
-                     printf("SSOR preconditioning \n");
-                  HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_LSI_SSORSolve,
-                                      HYPRE_DummyFunction, HYPrecon_);
                   break;
 
              case HYPARASAILS :
@@ -5436,9 +5482,6 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     delete [] new_a; 
     Destroy_SuperMatrix_Store(&B);
     Destroy_SuperNode_Matrix(&L);
-    //SUPERLU_FREE( ((NRformat *) A2.Store)->colind);
-    //SUPERLU_FREE( ((NRformat *) A2.Store)->rowptr);
-    //SUPERLU_FREE( ((NRformat *) A2.Store)->nzval);
     SUPERLU_FREE( A2.Store );
     SUPERLU_FREE( ((NRformat *) U.Store)->colind);
     SUPERLU_FREE( ((NRformat *) U.Store)->rowptr);
@@ -5656,9 +5699,6 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     delete [] colLengths;
     Destroy_SuperMatrix_Store(&B);
     Destroy_SuperNode_Matrix(&L);
-    //SUPERLU_FREE( ((NRformat *) A2.Store)->colind);
-    //SUPERLU_FREE( ((NRformat *) A2.Store)->rowptr);
-    //SUPERLU_FREE( ((NRformat *) A2.Store)->nzval);
     SUPERLU_FREE( A2.Store );
     SUPERLU_FREE( ((NRformat *) U.Store)->colind);
     SUPERLU_FREE( ((NRformat *) U.Store)->rowptr);
@@ -6044,6 +6084,10 @@ void HYPRE_LinSysCore::endCreateMapFromSoln()
        mapFromSolnList2_[i] = (int) darray[i];
     delete [] darray;
 
+    for ( i = 0; i < mapFromSolnLeng_; i++ )
+       printf("HYPRE_LSC::mapFromSoln %d = %d\n",mapFromSolnList_[i],
+              mapFromSolnList2_[i]);
+
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
        printf("%4d : HYPRE_LSC::leaving  endCreateMapFromSoln.\n",mypid_);
@@ -6113,7 +6157,7 @@ void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
        {
           newLeng--;
           colValues_[localRow][ind2] = values[i];
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
              printf("%4d : putIntoMappedMatrix (add) : row, col = %8d %8d %e \n",
                     mypid_, localRow, colIndices_[localRow][ind2]-1,
                     colValues_[localRow][ind2]);
@@ -6123,7 +6167,7 @@ void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
           ind2 = index;
           colIndices_[localRow][index] = mappedCol + 1;
           colValues_[localRow][index++] = values[i];
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 0 )
              printf("%4d : putIntoMappedMatrix : row, col = %8d %8d %e \n",
                     mypid_, localRow, colIndices_[localRow][ind2]-1,
                     colValues_[localRow][ind2]);
@@ -6216,7 +6260,7 @@ void HYPRE_LinSysCore::addToProjectionSpace(HYPRE_IJVector xvec,
     // initially, allocate space for B's and X's
     //-----------------------------------------------------------------------
 
-    if ( projectCurrSize_ == 0 && HYpbs_ == NULL )
+    if ( projectCurrSize_ == NULL && HYpbs_ == NULL )
     {
        nrows = localEndRow_ - localStartRow_ + 1;
        MPI_Allreduce(&numGlobalRows, &nrows,1,MPI_INT,MPI_SUM,comm_);
