@@ -1309,7 +1309,7 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes,int nDOF,int nsDim,
             j = 2; k = 4; offset = k * nullspaceLen_ + voffset + j; 
             nullspaceVec_[offset] *= -1.0;
          }
-         else if ( (nullspaceDim_ == 12 || nullspaceDim_ == 21) &&
+         else if ( (nullspaceDim_ == 12 || nullspaceDim_ == 21 || nullspaceDim_ == 24) &&
                     useSAMGeFlag_ == 0 )
          {
             voffset = i * nodeDofs_;
@@ -1341,7 +1341,7 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes,int nDOF,int nsDim,
                }
             }
          }
-         if ( nullspaceDim_ == 21 && useSAMGeFlag_ == 0 )
+         if ( (nullspaceDim_ == 21 || nullspaceDim_ == 24) && useSAMGeFlag_ == 0 )
          {
             voffset = i * nodeDofs_;
             for ( j = 0; j < 3; j++ )
@@ -1365,6 +1365,20 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes,int nDOF,int nsDim,
                   offset = k * nullspaceLen_ + voffset + j;
                   if (j == (k-18))
                        nullspaceVec_[offset] = coords[i*3]*coords[i*3+2];
+                  else nullspaceVec_[offset] = 0.0;
+               }
+            }
+         }
+         if ( nullspaceDim_ == 24 && useSAMGeFlag_ == 0 )
+         {
+            voffset = i * nodeDofs_;
+            for ( j = 0; j < 3; j++ )
+            {
+               for( k = 21; k < 24; k++ )
+               {
+                  offset = k * nullspaceLen_ + voffset + j;
+                  if (j == (k-21))
+                       nullspaceVec_[offset] = coords[i*3]*coords[i*3+1]*coords[i*3+2];
                   else nullspaceVec_[offset] = 0.0;
                }
             }
