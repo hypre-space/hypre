@@ -314,6 +314,24 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    MPI_Comm_rank(comm, &myproc);
 
    /*---------------------------------------------------------
+    * Sort the iUventries array and eliminate duplicates.
+    *---------------------------------------------------------*/
+
+   qsort0(iUventries, 0, nUventries - 1);
+
+   j = 1;
+   for (i = 1; i < nUventries; i++)
+   {
+      if (iUventries[i] > iUventries[i-1])
+      {
+         iUventries[j] = iUventries[i];
+         j++;
+      }
+   }
+   nUventries = j;
+   hypre_SStructGraphNUVEntries(graph) = nUventries;
+
+   /*---------------------------------------------------------
     * Compute non-stencil column numbers (if possible), and
     * start building requests for needed off-process info.
     *---------------------------------------------------------*/
