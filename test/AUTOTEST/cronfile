@@ -1,7 +1,7 @@
-0 4 * * 0 cd /usr/casc/hypre/i686-pc-linux-gnu/autotest_run/; ./autotest -tc2k -tuxgcc30 -gpsmp -insure | tee autotest.cron.Sun.log
-0 1 * * 1 cd /usr/casc/hypre/i686-pc-linux-gnu/autotest_run/; ./autotest -riptide -frost -tuxgcc31 -tux71 -tux81 | tee autotest.cron.Mon.log
-0 1 * * 2 cd /usr/casc/hypre/i686-pc-linux-gnu/autotest_run/; ./autotest -mcr -frostmp -tc2kmp -tuxgcc32 -insure | tee autotest.cron.Tue.log
-0 1 * * 3 cd /usr/casc/hypre/i686-pc-linux-gnu/autotest_run/; ./autotest -ilx -vivid -tuxpgi -insure | tee autotest.cron.Wed.log
-0 1 * * 4 cd /usr/casc/hypre/i686-pc-linux-gnu/autotest_run/; ./autotest -gps -frost -tux71 -tuxabsoft | tee autotest.cron.Thu.log
-0 1 * * 5 cd /usr/casc/hypre/i686-pc-linux-gnu/autotest_run/; ./autotest -mcr -tux81 -frostmp -tuxlahey | tee autotest.cron.Fri.log
-0 1 * * 6 cd /usr/casc/hypre/i686-pc-linux-gnu/autotest_run/; ./autotest -pengra -tc2k -ilx -tuxintel | tee autotest.cron.Sat.log
+0 4 * * 0 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tc2k -tuxgcc30 -gpsmp -insure | tee autotest.cron.Sun.log
+0 1 * * 1 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -riptide -frost -tuxgcc31 -tux71 -tux81 | tee autotest.cron.Mon.log
+0 1 * * 2 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -mcr -frostmp -tc2kmp -tuxgcc32 -insure | tee autotest.cron.Tue.log
+0 1 * * 3 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -ilx -vivid -tuxpgi -insure | tee autotest.cron.Wed.log
+0 1 * * 4 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -gps -frost -tux71 -tuxabsoft | tee autotest.cron.Thu.log
+0 1 * * 5 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -mcr -tux81 -frostmp -tuxlahey | tee autotest.cron.Fri.log
+0 1 * * 6 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -pengra -tc2k -ilx -tuxintel | tee autotest.cron.Sat.log
