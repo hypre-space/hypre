@@ -1676,7 +1676,7 @@ fi;
 
 
 
-if  test "$enable_shared" = no; then
+if test "$enable_shared" = no; then
   STATICONLY_TRUE=
   STATICONLY_FALSE='#'
 else
@@ -24993,12 +24993,6 @@ LIBS="$acx_blas_save_LIBS"
 if test x"$acx_blas_ok" = xyes; then
         casc_user_chose_blas=yes;BLASLIBFLAGS=$BLAS_LIBS
         :
-elif test x"$acx_blas_ok" = xdisable; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HYPRE_USING_HYPRE_BLAS 0
-_ACEOF
-
 else
     if test x"$acx_blas_ok" = xdisabled; then
         :
@@ -25065,7 +25059,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 acx_lapack_save_LIBS="$LIBS"
 
 # We cannot use LAPACK if BLAS is not found
-if test "x$acx_blas_ok" != xyes; then
+if test "x$acx_lapack_ok" != xdisable && test "x$acx_blas_ok" != xyes; then
         acx_lapack_ok=noblas
 fi
 
@@ -25429,7 +25423,6 @@ rm -f conftest.err conftest.$ac_objext \
    echo "$as_me:$LINENO: result: $acx_lsame_ok" >&5
 echo "${ECHO_T}$acx_lsame_ok" >&6
    LIBS="$save_LIBS"
-
    if test acx_lsame_ok = no; then
 
 cat >>confdefs.h <<\_ACEOF
@@ -25439,17 +25432,7 @@ _ACEOF
    fi
 else
    if test x"$acx_lapack_ok" = xdisable; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HYPRE_USING_HYPRE_LAPACK 0
-_ACEOF
-
-   elif test x"$acx_lapack_ok" = xnoblas; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HYPRE_USING_HYPRE_LAPACK 0
-_ACEOF
-
+        :
    else
         acx_lapack_ok=no
 
@@ -25460,6 +25443,8 @@ _ACEOF
         casc_user_chose_lapack=no;LAPACKLIBFLAGS="-lHYPRE_lapack"
    fi
 fi
+
+
 
 if test "$acx_lapack_ok" != disable && test "$casc_user_chose_lapack" = no; then
   LAPACKNEEDED_TRUE=
