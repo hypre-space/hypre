@@ -240,6 +240,7 @@ HYPRE_STANDARD_DRIVERS =\
  new_ij.c\
  sstruct.c\
  sstruct_es.c\
+ sstruct_fac.c\
  struct.c\
  struct_es.c
 
@@ -324,6 +325,10 @@ struct_es: struct_es.o
 	${CC} -o $@ $@.o ${STRUCT_ES_LFLAGS}
 
 sstruct: sstruct.o
+	@echo  "Building" $@ "... "
+	${CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
+
+sstruct_fac: sstruct_fac.o
 	@echo  "Building" $@ "... "
 	${CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
 
