@@ -1034,6 +1034,15 @@ int HYPRE_LinSysCore::resetMatrixAndVector(double s)
     // allocate space for storing the matrix coefficient
     //-------------------------------------------------------------------
 
+    if ( colValues_ != NULL )
+    {
+       int nrows = localEndRow_ - localStartRow_ + 1;
+       for ( i = 0; i < nrows; i++ )
+          if ( colValues_[i] != NULL ) delete [] colValues_[i];
+       delete [] colValues_;
+    }
+    colValues_  = NULL;
+
     colValues_ = new double*[size];
     for ( i = 0; i < size; i++ )
     {
@@ -1107,6 +1116,15 @@ int HYPRE_LinSysCore::resetMatrix(double s)
     //-------------------------------------------------------------------
     // allocate space for storing the matrix coefficient
     //-------------------------------------------------------------------
+
+    if ( colValues_ != NULL )
+    {
+       int nrows = localEndRow_ - localStartRow_ + 1;
+       for ( i = 0; i < nrows; i++ )
+          if ( colValues_[i] != NULL ) delete [] colValues_[i];
+       delete [] colValues_;
+    }
+    colValues_  = NULL;
 
     colValues_ = new double*[size];
     for ( i = 0; i < size; i++ )

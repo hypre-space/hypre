@@ -88,6 +88,7 @@ HYPRE_LSI_MLI;
 /* HYPRE_LSI_MLICreate                                                      */
 /*--------------------------------------------------------------------------*/
 
+extern "C"
 int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) malloc(sizeof(HYPRE_LSI_MLI));
@@ -123,6 +124,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
 /* HYPRE_LSI_MLIDestroy                                                     */
 /*--------------------------------------------------------------------------*/
 
+extern "C"
 int HYPRE_LSI_MLIDestroy( HYPRE_Solver solver )
 {
    HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
@@ -152,6 +154,7 @@ int HYPRE_LSI_MLIDestroy( HYPRE_Solver solver )
 /* HYPRE_LSI_MLISetup                                                       */
 /*--------------------------------------------------------------------------*/
 
+extern "C"
 int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,   HYPRE_ParVector x )
 {
@@ -306,6 +309,7 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 /* HYPRE_LSI_MLISolve                                                       */
 /*--------------------------------------------------------------------------*/
 
+extern "C"
 int HYPRE_LSI_MLISolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b, HYPRE_ParVector x )
 {
@@ -338,6 +342,7 @@ int HYPRE_LSI_MLISolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 /* HYPRE_LSI_MLISetParams                                                   */
 /*--------------------------------------------------------------------------*/
 
+extern "C"
 int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
 {
    HYPRE_LSI_MLI *mli_object;
@@ -442,6 +447,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
 /* HYPRE_LSI_MLISetStrengthhreshold                                         */
 /*--------------------------------------------------------------------------*/
 
+extern "C"
 int HYPRE_LSI_MLISetStrengthThreshold(HYPRE_Solver solver,
                                       double strengthThreshold)
 {
@@ -460,6 +466,7 @@ int HYPRE_LSI_MLISetStrengthThreshold(HYPRE_Solver solver,
 /* HYPRE_LSI_MLISetMethod                                                   */
 /*--------------------------------------------------------------------------*/
 
+extern "C"
 int HYPRE_LSI_MLI_SetMethod( HYPRE_Solver solver, char *paramString )
 {
    HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
@@ -478,6 +485,7 @@ int HYPRE_LSI_MLI_SetMethod( HYPRE_Solver solver, char *paramString )
 /* HYPRE_LSI_MLISetNumPDEs                                                  */
 /*--------------------------------------------------------------------------*/
 
+extern "C"
 int HYPRE_LSI_MLISetNumPDEs( HYPRE_Solver solver, int numPDE )
 {
    HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
@@ -497,6 +505,7 @@ int HYPRE_LSI_MLISetNumPDEs( HYPRE_Solver solver, int numPDE )
 /*                 5 (MLS)                                                  */
 /*--------------------------------------------------------------------------*/
 
+extern "C"
 int HYPRE_LSI_MLISetSmoother( HYPRE_Solver solver, int pre_post,
                               int smoother_type, int argc, char **argv  )
 {
@@ -594,6 +603,7 @@ int HYPRE_LSI_MLISetSmoother( HYPRE_Solver solver, int pre_post,
 /* solver ID = 1  (aggregation)                                             */
 /*--------------------------------------------------------------------------*/
 
+extern "C"
 int HYPRE_LSI_MLISetCoarseSolver( HYPRE_Solver solver, int solver_id,
                                   int argc, char **argv )
 {
@@ -637,6 +647,7 @@ int HYPRE_LSI_MLISetCoarseSolver( HYPRE_Solver solver, int solver_id,
 /* HYPRE_LSI_MLISetNullSpaces                                               */
 /*--------------------------------------------------------------------------*/
 
+extern "C"
 int HYPRE_LSI_MLISetNullSpaces( HYPRE_Solver solver, int nodeDOF,
                                 int numNS, double *NSpaces, int numEqns)
 {
