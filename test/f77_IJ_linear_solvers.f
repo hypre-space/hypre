@@ -42,6 +42,7 @@ c-----------------------------------------------------------------------
       integer             maxiter, num_iterations
       integer             generate_matrix, generate_rhs
       character           matfile(32), vecfile(32)
+      character*31        matfile_str, vecfile_str
 
       double precision    tol, pc_tol, convtol
       parameter           (pc_tol = 0.0)
@@ -151,8 +152,17 @@ c     write(6,*) 'Generate matrix? !0 yes, 0 no (from file)'
       read(5,*) generate_matrix
 
       if (generate_matrix .eq. 0) then
-c       write(6,*) 'What file to use for matrix (<= 32 chars)?'
-        read(5,*) matfile
+c       write(6,*) 'What file to use for matrix (<= 31 chars)?'
+        read(5,*) matfile_str
+        i = 1
+  100   if (matfile_str(i:i) .ne. ' ') then
+          matfile(i) = matfile_str(i:i)
+        else
+          goto 200
+        endif
+        i = i + 1
+        goto 100
+  200   matfile(i) = char(0)
       endif
 
 c     write(6,*) 'Generate right-hand side? !0 yes, 0 no (from file)'
@@ -160,8 +170,17 @@ c     write(6,*) 'Generate right-hand side? !0 yes, 0 no (from file)'
 
       if (generate_rhs .eq. 0) then
 c       write(6,*)
-c    &    'What file to use for right-hand side (<= 32 chars)?'
-        read(5,*) vecfile
+c    &    'What file to use for right-hand side (<= 31 chars)?'
+        read(5,*) vecfile_str
+        i = 1
+  300   if (vecfile_str(i:i) .ne. ' ') then
+          vecfile(i) = vecfile_str(i:i)
+        else
+          goto 400
+        endif
+        i = i + 1
+        goto 300
+  400   vecfile(i) = char(0)
       endif
 
 c     write(6,*) 'What solver_id?'
@@ -256,7 +275,19 @@ c-----------------------------------------------------------------------
       if (nz .gt. 1) values(1) = values(1) + 2d0*cz
 
 c Generate a Dirichlet Laplacian
-      if (generate_matrix .gt. 0) then
+      if (generate_matrix .eq. 0) then
+
+        call HYPRE_IJMatrixRead(matfile, MPI_COMM_WORLD,
+     &                          HYPRE_PARCSR, A, ierr)
+
+        call HYPRE_IJMatrixGetObject(A, A_storage, ierr)
+
+        call HYPRE_ParCSRMatrixGetLocalRange(A_storage,
+     &            first_local_row, last_local_row,
+     &            first_local_col, last_local_col, ierr)
+
+      else
+
 c       call HYPRE_ParCSRMatrixCreate(MPI_COMM_WORLD, gnrows, gncols,
 c    &     rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg,
 c    &     A_storage, ierr)
@@ -278,11 +309,6 @@ c       call HYPRE_ParCSRMatrixInitialize(A_storage, ierr)
         call HYPRE_IJMatrixSetObject(A, A_storage, ierr)
 
         call HYPRE_IJMatrixSetObjectType(A, HYPRE_PARCSR, ierr)
-
-      else
-
-        call HYPRE_IJMatrixRead(matfile, MPI_COMM_WORLD,
-     &                          HYPRE_PARCSR, A, ierr)
 
       endif
 
@@ -308,7 +334,14 @@ c-----------------------------------------------------------------------
 c     Set up the rhs and initial guess
 c-----------------------------------------------------------------------
 
-      if (generate_rhs .gt. 0) then
+      if (generate_rhs .eq. 0) then
+
+        call HYPRE_IJVectorRead(vecfile, MPI_COMM_WORLD,
+     &                          HYPRE_PARCSR, b, ierr)
+
+        call HYPRE_IJVectorGetObject(b, b_storage, ierr)
+
+      else
 
         call HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col,
      &                            last_local_col, b, ierr)
@@ -341,11 +374,6 @@ c Set up a Dirichlet 0 problem
         vecfile(13) = char(0)
    
         call HYPRE_IJVectorPrint(b, vecfile, ierr)
-
-      else
-
-        call HYPRE_IJVectorRead(vecfile, MPI_COMM_WORLD,
-     &                          HYPRE_PARCSR, b, ierr)
 
       endif
 
@@ -603,7 +631,6 @@ c    &                                        ierr)
         endif
 
         call HYPRE_ParCSRGMRESDestroy(solver, ierr)
-        print *, 'gmres destruction: ',ierr
 
       endif
 
