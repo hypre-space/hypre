@@ -13,15 +13,16 @@
 #include <assert.h>
 
 #include "utilities/utilities.h"
-#include "base/Data.h"
-#include "base/basicTypes.h"
-//#include "base/Utils.h"
+#include "Data.h"
+#include "basicTypes.h"
 
-#if defined(FEI_V13) || defined(FEI_V14)
-#include "base1.4/LinearSystemCore.h"
+#if defined(FEI_V13)
+#include "LinearSystemCore.1.3.h"
+#elseif defined(FEI_V14)
+#include "LinearSystemCore.1.4.h"
 #else
-#include "base/LinearSystemCore.h"
-#include "base/LSC.h"
+#include "LinearSystemCore.h"
+#include "LSC.h"
 #endif
 
 #include "HYPRE.h"

@@ -13,10 +13,10 @@
 //---------------------------------------------------------------------------
 
 #include "utilities/utilities.h"
-#include "base/Data.h"
-#include "base/basicTypes.h"
-#include "base/Utils.h"
-#include "base/LinearSystemCore.h"
+#include "Data.h"
+#include "basicTypes.h"
+#include "Utils.h"
+#include "LinearSystemCore.h"
 #include "HYPRE.h"
 #include "../../IJ_matrix_vector/HYPRE_IJ_mv.h"
 #include "../../parcsr_matrix_vector/HYPRE_parcsr_mv.h"
