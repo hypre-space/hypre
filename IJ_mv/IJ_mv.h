@@ -230,11 +230,9 @@ int HYPRE_NewIJVector P((MPI_Comm comm , HYPRE_IJVector *in_vector_ptr , int glo
 int HYPRE_FreeIJVector P((HYPRE_IJVector IJvector ));
 int HYPRE_InitializeIJVector P((HYPRE_IJVector IJvector ));
 int HYPRE_AssembleIJVector P((HYPRE_IJVector IJvector ));
-int HYPRE_DistributeIJVector P((HYPRE_IJVector IJvector , int *row_starts , int *col_starts ));
+int HYPRE_DistributeIJVector P((HYPRE_IJVector IJvector , int *row_starts ));
 int HYPRE_SetIJVectorLocalStorageType P((HYPRE_IJVector IJvector , int type ));
-int HYPRE_SetIJVectorLocalSize P((HYPRE_IJVector IJvector , int local_m , int local_n ));
-int HYPRE_SetIJVectorRowSizes P((HYPRE_IJVector IJvector , int *sizes ));
-int HYPRE_SetIJVectorTotalSize P((HYPRE_IJVector IJvector , int size ));
+int HYPRE_SetIJVectorLocalSize P((HYPRE_IJVector IJvector , int local_n ));
 int HYPRE_QueryIJVectorInsertionSemantics P((HYPRE_IJVector IJvector , int *level ));
 int HYPRE_InsertIJVectorRows P((HYPRE_IJVector IJvector , int n , int *rows , double *values ));
 int HYPRE_AddRowsToIJVector P((HYPRE_IJVector IJvector , int n , int *rows , double *values ));
@@ -322,6 +320,17 @@ int hypre_DistributeIJMatrixPETSc P((hypre_IJMatrix *matrix , int *row_starts , 
 int hypre_ApplyIJMatrixPETSc P((hypre_IJMatrix *matrix , hypre_ParVector *x , hypre_ParVector *b ));
 int hypre_FreeIJMatrixPETSc P((hypre_IJMatrix *matrix ));
 int hypre_SetIJMatrixTotalSizePETSc P((hypre_IJMatrix *matrix , int size ));
+
+/* hypre_IJVector_parcsr.c */
+int hypre_SetIJVectorLocalSizePar P((hypre_IJVector *vector , int local_n ));
+int hypre_NewIJVectorPar P((hypre_IJVector *vector ));
+int hypre_InitializeIJVectorPar P((hypre_IJVector *vector ));
+int hypre_InsertIJVectorRowsPar P((hypre_IJVector *vector , int n , int *rows , double *vals ));
+int hypre_AddRowsToIJVectorPar P((hypre_IJVector *vector , int n , int *rows , double *values ));
+int hypre_AddIJVectorRowPar P((hypre_IJVector *vector , int n , int row , int *indices , double *coeffs ));
+int hypre_AssembleIJVectorPar P((hypre_IJVector *vector ));
+int hypre_DistributeIJVectorPar P((hypre_IJVector *vector , int *row_starts ));
+int hypre_FreeIJVectorPar P((hypre_IJVector *vector ));
 
 /* qsort.c */
 void swap P((int *v , int i , int j ));
