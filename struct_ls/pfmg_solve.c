@@ -55,6 +55,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    double                e_dot_e, x_dot_x;
                     
    int                   i, l;
+   int                   constant_coefficient;
 
    int                   ierr = 0;
 #if DEBUG
@@ -66,6 +67,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
     *-----------------------------------------------------*/
 
    hypre_BeginTiming(pfmg_data -> time_index);
+
+   constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
 
    hypre_StructMatrixDestroy(A_l[0]);
    hypre_StructVectorDestroy(b_l[0]);
@@ -126,11 +129,13 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       hypre_PFMGRelaxSetPreRelax(relax_data_l[0]);
       hypre_PFMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
       hypre_PFMGRelaxSetZeroGuess(relax_data_l[0], zero_guess);
+      if (constant_coefficient) hypre_StructVectorClearBoundGhostValues( b_l[0] );
       hypre_PFMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
       zero_guess = 0;
 
       /* compute fine grid residual (b - Ax) */
       hypre_StructCopy(b_l[0], r_l[0]);
+      if (constant_coefficient) hypre_StructVectorClearBoundGhostValues( x_l[0] );
       hypre_StructMatvecCompute(matvec_data_l[0],
                                 -1.0, A_l[0], x_l[0], 1.0, r_l[0]);
 
@@ -166,6 +171,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       if (num_levels > 1)
       {
          /* restrict fine grid residual */
+         if (constant_coefficient) hypre_StructVectorClearBoundGhostValues( r_l[0] );
          hypre_SemiRestrict(restrict_data_l[0], RT_l[0], r_l[0], b_l[1]);
 #if DEBUG
          sprintf(filename, "zout_xdown.%02d", 0);
@@ -183,8 +189,10 @@ hypre_PFMGSolve( void               *pfmg_vdata,
                hypre_PFMGRelaxSetPreRelax(relax_data_l[l]);
                hypre_PFMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
                hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 1);
+               if (constant_coefficient) hypre_StructVectorClearBoundGhostValues( b_l[l] );
                hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
+               if (constant_coefficient) hypre_StructVectorClearBoundGhostValues( x_l[l] );
                /* compute residual (b - Ax) */
                hypre_StructCopy(b_l[l], r_l[l]);
                hypre_StructMatvecCompute(matvec_data_l[l],
@@ -198,6 +206,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             }
 
             /* restrict residual */
+            if (constant_coefficient) hypre_StructVectorClearBoundGhostValues( r_l[l] );
             hypre_SemiRestrict(restrict_data_l[l], RT_l[l], r_l[l], b_l[l+1]);
 #if DEBUG
             sprintf(filename, "zout_xdown.%02d", l);
@@ -214,6 +223,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
           *--------------------------------------------------*/
 
          hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 1);
+         if (constant_coefficient) hypre_StructVectorClearBoundGhostValues( b_l[l] );
          hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 #if DEBUG
          sprintf(filename, "zout_xbottom.%02d", l);
@@ -227,6 +237,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          for (l = (num_levels - 2); l >= 1; l--)
          {
             /* interpolate error and correct (x = x + Pe_c) */
+            if (constant_coefficient) hypre_StructVectorClearBoundGhostValues( x_l[l] );
+            if (constant_coefficient) hypre_StructVectorClearBoundGhostValues( e_l[l] );
             hypre_SemiInterp(interp_data_l[l], P_l[l], x_l[l+1], e_l[l]);
             hypre_StructAxpy(1.0, e_l[l], x_l[l]);
 #if DEBUG
@@ -241,11 +253,14 @@ hypre_PFMGSolve( void               *pfmg_vdata,
                hypre_PFMGRelaxSetPostRelax(relax_data_l[l]);
                hypre_PFMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
                hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 0);
+               if (constant_coefficient) hypre_StructVectorClearBoundGhostValues( b_l[l] );
                hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
             }
          }
 
          /* interpolate error and correct on fine grid (x = x + Pe_c) */
+         if (constant_coefficient) hypre_StructVectorClearBoundGhostValues( x_l[l] );
+         if (constant_coefficient) hypre_StructVectorClearBoundGhostValues( e_l[l] );
          hypre_SemiInterp(interp_data_l[0], P_l[0], x_l[1], e_l[0]);
          hypre_StructAxpy(1.0, e_l[0], x_l[0]);
 #if DEBUG
@@ -275,6 +290,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       hypre_PFMGRelaxSetPostRelax(relax_data_l[0]);
       hypre_PFMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
       hypre_PFMGRelaxSetZeroGuess(relax_data_l[0], 0);
+      if (constant_coefficient) hypre_StructVectorClearBoundGhostValues( b_l[0] );
       hypre_PFMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
 
       (pfmg_data -> num_iterations) = (i + 1);
