@@ -1,5 +1,5 @@
 /*
- * qsort.c:
+ * distributed_qsort.c:
  * Our own version of the system qsort routine which is faster by an average
  * of 25%, with lows and highs of 10% and 50%.
  * The THRESHold below is the insertion sort threshold, and has been adjusted

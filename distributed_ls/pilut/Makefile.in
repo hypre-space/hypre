@@ -43,8 +43,8 @@ LIBS     = -L. -lHYPREpilut -lm @MPILIBS@ $(OTHER_LIBS)
 HYPREFILES =\
  HYPRE_DistributedMatrixPilutSolver.c
 
-LOCALFILES = debug.c comm.c parutil.c serilut.c parilut.c util.c qsort.c\
-       qsort_si.c trifactor.c ilut.c pblas1.c 
+LOCALFILES = debug.c comm.c parutil.c serilut.c parilut.c util.c \
+ distributed_qsort.c distributed_qsort_si.c trifactor.c ilut.c pblas1.c 
 
 FILES = $(HYPREFILES) $(LOCALFILES)
 

@@ -74,9 +74,9 @@ void hypre_p_daxpy( DataDistType *ddist , double alpha , double *x , double *y )
 void hypre_p_daxbyz( DataDistType *ddist , double alpha , double *x , double beta , double *y , double *z );
 int hypre_p_vprintf( DataDistType *ddist , double *x , hypre_PilutSolverGlobals *globals );
 
-/* qsort.c */
+/* distributed_qsort.c */
 
-/* qsort_si.c */
+/* distributed_qsort_si.c */
 void hypre_sincsort_fast( int n , int *base );
 void hypre_sdecsort_fast( int n , int *base );
 
