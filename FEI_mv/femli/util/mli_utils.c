@@ -1048,7 +1048,9 @@ int MLI_Utils_HypreMatrixReadIJAFormat(char *filename, MPI_Comm mpiComm,
    int    irow, colNum, *inds, *matIA, *matJA, length, rowNum;
    int    j, nnz, currBufSize, *rowLengths, ierr, globalNnz, currRow;
    double colVal, *vals, *matAA, *diag=NULL, *diag2=NULL, scale;
+#if 0
    char   fname[20];
+#endif
    FILE   *fp;
    hypre_ParCSRMatrix *hypreA;
    HYPRE_IJMatrix     IJmat;
@@ -1217,7 +1219,7 @@ int MLI_Utils_HypreParMatrixReadIJAFormat(char *filename, MPI_Comm mpiComm,
 {
    int    mypid, nprocs, globalNRows, localNRows, localNnz, startRow;
    int    irow, colNum, *inds, *matIA, *matJA, length, rowNum, index;
-   int    j, *rowLengths, ierr, globalNnz, currRow, *rowsArray;
+   int    j, *rowLengths, ierr, currRow, *rowsArray;
    double colVal, *vals, *matAA, *diag=NULL, *diag2=NULL, scale;
    char   fname[20];
    FILE   *fp;
@@ -1425,7 +1427,7 @@ int MLI_Utils_DoubleParVectorRead(char *filename, MPI_Comm mpiComm,
                                   int length, int start, double *vec)
 {
    int    mypid, nprocs, localNRows;
-   int    irow, k, k2, base=0;
+   int    irow, k;
    double value;
    char   fname[20];
    FILE   *fp;
