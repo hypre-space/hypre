@@ -37,6 +37,13 @@ function MpirunString
       ;;
     peng*) RunString="mpirun $*"
       ;;
+    perr*|achi*|poin*|esak*|ares*|hypn*|weyl*|juve*) MACHINES_FILE="hostname"
+      if [ ! -f $MACHINES_FILE ]
+      then
+        hostname > $MACHINES_FILE
+      fi
+      RunString="mpirun -machinefile $MACHINES_FILE $*"
+      ;;
     gps*) RunString="mpirun $*"
       ;;
     lx*) RunString="mpirun $*"
@@ -77,7 +84,7 @@ function CheckBatch
       ;;
     gps*) BATCH_MODE=1
       ;;
-    lx*) BATCH_MODE=1
+    lx*) BATCH_MODE=0
       ;;
     tc*) BATCH_MODE=1
       ;;
@@ -102,7 +109,7 @@ function CalcNodes
       ;;
     tckk*) CPUS_PER_NODE=4
       ;;
-    peng*) CPUS_PER_NODE=2
+    peng*|ilx*) CPUS_PER_NODE=2
       ;;
     gps*) CPUS_PER_NODE=4
       ;;
