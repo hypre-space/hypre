@@ -59,7 +59,7 @@ HYPRE_BuildIJMatrixFromDistributedMatrix(
    comm = HYPRE_GetDistributedMatrixContext( DistributedMatrix );
    ierr = HYPRE_GetDistributedMatrixDims( DistributedMatrix, &M, &N );
 
-   ierr = HYPRE_NewIJMatrix( ij_matrix, comm, M, N );
+   ierr = HYPRE_NewIJMatrix( comm, ij_matrix, M, N );
 
    ierr = HYPRE_SetIJMatrixLocalStorageType( 
                  *ij_matrix, local_storage_type );
