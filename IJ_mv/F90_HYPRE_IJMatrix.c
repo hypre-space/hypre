@@ -1,0 +1,231 @@
+/*BHEADER**********************************************************************
+ * (c) 1997   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+/******************************************************************************
+ *
+ * HYPRE_IJMatrix Fortran interface
+ *
+ *****************************************************************************/
+
+#include "headers.h"
+#include "fortran.h"
+
+/*--------------------------------------------------------------------------
+ * HYPRE_NewIJMatrix
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_newijmatrix)( long int *matrix,
+                                    int      *comm,
+                                    int      *global_m,
+                                    int      *global_n,
+                                    int      *ierr      )
+{
+   *ierr = (int) ( HYPRE_NewIJMatrix( (HYPRE_IJMatrix *)  matrix,
+                                      (MPI_comm)         *comm,
+                                      (int)              *global_m,
+                                      (int)              *global_n  ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_FreeIJMatrix
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_freeijmatrix)( long int *matrix,
+                                     int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_FreeIJMatrix( (HYPRE_IJMatrix) *matrix ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_InitializeIJMatrix
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_initializeijmatrix)( long int *matrix,
+                                           int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_InitializeIJMatrix( (HYPRE_IJMatrix) *matrix ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AssembleIJMatrix
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_assembleijmatrix)( long int *matrix,
+                                         int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_AssembleIJMatrix ( (HYPRE_IJMatrix) *matrix ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_DistributeIJMatrix
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_distributeijmatrix)( long int *matrix,
+                                           int      *row_starts,
+                                           int      *col_starts,
+                                           int      *ierr        )
+{
+   *ierr = (int) ( HYPRE_DistributeIJMatrix( (HYPRE_IJMatrix) *matrix,
+                                             (int *)           row_starts,
+                                             (int *)           col_starts  ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SetIJMatrixLocalStorageType
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_setijmatrixlocalstoragetype)( long int *matrix,
+                                                    int      *type,
+                                                    int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_SetIJMatrixLocalStorageType( (HYPRE_IJMatrix) *matrix,
+                                                      (int *)          *type    ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SetIJMatrixLocalSize
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_setijmatrixlocalsize)( long int *matrix,
+                                             int      *local_m,
+                                             int      *local_n,
+                                             int      *ierr     )
+{
+   *ierr = (int) ( HYPRE_SetIJMatrixLocalSize( (HYPRE_IJMatrix) *matrix,
+                                               (int)            *local_m,
+                                               (int)            *local_n  ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SetIJMatrixDiagRowSizes
+ *--------------------------------------------------------------------------*/
+ 
+void
+hypre_F90_IFACE(hypre_setijmatrixdiagrowsizes)( long int *matrix,
+                                                int      *sizes,
+                                                int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_SetIJMatrixDiagRowSizes( (HYPRE_IJMatrix) *matrix,
+                                                  (int *)           sizes   ) );
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SetIJMatrixOffDiagRowSizes
+ *--------------------------------------------------------------------------*/
+ 
+void
+hypre_F90_IFACE(hypre_setijmatrixoffdiagrowsizes)( long int *matrix,
+                                                   int      *sizes,
+                                                   int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_SetIJMatrixOffDiagRowSizes( (HYPRE_IJMatrix) *matrix,
+                                                     (int *)           sizes   ) );
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SetIJMatrixTotalSize
+ *--------------------------------------------------------------------------*/
+ 
+void
+hypre_F90_IFACE(hypre_setijmatrixtotalsize)( long int *matrix,
+                                             int      *size,
+                                             int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_SetIJMatrixTotalSize( (HYPRE_IJMatrix) *matrix,
+                                               (int)            *size    ) );
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_QueryIJMatrixInsertionSem
+ *--------------------------------------------------------------------------*/
+ 
+void
+hypre_F90_IFACE(hypre_queryijmatrixinsertionsem)( long int *matrix,
+                                                  int      *level,
+                                                  int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_QueryIJMatrixInsertionSemantics(
+                              (HYPRE_IJMatrix) *matrix,
+                              (int *)           level   ) );
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_InsertIJMatrixBlock
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_insertijmatrixblock)( long int *matrix,
+                                            int      *m,
+                                            int      *n,
+                                            int      *rows,
+                                            int      *cols,
+                                            double   *values,
+                                            int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_InsertIJMatrixBlock( (HYPRE_ParCSRMatrix) *matrix,
+                                              (int)                *m,
+                                              (int)                *n,
+                                              (int *)               rows,
+                                              (int *)               cols,
+                                              (double *)            values  ) );
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AddBlockToIJMatrix
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_addblocktoijmatrix)( long int *matrix,
+                                           int      *m,
+                                           int      *n,
+                                           int      *rows,
+                                           int      *cols,
+                                           double   *values,
+                                           int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_AddBlockToIJMatrix( (HYPRE_ParCSRMatrix) *matrix,
+                                             (int)                *m,
+                                             (int)                *n,
+                                             (int *)               rows,
+                                             (int *)               cols,
+                                             (double *)            values  ) );
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_InsertIJMatrixRow
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_insertijmatrixrow)( long int *matrix,
+                                          int      *n,
+                                          int      *rows,
+                                          int      *cols,
+                                          double   *values,
+                                          int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_InsertIJMatrixRow( (HYPRE_ParCSRMatrix) *matrix,
+                                            (int)                *n,
+                                            (int *)               rows,
+                                            (int *)               cols,
+                                            (double *)            values  ) );
+
+} 
+
