@@ -9,6 +9,8 @@ FILES = \
  lobpcg2.jobs\
  lobpcg2.sh\
  solvers.jobs\
- solvers.sh
+ solvers.sh\
+ lobpcg_mtx.jobs\
+ lobpcg_mtx.sh
 
 EXTRA_DIST = $(FILES)

@@ -9,13 +9,13 @@
 #EHEADER***********************************************************************
 
 #=============================================================================
-# IJ_linear_and_eigenvaluesolvers: (-nolobpcg option runs PCG)
+# ij_es driver for eigenvaluesolvers: (wihtout -lobpcg option runs ij)
 # tests for LOBPCG only
 # same problem and solver with different number of inner iterations
 #    1:  BoomerAMG_PCG
 #=============================================================================
 
-mpirun -np 4 ./ij_es -27pt -lobpcg -solver 1 -veye 1 > lobpcg2.out.0
+mpirun -np 4 ./ij_es -27pt -lobpcg -solver 1 -pcgitr 1 -veye 1 > lobpcg2.out.0
 mpirun -np 4 ./ij_es -27pt -lobpcg -solver 1 -pcgitr 2 -veye 1 > lobpcg2.out.1
 mpirun -np 4 ./ij_es -27pt -lobpcg -solver 1 -pcgitr 3 -veye 1 > lobpcg2.out.2
 

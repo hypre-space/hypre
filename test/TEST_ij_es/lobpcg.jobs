@@ -9,14 +9,14 @@
 #EHEADER***********************************************************************
 
 #=============================================================================
-# IJ_linear_and_eigenvaluesolvers: (-nolobpcg option runs PCG)
+# ij_es driver for eigenvaluesolvers: (wihtout -lobpcg option runs ij)
 # tests for LOBPCG only
-# same problem and solver with different number of eigenvectors computed
-#    12: Schwarz-PCG
+# default problem and solver with different number of eigenvectors computed
+#   
 #=============================================================================
 
-mpirun -np 4 ./ij_es -9pt -lobpcg -solver 12 -pcgitr 2 -veye 1 > lobpcg.out.0
-#mpirun -np 4 ./ij_es -9pt -lobpcg -solver 12 -pcgitr 2 -veye 1 > lobpcg.out.1
-#mpirun -np 4 ./ij_es -9pt -lobpcg -solver 12 -pcgitr 2 -veye 1 > lobpcg.out.2
-#mpirun -np 4 ./ij_es -9pt -lobpcg -solver 12 -pcgitr 2 -veye 1 > lobpcg.out.3
+mpirun -np 4 ./ij_es -lobpcg -veye 1 > lobpcg.out.0
+mpirun -np 4 ./ij_es -lobpcg -veye 2 > lobpcg.out.1
+mpirun -np 4 ./ij_es -lobpcg -veye 3 > lobpcg.out.2
+mpirun -np 4 ./ij_es -lobpcg -veye 4 > lobpcg.out.3
 

@@ -9,7 +9,8 @@
 #EHEADER***********************************************************************
 
 #=============================================================================
-# IJ_linear_and_eigenvaluesolvers: (-nolobpcg option runs PCG)
+# ij_es driver for eigenvaluesolvers: (wihtout -lobpcg option runs ij)
+# tests for LOBPCG only
 #                    diffs it against 1 proc case
 #=============================================================================
 
