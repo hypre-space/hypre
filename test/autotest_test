@@ -105,7 +105,8 @@ parse_arguments () {
       i) confbuildtest $OPTARG  "--with-insure-to-file" \
                                                 "insure"    0 0 0 0 1 0 1;;
      +i) confbuildtest $OPTARG  "--with-insure" "insure"    0 0 0 0 1 0 1;;
-      l) HYPRE_BATCH_MODE="yes"; MailOpt="-mail"; BatchOpt="-batch";;
+#     l) HYPRE_BATCH_MODE="yes"; MailOpt="-mail"; BatchOpt="-batch";;
+      l) HYPRE_BATCH_MODE="yes"; BatchOpt="-batch";;
      +l) HYPRE_BATCH_MODE="yes"; BatchOpt="-batch";;
       m) HYPRE_SEND_MAIL="no"; MailOpt="";;
      +m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail";;
