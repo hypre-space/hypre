@@ -88,6 +88,9 @@ main( int   argc,
    HYPRE_Solver        pcg_solver;
    HYPRE_Solver        pcg_precond, pcg_precond_gotten;
    Hypre_ParAMG        Hypre_AMG;
+   Hypre_PCG           Hypre_PCG;
+   Hypre_ParDiagScale  Hypre_ParDiagScale;
+   Hypre_Solver        Hypre_SolverPC;
 
    int                 num_procs, myid;
    int                 local_row;
@@ -1742,6 +1745,7 @@ main( int   argc,
       ierr += Hypre_ParAMG_SetCommunicator( Hypre_AMG, comm );
       Hypre_ParAMG_SetOperator( Hypre_AMG, Hypre_op_A );
 
+      printf("**** before calling Hypre_ParAMGSet*Parameter\n");
       Hypre_ParAMG_SetIntParameter( Hypre_AMG, "CoarsenType", (hybrid*coarsen_type));
       Hypre_ParAMG_SetIntParameter( Hypre_AMG, "MeasureType", measure_type);
       Hypre_ParAMG_SetDoubleParameter( Hypre_AMG, "Tol", tol);
@@ -1841,7 +1845,8 @@ main( int   argc,
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
 /* note: log is written to standard output, not to file */
-      HYPRE_BoomerAMGSetPrintLevel(amg_solver, ioutdat, "driver.out.log"); 
+      HYPRE_BoomerAMGSetPrintLevel(amg_solver, ioutdat);
+      HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log"); 
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
       HYPRE_BoomerAMGSetGridRelaxType(amg_solver, grid_relax_type);
@@ -1885,7 +1890,7 @@ main( int   argc,
 #endif
 
       HYPRE_BoomerAMGDestroy(amg_solver);
-#endif
+#endif /* USE_BABEL_INTERFACE*/
    }
 
    /*-----------------------------------------------------------
@@ -1898,12 +1903,28 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
  
+#ifdef USE_BABEL_INTERFACE
+      Hypre_PCG = Hypre_PCG__create();
+      Hypre_Vector_b = (Hypre_Vector)Hypre_ParCSRVector__cast2( Hypre_b, "Hypre.Vector" );
+      Hypre_Vector_x = (Hypre_Vector)Hypre_ParCSRVector__cast2( Hypre_x, "Hypre.Vector" );
+      Hypre_op_A = (Hypre_Operator) Hypre_ParCSRMatrix__cast2( Hypre_parcsr_A, "Hypre.Operator" );
+      ierr += Hypre_PCG_SetCommunicator( Hypre_PCG, comm );
+      Hypre_PCG_SetOperator( Hypre_PCG, Hypre_op_A );
+      Hypre_PCG_SetIntParameter( Hypre_PCG, "Max Iter", 500 );
+      Hypre_PCG_SetDoubleParameter( Hypre_PCG, "Tol", tol );
+      Hypre_PCG_SetIntParameter( Hypre_PCG, "Two Norm", 1 );
+      Hypre_PCG_SetIntParameter( Hypre_PCG, "Rel Change", 0 );
+      Hypre_PCG_SetPrintLevel( Hypre_PCG, 1 );
+      ierr += Hypre_PCG_Setup( Hypre_PCG );
+
+#else
       HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_PCGSetMaxIter(pcg_solver, 500);
       HYPRE_PCGSetTol(pcg_solver, tol);
       HYPRE_PCGSetTwoNorm(pcg_solver, 1);
       HYPRE_PCGSetRelChange(pcg_solver, 0);
       HYPRE_PCGSetLogging(pcg_solver, 1);
+#endif /* USE_BABEL_INTERFACE*/
  
       if (solver_id == 1)
       {
@@ -1916,7 +1937,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat);
+         HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
@@ -1941,8 +1963,20 @@ main( int   argc,
       }
       else if (solver_id == 2)
       {
-         
          /* use diagonal scaling as preconditioner */
+
+#ifdef USE_BABEL_INTERFACE
+      /* To call a Hypre solver:
+         create, set comm, set operator, set other parameters,
+         Setup (noop in this case), Apply */
+      Hypre_ParDiagScale = Hypre_ParDiagScale__create();
+      ierr += Hypre_ParDiagScale_SetCommunicator( Hypre_ParDiagScale, comm );
+      Hypre_ParDiagScale_SetOperator( Hypre_ParDiagScale, Hypre_op_A );
+      ierr += Hypre_ParDiagScale_Setup( Hypre_ParDiagScale );
+      Hypre_SolverPC = (Hypre_Solver) Hypre_ParDiagScale__cast2
+         ( Hypre_ParDiagScale, "Hypre.Solver" );
+      ierr += Hypre_PCG_SetPreconditioner( Hypre_PCG, Hypre_SolverPC );
+#else
          if (myid == 0) printf("Solver: DS-PCG\n");
          pcg_precond = NULL;
 
@@ -1951,6 +1985,8 @@ main( int   argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                              pcg_precond);
          hypre_TFree(smooth_option);
+#endif /* USE_BABEL_INTERFACE */
+
       }
       else if (solver_id == 8)
       {
@@ -2006,6 +2042,34 @@ main( int   argc,
          hypre_TFree(smooth_option);
       }
  
+#ifdef USE_BABEL_INTERFACE
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+ 
+      time_index = hypre_InitializeTiming("PCG Solve");
+      hypre_BeginTiming(time_index);
+
+      ierr += Hypre_PCG_Apply( Hypre_PCG, Hypre_Vector_b, &Hypre_Vector_x );
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      ierr += Hypre_PCG_GetIntValue( Hypre_PCG, "Number of Iterations",
+                                     &num_iterations );
+      ierr += Hypre_PCG_GetDoubleValue( Hypre_PCG, "Final Relative Residual Norm",
+                                &final_res_norm );
+
+      /* Break encapsulation so that the rest of the driver stays the same */
+      temp_vecdata = Hypre_ParCSRVector__get_data( Hypre_x );
+      ij_x = temp_vecdata ->ij_b ;
+      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
+      x = (HYPRE_ParVector) object;
+
+#else
       HYPRE_PCGGetPrecond(pcg_solver, &pcg_precond_gotten);
       if (pcg_precond_gotten !=  pcg_precond)
       {
@@ -2062,6 +2126,8 @@ main( int   argc,
         HYPRE_EuclidDestroy(pcg_precond);
       }
 
+#endif /* USE_BABEL_INTERFACE */
+
       if (myid == 0)
       {
          printf("\n");
@@ -2099,7 +2165,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat);
+         HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
@@ -2286,7 +2353,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat);
+         HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
@@ -2441,7 +2509,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat);
+         HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);

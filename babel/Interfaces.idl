@@ -327,6 +327,8 @@ package Hypre {
   interface Operator 
   {
      int SetCommunicator (in opaque comm);
+     int GetDoubleValue (in string name, out double value);
+     int GetIntValue (in string name, out int value);
      int SetDoubleParameter (in string name, in double value);
      int SetIntParameter (in string name, in int value);
      int SetStringParameter (in string name, in string value);
@@ -440,7 +442,7 @@ package Hypre {
      int SetIJVector (in IJBuildVector I);
   }
 
-  class DiagScale implements-all Solver { }
+  class ParDiagScale implements-all Solver { }
 
   class StructSMG implements-all Solver { }
 
