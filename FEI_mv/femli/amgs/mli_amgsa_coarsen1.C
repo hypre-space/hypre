@@ -1042,11 +1042,11 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
                if ( dcomp1 > 0.0 )
                {
                   dcomp2 = habs(diag_data[irow] * diag_data[jj]);
-                  col_val[length] = dcomp2 / dcomp1;
                   if ( (dcomp2 >= epsilon * dcomp1) && (labeli == labelj) ) 
+                  {
+                     col_val[length] = dcomp2 / dcomp1;
                      col_ind[length++] = jj + start_row;
-                  else                              
-                     col_ind[length++] = - (jj + start_row) - 1;
+                  }
                }
             }
          }
@@ -1060,10 +1060,11 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
             else                        labelj = 0;
             if ( jj != irow )
             {
-               col_val[length] = Adiag_vals[j];
                if (Adiag_vals[j] != 0.0 && (labeli == labelj)) 
-                    col_ind[length++] = jj + start_row;
-               else col_ind[length++] = -(jj+start_row)-1;
+               {
+                  col_val[length] = Adiag_vals[j];
+                  col_ind[length++] = jj + start_row;
+               }
             }
          }
       }
