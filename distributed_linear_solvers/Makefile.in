@@ -40,10 +40,9 @@ clean:
 	do \
 	  if [ -d $$i ]; \
 	  then \
-	    echo "Cleaning $$i ..."; \
 	    (cd $$i; make clean); \
 	  fi; \
-	done; \
+	done
 
 veryclean:
 	@ \
@@ -51,8 +50,7 @@ veryclean:
 	do \
 	  if [ -d $$i ]; \
 	  then \
-	    echo "Very-cleaning $$i ..."; \
 	    (cd $$i; make veryclean); \
 	  fi; \
-	done; \
+	done
 
