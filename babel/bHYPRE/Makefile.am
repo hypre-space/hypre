@@ -15,6 +15,10 @@ AM_CPPFLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../krylov\
+ -I$(srcdir)/../../IJ_mv\
+ -I$(srcdir)/../../parcsr_mv\
+ -I$(srcdir)/../../parcsr_ls\
  -I$(srcdir)/../../seq_mv\
  ${BABEL_RUNTIME_INCLUDES}\
  ${CINCLUDES}\
