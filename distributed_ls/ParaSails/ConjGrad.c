@@ -160,13 +160,14 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
 
    free(p);
    free(s);
-   free(r);
 
    /* compute exact relative residual norm */
    MatrixMatvec(mat, x, r);  /* r = Ax */
    ScaleVector(n, -1.0, r);  /* r = -r */
    Axpy(n, 1.0, b, r);       /* r = r + b */
    i_prod = InnerProd(n, r, r, comm);
+
+   free(r);
 
    if (mype == 0)
       printf("Iter (%d): computed rrn    : %e\n", i, sqrt(i_prod/bi_prod));
