@@ -251,23 +251,14 @@ AC_ARG_WITH(gdb,
 
 AC_ARG_WITH(strict-checking,
 [  --with-strict-checking  compiles with out MPI ('--without-MPI') and
-			  assigns kcc and KCC as the c and c++ compilers 
-			  and --c --strict as the compiler flag this 
-			  enforces syntax described by ISO 9899-1990, 
-			  the C language standard. Additional compiler
-			  flags, --display_error_number --lint are enabled
-			  for lint-type checking. Individual types of 
-			  warnings can be suppressed using --diag_suppress
-			  and the error numbers provided by 
-			  --display_error_number],
-[CC=KCC
- CXX=KCC
- CFLAGS="$CFLAGS --c --strict --lint --display_error_number"
- CFLAGS="$CFLAGS --diag_suppress 45,236,450,826"
- CFLAGS="$CFLAGS,1018,1021,1022,1023,1024,1025,1030,1041"
- CXXFLAGS="$CXXFLAGS --c++ --strict --lint --display_error_number"
- CXXFLAGS="$CXXFLAGS --diag_suppress 236,381,450,826"
- CXXFLAGS="$CXXFLAGS,1018,1022,1023,1024,1025,1029,1030"
+			  assigns gcc and g++ as the c and c++ compilers.],
+[CC=gcc
+ CXX=g++
+ CFLAGS="$CFLAGS -Wall -Wunused -Wmissing-prototypes"
+ CFLAGS="$CFLAGS -Wmissing-declarations -ansi -pedantic"
+ CXXFLAGS="$CXXFLAGS -Wall -Wno-unused -Wmissing-prototypes"
+ CXXFLAGS="$CXXFLAGS -Wmissing-declarations -Wshadow"
+ CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
  casc_users_chose_compilers=yes
  casc_using_mpi=no
  AC_DEFINE(HYPRE_SEQUENTIAL)]
