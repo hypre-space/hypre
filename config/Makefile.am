@@ -3,8 +3,6 @@
 #
 ## Process this file with automake to create Makefile.in
 
-include 
-
 AUX_DIST = \
  compile\
  config.guess\
