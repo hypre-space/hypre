@@ -23,8 +23,8 @@ CINCLUDES=@INCLUDES@ @MPIINCLUDE@
  
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
- -I..\
- -I../utilities\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../utilities\
  ${CINCLUDES}
 
 RANLIB = @RANLIB@
@@ -48,7 +48,7 @@ OBJS = ${FILES:.c=.o}
 all: libkrylov.a 
 
 install: all
-	@cp -f krylov.h $$HYPRE_INSTALL_DIR/include/.
+	$(srcdir)/@cp -f krylov.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f lib*.a $$HYPRE_INSTALL_DIR/lib/.
 clean:
 	@rm -f *.o *.dxx 
