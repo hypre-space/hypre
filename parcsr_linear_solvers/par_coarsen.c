@@ -2840,8 +2840,26 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
       {
          if (measure < 0) printf("negative measure!\n");
          CF_marker[j] = ZPOINT;
-         /* CF_marker[j] = CPOINT;
-         ++coarse_size; */
+         for (k = S_diag_i[j]; k < S_diag_i[j+1]; k++)
+         {
+            nabor = S_diag_j[k];
+            if (nabor < j)
+            {
+               new_meas = i_measure_array[nabor];
+	       if (new_meas > 0)
+                  remove_point(&LoL_head, &LoL_tail, new_meas, 
+                               nabor, lists, where);
+
+               new_meas = ++(i_measure_array[nabor]);
+                 
+               enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                                 nabor, lists, where);
+            }
+	    else
+            {
+               new_meas = ++(i_measure_array[nabor]);
+            }
+         }
          --num_left;
       }
    }
@@ -2917,7 +2935,30 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 
             i_measure_array[nabor] = --measure;
 
-            enter_on_lists(&LoL_head, &LoL_tail, measure, nabor, lists, where);
+	    if (measure > 0)
+               enter_on_lists(&LoL_head, &LoL_tail, measure, nabor, 
+				lists, where);
+	    else
+	    {
+               CF_marker[nabor] = FPOINT;
+               --num_left;
+
+               for (k = S_diag_i[nabor]; k < S_diag_i[nabor+1]; k++)
+               {
+                  nabor_two = S_diag_j[k];
+                  if (CF_marker[nabor_two] == UNDECIDED)
+                  {
+                     new_meas = i_measure_array[nabor_two];
+                     remove_point(&LoL_head, &LoL_tail, new_meas, 
+                               nabor_two, lists, where);
+
+                     new_meas = ++(i_measure_array[nabor_two]);
+                 
+                     enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                                 nabor_two, lists, where);
+                  }
+               }
+	    }
          }
       }
    }
@@ -2941,7 +2982,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
     * Initialize the graph array
     *---------------------------------------------------*/
 
-   graph_array = hypre_CTAlloc(int, num_variables+num_cols_offd);
+/*   graph_array = hypre_CTAlloc(int, num_variables+num_cols_offd);
 
    for (i = 0; i < num_variables; i++)
    {
@@ -3006,7 +3047,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 	 }
       }
    }
-
+*/
    if (debug_flag == 3 )
    {
       wall_time = time_getWallclockSeconds() - wall_time;
