@@ -825,12 +825,14 @@ if [ ${BuildOpt} -ne $Skip ] ; then
   fi
   if [ ${BuildOpt} -eq $Run ] ; then
     echo "Autotest starting execution of $MessageStr"
+    HYPRE_INSTALL_DIR=${HYPRE_AUTOTEST_DIR}/${SRC}/hypre
     makeit "install" $MessageStr "$HYPRE_DEFAULT_EMAIL"
     cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test
     makeit "all" $MessageStr "$HYPRE_DEFAULT_EMAIL"
     if [ $NoFeiOpt -ne $Skip ] ; then
       cd ${HYPRE_AUTOTEST_DIR}/${SRC}
       makeit "nofei" $MessageStr "$HYPRE_FEI_EMAIL"
+      HYPRE_INSTALL_DIR=${HYPRE_AUTOTEST_DIR}/${SRC}/hypre
       makeit "install" $MessageStr "$HYPRE_FEI_EMAIL"
       cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test
       makeit "fei++" $MessageStr "$HYPRE_FEI_EMAIL"
