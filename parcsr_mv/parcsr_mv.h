@@ -338,27 +338,6 @@ void RowsWithColumn( int *rowmin , int *rowmax , int column , int num_rows_diag 
 void hypre_MatTCommPkgCreate_core( MPI_Comm comm , int *col_map_offd , int first_col_diag , int *col_starts , int num_rows_diag , int num_cols_diag , int num_cols_offd , int *row_starts , int firstColDiag , int *colMapOffd , int *mat_i_diag , int *mat_j_diag , int *mat_i_offd , int *mat_j_offd , int data , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elmts );
 int hypre_MatTCommPkgCreate( hypre_ParCSRMatrix *A );
 
-/* driver.c */
-int main( int argc , char *argv []);
-
-/* driver_aat.c */
-int main( int argc , char *argv []);
-
-/* driver_boolaat.c */
-int main( int argc , char *argv []);
-
-/* driver_boolmatmul.c */
-int main( int argc , char *argv []);
-
-/* driver_matmul.c */
-int main( int argc , char *argv []);
-
-/* driver_matvec.c */
-int main( int argc , char *argv []);
-
-/* driver_transpose.c */
-int main( int argc , char *argv []);
-
 /* par_csr_aat.c */
 void hypre_ParAat_RowSizes( int **C_diag_i , int **C_offd_i , int *B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *A_col_map_offd , int *A_ext_i , int *A_ext_j , int *A_ext_row_map , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int num_rows_A_ext , int first_col_diag_A , int first_row_index_A );
 hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix *A );
