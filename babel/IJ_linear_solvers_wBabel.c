@@ -872,7 +872,7 @@ main( int   argc,
      Hypre_IJBuildMatrix_addReference( Hypre_ij_A );
      Hypre_ParCSRMatrix_deleteReference( Hypre_parcsr_A );
 
-     ierr += Hypre_IJBuildMatrix_SetCommunicator( Hypre_ij_A, &comm );
+     ierr += Hypre_IJBuildMatrix_SetCommunicator( Hypre_ij_A, (void *)comm );
      ierr += Hypre_IJBuildMatrix_Create( Hypre_ij_A, 
                                    first_local_row, last_local_row,
                                    first_local_col, last_local_col );
@@ -1209,7 +1209,7 @@ main( int   argc,
       /* adjust reference counting system for new data type: */
       Hypre_IJBuildVector_addReference( Hypre_ij_b );
       Hypre_ParCSRVector_deleteReference( Hypre_b );
-      ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_b, &comm );
+      ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_b, (void *)comm );
       ierr += Hypre_IJBuildVector_Create( Hypre_ij_b, (void *)comm,
                                           first_local_row,last_local_row );
       ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_b );
@@ -1253,7 +1253,7 @@ main( int   argc,
       /* adjust reference counting system for new data type: */
       Hypre_IJBuildVector_addReference( Hypre_ij_x );
       Hypre_ParCSRVector_deleteReference( Hypre_x );
-      ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_x, &comm );
+      ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_x, (void *)comm );
       ierr += Hypre_IJBuildVector_Create( Hypre_ij_x, (void *)comm,
                                           first_local_col,last_local_col );
       ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_x );
@@ -1632,7 +1632,7 @@ main( int   argc,
       /* adjust reference counting system for new data type: */
       Hypre_IJBuildVector_addReference( Hypre_ij_y );
       Hypre_ParCSRVector_deleteReference( Hypre_y );
-      ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, &comm );
+      ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, (void *)comm );
       ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, (void *)comm,
                                           first_local_col,last_local_col );
       ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y );
@@ -1674,7 +1674,7 @@ main( int   argc,
          ( Hypre_y2, "Hypre.IJBuildVector" );
       Hypre_IJBuildVector_addReference( Hypre_ij_y2 );
       Hypre_ParCSRVector_deleteReference( Hypre_y2 );
-      ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y2, &comm );
+      ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y2, (void *)comm );
       ierr += Hypre_IJBuildVector_Create( Hypre_ij_y2, (void *)comm,
                                           first_local_col,last_local_col );
       ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y2 );
@@ -1826,7 +1826,7 @@ main( int   argc,
            /* adjust reference counting system for new data type: */
            Hypre_IJBuildVector_addReference( Hypre_ij_y );
            Hypre_ParCSRVector_deleteReference( Hypre_y );
-           ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, &comm );
+           ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, (void *)comm );
            ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, (void *)comm,
                                                first_local_col,last_local_col );
            ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y );
@@ -2077,7 +2077,7 @@ main( int   argc,
            /* adjust reference counting system for new data type: */
            Hypre_IJBuildVector_addReference( Hypre_ij_y );
            Hypre_ParCSRVector_deleteReference( Hypre_y );
-           ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, &comm );
+           ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, (void *)comm );
            ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, (void *)comm,
                                                first_local_col,last_local_col );
            ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y );
