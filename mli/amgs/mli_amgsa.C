@@ -328,6 +328,83 @@ int MLI_AMGSA::setNullSpace( int ndofs, int ndim, double *nullvec,
 }
 
 /* ********************************************************************* *
+ * load nodal coordinates (translates into rigid body modes)
+ * (abridged from similar function in ML)
+ * --------------------------------------------------------------------- */
+
+int MLI_AMGSA::setNodalCoordinates( int num_nodes, int ndofs, 
+                                    double *coords, double *scalings)
+{
+   int i, j, k, offset, voffset;
+
+   if ( ndofs == 1 )
+   {
+      node_dofs     = 1;
+      nullspace_len = num_nodes;
+      nullspace_dim = 1;
+   }
+   else if ( ndofs == 3 )
+   {
+      node_dofs     = 3;
+      nullspace_len = num_nodes * 3;
+      nullspace_dim = 6;
+   }
+   else
+   {
+      printf("setNodalCoordinates: ndofs = %d not supported\n",ndofs);
+      exit(1);
+   }
+   if ( nullspace_vec != NULL ) delete [] nullspace_vec;
+   nullspace_vec = new double[nullspace_len * nullspace_dim];
+
+   for( i = 0 ; i < num_nodes; i++ ) 
+   {
+      voffset = i * node_dofs;
+      if      ( node_dofs == 1 ) nullspace_vec[i] = 1.0;
+      else if ( node_dofs == 3 ) 
+      {
+         for ( j = 0; j < 3; j++ )
+         {
+            for( k = 0; k < 3; k++ )
+            {
+               offset = k * nullspace_len + voffset + j;
+               if ( j == k ) nullspace_vec[offset] = 1.0;
+               else          nullspace_vec[offset] = 0.0;
+            }
+         }
+         for ( j = 0; j < 3; j++ )
+         { 
+            for ( k = 3; k < 6; k++ )
+            {
+               offset = k * nullspace_len + voffset + j;
+               if ( j == k-3 ) nullspace_vec[offset] = 0.0;
+               else 
+               {
+                  if      (j+k == 4) nullspace_vec[offset] = coords[i*3+2];
+                  else if (j+k == 5) nullspace_vec[offset] = coords[i*3+1];
+                  else if (j+k == 6) nullspace_vec[offset] = coords[i*3];
+                  else nullspace_vec[offset] = 0.0;
+               }
+            }
+         }
+         j = 0; k = 5; offset = k * nullspace_len + voffset + j; 
+         nullspace_vec[offset] *= -1.0;
+         j = 1; k = 3; offset = k * nullspace_len + voffset + j; 
+         nullspace_vec[offset] *= -1.0;
+         j = 2; k = 4; offset = k * nullspace_len + voffset + j; 
+         nullspace_vec[offset] *= -1.0;
+      }
+   }
+   if ( scalings != NULL )
+   {
+      for ( i = 0 ; i < nullspace_dim; i++ ) 
+         for ( j = 0 ; j < nullspace_len; j++ ) 
+            nullspace_vec[i*nullspace_len+j] *= scalings[j];
+   }
+   return 0;
+}
+
+/* ********************************************************************* *
  * set parameter for calibration AMG 
  * --------------------------------------------------------------------- */
 

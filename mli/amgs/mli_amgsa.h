@@ -76,6 +76,7 @@ public :
    int    setPweight( double weight );
    int    setCalcSpectralNorm();
    int    setNullSpace(int node_dofs, int num_ns, double *null_vec, int length);
+   int    setNodalCoordinates(int nnodes,int ndofs,double *coor,double *scale);
    int    setCalibrationSize(int size);
    int    genMLStructure( MLI *mli );
    int    genMLStructureCalibration( MLI *mli );

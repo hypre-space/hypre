@@ -101,9 +101,9 @@ int MLI_Method::setup( MLI *mli )
 
 int MLI_Method::setParams(char *in_name, int argc, char *argv[])
 {
-   int        level, size, node_dofs, num_ns, length, nsweeps=1, set_id;
-   int        pre_post;
-   double     thresh, pweight, *nullspace, *weights=NULL;
+   int        level, size, ndofs, num_ns, length, nsweeps=1, set_id;
+   int        pre_post, nnodes;
+   double     thresh, pweight, *nullspace, *weights=NULL, *coords, *scales;
    char       param1[256], param2[256];
    MLI_AMGSA  *amgsa;
 
@@ -130,7 +130,8 @@ int MLI_Method::setParams(char *in_name, int argc, char *argv[])
          }
          else      
          {
-            cerr << "MLI_AMGSA ERROR : coarsen scheme not valid." << endl;
+            cout << "MLI_AMGSA ERROR : coarsen scheme not valid." << endl;
+            cout << "     valid options are : local\n";
             return 1;
          }
       }
@@ -169,12 +170,16 @@ int MLI_Method::setParams(char *in_name, int argc, char *argv[])
          else if (!strcmp(param2, "ParaSails")) set_id = MLI_SOLVER_PARASAILS_ID;
          else 
          {
-            cerr << "MLI_Method ERROR : setSmoother - invalid smoother." << endl;
+            cout << "MLI_Method ERROR : setSmoother - invalid smoother.\n";
+            cout << "     valid options are : Jacobi, GS, SGS, Schwarz\n";
+            cout << "                         MLS, ParaSails\n";
             return 1;
          } 
          if ( argc != 2 )
          {
-            cerr << "MLI_Method ERROR : setSmoother needs 2 arguments." << endl;
+            cout << "MLI_Method ERROR : setSmoother needs 2 arguments.\n";
+            cout << "     argument[0] : number of relaxation sweeps \n";
+            cout << "     argument[1] : relaxation weights\n";
             return 1;
          } 
          pre_post = MLI_SMOOTHER_PRE;
@@ -193,12 +198,16 @@ int MLI_Method::setParams(char *in_name, int argc, char *argv[])
          else if (!strcmp(param2, "ParaSails")) set_id = MLI_SOLVER_PARASAILS_ID;
          else 
          {
-            cerr << "MLI_Method ERROR : setSmoother - invalid smoother." << endl;
+            cout << "MLI_Method ERROR : setSmoother - invalid smoother.\n";
+            cout << "     valid options are : Jacobi, GS, SGS, Schwarz\n";
+            cout << "                         MLS, ParaSails\n";
             return 1;
          } 
          if ( argc != 2 )
          {
-            cerr << "MLI_Method ERROR : setSmoother needs 2 arguments." << endl;
+            cout << "MLI_Method ERROR : setSmoother needs 2 arguments.\n";
+            cout << "     argument[0] : number of relaxation sweeps \n";
+            cout << "     argument[1] : relaxation weights\n";
             return 1;
          } 
          pre_post = MLI_SMOOTHER_POST;
@@ -218,11 +227,15 @@ int MLI_Method::setParams(char *in_name, int argc, char *argv[])
          else 
          {
             cerr << "MLI_Method ERROR : setCoarseSolver - invalid smoother.\n";
+            cout << "     valid options are : Jacobi, GS, SGS, Schwarz\n";
+            cout << "                         ParaSails, SuperLu\n";
             return 1;
          } 
          if ( set_id != MLI_SOLVER_SUPERLU_ID && argc != 2 )
          {
             cerr << "MLI_Method ERROR : setCoarseSolver needs 2 arguments.\n";
+            cout << "     argument[0] : number of relaxation sweeps \n";
+            cout << "     argument[1] : relaxation weights\n";
             return 1;
          } 
          else if ( set_id != MLI_SOLVER_SUPERLU_ID )
@@ -236,14 +249,35 @@ int MLI_Method::setParams(char *in_name, int argc, char *argv[])
       {
          if ( argc != 4 )
          {
-            cerr << "MLI_Method ERROR : setNullSpace needs 4 arguments." << endl;
+            cout << "MLI_Method ERROR : setNullSpace needs 4 arguments.\n";
+            cout << "     argument[0] : node degree of freedom\n";
+            cout << "     argument[1] : number of null space vectors\n";
+            cout << "     argument[2] : null space information\n";
+            cout << "     argument[3] : vector length\n";
             return 1;
          } 
-         node_dofs = *(int *)   argv[0];
+         ndofs     = *(int *)   argv[0];
          num_ns    = *(int *)   argv[1];
          nullspace = (double *) argv[2];
          length    = *(int *)   argv[3];
-         return ( amgsa->setNullSpace(node_dofs,num_ns,nullspace,length) );
+         return ( amgsa->setNullSpace(ndofs,num_ns,nullspace,length) );
+      }
+      else if ( !strcmp(param1, "setNodalCoord" ))
+      {
+         if ( argc != 3 && argc != 4 )
+         {
+            cout << "MLI_Method ERROR : setNodalCoord needs 4 arguments.\n";
+            cout << "     argument[0] : number of nodes\n";
+            cout << "     argument[1] : node degree of freedom\n";
+            cout << "     argument[2] : coordinate information\n";
+            cout << "     argument[3] : scalings (can be null)\n";
+            return 1;
+         } 
+         nnodes = *(int *)   argv[0];
+         ndofs  = *(int *)   argv[1];
+         coords = (double *) argv[2];
+         if ( argc == 4 ) scales = (double *) argv[3]; else scales = NULL;
+         return ( amgsa->setNodalCoordinates(nnodes,ndofs,coords,scales) );
       }
       else if ( !strcmp(param1, "reinitialize" ))
       {
