@@ -146,8 +146,8 @@ main( int   argc,
 
    skip  = 0;
    sym  = 1;
-   rap = 1;
-   relax = 3;
+   rap = 0;
+   relax = 1;
    jump  = 0;
    reps = 1;
 
