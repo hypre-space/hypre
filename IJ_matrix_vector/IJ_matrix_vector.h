@@ -361,40 +361,40 @@ int hypre_RefIJVector P((HYPRE_IJVector IJvector , HYPRE_IJVector *reference ));
 # define	P(s) s
 
 /* F90_HYPRE_IJMatrix.c */
-void hypre_F90_IFACE P((int hypre_createijmatrix ));
-void hypre_F90_IFACE P((int hypre_destroyijmatrix ));
-void hypre_F90_IFACE P((int hypre_initializeijmatrix ));
-void hypre_F90_IFACE P((int hypre_assembleijmatrix ));
-void hypre_F90_IFACE P((int hypre_distributeijmatrix ));
-void hypre_F90_IFACE P((int hypre_setijmatrixlocalstoragety ));
-void hypre_F90_IFACE P((int hypre_setijmatrixlocalsize ));
-void hypre_F90_IFACE P((int hypre_setijmatrixrowsizes ));
-void hypre_F90_IFACE P((int hypre_setijmatrixdiagrowsizes ));
-void hypre_F90_IFACE P((int hypre_setijmatrixoffdiagrowsize ));
-void hypre_F90_IFACE P((int hypre_queryijmatrixinsertionsem ));
-void hypre_F90_IFACE P((int hypre_insertijmatrixblock ));
-void hypre_F90_IFACE P((int hypre_addblocktoijmatrix ));
-void hypre_F90_IFACE P((int hypre_insertijmatrixrow ));
-void hypre_F90_IFACE P((int hypre_getijmatrixlocalstorage ));
+void hypre_F90_IFACE P((int hypre_ijmatrixcreate ));
+void hypre_F90_IFACE P((int hypre_ijmatrixdestroy ));
+void hypre_F90_IFACE P((int hypre_ijmatrixinitialize ));
+void hypre_F90_IFACE P((int hypre_ijmatrixassemble ));
+void hypre_F90_IFACE P((int hypre_ijmatrixdistribute ));
+void hypre_F90_IFACE P((int hypre_ijmatrixsetlocalstoragety ));
+void hypre_F90_IFACE P((int hypre_ijmatrixsetlocalsize ));
+void hypre_F90_IFACE P((int hypre_ijmatrixsetrowsizes ));
+void hypre_F90_IFACE P((int hypre_ijmatrixsetdiagrowsizes ));
+void hypre_F90_IFACE P((int hypre_ijmatrixsetoffdiagrowsize ));
+void hypre_F90_IFACE P((int hypre_ijmatrixqueryinsertionsem ));
+void hypre_F90_IFACE P((int hypre_ijmatrixinsertblock ));
+void hypre_F90_IFACE P((int hypre_ijmatrixaddblock ));
+void hypre_F90_IFACE P((int hypre_ijmatrixinsertrow ));
+void hypre_F90_IFACE P((int hypre_ijmatrixgetlocalstorage ));
 
 /* F90_HYPRE_IJVector.c */
-void hypre_F90_IFACE P((int hypre_createijvector ));
-void hypre_F90_IFACE P((int hypre_destroyijvector ));
-void hypre_F90_IFACE P((int hypre_setijvectorpartitioning ));
-void hypre_F90_IFACE P((int hypre_setijvectorlocalpartition ));
-void hypre_F90_IFACE P((int hypre_initializeijvector ));
-void hypre_F90_IFACE P((int hypre_distributeijvector ));
-void hypre_F90_IFACE P((int hypre_setijvectorlocalstoragety ));
-void hypre_F90_IFACE P((int hypre_zeroijveclocalcomps ));
-void hypre_F90_IFACE P((int hypre_setijveclocalcomps ));
-void hypre_F90_IFACE P((int hypre_setijveclocalcompsinblock ));
-void hypre_F90_IFACE P((int hypre_addtoijveclocalcomps ));
-void hypre_F90_IFACE P((int hypre_addtoijveclocalcompsinblo ));
-void hypre_F90_IFACE P((int hypre_assembleijvector ));
-void hypre_F90_IFACE P((int hypre_getijveclocalcomps ));
-void hypre_F90_IFACE P((int hypre_getijveclocalcompsinblock ));
-void hypre_F90_IFACE P((int hypre_getijvectorlocalstoragety ));
-void hypre_F90_IFACE P((int hypre_getijvectorlocalstorage ));
+void hypre_F90_IFACE P((int hypre_ijvectorcreate ));
+void hypre_F90_IFACE P((int hypre_ijvectordestroy ));
+void hypre_F90_IFACE P((int hypre_ijvectorsetpartitioning ));
+void hypre_F90_IFACE P((int hypre_ijvectorsetlocalpartition ));
+void hypre_F90_IFACE P((int hypre_ijvectorinitialize ));
+void hypre_F90_IFACE P((int hypre_ijvectordistribute ));
+void hypre_F90_IFACE P((int hypre_ijvectorsetlocalstoragety ));
+void hypre_F90_IFACE P((int hypre_ijvectorzerolocalcomps ));
+void hypre_F90_IFACE P((int hypre_ijvectorsetlocalcomps ));
+void hypre_F90_IFACE P((int hypre_ijvectorsetlocalcompsinbl ));
+void hypre_F90_IFACE P((int hypre_ijvectoraddlocalcomps ));
+void hypre_F90_IFACE P((int hypre_ijvectoraddlocalcompsinbl ));
+void hypre_F90_IFACE P((int hypre_ijvectorassemble ));
+void hypre_F90_IFACE P((int hypre_ijvectorgetlocalcomps ));
+void hypre_F90_IFACE P((int hypre_ijvectorgetlocalcompsinbl ));
+void hypre_F90_IFACE P((int hypre_ijvectorgetlocalstoragety ));
+void hypre_F90_IFACE P((int hypre_ijvectorgetlocalstorage ));
 
 #undef P
 
