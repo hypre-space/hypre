@@ -63,7 +63,8 @@ am__libHYPRE_sstruct_mv_a_SOURCES_DIST = HYPRE_sstruct_graph.c \
 	HYPRE_sstruct_stencil.c HYPRE_sstruct_vector.c box_map.c \
 	sstruct_axpy.c sstruct_copy.c sstruct_graph.c sstruct_grid.c \
 	sstruct_innerprod.c sstruct_matrix.c sstruct_matvec.c \
-	sstruct_scale.c sstruct_stencil.c sstruct_vector.c
+	sstruct_overlap_innerprod.c sstruct_scale.c sstruct_stencil.c \
+	sstruct_vector.c
 am__objects_1 = HYPRE_sstruct_graph.$(OBJEXT) \
 	HYPRE_sstruct_grid.$(OBJEXT) HYPRE_sstruct_matrix.$(OBJEXT) \
 	HYPRE_sstruct_stencil.$(OBJEXT) HYPRE_sstruct_vector.$(OBJEXT) \
@@ -71,8 +72,8 @@ am__objects_1 = HYPRE_sstruct_graph.$(OBJEXT) \
 	sstruct_copy.$(OBJEXT) sstruct_graph.$(OBJEXT) \
 	sstruct_grid.$(OBJEXT) sstruct_innerprod.$(OBJEXT) \
 	sstruct_matrix.$(OBJEXT) sstruct_matvec.$(OBJEXT) \
-	sstruct_scale.$(OBJEXT) sstruct_stencil.$(OBJEXT) \
-	sstruct_vector.$(OBJEXT)
+	sstruct_overlap_innerprod.$(OBJEXT) sstruct_scale.$(OBJEXT) \
+	sstruct_stencil.$(OBJEXT) sstruct_vector.$(OBJEXT)
 @STATICONLY_TRUE@am_libHYPRE_sstruct_mv_a_OBJECTS = $(am__objects_1)
 libHYPRE_sstruct_mv_a_OBJECTS = $(am_libHYPRE_sstruct_mv_a_OBJECTS)
 libLTLIBRARIES_INSTALL = $(INSTALL)
@@ -83,13 +84,15 @@ am__libHYPRE_sstruct_mv_la_SOURCES_DIST = HYPRE_sstruct_graph.c \
 	HYPRE_sstruct_stencil.c HYPRE_sstruct_vector.c box_map.c \
 	sstruct_axpy.c sstruct_copy.c sstruct_graph.c sstruct_grid.c \
 	sstruct_innerprod.c sstruct_matrix.c sstruct_matvec.c \
-	sstruct_scale.c sstruct_stencil.c sstruct_vector.c
+	sstruct_overlap_innerprod.c sstruct_scale.c sstruct_stencil.c \
+	sstruct_vector.c
 am__objects_2 = HYPRE_sstruct_graph.lo HYPRE_sstruct_grid.lo \
 	HYPRE_sstruct_matrix.lo HYPRE_sstruct_stencil.lo \
 	HYPRE_sstruct_vector.lo box_map.lo sstruct_axpy.lo \
 	sstruct_copy.lo sstruct_graph.lo sstruct_grid.lo \
 	sstruct_innerprod.lo sstruct_matrix.lo sstruct_matvec.lo \
-	sstruct_scale.lo sstruct_stencil.lo sstruct_vector.lo
+	sstruct_overlap_innerprod.lo sstruct_scale.lo \
+	sstruct_stencil.lo sstruct_vector.lo
 @STATICONLY_FALSE@am_libHYPRE_sstruct_mv_la_OBJECTS =  \
 @STATICONLY_FALSE@	$(am__objects_2)
 libHYPRE_sstruct_mv_la_OBJECTS = $(am_libHYPRE_sstruct_mv_la_OBJECTS)
@@ -162,7 +165,6 @@ LAPACK_LIBS = @LAPACK_LIBS@
 LDFLAGS = @LDFLAGS@
 LIBDIRNEEDED_FALSE = @LIBDIRNEEDED_FALSE@
 LIBDIRNEEDED_TRUE = @LIBDIRNEEDED_TRUE@
-LIBG2C = @LIBG2C@
 LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
@@ -287,6 +289,7 @@ FILES = \
  sstruct_innerprod.c\
  sstruct_matrix.c\
  sstruct_matvec.c\
+ sstruct_overlap_innerprod.c\
  sstruct_scale.c\
  sstruct_stencil.c\
  sstruct_vector.c

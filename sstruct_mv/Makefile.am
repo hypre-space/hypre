@@ -46,6 +46,7 @@ FILES = \
  sstruct_innerprod.c\
  sstruct_matrix.c\
  sstruct_matvec.c\
+ sstruct_overlap_innerprod.c\
  sstruct_scale.c\
  sstruct_stencil.c\
  sstruct_vector.c
