@@ -16,6 +16,8 @@ INTERNAL_HEADER=parcsr_matrix_vector.h
 
 cat > $INTERNAL_HEADER <<@
 
+#include <HYPRE_config.h>
+
 #include "HYPRE_parcsr_mv.h"
 
 #ifndef hypre_PARCSR_MV_HEADER

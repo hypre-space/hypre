@@ -16,6 +16,8 @@ INTERNAL_HEADER=pamg.h
 
 cat > $INTERNAL_HEADER <<@
 
+#include <HYPRE_config.h>
+
 #include "HYPRE_ls.h"
 
 #ifndef hypre_LS_HEADER

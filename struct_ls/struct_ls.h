@@ -1,4 +1,6 @@
 
+#include <HYPRE_config.h>
+
 #include "HYPRE_ls.h"
 
 #ifndef hypre_LS_HEADER

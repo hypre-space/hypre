@@ -1,4 +1,6 @@
 
+#include <HYPRE_config.h>
+
 #include "HYPRE_parcsr_mv.h"
 
 #ifndef hypre_PARCSR_MV_HEADER
@@ -293,7 +295,6 @@ void hypre_F90_IFACE P((int hypre_printparvector ));
 void hypre_F90_IFACE P((int hypre_createparvector ));
 void hypre_F90_IFACE P((int hypre_setparvectordataowner ));
 void hypre_F90_IFACE P((int hypre_setparvectorpartitioningo ));
-void hypre_F90_IFACE P((int hypre_readparvector ));
 void hypre_F90_IFACE P((int hypre_setparvectorconstantvalue ));
 void hypre_F90_IFACE P((int hypre_setparvectorrandomvalues ));
 void hypre_F90_IFACE P((int hypre_copyparvector ));

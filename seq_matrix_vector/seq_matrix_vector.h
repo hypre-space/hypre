@@ -1,4 +1,6 @@
 
+#include <HYPRE_config.h>
+
 #include "HYPRE_seq_mv.h"
 
 #ifndef hypre_MV_HEADER

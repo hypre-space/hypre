@@ -15,6 +15,8 @@
 #ifndef HYPRE_LS_HEADER
 #define HYPRE_LS_HEADER
 
+#include <HYPRE_config.h>
+
 #include "HYPRE_utilities.h"
 #include "HYPRE_mv.h"
 

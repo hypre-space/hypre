@@ -1,4 +1,6 @@
 
+#include <HYPRE_config.h>
+
 #include "HYPRE_parcsr_ls.h"
 
 #ifndef hypre_PARCSR_LS_HEADER
