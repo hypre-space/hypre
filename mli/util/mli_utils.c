@@ -871,7 +871,7 @@ int MLI_Utils_HyprePCGSolve( CMLI *cmli, HYPRE_Matrix A,
    HYPRE_PCGSetup(pcg_solver, A, b, x);
    HYPRE_PCGSolve(pcg_solver, A, b, x);
    HYPRE_PCGGetNumIterations(pcg_solver, &num_iterations);
-   HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(pcg_solver, &norm);
+   HYPRE_PCGGetFinalRelativeResidualNorm(pcg_solver, &norm);
    HYPRE_ParCSRPCGDestroy(pcg_solver);
    printf("\tPCG maximum iterations           = %d\n", max_iter);
    printf("\tPCG convergence tolerance        = %e\n", tol);
@@ -910,7 +910,7 @@ int MLI_Utils_HypreGMRESSolve( CMLI *cmli, HYPRE_Matrix A,
    HYPRE_GMRESSetup(gmres_solver, A, b, x);
    HYPRE_GMRESSolve(gmres_solver, A, b, x);
    HYPRE_GMRESGetNumIterations(gmres_solver, &num_iterations);
-   HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(gmres_solver, &norm);
+   HYPRE_GMRESGetFinalRelativeResidualNorm(gmres_solver, &norm);
    HYPRE_ParCSRGMRESDestroy(gmres_solver);
    printf("\tGMRES maximum iterations           = %d\n", max_iter);
    printf("\tGMRES convergence tolerance        = %e\n", tol);
@@ -919,4 +919,42 @@ int MLI_Utils_HypreGMRESSolve( CMLI *cmli, HYPRE_Matrix A,
    return 0;
 }
 
+/***************************************************************************
+ * solve the system using HYPRE bicgstab
+ *--------------------------------------------------------------------------*/
+ 
+int MLI_Utils_HypreBiCGSTABSolve( CMLI *cmli, HYPRE_Matrix A,
+                                  HYPRE_Vector b, HYPRE_Vector x )
+{
+   int          ierr, num_iterations, max_iter=500;
+   double       tol=1.0e-6, norm;
+   CMLI_Vector  *csol, *crhs;
+   MPI_Comm     mpi_comm;
+   HYPRE_Solver cgstab_solver, cgstab_precond;
+   HYPRE_ParCSRMatrix hypreA;
+
+   hypreA = (HYPRE_ParCSRMatrix) A;
+   MLI_SetMaxIterations( cmli, 1 );
+   HYPRE_ParCSRMatrixGetComm( hypreA , &mpi_comm );
+   HYPRE_ParCSRBiCGSTABCreate(mpi_comm, &cgstab_solver);
+   HYPRE_BiCGSTABSetMaxIter(cgstab_solver, max_iter );
+   HYPRE_BiCGSTABSetTol(cgstab_solver, tol);
+   HYPRE_BiCGSTABSetStopCrit(cgstab_solver, 0);
+   HYPRE_BiCGSTABSetLogging(cgstab_solver, 2);
+   cgstab_precond = (HYPRE_Solver) cmli;
+   HYPRE_BiCGSTABSetPrecond(cgstab_solver,
+                       (HYPRE_PtrToSolverFcn) MLI_Utils_ParCSRMLISolve,
+                       (HYPRE_PtrToSolverFcn) MLI_Utils_ParCSRMLISetup,
+                       cgstab_precond);
+   HYPRE_BiCGSTABSetup(cgstab_solver, A, b, x);
+   HYPRE_BiCGSTABSolve(cgstab_solver, A, b, x);
+   HYPRE_BiCGSTABGetNumIterations(cgstab_solver, &num_iterations);
+   HYPRE_BiCGSTABGetFinalRelativeResidualNorm(cgstab_solver, &norm);
+   HYPRE_BiCGSTABDestroy(cgstab_solver);
+   printf("\tBiCGSTAB maximum iterations           = %d\n", max_iter);
+   printf("\tBiCGSTAB convergence tolerance        = %e\n", tol);
+   printf("\tBiCGSTAB number of iterations         = %d\n", num_iterations);
+   printf("\tBiCGSTAB final relative residual norm = %e\n", norm);
+   return 0;
+}
 
