@@ -19,8 +19,7 @@ A pointer parameter in C can achieve the same effect as call-by-reference,
 and by this mechanism the languages can interoperate in a straightforward
 manner.
 
-Portability across typical platforms 
-\footnote{DEC Compass, DEC Tera, and IBM ASCI-Blue at LLNL}
+Portability across typical platforms\footnote{DEC Compass, DEC Tera, and IBM ASCI-Blue at LLNL}
 is currently achieved with the specific Fortran-calling-C mapping: 
 
 \vspace{0.2in}
@@ -31,37 +30,36 @@ is currently achieved with the specific Fortran-calling-C mapping:
 \underline{called C function parameter type} \\
                               &                   &   \\
 \hspace{0.1in} (addr of) \verb+integer*8+        & $\longrightarrow$ &
-\hspace{0.5in} \verb+long int *+ \\
+\hspace{0.5in} \verb+long int*+ \\
 \hspace{0.1in} (addr of) \verb+integer+          & $\longrightarrow$ &
-\hspace{0.5in} \verb+int *+ \\
+\hspace{0.5in} \verb+int*+ \\
 \hspace{0.1in} (addr of) \verb+character+        & $\longrightarrow$ &
-\hspace{0.5in} \verb+char *+ \\
+\hspace{0.5in} \verb+char*+ \\
 \hspace{0.1in} (addr of) \verb+double precision+ & $\longrightarrow$ &
-\hspace{0.5in} \verb+double *+ \\
+\hspace{0.5in} \verb+double*+ \\
 
 \end{tabular}
 
 \vspace{0.2in}
 
 In particular, C-type
-\verb+long int *+ points to a space that can hold an address, a space
+\verb+long int*+ points to a space that can hold an address, a space
 which happens to be the size of that allocated by a Fortran
 \verb+integer*8+ declaration.
 In orther words, C can hold an address to anything in a \verb+long int+ and
 assign that address to a Fortran \verb+integer*8+ memory space
-(using \verb+long int *+ call-by-value).
+(using \verb+long int*+ call-by-value).
 
-So, on the above platforms, Fortran can carry addresses in \verb+integer*8+
-variables.  These addresses might not have originated in any Fortran call.
-Furthermore, if these addresses to inhomogeneously typed collections of data
-(e.g. C structures), Fortran might not have enough information to dereference
-the addresses.  But Fortran can still pass around such addresses, and in
+Addresses in \verb+integer*8+ variables might not have originated
+in a Fortran call, and if they address inhomogeneously typed collections
+of data (e.g. C structures), Fortran might not have enough information to
+dereference them.  But Fortran can still pass around such addresses, and in
 particular hand them back and forth between various C functions.  The
 {\slshape hypre} Fortran interface makes extensive use of this technique.
 
 \vspace{0.1in}
 
-\noindent Example:
+\noindent Generalized example:
 
 \vspace{0.1in}
 
@@ -76,15 +74,58 @@ particular hand them back and forth between various C functions.  The
 \end{verbatim}
 
 The interface is designed so that the label \verb+subroutine_name+ is exactly
-the label of the {\slshape hypre} C-function.  The {\slshape hypre}
-interlanguage interface
-accounts for related compilation/linking issues involving appended
-underscores, and for Fortran name length limitations.
+the label of the {\slshape hypre} C-function.
+{\slshape Hypre} interlanguage C-wrappers currently
+account for related compilation/linking issues involving appended
+underscores, and for Fortran name length limitations\footnote{For C
+function names under 32 characters in length, the Fortran name is the same
+as the C name.  For C function names over 31 characters, the Fortran
+name is condensed to less than 32 characters (see reference manual for
+Fortran name).}.
 Fortran variables like \verb+addr+
 are convenient for receiving, from C, pointers to arrays or other
 collections of data.  Such pointers need not point to data allocated by
 Fortran.  Fortran variable \verb+ierr+ exemplifies a convenient approach
 to error handling through the interface.
+
+\vspace{0.1in}
+
+\noindent Specific example:
+
+\vspace{0.1in}
+
+  Fortran calling:
+\begin{verbatim}
+      integer*8        IJmatrix, 
+      integer          num_nonzero_coefs, row_index
+      integer          col_indices(MAX_NUM_COLS), ierr
+      double precision coefs(MAX_NUM_COLS)
+             .
+             .
+             .
+
+      call HYPRE_IJMatrixInsertRow(IJmatrix, num_nonzero_coefs, row_index,
+                                   col_indexes, coefs, ierr)
+\end{verbatim}
+
+\vspace{0.1in}
+
+  C called:
+\begin{verbatim}
+      int HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix IJmatrix, int n,
+                                   int row, const int *cols,
+                                   const double *values)     
+
+      { int ierr = 0;
+              .
+              .
+              .
+
+        return(ierr); }
+\end{verbatim}
+
+\noindent Since the C function name has less than 32 characters, Fortran uses the
+same name in the subroutine call.
 
 The typical implementation above might not have the portability needed
 over a larger set of platforms.  The previous mapping might
@@ -95,11 +136,11 @@ with the {\slshape Babel} project.
 
 %  C called:
 %\begin{verbatim}
-%      void hypre_F90_NAME(sub_name)( long int  *struct_addr,
-%                                     int       *intg,
-%                                     char      *charact,
-%                                     double    *double_prec,
-%                                     int       *ierr          )
+%      void hypre_F90_NAME(sub_name)( long int *struct_addr,
+%                                     int      *intg,
+%                                     char     *charact,
+%                                     double   *double_prec,
+%                                     int      *ierr          )
 %\end{verbatim}
 
 %\section{Fortran subroutine calls in {\slshape hypre} source code}
