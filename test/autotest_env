@@ -16,11 +16,11 @@
 CVSROOT=/home/casc/repository
 export CVSROOT
 
-PATH=/usr/local/KAI/KCC-4.0d/KCC_BASE/bin
-PATH=${PATH}:/usr/local/mpi/mpich-1.2.0/bin
-PATH=${PATH}:/opt/ws6/SUNWspro/bin
+PATH=/opt/ws6/SUNWspro/bin
 PATH=${PATH}:/usr/xpg4/bin:/usr/bin:/usr/ccs/bin:/usr/ucb
 PATH=${PATH}:/usr/local/bin:/usr/local/scripts:/home/casc/bin
+PATH=${PATH}:/usr/local/KAI/KCC-4.0d/KCC_BASE/bin
+PATH=${PATH}:/usr/local/mpi/mpich-1.2.0/bin
 export PATH
 
 #==============================================================================
