@@ -179,6 +179,7 @@ am__libHYPRE_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/FEI_mv/femli/base/mli.cxx \
 	$(top_srcdir)/FEI_mv/femli/base/mli_oneLevel.cxx \
 	$(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx \
+	$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata_utils.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_sfei.cxx \
@@ -192,6 +193,7 @@ am__libHYPRE_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_bsgs.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_cg.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gs.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_hschwarz.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_hsgs.cxx \
@@ -556,32 +558,33 @@ am__objects_3 = $(am__objects_1) $(am__objects_2) colamd.$(OBJEXT) \
 	mli_amgsa_dd_sfei.$(OBJEXT) mli_method.$(OBJEXT) \
 	mli_method_amgcr.$(OBJEXT) mli_method_amgrs.$(OBJEXT) \
 	mli_method_amgsa.$(OBJEXT) mli.$(OBJEXT) \
-	mli_oneLevel.$(OBJEXT) cmli.$(OBJEXT) mli_fedata.$(OBJEXT) \
-	mli_fedata_utils.$(OBJEXT) mli_sfei.$(OBJEXT) \
-	mli_mapper.$(OBJEXT) mli_matrix.$(OBJEXT) \
+	mli_oneLevel.$(OBJEXT) cmli.$(OBJEXT) mli_febase.$(OBJEXT) \
+	mli_fedata.$(OBJEXT) mli_fedata_utils.$(OBJEXT) \
+	mli_sfei.$(OBJEXT) mli_mapper.$(OBJEXT) mli_matrix.$(OBJEXT) \
 	mli_matrix_mult.$(OBJEXT) mli_matrix_utils.$(OBJEXT) \
 	mli_solver.$(OBJEXT) mli_solver_arpacksuperlu.$(OBJEXT) \
 	mli_solver_bjacobi.$(OBJEXT) mli_solver_bsgs.$(OBJEXT) \
 	mli_solver_cg.$(OBJEXT) mli_solver_chebyshev.$(OBJEXT) \
-	mli_solver_gs.$(OBJEXT) mli_solver_hschwarz.$(OBJEXT) \
-	mli_solver_hsgs.$(OBJEXT) mli_solver_jacobi.$(OBJEXT) \
-	mli_solver_kaczmarz.$(OBJEXT) mli_solver_mls.$(OBJEXT) \
-	mli_solver_parasails.$(OBJEXT) mli_solver_seqsuperlu.$(OBJEXT) \
-	mli_solver_sgs.$(OBJEXT) mli_solver_superlu.$(OBJEXT) \
-	mli_vector.$(OBJEXT) mli_utils_fortran.$(OBJEXT) \
-	F90_HYPRE_IJMatrix.$(OBJEXT) F90_HYPRE_IJVector.$(OBJEXT) \
-	F90_IJMatrix.$(OBJEXT) HYPRE_IJMatrix.$(OBJEXT) \
-	HYPRE_IJVector.$(OBJEXT) IJMatrix.$(OBJEXT) \
-	IJMatrix_parcsr.$(OBJEXT) IJVector.$(OBJEXT) \
-	IJVector_parcsr.$(OBJEXT) aux_parcsr_matrix.$(OBJEXT) \
-	Euclid_apply.$(OBJEXT) Euclid_dh.$(OBJEXT) \
-	ExternalRows_dh.$(OBJEXT) Factor_dh.$(OBJEXT) \
-	Hash_dh.$(OBJEXT) Hash_i_dh.$(OBJEXT) MatGenFD.$(OBJEXT) \
-	Mat_dh.$(OBJEXT) Mem_dh.$(OBJEXT) Numbering_dh.$(OBJEXT) \
-	Parser_dh.$(OBJEXT) SortedList_dh.$(OBJEXT) \
-	SortedSet_dh.$(OBJEXT) SubdomainGraph_dh.$(OBJEXT) \
-	TimeLog_dh.$(OBJEXT) Timer_dh.$(OBJEXT) Vec_dh.$(OBJEXT) \
-	blas_dh.$(OBJEXT) getRow_dh.$(OBJEXT) globalObjects.$(OBJEXT) \
+	mli_solver_gmres.$(OBJEXT) mli_solver_gs.$(OBJEXT) \
+	mli_solver_hschwarz.$(OBJEXT) mli_solver_hsgs.$(OBJEXT) \
+	mli_solver_jacobi.$(OBJEXT) mli_solver_kaczmarz.$(OBJEXT) \
+	mli_solver_mls.$(OBJEXT) mli_solver_parasails.$(OBJEXT) \
+	mli_solver_seqsuperlu.$(OBJEXT) mli_solver_sgs.$(OBJEXT) \
+	mli_solver_superlu.$(OBJEXT) mli_vector.$(OBJEXT) \
+	mli_utils_fortran.$(OBJEXT) F90_HYPRE_IJMatrix.$(OBJEXT) \
+	F90_HYPRE_IJVector.$(OBJEXT) F90_IJMatrix.$(OBJEXT) \
+	HYPRE_IJMatrix.$(OBJEXT) HYPRE_IJVector.$(OBJEXT) \
+	IJMatrix.$(OBJEXT) IJMatrix_parcsr.$(OBJEXT) \
+	IJVector.$(OBJEXT) IJVector_parcsr.$(OBJEXT) \
+	aux_parcsr_matrix.$(OBJEXT) Euclid_apply.$(OBJEXT) \
+	Euclid_dh.$(OBJEXT) ExternalRows_dh.$(OBJEXT) \
+	Factor_dh.$(OBJEXT) Hash_dh.$(OBJEXT) Hash_i_dh.$(OBJEXT) \
+	MatGenFD.$(OBJEXT) Mat_dh.$(OBJEXT) Mem_dh.$(OBJEXT) \
+	Numbering_dh.$(OBJEXT) Parser_dh.$(OBJEXT) \
+	SortedList_dh.$(OBJEXT) SortedSet_dh.$(OBJEXT) \
+	SubdomainGraph_dh.$(OBJEXT) TimeLog_dh.$(OBJEXT) \
+	Timer_dh.$(OBJEXT) Vec_dh.$(OBJEXT) blas_dh.$(OBJEXT) \
+	getRow_dh.$(OBJEXT) globalObjects.$(OBJEXT) \
 	ilu_mpi_bj.$(OBJEXT) ilu_mpi_pilu.$(OBJEXT) ilu_seq.$(OBJEXT) \
 	io_dh.$(OBJEXT) krylov_dh.$(OBJEXT) mat_dh_private.$(OBJEXT) \
 	shellSort_dh.$(OBJEXT) sig_dh.$(OBJEXT) ConjGrad.$(OBJEXT) \
@@ -831,6 +834,7 @@ am__libHYPRE_LSI_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/FEI_mv/femli/base/mli.cxx \
 	$(top_srcdir)/FEI_mv/femli/base/mli_oneLevel.cxx \
 	$(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx \
+	$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata_utils.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_sfei.cxx \
@@ -844,6 +848,7 @@ am__libHYPRE_LSI_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_bsgs.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_cg.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gs.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_hschwarz.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_hsgs.cxx \
@@ -1260,6 +1265,7 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/FEI_mv/femli/base/mli.cxx \
 	$(top_srcdir)/FEI_mv/femli/base/mli_oneLevel.cxx \
 	$(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx \
+	$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata_utils.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_sfei.cxx \
@@ -1273,6 +1279,7 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_bsgs.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_cg.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gs.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_hschwarz.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_hsgs.cxx \
@@ -1606,29 +1613,30 @@ am__objects_6 = $(am__objects_4) $(am__objects_5) colamd.lo \
 	lsicg.lo mli_utils.lo mli_amgsa_calib.lo mli_amgsa_coarsen1.lo \
 	mli_amgsa_dd_fedata.lo mli_amgsa_dd_sfei.lo mli_method.lo \
 	mli_method_amgcr.lo mli_method_amgrs.lo mli_method_amgsa.lo \
-	mli.lo mli_oneLevel.lo cmli.lo mli_fedata.lo \
+	mli.lo mli_oneLevel.lo cmli.lo mli_febase.lo mli_fedata.lo \
 	mli_fedata_utils.lo mli_sfei.lo mli_mapper.lo mli_matrix.lo \
 	mli_matrix_mult.lo mli_matrix_utils.lo mli_solver.lo \
 	mli_solver_arpacksuperlu.lo mli_solver_bjacobi.lo \
 	mli_solver_bsgs.lo mli_solver_cg.lo mli_solver_chebyshev.lo \
-	mli_solver_gs.lo mli_solver_hschwarz.lo mli_solver_hsgs.lo \
-	mli_solver_jacobi.lo mli_solver_kaczmarz.lo mli_solver_mls.lo \
-	mli_solver_parasails.lo mli_solver_seqsuperlu.lo \
-	mli_solver_sgs.lo mli_solver_superlu.lo mli_vector.lo \
-	mli_utils_fortran.lo F90_HYPRE_IJMatrix.lo \
-	F90_HYPRE_IJVector.lo F90_IJMatrix.lo HYPRE_IJMatrix.lo \
-	HYPRE_IJVector.lo IJMatrix.lo IJMatrix_parcsr.lo IJVector.lo \
-	IJVector_parcsr.lo aux_parcsr_matrix.lo Euclid_apply.lo \
-	Euclid_dh.lo ExternalRows_dh.lo Factor_dh.lo Hash_dh.lo \
-	Hash_i_dh.lo MatGenFD.lo Mat_dh.lo Mem_dh.lo Numbering_dh.lo \
-	Parser_dh.lo SortedList_dh.lo SortedSet_dh.lo \
-	SubdomainGraph_dh.lo TimeLog_dh.lo Timer_dh.lo Vec_dh.lo \
-	blas_dh.lo getRow_dh.lo globalObjects.lo ilu_mpi_bj.lo \
-	ilu_mpi_pilu.lo ilu_seq.lo io_dh.lo krylov_dh.lo \
-	mat_dh_private.lo shellSort_dh.lo sig_dh.lo ConjGrad.lo \
-	DiagScale.lo FlexGmres.lo Hash.lo LoadBal.lo Matrix.lo Mem.lo \
-	Numbering.lo OrderStat.lo ParaSails.lo PrunedRows.lo \
-	RowPatt.lo StoredRows.lo hypre_ParaSails.lo comm.lo \
+	mli_solver_gmres.lo mli_solver_gs.lo mli_solver_hschwarz.lo \
+	mli_solver_hsgs.lo mli_solver_jacobi.lo mli_solver_kaczmarz.lo \
+	mli_solver_mls.lo mli_solver_parasails.lo \
+	mli_solver_seqsuperlu.lo mli_solver_sgs.lo \
+	mli_solver_superlu.lo mli_vector.lo mli_utils_fortran.lo \
+	F90_HYPRE_IJMatrix.lo F90_HYPRE_IJVector.lo F90_IJMatrix.lo \
+	HYPRE_IJMatrix.lo HYPRE_IJVector.lo IJMatrix.lo \
+	IJMatrix_parcsr.lo IJVector.lo IJVector_parcsr.lo \
+	aux_parcsr_matrix.lo Euclid_apply.lo Euclid_dh.lo \
+	ExternalRows_dh.lo Factor_dh.lo Hash_dh.lo Hash_i_dh.lo \
+	MatGenFD.lo Mat_dh.lo Mem_dh.lo Numbering_dh.lo Parser_dh.lo \
+	SortedList_dh.lo SortedSet_dh.lo SubdomainGraph_dh.lo \
+	TimeLog_dh.lo Timer_dh.lo Vec_dh.lo blas_dh.lo getRow_dh.lo \
+	globalObjects.lo ilu_mpi_bj.lo ilu_mpi_pilu.lo ilu_seq.lo \
+	io_dh.lo krylov_dh.lo mat_dh_private.lo shellSort_dh.lo \
+	sig_dh.lo ConjGrad.lo DiagScale.lo FlexGmres.lo Hash.lo \
+	LoadBal.lo Matrix.lo Mem.lo Numbering.lo OrderStat.lo \
+	ParaSails.lo PrunedRows.lo RowPatt.lo StoredRows.lo \
+	hypre_ParaSails.lo comm.lo \
 	HYPRE_DistributedMatrixPilutSolver.lo debug.lo \
 	distributed_qsort.lo distributed_qsort_si.lo ilut.lo \
 	parilut.lo parutil.lo pblas1.lo serilut.lo trifactor.lo \
@@ -1835,6 +1843,7 @@ am__libHYPRE_LSI_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/FEI_mv/femli/base/mli.cxx \
 	$(top_srcdir)/FEI_mv/femli/base/mli_oneLevel.cxx \
 	$(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx \
+	$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata_utils.cxx \
 	$(top_srcdir)/FEI_mv/femli/fedata/mli_sfei.cxx \
@@ -1848,6 +1857,7 @@ am__libHYPRE_LSI_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_bsgs.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_cg.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx \
+	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gs.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_hschwarz.cxx \
 	$(top_srcdir)/FEI_mv/femli/solver/mli_solver_hsgs.cxx \
@@ -2515,6 +2525,7 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/base/mli.cxx\
  $(top_srcdir)/FEI_mv/femli/base/mli_oneLevel.cxx\
  $(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx\
+ $(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx\
  $(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx\
  $(top_srcdir)/FEI_mv/femli/fedata/mli_fedata_utils.cxx\
  $(top_srcdir)/FEI_mv/femli/fedata/mli_sfei.cxx\
@@ -2528,6 +2539,7 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_bsgs.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_cg.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx\
+ $(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_gs.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_hschwarz.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_hsgs.cxx\
@@ -6934,6 +6946,15 @@ cmli.obj: $(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx
 cmli.lo: $(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cmli.lo `test -f '$(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx
 
+mli_febase.o: $(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_febase.o `test -f '$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx
+
+mli_febase.obj: $(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_febase.obj `if test -f '$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx'; then $(CYGPATH_W) '$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx'; fi`
+
+mli_febase.lo: $(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_febase.lo `test -f '$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx
+
 mli_fedata.o: $(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_fedata.o `test -f '$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx
 
@@ -7050,6 +7071,15 @@ mli_solver_chebyshev.obj: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev
 
 mli_solver_chebyshev.lo: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_chebyshev.lo `test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx
+
+mli_solver_gmres.o: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_gmres.o `test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx
+
+mli_solver_gmres.obj: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_gmres.obj `if test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx'; then $(CYGPATH_W) '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx'; fi`
+
+mli_solver_gmres.lo: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_gmres.lo `test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx
 
 mli_solver_gs.o: $(top_srcdir)/FEI_mv/femli/solver/mli_solver_gs.cxx
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mli_solver_gs.o `test -f '$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gs.cxx' || echo '$(srcdir)/'`$(top_srcdir)/FEI_mv/femli/solver/mli_solver_gs.cxx

@@ -219,6 +219,7 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/base/mli.cxx\
  $(top_srcdir)/FEI_mv/femli/base/mli_oneLevel.cxx\
  $(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx\
+ $(top_srcdir)/FEI_mv/femli/fedata/mli_febase.cxx\
  $(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.cxx\
  $(top_srcdir)/FEI_mv/femli/fedata/mli_fedata_utils.cxx\
  $(top_srcdir)/FEI_mv/femli/fedata/mli_sfei.cxx\
@@ -232,6 +233,7 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_bsgs.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_cg.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_chebyshev.cxx\
+ $(top_srcdir)/FEI_mv/femli/solver/mli_solver_gmres.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_gs.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_hschwarz.cxx\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_hsgs.cxx\
