@@ -71,6 +71,7 @@ main( int   argc,
    array1int intvals_hi;
    array1double doubvals;
    array1int num_ghost;
+   array1int periodic_arr;
 
 /*    HYPRE_StructMatrix  A; */
 /*    HYPRE_StructVector  b; */
@@ -501,9 +502,12 @@ main( int   argc,
    {
       Hypre_StructuredGrid_SetGridExtents( grid, box[ib] );
    }
-/* *** not implemented! ...
-   Hypre_StructuredGrid_SetParameter( grid, "periodic", periodic );
-   **** */
+
+   periodic_arr.lower[0] = 0;
+   periodic_arr.upper[0] = dim;
+   periodic_arr.data = periodic;
+   Hypre_StructuredGrid_SetIntArrayParameter( grid, "periodic", periodic_arr );
+
    Hypre_StructuredGrid_Setup( grid );
 
 /*    HYPRE_StructGridCreate(MPI_COMM_WORLD, dim, &grid); */
@@ -638,7 +642,7 @@ main( int   argc,
       }
    }
 
-   Hypre_StructMatrix_Setup(  A, grid, stencil, symmetric );
+   Hypre_StructMatrix_Setup(  A );
 #if 1
    Hypre_StructMatrix_print( A );
 /*   HYPRE_StructMatrixPrint("driver.out.A", A, 0); */
@@ -687,7 +691,7 @@ main( int   argc,
 /*       HYPRE_StructVectorSetBoxValues(b, ilower[ib], iupper[ib], values); */
    }
 /*   HYPRE_StructVectorAssemble(b); */
-   Hypre_StructVector_Setup( b, grid );
+   Hypre_StructVector_Setup( b );
 #if 0
    Hypre_StructVector_Print( b );
 /*   HYPRE_StructVectorPrint("driver.out.b", b, 0); */
@@ -707,7 +711,7 @@ main( int   argc,
 /*       HYPRE_StructVectorSetBoxValues(x, ilower[ib], iupper[ib], values); */
    }
 /*   HYPRE_StructVectorAssemble(x); */
-   Hypre_StructVector_Setup( x, grid );
+   Hypre_StructVector_Setup( x );
 #if 0
    Hypre_StructVector_Print( x );
 /*   HYPRE_StructVectorPrint("driver.out.x0", x, 0); */
