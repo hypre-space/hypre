@@ -77,7 +77,6 @@ AC_ARG_WITH(MPI,
    [  --without-MPI           do not use MPI],
    if test "$withval" = "no"; then
       casc_using_mpi=no
-      MEMORYEXTRAFILES="$MEMORYEXTRAFILES mpistubs.c"
       HYPREDEFS="$HYPREDEFS -DHYPRE_SEQUENTIAL"
    else
       casc_using_mpi=yes
@@ -88,7 +87,6 @@ if test "$casc_using_mpi" = "yes"; then
    CASC_FIND_MPI
    if test -z "$MPIINCLUDE"; then
       AC_MSG_WARN(configuring to not use MPI)
-      MEMORYEXTRAFILES="$MEMORYEXTRAFILES mpistubs.c"
       HYPREDEFS="$HYPREDEFS -DHYPRE_SEQUENTIAL"
    else
       TIMERDEFS="$TIMERDEFS -DTIMER_USE_MPI"
@@ -111,7 +109,7 @@ if test "$OPTCHOICE" = "g"; then
                                    /home/casc/include,
          CASC_ADD_LIB(dmalloc, malloc, /home/casc/lib /usr/local/lib, LD,
             HYPREDEFS="$HYPREDEFS -DHYPRE_MEMORY_DMALLOC"
-            MEMORYEXTRAFILES="$MEMORYEXTRAFILES memory_dmalloc.c"
+            UTILITIESEXTRAFILES="$UTILITIESEXTRAFILES memory_dmalloc.c"
          )
       )
    fi
@@ -148,7 +146,7 @@ AC_SUBST(TIMERDEFS)
 AC_SUBST(LDLIBS)
 AC_SUBST(LDLIBDIRS)
 AC_SUBST(ARCH)
-AC_SUBST(MEMORYEXTRAFILES)
+AC_SUBST(UTILITIESEXTRAFILES)
 
 dnl *********************************************************************
 dnl * DIRECTING THE OUTPUT

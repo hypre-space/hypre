@@ -16,12 +16,10 @@ INTERNAL_HEADER=hypre_utilities.h
 
 cat > $INTERNAL_HEADER <<@
 
+#include "HYPRE_utilities.h"
+
 #ifndef hypre_UTILITIES_HEADER
 #define hypre_UTILITIES_HEADER
-
-#ifndef HYPRE_SEQUENTIAL
-#include "mpi.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,9 +33,7 @@ extern "C" {
 
 cat general.h                  >> $INTERNAL_HEADER
 
-echo "#ifdef HYPRE_SEQUENTIAL" >> $INTERNAL_HEADER
 cat mpistubs.h                 >> $INTERNAL_HEADER
-echo "#endif"                  >> $INTERNAL_HEADER
 
 cat memory.h                   >> $INTERNAL_HEADER
 		          

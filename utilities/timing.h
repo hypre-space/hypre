@@ -19,9 +19,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#ifndef HYPRE_SEQUENTIAL
-#include "mpi.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {

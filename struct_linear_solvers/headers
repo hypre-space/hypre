@@ -16,13 +16,13 @@ INTERNAL_HEADER=hypre_ls.h
 
 cat > $INTERNAL_HEADER <<@
 
+#include "HYPRE_ls.h"
+
 #ifndef hypre_LS_HEADER
 #define hypre_LS_HEADER
 
-#ifndef HYPRE_SEQUENTIAL
-#include "mpi.h"
-#endif
-#include "HYPRE_ls.h"
+#include "hypre_utilities.h"
+#include "hypre_mv.h"
 
 #ifdef __cplusplus
 extern "C" {

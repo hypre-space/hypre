@@ -22,10 +22,12 @@ CDEBUG = @CDEBUG@
 CDEFS = @HYPREDEFS@ -DHYPRE_TIMING
  
 CFLAGS = \
-   ${CINCLUDES} \
-   ${COPT} \
-   ${CDEBUG} \
-   ${CDEFS}
+ -I../utilities\
+ -I../struct_matrix_vector\
+ ${CINCLUDES}\
+ ${COPT}\
+ ${CDEBUG}\
+ ${CDEFS}
 
 RANLIB = @RANLIB@
  

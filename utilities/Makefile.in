@@ -28,78 +28,49 @@ CFLAGS =\
 
 RANLIB = @RANLIB@
 
-MEMORY_EXTRA_FILES = @MEMORYEXTRAFILES@
-
+UTILITIES_EXTRA_FILES = @UTILITIESEXTRAFILES@
 
 ##################################################################
 # Targets
 ##################################################################
 
-all: libHYPRE_utilities.a libHYPRE_memory.a libHYPRE_timing.a
+all: libHYPRE_utilities.a
 
 install: all
-	@cp -f hypre_*.h $$HYPRE_INSTALL_DIR/include
+	@cp -f HYPRE_*.h hypre_*.h $$HYPRE_INSTALL_DIR/include
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib
 
 clean:
 	@rm -f *.o
 
 veryclean: clean
-	@rm -f libHYPRE_utilities.a
-	@rm -f libHYPRE_timing.a
-	@rm -f libHYPRE_memory.a
-
-##################################################################
-# Memory rules
-##################################################################
-
-MEMORY_HEADERS =\
- memory.h
-
-MEMORY_FILES =\
- memory.c\
- ${MEMORY_EXTRA_FILES}
-
-MEMORY_OBJS = ${MEMORY_FILES:.c=.o}
-
-libHYPRE_memory.a: ${MEMORY_OBJS}
-	@echo  "Building $@ ... "
-	ar -ru $@ ${MEMORY_OBJS}
-	${RANLIB} $@
-
-${MEMORY_OBJS}: ${MEMORY_HEADERS}
-
-##################################################################
-# Timing rules
-##################################################################
-
-TIMING_HEADERS =\
- timing.h
-
-TIMING_FILES =\
- timer.c\
- timing.c
-
-TIMING_OBJS = ${TIMING_FILES:.c=.o}
-
-libHYPRE_timing.a: ${TIMING_OBJS}
-	@echo  "Building $@ ... "
-	ar -ru $@ ${TIMING_OBJS}
-	${RANLIB} $@
-
-${TIMING_OBJS}: ${TIMING_HEADERS}
+	@rm -f libHYPRE_*.a
 
 ##################################################################
 # Utilities rules
 ##################################################################
  
-UTILITIES_OBJS = ${MEMORY_OBJS} ${TIMING_OBJS}
+UTILITIES_HEADERS =\
+ memory.h\
+ mpistubs.h\
+ timing.h
+
+UTILITIES_FILES =\
+ memory.c\
+ mpistubs.c\
+ timer.c\
+ timing.c\
+ @UTILITIESEXTRAFILES@
+
+UTILITIES_OBJS = ${UTILITIES_FILES:.c=.o}
  
 libHYPRE_utilities.a: ${UTILITIES_OBJS}
 	@echo  "Building $@ ... "
 	ar -ru $@ ${UTILITIES_OBJS}
 	ranlib $@
  
+${UTILITIES_OBJS}: ${UTILITIES_HEADERS}
+
 ##################################################################
 # Generic rules
 ##################################################################

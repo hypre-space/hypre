@@ -11,7 +11,5 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "../utilities/hypre_utilities.h"
-#include "../struct_matrix_vector/hypre_mv.h"
 #include "hypre_ls.h"
 

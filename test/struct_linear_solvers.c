@@ -3,9 +3,8 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "../utilities/hypre_utilities.h"
-#include "../struct_matrix_vector/HYPRE_mv.h"
-#include "../struct_linear_solvers/HYPRE_ls.h"
+#include "hypre_utilities.h"
+#include "HYPRE_ls.h"
  
 #ifdef HYPRE_DEBUG
 #include <cegdb.h>

@@ -11,7 +11,4 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "../utilities/hypre_utilities.h"
 #include "hypre_mv.h"
-
-

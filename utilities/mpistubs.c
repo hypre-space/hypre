@@ -12,13 +12,15 @@
  *
  *****************************************************************************/
 
-#include "mpistubs.h"
+#ifdef HYPRE_SEQUENTIAL
+
+#include "hypre_utilities.h"
 
 int
 MPI_Init( int    *argc,
           char ***argv)
 {
-   return(NO_MPI);
+   return(0);
 }
 
 double
@@ -306,3 +308,5 @@ MPI_Type_commit( MPI_Datatype *datatype )
 {
    return(0);
 }
+
+#endif

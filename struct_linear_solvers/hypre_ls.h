@@ -1,11 +1,11 @@
 
+#include "HYPRE_ls.h"
+
 #ifndef hypre_LS_HEADER
 #define hypre_LS_HEADER
 
-#ifndef HYPRE_SEQUENTIAL
-#include "mpi.h"
-#endif
-#include "HYPRE_ls.h"
+#include "hypre_utilities.h"
+#include "hypre_mv.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,21 +58,6 @@ int hypre_CyclicReductionSetup P((void *cyc_red_vdata , hypre_StructMatrix *A , 
 int hypre_CyclicReduction P((void *cyc_red_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x ));
 int hypre_CyclicReductionSetBase P((void *cyc_red_vdata , hypre_Index base_index , hypre_Index base_stride ));
 int hypre_CyclicReductionFinalize P((void *cyc_red_vdata ));
-
-/* driver.c */
-int main P((int argc , char *argv []));
-
-/* driver_internal.c */
-int main P((int argc , char *argv []));
-
-/* driver_internal_cgsmg.c */
-int main P((int argc , char *argv []));
-
-/* driver_internal_const_coef.c */
-int main P((int argc , char *argv []));
-
-/* driver_internal_overlap.c */
-int main P((int argc , char *argv []));
 
 /* general.c */
 int hypre_Log2 P((int p ));
