@@ -284,8 +284,6 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
       {
          data_offsets[i] = data_offset;
          data_box = hypre_BoxArrayBox(recv_data_space, i);
-         data_offsets[i] = data_offset;
-         data_box = hypre_BoxArrayBox(send_data_space, i);
          if ( constant_coefficient==0 )
          {
             data_offset += hypre_BoxVolume(data_box) * num_values;
