@@ -20,6 +20,7 @@ CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS = @TIMERDEFS@ -DHYPRE_TIMING
 
 CFLAGS =\
+   -I..\
    -I$(srcdir)/..\
    -I$(srcdir)\
    ${C_COMPILE_FLAGS}\
