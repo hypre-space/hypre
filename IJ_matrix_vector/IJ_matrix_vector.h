@@ -308,8 +308,8 @@ int HYPRE_AddToIJVectorLocalComponentsInBlock P((HYPRE_IJVector IJvector , int g
 int HYPRE_GetIJVectorLocalComponents P((HYPRE_IJVector IJvector , int num_values , int *glob_vec_indices , int *value_indices , double *values ));
 int HYPRE_GetIJVectorLocalComponentsInBlock P((HYPRE_IJVector IJvector , int glob_vec_index_start , int glob_vec_index_stop , int *value_indices , double *values ));
 int HYPRE_GetIJVectorLocalStorageType P((HYPRE_IJVector IJvector , int *type ));
+void *HYPRE_GetIJVectorLocalStorage P((HYPRE_IJVector IJvector ));
 int hypre_RefIJVector P((HYPRE_IJVector IJvector , HYPRE_IJVector *reference ));
-void *hypre_GetIJVectorLocalStorage P((HYPRE_IJVector IJvector ));
 
 /* IJMatrix_isis.c */
 int hypre_GetIJMatrixParCSRMatrix P((HYPRE_IJMatrix IJmatrix , HYPRE_ParCSRMatrix *reference ));
