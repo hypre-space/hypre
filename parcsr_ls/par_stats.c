@@ -492,11 +492,11 @@ void    *data;
       printf( "  Stopping Tolerance:               %e \n",tol); 
       printf( "  Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
       printf( "  Relaxation Parameters:\n");
-      printf( "   Visiting Grid:            fine  down   up  coarse\n");
-      printf( "   Number of partial sweeps:%4d  %4d   %2d  %4d \n",
+      printf( "   Visiting Grid:                     fine  down   up  coarse\n");
+      printf( "            Number of partial sweeps:%4d  %4d   %2d  %4d \n",
               num_grid_sweeps[0],num_grid_sweeps[2],
               num_grid_sweeps[2],num_grid_sweeps[3]);
-      printf( "   Type 0=Jac, 1=GS, 9=GE:  %4d  %4d   %2d  %4d \n",
+      printf( "   Type 0=Jac, 1=GS, 3=Hybrid 9=GE:  %4d  %4d   %2d  %4d \n",
               grid_relax_type[0],grid_relax_type[2],
               grid_relax_type[2],grid_relax_type[3]);
       printf( "   Point types, partial sweeps (1=C, -1=F):\n");
@@ -516,8 +516,12 @@ void    *data;
       for (j = 0; j < num_grid_sweeps[3]; j++)
               printf("  %2d", grid_relax_points[3][j]);
       printf( "\n\n");
-      for (j=0; j < num_levels; j++)
-      printf( "  Relaxation Weight (Jacobi) %f level %d\n",relax_weight[j],j);
+      if(grid_relax_type[0] == 0 || grid_relax_type[1] == 0 ||
+         grid_relax_type[2] == 0 || grid_relax_type[3] == 0)
+      {
+         for (j=0; j < num_levels; j++)
+         printf( "  Relaxation Weight (Jacobi) %f level %d\n",relax_weight[j],j);
+      }
 
       printf( " Output flag (ioutdat): %d \n", amg_ioutdat);
    }
