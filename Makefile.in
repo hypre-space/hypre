@@ -729,7 +729,7 @@ test-local:
 tests:
 	@ \
 	$(MAKE) $(AM_MAKEFLAGS) install; \
-	(cd test && $(MAKE) $(AM_MAKEFLAGS) all)
+	(cd test && $(MAKE) $(AM_MAKEFLAGS) install)
 
 docs: dvi ps pdf html
 
