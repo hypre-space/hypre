@@ -134,7 +134,7 @@ extern "C" {
  * Types, etc.
  *--------------------------------------------------------------------------*/
 
-/* typedef struct {int dummy;}  hypre_MPI_Comm;*/
+typedef struct {int dummy;}  hypre_MPI_Comm;
 
 typedef struct { int MPI_SOURCE; } hypre_MPI_Status;
 typedef int  hypre_MPI_Request;
@@ -205,7 +205,7 @@ int MPI_Type_commit P((MPI_Datatype *datatype ));
 int MPI_Request_free P((MPI_Request *request ));
 int MPI_Send_init P((void *buf , int count , MPI_Datatype datatype , int dest , int tag , MPI_Comm comm , MPI_Request *request ));
 int MPI_Recv_init P((void *buf , int count , MPI_Datatype datatype , int dest , int tag , MPI_Comm comm , MPI_Request *request ));
-int MPI_Startall P((int count , MPI_Request *array_of_requests ));
+int MPI_Startall P((int int , MPI_Request *request ));
 int MPI_Iprobe P((int source , int tag , MPI_Comm comm , int *flag , MPI_Status *status ));
 int MPI_Probe P((int source , int tag , MPI_Comm comm , MPI_Status *status ));
 int MPI_Irsend P((void *buf , int count , MPI_Datatype datatype , int dest , int tag , MPI_Comm comm , MPI_Request *request ));
@@ -345,13 +345,11 @@ double *hypre_IncrementSharedDataPtr P((double *ptr , int size ));
 #endif
 
 #endif
-# define	P(s) s
 
 /* random.c */
-void hypre_SeedRand P((int seed ));
-double hypre_Rand P((void ));
+void hypre_SeedRand( int seed );
+double hypre_Rand( void );
 
-#undef P
 /*BHEADER**********************************************************************
  * (c) 1998   The Regents of the University of California
  *
@@ -460,11 +458,12 @@ int hypre_thread_MPI_Type_commit P((MPI_Datatype *datatype ));
 #ifndef hypre_THREADING_HEADER
 #define hypre_THREADING_HEADER
 
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP)
 #define hypre_NumThreads 4
-#endif
-#ifdef HYPRE_USING_PGCC_SMP
+#elif defined(HYPRE_USING_PGCC_SMP)
 #define hypre_NumThreads 2
+#else
+#define hypre_NumThreads 1
 #endif
 
 #ifdef HYPRE_USE_PTHREADS
@@ -705,21 +704,17 @@ typedef hypre_ListElement  *hypre_LinkList;
 #endif
 
 #endif
-# define	P(s) s
 
 /* amg_linklist.c */
-void dispose_elt P((hypre_LinkList element_ptr ));
-void remove_point P((hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where ));
-hypre_LinkList create_elt P((int Item ));
-void enter_on_lists P((hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where ));
+void dispose_elt( hypre_LinkList element_ptr );
+void remove_point( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where );
+hypre_LinkList create_elt( int Item );
+void enter_on_lists( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where );
 
-#undef P
-# define	P(s) s
 
 /* binsearch.c */
-int hypre_BinarySearch P((int *list , int value , int list_length ));
+int hypre_BinarySearch( int *list , int value , int list_length );
 
-#undef P
 
 #ifdef __cplusplus
 }

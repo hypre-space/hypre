@@ -10,11 +10,12 @@
 #ifndef hypre_THREADING_HEADER
 #define hypre_THREADING_HEADER
 
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP)
 #define hypre_NumThreads 4
-#endif
-#ifdef HYPRE_USING_PGCC_SMP
+#elif defined(HYPRE_USING_PGCC_SMP)
 #define hypre_NumThreads 2
+#else
+#define hypre_NumThreads 1
 #endif
 
 #ifdef HYPRE_USE_PTHREADS
