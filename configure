@@ -8190,7 +8190,6 @@ CC="$PREPEND $CC"
  distributed_linear_solvers/ParaSAILS\
  distributed_matrix\
  matrix_matrix\
- bmakes\
  test\
  tools\
  docs; do
