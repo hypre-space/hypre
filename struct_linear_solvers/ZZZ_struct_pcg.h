@@ -18,7 +18,6 @@ typedef struct
 {
   void             *pc_data;
   zzz_StructMatrix *A;
-
 } ZZZ_PCGPrecondData;
 
 /*--------------------------------------------------------------------------
