@@ -131,6 +131,53 @@ zzz_SMGGetNumIterations( void *smg_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * zzz_SMGSetLogging
+ *--------------------------------------------------------------------------*/
+
+int
+zzz_SMGSetLogging( void *smg_vdata,
+		   int   logging)
+{
+   zzz_SMGData *smg_data = smg_vdata;
+   int          ierr = 0;
+ 
+   (smg_data -> logging) = logging;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * zzz_SMGPrintLogging
+ *--------------------------------------------------------------------------*/
+
+int
+zzz_SMGPrintLogging( void *smg_vdata,
+                      int  myid)
+{
+   zzz_SMGData *smg_data = smg_vdata;
+   int          ierr = 0;
+   int          i;
+   int          num_iterations  = (smg_data -> num_iterations);
+   int          logging   = (smg_data -> logging);
+   double      *norms     = (smg_data -> norms);
+   double      *rel_norms = (smg_data -> rel_norms);
+
+   
+   if (myid == 0)
+     {
+       if (logging > 0)
+	 {
+	   for (i = 0; i < num_iterations; i++)
+	     {
+	       printf("Residual norm[%d] = %e   ",i,norms[i]);
+	       printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
+	     }
+	 }
+     }
+  
+   return ierr;
+}
+/*--------------------------------------------------------------------------
  * zzz_SMGFinalize
  *--------------------------------------------------------------------------*/
 
