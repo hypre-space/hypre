@@ -107,11 +107,11 @@ parse_arguments () {
   do
     argcur=$arg
     case $arg in
-      a) confbuildtest $OPTARG  " "             "default"   1 1 1 1 1 1 1;;
+      a) confbuildtest $OPTARG  " "             "default"   0 0 0 0 1 1 1;;
       c) build $Build "all++"   "all++"         "test";;
       D) DEBUG_MODE="yes";;
       d) build $Build "all"     "docs"          "docs";;
-      e) confbuildtest $OPTARG  "--enable-debug" "debug"    1 1 1 1 1 1 1;;
+      e) confbuildtest $OPTARG  "--enable-debug" "debug"    0 0 0 0 1 1 1;;
       f) build $Build "all77"   "all77"         "test";;
       h) usage; exit 2;;
       i) confbuildtest 1        "--enable-debug" "debug"    0 0 0 0 1 0 1
@@ -120,14 +120,14 @@ parse_arguments () {
                                                 "insure"    0 0 0 0 1 0 1;;
       m) HYPRE_SEND_MAIL="no"; MailOpt=""; MailCmd="yes";;
      +m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail"; MailCmd="yes";;
-      n) confbuildtest $Build   "--without-MPI" "no_mpi"    1 0 1 1 1 1 0;;
-      o) confbuildtest $OPTARG  "--with-openmp" "openmp"    1 1 1 1 1 1 1;;
+      n) confbuildtest $Build   "--without-MPI" "no_mpi"    0 0 0 0 1 1 0;;
+      o) confbuildtest $OPTARG  "--with-openmp" "openmp"    0 0 0 0 1 1 1;;
       q) confbuildtest $OPTARG  "--with-purify-to-file" \
                                                 "purify"    0 0 0 0 1 0 1;;
      +q) confbuildtest $OPTARG  "--with-purify" "purify"    0 0 0 0 1 0 1;;
       r) HYPRE_RUN_MACHINE=$OPTARG;;
       s) confbuildtest $Build   "--with-strict-checking" \
-                                         "strict_checking"  1 1 1 1 1 1 0;;
+                                         "strict_checking"  0 0 0 0 1 1 0;;
       v) HYPRE_MESSAGE=$OPTARG;;
       :) echo "$0: \"$argcur\" requires a value"; exit 2;;
      \?) echo "$0: INVALID option \"$argcur\" at $OPTIND"; exit 2;;
