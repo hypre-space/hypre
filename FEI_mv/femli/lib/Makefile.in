@@ -12,18 +12,55 @@
 
 RANLIB = @RANLIB@
 
-OBJS = mli.o                mli_oneLevel.o          cmli.o \
-       mli_matrix.o         mli_matrix_utils.o      mli_vector.o \
-       mli_fedata.o         mli_fedata_utils.o      mli_utils.o \
-       mli_solver.o         mli_solver_jacobi.o     mli_solver_gs.o \
-       mli_solver_sgs.o     mli_solver_parasails.o  mli_solver_bsgs.o \
-       mli_solver_mls.o     mli_solver_superlu.o    mli_method.o \
-       mli_method_amgrs.o   mli_method_amgsa.o      mli_amgsa_coarsen1.o \
-       mli_amgsa_calib.o    mli_utils_fortran.o     mli_mapper.o \
-       mli_solver_cg.o      mli_solver_chebyshev.o  mli_amgsa_substructure.o \
-       mli_solver_bjacobi.o mli_solver_seqsuperlu.o mli_solver_arpacksuperlu.o \
-       mli_matrix_mult.o    mli_solver_kaczmarz.o   mli_solver_hsgs.o \
-       mli_solver_hschwarz.o
+#OBJS = mli.o                mli_oneLevel.o          cmli.o \
+#       mli_matrix.o         mli_matrix_utils.o      mli_vector.o \
+#       mli_fedata.o         mli_fedata_utils.o      mli_utils.o \
+#       mli_solver.o         mli_solver_jacobi.o     mli_solver_gs.o \
+#       mli_solver_sgs.o     mli_solver_parasails.o  mli_solver_bsgs.o \
+#       mli_solver_mls.o     mli_solver_superlu.o    mli_method.o \
+#       mli_method_amgrs.o   mli_method_amgsa.o      mli_amgsa_coarsen1.o \
+#       mli_amgsa_calib.o    mli_utils_fortran.o     mli_mapper.o \
+#       mli_solver_cg.o      mli_solver_chebyshev.o  mli_amgsa_substructure.o \
+#       mli_solver_bjacobi.o mli_solver_seqsuperlu.o mli_solver_arpacksuperlu.o \
+#       mli_matrix_mult.o    mli_solver_kaczmarz.o   mli_solver_hsgs.o \
+#       mli_solver_hschwarz.o
+FILES = \
+ $(srcdir)/../util/mli_utils.c\
+ $(srcdir)/../amgs/mli_method.cxx\
+ $(srcdir)/../amgs/mli_method_amgrs.cxx\
+ $(srcdir)/../amgs/mli_method_amgsa.cxx\
+ $(srcdir)/../amgs/mli_amgsa_coarsen1.cxx\
+ $(srcdir)/../amgs/mli_amgsa_calib.cxx\
+ $(srcdir)/../amgs/mli_amgsa_substructure.cxx\
+ $(srcdir)/../base/mli.cxx\
+ $(srcdir)/../base/mli_oneLevel.cxx\
+ $(srcdir)/../cintface/cmli.cxx\
+ $(srcdir)/../fedata/mli_fedata.cxx\
+ $(srcdir)/../fedata/mli_fedata_utils.cxx\
+ $(srcdir)/../mapper/mli_mapper.cxx\
+ $(srcdir)/../matrix/mli_matrix.cxx\
+ $(srcdir)/../matrix/mli_matrix_mult.cxx\
+ $(srcdir)/../matrix/mli_matrix_utils.cxx\
+ $(srcdir)/../solver/mli_solver.cxx\
+ $(srcdir)/../solver/mli_solver_jacobi.cxx\
+ $(srcdir)/../solver/mli_solver_bjacobi.cxx\
+ $(srcdir)/../solver/mli_solver_gs.cxx\
+ $(srcdir)/../solver/mli_solver_sgs.cxx\
+ $(srcdir)/../solver/mli_solver_bsgs.cxx\
+ $(srcdir)/../solver/mli_solver_hsgs.cxx\
+ $(srcdir)/../solver/mli_solver_hschwarz.cxx\
+ $(srcdir)/../solver/mli_solver_parasails.cxx\
+ $(srcdir)/../solver/mli_solver_mls.cxx\
+ $(srcdir)/../solver/mli_solver_chebyshev.cxx\
+ $(srcdir)/../solver/mli_solver_cg.cxx\
+ $(srcdir)/../solver/mli_solver_kaczmarz.cxx\
+ $(srcdir)/../solver/mli_solver_superlu.cxx\
+ $(srcdir)/../solver/mli_solver_seqsuperlu.cxx\
+ $(srcdir)/../solver/mli_solver_arpacksuperlu.cxx\
+ $(srcdir)/../vector/mli_vector.cxx\
+ $(srcdir)/../util/mli_utils_fortran.f
+
+OBJS = ${FILESS:.c=.o}
 
 ##################################################################
 # Targets

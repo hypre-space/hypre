@@ -24,6 +24,7 @@ CXXDEFS = -DMPICH_SKIP_MPICXX
  
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
+ -I../../..\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../..\
@@ -37,6 +38,7 @@ CFLAGS =\
  
 CXXFLAGS =\
  ${CXX_COMPILE_FLAGS}\
+ -I../../..\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../..\
@@ -89,7 +91,7 @@ driver: ${DRIVER_OBJS} ../lib/libHYPRE_mli.a
 	${CXX} -o driver $@.o ${OBJS} ${LFLAGS}
 
 install: all
-	@cp -f *.o ../lib
+##	@cp -f *.o ../lib
 #@cp -f $(srcdir)/*.h $$HYPRE_INSTALL_DIR/include/.
  
 clean:

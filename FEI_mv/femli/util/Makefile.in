@@ -28,6 +28,7 @@ F77DEFS =
 
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
+ -I../../..\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../..\
@@ -41,6 +42,8 @@ CFLAGS =\
  
 CXXFLAGS =\
  ${CXX_COMPILE_FLAGS}\
+ -I../../..\
+ -I$(srcdir)\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../..\
@@ -74,7 +77,7 @@ OBJS = ${TEMP:.f=.o}
 all: ${OBJS} 
  
 install: all
-	@cp -f *.o ../lib
+##	@cp -f *.o ../lib
 #@cp -f $(srcdir)/*.h $$HYPRE_INSTALL_DIR/include/.
  
 clean:
