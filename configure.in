@@ -24,6 +24,11 @@ AC_ARG_WITH(CC,
    CC=$withval,
    [AC_PROG_CC])
 
+AC_ARG_WITH(CXX,
+   [  --with-CXX=ARG          manually set C++ compiler to ARG],
+   CXX=$withval,
+   [AC_PROG_CXX])
+
 dnl * Next line will usually give you $CC -E.  Should be called
 dnl * before calling AC_CHECK_HEADER or CASC_CHECK_HEADER.
 AC_PROG_CPP
