@@ -991,6 +991,7 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
    counter = 0;
    AT_offd_j = NULL;
    AT_offd_data = NULL;
+   col_map_offd_AT = NULL;
  
    /*---------------------------------------------------------------------
     * If there exists no CommPkg for A, a CommPkg is generated using
@@ -1094,9 +1095,17 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
       hypre_TFree(tmp_comm_pkg);
       hypre_CSRMatrixDestroy(AT_tmp);
 
-      AT_offd_j = hypre_CTAlloc(int, AT_offd_i[num_cols]);
-      if (data) AT_offd_data = hypre_CTAlloc(double, AT_offd_i[num_cols]);
-
+      if (AT_offd_i[num_cols])
+      {
+         AT_offd_j = hypre_CTAlloc(int, AT_offd_i[num_cols]);
+         if (data) AT_offd_data = hypre_CTAlloc(double, AT_offd_i[num_cols]);
+      }
+      else
+      {
+         AT_offd_j = NULL;
+         AT_offd_data = NULL;
+      }
+	 
       counter = 0;
       for (i=0; i < num_sends; i++)
       {
