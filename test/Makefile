@@ -24,7 +24,7 @@ C_COMPILE_FLAGS = \
 CXX_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
- -I$(srcdir)/../fei-base\
+ -I$(srcdir)/../FEI_mv/fei-base\
  -I${HYPRE_BUILD_DIR}/include\
  ${CINCLUDES}\
  ${CXXDEFS}
