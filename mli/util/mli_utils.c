@@ -237,7 +237,6 @@ int MLI_Utils_ComputeSpectralRadius(hypre_ParCSRMatrix *Amat, double *max_eigen)
    ierr += HYPRE_IJVectorGetObject(IJvec2, (void **) &vec2);
    assert(!ierr);
    HYPRE_ParVectorSetRandomValues( vec1, 2934731 );
-   HYPRE_ParVectorSetConstantValues( vec1, 1.0 );
    HYPRE_ParCSRMatrixMatvec(1.0,(HYPRE_ParCSRMatrix) Amat,vec1,0.0,vec2 );
    HYPRE_ParVectorInnerProd( vec2, vec2, &norm2);
    for ( it = 0; it < maxits; it++ )
@@ -747,11 +746,14 @@ int MLI_Utils_DoubleVectorRead(char *filename, MPI_Comm mpi_comm,
          {
             fscanf( fp, "%ld", &k );
             fscanf( fp, "%lg", &value );
+            fscanf( fp, "%ld", &k );
          } 
          for ( irow = start; irow < start+length; irow++ )
          {
             fscanf( fp, "%ld", &k );
+            if ( irow != k ) printf("VectorRead Warning : index mismatch.\n");
             fscanf( fp, "%lg", &value );
+            fscanf( fp, "%ld", &k );
             vec[irow-start] = value;
          }
          fclose( fp );
