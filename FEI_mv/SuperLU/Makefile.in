@@ -69,7 +69,7 @@ FILES =\
  dsp_blas3.c \
  dutil.c \
  get_perm_c.c \
- lsame.c \ 
+ lsame.c \
  memory.c \
  mmd.c \
  relax_snode.c \
