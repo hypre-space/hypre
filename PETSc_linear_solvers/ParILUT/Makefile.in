@@ -11,12 +11,13 @@
 .SUFFIXES:
 .SUFFIXES: .c .f .o
 
+
+
 #Headers
-HEADERS=\
- PETScMatPilutSolver.h
- 
-HYPREFILES =\
- HYPRE_PETScMatPilutSolver.c
+HEADERS =\
+ PETScSolverParILUT.h
+
+HYPREFILES = HYPRE_PETScSolverParILUT.c HYPRE_PETScSolverParILUTSetup.c
 
 LOCALFILES =
 
@@ -28,15 +29,13 @@ OBJS = ${FILES:.c=.o}
 ${OBJS}: ${HEADERS}
 
 #include site-specific information
-include ../../bmakes/base
-
-
+include ../../bmakes/Makefile
 
 ##################################################################
 # Main rules
 ##################################################################
 
-driver: driver.o libHYPREPETScMatPilutSolver.a
+driver: driver.o libHYPRE.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS}
 
@@ -46,8 +45,8 @@ link:
 
 lib: ${PROTOS} ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru libHYPREPETScMatPilutSolver.a ${OBJS}
-	@ranlib libHYPREPETScMatPilutSolver.a 
+	@ar -ru libHYPREPETScSolverParILUT.a ${OBJS}
+	@ranlib libHYPREPETScSolverParILUT.a 
 
 ##################################################################
 # Generic rules

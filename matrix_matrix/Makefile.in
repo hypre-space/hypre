@@ -7,30 +7,21 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-default: lib
 
 .SUFFIXES:
 .SUFFIXES: .c .f .o
 
-HEADERS =\
- struct_solver.h
+HEADERS =
  
-LOCALFILES =\
- struct_solver.c\
- struct_solver_PETSc.c
-
 HYPREFILES =\
- HYPRE_struct_solver.c
+ HYPRE_ConvertPETScMatrixToDistributedMatrix.c
 
 FILES = $(HYPREFILES) $(LOCALFILES)
 
 OBJS = ${FILES:.c=.o}
 
-
-${OBJS}: ${HEADERS}
-
 #include site-specific information
-include ../bmakes/base
+include ../bmakes/Makefile
 
 ##################################################################
 # Main rules
@@ -38,16 +29,8 @@ include ../bmakes/base
 
 lib: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru libHYPRE_CI_ls.a ${OBJS}
-	@ranlib libHYPRE_CI_ls.a
-
-driver: driver.o libHYPRE.a
-	@echo  "Linking" $@ "... "
-	${CC} -o driver driver.o ${LFLAGS}
-
-link:
-	rm driver
-	make driver
+	@ar -ru libHYPRE_MatrixMatrix.a ${OBJS}
+	@ranlib libHYPRE_MatrixMatrix.a
 
 ${OBJS}: ${HEADERS}
 

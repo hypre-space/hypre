@@ -11,26 +11,56 @@
 .SUFFIXES:
 .SUFFIXES: .c .f .o
 
-HEADERS =
+HEADERS =\
+ box.h\
+ struct_grid.h\
+ grid_to_coord.h\
+ headers.h\
+ struct_stencil.h\
+ struct_matrix.h\
+ struct_vector.h
  
+LOCALFILES =\
+ box.c\
+ struct_grid.c\
+ grid_to_coord.c\
+ struct_stencil.c\
+ struct_matrix.c\
+ struct_matrix_PETSc.c\
+ struct_vector.c\
+ struct_vector_PETSc.c
+
 HYPREFILES =\
- HYPRE_ConvertPETScMatrixToDistributedMatrix.c
+ HYPRE_struct_grid.c\
+ HYPRE_struct_stencil.c\
+ HYPRE_struct_matrix.c\
+ HYPRE_struct_vector.c
 
 FILES = $(HYPREFILES) $(LOCALFILES)
 
 OBJS = ${FILES:.c=.o}
 
-#include site-specific information
-include ../bmakes/base
+# Declarations for this installation site
+include ../bmakes/Makefile
 
 ##################################################################
 # Main rules
 ##################################################################
 
-lib: $(PROTOS) ${OBJS}
+lib: libHYPRE_CI_mv.a
+
+driver: driver.o lib
+	@echo  "Linking" $@ "... "
+	${LD} -o driver driver.o ${LFLAGS} 
+
+link:
+	rm driver
+	make driver
+
+libHYPRE_CI_mv.a: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru libHYPRE_MatrixMatrix.a ${OBJS}
-	@ranlib libHYPRE_MatrixMatrix.a
+	@ar -ru libHYPRE_CI_mv.a ${OBJS}
+	@ranlib libHYPRE_CI_mv.a
 
 ${OBJS}: ${HEADERS}
 

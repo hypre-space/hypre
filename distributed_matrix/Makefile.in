@@ -8,61 +8,51 @@
 #EHEADER***********************************************************************
 
 
-.SUFFIXES:
-.SUFFIXES: .c .f .o
+.SUFFIXES: .cc .c .f .o
 
+#Headers
 HEADERS =\
- box.h\
- struct_grid.h\
- grid_to_coord.h\
- headers.h\
- struct_stencil.h\
- struct_matrix.h\
- struct_vector.h
+ distributed_matrix.h
  
-LOCALFILES =\
- box.c\
- struct_grid.c\
- grid_to_coord.c\
- struct_stencil.c\
- struct_matrix.c\
- struct_matrix_PETSc.c\
- struct_vector.c\
- struct_vector_PETSc.c
-
 HYPREFILES =\
- HYPRE_struct_grid.c\
- HYPRE_struct_stencil.c\
- HYPRE_struct_matrix.c\
- HYPRE_struct_vector.c
+ HYPRE_distributed_matrix.c
+
+LOCALFILES =\
+ distributed_matrix.c\
+ distributed_matrix_PETSc.c\
+ distributed_matrix_ISIS.cc
 
 FILES = $(HYPREFILES) $(LOCALFILES)
 
-OBJS = ${FILES:.c=.o}
 
-# Declarations for this installation site
-include ../bmakes/base
+OBJS = HYPRE_distributed_matrix.o \
+ distributed_matrix.o\
+ distributed_matrix_PETSc.o\
+ distributed_matrix_ISIS.o
+
+${OBJS}: ${HEADERS}
+
+#include site-specific information
+include ../bmakes/Makefile
+
 
 ##################################################################
 # Main rules
 ##################################################################
 
-lib: libHYPRE_CI_mv.a
-
-driver: driver.o lib
+driver: driver.o libHYPRE.a
 	@echo  "Linking" $@ "... "
-	${LD} -o driver driver.o ${LFLAGS} 
+	${CC} -o driver driver.o ${LFLAGS}
 
 link:
 	rm driver
 	make driver
 
-libHYPRE_CI_mv.a: $(PROTOS) ${OBJS}
+lib: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru libHYPRE_CI_mv.a ${OBJS}
-	@ranlib libHYPRE_CI_mv.a
-
-${OBJS}: ${HEADERS}
+	@echo  "Building ${OBJS} ... "
+	@ar -ru libHYPREDistributedMatrix.a ${OBJS}
+	@ranlib libHYPREDistributedMatrix.a 
 
 ##################################################################
 # Generic rules

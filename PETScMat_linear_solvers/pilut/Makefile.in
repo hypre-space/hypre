@@ -8,39 +8,35 @@
 #EHEADER***********************************************************************
 
 
-.SUFFIXES: .cc .c .f .o
+.SUFFIXES:
+.SUFFIXES: .c .f .o
 
 #Headers
-HEADERS =\
- distributed_matrix.h
+HEADERS=\
+ PETScMatPilutSolver.h
  
 HYPREFILES =\
- HYPRE_distributed_matrix.c
+ HYPRE_PETScMatPilutSolver.c
 
-LOCALFILES =\
- distributed_matrix.c\
- distributed_matrix_PETSc.c\
- distributed_matrix_ISIS.cc
+LOCALFILES =
 
 FILES = $(HYPREFILES) $(LOCALFILES)
 
+OBJS = ${FILES:.c=.o}
 
-OBJS = HYPRE_distributed_matrix.o \
- distributed_matrix.o\
- distributed_matrix_PETSc.o\
- distributed_matrix_ISIS.o
 
 ${OBJS}: ${HEADERS}
 
 #include site-specific information
-include ../bmakes/base
+include ../../bmakes/Makefile
+
 
 
 ##################################################################
 # Main rules
 ##################################################################
 
-driver: driver.o libHYPRE.a
+driver: driver.o libHYPREPETScMatPilutSolver.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS}
 
@@ -48,11 +44,10 @@ link:
 	rm driver
 	make driver
 
-lib: $(PROTOS) ${OBJS}
+lib: ${PROTOS} ${OBJS}
 	@echo  "Building $@ ... "
-	@echo  "Building ${OBJS} ... "
-	@ar -ru libHYPREDistributedMatrix.a ${OBJS}
-	@ranlib libHYPREDistributedMatrix.a 
+	@ar -ru libHYPREPETScMatPilutSolver.a ${OBJS}
+	@ranlib libHYPREPETScMatPilutSolver.a 
 
 ##################################################################
 # Generic rules
@@ -71,10 +66,3 @@ lib: $(PROTOS) ${OBJS}
 ##################################################################
 # Miscellaneous rules
 ##################################################################
-
-veryclean: clean
-	@rm -f driver libHYPRE.a
-
-clean:
-	@rm -f *.o
-

@@ -50,7 +50,7 @@ OBJS = ${FILES:.c=.o}
 ${OBJS}: ${HEADERS}
 
 #include site-specific information
-include ../../bmakes/base
+include ../../bmakes/Makefile
 
 ##################################################################
 # Generic rules

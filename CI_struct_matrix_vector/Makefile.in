@@ -11,42 +11,58 @@
 .SUFFIXES:
 .SUFFIXES: .c .f .o
 
-
-
-#Headers
 HEADERS =\
- PETScSolverParILUT.h
+ box.h\
+ struct_grid.h\
+ grid_to_coord.h\
+ headers.h\
+ struct_stencil.h\
+ struct_matrix.h\
+ struct_vector.h
+ 
+LOCALFILES =\
+ box.c\
+ struct_grid.c\
+ grid_to_coord.c\
+ struct_stencil.c\
+ struct_matrix.c\
+ struct_matrix_PETSc.c\
+ struct_vector.c\
+ struct_vector_PETSc.c
 
-HYPREFILES = HYPRE_PETScSolverParILUT.c HYPRE_PETScSolverParILUTSetup.c
-
-LOCALFILES =
+HYPREFILES =\
+ HYPRE_struct_grid.c\
+ HYPRE_struct_stencil.c\
+ HYPRE_struct_matrix.c\
+ HYPRE_struct_vector.c
 
 FILES = $(HYPREFILES) $(LOCALFILES)
 
 OBJS = ${FILES:.c=.o}
 
-
-${OBJS}: ${HEADERS}
-
-#include site-specific information
-include ../../bmakes/base
+# Declarations for this installation site
+include ../bmakes/Makefile
 
 ##################################################################
 # Main rules
 ##################################################################
 
-driver: driver.o libHYPRE.a
+lib: libHYPRE_CI_mv.a
+
+driver: driver.o lib
 	@echo  "Linking" $@ "... "
-	${CC} -o driver driver.o ${LFLAGS}
+	${LD} -o driver driver.o ${LFLAGS} 
 
 link:
 	rm driver
 	make driver
 
-lib: ${PROTOS} ${OBJS}
+libHYPRE_CI_mv.a: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru libHYPREPETScSolverParILUT.a ${OBJS}
-	@ranlib libHYPREPETScSolverParILUT.a 
+	@ar -ru libHYPRE_CI_mv.a ${OBJS}
+	@ranlib libHYPRE_CI_mv.a
+
+${OBJS}: ${HEADERS}
 
 ##################################################################
 # Generic rules
@@ -65,3 +81,10 @@ lib: ${PROTOS} ${OBJS}
 ##################################################################
 # Miscellaneous rules
 ##################################################################
+
+veryclean: clean
+	@rm -f driver libHYPRE.a
+
+clean:
+	@rm -f *.o
+
