@@ -108,7 +108,7 @@ class MLI_FEData
 
 public :
 
-   MLI_FEData(int my_id);
+   MLI_FEData(MPI_Comm comm);
 
    ~MLI_FEData();
 
