@@ -21,7 +21,7 @@
 . ./autotest_arch.sh
 
 MPIRUN="./mpirun.$HYPRE_ARCH"
-DRIVER="IJ_linear_solvers"
+DRIVER="./IJ_linear_solvers"
 
 #=============================================================================
 # IJ_linear_solvers: Run default case, weigthed Jacobi, BoomerAMG
