@@ -9,7 +9,9 @@
 #undef max
 #endif
 
+/*
 #include <iostream.h>
+*/
 
 class Data;
 class Lookup;
@@ -179,8 +181,7 @@ class LinearSystemCore {
    */
    virtual int getProperty(const char* name, double& value)
      {
-       cerr << "LinearSystemCore::getProperty not implemented by derived class."
-	 << endl;
+       printf("LinearSystemCore::getProperty not implemented by derived class.\n");
        return(-1);
      }
 
