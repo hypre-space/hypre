@@ -446,7 +446,7 @@ zzz_SMGSetup( void             *smg_vdata,
       (smg_data -> rel_norms) = zzz_TAlloc(double, max_iter);
    }
 
-#if 1
+#if 0
 {
    char  filename[255];
 

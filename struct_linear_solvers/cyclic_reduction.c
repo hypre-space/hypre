@@ -651,7 +651,7 @@ zzz_CyclicReductionSetup( void             *cyc_red_vdata,
    zzz_FreeIndex(findex);
    zzz_FreeIndex(stride);
 
-#if 1
+#if 0
 {
    char  filename[255];
 

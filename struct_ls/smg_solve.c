@@ -135,7 +135,7 @@ zzz_SMGSolve( void             *smg_vdata,
             zzz_SMGResidual(residual_data_l[l], x_l[l], b_l[l], r_l[l]);
          }
          zzz_SMGRestrict(restrict_data_l[l], r_l[l], b_l[l+1]);
-#if 1
+#if 0
       /* for debugging purposes */
    {
       char  filename[255];
@@ -164,7 +164,7 @@ zzz_SMGSolve( void             *smg_vdata,
       for (l = (num_levels - 2); l >= 0; l--)
       {
          zzz_SMGIntAdd(intadd_data_l[l], x_l[l+1], e_l[l], x_l[l]);
-#if 1
+#if 0
       /* for debugging purposes */
    {
       char  filename[255];
