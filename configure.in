@@ -829,6 +829,7 @@ CASC_CONFIG_OUTPUT_LIST(\
  seq_linear_solvers/pamg\
  CI_struct_linear_solvers\
  CI_struct_matrix_vector\
+ structIJ_matrix_vector\
  FEI_matrix_vector/fei-hypre\
  FEI_matrix_vector/fei-isis/src\
  FEI_matrix_vector/isis-mv\
