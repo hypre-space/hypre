@@ -69,7 +69,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    int       fine_grid;
    int       Not_Finished;
    int       num_sweep;
-   int       cg_num_sweep;
+   int       cg_num_sweep = 1;
    int       relax_type;
    int       relax_points;
    double   *relax_weight;
@@ -216,6 +216,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       else if (max_levels > 1)
       {
         /* If no coarsening occurred, apply a simple smoother once */
+        Aux_U = U_array[level];
+        Aux_F = F_array[level];
         num_sweep = 1;
         relax_type = 0;
       }

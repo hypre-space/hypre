@@ -577,20 +577,22 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          not_finished_coarsening = 0;
       }
    } 
-   F_array[level] =
-   hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
+   if (level > 0)
+   {
+      F_array[level] =
+      hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
                          hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
                          hypre_ParCSRMatrixRowStarts(A_array[level]));
-   hypre_ParVectorInitialize(F_array[level]);
-   hypre_ParVectorSetPartitioningOwner(F_array[level],0);
+      hypre_ParVectorInitialize(F_array[level]);
+      hypre_ParVectorSetPartitioningOwner(F_array[level],0);
 
-   U_array[level] =
-   hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
+      U_array[level] =
+      hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
                          hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
                          hypre_ParCSRMatrixRowStarts(A_array[level]));
-   hypre_ParVectorInitialize(U_array[level]);
-   hypre_ParVectorSetPartitioningOwner(U_array[level],0);
-   
+      hypre_ParVectorInitialize(U_array[level]);
+      hypre_ParVectorSetPartitioningOwner(U_array[level],0);
+   }   
    /*-----------------------------------------------------------------------
     * enter all the stuff created, A[level], P[level], CF_marker[level],
     * for levels 1 through coarsest, into amg_data data structure
