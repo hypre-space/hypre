@@ -248,11 +248,11 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
     *-----------------------------------------------------------------*/
 
 // if ( (curr_level > 0 && P_weight != 0.0) 
-   if ( (curr_level >= 0 && P_weight != 0.0) 
-        || pre_smoother == MLI_SOLVER_MLS_ID ||
-        postsmoother == MLI_SOLVER_MLS_ID || init_aggr != NULL )
+   if ( (curr_level >= 0 && P_weight != 0.0) || 
+        !strcmp(pre_smoother, "mls") ||
+        !strcmp(postsmoother, "mls") || init_aggr != NULL )
    {
-      MLI_Utils_ComputeExtremeRitzValues(Amat, ritzValues, 0);
+      MLI_Utils_ComputeExtremeRitzValues(Amat, ritzValues, 1);
       max_eigen = ritzValues[0];
       if ( mypid == 0 && output_level > 1 )
          printf("\tEstimated spectral radius of A = %e\n", max_eigen);
@@ -549,7 +549,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
     *-----------------------------------------------------------------*/
 
    func_ptr = new MLI_Function();
-   MLI_Utils_HypreMatrixGetDestroyFunc(func_ptr);
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(func_ptr);
    sprintf(param_string, "HYPRE_ParCSR" ); 
    mli_Pmat = new MLI_Matrix( Pmat, param_string, func_ptr );
    (*Pmat_out) = mli_Pmat;
