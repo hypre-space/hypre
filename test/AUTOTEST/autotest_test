@@ -372,12 +372,13 @@ apply_error_filters () {
       tckk*|tc2k*|gps*)
         for ii in \
           '^stty:\ tcgetattr:\ Not\ a\ typewriter'\
-          'WARNING:\ \ guidef77\ has\ implied\ '
+          'WARNING:\ \ guidef77\ has\ implied\ '\
+          '^cc:\ Info:\ '
         do process_filter $ErrorFile "${ii}"
         done
         for ii in \
-          '^cc:\ Info:\ '
-        do multi_line_delete $ErrorFile 2 "${ii}"
+          '\-\-\-\-'
+        do multi_line_bakdelete $ErrorFile 1 "${ii}"
         done
       ;;
       tux*)
