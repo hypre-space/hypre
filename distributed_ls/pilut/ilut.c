@@ -73,7 +73,8 @@ int ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu
 
   MPI_Barrier( pilut_comm ); stoptimer(ParTmr);
 
-  free_multi(rmat.rmat_rnz, rmat.rmat_rcolind, rmat.rmat_rvalues, -1);
+  free_multi(rmat.rmat_rnz, rmat.rmat_rrowlen, 
+             rmat.rmat_rcolind, rmat.rmat_rvalues, -1);
 }
 
 

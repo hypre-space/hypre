@@ -27,6 +27,184 @@
 #include "./DistributedMatrixPilutSolver.h"
 #include "ilu.h"
 
+
+/*************************************************************************
+* This function performs the forward and backward substitution.
+* It solves the system LDUx = b.
+**************************************************************************/
+void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
+                   hypre_PilutSolverGlobals *globals)
+{
+  int ii, i, j, k, l, TAG;
+  int nlevels, snbrpes, rnbrpes;
+  int *perm, *iperm, *nnodes, *rowptr, *colind,
+    *spes, *sptr, *sind, *auxsptr, *rpes, *rdone, *rnum;
+  double *lx, *ux, *values, *dvalues, *gatherbuf, **raddr, xx;
+  MPI_Status Status;
+
+  PrintLine("LDUSolve start", globals);
+
+  lnrows    = ddist->ddist_lnrows;
+  perm      = ldu->perm;
+  iperm     = ldu->iperm;
+  nnodes    = ldu->nnodes;
+  nlevels   = ldu->nlevels;
+  dvalues   = ldu->dvalues;
+  gatherbuf = ldu->gatherbuf;
+
+  lx = ldu->lx;
+  ux = ldu->ux;
+
+  /******************************************************************
+  * Do the L(lx) = b, first 
+  *******************************************************************/
+  snbrpes = ldu->lcomm.snbrpes;
+  spes    = ldu->lcomm.spes;
+  sptr    = ldu->lcomm.sptr;
+  sind    = ldu->lcomm.sind;
+  auxsptr = ldu->lcomm.auxsptr;
+  memcpy_idx(auxsptr, sptr, snbrpes+1);
+
+  rnbrpes = ldu->lcomm.rnbrpes;
+  raddr   = ldu->lcomm.raddr;
+  rpes    = ldu->lcomm.rpes;
+  rdone   = ldu->lcomm.rdone;
+  for (i=0; i<rnbrpes; i++)
+    rdone[i] = 0 ;
+
+  rowptr = ldu->lrowptr;
+  colind = ldu->lcolind;
+  values = ldu->lvalues;
+
+  /* Do the local first.
+   * For forward substitution we do local+1st MIS == nnodes[1] (NOT [0]!) */
+  for (i=0; i<nnodes[1]; i++) {
+    xx = 0.0;
+    for (j=rowptr[i]; j<rowptr[i+1]; j++) 
+      xx += values[j]*lx[colind[j]];
+    lx[i] = b[perm[i]] - xx;
+  }
+
+  /* Do the distributed next */
+  for (ii=1; ii<nlevels; ii++) {
+    /* make MPI LX tags unique for this level (so we don't have to sync) */
+    TAG = (TAG_LDU_lx | ii);
+
+    /* Send the required lx elements to the appropriate processors */
+    for (i=0; i<snbrpes; i++) {
+      if (sptr[i+1] > auxsptr[i]  &&  sind[auxsptr[i]]<nnodes[ii]) { /* Something to send */
+        for (j=auxsptr[i], l=0;   j<sptr[i+1] && sind[j]<nnodes[ii];   j++, l++) 
+          gatherbuf[l] = lx[sind[j]];
+
+	MPI_Send( gatherbuf, l, MPI_DOUBLE_PRECISION,
+		  spes[i], TAG, pilut_comm );
+
+        auxsptr[i] = j;
+      }
+    }
+
+    /* get number of recieves for this level */
+    rnum = &(ldu->lcomm.rnum[(ii-1)*rnbrpes]) ;
+
+    /* Recv the required lx elements from the appropriate processors */
+    for (i=0; i<rnbrpes; i++) {
+      if ( rnum[i] > 0 ) { /* Something to recv */
+	MPI_Recv( raddr[i]+rdone[i], rnum[i], MPI_DOUBLE_PRECISION,
+		  rpes[i], TAG, pilut_comm, &Status );
+
+	rdone[i] += rnum[i] ;
+      }
+    }
+
+    /* solve for this MIS set
+     * by construction all remote lx elements needed are filled in */
+    for (i=nnodes[ii]; i<nnodes[ii+1]; i++) {
+      xx = 0.0;
+      for (j=rowptr[i]; j<rowptr[i+1]; j++) {
+        xx += values[j]*lx[colind[j]];
+      }
+      lx[i] = b[perm[i]] - xx;
+    }
+  }
+
+
+  /******************************************************************
+  * Do the U(ly) = (lx), next 
+  *******************************************************************/
+  snbrpes = ldu->ucomm.snbrpes;
+  spes    = ldu->ucomm.spes;
+  sptr    = ldu->ucomm.sptr;
+  sind    = ldu->ucomm.sind;
+  auxsptr = ldu->ucomm.auxsptr;
+  memcpy_idx(auxsptr, sptr, snbrpes+1);
+
+  rnbrpes = ldu->ucomm.rnbrpes;
+  raddr   = ldu->ucomm.raddr;
+  rpes    = ldu->ucomm.rpes;
+  rdone   = ldu->ucomm.rdone;
+  for (i=0; i<rnbrpes; i++)
+    rdone[i] = 0 ;
+
+  rowptr = ldu->urowptr;
+  colind = ldu->ucolind;
+  values = ldu->uvalues;
+
+  /* Do the distributed */
+  for (ii=nlevels; ii>0; ii--) {
+    /* Solve for this MIS set
+     * by construction all remote lx elements needed are filled in */
+    for (i=nnodes[ii]-1; i>=nnodes[ii-1]; i--) {
+      xx = 0.0;
+      for (j=rowptr[i]; j<rowptr[i+1]; j++) 
+        xx += values[j]*ux[colind[j]];
+      ux[i] = dvalues[i]*(lx[i] - xx);
+    }
+
+    /* make MPI UX tags unique for this level (so we don't have to sync) */
+    TAG = (TAG_LDU_ux | ii);
+
+    /* Send the required ux elements to the appropriate processors */
+    for (i=0; i<snbrpes; i++) {
+      if (sptr[i+1] > auxsptr[i]  &&  sind[auxsptr[i]]>=nnodes[ii-1]) { /* Something to send */
+        for (j=auxsptr[i], l=0;   j<sptr[i+1] && sind[j]>=nnodes[ii-1];   j++, l++) 
+          gatherbuf[l] = ux[sind[j]];
+
+	MPI_Send( gatherbuf, l, MPI_DOUBLE_PRECISION,
+		  spes[i], TAG, pilut_comm );
+
+        auxsptr[i] = j;
+      }
+    }
+
+    /* get number of recieves for this level */
+    rnum = &(ldu->ucomm.rnum[(ii-1)*rnbrpes]);
+
+    /* Recv the required ux elements from the appropriate processors */
+    for (i=0; i<rnbrpes; i++) {
+      if ( rnum[i] > 0 ) { /* Something to recv */
+	MPI_Recv( raddr[i]+rdone[i], rnum[i], MPI_DOUBLE_PRECISION,
+		  rpes[i], TAG, pilut_comm, &Status );
+
+	rdone[i] += rnum[i] ;
+      }
+    }
+  }
+
+  /* Do the local next */
+  for (i=nnodes[0]-1; i>=0; i--) {
+    xx = 0.0;
+    for (j=rowptr[i]; j<rowptr[i+1]; j++) 
+      xx += values[j]*ux[colind[j]];
+    ux[i] = dvalues[i]*(lx[i] - xx);
+  }
+
+
+  /* Permute the solution to back to x */
+  for (i=0; i<lnrows; i++)
+    x[i] = ux[iperm[i]];
+}
+
+
 /*************************************************************************
 * This function sets-up the communication parameters for the forward
 * and backward substitution, and relabels the L and U matrices 
@@ -360,182 +538,4 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   for (i=0; i<lnrows; i++) 
     imap[firstrow+i] = -1;
 }
-
-
-/*************************************************************************
-* This function performs the forward and backward substitution.
-* It solves the system LDUx = b.
-**************************************************************************/
-void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
-                   hypre_PilutSolverGlobals *globals)
-{
-  int ii, i, j, k, l, TAG;
-  int nlevels, snbrpes, rnbrpes;
-  int *perm, *iperm, *nnodes, *rowptr, *colind,
-    *spes, *sptr, *sind, *auxsptr, *rpes, *rdone, *rnum;
-  double *lx, *ux, *values, *dvalues, *gatherbuf, **raddr, xx;
-  MPI_Status Status;
-
-  PrintLine("LDUSolve start", globals);
-
-  lnrows    = ddist->ddist_lnrows;
-  perm      = ldu->perm;
-  iperm     = ldu->iperm;
-  nnodes    = ldu->nnodes;
-  nlevels   = ldu->nlevels;
-  dvalues   = ldu->dvalues;
-  gatherbuf = ldu->gatherbuf;
-
-  lx = ldu->lx;
-  ux = ldu->ux;
-
-  /******************************************************************
-  * Do the L(lx) = b, first 
-  *******************************************************************/
-  snbrpes = ldu->lcomm.snbrpes;
-  spes    = ldu->lcomm.spes;
-  sptr    = ldu->lcomm.sptr;
-  sind    = ldu->lcomm.sind;
-  auxsptr = ldu->lcomm.auxsptr;
-  memcpy_idx(auxsptr, sptr, snbrpes+1);
-
-  rnbrpes = ldu->lcomm.rnbrpes;
-  raddr   = ldu->lcomm.raddr;
-  rpes    = ldu->lcomm.rpes;
-  rdone   = ldu->lcomm.rdone;
-  for (i=0; i<rnbrpes; i++)
-    rdone[i] = 0 ;
-
-  rowptr = ldu->lrowptr;
-  colind = ldu->lcolind;
-  values = ldu->lvalues;
-
-  /* Do the local first.
-   * For forward substitution we do local+1st MIS == nnodes[1] (NOT [0]!) */
-  for (i=0; i<nnodes[1]; i++) {
-    xx = 0.0;
-    for (j=rowptr[i]; j<rowptr[i+1]; j++) 
-      xx += values[j]*lx[colind[j]];
-    lx[i] = b[perm[i]] - xx;
-  }
-
-  /* Do the distributed next */
-  for (ii=1; ii<nlevels; ii++) {
-    /* make MPI LX tags unique for this level (so we don't have to sync) */
-    TAG = (TAG_LDU_lx | ii);
-
-    /* Send the required lx elements to the appropriate processors */
-    for (i=0; i<snbrpes; i++) {
-      if (sptr[i+1] > auxsptr[i]  &&  sind[auxsptr[i]]<nnodes[ii]) { /* Something to send */
-        for (j=auxsptr[i], l=0;   j<sptr[i+1] && sind[j]<nnodes[ii];   j++, l++) 
-          gatherbuf[l] = lx[sind[j]];
-
-	MPI_Send( gatherbuf, l, MPI_DOUBLE_PRECISION,
-		  spes[i], TAG, pilut_comm );
-
-        auxsptr[i] = j;
-      }
-    }
-
-    /* get number of recieves for this level */
-    rnum = &(ldu->lcomm.rnum[(ii-1)*rnbrpes]) ;
-
-    /* Recv the required lx elements from the appropriate processors */
-    for (i=0; i<rnbrpes; i++) {
-      if ( rnum[i] > 0 ) { /* Something to recv */
-	MPI_Recv( raddr[i]+rdone[i], rnum[i], MPI_DOUBLE_PRECISION,
-		  rpes[i], TAG, pilut_comm, &Status );
-
-	rdone[i] += rnum[i] ;
-      }
-    }
-
-    /* solve for this MIS set
-     * by construction all remote lx elements needed are filled in */
-    for (i=nnodes[ii]; i<nnodes[ii+1]; i++) {
-      xx = 0.0;
-      for (j=rowptr[i]; j<rowptr[i+1]; j++) {
-        xx += values[j]*lx[colind[j]];
-      }
-      lx[i] = b[perm[i]] - xx;
-    }
-  }
-
-
-  /******************************************************************
-  * Do the U(ly) = (lx), next 
-  *******************************************************************/
-  snbrpes = ldu->ucomm.snbrpes;
-  spes    = ldu->ucomm.spes;
-  sptr    = ldu->ucomm.sptr;
-  sind    = ldu->ucomm.sind;
-  auxsptr = ldu->ucomm.auxsptr;
-  memcpy_idx(auxsptr, sptr, snbrpes+1);
-
-  rnbrpes = ldu->ucomm.rnbrpes;
-  raddr   = ldu->ucomm.raddr;
-  rpes    = ldu->ucomm.rpes;
-  rdone   = ldu->ucomm.rdone;
-  for (i=0; i<rnbrpes; i++)
-    rdone[i] = 0 ;
-
-  rowptr = ldu->urowptr;
-  colind = ldu->ucolind;
-  values = ldu->uvalues;
-
-  /* Do the distributed */
-  for (ii=nlevels; ii>0; ii--) {
-    /* Solve for this MIS set
-     * by construction all remote lx elements needed are filled in */
-    for (i=nnodes[ii]-1; i>=nnodes[ii-1]; i--) {
-      xx = 0.0;
-      for (j=rowptr[i]; j<rowptr[i+1]; j++) 
-        xx += values[j]*ux[colind[j]];
-      ux[i] = dvalues[i]*(lx[i] - xx);
-    }
-
-    /* make MPI UX tags unique for this level (so we don't have to sync) */
-    TAG = (TAG_LDU_ux | ii);
-
-    /* Send the required ux elements to the appropriate processors */
-    for (i=0; i<snbrpes; i++) {
-      if (sptr[i+1] > auxsptr[i]  &&  sind[auxsptr[i]]>=nnodes[ii-1]) { /* Something to send */
-        for (j=auxsptr[i], l=0;   j<sptr[i+1] && sind[j]>=nnodes[ii-1];   j++, l++) 
-          gatherbuf[l] = ux[sind[j]];
-
-	MPI_Send( gatherbuf, l, MPI_DOUBLE_PRECISION,
-		  spes[i], TAG, pilut_comm );
-
-        auxsptr[i] = j;
-      }
-    }
-
-    /* get number of recieves for this level */
-    rnum = &(ldu->ucomm.rnum[(ii-1)*rnbrpes]);
-
-    /* Recv the required ux elements from the appropriate processors */
-    for (i=0; i<rnbrpes; i++) {
-      if ( rnum[i] > 0 ) { /* Something to recv */
-	MPI_Recv( raddr[i]+rdone[i], rnum[i], MPI_DOUBLE_PRECISION,
-		  rpes[i], TAG, pilut_comm, &Status );
-
-	rdone[i] += rnum[i] ;
-      }
-    }
-  }
-
-  /* Do the local next */
-  for (i=nnodes[0]-1; i>=0; i--) {
-    xx = 0.0;
-    for (j=rowptr[i]; j<rowptr[i+1]; j++) 
-      xx += values[j]*ux[colind[j]];
-    ux[i] = dvalues[i]*(lx[i] - xx);
-  }
-
-
-  /* Permute the solution to back to x */
-  for (i=0; i<lnrows; i++)
-    x[i] = ux[iperm[i]];
-}
-
 

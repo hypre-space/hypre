@@ -52,7 +52,7 @@ void ParILUT(DataDistType *ddist, FactorMatType *ldu,
 	     ReduceMatType *rmat, int gmaxnz, double tol, 
              hypre_PilutSolverGlobals *globals )
 {
-  int nmis, i, j, k, l, nlevel;
+  int nmis, i, j, k, l, nlevel, nbnd;
   CommInfoType cinfo;
   int *perm, *iperm, *newiperm, *newperm; 
   ReduceMatType *rmats[2], nrmat;
@@ -70,7 +70,7 @@ void ParILUT(DataDistType *ddist, FactorMatType *ldu,
   iperm = ldu->iperm;
 
   ndone = rmat->rmat_ndone;
-  ntogo = rmat->rmat_ntogo;
+  nbnd = ntogo = rmat->rmat_ntogo;
   nleft = GlobalSESum(ntogo, pilut_comm);
 
   rmats[0] = rmat;
@@ -131,7 +131,9 @@ void ParILUT(DataDistType *ddist, FactorMatType *ldu,
 	     nrmat.rmat_rnz,        nrmat.rmat_rrowlen,  nrmat.rmat_rcolind,   
              nrmat.rmat_rvalues,
 	     cinfo.gatherbuf,  cinfo.rrowind,  cinfo.rnbrind,   cinfo.rnbrptr, 
-	     cinfo.snbrind,    cinfo.snbrptr,  cinfo.incolind,  cinfo.invalues, -1);
+	     cinfo.snbrind, cinfo.srowind, cinfo.snbrptr,  
+             cinfo.incolind,  cinfo.invalues, 
+             newperm, newiperm, vrowdist, -1);
 
   PrintLine("ParILUT done", globals);
 }
@@ -151,7 +153,7 @@ void ParILUT(DataDistType *ddist, FactorMatType *ldu,
 void ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, int *rowdist,
              hypre_PilutSolverGlobals *globals)
 {
-  int i, ir, j, k, isLow, midpt, penum;
+  int i, ir, j, k, midpt, penum;
   int nrecv, nsend, rnnbr, snnbr, maxnrecv, maxnsend, maxnrand;
   int *rnz, *rcolind;
   int *rrowind,  *rnbrptr,  *rnbrind, *srowind, *snbrind, *snbrptr;
@@ -173,7 +175,6 @@ void ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, int *rowdist,
   midpt = (firstrow + lastrow)/2;
   for (ir=0; ir<ntogo; ir++) {
     rcolind = rmat->rmat_rcolind[ir];
-    isLow = (rcolind[0]<midpt);  /* by construction, [0] is diagonal==row# */
     for (j=1; j<rnz[ir]; j++) {
       k = rcolind[j];
       CheckBounds(0, k, nrows, globals);
@@ -1184,8 +1185,8 @@ void ParINIT( ReduceMatType *nrmat, CommInfoType *cinfo, int *rowdist,
   cinfo->incolind = NULL;
   cinfo->invalues = NULL;
   cinfo->srowind  = NULL;
-  cinfo->maxnrecv = -0;
-  cinfo->maxnsend = -0;
+  cinfo->maxnrecv = 0;
+  cinfo->maxnsend = 0;
 
   /* ---- ComputeMIS ---- */
   cinfo->gatherbuf = fp_malloc(ntogo*(global_maxnz+2), "ComputeMIS: gatherbuf");
