@@ -1159,6 +1159,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                          int                   *coarse_size_ptr     )
 {
    MPI_Comm         comm          = hypre_ParCSRMatrixComm(A);
+   hypre_CommPkg   *comm_pkg      = hypre_ParCSRMatrixCommPkg(A);
    int		   *row_starts    = hypre_ParCSRMatrixRowStarts(A);
    int		   *col_map_offd_A= hypre_ParCSRMatrixColMapOffd(A);
    hypre_CSRMatrix *A_diag        = hypre_ParCSRMatrixDiag(A);
@@ -1181,12 +1182,17 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    int             *S_offd_i;
    int             *S_offd_j;
    int		   *col_map_offd_S;
+
+   hypre_CSRMatrix *S_ext;
+   int             *S_ext_i;
+   int             *S_ext_j;
                  
    hypre_CSRMatrix *ST;
    int             *ST_i;
    int             *ST_j;
                  
    int             *CF_marker;
+   int             *CF_marker_offd;
    int              coarse_size;
 
    int             *measure_array;
@@ -1202,6 +1208,9 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    int		    set_empty = 1;
    int		    C_i_nonempty = 0;
    int		    num_strong;
+   int		    num_nonzeros;
+   int		    num_procs;
+   int		    first_col;
 
    int              ierr = 0;
 
@@ -1224,6 +1233,14 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
     * NOTE: the entries are negative initially, corresponding
     * to "unaccounted-for" dependence.
     *----------------------------------------------------------------*/
+
+   MPI_Comm_size(comm,&num_procs);
+
+   if (!comm_pkg)
+   {
+        hypre_GenerateMatvecCommunicationInfo(A);
+        comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+   }
 
    num_strong = A_i[num_variables] - num_variables;
 
@@ -1421,7 +1438,8 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
     * The measures are given by the row sums of ST.
     * Hence, measure_array[i] is the number of influences
     * of variable i.
-    *
+    * correct actual measures through adding influences from
+    * neighbor processors
     *----------------------------------------------------------*/
 
    measure_array = hypre_CTAlloc(int, num_variables);
@@ -1432,6 +1450,21 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    }
 
 
+   if (num_procs > 1)
+   {
+      S_ext      = hypre_ExtractBExt(S,A);
+      S_ext_i    = hypre_CSRMatrixI(S_ext);
+      S_ext_j    = hypre_CSRMatrixJ(S_ext);
+      num_nonzeros = S_ext_i[num_cols_offd];
+      first_col = hypre_ParCSRMatrixFirstColDiag(A);
+      for (i=0; i < num_nonzeros; i++)
+      {
+	 index = S_ext_j[i] - first_col;
+	 if (index > -1 && index < num_variables)
+		measure_array[index]++;
+      }
+
+   }
    /*---------------------------------------------------
     * Initialize the graph array
     *---------------------------------------------------*/
@@ -1583,9 +1616,74 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       }
    }
 
-		  	       
+   /* third pass, check boundary fine points for coarse neighbors */
 
+/*   CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+   for (i=0; i < num_cols_offd; i++)
+	CF_marker_offd[i] = 0;
 
+   for (i=0; i < num_cols_offd; i++)
+   {
+      if (CF_marker_offd[i] == -1)
+      {
+	 max_ci_size = S_ext_i[i+1]-S_ext_i[i];
+	 ci_tilde_size = max_ci_size;
+	 ci_size = 0;
+	 for (ji = S_ext_i[i]; ji < S_ext_i[i+1]; ji++)
+	 {
+	    j = S_ext_j[ji];
+	    if (CF_marker[j] > 0)
+	       graph_array[ci_size++] = j;
+ 	 }
+	 for (ji = S_ext_i[i]; ji < S_ext_i[i+1]; ji++)
+	 {
+	    j = S_ext_j[ji];
+	    if (CF_marker_offd[j] == -1)
+	    {
+	       set_empty = 1;
+	       for (jj = S_ext_i[j]; jj < S_ext_i[j+1]; jj++)
+	       {
+		  index = S_ext_j[jj];
+		  for (jl=0; jl < ci_size; jl++)
+		  {
+		     if (graph_array[jl] == index)
+		     {
+		        set_empty = 0;
+		        break;
+		     }
+	          }
+	          if (!set_empty) break;
+	       }
+	       if (set_empty)
+	       {
+		  if (C_i_nonempty)
+		  {
+		     CF_marker_offd[i] = 1;
+		     coarse_size++;
+		     for (jj=max_ci_size ; jj < ci_tilde_size; jj++)
+		     {
+			CF_marker_offd[graph_array[jj]] = -1;
+		        coarse_size--;
+		     }
+		     ci_tilde_size = max_ci_size;
+		     break;
+		  }
+		  else
+		  {
+		     graph_array[ci_tilde_size++] = j;
+		     CF_marker_offd[j] = 1;
+		     coarse_size++;
+		     C_i_nonempty = 1;
+		     i--;
+		     break;
+		  }
+	       }
+	    }
+	 }
+      }
+   }
+   hypre_TFree(CF_marker_offd);
+*/
    /*---------------------------------------------------
     * Clean up and return
     *---------------------------------------------------*/
@@ -1594,6 +1692,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    hypre_TFree(graph_array);
    hypre_TFree(graph_ptr);
    hypre_DestroyCSRMatrix(ST);
+   if (num_procs > 1) hypre_DestroyCSRMatrix(S_ext);
 
    *S_ptr           = S;
    *CF_marker_ptr   = CF_marker;
@@ -1601,4 +1700,3 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 
    return (ierr);
 }
-
