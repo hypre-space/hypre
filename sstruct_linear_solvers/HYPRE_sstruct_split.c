@@ -171,6 +171,9 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
    hypre_StructMatrix      *sA;
    hypre_StructVector      *sx;
    hypre_StructVector      *sy;
+   HYPRE_StructMatrix      sAH;
+   HYPRE_StructVector      sxH;
+   HYPRE_StructVector      syH;
    int                    (*ssolve)();
    int                    (*sdestroy)();
    void                    *sdata;
@@ -220,6 +223,9 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
          sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
          sx = hypre_SStructPVectorSVector(px, vi);
          sy = hypre_SStructPVectorSVector(py, vi);
+         sAH = (HYPRE_StructMatrix) sA;
+         sxH = (HYPRE_StructVector) sx;
+         syH = (HYPRE_StructVector) sy;
          switch(ssolver)
          {
             case HYPRE_SMG:
@@ -231,7 +237,7 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                HYPRE_StructSMGSetNumPreRelax(sdata, 1);
                HYPRE_StructSMGSetNumPostRelax(sdata, 1);
                HYPRE_StructSMGSetLogging(sdata, 0);
-               HYPRE_StructSMGSetup(sdata, sA, sy, sx);
+               HYPRE_StructSMGSetup(sdata, sAH, syH, sxH);
                ssolve = HYPRE_StructSMGSolve;
                sdestroy = HYPRE_StructSMGDestroy;
                break;
@@ -244,7 +250,7 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                HYPRE_StructPFMGSetNumPreRelax(sdata, 1);
                HYPRE_StructPFMGSetNumPostRelax(sdata, 1);
                HYPRE_StructPFMGSetLogging(sdata, 0);
-               HYPRE_StructPFMGSetup(sdata, sA, sy, sx);
+               HYPRE_StructPFMGSetup(sdata, sAH, syH, sxH);
                ssolve = HYPRE_StructPFMGSolve;
                sdestroy = HYPRE_StructPFMGDestroy;
                break;
