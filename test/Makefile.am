@@ -72,7 +72,6 @@ ij_libraries = \
  -lHYPRE_utilities\
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
- $(LIBG2C)\
  $(LIBM)
 ij_LDADD = $(ij_libraries)
 #ij_LDFLAGS = -static
@@ -137,7 +136,6 @@ driver_commpkg_libraries = \
  -lHYPRE_utilities\
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
- $(LIBG2C)\
  $(LIBM)
 driver_commpkg_LDADD = $(driver_commpkg_libraries)
 driver_commpkg_dependencies = \
@@ -168,7 +166,6 @@ sstruct_libraries = \
  -lHYPRE_utilities\
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
- $(LIBG2C)\
  $(LIBM)
 sstruct_LDADD = $(sstruct_libraries)
 sstruct_dependencies = \
@@ -185,7 +182,6 @@ struct_libraries = \
  -lHYPRE_struct_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
- $(LIBG2C)\
  $(LIBM)
 struct_LDADD = $(struct_libraries)
 struct_dependencies = \
@@ -208,7 +204,6 @@ fei_LDADD = \
  -lHYPRE_superlu\
  $(LAPACKLIBFLAGS)\
  $(BLASLIBFLAGS)\
- $(LIBG2C)\
  $(LIBM)
 #fei_LDFLAGS = -static
 fei_dependencies = \
