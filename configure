@@ -8081,7 +8081,7 @@ else
 echo "configure:8082: checking for Fortran libraries" >&5
             echo "      END" > conftest.f
   foutput=`${F77-f77} -v -o conftest conftest.f 2>&1`
-            xlf_p=`echo $foutput | sed -n -e '/xlfentry/p'`
+            xlf_p=`echo $foutput | grep xlfentry`
   if test -n "$xlf_p"; then
     foutput=`echo $foutput | sed 's/,/ /g'`
   fi
@@ -9400,7 +9400,6 @@ CXX="$PREPEND $CXX"
  seq_ls/pamg\
  sstruct_mv\
  sstruct_ls\
- structIJ_mv\
  struct_mv\
  struct_ls\
  test\

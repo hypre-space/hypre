@@ -66,7 +66,6 @@ HYPRE_DIRS =\
 # These are directories that are not yet officially in HYPRE
 HYPRE_EXTRA_DIRS =\
  seq_ls\
- structIJ_mv\
  CI_struct_mv\
  CI_struct_ls @HYPRE_PETSCLIBDIRS@ @HYPRE_BABELLIBDIR@ @MLI_DIR@
 

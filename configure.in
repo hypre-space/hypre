@@ -1255,7 +1255,6 @@ CASC_CONFIG_OUTPUT_LIST(\
  seq_ls/pamg\
  sstruct_mv\
  sstruct_ls\
- structIJ_mv\
  struct_mv\
  struct_ls\
  test\
