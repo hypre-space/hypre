@@ -61,7 +61,7 @@ extern "C"
 //      i+1 has equation numbers higher than those of processor i
 //------------------------------------------------------------------------------
 
-void HYPRE_LinSysCore::buildSlideReducedSystem2()
+void HYPRE_LinSysCore::buildSlideReducedSystem()
 {
     int    j, k, nRows, globalNRows, colIndex, nSlaves;
     int    globalNConstr, globalNSelected, *globalSelectedList;
@@ -1658,7 +1658,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
 // This version replaces the selected slave equation with an identity row
 //------------------------------------------------------------------------------
 
-void HYPRE_LinSysCore::buildSlideReducedSystem()
+void HYPRE_LinSysCore::buildSlideReducedSystem2()
 {
     int    i, j, k, nRows, globalNRows, colIndex, nSlaves;
     int    globalNConstr, globalNSelected, *globalSelectedList;
@@ -3550,7 +3550,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem()
 // it in place.  Additional information given are :
 //------------------------------------------------------------------------------
 
-void HYPRE_LinSysCore::buildSlideReducedSoln2()
+void HYPRE_LinSysCore::buildSlideReducedSoln()
 {
     int                i, j, *int_array, *gint_array, x2NRows, x2GlobalNRows;
     int                ierr, rowNum, startRow, startRow2, index, localNRows;
@@ -3710,7 +3710,7 @@ void HYPRE_LinSysCore::buildSlideReducedSoln2()
 // it in place.  Additional information given are :
 //------------------------------------------------------------------------------
 
-void HYPRE_LinSysCore::buildSlideReducedSoln()
+void HYPRE_LinSysCore::buildSlideReducedSoln2()
 {
     int                i, j, *int_array, *gint_array, x2NRows, x2GlobalNRows;
     int                ierr, rowNum, startRow, startRow2, index, localNRows;

@@ -441,6 +441,14 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
              printf("       HYPRE_LinSysCore::parameters - slide reduction.\n");
           }
        }
+       else if ( !strcmp(param1, "slideReduction2") )
+       {
+          slideReduction_ = 2;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters - slide reduction.\n");
+          }
+       }
 
        //----------------------------------------------------------------
        // which solver to pick : cg, gmres, superlu, superlux, y12m
@@ -2386,11 +2394,12 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
        buildSchurReducedSystem();
     }
 
-    if ( schurReduction_ == 0 && slideReduction_ == 1 )
+    if ( schurReduction_ == 0 && slideReduction_ != 0 )
     {
        if ( constrList_ != NULL ) delete [] constrList_;
        constrList_ = NULL;
-       buildSlideReducedSystem();
+       if      ( slideReduction_ == 1 ) buildSlideReducedSystem();
+       else if ( slideReduction_ == 2 ) buildSlideReducedSystem2();
     }
     MPI_Barrier(MPI_COMM_WORLD);
     rtime2  = MPI_Wtime();
@@ -2426,6 +2435,20 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           nrows = x2NRows;
        }
        else if ( slideReduction_ == 1 )
+       {
+          int_array = new int[numProcs_];
+          gint_array = new int[numProcs_];
+          for ( i = 0; i < numProcs_; i++ ) int_array[i] = 0;
+          int_array[mypid_] = 2 * nConstraints_;
+          MPI_Allreduce(int_array,gint_array,numProcs_,MPI_INT,MPI_SUM,comm_);
+          rowNum = 0;
+          for ( i = 0; i < mypid_; i++ ) rowNum += gint_array[i];
+          startRow = localStartRow_ - 1 - rowNum;
+          delete [] int_array;
+          delete [] gint_array;
+          nrows = localEndRow_ - localStartRow_ + 1 - 2 * nConstraints_;
+       }
+       else if ( slideReduction_ == 2 )
        {
           int_array = new int[numProcs_];
           gint_array = new int[numProcs_];
@@ -2971,6 +2994,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
     {
        buildSlideReducedSoln();
     }
+    else if ( slideReduction_ == 2 )
+    {
+       buildSlideReducedSoln2();
+    }
     else if ( schurReduction_ == 1 )
     {
        buildSchurReducedSoln();
@@ -3058,6 +3085,8 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     }
     if (slideReduction_  == 1) 
          nrows = localEndRow_ - 2 * nConstraints_;
+    else if (slideReduction_  == 2) 
+         nrows = localEndRow_ - nConstraints_;
     else if (schurReduction_ == 1) 
          nrows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
     else nrows = localEndRow_;
@@ -3240,6 +3269,8 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     }
     if (slideReduction_  == 1) 
          nrows = localEndRow_ - 2 * nConstraints_;
+    else if (slideReduction_  == 2) 
+         nrows = localEndRow_ - nConstraints_;
     else if (schurReduction_ == 1) 
          nrows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
     else nrows = localEndRow_;
@@ -3451,6 +3482,8 @@ void HYPRE_LinSysCore::solveUsingY12M(int& status)
     }
     if (slideReduction_  == 1) 
          nrows = localEndRow_ - 2 * nConstraints_;
+    else if (slideReduction_  == 2) 
+         nrows = localEndRow_ - nConstraints_;
     else if (schurReduction_ == 1) 
          nrows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
     else nrows = localEndRow_;
