@@ -52,6 +52,7 @@ main( int   argc,
    int                 n_pre, n_post;
    int                 nblocks, volume;
    int                 skip;
+   int                 jump;
 
    int               **iupper;
    int               **ilower;
@@ -101,6 +102,7 @@ main( int   argc,
    dim = 3;
 
    skip = 0;
+   jump = 0;
 
    nx = 10;
    ny = 10;
@@ -185,15 +187,20 @@ main( int   argc,
          arg_index++;
          dim = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-solver") == 0 )
-      {
-         arg_index++;
-         solver_id = atoi(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-skip") == 0 )
       {
          arg_index++;
          skip = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-jump") == 0 )
+      {
+         arg_index++;
+         jump = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-solver") == 0 )
+      {
+         arg_index++;
+         solver_id = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
@@ -223,6 +230,7 @@ main( int   argc,
       printf("  -v <n_pre> <n_post>  : number of pre and post relaxations\n");
       printf("  -d <dim>             : problem dimension (2 or 3)\n");
       printf("  -skip <s>            : skip some relaxation in PFMG (0 or 1)\n");
+      printf("  -jump <num>          : num levels to jump in SparseMSG\n");
       printf("  -solver <ID>         : solver ID (default = 0)\n");
       printf("                         0  - SMG\n");
       printf("                         1  - PFMG\n");
@@ -277,6 +285,7 @@ main( int   argc,
       printf("  (n_pre, n_post) = (%d, %d)\n", n_pre, n_post);
       printf("  dim             = %d\n", dim);
       printf("  skip            = %d\n", skip);
+      printf("  jump            = %d\n", jump);
       printf("  solver ID       = %d\n", solver_id);
    }
 
@@ -673,6 +682,7 @@ main( int   argc,
 
       HYPRE_StructSparseMSGInitialize(MPI_COMM_WORLD, &solver);
       HYPRE_StructSparseMSGSetMaxIter(solver, 50);
+      HYPRE_StructSparseMSGSetJump(solver, jump);
       HYPRE_StructSparseMSGSetTol(solver, 1.0e-06);
       HYPRE_StructSparseMSGSetRelChange(solver, 0);
       /* weighted Jacobi = 1; red-black GS = 2 */
@@ -761,6 +771,7 @@ main( int   argc,
          /* use symmetric SparseMSG as preconditioner */
          HYPRE_StructSparseMSGInitialize(MPI_COMM_WORLD, &precond);
          HYPRE_StructSparseMSGSetMaxIter(precond, 1);
+         HYPRE_StructSparseMSGSetJump(precond, jump);
          HYPRE_StructSparseMSGSetTol(precond, 0.0);
          HYPRE_StructSparseMSGSetZeroGuess(precond);
          /* weighted Jacobi = 1; red-black GS = 2 */
@@ -902,6 +913,7 @@ main( int   argc,
       {
          /* use symmetric SparseMSG as preconditioner */
          HYPRE_StructSparseMSGInitialize(MPI_COMM_WORLD, &precond);
+         HYPRE_StructSparseMSGSetJump(precond, jump);
          HYPRE_StructSparseMSGSetMaxIter(precond, 1);
          HYPRE_StructSparseMSGSetTol(precond, 0.0);
          HYPRE_StructSparseMSGSetZeroGuess(precond);
