@@ -1,4 +1,4 @@
-INCLUDE "babel.make"
+include babel.make
 
 .SUFFIXES: .c .o
 
@@ -48,3 +48,12 @@ ${OBJS}: ${HEADERS}
 .c.o:
 	${CC} -o $@ -c ${CFLAGS} $<
 
+##################################################################
+# Standard Targets
+##################################################################
+
+clean:
+	@rm -f *.o
+
+veryclean: clean
+	@rm -f libHypreBabel.a
