@@ -838,7 +838,7 @@ static void ConstructPatternForEachRow(int symmetric, PrunedRows *pruned_rows,
         (*costp) += (double) len*len*len;
     }
 
-#ifdef PARASAILS_DEBUG
+#if 0
     {
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
@@ -963,7 +963,7 @@ static void ConstructPatternForEachRowExt(int symmetric,
         (*costp) += (double) len*len*len;
     }
 
-#ifdef PARASAILS_DEBUG
+#if 0
     {
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
@@ -1145,7 +1145,7 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
     free(marker);
     free(ahat);
 
-#ifdef PARASAILS_DEBUG
+#if 0
     {
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
@@ -1315,7 +1315,7 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
     free(ahat);
     free(work);
 
-#ifdef PARASAILS_DEBUG
+#if 0
     {
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
@@ -1823,15 +1823,6 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
     }
 
     StoredRowsDestroy(stored_rows);
-
-/*
-    time1 = MPI_Wtime();
-    ps->setup_values_time = time1 - time0;
-*/
-
-#ifdef PARASAILS_DEBUG
-    ParaSailsStats(ps, A);
-#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -1860,15 +1851,64 @@ void ParaSailsApply(ParaSails *ps, double *u, double *v)
 }
 
 /*--------------------------------------------------------------------------
- * ParaSailsStats - Print some statistics about the setup procedure to stdout.
+ * ParaSailsStatsPattern - Print some statistics about ParaSailsSetupPattern.
+ * Returns a cost, which can be used to preempt ParaSailsSetupValues if the
+ * cost is too high.
  *--------------------------------------------------------------------------*/
 
-void ParaSailsStats(ParaSails *ps, Matrix *A)
+double ParaSailsStatsPattern(ParaSails *ps, Matrix *A)
 {
     int mype, npes;
     int n, nnzm, nnza;
     MPI_Comm comm = ps->comm;
-    double max_pattern_time, max_values_time, max_cost;
+    double max_pattern_time, max_cost, ave_cost;
+
+    MPI_Comm_rank(comm, &mype);
+    MPI_Comm_size(comm, &npes);
+
+    nnzm = MatrixNnz(ps->M);
+    nnza = MatrixNnz(A);
+    if (ps->symmetric)
+    {
+        n = ps->end_rows[npes-1] - ps->beg_rows[0] + 1;
+	nnza = (nnza - n) / 2 + n;
+    }
+
+    MPI_Allreduce(&ps->setup_pattern_time, &max_pattern_time, 
+	1, MPI_DOUBLE, MPI_MAX, comm);
+    MPI_Allreduce(&ps->cost, &max_cost, 1, MPI_DOUBLE, MPI_MAX, comm);
+    MPI_Allreduce(&ps->cost, &ave_cost, 1, MPI_DOUBLE, MPI_SUM, comm);
+    ave_cost = ave_cost / (double) npes;
+
+    if (mype)
+	return ave_cost;
+
+    if (ps->symmetric == 0)
+        max_cost *= 8.0;  /* nonsymmetric method is harder */
+
+    printf("** ParaSails Setup Pattern Statistics ***********\n");
+    printf("symmetric             : %d\n", ps->symmetric);
+    printf("thresh                : %f\n", ps->thresh);
+    printf("num_levels            : %d\n", ps->num_levels);
+    printf("Max cost (average)    : %7.1e (%7.1e)\n", max_cost, ave_cost);
+    printf("Nnz (ratio)           : %d (%5.2f)\n", nnzm, nnzm/(double)nnza);
+    printf("Max setup pattern time: %8.1f\n", max_pattern_time);
+    printf("*************************************************\n");
+    fflush(NULL);
+
+    return ave_cost;
+}
+
+/*--------------------------------------------------------------------------
+ * ParaSailsStatsValues - Print some statistics about ParaSailsSetupValues.
+ *--------------------------------------------------------------------------*/
+
+void ParaSailsStatsValues(ParaSails *ps, Matrix *A)
+{
+    int mype, npes;
+    int n, nnzm, nnza;
+    MPI_Comm comm = ps->comm;
+    double max_values_time;
     double temp, *setup_times = NULL;
     int i;
 
@@ -1883,11 +1923,8 @@ void ParaSailsStats(ParaSails *ps, Matrix *A)
         nnza = (nnza - n) / 2 + n;
     }
 
-    MPI_Allreduce(&ps->setup_pattern_time, &max_pattern_time,
-        1, MPI_DOUBLE, MPI_MAX, comm);
-    MPI_Allreduce(&ps->setup_values_time, &max_values_time,
-        1, MPI_DOUBLE, MPI_MAX, comm);
-    MPI_Allreduce(&ps->cost, &max_cost, 1, MPI_DOUBLE, MPI_MAX, comm);
+    MPI_Allreduce(&ps->setup_values_time, &max_values_time, 
+	1, MPI_DOUBLE, MPI_MAX, comm);
 
     if (!mype)
         setup_times = (double *) malloc(npes * sizeof(double));
@@ -1898,11 +1935,13 @@ void ParaSailsStats(ParaSails *ps, Matrix *A)
     if (mype)
         return;
 
-    if (ps->symmetric == 0)
-        max_cost *= 8.0;  /* nonsymmetric method is harder */
-
-    printf("******************* ParaSails *******************\n");
-    printf("Setup times:\n");
+    printf("** ParaSails Setup Values Statistics ************\n");
+    printf("filter                : %f\n", ps->filter);
+    printf("loadbal               : %f\n", ps->loadbal_beta);
+    printf("Final Nnz (ratio)     : %d (%5.2f)\n", nnzm, nnzm/(double)nnza);
+    printf("Max setup values time : %8.1f\n", max_values_time);
+    printf("*************************************************\n");
+    printf("Setup (pattern and values) times:\n");
 
     temp = 0.0;
     for (i=0; i<npes; i++)
@@ -1911,19 +1950,9 @@ void ParaSailsStats(ParaSails *ps, Matrix *A)
         temp += setup_times[i];
     }
     printf("ave: %8.1f\n", temp / (double) npes);
+    printf("*************************************************\n");
 
     free(setup_times);
 
-    printf("*************************************************\n");
-    printf("symmetric             : %d\n", ps->symmetric);
-    printf("thresh                : %f\n", ps->thresh);
-    printf("num_levels            : %d\n", ps->num_levels);
-    printf("filter                : %f\n", ps->filter);
-    printf("loadbal               : %f\n", ps->loadbal_beta);
-    printf("Max cost              : %7.1e\n", max_cost);
-    printf("Nnz (ratio)           : %d (%.2f)\n", nnzm, nnzm/(double)nnza);
-    printf("Max setup pattern time: %8.1f\n", max_pattern_time);
-    printf("Max setup values time : %8.1f\n", max_values_time);
-    printf("*************************************************\n");
     fflush(NULL);
 }

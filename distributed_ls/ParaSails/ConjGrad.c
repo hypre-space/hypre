@@ -139,7 +139,7 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
       i_prod = InnerProd(n, r, r, comm);
 
 #ifdef PARASAILS_CG_PRINT
-      if (mype == 0 && i % 10 == 0)
+      if (mype == 0 && i % 100 == 0)
          printf("Iter (%d): rel. resid. norm: %e\n", i, sqrt(i_prod/bi_prod));
 #endif
 
@@ -148,7 +148,7 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
          break;
 
       /* non-convergence test */
-      if (i >= 500 && i_prod/bi_prod > 0.01)
+      if (i >= 1000 && i_prod/bi_prod > 0.01)
       {
          if (mype == 0)
             printf("Aborting solve due to slow or no convergence.\n");
@@ -175,5 +175,5 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
    free(r);
 
    if (mype == 0)
-      printf("Iter (%d): computed rrn    : %e\n", i, sqrt(i_prod/bi_prod));
+      printf("Iter (%4d): computed rrn    : %e\n", i, sqrt(i_prod/bi_prod));
 }

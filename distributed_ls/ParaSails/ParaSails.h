@@ -53,6 +53,7 @@ void ParaSailsSetupPatternExt(ParaSails *ps, Matrix *A,
   double thresh_global, double thresh_local, int num_levels);
 void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter);
 void ParaSailsApply(ParaSails *ps, double *u, double *v);
-void ParaSailsStats(ParaSails *ps, Matrix *A);
+double ParaSailsStatsPattern(ParaSails *ps, Matrix *A);
+void ParaSailsStatsValues(ParaSails *ps, Matrix *A);
 
 #endif /* _PARASAILS_H */

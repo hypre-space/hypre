@@ -89,11 +89,23 @@ int HYPRE_ParaSailsDestroy(HYPRE_ParaSails ps)
 int HYPRE_ParaSailsSetup(HYPRE_ParaSails ps, double thresh, 
   int nlevels, double filter)
 {
+    double cost;
+
     hypre_ParaSails *internal = (hypre_ParaSails *) ps;
 
     ParaSailsSetupPattern(internal->ps, internal->A, thresh, nlevels);
 
+#if 1
+    cost = ParaSailsStatsPattern(internal->ps, internal->A);
+#endif
+
+    internal->ps->loadbal_beta = 0.9;
+
     ParaSailsSetupValues(internal->ps, internal->A, filter);
+
+#if 1
+    ParaSailsStatsValues(internal->ps, internal->A);
+#endif
 
     return 0;
 }

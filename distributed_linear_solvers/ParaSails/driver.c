@@ -27,10 +27,12 @@ int main(int argc, char *argv[])
     double time0, time1;
     double setup_time, solve_time;
     double max_setup_time, max_solve_time;
+    double cost;
 
     double *x, *b;
     int i, niter;
     double thresh;
+    double threshg;
     int nlevels;
     double filter;
     double loadbal;
@@ -107,13 +109,14 @@ int main(int argc, char *argv[])
 	{
             if (mype == 0)
             {
-                printf("Enter parameters thresh (0.75), nlevels (1), "
-	            "filter (0.1), beta (0.0):\n");
+                printf("Enter parameters threshg, thresh, nlevels, "
+	            "filter, beta:\n");
 	        fflush(NULL);
-                scanf("%lf %d %lf %lf", &thresh, &nlevels, 
+                scanf("%lf %lf %d %lf %lf", &threshg, &thresh, &nlevels, 
 		    &filter, &loadbal);
 	    }
 
+	    MPI_Bcast(&threshg, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	    MPI_Bcast(&thresh,  1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	    MPI_Bcast(&nlevels, 1, MPI_INT,    0, MPI_COMM_WORLD);
 	    MPI_Bcast(&filter,  1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -134,13 +137,28 @@ int main(int argc, char *argv[])
 
         ps->loadbal_beta = loadbal;
 
-        ParaSailsSetupPattern(ps, A, thresh, nlevels);
-        ParaSailsSetupValues(ps, A, filter);
+        /*ParaSailsSetupPattern(ps, A, thresh, nlevels);*/
+        ParaSailsSetupPatternExt(ps, A, threshg, thresh, nlevels);
 
         time1 = MPI_Wtime();
 	setup_time = time1-time0;
-	fflush(NULL);
+
+        cost = ParaSailsStatsPattern(ps, A);
+	if (cost > 5.e11)
+	{
+            printf("Aborting setup and solve due to high cost.\n");
+	    goto cleanup;
+	}
+
         MPI_Barrier(MPI_COMM_WORLD);
+        time0 = MPI_Wtime();
+
+        ParaSailsSetupValues(ps, A, filter);
+
+        time1 = MPI_Wtime();
+	setup_time += (time1-time0);
+
+        ParaSailsStatsValues(ps, A);
 
 	if (!strncmp(argv[3], "testpsmat", 8))
             MatrixPrint(ps->M, "M");
@@ -156,12 +174,12 @@ int main(int argc, char *argv[])
 	 * Solution phase
 	 *****************/
 
-        MPI_Barrier(MPI_COMM_WORLD);
-        time0 = MPI_Wtime();
-
-	niter = 1500;
+	niter = 3000;
         if (MatrixNnz(ps->M) == n) /* if diagonal preconditioner */
 	    niter = 5000;
+
+        MPI_Barrier(MPI_COMM_WORLD);
+        time0 = MPI_Wtime();
 
         if (symmetric == 1)
             PCG_ParaSails(A, ps, b, x, 1.e-8, niter);
@@ -185,6 +203,7 @@ int main(int argc, char *argv[])
             printf("**********************************************\n");
 	}
 
+cleanup:
         ParaSailsDestroy(ps);
 
         num_runs--;
