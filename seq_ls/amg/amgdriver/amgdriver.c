@@ -72,7 +72,7 @@ char *argv[];
 #endif
 
    /*-------------------------------------------------------
-    * Set up globals
+    * Set up globals 
     *-------------------------------------------------------*/
 
    run_name = argv[1];
@@ -138,7 +138,11 @@ char *argv[];
       if (setup_err_flag != 0) 
       {
          printf("setup error = %d\n",setup_err_flag);
-         return 1;
+         if (setup_err_flag > 0)
+         {
+            return 1;
+         }
+         printf("Setup Error Warning. Execution Continues.\n");
       }
 
       setup_ticks = amg_Clock() - start_ticks;
@@ -197,12 +201,43 @@ char *argv[];
       GMRES(u, f, stop_tolerance, gmres_data);
    }
 
-   printf("\nSetup Time:\n");
-   PrintTiming((double) setup_ticks,(double) setup_cpu);
-   printf("\nSolve Time:\n");
-   PrintTiming((double) solve_ticks,(double) solve_cpu);
-   printf("\nOverall Time:\n");
-   PrintTiming((double) time_ticks,(double) cpu_ticks);
+/* The following should be replaced at a later data with
+   a more appropriate routine.  That is, we should call
+   amg_TimingOut(amg_times) where amg_times is a structure 
+   carrying the timing information.  The following works 
+   for now, however.  VEH 9/24/97                          */
+
+   if (SolverAMGIOutDat(solver) >= 3)
+   {
+      long AMG_CPU_TICKS_PER_SEC;
+
+      AMG_CPU_TICKS_PER_SEC = sysconf(_SC_CLK_TCK);
+
+      fp = fopen(GlobalsLogFileName, "a");
+ 
+      fprintf(fp,"\nTIMING INFORMATION\n");
+      fprintf(fp,"\nSetup Time:\n");
+      fprintf(fp, " wall clock time = %f seconds\n", 
+                         ((double) setup_ticks)/AMG_TICKS_PER_SEC);
+      fprintf(fp," CPU clock time  = %f seconds\n", 
+                         ((double) setup_cpu)/AMG_CPU_TICKS_PER_SEC);
+
+      fprintf(fp,"\nSolve Time:\n");
+      fprintf(fp, " wall clock time = %f seconds\n", 
+                         ((double) solve_ticks)/AMG_TICKS_PER_SEC);
+      fprintf(fp," CPU clock time  = %f seconds\n", 
+                         ((double) solve_cpu)/AMG_CPU_TICKS_PER_SEC);
+ 
+      fprintf(fp,"\nOverall Time:\n");
+      fprintf(fp, " wall clock time = %f seconds\n", 
+                         ((double) time_ticks)/AMG_TICKS_PER_SEC);
+      fprintf(fp," CPU clock time  = %f seconds\n", 
+                         ((double) cpu_ticks)/AMG_CPU_TICKS_PER_SEC);
+  
+      fclose(fp);
+
+   }
+
 
    /*-------------------------------------------------------
     * Debugging prints
