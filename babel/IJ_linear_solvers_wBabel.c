@@ -69,6 +69,7 @@ main( int   argc,
    HYPRE_IJVector      ij_x;
    Hypre_IJBuildVector Hypre_ij_b;
    Hypre_IJBuildVector Hypre_ij_x;
+   Hypre_IJBuildVector Hypre_ij_y;
 
    HYPRE_ParCSRMatrix  parcsr_A;
    Hypre_ParCSRMatrix  Hypre_parcsr_A;
@@ -76,6 +77,7 @@ main( int   argc,
    HYPRE_ParVector     x;
    Hypre_ParCSRVector     Hypre_b;
    Hypre_ParCSRVector     Hypre_x;
+   Hypre_ParCSRVector     Hypre_y;
    Hypre_Vector        y;
 
    HYPRE_Solver        amg_solver;
@@ -1261,97 +1263,6 @@ main( int   argc,
      }
 
 
-   /*-----------------------------------------------------------
-    * Matrix-Vector and Vector Operation Debugging code from Rob Falgout's sstruct tests
-    *-----------------------------------------------------------*/
-
-#define DEBUG 1
-#if DEBUG
-   {
-      FILE *file;
-      char  filename[255];
-                       
-      /* result is 1's on the interior of the grid */
-      y = Hypre_ParCSRVector__cast2( Hypre_b, "Hypre.Vector" );
-      Hypre_ParCSRMatrix_Apply( Hypre_parcsr_A, Hypre_ParCSRVector__cast2( Hypre_x, "Hypre.Vector" ),
-                                &y );
-/*
-      hypre_SStructMatvec(1.0, A, b, 0.0, x);
-      HYPRE_SStructVectorPrint("sstruct.out.matvec", x, 0);
-*/
-      /* result is all 1's */
-/*
-      hypre_SStructCopy(b, x);
-      HYPRE_SStructVectorPrint("sstruct.out.copy", x, 0);
-*/
-      /* result is all 2's */
-/*
-      hypre_SStructScale(2.0, x);
-      HYPRE_SStructVectorPrint("sstruct.out.scale", x, 0);
-*/
-      /* result is all 0's */
-      Hypre_ParCSRVector_Axpy( Hypre_b, -2.0, Hypre_ParCSRVector__cast2( Hypre_x, "Hypre.Vector" ) );
-/*      HYPRE_SStructVectorPrint("sstruct.out.axpy", x, 0);*/
-
-      /* result is 1's with 0's on some boundaries */
-/*
-      hypre_SStructCopy(b, x);
-      sprintf(filename, "sstruct.out.gatherpre.%05d", myid);
-      file = fopen(filename, "w");
-      for (part = 0; part < data.nparts; part++)
-      {
-         pdata = data.pdata[part];
-         for (var = 0; var < pdata.nvars; var++)
-         {
-            for (box = 0; box < pdata.nboxes; box++)
-            {
-               GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
-                              ilower, iupper);
-               HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
-                                               var, values);
-               fprintf(file, "\nPart %d, var %d, box %d:\n", part, var, box);
-               for (i = 0; i < pdata.boxsizes[box]; i++)
-               {
-                  fprintf(file, "%e\n", values[i]);
-               }
-            }
-         }
-      }
-      fclose(file);
-*/
-      /* result is all 1's */
-/*
-      HYPRE_SStructVectorGather(x);
-      sprintf(filename, "sstruct.out.gatherpost.%05d", myid);
-      file = fopen(filename, "w");
-      for (part = 0; part < data.nparts; part++)
-      {
-         pdata = data.pdata[part];
-         for (var = 0; var < pdata.nvars; var++)
-         {
-            for (box = 0; box < pdata.nboxes; box++)
-            {
-               GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
-                              ilower, iupper);
-               HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
-                                               var, values);
-               fprintf(file, "\nPart %d, var %d, box %d:\n", part, var, box);
-               for (i = 0; i < pdata.boxsizes[box]; i++)
-               {
-                  fprintf(file, "%e\n", values[i]);
-               }
-            }
-         }
-      }
-*/
-      /* re-initializes x to 0 */
-/*
-      hypre_SStructAxpy(-1.0, b, x);
-*/
-   }
-#endif
-
-
       /* Break encapsulation so that the rest of the driver stays the same */
 
       temp_vecdata = Hypre_ParCSRVector__get_data( Hypre_x );
@@ -1642,6 +1553,9 @@ main( int   argc,
    
    HYPRE_IJMatrixPrint(ij_A, "driver.out.A");
    HYPRE_IJVectorPrint(ij_x, "driver.out.x0");
+   Hypre_ParCSRMatrix_Print( Hypre_parcsr_A, "driver.out.HA");
+   Hypre_ParCSRVector_Print( Hypre_b, "driver.out.Hb0");
+   Hypre_ParCSRVector_Print( Hypre_x, "driver.out.Hx0");
 
    if (num_functions > 1)
    {
@@ -1679,6 +1593,108 @@ main( int   argc,
       }
    }
  
+
+   /*-----------------------------------------------------------
+    * Matrix-Vector and Vector Operation Debugging code from Rob Falgout's sstruct tests
+    *-----------------------------------------------------------*/
+
+#define DEBUG 1
+#if DEBUG
+   {
+      FILE *file;
+      char  filename[255];
+                       
+      /* result is 1's on the interior of the grid */
+      Hypre_y = Hypre_ParCSRVector__create();
+      Hypre_ij_y = (Hypre_IJBuildVector) Hypre_ParCSRVector__cast2
+         ( Hypre_y, "Hypre.IJBuildVector" );
+      /* adjust reference counting system for new data type: */
+      Hypre_IJBuildVector_addReference( Hypre_ij_y );
+      Hypre_ParCSRVector_deleteReference( Hypre_y );
+      ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, &comm );
+      ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, comm, first_local_col,last_local_col );
+      ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y );
+      y = Hypre_ParCSRVector__cast2( Hypre_y, "Hypre.Vector" );
+
+      Hypre_ParCSRMatrix_Apply( Hypre_parcsr_A, Hypre_ParCSRVector__cast2( Hypre_b, "Hypre.Vector" ),
+                                &y );
+      Hypre_ParCSRMatrix_Print( Hypre_parcsr_A, "test.A.out" );
+      Hypre_ParCSRVector_Print( Hypre_y, "test.y.out" );
+
+
+      /* result is all 1's */
+/*
+      hypre_SStructCopy(b, x);
+      HYPRE_SStructVectorPrint("sstruct.out.copy", x, 0);
+*/
+      /* result is all 2's */
+/*
+      hypre_SStructScale(2.0, x);
+      HYPRE_SStructVectorPrint("sstruct.out.scale", x, 0);
+*/
+      /* result is all 0's */
+      Hypre_ParCSRVector_Axpy( Hypre_b, -2.0, Hypre_ParCSRVector__cast2( Hypre_x, "Hypre.Vector" ) );
+/*      HYPRE_SStructVectorPrint("sstruct.out.axpy", x, 0);*/
+
+      /* result is 1's with 0's on some boundaries */
+/*
+      hypre_SStructCopy(b, x);
+      sprintf(filename, "sstruct.out.gatherpre.%05d", myid);
+      file = fopen(filename, "w");
+      for (part = 0; part < data.nparts; part++)
+      {
+         pdata = data.pdata[part];
+         for (var = 0; var < pdata.nvars; var++)
+         {
+            for (box = 0; box < pdata.nboxes; box++)
+            {
+               GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
+                              ilower, iupper);
+               HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
+                                               var, values);
+               fprintf(file, "\nPart %d, var %d, box %d:\n", part, var, box);
+               for (i = 0; i < pdata.boxsizes[box]; i++)
+               {
+                  fprintf(file, "%e\n", values[i]);
+               }
+            }
+         }
+      }
+      fclose(file);
+*/
+      /* result is all 1's */
+/*
+      HYPRE_SStructVectorGather(x);
+      sprintf(filename, "sstruct.out.gatherpost.%05d", myid);
+      file = fopen(filename, "w");
+      for (part = 0; part < data.nparts; part++)
+      {
+         pdata = data.pdata[part];
+         for (var = 0; var < pdata.nvars; var++)
+         {
+            for (box = 0; box < pdata.nboxes; box++)
+            {
+               GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
+                              ilower, iupper);
+               HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
+                                               var, values);
+               fprintf(file, "\nPart %d, var %d, box %d:\n", part, var, box);
+               for (i = 0; i < pdata.boxsizes[box]; i++)
+               {
+                  fprintf(file, "%e\n", values[i]);
+               }
+            }
+         }
+      }
+*/
+      /* re-initializes x to 0 */
+/*
+      hypre_SStructAxpy(-1.0, b, x);
+*/
+   }
+#endif
+
+
    /*-----------------------------------------------------------
     * Solve the system using AMG
     *-----------------------------------------------------------*/

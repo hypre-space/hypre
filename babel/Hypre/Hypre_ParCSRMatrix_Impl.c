@@ -153,6 +153,10 @@ impl_Hypre_ParCSRMatrix_Apply(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.Apply) */
   /* Insert the implementation of the Apply method here... */
+   /* Apply means to multiply by a vector, y = A*x .
+      We do it by calling the HYPRE function which performs Matvec,
+      y = a*A*x + b*y , here with a=1 and b=0.
+   */
    int ierr=0;
    void * object;
    struct Hypre_ParCSRMatrix__data * data;
@@ -173,6 +177,7 @@ impl_Hypre_ParCSRMatrix_Apply(
    HypreP_x = Hypre_Vector__cast2( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
                                   "Hypre.ParCSRVector" );
    assert( HypreP_x!=NULL );
+
    HypreP_y = Hypre_Vector__cast2( Hypre_Vector_queryInterface( *y, "Hypre.ParCSRVector"),
                                   "Hypre.ParCSRVector" );
    assert( HypreP_y!=NULL );
@@ -186,7 +191,7 @@ impl_Hypre_ParCSRMatrix_Apply(
    ierr += HYPRE_IJVectorGetObject( ij_x, &object );
    xx = (HYPRE_ParVector) object;
 
-   ierr += HYPRE_ParCSRMatrixMatvec( 1.0, A, xx, 1.0, yy );
+   ierr += HYPRE_ParCSRMatrixMatvec( 1.0, A, xx, 0.0, yy );
 
    printf("impl_Hypre_ParCSRMatrix_Apply\n");
 
