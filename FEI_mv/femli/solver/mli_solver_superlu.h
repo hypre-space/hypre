@@ -13,7 +13,7 @@
 
 #include <stdio.h>
 #include "dsp_defs.h"
-#include "slu_util.h"
+#include "superlu_util.h"
 #include "matrix/mli_matrix.h"
 #include "vector/mli_vector.h"
 #include "solver/mli_solver.h"

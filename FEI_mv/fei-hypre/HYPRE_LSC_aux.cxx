@@ -66,7 +66,7 @@
 
 #ifdef HAVE_SUPERLU
 #include "dsp_defs.h"
-#include "slu_util.h"
+#include "superlu_util.h"
 #endif
 
 //---------------------------------------------------------------------------
