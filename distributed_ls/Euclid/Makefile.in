@@ -69,26 +69,34 @@ LFLAGS =\
 HEADERS =
 
 FILES =\
- src/Euclid_all.c\
- src/Euclid_mpi.c\
- src/Euclid_seq.c\
- src/Euclid_apply.c\
- src/Hash_dh.c\
- src/Mat_dh.c\
- src/Mem_dh.c\
- src/Numbering_dh.c\
- src/Parser_dh.c\
- src/SortedList_dh.c\
- src/TimeLog_dh.c\
- src/Timer_dh.c\
- src/Vec_dh.c\
- src/blas_dh.c\
- src/globalObjects.c\
- src/ilu_mpi.c\
- src/ilu_seq.c\
- src/io_dh.c\
- src/shellSort_dh.c\
- src/getRow_dh.c
+ Euclid_apply.c\
+ Euclid_dh.c\
+ ExternalRows_dh.c\
+ Factor_dh.c\
+ Hash_dh.c\
+ Hash_i_dh.c\
+ MatGenFD.c\
+ Mat_dh.c\
+ Mem_dh.c\
+ Numbering_dh.c\
+ Parser_dh.c\
+ SortedList_dh.c\
+ SortedSet_dh.c\
+ SubdomainGraph_dh.c\
+ TimeLog_dh.c\
+ Timer_dh.c\
+ Vec_dh.c\
+ blas_dh.c\
+ getRow_dh.c\
+ globalObjects.c\
+ ilu_mpi_bj.c\
+ ilu_mpi_pilu.c\
+ ilu_seq.c\
+ io_dh.c\
+ krylov_dh.c\
+ mat_dh_private.c\
+ shellSort_dh.c\
+ sig_dh.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -96,7 +104,7 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: setHomeDir libHYPRE_Euclid.a 
+all: libHYPRE_Euclid.a 
 
 driver: driver.o libHYPRE_Euclid.a
 	@echo  "Linking" $@ "... "
@@ -104,15 +112,6 @@ driver: driver.o libHYPRE_Euclid.a
 
 convert: convert.o
 	${CC} -o $@ convert.o
-
-setHomeDir:
-	@mkdir -p src
-	@mkdir -p include
-	@rm -f include/home_dh.h
-	@echo "#ifndef PCPACK_HOME_DH" > include/home_dh.h 
-	@echo "#define PCPACK_HOME_DH" >> include/home_dh.h 
-	@echo "#define MASTER_OPTIONS_LIST \"${PCPACK_DIR}/include/options_database\" " >> include/home_dh.h
-	@echo "#endif" >> include/home_dh.h
 
 install: all
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
