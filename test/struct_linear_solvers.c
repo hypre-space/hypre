@@ -4,6 +4,7 @@
 
 #include "utilities.h"
 #include "HYPRE_struct_ls.h"
+#include "krylov.h"
  
 #ifdef HYPRE_DEBUG
 #include <cegdb.h>
@@ -748,11 +749,11 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructPCGCreate(MPI_COMM_WORLD, &solver);
-      HYPRE_StructPCGSetMaxIter(solver, 50);
-      HYPRE_StructPCGSetTol(solver, 1.0e-06);
-      HYPRE_StructPCGSetTwoNorm(solver, 1);
-      HYPRE_StructPCGSetRelChange(solver, 0);
-      HYPRE_StructPCGSetLogging(solver, 1);
+      HYPRE_PCGSetMaxIter( (HYPRE_Solver)solver, 50 );
+      HYPRE_PCGSetTol( (HYPRE_Solver)solver, 1.0e-06 );
+      HYPRE_PCGSetTwoNorm( (HYPRE_Solver)solver, 1 );
+      HYPRE_PCGSetRelChange( (HYPRE_Solver)solver, 0 );
+      HYPRE_PCGSetLogging( (HYPRE_Solver)solver, 1 );
 
       if (solver_id == 10)
       {
@@ -765,10 +766,10 @@ main( int   argc,
          HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSMGSetNumPostRelax(precond, n_post);
          HYPRE_StructSMGSetLogging(precond, 0);
-         HYPRE_StructPCGSetPrecond(solver,
-                                   HYPRE_StructSMGSolve,
-                                   HYPRE_StructSMGSetup,
-                                   precond);
+         HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+                              (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
+                              (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup,
+                              (HYPRE_Solver) precond);
       }
 
       else if (solver_id == 11)
@@ -785,10 +786,10 @@ main( int   argc,
          HYPRE_StructPFMGSetSkipRelax(precond, skip);
          /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
          HYPRE_StructPFMGSetLogging(precond, 0);
-         HYPRE_StructPCGSetPrecond(solver,
-                                   HYPRE_StructPFMGSolve,
-                                   HYPRE_StructPFMGSetup,
-                                   precond);
+         HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+                              (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
+                              (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
+                              (HYPRE_Solver) precond);
       }
 
       else if (solver_id == 12)
@@ -804,10 +805,10 @@ main( int   argc,
          HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
          HYPRE_StructSparseMSGSetLogging(precond, 0);
-         HYPRE_StructPCGSetPrecond(solver,
-                                   HYPRE_StructSparseMSGSolve,
-                                   HYPRE_StructSparseMSGSetup,
-                                   precond);
+         HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+                              (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
+                              (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSetup,
+                              (HYPRE_Solver) precond);
       }
 
       else if (solver_id == 17)
@@ -817,10 +818,10 @@ main( int   argc,
          HYPRE_StructJacobiSetMaxIter(precond, 2);
          HYPRE_StructJacobiSetTol(precond, 0.0);
          HYPRE_StructJacobiSetZeroGuess(precond);
-         HYPRE_StructPCGSetPrecond(solver,
-                                   HYPRE_StructJacobiSolve,
-                                   HYPRE_StructJacobiSetup,
-                                   precond);
+         HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+                               (HYPRE_PtrToSolverFcn) HYPRE_StructJacobiSolve,
+                               (HYPRE_PtrToSolverFcn) HYPRE_StructJacobiSetup,
+                               (HYPRE_Solver) precond);
       }
 
       else if (solver_id == 18)
@@ -834,13 +835,14 @@ main( int   argc,
 #else
          precond = NULL;
 #endif
-         HYPRE_StructPCGSetPrecond(solver,
-                                   HYPRE_StructDiagScale,
-                                   HYPRE_StructDiagScaleSetup,
-                                   precond);
+         HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+                              (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
+                              (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
+                              (HYPRE_Solver) precond);
       }
 
-      HYPRE_StructPCGSetup(solver, A, b, x);
+      HYPRE_PCGSetup
+         ( (HYPRE_Solver)solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -850,15 +852,16 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Solve");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructPCGSolve(solver, A, b, x);
+      HYPRE_PCGSolve
+         ( (HYPRE_Solver) solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      HYPRE_StructPCGGetNumIterations(solver, &num_iterations);
-      HYPRE_StructPCGGetFinalRelativeResidualNorm(solver, &final_res_norm);
+      HYPRE_PCGGetNumIterations( (HYPRE_Solver)solver, &num_iterations );
+      HYPRE_PCGGetFinalRelativeResidualNorm( (HYPRE_Solver)solver, &final_res_norm );
       HYPRE_StructPCGDestroy(solver);
 
       if (solver_id == 10)
@@ -998,9 +1001,9 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructGMRESCreate(MPI_COMM_WORLD, &solver);
-      HYPRE_StructGMRESSetMaxIter(solver, 50);
-      HYPRE_StructGMRESSetTol(solver, 1.0e-06);
-      HYPRE_StructGMRESSetLogging(solver, 1);
+      HYPRE_GMRESSetMaxIter( (HYPRE_Solver)solver, 50 );
+      HYPRE_GMRESSetTol( (HYPRE_Solver)solver, 1.0e-06 );
+      HYPRE_GMRESSetLogging( (HYPRE_Solver)solver, 1 );
 
       if (solver_id == 30)
       {
@@ -1013,10 +1016,10 @@ main( int   argc,
          HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSMGSetNumPostRelax(precond, n_post);
          HYPRE_StructSMGSetLogging(precond, 0);
-         HYPRE_StructGMRESSetPrecond(solver,
-                                   HYPRE_StructSMGSolve,
-                                   HYPRE_StructSMGSetup,
-                                   precond);
+         HYPRE_GMRESSetPrecond( (HYPRE_Solver)solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup,
+                                (HYPRE_Solver)precond);
       }
 
       else if (solver_id == 31)
@@ -1033,10 +1036,10 @@ main( int   argc,
          HYPRE_StructPFMGSetSkipRelax(precond, skip);
          /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
          HYPRE_StructPFMGSetLogging(precond, 0);
-         HYPRE_StructGMRESSetPrecond(solver,
-                                   HYPRE_StructPFMGSolve,
-                                   HYPRE_StructPFMGSetup,
-                                   precond);
+         HYPRE_GMRESSetPrecond( (HYPRE_Solver)solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
+                                (HYPRE_Solver)precond);
       }
 
       else if (solver_id == 32)
@@ -1052,10 +1055,10 @@ main( int   argc,
          HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
          HYPRE_StructSparseMSGSetLogging(precond, 0);
-         HYPRE_StructGMRESSetPrecond(solver,
-                                   HYPRE_StructSparseMSGSolve,
-                                   HYPRE_StructSparseMSGSetup,
-                                   precond);
+         HYPRE_GMRESSetPrecond( (HYPRE_Solver)solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSetup,
+                                (HYPRE_Solver)precond);
       }
 
       else if (solver_id == 37)
@@ -1065,10 +1068,10 @@ main( int   argc,
          HYPRE_StructJacobiSetMaxIter(precond, 2);
          HYPRE_StructJacobiSetTol(precond, 0.0);
          HYPRE_StructJacobiSetZeroGuess(precond);
-         HYPRE_StructGMRESSetPrecond(solver,
-                                   HYPRE_StructJacobiSolve,
-                                   HYPRE_StructJacobiSetup,
-                                   precond);
+         HYPRE_GMRESSetPrecond( (HYPRE_Solver)solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructJacobiSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructJacobiSetup,
+                                (HYPRE_Solver)precond);
       }
 
       else if (solver_id == 38)
@@ -1082,13 +1085,14 @@ main( int   argc,
 #else
          precond = NULL;
 #endif
-         HYPRE_StructGMRESSetPrecond(solver,
-                                   HYPRE_StructDiagScale,
-                                   HYPRE_StructDiagScaleSetup,
-                                   precond);
+         HYPRE_GMRESSetPrecond( (HYPRE_Solver)solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
+                                (HYPRE_Solver)precond);
       }
 
-      HYPRE_StructGMRESSetup(solver, A, b, x);
+      HYPRE_GMRESSetup
+         ( (HYPRE_Solver)solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -1098,15 +1102,16 @@ main( int   argc,
       time_index = hypre_InitializeTiming("GMRES Solve");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructGMRESSolve(solver, A, b, x);
+      HYPRE_GMRESSolve
+         ( (HYPRE_Solver)solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      HYPRE_StructGMRESGetNumIterations(solver, &num_iterations);
-      HYPRE_StructGMRESGetFinalRelativeResidualNorm(solver, &final_res_norm);
+      HYPRE_GMRESGetNumIterations( (HYPRE_Solver)solver, &num_iterations);
+      HYPRE_GMRESGetFinalRelativeResidualNorm( (HYPRE_Solver)solver, &final_res_norm);
       HYPRE_StructGMRESDestroy(solver);
 
       if (solver_id == 30)
