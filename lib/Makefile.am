@@ -451,9 +451,9 @@ hypre-stamp:
 	do \
 	  if [ -d ../$$i ]; \
 	  then \
-	    cp ../$$i/*.lo .; \
-	    cp ../$$i/.libs/*.o .libs; \
-	    cp ../$$i/*.o .; \
+	    cp -f ../$$i/*.lo .; \
+	    cp -f ../$$i/.libs/*.o .libs; \
+	    cp -f ../$$i/*.o .; \
 	  fi; \
 	done
 
