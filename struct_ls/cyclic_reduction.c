@@ -923,7 +923,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          }
 
          fi = 0;
-         hypre_ForBoxArrayI(ci, cgrid_boxes)
+         hypre_ForBoxI(ci, cgrid_boxes)
             {
                while (fgrid_ids[fi] != cgrid_ids[ci])
                {
