@@ -48,6 +48,7 @@ HYPRE_BuildIJMatrixFromDistributedMatrix(
    MPI_Comm comm;
    int M, N;
    int first_local_row, last_local_row;
+   int first_local_col, last_local_col;
    int i;
    int size, *col_ind;
    double *values;
@@ -66,10 +67,12 @@ HYPRE_BuildIJMatrixFromDistributedMatrix(
    if(ierr) return(ierr);
 
    ierr = HYPRE_GetDistributedMatrixLocalRange( DistributedMatrix, 
-             &first_local_row, &last_local_row );
+             &first_local_row, &last_local_row ,
+             &first_local_col, &last_local_col );
 
    ierr = HYPRE_SetIJMatrixLocalSize( *ij_matrix, 
-                last_local_row-first_local_row+1, N );
+                last_local_row-first_local_row+1,
+                last_local_col-first_local_col+1 );
 
    ierr = HYPRE_InitializeIJMatrix( *ij_matrix );
    if(ierr) return(ierr);
