@@ -14,6 +14,7 @@ VPATH = @srcdir@
 
 # These are directories that are officially in HYPRE
 HYPRE_DIRS =\
+ blas\
  utilities\
  struct_matrix_vector\
  struct_linear_solvers
@@ -33,18 +34,21 @@ HYPRE_EXTRA_DIRS =\
 
 #These are the directories for structured matrices
 HYPRE_STRUCT_DIRS =\
+ blas\
  utilities\
  struct_matrix_vector\
  struct_linear_solvers
 
 #These are the directories for sequential structured matrices
 HYPRE_SEQ_DIRS =\
+ blas\
  utilities\
  seq_matrix_vector\
  seq_linear_solvers/pamg
 
 #These are the directories for parallel compressed sparse row
 HYPRE_PARCSR_DIRS =\
+ blas\
  utilities\
  seq_matrix_vector\
  parcsr_matrix_vector\
@@ -55,6 +59,7 @@ HYPRE_PARCSR_DIRS =\
 
 #These are the directories for PILUT accessed through CI using PETSc
 HYPRE_CIPETSCPILUT_DIRS =\
+ blas\
  utilities\
  CI_struct_matrix_vector\
  CI_struct_linear_solvers\
