@@ -75,23 +75,21 @@ hypre_BoomerAMGCoarseParms(MPI_Comm comm,
 
    MPI_Comm_size(comm,&num_procs);
 
+   for (i=0; i < local_num_variables; i++)
+   {
+      if (CF_marker[i] == 1) local_coarse_size++;
+   }
    if (num_functions > 1)
    {
       coarse_dof_func = hypre_CTAlloc(int,local_coarse_size);
 
+      local_coarse_size = 0;
       for (i=0; i < local_num_variables; i++)
       {
          if (CF_marker[i] == 1)
             coarse_dof_func[local_coarse_size++] = dof_func[i];
       }
       *coarse_dof_func_ptr    = coarse_dof_func;
-   }
-   else
-   {
-      for (i=0; i < local_num_variables; i++)
-      {
-         if (CF_marker[i] == 1) local_coarse_size++;
-      }
    }
 
    coarse_pnts_global = hypre_CTAlloc(int,num_procs+1);
