@@ -167,6 +167,27 @@ AC_ARG_WITH(purify, [\
   fi
 )
 
+AC_ARG_WITH(purify-to-file, [\
+  --with-purify-to-file   direct purify output to the file \"purify.log\"],
+  if test "$casc_user_chose_compilers" = "no"
+  then
+    CC=cc
+    CXX=CC
+    CFLAGS="$CFLAGS -g"
+    CXXFLAGS="$CXXFLAGS -g"
+    casc_user_chose_compilers=yes
+  fi
+  if test "$withval" = "no"
+  then
+    PREPEND=""
+  elif test "$withval" = "yes"
+  then
+    PREPEND="purify -log-file=purify.log -append-logfile=yes -best-effort"
+  else
+    PREPEND="purify $withval"
+  fi
+)
+
 AC_ARG_WITH(cegdb, [\
   --with-cegdb            assign gcc and g++ as the c and c++ compilers 
 			  and -g as the compiler flag and link in -lcegdb and
