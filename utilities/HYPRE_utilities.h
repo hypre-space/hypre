@@ -29,6 +29,12 @@
 extern "C" {
 #endif
 
+/* 
+ * Before a version of HYPRE goes out the door, increment the version
+ * number and check in this file (for CVS to substitute the Date).
+ */
+#define HYPRE_Version() "HYPRE 1.0.0 $Date$ Compiled: " __DATE__ " " __TIME__
+
 #ifdef HYPRE_USE_PTHREADS
 #ifndef hypre_MAX_THREADS
 #define hypre_MAX_THREADS 128
