@@ -452,6 +452,7 @@ am__libHYPRE_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/struct_mv/box.c \
 	$(top_srcdir)/struct_mv/box_algebra.c \
 	$(top_srcdir)/struct_mv/box_alloc.c \
+	$(top_srcdir)/struct_mv/box_boundary.c \
 	$(top_srcdir)/struct_mv/box_neighbors.c \
 	$(top_srcdir)/struct_mv/grow.c \
 	$(top_srcdir)/struct_mv/communication_info.c \
@@ -693,7 +694,7 @@ am__objects_3 = $(am__objects_1) $(am__objects_2) colamd.$(OBJEXT) \
 	HYPRE_struct_matrix.$(OBJEXT) HYPRE_struct_stencil.$(OBJEXT) \
 	HYPRE_struct_vector.$(OBJEXT) box.$(OBJEXT) \
 	box_algebra.$(OBJEXT) box_alloc.$(OBJEXT) \
-	box_neighbors.$(OBJEXT) grow.$(OBJEXT) \
+	box_boundary.$(OBJEXT) box_neighbors.$(OBJEXT) grow.$(OBJEXT) \
 	communication_info.$(OBJEXT) computation.$(OBJEXT) \
 	project.$(OBJEXT) struct_axpy.$(OBJEXT) \
 	struct_communication.$(OBJEXT) struct_copy.$(OBJEXT) \
@@ -1107,6 +1108,7 @@ am__libHYPRE_LSI_a_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/struct_mv/box.c \
 	$(top_srcdir)/struct_mv/box_algebra.c \
 	$(top_srcdir)/struct_mv/box_alloc.c \
+	$(top_srcdir)/struct_mv/box_boundary.c \
 	$(top_srcdir)/struct_mv/box_neighbors.c \
 	$(top_srcdir)/struct_mv/grow.c \
 	$(top_srcdir)/struct_mv/communication_info.c \
@@ -1538,6 +1540,7 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/struct_mv/box.c \
 	$(top_srcdir)/struct_mv/box_algebra.c \
 	$(top_srcdir)/struct_mv/box_alloc.c \
+	$(top_srcdir)/struct_mv/box_boundary.c \
 	$(top_srcdir)/struct_mv/box_neighbors.c \
 	$(top_srcdir)/struct_mv/grow.c \
 	$(top_srcdir)/struct_mv/communication_info.c \
@@ -1708,7 +1711,7 @@ am__objects_6 = $(am__objects_4) $(am__objects_5) colamd.lo \
 	F90_HYPRE_struct_vector.lo HYPRE_struct_grid.lo \
 	HYPRE_struct_matrix.lo HYPRE_struct_stencil.lo \
 	HYPRE_struct_vector.lo box.lo box_algebra.lo box_alloc.lo \
-	box_neighbors.lo grow.lo communication_info.lo computation.lo \
+	box_boundary.lo box_neighbors.lo grow.lo communication_info.lo computation.lo \
 	project.lo struct_axpy.lo struct_communication.lo \
 	struct_copy.lo struct_grid.lo struct_io.lo struct_innerprod.lo \
 	struct_matrix.lo struct_matrix_mask.lo struct_matvec.lo \
@@ -2116,6 +2119,7 @@ am__libHYPRE_LSI_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/struct_mv/box.c \
 	$(top_srcdir)/struct_mv/box_algebra.c \
 	$(top_srcdir)/struct_mv/box_alloc.c \
+	$(top_srcdir)/struct_mv/box_boundary.c \
 	$(top_srcdir)/struct_mv/box_neighbors.c \
 	$(top_srcdir)/struct_mv/grow.c \
 	$(top_srcdir)/struct_mv/communication_info.c \
@@ -2794,6 +2798,7 @@ FILES = \
  $(top_srcdir)/struct_mv/box.c\
  $(top_srcdir)/struct_mv/box_algebra.c\
  $(top_srcdir)/struct_mv/box_alloc.c\
+ $(top_srcdir)/struct_mv/box_boundary.c\
  $(top_srcdir)/struct_mv/box_neighbors.c\
  $(top_srcdir)/struct_mv/grow.c\
  $(top_srcdir)/struct_mv/communication_info.c\
@@ -6471,6 +6476,15 @@ box_alloc.obj: $(top_srcdir)/struct_mv/box_alloc.c
 
 box_alloc.lo: $(top_srcdir)/struct_mv/box_alloc.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o box_alloc.lo `test -f '$(top_srcdir)/struct_mv/box_alloc.c' || echo '$(srcdir)/'`$(top_srcdir)/struct_mv/box_alloc.c
+
+box_boundary.o: $(top_srcdir)/struct_mv/box_boundary.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o box_boundary.o `test -f '$(top_srcdir)/struct_mv/box_boundary.c' || echo '$(srcdir)/'`$(top_srcdir)/struct_mv/box_boundary.c
+
+box_boundary.obj: $(top_srcdir)/struct_mv/box_boundary.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o box_boundary.obj `if test -f '$(top_srcdir)/struct_mv/box_boundary.c'; then $(CYGPATH_W) '$(top_srcdir)/struct_mv/box_boundary.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/struct_mv/box_boundary.c'; fi`
+
+box_boundary.lo: $(top_srcdir)/struct_mv/box_boundary.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o box_boundary.lo `test -f '$(top_srcdir)/struct_mv/box_boundary.c' || echo '$(srcdir)/'`$(top_srcdir)/struct_mv/box_boundary.c
 
 box_neighbors.o: $(top_srcdir)/struct_mv/box_neighbors.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o box_neighbors.o `test -f '$(top_srcdir)/struct_mv/box_neighbors.c' || echo '$(srcdir)/'`$(top_srcdir)/struct_mv/box_neighbors.c

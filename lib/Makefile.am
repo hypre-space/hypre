@@ -494,6 +494,7 @@ FILES = \
  $(top_srcdir)/struct_mv/box.c\
  $(top_srcdir)/struct_mv/box_algebra.c\
  $(top_srcdir)/struct_mv/box_alloc.c\
+ $(top_srcdir)/struct_mv/box_boundary.c\
  $(top_srcdir)/struct_mv/box_neighbors.c\
  $(top_srcdir)/struct_mv/grow.c\
  $(top_srcdir)/struct_mv/communication_info.c\
