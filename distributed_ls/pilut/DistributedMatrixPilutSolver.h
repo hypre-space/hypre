@@ -92,7 +92,7 @@ int Ul_timer;
 #define ntogo (globals->ntogo)
 #define nleft (globals->nleft)
 #define global_maxnz (globals->maxnz)
-#define map (globals->map)
+#define pilut_map (globals->map)
 #define vrowdist (globals->vrowdist)
 #define pilu_recv (globals->pilu_recv)
 #define pilu_send (globals->pilu_send)
