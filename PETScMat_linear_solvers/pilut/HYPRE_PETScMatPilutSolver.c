@@ -48,7 +48,8 @@ int HYPRE_FreePETScMatPilutSolver (
 
    /* Distributed Matrix was created not by user but by 
       HYPRE_ConvertPETScMatrixToDistributedMatrix, so we must free it */
-  ierr = HYPRE_LimitedFreeDistributedMatrix( HYPRE_DistributedMatrixPilutSolverGetMatrix( 
+
+  ierr = HYPRE_DistributedMatrixLimitedDestroy( HYPRE_DistributedMatrixPilutSolverGetMatrix( 
      hypre_PETScMatPilutSolverDistributedSolver ( solver ) ) );
 
   ierr = HYPRE_FreeDistributedMatrixPilutSolver( 
