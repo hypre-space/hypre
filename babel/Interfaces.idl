@@ -569,7 +569,7 @@ package bHYPRE version 1.0.0
    {
       int SetGrid(in StructGrid grid);
 
-      int SetStencil(in StructStencil stencil);   // really needed?
+      int SetNumGhost(in array<int,1,column-major> num_ghost); /* call before Initialize */
 
       int SetValue(in array<int,1,column-major> grid_index,
                    in double value);
@@ -1245,6 +1245,10 @@ package bHYPRE version 1.0.0
     * RDF: Documentation goes here.
     **/
    class GMRES implements-all PreconditionedSolver
+   {
+   }
+
+   class StructSMG implements-all Solver
    {
    }
 }
