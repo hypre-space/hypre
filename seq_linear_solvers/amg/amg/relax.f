@@ -4,7 +4,7 @@ c     relaxation routines
 c     
 c=====================================================================
 c     
-      subroutine relax(ierr,itrel,iprel,ierel,iurel,
+      subroutine relax(ierr,itrel,iprel,
      *     imin,imax,vtmp,u,f,a,ia,ja,iu,icg,ipmn,ipmx,iv)
 c     
 c---------------------------------------------------------------------
@@ -38,7 +38,9 @@ c
       dimension vtmp(*)
 c     
 c---------------------------------------------------------------------
-c     
+c
+      ierel = 9
+      iurel = 9     
       go to (100,200,300,999,999,999,999,800,900),itrel
       return
 c     
