@@ -156,6 +156,21 @@ main( int   argc,
          arg_index++;
          coarsen_type      = 3;
       }    
+      else if ( strcmp(argv[arg_index], "-rugeL") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 4;
+      }    
+      else if ( strcmp(argv[arg_index], "-rugeL2b") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 5;
+      }    
+      else if ( strcmp(argv[arg_index], "-rugeL3") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 6;
+      }          
       else if ( strcmp(argv[arg_index], "-rugerlx") == 0 )
       {
          arg_index++;
@@ -334,6 +349,9 @@ main( int   argc,
       printf("   -ruge                 : Ruge coarsening (local)\n");
       printf("   -ruge3                : third pass on boundary\n");
       printf("   -ruge2b               : 2nd pass is global\n");
+      printf("   -rugeL                : Ruge List based (local)\n");
+      printf("   -rugeL3               : (list) third pass on boundary\n");
+      printf("   -rugeL2b              : (list) 2nd pass is global\n");
       printf("   -gm                   : use global measures\n");
       printf("\n");
       printf("  -rlx <val>             : relaxation type\n");
