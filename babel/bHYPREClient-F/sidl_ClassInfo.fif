@@ -1,13 +1,13 @@
 C       
-C       File:          SIDL_ClassInfo_Impl.f
-C       Symbol:        SIDL.ClassInfo-v0.8.2
+C       File:          sidl_ClassInfo_Impl.f
+C       Symbol:        sidl.ClassInfo-v0.9.0
 C       Symbol Type:   interface
-C       Babel Version: 0.8.2
-C       SIDL Created:  20030326 16:09:17 PST
-C       Generated:     20030401 14:48:14 PST
+C       Babel Version: 0.9.8
+C       sidl Created:  20050204 10:21:31 PST
+C       Generated:     20050208 15:29:15 PST
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
-C       Description:   Client-side documentation text for SIDL.ClassInfo
+C       Description:   Client-side documentation text for sidl.ClassInfo
 C       
 C       Copyright (c) 2000-2002, The Regents of the University of California.
 C       Produced at the Lawrence Livermore National Laboratory.
@@ -34,15 +34,15 @@ C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.8.2
-C       source-line   = 332
-C       source-url    = file:/home/epperly/current/release_082/linux_gcc2/share/../../babel-0.8.2/runtime/sidl/sidl.sidl
+C       babel-version = 0.9.8
+C       source-line   = 419
+C       source-url    = file:/home/painter/babel-0.9.8/share/../runtime/sidl/sidl.sidl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
 
 C       
-C       Symbol "SIDL.ClassInfo" (version 0.8.2)
+C       Symbol "sidl.ClassInfo" (version 0.9.0)
 C       
 C       This provides an interface to the meta-data available on the
 C       class.
@@ -55,11 +55,11 @@ C
 C       Cast method for interface and type conversions.
 C       
 
-        subroutine SIDL_ClassInfo__cast_f(ref, retval)
+        subroutine sidl_ClassInfo__cast_f(ref, retval)
         implicit none
 C       in opaque ref
         integer*8 ref
-C       out SIDL.ClassInfo retval
+C       out sidl.ClassInfo retval
         integer*8 retval
         end
 
@@ -68,9 +68,9 @@ C
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine SIDL_ClassInfo__cast2_f(self, name, retval)
+        subroutine sidl_ClassInfo__cast2_f(self, name, retval)
         implicit none
-C       in SIDL.ClassInfo self
+C       in sidl.ClassInfo self
         integer*8 self
 C       in string name
         character*(*) name
@@ -82,7 +82,7 @@ C       out opaque retval
 C       
 C       <p>
 C       Add one to the intrinsic reference count in the underlying object.
-C       Object in <code>SIDL</code> have an intrinsic reference count.
+C       Object in <code>sidl</code> have an intrinsic reference count.
 C       Objects continue to exist as long as the reference count is
 C       positive. Clients should call this method whenever they
 C       create another ongoing reference to an object or interface.
@@ -94,9 +94,9 @@ C       class.
 C       </p>
 C       
 
-        subroutine SIDL_ClassInfo_addRef_f(self)
+        subroutine sidl_ClassInfo_addRef_f(self)
         implicit none
-C       in SIDL.ClassInfo self
+C       in sidl.ClassInfo self
         integer*8 self
         end
 
@@ -104,14 +104,14 @@ C       in SIDL.ClassInfo self
 C       
 C       Decrease by one the intrinsic reference count in the underlying
 C       object, and delete the object if the reference is non-positive.
-C       Objects in <code>SIDL</code> have an intrinsic reference count.
+C       Objects in <code>sidl</code> have an intrinsic reference count.
 C       Clients should call this method whenever they remove a
 C       reference to an object or interface.
 C       
 
-        subroutine SIDL_ClassInfo_deleteRef_f(self)
+        subroutine sidl_ClassInfo_deleteRef_f(self)
         implicit none
-C       in SIDL.ClassInfo self
+C       in sidl.ClassInfo self
         integer*8 self
         end
 
@@ -121,11 +121,11 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine SIDL_ClassInfo_isSame_f(self, iobj, retval)
+        subroutine sidl_ClassInfo_isSame_f(self, iobj, retval)
         implicit none
-C       in SIDL.ClassInfo self
+C       in sidl.ClassInfo self
         integer*8 self
-C       in SIDL.BaseInterface iobj
+C       in sidl.BaseInterface iobj
         integer*8 iobj
 C       out bool retval
         logical retval
@@ -134,7 +134,7 @@ C       out bool retval
 
 C       
 C       Check whether the object can support the specified interface or
-C       class.  If the <code>SIDL</code> type name in <code>name</code>
+C       class.  If the <code>sidl</code> type name in <code>name</code>
 C       is supported, then a reference to that object is returned with the
 C       reference count incremented.  The callee will be responsible for
 C       calling <code>deleteRef</code> on the returned object.  If
@@ -142,27 +142,27 @@ C       the specified type is not supported, then a null reference is
 C       returned.
 C       
 
-        subroutine SIDL_ClassInfo_queryInt_f(self, name, retval)
+        subroutine sidl_ClassInfo_queryInt_f(self, name, retval)
         implicit none
-C       in SIDL.ClassInfo self
+C       in sidl.ClassInfo self
         integer*8 self
 C       in string name
         character*(*) name
-C       out SIDL.BaseInterface retval
+C       out sidl.BaseInterface retval
         integer*8 retval
         end
 
 
 C       
 C       Return whether this object is an instance of the specified type.
-C       The string name must be the <code>SIDL</code> type name.  This
+C       The string name must be the <code>sidl</code> type name.  This
 C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine SIDL_ClassInfo_isType_f(self, name, retval)
+        subroutine sidl_ClassInfo_isType_f(self, name, retval)
         implicit none
-C       in SIDL.ClassInfo self
+C       in sidl.ClassInfo self
         integer*8 self
 C       in string name
         character*(*) name
@@ -175,11 +175,11 @@ C
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine SIDL_ClassInfo_getClassInfo_f(self, retval)
+        subroutine sidl_ClassInfo_getClassInfo_f(self, retval)
         implicit none
-C       in SIDL.ClassInfo self
+C       in sidl.ClassInfo self
         integer*8 self
-C       out SIDL.ClassInfo retval
+C       out sidl.ClassInfo retval
         integer*8 retval
         end
 
@@ -188,9 +188,9 @@ C
 C       Return the name of the class.
 C       
 
-        subroutine SIDL_ClassInfo_getName_f(self, retval)
+        subroutine sidl_ClassInfo_getName_f(self, retval)
         implicit none
-C       in SIDL.ClassInfo self
+C       in sidl.ClassInfo self
         integer*8 self
 C       out string retval
         character*(*) retval
@@ -202,9 +202,9 @@ C       Get the version of the intermediate object representation.
 C       This will be in the form of major_version.minor_version.
 C       
 
-        subroutine SIDL_ClassInfo_getIORVersion_f(self, retval)
+        subroutine sidl_ClassInfo_getIORVersion_f(self, retval)
         implicit none
-C       in SIDL.ClassInfo self
+C       in sidl.ClassInfo self
         integer*8 self
 C       out string retval
         character*(*) retval
