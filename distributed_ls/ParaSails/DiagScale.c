@@ -172,11 +172,16 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
        This is simply the external indices */
     /* ExchangeDiagEntries will sort the list - so give it a copy */
     len = numb->num_ind - numb->num_loc;
-    ind = (int *) malloc(len * sizeof(int));
-    memcpy(ind, &numb->local_to_global[numb->num_loc], len * sizeof(int));
+    ind = NULL;
+    p->ext_diags = NULL;
+    if (len)
+    {
+        ind = (int *) malloc(len * sizeof(int));
+        memcpy(ind, &numb->local_to_global[numb->num_loc], len * sizeof(int));
 
-    /* buffer for receiving diagonal values from other processors */
-    p->ext_diags = (double *) malloc(len * sizeof(double));
+        /* buffer for receiving diagonal values from other processors */
+        p->ext_diags = (double *) malloc(len * sizeof(double));
+    }
 
     MPI_Comm_size(A->comm, &npes);
     requests = (MPI_Request *) malloc(npes * sizeof(MPI_Request));
@@ -190,7 +195,9 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     free(replies_list);
 
     mem = MemCreate();
-    requests2 = (MPI_Request *) malloc(num_replies * sizeof(MPI_Request));
+    requests2 = NULL;
+    if (num_replies)
+        requests2 = (MPI_Request *) malloc(num_replies * sizeof(MPI_Request));
 
     ExchangeDiagEntriesServer(A->comm, A, p->local_diags, num_replies,
 	mem, requests2);
@@ -204,7 +211,9 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     /* ind contains global indices corresponding to order that entries
        are stored in ext_diags.  Reorder ext_diags in original ordering */
     NumberingGlobalToLocal(numb, len, ind, ind);
-    temp = (double *) malloc(len * sizeof(double));
+    temp = NULL;
+    if (len)
+        temp = (double *) malloc(len * sizeof(double));
     for (j=0; j<len; j++)
 	temp[ind[j]-p->offset] = p->ext_diags[j];
 

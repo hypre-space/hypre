@@ -342,8 +342,8 @@ LoadBal *LoadBalDonate(MPI_Comm comm, Matrix *mat, Numbering *numb,
     int i, npes;
     int    *donor_data_pe;
     double *donor_data_cost;
-    MPI_Request *requests;
-    MPI_Status  *statuses;
+    MPI_Request *requests = NULL;
+    MPI_Status  *statuses = NULL;
 
     p = (LoadBal *) malloc(sizeof(LoadBal));
 
@@ -355,11 +355,18 @@ LoadBal *LoadBalDonate(MPI_Comm comm, Matrix *mat, Numbering *numb,
     LoadBalInit(comm, local_cost, beta, &p->num_given, 
         donor_data_pe, donor_data_cost, &p->num_taken);
 
-    p->donor_data = (DonorData *) malloc(p->num_given * sizeof(DonorData));
-    p->recip_data = (RecipData *) malloc(p->num_taken * sizeof(RecipData));
+    p->recip_data = NULL;
+    p->donor_data = NULL;
 
-    requests = (MPI_Request *) malloc(p->num_given * sizeof(MPI_Request));
-    statuses = (MPI_Status  *) malloc(p->num_given * sizeof(MPI_Status));
+    if (p->num_taken)
+        p->recip_data = (RecipData *) malloc(p->num_taken * sizeof(RecipData));
+
+    if (p->num_given)
+    {
+        p->donor_data = (DonorData *) malloc(p->num_given * sizeof(DonorData));
+        requests = (MPI_Request *) malloc(p->num_given * sizeof(MPI_Request));
+        statuses = (MPI_Status  *) malloc(p->num_given * sizeof(MPI_Status));
+    }
 
     LoadBalDonorSend(comm, mat, numb, p->num_given,
         donor_data_pe, donor_data_cost, p->donor_data, &p->beg_row, requests);
@@ -389,11 +396,14 @@ void LoadBalReturn(LoadBal *p, MPI_Comm comm, Matrix *mat)
 {
     int i;
 
-    MPI_Request *requests;
-    MPI_Status  *statuses;
+    MPI_Request *requests = NULL;
+    MPI_Status  *statuses = NULL;
 
-    requests = (MPI_Request *) malloc(p->num_taken * sizeof(MPI_Request));
-    statuses = (MPI_Status  *) malloc(p->num_taken * sizeof(MPI_Status));
+    if (p->num_taken)
+    {
+        requests = (MPI_Request *) malloc(p->num_taken * sizeof(MPI_Request));
+        statuses = (MPI_Status  *) malloc(p->num_taken * sizeof(MPI_Status));
+    }
 
     LoadBalRecipSend(comm, p->num_taken, p->recip_data, requests);
 

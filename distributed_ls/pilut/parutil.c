@@ -41,7 +41,7 @@ void hypre_errexit( char *f_str, ...)
 void hypre_my_abort( int inSignal, hypre_PilutSolverGlobals *globals )
 {
   printf( "PE %d caught sig %d\n", mype, inSignal );
-  fflush(0);
+  fflush(stdout);
   MPI_Abort( pilut_comm, inSignal );
 }
 

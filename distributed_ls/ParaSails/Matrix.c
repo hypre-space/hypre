@@ -633,8 +633,13 @@ static void SetupSends(Matrix *mat, int *inlist)
     mat->sendlen = 0;
     for (i=0; i<npes; i++)
         mat->sendlen += inlist[i];
-    mat->sendbuf = (double *) malloc(mat->sendlen * sizeof(double));
-    mat->sendind = (int *) malloc(mat->sendlen * sizeof(int));
+    mat->sendbuf = NULL;
+    mat->sendind = NULL;
+    if (mat->sendlen)
+    {
+        mat->sendbuf = (double *) malloc(mat->sendlen * sizeof(double));
+        mat->sendind = (int *) malloc(mat->sendlen * sizeof(int));
+    }
 
     j = 0;
     mat->num_send = 0;

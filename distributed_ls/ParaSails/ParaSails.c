@@ -696,8 +696,8 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
 
     int i;
     int count;
-    MPI_Request *requests;
-    MPI_Status *statuses;
+    MPI_Request *requests = NULL;
+    MPI_Status *statuses = NULL;
     int npes;
     int num_replies, *replies_list;
 
@@ -744,8 +744,11 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
     num_replies = FindNumReplies(comm, replies_list);
     free(replies_list);
 
-    requests = (MPI_Request *) malloc(num_replies * sizeof(MPI_Request));
-    statuses = (MPI_Status *) malloc(num_replies * sizeof(MPI_Status));
+    if (num_replies)
+    {
+        requests = (MPI_Request *) malloc(num_replies * sizeof(MPI_Request));
+        statuses = (MPI_Status *) malloc(num_replies * sizeof(MPI_Status));
+    }
 
     bufferlen = 10; /* size will grow if get a long msg */
     buffer = (int *) malloc(bufferlen * sizeof(int));
@@ -847,7 +850,7 @@ static void ConstructPatternForEachRow(int symmetric, PrunedRows *pruned_rows,
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
     printf("%d: nnz: %10d  ********* cost %7.1e\n", mype, nnz, *costp);
-    fflush(NULL);
+    fflush(stdout);
     }
 #endif
 
@@ -972,7 +975,7 @@ static void ConstructPatternForEachRowExt(int symmetric,
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
     printf("%d: nnz: %10d  ********* cost %7.1e\n", mype, nnz, *costp);
-    fflush(NULL);
+    fflush(stdout);
     }
 #endif
 
@@ -1157,7 +1160,7 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
     printf("%d: Time for ahat: %f, for local solves: %f\n", mype, timea, timet);
     printf("%d: ahatcost: %7.1e, numrows: %d, maxlen: %d\n",
         mype, ahatcost, mat->end_row-local_beg_row+1, maxlen);
-    fflush(NULL);
+    fflush(stdout);
     }
 #endif
 }
@@ -1325,7 +1328,7 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
     printf("%d: Time for ahat: %f, for local solves: %f\n", mype, timea, timet);
-    fflush(NULL);
+    fflush(stdout);
     }
 #endif
 }
@@ -1933,7 +1936,7 @@ double ParaSailsStatsPattern(ParaSails *ps, Matrix *A)
     printf("Nnz (ratio)           : %d (%5.2f)\n", nnzm, nnzm/(double)nnza);
     printf("Max setup pattern time: %8.1f\n", max_pattern_time);
     printf("*************************************************\n");
-    fflush(NULL);
+    fflush(stdout);
 
     return ave_cost;
 }
@@ -1993,5 +1996,5 @@ void ParaSailsStatsValues(ParaSails *ps, Matrix *A)
 
     free(setup_times);
 
-    fflush(NULL);
+    fflush(stdout);
 }

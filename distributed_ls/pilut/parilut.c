@@ -94,7 +94,7 @@ void hypre_ParILUT(DataDistType *ddist, FactorMatType *ldu,
 
   while( nleft > 0 ) {
     /* printf("PE %d Nlevel: %d, Nleft: %d, (%d,%d)\n",
-     * mype, nlevel, nleft, ndone, ntogo); fflush(0); */
+     * mype, nlevel, nleft, ndone, ntogo); fflush(stdout); */
 
     hypre_ComputeCommInfo(rmats[nlevel%2], &cinfo, ddist->ddist_rowdist, globals );
     nmis = hypre_SelectSet(rmats[nlevel%2], &cinfo, perm, iperm, newperm, newiperm, globals );
@@ -102,9 +102,9 @@ void hypre_ParILUT(DataDistType *ddist, FactorMatType *ldu,
     hypre_FactorLocal(ldu, rmats[nlevel%2], rmats[(nlevel+1)%2], &cinfo,
 		perm, iperm, newperm, newiperm, nmis, tol, globals );
 
-    fflush(0); MPI_Barrier(pilut_comm);
+    fflush(stdout); MPI_Barrier(pilut_comm);
     hypre_SendFactoredRows(ldu, &cinfo, newperm, nmis, globals);
-    fflush(0); MPI_Barrier(pilut_comm);
+    fflush(stdout); MPI_Barrier(pilut_comm);
 
     hypre_ComputeRmat(ldu, rmats[nlevel%2], rmats[(nlevel+1)%2], &cinfo,
 		perm, iperm, newperm, newiperm, nmis, tol, globals);

@@ -112,13 +112,13 @@ int main(int argc, char *argv[])
 #if PARASAILS_EXT_PATTERN
                 printf("Enter parameters threshg, thresh, nlevels, "
 	            "filter, beta:\n");
-	        fflush(NULL);
+	        fflush(stdout);
                 scanf("%lf %lf %d %lf %lf", &threshg, &thresh, &nlevels, 
 		    &filter, &loadbal);
 #else
                 printf("Enter parameters thresh, nlevels, "
 	            "filter, beta:\n");
-	        fflush(NULL);
+	        fflush(stdout);
                 scanf("%lf %d %lf %lf", &thresh, &nlevels, 
 		    &filter, &loadbal);
 #endif

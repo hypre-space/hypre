@@ -22,7 +22,7 @@ void hypre_PrintLine(char *str, hypre_PilutSolverGlobals *globals)
 {
   printf("PE %d ---- %-27s (%s, %d)\n",
 	 mype, str, __FILE__, __LINE__);
-  fflush(0);
+  fflush(stdout);
 }
 
 
@@ -51,7 +51,7 @@ long hypre_IDX_Checksum(const int *v, int len, const char *msg, int tag,
 
   printf("PE %d [i%3d] %15s/%3d chk: %16lx [len %4d]\n", 
 	 mype, numChk, msg, tag, sum, len);
-  fflush(0);
+  fflush(stdout);
 
   numChk++;
 
@@ -73,7 +73,7 @@ long hypre_INT_Checksum(const int *v, int len, const char *msg, int tag,
 
   printf("PE %d [d%3d] %15s/%3d chk: %16lx [len %4d]\n",
 	 mype, numChk, msg, tag, sum, len);
-  fflush(0);
+  fflush(stdout);
 
   numChk++;
 
@@ -96,7 +96,7 @@ long hypre_FP_Checksum(const double *v, int len, const char *msg, int tag,
 
   printf("PE %d [f%3d] %15s/%3d chk: %16lx [len %4d]\n",
 	 mype, numChk, msg, tag, sum, len);
-  fflush(0);
+  fflush(stdout);
 
   numChk++;
 
@@ -120,7 +120,7 @@ long hypre_RMat_Checksum(const ReduceMatType *rmat,
        rmat->rmat_rvalues == NULL ) {
     printf("PE %d [r%3d] rmat checksum -- not initializied\n",
 	   mype, numChk);
-    fflush(0);
+    fflush(stdout);
 
     numChk++;
     return 0;
@@ -129,7 +129,7 @@ long hypre_RMat_Checksum(const ReduceMatType *rmat,
   /* print ints */
   printf("PE %d [r%3d] rmat checksum -- ndone %d ntogo %d nlevel %d\n",
 	 mype, numChk, rmat->rmat_ndone, rmat->rmat_ntogo, rmat->rmat_nlevel);
-  fflush(0);
+  fflush(stdout);
 
   /* print checksums for each array */
   hypre_IDX_Checksum(rmat->rmat_rnz,     rmat->rmat_ntogo, "rmat->rmat_rnz",     numChk,
@@ -169,7 +169,7 @@ long hypre_LDU_Checksum(const FactorMatType *ldu,
       ldu->nrm2s    == NULL) {
     printf("PE %d [S%3d] LDU check -- not initializied\n",
 	   mype, numChk);
-    fflush(0);
+    fflush(stdout);
     return 0;
   }
 
@@ -190,7 +190,7 @@ long hypre_LDU_Checksum(const FactorMatType *ldu,
 
   printf("PE %d [S%3d] LDU check [%16lx %16lx] [%16lx] [%16lx %16lx]\n",
 	 mype, numChk, lisum, ldsum, dsum, uisum, udsum);
-  fflush(0);
+  fflush(stdout);
 
   hypre_FP_Checksum(ldu->nrm2s, lnrows, "2-norms", numChk,
       globals);
