@@ -20,6 +20,9 @@ dnl * package as its argument.  configure checks for the existence of this
 dnl * file to make sure it is located in the right place
 dnl *********************************************************************
 
+define([AC_CACHE_LOAD], )dnl
+define([AC_CACHE_SAVE], )dnl
+
 AC_INIT(utilities/memory.c)
 
 dnl *********************************************************************
