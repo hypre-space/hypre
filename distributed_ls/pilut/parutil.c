@@ -1,5 +1,5 @@
 /*
- * util.c
+ * parutil.c
  *
  * This file contains utility functions
  *
@@ -183,7 +183,7 @@ void free_multi(void *ptr1,...)
 **************************************************************************/
 void memcpy_int( int *dest, const int *src, size_t n )
 {
-  memcpy(dest, src, n*sizeof(int));
+  if (dest) memcpy(dest, src, n*sizeof(int));
 }
 
 /*************************************************************************
@@ -191,7 +191,7 @@ void memcpy_int( int *dest, const int *src, size_t n )
 **************************************************************************/
 void memcpy_idx( int *dest, const int *src, size_t n )
 {
-  memcpy(dest, src, n*sizeof(int));
+  if (dest) memcpy(dest, src, n*sizeof(int));
 }
 
 /*************************************************************************
