@@ -41,6 +41,8 @@ install: all
 
 clean:
 	@rm -f *.o
+	@rm -f *.prj
+	@rm -f *.kdd
 
 veryclean: clean
 	@rm -f libHYPRE_*.a

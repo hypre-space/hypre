@@ -122,7 +122,8 @@ extern "C" {
 #define MPI_Type_hvector    hypre_MPI_Type_hvector     
 #define MPI_Type_struct     hypre_MPI_Type_struct      
 #define MPI_Type_free       hypre_MPI_Type_free        
-#define MPI_Type_commit     hypre_MPI_Type_commit        
+#define MPI_Type_commit     hypre_MPI_Type_commit
+#define MPI_LOR             hypre_MPI_LOR
 
 /*--------------------------------------------------------------------------
  * Types, etc.
