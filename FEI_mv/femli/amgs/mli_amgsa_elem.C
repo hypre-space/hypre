@@ -38,7 +38,7 @@ void mli_computespectrum_(int *,int *,double *, double *, int *, double *,
 
 /***********************************************************************
  * set up initial data using FEData
- * (nullspace_vec, sa_data, sa_counts)
+ * (nullspaceVec, saData_, saCounts_)
  * --------------------------------------------------------------------- */
 
 int MLI_Method_AMGSA::setupUsingFEData( MLI *mli ) 
@@ -205,9 +205,9 @@ int MLI_Method_AMGSA::setupUsingFEData( MLI *mli )
    
    /* --- compute null spaces --- */
 
-   if ( nullspace_vec != NULL ) delete [] nullspace_vec;
-   nullspace_len = localNRows;
-   nullspace_vec = new double[nullspace_len*nullspace_dim];
+   if ( nullspaceVec_ != NULL ) delete [] nullspaceVec_;
+   nullspaceLen_ = localNRows;
+   nullspaceVec_ = new double[nullspaceLen_*nullspaceDim_];
    eMatDim  = elemNNodes * blockSize;
    elemMat  = new double[eMatDim*eMatDim];
    evectors = NULL;
@@ -217,7 +217,7 @@ int MLI_Method_AMGSA::setupUsingFEData( MLI *mli )
    while ( elemStart < nElems )
    {
       currMacroNumber = macroNumbers[elemStart];
-      if ( output_level >= 1 && currMacroNumber % 200 == 0 )
+      if ( outputLevel_ >= 1 && currMacroNumber % 200 == 0 )
          printf("Computing null spaces of aggregate %d (%d)\n", 
                 currMacroNumber, nMacros);
       elemCount = elemStart + 1;
@@ -291,7 +291,7 @@ int MLI_Method_AMGSA::setupUsingFEData( MLI *mli )
       mli_computespectrum_(&macroMatDim, &macroMatDim, elemMats, evalues, 
                            &matz, evectors, dAux1, dAux2, &ierr);
 
-      for ( i = 0; i < nullspace_dim; i++ )
+      for ( i = 0; i < nullspaceDim_; i++ )
       {
          for ( j = 0; j < macroNumNodes; j++ )
          {
@@ -300,7 +300,7 @@ int MLI_Method_AMGSA::setupUsingFEData( MLI *mli )
                  aggrMap[eqnNumber] == macroNumbers[elemStart] )
             {
                for ( k = 0; k < blockSize; k++ )
-                  nullspace_vec[eqnNumber+k+i*nullspace_len] =
+                  nullspaceVec_[eqnNumber+k+i*nullspaceLen_] =
                      evectors[j*blockSize+k+i*macroMatDim];
             }
          }
@@ -335,8 +335,8 @@ int MLI_Method_AMGSA::setupUsingFEData( MLI *mli )
 
 printf("setupUsingFEData : no aggregate\n");
 /*
-   sa_counts[0] = nAggr;
-   sa_data[0]   = aggrMap;
+   saCounts_[0] = nAggr;
+   saData_[0]   = aggrMap;
 */
    
    /* --------------------------------------------------------------- */
