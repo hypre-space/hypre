@@ -68,7 +68,7 @@ SUBDIRS = . config\
  struct_mv struct_ls\
  sstruct_mv sstruct_ls\
  seq_mv parcsr_mv distributed_matrix matrix_matrix\
- IJ_mv distributed_ls parcsr_ls parcsr_es\
+ IJ_mv distributed_ls parcsr_ls eigensolvers\
  FEI_mv $(SEQLS) $(TOOLS) $(BABELDIR) $(LIBDIR)
 
 HYPRE_SUBDIR_LIST = config\
@@ -77,7 +77,7 @@ HYPRE_SUBDIR_LIST = config\
  struct_mv struct_ls\
  sstruct_mv sstruct_ls\
  seq_mv parcsr_mv distributed_matrix matrix_matrix\
- IJ_mv distributed_ls parcsr_ls parcsr_es\
+ IJ_mv distributed_ls parcsr_ls eigensolvers\
  FEI_mv babel-runtime babel test lib 
 
 DIST_SUBDIRS = \
@@ -87,7 +87,7 @@ config\
  struct_mv struct_ls\
  sstruct_mv sstruct_ls\
  seq_mv parcsr_mv distributed_matrix matrix_matrix\
- IJ_mv distributed_ls parcsr_ls parcsr_es\
+ IJ_mv distributed_ls parcsr_ls eigensolvers\
  FEI_mv $(BABELDIR) test lib $(DOCSDIR) .
 
 test: install
