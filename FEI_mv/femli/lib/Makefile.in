@@ -75,8 +75,9 @@ HEADERS = \
  $(srcdir)/../base/mli_oneLevel.h\
  $(srcdir)/../cintface/cmli.h\
  $(srcdir)/../fedata/mli_fedata.h\
+ $(srcdir)/../fedata/mli_sfei.h\
  $(srcdir)/../fedata/mli_fedata_utils.h\
- $(srcdir)/../fedata/mli_festruct.h\
+ $(srcdir)/../fedata/mli_febase.h\
  $(srcdir)/../mapper/mli_mapper.h\
  $(srcdir)/../matrix/mli_matrix.h\
  $(srcdir)/../matrix/mli_matrix_misc.h\
@@ -106,11 +107,13 @@ FILES = \
  ../amgs/mli_method_amgsa.cxx\
  ../amgs/mli_amgsa_coarsen1.cxx\
  ../amgs/mli_amgsa_calib.cxx\
- ../amgs/mli_amgsa_substructure.cxx\
+ ../amgs/mli_amgsa_dd_fedata.cxx\
+ ../amgs/mli_amgsa_dd_sfei.cxx\
  ../base/mli.cxx\
  ../base/mli_oneLevel.cxx\
  ../cintface/cmli.cxx\
  ../fedata/mli_fedata.cxx\
+ ../fedata/mli_sfei.cxx\
  ../fedata/mli_fedata_utils.cxx\
  ../mapper/mli_mapper.cxx\
  ../matrix/mli_matrix.cxx\
