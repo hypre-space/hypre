@@ -76,12 +76,23 @@ hypre_F90_IFACE(hypre_parvectorread)( int      *comm,
  * HYPRE_ParVectorPrint
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_parvectorprint)( long int *vector,
-                                       char     *file_name,
+                                       char     *fort_file_name,
+                                       int      *fort_file_name_size,
                                        int      *ierr       )
 {
-   *ierr = (int) ( HYPRE_ParVectorPrint ( (HYPRE_ParVector) *vector,
-                                          (char *)           file_name ) );
-}
+   int i;
+   char *c_file_name;
 
+   c_file_name = hypre_CTAlloc(char, *fort_file_name_size);
+
+   for (i = 0; i < *fort_file_name_size; i++)
+     c_file_name[i] = fort_file_name[i];
+
+   *ierr = (int) ( HYPRE_ParVectorPrint ( (HYPRE_ParVector) *vector,
+                                          (char *)           c_file_name ) );
+
+   hypre_TFree(c_file_name);
+
+}
