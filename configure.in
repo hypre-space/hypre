@@ -787,6 +787,7 @@ dnl * The following macros are exported and may be used in Makefile.in's
 dnl ********************************************************************
 
 CC="$PREPEND $CC"
+CXX="$PREPEND $CXX"
 
 dnl * General purpose header files and libraries and directories for
 dnl * those libraries.  

@@ -8255,6 +8255,7 @@ unset ac_cv_lib_$ac_lib_var
 
 
 CC="$PREPEND $CC"
+CXX="$PREPEND $CXX"
 
 
 
