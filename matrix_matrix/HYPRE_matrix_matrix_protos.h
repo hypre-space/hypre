@@ -8,4 +8,6 @@ int HYPRE_ConvertPETScMatrixToDistributedMatrix P((Mat PETSc_matrix , HYPRE_Dist
 /* HYPRE_ConvertParCSRMatrixToDistributedMatrix.c */
 int HYPRE_ConvertParCSRMatrixToDistributedMatrix P((HYPRE_ParCSRMatrix parcsr_matrix , HYPRE_DistributedMatrix *DistributedMatrix ));
 
+/* HYPRE_BuildIJMatrixFromDistributedMatrix.c */
+int HYPRE_BuildIJMatrixFromDistributedMatrix P((HYPRE_DistributedMatrix DistributedMatrix, HYPRE_IJMatrix *ij_matrix ));
 #undef P
