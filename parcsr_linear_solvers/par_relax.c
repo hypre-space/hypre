@@ -29,18 +29,31 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                         hypre_ParVector    *Vtemp )
 {
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   double         *A_data  = hypre_CSRMatrixData(A_diag);
-   int            *A_i     = hypre_CSRMatrixI(A_diag);
+   double         *A_diag_data  = hypre_CSRMatrixData(A_diag);
+   int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
+   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixDiag(A);
+   int            *A_offd_i     = hypre_CSRMatrixI(A_offd);
+   double         *A_offd_data  = hypre_CSRMatrixData(A_offd);
+   int            *A_offd_j     = hypre_CSRMatrixJ(A_offd);
+   hypre_CommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   hypre_CommHandle *comm_handle;
 
    int             n_global= hypre_ParCSRMatrixGlobalNumRows(A);
    int             n       = hypre_CSRMatrixNumRows(A_diag);
+   int             num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
    int	      	   first_index = hypre_ParVectorFirstIndex(u);
    
    hypre_Vector   *u_local = hypre_ParVectorLocalVector(u);
    double         *u_data  = hypre_VectorData(u_local);
 
+   hypre_Vector   *f_local = hypre_ParVectorLocalVector(f);
+   double         *f_data  = hypre_VectorData(f_local);
+
    hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
    double         *Vtemp_data = hypre_VectorData(Vtemp_local);
+   double 	  *Vext_data;
+   double 	  *v_buf_data;
 
    hypre_CSRMatrix *A_CSR;
    int		   *A_CSR_i;   
@@ -50,26 +63,30 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
    hypre_Vector    *f_vector;
    double	   *f_vector_data;
 
-   int             i;
-   int             jj;
+   int             i, j;
+   int             ii, jj;
    int             column;
    int             relax_error = 0;
+   int		   num_sends;
+   int		   index, start;
 
    double         *A_mat;
    double         *b_vec;
 
    double          zero = 0.0;
-   
+   double	   res;
+  
    /*-----------------------------------------------------------------------
     * Switch statement to direct control based on relax_type:
-    *     relax_type = 0 -> Jacobi
+    *     relax_type = 0 -> Jacobi or CF-Jacobi
+    *     relax_type = 2 -> Jacobi (uses ParMatvec)
     *     relax_type = 1 -> Gauss-Siedel <--- currently not implemented
     *     relax_type = 9 -> Direct Solve
     *-----------------------------------------------------------------------*/
    
    switch (relax_type)
    {
-      case 0: /* Jacobi */
+      case 2: /* Jacobi (uses ParMatvec) */
       {
 
          /*-----------------------------------------------------------------
@@ -82,8 +99,6 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
           * Relax all points.
           *-----------------------------------------------------------------*/
 
-         if (relax_points == 0)
-         {
 	    hypre_ParMatvec(-1.0,A, u, 1.0, Vtemp);
             for (i = 0; i < n; i++)
             {
@@ -92,17 +107,121 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                 * If diagonal is nonzero, relax point i; otherwise, skip it.
                 *-----------------------------------------------------------*/
              
-               if (A_data[A_i[i]] != zero)
+               if (A_diag_data[A_diag_i[i]] != zero)
                {
-                  u_data[i] -= Vtemp_data[i] / A_data[A_i[i]];
+                  u_data[i] -= Vtemp_data[i] / A_diag_data[A_diag_i[i]];
 /*  or Jacobi relaxation
-                  u_data[i] -= omega * Vtemp_data[i] / A_data[A_i[i]]; */
+                  u_data[i] -= omega * Vtemp_data[i] / A_diag_data[A_diag_i[i]];
+*/
                }
             }
-         }
       }
       break;
       
+      
+      case 0: /* Jacobi */
+      {
+   	num_sends = hypre_CommPkgNumSends(comm_pkg);
+
+	if (num_sends)
+   		v_buf_data = hypre_CTAlloc(double, 
+			hypre_CommPkgSendMapStart(comm_pkg, num_sends));
+        if (num_cols_offd)
+	{
+		A_offd_j = hypre_CSRMatrixJ(A_offd);
+		A_offd_data = hypre_CSRMatrixData(A_offd);
+		Vext_data = hypre_CTAlloc(double,num_cols_offd);
+	}
+ 
+   	index = 0;
+   	for (i = 0; i < num_sends; i++)
+   	{
+        	start = hypre_CommPkgSendMapStart(comm_pkg, i);
+        	for (j=start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
+                	v_buf_data[index++] 
+                 	= u_data[hypre_CommPkgSendMapElmt(comm_pkg,j)];
+   	}
+ 
+   	comm_handle = hypre_InitializeCommunication( 1, comm_pkg, v_buf_data, 
+        	Vext_data);
+
+         /*-----------------------------------------------------------------
+          * Copy current approximation into temporary vector.
+          *-----------------------------------------------------------------*/
+         
+         for (i = 0; i < n; i++)
+         {
+            Vtemp_data[i] = u_data[i];
+         }
+ 
+   	 hypre_FinalizeCommunication(comm_handle);
+
+         /*-----------------------------------------------------------------
+          * Relax all points.
+          *-----------------------------------------------------------------*/
+
+         if (relax_points == 0)
+         {
+            for (i = 0; i < n; i++)
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if (A_diag_data[A_diag_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res -= A_diag_data[jj] * Vtemp_data[ii];
+                  }
+                  for (jj = A_offd_i[i]+1; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] = res / A_diag_data[A_diag_i[i]];
+               }
+            }
+         }
+
+         /*-----------------------------------------------------------------
+          * Relax only C or F points as determined by relax_points.
+          *-----------------------------------------------------------------*/
+
+         else
+         {
+            for (i = 0; i < n; i++)
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if (cf_marker[i] == relax_points 
+				&& A_diag_data[A_diag_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res -= A_diag_data[jj] * Vtemp_data[ii];
+                  }
+                  for (jj = A_offd_i[i]+1; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] = res / A_diag_data[A_diag_i[i]];
+               }
+            }     
+         }
+      }
+      break;
+
       case 9: /* Direct solve: use gaussian elimination */
       {
 
@@ -226,4 +345,3 @@ int n;
          
 
 
-      
