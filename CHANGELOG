@@ -14,6 +14,19 @@
 #
 #=============================================================================
 
+Version 1.9.0b released, 2005/02/10.
+
+- NOTE: Soft links NOT changed until 2/17/05 due to vacation.
+
+- Added updated LOBPCG source code and test files.
+
+- Updated autotest scripts for current set of platforms.
+
+- Added a vector Laplace problem for testing systems AMG.
+
+- Added FAC to semi-struct
+
+
 Version 1.9.0a released, 2005/01/18.
 
 - NOTE: Link lines may need to be changed depending on configure options used.
