@@ -283,7 +283,7 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
     }
     if ( HYpbs_ != NULL ) 
     {
-       for ( i = 0; i < projectSize_; i++ ) 
+       for ( i = 0; i <= projectSize_; i++ ) 
           if ( HYpbs_[i] != NULL ) HYPRE_IJVectorDestroy(HYpbs_[i]);
        delete [] HYpbs_;
        HYpbs_ = NULL;
@@ -564,7 +564,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        {
           if ( HYpbs_ != NULL ) 
           {
-             for ( k = 0; k < projectSize_; k++ ) 
+             for ( k = 0; k <= projectSize_; k++ ) 
                 if ( HYpbs_[k] != NULL ) HYPRE_IJVectorDestroy(HYpbs_[k]);
              delete [] HYpbs_;
              HYpbs_ = NULL;
@@ -3495,7 +3495,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
     int                startRow, *int_array, *gint_array, startRow2;
     int                rowSize, *colInd, nnz, nrows;
     double             rnorm=0.0, *relax_wt, ddata, *colVal, value;
-    double             stime, etime, ptime, rtime1, rtime2, oldnorm, newnorm;
+    double             stime, etime, ptime, rtime1, rtime2, newnorm;
     char               fname[40];
     FILE               *fp;
     HYPRE_ParCSRMatrix A_csr;
@@ -3590,7 +3590,6 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           delete [] int_array;
           delete [] gint_array;
           nrows = localEndRow_ - localStartRow_ + 1 - nConstraints_;
-          printf("%d : Print to file : nrows = %d %d\n", mypid_, nrows, nConstraints_);
        }
        else
        {
@@ -3650,8 +3649,8 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
     if ( minResProjection_ == 1 )
     {
-       computeMinResProjection(A_csr, x_csr, b_csr, oldnorm, newnorm);
-    } else oldnorm = newnorm = 1.0;
+       computeMinResProjection(A_csr, x_csr, b_csr);
+    }
     
     switch ( HYSolverID_ )
     {
@@ -3865,7 +3864,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           }
 
           HYPRE_ParCSRPCGSetMaxIter(HYSolver_, maxIterations_);
-          HYPRE_ParCSRPCGSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
+          HYPRE_ParCSRPCGSetTol(HYSolver_, tolerance_);
           HYPRE_ParCSRPCGSetRelChange(HYSolver_, 0);
           HYPRE_ParCSRPCGSetTwoNorm(HYSolver_, 1);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRPCGSetStopCrit(HYSolver_,0);
@@ -3883,7 +3882,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &num_iterations);
           HYPRE_ParVectorCopy( b_csr, r_csr );
           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-          if (minResProjection_ == 1) addToProjectionSpace( currX_, currR_ );
+          if (minResProjection_ == 1) addToProjectionSpace( currX_, currB_ );
           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
           rnorm = sqrt( rnorm );
 #if defined(FEI_V13) || defined(FEI_V14)
@@ -4140,7 +4139,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
           HYPRE_ParCSRGMRESSetKDim(HYSolver_, gmresDim_);
           HYPRE_ParCSRGMRESSetMaxIter(HYSolver_, maxIterations_);
-          HYPRE_ParCSRGMRESSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
+          HYPRE_ParCSRGMRESSetTol(HYSolver_, tolerance_);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRGMRESSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRGMRESSetStopCrit(HYSolver_,1);
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
@@ -4156,7 +4155,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &num_iterations);
           HYPRE_ParVectorCopy( b_csr, r_csr );
           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-          if (minResProjection_ == 1) addToProjectionSpace( currX_, currR_ );
+          if (minResProjection_ == 1) addToProjectionSpace( currX_, currB_ );
           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
           rnorm = sqrt( rnorm );
 #if defined(FEI_V13) || defined(FEI_V14)
@@ -4409,7 +4408,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           }
 
           HYPRE_ParCSRBiCGSTABSetMaxIter(HYSolver_, maxIterations_);
-          HYPRE_ParCSRBiCGSTABSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
+          HYPRE_ParCSRBiCGSTABSetTol(HYSolver_, tolerance_);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRBiCGSTABSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRBiCGSTABSetStopCrit(HYSolver_,1);
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
@@ -4425,7 +4424,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRBiCGSTABGetNumIterations(HYSolver_, &num_iterations);
           HYPRE_ParVectorCopy( b_csr, r_csr );
           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-          if (minResProjection_ == 1) addToProjectionSpace( currX_, currR_ );
+          if (minResProjection_ == 1) addToProjectionSpace( currX_, currB_ );
           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
           rnorm = sqrt( rnorm );
 #if defined(FEI_V13) || defined(FEI_V14)
@@ -4678,7 +4677,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           }
 
           HYPRE_ParCSRBiCGSTABLSetMaxIter(HYSolver_, maxIterations_);
-          HYPRE_ParCSRBiCGSTABLSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
+          HYPRE_ParCSRBiCGSTABLSetTol(HYSolver_, tolerance_);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRBiCGSTABLSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRBiCGSTABLSetStopCrit(HYSolver_,1);
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
@@ -4694,7 +4693,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRBiCGSTABLGetNumIterations(HYSolver_, &num_iterations);
           HYPRE_ParVectorCopy( b_csr, r_csr );
           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-          if (minResProjection_ == 1) addToProjectionSpace( currX_, currR_ );
+          if (minResProjection_ == 1) addToProjectionSpace( currX_, currB_ );
           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
           rnorm = sqrt( rnorm );
 #if defined(FEI_V13) || defined(FEI_V14)
@@ -4942,7 +4941,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           }
 
           HYPRE_ParCSRTFQmrSetMaxIter(HYSolver_, maxIterations_);
-          HYPRE_ParCSRTFQmrSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
+          HYPRE_ParCSRTFQmrSetTol(HYSolver_, tolerance_);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRTFQmrSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRTFQmrSetStopCrit(HYSolver_,1);
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
@@ -4958,7 +4957,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRTFQmrGetNumIterations(HYSolver_, &num_iterations);
           HYPRE_ParVectorCopy( b_csr, r_csr );
           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-          if (minResProjection_ == 1) addToProjectionSpace( currX_, currR_ );
+          if (minResProjection_ == 1) addToProjectionSpace( currX_, currB_ );
           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
           rnorm = sqrt( rnorm );
 #if defined(FEI_V13) || defined(FEI_V14)
@@ -5206,7 +5205,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           }
 
           HYPRE_ParCSRBiCGSSetMaxIter(HYSolver_, maxIterations_);
-          HYPRE_ParCSRBiCGSSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
+          HYPRE_ParCSRBiCGSSetTol(HYSolver_, tolerance_);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRBiCGSSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRBiCGSSetStopCrit(HYSolver_,1);
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
@@ -5222,7 +5221,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRBiCGSGetNumIterations(HYSolver_, &num_iterations);
           HYPRE_ParVectorCopy( b_csr, r_csr );
           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-          if (minResProjection_ == 1) addToProjectionSpace( currX_, currR_ );
+          if (minResProjection_ == 1) addToProjectionSpace( currX_, currB_ );
           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
           rnorm = sqrt( rnorm );
 #if defined(FEI_V13) || defined(FEI_V14)
@@ -5721,7 +5720,6 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     for ( i = 0; i < nrows; i++ ) colLengths[i] = 0;
     
     maxRowSize = 0;
-    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
     for ( i = 0; i < nrows; i++ )
     {
        HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
@@ -5730,14 +5728,14 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
           if ( colVal[j] != 0.0 ) colLengths[colInd[j]]++;
        HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
     }   
-    nnz   = 0;
+    nnz = 0;
     for ( i = 0; i < nrows; i++ ) nnz += colLengths[i];
 
     new_ia = new int[nrows+1];
     new_ja = new int[nnz];
     new_a  = new double[nnz];
     nz_ptr = getMatrixCSR(currA_, nrows, nnz, new_ia, new_ja, new_a);
-    nnz    = nz_ptr;
+    nnz = nz_ptr;
 
     //------------------------------------------------------------------
     // set up SuperLU CSR matrix and the corresponding rhs
@@ -6337,18 +6335,44 @@ void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
 }
 
 //***************************************************************************
-// project the initial guess into the previous solutions (x - X inv(R) Q^T b
+// project the initial guess into the previous solutions (x + X inv(R) Q^T b)
+// Given r and B (a collection of right hand vectors such that A X = B)
+//
+//          min   || r - B v ||
+//           v
+//
+// = min (trans(r) r - trans(r) B v-trans(v) trans(B) r+trans(v) trans(B) B v)
+//
+// ==> trans(B) r = trans(B) B v ==> v = inv(trans(B) B) trans(B) r
+//
+// Use QR decomposition B = QR
+//
+//   ==>  v = inv( trans(R) R ) trans(R) trans(Q) r = inv(R) trans(Q) r
+//
+// Once v is computed, x = x + X v
 //---------------------------------------------------------------------------
 
 void HYPRE_LinSysCore::computeMinResProjection(HYPRE_ParCSRMatrix A_csr,
-                                               HYPRE_ParVector x_csr,
-                                               HYPRE_ParVector b_csr, 
-                                               double& oldnorm,
-                                               double& newnorm)
+                              HYPRE_ParVector x_csr, HYPRE_ParVector b_csr)
 {
     int             i, j;
     double          alpha, *darray, *darray2;
-    HYPRE_ParVector r_csr, v_csr; 
+    HYPRE_ParVector r_csr, v_csr;
+
+    //-----------------------------------------------------------------------
+    // diagnostic message
+    //-----------------------------------------------------------------------
+
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+    {
+       printf("%4d : HYPRE_LSC::entering computeMinResProjection %d\n",mypid_,
+              projectCurrSize_);
+    }
+    if ( projectCurrSize_ == 0 ) return;
+
+    //-----------------------------------------------------------------------
+    // compute r = b - A x
+    //-----------------------------------------------------------------------
 
     darray  = (double *) malloc( projectSize_ * sizeof(double) );
     darray2 = (double *) malloc( projectSize_ * sizeof(double) );
@@ -6356,11 +6380,9 @@ void HYPRE_LinSysCore::computeMinResProjection(HYPRE_ParCSRMatrix A_csr,
     r_csr = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currR_);
     HYPRE_ParVectorCopy( b_csr, r_csr );
     HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-    HYPRE_ParVectorInnerProd( r_csr,  r_csr, &oldnorm);
-    oldnorm = sqrt( oldnorm );
 
     //-----------------------------------------------------------------------
-    // Q^T (b-Ax)
+    // compute rtil = trans(Q) r
     //-----------------------------------------------------------------------
 
     for ( i = 0; i < projectCurrSize_; i++ )
@@ -6371,35 +6393,38 @@ void HYPRE_LinSysCore::computeMinResProjection(HYPRE_ParCSRMatrix A_csr,
     }
 
     //-----------------------------------------------------------------------
-    // inv(R) * Q^T (b-Ax)
+    // compute v = inv(R) * rtil
     //-----------------------------------------------------------------------
 
     for ( i = projectCurrSize_-1; i >= 0; i-- )
     {
        darray2[i] = darray[i];
-       for ( j = i+1; j < projectCurrSize_; j++ ) 
+       for ( j = i+1; j < projectCurrSize_; j++ )
           darray2[i] -= ( darray2[j] * projectionMatrix_[i][j] );
        darray2[i] /= projectionMatrix_[i][i];
     }
 
     //-----------------------------------------------------------------------
-    // x - X * inv(R) * Q^T (b-Ax)
+    // compute x + X v
     //-----------------------------------------------------------------------
 
     for ( i = 0; i < projectCurrSize_; i++ )
     {
        v_csr = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYpxs_[i]);
-       alpha = - darray2[i];
+       alpha = darray2[i];
        hypre_ParVectorAxpy(alpha,(hypre_ParVector*)v_csr,(hypre_ParVector*)x_csr);
     }
+    free( darray );
+    free( darray2 );
 
     //-----------------------------------------------------------------------
-    // compute new norm
+    // diagnostic message
     //-----------------------------------------------------------------------
 
-    HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-    HYPRE_ParVectorInnerProd( r_csr,  r_csr, &newnorm);
-
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+    {
+       printf("%4d : HYPRE_LSC:: leaving computeMinResProjection n", mypid_);
+    }
     return;
 }
 
@@ -6407,38 +6432,56 @@ void HYPRE_LinSysCore::computeMinResProjection(HYPRE_ParCSRMatrix A_csr,
 // add a new pair of (x,b) vectors to the projection space
 //---------------------------------------------------------------------------
 
-void HYPRE_LinSysCore::addToProjectionSpace(HYPRE_IJVector xvec, 
+void HYPRE_LinSysCore::addToProjectionSpace(HYPRE_IJVector xvec,
                                             HYPRE_IJVector bvec)
 {
-    int             i, k, ierr, nrows, numGlobalRows;
-    double          *darray, alpha;
-    HYPRE_ParVector v_csr, x_csr, b_csr; 
-    HYPRE_IJVector  tmpxvec, tmpbvec; 
+    int                i, k, ierr, nrows, numGlobalRows;
+    int                *partition, start_row, end_row;
+    double             *darray, alpha;
+    HYPRE_ParVector    v_csr, x_csr, b_csr;
+    HYPRE_IJVector     tmpxvec, tmpbvec;
+    HYPRE_ParCSRMatrix A_csr;
 
     //-----------------------------------------------------------------------
-    // initially, allocate space for B's and X's
+    // diagnostic message
+    //-----------------------------------------------------------------------
+
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+    {
+       printf("%4d : HYPRE_LSC::addToProjectionSpace %d\n",mypid_,
+              projectCurrSize_);
+    }
+
+    //-----------------------------------------------------------------------
+    // initially, allocate space for B's and X's and R
     //-----------------------------------------------------------------------
 
     if ( projectCurrSize_ == 0 && HYpbs_ == NULL )
     {
-       nrows = localEndRow_ - localStartRow_ + 1;
-       MPI_Allreduce(&nrows, &numGlobalRows, 1, MPI_INT, MPI_SUM, comm_);
+       A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
+       HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &partition );
+       start_row     = partition[mypid_];
+       end_row       = partition[mypid_+1] - 1;
+       nrows         = end_row - start_row + 1;
+       numGlobalRows = partition[numProcs_];
+
        HYpxs_ = new HYPRE_IJVector[projectSize_];
-       HYpbs_ = new HYPRE_IJVector[projectSize_];
-       for ( i = 0; i < projectSize_; i++ )
+       HYpbs_ = new HYPRE_IJVector[projectSize_+1];
+       for ( i = 0; i <= projectSize_; i++ )
        {
-          ierr = HYPRE_IJVectorCreate(comm_, &(HYpbs_[i]), numGlobalRows_);
-          ierr = HYPRE_IJVectorSetLocalStorageType(HYpbs_[i], HYPRE_PARCSR);
-          ierr = HYPRE_IJVectorSetLocalPartitioning(HYpbs_[i],localStartRow_-1,
-                                                 localEndRow_);
+          HYPRE_IJVectorCreate(comm_, &(HYpbs_[i]), numGlobalRows_);
+          HYPRE_IJVectorSetLocalStorageType(HYpbs_[i], HYPRE_PARCSR);
+          HYPRE_IJVectorSetLocalPartitioning(HYpbs_[i],start_row,end_row+1);
           ierr = HYPRE_IJVectorAssemble(HYpbs_[i]);
           ierr = HYPRE_IJVectorInitialize(HYpbs_[i]);
           ierr = HYPRE_IJVectorZeroLocalComponents(HYpbs_[i]);
-
-          ierr = HYPRE_IJVectorCreate(comm_, &(HYpxs_[i]), numGlobalRows_);
-          ierr = HYPRE_IJVectorSetLocalStorageType(HYpxs_[i], HYPRE_PARCSR);
-          ierr = HYPRE_IJVectorSetLocalPartitioning(HYpxs_[i],localStartRow_-1,
-                                                 localEndRow_);
+          assert( !ierr );
+       }
+       for ( i = 0; i < projectSize_; i++ )
+       {
+          HYPRE_IJVectorCreate(comm_, &(HYpxs_[i]), numGlobalRows_);
+          HYPRE_IJVectorSetLocalStorageType(HYpxs_[i], HYPRE_PARCSR);
+          HYPRE_IJVectorSetLocalPartitioning(HYpxs_[i],start_row,end_row+1);
           ierr = HYPRE_IJVectorAssemble(HYpxs_[i]);
           ierr = HYPRE_IJVectorInitialize(HYpxs_[i]);
           ierr = HYPRE_IJVectorZeroLocalComponents(HYpxs_[i]);
@@ -6446,10 +6489,10 @@ void HYPRE_LinSysCore::addToProjectionSpace(HYPRE_IJVector xvec,
        }
        projectCurrSize_ = 0;
        projectionMatrix_ = new double*[projectSize_];
-       for ( i = 0; i < projectSize_; i++ ) 
+       for ( i = 0; i < projectSize_; i++ )
        {
           projectionMatrix_[i] = new double[projectSize_];
-          for ( k = 0; k < projectSize_; k++ ) 
+          for ( k = 0; k < projectSize_; k++ )
              projectionMatrix_[i][k] = 0.0;
        }
     }
@@ -6458,7 +6501,7 @@ void HYPRE_LinSysCore::addToProjectionSpace(HYPRE_IJVector xvec,
     // if buffer has been filled, move things up
     //-----------------------------------------------------------------------
 
-    if ( projectCurrSize_ >= projectSize_ ) 
+    if ( projectCurrSize_ >= projectSize_ )
     {
        projectCurrSize_--;
        darray  = projectionMatrix_[0];
@@ -6466,15 +6509,15 @@ void HYPRE_LinSysCore::addToProjectionSpace(HYPRE_IJVector xvec,
        tmpbvec = HYpbs_[0];
        for ( i = 0; i < projectCurrSize_; i++ )
        {
-          HYpbs_[i] = HYpbs_[i+1]; 
-          HYpxs_[i] = HYpxs_[i+1]; 
+          HYpbs_[i] = HYpbs_[i+1];
+          HYpxs_[i] = HYpxs_[i+1];
           projectionMatrix_[i] = projectionMatrix_[i+1];
           for ( k = 0; k < projectCurrSize_; k++ )
              projectionMatrix_[i][k] = projectionMatrix_[i][k+1];
           projectionMatrix_[i][projectSize_-1] = 0.0;
        }
        for ( i = 0; i < projectSize_; i++ ) darray[i] = 0.0;
-       projectionMatrix_[projectSize_] = darray;
+       projectionMatrix_[projectSize_-1] = darray;
        HYpxs_[projectCurrSize_] = tmpxvec;
        HYpbs_[projectCurrSize_] = tmpbvec;
     }
@@ -6484,17 +6527,19 @@ void HYPRE_LinSysCore::addToProjectionSpace(HYPRE_IJVector xvec,
     //-----------------------------------------------------------------------
 
     x_csr = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(xvec);
-    v_csr = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYpxs_[projectCurrSize_]);
+    v_csr = (HYPRE_ParVector)
+            HYPRE_IJVectorGetLocalStorage(HYpxs_[projectCurrSize_]);
     HYPRE_ParVectorCopy( x_csr, v_csr );
     b_csr = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(bvec);
-    v_csr = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYpbs_[projectCurrSize_]);
+    v_csr = (HYPRE_ParVector)
+            HYPRE_IJVectorGetLocalStorage(HYpbs_[projectCurrSize_]);
     HYPRE_ParVectorCopy( b_csr, v_csr );
 
     //-----------------------------------------------------------------------
     // compute QR decomposition
     //-----------------------------------------------------------------------
 
-    b_csr = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYpbs_[projectCurrSize_]);
+    b_csr = v_csr;
     for ( i = 0; i < projectCurrSize_; i++ )
     {
        v_csr = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(HYpbs_[i]);
@@ -6509,7 +6554,17 @@ void HYPRE_LinSysCore::addToProjectionSpace(HYPRE_IJVector xvec,
     projectionMatrix_[projectCurrSize_][projectCurrSize_] = alpha;
     alpha = 1.0 / alpha;
     hypre_ParVectorScale(alpha,(hypre_ParVector*)b_csr);
- 
+
     projectCurrSize_++;
+
+    //-----------------------------------------------------------------------
+    // diagnostic message
+    //-----------------------------------------------------------------------
+
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+    {
+       printf("%4d : HYPRE_LSC::leaving addToProjectionSpace %d\n",mypid_,
+               projectCurrSize_);
+    }
 }
 
