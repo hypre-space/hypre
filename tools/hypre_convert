@@ -1,0 +1,513 @@
+#!/bin/sh
+
+##################################################################
+# To use:
+#
+#   1) Make a backup of your source files
+#
+#        mkdir BACKUP
+#        cp * BACKUP
+#
+#   2) Type 'hypre_convert <files>'
+#
+##################################################################
+
+INFILE=hypre_convert.in
+SEDFILE=hypre_convert.sed
+
+##################################################################
+# Create conversion input files
+##################################################################
+
+########################
+# IJ matrix-vector
+########################
+
+cat > $INFILE <<EOF
+HYPRE_IJMatrixCreate HYPRE_CreateIJMatrix
+HYPRE_IJMatrixDestroy HYPRE_DestroyIJMatrix
+HYPRE_IJMatrixInitialize HYPRE_InitializeIJMatrix
+HYPRE_IJMatrixAssemble HYPRE_AssembleIJMatrix
+HYPRE_IJMatrixDistribute HYPRE_DistributeIJMatrix
+HYPRE_IJMatrixSetLocalStorageType HYPRE_SetIJMatrixLocalStorageType
+HYPRE_IJMatrixSetLocalSize HYPRE_SetIJMatrixLocalSize
+HYPRE_IJMatrixSetRowSizes HYPRE_SetIJMatrixRowSizes
+HYPRE_IJMatrixSetDiagRowSizes HYPRE_SetIJMatrixDiagRowSizes
+HYPRE_IJMatrixSetOffDiagRowSizes HYPRE_SetIJMatrixOffDiagRowSizes
+HYPRE_IJMatrixQueryInsertionSemantics HYPRE_QueryIJMatrixInsertionSemantics
+HYPRE_IJMatrixInsertBlock HYPRE_InsertIJMatrixBlock
+HYPRE_IJMatrixAddBlock HYPRE_AddBlockToIJMatrix
+HYPRE_IJMatrixInsertRow HYPRE_InsertIJMatrixRow
+HYPRE_IJMatrixAddRow HYPRE_AddIJMatrixRow
+HYPRE_IJMatrixGetLocalStorage HYPRE_GetIJMatrixLocalStorage
+HYPRE_IJMatrixGetRowPartitioning HYPRE_GetIJMatrixRowPartitioning
+HYPRE_IJMatrixGetColPartitioning HYPRE_GetIJMatrixColPartitioning
+HYPRE_IJVectorCreate HYPRE_CreateIJVector
+HYPRE_IJVectorDestroy HYPRE_DestroyIJVector
+HYPRE_IJVectorSetPartitioning HYPRE_SetIJVectorPartitioning
+HYPRE_IJVectorSetLocalPartitioning HYPRE_SetIJVectorLocalPartitioning
+HYPRE_IJVectorInitialize HYPRE_InitializeIJVector
+HYPRE_IJVectorDistribute HYPRE_DistributeIJVector
+HYPRE_IJVectorSetLocalStorageType HYPRE_SetIJVectorLocalStorageType
+HYPRE_IJVectorZeroLocalComponents HYPRE_ZeroIJVectorLocalComponents
+HYPRE_IJVectorSetLocalComponents HYPRE_SetIJVectorLocalComponents
+HYPRE_IJVectorSetLocalComponentsInBlock HYPRE_SetIJVectorLocalComponentsInBlock
+HYPRE_IJVectorAddLocalComponents HYPRE_AddToIJVectorLocalComponents
+HYPRE_IJVectorAddLocalComponentsInBlock HYPRE_AddToIJVectorLocalComponentsInBlock
+HYPRE_IJVectorAssemble HYPRE_AssembleIJVector
+HYPRE_IJVectorGetLocalComponents HYPRE_GetIJVectorLocalComponents
+HYPRE_IJVectorGetLocalComponentsInBlock HYPRE_GetIJVectorLocalComponentsInBlock
+HYPRE_IJVectorGetLocalStorageType HYPRE_GetIJVectorLocalStorageType
+HYPRE_IJVectorGetLocalStorage HYPRE_GetIJVectorLocalStorage
+hypre_IJVectorGetParVector hypre_GetIJVectorParVector
+hypre_AuxParCSRMatrixCreate hypre_CreateAuxParCSRMatrix
+hypre_AuxParCSRMatrixDestroy hypre_DestroyAuxParCSRMatrix
+hypre_AuxParCSRMatrixInitialize hypre_InitializeAuxParCSRMatrix
+hypre_IJMatrixSetLocalSizeISIS hypre_SetIJMatrixLocalSizeISIS
+hypre_IJMatrixCreateISIS hypre_CreateIJMatrixISIS
+hypre_IJMatrixSetRowSizesISIS hypre_SetIJMatrixRowSizesISIS
+hypre_IJMatrixSetDiagRowSizesISIS hypre_SetIJMatrixDiagRowSizesISIS
+hypre_IJMatrixSetOffDiagRowSizesISIS hypre_SetIJMatrixOffDiagRowSizesISIS
+hypre_IJMatrixInitializeISIS hypre_InitializeIJMatrixISIS
+hypre_IJMatrixInsertBlockISIS hypre_InsertIJMatrixBlockISIS
+hypre_IJMatrixAddBlockISIS hypre_AddBlockToIJMatrixISIS
+hypre_IJMatrixInsertRowISIS hypre_InsertIJMatrixRowISIS
+hypre_IJMatrixAddRowISIS hypre_AddIJMatrixRowISIS
+hypre_IJMatrixAssembleISIS hypre_AssembleIJMatrixISIS
+hypre_IJMatrixDistributeISIS hypre_DistributeIJMatrixISIS
+hypre_IJMatrixApplyISIS hypre_ApplyIJMatrixISIS
+hypre_IJMatrixDestroyISIS hypre_DestroyIJMatrixISIS
+hypre_IJMatrixSetTotalSizeISIS hypre_SetIJMatrixTotalSizeISIS
+hypre_IJMatrixSetLocalSizeParCSR hypre_SetIJMatrixLocalSizeParCSR
+hypre_IJMatrixCreateParCSR hypre_CreateIJMatrixParCSR
+hypre_IJMatrixSetRowSizesParCSR hypre_SetIJMatrixRowSizesParCSR
+hypre_IJMatrixSetDiagRowSizesParCSR hypre_SetIJMatrixDiagRowSizesParCSR
+hypre_IJMatrixSetOffDiagRowSizesParCSR hypre_SetIJMatrixOffDiagRowSizesParCSR
+hypre_IJMatrixInitializeParCSR hypre_InitializeIJMatrixParCSR
+hypre_IJMatrixInsertBlockParCSR hypre_InsertIJMatrixBlockParCSR
+hypre_IJMatrixAddBlockParCSR hypre_AddBlockToIJMatrixParCSR
+hypre_IJMatrixInsertRowParCSR hypre_InsertIJMatrixRowParCSR
+hypre_IJMatrixAddRowParCSR hypre_AddIJMatrixRowParCSR
+hypre_IJMatrixAssembleParCSR hypre_AssembleIJMatrixParCSR
+hypre_IJMatrixDistributeParCSR hypre_DistributeIJMatrixParCSR
+hypre_IJMatrixApplyParCSR hypre_ApplyIJMatrixParCSR
+hypre_IJMatrixDestroyParCSR hypre_DestroyIJMatrixParCSR
+hypre_IJMatrixGetRowPartitioningParCSR hypre_GetIJMatrixRowPartitioningParCSR
+hypre_IJMatrixGetColPartitioningParCSR hypre_GetIJMatrixColPartitioningParCSR
+hypre_IJMatrixSetLocalSizePETSc hypre_SetIJMatrixLocalSizePETSc
+hypre_IJMatrixCreatePETSc hypre_CreateIJMatrixPETSc
+hypre_IJMatrixSetRowSizesPETSc hypre_SetIJMatrixRowSizesPETSc
+hypre_IJMatrixSetDiagRowSizesPETSc hypre_SetIJMatrixDiagRowSizesPETSc
+hypre_IJMatrixSetOffDiagRowSizesPETSc hypre_SetIJMatrixOffDiagRowSizesPETSc
+hypre_IJMatrixInitializePETSc hypre_InitializeIJMatrixPETSc
+hypre_IJMatrixInsertBlockPETSc hypre_InsertIJMatrixBlockPETSc
+hypre_IJMatrixAddBlockPETSc hypre_AddBlockToIJMatrixPETSc
+hypre_IJMatrixInsertRowPETSc hypre_InsertIJMatrixRowPETSc
+hypre_IJMatrixAddRowPETSc hypre_AddIJMatrixRowPETSc
+hypre_IJMatrixAssemblePETSc hypre_AssembleIJMatrixPETSc
+hypre_IJMatrixDistributePETSc hypre_DistributeIJMatrixPETSc
+hypre_IJMatrixApplyPETSc hypre_ApplyIJMatrixPETSc
+hypre_IJMatrixDestroyPETSc hypre_DestroyIJMatrixPETSc
+hypre_IJMatrixSetTotalSizePETSc hypre_SetIJMatrixTotalSizePETSc
+hypre_IJVectorCreatePar hypre_CreateIJVectorPar
+hypre_IJVectorDestroyPar hypre_DestroyIJVectorPar
+hypre_IJVectorSetPartitioningPar hypre_SetIJVectorParPartitioning
+hypre_IJVectorSetLocalPartitioningPar hypre_SetIJVectorParLocalPartitioning
+hypre_IJVectorInitializePar hypre_InitializeIJVectorPar
+hypre_IJVectorDistributePar hypre_DistributeIJVectorPar
+hypre_IJVectorZeroLocalComponentsPar hypre_ZeroIJVectorParLocalComponents
+hypre_IJVectorSetLocalComponentsPar hypre_SetIJVectorParLocalComponents
+hypre_IJVectorSetLocalComponentsInBlockPar hypre_SetIJVectorParLocalComponentsInBlock
+hypre_IJVectorAddLocalComponentsPar hypre_AddToIJVectorParLocalComponents
+hypre_IJVectorAddLocalComponentsInBlockPar hypre_AddToIJVectorParLocalComponentsInBlock
+hypre_IJVectorAssemblePar hypre_AssembleIJVectorPar
+hypre_IJVectorGetLocalComponentsPar hypre_GetIJVectorParLocalComponents
+hypre_IJVectorGetLocalComponentsInBlockPar hypre_GetIJVectorParLocalComponentsInBlock
+EOF
+
+########################
+# parcsr matrix-vector
+########################
+
+cat >> $INFILE <<EOF
+HYPRE_ParCSRMatrixCreate HYPRE_CreateParCSRMatrix
+HYPRE_ParCSRMatrixDestroy HYPRE_DestroyParCSRMatrix
+HYPRE_ParCSRMatrixInitialize HYPRE_InitializeParCSRMatrix
+HYPRE_ParCSRMatrixRead HYPRE_ReadParCSRMatrix
+HYPRE_ParCSRMatrixPrint HYPRE_PrintParCSRMatrix
+HYPRE_ParCSRMatrixGetComm HYPRE_GetCommParCSR 
+HYPRE_ParCSRMatrixGetDims HYPRE_GetDimsParCSR
+HYPRE_ParCSRMatrixGetRowPartitioning HYPRE_GetRowPartitioningParCSR
+HYPRE_ParCSRMatrixGetColPartitioning HYPRE_GetColPartitioningParCSR
+HYPRE_ParCSRMatrixGetLocalRange HYPRE_GetLocalRangeParcsr
+HYPRE_ParCSRMatrixGetRow HYPRE_GetRowParCSRMatrix
+HYPRE_ParCSRMatrixRestoreRow HYPRE_RestoreRowParCSRMatrix
+HYPRE_ParCSRMatrixMatvec HYPRE_ParMatvec
+HYPRE_ParCSRMatrixMatvecT HYPRE_ParMatvecT
+HYPRE_ParVectorCreate HYPRE_CreateParVector
+HYPRE_ParVectorDestroy HYPRE_DestroyParVector
+HYPRE_ParVectorInitialize HYPRE_InitializeParVector
+HYPRE_ParVectorRead HYPRE_ReadParVector
+HYPRE_ParVectorPrint HYPRE_PrintParVector
+HYPRE_ParVectorSetConstantValues HYPRE_SetParVectorConstantValues
+HYPRE_ParVectorSetRandomValues HYPRE_SetParVectorRandomValues
+HYPRE_ParVectorCopy HYPRE_CopyParVector
+HYPRE_ParVectorScale HYPRE_ScaleParVector
+HYPRE_ParVectorInnerProd HYPRE_ParInnerProd
+hypre_MatvecCommPkgCreate hypre_GenerateMatvecCommunicationInfo
+hypre_MatvecCommPkgDestroy hypre_DestroyMatvecCommPkg
+hypre_ParCSRMatrixExtractBExt hypre_ExtractBExt
+hypre_ParCSRMatrixCreate hypre_CreateParCSRMatrix
+hypre_ParCSRMatrixDestroy hypre_DestroyParCSRMatrix
+hypre_ParCSRMatrixInitialize hypre_InitializeParCSRMatrix
+hypre_ParCSRMatrixSetNumNonzeros hypre_SetParCSRMatrixNumNonzeros
+hypre_ParCSRMatrixSetDataOwner hypre_SetParCSRMatrixDataOwner
+hypre_ParCSRMatrixSetRowStartsOwner hypre_SetParCSRMatrixRowStartsOwner
+hypre_ParCSRMatrixSetColStartsOwner hypre_SetParCSRMatrixColStartsOwner
+hypre_ParCSRMatrixRead hypre_ReadParCSRMatrix
+hypre_ParCSRMatrixPrint hypre_PrintParCSRMatrix
+hypre_ParCSRMatrixGetLocalRange hypre_GetLocalRangeParCSRMatrix
+hypre_ParCSRMatrixGetRow hypre_GetRowParCSRMatrix
+hypre_ParCSRMatrixRestoreRow hypre_RestoreRowParCSRMatrix
+hypre_ParCSRMatrixCopy hypre_CopyParCSRMatrix
+hypre_ParCSRMatrixMatvec hypre_ParMatvec
+hypre_ParCSRMatrixMatvecT hypre_ParMatvecT
+hypre_ParVectorCreate hypre_CreateParVector
+hypre_ParVectorDestroy hypre_DestroyParVector
+hypre_ParVectorInitialize hypre_InitializeParVector
+hypre_ParVectorSetDataOwner hypre_SetParVectorDataOwner
+hypre_ParVectorSetPartitioningOwner hypre_SetParVectorPartitioningOwner
+hypre_ParVectorRead hypre_ReadParVector
+hypre_ParVectorPrint hypre_PrintParVector
+hypre_ParVectorSetConstantValues hypre_SetParVectorConstantValues
+hypre_ParVectorSetRandomValues hypre_SetParVectorRandomValues
+hypre_ParVectorCopy hypre_CopyParVector
+hypre_ParVectorScale hypre_ScaleParVector
+hypre_ParVectorAxpy hypre_ParAxpy
+hypre_ParVectorInnerProd hypre_ParInnerProd
+EOF
+
+########################
+# sequential matrix-vector
+########################
+
+cat >> $INFILE <<EOF
+HYPRE_CSRMatrixCreate     HYPRE_CreateCSRMatrix 
+HYPRE_CSRMatrixDestroy   HYPRE_DestroyCSRMatrix 
+HYPRE_CSRMatrixInitialize   HYPRE_InitializeCSRMatrix
+HYPRE_CSRMatrixRead   HYPRE_ReadCSRMatrix 
+HYPRE_CSRMatrixPrint   HYPRE_PrintCSRMatrix 
+HYPRE_MappedMatrixCreate   HYPRE_NewMappedMatrix
+HYPRE_MappedMatrixDestroy   HYPRE_FreeMappedMatrix
+HYPRE_MappedMatrixLimitedDestroy   HYPRE_LimitedFreeMappedMatrix 
+HYPRE_MappedMatrixInitialize   HYPRE_InitializeMappedMatrix
+HYPRE_MappedMatrixAssemble   HYPRE_AssembleMappedMatrix
+HYPRE_MappedMatrixPrint   HYPRE_PrintMappedMatrix 
+HYPRE_MappedMatrixGetColIndex   HYPRE_GetMappedMatrixColIndex 
+HYPRE_MappedMatrixGetMatrix   HYPRE_GetMappedMatrixMatrix
+HYPRE_MappedMatrixSetMatrix   HYPRE_SetMappedMatrixMatrix
+HYPRE_MappedMatrixSetColMap   HYPRE_SetMappedMatrixColMap 
+HYPRE_MappedMatrixSetMapData   HYPRE_SetMappedMatrixMapData 
+HYPRE_MultiblockMatrixCreate   HYPRE_NewMultiblockMatrix
+HYPRE_MultiblockMatrixDestroy   HYPRE_FreeMultiblockMatrix
+HYPRE_MultiblockMatrixLimitedDestroy   HYPRE_LimitedFreeMultiblockMatrix
+HYPRE_MultiblockMatrixInitialize   HYPRE_InitializeMultiblockMatrix
+HYPRE_MultiblockMatrixAssemble   HYPRE_AssembleMultiblockMatrix 
+HYPRE_MultiblockMatrixPrint   HYPRE_PrintMultiblockMatrix
+HYPRE_MultiblockMatrixSetNumSubmatrices   HYPRE_SetMultiblockMatrixNumSubmatrices
+HYPRE_MultiblockMatrixSetSubmatrixType   HYPRE_SetMultiblockMatrixSubmatrixType 
+HYPRE_VectorCreate   HYPRE_CreateVector
+HYPRE_VectorDestroy   HYPRE_DestroyVector
+HYPRE_VectorInitialize   HYPRE_InitializeVector       
+HYPRE_VectorPrint   HYPRE_PrintVector
+HYPRE_VectorRead   HYPRE_ReadVector
+hypre_CSRMatrixAdd   hypre_Matadd
+hypre_CSRMatrixMultiply   hypre_Matmul
+hypre_CSRMatrixDeleteZeros   hypre_DeleteZerosInMatrix
+hypre_CSRMatrixCreate   hypre_CreateCSRMatrix
+hypre_CSRMatrixDestroy   hypre_DestroyCSRMatrix
+hypre_CSRMatrixInitialize   hypre_InitializeCSRMatrix 
+hypre_CSRMatrixSetDataOwner   hypre_SetCSRMatrixDataOwner 
+hypre_CSRMatrixRead   hypre_ReadCSRMatrix
+hypre_CSRMatrixPrint   hypre_PrintCSRMatrix
+hypre_CSRMatrixCopy   hypre_CopyCSRMatrix
+hypre_CSRMatrixMatvec   hypre_Matvec 
+hypre_CSRMatrixMatvecT   hypre_MatvecT
+hypre_MappedMatrixCreate   hypre_NewMappedMatrix
+hypre_MappedMatrixDestroy   hypre_FreeMappedMatrix 
+hypre_MappedMatrixLimitedDestroy   hypre_LimitedFreeMappedMatrix 
+hypre_MappedMatrixInitialize   hypre_InitializeMappedMatrix
+hypre_MappedMatrixAssemble   hypre_AssembleMappedMatrix
+hypre_MappedMatrixPrint   hypre_PrintMappedMatrix
+hypre_MappedMatrixGetColIndex   hypre_GetMappedMatrixColIndex
+hypre_MappedMatrixGetMatrix   hypre_GetMappedMatrixMatrix 
+hypre_MappedMatrixSetMatrix   hypre_SetMappedMatrixMatrix 
+hypre_MappedMatrixSetColMap   hypre_SetMappedMatrixColMap 
+hypre_MappedMatrixSetMapData   hypre_SetMappedMatrixMapData
+hypre_MultiblockMatrixCreate   hypre_NewMultiblockMatrix 
+hypre_MultiblockMatrixDestroy   hypre_FreeMultiblockMatrix
+hypre_MultiblockMatrixLimitedDestroy   hypre_LimitedFreeMultiblockMatrix
+hypre_MultiblockMatrixInitialize   hypre_InitializeMultiblockMatrix
+hypre_MultiblockMatrixAssemble   hypre_AssembleMultiblockMatrix
+hypre_MultiblockMatrixPrint   hypre_PrintMultiblockMatrix
+hypre_MultiblockMatrixSetNumSubmatrices   hypre_SetMultiblockMatrixNumSubmatrices
+hypre_MultiblockMatrixSetSubmatrixType   hypre_SetMultiblockMatrixSubmatrixType 
+hypre_MultiblockMatrixSetSubmatrix   hypre_SetMultiblockMatrixSubmatrix
+hypre_VectorCreate   hypre_CreateVector
+hypre_VectorDestroy   hypre_DestroyVector 
+hypre_VectorInitialize   hypre_InitializeVector       
+hypre_VectorSetDataOwner   hypre_SetVectorDataOwner       
+hypre_VectorRead   hypre_ReadVector 
+hypre_VectorPrint   hypre_PrintVector 
+hypre_VectorSetConstantValues   hypre_SetVectorConstantValues
+hypre_VectorSetRandomValues   hypre_SetVectorRandomValues
+hypre_VectorCopy   hypre_CopyVector 
+hypre_VectorScale   hypre_ScaleVector 
+hypre_VectorAxpy   hypre_Axpy 
+hypre_VectorInnerProd   hypre_InnerProd 
+EOF
+
+########################
+# struct matrix-vector
+########################
+
+cat >> $INFILE <<EOF
+HYPRE_StructGridCreate          HYPRE_NewStructGrid
+HYPRE_StructGridDestroy          HYPRE_FreeStructGrid
+HYPRE_StructGridSetExtents          HYPRE_SetStructGridExtents
+HYPRE_StructGridSetPeriodic          HYPRE_SetStructGridPeriodic
+HYPRE_StructGridAssemble          HYPRE_AssembleStructGrid
+HYPRE_StructMatrixCreate          HYPRE_NewStructMatrix
+HYPRE_StructMatrixDestroy          HYPRE_FreeStructMatrix
+HYPRE_StructMatrixInitialize          HYPRE_InitializeStructMatrix
+HYPRE_StructMatrixSetValues          HYPRE_SetStructMatrixValues
+HYPRE_StructMatrixSetBoxValues          HYPRE_SetStructMatrixBoxValues
+HYPRE_StructMatrixAssemble          HYPRE_AssembleStructMatrix
+HYPRE_StructMatrixSetNumGhost          HYPRE_SetStructMatrixNumGhost
+HYPRE_StructMatrixGetGrid          HYPRE_StructMatrixGrid
+HYPRE_StructMatrixSetSymmetric          HYPRE_SetStructMatrixSymmetric
+HYPRE_StructMatrixPrint          HYPRE_PrintStructMatrix
+HYPRE_StructStencilCreate          HYPRE_NewStructStencil
+HYPRE_StructStencilSetElement          HYPRE_SetStructStencilElement
+HYPRE_StructStencilDestroy          HYPRE_FreeStructStencil
+HYPRE_StructVectorCreate          HYPRE_NewStructVector
+HYPRE_StructVectorDestroy          HYPRE_FreeStructVector
+HYPRE_StructVectorInitialize          HYPRE_InitializeStructVector
+HYPRE_StructVectorSetValues          HYPRE_SetStructVectorValues
+HYPRE_StructVectorGetValues          HYPRE_GetStructVectorValues
+HYPRE_StructVectorSetBoxValues          HYPRE_SetStructVectorBoxValues
+HYPRE_StructVectorGetBoxValues          HYPRE_GetStructVectorBoxValues
+HYPRE_StructVectorAssemble          HYPRE_AssembleStructVector
+HYPRE_StructVectorPrint          HYPRE_PrintStructVector
+HYPRE_StructVectorSetNumGhost          HYPRE_SetStructVectorNumGhost
+HYPRE_StructVectorSetConstantValues          HYPRE_SetStructVectorConstantValues
+HYPRE_StructVectorGetMigrateCommPkg          HYPRE_GetMigrateStructVectorCommPkg
+HYPRE_StructVectorMigrate          HYPRE_MigrateStructVector
+HYPRE_CommPkgDestroy          HYPRE_FreeCommPkg
+hypre_BoxCreate          hypre_NewBox
+hypre_BoxSetExtents          hypre_SetBoxExtents
+hypre_BoxArrayCreate          hypre_NewBoxArray
+hypre_BoxArraySetSize          hypre_SetBoxArraySize
+hypre_BoxArrayArrayCreate          hypre_NewBoxArrayArray
+hypre_BoxDestroy          hypre_FreeBox
+hypre_BoxArrayDestroy          hypre_FreeBoxArray
+hypre_BoxArrayArrayDestroy          hypre_FreeBoxArrayArray
+hypre_BoxDuplicate          hypre_DuplicateBox
+hypre_BoxArrayDuplicate          hypre_DuplicateBoxArray
+hypre_BoxArrayArrayDuplicate          hypre_DuplicateBoxArrayArray
+hypre_BoxGetSize          hypre_GetBoxSize
+hypre_BoxGetStrideSize          hypre_GetStrideBoxSize
+hypre_UnionBoxes          hypre_UnionBoxArray
+hypre_BoxInitializeMemory          hypre_InitializeBoxMemory
+hypre_BoxFinalizeMemory          hypre_FinalizeBoxMemory
+hypre_RankLinkCreate          hypre_NewRankLink
+hypre_RankLinkDestroy          hypre_FreeRankLink
+hypre_BoxNeighborsCreate          hypre_NewBoxNeighbors
+hypre_BoxNeighborsDestroy          hypre_FreeBoxNeighbors
+hypre_CommPkgCreate          hypre_NewCommPkg
+hypre_CommPkgDestroy          hypre_FreeCommPkg
+hypre_CommTypeCreate          hypre_NewCommType
+hypre_CommTypeDestroy          hypre_FreeCommType
+hypre_CommTypeEntryCreate          hypre_NewCommTypeEntry
+hypre_CommTypeEntryDestroy          hypre_FreeCommTypeEntry
+hypre_CommPkgCreateInfo          hypre_NewCommPkgInfo
+hypre_CommTypeSort          hypre_SortCommType
+hypre_CommPkgCommit          hypre_CommitCommPkg
+hypre_CommPkgUnCommit          hypre_UnCommitCommPkg
+hypre_CommTypeBuildMPI          hypre_BuildCommMPITypes
+hypre_CommTypeEntryBuildMPI          hypre_BuildCommEntryMPIType
+hypre_CreateComputeInfo          hypre_GetComputeInfo
+hypre_ComputePkgCreate          hypre_NewComputePkg
+hypre_ComputePkgDestroy          hypre_FreeComputePkg
+hypre_StructGridCreate          hypre_NewStructGrid
+hypre_StructGridRef          hypre_RefStructGrid
+hypre_StructGridDestroy          hypre_FreeStructGrid
+hypre_StructGridSetPeriodic          hypre_SetStructGridPeriodic
+hypre_StructGridSetExtents          hypre_SetStructGridExtents
+hypre_StructGridSetBoxes          hypre_SetStructGridBoxes
+hypre_StructGridSetGlobalInfo          hypre_SetStructGridGlobalInfo
+hypre_StructGridAssemble          hypre_AssembleStructGrid
+hypre_StructGridPrint          hypre_PrintStructGrid
+hypre_StructGridRead          hypre_ReadStructGrid
+hypre_StructMatrixCreate          hypre_NewStructMatrix
+hypre_StructMatrixRef          hypre_RefStructMatrix
+hypre_StructMatrixDestroy          hypre_FreeStructMatrix
+hypre_StructMatrixInitializeShell          hypre_InitializeStructMatrixShell
+hypre_StructMatrixInitializeData          hypre_InitializeStructMatrixData
+hypre_StructMatrixInitialize          hypre_InitializeStructMatrix
+hypre_StructMatrixSetValues          hypre_SetStructMatrixValues
+hypre_StructMatrixSetBoxValues          hypre_SetStructMatrixBoxValues
+hypre_StructMatrixAssemble          hypre_AssembleStructMatrix
+hypre_StructMatrixSetNumGhost          hypre_SetStructMatrixNumGhost
+hypre_StructMatrixPrint          hypre_PrintStructMatrix
+hypre_StructMatrixMigrate          hypre_MigrateStructMatrix
+hypre_StructMatrixRead          hypre_ReadStructMatrix
+hypre_StructMatrixCreateMask          hypre_NewStructMatrixMask
+hypre_StructMatvecCreate          hypre_StructMatvecInitialize
+hypre_StructMatvecDestroy          hypre_StructMatvecFinalize
+hypre_StructStencilCreate          hypre_NewStructStencil
+hypre_StructStencilRef          hypre_RefStructStencil
+hypre_StructStencilDestroy          hypre_FreeStructStencil
+hypre_StructStencilSymmetrize          hypre_SymmetrizeStructStencil
+hypre_StructVectorCreate          hypre_NewStructVector
+hypre_StructVectorRef          hypre_RefStructVector
+hypre_StructVectorDestroy          hypre_FreeStructVector
+hypre_StructVectorInitializeShell          hypre_InitializeStructVectorShell
+hypre_StructVectorInitializeData          hypre_InitializeStructVectorData
+hypre_StructVectorInitialize          hypre_InitializeStructVector
+hypre_StructVectorSetValues          hypre_SetStructVectorValues
+hypre_StructVectorGetValues          hypre_GetStructVectorValues
+hypre_StructVectorSetBoxValues          hypre_SetStructVectorBoxValues
+hypre_StructVectorGetBoxValues          hypre_GetStructVectorBoxValues
+hypre_StructVectorSetNumGhost          hypre_SetStructVectorNumGhost
+hypre_StructVectorAssemble          hypre_AssembleStructVector
+hypre_StructVectorSetConstantValues          hypre_SetStructVectorConstantValues
+hypre_StructVectorClearGhostValues          hypre_ClearStructVectorGhostValues
+hypre_StructVectorClearAllValues          hypre_ClearStructVectorAllValues
+hypre_StructVectorGetMigrateCommPkg          hypre_GetMigrateStructVectorCommPkg
+hypre_StructVectorMigrate          hypre_MigrateStructVector
+hypre_StructVectorPrint          hypre_PrintStructVector
+hypre_StructVectorRead          hypre_ReadStructVector
+EOF
+
+########################
+# struct linear solvers
+########################
+
+cat >> $INFILE <<EOF
+HYPRE_StructHybridCreate          HYPRE_StructHybridInitialize
+HYPRE_StructHybridDestroy          HYPRE_StructHybridFinalize
+HYPRE_StructJacobiCreate          HYPRE_StructJacobiInitialize
+HYPRE_StructJacobiDestroy          HYPRE_StructJacobiFinalize
+HYPRE_StructPCGCreate          HYPRE_StructPCGInitialize
+HYPRE_StructPCGDestroy          HYPRE_StructPCGFinalize
+HYPRE_StructPFMGCreate          HYPRE_StructPFMGInitialize
+HYPRE_StructPFMGDestroy          HYPRE_StructPFMGFinalize
+HYPRE_StructSMGCreate          HYPRE_StructSMGInitialize
+HYPRE_StructSMGDestroy          HYPRE_StructSMGFinalize
+HYPRE_StructSparseMSGCreate          HYPRE_StructSparseMSGInitialize
+HYPRE_StructSparseMSGDestroy          HYPRE_StructSparseMSGFinalize
+hypre_CyclicReductionCreate          hypre_CyclicReductionInitialize
+hypre_CycRedCreateCoarseOp          hypre_CycRedNewCoarseOp
+hypre_CyclicReductionDestroy          hypre_CyclicReductionFinalize
+hypre_HybridCreate          hypre_HybridInitialize
+hypre_HybridDestroy          hypre_HybridFinalize
+hypre_JacobiCreate          hypre_JacobiInitialize
+hypre_JacobiDestroy          hypre_JacobiFinalize
+hypre_PCGCreate          hypre_PCGInitialize
+hypre_PCGDestroy          hypre_PCGFinalize
+hypre_PCGCreateVector          hypre_PCGNewVector
+hypre_PCGDestroyVector          hypre_PCGFreeVector
+hypre_PCGMatvecCreate          hypre_PCGMatvecInitialize
+hypre_PCGMatvecDestroy          hypre_PCGMatvecFinalize
+hypre_PFMGCreate          hypre_PFMGInitialize
+hypre_PFMGDestroy          hypre_PFMGFinalize
+hypre_PFMG2CreateRAPOp          hypre_PFMG2NewRAPOp
+hypre_PFMG3CreateRAPOp          hypre_PFMG3NewRAPOp
+hypre_PFMGInterpCreate          hypre_PFMGInterpInitialize
+hypre_PFMGInterpDestroy          hypre_PFMGInterpFinalize
+hypre_PFMGRelaxCreate          hypre_PFMGRelaxInitialize
+hypre_PFMGRelaxDestroy          hypre_PFMGRelaxFinalize
+hypre_PFMGRestrictCreate          hypre_PFMGRestrictInitialize
+hypre_PFMGRestrictDestroy          hypre_PFMGRestrictFinalize
+hypre_PFMGCreateInterpOp          hypre_PFMGNewInterpOp
+hypre_PFMGCreateRAPOp          hypre_PFMGNewRAPOp
+hypre_PointRelaxCreate          hypre_PointRelaxInitialize
+hypre_PointRelaxDestroy          hypre_PointRelaxFinalize
+hypre_SMGCreate          hypre_SMGInitialize
+hypre_SMGDestroy          hypre_SMGFinalize
+hypre_SMG2CreateRAPOp          hypre_SMG2NewRAPOp
+hypre_SMG3CreateRAPOp          hypre_SMG3NewRAPOp
+hypre_SMGIntAddCreate          hypre_SMGIntAddInitialize
+hypre_SMGIntAddDestroy          hypre_SMGIntAddFinalize
+hypre_SMGRelaxCreate          hypre_SMGRelaxInitialize
+hypre_SMGRelaxDestroyTempVec          hypre_SMGRelaxFreeTempVec
+hypre_SMGRelaxDestroyARem          hypre_SMGRelaxFreeARem
+hypre_SMGRelaxDestroyASol          hypre_SMGRelaxFreeASol
+hypre_SMGRelaxDestroy          hypre_SMGRelaxFinalize
+hypre_SMGResidualCreate          hypre_SMGResidualInitialize
+hypre_SMGResidualDestroy          hypre_SMGResidualFinalize
+hypre_SMGRestrictCreate          hypre_SMGRestrictInitialize
+hypre_SMGRestrictDestroy          hypre_SMGRestrictFinalize
+hypre_SMGCreateInterpOp          hypre_SMGNewInterpOp
+hypre_SMGCreateRAPOp          hypre_SMGNewRAPOp
+hypre_SMGCreateRestrictOp          hypre_SMGNewRestrictOp
+hypre_SparseMSGCreate          hypre_SparseMSGInitialize
+hypre_SparseMSGDestroy          hypre_SparseMSGFinalize
+EOF
+
+##################################################################
+# Find files that need to be converted, and make backups
+##################################################################
+
+cat $INFILE | `
+  while read REPLACE MATCH
+  do
+    grep -l $MATCH $* >> hypre_convert.tmp
+  done
+`
+
+FILES=`cat hypre_convert.tmp | sort | uniq`
+rm -f hypre_convert.tmp
+
+for i in $FILES
+do
+  cp $i $i.bak
+done
+
+##################################################################
+# Convert files
+##################################################################
+
+cat $INFILE | `
+  while read REPLACE MATCH
+  do
+
+    rm -f $SEDFILE
+
+    echo "s/\([^a-zA-Z_0-9]\)$MATCH\([^a-zA-Z_0-9]\)/\1$REPLACE\2/g" >> $SEDFILE
+    echo "s/^$MATCH\([^a-zA-Z_0-9]\)/$REPLACE\1/g" >> $SEDFILE
+    echo "s/\([^a-zA-Z_0-9]\)$MATCH$/\1$REPLACE/g" >> $SEDFILE
+    echo "s/^$MATCH$/$REPLACE/g" >> $SEDFILE
+
+    for i in $FILES
+    do
+      cp $i $i.tmp
+      /usr/bin/sed -f $SEDFILE $i.tmp > $i
+    done
+
+  done
+`
+
+##################################################################
+# Clean up
+##################################################################
+
+for i in $FILES
+do
+  rm -f $i.tmp
+done
+
+rm -f $INFILE
+rm -f $SEDFILE
+
