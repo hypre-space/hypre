@@ -61,6 +61,10 @@ define(IWAIT,<<
 Usage: PLOOP(increment_variable, loop_initial_value, loop_stopping value,
              index_array_name, array_index, thread_counter, mutex_object,
              cond_object <<loop_body>>)
+
+NUM_THREADS must either be #defined as the number of threads being used or
+be an integer variable containing the number of threads.
+
 Arguments:  $1 -- the name of the increment variable for the loop
             $2 -- the initial value for the increment variable
             $3 -- the stopping value for the increment variable
@@ -76,15 +80,6 @@ Arguments:  $1 -- the name of the increment variable for the loop
 */
 
 define(PLOOP,<<
-/*
-         $1 = ifetchadd( indx($4), $4 ) + $2
-         do while ($1 .le. $3 )
-$5
-         $1 = ifetchadd( indx($4), $4 ) + $2
-         enddo
-         if ( $1 .eq. $3+msg_nthreads ) indx($4)=0
-*/
-
 
    for ($1 = ifetchadd(&$4[$5], &$7) + $2; 
         $1 <  $3;
@@ -98,18 +93,18 @@ $5
 
    if ($6 < NUM_THREADS)
       pthread_cond_wait(&$8, &$7);
-   else if ($6 == NUM_THREADS)
+   else if ($6 == NUM_THREADS) {
       pthread_cond_broadcast(&$8);
+      $4[$5] =0;
+   }
 
    pthread_mutex_unlock(&$7);
 
-   if ($1 == $3)
-      $4[$5] =0;
 
    pthread_mutex_destroy(&$7);
    pthread_cond_destroy(&$8);
 
-
+   $6 = 0;
 >>)
 
 
@@ -124,19 +119,15 @@ define(IWAIT,<<>>)
 
 /* PLOOP parallel loop macro.
  Example:
-     PLOOP(z,lz,mz,indx,3,<<body>>)
+     PLOOP(z,lz,mz, , , , , ,<<body>>)
+
+ This macro creates a sequential, non-threaded loop, using the PLOOP
+ syntax.
 */
 define(PLOOP,<<
-/*
-        $1 = $2
-        do while ($1 .le. $3) !ploop started here
-$5
-        $1 = $1 + 1
-	enddo   ! ploop expanded above
-*/
 
    for ($1 = $2; $1 < $3; $1++) {
-      $6
+      $9
    }
 
 
@@ -144,7 +135,3 @@ $5
 
 
 >>)
-
-
-
-
