@@ -127,6 +127,8 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
    num_threads = hypre_NumThreads();
+   my_first_cpt = num_cpts_global[my_id];
+   total_global_cpts = num_cpts_global[num_procs];
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -212,7 +214,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
     * Determine the number of C-pts on each processor, broadcast,
     * the first C-pt on each processor, and the total number of C-pts
     *----------------------------------------------------------------------*/
-
+/*
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
     num_cpts_global = hypre_CTAlloc(int, num_procs+1);
@@ -253,7 +255,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
     {
        num_cpts_global[i] = num_cpts_global[i+1] - num_cpts_global[i];
     }
-
+*/
    /*-----------------------------------------------------------------------
     *  First Pass: Determine size of P and fill in fine_to_coarse mapping.
     *-----------------------------------------------------------------------*/

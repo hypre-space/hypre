@@ -185,10 +185,10 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-						num_sends));
    if (num_functions > 1)
    {
+      int_buf_data = hypre_CTAlloc(int,hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+						num_sends));
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
@@ -202,6 +202,7 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
 	dof_func_offd);
 
       hypre_ParCSRCommHandleDestroy(comm_handle);   
+      hypre_TFree(int_buf_data);
    }
 
    /* give S same nonzero structure as A */

@@ -270,6 +270,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	 }
 	 if (S)
             hypre_ParCSRMatrixDestroy(S);
+	 hypre_TFree(coarse_pnts_global);
          if (level > 0)
          {
             /* note special case treatment of CF_marker is necessary
