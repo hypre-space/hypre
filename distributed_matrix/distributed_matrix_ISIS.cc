@@ -24,16 +24,20 @@ int
 hypre_InitializeDistributedMatrixISIS(hypre_DistributedMatrix *dm)
 {
    RowMatrix *mat = (RowMatrix *) hypre_DistributedMatrixLocalStorage(dm);
-   int num_rows = mat->getMap().numLocalRows();
+
+   const Map& map = mat->getMap();
+
+   int num_rows = mat->getMap().n();
+   int num_cols = mat->getMap().n();
    
    hypre_DistributedMatrixM(dm) = num_rows;
-   hypre_DistributedMatrixN(dm) = num_rows;
+   hypre_DistributedMatrixN(dm) = num_cols;
 
    // allocate space for row buffers
 
    RowBuf *rowbuf = new RowBuf;
-   rowbuf->ind = new int[num_rows];
-   rowbuf->val = new double[num_rows];
+   rowbuf->ind = new int[num_cols];
+   rowbuf->val = new double[num_cols];
 
    dm->auxiliary_data = (void *) rowbuf;
 

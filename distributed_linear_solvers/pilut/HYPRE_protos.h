@@ -1,10 +1,10 @@
 #ifdef __STDC__
-# define	P(s) s
+# define        P(s) s
 #else
 # define P(s) ()
 #endif
-
-
+ 
+ 
 /* HYPRE_DistributedMatrixPilutSolver.c */
 HYPRE_DistributedMatrixPilutSolver HYPRE_NewDistributedMatrixPilutSolver P((MPI_Comm comm , HYPRE_DistributedMatrix matrix ));
 int HYPRE_FreeDistributedMatrixPilutSolver P((HYPRE_DistributedMatrixPilutSolver in_ptr ));
@@ -17,5 +17,6 @@ int HYPRE_DistributedMatrixPilutSolverSetDropTolerance P((HYPRE_DistributedMatri
 int HYPRE_DistributedMatrixPilutSolverSetMaxIts P((HYPRE_DistributedMatrixPilutSolver in_ptr , int its ));
 int HYPRE_DistributedMatrixPilutSolverSetup P((HYPRE_DistributedMatrixPilutSolver in_ptr ));
 int HYPRE_DistributedMatrixPilutSolverSolve P((HYPRE_DistributedMatrixPilutSolver in_ptr , double *x , const double *b ));
-
+ 
 #undef P
+
