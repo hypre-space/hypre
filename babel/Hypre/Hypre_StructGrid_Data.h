@@ -9,7 +9,6 @@
 
 #include "HYPRE_mv.h"
 #include "struct_matrix_vector.h"
-#include "struct_grid.h"
 #include "Hypre_MPI_Com_Skel.h"
 #include "Hypre_MPI_Com_Data.h"
 
