@@ -54,6 +54,8 @@ ACX_INSURE
 
 ACX_PURIFY
 
+ACX_ASCI_HOST
+
 AC_ARG_WITH(babel,
 AC_HELP_STRING([--with-babel],[use babel]),
 [ if test "$withval" = "yes"; then
