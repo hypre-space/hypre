@@ -33,6 +33,10 @@
 /* 
  * Function prototypes 
  */
+extern int hypre_F90_NAME_BLAS(dtrsv,DTRSV)(char *, char *, char *, int *, double *, int *, 
+	                                    double *, int *);
+extern int hypre_F90_NAME_BLAS(dgemv,DGEMV)(char *, int *, int *, double *, double *, int *, 
+		                            double *, int *, double *, double *, int *);
 void sludlsolve(int, int, double*, double*);
 void sludmatvec(int, int, int, double*, double*, double*);
 
