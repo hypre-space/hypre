@@ -160,44 +160,20 @@ hypre_F90_IFACE(hypre_sstructgmressetprecond, HYPRE_SSTRUCTGMRESSETPRECOND)
                                                       int      *ierr)
 /*------------------------------------------
  *    precond_id flags mean:
- *    0 - setup a smg preconditioner
- *    1 - setup a pfmg preconditioner
  *    2 - setup a split-solver preconditioner
  *    3 - setup a syspfmg preconditioner
- *    4 - setup a ParCSRPilut preconditioner
- *    5 - setup a ParCSRParaSails preconditioner
- *    6 - setup a BoomerAMG preconditioner
- *    7 - setup a ParCSRDiagScale preconditioner
  *    8 - setup a DiagScale preconditioner
  *    9 - no preconditioner setup
  *----------------------------------------*/
 
 {
-   if(*precond_id == 0)
-      {
-       *ierr = (int)
-               (HYPRE_SStructGMRESSetPrecond( (HYPRE_SStructSolver)    *solver,
-                                               HYPRE_StructSMGSolve,
-                                               HYPRE_StructSMGSetup,
-                                              (HYPRE_SStructSolver)    *precond_solver));
-      }
-
-   else if(*precond_id == 1)
-      {
-       *ierr = (int)
-               (HYPRE_SStructGMRESSetPrecond( (HYPRE_SStructSolver)    *solver,
-                                               HYPRE_StructPFMGSolve,
-                                               HYPRE_StructPFMGSetup,
-                                              (HYPRE_SStructSolver)    *precond_solver));
-      }
-
-   else if(*precond_id == 2)
+   if(*precond_id == 2)
       {
        *ierr = (int)
                (HYPRE_SStructGMRESSetPrecond( (HYPRE_SStructSolver)    *solver,
                                                HYPRE_SStructSplitSolve,
                                                HYPRE_SStructSplitSetup,
-                                              (HYPRE_SStructSolver)    *precond_solver));
+                                              (HYPRE_SStructSolver *)   precond_solver));
       }
 
    else if(*precond_id == 3)
@@ -206,43 +182,7 @@ hypre_F90_IFACE(hypre_sstructgmressetprecond, HYPRE_SSTRUCTGMRESSETPRECOND)
                (HYPRE_SStructGMRESSetPrecond( (HYPRE_SStructSolver)    *solver,
                                                HYPRE_SStructSysPFMGSolve,
                                                HYPRE_SStructSysPFMGSetup,
-                                              (HYPRE_SStructSolver)    *precond_solver));
-      }
-
-   else if(*precond_id == 4)
-      {
-       *ierr = (int)
-               (HYPRE_SStructGMRESSetPrecond( (HYPRE_SStructSolver)    *solver,
-                                               HYPRE_ParCSRPilutSolve,
-                                               HYPRE_ParCSRPilutSetup,
-                                              (HYPRE_SStructSolver)    *precond_solver));
-      }
-
-   else if(*precond_id == 5)
-      {
-       *ierr = (int)
-               (HYPRE_SStructGMRESSetPrecond( (HYPRE_SStructSolver)    *solver,
-                                               HYPRE_ParCSRParaSailsSolve,
-                                               HYPRE_ParCSRParaSailsSetup,
-                                              (HYPRE_SStructSolver)    *precond_solver));
-      }
-
-   else if(*precond_id == 6)
-      {
-       *ierr = (int)
-               (HYPRE_SStructGMRESSetPrecond( (HYPRE_SStructSolver)    *solver,
-                                               HYPRE_BoomerAMGSolve,
-                                               HYPRE_BoomerAMGSetup,
-                                              (HYPRE_SStructSolver)    *precond_solver));
-      }
-
-   else if(*precond_id == 7)
-      {
-       *ierr = (int)
-               (HYPRE_SStructGMRESSetPrecond( (HYPRE_SStructSolver)    *solver,
-                                               HYPRE_ParCSRDiagScale,
-                                               HYPRE_ParCSRDiagScaleSetup,
-                                              (HYPRE_SStructSolver)    *precond_solver));
+                                              (HYPRE_SStructSolver *)   precond_solver));
       }
 
    else if(*precond_id == 8)
@@ -251,7 +191,7 @@ hypre_F90_IFACE(hypre_sstructgmressetprecond, HYPRE_SSTRUCTGMRESSETPRECOND)
                (HYPRE_SStructGMRESSetPrecond( (HYPRE_SStructSolver)    *solver,
                                                HYPRE_SStructDiagScale,
                                                HYPRE_SStructDiagScaleSetup,
-                                              (HYPRE_SStructSolver)    *precond_solver));
+                                              (HYPRE_SStructSolver *)   precond_solver));
       }
    else if(*precond_id == 9)
       {

@@ -79,11 +79,11 @@ hypre_F90_IFACE(hypre_sstructgraphaddentries, HYPRE_SSTRUCTGRAPHADDENTRIES)
 {
    *ierr = (int) (HYPRE_SStructGraphAddEntries( (HYPRE_SStructGraph)  *graph,
                                                 (int)                 *part,
-                                                (int *)                index,
-                                                (int *)               var,
-                                                (int *)               to_part,
-                                                (int)                *to_index,
-                                                (int *)               to_var ) );
+                                                (int)                 *index,
+                                                (int)                 *var,
+                                                (int)                 *to_part,
+                                                (int)                 *to_index,
+                                                (int)                 *to_var ) );
 }
 
 /*--------------------------------------------------------------------------
