@@ -1,3 +1,4 @@
+
 #include "utilities.h"
 
 #include "HYPRE_struct_ls.h"
@@ -21,15 +22,6 @@ int hypre_StructCoarsen( hypre_StructGrid *fgrid , hypre_Index index , hypre_Ind
 int hypre_Merge( int **arrays , int *sizes , int size , int **mergei_ptr , int **mergej_ptr );
 
 /* cyclic_reduction.c */
-void *hypre_CyclicReductionCreate( MPI_Comm comm );
-hypre_StructMatrix *hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A , hypre_StructGrid *coarse_grid , int cdir );
-int hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A , hypre_StructMatrix *Ac , hypre_Index cindex , hypre_Index cstride );
-int hypre_CyclicReductionSetup( void *cyc_red_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-int hypre_CyclicReduction( void *cyc_red_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-int hypre_CyclicReductionSetBase( void *cyc_red_vdata , hypre_Index base_index , hypre_Index base_stride );
-int hypre_CyclicReductionDestroy( void *cyc_red_vdata );
-
-/* cyclic_reduction-pragma-disjoint.c */
 void *hypre_CyclicReductionCreate( MPI_Comm comm );
 hypre_StructMatrix *hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A , hypre_StructGrid *coarse_grid , int cdir );
 int hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A , hypre_StructMatrix *Ac , hypre_Index cindex , hypre_Index cstride );
@@ -314,6 +306,20 @@ int hypre_PointRelaxSetTempVec( void *relax_vdata , hypre_StructVector *t );
 int hypre_relax_wtx( void *relax_vdata , hypre_StructVector *t , hypre_StructVector *x );
 int hypre_relax_copy( void *relax_vdata , hypre_StructVector *t , hypre_StructVector *x );
 
+/* red_black_constantcoef_gs.c */
+int hypre_RedBlackConstantCoefGS( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
+
+/* red_black_gs.c */
+void *hypre_RedBlackGSCreate( MPI_Comm comm );
+int hypre_RedBlackGSDestroy( void *relax_vdata );
+int hypre_RedBlackGSSetup( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
+int hypre_RedBlackGS( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
+int hypre_RedBlackGSSetTol( void *relax_vdata , double tol );
+int hypre_RedBlackGSSetMaxIter( void *relax_vdata , int max_iter );
+int hypre_RedBlackGSSetZeroGuess( void *relax_vdata , int zero_guess );
+int hypre_RedBlackGSSetStartRed( void *relax_vdata );
+int hypre_RedBlackGSSetStartBlack( void *relax_vdata );
+
 /* semi_interp.c */
 void *hypre_SemiInterpCreate( void );
 int hypre_SemiInterpSetup( void *interp_vdata , hypre_StructMatrix *P , int P_stored_as_transpose , hypre_StructVector *xc , hypre_StructVector *e , hypre_Index cindex , hypre_Index findex , hypre_Index stride );
@@ -394,13 +400,6 @@ int hypre_SMGRelaxSetNewMatrixStencil( void *relax_vdata , hypre_StructStencil *
 int hypre_SMGRelaxSetupBaseBoxArray( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
 
 /* smg_residual.c */
-void *hypre_SMGResidualCreate( void );
-int hypre_SMGResidualSetup( void *residual_vdata , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *b , hypre_StructVector *r );
-int hypre_SMGResidual( void *residual_vdata , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *b , hypre_StructVector *r );
-int hypre_SMGResidualSetBase( void *residual_vdata , hypre_Index base_index , hypre_Index base_stride );
-int hypre_SMGResidualDestroy( void *residual_vdata );
-
-/* smg_residual-pragma-disjoint.c */
 void *hypre_SMGResidualCreate( void );
 int hypre_SMGResidualSetup( void *residual_vdata , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *b , hypre_StructVector *r );
 int hypre_SMGResidual( void *residual_vdata , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *b , hypre_StructVector *r );
