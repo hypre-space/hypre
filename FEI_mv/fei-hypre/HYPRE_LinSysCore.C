@@ -249,6 +249,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     strcpy(euclidargv_[1], "0");   
     strcpy(euclidargv_[2], "-sparseA");   
     strcpy(euclidargv_[3], "0.0");   
+    blockScheme_        = 0;    // block diagonal (1-block triangular)
 
     superluOrdering_    = 0;    // natural ordering in SuperLU
     superluScale_[0]    = 'N';  // no scaling in SuperLUX

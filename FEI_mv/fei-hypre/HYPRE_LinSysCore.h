@@ -579,6 +579,7 @@ class HYPRE_LinSysCore
    int             polyOrder_;
    int             euclidargc_;
    char            **euclidargv_;
+   int             blockScheme_;
 
    // ----------------------------------------------------------------------
    // map and others

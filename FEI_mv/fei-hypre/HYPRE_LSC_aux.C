@@ -1561,10 +1561,15 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
             }
             else
             {
-               HYPRE_EuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
+               if ( blockScheme_ == 1 )
+                  HYPRE_LSI_BlockPrecondSetSchemeBTri(HYPrecon_);
+               else if ( blockScheme_ == 2 )
+                  HYPRE_LSI_BlockPrecondSetSchemeBInv(HYPrecon_);
+               else
+                  HYPRE_LSI_BlockPrecondSetSchemeBDiag(HYPrecon_);
                HYPRE_ParCSRGMRESSetPrecond(HYSolver_, 
-                     HYPRE_LSI_BlockPrecondSolve, 
-                     HYPRE_LSI_BlockPrecondSetup, HYPrecon_);
+                                       HYPRE_LSI_BlockPrecondSolve, 
+                                       HYPRE_LSI_BlockPrecondSetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
@@ -2886,6 +2891,28 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
        case HYEUCLID :
             printf("ERROR : Euclid does not match SymQMR in general.\n");
             exit(1);
+            break;
+
+       case HYBLOCK :
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+            {
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, 
+                     HYPRE_LSI_BlockPrecondSolve, HYPRE_DummyFunction, 
+                     HYPrecon_);
+            }
+            else
+            {
+               if ( blockScheme_ == 1 )
+                  HYPRE_LSI_BlockPrecondSetSchemeBTri(HYPrecon_);
+               else if ( blockScheme_ == 2 )
+                  HYPRE_LSI_BlockPrecondSetSchemeBInv(HYPrecon_);
+               else
+                  HYPRE_LSI_BlockPrecondSetSchemeBDiag(HYPrecon_);
+               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, 
+                                       HYPRE_LSI_BlockPrecondSolve, 
+                                       HYPRE_LSI_BlockPrecondSetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
             break;
 
 #ifdef MLPACK
