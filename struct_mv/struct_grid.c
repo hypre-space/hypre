@@ -24,6 +24,7 @@ hypre_StructGridCreate( MPI_Comm           comm,
                         hypre_StructGrid **grid_ptr)
 {
    hypre_StructGrid    *grid;
+   int                 i;
 
    grid = hypre_TAlloc(hypre_StructGrid, 1);
 
@@ -38,6 +39,15 @@ hypre_StructGridCreate( MPI_Comm           comm,
    hypre_StructGridGlobalSize(grid)  = 0;
    hypre_SetIndex(hypre_StructGridPeriodic(grid), 0, 0, 0);
    hypre_StructGridRefCount(grid)     = 1;
+
+   /* additional defaults for the grid ghosts GEC0902  */
+   
+   hypre_StructGridGhlocalSize(grid)  = 0;
+
+   for (i = 0; i < 6; i++)
+   {
+     hypre_StructGridNumGhost(grid)[i] = 1;
+   }
 
    *grid_ptr = grid;
 
@@ -234,6 +244,10 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    int                  size;
    int                  prune;
    int                  i, d, idmin, idmax;
+   /*  GEC  new declarations for the ghost size local  */
+   int                  *numghost;
+   int                   ghostsize;
+   hypre_Box            *ghostbox;
 
    prune = 1;
 
@@ -318,13 +332,44 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    hypre_BoxNeighborsAssemble(neighbors, max_distance, prune);
 
    /* compute local size */
+  
    size = 0;
+   ghostsize = 0;
    hypre_ForBoxI(i, boxes)
       {
          box = hypre_BoxArrayBox(boxes, i);
-         size += hypre_BoxVolume(box);
+         size += hypre_BoxVolume(box);         
       }
+
    hypre_StructGridLocalSize(grid) = size;
+
+ /* GEC0902 expand the box to include the ghosts. Create, copy and expand
+  * the ghostbox and finally inserting into the ghlocalsize. As a reminder
+  * the boxes variable is the localboxes of the grid (owned by the processor)  
+  */
+
+   numghost = hypre_StructGridNumGhost(grid) ;
+   ghostsize = 0;
+   ghostbox = hypre_BoxCreate();
+   hypre_ForBoxI(i, boxes)
+      {
+         box = hypre_BoxArrayBox(boxes, i);
+
+         hypre_CopyBox(box, ghostbox);
+         hypre_BoxExpand(ghostbox, numghost);         
+
+	 /*        for (d = 0; d < 3; d++)
+	  * {
+	  *    hypre_BoxIminD(ghostbox, d) -= numghost[2*d];
+	  *    hypre_BoxImaxD(ghostbox, d) += numghost[2*d + 1];
+	  *  }                                           */
+
+        ghostsize += hypre_BoxVolume(ghostbox);        
+
+      }
+   
+   hypre_StructGridGhlocalSize(grid) = ghostsize;
+   hypre_BoxDestroy(ghostbox);
 
    return ierr;
 }
@@ -673,4 +718,24 @@ hypre_StructGridPeriodicAllBoxes( hypre_StructGrid  *grid,
    *num_periodic_ptr = new_num_periodic;
 
    return ierr;
+}
+/*------------------------------------------------------------------------------
+ * GEC0902  hypre_StructGridSetNumGhost
+ *
+ * the purpose is to set num ghost in the structure grid. It is identical
+ * to the function that is used in the structure vector entity.
+ *-----------------------------------------------------------------------------*/
+
+int
+hypre_StructGridSetNumGhost( hypre_StructGrid *grid, int  *num_ghost )
+{
+  int  ierr = 0;
+  int  i;
+  
+  for (i = 0; i < 6; i++)
+  {
+    hypre_StructGridNumGhost(grid)[i] = num_ghost[i];
+  }
+
+  return ierr;
 }

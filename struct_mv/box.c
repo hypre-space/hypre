@@ -363,4 +363,35 @@ hypre_BoxGetStrideSize( hypre_Box   *box,
    return 0;
 }
 
+/*--------------------------------------------------------------------------
+ * GEC0209 function to expand a box given a ghostvector numexp
+ * the idea is to dilatate the box using two vectors.
+ *
+ * even components of numexp shift negatively the imin of the box
+ * odd  components of numexp shift positively the imax of the box
+ * 
+ * 
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoxExpand( hypre_Box   *box,
+                 int         *numexp)
+{ 
+  int   ierr = 0;
+  int  *imin = hypre_BoxIMin(box);
+  int  *imax = hypre_BoxIMax(box);
+  int  d; 
+
+  for (d = 0; d < 3; d++)
+  {
+    imin[d] -= numexp[2*d];
+    imax[d] += numexp[2*d+1];
+  }
+  
+  return ierr;
+}
+        
+
+  
+
 
