@@ -474,8 +474,8 @@ int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
 
 int MLI_Method_AMGSA::setup( MLI *mli ) 
 {
-   int             level, mypid;
-   double          start_time, elapsed_time, max_eigen;
+   int             i, level, mypid;
+   double          start_time, elapsed_time, max_eigen, dtemp;
    char            param_string[100], *targv[10];
    MLI_Matrix      *mli_Pmat, *mli_Rmat, *mli_Amat, *mli_cAmat;
    MLI_Solver      *smoother_ptr, *csolve_ptr;
@@ -586,6 +586,19 @@ int MLI_Method_AMGSA::setup( MLI *mli )
 
       if (pre_smoother == MLI_SOLVER_MLS_ID) pre_smoother_wgt[0] = max_eigen;
       if (postsmoother == MLI_SOLVER_MLS_ID) postsmoother_wgt[0] = max_eigen;
+      if (pre_smoother==MLI_SOLVER_SGS_ID || pre_smoother==MLI_SOLVER_CGSGS_ID)
+      {
+         dtemp = -999.0;
+         MLI_Utils_ComputeSpectralRadius((hypre_ParCSRMatrix *) 
+                                         mli_Amat->getMatrix(), &dtemp);
+         for ( i = 0; i < pre_smoother_num; i++ )
+            pre_smoother_wgt[i] = 4.0 / ( 3.0 * dtemp );
+      }
+      if (postsmoother==MLI_SOLVER_SGS_ID || postsmoother==MLI_SOLVER_CGSGS_ID)
+      {
+         for ( i = 0; i < postsmoother_num; i++ )
+            postsmoother_wgt[i] = 4.0 / ( 3.0 * dtemp );
+      }
 
       /* ------set the smoothers---------------------------------------- */
 
