@@ -176,15 +176,9 @@ main( int   argc,
    solver_id = 0;
    solver_type = 1;
 
-/*
    istart[0] = -3; 
    istart[1] = -3; 
    istart[2] = -3;
- */
-/* istart changed for testing, <<< DON'T CHECK THIS IN */
-   istart[0] = 1; 
-   istart[1] = 1; 
-   istart[2] = 1;
 
    px = 0;
    py = 0;
