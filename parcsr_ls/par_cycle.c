@@ -162,7 +162,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 	   num_sweep = hypre_ParAMGDataSmoothNumSweep(amg_data);
         relax_type = grid_relax_type[cycle_param];
       }
-      else if (max_levels > 1)
+      else if (max_levels > 0)
       {
         /* If no coarsening occurred, apply a simple smoother once */
         num_sweep = 1;

@@ -320,6 +320,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else
       {
+	 S = NULL;
+	 coarse_pnts_global = NULL;
          CF_marker = hypre_CTAlloc(int, local_size );
 	 for (i=0; i < local_size ; i++)
 	    CF_marker[i] = 1;
