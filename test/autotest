@@ -63,8 +63,8 @@ make
 make parcsr 1> $0.parcsr.log 2> $0.parcsr.err
 echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.parcsr.err.email 
 
-#make ci_struct 1> $0.ci_struct.log 2> $0.ci_struct.err
-#echo "dwalker@llnl.gov rfalgout@llnl.gov cleary1@llnl.gov" > $0.ci_struct.err.email 
+make pilut 1> $0.ci_struct.log 2> $0.ci_struct.err
+echo "dwalker@llnl.gov rfalgout@llnl.gov cleary1@llnl.gov" > $0.ci_struct.err.email 
 
 make seq 1> $0.seq.log 2> $0.seq.err
 echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.seq.err.email 
@@ -118,8 +118,8 @@ make
 make parcsr 1> $0.parcsr_threads.log 2> $0.parcsr_threads.err
 echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.parcsr_threads.err.email 
 
-#make ci_struct 1> $0.ci_struct_threads.log 2> $0.ci_struct_threads.err
-#echo "dwalker@llnl.gov rfalgout@llnl.gov cleary1@llnl.gov" > $0.ci_struct_threads.err.email 
+make pilut 1> $0.ci_struct_threads.log 2> $0.ci_struct_threads.err
+echo "dwalker@llnl.gov rfalgout@llnl.gov cleary1@llnl.gov" > $0.ci_struct_threads.err.email 
 
 make seq 1> $0.seq_threads.log 2> $0.seq_threads.err
 echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.seq_threads.err.email 
@@ -152,8 +152,8 @@ make
 make parcsr 1> $0.parcsr_no_mpi.log 2> $0.parcsr_no_mpi.err
 echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.parcsr_no_mpi.err.email 
 
-#make ci_struct 1> $0.ci_struct_no_mpi.log 2> $0.ci_struct_no_mpi.err
-#echo "dwalker@llnl.gov rfalgout@llnl.gov cleary1@llnl.gov" > $0.ci_struct_no_mpi.err.email 
+make pilut 1> $0.ci_struct_no_mpi.log 2> $0.ci_struct_no_mpi.err
+echo "dwalker@llnl.gov rfalgout@llnl.gov cleary1@llnl.gov" > $0.ci_struct_no_mpi.err.email 
 
 make seq 1> $0.seq_no_mpi.log 2> $0.seq_no_mpi.err
 echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.seq_no_mpi.err.email 
