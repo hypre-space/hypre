@@ -784,8 +784,14 @@ if [ ${BuildOpt} -ne $Skip ] ; then
       fi
     fi
     [ -f config.cache ] && rm config.cache
-    $CONFIGURE "$ConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
+    if [ "$ConfigOption" != " " ]
+    then			# configure after 2.5x does't like blanks
+      $CONFIGURE "$ConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
 	2> ${Hdr}.${MessageStr}.configure.err
+    else
+      $CONFIGURE 1> ${Hdr}.${MessageStr}.configure.log \
+	2> ${Hdr}.${MessageStr}.configure.err
+    fi
     echo "$HYPRE_CONFIGURE_EMAIL" > ${Hdr}.${MessageStr}.configure.err.email
 
     if [ $IJOpt -ne $Skip ] ; then
