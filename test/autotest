@@ -276,11 +276,15 @@ echo "cleaning up...."
 ssh ${HYPRE_COMPILE_MACHINE} "
     (\
 	 cd  ${HYPRE_REMOTE_DIR}/linear_solvers
-	 tar -cvf autotest.${HYPRE_RUN_MACHINE}.tar test;\
-	 rm -fR ${HYPRE_REMOTE_DIR}\
+	 tar -cvf autotest.${HYPRE_RUN_MACHINE}.tar test\
     )"
 
 echo "copying test results to CASC machine..."
 scp -r  ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}/linear_solvers/autotest.${HYPRE_RUN_MACHINE}.tar $HYPRE_AUTOTEST_DIR/.
+
+ssh ${HYPRE_COMPILE_MACHINE} "
+    (\
+	 rm -fR ${HYPRE_REMOTE_DIR}\
+    )"
 
 done
