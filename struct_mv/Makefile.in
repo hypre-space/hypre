@@ -67,8 +67,9 @@ am__libHYPRE_struct_mv_a_SOURCES_DIST = F90_HYPRE_struct_grid.c \
 	computation.c grow.c project.c struct_axpy.c \
 	struct_communication.c struct_copy.c struct_grid.c \
 	struct_innerprod.c struct_io.c struct_matrix.c \
-	struct_matrix_mask.c struct_matvec.c struct_scale.c \
-	struct_stencil.c struct_vector.c
+	struct_matrix_mask.c struct_matvec.c \
+	struct_overlap_innerprod.c struct_scale.c struct_stencil.c \
+	struct_vector.c
 am__objects_1 = F90_HYPRE_struct_grid.$(OBJEXT) \
 	F90_HYPRE_struct_matrix.$(OBJEXT) \
 	F90_HYPRE_struct_stencil.$(OBJEXT) \
@@ -83,8 +84,8 @@ am__objects_1 = F90_HYPRE_struct_grid.$(OBJEXT) \
 	struct_grid.$(OBJEXT) struct_innerprod.$(OBJEXT) \
 	struct_io.$(OBJEXT) struct_matrix.$(OBJEXT) \
 	struct_matrix_mask.$(OBJEXT) struct_matvec.$(OBJEXT) \
-	struct_scale.$(OBJEXT) struct_stencil.$(OBJEXT) \
-	struct_vector.$(OBJEXT)
+	struct_overlap_innerprod.$(OBJEXT) struct_scale.$(OBJEXT) \
+	struct_stencil.$(OBJEXT) struct_vector.$(OBJEXT)
 @STATICONLY_TRUE@am_libHYPRE_struct_mv_a_OBJECTS = $(am__objects_1)
 libHYPRE_struct_mv_a_OBJECTS = $(am_libHYPRE_struct_mv_a_OBJECTS)
 libLTLIBRARIES_INSTALL = $(INSTALL)
@@ -99,8 +100,9 @@ am__libHYPRE_struct_mv_la_SOURCES_DIST = F90_HYPRE_struct_grid.c \
 	computation.c grow.c project.c struct_axpy.c \
 	struct_communication.c struct_copy.c struct_grid.c \
 	struct_innerprod.c struct_io.c struct_matrix.c \
-	struct_matrix_mask.c struct_matvec.c struct_scale.c \
-	struct_stencil.c struct_vector.c
+	struct_matrix_mask.c struct_matvec.c \
+	struct_overlap_innerprod.c struct_scale.c struct_stencil.c \
+	struct_vector.c
 am__objects_2 = F90_HYPRE_struct_grid.lo F90_HYPRE_struct_matrix.lo \
 	F90_HYPRE_struct_stencil.lo F90_HYPRE_struct_vector.lo \
 	HYPRE_struct_grid.lo HYPRE_struct_matrix.lo \
@@ -110,7 +112,8 @@ am__objects_2 = F90_HYPRE_struct_grid.lo F90_HYPRE_struct_matrix.lo \
 	struct_axpy.lo struct_communication.lo struct_copy.lo \
 	struct_grid.lo struct_innerprod.lo struct_io.lo \
 	struct_matrix.lo struct_matrix_mask.lo struct_matvec.lo \
-	struct_scale.lo struct_stencil.lo struct_vector.lo
+	struct_overlap_innerprod.lo struct_scale.lo struct_stencil.lo \
+	struct_vector.lo
 @STATICONLY_FALSE@am_libHYPRE_struct_mv_la_OBJECTS = $(am__objects_2)
 libHYPRE_struct_mv_la_OBJECTS = $(am_libHYPRE_struct_mv_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -182,7 +185,6 @@ LAPACK_LIBS = @LAPACK_LIBS@
 LDFLAGS = @LDFLAGS@
 LIBDIRNEEDED_FALSE = @LIBDIRNEEDED_FALSE@
 LIBDIRNEEDED_TRUE = @LIBDIRNEEDED_TRUE@
-LIBG2C = @LIBG2C@
 LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
@@ -319,6 +321,7 @@ FILES = \
  struct_matrix.c\
  struct_matrix_mask.c\
  struct_matvec.c\
+ struct_overlap_innerprod.c\
  struct_scale.c\
  struct_stencil.c\
  struct_vector.c
