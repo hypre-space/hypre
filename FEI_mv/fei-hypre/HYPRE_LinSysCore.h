@@ -13,7 +13,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R11"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R12"
 
 // *************************************************************************
 // system libraries used
@@ -382,7 +382,12 @@ class HYPRE_LinSysCore
    // MLI-specific public functions
    // ----------------------------------------------------------------------
 
+   void   FE_initFields(int nFields, int *fieldSizes, int *fieldIDs);
+   void   FE_initElemBlock(int nElems, int nNodesPerElem, int numNodeFields,
+                           int *nodeFieldIDs);
    void   FE_initElemNodeList(int elemID, int nNodesPerElem, int *nodeIDs);
+   void   FE_initSharedNodes(int nShared, int *sharedIDs, int *sharedPLengs,
+                             int **sharedProcs);
    void   FE_initComplete(); 
    void   FE_loadElemMatrix(int elemID, int nNodes, int *elemNodeList, 
                             int matDim, double **elemMat);

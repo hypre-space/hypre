@@ -59,10 +59,13 @@ extern int  HYPRE_LSI_MLISetNullSpace( HYPRE_Solver, int, int, double *, int );
 
 extern void *HYPRE_LSI_MLIFEDataCreate( MPI_Comm );
 extern int  HYPRE_LSI_MLIFEDataDestroy( void * );
-extern int  HYPRE_LSI_MLIFEDataInit( void *, Lookup * );
-extern int  HYPRE_LSI_MLIFEDataInitElemNodeList(void *, int, int, int*, int **);
+extern int  HYPRE_LSI_MLIFEDataInitFields( void *, int, int *, int * );
+extern int  HYPRE_LSI_MLIFEDataInitElemBlock(void *, int, int, int, int *);
+extern int  HYPRE_LSI_MLIFEDataInitElemNodeList(void *, int, int, int*);
+extern int  HYPRE_LSI_MLIFEDataInitSharedNodes(void *, int, int *, int*, int **);
 extern int  HYPRE_LSI_MLIFEDataInitComplete( void * );
-extern int  HYPRE_LSI_MLIFEDataLoadElemMatrix(void *, int, int, int *, double **);
+extern int  HYPRE_LSI_MLIFEDataLoadElemMatrix(void *, int, int, int *, int,
+                                              double **);
 extern int  HYPRE_LSI_MLIFEDataLoadNullSpaceInfo( void *, int );
 extern int  HYPRE_LSI_MLIFEDataConstructNullSpace( void * );
 extern int  HYPRE_LSI_MLIFEDataGetNullSpacePtr(void *, double **, int *, int *);

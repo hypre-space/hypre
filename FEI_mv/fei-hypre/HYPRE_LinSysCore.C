@@ -505,15 +505,6 @@ int HYPRE_LinSysCore::setLookup(Lookup& lookup)
    haveLookup_ = 1;
 
    //-------------------------------------------------------------------
-   // initialize MLI_FEData
-   //-------------------------------------------------------------------
-
-#ifdef HAVE_MLI
-   if ( haveFEData_ )
-      HYPRE_LSI_MLIFEDataInit( feData_, lookup_ );
-#endif
-
-   //-------------------------------------------------------------------
    // diagnostic message
    //-------------------------------------------------------------------
 
@@ -767,18 +758,12 @@ int HYPRE_LinSysCore::setConnectivities(GlobalID elemBlock, int numElements,
                        const int* const* connNodes)
 {
    (void) elemBlock;
-#ifdef HAVE_MLI
-   if ( haveFEData_ )
-      HYPRE_LSI_MLIFEDataInitElemNodeList(feData_, numElements, numNodesPerElem, 
-                                          (int *) elemIDs, (int **) connNodes);
-#else
    (void) numElements;
    (void) numNodesPerElem;
    (void) elemIDs;
    (void) connNodes;
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 3 )
       printf("%4d : HYPRE_LSC::setConnectivities not implemented.\n",mypid_);
-#endif
 
    return (0);
 }
@@ -928,24 +913,6 @@ int HYPRE_LinSysCore::setMatrixStructure(int** ptColIndices, int* ptRowLengths,
    (void) blkColIndices;
    (void) blkRowLengths;
    (void) ptRowsPerBlkRow;
-
-   //-------------------------------------------------------------------
-   // This setMatrixStructure function is called after element node 
-   // connectivities are loaded and before stiffness matrices loaded.
-   // Therefore it is appropriate to call initComplete here for FEData.
-   //-------------------------------------------------------------------
-
-#ifdef HAVE_MLI
-   if ( haveFEData_ && feData_ != NULL )
-   {
-      int status = HYPRE_LSI_MLIFEDataInitComplete( feData_ );
-      if ( status )
-      {
-         if ( feData_ != NULL ) HYPRE_LSI_MLIFEDataDestroy( feData_ );
-         feData_ = NULL;
-      }
-   }
-#endif
 
    //-------------------------------------------------------------------
    // allocate local space for matrix

@@ -24,9 +24,6 @@ char *HYPRE_LSC_GetVersion(LinSysCore* lsc);
 
 int HYPRE_LSC_GetFEDataObject(LinSysCore* lsc, void **object);
 
-int HYPRE_LSC_FEDataLoadElemMatrix(LinSysCore* lsc, int elemID, int nNodes,
-                                   int *nList, int sDim, double **sMat);
-
 int HYPRE_LSC_parameters(LinSysCore* lsc, int numParams, char **params);
 
 int HYPRE_LSC_setGlobalOffsets(LinSysCore* lsc, int leng, int* nodeOffsets,
@@ -71,6 +68,23 @@ int HYPRE_LSC_getSolnEntry(LinSysCore *lsc, int eqnNumber, double *answer);
 int HYPRE_LSC_formResidual(LinSysCore *lsc, double *values, int leng);
 
 int HYPRE_LSC_launchSolver(LinSysCore *lsc, int *solveStatus, int *iter);
+
+int HYPRE_LSC_FEDataInitFields(LinSysCore* lsc, int nFields, int *fieldSizes,
+                               int *fieldIDs);
+
+int HYPRE_LSC_FEDataInitElemBlock(LinSysCore* lsc, int nElems, int nNodes,
+                                  int nNodeFields, int *nodeFieldIDs);
+
+int HYPRE_LSC_FEDataInitElemNodeList(LinSysCore* lsc, int elemID, int nNodes,
+                                     int *nList);
+
+int HYPRE_LSC_FEDataInitSharedNodes(LinSysCore* lsc, int nShared, int *sharedIDs,
+                                    int *sharedPLengs, int **sharedProcs);
+
+int HYPRE_LSC_FEDataInitComplete(LinSysCore* lsc);
+
+int HYPRE_LSC_FEDataLoadElemMatrix(LinSysCore* lsc, int elemID, int nNodes,
+                                   int *nList, int sDim, double **sMat);
 
 #ifdef __cplusplus
 }

@@ -4948,6 +4948,53 @@ void HYPRE_LinSysCore::addToAConjProjectionSpace(HYPRE_IJVector xvec,
 //***************************************************************************
 
 //***************************************************************************
+// initialize field information 
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::FE_initFields(int nFields, int *fieldSizes, 
+                                     int *fieldIDs)
+{
+#ifdef HAVE_MLI
+   if ( haveFEData_ && feData_ != NULL )
+      HYPRE_LSI_MLIFEDataInitFields(feData_,nFields,fieldSizes,fieldIDs);
+#else
+   (void) nFields;
+   (void) fieldSizes;
+   (void) fieldIDs;
+#endif
+   return;
+}
+
+//***************************************************************************
+// initialize element block
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::FE_initElemBlock(int nElems, int nNodesPerElem, 
+                                        int numNodeFields, int *nodeFieldIDs)
+{
+#ifdef HAVE_MLI
+   int status;
+   if ( haveFEData_ && feData_ != NULL )
+   {
+      status = HYPRE_LSI_MLIFEDataInitElemBlock(feData_, nElems, 
+                           nNodesPerElem, numNodeFields, nodeFieldIDs);
+      if ( status )
+      {
+         delete feData_;
+         feData_ = NULL;
+         haveFEData_ = 0;
+      }
+   }
+#else
+   (void) nElems;
+   (void) nNodesPerElem;
+   (void) numNodeFields;
+   (void) nodeFieldIDs;
+#endif
+   return;
+}
+
+//***************************************************************************
 // initialize element node list
 //---------------------------------------------------------------------------
 
@@ -4956,8 +5003,32 @@ void HYPRE_LinSysCore::FE_initElemNodeList(int elemID, int nNodesPerElem,
 {
 #ifdef HAVE_MLI
    if ( haveFEData_ && feData_ != NULL )
-      HYPRE_LSI_MLIFEDataInitElemNodeList(feData_,1,nNodesPerElem,&elemID,
-                                          &nodeIDs);
+      HYPRE_LSI_MLIFEDataInitElemNodeList(feData_, elemID, nNodesPerElem,
+                                          nodeIDs);
+#else
+   (void) elemID;
+   (void) nNodesPerElem;
+   (void) nodeIDs;
+#endif
+   return;
+}
+
+//***************************************************************************
+// initialize shared nodes 
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::FE_initSharedNodes(int nShared, int *sharedIDs, 
+                                        int *sharedPLengs, int **sharedProcs)
+{
+#ifdef HAVE_MLI
+   if ( haveFEData_ && feData_ != NULL )
+      HYPRE_LSI_MLIFEDataInitSharedNodes(feData_, nShared, sharedIDs,
+                                         sharedPLengs, sharedProcs);
+#else
+   (void) nShared;
+   (void) sharedIDs;
+   (void) sharedPLengs;
+   (void) sharedProcs;
 #endif
    return;
 }
@@ -4983,28 +5054,9 @@ void HYPRE_LinSysCore::FE_loadElemMatrix(int elemID, int nNodes,
                          int *elemNodeList, int matDim, double **elemMat)
 {
 #ifdef HAVE_MLI
-   int   i, j, blockID, *cols, nDOF, fieldID, **nodeFieldIDs;
-   int   nBlocks, *blockIDs;
-
-   if ( lookup_ == NULL ) return;
    if ( haveFEData_ && feData_ != NULL )
-   {
-      nBlocks = lookup_->getNumElemBlocks();
-      if ( nBlocks != 1 ) return;
-      blockIDs = (int *) lookup_->getElemBlockIDs();
-      blockID = blockIDs[0];
-      nodeFieldIDs = (int **) lookup_->getFieldIDsTable(blockID);
-      fieldID = nodeFieldIDs[0][0];
-      cols = new int[matDim];
-      nDOF = matDim / nNodes;
-      for ( i = 0; i < nNodes; i++ )
-      {
-         cols[i*nDOF] = lookup_->getEqnNumber(elemNodeList[i], fieldID); 
-         for ( j = 1; j < nDOF; j++ ) cols[i*nDOF+j] = cols[i*nDOF] + j;
-      }
-      HYPRE_LSI_MLIFEDataLoadElemMatrix(feData_, matDim, matDim, cols,
-                                        elemMat);
-   }
+      HYPRE_LSI_MLIFEDataLoadElemMatrix(feData_, elemID, nNodes, elemNodeList,
+                                        matDim, elemMat);
 #else
    (void) elemID;
    (void) nNodes;

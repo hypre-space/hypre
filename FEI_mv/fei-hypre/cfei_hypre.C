@@ -156,25 +156,6 @@ extern "C" int HYPRE_LSC_GetFEDataObject(LinSysCore* lsc, void **object)
 }
 
 /******************************************************************************/
-/* begin initializing the element set                                         */
-/*----------------------------------------------------------------------------*/
-
-extern "C" int HYPRE_LSC_FEDataLoadElemMatrix(LinSysCore *lsc, int elemID,
-                    int nNodesPerElem, int *elemConn, int matDim, 
-                    double **elemStiff)
-{
-   if (lsc == NULL) return(1);
-
-   HYPRE_LinSysCore* linSys = (HYPRE_LinSysCore*)(lsc->lsc_);
-
-   if ( linSys == NULL ) return(1);
-
-   linSys->FE_loadElemMatrix(elemID,nNodesPerElem,elemConn,matDim,elemStiff);
-
-   return(0);
-}
-
-/******************************************************************************/
 /* the parameter function (to set parameter values)                           */
 /*----------------------------------------------------------------------------*/
 
@@ -479,4 +460,114 @@ extern "C" int HYPRE_LSC_launchSolver(LinSysCore *lsc, int *solveStatus,
 
    return(0);
 }
+
+/******************************************************************************/
+/* begin initializing the field IDs                                           */
+/*----------------------------------------------------------------------------*/
+
+extern "C" int HYPRE_LSC_FEDataInitFields(LinSysCore *lsc, int nFields,
+                                          int *fieldSizes, int *fieldIDs)
+{
+   if (lsc == NULL) return(1);
+
+   HYPRE_LinSysCore* linSys = (HYPRE_LinSysCore*)(lsc->lsc_);
+
+   if ( linSys == NULL ) return(1);
+
+   linSys->FE_initFields(nFields, fieldSizes, fieldIDs);
+
+   return(0);
+}
+
+/******************************************************************************/
+/* begin initializing the element block                                       */
+/*----------------------------------------------------------------------------*/
+
+extern "C" int HYPRE_LSC_FEDataInitElemBlock(LinSysCore *lsc, int nElems,
+                         int nNodesPerElem, int numNodeFields, int *nodeFieldIDs)
+
+{
+   if (lsc == NULL) return(1);
+
+   HYPRE_LinSysCore* linSys = (HYPRE_LinSysCore*)(lsc->lsc_);
+
+   if ( linSys == NULL ) return(1);
+
+   linSys->FE_initElemBlock(nElems, nNodesPerElem, numNodeFields, nodeFieldIDs);
+
+   return(0);
+}
+
+/******************************************************************************/
+/* begin initializing element connectivity information                        */
+/*----------------------------------------------------------------------------*/
+
+extern "C" int HYPRE_LSC_FEDataInitElemNodeList(LinSysCore *lsc, int elemID,
+                                           int nNodesPerElem, int *elemConn)
+{
+   if (lsc == NULL) return(1);
+
+   HYPRE_LinSysCore* linSys = (HYPRE_LinSysCore*)(lsc->lsc_);
+
+   if ( linSys == NULL ) return(1);
+
+   linSys->FE_initElemNodeList(elemID,nNodesPerElem,elemConn);
+
+   return(0);
+}
+
+/******************************************************************************/
+/* begin initializing shared node information                                 */
+/*----------------------------------------------------------------------------*/
+
+extern "C" int HYPRE_LSC_FEDataInitSharedNodes(LinSysCore *lsc, int nShared,
+                         int *sharedIDs, int *sharedLengs, int **sharedProcs)
+{
+   if (lsc == NULL) return(1);
+
+   HYPRE_LinSysCore* linSys = (HYPRE_LinSysCore*)(lsc->lsc_);
+
+   if ( linSys == NULL ) return(1);
+
+   linSys->FE_initSharedNodes(nShared,sharedIDs,sharedLengs,sharedProcs);
+
+   return(0);
+}
+
+/******************************************************************************/
+/* initialization done                                                        */
+/*----------------------------------------------------------------------------*/
+
+extern "C" int HYPRE_LSC_FEDataInitComplete(LinSysCore *lsc)
+{
+   if (lsc == NULL) return(1);
+
+   HYPRE_LinSysCore* linSys = (HYPRE_LinSysCore*)(lsc->lsc_);
+
+   if ( linSys == NULL ) return(1);
+
+   linSys->FE_initComplete();
+
+   return(0);
+}
+
+/******************************************************************************/
+/* begin initializing the element set                                         */
+/*----------------------------------------------------------------------------*/
+
+extern "C" int HYPRE_LSC_FEDataLoadElemMatrix(LinSysCore *lsc, int elemID,
+                    int nNodesPerElem, int *elemConn, int matDim, 
+                    double **elemStiff)
+{
+   if (lsc == NULL) return(1);
+
+   HYPRE_LinSysCore* linSys = (HYPRE_LinSysCore*)(lsc->lsc_);
+
+   if ( linSys == NULL ) return(1);
+
+   linSys->FE_loadElemMatrix(elemID,nNodesPerElem,elemConn,matDim,elemStiff);
+
+   return(0);
+}
+
 
