@@ -61,6 +61,12 @@ LFLAGS =\
  ${BLASLIBFLAGS} \
  ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
 
+BABELIBFLAGS =\
+ -L${HYPRE_BUILD_DIR}/lib\
+ -lbHYPRE\
+ -lbHYPREClient-C\
+ -lbHYPREClient-F
+
 ###########################################
 # Commpkg definitions
 ###########################################
