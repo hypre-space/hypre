@@ -1017,7 +1017,7 @@ int MLI_Utils_QR(double *qArray, double *rArray, int nrows, int ncols)
       for ( irow = 0; irow < nrows; irow++ )
          innerProd += (currQ[irow] * currQ[irow]); 
       innerProd = sqrt( innerProd );
-      if ( innerProd < 1.0e-10 ) 
+      if ( innerProd < 1.0e-13 ) 
       {
          if ( retFlag != 0 ) return icol + 1;
          retFlag = icol + 1;
