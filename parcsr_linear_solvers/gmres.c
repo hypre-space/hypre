@@ -176,7 +176,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    int             logging        = (gmres_data -> logging);
    double         *norms          = (gmres_data -> norms);
    char           *log_file_name  = (gmres_data -> log_file_name);
-   FILE           *fp;
+/*   FILE           *fp; */
    
    int        ierr = 0;
    int	      i, j, k;
@@ -189,7 +189,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    {
       norms          = (gmres_data -> norms);
       log_file_name  = (gmres_data -> log_file_name);
-      fp = fopen(log_file_name,"w");
+      /* fp = fopen(log_file_name,"w"); */
    }
 
    /* initialize work arrays */
@@ -326,15 +326,17 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
    if (logging > 0)
    {
-      fprintf(fp, "Iters     resid.norm     conv.rate  rel.res.norm\n");
-      fprintf(fp, "-----    ------------    ---------- ------------\n");
+      printf("=============================================\n\n");
+      printf("Iters     resid.norm     conv.rate  rel.res.norm\n");
+      printf("-----    ------------    ---------- ------------\n");
       
       for (j = 1; j <= iter; j++)
       {
-         fprintf(fp,"% 5d    %e    %f   %e\n", j, norms[j],norms[j]/norms[j-1],
+         printf("% 5d    %e    %f   %e\n", j, norms[j],norms[j]/norms[j-1],
  			norms[j]/b_norm);
       }
-      fclose(fp);
+      printf("\n\n");
+      /* fclose(fp);  */
    }
 
    (gmres_data -> num_iterations) = iter;
