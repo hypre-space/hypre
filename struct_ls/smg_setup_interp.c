@@ -131,7 +131,6 @@ zzz_SMGSetupInterpOp( void             *relax_data,
    int                 PTi;
    int                 xi;
 
-   zzz_Index          *loop_index;
    zzz_Index          *loop_size;
    zzz_Index          *start;
    zzz_Index          *startc;
@@ -140,6 +139,7 @@ zzz_SMGSetupInterpOp( void             *relax_data,
                       
    int                 si, sj, d;
    int                 compute_i, i, j;
+   int                 loopi, loopj, loopk;
                       
    int                 ierr;
 
@@ -147,7 +147,6 @@ zzz_SMGSetupInterpOp( void             *relax_data,
     * Initialize some things
     *--------------------------------------------------------*/
 
-   loop_index = zzz_NewIndex();
    loop_size  = zzz_NewIndex();
    start = zzz_NewIndex();
    startc = zzz_NewIndex();
@@ -295,7 +294,7 @@ zzz_SMGSetupInterpOp( void             *relax_data,
                stride = zzz_SBoxStride(compute_sbox);
  
                zzz_GetSBoxSize(compute_sbox, loop_size);
-               zzz_BoxLoop2(loop_index, loop_size,
+               zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
                             x_data_box,  start,  stride,  xi,
                             PT_data_box, startc, stridec, PTi,
                             {
@@ -319,7 +318,6 @@ zzz_SMGSetupInterpOp( void             *relax_data,
    zzz_FreeIndex(start);
    zzz_FreeIndex(startc);
    zzz_FreeIndex(stridec);
-   zzz_FreeIndex(loop_index);
    zzz_FreeIndex(loop_size);
 
    zzz_AssembleStructMatrix(PT);

@@ -71,6 +71,8 @@ char *argv[];
 
    int                 i, d;
 
+   double              local_wall_time, wall_time;
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -273,7 +275,9 @@ char *argv[];
 
    time_index = zzz_InitializeTiming("Driver");
    zzz_BeginTiming(time_index);
+   local_wall_time = - time_getWallclockSeconds();
    zzz_SMGSolve(smg_data, A, b, x);
+   local_wall_time += time_getWallclockSeconds();
    zzz_EndTiming(time_index);
 
    /*-----------------------------------------------------------
@@ -286,6 +290,13 @@ char *argv[];
    if (myid == 0)
    {
       printf("Iterations = %d\n", num_iterations);
+   }
+
+   MPI_Allreduce(&local_wall_time, &wall_time, 1,
+                 MPI_DOUBLE, MPI_MAX, *comm);
+   if (myid == 0)
+   {
+      printf("Time = %f seconds\n", wall_time);
    }
 
    zzz_PrintTiming(comm);

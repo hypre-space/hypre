@@ -158,7 +158,6 @@ zzz_SMGRestrict( void             *restrict_vdata,
    double               *rp, *rp0, *rp1;
    double               *rcp;
                        
-   zzz_Index            *loop_index;
    zzz_Index            *loop_size;
    zzz_Index            *start;
    zzz_Index            *stride;
@@ -169,6 +168,7 @@ zzz_SMGRestrict( void             *restrict_vdata,
    zzz_Index           **stencil_shape;
 
    int                   compute_i, i, j;
+   int                   loopi, loopj, loopk;
 
    zzz_BeginTiming(restrict_data -> time_index);
 
@@ -183,7 +183,6 @@ zzz_SMGRestrict( void             *restrict_vdata,
    stencil       = zzz_StructMatrixStencil(R);
    stencil_shape = zzz_StructStencilShape(stencil);
 
-   loop_index = zzz_NewIndex();
    loop_size  = zzz_NewIndex();
 
    startc = zzz_NewIndex();
@@ -239,7 +238,7 @@ zzz_SMGRestrict( void             *restrict_vdata,
             zzz_SMGMapFineToCoarse(start, startc, cindex, cstride);
 
             zzz_GetSBoxSize(compute_sbox, loop_size);
-            zzz_BoxLoop3(loop_index, loop_size,
+            zzz_BoxLoop3(loopi, loopj, loopk, loop_size,
                          R_data_box,  startc, stridec, Ri,
                          r_data_box,  start,  stride,  ri,
                          rc_data_box, startc, stridec, rci,
@@ -255,7 +254,6 @@ zzz_SMGRestrict( void             *restrict_vdata,
     * Return
     *-----------------------------------------------------------------------*/
 
-   zzz_FreeIndex(loop_index);
    zzz_FreeIndex(loop_size);
    zzz_FreeIndex(startc);
    zzz_FreeIndex(stridec);

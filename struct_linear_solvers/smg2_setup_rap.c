@@ -172,10 +172,10 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
    zzz_Index            *stridec;
    zzz_Index            *fstart;
    zzz_Index            *stridef;
-   zzz_Index            *loop_index;
    zzz_Index            *loop_size;
 
    int                  i;
+   int                  loopi, loopj, loopk;
 
    zzz_Box              *A_data_box;
    zzz_Box              *PT_data_box;
@@ -203,7 +203,6 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
    int                  ierr;
 
    index_temp = zzz_NewIndex();
-   loop_index = zzz_NewIndex();
    loop_size = zzz_NewIndex();
 
    fine_stencil = zzz_StructMatrixStencil(A);
@@ -358,7 +357,7 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
               case 5:
 
               zzz_GetBoxSize(cgrid_box, loop_size);
-              zzz_BoxLoop4(loop_index, loop_size,
+              zzz_BoxLoop4(loopi, loopj, loopk, loop_size,
                            PT_data_box, cstart, stridec, iP,
                            R_data_box, cstart, stridec, iR,
                            A_data_box, fstart, stridef, iA,
@@ -406,7 +405,7 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
               default:
 
               zzz_GetBoxSize(cgrid_box, loop_size);
-              zzz_BoxLoop4(loop_index, loop_size,
+              zzz_BoxLoop4(loopi, loopj, loopk, loop_size,
                            PT_data_box, cstart, stridec, iP,
                            R_data_box, cstart, stridec, iR,
                            A_data_box, fstart, stridef, iA,
@@ -457,7 +456,6 @@ zzz_SMG2BuildRAPSym( zzz_StructMatrix *A,
 
    zzz_FreeIndex(index_temp);
    zzz_FreeIndex(stridec);
-   zzz_FreeIndex(loop_index);
    zzz_FreeIndex(loop_size);
    zzz_FreeIndex(fstart);
 
@@ -489,10 +487,10 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
    zzz_Index            *stridec;
    zzz_Index            *fstart;
    zzz_Index            *stridef;
-   zzz_Index            *loop_index;
    zzz_Index            *loop_size;
 
    int                  i;
+   int                  loopi, loopj, loopk;
 
    zzz_Box              *A_data_box;
    zzz_Box              *PT_data_box;
@@ -520,7 +518,6 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
    int                  ierr;
 
    index_temp = zzz_NewIndex();
-   loop_index = zzz_NewIndex();
    loop_size = zzz_NewIndex();
 
    fine_stencil = zzz_StructMatrixStencil(A);
@@ -671,7 +668,7 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
               case 5:
 
               zzz_GetBoxSize(cgrid_box, loop_size);
-              zzz_BoxLoop4(loop_index, loop_size,
+              zzz_BoxLoop4(loopi, loopj, loopk, loop_size,
                            PT_data_box, cstart, stridec, iP,
                            R_data_box, cstart, stridec, iR,
                            A_data_box, fstart, stridef, iA,
@@ -709,7 +706,7 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
               default:
 
               zzz_GetBoxSize(cgrid_box, loop_size);
-              zzz_BoxLoop4(loop_index, loop_size,
+              zzz_BoxLoop4(loopi, loopj, loopk, loop_size,
                            PT_data_box, cstart, stridec, iP,
                            R_data_box, cstart, stridec, iR,
                            A_data_box, fstart, stridef, iA,
@@ -752,7 +749,6 @@ zzz_SMG2BuildRAPNoSym( zzz_StructMatrix *A,
 
    zzz_FreeIndex(index_temp);
    zzz_FreeIndex(stridec);
-   zzz_FreeIndex(loop_index);
    zzz_FreeIndex(loop_size);
    zzz_FreeIndex(fstart);
 

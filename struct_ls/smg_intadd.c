@@ -233,7 +233,6 @@ zzz_SMGIntAdd( void             *intadd_vdata,
    double               *ep, *ep0, *ep1;
    double               *xp;
                        
-   zzz_Index            *loop_index;
    zzz_Index            *loop_size;
    zzz_Index            *start;
    zzz_Index            *stride;
@@ -244,6 +243,7 @@ zzz_SMGIntAdd( void             *intadd_vdata,
    zzz_Index           **stencil_shape;
 
    int                   compute_i, i, j;
+   int                   loopi, loopj, loopk;
 
    zzz_BeginTiming(intadd_data -> time_index);
 
@@ -259,7 +259,6 @@ zzz_SMGIntAdd( void             *intadd_vdata,
    stencil       = zzz_StructMatrixStencil(PT);
    stencil_shape = zzz_StructStencilShape(stencil);
 
-   loop_index = zzz_NewIndex();
    loop_size  = zzz_NewIndex();
 
    startc = zzz_NewIndex();
@@ -295,7 +294,7 @@ zzz_SMGIntAdd( void             *intadd_vdata,
       xcp = zzz_StructVectorBoxData(xc, i);
 
       zzz_GetSBoxSize(compute_sbox, loop_size);
-      zzz_BoxLoop3(loop_index, loop_size,
+      zzz_BoxLoop3(loopi, loopj, loopk, loop_size,
                    e_data_box,  start,  stride,  ei,
                    PT_data_box, startc, stridec, PTi,
                    xc_data_box, startc, stridec, xci,
@@ -350,7 +349,7 @@ zzz_SMGIntAdd( void             *intadd_vdata,
             xcp = zzz_StructVectorBoxData(xc, i);
 
             zzz_GetSBoxSize(compute_sbox, loop_size);
-            zzz_BoxLoop2(loop_index, loop_size,
+            zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
                          x_data_box,  start,  stride,  xi,
                          xc_data_box, startc, stridec, xci,
                          {
@@ -382,7 +381,7 @@ zzz_SMGIntAdd( void             *intadd_vdata,
             start  = zzz_SBoxIMin(compute_sbox);
 
             zzz_GetSBoxSize(compute_sbox, loop_size);
-            zzz_BoxLoop2(loop_index, loop_size,
+            zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
                          x_data_box, start, stride, xi,
                          e_data_box, start, stride, ei,
                          {
@@ -396,7 +395,6 @@ zzz_SMGIntAdd( void             *intadd_vdata,
     * Return
     *-----------------------------------------------------------------------*/
 
-   zzz_FreeIndex(loop_index);
    zzz_FreeIndex(loop_size);
    zzz_FreeIndex(startc);
    zzz_FreeIndex(stridec);

@@ -234,10 +234,10 @@ zzz_CycRedSetupCoarseOp( zzz_StructMatrix *A,
    zzz_Index            *stridec;
    zzz_Index            *fstart;
    zzz_Index            *stridef;
-   zzz_Index            *loop_index;
    zzz_Index            *loop_size;
 
    int                  i;
+   int                  loopi, loopj, loopk;
 
    zzz_Box              *A_data_box;
    zzz_Box              *Ac_data_box;
@@ -253,7 +253,6 @@ zzz_CycRedSetupCoarseOp( zzz_StructMatrix *A,
    int                  ierr;
 
    index_temp = zzz_NewIndex();
-   loop_index = zzz_NewIndex();
    loop_size = zzz_NewIndex();
 
    stridef = cstride;
@@ -332,7 +331,7 @@ zzz_CycRedSetupCoarseOp( zzz_StructMatrix *A,
       if(!zzz_StructMatrixSymmetric(A))
       {
          zzz_GetBoxSize(cgrid_box, loop_size);
-         zzz_BoxLoop2(loop_index, loop_size,
+         zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
                       A_data_box, fstart, stridef, iA,
                       Ac_data_box, cstart, stridec, iAc,
                       {
@@ -357,7 +356,7 @@ zzz_CycRedSetupCoarseOp( zzz_StructMatrix *A,
       else
       {
          zzz_GetBoxSize(cgrid_box, loop_size);
-         zzz_BoxLoop2(loop_index, loop_size,
+         zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
                       A_data_box, fstart, stridef, iA,
                       Ac_data_box, cstart, stridec, iAc,
                       {
@@ -376,7 +375,6 @@ zzz_CycRedSetupCoarseOp( zzz_StructMatrix *A,
 
    zzz_FreeIndex(index_temp);
    zzz_FreeIndex(stridec);
-   zzz_FreeIndex(loop_index);
    zzz_FreeIndex(loop_size);
    zzz_FreeIndex(fstart);
 
@@ -752,13 +750,13 @@ zzz_CyclicReduction( void             *cyc_red_vdata,
    zzz_Index          *stride;
 
    zzz_Index          *index;
-   zzz_Index          *loop_index;
    zzz_Index          *loop_size;
    zzz_Index          *start;
    zzz_Index          *startc;
    zzz_Index          *stridec;
                      
    int                 compute_i, i, j, l;
+   int                 loopi, loopj, loopk;
 
    int                 ierr;
 
@@ -770,7 +768,6 @@ zzz_CyclicReduction( void             *cyc_red_vdata,
 
    index = zzz_NewIndex();
 
-   loop_index = zzz_NewIndex();
    loop_size  = zzz_NewIndex();
 
    cindex  = zzz_NewIndex();
@@ -800,7 +797,7 @@ zzz_CyclicReduction( void             *cyc_red_vdata,
       start  = zzz_SBoxIMin(compute_sbox);
 
       zzz_GetSBoxSize(compute_sbox, loop_size);
-      zzz_BoxLoop2(loop_index, loop_size,
+      zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
                    x_data_box, start, base_stride, xi,
                    b_data_box, start, base_stride, bi,
                    {
@@ -853,7 +850,7 @@ zzz_CyclicReduction( void             *cyc_red_vdata,
          start  = zzz_SBoxIMin(compute_sbox);
 
          zzz_GetSBoxSize(compute_sbox, loop_size);
-         zzz_BoxLoop2(loop_index, loop_size,
+         zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
                       A_data_box,  start,  stride,  Ai,
                       x_data_box,  start,  stride,  xi,
                       {
@@ -920,7 +917,7 @@ zzz_CyclicReduction( void             *cyc_red_vdata,
                zzz_CycRedMapFineToCoarse(start, startc, cindex, stride);
 
                zzz_GetSBoxSize(compute_sbox, loop_size);
-               zzz_BoxLoop3(loop_index, loop_size,
+               zzz_BoxLoop3(loopi, loopj, loopk, loop_size,
                             A_data_box,  start,  stride,  Ai,
                             x_data_box,  start,  stride,  xi,
                             xc_data_box, startc, stridec, xci,
@@ -968,7 +965,7 @@ zzz_CyclicReduction( void             *cyc_red_vdata,
          zzz_CycRedMapFineToCoarse(start, startc, cindex, stride);
 
          zzz_GetSBoxSize(compute_sbox, loop_size);
-         zzz_BoxLoop2(loop_index, loop_size,
+         zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
                       x_data_box,  start,  stride,  xi,
                       xc_data_box, startc, stridec, xci,
                       {
@@ -1030,7 +1027,7 @@ zzz_CyclicReduction( void             *cyc_red_vdata,
                start  = zzz_SBoxIMin(compute_sbox);
 
                zzz_GetSBoxSize(compute_sbox, loop_size);
-               zzz_BoxLoop2(loop_index, loop_size,
+               zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
                             A_data_box,  start,  stride,  Ai,
                             x_data_box,  start,  stride,  xi,
                             {
@@ -1047,7 +1044,6 @@ zzz_CyclicReduction( void             *cyc_red_vdata,
     *-----------------------------------------------------*/
 
    zzz_FreeIndex(index);
-   zzz_FreeIndex(loop_index);
    zzz_FreeIndex(loop_size);
    zzz_FreeIndex(cindex);
    zzz_FreeIndex(stride);

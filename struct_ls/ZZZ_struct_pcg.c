@@ -139,8 +139,8 @@ ZZZ_PCGSMGPrecondSetup( Matrix   *vA,
 			void     *precond_vdata )
 {
   zzz_StructMatrix     *A = vA;
-  zzz_StructMatrix     *b_l = vb_l;
-  zzz_StructMatrix     *x_l = vx_l;
+  zzz_StructVector     *b_l = vb_l;
+  zzz_StructVector     *x_l = vx_l;
   zzz_SMGData          *smg_data;
   ZZZ_PCGPrecondData  *precond_data = precond_vdata;
   
@@ -182,8 +182,7 @@ ZZZ_PCGSMGPrecond( Vector *x,
   zzz_StructVector *b_l;
   zzz_StructVector *x_l;
 
-  int    num_iterations, ierr;
-  double rel_norm;
+  int               ierr;
   
   smg_data = ZZZ_PCGPrecondDataSMGData(precond_data);
   A = ZZZ_PCGPrecondDataMatrix(precond_data);
@@ -204,12 +203,18 @@ ZZZ_PCGSMGPrecond( Vector *x,
 		       (zzz_StructMatrix *) A,
 		       (zzz_StructVector *) y,
 		       (zzz_StructVector *) x ); */
-  /*
+
+#if 0
+{
+  int    num_iterations, ierr;
+  double rel_norm;
+
   ZZZ_SMGGetNumIterations(smg_data, &num_iterations);
   ZZZ_SMGGetFinalRelativeResidualNorm(smg_data, &rel_norm);
   printf("Iterations = %d Final Rel Norm = %e\n", num_iterations,
 	 rel_norm);
-  */
+}
+#endif
 
   return ierr;
   

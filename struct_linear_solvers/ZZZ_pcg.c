@@ -65,7 +65,6 @@ ZZZ_PCG( Vector *x,
    double    *norm_log;
    double    *rel_norm_log;
    double    *conv_rate;
-   int        j;
 
 
    /*-----------------------------------------------------------------------

@@ -185,7 +185,6 @@ zzz_SMGResidual( void             *residual_vdata,
    double               *bp;
    double               *rp;
                        
-   zzz_Index            *loop_index;
    zzz_Index            *loop_size;
    zzz_Index            *start;
                        
@@ -194,6 +193,7 @@ zzz_SMGResidual( void             *residual_vdata,
    int                   stencil_size;
 
    int                   compute_i, i, j, si;
+   int                   loopi, loopj, loopk;
 
    zzz_BeginTiming(residual_data -> time_index);
 
@@ -201,7 +201,6 @@ zzz_SMGResidual( void             *residual_vdata,
     * Initialize some things
     *-----------------------------------------------------------------------*/
 
-   loop_index = zzz_NewIndex();
    loop_size = zzz_NewIndex();
 
    /*-----------------------------------------------------------------------
@@ -239,7 +238,7 @@ zzz_SMGResidual( void             *residual_vdata,
                rp = zzz_StructVectorBoxData(r, i);
 
                zzz_GetSBoxSize(compute_sbox, loop_size);
-               zzz_BoxLoop2(loop_index, loop_size,
+               zzz_BoxLoop2(loopi, loopj, loopk, loop_size,
                             b_data_box, start, base_stride, bi,
                             r_data_box, start, base_stride, ri,
                             {
@@ -284,7 +283,7 @@ zzz_SMGResidual( void             *residual_vdata,
                   zzz_BoxOffsetDistance(x_data_box, stencil_shape[si]);
 
                zzz_GetSBoxSize(compute_sbox, loop_size);
-               zzz_BoxLoop3(loop_index, loop_size,
+               zzz_BoxLoop3(loopi, loopj, loopk, loop_size,
                             A_data_box, start, base_stride, Ai,
                             x_data_box, start, base_stride, xi,
                             r_data_box, start, base_stride, ri,
@@ -300,7 +299,6 @@ zzz_SMGResidual( void             *residual_vdata,
     * Return
     *-----------------------------------------------------------------------*/
 
-   zzz_FreeIndex(loop_index);
    zzz_FreeIndex(loop_size);
 
    zzz_IncFLOPCount(residual_data -> flops);
