@@ -44,7 +44,7 @@ case $with_lapack in
 esac
 
 # Get fortran linker name of LAPACK function to check for.
-AC_F77_FUNC(dsyev)
+AC_F77_FUNC(dsygv)
 
 acx_lapack_save_LIBS="$LIBS"
 
@@ -56,8 +56,8 @@ fi
 # First, check LAPACK_LIBS environment variable
 if test "x$LAPACK_LIBS" != x; then
         save_LIBS="$LIBS"; LIBS="$LAPACK_LIBS $BLAS_LIBS $LIBS $FLIBS"
-        AC_MSG_CHECKING([for $dsyev in $LAPACK_LIBS])
-        AC_TRY_LINK_FUNC($dsyev, [acx_lapack_ok=yes], [LAPACK_LIBS=""])
+        AC_MSG_CHECKING([for $dsygv in $LAPACK_LIBS])
+        AC_TRY_LINK_FUNC($dsygv, [acx_lapack_ok=yes], [LAPACK_LIBS=""])
         AC_MSG_RESULT($acx_lapack_ok)
         LIBS="$save_LIBS"
         if test acx_lapack_ok = no; then
@@ -68,7 +68,7 @@ fi
 # LAPACK linked to by default?  (is sometimes included in BLAS lib)
 if test $acx_lapack_ok = no; then
         save_LIBS="$LIBS"; LIBS="$LIBS $BLAS_LIBS $FLIBS"
-        AC_CHECK_FUNC($dsyev, [acx_lapack_ok=yes])
+        AC_CHECK_FUNC($dsygv, [acx_lapack_ok=yes])
         LIBS="$save_LIBS"
 fi
 
@@ -76,7 +76,7 @@ fi
 for lapack in lapack lapack_rs6k; do
         if test $acx_lapack_ok = no; then
                 save_LIBS="$LIBS"; LIBS="$BLAS_LIBS $LIBS"
-                AC_CHECK_LIB($lapack, $dsyev,
+                AC_CHECK_LIB($lapack, $dsygv,
                     [acx_lapack_ok=yes; LAPACK_LIBS="-l$lapack"], [], [$FLIBS])
                 LIBS="$save_LIBS"
         fi
