@@ -28,6 +28,11 @@
           INFRINGE PRIVATELY OWNED RIGHTS.
 */
 
+#ifdef FEI_SER
+#include <mpiuni/mpi.h>
+#else
+#include <mpi.h>
+#endif
 
 #include "other/basicTypes.h"
 #include "src/fei_proc.h"

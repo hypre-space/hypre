@@ -1,0 +1,19 @@
+#!/bin/sh
+echo " "
+echo "fei-isis setMake, copying setup/make.options.$1 to make.options"
+echo " "
+
+FEI_ROOT=`pwd`
+
+echo "FEI_ROOT=$FEI_ROOT" >> make.tmp
+echo "ISIS_ROOT=$FEI_ROOT/../isis" >> make.tmp
+cat make.tmp setup/make.options.$1 > make.options
+rm make.tmp
+
+echo "IMPORTANT NOTE: IF ISIS++ is not located in"
+echo "$FEI_ROOT/../isis, then you need to edit the"
+echo "'ISIS_ROOT' variable in make.options."
+echo " "
+echo "You may now build fei-isis with make." 
+echo " "
+

@@ -55,13 +55,13 @@ fi
 echo " "
 
 if [ $serchoice = p ] ; then
-   ISIS_TARGET=PLL
-   echo "ISIS_TARGET=PLL" >> $outfile;
+   FEI_TARGET=FEI_PLL
+   echo "FEI_TARGET=FEI_PLL" >> $outfile;
    echo "Building for parallel (with MPI) execution."
    echo " "
 else
-   ISIS_TARGET=SER
-   echo "ISIS_TARGET=SER" >> $outfile;
+   FEI_TARGET=FEI_SER
+   echo "FEI_TARGET=FEI_SER" >> $outfile;
    echo "Building for serial execution."
    echo "NOTE: This REQUIRES that the solver library (ISIS++) was"
    echo "also built for purely serial execution."
@@ -79,7 +79,7 @@ if [ -f /usr/local/isis++/isis-mpi.h ] ; then
 fi
 if [ $haveisis = 0 ] ; then
 	if [ -f `pwd`/../isis/isis-mpi.h ] ; then
-		ISIS_ROOT=`pwd`/../isis
+		ISIS_ROOT="\$(FEI_ROOT)/../isis"
 		haveisis=1
 	fi
 fi
@@ -180,7 +180,7 @@ if [ $ISIS_ARCH = meiko ] ; then
     LDFLAGS="-L/opt/MEIKOcs2/lib -L/opt/SUNWspro/SC4.0/lib"
 fi
 
-LDFLAGS="$LDFLAGS -L$FEI_ROOT/lib/$ISIS_ARCH -L$ISIS_ROOT/lib/$ISIS_ARCH -L$LAPACK_PATH"
+LDFLAGS="$LDFLAGS -L\$(FEI_ROOT)/lib/$ISIS_ARCH -L\$(ISIS_ROOT)/lib/$ISIS_ARCH -L$LAPACK_PATH"
 
 ##############################################################
 
@@ -624,7 +624,7 @@ if [ $serchoice = p ]; then
    echo "MPI_ROOT=$MPI_ROOT" >> $shport
    echo "LDFLAGS=$LDFLAGS -L$MPI_LIB $AZTEC_LIB_PATH $SPARSKIT2_LIB_PATH $BPKIT_LIB_PATH $HYPRE_LIB_PATH" >> $outfile
 else 
-   MPI_INCLUDE=$FEI_ROOT/other
+   MPI_INCLUDE="$(FEI_ROOT)/mpiuni"
    echo "MPI_INCLUDE=$MPI_INCLUDE" >> $outfile
    echo "LDFLAGS=$LDFLAGS" >> $outfile
 fi

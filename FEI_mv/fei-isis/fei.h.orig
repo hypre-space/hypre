@@ -496,9 +496,6 @@
  
 // include the file where typedefs are for GlobalID, etc
 
-#ifndef FEI_H
-#define FEI_H
-
 //requires:
 //#include "fei/basicTypes.h"
 //#include <mpi.h>
@@ -838,4 +835,3 @@ class FEI {
     virtual int getNumBlockElemEqns(GlobalID blockID) const = 0;                                      
 
 };
-#endif

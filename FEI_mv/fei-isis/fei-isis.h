@@ -26,14 +26,19 @@
           USEFULNESS OF ANY INFORMATION, APPARATUS, PRODUCT, OR
           PROCESS DISCLOSED, OR REPRESENTS THAT ITS USE WOULD NOT
           INFRINGE PRIVATELY OWNED RIGHTS.
+
+Latest released version: 1.1.0
+
 */
 //requires:
 //#include <stdlib.h>
 //#include <math.h>
 
-#ifdef SER
+#ifdef FEI_SER
+#include <mpiuni/mpi.h>
 #include <isis-ser.h>
 #else
+#include <mpi.h>
 #include <isis-mpi.h>
 #endif
 
