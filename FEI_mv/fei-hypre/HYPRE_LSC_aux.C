@@ -52,6 +52,10 @@
 #include "util.h"
 #endif
 
+#ifdef HAVE_MLI
+#include "HYPRE_LSI_mli.h"
+#endif
+
 //---------------------------------------------------------------------------
 // These are external functions needed internally here
 //---------------------------------------------------------------------------
@@ -154,6 +158,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
           printf(" - outputLevel <d> \n");
           printf(" - setDebug <slideReduction1,amgDebug,printMat,printFEInfo>\n");
           printf(" - haveFEData <0,1>\n");
+          printf(" - FEDataNullSize <d>\n");
           printf(" - schurReduction\n");
           printf(" - slideReduction\n");
           printf(" - AConjugateProjection <dsize>\n");
@@ -275,6 +280,22 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
              printf("       HYPRE_LSC::parameters haveFEData = %d\n",
                     haveFEGrid_);
           }
+       }
+
+       //----------------------------------------------------------------
+       // turn on MLI's FEData null space module
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "FEDataNullSize") )
+       {
+          sscanf(params[i],"%s %d", param, &k);
+#ifdef HAVE_MLI
+          if ( feGrid_ != NULL ) HYPRE_LSI_MLIFEDataSetNullSpaceInfo(feGrid_,k);
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LSC::parameters FEDataNullSize = %d\n",k);
+          }
+#endif
        }
 
        //----------------------------------------------------------------

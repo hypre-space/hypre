@@ -53,15 +53,19 @@ extern int  HYPRE_LSI_MLISetMethod( HYPRE_Solver, char * );
 extern int  HYPRE_LSI_MLISetNumPDEs( HYPRE_Solver, int );
 extern int  HYPRE_LSI_MLISetSmoother( HYPRE_Solver, int, int, int, char ** );
 extern int  HYPRE_LSI_MLISetCoarseSolver( HYPRE_Solver, int, int, char ** );
+extern int  HYPRE_LSI_MLISetNullSpace( HYPRE_Solver, int, int, double *, int );
+
 extern void *HYPRE_LSI_MLIFEDataCreate( MPI_Comm );
 extern int  HYPRE_LSI_MLIFEDataDestroy( void * );
+extern int  HYPRE_LSI_MLIFEDataSetNullSpaceInfo( void *, int );
 extern int  HYPRE_LSI_MLIFEDataInit( void *, Lookup * );
 extern int  HYPRE_LSI_MLIFEDataSetElemNodeList( void *, int, int, const int*,
                                                 const int* const* );
 extern int  HYPRE_LSI_MLIFEDataInitComplete( void * );
 extern int  HYPRE_LSI_MLIFEDataAccumulateElemMatrix( void *, int, int, 
                                  const int *, const double * const * );
-extern int  HYPRE_LSI_MLIFEDataConstructKernel( void * );
+extern int  HYPRE_LSI_MLIFEDataConstructNullSpace( void * );
+extern int  HYPRE_LSI_MLIFEDataGetNullSpacePtr( void *, double **, int *, int * );
 extern int  HYPRE_LSI_MLIFEDataWriteToFile( void *, char * );
 
 #ifdef __cplusplus

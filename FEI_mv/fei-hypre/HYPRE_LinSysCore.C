@@ -1814,13 +1814,19 @@ int HYPRE_LinSysCore::matrixLoadComplete()
    //-------------------------------------------------------------------
 
 #ifdef HAVE_MLI
-   if ( (HYOutputLevel_ & HYFEI_PRINTFEINFO) && feGrid_ != NULL )
+   if ( haveFEGrid_ && feGrid_ != NULL )
    {
-      if ( haveFEGrid_ )
+      int    nDim;
+      double *nSpaces=NULL;
+      char   filename[100];
+
+      HYPRE_LSI_MLIFEDataConstructNullSpace( feGrid_ );
+      HYPRE_LSI_MLIFEDataGetNullSpacePtr( feGrid_, &nSpaces, &leng, &nDim );
+      if ( nSpaces != NULL )
+         HYPRE_LSI_MLISetNullSpace( HYPrecon_, 3, nDim, nSpaces, leng );
+      if ( (HYOutputLevel_ & HYFEI_PRINTFEINFO) )
       {
-         char       filename[100];
          sprintf( filename, "fedata.%d", mypid_);
-         HYPRE_LSI_MLIFEDataConstructKernel( feGrid_ );
          HYPRE_LSI_MLIFEDataWriteToFile( feGrid_, filename );
       }
    }
