@@ -442,8 +442,8 @@ c Set defaults for BoomerAMG
         call HYPRE_BoomerAMGSetStrongThrshld(solver,
      &                                      strong_threshold, ierr)
         call HYPRE_BoomerAMGSetTruncFactor(solver, trunc_factor, ierr)
-        call HYPRE_BoomerAMGSetLogging(solver, ioutdat,
-     &                              "test.out.log", ierr)
+        call HYPRE_BoomerAMGSetPrintLevel(solver, ioutdat,ierr)
+        call HYPRE_BoomerAMGSetPrintFileName(solver,"test.out.log",ierr)
         call HYPRE_BoomerAMGSetMaxIter(solver, maxiter, ierr)
         call HYPRE_BoomerAMGSetCycleType(solver, cycle_type, ierr)
         call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
@@ -532,8 +532,9 @@ c Set defaults for BoomerAMG
      &                                        strong_threshold, ierr)
           call HYPRE_BoomerAMGSetTruncFactor(precond, trunc_factor,
      &                                       ierr)
-          call HYPRE_BoomerAMGSetLogging(precond, ioutdat,
-     &                                "test.out.log", ierr)
+          call HYPRE_BoomerAMGSetPrintLevel(precond, ioutdat, ierr)
+          call HYPRE_BoomerAMGSetPrintFileName(precond, "test.out.log",
+     &                                         ierr)
           call HYPRE_BoomerAMGSetMaxIter(precond, maxiter, ierr)
           call HYPRE_BoomerAMGSetCycleType(precond, cycle_type, ierr)
           call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
@@ -684,8 +685,9 @@ c Set defaults for BoomerAMG
      &                                         ierr)
           call HYPRE_BoomerAMGSetTruncFactor(precond, trunc_factor,
      &                                       ierr)
-          call HYPRE_BoomerAMGSetLogging(precond, ioutdat,
-     &                                   "test.out.log", ierr)
+          call HYPRE_BoomerAMGSetPrintLevel(precond, ioutdat,ierr)
+          call HYPRE_BoomerAMGSetPrintFileName(precond, "test.out.log",
+     &                                         ierr)
           call HYPRE_BoomerAMGSetMaxIter(precond, maxiter, ierr)
           call HYPRE_BoomerAMGSetCycleType(precond, cycle_type, ierr)
           call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
@@ -789,8 +791,9 @@ c Set defaults for BoomerAMG
      &                                         strong_threshold, ierr)
           call HYPRE_BoomerAMGSetTruncFactor(precond, trunc_factor,
      &                                       ierr)
-          call HYPRE_BoomerAMGSetLogging(precond, ioutdat,
-     &                                   "test.out.log", ierr)
+          call HYPRE_BoomerAMGSetPrintLevel(precond, ioutdat,ierr)
+          call HYPRE_BoomerAMGSetPrintFileName(precond, "test.out.log",
+     &                                         ierr)
           call HYPRE_BoomerAMGSetMaxIter(precond, maxiter, ierr)
           call HYPRE_BoomerAMGSetCycleType(precond, cycle_type, ierr)
           call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
@@ -894,8 +897,9 @@ c Set defaults for BoomerAMG
      &                                         ierr)
           call HYPRE_BoomerAMGSetTruncFactor(precond, trunc_factor,
      &                                       ierr)
-          call HYPRE_BoomerAMGSetLogging(precond, ioutdat,
-     &                                   "test.out.log", ierr)
+          call HYPRE_BoomerAMGSetPrintLevel(precond, ioutdat,ierr)
+          call HYPRE_BoomerAMGSetPrintFileName(precond, "test.out.log",
+     &                                         ierr)
           call HYPRE_BoomerAMGSetMaxIter(precond, maxiter, ierr)
           call HYPRE_BoomerAMGSetCycleType(precond, cycle_type, ierr)
           call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
