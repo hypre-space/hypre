@@ -1632,7 +1632,7 @@ main( int   argc,
          HYPRE_BoomerAMGCreate(&par_precond); 
          HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
-         HYPRE_BoomerAMGSetLogging(par_precond, 3, "sstruct.out.log");
+         HYPRE_BoomerAMGSetLogging(par_precond, 1, "sstruct.out.log");
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
          HYPRE_ParCSRPCGSetPrecond(par_solver,
                                    HYPRE_BoomerAMGSolve,
@@ -1777,7 +1777,7 @@ main( int   argc,
          HYPRE_BoomerAMGCreate(&par_precond); 
          HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
-         HYPRE_BoomerAMGSetLogging(par_precond, 3, "sstruct.out.log");
+         HYPRE_BoomerAMGSetLogging(par_precond, 1, "sstruct.out.log");
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
          HYPRE_ParCSRGMRESSetPrecond(par_solver,
                                      HYPRE_BoomerAMGSolve,
