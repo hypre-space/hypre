@@ -13,6 +13,8 @@
 HEADERS =\
  communication.h\
  headers.h\
+ par_csr_matrix.h\
+ par_vector.h\
  protos.h
 
 FILES =\
@@ -42,7 +44,7 @@ LFLAGS =\
  -L.\
  -L../utilities\
  -L../seq_matrix_vector\
- -lHYPRE_memory\
+ -lHYPRE_utilities\
  -lHYPRE_mv\
  -lnsl -lsocket -lmpi -lmpe\
  -lf2c\
