@@ -26,12 +26,12 @@ typedef struct
 
    int      	 global_size;
    int      	 first_index;
+   int      	*partitioning;
    hypre_Vector	*local_vector; 
-
-   hypre_VectorCommPkg *vector_comm_pkg;
 
    /* Does the Vector create/destroy `data'? */
    int      	 owns_data;
+   int      	 owns_partitioning;
 
 } hypre_ParVector;
 
@@ -39,11 +39,12 @@ typedef struct
  * Accessor functions for the Vector structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_ParVectorComm(vector)  	   ((vector) -> comm)
-#define hypre_ParVectorGlobalSize(vector)  ((vector) -> global_size)
-#define hypre_ParVectorFirstIndex(vector)  ((vector) -> first_index)
-#define hypre_ParVectorLocalVector(vector) ((vector) -> local_vector)
-#define hypre_ParVectorCommPkg(vector)     ((vector) -> vector_comm_pkg)
-#define hypre_ParVectorOwnsData(vector)    ((vector) -> owns_data)
+#define hypre_ParVectorComm(vector)  	        ((vector) -> comm)
+#define hypre_ParVectorGlobalSize(vector)       ((vector) -> global_size)
+#define hypre_ParVectorFirstIndex(vector)       ((vector) -> first_index)
+#define hypre_ParVectorPartitioning(vector)     ((vector) -> partitioning)
+#define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
+#define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
+#define hypre_ParVectorOwnsPartitioning(vector) ((vector) -> owns_partitioning)
 
 #endif
