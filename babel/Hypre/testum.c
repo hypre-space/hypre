@@ -12,6 +12,8 @@
 #include "Hypre_MPI_Com.h"
 #include "Hypre_StructJacobi.h"
 
+#include "Hypre_StructJacobi_Skel.h" 
+
 Hypre_StructMatrix Hypre_StructMatrix_new();
 /* ... without this, compiler thinks Hypre_StructMatrix_new returns
  an int.  If you #include "Hypre_StructMatrix_Skel.h" (which declares
@@ -38,6 +40,10 @@ main( int argc, char *argv[] )
    Hypre_StructVector vecb, vecx;
    Hypre_StructJacobi solver;
    
+   Hypre_StructJacobi_Private HSJP;
+   struct Hypre_StructJacobi_private *HSJp;
+   HYPRE_StructSolver *S;
+
    int resultCode, size, i, d, s, symmetric;
    int dim = 3;
    array1int lower;
@@ -65,9 +71,9 @@ main( int argc, char *argv[] )
    if ( volume*(dim+1)>=MAT_SIZE ) printf( "matrix dimensioned to small!\n" );
    if ( volume>=VEC_SIZE ) printf( "vector dimensioned to small!\n" );
 
-   istart[0] = -17;
+   istart[0] = 0;
    istart[1] = 0;
-   istart[2] = 32;
+   istart[2] = 0;
 
    /* Make and destroy a sample box ... */
    ilower[0] = 0;
@@ -158,6 +164,7 @@ main( int argc, char *argv[] )
    /* set the matrix elements */
 
    /* Set the coefficients for the grid */
+   /* nested for-loops are weird; was copied from slsbabel.c
    for ( i=0; i<(dim+1)*volume; i+=(dim+1) )
    {
       for ( s=0; s<(dim+1); ++s )
@@ -169,6 +176,16 @@ main( int argc, char *argv[] )
          matrix_values[i+3] = 2.0*(cx+cy+cz);
       }
    }
+ */
+   for ( s=0; s<(dim+1); ++s ) stencil_indices[s] = s;
+   /* Assert( dim==3 ); */
+   for ( i=0; i<(dim+1)*volume; i+=(dim+1) )
+   {
+      matrix_values[i  ] = -cx;
+      matrix_values[i+1] = -cy;
+      matrix_values[i+2] = -cz;
+      matrix_values[i+3] = 2.0*(cx+cy+cz);
+   };
 
    intvals.lower[0] = 0;
    intvals.upper[0] = dim+1;
@@ -179,8 +196,12 @@ main( int argc, char *argv[] )
    Hypre_StructMatrix_SetValues( mat, box, intvals, doubvals );
 
 
-   /* Zero out stencils reaching to real boundary; based on slsbabel.c */
+   /* Zero out stencils reaching to real boundary; based on slsbabel.c
+    This is so weird that I doubt if it ever did what was intended.
+    The actual code seems to zero part of the matrix diagonal - very bad for
+    a Jabobi iteration! */
 
+/*
    for ( i=0; i<volume; ++i )
    {
       matrix_values[i] = 0.0;
@@ -191,7 +212,9 @@ main( int argc, char *argv[] )
       if( ilower[d] == istart[d] )
       {
          i = iupper[d];
-/*** UGGH. This changes box, a very very bad coding style, fix it soon ... ***/
+ The main change I made to this section (from slsbabel.c) was to change
+ the interface to pass "box" rather than its corner indices.  I commented:
+ UGGH. This changes box, a very very bad coding style, fix it soon ...
          iupper[d] = istart[d];
          stencil_indices[0] = d;
          intvals.data = stencil_indices;
@@ -202,6 +225,7 @@ main( int argc, char *argv[] )
          iupper[d] = i;
       }
    }
+   */
 
    Hypre_StructMatrix_print( mat );
 
@@ -233,21 +257,40 @@ main( int argc, char *argv[] )
 
    Hypre_StructVector_print( vecx );
    
-   /* Make a linear solver */
+   /* Make a linear solver and solve. */
+   /* The Jacobi solver just iterates the maximum number of iterations;
+      the tolerance is ignored. */
 
    solver = Hypre_StructJacobi_new();
-/* First call of Setup is to call HYPRE_StructJacobiCreate (args are
-   solver and comm), which is needed before SetParameter.
-   Second call of Setup is to call HYPRE_StructJacobiSetup, which apparantly
-   should be called once parameters are set.
-   This needs to be reorganized! */
-   Hypre_StructJacobi_Setup( solver, mat, vecb, vecx, comm );
+   Hypre_StructJacobi_NewSolver( solver, comm );
    Hypre_StructJacobi_SetParameter( solver, "tol", 1.0e-4 );
-   Hypre_StructJacobi_SetParameter( solver, "max_iter", 40 );
+   Hypre_StructJacobi_SetParameter( solver, "max_iter", 50 );
+   Hypre_StructJacobi_Setup( solver, mat, vecb, vecx, comm );
+   Hypre_StructJacobi_Apply( solver, vecb, &vecx );
+
+/*  HSJP = solver->d_table;
+    HSJp = HSJP;
+    S = HSJp->hssolver; */
+/* not implemented ... /*
+/*   HYPRE_StructJacobiGetNumIterations( *S, &i );
+    printf( "%i iterations\n", i );
+*/
+
+   Hypre_StructVector_print( vecx );
+   Hypre_StructJacobi_destructor( solver );
+
+   /* Make another linear solver and solve, with a different
+      number of iterations. */
+
+   solver = Hypre_StructJacobi_new();
+   Hypre_StructJacobi_NewSolver( solver, comm );
+   Hypre_StructJacobi_SetParameter( solver, "tol", 1.0e-4 );
+   Hypre_StructJacobi_SetParameter( solver, "max_iter", 500 );
    Hypre_StructJacobi_Setup( solver, mat, vecb, vecx, comm );
    Hypre_StructJacobi_Apply( solver, vecb, &vecx );
 
    Hypre_StructVector_print( vecx );
+   Hypre_StructJacobi_destructor( solver );
 
    return( 0 );
 }

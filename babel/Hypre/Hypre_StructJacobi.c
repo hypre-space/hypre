@@ -208,6 +208,8 @@ void  impl__Hypre_StructJacobi_Setup(
    Hypre_StructJacobi this, Hypre_StructMatrix A, Hypre_StructVector b,
    Hypre_StructVector x, Hypre_MPI_Com comm) {
 
+/* after next Babel run, won't need comm argument */
+
    Hypre_StructJacobi_Private HSJP = this->d_table;
    struct Hypre_StructJacobi_private *HSJp = HSJP;
    HYPRE_StructSolver *S = HSJp->hssolver;
@@ -224,13 +226,25 @@ void  impl__Hypre_StructJacobi_Setup(
    struct Hypre_StructVector_private *SVxp = SVxP;
    HYPRE_StructVector *Vx = SVxp->hsvec;
 
+   HYPRE_StructJacobiSetup( *S, *MA, *Vb, *Vx );
+
+}
+
+void Hypre_StructJacobi_NewSolver
+( Hypre_StructJacobi this, Hypre_MPI_Com comm) {
+
+/* after next Babel run, will have a name like
+   impl__Hypre_StructJacobi_NewSolver */
+
+   Hypre_StructJacobi_Private HSJP = this->d_table;
+   struct Hypre_StructJacobi_private *HSJp = HSJP;
+   HYPRE_StructSolver *S = HSJp->hssolver;
+
    Hypre_MPI_Com_Private CP = comm->d_table;
    struct Hypre_MPI_Com_private * HMCp = CP;
    MPI_Comm *C = CP->hcom;
 
    HYPRE_StructJacobiCreate( *C, S );
-
-   HYPRE_StructJacobiSetup( *S, *MA, *Vb, *Vx );
 
 }
 
