@@ -16,7 +16,6 @@ BLASFILES = \
  $(top_srcdir)/blas/dgels_all.c\
  $(top_srcdir)/blas/dgemm.c\
  $(top_srcdir)/blas/dgemv.c\
- $(top_srcdir)/blas/dmyblas2.c\
  $(top_srcdir)/blas/dnrm2.c\
  $(top_srcdir)/blas/dpotrf.c\
  $(top_srcdir)/blas/dpotrs.c\

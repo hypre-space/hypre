@@ -13,7 +13,6 @@ FILES = \
  dgels_all.c \
  dgemm.c \
  dgemv.c \
- dmyblas2.c \
  dnrm2.c \
  dpotrf.c \
  dpotrs.c \
