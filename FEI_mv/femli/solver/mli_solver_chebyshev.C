@@ -21,8 +21,7 @@
  * constructor
  *---------------------------------------------------------------------------*/
 
-MLI_Solver_Chebyshev::MLI_Solver_Chebyshev() : 
-                          MLI_Solver(MLI_SOLVER_CHEBYSHEV_ID)
+MLI_Solver_Chebyshev::MLI_Solver_Chebyshev(char *name) : MLI_Solver(name)
 {
    Amat_             = NULL;
    degree_           = 2;
