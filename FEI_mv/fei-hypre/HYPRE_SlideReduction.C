@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#define HYPRE_SLIDEMAX 50
+#define HYPRE_SLIDEMAX 100
 
 //***************************************************************************
 // local includes
@@ -34,7 +34,7 @@
 // local defines and external functions
 //---------------------------------------------------------------------------
 
-#define dabs(x) (((x) > 0.0) ? x : -(x))
+#define habs(x) (((x) > 0.0) ? x : -(x))
 
 extern "C" 
 {
@@ -364,7 +364,7 @@ int HYPRE_SlideReduction::findSlaveEqns1()
          {
             constrListAux[nCandidates]   = searchIndex;
             candidateList[nCandidates++] = irow;
-            if ( outputLevel_ >= 2 )
+            if ( outputLevel_ >= 3 )
                printf("%4d : findSlaveEqns1 - candidate %d = %d(%d)\n", 
                       mypid, nCandidates-1, irow, searchIndex);
          }
@@ -386,7 +386,7 @@ int HYPRE_SlideReduction::findSlaveEqns1()
    {
       HYPRE_ParCSRMatrixGetRow(A_csr,irow,&rowSize,&colInd,&colVal);
       searchIndex = -1;
-      searchValue = -1.0E10;
+      searchValue = 1.0E-6;
       for ( jcol = 0;  jcol < rowSize;  jcol++ ) 
       {
          if (colVal[jcol] != 0.0 && colInd[jcol] >= startRow && 
@@ -395,10 +395,10 @@ int HYPRE_SlideReduction::findSlaveEqns1()
          {
             colIndex = hypre_BinarySearch(candidateList, colInd[jcol],
                                           nCandidates);
-            if ( colIndex >= 0 && dabs(colVal[jcol]) > searchValue )
+            if ( colIndex >= 0 && habs(colVal[jcol]) > searchValue )
             {
                if ( irow != constrListAux[colIndex] ) break;
-               searchValue = dabs(colVal[jcol]);
+               searchValue = habs(colVal[jcol]);
                searchIndex = colInd[jcol];
             }
          }
@@ -470,12 +470,12 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
    int    mypid, nprocs, *procNRows, startRow, endRow, localNRows;
    int    nConstraints, irow, jcol, rowSize, ncnt, *colInd, globalNConstr;
    int    nCandidates, *candidateList, **constrListAuxs, colIndex, rowSize2;
-   int    ic, ii, searchIndex, searchInd2, newEndRow, rowIndex;
-   int    blkSizeMax=HYPRE_SLIDEMAX;
+   int    ic, ii, jj, searchIndex, searchInd2, newEndRow, rowIndex;
+   int    blkSizeMax=HYPRE_SLIDEMAX, *colInd2, searchInd3;
    int    constrIndex, uBound, lBound, nSum, isACandidate, newBlkSize, *colTmp;
    int    constrIndex2, searchBlkSize, newIndex, oldIndex, irowLocal, ip;
    int    *blkInfo, blkInfoCnt;
-   double *colVal, searchValue;
+   double *colVal, searchValue, retVal, *colVal2;
    HYPRE_ParCSRMatrix A_csr;
 
    //------------------------------------------------------------------
@@ -548,7 +548,7 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
             if ( ncnt > blkSize ) break;
          }
          HYPRE_ParCSRMatrixRestoreRow(A_csr,irow,&rowSize,&colInd,&colVal);
-         if ( ncnt <= blkSize ) 
+         if ( ncnt >= 1 && ncnt <= blkSize ) 
          {
             isACandidate = 1;
             for ( ic = 0; ic < ncnt; ic++ ) 
@@ -563,7 +563,7 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
             if ( isACandidate )
             {
                candidateList[nCandidates++] = irow;
-               if ( outputLevel_ >= 2 )
+               if ( outputLevel_ >= 3 )
                   printf("%4d : findSlaveEqnsBlock - candidate %d = %d\n", 
                          mypid, nCandidates-1, irow);
             }
@@ -575,6 +575,79 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
    }
 
    //---------------------------------------------------------------------
+   // revise candidates taking into consideration nonsymmetry
+   //---------------------------------------------------------------------
+
+   int *tempSlaveList, *tempSlaveListAux;
+   if ( nConstraints > 0 ) tempSlaveList = new int[nConstraints];
+   if ( nConstraints > 0 ) tempSlaveListAux = new int[nConstraints];
+   for (irow = 0; irow < nConstraints; irow++) 
+   {
+      tempSlaveList[irow] = slaveEqnList_[irow];
+      tempSlaveListAux[irow] = irow;
+   }
+   HYPRE_LSI_qsort1a(tempSlaveList, tempSlaveListAux, 0, nConstraints-1);
+
+   /* for each of the candidates, examine all associated constraints dof */
+   for ( irow = 0; irow < nCandidates; irow++ ) 
+   {
+      for ( ic = 0; ic < blkSize; ic++ ) 
+      {
+         constrIndex = constrListAuxs[irow][ic];
+         /* if valid constraint number */
+         if ( constrIndex >= 0 )
+         { 
+            /* get the constraint row */
+            HYPRE_ParCSRMatrixGetRow(A_csr,constrIndex,&rowSize,&colInd,NULL);
+
+            /* for each nonzero entry of the constraint row */
+            /* - see if the column number is an already selected slave */
+            /* - if so, find the corresponding constraint number of that slave */
+            /* - add that constraint to my list */
+            for ( jcol = 0; jcol < rowSize; jcol++ ) 
+            {
+               colIndex = colInd[jcol];
+               searchIndex = hypre_BinarySearch(tempSlaveList,colIndex,nConstraints);
+               if ( searchIndex >= 0 )
+               {      
+                  searchInd2 = tempSlaveListAux[searchIndex] + newEndRow + 1;
+                  for ( ip = 0; ip < blkSize; ip++ ) 
+                     if ( constrListAuxs[irow][ip] == searchInd2 ||
+                          constrListAuxs[irow][ip] == -1 ) break;
+                  if ( ip == blkSize ) constrListAuxs[irow][0] = -5;
+                  else if ( constrListAuxs[irow][ip] == -1 )
+                  {
+                     constrListAuxs[irow][ip] = searchInd2;
+                     if ( outputLevel_ >= 2 )
+                        printf("Slave candiate %d adds new constr %d\n",
+                               candidateList[irow], searchInd2);
+                  }
+               }
+            }
+            HYPRE_ParCSRMatrixRestoreRow(A_csr,constrIndex,&rowSize,&colInd,NULL);
+         }
+      }
+   }
+   ncnt = 0;
+   for ( irow = 0; irow < nCandidates; irow++ ) 
+   {
+      if ( constrListAuxs[irow][0] != -5 )
+      {
+         if ( irow != ncnt )
+         {
+            if ( constrListAuxs[ncnt] != NULL ) delete [] constrListAuxs[ncnt];
+            constrListAuxs[ncnt] = constrListAuxs[irow];
+            constrListAuxs[irow] = NULL;
+            candidateList[ncnt++] = candidateList[irow];
+         }
+         else ncnt++;
+      }
+   }
+   nCandidates = ncnt;
+   if ( nConstraints > 0 ) delete [] tempSlaveList;
+   if ( nConstraints > 0 ) delete [] tempSlaveListAux;
+
+   //---------------------------------------------------------------------
    // search the constraint equations for the selected slave equations
    // (search for candidates column index with maximum magnitude)
    // ==> slaveEqnList_
@@ -583,7 +656,7 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
    rowIndex    = -1;
    searchIndex = 0;
 
-   blkInfo = new int[blkSize];
+   blkInfo = new int[blkSize+HYPRE_SLIDEMAX];
    for ( irow = newEndRow+1; irow <= endRow; irow++ ) 
    {
       /* -- if slave variable has not been picked for constraint irow -- */
@@ -594,9 +667,18 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
       {
          /* -- get the constraint row, and search for nonzero entries -- */
 
-         HYPRE_ParCSRMatrixGetRow(A_csr,irow,&rowSize,&colInd,&colVal);
+         HYPRE_ParCSRMatrixGetRow(A_csr,irow,&rowSize2,&colInd2,&colVal2);
+         rowSize = rowSize2;
+         colInd = new int[rowSize];
+         colVal = new double[rowSize];
+         for ( jcol = 0;  jcol < rowSize;  jcol++ ) 
+         {
+            colInd[jcol] = colInd2[jcol];
+            colVal[jcol] = colVal2[jcol];
+         }
+         HYPRE_ParCSRMatrixRestoreRow(A_csr,irow,&rowSize2,&colInd2,&colVal2);
          searchIndex = -1;
-         searchValue = -1.0E10;
+         searchValue = 1.0E-5;
          for ( jcol = 0;  jcol < rowSize;  jcol++ ) 
          {
             colIndex = colInd[jcol];
@@ -612,7 +694,7 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
                /* -- if the use of this as slave will give block size   -- */
                /* -- that is too large.                                 -- */
 
-               if ( searchInd2 >= 0 && constrListAuxs[searchInd2][0] != -8 )
+               if (searchInd2 >= 0 && eqnStatuses_[colIndex-startRow] != 1)
                {
                   newBlkSize = 1;
                   blkInfoCnt = 0; 
@@ -622,7 +704,8 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
                      if ( constrIndex != -1 )
                      {
                         constrIndex2 = constrIndex - endRow + nConstraints - 1;
-                        if (constrIndex != irow && slaveEqnList_[constrIndex2] != -1)
+                        if ( constrIndex != irow && 
+                             slaveEqnList_[constrIndex2] != -1)
                         {
                            for ( ip = 0; ip < blkInfoCnt; ip++ )
                               if ( blkInfo[ip] == constrBlkInfo_[constrIndex2] )
@@ -634,23 +717,32 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
                               blkInfoCnt++;
                            }
                         }
+                        else if (constrIndex != irow ) newBlkSize++;
                      }
                   }
                   if ( outputLevel_ >= 1 )
-                     printf("%4d : constraint %d - candidate %d gives blksize = %d\n",
-                            mypid, irow, candidateList[searchInd2], newBlkSize); 
-                  if (newBlkSize > 1 && newBlkSize <= blkSize && 
-                      (dabs(colVal[jcol])>searchValue))
+                     printf("%4d : constraint %d - candidate %d (%d) gives blksize = %d\n",
+                            mypid, irow, searchInd2, candidateList[searchInd2], 
+                            newBlkSize); 
+                  if (newBlkSize > 1 && newBlkSize <= blkSize)
                   {
-                     searchValue   = dabs(colVal[jcol]);
-                     searchIndex   = colIndex;
-                     searchBlkSize = newBlkSize;
+                     retVal = matrixCondEst(irow,colIndex,blkInfo,blkInfoCnt);
+                     if ( outputLevel_ >= 2 )
+                        printf("%4d : pivot = %e (%e) : %d\n", mypid, retVal, 
+                               searchValue,newBlkSize);
+                     if ( retVal > searchValue )
+                     {
+                        searchValue   = habs(colVal[jcol]);
+                        searchIndex   = colIndex;
+                        searchBlkSize = newBlkSize;
+                     }
                   }
                }
             }
          } 
-         HYPRE_ParCSRMatrixRestoreRow(A_csr,irow,&rowSize,&colInd,&colVal);
-         if ( searchIndex >= 0 && searchValue > 1.0e-3 )
+         delete [] colInd;
+         delete [] colVal;
+         if ( searchIndex >= 0 && searchValue > 1.0e-5 )
          {
             searchInd2 = hypre_BinarySearch(candidateList,searchIndex,nCandidates);
             newIndex = -9;
@@ -677,48 +769,97 @@ int HYPRE_SlideReduction::findSlaveEqnsBlock(int blkSize)
             slaveEqnList_[irowLocal]   = searchIndex;
             searchInd2 = hypre_BinarySearch(candidateList, searchIndex,
                                             nCandidates);
-            constrListAuxs[searchInd2][0] = -8;
             eqnStatuses_[searchIndex-startRow] = 1;
+
+            /* update the constrListAux - first get selected slave row */
+
+            for ( ii = 0;  ii < blkSize;  ii++ ) 
+            {
+               constrIndex2 = constrListAuxs[searchInd2][ii];
+               if ( constrIndex2 != -1 )
+               {
+                  HYPRE_ParCSRMatrixGetRow(A_csr,constrIndex2,&rowSize2,
+                                           &colInd2,&colVal2);
+                  for ( jj = 0;  jj < rowSize2;  jj++ ) 
+                  {
+                     searchInd3 = hypre_BinarySearch(candidateList, 
+                                                     colInd2[jj],nCandidates);
+                     if ( searchInd3 >= 0 )
+                     {
+                        for ( ip = 0; ip < blkSize; ip++ ) 
+                        {
+                           if ( constrListAuxs[searchInd3][ip] == irow ||
+                                constrListAuxs[searchInd3][ip] == -1 ) break;
+                        }
+                        if ( ip == blkSize ) 
+                        {
+                           constrListAuxs[searchInd3][0] = -5;
+                           eqnStatuses_[colInd2[jj]-startRow] = 1;
+                           if ( outputLevel_ >= 2 )
+                              printf("*Slave candidate %d disabled.\n",
+                                     candidateList[searchInd3]);
+                        }
+                        else if ( constrListAuxs[searchInd3][ip] == -1 )
+                        {
+                           constrListAuxs[searchInd3][ip] = irow;
+                           if ( outputLevel_ >= 2 )
+                              printf("*Slave candidate %d adds new constr %d\n",
+                                     candidateList[searchInd3], irow);
+                        } 
+                     } 
+                  } 
+                  HYPRE_ParCSRMatrixRestoreRow(A_csr,constrIndex2,&rowSize2,
+                                               &colInd2,&colVal2);
+               }
+            }
             if ( outputLevel_ >= 1 )
                printf("%4d : findSlaveEqnsBlock - constr %d <=> slave %d (%d)\n",
                       mypid, irow, searchIndex, newIndex);
          }
          else 
          {
-            if ( outputLevel_ >= 2 )
+            if ( outputLevel_ >= 1 )
             {
                printf("%4d : findSlaveEqnsBlock - constraint %4d fails", mypid,
                       irow);
                printf(" to find a slave.\n");
-               HYPRE_ParCSRMatrixGetRow(A_csr,irow,&rowSize,&colInd,&colVal);
-               colTmp = new int[rowSize];
-               rowSize2 = rowSize;
-               for ( ii = 0;  ii < rowSize;  ii++ ) colTmp[ii] = colInd[ii];
-               HYPRE_ParCSRMatrixRestoreRow(A_csr,irow,&rowSize,&colInd,&colVal);
-               for ( jcol = 0;  jcol < rowSize2;  jcol++ ) 
+               if ( outputLevel_ >= 3 )
                {
-                  colIndex = colTmp[jcol];
-                  printf("%4d : row %d has col %d (%d,%d) (%d,%d)\n",mypid,irow,
-                         colIndex,jcol,rowSize,procNRows[mypid],procNRows[mypid+1]); 
-                  if (colIndex >= procNRows[mypid] && colIndex < procNRows[mypid+1])
+                  HYPRE_ParCSRMatrixGetRow(A_csr,irow,&rowSize,&colInd,&colVal);
+                  colTmp = new int[rowSize];
+                  rowSize2 = rowSize;
+                  for ( ii = 0;  ii < rowSize;  ii++ ) colTmp[ii] = colInd[ii];
+                  HYPRE_ParCSRMatrixRestoreRow(A_csr,irow,&rowSize,&colInd,
+                                               &colVal);
+                  for ( jcol = 0;  jcol < rowSize2;  jcol++ ) 
                   {
-                     HYPRE_ParCSRMatrixGetRow(A_csr,colIndex,&rowSize,&colInd,NULL);
-                     for ( ii = 0; ii < rowSize;  ii++ ) 
-                        printf("%4d :      col %d has col %d (%d,%d) \n", mypid,
-                               colIndex,colInd[ii],ii,rowSize);
-                     HYPRE_ParCSRMatrixRestoreRow(A_csr,colIndex,&rowSize,&colInd,NULL);
+                     colIndex = colTmp[jcol];
+                     printf("%4d : row %d has col %d (%d,%d) (%d,%d)\n",mypid,irow,
+                       colIndex,jcol,rowSize,procNRows[mypid],procNRows[mypid+1]); 
+                     if ( colIndex >= procNRows[mypid] && 
+                          colIndex < procNRows[mypid+1])
+                     {
+                        HYPRE_ParCSRMatrixGetRow(A_csr,colIndex,&rowSize,&colInd,
+                                                 NULL);
+                        for ( ii = 0; ii < rowSize;  ii++ ) 
+                           printf("%4d :     col %d has col %d (%d,%d)\n",mypid,
+                                  colIndex,colInd[ii],ii,rowSize);
+                        HYPRE_ParCSRMatrixRestoreRow(A_csr,colIndex,&rowSize,
+                                                     &colInd,NULL);
+                     }
                   }
+                  delete [] colTmp;
                }
-               delete [] colTmp;
             }
          }
       }
    }
+
    delete [] blkInfo;
    if ( nConstraints > 0 )
    {
       for ( ic = 0; ic < localNRows-nConstraints; ic++ ) 
-         delete [] constrListAuxs[ic];
+         if ( constrListAuxs[ic] != NULL ) delete [] constrListAuxs[ic];
       delete [] constrListAuxs;
       delete [] candidateList;
    }
@@ -906,32 +1047,30 @@ int HYPRE_SlideReduction::buildReducedMatrix()
       printf("%4d : buildReducedMatrix - Triple matrix product ends\n",
              mypid);
 
-   if ( outputLevel_ >= 3 )
+   if ( outputLevel_ >= 4 )
    {
-      MPI_Barrier(mpiComm_);
-      ncnt = 0;
-      while ( ncnt < nprocs )
+      char fname[40];
+      sprintf(fname, "rap.%d", mypid);
+      FILE *fp = fopen(fname, "w");
+
+      if ( mypid == 0 )
       {
-         if ( mypid == ncnt )
-         {
-            printf("====================================================\n");
-            printf("%4d : Printing RAP matrix... \n", mypid);
-            fflush(stdout);
-            for (irow=reducedAStartRow; irow<reducedAStartRow+reducedANRows; 
-                 irow++ ) 
-            {
-               HYPRE_ParCSRMatrixGetRow(RAP_csr,irow,&rowSize,&colInd,&colVal);
-               for ( jcol = 0; jcol < rowSize; jcol++ )
-                  if ( colVal[jcol] != 0.0 )
-                     printf("%6d  %6d  %25.16e \n",irow+1,colInd[jcol]+1,
-                            colVal[jcol]);
-               HYPRE_ParCSRMatrixRestoreRow(RAP_csr,irow,&rowSize,&colInd,
-                                            &colVal);
-            }
-         }
-         MPI_Barrier(mpiComm_);
-         ncnt++;
+         printf("====================================================\n");
+         printf("%4d : Printing RAP matrix... \n", mypid);
+         fflush(stdout);
       }
+      for (irow=reducedAStartRow; irow<reducedAStartRow+reducedANRows;irow++) 
+      {
+         HYPRE_ParCSRMatrixGetRow(RAP_csr,irow,&rowSize,&colInd,&colVal);
+         for ( jcol = 0; jcol < rowSize; jcol++ )
+            if ( colVal[jcol] != 0.0 )
+               fprintf(fp,"%6d  %6d  %25.16e \n",irow+1,colInd[jcol]+1,
+                      colVal[jcol]);
+         HYPRE_ParCSRMatrixRestoreRow(RAP_csr,irow,&rowSize,&colInd,&colVal);
+      }
+      fclose(fp);
+      if ( mypid == 0 )
+         printf("====================================================\n");
    }
 
    //******************************************************************
@@ -1093,7 +1232,7 @@ int HYPRE_SlideReduction::buildReducedMatrix()
    delete [] newColInd;
    delete [] newColVal;
    free( procNRows );
-   //HYPRE_ParCSRMatrixDestroy(RAP_csr);
+   HYPRE_ParCSRMatrixDestroy(RAP_csr);
 
    //------------------------------------------------------------------
    // assemble the reduced matrix
@@ -1102,36 +1241,35 @@ int HYPRE_SlideReduction::buildReducedMatrix()
    HYPRE_IJMatrixAssemble(reducedAmat_);
    HYPRE_IJMatrixGetObject(reducedAmat_, (void **) &reducedA_csr);
 
-   if ( outputLevel_ >= 2 )
+   if ( outputLevel_ >= 3 )
    {
-      MPI_Barrier(mpiComm_);
-      ncnt = 0;
-      while ( ncnt < nprocs )
+      char fname[40];
+      sprintf(fname, "reducedA.%d", mypid);
+      FILE *fp = fopen(fname, "w");
+
+      if ( mypid == 0 )
       {
-         if ( mypid == ncnt )
-         {
-            printf("====================================================\n");
-            printf("%4d : Printing reducedA matrix... \n", mypid);
-            fflush(stdout);
-            for ( irow = reducedAStartRow; 
-                   irow < reducedAStartRow+localNRows-nConstraints; irow++ )
-            {
-               //printf("%d : reducedA ROW %d\n", mypid, irow);
-               ierr = HYPRE_ParCSRMatrixGetRow(reducedA_csr,irow,&rowSize,
-                                               &colInd, &colVal);
-               //qsort1(colInd, colVal, 0, rowSize-1);
-               for ( jcol = 0; jcol < rowSize; jcol++ )
-                  if ( colVal[jcol] != 0.0 )
-                     printf("%6d  %6d  %25.16e \n",irow+1,colInd[jcol]+1,
-                            colVal[jcol]);
-               HYPRE_ParCSRMatrixRestoreRow(reducedA_csr,irow,&rowSize,
-                                            &colInd, &colVal);
-            }
-            printf("====================================================\n");
-         }
-         MPI_Barrier(mpiComm_);
-         ncnt++;
+         printf("====================================================\n");
+         printf("%4d : Printing reducedA matrix... \n", mypid);
+         fflush(stdout);
       }
+      for ( irow = reducedAStartRow; 
+             irow < reducedAStartRow+localNRows-nConstraints; irow++ )
+      {
+         //printf("%d : reducedA ROW %d\n", mypid, irow);
+         ierr = HYPRE_ParCSRMatrixGetRow(reducedA_csr,irow,&rowSize,
+                                         &colInd, &colVal);
+         //qsort1(colInd, colVal, 0, rowSize-1);
+         for ( jcol = 0; jcol < rowSize; jcol++ )
+            if ( colVal[jcol] != 0.0 )
+               fprintf(fp,"%6d  %6d  %25.16e \n",irow+1,colInd[jcol]+1,
+                      colVal[jcol]);
+         HYPRE_ParCSRMatrixRestoreRow(reducedA_csr,irow,&rowSize,&colInd,
+                                      &colVal);
+      }
+      fclose(fp);
+      if ( mypid == 0 )
+         printf("====================================================\n");
    }
    return 0;
 }
@@ -1317,7 +1455,6 @@ int HYPRE_SlideReduction::buildReducedSolnVector(HYPRE_IJVector x,
    localNRows   = endRow - startRow + 1;
    nConstraints = procNConstr_[mypid+1] - procNConstr_[mypid];
    newEndRow    = endRow - nConstraints;
-   free( procNRows );
    if ( procNConstr_ == NULL || procNConstr_[nprocs] == 0 )
    {
       printf("%4d : buildReducedSolnVector WARNING - no local entries.\n",mypid);
@@ -1384,6 +1521,13 @@ int HYPRE_SlideReduction::buildReducedSolnVector(HYPRE_IJVector x,
    HYPRE_IJMatrixGetObject(invA22mat_, (void **) &invA22_csr );
    HYPRE_ParCSRMatrixMatvec(1.0, invA22_csr, v1_csr, 0.0, x2_csr);
 
+#if 0
+   FILE *fp = fopen("rhs.m", "w");
+   for ( irow = 0; irow < 2*nConstraints; irow++ )
+      fprintf(fp, " %6d %25.16e \n", irow+1, v1_data[irow]);
+   fclose(fp);
+#endif
+
    //-------------------------------------------------------------
    // inject final solution to the solution vector x 
    //-------------------------------------------------------------
@@ -1414,12 +1558,56 @@ int HYPRE_SlideReduction::buildReducedSolnVector(HYPRE_IJVector x,
    for ( irow = nConstraints; irow < 2*nConstraints; irow++ )
       x_data[localNRows-2*nConstraints+irow] = x2_data[irow];
 
+   //------------------------------------------------------------------
+   // compute true residual
+   //------------------------------------------------------------------
+
+#if 1
+   double          rnorm;
+   HYPRE_IJVector  R;
+   HYPRE_ParVector R_csr;
+
+   ierr  = HYPRE_IJVectorCreate(mpiComm_, procNRows[mypid], 
+                                procNRows[mypid+1], &R);
+   ierr += HYPRE_IJVectorSetObjectType(R, HYPRE_PARCSR);
+   ierr += HYPRE_IJVectorInitialize(R);
+   ierr += HYPRE_IJVectorAssemble(R);
+   assert(!ierr);
+   HYPRE_IJVectorGetObject(R, (void **) &R_csr);
+   HYPRE_ParVectorCopy( b_csr, R_csr );
+   HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, R_csr );
+   HYPRE_ParVectorInnerProd( R_csr, R_csr, &rnorm);
+   hypre_Vector *R_local=hypre_ParVectorLocalVector((hypre_ParVector*) R_csr);
+   double *R_data  = (double *) hypre_VectorData(R_local);
+   HYPRE_ParVectorInnerProd( R_csr, R_csr, &rnorm);
+   double rnorm2 = 0.0;
+   for ( irow = 0; irow < nConstraints; irow++ )
+   {
+      searchIndex = -1;
+      for ( jcol = 0; jcol < nConstraints; jcol++ ) 
+      {
+         if ( slaveEqnListAux_[jcol] == irow ) 
+         {
+            searchIndex = slaveEqnList_[jcol]; 
+            break;
+         }
+      }
+      rnorm2 += (R_data[searchIndex-startRow] * R_data[searchIndex-startRow]);
+   }
+   for ( irow = endRow-nConstraints+1; irow <= endRow; irow++ )
+      rnorm2 += (R_data[irow-startRow] * R_data[irow-startRow]);
+   if ( mypid == 0 )
+      printf("HYPRE_SlideRedction norm check = %e %e %e\n", sqrt(rnorm),
+             sqrt(rnorm-rnorm2), sqrt(rnorm2));
+#endif
+
    //----------------------------------------------------------------
    // clean up
    //----------------------------------------------------------------
 
-   //HYPRE_IJVectorDestroy(v1); 
-   //HYPRE_IJVectorDestroy(x2); 
+   HYPRE_IJVectorDestroy(v1); 
+   HYPRE_IJVectorDestroy(x2); 
+   free( procNRows );
    return 0;
 }
 
@@ -1677,32 +1865,31 @@ int HYPRE_SlideReduction::buildA21Mat()
    HYPRE_IJMatrixGetObject(A21mat_, (void **) &A21_csr);
    hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) A21_csr);
 
-   if ( outputLevel_ >= 3 )
+   if ( outputLevel_ >= 4 )
    {
-      ncnt = 0;
-      MPI_Barrier(mpiComm_);
-      while ( ncnt < nprocs ) 
+      char fname[40];
+      sprintf(fname, "A21.%d", mypid);
+      FILE *fp = fopen(fname, "w");
+
+      if ( mypid == 0 ) 
       {
-         if ( mypid == ncnt ) 
-         {
-            printf("====================================================\n");
-            printf("%4d : Printing A21 matrix... \n", mypid);
-            fflush(stdout);
-            for (irow = A21StartRow;irow < A21StartRow+2*nConstraints;irow++) 
-            {
-               HYPRE_ParCSRMatrixGetRow(A21_csr,irow,&rowSize,&colInd,&colVal);
-               for ( jcol = 0; jcol < rowSize; jcol++ )
-                  if ( colVal[jcol] != 0.0 )
-                     printf("%6d  %6d  %25.16e \n",irow+1,colInd[jcol]+1,
-                            colVal[jcol]);
-               HYPRE_ParCSRMatrixRestoreRow(A21_csr, irow, &rowSize,
-                                            &colInd, &colVal);
-            }
-            printf("====================================================\n");
-         }
-         ncnt++;
-         MPI_Barrier(mpiComm_);
+         printf("====================================================\n");
+         printf("%4d : Printing A21 matrix... \n", mypid);
+         fflush(stdout);
       }
+      for (irow = A21StartRow;irow < A21StartRow+2*nConstraints;irow++) 
+      {
+         HYPRE_ParCSRMatrixGetRow(A21_csr,irow,&rowSize,&colInd,&colVal);
+         for ( jcol = 0; jcol < rowSize; jcol++ )
+            if ( colVal[jcol] != 0.0 )
+               fprintf(fp, "%6d  %6d  %25.16e \n",irow+1,colInd[jcol]+1,
+                      colVal[jcol]);
+         HYPRE_ParCSRMatrixRestoreRow(A21_csr, irow, &rowSize, &colInd, 
+                                      &colVal);
+      }
+      fclose(fp);
+      if ( mypid == 0 ) 
+         printf("====================================================\n");
    }
    return 0;
 }
@@ -1808,6 +1995,9 @@ int HYPRE_SlideReduction::buildInvA22Mat()
       CT_AA    = new double[nConstraints*maxBlkSize];
       for ( irow = 0; irow < nConstraints*maxBlkSize; irow++ ) CT_JA[irow] = -1;
    }
+#if 0
+FILE *fp = fopen("CT.m","w");
+#endif
    for ( irow = 0; irow < nConstraints; irow++ ) 
    {
       rowIndex = newEndRow + 1 + irow;
@@ -1823,15 +2013,24 @@ int HYPRE_SlideReduction::buildInvA22Mat()
             CT_JA[CTOffset+CTRowSize] = slaveEqnListAux_[searchIndex];
             CT_AA[CTOffset+CTRowSize] = colVal[jcol]; 
             CTRowSize++;
+#if 0
+fprintf(fp,"%d %d %25.16e\n",irow+1,CT_JA[CTOffset+CTRowSize-1]+1,colVal[jcol]);
+#endif
          }
       } 
       HYPRE_ParCSRMatrixRestoreRow(A_csr,rowIndex,&rowSize,&colInd,&colVal);
    }
+#if 0
+fclose(fp);
+#endif
 
    //------------------------------------------------------------------
    // invert the (2,1) block of A22 
    //------------------------------------------------------------------
 
+#if 0
+FILE *fp2 = fopen("invCT.m","w");
+#endif
    Imat = (double **) malloc( maxBlkSize * sizeof(double*) );
    for ( ir = 0; ir < maxBlkSize; ir++ )
       Imat[ir] = (double *) malloc( maxBlkSize * sizeof(double) );
@@ -1855,33 +2054,42 @@ int HYPRE_SlideReduction::buildInvA22Mat()
             }
          }
       }
-#if 1
-printf("(1) Block %d has indices : ", ig);
-for ( ir = 0; ir < groupSizes[ig]; ir++ )
-printf(" %d ", groupRowNums[ig][ir]);
-printf("\n");
-/*
-for ( ir = 0; ir < groupSizes[ig]; ir++ )
-{
-for ( ic = 0; ic < groupSizes[ig]; ic++ )
-printf(" %e ", Imat[ir][ic]);
-printf("\n");
-}
-*/
-#endif
       ierr = HYPRE_LSI_MatrixInverse((double**) Imat, groupSizes[ig], &Imat2);
-#if 0
-printf("(2) Block %d has indices : ", ig);
-for ( ir = 0; ir < groupSizes[ig]; ir++ )
-printf(" %d ", groupRowNums[ig][ir]);
-printf("\n");
-for ( ir = 0; ir < groupSizes[ig]; ir++ )
-{
-for ( ic = 0; ic < groupSizes[ig]; ic++ )
-printf(" %e ", Imat2[ir][ic]);
-printf("\n");
-}
-#endif
+      if ( ierr )
+      {
+         printf("Failed Block %d has indices (%d) : ", ig, groupSizes[ig]);
+         for ( ir = 0; ir < groupSizes[ig]; ir++ )
+            printf(" %d ", groupRowNums[ig][ir]);
+         printf("\n");
+         for ( ir = 0; ir < groupSizes[ig]; ir++ )
+         {
+            for ( ic = 0; ic < groupSizes[ig]; ic++ )
+               printf(" %e ", Imat[ir][ic]);
+            printf("\n");
+         }
+         printf("\n");
+         for ( ir = 0; ir < groupSizes[ig]; ir++ )
+         {
+            for ( ic = 0; ic < groupSizes[ig]; ic++ )
+               printf(" %e ", Imat2[ir][ic]);
+            printf("\n");
+         }
+         printf("\n");
+         for ( ir = 0; ir < groupSizes[ig]; ir++ )
+         { 
+            rowIndex = groupRowNums[ig][ir];
+            offset   = rowIndex * maxBlkSize;
+            for ( ic = 0; ic < maxBlkSize; ic++ ) 
+            {
+               colIndex = CT_JA[offset+ic];
+               if ( colIndex != -1 )
+               {
+                  printf("  rowIndex,colIndex,val = %d %d %e\n",rowIndex,
+                         colIndex,CT_AA[offset+ic]);
+               }
+            }
+         }
+      }
       assert( !ierr );
       for ( ir = 0; ir < groupSizes[ig]; ir++ )
       { 
@@ -1894,12 +2102,18 @@ printf("\n");
             {
                CT_JA[offset+ic] = groupRowNums[ig][ic];
                CT_AA[offset+ic] = Imat2[ir][ic];
+#if 0
+fprintf(fp2,"%d %d %25.16e\n",rowIndex+1,CT_JA[offset+ic]+1,CT_AA[offset+ic]);
+#endif
             }
          }
          free( Imat2[ir] );
       }
       free( Imat2 );
    }
+#if 0
+fclose(fp2);
+#endif
    for ( ir = 0; ir < maxBlkSize; ir++ ) free( Imat[ir] );
    free( Imat );
 
@@ -2422,36 +2636,154 @@ printf("\n");
    HYPRE_IJMatrixGetObject(invA22mat_, (void **) &invA22_csr);
    hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) invA22_csr);
 
-   if ( outputLevel_ >= 3 )
+   if ( outputLevel_ >= 4 )
    {
-      ncnt = 0;
-      MPI_Barrier(mpiComm_);
-      while ( ncnt < nprocs ) 
+      char fname[40];
+      sprintf( fname, "invA.%d", mypid );
+      FILE *fp = fopen( fname, "w");
+
+      if ( mypid == 0 ) 
       {
-         if ( mypid == ncnt ) 
-         {
-            printf("====================================================\n");
-            printf("%4d : Printing invA22 matrix... \n", mypid);
-            fflush(stdout);
-            for (irow = invA22StartRow; irow < invA22StartRow+invA22NRows;
-                 irow++) 
-            {
-               HYPRE_ParCSRMatrixGetRow(invA22_csr,irow,&rowSize,&colInd,
-                                        &colVal);
-               for ( jcol = 0; jcol < rowSize; jcol++ )
-                  if ( colVal[jcol] != 0.0 )
-                     printf("%6d  %6d  %25.16e \n",irow+1,colInd[jcol]+1,
-                            colVal[jcol]);
-               HYPRE_ParCSRMatrixRestoreRow(invA22_csr,irow,&rowSize,&colInd,
-                                            &colVal);
-            }
-            printf("====================================================\n");
-         }
-         MPI_Barrier(mpiComm_);
-         ncnt++;
+         printf("====================================================\n");
+         printf("%4d : Printing invA22 matrix... \n", mypid);
+         fflush(stdout);
       }
+      for (irow=invA22StartRow; irow < invA22StartRow+invA22NRows;irow++) 
+      {
+         HYPRE_ParCSRMatrixGetRow(invA22_csr,irow,&rowSize,&colInd,&colVal);
+         for ( jcol = 0; jcol < rowSize; jcol++ )
+            if ( colVal[jcol] != 0.0 )
+               fprintf(fp,"%6d  %6d  %25.16e \n",irow+1,colInd[jcol]+1,
+                      colVal[jcol]);
+         HYPRE_ParCSRMatrixRestoreRow(invA22_csr,irow,&rowSize,&colInd,
+                                      &colVal);
+      }
+      fclose(fp);
+      if ( mypid == 0 ) 
+         printf("====================================================\n");
    }
    return 0;
+}
+
+//****************************************************************************
+// estimate conditioning of a small block
+//----------------------------------------------------------------------------
+
+double HYPRE_SlideReduction::matrixCondEst(int globalRowID, int globalColID,
+                                           int *blkInfo,int blkCnt)
+{
+   int    mypid, nprocs, *procNRows, startRow, endRow, nConstraints;
+   int    localBlkCnt, *localBlkInfo, irow, jcol, matDim, searchIndex;
+   int    *rowIndices, rowSize, *colInd, rowIndex, index2, ierr;
+   int    *localSlaveEqns, *localSlaveAuxs;
+   double *colVal, **matrix, **matrix2, retVal, value;
+   HYPRE_ParCSRMatrix A_csr;
+
+   //------------------------------------------------------------------
+   // get matrix information
+   //------------------------------------------------------------------
+
+   MPI_Comm_rank(mpiComm_, &mypid);
+   MPI_Comm_size(mpiComm_, &nprocs);
+   HYPRE_IJMatrixGetObject(Amat_, (void **) &A_csr);
+   HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &procNRows );
+   startRow     = procNRows[mypid];
+   endRow       = procNRows[mypid+1] - 1;
+   nConstraints = procNConstr_[mypid+1] - procNConstr_[mypid];
+   free( procNRows );
+
+   //------------------------------------------------------------------
+   // collect all row indices
+   //------------------------------------------------------------------
+
+   localBlkCnt  = blkCnt;
+   localBlkInfo = new int[blkCnt];
+   for (irow = 0; irow < blkCnt; irow++) localBlkInfo[irow] = blkInfo[irow];
+
+   qsort0(localBlkInfo, 0, localBlkCnt-1);
+   matDim = 1;
+   for ( irow = 0; irow < nConstraints; irow++ )
+   {
+      searchIndex = hypre_BinarySearch(localBlkInfo, constrBlkInfo_[irow],
+                                       localBlkCnt);
+      if ( searchIndex >= 0 ) matDim++;
+   }
+   rowIndices = new int[matDim];
+   matDim = 0;
+   rowIndices[matDim++] = globalRowID;
+   for ( irow = 0; irow < nConstraints; irow++ )
+   {
+      searchIndex = hypre_BinarySearch(localBlkInfo, constrBlkInfo_[irow],
+                                       localBlkCnt);
+      if ( searchIndex >= 0 ) 
+         rowIndices[matDim++] = endRow - nConstraints + irow + 1;
+   }
+   qsort0(rowIndices, 0, matDim-1);
+   matrix = (double **) malloc( matDim * sizeof(double*) );
+   localSlaveEqns = new int[nConstraints];
+   localSlaveAuxs = new int[nConstraints];
+   for ( irow = 0; irow < nConstraints; irow++ ) 
+      localSlaveEqns[irow] = slaveEqnList_[irow]; 
+   localSlaveEqns[globalRowID-(endRow+1-nConstraints)] = globalColID; 
+   for ( irow = 0; irow < nConstraints; irow++ ) 
+      localSlaveAuxs[irow] = irow;
+   HYPRE_LSI_qsort1a(localSlaveEqns, localSlaveAuxs, 0, nConstraints-1);
+
+   for ( irow = 0; irow < matDim; irow++ ) 
+   {
+      matrix[irow] = (double *) malloc( matDim * sizeof(double) );
+      for ( jcol = 0; jcol < matDim; jcol++ ) matrix[irow][jcol] = 0.0;
+   }
+   for ( irow = 0; irow < matDim; irow++ ) 
+   {
+      rowIndex = rowIndices[irow];
+      HYPRE_ParCSRMatrixGetRow(A_csr,rowIndex,&rowSize,&colInd,&colVal);
+      for ( jcol = 0; jcol < rowSize; jcol++ ) 
+      {
+         searchIndex = hypre_BinarySearch(localSlaveEqns,colInd[jcol], 
+                                          nConstraints);
+         if ( searchIndex >= 0 )
+         {
+            index2 = localSlaveAuxs[searchIndex] + endRow - nConstraints + 1;
+            searchIndex = hypre_BinarySearch(rowIndices,index2,matDim);
+            if ( searchIndex >= 0 ) matrix[irow][searchIndex] = colVal[jcol];
+         }
+      }
+      HYPRE_ParCSRMatrixRestoreRow(A_csr,rowIndex,&rowSize,&colInd,&colVal);
+   }
+#if 0
+   if ( matDim <= 4 )
+      for ( irow = 0; irow < matDim; irow++ ) 
+      {
+         for ( jcol = 0; jcol < matDim; jcol++ ) 
+            printf(" %e ", matrix[irow][jcol]);
+         printf("\n");
+      }
+#endif
+   ierr = HYPRE_LSI_MatrixInverse((double**) matrix,matDim,&matrix2);
+   if ( ierr ) retVal = 1.0e-10;
+   else
+   {
+      retVal = 0.0;
+      for ( irow = 0; irow < matDim; irow++ ) 
+      {
+         for ( jcol = 0; jcol < matDim; jcol++ ) 
+         {
+            value  = habs(matrix2[irow][jcol]);
+            retVal = ( value > retVal ) ? value : retVal;
+         }
+      }
+      retVal = 1.0 / retVal;
+      for ( irow = 0; irow < matDim; irow++ ) free(matrix2[irow]);
+      free( matrix2 );
+   }
+   for ( irow = 0; irow < matDim; irow++ ) free(matrix[irow]);
+   free( matrix );
+   delete [] localBlkInfo;
+   delete [] rowIndices;
+   delete [] localSlaveEqns;
+   delete [] localSlaveAuxs;
+   return retVal;
 }
 
 //***************************************************************************
@@ -2591,9 +2923,9 @@ int HYPRE_SlideReduction::findSlaveEqns2(int **couplings)
                      constrIndex = constrListAux2[colIndex];
                   if (slaveEqnList_[constrIndex-endRow+nConstraints-1] != -1)
                   { 
-                     if ( dabs(colVal[jcol]) > searchValue )
+                     if ( habs(colVal[jcol]) > searchValue )
                      {
-                        searchValue = dabs(colVal[jcol]);
+                        searchValue = habs(colVal[jcol]);
                         searchIndex = colInd[jcol];
                      }
                   }
@@ -2916,32 +3248,31 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
    HYPRE_IJMatrixGetObject(A21mat_, (void **) &A21_csr);
    hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) A21_csr);
 
-   if ( outputLevel_ >= 3 )
+   if ( outputLevel_ >= 4 )
    {
-      ncnt = 0;
-      MPI_Barrier(mpiComm_);
-      while ( ncnt < nprocs ) 
+      char fname[40];
+      sprintf(fname, "A21.%d", mypid);
+      FILE *fp = fopen(fname, "w");
+
+      if ( mypid == 0 ) 
       {
-         if ( mypid == ncnt ) 
-         {
-            printf("====================================================\n");
-            printf("%4d : Printing A21 matrix... \n", mypid);
-            fflush(stdout);
-            for (irow = A21StartRow;irow < A21StartRow+2*nConstraints;irow++) 
-            {
-               HYPRE_ParCSRMatrixGetRow(A21_csr,irow,&rowSize,&colInd,&colVal);
-               for ( jcol = 0; jcol < rowSize; jcol++ )
-                  if ( colVal[jcol] != 0.0 )
-                     printf("%6d  %6d  %25.16e \n",irow+1,colInd[jcol]+1,
-                            colVal[jcol]);
-               HYPRE_ParCSRMatrixRestoreRow(A21_csr, irow, &rowSize,
-                                            &colInd, &colVal);
-            }
-            printf("====================================================\n");
-         }
-         ncnt++;
-         MPI_Barrier(mpiComm_);
+         printf("====================================================\n");
+         printf("%4d : Printing A21 matrix... \n", mypid);
+         fflush(stdout);
       }
+      for (irow = A21StartRow;irow < A21StartRow+2*nConstraints;irow++) 
+      {
+         HYPRE_ParCSRMatrixGetRow(A21_csr,irow,&rowSize,&colInd,&colVal);
+         for ( jcol = 0; jcol < rowSize; jcol++ )
+            if ( colVal[jcol] != 0.0 )
+               fprintf(fp,"%6d  %6d  %25.16e \n",irow+1,colInd[jcol]+1,
+                       colVal[jcol]);
+         HYPRE_ParCSRMatrixRestoreRow(A21_csr, irow, &rowSize,
+                                      &colInd, &colVal);
+      }
+      if ( mypid == 0 ) 
+         printf("====================================================\n");
+      fclose(fp);
    }
 
    //******************************************************************
@@ -3561,34 +3892,31 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
    HYPRE_IJMatrixGetObject(invA22mat_, (void **) &invA22_csr);
    hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) invA22_csr);
 
-   if ( outputLevel_ >= 3 )
+   if ( outputLevel_ >= 4 )
    {
-      ncnt = 0;
-      MPI_Barrier(mpiComm_);
-      while ( ncnt < nprocs ) 
+      char fname[40];
+      sprintf(fname, "invA22.%d", mypid);
+      FILE *fp = fopen(fname, "w");
+
+      if ( mypid == ncnt ) 
       {
-         if ( mypid == ncnt ) 
-         {
-            printf("====================================================\n");
-            printf("%4d : Printing invA22 matrix... \n", mypid);
-            fflush(stdout);
-            for (irow = invA22StartRow; irow < invA22StartRow+invA22NRows;
-                 irow++) 
-            {
-               HYPRE_ParCSRMatrixGetRow(invA22_csr,irow,&rowSize,&colInd,
-                                        &colVal);
-               for ( jcol = 0; jcol < rowSize; jcol++ )
-                  if ( colVal[jcol] != 0.0 )
-                     printf("%6d  %6d  %25.16e \n",irow+1,colInd[jcol]+1,
-                            colVal[jcol]);
-               HYPRE_ParCSRMatrixRestoreRow(invA22_csr,irow,&rowSize,&colInd,
-                                            &colVal);
-            }
-            printf("====================================================\n");
-         }
-         MPI_Barrier(mpiComm_);
-         ncnt++;
+         printf("====================================================\n");
+         printf("%4d : Printing invA22 matrix... \n", mypid);
+         fflush(stdout);
       }
+      for (irow=invA22StartRow; irow < invA22StartRow+invA22NRows;irow++) 
+      {
+         HYPRE_ParCSRMatrixGetRow(invA22_csr,irow,&rowSize,&colInd,&colVal);
+         for ( jcol = 0; jcol < rowSize; jcol++ )
+            if ( colVal[jcol] != 0.0 )
+               fprintf(fp,"%6d  %6d  %25.16e \n",irow+1,colInd[jcol]+1,
+                      colVal[jcol]);
+         HYPRE_ParCSRMatrixRestoreRow(invA22_csr,irow,&rowSize,&colInd,
+                                      &colVal);
+      }
+      if ( mypid == ncnt ) 
+            printf("====================================================\n");
+      fclose(fp);
    }
 
    //******************************************************************
@@ -3610,31 +3938,31 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
       printf("%4d : buildReducedMatrix - Triple matrix product ends\n", 
              mypid);
 
-   if ( outputLevel_ >= 3 )
+   if ( outputLevel_ >= 4 )
    {
-      MPI_Barrier(mpiComm_);
-      ncnt = 0;
-      while ( ncnt < nprocs )
+      char fname[40];
+      sprintf(fname, "rap.%d", mypid);
+      FILE *fp = fopen(fname, "w");
+
+      if ( mypid == 0 )
       {
-         if ( mypid == ncnt )
-         {
-            printf("====================================================\n");
-            printf("%4d : Printing RAP matrix... \n", mypid);
-            fflush(stdout);
-            for ( irow = A21StartRow; irow < A21StartRow+A21NCols; irow++ ) 
-            {
-               HYPRE_ParCSRMatrixGetRow(RAP_csr,irow,&rowSize,&colInd,&colVal);
-               for ( jcol = 0; jcol < rowSize; jcol++ )
-                  if ( colVal[jcol] != 0.0 )
-                     printf("%6d  %6d  %25.16e \n",irow+1,colInd[jcol]+1,
-                            colVal[jcol]);
-               HYPRE_ParCSRMatrixRestoreRow(RAP_csr,irow,&rowSize,&colInd,
-                                            &colVal);
-            }
-         }
-         MPI_Barrier(mpiComm_);
-         ncnt++;
+         printf("====================================================\n");
+         printf("%4d : Printing RAP matrix... \n", mypid);
+         fflush(stdout);
       }
+      for ( irow = A21StartRow; irow < A21StartRow+A21NCols; irow++ ) 
+      {
+         HYPRE_ParCSRMatrixGetRow(RAP_csr,irow,&rowSize,&colInd,&colVal);
+         for ( jcol = 0; jcol < rowSize; jcol++ )
+            if ( colVal[jcol] != 0.0 )
+               printf("%6d  %6d  %25.16e \n",irow+1,colInd[jcol]+1,
+                      colVal[jcol]);
+         HYPRE_ParCSRMatrixRestoreRow(RAP_csr,irow,&rowSize,&colInd,
+                                      &colVal);
+      }
+      fclose(fp);
+      if ( mypid == 0 )
+         printf("====================================================\n");
    }
 
    //******************************************************************

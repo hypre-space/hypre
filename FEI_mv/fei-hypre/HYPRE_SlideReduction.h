@@ -61,6 +61,8 @@ class HYPRE_SlideReduction
                        { (*sol) = reducedXvec_; return 0; }
    int    getReducedAuxVector(HYPRE_IJVector *auxV ) 
                        { (*auxV) = reducedRvec_; return 0; }
+   int    getProcConstraintMap(int **map) 
+                       { (*map) = procNConstr_; return 0; }
 
  private:
    int    findConstraints();
@@ -72,6 +74,7 @@ class HYPRE_SlideReduction
 
    int    findSlaveEqns2(int **couplings);
    int    buildReducedMatrix2();
+   double matrixCondEst(int, int, int *, int);
 };
 
 #endif
