@@ -15,7 +15,7 @@
 #include "../utilities/timing.h"
 #include "../struct_matrix_vector/headers.h"
 
-/*#include "ZZZ_ls.h"*/
+#include "ZZZ_ls.h"
 
 #include "general.h"
 

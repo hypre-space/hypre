@@ -14,23 +14,25 @@ HEADERS =\
  general.h\
  headers.h\
  protos.h\
- smg.h
+ smg.h\
+ ZZZ_struct_smg.c
 
 FILES =\
-cyclic_reduction.c\
-general.c\
-smg2_setup_rap.c\
-smg3_setup_rap.c\
-smg.c\
-smg_intadd.c\
-smg_relax.c\
-smg_residual.c\
-smg_restrict.c\
-smg_setup.c\
-smg_setup_interp.c\
-smg_setup_rap.c\
-smg_setup_restrict.c\
-smg_solve.c
+ cyclic_reduction.c\
+ general.c\
+ smg2_setup_rap.c\
+ smg3_setup_rap.c\
+ smg.c\
+ smg_intadd.c\
+ smg_relax.c\
+ smg_residual.c\
+ smg_restrict.c\
+ smg_setup.c\
+ smg_setup_interp.c\
+ smg_setup_rap.c\
+ smg_setup_restrict.c\
+ smg_solve.c\
+ ZZZ_struct_smg.c
 
 OBJS = ${FILES:.c=.o}
 
