@@ -1,0 +1,369 @@
+
+      Info for Transitioning to hypre Version 1.5.0b
+      ----------------------------------------------
+
+We have re-drafted the IJ interface to be more consistent with other
+interfaces in hypre, easier to use, and clearer than previous drafts.
+In the process, various routines have been renamed, changed, removed
+or added.  This document is intended to aid in the transition from the
+previous iterface to the new one.
+
+The table below first lists the new names, followed by the old names,
+and marks in the last column which types of changes have occurred,
+where `P' stands for "change in parameters", `N' for "name change",
+and `-' for "no change".
+
+new                             old                                     change
+
+HYPRE_IJMatrixCreate            HYPRE_IJMatrixCreate                    P
+HYPRE_IJMatrixDestroy           HYPRE_IJMatrixDestroy                   -
+HYPRE_IJMatrixInitialize        HYPRE_IJMatrixInitialize                -
+HYPRE_IJMatrixSetValues         HYPRE_IJMatrixSetValues,                P
+                                HYPRE_IJMatrixSetBlockValues            P,N
+HYPRE_IJMatrixAddToValues       HYPRE_IJMatrixAddToValues,              P
+                                HYPRE_IJMatrixAddToBlockValues          P,N
+HYPRE_IJMatrixAssemble          HYPRE_IJMatrixAssemble                  -
+HYPRE_IJMatrixSetObjectType     HYPRE_IJMatrixSetLocalStorageType       N
+HYPRE_IJMatrixGetObject         HYPRE_IJMatrixGetLocalStorage           P,N
+HYPRE_IJMatrixSetRowSizes       HYPRE_IJMatrixSetRowSizes               -
+HYPRE_IJMatrixSetDiagOffdSizes  HYPRE_IJMatrixSetDiagRowSizes,          P,N
+                                HYPRE_IJMatrixSetOffDiagRowSizes        P,N
+HYPRE_IJMatrixGetValues
+HYPRE_IJMatrixPrint             -
+HYPRE_IJMatrixRead              -
+-                               HYPRE_IJMatrixSetLocalSize
+
+HYPRE_IJVectorCreate            HYPRE_IJVectorCreate                    P
+HYPRE_IJVectorDestroy           HYPRE_IJVectorDestroy                   -
+HYPRE_IJVectorInitialize        HYPRE_IJVectorInitialize                -
+HYPRE_IJVectorSetValues         HYPRE_IJVectorSetLocalComponents        P,N
+HYPRE_IJVectorAddToValues       HYPRE_IJVectorAddToLocalComponents      P,N
+HYPRE_IJVectorAssemble          HYPRE_IJVectorAssemble                  -
+HYPRE_IJVectorSetObjectType     HYPRE_IJVectorSetLocalStorageType       N
+HYPRE_IJVectorGetObject         HYPRE_IJVectorGetLocalStorage           P,N
+HYPRE_IJVectorGetValues         HYPRE_IJVectorGetLocalComponents,       P,N
+                                HYPRE_IJVectorGetLocalComponentsinBlock P,N
+HYPRE_IJVectorPrint             -
+HYPRE_IJVectorRead              -
+-                               HYPRE_IJVectorSetPartitioning
+-                               HYPRE_IJVectorSetLocalPartitioning
+
+
+1. Routines that have been renamed, but not changed otherwise:
+
+old: int HYPRE_IJVectorSetLocalStorageType (HYPRE_IJVector vector, int type);
+new: int HYPRE_IJVectorSetObjectType (HYPRE_IJVector vector, int type);
+old: int HYPRE_IJMatrixSetLocalStorageType (HYPRE_IJMatrix matrix, int type);
+new: int HYPRE_IJMatrixSetObjectType (HYPRE_IJMatrix matrix, int type);
+
+
+2. Routines with parameter changes:
+
+2.1. HYPRE_IJMatrixCreate
+
+old: 
+int HYPRE_IJMatrixCreate(MPI_Comm comm, HYPRE_IJMatrix *matrix,
+                         int global_m, int global_n)
+new:
+int HYPRE_IJMatrixCreate(MPI_Comm comm, 
+                         int ilower, int iupper,
+                         int jlower, int jupper,
+                         HYPRE_IJMatrix *matrix)
+
+This routine underwent a major change, since it now requires to input
+the range on each processor. It will then internally compute the
+partitioning and the global size both in I and J-direction.  This adds
+the possibility of using indexing that is based on another integer
+than 0.  Note, the partitionings need to be contiguous, i.e. iupper of
+proc i needs to equal ilower-1 of proc i+1 , etc.
+
+2.2 HYPRE_IJMatrixSetValues
+
+old
+int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix matrix, int n, int row,
+                            const int *cols, const double *values)
+and
+int HYPRE_IJMatrixSetBlockValues(HYPRE_IJMatrix matrix, int m, int n,
+                                 const int *rows, const int *cols, 
+                                 const double *values)
+
+new:
+int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix matrix, int nrows, int *ncols,
+                            const int *rows, const int *cols, 
+                            const double *values)
+
+nrows           number of rows to be changed
+ncols           number of elements to be set for each row
+rows            indices of rows in which values are to be set
+cols            column indices of the values to be set
+values          values to be set
+
+The new routine is more general than the old routine. Whereas the old
+HYPRE_IJMatrixSetValues allowed to only set elements in the same row
+and HYPRE_IJMatrixSetBlockValues to set a fixed number (n) of elements
+in several rows, the new HYPRE_IJMatrixSetValues allows to set a
+variable number of elements in various rows. It can also be used to
+overwrite existing elements in an already assembled matrix, it will
+return with an error message if one attempts to set a nonexisting
+value in an already assembled matrix.
+
+Examples for replacing old calls:
+
+HYPRE_IJMatrixSetValues(A, n, row, cols, values); 
+needs to be replaced by
+HYPRE_IJMatrixSetValues(A, 1, &n, &row, cols, values); 
+
+HYPRE_IJMatrixSetBlockValues(A, m, n, rows, cols, values; 
+needs to be replaced by
+for (i=0; i<m; i++)
+   ncols[i] = n;
+HYPRE_IJMatrixSetValues(A, m, ncols, rows, cols, values); 
+
+2.3 HYPRE_IJMatrixAddToValues
+
+old:
+int HYPRE_IJMatrixAddToValues(HYPRE_IJMatrix matrix, int n, int row,
+                              const int *cols, const double *values)
+and
+int HYPRE_IJMatrixAddToBlockValues(HYPRE_IJMatrix matrix, int m, int n,
+                                   const int *rows, const int *cols, 
+                                   const double *values)
+
+new:
+int HYPRE_IJMatrixAddToValues(HYPRE_IJMatrix matrix, int nrows, int *ncols,
+                              const int *rows, const int *cols, 
+                              const double *values)
+
+nrows           number of rows to be changed
+ncols           number of elements to be set for each row
+rows            indices of rows in which values are to be set
+cols            column indices of the values to be set
+values          values to be set
+
+The new routine is more general than the old routine. Whereas the old
+HYPRE_IJMatrixAddToValues allowed to only add to elements in the same
+row and HYPRE_IJMatrixAddToBlockValues to add to a fixed number (n) of
+elements in several rows, the new HYPRE_IJMatrixAddToValues allows to
+add to a variable number of elements in various rows. It can also be
+used to add to existing elements in an already assembled matrix, it
+will return with an error message if one attempts to add to a
+nonexisting value in an already assembled matrix.
+
+Examples for replacing old calls:
+
+HYPRE_IJMatrixAddToValues(A, n, row, cols, values); 
+needs to be replaced by
+HYPRE_IJMatrixAddToValues(A, 1, &n, &row, cols, values); 
+
+HYPRE_IJMatrixAddToBlockValues(A, m, n, rows, cols, values); 
+needs to be replaced by
+for (i=0; i<m; i++)
+   ncols[i] = n;
+HYPRE_IJMatrixAddToValues(A, m, ncols, rows, cols, values); 
+
+2.4 HYPRE_IJMatrixGetObject
+
+old: 
+void *HYPRE_IJMatrixGetLocalStorage(HYPRE_IJMatrix matrix)
+
+new:
+int HYPRE_IJMatrixGetObject(HYPRE_IJMatrix matrix, void **object)
+
+Example for replacing the old call:
+
+A = HYPRE_IJMatrixGetLocalStorage(matrix);
+needs to be replaced by
+HYPRE_IJMatrixGetObject(matrix, (void **) &A);
+
+2.5 HYPRE_IJMatrixGetValues
+
+new:
+int HYPRE_IJMatrixGetValues(HYPRE_IJMatrix matrix, int nrows, int *ncols,
+                            int *rows, int *cols, double *values)
+
+nrows           number of rows to be fetched
+ncols           number of elements to be fetched for each row
+rows            indices of rows of values to be fetched
+cols            column indices of the values to be fetched
+values          values to be fetched
+
+2.6 HYPRE_IJMatrixSetDiagOffdSizes
+
+old:
+int HYPRE_IJMatrixSetDiagRowSizes(HYPRE_IJMatrix matrix, const int *diag_sizes)
+int HYPRE_IJMatrixSetOffDiagRowSizes(HYPRE_IJMatrix matrix, 
+                                     const int *offdiag_sizes)
+
+new:
+int HYPRE_IJMatrixSetDiagOffdSizes(HYPRE_IJMatrix matrix,
+                                   const int *diag_sizes,
+                                   const int *offdiag_sizes)       
+
+matrix          matrix to be generated
+diag_sizes      contains the exact number of elements in each row of the 
+                diagonal part of the matrix (local connections)
+offdiag_sizes   contains the exact number of elements in each row of the 
+                offdiagonal part of the matrix (i.e. connections to elements
+                outside the processor)
+
+The new call combines the previous two calls.
+
+2.7 HYPRE_IJMatrixPrint
+
+new:
+int HYPRE_IJMatrixPrint (HYPRE_IJMatrix matrix, char *filename)
+
+matrix          matrix to be printed
+filename        name of file
+
+This routine prints a matrix into p files `<filename>.i'
+i = 0, 1, ..., p-1 , where p is the number of processors used.
+
+The files contain 
+
+global_m global_n
+nrows ncols_diag ncols_offdiag           / local information
+num_nonzeros_diag num_nonzeros_offdiag   /local information
+ilower[0]  jlower[0]                     / partitioning information      
+ilower[1]  jlower[1]
+.
+.
+ilower[p-1]  jlower[p-1]
+iupper[p-1]+1  jupper[p-1]+1
+i       j       value          / matrix value at global row i, global col j
+.
+.
+
+2.8 HYPRE_IJMatrixRead
+
+new:
+int HYPRE_IJMatrixRead (char *filename, MPI_Comm comm, int type, 
+                        HYPRE_IJMatrix *matrix)
+
+filename        name of file(s) to be read from
+comm            communicator
+type            object type of the matrix to be read
+matrix          to be read 
+
+This routine will read a matrix from file(s) generated by HYPRE_IJMatrixPrint.
+
+2.9. HYPRE_IJVectorCreate
+
+old: 
+int HYPRE_IJVectorCreate(MPI_Comm comm, HYPRE_IJVector *vector, int global_n)
+new:
+int HYPRE_IJVectorCreate(MPI_Comm comm, 
+                         int jlower, int jupper,
+                         HYPRE_IJVector *vector)
+
+This routine underwent a major change, since it now requires to input
+the range on each processor. It will then internally compute the
+partitioning and the global size.  This adds the possibility of using
+indexing that is based on another integer than 0.  Note the
+partitioning needs to be contiguous, i.e. iupper of proc i needs to
+equal ilower-1 of proc i+1 , etc.
+
+2.10 HYPRE_IJVectorSetValues
+
+old:
+int HYPRE_IJVectorSetLocalComponents(HYPRE_IJVector vector, int nvalues,
+                                     const int *indices,
+                                     const int *value_indices, 
+                                     const double *values)
+new:
+int HYPRE_IJVectorSetValues(HYPRE_IJVector vector, int nvalues,
+                            const int *indices, const double *values)
+
+nvalues         number of values
+indices         indices of the values to be set
+values          values to be set
+
+The new routine is simpler than the old routine. The fourth parameter,
+`value_indices', which allowed a permutation of the values, has been
+removed.
+
+2.11 HYPRE_IJVectorAddToValues
+
+old:
+int HYPRE_IJVectorAddToLocalComponents(HYPRE_IJVector vector, int nvalues,
+                                       const int *indices,
+                                       const int *value_indices, 
+                                       const double *values)
+new:
+int HYPRE_IJVectorAddToValues(HYPRE_IJVector vector, int nvalues,
+                              const int *indices, const double *values)
+
+nvalues         number of values
+indices         indices of the values to be set
+values          values to be set
+
+The new routine is simpler than the old routine. The fourth parameter,
+`value_indices', which allowed a permutation of the values, has been
+removed.
+
+2.12 HYPRE_IJVectorGetObject
+
+old: 
+void *HYPRE_IJVectorGetLocalStorage(HYPRE_IJVector vector)
+
+new:
+int HYPRE_IJVectorGetObject(HYPRE_IJVector vector, void **object)
+
+Example for replacing the old call:
+
+A = HYPRE_IJVectorGetLocalStorage(vector);
+needs to be replaced by
+HYPRE_IJVectorGetObject(vector, (void **) &A);
+
+2.13 HYPRE_IJVectorGetValues
+
+old:
+int HYPRE_IJVectorGetLocalComponentsInBlock(HYPRE_IJVector vector, 
+                                            int glob_index_start,
+                                            int glob_index_stop,
+                                            const int *value_indices,
+                                            double *values)
+new:
+int HYPRE_IJVectorGetValues(HYPRE_IJVector vector, int nvalues,
+                            int *indices, double *values)
+
+nvalues         number of values
+indices         global indices of the values to be set
+values          values to be fetched
+
+2.14 HYPRE_IJVectorPrint
+
+new:
+int HYPRE_IJVectorPrint (HYPRE_IJVector vector, char *filename)
+
+vector          vector to be printed
+filename        name of file
+
+This routine prints a vector into p files `<filename>.i'
+i = 0, 1, ..., p-1 , where p is the number of processors used.
+
+The files contain 
+
+nvalues         / local information
+jlower[0]       / partitioning information      
+jlower[1] 
+.
+.
+jlower[p-1]  
+jupper[p-1]+1 
+j       value   / vector value at global index j
+.
+.
+
+2.15 HYPRE_IJVectorRead
+
+new:
+int HYPRE_IJVectorRead (char *filename, MPI_Comm comm, int type, 
+                        HYPRE_IJVector *vector)
+
+filename        name of file(s) to be read from
+comm            communicator
+type            object type of the vector to be read
+vector          to be read 
+
+This routine will read a vector from file(s) generated by HYPRE_IJVectorPrint.
