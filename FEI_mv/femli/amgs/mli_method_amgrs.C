@@ -49,6 +49,7 @@ MLI_Method_AMGRS::MLI_Method_AMGRS( MPI_Comm comm ) : MLI_Method( comm )
    smootherWeights_  = new double[2];
    smootherWeights_[0] = smootherWeights_[1] = 0.667;
    smootherPrintRNorm_ = 0;
+   smootherFindOmega_  = 0;
    strcpy(coarseSolver_, "SGS");
    coarseSolverNSweeps_ = 20;
    coarseSolverWeights_ = new double[20];
@@ -167,6 +168,11 @@ int MLI_Method_AMGRS::setParams(char *in_name, int argc, char *argv[])
    else if ( !strcasecmp(param1, "setSmootherPrintRNorm" ))
    {
       smootherPrintRNorm_ = 1;
+      return 0;
+   }
+   else if ( !strcasecmp(param1, "setSmootherFindOmega" ))
+   {
+      smootherFindOmega_ = 1;
       return 0;
    }
    else if ( !strcasecmp(param1, "setCoarseSolver" ))
@@ -449,6 +455,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
            delete func_ptr;
 #endif
       }
+mli_cAmat->print("camat");
       mli->setSystemMatrix(level+1, mli_cAmat);
       elapsed_time = (MLI_Utils_WTime() - start_time);
       RAPTime_ += elapsed_time;
@@ -465,6 +472,11 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       if ( smootherPrintRNorm_ == 1 )
       {
          sprintf( param_string, "printRNorm" );
+         smoother_ptr->setParams(param_string, 0, NULL);
+      }
+      if ( smootherFindOmega_ == 1 )
+      {
+         sprintf( param_string, "findOmega" );
          smoother_ptr->setParams(param_string, 0, NULL);
       }
       smoother_ptr->setup(mli_Amat);
