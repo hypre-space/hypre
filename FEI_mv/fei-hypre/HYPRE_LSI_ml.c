@@ -990,7 +990,7 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
     double      *colVal, *values;
 #ifndef HYPRE_SEQUENTIAL
     int         sendProcCnt, *sendLeng, *sendProc, **sendList;
-    int         recvProcCnt, *recvLeng, *recvProc, *tempcnt, msgid;
+    int         recvProcCnt, *recvLeng, *recvProc, *tempCnt, msgid;
     MPI_Request *Request;
     MPI_Status  status;
 #endif
