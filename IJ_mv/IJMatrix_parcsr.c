@@ -587,9 +587,9 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
       	             return -1;
       	          }
                }
+               indx++;
             }
          }
-         indx++;
       }
    }
    else
@@ -938,9 +938,9 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
       	             return -1;
       	          }
                }
+            indx++;
             }
          }
-         indx++;
       }
    }
    else
