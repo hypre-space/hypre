@@ -2744,13 +2744,13 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRPCGSetTol(HYSolver_, tolerance_);
           HYPRE_ParCSRPCGSetRelChange(HYSolver_, 0);
           HYPRE_ParCSRPCGSetTwoNorm(HYSolver_, 1);
-          ptime  = MPI_Wtime();
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
           {
              printf("***************************************************\n");
              HYPRE_ParCSRPCGSetLogging(HYSolver_, 1);
           }
           HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
+          ptime  = MPI_Wtime();
           HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
           HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &num_iterations);
           HYPRE_ParVectorCopy( b_csr, r_csr );
