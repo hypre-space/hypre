@@ -16,6 +16,8 @@ VPATH = @srcdir@
 
 CC = @CC@
 
+M4 = m4
+
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 COPT= @COPT@
 CDEBUG = @CDEBUG@
@@ -129,6 +131,9 @@ libHYPRE_mv.a: ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
+
+box_pthreads.h: box_pthreads.m4 pthreads_c_definitions.m4
+	$M4 -DTHREADED=1 box_pthreads.m4 > box_pthreads.h
 
 docs: docs_html docs_tex
 
