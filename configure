@@ -8849,6 +8849,7 @@ subdirs="$config_babel_runtime"
  distributed_ls/ParaSails\
  distributed_matrix\
  docs\
+ FEI_mv\
  FEI_mv/ARPACK/SUPLU\
  FEI_mv/ARPACK/ARPACK\
  FEI_mv/SuperLU\
