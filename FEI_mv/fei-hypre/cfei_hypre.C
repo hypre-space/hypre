@@ -1,5 +1,4 @@
 #include <string.h>
-#include <iostream.h>
 #include <stdlib.h>
 
 #include "HYPRE.h"
