@@ -64,11 +64,10 @@ int
 hypre_BoxBoundaryNT( hypre_Box *box, hypre_BoxArray *neighbor_boxes,
                     hypre_BoxArray *boundary, int* thickness )
 {
-   int i, size;
+   int i;
    int numexp[6];
    int ierr = 0;
    hypre_Box *boxe = hypre_BoxDuplicate( box );
-   hypre_Box *boxi;
    int thick = 1;
    for ( i=0; i<6; ++i ) {
       numexp[i] = -thickness[i];
@@ -106,7 +105,6 @@ hypre_BoxBoundaryDNT( hypre_Box *box, hypre_BoxArray *neighbor_boxes,
    int numexp[6];
    int ierr = 0;
    hypre_Box *boxe = hypre_BoxDuplicate( box );
-   hypre_Box *boxi;
    for ( i=0; i<6; ++i ) numexp[i] = 0;
    numexp[ds] = -thick;
 
