@@ -165,7 +165,6 @@ function CheckPath
 function PsubCmdStub
 { # initialize the common part of the " PsubCmd" string, ulgy global vars!
   # global "RunName" is assumed to be predefined
-  Minutes=45
   CalcNodes "$@"
   NumNodes=$?
   CalcProcs "$@"
@@ -174,7 +173,7 @@ function PsubCmdStub
   HOST=${HOST%%.*}              # remove possible ".llnl.gov"
   case $HOST in
     fros*) PsubCmd="psub -c frost,pbatch -b a_casc -nettype css0 -r $RunName"
-      PsubCmd="$PsubCmd -tW $Minutes -tM $Minutes -ln $NumNodes -g $NumProcs"
+      PsubCmd="$PsubCmd -ln $NumNodes -g $NumProcs"
       ;;
     blue*) PsubCmd="psub -c blue,pbatch -b a_casc -r $RunName"
       PsubCmd="$PsubCmd -ln $NumNodes -g $NumProcs"
@@ -216,15 +215,16 @@ function ExecuteJobs
         if (( DebugMode > 0 )) ; then print "Batch line" ; fi
         ;;
       \#End*|\#end*|\#END*) BatchFlag=0
-        if (( DebugMode > 0 )) ; then print "End line" ; fi
-        cat >> $BatchFile <<- EOF
-		touch $BatchFile.\$PSUB_JOBID.done
-		EOF
+        if (( DebugMode > 0 )) ; then print "Submit job" ; fi
         chmod +x $BatchFile
         PsubCmd="$PsubCmd -o $OutFile -e $ErrFile $BatchFile"
-        CmdReply=$($PsubCmd)
+        if (( NoRun == 0 )) ; then CmdReply=$($PsubCmd) ; fi
         PrevPid=$(print $CmdReply | cut -d \  -f 2)
         if (( DebugMode > 0 )) ; then print "PsubCmd=$PsubCmd $PrevPid" ; fi
+        while [[ $(pstat | grep $PrevPid) != "" ]]
+        do sleep $JobCheckInterval      # global, see runtest.sh
+        done
+        if (( DebugMode > 0 )) ; then print "Job finished $(date)" ; fi
         BatchFile=""
         ;;
       *mpirun*)
@@ -257,16 +257,19 @@ function ExecuteJobs
             if (( DebugMode > 0 )) ; then print "RunName=$RunName BatchFile=$BatchFile" ; fi
             cat > $BatchFile <<- EOF 
 		#!/bin/ksh
-		cd \$PSUB_WORKDIR
+		cd $(pwd)
 		${RunString}
-		touch $BatchFile.\$PSUB_JOBID.done
 		EOF
             chmod +x $BatchFile
             PsubCmdStub ${RunCmd}
             PsubCmd="$PsubCmd -o $OutFile -e $ErrFile $BatchFile"
-            CmdReply=$($PsubCmd)
+            if (( NoRun == 0 )) ; then CmdReply=$($PsubCmd) ; fi
             PrevPid=$(print $CmdReply | cut -d \  -f 2)
             if (( DebugMode > 0 )) ; then print "$PsubCmd $PrevPid" ; fi
+            while [[ $(pstat | grep $PrevPid) != "" ]]
+            do sleep $JobCheckInterval  # global, see runtest.sh
+            done
+            if (( DebugMode > 0 )) ; then print "Job finished $(date)" ; fi
           else                          # BatchFlag set
             if (( DebugMode > 0 )) ; then print "RunName=$RunName BatchFile=$BatchFile" ; fi
 ###         if [[ $BatchFile == "" ]]   # OSF1 doesn't support ksh93 convension
@@ -275,7 +278,7 @@ function ExecuteJobs
               BatchCount=BatchCount+1
               cat > $BatchFile <<- EOF
 		#!/bin/ksh
-		cd \$PSUB_WORKDIR
+		cd $(pwd)
 		${RunString}
 		EOF
             else
@@ -309,98 +312,10 @@ function ExecuteTest
   if (( DebugMode > 0 )) ; then print "In function ExecuteTest" ; fi
   WorkingDir=$1
   InputFile=$2
-  integer PrevPid=0
-  typeset -fx CalcNodes CalcProcs PsubCmdStub
-  typeset -L15 RunName
-  integer BatchJobs                     # number of $InputFile.batch.* files
-  integer BatchDone                     # number of $InputFile.batch.*.done
-  integer JobsDone=0
-  integer LoopCount=0
-  integer LoopMax=0
   SavePWD=$(pwd)
   cd $WorkingDir
-  if (( BatchMode == 0 ))
-  then
-    if (( DebugMode > 0 )) ; then print "./$InputFile.sh  $InputFile.err " ; fi
-    ./$InputFile.sh > $InputFile.err 2>&1
-  else
-    ((LoopMax=GiveUpOnJob * 3600 / JobCheckInterval))
-    while { (( JobsDone <= 0 )) && ((LoopCount <= LoopMax)) }
-    do BatchJobs=$(ls $InputFile.batch.+([0-9]) | wc -w)
-      BatchDone=$(ls $InputFile.batch.*.done | wc -w)
-      if (( BatchDone >= BatchJobs ))
-      then BatchFile=$InputFile.batch
-        OutFile=$InputFile.out
-        ErrFile=$InputFile.err
-        LogFile=$InputFile.log
-        sleep 10                        # give psub chance to cleanup
-        for i in $InputFile.batch.+([0-9])
-        do
-          TestOutFile=$(echo $i | sed -e 's/\.batch\./.out./')
-          if [[ ! -f $TestOutFile ]]
-          then
-            cat >> $LogFile <<- EOF
-		$TestOutFile does not exist. No output was generated from $i.
-		EOF
-          fi
-          if [[ ! -s $TestOutFile ]]
-          then
-            cat >> $LogFile <<- EOF
-		$TestOutFile has no data. No output was generated from $i.
-		EOF
-          fi
-          TestErrFile=$(echo $i | sed -e 's/\.batch\./.err./')
-          if [[ -f $TestErrFile ]] && [[ -s $TestErrFile ]]
-          then
-            cat $TestErrFile >> $ErrFile
-          fi
-        done
-        cat > $BatchFile <<- EOF
-		#!/bin/ksh
-		cd \$PSUB_WORKDIR
-		EOF
-        exec 3>> $BatchFile             # open *.sh.batch for output 
-        exec 4< $InputFile.sh           # open *.sh file for reading
-        while read -u4 InputLine
-        do
-          if (( DebugMode > 0 )) ; then print $InputLine ; fi
-###       if [[ $InputLine == *#* ]]    # oops, ksh93 syntax
-          if [[ $InputLine = *#* ]]
-          then :
-            if (( DebugMode > 0 )) ; then print "# line" ; fi
-###       elif [[ $InputLine == "" ]] || [[ $InputLine == "\n" ]]
-          elif [[ $InputLine = "" ]] || [[ $InputLine = "\n" ]]
-          then :
-            if (( DebugMode > 0 )) ; then print "Blank line" ; fi
-          else      
-            print -u3 $InputLine
-          fi
-        done
-        exec 3>&-                       # close *.sh.batch output stream 
-        exec 4<&-                       # close *.sh input stream 
-        JobsDone=1
-      else
-        if (( DebugMode > 0 )) ; then print "ExecuteTest sleeping, execution not finished" ; fi
-        sleep $JobCheckInterval         # global, see dotest.sh
-      fi
-      ((LoopCount=LoopCount + 1))
-    done 
-    if [[ -f $BatchFile ]] && [[ -r $BatchFile ]]
-    then
-      chmod +x $BatchFile
-      RunName=$InputFile
-      PsubCmdStub "-np" "1"
-      PsubCmd="$PsubCmd -o $OutFile -e $ErrFile $BatchFile"
-      if (( DebugMode > 0 )) ; then print   "CmdReply=$PsubCmd" ; fi
-      CmdReply=$($PsubCmd)
-      PrevPid=$(echo $CmdReply | cut -d \  -f 2)
-    else
-      cat > $ErrFile <<- EOF
-		Job was queued more than $GiveUpOnJob hours so giving up
-		Execution test not been run.
-		EOF
-    fi
-  fi
+  if (( DebugMode > 0 )) ; then print "./$InputFile.sh  $InputFile.err " ; fi
+  ./$InputFile.sh > $InputFile.err 2>&1
   cd $SavePWD
 }
 function PostProcess
