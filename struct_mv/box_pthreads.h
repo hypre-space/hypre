@@ -51,7 +51,7 @@ Arguments:  $1 -- the name of an array of flags
 
 Usage: PLOOP(increment_variable, loop_initial_value, loop_stopping value,
              index_array_name, array_index, thread_counter, mutex_object,
-             cond_object loop_body)
+             cond_object, loop_body)
 
 NUM_THREADS must either be #defined as the number of threads being used or
 be an integer variable containing the number of threads.
@@ -60,11 +60,10 @@ Arguments:  $1 -- the name of the increment variable for the loop
             $2 -- the initial value for the increment variable
             $3 -- the stopping value for the increment variable
                   (loop will not be entered when increment reaches this value)
-            $4 -- the name of an array of indices
+            $4 -- the name of an -1
             $6 -- an integer counter to count each thread as it passes
             $7 -- a pthread_mutex_t object (must be initialized
                   externally)
-            $8 -- a pthread_cond_t object (must be initialized externally)
             $9 -- The body of the loop (enclose between  and  )
 */
 
