@@ -85,9 +85,11 @@ fi
 # Set configurations
 #=============================================================================
 
-if [ -f "config.$AMG_ARCH" ]
+if [ -f "config.defaults" ]
 then
    . config.defaults
+else
+   echo "Error: can't find config.defaults file."
 fi
 
 if [ -f "config.$AMG_ARCH" ]
