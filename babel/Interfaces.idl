@@ -19,14 +19,14 @@ package Hypre {
    
 // ---------------- Interfaces ----------------
 
-  interface Vector {
-     int Clear ();                          // y <- 0 (where y=self)
-     int Copy (in Vector x);                // y <- x 
-     int Clone (out Vector x);              // create an x compatible with y
-     int Scale (in double a);               // y <- a*y 
-     int Dot (in Vector x, out double d);   // d <- (y,x)
-     int Axpy (in double a, in Vector x);   // y <- a*x + y
-  };
+   interface Vector {
+      int Clear ();                          // y <- 0 (where y=self)
+      int Copy (in Vector x);                // y <- x 
+      int Clone (out Vector x);              // create an x compatible with y
+      int Scale (in double a);               // y <- a*y 
+      int Dot (in Vector x, out double d);   // d <- (y,x)
+      int Axpy (in double a, in Vector x);   // y <- a*x + y
+   };
 
    interface Operator {
       int Apply( in Vector x, out Vector b );
@@ -57,9 +57,61 @@ package Hypre {
       // it would be better to encode the "values" data structure in a more
       // natural form.
       int New( in StructuredGrid grid, in StructStencil stencil,
-                in int symmetric, in array<int,1> num_ghost );
+               in int symmetric, in array<int,1> num_ghost );
       int Setup();
       LinearOperator GetConstructedObject();
+   };
+
+   interface IJMatrixBuilder {
+      int New( in MPI_Com com, in int global_m, in int global_n );
+      int SetLocalSize( in int local_m, in int local_n );
+      int SetRowSizes( in array<int,1> sizes );
+      int SetDiagRowSizes( in array<int,1> sizes );
+      int SetOffDiagRowSizes( in array<int,1> sizes );
+      int InsertRow( in int n, 
+                     in int row, 
+                     in array<int,1> cols, 
+                     in array<double,1> values );
+      int AddToRow ( in int n, 
+                     in int row, 
+                     in array<int,1> cols, 
+                     in array<double,1> values );
+      int InsertBlock( in int m, 
+                       in int n, 
+                       in array<int,1> rows, 
+                       in array<int,1> cols, 
+                       in array<double,1> values );
+      int AddtoBlock ( in int m, 
+                       in int n, 
+                       in array<int,1> rows, 
+                       in array<int,1> cols, 
+                       in array<double,1> values );
+      int GetRowPartitioning( out array<int,1> partitioning );
+      int Setup();
+      LinearOperator GetConstructedObject();
+   };
+
+   interface IJVectorBuilder {
+      int New( in MPI_Com com, in int global_n );
+      int SetPartitioning( in array<int,1> partitioning );
+      int SetLocalComponents( in int num_values,
+                              in array<int,1> glob_vec_indices,
+ 			      in array<int,1> value_indices,
+                              in array<double,1> values );
+      int AddtoLocalComponents( in int num_values,
+                                in array<int,1> glob_vec_indices,
+ 			        in array<int,1> value_indices,
+                                in array<double,1> values );
+      int SetLocalComponentsInBlock( in int glob_vec_index_start,
+                                     in int glob_vec_index_stop,
+                                     in array<int,1> value_indices,
+                                     in array<double,1> values );
+      int AddToLocalComponentsInBlock( in int glob_vec_index_start,
+                                       in int glob_vec_index_stop,
+                                       in array<int,1> value_indices,
+                                       in array<double,1> values );
+      int Setup();
+      Vector GetConstructedObject();
    };
 
    interface StructuredGridBuilder 
@@ -111,7 +163,7 @@ package Hypre {
       int SetIntParameter( in string name, in int value );
       int New( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
-      PreconditionedSolver GetConstructedObject();    
+      Solver GetConstructedObject();    
 
       int SetPreconditioner( in Solver precond );
    };
@@ -166,7 +218,7 @@ package Hypre {
 
    class Box {
       int New( in array<int,1> lower, in array<int,1> upper,
-                in int dimension );
+               in int dimension );
       static Box Constructor( in array<int,1> lower, in array<int,1> upper,
                               in int dimension );
       int Setup();
@@ -209,7 +261,7 @@ package Hypre {
       int Apply( in StructVector b, out StructVector x );
       LinearOperator GetConstructedObject();
       int New( in StructuredGrid grid, in StructStencil stencil,
-                in int symmetric, in array<int,1> num_ghost  );
+               in int symmetric, in array<int,1> num_ghost  );
       static StructMatrixBldr Constructor
       ( in StructuredGrid grid, in StructStencil stencil, in int symmetric,
         in array<int,1> num_ghost );
@@ -236,6 +288,74 @@ package Hypre {
    };
    
          
+   class ParCSRMatrixBuilder implements IJMatrixBuilder {
+      static ParCSRMatrixBuilder Constructor (in MPI_Com com, 
+                                              in int global_m,                                                                in int global_n);
+      int New( in MPI_Com com, in int global_m, in int global_n );
+      int SetLocalSize( in int local_m, in int local_n );
+      int SetRowSizes( in array<int,1> sizes );
+      int SetDiagRowSizes( in array<int,1> sizes );
+      int SetOffDiagRowSizes( in array<int,1> sizes );
+      int InsertRow( in int n, 
+                     in int row, 
+                     in array<int,1> cols, 
+                     in array<double,1> values );
+      int  AddToRow( in int n, 
+                     in int row, 
+                     in array<int,1> cols, 
+                     in array<double,1> values );
+      int InsertBlock( in int m, 
+                       in int n, 
+                       in array<int,1> rows, 
+                       in array<int,1> cols, 
+                       in array<double,1> values );
+      int  AddtoBlock( in int m, 
+                       in int n, 
+                       in array<int,1> rows, 
+                       in array<int,1> cols, 
+                       in array<double,1> values );
+      int GetRowPartitioning( out array<int,1> partitioning );
+      int Setup();
+      LinearOperator GetConstructedObject();
+   };
+
+   class ParCSRVectorBuilder implements IJVectorBuilder {
+      static ParCSRVectorBuilder Constructor( in MPI_Com com, in int global_n );
+      int New( in MPI_Com com, in int global_n );
+      int SetPartitioning( in array<int,1> partitioning );
+      int SetLocalComponents( in int num_values,
+                              in array<int,1> glob_vec_indices,
+ 			      in array<int,1> value_indices,
+                              in array<double,1> values );
+      int AddtoLocalComponents( in int num_values,
+                                in array<int,1> glob_vec_indices,
+ 			        in array<int,1> value_indices,
+                                in array<double,1> values );
+      int SetLocalComponentsInBlock( in int glob_vec_index_start,
+                                     in int glob_vec_index_stop,
+                                     in array<int,1> value_indices,
+                                     in array<double,1> values );
+      int AddToLocalComponentsInBlock( in int glob_vec_index_start,
+                                       in int glob_vec_index_stop,
+                                       in array<int,1> value_indices,
+                                       in array<double,1> values );
+      int Setup();
+      Vector GetConstructedObject();
+   };
+
+   class ParCSRMatrix implements LinearOperator { 
+      int Apply( in Vector x, out Vector y );
+   };
+
+   class ParCSRVector implements Vector { 
+      int Clear();                    
+      int Copy( in Vector x );         
+      int Clone( out Vector x );       
+      int Scale( in double a );        
+      int Dot( in Vector x, out double d );
+      int Axpy( in double a, in Vector x );
+   };
+
    // ---------------- Solver and related classes
 
 
@@ -291,12 +411,60 @@ package Hypre {
       int New( in MPI_Com comm );
       static PCG Constructor( in MPI_Com comm );
       int Setup( in LinearOperator A, in Vector b, in Vector x );
-      PreconditionedSolver GetConstructedObject();    
+      Solver GetConstructedObject();    
 
       int SetPreconditioner( in Solver precond );
 
    };
 
+   class GMRES implements PreconditionedSolverBuilder, PreconditionedSolver { 
+      double GetDoubleParameter( in string name );
+      int GetIntParameter( in string name );
+      int SetDoubleParameter( in string name, in double value );
+      int SetIntParameter( in string name, in int value );
+      int SetPreconditioner( in Solver precond );
+      int New( in MPI_Com comm );
+      static GMRES Constructor ( in MPI_Com comm );
+      int Setup( in LinearOperator A, in Vector b, in Vector x );
+      Solver GetConstructedObject();    
+
+      int Apply( in Vector b, out Vector x );
+      LinearOperator GetSystemOperator();
+      Vector GetResidual();
+      int GetConvergenceInfo( in string name, out double value );
+   };
+
+   class ParAMG implements SolverBuilder, Solver { 
+      double GetDoubleParameter( in string name );
+      int GetIntParameter( in string name );
+      int SetDoubleParameter( in string name, in double value );
+      int SetIntParameter( in string name, in int value );
+      int New( in MPI_Com comm );
+      static ParAMG Constructor( in MPI_Com comm );
+      int Setup( in LinearOperator A, in Vector b, in Vector x );
+      Solver GetConstructedObject();    
+
+      int Apply( in Vector b, out Vector x );
+      LinearOperator GetSystemOperator();
+      Vector GetResidual();
+      int GetConvergenceInfo( in string name, out double value );
+   };
+
+   class Pilut implements SolverBuilder, Solver { 
+      double GetDoubleParameter( in string name );
+      int GetIntParameter( in string name );
+      int SetDoubleParameter( in string name, in double value );
+      int SetIntParameter( in string name, in int value );
+      int New( in MPI_Com comm );
+      static Pilut Constructor( in MPI_Com comm );
+      int Setup( in LinearOperator A, in Vector b, in Vector x );
+      Solver GetConstructedObject();    
+
+      int Apply( in Vector b, out Vector x );
+      LinearOperator GetSystemOperator();
+      Vector GetResidual();
+      int GetConvergenceInfo( in string name, out double value );
+   };
 
 
 }
