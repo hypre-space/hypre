@@ -34,6 +34,8 @@ typedef void *HYPRE_StructGrid;
  * Constants
  *--------------------------------------------------------------------------*/
 
+#define HYPRE_ISIS_MATRIX 11
+
 #define HYPRE_PETSC_MATRIX 12
 #define HYPRE_PETSC_VECTOR 33
 

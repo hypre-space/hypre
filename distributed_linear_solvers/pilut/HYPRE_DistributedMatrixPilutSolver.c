@@ -323,7 +323,7 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
  *--------------------------------------------------------------------------*/
 
 int HYPRE_DistributedMatrixPilutSolverSolve( HYPRE_DistributedMatrixPilutSolver in_ptr,
-                                           double *x, double *b )
+                                           double *x, const double *b )
 {
 
    hypre_DistributedMatrixPilutSolver *solver = 
