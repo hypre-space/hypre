@@ -81,7 +81,6 @@ echo "$HYPRE_CHECKOUT_EMAIL" > $0.checkout.err.email
 
 while [ "$*" != "" ]
 do
-
   case $1 in
     -dec)
         HYPRE_ARCH="dec"
@@ -90,6 +89,7 @@ do
         HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -b 2 -cf -o 1"
 	perform_test
+	CASC_BUILD_OPT=2
         shift;;
     -blue)
         HYPRE_ARCH="blue"
@@ -98,6 +98,7 @@ do
         HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -b 2 -cf -o 1"
 	perform_test
+	CASC_BUILD_OPT=2
         shift;;
     -red)
         HYPRE_ARCH="red"
@@ -106,24 +107,28 @@ do
         HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -b 2 -cf -o 1"
 	perform_test
+	CASC_BUILD_OPT=2
         shift;;
     -casc)
-        HYPRE_ARCH="casc"
-        HYPRE_COMPILE_MACHINE="perrin"
-        HYPRE_RUN_MACHINE="perrin"
-        HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
-	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -n"
-	./autotest_test $HYPRE_MACHINE_COMMANDS
-        shift;;
+	CASC_BUILD_OPT=2
     -purify)
         HYPRE_ARCH="casc"
         HYPRE_COMPILE_MACHINE="perrin"
         HYPRE_RUN_MACHINE="perrin"
         HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
-	HYPRE_MACHINE_COMMANDS="-m -q 2 -a 2 -dcxfy -t 1 -n"
+	HYPRE_MACHINE_COMMANDS="+m -q 2"
 	./autotest_test $HYPRE_MACHINE_COMMANDS
+	CASC_BUILD_OPT=1
         shift;;
   esac
+
+  HYPRE_ARCH="casc"
+  HYPRE_COMPILE_MACHINE="perrin"
+  HYPRE_RUN_MACHINE="perrin"
+  HYPRE_REMOTE_DIR="/home/casc/software/hypre/autotest"
+  HYPRE_MACHINE_COMMANDS="-m -a $CASC_BUILD_OPT -dcxfy -t 1 -n"
+  ./autotest_test $HYPRE_MACHINE_COMMANDS
+  shift;;
 
 done
 
