@@ -71,6 +71,7 @@ if [ $# -gt 0 ]
 then
   VersionId=$1
   RtagVersionId="`echo ${VersionId} | tr '.' '-'`"
+  RtagVersionId="V$RtagVersionID"
 else
   usage
   exit
