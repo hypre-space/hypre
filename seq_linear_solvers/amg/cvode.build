@@ -55,8 +55,8 @@ then
    mkdir -p $LIB_DIR
    mkdir -p $INCLUDE_DIR
     
-   cp -fp lib/libcvode.$AMG_ARCH.a $LIB_DIR/libcvode.a
-   cp -fp include/* $INCLUDE_DIR
+   cp -f lib/libcvode.$AMG_ARCH.a $LIB_DIR/libcvode.a
+   cp -f include/* $INCLUDE_DIR
 fi
 
 #=============================================================================
