@@ -848,7 +848,7 @@ int MLI_Utils_HyprePCGSolve( CMLI *cmli, HYPRE_Matrix A,
                              HYPRE_Vector b, HYPRE_Vector x )
 {
    int          ierr, num_iterations, max_iter=500;
-   double       tol=1.0e-6, norm;
+   double       tol=1.0e-6, norm, setup_time, solve_time;
    CMLI_Vector  *csol, *crhs;
    MPI_Comm     mpi_comm;
    HYPRE_Solver pcg_solver, pcg_precond;
@@ -868,8 +868,12 @@ int MLI_Utils_HyprePCGSolve( CMLI *cmli, HYPRE_Matrix A,
                        (HYPRE_PtrToSolverFcn) MLI_Utils_ParCSRMLISolve,
                        (HYPRE_PtrToSolverFcn) MLI_Utils_ParCSRMLISetup,
                        pcg_precond);
+   setup_time = MLI_Utils_WTime();
    HYPRE_PCGSetup(pcg_solver, A, b, x);
+   solve_time = MLI_Utils_WTime();
+   setup_time = solve_time - setup_time;
    HYPRE_PCGSolve(pcg_solver, A, b, x);
+   solve_time = MLI_Utils_WTime() - solve_time;
    HYPRE_PCGGetNumIterations(pcg_solver, &num_iterations);
    HYPRE_PCGGetFinalRelativeResidualNorm(pcg_solver, &norm);
    HYPRE_ParCSRPCGDestroy(pcg_solver);
@@ -877,6 +881,8 @@ int MLI_Utils_HyprePCGSolve( CMLI *cmli, HYPRE_Matrix A,
    printf("\tPCG convergence tolerance        = %e\n", tol);
    printf("\tPCG number of iterations         = %d\n", num_iterations);
    printf("\tPCG final relative residual norm = %e\n", norm);
+   printf("\tPCG setup time                   = %e seconds\n",setup_time);
+   printf("\tPCG solve time                   = %e seconds\n",solve_time);
    return 0;
 }
 
@@ -888,7 +894,7 @@ int MLI_Utils_HypreGMRESSolve( CMLI *cmli, HYPRE_Matrix A,
                              HYPRE_Vector b, HYPRE_Vector x )
 {
    int          ierr, num_iterations, max_iter=500;
-   double       tol=1.0e-6, norm;
+   double       tol=1.0e-6, norm, setup_time, solve_time;
    CMLI_Vector  *csol, *crhs;
    MPI_Comm     mpi_comm;
    HYPRE_Solver gmres_solver, gmres_precond;
@@ -907,8 +913,12 @@ int MLI_Utils_HypreGMRESSolve( CMLI *cmli, HYPRE_Matrix A,
                        (HYPRE_PtrToSolverFcn) MLI_Utils_ParCSRMLISolve,
                        (HYPRE_PtrToSolverFcn) MLI_Utils_ParCSRMLISetup,
                        gmres_precond);
+   setup_time = MLI_Utils_WTime();
    HYPRE_GMRESSetup(gmres_solver, A, b, x);
+   solve_time = MLI_Utils_WTime();
+   setup_time = solve_time - setup_time;
    HYPRE_GMRESSolve(gmres_solver, A, b, x);
+   solve_time = MLI_Utils_WTime() - solve_time;
    HYPRE_GMRESGetNumIterations(gmres_solver, &num_iterations);
    HYPRE_GMRESGetFinalRelativeResidualNorm(gmres_solver, &norm);
    HYPRE_ParCSRGMRESDestroy(gmres_solver);
@@ -916,6 +926,8 @@ int MLI_Utils_HypreGMRESSolve( CMLI *cmli, HYPRE_Matrix A,
    printf("\tGMRES convergence tolerance        = %e\n", tol);
    printf("\tGMRES number of iterations         = %d\n", num_iterations);
    printf("\tGMRES final relative residual norm = %e\n", norm);
+   printf("\tGMRES setup time                   = %e seconds\n",setup_time);
+   printf("\tGMRES solve time                   = %e seconds\n",solve_time);
    return 0;
 }
 
@@ -927,7 +939,7 @@ int MLI_Utils_HypreBiCGSTABSolve( CMLI *cmli, HYPRE_Matrix A,
                                   HYPRE_Vector b, HYPRE_Vector x )
 {
    int          ierr, num_iterations, max_iter=500;
-   double       tol=1.0e-6, norm;
+   double       tol=1.0e-6, norm, setup_time, solve_time;
    CMLI_Vector  *csol, *crhs;
    MPI_Comm     mpi_comm;
    HYPRE_Solver cgstab_solver, cgstab_precond;
@@ -946,8 +958,12 @@ int MLI_Utils_HypreBiCGSTABSolve( CMLI *cmli, HYPRE_Matrix A,
                        (HYPRE_PtrToSolverFcn) MLI_Utils_ParCSRMLISolve,
                        (HYPRE_PtrToSolverFcn) MLI_Utils_ParCSRMLISetup,
                        cgstab_precond);
+   setup_time = MLI_Utils_WTime();
    HYPRE_BiCGSTABSetup(cgstab_solver, A, b, x);
+   solve_time = MLI_Utils_WTime();
+   setup_time = solve_time - setup_time;
    HYPRE_BiCGSTABSolve(cgstab_solver, A, b, x);
+   solve_time = MLI_Utils_WTime() - solve_time;
    HYPRE_BiCGSTABGetNumIterations(cgstab_solver, &num_iterations);
    HYPRE_BiCGSTABGetFinalRelativeResidualNorm(cgstab_solver, &norm);
    HYPRE_BiCGSTABDestroy(cgstab_solver);
@@ -955,6 +971,8 @@ int MLI_Utils_HypreBiCGSTABSolve( CMLI *cmli, HYPRE_Matrix A,
    printf("\tBiCGSTAB convergence tolerance        = %e\n", tol);
    printf("\tBiCGSTAB number of iterations         = %d\n", num_iterations);
    printf("\tBiCGSTAB final relative residual norm = %e\n", norm);
+   printf("\tBiCGSTAB setup time                   = %e seconds\n",setup_time);
+   printf("\tBiCGSTAB solve time                   = %e seconds\n",solve_time);
    return 0;
 }
 
