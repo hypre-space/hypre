@@ -83,17 +83,6 @@ HYPRE_PCGSetTol( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_PCGSetMaxIter
- *--------------------------------------------------------------------------*/
-
-int
-HYPRE_PCGSetMaxIter( HYPRE_Solver solver,
-                     int                max_iter )
-{
-   return( hypre_PCGSetMaxIter( (void *) solver, max_iter ) );
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_PCGSetAbsoluteTolFactor
  *--------------------------------------------------------------------------*/
 
@@ -102,6 +91,28 @@ HYPRE_PCGSetAbsoluteTolFactor( HYPRE_Solver solver,
                                int       abstolf )
 {
    return( hypre_PCGSetAbsoluteTolFactor( (void *) solver, abstolf ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PCGSetConvergenceFactorTol
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_PCGSetConvergenceFactorTol( HYPRE_Solver solver,
+                                  double cf_tol )
+{
+   return hypre_PCGSetConvergenceFactorTol( (void *) solver,
+                                            cf_tol   );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PCGSetMaxIter
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_PCGSetMaxIter( HYPRE_Solver solver,
+                     int                max_iter )
+{
+   return( hypre_PCGSetMaxIter( (void *) solver, max_iter ) );
 }
 
 /*--------------------------------------------------------------------------
