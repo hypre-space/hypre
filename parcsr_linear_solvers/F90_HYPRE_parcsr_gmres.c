@@ -174,9 +174,9 @@ hypre_F90_IFACE(hypre_parcsrgmressetlogging)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrgmresgetnumiter)( long int *solver,
-                                              int      *num_iterations,
-                                              int      *ierr            )
+hypre_F90_IFACE(hypre_parcsrgmresgetnumiteratio)( long int *solver,
+                                                  int      *num_iterations,
+                                                  int      *ierr            )
 {
    *ierr = (int) ( HYPRE_ParCSRGMRESGetNumIterations(
                             (HYPRE_Solver) *solver,
@@ -188,9 +188,9 @@ hypre_F90_IFACE(hypre_parcsrgmresgetnumiter)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrgmresgetfinalrel)( long int *solver,
-                                               double   *norm,
-                                               int      *ierr    )
+hypre_F90_IFACE(hypre_parcsrgmresgetfinalrelati)( long int *solver,
+                                                  double   *norm,
+                                                  int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(
                             (HYPRE_Solver) *solver,

@@ -21,6 +21,7 @@ void hypre_F90_IFACE P((int hypre_paramgsetup ));
 void hypre_F90_IFACE P((int hypre_paramgsolve ));
 void hypre_F90_IFACE P((int hypre_paramgsolvet ));
 void hypre_F90_IFACE P((int hypre_paramgsetrestriction ));
+void hypre_F90_IFACE P((int hypre_paramgsetmaxlevels ));
 void hypre_F90_IFACE P((int hypre_paramgsetstrongthreshold ));
 void hypre_F90_IFACE P((int hypre_paramgsettruncfactor ));
 void hypre_F90_IFACE P((int hypre_paramgsetinterptype ));
@@ -47,8 +48,8 @@ void hypre_F90_IFACE P((int hypre_parcsrcgnrsettol ));
 void hypre_F90_IFACE P((int hypre_parcsrcgnrsetmaxiter ));
 void hypre_F90_IFACE P((int hypre_parcsrcgnrsetprecond ));
 void hypre_F90_IFACE P((int hypre_parcsrcgnrsetlogging ));
-void hypre_F90_IFACE P((int hypre_parcsrcgnrgetnumiter ));
-void hypre_F90_IFACE P((int hypre_parcsrcgnrgetfinalrel ));
+void hypre_F90_IFACE P((int hypre_parcsrcgnrgetnumiteration ));
+void hypre_F90_IFACE P((int hypre_parcsrcgnrgetfinalrelativ ));
 
 /* F90_HYPRE_parcsr_gmres.c */
 void hypre_F90_IFACE P((int hypre_parcsrgmresinitialize ));
@@ -60,8 +61,8 @@ void hypre_F90_IFACE P((int hypre_parcsrgmressettol ));
 void hypre_F90_IFACE P((int hypre_parcsrgmressetmaxiter ));
 void hypre_F90_IFACE P((int hypre_parcsrgmressetprecond ));
 void hypre_F90_IFACE P((int hypre_parcsrgmressetlogging ));
-void hypre_F90_IFACE P((int hypre_parcsrgmresgetnumiter ));
-void hypre_F90_IFACE P((int hypre_parcsrgmresgetfinalrel ));
+void hypre_F90_IFACE P((int hypre_parcsrgmresgetnumiteratio ));
+void hypre_F90_IFACE P((int hypre_parcsrgmresgetfinalrelati ));
 
 /* F90_HYPRE_parcsr_pcg.c
 void hypre_F90_IFACE P((int hypre_parcsrpcginitialize ));

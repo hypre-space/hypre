@@ -105,6 +105,19 @@ hypre_F90_IFACE(hypre_paramgsetrestriction)( long int *solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParAMGSetMaxLevels
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_paramgsetmaxlevels)( long int *solver,
+                                           int      *max_levels,
+                                           int      *ierr        )
+{
+   *ierr = (int) ( HYPRE_ParAMGSetMaxLevels( (HYPRE_Solver) *solver,
+                                             (int)          *max_levels ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParAMGSetStrongThreshold
  *--------------------------------------------------------------------------*/
 
