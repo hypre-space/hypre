@@ -1,8 +1,8 @@
-0 6 * * 0 cd /home/casc/software/hypre/autotest/; ./autotest -tc2k | tee autotest.cron.log
-0 1 * * 1 cd /home/casc/software/hypre/autotest/; ./autotest -sgi | tee autotest.cron.log
+0 6 * * 0 cd /home/casc/software/hypre/autotest/; ./autotest -tc2k -casc | tee autotest.cron.log
+0 1 * * 1 cd /home/casc/software/hypre/autotest/; ./autotest -sgi -casc | tee autotest.cron.log
 0 1 * * 2 cd /home/casc/software/hypre/autotest/; ./autotest -purify | tee autotest.cron.log
-0 1 * * 3 cd /home/casc/software/hypre/autotest/; ./autotest -blue | tee autotest.cron.log
-0 1 * * 4 cd /home/casc/software/hypre/autotest/; ./autotest -dec | tee autotest.cron.log
-0 1 * * 5 cd /home/casc/software/hypre/autotest/; ./autotest -tc | tee autotest.cron.log
-0 1 * * 6 cd /home/casc/software/hypre/autotest/; ./autotest -lx | tee autotest.cron.log
+0 1 * * 3 cd /home/casc/software/hypre/autotest/; ./autotest -blue -casc | tee autotest.cron.log
+0 1 * * 4 cd /home/casc/software/hypre/autotest/; ./autotest -dec -casc | tee autotest.cron.log
+0 1 * * 5 cd /home/casc/software/hypre/autotest/; ./autotest -tc -casc | tee autotest.cron.log
+0 1 * * 6 cd /home/casc/software/hypre/autotest/; ./autotest -lx -casc | tee autotest.cron.log
 0 12 * * * cd /home/casc/software/hypre/autotest/; ./autotest_check
