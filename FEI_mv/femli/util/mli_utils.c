@@ -164,7 +164,7 @@ int MLI_Utils_HypreMatrixFormJacobi(void *A, double alpha, void **J)
       {
          newColInd[icol] = colInd[icol];
 #if 0
-// Note : no diagonal scaling
+/* Note : no diagonal scaling */
 newColVal[icol] = - alpha * colVal[icol] / colVal[0];
 if ( colInd[icol] == rownum ) newColVal[icol] = 1.0 - alpha;
 #endif

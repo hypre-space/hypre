@@ -1423,8 +1423,8 @@ Metis arguments:
 n - number of nodes
 rp[], cval[]
 NULL, NULL,
-0   //no edge or vertex weights
-0  //use zero-based numbering
+0   /*no edge or vertex weights*/
+0  /*use zero-based numbering*/
 blocksIN,
 options[5] = 
   0 :: 0/1 use defauls; use uptions 1..4
