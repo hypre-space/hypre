@@ -43,6 +43,7 @@ HYPRE_SetStructStencilElement( HYPRE_StructStencil  stencil,
    int                   d;
  
    shape = hypre_StructStencilShape(new_stencil);
+   hypre_ClearIndex(shape[element_index]);
    for (d = 0; d < hypre_StructStencilDim(new_stencil); d++)
    {
       hypre_IndexD(shape[element_index], d) = offset[d];

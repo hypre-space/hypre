@@ -230,9 +230,11 @@ hypre_SetStructVectorValues( hypre_StructVector *vector,
 int 
 hypre_GetStructVectorValues( hypre_StructVector *vector,
                              hypre_Index         grid_index,
-                             double             *values     )
+                             double             *values_ptr )
 {
    int    ierr;
+
+   double              values;
 
    hypre_BoxArray     *boxes;
    hypre_Box          *box;
@@ -255,9 +257,11 @@ hypre_GetStructVectorValues( hypre_StructVector *vector,
              (hypre_IndexZ(grid_index) <= hypre_BoxIMaxZ(box))   )
          {
             vecp = hypre_StructVectorBoxDataValue(vector, i, grid_index);
-            *values = *vecp;
+            values = *vecp;
          }
       }
+
+   *values_ptr = values;
 
    return ierr;
 }
@@ -347,6 +351,105 @@ hypre_SetStructVectorBoxValues( hypre_StructVector *vector,
    }
  
    hypre_FreeBoxArray(box_array);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GetStructVectorBoxValues
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_GetStructVectorBoxValues( hypre_StructVector *vector,
+                                hypre_Box          *value_box,
+                                double            **values_ptr )
+{
+   int    ierr;
+
+   double             *values;
+
+   hypre_BoxArray     *grid_boxes;
+   hypre_Box          *grid_box;
+   hypre_BoxArray     *box_array;
+   hypre_Box          *box;
+
+   hypre_BoxArray     *data_space;
+   hypre_Box          *data_box;
+   hypre_IndexRef      data_start;
+   hypre_Index         data_stride;
+   int                 datai;
+   double             *datap;
+
+   hypre_Box          *dval_box;
+   hypre_Index         dval_start;
+   hypre_Index         dval_stride;
+   int                 dvali;
+
+   hypre_Index         loop_size;
+
+   int                 i;
+   int                 loopi, loopj, loopk;
+
+   /*-----------------------------------------------------------------------
+    * Allocate values array
+    *-----------------------------------------------------------------------*/
+
+   values = hypre_CTAlloc(double, hypre_BoxVolume(value_box));
+
+   /*-----------------------------------------------------------------------
+    * Set up `box_array' by intersecting `box' with the grid boxes
+    *-----------------------------------------------------------------------*/
+
+   box_array = hypre_NewBoxArray();
+   grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
+   hypre_ForBoxI(i, grid_boxes)
+      {
+         grid_box = hypre_BoxArrayBox(grid_boxes, i);
+         box = hypre_IntersectBoxes(value_box, grid_box);
+         hypre_AppendBox(box, box_array);
+      }
+
+   /*-----------------------------------------------------------------------
+    * Set the vector coefficients
+    *-----------------------------------------------------------------------*/
+
+   if (box_array)
+   {
+      data_space = hypre_StructVectorDataSpace(vector);
+      hypre_SetIndex(data_stride, 1, 1, 1);
+ 
+      dval_box = hypre_DuplicateBox(value_box);
+      hypre_SetIndex(dval_stride, 1, 1, 1);
+ 
+      hypre_ForBoxI(i, box_array)
+         {
+            box      = hypre_BoxArrayBox(box_array, i);
+            data_box = hypre_BoxArrayBox(data_space, i);
+ 
+            /* if there was an intersection */
+            if (box)
+            {
+               data_start = hypre_BoxIMin(box);
+               hypre_CopyIndex(data_start, dval_start);
+ 
+               datap = hypre_StructVectorBoxData(vector, i);
+ 
+               hypre_GetBoxSize(box, loop_size);
+               hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
+                              data_box, data_start, data_stride, datai,
+                              dval_box, dval_start, dval_stride, dvali,
+                              {
+                                 values[dvali] = datap[datai];
+                              });
+            }
+         }
+
+      hypre_FreeBox(dval_box);
+   }
+ 
+   hypre_FreeBoxArray(box_array);
+
+   *values_ptr = values;
 
    return ierr;
 }

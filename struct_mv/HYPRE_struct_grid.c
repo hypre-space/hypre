@@ -49,15 +49,12 @@ HYPRE_SetStructGridExtents( HYPRE_StructGrid  grid,
 
    int          d;
 
+   hypre_ClearIndex(new_ilower);
+   hypre_ClearIndex(new_iupper);
    for (d = 0; d < hypre_StructGridDim((hypre_StructGrid *) grid); d++)
    {
       hypre_IndexD(new_ilower, d) = ilower[d];
       hypre_IndexD(new_iupper, d) = iupper[d];
-   }
-   for (d = hypre_StructGridDim((hypre_StructGrid *) grid); d < 3; d++)
-   {
-      hypre_IndexD(new_ilower, d) = 0;
-      hypre_IndexD(new_iupper, d) = 0;
    }
 
    hypre_SetStructGridExtents( (hypre_StructGrid *) grid,

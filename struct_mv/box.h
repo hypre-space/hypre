@@ -79,6 +79,22 @@ typedef struct
 #define hypre_IndexZ(index)     hypre_IndexD(index, 2)
 
 /*--------------------------------------------------------------------------
+ * Member functions: hypre_Index
+ *--------------------------------------------------------------------------*/
+
+#define hypre_SetIndex(index, ix, iy, iz) \
+( hypre_IndexX(index) = ix,\
+  hypre_IndexY(index) = iy,\
+  hypre_IndexZ(index) = iz )
+
+#define hypre_ClearIndex(index)  hypre_SetIndex(index, 0, 0, 0)
+
+#define hypre_CopyIndex(index1, index2) \
+( hypre_IndexX(index2) = hypre_IndexX(index1),\
+  hypre_IndexY(index2) = hypre_IndexY(index1),\
+  hypre_IndexZ(index2) = hypre_IndexZ(index1) )
+
+/*--------------------------------------------------------------------------
  * Accessor macros: hypre_Box
  *--------------------------------------------------------------------------*/
 

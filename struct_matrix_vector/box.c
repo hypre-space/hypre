@@ -16,38 +16,6 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SetIndex
- *--------------------------------------------------------------------------*/
-
-int
-hypre_SetIndex( hypre_Index index,
-                int         ix,
-                int         iy,
-                int         iz    )
-{
-   hypre_IndexX(index) = ix;
-   hypre_IndexY(index) = iy;
-   hypre_IndexZ(index) = iz;
-
-   return 0;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_CopyIndex
- *--------------------------------------------------------------------------*/
-
-int
-hypre_CopyIndex( hypre_Index index1,
-                 hypre_Index index2 )
-{
-   hypre_IndexX(index2) = hypre_IndexX(index1);
-   hypre_IndexY(index2) = hypre_IndexY(index1);
-   hypre_IndexZ(index2) = hypre_IndexZ(index1);
-
-   return 0;
-}
-
-/*--------------------------------------------------------------------------
  * hypre_NewBox
  *--------------------------------------------------------------------------*/
 

@@ -33,16 +33,15 @@ HYPRE_StructVector HYPRE_NewStructVector P((MPI_Comm *comm , HYPRE_StructGrid gr
 int HYPRE_FreeStructVector P((HYPRE_StructVector struct_vector ));
 int HYPRE_InitializeStructVector P((HYPRE_StructVector vector ));
 int HYPRE_SetStructVectorValues P((HYPRE_StructVector vector , int *grid_index , double values ));
-int HYPRE_GetStructVectorValues P((HYPRE_StructVector vector , int *grid_index , double *values ));
+int HYPRE_GetStructVectorValues P((HYPRE_StructVector vector , int *grid_index , double *values_ptr ));
 int HYPRE_SetStructVectorBoxValues P((HYPRE_StructVector vector , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values ));
+int HYPRE_GetStructVectorBoxValues P((HYPRE_StructVector vector , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double **values_ptr ));
 int HYPRE_AssembleStructVector P((HYPRE_StructVector vector ));
 void HYPRE_PrintStructVector P((char *filename , HYPRE_StructVector vector , int all ));
 void HYPRE_SetStructVectorNumGhost P((HYPRE_StructMatrix vector , int *num_ghost ));
 int HYPRE_SetStructVectorConstantValues P((HYPRE_StructMatrix vector , double values ));
 
 /* box.c */
-int hypre_SetIndex P((hypre_Index index , int ix , int iy , int iz ));
-int hypre_CopyIndex P((hypre_Index index1 , hypre_Index index2 ));
 hypre_Box *hypre_NewBox P((hypre_Index imin , hypre_Index imax ));
 hypre_BoxArray *hypre_NewBoxArray P((void ));
 hypre_BoxArrayArray *hypre_NewBoxArrayArray P((int size ));
@@ -203,8 +202,9 @@ int hypre_InitializeStructVectorShell P((hypre_StructVector *vector ));
 void hypre_InitializeStructVectorData P((hypre_StructVector *vector , double *data ));
 int hypre_InitializeStructVector P((hypre_StructVector *vector ));
 int hypre_SetStructVectorValues P((hypre_StructVector *vector , hypre_Index grid_index , double values ));
-int hypre_GetStructVectorValues P((hypre_StructVector *vector , hypre_Index grid_index , double *values ));
+int hypre_GetStructVectorValues P((hypre_StructVector *vector , hypre_Index grid_index , double *values_ptr ));
 int hypre_SetStructVectorBoxValues P((hypre_StructVector *vector , hypre_Box *value_box , double *values ));
+int hypre_GetStructVectorBoxValues P((hypre_StructVector *vector , hypre_Box *value_box , double **values_ptr ));
 int hypre_SetStructVectorConstantValues P((hypre_StructVector *vector , double values ));
 int hypre_ClearStructVectorGhostValues P((hypre_StructVector *vector ));
 int hypre_ClearStructVectorAllValues P((hypre_StructVector *vector ));

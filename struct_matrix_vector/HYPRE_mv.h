@@ -63,8 +63,9 @@ HYPRE_StructVector HYPRE_NewStructVector P((MPI_Comm *comm , HYPRE_StructGrid gr
 int HYPRE_FreeStructVector P((HYPRE_StructVector struct_vector ));
 int HYPRE_InitializeStructVector P((HYPRE_StructVector vector ));
 int HYPRE_SetStructVectorValues P((HYPRE_StructVector vector , int *grid_index , double values ));
-int HYPRE_GetStructVectorValues P((HYPRE_StructVector vector , int *grid_index , double *values ));
+int HYPRE_GetStructVectorValues P((HYPRE_StructVector vector , int *grid_index , double *values_ptr ));
 int HYPRE_SetStructVectorBoxValues P((HYPRE_StructVector vector , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values ));
+int HYPRE_GetStructVectorBoxValues P((HYPRE_StructVector vector , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double **values_ptr ));
 int HYPRE_AssembleStructVector P((HYPRE_StructVector vector ));
 void HYPRE_PrintStructVector P((char *filename , HYPRE_StructVector vector , int all ));
 void HYPRE_SetStructVectorNumGhost P((HYPRE_StructMatrix vector , int *num_ghost ));
