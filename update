@@ -246,7 +246,7 @@ then
 
 	# set permissions: give everybody `rx', and give user/group `w'
 	echo "setting permissions ..."
-	chmod -fR a+rX,ug+w .
+	chmod -fR a+rX,ug+w *
     )
 fi
 
