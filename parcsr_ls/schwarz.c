@@ -2378,8 +2378,6 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
   int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
   int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
 
-  hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-
   hypre_CSRMatrix *A_ext;
   int *a_ext_i;
   int *a_ext_j;
