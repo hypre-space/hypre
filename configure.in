@@ -420,6 +420,7 @@ then
 
    alpha)
 
+     casc_using_blas=yes
      if test "$casc_user_chose_compilers" = "no"
      then
        if test "$casc_using_mpi" = "no" &&

@@ -48,6 +48,8 @@ all:
 	mkdir -p hypre/lib; \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
 	export HYPRE_INSTALL_DIR; \
+	cp -f HYPRE_config.h $$HYPRE_INSTALL_DIR/include/.;\
+	cp -f HYPRE.h $$HYPRE_INSTALL_DIR/include/.;\
 	for i in ${HYPRE_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
