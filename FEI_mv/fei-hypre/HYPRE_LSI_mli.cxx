@@ -508,6 +508,11 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
       HYPRE_ParCSRMatrixDestroy( mli_object->correctionMatrix_ );
       mli_object->correctionMatrix_ = NULL;
    }
+   if (!strcmp(mli_object->method_,"AMGRS") )
+   {
+      sprintf( paramString, "setNodeDOF %d", mli_object->nodeDOF_ );
+      method->setParams( paramString, 0, NULL );
+   }
 
    /* -------------------------------------------------------- */ 
    /* load material labels, if there is any                    */

@@ -2126,7 +2126,7 @@ This should ultimately be taken out even for newer ale3d implementation
             for (i=0; i<nRows/fieldSize; i++) 
                MLI_EqnNumbers_[i] = localStartRow_ - 1 + i * fieldSize;
             MLI_NodalCoord_ = new double[localEndRow_-localStartRow_+1];
-            for (i=0; i<nRows; i++) MLI_NodalCoord_[i] = -9999999.0;
+            for (i=0; i<nRows; i++) MLI_NodalCoord_[i] = -99999.0;
             MLI_FieldSize_  = fieldSize;
             MLI_NumNodes_   = nRows / fieldSize;
          }
@@ -3956,7 +3956,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       delete [] iArray;
       for (i = 0; i < MLI_NumNodes_; i++) 
       {
-         if (MLI_NodalCoord_[i] == -9999999.0) 
+         if (MLI_NodalCoord_[i] == -99999.0) 
             printf("%d : HYPRE launchSolver ERROR - coord %d not filled.\n",
                    mypid_, i);
       }
