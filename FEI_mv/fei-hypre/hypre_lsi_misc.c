@@ -556,9 +556,9 @@ int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
    SCformat           *Lstore;
    DNformat           *Bstore;
 
-   //------------------------------------------------------------------
-   // available for sequential processing only for now
-   //------------------------------------------------------------------
+   /*----------------------------------------------------------------*/
+   /* available for sequential processing only for now               */
+   /*----------------------------------------------------------------*/
 
    HYPRE_IJMatrixGetObject(Amat, (void **) &A_csr);
    HYPRE_ParCSRMatrixGetComm( A_csr, &mpi_comm );
@@ -569,19 +569,19 @@ int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
       return -1;
    }
 
-   //------------------------------------------------------------------
-   // need to construct a CSR matrix, and the column indices should
-   // have been stored in colIndices and rowLengths
-   //------------------------------------------------------------------
+   /*----------------------------------------------------------------*/
+   /* need to construct a CSR matrix, and the column indices should  */
+   /* have been stored in colIndices and rowLengths                  */
+   /*----------------------------------------------------------------*/
       
    HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &partition );
    start_row = partition[0];
    end_row   = partition[1] - 1;
    nrows     = partition[1] - partition[0];
 
-   //------------------------------------------------------------------
-   // get information about the current matrix
-   //------------------------------------------------------------------
+   /*----------------------------------------------------------------*/
+   /* get information about the current matrix                       */
+   /*----------------------------------------------------------------*/
 
    nnz = 0;
    for ( i = start_row; i <= end_row; i++ )
@@ -597,9 +597,9 @@ int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
    nz_ptr = HYPRE_LSI_GetParCSRMatrix(Amat, nrows, nnz, new_ia, new_ja, new_a);
    nnz    = nz_ptr;
 
-   //------------------------------------------------------------------
-   // set up SuperLU CSR matrix and the corresponding rhs
-   //------------------------------------------------------------------
+   /*----------------------------------------------------------------*/
+   /* set up SuperLU CSR matrix and the corresponding rhs            */
+   /*----------------------------------------------------------------*/
 
    dCreate_CompRow_Matrix(&A2,nrows,nrows,nnz,new_a,new_ja,new_ia,NR,D_D,GE);
    ind_array = (int *) malloc( nrows * sizeof(int) );
@@ -610,9 +610,9 @@ int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
    assert(!ierr);
    dCreate_Dense_Matrix(&B, nrows, 1, rhs, nrows, DN, D_D, GE);
 
-   //------------------------------------------------------------------
-   // set up the rest and solve (permc_spec=0 : natural ordering)
-   //------------------------------------------------------------------
+   /*----------------------------------------------------------------*/
+   /* set up the rest and solve (permc_spec=0 : natural ordering)    */
+   /*----------------------------------------------------------------*/
  
    perm_r = (int *) malloc( nrows * sizeof(int) );
    perm_c = (int *) malloc( nrows * sizeof(int) );
@@ -622,9 +622,9 @@ int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
 
    dgssv(&A2, perm_c, perm_r, &L, &U, &B, &info);
 
-   //------------------------------------------------------------------
-   // postprocessing of the return status information
-   //------------------------------------------------------------------
+   /*----------------------------------------------------------------*/
+   /* postprocessing of the return status information                */
+   /*----------------------------------------------------------------*/
 
    if ( info == 0 ) 
    {
@@ -638,9 +638,9 @@ int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
       printf("HYPRE_LinSysCore::solveUsingSuperLU - dgssv error = %d\n",info);
    }
 
-   //------------------------------------------------------------------
-   // fetch the solution and find residual norm
-   //------------------------------------------------------------------
+   /*----------------------------------------------------------------*/
+   /* fetch the solution and find residual norm                      */
+   /*----------------------------------------------------------------*/
 
    if ( info == 0 )
    {
@@ -650,9 +650,9 @@ int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
       assert(!ierr);
    }
 
-   //------------------------------------------------------------------
-   // clean up 
-   //------------------------------------------------------------------
+   /*----------------------------------------------------------------*/
+   /* clean up                                                       */
+   /*----------------------------------------------------------------*/
 
    free( ind_array ); 
    free( rhs ); 
@@ -670,7 +670,7 @@ int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
    SUPERLU_FREE( U.Store );
    return info;
 #else
-   printf("HYPRE_LSI_BlockP::solveUsingSuperLU : not available.\n");
+   printf("HYPRE_LSI_SolveUsingSuperLU : not available.\n");
    return 1;
 #endif
 }
