@@ -12,14 +12,39 @@
  *****************************************************************************/
 
 #include "headers.h"
-#include "smg3.h"
+#include "smg.h"
 
 /*--------------------------------------------------------------------------
  * 
  *--------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------
- * zzz_SMG3NewRAPOp
+ * zzz_SMGExtractPointerByIndex
+ *    Returns pointer to data for stencil entry coresponding to
+ *    `index' in `matrix'. If the index does not exist in the matrix's
+ *    stencil, the NULL pointer is returned. 
+ *--------------------------------------------------------------------------*/
+ 
+double *
+zzz_SMGExtractPointerByIndex( zzz_StructMatrix *matrix,
+                               int b,
+                               zzz_Index *index )
+{
+   zzz_StructStencil   *stencil;
+   int                  rank;
+
+   stencil = zzz_StructMatrixStencil(matrix);
+   rank = zzz_StructStencilElementRank( stencil, index );
+
+   if ( rank >= 0 )
+      return zzz_StructMatrixBoxData(matrix, b, rank);
+   else
+      return NULL;  /* error - invalid index */
+}
+
+/*--------------------------------------------------------------------------
+ * zzz_SMG3NewRAPOp 
+ *    Sets up new coarse grid operator stucture.
  *--------------------------------------------------------------------------*/
  
 zzz_StructMatrix *
@@ -27,25 +52,188 @@ zzz_SMG3NewRAPOp( zzz_StructMatrix *R,
                   zzz_StructMatrix *A,
                   zzz_StructMatrix *PT )
 {
-   zzz_StructMatrix *RAP;
+   zzz_StructMatrix     *RAP;
+
+   zzz_Index            **RAP_stencil_shape;
+   zzz_StructStencil    *RAP_stencil;
+   int                  RAP_stencil_size;
+   int                  RAP_num_ghost[6];
+
+   zzz_StructStencil    *A_stencil;
+   int                  A_stencil_size;
+
+   int                  k, j, i;
+   int                  stencil_rank;
  
    coarse_grid = zzz_StructMatrixGrid(R);
+
+   A_stencil = zzz_StructMatrixStencil(A);
+   A_stencil_size = zzz_StructStencilSize(A_stencil);
  
+/*--------------------------------------------------------------------------
+ * Define RAP_stencil
+ *--------------------------------------------------------------------------*/
+
+   stencil_rank = 0;
+
+/*--------------------------------------------------------------------------
+ * non-symmetric case
+ *--------------------------------------------------------------------------*/
+
+   if (!zzz_StructMatrixSymmetric(A))
+   {
+
+/*--------------------------------------------------------------------------
+ *    7 or 15 point fine grid stencil produces 15 point RAP
+ *--------------------------------------------------------------------------*/
+      if( A_stencil_size <= 15)
+      {
+         RAP_stencil_size = 15;
+         RAP_stencil_shape = zzz_CTAlloc(zzz_Index *, RAP_stencil_size);
+         for (k = -1; k < 2; k++)
+         {
+            for (j = -1; j < 2; j++)
+            {
+                for (i = -1; i < 2; i++)
+                {
+
+/*--------------------------------------------------------------------------
+ *                 Storage for c,w,e,n,s elements in each plane
+ *--------------------------------------------------------------------------*/
+                   if( i*j == 0 )
+                   {
+                      RAP_stencil_shape[stencil_rank] = zzz_NewIndex();
+                      zzz_SetIndex(RAP_stencil_shape[stencil_rank],i,j,k);
+                      stencil_rank++;
+                   }
+                }
+             }
+          }
+      }
+
+/*--------------------------------------------------------------------------
+ *    19 or 27 point fine grid stencil produces 27 point RAP
+ *--------------------------------------------------------------------------*/
+      else
+      {
+         RAP_stencil_size = 27;
+         RAP_stencil_shape = zzz_CTAlloc(zzz_Index *, RAP_stencil_size);
+         for (k = -1; k < 2; k++)
+         {
+            for (j = -1; j < 2; j++)
+            {
+                for (i = -1; i < 2; i++)
+                {
+
+/*--------------------------------------------------------------------------
+ *                 Storage for 9 elements (c,w,e,n,s,sw,se,nw,se) in
+ *                 each plane
+ *--------------------------------------------------------------------------*/
+                   RAP_stencil_shape[stencil_rank] = zzz_NewIndex();
+                   zzz_SetIndex(RAP_stencil_shape[stencil_rank],i,j,k);
+                   stencil_rank++;
+                }
+             }
+          }
+      }
+   }
+
+/*--------------------------------------------------------------------------
+ * symmetric case
+ *--------------------------------------------------------------------------*/
+
+   else
+   {
+
+/*--------------------------------------------------------------------------
+ *    7 or 15 point fine grid stencil produces 15 point RAP
+ *    Only store the lower triangular part + diagonal = 8 entries,
+ *    lower triangular means the lower triangular part on the matrix
+ *    in the standard lexicalgraphic ordering.
+ *--------------------------------------------------------------------------*/
+      if( A_stencil_size <= 15)
+      {
+         RAP_stencil_size = 8;
+         RAP_stencil_shape = zzz_CTAlloc(zzz_Index *, RAP_stencil_size);
+         for (k = -1; k < 1; k++)
+         {
+            for (j = -1; j < 2; j++)
+            {
+                for (i = -1; i < 2; i++)
+                {
+
+/*--------------------------------------------------------------------------
+ *                 Store  5 elements in lower plane (c,w,e,s,n)  
+ *                 and 3 elements in same plane (c,w,s)
+ *--------------------------------------------------------------------------*/
+                   if( i*j == 0 && i+j+k <= 0)
+                   {
+                      RAP_stencil_shape[stencil_rank] = zzz_NewIndex();
+                      zzz_SetIndex(RAP_stencil_shape[stencil_rank],i,j,k);
+                      stencil_rank++;
+                   }
+                }
+             }
+          }
+      }
+
+/*--------------------------------------------------------------------------
+ *    19 or 27 point fine grid stencil produces 27 point RAP
+ *    Only store the lower triangular part + diagonal = 14 entries,
+ *    lower triangular means the lower triangular part on the matrix
+ *    in the standard lexicalgraphic ordering.
+ *--------------------------------------------------------------------------*/
+      else
+      {
+         RAP_stencil_size = 14;
+         RAP_stencil_shape = zzz_CTAlloc(zzz_Index *, RAP_stencil_size);
+         for (k = -1; k < 1; k++)
+         {
+            for (j = -1; j < 2; j++)
+            {
+                for (i = -1; i < 2; i++)
+                {
+
+/*--------------------------------------------------------------------------
+ *                 Store  9 elements in lower plane (c,w,e,s,n,sw,se,nw,ne)  
+ *                 and 5 elements in same plane (c,w,s,sw,se)
+ *--------------------------------------------------------------------------*/
+                   if( k < 0 || (i+j+k <=0 && j < 1) )
+                   {
+                      RAP_stencil_shape[stencil_rank] = zzz_NewIndex();
+                      zzz_SetIndex(RAP_stencil_shape[stencil_rank],i,j,k);
+                      stencil_rank++;
+                   }
+                }
+             }
+          }
+      }
+   }
+
    RAP = zzz_NewStructMatrix(coarse_grid, RAP_stencil);
+
+/*--------------------------------------------------------------------------
+ * Coarse operator in symmetric iff fine operator is
+ *--------------------------------------------------------------------------*/
+   zzz_StructMatrixSymmetric(RAP) = zzz_StructMatrixSymmetric(A);
+
+/*--------------------------------------------------------------------------
+ * Set number of ghost points - one one each boundary
+ *--------------------------------------------------------------------------*/
+   for (i = 0; i <= 6; i++ )
+       RAP_num_ghost[i] = 1;
    zzz_SetStructMatrixNumGhost(RAP, RAP_num_ghost);
-   zzz_StructMatrixSymmetric(RAP) = 1;
+
    zzz_InitializeStructMatrix(RAP);
-   zzz_AssembleStructMatrix(RAP);
  
    return RAP;
 }
 
 /*--------------------------------------------------------------------------
- * Sketch of routines to build RAP. I'm writing it as general as
- * possible:
+ * Routines to build RAP. These routines are fairly general
  *  1) No assumptions about symmetry of A
  *  2) No assumption that R = transpose(P)
- *  3) General 7,15,19 or 27-point fine grid A 
+ *  3) 7,15,19 or 27-point fine grid A 
  *
  * I am, however, assuming that the c-to-c interpolation is the identity.
  *
@@ -55,23 +243,6 @@ zzz_SMG3NewRAPOp( zzz_StructMatrix *R,
  * (excluding the diagonal). So using symmetric storage, only the first
  * routine would be called. With full storage both would need to be called.
  *
- * At the moment I have written a switch statement (based on stencil size)
- * that directs control to the appropriate BoxLoop. All coefficients are
- * calculated in a single BoxLoop. Other possibilities are:
- *
- * i)  a BoxLoop for each coefficient
- * ii) 4 BoxLoops - the first always executed, following ones exectuted
- *                  depending on stencil size. This would cut code length
- *                  and perhaps be easier to maintain (with the switch
- *                  statement, the same code appears multiple time), but
- *                  likely less efficient.
- * 
- *--------------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------------
- * Unwritten Functions:
- *  1) ExtractPointer... a function to extract the pointer to
- *  appropriate data. (in parflow it appears to be SubmatrixStencilData)
  *--------------------------------------------------------------------------*/
 
 int
@@ -83,6 +254,31 @@ zzz_SMG3BuildRAPSym(
                    )
 
 {
+
+   zzz_Index            *index_temp;
+
+   zzz_Index            *cindex;
+   zzz_Index            *cstride;
+
+   zzz_StructStencil    *fine_stencil
+   int                  fine_stencil_size
+
+   zzz_StructGrid       *cgrid;
+   zzz_BoxArray         *cgrid_boxes;
+   zzz_Box              *cgrid_box;
+   zzz_Index            *cstart;
+   zzz_Index            *stridec;
+   zzz_Index            *fstart;
+   zzz_Index            *stridef;
+   zzz_Index            *loop_index;
+   zzz_Index            *loop_size;
+
+   int                  i
+
+   zzz_Box              *A_data_box;
+   zzz_Box              *PT_data_box;
+   zzz_Box              *R_data_box;
+   zzz_Box              *RAP_data_box;
 
    double               *pa, pb;
    double               *ra, rb;
@@ -108,14 +304,44 @@ zzz_SMG3BuildRAPSym(
    int                  yOffsetP; 
    int                  zOffsetP; 
 
+   index_temp = zzz_NewIndex();
+   loop_index = zzz_NewIndex();
+   loop_size = zzz_NewIndex();
+
+   fine_stencil = zzz_StructMatrixStencil(A);
+   fine_stencil_size = zzz_StructStencilSize(fine_stencil);
+
+   stridef = cstride;
+   fstart = zzz_NewIndex();
+   stridec = zzz_NewIndex();
+   zzz_SetIndex(stridec, 1, 1, 1);
+
+   cgrid = zzz_StructMatrixGrid(RAP);
+   cgrid_boxes = zzz_StructGridBoxes(cgrid);
+
+   zzz_ForBoxI(i, cgrid_boxes)
+   {
+      cgrid_box = zzz_BoxArrayBox(cgrid_boxes, i);
+
+      cstart = zzz_BoxImin(cgrid_box);
+      zzz_SMGMapCoarseToFine(cstart, fstart, cindex, cstride) 
+
+      A_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(A), i);
+      PT_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(PT), i);
+      R_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(R), i);
+      RAP_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(RAP), i);
+
 /*--------------------------------------------------------------------------
  * Extract pointers for interpolation operator:
  * pa is pointer for weight for f-point above c-point 
  * pb is pointer for weight for f-point below c-point 
  *--------------------------------------------------------------------------*/
 
-            pa = ExtractPointerP(PT,...);
-            pb = ExtractPointerP(PT,...);
+      zzz_SetIndex(index_temp,0,0,1);
+      pa = zzz_SMGExtractPointerByIndex(PT, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,0,-1);
+      pb = zzz_SMGExtractPointerByIndex(PT, i, index_temp);
  
 /*--------------------------------------------------------------------------
  * Extract pointers for restriction operator:
@@ -123,8 +349,11 @@ zzz_SMG3BuildRAPSym(
  * rb is pointer for weight for f-point below c-point 
  *--------------------------------------------------------------------------*/
 
-            ra = ExtractPointerR(R,...);
-            rb = ExtractPointerR(R,...);
+      zzz_SetIndex(index_temp,0,0,1);
+      ra = zzz_SMGExtractPointerByIndex(R, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,0,-1);
+      rb = zzz_SMGExtractPointerByIndex(R, i, index_temp);
  
 /*--------------------------------------------------------------------------
  * Extract pointers for 7-point fine grid operator:
@@ -138,13 +367,26 @@ zzz_SMG3BuildRAPSym(
  * a_bc is pointer for center coefficient in plane below
  *--------------------------------------------------------------------------*/
 
-            a_cc = ExtractPointerA(A,...);
-            a_cw = ExtractPointerA(A,...);
-            a_ce = ExtractPointerA(A,...);
-            a_cs = ExtractPointerA(A,...);
-            a_cn = ExtractPointerA(A,...);
-            a_ac = ExtractPointerA(A,...);
-            a_bc = ExtractPointerA(A,...);
+      zzz_SetIndex(index_temp,0,0,0);
+      a_cc = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      zzz_SetIndex(index_temp,-1,0,0);
+      a_cw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      zzz_SetIndex(index_temp,1,0,0);
+      a_ce = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,-1,0);
+      a_cs = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,1,0);
+      a_cn = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,0,1);
+      a_ac = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,0,-1);
+      a_bc = zzz_SMGExtractPointerByIndex(A, i, index_temp);
 
 /*--------------------------------------------------------------------------
  * Extract additional pointers for 15-point fine grid operator:
@@ -159,17 +401,33 @@ zzz_SMG3BuildRAPSym(
  * a_bn is pointer for north coefficient in plane below
  *--------------------------------------------------------------------------*/
 
-            if(fine_stencil_size > 7)
-            {
-              a_aw = ExtractPointerA(A,...);
-              a_ae = ExtractPointerA(A,...);
-              a_as = ExtractPointerA(A,...);
-              a_an = ExtractPointerA(A,...);
-              a_bw = ExtractPointerA(A,...);
-              a_be = ExtractPointerA(A,...);
-              a_bs = ExtractPointerA(A,...);
-              a_bn = ExtractPointerA(A,...);
-            }
+      if(fine_stencil_size > 7)
+      {
+         zzz_SetIndex(index_temp,-1,0,1);
+         a_aw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,0,1);
+         a_ae = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,0,-1,1);
+         a_as = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,0,1,1);
+         a_an = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,-1,0,-1);
+         a_bw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,0,-1);
+         a_be = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,0,-1,-1);
+         a_bs = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,0,1,-1);
+         a_bn = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      }
   
 /*--------------------------------------------------------------------------
  * Extract additional pointers for 19-point fine grid operator:
@@ -180,13 +438,21 @@ zzz_SMG3BuildRAPSym(
  * a_cne is pointer for northeast coefficient in same plane
  *--------------------------------------------------------------------------*/
 
-            if(fine_stencil_size > 15)
-            {
-              a_csw = ExtractPointerA(A,...);
-              a_cse = ExtractPointerA(A,...);
-              a_cnw = ExtractPointerA(A,...);
-              a_cne = ExtractPointerA(A,...);
-            }
+      if(fine_stencil_size > 15)
+      {
+         zzz_SetIndex(index_temp,-1,-1,0);
+         a_csw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,-1,0);
+         a_cse = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,-1,1,0);
+         a_cnw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,1,0);
+         a_cne = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      }
 
 /*--------------------------------------------------------------------------
  * Extract additional pointers for 27-point fine grid operator:
@@ -201,17 +467,33 @@ zzz_SMG3BuildRAPSym(
  * a_bne is pointer for northeast coefficient in plane below
  *--------------------------------------------------------------------------*/
 
-            if(fine_stencil_size > 19)
-            {
-              a_asw = ExtractPointerA(A,...);
-              a_ase = ExtractPointerA(A,...);
-              a_anw = ExtractPointerA(A,...);
-              a_ane = ExtractPointerA(A,...);
-              a_bsw = ExtractPointerA(A,...);
-              a_bse = ExtractPointerA(A,...);
-              a_bnw = ExtractPointerA(A,...);
-              a_bne = ExtractPointerA(A,...);
-            }
+      if(fine_stencil_size > 19)
+      {
+         zzz_SetIndex(index_temp,-1,-1,1);
+         a_asw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,-1,1);
+         a_ase = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,-1,1,1);
+         a_anw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,1,1);
+         a_ane = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,-1,-1,-1);
+         a_bsw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,-1,-1);
+         a_bse = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,-1,1,-1);
+         a_bnw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,1,-1);
+         a_bne = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      }
 
 /*--------------------------------------------------------------------------
  * Extract pointers for 15-point coarse grid operator:
@@ -221,14 +503,29 @@ zzz_SMG3BuildRAPSym(
  * rap_cc is pointer for center coefficient (etc.)
  *--------------------------------------------------------------------------*/
 
-            rap_cc = ExtractPointerAc(RAP,...);
-            rap_cw = ExtractPointerAc(RAP,...);
-            rap_cs = ExtractPointerAc(RAP,...);
-            rap_bc = ExtractPointerAc(RAP,...);
-            rap_bw = ExtractPointerAc(RAP,...);
-            rap_be = ExtractPointerAc(RAP,...);
-            rap_bs = ExtractPointerAc(RAP,...);
-            rap_bn = ExtractPointerAc(RAP,...);
+      zzz_SetIndex(index_temp,0,0,0);
+      rap_cc = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+      zzz_SetIndex(index_temp,-1,0,0);
+      rap_cw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,-1,0);
+      rap_cs = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,0,-1);
+      rap_bc = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+      zzz_SetIndex(index_temp,-1,0,-1);
+      rap_bw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+      zzz_SetIndex(index_temp,1,0,-1);
+      rap_be = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,-1,-1);
+      rap_bs = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,1,-1);
+      rap_bn = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
 
 /*--------------------------------------------------------------------------
  * Extract additional pointers for 27-point coarse grid operator:
@@ -241,41 +538,51 @@ zzz_SMG3BuildRAPSym(
  * rap_csw is pointer for southwest coefficient in same plane (etc.)
  *--------------------------------------------------------------------------*/
 
-            if(fine_stencil_size > 15)
-            {
-              rap_csw = ExtractPointerAc(RAP,...);
-              rap_cse = ExtractPointerAc(RAP,...);
-              rap_bsw = ExtractPointerAc(RAP,...);
-              rap_bse = ExtractPointerAc(RAP,...);
-              rap_bnw = ExtractPointerAc(RAP,...);
-              rap_bne = ExtractPointerAc(RAP,...);
-            }
+      if(fine_stencil_size > 15)
+      {
+         zzz_SetIndex(index_temp,-1,-1,0);
+         rap_csw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,-1,0);
+         rap_cse = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+         zzz_SetIndex(index_temp,-1,-1,-1);
+         rap_bsw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,-1,-1);
+         rap_bse = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+         zzz_SetIndex(index_temp,-1,1,-1);
+         rap_bnw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,1,-1);
+         rap_bne = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+      }
 
 /*--------------------------------------------------------------------------
- * Define pointers and offsets for fine/coarse grid stencil and interpolation
+ * Define offsets for fine grid stencil and interpolation
  *
- * In the BoxLoop below I assume iA and iP point to data associated
+ * In the BoxLoop below I assume iA and iP refer to data associated
  * with the point which we are building the stencil for. The below
- * Offsets are used in pointer arithmetic to point to data associated
- * with other points. 
+ * Offsets are used in refering to data associated with other points. 
  *--------------------------------------------------------------------------*/
 
-            iA = ;
-            iAc = ;
-            iP = ;
-
-            zOffsetA = ; 
-            xOffsetP = ;
-            yOffsetP = ;
-            zOffsetP = ;
+      zzz_SetIndex(index_temp,0,0,1);
+      zOffsetA = zzz_BoxOffsetDistance(A_data_box,index_temp); 
+      zOffsetP = zzz_BoxOffsetDistance(PT_data_box,index_temp); 
+      zzz_SetIndex(index_temp,0,1,0);
+      yOffsetP = zzz_BoxOffsetDistance(PT_data_box,index_temp); 
+      zzz_SetIndex(index_temp,1,0,0);
+      xOffsetP = zzz_BoxOffsetDistance(PT_data_box,index_temp); 
 
 /*--------------------------------------------------------------------------
  * Switch statement to direct control to apropriate BoxLoop depending
  * on stencil size. Default is full 27-point.
  *--------------------------------------------------------------------------*/
 
-            switch (fine_stencil_size)
-            {
+      switch (fine_stencil_size)
+      {
 
 /*--------------------------------------------------------------------------
  * Loop for symmetric 7-point fine grid operator; produces a symmetric
@@ -286,12 +593,13 @@ zzz_SMG3BuildRAPSym(
 
               case 7:
 
-              zzz_BoxLoop4(box,index,
-                         data_box1, start1, stride1, iP,
-                         data_box2, start2, stride2, iR,
-                         data_box3, start3, stride3, iA,
-                         data_box4, start4, stride4, iAc,
-                         {
+              zzz_GetSBoxSize(cgrid_box, loop_size);
+              zzz_BoxLoop4(loop_index, loop_size,
+                           PT_data_box, cstart, stridec, iP,
+                           R_data_box, cstart, stridec, iR,
+                           A_data_box, fstart, stridef, iA,
+                           RAP_data_box, cstart, stridec, iAc,
+                           {
                             iAm1 = iA - zOffsetA;
                             iAp1 = iA + zOffsetA;
 
@@ -330,7 +638,7 @@ zzz_SMG3BuildRAPSym(
                                         +          a_bc[iA] * pb[iP]
                                         +          a_ac[iA] * pa[iP];
 
-                         });
+                           });
 
               break;
 
@@ -343,12 +651,13 @@ zzz_SMG3BuildRAPSym(
 
               case 15:
 
-              zzz_BoxLoop4(box,index,
-                         data_box1, start1, stride1, iP,
-                         data_box2, start2, stride2, iR,
-                         data_box3, start3, stride3, iA,
-                         data_box4, start4, stride4, iAc,
-                         {
+              zzz_GetSBoxSize(cgrid_box, loop_size);
+              zzz_BoxLoop4(loop_index, loop_size,
+                           PT_data_box, cstart, stridec, iP,
+                           R_data_box, cstart, stridec, iR,
+                           A_data_box, fstart, stridef, iA,
+                           RAP_data_box, cstart, stridec, iAc,
+                           {
                             iAm1 = iA - zOffsetA;
                             iAp1 = iA + zOffsetA;
 
@@ -403,7 +712,7 @@ zzz_SMG3BuildRAPSym(
                                         +          a_bc[iA] * pb[iP]
                                         +          a_ac[iA] * pa[iP];
 
-                         });
+                           });
 
               break;
 
@@ -418,12 +727,13 @@ zzz_SMG3BuildRAPSym(
 
               case 19:
 
-              zzz_BoxLoop4(box,index,
-                         data_box1, start1, stride1, iP,
-                         data_box2, start2, stride2, iR,
-                         data_box3, start3, stride3, iA,
-                         data_box4, start4, stride4, iAc,
-                         {
+              zzz_GetSBoxSize(cgrid_box, loop_size);
+              zzz_BoxLoop4(loop_index, loop_size,
+                           PT_data_box, cstart, stridec, iP,
+                           R_data_box, cstart, stridec, iR,
+                           A_data_box, fstart, stridef, iA,
+                           RAP_data_box, cstart, stridec, iAc,
+                           {
                             iAm1 = iA - zOffsetA;
                             iAp1 = iA + zOffsetA;
 
@@ -500,7 +810,7 @@ zzz_SMG3BuildRAPSym(
                                         +          a_bc[iA] * pb[iP]
                                         +          a_ac[iA] * pa[iP];
 
-                         });
+                           });
 
               break;
 
@@ -515,12 +825,13 @@ zzz_SMG3BuildRAPSym(
 
               default:
 
-              zzz_BoxLoop4(box,index,
-                         data_box1, start1, stride1, iP,
-                         data_box2, start2, stride2, iR,
-                         data_box3, start3, stride3, iA,
-                         data_box4, start4, stride4, iAc,
-                         {
+              zzz_GetSBoxSize(cgrid_box, loop_size);
+              zzz_BoxLoop4(loop_index, loop_size,
+                           PT_data_box, cstart, stridec, iP,
+                           R_data_box, cstart, stridec, iR,
+                           A_data_box, fstart, stridef, iA,
+                           RAP_data_box, cstart, stridec, iAc,
+                           {
                             iAm1 = iA - zOffsetA;
                             iAp1 = iA + zOffsetA;
 
@@ -613,11 +924,20 @@ zzz_SMG3BuildRAPSym(
                                         +          a_bc[iA] * pb[iP]
                                         +          a_ac[iA] * pa[iP];
 
-                         });
+                           });
 
               break;
 
-            }
+      } */ end switch statement */
+
+   } */ end ForBoxI */
+
+   zzz_FreeIndex(index_temp)
+   zzz_FreeIndex(stridec)
+   zzz_FreeIndex(loop_index)
+   zzz_FreeIndex(loop_size)
+   zzz_FreeIndex(fstart)
+
 }
 
 /*--------------------------------------------------------------------------
@@ -625,17 +945,102 @@ zzz_SMG3BuildRAPSym(
 
 int
 zzz_SMG3BuildRAPNoSym(
-                   )
+                       zzz_StructMatrix *A,
+                       zzz_StructMatrix *PT,
+                       zzz_StructMatrix *R,
+                       zzz_StructMatrix *RAP,
+                     )
 
 {
+
+   zzz_Index            *index_temp;
+
+   zzz_Index            *cindex;
+   zzz_Index            *cstride;
+
+   zzz_StructStencil    *fine_stencil
+   int                  fine_stencil_size
+
+   zzz_StructGrid       *cgrid;
+   zzz_BoxArray         *cgrid_boxes;
+   zzz_Box              *cgrid_box;
+   zzz_Index            *cstart;
+   zzz_Index            *stridec;
+   zzz_Index            *fstart;
+   zzz_Index            *stridef;
+   zzz_Index            *loop_index;
+   zzz_Index            *loop_size;
+
+   int                  i
+
+   zzz_Box              *A_data_box;
+   zzz_Box              *PT_data_box;
+   zzz_Box              *R_data_box;
+   zzz_Box              *RAP_data_box;
+
+   double               *pa, pb;
+   double               *ra, rb;
+
+   double               *a_cc, a_cw, a_ce, a_cs, a_cn;
+   double               *a_ac, a_aw, a_ae, a_as, a_an;
+   double               *a_bc, a_bw, a_be, a_bs, a_bn;
+   double               *a_csw, a_cse, a_cnw, a_cne;
+   double               *a_asw, a_ase, a_anw, a_ane;
+   double               *a_bsw, a_bse, a_bnw, a_bne;
+
+   double               *rap_ce, rap_cn;
+   double               *rap_ac, rap_aw, rap_ae, rap_as, rap_an;
+   double               *rap_cnw, rap_cne;
+   double               *rap_asw, rap_ase, rap_anw, rap_ane;
+
+   int                  iA, iAm1, iAp1;
+   int                  iAc;
+   int                  iP, iP1;
+
+   int                  zOffsetA;
+   int                  xOffsetP;
+   int                  yOffsetP;
+   int                  zOffsetP;
+
+   index_temp = zzz_NewIndex();
+   loop_index = zzz_NewIndex();
+   loop_size = zzz_NewIndex();
+
+   fine_stencil = zzz_StructMatrixStencil(A);
+   fine_stencil_size = zzz_StructStencilSize(fine_stencil);
+
+   stridef = cstride;
+   fstart = zzz_NewIndex();
+   stridec = zzz_NewIndex();
+   zzz_SetIndex(stridec, 1, 1, 1);
+
+   cgrid = zzz_StructMatrixGrid(RAP);
+   cgrid_boxes = zzz_StructGridBoxes(cgrid);
+
+   zzz_ForBoxI(i, cgrid_boxes)
+   {
+      cgrid_box = zzz_BoxArrayBox(cgrid_boxes, i);
+
+      cstart = zzz_BoxImin(cgrid_box);
+      zzz_SMGMapCoarseToFine(cstart, fstart, cindex, cstride)
+
+      A_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(A), i);
+      PT_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(PT), i);
+      R_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(R), i);
+      RAP_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(RAP), i);
+
 /*--------------------------------------------------------------------------
  * Extract pointers for interpolation operator:
  * pa is pointer for weight for f-point above c-point 
  * pb is pointer for weight for f-point below c-point 
  *--------------------------------------------------------------------------*/
 
-            pa = ExtractPointerP(PT,...);
-            pb = ExtractPointerP(PT,...);
+      zzz_SetIndex(index_temp,0,0,1);
+      pa = zzz_SMGExtractPointerByIndex(PT, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,0,-1);
+      pb = zzz_SMGExtractPointerByIndex(PT, i, index_temp);
+
  
 /*--------------------------------------------------------------------------
  * Extract pointers for restriction operator:
@@ -643,8 +1048,12 @@ zzz_SMG3BuildRAPNoSym(
  * rb is pointer for weight for f-point below c-point 
  *--------------------------------------------------------------------------*/
 
-            ra = ExtractPointerR(R,...);
-            rb = ExtractPointerR(R,...);
+      zzz_SetIndex(index_temp,0,0,1);
+      ra = zzz_SMGExtractPointerByIndex(R, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,0,-1);
+      rb = zzz_SMGExtractPointerByIndex(R, i, index_temp);
+
  
 /*--------------------------------------------------------------------------
  * Extract pointers for 7-point fine grid operator:
@@ -658,13 +1067,27 @@ zzz_SMG3BuildRAPNoSym(
  * a_bc is pointer for center coefficient in plane below
  *--------------------------------------------------------------------------*/
 
-            a_cc = ExtractPointerA(A,...);
-            a_cw = ExtractPointerA(A,...);
-            a_ce = ExtractPointerA(A,...);
-            a_cs = ExtractPointerA(A,...);
-            a_cn = ExtractPointerA(A,...);
-            a_ac = ExtractPointerA(A,...);
-            a_bc = ExtractPointerA(A,...);
+      zzz_SetIndex(index_temp,0,0,0);
+      a_cc = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      zzz_SetIndex(index_temp,-1,0,0);
+      a_cw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      zzz_SetIndex(index_temp,1,0,0);
+      a_ce = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,-1,0);
+      a_cs = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,1,0);
+      a_cn = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,0,1);
+      a_ac = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,0,-1);
+      a_bc = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
 
 /*--------------------------------------------------------------------------
  * Extract additional pointers for 15-point fine grid operator:
@@ -679,17 +1102,33 @@ zzz_SMG3BuildRAPNoSym(
  * a_bn is pointer for north coefficient in plane below
  *--------------------------------------------------------------------------*/
 
-            if(fine_stencil_size > 7)
-            {
-              a_aw = ExtractPointerA(A,...);
-              a_ae = ExtractPointerA(A,...);
-              a_as = ExtractPointerA(A,...);
-              a_an = ExtractPointerA(A,...);
-              a_bw = ExtractPointerA(A,...);
-              a_be = ExtractPointerA(A,...);
-              a_bs = ExtractPointerA(A,...);
-              a_bn = ExtractPointerA(A,...);
-            }
+      if(fine_stencil_size > 7)
+      {
+         zzz_SetIndex(index_temp,-1,0,1);
+         a_aw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,0,1);
+         a_ae = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,0,-1,1);
+         a_as = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,0,1,1);
+         a_an = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,-1,0,-1);
+         a_bw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,0,-1);
+         a_be = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,0,-1,-1);
+         a_bs = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,0,1,-1);
+         a_bn = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      }
   
 /*--------------------------------------------------------------------------
  * Extract additional pointers for 19-point fine grid operator:
@@ -700,13 +1139,21 @@ zzz_SMG3BuildRAPNoSym(
  * a_cne is pointer for northeast coefficient in same plane
  *--------------------------------------------------------------------------*/
 
-            if(fine_stencil_size > 15)
-            {
-              a_csw = ExtractPointerA(A,...);
-              a_cse = ExtractPointerA(A,...);
-              a_cnw = ExtractPointerA(A,...);
-              a_cne = ExtractPointerA(A,...);
-            }
+      if(fine_stencil_size > 15)
+      {
+         zzz_SetIndex(index_temp,-1,-1,0);
+         a_csw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,-1,0);
+         a_cse = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,-1,1,0);
+         a_cnw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,1,0);
+         a_cne = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      }
 
 /*--------------------------------------------------------------------------
  * Extract additional pointers for 27-point fine grid operator:
@@ -721,17 +1168,33 @@ zzz_SMG3BuildRAPNoSym(
  * a_bne is pointer for northeast coefficient in plane below
  *--------------------------------------------------------------------------*/
 
-            if(fine_stencil_size > 19)
-            {
-              a_asw = ExtractPointerA(A,...);
-              a_ase = ExtractPointerA(A,...);
-              a_anw = ExtractPointerA(A,...);
-              a_ane = ExtractPointerA(A,...);
-              a_bsw = ExtractPointerA(A,...);
-              a_bse = ExtractPointerA(A,...);
-              a_bnw = ExtractPointerA(A,...);
-              a_bne = ExtractPointerA(A,...);
-            }
+      if(fine_stencil_size > 19)
+      {
+         zzz_SetIndex(index_temp,-1,-1,1);
+         a_asw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,-1,1);
+         a_ase = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,-1,1,1);
+         a_anw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,1,1);
+         a_ane = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,-1,-1,-1);
+         a_bsw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,-1,-1);
+         a_bse = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,-1,1,-1);
+         a_bnw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,1,-1);
+         a_bne = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+
+      }
 
 /*--------------------------------------------------------------------------
  * Extract pointers for 15-point coarse grid operator:
@@ -741,13 +1204,26 @@ zzz_SMG3BuildRAPNoSym(
  * rap_ce is pointer for east coefficient in same plane (etc.)
  *--------------------------------------------------------------------------*/
 
-            rap_ce = ExtractPointerAc(RAP,...);
-            rap_cn = ExtractPointerAc(RAP,...);
-            rap_ac = ExtractPointerAc(RAP,...);
-            rap_aw = ExtractPointerAc(RAP,...);
-            rap_ae = ExtractPointerAc(RAP,...);
-            rap_as = ExtractPointerAc(RAP,...);
-            rap_an = ExtractPointerAc(RAP,...);
+      zzz_SetIndex(index_temp,1,0,0);
+      rap_ce = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,1,0);
+      rap_cn = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,0,1);
+      rap_ac = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+      zzz_SetIndex(index_temp,-1,0,1);
+      rap_aw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+      zzz_SetIndex(index_temp,1,0,1);
+      rap_ae = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,-1,1);
+      rap_as = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+      zzz_SetIndex(index_temp,0,1,1);
+      rap_an = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
 
 /*--------------------------------------------------------------------------
  * Extract additional pointers for 27-point coarse grid operator:
@@ -760,41 +1236,51 @@ zzz_SMG3BuildRAPNoSym(
  * rap_cnw is pointer for northwest coefficient in same plane (etc.)
  *--------------------------------------------------------------------------*/
 
-            if(fine_stencil_size > 15)
-            {
-              rap_cnw = ExtractPointerAc(RAP,...);
-              rap_cne = ExtractPointerAc(RAP,...);
-              rap_asw = ExtractPointerAc(RAP,...);
-              rap_ase = ExtractPointerAc(RAP,...);
-              rap_anw = ExtractPointerAc(RAP,...);
-              rap_ane = ExtractPointerAc(RAP,...);
-            }
+      if(fine_stencil_size > 15)
+      {
+         zzz_SetIndex(index_temp,-1,1,0);
+         rap_cnw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,1,0);
+         rap_cne = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+         zzz_SetIndex(index_temp,-1,-1,1);
+         rap_asw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,-1,1);
+         rap_ase = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+         zzz_SetIndex(index_temp,-1,1,1);
+         rap_anw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+         zzz_SetIndex(index_temp,1,1,1);
+         rap_ane = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+
+      }
 
 /*--------------------------------------------------------------------------
- * Define pointers and offsets for fine/coarse grid stencil and interpolation
+ * Define offsets for fine grid stencil and interpolation
  *
- * In the BoxLoop below I assume iA and iP point to data associated
+ * In the BoxLoop below I assume iA and iP refer to data associated
  * with the point which we are building the stencil for. The below
- * Offsets are used in pointer arithmetic to point to data associated
- * with other points. 
+ * Offsets are used in refering to data associated with other points. 
  *--------------------------------------------------------------------------*/
 
-            iA = ;
-            iAc = ;
-            iP = ;
-
-            zOffsetA = ; 
-            xOffsetP = ;
-            yOffsetP = ;
-            zOffsetP = ;
+      zzz_SetIndex(index_temp,0,0,1);
+      zOffsetA = zzz_BoxOffsetDistance(A_data_box,index_temp); 
+      zOffsetP = zzz_BoxOffsetDistance(PT_data_box,index_temp); 
+      zzz_SetIndex(index_temp,0,1,0);
+      yOffsetP = zzz_BoxOffsetDistance(PT_data_box,index_temp); 
+      zzz_SetIndex(index_temp,1,0,0);
+      xOffsetP = zzz_BoxOffsetDistance(PT_data_box,index_temp); 
 
 /*--------------------------------------------------------------------------
  * Switch statement to direct control to apropriate BoxLoop depending
  * on stencil size. Default is full 27-point.
  *--------------------------------------------------------------------------*/
 
-            switch (fine_stencil_size)
-            {
+      switch (fine_stencil_size)
+      {
 
 /*--------------------------------------------------------------------------
  * Loop for 7-point fine grid operator; produces upper triangular part of
@@ -805,12 +1291,13 @@ zzz_SMG3BuildRAPNoSym(
 
               case 7:
 
-              zzz_BoxLoop4(box,index,
-                         data_box1, start1, stride1, iP,
-                         data_box2, start2, stride2, iR,
-                         data_box3, start3, stride3, iA,
-                         data_box4, start4, stride4, iAc,
-                         {
+              zzz_GetSBoxSize(cgrid_box, loop_size);
+              zzz_BoxLoop4(loop_index, loop_size,
+                           PT_data_box, cstart, stridec, iP,
+                           R_data_box, cstart, stridec, iR,
+                           A_data_box, fstart, stridef, iA,
+                           RAP_data_box, cstart, stridec, iAc,
+                           {
                             iAm1 = iA - zOffsetA;
                             iAp1 = iA + zOffsetA;
 
@@ -841,7 +1328,7 @@ zzz_SMG3BuildRAPNoSym(
                                         + rb[iR] * a_ce[iAm1] * pb[iP1]
                                         + ra[iR] * a_ce[iAp1] * pa[iP1];
  
-                         });
+                           });
 
               break;
 
@@ -854,12 +1341,13 @@ zzz_SMG3BuildRAPNoSym(
 
               case 15:
 
-              zzz_BoxLoop4(box,index,
-                         data_box1, start1, stride1, iP,
-                         data_box2, start2, stride2, iR,
-                         data_box3, start3, stride3, iA,
-                         data_box4, start4, stride4, iAc,
-                         {
+              zzz_GetSBoxSize(cgrid_box, loop_size);
+              zzz_BoxLoop4(loop_index, loop_size,
+                           PT_data_box, cstart, stridec, iP,
+                           R_data_box, cstart, stridec, iR,
+                           A_data_box, fstart, stridef, iA,
+                           RAP_data_box, cstart, stridec, iAc,
+                           {
                             iAm1 = iA - zOffsetA;
                             iAp1 = iA + zOffsetA;
 
@@ -906,7 +1394,7 @@ zzz_SMG3BuildRAPNoSym(
                                         + rb[iR] * a_ae[iAm1]
                                         + ra[iR] * a_be[iAp1];
  
-                         });
+                           });
 
               break;
 
@@ -922,12 +1410,13 @@ zzz_SMG3BuildRAPNoSym(
 
               case 19:
 
-              zzz_BoxLoop4(box,index,
-                         data_box1, start1, stride1, iP,
-                         data_box2, start2, stride2, iR,
-                         data_box3, start3, stride3, iA,
-                         data_box4, start4, stride4, iAc,
-                         {
+              zzz_GetSBoxSize(cgrid_box, loop_size);
+              zzz_BoxLoop4(loop_index, loop_size,
+                           PT_data_box, cstart, stridec, iP,
+                           R_data_box, cstart, stridec, iR,
+                           A_data_box, fstart, stridef, iA,
+                           RAP_data_box, cstart, stridec, iAc,
+                           {
                             iAm1 = iA - zOffsetA;
                             iAp1 = iA + zOffsetA;
 
@@ -996,7 +1485,7 @@ zzz_SMG3BuildRAPNoSym(
                                         + rb[iR] * a_ae[iAm1]
                                         + ra[iR] * a_be[iAp1];
  
-                         });
+                           });
 
               break;
 
@@ -1011,12 +1500,13 @@ zzz_SMG3BuildRAPNoSym(
 
               default:
 
-              zzz_BoxLoop4(box,index,
-                         data_box1, start1, stride1, iP,
-                         data_box2, start2, stride2, iR,
-                         data_box3, start3, stride3, iA,
-                         data_box4, start4, stride4, iAc,
-                         {
+              zzz_GetSBoxSize(cgrid_box, loop_size);
+              zzz_BoxLoop4(loop_index, loop_size,
+                           PT_data_box, cstart, stridec, iP,
+                           R_data_box, cstart, stridec, iR,
+                           A_data_box, fstart, stridef, iA,
+                           RAP_data_box, cstart, stridec, iAc,
+                           {
                             iAm1 = iA - zOffsetA;
                             iAp1 = iA + zOffsetA;
 
@@ -1102,10 +1592,19 @@ zzz_SMG3BuildRAPNoSym(
                                         + rb[iR] * a_ae[iAm1]
                                         + ra[iR] * a_be[iAp1];
  
-                         });
+                           });
 
               break;
 
-            }
+      } */ end switch statement */
+
+   } */ end ForBoxI */
+
+   zzz_FreeIndex(index_temp)
+   zzz_FreeIndex(stridec)
+   zzz_FreeIndex(loop_index)
+   zzz_FreeIndex(loop_size)
+   zzz_FreeIndex(fstart)
+
 }
 
