@@ -52,7 +52,7 @@ int
 HYPRE_PrintVector( HYPRE_Vector  vector,
                    char         *file_name )
 {
-   hypre_PrintVector( (hypre_Vector *) vector,
-                      file_name );
+   return ( hypre_PrintVector( (hypre_Vector *) vector,
+                      file_name ) );
 }
 
