@@ -418,7 +418,7 @@ do
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi5.x/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mnse 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mndse 1 -l 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[pgi-5.1]'
         COMPILERSELECT="pgi"
 	perform_test
@@ -473,7 +473,7 @@ do
         HYPRE_RUN_MACHINE="tux81"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-redhat8/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mnse 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mndse 1 -l 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[redhat8-gcc-3.2.3]'
 ##      ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
         COMPILERSELECT="default"
@@ -485,7 +485,7 @@ do
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi5.x/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mnse 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mndse 1 -l 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[pgi-5.1]'
 ##      ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
         COMPILERSELECT="pgi"
@@ -497,7 +497,7 @@ do
         HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/tmp"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
-	  HYPRE_MACHINE_COMMANDS="-mnse 1 -l 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mndse 1 -l 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[gcc]'
         ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
         COMPILERSELECT="default"
