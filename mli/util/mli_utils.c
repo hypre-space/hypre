@@ -109,6 +109,11 @@ int MLI_Utils_HypreMatrixFormJacobi(void *A, double alpha, void **J)
       rownum = start_row + irow; 
       hypre_ParCSRMatrixGetRow(Amat, rownum, &rowSize, &colInd, NULL);
       row_lengths[irow] = rowSize;
+      if ( rowSize <= 0 )
+      {
+         printf("FormJacobi ERROR : Amat has rowSize <= 0 (%d)\n", rownum);
+         exit(1);
+      }
       for ( icol = 0; icol < rowSize; icol++ )
          if ( colInd[icol] == rownum ) break;
       if ( icol == rowSize ) row_lengths[irow]++;
