@@ -147,6 +147,18 @@ int HYPRE_SStructPCGGetNumIterations(HYPRE_SStructSolver  solver,
 int HYPRE_SStructPCGGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
                                                  double              *norm);
 
+int HYPRE_SStructDiagScaleSetup( HYPRE_SStructSolver solver,
+                                 HYPRE_SStructMatrix A,
+                                 HYPRE_SStructVector y,
+                                 HYPRE_SStructVector x      );
+
+int HYPRE_SStructDiagScale( HYPRE_SStructSolver solver,
+                            HYPRE_SStructMatrix A,
+                            HYPRE_SStructVector y,
+                            HYPRE_SStructVector x      );
+
+
+
 /*@}*/
 
 /*--------------------------------------------------------------------------
