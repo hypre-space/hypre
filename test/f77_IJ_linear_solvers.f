@@ -362,7 +362,7 @@ c       Solve the system using preconditioned GMRES
         call HYPRE_ParCSRGMRESSetKDim(solver, k_dim, ierr)
         call HYPRE_ParCSRGMRESSetMaxIter(solver, maxiter, ierr)
         call HYPRE_ParCSRGMRESSetTol(solver, tol, ierr)
-        call HYPRE_ParCSRGMRESSetLogging(solver, solver, one, ierr)
+        call HYPRE_ParCSRGMRESSetLogging(solver, one, ierr)
 
         if (solver_id .eq. 2) then
 
