@@ -122,17 +122,18 @@ int  impl_Hypre_ParCSRVector_Clone(Hypre_ParCSRVector this, Hypre_Vector* x) {
    /* To build the new x, we first need to build a builder...*/
    Hypre_ParCSRVectorBuilder Bldr = Hypre_ParCSRVectorBuilder_Constructor( comm, 0 );
 
-//   array1int partitioning;
+/*   array1int partitioning; */
    Hypre_Map map;
 
    ierr += impl_Hypre_ParCSRVectorBuilder_Start( Bldr, *comm, global_n );
 
    /* copy partitioning from y to x ... */
-//   MPI_Comm_size( *MCp, &num_procs );
+/*   MPI_Comm_size( *MCp, &num_procs );
 //   partitioning.lower[0] = 0;
 //   partitioning.upper[0] = num_procs;
 //   ierr +=  Hypre_ParCSRVector_GetPartitioning( this, &partitioning );
 //   ierr +=  Hypre_ParCSRVectorBuilder_SetPartitioning( Bldr, partitioning );
+*/
    ierr += Hypre_ParCSRVector_GetMap( this, &map );
    ierr += Hypre_ParCSRVectorBuilder_SetMap( Bldr, map );
 
