@@ -47,7 +47,7 @@
 #include "HYPRE_LSI_poly.h"
 #include "HYPRE_LSI_block.h"
 
-#ifdef SUPERLU
+#ifdef HAVE_SUPERLU
 #include "dsp_defs.h"
 #include "util.h"
 #endif
@@ -3500,7 +3500,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     HYPRE_ParVector    b_csr;
     HYPRE_ParVector    x_csr;
 
-#ifdef SUPERLU
+#ifdef HAVE_SUPERLU
     int                info, panel_size, permc_spec;
     int                *perm_r, *perm_c;
     double             *rhs, *soln;
@@ -3699,7 +3699,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     HYPRE_ParVector    b_csr;
     HYPRE_ParVector    x_csr;
 
-#ifdef SUPERLU
+#ifdef HAVE_SUPERLU
     int                info, panel_size, permc_spec;
     int                *perm_r, *perm_c, *etree, lwork, relax;
     double             *rhs, *soln;

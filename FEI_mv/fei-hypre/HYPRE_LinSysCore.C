@@ -43,7 +43,7 @@
 #include "HYPRE_LSI_poly.h"
 #include "HYPRE_LSI_block.h"
 
-#ifdef SUPERLU
+#ifdef HAVE_SUPERLU
 #include "dsp_defs.h"
 #include "util.h"
 #endif

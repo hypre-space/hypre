@@ -24,7 +24,7 @@
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 #include "HYPRE_MHMatrix.h"
 
-#ifdef MLPACK
+#ifdef HAVE_ML
 
 #include "ml_struct.h"
 #include "ml_aggregate.h"

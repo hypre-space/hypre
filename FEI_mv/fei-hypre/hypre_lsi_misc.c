@@ -16,7 +16,7 @@
 #include "parcsr_mv/parcsr_mv.h"
 #include "parcsr_ls/parcsr_ls.h"
 
-#ifdef SUPERLU
+#ifdef HAVE_SUPERLU
 #include "dsp_defs.h"
 #include "util.h"
 #endif
@@ -447,7 +447,7 @@ int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
    HYPRE_ParVector    x_csr;
    MPI_Comm           mpi_comm;
 
-#ifdef SUPERLU
+#ifdef HAVE_SUPERLU
    int                info, panel_size, permc_spec;
    int                *perm_r, *perm_c;
    double             *rhs, *soln;

@@ -63,7 +63,7 @@ extern "C" {
    int HYPRE_LSI_MLSetCoarseSolver( HYPRE_Solver, int );
 }
 #endif
-#ifdef SUPERLU
+#ifdef HAVE_SUPERLU
 #include "dsp_defs.h"
 #include "util.h"
 #endif

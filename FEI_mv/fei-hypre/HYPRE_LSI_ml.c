@@ -709,7 +709,7 @@ int HYPRE_LSI_MLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 
     if ( link->coarse_solver == 0 )
     {
-#ifdef SUPERLU
+#ifdef HAVE_SUPERLU
        ML_Gen_CoarseSolverSuperLU(ml, coarsest_level);
 #else
        printf("SuperLU not compiled in : default to GS(50).\n");
