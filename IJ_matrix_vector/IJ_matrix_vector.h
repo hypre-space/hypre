@@ -4,10 +4,10 @@
 #ifndef hypre_IJ_HEADER
 #define hypre_IJ_HEADER
 
-#include "../utilities/utilities.h"
-#include "../seq_matrix_vector/seq_matrix_vector.h"
-#include "../parcsr_matrix_vector/parcsr_matrix_vector.h"
-#include "./HYPRE_IJ_mv.h"
+#include "utilities.h"
+#include "seq_matrix_vector.h"
+#include "parcsr_matrix_vector.h"
+#include "HYPRE_IJ_mv.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,6 +19,7 @@ extern "C" {
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
+ * $Revision$
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -47,6 +48,7 @@ extern "C" {
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
+ * $Revision$
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -111,6 +113,7 @@ typedef struct
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
+ * $Revision$
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -192,6 +195,7 @@ hypre_GetIJMatrixISISMatrix( HYPRE_IJMatrix IJmatrix, RowMatrix *reference )
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
+ * $Revision$
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
