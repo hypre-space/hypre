@@ -103,7 +103,7 @@ parse_arguments () {
 # probably implement the obsolute getopt) then
 # getopts(1) will be used.
 #
-  while getopts :a:b:cDdfhi:lmno:p:q:r:st:v:xy arg
+  while getopts :a:b:cDdfhi:mno:q:r:sv:xy arg
   do
     argcur=$arg
     case $arg in
@@ -118,21 +118,16 @@ parse_arguments () {
          confbuildtest $OPTARG  "--with-insure" "insure"    0 0 0 0 1 0 1;;
      +i) confbuildtest $OPTARG  "--with-insure-to-file" \
                                                 "insure"    0 0 0 0 1 0 1;;
-#     l) HYPRE_BATCH_MODE="yes"; MailOpt="-mail"; BatchOpt="-batch";;
-      l) HYPRE_BATCH_MODE="yes"; BatchOpt="-batch";;
-     +l) HYPRE_BATCH_MODE="yes"; BatchOpt="-batch";;
       m) HYPRE_SEND_MAIL="no"; MailOpt=""; MailCmd="yes";;
      +m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail"; MailCmd="yes";;
       n) confbuildtest $Build   "--without-MPI" "no_mpi"    1 0 1 1 1 1 0;;
       o) confbuildtest $OPTARG  "--with-openmp" "openmp"    1 1 1 1 1 1 1;;
-      p) confbuildtest $OPTARG  "--with-petac"  "petac"     0 0 0 0 1 0 0;;
       q) confbuildtest $OPTARG  "--with-purify-to-file" \
                                                 "purify"    0 0 0 0 1 0 1;;
      +q) confbuildtest $OPTARG  "--with-purify" "purify"    0 0 0 0 1 0 1;;
       r) HYPRE_RUN_MACHINE=$OPTARG;;
       s) confbuildtest $Build   "--with-strict-checking" \
                                          "strict_checking"  1 1 1 1 1 1 0;;
-      t) confbuildtest $OPTARG "--with-pthreads" "pthreads" 0 0 1 0 0 0 0;;
       v) HYPRE_MESSAGE=$OPTARG;;
       x) build $Build   "beta++" "beta++" "test";;
       y) build $Build   "beta77" "beta77" "test";;
@@ -148,8 +143,8 @@ parse_arguments () {
 # Function for display of help/usage
 #=============================================================================
 usage () {
-  printf "Usage: %s [-cdfhmns] [-a opt] [-b opt]\n" $0
-  printf "       [-o opt] [-p opt] [-r host] [-t opt]\n"
+  printf "Usage: %s [-cDdfhmnsxy] [-a opt] [-b opt] [-i opt]\n" $0
+  printf "       [-o opt] [-q opt] [-r host] [-v text]\n"
   printf "\n"
   printf "Hypre autotest (Note: all options are positional dependent\n"
   printf "i.e., options are sequentially executed in left-to-right order).\n"
@@ -170,21 +165,18 @@ usage () {
   printf "%s\n" "-f       F77; make all77 (no configure, or execute)."
   printf "%s\n" "-i opt   Insure++; perform configure --with-insure. Output"
   printf "         is appended to a file called insure.log.\n"
-  printf "%s\n" "-l       use DPCS Scheduling."
   printf "%s\n" "-h       Help; display this help message."
   printf "%s\n" "-m       Mail; mail error summary to developers."
   printf "%s\n" "+m       Mail+; mail error logs to developers."
   printf "%s\n" "-n       NoMPI; configure --without-MPI, make struct, IJ,"
   printf "         all, and beta (no execute option).\n"
   printf "%s\n" "-o opt   openMP; configure --with-openmp, make beta."
-  printf "%s\n" "-p opt   PETSc; perform configure --with-petsc, make all."
   printf "%s\n" "-q opt   Purify; perform configure --with-purify-to-file."
   printf "         Output is appended to a file called purify.log.\n"
   printf "%s\n" "+q opt   Purify; no file output option (interactive)."
   printf "%s\n" "-r host  Remote; remote exection is performed on "host"."
   printf "%s\n" "-s       Strict; configure --with-strict-checking,"
   printf "         followed by make struct, IJ, all, beta(no execute option).\n"
-  printf "%s\n" "-t opt   Thread; perform configure --with-pthreads, make struct."
   printf "%s\n" "-v text  Additional test to prefix to email subject line."
   printf "%s\n" "-x       BetaC++; make beta++ (no configure, or execute)."
   printf "%s\n" "-y       BetaF77; make beta77 (no configure, or execute)."
@@ -220,6 +212,7 @@ apply_error_filters () {
           egrep -v "^[A-Za-z0-9_]\.[cCf]$| remark: " $ErrorFile.orig > $ErrorFile
         fi
       ;;
+    esac
   fi
 }
 
