@@ -65,6 +65,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    int       coarse_threshold = 9;
    int       j;
    int       num_procs,my_id;
+   int     *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
 
    double    wall_time;   /* for debugging instrumentation */
 
@@ -83,6 +84,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    P_array = hypre_ParAMGDataPArray(amg_data);
    CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
 
+   grid_relax_type[3] = hypre_ParAMGDataUserCoarseRelaxType(amg_data); 
    if (A_array || P_array || CF_marker_array)
    {
       for (j = 1; j < old_num_levels; j++)
@@ -255,14 +257,14 @@ hypre_ParAMGSetup( void               *amg_vdata,
       {
          int     *num_grid_sweeps =
             hypre_ParAMGDataNumGridSweeps(amg_data);
-         int     *grid_relax_type =
-            hypre_ParAMGDataGridRelaxType(amg_data);
          int    **grid_relax_points =
             hypre_ParAMGDataGridRelaxPoints(amg_data);
-         num_grid_sweeps[3] = 1;
-         grid_relax_type[3] = 0;
-         grid_relax_points[3][0] = 0;
-
+         if (grid_relax_type[3] == 9)
+	 {
+	    grid_relax_type[3] = grid_relax_type[0];
+	    num_grid_sweeps[3] = 1;
+	    grid_relax_points[3][0] = 0; 
+	 }
 	 if (P_array)
             hypre_ParCSRMatrixDestroy(P_array[level]);
          if (level > 0)

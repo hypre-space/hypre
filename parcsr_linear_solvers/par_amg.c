@@ -114,6 +114,7 @@ hypre_ParAMGCreate()
 
    amg_data = hypre_CTAlloc(hypre_ParAMGData, 1);
 
+   hypre_ParAMGDataUserCoarseRelaxType(amg_data) = 9;
    hypre_ParAMGSetMaxLevels(amg_data, max_levels);
    hypre_ParAMGSetStrongThreshold(amg_data, strong_threshold);
    hypre_ParAMGSetMaxRowSum(amg_data, max_row_sum);
@@ -371,6 +372,7 @@ hypre_ParAMGSetGridRelaxType( void     *data,
    if (hypre_ParAMGDataGridRelaxType(amg_data))
       hypre_TFree(hypre_ParAMGDataGridRelaxType(amg_data));
    hypre_ParAMGDataGridRelaxType(amg_data) = grid_relax_type;
+   hypre_ParAMGDataUserCoarseRelaxType(amg_data) = grid_relax_type[3];
 
    return (ierr);
 }
