@@ -617,7 +617,7 @@ c left at default: GridRelaxPoints
       call Hypre_ParCSRMatrix__cast_f(
      1     Hypre_ParCSR_A, "Hypre.LinearOperator", linop )
       call Hypre_ParAMG_Setup_f(
-     1     Hypre_AMG, linop, Hypre_Vector_b, Hypre_Vector_x, ierrtmp )
+     1     Hypre_AMG, Hypre_Vector_b, Hypre_Vector_x, ierrtmp )
       ierr = ierr + ierrtmp
       call Hypre_ParCSRVector_print_f(
      1     Hypre_parcsr_x, "driver.out.x2", ierrtmp )
