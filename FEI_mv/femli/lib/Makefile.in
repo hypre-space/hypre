@@ -17,14 +17,15 @@ CC = @CC@
 CXX = @CXX@
 F77 = @F77@
 
+SUPERLU_INCLUDE = -I$(srcdir)/../../SuperLU
 C_COMPILE_FLAGS=@CFLAGS@
 CXX_COMPILE_FLAGS=@CXXFLAGS@
 F77_COMPILE_FLAGS=@F77FLAGS@
-CINCLUDES=@INCLUDES@ @MPIINCLUDE@
-CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@ ${SUPERLU_INCLUDE}
+CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@ ${SUPERLU_INCLUDE}
 F77INCLUDES=@INCLUDES@ @MPIINCLUDE@
-CDEFS =
-CXXDEFS =
+CDEFS = -DMLI_SUPERLU
+CXXDEFS = -DMPICH_SKIP_MPICXX -DMLI_SUPERLU
 F77DEFS =
 
 CFLAGS =\
@@ -51,6 +52,8 @@ CXXFLAGS =\
  -I$(srcdir)/../../..\
  -I$(srcdir)/../../../utilities\
  -I$(srcdir)/../../../parcsr_mv\
+ -I$(srcdir)/../../../parcsr_ls\
+ -I$(srcdir)/../../../krylov\
  -I$(srcdir)/../../../seq_mv\
  -I$(srcdir)/../../../IJ_mv\
  ${CXXINCLUDES}\
@@ -63,53 +66,74 @@ F77FLAGS =\
 
 RANLIB = @RANLIB@
 
-#OBJS = mli.o                mli_oneLevel.o          cmli.o \
-#       mli_matrix.o         mli_matrix_utils.o      mli_vector.o \
-#       mli_fedata.o         mli_fedata_utils.o      mli_utils.o \
-#       mli_solver.o         mli_solver_jacobi.o     mli_solver_gs.o \
-#       mli_solver_sgs.o     mli_solver_parasails.o  mli_solver_bsgs.o \
-#       mli_solver_mls.o     mli_solver_superlu.o    mli_method.o \
-#       mli_method_amgrs.o   mli_method_amgsa.o      mli_amgsa_coarsen1.o \
-#       mli_amgsa_calib.o    mli_utils_fortran.o     mli_mapper.o \
-#       mli_solver_cg.o      mli_solver_chebyshev.o  mli_amgsa_substructure.o \
-#       mli_solver_bjacobi.o mli_solver_seqsuperlu.o mli_solver_arpacksuperlu.o \
-#       mli_matrix_mult.o    mli_solver_kaczmarz.o   mli_solver_hsgs.o \
-#       mli_solver_hschwarz.o
+HEADERS = \
+ $(srcdir)/../amgs/mli_method_amgrs.h\
+ $(srcdir)/../amgs/mli_method_amgsa.h\
+ $(srcdir)/../amgs/mli_method.h\
+ $(srcdir)/../base/mli_defs.h\
+ $(srcdir)/../base/mli.h\
+ $(srcdir)/../base/mli_oneLevel.h\
+ $(srcdir)/../cintface/cmli.h\
+ $(srcdir)/../fedata/mli_fedata.h\
+ $(srcdir)/../fedata/mli_fedata_utils.h\
+ $(srcdir)/../fedata/mli_festruct.h\
+ $(srcdir)/../mapper/mli_mapper.h\
+ $(srcdir)/../matrix/mli_matrix.h\
+ $(srcdir)/../matrix/mli_matrix_misc.h\
+ $(srcdir)/../solver/mli_solver_arpacksuperlu.h\
+ $(srcdir)/../solver/mli_solver_bjacobi.h\
+ $(srcdir)/../solver/mli_solver_bsgs.h\
+ $(srcdir)/../solver/mli_solver_cg.h\
+ $(srcdir)/../solver/mli_solver_chebyshev.h\
+ $(srcdir)/../solver/mli_solver_gs.h\
+ $(srcdir)/../solver/mli_solver.h\
+ $(srcdir)/../solver/mli_solver_hschwarz.h\
+ $(srcdir)/../solver/mli_solver_hsgs.h\
+ $(srcdir)/../solver/mli_solver_jacobi.h\
+ $(srcdir)/../solver/mli_solver_kaczmarz.h\
+ $(srcdir)/../solver/mli_solver_mls.h\
+ $(srcdir)/../solver/mli_solver_parasails.h\
+ $(srcdir)/../solver/mli_solver_seqsuperlu.h\
+ $(srcdir)/../solver/mli_solver_sgs.h\
+ $(srcdir)/../solver/mli_solver_superlu.h\
+ $(srcdir)/../util/mli_utils.h\
+ $(srcdir)/../vector/mli_vector.h
+
 FILES = \
- $(srcdir)/../util/mli_utils.c\
- $(srcdir)/../amgs/mli_method.cxx\
- $(srcdir)/../amgs/mli_method_amgrs.cxx\
- $(srcdir)/../amgs/mli_method_amgsa.cxx\
- $(srcdir)/../amgs/mli_amgsa_coarsen1.cxx\
- $(srcdir)/../amgs/mli_amgsa_calib.cxx\
- $(srcdir)/../amgs/mli_amgsa_substructure.cxx\
- $(srcdir)/../base/mli.cxx\
- $(srcdir)/../base/mli_oneLevel.cxx\
- $(srcdir)/../cintface/cmli.cxx\
- $(srcdir)/../fedata/mli_fedata.cxx\
- $(srcdir)/../fedata/mli_fedata_utils.cxx\
- $(srcdir)/../mapper/mli_mapper.cxx\
- $(srcdir)/../matrix/mli_matrix.cxx\
- $(srcdir)/../matrix/mli_matrix_mult.cxx\
- $(srcdir)/../matrix/mli_matrix_utils.cxx\
- $(srcdir)/../solver/mli_solver.cxx\
- $(srcdir)/../solver/mli_solver_jacobi.cxx\
- $(srcdir)/../solver/mli_solver_bjacobi.cxx\
- $(srcdir)/../solver/mli_solver_gs.cxx\
- $(srcdir)/../solver/mli_solver_sgs.cxx\
- $(srcdir)/../solver/mli_solver_bsgs.cxx\
- $(srcdir)/../solver/mli_solver_hsgs.cxx\
- $(srcdir)/../solver/mli_solver_hschwarz.cxx\
- $(srcdir)/../solver/mli_solver_parasails.cxx\
- $(srcdir)/../solver/mli_solver_mls.cxx\
- $(srcdir)/../solver/mli_solver_chebyshev.cxx\
- $(srcdir)/../solver/mli_solver_cg.cxx\
- $(srcdir)/../solver/mli_solver_kaczmarz.cxx\
- $(srcdir)/../solver/mli_solver_superlu.cxx\
- $(srcdir)/../solver/mli_solver_seqsuperlu.cxx\
- $(srcdir)/../solver/mli_solver_arpacksuperlu.cxx\
- $(srcdir)/../vector/mli_vector.cxx\
- $(srcdir)/../util/mli_utils_fortran.f
+ ../util/mli_utils.c\
+ ../amgs/mli_method.cxx\
+ ../amgs/mli_method_amgrs.cxx\
+ ../amgs/mli_method_amgsa.cxx\
+ ../amgs/mli_amgsa_coarsen1.cxx\
+ ../amgs/mli_amgsa_calib.cxx\
+ ../amgs/mli_amgsa_substructure.cxx\
+ ../base/mli.cxx\
+ ../base/mli_oneLevel.cxx\
+ ../cintface/cmli.cxx\
+ ../fedata/mli_fedata.cxx\
+ ../fedata/mli_fedata_utils.cxx\
+ ../mapper/mli_mapper.cxx\
+ ../matrix/mli_matrix.cxx\
+ ../matrix/mli_matrix_mult.cxx\
+ ../matrix/mli_matrix_utils.cxx\
+ ../solver/mli_solver.cxx\
+ ../solver/mli_solver_jacobi.cxx\
+ ../solver/mli_solver_bjacobi.cxx\
+ ../solver/mli_solver_gs.cxx\
+ ../solver/mli_solver_sgs.cxx\
+ ../solver/mli_solver_bsgs.cxx\
+ ../solver/mli_solver_hsgs.cxx\
+ ../solver/mli_solver_hschwarz.cxx\
+ ../solver/mli_solver_parasails.cxx\
+ ../solver/mli_solver_mls.cxx\
+ ../solver/mli_solver_chebyshev.cxx\
+ ../solver/mli_solver_cg.cxx\
+ ../solver/mli_solver_kaczmarz.cxx\
+ ../solver/mli_solver_superlu.cxx\
+ ../solver/mli_solver_seqsuperlu.cxx\
+ ../solver/mli_solver_arpacksuperlu.cxx\
+ ../vector/mli_vector.cxx\
+ ../util/mli_utils_fortran.f
 
 TEMP1 = ${FILES:.c=.o}
 TEMP2 = ${TEMP1:.cxx=.o}
@@ -125,23 +149,30 @@ libHYPRE_mli.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} -rcu $@ ${OBJS}
 	${RANLIB} $@
-	@cp -f libHYPRE_mli.a $$HYPRE_INSTALL_DIR/lib
 
 install: all
+	@cp -f libHYPRE_mli.a $$HYPRE_INSTALL_DIR/lib
  
 clean:
-	@rm -f *.o libHYPRE_mli.a
+	@rm -f ${OBJS}
 
 veryclean: clean
+	@rm -f libHYPRE_mli.a
 
 ##################################################################
 # Rules
 ##################################################################
+
+${OBJS}: ${HEADERS}
+ 
+##################################################################
+# Generic rules
+##################################################################
  
 .c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
+	${CC} -o $@ -c ${CFLAGS} `test -f '$<' || echo '$(srcdir)/'`$<
 .cxx.o:
-	${CXX} -o $@ -c ${CXXFLAGS} $<
+	${CXX} -o $@ -c ${CXXFLAGS} `test -f '$<' || echo '$(srcdir)/'`$<
 .f.o:
-	${F77} -o $@ -c ${F77FLAGS} $<
+	${F77} -o $@ -c ${F77FLAGS} `test -f '$<' || echo '$(srcdir)/'`$<
 
