@@ -26,17 +26,20 @@ typedef struct rank_link
 
 } hypre_RankLink;
 
+typedef hypre_RankLink *hypre_RankLinkArray[3][3][3];
+
 /*--------------------------------------------------------------------------
  * hypre_BoxNeighbors:
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
-   hypre_BoxArray  *boxes;
-   int              box_rank;
-   int              max_distance;         /* in infinity norm */
+   int                  num_local;      /* number of local boxes */
+   hypre_BoxArray      *boxes;          /* array of boxes */
+   int                 *processes;      /* processes of `boxes' */
+   int                  max_distance;   /* in infinity norm */
 
-   hypre_RankLink  *rank_links[3][3][3];  /* neighbors of box `box_rank' */
+   hypre_RankLinkArray *rank_links;     /* neighbors of `box_ranks' boxes */
 
 } hypre_BoxNeighbors;
 
@@ -52,19 +55,24 @@ typedef struct
  * Accessor macros: hypre_BoxNeighbors
  *--------------------------------------------------------------------------*/
 
-#define hypre_BoxNeighborsBoxes(neighbors)        ((neighbors) -> boxes)
-#define hypre_BoxNeighborsBoxRank(neighbors)      ((neighbors) -> box_rank)
-#define hypre_BoxNeighborsMaxDistance(neighbors)  ((neighbors) -> max_distance)
-#define hypre_BoxNeighborsRankLinks(neighbors)    ((neighbors) -> rank_links)
+#define hypre_BoxNeighborsNumLocal(neighbors)    ((neighbors) -> num_local)
+#define hypre_BoxNeighborsBoxes(neighbors)       ((neighbors) -> boxes)
+#define hypre_BoxNeighborsBox(neighbors, n)      ((neighbors) -> boxes[n])
+#define hypre_BoxNeighborsProcesses(neighbors)   ((neighbors) -> processes)
+#define hypre_BoxNeighborsProcess(neighbors, n)  ((neighbors) -> processes[n])
+#define hypre_BoxNeighborsMaxDistance(neighbors) ((neighbors) -> max_distance)
+#define hypre_BoxNeighborsRankLinks(neighbors)   ((neighbors) -> rank_links)
 
-#define hypre_BoxNeighborsRankLink(neighbors, i, j, k) \
-(hypre_BoxNeighborsRankLinks(neighbors)[i+1][j+1][k+1])
+#define hypre_BoxNeighborsNumBoxes(neighbors) \
+(hypre_BoxArraySize(hypre_BoxNeighborsBoxes(neighbors)))
+#define hypre_BoxNeighborsRankLink(neighbors, b, i, j, k) \
+(hypre_BoxNeighborsRankLinks(neighbors)[b][i+1][j+1][k+1])
 
 /*--------------------------------------------------------------------------
  * Looping macros:
  *--------------------------------------------------------------------------*/
  
-#define hypre_BeginBoxNeighborsLoop(rank, neighbors, distance_index)\
+#define hypre_BeginBoxNeighborsLoop(n, b, neighbors, distance_index)\
 {\
    int             hypre__istart = 0;\
    int             hypre__jstart = 0;\
@@ -99,13 +107,12 @@ typedef struct
       {\
          for (hypre__i = hypre__istart; hypre__i <= hypre__istop; hypre__i++)\
          {\
-            hypre__rank_link = hypre_BoxNeighborsRankLink(neighbors,\
-                                                          hypre__i,\
-                                                          hypre__j,\
-                                                          hypre__k);\
+            hypre__rank_link = \
+               hypre_BoxNeighborsRankLink(neighbors, b,\
+                                          hypre__i, hypre__j, hypre__k);\
             while (hypre__rank_link)\
             {\
-               rank = hypre_RankLinkRank(hypre__rank_link);
+               n = hypre_RankLinkRank(hypre__rank_link);
 
 #define hypre_EndBoxNeighborsLoop\
                hypre__rank_link = hypre_RankLinkNext(hypre__rank_link);\

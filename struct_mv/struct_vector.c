@@ -109,7 +109,7 @@ hypre_InitializeStructVectorShell( hypre_StructVector *vector )
       num_ghost = hypre_StructVectorNumGhost(vector);
 
       boxes = hypre_StructGridBoxes(grid);
-      data_space = hypre_NewBoxArray();
+      data_space = hypre_NewBoxArray(hypre_BoxArraySize(boxes));
 
       hypre_ForBoxI(i, boxes)
          {
@@ -311,8 +311,8 @@ hypre_SetStructVectorBoxValues( hypre_StructVector *vector,
     * Set up `box_array' by intersecting `box' with the grid boxes
     *-----------------------------------------------------------------------*/
 
-   box_array = hypre_NewBoxArray();
    grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
+   box_array = hypre_NewBoxArray(hypre_BoxArraySize(grid_boxes));
    hypre_ForBoxI(i, grid_boxes)
       {
          grid_box = hypre_BoxArrayBox(grid_boxes, i);
@@ -408,8 +408,8 @@ hypre_GetStructVectorBoxValues( hypre_StructVector *vector,
     * Set up `box_array' by intersecting `box' with the grid boxes
     *-----------------------------------------------------------------------*/
 
-   box_array = hypre_NewBoxArray();
    grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
+   box_array = hypre_NewBoxArray(hypre_BoxArraySize(grid_boxes));
    hypre_ForBoxI(i, grid_boxes)
       {
          grid_box = hypre_BoxArrayBox(grid_boxes, i);

@@ -36,7 +36,7 @@ hypre_GrowBoxByStencil( hypre_Box           *box,
 
    stencil_shape = hypre_StructStencilShape(stencil);
 
-   shift_box_array = hypre_NewBoxArray();
+   shift_box_array = hypre_NewBoxArray(hypre_StructStencilSize(stencil));
    for (s = 0; s < hypre_StructStencilSize(stencil); s++)
    {
       shift_box = hypre_DuplicateBox(box);

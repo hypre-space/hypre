@@ -200,7 +200,7 @@ hypre_InitializeStructMatrixShell( hypre_StructMatrix *matrix )
    if (hypre_StructMatrixDataSpace(matrix) == NULL)
    {
       boxes = hypre_StructGridBoxes(grid);
-      data_space = hypre_NewBoxArray();
+      data_space = hypre_NewBoxArray(hypre_BoxArraySize(boxes));
 
       hypre_ForBoxI(i, boxes)
          {
@@ -434,8 +434,8 @@ hypre_SetStructMatrixBoxValues( hypre_StructMatrix *matrix,
     * Set up `box_array' by intersecting `box' with the grid boxes
     *-----------------------------------------------------------------------*/
 
-   box_array = hypre_NewBoxArray();
    grid_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(matrix));
+   box_array = hypre_NewBoxArray(hypre_BoxArraySize(grid_boxes));
    hypre_ForBoxI(i, grid_boxes)
       {
          grid_box = hypre_BoxArrayBox(grid_boxes, i);

@@ -48,7 +48,7 @@ void HYPRE_FreeCommPkg P((HYPRE_CommPkg comm_pkg ));
 
 /* box.c */
 hypre_Box *hypre_NewBox P((hypre_Index imin , hypre_Index imax ));
-hypre_BoxArray *hypre_NewBoxArray P((void ));
+hypre_BoxArray *hypre_NewBoxArray P((int alloc_size ));
 hypre_BoxArrayArray *hypre_NewBoxArrayArray P((int size ));
 void hypre_FreeBox P((hypre_Box *box ));
 void hypre_FreeBoxArrayShell P((hypre_BoxArray *box_array ));
@@ -74,26 +74,27 @@ hypre_BoxArray *hypre_UnionBoxArray P((hypre_BoxArray *boxes ));
 /* box_neighbors.c */
 hypre_RankLink *hypre_NewRankLink P((int rank ));
 int hypre_FreeRankLink P((hypre_RankLink *rank_link ));
-hypre_BoxNeighbors *hypre_NewBoxNeighbors P((hypre_BoxArray *boxes , int box_rank , int max_distance ));
+hypre_BoxNeighbors *hypre_NewBoxNeighbors P((int *local_ranks , int num_local , hypre_BoxArray *boxes , int *processes , int max_distance ));
 int hypre_FreeBoxNeighbors P((hypre_BoxNeighbors *neighbors ));
 
 /* communication.c */
-hypre_CommTypeEntry *hypre_NewCommTypeEntry P((hypre_SBox *sbox , hypre_Box *data_box , int num_values , int sbox_offset , int data_box_offset ));
-void hypre_FreeCommTypeEntry P((hypre_CommTypeEntry *comm_entry ));
-hypre_CommType *hypre_NewCommType P((hypre_CommTypeEntry **comm_entries , int num_entries ));
-void hypre_FreeCommType P((hypre_CommType *comm_type ));
-int hypre_SortCommType P((hypre_CommType *comm_type ));
 hypre_CommPkg *hypre_NewCommPkg P((hypre_SBoxArrayArray *send_sboxes , hypre_SBoxArrayArray *recv_sboxes , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , int **send_processes , int **recv_processes , int num_values , MPI_Comm comm ));
 void hypre_FreeCommPkg P((hypre_CommPkg *comm_pkg ));
+hypre_CommHandle *hypre_InitializeCommunication P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
+hypre_CommHandle *hypre_InitializeCommunication P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
+int hypre_FinalizeCommunication P((hypre_CommHandle *comm_handle ));
+int hypre_FinalizeCommunication P((hypre_CommHandle *comm_handle ));
+int hypre_ExchangeLocalData P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
+hypre_CommType *hypre_NewCommType P((hypre_CommTypeEntry **comm_entries , int num_entries ));
+void hypre_FreeCommType P((hypre_CommType *comm_type ));
+hypre_CommTypeEntry *hypre_NewCommTypeEntry P((hypre_SBox *sbox , hypre_Box *data_box , int num_values , int sbox_offset , int data_box_offset ));
+void hypre_FreeCommTypeEntry P((hypre_CommTypeEntry *comm_entry ));
 int hypre_NewCommPkgInfo P((hypre_SBoxArrayArray *sboxes , hypre_BoxArray *data_space , int **processes , int num_values , MPI_Comm comm , int *num_comms_ptr , int **comm_processes_ptr , hypre_CommType ***comm_types_ptr , hypre_CommType **copy_type_ptr ));
+int hypre_SortCommType P((hypre_CommType *comm_type ));
 int hypre_CommitCommPkg P((hypre_CommPkg *comm_pkg ));
 int hypre_UnCommitCommPkg P((hypre_CommPkg *comm_pkg ));
 int hypre_BuildCommMPITypes P((int num_comms , int *comm_procs , hypre_CommType **comm_types , MPI_Datatype *comm_mpi_types ));
 int hypre_BuildCommEntryMPIType P((hypre_CommTypeEntry *comm_entry , MPI_Datatype *comm_entry_mpi_type ));
-hypre_CommHandle *hypre_InitializeCommunication P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
-hypre_CommHandle *hypre_InitializeCommunication P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
-int hypre_FinalizeCommunication P((hypre_CommHandle *comm_handle ));
-int hypre_ExchangeLocalData P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
 
 /* communication_info.c */
 void hypre_NewCommInfoFromStencil P((hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr , hypre_StructGrid *grid , hypre_StructStencil *stencil ));
@@ -106,9 +107,27 @@ void hypre_FreeComputePkg P((hypre_ComputePkg *compute_pkg ));
 hypre_CommHandle *hypre_InitializeIndtComputations P((hypre_ComputePkg *compute_pkg , double *data ));
 void hypre_FinalizeIndtComputations P((hypre_CommHandle *comm_handle ));
 
+/* create_2d_laplacian.c */
+int main P((int argc , char *argv []));
+
+/* create_3d_laplacian.c */
+int main P((int argc , char *argv []));
+
+/* driver.c */
+int main P((int argc , char *argv []));
+
+/* driver_internal.c */
+int main P((int argc , char *argv []));
+
 /* grow.c */
 hypre_BoxArray *hypre_GrowBoxByStencil P((hypre_Box *box , hypre_StructStencil *stencil , int transpose ));
 hypre_BoxArrayArray *hypre_GrowBoxArrayByStencil P((hypre_BoxArray *box_array , hypre_StructStencil *stencil , int transpose ));
+
+/* one_to_many.c */
+int main P((int argc , char *argv []));
+
+/* one_to_many_vector.c */
+int main P((int argc , char *argv []));
 
 /* project.c */
 hypre_SBox *hypre_ProjectBox P((hypre_Box *box , hypre_Index index , hypre_Index stride ));
@@ -118,7 +137,7 @@ hypre_SBoxArrayArray *hypre_ProjectRBPoint P((hypre_BoxArrayArray *box_array_arr
 
 /* sbox.c */
 hypre_SBox *hypre_NewSBox P((hypre_Box *box , hypre_Index stride ));
-hypre_SBoxArray *hypre_NewSBoxArray P((void ));
+hypre_SBoxArray *hypre_NewSBoxArray P((int alloc_size ));
 hypre_SBoxArrayArray *hypre_NewSBoxArrayArray P((int size ));
 void hypre_FreeSBox P((hypre_SBox *sbox ));
 void hypre_FreeSBoxArrayShell P((hypre_SBoxArray *sbox_array ));
@@ -145,14 +164,13 @@ int hypre_StructCopy P((hypre_StructVector *x , hypre_StructVector *y ));
 
 /* struct_grid.c */
 hypre_StructGrid *hypre_NewStructGrid P((MPI_Comm comm , int dim ));
-hypre_StructGrid *hypre_NewAssembledStructGrid P((MPI_Comm comm , int dim , hypre_BoxArray *all_boxes , int *processes ));
 void hypre_FreeStructGrid P((hypre_StructGrid *grid ));
 void hypre_SetStructGridExtents P((hypre_StructGrid *grid , hypre_Index ilower , hypre_Index iupper ));
-void hypre_AssembleStructGrid P((hypre_StructGrid *grid ));
+void hypre_SetStructGridBoxes P((hypre_StructGrid *grid , hypre_BoxArray *boxes ));
+void hypre_AssembleStructGrid P((hypre_StructGrid *grid , hypre_BoxArray *all_boxes , int *processes , int *box_ranks ));
+int hypre_GatherAllBoxes P((MPI_Comm comm , hypre_BoxArray *boxes , hypre_BoxArray **all_boxes_ptr , int **processes_ptr , int **box_ranks_ptr ));
 void hypre_PrintStructGrid P((FILE *file , hypre_StructGrid *grid ));
 hypre_StructGrid *hypre_ReadStructGrid P((MPI_Comm comm , FILE *file ));
-int hypre_NewStructGridNeighbors P((hypre_StructGrid *grid , int max_neighbor_distance ));
-int hypre_FreeStructGridNeighbors P((hypre_StructGrid *grid ));
 
 /* struct_innerprod.c */
 double hypre_StructInnerProd P((hypre_StructVector *x , hypre_StructVector *y ));

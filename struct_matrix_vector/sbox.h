@@ -36,6 +36,7 @@ typedef struct
 {
    hypre_SBox  **sboxes;       /* Array of pointers to sboxes */
    int           size;         /* Size of sbox array */
+   int           alloc_size;
 
 } hypre_SBoxArray;
 
@@ -93,9 +94,10 @@ typedef struct
  * Accessor macros: hypre_SBoxArray
  *--------------------------------------------------------------------------*/
 
-#define hypre_SBoxArraySBoxes(sbox_array)  ((sbox_array) -> sboxes)
-#define hypre_SBoxArraySBox(sbox_array, i) ((sbox_array) -> sboxes[(i)])
-#define hypre_SBoxArraySize(sbox_array)    ((sbox_array) -> size)
+#define hypre_SBoxArraySBoxes(sbox_array)    ((sbox_array) -> sboxes)
+#define hypre_SBoxArraySBox(sbox_array, i)   ((sbox_array) -> sboxes[(i)])
+#define hypre_SBoxArraySize(sbox_array)      ((sbox_array) -> size)
+#define hypre_SBoxArrayAllocSize(sbox_array) ((sbox_array) -> alloc_size)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SBoxArrayArray

@@ -37,10 +37,6 @@ hypre_SMGInitialize( MPI_Comm  comm )
    (smg_data -> num_pre_relax)  = 1;
    (smg_data -> num_post_relax) = 1;
    (smg_data -> cdir) = 2;
-   (smg_data -> ci) = 0;
-   (smg_data -> fi) = 1;
-   (smg_data -> cs) = 2;
-   (smg_data -> fs) = 2;
    hypre_SetIndex((smg_data -> base_index), 0, 0, 0);
    hypre_SetIndex((smg_data -> base_stride), 1, 1, 1);
 
@@ -103,13 +99,6 @@ hypre_SMGFinalize( void *smg_vdata )
       hypre_TFree(smg_data -> tb_l);
       hypre_TFree(smg_data -> tx_l);
  
-      hypre_TFree(smg_data -> base_index_l);
-      hypre_TFree(smg_data -> cindex_l);
-      hypre_TFree(smg_data -> findex_l);
-      hypre_TFree(smg_data -> base_stride_l);
-      hypre_TFree(smg_data -> cstride_l);
-      hypre_TFree(smg_data -> fstride_l);
-
       hypre_FinalizeTiming(smg_data -> time_index);
       hypre_TFree(smg_data);
    }

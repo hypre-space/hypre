@@ -138,7 +138,7 @@ char *argv[];
 
    grid = hypre_NewStructGrid(MPI_COMM_WORLD, dim);
    hypre_SetStructGridExtents(grid, ilower, iupper);
-   hypre_AssembleStructGrid(grid);
+   hypre_AssembleStructGrid(grid, NULL, NULL, NULL);
 
    /*-----------------------------------------------------------
     * Set up an overlapped grid structure
@@ -156,7 +156,7 @@ char *argv[];
    /* create an overlapped grid */
    overlapped_grid = hypre_NewStructGrid(MPI_COMM_WORLD, dim);
    hypre_SetStructGridExtents(overlapped_grid, ilower, iupper);
-   hypre_AssembleStructGrid(overlapped_grid);
+   hypre_AssembleStructGrid(overlapped_grid, NULL, NULL, NULL);
 
    /*-----------------------------------------------------------
     * Set up the stencil structure

@@ -86,7 +86,7 @@ hypre_ProjectBoxArray( hypre_BoxArray  *box_array,
                   
    int               i;
 
-   new_sbox_array = hypre_NewSBoxArray();
+   new_sbox_array = hypre_NewSBoxArray(hypre_BoxArraySize(box_array));
 
    hypre_ForBoxI(i, box_array)
       {

@@ -21,21 +21,17 @@
 
 typedef struct
 {
-   MPI_Comm         comm;
+   MPI_Comm             comm;
+                      
+   hypre_BoxArray      *boxes;        /* Array of boxes in this process */
+                      
+   int                  dim;          /* Number of grid dimensions */
+                      
+   int                  global_size;  /* Total number of grid points */
+   int                  local_size;   /* Number of grid points locally */
 
-   hypre_BoxArray  *all_boxes;    /* Array of all grid boxes in the grid */
-   int             *processes;    /* Processes corresponding to grid boxes */
-
-   hypre_BoxArray  *boxes;        /* Array of grid boxes in this process */
-   int             *box_ranks;    /* Ranks of grid boxes in this process */
-
-   int              dim;          /* Number of grid dimensions */
-
-   int              global_size;  /* Total number of grid points */
-   int              local_size;   /* Total number of points locally */
-
-   hypre_BoxNeighbors  **neighbors;  /* neighbors of boxes */
-   int                   max_neighbor_distance;
+   hypre_BoxNeighbors  *neighbors;    /* neighbors of boxes */
+   int                  max_distance;
 
 } hypre_StructGrid;
 
@@ -44,25 +40,17 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 #define hypre_StructGridComm(grid)          ((grid) -> comm)
-#define hypre_StructGridAllBoxes(grid)      ((grid) -> all_boxes)
-#define hypre_StructGridProcesses(grid)     ((grid) -> processes)
 #define hypre_StructGridBoxes(grid)         ((grid) -> boxes)
-#define hypre_StructGridBoxRanks(grid)      ((grid) -> box_ranks)
 #define hypre_StructGridDim(grid)           ((grid) -> dim)
 #define hypre_StructGridGlobalSize(grid)    ((grid) -> global_size)
 #define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)
 #define hypre_StructGridNeighbors(grid)     ((grid) -> neighbors)
-#define hypre_StructGridMaxNeighborDistance(grid) \
-((grid) -> max_neighbor_distance)
+#define hypre_StructGridMaxDistance(grid)   ((grid) -> max_distance)
 
-#define hypre_StructGridProcess(grid, i) \
-(hypre_StructGridProcesses(grid)[i])
 #define hypre_StructGridBox(grid, i) \
 (hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))
 #define hypre_StructGridNumBoxes(grid) \
 (hypre_BoxArraySize(hypre_StructGridBoxes(grid)))
-#define hypre_StructGridBoxRank(grid, i) \
-(hypre_StructGridBoxRanks(grid)[i])
 
 /*--------------------------------------------------------------------------
  * Looping macros:

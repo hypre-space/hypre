@@ -107,6 +107,7 @@ hypre_CyclicReductionInitialize( MPI_Comm  comm )
    cyc_red_data = hypre_CTAlloc(hypre_CyclicReductionData, 1);
 
    (cyc_red_data -> comm) = comm;
+   (cyc_red_data -> cdir) = 0;
    (cyc_red_data -> time_index)  = hypre_InitializeTiming("CyclicReduction");
 
    /* set defaults */
@@ -414,9 +415,13 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    hypre_SBoxArrayArray   *indt_sboxes;
    hypre_SBoxArrayArray   *dept_sboxes;
 
+   hypre_BoxArray         *boxes;
    hypre_BoxArray         *all_boxes;
-   hypre_SBoxArray        *coarse_points;
    int                    *processes;
+   int                    *box_ranks;
+   hypre_SBoxArray        *coarse_points;
+   int                     num_boxes;
+   int                     num_all_boxes;
  
    hypre_SBox             *sbox;
    hypre_Box              *box;
@@ -430,32 +435,28 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    int                     ierr = 0;
 
    /*-----------------------------------------------------
-    * Compute a preliminary num_levels value based on the grid
-    *-----------------------------------------------------*/
-
-   cdir = hypre_StructStencilDim(hypre_StructMatrixStencil(A)) - 1;
-
-   all_boxes = hypre_StructGridAllBoxes(hypre_StructMatrixGrid(A));
-   idmin = hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, 0), cdir);
-   idmax = hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, 0), cdir);
-   hypre_ForBoxI(i, all_boxes)
-      {
-         idmin = min(idmin,
-                     hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, i), cdir));
-         idmax = max(idmax,
-                     hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, i), cdir));
-      }
-   num_levels = hypre_Log2(idmax - idmin + 1) + 2;
-
-   (cyc_red_data -> cdir) = cdir;
-
-   /*-----------------------------------------------------
     * Set up coarse grids
     *-----------------------------------------------------*/
 
+   boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
+   hypre_GatherAllBoxes(comm, boxes, &all_boxes, &processes, &box_ranks);
+   num_boxes = hypre_BoxArraySize(boxes);
+   num_all_boxes = hypre_BoxArraySize(all_boxes);
+
+   /* Compute a preliminary num_levels value based on the grid */
+   idmin = hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, 0), cdir);
+   idmax = hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, 0), cdir);
+   for (i = 0; i < num_all_boxes; i++)
+   {
+      idmin =
+         min(idmin, hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, i), cdir));
+      idmax =
+         max(idmax, hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, i), cdir));
+   }
+   num_levels = hypre_Log2(idmax - idmin + 1) + 2;
+
    grid_l    = hypre_TAlloc(hypre_StructGrid *, num_levels);
    grid_l[0] = hypre_StructMatrixGrid(A);
-
    for (l = 0; ; l++)
    {
       /* set cindex and stride */
@@ -465,42 +466,52 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       /* check to see if we should coarsen */
       idmin = hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, 0), cdir);
       idmax = hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, 0), cdir);
-      hypre_ForBoxI(i, all_boxes)
-         {
-            idmin = min(idmin,
-                        hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, i), cdir));
-            idmax = max(idmax,
-                        hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, i), cdir));
-         }
+      for (i = 0; i < num_all_boxes; i++)
+      {
+         idmin =
+            min(idmin, hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, i), cdir));
+         idmax =
+            max(idmax, hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, i), cdir));
+      }
       if ( idmin == idmax )
       {
          /* stop coarsening */
          break;
       }
 
-      /* coarsen the grid */
-      coarse_points =
-         hypre_ProjectBoxArray(hypre_StructGridAllBoxes(grid_l[l]),
-                               cindex, stride);
-      all_boxes = hypre_NewBoxArray();
-      processes = hypre_TAlloc(int, hypre_SBoxArraySize(coarse_points));
-      hypre_ForSBoxI(i, coarse_points)
-         {
-            sbox = hypre_SBoxArraySBox(coarse_points, i);
-            box = hypre_DuplicateBox(hypre_SBoxBox(sbox));
-            hypre_CycRedMapFineToCoarse(hypre_BoxIMin(box), hypre_BoxIMin(box),
-                                        cindex, stride);
-            hypre_CycRedMapFineToCoarse(hypre_BoxIMax(box), hypre_BoxIMax(box),
-                                        cindex, stride);
-            hypre_AppendBox(box, all_boxes);
-            processes[i] = hypre_StructGridProcess(grid_l[l], i);
-         }
-      grid_l[l+1] =
-         hypre_NewAssembledStructGrid(comm, hypre_StructGridDim(grid_l[l]),
-                                      all_boxes, processes);
+      /* coarsen the grid by coarsening all_boxes (reduces communication) */
+      coarse_points = hypre_ProjectBoxArray(all_boxes, cindex, stride);
+      hypre_FreeBoxArray(all_boxes);
+      all_boxes = hypre_NewBoxArray(num_all_boxes);
+      for (i = 0; i < num_all_boxes; i++)
+      {
+         sbox = hypre_SBoxArraySBox(coarse_points, i);
+         box = hypre_DuplicateBox(hypre_SBoxBox(sbox));
+         hypre_CycRedMapFineToCoarse(hypre_BoxIMin(box), hypre_BoxIMin(box),
+                                     cindex, stride);
+         hypre_CycRedMapFineToCoarse(hypre_BoxIMax(box), hypre_BoxIMax(box),
+                                     cindex, stride);
+         hypre_AppendBox(box, all_boxes);
+      }
       hypre_FreeSBoxArray(coarse_points);
+
+      /* compute local boxes */
+      boxes = hypre_NewBoxArray(num_boxes);
+      for (i = 0; i < num_boxes; i++)
+      {
+         box = hypre_DuplicateBox(hypre_BoxArrayBox(all_boxes, box_ranks[i]));
+         hypre_AppendBox(box, boxes);
+      }
+
+      grid_l[l+1] = hypre_NewStructGrid(comm, hypre_StructGridDim(grid_l[l]));
+      hypre_SetStructGridBoxes(grid_l[l+1], boxes);
+      hypre_AssembleStructGrid(grid_l[l+1], all_boxes, processes, box_ranks);
    }
    num_levels = l + 1;
+
+   hypre_FreeBoxArray(all_boxes);
+   hypre_TFree(processes);
+   hypre_TFree(box_ranks);
 
    (cyc_red_data -> num_levels)      = num_levels;
    (cyc_red_data -> grid_l)          = grid_l;
@@ -523,8 +534,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      hypre_CycRedSetFIndex(base_index, base_stride, l, cdir, findex);
       hypre_CycRedSetCIndex(base_index, base_stride, l, cdir, cindex);
+      hypre_CycRedSetFIndex(base_index, base_stride, l, cdir, findex);
       hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
 
       fine_points_l[l]   =
@@ -587,8 +598,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      hypre_CycRedSetFIndex(base_index, base_stride, l, cdir, findex);
       hypre_CycRedSetCIndex(base_index, base_stride, l, cdir, cindex);
+      hypre_CycRedSetFIndex(base_index, base_stride, l, cdir, findex);
       hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
 
       hypre_GetComputeInfo(&send_boxes, &recv_boxes,

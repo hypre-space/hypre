@@ -49,14 +49,15 @@ hypre_NewSBox( hypre_Box   *box,
  *--------------------------------------------------------------------------*/
 
 hypre_SBoxArray *
-hypre_NewSBoxArray( )
+hypre_NewSBoxArray( int alloc_size )
 {
    hypre_SBoxArray *sbox_array;
 
    sbox_array = hypre_TAlloc(hypre_SBoxArray, 1);
 
-   hypre_SBoxArraySBoxes(sbox_array) = NULL;
+   hypre_SBoxArraySBoxes(sbox_array) = hypre_CTAlloc(hypre_SBox *, alloc_size);
    hypre_SBoxArraySize(sbox_array)   = 0;
+   hypre_SBoxArrayAllocSize(sbox_array) = alloc_size;
 
    return sbox_array;
 }
@@ -78,7 +79,7 @@ hypre_NewSBoxArrayArray( int size )
 
    for (i = 0; i < size; i++)
       hypre_SBoxArrayArraySBoxArray(sbox_array_array, i) =
-         hypre_NewSBoxArray();
+         hypre_NewSBoxArray(0);
    hypre_SBoxArrayArraySize(sbox_array_array) = size;
 
    return sbox_array_array;
@@ -195,30 +196,17 @@ hypre_SBoxArray *
 hypre_DuplicateSBoxArray( hypre_SBoxArray *sbox_array )
 {
    hypre_SBoxArray  *new_sbox_array;
-   hypre_SBox      **new_sboxes;
-   int               new_size;
 
-   hypre_SBox      **sboxes;
-   int               i, data_sz;
+   hypre_SBox      **sboxes = hypre_SBoxArraySBoxes(sbox_array);
+   int               size   = hypre_SBoxArraySize(sbox_array);
 
-   new_sbox_array = hypre_NewSBoxArray();
-   new_sboxes = NULL;
-   new_size = hypre_SBoxArraySize(sbox_array);
+   int               i;
 
-   if (new_size)
-   {
-      data_sz = ((((new_size - 1) / hypre_SBoxArrayBlocksize) + 1) *
-                 hypre_SBoxArrayBlocksize);
-      new_sboxes = hypre_CTAlloc(hypre_SBox *, data_sz);
-
-      sboxes = hypre_SBoxArraySBoxes(sbox_array);
-
-      for (i = 0; i < new_size; i++)
-	 new_sboxes[i] = hypre_DuplicateSBox(sboxes[i]);
-   }
-
-   hypre_SBoxArraySBoxes(new_sbox_array) = new_sboxes;
-   hypre_SBoxArraySize(new_sbox_array)   = new_size;
+   new_sbox_array = hypre_NewSBoxArray(size);
+   hypre_ForSBoxI(i, sbox_array)
+      {
+         hypre_AppendSBox(hypre_DuplicateSBox(sboxes[i]), new_sbox_array);
+      }
 
    return new_sbox_array;
 }
@@ -287,7 +275,7 @@ hypre_ConvertToSBoxArray( hypre_BoxArray *box_array )
    hypre_SBox      *sbox;
    int              i;
 
-   sbox_array = hypre_NewSBoxArray();
+   sbox_array = hypre_NewSBoxArray(hypre_BoxArraySize(box_array));
    hypre_ForBoxI(i, box_array)
       {
          sbox = hypre_ConvertToSBox(hypre_BoxArrayBox(box_array, i));

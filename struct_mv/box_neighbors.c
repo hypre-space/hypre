@@ -51,86 +51,128 @@ hypre_FreeRankLink( hypre_RankLink  *rank_link )
 /*--------------------------------------------------------------------------
  * hypre_NewBoxNeighbors:
  *
- * Finds boxes that are "near" the box given by `box_rank', where near
- * is defined by max_distance.
+ * Finds boxes that are "near" the boxes given by `local_ranks',
+ * where near is defined by max_distance.
  *--------------------------------------------------------------------------*/
 
 hypre_BoxNeighbors *
-hypre_NewBoxNeighbors( hypre_BoxArray  *boxes,
-                       int              box_rank,
+hypre_NewBoxNeighbors( int             *local_ranks,
+                       int              num_local,
+                       hypre_BoxArray  *boxes,
+                       int             *processes,
                        int              max_distance )
 {
+   hypre_BoxArray      *new_boxes;
+   int                 *new_processes;
+   int                 *new_boxes_ranks;
+   int                  num_new_boxes;
+
    hypre_BoxNeighbors  *neighbors;
    hypre_RankLink      *rank_link;
 
-   hypre_Box           *box;
+   hypre_Box           *local_box;
    hypre_Box           *neighbor_box;
 
    int                  distance;
    int                  distance_index[3];
 
    int                  diff;
-   int                  i, d;
+   int                  i, j, d;
 
-   /*-----------------------------------------------------------------------
-    * Initialize the hypre_BoxNeighbors structure
-    *-----------------------------------------------------------------------*/
+   /*---------------------------------------------
+    * Find neighboring boxes
+    *---------------------------------------------*/
 
    neighbors = hypre_CTAlloc(hypre_BoxNeighbors, 1);
+   hypre_BoxNeighborsRankLinks(neighbors) =
+      hypre_CTAlloc(hypre_RankLinkArray, num_local);
 
-   hypre_BoxNeighborsBoxes(neighbors)       = boxes;
-   hypre_BoxNeighborsBoxRank(neighbors)     = box_rank;
-   hypre_BoxNeighborsMaxDistance(neighbors) = max_distance;
-
-   /*-----------------------------------------------------------------------
-    * Find neighboring boxes
-    *-----------------------------------------------------------------------*/
-
-   box = hypre_BoxArrayBox(boxes, box_rank);
+   new_boxes_ranks = hypre_TAlloc(int, hypre_BoxArraySize(boxes));
+   num_new_boxes = 0;
+   new_boxes_ranks[num_new_boxes] = -1;
    hypre_ForBoxI(i, boxes)
       {
-         if (i != box_rank)
+         for (j = 0; j < num_local; j++)
          {
-            neighbor_box = hypre_BoxArrayBox(boxes, i);
-
-            /* compute distance info */
-            distance = 0;
-            for (d = 0; d < 3; d++)
+            if (i != local_ranks[j])
             {
-               distance_index[d] = 0;
+               local_box = hypre_BoxArrayBox(boxes, local_ranks[j]);
+               neighbor_box = hypre_BoxArrayBox(boxes, i);
 
-               diff = hypre_BoxIMinD(neighbor_box, d) - hypre_BoxIMaxD(box, d);
-               if (diff > 0)
+               /* compute distance info */
+               distance = 0;
+               for (d = 0; d < 3; d++)
                {
-                  distance_index[d] = 1;
-                  distance = max(distance, diff);
+                  distance_index[d] = 0;
+
+                  diff = hypre_BoxIMinD(neighbor_box, d) -
+                     hypre_BoxIMaxD(local_box, d);
+                  if (diff > 0)
+                  {
+                     distance_index[d] = 1;
+                     distance = max(distance, diff);
+                  }
+
+                  diff = hypre_BoxIMinD(local_box, d) -
+                     hypre_BoxIMaxD(neighbor_box, d);
+                  if (diff > 0)
+                  {
+                     distance_index[d] = -1;
+                     distance = max(distance, diff);
+                  }
                }
 
-               diff = hypre_BoxIMinD(box, d) - hypre_BoxIMaxD(neighbor_box, d);
-               if (diff > 0)
+               /* create new rank_link */
+               if (distance <= max_distance)
                {
-                  distance_index[d] = -1;
-                  distance = max(distance, diff);
-               }
-            }
+                  new_boxes_ranks[num_new_boxes] = i;
 
-            /* create new rank_link */
-            if (distance <= max_distance)
-            {
-               rank_link = hypre_NewRankLink(i);
-               hypre_RankLinkNext(rank_link) =
-                  hypre_BoxNeighborsRankLink(neighbors,
+                  rank_link = hypre_NewRankLink(num_new_boxes);
+                  hypre_RankLinkNext(rank_link) =
+                     hypre_BoxNeighborsRankLink(neighbors, j,
+                                                distance_index[0],
+                                                distance_index[1],
+                                                distance_index[2]);
+                  hypre_BoxNeighborsRankLink(neighbors, j,
                                              distance_index[0],
                                              distance_index[1],
-                                             distance_index[2]);
-               hypre_BoxNeighborsRankLink(neighbors,
-                                          distance_index[0],
-                                          distance_index[1],
-                                          distance_index[2]) = rank_link;
+                                             distance_index[2]) = rank_link;
+               }
             }
+         }
+
+         if (new_boxes_ranks[num_new_boxes] > -1)
+         {
+            num_new_boxes++;
+            new_boxes_ranks[num_new_boxes] = -1;
          }
       }
 
+   /*---------------------------------------------
+    * Create new_boxes and new_processes
+    *---------------------------------------------*/
+
+   new_boxes = hypre_NewBoxArray(num_new_boxes);
+   new_processes = hypre_TAlloc(int, num_new_boxes);
+   for (i = 0; i < num_new_boxes; i++)
+   {
+      neighbor_box =
+         hypre_DuplicateBox(hypre_BoxArrayBox(boxes, new_boxes_ranks[i]));
+      hypre_AppendBox(neighbor_box, new_boxes);
+      new_processes[i] = processes[new_boxes_ranks[i]];
+   }
+
+   hypre_TFree(new_boxes_ranks);
+
+   /*---------------------------------------------
+    * Create neighbors
+    *---------------------------------------------*/
+
+   hypre_BoxNeighborsNumLocal(neighbors)    = num_local;
+   hypre_BoxNeighborsBoxes(neighbors)       = new_boxes;
+   hypre_BoxNeighborsProcesses(neighbors)   = new_processes;
+   hypre_BoxNeighborsMaxDistance(neighbors) = max_distance;
+   
    return neighbors;
 }
 
@@ -144,28 +186,35 @@ hypre_FreeBoxNeighbors( hypre_BoxNeighbors  *neighbors )
    hypre_RankLink  *rank_link;
    hypre_RankLink  *next_rank_link;
 
-   int              i, j, k;
+   int              b, i, j, k;
 
    int              ierr = 0;
 
    if (neighbors)
    {
-      for (k = -1; k <= 1; k++)
+      for (b = 0; b < hypre_BoxNeighborsNumLocal(neighbors); b++)
       {
-         for (j = -1; j <= 1; j++)
+         for (k = -1; k <= 1; k++)
          {
-            for (i = -1; i <= 1; i++)
+            for (j = -1; j <= 1; j++)
             {
-               rank_link = hypre_BoxNeighborsRankLink(neighbors, i, j, k);
-               while (rank_link)
+               for (i = -1; i <= 1; i++)
                {
-                  next_rank_link = hypre_RankLinkNext(rank_link);
-                  hypre_FreeRankLink(rank_link);
-                  rank_link = next_rank_link;
+                  rank_link =
+                     hypre_BoxNeighborsRankLink(neighbors, b, i, j, k);
+                  while (rank_link)
+                  {
+                     next_rank_link = hypre_RankLinkNext(rank_link);
+                     hypre_FreeRankLink(rank_link);
+                     rank_link = next_rank_link;
+                  }
                }
             }
          }
       }
+      hypre_FreeBoxArray(hypre_BoxNeighborsBoxes(neighbors));
+      hypre_TFree(hypre_BoxNeighborsProcesses(neighbors));
+      hypre_TFree(hypre_BoxNeighborsRankLinks(neighbors));
       hypre_TFree(neighbors);
    }
 

@@ -50,10 +50,11 @@ typedef struct
 {
    hypre_Box  **boxes;         /* Array of pointers to boxes */
    int          size;          /* Size of box array */
+   int          alloc_size;
 
 } hypre_BoxArray;
 
-#define hypre_BoxArrayBlocksize 10
+#define hypre_BoxArrayBlocksize 5
 
 /*--------------------------------------------------------------------------
  * hypre_BoxArrayArray:
@@ -139,9 +140,10 @@ typedef struct
  * Accessor macros: hypre_BoxArray
  *--------------------------------------------------------------------------*/
 
-#define hypre_BoxArrayBoxes(box_array)  ((box_array) -> boxes)
-#define hypre_BoxArrayBox(box_array, i) ((box_array) -> boxes[(i)])
-#define hypre_BoxArraySize(box_array)   ((box_array) -> size)
+#define hypre_BoxArrayBoxes(box_array)     ((box_array) -> boxes)
+#define hypre_BoxArrayBox(box_array, i)    ((box_array) -> boxes[(i)])
+#define hypre_BoxArraySize(box_array)      ((box_array) -> size)
+#define hypre_BoxArrayAllocSize(box_array) ((box_array) -> alloc_size)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_BoxArrayArray

@@ -68,7 +68,7 @@ hypre_IntersectBoxArrays( hypre_BoxArray *box_array1,
 
    int              i1, i2;
 
-   box_array = hypre_NewBoxArray();
+   box_array = hypre_NewBoxArray(0);
 
    hypre_ForBoxI(i1, box_array1)
       {
@@ -119,7 +119,7 @@ hypre_SubtractBoxes( hypre_Box *box1,
       if ( (hypre_BoxIMinD(box2, d) > hypre_BoxIMaxD(box1, d)) ||
 	   (hypre_BoxIMaxD(box2, d) < hypre_BoxIMinD(box1, d)) )
       {
-	 box_array = hypre_NewBoxArray();
+	 box_array = hypre_NewBoxArray(1);
 	 hypre_AppendBox(hypre_DuplicateBox(box1), box_array);
 	 return box_array;
       }
@@ -129,7 +129,7 @@ hypre_SubtractBoxes( hypre_Box *box1,
     * create BoxArray
     *------------------------------------------------------*/
 
-   box_array = hypre_NewBoxArray();
+   box_array = hypre_NewBoxArray(0);
    cutbox = hypre_DuplicateBox(box1);
 
    /* cut cutbox in x, then y, then z */
@@ -229,7 +229,7 @@ hypre_UnionBoxArray( hypre_BoxArray *boxes )
 
    if (hypre_BoxArraySize(boxes) == 0)
    {
-      box_union = hypre_NewBoxArray();
+      box_union = hypre_NewBoxArray(0);
       return box_union;
    }
       
@@ -395,7 +395,7 @@ hypre_UnionBoxArray( hypre_BoxArray *boxes )
     * Set up the box_union BoxArray
     *------------------------------------------------------*/
 
-   box_union = hypre_NewBoxArray();
+   box_union = hypre_NewBoxArray(0);
 
    index = 0;
    for (k = 0; k < block_sz[2]; k++)

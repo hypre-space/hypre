@@ -34,26 +34,11 @@ typedef struct
    int                   num_pre_relax;  /* number of pre relaxation sweeps */
    int                   num_post_relax; /* number of post relaxation sweeps */
 
-   /* base coarsening info */
    int                   cdir;  /* coarsening direction */
-   int                   ci;    /* 1st coarse index in coarsening direction */
-   int                   fi;    /* 1st fine index in coarsening direction */
-   int                   cs;    /* coarse index stride */
-   int                   fs;    /* fine index stride */
 
    /* base index space info */
    hypre_Index           base_index;
    hypre_Index           base_stride;
-
-   /* base index space info for each grid level */
-   hypre_Index          *base_index_l;
-   hypre_Index          *base_stride_l;
-
-   /* coarsening info for each grid level */
-   hypre_Index          *cindex_l;
-   hypre_Index          *findex_l;
-   hypre_Index          *cstride_l;
-   hypre_Index          *fstride_l;
 
    hypre_StructGrid    **grid_l;
                     
@@ -108,6 +93,40 @@ typedef struct
       hypre_IndexY(index1) * hypre_IndexY(cstride) + hypre_IndexY(cindex);\
    hypre_IndexZ(index2) =\
       hypre_IndexZ(index1) * hypre_IndexZ(cstride) + hypre_IndexZ(cindex);\
+}
+
+#define hypre_SMGSetBIndex(base_index, base_stride, level, bindex) \
+{\
+   if (level > 0)\
+      hypre_SetIndex(bindex, 0, 0, 0);\
+   else\
+      hypre_CopyIndex(base_index, bindex);\
+}
+
+#define hypre_SMGSetBStride(base_index, base_stride, level, bstride) \
+{\
+   if (level > 0)\
+      hypre_SetIndex(bstride, 1, 1, 1);\
+   else\
+      hypre_CopyIndex(base_stride, bstride);\
+}
+
+#define hypre_SMGSetCIndex(base_index, base_stride, level, cdir, cindex) \
+{\
+   hypre_SMGSetBIndex(base_index, base_stride, level, cindex);\
+   hypre_IndexD(cindex, cdir) = 0;\
+}
+
+#define hypre_SMGSetFIndex(base_index, base_stride, level, cdir, findex) \
+{\
+   hypre_SMGSetBIndex(base_index, base_stride, level, findex);\
+   hypre_IndexD(findex, cdir) = 1;\
+}
+
+#define hypre_SMGSetStride(base_index, base_stride, level, cdir, stride) \
+{\
+   hypre_SMGSetBStride(base_index, base_stride, level, stride);\
+   hypre_IndexD(stride, cdir) = 2;\
 }
 
 #endif

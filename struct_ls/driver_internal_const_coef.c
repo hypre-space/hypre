@@ -123,7 +123,7 @@ char *argv[];
 
    grid = hypre_NewStructGrid(MPI_COMM_WORLD, dim);
    hypre_SetStructGridExtents(grid, ilower, iupper);
-   hypre_AssembleStructGrid(grid);
+   hypre_AssembleStructGrid(grid, NULL, NULL, NULL);
 
    /*-----------------------------------------------------------
     * Set up the stencil structure

@@ -36,7 +36,6 @@ hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
 
    /* internal variables */
    hypre_BoxArray          *boxes;
-   hypre_BoxArray          *all_boxes;
 
    hypre_Box               *box0;
 
@@ -59,8 +58,7 @@ hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
     * Extract needed grid info
     *------------------------------------------------------*/
 
-   boxes     = hypre_StructGridBoxes(grid);
-   all_boxes = hypre_StructGridAllBoxes(grid);
+   boxes = hypre_StructGridBoxes(grid);
 
    /*------------------------------------------------------
     * Get communication info
@@ -85,7 +83,7 @@ hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
          box_aa0 = hypre_GrowBoxArrayByStencil(recv_box_a, stencil, 1);
 
          /* intersect `box_aa0' with `boxes' to create `dept_box_a' */
-         dept_box_a = hypre_NewBoxArray();
+         dept_box_a = hypre_NewBoxArray(0);
          hypre_ForBoxArrayI(j, box_aa0)
             {
                box_a0 = hypre_BoxArrayArrayBoxArray(box_aa0, i);
@@ -147,7 +145,7 @@ hypre_GetComputeInfo( hypre_BoxArrayArray  **send_boxes_ptr,
          /* subtract `dept_box_a' from `indt_box_a' */
          hypre_ForBoxI(j, dept_box_a)
             {
-               box_a0 = hypre_NewBoxArray();
+               box_a0 = hypre_NewBoxArray(0);
 
                hypre_ForBoxI(k, indt_box_array)
                   {
