@@ -77,7 +77,10 @@ char *argv[];
       fclose(fp);
 
       WriteProblem(GlobalsLogFileName, problem);
-      WriteSolver(GlobalsLogFileName, solver);
+      if (SolverType(solver) != SOLVER_AMG)
+      {
+         WriteSolver(GlobalsLogFileName, solver);
+      }
    }
 
    /*-------------------------------------------------------
@@ -98,9 +101,14 @@ char *argv[];
    /* call AMG */
    if (SolverType(solver) == SOLVER_AMG)
    {
-      amg_Setup(A, amg_data);
+      int setup_err_flag;
+      int solve_err_flag;
 
-      amg_Solve(u, f, stop_tolerance, amg_data);
+      setup_err_flag = amg_Setup(A, amg_data);
+      if (setup_err_flag != 0) printf("setup error = %d\n",setup_err_flag);
+
+      solve_err_flag = amg_Solve(u, f, stop_tolerance, amg_data);
+      if (solve_err_flag != 0) printf("solve error = %d\n",solve_err_flag);
    }
 
    /* call Jacobi */

@@ -23,7 +23,7 @@
 
 typedef struct
 {
-   void   (*precond)();
+   int    (*precond)();
    void    *precond_data;
 
    Vector  *s;

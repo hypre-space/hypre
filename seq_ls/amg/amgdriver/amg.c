@@ -44,9 +44,7 @@ char     *log_file_name;
    amg_SetIERLX(SolverAMGIERLX(solver), amg_data);
    amg_SetIURLX(SolverAMGIURLX(solver), amg_data);
    				    
-   amg_SetIOutDat(SolverAMGIOutDat(solver), amg_data);
-
-   amg_SetLogFileName(log_file_name, amg_data);
+   amg_SetLogging(SolverAMGIOutDat(solver), log_file_name, amg_data);
 
    amg_SetNumUnknowns(ProblemNumUnknowns(problem), amg_data);
    amg_SetNumPoints(ProblemNumPoints(problem), amg_data);

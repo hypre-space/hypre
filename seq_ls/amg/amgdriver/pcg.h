@@ -31,7 +31,7 @@ typedef struct
    Vector  *s;
    Vector  *r;
 
-   void   (*precond)();
+   int    (*precond)();
    void    *precond_data;
 
    char    *log_file_name;

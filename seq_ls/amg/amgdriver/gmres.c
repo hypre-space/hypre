@@ -53,7 +53,7 @@ N_Vector  z_arg;
 int       lr_arg;
 {
    SPGMRPData  *P_data = P_data_arg;
-   void       (*precond)()   = (P_data -> precond);
+   int        (*precond)()   = (P_data -> precond);
    void        *precond_data = (P_data -> precond_data);
    Vector  *s                = (P_data -> s);
    Vector  *r                = (P_data -> r);
@@ -156,7 +156,7 @@ void    *data_arg;
 
 void      GMRESSetup(A, precond, precond_data, data)
 Matrix   *A;
-void    (*precond)();
+int     (*precond)();
 void     *precond_data;
 void     *data;
 {

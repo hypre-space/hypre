@@ -23,4 +23,3 @@ solver.c
 solver.h
 wjacobi.c
 wjacobi.h
-write.c

@@ -21,7 +21,7 @@
  * WJacobi
  *--------------------------------------------------------------------------*/
 
-void   	 WJacobi(x, b, tol, data)
+int    	 WJacobi(x, b, tol, data)
 Vector 	*x;
 Vector 	*b;
 double 	 tol;

@@ -51,7 +51,7 @@ void    *data;
    Vector    *s            = PCGDataS(pcg_data);
    Vector    *r            = PCGDataR(pcg_data);
 
-   void     (*precond)()   = PCGDataPrecond(pcg_data);
+   int      (*precond)()   = PCGDataPrecond(pcg_data);
    void      *precond_data = PCGDataPrecondData(pcg_data);
 
    double     alpha, beta;
@@ -206,7 +206,7 @@ void    *data;
 
 void      PCGSetup(A, precond, precond_data, data)
 Matrix   *A;
-void    (*precond)();
+int     (*precond)();
 void     *precond_data;
 void     *data;
 {

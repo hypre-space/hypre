@@ -20,13 +20,13 @@ void FreeGlobals P((void ));
 int SPGMRATimes P((void *A_data_arg , N_Vector v_arg , N_Vector z_arg ));
 int SPGMRPSolve P((void *P_data_arg , N_Vector r_arg , N_Vector z_arg , int lr_arg ));
 void GMRES P((Vector *x_arg , Vector *b_arg , double tol_arg , void *data_arg ));
-void GMRESSetup P((Matrix *A , void (*precond )(), void *precond_data , void *data ));
+void GMRESSetup P((Matrix *A , int (*precond )(), void *precond_data , void *data ));
 void *NewGMRESData P((Problem *problem , Solver *solver , char *log_file_name ));
 void FreeGMRESData P((void *data ));
 
 /* pcg.c */
 void PCG P((Vector *x , Vector *b , double tol , void *data ));
-void PCGSetup P((Matrix *A , void (*precond )(), void *precond_data , void *data ));
+void PCGSetup P((Matrix *A , int (*precond )(), void *precond_data , void *data ));
 void *NewPCGData P((Problem *problem , Solver *solver , char *log_file_name ));
 void FreePCGData P((void *data ));
 
@@ -49,14 +49,10 @@ void FreeSolver P((Solver *solver ));
 void WriteSolver P((char *file_name , Solver *solver ));
 
 /* wjacobi.c */
-void WJacobi P((Vector *x , Vector *b , double tol , void *data ));
+int WJacobi P((Vector *x , Vector *b , double tol , void *data ));
 void WJacobiSetup P((Matrix *A , void *data ));
 void *NewWJacobiData P((Problem *problem , Solver *solver , char *log_file_name ));
 void FreeWJacobiData P((void *data ));
-
-/* write.c */
-void WriteYSMP P((char *file_name , Matrix *matrix ));
-void WriteVec P((char *file_name , Vector *vector ));
 
 #undef P
  
