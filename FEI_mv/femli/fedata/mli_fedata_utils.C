@@ -12,10 +12,9 @@
  **************************************************************************
  **************************************************************************/
 
+#include <string.h>
 #include <iostream.h>
 #include <stdio.h>
-#include <string.h>
-#include <mpi.h>
 #include "fedata/mli_fedata_utils.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
 #include "util/mli_utils.h"
@@ -1194,7 +1193,7 @@ void MLI_FEDataAgglomerateElemsLocalOld(MLI_Matrix *elemMatrix,
             {
                elemIndex = macroList[jj];
                macroLabels[elemIndex] = nMacros;
-#if 1
+#if 0
                printf("Macroelement %4d has element %4d\n",nMacros,elemIndex);
 #endif
             }

@@ -26,6 +26,7 @@
 #include "vector/mli_vector.h"
 #include "amgs/mli_method_amgsa.h"
 #include "util/mli_utils.h"
+#include "solver/mli_solver.h"
  
 // *********************************************************************
 // local defines
@@ -59,10 +60,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
    hypre_ParCSRMatrix     *Amat, *A2mat, *Pmat, *Gmat, *Jmat, *Pmat2;
    hypre_ParCSRCommPkg    *comm_pkg;
    hypre_ParCSRCommHandle *comm_handle;
-   hypre_ParVector        *hypreP, *hypreP2;
-   hypre_Vector           *hyprePLocal, *hyprePLocal2;
    MLI_Matrix             *mli_Pmat, *mli_Jmat, *mli_A2mat;
-   MLI_Vector             *mli_vecP, *mli_vecP2;
    MLI_Function           *func_ptr;
    MPI_Comm  comm;
    int       i, j, mypid, num_procs, A_start_row, A_end_row, A_global_nrows;
@@ -76,12 +74,15 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
    int       J_local_nrows, cindex, max_nnz, max_nnz_diag, max_nnz_offd;
    int       *new_col_ind, *K_diag_i, *K_offd_i, old_index, old_offset;
    int       blk_size, max_agg_size, *agg_cnt_array, **agg_ind_array;
-   int       agg_size, info;
+   int       agg_size, info, row_leng, *cols, nzcnt;
    double    *col_val, **P_vecs_ext, *send_buf, **P_vecs, max_eigen=0, alpha;
    double    *J_diag_data, *J_offd_data, *K_diag_data, *K_offd_data, cvalue;
    double    *new_col_val, *new_col_itmp, *q_array, *new_null, *r_array;
-   double    *hyprePData, *hyprePData2;
    char      param_string[200];
+   MLI_Vector      *mli_vecP, *mli_vecP2;
+   hypre_ParVector *hypreP, *hypreP2;
+   hypre_Vector    *hyprePLocal, *hyprePLocal2;
+   double          *hyprePData, *hyprePData2;
 
    /*-----------------------------------------------------------------
     * fetch matrix and machine information
@@ -96,7 +97,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
     * fetch other matrix information
     *-----------------------------------------------------------------*/
 
-   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) Amat, &partition);
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) Amat,&partition);
    A_start_row    = partition[mypid];
    A_end_row      = partition[mypid+1] - 1;
    A_global_nrows = partition[num_procs];
@@ -155,7 +156,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
    P_start_col    = partition[mypid];
    P_global_ncols = partition[num_procs];
    free( partition );
-   if ( P_global_ncols < min_coarse_size ) 
+   if ( P_global_ncols < min_coarse_size || P_global_ncols < num_procs ) 
    {
       (*Pmat_out) = NULL;
       delete [] node2aggr;
@@ -183,10 +184,33 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
    else eqn2aggr = node2aggr;
  
    /*-----------------------------------------------------------------
+    * reset row corresponding to boundary conditions
+    *-----------------------------------------------------------------*/
+
+/*
+   if ( nullspace_vec != NULL )
+   {
+      for ( irow = 0; irow < A_local_nrows; irow++ )
+      {
+         row_num = A_start_row + irow;
+         hypre_ParCSRMatrixGetRow(Amat,row_num,&row_leng,&cols,NULL);
+         if ( row_leng == 1 && cols[0] == row_num )
+         {
+            for ( i = 0; i < nullspace_dim; i++ )
+               nullspace_vec[irow+i*A_local_nrows] = 0.0;
+            eqn2aggr[irow] = -1;      
+         }
+         hypre_ParCSRMatrixRestoreRow(Amat,row_num,&row_leng,&cols,NULL);
+      }
+   }
+*/
+
+   /*-----------------------------------------------------------------
     * compute smoothing factor for the prolongation smoother
     *-----------------------------------------------------------------*/
 
-   if ( P_weight != 0.0 || pre_smoother == MLI_SOLVER_MLS_ID ||
+   if ( (curr_level > 0 && P_weight != 0.0) 
+        || pre_smoother == MLI_SOLVER_MLS_ID ||
         postsmoother == MLI_SOLVER_MLS_ID || init_aggr != NULL )
    {
       MLI_Utils_ComputeSpectralRadius(Amat, &max_eigen);
@@ -194,32 +218,6 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
          printf("\tEstimated spectral radius of A = %e\n", max_eigen);
       assert ( max_eigen > 0.0 );
       alpha = P_weight / max_eigen;
-   }
-
-   /*-----------------------------------------------------------------
-    * if element-based method is used, smooth the prolongator first
-    *-----------------------------------------------------------------*/
-
-   if ( init_aggr != NULL )
-   {
-      mli_vecP = mli_Amat->createVector();
-      hypreP = (hypre_ParVector *) mli_vecP->getVector();
-      hyprePLocal = hypre_ParVectorLocalVector( hypreP );
-      hyprePData = hypre_VectorData( hyprePLocal );
-      mli_vecP2 = mli_Amat->createVector();
-      hypreP2 = (hypre_ParVector *) mli_vecP2->getVector();
-      hyprePLocal2 = hypre_ParVectorLocalVector( hypreP2 );
-      hyprePData2 = hypre_VectorData( hyprePLocal2 );
-      for ( i = 0; i < nullspace_dim; i++ )
-      {
-         for ( irow = 0; irow < P_local_nrows; irow++ )
-            hyprePData[irow] = nullspace_vec[i*P_local_nrows+irow];
-         hypre_ParCSRMatrixMatvec(1.0, Amat, hypreP, 0.0, hypreP2);
-         for ( irow = 0; irow < P_local_nrows; irow++ )
-            nullspace_vec[i*P_local_nrows+irow] -= (alpha*hyprePData2[irow]);
-      }
-      delete mli_vecP;
-      delete mli_vecP2;
    }
 
    /*-----------------------------------------------------------------
@@ -304,7 +302,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
          {
             cout << "Aggregation ERROR : underdetermined system in QR.\n";
             cout << "            error on Proc " << mypid << endl;
-            cout << "            error on aggr " << i << endl;
+            cout << "            error on aggr " << i << " (" << naggr << ")\n";
             cout << "            aggr size is  " << agg_size << endl;
             exit(1);
          }
@@ -316,24 +314,27 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
             for ( k = 0; k < nullspace_dim; k++ ) 
                q_array[agg_size*k+j] = P_vecs[k][agg_ind_array[i][j]]; 
          }
-if (mypid == -1 && i == 0)
-{
-for ( j = 0; j < agg_size; j++ ) 
-{
-printf("%d, %d : ", mypid, agg_ind_array[i][j]);
-for ( k = 0; k < nullspace_dim; k++ ) 
-printf(" %10.3e", q_array[agg_size*k+j]);
-printf("\n");
-}
-}
 
          /* ------ call QR function ------ */
 
+#if 0
+         if ( mypid == 0 )
+         {
+            for ( j = 0; j < agg_size; j++ ) 
+            {
+               printf("%5d : (size=%d)\n", agg_ind_array[i][j], agg_size);
+               for ( k = 0; k < nullspace_dim; k++ ) 
+                  printf("%10.3e ", q_array[agg_size*k+j]);
+               printf("\n");
+            }
+         }
+#endif
          info = MLI_Utils_QR(q_array, r_array, agg_size, nullspace_dim); 
          if (info != 0)
          {
-            cout << mypid << " : Aggregation ERROR : QR returned a non-zero " 
-                 << i << " " << agg_size << endl;
+            cout << mypid << "Aggregation WARNING : QR returned a non-zero " 
+                 << i << " size = " << agg_size << ", info = " << info << endl;
+#if 0
             for ( j = 0; j < agg_size; j++ ) 
             {
                printf("%5d : ", agg_ind_array[i][j]);
@@ -341,7 +342,7 @@ printf("\n");
                   printf("%10.3e ", q_array[agg_size*k+j]);
                printf("\n");
             }
-            exit(1);
+#endif
          }
 
          /* ------ after QR, put the R into the next null space ------ */
@@ -372,11 +373,24 @@ printf("\n");
    nullspace_vec = new_null;
    curr_node_dofs = nullspace_dim;
 
+#if 0
+   FILE *fp;
+   sprintf(param_string, "null%d.%d", curr_level, mypid);
+   fp = fopen( param_string, "w" );
+   for ( i = 0; i < naggr*nullspace_dim; i++ ) 
+   {
+      for ( j = 0; j < nullspace_dim; j++ ) 
+         fprintf(fp, "%25.16e ", new_null[naggr*nullspace_dim*j+i]);
+      fprintf(fp, "\n");
+   }
+   fclose(fp);
+#endif
+
    /*-----------------------------------------------------------------
     * if damping factor for prolongator smoother = 0
     *-----------------------------------------------------------------*/
 
-   if ( P_weight == 0.0 )
+   if ( curr_level == 0 || P_weight == 0.0 )
    {
       /*--------------------------------------------------------------
        * create and initialize Pmat 
@@ -399,13 +413,17 @@ printf("\n");
       {
          if ( P_cols[irow] >= 0 )
          {
+            nzcnt = 0;
             for ( j = 0; j < nullspace_dim; j++ )
             {
-               col_ind[j] = P_cols[irow] + j;
-               col_val[j] = P_vecs[j][irow];
+               if ( P_vecs[j][irow] != 0.0 )
+               {
+                  col_ind[nzcnt] = P_cols[irow] + j;
+                  col_val[nzcnt++] = P_vecs[j][irow];
+               }
             }
             row_num = P_start_row + irow;
-            HYPRE_IJMatrixSetValues(IJPmat, 1, &nullspace_dim, 
+            HYPRE_IJMatrixSetValues(IJPmat, 1, &nzcnt, 
                              (const int *) &row_num, (const int *) col_ind, 
                              (const double *) col_val);
          }
@@ -413,7 +431,9 @@ printf("\n");
       ierr = HYPRE_IJMatrixAssemble(IJPmat);
       assert( !ierr );
       HYPRE_IJMatrixGetObject(IJPmat, (void **) &Pmat);
-      //hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) Pmat);
+      hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) Pmat);
+      comm_pkg = hypre_ParCSRMatrixCommPkg(Amat);
+      if (!comm_pkg) hypre_MatvecCommPkgCreate(Amat);
       HYPRE_IJMatrixSetObjectType(IJPmat, -1);
       HYPRE_IJMatrixDestroy( IJPmat );
       delete [] col_ind;
@@ -426,6 +446,7 @@ printf("\n");
 
    else
    {
+#if 0
       /* ================================================================*/
       /* ================= old version (before Matmul debugged) ==========
        *--------------------------------------------------------------
@@ -707,7 +728,9 @@ printf("\n");
       ierr = HYPRE_IJMatrixAssemble(IJPmat);
       assert( !ierr );
       HYPRE_IJMatrixGetObject(IJPmat, (void **) &Pmat);
-      //hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) Pmat);
+      hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) Pmat);
+      comm_pkg = hypre_ParCSRMatrixCommPkg(Amat);
+      if (!comm_pkg) hypre_MatvecCommPkgCreate(Amat);
       HYPRE_IJMatrixSetObjectType(IJPmat, -1);
       HYPRE_IJMatrixDestroy( IJPmat );
       //sprintf( param_string, "Pmat" );
@@ -737,6 +760,7 @@ printf("\n");
 
        * ================= old version (before Matmul debugged) =========*/
       /* ================================================================*/
+#endif
 
       MLI_Matrix_FormJacobi(mli_Amat, alpha, &mli_Jmat);
       Jmat = (hypre_ParCSRMatrix *) mli_Jmat->getMatrix();
@@ -752,13 +776,17 @@ printf("\n");
       {
          if ( P_cols[irow] >= 0 )
          {
+            nzcnt = 0;
             for ( j = 0; j < nullspace_dim; j++ )
             {
-               col_ind[j] = P_cols[irow] + j;
-               col_val[j] = P_vecs[j][irow];
+               if ( P_vecs[j][irow] != 0.0 )
+               {
+                  col_ind[nzcnt] = P_cols[irow] + j;
+                  col_val[nzcnt++] = P_vecs[j][irow];
+               }
             }
             row_num = P_start_row + irow;
-            HYPRE_IJMatrixSetValues(IJPmat, 1, &nullspace_dim, 
+            HYPRE_IJMatrixSetValues(IJPmat, 1, &nzcnt, 
                              (const int *) &row_num, (const int *) col_ind, 
                              (const double *) col_val);
          }
@@ -1100,6 +1128,11 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
 
    if ( local_nrows > 0 ) delete [] aggr_size; 
    if ( local_nrows > 0 ) delete [] node_stat; 
+   if ( local_nrows == 1 && naggr == 0 )
+   {
+      node2aggr[0] = 0;
+      naggr = 1;
+   }
    (*mli_aggr_array) = node2aggr;
    (*mli_aggr_leng)  = naggr;
    return 0;

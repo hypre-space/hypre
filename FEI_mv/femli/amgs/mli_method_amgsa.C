@@ -18,6 +18,19 @@
 #include "amgs/mli_method_amgsa.h"
  
 /* ********************************************************************* *
+ * functions external to MLI 
+ * --------------------------------------------------------------------- */
+
+extern "C"
+{
+   /* ARPACK function to compute eigenvalues/eigenvectors */
+
+   void dnstev_(int *n, int *nev, char *which, double *sigmar, 
+                double *sigmai, int *colptr, int *rowind, double *nzvals, 
+                double *dr, double *di, double *z, int *ldz, int *info);
+}
+
+/* ********************************************************************* *
  * constructor
  * --------------------------------------------------------------------- */
 
@@ -61,10 +74,13 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    coarse_solver_num   = 20;
    coarse_solver_wgt   = new double[20];
    for ( int j = 0; j < 20; j++ ) coarse_solver_wgt[j] = 1.0;
-   calibration_size  = 0;
-   useSAMGeFlag_     = 0;
-   RAP_time          = 0.0;
-   total_time        = 0.0;
+   calibration_size    = 0;
+   useSAMGeFlag_       = 0;
+   RAP_time            = 0.0;
+   total_time          = 0.0;
+   ddObj               = NULL;
+   ARPACKSuperLUExists_ = 0;
+   useSAMGDDFlag_       = 0;
 }
 
 /* ********************************************************************* *
@@ -73,16 +89,11 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
 
 MLI_Method_AMGSA::~MLI_Method_AMGSA()
 {
-   if ( nullspace_vec != NULL )
-   {
-      delete [] nullspace_vec;
-      nullspace_vec = NULL;
-   }
-   if ( sa_counts != NULL )
-   {
-      delete [] sa_counts;
-      sa_counts = NULL;
-   }
+   int  info;
+   char paramString[20];
+
+   if ( nullspace_vec != NULL ) delete [] nullspace_vec;
+   if ( sa_counts != NULL ) delete [] sa_counts;
    if ( sa_data != NULL )
    {
       for ( int i = 0; i < max_levels; i++ )
@@ -94,25 +105,26 @@ MLI_Method_AMGSA::~MLI_Method_AMGSA()
       delete [] sa_data;
       sa_data = NULL;
    }
-   if ( spectral_norms != NULL )
+   if ( spectral_norms    != NULL ) delete [] spectral_norms;
+   if ( pre_smoother_wgt  != NULL ) delete [] pre_smoother_wgt;
+   if ( postsmoother_wgt  != NULL ) delete [] postsmoother_wgt;
+   if ( coarse_solver_wgt != NULL ) delete [] coarse_solver_wgt;
+   if ( ddObj != NULL ) 
    {
-      delete [] spectral_norms;
-      spectral_norms = NULL;
+      if ( ddObj->sendProcs != NULL ) delete [] ddObj->sendProcs;
+      if ( ddObj->recvProcs != NULL ) delete [] ddObj->recvProcs;
+      if ( ddObj->sendLengs != NULL ) delete [] ddObj->sendLengs;
+      if ( ddObj->recvLengs != NULL ) delete [] ddObj->recvLengs;
+      if ( ddObj->sendMap   != NULL ) delete [] ddObj->sendMap;
+      if ( ddObj->ANodeEqnList != NULL ) delete [] ddObj->ANodeEqnList;
+      if ( ddObj->SNodeEqnList != NULL ) delete [] ddObj->SNodeEqnList;
+      delete ddObj;
    }
-   if ( pre_smoother_wgt != NULL ) 
+   if ( ARPACKSuperLUExists_ ) 
    {
-      delete [] pre_smoother_wgt;
-      pre_smoother_wgt = NULL;
-   }
-   if ( postsmoother_wgt != NULL ) 
-   {
-      delete [] postsmoother_wgt;
-      postsmoother_wgt = NULL;
-   }
-   if ( coarse_solver_wgt != NULL ) 
-   {
-      delete [] coarse_solver_wgt;
-      coarse_solver_wgt = NULL;
+      strcpy( paramString, "destroy" );
+      dnstev_(NULL, NULL, paramString, NULL, NULL, NULL, NULL, NULL, NULL, 
+              NULL, NULL, NULL, &info);
    }
 }
 
@@ -143,6 +155,11 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       useSAMGeFlag_ = 1;
       return 0;
    }
+   else if ( !strcmp(param1, "useSAMGDD" ))
+   {
+      useSAMGDDFlag_ = 1;
+      return 0;
+   }
    else if ( !strcmp(param1, "setCoarsenScheme" ))
    {
       sscanf(in_name,"%s %s", param1, param2);
@@ -150,7 +167,7 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
          return ( setCoarsenScheme( MLI_METHOD_AMGSA_LOCAL ) );
       else      
       {
-         cout << "MLI_Method_AMGSA ERROR : coarsen scheme not valid." << endl;
+         cout << "MLI::AMGSA ERROR : coarsen scheme not valid.\n";
          cout << "     valid options are : local\n";
          return 1;
       }
@@ -178,7 +195,7 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
    {
       if ( argc != 4 )
       {
-         cout << "MLI_Method_AMGSA ERROR : setAggregateInfo needs 4 arguments.\n";
+         cout << "MLI_Method_AMGSA ERROR : setAggregateInfo needs 4 args.\n";
          cout << "     argument[0] : level number \n";
          cout << "     argument[1] : number of aggregates \n";
          cout << "     argument[2] : total degree of freedom \n";
@@ -235,14 +252,14 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       else if (!strcmp(param2, "ParaSails")) set_id = MLI_SOLVER_PARASAILS_ID;
       else 
       {
-         cout << "MLI_Method_AMGSA ERROR : setSmoother - invalid smoother.\n";
+         cout << "MLI::AMGSA ERROR : setSmoother - invalid smoother.\n";
          cout << "     valid options are : Jacobi, GS, SGS, Schwarz\n";
          cout << "                         MLS, ParaSails\n";
          return 1;
       } 
       if ( argc != 2 )
       {
-         cout << "MLI_Method_AMGSA ERROR : setSmoother needs 2 arguments.\n";
+         cout << "MLI::AMGSA ERROR : setSmoother needs 2 arguments.\n";
          cout << "     argument[0] : number of relaxation sweeps \n";
          cout << "     argument[1] : relaxation weights\n";
          return 1;
@@ -263,14 +280,14 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       else if (!strcmp(param2, "SuperLU"))   set_id = MLI_SOLVER_SUPERLU_ID;
       else 
       {
-         cout << "MLI_Method_AMGSA ERROR : setCoarseSolver - invalid solver\n";
+         cout << "MLI::AMGSA ERROR : setCoarseSolver - invalid solver\n";
          cout << "     valid options are : Jacobi, GS, SGS, Schwarz\n";
          cout << "                         ParaSails, SuperLu\n";
          return 1;
       } 
       if ( set_id != MLI_SOLVER_SUPERLU_ID && argc != 2 )
       {
-         cout << "MLI_Method_AMGSA ERROR : setCoarseSolver needs 2 arguments.\n";
+         cout << "MLI::AMGSA ERROR : setCoarseSolver needs 2 args.\n";
          cout << "     argument[0] : number of relaxation sweeps \n";
          cout << "     argument[1] : relaxation weights\n";
          return 1;
@@ -291,7 +308,7 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
    {
       if ( argc != 4 )
       {
-         cout << "MLI_Method_AMGSA ERROR : setNullSpace needs 4 arguments.\n";
+         cout << "MLI::AMGSA ERROR : setNullSpace needs 4 args.\n";
          cout << "     argument[0] : node degree of freedom\n";
          cout << "     argument[1] : number of null space vectors\n";
          cout << "     argument[2] : null space information\n";
@@ -302,13 +319,14 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       numNS     = *(int *)   argv[1];
       nullspace = (double *) argv[2];
       length    = *(int *)   argv[3];
+printf("amgsa : null dim = %d\n", numNS);
       return ( setNullSpace(nDOF,numNS,nullspace,length) );
    }
    else if ( !strcmp(param1, "setNodalCoord" ))
    {
       if ( argc != 3 && argc != 4 )
       {
-         cout << "MLI_Method_AMGSA ERROR : setNodalCoord needs 4 arguments.\n";
+         cout << "MLI::AMGSA ERROR : setNodalCoord needs 4 args.\n";
          cout << "     argument[0] : number of nodes\n";
          cout << "     argument[1] : node degree of freedom\n";
          cout << "     argument[2] : coordinate information\n";
@@ -317,6 +335,7 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       } 
       nnodes = *(int *)   argv[0];
       nDOF   = *(int *)   argv[1];
+printf("amgsa : set nodal coord = %d\n", nDOF);
       coords = (double *) argv[2];
       if ( argc == 4 ) scales = (double *) argv[3]; else scales = NULL;
       return ( setNodalCoordinates(nnodes,nDOF,coords,scales) );
@@ -341,7 +360,7 @@ int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
    {
       if ( (*argc) < 4 )
       {
-         cout << "MLI_Method_AMGSA ERROR : getNullSpace needs 4 args.\n";
+         cout << "MLI::AMGSA ERROR : getNullSpace needs 4 args.\n";
          exit(1);
       }
       getNullSpace(node_dofs,numNS,nullspace,length);
@@ -354,7 +373,7 @@ int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
    }
    else
    {
-      cout << "MLI_Method_AMGSA ERROR : getParams string not valid.\n";
+      cout << "MLI::AMGSA ERROR : getParams string not valid.\n";
       return 1;
    }
 }
@@ -373,7 +392,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    MPI_Comm        comm;
 
 #ifdef MLI_DEBUG_DETAILED
-   cout << " MLI_Method_AMGSA::setup begins..." << endl;
+   cout << " MLI::AMGSA:setup begins..." << endl;
    cout.flush();
 #endif
 
@@ -391,10 +410,11 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    }
 
    /* --------------------------------------------------------------- */
-   /* call SAe if flag is set                                         */
+   /* call SAe and/or setupDD if flag is set                          */
    /* --------------------------------------------------------------- */
 
-   if ( useSAMGeFlag_ ) setupUsingFEData(mli);
+   if ( useSAMGeFlag_ )  setupNullSpaceUsingFEData(mli);
+   if ( useSAMGDDFlag_ ) setupDDFormSubdomainAggregate(mli);
 
    /* --------------------------------------------------------------- */
    /* call calibration if calibration size > 0                        */
@@ -412,14 +432,16 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    MPI_Comm_rank( comm, &mypid );
    mli_Amat   = mli->getSystemMatrix(level);
    total_time = MLI_Utils_WTime();
+   if ( nullspace_dim != node_dofs && nullspace_vec == NULL )
+      nullspace_dim = node_dofs;
 
    for (level = 0; level < num_levels; level++ )
    {
       if ( mypid == 0 && output_level > 0 )
       {
-         printf("\t*********************************************************\n");
+         printf("\t*****************************************************\n");
          printf("\t*** Aggregation (uncoupled) : level = %d\n", level);
-         printf("\t---------------------------------------------------------\n");
+         printf("\t-----------------------------------------------------\n");
       }
       curr_level = level;
       if ( level == num_levels-1 ) break;
@@ -449,14 +471,17 @@ int MLI_Method_AMGSA::setup( MLI *mli )
 
       if ( mypid == 0 && output_level > 0 ) cout << "\tComputing RAP\n";
       MLI_Matrix_ComputePtAP(mli_Pmat, mli_Amat, &mli_cAmat);
+      mli->setSystemMatrix(level+1, mli_cAmat);
       elapsed_time = (MLI_Utils_WTime() - start_time);
       RAP_time += elapsed_time;
       if ( mypid == 0 && output_level > 0 ) 
          cout << "\tRAP computed, time = " << elapsed_time << endl;
-      //mli_Amat->print("Amat");
-      //mli_Pmat->print("Pmat");
-      //mli_cAmat->print("cAmat");
-      mli->setSystemMatrix(level+1, mli_cAmat);
+
+#if 0
+      mli_Amat->print("Amat");
+      mli_Pmat->print("Pmat");
+      mli_cAmat->print("cAmat");
+#endif
 
       /* ------set the prolongation matrix------------------------------ */
 
@@ -475,6 +500,23 @@ int MLI_Method_AMGSA::setup( MLI *mli )
 
       /* ------set the smoothers---------------------------------------- */
 
+      if ( useSAMGDDFlag_ && num_levels == 2 ) 
+      {
+         setupDDSuperLUSmoother(mli, level);
+         smoother_ptr = MLI_Solver_CreateFromID(MLI_SOLVER_ARPACKSUPERLU_ID);
+         targv[0] = (char *) ddObj;
+         sprintf( param_string, "ARPACKSuperLUObject" );
+         smoother_ptr->setParams(param_string, 1, targv);
+         smoother_ptr->setup(mli_Amat);
+         mli->setSmoother( level, MLI_SMOOTHER_PRE, smoother_ptr );
+/*
+         smoother_ptr = MLI_Solver_CreateFromID(MLI_SOLVER_ARPACKSUPERLU_ID);
+         smoother_ptr->setParams(param_string, 1, targv);
+         smoother_ptr->setup(mli_Amat);
+         mli->setSmoother( level, MLI_SMOOTHER_POST, smoother_ptr );
+*/
+         continue;
+      }
       smoother_ptr = MLI_Solver_CreateFromID( pre_smoother );
       targv[0] = (char *) &pre_smoother_num;
       targv[1] = (char *) pre_smoother_wgt;
@@ -494,7 +536,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
 
    /* ------set the coarse grid solver---------------------------------- */
 
-   if ( mypid == 0 && output_level > 0 ) printf("\tCoarse level = %d\n", level);
+   if (mypid == 0 && output_level > 0) printf("\tCoarse level = %d\n",level);
    if (coarse_solver == MLI_SOLVER_MLS_ID) coarse_solver_wgt[0] = max_eigen;
    csolve_ptr = MLI_Solver_CreateFromID( coarse_solver );
    if (coarse_solver != MLI_SOLVER_SUPERLU_ID) 
@@ -738,6 +780,7 @@ int MLI_Method_AMGSA::setAggregateInfo(int level, int aggrCnt, int length,
 int MLI_Method_AMGSA::setNullSpace( int nDOF, int ndim, double *nullvec, 
                                     int length ) 
 {
+#if 0
    if ( (nullvec == NULL) && (nDOF != ndim) )
    {
       cout << "WARNING:  When no nullspace vector is specified, the nodal\n";
@@ -745,6 +788,7 @@ int MLI_Method_AMGSA::setNullSpace( int nDOF, int ndim, double *nullvec,
       cout.flush();
       ndim = nDOF;
    }
+#endif
    node_dofs      = nDOF;
    curr_node_dofs = nDOF;
    nullspace_dim  = ndim;
@@ -768,7 +812,11 @@ int MLI_Method_AMGSA::setNullSpace( int nDOF, int ndim, double *nullvec,
 int MLI_Method_AMGSA::setNodalCoordinates( int num_nodes, int nDOF, 
                                            double *coords, double *scalings)
 {
-   int i, j, k, offset, voffset;
+   int i, j, k, offset, voffset, mypid;
+   MPI_Comm comm = getComm();
+   MPI_Comm_rank( comm, &mypid );
+
+   if ( useSAMGeFlag_ ) return 0;
 
    if ( nDOF == 1 )
    {
@@ -861,7 +909,7 @@ int MLI_Method_AMGSA::print()
    MPI_Comm_rank( comm, &mypid);
    if ( mypid == 0 )
    {
-      cout << "\t************************************************************\n";
+      cout << "\t********************************************************\n";
       cout << "\t*** method name             = " << getName() << endl;
       cout << "\t*** number of levels        = " << num_levels << endl;
       cout << "\t*** coarsen_scheme          = " << coarsen_scheme << endl;
@@ -930,7 +978,7 @@ int MLI_Method_AMGSA::print()
       }
       cout << "\t*** coarse solver nsweeps   = " << coarse_solver_num << endl;  
       cout << "\t*** calibration size        = " << calibration_size << endl;  
-      cout << "\t************************************************************\n";
+      cout << "\t********************************************************\n";
       cout.flush();
    }
    return 0;
@@ -955,7 +1003,7 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
 
    MPI_Comm_rank( comm, &mypid);
    if ( mypid == 0 )
-      cout << "\t******************** AMGSA Statistics **********************\n";
+      cout << "\t****************** AMGSA Statistics ********************\n";
 
    /* --------------------------------------------------------------- */
    /* output processing time                                          */
@@ -966,8 +1014,8 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
       cout << "\t*** number of levels = " << curr_level+1 << endl;
       cout << "\t*** total RAP   time = " << RAP_time     << " seconds\n";
       cout << "\t*** total GenML time = " << total_time   << " seconds\n";
-      cout << "\t********************** Amatrix *****************************\n";
-      cout << "\t*level   Nrows MaxNnz MinNnz TotalNnz   maxValue   minValue*\n";
+      cout << "\t******************** Amatrix ***************************\n";
+      cout << "\t*level   Nrows MaxNnz MinNnz TotalNnz  maxValue  minValue*\n";
       cout.flush();
    }
 
@@ -993,7 +1041,7 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
       mli_Amat->getMatrixInfo(param_string, itemp, min_val);
       if ( mypid == 0 )
       {
-         printf("\t*%3d %9d %5d  %5d %10d %9.3e %9.3e *\n",level,
+         printf("\t*%3d %9d %5d  %5d %10d %8.3e %8.3e *\n",level,
                 global_nrows, max_nnz, min_nnz, this_nnz, max_val, min_val);
       }
       if ( level == 0 ) fine_nnz = this_nnz;
@@ -1008,8 +1056,8 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
 
    if ( mypid == 0 )
    {
-      cout << "\t********************** Pmatrix *****************************\n";
-      cout << "\t*level   Nrows MaxNnz MinNnz TotalNnz   maxValue   minValue*\n";
+      cout << "\t******************** Pmatrix ***************************\n";
+      cout << "\t*level   Nrows MaxNnz MinNnz TotalNnz  maxValue  minValue*\n";
       cout.flush();
    }
    for ( level = 1; level <= curr_level; level++ )
@@ -1029,7 +1077,7 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
       mli_Pmat->getMatrixInfo(param_string, itemp, min_val);
       if ( mypid == 0 )
       {
-         printf("\t*%3d %9d %5d  %5d %10d %9.3e %9.3e *\n",level,
+         printf("\t*%3d %9d %5d  %5d %10d %8.3e %8.3e *\n",level,
                 global_nrows, max_nnz, min_nnz, this_nnz, max_val, min_val);
       }
    }
@@ -1040,12 +1088,12 @@ int MLI_Method_AMGSA::printStatistics(MLI *mli)
 
    if ( mypid == 0 )
    {
-      cout << "\t************************************************************\n";
+      cout << "\t********************************************************\n";
       dtemp = (double) tot_nnz / (double) fine_nnz;
       cout << "\t*** Amat complexity  = " << dtemp << endl;
       dtemp = (double) tot_nrows / (double) fine_nrows;
       cout << "\t*** grid complexity  = " << dtemp << endl;
-      cout << "\t************************************************************\n";
+      cout << "\t********************************************************\n";
       cout.flush();
    }
    return 0;

@@ -9,6 +9,7 @@
 #ifndef __MLIFEDATAH__
 #define __MLIFEDATAH__
 
+#include "utilities/utilities.h"
 #include "fedata/mli_festruct.h"
 
 /****************************************************************************/ 

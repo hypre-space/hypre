@@ -31,6 +31,7 @@ CFLAGS =\
  -I$(srcdir)/../../../utilities\
  -I$(srcdir)/../../../parcsr_mv\
  -I$(srcdir)/../../../seq_mv\
+ -I$(srcdir)/../../../IJ_mv\
  ${CINCLUDES}\
  ${CDEFS}
  
@@ -43,6 +44,7 @@ CXXFLAGS =\
  -I$(srcdir)/../../../utilities\
  -I$(srcdir)/../../../parcsr_mv\
  -I$(srcdir)/../../../seq_mv\
+ -I$(srcdir)/../../../IJ_mv\
  ${CXXINCLUDES}\
  ${CXXDEFS}
  
@@ -55,7 +57,7 @@ FILES =\
  mli_method_amgsa.C\
  mli_amgsa_coarsen1.C\
  mli_amgsa_calib.C\
- mli_amgsa_elem.C
+ mli_amgsa_subdomain.C
 
 TEMP = ${FILES:.c=.o}
 OBJS = ${TEMP:.C=.o}

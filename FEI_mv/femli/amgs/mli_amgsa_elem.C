@@ -38,7 +38,8 @@ void mli_computespectrum_(int *,int *,double *, double *, int *, double *,
 }
 
 /***********************************************************************
- * generate multilevel structure
+ * set up initial data using FEData
+ * (nullspace_vec, sa_data, sa_counts)
  * --------------------------------------------------------------------- */
 
 int MLI_Method_AMGSA::setupUsingFEData( MLI *mli ) 
@@ -89,7 +90,6 @@ int MLI_Method_AMGSA::setupUsingFEData( MLI *mli )
    /* fetch communicator matrix information                           */
    /* --------------------------------------------------------------- */
 
-nullspace_dim = 6;
    comm = getComm();
    MPI_Comm_rank( comm, &mypid );
    MPI_Comm_size( comm, &nprocs );
@@ -219,7 +219,7 @@ nullspace_dim = 6;
    while ( elemStart < nElems )
    {
       currMacroNumber = macroNumbers[elemStart];
-      if ( output_level >= 1 && currMacroNumber % 10 == 0 )
+      if ( output_level >= 1 && currMacroNumber % 200 == 0 )
          printf("Computing null spaces of aggregate %d (%d)\n", 
                 currMacroNumber, nMacros);
       elemCount = elemStart + 1;
@@ -335,8 +335,11 @@ nullspace_dim = 6;
    for ( i = 0; i < localNRows; i++ ) 
       aggrMap[i] = macroNumbers[aggrMap[i]];
 
+printf("setupUsingFEData : no aggregate\n");
+/*
    sa_counts[0] = nAggr;
    sa_data[0]   = aggrMap;
+*/
    
    /* --------------------------------------------------------------- */
    /* clean up                                                        */

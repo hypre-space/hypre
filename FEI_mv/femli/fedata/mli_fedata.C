@@ -12,12 +12,13 @@
  **************************************************************************
  **************************************************************************/
 
+#include <string.h>
 #include <iostream.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-#include <mpi.h>
+#include <assert.h>
 
+#include "utilities/utilities.h"
 #include "fedata/mli_fedata.h"
 #include "util/mli_utils.h"
 
@@ -431,7 +432,8 @@ int MLI_FEData::initElemNodeList( int eGlobalID, int nNodesPerElem,
 int MLI_FEData::initSharedNodes(int nNodes, const int *nGlobalIDs, 
                     const int *numProcs, const int * const *procLists)
 {
-   int           i, j, length, index, *intArray;
+   int i, j, length, index, index2, *nodeIDs, *auxArray;
+   int *sharedNodeIDs, *sharedNodeNProcs, **sharedNodeProc, nSharedNodes;
    MLI_ElemBlock *currBlock;
 
    // -------------------------------------------------------------
@@ -443,6 +445,7 @@ int MLI_FEData::initSharedNodes(int nNodes, const int *nGlobalIDs,
       cout << "initSharedNodes ERROR : nNodes < 0.\n";
       exit(1);
    }
+   if ( nNodes == 0 ) return 0;
    currBlock = elemBlockList_[currentElemBlock_];
    if ( currBlock->sharedNodeIDs_ != NULL )
       cout << "initSharedNodes WARNING : already initialized (1) ?\n";
@@ -464,38 +467,63 @@ int MLI_FEData::initSharedNodes(int nNodes, const int *nGlobalIDs,
 #endif
 
    // -------------------------------------------------------------
-   // --- allocate space for shared node information
-   // -------------------------------------------------------------
-
-   currBlock->numSharedNodes_   = nNodes;
-   currBlock->sharedNodeIDs_    = new int[nNodes];
-   currBlock->sharedNodeNProcs_ = new int[nNodes];
-   currBlock->sharedNodeProc_   = new int*[nNodes];
-
-   // -------------------------------------------------------------
    // --- sort and copy the shared node list
    // -------------------------------------------------------------
 
-   intArray = new int[nNodes];
-   for (i = 0; i < nNodes; i++) currBlock->sharedNodeIDs_[i] = nGlobalIDs[i];
-   for (i = 0; i < nNodes; i++) intArray[i] = i;
-   MLI_Utils_IntQSort2(currBlock->sharedNodeIDs_, intArray, 0, nNodes-1);
+   nodeIDs  = new int[nNodes];
+   auxArray = new int[nNodes];
+   for (i = 0; i < nNodes; i++) nodeIDs[i]  = nGlobalIDs[i];
+   for (i = 0; i < nNodes; i++) auxArray[i] = i;
+   MLI_Utils_IntQSort2(nodeIDs, auxArray, 0, nNodes-1);
+   nSharedNodes = 1;
+   for (i = 1; i < nNodes; i++) 
+      if ( nodeIDs[i] != nodeIDs[nSharedNodes-1] ) nSharedNodes++;
+   sharedNodeIDs    = new int[nSharedNodes];
+   sharedNodeNProcs = new int[nSharedNodes];
+   sharedNodeProc   = new int*[nSharedNodes];
+   nSharedNodes = 1;
+   sharedNodeIDs[0] = nodeIDs[0];
+   for (i = 1; i < nNodes; i++) 
+      if ( nodeIDs[i] != sharedNodeIDs[nSharedNodes-1] )
+         sharedNodeIDs[nSharedNodes++] = nodeIDs[i];
+   for ( i = 0; i < nSharedNodes; i++ ) sharedNodeNProcs[i] = 0;
    for ( i = 0; i < nNodes; i++ )
    {
-      index = intArray[i];
-      if ( numProcs[index] <= 0 )
-      {
-         cout << "initSharedNodes ERROR : numProcs not valid.\n";
-         exit(1);
-      }
-      currBlock->sharedNodeNProcs_[i] = numProcs[index];
-      currBlock->sharedNodeProc_[i] = new int[numProcs[index]];
-      for ( j = 0; j < numProcs[index]; j++ )
-         currBlock->sharedNodeProc_[i][j] = procLists[index][j];
-      MLI_Utils_IntQSort2(currBlock->sharedNodeProc_[i], NULL, 0, 
-                          numProcs[index]-1);
-   } 
-   delete [] intArray;
+      index  = MLI_Utils_BinarySearch(nodeIDs[i],sharedNodeIDs,
+                                      nSharedNodes);
+      index2 = auxArray[i];
+      sharedNodeNProcs[index] += numProcs[index2];
+   }
+   for ( i = 0; i < nSharedNodes; i++ )
+   {
+      sharedNodeProc[i] = new int[sharedNodeNProcs[i]];
+      sharedNodeNProcs[i] = 0;
+   }
+   for ( i = 0; i < nNodes; i++ )
+   {
+      index  = MLI_Utils_BinarySearch(nodeIDs[i],sharedNodeIDs,
+                                      nSharedNodes);
+      index2 = auxArray[i];
+      for ( j = 0; j < numProcs[index2]; j++ )
+         sharedNodeProc[index][sharedNodeNProcs[index]++] = 
+                       procLists[index2][j];
+   }
+   delete [] nodeIDs;
+   delete [] auxArray;
+   for ( i = 0; i < nSharedNodes; i++ )
+   {
+      MLI_Utils_IntQSort2(sharedNodeProc[i],NULL,0,sharedNodeNProcs[i]-1);
+      length = 1;       
+      for ( j = 1; j < sharedNodeNProcs[i]; j++ )
+         if ( sharedNodeProc[i][j] != sharedNodeProc[i][length-1] )
+            sharedNodeProc[i][length++] = sharedNodeProc[i][j];
+      sharedNodeNProcs[i] = length;
+   }
+   currBlock->numSharedNodes_   = nSharedNodes;
+   currBlock->sharedNodeIDs_    = sharedNodeIDs;
+   currBlock->sharedNodeNProcs_ = sharedNodeNProcs;
+   currBlock->sharedNodeProc_   = sharedNodeProc;
+
    return 1;
 }
 
@@ -626,6 +654,8 @@ int MLI_FEData::initFaceBlockNodeLists(int nFaces, const int *fGlobalIDs,
 
 //*************************************************************************
 // initialize shared face list 
+// (*** need to take into consideration of repeated face numbers in the
+//      face list - for pairs, just as already been done in initSharedNodes)
 //-------------------------------------------------------------------------
 
 int MLI_FEData::initSharedFaces(int nFaces, const int *fGlobalIDs,
@@ -714,7 +744,7 @@ int MLI_FEData::initComplete()
    int           **elemFaceList, *procArray2, *ownerP, *sndrcvReg, nProcs;
    int           nRecv, nSend, *recvProcs, *sendProcs, *recvLengs, *sendLengs;
    int           nNodes, pnum, **sendBuf, **recvBuf, *iauxArray, index2; 
-   int           *intArray, **intArray2, nNodesPerElem, length;
+   int           *intArray, **intArray2, nNodesPerElem, length, *nodeArrayAux;
    double        *dtemp_array, *nodeCoords; 
    MPI_Request   *request;
    MPI_Status    status;
@@ -727,11 +757,7 @@ int MLI_FEData::initComplete()
    // -------------------------------------------------------------
 
    nElems = currBlock->numLocalElems_;
-   if ( nElems <= 0 )
-   {
-      cout << "initComplete ERROR : nElems <= 0.\n";
-      exit(1);
-   }
+   assert( nElems > 0 );
    elemList = currBlock->elemGlobalIDs_;
    if ( elemList == NULL )
    {
@@ -773,11 +799,7 @@ int MLI_FEData::initComplete()
 
    for ( i = 1; i < nElems; i++ ) 
    { 
-      if ( currBlock->elemGlobalIDs_[i] < 0 )
-      {
-         cout << "initComplete ERROR : element ID < 0.\n";
-         exit(1);
-      }
+      assert( currBlock->elemGlobalIDs_[i] >= 0 );
       if ( currBlock->elemGlobalIDs_[i] == currBlock->elemGlobalIDs_[i-1] )
       {
          cout << "initComplete ERROR : duplicate elemIDs.\n";
@@ -838,6 +860,7 @@ int MLI_FEData::initComplete()
    elemNodeList = currBlock->elemNodeIDList_;
    temp_cnt     = nElems * elemNumNodes;
    nodeArray    = new int[temp_cnt];
+   nodeArrayAux = new int[temp_cnt];
    totalNodes   = 0;
    for ( i = 0; i < nElems; i++ )
    {
@@ -847,8 +870,9 @@ int MLI_FEData::initComplete()
    MLI_Utils_IntQSort2(nodeArray, NULL, 0, temp_cnt-1);
    totalNodes = 1;
    for ( i = 1; i < temp_cnt; i++ )
-      if ( nodeArray[i] != nodeArray[i-1] )
+      if ( nodeArray[i] != nodeArray[totalNodes-1] )
          nodeArray[totalNodes++] = nodeArray[i];
+   for ( i = 0; i < totalNodes; i++ ) nodeArrayAux[i] = nodeArray[i];
 
    // -------------------------------------------------------------
    // --- search for external nodes
@@ -878,7 +902,8 @@ int MLI_FEData::initComplete()
                   cout << " nodeArray = " << nodeArray[k] << endl;
                exit(1);
             }
-            nodeArray[index] = - nodeArray[index];
+            if ( nodeArrayAux[index] >= 0 )
+               nodeArrayAux[index] = - nodeArrayAux[index] - 1;
             break;
          }
       }
@@ -888,21 +913,24 @@ int MLI_FEData::initComplete()
    // --- initialize the external nodes apart from internal
    // -------------------------------------------------------------
 
+   nExtNodes = 0;
+   for (i = 0; i < totalNodes; i++) if ( nodeArrayAux[i] < 0 ) nExtNodes++;
    currBlock->numExternalNodes_ = nExtNodes;
    currBlock->numLocalNodes_    = totalNodes - nExtNodes;
    currBlock->nodeGlobalIDs_    = new int[totalNodes];
    temp_cnt = 0;
    for (i = 0; i < totalNodes; i++) 
    {
-      if ( nodeArray[i] >= 0 ) 
+      if ( nodeArrayAux[i] >= 0 ) 
          currBlock->nodeGlobalIDs_[temp_cnt++] = nodeArray[i];
    }
    for (i = 0; i < totalNodes; i++) 
    {
-      if ( nodeArray[i] < 0 ) 
-         currBlock->nodeGlobalIDs_[temp_cnt++] = - nodeArray[i];
+      if ( nodeArrayAux[i] < 0 ) 
+         currBlock->nodeGlobalIDs_[temp_cnt++] = nodeArray[i];
    }
    delete [] nodeArray;
+   delete [] nodeArrayAux;
 
    // -------------------------------------------------------------
    // --- create an aux array for holding mapped external node IDs
@@ -942,10 +970,12 @@ int MLI_FEData::initComplete()
    recvProcs = NULL;
    recvLengs = NULL;
    recvBuf   = NULL;
+
    MLI_Utils_IntQSort2( iauxArray, NULL, 0, nExtNodes-1);
    if ( nExtNodes > 0 ) nRecv = 1;
    for ( i = 1; i < nExtNodes; i++ )
-      if (iauxArray[i] != iauxArray[i-1]) iauxArray[nRecv++] = iauxArray[i];
+      if (iauxArray[i] != iauxArray[nRecv-1]) 
+         iauxArray[nRecv++] = iauxArray[i];
    if ( nRecv > 0 )
    {
       recvProcs = new int[nRecv];
@@ -985,7 +1015,8 @@ int MLI_FEData::initComplete()
       MLI_Utils_IntQSort2( iauxArray, NULL, 0, counter-1);
       nSend = 1;
       for ( i = 1; i < counter; i++ )
-         if (iauxArray[i] != iauxArray[i-1]) iauxArray[nSend++] = iauxArray[i];
+         if (iauxArray[i] != iauxArray[nSend-1]) 
+            iauxArray[nSend++] = iauxArray[i];
       sendProcs = new int[nSend];
       for ( i = 0; i < nSend; i++ ) sendProcs[i] = iauxArray[i];
       sendLengs = new int[nSend];
@@ -3565,6 +3596,24 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
       for ( int i = 0; i < currBlock->numExternalFaces_; i++ )
          newGlobalIDs[i] = currBlock->faceExtNewGlobalIDs_[i];
       return 1;
+   }
+
+   // --- get the mapped globalIDs of external faces
+
+   else if ( ! strcmp("destroyElemMatrix", data_key) )
+   {
+      int elemNum = *(int *) argv[0];
+      int index = searchElement(elemNum);
+      if ( index < 0 )
+      {
+         cout << "impSpecificRequests ERROR : getElemMatrix not found.\n";
+         exit(1);
+      }
+      if ( currBlock->elemStiffMat_[index] != NULL )
+      {
+         delete [] currBlock->elemStiffMat_[index];
+         currBlock->elemStiffMat_[index] = NULL;
+      }
    }
 
    // --- create node element matrix (given local nodeExt element matrix)

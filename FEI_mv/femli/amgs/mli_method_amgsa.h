@@ -16,7 +16,9 @@
 #define __MLIMETHODAMGSAH__
 
 #include "utilities/utilities.h"
+/*
 #include <mpi.h>
+*/
 #include "parcsr_mv/parcsr_mv.h"
 #include "base/mli.h"
 #include "base/mli_defs.h"
@@ -24,6 +26,27 @@
 #include "amgs/mli_method.h"
 
 #define MLI_METHOD_AMGSA_LOCAL 0
+
+/* ********************************************************************* *
+ * internal data structure used for domain decomposition
+ * --------------------------------------------------------------------- */
+
+typedef struct MLI_AMGSA_DD_Struct
+{
+   int nSends;
+   int nRecvs;
+   int *sendLengs;
+   int *recvLengs;
+   int *sendProcs;
+   int *recvProcs;
+   int *sendMap;
+   int nSendMap;
+   int NNodes;
+   int *ANodeEqnList;
+   int *SNodeEqnList;
+   int dofPerNode;
+}
+MLI_AMGSA_DD;
 
 /* ***********************************************************************
  * definition of the aggregation based AMG data structure
@@ -60,8 +83,11 @@ class MLI_Method_AMGSA : public MLI_Method
    double   *coarse_solver_wgt;      /* weight used in coarse solver     */
    int      calibration_size;        /* for calibration AMG method       */
    int      useSAMGeFlag_;           /* element based method             */
+   int      useSAMGDDFlag_;          /* domain decomposition (NN) method */
    double   RAP_time;
    double   total_time;
+   int      ARPACKSuperLUExists_;
+   MLI_AMGSA_DD *ddObj;
 
 public :
 
@@ -85,7 +111,9 @@ public :
    int    setNodalCoordinates(int nNodes,int nDOF,double *coor,double *scale);
    int    setCalibrationSize(int size);
    int    setupCalibration( MLI *mli );
-   int    setupUsingFEData( MLI *mli );
+   int    setupNullSpaceUsingFEData( MLI *mli );
+   int    setupDDFormSubdomainAggregate( MLI *mli );
+   int    setupDDSuperLUSmoother( MLI *mli, int level );
    int    print();
    int    printStatistics(MLI *mli);
    int    getNullSpace(int &nodeDOF,int &numNS,double *&nullVec, int &leng);

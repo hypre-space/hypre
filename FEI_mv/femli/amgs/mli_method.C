@@ -41,12 +41,28 @@ MLI_Method *MLI_Method_CreateFromName( char *str, MPI_Comm mpi_comm )
       strcpy( paramString, "useSAMGe" );
       method_ptr->setParams( paramString, 0, NULL );
    }
+   else if ( !strcmp(str, "AMGSADD" ) )
+   {
+      method_ptr  = new MLI_Method_AMGSA(mpi_comm);
+      strcpy( paramString, "useSAMGDD" );
+      method_ptr->setParams( paramString, 0, NULL );
+   }
+   else if ( !strcmp(str, "AMGSADDe" ) )
+   {
+      method_ptr  = new MLI_Method_AMGSA(mpi_comm);
+      strcpy( paramString, "useSAMGe" );
+      method_ptr->setParams( paramString, 0, NULL );
+      strcpy( paramString, "useSAMGDD" );
+      method_ptr->setParams( paramString, 0, NULL );
+   }
    else
    {
       cout << "MLI_Method_Create ERROR : method " << str << " not defined\n";
       cout << "    valid ones are : \n";
       cout << "            AMGSA\n";
       cout << "            AMGSAe\n";
+      cout << "            AMGSADD\n";
+      cout << "            AMGSADDe\n";
       cout.flush();
       exit(1);
    }
@@ -72,12 +88,26 @@ MLI_Method *MLI_Method_CreateFromID( int method_id, MPI_Comm mpi_comm )
            strcpy( paramString, "useSAMGe" );
            method_ptr->setParams(paramString, 0, NULL);
            break;
+      case MLI_METHOD_AMGSADD_ID :
+           method_ptr  = new MLI_Method_AMGSA(mpi_comm);
+           strcpy( paramString, "useSAMGDD" );
+           method_ptr->setParams(paramString, 0, NULL);
+           break;
+      case MLI_METHOD_AMGSADDE_ID :
+           method_ptr  = new MLI_Method_AMGSA(mpi_comm);
+           strcpy( paramString, "useSAMGe" );
+           method_ptr->setParams(paramString, 0, NULL);
+           strcpy( paramString, "useSAMGDD" );
+           method_ptr->setParams(paramString, 0, NULL);
+           break;
       default :
            cout << "MLI_Method_Create ERROR : method " << method_id 
                 << " not defined\n";
            cout << "    valid ones are : " << endl;
-           cout << "                " << MLI_METHOD_AMGSA_ID  << " (AMGSA)\n"; 
-           cout << "                " << MLI_METHOD_AMGSAE_ID << " (AMGSAe)\n"; 
+           cout << "              " << MLI_METHOD_AMGSA_ID  << " (AMGSA)\n"; 
+           cout << "              " << MLI_METHOD_AMGSAE_ID << " (AMGSAe)\n"; 
+           cout << "              " << MLI_METHOD_AMGSADD_ID << " (AMGSAe)\n"; 
+           cout << "              " << MLI_METHOD_AMGSADDE_ID << " (AMGSAe)\n"; 
            cout.flush();
            exit(1);
    }
