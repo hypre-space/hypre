@@ -42,6 +42,7 @@ int ZZZ_SMGSetTol P((ZZZ_StructSolver solver , double tol ));
 int ZZZ_SMGSetMaxIter P((ZZZ_StructSolver solver , int max_iter ));
 int ZZZ_SMGSetZeroGuess P((ZZZ_StructSolver solver ));
 int ZZZ_SMGGetNumIterations P((ZZZ_StructSolver solver , int *num_iterations ));
+int ZZZ_SMGGetFinalRelativeResidualNorm P((ZZZ_StructSolver solver , double *relative_residual_norm ));
  
 #undef P
 
