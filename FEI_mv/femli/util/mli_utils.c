@@ -1082,17 +1082,24 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
 
+#ifdef HAVE_LAPACK
     void hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, int *, 
         int *, double *, int *, double *, double *, int *, 
         double *, int *, double *, int *, int *);
+#endif
 
     char jobu  = 'O'; /* overwrite input with U */
     char jobvt = 'S'; /* return rows of V in vtArray */
     int  dim = MIN(m,n);
     int  info;
 
+#ifdef HAVE_LAPACK
     hypre_F90_NAME_BLAS(dgesvd, DGESVD)(&jobu, &jobvt, &m, &n, uArray,
         &m, sArray, NULL, &m, vtArray, &dim, workArray, &workLen, &info);
+#else
+    printf("MLI_Utils_SVD::dgesvd not available.\n");
+    exit(1);
+#endif
 
     return info;
 }
