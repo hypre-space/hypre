@@ -146,8 +146,8 @@ main( int   argc,
 
    skip  = 0;
    sym  = 1;
-   rap = 0;
-   relax = 1;
+   rap = 1;
+   relax = 3;
    jump  = 0;
    reps = 1;
 
@@ -178,7 +178,7 @@ main( int   argc,
 
    istart[0] = -3; 
    istart[1] = -3; 
-   istart[2] = -3; 
+   istart[2] = -3;
 
    px = 0;
    py = 0;
@@ -219,6 +219,13 @@ main( int   argc,
          nx = atoi(argv[arg_index++]);
          ny = atoi(argv[arg_index++]);
          nz = atoi(argv[arg_index++]);
+      }
+      if ( strcmp(argv[arg_index], "-istart") == 0 )
+      {
+         arg_index++;
+         istart[0] = atoi(argv[arg_index++]);
+         istart[1] = atoi(argv[arg_index++]);
+         istart[2] = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-P") == 0 )
       {
@@ -357,6 +364,7 @@ main( int   argc,
       printf("Usage: %s [<options>]\n", argv[0]);
       printf("\n");
       printf("  -n <nx> <ny> <nz>   : problem size per block\n");
+      printf("  -istart <istart[0]> <istart[1]> <istart[2]> : start of box\n");
       printf("  -P <Px> <Py> <Pz>   : processor topology\n");
       printf("  -b <bx> <by> <bz>   : blocking per processor\n");
       printf("  -p <px> <py> <pz>   : periodicity in each dimension\n");
@@ -444,6 +452,8 @@ main( int   argc,
    {
       printf("Running with these driver parameters:\n");
       printf("  (nx, ny, nz)    = (%d, %d, %d)\n", nx, ny, nz);
+      printf("  (istart[0],istart[1],istart[2]) = (%d, %d, %d)\n", \
+                 istart[0],istart[1],istart[2]);
       printf("  (Px, Py, Pz)    = (%d, %d, %d)\n", P,  Q,  R);
       printf("  (bx, by, bz)    = (%d, %d, %d)\n", bx, by, bz);
       printf("  (px, py, pz)    = (%d, %d, %d)\n", px, py, pz);
@@ -769,18 +779,18 @@ main( int   argc,
       }
 
       HYPRE_StructMatrixCreate(MPI_COMM_WORLD, grid, stencil, &A);
-      if ( solver_id == 3 || solver_id == 4 )
+      if ( solver_id == 3 || solver_id == 4 || solver_id == 13 || solver_id == 14)
       {
          stencil_size  = hypre_StructStencilSize(stencil);
          stencil_entries = hypre_CTAlloc(int, stencil_size);
-         if ( solver_id == 3 )
+         if ( solver_id == 3 || solver_id == 13)
          {
             for ( i=0; i<stencil_size; ++i ) stencil_entries[i]=i;
             hypre_StructMatrixSetConstantEntries( A, stencil_size, stencil_entries );
             hypre_TFree( stencil_entries );
             constant_coefficient = 1;
          }
-         if ( solver_id == 4 )
+         if ( solver_id == 4 || solver_id == 14)
          {
             hypre_SetIndex(diag_index, 0, 0, 0);
             diag_rank = hypre_StructStencilElementRank( stencil, diag_index );
@@ -1295,7 +1305,7 @@ main( int   argc,
                               (HYPRE_Solver) precond);
       }
 
-      else if (solver_id == 11)
+      else if (solver_id == 11 || solver_id == 13 || solver_id == 14)
       {
          /* use symmetric PFMG as preconditioner */
          HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &precond);
@@ -1392,7 +1402,7 @@ main( int   argc,
       {
          HYPRE_StructSMGDestroy(precond);
       }
-      else if (solver_id == 11)
+      else if (solver_id == 11 || solver_id == 13 || solver_id == 14)
       {
          HYPRE_StructPFMGDestroy(precond);
       }
