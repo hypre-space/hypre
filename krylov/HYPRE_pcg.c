@@ -94,6 +94,17 @@ HYPRE_PCGSetMaxIter( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_PCGSetAbsoluteTolFactor
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_PCGSetAbsoluteTolFactor( HYPRE_Solver solver,
+                               int       abstolf )
+{
+   return( hypre_PCGSetAbsoluteTolFactor( (void *) solver, abstolf ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_PCGSetStopCrit
  *--------------------------------------------------------------------------*/
 

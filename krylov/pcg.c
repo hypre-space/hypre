@@ -87,6 +87,7 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
 
    /* set defaults */
    (pcg_data -> tol)          = 1.0e-06;
+   (pcg_data -> atolf)        = 0.0;
    (pcg_data -> cf_tol)       = 0.0;
    (pcg_data -> max_iter)     = 1000;
    (pcg_data -> two_norm)     = 0;
@@ -216,6 +217,7 @@ hypre_PCGSolve( void *pcg_vdata,
    hypre_PCGFunctions *pcg_functions = pcg_data->functions;
 
    double          tol          = (pcg_data -> tol);
+   double          atolf        = (pcg_data -> atolf);
    double          cf_tol       = (pcg_data -> cf_tol);
    int             max_iter     = (pcg_data -> max_iter);
    int             two_norm     = (pcg_data -> two_norm);
@@ -243,7 +245,7 @@ hypre_PCGSolve( void *pcg_vdata,
    double          weight;
    double          ratio;
 
-   double          guard_zero_residual; 
+   double          guard_zero_residual, sdotp; 
 
    int             i = 0;
    int             ierr = 0;
@@ -284,9 +286,14 @@ hypre_PCGSolve( void *pcg_vdata,
 
    eps = tol*tol;
    if ( bi_prod > 0.0 ) {
-      if ( stop_crit && !rel_change ) {  /* absolute tolerance */
+      if ( stop_crit && !rel_change && atolf<=0 ) {  /* pure absolute tolerance */
          eps = eps / bi_prod;
+         /* Note: this section is obsolete.  Aside from backwards comatability
+            concerns, we could delete the stop_crit parameter and related code,
+            using tol & atolf instead. */
       }
+      else if ( atolf>0 )  /* mixed relative and absolute tolerance */
+         bi_prod += atolf;
    }
    else    /* bi_prod==0.0: the rhs vector b is zero */
    {
@@ -329,7 +336,7 @@ hypre_PCGSolve( void *pcg_vdata,
       printf("\n\n");
       if (two_norm)
       {
-         if ( stop_crit && !rel_change ) {  /* absolute tolerance */
+         if ( stop_crit && !rel_change && atolf==0 ) {  /* pure absolute tolerance */
             printf("Iters       ||r||_2     conv.rate\n");
             printf("-----    ------------   ---------\n");
          }
@@ -353,7 +360,9 @@ hypre_PCGSolve( void *pcg_vdata,
       (*(pcg_functions->Matvec))(matvec_data, 1.0, A, p, 0.0, s);
 
       /* alpha = gamma / <s,p> */
-      alpha = gamma / (*(pcg_functions->InnerProd))(s, p);
+      sdotp = (*(pcg_functions->InnerProd))(s, p);
+      if ( sdotp==0.0 ) { ++ierr; break; };
+      alpha = gamma / sdotp;
 
       gamma_old = gamma;
 
@@ -395,7 +404,7 @@ hypre_PCGSolve( void *pcg_vdata,
       {
          if (two_norm)
          {
-            if ( stop_crit && !rel_change ) {  /* absolute tolerance */
+            if ( stop_crit && !rel_change && atolf==0 ) {  /* pure absolute tolerance */
                printf("% 5d    %e    %f\n", i, norms[i],
                       norms[i]/norms[i-1] );
             }
@@ -457,10 +466,12 @@ hypre_PCGSolve( void *pcg_vdata,
          if (weight * cf_ave_1 > cf_tol) break;
       }
 
-      if ( gamma==0 ) break;
-      /* ... gamma==0 means no hope of progress, probably because most
-         everything's nearly 0 anyway; and if we go on we'll start computing
-         0/0 */
+      if ( gamma<1.0e-292 ) break;
+      /* ... gamma should be >=0.  IEEE subnormal numbers are < 2**(-1022)=2.2e-308
+         (and >= 2**(-1074)=4.9e-324).  So a gamma this small means we're getting
+         dangerously close to subnormal or zero numbers (usually if gamma is small,
+         so will be other variables).  Thus further calculations risk a crash.
+         Such small gamma generally means no hope of progress anyway. */
 
       /* beta = gamma / gamma_old */
       beta = gamma / gamma_old;
@@ -470,24 +481,13 @@ hypre_PCGSolve( void *pcg_vdata,
       (*(pcg_functions->Axpy))(1.0, s, p);
    }
 
-#if 0
-  /* old code, should delete on next revision.
-     Following logging code does the same thing, but better */
-   if (two_norm)
-      printf("Iterations = %d: ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
-             i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
-   else
-      printf("Iterations = %d: ||r||_C = %e, ||r||_C/||b||_C = %e\n",
-             i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
-#endif
-
    if ( logging > 1 && my_id==0 )  /* formerly for par_csr only */
       printf("\n\n");
 
    (pcg_data -> num_iterations) = i;
    if (bi_prod > 0.0)
       (pcg_data -> rel_residual_norm) = sqrt(i_prod/bi_prod);
-   else
+   else /* actually, we'll never get here... */
       (pcg_data -> rel_residual_norm) = 0.0;
 
    return ierr;
@@ -505,6 +505,22 @@ hypre_PCGSetTol( void   *pcg_vdata,
    int            ierr = 0;
  
    (pcg_data -> tol) = tol;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PCGSetAbsoluteTolFactor
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PCGSetAbsoluteTolFactor( void   *pcg_vdata,
+                               double  atolf   )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+ 
+   (pcg_data -> atolf) = atolf;
  
    return ierr;
 }

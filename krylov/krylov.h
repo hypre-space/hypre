@@ -631,16 +631,25 @@ typedef struct
  * The {\tt hypre\_PCGData} object ...
  **/
 
-/* rel_change!=0 means: if pass the other stopping criteria,
- also check the relative change in the solution x.
-   stop_crit!=0 means: absolute error tolerance rather than
- the usual relative error tolerance on the residual.  Never
- applies if rel_change!=0.
+/*
+  Standard error tolerance: |delta-residual|/|right-hand-side|<tol
+ where the norm is an energy norm wrt preconditioner, |r|=sqrt(<Cr,r>).
+   two_norm!=0 means: the norm is the L2 norm, |r|=sqrt(<r,r>)
+   rel_change!=0 means: if pass the other stopping criteria, also check the
+ relative change in the solution x.
+   stop_crit!=0 means: pure absolute error tolerance rather than a pure relative
+ error tolerance on the residual.  Never applies if rel_change!=0 or abstolf!=0.
+   abstolf = absolute error tolerance factor to be used _together_ with the
+ relative error tolerance, |delta-residual| / ( abstolf + |right-hand-side| ) < tol
+   tol = relative error tolerance, as above
+   cf_tol = convergence factor tolerance; if >0 used for special test
+ for slow convergence
 */
 
 typedef struct
 {
    double   tol;
+   double   atolf;
    double   cf_tol;
    int      max_iter;
    int      two_norm;
@@ -778,6 +787,7 @@ int HYPRE_PCGSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPR
 int HYPRE_PCGSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
 int HYPRE_PCGSetTol( HYPRE_Solver solver , double tol );
 int HYPRE_PCGSetMaxIter( HYPRE_Solver solver , int max_iter );
+int HYPRE_PCGSetAbsoluteTolFactor( HYPRE_Solver solver , int abstolf );
 int HYPRE_PCGSetStopCrit( HYPRE_Solver solver , int stop_crit );
 int HYPRE_PCGSetTwoNorm( HYPRE_Solver solver , int two_norm );
 int HYPRE_PCGSetRelChange( HYPRE_Solver solver , int rel_change );
@@ -844,6 +854,7 @@ int hypre_PCGDestroy( void *pcg_vdata );
 int hypre_PCGSetup( void *pcg_vdata , void *A , void *b , void *x );
 int hypre_PCGSolve( void *pcg_vdata , void *A , void *b , void *x );
 int hypre_PCGSetTol( void *pcg_vdata , double tol );
+int hypre_PCGSetAbsoluteTolFactor( void *pcg_vdata , double atolf );
 int hypre_PCGSetConvergenceFactorTol( void *pcg_vdata , double cf_tol );
 int hypre_PCGSetMaxIter( void *pcg_vdata , int max_iter );
 int hypre_PCGSetTwoNorm( void *pcg_vdata , int two_norm );
