@@ -25,5 +25,7 @@ random.c
 read.c
 solver.c
 solver.h
+timing.c
+timing.h
 wjacobi.c
 wjacobi.h

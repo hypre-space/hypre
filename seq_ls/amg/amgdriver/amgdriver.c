@@ -8,6 +8,7 @@
  *********************************************************************EHEADER*/
 
 #include "headers.h"
+#include "timing.h"
 
 
 /*--------------------------------------------------------------------------
@@ -34,6 +35,9 @@ char *argv[];
    void    *wjacobi_data;
    void    *pcg_data;
    void    *gmres_data;
+
+   amg_Clock_t time_ticks;
+   amg_CPUClock_t cpu_ticks;
 
 
    /*-------------------------------------------------------
@@ -99,6 +103,11 @@ char *argv[];
    gmres_data   = NewGMRESData(problem, solver, GlobalsLogFileName);
 
    /* call AMG */
+
+   amg_Clock_init();
+   time_ticks = -amg_Clock();
+   cpu_ticks = -amg_CPUClock();
+
    if (SolverType(solver) == SOLVER_AMG)
    {
       int setup_err_flag;
@@ -154,6 +163,10 @@ char *argv[];
 
       GMRES(u, f, stop_tolerance, gmres_data);
    }
+
+   time_ticks += amg_Clock();
+   cpu_ticks  += amg_CPUClock();
+   PrintTiming(time_ticks,cpu_ticks);
 
    /*-------------------------------------------------------
     * Debugging prints
