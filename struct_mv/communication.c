@@ -11,7 +11,6 @@
 
 /*==========================================================================*/
 /**
-
 Create a communication type entry.
 
 {\bf Input files:}
@@ -35,7 +34,6 @@ headers.h
   the imin index of data\_box.
 
 @see hypre_FreeCommTypeEntry
-
 */
 /*--------------------------------------------------------------------------*/
 
@@ -126,7 +124,6 @@ hypre_NewCommTypeEntry( hypre_SBox  *sbox,
  
 /*==========================================================================*/
 /**
-
 Destroy a communication type entry.
 
 {\bf Input files:}
@@ -138,7 +135,6 @@ headers.h
   communication type entry.
 
 @see hypre_NewCommTypeEntry
-
 */
 /*--------------------------------------------------------------------------*/
 
@@ -153,7 +149,6 @@ hypre_FreeCommTypeEntry( hypre_CommTypeEntry *comm_entry )
 
 /*==========================================================================*/
 /**
-
 Create a communication type.
 
 {\bf Input files:}
@@ -167,7 +162,6 @@ headers.h
   number of elements in comm\_entries array.
 
 @see hypre_FreeCommType
-
 */
 /*--------------------------------------------------------------------------*/
 
@@ -187,7 +181,6 @@ hypre_NewCommType( hypre_CommTypeEntry **comm_entries,
 
 /*==========================================================================*/
 /**
-
 Destroy a communication type.
 
 {\bf Input files:}
@@ -199,7 +192,6 @@ headers.h
   communication type.
 
 @see hypre_NewCommType
-
 */
 /*--------------------------------------------------------------------------*/
 
@@ -227,7 +219,6 @@ hypre_FreeCommType( hypre_CommType *comm_type )
 
 /*==========================================================================*/
 /**
-
 Sort the entries of a communication type.  This routine is used to
 maintain consistency in communications.
 
@@ -245,7 +236,6 @@ pair of processes is distinct.
   communication type to be sorted.
 
 @see hypre_NewCommPkgInfo
-
 */
 /*--------------------------------------------------------------------------*/
 
@@ -305,18 +295,17 @@ hypre_SortCommType( hypre_CommType  *comm_type )
 
 /*==========================================================================*/
 /**
-
 Create a communication package.  A grid-based description of a
 communication exchange is passed in.  This description is then
 compiled into an intermediate processor-based description of the
 communication.  It is further compiled into a form based on the
-message-passing layer in the routine hypre_CommitCommPkg.  This
-proceeds as follows based on the compiler flag HYPRE_NO_COMMIT:
+message-passing layer in the routine hypre\_CommitCommPkg.  This
+proceeds as follows based on the compiler flag HYPRE\_NO\_COMMIT:
 
 \begin{itemize}
-\item If HYPRE_NO_COMMIT is not defined, commit the communication
+\item If HYPRE\_NO\_COMMIT is not defined, commit the communication
 package and free up the intermediate processor-based description.
-\item If HYPRE_NO_COMMIT is defined, do not commit the communication
+\item If HYPRE\_NO\_COMMIT is defined, do not commit the communication
 package and retain the intermediate processor-based description.
 The package is committed at communication time.
 \end{itemize}
@@ -347,7 +336,6 @@ headers.h
   communicator.
 
 @see hypre_NewCommPkgInfo, hypre_CommitCommPkg, hypre_FreeCommPkg
-
 */
 /*--------------------------------------------------------------------------*/
 
@@ -444,7 +432,6 @@ hypre_NewCommPkg( hypre_SBoxArrayArray  *send_sboxes,
 
 /*==========================================================================*/
 /**
-
 Destroy a communication package.
 
 {\bf Input files:}
@@ -456,7 +443,6 @@ headers.h
   communication package.
 
 @see hypre_NewCommPkg
-
 */
 /*--------------------------------------------------------------------------*/
 
@@ -493,7 +479,6 @@ hypre_FreeCommPkg( hypre_CommPkg *comm_pkg )
 
 /*==========================================================================*/
 /**
-
 Compute a processor-based description of a communication from a
 grid-based one.  Used to construct a communication package.
 
@@ -524,7 +509,6 @@ headers.h
   intra-processor communication type (copies).
 
 @see hypre_NewCommPkg, hypre_SortCommType
-
 */
 /*--------------------------------------------------------------------------*/
 
@@ -686,7 +670,6 @@ hypre_NewCommPkgInfo( hypre_SBoxArrayArray  *sboxes,
 
 /*==========================================================================*/
 /**
-
 Compile a communication package into a form based on the
 message-passing layer.
 
@@ -700,7 +683,6 @@ headers.h
 
 @see hypre_NewCommPkg, hypre_InitializeCommunication,
   hypre_BuildCommMPITypes, hypre_UnCommitCommPkg
-
 */
 /*--------------------------------------------------------------------------*/
 
@@ -730,7 +712,6 @@ hypre_CommitCommPkg( hypre_CommPkg *comm_pkg )
 
 /*==========================================================================*/
 /**
-
 Destroy the message-passing-layer component of the communication package.
 
 {\bf Input files:}
@@ -742,7 +723,6 @@ headers.h
   communication package.
 
 @see hypre_CommitCommPkg
-
 */
 /*--------------------------------------------------------------------------*/
 
@@ -777,7 +757,6 @@ hypre_UnCommitCommPkg( hypre_CommPkg *comm_pkg )
 
 /*==========================================================================*/
 /**
-
 Create an MPI-based description of a communication from a
 processor-based one.
 
@@ -796,7 +775,6 @@ headers.h
   MPI derived data-types.
 
 @see hypre_CommitCommPkg, hypre_BuildCommEntryMPIType
-
 */
 /*--------------------------------------------------------------------------*/
 
@@ -860,7 +838,6 @@ hypre_BuildCommMPITypes( int               num_comms,
 
 /*==========================================================================*/
 /**
-
 Create an MPI-based description of a communication entry.
 
 {\bf Input files:}
@@ -874,7 +851,6 @@ headers.h
   MPI derived data-type.
 
 @see hypre_BuildCommMPITypes
-
 */
 /*--------------------------------------------------------------------------*/
 
@@ -933,10 +909,9 @@ hypre_BuildCommEntryMPIType( hypre_CommTypeEntry *comm_entry,
 
 /*==========================================================================*/
 /**
-
 Initialize a non-blocking communication exchange.  If the compiler flag
-HYPRE_NO_COMMIT is defined, hypre_CommitCommPkg is called before the
-communication requests are posted and hypre_UnCommitCommPkg is called
+HYPRE\_NO\_COMMIT is defined, hypre\_CommitCommPkg is called before the
+communication requests are posted and hypre\_UnCommitCommPkg is called
 after they are posted.
 
 {\bf Input files:}
@@ -954,7 +929,6 @@ headers.h
   reference pointer for the recv data.
 
 @see hypre_FinalizeCommunication, hypre_NewCommPkg
-
 */
 /*--------------------------------------------------------------------------*/
 
@@ -1081,7 +1055,6 @@ hypre_InitializeCommunication( hypre_CommPkg *comm_pkg,
 
 /*==========================================================================*/
 /**
-
 Finalize a communication exchange.  This routine blocks until all of
 the communication requests are finished.
 
@@ -1094,7 +1067,6 @@ headers.h
   communication handle.
 
 @see hypre_InitializeCommunication, hypre_NewCommPkg
-
 */
 /*--------------------------------------------------------------------------*/
 

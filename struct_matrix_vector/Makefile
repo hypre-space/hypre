@@ -142,6 +142,9 @@ docs_tex:
 veryclean: clean
 	@rm -f libHYPRE_mv.a
 	@rm -f driver driver_internal
+	@rm -fr Docs
+	@rm -f DevManual.tex DevManual.ps
+	@rm -f DevManual.dvi DevManual.aux DevManual.log
 
 clean:
 	@rm -f *.o
