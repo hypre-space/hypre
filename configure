@@ -3439,7 +3439,7 @@ fi
 
 if test "$casc_user_chose_compilers" != "yes" ; then
   if test "$casc_using_openmp" = "yes" ; then
-    for ac_prog in mpguidec icc pgcc xlc cc
+    for ac_prog in mpguidec guidec icc pgcc xlc cc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3479,7 +3479,7 @@ fi
   test -n "$CC" && break
 done
 
-    for ac_prog in mpguidec++ icc pgCC xlC CC
+    for ac_prog in mpguidec++  guidec++ icc pgCC xlC CC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3519,7 +3519,7 @@ fi
   test -n "$CXX" && break
 done
 
-    for ac_prog in mpguidef77 ifc pgf77 xlf f77
+    for ac_prog in mpguidef77 guidef77 ifc pgf77 xlf f77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -25901,7 +25901,7 @@ then
             CFLAGS="-D_ALL_SOURCE -O2"
             ;;
           powerpc-ibm-aix*)
-            CFLAGS="-O3 -qstrict -qmaxmem=8192"
+            CFLAGS="-O3 -qstrict"
             if test "$casc_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -qsmp=omp"
             fi
@@ -25966,7 +25966,7 @@ then
             CXXFLAGS="-D_ALL_SOURCE -O2"
             ;;
           powerpc-ibm-aix*)
-            CXXFLAGS="-O3 -qstrict -qmaxmem=8192"
+            CXXFLAGS="-O3 -qstrict"
             if test "$casc_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -qsmp=omp"
             fi
