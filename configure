@@ -7884,10 +7884,11 @@ if test "$casc_using_babel" = "yes"
 then
  # JNI_INCLUDES has a path needed for Java support on Frost by Babel runtime:
  JNI_INCLUDES="-I /usr/java130/include"; export JNI_INCLUDES
- # Default Fortran compilers differ for this configure file and the Babel runtime
- # configure file on Frost:
- F77= $ac_cv_prog_F77; export F77
- # Other language environment variables should also be set here, e.g. CC.
+ # Default C and Fortran compilers differ for this configure file and the Babel
+ # runtime configure file on LLNL MP AIX machines:
+ export F77
+ export CC
+ # Other language environment variables should also be set here.
 
  config_babel_runtime=babel-runtime
 else
