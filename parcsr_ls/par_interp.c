@@ -885,14 +885,17 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
             }
 	    /* normalize row of P */
 
-   	    scale = row_sum/scale;
-	    if (scale != 1)
-	    {
-   	       for (j = P_diag_i[i]; j < (P_diag_i[i+1]-num_lost); j++)
-      	          P_diag_data[j] *= scale;
-   	       for (j = P_offd_i[i]; j < (P_offd_i[i+1]-num_lost_offd); j++)
-      	          P_offd_data[j] *= scale;
-	    }
+            if (scale != 0.)
+            {
+              scale = row_sum/scale;
+              if (scale != 1)
+              {
+   	         for (j = P_diag_i[i]; j < (P_diag_i[i+1]-num_lost); j++)
+      	            P_diag_data[j] *= scale;
+   	         for (j = P_offd_i[i]; j < (P_offd_i[i+1]-num_lost_offd); j++)
+      	            P_offd_data[j] *= scale;
+              }
+            }
          }
       }
       P_diag_i[n_fine] -= num_lost;
