@@ -55,10 +55,15 @@ void amg_FreeData P((AMGData *amg_data ));
 Matrix *NewMatrix P((double *data , int *ia , int *ja , int size ));
 void FreeMatrix P((Matrix *matrix ));
 void Matvec P((double alpha , Matrix *A , Vector *x , double beta , Vector *y ));
+void MatvecT P((double alpha , Matrix *A , Vector *x , double beta , Vector *y ));
 
 /* random.c */
 void SeedRand P((int seed ));
 double Rand P((void ));
+
+/* relaxC.c */
+int RelaxC P((Vector *u , Vector *f , Matrix *A , VectorInt *ICG , VectorInt *IV , int min_point , int max_point , int point_type , int relax_type , double *D_mat , double *S_vec ));
+int gselim P((double *A , double *x , int n ));
 
 /* vector.c */
 Vector *NewVector P((double *data , int size ));
