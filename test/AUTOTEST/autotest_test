@@ -28,9 +28,7 @@ initialize_variables ()
   Skip=0
   Build=1
   Run=2
-  PurifytoFile="--with-purify-to-file"
   InsuretoFile="--with-insure-to-file"
-  PurifySelected=0
   InsureSelected=0
   if [ -z "$MAKE" -o "$MAKE" = "" ] ; then
     MAKE="make -i"
@@ -126,7 +124,7 @@ parse_arguments () {
 # probably implement the obsolute getopt) then
 # getopts(1) will be used.
 #
-  while getopts :a:b:cDde:fhi:l:mno:p:q:r:sv: arg
+  while getopts :a:b:cDde:fhi:l:mno:p:r:sv: arg
   do
     argcur=$arg
     case $arg in
@@ -148,9 +146,6 @@ parse_arguments () {
       n) confbuildtest $Build   "--without-MPI" "no_mpi"    0 0 0 0 1 0 0;;
       o) confbuildtest $OPTARG  "--with-openmp" "openmp"    0 0 0 0 1 0 1;;
       p) HYPRE_DST_DIR=$OPTARG;;
-      q) confbuildtest $OPTARG  "--with-purify-to-file" \
-                                                "purify"    0 0 0 0 1 0 1;;
-     +q) confbuildtest $OPTARG  "--with-purify" "purify"    0 0 0 0 1 0 1;;
       r) HYPRE_RUN_MACHINE=$OPTARG;;
       s) confbuildtest $Build   "--with-strict-checking" \
                                          "strict_checking"  0 0 0 0 1 0 0;;
@@ -198,9 +193,6 @@ usage () {
   printf "         and all (no execute option).\n"
   printf "%s\n" "-o opt   openMP; configure --with-openmp, make."
   printf "%s\n" "-p path  Path to test directory (copied from local test)."
-  printf "%s\n" "-q opt   Purify; perform configure --with-purify-to-file."
-  printf "         Output is appended to a file called purify.log.\n"
-  printf "%s\n" "+q opt   Purify; no file output option (interactive)."
   printf "%s\n" "-r host  Remote; remote exection is performed on "host"."
   printf "%s\n" "-s       Strict; configure --with-strict-checking,"
   printf "         followed by make struct, IJ, all(no execute option).\n"
@@ -360,12 +352,6 @@ apply_error_filters () {
         done
 ###   fi   # blue
         ;;
-      ilx*)
-        for ii in \
-          ':\ compilation\ completed\ with\ warnings'
-        do process_filter $ErrorFile "${ii}"
-        done
-      ;;
       peng*)
         for ii in \
           '[A-Za-z0-9_]*\.[cCf]$'\
@@ -432,41 +418,6 @@ apply_error_filters () {
         do process_filter $ErrorFile "${ii}"
         done
       ;;
-      achi*|sunup*)		# sparc-sun-solaris2.8
-        for ii in \
-          'Option -fexceptions passed to ld'\
-          '(autoconf|automake|autoheader) has been disabled'\
-          'babel_config.h.in: No such file or directory'\
-          'xauth:  error in locking authority file '\
-          '^No begin line'\
-          '^configure: WARNING: '
-        do process_filter $ErrorFile "${ii}"
-        done
-        for ii in \
-          ': warning: assignment type mismatch:'
-        do multi_line_delete $ErrorFile 1 "${ii}"
-        done
-      ;;
-      perr*|poin*)		# sparc-sun-solaris2.7
-        for ii in \
-          '(autoconf|automake|autoheader) has been disabled'\
-          'python: fatal: '\
-          'babel_config.h.in: No such file or directory'\
-          'xauth:  error in locking authority file '\
-          'Xauthority not writable, changes will be ignored'\
-          '^No begin line'\
-          '^configure: WARNING: '
-        do process_filter $ErrorFile "${ii}"
-        done
-        for ii in \
-          ': warning: assignment type mismatch:'
-        do multi_line_delete $ErrorFile 1 "${ii}"
-        done
-        for ii in \
-          'Warning: Releases of GCC earlier than version 3.0'
-        do multi_line_range $ErrorFile 1 9 "${ii}"
-        done
-      ;;
     esac
   fi
 }
@@ -506,7 +457,7 @@ mail_summary () {
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
   printf "Compile summary: Status: Warnings: Errors\n" >> $SUMFILE
   for ConfOpt in babel debug default no_mpi openmp \
-           insure purify shared strict_checking \
+           insure shared strict_checking \
            docs all++ all77
   do
     printf "%-15s: " $ConfOpt >> $SUMFILE
@@ -581,7 +532,7 @@ mail_summary () {
         ErrFile=`echo $j | sed -e 's/\.sh$/.err/'`
         OutFile=`echo $j | sed -e 's/\.sh$/.out/'`
 # look for non-zero length subtest, TEST_*/test.err.[0-9]+ files
-        if [ "$PurifySelected" = "0" -a "$InsureSelected" = "0" ] ; then
+        if [ "$InsureSelected" = "0" ] ; then
           for k in "${ErrFile}.[0-9]+"; do
             apply_error_filters ${k}
             if [ -s "${k}" ] ; then
@@ -751,11 +702,7 @@ makeit ()
 {
 MakeStr=$1	 MessageStr=$2
 MailGroup=$3
-if [ "$MessageStr" = "purify" ]
-then				# don't need extra purify status messages
-  PurifySelected=1
-  $MAKE $MakeStr 1>> ${Hdr}.${MessageStr}.${MakeStr}.log 2>&1
-elif [ "$MessageStr" = "insure" ]
+if [ "$MessageStr" = "insure" ]
 then				# don't need extra insure status messages
   InsureSelected=1
   $MAKE $MakeStr 1>> ${Hdr}.${MessageStr}.${MakeStr}.log 2>&1
