@@ -106,23 +106,30 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
 {
    int ierr = 0;
    static int virgin = 1;
-   HYPRE_DistributedMatrix matrix;
+   HYPRE_DistributedMatrix mat;
    Secret *secret = (Secret *) solver;
 
-   ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix( A, &matrix );
+   ierr = HYPRE_DistributedMatrixCreate(comm, &matp);
+   if (ierr) return ierr;
+
+   ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix( A, &mat );
    if (ierr) return ierr;
 
    if (virgin || secret->reuse == 0) /* call set up at least once */
    {
        virgin = 0;
-       ierr = HYPRE_ParaSailsSetup(secret->obj, matrix, secret->sym, 
+       ierr = HYPRE_ParaSailsSetup(secret->obj, mat, secret->sym, 
            secret->thresh, secret->nlevels, secret->filter, secret->loadbal);
+       if (ierr) return ierr;
    }
    else /* reuse is true; this is a subsequent call */
    {
-       ierr = HYPRE_ParaSailsSetupValues(secret->obj, matrix,
+       ierr = HYPRE_ParaSailsSetupValues(secret->obj, mat,
 	 secret->filter, secret->loadbal);
+       if (ierr) return ierr;
    }
+
+   ierr = HYPRE_DistributedMatrixDestroy(matp);
 
    return ierr;
 }
