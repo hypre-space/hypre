@@ -1,0 +1,5 @@
+ 4  L - elements along length of beam
+ 4  W - elements along width of beam
+ 1  DOF - number of equations per node
+ 1 outputLevel
+ 1 debugOutput

@@ -1,0 +1,1 @@
+ISIS_ARCH=solaris
