@@ -182,6 +182,7 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
    MPI_Status          *status0;
    int			ierr = 0;
 
+   if ( comm_handle==NULL ) return ierr;
    if (hypre_ParCSRCommHandleNumRequests(comm_handle))
    {
       status0 = hypre_CTAlloc(MPI_Status,
