@@ -259,6 +259,7 @@ class HYPRE_LinSysCore: public LinearSystemCore {
    int             parasailsNlevels_;
    double          parasailsThreshold_;
    double          parasailsFilter_;
+   int             parasailsSym_;
    int             mlNumPreSweeps_;
    int             mlNumPostSweeps_;
    int             mlPresmootherType_;

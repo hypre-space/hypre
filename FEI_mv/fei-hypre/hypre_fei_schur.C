@@ -314,6 +314,8 @@ void HYPRE_LinSysCore::buildSchurSystem()
        HYPRE_IJMatrixInsertRow(Cmat,newRowSize,rowCount,newColInd,newColVal);
        rowCount++;
     }
+    delete [] newColInd;
+    delete [] newColVal;
 
     //------------------------------------------------------------------
     // finally assemble the matrix 
@@ -565,6 +567,8 @@ void HYPRE_LinSysCore::buildSchurSystem()
           rowCount++;
        }
     }
+    delete [] newColInd;
+    delete [] newColVal;
 
     //------------------------------------------------------------------
     // finally assemble the matrix 

@@ -82,6 +82,8 @@ extern "C" {
 HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) : 
                   comm_(comm),
                   HYA_(NULL),
+                  HYA21_(NULL),
+                  HYinvA22_(NULL),
                   HYb_(NULL),
                   HYbs_(NULL),
                   HYx_(NULL),
@@ -165,16 +167,17 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     parasailsNlevels_   = 1;
     parasailsThreshold_ = 0.0;
     parasailsFilter_    = 0.01;
+    parasailsSym_       = 0;
 
     superluOrdering_    = 0;    // natural ordering in SuperLU
     superluScale_[0]    = 'N';  // no scaling in SuperLUX
     gmresDim_           = 200;  // restart size in GMRES
     mlNumPreSweeps_     = 2;
     mlNumPostSweeps_    = 2;
-    mlPresmootherType_  = 3;    // default symmetric Gauss-Seidel
-    mlPostsmootherType_ = 3;    // default symmetric Gauss-Seidel
+    mlPresmootherType_  = 1;    // default symmetric Gauss-Seidel
+    mlPostsmootherType_ = 1;    // default symmetric Gauss-Seidel
     mlRelaxWeight_      = 0.5;
-    mlStrongThreshold_  = 0.12; // one suggested by Vanek/Brezina/Mandel
+    mlStrongThreshold_  = 0.08; // one suggested by Vanek/Brezina/Mandel
 
     rhsIDs_             = new int[1];
     rhsIDs_[0]          = 0;
@@ -463,34 +466,6 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     }
 
     //-------------------------------------------------------------------
-    // relative norm as termination criterion
-    //-------------------------------------------------------------------
-
-    if (Utils::getParam("relativeNorm",numParams,params,param) == 1)
-    {
-       normAbsRel_ = 0;
-       nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters relativeNorm \n");
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // absolute norm as termination criterion
-    //-------------------------------------------------------------------
-
-    if (Utils::getParam("absoluteNorm",numParams,params,param) == 1)
-    {
-       normAbsRel_ = 1;
-       nParamsFound++;
-       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters absoluteNorm \n");
-       }
-    }
-
-    //-------------------------------------------------------------------
     // pilut preconditioner : max number of nonzeros to keep per row
     //-------------------------------------------------------------------
 
@@ -603,6 +578,7 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        else if ( !strcmp(param2, "gsSlow") )  rtype = 1;
        else if ( !strcmp(param2, "gsFast") )  rtype = 4;
        else if ( !strcmp(param2, "hybrid" ) ) rtype = 3;
+       else if ( !strcmp(param2, "hybridsym" ) ) rtype = 5;
        else                                   rtype = 4;
        for ( i = 0; i < 3; i++ ) amgRelaxType_[i] = rtype;
        nParamsFound++;
@@ -664,13 +640,13 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     }
 
     //-------------------------------------------------------------------
-    // parasails preconditoner : nlevels ( >= 1)
+    // parasails preconditoner : nlevels ( >= 0)
     //-------------------------------------------------------------------
 
     if (Utils::getParam("parasailsNlevels",numParams,params,param) == 1)
     {
        sscanf(param,"%d", &parasailsNlevels_);
-       if ( parasailsNlevels_ < 1 ) parasailsNlevels_ = 1;
+       if ( parasailsNlevels_ < 0 ) parasailsNlevels_ = 0;
        nParamsFound++;
        if ( HYOutputLevel_ > 2 && mypid_ == 0 )
        {
@@ -692,6 +668,31 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        {
           printf("HYPRE_LinSysCore::parameters parasailsFilter = %e\n",
                  parasailsFilter_);
+       }
+    }
+
+    //-------------------------------------------------------------------
+    // parasails preconditoner : symmetry flag (1 - symm, 0 - nonsym) 
+    //-------------------------------------------------------------------
+
+    if (Utils::getParam("parasailsSymmetric",numParams,params,param) == 1)
+    {
+       parasailsSym_ = 1;
+       nParamsFound++;
+       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       {
+          printf("HYPRE_LinSysCore::parameters parasailsSym = %d\n",
+                 parasailsSym_);
+       }
+    }
+    if (Utils::getParam("parasailsUnSymmetric",numParams,params,param) == 1)
+    {
+       parasailsSym_ = 0;
+       nParamsFound++;
+       if ( HYOutputLevel_ > 2 && mypid_ == 0 )
+       {
+          printf("HYPRE_LinSysCore::parameters parasailsSym = %d\n",
+                 parasailsSym_);
        }
     }
 
@@ -748,8 +749,10 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
        else if ( !strcmp(param2, "gs") )      rtype = 1;
        else if ( !strcmp(param2, "sgs") )     rtype = 2;
-       else if ( !strcmp(param2, "bgs") )     rtype = 3;
-       else if ( !strcmp(param2, "bjacobi") ) rtype = 4;
+       else if ( !strcmp(param2, "vbjacobi")) rtype = 3;
+       else if ( !strcmp(param2, "vbsgs") )   rtype = 4;
+       else if ( !strcmp(param2, "vbsgsseq")) rtype = 5;
+       else if ( !strcmp(param2, "ilut") )    rtype = 6;
        mlPresmootherType_  = rtype;
        nParamsFound++;
        if ( HYOutputLevel_ > 2 && mypid_ == 0 )
@@ -765,8 +768,9 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
        else if ( !strcmp(param2, "gs") )      rtype = 1;
        else if ( !strcmp(param2, "sgs") )     rtype = 2;
-       else if ( !strcmp(param2, "bgs") )     rtype = 3;
-       else if ( !strcmp(param2, "bjacobi") ) rtype = 4;
+       else if ( !strcmp(param2, "vbjacobi")) rtype = 3;
+       else if ( !strcmp(param2, "vbsgs") )   rtype = 4;
+       else if ( !strcmp(param2, "vbsgsseq")) rtype = 5;
        mlPostsmootherType_  = rtype;
        nParamsFound++;
        if ( HYOutputLevel_ > 2 && mypid_ == 0 )
@@ -782,10 +786,13 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
        if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
        else if ( !strcmp(param2, "gs") )      rtype = 1;
        else if ( !strcmp(param2, "sgs") )     rtype = 2;
-       else if ( !strcmp(param2, "bgs") )     rtype = 3;
-       else if ( !strcmp(param2, "bjacobi") ) rtype = 4;
+       else if ( !strcmp(param2, "vbjacobi")) rtype = 3;
+       else if ( !strcmp(param2, "vbsgs") )   rtype = 4;
+       else if ( !strcmp(param2, "vbsgsseq")) rtype = 5;
+       else if ( !strcmp(param2, "ilut") )    rtype = 6;
        mlPresmootherType_  = rtype;
        mlPostsmootherType_ = rtype;
+       if ( rtype == 6 ) mlPostsmootherType_ = 1;
        nParamsFound++;
        if ( HYOutputLevel_ > 2 && mypid_ == 0 )
        {
@@ -2349,6 +2356,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("ParaSails - threshold = %e\n", parasailsThreshold_);
                      printf("ParaSails - filter    = %e\n", parasailsFilter_);
                   }
+                  HYPRE_ParCSRParaSailsSetSym(HYPrecon_,parasailsSym_);
                   HYPRE_ParCSRParaSailsSetParams(HYPrecon_,
                                                  parasailsThreshold_,
                                                  parasailsNlevels_);
@@ -2453,8 +2461,8 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           }
           HYPRE_ParCSRPCGSetMaxIter(HYSolver_, maxIterations_);
           HYPRE_ParCSRPCGSetTol(HYSolver_, tolerance_);
-          if ( normAbsRel_ == 0 ) HYPRE_ParCSRPCGSetRelChange(HYSolver_, 0);
-          else                    HYPRE_ParCSRPCGSetTwoNorm(HYSolver_, 1);
+          HYPRE_ParCSRPCGSetRelChange(HYSolver_, 0);
+          HYPRE_ParCSRPCGSetTwoNorm(HYSolver_, 1);
           HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
           if (HYOutputLevel_ >= 0 && mypid_ == 0) 
           {
@@ -2541,7 +2549,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("ParaSails - threshold = %e\n", parasailsThreshold_);
                      printf("ParaSails - filter    = %e\n", parasailsFilter_);
                   }
-                  HYPRE_ParCSRParaSailsSetSym(HYPrecon_,0);
+                  HYPRE_ParCSRParaSailsSetSym(HYPrecon_,parasailsSym_);
                   HYPRE_ParCSRParaSailsSetParams(HYPrecon_,
                                                  parasailsThreshold_,
                                                  parasailsNlevels_);
@@ -3838,7 +3846,11 @@ void fei_hypre_test(int argc, char *argv[])
 
     char *paramString = new char[100];
 
-    strcpy(paramString, "solver gmres");
+    strcpy(paramString, "solver cg");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "relativeNorm");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "tolerance 1.0e-6");
     H.parameters(1, &paramString);
     if ( my_rank == 0 )
     {

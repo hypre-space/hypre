@@ -110,7 +110,7 @@ void HYPRE_LinSysCore::buildReducedSystem()
     int    *colInd2, *selectedList, ncnt, ubound;
     int    rowSize2, *recvCntArray, *displArray, ncnt2;
     int    StartRow, EndRow, *reducedAMatSize;
-    int    *ProcNRows, *ProcNConstr;
+    int    *ProcNRows, *ProcNConstr, nnzA21, nnzA12;
 
     double searchValue, *colVal, *colVal2, *newColVal, *diagonal;
     double *extDiagonal, *dble_array, ddata;
@@ -587,10 +587,13 @@ void HYPRE_LinSysCore::buildReducedSystem()
        for (j = 0; j < rowSize; j++) 
        {
           colIndex = colInd[j];
-	  searchIndex = hypre_BinarySearch(globalSelectedList,colIndex, 
-                                           globalNSelected);
-          if (searchIndex < 0 && 
-              (colIndex <= newEndRow || colIndex > localEndRow_)) rowSize2++;
+          if ( colVal[j] != 0.0 ) 
+          {
+	     searchIndex = hypre_BinarySearch(globalSelectedList,colIndex, 
+                                              globalNSelected);
+             if (searchIndex < 0 && 
+                 (colIndex <= newEndRow || colIndex >= localEndRow_)) rowSize2++;
+          }
        }
        A21MatSize[rowCount] = rowSize2;
        maxRowSize = ( rowSize2 > maxRowSize ) ? rowSize2 : maxRowSize;
@@ -617,7 +620,8 @@ void HYPRE_LinSysCore::buildReducedSystem()
           if ( colVal[j] != 0.0 )
           {
              colIndex = colInd[j];
-	     searchIndex = hypre_BinarySearch(selectedList,colIndex,nSelected); 
+	     searchIndex = hypre_BinarySearch(globalSelectedList,colIndex,
+                                              globalNSelected); 
              if ( searchIndex < 0 ) rowSize2++;
           }
        }
@@ -626,6 +630,8 @@ void HYPRE_LinSysCore::buildReducedSystem()
        HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
        rowCount++;
     }
+    nnzA21 = 0;
+    for ( i = 0; i < 2*nConstraints_; i++ ) nnzA21 += A21MatSize[i];
 
     //------------------------------------------------------------------
     // after fetching the row sizes, set up A21 with such sizes
@@ -665,7 +671,7 @@ void HYPRE_LinSysCore::buildReducedSystem()
           if ( colVal[j] != 0.0 )
           {
              colIndex = colInd[j];
-             if (colIndex <= newEndRow || colIndex > localEndRow_) 
+             if (colIndex <= newEndRow || colIndex >= localEndRow_) 
              {
 	        searchIndex = HYFEI_BinarySearch(globalSelectedList,colIndex, 
                                                  globalNSelected); 
@@ -1364,21 +1370,24 @@ void HYPRE_LinSysCore::buildReducedSystem()
           newRowSize = 0;
           for (j = 0; j < rowSize; j++)  
           {
-             colIndex = colInd[j];
-             for ( procIndex = 0; procIndex < numProcs_; procIndex++ )
-                if ( ProcNRows[procIndex] > colIndex ) break;
-             if ( procIndex == numProcs_ ) 
-                ubound = globalNRows-(globalNConstr-ProcNConstr[numProcs_-1]);
-             else
-                ubound = ProcNRows[procIndex] - 
-                         (ProcNConstr[procIndex]-ProcNConstr[procIndex-1]);
-             procIndex--;
-             if ( colIndex >= ubound ) newRowSize++; 
-             else
+             if ( colVal[j] != 0.0 )
              {
-                if (hypre_BinarySearch(globalSelectedList,colIndex, 
-                                                 globalNSelected) >= 0)
-                   newRowSize++;
+                colIndex = colInd[j];
+                for ( procIndex = 0; procIndex < numProcs_; procIndex++ )
+                   if ( ProcNRows[procIndex] > colIndex ) break;
+                if ( procIndex == numProcs_ ) 
+                   ubound = globalNRows-(globalNConstr-ProcNConstr[numProcs_-1]);
+                else
+                   ubound = ProcNRows[procIndex] - 
+                            (ProcNConstr[procIndex]-ProcNConstr[procIndex-1]);
+                procIndex--;
+                if ( colIndex >= ubound ) newRowSize++; 
+                else
+                {
+                   if (hypre_BinarySearch(globalSelectedList,colIndex, 
+                                                    globalNSelected) >= 0)
+                      newRowSize++;
+                }
              }
           }
           A12MatSize[rowIndex++] = newRowSize;
@@ -1391,6 +1400,8 @@ void HYPRE_LinSysCore::buildReducedSystem()
     // after fetching the row sizes, set up A12 with such sizes
     //------------------------------------------------------------------
 
+    nnzA12 = 0;
+    for ( i = 0; i < A12NRows; i++ ) nnzA12 += A12MatSize[i];
     ierr  = HYPRE_IJMatrixSetRowSizes(A12, A12MatSize);
     ierr += HYPRE_IJMatrixInitialize(A12);
     assert(!ierr);
@@ -1625,5 +1636,16 @@ void HYPRE_LinSysCore::buildReducedSystem()
           rowLengths_ = NULL;
        }
     }
+
+    //------------------------------------------------------------------
+    // checking 
+    //------------------------------------------------------------------
+
+    MPI_Allreduce(&nnzA12,&ncnt,1,MPI_INT,MPI_SUM,comm_);
+    if ( mypid_ == 0 )
+       printf("NNZ of A12 = %d\n", ncnt);
+    MPI_Allreduce(&nnzA21,&ncnt,1,MPI_INT,MPI_SUM,comm_);
+    if ( mypid_ == 0 )
+       printf("NNZ of A21 = %d\n", ncnt);
 }
 

@@ -42,6 +42,128 @@ int            **offColInd;
 int            *remap_array;
 double         **offColVal;
 MPI_Comm       parComm;      
+HYPRE_Solver   cSolver;
+HYPRE_Solver   cPrecon;
+
+int HYPRE_IntfaceCreate(HYPRE_Solver *cPrecon) { cPrecon = NULL; return 0;}
+int HYPRE_DummySetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
+                      HYPRE_ParVector x_csr, HYPRE_ParVector y_csr )
+{
+   return 0;
+}
+
+int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
+                        HYPRE_ParVector x_csr, HYPRE_ParVector y_csr )
+{
+   int                i, j, index, local_nrows, *temp_list, global_nrows;
+   HYPRE_ParCSRMatrix LA_csr;
+   HYPRE_ParVector    Lx_csr;
+   HYPRE_ParVector    Lb_csr;
+   hypre_ParVector    *x_par;
+   hypre_ParVector    *y_par;
+   hypre_ParVector    *tv_par;
+   hypre_Vector       *x_par_local;
+   hypre_Vector       *y_par_local;
+   hypre_Vector       *tv_par_local;
+   double             *x_par_data ;
+   double             *y_par_data ;
+   double             *tv_par_data;
+   double             *temp_vect;
+   hypre_ParVector    *Lx_par;
+   hypre_Vector       *Lx_local;
+   double             *Lx_data;
+
+   local_nrows = myEnd - myBegin + 1;
+   x_par       = (hypre_ParVector *) x_csr;
+   x_par_local = hypre_ParVectorLocalVector(x_par);
+   x_par_data  = hypre_VectorData(x_par_local);
+   y_par       = (hypre_ParVector *) y_csr;
+   y_par_local = hypre_ParVectorLocalVector(y_par);
+   y_par_data  = hypre_VectorData(y_par_local);
+
+   // apply E^T to vector
+
+   temp_list = new int[interior_nrows];
+   temp_vect = new double[interior_nrows];
+   for (i=0; i<interior_nrows; i++) temp_list[i] = i;
+   for (i=0; i<local_nrows; i++) 
+   {
+      if ( remap_array[i] >= 0 && remap_array[i] < interior_nrows) 
+      {
+         temp_vect[remap_array[i]] = 0.0;
+         for (j=0; j<offRowLengths[i]; j++) 
+            temp_vect[remap_array[i]] += 
+               (offColVal[i][j]*tv_par_data[offColInd[i][j]]);
+      } else if ( remap_array[i] >= interior_nrows) 
+        printf("WARNING : index out of range.\n");
+   }
+
+   HYPRE_IJVectorSetLocalComponents(localb,interior_nrows,temp_list,
+                                    NULL,temp_vect);
+   HYPRE_IJVectorZeroLocalComponents(localx);
+   delete [] temp_list;
+   delete [] temp_vect;
+
+   LA_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
+   Lx_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);
+   Lb_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);
+   HYPRE_ParAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
+
+   Lx_par   = (hypre_ParVector *) Lx_csr;
+   Lx_local = hypre_ParVectorLocalVector(Lx_par);
+   Lx_data  = hypre_VectorData(Lx_local);
+   for (i=0; i<local_nrows; i++) 
+   {
+      if (remap_array[i] >= 0) y_par_data[i] -= Lx_data[remap_array[i]];
+   }
+
+   // apply E to vector
+
+   for (i=0; i<local_nrows; i++) tv_par_data[i] = x_par_data[i];
+
+   temp_list = new int[interior_nrows];
+   temp_vect = new double[interior_nrows];
+   for (i=0; i<interior_nrows; i++) temp_list[i] = i;
+   for (i=0; i<local_nrows; i++) 
+   {
+      if (remap_array[i] >= 0 && remap_array[i] < interior_nrows) 
+         temp_vect[remap_array[i]] = x_par_data[i];
+   }
+   HYPRE_IJVectorSetLocalComponents(localb,interior_nrows,temp_list,
+                                    NULL,temp_vect);
+   HYPRE_IJVectorZeroLocalComponents(localx);
+   delete [] temp_list;
+   delete [] temp_vect;
+
+   LA_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
+   Lx_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);
+   Lb_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);
+   HYPRE_ParAMGSolve( solver, LA_csr, Lb_csr, Lx_csr );
+
+   Lx_par   = (hypre_ParVector *) Lx_csr;
+   Lx_local = hypre_ParVectorLocalVector(Lx_par);
+   Lx_data  = hypre_VectorData(Lx_local);
+   for (i=0; i<local_nrows; i++) 
+   {
+      if ( remap_array[i] >= 0 ) 
+      {
+         for (j=0; j<offRowLengths[i]; j++) 
+         {
+            index = offColInd[i][j];
+            tv_par_data[index] -= (Lx_data[remap_array[i]] * offColVal[i][j]);
+         }
+         //tv_par_data[i] = Lx_data[remap_array[i]];
+      }
+   }
+
+   // -----------------------------------------------------------------
+   // solve for E^T A E using CG
+   // -----------------------------------------------------------------
+
+   HYPRE_IntfaceCreate(&cPrecon);
+   HYPRE_ParCSRPCGCreate(parComm, &cSolver);
+}
+
 
 //***************************************************************************
 // Compute y = E^T A E x where A is the global matrix and x and y are
@@ -142,6 +264,19 @@ int HYPRE_Precondition( HYPRE_Solver solver,
    }
 
    // -----------------------------------------------------------------
+   // solve for E^T A E using CG
+   // -----------------------------------------------------------------
+
+   HYPRE_IntfaceCreate(&cPrecon);
+   HYPRE_ParCSRPCGCreate(parComm, &cSolver);
+   HYPRE_ParCSRPCGSetPrecond(cSolver,HYPRE_IntfaceSolve,HYPRE_DummySetup,cPrecon);
+   HYPRE_ParCSRPCGSetMaxIter(cSolver, 1000);
+   HYPRE_ParCSRPCGSetTol(cSolver, 1.0E-8);
+   HYPRE_ParCSRPCGSetRelChange(cSolver, 0);
+   HYPRE_ParCSRPCGSetup(cSolver, A_csr, tv_csr, x_csr);
+   HYPRE_ParCSRPCGSolve(cSolver, A_csr, tv_csr, y_csr);
+
+   // -----------------------------------------------------------------
    // apply E to tv => y
    // - y(border) = tv(border)
    // - solve inteior using the border data 
@@ -151,7 +286,7 @@ int HYPRE_Precondition( HYPRE_Solver solver,
    //   + y(int) = x(int) + E * x(border)
    // -----------------------------------------------------------------
   
-   for (i=0; i<local_nrows; i++) y_par_data[i] = tv_par_data[i];
+   //for (i=0; i<local_nrows; i++) y_par_data[i] = tv_par_data[i];
 
    temp_list = new int[interior_nrows];
    temp_vect = new double[interior_nrows];
