@@ -535,6 +535,16 @@ hypre_PCGSolve( void *pcg_vdata,
          }
       }
 
+      if ( (gamma<1.0e-292) && ((-gamma)<1.0e-292) ) {
+         ierr = 1;
+         break;
+      }
+      /* ... gamma should be >=0.  IEEE subnormal numbers are < 2**(-1022)=2.2e-308
+         (and >= 2**(-1074)=4.9e-324).  So a gamma this small means we're getting
+         dangerously close to subnormal or zero numbers (usually if gamma is small,
+         so will be other variables).  Thus further calculations risk a crash.
+         Such small gamma generally means no hope of progress anyway. */
+
       /*--------------------------------------------------------------------
        * Optional test to see if adequate progress is being made.
        * The average convergence factor is recorded and compared
@@ -557,16 +567,6 @@ hypre_PCGSolve( void *pcg_vdata,
 #endif
          if (weight * cf_ave_1 > cf_tol) break;
       }
-
-      if ( (gamma<1.0e-292) && ((-gamma)<1.0e-292) ) {
-         ierr = 1;
-         break;
-      }
-      /* ... gamma should be >=0.  IEEE subnormal numbers are < 2**(-1022)=2.2e-308
-         (and >= 2**(-1074)=4.9e-324).  So a gamma this small means we're getting
-         dangerously close to subnormal or zero numbers (usually if gamma is small,
-         so will be other variables).  Thus further calculations risk a crash.
-         Such small gamma generally means no hope of progress anyway. */
 
       /* beta = gamma / gamma_old */
       beta = gamma / gamma_old;
