@@ -168,7 +168,7 @@ int symbolic_row_private(int localRow, int beg_row, int end_row,
   int *cval = ctx->F->cval, *diag = ctx->F->diag, *rp = ctx->F->rp; 
   int *fill = ctx->F->fill;
   int count = 0;
-  int j, node, tmp, col, col2, head;
+  int j, node, tmp, col, head;
   int fill1, fill2;
   float val;
   double thresh = ctx->sparseTolA;

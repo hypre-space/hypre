@@ -226,8 +226,8 @@ void generateStriped(MatGenFD mg, int *rp, int *cval, double *aval, Mat_dh A, Ve
   double bcx2 = mg->bcX2;
   double bcy1 = mg->bcY1;
   double bcy2 = mg->bcY2;
-  double bcz1 = mg->bcZ1;
-  double bcz2 = mg->bcZ2;
+  /* double bcz1 = mg->bcZ1; */
+  /* double bcz2 = mg->bcZ2; */
   int nx, ny;
 
   printf_dh("@@@ using striped partitioning\n");
@@ -652,7 +652,7 @@ void generateBlocked(MatGenFD mg, int *rp, int *cval, double *aval, Mat_dh A, Ve
   int startRow;
   int x, y, z;
   bool debug = false;
-  int idx = 0, localRow = 0, nabor;
+  int idx = 0, localRow = 0; /* nabor; */
   int naborx1, naborx2, nabory1, nabory2, naborz1, naborz2;
   double *rhs;
 
@@ -661,8 +661,8 @@ void generateBlocked(MatGenFD mg, int *rp, int *cval, double *aval, Mat_dh A, Ve
   double bcx2 = mg->bcX2;
   double bcy1 = mg->bcY1;
   double bcy2 = mg->bcY2;
-  double bcz1 = mg->bcZ1;
-  double bcz2 = mg->bcZ2;
+  /* double bcz1 = mg->bcZ1; */
+  /* double bcz2 = mg->bcZ2; */
 
   Vec_dhInit(b, A->m); CHECK_V_ERROR;
   rhs = b->vals;

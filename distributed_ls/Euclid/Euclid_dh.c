@@ -113,7 +113,6 @@ void Euclid_dhSetup(Euclid_dh ctx)
   START_FUNC_DH
   int m, n, beg_row;
   double t1;
-  bool debug;
   bool isSetup = ctx->isSetup;
   bool bj = false;
 
@@ -161,7 +160,6 @@ void Euclid_dhSetup(Euclid_dh ctx)
   sprintf(msgBuf_dh, "localRow= %i;  globalRows= %i;  beg_row= %i", m, n, beg_row);
   SET_INFO(msgBuf_dh);
 
-  debug = Parser_dhHasSwitch(parser_dh, "-debug");
   bj = Parser_dhHasSwitch(parser_dh, "-bj");
 
   /*------------------------------------------------------------------------
@@ -731,12 +729,12 @@ void Euclid_dhPrintStatsShort(Euclid_dh ctx, double setup, double solve, FILE *f
 {
   START_FUNC_DH
   double *timing = ctx->timing;
-  double *stats = ctx->stats;
-  double setup_factor;
-  double setup_other;
+  /* double *stats = ctx->stats; */
+  /* double setup_factor; */
+  /* double setup_other; */
   double apply_total;
   double apply_per_it;
-  double nzUsedRatio;
+  /* double nzUsedRatio; */
   double perIt;
   int blocks = np_dh;
 
@@ -744,11 +742,11 @@ void Euclid_dhPrintStatsShort(Euclid_dh ctx, double setup, double solve, FILE *f
 
   reduce_timings_private(ctx); CHECK_V_ERROR;
 
-  setup_factor  = timing[FACTOR_T];
-  setup_other   = timing[SETUP_T] - setup_factor;
+  /* setup_factor  = timing[FACTOR_T]; */
+  /* setup_other   = timing[SETUP_T] - setup_factor; */
   apply_total   = timing[TRI_SOLVE_T];
   apply_per_it  = apply_total/(double)ctx->its;
-  nzUsedRatio   = stats[NZA_RATIO_STATS];
+  /* nzUsedRatio   = stats[NZA_RATIO_STATS]; */
   perIt         = solve/(double)ctx->its;
 
   fprintf_dh(fp, "\n");

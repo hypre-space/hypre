@@ -45,26 +45,42 @@ void EuclidGetDimensions(void *A, int *beg_row, int *rowsLocal, int *rowsGlobal)
   START_FUNC_DH
   int ierr, m, n;
   int row_start, row_end, col_start, col_end;
+  HYPRE_ParCSRMatrix mat = (HYPRE_ParCSRMatrix) A;
 
-  HYPRE_DistributedMatrix mat = (HYPRE_DistributedMatrix) A;
-  HYPRE_DistributedMatrixGetDims(mat, &m , &n);
-  HYPRE_DistributedMatrixGetDims(mat, &m , &n);
-  HYPRE_DistributedMatrixGetLocalRange(mat, &row_start, &row_end, 
-                                            &col_start, &col_end);
+  ierr = HYPRE_ParCSRMatrixGetDims(mat, &m, &n);
+  if (ierr) {
+    sprintf(msgBuf_dh, "HYPRE_ParCSRMatrixGetDims() returned %i", ierr);
+    SET_V_ERROR(msgBuf_dh);
+  }
+
+  ierr = HYPRE_ParCSRMatrixGetLocalRange(mat, &row_start, &row_end, 
+                                       &col_start, &col_end);
+  if (ierr) {
+    sprintf(msgBuf_dh, "HYPRE_ParCSRMatrixGetLocalRange() returned %i", ierr);
+    SET_V_ERROR(msgBuf_dh);
+  }
+
+/* fprintf(stderr, "\n##### [%i] EuclidGetDimensions: m= %i  n= %i  beg_row= %i row_end= %i  col_start= %i  col_end= %i\n",
+                             myid_dh, m,n,row_start,row_end,col_start,col_end);
+*/
+
   *beg_row = row_start;
-  *rowsLocal = m;
+  *rowsLocal = (row_end - row_start + 1);
   *rowsGlobal = n;
   END_FUNC_DH
 }
 
+/*
 #undef __FUNC__
 #define __FUNC__ "EuclidReadLocalNz (HYPRE)"
 int EuclidReadLocalNz(void *A)
 {
   START_FUNC_DH
   if (ignoreMe) SET_V_ERROR("not implemented");
+  return(0);
   END_FUNC_DH
 }
+*/
 
 
 /*-------------------------------------------------------------------

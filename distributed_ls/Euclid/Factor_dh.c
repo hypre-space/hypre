@@ -71,7 +71,6 @@ void Factor_dhCreate(Factor_dh *mat)
 void Factor_dhDestroy(Factor_dh mat)
 {
   START_FUNC_DH
-  int i;
 
   if (mat->rp != NULL) { FREE_DH(mat->rp); CHECK_V_ERROR; }
   if (mat->cval != NULL) { FREE_DH(mat->cval); CHECK_V_ERROR; }
@@ -178,7 +177,7 @@ void Factor_dhPrintDiags(Factor_dh mat, FILE *fp)
 {
   START_FUNC_DH
   int beg_row = mat->beg_row;
-  int m = mat->m, i, j, pe, *diag = mat->diag;
+  int m = mat->m, i, pe, *diag = mat->diag;
   REAL_DH *aval = mat->aval; 
 
   
@@ -472,8 +471,7 @@ void Factor_dhSolveSetup(Factor_dh mat, SubdomainGraph_dh sg)
   int i, row, *rp = mat->rp, *cval = mat->cval;
   Numbering_dh numb;
   int m = mat->m;
-  int firstLocalRow = mat->beg_row;
-  int lastLocalRow  = firstLocalRow+m-1;
+  /* int firstLocalRow = mat->beg_row; */
   int *beg_rows = sg->beg_rowP, *row_count = sg->row_count, *end_rows;
   Mat_dh matFake;
   bool debug = false;
@@ -964,7 +962,8 @@ void Factor_dhSolveSeq(double *rhs, double *lhs, Euclid_dh ctx)
   Factor_dh F = ctx->F;
   int       *rp, *cval, *diag;
   int       i, j, *vi, nz, m = F->m;
-  REAL_DH   *aval, *scale, *work;
+  REAL_DH   *aval, *work;
+  /* REAL_DH   *scale; */
   REAL_DH   *v, sum;
   bool debug = false;
 
@@ -974,7 +973,7 @@ void Factor_dhSolveSeq(double *rhs, double *lhs, Euclid_dh ctx)
   cval = F->cval;
   aval = F->aval;
   diag = F->diag;
-  scale = ctx->scale;
+  /* scale = ctx->scale; */
   work = ctx->work;
 
  if (debug) {
@@ -1099,11 +1098,11 @@ double Factor_dhMaxPivotInverse(Factor_dh mat)
   }
 
   if (minGlobal == 0) {
-    retval == 0;
+    retval = 0;
   } else {
    retval = 1.0 / minGlobal;
   }
-  END_FUNC_VAL(minGlobal)
+  END_FUNC_VAL(retval)
 }
 
 #undef __FUNC__

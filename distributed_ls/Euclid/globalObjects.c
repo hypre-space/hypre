@@ -50,7 +50,7 @@ static  char errMsg_private[MAX_STACK_SIZE][MAX_MSG_SIZE];
 static  int errCount_private = 0;
 
 static  char calling_stack[MAX_STACK_SIZE][MAX_MSG_SIZE];
-static  int  priority_private[MAX_STACK_SIZE];
+/* static  int  priority_private[MAX_STACK_SIZE]; */
 static  int calling_stack_count = 0;
 
 /* static  char errMsg[MAX_MSG_SIZE];    */
@@ -124,7 +124,7 @@ void dh_StartFunc(char *function, char *file, int line, int priority)
   if (priority == 1) {
     sprintf(calling_stack[calling_stack_count], 
           "[%i]   %s  file= %s  line= %i", myid_dh, function, file, line);
-    priority_private[calling_stack_count] = priority;
+    /* priority_private[calling_stack_count] = priority; */
     ++calling_stack_count;
 
     if (calling_stack_count == MAX_STACK_SIZE) {

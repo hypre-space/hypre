@@ -56,16 +56,16 @@ Then in the matvec, no reordering of the data is needed.
 void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
 {
   START_FUNC_DH
-  int       row, i, len, *cval = mat->cval;
+  int       i, len, *cval = mat->cval;
   int       num_ext, num_extLo, num_extHi;
   int       m = mat->m, size;
   Hash_i_dh global_to_local_hash;
   int       first = mat->beg_row, last  = first+m;
   int       *idx_ext;
   int       data;
-  int       debug = false;
+/*  int       debug = false; */
 
-  if (logFile != NULL && numb->debug) debug = true;
+/*   if (logFile != NULL && numb->debug) debug = true; */
 
   numb->first = first;
   numb->m = m;

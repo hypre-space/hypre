@@ -16,7 +16,6 @@ VPATH = @srcdir@
 PCPACK_DIR = $(srcdir)
 EUCLID_CFLAGS =  -DMPI_MODE -DMPI_TIMING -DUSING_MPI -DHYPRE_GET_ROW \
                  -DHYPRE_MODE -DOPTIMIZED_DH
-EUCLID_INCLUDES = -I$(srcdir)/include -Iinclude
 
 CC =  @CC@
 
@@ -27,7 +26,6 @@ CINCLUDES=@INCLUDES@ @MPIINCLUDE@
  
 CFLAGS = \
  ${EUCLID_CFLAGS} \
- ${EUCLID_INCLUDES} \
  ${C_COMPILE_FLAGS}\
  -I../..\
  -I$(srcdir)\
@@ -108,10 +106,7 @@ all: libHYPRE_Euclid.a
 
 driver: driver.o libHYPRE_Euclid.a
 	@echo  "Linking" $@ "... "
-	${CC} -o $@ driver.o ${LFLAGS}
-
-convert: convert.o
-	${CC} -o $@ convert.o
+	${CC} -o $@ driver.o ./libHYPRE_Euclid.a ${LFLAGS}
 
 install: all
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.

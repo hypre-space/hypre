@@ -467,6 +467,10 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
   EuclidGetDimensions(A, &beg_row, &m, &n); CHECK_V_ERROR;
   s->m = m;
 
+
+/* fprintf(stderr, "\n@@@ [%i] m= %i  n= %i  beg_row= %i\n\n", myid_dh, m,n,beg_row);
+*/
+
   /*-------------------------------------------------------
    * allocate storage for all data structures 
    * EXCEPT s->adj and hash tables.
@@ -927,6 +931,13 @@ void find_all_neighbors_unsym_private(SubdomainGraph_dh s, int m, void *A)
    */
   beg_row = s->beg_row[myid_dh];
   end_row = beg_row + s->row_count[myid_dh];
+
+/*
+fprintf(stderr, "[%i] find_all_neighbors_unsym_private: beg_row= %i  end_row= %i\n",
+myid_dh, beg_row, end_row);
+*/
+
+
   for (row=beg_row; row<end_row; ++row) {
     EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
     for (j=0; j<len; ++j) {

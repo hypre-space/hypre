@@ -230,7 +230,7 @@ void iluk_seq_block(Euclid_dh ctx)
   int      h, i, j, len, count, col, idx = 0;
   int      *list, *marker, *fill, *tmpFill;
   int      temp, m;
-  int      *n2o_row, *o2n_col, *beg_row, *beg_rowP, *n2o_sub, blocks;
+  int      *n2o_row, *o2n_col, *beg_rowP, *n2o_sub, blocks;
   int      *row_count, *dummy = NULL, dummy2[1];
   double   *AVAL;
   REAL_DH  *work, *aval;
@@ -261,7 +261,7 @@ void iluk_seq_block(Euclid_dh ctx)
     n2o_row   = sg->n2o_row;
     o2n_col   = sg->o2n_col;
     row_count = sg->row_count;
-    beg_row   = sg->beg_row ;
+    /* beg_row   = sg->beg_row ; */
     beg_rowP  = sg->beg_rowP;
     n2o_sub   = sg->n2o_sub;
     blocks    = sg->blocks;
@@ -273,7 +273,7 @@ void iluk_seq_block(Euclid_dh ctx)
     n2o_row   = dummy;
     o2n_col   = dummy;
     dummy2[0] = m; row_count = dummy2;
-    beg_row   = 0;
+    /* beg_row   = 0; */
     beg_rowP  = dummy;
     n2o_sub   = dummy;
     blocks    = 1;

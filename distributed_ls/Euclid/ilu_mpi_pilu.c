@@ -27,13 +27,13 @@ void iluk_mpi_pilu(Euclid_dh ctx)
   START_FUNC_DH
   int from = ctx->from, to = ctx->to;
   int i, m; 
-  int *n2o_row, *o2n_col;
+  int *n2o_row; /* *o2n_col; */
   int *rp, *cval, *diag, *fill;
-  int beg_row, end_row, beg_rowP, end_rowP;
+  int beg_row, beg_rowP, end_rowP;
   SubdomainGraph_dh sg = ctx->sg;
   int *CVAL, len, idx = 0, count;
   double *AVAL;
-  REAL_DH *aval, *work;
+  REAL_DH *aval;
   Factor_dh F = ctx->F;
   SortedList_dh slist = ctx->slist;
   ExternalRows_dh extRows = ctx->extRows;
@@ -50,10 +50,10 @@ void iluk_mpi_pilu(Euclid_dh ctx)
   fill = F->fill;
   diag = F->diag;
   aval = F->aval;
-  work = ctx->work;
+  /* work = ctx->work; */
 
   n2o_row = sg->n2o_row;
-  o2n_col = sg->o2n_col;
+  /* o2n_col = sg->o2n_col; */
 
   if (from != 0) idx = rp[from];
 
@@ -61,7 +61,7 @@ void iluk_mpi_pilu(Euclid_dh ctx)
      with respect to A 
    */
   beg_row = sg->beg_row[myid_dh];
-  end_row  = beg_row + sg->row_count[myid_dh];
+  /* end_row  = beg_row + sg->row_count[myid_dh]; */
 
   /* global number or first locally owned row, after reordering */
   beg_rowP = sg->beg_rowP[myid_dh];
