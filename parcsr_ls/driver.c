@@ -18,6 +18,7 @@ main( int   argc,
    int                 build_rhs_arg_index;
    int                 solver_id;
    int                 ioutdat;
+   int                 debug_flag;
    int                 ierr; 
    int                 num_iterations; 
    double              norm;
@@ -168,7 +169,13 @@ main( int   argc,
       {
          arg_index++;
          relax_default = atoi(argv[arg_index++]);
-      }      else if ( strcmp(argv[arg_index], "-help") == 0 )
+      }
+      else if ( strcmp(argv[arg_index], "-dbg") == 0 )
+      {
+         arg_index++;
+         debug_flag = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          print_usage = 1;
       }
@@ -261,7 +268,6 @@ main( int   argc,
       printf("Usage: %s [<options>]\n", argv[0]);
       printf("\n");
       printf("  -fromfile <filename>   : matrix from distributed file\n");
-      printf("\n");
       printf("  -fromonefile <filename>: matrix from standard CSR file\n");
       printf("\n");
       printf("  -laplacian [<options>] : build laplacian matrix\n");
@@ -271,14 +277,35 @@ main( int   argc,
       printf("    -P <Px> <Py> <Pz>    : processor topology\n");
       printf("    -c <cx> <cy> <cz>    : diffusion coefficients\n");
       printf("\n");
+      printf("   -rhsfromfile          : from distributed file (NOT YET)\n");
+      printf("   -rhsfromonefile       : from vector file \n");
+      printf("   -rhsrand              : rhs is random vector, ||x||=1\n");
+      printf("   -xisone               : rhs of all ones\n");
+      printf("\n");
       printf("  -solver <ID>           : solver ID\n");
-      printf("    1=AMG-PCG    2=DS-PCG   \n");
-      printf("    3=AMG-GMRES  4=DS-GMRES  \n");     
-      printf("    5=AMG-CGNR   6=DS-CGNR  \n");     
+      printf("       1=AMG-PCG    2=DS-PCG   \n");
+      printf("       3=AMG-GMRES  4=DS-GMRES  \n");     
+      printf("       5=AMG-CGNR   6=DS-CGNR  \n");     
       printf("\n");
+      printf("   -ruge                 : Ruge coarsening (local)\n");
+      printf("   -ruge3                : third pass on boundary\n");
+      printf("   -ruge2b               : 2nd pass is global\n");
+      printf("   -gm                   : use global measures\n");
+      printf("\n");
+      printf("  -rlx <val>             : relaxation type\n");
+      printf("       0=Weighted Jacobi  \n");
+      printf("       3=Hybrid Jacobi/Gauss-Seidel  \n");
+      printf("\n");  
       printf("  -th <val>              : set AMG threshold Theta = val \n");
-      printf("\n");
       printf("  -w  <val>              : set Jacobi relax weight = val\n");
+      printf("  -k  <val>              : dimension Krylov space for GMRES\n");
+      printf("\n");  
+      printf("  -iout <val>            : set output flag\n");
+      printf("       0=no output    1=matrix stats\n"); 
+      printf("       2=cycle stats  3=matrix & cycle stats\n"); 
+      printf("\n");  
+      printf("  -dbg <val>             : set debug flag\n");
+      printf("       0=no debugging 1=internal timing\n");
       exit(1);
    }
 
@@ -432,7 +459,10 @@ main( int   argc,
       HYPRE_ParAMGSetRelaxWeight(amg_solver, relax_weight);
       HYPRE_ParAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
       HYPRE_ParAMGSetMaxLevels(amg_solver, 25);
+      HYPRE_ParAMGSetDebugFlag(amg_solver, debug_flag);
+
       HYPRE_ParAMGSetup(amg_solver, A, b, x);
+
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);

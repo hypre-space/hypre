@@ -38,6 +38,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    int      num_variables;
    int      max_levels; 
    int      amg_ioutdat;
+   int      debug_flag;
  
    /* Local variables */
    int                 *CF_marker;
@@ -57,6 +58,8 @@ hypre_ParAMGSetup( void               *amg_vdata,
    int       j;
    int       num_procs,my_id;
 
+   double    wall_time;   /* for debugging instrumentation */
+
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
 
@@ -64,6 +67,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    amg_ioutdat = hypre_ParAMGDataIOutDat(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
+   debug_flag = hypre_ParAMGDataDebugFlag(amg_data);
    
    A_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_levels);
    P_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_levels-1);
@@ -96,7 +100,8 @@ hypre_ParAMGSetup( void               *amg_vdata,
        * Select coarse-grid points on 'level' : returns CF_marker
        * for the level.  Returns strength matrix, S  
        *--------------------------------------------------------------*/
-
+     
+      if (debug_flag) wall_time = time_getWallclockSeconds();
       if (coarsen_type)
       {
 	 hypre_ParAMGCoarsenRuge(A_array[level], strong_threshold,
@@ -108,15 +113,29 @@ hypre_ParAMGSetup( void               *amg_vdata,
 	 hypre_ParAMGCoarsen(A_array[level], strong_threshold,
                           &S, &CF_marker, &coarse_size); 
       }
-
+      if (debug_flag)
+      {
+         wall_time = time_getWallclockSeconds() - wall_time;
+         printf("Proc = %d    Level = %d    Coarsen Time = %f\n",
+                       my_id,level, wall_time); 
+      }
 
       CF_marker_array[level] = CF_marker;
       
       /*-------------------------------------------------------------
        * Build prolongation matrix, P, and place in P_array[level] 
        *--------------------------------------------------------------*/
+      if (debug_flag) wall_time = time_getWallclockSeconds();
 
       hypre_ParAMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
+
+      if (debug_flag)
+      {
+         wall_time = time_getWallclockSeconds() - wall_time;
+         printf("Proc = %d    Level = %d    Build Interp Time = %f\n",
+                       my_id,level, wall_time);
+      }
+
       P_array[level] = P; 
       hypre_DestroyParCSRMatrix(S);
       coarse_size = hypre_ParCSRMatrixGlobalNumCols(P);
@@ -129,8 +148,17 @@ hypre_ParAMGSetup( void               *amg_vdata,
        * Build coarse-grid operator, A_array[level+1] by R*A*P
        *--------------------------------------------------------------*/
 
+      if (debug_flag) wall_time = time_getWallclockSeconds();
+
       hypre_ParAMGBuildCoarseOperator(P_array[level], A_array[level] , 
                                       P_array[level], &A_H);
+
+      if (debug_flag)
+      {
+         wall_time = time_getWallclockSeconds() - wall_time;
+         printf("Proc = %d    Level = %d    Build Coarse Operator Time = %f\n",
+                       my_id,level, wall_time);
+      }
 
       ++level;
       hypre_SetParCSRMatrixNumNonzeros(A_H);

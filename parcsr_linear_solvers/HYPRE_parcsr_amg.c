@@ -265,3 +265,14 @@ HYPRE_ParAMGSetLogging( HYPRE_Solver  solver,
    return( hypre_ParAMGSetLogging( (void *) solver, ioutdat, log_file_name ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_ParAMGSetDebugFlag
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParAMGSetDebugFlag( HYPRE_Solver solver,
+                          int          debug_flag  )
+{
+   return( hypre_ParAMGSetDebugFlag( (void *) solver, debug_flag ) );
+}
+

@@ -64,6 +64,7 @@ typedef struct
    /* output params */
    int      ioutdat;
    char     log_file_name[256];
+   int      debug_flag;
 
 } hypre_ParAMGData;
 
@@ -122,6 +123,7 @@ typedef struct
 /* output parameters */
 #define hypre_ParAMGDataIOutDat(amg_data) ((amg_data)->ioutdat)
 #define hypre_ParAMGDataLogFileName(amg_data) ((amg_data)->log_file_name)
+#define hypre_ParAMGDataDebugFlag(amg_data)   ((amg_data)->debug_flag)
 
 #endif
 

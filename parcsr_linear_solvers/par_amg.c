@@ -48,6 +48,7 @@ hypre_ParAMGInitialize()
    int      ioutdat;
    int      cycle_op_count;
    char     log_file_name[256];
+   int      debug_flag;
 
    int      j;
 
@@ -89,6 +90,7 @@ hypre_ParAMGInitialize()
    ioutdat = 0;
    sprintf(log_file_name, "%s", "amg.out.log");
    cycle_op_count = 0;
+   debug_flag = 0;
 
    /*-----------------------------------------------------------------------
     * Create the hypre_ParAMGData structure and return
@@ -112,6 +114,7 @@ hypre_ParAMGInitialize()
 
    hypre_ParAMGSetIOutDat(amg_data, ioutdat);
    hypre_ParAMGSetLogFileName(amg_data, log_file_name); 
+   hypre_ParAMGSetDebugFlag(amg_data, debug_flag);
 
    hypre_ParAMGSetRestriction(amg_data, 0);
    
@@ -366,6 +369,19 @@ hypre_ParAMGSetLogging( void     *data,
 
    return (ierr);
 }
+
+int
+hypre_ParAMGSetDebugFlag( void     *data,
+                          int       debug_flag )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   hypre_ParAMGDataDebugFlag(amg_data) = debug_flag;
+
+   return (ierr);
+}
+
 
 /*--------------------------------------------------------------------------
  * Routines to set the problem data parameters

@@ -58,6 +58,7 @@ int HYPRE_ParAMGSetRelaxWeight P((HYPRE_Solver solver , double relax_weight ));
 int HYPRE_ParAMGSetIOutDat P((HYPRE_Solver solver , int ioutdat ));
 int HYPRE_ParAMGSetLogFileName P((HYPRE_Solver solver , char *log_file_name ));
 int HYPRE_ParAMGSetLogging P((HYPRE_Solver solver , int ioutdat , char *log_file_name ));
+int HYPRE_ParAMGSetDebugFlag P((HYPRE_Solver solver , int debug_flag ));
 
 /* HYPRE_parcsr_gmres.c */
 int HYPRE_ParCSRGMRESInitialize P((MPI_Comm comm , HYPRE_Solver *solver ));

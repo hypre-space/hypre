@@ -41,6 +41,7 @@ int HYPRE_ParAMGSetRelaxWeight P((HYPRE_Solver solver , double relax_weight ));
 int HYPRE_ParAMGSetIOutDat P((HYPRE_Solver solver , int ioutdat ));
 int HYPRE_ParAMGSetLogFileName P((HYPRE_Solver solver , char *log_file_name ));
 int HYPRE_ParAMGSetLogging P((HYPRE_Solver solver , int ioutdat , char *log_file_name ));
+int HYPRE_ParAMGSetDebugFlag P((HYPRE_Solver solver , int debug_flag ));
 
 /* HYPRE_parcsr_cgnr.c */
 int HYPRE_ParCSRCGNRInitialize P((MPI_Comm comm , HYPRE_Solver *solver ));
@@ -142,6 +143,7 @@ int hypre_ParAMGSetRelaxWeight P((void *data , double relax_weight ));
 int hypre_ParAMGSetIOutDat P((void *data , int ioutdat ));
 int hypre_ParAMGSetLogFileName P((void *data , char *log_file_name ));
 int hypre_ParAMGSetLogging P((void *data , int ioutdat , char *log_file_name ));
+int hypre_ParAMGSetDebugFlag P((void *data , int debug_flag ));
 int hypre_ParAMGSetNumUnknowns P((void *data , int num_unknowns ));
 int hypre_ParAMGSetNumPoints P((void *data , int num_points ));
 int hypre_ParAMGSetUnknownMap P((void *data , int *unknown_map ));
