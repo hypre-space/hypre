@@ -16,7 +16,14 @@ VPATH = @srcdir@
 HYPRE_DIRS =\
  utilities\
  struct_matrix_vector\
- struct_linear_solvers
+ struct_linear_solvers\
+ CI_struct_matrix_vector\
+ CI_struct_linear_solvers\
+ PETScMat_linear_solvers/pilut\
+ PETSc_linear_solvers/ParILUT\
+ distributed_linear_solvers/pilut\
+ distributed_matrix\
+ matrix_matrix
 
 # These are directories that are not yet officially in HYPRE
 HYPRE_EXTRA_DIRS =\
@@ -45,9 +52,16 @@ HYPRE_PARCSR_DIRS =\
  parcsr_matrix_vector\
  parcsr_linear_solvers
 
-#These are the directories for the conceptual structured interface
-#HYPRE_CI_STRUCT_DIRS =\
-# bmakes 
+#These are the directories for PILUT accessed through CI using PETSc
+HYPRE_CIPETSCPILUT_DIRS =\
+ utilities\
+ CI_struct_matrix_vector\
+ CI_struct_linear_solvers\
+ PETScMat_linear_solvers/pilut\
+ PETSc_linear_solvers/ParILUT\
+ distributed_linear_solvers/pilut\
+ distributed_matrix\
+ matrix_matrix
 
 all:
 	@ \
@@ -168,6 +182,18 @@ ci_struct:
 seq:
 	@ \
 	for i in ${HYPRE_SEQ_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make); \
+	    echo ""; \
+	  fi; \
+	done
+
+pilut:
+	@ \
+	for i in ${HYPRE_CIPETSCPILUT_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \

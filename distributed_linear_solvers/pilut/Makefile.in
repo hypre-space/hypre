@@ -1,22 +1,7 @@
-.SUFFIXES:
-.SUFFIXES: .c .f .o
 
 all: lib
 
-#Driver stuff; ignore if just concerned about library
-WANG  = test/wang4.bin
-G40   = test/g40x40x40.10.bin
-TORSO = test/torso.bin
-ALE0  = -ysmp test/test0_full.matx
-ALE1  = -ysmp test/test1_full.matx
-ARGS  = 5 1e-4 1 20 10 1e-8
 
-# Gnu gcc
-# OPTIMIZATION = -O3
-OTHER_LIBS = /home/casc/lib/blas_solaris.a -R/opt/SUNWspro/lib \
-             -L/opt/SUNWspro/lib -lF77 -lM77 -lsunmath
-
-# MPICH on the CASC cluster @ LLNL
 MPI_INCLUDES = -I/usr/local/mpi/mpich/include
 MPI_LIBDIR   = -L/usr/local/mpi/mpich/lib/solaris/ch_p4/
 MPI_LIBS     = -lmpi -lnsl -lsocket -lgen
@@ -52,19 +37,11 @@ ${OBJS}: ${HEADERS}
 #include site-specific information
 include ../../bmakes/Makefile
 
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	@echo "Making (c) " $@
-	${CC} -o $@ -c ${CFLAGS} $<
-
 
 ##################################################################
 # Main rules
 ##################################################################
 
 lib:    $(PROTOS) $(OBJS)
-	ar -r libHYPREDistributedMatrixPilutSolver.a $(OBJS)
+	ar -r lib_HYPREDistributedMatrixPilutSolver.a $(OBJS)
 

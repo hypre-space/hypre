@@ -38,10 +38,10 @@ include ../bmakes/Makefile
 
 lib: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru libHYPRE_CI_ls.a ${OBJS}
-	@ranlib libHYPRE_CI_ls.a
+	@ar -ru lib_HYPRE_CI_ls.a ${OBJS}
+	@ranlib lib_HYPRE_CI_ls.a
 
-driver: driver.o libHYPRE.a
+driver: driver.o lib_HYPRE.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS}
 
@@ -50,28 +50,4 @@ link:
 	make driver
 
 ${OBJS}: ${HEADERS}
-
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	@echo "Making (c) " $@
-	${CC} -o $@ -c ${CFLAGS} $<
-
-#	@${CC} -o $@ -c ${CFLAGS} $<
-
-.f.${AMG_ARCH}.o:
-	@echo "Making (f) " $@
-	@${F77} -o $@ -c ${FFLAGS} $<
-
-##################################################################
-# Miscellaneous rules
-##################################################################
-
-veryclean: clean
-	@rm -f driver libHYPRE.a
-
-clean:
-	@rm -f *.o
 

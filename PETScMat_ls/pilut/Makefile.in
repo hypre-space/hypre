@@ -36,7 +36,7 @@ include ../../bmakes/Makefile
 # Main rules
 ##################################################################
 
-driver: driver.o libHYPREPETScMatPilutSolver.a
+driver: driver.o lib_HYPREPETScMatPilutSolver.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS}
 
@@ -46,23 +46,6 @@ link:
 
 lib: ${PROTOS} ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru libHYPREPETScMatPilutSolver.a ${OBJS}
-	@ranlib libHYPREPETScMatPilutSolver.a 
+	@ar -ru lib_HYPREPETScMatPilutSolver.a ${OBJS}
+	@ranlib lib_HYPREPETScMatPilutSolver.a 
 
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	@echo "Making (c) " $@
-	${CC} -o $@ -c ${CFLAGS} $<
-
-#	@${CC} -o $@ -c ${CFLAGS} $<
-
-.f.${AMG_ARCH}.o:
-	@echo "Making (f) " $@
-	@${F77} -o $@ -c ${FFLAGS} $<
-
-##################################################################
-# Miscellaneous rules
-##################################################################

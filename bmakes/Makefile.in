@@ -7,39 +7,53 @@
 # $Revision$
 #EHEADER***********************************************************************
 
+.SUFFIXES: .c .f .o
 
+HYPRE_DIR = @HYPRE_TOP_SRC_DIR@
 
 CC = @CC@
 CCC = @CXX@
-
 F77 = @F77@
 
-LD = @(CC)
+C_COMPILE_FLAGS=@CFLAGS@
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+F77_COMPILE_FLAGS=@F77FLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+COPT= @COPT@
+CDEBUG = @CDEBUG@
+CDEFS = @HYPREDEFS@ @HYPRE_PETSCDEFS@ -DHYPRE_TIMING -DHYPRE_NO_PTHREAD_MANGLING
 
 
+CFLAGS = \
+ @PETSCINCLUDE@ \
+ ${C_COMPILE_FLAGS}\
+ -I$(HYPRE_DIR)/utilities\
+ -I$(HYPRE_DIR)\
+ ${CINCLUDES}\
+ ${COPT}\
+ ${CDEBUG}\
+ ${CDEFS}
 
-PETSC_OPT = @OPTCHOICE@
-PETSC_CFLAGS = @PETSCINCLUDE@
-PETSC_LFLAGS = @PETSCLIBS@
+RANLIB = @RANLIB@
 
 
-ISIS_CFLAGS = @ISISINCLUDE@
-ISIS_LFLAGS = @ISISLIBS@
+##################################################################
+# Targets
+##################################################################
+clean:
+	@rm -f *.o *.dxx 
+
+veryclean: clean
+	@rm -f lib*.a
 
 
-MPIINCLUDE = @MPIINCLUDE@
-MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
+##################################################################
+# Generic rules
+##################################################################
 
-CFLAGS = @COPT@ @(PETSC_CFLAGS) @(ISIS_CFLAGS) @(MPIINCLUDE)
-FFLAGS = @FOPT@
 
-LIBFLAGS = @LIBDIRS@ @LIBS@
-LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
 
- 
-
-@CRULE@
-
-@CCRULE@@
-
-@F77RULE@
+.f.o:
+	${F77} -o $@ -c ${FFLAGS} $<

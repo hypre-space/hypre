@@ -11,6 +11,8 @@
 .SUFFIXES:
 .SUFFIXES: .c .f .o
 
+default: lib
+
 HEADERS =
  
 HYPREFILES =\
@@ -29,32 +31,10 @@ include ../bmakes/Makefile
 
 lib: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru libHYPRE_MatrixMatrix.a ${OBJS}
-	@ranlib libHYPRE_MatrixMatrix.a
+	@ar -ru lib_HYPRE_MatrixMatrix.a ${OBJS}
+	@ranlib lib_HYPRE_MatrixMatrix.a
 
 ${OBJS}: ${HEADERS}
 
-##################################################################
-# Generic rules
-##################################################################
 
-.c.o:
-	@echo "Making (c) " $@
-	${CC} -o $@ -c ${CFLAGS} $<
-
-#	@${CC} -o $@ -c ${CFLAGS} $<
-
-.f.${AMG_ARCH}.o:
-	@echo "Making (f) " $@
-	@${F77} -o $@ -c ${FFLAGS} $<
-
-##################################################################
-# Miscellaneous rules
-##################################################################
-
-veryclean: clean
-	@rm -f driver libHYPRE.a
-
-clean:
-	@rm -f *.o
 

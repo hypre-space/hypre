@@ -202,7 +202,8 @@ AC_ARG_WITH(petsc,
    [  --with-petsc		use petsc],
    if test "$withval" != "no"
    then
-      casc_using_patsc=yes
+      casc_using_petsc=yes
+      HYPRE_PETSCDEFS="$HYPRE_PETSCDEFS -DPETSC_AVAILABLE"
    fi
 )
 
@@ -550,6 +551,10 @@ fi
 
 CC="$PREPEND $CC"
 
+dnl top level source directory
+
+HYPRE_TOP_SRC_DIR=`pwd`
+
 dnl *********************************************************************
 dnl * This macro uses the values assigned to CASC_SET_COPT and 
 dnl * CASC_SET_CDEBUG (and C++ and Fortan counterparts) to set either
@@ -601,6 +606,8 @@ AC_SUBST(LACKS_PETSC)
 AC_SUBST(PETSCLIBS)
 AC_SUBST(PETSCLIBDIRS)
 AC_SUBST(PETSCINCLUDE)
+AC_SUBST(HYPRE_PETSCDEFS)
+AC_SUBST(HYPRE_TOP_SRC_DIR)
 
 dnl *********************************************************************
 dnl * Use CASC_CONFIG_OUTPUT_LIST with AC_OUTPUT if you want to handle the
@@ -618,9 +625,20 @@ CASC_CONFIG_OUTPUT_LIST(\
  struct_linear_solvers\
  seq_linear_solvers/pamg\
  test\
+ CI_struct_linear_solvers\
+ CI_struct_matrix_vector\
+ PETScMat_linear_solvers/pilut\
+ PETSc_linear_solvers/ParILUT\
+ distributed_linear_solvers/pilut\
+ distributed_matrix\
+ matrix_matrix\
  bmakes\
  docs)
 
 AC_OUTPUT($Makefile_list)
+
+
+
+--------------00A4D32083717EFEB175693C--
 
 

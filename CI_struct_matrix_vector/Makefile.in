@@ -11,6 +11,8 @@
 .SUFFIXES:
 .SUFFIXES: .c .f .o
 
+default: lib
+
 HEADERS =\
  box.h\
  struct_grid.h\
@@ -63,28 +65,4 @@ libHYPRE_CI_mv.a: $(PROTOS) ${OBJS}
 	@ranlib libHYPRE_CI_mv.a
 
 ${OBJS}: ${HEADERS}
-
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	@echo "Making (c) " $@
-	${CC} -o $@ -c ${CFLAGS} $<
-
-#	@${CC} -o $@ -c ${CFLAGS} $<
-
-.f.${AMG_ARCH}.o:
-	@echo "Making (f) " $@
-	@${F77} -o $@ -c ${FFLAGS} $<
-
-##################################################################
-# Miscellaneous rules
-##################################################################
-
-veryclean: clean
-	@rm -f driver libHYPRE.a
-
-clean:
-	@rm -f *.o
 
