@@ -8,6 +8,7 @@
 
 #include "utilities.h"
 #include "krylov.h"
+#include "struct_ls.h"
 #include "sstruct_mv.h"
 
 #ifdef __cplusplus
