@@ -190,4 +190,6 @@
             - clean up a few compiler complaints
             - a few adjustments for mli
             - re-do the outputlevel stuff
+11/19/03    2.5.3R1
+            - fix the vendor blas/lapack problem in superlu
 
