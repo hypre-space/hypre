@@ -158,10 +158,15 @@ main( int   argc,
          arg_index++;
          coarsen_type      = 3;
       }    
-      else if ( strcmp(argv[arg_index], "-rugerlx") == 0 )
+      else if ( strcmp(argv[arg_index], "-ruge3c") == 0 )
       {
          arg_index++;
          coarsen_type      = 4;
+      }    
+      else if ( strcmp(argv[arg_index], "-rugerlx") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 5;
       }    
       else if ( strcmp(argv[arg_index], "-falgout") == 0 )
       {
@@ -349,6 +354,7 @@ main( int   argc,
       printf("\n");
       printf("   -ruge                 : Ruge coarsening (local)\n");
       printf("   -ruge3                : third pass on boundary\n");
+      printf("   -ruge3c               : third pass on boundary, keep c-points\n");
       printf("   -ruge2b               : 2nd pass is global\n");
       printf("   -rugerlx              : relaxes special points\n");
       printf("   -falgout              : local ruge followed by LJP\n");
