@@ -17,11 +17,11 @@
 #include "par_amg.h"
 
 /*--------------------------------------------------------------------
- * hypre_ParAMGSolve
+ * hypre_BoomerAMGSolve
  *--------------------------------------------------------------------*/
 
 int
-hypre_ParAMGSolve( void               *amg_vdata,
+hypre_BoomerAMGSolve( void               *amg_vdata,
                    hypre_ParCSRMatrix *A,
                    hypre_ParVector    *f,
                    hypre_ParVector    *u         )
@@ -113,7 +113,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
 
 
    if (my_id == 0 && amg_ioutdat > 1)
-      hypre_ParAMGWriteSolverParams(amg_data); 
+      hypre_BoomerAMGWriteSolverParams(amg_data); 
 
 
 
@@ -174,7 +174,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
       hypre_ParAMGDataCycleOpCount(amg_data) = 0;   
       /* Op count only needed for one cycle */
 
-      Solve_err_flag = hypre_ParAMGCycle(amg_data, F_array, U_array); 
+      Solve_err_flag = hypre_BoomerAMGCycle(amg_data, F_array, U_array); 
 
       old_resid = resid_nrm;
 

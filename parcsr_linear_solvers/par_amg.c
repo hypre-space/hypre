@@ -17,11 +17,11 @@
 #include "par_amg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_ParAMGCreate
+ * hypre_BoomerAMGCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_ParAMGCreate()
+hypre_BoomerAMGCreate()
 {
    hypre_ParAMGData  *amg_data;
 
@@ -115,29 +115,29 @@ hypre_ParAMGCreate()
    amg_data = hypre_CTAlloc(hypre_ParAMGData, 1);
 
    hypre_ParAMGDataUserCoarseRelaxType(amg_data) = 9;
-   hypre_ParAMGSetMaxLevels(amg_data, max_levels);
-   hypre_ParAMGSetStrongThreshold(amg_data, strong_threshold);
-   hypre_ParAMGSetMaxRowSum(amg_data, max_row_sum);
-   hypre_ParAMGSetTruncFactor(amg_data, trunc_factor);
-   hypre_ParAMGSetInterpType(amg_data, interp_type);
-   hypre_ParAMGSetCoarsenType(amg_data, coarsen_type);
-   hypre_ParAMGSetMeasureType(amg_data, measure_type);
+   hypre_BoomerAMGSetMaxLevels(amg_data, max_levels);
+   hypre_BoomerAMGSetStrongThreshold(amg_data, strong_threshold);
+   hypre_BoomerAMGSetMaxRowSum(amg_data, max_row_sum);
+   hypre_BoomerAMGSetTruncFactor(amg_data, trunc_factor);
+   hypre_BoomerAMGSetInterpType(amg_data, interp_type);
+   hypre_BoomerAMGSetCoarsenType(amg_data, coarsen_type);
+   hypre_BoomerAMGSetMeasureType(amg_data, measure_type);
 
-   hypre_ParAMGSetMinIter(amg_data, min_iter);
-   hypre_ParAMGSetMaxIter(amg_data, max_iter);
-   hypre_ParAMGSetCycleType(amg_data, cycle_type);
-   hypre_ParAMGSetTol(amg_data, tol); 
-   hypre_ParAMGSetNumGridSweeps(amg_data, num_grid_sweeps);
-   hypre_ParAMGSetGridRelaxType(amg_data, grid_relax_type);
-   hypre_ParAMGSetGridRelaxPoints(amg_data, grid_relax_points);
-   hypre_ParAMGSetRelaxWeight(amg_data, relax_weight);
+   hypre_BoomerAMGSetMinIter(amg_data, min_iter);
+   hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
+   hypre_BoomerAMGSetCycleType(amg_data, cycle_type);
+   hypre_BoomerAMGSetTol(amg_data, tol); 
+   hypre_BoomerAMGSetNumGridSweeps(amg_data, num_grid_sweeps);
+   hypre_BoomerAMGSetGridRelaxType(amg_data, grid_relax_type);
+   hypre_BoomerAMGSetGridRelaxPoints(amg_data, grid_relax_points);
+   hypre_BoomerAMGSetRelaxWeight(amg_data, relax_weight);
 
-   hypre_ParAMGSetNumIterations(amg_data, num_iterations);
-   hypre_ParAMGSetIOutDat(amg_data, ioutdat);
-   hypre_ParAMGSetLogFileName(amg_data, log_file_name); 
-   hypre_ParAMGSetDebugFlag(amg_data, debug_flag);
+   hypre_BoomerAMGSetNumIterations(amg_data, num_iterations);
+   hypre_BoomerAMGSetIOutDat(amg_data, ioutdat);
+   hypre_BoomerAMGSetLogFileName(amg_data, log_file_name); 
+   hypre_BoomerAMGSetDebugFlag(amg_data, debug_flag);
 
-   hypre_ParAMGSetRestriction(amg_data, 0);
+   hypre_BoomerAMGSetRestriction(amg_data, 0);
    
    hypre_ParAMGDataAArray(amg_data) = NULL;
    hypre_ParAMGDataPArray(amg_data) = NULL;
@@ -151,11 +151,11 @@ hypre_ParAMGCreate()
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParAMGDestroy
+ * hypre_BoomerAMGDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_ParAMGDestroy( void *data )
+hypre_BoomerAMGDestroy( void *data )
 {
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
@@ -205,7 +205,7 @@ hypre_ParAMGDestroy( void *data )
  *--------------------------------------------------------------------------*/
 
 int
-hypre_ParAMGSetRestriction( void *data,
+hypre_BoomerAMGSetRestriction( void *data,
                             int   restr_par )
 {
    int ierr = 0;
@@ -217,7 +217,7 @@ hypre_ParAMGSetRestriction( void *data,
 }
 
 int
-hypre_ParAMGSetMaxLevels( void *data,
+hypre_BoomerAMGSetMaxLevels( void *data,
                           int   max_levels )
 {
    int ierr = 0;
@@ -229,7 +229,7 @@ hypre_ParAMGSetMaxLevels( void *data,
 }
 
 int
-hypre_ParAMGSetStrongThreshold( void     *data,
+hypre_BoomerAMGSetStrongThreshold( void     *data,
                                 double    strong_threshold )
 {
    int ierr = 0;
@@ -241,7 +241,7 @@ hypre_ParAMGSetStrongThreshold( void     *data,
 }
 
 int
-hypre_ParAMGSetMaxRowSum( void     *data,
+hypre_BoomerAMGSetMaxRowSum( void     *data,
                           double    max_row_sum )
 {
    int ierr = 0;
@@ -253,7 +253,7 @@ hypre_ParAMGSetMaxRowSum( void     *data,
 }
 
 int
-hypre_ParAMGSetTruncFactor( void     *data,
+hypre_BoomerAMGSetTruncFactor( void     *data,
                             double    trunc_factor )
 {
    int ierr = 0;
@@ -265,7 +265,7 @@ hypre_ParAMGSetTruncFactor( void     *data,
 }
 
 int
-hypre_ParAMGSetInterpType( void     *data,
+hypre_BoomerAMGSetInterpType( void     *data,
                            int       interp_type )
 {
    int ierr = 0;
@@ -277,7 +277,7 @@ hypre_ParAMGSetInterpType( void     *data,
 }
 
 int
-hypre_ParAMGSetMinIter( void     *data,
+hypre_BoomerAMGSetMinIter( void     *data,
                         int       min_iter )
 {
    int ierr = 0;
@@ -289,7 +289,7 @@ hypre_ParAMGSetMinIter( void     *data,
 } 
 
 int
-hypre_ParAMGSetMaxIter( void     *data,
+hypre_BoomerAMGSetMaxIter( void     *data,
                         int       max_iter )
 {
    int ierr = 0;
@@ -301,7 +301,7 @@ hypre_ParAMGSetMaxIter( void     *data,
 } 
 
 int
-hypre_ParAMGSetCoarsenType( void  *data,
+hypre_BoomerAMGSetCoarsenType( void  *data,
                           int    coarsen_type )
 {
    int ierr = 0;
@@ -313,7 +313,7 @@ hypre_ParAMGSetCoarsenType( void  *data,
 }
 
 int
-hypre_ParAMGSetMeasureType( void  *data,
+hypre_BoomerAMGSetMeasureType( void  *data,
                             int    measure_type )
 {
    int ierr = 0;
@@ -325,7 +325,7 @@ hypre_ParAMGSetMeasureType( void  *data,
 }
 
 int
-hypre_ParAMGSetCycleType( void  *data,
+hypre_BoomerAMGSetCycleType( void  *data,
                           int    cycle_type )
 {
    int ierr = 0;
@@ -337,7 +337,7 @@ hypre_ParAMGSetCycleType( void  *data,
 }
 
 int
-hypre_ParAMGSetTol( void     *data,
+hypre_BoomerAMGSetTol( void     *data,
                     double    tol  )
 {
    int ierr = 0;
@@ -349,7 +349,7 @@ hypre_ParAMGSetTol( void     *data,
 }
 
 int
-hypre_ParAMGSetNumGridSweeps( void     *data,
+hypre_BoomerAMGSetNumGridSweeps( void     *data,
                               int      *num_grid_sweeps )
 {
    int ierr = 0;
@@ -363,7 +363,7 @@ hypre_ParAMGSetNumGridSweeps( void     *data,
 }
  
 int
-hypre_ParAMGSetGridRelaxType( void     *data,
+hypre_BoomerAMGSetGridRelaxType( void     *data,
                               int      *grid_relax_type )
 {
    int ierr = 0;
@@ -378,7 +378,7 @@ hypre_ParAMGSetGridRelaxType( void     *data,
 }
 
 int
-hypre_ParAMGSetGridRelaxPoints( void     *data,
+hypre_BoomerAMGSetGridRelaxPoints( void     *data,
                                 int      **grid_relax_points )
 {
    int i, ierr = 0;
@@ -396,7 +396,7 @@ hypre_ParAMGSetGridRelaxPoints( void     *data,
 }
 
 int
-hypre_ParAMGSetRelaxWeight( void     *data,
+hypre_BoomerAMGSetRelaxWeight( void     *data,
                             double   *relax_weight )
 {
    int ierr = 0;
@@ -410,7 +410,7 @@ hypre_ParAMGSetRelaxWeight( void     *data,
 }
 
 int
-hypre_ParAMGSetIOutDat( void     *data,
+hypre_BoomerAMGSetIOutDat( void     *data,
                         int       ioutdat )
 {
    int ierr = 0;
@@ -422,7 +422,7 @@ hypre_ParAMGSetIOutDat( void     *data,
 }
 
 int
-hypre_ParAMGSetLogFileName( void   *data,
+hypre_BoomerAMGSetLogFileName( void   *data,
                             char   *log_file_name )
 {
    int ierr = 0;
@@ -434,7 +434,7 @@ hypre_ParAMGSetLogFileName( void   *data,
 }
 
 int
-hypre_ParAMGSetNumIterations( void    *data,
+hypre_BoomerAMGSetNumIterations( void    *data,
                               int      num_iterations )
 {
    int ierr = 0;
@@ -446,7 +446,7 @@ hypre_ParAMGSetNumIterations( void    *data,
 }
 
 int
-hypre_ParAMGSetLogging( void     *data,
+hypre_BoomerAMGSetLogging( void     *data,
                         int       ioutdat,
                         char     *log_file_name )
 {
@@ -471,7 +471,7 @@ hypre_ParAMGSetLogging( void     *data,
 }
 
 int
-hypre_ParAMGSetDebugFlag( void     *data,
+hypre_BoomerAMGSetDebugFlag( void     *data,
                           int       debug_flag )
 {
    int ierr = 0;
@@ -488,7 +488,7 @@ hypre_ParAMGSetDebugFlag( void     *data,
  *--------------------------------------------------------------------------*/
 
 int
-hypre_ParAMGSetNumUnknowns( void     *data,
+hypre_BoomerAMGSetNumUnknowns( void     *data,
                             int       num_unknowns )
 {
    int ierr = 0;
@@ -500,7 +500,7 @@ hypre_ParAMGSetNumUnknowns( void     *data,
 }
 
 int
-hypre_ParAMGSetNumPoints( void     *data,
+hypre_BoomerAMGSetNumPoints( void     *data,
                           int       num_points )
 {
    int ierr = 0;
@@ -512,7 +512,7 @@ hypre_ParAMGSetNumPoints( void     *data,
 }
 
 int
-hypre_ParAMGSetUnknownMap( void     *data,
+hypre_BoomerAMGSetUnknownMap( void     *data,
                            int      *unknown_map )
 {
    int ierr = 0;
@@ -525,7 +525,7 @@ hypre_ParAMGSetUnknownMap( void     *data,
 }
 
 int
-hypre_ParAMGSetPointMap( void     *data,
+hypre_BoomerAMGSetPointMap( void     *data,
                          int      *point_map )
 {
    int ierr = 0;
@@ -538,7 +538,7 @@ hypre_ParAMGSetPointMap( void     *data,
 }
 
 int
-hypre_ParAMGSetVatPoint( void     *data,
+hypre_BoomerAMGSetVatPoint( void     *data,
                          int      *v_at_point )
 {
    int ierr = 0;
@@ -551,7 +551,7 @@ hypre_ParAMGSetVatPoint( void     *data,
 }
 
 int
-hypre_ParAMGGetNumIterations( void     *data,
+hypre_BoomerAMGGetNumIterations( void     *data,
                               int      *num_iterations )
 {
    int ierr = 0;
@@ -563,7 +563,7 @@ hypre_ParAMGGetNumIterations( void     *data,
 }
 
 int
-hypre_ParAMGGetRelativeResidualNorm( void     *data,
+hypre_BoomerAMGGetRelResidualNorm( void     *data,
                                      double   *rel_resid_norm )
 {
    int ierr = 0;

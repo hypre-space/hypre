@@ -10,10 +10,10 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_ParAMGBuildCoarseOperator
+ * hypre_BoomerAMGBuildCoarseOperator
  *--------------------------------------------------------------------------*/
 
-int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
+int hypre_BoomerAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 					hypre_ParCSRMatrix  *A,
 					hypre_ParCSRMatrix  *P,
 					hypre_ParCSRMatrix **RAP_ptr)

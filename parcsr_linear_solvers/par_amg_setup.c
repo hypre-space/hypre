@@ -19,7 +19,7 @@
  *****************************************************************************/
 
 int
-hypre_ParAMGSetup( void               *amg_vdata,
+hypre_BoomerAMGSetup( void               *amg_vdata,
                    hypre_ParCSRMatrix *A,
                    hypre_ParVector    *f,
                    hypre_ParVector    *u         )
@@ -165,20 +165,20 @@ hypre_ParAMGSetup( void               *amg_vdata,
       {
          if (coarsen_type == 6)
          {
-	    hypre_ParAMGCoarsenFalgout(A_array[level],
+	    hypre_BoomerAMGCoarsenFalgout(A_array[level],
                                     strong_threshold, max_row_sum,
                                     debug_flag, &S, &CF_marker, &coarse_size); 
          }
          else if (coarsen_type)
          {
-	    hypre_ParAMGCoarsenRuge(A_array[level],
+	    hypre_BoomerAMGCoarsenRuge(A_array[level],
                                  strong_threshold, max_row_sum,
                                  measure_type, coarsen_type, debug_flag,
                                  &S, &CF_marker, &coarse_size); 
          }
          else
          {
-	    hypre_ParAMGCoarsen(A_array[level],
+	    hypre_BoomerAMGCoarsen(A_array[level],
                              strong_threshold, max_row_sum,
                              debug_flag, &S, &CF_marker, &coarse_size); 
          }
@@ -221,7 +221,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
           *--------------------------------------------------------------*/
          if (debug_flag==1) wall_time = time_getWallclockSeconds();
 
-         hypre_ParAMGBuildInterp(A_array[level], CF_marker_array[level], S,
+         hypre_BoomerAMGBuildInterp(A_array[level], CF_marker_array[level], S,
                               debug_flag, trunc_factor, &P);
 
          if (debug_flag==1)
@@ -283,7 +283,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
 
       if (debug_flag==1) wall_time = time_getWallclockSeconds();
 
-      hypre_ParAMGBuildCoarseOperator(P_array[level], A_array[level] , 
+      hypre_BoomerAMGBuildCoarseOperator(P_array[level], A_array[level] , 
                                       P_array[level], &A_H);
 
       if (debug_flag==1)
@@ -395,7 +395,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
     *-----------------------------------------------------------------------*/
 
    if (amg_ioutdat == 1 || amg_ioutdat == 3)
-      hypre_ParAMGSetupStats(amg_data,A);
+      hypre_BoomerAMGSetupStats(amg_data,A);
 
 #if DEBUG
    if (amg_ioutdat == -3)

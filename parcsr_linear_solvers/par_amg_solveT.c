@@ -17,11 +17,11 @@
 #include "par_amg.h"
 
 /*--------------------------------------------------------------------
- * hypre_ParAMGSolveT
+ * hypre_BoomerAMGSolveT
  *--------------------------------------------------------------------*/
 
 int
-hypre_ParAMGSolveT( void               *amg_vdata,
+hypre_BoomerAMGSolveT( void               *amg_vdata,
                    hypre_ParCSRMatrix *A,
                    hypre_ParVector    *f,
                    hypre_ParVector    *u         )
@@ -116,7 +116,7 @@ hypre_ParAMGSolveT( void               *amg_vdata,
 
 
    if (my_id == 0 && amg_ioutdat > 1)
-      hypre_ParAMGWriteSolverParams(amg_data); 
+      hypre_BoomerAMGWriteSolverParams(amg_data); 
 
 
 
@@ -180,7 +180,7 @@ hypre_ParAMGSolveT( void               *amg_vdata,
       hypre_ParAMGDataCycleOpCount(amg_data) = 0;   
       /* Op count only needed for one cycle */
 
-      Solve_err_flag = hypre_ParAMGCycleT(amg_data, F_array, U_array); 
+      Solve_err_flag = hypre_BoomerAMGCycleT(amg_data, F_array, U_array); 
 
       old_resid = resid_nrm;
 
@@ -270,11 +270,11 @@ hypre_ParAMGSolveT( void               *amg_vdata,
  *****************************************************************************/
 
 /*--------------------------------------------------------------------------
- * hypre_ParAMGCycleT
+ * hypre_BoomerAMGCycleT
  *--------------------------------------------------------------------------*/
 
 int
-hypre_ParAMGCycleT( void              *amg_vdata, 
+hypre_BoomerAMGCycleT( void              *amg_vdata, 
                    hypre_ParVector  **F_array,
                    hypre_ParVector  **U_array   )
 {
@@ -427,7 +427,7 @@ hypre_ParAMGCycleT( void              *amg_vdata,
          }
 
 
-         Solve_err_flag = hypre_ParAMGRelaxT(A_array[level], 
+         Solve_err_flag = hypre_BoomerAMGRelaxT(A_array[level], 
                                             F_array[level],
                                             CF_marker_array[level],
                                             relax_type,
@@ -524,10 +524,10 @@ hypre_ParAMGCycleT( void              *amg_vdata,
  *****************************************************************************/
 
 /*--------------------------------------------------------------------------
- * hypre_ParAMGRelaxT
+ * hypre_BoomerAMGRelaxT
  *--------------------------------------------------------------------------*/
 
-int  hypre_ParAMGRelaxT( hypre_ParCSRMatrix *A,
+int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
                         hypre_ParVector    *f,
                         int                *cf_marker,
                         int                 relax_type,

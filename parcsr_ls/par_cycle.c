@@ -17,11 +17,11 @@
 #include "par_amg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_ParAMGCycle
+ * hypre_BoomerAMGCycle
  *--------------------------------------------------------------------------*/
 
 int
-hypre_ParAMGCycle( void              *amg_vdata, 
+hypre_BoomerAMGCycle( void              *amg_vdata, 
                    hypre_ParVector  **F_array,
                    hypre_ParVector  **U_array   )
 {
@@ -174,7 +174,7 @@ hypre_ParAMGCycle( void              *amg_vdata,
             cycle_op_count += num_coeffs[level]; 
          }
 
-         Solve_err_flag = hypre_ParAMGRelax(A_array[level], 
+         Solve_err_flag = hypre_BoomerAMGRelax(A_array[level], 
                                             F_array[level],
                                             CF_marker_array[level],
                                             relax_type,

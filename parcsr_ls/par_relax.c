@@ -17,10 +17,10 @@
 
 
 /*--------------------------------------------------------------------------
- * hypre_ParAMGRelax
+ * hypre_BoomerAMGRelax
  *--------------------------------------------------------------------------*/
 
-int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
+int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                         hypre_ParVector    *f,
                         int                *cf_marker,
                         int                 relax_type,

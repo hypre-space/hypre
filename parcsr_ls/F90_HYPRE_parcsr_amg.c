@@ -16,258 +16,258 @@
 #include "fortran.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGCreate
+ * HYPRE_BoomerAMGCreate
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgcreate)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgcreate)( long int *solver,
                                          int      *ierr    )
 
 {
-   *ierr = (int) ( HYPRE_ParAMGCreate( (HYPRE_Solver *) solver) );
+   *ierr = (int) ( HYPRE_BoomerAMGCreate( (HYPRE_Solver *) solver) );
 
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGDestroy
+ * HYPRE_BoomerAMGDestroy
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_paramgdestroy)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgdestroy)( long int *solver,
                                        int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_ParAMGDestroy( (HYPRE_Solver) *solver ) );
+   *ierr = (int) ( HYPRE_BoomerAMGDestroy( (HYPRE_Solver) *solver ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetup
+ * HYPRE_BoomerAMGSetup
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_paramgsetup)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetup)( long int *solver,
                                     long int *A,
                                     long int *b,
                                     long int *x,
                                     int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetup( (HYPRE_Solver)       *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSetup( (HYPRE_Solver)       *solver,
                                       (HYPRE_ParCSRMatrix) *A,
                                       (HYPRE_ParVector)    *b,
                                       (HYPRE_ParVector)    *x       ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSolve
+ * HYPRE_BoomerAMGSolve
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_paramgsolve)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsolve)( long int *solver,
                                     long int *A,
                                     long int *b,
                                     long int *x,
                                     int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_ParAMGSolve( (HYPRE_Solver)       *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSolve( (HYPRE_Solver)       *solver,
                                       (HYPRE_ParCSRMatrix) *A,
                                       (HYPRE_ParVector)    *b,
                                       (HYPRE_ParVector)    *x       ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSolveT
+ * HYPRE_BoomerAMGSolveT
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_paramgsolvet)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsolvet)( long int *solver,
                                      long int *A,
                                      long int *b,
                                      long int *x,
                                      int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_ParAMGSolveT( (HYPRE_Solver)       *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSolveT( (HYPRE_Solver)       *solver,
                                        (HYPRE_ParCSRMatrix) *A,
                                        (HYPRE_ParVector)    *b,
                                        (HYPRE_ParVector)    *x       ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetRestriction
+ * HYPRE_BoomerAMGSetRestriction
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetrestriction)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetrestriction)( long int *solver,
                                              int      *restr_par,
                                              int      *ierr       )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetRestriction( (HYPRE_Solver) *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSetRestriction( (HYPRE_Solver) *solver,
                                                (int)          *restr_par ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetMaxLevels
+ * HYPRE_BoomerAMGSetMaxLevels
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetmaxlevels)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetmaxlevels)( long int *solver,
                                            int      *max_levels,
                                            int      *ierr        )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetMaxLevels( (HYPRE_Solver) *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSetMaxLevels( (HYPRE_Solver) *solver,
                                              (int)          *max_levels ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetStrongThreshold
+ * HYPRE_BoomerAMGSetStrongThreshold
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetstrongthreshold)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetstrongthrshld)( long int *solver,
                                                  double   *strong_threshold,
                                                  int      *ierr              )
 {
    *ierr = (int)
-           ( HYPRE_ParAMGSetStrongThreshold( (HYPRE_Solver) *solver,
+           ( HYPRE_BoomerAMGSetStrongThreshold( (HYPRE_Solver) *solver,
                                              (double)       *strong_threshold ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetMaxRowSum
+ * HYPRE_BoomerAMGSetMaxRowSum
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetmaxrowsum)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetmaxrowsum)( long int *solver,
                                            double   *max_row_sum,
                                            int      *ierr              )
 {
    *ierr = (int)
-           ( HYPRE_ParAMGSetMaxRowSum( (HYPRE_Solver) *solver,
+           ( HYPRE_BoomerAMGSetMaxRowSum( (HYPRE_Solver) *solver,
                                        (double)       *max_row_sum ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetTruncFactor
+ * HYPRE_BoomerAMGSetTruncFactor
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsettruncfactor)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsettruncfactor)( long int *solver,
                                              double   *trunc_factor,
                                              int      *ierr          )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetTruncFactor( (HYPRE_Solver) *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSetTruncFactor( (HYPRE_Solver) *solver,
                                                (double)       *trunc_factor ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetInterpType
+ * HYPRE_BoomerAMGSetInterpType
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetinterptype)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetinterptype)( long int *solver,
                                             int      *interp_type,
                                             int      *ierr         )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetInterpType( (HYPRE_Solver) *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSetInterpType( (HYPRE_Solver) *solver,
                                               (int)          *interp_type ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetMinIter
+ * HYPRE_BoomerAMGSetMinIter
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetminiter)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetminiter)( long int *solver,
                                          int      *min_iter,
                                          int      *ierr      )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetMinIter( (HYPRE_Solver) *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSetMinIter( (HYPRE_Solver) *solver,
                                            (int)          *min_iter ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetMaxIter
+ * HYPRE_BoomerAMGSetMaxIter
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetmaxiter)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetmaxiter)( long int *solver,
                                          int      *max_iter,
                                          int      *ierr      )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetMaxIter( (HYPRE_Solver) *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSetMaxIter( (HYPRE_Solver) *solver,
                                            (int)          *max_iter ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetCoarsenType
+ * HYPRE_BoomerAMGSetCoarsenType
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetcoarsentype)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetcoarsentype)( long int *solver,
                                              int      *coarsen_type,
                                              int      *ierr          )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetCoarsenType( (HYPRE_Solver) *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSetCoarsenType( (HYPRE_Solver) *solver,
                                                (int)          *coarsen_type ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetMeasureType
+ * HYPRE_BoomerAMGSetMeasureType
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetmeasuretype)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetmeasuretype)( long int *solver,
                                              int      *measure_type,
                                              int      *ierr          )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetMeasureType( (HYPRE_Solver) *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSetMeasureType( (HYPRE_Solver) *solver,
                                                (int)          *measure_type ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetCycleType
+ * HYPRE_BoomerAMGSetCycleType
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetcycletype)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetcycletype)( long int *solver,
                                            int      *cycle_type,
                                            int      *ierr        )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetCycleType( (HYPRE_Solver) *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSetCycleType( (HYPRE_Solver) *solver,
                                              (int)          *cycle_type ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetTol
+ * HYPRE_BoomerAMGSetTol
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsettol)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsettol)( long int *solver,
                                      double   *tol,
                                      int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetTol( (HYPRE_Solver) *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSetTol( (HYPRE_Solver) *solver,
                                        (double)       *tol     ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetNumGridSweeps
+ * HYPRE_BoomerAMGSetNumGridSweeps
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetnumgridsweeps)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetnumgridsweeps)( long int *solver,
                                                long int *num_grid_sweeps,
                                                int      *ierr             )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetNumGridSweeps(
+   *ierr = (int) ( HYPRE_BoomerAMGSetNumGridSweeps(
                         (HYPRE_Solver) *solver,
                         (int *)        *((int **)(*num_grid_sweeps)) ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGInitGridRelaxation
+ * HYPRE_BoomerAMGInitGridRelaxation
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramginitgridrelaxation)( long int *num_grid_sweeps,
+hypre_F90_IFACE(hypre_boomeramginitgridrelaxatn)( long int *num_grid_sweeps,
                                                  long int *grid_relax_type,
                                                  long int *grid_relax_points,
                                                  int      *coarsen_type,
@@ -280,7 +280,7 @@ hypre_F90_IFACE(hypre_paramginitgridrelaxation)( long int *num_grid_sweeps,
    *grid_relax_points = (long int) hypre_CTAlloc(int**, 1);
    *relax_weights     = (long int) hypre_CTAlloc(double*, 1);
 
-   *ierr = (int) ( HYPRE_ParAMGInitGridRelaxation( (int **)    *num_grid_sweeps,
+   *ierr = (int) ( HYPRE_BoomerAMGInitGridRelaxation( (int **)    *num_grid_sweeps,
                                                    (int **)    *grid_relax_type,
                                                    (int ***)   *grid_relax_points,
                                                    (int)       *coarsen_type,
@@ -290,112 +290,112 @@ hypre_F90_IFACE(hypre_paramginitgridrelaxation)( long int *num_grid_sweeps,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetGridRelaxType
+ * HYPRE_BoomerAMGSetGridRelaxType
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetgridrelaxtype)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetgridrelaxtype)( long int *solver,
                                                long int *grid_relax_type,
                                                int      *ierr   )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetGridRelaxType(
+   *ierr = (int) ( HYPRE_BoomerAMGSetGridRelaxType(
                        (HYPRE_Solver) *solver,
                        (int *)        *((int **)(*grid_relax_type)) ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetGridRelaxPoints
+ * HYPRE_BoomerAMGSetGridRelaxPoints
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetgridrelaxpoints)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetgridrelaxpnts)( long int *solver,
                                                  long int *grid_relax_points,
                                                  int      *ierr               )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetGridRelaxPoints(
+   *ierr = (int) ( HYPRE_BoomerAMGSetGridRelaxPoints(
                        (HYPRE_Solver) *solver,
                        (int **)       *((int ***)(*grid_relax_points)) ) );
 
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetRelaxWeight
+ * HYPRE_BoomerAMGSetRelaxWeight
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetrelaxweight)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetrelaxweight)( long int *solver,
                                              long int *relax_weights,
                                              int      *ierr     )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetRelaxWeight(
+   *ierr = (int) ( HYPRE_BoomerAMGSetRelaxWeight(
                        (HYPRE_Solver) *solver,
                        (double *)     *((double **)(*relax_weights)) ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetIOutDat
+ * HYPRE_BoomerAMGSetIOutDat
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetioutdat)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetioutdat)( long int *solver,
                                          int      *ioutdat,
                                          int      *ierr     )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetIOutDat( (HYPRE_Solver) *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSetIOutDat( (HYPRE_Solver) *solver,
                                            (int)          *ioutdat ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetLogFileName
+ * HYPRE_BoomerAMGSetLogFileName
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetlogfilename)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetlogfilename)( long int *solver,
                                              char     *log_file_name,
                                              int      *ierr     )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetLogFileName( (HYPRE_Solver) *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSetLogFileName( (HYPRE_Solver) *solver,
                                                (char *)       log_file_name ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetLogging
+ * HYPRE_BoomerAMGSetLogging
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetlogging)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetlogging)( long int *solver,
                                          int      *ioutdat,
                                          char     *log_file_name,
                                          int      *ierr     )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetLogging( (HYPRE_Solver) *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSetLogging( (HYPRE_Solver) *solver,
                                            (int)          *ioutdat,
                                            (char *)       log_file_name ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGSetDebugFlag
+ * HYPRE_BoomerAMGSetDebugFlag
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramgsetdebugflag)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetdebugflag)( long int *solver,
                                            int      *debug_flag,
                                            int      *ierr     )
 {
-   *ierr = (int) ( HYPRE_ParAMGSetDebugFlag( (HYPRE_Solver) *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGSetDebugFlag( (HYPRE_Solver) *solver,
                                              (int)          *debug_flag ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGGetNumIterations
+ * HYPRE_BoomerAMGGetNumIterations
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramggetnumiterations)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramggetnumiterations)( long int *solver,
                                                int      *num_iterations,
                                                int      *ierr     )
 {
-   *ierr = (int) ( HYPRE_ParAMGGetNumIterations( (HYPRE_Solver) *solver,
+   *ierr = (int) ( HYPRE_BoomerAMGGetNumIterations( (HYPRE_Solver) *solver,
                                                  (int *)         num_iterations ) );
 }
 
@@ -404,11 +404,11 @@ hypre_F90_IFACE(hypre_paramggetnumiterations)( long int *solver,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramggetfinalrelativeres)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramggetfinalreltvres)( long int *solver,
                                                   double   *rel_resid_norm,
                                                   int      *ierr            )
 {
-   *ierr = (int) ( HYPRE_ParAMGGetFinalRelativeResidualNorm(
+   *ierr = (int) ( HYPRE_BoomerAMGGetFinalRelativeResidualNorm(
                                 (HYPRE_Solver) *solver,
                                 (double *)      rel_resid_norm ) );
 }

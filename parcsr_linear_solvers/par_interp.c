@@ -10,11 +10,11 @@
 #include "headers.h"
 
 /*---------------------------------------------------------------------------
- * hypre_ParAMGBuildInterp
+ * hypre_BoomerAMGBuildInterp
  *--------------------------------------------------------------------------*/
 
 int
-hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
+hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                          int                  *CF_marker,
                          hypre_ParCSRMatrix   *S,
                          int                   debug_flag,

@@ -93,7 +93,7 @@
 #define COMMON_C_PT  2
 
 int
-hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
+hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *A,
                      double                 strength_threshold,
                      double                 max_row_sum,
                      int                    debug_flag,
@@ -447,7 +447,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    }
 
    /* this augments the measures */
-   hypre_InitParAMGIndepSet(S, measure_array);
+   hypre_BoomerAMGIndepSetInit(S, measure_array);
 
    /*---------------------------------------------------
     * Initialize the graph array
@@ -695,7 +695,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
        * maximal measure.
        *------------------------------------------------*/
 
-      hypre_ParAMGIndepSet(S, S_ext, measure_array, graph_array, graph_size, 
+      hypre_BoomerAMGIndepSet(S, S_ext, measure_array, graph_array, graph_size, 
 				CF_marker, CF_marker_offd);
 
       iter++;
@@ -1217,7 +1217,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
  *
  **************************************************************/
 int
-hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
+hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                          double                 strength_threshold,
                          double                 max_row_sum,
                          int                    measure_type,
@@ -2425,7 +2425,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 
 
 int
-hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
+hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                             double                 strength_threshold,
                             double                 max_row_sum,
                             int                    debug_flag,
@@ -3127,7 +3127,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 
 
    /* this augments the measures */
-   hypre_InitParAMGIndepSet(S, measure_array);
+   hypre_BoomerAMGIndepSetInit(S, measure_array);
 
    /*---------------------------------------------------
     * Initialize the graph array
@@ -3406,7 +3406,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
        * maximal measure.
        *------------------------------------------------*/
       if (iter)
-         hypre_ParAMGIndepSet(S, S_ext, measure_array, graph_array, 
+         hypre_BoomerAMGIndepSet(S, S_ext, measure_array, graph_array, 
 				graph_size, CF_marker, CF_marker_offd);
       iter++;
 

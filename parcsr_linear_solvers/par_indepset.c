@@ -31,7 +31,7 @@
 /*--------------------------------------------------------------------------*/
 
 int
-hypre_InitParAMGIndepSet( hypre_ParCSRMatrix *S,
+hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
                           double             *measure_array )
 {
    hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
@@ -90,7 +90,7 @@ hypre_InitParAMGIndepSet( hypre_ParCSRMatrix *S,
 /*--------------------------------------------------------------------------*/
 
 int
-hypre_ParAMGIndepSet( hypre_ParCSRMatrix *S,
+hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
 		      hypre_CSRMatrix    *S_ext,
                       double             *measure_array,
                       int                *graph_array,

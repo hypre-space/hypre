@@ -18,7 +18,7 @@
 
 
 int
-hypre_ParAMGSetupStats( void               *amg_vdata,
+hypre_BoomerAMGSetupStats( void               *amg_vdata,
                         hypre_ParCSRMatrix *A         )
 {
    MPI_Comm 	      comm = hypre_ParCSRMatrixComm(A);   
@@ -440,11 +440,11 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
 
 
 /*---------------------------------------------------------------
- * hypre_ParAMGWriteSolverParams
+ * hypre_BoomerAMGWriteSolverParams
  *---------------------------------------------------------------*/
 
 
-int    hypre_ParAMGWriteSolverParams(data)
+int    hypre_BoomerAMGWriteSolverParams(data)
 void    *data;
  
 { 

@@ -121,9 +121,9 @@ hypre_F90_IFACE(hypre_parcsrcgnrsetprecond)( long int *solver,
    if (*precond_id == 2)
    {
       *ierr = (int) ( HYPRE_ParCSRCGNRSetPrecond( (HYPRE_Solver) *solver,
-                                                  HYPRE_ParAMGSolve,
-                                                  HYPRE_ParAMGSolve,
-                                                  HYPRE_ParAMGSetup,
+                                                  HYPRE_BoomerAMGSolve,
+                                                  HYPRE_BoomerAMGSolve,
+                                                  HYPRE_BoomerAMGSetup,
                                                   (void *)       *precond_solver ) );
    }
    if (*precond_id == 7)
