@@ -3,7 +3,7 @@
 # rename CVS directories in linear_solvers (hypre-1.3.0b+)
 #
 # This script was used to perform the directory renaming on 12/14/00.
-#
+# ENHANCED VERSION
 # *_linear_solvers -> *_ls
 # *_matrix_vector -> *_mv
 #
@@ -27,9 +27,9 @@ for i in *_linear_solvers; do
     if [ ! -d "$j" ]
     then
       cvs remove -f $j
-      cvs commit -m 'removing *_linear_solvers directories and files' $j
     fi
   done
+  cvs commit -m 'removing *_linear_solvers directories and files' $j
 done
 # process all the linear_solvers subdirectories
 cd ~/$MODUL
@@ -53,9 +53,9 @@ for i in PETScMat_linear_solvers/pilut \
     if [ ! -d "$j" ]
     then
       cvs remove -f $j
-      cvs commit -m 'removing *_linear_solvers directories and files' $j
     fi
   done
+  cvs commit -m 'removing *_linear_solvers directories and files' $j
 done
 # rename the *_linear_solvers.h include files
 cd $REPOS
@@ -72,9 +72,9 @@ for k in *_matrix_vector; do
     if [ ! -d "$l" ]
     then
       cvs remove -f $l
-      cvs commit -m 'removing *_matrix_vector directories and files' $l
     fi
   done
+  cvs commit -m 'removing *_matrix_vector directories and files' $l
 done
 # now do all the "matrix_vector" subdirectories by name
 cd ~/$MODUL
@@ -84,9 +84,9 @@ for k in FEI_matrix_vector/fei-base FEI_matrix_vector/fei-hypre; do
     if [ ! -d "$l" ]
     then
       cvs remove -f $l
-      cvs commit -m 'removing *_matrix_vector directories and files' $l
     fi
   done
+  cvs commit -m 'removing *_matrix_vector directories and files' $l
 done
 # rename the *_matrix_vector.h include files
 cd $REPOS
@@ -138,8 +138,8 @@ for i in Makefile.in configure configure.in mkdist \
   cvs edit $i
   sed -e 's/_linear_solvers/_ls/g' -e 's/_matrix_vector/_mv/g' $i > $i.tmp
   mv $i.tmp $i
-  cvs commit -m '_linear_solvers=>_ls and _matrix_vector=>_mv translations' $i
 done
+cvs commit -m '_linear_solvers=>_ls and _matrix_vector=>_mv translations' $i
 # edit files containing _linear_solvers only
 for i in krylov/pcg.c \
 	parcsr_ls/HYPRE_parcsr_pcg.c parcsr_ls/headers.h \
@@ -159,8 +159,8 @@ for i in krylov/pcg.c \
   cvs edit $i
   sed -e 's/_linear_solvers/_ls/g' $i > $i.tmp
   mv $i.tmp $i
-  cvs commit -m '_linear_solvers=>_ls translations' $i
 done
+cvs commit -m '_linear_solvers=>_ls translations' $i
 # edit files containing _matrix_vector only
 for i in CI_struct_ls/CI_struct_ls.h \
 	CI_struct_mv/HYPRE_CI_mv.h CI_struct_mv/Makefile.in \
@@ -212,11 +212,12 @@ for i in CI_struct_ls/CI_struct_ls.h \
   cvs edit $i
   sed -e 's/_matrix_vector/_mv/g' $i > $i.tmp
   mv $i.tmp $i
-  cvs commit -m '_matrix_vector=>_mv translations' $i
 done
+cvs commit -m '_matrix_vector=>_mv translations' $i
 # mark all files with a new revision number
 cvs commit -r 2.0 -f -R -m 'after _linear_solvers/_matrix_vector rename' *
 # clean up some of the repository permissions
+chown -Rf falgout:hypre *
 cd $REPOS
 for i in $(find . -type d);do
   chmod g+s,o-rwx $i
@@ -224,4 +225,3 @@ done
 for i in $(find . -type f);do
   chmod a-w,o-rx $i
 done
-chown -Rf falgout:hypre *
