@@ -125,7 +125,8 @@ bref_pdf: bHYPRE_ref_manual.pdf
 
 HYPRE_usr_manual/usr_manual.html: usr_manual.dvi
 	@ \
-	${LATEX2HTML} -dir HYPRE_usr_manual $(abs_srcdir)/usr_manual.tex 2>&1
+	${LATEX2HTML} -dir HYPRE_usr_manual $(abs_srcdir)/usr_manual.tex 2>&1; \
+	cp -f $(srcdir)/hypre_wiw.gif HYPRE_usr_manual
 
 HYPRE_usr_manual.ps: usr_manual.dvi
 	@ \
@@ -147,7 +148,8 @@ usr_manual.idx: ${USR_FILES}
 
 HYPRE_dev_manual/dev_manual.html: dev_manual.dvi
 	@ \
-	${LATEX2HTML} -dir HYPRE_dev_manual $(abs_srcdir)/dev_manual.tex  2>&1
+	${LATEX2HTML} -dir HYPRE_dev_manual $(abs_srcdir)/dev_manual.tex 2>&1; \
+	cp -f $(srcdir)/hypre_wiw.gif HYPRE_dev_manual
 
 HYPRE_dev_manual.ps: dev_manual.dvi
 	@ \
@@ -169,7 +171,8 @@ dev_manual.idx: ${DEV_FILES}
 HYPRE_ref_manual/index.html: vref_manual.dxx 
 	@ \
 	doc++ -d HYPRE_ref_manual -B $(abs_srcdir)/hypre_wiw.html \
-		vref_manual.dxx 2>&1
+		vref_manual.dxx 2>&1; \
+	cp -f $(srcdir)/hypre_wiw.gif HYPRE_ref_manual
 
 HYPRE_ref_manual.ps: vref_manual.dvi
 	${DVIPS} -o HYPRE_ref_manual.ps vref_manual.dvi
@@ -196,7 +199,8 @@ vref_manual.dxx: ref_manual.dxx
 bHYPRE_ref_manual/index.html: vbref_manual.dxx 
 	@ \
 	doc++ -d bHYPRE_ref_manual -B $(abs_srcdir)/hypre_wiw.html \
-		vbref_manual.dxx 2>&1
+		vbref_manual.dxx 2>&1; \
+	cp -f $(srcdir)/hypre_wiw.gif bHYPRE_ref_manual
 
 bHYPRE_ref_manual.ps: vbref_manual.dvi
 	${DVIPS} -o bHYPRE_ref_manual.ps vbref_manual.dvi 		
