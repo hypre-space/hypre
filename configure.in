@@ -208,7 +208,7 @@ AC_ARG_WITH(pthreads, [\
   if test "$withval" != "no"
   then
     casc_using_pthreads=yes
-    CASC_CHECK_LIB(pthread, pthread_create, /opt/intel/tflop/TF99_2.6.1/tflops/lib ,
+    CASC_CHECK_LIB(pthread, pthread_create, ,
       [CASC_CHECK_LIB(pthreads, pthread_create)])
   
     if test "$ac_cv_lib_pthread_pthread_create" = "yes" ||
