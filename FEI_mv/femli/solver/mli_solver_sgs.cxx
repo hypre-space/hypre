@@ -362,11 +362,11 @@ int MLI_Solver_SGS::setParams( char *paramString, int argc, char **argv )
  * set SGS parameters
  *---------------------------------------------------------------------------*/
 
-int MLI_Solver_SGS::setParams( int ntimes, double *weights )
+int MLI_Solver_SGS::setParams( int nsweeps, double *weights )
 {
-   int i, nsweeps;
+   int i;
 
-   if ( ntimes <= 0 )
+   if ( nsweeps <= 0 )
    {
       printf("MLI_Solver_SGS::setParams WARNING : nsweeps set to 1.\n");
       nsweeps = 1;
