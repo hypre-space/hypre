@@ -8004,7 +8004,7 @@ fi
 
 if test "$casc_using_mli" = "yes"
 then
-   MLI_DIR="$HYPRE_TOP_SRC_DIR/mli/matrix"
+   MLI_DIR="$HYPRE_TOP_SRC_DIR/FEI_mv/femli/matrix"
    MLILIBS="-lHYPRE_mli_mat"
    MLILIBDIRS="-L $MLI_DIR"
    MLIINCLUDE="-I $MLI_DIR"
@@ -8568,8 +8568,18 @@ CXX="$PREPEND $CXX"
  IJ_mv\
  krylov\
  matrix_matrix\
- mli\
- mli/matrix\
+ FEI_mv/femli\
+ FEI_mv/femli/amgs\
+ FEI_mv/femli/base\
+ FEI_mv/femli/cintface\
+ FEI_mv/femli/fedata\
+ FEI_mv/femli/lib\
+ FEI_mv/femli/matrix\
+ FEI_mv/femli/mapper\
+ FEI_mv/femli/solver\
+ FEI_mv/femli/test\
+ FEI_mv/femli/util\
+ FEI_mv/femli/vector\
  parcsr_ls\
  parcsr_mv\
  PETSc_ls\
