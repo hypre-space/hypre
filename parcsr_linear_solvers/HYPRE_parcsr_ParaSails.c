@@ -41,6 +41,7 @@ typedef struct
     double          filter;
     double          loadbal;
     int             reuse; /* reuse pattern */
+    MPI_Comm        comm;
 }
 Secret;
 
@@ -66,6 +67,7 @@ HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
    secret->filter  = 0.1;
    secret->loadbal = 0.0;
    secret->reuse   = 0;
+   secret->comm    = comm;
 
    HYPRE_ParaSailsCreate(comm, &secret->obj);
 
@@ -109,7 +111,7 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
    HYPRE_DistributedMatrix mat;
    Secret *secret = (Secret *) solver;
 
-   ierr = HYPRE_DistributedMatrixCreate(comm, &matp);
+   ierr = HYPRE_DistributedMatrixCreate(secret->comm, &mat);
    if (ierr) return ierr;
 
    ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix( A, &mat );
@@ -129,7 +131,7 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
        if (ierr) return ierr;
    }
 
-   ierr = HYPRE_DistributedMatrixDestroy(matp);
+   ierr = HYPRE_DistributedMatrixDestroy(mat);
 
    return ierr;
 }
