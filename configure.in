@@ -451,33 +451,33 @@ AC_ARG_WITH(FEI_BASE_DIR,
 [  --with-FEI_BASE_DIR     specify the directory where the fei header
                           files live.], 
 [case "${withval}" in
-   yes) FEI_BASE_DIR="" ;;
-   no)  FEI_BASE_DIR="" ;;
-   *)   FEI_BASE_DIR=$wddithval ;;
+   yes) FEI_BASE_DIR="${srcdir}/FEI_mv/fei-base" ;;
+   no)  FEI_BASE_DIR="${srcdir}/FEI_mv/fei-base" ;;
+   *)   FEI_BASE_DIR=$withval ;;
  esac],
-[FEI_BASE_DIR=""]
+[FEI_BASE_DIR="${srcdir}/FEI_mv/fei-base"]
 )
 
 AC_ARG_WITH(FEI_LIB_DIR,
 [  --with-FEI_LIB_DIR      specify an additional directory for fei library
                           intalls.], 
 [case "${withval}" in
-   yes) FEI_LIB_DIR="" ;;
-   no)  FEI_LIB_DIR="" ;;
+   yes) FEI_LIB_DIR="$HYPRE_TOP_SRC_DIR/hypre/lib" ;;
+   no)  FEI_LIB_DIR="$HYPRE_TOP_SRC_DIR/hypre/lib" ;;
    *)   FEI_LIB_DIR=$withval ;;
  esac],
-[FEI_LIB_DIR=""]
+[FEI_LIB_DIR="$HYPRE_TOP_SRC_DIR/hypre/lib"]
 )
 
 AC_ARG_WITH(FEI_INC_DIR,
 [  --with-FEI_INC_DIR     specify an additional directory for fei include
                           installs.], 
 [case "${withval}" in
-   yes) FEI_INC_DIR="" ;;
-   no)  FEI_INC_DIR="" ;;
+   yes) FEI_INC_DIR="$HYPRE_TOP_SRC_DIR/hypre/include" ;;
+   no)  FEI_INC_DIR="$HYPRE_TOP_SRC_DIR/hypre/include" ;;
    *)   FEI_INC_DIR=$withval ;;
  esac],
-[FEI_INC_DIR=""]
+[FEI_INC_DIR="$HYPRE_TOP_SRC_DIR/hypre/include"]
 )
 
 dnl *********************************************************************
@@ -861,6 +861,9 @@ case $ARCH in
           CASC_SET_FOPT(-O)
         fi
       fi
+    fi
+    if test "$casc_using_mpi" = "no" ; then
+      CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
     fi
     CASC_SET_CDEBUG(-g)
     CASC_SET_CXXDEBUG(-g)
@@ -1526,6 +1529,7 @@ CASC_CONFIG_OUTPUT_LIST(\
  krylov\
  matrix_matrix\
  parcsr_ls\
+ parcsr_es\
  parcsr_es/LOBPCG\
  parcsr_mv\
  PETSc_ls\
