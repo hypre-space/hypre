@@ -67,8 +67,10 @@ int dataExchangeList(int num_contacts,
       max_response_size data, then a second communication is used - this is
       transparent to the user and occurs inside dataExchangeList().
       Choosing a max_response_size that is way too large will result in
-      the passing of overly large messages.
-     
+      the passing of overly large messages. THIS NEEDS TO BE THE SAME
+      NUMBER FOR ALL PROCESSORS.
+
+
   rnum = two consecutive calls to this function should have
       different rnums. Recommend alternating rnum = 1 and rnum=2 - these
       flags will be even (so odd numbered tags could be used in calling
