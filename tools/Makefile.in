@@ -49,6 +49,7 @@ LFLAGS =\
 all: 
 
 install: all
+	@cp -f hypre_convert $$HYPRE_INSTALL_DIR/bin/.
 
 clean:
 	@rm -f *.o
