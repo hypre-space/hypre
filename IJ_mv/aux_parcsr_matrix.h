@@ -29,6 +29,7 @@ typedef struct
 
    int	   diag_size;	    /* size of aux_diag_j or aux_diag_data */
    int	   indx_diag;	   /* first empty element of aux_diag_j(data) */
+   int	   nnz_diag;   /* number of nonzeros entered into the structure */
    int    *row_start_diag; /* row_start_diag[i] points to first element 
 				of i-th row */
    int    *row_end_diag; /* row_end_diag[i] points to last element 
@@ -38,6 +39,7 @@ typedef struct
 
    int	   offd_size; /* size of aux_offd_j or aux_offd_data */
    int	   indx_offd; /* first empty element of aux_offd_j(data) */
+   int	   nnz_offd;  /* number of nonzeros entered into the structure */
    int    *row_start_offd;  /* row_start_offd[i] points to first element 
                                 of i-th row */
    int    *row_end_offd;  /* row_end_offd[i] points to last element 
@@ -56,6 +58,7 @@ typedef struct
 
 #define hypre_AuxParCSRMatrixDiagSize(matrix)      ((matrix) -> diag_size)
 #define hypre_AuxParCSRMatrixIndxDiag(matrix)      ((matrix) -> indx_diag)
+#define hypre_AuxParCSRMatrixNnzDiag(matrix)       ((matrix) -> nnz_diag)
 #define hypre_AuxParCSRMatrixRowStartDiag(matrix)  ((matrix) -> row_start_diag)
 #define hypre_AuxParCSRMatrixRowEndDiag(matrix)    ((matrix) -> row_end_diag)
 #define hypre_AuxParCSRMatrixAuxDiagJ(matrix)  	   ((matrix) -> aux_diag_j)
@@ -63,6 +66,7 @@ typedef struct
 
 #define hypre_AuxParCSRMatrixOffdSize(matrix)      ((matrix) -> offd_size)
 #define hypre_AuxParCSRMatrixIndxOffd(matrix)      ((matrix) -> indx_offd)
+#define hypre_AuxParCSRMatrixNnzOffd(matrix)       ((matrix) -> nnz_offd)
 #define hypre_AuxParCSRMatrixRowStartOffd(matrix)  ((matrix) -> row_start_offd)
 #define hypre_AuxParCSRMatrixRowEndOffd(matrix)    ((matrix) -> row_end_offd)
 #define hypre_AuxParCSRMatrixAuxOffdJ(matrix)  	   ((matrix) -> aux_offd_j)
