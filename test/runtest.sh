@@ -236,14 +236,13 @@ function ExecuteScripts
   cd $SavePWD
 }
 function PsubCmdStub
-{ # initialize the common part of the " PsubCmd" string, ulgy global vars!
+{ # initialize the common part of the " PsubCmd" string, ugly global vars!
   # global "RunName" is assumed to be predefined
   CalcNodes "$@"
   NumNodes=$?
   CalcProcs "$@"
   NumProcs=$?
   HOST=`hostname|cut -c1-4`
-# HOST=${HOST%%.*}              # remove possible ".llnl.gov"
   case $HOST in
     fros*) PsubCmd="psub -c frost,pbatch -b a_casc -nettype css0 -r $RunName"
       PsubCmd="$PsubCmd -ln $NumNodes -g $NumProcs"
@@ -412,22 +411,30 @@ function PostProcess
   cd $SavePWD
 }
 function CleanUp
-{ # removes executable and hostname files from working TEST_* directory
-  if [ "$DebugMode" -gt 0 ] ; then echo "In function CleanUp" ; fi
-  WorkingDir=$2
-  SavePWD=`pwd`
-  cd $WorkingDir
+{ # removes executable and hostname files from all TEST_* directories
+  if [ "$DebugMode" -gt 0 ] ; then echo "in CleanUp" ; fi
   if [ "$BatchMode" -eq 0 ]
   then
-     ExecuteFile=`echo $WorkingDir | sed -e 's/TEST_//g'`
-     if test -f $ExecuteFile && test -x $ExecuteFile
-     then
-        rm -f $ExecuteFile
-        rm -f hostname
-        return 0
-     fi
+     SavePWD=`pwd`
+     while read InputLine
+     do 
+       case $InputLine in
+       TEST*) 
+          cd $InputLine
+          ExecuteFile=`echo $InputLine | sed -e 's/TEST_//g'`
+          if test -f $ExecuteFile && test -x $ExecuteFile
+          then
+             rm -f $ExecuteFile
+             rm -f hostname
+          fi
+          cd $SavePWD
+          ;;
+       *) 
+        ;;
+       esac
+     done < $1
   fi
-  cd $SavePWD
+ cd $SavePWD
 }
 
 function StartCrunch
@@ -448,7 +455,6 @@ function StartCrunch
   fi
   if [ "$RtnCode" -eq 0 ]
   then PostProcess "$@"
-       CleanUp "$@"
   fi
 }
 
@@ -479,6 +485,7 @@ do case $1 in
         then FilePart=`basename $InputString .sh`
           DirPart=`dirname $InputString`
           CurDir=`pwd`
+          echo $DirPart >> ArgsFile
           if [ "$BatchMode" -eq 0 ]       # machine DCSP capable
           then
             CheckBatch
@@ -504,3 +511,5 @@ do case $1 in
     ;;
   esac
 done
+CleanUp ArgsFile
+rm -f ArgsFile
