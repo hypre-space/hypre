@@ -23,13 +23,14 @@ AM_CXXFLAGS = -DMPICH_SKIP_MPICXX
 #
 FILES = \
  $(top_srcdir)/FEI_mv/femli/util/mli_utils.c\
- $(top_srcdir)/FEI_mv/femli/amgs/mli_method.cxx\
- $(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgrs.cxx\
- $(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgsa.cxx\
- $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_coarsen1.cxx\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_calib.cxx\
+ $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_coarsen1.cxx\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_dd_fedata.cxx\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_dd_sfei.cxx\
+ $(top_srcdir)/FEI_mv/femli/amgs/mli_method.cxx\
+ $(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgcr.cxx\
+ $(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgrs.cxx\
+ $(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgsa.cxx\
  $(top_srcdir)/FEI_mv/femli/base/mli.cxx\
  $(top_srcdir)/FEI_mv/femli/base/mli_oneLevel.cxx\
  $(top_srcdir)/FEI_mv/femli/cintface/cmli.cxx\
@@ -59,6 +60,7 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/vector/mli_vector.cxx\
  $(top_srcdir)/FEI_mv/femli/util/mli_utils_fortran.f\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_method.h\
+ $(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgcr.h\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgrs.h\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgsa.h\
  $(top_srcdir)/FEI_mv/femli/base/mli.h\

@@ -131,6 +131,7 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_dd_fedata.cxx\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_amgsa_dd_sfei.cxx\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_method.cxx\
+ $(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgcr.cxx\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgrs.cxx\
  $(top_srcdir)/FEI_mv/femli/amgs/mli_method_amgsa.cxx\
  $(top_srcdir)/FEI_mv/femli/base/mli.cxx\
@@ -371,6 +372,8 @@ FILES = \
  $(top_srcdir)/struct_ls/pfmg_setup.c\
  $(top_srcdir)/struct_ls/pfmg_setup_interp.c\
  $(top_srcdir)/struct_ls/pfmg_setup_rap.c\
+ $(top_srcdir)/struct_ls/pfmg_setup_rap5.c\
+ $(top_srcdir)/struct_ls/pfmg_setup_rap7.c\
  $(top_srcdir)/struct_ls/pfmg_solve.c\
  $(top_srcdir)/struct_ls/point_relax.c\
  $(top_srcdir)/struct_ls/semi_interp.c\
