@@ -121,11 +121,9 @@ c Babel-interface variables
       integer*8 Hypre_num_grid_sweeps
       integer*8 Hypre_grid_relax_type
       integer*8 Hypre_relax_weight
-      integer*8 Hypre_smooth_option
       integer max_levels
       data   max_levels /25/
       double precision relax_weight(25)
-      integer smooth_option(25)
       double precision double_zero
       data   double_zero /0.0/
       integer num_grid_sweeps_f(1)
@@ -728,7 +726,8 @@ c HYPRE interface calls.
      &                                      strong_threshold, ierr)
         call HYPRE_BoomerAMGSetTruncFactor(solver, trunc_factor, ierr)
         call HYPRE_BoomerAMGSetPrintLevel(solver, ioutdat,ierr)
-        call HYPRE_BoomerAMGSetPrintFileName(solver,"test.out.log",ierr)
+c the old Fortran interface isn't handling the string right:
+c              call HYPRE_BoomerAMGSetPrintFileName(solver,"test.out.log",ierr)
         call HYPRE_BoomerAMGSetMaxIter(solver, maxiter, ierr)
         call HYPRE_BoomerAMGSetCycleType(solver, cycle_type, ierr)
         call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
@@ -849,27 +848,18 @@ c            relax_weight(i)=1.0: simple to set, fine for testing:
      1            Hypre_relax_weight, i, relax_weight(i) )
           enddo
           call Hypre_ParAMG_SetDoubleArrayParameter_f(
-     1         Hypre_AMG, "RelaxWeight", Hypre_relax_weight )
+     1         Hypre_AMG, "RelaxWeight", Hypre_relax_weight, ierrtmp )
+          ierr = ierr + ierrtmp
 
 c        dimsl[0] = 0;   dimsu[0] = max_levels;
 c        Hypre_smooth_option = SIDL_int__array_create( 1, dimsl, dimsu );
 c        for ( i=0; i<max_levels; ++i )
 c           SIDL_int__array_set1( Hypre_smooth_option, i, smooth_option[i] );
 c      Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "SmoothOption", Hypre_smooth_option );
-          dimsl(1) = 0
-          dimsu(1) = max_levels
-          call SIDL_int__array_create1d_f(
-     1         max_levels+1, Hypre_smooth_option )
-          do i = 1, max_levels
-             smooth_option(i) = -1.0
-          enddo
-          do i = 1, max_levels
-             call SIDL_int__array_set1_f(
-     1            Hypre_smooth_option, i, smooth_option(i) )
-          enddo
-          call Hypre_ParAMG_SetIntArrayParameter_f(
-     1         Hypre_AMG, "SmoothOption", Hypre_smooth_option, ierrtmp )
-          ierr = ierr + ierrtmp
+c smooth_option is obsolete
+c          call Hypre_ParAMG_SetIntArrayParameter_f(
+c     1         Hypre_AMG, "SmoothOption", Hypre_smooth_option, ierrtmp )
+c          ierr = ierr + ierrtmp
 
 c      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "SmoothNumSweep", smooth_num_sweep);
 cc          call Hypre_ParAMG_SetIntParameter_f(
