@@ -453,9 +453,9 @@ int MLI_FEData::initSharedNodes(int nNodes, const int *nGlobalIDs,
    // --- initial checking
    // -------------------------------------------------------------
 
-   if ( nNodes <= 0 )
+   if ( nNodes < 0 )
    {
-      cout << "initSharedNodes ERROR : nNodes <= 0.\n";
+      cout << "initSharedNodes ERROR : nNodes < 0.\n";
       exit(1);
    }
    currBlock = elemBlockList_[currentElemBlock_];
