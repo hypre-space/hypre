@@ -473,6 +473,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
    int *offd_i;
    int *offd_j;
    double *offd_data;
+   int first;
 
    MPI_Comm_size(comm, &num_procs);
    MPI_Comm_rank(comm, &my_id);
@@ -481,6 +482,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
    col_partitioning = hypre_IJMatrixColPartitioning(matrix);
    col_0 = col_partitioning[my_id];
    col_n = col_partitioning[my_id+1]-1;
+   first = col_partitioning[0];
 
    if (nrows < 0)
    {
@@ -535,7 +537,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix,
                if (cols[indx] < col_0 || cols[indx] > col_n)
 				/* insert into offd */	
                {
-      	          j_offd = hypre_BinarySearch(col_map_offd,cols[indx],
+      	          j_offd = hypre_BinarySearch(col_map_offd,cols[indx]-first,
 						num_cols_offd);
       	          if (j_offd == -1)
       	          {
@@ -824,6 +826,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
    int pos_diag, pos_offd;
    int len_diag, len_offd;
    int offd_indx, diag_indx;
+   int first;
    int *diag_i;
    int *diag_j;
    double *diag_data;
@@ -838,6 +841,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
    col_partitioning = hypre_IJMatrixColPartitioning(matrix);
    col_0 = col_partitioning[my_id];
    col_n = col_partitioning[my_id+1]-1;
+   first = col_partitioning[0];
 
    if (hypre_IJMatrixAssembleFlag(matrix))
    {
@@ -886,7 +890,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix,
                if (cols[indx] < col_0 || cols[indx] > col_n)
 				/* insert into offd */	
                {
-      	          j_offd = hypre_BinarySearch(col_map_offd,cols[indx],
+      	          j_offd = hypre_BinarySearch(col_map_offd,cols[indx]-first,
 						num_cols_offd);
       	          if (j_offd == -1)
       	          {
