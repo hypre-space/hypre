@@ -67,7 +67,6 @@ FILES =\
  par_laplace_9pt.c\
  par_rap.c\
  par_rap_communication.c\
- random.c\
  transpose.c\
  HYPRE_parcsr_amg.c
 
