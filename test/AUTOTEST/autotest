@@ -111,8 +111,9 @@ help () {
   printf "%s\n" "     -tc2kmp   Compaq TC2K systum, executing OpenMP, DPCS."
   printf "%s\n" "     -tc       # obsolute"
   printf "%s\n" "     -tcmp     # obsolute"
-  printf "%s\n" "     -tux71    CASC Intel running RedHat Linux (pgi-4.1)."
-  printf "%s\n" "     -tux83    CASC Intel running RedHat Linux."
+  printf "%s\n" "     -tux71    CASC Intel running RedHat 7 Linux (pgi-4.1)."
+  printf "%s\n" "     -tux81    CASC Intel running RedHat 8 Linux."
+  printf "%s\n" "     -tux83    CASC Intel running RedHat 7 Linux."
   printf "%s\n" "     -tuxgcc2  Linux running gcc-2.95.3 compilers"
   printf "%s\n" "     -tuxgcc30 Linux running gcc-3.0.4 compilers"
   printf "%s\n" "     -tuxgcc31 Linux running gcc-3.1.1 compilers"
@@ -691,6 +692,23 @@ do
           HYPRE_MESSAGE='SECONDARY[KCC-4.0f]'
         fi
         COMPILERSELECT="kai"
+	perform_test
+        shift;;
+    -tux81)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="tux81"
+        HYPRE_RUN_MACHINE="tux81"
+        HYPRE_REMOTE_DIR="/usr/tmp"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-redhat8/AUTOTEST"
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nse 1 -a 1 -cfl 1"
+          HYPRE_MESSAGE='TEST[automake-redhat8-gcc-3.2.3]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 2 -cf"
+          HYPRE_MESSAGE='SECONDARY[redhat8-gcc-3.2.3]'
+        fi
+##      ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
+        COMPILERSELECT="default"
 	perform_test
         shift;;
     -tux83)
