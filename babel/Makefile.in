@@ -71,8 +71,8 @@ LFLAGS =\
 # Targets
 ##################################################################
 
-HYPRE_BABEL_DRIVERS =\
-IJ_linear_solvers_wBabel.c
+HYPRE_BABEL_DRIVERS =
+#IJ_linear_solvers_wBabel.c
 
 # HYPRE_BABEL_DRIVERS_CXX =
 # 
