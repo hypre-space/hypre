@@ -36,6 +36,7 @@ hypre_AMGSetup( void            *amg_vdata,
    int      num_variables;
    int      max_levels; 
    int      amg_ioutdat;
+   int      interp_type;
  
    /* Local variables */
    int              *CF_marker;
@@ -55,10 +56,12 @@ hypre_AMGSetup( void            *amg_vdata,
 
    max_levels = hypre_AMGDataMaxLevels(amg_data);
    amg_ioutdat = hypre_AMGDataIOutDat(amg_data);
+   interp_type = hypre_AMGDataInterpType(amg_data);
    
    A_array = hypre_CTAlloc(hypre_CSRMatrix*, max_levels);
    P_array = hypre_CTAlloc(hypre_CSRMatrix*, max_levels-1);
    CF_marker_array = hypre_CTAlloc(int*, max_levels-1);
+
 
    A_array[0] = A;
 
@@ -116,8 +119,17 @@ hypre_AMGSetup( void            *amg_vdata,
        * Build prolongation matrix, P, and place in P_array[level] 
        *--------------------------------------------------------------*/
 
-      hypre_AMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
+      if (interp_type == 1)
+      {
+          hypre_AMGBuildRBMInterp(A_array[level], CF_marker_array[level], S, &P);
+      }
+      else
+      {
+          hypre_AMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
+      }
+
       P_array[level] = P; 
+      
 
       if (amg_ioutdat == 5 && level == 0)
       {
