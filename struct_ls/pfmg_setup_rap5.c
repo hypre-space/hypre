@@ -178,6 +178,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
 
    double               *rap_cc, *rap_cw, *rap_cs;
    double               *rap_ce, *rap_cn;
+   double                west, east;
 
    int                   iA, iAm1, iAp1;
    int                   iAc;
@@ -309,7 +310,8 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                              P_dbox, cstart, stridec, iP,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iA,iAc,iAm1,iAp1,iPm1,iPp1
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iA,iAc,iAm1,iAp1,iPm1,iPp1,\
+                              west,east
 #include "hypre_box_smp_forloop.h"
          hypre_BoxLoop3For(loopi, loopj, loopk, iP, iA, iAc)
             {
@@ -322,13 +324,21 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                rap_cs[iAc] = a_cs[iA] * pa[iPm1];
                rap_cn[iAc] = a_cn[iA] * pb[iPp1];
 
-               rap_cw[iAc] = a_cw[iA] + 0.5 * a_cw[iAm1] + 0.5 * a_cw[iAp1];
-               rap_ce[iAc] = a_ce[iA] + 0.5 * a_ce[iAm1] + 0.5 * a_ce[iAp1];
+               west = a_cw[iA] + 0.5 * a_cw[iAm1] + 0.5 * a_cw[iAp1];
+               east = a_ce[iA] + 0.5 * a_ce[iAm1] + 0.5 * a_ce[iAp1];
+
+               /*-----------------------------------------------------
+                * Prevent non-zero entries reaching off grid
+                *-----------------------------------------------------*/
+               if(a_cw[iA] == 0.0) west = 0.0;
+               if(a_ce[iA] == 0.0) east = 0.0;
+               
+               rap_cw[iAc] = west;
+               rap_ce[iAc] = east;
 
                rap_cc[iAc] = a_cc[iA] + a_cw[iA] + a_ce[iA]
                            + a_cs[iA] * pb[iP] + a_cn[iA] * pa[iP]
-                           - (a_cw[iA] + 0.5 * a_cw[iAm1] + 0.5 * a_cw[iAp1])
-                           - (a_ce[iA] + 0.5 * a_ce[iAm1] + 0.5 * a_ce[iAp1]);
+                           - west - east;
             }
          hypre_BoxLoop3End(iP, iA, iAc);
 

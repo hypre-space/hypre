@@ -188,6 +188,8 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
    double               *rap_cc, *rap_cw, *rap_cs;
    double               *rap_ce, *rap_cn;
    double               *rap_ac, *rap_bc;
+   double                west, east;
+   double                south, north;
 
    int                   iA, iAm1, iAp1;
    int                   iAc;
@@ -337,7 +339,8 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
                              P_dbox, cstart, stridec, iP,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iA,iAc,iAm1,iAp1,iPm1,iPp1
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iA,iAc,iAm1,iAp1,iPm1,iPp1,\
+                              west,east,south,north
 #include "hypre_box_smp_forloop.h"
          hypre_BoxLoop3For(loopi, loopj, loopk, iP, iA, iAc)
             {
@@ -350,18 +353,29 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
                rap_bc[iAc] = a_bc[iA] * pa[iPm1];
                rap_ac[iAc] = a_ac[iA] * pb[iPp1];
 
-               rap_cw[iAc] = a_cw[iA] + 0.5 * a_cw[iAm1] + 0.5 * a_cw[iAp1];
-               rap_ce[iAc] = a_ce[iA] + 0.5 * a_ce[iAm1] + 0.5 * a_ce[iAp1];
-               rap_cs[iAc] = a_cs[iA] + 0.5 * a_cs[iAm1] + 0.5 * a_cs[iAp1];
-               rap_cn[iAc] = a_cn[iA] + 0.5 * a_cn[iAm1] + 0.5 * a_cn[iAp1];
+               west  = a_cw[iA] + 0.5 * a_cw[iAm1] + 0.5 * a_cw[iAp1];
+               east  = a_ce[iA] + 0.5 * a_ce[iAm1] + 0.5 * a_ce[iAp1];
+               south = a_cs[iA] + 0.5 * a_cs[iAm1] + 0.5 * a_cs[iAp1];
+               north = a_cn[iA] + 0.5 * a_cn[iAm1] + 0.5 * a_cn[iAp1];
+
+               /*-----------------------------------------------------
+                * Prevent non-zero entries reaching off grid
+                *-----------------------------------------------------*/
+               if(a_cw[iA] == 0.0) west = 0.0;
+               if(a_ce[iA] == 0.0) east = 0.0;
+               if(a_cs[iA] == 0.0) south = 0.0;
+               if(a_cn[iA] == 0.0) north = 0.0;
+
+
+               rap_cw[iAc] = west;
+               rap_ce[iAc] = east;
+               rap_cs[iAc] = south;
+               rap_cn[iAc] = north;
 
                rap_cc[iAc] = a_cc[iA] 
                            + a_cw[iA] + a_ce[iA] + a_cs[iA] + a_cn[iA]
                            + a_bc[iA] * pb[iP] + a_ac[iA] * pa[iP]
-                           - (a_cw[iA] + 0.5 * a_cw[iAm1] + 0.5 * a_cw[iAp1])
-                           - (a_ce[iA] + 0.5 * a_ce[iAm1] + 0.5 * a_ce[iAp1])
-                           - (a_cs[iA] + 0.5 * a_cs[iAm1] + 0.5 * a_cs[iAp1])
-                           - (a_cn[iA] + 0.5 * a_cn[iAm1] + 0.5 * a_cn[iAp1]);
+                           - west - east - south - north;
             }
          hypre_BoxLoop3End(iP, iA, iAc);
 
