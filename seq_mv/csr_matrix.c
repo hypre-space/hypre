@@ -214,9 +214,16 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
       fprintf(fp, "%d\n", matrix_j[j] + file_base);
    }
 
-   for (j = 0; j < matrix_i[num_rows]; j++)
+   if (matrix_data)
    {
-      fprintf(fp, "%le\n", matrix_data[j]);
+      for (j = 0; j < matrix_i[num_rows]; j++)
+      {
+         fprintf(fp, "%le\n", matrix_data[j]);
+      }
+   }
+   else
+   {
+      fprintf(fp, "Warning: No matrix data!\n");
    }
 
    fclose(fp);
