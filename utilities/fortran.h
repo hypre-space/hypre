@@ -31,7 +31,7 @@
 #  define hypre_NAME_C_CALLING_FORT(name,NAME) name##__
 #  define hypre_NAME_FORT_CALLING_C(name,NAME) name##__
 
-#elif defined(HYPRE_HP)
+#elif defined(HYPRE_HPPA)
 
 #  define hypre_NAME_C_CALLING_FORT(name,NAME) name
 #  define hypre_NAME_FORT_CALLING_C(name,NAME) name

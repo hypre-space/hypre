@@ -38,6 +38,10 @@
 #undef HYPRE_LINUX
 #endif
 
+#ifndef HYPRE_HPPA
+#undef HYPRE_HPPA
+#endif
+
 #ifndef HYPRE_IRIX64
 #undef HYPRE_IRIX64
 #endif

@@ -642,10 +642,7 @@ case $ARCH in
         if test "$casc_using_openmp" = "no" ; then
           AC_CHECK_PROGS(CC, mpicc)
         else
-          AC_CHECK_PROGS(CC,ompcc) 
-          CASC_CHECK_HEADER(omp.h, /usr/local/omni/lib/openmp/include)
-          CASC_CHECK_HEADER(mpi.h, /usr/local/mpich-1.2.1/include)
-          CASC_ADD_LIB(ompc, main, /usr/local/omni/lib/openmp/lib)
+          AC_CHECK_PROGS(CC,pgcc) 
         fi
       fi
     fi
@@ -658,7 +655,7 @@ case $ARCH in
         if test "$casc_using_openmp" = "no" ; then
           AC_CHECK_PROGS(CXX, mpiCC)
         else
-          AC_CHECK_PROGS(CXX,ompcc) 
+          AC_CHECK_PROGS(CXX,pgcc) 
         fi
       fi
     fi
@@ -671,7 +668,74 @@ case $ARCH in
         if test "$casc_using_openmp" = "no" ; then
           AC_CHECK_PROGS(F77, mpif77)
         else
-          AC_CHECK_PROGS(F77,ompf77)
+          AC_CHECK_PROGS(F77,pgf77)
+        fi
+      fi
+    fi
+
+    if test "$casc_using_openmp" = "no" ; then
+      if test -z "$CFLAGS"; then
+        CASC_SET_COPT(-O)
+      fi
+      if test -z "$CXXFLAGS"; then
+        CASC_SET_CXXOPT(-O)
+      fi
+      if test -z "$F77FLAGS"; then
+        CASC_SET_FOPT(-O)
+      fi
+    else
+      if test -z "$CFLAGS"; then
+        CASC_SET_COPT(-mp)
+      fi
+      if test -z "$CXXFLAGS"; then
+        CASC_SET_CXXOPT(-mp)
+      fi
+      if test -z "$F77FLAGS"; then
+        CASC_SET_FOPT(-mp)
+      fi
+    fi
+    CASC_SET_CDEBUG(-g)
+    CASC_SET_CXXDEBUG(-g)
+    CASC_SET_FDEBUG(-g)
+  ;;
+
+  hpux | HPUX | hppa | HPPA )
+    if test -z "$CC"; then
+      if test "$casc_using_mpi" = "no" &&
+        test "$casc_using_openmp" = "no"
+      then
+        AC_CHECK_PROGS(CC, c89 cc gcc kcc)
+      else
+        if test "$casc_using_openmp" = "no" ; then
+          AC_CHECK_PROGS(CC, mpicc)
+        else
+          AC_CHECK_PROGS(CC,guidec) 
+        fi
+      fi
+    fi
+    if test -z "$CXX"; then
+      if test "$casc_using_mpi" = "no" &&
+        test "$casc_using_openmp" = "no"
+      then
+        AC_CHECK_PROGS(CXX, aCC CC g++)
+      else
+        if test "$casc_using_openmp" = "no" ; then
+          AC_CHECK_PROGS(CXX, mpiCC)
+        else
+          AC_CHECK_PROGS(CXX,guidec++) 
+        fi
+      fi
+    fi
+    if test -z "$F77"; then
+      if test "$casc_using_mpi" = "no" &&
+        test "$casc_using_openmp" = "no"
+      then
+        AC_CHECK_PROGS(F77, fort77 f77 g77)
+      else
+        if test "$casc_using_openmp" = "no" ; then
+          AC_CHECK_PROGS(F77, mpif77)
+        else
+          AC_CHECK_PROGS(F77,guidef77)
         fi
       fi
     fi
@@ -903,7 +967,7 @@ case $ARCH in
     CASC_SET_FDEBUG(-g) 
   ;;
 
-  IRIX64)
+  IRIX64 | IRIX )
     if test -z "$CC"; then
       AC_CHECK_PROGS(CC, cc gcc c89)
     fi
@@ -956,24 +1020,36 @@ esac
 case $ARCH in
   sun4 | solaris )
     AC_DEFINE(HYPRE_SOLARIS)
+    CSUPERLUFLAGS=-DAdd_
   ;;
   LINUX | Linux )
     AC_DEFINE(HYPRE_LINUX)
+    CSUPERLUFLAGS=-DAdd_
+  ;;
+  hpux | HPUX | hppa | HPPA )
+    AC_DEFINE(HYPRE_HPPA)
+    CSUPERLUFLAGS=--DNoChange
+    if test -z "$casc_using_blas" ; then
+      casc_using_blas=yes
+    fi
   ;;
   alpha)
     AC_DEFINE(HYPRE_ALPHA)
+    CSUPERLUFLAGS=-DAdd_
     if test -z "$casc_using_blas" ; then
       casc_using_blas=yes
     fi
   ;;
   rs6000)
     AC_DEFINE(HYPRE_RS6000)
+    CSUPERLUFLAGS=--DNoChange
     if test -z "$casc_using_blas" ; then
       casc_using_blas=yes
     fi
   ;;
   IRIX64)
     AC_DEFINE(HYPRE_IRIX64)
+    CSUPERLUFLAGS=-DAdd_
   ;;
 esac
 
@@ -1114,15 +1190,18 @@ fi
 
 if test "$casc_using_blas" = "yes"
 then
- CASC_FIND_BLAS
- if test "$BLASLIBFLAGS" = "-lessl"
+ if test "$ARCH" = "rs6000"
  then
+   BLASLIBFLAGS=-lessl
    AC_DEFINE(HYPRE_USING_ESSL)
- elif test "$BLASLIBFLAGS" = "-ldxml"
+ elif test "$ARCH" = "alpha"
  then
+   BLASLIBFLAGS=-ldxml
    AC_DEFINE(HYPRE_USING_DXML)
- elif test "$BLASLIBFLAGS" = ""
+ elif test "$ARCH" = "hpux"
  then
+   BLASLIBFLAGS="-lblas -lcl" 
+ else
    casc_using_blas=no
  fi
 fi
@@ -1213,6 +1292,7 @@ AC_SUBST(HYPRE_PETSCLIBDIRS)
 
 AC_SUBST(HYPRE_TOP_SRC_DIR)
 
+AC_SUBST(CSUPERLUFLAGS)
 AC_SUBST(BLASLIBFLAGS)
 
 dnl *********************************************************************
