@@ -348,9 +348,9 @@ zzz_PrintStructVector( char             *filename,
    data_space = zzz_StructVectorDataSpace(vector);
 
    if (all)
-      boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(vector));
-   else
       boxes = data_space;
+   else
+      boxes = zzz_StructGridBoxes(zzz_StructVectorGrid(vector));
 
    fprintf(file, "\nData:\n");
    zzz_PrintBoxArrayData(file, boxes, data_space, 1,

@@ -97,7 +97,8 @@ ${OBJS}: ${HEADERS}
 ##################################################################
 
 veryclean: clean
-	@rm -f driver driver_internal libZZZ.a
+	@rm -f libZZZ.a
+	@rm -f driver driver_internal
 
 clean:
 	@rm -f *.o

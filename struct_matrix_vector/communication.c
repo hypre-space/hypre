@@ -19,16 +19,16 @@
 void
 zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
                  zzz_BoxArrayArray  **recv_boxes_ptr,
-                 int               ***send_processes_ptr,
-                 int               ***recv_processes_ptr,
+                 int               ***send_box_ranks_ptr,
+                 int               ***recv_box_ranks_ptr,
                  zzz_StructGrid      *grid,
                  zzz_StructStencil   *stencil            )
 {
    /* output variables */
    zzz_BoxArrayArray     *send_boxes;
    zzz_BoxArrayArray     *recv_boxes;
-   int                  **send_processes;
-   int                  **recv_processes;
+   int                  **send_box_ranks;
+   int                  **recv_box_ranks;
 
    /* internal variables */
    zzz_BoxArray          *boxes;
@@ -37,16 +37,12 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
 
    zzz_BoxArray          *neighbors;
    int                   *neighbor_ranks;
+   int                    num_neighbors;
                          
    zzz_BoxArrayArray     *shift_boxes;
    zzz_BoxArrayArray     *shift_neighbors;
                           
-   int                   *neighbor_processes;
-   int                    num_neighbor_processes;
-
-   int                    process;
-
-   int                    r, p, i, j, k;
+   int                    r, n, i, j, k;
 
    /* temporary work variables */
    zzz_BoxArrayArray     *box_aa0;
@@ -61,7 +57,7 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
    zzz_Box               *box1;
    zzz_Box               *box2;
 
-   int                  **process_aa;
+   int                  **box_ranks;
    int                   *box_array_sizes;
 
    /*------------------------------------------------------
@@ -129,7 +125,7 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
 
    /*------------------------------------------------------
     * Determine recv_boxes and send_boxes by intersecting.
-    * Also keep track of processes.
+    * Also keep track of communication box ranks.
     *------------------------------------------------------*/
 
    for (r = 0; r < 2; r++)
@@ -148,9 +144,9 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
       }
 
       box_aa1 = zzz_NewBoxArrayArray(zzz_BoxArraySize(boxes));
-      process_aa = ctalloc(int *, zzz_BoxArraySize(boxes));
+      box_ranks = ctalloc(int *, zzz_BoxArraySize(boxes));
       zzz_ForBoxI(i, boxes)
-         process_aa[i] = ctalloc(int, zzz_BoxArraySize(neighbors));
+         box_ranks[i] = ctalloc(int, zzz_BoxArraySize(neighbors));
 
       zzz_ForBoxI(i, box_a0)
       {
@@ -171,15 +167,15 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
                   {
                      case 0:
                      box_a3 = zzz_BoxArrayArrayBoxArray(box_aa1, j);
-                     process_aa[j][zzz_BoxArraySize(box_a3)] =
-                        processes[neighbor_ranks[i]];
+                     box_ranks[j][zzz_BoxArraySize(box_a3)] =
+                        neighbor_ranks[i];
                      zzz_AppendBox(box2, box_a3);
                      break;
 
                      case 1:
                      box_a3 = zzz_BoxArrayArrayBoxArray(box_aa1, i);
-                     process_aa[i][zzz_BoxArraySize(box_a3)] =
-                        processes[neighbor_ranks[j]];
+                     box_ranks[i][zzz_BoxArraySize(box_a3)] =
+                        neighbor_ranks[j];
                      zzz_AppendBox(box2, box_a3);
                      break;
                   }
@@ -192,12 +188,12 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
       {
          case 0:
          recv_boxes = box_aa1;
-         recv_processes = process_aa;
+         recv_box_ranks = box_ranks;
          break;
 
          case 1:
          send_boxes = box_aa1;
-         send_processes = process_aa;
+         send_box_ranks = box_ranks;
          break;
       }
    }
@@ -206,28 +202,12 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
    zzz_FreeBoxArrayArray(shift_neighbors);
 
    /*------------------------------------------------------
-    * Union the send_boxes and recv_boxes by process
+    * Union the send_boxes and recv_boxes by communication
+    * box ranks.
     *------------------------------------------------------*/
 
-   /* determine neighbor_processes and num_neighbor_processes */
-   neighbor_processes = talloc(int, zzz_BoxArraySize(neighbors));
-   num_neighbor_processes = 0;
-   zzz_ForBoxI(i, neighbors)
-   {
-      process = processes[neighbor_ranks[i]];
-      box0 = zzz_BoxArrayBox(neighbors, i);
-
-      for (p = 0; p < num_neighbor_processes; p++)
-         if (process == neighbor_processes[p])
-            break;
-      if (p == num_neighbor_processes)
-      {
-         neighbor_processes[p] = process;
-         num_neighbor_processes++;
-      }
-   }
-
-   box_array_sizes = ctalloc(int, num_neighbor_processes);
+   num_neighbors = zzz_BoxArraySize(neighbors);
+   box_array_sizes = ctalloc(int, num_neighbors);
 
    for (r = 0; r < 2; r++)
    {
@@ -235,12 +215,12 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
       {
          case 0:
          box_aa0 = send_boxes;
-         process_aa = send_processes;
+         box_ranks = send_box_ranks;
          break;
 
          case 1:
          box_aa0 = recv_boxes;
-         process_aa = recv_processes;
+         box_ranks = recv_box_ranks;
          break;
       }
 
@@ -251,32 +231,32 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
          box_a0 = zzz_BoxArrayArrayBoxArray(box_aa0, i);
          box_a1 = zzz_BoxArrayArrayBoxArray(box_aa1, i);
 
-         for (p = 0; p < num_neighbor_processes; p++)
+         for (n = 0; n < num_neighbors; n++)
          {
             box_a2 = zzz_NewBoxArray();
             zzz_ForBoxI(j, box_a0)
             {
-               if (process_aa[i][j] == neighbor_processes[p])
+               if (box_ranks[i][j] == neighbor_ranks[n])
                   zzz_AppendBox(zzz_BoxArrayBox(box_a0, j), box_a2);
             }
 
             box_a3 = zzz_UnionBoxArray(box_a2);
             zzz_AppendBoxArray(box_a3, box_a1);
-            box_array_sizes[p] = zzz_BoxArraySize(box_a3);
+            box_array_sizes[n] = zzz_BoxArraySize(box_a3);
 
             zzz_FreeBoxArrayShell(box_a2);
             zzz_FreeBoxArrayShell(box_a3);
          }
 
-         /* fix process info */
-         tfree(process_aa[i]);
-         process_aa[i] = ctalloc(int, zzz_BoxArraySize(box_a1));
+         /* fix box rank info */
+         tfree(box_ranks[i]);
+         box_ranks[i] = ctalloc(int, zzz_BoxArraySize(box_a1));
          j = 0;
-         for (p = 0; p < num_neighbor_processes; p++)
+         for (n = 0; n < num_neighbors; n++)
          {
-            for (k = 0; k < box_array_sizes[p]; k++)
+            for (k = 0; k < box_array_sizes[n]; k++)
             {
-               process_aa[i][j] = neighbor_processes[p];
+               box_ranks[i][j] = neighbor_ranks[n];
                j++;
             }
          }
@@ -297,7 +277,6 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
    }
 
    tfree(box_array_sizes);
-   tfree(neighbor_processes);
 
    /*------------------------------------------------------
     * Return
@@ -308,8 +287,8 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
 
    *send_boxes_ptr = send_boxes;
    *recv_boxes_ptr = recv_boxes;
-   *send_processes_ptr = send_processes;
-   *recv_processes_ptr = recv_processes;
+   *send_box_ranks_ptr = send_box_ranks;
+   *recv_box_ranks_ptr = recv_box_ranks;
 }
 
 /*--------------------------------------------------------------------------
@@ -422,8 +401,9 @@ zzz_GetSBoxType( zzz_SBox     *comm_sbox,
 zzz_CommPkg *
 zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
                 zzz_SBoxArrayArray  *recv_sboxes,
-                int                **send_processes,
-                int                **recv_processes,
+                int                **send_sbox_ranks,
+                int                **recv_sbox_ranks,
+                zzz_StructGrid      *grid,
                 zzz_BoxArray        *data_space,
                 int                  num_values     )
 {
@@ -443,187 +423,260 @@ zzz_NewCommPkg( zzz_SBoxArrayArray  *send_sboxes,
    int                  pkg_num_comms;
    int                 *pkg_comm_processes;
    MPI_Datatype        *pkg_comm_types;
-   int                 *tmp_pkg_comm_processes;
+
+   int                 *box_ranks;
+   int                 *processes;
 
    zzz_SBoxArrayArray  *comm_sboxes;
    zzz_SBoxArray       *comm_sbox_array;
    zzz_SBox            *comm_sbox;
-   int                **comm_processes;
-
-   int                  num_comm_sboxes;
-   int                  max_num_comm_sboxes;
-                     
-   int                 *comm_sbox_block_lengths;
-   MPI_Aint            *comm_sbox_displacements;
-   MPI_Datatype        *comm_sbox_types;
+   int                **comm_sbox_ranks;
 
    zzz_Box             *data_box;
    int                  data_box_offset;
+
+   int                 *comm_process_flags;
+   struct CommStruct
+   {
+      zzz_SBox         *comm_sbox;
+      zzz_Box          *data_box;
+      int               data_box_offset;
+      int               orig;
+      int               dest;
+   };
+   struct CommStruct  **comm_structs;
                      
-   int                  process;
+   int                 *comm_origs;
+   int                 *comm_dests;
+   int                 *comm_sort;
+   
+   int                  num_comms;
+   int                 *comm_block_lengths;
+   MPI_Aint            *comm_displacements;
+   MPI_Datatype        *comm_types;
+                     
    int                  r, p, i, j;
+   int                  num_procs;
+   int                  tmp_int;
                 
-   /*------------------------------------------------------
-    * Compute an upper bound for the number of send and
-    * receive SBoxes, `max_num_comm_sboxes'.
-    *------------------------------------------------------*/
+   /*---------------------------------------------------------
+    * First time through, compute send package info.
+    * Second time through, compute recv package info.
+    *---------------------------------------------------------*/
 
-   max_num_comm_sboxes = 0;
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
 
-   num_comm_sboxes = 0;
-   zzz_ForSBoxArrayI(i, send_sboxes)
-      num_comm_sboxes +=
-	 zzz_SBoxArraySize(zzz_SBoxArrayArraySBoxArray(send_sboxes, i));
-   max_num_comm_sboxes = max(max_num_comm_sboxes, num_comm_sboxes);
-
-   num_comm_sboxes = 0;
-   zzz_ForSBoxArrayI(i, recv_sboxes)
-      num_comm_sboxes +=
-	 zzz_SBoxArraySize(zzz_SBoxArrayArraySBoxArray(recv_sboxes, i));
-   max_num_comm_sboxes = max(max_num_comm_sboxes, num_comm_sboxes);
-
-   /*------------------------------------------------------
-    * compute pkg_num_sends, pkg_send_processes and
-    *         pkg_num_recvs, pkg_recv_processes
-    *------------------------------------------------------*/
-
-   tmp_pkg_comm_processes = talloc(int, max_num_comm_sboxes);
+   box_ranks = zzz_StructGridBoxRanks(grid);
+   processes = zzz_StructGridProcesses(grid);
 
    for (r = 0; r < 2; r++)
    {
       switch(r)
       {
          case 0:
-         comm_sboxes    = send_sboxes;
-         comm_processes = send_processes;
+         comm_sboxes     = send_sboxes;
+         comm_sbox_ranks = send_sbox_ranks;
          break;
  
          case 1:
-         comm_sboxes    = recv_sboxes;
-         comm_processes = recv_processes;
+         comm_sboxes     = recv_sboxes;
+         comm_sbox_ranks = recv_sbox_ranks;
          break;
       }
+
+      /*------------------------------------------------------
+       * Loop over `comm_sboxes' and compute `comm_process_flags'.
+       *------------------------------------------------------*/
+
+      comm_process_flags = ctalloc(int, num_procs);
 
       pkg_num_comms = 0;
       zzz_ForSBoxArrayI(i, comm_sboxes)
       {
          comm_sbox_array = zzz_SBoxArrayArraySBoxArray(comm_sboxes, i);
+
          zzz_ForSBoxI(j, comm_sbox_array)
          {
-            process = comm_processes[i][j];
-            for (p = 0; p < pkg_num_comms; p++)
-               if (process == tmp_pkg_comm_processes[p])
-                  break;
-            if (p == pkg_num_comms)
-               tmp_pkg_comm_processes[pkg_num_comms++] = process;
+            comm_sbox = zzz_SBoxArraySBox(comm_sbox_array, j);
+            p = processes[comm_sbox_ranks[i][j]];
+
+            if (zzz_SBoxVolume(comm_sbox) != 0)
+            {
+               comm_process_flags[p]++;
+               if (comm_process_flags[p] == 1)
+                  pkg_num_comms++;
+            }
          }
       }
 
+      /*------------------------------------------------------
+       * Loop over `comm_sboxes' and compute `comm_structs'.
+       *------------------------------------------------------*/
+
+      comm_structs = ctalloc(struct CommStruct *, num_procs);
+
+      data_box_offset = 0;
+      zzz_ForSBoxArrayI(i, comm_sboxes)
+      {
+         comm_sbox_array = zzz_SBoxArrayArraySBoxArray(comm_sboxes, i);
+         data_box = zzz_BoxArrayBox(data_space, i);
+
+         zzz_ForSBoxI(j, comm_sbox_array)
+         {
+            comm_sbox = zzz_SBoxArraySBox(comm_sbox_array, j);
+            p = processes[comm_sbox_ranks[i][j]];
+
+            if (zzz_SBoxVolume(comm_sbox) != 0)
+            {
+               /* allocate CommStruct pointer */
+               if (comm_structs[p] == NULL)
+               {
+                  comm_structs[p] =
+                     ctalloc(struct CommStruct, comm_process_flags[p]);
+                  comm_process_flags[p] = 0;
+               }
+
+               num_comms = comm_process_flags[p];
+
+               comm_structs[p][num_comms].comm_sbox       = comm_sbox;
+               comm_structs[p][num_comms].data_box        = data_box;
+               comm_structs[p][num_comms].data_box_offset = data_box_offset;
+               switch(r)
+               {
+                  case 0:
+                  comm_structs[p][num_comms].orig = box_ranks[i];
+                  comm_structs[p][num_comms].dest = comm_sbox_ranks[i][j];
+                  break;
+ 
+                  case 1:
+                  comm_structs[p][num_comms].orig = comm_sbox_ranks[i][j];
+                  comm_structs[p][num_comms].dest = box_ranks[i];
+                  break;
+               }
+
+               comm_process_flags[p]++;
+            }
+         }
+
+         data_box_offset += zzz_BoxVolume(data_box) * num_values;
+      }
+
+      /*------------------------------------------------------
+       * Loop over comm_structs and build package info
+       *------------------------------------------------------*/
+
       pkg_comm_processes = talloc(int, pkg_num_comms);
-      for (i = 0; i < pkg_num_comms; i++)
-         pkg_comm_processes[i] = tmp_pkg_comm_processes[i];
+      pkg_comm_types     = talloc(MPI_Datatype, pkg_num_comms);
+
+      pkg_num_comms = 0;
+      for (p = 0; p < num_procs; p++)
+      {
+         if (comm_structs[p] != NULL)
+         {
+            num_comms = comm_process_flags[p];
+
+            /* add process number to `pkg_comm_processes' */
+            pkg_comm_processes[pkg_num_comms] = p;
+
+            /* sort the comm_struct data                               */
+            /* note: this bubble sort will maintain the original order */
+            /*       for data with the same `orig' and `dest'          */
+            comm_origs = talloc(int, num_comms);
+            comm_dests = talloc(int, num_comms);
+            comm_sort  = talloc(int, num_comms);
+            for (i = 0; i < num_comms; i++)
+            {
+               comm_origs[i] = comm_structs[p][i].orig;
+               comm_dests[i] = comm_structs[p][i].dest;
+               comm_sort[i]  = i;
+            }
+            for (i = (num_comms - 1); i > 0; i--)
+            {
+               for (j = 0; j < i; j++)
+               {
+                  if ( (comm_dests[j] > comm_dests[j+1]) ||
+                       ((comm_dests[j] == comm_dests[j+1]) &&
+                        (comm_origs[j]  > comm_origs[j+1]))   )
+                  {
+                     tmp_int         = comm_origs[j];
+                     comm_origs[j]   = comm_origs[j+1];
+                     comm_origs[j+1] = tmp_int;
+
+                     tmp_int         = comm_dests[j];
+                     comm_dests[j]   = comm_dests[j+1];
+                     comm_dests[j+1] = tmp_int;
+
+                     tmp_int         = comm_sort[j];
+                     comm_sort[j]    = comm_sort[j+1];
+                     comm_sort[j+1]  = tmp_int;
+                  }
+               }
+            }
+
+            /* compute arguments for MPI_Type_struct routine */
+            comm_block_lengths = talloc(int, num_comms);
+            comm_displacements = talloc(MPI_Aint, num_comms);
+            comm_types         = talloc(MPI_Datatype, num_comms);
+            for (i = 0; i < num_comms; i++)
+            {
+               /* extract data from comm_struct */
+               j = comm_sort[i];
+               comm_sbox       = comm_structs[p][j].comm_sbox;
+               data_box        = comm_structs[p][j].data_box;
+               data_box_offset = comm_structs[p][j].data_box_offset;
+
+               /* set block_lengths */
+               comm_block_lengths[i] = 1;
+
+               /* compute displacements */
+               comm_displacements[i] = 
+                  (zzz_BoxIndexRank(data_box, zzz_SBoxIMin(comm_sbox)) +
+                   data_box_offset) * sizeof(double);
+
+               /* compute types */
+               zzz_GetSBoxType(comm_sbox, data_box, num_values,
+                               &comm_types[i]);
+            }
+
+            /* create `pkg_comm_types' */
+            MPI_Type_struct(num_comms, comm_block_lengths,
+                            comm_displacements, comm_types,
+                            &pkg_comm_types[pkg_num_comms]);
+            MPI_Type_commit(&pkg_comm_types[pkg_num_comms]);
+
+            pkg_num_comms++;
+
+            /* free up memory */
+            for (i = 0; i < num_comms; i++)
+               MPI_Type_free(&comm_types[i]);
+            tfree(comm_block_lengths);
+            tfree(comm_displacements);
+            tfree(comm_types);
+            tfree(comm_origs);
+            tfree(comm_dests);
+            tfree(comm_sort);
+            tfree(comm_structs[p]);
+         }
+      }
+
+      tfree(comm_structs);
+      tfree(comm_process_flags);
 
       switch(r)
       {
          case 0:
          pkg_num_sends      = pkg_num_comms;
          pkg_send_processes = pkg_comm_processes;
+         pkg_send_types     = pkg_comm_types;
          break;
  
          case 1:
          pkg_num_recvs      = pkg_num_comms;
          pkg_recv_processes = pkg_comm_processes;
+         pkg_recv_types     = pkg_comm_types;
          break;
       }
    }
-
-   tfree(tmp_pkg_comm_processes);
-
-   /*------------------------------------------------------
-    * Set up pkg_send_types and pkg_recv_types
-    *------------------------------------------------------*/
-
-   comm_sbox_block_lengths = talloc(int, max_num_comm_sboxes);
-   for (i = 0; i < max_num_comm_sboxes; i++)
-      comm_sbox_block_lengths[i] = 1;
-   comm_sbox_displacements = talloc(MPI_Aint, max_num_comm_sboxes);
-   comm_sbox_types = talloc(MPI_Datatype, max_num_comm_sboxes);
-
-   for (r = 0; r < 2; r++)
-   {
-      switch(r)
-      {
-         case 0:
-         pkg_num_comms       = pkg_num_sends;
-         pkg_comm_processes  = pkg_send_processes;
-         comm_sboxes         = send_sboxes;
-         comm_processes      = send_processes;
-         break;
- 
-         case 1:
-         pkg_num_comms       = pkg_num_recvs;
-         pkg_comm_processes  = pkg_recv_processes;
-         comm_sboxes         = recv_sboxes;
-         comm_processes      = recv_processes;
-         break;
-      }
-
-      pkg_comm_types = talloc(MPI_Datatype, pkg_num_comms);
-
-      for(p = 0; p < pkg_num_comms; p++)
-      {
-	 num_comm_sboxes = 0;
-         data_box_offset = 0;
-	 zzz_ForSBoxArrayI(i, comm_sboxes)
-	 {
-	    comm_sbox_array = zzz_SBoxArrayArraySBoxArray(comm_sboxes, i);
-	    data_box = zzz_BoxArrayBox(data_space, i);
-
-	    zzz_ForSBoxI(j, comm_sbox_array)
-	    {
-	       comm_sbox = zzz_SBoxArraySBox(comm_sbox_array, j);
-
-	       if ((zzz_SBoxVolume(comm_sbox) != 0) &&
-                   (comm_processes[i][j] == pkg_comm_processes[p]))
-	       {
-                  zzz_GetSBoxType(comm_sbox, data_box, num_values,
-                                  &comm_sbox_types[num_comm_sboxes]);
-
-                  comm_sbox_displacements[num_comm_sboxes] =
-                     (zzz_BoxIndexRank(data_box, zzz_SBoxIMin(comm_sbox)) +
-                      data_box_offset) * sizeof(double);
-
-		  num_comm_sboxes++;
-	       }
-	    }
-
-            data_box_offset += zzz_BoxVolume(data_box);
-	 }
-
-         MPI_Type_struct(num_comm_sboxes, comm_sbox_block_lengths,
-                         comm_sbox_displacements, comm_sbox_types,
-                         &pkg_comm_types[p]);
-         MPI_Type_commit(&pkg_comm_types[p]);
-
-         for (i = 0; i < num_comm_sboxes; i++)
-            MPI_Type_free(&comm_sbox_types[i]);
-      }
-
-      switch(r)
-      {
-         case 0:
-         pkg_send_types = pkg_comm_types;
-         break;
-
-         case 1:
-         pkg_recv_types = pkg_comm_types;
-         break;
-      }
-   }
-
-   tfree(comm_sbox_block_lengths);
-   tfree(comm_sbox_displacements);
-   tfree(comm_sbox_types);
 
    /*------------------------------------------------------
     * Set up zzz_CommPkg

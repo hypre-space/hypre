@@ -114,16 +114,16 @@ typedef struct
 #define zzz_BoxIndexRank(box, index) \
 ((zzz_IndexX(index) - zzz_BoxIMinX(box)) + \
  ((zzz_IndexY(index) - zzz_BoxIMinY(box)) + \
-  ((zzz_IndexZ(index) - zzz_BoxIMinZ(box)) * \
-   zzz_BoxSizeY(box)) * \
-  zzz_BoxSizeX(box)))
+   ((zzz_IndexZ(index) - zzz_BoxIMinZ(box)) * \
+    zzz_BoxSizeY(box))) * \
+  zzz_BoxSizeX(box))
 
 #define zzz_BoxOffsetDistance(box, index) \
 (zzz_IndexX(index) + \
  (zzz_IndexY(index) + \
   (zzz_IndexZ(index) * \
-   zzz_BoxSizeY(box)) * \
-  zzz_BoxSizeX(box)))
+   zzz_BoxSizeY(box))) * \
+ zzz_BoxSizeX(box))
   
 /*--------------------------------------------------------------------------
  * Accessor macros: zzz_BoxArray

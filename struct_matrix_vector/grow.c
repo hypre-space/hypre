@@ -34,12 +34,13 @@ zzz_GrowBoxByStencil( zzz_Box           *box,
 
    int             s, d;
 
-   shift_box = zzz_DuplicateBox(box);
    stencil_shape = zzz_StructStencilShape(stencil);
 
    shift_box_array = zzz_NewBoxArray();
    for (s = 0; s < zzz_StructStencilSize(stencil); s++)
    {
+      shift_box = zzz_DuplicateBox(box);
+
       if (transpose)
          for (d = 0; d < 3; d++)
          {

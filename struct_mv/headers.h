@@ -18,11 +18,12 @@
 #include "box.h"
 #include "sbox.h"
 
+#include "struct_stencil.h"
+#include "struct_grid.h"
+
 #include "communication.h"
 #include "computation.h"
 
-#include "struct_stencil.h"
-#include "struct_grid.h"
 #include "struct_matrix.h"
 #include "struct_vector.h"
 

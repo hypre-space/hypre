@@ -78,6 +78,8 @@ zzz_PrintBoxArrayData( FILE             *file,
                                  j, data[datai + j*data_box_volume]);
                       }
                    });
+
+      data += num_values*data_box_volume;
    }
 
    zzz_FreeIndex(index);

@@ -10,10 +10,10 @@ zzz_Box *zzz_NewBox P((zzz_Index *imin , zzz_Index *imax ));
 zzz_BoxArray *zzz_NewBoxArray P((void ));
 zzz_BoxArrayArray *zzz_NewBoxArrayArray P((int size ));
 void zzz_FreeBox P((zzz_Box *box ));
-void zzz_FreeBoxArray P((zzz_BoxArray *box_array ));
 void zzz_FreeBoxArrayShell P((zzz_BoxArray *box_array ));
-void zzz_FreeBoxArrayArray P((zzz_BoxArrayArray *box_array_array ));
+void zzz_FreeBoxArray P((zzz_BoxArray *box_array ));
 void zzz_FreeBoxArrayArrayShell P((zzz_BoxArrayArray *box_array_array ));
+void zzz_FreeBoxArrayArray P((zzz_BoxArrayArray *box_array_array ));
 zzz_Box *zzz_DuplicateBox P((zzz_Box *box ));
 zzz_BoxArray *zzz_DuplicateBoxArray P((zzz_BoxArray *box_array ));
 zzz_BoxArrayArray *zzz_DuplicateBoxArrayArray P((zzz_BoxArrayArray *box_array_array ));
@@ -29,9 +29,9 @@ zzz_BoxArray *zzz_SubtractBoxes P((zzz_Box *box1 , zzz_Box *box2 ));
 zzz_BoxArray *zzz_UnionBoxArray P((zzz_BoxArray *boxes ));
 
 /* communication.c */
-void zzz_GetCommInfo P((zzz_BoxArrayArray **send_boxes_ptr , zzz_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr , zzz_StructGrid *grid , zzz_StructStencil *stencil ));
+void zzz_GetCommInfo P((zzz_BoxArrayArray **send_boxes_ptr , zzz_BoxArrayArray **recv_boxes_ptr , int ***send_box_ranks_ptr , int ***recv_box_ranks_ptr , zzz_StructGrid *grid , zzz_StructStencil *stencil ));
 void zzz_GetSBoxType P((zzz_SBox *comm_sbox , zzz_Box *data_box , int num_values , MPI_Datatype *comm_sbox_type ));
-zzz_CommPkg *zzz_NewCommPkg P((zzz_SBoxArrayArray *send_sboxes , zzz_SBoxArrayArray *recv_sboxes , int **send_processes , int **recv_processes , zzz_BoxArray *data_space , int num_values ));
+zzz_CommPkg *zzz_NewCommPkg P((zzz_SBoxArrayArray *send_sboxes , zzz_SBoxArrayArray *recv_sboxes , int **send_sbox_ranks , int **recv_sbox_ranks , zzz_StructGrid *grid , zzz_BoxArray *data_space , int num_values ));
 void zzz_FreeCommPkg P((zzz_CommPkg *comm_pkg ));
 zzz_CommHandle *zzz_NewCommHandle P((int num_requests , MPI_Request *requests ));
 void zzz_FreeCommHandle P((zzz_CommHandle *comm_handle ));
@@ -39,10 +39,10 @@ zzz_CommHandle *zzz_InitializeCommunication P((zzz_CommPkg *comm_pkg , double *d
 void zzz_FinalizeCommunication P((zzz_CommHandle *comm_handle ));
 
 /* computation.c */
-void zzz_GetComputeInfo P((zzz_BoxArrayArray **send_boxes_ptr , zzz_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr , zzz_BoxArrayArray **indt_boxes_ptr , zzz_BoxArrayArray **dept_boxes_ptr , zzz_StructGrid *grid , zzz_StructStencil *stencil ));
-zzz_ComputeInfo *zzz_NewComputeInfo P((zzz_SBoxArrayArray *send_sboxes , zzz_SBoxArrayArray *recv_sboxes , int **send_processes , int **recv_processes , zzz_SBoxArrayArray *indt_sboxes , zzz_SBoxArrayArray *dept_sboxes ));
+void zzz_GetComputeInfo P((zzz_BoxArrayArray **send_boxes_ptr , zzz_BoxArrayArray **recv_boxes_ptr , int ***send_box_ranks_ptr , int ***recv_box_ranks_ptr , zzz_BoxArrayArray **indt_boxes_ptr , zzz_BoxArrayArray **dept_boxes_ptr , zzz_StructGrid *grid , zzz_StructStencil *stencil ));
+zzz_ComputeInfo *zzz_NewComputeInfo P((zzz_SBoxArrayArray *send_sboxes , zzz_SBoxArrayArray *recv_sboxes , int **send_box_ranks , int **recv_box_ranks , zzz_SBoxArrayArray *indt_sboxes , zzz_SBoxArrayArray *dept_sboxes ));
 void zzz_FreeComputeInfo P((zzz_ComputeInfo *compute_info ));
-zzz_ComputePkg *zzz_NewComputePkg P((zzz_ComputeInfo *compute_info , zzz_BoxArray *data_space , int num_values ));
+zzz_ComputePkg *zzz_NewComputePkg P((zzz_ComputeInfo *compute_info , zzz_StructGrid *grid , zzz_BoxArray *data_space , int num_values ));
 void zzz_FreeComputePkg P((zzz_ComputePkg *compute_pkg ));
 zzz_CommHandle *zzz_InitializeIndtComputations P((zzz_ComputePkg *compute_pkg , double *data ));
 void zzz_FinalizeIndtComputations P((zzz_CommHandle *comm_handle ));
@@ -67,10 +67,10 @@ zzz_SBox *zzz_NewSBox P((zzz_Box *box , zzz_Index *stride ));
 zzz_SBoxArray *zzz_NewSBoxArray P((void ));
 zzz_SBoxArrayArray *zzz_NewSBoxArrayArray P((int size ));
 void zzz_FreeSBox P((zzz_SBox *sbox ));
-void zzz_FreeSBoxArray P((zzz_SBoxArray *sbox_array ));
 void zzz_FreeSBoxArrayShell P((zzz_SBoxArray *sbox_array ));
-void zzz_FreeSBoxArrayArray P((zzz_SBoxArrayArray *sbox_array_array ));
+void zzz_FreeSBoxArray P((zzz_SBoxArray *sbox_array ));
 void zzz_FreeSBoxArrayArrayShell P((zzz_SBoxArrayArray *sbox_array_array ));
+void zzz_FreeSBoxArrayArray P((zzz_SBoxArrayArray *sbox_array_array ));
 zzz_SBox *zzz_DuplicateSBox P((zzz_SBox *sbox ));
 zzz_SBoxArray *zzz_DuplicateSBoxArray P((zzz_SBoxArray *sbox_array ));
 zzz_SBoxArrayArray *zzz_DuplicateSBoxArrayArray P((zzz_SBoxArrayArray *sbox_array_array ));

@@ -12,7 +12,7 @@ char malloc_logpath_memory[256];
  *--------------------------------------------------------------------------*/
  
 /*----------------------------------------------------------------------
- * Example 1: (nonsymmetric storage)
+ * Example 2: (symmetric storage)
  *
  *    Standard 5-point laplacian in 2D on a 10 x 7 grid,
  *    ignoring boundary conditions for simplicity.
@@ -35,14 +35,15 @@ char *argv[];
                      
    int                 dim = 2;
                      
-   int                 offsets[5][2] = {{ 0,  0},
+   int                 offsets[4][2] = {{ 0,  0},
                                         {-1,  0},
                                         { 1,  0},
-                                        { 0, -1},
                                         { 0,  1}};
                      
-   double              coeffs[5] = { 4, -1, -1, -1, -1};
+   int                 num_ghost[6] = { 1, 1, 0, 0, 0, 0};
                      
+   double              coeffs[5] = { 4, -1, -1, -1};
+
    zzz_StructGrid     *grid;
    zzz_StructStencil  *stencil;
    zzz_Index         **stencil_shape;
@@ -84,7 +85,9 @@ char *argv[];
    ilower = zzz_NewIndex();
    iupper = zzz_NewIndex();
 
-   P = Q = (int) sqrt(num_procs);
+/*   P = Q = (int) sqrt(num_procs);*/
+   P = num_procs;
+   Q = 1;
    p = myid % P;
    q = (myid - p) / P;
    nx = Nx / P;
@@ -102,6 +105,8 @@ char *argv[];
    zzz_SetStructGridExtents(grid, ilower, iupper);
    if ((p == 1) && (q == 0))
    {
+      ilower2 = zzz_NewIndex();
+      iupper2 = zzz_NewIndex();
       zzz_IndexD(ilower2, 0) = zzz_IndexD(ilower, 0) + nx;
       zzz_IndexD(ilower2, 1) = zzz_IndexD(ilower, 1);
       zzz_IndexD(iupper2, 0) = zzz_IndexD(iupper, 0) + nx;
@@ -115,19 +120,21 @@ char *argv[];
     *-----------------------------------------------------------*/
  
    stencil_shape = ctalloc(zzz_Index *, 5);
-   for (i = 0; i < 5; i++)
+   for (i = 0; i < 4; i++)
    {
       stencil_shape[i] = zzz_NewIndex();
       for (d = 0; d < dim; d++)
          zzz_IndexD(stencil_shape[i], d) = offsets[i][d];
    }
-   stencil = zzz_NewStructStencil(dim, 5, stencil_shape);
+   stencil = zzz_NewStructStencil(dim, 4, stencil_shape);
 
    /*-----------------------------------------------------------
     * Set up the matrix structure
     *-----------------------------------------------------------*/
  
    matrix = zzz_NewStructMatrix(grid, stencil);
+   zzz_StructMatrixSymmetric(matrix) = 1;
+   zzz_SetStructMatrixNumGhost(matrix, num_ghost);
    zzz_InitializeStructMatrix(matrix);
 
    /*-----------------------------------------------------------
@@ -137,37 +144,39 @@ char *argv[];
    index = zzz_NewIndex();
    stride = zzz_NewIndex();
    for (d = 0; d < 3; d++)
-      zzz_IndexD(stride, d) = 5;
-   stencil_indices = ctalloc(int, 5);
-   for (i = 0; i < 5; i++)
+      zzz_IndexD(stride, d) = 4;
+   stencil_indices = ctalloc(int, 4);
+   for (i = 0; i < 4; i++)
       stencil_indices[i] = i;
 
    box = zzz_NewBox(ilower, iupper);
-   values = ctalloc(double, 5*zzz_BoxVolume(box));
+   values = ctalloc(double, 4*zzz_BoxVolume(box));
    zzz_BoxLoop1(box, index,
                 box, zzz_BoxIMin(box), stride, i,
                 {
-                   for (j = 0; j < 5; j++)
-                      values[i+j] = coeffs[j];
+                   for (j = 0; j < 4; j++)
+                      values[i+j] = coeffs[j]*(myid+1);
                 });
-   zzz_SetStructMatrixBoxValues(matrix, box, 5, stencil_indices, values);
+   zzz_SetStructMatrixBoxValues(matrix, box, 4, stencil_indices, values);
    tfree(values);
 
    if ((p == 1) && (q == 0))
    {
       box2 = zzz_NewBox(ilower2, iupper2);
-      values = ctalloc(double, 5*zzz_BoxVolume(box2));
+      values = ctalloc(double, 4*zzz_BoxVolume(box2));
       zzz_BoxLoop1(box2, index,
                    box2, zzz_BoxIMin(box2), stride, i,
                    {
-                      for (j = 0; j < 5; j++)
-                         values[i+j] = coeffs[j];
+                      for (j = 0; j < 4; j++)
+                         values[i+j] = coeffs[j]*(myid+2);
                    });
-      zzz_SetStructMatrixBoxValues(matrix, box2, 5, stencil_indices, values);
+      zzz_SetStructMatrixBoxValues(matrix, box2, 4, stencil_indices, values);
       tfree(values);
    }
 
+   zzz_PrintStructMatrix("zout_matrix_before", matrix, 1);
    zzz_AssembleStructMatrix(matrix);
+   zzz_PrintStructMatrix("zout_matrix_after", matrix, 1);
 
    /*-----------------------------------------------------------
     * Output information about the matrix
@@ -222,8 +231,11 @@ char *argv[];
     * Finalize things
     *-----------------------------------------------------------*/
 
-   zzz_FreeIndex(ilower);
-   zzz_FreeIndex(iupper);
+   zzz_FreeBox(box);
+   if ((p == 1) && (q == 0))
+   {
+      zzz_FreeBox(box2);
+   }
    zzz_FreeIndex(index);
    zzz_FreeIndex(stride);
 

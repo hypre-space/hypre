@@ -152,20 +152,24 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
       stencil_shape = ctalloc(zzz_Index *, 2*user_stencil_size);
       for (i = 0; i < user_stencil_size; i++)
       {
+         stencil_shape[i] = zzz_NewIndex();
          for (d = 0; d < 3; d++)
+         {
             zzz_IndexD(stencil_shape[i], d) =
                zzz_IndexD(user_stencil_shape[i], d);
+         }
       }
 
       /* create symmetric stencil elements and `symm_coeff' */
-      symm_coeff = ctalloc(int, zzz_StructStencilSize(stencil));
+      symm_coeff = ctalloc(int, 2*user_stencil_size);
       stencil_size = user_stencil_size;
       for (i = 0; i < user_stencil_size; i++)
       {
 	 if (!symm_coeff[i])
 	 {
+            /* note: start at i to handle "center" element correctly */
             no_symmetric_stencil_element = 1;
-            for (j = (i + 1); j < user_stencil_size; j++)
+            for (j = i; j < user_stencil_size; j++)
             {
 	       if ( (zzz_IndexX(stencil_shape[j]) ==
                      -zzz_IndexX(stencil_shape[i])  ) &&
@@ -174,7 +178,9 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
                     (zzz_IndexZ(stencil_shape[j]) ==
                      -zzz_IndexZ(stencil_shape[i])  )   )
 	       {
-		  symm_coeff[j] = i;
+                  /* only "off-center" elements have symmetric entries */
+                  if (i != j)
+                     symm_coeff[j] = i;
                   no_symmetric_stencil_element = 0;
 	       }
             }
@@ -182,6 +188,7 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
             if (no_symmetric_stencil_element)
             {
                /* add symmetric stencil element to `stencil' */
+               stencil_shape[stencil_size] = zzz_NewIndex();
                for (d = 0; d < 3; d++)
                {
                   zzz_IndexD(stencil_shape[stencil_size], d) =
@@ -243,7 +250,7 @@ zzz_InitializeStructMatrixShell( zzz_StructMatrix *matrix )
          for (d = 0; d < 3; d++)
          {
             zzz_BoxIMinD(data_box, d) -= num_ghost[2*d];
-            zzz_BoxIMinD(data_box, d) += num_ghost[2*d + 1];
+            zzz_BoxIMaxD(data_box, d) += num_ghost[2*d + 1];
          }
       }
 
@@ -410,20 +417,24 @@ zzz_SetStructMatrixBoxValues( zzz_StructMatrix *matrix,
 {
    int    ierr;
 
+   zzz_BoxArray     *grid_boxes;
+   zzz_Box          *grid_box;
    zzz_BoxArray     *box_array;
    zzz_Box          *box;
-   zzz_BoxArray     *box_a0;
-   zzz_BoxArray     *box_a1;
 
    zzz_BoxArray     *data_space;
    zzz_Box          *data_box;
+   zzz_Index        *data_start;
+   zzz_Index        *data_stride;
+   int               datai;
+   double           *datap;
+
+   zzz_Box          *dval_box;
+   zzz_Index        *dval_start;
+   zzz_Index        *dval_stride;
+   int               dvali;
+
    zzz_Index        *index;
-   zzz_Index        *stride;
-
-   double           *matp;
-   int               mati;
-
-   int               value_index;
 
    int               i, s, d;
 
@@ -431,13 +442,14 @@ zzz_SetStructMatrixBoxValues( zzz_StructMatrix *matrix,
     * Set up `box_array' by intersecting `box' with the grid boxes
     *-----------------------------------------------------------------------*/
 
-   box_a0 = zzz_NewBoxArray();
-   zzz_AppendBox(value_box, box_a0);
-   box_a1 = zzz_StructGridBoxes(zzz_StructMatrixGrid(matrix));
-
-   box_array = zzz_IntersectBoxArrays(box_a0, box_a1);
-
-   zzz_FreeBoxArrayShell(box_a0);
+   box_array = zzz_NewBoxArray();
+   grid_boxes = zzz_StructGridBoxes(zzz_StructMatrixGrid(matrix));
+   zzz_ForBoxI(i, grid_boxes)
+   {
+      grid_box = zzz_BoxArrayBox(grid_boxes, i);
+      box = zzz_IntersectBoxes(value_box, grid_box);
+      zzz_AppendBox(box, box_array);
+   }
 
    /*-----------------------------------------------------------------------
     * Set the matrix coefficients
@@ -445,38 +457,59 @@ zzz_SetStructMatrixBoxValues( zzz_StructMatrix *matrix,
 
    if (box_array)
    {
-      data_space = zzz_StructMatrixDataSpace(matrix);
-
       index = zzz_NewIndex();
 
-      stride = zzz_NewIndex();
-      for (d = 0; d < 3; d++)
-         zzz_IndexD(stride, d) = 1;
+      data_space = zzz_StructMatrixDataSpace(matrix);
+      data_stride = zzz_NewIndex();
+      zzz_IndexD(data_stride, 0) = 1;
+      zzz_IndexD(data_stride, 1) = 1;
+      zzz_IndexD(data_stride, 2) = 1;
+
+      dval_box = zzz_DuplicateBox(value_box);
+      zzz_BoxIMaxD(dval_box, 0) +=
+         (num_stencil_indices - 1)*zzz_BoxSizeD(dval_box, 0);
+      dval_stride = zzz_NewIndex();
+      zzz_IndexD(dval_stride, 0) = num_stencil_indices;
+      zzz_IndexD(dval_stride, 1) = 1;
+      zzz_IndexD(dval_stride, 2) = 1;
+      dval_start = zzz_NewIndex();
 
       zzz_ForBoxI(i, box_array)
       {
          box      = zzz_BoxArrayBox(box_array, i);
          data_box = zzz_BoxArrayBox(data_space, i);
- 
-         for (s = 0; s < num_stencil_indices; s++)
-         {
-            matp = zzz_StructMatrixBoxData(matrix, i, stencil_indices[s]);
 
-            value_index = s;
-            zzz_BoxLoop1(box, index,
-                         data_box, zzz_BoxIMin(box), stride, mati,
-                         {
-                            matp[mati] = values[value_index];
-                            value_index += num_stencil_indices;
-                         });
+         /* if there was an intersection */
+         if (box)
+         {
+            data_start = zzz_BoxIMin(box);
+            for (d = 0; d < 3; d++)
+               zzz_IndexD(dval_start, d) = zzz_IndexD(data_start, d);
+
+            for (s = 0; s < num_stencil_indices; s++)
+            {
+               datap = zzz_StructMatrixBoxData(matrix, i, stencil_indices[s]);
+
+               zzz_BoxLoop2(box, index,
+                            data_box, data_start, data_stride, datai,
+                            dval_box, dval_start, dval_stride, dvali,
+                            {
+                               datap[datai] = values[dvali];
+                            });
+
+               zzz_IndexD(dval_start, 0) ++;
+            }
          }
       }
 
-      zzz_FreeIndex(stride);
+      zzz_FreeBox(dval_box);
+      zzz_FreeIndex(dval_start);
+      zzz_FreeIndex(dval_stride);
+      zzz_FreeIndex(data_stride);
       zzz_FreeIndex(index);
-
-      zzz_FreeBoxArray(box_array);
    }
+
+   zzz_FreeBoxArray(box_array);
 
    return(ierr);
 }
@@ -500,11 +533,11 @@ zzz_AssembleStructMatrix( zzz_StructMatrix *matrix )
 
    zzz_BoxArrayArray   *send_boxes;
    zzz_BoxArrayArray   *recv_boxes;
-   int                **send_processes;
-   int                **recv_processes;
 
    zzz_SBoxArrayArray  *send_sboxes;
    zzz_SBoxArrayArray  *recv_sboxes;
+   int                **send_sbox_ranks;
+   int                **recv_sbox_ranks;
    int                  num_values;
    zzz_CommPkg         *comm_pkg;
 
@@ -552,7 +585,7 @@ zzz_AssembleStructMatrix( zzz_StructMatrix *matrix )
       /* Set up the CommPkg */
 
       zzz_GetCommInfo(&send_boxes, &recv_boxes,
-                      &send_processes, &recv_processes,
+                      &send_sbox_ranks, &recv_sbox_ranks,
                       zzz_StructMatrixGrid(matrix),
                       comm_stencil);
 
@@ -563,20 +596,21 @@ zzz_AssembleStructMatrix( zzz_StructMatrix *matrix )
       if (zzz_StructMatrixSymmetric(matrix))
          num_values = (num_values + 1) / 2;
       comm_pkg = zzz_NewCommPkg(send_sboxes, recv_sboxes,
-                                send_processes, recv_processes,
+                                send_sbox_ranks, recv_sbox_ranks,
+                                zzz_StructMatrixGrid(matrix),
                                 zzz_StructMatrixDataSpace(matrix),
                                 num_values);
 
       zzz_StructMatrixCommPkg(matrix) = comm_pkg;
 
       zzz_ForSBoxArrayI(i, send_sboxes)
-         tfree(send_processes[i]);
-      tfree(send_processes);
+         tfree(send_sbox_ranks[i]);
+      tfree(send_sbox_ranks);
       zzz_FreeSBoxArrayArray(send_sboxes);
 
       zzz_ForSBoxArrayI(i, recv_sboxes)
-         tfree(recv_processes[i]);
-      tfree(recv_processes);
+         tfree(recv_sbox_ranks[i]);
+      tfree(recv_sbox_ranks);
       zzz_FreeSBoxArrayArray(recv_sboxes);
 
       zzz_FreeStructStencil(comm_stencil);
@@ -671,10 +705,12 @@ zzz_PrintStructMatrix( char             *filename,
    num_values = zzz_StructStencilSize(stencil);
    if (zzz_StructMatrixSymmetric(matrix))
    {
+      symm_coeff = zzz_StructMatrixSymmCoeff(matrix);
+
       j = 0;
       for (i = 0; i < zzz_StructStencilSize(stencil); i++)
       {
-         if (!symm_coeff)
+         if (!symm_coeff[i])
          {
             fprintf(file, "%d: %d %d %d\n", j++,
                     zzz_IndexX(shape[i]),
@@ -704,9 +740,9 @@ zzz_PrintStructMatrix( char             *filename,
    data_space = zzz_StructMatrixDataSpace(matrix);
  
    if (all)
-      boxes = zzz_StructGridBoxes(zzz_StructMatrixGrid(matrix));
-   else
       boxes = data_space;
+   else
+      boxes = zzz_StructGridBoxes(zzz_StructMatrixGrid(matrix));
  
    fprintf(file, "\nData:\n");
    zzz_PrintBoxArrayData(file, boxes, data_space, num_values,
