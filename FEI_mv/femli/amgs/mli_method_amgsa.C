@@ -1058,7 +1058,6 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim,
          for ( j = 0 ; j < nullspaceLen_; j++ ) 
             nullspaceVec_[i*nullspaceLen_+j] *= scalings[j];
    }
-
    if ( printNullSpace_ == 1 )
    {
       for ( i = 0 ; i < nullspaceDim_; i++ ) 

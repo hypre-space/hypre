@@ -207,7 +207,8 @@ int MLI_Method_AMGRS::setup( MLI *mli )
 {
    int             k, level, irow, local_nrows, mypid, nprocs;
    int             num_nodes, one=1, global_nrows, *coarse_partition;
-   int             *CF_markers, coarse_nrows, *dof_array, *cdof_array;
+   int             *CF_markers, coarse_nrows, *dof_array, *cdof_array=NULL;
+   int             reduceArray1[2], reduceArray2[2], zeroNRows;
    double          start_time, elapsed_time;
    char            param_string[100], *targv[10];
    MLI_Matrix      *mli_Pmat, *mli_Rmat, *mli_APmat, *mli_Amat, *mli_cAmat;
@@ -217,7 +218,9 @@ int MLI_Method_AMGRS::setup( MLI *mli )
    MLI_Function    *func_ptr;
    hypre_ParCSRMatrix *hypreA, *hypreS, *hypreAT, *hypreST, *hypreP, *hypreR;
    hypre_ParCSRMatrix *hypreRT;
-// hypre_ParCSRMatrix *hypreAP, *hypreCA;
+#if 0 
+   hypre_ParCSRMatrix *hypreAP, *hypreCA;
+#endif
 
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_Method_AMGRS::setup begins...\n");
@@ -266,13 +269,14 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       }
       if ( level == 0 )
       {
-         dof_array = new int[local_nrows];
+         if ( local_nrows > 0 ) dof_array = new int[local_nrows];
+         else                   dof_array = NULL;
          for ( irow = 0; irow < local_nrows; irow+=nodeDOF_ )
             for ( k = 0; k < nodeDOF_; k++ ) dof_array[irow+k] = k;
       }
       else
       {
-         if ( level > 0 ) delete [] dof_array;
+         if ( level > 0 && dof_array != NULL ) delete [] dof_array;
          dof_array = cdof_array;
       }
       hypre_BoomerAMGCreateS(hypreA, threshold_, maxRowSum_, nodeDOF_,
@@ -315,8 +319,12 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          for ( irow = 0; irow < local_nrows; irow++ )
             if ( CF_markers[irow] == 1 ) coarse_nrows++;
       }
+      reduceArray1[0] = coarse_nrows;
+      reduceArray1[1] = local_nrows;
+      MPI_Allreduce(reduceArray1, reduceArray2, 2, MPI_INT, MPI_SUM, comm);
       if ( outputLevel_ > 1 && mypid == 0 )
-         printf("\tMLI_Method_AMGRS::setup - # C dof = %d\n",coarse_nrows);
+         printf("\tMLI_Method_AMGRS::setup - # C dof = %d(%d)\n",
+                reduceArray2[0],reduceArray2[1]);
 
       /* ------see if the coarsest level is reached--------------------- */
 
@@ -327,8 +335,26 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       for ( irow = 2; irow < nprocs+1; irow++ )
          coarse_partition[irow] += coarse_partition[irow-1];
 
+      /* ------if nonsymmetric, need to make sure local_nrows > 0 ------ */
+      /* ------ or the matrixTranspose function will give problems ----- */
+
+      if ( symmetric_ == 0 )
+      {
+         zeroNRows = 0;
+         for ( irow = 0; irow < nprocs; irow++ )
+         {
+            if ( (coarse_partition[irow+1]-coarse_partition[irow]) <= 0 )
+            {
+               zeroNRows = 1;
+               break;
+            }
+         }
+      }
+          
+      /* ------ wrap up creating the multigrid hierarchy --------------- */
+
       if ( coarse_partition[nprocs] < minCoarseSize_ ||
-           coarse_partition[nprocs] == global_nrows ) 
+           coarse_partition[nprocs] == global_nrows || zeroNRows == 1 ) 
       {
          if ( symmetric_ == 0 )
          {
@@ -336,8 +362,8 @@ int MLI_Method_AMGRS::setup( MLI *mli )
             hypre_ParCSRMatrixDestroy(hypreST);
          }
          hypre_TFree( coarse_partition );
-         hypre_TFree( CF_markers );
-         hypre_ParCSRMatrixDestroy(hypreS);
+         if ( CF_markers != NULL ) hypre_TFree( CF_markers );
+         if ( hypreS != NULL ) hypre_ParCSRMatrixDestroy(hypreS);
          break;
       }
       k = (int) (global_nrows * 0.75);
@@ -346,7 +372,8 @@ int MLI_Method_AMGRS::setup( MLI *mli )
 
       /* ------create new dof array for coarse grid--------------------- */
 
-      cdof_array = new int[coarse_nrows];
+      if ( coarse_nrows > 0 ) cdof_array = new int[coarse_nrows];
+      else                    cdof_array = NULL;
       coarse_nrows = 0;
       for ( irow = 0; irow < local_nrows; irow++ )
       {
@@ -365,7 +392,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       mli_Pmat = new MLI_Matrix( (void *) hypreP, param_string, func_ptr );
       mli->setProlongation(level+1, mli_Pmat);
       delete func_ptr;
-      hypre_ParCSRMatrixDestroy(hypreS);
+      if ( hypreS != NULL ) hypre_ParCSRMatrixDestroy(hypreS);
 
       /* ------build and set the restriction operator, if needed-------- */
 
@@ -378,8 +405,8 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          hypre_ParCSRMatrixTranspose( hypreRT, &hypreR, one );
          func_ptr = new MLI_Function();
          MLI_Utils_HypreParCSRMatrixGetDestroyFunc(func_ptr);
-         sprintf(param_string, "HYPRE_ParCSR" ); 
-         mli_Rmat = new MLI_Matrix( (void *) hypreR, param_string, func_ptr );
+         sprintf(param_string, "HYPRE_ParCSRT" ); 
+         mli_Rmat = new MLI_Matrix( (void *) hypreRT, param_string, func_ptr );
          mli->setRestriction(level, mli_Rmat);
          delete func_ptr;
          delete mli_ATmat;
@@ -392,7 +419,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          mli_Rmat = new MLI_Matrix(mli_Pmat->getMatrix(), param_string, NULL);
          mli->setRestriction(level, mli_Rmat);
       }
-      hypre_TFree( CF_markers );
+      if ( CF_markers != NULL ) hypre_TFree( CF_markers );
 
       start_time = MLI_Utils_WTime();
 
@@ -405,19 +432,22 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       }
       else
       {
-         MLI_Matrix_MatMatMult(mli_Amat, mli_Pmat, &mli_APmat);
-         MLI_Matrix_MatMatMult(mli_Rmat, mli_APmat, &mli_cAmat);
-         delete mli_APmat;
-//hypreP  = (hypre_ParCSRMatrix *) mli_Pmat->getMatrix();
-//hypreR  = (hypre_ParCSRMatrix *) mli_Rmat->getMatrix();
-//hypreAP = hypre_ParMatmul( hypreA, hypreP );
-//hypreCA = hypre_ParMatmul( hypreR, hypreAP );
-//hypre_ParCSRMatrixDestroy( hypreAP );
-//func_ptr = new MLI_Function();
-//MLI_Utils_HypreParCSRMatrixGetDestroyFunc(func_ptr);
-//sprintf(param_string, "HYPRE_ParCSR" ); 
-//mli_cAmat = new MLI_Matrix((void *) hypreCA, param_string, func_ptr);
-//delete func_ptr;
+#if 1
+           MLI_Matrix_MatMatMult(mli_Amat, mli_Pmat, &mli_APmat);
+           MLI_Matrix_MatMatMult(mli_Rmat, mli_APmat, &mli_cAmat);
+           delete mli_APmat;
+#else
+           hypreP  = (hypre_ParCSRMatrix *) mli_Pmat->getMatrix();
+           hypreR  = (hypre_ParCSRMatrix *) mli_Rmat->getMatrix();
+           hypreAP = hypre_ParMatmul( hypreA, hypreP );
+           hypreCA = hypre_ParMatmul( hypreR, hypreAP );
+           hypre_ParCSRMatrixDestroy( hypreAP );
+           func_ptr = new MLI_Function();
+           MLI_Utils_HypreParCSRMatrixGetDestroyFunc(func_ptr);
+           sprintf(param_string, "HYPRE_ParCSR" ); 
+           mli_cAmat = new MLI_Matrix((void *) hypreCA, param_string, func_ptr);
+           delete func_ptr;
+#endif
       }
       mli->setSystemMatrix(level+1, mli_cAmat);
       elapsed_time = (MLI_Utils_WTime() - start_time);
@@ -440,7 +470,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       smoother_ptr->setup(mli_Amat);
       mli->setSmoother( level, MLI_SMOOTHER_BOTH, smoother_ptr );
    }
-   delete [] dof_array;
+   if ( dof_array != NULL ) delete [] dof_array;
 
    /* ------set the coarse grid solver---------------------------------- */
 
