@@ -134,6 +134,10 @@ main( int   argc,
    int      relax_default;
    double  *relax_weight; 
    double   tol = 1.0e-6;
+   array1int Num_Grid_Sweeps;
+   array1int Grid_Relax_Type;
+   array2int Grid_Relax_Points;
+   array1double Relax_Weight;
 
    /* parameters for PILUT */
    double   drop_tol = -1;
@@ -340,6 +344,21 @@ main( int   argc,
    grid_relax_points = hypre_CTAlloc(int *,4);
    relax_weight      = hypre_CTAlloc(double, max_levels);
 
+   Num_Grid_Sweeps.lower[0] = 0;
+   Num_Grid_Sweeps.upper[0] = 4;
+   Num_Grid_Sweeps.data = num_grid_sweeps;
+   Grid_Relax_Type.lower[0] = 0;
+   Grid_Relax_Type.upper[0] = 4;
+   Grid_Relax_Type.data = grid_relax_type;
+   Grid_Relax_Points.lower[0] = 0;
+   Grid_Relax_Points.upper[0] = 4;
+   Grid_Relax_Points.lower[1] = 0;
+   Grid_Relax_Points.upper[1] = 4;
+   Grid_Relax_Points.data = hypre_CTAlloc(int,4*4);
+   Relax_Weight.lower[0] = 0;
+   Relax_Weight.upper[0] = 4;
+   Relax_Weight.data = relax_weight;
+
    for (i=0; i < max_levels; i++)
 	relax_weight[i] = 1.0;
 
@@ -400,6 +419,12 @@ main( int   argc,
    grid_relax_points[3] = hypre_CTAlloc(int, 1);
    grid_relax_points[3][0] = 0;
    }
+   for ( i=0; i<4; ++i )
+      for ( j=0; j<4; ++j )
+         Grid_Relax_Points.data[i+4*j] = grid_relax_points[i][j];
+
+
+
    /* defaults for GMRES */
 
    k_dim = 5;
@@ -856,20 +881,23 @@ main( int   argc,
       Hypre_ParAMG_SetDoubleParameter( AMG_Solver, "strong threshold",
                                        strong_threshold );
       Hypre_ParAMG_SetDoubleParameter( AMG_Solver, "trunc factor", trunc_factor );
+      Hypre_ParAMG_SetIntParameter( AMG_Solver, "logging", ioutdat );
+      Hypre_ParAMG_SetStringParameter( AMG_Solver, "log file name",
+                                       "driver.out.log" );
       Hypre_ParAMG_SetIntParameter( AMG_Solver, "cycle type", cycle_type );
+      Hypre_ParAMG_SetIntArrayParameter( AMG_Solver, "num grid sweeps",
+                                         Num_Grid_Sweeps );
+      Hypre_ParAMG_SetIntArrayParameter( AMG_Solver, "grid relax type",
+                                         Grid_Relax_Type );
+      Hypre_ParAMG_SetDoubleArrayParameter( AMG_Solver, "relax weight",
+                                            Relax_Weight );
+      Hypre_ParAMG_SetIntArray2Parameter( AMG_Solver, "grid relax points",
+                                          Grid_Relax_Points );
       Hypre_ParAMG_SetIntParameter( AMG_Solver, "max levels", max_levels );
       Hypre_ParAMG_SetIntParameter( AMG_Solver, "debug", debug_flag );
 
-/* direct calls where Babel interface isn't there ...
- >>>>> TO DO: fix Babel interface   */
-      amg_solver = *(AMG_Solver->d_table->Hsolver);
-      HYPRE_ParAMGSetLogging(amg_solver, ioutdat, "driver.out.log"); 
-      HYPRE_ParAMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
-      HYPRE_ParAMGSetGridRelaxType(amg_solver, grid_relax_type);
-      HYPRE_ParAMGSetRelaxWeight(amg_solver, relax_weight);
-      HYPRE_ParAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
-
 /*
+      amg_solver = *(AMG_Solver->d_table->Hsolver);
       HYPRE_ParAMGCreate(&amg_solver); 
       HYPRE_ParAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
       HYPRE_ParAMGSetMeasureType(amg_solver, measure_type);
@@ -965,19 +993,22 @@ main( int   argc,
          Hypre_ParAMG_SetDoubleParameter( AMG_Solver, "strong threshold",
                                           strong_threshold );
          Hypre_ParAMG_SetIntParameter( AMG_Solver, "max iter", 1 );
+         Hypre_ParAMG_SetStringParameter( AMG_Solver, "log file name",
+                                          "driver.out.log" );
          Hypre_ParAMG_SetIntParameter( AMG_Solver, "cycle type", cycle_type );
+         Hypre_ParAMG_SetIntArrayParameter( AMG_Solver, "num grid sweeps",
+                                            Num_Grid_Sweeps );
+         Hypre_ParAMG_SetIntArrayParameter( AMG_Solver, "grid relax type",
+                                            Grid_Relax_Type );
+         Hypre_ParAMG_SetDoubleArrayParameter( AMG_Solver, "relax weight",
+                                               Relax_Weight );
+         Hypre_ParAMG_SetIntArray2Parameter( AMG_Solver, "grid relax points",
+                                             Grid_Relax_Points );
          Hypre_ParAMG_SetIntParameter( AMG_Solver, "max levels", max_levels );
          Hypre_ParAMG_SetIntParameter( AMG_Solver, "debug", debug_flag );
 
-/* direct calls where Babel interface isn't there ...
- >>>>> TO DO: fix Babel interface   */
-         amg_solver = *(AMG_Solver->d_table->Hsolver);
-         HYPRE_ParAMGSetLogging(amg_solver, ioutdat, "driver.out.log"); 
-         HYPRE_ParAMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
-         HYPRE_ParAMGSetGridRelaxType(amg_solver, grid_relax_type);
-         HYPRE_ParAMGSetRelaxWeight(amg_solver, relax_weight);
-         HYPRE_ParAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
 /*
+         amg_solver = *(AMG_Solver->d_table->Hsolver);
          HYPRE_ParAMGCreate(&pcg_precond); 
          HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
