@@ -67,8 +67,7 @@ typedef struct
 /* setup params */
 		  		      
 #define hypre_ParAMGDataMaxLevels(amg_data) ((amg_data)->max_levels)
-#define hypre_ParAMGDataStrongThreshold(amg_data) 
-                                      ((amg_data)->strong_threshold)
+#define hypre_ParAMGDataStrongThreshold(amg_data) ((amg_data)->strong_threshold)
 #define hypre_ParAMGDataInterpType(amg_data) ((amg_data)->interp_type)
 
 /* solve params */
@@ -78,8 +77,7 @@ typedef struct
 #define hypre_ParAMGDataTol(amg_data) ((amg_data)->tol)
 #define hypre_ParAMGDataNumGridSweeps(amg_data) ((amg_data)->num_grid_sweeps)
 #define hypre_ParAMGDataGridRelaxType(amg_data) ((amg_data)->grid_relax_type)
-#define hypre_ParAMGDataGridRelaxPoints(amg_data) 
-                                      ((amg_data)->grid_relax_points)
+#define hypre_ParAMGDataGridRelaxPoints(amg_data) ((amg_data)->grid_relax_points)
 
 /* problem data parameters */
 #define  hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
@@ -93,11 +91,9 @@ typedef struct
 #define hypre_ParAMGDataCFMarkerArray(amg_data) ((amg_data)-> CF_marker_array)
 #define hypre_ParAMGDataAArray(amg_data) ((amg_data)->A_array)
 #define hypre_ParAMGDataPArray(amg_data) ((amg_data)->P_array)
-#define hypre_ParAMGDataUnknownMapArray(amg_data)
-                                      ((amg_data)->unknown_map_array) 
+#define hypre_ParAMGDataUnknownMapArray(amg_data) ((amg_data)->unknown_map_array) 
 #define hypre_ParAMGDataPointMapArray(amg_data) ((amg_data)->point_map_array) 
-#define hypre_ParAMGDataVatPointArray(amg_data) 
-                                    ((amg_data)->v_at_point_array)
+#define hypre_ParAMGDataVatPointArray(amg_data) ((amg_data)->v_at_point_array)
 #define hypre_ParAMGDataNumLevels(amg_data) ((amg_data)->num_levels)	
       
 /* data generated in the solve phase */
