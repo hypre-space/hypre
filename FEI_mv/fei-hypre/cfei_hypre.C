@@ -116,6 +116,25 @@ extern "C" int HYPRE_LSC_MappedMatrixLoad(LinSysCore* lsc, int row,
 }
 
 /******************************************************************************/
+/* function for getting the version number                                    */
+/*----------------------------------------------------------------------------*/
+
+extern "C" char *HYPRE_LSC_GetVersion(LinSysCore* lsc)
+{
+   char *version;
+
+   if (lsc == NULL) return(NULL);
+
+   HYPRE_LinSysCore* linSys = (HYPRE_LinSysCore*)(lsc->lsc_);
+
+   if (linSys == NULL) return(NULL);
+
+   version = linSys->getVersion();
+
+   return(version);
+}
+
+/******************************************************************************/
 /******************************************************************************/
 /* functions for interfacing to a finite element object                       */
 /******************************************************************************/

@@ -20,6 +20,8 @@ int HYPRE_LSC_EndMappedMatrixLoad(LinSysCore* lsc);
 
 int HYPRE_LSC_MappedMatrixLoad(LinSysCore* lsc, int row, int col, double val);
 
+char *HYPRE_LSC_GetVersion(LinSysCore* lsc);
+
 int HYPRE_LSC_GetFEGridObject(LinSysCore* lsc, void **object);
 
 int HYPRE_FEGrid_beginInitElemSet(void *grid, int nElems, int *gid);
