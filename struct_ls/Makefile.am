@@ -39,6 +39,8 @@ FILES = \
  pfmg_setup.c\
  pfmg_setup_interp.c\
  pfmg_setup_rap.c\
+ pfmg_setup_rap5.c\
+ pfmg_setup_rap7.c\
  pfmg_solve.c\
  point_relax.c\
  semi_interp.c\
