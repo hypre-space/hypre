@@ -686,7 +686,7 @@ then
             CFLAGS="-D_ALL_SOURCE -g"
             ;;
           powerpc-ibm-aix*)
-            CFLAGS="-g -qstrict -qmaxmem=8192"
+            CFLAGS="-g -qstrict"
             if test "$casc_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -qsmp=omp"
             fi
@@ -752,7 +752,7 @@ then
             CXXFLAGS="-D_ALL_SOURCE -g"
             ;;
           powerpc-ibm-aix*)
-            CXXFLAGS="-g -qstrict -qmaxmem=8192"
+            CXXFLAGS="-g -qstrict"
             if test "$casc_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -qsmp=omp"
             fi
