@@ -57,6 +57,7 @@ hypre_SMGSolve( void               *smg_vdata,
 
    double                tol             = (smg_data -> tol);
    int                   max_iter        = (smg_data -> max_iter);
+   int                   rel_change      = (smg_data -> rel_change);
    int                   num_levels      = (smg_data -> num_levels);
    int                   num_pre_relax   = (smg_data -> num_pre_relax);
    int                   num_post_relax  = (smg_data -> num_post_relax);
@@ -67,6 +68,7 @@ hypre_SMGSolve( void               *smg_vdata,
    hypre_StructVector  **x_l             = (smg_data -> x_l);
    hypre_StructVector  **r_l             = (smg_data -> r_l);
    hypre_StructVector  **e_l             = (smg_data -> e_l);
+   hypre_StructVector  **tb_l            = (smg_data -> tb_l);
    void                **relax_data_l    = (smg_data -> relax_data_l);
    void                **residual_data_l = (smg_data -> residual_data_l);
    void                **restrict_data_l = (smg_data -> restrict_data_l);
@@ -76,6 +78,7 @@ hypre_SMGSolve( void               *smg_vdata,
    double               *rel_norms       = (smg_data -> rel_norms);
 
    double                b_dot_b, r_dot_r, eps;
+   double                xx_dot_xx, x_dot_x;
                     
    int                   i, l;
                     
@@ -139,7 +142,17 @@ hypre_SMGSolve( void               *smg_vdata,
          }
 
          if (r_dot_r < eps)
-            break;
+         {
+            if ((rel_change) && (i > 0))
+            {
+               if ((xx_dot_xx/x_dot_x) < (eps/b_dot_b))
+                  break;
+            }
+            else
+            {
+               break;
+            }
+         }
       }
 
       for (l = 0; l <= (num_levels - 2); l++)
@@ -185,7 +198,21 @@ hypre_SMGSolve( void               *smg_vdata,
 
       for (l = (num_levels - 2); l >= 0; l--)
       {
+         /* part of convergence check */
+         if ((l == 0) && (tol > 0.0) && (rel_change))
+         {
+            /* store x in tb) */
+            hypre_StructCopy(x_l[0], tb_l[0]);
+         }
          hypre_SMGIntAdd(intadd_data_l[l], PT_l[l], x_l[l+1], e_l[l], x_l[l]);
+         /* part of convergence check */
+         if ((l == 0) && (tol > 0.0) && (rel_change))
+         {
+            /* compute x_i+1 - x_i, (note: x_i stored in tb) */
+            hypre_StructAxpy(-1.0, x_l[0], tb_l[0]);
+            xx_dot_xx = hypre_StructInnerProd(tb_l[0], tb_l[0]);
+            x_dot_x = hypre_StructInnerProd(x_l[0], x_l[0]);
+         }
 #if 0
          /* for debugging purposes */
          if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)

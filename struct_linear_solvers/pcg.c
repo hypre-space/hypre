@@ -45,6 +45,7 @@ typedef struct
    double   tol;
    int      max_iter;
    int      two_norm;
+   int      rel_change;
 
    void    *A;
    void    *p;
@@ -116,6 +117,7 @@ hypre_PCGInitialize( )
    (pcg_data -> tol)          = 1.0e-06;
    (pcg_data -> max_iter)     = 1000;
    (pcg_data -> two_norm)     = 0;
+   (pcg_data -> rel_change)   = 0;
    (pcg_data -> matvec_data)  = NULL;
    (pcg_data -> precond)       = hypre_PCGIdentity;
    (pcg_data -> precond_setup) = hypre_PCGIdentitySetup;
@@ -231,6 +233,7 @@ hypre_PCGSolve( void *pcg_vdata,
    double          tol          = (pcg_data -> tol);
    int             max_iter     = (pcg_data -> max_iter);
    int             two_norm     = (pcg_data -> two_norm);
+   int             rel_change   = (pcg_data -> rel_change);
    void           *p            = (pcg_data -> p);
    void           *s            = (pcg_data -> s);
    void           *r            = (pcg_data -> r);
@@ -244,6 +247,7 @@ hypre_PCGSolve( void *pcg_vdata,
    double          alpha, beta;
    double          gamma, gamma_old;
    double          bi_prod, i_prod, eps;
+   double          pi_prod, xi_prod;
                 
    int             i = 0;
    int             ierr = 0;
@@ -252,20 +256,20 @@ hypre_PCGSolve( void *pcg_vdata,
     * Start pcg solve
     *-----------------------------------------------------------------------*/
 
+   /* compute eps */
    if (two_norm)
    {
-      /* eps = (tol^2)*<b,b> */
+      /* bi_prod = <b,b> */
       bi_prod = hypre_PCGInnerProd(b, b);
-      eps = (tol*tol)*bi_prod;
    }
    else
    {
-      /* eps = (tol^2)*<C*b,b> */
+      /* bi_prod = <C*b,b> */
       hypre_PCGClearVector(p);
       precond(precond_data, A, b, p);
       bi_prod = hypre_PCGInnerProd(p, b);
-      eps = (tol*tol)*bi_prod;
    }
+   eps = (tol*tol)*bi_prod;
 
    /* r = b - Ax */
    hypre_PCGCopyVector(b, r);
@@ -333,7 +337,19 @@ hypre_PCGSolve( void *pcg_vdata,
 
       /* check for convergence */
       if (i_prod < eps)
-	 break;
+      {
+         if (rel_change)
+         {
+            pi_prod = hypre_PCGInnerProd(p,p);
+            xi_prod = hypre_PCGInnerProd(x,x);
+            if ((alpha*alpha*pi_prod/xi_prod) < (eps/bi_prod))
+               break;
+         }
+         else
+         {
+            break;
+         }
+      }
 
       /* beta = gamma / gamma_old */
       beta = gamma / gamma_old;
@@ -425,6 +441,22 @@ hypre_PCGSetTwoNorm( void *pcg_vdata,
    int            ierr = 0;
  
    (pcg_data -> two_norm) = two_norm;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PCGSetRelChange
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PCGSetRelChange( void *pcg_vdata,
+                       int   rel_change  )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+ 
+   (pcg_data -> rel_change) = rel_change;
  
    return ierr;
 }

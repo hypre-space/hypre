@@ -239,6 +239,7 @@ char *argv[];
       smg_solver = HYPRE_StructSMGInitialize(MPI_COMM_WORLD);
       HYPRE_StructSMGSetMemoryUse(smg_solver, 0);
       HYPRE_StructSMGSetMaxIter(smg_solver, 50);
+      HYPRE_StructSMGSetRelChange(smg_solver, 0);
       HYPRE_StructSMGSetTol(smg_solver, 1.0e-06);
       HYPRE_StructSMGSetNumPreRelax(smg_solver, 1);
       HYPRE_StructSMGSetNumPostRelax(smg_solver, 1);
@@ -277,6 +278,7 @@ char *argv[];
       HYPRE_StructPCGSetMaxIter(pcg_solver, 50);
       HYPRE_StructPCGSetTol(pcg_solver, 1.0e-06);
       HYPRE_StructPCGSetTwoNorm(pcg_solver, 1);
+      HYPRE_StructPCGSetRelChange(pcg_solver, 0);
       HYPRE_StructPCGSetLogging(pcg_solver, 0);
 
       if (solver_id == 1)

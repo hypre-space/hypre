@@ -57,12 +57,13 @@ int HYPRE_StructPCGSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , H
 int HYPRE_StructPCGSetTol P((HYPRE_StructSolver solver , double tol ));
 int HYPRE_StructPCGSetMaxIter P((HYPRE_StructSolver solver , int max_iter ));
 int HYPRE_StructPCGSetTwoNorm P((HYPRE_StructSolver solver , int two_norm ));
+int HYPRE_StructPCGSetRelChange P((HYPRE_StructSolver solver , int rel_change ));
 int HYPRE_StructPCGSetPrecond P((HYPRE_StructSolver solver , int (*precond )(), int (*precond_setup )(), void *precond_data ));
 int HYPRE_StructPCGSetLogging P((HYPRE_StructSolver solver , int logging ));
 int HYPRE_StructPCGGetNumIterations P((HYPRE_StructSolver solver , int *num_iterations ));
 int HYPRE_StructPCGGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));
 int HYPRE_StructDiagScaleSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector y , HYPRE_StructVector x ));
-int HYPRE_StructDiagScale P((HYPRE_StructSolver solver , HYPRE_StructMatrix vA , HYPRE_StructVector vy , HYPRE_StructVector vx ));
+int HYPRE_StructDiagScale P((HYPRE_StructSolver solver , HYPRE_StructMatrix HA , HYPRE_StructVector Hy , HYPRE_StructVector Hx ));
 
 /* HYPRE_struct_smg.c */
 HYPRE_StructSolver HYPRE_StructSMGInitialize P((MPI_Comm comm ));
@@ -72,6 +73,7 @@ int HYPRE_StructSMGSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , H
 int HYPRE_StructSMGSetMemoryUse P((HYPRE_StructSolver solver , int memory_use ));
 int HYPRE_StructSMGSetTol P((HYPRE_StructSolver solver , double tol ));
 int HYPRE_StructSMGSetMaxIter P((HYPRE_StructSolver solver , int max_iter ));
+int HYPRE_StructSMGSetRelChange P((HYPRE_StructSolver solver , int rel_change ));
 int HYPRE_StructSMGSetZeroGuess P((HYPRE_StructSolver solver ));
 int HYPRE_StructSMGSetNumPreRelax P((HYPRE_StructSolver solver , int num_pre_relax ));
 int HYPRE_StructSMGSetNumPostRelax P((HYPRE_StructSolver solver , int num_post_relax ));
@@ -107,15 +109,16 @@ int main P((int argc , char *argv []));
 int hypre_Log2 P((int p ));
 
 /* pcg.c */
-void *hypre_PCGInitialize P((void ));
 int hypre_PCGIdentitySetup P((void *vdata , void *A , void *b , void *x ));
 int hypre_PCGIdentity P((void *vdata , void *A , void *b , void *x ));
+void *hypre_PCGInitialize P((void ));
 int hypre_PCGFinalize P((void *pcg_vdata ));
 int hypre_PCGSetup P((void *pcg_vdata , void *A , void *b , void *x ));
 int hypre_PCGSolve P((void *pcg_vdata , void *A , void *b , void *x ));
 int hypre_PCGSetTol P((void *pcg_vdata , double tol ));
 int hypre_PCGSetMaxIter P((void *pcg_vdata , int max_iter ));
 int hypre_PCGSetTwoNorm P((void *pcg_vdata , int two_norm ));
+int hypre_PCGSetRelChange P((void *pcg_vdata , int rel_change ));
 int hypre_PCGSetPrecond P((void *pcg_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data ));
 int hypre_PCGSetLogging P((void *pcg_vdata , int logging ));
 int hypre_PCGGetNumIterations P((void *pcg_vdata , int *num_iterations ));
@@ -142,6 +145,7 @@ int hypre_SMGFinalize P((void *smg_vdata ));
 int hypre_SMGSetMemoryUse P((void *smg_vdata , int memory_use ));
 int hypre_SMGSetTol P((void *smg_vdata , double tol ));
 int hypre_SMGSetMaxIter P((void *smg_vdata , int max_iter ));
+int hypre_SMGSetRelChange P((void *smg_vdata , int rel_change ));
 int hypre_SMGSetZeroGuess P((void *smg_vdata ));
 int hypre_SMGSetNumPreRelax P((void *smg_vdata , int num_pre_relax ));
 int hypre_SMGSetNumPostRelax P((void *smg_vdata , int num_post_relax ));

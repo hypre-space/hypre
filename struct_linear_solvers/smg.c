@@ -32,6 +32,7 @@ hypre_SMGInitialize( MPI_Comm  comm )
    (smg_data -> memory_use) = 0;
    (smg_data -> tol)        = 1.0e-06;
    (smg_data -> max_iter)   = 200;
+   (smg_data -> rel_change) = 0;
    (smg_data -> zero_guess) = 0;
    (smg_data -> max_levels) = 0;
    (smg_data -> num_pre_relax)  = 1;
@@ -158,6 +159,22 @@ hypre_SMGSetMaxIter( void *smg_vdata,
    int            ierr = 0;
  
    (smg_data -> max_iter) = max_iter;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SMGSetRelChange
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SMGSetRelChange( void *smg_vdata,
+                       int   rel_change  )
+{
+   hypre_SMGData *smg_data = smg_vdata;
+   int            ierr = 0;
+ 
+   (smg_data -> rel_change) = rel_change;
  
    return ierr;
 }

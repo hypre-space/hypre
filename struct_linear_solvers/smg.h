@@ -26,6 +26,7 @@ typedef struct
    int                   memory_use;
    double                tol;
    int                   max_iter;
+   int                   rel_change;
    int                   zero_guess;
    int                   max_levels;  /* max_level <= 0 means no limit */
                       

@@ -101,6 +101,17 @@ HYPRE_StructPCGSetTwoNorm( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructPCGSetRelChange
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructPCGSetRelChange( HYPRE_StructSolver solver,
+                             int                rel_change )
+{
+   return( hypre_PCGSetRelChange( (void *) solver, rel_change ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructPCGSetPrecond
  *--------------------------------------------------------------------------*/
 
