@@ -5,6 +5,7 @@ libHYPRE_ParaSails_la_SOURCES = $(FILES)
 libHYPRE_ParaSails_la_LDFLAGS = -avoid-version
 
 AM_CPPFLAGS = \
+ -I$(top_builddir)/utilities\
  -I$(top_srcdir)/utilities\
  -I$(top_srcdir)/distributed_matrix
 

@@ -7,6 +7,7 @@ libHYPRE_Euclid_la_LDFLAGS = -avoid-version
 EUCLID_CFLAGS =  -DMPI_MODE -DMPI_TIMING -DUSING_MPI -DHYPRE_GET_ROW \
                  -DHYPRE_MODE -DOPTIMIZED_DH
 AM_CPPFLAGS = ${EUCLID_CFLAGS} \
+ -I$(top_builddir)/utilities\
  -I$(top_srcdir)/utilities\
  -I$(top_srcdir)/parcsr_mv\
  -I$(top_srcdir)/seq_mv\

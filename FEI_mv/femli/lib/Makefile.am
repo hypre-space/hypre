@@ -5,6 +5,7 @@ libHYPRE_mli_la_SOURCES = $(FILES)
 libHYPRE_mli_la_LDFLAGS = -avoid-version
 
 AM_CPPFLAGS = -DMLI_SUPERLU \
+ -I$(top_srcdir)\
  -I$(top_builddir)/utilities\
  -I$(top_srcdir)/utilities\
  -I$(top_srcdir)/FEI_mv/femli\

@@ -8,12 +8,13 @@ include_HEADERS = HYPRE_lobpcg.h lobpcg.h
 
 AM_CPPFLAGS = \
  -I$(top_srcdir)\
+ -I$(top_builddir)/utilities\
+ -I$(top_srcdir)/utilities\
  -I$(top_srcdir)/IJ_mv\
  -I$(top_srcdir)/parcsr_mv\
  -I$(top_srcdir)/parcsr_ls\
  -I$(top_srcdir)/seq_mv\
- -I$(top_srcdir)/krylov\
- -I$(top_srcdir)/utilities
+ -I$(top_srcdir)/krylov
 
 EXTRA_DIST = \
  IJ_eigen_solver.c\

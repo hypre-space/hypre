@@ -11,6 +11,7 @@ include_HEADERS = distributed_matrix.h \
 
 AM_CPPFLAGS = \
  -I$(top_srcdir)\
+ -I$(top_builddir)/utilities\
  -I$(top_srcdir)/utilities\
  -I$(top_srcdir)/seq_mv\
  -I$(top_srcdir)/parcsr_mv
