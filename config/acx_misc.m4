@@ -280,12 +280,12 @@ for MPI.  Selecting --without-MPI may affect which compiler is chosen]),
           MPILIBS=mpi
           MPILIBDIRS=${withval}/lib
           LIBS="$LIBS -lmpi"
-          LIBDIRS="$LIBDIRS -L${withval}/lib"
+          LDFLAGS="$LDFLAGS -L${withval}/lib"
         elif test -r "${withval}/lib/libmpich.a" ; then
           MPILIBS=mpich
           MPILIBDIRS=${withval}/lib
           LIBS="$LIBS -lmpich"
-          LIBDIRS="$LIBDIRS -L${withval}/lib"
+          LDFLAGS="$LDFLAGS -L${withval}/lib"
         else
           AC_MSG_ERROR(DIR=${withval}\/lib/libmpi.a or libmpich.a does not exist for --with-MPI)
         fi

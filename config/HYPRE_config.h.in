@@ -110,6 +110,9 @@
 /* HYPRE timing routines are being used */
 #undef HYPRE_TIMING
 
+/* Using Hypre lsame and xerbla */
+#undef HYPRE_USING_BLAS_WRAPPERS
+
 /* Using dxml for Blas */
 #undef HYPRE_USING_DXML
 
