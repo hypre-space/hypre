@@ -41,7 +41,7 @@
 /*--------------------------------------------------------------------------*/
 
 #include <string.h>
-#include <strings.h>
+#include <iostream.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -106,6 +106,7 @@ typedef struct HYPRE_LSI_MLI_Struct
    double   *nullScales_;         /* scaling vector for null space */
    int      calibrationSize_;     /* for calibration smoothed aggregation */
    double   Pweight_;
+   char     paramFile_[50];
 } 
 HYPRE_LSI_MLI;
 
@@ -160,6 +161,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->nullScales_          = NULL;
    mli_object->calibrationSize_     = 0;
    mli_object->Pweight_             = 1.333;
+   strcpy(mli_object->paramFile_, "empty");
 #ifdef HAVE_MLI
    mli_object->mli_                 = NULL;
    mli_object->feData_              = NULL;
@@ -376,6 +378,18 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    }
 
    /* -------------------------------------------------------- */ 
+   /* set parameter file                                       */
+   /* -------------------------------------------------------- */ 
+   
+   if ( strcmp(mli_object->paramFile_, "empty") )
+   {
+      targc    = 1;
+      targv[0] = (char *) mli_object->paramFile_;
+      strcpy( paramString, "setParamFile" );
+      method->setParams( paramString, targc, targv );
+   }
+
+   /* -------------------------------------------------------- */ 
    /* finally, set up                                          */
    /* -------------------------------------------------------- */ 
 
@@ -467,6 +481,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      nodeDOF <d> \n");
          printf("\t      nullSpaceDim <d> \n");
          printf("\t      useNodalCoord <on,off> \n");
+         printf("\t      paramFile <s> \n");
       }
    }
    else if ( !strcasecmp(param2, "outputLevel") )
@@ -611,6 +626,10 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
       if ( mli_object->calibrationSize_ < 0 ) 
          mli_object->calibrationSize_ = 0; 
    }
+   else if ( !strcasecmp(param2, "paramFile") )
+   {
+      sscanf(paramString,"%s %s %s",param1,param2,mli_object->paramFile_);
+   }
    else 
    {
       if ( mypid == 0 )
@@ -632,6 +651,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      nullSpaceDim <d> \n");
          printf("\t      useNodalCoord <on,off> \n");
          printf("\t      saAMGCalibrationSize <d> \n");
+         printf("\t      paramFile <s> \n");
          exit(1);
       }
    }
