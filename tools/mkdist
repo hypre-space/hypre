@@ -161,6 +161,7 @@ tar cf $HYPRE_DIR.tar \
     $HYPRE_DIR/src/distributed_matrix \
     $HYPRE_DIR/src/krylov \
     $HYPRE_DIR/src/matrix_matrix \
+    $HYPRE_DIR/src/nopoe \
     $HYPRE_DIR/src/parcsr_es \
     $HYPRE_DIR/src/parcsr_ls \
     $HYPRE_DIR/src/parcsr_mv \
