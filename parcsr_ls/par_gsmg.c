@@ -20,9 +20,13 @@
 #include "headers.h"
 #include "par_amg.h"
 
+#ifdef ESSL
+#include <essl.h>
+#else
 #include "fortran.h"
 void hypre_F90_NAME_BLAS(dgels, DGELS)(char *, int *, int *, int *, double *, 
   int *, double *, int *, double *, int *, int *);
+#endif
 
 #ifndef ABS
 #define ABS(x) ((x)>0 ? (x) : -(x))
@@ -661,8 +665,6 @@ hypre_BoomerAMGFitVectors(int ip, int n, int num, const double *V,
    double *work;
    int    work_size;
    int    info;
-   char trans = 'T';
-   int  one   = 1;
    int  temp;
 
 /*
@@ -672,14 +674,18 @@ hypre_BoomerAMGFitVectors(int ip, int n, int num, const double *V,
    printf("\n");
 */
 
+   if (nc == 0)
+      return 0;
+
    work_size = 2000*64;
    work = hypre_CTAlloc(double, work_size);
 
    a = hypre_CTAlloc(double, num*nc);
    ap = a;
-   for (i=0; i<num; i++)
+
+   for (j=0; j<nc; j++)
    {
-      for (j=0; j<nc; j++)
+      for (i=0; i<num; i++)
       {
           *ap = V[i*n+ind[j]];
 	  ap++;
@@ -691,7 +697,14 @@ hypre_BoomerAMGFitVectors(int ip, int n, int num, const double *V,
    for (i=0; i<num; i++)
       b[i] = V[i*n+ip];
 
-   hypre_F90_NAME_BLAS(dgels, DGELS)(&trans, &nc, &num, &one, a, &nc,
+#ifdef ESSL
+   dgells(0, a, num, b, num, val, nc, NULL, 1.e-12, num, nc, 1, 
+      &info, work, work_size);
+#else
+   {
+   char trans = 'N';
+   int  one   = 1;
+   hypre_F90_NAME_BLAS(dgels, DGELS)(&trans, &num, &nc, &one, a, &num,
       b, &temp, work, &work_size, &info);
 
    if (info != 0)
@@ -700,6 +713,8 @@ hypre_BoomerAMGFitVectors(int ip, int n, int num, const double *V,
    /* copy solution into output vector */
    for (j=0; j<nc; j++)
       val[j] = b[j];
+   }
+#endif
 
    hypre_TFree(b);
    hypre_TFree(a);
