@@ -87,17 +87,6 @@ STRUCT_LFLAGS =\
  -L${HYPRE_BUILD_DIR}/lib\
  -lHYPRE_struct_ls\
  -lHYPRE_struct_mv\
- -lHYPRE_krylov\
- -lHYPRE_utilities\
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
-
-###########################################
-# Struct_es definitions
-###########################################
-STRUCT_ES_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
- -lHYPRE_struct_ls\
- -lHYPRE_struct_mv\
  -lHYPRE_parcsr_ls\
  -lHYPRE_DistributedMatrixPilutSolver \
  -lHYPRE_ParaSails \
@@ -133,30 +122,6 @@ SSTRUCT_LFLAGS =\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
- -lHYPRE_utilities\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
-
-###########################################
-# Sstruct_es definitions
-###########################################
-SSTRUCT_ES_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
- -lHYPRE_sstruct_ls\
- -lHYPRE_sstruct_mv\
- -lHYPRE_struct_ls\
- -lHYPRE_struct_mv\
- -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_ParaSails \
- -lHYPRE_Euclid \
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_krylov\
  -lHYPRE_lobpcg\
  -lHYPRE_utilities\
  ${LAPACKLIBFLAGS} \
@@ -167,26 +132,6 @@ SSTRUCT_ES_LFLAGS =\
 # IJ definitions
 ###########################################
 IJ_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
- -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_ParaSails \
- -lHYPRE_Euclid \
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_krylov\
- -lHYPRE_utilities\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
-
-###########################################
-# IJ_ES definitions
-###########################################
-IJ_ES_LFLAGS =\
  -L${HYPRE_BUILD_DIR}/lib\
  -lHYPRE_parcsr_ls\
  -lHYPRE_DistributedMatrixPilutSolver \
@@ -232,14 +177,11 @@ FEICXX_LFLAGS =\
 ##################################################################
 HYPRE_STANDARD_DRIVERS =\
  ij.c\
- ij_es.c\
  ij_mv.c\
  new_ij.c\
  sstruct.c\
- sstruct_es.c\
  sstruct_fac.c\
- struct.c\
- struct_es.c
+ struct.c
 
 HYPRE_BABEL_DRIVERS =\
  struct_b.c\
@@ -317,10 +259,6 @@ struct: struct.o
 	@echo  "Building" $@ "... "
 	${CC} -o $@ $@.o ${STRUCT_LFLAGS}
 
-struct_es: struct_es.o
-	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${STRUCT_ES_LFLAGS}
-
 sstruct: sstruct.o
 	@echo  "Building" $@ "... "
 	${CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
@@ -329,17 +267,9 @@ sstruct_fac: sstruct_fac.o
 	@echo  "Building" $@ "... "
 	${CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
 
-sstruct_es: sstruct_es.o
-	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${SSTRUCT_ES_LFLAGS}
-
 ij: ij.o
 	@echo  "Building" $@ "... "
 	${CC} -o $@ $@.o ${IJ_LFLAGS}
-
-ij_es: ij_es.o
-	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${IJ_ES_LFLAGS}
 
 ij_mv: ij_mv.o
 	@echo  "Building" $@ "... "
