@@ -1,376 +1,186 @@
 %==========================================================================
-\chapter{The IJ Linear System Interface}
-\label{IJ}
+\chapter{Linear-Algebraic System Interface (IJ)}
+\label{Linear-Algebraic System Interface}
 
-The IJ linear system (IJ) interface is the lowest common denominator
-for specification of an unaugmented\footnote{An example of an
-augmented linear system of equations would be a a linear system plus
-the stiffness matrices from which the matrix coefficients are
-assembled in a finite element discretization.  More than the linear
-system of equations is provided.}  linear system of equations to be
-solved by \hypre{}.  No {\it a priori} assumptions are made about
-the sparsity pattern of a linear system passed through the IJ
-interface.  Like all \hypre{} interfaces, it is designed to insulate
-the user from underlying implementation details.
+The \code{IJ} interface described in this chapter is the lowest common
+denominator for specifying linear systems in \hypre{}.  This interface
+provides access to general sparse-matrix solvers in \hypre{}, but not
+to the specialized solvers that require more problem information.
 
-One would typically use the IJ interface to specify the linear
-system originating from an unstructured grid PDE discretization.
-However, the interface can be used for discretizations from more
-structured grids, with consequent solver inefficiencies from lack
-of built-in sparsity assumptions.
-
-IJ matrix interface calls facilitate creation and destruction of 
-matrix interface objects; specification, manipulation and retrieval
-of rows and blocks of linear system coefficients; and determination
-and querying of underlying linear system data structure formats.
-\hypre{} supports multiple underlying data structure formats
-in order to cooperate with packages such as {\sl PETSc} and
-{\sl ISIS}, as well as for convenience to the \hypre{} solver
-developer.  One format is abbreviated {\it ParCSR}, meaning
-{\it Par}allel {\it C}ompressed {\it S}parse {\it
-R}ow.
-
-IJ vector interface calls facilitate creation and destruction of
-vector interface objects, as well as specification, manipulation,
-and retrieval of right-hand side and initial guess vector components.
-
-Currently, \hypre{} solvers which operate directly on linear systems
-passing through the IJ interface have either {\it ParCSR}
-implementations, {\sl ISIS} implementations, or {\sl PETSc}
-implementations.
-
-A full listing of IJ linear system C-functions and Fortran interface
-names should be located in the \hypre{} reference manual.
+%==========================================================================
 
 \section{IJ Matrix Interface}
 
-\subsection{Creation and destruction of interface object}
-
-An IJ matrix interface object can be created and destroyed with
-the following functions;
+The following example code illustrates the basic usage of the
+\code{IJ} interface for building matrices:
+\begin{display}
 \begin{verbatim}
-  int HYPRE_IJMatrixCreate(MPI_Comm *communicator,
-                           HYPRE_IJMatrix **ij_matrix,
-                           int global_m, int global_n);
 
-  int HYPRE_IJMatrixDestroy(HYPRE_IJMatrix *ij_matrix);
+MPI_Comm        comm;
+HYPRE_IJMatrix *ij_matrix;
+int             global_m, global_n;
+int             num_values;
+int             row;
+int            *cols;
+double         *values;
+
+HYPRE_IJMatrixCreate(comm, &ij_matrix, global_m, global_n);
+HYPRE_IJMatrixSetLocalStorageType(ij_matrix, HYPRE_PARCSR);
+HYPRE_IJMatrixInitialize(ij_matrix);
+
+/* set matrix coefficients a row at a time */
+HYPRE_IJMatrixSetValues(ij_matrix, num_values, row, cols, values);
+...
+
+HYPRE_IJMatrixAssemble(ij_matrix);
+
 \end{verbatim}
-\noindent The \code{MPI_Comm} pointer \code{communicator}
-points to interprocessor communication information needed by MPI.
-Integers \code{global_m} and \code{global_n} specify the global
-number of rows and columns in the coefficient matrix, over all processors.
+\end{display}
+The \code{Create()} routine creates an empty \code{global_m} by
+\code{global_n} matrix object that lives on the \code{comm} communicator.
+The \code{SetLocalStorageType} routine sets the underlying matrix
+storage type to \code{HYPRE_PARCSR} (this is the only storage type
+currently supported).  The \code{Initialize()} routine indicates that
+the matrix coefficients (or values) are ready to be set.  This routine
+may or may not involve the allocation of memory for the coefficient
+data, depending on the implementation.  The optional \code{Set}
+routines mentioned later in this chapter and in the Reference Manual,
+should be called before this step.  The \code{SetValues()} routine
+sets the matrix coefficients for a specified \code{row} and list of
+\code{cols} (\code{num_values} is the number of column coefficients being set).
+The \code{Assemble()} routine is a collective call (i.e., must be
+called on all processes), and finalizes the matrix assembly, making
+the matrix ``ready to use''.
 
-\subsection{Typical implementation}
+%\begin{figure}
+%\begin{center}
+%\newcommand{\qq}{\scriptstyle}
+%\renewcommand{\arraycolsep}{4 pt}
+%\renewcommand{\arraystretch}{0.5}
+%\begin{equation}
+%\left(
+%\begin{array}{ c|c c c c c|c c c c c|c c c c c|c }
+% & & & & & & & &\qq \; & & & & & & & & \\
+% & & & & & & & &\qq \vdots & & & & & & & & \\
+%\hline
+% & & & & & & & &\qq \vdots & & & & & & & & \\
+%\qq .\,.\,.\; &\qq \; &\qq \; &\qq a &\qq \; &\qq \; &
+%\qq \! & \qq a &\qq a &\qq a &\qq \; &
+%\qq \; &\qq a &\qq \; &\qq \; &\qq \; &\qq \; .\,.\,.\\
+% & & & & & & & &\qq \vdots & & & & & & & & \\
+% & & & & & & & &\qq \; & & & & & & & & \\
+%\hline
+% & & & & & & & &\qq \vdots & & & & & & & \\
+% & & & & & & & &\qq \; & & & & & & & & \\
+%\end{array}
+%\right)
+%\left(
+%\begin{array}{c}
+%\qq x \\
+%\qq \vdots \\
+%\\
+%\\
+%\\
+%\\
+%\qq \vdots \\
+%\\
+%\qq x \\
+%\end{array}
+%\right)
+%=
+%\left(
+%\begin{array}{c}
+%\qq \;\\
+%\qq \vdots \\
+%\hline
+%\qq \vdots \\
+%\qq b \\
+%\qq \vdots \\
+%\qq \;\\
+%\hline
+%\qq \vdots \\
+%\qq \; \\
+%\end{array}
+%\right)
+%\end{equation}
+%\caption{Single row of a distributed system of equations.
+%Interprocessor boundaries are marked by horizontal lines.
+%Nonzero matrix coefficients are here indistinguishably
+%expressed as {\it a}'s.  Unknown and right-hand side
+%vectors are similarly expressed.}
+%\end{center}
+%\end{figure}
+%
+%\begin{figure}
+%\label{fig-set-values}
+%\centerline{\epsfig{figure=insert_row.eps,height=2.2in}}
+%\vspace{0.15in}
+%\parbox{6.5in}{\hspace{0.5in}
+%  {\tt int HYPRE\_IJMatrixInsertRow(HYPRE\_IJMatrix *ij\_matrix,
+%   int num\_cols, }}
+%\parbox{6.5in}{\hspace{1.5in}
+%  {\tt int row\_index, int *col\_indices, double *coeffs);}}
+%\vspace{0.in}
+%\caption{Array layout for {\tt HYPRE\_IJMatrixInsertRow}.}
+%\end{figure}
 
-Following are example uses of the IJ matrix interface functions.
-Variables and parameters in the
-function calls would be associated with the following declarations:
-
-\begin{verbatim}
-  MPI_Comm communicator;
-  HYPRE_IJMatrix *ij_matrix;
-  int global_m, global_n, num_cols, row_index;
-  int *col_indices;
-  double *coeffs;
-  int ierr;
-\end{verbatim}
-
-\noindent In reference to a row, variable \code{num_cols} specifies
-the number of columns with nonzero entries.
-Integer \code{ierr} carries program error state information. 
-
-\begin{verbatim}
-  ierr = HYPRE_IJMatrixCreate(communicator, &ij_matrix_ptr,
-                              global_m, global_n);
-
-  ierr = HYPRE_IJMatrixSetLocalStorageType(ij_matrix, type);
-\end{verbatim}
-
-\noindent Allowed storage types will be \code{HYPRE_PARCSR},
-\code{HYPRE_ISIS}, and \code{HYPRE_PETSC}.  Currently, only
-\code{HYPRE_PARCSR} has been tested. 
-
-\begin{figure}
-\begin{center}
-\newcommand{\qq}{\scriptstyle}
-\renewcommand{\arraycolsep}{4 pt}
-\renewcommand{\arraystretch}{0.5}
-\begin{equation}
-\left(
-\begin{array}{ c|c c c c c|c c c c c|c c c c c|c }
- & & & & & & & &\qq \; & & & & & & & & \\
- & & & & & & & &\qq \vdots & & & & & & & & \\
-\hline
- & & & & & & & &\qq \vdots & & & & & & & & \\
-\qq .\,.\,.\; &\qq \; &\qq \; &\qq a &\qq \; &\qq \; &
-\qq \! & \qq a &\qq a &\qq a &\qq \; &
-\qq \; &\qq a &\qq \; &\qq \; &\qq \; &\qq \; .\,.\,.\\
- & & & & & & & &\qq \vdots & & & & & & & & \\
- & & & & & & & &\qq \; & & & & & & & & \\
-\hline
- & & & & & & & &\qq \vdots & & & & & & & \\
- & & & & & & & &\qq \; & & & & & & & & \\
-\end{array}
-\right)
-\left(
-\begin{array}{c}
-\qq x \\
-\qq \vdots \\
-\\
-\\
-\\
-\\
-\qq \vdots \\
-\\
-\qq x \\
-\end{array}
-\right)
-=
-\left(
-\begin{array}{c}
-\qq \;\\
-\qq \vdots \\
-\hline
-\qq \vdots \\
-\qq b \\
-\qq \vdots \\
-\qq \;\\
-\hline
-\qq \vdots \\
-\qq \; \\
-\end{array}
-\right)
-\end{equation}
-\caption{Single row of a distributed system of equations.
-Interprocessor boundaries are marked by horizontal lines.
-Nonzero matrix coefficients are here indistinguishably
-expressed as {\it a}'s.  Unknown and right-hand side
-vectors are similarly expressed.}
-\end{center}
-\end{figure}
-
-\begin{figure}
-\label{insert_row}
-\centerline{\epsfig{figure=insert_row.eps,height=2.2in}}
-\vspace{0.15in}
-\parbox{6.5in}{\hspace{0.5in}
-  {\tt int HYPRE\_IJMatrixInsertRow(HYPRE\_IJMatrix *ij\_matrix,
-   int num\_cols, }}
-\parbox{6.5in}{\hspace{1.5in}
-  {\tt int row\_index, int *col\_indices, double *coeffs);}}
-\vspace{0.in}
-\caption{Array layout for {\tt HYPRE\_IJMatrixInsertRow}.}
-\end{figure}
-
-Once the matrix is initialized, repeated calls to
-\code{HYPRE_IJMatrixInsertRow} can be used to pass in
-the matrix coefficients.  Then a matrix assembly call stows
-the coefficients in objects which the solvers can process. 
-
-\begin{verbatim}
-  ierr = HYPRE_IJMatrixInitialize(ij_matrix);
-
-  ierr = HYPRE_IJMatrixInsertRow(ij_matrix, num_cols,
-                                 row_index, col_indices, coeffs);
-
-  ierr = HYPRE_IJMatrixAssemble(ij_matrix);
-\end{verbatim}
-
-\noindent Integer \code{row_index} is used to specify the global
-number of the row being inserted.
-\noindent Pointer \code{coeffs} would typically address an array of
-\code{num_cols} doubles.
-Pointer \code{col_indices} would typically
-address an array of \code{num_cols} integers which specify the
-matrix column in which each \code{coeffs} double belongs.  
-Typically, linear systems involving the \code{ij_matrix}
-object are solved after this point.  After solution, the
-\code{ij_matrix} should be deallocated if it is not to be reused:
-
-\begin{verbatim}
-   ierr = HYPRE_IJMatrixDestroy(ij_matrix);
-\end{verbatim}
+%==========================================================================
 
 \section{IJ Vector Interface}
 
-\subsection{Creation and destruction of interface object}
-
-An IJ vector interface object can be created and destroyed with
-the following functions;
+The following example code illustrates the basic usage of the
+\code{IJ} interface for building vectors:
+\begin{display}
 \begin{verbatim}
-   int HYPRE_IJVectorCreate(MPI_Comm *communicator,
-                            HYPRE_IJVector **ij_x,
-                            int global_m);
 
-   int HYPRE_IJVectorDestroy(HYPRE_IJVector *ij_x);
+MPI_Comm        comm;
+HYPRE_IJVector *ij_vector;
+int             global_n;
+int             num_values;
+int            *global_indices;
+int            *value_indices;
+double         *values;
+
+HYPRE_IJVectorCreate(comm, &ij_vector, global_n);
+HYPRE_IJVectorSetLocalStorageType(ij_vector, HYPRE_PARCSR);
+HYPRE_IJVectorInitialize(ij_vector);
+
+/* set vector values */
+HYPRE_IJVectorSetLocalComponents(ij_vector, num_values,
+                                 global_indices, value_indices, values);
+...
+
+HYPRE_IJVectorAssemble(ij_vector);
+
 \end{verbatim}
+\end{display}
+The \code{Create()} routine creates an empty \code{global_n}-vector
+object that lives on the \code{comm} communicator.  The
+\code{SetLocalStorageType} routine sets the underlying vector storage
+type to \code{HYPRE_PARCSR} (this is the only storage type currently
+supported).  The \code{Initialize()} routine indicates that the vector
+coefficients (or values) are ready to be set.  This routine may or may
+not involve the allocation of memory for the coefficient data,
+depending on the implementation.  The optional \code{Set} routines
+mentioned later in this chapter and in the Reference Manual, should be
+called before this step.  The \code{SetLocalComponents()} routine sets
+the vector coefficients for a specified list of \code{global_indices}
+(\code{num_values} is the number of values being set).  The \code{Assemble()}
+routine is a collective call (i.e., must be called on all processes),
+and finalizes the vector assembly, making the vector ``ready to use''.
 
-\noindent As expected, the global number of components of the
-vector is the same as the global number of rows in the matrix,
-\code{global_m}.
-Similarly for the right-hand side IJ vector object to a linear
-system.
-
-\subsection{Typical setup of right-hand side and solution vectors}
-
-Following are examples of function calls necessary for use of the
-IJ vector interface.  The variables and parameters in the
-function calls would be associated with the following declarations:
-
-\begin{verbatim}
-   MPI_Comm communicator;
-   HYPRE_IJVector *ij_vec, *ij_b, *ij_x;
-   int domain_pt_start, next_domain_pt_start, ierr;
-   int global_number_pts, num_components;
-   int *glob_vec_indices, *b_indices, *x_indices;
-   double *b, *b_plus, *x;
-\end{verbatim}
-
-\noindent Integers \code{domain_pt_start} and \code{next_domain_pt_start}
-specify the global indices of the first unknown on the local processor
-and on the next processor in the domain decomposition, respectively.
-
-\begin{verbatim}
-   ierr = HYPRE_IJVectorCreate(communicator, ij_b, global_m);
-
-   ierr = HYPRE_IJVectorSetLocalStorageType(ij_b, HYPRE_PARCSR);
-\end{verbatim}
-
-\noindent Allowed storage types will be \code{HYPRE_PARCSR},
-\code{HYPRE_ISIS}, and \code{HYPRE_PETSC}.  Currently, only
-\code{HYPRE_PARCSR} has been tested.  Processors can be informed
-about distribution of unknowns over processors,
-
-\begin{verbatim}
-   ierr = HYPRE_IJVectorSetLocalPartitioning(ij_b, domain_pt_start,
-                                             next_domain_pt_start);
-\end{verbatim}
-
-\noindent and then all processors must agree upon the distribution, ...
-
-\begin{verbatim}
-   ierr = HYPRE_IJVectorAssemble(ij_b);
-\end{verbatim}
-
-\noindent Memory space is then allocated for the vector components
-that must be handled on the processor, ...
-
-\begin{verbatim}
-   ierr = HYPRE_IJVectorInitialize(ij_b);          
-\end{verbatim}
-
-\noindent The same should be done for the solution vector:
-
-\begin{verbatim}
-   ierr = HYPRE_IJVectorCreate(communicator, ij_x, global_m);
-
-   ierr = HYPRE_IJVectorSetLocalStorageType(ij_x, HYPRE_PARCSR);
-
-   ierr = HYPRE_IJVectorSetLocalPartitioning(ij_x, domain_pt_start,
-                                             next_domain_pt_start);
-
-   ierr = HYPRE_IJVectorAssemble(ij_x);
-
-   ierr = HYPRE_IJVectorInitialize(ij_x);
-\end{verbatim}
-
-\begin{figure}
-\label{loc_comps_blk}
-\centerline{\epsfig{figure=loc_cmps_blk.eps,height=2.5in}}
-\vspace{0.15in}
-\parbox{6.5in}{\hspace{1in}
-  {\tt int HYPRE\_IJVectorXXXLocalComponentsInBlock(HYPRE\_IJVector *ij\_vec,}}
-\parbox{6.5in}{\hspace{2in}
-  {\tt int glob\_vec\_index\_start, int glob\_vec\_index\_stop,}}
-\parbox{6.5in}{\hspace{2in}
-  {\tt int *value\_indices, double *values);}}
-\caption{Mapping between external array values and
-  internal vector data for functions
-  {\tt HYPRE\_IJVectorXXX}{\tt LocalComponentsInBlock}.
-  Use rightward arrows for {\tt XXX = Set} or {\tt AddTo}.
-  Use leftward arrows for {\tt XXX = Get}.}
-\end{figure}
-
-\begin{figure}
-\label{loc_comps}
-\centerline{\epsfig{figure=loc_cmps.eps,height=2.4in}}
-\vspace{0.15in}
-\parbox{6.5in}{\hspace{1in}
-   {\tt int HYPRE\_IJVectorXXXLocalComponents(HYPRE\_IJVector *ij\_vec,}}
-\parbox{6.5in}{\hspace{2in}
-   {\tt int num\_values, int *glob\_vec\_indices,}}
-\parbox{6.5in}{\hspace{2in}
-   {\tt int *value\_indices, double *values);}}
-\caption{Mapping between external array values and
-   internal vector data for functions
-   {\tt HYPRE\_IJVectorXXX}{\tt LocalComponents}.
-   Use rightward arrows for {\tt XXX = Set} or {\tt AddTo}.
-   Use leftward arrows for {\tt XXX = Get}.}
-\end{figure}
-
-\noindent Vector components can be placed into
-underlying \hypre{} formats either in contiguous subsets (Figure
-\ref{loc_comps_blk}) or in indexed subsets (Figure
-\ref{loc_comps}). For \code{ij_b} only, one can use either of the
-following:
-
-\begin{verbatim}
-   ierr = HYPRE_IJVectorSetLocalComponentsInBlock(ij_b,
-                                      glob_vec_index_start,
-                                      glob_vec_index_stop,
-                                      b_indices, b);
-\end{verbatim}
-\begin{verbatim}
-   ierr = HYPRE_IJVectorSetLocalComponents(ij_b, num_components,
-                                      glob_vec_indices,
-                                      b_indices, b);
-\end{verbatim}
-
-\noindent To assign values to all components in a domain, one would
-choose \code{glob_vec_index_start} \code{=} \code{domain_pt_start},
-and \code{glob_vec_index_stop} \code{=}\code{next_domain_pt_start-1}.
-
-One can also add to vector components that are already set, in
-contiguous or indexed subsets of components.
-In the following example,
-assume that array \code{b_plus}
-contains values to be added to components of \code{ij_b}:
-
-\begin{verbatim}
-   ierr = HYPRE_IJVectorAddToLocalComponentsInBlock(ij_b,
-                                      glob_vec_index_start,
-                                      glob_vec_index_stop,
-                                      b_indices, b_plus); 
-\end{verbatim}
-\begin{verbatim}
-   ierr = HYPRE_IJVectorAddToLocalComponents(ij_b, num_components,
-                                      glob_vec_indices,
-                                      b_indices, b_plus);
-\end{verbatim}
-
-\noindent After the solver is finished, solution vector components
-can be extracted from a contiguous or an indexed subset of
-the underlying vector data array, ...
-
-\begin{verbatim}
-   ierr = HYPRE_IJVectorGetLocalComponentsInBlock(ij_x,
-                                      glob_vec_index_start,
-                                      glob_vec_index_stop,
-                                      x_indices, x);
-\end{verbatim}
-\begin{verbatim}
-   ierr = HYPRE_IJVectorGetLocalComponents(ij_x, num_components,
-                                      glob_vec_indices,
-                                      x_indices, x);
-\end{verbatim}
-
-\noindent After the solution vector is communicated through the interface,
-the interface should be deallocated if it is not to be reused.
-
-\begin{verbatim}
-   ierr =  HYPRE_IJVectorDestroy(ij_b);
-   ierr =  HYPRE_IJVectorDestroy(ij_x);
-\end{verbatim}
-
-
-
+%In general, vector components can be placed into underlying \hypre{}
+%formats either in contiguous subsets (Figure \ref{loc_comps_blk}) or
+%in indexed subsets (Figure \ref{loc_comps}).
+%\begin{figure}
+%\label{loc_comps_blk}
+%\centerline{\epsfig{figure=loc_cmps_blk.eps,height=2.5in}}
+%\caption{Mapping between external array values and
+%  internal vector data for \code{LocalComponentsInBlock} functions.}
+%\end{figure}
+%\begin{figure}
+%\label{loc_comps}
+%\centerline{\epsfig{figure=loc_cmps.eps,height=2.4in}}
+%\caption{Mapping between external array values and
+%   internal vector data for \code{LocalComponents} functions.}
+%\end{figure}

@@ -1,19 +1,44 @@
+%==========================================================================
 \chapter{Solvers and Preconditioners}
-\label{solvers}
+\label{Solvers and Preconditioners}
 
-There are several solvers available in \hypre{}.  Some of them are
-listed below.
+There are several solvers available in \hypre{} via different
+conceptual interfaces (see Table \ref{table-solver-availability}).
+The procedure for setup and use of solvers and preconditioners is
+largely the same. We will refer to them both as solvers in the sequel
+except when noted.  In normal usage, the preconditioner is chosen and
+constructed before the solver, and then handed to the solver as part
+of the solver's setup.  In the following, we assume the most common
+usage pattern in which a single linear system is set up and then
+solved with a single righthand side. We comment later on
+considerations for other usage patterns.
 
-The procedure for setup and use of solvers and preconditioners is largely
-the same. We will refer to them both as solvers in the sequel except when noted. 
-In normal usage, 
-the preconditioner is chosen and constructed before the solver,
-and then handed to the solver as part of the solver's setup.
-In the following, we assume the most common usage pattern in which
-a single linear system is set up and then solved with a single righthand
-side. We comment later on considerations for other usage patterns.
+\begin{table}[h]
+\center
+\begin{tabular}{|l||c|c|c|c|}
+\hline
+                               & \multicolumn{4}{|c|}{System Interfaces} \\
+\multicolumn{1}{|c||}{Solvers} & Struct & SStruct & FEI & IJ \\
+\hline\hline
+Jacobi     & X &   &   &   \\
+SMG        & X &   &   &   \\
+PFMG       & X &   &   &   \\
+BoomerAMG  &   & X & X & X \\
+ParaSails  &   & X & X & X \\
+PILUT      &   & X & X & X \\
+PCG        & X &   & X & X \\
+GMRES      &   & X & X & X \\
+\hline
+\end{tabular}
+\caption{%
+Current solver availability via \hypre{} conceptual interfaces.
+}
+\label{table-solver-availability}
+\end{table}
 
-{\bf Setup:}
+%==========================================================================
+
+\section*{Setup:}
 
 \begin{enumerate}
 
@@ -56,7 +81,9 @@ builder interface.
 At this point, the solver/preconditioner is fully constructed and
 ready for use.
 
-{\bf Use:}
+%==========================================================================
+
+\section*{Use:}
 
 \begin{enumerate}
 

@@ -1,6 +1,8 @@
-/**@name HYPRE Reference Manual
+/**
+@name {\it hypre} Reference Manual
+@version HYPREVersion
 */
-/* \tex{\input{version}\HYPREVersion{}}*/
+/*@version \TEX{\input{version}\HYPREVersion{}}*/
 
 //@{
 	//@Include: ../struct_matrix_vector/HYPRE_struct_mv.h

@@ -133,10 +133,11 @@ int
 HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver          solver,
                               HYPRE_PtrToSStructSolverFcn  precond,
                               HYPRE_PtrToSStructSolverFcn  precond_setup,
-                              void                        *precond_data )
+                              HYPRE_SStructSolver          precond_solver )
 {
    return( hypre_XGMRESSetPrecond( (void *) solver,
-                                  precond, precond_setup, precond_data ) );
+                                   precond, precond_setup,
+                                   (void *) precond_solver ) );
 }
 
 /*--------------------------------------------------------------------------

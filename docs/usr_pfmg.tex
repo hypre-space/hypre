@@ -1,0 +1,12 @@
+%==========================================================================
+\section{PFMG}
+
+PFMG is a parallel semicoarsening multigrid solver similar to SMG.
+See \cite{SFAshby_RDFalgout_1996,RDFalgout_JEJones_2000} for details
+on the algorithm and its parallel implementation/performance.
+
+The main difference between the two methods is in the smoother: PFMG
+uses simple pointwise smoothing.  As a result, PFMG is not as robust
+as SMG, but is much more efficient per V-cycle.
+
+%==========================================================================

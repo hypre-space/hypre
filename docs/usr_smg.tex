@@ -1,0 +1,21 @@
+%==========================================================================
+\section{SMG}
+
+SMG is a parallel semicoarsening multigrid solver for the linear
+systems arising from finite difference, finite volume, or finite
+element discretizations of the diffusion equation,
+\begin{equation}
+\nabla \cdot ( D \nabla u ) + \sigma u = f
+\end{equation}
+on logically rectangular grids.  The code solves both 2D and 3D
+problems with discretization stencils of up to 9-point in 2D and up to
+27-point in 3D.  See
+\cite{SSchaffer_1998a,PNBrown_RDFalgout_JEJones_2000,RDFalgout_JEJones_2000}
+for details on the algorithm and its parallel implementation/performance.
+
+SMG is a particularly robust method.  The algorithm semicoarsens in
+the z-direction and uses plane smoothing.  The xy plane-solves are
+effected by one V-cycle of the 2D SMG algorithm, which semicoarsens in
+the y-direction and uses line smoothing.
+
+%==========================================================================

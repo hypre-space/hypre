@@ -27,13 +27,12 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /**
- * @name ParCSR Linear Solvers Interface
+ * @name ParCSR Solvers
  *
- * A general description of the interface goes here...
+ * These solvers use matrix/vector storage schemes that are taylored
+ * for general sparse matrix systems.
  *
- * @memo A linear solver interface for unstructured grids
- * @version 1.0
- * @author Robert D. Falgout
+ * @memo Linear solvers for sparse matrix systems
  **/
 /*@{*/
 
@@ -41,17 +40,205 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /**
- * @name ParCSR Solvers and Preconditioners Type
- *
- * Description...
+ * @name ParCSR Solvers
+ **/
+/*@{*/
+
+struct hypre_Solver_struct;
+/**
+ * The solver object.
+ **/
+typedef struct hypre_Solver_struct *HYPRE_Solver;
+
+typedef int (*HYPRE_PtrToSolverFcn)(HYPRE_Solver,
+                                    HYPRE_ParCSRMatrix,
+                                    HYPRE_ParVector,
+                                    HYPRE_ParVector);
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name ParCSR BoomerAMG Solver
  **/
 /*@{*/
 
 /**
- * The {\tt HYPRE\_Solver} object.
+ * Create a solver object.
  **/
-struct hypre_Solver_struct;
-typedef struct hypre_Solver_struct *HYPRE_Solver;
+int HYPRE_BoomerAMGCreate(HYPRE_Solver *solver);
+
+/**
+ * Destroy a solver object.
+ **/
+int HYPRE_BoomerAMGDestroy(HYPRE_Solver solver);
+
+/**
+ **/
+int HYPRE_BoomerAMGSetup(HYPRE_Solver       solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector    b,
+                         HYPRE_ParVector    x);
+
+/**
+ * Solve the system.
+ **/
+int HYPRE_BoomerAMGSolve(HYPRE_Solver       solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector    b,
+                         HYPRE_ParVector    x);
+
+/**
+ * Solve the transpose system.
+ **/
+int HYPRE_BoomerAMGSolveT(HYPRE_Solver       solver,
+                          HYPRE_ParCSRMatrix A,
+                          HYPRE_ParVector    b,
+                          HYPRE_ParVector    x);
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+int HYPRE_BoomerAMGSetTol(HYPRE_Solver solver,
+                          double       tol);
+
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+int HYPRE_BoomerAMGSetMaxIter(HYPRE_Solver solver,
+                              int          max_iter);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
+                                  int          restr_par);
+
+/**
+ * (Optional) Set maximum number of multigrid levels.
+ **/
+int HYPRE_BoomerAMGSetMaxLevels(HYPRE_Solver solver,
+                                int          max_levels);
+
+/**
+ * (Optional) Set AMG strength threshold.
+ **/
+int HYPRE_BoomerAMGSetStrongThreshold(HYPRE_Solver solver,
+                                      double       strong_threshold);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetMaxRowSum(HYPRE_Solver solver,
+                                double        max_row_sum);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetTruncFactor(HYPRE_Solver solver,
+                                  double       trunc_factor);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetInterpType(HYPRE_Solver solver,
+                                 int          interp_type);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetMinIter(HYPRE_Solver solver,
+                              int          min_iter);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetCoarsenType(HYPRE_Solver solver,
+                                  int          coarsen_type);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetMeasureType(HYPRE_Solver solver,
+                                  int          measure_type);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetCycleType(HYPRE_Solver solver,
+                                int          cycle_type);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetNumGridSweeps(HYPRE_Solver  solver,
+                                    int          *num_grid_sweeps);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGInitGridRelaxation(int    **num_grid_sweeps_ptr,
+                                      int    **grid_relax_type_ptr,
+                                      int   ***grid_relax_points_ptr,
+                                      int      coarsen_type,
+                                      double **relax_weights_ptr,
+                                      int      max_levels);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetGridRelaxType(HYPRE_Solver  solver,
+                                    int          *grid_relax_type);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetGridRelaxPoints(HYPRE_Solver   solver,
+                                      int          **grid_relax_points);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetRelaxWeight(HYPRE_Solver  solver,
+                                  double       *relax_weight);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetIOutDat(HYPRE_Solver solver,
+                              int          ioutdat);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetLogFileName(HYPRE_Solver  solver,
+                                  char         *log_file_name);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetLogging(HYPRE_Solver  solver,
+                              int           ioutdat,
+                              char         *log_file_name);
+
+/**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetDebugFlag(HYPRE_Solver solver,
+                                int          debug_flag);
+
+/**
+ * Return the number of iterations taken.
+ **/
+int HYPRE_BoomerAMGGetNumIterations(HYPRE_Solver  solver,
+                                    int          *num_iterations);
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+int HYPRE_BoomerAMGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
+                                                double       *rel_resid_norm);
 
 /*@}*/
 
@@ -68,27 +255,19 @@ typedef struct hypre_Solver_struct *HYPRE_Solver;
 
 /**
  * Create a ParaSails preconditioner.
- *
- * @return Error code.
- * @param comm [IN] MPI Communicator.
- * @param solver [OUT] solver object.
  **/
 int HYPRE_ParCSRParaSailsCreate(MPI_Comm      comm,
                                 HYPRE_Solver *solver);
 
 /**
  * Destroy a ParaSails preconditioner.
- *
- * @return Error code.
- * @param solver [IN] Preconditioner object to be destroyed.
  **/
 int HYPRE_ParCSRParaSailsDestroy(HYPRE_Solver solver);
 
 /**
  * Set up the ParaSails preconditioner.  This function should be passed
- * to the iterative solver SetPrecond function.
+ * to the iterative solver {\tt SetPrecond} function.
  *
- * @return Error code.
  * @param solver [IN] Preconditioner object to set up.
  * @param A [IN] ParCSR matrix used to construct the preconditioner.
  * @param b Ignored by this function.
@@ -101,9 +280,8 @@ int HYPRE_ParCSRParaSailsSetup(HYPRE_Solver       solver,
 
 /**
  * Apply the ParaSails preconditioner.  This function should be passed
- * to the iterative solver SetPrecond function.
+ * to the iterative solver {\tt SetPrecond} function.
  *
- * @return Error code.
  * @param solver [IN] Preconditioner object to apply.
  * @param A Ignored by this function.
  * @param b [IN] Vector to precondition.
@@ -121,7 +299,6 @@ int HYPRE_ParCSRParaSailsSolve(HYPRE_Solver       solver,
  * threshold parameter and higher values of levels parameter 
  * lead to more accurate, but more expensive preconditioners.
  *
- * @return Error code.
  * @param solver [IN] Preconditioner object for which to set parameters.
  * @param thresh [IN] Value of threshold parameter, $0 \le$ thresh $\le 1$.
  *                    The default value is 0.1.
@@ -136,7 +313,6 @@ int HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver,
  * Set the filter parameter for the 
  * ParaSails preconditioner.
  *
- * @return Error code.
  * @param solver [IN] Preconditioner object for which to set filter parameter.
  * @param filter [IN] Value of filter parameter.  The filter parameter is
  *                    used to drop small nonzeros in the preconditioner,
@@ -151,7 +327,6 @@ int HYPRE_ParCSRParaSailsSetFilter(HYPRE_Solver solver,
  * Set the symmetry parameter for the
  * ParaSails preconditioner.
  *
- * @return Error code.
  * @param solver [IN] Preconditioner object for which to set symmetry parameter.
  * @param sym [IN] Value of the symmetry parameter:
  * \begin{tabular}{|c|l|} \hline
@@ -169,7 +344,6 @@ int HYPRE_ParCSRParaSailsSetSym(HYPRE_Solver solver,
  * Set the load balance parameter for the
  * ParaSails preconditioner.
  *
- * @return Error code.
  * @param solver [IN] Preconditioner object for which to set the load balance
  *                    parameter.
  * @param loadbal [IN] Value of the load balance parameter, 
@@ -189,7 +363,6 @@ int HYPRE_ParCSRParaSailsSetLoadbal(HYPRE_Solver solver,
  * Set the pattern reuse parameter for the
  * ParaSails preconditioner.
  *
- * @return Error code.
  * @param solver [IN] Preconditioner object for which to set the pattern reuse 
  *                    parameter.
  * @param reuse [IN] Value of the pattern reuse parameter.  A nonzero value
@@ -206,7 +379,6 @@ int HYPRE_ParCSRParaSailsSetReuse(HYPRE_Solver solver,
  * Set the logging parameter for the
  * ParaSails preconditioner.
  *
- * @return Error code.
  * @param solver [IN] Preconditioner object for which to set the logging
  *                    parameter.
  * @param logging [IN] Value of the logging parameter.  A nonzero value
@@ -222,637 +394,53 @@ int HYPRE_ParCSRParaSailsSetLogging(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 /**
- * @name ParCSR BoomerAMG Preconditioner
- *
- * Description...
+ * @name ParCSR Pilut Preconditioner
  **/
 /*@{*/
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Create a preconditioner object.
  **/
-int HYPRE_BoomerAMGCreate(HYPRE_Solver *solver);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGDestroy(HYPRE_Solver solver);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetup(HYPRE_Solver       solver,
-                         HYPRE_ParCSRMatrix A,
-                         HYPRE_ParVector    b,
-                         HYPRE_ParVector    x);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSolve(HYPRE_Solver       solver,
-                         HYPRE_ParCSRMatrix A,
-                         HYPRE_ParVector    b,
-                         HYPRE_ParVector    x);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSolveT(HYPRE_Solver       solver,
-                          HYPRE_ParCSRMatrix A,
-                          HYPRE_ParVector    b,
-                          HYPRE_ParVector    x);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
-                                  int          restr_par);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetMaxLevels(HYPRE_Solver solver,
-                                int          max_levels);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetStrongThreshold(HYPRE_Solver solver,
-                                      double       strong_threshold);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetMaxRowSum(HYPRE_Solver solver,
-                                double        max_row_sum);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetTruncFactor(HYPRE_Solver solver,
-                                  double       trunc_factor);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetInterpType(HYPRE_Solver solver,
-                                 int          interp_type);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetMinIter(HYPRE_Solver solver,
-                              int          min_iter);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetMaxIter(HYPRE_Solver solver,
-                              int          max_iter);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetCoarsenType(HYPRE_Solver solver,
-                                  int          coarsen_type);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetMeasureType(HYPRE_Solver solver,
-                                  int          measure_type);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetCycleType(HYPRE_Solver solver,
-                                int          cycle_type);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetTol(HYPRE_Solver solver,
-                          double       tol);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetNumGridSweeps(HYPRE_Solver  solver,
-                                    int          *num_grid_sweeps);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGInitGridRelaxation(int    **num_grid_sweeps_ptr,
-                                      int    **grid_relax_type_ptr,
-                                      int   ***grid_relax_points_ptr,
-                                      int      coarsen_type,
-                                      double **relax_weights_ptr,
-                                      int      max_levels);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetGridRelaxType(HYPRE_Solver  solver,
-                                    int          *grid_relax_type);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetGridRelaxPoints(HYPRE_Solver   solver,
-                                      int          **grid_relax_points);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetRelaxWeight(HYPRE_Solver  solver,
-                                  double       *relax_weight);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetIOutDat(HYPRE_Solver solver,
-                              int          ioutdat);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetLogFileName(HYPRE_Solver  solver,
-                                  char         *log_file_name);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetLogging(HYPRE_Solver  solver,
-                              int           ioutdat,
-                              char         *log_file_name);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGSetDebugFlag(HYPRE_Solver solver,
-                                int          debug_flag);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGGetNumIterations(HYPRE_Solver  solver,
-                                    int          *num_iterations);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_BoomerAMGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                                double       *rel_resid_norm);
-
-/*@}*/
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-/**
- * @name ParCSR BiCGSTAB Solver
- *
- * Description...
- **/
-/*@{*/
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRBiCGSTABCreate(MPI_Comm      comm,
-                               HYPRE_Solver *solver);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRBiCGSTABDestroy(HYPRE_Solver solver);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRBiCGSTABSetup(HYPRE_Solver       solver,
-                              HYPRE_ParCSRMatrix A,
-                              HYPRE_ParVector    b,
-                              HYPRE_ParVector    x);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRBiCGSTABSolve(HYPRE_Solver       solver,
-                              HYPRE_ParCSRMatrix A,
-                              HYPRE_ParVector    b,
-                              HYPRE_ParVector    x);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRBiCGSTABSetTol(HYPRE_Solver solver,
-                               double       tol);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRBiCGSTABSetMinIter(HYPRE_Solver solver,
-                                   int          min_iter);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRBiCGSTABSetMaxIter(HYPRE_Solver solver,
-                                   int          max_iter);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRBiCGSTABSetStopCrit(HYPRE_Solver solver,
-                                    int          stop_crit);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRBiCGSTABSetPrecond(HYPRE_Solver solver,
-                                   int (*precond)(HYPRE_Solver       sol,
-                                                  HYPRE_ParCSRMatrix matrix,
-                                                  HYPRE_ParVector    b,
-                                                  HYPRE_ParVector    x),
-                                   int (*precond_setup)(HYPRE_Solver     sol,
-                                                      HYPRE_ParCSRMatrix matrix,
-                                                      HYPRE_ParVector    b,
-                                                      HYPRE_ParVector    x),
-                                   void *precond_data);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRBiCGSTABGetPrecond(HYPRE_Solver  solver,
-                                   HYPRE_Solver *precond_data);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRBiCGSTABSetLogging(HYPRE_Solver solver,
-                                   int          logging);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRBiCGSTABGetNumIterations(HYPRE_Solver  solver,
-                                         int          *num_iterations);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                 		     double       *norm);
-
-/*@}*/
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-/**
- * @name ParCSR CGN Solver
- *
- * Description...
- **/
-/*@{*/
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRCGNRCreate(MPI_Comm      comm,
-                           HYPRE_Solver *solver);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRCGNRDestroy(HYPRE_Solver solver);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRCGNRSetup(HYPRE_Solver       solver,
-                          HYPRE_ParCSRMatrix A,
-                          HYPRE_ParVector    b,
-                          HYPRE_ParVector    x);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRCGNRSolve(HYPRE_Solver       solver,
-                          HYPRE_ParCSRMatrix A,
-                          HYPRE_ParVector    b,
-                          HYPRE_ParVector    x);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRCGNRSetTol(HYPRE_Solver solver,
-                           double       tol);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRCGNRSetMinIter(HYPRE_Solver solver,
-                               int          min_iter);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRCGNRSetMaxIter(HYPRE_Solver solver,
-                               int          max_iter);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRCGNRSetStopCrit(HYPRE_Solver solver,
-                                int          stop_crit);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRCGNRSetPrecond(HYPRE_Solver solver,
-                               int (*precond)(HYPRE_Solver       sol,
-                                              HYPRE_ParCSRMatrix matrix,
-                                              HYPRE_ParVector    b,
-                                              HYPRE_ParVector    x),
-                               int (*precondT)(HYPRE_Solver       sol,
-                                               HYPRE_ParCSRMatrix matrix,
-                                               HYPRE_ParVector     b,
-                                               HYPRE_ParVector     x),
-                               int (*precond_setup)(HYPRE_Solver       sol,
-                                                    HYPRE_ParCSRMatrix matrix,
-                                                    HYPRE_ParVector    b,
-                                                    HYPRE_ParVector    x),
-                               void *precond_data);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRCGNRGetPrecond(HYPRE_Solver  solver,
-                               HYPRE_Solver *precond_data);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRCGNRSetLogging(HYPRE_Solver solver,
-                               int          logging);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRCGNRGetNumIterations(HYPRE_Solver  solver,
-                                     int          *num_iterations);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                                 double       *norm);
-
-/*@}*/
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-/**
- * @name ParCSR GMRES Solver
- *
- * Description...
- **/
-/*@{*/
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRGMRESCreate(MPI_Comm      comm,
+int HYPRE_ParCSRPilutCreate(MPI_Comm      comm,
                             HYPRE_Solver *solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Destroy a preconditioner object.
  **/
-int HYPRE_ParCSRGMRESDestroy(HYPRE_Solver solver);
+int HYPRE_ParCSRPilutDestroy(HYPRE_Solver solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
  **/
-int HYPRE_ParCSRGMRESSetup(HYPRE_Solver       solver,
+int HYPRE_ParCSRPilutSetup(HYPRE_Solver       solver,
                            HYPRE_ParCSRMatrix A,
                            HYPRE_ParVector    b,
                            HYPRE_ParVector    x);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Precondition the system.
  **/
-int HYPRE_ParCSRGMRESSolve(HYPRE_Solver       solver,
+int HYPRE_ParCSRPilutSolve(HYPRE_Solver       solver,
                            HYPRE_ParCSRMatrix A,
                            HYPRE_ParVector    b,
                            HYPRE_ParVector    x);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set maximum number of iterations.
  **/
-int HYPRE_ParCSRGMRESSetKDim(HYPRE_Solver solver,
-                             int          k_dim);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRGMRESSetTol(HYPRE_Solver solver,
-                            double       tol);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRGMRESSetMinIter(HYPRE_Solver solver,
-                                int          min_iter);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRGMRESSetMaxIter(HYPRE_Solver solver,
+int HYPRE_ParCSRPilutSetMaxIter(HYPRE_Solver solver,
                                 int          max_iter);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional)
  **/
-int HYPRE_ParCSRGMRESSetStopCrit(HYPRE_Solver solver,
-                                 int          stop_crit);
+int HYPRE_ParCSRPilutSetDropTolerance(HYPRE_Solver solver,
+                                      double       tol);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional)
  **/
-int HYPRE_ParCSRGMRESSetPrecond(HYPRE_Solver solver,
-                                int (*precond)(HYPRE_Solver sol,
-                                               HYPRE_ParCSRMatrix matrix,
-                                               HYPRE_ParVector b,
-                                               HYPRE_ParVector x),
-                                int (*precond_setup)(HYPRE_Solver sol,
-                                		     HYPRE_ParCSRMatrix matrix,
-                                		     HYPRE_ParVector b,
-                                		     HYPRE_ParVector x),
-                                void *precond_data);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRGMRESGetPrecond(HYPRE_Solver  solver,
-                                HYPRE_Solver *precond_data);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRGMRESSetLogging(HYPRE_Solver solver,
-                                int          logging);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRGMRESGetNumIterations(HYPRE_Solver  solver,
-                                      int          *num_iterations);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                                  double       *norm);
+int HYPRE_ParCSRPilutSetFactorRowSize(HYPRE_Solver solver,
+                                      int          size);
 
 /*@}*/
 
@@ -861,30 +449,21 @@ int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
 
 /**
  * @name ParCSR PCG Solver
- *
- * Description...
  **/
 /*@{*/
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Create a solver object.
  **/
 int HYPRE_ParCSRPCGCreate(MPI_Comm      comm,
                           HYPRE_Solver *solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Destroy a solver object.
  **/
 int HYPRE_ParCSRPCGDestroy(HYPRE_Solver solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
  **/
 int HYPRE_ParCSRPCGSetup(HYPRE_Solver       solver,
                          HYPRE_ParCSRMatrix A,
@@ -892,9 +471,7 @@ int HYPRE_ParCSRPCGSetup(HYPRE_Solver       solver,
                          HYPRE_ParVector    x);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Solve the system.
  **/
 int HYPRE_ParCSRPCGSolve(HYPRE_Solver       solver,
                          HYPRE_ParCSRMatrix A,
@@ -902,97 +479,69 @@ int HYPRE_ParCSRPCGSolve(HYPRE_Solver       solver,
                          HYPRE_ParVector    x);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set the convergence tolerance.
  **/
 int HYPRE_ParCSRPCGSetTol(HYPRE_Solver solver,
                           double       tol);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set maximum number of iterations.
  **/
 int HYPRE_ParCSRPCGSetMaxIter(HYPRE_Solver solver,
                               int          max_iter);
 
-/**
- * Description...
- *
- * @param param [IN] ...
+/*
+ * RE-VISIT
  **/
 int HYPRE_ParCSRPCGSetStopCrit(HYPRE_Solver solver,
                                int          stop_crit);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Use the two-norm in stopping criteria.
  **/
 int HYPRE_ParCSRPCGSetTwoNorm(HYPRE_Solver solver,
                               int          two_norm);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Additionally require that the relative difference in
+ * successive iterates be small.
  **/
 int HYPRE_ParCSRPCGSetRelChange(HYPRE_Solver solver,
                                 int          rel_change);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set the preconditioner to use.
  **/
-int HYPRE_ParCSRPCGSetPrecond(HYPRE_Solver solver,
-                              int (*precond)(HYPRE_Solver       sol,
-                                             HYPRE_ParCSRMatrix matrix,
-                                             HYPRE_ParVector    b,
-                                             HYPRE_ParVector    x),
-                              int (*precond_setup)(HYPRE_Solver       sol,
-                                                   HYPRE_ParCSRMatrix matrix,
-                                                   HYPRE_ParVector    b,
-                                                   HYPRE_ParVector    x),
-                              void *precond_data);
+int HYPRE_ParCSRPCGSetPrecond(HYPRE_Solver         solver,
+                              HYPRE_PtrToSolverFcn precond,
+                              HYPRE_PtrToSolverFcn precond_setup,
+                              HYPRE_Solver         precond_solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
  **/
 int HYPRE_ParCSRPCGGetPrecond(HYPRE_Solver  solver,
                               HYPRE_Solver *precond_data);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set the amount of logging to do.
  **/
 int HYPRE_ParCSRPCGSetLogging(HYPRE_Solver solver,
                               int          logging);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Return the number of iterations taken.
  **/
 int HYPRE_ParCSRPCGGetNumIterations(HYPRE_Solver  solver,
                                     int          *num_iterations);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Return the norm of the final relative residual.
  **/
 int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                 double       *norm);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Setup routine for diagonal preconditioning.
  **/
 int HYPRE_ParCSRDiagScaleSetup(HYPRE_Solver       solver,
                                HYPRE_ParCSRMatrix A,
@@ -1000,9 +549,7 @@ int HYPRE_ParCSRDiagScaleSetup(HYPRE_Solver       solver,
                                HYPRE_ParVector    x);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Solve routine for diagonal preconditioning.
  **/
 int HYPRE_ParCSRDiagScale(HYPRE_Solver       solver,
                           HYPRE_ParCSRMatrix HA,
@@ -1015,82 +562,207 @@ int HYPRE_ParCSRDiagScale(HYPRE_Solver       solver,
  *--------------------------------------------------------------------------*/
 
 /**
- * @name ParCSR Pilut Preconditioner
- *
- * Description...
+ * @name ParCSR GMRES Solver
  **/
 /*@{*/
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Create a solver object.
  **/
-int HYPRE_ParCSRPilutCreate(MPI_Comm      comm,
+int HYPRE_ParCSRGMRESCreate(MPI_Comm      comm,
                             HYPRE_Solver *solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Destroy a solver object.
  **/
-int HYPRE_ParCSRPilutDestroy(HYPRE_Solver solver);
+int HYPRE_ParCSRGMRESDestroy(HYPRE_Solver solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
  **/
-int HYPRE_ParCSRPilutSetup(HYPRE_Solver       solver,
+int HYPRE_ParCSRGMRESSetup(HYPRE_Solver       solver,
                            HYPRE_ParCSRMatrix A,
                            HYPRE_ParVector    b,
                            HYPRE_ParVector    x);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Solve the system.
  **/
-int HYPRE_ParCSRPilutSolve(HYPRE_Solver       solver,
+int HYPRE_ParCSRGMRESSolve(HYPRE_Solver       solver,
                            HYPRE_ParCSRMatrix A,
                            HYPRE_ParVector    b,
                            HYPRE_ParVector    x);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set the maximum size of the Krylov space.
  **/
-int HYPRE_ParCSRPilutSetMaxIter(HYPRE_Solver solver,
+int HYPRE_ParCSRGMRESSetKDim(HYPRE_Solver solver,
+                             int          k_dim);
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+int HYPRE_ParCSRGMRESSetTol(HYPRE_Solver solver,
+                            double       tol);
+
+/*
+ * RE-VISIT
+ **/
+int HYPRE_ParCSRGMRESSetMinIter(HYPRE_Solver solver,
+                                int          min_iter);
+
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+int HYPRE_ParCSRGMRESSetMaxIter(HYPRE_Solver solver,
                                 int          max_iter);
 
-/**
- * Description...
- *
- * @param param [IN] ...
+/*
+ * RE-VISIT
  **/
-int HYPRE_ParCSRPilutSetDropTolerance(HYPRE_Solver solver,
-                                      double       tol);
+int HYPRE_ParCSRGMRESSetStopCrit(HYPRE_Solver solver,
+                                 int          stop_crit);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set the preconditioner to use.
  **/
-int HYPRE_ParCSRPilutSetFactorRowSize(HYPRE_Solver solver,
-                                      int          size);
+int HYPRE_ParCSRGMRESSetPrecond(HYPRE_Solver          solver,
+                                HYPRE_PtrToSolverFcn  precond,
+                                HYPRE_PtrToSolverFcn  precond_setup,
+                                HYPRE_Solver          precond_solver);
+
+/**
+ **/
+int HYPRE_ParCSRGMRESGetPrecond(HYPRE_Solver  solver,
+                                HYPRE_Solver *precond_data);
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+int HYPRE_ParCSRGMRESSetLogging(HYPRE_Solver solver,
+                                int          logging);
+
+/**
+ * Return the number of iterations taken.
+ **/
+int HYPRE_ParCSRGMRESGetNumIterations(HYPRE_Solver  solver,
+                                      int          *num_iterations);
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
+                                                  double       *norm);
 
 /*@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/**
- * @name ParCSR Utility Functions
- *
- * Description...
+/*
+ * @name ParCSR BiCGSTAB Solver
  **/
-/*@{*/
+
+int HYPRE_ParCSRBiCGSTABCreate(MPI_Comm      comm,
+                               HYPRE_Solver *solver);
+
+int HYPRE_ParCSRBiCGSTABDestroy(HYPRE_Solver solver);
+
+int HYPRE_ParCSRBiCGSTABSetup(HYPRE_Solver       solver,
+                              HYPRE_ParCSRMatrix A,
+                              HYPRE_ParVector    b,
+                              HYPRE_ParVector    x);
+
+int HYPRE_ParCSRBiCGSTABSolve(HYPRE_Solver       solver,
+                              HYPRE_ParCSRMatrix A,
+                              HYPRE_ParVector    b,
+                              HYPRE_ParVector    x);
+
+int HYPRE_ParCSRBiCGSTABSetTol(HYPRE_Solver solver,
+                               double       tol);
+
+int HYPRE_ParCSRBiCGSTABSetMinIter(HYPRE_Solver solver,
+                                   int          min_iter);
+
+int HYPRE_ParCSRBiCGSTABSetMaxIter(HYPRE_Solver solver,
+                                   int          max_iter);
+
+int HYPRE_ParCSRBiCGSTABSetStopCrit(HYPRE_Solver solver,
+                                    int          stop_crit);
+
+int HYPRE_ParCSRBiCGSTABSetPrecond(HYPRE_Solver         solver,
+                                   HYPRE_PtrToSolverFcn precond,
+                                   HYPRE_PtrToSolverFcn precond_setup,
+                                   HYPRE_Solver         precond_solver);
+
+int HYPRE_ParCSRBiCGSTABGetPrecond(HYPRE_Solver  solver,
+                                   HYPRE_Solver *precond_data);
+
+int HYPRE_ParCSRBiCGSTABSetLogging(HYPRE_Solver solver,
+                                   int          logging);
+
+int HYPRE_ParCSRBiCGSTABGetNumIterations(HYPRE_Solver  solver,
+                                         int          *num_iterations);
+
+int HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
+                                 		     double       *norm);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/*
+ * @name ParCSR CGNR Solver
+ **/
+
+int HYPRE_ParCSRCGNRCreate(MPI_Comm      comm,
+                           HYPRE_Solver *solver);
+
+int HYPRE_ParCSRCGNRDestroy(HYPRE_Solver solver);
+
+int HYPRE_ParCSRCGNRSetup(HYPRE_Solver       solver,
+                          HYPRE_ParCSRMatrix A,
+                          HYPRE_ParVector    b,
+                          HYPRE_ParVector    x);
+
+int HYPRE_ParCSRCGNRSolve(HYPRE_Solver       solver,
+                          HYPRE_ParCSRMatrix A,
+                          HYPRE_ParVector    b,
+                          HYPRE_ParVector    x);
+
+int HYPRE_ParCSRCGNRSetTol(HYPRE_Solver solver,
+                           double       tol);
+
+int HYPRE_ParCSRCGNRSetMinIter(HYPRE_Solver solver,
+                               int          min_iter);
+
+int HYPRE_ParCSRCGNRSetMaxIter(HYPRE_Solver solver,
+                               int          max_iter);
+
+int HYPRE_ParCSRCGNRSetStopCrit(HYPRE_Solver solver,
+                                int          stop_crit);
+
+int HYPRE_ParCSRCGNRSetPrecond(HYPRE_Solver         solver,
+                               HYPRE_PtrToSolverFcn precond,
+                               HYPRE_PtrToSolverFcn precondT,
+                               HYPRE_PtrToSolverFcn precond_setup,
+                               HYPRE_Solver         precond_solver);
+
+int HYPRE_ParCSRCGNRGetPrecond(HYPRE_Solver  solver,
+                               HYPRE_Solver *precond_data);
+
+int HYPRE_ParCSRCGNRSetLogging(HYPRE_Solver solver,
+                               int          logging);
+
+int HYPRE_ParCSRCGNRGetNumIterations(HYPRE_Solver  solver,
+                                     int          *num_iterations);
+
+int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
+                                                 double       *norm);
+
+/*--------------------------------------------------------------------------
+ * Miscellaneous: These probably do not belong in the interface.
+ *--------------------------------------------------------------------------*/
 
 HYPRE_ParCSRMatrix GenerateLaplacian(MPI_Comm comm,
                                      int      nx,
@@ -1104,11 +776,6 @@ HYPRE_ParCSRMatrix GenerateLaplacian(MPI_Comm comm,
                                      int      r,
                                      double  *value);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int map(int ix,
         int iy,
         int iz,
@@ -1135,11 +802,6 @@ HYPRE_ParCSRMatrix GenerateLaplacian27pt(MPI_Comm comm,
                                          int      r,
                                          double  *value);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int map3(int ix,
          int iy,
          int iz,
@@ -1163,11 +825,6 @@ HYPRE_ParCSRMatrix GenerateLaplacian9pt(MPI_Comm comm,
                                         int      q,
                                         double  *value);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int map2(int ix,
          int iy,
          int p,
@@ -1190,11 +847,10 @@ HYPRE_ParCSRMatrix GenerateDifConv(MPI_Comm comm,
                                    int      r,
                                    double  *value);
 
-/*@}*/
-/*@}*/
-
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+
+/*@}*/
 
 #ifdef __cplusplus
 }

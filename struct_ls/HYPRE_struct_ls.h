@@ -2,9 +2,7 @@
  * (c) 2000   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice,
-contact person,
-and disclaimer.
+ * notice, contact person, and disclaimer.
  *
  * $Revision$
  *********************************************************************EHEADER*/
@@ -29,13 +27,12 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /**
- * @name Struct Linear Solvers Interface
+ * @name Struct Solvers
  *
- * A general description of the interface goes here...
+ * These solvers use matrix/vector storage schemes that are taylored
+ * to structured grid problems.
  *
- * @memo A linear solver interface for structured grids
- * @version 1.0
- * @author Robert D. Falgout
+ * @memo Linear solvers for structured grids
  **/
 /*@{*/
 
@@ -44,15 +41,13 @@ extern "C" {
 
 /**
  * @name Struct Solvers
- *
- * Description...
  **/
 /*@{*/
 
-/**
- * The {\tt HYPRE\_StructSolver} object ...
- **/
 struct hypre_StructSolver_struct;
+/**
+ * The solver object.
+ **/
 typedef struct hypre_StructSolver_struct *HYPRE_StructSolver;
 
 typedef int (*HYPRE_PtrToStructSolverFcn)(HYPRE_StructSolver,
@@ -66,313 +61,28 @@ typedef int (*HYPRE_PtrToStructSolverFcn)(HYPRE_StructSolver,
  *--------------------------------------------------------------------------*/
 
 /**
- * @name Struct PCG Solver
- *
- * Description...
- **/
-/*@{*/
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructPCGCreate(MPI_Comm            comm,
-                          HYPRE_StructSolver *solver);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructPCGDestroy(HYPRE_StructSolver solver);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructPCGSetup(HYPRE_StructSolver solver,
-                         HYPRE_StructMatrix A,
-                         HYPRE_StructVector b,
-                         HYPRE_StructVector x);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructPCGSolve(HYPRE_StructSolver solver,
-                         HYPRE_StructMatrix A,
-                         HYPRE_StructVector b,
-                         HYPRE_StructVector x);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructPCGSetTol(HYPRE_StructSolver solver,
-                          double             tol);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructPCGSetMaxIter(HYPRE_StructSolver solver,
-                              int                max_iter);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructPCGSetTwoNorm(HYPRE_StructSolver solver,
-                              int                two_norm);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructPCGSetRelChange(HYPRE_StructSolver solver,
-                                int                rel_change);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructPCGSetPrecond(HYPRE_StructSolver         solver,
-                              HYPRE_PtrToStructSolverFcn precond,
-                              HYPRE_PtrToStructSolverFcn precond_setup,
-                              HYPRE_StructSolver         precond_solver);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructPCGSetLogging(HYPRE_StructSolver solver,
-                              int                logging);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructPCGGetNumIterations(HYPRE_StructSolver  solver,
-                                    int                *num_iterations);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructPCGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
-                                                double             *norm);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructDiagScaleSetup(HYPRE_StructSolver solver,
-                               HYPRE_StructMatrix A,
-                               HYPRE_StructVector y,
-                               HYPRE_StructVector x);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructDiagScale(HYPRE_StructSolver solver,
-                          HYPRE_StructMatrix HA,
-                          HYPRE_StructVector Hy,
-                          HYPRE_StructVector Hx);
-
-/*@}*/
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-/**
- * @name Struct Hybrid Solver
- *
- * Description...
- **/
-/*@{*/
-
-/* HYPRE_struct_hybrid.c */
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructHybridCreate(MPI_Comm            comm,
-                             HYPRE_StructSolver *solver);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructHybridDestroy(HYPRE_StructSolver solver);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructHybridSetup(HYPRE_StructSolver solver,
-                            HYPRE_StructMatrix A,
-                            HYPRE_StructVector b,
-                            HYPRE_StructVector x);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructHybridSolve(HYPRE_StructSolver solver,
-                            HYPRE_StructMatrix A,
-                            HYPRE_StructVector b,
-                            HYPRE_StructVector x);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructHybridSetTol(HYPRE_StructSolver solver,
-                             double             tol);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructHybridSetConvergenceTol(HYPRE_StructSolver solver,
-                                        double             cf_tol);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructHybridSetDSCGMaxIter(HYPRE_StructSolver solver,
-                                     int                dscg_max_its);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructHybridSetPCGMaxIter(HYPRE_StructSolver solver,
-                                    int                pcg_max_its);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructHybridSetTwoNorm(HYPRE_StructSolver solver,
-                                 int                two_norm);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructHybridSetRelChange(HYPRE_StructSolver solver,
-                                   int                rel_change);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructHybridSetPrecond(HYPRE_StructSolver         solver,
-                                 HYPRE_PtrToStructSolverFcn precond,
-                                 HYPRE_PtrToStructSolverFcn precond_setup,
-                                 HYPRE_StructSolver         precond_solver);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructHybridSetLogging(HYPRE_StructSolver solver,
-                                 int                logging);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructHybridGetNumIterations(HYPRE_StructSolver  solver,
-                                       int                *num_its);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructHybridGetDSCGNumIterations(HYPRE_StructSolver  solver,
-                                           int                *dscg_num_its);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructHybridGetPCGNumIterations(HYPRE_StructSolver  solver,
-                                          int                *pcg_num_its);
-
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructHybridGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
-                                                   double             *norm);
-
-/*@}*/
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-/**
  * @name Struct Jacobi Solver
- *
- * Description...
  **/
 /*@{*/
 
-/* HYPRE_struct_jacobi.c */
-
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Create a solver object.
  **/
 int HYPRE_StructJacobiCreate(MPI_Comm            comm,
                              HYPRE_StructSolver *solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Destroy a solver object.  An object should be explicitly destroyed
+ * using this destructor when the user's code no longer needs direct
+ * access to it.  Once destroyed, the object must not be referenced
+ * again.  Note that the object may not be deallocated at the
+ * completion of this call, since there may be internal package
+ * references to the object.  The object will then be destroyed when
+ * all internal reference counts go to zero.
  **/
 int HYPRE_StructJacobiDestroy(HYPRE_StructSolver solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructJacobiSetup(HYPRE_StructSolver solver,
                             HYPRE_StructMatrix A,
@@ -380,9 +90,7 @@ int HYPRE_StructJacobiSetup(HYPRE_StructSolver solver,
                             HYPRE_StructVector x);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Solve the system.
  **/
 int HYPRE_StructJacobiSolve(HYPRE_StructSolver solver,
                             HYPRE_StructMatrix A,
@@ -390,47 +98,35 @@ int HYPRE_StructJacobiSolve(HYPRE_StructSolver solver,
                             HYPRE_StructVector x);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set the convergence tolerance.
  **/
 int HYPRE_StructJacobiSetTol(HYPRE_StructSolver solver,
                              double             tol);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set maximum number of iterations.
  **/
 int HYPRE_StructJacobiSetMaxIter(HYPRE_StructSolver solver,
                                  int                max_iter);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Use a zero initial guess.
  **/
 int HYPRE_StructJacobiSetZeroGuess(HYPRE_StructSolver solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Use a nonzero initial guess.
  **/
 int HYPRE_StructJacobiSetNonZeroGuess(HYPRE_StructSolver solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Return the number of iterations taken.
  **/
 int HYPRE_StructJacobiGetNumIterations(HYPRE_StructSolver  solver,
                                        int                *num_iterations);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Return the norm of the final relative residual.
  **/
 int HYPRE_StructJacobiGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                    double             *norm);
@@ -442,32 +138,21 @@ int HYPRE_StructJacobiGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
 
 /**
  * @name Struct PFMG Solver
- *
- * Description...
  **/
 /*@{*/
 
-/* HYPRE_struct_pfmg.c */
-
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Create a solver object.
  **/
 int HYPRE_StructPFMGCreate(MPI_Comm            comm,
                            HYPRE_StructSolver *solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Destroy a solver object.
  **/
 int HYPRE_StructPFMGDestroy(HYPRE_StructSolver solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructPFMGSetup(HYPRE_StructSolver solver,
                           HYPRE_StructMatrix A,
@@ -475,9 +160,7 @@ int HYPRE_StructPFMGSetup(HYPRE_StructSolver solver,
                           HYPRE_StructVector x);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Solve the system.
  **/
 int HYPRE_StructPFMGSolve(HYPRE_StructSolver solver,
                           HYPRE_StructMatrix A,
@@ -485,103 +168,78 @@ int HYPRE_StructPFMGSolve(HYPRE_StructSolver solver,
                           HYPRE_StructVector x);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set the convergence tolerance.
  **/
 int HYPRE_StructPFMGSetTol(HYPRE_StructSolver solver,
                            double             tol);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set maximum number of iterations.
  **/
 int HYPRE_StructPFMGSetMaxIter(HYPRE_StructSolver solver,
                                int                max_iter);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Additionally require that the relative difference in
+ * successive iterates be small.
  **/
 int HYPRE_StructPFMGSetRelChange(HYPRE_StructSolver solver,
                                  int                rel_change);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Use a zero initial guess.
  **/
 int HYPRE_StructPFMGSetZeroGuess(HYPRE_StructSolver solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Use a nonzero initial guess.
  **/
 int HYPRE_StructPFMGSetNonZeroGuess(HYPRE_StructSolver solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set relaxation type.
  **/
 int HYPRE_StructPFMGSetRelaxType(HYPRE_StructSolver solver,
                                  int                relax_type);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set number of pre-relaxation sweeps.
  **/
 int HYPRE_StructPFMGSetNumPreRelax(HYPRE_StructSolver solver,
                                    int                num_pre_relax);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set number of post-relaxation sweeps.
  **/
 int HYPRE_StructPFMGSetNumPostRelax(HYPRE_StructSolver solver,
                                     int                num_post_relax);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Skip relaxation on certain grids for isotropic problems.
  **/
 int HYPRE_StructPFMGSetSkipRelax(HYPRE_StructSolver solver,
                                  int                skip_relax);
 
-/**
- * Description...
- *
- * @param param [IN] ...
+/*
+ * RE-VISIT
  **/
 int HYPRE_StructPFMGSetDxyz(HYPRE_StructSolver  solver,
                             double             *dxyz);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set the amount of logging to do.
  **/
 int HYPRE_StructPFMGSetLogging(HYPRE_StructSolver solver,
                                int                logging);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Return the number of iterations taken.
  **/
 int HYPRE_StructPFMGGetNumIterations(HYPRE_StructSolver  solver,
                                      int                *num_iterations);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Return the norm of the final relative residual.
  **/
 int HYPRE_StructPFMGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                  double             *norm);
@@ -593,32 +251,21 @@ int HYPRE_StructPFMGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
 
 /**
  * @name Struct SMG Solver
- *
- * Description...
  **/
 /*@{*/
 
-/* HYPRE_struct_smg.c */
-
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Create a solver object.
  **/
 int HYPRE_StructSMGCreate(MPI_Comm            comm,
                           HYPRE_StructSolver *solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Destroy a solver object.
  **/
 int HYPRE_StructSMGDestroy(HYPRE_StructSolver solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructSMGSetup(HYPRE_StructSolver solver,
                          HYPRE_StructMatrix A,
@@ -626,97 +273,74 @@ int HYPRE_StructSMGSetup(HYPRE_StructSolver solver,
                          HYPRE_StructVector x);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Solve the system.
  **/
 int HYPRE_StructSMGSolve(HYPRE_StructSolver solver,
                          HYPRE_StructMatrix A,
                          HYPRE_StructVector b,
                          HYPRE_StructVector x);
 
-/**
- * Description...
- *
- * @param param [IN] ...
+/*
+ * RE-VISIT
  **/
 int HYPRE_StructSMGSetMemoryUse(HYPRE_StructSolver solver,
                                 int                memory_use);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set the convergence tolerance.
  **/
 int HYPRE_StructSMGSetTol(HYPRE_StructSolver solver,
                           double             tol);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set maximum number of iterations.
  **/
 int HYPRE_StructSMGSetMaxIter(HYPRE_StructSolver solver,
                               int                max_iter);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Additionally require that the relative difference in
+ * successive iterates be small.
  **/
 int HYPRE_StructSMGSetRelChange(HYPRE_StructSolver solver,
                                 int                rel_change);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Use a zero initial guess.
  **/
 int HYPRE_StructSMGSetZeroGuess(HYPRE_StructSolver solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Use a nonzero initial guess.
  **/
 int HYPRE_StructSMGSetNonZeroGuess(HYPRE_StructSolver solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set number of pre-relaxation sweeps.
  **/
 int HYPRE_StructSMGSetNumPreRelax(HYPRE_StructSolver solver,
                                   int                num_pre_relax);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set number of post-relaxation sweeps.
  **/
 int HYPRE_StructSMGSetNumPostRelax(HYPRE_StructSolver solver,
                                    int                num_post_relax);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set the amount of logging to do.
  **/
 int HYPRE_StructSMGSetLogging(HYPRE_StructSolver solver,
                               int                logging);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Return the number of iterations taken.
  **/
 int HYPRE_StructSMGGetNumIterations(HYPRE_StructSolver  solver,
                                     int                *num_iterations);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Return the norm of the final relative residual.
  **/
 int HYPRE_StructSMGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                 double             *norm);
@@ -727,156 +351,228 @@ int HYPRE_StructSMGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
  *--------------------------------------------------------------------------*/
 
 /**
- * @name Struct SparseMSGSolver
- *
- * Description...
+ * @name Struct PCG Solver
  **/
 /*@{*/
 
-/* HYPRE_struct_sparse_msg.c */
+/**
+ * Create a solver object.
+ **/
+int HYPRE_StructPCGCreate(MPI_Comm            comm,
+                          HYPRE_StructSolver *solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Destroy a solver object.
  **/
+int HYPRE_StructPCGDestroy(HYPRE_StructSolver solver);
+
+/**
+ **/
+int HYPRE_StructPCGSetup(HYPRE_StructSolver solver,
+                         HYPRE_StructMatrix A,
+                         HYPRE_StructVector b,
+                         HYPRE_StructVector x);
+
+/**
+ * Solve the system.
+ **/
+int HYPRE_StructPCGSolve(HYPRE_StructSolver solver,
+                         HYPRE_StructMatrix A,
+                         HYPRE_StructVector b,
+                         HYPRE_StructVector x);
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+int HYPRE_StructPCGSetTol(HYPRE_StructSolver solver,
+                          double             tol);
+
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+int HYPRE_StructPCGSetMaxIter(HYPRE_StructSolver solver,
+                              int                max_iter);
+
+/**
+ * (Optional) Use the two-norm in stopping criteria.
+ **/
+int HYPRE_StructPCGSetTwoNorm(HYPRE_StructSolver solver,
+                              int                two_norm);
+
+/**
+ * (Optional) Additionally require that the relative difference in
+ * successive iterates be small.
+ **/
+int HYPRE_StructPCGSetRelChange(HYPRE_StructSolver solver,
+                                int                rel_change);
+
+/**
+ * (Optional) Set the preconditioner to use.
+ **/
+int HYPRE_StructPCGSetPrecond(HYPRE_StructSolver         solver,
+                              HYPRE_PtrToStructSolverFcn precond,
+                              HYPRE_PtrToStructSolverFcn precond_setup,
+                              HYPRE_StructSolver         precond_solver);
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+int HYPRE_StructPCGSetLogging(HYPRE_StructSolver solver,
+                              int                logging);
+
+/**
+ * Return the number of iterations taken.
+ **/
+int HYPRE_StructPCGGetNumIterations(HYPRE_StructSolver  solver,
+                                    int                *num_iterations);
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+int HYPRE_StructPCGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
+                                                double             *norm);
+
+/**
+ * Setup routine for diagonal preconditioning.
+ **/
+int HYPRE_StructDiagScaleSetup(HYPRE_StructSolver solver,
+                               HYPRE_StructMatrix A,
+                               HYPRE_StructVector y,
+                               HYPRE_StructVector x);
+
+/**
+ * Solve routine for diagonal preconditioning.
+ **/
+int HYPRE_StructDiagScale(HYPRE_StructSolver solver,
+                          HYPRE_StructMatrix HA,
+                          HYPRE_StructVector Hy,
+                          HYPRE_StructVector Hx);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/*
+ * @name Struct SparseMSG Solver
+ **/
+
 int HYPRE_StructSparseMSGCreate(MPI_Comm            comm,
                                 HYPRE_StructSolver *solver);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructSparseMSGDestroy(HYPRE_StructSolver solver);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructSparseMSGSetup(HYPRE_StructSolver solver,
                                HYPRE_StructMatrix A,
                                HYPRE_StructVector b,
                                HYPRE_StructVector x);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructSparseMSGSolve(HYPRE_StructSolver solver,
                                HYPRE_StructMatrix A,
                                HYPRE_StructVector b,
                                HYPRE_StructVector x);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructSparseMSGSetTol(HYPRE_StructSolver solver,
                                 double             tol);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructSparseMSGSetMaxIter(HYPRE_StructSolver solver,
                                     int                max_iter);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructSparseMSGSetJump(HYPRE_StructSolver solver,
                                  int                jump);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructSparseMSGSetRelChange(HYPRE_StructSolver solver,
                                       int                rel_change);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructSparseMSGSetZeroGuess(HYPRE_StructSolver solver);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructSparseMSGSetNonZeroGuess(HYPRE_StructSolver solver);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructSparseMSGSetRelaxType(HYPRE_StructSolver solver,
                                       int                relax_type);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructSparseMSGSetNumPreRelax(HYPRE_StructSolver solver,
                                         int                num_pre_relax);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructSparseMSGSetNumPostRelax(HYPRE_StructSolver solver,
                                          int                num_post_relax);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructSparseMSGSetNumFineRelax(HYPRE_StructSolver solver,
                                          int                num_fine_relax);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructSparseMSGSetLogging(HYPRE_StructSolver solver,
                                     int                logging);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructSparseMSGGetNumIterations(HYPRE_StructSolver  solver,
                                           int                *num_iterations);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructSparseMSGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                       double             *norm);
 
-/*@}*/
-/*@}*/
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/*
+ * @name Struct Hybrid Solver
+ **/
+
+int HYPRE_StructHybridCreate(MPI_Comm            comm,
+                             HYPRE_StructSolver *solver);
+
+int HYPRE_StructHybridDestroy(HYPRE_StructSolver solver);
+
+int HYPRE_StructHybridSetup(HYPRE_StructSolver solver,
+                            HYPRE_StructMatrix A,
+                            HYPRE_StructVector b,
+                            HYPRE_StructVector x);
+
+int HYPRE_StructHybridSolve(HYPRE_StructSolver solver,
+                            HYPRE_StructMatrix A,
+                            HYPRE_StructVector b,
+                            HYPRE_StructVector x);
+
+int HYPRE_StructHybridSetTol(HYPRE_StructSolver solver,
+                             double             tol);
+
+int HYPRE_StructHybridSetConvergenceTol(HYPRE_StructSolver solver,
+                                        double             cf_tol);
+
+int HYPRE_StructHybridSetDSCGMaxIter(HYPRE_StructSolver solver,
+                                     int                dscg_max_its);
+
+int HYPRE_StructHybridSetPCGMaxIter(HYPRE_StructSolver solver,
+                                    int                pcg_max_its);
+
+int HYPRE_StructHybridSetTwoNorm(HYPRE_StructSolver solver,
+                                 int                two_norm);
+
+int HYPRE_StructHybridSetRelChange(HYPRE_StructSolver solver,
+                                   int                rel_change);
+
+int HYPRE_StructHybridSetPrecond(HYPRE_StructSolver         solver,
+                                 HYPRE_PtrToStructSolverFcn precond,
+                                 HYPRE_PtrToStructSolverFcn precond_setup,
+                                 HYPRE_StructSolver         precond_solver);
+
+int HYPRE_StructHybridSetLogging(HYPRE_StructSolver solver,
+                                 int                logging);
+
+int HYPRE_StructHybridGetNumIterations(HYPRE_StructSolver  solver,
+                                       int                *num_its);
+
+int HYPRE_StructHybridGetDSCGNumIterations(HYPRE_StructSolver  solver,
+                                           int                *dscg_num_its);
+
+int HYPRE_StructHybridGetPCGNumIterations(HYPRE_StructSolver  solver,
+                                          int                *pcg_num_its);
+
+int HYPRE_StructHybridGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
+                                                   double             *norm);
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+
+/*@}*/
 
 #ifdef __cplusplus
 }

@@ -178,7 +178,7 @@ int HYPRE_ParCSRBiCGSTABSetTol( HYPRE_Solver solver , double tol );
 int HYPRE_ParCSRBiCGSTABSetMinIter( HYPRE_Solver solver , int min_iter );
 int HYPRE_ParCSRBiCGSTABSetMaxIter( HYPRE_Solver solver , int max_iter );
 int HYPRE_ParCSRBiCGSTABSetStopCrit( HYPRE_Solver solver , int stop_crit );
-int HYPRE_ParCSRBiCGSTABSetPrecond( HYPRE_Solver solver , int (*precond )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precond_setup )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), void *precond_data );
+int HYPRE_ParCSRBiCGSTABSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
 int HYPRE_ParCSRBiCGSTABGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
 int HYPRE_ParCSRBiCGSTABSetLogging( HYPRE_Solver solver , int logging );
 int HYPRE_ParCSRBiCGSTABGetNumIterations( HYPRE_Solver solver , int *num_iterations );
@@ -193,7 +193,7 @@ int HYPRE_ParCSRCGNRSetTol( HYPRE_Solver solver , double tol );
 int HYPRE_ParCSRCGNRSetMinIter( HYPRE_Solver solver , int min_iter );
 int HYPRE_ParCSRCGNRSetMaxIter( HYPRE_Solver solver , int max_iter );
 int HYPRE_ParCSRCGNRSetStopCrit( HYPRE_Solver solver , int stop_crit );
-int HYPRE_ParCSRCGNRSetPrecond( HYPRE_Solver solver , int (*precond )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precondT )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precond_setup )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), void *precond_data );
+int HYPRE_ParCSRCGNRSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precondT , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
 int HYPRE_ParCSRCGNRGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
 int HYPRE_ParCSRCGNRSetLogging( HYPRE_Solver solver , int logging );
 int HYPRE_ParCSRCGNRGetNumIterations( HYPRE_Solver solver , int *num_iterations );
@@ -209,7 +209,7 @@ int HYPRE_ParCSRGMRESSetTol( HYPRE_Solver solver , double tol );
 int HYPRE_ParCSRGMRESSetMinIter( HYPRE_Solver solver , int min_iter );
 int HYPRE_ParCSRGMRESSetMaxIter( HYPRE_Solver solver , int max_iter );
 int HYPRE_ParCSRGMRESSetStopCrit( HYPRE_Solver solver , int stop_crit );
-int HYPRE_ParCSRGMRESSetPrecond( HYPRE_Solver solver , int (*precond )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precond_setup )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), void *precond_data );
+int HYPRE_ParCSRGMRESSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
 int HYPRE_ParCSRGMRESGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
 int HYPRE_ParCSRGMRESSetLogging( HYPRE_Solver solver , int logging );
 int HYPRE_ParCSRGMRESGetNumIterations( HYPRE_Solver solver , int *num_iterations );
@@ -225,7 +225,7 @@ int HYPRE_ParCSRPCGSetMaxIter( HYPRE_Solver solver , int max_iter );
 int HYPRE_ParCSRPCGSetStopCrit( HYPRE_Solver solver , int stop_crit );
 int HYPRE_ParCSRPCGSetTwoNorm( HYPRE_Solver solver , int two_norm );
 int HYPRE_ParCSRPCGSetRelChange( HYPRE_Solver solver , int rel_change );
-int HYPRE_ParCSRPCGSetPrecond( HYPRE_Solver solver , int (*precond )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precond_setup )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), void *precond_data );
+int HYPRE_ParCSRPCGSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
 int HYPRE_ParCSRPCGGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
 int HYPRE_ParCSRPCGSetLogging( HYPRE_Solver solver , int logging );
 int HYPRE_ParCSRPCGGetNumIterations( HYPRE_Solver solver , int *num_iterations );
@@ -384,10 +384,6 @@ int hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP , hypre_ParCSRMatrix *A );
 /* par_relax.c */
 int hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight , hypre_ParVector *u , hypre_ParVector *Vtemp );
 int gselim( double *A , double *x , int n );
-
-/* par_ruge.c */
-int hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int measure_type , int coarsen_type , int debug_flag , int **CF_marker_ptr , int *coarse_size_ptr );
-int hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int measure_type , int debug_flag , int **CF_marker_ptr , int *coarse_size_ptr );
 
 /* par_scaled_matnorm.c */
 int hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A , double *scnorm );

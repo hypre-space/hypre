@@ -4,16 +4,16 @@
 \chapter{Getting Started}
 \label{Getting Started}
 
-Before coding:
+Before writing any code:
 
 \begin{enumerate}
 
 \item
 {\bf Choose a conceptual interface (see Sections
 \ref{What are conceptual interfaces} and
-\ref{Which conceptual interface should I use}.}
-Generally, the choice is fairly obvious.  A structured grid interface
-is clearly inappropriate for an unstructured grid application.  It is
+\ref{Which conceptual interface should I use}).}
+Generally, the choice is fairly obvious.  A structured-grid interface
+is clearly inappropriate for an unstructured-grid application.  It is
 desirable to use a more specific interface if appropriate, e.g., the
 linear-algebraic interface is usable from any type of grid but will
 involve much more user work and prevent access to some
@@ -26,8 +26,9 @@ will mean a single Krylov method and a single preconditioner.
 \item 
 {\bf Look up matrix requirements for each solver and preconditioner.}
 Each specific solver and preconditioner has requirements from the
-input matrix. This information is provided in several places:
-\ref{solvers}, \hypre{} Reference Manual, and header files).
+input matrix. This information is provided in several places: Chapter
+\ref{Solvers and Preconditioners}, the \hypre{} Reference Manual, and
+\hypre{} header files).
 
 \item 
 {\bf Choose a matrix class that is compatible with your solvers and
@@ -41,7 +42,7 @@ application to call \hypre{}:
 \item
 {\bf Build any necessary auxiliary structures for your chosen
 conceptual interface.} This includes, e.g., the grid and stencil
-structures for the structured grid interface.
+structures for the structured-grid interface.
 
 \item
 {\bf Build the matrix and vectors through your chosen conceptual
@@ -74,11 +75,15 @@ solver.
 
 \section{A Simple Example}
 
-The following code sample serves as a simple example of the usage of
-\hypre{}. In this example, the structured grid interface (discussed in
-Chapter ~\ref{Structured Grid Interface}) is used to enter the problem
-into \hypre{}, and the \code{PFMG} Multigrid solver is used to solve
-the system.
+The following code serves as a simple example of the usage of
+\hypre{}.  In this example, the structured-grid interface
+(discussed in Chapter ~\ref{Structured-Grid System Interface}) is used
+to enter the problem into \hypre{}, and the \code{PFMG} Multigrid
+solver is used to solve the system.
+
+This example and all other examples in this manual are written in C,
+but \hypre{} also supports Fortran.  See Chapter
+\ref{Calling hypre from Fortran} for details.
 
 \begin{display}
 \begin{verbatim}
@@ -88,15 +93,18 @@ the system.
  *-----------------------------------------------------------*/
 
 HYPRE_StructGridCreate(MPI_COMM_WORLD, dim, &grid);
-/* Use HYPRE_StructGridSetExtents to define grid indices */
+HYPRE_StructGridSetExtents(grid, ilower, iupper);
+...
 HYPRE_StructGridAssemble(grid);
 	
 HYPRE_StructStencilCreate(dim, stencil_size, &stencil);
-/* Use HYPRE_StructStencilSetElement to define the stencil shape */
+HYPRE_StructStencilSetElement(stencil, 0, offset0);
+...
 
 HYPRE_StructMatrixCreate(MPI_COMM_WORLD, grid, stencil, &A);
 HYPRE_StructMatrixInitialize(A);
-/* Use HYPRE_StructMatrixSetBoxValues to set matrix coefficients */
+HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nelts, elts, Avalues);
+...
 HYPRE_StructMatrixAssemble(A);
 
 /*-----------------------------------------------------------
@@ -105,12 +113,14 @@ HYPRE_StructMatrixAssemble(A);
 
 HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, &b);
 HYPRE_StructVectorInitialize(b);
-/* Use HYPRE_StructVectorSetBoxValues to set right-hand side values */
+HYPRE_StructVectorSetBoxValues(b, ilower, iupper, bvalues);
+...
 HYPRE_StructVectorAssemble(b);
 
 HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, &x);
 HYPRE_StructVectorInitialize(x);
-/* Use HYPRE_StructVectorSetBoxValues to set initial guess values */
+HYPRE_StructVectorSetBoxValues(x, ilower, iupper, xvalues);
+...
 HYPRE_StructVectorAssemble(x);
 
 /*-----------------------------------------------------------
@@ -118,8 +128,8 @@ HYPRE_StructVectorAssemble(x);
  *-----------------------------------------------------------*/
 
 HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &solver);
-HYPRE_StructPFMGSetMaxIter(solver, 50);  /* optional parameter */
-HYPRE_StructPFMGSetTol(solver, 1.0e-06); /* optional parameter */
+HYPRE_StructPFMGSetMaxIter(solver, 50);     	 /* optional */
+HYPRE_StructPFMGSetTol(solver, 1.0e-06);    	 /* optional */
 HYPRE_StructPFMGSetup(solver, A, b, x);
 
 /*-----------------------------------------------------------
@@ -132,7 +142,8 @@ HYPRE_StructPFMGSolve(solver, A, b, x);
  * Get solution info
  *-----------------------------------------------------------*/
 
-/* Use HYPRE_StructVectorGetBoxValues to get solution vector */
+HYPRE_StructVectorGetBoxValues(x, ilower, iupper, xvalues);
+...
 
 /*-----------------------------------------------------------
  * Free up memory
@@ -204,41 +215,45 @@ interface and linear solver.
 \begin{itemize}
 
 \item
-\code{Structured Grid Interface:}
-This interface is appropriate for applications whose grids consist of
-unions of logically rectangular grids with a fixed stencil pattern of
-nonzeros at each grid point.  Contributions to the matrix are made in
-terms of the stencils.  {\bf NOTE:} The current version only supports
-a single unknown per grid point.
+{\bf Structured-Grid System Interface (\code{Struct}):} This interface
+is appropriate for applications whose grids consist of unions of
+logically rectangular grids with a fixed stencil pattern of nonzeros
+at each grid point.  This interface supports only a single unknown per
+grid point.
+See Chapter \ref{Structured-Grid System Interface} for details.
 
 \item
-\code{Semi-Structured Grid Interface:}
-This interface is appropriate for applications whose grids are mostly
+{\bf Semi-Structured-Grid System Interface (\code{SStruct}):} This
+interface is appropriate for applications whose grids are mostly
 structured, but with some unstructured features.  Examples include
-block-structured grids, composite grids from structured adaptive mesh
+block-structured grids, composite grids in structured adaptive mesh
 refinement (AMR) applications, and overset grids.  This interface
-supports multiple unknowns per cell.  {\bf NOTE:} This is a very new
-interface, and should be used with caution while it matures.
+supports multiple unknowns per cell.
+See Chapter \ref{Semi-Structured-Grid System Interface} for details.
+{\bf NOTE:} This is a very new interface and should be used with
+caution as it matures.
 
 \item
-\code{Finite Element Interface:}
-This is appropriate for users who form their linear systems from a
-finite element discretization.  The interface mirrors typical finite
-element data structures, including element stiffness matrices.  Though
-this interface is provided in \hypre{}, its definition was determined
+{\bf Finite Element Interface (\code{FEI}):} This is appropriate for
+users who form their linear systems from a finite element
+discretization.  The interface mirrors typical finite element data
+structures, including element stiffness matrices.  Though this
+interface is provided in \hypre{}, its definition was determined
 elsewhere (www.z.ca.sandia.gov/fei).
+See Chapter \ref{Finite Element Interface} for details.
 
 \item
-\code{IJ interface:}
-This is the traditional linear algebraic interface.  It can be used as
-a last resort by users for whom the other grid-based interfaces are
-not appropriate.  It requires more work on the user's part, though
-still less than building parallel sparse data structures.  General
-solvers and preconditioners are available through this interface, but
-not specialized solvers which need more information.  Our experience
-is that users with legacy codes, in which they already have code for
+{\bf Linear-Algebraic System Interface (\code{IJ}):} This is the
+traditional linear-algebraic interface.  It can be used as a last
+resort by users for whom the other grid-based interfaces are not
+appropriate.  It requires more work on the user's part, though still
+less than building parallel sparse data structures.  General solvers
+and preconditioners are available through this interface, but not
+specialized solvers which need more information.  Our experience is
+that users with legacy codes, in which they already have code for
 building matrices in particular formats, find the IJ interface
 relatively easy to use.
+See Chapter \ref{Linear-Algebraic System Interface} for details.
 
 \end{itemize}
 
@@ -248,16 +263,3 @@ specialized and more efficient solvers and preconditioners without
 losing access to more general solvers.
 
 %==========================================================================
-
-\section{Bug Reporting}
-
-\hypre{} has an automated bug reporting mechanism in place that may be used 
-as a resource for submitting bugs, desired features, and documentation
-problems, as well as querying the status of previous reports.  Access
-\htmladdnormallink{http://apollo.llnl.gov:8080/bugs}{http://apollo.llnl.gov:8080/bugs}
-for full bug tracking details or to submit or query a bug report.
-This website is currently available only within the llnl.gov domain.
-When using the CASC bug reporting site for the first time, click on
-``Open a new Bugzilla account'' under the ``User login account
-management'' heading.
-

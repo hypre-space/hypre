@@ -8,7 +8,7 @@
 systems of equations on massively parallel computers.  The library was
 created with the primary goal of providing users with advanced
 parallel preconditioners.  Issues of robustness, ease of use,
-flexibility, and interoperability have also played an important role.
+flexibility, and interoperability also play an important role.
 
 %==========================================================================
 
@@ -19,7 +19,7 @@ flexibility, and interoperability have also played an important role.
 
 \item
 {\bf Scalable preconditioners provide efficient solution on today's
-and tomorrow's systems:} \hypre{} contains several families of complex
+and tomorrow's systems:} \hypre{} contains several families of
 preconditioner algorithms focused on the scalable solution of very
 large sparse linear systems. \hypre{} includes ``grey-box'' algorithms
 that use more than just the matrix to solve certain classes of
@@ -30,24 +30,24 @@ algebraic multigrid.
 \item
 {\bf Suite of common iterative methods provides options for a spectrum
 of problems:} \hypre{} provides several of the most commonly used
-Krylov-based iterative methods to be used in conjunction with our
+Krylov-based iterative methods to be used in conjunction with its
 scalable preconditioners. This includes methods for nonsymmetric
 systems such as GMRES and methods for symmetric matrices such as
 Conjugate Gradient.
 
 \item
-{\bf Intuitive grid-centric interfaces obviate need for complex data
-structures and provide access to advanced solvers:} \hypre{} has made
-a major step forward in usability from earlier generations of sparse
-linear solver libraries in that users do not have to learn complicated
-sparse matrix data structures.  Instead, \hypre{} does the work of
-building these data structures for the user through a variety of
-interfaces, each appropriate to different classes of users.  These
-include structured and semi-structured, stencil-based interfaces most
-appropriate for finite-difference applications; an unstructured
-finite-element based interface; and a linear-algebra based interface.
-Each interface provides access to several solvers without the need to
-write new interface code.
+{\bf Intuitive grid-centric interfaces obviate need for complicated
+data structures and provide access to advanced solvers:} \hypre{} has
+made a major step forward in usability from earlier generations of
+sparse linear solver libraries in that users do not have to learn
+complicated sparse matrix data structures.  Instead, \hypre{} does the
+work of building these data structures for the user through a variety
+of interfaces, each appropriate to different classes of users.  These
+include stencil-based structured/semi-structured interfaces most
+appropriate for finite-difference applications; a finite-element based
+unstructured interface; and a linear-algebra based interface.  Each
+interface provides access to several solvers without the need to write
+new interface code.
 
 \item
 {\bf User options accommodate beginners through experts:} \hypre{}
@@ -58,7 +58,7 @@ various parameters.
 
 \item
 {\bf Configuration options to suit your computing system:} \hypre{}
-utilizes the autoconf package to allow simple and flexible
+utilizes the GNU Autoconf package to allow simple and flexible
 installation on a wide variety of computing systems.  Users can tailor
 the installation to match their computing system. Options include
 debug and optimized modes, the ability to change required libraries

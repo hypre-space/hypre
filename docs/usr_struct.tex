@@ -1,6 +1,6 @@
 %==========================================================================
-\chapter{Structured Grid Interface}
-\label{Structured Grid Interface}
+\chapter{Structured-Grid System Interface (Struct)}
+\label{Structured-Grid System Interface}
 
 In order to get access to the most efficient and scalable solvers for
 scalar structured-grid applications, users should use the
@@ -10,20 +10,19 @@ will also provide access (this is not yet supported) to solvers in
 sparse linear systems in general.  These additional solvers are
 usually provided via the unstructured-grid interface (\code{FEI}) or
 the linear-algebraic interface (\code{IJ}) described in Chapters
-\ref{chapter-FEI} and \ref{IJ}.
+\ref{Finite Element Interface} and \ref{Linear-Algebraic System Interface}.
 
 Figure \ref{fig-fv-grid} gives an example of the type of grid
 currently supported by the \code{Struct} interface.  The interface
 uses a finite-difference or finite-volume style, and currently
 supports only scalar PDEs (i.e., one unknown per gridpoint).
-\begin{figure}
+\begin{figure}[t]
 \centering
 \includegraphics[width=4in]{fv_grid.eps}
 \caption{%
 An example 2D structured grid, distributed accross two processors.}
 \label{fig-fv-grid}
 \end{figure}
-
 There are four basic steps involved in setting up the linear system
 to be solved:
 \begin{enumerate}
@@ -80,12 +79,11 @@ HYPRE_StructGridAssemble(grid);
 
 \end{verbatim}
 \end{display}
-The \code{HYPRE_StructGridCreate()} routine creates an empty 2D grid
-object that lives on the \code{MPI_COMM_WORLD} communicator.  The
-\code{HYPRE_StructGridSetExtents()} routine adds a new box to the grid.
-The \code{HYPRE_StructGridAssemble()} routine is a collective call
-(i.e., must be called on all processes), and finalizes the grid
-assembly, making the grid ``ready to use''.
+The \code{Create()} routine creates an empty 2D grid object that lives
+on the \code{MPI_COMM_WORLD} communicator.  The \code{SetExtents()}
+routine adds a new box to the grid.  The \code{Assemble()} routine is
+a collective call (i.e., must be called on all processes), and
+finalizes the grid assembly, making the grid ``ready to use''.
 
 %==========================================================================
 
@@ -138,11 +136,10 @@ for (s = 0; s < 5; s++)
 
 \end{verbatim}
 \end{display}
-The \code{HYPRE_StructStencilCreate()} routine creates an empty 2D,
-5-pt stencil object.  The \code{HYPRE_StructStencilSetElement()}
-routine defines the geometry of the stencil and assigns the array
-numbers for each of the stencil entries.  None of the calls are
-collective calls.
+The \code{Create()} routine creates an empty 2D, 5-pt stencil object.
+The \code{SetElement()} routine defines the geometry of the stencil
+and assigns the array numbers for each of the stencil entries.  None
+of the calls are collective calls.
 
 %==========================================================================
 
@@ -199,20 +196,19 @@ HYPRE_StructMatrixAssemble(A);
 
 \end{verbatim}
 \end{display}
-The \code{HYPRE_StructMatrixCreate()} routine creates an empty matrix
-object.  The \code{HYPRE_StructMatrixInitialize()} routine indicates
-that the matrix coefficients (or values) are ready to be set.  This
-routine may or may not involve the allocation of memory for the
-coefficient data, depending on the implementation.  The optional
-\code{Set} routines mentioned later in this chapter and in the
-Reference Manual, should be called before this step.  The
-\code{HYPRE_StructMatrixSetBoxValues()} routine sets the matrix
-coefficients for some set of stencil entries over the gridpoints in
-some box.  Note that the box need not correspond to any of the boxes
-used to create the grid, but values should be set for all gridpoints
-that this process ``owns''.  The \code{HYPRE_StructMatrixAssemble()}
-routine is a collective call (i.e., must be called on all processes),
-and finalizes the matrix assembly, making the matrix ``ready to use''.
+The \code{Create()} routine creates an empty matrix object.  The
+\code{Initialize()} routine indicates that the matrix coefficients
+(or values) are ready to be set.  This routine may or may not involve
+the allocation of memory for the coefficient data, depending on the
+implementation.  The optional \code{Set} routines mentioned later in
+this chapter and in the Reference Manual, should be called before this
+step.  The \code{SetBoxValues()} routine sets the matrix coefficients
+for some set of stencil entries over the gridpoints in some box.  Note
+that the box need not correspond to any of the boxes used to create
+the grid, but values should be set for all gridpoints that this
+process ``owns''.  The \code{Assemble()} routine is a collective call
+(i.e., must be called on all processes), and finalizes the matrix
+assembly, making the matrix ``ready to use''.
 
 Matrix coefficients that reach outside of the boundary should be set
 to zero.  For efficiency reasons, \hypre{} does not do this
@@ -284,16 +280,15 @@ HYPRE_StructVectorAssemble(b);
 \end{verbatim}
 \end{display}
 
-The \code{HYPRE_StructVectorCreate()} routine creates an empty vector
-object.  The \code{HYPRE_StructVectorInitialize()} routine indicates
-that the vector coefficients (or values) are ready to be set.  This
-routine follows the same rules as its corresponding \code{Matrix}
-routine.  The \code{HYPRE_StructVectorSetBoxValues()} routine sets the
-vector coefficients over the gridpoints in some box, and again,
-follows the same rules as its corresponding \code{Matrix} routine.
-The \code{HYPRE_StructVectorAssemble()} routine is a collective call
-(i.e., must be called on all processes), and finalizes the vector
-assembly, making the vector ``ready to use''.
+The \code{Create()} routine creates an empty vector object.  The
+\code{Initialize()} routine indicates that the vector coefficients
+(or values) are ready to be set.  This routine follows the same rules
+as its corresponding \code{Matrix} routine.  The \code{SetBoxValues()}
+routine sets the vector coefficients over the gridpoints in some box,
+and again, follows the same rules as its corresponding \code{Matrix}
+routine.  The \code{Assemble()} routine is a collective call (i.e.,
+must be called on all processes), and finalizes the vector assembly,
+making the vector ``ready to use''.
 
 %==========================================================================
 
@@ -306,15 +301,14 @@ symmetric.  In this situation, each off-diagonal coefficient appears
 twice in the matrix, but only one copy needs to be stored.  The
 \code{Struct} interface provides support for matrix and solver
 implementations that use symmetric storage via the
-\code{HYPRE_StructMatrixSetSymmetric()} routine.
+\code{SetSymmetric()} routine.
 
 To describe this in more detail, consider again the 5-pt finite-volume
 discretization of (\ref{eqn-laplacian}) on the grid pictured in Figure
 \ref{fig-fv-grid}.  Because the discretization is symmetric, only half
 of the off-diagonal coefficients need to be stored.  To turn symmetric
 storage on, the following line of code needs to be inserted somewhere
-between the \code{HYPRE_StructMatrixCreate()} and
-\code{HYPRE_StructMatrixInitialize()} calls.
+between the \code{Create()} and \code{Initialize()} calls.
 \begin{display}
 \begin{verbatim}
 

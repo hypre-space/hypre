@@ -24,7 +24,7 @@ int HYPRE_SStructGMRESSetTol( HYPRE_SStructSolver solver , double tol );
 int HYPRE_SStructGMRESSetMinIter( HYPRE_SStructSolver solver , int min_iter );
 int HYPRE_SStructGMRESSetMaxIter( HYPRE_SStructSolver solver , int max_iter );
 int HYPRE_SStructGMRESSetStopCrit( HYPRE_SStructSolver solver , int stop_crit );
-int HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver solver , HYPRE_PtrToSStructSolverFcn precond , HYPRE_PtrToSStructSolverFcn precond_setup , void *precond_data );
+int HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver solver , HYPRE_PtrToSStructSolverFcn precond , HYPRE_PtrToSStructSolverFcn precond_setup , HYPRE_SStructSolver precond_solver );
 int HYPRE_SStructGMRESSetLogging( HYPRE_SStructSolver solver , int logging );
 int HYPRE_SStructGMRESGetNumIterations( HYPRE_SStructSolver solver , int *num_iterations );
 int HYPRE_SStructGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver , double *norm );

@@ -117,23 +117,15 @@ HYPRE_ParCSRCGNRSetStopCrit( HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_ParCSRCGNRSetPrecond( HYPRE_Solver  solver,
-                             int   (*precond)    (HYPRE_Solver sol,
-						  HYPRE_ParCSRMatrix matrix,
-						  HYPRE_ParVector b,
-						  HYPRE_ParVector x),
-                             int   (*precondT)   (HYPRE_Solver sol,
-						  HYPRE_ParCSRMatrix matrix,
-						  HYPRE_ParVector b,
-						  HYPRE_ParVector x),
-                             int (*precond_setup)(HYPRE_Solver sol,
-						  HYPRE_ParCSRMatrix matrix,
-						  HYPRE_ParVector b,
-						  HYPRE_ParVector x),
-                             void                *precond_data )
+HYPRE_ParCSRCGNRSetPrecond( HYPRE_Solver         solver,
+                            HYPRE_PtrToSolverFcn precond,
+                            HYPRE_PtrToSolverFcn precondT,
+                            HYPRE_PtrToSolverFcn precond_setup,
+                            HYPRE_Solver         precond_solver )
 {
-   return( hypre_CGNRSetPrecond( (void *) solver, precond,
-                                 precondT, precond_setup, precond_data ) );
+   return( hypre_CGNRSetPrecond( (void *) solver,
+                                 precond, precondT, precond_setup,
+                                 (void *) precond_solver ) );
 }
 
 /*--------------------------------------------------------------------------

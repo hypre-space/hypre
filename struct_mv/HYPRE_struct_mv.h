@@ -21,12 +21,12 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /**
- * @name Struct Linear Solvers Interface
+ * @name Struct System Interface
  *
- * A general description of the interface goes here...
+ * This interface represents a structured-grid conceptual view of a
+ * linear system.
  *
- * @memo A linear solver interface for structured grids
- * @version 1.0
+ * @memo A structured-grid conceptual interface
  * @author Robert D. Falgout
  **/
 /*@{*/
@@ -36,44 +36,36 @@ extern "C" {
 
 /**
  * @name Struct Grids
- *
- * A grid object is constructed out of several ``boxes'', defined on a
- * global abstract index space.
  **/
 /*@{*/
 
-/**
- * The {\tt HYPRE\_StructGrid} object ...
- **/
 struct hypre_StructGrid_struct;
+/**
+ * A grid object is constructed out of several ``boxes'', defined on a
+ * global abstract index space.
+ **/
 typedef struct hypre_StructGrid_struct *HYPRE_StructGrid;
 
 /**
  * Create an {\tt ndim}-dimensional grid object.
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructGridCreate(MPI_Comm          comm,
                            int               ndim,
                            HYPRE_StructGrid *grid);
 
 /**
- * Destroy a grid object.  A grid should be explicitly destroyed using
- * this destructor when the user's code no longer needs direct access
- * to the grid description.  Once destroyed, the object must not be
- * referenced again.  Note that the grid description may not be
- * deallocated at the completion of this call, since there may be
- * internal package references to the object.  The grid will then be
- * destroyed when all internal reference counts go to zero.
- *
- * @param param [IN] ...
+ * Destroy a grid object.  An object should be explicitly destroyed
+ * using this destructor when the user's code no longer needs direct
+ * access to it.  Once destroyed, the object must not be referenced
+ * again.  Note that the object may not be deallocated at the
+ * completion of this call, since there may be internal package
+ * references to the object.  The object will then be destroyed when
+ * all internal reference counts go to zero.
  **/
 int HYPRE_StructGridDestroy(HYPRE_StructGrid grid);
 
 /**
  * Set the extents for a box on the grid.
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructGridSetExtents(HYPRE_StructGrid  grid,
                                int              *ilower,
@@ -81,15 +73,11 @@ int HYPRE_StructGridSetExtents(HYPRE_StructGrid  grid,
 
 /**
  * Finalize the construction of the grid before using.
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructGridAssemble(HYPRE_StructGrid grid);
 
 /**
- * Set periodic.
- *
- * @param param [IN] ...
+ * (Optional) Set periodic.
  **/
 int HYPRE_StructGridSetPeriodic(HYPRE_StructGrid  grid,
                                 int              *periodic);
@@ -101,44 +89,33 @@ int HYPRE_StructGridSetPeriodic(HYPRE_StructGrid  grid,
 
 /**
  * @name Struct Stencils
- *
- * Description...
  **/
 /*@{*/
 
-/**
- * The {\tt HYPRE\_StructStencil} object ...
- **/
 struct hypre_StructStencil_struct;
+/**
+ * The stencil object.
+ **/
 typedef struct hypre_StructStencil_struct *HYPRE_StructStencil;
 
 /**
  * Create a stencil object for the specified number of spatial dimensions
  * and stencil entries.
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructStencilCreate(int                  ndim,
                               int                  size,
                               HYPRE_StructStencil *stencil);
 
 /**
- * Destroy the stencil object.  The stencil object should be explicitly
- * destroyed using this destructor when the user's code no longer needs to
- * directly access the stencil description.  Once destroyed, the object
- * must not be referenced again.
- *
- * @param param [IN] ...
+ * Destroy a stencil object.
  **/
 int HYPRE_StructStencilDestroy(HYPRE_StructStencil stencil);
 
 /**
- * Set a stencil entry ...
+ * Set a stencil entry.
  *
  * NOTE: The name of this routine will eventually be changed to
- * HYPRE\_StructStencilSetEntry.
- *
- * @param param [IN] ...
+ * {\tt HYPRE\_StructStencilSetEntry}.
  **/
 int HYPRE_StructStencilSetElement(HYPRE_StructStencil  stencil,
                                   int                  entry,
@@ -151,21 +128,17 @@ int HYPRE_StructStencilSetElement(HYPRE_StructStencil  stencil,
 
 /**
  * @name Struct Matrices
- *
- * Description...
  **/
 /*@{*/
 
-/**
- * The {\tt HYPRE\_StructMatrix} object ...
- **/
 struct hypre_StructMatrix_struct;
+/**
+ * The matrix object.
+ **/
 typedef struct hypre_StructMatrix_struct *HYPRE_StructMatrix;
 
 /**
  * Create a matrix object.
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructMatrixCreate(MPI_Comm             comm,
                              HYPRE_StructGrid     grid,
@@ -174,22 +147,16 @@ int HYPRE_StructMatrixCreate(MPI_Comm             comm,
 
 /**
  * Destroy a matrix object.
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructMatrixDestroy(HYPRE_StructMatrix matrix);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Prepare a matrix object for setting coefficient values.
  **/
 int HYPRE_StructMatrixInitialize(HYPRE_StructMatrix matrix);
 
 /**
  * Set matrix coefficients index by index.
- *
- * @param param [IN] ... 
  **/
 int HYPRE_StructMatrixSetValues(HYPRE_StructMatrix  matrix,
                                 int                *index,
@@ -199,8 +166,6 @@ int HYPRE_StructMatrixSetValues(HYPRE_StructMatrix  matrix,
 
 /**
  * Set matrix coefficients a box at a time.
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructMatrixSetBoxValues(HYPRE_StructMatrix  matrix,
                                    int                *ilower,
@@ -210,8 +175,6 @@ int HYPRE_StructMatrixSetBoxValues(HYPRE_StructMatrix  matrix,
                                    double             *values);
 /**
  * Add to matrix coefficients index by index.
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructMatrixAddToValues(HYPRE_StructMatrix  matrix,
                                   int                *index,
@@ -221,8 +184,6 @@ int HYPRE_StructMatrixAddToValues(HYPRE_StructMatrix  matrix,
 
 /**
  * Add to matrix coefficients a box at a time.
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructMatrixAddToBoxValues(HYPRE_StructMatrix  matrix,
                                      int                *ilower,
@@ -232,44 +193,20 @@ int HYPRE_StructMatrixAddToBoxValues(HYPRE_StructMatrix  matrix,
                                      double             *values);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Finalize the construction of the matrix before using.
  **/
 int HYPRE_StructMatrixAssemble(HYPRE_StructMatrix matrix);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Define symmetry properties of the matrix.  By default,
+ * matrices are assumed to be nonsymmetric.  Significant storage
+ * savings can be made if the matrix is symmetric.
  **/
 int HYPRE_StructMatrixSetSymmetric(HYPRE_StructMatrix  matrix,
                                    int                 symmetric);
 
 /**
- * Description...
- *
- * NOTE: This routine should not be in the interface.
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructMatrixSetNumGhost(HYPRE_StructMatrix  matrix,
-                                  int                *num_ghost);
-
-/**
- * Description...
- *
- * NOTE: Not sure if this needs to be in the interface.
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructMatrixGetGrid(HYPRE_StructMatrix  matrix,
-                              HYPRE_StructGrid   *grid);
-
-/**
- * Description...
- *
- * @param param [IN] ...
+ * Print the matrix to file.  This is mainly for debugging purposes.
  **/
 int HYPRE_StructMatrixPrint(char               *filename,
                             HYPRE_StructMatrix  matrix,
@@ -282,21 +219,17 @@ int HYPRE_StructMatrixPrint(char               *filename,
 
 /**
  * @name Struct Vectors
- *
- * Description...
  **/
 /*@{*/
 
-/**
- * The {\tt HYPRE\_StructVector} object ...
- **/
 struct hypre_StructVector_struct;
+/**
+ * The vector object.
+ **/
 typedef struct hypre_StructVector_struct *HYPRE_StructVector;
 
 /**
  * Create a vector object.
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructVectorCreate(MPI_Comm            comm,
                              HYPRE_StructGrid    grid,
@@ -304,22 +237,16 @@ int HYPRE_StructVectorCreate(MPI_Comm            comm,
 
 /**
  * Destroy a vector object.
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructVectorDestroy(HYPRE_StructVector vector);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Prepare a vector object for setting coefficient values.
  **/
 int HYPRE_StructVectorInitialize(HYPRE_StructVector vector);
 
 /**
  * Set vector coefficients index by index.
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructVectorSetValues(HYPRE_StructVector  vector,
                                 int                *index,
@@ -327,8 +254,6 @@ int HYPRE_StructVectorSetValues(HYPRE_StructVector  vector,
 
 /**
  * Set vector coefficients a box at a time.
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructVectorSetBoxValues(HYPRE_StructVector  vector,
                                    int                *ilower,
@@ -336,8 +261,6 @@ int HYPRE_StructVectorSetBoxValues(HYPRE_StructVector  vector,
                                    double             *values);
 /**
  * Set vector coefficients index by index.
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructVectorAddToValues(HYPRE_StructVector  vector,
                                   int                *index,
@@ -345,8 +268,6 @@ int HYPRE_StructVectorAddToValues(HYPRE_StructVector  vector,
 
 /**
  * Set vector coefficients a box at a time.
- *
- * @param param [IN] ...
  **/
 int HYPRE_StructVectorAddToBoxValues(HYPRE_StructVector  vector,
                                      int                *ilower,
@@ -354,35 +275,19 @@ int HYPRE_StructVectorAddToBoxValues(HYPRE_StructVector  vector,
                                      double             *values);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Finalize the construction of the vector before using.
  **/
 int HYPRE_StructVectorAssemble(HYPRE_StructVector vector);
 
 /**
- * Description...
- *
- * NOTE: This routine should not be in the interface.
- *
- * @param param [IN] ...
- **/
-int HYPRE_StructVectorSetNumGhost(HYPRE_StructVector  vector,
-                                  int                *num_ghost);
-
-/**
- * Description...
- *
- * @param param [IN] ... 
+ * Get vector coefficients index by index.
  **/
 int HYPRE_StructVectorGetValues(HYPRE_StructVector  vector,
                                 int                *index,
                                 double             *value);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Get vector coefficients a box at a time.
  **/
 int HYPRE_StructVectorGetBoxValues(HYPRE_StructVector  vector,
                                    int                *ilower,
@@ -390,67 +295,43 @@ int HYPRE_StructVectorGetBoxValues(HYPRE_StructVector  vector,
                                    double             *values);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Print the vector to file.  This is mainly for debugging purposes.
  **/
 int HYPRE_StructVectorPrint(char               *filename,
                             HYPRE_StructVector  vector,
                             int                 all);
 
 /*@}*/
+/*@}*/
 
 /*--------------------------------------------------------------------------
+ * Miscellaneous: These probably do not belong in the interface.
  *--------------------------------------------------------------------------*/
 
-/**
- * @name Miscellaneous
- *
- * This does not belong in the interface, and will be removed.
- **/
-/*@{*/
+int HYPRE_StructMatrixSetNumGhost(HYPRE_StructMatrix  matrix,
+                                  int                *num_ghost);
 
-/**
- * The {\tt HYPRE\_CommPkg} object ...
- **/
+int HYPRE_StructMatrixGetGrid(HYPRE_StructMatrix  matrix,
+                              HYPRE_StructGrid   *grid);
+
 struct hypre_CommPkg_struct;
 typedef struct hypre_CommPkg_struct *HYPRE_CommPkg;
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
+int HYPRE_StructVectorSetNumGhost(HYPRE_StructVector  vector,
+                                  int                *num_ghost);
+
 int HYPRE_StructVectorSetConstantValues(HYPRE_StructVector vector,
                                         double             values);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructVectorGetMigrateCommPkg(HYPRE_StructVector  from_vector,
                                         HYPRE_StructVector  to_vector,
                                         HYPRE_CommPkg      *comm_pkg);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_StructVectorMigrate(HYPRE_CommPkg      comm_pkg,
                               HYPRE_StructVector from_vector,
                               HYPRE_StructVector to_vector);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_CommPkgDestroy(HYPRE_CommPkg comm_pkg);
-
-/*@}*/
-/*@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/

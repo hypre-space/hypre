@@ -25,13 +25,12 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /**
- * @name SStruct Linear Solvers Interface
+ * @name SStruct Solvers
  *
- * A general description of the interface goes here...
+ * These solvers use matrix/vector storage schemes that are taylored
+ * to semi-structured grid problems.
  *
- * @memo A linear solver interface for semi-structured grids
- * @version 0.2
- * @author Robert D. Falgout
+ * @memo Linear solvers for semi-structured grids
  **/
 /*@{*/
 
@@ -40,15 +39,13 @@ extern "C" {
 
 /**
  * @name SStruct Solvers
- *
- * Description...
  **/
 /*@{*/
 
-/**
- * The {\tt HYPRE\_SStructSolver} object ...
- **/
 struct hypre_SStructSolver_struct;
+/**
+ * The solver object.
+ **/
 typedef struct hypre_SStructSolver_struct *HYPRE_SStructSolver;
 
 typedef int (*HYPRE_PtrToSStructSolverFcn)(HYPRE_SStructSolver,
@@ -63,30 +60,27 @@ typedef int (*HYPRE_PtrToSStructSolverFcn)(HYPRE_SStructSolver,
 
 /**
  * @name SStruct GMRES Solver
- *
- * Description...
  **/
 /*@{*/
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Create a solver object.
  **/
 int HYPRE_SStructGMRESCreate(MPI_Comm             comm,
                              HYPRE_SStructSolver *solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Destroy a solver object.  An object should be explicitly destroyed
+ * using this destructor when the user's code no longer needs direct
+ * access to it.  Once destroyed, the object must not be referenced
+ * again.  Note that the object may not be deallocated at the
+ * completion of this call, since there may be internal package
+ * references to the object.  The object will then be destroyed when
+ * all internal reference counts go to zero.
  **/
 int HYPRE_SStructGMRESDestroy(HYPRE_SStructSolver solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
  **/
 int HYPRE_SStructGMRESSetup(HYPRE_SStructSolver solver,
                             HYPRE_SStructMatrix A,
@@ -94,9 +88,7 @@ int HYPRE_SStructGMRESSetup(HYPRE_SStructSolver solver,
                             HYPRE_SStructVector x);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Solve the system.
  **/
 int HYPRE_SStructGMRESSolve(HYPRE_SStructSolver solver,
                             HYPRE_SStructMatrix A,
@@ -104,75 +96,57 @@ int HYPRE_SStructGMRESSolve(HYPRE_SStructSolver solver,
                             HYPRE_SStructVector x);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set the maximum size of the Krylov space.
  **/
 int HYPRE_SStructGMRESSetKDim(HYPRE_SStructSolver solver,
                               int                 k_dim);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set the convergence tolerance.
  **/
 int HYPRE_SStructGMRESSetTol(HYPRE_SStructSolver solver,
                              double              tol);
 
-/**
- * Description...
- *
- * @param param [IN] ...
+/*
+ * RE-VISIT
  **/
 int HYPRE_SStructGMRESSetMinIter(HYPRE_SStructSolver solver,
                                  int                 min_iter);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set maximum number of iterations.
  **/
 int HYPRE_SStructGMRESSetMaxIter(HYPRE_SStructSolver solver,
                                  int                 max_iter);
 
-/**
- * Description...
- *
- * @param param [IN] ...
+/*
+ * RE-VISIT
  **/
 int HYPRE_SStructGMRESSetStopCrit(HYPRE_SStructSolver solver,
                                   int                 stop_crit);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set the preconditioner to use.
  **/
 int HYPRE_SStructGMRESSetPrecond(HYPRE_SStructSolver          solver,
                                  HYPRE_PtrToSStructSolverFcn  precond,
                                  HYPRE_PtrToSStructSolverFcn  precond_setup,
-                                 void                        *precond_data);
+                                 HYPRE_SStructSolver          precond_solver);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * (Optional) Set the amount of logging to do.
  **/
 int HYPRE_SStructGMRESSetLogging(HYPRE_SStructSolver solver,
                                  int                 logging);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Return the number of iterations taken.
  **/
 int HYPRE_SStructGMRESGetNumIterations(HYPRE_SStructSolver  solver,
                                        int                 *num_iterations);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Return the norm of the final relative residual.
  **/
 int HYPRE_SStructGMRESGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
                                                    double              *norm);
@@ -182,110 +156,51 @@ int HYPRE_SStructGMRESGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/**
+/*
  * @name SStruct Split Solver
- *
- * Description...
  **/
-/*@{*/
 
 #define HYPRE_SMG  0
 #define HYPRE_PFMG 1
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_SStructSplitCreate(MPI_Comm             comm,
                              HYPRE_SStructSolver *solver);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_SStructSplitDestroy(HYPRE_SStructSolver solver);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_SStructSplitSetup(HYPRE_SStructSolver solver,
                             HYPRE_SStructMatrix A,
                             HYPRE_SStructVector b,
                             HYPRE_SStructVector x);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_SStructSplitSolve(HYPRE_SStructSolver solver,
                             HYPRE_SStructMatrix A,
                             HYPRE_SStructVector b,
                             HYPRE_SStructVector x);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_SStructSplitSetTol(HYPRE_SStructSolver solver,
                              double              tol);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_SStructSplitSetMaxIter(HYPRE_SStructSolver solver,
                                  int                 max_iter);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_SStructSplitSetZeroGuess(HYPRE_SStructSolver solver);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_SStructSplitSetNonZeroGuess(HYPRE_SStructSolver solver);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_SStructSplitSetStructSolver(HYPRE_SStructSolver solver,
                                       int                 ssolver);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_SStructSplitGetNumIterations(HYPRE_SStructSolver  solver,
                                        int                 *num_iterations);
 
-/**
- * Description...
- *
- * @param param [IN] ...
- **/
 int HYPRE_SStructSplitGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
                                                    double              *norm);
 
-/*@}*/
-/*@}*/
-
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+
+/*@}*/
 
 #ifdef __cplusplus
 }

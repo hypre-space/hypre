@@ -24,12 +24,12 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /**
- * @name SStruct Linear Solvers Interface
+ * @name SStruct System Interface
  *
- * A general description of the interface goes here...
+ * This interface represents a semi-structured-grid conceptual view of
+ * a linear system.
  *
- * @memo A linear solver interface for semi-structured grids
- * @version 0.3
+ * @memo A semi-structured-grid conceptual interface
  * @author Robert D. Falgout
  **/
 /*@{*/
@@ -39,19 +39,29 @@ extern "C" {
 
 /**
  * @name SStruct Grids
- *
- * A grid object is constructed out of several structured ``parts''
- * and an optional unstructured ``part''.  Each structured part has
- * its own abstract index space. 
  **/
 /*@{*/
 
-/**
- * The {\tt HYPRE\_SStructGrid} object ...
- **/
 struct hypre_SStructGrid_struct;
+/**
+ * A grid object is constructed out of several structured ``parts''
+ * and an optional unstructured ``part''.  Each structured part has
+ * its own abstract index space.
+ **/
 typedef struct hypre_SStructGrid_struct *HYPRE_SStructGrid;
 
+enum hypre_SStructVariable_enum
+{
+   HYPRE_SSTRUCT_VARIABLE_UNDEFINED = -1,
+   HYPRE_SSTRUCT_VARIABLE_CELL      =  0,
+   HYPRE_SSTRUCT_VARIABLE_NODE      =  1,
+   HYPRE_SSTRUCT_VARIABLE_XFACE     =  2,
+   HYPRE_SSTRUCT_VARIABLE_YFACE     =  3,
+   HYPRE_SSTRUCT_VARIABLE_ZFACE     =  4,
+   HYPRE_SSTRUCT_VARIABLE_XEDGE     =  5,
+   HYPRE_SSTRUCT_VARIABLE_YEDGE     =  6,
+   HYPRE_SSTRUCT_VARIABLE_ZEDGE     =  7
+};
 /**
  * An enumerated type that supports cell centered, node centered, face
  * centered, and edge centered variables.  Face centered variables are
@@ -93,28 +103,12 @@ typedef struct hypre_SStructGrid_struct *HYPRE_SStructGrid;
  * cells are distributed uniquely to different processes, variables
  * may be owned by multiple processes because they may be associated
  * with multiple cells.
- *
- * @param param [IN] ... 
  **/
-enum hypre_SStructVariable_enum
-{
-   HYPRE_SSTRUCT_VARIABLE_UNDEFINED = -1,
-   HYPRE_SSTRUCT_VARIABLE_CELL      =  0,
-   HYPRE_SSTRUCT_VARIABLE_NODE      =  1,
-   HYPRE_SSTRUCT_VARIABLE_XFACE     =  2,
-   HYPRE_SSTRUCT_VARIABLE_YFACE     =  3,
-   HYPRE_SSTRUCT_VARIABLE_ZFACE     =  4,
-   HYPRE_SSTRUCT_VARIABLE_XEDGE     =  5,
-   HYPRE_SSTRUCT_VARIABLE_YEDGE     =  6,
-   HYPRE_SSTRUCT_VARIABLE_ZEDGE     =  7
-};
 typedef enum hypre_SStructVariable_enum HYPRE_SStructVariable;
 
 /**
  * Create an {\tt ndim}-dimensional grid object with {\tt nparts}
  * structured parts.
- *
- * @param param [IN] ...
  **/
 int HYPRE_SStructGridCreate(MPI_Comm           comm,
                             int                ndim,
@@ -122,22 +116,18 @@ int HYPRE_SStructGridCreate(MPI_Comm           comm,
                             HYPRE_SStructGrid *grid);
 
 /**
- * Destroy a grid object.  A grid should be explicitly destroyed using
- * this destructor when the user's code no longer needs direct access
- * to the grid description.  Once destroyed, the object must not be
- * referenced again.  Note that the grid description may not be
- * deallocated at the completion of this call, since there may be
- * internal package references to the object.  The grid will then be
- * destroyed when all internal reference counts go to zero.
- *
- * @param param [IN] ...
+ * Destroy a grid object.  An object should be explicitly destroyed
+ * using this destructor when the user's code no longer needs direct
+ * access to it.  Once destroyed, the object must not be referenced
+ * again.  Note that the object may not be deallocated at the
+ * completion of this call, since there may be internal package
+ * references to the object.  The object will then be destroyed when
+ * all internal reference counts go to zero.
  **/
 int HYPRE_SStructGridDestroy(HYPRE_SStructGrid grid);
 
 /**
  * Set the extents for a box on a structured part of the grid.
- *
- * @param param [IN] ...
  **/
 int HYPRE_SStructGridSetExtents(HYPRE_SStructGrid  grid,
                                 int                part,
@@ -146,8 +136,6 @@ int HYPRE_SStructGridSetExtents(HYPRE_SStructGrid  grid,
 
 /**
  * Describe the variables that live on a structured part of the grid.
- *
- * @param param [IN] ...
  **/
 int HYPRE_SStructGridSetVariables(HYPRE_SStructGrid      grid,
                                   int                    part,
@@ -156,10 +144,8 @@ int HYPRE_SStructGridSetVariables(HYPRE_SStructGrid      grid,
 
 /**
  * Describe additional variables that live at a particular index.
- * These variables are appended to the array of variables set in {\tt
- * HYPRE\_SStructGridSetVariables}, and are referenced as such.
- *
- * @param param [IN] ... 
+ * These variables are appended to the array of variables set in
+ * \Ref{HYPRE_SStructGridSetVariables}, and are referenced as such.
  **/
 int HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
                                   int                    part,
@@ -182,8 +168,6 @@ int HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
  * nbor\_part}.  For example, triple (1, 2, 0) means that indexes 0,
  * 1, and 2 on part {\tt part} map to indexes 1, 2, and 0 on part {\tt
  * nbor\_part}, respectively.
- *
- * @param param [IN] ...
  **/
 int HYPRE_SStructGridSetNeighborBox(HYPRE_SStructGrid  grid,
                                     int                part,
@@ -203,8 +187,6 @@ int HYPRE_SStructGridSetNeighborBox(HYPRE_SStructGrid  grid,
  *
  * NOTE: This is just a placeholder.  This part of the interface
  * is not finished.
- *
- * @param param [IN] ... 
  **/
 int HYPRE_SStructGridAddUnstructuredPart(HYPRE_SStructGrid grid,
                                          int               ilower,
@@ -212,8 +194,6 @@ int HYPRE_SStructGridAddUnstructuredPart(HYPRE_SStructGrid grid,
 
 /**
  * Finalize the construction of the grid before using.
- *
- * @param param [IN] ...
  **/
 int HYPRE_SStructGridAssemble(HYPRE_SStructGrid grid);
 
@@ -224,41 +204,30 @@ int HYPRE_SStructGridAssemble(HYPRE_SStructGrid grid);
 
 /**
  * @name SStruct Stencils
- *
- * Description...
  **/
 /*@{*/
 
-/**
- * The {\tt HYPRE\_SStructStencil} object ...
- **/
 struct hypre_SStructStencil_struct;
+/**
+ * The stencil object.
+ **/
 typedef struct hypre_SStructStencil_struct *HYPRE_SStructStencil;
 
 /**
  * Create a stencil object for the specified number of spatial dimensions
  * and stencil entries.
- *
- * @param param [IN] ...
  **/
 int HYPRE_SStructStencilCreate(int                   ndim,
                                int                   size,
                                HYPRE_SStructStencil *stencil);
 
 /**
- * Destroy the stencil object.  The stencil object should be explicitly
- * destroyed using this destructor when the user's code no longer needs to
- * directly access the stencil description.  Once destroyed, the object
- * must not be referenced again.
- *
- * @param param [IN] ...
+ * Destroy a stencil object.
  **/
 int HYPRE_SStructStencilDestroy(HYPRE_SStructStencil stencil);
 
 /**
- * Set a stencil entry ...
- *
- * @param param [IN] ...
+ * Set a stencil entry.
  **/
 int HYPRE_SStructStencilSetEntry(HYPRE_SStructStencil  stencil,
                                  int                   entry,
@@ -272,40 +241,30 @@ int HYPRE_SStructStencilSetEntry(HYPRE_SStructStencil  stencil,
 
 /**
  * @name SStruct Graphs
- *
- * Description...
  **/
 /*@{*/
 
-/**
- * The {\tt HYPRE\_SStructGraph} object ...
- **/
 struct hypre_SStructGraph_struct;
+/**
+ * The graph object is used to describe the nonzero structure of a
+ * matrix.
+ **/
 typedef struct hypre_SStructGraph_struct *HYPRE_SStructGraph;
 
 /**
- * Create a graph object, such as the nonzero structure of a matrix.
- *
- * @param param [IN] ...
+ * Create a graph object.
  **/
 int HYPRE_SStructGraphCreate(MPI_Comm             comm,
                              HYPRE_SStructGrid    grid,
                              HYPRE_SStructGraph  *graph);
 
 /**
- * Destroy a graph object.  A graph should be explicitly destroyed
- * using this destructor when the user's code no longer needs to
- * directly access the graph description.  Once destroyed, the object
- * must not be referenced again.
- *
- * @param param [IN] ...
+ * Destroy a graph object.
  **/
 int HYPRE_SStructGraphDestroy(HYPRE_SStructGraph graph);
 
 /**
  * Set the stencil for a variable on a structured part of the grid.
- *
- * @param param [IN] ...
  **/
 int HYPRE_SStructGraphSetStencil(HYPRE_SStructGraph   graph,
                                  int                  part,
@@ -320,8 +279,6 @@ int HYPRE_SStructGraphSetStencil(HYPRE_SStructGraph   graph,
  * NOTE: Users are required to set graph entries on all processes that
  * own the associated variables.  This means that some data will be
  * multiply defined.
- *
- * @param param [IN] ... 
  **/
 int HYPRE_SStructGraphAddEntries(HYPRE_SStructGraph   graph,
                                  int                  part,
@@ -334,8 +291,6 @@ int HYPRE_SStructGraphAddEntries(HYPRE_SStructGraph   graph,
 
 /**
  * Finalize the construction of the graph before using.
- *
- * @param param [IN] ...
  **/
 int HYPRE_SStructGraphAssemble(HYPRE_SStructGraph graph);
 
@@ -346,21 +301,17 @@ int HYPRE_SStructGraphAssemble(HYPRE_SStructGraph graph);
 
 /**
  * @name SStruct Matrices
- *
- * Description...
  **/
 /*@{*/
 
-/**
- * The {\tt HYPRE\_SStructMatrix} object ...
- **/
 struct hypre_SStructMatrix_struct;
+/**
+ * The matrix object.
+ **/
 typedef struct hypre_SStructMatrix_struct *HYPRE_SStructMatrix;
 
 /**
  * Create a matrix object.
- *
- * @param param [IN] ...
  **/
 int HYPRE_SStructMatrixCreate(MPI_Comm              comm,
                               HYPRE_SStructGraph    graph,
@@ -368,15 +319,11 @@ int HYPRE_SStructMatrixCreate(MPI_Comm              comm,
 
 /**
  * Destroy a matrix object.
- *
- * @param param [IN] ...
  **/
 int HYPRE_SStructMatrixDestroy(HYPRE_SStructMatrix matrix);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Prepare a matrix object for setting coefficient values.
  **/
 int HYPRE_SStructMatrixInitialize(HYPRE_SStructMatrix matrix);
 
@@ -396,8 +343,6 @@ int HYPRE_SStructMatrixInitialize(HYPRE_SStructMatrix matrix);
  * If the matrix is complex, then {\tt values} consists of pairs of
  * doubles representing the real and imaginary parts of each complex
  * value.
- *
- * @param param [IN] ... 
  *
  * @see HYPRE_SStructMatrixSetComplex
  **/
@@ -426,8 +371,6 @@ int HYPRE_SStructMatrixSetValues(HYPRE_SStructMatrix  matrix,
  * doubles representing the real and imaginary parts of each complex
  * value.
  *
- * @param param [IN] ...
- *
  * @see HYPRE_SStructMatrixSetComplex
  **/
 int HYPRE_SStructMatrixSetBoxValues(HYPRE_SStructMatrix  matrix,
@@ -454,8 +397,6 @@ int HYPRE_SStructMatrixSetBoxValues(HYPRE_SStructMatrix  matrix,
  * doubles representing the real and imaginary parts of each complex
  * value.
  *
- * @param param [IN] ...
- *
  * @see HYPRE_SStructMatrixSetComplex
  **/
 int HYPRE_SStructMatrixAddToValues(HYPRE_SStructMatrix  matrix,
@@ -480,8 +421,6 @@ int HYPRE_SStructMatrixAddToValues(HYPRE_SStructMatrix  matrix,
  * doubles representing the real and imaginary parts of each complex
  * value.
  *
- * @param param [IN] ...
- *
  * @see HYPRE_SStructMatrixSetComplex
  **/
 int HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
@@ -494,47 +433,43 @@ int HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
                                       double              *values);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Finalize the construction of the matrix before using.
  **/
 int HYPRE_SStructMatrixAssemble(HYPRE_SStructMatrix matrix);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Define symmetry properties of the matrix.  By default, matrices are
+ * assumed to be nonsymmetric.  Significant storage savings can be
+ * made if the matrix is symmetric.
  **/
 int HYPRE_SStructMatrixSetSymmetric(HYPRE_SStructMatrix  matrix,
                                     int                  symmetric);
 
 /**
- * Description...
+ * Set the storage type of the matrix object to be constructed.
+ * Currently, {\tt type} can be either {\tt HYPRE\_SSTRUCT} (the
+ * default) or {\tt HYPRE\_PARCSR}.
  *
- * @param param [IN] ...
+ * @see HYPRE_SStructMatrixGetObject
  **/
 int HYPRE_SStructMatrixSetObjectType(HYPRE_SStructMatrix  matrix,
                                      int                  type);
 
 /**
- * Description...
+ * Get a reference to the constructed matrix object.
  *
- * @param param [IN] ...
+ * @see HYPRE_SStructMatrixSetObjectType
  **/
 int HYPRE_SStructMatrixGetObject(HYPRE_SStructMatrix   matrix,
                                  void                **object);
 
 /**
  * Set the matrix to be complex.
- *
- * @param param [IN] ...
  **/
 int HYPRE_SStructMatrixSetComplex(HYPRE_SStructMatrix matrix);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Print the matrix to file.  This is mainly for debugging purposes.
  **/
 int HYPRE_SStructMatrixPrint(char                *filename,
                              HYPRE_SStructMatrix  matrix,
@@ -547,21 +482,17 @@ int HYPRE_SStructMatrixPrint(char                *filename,
 
 /**
  * @name SStruct Vectors
- *
- * Description...
  **/
 /*@{*/
 
-/**
- * The {\tt HYPRE\_SStructVector} object ...
- **/
 struct hypre_SStructVector_struct;
+/**
+ * The vector object.
+ **/
 typedef struct hypre_SStructVector_struct *HYPRE_SStructVector;
 
 /**
  * Create a vector object.
- *
- * @param param [IN] ...
  **/
 int HYPRE_SStructVectorCreate(MPI_Comm              comm,
                               HYPRE_SStructGrid     grid,
@@ -569,15 +500,11 @@ int HYPRE_SStructVectorCreate(MPI_Comm              comm,
 
 /**
  * Destroy a vector object.
- *
- * @param param [IN] ...
  **/
 int HYPRE_SStructVectorDestroy(HYPRE_SStructVector vector);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Prepare a vector object for setting coefficient values.
  **/
 int HYPRE_SStructVectorInitialize(HYPRE_SStructVector vector);
 
@@ -591,8 +518,6 @@ int HYPRE_SStructVectorInitialize(HYPRE_SStructVector vector);
  * If the vector is complex, then {\tt value} consists of a pair of
  * doubles representing the real and imaginary parts of the complex
  * value.
- *
- * @param param [IN] ...
  *
  * @see HYPRE_SStructVectorSetComplex
  **/
@@ -613,8 +538,6 @@ int HYPRE_SStructVectorSetValues(HYPRE_SStructVector  vector,
  * doubles representing the real and imaginary parts of each complex
  * value.
  *
- * @param param [IN] ...
- *
  * @see HYPRE_SStructVectorSetComplex
  **/
 int HYPRE_SStructVectorSetBoxValues(HYPRE_SStructVector  vector,
@@ -633,8 +556,6 @@ int HYPRE_SStructVectorSetBoxValues(HYPRE_SStructVector  vector,
  * If the vector is complex, then {\tt value} consists of a pair of
  * doubles representing the real and imaginary parts of the complex
  * value.
- *
- * @param param [IN] ...
  *
  * @see HYPRE_SStructVectorSetComplex
  **/
@@ -655,8 +576,6 @@ int HYPRE_SStructVectorAddToValues(HYPRE_SStructVector  vector,
  * doubles representing the real and imaginary parts of each complex
  * value.
  *
- * @param param [IN] ...
- *
  * @see HYPRE_SStructVectorSetComplex
  **/
 int HYPRE_SStructVectorAddToBoxValues(HYPRE_SStructVector  vector,
@@ -667,23 +586,19 @@ int HYPRE_SStructVectorAddToBoxValues(HYPRE_SStructVector  vector,
                                       double              *values);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Finalize the construction of the vector before using.
  **/
 int HYPRE_SStructVectorAssemble(HYPRE_SStructVector vector);
 
 
 /**
- * Gather vector data so that efficient GetValues can be done.
- *
- * @param param [IN] ...
+ * Gather vector data so that efficient {\tt GetValues} can be done.
  **/
 int HYPRE_SStructVectorGather(HYPRE_SStructVector vector);
 
 
 /**
- * Description...
+ * Get vector coefficients index by index.
  *
  * NOTE: Users may only get values on processes that own the
  * associated variables.
@@ -691,8 +606,6 @@ int HYPRE_SStructVectorGather(HYPRE_SStructVector vector);
  * If the vector is complex, then {\tt value} consists of a pair of
  * doubles representing the real and imaginary parts of the complex
  * value.
- *
- * @param param [IN] ... 
  *
  * @see HYPRE_SStructVectorSetComplex
  **/
@@ -703,7 +616,7 @@ int HYPRE_SStructVectorGetValues(HYPRE_SStructVector  vector,
                                  double              *value);
 
 /**
- * Description...
+ * Get vector coefficients a box at a time.
  *
  * NOTE: Users may only get values on processes that own the
  * associated variables.
@@ -711,8 +624,6 @@ int HYPRE_SStructVectorGetValues(HYPRE_SStructVector  vector,
  * If the vector is complex, then {\tt values} consists of pairs of
  * doubles representing the real and imaginary parts of each complex
  * value.
- *
- * @param param [IN] ...
  *
  * @see HYPRE_SStructVectorSetComplex
  **/
@@ -724,32 +635,30 @@ int HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
                                     double              *values);
 
 /**
- * Description...
+ * Set the storage type of the vector object to be constructed.
+ * Currently, {\tt type} can be either {\tt HYPRE\_SSTRUCT} (the
+ * default) or {\tt HYPRE\_PARCSR}.
  *
- * @param param [IN] ...
+ * @see HYPRE_SStructVectorGetObject
  **/
 int HYPRE_SStructVectorSetObjectType(HYPRE_SStructVector  vector,
                                      int                  type);
 
 /**
- * Description...
+ * Get a reference to the constructed vector object.
  *
- * @param param [IN] ...
+ * @see HYPRE_SStructVectorSetObjectType
  **/
 int HYPRE_SStructVectorGetObject(HYPRE_SStructVector   vector,
                                  void                **object);
 
 /**
  * Set the vector to be complex.
- *
- * @param param [IN] ...
  **/
 int HYPRE_SStructVectorSetComplex(HYPRE_SStructVector vector);
 
 /**
- * Description...
- *
- * @param param [IN] ...
+ * Print the vector to file.  This is mainly for debugging purposes.
  **/
 int HYPRE_SStructVectorPrint(char                *filename,
                              HYPRE_SStructVector  vector,

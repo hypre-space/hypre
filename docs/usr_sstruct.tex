@@ -1,20 +1,30 @@
 %==========================================================================
-\chapter{Semi-Structured Grid Interface}
-\label{Semi-Structured Grid Interface}
+\chapter{Semi-Structured-Grid System Interface (SStruct)}
+\label{Semi-Structured-Grid System Interface}
 
-Consider the block-structured grid example pictured in Figure
-\ref{fig-block-structured-grid}.  The grid is composed of three
-``parts''.  There is a single cell-centered variable across the entire
-grid, except at the grid cell marked with a square, which has one
-additional cell-centered variable.
-\begin{figure}
+In order to get access to the most efficient and scalable solvers for
+semi-structured-grid applications (applications with grids that are
+mostly structured, but with some unstructured features), users should
+use the \code{SStruct} interface described in this chapter.  This
+interface also provides access to solvers in \hypre{} that were
+designed for unstructured-grid applications and sparse linear systems
+in general.  These additional solvers are usually provided via the
+unstructured-grid interface (\code{FEI}) or the linear-algebraic
+interface (\code{IJ}) described in Chapters
+\ref{Finite Element Interface} and \ref{Linear-Algebraic System Interface}.
+
+Figure \ref{fig-block-structured-grid} gives an example of the type of
+grid currently supported by the \code{SStruct} interface.  The grid is
+composed of three ``parts''.  There is a single cell-centered variable
+across the entire grid, except at the grid cell marked with a square,
+which has one additional cell-centered variable.
+\begin{figure}[t]
 \centering
 \includegraphics[width=4in]{block_structured.eps}
 \caption{%
 An example 2D block-structured grid, distributed accross three processes.}
 \label{fig-block-structured-grid}
 \end{figure}
-
 There are five basic steps involved in setting up the linear system to
 be solved:
 \begin{enumerate}
@@ -75,16 +85,15 @@ HYPRE_SStructGridAssemble(grid);
 
 \end{verbatim}
 \end{display}
-The \code{HYPRE_SStructGridCreate()} routine creates an empty 2D grid
-object that lives on the \code{MPI_COMM_WORLD} communicator.  The
-\code{HYPRE_SStructGridSetExtents()} routine adds a new box to the
-grid.  The \code{HYPRE_SStructGridSetVariables()} routine sets the
-variables on a grid part, and the
-\code{HYPRE_SStructGridAddVariables()} routine adds variables to a grid
-part index (in the above example, there are two cell-centered
-variables at index (1,2)).  The \code{HYPRE_SStructGridAssemble()}
-routine is a collective call (i.e., must be called on all processes),
-and finalizes the grid assembly, making the grid ``ready to use''.
+The \code{Create()} routine creates an empty 2D grid object that lives
+on the \code{MPI_COMM_WORLD} communicator.  The \code{SetExtents()}
+routine adds a new box to the grid.  The \code{SetVariables()} routine
+sets the variables on a grid part, and the \code{AddVariables()}
+routine adds variables to a grid part index (in the above example,
+there are two cell-centered variables at index (1,2)).  The
+\code{Assemble()} routine is a collective call (i.e., must be called
+on all processes), and finalizes the grid assembly, making the grid
+``ready to use''.
 
 %==========================================================================
 
@@ -136,11 +145,10 @@ for (s = 0; s < 9; s++)
 
 \end{verbatim}
 \end{display}
-The \code{HYPRE_SStructStencilCreate()} routine creates an empty 2D,
-9-pt stencil object.  The \code{HYPRE_SStructStencilSetEntry()}
-routine defines the geometry of the stencil, and assigns the array
-numbers for each of the stencil entries.  None of the calls are
-collective calls.
+The \code{Create()} routine creates an empty 2D, 9-pt stencil object.
+The \code{SetEntry()} routine defines the geometry of the stencil, and
+assigns the array numbers for each of the stencil entries.  None of
+the calls are collective calls.
 
 %==========================================================================
 

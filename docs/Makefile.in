@@ -37,7 +37,7 @@ install: all
 clean:
 	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
 	@/bin/rm -f *.idx *.ilg *.ind 
-	@/bin/rm -f ref_manual.tex version.tex
+	@/bin/rm -f vref_manual.* version.tex
 
 veryclean: clean
 	@/bin/rm -fr HYPRE_usr_manual
@@ -80,8 +80,7 @@ USR_FILES =\
  usr_parasails.tex\
  usr_pilut.tex\
  usr_boomeramg.tex\
- usr_interlang.tex\
- usr_building_code.tex\
+ usr_misc.tex\
  usr_manual.tex
 
 HYPRE_usr_manual/usr_manual.html: usr_manual.dvi
@@ -135,19 +134,25 @@ dev_manual.idx: ${DEV_FILES}
 
 ##########
 
-HYPRE_ref_manual/index.html: ref_manual.dxx 
-	doc++ -d HYPRE_ref_manual -B hypre_wiw.html ref_manual.dxx 2>&1
+HYPRE_ref_manual/index.html: vref_manual.dxx 
+	doc++ -d HYPRE_ref_manual -B hypre_wiw.html vref_manual.dxx 2>&1
 	cp -f hypre_wiw.gif HYPRE_ref_manual
 
-HYPRE_ref_manual.ps: ref_manual.dvi
-	${DVIPS} -o HYPRE_ref_manual.ps ref_manual.dvi 		
+HYPRE_ref_manual.ps: vref_manual.dvi
+	${DVIPS} -o HYPRE_ref_manual.ps vref_manual.dvi 		
 
-ref_manual.dvi: version.tex ref_manual.tex
-	${LATEX} ref_manual
-	${LATEX} ref_manual
+vref_manual.dvi: version.tex vref_manual.tex
+	${LATEX} vref_manual
+	${LATEX} vref_manual
 
-ref_manual.tex: ref_manual.dxx
-	doc++ -t -o ref_manual.tex ref_manual.dxx
+vref_manual.tex: vref_manual.dxx
+	doc++ -t -o vref_manual.tex vref_manual.dxx
+
+vref_manual.dxx: ref_manual.dxx
+	@ \
+	VNUM=`../utilities/version -number`; \
+	VDATE=`../utilities/version -date`; \
+	sed "s/HYPREVersion/$$VNUM/g" ref_manual.dxx > vref_manual.dxx
 
 ##########
 
