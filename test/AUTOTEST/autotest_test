@@ -20,9 +20,7 @@ initialize_variables ()
   Hdr="autotest"
   HYPRE_BATCH_MODE="no"
   HYPRE_SEND_MAIL="no"
-  ES_TEST_DIRS='TEST_ij_es/*.sh TEST_sstruct_es/*.sh TEST_struct_es/*.sh'
-  BASIC_TEST_DIRS='TEST_fei/*.sh TEST_ij/*.sh TEST_sstruct/*.sh TEST_struct/*.sh'
-  STD_TEST_DIRS=${BASIC_TEST_DIRS} ${ES_TEST_DIRS}
+  STD_TEST_DIRS='TEST_fac/*.sh TEST_fei/*.sh TEST_ij/*.sh TEST_sstruct/*.sh TEST_struct/*.sh'
   MailOpt=""
   MailCmd="no"
   DEBUG_MODE="no"
@@ -497,7 +495,7 @@ mail_summary () {
     TotalTestCount=0
     TotalSuccessCount=0
     TotalFailureCount=0
-    for i in fac ij ij_es sstruct sstruct_es struct struct_es ; do
+    for i in fac ij sstruct struct ; do
       printf "%-15s: " ${i} >> $SUMFILE
       TestCaseSuccessCount=0; TestCaseFailedCount=0; TestCaseFailedFlag=0
       for j in ${SRC}/test/TEST_${i}/*.sh ; do
