@@ -3535,7 +3535,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    HYPRE_ParVector    b_csr;
    HYPRE_ParVector    x_csr;
 
-   int                info, panel_size, permc_spec;
+   int                info=0, panel_size, permc_spec;
    int                *perm_r, *perm_c;
    double             *rhs, *soln;
    mem_usage_t        mem_usage;
@@ -3614,6 +3614,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    permc_spec = superluOrdering_;
    get_perm_c(permc_spec, &A2, perm_c);
    panel_size = sp_ienv(1);
+   for ( i = 0; i < nrows; i++ ) perm_r[i] = 0;
 
    dgssv(&A2, perm_c, perm_r, &L, &U, &B, &info);
 
