@@ -193,6 +193,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
    max_row_sum = hypre_ParAMGDataMaxRowSum(amg_data);
    trunc_factor = hypre_ParAMGDataTruncFactor(amg_data);
+   if (smooth_option[level] == 6)
+   {
+      smoother = hypre_CTAlloc(HYPRE_Solver, max_levels);
+      hypre_ParAMGDataSmoother(amg_data) = smoother;
+   }
 
    /*-----------------------------------------------------
     *  Enter Coarsening Loop
@@ -221,6 +226,23 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	    relax_weight[level] = (4.0/3.0)/relax_weight[level];
 	 else
 	   printf (" Warning ! Matrix norm is zero !!!");
+      }
+      if (smooth_option[level] == 6)
+      {
+         HYPRE_SchwarzCreate(&smoother[level]);
+         HYPRE_SchwarzSetNumFunctions(smoother[level],num_functions);
+         HYPRE_SchwarzSetVariant(smoother[level],
+		hypre_ParAMGDataVariant(amg_data));
+         HYPRE_SchwarzSetOverlap(smoother[level],
+		hypre_ParAMGDataOverlap(amg_data));
+         HYPRE_SchwarzSetDomainType(smoother[level],
+		hypre_ParAMGDataDomainType(amg_data));
+         HYPRE_SchwarzSetRelaxWeight(smoother[level],
+		hypre_ParAMGDataSchwarzRlxWeight(amg_data));
+         HYPRE_SchwarzSetup(smoother[level],
+                        (HYPRE_ParCSRMatrix) A_array[level],
+                        (HYPRE_ParVector) f,
+                        (HYPRE_ParVector) u);
       }
       if (max_levels > 1)
       {
@@ -496,23 +518,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       HYPRE_ParCSRPilutSetDropTolerance(smoother[0],1.e-6);
       HYPRE_ParCSRPilutSetFactorRowSize(smoother[0],20);
    }
-   else if (smooth_option[0] == 6)
-   {
-      smoother = hypre_CTAlloc(HYPRE_Solver, num_levels);
-      hypre_ParAMGDataSmoother(amg_data) = smoother;
-      HYPRE_SchwarzCreate(&smoother[0]);
-      HYPRE_SchwarzSetNumFunctions(smoother[0],num_functions);
-      HYPRE_SchwarzSetVariant(smoother[0],hypre_ParAMGDataVariant(amg_data));
-      HYPRE_SchwarzSetOverlap(smoother[0],hypre_ParAMGDataOverlap(amg_data));
-      HYPRE_SchwarzSetDomainType(smoother[0],
-		hypre_ParAMGDataDomainType(amg_data));
-      HYPRE_SchwarzSetRelaxWeight(smoother[0],
-		hypre_ParAMGDataSchwarzRlxWeight(amg_data));
-      HYPRE_SchwarzSetup(smoother[0],
-                        (HYPRE_ParCSRMatrix) A_array[0],
-                        (HYPRE_ParVector) F_array[0],
-                        (HYPRE_ParVector) U_array[0]);
-   }
       
    for (j = 1; j < num_levels; j++)
    {
@@ -550,21 +555,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                         (HYPRE_ParVector) U_array[j]);
          HYPRE_ParCSRPilutSetDropTolerance(smoother[j],1.e-6);
          HYPRE_ParCSRPilutSetFactorRowSize(smoother[j],20);
-      }
-      else if (smooth_option[j] == 6)
-      {
-         HYPRE_SchwarzCreate(&smoother[j]);
-         HYPRE_SchwarzSetNumFunctions(smoother[j],num_functions);
-         HYPRE_SchwarzSetVariant(smoother[j],hypre_ParAMGDataVariant(amg_data));
-         HYPRE_SchwarzSetOverlap(smoother[j],hypre_ParAMGDataOverlap(amg_data));
-         HYPRE_SchwarzSetDomainType(smoother[j],
-		hypre_ParAMGDataDomainType(amg_data));
-         HYPRE_SchwarzSetRelaxWeight(smoother[j],
-		hypre_ParAMGDataSchwarzRlxWeight(amg_data));
-         HYPRE_SchwarzSetup(smoother[j],
-                        (HYPRE_ParCSRMatrix) A_array[j],
-                        (HYPRE_ParVector) F_array[j],
-                        (HYPRE_ParVector) U_array[j]);
       }
    }
 
