@@ -88,10 +88,11 @@ hypre_SStructPGridCreate( MPI_Comm             comm,
 
    pgrid = hypre_TAlloc(hypre_SStructPGrid, 1);
 
-   hypre_SStructPGridComm(pgrid)     = comm;
-   hypre_SStructPGridNDim(pgrid)     = ndim;
-   hypre_SStructPGridNVars(pgrid)    = 0;
-   hypre_SStructPGridVarTypes(pgrid) = NULL;
+   hypre_SStructPGridComm(pgrid)             = comm;
+   hypre_SStructPGridNDim(pgrid)             = ndim;
+   hypre_SStructPGridNVars(pgrid)            = 0;
+   hypre_SStructPGridCellSGridDone(pgrid)    = 0;
+   hypre_SStructPGridVarTypes(pgrid)         = NULL;
    
    for (t = 0; t < 8; t++)
    {
@@ -158,6 +159,22 @@ hypre_SStructPGridSetExtents( hypre_SStructPGrid  *pgrid,
    hypre_StructGrid *sgrid = hypre_SStructPGridCellSGrid(pgrid);
 
    return ( HYPRE_StructGridSetExtents(sgrid, ilower, iupper) );
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructPGridSetCellSGrid
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SStructPGridSetCellSGrid( hypre_SStructPGrid  *pgrid,
+                                hypre_StructGrid    *cell_sgrid )
+{
+   int                     ierr = 0;
+
+   hypre_SStructPGridCellSGrid(pgrid) = cell_sgrid;
+   hypre_SStructPGridCellSGridDone(pgrid) = 1;
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -245,7 +262,8 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
 
    cell_sgrid = hypre_SStructPGridCellSGrid(pgrid);
    HYPRE_StructGridSetPeriodic(cell_sgrid, periodic);
-   HYPRE_StructGridAssemble(cell_sgrid);
+   if (!hypre_SStructPGridCellSGridDone(pgrid))
+      HYPRE_StructGridAssemble(cell_sgrid);
 
    /* this is used to truncate boxes when periodicity is on */
    cell_imax = hypre_BoxIMax(hypre_StructGridBoundingBox(cell_sgrid));

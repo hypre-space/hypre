@@ -44,25 +44,25 @@ typedef struct
 
 typedef struct
 {
-   MPI_Comm                comm;          /* TODO: use different comms */
+   MPI_Comm                comm;             /* TODO: use different comms */
    int                     ndim;
-   int                     nvars;         /* number of variables */
-   HYPRE_SStructVariable  *vartypes;      /* types of variables */
-   hypre_StructGrid       *sgrids[8];     /* struct grids for each vartype */
-   hypre_BoxArray         *iboxarrays[8]; /* interface boxes */
+   int                     nvars;            /* number of variables */
+   HYPRE_SStructVariable  *vartypes;         /* types of variables */
+   hypre_StructGrid       *sgrids[8];        /* struct grids for each vartype */
+   hypre_BoxArray         *iboxarrays[8];    /* interface boxes */
                                        
    hypre_BoxArray         *pneighbors;
 
-   int                     local_size;    /* Number of variables locally */
-   int                     global_size;   /* Total number of variables */
+   int                     local_size;       /* Number of variables locally */
+   int                     global_size;      /* Total number of variables */
 
-
-   hypre_Index             periodic;      /* Indicates if pgrid is periodic */
+   hypre_Index             periodic;         /* Indicates if pgrid is periodic */
 
   /* GEC0902 additions for ghost expansion of boxes */
 
-   int                     ghlocal_size;   /* Number of vars including ghosts */
+   int                     ghlocal_size;     /* Number of vars including ghosts */
                            
+   int                     cell_sgrid_done;  /* =1 implies cell grid already assembled */
 } hypre_SStructPGrid;
 
 typedef struct
@@ -180,6 +180,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructPGridNVars(pgrid)            ((pgrid) -> nvars)
 #define hypre_SStructPGridVarTypes(pgrid)         ((pgrid) -> vartypes)
 #define hypre_SStructPGridVarType(pgrid, var)     ((pgrid) -> vartypes[var])
+#define hypre_SStructPGridCellSGridDone(pgrid)    ((pgrid) -> cell_sgrid_done)
 
 #define hypre_SStructPGridSGrids(pgrid)           ((pgrid) -> sgrids)
 #define hypre_SStructPGridSGrid(pgrid, var) \

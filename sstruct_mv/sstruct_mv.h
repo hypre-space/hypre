@@ -161,7 +161,9 @@ typedef struct
 
   /* GEC0902 additions for ghost expansion of boxes */
 
-   int                     ghlocal_size;   /* Number of vars including ghosts */
+   int                     ghlocal_size;     /* Number of vars including ghosts */
+
+   int                     cell_sgrid_done;  /* =1 implies cell grid already assembled */
                            
 } hypre_SStructPGrid;
 
@@ -280,6 +282,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructPGridNVars(pgrid)            ((pgrid) -> nvars)
 #define hypre_SStructPGridVarTypes(pgrid)         ((pgrid) -> vartypes)
 #define hypre_SStructPGridVarType(pgrid, var)     ((pgrid) -> vartypes[var])
+#define hypre_SStructPGridCellSGridDone(pgrid)    ((pgrid) -> cell_sgrid_done)
 
 #define hypre_SStructPGridSGrids(pgrid)           ((pgrid) -> sgrids)
 #define hypre_SStructPGridSGrid(pgrid, var) \
@@ -839,6 +842,7 @@ int hypre_SStructVariableGetOffset( HYPRE_SStructVariable vartype , int ndim , h
 int hypre_SStructPGridCreate( MPI_Comm comm , int ndim , hypre_SStructPGrid **pgrid_ptr );
 int hypre_SStructPGridDestroy( hypre_SStructPGrid *pgrid );
 int hypre_SStructPGridSetExtents( hypre_SStructPGrid *pgrid , hypre_Index ilower , hypre_Index iupper );
+int hypre_SStructPGridSetCellSGrid( hypre_SStructPGrid *pgrid , hypre_StructGrid *cell_sgrid );
 int hypre_SStructGridSetNumGhost(hypre_SStructGrid *grid, int *num_ghost);
 int hypre_SStructPGridSetVariables( hypre_SStructPGrid *pgrid , int nvars , HYPRE_SStructVariable *vartypes );
 int hypre_SStructPGridSetPNeighbor( hypre_SStructPGrid *pgrid , hypre_Box *pneighbor_box );
