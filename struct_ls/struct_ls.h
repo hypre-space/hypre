@@ -202,6 +202,7 @@ int hypre_PFMGRestrictFinalize P((void *restrict_vdata ));
 
 /* pfmg_setup.c */
 int hypre_PFMGSetup P((void *pfmg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x ));
+int hypre_PFMGComputeDxyz P((hypre_StructMatrix *A , double *dxyz ));
 
 /* pfmg_setup_interp.c */
 hypre_StructMatrix *hypre_PFMGNewInterpOp P((hypre_StructMatrix *A , hypre_StructGrid *cgrid , int cdir ));

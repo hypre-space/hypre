@@ -37,9 +37,9 @@ hypre_PFMGInitialize( MPI_Comm  comm )
    (pfmg_data -> rel_change)     = 0;
    (pfmg_data -> zero_guess)     = 0;
    (pfmg_data -> max_levels)     = 0;
-   (pfmg_data -> dxyz)[0]        = 1.0;
-   (pfmg_data -> dxyz)[1]        = 1.0;
-   (pfmg_data -> dxyz)[2]        = 1.0;
+   (pfmg_data -> dxyz)[0]        = 0.0;
+   (pfmg_data -> dxyz)[1]        = 0.0;
+   (pfmg_data -> dxyz)[2]        = 0.0;
    (pfmg_data -> relax_type)     = 1;       /* weighted Jacobi */
    (pfmg_data -> num_pre_relax)  = 1;
    (pfmg_data -> num_post_relax) = 1;

@@ -166,6 +166,12 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    }
    (pfmg_data -> max_levels) = max_levels;
 
+   /* compute dxyz */
+   if ((dxyz[0] == 0) || (dxyz[1] == 0) || (dxyz[2] == 0))
+   {
+      hypre_PFMGComputeDxyz(A, dxyz);
+   }
+
    cdir_l = hypre_TAlloc(int, max_levels);
    grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
    grid_l[0] = hypre_RefStructGrid(grid);
@@ -506,6 +512,137 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    sprintf(filename, "zout_A.%02d", l);
    hypre_PrintStructMatrix(filename, A_l[l], 0);
 #endif
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PFMGComputeDxyz
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
+                       double             *dxyz )
+{
+   hypre_BoxArray        *compute_boxes;
+   hypre_Box             *compute_box;
+                        
+   hypre_Box             *A_data_box;
+                        
+   int                    Ai;
+                        
+   double                *Ap;
+   double                 cxyz[3];
+   double                 tcxyz[3];
+   double                 cxyz_max;
+                        
+   hypre_StructStencil   *stencil;
+   hypre_Index           *stencil_shape;
+   int                    stencil_size;
+                        
+   int                    Astenc;
+                        
+   hypre_Index            loop_size;
+   hypre_IndexRef         start;
+   hypre_Index            stride;
+                        
+   int                    i, si, d;
+   int                    loopi, loopj, loopk;
+
+   int                    ierr = 0;
+
+   /*----------------------------------------------------------
+    * Initialize some things
+    *----------------------------------------------------------*/
+
+   stencil       = hypre_StructMatrixStencil(A);
+   stencil_shape = hypre_StructStencilShape(stencil);
+   stencil_size  = hypre_StructStencilSize(stencil);
+
+   hypre_SetIndex(stride, 1, 1, 1);
+
+   /*----------------------------------------------------------
+    * Compute cxyz (use arithmetic mean)
+    *----------------------------------------------------------*/
+
+   cxyz[0] = 0.0;
+   cxyz[1] = 0.0;
+   cxyz[2] = 0.0;
+
+   compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
+   hypre_ForBoxI(i, compute_boxes)
+      {
+         compute_box = hypre_BoxArrayBox(compute_boxes, i);
+
+         A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+
+         start  = hypre_BoxIMin(compute_box);
+
+         hypre_GetStrideBoxSize(compute_box, stride, loop_size);
+         hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
+                        A_data_box, start,  stride,  Ai,
+                        {
+                           tcxyz[0] = 0.0;
+                           tcxyz[1] = 0.0;
+                           tcxyz[2] = 0.0;
+
+                           for (si = 0; si < stencil_size; si++)
+                           {
+                              Ap = hypre_StructMatrixBoxData(A, i, si);
+
+                              /* x-direction */
+                              Astenc = hypre_IndexD(stencil_shape[si], 0);
+                              if (Astenc)
+                              {
+                                 tcxyz[0] -= Ap[Ai];
+                              }
+
+                              /* y-direction */
+                              Astenc = hypre_IndexD(stencil_shape[si], 1);
+                              if (Astenc)
+                              {
+                                 tcxyz[1] -= Ap[Ai];
+                              }
+
+                              /* z-direction */
+                              Astenc = hypre_IndexD(stencil_shape[si], 2);
+                              if (Astenc)
+                              {
+                                 tcxyz[2] -= Ap[Ai];
+                              }
+                           }
+
+                           cxyz[0] += tcxyz[0];
+                           cxyz[1] += tcxyz[1];
+                           cxyz[2] += tcxyz[2];
+                        });
+      }
+
+   /*----------------------------------------------------------
+    * Compute dxyz
+    *----------------------------------------------------------*/
+
+   tcxyz[0] = cxyz[0];
+   tcxyz[1] = cxyz[1];
+   tcxyz[2] = cxyz[2];
+   MPI_Allreduce(tcxyz, cxyz, 3, MPI_DOUBLE, MPI_SUM,
+                 hypre_StructMatrixComm(A));
+
+   cxyz_max = 0.0;
+   for (d = 0; d < 3; d++)
+   {
+      cxyz_max = hypre_max(cxyz_max, cxyz[d]);
+   }
+
+   for (d = 0; d < 3; d++)
+   {
+      cxyz[d] /= cxyz_max;
+      dxyz[d] = sqrt(1.0 / cxyz[d]);
+   }
+
+   /*-----------------------------------------------------------------------
+    * Return
+    *-----------------------------------------------------------------------*/
 
    return ierr;
 }

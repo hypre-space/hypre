@@ -548,7 +548,7 @@ main( int   argc,
       HYPRE_StructPFMGSetRelaxType(solver, 1);
       HYPRE_StructPFMGSetNumPreRelax(solver, n_pre);
       HYPRE_StructPFMGSetNumPostRelax(solver, n_post);
-      HYPRE_StructPFMGSetDxyz(solver, dxyz);
+      /*HYPRE_StructPFMGSetDxyz(solver, dxyz);*/
       HYPRE_StructPFMGSetLogging(solver, 1);
       HYPRE_StructPFMGSetup(solver, A, b, x);
 
@@ -614,7 +614,7 @@ main( int   argc,
          HYPRE_StructPFMGSetRelaxType(precond, 1);
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
-         HYPRE_StructPFMGSetDxyz(precond, dxyz);
+         /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
          HYPRE_StructPFMGSetLogging(precond, 0);
          HYPRE_StructPCGSetPrecond(solver,
                                    HYPRE_StructPFMGSolve,
@@ -714,7 +714,7 @@ main( int   argc,
          HYPRE_StructPFMGSetRelaxType(precond, 1);
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
-         HYPRE_StructPFMGSetDxyz(precond, dxyz);
+         /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
          HYPRE_StructPFMGSetLogging(precond, 0);
          HYPRE_StructHybridSetPrecond(solver,
                                       HYPRE_StructPFMGSolve,
