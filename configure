@@ -2025,7 +2025,8 @@ unset ac_cv_lib_$ac_lib_var
  utilities\
  struct_matrix_vector\
  struct_linear_solvers\
- test; do
+ test\
+ docs; do
       if test -f $srcdir/$casc_dir/$casc_output_file.in; then
          Makefile_list="$Makefile_list $casc_dir/$casc_output_file"
       fi
