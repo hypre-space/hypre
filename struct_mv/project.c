@@ -32,7 +32,7 @@ hypre_ProjectBox( hypre_Box    *box,
    hypre_Box   *new_box;
    hypre_Index  new_stride;
 
-   int          il, iu, i, s, d;
+   int          i, s, d, hl, hu, kl, ku;
 
    /*------------------------------------------------------
     * project in all 3 dimensions
@@ -42,17 +42,26 @@ hypre_ProjectBox( hypre_Box    *box,
 
    for (d = 0; d < 3; d++)
    {
+
       i = hypre_IndexD(index, d);
       s = hypre_IndexD(stride, d);
 
-      il = hypre_BoxIMinD(new_box, d) + i;
-      iu = hypre_BoxIMaxD(new_box, d) + i + 1;
+      hl = hypre_BoxIMinD(new_box, d) - i;
+      hu = hypre_BoxIMaxD(new_box, d) - i;
 
-      il = ((int) ((il + (s-1)) / s)) * s - i;
-      iu = ((int) ((iu + (s-1)) / s)) * s - i;
+      if ( hl <= 0 )
+         kl = (int) (hl / s);
+      else
+         kl = (int) ((hl + (s-1)) / s);
 
-      hypre_BoxIMinD(new_box, d) = il;
-      hypre_BoxIMaxD(new_box, d) = iu - s;
+      if ( hu >= 0 )
+         ku = (int) (hu / s);
+      else
+         ku = (int) ((hu - (s-1)) / s);
+
+      hypre_BoxIMinD(new_box, d) = i + kl * s;
+      hypre_BoxIMaxD(new_box, d) = i + ku * s;
+
    }
 
    /*------------------------------------------------------
