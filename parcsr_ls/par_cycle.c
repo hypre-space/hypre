@@ -252,6 +252,7 @@ hypre_ParAMGCycle( void              *amg_vdata,
    hypre_ParAMGDataCycleOpCount(amg_data) = cycle_op_count;
 
    hypre_TFree(lev_counter);
+   hypre_TFree(num_coeffs);
 
    return(Solve_err_flag);
 }
