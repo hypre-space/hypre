@@ -731,8 +731,8 @@ main( int   argc,
 
       solver_SJ = Hypre_StructJacobi_Constructor( comm );
 
-      Hypre_StructJacobi_SetParameter( solver_SJ, "tol", 1.0e-4 );
-      Hypre_StructJacobi_SetParameter( solver_SJ, "max_iter", 500 );
+      Hypre_StructJacobi_SetDoubleParameter( solver_SJ, "tol", 1.0e-4 );
+      Hypre_StructJacobi_SetIntParameter( solver_SJ, "max_iter", 500 );
 
       Hypre_StructJacobi_Setup( solver_SJ, A, b, x );
 
@@ -774,11 +774,11 @@ main( int   argc,
 
       solver_PCG = Hypre_PCG_Constructor( comm );
 
-      Hypre_PCG_SetParameter( solver_PCG, "max_iter", 50 );
-      Hypre_PCG_SetParameter( solver_PCG, "tol", 1.0e-06);
-      Hypre_PCG_SetParameter( solver_PCG, "2-norm", 1);
-      Hypre_PCG_SetParameter( solver_PCG, "relative change test", 0);
-      Hypre_PCG_SetParameter( solver_PCG, "log", 1);
+      Hypre_PCG_SetIntParameter( solver_PCG, "max_iter", 50 );
+      Hypre_PCG_SetDoubleParameter( solver_PCG, "tol", 1.0e-06);
+      Hypre_PCG_SetIntParameter( solver_PCG, "2-norm", 1);
+      Hypre_PCG_SetIntParameter( solver_PCG, "relative change test", 0);
+      Hypre_PCG_SetIntParameter( solver_PCG, "log", 1);
 
       if (solver_id == 10)
       {
@@ -787,14 +787,14 @@ main( int   argc,
          precond_S = (Hypre_StructSolver) Hypre_StructSMG_castTo
             ( solver_SMG, "Hypre_StructSolver" ); 
 
-         Hypre_StructSMG_SetParameter( solver_SMG, "memory use", 0 );
-         Hypre_StructSMG_SetParameter( solver_SMG, "max iter", 1 );
-         Hypre_StructSMG_SetParameter( solver_SMG, "tol", 0.0 );
-         Hypre_StructSMG_SetParameter( solver_SMG, "zero guess", 1 );
-         Hypre_StructSMG_SetParameter( solver_SMG, "rel change", 0 );
-         Hypre_StructSMG_SetParameter( solver_SMG, "num prerelax", n_pre );
-         Hypre_StructSMG_SetParameter( solver_SMG, "num postrelax", n_post );
-         Hypre_StructSMG_SetParameter( solver_SMG, "logging", 0 );
+         Hypre_StructSMG_SetIntParameter( solver_SMG, "memory use", 0 );
+         Hypre_StructSMG_SetIntParameter( solver_SMG, "max iter", 1 );
+         Hypre_StructSMG_SetDoubleParameter( solver_SMG, "tol", 0.0 );
+         Hypre_StructSMG_SetIntParameter( solver_SMG, "zero guess", 1 );
+         Hypre_StructSMG_SetIntParameter( solver_SMG, "rel change", 0 );
+         Hypre_StructSMG_SetIntParameter( solver_SMG, "num prerelax", n_pre );
+         Hypre_StructSMG_SetIntParameter( solver_SMG, "num postrelax", n_post );
+         Hypre_StructSMG_SetIntParameter( solver_SMG, "logging", 0 );
 
          Hypre_StructSMG_Setup( solver_SMG, A, b, x );
       }
@@ -804,9 +804,9 @@ main( int   argc,
          solver_SJ = Hypre_StructJacobi_Constructor( comm );
          precond_S = (Hypre_StructSolver) Hypre_StructJacobi_castTo
             ( solver_SJ, "Hypre_StructSolver" ); 
-         Hypre_StructJacobi_SetParameter( solver_SJ, "tol", 0.0 );
-         Hypre_StructJacobi_SetParameter( solver_SJ, "max_iter", 2 );
-         Hypre_StructJacobi_SetParameter( solver_SJ, "zero guess", 0 );
+         Hypre_StructJacobi_SetDoubleParameter( solver_SJ, "tol", 0.0 );
+         Hypre_StructJacobi_SetIntParameter( solver_SJ, "max_iter", 2 );
+         Hypre_StructJacobi_SetIntParameter( solver_SJ, "zero guess", 0 );
       
          Hypre_StructJacobi_Setup( solver_SJ, A, b, x );
       }
@@ -874,13 +874,13 @@ main( int   argc,
 
       solver_SMG = Hypre_StructSMG_Constructor( comm );
 
-      Hypre_StructSMG_SetParameter( solver_SMG, "memory use", 0 );
-      Hypre_StructSMG_SetParameter( solver_SMG, "max iter", 50 );
-      Hypre_StructSMG_SetParameter( solver_SMG, "tol", 1.0e-6 );
-      Hypre_StructSMG_SetParameter( solver_SMG, "rel change", 0 );
-      Hypre_StructSMG_SetParameter( solver_SMG, "num prerelax", n_pre );
-      Hypre_StructSMG_SetParameter( solver_SMG, "num postrelax", n_post );
-      Hypre_StructSMG_SetParameter( solver_SMG, "logging", 1 );
+      Hypre_StructSMG_SetIntParameter( solver_SMG, "memory use", 0 );
+      Hypre_StructSMG_SetIntParameter( solver_SMG, "max iter", 50 );
+      Hypre_StructSMG_SetDoubleParameter( solver_SMG, "tol", 1.0e-6 );
+      Hypre_StructSMG_SetIntParameter( solver_SMG, "rel change", 0 );
+      Hypre_StructSMG_SetIntParameter( solver_SMG, "num prerelax", n_pre );
+      Hypre_StructSMG_SetIntParameter( solver_SMG, "num postrelax", n_post );
+      Hypre_StructSMG_SetIntParameter( solver_SMG, "logging", 1 );
 
       Hypre_StructSMG_Setup( solver_SMG, A, b, x );
 /*
