@@ -74,6 +74,11 @@ typedef struct HYPRE_LSI_BLOCKP_PARAMS_Struct
    double         DDIlutDropTol_; // drop tolerance for DDIlut
    double         MLThresh_;      // threshold for SA AMG
    int            MLNSweeps_;     // no. of relaxations for SA AMG
+   double         MLIThresh_;     // threshold for MLI's SA AMG
+   int            MLINSweeps_;    // no. of relaxations for MLI's SA AMG
+   double         MLIPweight_;    // prolongation smoother weight
+   int            MLINodeDOF_;    // nodal degree of freedom
+   int            MLINullDim_;    // null space dimension
 }
 HYPRE_LSI_BLOCKP_PARAMS;
 
@@ -102,6 +107,9 @@ class HYPRE_LSI_BlockP
    int            block2FieldID_;    // identifier for (2,2) block
    int            assembled_;        // set up complete flag
    int            outputLevel_;      // for diagnostics
+   int            lumpedMassScheme_; // use diagonal or approximate inverse
+   int            lumpedMassNlevels_;// if approx inverse, nlevels
+   int            lumpedMassThresh_; // if approx inverse, threshold
    int            lumpedMassLength_; // length of M_v and M_p
    double         *lumpedMassDiag_;  // M_v and M_p lumped
    int            scheme_;           // which preconditioning ?
