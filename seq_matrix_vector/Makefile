@@ -11,10 +11,11 @@
 .SUFFIXES: .c .f .o
 
 HEADERS =\
- ../includes/matrix.h
+ ../includes/HYPRE_seq_matrix.h CSR_matrix.h mapped_matrix.h multiblock_matrix.h
  
 FILES =\
- matrix.c
+ HYPRE_CSR_matrix.c HYPRE_mapped_matrix.c HYPRE_multiblock_matrix.c \
+ CSR_matrix.c mapped_matrix.c multiblock_matrix.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -26,6 +27,7 @@ CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I../includes\
+ -DHYPRE_MEMORY_CHECK\
  -g
 
 FFLAGS = -g
@@ -47,6 +49,9 @@ LFLAGS =\
 
 ${OBJS}: ${HEADERS}
 
+lib: ${OBJS}
+	$(AR) -r libHYPREseq_mat_vec.a $(OBJS)
+
 ##################################################################
 # Generic rules
 ##################################################################
@@ -66,7 +71,7 @@ ${OBJS}: ${HEADERS}
 ##################################################################
 
 veryclean: clean
-	@rm -f driver libZZZ.a
+	@rm -f driver libHYPRE.a
 
 clean:
 	@rm -f *.o
