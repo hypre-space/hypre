@@ -374,7 +374,7 @@ MLI_OneLevel* MLI::getOneLevelObject( int level )
 }
 
 /*****************************************************************************
- * get matrix 
+ * get system matrix 
  *---------------------------------------------------------------------------*/
 
 MLI_Matrix* MLI::getSystemMatrix( int level )
@@ -383,8 +383,63 @@ MLI_Matrix* MLI::getSystemMatrix( int level )
       return one_levels[level]->getAmat();
    else
    {
-      cout << "MLI::getMatrix ERROR : wrong level = " << level << endl;
+      cout << "MLI::getSystemMatrix ERROR : wrong level = " << level << endl;
       return NULL;
+   }
+}
+
+/*****************************************************************************
+ * get prolongation operator 
+ *---------------------------------------------------------------------------*/
+
+MLI_Matrix* MLI::getProlongation( int level )
+{
+   if ( level >= 0 && level < max_levels ) 
+      return one_levels[level]->getPmat();
+   else
+   {
+      cout << "MLI::getProlongation ERROR : wrong level = " << level << endl;
+      return NULL;
+   }
+}
+
+/*****************************************************************************
+ * get restriction operator 
+ *---------------------------------------------------------------------------*/
+
+MLI_Matrix* MLI::getRestriction( int level )
+{
+   if ( level >= 0 && level < max_levels ) 
+      return one_levels[level]->getRmat();
+   else
+   {
+      cout << "MLI::getRestriction ERROR : wrong level = " << level << endl;
+      return NULL;
+   }
+}
+
+/*****************************************************************************
+ * get smoother
+ *---------------------------------------------------------------------------*/
+
+MLI_Solver* MLI::getSmoother( int level, int pre_post )
+{
+   if ( level >= 0 && level < max_levels ) 
+   {
+      if ( pre_post == MLI_SMOOTHER_PRE ) 
+         return one_levels[level]->getPreSmoother();
+      else if ( pre_post == MLI_SMOOTHER_POST ) 
+         return one_levels[level]->getPostSmoother();
+      else 
+      {
+         cout << "MLI::getSmoother ERROR : pre or post ? " << endl;
+         return ((MLI_Solver *) NULL);
+      }
+   }
+   else
+   {
+      cout << "MLI::getRestriction ERROR : wrong level = " << level << endl;
+      return ((MLI_Solver *) NULL);
    }
 }
 

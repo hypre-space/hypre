@@ -69,6 +69,9 @@ public :
    int  resetAmat();
    MLI_Matrix *getAmat()                     { return Amat; }
    MLI_Matrix *getPmat()                     { return Pmat; }
+   MLI_Matrix *getRmat()                     { return Rmat; }
+   MLI_Solver *getPreSmoother()              { return pre_smoother; }     
+   MLI_Solver *getPostSmoother()             { return postsmoother; }     
    MLI_Vector *getRHSVector()                { return vec_rhs; }
    MLI_Vector *getResidualVector()           { return vec_res; }
    MLI_Vector *getSolutionVector()           { return vec_sol; }
