@@ -35,6 +35,15 @@ that you choose all (C, C++, Fortran) compilers.
 \verb+--enable-opt+ (default) or \verb+--enable-debug+.
 For other compiler flags use the \verb+--with-CFLAGS+ option.  
 
+\item[BLAS] The optimum BLAS for the platform should be obtained
+without specification of a configure option.
+To specify another BLAS library available on a
+platform, use \verb+--with-BLAS=+{\itshape pathname} or
+\verb+--with-BLAS=+{\itshape link list}.  On platforms with
+default use of the BLAS packaged within {\slshape hypre},
+\verb+--with-system-blas+ might also allow use
+of another BLAS appropriately user-installed on the system.
+
 \item[BLAS] If you want the optimum BLAS for the platform,
 no configure option for it needs to be specified.
 To specify another BLAS library available on a
