@@ -11,7 +11,6 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision$
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -26,26 +25,19 @@
  * Define various functions
  *--------------------------------------------------------------------------*/
 
-#ifndef max
-#define max(a,b)  (((a)<(b)) ? (b) : (a))
+#ifndef hypre_max
+#define hypre_max(a,b)  (((a)<(b)) ? (b) : (a))
 #endif
-#ifndef min
-#define min(a,b)  (((a)<(b)) ? (a) : (b))
-#endif
-
-#ifndef round
-#define round(x)  ( ((x) < 0.0) ? ((int)(x - 0.5)) : ((int)(x + 0.5)) )
+#ifndef hypre_min
+#define hypre_min(a,b)  (((a)<(b)) ? (a) : (b))
 #endif
 
+#ifndef hypre_round
+#define hypre_round(x)  ( ((x) < 0.0) ? ((int)(x - 0.5)) : ((int)(x + 0.5)) )
 #endif
-/*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
- *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
- *
- * $Revision$
- *********************************************************************EHEADER*/
+
+#endif
+
 /******************************************************************************
  *
  *  Fake mpi stubs to generate serial codes without mpi
@@ -196,7 +188,11 @@ int MPI_Type_commit P((MPI_Datatype *datatype ));
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
+<<<<<<< utilities.h
  * $Revision$
+=======
+ * $Revision$
+>>>>>>> 1.20
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -342,7 +338,11 @@ double hypre_Rand P((void ));
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
+<<<<<<< utilities.h
  * $Revision$
+=======
+ * $Revision$
+>>>>>>> 1.20
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -512,7 +512,11 @@ extern int hypre_NumThreads;
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
+<<<<<<< utilities.h
  * $Revision$
+=======
+ * $Revision$
+>>>>>>> 1.20
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -674,7 +678,11 @@ int hypre_PrintTiming P((char *heading , MPI_Comm comm ));
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
+<<<<<<< utilities.h
  * $Revision$
+=======
+ * $Revision$
+>>>>>>> 1.20
  *********************************************************************EHEADER*/
 
 /******************************************************************************
