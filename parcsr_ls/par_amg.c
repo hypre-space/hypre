@@ -115,10 +115,29 @@ int
 hypre_ParAMGFinalize( void *data )
 {
    int ierr = 0;
-/*   hypre_ParAMGData  *amg_data = data;*/
+   hypre_ParAMGData  *amg_data = data;
+   int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   int i;
 
 /*   hypre_ParAMGFreeData(amg_data);*/
-
+   hypre_TFree (hypre_ParAMGDataNumGridSweeps(amg_data));
+   hypre_TFree (hypre_ParAMGDataGridRelaxType(amg_data));
+   hypre_TFree (hypre_ParAMGDataGridRelaxPoints(amg_data));
+   for (i=1; i < num_levels; i++)
+   {
+	hypre_DestroyParVector(hypre_ParAMGDataFArray(amg_data)[i]);
+	hypre_DestroyParVector(hypre_ParAMGDataUArray(amg_data)[i]);
+	hypre_DestroyParCSRMatrix(hypre_ParAMGDataAArray(amg_data)[i]);
+	hypre_DestroyParCSRMatrix(hypre_ParAMGDataPArray(amg_data)[i-1]);
+	hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data)[i-1]);
+   }
+   hypre_DestroyParVector(hypre_ParAMGDataVtemp(amg_data));
+   hypre_TFree(hypre_ParAMGDataFArray(amg_data));
+   hypre_TFree(hypre_ParAMGDataUArray(amg_data));
+   hypre_TFree(hypre_ParAMGDataAArray(amg_data));
+   hypre_TFree(hypre_ParAMGDataPArray(amg_data));
+   hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data));
+   hypre_TFree(amg_data);
    return (ierr);
 }
 
