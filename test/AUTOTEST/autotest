@@ -88,15 +88,17 @@ help () {
   printf "host   Host ID or configuration on which autotest is to be run.\n"
   printf "       Valid host IDs are:\n"
   printf "%s\n" "     -debug    Turn on debug mode."
-  printf "%s\n" "     -frost    ASCI Frost, DPCS."
-  printf "%s\n" "     -frostmp  ASCI Frost executing OpenMP, DPCS."
-  printf "%s\n" "     -gps      Compaq gps320 system, DPCS."
-  printf "%s\n" "     -gpsmp    Compaq gps320 system, executing OpenMP, DPCS."
+  printf "%s\n" "     -emperor  Intel Linux, CHAOS2."
+  printf "%s\n" "     -frost    ASCI Frost."
+  printf "%s\n" "     -frostmp  ASCI Frost executing OpenMP."
+  printf "%s\n" "     -gps      Compaq gps320 system."
+  printf "%s\n" "     -gpsmp    Compaq gps320 system executing OpenMP."
   printf "%s\n" "     -ilx      Intel running Linux."
   printf "%s\n" "     -insure   CASC Linux, executing insure++."
   printf "%s\n" "     -mcr      Intel Linux, CHAOS2."
   printf "%s\n" "     -pengra   Intel Linux, CHAOS2."
   printf "%s\n" "     -red      ASCI Red"
+  printf "%s\n" "     -sc       Compaq system."
   printf "%s\n" "     -tux149   CASC running RedHat Enterprise Linux."
   printf "%s\n" "     -tuxgcc   CASC running latest gcc compilers"
   printf "%s\n" "     -tuxpgi   CASC running latest PGI compilers"
@@ -104,6 +106,7 @@ help () {
   printf "%s\n" "     -tuxlahey CASC running Lahey Frotran compiler"
   printf "%s\n" "     -tuxintel CASC running Intel-8.0 compilers"
   printf "%s\n" "     -tuxkai   CASC running latest KAI KCC compiler"
+  printf "%s\n" "     -white    ASCI White."
   printf "\n"
 }
 
@@ -199,6 +202,15 @@ do
         DEBUGMODE="yes"
         set -xv
         shift;;
+    -emperor)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="emperor"
+        HYPRE_RUN_MACHINE="emperor"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-chaos2/AUTOTEST"
+        HYPRE_MACHINE_COMMANDS="-mnse 1 -a 2 -cf"
+        HYPRE_MESSAGE='SECONDARY[EMPEROR]'
+	perform_test
+        shift;;
     -frost | -frostmp)
         HYPRE_ARCH="frost"
         HYPRE_COMPILE_MACHINE="frost"
@@ -286,6 +298,15 @@ do
         echo "ERROR: -rev option MUST be first argument! Quiting..."
         help
         exit;;
+    -sc*)
+        HYPRE_ARCH="dec"
+        HYPRE_COMPILE_MACHINE="sc"
+        HYPRE_RUN_MACHINE="sc"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/alphaev68-dec-osf5.1/AUTOTEST"
+        HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf"
+        HYPRE_MESSAGE='SECONDARY[SC]'
+	perform_test
+        shift;;
     -tux149)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
@@ -373,6 +394,15 @@ do
         SCP_COMMAND="scp -q"
 	perform_test
         SCP_COMMAND="cp"
+        shift;;
+    -white)
+        HYPRE_ARCH="white"
+        HYPRE_COMPILE_MACHINE="white"
+        HYPRE_RUN_MACHINE="white"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/powerpcll-ibm-aix5.1.0.0/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-me 1 -nsb 1 -o 1 -a 2 -cf"
+        HYPRE_MESSAGE='SECONDARY[white]'
+	perform_test
         shift;;
     *)
         shift;;

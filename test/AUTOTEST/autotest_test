@@ -20,7 +20,8 @@ initialize_variables ()
   Hdr="autotest"
   HYPRE_BATCH_MODE="no"
   HYPRE_SEND_MAIL="no"
-  STD_TEST_DIRS='TEST_fei/*.sh TEST_ij/*.sh TEST_ij_es/*.sh TEST_sstruct/*.sh TEST_struct/*.sh'
+  ES_TEST_DIRS='TEST_ij_es/*.sh TEST_sstruct_es/*.sh TEST_struct_es/*.sh'
+  STD_TEST_DIRS='TEST_fei/*.sh TEST_ij/*.sh TEST_sstruct/*.sh TEST_struct/*.sh ${ES_TEST_DIRS}'
   MailOpt=""
   MailCmd="no"
   DEBUG_MODE="no"
@@ -90,6 +91,8 @@ initialize_variables ()
   if [ "$HYPRE_ARCH"="frost" ] ; then
     CONFIGURE="./nopoe ./configure"
   elif [ "$HYPRE_ARCH"="uv" ] ; then
+    CONFIGURE="./nopoe ./configure"
+  elif [ "$HYPRE_ARCH"="white" ] ; then
     CONFIGURE="./nopoe ./configure"
   else
     CONFIGURE="./configure"
@@ -324,7 +327,7 @@ apply_error_filters () {
   if [ -s "${ErrorFile}" ] ; then
     HOST=`hostname`
     case $HOST in
-      fros*|uv*)
+      fros*|uv*|whit*)
         for ii in \
           '===\ End\ of\ Compilation'\
           'Compilation\ successful'\
@@ -344,7 +347,7 @@ apply_error_filters () {
         do multi_line_delete $ErrorFile 4 "${ii}"
         done
         ;;
-      peng*)
+      peng|emper**)
         for ii in \
           '[A-Za-z0-9_]*\.[cCf]$'\
           '[A-Za-z0-9_]*\.cxx$'\
@@ -358,7 +361,7 @@ apply_error_filters () {
         do process_filter $ErrorFile "${ii}"
         done
       ;;
-      gps*)
+      gps*|sc*)
         for ii in \
           '^No\ suffix\ list'\
           '^stty:\ tcgetattr:\ Not\ a\ typewriter'\
