@@ -370,9 +370,9 @@ LinearSystemCore* HYPRE_LinSysCore::clone()
 
 void HYPRE_LinSysCore::parameters(int numParams, char **params)
 {
-    int    i, nsweeps, rtype, olevel, nParamsFound;
+    int    i, nsweeps, rtype, olevel;
     double weight;
-    char   param[256], param2[80];
+    char   param[256], param1[256], param2[80];
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
@@ -388,599 +388,577 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     }
 
     if ( numParams <= 0 ) return;
-    nParamsFound = 0;
 
     //-------------------------------------------------------------------
-    // output level
+    // parse all parameters
     //-------------------------------------------------------------------
 
-    if ( getParam("outputLevel",numParams,params,param) == 1)
+    for ( i = 0; i < numParams; i++ )
     {
-       sscanf(param,"%d", &olevel);
-       if ( olevel < 0 ) olevel = 0;
-       if ( olevel > 4 ) olevel = 4;
-       HYOutputLevel_ = ( HYOutputLevel_ & HYFEI_HIGHMASK ) + olevel;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+
+       sscanf(params[i],"%s", param1);
+       
+       //----------------------------------------------------------------
+       // output level
+       //----------------------------------------------------------------
+
+       if ( !strcmp(param1, "outputLevel") )
        {
-          printf("HYPRE_LinSysCore::parameters outputLevel = %d\n",
-                 HYOutputLevel_);
+          sscanf(params[i],"%s %d", param, &olevel);
+          if ( olevel < 0 ) olevel = 0;
+          if ( olevel > 4 ) olevel = 4;
+          HYOutputLevel_ = ( HYOutputLevel_ & HYFEI_HIGHMASK ) + olevel;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters outputLevel = %d\n",
+                    HYOutputLevel_);
+          }
        }
-    }
 
-    //-------------------------------------------------------------------
-    // special output level
-    //-------------------------------------------------------------------
+       //----------------------------------------------------------------
+       // special output level
+       //----------------------------------------------------------------
 
-    if ( getParam("setDebug",numParams,params,param) == 1)
-    {
-       sscanf(param,"%s", &param2);
-       if (!strcmp(param2, "slideReduction1")) 
-          HYOutputLevel_ |= HYFEI_SLIDEREDUCE1;
-       if (!strcmp(param2, "slideReduction2")) 
-          HYOutputLevel_ |= HYFEI_SLIDEREDUCE2;
-       if (!strcmp(param2, "slideReduction3")) 
-          HYOutputLevel_ |= HYFEI_SLIDEREDUCE3;
-       if (!strcmp(param2, "printMat")) HYOutputLevel_ |= HYFEI_PRINTMAT;
-       if (!strcmp(param2, "printSol")) HYOutputLevel_ |= HYFEI_PRINTSOL;
-       if (!strcmp(param2, "printReducedMat")) HYOutputLevel_ |= HYFEI_PRINTREDMAT;
-       if (!strcmp(param2, "ddilut")) HYOutputLevel_ |= HYFEI_DDILUT;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+       else if ( !strcmp(param1, "setDebug") )
        {
-          printf("HYPRE_LinSysCore::parameters setDebug.\n");
+          sscanf(params[i],"%s %s", param, param2);
+          if (!strcmp(param2, "slideReduction1")) 
+             HYOutputLevel_ |= HYFEI_SLIDEREDUCE1;
+          if (!strcmp(param2, "slideReduction2")) 
+             HYOutputLevel_ |= HYFEI_SLIDEREDUCE2;
+          if (!strcmp(param2, "slideReduction3")) 
+             HYOutputLevel_ |= HYFEI_SLIDEREDUCE3;
+          if (!strcmp(param2, "printMat")) HYOutputLevel_ |= HYFEI_PRINTMAT;
+          if (!strcmp(param2, "printSol")) HYOutputLevel_ |= HYFEI_PRINTSOL;
+          if (!strcmp(param2, "printReducedMat")) 
+             HYOutputLevel_ |= HYFEI_PRINTREDMAT;
+          if (!strcmp(param2, "ddilut")) HYOutputLevel_ |= HYFEI_DDILUT;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters setDebug.\n");
+          }
        }
-    }
 
-    //-------------------------------------------------------------------
-    // perform Schur complement reduction
-    //-------------------------------------------------------------------
+       //----------------------------------------------------------------
+       // perform Schur complement reduction
+       //----------------------------------------------------------------
 
-    if ( getParam("schurReduction",numParams,params,param) == 1)
-    {
-       schurReduction_ = 1;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+       else if ( !strcmp(param1, "schurReduction") )
        {
-          printf("HYPRE_LinSysCore::parameters - schur reduction enabled.\n");
+          schurReduction_ = 1;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters - schur reduction.\n");
+          }
        }
-    }
 
-    //-------------------------------------------------------------------
-    // perform slide reduction 
-    //-------------------------------------------------------------------
+       //----------------------------------------------------------------
+       // perform slide reduction 
+       //----------------------------------------------------------------
 
-    if ( getParam("slideReduction",numParams,params,param) == 1)
-    {
-       slideReduction_ = 1;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+       else if ( !strcmp(param1, "slideReduction") )
        {
-          printf("HYPRE_LinSysCore::parameters - slide reduction enabled.\n");
+          slideReduction_ = 1;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters - slide reduction.\n");
+          }
        }
-    }
 
-    //-------------------------------------------------------------------
-    // which solver to pick : cg, gmres, superlu, superlux, y12m
-    //-------------------------------------------------------------------
+       //----------------------------------------------------------------
+       // which solver to pick : cg, gmres, superlu, superlux, y12m
+       //----------------------------------------------------------------
 
-    if ( getParam("solver",numParams,params,param) == 1)
-    {
-       sscanf(param,"%s",HYSolverName_);
-       selectSolver(HYSolverName_);
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+       else if ( !strcmp(param1, "solver") )
        {
-          printf("HYPRE_LinSysCore::parameters solver = %s\n",HYSolverName_);
+          sscanf(params[i],"%s", HYSolverName_);
+          selectSolver(HYSolverName_);
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters solver = %s\n",
+                    HYSolverName_);
+          }
        }
-    }
 
-    //-------------------------------------------------------------------
-    // for GMRES, the restart size
-    //-------------------------------------------------------------------
+       //----------------------------------------------------------------
+       // for GMRES, the restart size
+       //----------------------------------------------------------------
 
-    if ( getParam("gmresDim",numParams,params,param) == 1)
-    {
-       sscanf(param,"%d", &gmresDim_);
-       if ( gmresDim_ < 1 ) gmresDim_ = 100;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+       else if ( !strcmp(param1, "gmresDim") )
        {
-          printf("HYPRE_LinSysCore::parameters gmresDim = %d\n",gmresDim_);
+          sscanf(params[i],"%s %d", param, &gmresDim_);
+          if ( gmresDim_ < 1 ) gmresDim_ = 100;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters gmresDim = %d\n",
+                    gmresDim_);
+          }
        }
-    }
 
-    //-------------------------------------------------------------------
-    // which preconditioner : diagonal, pilut, boomeramg, parasails
-    //-------------------------------------------------------------------
+       //----------------------------------------------------------------
+       // which preconditioner : diagonal, pilut, boomeramg, parasails
+       //----------------------------------------------------------------
 
-    if ( getParam("preconditioner",numParams,params,param) == 1)
-    {
-       sscanf(param,"%s",param2);
-       if ( !strcmp(param2, "reuse" ) ) HYPreconReuse_ = 1;
+       else if ( !strcmp(param1, "preconditioner") )
+       {
+          sscanf(params[i],"%s %s", param, param2);
+          if ( !strcmp(param2, "reuse" ) ) HYPreconReuse_ = 1;
+          else
+          {
+             sscanf(params[i],"%s %s", param, HYPreconName_);
+             selectPreconditioner(HYPreconName_);
+          }
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters preconditioner = %s\n",
+                    HYPreconName_);
+          }
+       }
+
+       //----------------------------------------------------------------
+       // maximum number of iterations for pcg or gmres
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "maxIterations") )
+       {
+          sscanf(params[i],"%s %d", param, &maxIterations_);
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters maxIterations = %d\n",
+                    maxIterations_);
+          }
+       }
+
+       //----------------------------------------------------------------
+       // tolerance as termination criterion
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "tolerance") )
+       {
+          sscanf(params[i],"%s %lg", param, &tolerance_);
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters tolerance = %e\n",
+                    tolerance_);
+          }
+       }
+
+       //----------------------------------------------------------------
+       // pilut preconditioner : max number of nonzeros to keep per row
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "pilutRowSize") )
+       {
+          sscanf(params[i],"%s %d", param, &pilutRowSize_);
+          if ( pilutRowSize_ < 1 ) pilutRowSize_ = 50;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters pilutRowSize = %d\n",
+                    pilutRowSize_);
+          }
+       }
+
+       //----------------------------------------------------------------
+       // pilut preconditioner : threshold to drop small nonzeros
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "pilutDropTol") )
+       {
+          sscanf(params[i],"%s %lg", param, &pilutDropTol_);
+          if (pilutDropTol_<0.0 || pilutDropTol_ >=1.0) pilutDropTol_ = 0.0;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters pilutDropTol = %e\n",
+                    pilutDropTol_);
+          }
+       }
+
+       //----------------------------------------------------------------
+       // DDILUT preconditioner : amount of fillin (0 == same as A)
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "ddilutFillin") )
+       {
+          sscanf(params[i],"%s %lg", param, &ddilutFillin_);
+          if ( ddilutFillin_ < 0.0 ) ddilutFillin_ = 0.0;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters ddilutFillin = %d\n",
+                    ddilutFillin_);
+          }
+       }
+
+       //----------------------------------------------------------------
+       // DDILUT preconditioner : threshold to drop small nonzeros
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "ddilutDropTol") )
+       {
+          sscanf(params[i],"%s %lg", param, &ddilutDropTol_);
+          if (ddilutDropTol_<0.0 || ddilutDropTol_ >=1.0) ddilutDropTol_ = 0.0;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters ddilutDropTol = %e\n",
+                    ddilutDropTol_);
+          }
+       }
+
+       //----------------------------------------------------------------
+       // superlu : ordering to use (natural, mmd)
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "superluOrdering") )
+       {
+          sscanf(params[i],"%s %s", param, param2);
+          if      ( !strcmp(param2, "natural" ) ) superluOrdering_ = 0;
+          else if ( !strcmp(param2, "mmd") )      superluOrdering_ = 2;
+          else                                    superluOrdering_ = 0;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters superluOrdering = %s\n",
+                    param2);
+          }
+       }
+
+       //----------------------------------------------------------------
+       // superlu : scaling none ('N') or both col/row ('B')
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "superluScale") )
+       {
+          sscanf(params[i],"%s %s", param, param2);
+          if   ( !strcmp(param2, "y" ) ) superluScale_[0] = 'B';
+          else                           superluScale_[0] = 'N';
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters superluScale = %s\n",
+                    params);
+          }
+       }
+
+       //----------------------------------------------------------------
+       // amg preconditoner : coarsening type 
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "amgCoarsenType") )
+       {
+          sscanf(params[i],"%s %s", param, param2);
+          if      ( !strcmp(param2, "ruge" ) )    amgCoarsenType_ = 1;
+          else if ( !strcmp(param2, "falgout" ) ) amgCoarsenType_ = 6;
+          else if ( !strcmp(param2, "default" ) ) amgCoarsenType_ = 0;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters amgCoarsenType = %s\n",
+                    param2);
+          }
+       }
+
+      //----------------------------------------------------------------
+      // amg preconditoner : no of relaxation sweeps per level
+      //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "amgNumSweeps") )
+       {
+          sscanf(params[i],"%s %d", param, &nsweeps);
+          if ( nsweeps < 1 ) nsweeps = 1;
+          for ( i = 0; i < 3; i++ ) amgNumSweeps_[i] = nsweeps;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters amgNumSweeps = %d\n",
+                    nsweeps);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // amg preconditoner : which smoother to use
+       //----------------------------------------------------------------
+
+       else if ( !strcmp(param1, "amgRelaxType") )
+       {
+          sscanf(params[i],"%s %s", param, param2);
+          if      ( !strcmp(param2, "jacobi" ) ) rtype = 2;
+          else if ( !strcmp(param2, "gsSlow") )  rtype = 1;
+          else if ( !strcmp(param2, "gsFast") )  rtype = 4;
+          else if ( !strcmp(param2, "hybrid" ) ) rtype = 3;
+          else if ( !strcmp(param2, "hybridsym" ) ) rtype = 5;
+          else                                   rtype = 4;
+          for ( i = 0; i < 3; i++ ) amgRelaxType_[i] = rtype;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters amgRelaxType = %s\n",
+                    params);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // amg preconditoner : damping factor for Jacobi smoother
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "amgRelaxWeight") )
+       {
+          sscanf(params[i],"%s %lg", param, &weight);
+          if ( weight < 0.0 || weight > 1.0 ) weight = 0.5;
+          for ( i = 0; i < 25; i++ ) amgRelaxWeight_[i] = weight;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters amgRelaxWeight = %e\n",
+                    weight);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // amg preconditoner : threshold to determine strong coupling
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "amgStrongThreshold") )
+       {
+          sscanf(params[i],"%s %lg", param, &amgStrongThreshold_);
+          if ( amgStrongThreshold_ < 0.0 || amgStrongThreshold_ > 1.0 )
+             amgStrongThreshold_ = 0.25;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters amgStrongThreshold = %e\n",
+                    amgStrongThreshold_);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // parasails preconditoner : threshold ( >= 0.0 )
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "parasailsThreshold") )
+       {
+          sscanf(params[i],"%s %lg", param, &parasailsThreshold_);
+          if ( parasailsThreshold_ < 0.0 ) parasailsThreshold_ = 0.1;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters parasailsThreshold = %e\n",
+                    parasailsThreshold_);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // parasails preconditoner : nlevels ( >= 0)
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "parasailsNlevels") )
+       {
+          sscanf(params[i],"%s %d", param, &parasailsNlevels_);
+          if ( parasailsNlevels_ < 0 ) parasailsNlevels_ = 1;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters parasailsNlevels = %d\n",
+                    parasailsNlevels_);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // parasails preconditoner : filter
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "parasailsFilter") )
+       {
+          sscanf(params[i],"%s %lg", param, &parasailsFilter_);
+
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters parasailsFilter = %e\n",
+                    parasailsFilter_);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // parasails preconditoner : loadbal
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "parasailsLoadbal") )
+       {
+          sscanf(params[i],"%s %lg", param, &parasailsLoadbal_);
+
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters parasailsLoadbal = %e\n",
+                    parasailsLoadbal_);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // parasails preconditoner : symmetry flag (1 - symm, 0 - nonsym) 
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "parasailsSymmetric") )
+       {
+          parasailsSym_ = 1;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters parasailsSym = %d\n",
+                    parasailsSym_);
+          }
+       }
+       else if ( !strcmp(param1, "parasailsUnSymmetric") )
+       {
+          parasailsSym_ = 0;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters parasailsSym = %d\n",
+                    parasailsSym_);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // parasails preconditoner : reuse flag
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "parasailsReuse") )
+       {
+          sscanf(params[i],"%s %d", param, &parasailsReuse_);
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters parasailsReuse = %d\n",
+                    parasailsReuse_);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // mlpack preconditoner : no of relaxation sweeps per level
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "mlNumPresweeps") )
+       {
+          sscanf(params[i],"%s %d", param, &nsweeps);
+          if ( nsweeps < 1 ) nsweeps = 1;
+          mlNumPreSweeps_ = nsweeps;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters mlNumPresweeps = %d\n",
+                    nsweeps);
+          }
+       }
+       else if ( !strcmp(param1, "mlNumPostsweeps") )
+       {
+          sscanf(params[i],"%s %d", param, &nsweeps);
+          if ( nsweeps < 1 ) nsweeps = 1;
+          mlNumPostSweeps_ = nsweeps;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters mlNumPostsweeps = %d\n",
+                    nsweeps);
+          }
+       }
+       else if ( !strcmp(param1, "mlNumSweeps") )
+       {
+          sscanf(params[i],"%s %d", param, &nsweeps);
+          if ( nsweeps < 1 ) nsweeps = 1;
+          mlNumPreSweeps_  = nsweeps;
+          mlNumPostSweeps_ = nsweeps;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters mlNumSweeps = %d\n",
+                    nsweeps);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // mlpack preconditoner : which smoother to use
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "mlPresmootherType") )
+       {
+          sscanf(params[i],"%s %s", param, param2);
+          rtype = 1;
+          if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
+          else if ( !strcmp(param2, "gs") )      rtype = 1;
+          else if ( !strcmp(param2, "sgs") )     rtype = 2;
+          else if ( !strcmp(param2, "vbjacobi")) rtype = 3;
+          else if ( !strcmp(param2, "vbsgs") )   rtype = 4;
+          else if ( !strcmp(param2, "vbsgsseq")) rtype = 5;
+          else if ( !strcmp(param2, "ilut") )    rtype = 6;
+          mlPresmootherType_  = rtype;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters mlPresmootherType = %s\n",
+                    param2);
+          }
+       }
+       else if ( !strcmp(param1, "mlPostsmootherType") )
+       {
+          sscanf(params[i],"%s %s", param, param2);
+          rtype = 1;
+          if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
+          else if ( !strcmp(param2, "gs") )      rtype = 1;
+          else if ( !strcmp(param2, "sgs") )     rtype = 2;
+          else if ( !strcmp(param2, "vbjacobi")) rtype = 3;
+          else if ( !strcmp(param2, "vbsgs") )   rtype = 4;
+          else if ( !strcmp(param2, "vbsgsseq")) rtype = 5;
+          mlPostsmootherType_  = rtype;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters mlPostsmootherType = %s\n",
+                    param2);
+          }
+       }
+       else if ( !strcmp(param1, "mlRelaxType") )
+       {
+          sscanf(params[i],"%s %s", param, param2);
+          rtype = 1;
+          if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
+          else if ( !strcmp(param2, "gs") )      rtype = 1;
+          else if ( !strcmp(param2, "sgs") )     rtype = 2;
+          else if ( !strcmp(param2, "vbjacobi")) rtype = 3;
+          else if ( !strcmp(param2, "vbsgs") )   rtype = 4;
+          else if ( !strcmp(param2, "vbsgsseq")) rtype = 5;
+          else if ( !strcmp(param2, "ilut") )    rtype = 6;
+          mlPresmootherType_  = rtype;
+          mlPostsmootherType_ = rtype;
+          if ( rtype == 6 ) mlPostsmootherType_ = 1;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters mlRelaxType = %s\n",
+                    param2);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // mlpack preconditoner : damping factor for Jacobi smoother
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "mlRelaxWeight") )
+       {
+          sscanf(params[i],"%s %lg", param, &weight);
+          if ( weight < 0.0 || weight > 1.0 ) weight = 0.5;
+          mlRelaxWeight_ = weight;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters mlRelaxWeight = %e\n",
+                    weight);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // mlpack preconditoner : threshold to determine strong coupling
+       //---------------------------------------------------------------
+
+       else if ( !strcmp(param1, "mlStrongThreshold") )
+       {
+          sscanf(param,"%lg", &mlStrongThreshold_);
+          if ( mlStrongThreshold_ < 0.0 || mlStrongThreshold_ > 1.0 )
+             mlStrongThreshold_ = 0.08;
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+          {
+             printf("       HYPRE_LinSysCore::parameters mlStrongThreshold = %e\n",
+                    mlStrongThreshold_);
+          }
+       }
+
+       //---------------------------------------------------------------
+       // error 
+       //---------------------------------------------------------------
+
        else
        {
-          sscanf(param,"%s",HYPreconName_);
-          selectPreconditioner(HYPreconName_);
+          printf("HYPRE_LinSysCore::parameters WARNING : %s not recognized\n",
+                 params[i]);
        }
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters preconditioner = %s\n",
-                 HYPreconName_);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // maximum number of iterations for pcg or gmres
-    //-------------------------------------------------------------------
-
-    if (getParam("maxIterations",numParams,params,param) == 1)
-    {
-       sscanf(param,"%d", &maxIterations_);
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters maxIterations = %d\n",
-                 maxIterations_);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // tolerance as termination criterion
-    //-------------------------------------------------------------------
-
-    if (getParam("tolerance",numParams,params,param) == 1)
-    {
-       sscanf(param,"%lg", &tolerance_);
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters tolerance = %e\n",
-                 tolerance_);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // pilut preconditioner : max number of nonzeros to keep per row
-    //-------------------------------------------------------------------
-
-    if (getParam("pilutRowSize",numParams,params,param) == 1)
-    {
-       sscanf(param,"%d", &pilutRowSize_);
-       if ( pilutRowSize_ < 1 ) pilutRowSize_ = 50;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters pilutRowSize = %d\n",
-                 pilutRowSize_);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // pilut preconditioner : threshold to drop small nonzeros
-    //-------------------------------------------------------------------
-
-    if (getParam("pilutDropTol",numParams,params,param) == 1)
-    {
-       sscanf(param,"%lg", &pilutDropTol_);
-       if (pilutDropTol_<0.0 || pilutDropTol_ >=1.0) pilutDropTol_ = 0.0;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters pilutDropTol = %e\n",
-                 pilutDropTol_);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // DDILUT preconditioner : amount of fillin (0 == same as A)
-    //-------------------------------------------------------------------
-
-    if (getParam("ddilutFillin",numParams,params,param) == 1)
-    {
-       sscanf(param,"%lg", &ddilutFillin_);
-       if ( ddilutFillin_ < 0.0 ) ddilutFillin_ = 0.0;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters ddilutFillin = %d\n",
-                 ddilutFillin_);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // DDILUT preconditioner : threshold to drop small nonzeros
-    //-------------------------------------------------------------------
-
-    if (getParam("ddilutDropTol",numParams,params,param) == 1)
-    {
-       sscanf(param,"%lg", &ddilutDropTol_);
-       if (ddilutDropTol_<0.0 || ddilutDropTol_ >=1.0) ddilutDropTol_ = 0.0;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters ddilutDropTol = %e\n",
-                 ddilutDropTol_);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // superlu : ordering to use (natural, mmd)
-    //-------------------------------------------------------------------
-
-    if (getParam("superluOrdering",numParams,params,param) == 1)
-    {
-       sscanf(param,"%s", &param2);
-       if      ( !strcmp(param2, "natural" ) ) superluOrdering_ = 0;
-       else if ( !strcmp(param2, "mmd") )      superluOrdering_ = 2;
-       else                                    superluOrdering_ = 0;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters superluOrdering = %s\n",
-                 param2);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // superlu : scaling none ('N') or both col/row ('B')
-    //-------------------------------------------------------------------
-
-    if (getParam("superluScale",numParams,params,param) == 1)
-    {
-       sscanf(param,"%s", &param2);
-       if      ( !strcmp(param2, "y" ) ) superluScale_[0] = 'B';
-       else                              superluScale_[0] = 'N';
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters superluScale = %s\n",
-                 params);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // amg preconditoner : coarsening type 
-    //-------------------------------------------------------------------
-
-    if (getParam("amgCoarsenType",numParams,params,param) == 1)
-    {
-       sscanf(param,"%s", param2);
-       if      ( !strcmp(param2, "ruge" ) )    amgCoarsenType_ = 1;
-       else if ( !strcmp(param2, "falgout" ) ) amgCoarsenType_ = 6;
-       else if ( !strcmp(param2, "default" ) ) amgCoarsenType_ = 0;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters amgCoarsenType = %s\n",
-                 param2);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // amg preconditoner : no of relaxation sweeps per level
-    //-------------------------------------------------------------------
-
-    if (getParam("amgNumSweeps",numParams,params,param) == 1)
-    {
-       sscanf(param,"%d", &nsweeps);
-       if ( nsweeps < 1 ) nsweeps = 1;
-       for ( i = 0; i < 3; i++ ) amgNumSweeps_[i] = nsweeps;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters amgNumSweeps = %d\n",
-                 nsweeps);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // amg preconditoner : which smoother to use
-    //-------------------------------------------------------------------
-
-    if (getParam("amgRelaxType",numParams,params,param) == 1)
-    {
-       sscanf(param,"%s", param2);
-       if      ( !strcmp(param2, "jacobi" ) ) rtype = 2;
-       else if ( !strcmp(param2, "gsSlow") )  rtype = 1;
-       else if ( !strcmp(param2, "gsFast") )  rtype = 4;
-       else if ( !strcmp(param2, "hybrid" ) ) rtype = 3;
-       else if ( !strcmp(param2, "hybridsym" ) ) rtype = 5;
-       else                                   rtype = 4;
-       for ( i = 0; i < 3; i++ ) amgRelaxType_[i] = rtype;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters amgRelaxType = %s\n",
-                 params);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // amg preconditoner : damping factor for Jacobi smoother
-    //-------------------------------------------------------------------
-
-    if (getParam("amgRelaxWeight",numParams,params,param) == 1)
-    {
-       sscanf(param,"%lg", &weight);
-       if ( weight < 0.0 || weight > 1.0 ) weight = 0.5;
-       for ( i = 0; i < 25; i++ ) amgRelaxWeight_[i] = weight;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters amgRelaxWeight = %e\n",
-                 weight);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // amg preconditoner : threshold to determine strong coupling
-    //-------------------------------------------------------------------
-
-    if (getParam("amgStrongThreshold",numParams,params,param) == 1)
-    {
-       sscanf(param,"%lg", &amgStrongThreshold_);
-       if ( amgStrongThreshold_ < 0.0 || amgStrongThreshold_ > 1.0 )
-          amgStrongThreshold_ = 0.25;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters amgStrongThreshold = %e\n",
-                 amgStrongThreshold_);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // parasails preconditoner : threshold ( >= 0.0 )
-    //-------------------------------------------------------------------
-
-    if (getParam("parasailsThreshold",numParams,params,param) == 1)
-    {
-       sscanf(param,"%lg", &parasailsThreshold_);
-       if ( parasailsThreshold_ < 0.0 ) parasailsThreshold_ = 0.1;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters parasailsThreshold = %e\n",
-                 parasailsThreshold_);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // parasails preconditoner : nlevels ( >= 0)
-    //-------------------------------------------------------------------
-
-    if (getParam("parasailsNlevels",numParams,params,param) == 1)
-    {
-       sscanf(param,"%d", &parasailsNlevels_);
-       if ( parasailsNlevels_ < 0 ) parasailsNlevels_ = 1;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters parasailsNlevels = %d\n",
-                 parasailsNlevels_);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // parasails preconditoner : filter
-    //-------------------------------------------------------------------
-
-    if (getParam("parasailsFilter",numParams,params,param) == 1)
-    {
-       sscanf(param,"%lg", &parasailsFilter_);
-
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters parasailsFilter = %e\n",
-                 parasailsFilter_);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // parasails preconditoner : loadbal
-    //-------------------------------------------------------------------
-
-    if (getParam("parasailsLoadbal",numParams,params,param) == 1)
-    {
-       sscanf(param,"%lg", &parasailsLoadbal_);
-
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters parasailsLoadbal = %e\n",
-                 parasailsLoadbal_);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // parasails preconditoner : symmetry flag (1 - symm, 0 - nonsym) 
-    //-------------------------------------------------------------------
-
-    if (getParam("parasailsSymmetric",numParams,params,param) == 1)
-    {
-       parasailsSym_ = 1;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters parasailsSym = %d\n",
-                 parasailsSym_);
-       }
-    }
-    if (getParam("parasailsUnSymmetric",numParams,params,param) == 1)
-    {
-       parasailsSym_ = 0;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters parasailsSym = %d\n",
-                 parasailsSym_);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // parasails preconditoner : reuse flag
-    //-------------------------------------------------------------------
-
-    if (getParam("parasailsReuse",numParams,params,param) == 1)
-    {
-       sscanf(param,"%d", &parasailsReuse_);
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters parasailsReuse = %d\n",
-                 parasailsReuse_);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // mlpack preconditoner : no of relaxation sweeps per level
-    //-------------------------------------------------------------------
-
-    if (getParam("mlNumPresweeps",numParams,params,param) == 1)
-    {
-       sscanf(param,"%d", &nsweeps);
-       if ( nsweeps < 1 ) nsweeps = 1;
-       mlNumPreSweeps_ = nsweeps;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters mlNumPresweeps = %d\n",
-                 nsweeps);
-       }
-    }
-    if (getParam("mlNumPostsweeps",numParams,params,param) == 1)
-    {
-       sscanf(param,"%d", &nsweeps);
-       if ( nsweeps < 1 ) nsweeps = 1;
-       mlNumPostSweeps_ = nsweeps;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters mlNumPostsweeps = %d\n",
-                 nsweeps);
-       }
-    }
-    if (getParam("mlNumSweeps",numParams,params,param) == 1)
-    {
-       sscanf(param,"%d", &nsweeps);
-       if ( nsweeps < 1 ) nsweeps = 1;
-       mlNumPreSweeps_  = nsweeps;
-       mlNumPostSweeps_ = nsweeps;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters mlNumSweeps = %d\n",
-                 nsweeps);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // mlpack preconditoner : which smoother to use
-    //-------------------------------------------------------------------
-
-    if (getParam("mlPresmootherType",numParams,params,param) == 1)
-    {
-       sscanf(param,"%s", param2);
-       rtype = 1;
-       if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
-       else if ( !strcmp(param2, "gs") )      rtype = 1;
-       else if ( !strcmp(param2, "sgs") )     rtype = 2;
-       else if ( !strcmp(param2, "vbjacobi")) rtype = 3;
-       else if ( !strcmp(param2, "vbsgs") )   rtype = 4;
-       else if ( !strcmp(param2, "vbsgsseq")) rtype = 5;
-       else if ( !strcmp(param2, "ilut") )    rtype = 6;
-       mlPresmootherType_  = rtype;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters mlPresmootherType = %s\n",
-                 param2);
-       }
-    }
-    if (getParam("mlPostsmootherType",numParams,params,param) == 1)
-    {
-       sscanf(param,"%s", param2);
-       rtype = 1;
-       if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
-       else if ( !strcmp(param2, "gs") )      rtype = 1;
-       else if ( !strcmp(param2, "sgs") )     rtype = 2;
-       else if ( !strcmp(param2, "vbjacobi")) rtype = 3;
-       else if ( !strcmp(param2, "vbsgs") )   rtype = 4;
-       else if ( !strcmp(param2, "vbsgsseq")) rtype = 5;
-       mlPostsmootherType_  = rtype;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters mlPostsmootherType = %s\n",
-                 param2);
-       }
-    }
-    if (getParam("mlRelaxType",numParams,params,param) == 1)
-    {
-       sscanf(param,"%s", param2);
-       rtype = 1;
-       if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
-       else if ( !strcmp(param2, "gs") )      rtype = 1;
-       else if ( !strcmp(param2, "sgs") )     rtype = 2;
-       else if ( !strcmp(param2, "vbjacobi")) rtype = 3;
-       else if ( !strcmp(param2, "vbsgs") )   rtype = 4;
-       else if ( !strcmp(param2, "vbsgsseq")) rtype = 5;
-       else if ( !strcmp(param2, "ilut") )    rtype = 6;
-       mlPresmootherType_  = rtype;
-       mlPostsmootherType_ = rtype;
-       if ( rtype == 6 ) mlPostsmootherType_ = 1;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters mlRelaxType = %s\n",
-                 param2);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // mlpack preconditoner : damping factor for Jacobi smoother
-    //-------------------------------------------------------------------
-
-    if (getParam("mlRelaxWeight",numParams,params,param) == 1)
-    {
-       sscanf(param,"%lg", &weight);
-       if ( weight < 0.0 || weight > 1.0 ) weight = 0.5;
-       mlRelaxWeight_ = weight;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters mlRelaxWeight = %e\n",
-                 weight);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // mlpack preconditoner : threshold to determine strong coupling
-    //-------------------------------------------------------------------
-
-    if (getParam("mlStrongThreshold",numParams,params,param) == 1)
-    {
-       sscanf(param,"%lg", &mlStrongThreshold_);
-       if ( mlStrongThreshold_ < 0.0 || mlStrongThreshold_ > 1.0 )
-          mlStrongThreshold_ = 0.08;
-       nParamsFound++;
-       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
-       {
-          printf("HYPRE_LinSysCore::parameters mlStrongThreshold = %e\n",
-                 mlStrongThreshold_);
-       }
-    }
-
-    //-------------------------------------------------------------------
-    // error checking
-    //-------------------------------------------------------------------
-
-    if ( nParamsFound != numParams && mypid_ == 0 )
-    {
-       printf("HYPRE_LinSysCore::parameters WARNING - some param invalid.\n");
     }
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
