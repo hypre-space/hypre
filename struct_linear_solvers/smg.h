@@ -115,19 +115,19 @@ typedef struct
 #define hypre_SMGSetCIndex(base_index, base_stride, level, cdir, cindex) \
 {\
    hypre_SMGSetBIndex(base_index, base_stride, level, cindex);\
-   hypre_IndexD(cindex, cdir) = 0;\
+   hypre_IndexD(cindex, cdir) += 0;\
 }
 
 #define hypre_SMGSetFIndex(base_index, base_stride, level, cdir, findex) \
 {\
    hypre_SMGSetBIndex(base_index, base_stride, level, findex);\
-   hypre_IndexD(findex, cdir) = 1;\
+   hypre_IndexD(findex, cdir) += 1;\
 }
 
 #define hypre_SMGSetStride(base_index, base_stride, level, cdir, stride) \
 {\
    hypre_SMGSetBStride(base_index, base_stride, level, stride);\
-   hypre_IndexD(stride, cdir) = 2;\
+   hypre_IndexD(stride, cdir) *= 2;\
 }
 
 #endif
