@@ -1571,8 +1571,8 @@ void HYPRE_LinSysCore::setupPCGPrecon()
            exit(1);
            break;
 
-#ifdef HAVE_ML
       case HYML :
+#ifdef HAVE_ML
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
               HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
                                         HYPRE_DummyFunction, HYPrecon_);
@@ -1583,11 +1583,13 @@ void HYPRE_LinSysCore::setupPCGPrecon()
                                         HYPRE_LSI_MLSetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("CG : ML preconditioning not available.\n");
 #endif
+           break;
 
-#ifdef HAVE_MLI
       case HYMLI :
+#ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("MLI preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -1599,8 +1601,10 @@ void HYPRE_LinSysCore::setupPCGPrecon()
                                         HYPRE_LSI_MLISetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("CG : MLI preconditioning not available.\n");
 #endif
+           break;
 
       case HYUZAWA :
            printf("CG : Uzawa preconditioning not available.\n");
@@ -1732,8 +1736,8 @@ void HYPRE_LinSysCore::setupLSICGPrecon()
            exit(1);
            break;
 
-#ifdef HAVE_MLI
       case HYMLI :
+#ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("MLI preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -1745,8 +1749,10 @@ void HYPRE_LinSysCore::setupLSICGPrecon()
                                         HYPRE_LSI_MLISetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("HYPRE_LSI LSICG : MLI preconditioning not available.\n");
 #endif
+           break;
 
       case HYUZAWA :
            if ( mypid_ == 0 )
@@ -1911,8 +1917,8 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
            exit(1);
            break;
 
-#ifdef HAVE_ML
       case HYML :
+#ifdef HAVE_ML
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
               HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
                                           HYPRE_DummyFunction, HYPrecon_);
@@ -1923,11 +1929,13 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
                                           HYPRE_LSI_MLSetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("GMRES : ML preconditioning not available.\n");
 #endif
+           break;
 
-#ifdef HAVE_MLI
       case HYMLI :
+#ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("MLI preconditioning \n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -1939,8 +1947,10 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
                                           HYPRE_LSI_MLISetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("GMRES : MLI preconditioning not available.\n");
 #endif
+           break;
 
       case HYUZAWA :
            printf("GMRES : Uzawa preconditioning not available.\n");
@@ -2109,8 +2119,8 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
            }
            break;
 
-#ifdef HAVE_ML
       case HYML :
+#ifdef HAVE_ML
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
               HYPRE_ParCSRFGMRESSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
                                            HYPRE_DummyFunction, HYPrecon_);
@@ -2121,11 +2131,13 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
                                            HYPRE_LSI_MLSetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("FGMRES : ML preconditioning not available.\n");
 #endif
+           break;
 
-#ifdef HAVE_MLI
       case HYMLI :
+#ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("MLI preconditioning \n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -2137,8 +2149,10 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
                                            HYPRE_LSI_MLISetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("FGMRES : ML preconditioning not available.\n");
 #endif
+           break;
 
       case HYUZAWA :
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -2309,8 +2323,8 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
            exit(1);
            break;
 
-#ifdef HAVE_ML
       case HYML :
+#ifdef HAVE_ML
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
               HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
                                              HYPRE_DummyFunction, HYPrecon_);
@@ -2321,11 +2335,13 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
                                              HYPRE_LSI_MLSetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("BiCGSTAB : ML preconditioning not available.\n");
 #endif
+           break;
 
-#ifdef HAVE_MLI
       case HYMLI :
+#ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("MLI preconditioning\n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -2337,8 +2353,10 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
                                              HYPRE_LSI_MLISetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("BiCGSTAB : MLI preconditioning not available.\n");
 #endif
+           break;
       case HYUZAWA :
            printf("BiCGSTAB : Uzawa preconditioning not available.\n");
            exit(1);
@@ -2500,8 +2518,8 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
            exit(1);
            break;
 
-#ifdef HAVE_ML
       case HYML :
+#ifdef HAVE_ML
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
               HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
                                               HYPRE_DummyFunction, HYPrecon_);
@@ -2512,11 +2530,13 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
                                               HYPRE_LSI_MLSetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("BiCGSTABL : ML preconditioning not available.\n");
 #endif
+           break;
 
-#ifdef HAVE_MLI
       case HYMLI :
+#ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("MLI preconditioning \n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -2528,8 +2548,10 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
                                               HYPRE_LSI_MLISetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("BiCGSTABL : ML preconditioning not available.\n");
 #endif
+           break;
       case HYUZAWA :
            printf("BiCGSTABL : Uzawa preconditioning not available.\n");
            exit(1);
@@ -2687,8 +2709,8 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
            exit(1);
            break;
 
-#ifdef HAVE_ML
       case HYML :
+#ifdef HAVE_ML
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
               HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
                                           HYPRE_DummyFunction, HYPrecon_);
@@ -2699,11 +2721,13 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
                                           HYPRE_LSI_MLSetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("TFQMR : ML preconditioning not available.\n");
 #endif
+           break;
 
-#ifdef HAVE_MLI
       case HYMLI :
+#ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("MLI preconditioning \n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -2715,8 +2739,10 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
                                           HYPRE_LSI_MLISetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("TFQMR : MLI preconditioning not available.\n");
 #endif
+           break;
       case HYUZAWA :
            printf("TFQMR : Uzawa preconditioning not available.\n");
            exit(1);
@@ -2874,8 +2900,8 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
            exit(1);
            break;
 
-#ifdef HAVE_ML
       case HYML :
+#ifdef HAVE_ML
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
               HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
                                           HYPRE_DummyFunction, HYPrecon_);
@@ -2886,11 +2912,13 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
                                           HYPRE_LSI_MLSetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("BiCGS : ML preconditioning not available.\n");
 #endif
+           break;
 
-#ifdef HAVE_MLI
       case HYMLI :
+#ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("MLI preconditioning \n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -2902,8 +2930,10 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
                                           HYPRE_LSI_MLISetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("BiCGS : MLI preconditioning not available.\n");
 #endif
+           break;
       case HYUZAWA :
            printf("BiCGS : Uzawa preconditioning not available.\n");
            exit(1);
@@ -3041,8 +3071,8 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
            }
            break;
 
-#ifdef HAVE_ML
       case HYML :
+#ifdef HAVE_ML
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
               HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_LSI_MLSolve,
                                            HYPRE_DummyFunction, HYPrecon_);
@@ -3053,11 +3083,13 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
                                            HYPRE_LSI_MLSetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("SymQMR : ML preconditioning not available.\n");
 #endif
+           break;
 
-#ifdef HAVE_MLI
       case HYMLI :
+#ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
               printf("MLI preconditioning \n");
            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
@@ -3069,8 +3101,11 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
                                            HYPRE_LSI_MLISetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
-           break;
+#else
+           printf("SymQMR : MLI preconditioning not available.\n");
 #endif
+           break;
+
       case HYUZAWA :
            printf("SymQMR : Uzawa preconditioning not available.\n");
            exit(1);
