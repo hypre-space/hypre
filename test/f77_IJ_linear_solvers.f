@@ -316,8 +316,8 @@ c Set defaults for BoomerAMG
         coarsen_type = 0
         hybrid = 1
         measure_type = 0
-        strong_threshold = 0.25
-        trunc_factor = 0.0
+        strong_threshold = 0.1
+        trunc_factor = 0.9
         cycle_type = 1
 
         print *, 'AMG'
@@ -341,13 +341,14 @@ c Set defaults for BoomerAMG
      &                                      relax_weights,
      &                                      MAXLEVELS,ierr)
         call HYPRE_BoomerAMGSetNumGridSweeps(solver,
-     &                                    num_grid_sweeps, ierr)
+     &                                       num_grid_sweeps, ierr)
         call HYPRE_BoomerAMGSetGridRelaxType(solver,
-     &                                    grid_relax_type, ierr)
+     &                                       grid_relax_type, ierr)
         call HYPRE_BoomerAMGSetRelaxWeight(solver,
-     &                                  relax_weights, ierr)
+     &                                     relax_weights, ierr)
         call HYPRE_BoomerAMGSetGridRelaxPnts(solver,
-     &                                      grid_relax_points, ierr)
+     &                                       grid_relax_points,
+     &                                       ierr)
         call HYPRE_BoomerAMGSetMaxLevels(solver, MAXLEVELS, ierr)
         call HYPRE_BoomerAMGSetDebugFlag(solver, debug_flag, ierr)
         call HYPRE_BoomerAMGSetup(solver, A_storage, b_storage,
@@ -393,8 +394,8 @@ c Set defaults for BoomerAMG
           hybrid = 1
           measure_type = 0
           setup_type = 1
-          strong_threshold = 0.25
-          trunc_factor = 0.0
+          strong_threshold = 0.1
+          trunc_factor = 0.9
           cycle_type = 1
 
           call HYPRE_BoomerAMGCreate(precond, ierr)
@@ -404,7 +405,8 @@ c Set defaults for BoomerAMG
      &						ierr)
           call HYPRE_BoomerAMGSetStrongThrshld(precond,
      &                                        strong_threshold, ierr)
-c         call HYPRE_BoomerAMGSetTruncFactor(precond, trunc_factor, ierr)
+          call HYPRE_BoomerAMGSetTruncFactor(precond, trunc_factor,
+     &                                       ierr)
           call HYPRE_BoomerAMGSetLogging(precond, ioutdat,
      &                                "test.out.log", ierr)
           call HYPRE_BoomerAMGSetMaxIter(precond, maxiter, ierr)
