@@ -53,22 +53,17 @@ LFLAGS =\
 
 HEADERS =\
  aux_parcsr_matrix.h\
- headers.h\
  fortran.h\
- IJ_matrix.h\
- IJ_matrix_vector.h\
- HYPRE_IJMatrix.h
+ HYPRE_IJ_mv.h \
+ IJ_matrix_vector.h \
+ IJ_matrix.h
 
 FILES =\
- aux_parcsr_matrix.c\
  hypre_IJMatrix_parcsr.c\
- hypre_IJMatrix_petsc.c\
- hypre_IJMatrix_isis.c\
- IJMatrix_parcsr.c\
- IJMatrix_petsc.c\
- IJMatrix_isis.c\
  HYPRE_IJMatrix.c\
- F90_HYPRE_IJMatrix.c
+ F90_HYPRE_IJMatrix.c\
+ aux_parcsr_matrix.c\
+ qsort.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -91,14 +86,14 @@ veryclean: clean
 # Rules
 ##################################################################
 
-driver: driver.o libHYPRE_IJ_mv.a
-	@echo  "Linking" $@ "... "
-	${CC} -o driver driver.o ${LFLAGS}
-
 libHYPRE_IJ_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -rcu $@ ${OBJS}
 	${RANLIB} $@
+
+driver: driver.o libHYPRE_IJ_mv.a
+	@echo  "Linking" $@ "... "
+	${CC} -o driver driver.o ${LFLAGS}
 
 ${OBJS}: ${HEADERS}
 
