@@ -54,6 +54,10 @@ New internal installation: V2000-03-30
 
 New internal installation: V2000-05-31
 
+- Now installing both optimized and debugging versions of the library.
+  The optimized library is in the usual place; the debugging library
+  is in the subdirectory 'debug'.
+
 - Added support for the FEI
 
 - Using a new version numbering scheme.  The C macro HYPRE_Version()
