@@ -1,5 +1,5 @@
 /*BHEADER**********************************************************************
- * (c) 1997   The Regents of the University of California
+ * (c) 2000   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
@@ -12,64 +12,65 @@
  *****************************************************************************/
 
 #include "headers.h"
-#include "smg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRestrictData data structure
+ * hypre_SemiRestrictData data structure
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
    hypre_StructMatrix *R;
+   int                 R_stored_as_transpose;
    hypre_ComputePkg   *compute_pkg;
    hypre_Index         cindex;
    hypre_Index         stride;
 
    int                 time_index;
 
-} hypre_SMGRestrictData;
+} hypre_SemiRestrictData;
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRestrictCreate
+ * hypre_SemiRestrictCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SMGRestrictCreate( )
+hypre_SemiRestrictCreate( )
 {
-   hypre_SMGRestrictData *restrict_data;
+   hypre_SemiRestrictData *restrict_data;
 
-   restrict_data = hypre_CTAlloc(hypre_SMGRestrictData, 1);
+   restrict_data = hypre_CTAlloc(hypre_SemiRestrictData, 1);
 
-   (restrict_data -> time_index)  = hypre_InitializeTiming("SMGRestrict");
+   (restrict_data -> time_index)  = hypre_InitializeTiming("SemiRestrict");
    
    return (void *) restrict_data;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRestrictSetup
+ * hypre_SemiRestrictSetup
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGRestrictSetup( void               *restrict_vdata,
-                        hypre_StructMatrix *R,
-                        hypre_StructVector *r,
-                        hypre_StructVector *rc,
-                        hypre_Index         cindex,
-                        hypre_Index         findex,
-                        hypre_Index         stride            )
+hypre_SemiRestrictSetup( void               *restrict_vdata,
+                         hypre_StructMatrix *R,
+                         int                 R_stored_as_transpose,
+                         hypre_StructVector *r,
+                         hypre_StructVector *rc,
+                         hypre_Index         cindex,
+                         hypre_Index         findex,
+                         hypre_Index         stride                )
 {
-   hypre_SMGRestrictData  *restrict_data = restrict_vdata;
+   hypre_SemiRestrictData *restrict_data = restrict_vdata;
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
-                       
+
    hypre_BoxArrayArray    *send_boxes;
    hypre_BoxArrayArray    *recv_boxes;
    int                   **send_processes;
    int                   **recv_processes;
    hypre_BoxArrayArray    *indt_boxes;
    hypre_BoxArrayArray    *dept_boxes;
-                       
+
    hypre_ComputePkg       *compute_pkg;
 
    int                     ierr = 0;
@@ -100,10 +101,11 @@ hypre_SMGRestrictSetup( void               *restrict_vdata,
                           &compute_pkg);
 
    /*----------------------------------------------------------
-    * Set up the intadd data structure
+    * Set up the restrict data structure
     *----------------------------------------------------------*/
 
-   (restrict_data -> R)           = hypre_StructMatrixRef(R);
+   (restrict_data -> R) = hypre_StructMatrixRef(R);
+   (restrict_data -> R_stored_as_transpose) = R_stored_as_transpose;
    (restrict_data -> compute_pkg) = compute_pkg;
    hypre_CopyIndex(cindex ,(restrict_data -> cindex));
    hypre_CopyIndex(stride ,(restrict_data -> stride));
@@ -112,26 +114,29 @@ hypre_SMGRestrictSetup( void               *restrict_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRestrict:
- *
- * Notes:
- *    This routine assumes that the interpolation stencil is a
- *    2-point stencil.
+ * hypre_SemiRestrict:
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGRestrict( void               *restrict_vdata,
-                   hypre_StructMatrix *R,
-                   hypre_StructVector *r,
-                   hypre_StructVector *rc             )
+hypre_SemiRestrict( void               *restrict_vdata,
+                    hypre_StructMatrix *R,
+                    hypre_StructVector *r,
+                    hypre_StructVector *rc             )
 {
    int ierr = 0;
 
-   hypre_SMGRestrictData  *restrict_data = restrict_vdata;
+   hypre_SemiRestrictData *restrict_data = restrict_vdata;
 
+   int                     R_stored_as_transpose;
    hypre_ComputePkg       *compute_pkg;
    hypre_IndexRef          cindex;
    hypre_IndexRef          stride;
+
+   hypre_StructGrid       *fgrid;
+   int                    *fgrid_ids;
+   hypre_StructGrid       *cgrid;
+   hypre_BoxArray         *cgrid_boxes;
+   int                    *cgrid_ids;
 
    hypre_CommHandle       *comm_handle;
                        
@@ -139,9 +144,9 @@ hypre_SMGRestrict( void               *restrict_vdata,
    hypre_BoxArray         *compute_box_a;
    hypre_Box              *compute_box;
                        
-   hypre_Box              *R_data_box;
-   hypre_Box              *r_data_box;
-   hypre_Box              *rc_data_box;
+   hypre_Box              *R_dbox;
+   hypre_Box              *r_dbox;
+   hypre_Box              *rc_dbox;
                        
    int                     Ri;
    int                     ri;
@@ -159,15 +164,16 @@ hypre_SMGRestrict( void               *restrict_vdata,
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
 
-   int                     compute_i, i, j;
+   int                     compute_i, fi, ci, j;
    int                     loopi, loopj, loopk;
-
-   hypre_BeginTiming(restrict_data -> time_index);
 
    /*-----------------------------------------------------------------------
     * Initialize some things.
     *-----------------------------------------------------------------------*/
 
+   hypre_BeginTiming(restrict_data -> time_index);
+
+   R_stored_as_transpose = (restrict_data -> R_stored_as_transpose);
    compute_pkg   = (restrict_data -> compute_pkg);
    cindex        = (restrict_data -> cindex);
    stride        = (restrict_data -> stride);
@@ -180,6 +186,12 @@ hypre_SMGRestrict( void               *restrict_vdata,
    /*--------------------------------------------------------------------
     * Restrict the residual.
     *--------------------------------------------------------------------*/
+
+   fgrid = hypre_StructVectorGrid(r);
+   fgrid_ids = hypre_StructGridIDs(fgrid);
+   cgrid = hypre_StructVectorGrid(rc);
+   cgrid_boxes = hypre_StructGridBoxes(cgrid);
+   cgrid_ids = hypre_StructGridIDs(cgrid);
 
    for (compute_i = 0; compute_i < 2; compute_i++)
    {
@@ -201,34 +213,48 @@ hypre_SMGRestrict( void               *restrict_vdata,
          break;
       }
 
-      hypre_ForBoxArrayI(i, compute_box_aa)
+      fi = 0;
+      hypre_ForBoxArrayI(ci, cgrid_boxes)
          {
-            compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
+            while (fgrid_ids[fi] != cgrid_ids[ci])
+            {
+               fi++;
+            }
 
-            R_data_box  = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), i);
-            r_data_box  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r), i);
-            rc_data_box =
-               hypre_BoxArrayBox(hypre_StructVectorDataSpace(rc), i);
+            compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
 
-            Rp0 = hypre_StructMatrixBoxData(R, i, 0);
-            Rp1 = hypre_StructMatrixBoxData(R, i, 1);
-            rp  = hypre_StructVectorBoxData(r, i);
-            rp0 = rp + hypre_BoxOffsetDistance(r_data_box, stencil_shape[0]);
-            rp1 = rp + hypre_BoxOffsetDistance(r_data_box, stencil_shape[1]);
-            rcp = hypre_StructVectorBoxData(rc, i);
+            R_dbox  = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R),  fi);
+            r_dbox  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r),  fi);
+            rc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(rc), ci);
+
+            if (R_stored_as_transpose)
+            {
+               Rp0 = hypre_StructMatrixBoxData(R, fi, 1) -
+                  hypre_BoxOffsetDistance(R_dbox, stencil_shape[1]);
+               Rp1 = hypre_StructMatrixBoxData(R, fi, 0);
+            }
+            else
+            {
+               Rp0 = hypre_StructMatrixBoxData(R, fi, 0);
+               Rp1 = hypre_StructMatrixBoxData(R, fi, 1);
+            }
+            rp  = hypre_StructVectorBoxData(r, fi);
+            rp0 = rp + hypre_BoxOffsetDistance(r_dbox, stencil_shape[0]);
+            rp1 = rp + hypre_BoxOffsetDistance(r_dbox, stencil_shape[1]);
+            rcp = hypre_StructVectorBoxData(rc, ci);
 
             hypre_ForBoxI(j, compute_box_a)
                {
                   compute_box = hypre_BoxArrayBox(compute_box_a, j);
 
                   start  = hypre_BoxIMin(compute_box);
-                  hypre_SMGMapFineToCoarse(start, startc, cindex, stride);
+                  hypre_StructMapFineToCoarse(start, cindex, stride, startc);
 
                   hypre_BoxGetStrideSize(compute_box, stride, loop_size);
                   hypre_BoxLoop3Begin(loop_size,
-                                      R_data_box,  startc, stridec, Ri,
-                                      r_data_box,  start,  stride,  ri,
-                                      rc_data_box, startc, stridec, rci);
+                                      R_dbox,  startc, stridec, Ri,
+                                      r_dbox,  start,  stride,  ri,
+                                      rc_dbox, startc, stridec, rci);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ri,ri,rci
 #include "hypre_box_smp_forloop.h"
                   hypre_BoxLoop3For(loopi, loopj, loopk, Ri, ri, rci)
@@ -252,15 +278,15 @@ hypre_SMGRestrict( void               *restrict_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRestrictDestroy
+ * hypre_SemiRestrictDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGRestrictDestroy( void *restrict_vdata )
+hypre_SemiRestrictDestroy( void *restrict_vdata )
 {
    int ierr = 0;
 
-   hypre_SMGRestrictData *restrict_data = restrict_vdata;
+   hypre_SemiRestrictData *restrict_data = restrict_vdata;
 
    if (restrict_data)
    {

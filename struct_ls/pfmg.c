@@ -78,8 +78,8 @@ hypre_PFMGDestroy( void *pfmg_vdata )
          }
          for (l = 0; l < ((pfmg_data -> num_levels) - 1); l++)
          {
-            hypre_PFMGRestrictDestroy(pfmg_data -> restrict_data_l[l]);
-            hypre_PFMGInterpDestroy(pfmg_data -> interp_data_l[l]);
+            hypre_SemiRestrictDestroy(pfmg_data -> restrict_data_l[l]);
+            hypre_SemiInterpDestroy(pfmg_data -> interp_data_l[l]);
          }
          hypre_TFree(pfmg_data -> relax_data_l);
          hypre_TFree(pfmg_data -> matvec_data_l);

@@ -54,6 +54,7 @@ HEADERS =\
  HYPRE_ls.h
 
 FILES =\
+ coarsen.c\
  cyclic_reduction.c\
  general.c\
  hybrid.c\
@@ -63,14 +64,14 @@ FILES =\
  pfmg.c\
  pfmg2_setup_rap.c\
  pfmg3_setup_rap.c\
- pfmg_interp.c\
  pfmg_relax.c\
- pfmg_restrict.c\
  pfmg_setup.c\
  pfmg_setup_interp.c\
  pfmg_setup_rap.c\
  pfmg_solve.c\
  point_relax.c\
+ semi_interp.c\
+ semi_restrict.c\
  sparse_msg.c\
  sparse_msg_setup.c\
  sparse_msg_setup_interp.c\
@@ -78,10 +79,9 @@ FILES =\
  smg2_setup_rap.c\
  smg3_setup_rap.c\
  smg.c\
- smg_intadd.c\
+ smg_axpy.c\
  smg_relax.c\
  smg_residual.c\
- smg_restrict.c\
  smg_setup.c\
  smg_setup_interp.c\
  smg_setup_rap.c\

@@ -74,8 +74,8 @@ hypre_SMGDestroy( void *smg_vdata )
          {
             hypre_SMGRelaxDestroy(smg_data -> relax_data_l[l]);
             hypre_SMGResidualDestroy(smg_data -> residual_data_l[l]);
-            hypre_SMGRestrictDestroy(smg_data -> restrict_data_l[l]);
-            hypre_SMGIntAddDestroy(smg_data -> intadd_data_l[l]);
+            hypre_SemiRestrictDestroy(smg_data -> restrict_data_l[l]);
+            hypre_SemiInterpDestroy(smg_data -> interp_data_l[l]);
          }
          hypre_SMGRelaxDestroy(smg_data -> relax_data_l[l]);
          if (l == 0)
@@ -85,7 +85,7 @@ hypre_SMGDestroy( void *smg_vdata )
          hypre_TFree(smg_data -> relax_data_l);
          hypre_TFree(smg_data -> residual_data_l);
          hypre_TFree(smg_data -> restrict_data_l);
-         hypre_TFree(smg_data -> intadd_data_l);
+         hypre_TFree(smg_data -> interp_data_l);
  
          hypre_StructVectorDestroy(smg_data -> tb_l[0]);
          hypre_StructVectorDestroy(smg_data -> tx_l[0]);
@@ -96,6 +96,7 @@ hypre_SMGDestroy( void *smg_vdata )
          for (l = 0; l < ((smg_data -> num_levels) - 1); l++)
          {
             hypre_StructGridDestroy(smg_data -> grid_l[l+1]);
+            hypre_StructGridDestroy(smg_data -> PT_grid_l[l+1]);
             hypre_StructMatrixDestroy(smg_data -> A_l[l+1]);
             if (smg_data -> PT_l[l] == smg_data -> R_l[l])
             {
@@ -113,6 +114,7 @@ hypre_SMGDestroy( void *smg_vdata )
          }
          hypre_SharedTFree(smg_data -> data);
          hypre_TFree(smg_data -> grid_l);
+         hypre_TFree(smg_data -> PT_grid_l);
          hypre_TFree(smg_data -> A_l);
          hypre_TFree(smg_data -> PT_l);
          hypre_TFree(smg_data -> R_l);

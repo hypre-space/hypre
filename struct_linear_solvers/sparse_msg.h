@@ -74,47 +74,9 @@ typedef struct
  * Utility routines:
  *--------------------------------------------------------------------------*/
 
-#define hypre_SparseMSGMapFineToCoarse(index_in, cfindex, stride, index_out) \
+#define hypre_SparseMSGSetArrayIndex(lx, ly, lz, nl, index) \
 {\
-   hypre_IndexX(index_out) =\
-      (hypre_IndexX(index_in) - hypre_IndexX(cfindex)) / hypre_IndexX(stride);\
-   hypre_IndexY(index_out) =\
-      (hypre_IndexY(index_in) - hypre_IndexY(cfindex)) / hypre_IndexY(stride);\
-   hypre_IndexZ(index_out) =\
-      (hypre_IndexZ(index_in) - hypre_IndexZ(cfindex)) / hypre_IndexZ(stride);\
-}
-
-#define hypre_SparseMSGMapCoarseToFine(index_in, cfindex, stride, index_out) \
-{\
-   hypre_IndexX(index_out) =\
-      hypre_IndexX(index_in) * hypre_IndexX(stride) + hypre_IndexX(cfindex);\
-   hypre_IndexY(index_out) =\
-      hypre_IndexY(index_in) * hypre_IndexY(stride) + hypre_IndexY(cfindex);\
-   hypre_IndexZ(index_out) =\
-      hypre_IndexZ(index_in) * hypre_IndexZ(stride) + hypre_IndexZ(cfindex);\
-}
-
-#define hypre_SparseMSGSetCIndex(cdir, cindex) \
-{\
-   hypre_SetIndex(cindex, 0, 0, 0);\
-   hypre_IndexD(cindex, cdir) = 0;\
-}
-
-#define hypre_SparseMSGSetFIndex(cdir, findex) \
-{\
-   hypre_SetIndex(findex, 0, 0, 0);\
-   hypre_IndexD(findex, cdir) = 1;\
-}
-
-#define hypre_SparseMSGSetStride(cdir, stride) \
-{\
-   hypre_SetIndex(stride, 1, 1, 1);\
-   hypre_IndexD(stride, cdir) = 2;\
-}
-
-#define hypre_SparseMSGComputeArrayIndex(lx, ly, lz, num_levels_x, num_levels_y,index) \
-{\
-   index = lx + (ly * num_levels_x) + (lz * num_levels_x * num_levels_y);\
+   index = lx + (ly * nl[0]) + (lz * nl[0] * nl[1]);\
 }
 
 #endif

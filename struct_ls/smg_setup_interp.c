@@ -213,9 +213,9 @@ hypre_SMGSetupInterpOp( void               *relax_data,
 
       hypre_CopyIndex(PT_stencil_shape[si], compute_pkg_stencil_shape[0]);
       hypre_CreateComputeInfo(fgrid, compute_pkg_stencil,
-                           &send_boxes, &recv_boxes,
-                           &send_processes, &recv_processes,
-                           &indt_boxes, &dept_boxes);
+                              &send_boxes, &recv_boxes,
+                              &send_processes, &recv_processes,
+                              &indt_boxes, &dept_boxes);
  
       hypre_ProjectBoxArrayArray(send_boxes, findex, stride);
       hypre_ProjectBoxArrayArray(recv_boxes, findex, stride);
@@ -271,7 +271,8 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                      compute_box = hypre_BoxArrayBox(compute_box_a, j);
 
                      hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
-                     hypre_SMGMapFineToCoarse(start, startc, cindex, stride);
+                     hypre_StructMapFineToCoarse(start, cindex, stride,
+                                                 startc);
 
                      /* shift start index to appropriate F-point */
                      for (d = 0; d < 3; d++)

@@ -71,46 +71,4 @@ typedef struct
 
 } hypre_PFMGData;
 
-/*--------------------------------------------------------------------------
- * Utility routines:
- *--------------------------------------------------------------------------*/
-
-#define hypre_PFMGMapFineToCoarse(index_in, cfindex, stride, index_out) \
-{\
-   hypre_IndexX(index_out) =\
-      (hypre_IndexX(index_in) - hypre_IndexX(cfindex)) / hypre_IndexX(stride);\
-   hypre_IndexY(index_out) =\
-      (hypre_IndexY(index_in) - hypre_IndexY(cfindex)) / hypre_IndexY(stride);\
-   hypre_IndexZ(index_out) =\
-      (hypre_IndexZ(index_in) - hypre_IndexZ(cfindex)) / hypre_IndexZ(stride);\
-}
-
-#define hypre_PFMGMapCoarseToFine(index_in, cfindex, stride, index_out) \
-{\
-   hypre_IndexX(index_out) =\
-      hypre_IndexX(index_in) * hypre_IndexX(stride) + hypre_IndexX(cfindex);\
-   hypre_IndexY(index_out) =\
-      hypre_IndexY(index_in) * hypre_IndexY(stride) + hypre_IndexY(cfindex);\
-   hypre_IndexZ(index_out) =\
-      hypre_IndexZ(index_in) * hypre_IndexZ(stride) + hypre_IndexZ(cfindex);\
-}
-
-#define hypre_PFMGSetCIndex(cdir, cindex) \
-{\
-   hypre_SetIndex(cindex, 0, 0, 0);\
-   hypre_IndexD(cindex, cdir) = 0;\
-}
-
-#define hypre_PFMGSetFIndex(cdir, findex) \
-{\
-   hypre_SetIndex(findex, 0, 0, 0);\
-   hypre_IndexD(findex, cdir) = 1;\
-}
-
-#define hypre_PFMGSetStride(cdir, stride) \
-{\
-   hypre_SetIndex(stride, 1, 1, 1);\
-   hypre_IndexD(stride, cdir) = 2;\
-}
-
 #endif

@@ -49,6 +49,7 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_Index           stride;
 
    hypre_StructGrid    **grid_l;
+   hypre_StructGrid    **PT_grid_l;
                     
    double               *data;
    int                   data_size = 0;
@@ -71,30 +72,19 @@ hypre_SMGSetup( void               *smg_vdata,
    void                **relax_data_l;
    void                **residual_data_l;
    void                **restrict_data_l;
-   void                **intadd_data_l;
+   void                **interp_data_l;
 
    hypre_StructGrid     *grid;
    hypre_BoxArray       *boxes;
-   hypre_BoxArray       *all_boxes;
-   int                  *processes;
-   int                  *box_ranks;
-   hypre_BoxArray       *base_all_boxes;
-   hypre_Index           pindex;
-   hypre_Index           pstride;
-
-   int                   num_boxes;
-   int                   num_all_boxes;
 
    hypre_Box            *box;
+   hypre_Box            *cbox;
 
-   int                   idmin, idmax;
    int                   i, d, l;
                        
    int                   b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    int                   x_num_ghost[]  = {0, 0, 0, 0, 0, 0};
                        
-   hypre_Index           periodic;
-
    int                   ierr = 0;
 #if DEBUG
    char                  filename[255];
@@ -111,46 +101,22 @@ hypre_SMGSetup( void               *smg_vdata,
     * Set up coarse grids
     *-----------------------------------------------------*/
 
-   grid           = hypre_StructMatrixGrid(A);
-   boxes          = hypre_StructGridBoxes(grid);
-   all_boxes      = hypre_StructGridAllBoxes(grid);
-   processes      = hypre_StructGridProcesses(grid);
-   box_ranks      = hypre_StructGridBoxRanks(grid);
-   base_all_boxes = hypre_StructGridBaseAllBoxes(grid);
-   hypre_CopyIndex(hypre_StructGridPIndex(grid),  pindex);
-   hypre_CopyIndex(hypre_StructGridPStride(grid), pstride);
-   num_boxes      = hypre_BoxArraySize(boxes);
-   num_all_boxes  = hypre_BoxArraySize(all_boxes);
-
-   /* compute all_boxes from base_all_boxes */
-   hypre_ForBoxI(i, all_boxes)
-      {
-         box = hypre_BoxArrayBox(all_boxes, i);
-         hypre_CopyBox(hypre_BoxArrayBox(base_all_boxes, i), box);
-         hypre_ProjectBox(box, pindex, pstride);
-         hypre_SMGMapFineToCoarse(hypre_BoxIMin(box), hypre_BoxIMin(box),
-                                  pindex, pstride);
-         hypre_SMGMapFineToCoarse(hypre_BoxIMax(box), hypre_BoxIMax(box),
-                                  pindex, pstride);
-      }
+   grid  = hypre_StructMatrixGrid(A);
+   boxes = hypre_StructGridBoxes(grid);
 
    /* Compute a new max_levels value based on the grid */
-   idmin = hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, 0), cdir);
-   idmax = hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, 0), cdir);
-   for (i = 0; i < num_all_boxes; i++)
-   {
-      idmin =
-         hypre_min(idmin, hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, i), cdir));
-      idmax =
-         hypre_max(idmax, hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, i), cdir));
-   }
-   max_levels = hypre_Log2(idmax - idmin + 1) + 2;
+   cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(grid));
+   max_levels = hypre_Log2(hypre_BoxSizeD(cbox, cdir)) + 2;
    if ((smg_data -> max_levels) > 0)
+   {
       max_levels = hypre_min(max_levels, (smg_data -> max_levels));
+   }
    (smg_data -> max_levels) = max_levels;
 
    grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
-   grid_l[0] = hypre_StructGridRef(grid);
+   PT_grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
+   PT_grid_l[0] = NULL;
+   hypre_StructGridRef(grid, &grid_l[0]);
    for (l = 0; ; l++)
    {
       /* set cindex and stride */
@@ -158,64 +124,34 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_SMGSetStride(base_index, base_stride, l, cdir, stride);
 
       /* check to see if we should coarsen */
-      idmin = hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, 0), cdir);
-      idmax = hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, 0), cdir);
-      for (i = 0; i < num_all_boxes; i++)
-      {
-         idmin =
-            hypre_min(idmin, hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, i), cdir));
-         idmax =
-            hypre_max(idmax, hypre_BoxIMaxD(hypre_BoxArrayBox(all_boxes, i), cdir));
-      }
-      if ( (idmin == idmax) || (l == (max_levels - 1)) )
+      if ( ( hypre_BoxIMinD(cbox, cdir) == hypre_BoxIMaxD(cbox, cdir) ) ||
+           (l == (max_levels - 1)) )
       {
          /* stop coarsening */
          break;
       }
 
-      /* coarsen the grid by coarsening all_boxes (reduces communication) */
-      hypre_ProjectBoxArray(all_boxes, cindex, stride);
-      for (i = 0; i < num_all_boxes; i++)
-      {
-         box = hypre_BoxArrayBox(all_boxes, i);
-         hypre_SMGMapFineToCoarse(hypre_BoxIMin(box), hypre_BoxIMin(box),
-                                  cindex, stride);
-         hypre_SMGMapFineToCoarse(hypre_BoxIMax(box), hypre_BoxIMax(box),
-                                  cindex, stride);
-      }
+      /* coarsen cbox */
+      hypre_ProjectBox(cbox, cindex, stride);
+      hypre_StructMapFineToCoarse(hypre_BoxIMin(cbox), cindex, stride,
+                                  hypre_BoxIMin(cbox));
+      hypre_StructMapFineToCoarse(hypre_BoxIMax(cbox), cindex, stride,
+                                  hypre_BoxIMax(cbox));
 
-      /* compute local boxes */
-      boxes = hypre_BoxArrayCreate(num_boxes);
-      for (i = 0; i < num_boxes; i++)
-      {
-         hypre_CopyBox(hypre_BoxArrayBox(all_boxes, box_ranks[i]),
-                       hypre_BoxArrayBox(boxes, i));
-      }
+      /* build the interpolation grid */
+      hypre_StructCoarsen(grid_l[l], cindex, stride, 0, &PT_grid_l[l+1]);
 
-      grid_l[l+1] = hypre_StructGridCreate(comm, hypre_StructGridDim(grid_l[l]));
-      for (d = 0; d < 3; d++)
-      {
-         hypre_IndexD(pindex, d) +=
-            hypre_IndexD(cindex, d) * hypre_IndexD(pstride, d);
-         hypre_IndexD(pstride, d) *= hypre_IndexD(stride, d);
-      }
-      hypre_StructGridSetBoxes(grid_l[l+1], boxes);
-      hypre_StructGridSetGlobalInfo(grid_l[l+1],
-                                    all_boxes, processes, box_ranks,
-                                    base_all_boxes, pindex, pstride);
-
-      /* set periodicity on coarser grid */
-      hypre_CopyIndex(hypre_StructGridPeriodic(grid_l[l]), periodic);
-      hypre_IndexD(periodic, cdir) =
-         (hypre_IndexD(periodic, cdir) + 1)/2;
-      hypre_StructGridSetPeriodic(grid_l[l+1], periodic);
-
-      hypre_StructGridAssemble(grid_l[l+1]);
+      /* build the coarse grid */
+      hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
    }
    num_levels = l + 1;
 
+   /* free up some things */
+   hypre_BoxDestroy(cbox);
+
    (smg_data -> num_levels) = num_levels;
    (smg_data -> grid_l)     = grid_l;
+   (smg_data -> PT_grid_l)  = PT_grid_l;
 
    /*-----------------------------------------------------
     * Set up matrix and vector structures
@@ -253,7 +189,7 @@ hypre_SMGSetup( void               *smg_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      PT_l[l]  = hypre_SMGCreateInterpOp(A_l[l], grid_l[l+1], cdir);
+      PT_l[l]  = hypre_SMGCreateInterpOp(A_l[l], PT_grid_l[l+1], cdir);
       hypre_StructMatrixInitializeShell(PT_l[l]);
       data_size += hypre_StructMatrixDataSize(PT_l[l]);
 
@@ -266,13 +202,14 @@ hypre_SMGSetup( void               *smg_vdata,
          R_l[l] = PT_l[l];
 #if 0
          /* Allow R != PT for non symmetric case */
+         /* NOTE: Need to create a non-pruned grid for this to work */
          R_l[l]   = hypre_SMGCreateRestrictOp(A_l[l], grid_l[l+1], cdir);
          hypre_StructMatrixInitializeShell(R_l[l]);
          data_size += hypre_StructMatrixDataSize(R_l[l]);
 #endif
       }
 
-      A_l[l+1] = hypre_SMGCreateRAPOp(R_l[l], A_l[l], PT_l[l]);
+      A_l[l+1] = hypre_SMGCreateRAPOp(R_l[l], A_l[l], PT_l[l], grid_l[l+1]);
       hypre_StructMatrixInitializeShell(A_l[l+1]);
       data_size += hypre_StructMatrixDataSize(A_l[l+1]);
 
@@ -363,7 +300,7 @@ hypre_SMGSetup( void               *smg_vdata,
    relax_data_l    = hypre_TAlloc(void *, num_levels);
    residual_data_l = hypre_TAlloc(void *, num_levels);
    restrict_data_l = hypre_TAlloc(void *, num_levels);
-   intadd_data_l   = hypre_TAlloc(void *, num_levels);
+   interp_data_l   = hypre_TAlloc(void *, num_levels);
 
    /* temporarily set the data for x_l[0] and b_l[0] to temp data */
    b_data = hypre_StructVectorData(b_l[0]);
@@ -415,9 +352,9 @@ hypre_SMGSetup( void               *smg_vdata,
                              A_l[l], x_l[l], b_l[l], r_l[l]);
 
       /* set up the interpolation routine */
-      intadd_data_l[l] = hypre_SMGIntAddCreate();
-      hypre_SMGIntAddSetup(intadd_data_l[l], PT_l[l], x_l[l+1], e_l[l], x_l[l],
-                           cindex, findex, stride);
+      interp_data_l[l] = hypre_SemiInterpCreate();
+      hypre_SemiInterpSetup(interp_data_l[l], PT_l[l], 1, x_l[l+1], e_l[l],
+                            cindex, findex, stride);
 
       /* set up the restriction operator */
 #if 0
@@ -428,9 +365,9 @@ hypre_SMGSetup( void               *smg_vdata,
 #endif
 
       /* set up the restriction routine */
-      restrict_data_l[l] = hypre_SMGRestrictCreate();
-      hypre_SMGRestrictSetup(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1],
-                             cindex, findex, stride);
+      restrict_data_l[l] = hypre_SemiRestrictCreate();
+      hypre_SemiRestrictSetup(restrict_data_l[l], R_l[l], 0, r_l[l], b_l[l+1],
+                              cindex, findex, stride);
 
       /* set up the coarse grid operator */
       hypre_SMGSetupRAPOp(R_l[l], A_l[l], PT_l[l], A_l[l+1],
@@ -468,7 +405,7 @@ hypre_SMGSetup( void               *smg_vdata,
    (smg_data -> relax_data_l)      = relax_data_l;
    (smg_data -> residual_data_l)   = residual_data_l;
    (smg_data -> restrict_data_l)   = restrict_data_l;
-   (smg_data -> intadd_data_l)     = intadd_data_l;
+   (smg_data -> interp_data_l)     = interp_data_l;
 
    /*-----------------------------------------------------
     * Allocate space for log info

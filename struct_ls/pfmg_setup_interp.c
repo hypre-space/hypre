@@ -70,8 +70,8 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
                         
-   hypre_Box             *A_data_box;
-   hypre_Box             *P_data_box;
+   hypre_Box             *A_dbox;
+   hypre_Box             *P_dbox;
                         
    int                    Ai;
    int                    Pi;
@@ -156,8 +156,8 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
       {
          compute_box = hypre_BoxArrayBox(compute_boxes, i);
 
-         A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-         P_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), i);
+         A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+         P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), i);
 
          Pp0 = hypre_StructMatrixBoxData(P, i, 0);
          Pp1 = hypre_StructMatrixBoxData(P, i, 1);
@@ -166,13 +166,13 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
          Pstenc1 = hypre_IndexD(P_stencil_shape[1], cdir);
  
          startc  = hypre_BoxIMin(compute_box);
-         hypre_PFMGMapCoarseToFine(startc, findex, stride, start);
+         hypre_StructMapCoarseToFine(startc, findex, stride, start);
 
          hypre_BoxGetStrideSize(compute_box, stridec, loop_size);
 
          hypre_BoxLoop2Begin(loop_size,
-                             A_data_box, start, stride, Ai,
-                             P_data_box, startc, stridec, Pi);
+                             A_dbox, start, stride, Ai,
+                             P_dbox, startc, stridec, Pi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,center,si,Ap,Astenc,mrk0,mrk1
 #include "hypre_box_smp_forloop.h"
          hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)

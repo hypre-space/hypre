@@ -199,8 +199,8 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                   if (lx >= 0 && lx <= (num_levels[0]-1))
                   {
                      /* compute the array index */
-                     hypre_SparseMSGComputeArrayIndex(
-                        lx,ly,lz,num_levels[0],num_levels[1],index);
+                     hypre_SparseMSGSetArrayIndex(
+                        lx,ly,lz,num_levels,index);
 
                      /* initialize b_array */
                      hypre_StructVectorSetConstantValues(b_array[index], 0.0);
@@ -208,9 +208,9 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                      if (lx > 0)
                      {
                         /* restrict from ((lx-1),ly,lz) to (lx,ly,lz) */
-                        hypre_SparseMSGComputeArrayIndex(
-                           (lx-1),ly,lz,num_levels[0],num_levels[1],index2);
-                        hypre_PFMGRestrict(restrict_data_array[3*index2],
+                        hypre_SparseMSGSetArrayIndex(
+                           (lx-1),ly,lz,num_levels,index2);
+                        hypre_SemiRestrict(restrict_data_array[3*index2],
                                            RT_array[3*index2],
                                            r_array[index2],
                                            tx_array[index]);
@@ -231,9 +231,9 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                      if (ly > 0)
                      {
                         /* restrict from (lx,(ly-1),lz) to (lx,ly,lz) */
-                        hypre_SparseMSGComputeArrayIndex(
-                           lx,(ly-1),lz,num_levels[0],num_levels[1],index2);
-                        hypre_PFMGRestrict(restrict_data_array[(3*index2)+1],
+                        hypre_SparseMSGSetArrayIndex(
+                           lx,(ly-1),lz,num_levels,index2);
+                        hypre_SemiRestrict(restrict_data_array[(3*index2)+1],
                                            RT_array[(3*index2)+1],
                                            r_array[index2],
                                            tx_array[index]);
@@ -254,9 +254,9 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                      if (lz > 0)
                      {
                         /* restrict from (lx,ly,(lz-1)) to (lx,ly,lz) */
-                        hypre_SparseMSGComputeArrayIndex(
-                           lx,ly,(lz-1),num_levels[0],num_levels[1],index2);
-                        hypre_PFMGRestrict(restrict_data_array[(3*index2)+2],
+                        hypre_SparseMSGSetArrayIndex(
+                           lx,ly,(lz-1),num_levels,index2);
+                        hypre_SemiRestrict(restrict_data_array[(3*index2)+2],
                                            RT_array[(3*index2)+2],
                                            r_array[index2],
                                            tx_array[index]);
@@ -322,8 +322,8 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                   if (lx >= 0 && lx <= (num_levels[0]-1))
                   {
                      /* compute the array index */
-                     hypre_SparseMSGComputeArrayIndex(
-                        lx,ly,lz,num_levels[0],num_levels[1],index);   
+                     hypre_SparseMSGSetArrayIndex(
+                        lx,ly,lz,num_levels,index);   
 
                      /* initialize b_array */
                      hypre_StructVectorSetConstantValues(b_array[index], 0.0);
@@ -331,9 +331,9 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                      if (lx > 0)
                      {
                         /* restrict from ((lx-1),ly,lz) to (lx,ly,lz) */
-                        hypre_SparseMSGComputeArrayIndex(
-                           (lx-1),ly,lz,num_levels[0],num_levels[1],index2);
-                        hypre_PFMGRestrict(restrict_data_array[3*index2],
+                        hypre_SparseMSGSetArrayIndex(
+                           (lx-1),ly,lz,num_levels,index2);
+                        hypre_SemiRestrict(restrict_data_array[3*index2],
                                            RT_array[3*index2],
                                            r_array[index2],
                                            tx_array[index]);
@@ -354,9 +354,9 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                      if (ly > 0)
                      {
                         /* restrict from (lx,(ly-1),lz) to (lx,ly,lz) */
-                        hypre_SparseMSGComputeArrayIndex(
-                           lx,(ly-1),lz,num_levels[0],num_levels[1],index2);
-                        hypre_PFMGRestrict(restrict_data_array[(3*index2)+1],
+                        hypre_SparseMSGSetArrayIndex(
+                           lx,(ly-1),lz,num_levels,index2);
+                        hypre_SemiRestrict(restrict_data_array[(3*index2)+1],
                                            RT_array[(3*index2)+1],
                                            r_array[index2],
                                            tx_array[index]);
@@ -377,9 +377,9 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                      if (lz > 0)
                      {
                         /* restrict from (lx,ly,(lz-1)) to (lx,ly,lz) */
-                        hypre_SparseMSGComputeArrayIndex(
-                           lx,ly,(lz-1),num_levels[0],num_levels[1],index2);
-                        hypre_PFMGRestrict(restrict_data_array[(3*index2)+2],
+                        hypre_SparseMSGSetArrayIndex(
+                           lx,ly,(lz-1),num_levels,index2);
+                        hypre_SemiRestrict(restrict_data_array[(3*index2)+2],
                                            RT_array[(3*index2)+2],
                                            r_array[index2],
                                            tx_array[index]);
@@ -452,15 +452,15 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                   if (lx >= 0 &&  lx <= (num_levels[0]-1))
                   {
                      /* compute the array index */
-                     hypre_SparseMSGComputeArrayIndex(
-                        lx,ly,lz,num_levels[0],num_levels[1],index);
+                     hypre_SparseMSGSetArrayIndex(
+                        lx,ly,lz,num_levels,index);
                      
                      if (lx < (num_levels[0]-1))
                      {
                         /* interpolate from ((lx+1),ly,lz) to (lx,ly,lz) */
-                        hypre_SparseMSGComputeArrayIndex(
-                           (lx+1),ly,lz,num_levels[0],num_levels[1],index2);
-                        hypre_PFMGInterp(interp_data_array[3*index],
+                        hypre_SparseMSGSetArrayIndex(
+                           (lx+1),ly,lz,num_levels,index2);
+                        hypre_SemiInterp(interp_data_array[3*index],
                                          P_array[3*index],
                                          x_array[index2],
                                          e_array[index]);
@@ -474,9 +474,9 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                      if (ly < (num_levels[1]-1))
                      {
                         /* interpolate from (lx,(ly+1),lz) to (lx,ly,lz) */
-                        hypre_SparseMSGComputeArrayIndex(
-                           lx,(ly+1),lz,num_levels[0],num_levels[1],index2);
-                        hypre_PFMGInterp(interp_data_array[(3*index)+1],
+                        hypre_SparseMSGSetArrayIndex(
+                           lx,(ly+1),lz,num_levels,index2);
+                        hypre_SemiInterp(interp_data_array[(3*index)+1],
                                          P_array[(3*index)+1],
                                          x_array[index2],
                                          e_array[index]);
@@ -490,9 +490,9 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                      if (lz < (num_levels[2]-1))
                      {
                         /* interpolate from (lx,ly,(lz+1)) to (lx,ly,lz) */
-                        hypre_SparseMSGComputeArrayIndex(
-                           lx,ly,(lz+1),num_levels[0],num_levels[1],index2);
-                        hypre_PFMGInterp(interp_data_array[(3*index)+2],
+                        hypre_SparseMSGSetArrayIndex(
+                           lx,ly,(lz+1),num_levels,index2);
+                        hypre_SemiInterp(interp_data_array[(3*index)+2],
                                          P_array[(3*index)+2],
                                          x_array[index2],
                                          e_array[index]);
@@ -532,15 +532,15 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                   if (lx >= 0 &&  lx <= (num_levels[0]-1))
                   {
                      /* compute the array index */
-                     hypre_SparseMSGComputeArrayIndex(
-                        lx,ly,lz,num_levels[0],num_levels[1],index);
+                     hypre_SparseMSGSetArrayIndex(
+                        lx,ly,lz,num_levels,index);
 
                      if (lx < (num_levels[0]-1))
                      {
                         /* interpolate from ((lx+1),ly,lz) to (lx,ly,lz) */
-                        hypre_SparseMSGComputeArrayIndex(
-                           (lx+1),ly,lz,num_levels[0],num_levels[1],index2);
-                        hypre_PFMGInterp(interp_data_array[3*index],
+                        hypre_SparseMSGSetArrayIndex(
+                           (lx+1),ly,lz,num_levels,index2);
+                        hypre_SemiInterp(interp_data_array[3*index],
                                          P_array[3*index],
                                          x_array[index2],
                                          e_array[index]);
@@ -554,9 +554,9 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                      if (ly < (num_levels[1]-1))
                      {
                         /* interpolate from (lx,(ly+1),lz) to (lx,ly,lz) */
-                        hypre_SparseMSGComputeArrayIndex(
-                           lx,(ly+1),lz,num_levels[0],num_levels[1],index2);
-                        hypre_PFMGInterp(interp_data_array[(3*index)+1],
+                        hypre_SparseMSGSetArrayIndex(
+                           lx,(ly+1),lz,num_levels,index2);
+                        hypre_SemiInterp(interp_data_array[(3*index)+1],
                                          P_array[(3*index)+1],
                                          x_array[index2],
                                          e_array[index]);
@@ -570,9 +570,9 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
                      if (lz < (num_levels[2]-1))
                      {
                         /* interpolate from (lx,ly,(lz+1)) to (lx,ly,lz) */
-                        hypre_SparseMSGComputeArrayIndex(
-                           lx,ly,(lz+1),num_levels[0],num_levels[1],index2);
-                        hypre_PFMGInterp(interp_data_array[(3*index)+2],
+                        hypre_SparseMSGSetArrayIndex(
+                           lx,ly,(lz+1),num_levels,index2);
+                        hypre_SemiInterp(interp_data_array[(3*index)+2],
                                          P_array[(3*index)+2],
                                          x_array[index2],
                                          e_array[index]);

@@ -76,9 +76,9 @@ hypre_SparseMSGDestroy( void *SparseMSG_vdata )
 
          for (l = 0; l < (3*(SparseMSG_data -> num_grids)); l++)
          {
-            hypre_PFMGRestrictDestroy(SparseMSG_data ->
+            hypre_SemiRestrictDestroy(SparseMSG_data ->
                                       restrict_data_array[l]);
-            hypre_PFMGInterpDestroy(SparseMSG_data -> interp_data_array[l]);
+            hypre_SemiInterpDestroy(SparseMSG_data -> interp_data_array[l]);
          }
 
          hypre_TFree(SparseMSG_data -> relax_data_array);

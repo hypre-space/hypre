@@ -42,6 +42,7 @@ typedef struct
    hypre_Index           base_stride;
 
    hypre_StructGrid    **grid_l;
+   hypre_StructGrid    **PT_grid_l;
                     
    double               *data;
    hypre_StructMatrix  **A_l;
@@ -59,7 +60,7 @@ typedef struct
    void                **relax_data_l;
    void                **residual_data_l;
    void                **restrict_data_l;
-   void                **intadd_data_l;
+   void                **interp_data_l;
 
    /* log info (always logged) */
    int                   num_iterations;
@@ -75,26 +76,6 @@ typedef struct
 /*--------------------------------------------------------------------------
  * Utility routines:
  *--------------------------------------------------------------------------*/
-
-#define hypre_SMGMapFineToCoarse(index1, index2, cindex, cstride) \
-{\
-   hypre_IndexX(index2) =\
-      (hypre_IndexX(index1) - hypre_IndexX(cindex)) / hypre_IndexX(cstride);\
-   hypre_IndexY(index2) =\
-      (hypre_IndexY(index1) - hypre_IndexY(cindex)) / hypre_IndexY(cstride);\
-   hypre_IndexZ(index2) =\
-      (hypre_IndexZ(index1) - hypre_IndexZ(cindex)) / hypre_IndexZ(cstride);\
-}
-
-#define hypre_SMGMapCoarseToFine(index1, index2, cindex, cstride) \
-{\
-   hypre_IndexX(index2) =\
-      hypre_IndexX(index1) * hypre_IndexX(cstride) + hypre_IndexX(cindex);\
-   hypre_IndexY(index2) =\
-      hypre_IndexY(index1) * hypre_IndexY(cstride) + hypre_IndexY(cindex);\
-   hypre_IndexZ(index2) =\
-      hypre_IndexZ(index1) * hypre_IndexZ(cstride) + hypre_IndexZ(cindex);\
-}
 
 #define hypre_SMGSetBIndex(base_index, base_stride, level, bindex) \
 {\

@@ -43,8 +43,8 @@
  *   One important parameter sets whether or not an initial guess of zero
  *   is to be used in the relaxation.
  * - hypre_SMGResidual computes the residual, b - Ax.
- * - hypre_SMGRestrict restricts the residual to the coarse grid.
- * - hypre_SMGIntAdd interpolates the coarse error and adds it to the
+ * - hypre_SemiRestrict restricts the residual to the coarse grid.
+ * - hypre_SemiInterp interpolates the coarse error and adds it to the
  *   fine grid solution.
  *
  *--------------------------------------------------------------------------*/
@@ -65,6 +65,8 @@ hypre_SMGSolve( void               *smg_vdata,
    int                   num_levels      = (smg_data -> num_levels);
    int                   num_pre_relax   = (smg_data -> num_pre_relax);
    int                   num_post_relax  = (smg_data -> num_post_relax);
+   hypre_IndexRef        base_index      = (smg_data -> base_index);
+   hypre_IndexRef        base_stride     = (smg_data -> base_stride);
    hypre_StructMatrix  **A_l             = (smg_data -> A_l);
    hypre_StructMatrix  **PT_l            = (smg_data -> PT_l);
    hypre_StructMatrix  **R_l             = (smg_data -> R_l);
@@ -76,13 +78,13 @@ hypre_SMGSolve( void               *smg_vdata,
    void                **relax_data_l    = (smg_data -> relax_data_l);
    void                **residual_data_l = (smg_data -> residual_data_l);
    void                **restrict_data_l = (smg_data -> restrict_data_l);
-   void                **intadd_data_l   = (smg_data -> intadd_data_l);
+   void                **interp_data_l   = (smg_data -> interp_data_l);
    int                   logging         = (smg_data -> logging);
    double               *norms           = (smg_data -> norms);
    double               *rel_norms       = (smg_data -> rel_norms);
 
    double                b_dot_b, r_dot_r, eps;
-   double                xx_dot_xx, x_dot_x;
+   double                e_dot_e, x_dot_x;
                     
    int                   i, l;
                     
@@ -152,46 +154,18 @@ hypre_SMGSolve( void               *smg_vdata,
        * Down cycle
        *--------------------------------------------------*/
 
-      hypre_SMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
-      if ( num_levels > 1 )
+      /* fine grid pre-relaxation */
+      if (num_levels > 1)
       {
          hypre_SMGRelaxSetRegSpaceRank(relax_data_l[0], 0, 0);
          hypre_SMGRelaxSetRegSpaceRank(relax_data_l[0], 1, 1);
       }
-      if (i == 0)
-      {
-         hypre_SMGRelaxSetZeroGuess(relax_data_l[0], zero_guess);
-      }
-      else
-      {
-         hypre_SMGRelaxSetZeroGuess(relax_data_l[0], 0);
-      }
-      /* part of convergence check */
-      if ((i == 0) && (tol > 0.0) && (rel_change))
-      {
-         /* store x in tb) */
-         if (!zero_guess)
-         {
-            hypre_StructCopy(x_l[0], r_l[0]);
-         }
-      }
+      hypre_SMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
+      hypre_SMGRelaxSetZeroGuess(relax_data_l[0], zero_guess);
       hypre_SMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
-      /* part of convergence check */
-      if ((i == 0) && (tol > 0.0) && (rel_change))
-      {
-         if (!zero_guess)
-         {
-            /* compute x_i+1 - x_i, (note: x_i stored in r) */
-            hypre_StructAxpy(-1.0, x_l[0], r_l[0]);
-            xx_dot_xx = hypre_StructInnerProd(r_l[0], r_l[0]);
-            x_dot_x = hypre_StructInnerProd(x_l[0], x_l[0]);
-         }
-         else
-         {
-            xx_dot_xx = 1.0;
-            x_dot_x = 1.0;
-         }
-      }
+      zero_guess = 0;
+
+      /* compute fine grid residual (b - Ax) */
       hypre_SMGResidual(residual_data_l[0], A_l[0], x_l[0], b_l[0], r_l[0]);
 
       /* convergence check */
@@ -208,11 +182,12 @@ hypre_SMGSolve( void               *smg_vdata,
                rel_norms[i] = 0.0;
          }
 
-         if (r_dot_r < eps)
+         /* always do at least 1 V-cycle */
+         if ((r_dot_r < eps) && (i > 0))
          {
             if (rel_change)
             {
-               if ((xx_dot_xx/x_dot_x) < (eps/b_dot_b))
+               if ((e_dot_e/x_dot_x) < (eps/b_dot_b))
                   break;
             }
             else
@@ -222,77 +197,127 @@ hypre_SMGSolve( void               *smg_vdata,
          }
       }
 
-      for (l = 0; l <= (num_levels - 2); l++)
-      {
-         if (l > 0)
-         {
-            hypre_SMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
-            hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 0, 0);
-            hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 1);
-            hypre_SMGRelaxSetZeroGuess(relax_data_l[l], 1);
-            hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
-            hypre_SMGResidual(residual_data_l[l],
-                              A_l[l], x_l[l], b_l[l], r_l[l]);
-         }
-         hypre_SMGRestrict(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1]);
-#if DEBUG
-         if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
-         {
-            sprintf(filename, "zout_xbefore.%02d", l);
-            hypre_StructVectorPrint(filename, x_l[l], 0);
-            sprintf(filename, "zout_b.%02d", l+1);
-            hypre_StructVectorPrint(filename, b_l[l+1], 0);
-         }
-#endif
-      }
-
-      /*--------------------------------------------------
-       * Bottom
-       *--------------------------------------------------*/
-
       if (num_levels > 1)
       {
-         hypre_SMGRelaxSetZeroGuess(relax_data_l[l], 1);
-         hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
-      }
-
-      /*--------------------------------------------------
-       * Up cycle
-       *--------------------------------------------------*/
-
-      for (l = (num_levels - 2); l >= 0; l--)
-      {
-         /* part of convergence check */
-         if ((l == 0) && (tol > 0.0) && (rel_change))
-         {
-            /* store x in tb) */
-            hypre_StructCopy(x_l[0], tb_l[0]);
-         }
-         hypre_SMGIntAdd(intadd_data_l[l], PT_l[l], x_l[l+1], e_l[l], x_l[l]);
-         /* part of convergence check */
-         if ((l == 0) && (tol > 0.0) && (rel_change))
-         {
-            /* compute x_i+1 - x_i, (note: x_i stored in tb) */
-            hypre_StructAxpy(-1.0, x_l[0], tb_l[0]);
-            xx_dot_xx = hypre_StructInnerProd(tb_l[0], tb_l[0]);
-            x_dot_x = hypre_StructInnerProd(x_l[0], x_l[0]);
-         }
+         /* restrict fine grid residual */
+         hypre_SemiRestrict(restrict_data_l[0], R_l[0], r_l[0], b_l[1]);
 #if DEBUG
          if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
          {
-            sprintf(filename, "zout_xafter.%02d", l);
+            sprintf(filename, "zout_xdown.%02d", 0);
+            hypre_StructVectorPrint(filename, x_l[0], 0);
+            sprintf(filename, "zout_rdown.%02d", 0);
+            hypre_StructVectorPrint(filename, r_l[0], 0);
+            sprintf(filename, "zout_b.%02d", 1);
+            hypre_StructVectorPrint(filename, b_l[1], 0);
+         }
+#endif
+         for (l = 1; l <= (num_levels - 2); l++)
+         {
+            /* pre-relaxation */
+            hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 0, 0);
+            hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 1);
+            hypre_SMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
+            hypre_SMGRelaxSetZeroGuess(relax_data_l[l], 1);
+            hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+
+            /* compute residual (b - Ax) */
+            hypre_SMGResidual(residual_data_l[l],
+                              A_l[l], x_l[l], b_l[l], r_l[l]);
+
+            /* restrict residual */
+            hypre_SemiRestrict(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1]);
+#if DEBUG
+            if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
+            {
+               sprintf(filename, "zout_xdown.%02d", l);
+               hypre_StructVectorPrint(filename, x_l[l], 0);
+               sprintf(filename, "zout_rdown.%02d", l);
+               hypre_StructVectorPrint(filename, r_l[l], 0);
+               sprintf(filename, "zout_b.%02d", l+1);
+               hypre_StructVectorPrint(filename, b_l[l+1], 0);
+            }
+#endif
+         }
+
+         /*--------------------------------------------------
+          * Bottom
+          *--------------------------------------------------*/
+
+         hypre_SMGRelaxSetZeroGuess(relax_data_l[l], 1);
+         hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+#if DEBUG
+         if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
+         {
+            sprintf(filename, "zout_xbottom.%02d", l);
             hypre_StructVectorPrint(filename, x_l[l], 0);
          }
 #endif
-         hypre_SMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
-         if ( num_levels > 1 )
+
+         /*--------------------------------------------------
+          * Up cycle
+          *--------------------------------------------------*/
+
+         for (l = (num_levels - 2); l >= 1; l--)
          {
+            /* interpolate error and correct (x = x + Pe_c) */
+            hypre_SemiInterp(interp_data_l[l], PT_l[l], x_l[l+1], e_l[l]);
+            hypre_StructAxpy(1.0, e_l[l], x_l[l]);
+#if DEBUG
+            if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
+            {
+               sprintf(filename, "zout_eup.%02d", l);
+               hypre_StructVectorPrint(filename, e_l[l], 0);
+               sprintf(filename, "zout_xup.%02d", l);
+               hypre_StructVectorPrint(filename, x_l[l], 0);
+            }
+#endif
+            /* post-relaxation */
             hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 0, 1);
             hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 0);
+            hypre_SMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
+            hypre_SMGRelaxSetZeroGuess(relax_data_l[l], 0);
+            hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
          }
-         hypre_SMGRelaxSetZeroGuess(relax_data_l[l], 0);
-         hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+
+         /* interpolate error and correct on fine grid (x = x + Pe_c) */
+         hypre_SemiInterp(interp_data_l[0], PT_l[0], x_l[1], e_l[0]);
+         hypre_SMGAxpy(1.0, e_l[0], x_l[0], base_index, base_stride);
+#if DEBUG
+         if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
+         {
+            sprintf(filename, "zout_eup.%02d", 0);
+            hypre_StructVectorPrint(filename, e_l[0], 0);
+            sprintf(filename, "zout_xup.%02d", 0);
+            hypre_StructVectorPrint(filename, x_l[0], 0);
+         }
+#endif
       }
+
+      /* part of convergence check */
+      if ((tol > 0.0) && (rel_change))
+      {
+         if (num_levels > 1)
+         {
+            e_dot_e = hypre_StructInnerProd(e_l[0], e_l[0]);
+            x_dot_x = hypre_StructInnerProd(x_l[0], x_l[0]);
+         }
+         else
+         {
+            e_dot_e = 0.0;
+            x_dot_x = 1.0;
+         }
+      }
+
+      /* fine grid post-relaxation */
+      if (num_levels > 1)
+      {
+         hypre_SMGRelaxSetRegSpaceRank(relax_data_l[0], 0, 1);
+         hypre_SMGRelaxSetRegSpaceRank(relax_data_l[0], 1, 0);
+      }
+      hypre_SMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
+      hypre_SMGRelaxSetZeroGuess(relax_data_l[0], 0);
+      hypre_SMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
 
       (smg_data -> num_iterations) = (i + 1);
    }

@@ -24,7 +24,8 @@
 hypre_StructMatrix *
 hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
                       hypre_StructMatrix *A,
-                      hypre_StructMatrix *PT )
+                      hypre_StructMatrix *PT,
+                      hypre_StructGrid   *coarse_grid )
 {
    hypre_StructMatrix    *RAP;
    hypre_StructStencil   *stencil;
@@ -34,11 +35,11 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
    switch (hypre_StructStencilDim(stencil)) 
    {
       case 2:
-      RAP = hypre_SMG2CreateRAPOp(R ,A, PT);
+      RAP = hypre_SMG2CreateRAPOp(R ,A, PT, coarse_grid);
       break;
     
       case 3:
-      RAP = hypre_SMG3CreateRAPOp(R ,A, PT);
+      RAP = hypre_SMG3CreateRAPOp(R ,A, PT, coarse_grid);
       break;
    } 
 
@@ -82,16 +83,16 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
       if(!hypre_StructMatrixSymmetric(A))
       {
          ierr += hypre_SMG2BuildRAPNoSym(A, PT, R, Ac, cindex, cstride);
-/*--------------------------------------------------------------------------
- *    Collapse stencil for periodic probems on coarsest grid.
- *--------------------------------------------------------------------------*/
+         /*-----------------------------------------------------------------
+          *    Collapse stencil for periodic probems on coarsest grid.
+          *-----------------------------------------------------------------*/
          ierr = hypre_SMG2RAPPeriodicNoSym(Ac, cindex, cstride);
       }
       else
       {
-/*--------------------------------------------------------------------------
- *    Collapse stencil for periodic problems on coarsest grid.
- *--------------------------------------------------------------------------*/
+         /*-----------------------------------------------------------------
+          *    Collapse stencil for periodic problems on coarsest grid.
+          *-----------------------------------------------------------------*/
          ierr = hypre_SMG2RAPPeriodicSym(Ac, cindex, cstride);
       }
 
@@ -110,16 +111,16 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
       if(!hypre_StructMatrixSymmetric(A))
       {
          ierr += hypre_SMG3BuildRAPNoSym(A, PT, R, Ac, cindex, cstride);
-/*--------------------------------------------------------------------------
- *    Collapse stencil for periodic probems on coarsest grid.
- *--------------------------------------------------------------------------*/
+         /*-----------------------------------------------------------------
+          *    Collapse stencil for periodic probems on coarsest grid.
+          *-----------------------------------------------------------------*/
          ierr = hypre_SMG3RAPPeriodicNoSym(Ac, cindex, cstride);
       }
       else
       {
-/*--------------------------------------------------------------------------
- *    Collapse stencil for periodic problems on coarsest grid.
- *--------------------------------------------------------------------------*/
+         /*-----------------------------------------------------------------
+          *    Collapse stencil for periodic problems on coarsest grid.
+          *-----------------------------------------------------------------*/
          ierr = hypre_SMG3RAPPeriodicSym(Ac, cindex, cstride);
       }
 
