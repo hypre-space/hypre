@@ -226,7 +226,7 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
         comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
-   num_cols_offd = S_offd_i[n];
+   num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    buf_data = hypre_CTAlloc(double,hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                 num_sends));
