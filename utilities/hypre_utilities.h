@@ -628,6 +628,7 @@ void hypre_BeginTiming P((int time_index ));
 void hypre_EndTiming P((int time_index ));
 void hypre_ClearTiming P((void ));
 void hypre_PrintTiming P((char *heading , MPI_Comm comm ));
+void hypre_PrintTimingOne P(( char *heading, int timer_index, MPI_Comm comm  ))
 
 #undef P
 
