@@ -292,7 +292,6 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
          {
             /* set to be an F-pt */
             CF_marker[i] = F_PT;
-            measure_array[i] = 0;
 
             /* make sure all dependencies have been accounted for */
             for (jS = S_i[i]; jS < S_i[i+1]; jS++)
@@ -306,6 +305,8 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
 
          if (CF_marker[i])
          {
+            measure_array[i] = 0;
+
             /* take point out of the subgraph */
             graph_size--;
             graph_array[ig] = graph_array[graph_size];
@@ -381,7 +382,6 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
          {
             /* set to be a C-pt */
             CF_marker[i] = C_PT;
-            measure_array[i] = 0;
             coarse_size++;
 
             for (jS = S_i[i]; jS < S_i[i+1]; jS++)
