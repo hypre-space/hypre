@@ -21,6 +21,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                          int                  *dof_func,
                          int                   debug_flag,
                          double                trunc_factor,
+                         int 		      *col_offd_S_to_A,
                          hypre_ParCSRMatrix  **P_ptr)
 {
 
@@ -285,6 +286,19 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
          if (num_procs > 1)
          {
+	   if (col_offd_S_to_A)
+           {
+            for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+            {
+               i1 = col_offd_S_to_A[S_offd_j[jj]];           
+               if (CF_marker_offd[i1] >= 0)
+               {
+                  jj_count_offd[j]++;
+               }
+            }
+           }
+           else
+           {
             for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
             {
                i1 = S_offd_j[jj];           
@@ -293,6 +307,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                   jj_count_offd[j]++;
                }
             }
+           }
          }
       }
     }
@@ -498,6 +513,38 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
          if (num_procs > 1)
          {
+           if (col_offd_S_to_A)
+           {
+            for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+            {
+               i1 = col_offd_S_to_A[S_offd_j[jj]];   
+
+               /*-----------------------------------------------------------
+                * If neighbor i1 is a C-point, set column number in P_offd_j
+                * and initialize interpolation weight to zero.
+                *-----------------------------------------------------------*/
+
+               if (CF_marker_offd[i1] >= 0)
+               {
+                  P_marker_offd[i1] = jj_counter_offd;
+                  P_offd_j[jj_counter_offd]  = fine_to_coarse_offd[i1];
+                  P_offd_data[jj_counter_offd] = zero;
+                  jj_counter_offd++;
+               }
+
+               /*-----------------------------------------------------------
+                * If neighbor i1 is an F-point, mark it as a strong F-point
+                * whose connection needs to be distributed.
+                *-----------------------------------------------------------*/
+
+               else if (CF_marker_offd[i1] != -3)
+               {
+                  P_marker_offd[i1] = strong_f_marker;
+               }            
+            }
+           }
+           else
+           {
             for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
             {
                i1 = S_offd_j[jj];   
@@ -525,6 +572,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                   P_marker_offd[i1] = strong_f_marker;
                }            
             }
+           }
          }
       
          jj_end_row_offd = jj_counter_offd;
@@ -1011,6 +1059,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
                          int                  *dof_func,
                          int                   debug_flag,
                          double                trunc_factor,
+                         int		      *col_offd_S_to_A,
                          hypre_ParCSRMatrix  **P_ptr)
 {
 
@@ -1273,6 +1322,19 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
 
          if (num_procs > 1)
          {
+           if (col_offd_S_to_A)
+           {
+            for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+            {
+               i1 = col_offd_S_to_A[S_offd_j[jj]];           
+               if (CF_marker_offd[i1] >= 0)
+               {
+                  jj_count_offd[j]++;
+               }
+            }
+           }
+           else
+           {
             for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
             {
                i1 = S_offd_j[jj];           
@@ -1281,6 +1343,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
                   jj_count_offd[j]++;
                }
             }
+           }
          }
       }
     }
@@ -1476,6 +1539,28 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
 
          if (num_procs > 1)
          {
+	   if (col_offd_S_to_A)
+           {
+            for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+            {
+               i1 = col_offd_S_to_A[S_offd_j[jj]];   
+
+               /*-----------------------------------------------------------
+                * If neighbor i1 is a C-point, set column number in P_offd_j
+                * and initialize interpolation weight to zero.
+                *-----------------------------------------------------------*/
+
+               if (CF_marker_offd[i1] >= 0)
+               {
+                  P_marker_offd[i1] = jj_counter_offd;
+                  P_offd_j[jj_counter_offd]  = fine_to_coarse_offd[i1];
+                  P_offd_data[jj_counter_offd] = zero;
+                  jj_counter_offd++;
+               }
+            }
+           }
+           else
+           {
             for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
             {
                i1 = S_offd_j[jj];   
@@ -1492,8 +1577,8 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
                   P_offd_data[jj_counter_offd] = zero;
                   jj_counter_offd++;
                }
-
             }
+           }
          }
       
          jj_end_row_offd = jj_counter_offd;

@@ -779,3 +779,237 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
 
    return (ierr);
 }
+
+/*--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A, 
+			      hypre_ParCSRMatrix *S,
+			      int		 **col_offd_S_to_A_ptr)
+{
+   MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(A);
+   MPI_Status	      *status;
+   MPI_Request	      *requests;
+   hypre_ParCSRCommPkg     *comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
+   hypre_ParCSRCommPkg     *comm_pkg_S;
+   hypre_ParCSRCommHandle  *comm_handle;
+   hypre_CSRMatrix    *A_offd = hypre_ParCSRMatrixOffd(A);
+   int    	      *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
+                  
+   hypre_CSRMatrix    *S_diag = hypre_ParCSRMatrixDiag(S);
+   hypre_CSRMatrix    *S_offd = hypre_ParCSRMatrixOffd(S);
+   int                *S_offd_i = hypre_CSRMatrixI(S_offd);
+   int                *S_offd_j = hypre_CSRMatrixJ(S_offd);
+   int    	      *col_map_offd_S;
+
+   int                *recv_procs_A = hypre_ParCSRCommPkgRecvProcs(comm_pkg_A);
+   int                *recv_vec_starts_A = 
+				hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_A);
+   int                *send_procs_A = 
+				hypre_ParCSRCommPkgSendProcs(comm_pkg_A);
+   int                *send_map_starts_A = 
+				hypre_ParCSRCommPkgSendMapStarts(comm_pkg_A);
+   int                *recv_procs_S;
+   int                *recv_vec_starts_S;
+   int                *send_procs_S;
+   int                *send_map_starts_S;
+   int                *send_map_elmts_S;
+   int                *col_offd_S_to_A;
+
+   int                *S_marker;
+   int                *send_change;
+   int                *recv_change;
+
+   int                 num_variables   = hypre_CSRMatrixNumRows(S_diag);
+   int		       num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);                 
+   int		       num_cols_offd_S;
+   int                 i, j, jcol;
+   int                 proc, cnt, proc_cnt, total_nz;
+   int                 first_row;
+                      
+   int                 ierr = 0;
+
+   int		       num_sends_A = hypre_ParCSRCommPkgNumSends(comm_pkg_A);
+   int		       num_recvs_A = hypre_ParCSRCommPkgNumRecvs(comm_pkg_A);
+   int		       num_sends_S;
+   int		       num_recvs_S;
+   int		       num_nonzeros;
+
+   num_nonzeros = S_offd_i[num_variables];
+
+   S_marker = NULL;
+   if (num_cols_offd_A)
+      S_marker = hypre_CTAlloc(int,num_cols_offd_A);
+
+   for (i=0; i < num_cols_offd_A; i++)
+      S_marker[i] = -1;
+
+   for (i=0; i < num_nonzeros; i++)
+   {
+      jcol = S_offd_j[i];
+      S_marker[jcol] = 0;
+   }
+
+   proc = 0;
+   proc_cnt = 0;
+   cnt = 0;
+   num_recvs_S = 0;
+   for (i=0; i < num_recvs_A; i++)
+   {
+      for (j=recv_vec_starts_A[i]; j < recv_vec_starts_A[i+1]; j++)
+      {
+         if (!S_marker[j])
+         {
+            S_marker[j] = cnt;
+	    cnt++;
+	    proc = 1;
+         }
+      }
+      if (proc) {num_recvs_S++; proc = 0;}
+   }
+
+
+   num_cols_offd_S = cnt;  
+   recv_change = NULL;
+   recv_procs_S = NULL;
+   send_change = NULL;
+   col_map_offd_S = NULL;
+   col_offd_S_to_A = NULL;
+   if (num_recvs_A) recv_change = hypre_CTAlloc(int, num_recvs_A);
+   if (num_sends_A) send_change = hypre_CTAlloc(int, num_sends_A);
+   if (num_recvs_S) recv_procs_S = hypre_CTAlloc(int, num_recvs_S);
+   recv_vec_starts_S = hypre_CTAlloc(int, num_recvs_S+1);
+   if (num_cols_offd_S)
+   {
+      col_map_offd_S = hypre_CTAlloc(int,num_cols_offd_S);
+      col_offd_S_to_A = hypre_CTAlloc(int,num_cols_offd_S);
+   }
+   if (num_cols_offd_S < num_cols_offd_A)
+   {
+      for (i=0; i < num_nonzeros; i++)
+      {
+         jcol = S_offd_j[i];
+         S_offd_j[i] = S_marker[jcol];
+      }
+
+      proc = 0;
+      proc_cnt = 0;
+      cnt = 0;
+      recv_vec_starts_S[0] = 0;
+      for (i=0; i < num_recvs_A; i++)
+      {
+         for (j=recv_vec_starts_A[i]; j < recv_vec_starts_A[i+1]; j++)
+         {
+            if (S_marker[j] != -1)
+            {
+               col_map_offd_S[cnt] = col_map_offd_A[j];
+               col_offd_S_to_A[cnt++] = j;
+               proc = 1;
+            }
+         }
+         recv_change[i] = j-cnt-recv_vec_starts_A[i]
+				+recv_vec_starts_S[proc_cnt];
+         if (proc)
+         {
+            recv_procs_S[proc_cnt++] = recv_procs_A[i];
+            recv_vec_starts_S[proc_cnt] = cnt;
+            proc = 0;
+         }
+      }
+   }
+   else
+   {
+      for (i=0; i < num_recvs_A; i++)
+      {
+         for (j=recv_vec_starts_A[i]; j < recv_vec_starts_A[i+1]; j++)
+         {
+            col_map_offd_S[j] = col_map_offd_A[j];
+            col_offd_S_to_A[j] = j;
+         }
+         recv_procs_S[i] = recv_procs_A[i];
+         recv_vec_starts_S[i] = recv_vec_starts_A[i];
+      }
+      recv_vec_starts_S[num_recvs_A] = recv_vec_starts_A[num_recvs_A];
+   } 
+
+   requests = hypre_CTAlloc(MPI_Request,num_sends_A+num_recvs_A);
+   j=0;
+   for (i=0; i < num_sends_A; i++)
+       MPI_Irecv(&send_change[i],1,MPI_INT,send_procs_A[i],
+		0,comm,&requests[j++]);
+
+   for (i=0; i < num_recvs_A; i++)
+       MPI_Isend(&recv_change[i],1,MPI_INT,recv_procs_A[i],
+		0,comm,&requests[j++]);
+
+   status = hypre_CTAlloc(MPI_Status,j);
+   MPI_Waitall(j,requests,status);
+   hypre_TFree(status);
+
+   num_sends_S = 0;
+   total_nz = send_map_starts_A[num_sends_A];
+   for (i=0; i < num_sends_A; i++)
+   {
+      if (send_change[i])
+      {
+	 if ((send_map_starts_A[i+1]-send_map_starts_A[i]) > send_change[i])
+	    num_sends_S++;
+      }
+      else
+	 num_sends_S++;
+      total_nz -= send_change[i];
+   }
+
+   send_procs_S = NULL;
+   if (num_sends_S)
+      send_procs_S = hypre_CTAlloc(int,num_sends_S);
+   send_map_starts_S = hypre_CTAlloc(int,num_sends_S+1);
+   send_map_elmts_S = NULL;
+   if (total_nz)
+      send_map_elmts_S = hypre_CTAlloc(int,total_nz);
+
+
+   proc = 0;
+   proc_cnt = 0;
+   for (i=0; i < num_sends_A; i++)
+   {
+      cnt = send_map_starts_A[i+1]-send_map_starts_A[i]-send_change[i];
+      if (cnt)
+      {
+	 send_procs_S[proc_cnt++] = send_procs_A[i];
+         send_map_starts_S[proc_cnt] = send_map_starts_S[proc_cnt-1]+cnt;
+      }
+   }
+
+   comm_pkg_S = hypre_CTAlloc(hypre_ParCSRCommPkg,1);
+   hypre_ParCSRCommPkgComm(comm_pkg_S) = comm;
+   hypre_ParCSRCommPkgNumRecvs(comm_pkg_S) = num_recvs_S;
+   hypre_ParCSRCommPkgRecvProcs(comm_pkg_S) = recv_procs_S;
+   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_S) = recv_vec_starts_S;
+   hypre_ParCSRCommPkgNumSends(comm_pkg_S) = num_sends_S;
+   hypre_ParCSRCommPkgSendProcs(comm_pkg_S) = send_procs_S;
+   hypre_ParCSRCommPkgSendMapStarts(comm_pkg_S) = send_map_starts_S;
+
+   comm_handle = hypre_ParCSRCommHandleCreate(12, comm_pkg_S, col_map_offd_S,
+			send_map_elmts_S);
+   hypre_ParCSRCommHandleDestroy(comm_handle);
+
+   first_row = hypre_ParCSRMatrixFirstRowIndex(A);
+   if (first_row)
+      for (i=0; i < send_map_starts_S[num_sends_S]; i++)
+          send_map_elmts_S[i] -= first_row;
+
+   hypre_ParCSRCommPkgSendMapElmts(comm_pkg_S) = send_map_elmts_S;
+  
+   hypre_ParCSRMatrixCommPkg(S) = comm_pkg_S;
+   hypre_ParCSRMatrixColMapOffd(S) = col_map_offd_S;
+   hypre_CSRMatrixNumCols(S_offd) = num_cols_offd_S;
+
+   hypre_TFree(S_marker);
+   hypre_TFree(send_change);
+   hypre_TFree(recv_change);
+
+   *col_offd_S_to_A_ptr = col_offd_S_to_A;
+
+   return ierr;
+} 

@@ -146,6 +146,18 @@ HYPRE_BoomerAMGSetTruncFactor( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetSCommPkgSwitch
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetSCommPkgSwitch( HYPRE_Solver solver,
+                            double       S_commpkg_switch  )
+{
+   return( hypre_BoomerAMGSetSCommPkgSwitch( (void *) solver,
+                                           S_commpkg_switch ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetInterpType
  *--------------------------------------------------------------------------*/
 

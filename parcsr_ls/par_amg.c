@@ -31,6 +31,7 @@ hypre_BoomerAMGCreate()
    double   strong_threshold;
    double   max_row_sum;
    double   trunc_factor;
+   double   S_commpkg_switch;
    int      interp_type;
    int      coarsen_type;
    int      measure_type;
@@ -81,6 +82,7 @@ hypre_BoomerAMGCreate()
    strong_threshold = 0.25;
    max_row_sum = 0.9;
    trunc_factor = 0.0;
+   S_commpkg_switch = 0.05;
    interp_type = 200;
    coarsen_type = 6;
    measure_type = 0;
@@ -137,6 +139,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetStrongThreshold(amg_data, strong_threshold);
    hypre_BoomerAMGSetMaxRowSum(amg_data, max_row_sum);
    hypre_BoomerAMGSetTruncFactor(amg_data, trunc_factor);
+   hypre_BoomerAMGSetSCommPkgSwitch(amg_data, S_commpkg_switch);
    hypre_BoomerAMGSetInterpType(amg_data, interp_type);
    hypre_BoomerAMGSetMeasureType(amg_data, measure_type);
    hypre_BoomerAMGSetCoarsenType(amg_data, coarsen_type);
@@ -400,6 +403,18 @@ hypre_BoomerAMGSetTruncFactor( void     *data,
    hypre_ParAMGData  *amg_data = data;
 
    hypre_ParAMGDataTruncFactor(amg_data) = trunc_factor;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetSCommPkgSwitch( void     *data,
+                                  double    S_commpkg_switch )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   hypre_ParAMGDataSCommPkgSwitch(amg_data) = S_commpkg_switch;
 
    return (ierr);
 }

@@ -22,6 +22,7 @@ typedef struct
    double   strong_threshold;
    double   max_row_sum;
    double   trunc_factor;
+   double   S_commpkg_switch;
    int      measure_type;
    int      setup_type;
    int      coarsen_type;
@@ -118,6 +119,7 @@ typedef struct
 ((amg_data)->strong_threshold)
 #define hypre_ParAMGDataMaxRowSum(amg_data) ((amg_data)->max_row_sum)
 #define hypre_ParAMGDataTruncFactor(amg_data) ((amg_data)->trunc_factor)
+#define hypre_ParAMGDataSCommPkgSwitch(amg_data) ((amg_data)->S_commpkg_switch)
 #define hypre_ParAMGDataInterpType(amg_data) ((amg_data)->interp_type)
 #define hypre_ParAMGDataCoarsenType(amg_data) ((amg_data)->coarsen_type)
 #define hypre_ParAMGDataMeasureType(amg_data) ((amg_data)->measure_type)

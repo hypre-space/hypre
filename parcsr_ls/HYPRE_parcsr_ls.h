@@ -419,6 +419,18 @@ int HYPRE_BoomerAMGSetTruncFactor(HYPRE_Solver solver,
                                   double       trunc_factor);
 
 /*
+ * (Optional) Defines the largest strength threshold for which 
+ * the strength matrix S uses the communication package of the operator A.
+ * If the strength threshold is larger than this values,
+ * a communication package is generated for S. This can save
+ * memory and decrease the amount of data that needs to be communicated,
+ * if S is substantially sparser than A.
+ * The default is 0.05.
+ **/
+int HYPRE_BoomerAMGSetSCommPkgSwitch(HYPRE_Solver solver,
+                                  double       S_commpkg_switch);
+
+/*
  * (Optional) Specifies the use of LS interpolation - least-squares
  * fitting of smooth vectors.
  **/

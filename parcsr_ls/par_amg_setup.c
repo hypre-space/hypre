@@ -47,12 +47,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int                **dof_func_array;   
    int                 *dof_func;
    int                 *dof_func1;
+   int                 *col_offd_S_to_A;
    double              *relax_weight;
    double              *omega;
    double               schwarz_relax_wt = 1;
    double               strong_threshold;
    double               max_row_sum;
    double               trunc_factor;
+   double               S_commpkg_switch;
 
    int      max_levels; 
    int      amg_logging;
@@ -310,6 +312,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
    max_row_sum = hypre_ParAMGDataMaxRowSum(amg_data);
    trunc_factor = hypre_ParAMGDataTruncFactor(amg_data);
+   S_commpkg_switch = hypre_ParAMGDataSCommPkgSwitch(amg_data);
    if (smooth_num_levels > level)
    {
       smoother = hypre_CTAlloc(HYPRE_Solver, smooth_num_levels);
@@ -393,12 +396,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                else
                   hypre_BoomerAMGCreateS(AN, strong_threshold, max_row_sum,
                                    1, NULL,&SN);
+	       col_offd_S_to_A = NULL;
+	       if (strong_threshold > S_commpkg_switch)
+                  hypre_BoomerAMGCreateSCommPkg(AN,SN,&col_offd_S_to_A);
 	    }
 	    else
 	    {
 	       hypre_BoomerAMGCreateS(A_array[level], 
 				   strong_threshold, max_row_sum, 
 				   num_functions, dof_func_array[level],&S);
+	       col_offd_S_to_A = NULL;
+	       if (strong_threshold > S_commpkg_switch)
+                  hypre_BoomerAMGCreateSCommPkg(A_array[level],S,
+				&col_offd_S_to_A);
 	    }
 	 }
 	 else
@@ -668,7 +678,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
           hypre_BoomerAMGBuildInterpHE(A_array[level], CF_marker_array[level], 
                  S, coarse_pnts_global, num_functions, dof_func_array[level], 
-		 debug_flag, trunc_factor, &P);
+		 debug_flag, trunc_factor, col_offd_S_to_A, &P);
+	  hypre_TFree(col_offd_S_to_A);
       }
       else if (hypre_ParAMGDataGSMG(amg_data) == 0)
       {
@@ -676,14 +687,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	 {
             hypre_BoomerAMGBuildInterp(A_array[level], CF_marker_array[level], 
                  S, coarse_pnts_global, num_functions, dof_func_array[level], 
-		 debug_flag, trunc_factor, &P);
+		 debug_flag, trunc_factor, col_offd_S_to_A, &P);
+	    hypre_TFree(col_offd_S_to_A);
 	 }
          else
          {
             CFN_marker = CF_marker_array[level],
             hypre_BoomerAMGBuildInterp(AN, CFN_marker,
                  SN, coarse_pnts_global, 1, NULL,
-                 debug_flag, trunc_factor, &PN);
+                 debug_flag, trunc_factor, col_offd_S_to_A, &PN);
+	    hypre_TFree(col_offd_S_to_A);
             hypre_BoomerAMGCreateScalarCFS(PN, CFN_marker,
                 num_functions, nodal, 1, &dof_func1,
                 &CF_marker, &P);

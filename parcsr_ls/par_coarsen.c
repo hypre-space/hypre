@@ -100,7 +100,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
                         int                  **CF_marker_ptr)
 {
    MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(S);
-   hypre_ParCSRCommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(A);
+   hypre_ParCSRCommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle   *comm_handle;
 
    hypre_CSRMatrix    *S_diag          = hypre_ParCSRMatrixDiag(S);
@@ -139,6 +139,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    int		       index, start, my_id, num_procs, jrow, cnt;
                       
    int                 ierr = 0;
+   int                 use_commpkg_A = 0;
    int                 break_var = 1;
 
    double	    wall_time;
@@ -168,6 +169,12 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    if (debug_flag == 3) wall_time = time_getWallclockSeconds();
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
+
+   if (!comm_pkg)
+   {
+        use_commpkg_A = 1;
+        comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+   }
 
    if (!comm_pkg)
    {
@@ -326,7 +333,10 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
 
    if (num_procs > 1)
    {
-      S_ext      = hypre_ParCSRMatrixExtractBExt(S,A,0);
+      if (use_commpkg_A)
+         S_ext      = hypre_ParCSRMatrixExtractBExt(S,A,0);
+      else
+         S_ext      = hypre_ParCSRMatrixExtractBExt(S,S,0);
       S_ext_i    = hypre_CSRMatrixI(S_ext);
       S_ext_j    = hypre_CSRMatrixJ(S_ext);
    }
@@ -851,7 +861,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
                             int                  **CF_marker_ptr)
 {
    MPI_Comm         comm          = hypre_ParCSRMatrixComm(S);
-   hypre_ParCSRCommPkg   *comm_pkg      = hypre_ParCSRMatrixCommPkg(A);
+   hypre_ParCSRCommPkg   *comm_pkg      = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle *comm_handle;
    hypre_CSRMatrix *S_diag        = hypre_ParCSRMatrixDiag(S);
    hypre_CSRMatrix *S_offd        = hypre_ParCSRMatrixOffd(S);
@@ -902,6 +912,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    int              nabor, nabor_two;
 
    int              ierr = 0;
+   int              use_commpkg_A = 0;
    int              break_var = 0;
    int              f_pnt = F_PT;
    double	    wall_time;
@@ -941,6 +952,12 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
+
+   if (!comm_pkg)
+   {
+        use_commpkg_A = 1;
+        comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+   }
 
    if (!comm_pkg)
    {
@@ -1021,7 +1038,10 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    if ((measure_type || coarsen_type != 1 || coarsen_type != 11) 
 		&& num_procs > 1)
    {
-      S_ext      = hypre_ParCSRMatrixExtractBExt(S,A,0);
+      if (use_commpkg_A)
+         S_ext      = hypre_ParCSRMatrixExtractBExt(S,A,0);
+      else
+         S_ext      = hypre_ParCSRMatrixExtractBExt(S,S,0);
       S_ext_i    = hypre_CSRMatrixI(S_ext);
       S_ext_j    = hypre_CSRMatrixJ(S_ext);
       num_nonzeros = S_ext_i[num_cols_offd];
@@ -1932,7 +1952,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
                         int                  **CF_marker_ptr)
 {
    MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(S);
-   hypre_ParCSRCommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(A);
+   hypre_ParCSRCommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle   *comm_handle;
 
    hypre_CSRMatrix    *S_diag          = hypre_ParCSRMatrixDiag(S);
@@ -1968,6 +1988,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
    int		       index, start, my_id, num_procs, jrow, cnt, elmt;
                       
    int                 ierr = 0;
+   int                 use_commpkg_A = 0;
 
    double	    wall_time;
    int   iter = 0;
@@ -2009,8 +2030,14 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 
    if (!comm_pkg)
    {
-        hypre_MatvecCommPkgCreate(S);
-        comm_pkg = hypre_ParCSRMatrixCommPkg(S); 
+        use_commpkg_A = 1;
+        comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+   }
+
+   if (!comm_pkg)
+   {
+        hypre_MatvecCommPkgCreate(A);
+        comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
