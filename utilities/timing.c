@@ -176,7 +176,7 @@ hypre_FinalizeTiming( int time_index )
 #endif
 
    if (hypre_global_timing == NULL)
-      return;
+      return ierr;
 
    if (time_index < (hypre_global_timing_ref(threadid, size)))
    {
@@ -262,7 +262,7 @@ hypre_IncFLOPCount( int inc )
 #endif
 
    if (hypre_global_timing == NULL)
-      return;
+      return ierr;
 
    hypre_TimingFLOPCount += (double) (inc);
 
@@ -291,7 +291,7 @@ hypre_BeginTiming( int time_index )
 #endif
 
    if (hypre_global_timing == NULL)
-      return;
+      return ierr;
 
    if (hypre_TimingState(time_index) == 0)
    {
@@ -327,7 +327,7 @@ hypre_EndTiming( int time_index )
 #endif
 
    if (hypre_global_timing == NULL)
-      return;
+      return ierr;
 
    hypre_TimingState(time_index) --;
    if (hypre_TimingState(time_index) == 0)
@@ -363,13 +363,14 @@ hypre_ClearTiming( )
 #endif
 
    if (hypre_global_timing == NULL)
-      return;
+      return ierr;
 
    for (i = 0; i < (hypre_global_timing_ref(threadid,size)); i++)
    {
       hypre_TimingWallTime(i) = 0.0;
       hypre_TimingCPUTime(i)  = 0.0;
       hypre_TimingFLOPS(i)    = 0.0;
+printf("Hello\n");
    }
 
    return ierr;
@@ -398,7 +399,7 @@ hypre_PrintTiming( char     *heading,
    int     myrank;
 
    if (hypre_global_timing == NULL)
-      return;
+      return ierr;
 
    MPI_Comm_rank(comm, &myrank );
 
@@ -481,7 +482,7 @@ hypre_PrintTiming( char     *heading,
    if (my_thread == hypre_NumThreads)
    {
       if (hypre_global_timing == NULL)
-         return;
+         return ierr;
 
       MPI_Comm_rank(comm, &myrank );
 
