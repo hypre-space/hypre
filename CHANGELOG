@@ -14,6 +14,8 @@
 #
 #=============================================================================
 
+Version 1.7.10b released, 2002/12/02.
+
 - New Hybrid solvers available for ParCSR and Struct.
 - IJ: Modified the 'GetValues' part of the matrix interface to make
   it possible to get matrix values without knowing the nonzero
