@@ -120,7 +120,106 @@ Vector         *y;
       for (jj = ia[i]-1; jj < ia[i+1]-1; jj++)
       {
 	 j = ja[jj]-1;
-	 yp[i] += a[jj] * xp[j];
+         if (j >= 0)        
+         {                        
+                /* temporary alteration, until P_array
+                   has excess entries removed.  veh, 1/98 */
+
+	    yp[i] += a[jj] * xp[j];
+         }
+      }
+   }
+
+   /*-----------------------------------------------------------------
+    * y = alpha*y
+    *-----------------------------------------------------------------*/
+
+   if (alpha != 1.0)
+   {
+      for (i = 0; i < n; i++)
+	 yp[i] *= alpha;
+   }
+}
+
+
+
+/*--------------------------------------------------------------------------
+ * MatvecT
+ *
+ *             Performs y <- alpha * A^T * x + beta * y
+ *
+ *             Modified from Matvec, Jan 7 1998, by Van Henson
+ *
+ *--------------------------------------------------------------------------*/
+
+void            MatvecT(alpha, A, x, beta, y)
+double          alpha;
+Matrix         *A;
+Vector         *x;
+double          beta;
+Vector         *y;
+{
+   double     *a  = MatrixData(A);
+   int        *ia = MatrixIA(A);
+   int        *ja = MatrixJA(A);
+   int         n  = MatrixSize(A);
+
+   double     *xp = VectorData(x);
+   double     *yp = VectorData(y);
+
+   double      temp;
+
+   int         i, j, jj;
+
+
+   /*-----------------------------------------------------------------------
+    * Do (alpha == 0.0) computation - RDF: USE MACHINE EPS
+    *-----------------------------------------------------------------------*/
+
+   if (alpha == 0.0)
+   {
+      for (i = 0; i < n; i++)
+	 yp[i] *= beta;
+
+      return;
+   }
+
+   /*-----------------------------------------------------------------------
+    * y = (beta/alpha)*y
+    *-----------------------------------------------------------------------*/
+   
+   temp = beta / alpha;
+   
+   if (temp != 1.0)
+   {
+      if (temp == 0.0)
+      {
+	 for (i = 0; i < n; i++)
+	    yp[i] = 0.0;
+      }
+      else
+      {
+	 for (i = 0; i < n; i++)
+	    yp[i] *= temp;
+      }
+   }
+
+   /*-----------------------------------------------------------------
+    * y += A^T*x
+    *-----------------------------------------------------------------*/
+
+   for (i = 0; i < n; i++)
+   {
+      for (jj = ia[i]-1; jj < ia[i+1]-1; jj++)
+      {
+	 j = ja[jj]-1;
+         if (j >= 0)        
+         {                        
+                /* temporary alteration, until P_array
+                   has excess entries removed.  veh, 1/98 */
+
+	    yp[j] += a[jj] * xp[i];
+         }
       }
    }
 
