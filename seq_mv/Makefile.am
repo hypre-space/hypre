@@ -7,6 +7,7 @@ libHYPRE_seq_mv_la_LDFLAGS = -avoid-version
 include_HEADERS = HYPRE_seq_mv.h seq_mv.h
 
 AM_CPPFLAGS = \
+ -I$(top_builddir)/utilities\
  -I$(top_srcdir)/utilities
 
 #

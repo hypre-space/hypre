@@ -7,6 +7,7 @@ libHYPRE_parcsr_mv_la_LDFLAGS = -avoid-version
 include_HEADERS = parcsr_mv.h HYPRE_parcsr_mv.h
 
 AM_CPPFLAGS = \
+ -I$(top_builddir)/utilities\
  -I$(top_srcdir)/utilities\
  -I$(top_srcdir)/seq_mv
 

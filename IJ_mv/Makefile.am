@@ -7,6 +7,7 @@ libHYPRE_IJ_mv_la_LDFLAGS = -avoid-version
 include_HEADERS = IJ_mv.h HYPRE_IJ_mv.h
 
 AM_CPPFLAGS = \
+ -I$(top_builddir)/utilities\
  -I$(top_srcdir)/utilities\
  -I$(top_srcdir)/struct_mv\
  -I$(top_srcdir)/seq_mv\

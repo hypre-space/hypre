@@ -8,6 +8,7 @@ include_HEADERS = parcsr_ls.h HYPRE_parcsr_ls.h
 
 AM_CPPFLAGS = \
  -DHYPRE_MODE -DOPTIMIZED_DH\
+ -I$(top_builddir)/utilities\
  -I$(top_srcdir)/utilities\
  -I$(top_srcdir)/krylov\
  -I$(top_srcdir)/seq_mv\

@@ -7,6 +7,7 @@ libHYPRE_struct_ls_la_LDFLAGS = -avoid-version
 include_HEADERS = struct_ls.h HYPRE_struct_ls.h
 
 AM_CPPFLAGS = \
+ -I$(top_builddir)/utilities\
  -I$(top_srcdir)/utilities\
  -I$(top_srcdir)/krylov\
  -I$(top_srcdir)/struct_mv

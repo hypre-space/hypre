@@ -7,7 +7,7 @@ libHYPRE_sstruct_mv_la_LDFLAGS = -avoid-version
 include_HEADERS = HYPRE_sstruct_mv.h sstruct_mv.h
 
 AM_CPPFLAGS = \
- -I$(top_srcdir)\
+ -I$(top_builddir)/utilities\
  -I$(top_srcdir)/utilities\
  -I$(top_srcdir)/struct_mv\
  -I$(top_srcdir)/seq_mv\
