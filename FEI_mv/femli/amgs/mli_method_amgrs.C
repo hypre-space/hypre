@@ -44,6 +44,7 @@ MLI_Method_AMGRS::MLI_Method_AMGRS( MPI_Comm comm ) : MLI_Method( comm )
    smootherNSweeps_ = 2;
    smootherWeights_  = new double[2];
    smootherWeights_[0] = smootherWeights_[1] = 0.667;
+   smootherPrintRNorm_ = 0;
    strcpy(coarseSolver_, "SGS");
    coarseSolverNSweeps_ = 20;
    coarseSolverWeights_ = new double[20];
@@ -158,6 +159,11 @@ int MLI_Method_AMGRS::setParams(char *in_name, int argc, char *argv[])
       nSweeps = *(int *)   argv[0];
       weights = (double *) argv[1];
       return ( setSmoother(param2, nSweeps, weights) );
+   }
+   else if ( !strcasecmp(param1, "setSmootherPrintRNorm" ))
+   {
+      smootherPrintRNorm_ = 1;
+      return 0;
    }
    else if ( !strcasecmp(param1, "setCoarseSolver" ))
    {
@@ -422,6 +428,11 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       targv[1] = (char *) smootherWeights_;
       sprintf( param_string, "relaxWeight" );
       smoother_ptr->setParams(param_string, 2, targv);
+      if ( smootherPrintRNorm_ == 1 )
+      {
+         sprintf( param_string, "printRNorm" );
+         smoother_ptr->setParams(param_string, 0, NULL);
+      }
       smoother_ptr->setup(mli_Amat);
       mli->setSmoother( level, MLI_SMOOTHER_BOTH, smoother_ptr );
    }

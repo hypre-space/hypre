@@ -46,6 +46,7 @@ class MLI_Method_AMGRS : public MLI_Method
    char     smoother_[20];           /* denote which pre-smoother to use */
    int      smootherNSweeps_;        /* number of pre-smoother sweeps    */
    double   *smootherWeights_;       /* number of postsmoother sweeps    */
+   int      smootherPrintRNorm_;     /* tell smoother to print rnorm     */
    char     coarseSolver_[20];       /* denote which coarse solver to use*/
    int      coarseSolverNSweeps_;    /* number of coarse solver sweeps   */
    double   *coarseSolverWeights_;   /* weight used in coarse solver     */
