@@ -15,6 +15,7 @@
 
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
+#include "parcsr_mv.h"
 #include "krylov.h"
 
 int BuildParFromFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
@@ -776,7 +777,7 @@ main( int   argc,
    }
 
    if ( print_matrix )
-      hypre_ParCSRMatrixPrint( parcsr_A, "matout" );
+      HYPRE_ParCSRMatrixPrint( parcsr_A, "matout" );
 
    time_index = hypre_InitializeTiming("Spatial operator");
    hypre_BeginTiming(time_index);
