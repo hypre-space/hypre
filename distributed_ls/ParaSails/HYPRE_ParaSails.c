@@ -163,6 +163,7 @@ int HYPRE_ParaSailsSetupValues(HYPRE_ParaSails obj,
     mat = convert_matrix(internal->comm, distmat);
 
     internal->ps->loadbal_beta = loadbal;
+    internal->ps->setup_pattern_time = 0.0;
 
     ParaSailsSetupValues(internal->ps, mat, filter);
 
