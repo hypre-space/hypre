@@ -915,7 +915,6 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     ierr = HYPRE_IJVectorInitialize(reducedX_);
     ierr = HYPRE_IJVectorAssemble(reducedX_);
     assert(!ierr);
-    buildSchurInitialGuess();
 
     ierr = HYPRE_IJVectorCreate(comm_,CStartRow,CStartRow+CNRows-1,&reducedR_);
     ierr = HYPRE_IJVectorSetObjectType(reducedR_, HYPRE_PARCSR);
@@ -938,6 +937,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     HYinvA22_ = Mmat; 
     A21NRows_ = CTNRows;
     A21NCols_ = CTNCols;
+    buildSchurInitialGuess();
 
     //------------------------------------------------------------------
     // final clean up
@@ -1128,58 +1128,44 @@ double HYPRE_LinSysCore::buildSchurReducedSoln()
 
 void HYPRE_LinSysCore::buildSchurInitialGuess()
 {
-    int    i, ierr,StartRow, EndRow, nSchur, *partition, searchIndex, rowIndex;
-    double ddata;
+    int    i, ierr, StartRow, EndRow, nSchur, *partition, CStartRow;
+    int    *getIndices, *putIndices;
+    double *dArray;
     HYPRE_ParVector hypre_x;
 
     //------------------------------------------------------------------
     // initial set up 
     //------------------------------------------------------------------
 
-    if ( HYA21_ == NULL || HYinvA22_ == NULL )
-    {
-       printf("buildSchurInitialGuess WARNING : A21 or A22 absent.\n");
-       return;
-    }
     if (reducedX_ == HYx_ || reducedX_ == NULL || reducedA_ == NULL) return;
-
     StartRow  = localStartRow_ - 1;
     EndRow    = localEndRow_ - 1;
     nSchur    = A21NCols_;
+    if ( nSchur == 0 ) return;
     HYPRE_IJVectorGetObject(reducedX_, (void **) &hypre_x);
     partition = hypre_ParVectorPartitioning((hypre_ParVector *) hypre_x);
-    rowIndex  = partition[mypid_];
+    CStartRow = partition[mypid_];
 
     //------------------------------------------------------------------
     // injecting initial guesses
     //------------------------------------------------------------------
 
-    if ( selectedList_ != NULL )
-    {
-       for ( i = StartRow; i <= EndRow; i++ ) 
-       {
-          searchIndex = hypre_BinarySearch(selectedList_, i, nSchur);
-          if ( searchIndex < 0 )
-          {
-             HYPRE_IJVectorGetValues(HYx_, 1, &i, &ddata);
-             ierr = HYPRE_IJVectorSetValues(reducedX_, 1, 
-                        (const int *) &rowIndex, (const double *) &ddata);
-             assert( !ierr );
-             rowIndex++;
-          }
-       } 
-    } 
+    if ( selectedList_ != NULL ) getIndices = selectedList_;
     else
     {
-       for ( i = StartRow; i <= EndRow-nSchur; i++ ) 
-       {
-          HYPRE_IJVectorGetValues(HYx_, 1, &i, &ddata);
-          ierr = HYPRE_IJVectorSetValues(reducedX_, 1, 
-                       (const int *) &rowIndex, (const double *) &ddata);
-          assert( !ierr );
-          rowIndex++;
-       } 
-    } 
+       getIndices = new int[nSchur];
+       for ( i = 0; i < nSchur; i++ ) getIndices[i] = EndRow+1-nSchur+i; 
+    }
+    dArray     = new double[nSchur];
+    putIndices = new int[nSchur];
+    for ( i = 0; i < nSchur; i++ ) putIndices[i] = CStartRow + i;
+    HYPRE_IJVectorGetValues(HYx_, nSchur, getIndices, dArray);
+    ierr = HYPRE_IJVectorSetValues(reducedX_, 1, 
+                    (const int *) putIndices, (const double *) dArray);
+    assert( !ierr );
+    delete [] dArray;
+    delete [] putIndices;
+    if ( selectedList_ == NULL ) delete [] getIndices;
 }
 
 //*****************************************************************************
@@ -1194,7 +1180,7 @@ void HYPRE_LinSysCore::buildSchurReducedRHS()
     int    nSchur, *schurList, *ProcNRows, *ProcNSchur;
     int    globalNSchur, CTNRows, CTNCols, CTGlobalNRows, CTGlobalNCols;
     int    CNRows, CGlobalNRows, *tempList, searchIndex, rowCount, rowSize;
-    double ddata, *colVal;
+    double ddata, ddata2, *colVal;
     HYPRE_IJMatrix     Cmat, Mmat;
     HYPRE_IJVector     f1, f2, f2hat;
     HYPRE_ParVector    f1_csr, f2_csr, f2hat_csr;
@@ -1337,13 +1323,10 @@ void HYPRE_LinSysCore::buildSchurReducedRHS()
        if ( schurList != NULL ) rowIndex = schurList[i];
        else                     rowIndex = EndRow+1-nSchur+i; 
        HYPRE_IJVectorGetValues(HYb_, 1, &rowIndex, &ddata);
-       ddata = - ddata;
+       HYPRE_IJVectorGetValues(f2hat, 1, &rowCount,  &ddata2);
+       ddata = ddata2 - ddata;
        ierr = HYPRE_IJVectorSetValues(f2, 1, (const int *) &rowCount,
 			(const double *) &ddata);
-       HYPRE_IJVectorGetValues(f2hat, 1, &rowCount,  &ddata);
-       HYPRE_IJVectorAddToValues(f2, 1, (const int *) &rowCount,
-			(const double *) &ddata);
-       HYPRE_IJVectorGetValues(f2, 1, &rowCount,  &ddata);
        assert( !ierr );
        rowCount++;
     } 
