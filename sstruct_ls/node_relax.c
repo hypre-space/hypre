@@ -798,7 +798,7 @@ hypre_NodeRelax(  void               *relax_vdata,
             {
                for (vi = 0; vi < nvars; vi++)
                {
-                  hypre_FinalizeIndtComputations(comm_handle[vi],0);
+                  hypre_FinalizeIndtComputations(comm_handle[vi]);
                }
                compute_box_aa = hypre_ComputePkgDeptBoxes(compute_pkg);
             }
