@@ -283,7 +283,7 @@ c     Generate a Dirichlet Laplacian
 
       call bHYPRE_IJParCSRMatrix__create_f( bHYPRE_parcsr_A )
 
-      call bHYPRE_IJParCSRMatrix__cast_f
+      call bHYPRE_IJParCSRMatrix__cast2_f
      1     ( bHYPRE_parcsr_A, "bHYPRE.IJBuildMatrix", bHYPRE_ij_A )
       if ( bHYPRE_ij_A .eq. 0 ) then
          write(6,*) 'Cast failed'
@@ -393,7 +393,7 @@ c-----------------------------------------------------------------------
      &     last_local_col - first_local_col + 1, indices, vals, ierr)
 
       call bHYPRE_IJParCSRVector__create_f( bHYPRE_parcsr_b )
-      call bHYPRE_IJParCSRVector__cast_f
+      call bHYPRE_IJParCSRVector__cast2_f
      1     ( bHYPRE_parcsr_b, "bHYPRE.IJBuildVector", bHYPRE_ij_b )
       if ( bHYPRE_ij_b .eq. 0 ) then
          write(6,*) 'Cast failed'
@@ -436,7 +436,7 @@ c-----------------------------------------------------------------------
       call bHYPRE_IJBuildVector_deleteref_f( bHYPRE_ij_b )
       call SIDL_BaseInterface_queryint_f(
      1     bHYPRE_object, "bHYPRE.IJParCSRVector", bHYPRE_object_tmp )
-      call SIDL_BaseInterface__cast_f(
+      call SIDL_BaseInterface__cast2_f(
      1     bHYPRE_object_tmp, "bHYPRE.IJParCSRVector", bHYPRE_parcsr_b )
       if ( bHYPRE_parcsr_b .eq. 0 ) then
          write (6,*) 'Cast/QI failed\n'
@@ -449,7 +449,7 @@ c-----------------------------------------------------------------------
       ierr = ierr + ierrtmp
 
       call bHYPRE_IJParCSRVector__create_f( bHYPRE_parcsr_x )
-      call bHYPRE_IJParCSRVector__cast_f
+      call bHYPRE_IJParCSRVector__cast2_f
      1     ( bHYPRE_parcsr_x, "bHYPRE.IJBuildVector", bHYPRE_ij_x )
       if ( bHYPRE_ij_x .eq. 0 ) then
          write(6,*) 'Cast failed'
@@ -491,7 +491,7 @@ c-----------------------------------------------------------------------
       call bHYPRE_IJBuildVector_deleteref_f( bHYPRE_ij_x )
       call SIDL_BaseInterface_queryint_f(
      1     bHYPRE_object, "bHYPRE.IJParCSRVector", bHYPRE_object_tmp )
-      call SIDL_BaseInterface__cast_f(
+      call SIDL_BaseInterface__cast2_f(
      1     bHYPRE_object_tmp, "bHYPRE.IJParCSRVector", bHYPRE_parcsr_x )
       if ( bHYPRE_parcsr_x .eq. 0 ) then
          write (6,*) 'Cast/QI failed\n'
@@ -536,11 +536,11 @@ c      print *, 'Solver: AMG'
      &     MAXLEVELS,ierr)
 
       call bHYPRE_BoomerAMG__create_f( bHYPRE_AMG )
-      call bHYPRE_IJParCSRVector__cast_f
+      call bHYPRE_IJParCSRVector__cast2_f
      1     ( bHYPRE_parcsr_b, "bHYPRE.Vector", bHYPRE_Vector_b )
-      call bHYPRE_IJParCSRVector__cast_f
+      call bHYPRE_IJParCSRVector__cast2_f
      1     ( bHYPRE_parcsr_x, "bHYPRE.Vector", bHYPRE_Vector_x )
-      call bHYPRE_IJParCSRVector__cast_f
+      call bHYPRE_IJParCSRVector__cast2_f
      1     ( bHYPRE_parcsr_A, "bHYPRE.Operator", bHYPRE_op_A )
       call bHYPRE_BoomerAMG_SetCommunicator_f(
      1     bHYPRE_AMG, MPI_COMM_WORLD, ierrtmp )
