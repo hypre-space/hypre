@@ -73,8 +73,8 @@ LFLAGS =\
  -L${HYPRE_DIR}/seq_linear_solvers/ict\
  -L${HYPRE_DIR}/seq_linear_solvers/sparskit\
  -L${HYPRE_DIR}/seq_matrix_vector \
- -L${HYPRE_DIR}/struct_linear_solvers_andy \
- -L${HYPRE_DIR}/struct_matrix_vector_andy\
+ -L${HYPRE_DIR}/CI_struct_linear_solvers\
+ -L${HYPRE_DIR}/CI_struct_matrix_vector\
  -L${HYPRE_DIR}/utilities\
  -lHYPRE_StructSolver \
  -lHYPREPETScSolverParILUT \

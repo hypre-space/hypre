@@ -30,12 +30,12 @@ rm *.o
 make lib
 popd
 #
-pushd struct_matrix_vector_andy
+pushd CI_struct_matrix_vector
 rm *.o
 make lib
 popd
 #
-pushd struct_linear_solvers_andy
+pushd CI_struct_linear_solvers
 rm *.o
 make lib
 popd

@@ -20,8 +20,8 @@
  * Structures
  *--------------------------------------------------------------------------*/
 
-#include "../struct_matrix_vector_andy/HYPRE_types.h"
-#include "../struct_linear_solvers_andy/HYPRE_types.h"
+#include "../CI_struct_matrix_vector/HYPRE_types.h"
+#include "../CI_struct_linear_solvers/HYPRE_types.h"
 #include "../distributed_matrix/HYPRE_types.h"
 #include "../distributed_linear_solvers/pilut/HYPRE_types.h"
 #include "../PETScMat_linear_solvers/pilut/HYPRE_types.h"
@@ -46,8 +46,8 @@
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-#include "../struct_matrix_vector_andy/HYPRE_protos.h"
-#include "../struct_linear_solvers_andy/HYPRE_protos.h"
+#include "../CI_struct_matrix_vector/HYPRE_protos.h"
+#include "../CI_struct_linear_solvers/HYPRE_protos.h"
 #include "../distributed_matrix/HYPRE_protos.h"
 #include "../distributed_linear_solvers/pilut/HYPRE_protos.h"
 #include "../PETScMat_linear_solvers/pilut/HYPRE_protos.h"
