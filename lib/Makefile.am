@@ -3,12 +3,12 @@
 if STATICONLY
  lib_LIBRARIES = libHYPRE.a libHYPRE_LSI.a
  libHYPRE_a_SOURCES = $(FILES)
- libHYPRE_LSI_a_SOURCES = $(FILES)
+ libHYPRE_LSI_a_SOURCES = $(SUBSETFILES)
 else !STATICONLY
  lib_LTLIBRARIES = libHYPRE.la libHYPRE_LSI.la
  libHYPRE_la_SOURCES = $(FILES)
  libHYPRE_la_LDFLAGS = -avoid-version
- libHYPRE_LSI_la_SOURCES = $(FILES)
+ libHYPRE_LSI_la_SOURCES = $(SUBSETFILES)
  libHYPRE_LSI_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
@@ -138,9 +138,7 @@ HYPRE_SRC_DIRS = \
  struct_mv\
  utilities
 
-FILES = \
- $(BLASFILES)\
- $(LAPACKFILES)\
+SUPERLUFILES = \
  $(top_srcdir)/FEI_mv/SuperLU/colamd.c\
  $(top_srcdir)/FEI_mv/SuperLU/dcolumn_bmod.c\
  $(top_srcdir)/FEI_mv/SuperLU/dcolumn_dfs.c\
@@ -175,15 +173,12 @@ FILES = \
  $(top_srcdir)/FEI_mv/SuperLU/sp_preorder.c\
  $(top_srcdir)/FEI_mv/SuperLU/superlu_memory.c\
  $(top_srcdir)/FEI_mv/SuperLU/superlu_timer.c\
- $(top_srcdir)/FEI_mv/SuperLU/superlu_util.c\
+ $(top_srcdir)/FEI_mv/SuperLU/superlu_util.c
+
+MOSTFILES = \
  $(top_srcdir)/FEI_mv/fei-hypre/bicgs.c\
  $(top_srcdir)/FEI_mv/fei-hypre/bicgstabl.c\
  $(top_srcdir)/FEI_mv/fei-hypre/FEI_HYPRE_Impl.cxx\
- $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.cxx\
- $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.cxx\
- $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.cxx\
- $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.cxx\
- $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.cxx\
  $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSC_aux.cxx\
  $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_Dsuperlu.c\
  $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_UZAWA.cxx\
@@ -367,7 +362,6 @@ FILES = \
  $(top_srcdir)/parcsr_ls/par_laplace.c\
  $(top_srcdir)/parcsr_ls/par_laplace_27pt.c\
  $(top_srcdir)/parcsr_ls/par_laplace_9pt.c\
- $(top_srcdir)/parcsr_ls/par_nodal_systems.c\
  $(top_srcdir)/parcsr_ls/par_rap.c\
  $(top_srcdir)/parcsr_ls/par_rap_communication.c\
  $(top_srcdir)/parcsr_ls/par_relax.c\
@@ -394,7 +388,6 @@ FILES = \
  $(top_srcdir)/parcsr_mv/par_csr_matrix.c\
  $(top_srcdir)/parcsr_mv/par_csr_matvec.c\
  $(top_srcdir)/parcsr_mv/par_vector.c\
- $(top_srcdir)/parcsr_mv/new_commpkg.c\
  $(top_srcdir)/seq_mv/HYPRE_csr_matrix.c\
  $(top_srcdir)/seq_mv/HYPRE_mapped_matrix.c\
  $(top_srcdir)/seq_mv/HYPRE_vector.c\
@@ -521,7 +514,6 @@ FILES = \
  $(top_srcdir)/struct_mv/struct_vector.c\
  $(top_srcdir)/utilities/amg_linklist.c\
  $(top_srcdir)/utilities/binsearch.c\
- $(top_srcdir)/utilities/exchange_data.c\
  $(top_srcdir)/utilities/hypre_memory.c\
  $(top_srcdir)/utilities/hypre_qsort.c\
  $(top_srcdir)/utilities/memory_dmalloc.c\
@@ -533,6 +525,14 @@ FILES = \
  $(top_srcdir)/utilities/timer.c\
  $(top_srcdir)/utilities/timing.c\
  $(top_srcdir)/utilities/umalloc_local.c
+
+FILES = \
+ $(BLASFILES)\
+ $(LAPACKFILES)\
+ $(SUPERLUFILES)\
+ $(MOSTFILES)
+
+SUBSETFILES = $(MOSTFILES)
 
 BUILT_SOURCES = copy-objects
 
@@ -557,5 +557,4 @@ copy-objects:
 	    done; \
 	  fi; \
 	done
-
 
