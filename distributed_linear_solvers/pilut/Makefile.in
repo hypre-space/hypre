@@ -1,9 +1,9 @@
 
-all: lib_HYPRE_DistributedMatrixPilutSolver.a
+all: libHYPRE_DistributedMatrixPilutSolver.a
 
 install:all
 	@cp -f HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f lib_HYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 
 MPI_INCLUDES = -I/usr/local/mpi/mpich/include
 MPI_LIBDIR   = -L/usr/local/mpi/mpich/lib/solaris/ch_p4/

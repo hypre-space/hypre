@@ -17,7 +17,7 @@ all: lib
 
 install:all
 	@cp -f HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f lib_HYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 
 HEADERS =
  
