@@ -28,6 +28,8 @@
 #include "Hypre_ParAMG_Skel.h"
 #include "Hypre_ParAMG_Data.h"
 #include "Hypre_MPI_Com.h"
+#include "Hypre_PCG_Skel.h"
+#include "Hypre_PCG_Data.h"
 
 # define	P(s) s
 
@@ -62,13 +64,13 @@ main( int   argc,
    int                 num_iterations; 
    double              norm;
    double              final_res_norm;
+   double              dummy_double;
+   double * pdouble = &dummy_double;
 
    Hypre_ParCSRMatrixBuilder     MatBuilder;
    Hypre_ParCSRMatrix      ij_matrix_Hypre;
    Hypre_ParCSRVectorBuilder     VecBuilder;
    Hypre_LinearOperator linop;
-   Hypre_Vector vec1;
-   Hypre_Vector vec2;
 
    HYPRE_IJMatrix      ij_matrix;
    HYPRE_IJVector      ij_b;
@@ -81,16 +83,15 @@ main( int   argc,
    Hypre_ParCSRMatrix  parcsr_A_Hypre;
    Hypre_ParCSRVector  b_Hypre;
    Hypre_ParCSRVector  x_Hypre;
-
-/*
-   Hypre_Solver        pcg_solver;
-   Hypre_Solver        pcg_precond;
-*/
+   Hypre_Vector  b_HypreV;
+   Hypre_Vector  x_HypreV;
 
    HYPRE_ParCSRMatrix  parcsr_A;
    HYPRE_ParCSRMatrix  A;
 
    Hypre_ParAMG        AMG_Solver;
+   Hypre_PCG           PCG_Solver;
+   Hypre_Solver        PCG_Precond;
 
    HYPRE_ParVector     b;
    HYPRE_ParVector     x;
@@ -828,17 +829,14 @@ main( int   argc,
       HYPRE_IJVectorSetLocalStorageType(ij_b,ij_vector_storage_type );
       HYPRE_IJVectorSetPartitioning(ij_b, (const int *) part_b);
       HYPRE_IJVectorInitialize(ij_b);
-
       hypre_IJVectorLocalStorage((hypre_IJVector*)ij_b) = b;
    };
-   ierr += Hypre_ParCSRVectorBuilder_New_fromHYPRE( VecBuilder, &ij_x );
-   x_Hypre = Hypre_Vector_castTo(
-      Hypre_ParCSRVectorBuilder_GetConstructedObject( VecBuilder ),
-      "Hypre_ParCSRVector" );
-   ierr += Hypre_ParCSRVectorBuilder_New_fromHYPRE( VecBuilder, &ij_b );
-   b_Hypre = Hypre_Vector_castTo(
-      Hypre_ParCSRVectorBuilder_GetConstructedObject( VecBuilder ),
-      "Hypre_ParCSRVector" );
+   ierr += Hypre_ParCSRVectorBuilder_New_fromHYPRE( VecBuilder, Hcomm, &ij_x );
+   x_HypreV = Hypre_ParCSRVectorBuilder_GetConstructedObject( VecBuilder );
+   x_Hypre = Hypre_Vector_castTo( x_HypreV, "Hypre_ParCSRVector" );
+   ierr += Hypre_ParCSRVectorBuilder_New_fromHYPRE( VecBuilder, Hcomm, &ij_b );
+   b_HypreV = Hypre_ParCSRVectorBuilder_GetConstructedObject( VecBuilder );
+   b_Hypre = Hypre_Vector_castTo( b_HypreV, "Hypre_ParCSRVector" );
 
    /*-----------------------------------------------------------
     * Solve the system using AMG
@@ -902,12 +900,8 @@ main( int   argc,
 
       linop = (Hypre_LinearOperator) Hypre_ParCSRMatrix_castTo(
          ij_matrix_Hypre, "Hypre_LinearOperator" );
-      vec1 = (Hypre_Vector) Hypre_ParCSRVector_castTo(
-         b_Hypre, "Hypre_Vector" );
-      vec2 = (Hypre_Vector) Hypre_ParCSRVector_castTo(
-         x_Hypre, "Hypre_Vector" );
-      ierr += Hypre_ParAMG_Setup( AMG_Solver, linop, vec1, vec2 );
-      ierr += Hypre_ParAMG_Apply( AMG_Solver, vec1, &vec2 );
+      ierr += Hypre_ParAMG_Setup( AMG_Solver, linop, b_HypreV, x_HypreV );
+      ierr += Hypre_ParAMG_Apply( AMG_Solver, b_HypreV, &x_HypreV );
 /*
       HYPRE_ParAMGSolve(amg_solver, A, b, x);
 */
@@ -919,15 +913,16 @@ main( int   argc,
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
-      ierr += Hypre_ParAMG_Setup( AMG_Solver, ij_matrix_Hypre, b_Hypre, x_Hypre );
-      ierr += Hypre_ParAMG_Apply( AMG_Solver, ij_matrix_Hypre, b_Hypre, x_Hypre );
+      ierr += Hypre_ParAMG_Setup( AMG_Solver, ij_matrix_Hypre, b_HypreV, x_HypreV );
+      ierr += Hypre_ParAMG_Apply( AMG_Solver, ij_matrix_Hypre, b_HypreV, x_HypreV );
 /*
       HYPRE_ParAMGSetup(amg_solver, A, b, x);
       HYPRE_ParAMGSolve(amg_solver, A, b, x);
 */
 #endif
 
-/* now called at the end from Hypre_ParAMG_destructor...
+   Hypre_ParAMG_destructor(AMG_Solver);
+/*
       HYPRE_ParAMGDestroy(amg_solver);
 */
    }
@@ -941,17 +936,48 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
  
+      PCG_Solver = Hypre_PCG_Constructor( Hcomm );
+      ierr += Hypre_PCG_SetIntParameter( PCG_Solver, "max iter", 500 );
+      ierr += Hypre_PCG_SetDoubleParameter( PCG_Solver, "tol", tol );
+      ierr += Hypre_PCG_SetIntParameter( PCG_Solver, "2-norm", 1 );
+      ierr += Hypre_PCG_SetIntParameter( PCG_Solver,
+                                         "relative change test", 0 );
+      ierr += Hypre_PCG_SetIntParameter( PCG_Solver, "logging", 1 );
+/* 
       HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_ParCSRPCGSetMaxIter(pcg_solver, 500);
       HYPRE_ParCSRPCGSetTol(pcg_solver, tol);
       HYPRE_ParCSRPCGSetTwoNorm(pcg_solver, 1);
       HYPRE_ParCSRPCGSetRelChange(pcg_solver, 0);
       HYPRE_ParCSRPCGSetLogging(pcg_solver, 1);
+*/
  
       if (solver_id == 1)
       {
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-PCG\n");
+         AMG_Solver = Hypre_ParAMG_Constructor( Hcomm );
+         PCG_Precond = (Hypre_Solver) Hypre_ParAMG_castTo(
+            AMG_Solver, "Hypre_Solver" );
+         Hypre_ParAMG_SetIntParameter( AMG_Solver, "coarsen type",
+                                       (hybrid*coarsen_type) );
+         Hypre_ParAMG_SetIntParameter( AMG_Solver, "measure type", measure_type );
+         Hypre_ParAMG_SetDoubleParameter( AMG_Solver, "strong threshold",
+                                          strong_threshold );
+         Hypre_ParAMG_SetIntParameter( AMG_Solver, "max iter", 1 );
+         Hypre_ParAMG_SetIntParameter( AMG_Solver, "cycle type", cycle_type );
+         Hypre_ParAMG_SetIntParameter( AMG_Solver, "max levels", max_levels );
+         Hypre_ParAMG_SetIntParameter( AMG_Solver, "debug", debug_flag );
+
+/* direct calls where Babel interface isn't there ...
+ >>>>> TO DO: fix Babel interface   */
+         amg_solver = *(AMG_Solver->d_table->Hsolver);
+         HYPRE_ParAMGSetLogging(amg_solver, ioutdat, "driver.out.log"); 
+         HYPRE_ParAMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
+         HYPRE_ParAMGSetGridRelaxType(amg_solver, grid_relax_type);
+         HYPRE_ParAMGSetRelaxWeight(amg_solver, relax_weight);
+         HYPRE_ParAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
+/*
          HYPRE_ParAMGCreate(&pcg_precond); 
          HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
@@ -964,10 +990,17 @@ main( int   argc,
          HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_weight);
          HYPRE_ParAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_ParAMGSetMaxLevels(pcg_precond, max_levels);
+*/
+         linop = (Hypre_LinearOperator) Hypre_ParCSRMatrix_castTo(
+            ij_matrix_Hypre, "Hypre_LinearOperator" );
+         Hypre_ParAMG_Setup( AMG_Solver, linop, b_HypreV, x_HypreV );
+         Hypre_PCG_SetPreconditioner( PCG_Solver, PCG_Precond );
+/*
          HYPRE_ParCSRPCGSetPrecond(pcg_solver,
                                    HYPRE_ParAMGSolve,
                                    HYPRE_ParAMGSetup,
                                    pcg_precond);
+*/
       }
       else if (solver_id == 2)
       {
@@ -995,7 +1028,11 @@ main( int   argc,
                                    pcg_precond);
       }
  
-      HYPRE_ParCSRPCGSetup(pcg_solver, A, b, x);
+      linop = (Hypre_LinearOperator) Hypre_ParCSRMatrix_castTo(
+         ij_matrix_Hypre, "Hypre_LinearOperator" );
+
+      ierr += Hypre_PCG_Setup( PCG_Solver, linop, b_HypreV, x_HypreV );
+/*      HYPRE_ParCSRPCGSetup(pcg_solver, A, b, x); */
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -1005,16 +1042,23 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Solve");
       hypre_BeginTiming(time_index);
  
-      HYPRE_ParCSRPCGSolve(pcg_solver, A, b, x);
+      Hypre_PCG_Apply( PCG_Solver, b_HypreV, &x_HypreV );
+/*      HYPRE_ParCSRPCGSolve(pcg_solver, A, b, x); */
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
  
+      ierr += Hypre_PCG_GetConvergenceInfo( PCG_Solver, "number of iterations",
+                                            pdouble );
+      num_iterations = *pdouble;
+      ierr += Hypre_PCG_GetConvergenceInfo( PCG_Solver, "residual norm",
+                                            &final_res_norm );
+/*
       HYPRE_ParCSRPCGGetNumIterations(pcg_solver, &num_iterations);
       HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
-
+*/
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
@@ -1022,11 +1066,13 @@ main( int   argc,
       HYPRE_ParCSRPCGSolve(pcg_solver, A, b, x);
 #endif
 
-      HYPRE_ParCSRPCGDestroy(pcg_solver);
+      Hypre_PCG_destructor( PCG_Solver );
+/*      HYPRE_ParCSRPCGDestroy(pcg_solver);*/
  
       if (solver_id == 1)
       {
-         HYPRE_ParAMGDestroy(pcg_precond);
+         Hypre_ParAMG_destructor( AMG_Solver );
+/*         HYPRE_ParAMGDestroy(pcg_precond);*/
       }
       else if (solver_id == 8)
       {
@@ -1265,7 +1311,6 @@ main( int   argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
-   Hypre_ParAMG_destructor(AMG_Solver);
    Hypre_ParCSRMatrixBuilder_destructor(MatBuilder);
    Hypre_ParCSRMatrix_destructor(ij_matrix_Hypre);
    HYPRE_IJMatrixDestroy(ij_matrix);
