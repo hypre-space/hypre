@@ -221,6 +221,7 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
     *-------------------------------------------------------------*/
 
    cell_sgrid = hypre_SStructPGridCellSGrid(pgrid);
+   HYPRE_StructGridSetPeriodic(cell_sgrid, periodic);
    HYPRE_StructGridAssemble(cell_sgrid);
 
    /* this is used to truncate boxes when periodicity is on */
