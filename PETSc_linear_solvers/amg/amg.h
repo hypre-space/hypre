@@ -29,10 +29,10 @@ typedef struct
    int      zero_guess;
    int      num_pre_relax;
    int      pre_relax_type;
-   int     *pre_relax_points
+   int     *pre_relax_points;
    int      num_post_relax;
    int      post_relax_type;
-   int     *post_relax_points
+   int     *post_relax_points;
 
    /* problem data */
    int      num_variables; 
@@ -48,10 +48,12 @@ typedef struct
    int     *ifg;
    hypre_CSRMatrix **A_array;
    hypre_CSRMatrix **P_array;
-   hypre_IntVector **IU_array;
-   hypre_IntVector **IP_array;
-   hypre_IntVector **IV_array;
-   hypre_IntVector **ICG_array;    
+/*-------
+   hypre_CSRIntVector **IU_array;
+   hypre_CSRIntVector **IP_array;
+   hypre_CSRIntVector **IV_array;
+   hypre_CSRIntVector **ICG_array;
+ *-----------*/   
 
    /* data generated in the solve phase */
    hypre_Vector *Vtemp;
@@ -77,3 +79,6 @@ typedef struct
 /* data generated in the solve phase */
 
 #endif
+
+
+
