@@ -1480,6 +1480,7 @@ main( int   argc,
       HYPRE_ParCSRHybridSetNumGridSweeps(amg_solver, num_grid_sweeps);
       HYPRE_ParCSRHybridSetGridRelaxType(amg_solver, grid_relax_type);
       HYPRE_ParCSRHybridSetRelaxWeight(amg_solver, relax_weight);
+      HYPRE_ParCSRHybridSetOmega(amg_solver, omega);
       HYPRE_ParCSRHybridSetGridRelaxPoints(amg_solver, grid_relax_points);
       HYPRE_ParCSRHybridSetMaxLevels(amg_solver, max_levels);
       HYPRE_ParCSRHybridSetMaxRowSum(amg_solver, max_row_sum);
