@@ -8,6 +8,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-echo "(mpirun $*)"
-mpirun $*
+NUM_PROCS=$2
+echo "(bsub -n $NUM_PROCS mpirun $*)"
+bsub -n $NUM_PROCS mpirun $*
 

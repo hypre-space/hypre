@@ -14,6 +14,7 @@ VPATH = @srcdir@
 
 # These are directories that are not yet officially in HYPRE
 HYPRE_FEI_DIRS =\
+ SuperLU \
  fei-hypre
 
 all: 

@@ -1,5 +1,5 @@
 #BHEADER***********************************************************************
-# (c) 1997   The Regents of the University of California
+# (c) 2001   The Regents of the University of California
 #
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
@@ -32,31 +32,51 @@ LIBFLAGS = @LIBDIRS@ @LIBS@
 LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
 
 HEADERS =\
- f2c.h
+ Cnames.h \
+ colamd.h \
+ dsp_defs.h \
+ supermatrix.h \
+ util.h
 
 FILES =\
- dcopy.c \
- ddot.c \
- dnrm2.c \
- dscal.c \
- daxpy.c \
- dpotrf.c \
- dpotrs.c \
- dtrsm.c \
- dgemm.c \
- dgemv.c \
- dsyrk.c \
- s_cmp.c \
- s_copy.c \
- dgels_all.c \
- dasum.c \
- dger.c \
- dmyblas2.c \
- drot.c \
- dsymv.c \
- dsyr2.c \
- dtrsv.c \
- idamax.c
+ colamd.c \
+ dcolumn_bmod.c \
+ dcolumn_dfs.c \
+ dcopy_to_ucol.c \
+ dgscon.c \
+ dgsequ.c \
+ dgsrfs.c \
+ dgssv.c \
+ dgssvx.c \
+ dgstrf.c \
+ dgstrs.c \
+ dlacon.c \
+ dlamch.c \
+ dlangs.c \
+ dlaqgs.c \
+ dmemory.c \
+ dpanel_bmod.c \
+ dpanel_dfs.c \
+ dpivotL.c \
+ dpivotgrowth.c \
+ dpruneL.c \
+ dreadhb.c \
+ dsnode_bmod.c \
+ dsnode_dfs.c \
+ dsp_blas2.c \
+ dsp_blas3.c \
+ dutil.c \
+ get_perm_c.c \
+ lsame.c \
+ memory.c \
+ mmd.c \
+ relax_snode.c \
+ sp_coletree.c \
+ sp_ienv.c \
+ sp_preorder.c \
+ superlu_timer.c \
+ util.c \
+ xerbla.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -64,9 +84,10 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_blas.a 
+all: libHYPRE_superlu.a 
 
 install: all
+	@cp -f *.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 
 clean:
@@ -79,7 +100,7 @@ veryclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_blas.a: ${OBJS}
+libHYPRE_superlu.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -rcu $@ ${OBJS}
 	${RANLIB} $@
