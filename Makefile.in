@@ -149,7 +149,7 @@ fei: base
 	echo ""
 
 # special autotest target
-nofei:
+nofei: IJ
 	@ \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
 	export HYPRE_INSTALL_DIR; \
