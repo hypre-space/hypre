@@ -70,17 +70,6 @@ then
       esac
    done
    
-#   export \
-#     AMG_BUILD_ARGS \
-#     AMG_ARGS \
-#     AMG_ALL_FLAG \
-#     AMG_INSTALL_FLAG \
-#     AMG_CLEAN_FLAG \
-#     AMG_VERYCLEAN_FLAG \
-#     AMG_ARCH \
-#     AMG_DEBUG_FLAG \
-#     AMG_OPTIMIZE_FLAG
-
 fi
 
 #=============================================================================
@@ -96,12 +85,12 @@ fi
 # Set configurations
 #=============================================================================
 
-if [ -f config.$AMG_ARCH ]
+if [ -f "config.$AMG_ARCH" ]
 then
    . config.defaults
 fi
 
-if [ -f config.$AMG_ARCH ]
+if [ -f "config.$AMG_ARCH" ]
 then
    . config.$AMG_ARCH
 fi

@@ -70,7 +70,7 @@ if [ "$AMG_INSTALL_FLAG" ]
 then
    for i in $AMG_LIB_DIR $AMG_INCLUDE_DIR
    do
-      if [ ! -d $i ]
+      if [ ! -d "$i" ]
       then
          $AMG_MKDIR $i
       fi

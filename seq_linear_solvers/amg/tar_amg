@@ -1,0 +1,28 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1996   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#===========================================================================
+# This script creates a tar file of the AMG library distribution
+#===========================================================================
+
+TOP_DIR="$AMG_SRC/tmp"
+
+mkdir -p $TOP_DIR/amg
+mkdir -p $TOP_DIR/amg/src
+mkdir -p $TOP_DIR/amg/config
+mkdir -p $TOP_DIR/amg/examples
+
+(cd $AMG_SRC/amg;        cp `cat rcs_files` $TOP_DIR/amg/src)
+(cd $AMG_SRC/config;     cp `cat rcs_files` $TOP_DIR/amg/config)
+(cd $AMG_SRC/amg_fdrive; cp `cat rcs_files` $TOP_DIR/amg/examples)
+
+(cd $TOP_DIR; gtar czf $AMG_SRC/amg.tgz amg)
+
+rm -fr $TOP_DIR

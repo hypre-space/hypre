@@ -11,7 +11,7 @@
 # Defaults for building the AMG driver
 #=============================================================================
 
-if [ -z $AMG_DIR ]
+if [ -z "$AMG_DIR" ]
 then
    AMG_DIR="$AMG_SRC"
 fi

@@ -68,7 +68,7 @@ fi
 
 if [ "$AMG_INSTALL_FLAG" ]
 then
-   if [ ! -d $AMG_BIN_DIR ]
+   if [ ! -d "$AMG_BIN_DIR" ]
    then
       $AMG_MKDIR $i
    fi

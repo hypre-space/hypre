@@ -19,7 +19,7 @@ AMG_ARCH=""
 # Determine the OS
 #=============================================================================
 
-if [ -f /bin/uname ] 
+if [ -f "/bin/uname" ] 
 then
    AMG_OS="`/bin/uname -s`"
    AMG_OS_Release="`/bin/uname -r`"

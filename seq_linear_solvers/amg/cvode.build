@@ -42,7 +42,7 @@ fi
 
 if [ "$AMG_INSTALL_FLAG" ]
 then
-   if [ -z $AMG_DIR ]
+   if [ -z "$AMG_DIR" ]
    then
       AMG_DIR="$AMG_SRC"
    fi
