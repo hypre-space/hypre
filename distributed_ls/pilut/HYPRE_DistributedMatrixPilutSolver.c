@@ -295,18 +295,20 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
 
 
    /* Perform approximate factorization */
-   ILUT( hypre_DistributedMatrixPilutSolverDataDist (solver),
+   ierr = ILUT( hypre_DistributedMatrixPilutSolverDataDist (solver),
          hypre_DistributedMatrixPilutSolverMatrix (solver),
          hypre_DistributedMatrixPilutSolverFactorMat (solver),
          hypre_DistributedMatrixPilutSolverGmaxnz (solver),
          hypre_DistributedMatrixPilutSolverTol (solver),
          hypre_DistributedMatrixPilutSolverGlobals (solver)
        );
+   if (ierr) return(ierr);
 
-   SetUpLUFactor( hypre_DistributedMatrixPilutSolverDataDist (solver), 
+   ierr = SetUpLUFactor( hypre_DistributedMatrixPilutSolverDataDist (solver), 
                hypre_DistributedMatrixPilutSolverFactorMat (solver),
                hypre_DistributedMatrixPilutSolverGmaxnz (solver),
                hypre_DistributedMatrixPilutSolverGlobals (solver) );
+   if (ierr) return(ierr);
 
 #ifdef HYPRE_DEBUG
    fflush(stdout);
