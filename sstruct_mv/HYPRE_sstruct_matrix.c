@@ -42,6 +42,7 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    HYPRE_SStructVariable   vitype, vjtype;
    int                     part, vi, vj, i;
    int                     size;
+   int                     ilower, iupper;
 
    matrix = hypre_TAlloc(hypre_SStructMatrix, 1);
 
@@ -85,10 +86,9 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
       }
    }
 
-   /* ZIJ: need local extents */
-   HYPRE_IJMatrixCreate(comm,
-                        0, (hypre_SStructGridGlobalSize(grid) - 1),
-                        0, (hypre_SStructGridGlobalSize(grid) - 1),
+   ilower = hypre_SStructGridStartRank(grid);
+   iupper = ilower + hypre_SStructGridLocalSize(grid) - 1;
+   HYPRE_IJMatrixCreate(comm, ilower, iupper, ilower, iupper,
                         &hypre_SStructMatrixIJMatrix(matrix));
    hypre_SStructMatrixParCSRMatrix(matrix) = NULL;
 

@@ -30,6 +30,7 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
    MPI_Comm               pcomm;
    hypre_SStructPGrid    *pgrid;
    int                    part;
+   int                    ilower, iupper;
 
    vector = hypre_TAlloc(hypre_SStructVector, 1);
 
@@ -48,8 +49,9 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
    }
    hypre_SStructVectorPVectors(vector)   = pvectors;
    hypre_SStructVectorIJVector(vector)   = NULL;
-   /* ZIJ: need local extents */
-   HYPRE_IJVectorCreate(comm, 0, (hypre_SStructGridGlobalSize(grid) - 1),
+   ilower = hypre_SStructGridStartRank(grid);
+   iupper = ilower + hypre_SStructGridLocalSize(grid) - 1;
+   HYPRE_IJVectorCreate(comm, ilower, iupper,
                         &hypre_SStructVectorIJVector(vector));
    hypre_SStructVectorParVector(vector)  = NULL;
    hypre_SStructVectorGlobalSize(vector) = 0;
@@ -112,19 +114,6 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 
    /* u-vector */
    ierr = HYPRE_IJVectorSetObjectType(ijvector, HYPRE_PARCSR);
-
-#if 0 /* ZIJ: don't need */
-   MPI_Comm_size(comm, &num_procs);
-   partitioning = hypre_TAlloc(int, num_procs + 1);
-   partitioning[0] = 0;
-   local_size = hypre_SStructGridLocalSize(hypre_SStructVectorGrid(vector));
-   MPI_Allgather(&local_size, 1, MPI_INT, &partitioning[1], 1, MPI_INT, comm);
-   for (i = 1; i < (num_procs + 1); i++)
-   {
-      partitioning[i] += partitioning[i-1];
-   }
-   ierr = HYPRE_IJVectorSetPartitioning(ijvector, partitioning);
-#endif
 
    ierr += HYPRE_IJVectorInitialize(ijvector);
 
