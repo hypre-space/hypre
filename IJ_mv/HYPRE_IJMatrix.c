@@ -156,7 +156,7 @@ HYPRE_IJMatrixDestroy( HYPRE_IJMatrix matrix )
 
       if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
          ierr = hypre_IJMatrixDestroyParCSR( ijmatrix );
-      else
+      else if ( hypre_IJMatrixObjectType(ijmatrix) != -1 )
       {
          printf("Unrecognized object type -- HYPRE_IJMatrixDestroy\n");
          exit(1);
