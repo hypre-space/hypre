@@ -508,21 +508,27 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
    hypre_CSRMatrix *S;
    int             *S_i;
    int             *S_j;
-   double          *S_data;
+                 
+   hypre_CSRMatrix *ST;
+   int             *ST_i;
+   int             *ST_j;
                  
    int             *CF_marker;
    int              coarse_size;
 
-   double          *measure_array;
+   int             *measure_array;
    int             *graph_array;
+   int             *graph_ptr;
    int              graph_size;
 
-   double           diag, row_scale, max_measure;
+   double           diag, row_scale;
+   int              measure, max_measure;
    int              i, j, k, jA, jS, kS, ig;
    int		    ic, ji, jj, jl, index;
    int		    max_ci_size, ci_size, ci_tilde_size;
    int		    set_empty = 1;
    int		    C_i_nonempty = 0;
+   int		    num_strong;
 
    int              ierr = 0;
 
@@ -546,24 +552,29 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
     * to "unaccounted-for" dependence.
     *----------------------------------------------------------------*/
 
-   S = hypre_CreateCSRMatrix(num_variables, num_variables,
-                             A_i[num_variables]);
-   hypre_InitializeCSRMatrix(S);
+   num_strong = A_i[num_variables] - num_variables;
+   S = hypre_CreateCSRMatrix(num_variables, num_variables, num_strong);
+   ST = hypre_CreateCSRMatrix(num_variables, num_variables, num_strong);
 
-   S_i           = hypre_CSRMatrixI(S);
-   S_j           = hypre_CSRMatrixJ(S);
-   S_data        = hypre_CSRMatrixData(S);
+   S_i = hypre_CTAlloc(int,num_variables+1);
+   hypre_CSRMatrixI(S) = S_i;
 
-   /* give S same nonzero structure as A */
+   ST_i = hypre_CTAlloc(int,num_variables+1);
+   hypre_CSRMatrixI(ST) = ST_i;
+
+   ST_j = hypre_CTAlloc(int,A_i[num_variables]);
+   hypre_CSRMatrixJ(ST) = ST_j;
+
+   /* give S same nonzero structure as A, store in ST*/
    for (i = 0; i < num_variables; i++)
    {
-      S_i[i] = A_i[i];
+      ST_i[i] = A_i[i];
       for (jA = A_i[i]; jA < A_i[i+1]; jA++)
       {
-         S_j[jA] = A_j[jA];
+         ST_j[jA] = A_j[jA];
       }
    }
-   S_i[num_variables] = A_i[num_variables];
+   ST_i[num_variables] = A_i[num_variables];
 
    for (i = 0; i < num_variables; i++)
    {
@@ -587,15 +598,14 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
       }
 
       /* compute row entries of S */
-      S_data[A_i[i]] = 0;
       if (diag < 0) 
-      { 
+      {
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
          {
-            S_data[jA] = 0;
-            if (A_data[jA] > strength_threshold * row_scale)
+            if (A_data[jA] <= strength_threshold * row_scale)
             {
-               S_data[jA] = -1;
+               ST_j[jA] = -1;
+	       num_strong--;
             }
          }
       }
@@ -603,14 +613,17 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
       {
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
          {
-            S_data[jA] = 0;
-            if (A_data[jA] < strength_threshold * row_scale)
+            if (A_data[jA] >= strength_threshold * row_scale)
             {
-               S_data[jA] = -1;
+               ST_j[jA] = -1;
+	       num_strong--;
             }
          }
       }
    }
+
+   S_j = hypre_CTAlloc(int,num_strong);
+   hypre_CSRMatrixJ(S) = S_j;
 
    /*--------------------------------------------------------------
     * "Compress" the strength matrix.
@@ -626,37 +639,63 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
    for (i = 0; i < num_variables; i++)
    {
       S_i[i] = jS;
-      for (jA = A_i[i]; jA < A_i[i+1]; jA++)
+      for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
       {
-         if (S_data[jA])
+         if (ST_j[jA] != -1)
          {
-            S_j[jS]    = S_j[jA];
-            S_data[jS] = S_data[jA];
+            S_j[jS]    = ST_j[jA];
             jS++;
          }
       }
    }
    S_i[num_variables] = jS;
    hypre_CSRMatrixNumNonzeros(S) = jS;
+   hypre_CSRMatrixNumNonzeros(ST) = jS;
+
+   /*----------------------------------------------------------
+    * generate transpose of S, ST
+    *----------------------------------------------------------*/
+
+   for (i=0; i <= num_variables; i++)
+      ST_i[i] = 0;
+ 
+   for (i=0; i < jS; i++)
+   {
+	 ST_i[S_j[i]+1]++;
+   }
+   for (i=0; i < num_variables; i++)
+   {
+      ST_i[i+1] += ST_i[i];
+   }
+   for (i=0; i < num_variables; i++)
+   {
+      for (j=S_i[i]; j < S_i[i+1]; j++)
+      {
+	 index = S_j[j];
+       	 ST_j[ST_i[index]] = i;
+       	 ST_i[index]++;
+      }
+   }      
+   for (i = num_variables; i > 0; i--)
+   {
+      ST_i[i] = ST_i[i-1];
+   }
+   ST_i[0] = 0;
 
    /*----------------------------------------------------------
     * Compute the measures
     *
-    * The measures are currently given by the column sums of S.
+    * The measures are given by the row sums of ST.
     * Hence, measure_array[i] is the number of influences
     * of variable i.
     *
     *----------------------------------------------------------*/
 
-   measure_array = hypre_CTAlloc(double, num_variables);
+   measure_array = hypre_CTAlloc(int, num_variables);
 
    for (i = 0; i < num_variables; i++)
    {
-      for (jS = S_i[i]; jS < S_i[i+1]; jS++)
-      {
-         j = S_j[jS];
-         measure_array[j] -= S_data[jS];
-      }
+      measure_array[i] = ST_i[i+1]-ST_i[i];
    }
 
 
@@ -664,11 +703,13 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
     * Initialize the graph array
     *---------------------------------------------------*/
 
-   graph_array   = hypre_CTAlloc(int, num_variables);
+   graph_array = hypre_CTAlloc(int, num_variables);
+   graph_ptr   = hypre_CTAlloc(int, num_variables);
 
    for (i = 0; i < num_variables; i++)
    {
-      graph_array[i] = 1;
+      graph_array[i] = i;
+      graph_ptr[i] = i;
    }
 
    /*---------------------------------------------------
@@ -697,46 +738,43 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
        *------------------------------------------------*/
 
       max_measure = -1;
-      for (ic=0; ic < num_variables; ic++)
+      for (ic=0; ic < graph_size; ic++)
       {
-	 if (graph_array[ic] && measure_array[ic] >= max_measure)
+	 measure = measure_array[graph_array[ic]];
+	 if (measure > max_measure)
 	 {
-	    i = ic;
-	    max_measure = measure_array[ic];
+	    i = graph_array[ic];
+	    ig = ic;
+	    max_measure = measure;
 	 }
       }
 
       /* make i a coarse point */
 
       CF_marker[i] = 1;
+      measure_array[i] = -1;
       coarse_size++;
       graph_size--;
-      graph_array[i] = 0;
-      measure_array[i] = 0;
+      graph_array[ig] = graph_array[graph_size];
+      graph_ptr[graph_array[graph_size]] = ig;
 
       /* examine its connections, S_i^T */
 
-      for (ji = 0; ji < num_variables; ji++)
+      for (ji = ST_i[i]; ji < ST_i[i+1]; ji++)
       {
-	 if (graph_array[ji])
+	 jj = ST_j[ji];
+   	 if (measure_array[jj] != -1)
 	 {
-	    for (jj = S_i[ji]; jj < S_i[ji+1]; jj++)
+	    CF_marker[jj] = -1;
+	    measure_array[jj] = -1;
+	    graph_size--;
+	    graph_array[graph_ptr[jj]] = graph_array[graph_size];
+            graph_ptr[graph_array[graph_size]] = graph_ptr[jj];
+	    for (jl = S_i[jj]; jl < S_i[jj+1]; jl++)
 	    {
-	       index = S_j[jj];
-	       if (index == i)
-	       {
-		  CF_marker[ji] = -1;
-		  graph_size--;
-		  graph_array[ji] = 0;
-		  measure_array[ji] = 0;
-		  for (jl = S_i[ji]; jl < S_i[ji+1]; jl++)
-		  {
-		     index = S_j[jl];
-	 	     if (graph_array[index])
-	        	measure_array[index]++;
-		  }
-		  break;
-	       }
+	       index = S_j[jl];
+	       if (measure_array[index] != -1)
+	          measure_array[index]++;
 	    }
 	 }
       }
@@ -744,7 +782,7 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
       for (ji = S_i[i]; ji < S_i[i+1]; ji++)
       {
 	 index = S_j[ji];
-	 if (graph_array[index])
+	 if (measure_array[index] != -1)
 	    measure_array[index]--;
       }
    } 
@@ -818,6 +856,8 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
 
    hypre_TFree(measure_array);
    hypre_TFree(graph_array);
+   hypre_TFree(graph_ptr);
+   hypre_DestroyCSRMatrix(ST);
 
    *S_ptr           = S;
    *CF_marker_ptr   = CF_marker;
