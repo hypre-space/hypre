@@ -17,12 +17,18 @@ main( int   argc,
    int                 build_matrix_arg_index;
    int                 build_rhs_type;
    int                 build_rhs_arg_index;
+   int                 build_funcs_type;
+   int                 build_funcs_arg_index;
+   int                *dof_func;
    int                 interp_type;
    int                 solver_id;
    int                 relax_default;
    int                 coarsen_type;
    int                 max_levels;
+   int                 num_functions;
+   int                 func_type;
    double	       norm;
+   int                 j, k;
    int		       ierr = 0;
 
 #if 0
@@ -45,6 +51,8 @@ main( int   argc,
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
+
+   dof_func = NULL;
 
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
@@ -70,6 +78,9 @@ main( int   argc,
    coarsen_type      = 0;
    relax_default = 0;
    interp_type = 0;
+   num_functions = 1;
+   build_funcs_type = 0;
+   build_funcs_arg_index = argc;
 
    solver_id = 0;
    max_levels = 25;
@@ -160,6 +171,17 @@ main( int   argc,
       {
          arg_index++;
          interp_type      = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-nf") == 0 )
+      {
+         arg_index++;
+         num_functions = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-funcsfromfile") == 0 )
+      {
+         arg_index++;
+         build_funcs_type      = 1;
+         build_funcs_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
@@ -302,6 +324,21 @@ main( int   argc,
       hypre_VectorInitialize(x);
       hypre_VectorSetConstantValues(x, 1.0);
    }
+   if ( build_funcs_type == 1 )
+   {
+      BuildFuncsFromFile(argc, argv, build_funcs_arg_index, &dof_func);    
+   }
+   else if (num_functions > 1)
+   {
+      printf("\n Number of unknown functions = %d\n\n",num_functions);
+      dof_func = hypre_CTAlloc(int,hypre_CSRMatrixNumRows(A));
+ 
+      for (j = 0; j < hypre_CSRMatrixNumRows(A)/num_functions; j += num_functions)
+      {
+         for (k = 0; k < num_functions; k++) dof_func[j*num_functions+k] = k;
+      }
+   }
+
    /*-----------------------------------------------------------
     * Solve the system using AMG
     *-----------------------------------------------------------*/
@@ -390,6 +427,8 @@ main( int   argc,
       HYPRE_AMGSetRelaxWeight(amg_solver, relax_weight);
       HYPRE_AMGSetMaxLevels(amg_solver, max_levels);
       HYPRE_AMGSetInterpType(amg_solver, interp_type);
+      HYPRE_AMGSetNumFunctions(amg_solver, num_functions);
+      HYPRE_AMGSetDofFunc(amg_solver, dof_func);
 
       HYPRE_AMGSetup(amg_solver, (HYPRE_CSRMatrix) A, (HYPRE_Vector) b, 
 			(HYPRE_Vector) x);
@@ -498,7 +537,7 @@ BuildFromFile( int               argc,
  
    if (myid == 0)
    {
-      printf("  FromFile: %s\n", filename);
+      printf("  Operator FromFile: %s\n", filename);
    }
 
    /*-----------------------------------------------------------
@@ -1165,6 +1204,74 @@ BuildRhsFromFile( int                  argc,
    b = hypre_VectorRead(filename);
  
    *b_ptr = b;
+ 
+   return (0);
+}
+
+
+/********************************************************************
+ *      
+ * Build dof_func vector
+ *
+ *********************************************************************/
+
+int
+BuildFuncsFromFile( int                  argc,
+                    char                *argv[],
+                    int                  arg_index,
+                    int                 **dof_func_ptr     )
+{
+   char               *filename;
+
+   FILE    *fp;
+
+   int     *dof_func;
+   int      size;
+   
+   int      j;
+
+
+ 
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+ 
+   if (arg_index < argc)
+   {
+      filename = argv[arg_index];
+   }
+   else
+   {
+      printf("Error: No filename specified \n");
+      exit(1);
+   }
+ 
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   printf("\n  FuncsFromFile: %s\n", filename);
+ 
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+
+   /*----------------------------------------------------------
+    * Read in the data
+    *----------------------------------------------------------*/
+
+   fp = fopen(filename, "r");
+
+   fscanf(fp, "%d", &size);
+   dof_func = hypre_CTAlloc(int, size);
+
+   for (j = 0; j < size; j++)
+   {
+      fscanf(fp, "%d", &dof_func[j]);
+   }
+
+   fclose(fp);
+  *dof_func_ptr = dof_func;
  
    return (0);
 }

@@ -30,6 +30,7 @@ hypre_AMGInitialize()
    double   strong_threshold;
    int      coarsen_type;
    int      interp_type;
+   int      num_functions;
 
    /* solve params */
    int      max_iter;
@@ -59,6 +60,7 @@ hypre_AMGInitialize()
    strong_threshold = 0.25;
    coarsen_type = 0;
    interp_type = 200;
+   num_functions = 1;
 
    /* solve params */
    max_iter  = 20;
@@ -98,6 +100,7 @@ hypre_AMGInitialize()
    hypre_AMGSetStrongThreshold(amg_data, strong_threshold);
    hypre_AMGSetCoarsenType(amg_data, coarsen_type);
    hypre_AMGSetInterpType(amg_data, interp_type);
+   hypre_AMGSetNumFunctions(amg_data, num_functions);
 
    hypre_AMGSetMaxIter(amg_data, max_iter);
    hypre_AMGSetCycleType(amg_data, cycle_type);
@@ -320,13 +323,13 @@ hypre_AMGSetLogging( void     *data,
  *--------------------------------------------------------------------------*/
 
 int
-hypre_AMGSetNumUnknowns( void     *data,
-                         int       num_unknowns )
+hypre_AMGSetNumFunctions( void     *data,
+                         int       num_functions )
 {
    int ierr = 0;
    hypre_AMGData  *amg_data = data;
  
-   hypre_AMGDataNumUnknowns(amg_data) = num_unknowns;
+   hypre_AMGDataNumFunctions(amg_data) = num_functions;
 
    return (ierr);
 }
@@ -344,40 +347,40 @@ hypre_AMGSetNumPoints( void     *data,
 }
 
 int
-hypre_AMGSetUnknownMap( void     *data,
-                        int      *unknown_map )
+hypre_AMGSetDofFunc( void     *data,
+                        int      *dof_func )
 {
    int ierr = 0;
    hypre_AMGData  *amg_data = data;
  
-   hypre_TFree(hypre_AMGDataUnknownMap(amg_data));
-   hypre_AMGDataUnknownMap(amg_data) = unknown_map;
+   hypre_TFree(hypre_AMGDataDofFunc(amg_data));
+   hypre_AMGDataDofFunc(amg_data) = dof_func;
 
    return (ierr);
 }
 
 int
-hypre_AMGSetPointMap( void     *data,
-                      int      *point_map )
+hypre_AMGSetDofPoint( void     *data,
+                      int      *dof_point )
 {
    int ierr = 0;
    hypre_AMGData  *amg_data = data;
  
-   hypre_TFree(hypre_AMGDataPointMap(amg_data));
-   hypre_AMGDataPointMap(amg_data) = point_map;
+   hypre_TFree(hypre_AMGDataDofPoint(amg_data));
+   hypre_AMGDataDofPoint(amg_data) = dof_point;
 
    return (ierr);
 }
 
 int
-hypre_AMGSetVatPoint( void     *data,
-                      int      *v_at_point )
+hypre_AMGSetPointDofMap( void     *data,
+                         int      *point_dof_map  )
 {
    int ierr = 0;
    hypre_AMGData  *amg_data = data;
  
-   hypre_TFree(hypre_AMGDataVatPoint(amg_data));
-   hypre_AMGDataVatPoint(amg_data) = v_at_point;
+   hypre_TFree(hypre_AMGDataPointDofMap(amg_data));
+   hypre_AMGDataPointDofMap(amg_data) = point_dof_map;
 
    return (ierr);
 }

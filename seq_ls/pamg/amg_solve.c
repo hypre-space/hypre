@@ -36,7 +36,7 @@ hypre_AMGSolve( void            *amg_vdata,
    int     *num_variables;
    int      cycle_op_count;
    int      num_levels;
-   int      num_unknowns;
+   int      num_functions;
    double   tol;
    char    *file_name;
    hypre_CSRMatrix **A_array;
@@ -68,7 +68,7 @@ hypre_AMGSolve( void            *amg_vdata,
 
    amg_ioutdat   = hypre_AMGDataIOutDat(amg_data);
    file_name     = hypre_AMGDataLogFileName(amg_data);
-   num_unknowns  = hypre_AMGDataNumUnknowns(amg_data);
+   num_functions  = hypre_AMGDataNumFunctions(amg_data);
    num_levels    = hypre_AMGDataNumLevels(amg_data);
    A_array       = hypre_AMGDataAArray(amg_data);
    F_array       = hypre_AMGDataFArray(amg_data);

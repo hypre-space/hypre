@@ -223,3 +223,20 @@ HYPRE_AMGSetLogging( HYPRE_Solver  solver,
    return( hypre_AMGSetLogging( (void *) solver, ioutdat, log_file_name ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_AMGSetNumFunctions
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetNumFunctions( HYPRE_Solver solver,
+                       int          num_functions  )
+{
+   return( hypre_AMGSetNumFunctions( (void *) solver, num_functions ) );
+}
+
+int
+HYPRE_AMGSetDofFunc( HYPRE_Solver solver,
+                     int          *dof_func  )
+{
+   return( hypre_AMGSetDofFunc( (void *) solver, dof_func ) );
+}

@@ -30,6 +30,11 @@ hypre_AMGSetup( void            *amg_vdata,
    hypre_Vector    **F_array;
    hypre_Vector    **U_array;
    hypre_CSRMatrix **P_array;
+
+   int             **dof_func_array;
+   int              *dof_func;
+   int              *coarse_dof_func;
+
    int             **CF_marker_array;   
    double            strong_threshold;
 
@@ -37,6 +42,7 @@ hypre_AMGSetup( void            *amg_vdata,
    int      max_levels; 
    int      amg_ioutdat;
    int      interp_type;
+   int      num_functions;
  
    /* Local variables */
    int              *CF_marker;
@@ -54,15 +60,21 @@ hypre_AMGSetup( void            *amg_vdata,
    int       j;
    int	     coarsen_type;
 
+
    max_levels = hypre_AMGDataMaxLevels(amg_data);
    amg_ioutdat = hypre_AMGDataIOutDat(amg_data);
    interp_type = hypre_AMGDataInterpType(amg_data);
-   
+   num_functions = hypre_AMGDataNumFunctions(amg_data);
+ 
+   dof_func = hypre_AMGDataDofFunc(amg_data);
+
    A_array = hypre_CTAlloc(hypre_CSRMatrix*, max_levels);
    P_array = hypre_CTAlloc(hypre_CSRMatrix*, max_levels-1);
    CF_marker_array = hypre_CTAlloc(int*, max_levels-1);
+   dof_func_array = hypre_CTAlloc(int*, max_levels);
 
 
+   if (num_functions > 1) dof_func_array[0] = dof_func;
    A_array[0] = A;
 
    /*----------------------------------------------------------
@@ -121,13 +133,22 @@ hypre_AMGSetup( void            *amg_vdata,
 
       if (interp_type == 1)
       {
-          hypre_AMGBuildRBMInterp(A_array[level], CF_marker_array[level], S, &P);
+          hypre_AMGBuildRBMInterp(A_array[level], 
+                                  CF_marker_array[level], 
+                                  S, 
+                                  dof_func_array[level],
+                                  num_functions,
+                                  &coarse_dof_func,
+                                  &P);
+          /* this will need some cleanup, to make sure we do the right thing 
+             when it is a scalar function */ 
       }
       else
       {
           hypre_AMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
       }
 
+      dof_func_array[level+1] = coarse_dof_func;
       P_array[level] = P; 
       
 

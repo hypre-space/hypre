@@ -64,6 +64,7 @@ hypre_AMGSetupStats( void *amg_vdata )
    log_file_name = hypre_AMGDataLogFileName(amg_data);
     
    printf("\n  AMG SETUP PARAMETERS:\n\n");
+   printf(" Strength threshold = %f\n",hypre_AMGDataStrongThreshold(amg_data));
    printf(" Max levels = %d\n",hypre_AMGDataMaxLevels(amg_data));
    printf(" Num levels = %d\n\n",num_levels);
 
