@@ -27,7 +27,7 @@ hypre_NewBox( )
 {
    hypre_Box *box;
 
-#ifdef HYPRE_USE_PTHREADS
+#ifdef 1
    box = hypre_TAlloc(hypre_Box, 1);
 #else
    box = hypre_BoxAlloc();
@@ -72,6 +72,35 @@ hypre_NewBoxArray( int size )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SetBoxArraySize
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SetBoxArraySize( hypre_BoxArray  *box_array,
+                       int              size      )
+{
+   int  ierr  = 0;
+   int  alloc_size;
+
+   alloc_size = hypre_BoxArrayAllocSize(box_array);
+
+   if (size > alloc_size)
+   {
+      alloc_size = size + hypre_BoxArrayExcess;
+
+      hypre_BoxArrayBoxes(box_array) =
+         hypre_TReAlloc(hypre_BoxArrayBoxes(box_array),
+                        hypre_Box, alloc_size);
+
+      hypre_BoxArrayAllocSize(box_array) = alloc_size;
+   }
+
+   hypre_BoxArraySize(box_array) = size;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_NewBoxArrayArray
  *--------------------------------------------------------------------------*/
 
@@ -106,7 +135,7 @@ hypre_FreeBox( hypre_Box *box )
 
    if (box)
    {
-#ifdef HYPRE_USE_PTHREADS
+#ifdef 1
       hypre_TFree(box);
 #else
       hypre_BoxFree(box);
@@ -239,25 +268,11 @@ hypre_AppendBox( hypre_Box      *box,
                  hypre_BoxArray *box_array )
 {
    int  ierr  = 0;
-   int  size, alloc_size;
+   int  size;
 
-   size       = hypre_BoxArraySize(box_array);
-   alloc_size = hypre_BoxArrayAllocSize(box_array);
-
-   if ((size + 1) > alloc_size)
-   {
-      alloc_size = (size + 1) + hypre_BoxArrayExcess;
-
-      hypre_BoxArrayBoxes(box_array) =
-         hypre_TReAlloc(hypre_BoxArrayBoxes(box_array),
-                        hypre_Box, alloc_size);
-
-      hypre_BoxArrayAllocSize(box_array) = alloc_size;
-   }
-
-   /* copy new box into box_array */
+   size = hypre_BoxArraySize(box_array);
+   hypre_SetBoxArraySize(box_array, (size + 1));
    hypre_CopyBox(box, hypre_BoxArrayBox(box_array, size));
-   hypre_BoxArraySize(box_array) = (size + 1);
 
    return ierr;
 }
@@ -296,23 +311,12 @@ hypre_AppendBoxArray( hypre_BoxArray *box_array_0,
                       hypre_BoxArray *box_array_1 )
 {
    int  ierr  = 0;
-   int  size, alloc_size, size_0;
+   int  size, size_0;
    int  i;
 
-   size       = hypre_BoxArraySize(box_array_1);
-   alloc_size = hypre_BoxArrayAllocSize(box_array_1);
-   size_0     = hypre_BoxArraySize(box_array_0);
-
-   if ((size + size_0) > alloc_size)
-   {
-      alloc_size = (size + size_0) + hypre_BoxArrayExcess;
-
-      hypre_BoxArrayBoxes(box_array_1) =
-         hypre_TReAlloc(hypre_BoxArrayBoxes(box_array_1),
-                        hypre_Box, alloc_size);
-
-      hypre_BoxArrayAllocSize(box_array_1) = alloc_size;
-   }
+   size   = hypre_BoxArraySize(box_array_1);
+   size_0 = hypre_BoxArraySize(box_array_0);
+   hypre_SetBoxArraySize(box_array_1, (size + size_0));
 
    /* copy box_array_0 boxes into box_array_1 */
    for (i = 0; i < size_0; i++)
@@ -320,7 +324,6 @@ hypre_AppendBoxArray( hypre_BoxArray *box_array_0,
       hypre_CopyBox(hypre_BoxArrayBox(box_array_0, i),
                     hypre_BoxArrayBox(box_array_1, size + i));
    }
-   hypre_BoxArraySize(box_array_1) = (size + size_0);
 
    return ierr;
 }

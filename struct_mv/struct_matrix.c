@@ -572,10 +572,10 @@ hypre_AssembleStructMatrix( hypre_StructMatrix *matrix )
 
       /* Set up the CommPkg */
 
-      hypre_NewCommInfoFromStencil(&send_boxes, &recv_boxes,
-                                   &send_processes, &recv_processes,
-                                   hypre_StructMatrixGrid(matrix),
-                                   comm_stencil);
+      hypre_NewCommInfoFromStencil(hypre_StructMatrixGrid(matrix),
+                                   comm_stencil,
+                                   &send_boxes, &recv_boxes,
+                                   &send_processes, &recv_processes);
 
       comm_pkg = hypre_NewCommPkg(send_boxes, recv_boxes,
                                   unit_stride, unit_stride,
@@ -594,9 +594,10 @@ hypre_AssembleStructMatrix( hypre_StructMatrix *matrix )
     * Update the ghost data
     *-----------------------------------------------------------------------*/
 
-   comm_handle = hypre_InitializeCommunication(comm_pkg,
-                                               hypre_StructMatrixData(matrix),
-                                               hypre_StructMatrixData(matrix));
+   hypre_InitializeCommunication(comm_pkg,
+                                 hypre_StructMatrixData(matrix),
+                                 hypre_StructMatrixData(matrix),
+                                 &comm_handle);
    hypre_FinalizeCommunication(comm_handle);
 
    return(ierr);
@@ -755,10 +756,10 @@ hypre_MigrateStructMatrix( hypre_StructMatrix *from_matrix,
  
    hypre_SetIndex(unit_stride, 1, 1, 1);
 
-   hypre_NewCommInfoFromGrids(&send_boxes, &recv_boxes,
-                              &send_processes, &recv_processes,
-                              hypre_StructMatrixGrid(from_matrix),
-                              hypre_StructMatrixGrid(to_matrix)   );
+   hypre_NewCommInfoFromGrids(hypre_StructMatrixGrid(from_matrix),
+                              hypre_StructMatrixGrid(to_matrix),
+                              &send_boxes, &recv_boxes,
+                              &send_processes, &recv_processes);
 
    comm_pkg = hypre_NewCommPkg(send_boxes, recv_boxes,
                                unit_stride, unit_stride,
@@ -772,10 +773,10 @@ hypre_MigrateStructMatrix( hypre_StructMatrix *from_matrix,
     * Migrate the matrix data
     *-----------------------------------------------------------------------*/
  
-   comm_handle =
-      hypre_InitializeCommunication(comm_pkg,
-                                    hypre_StructMatrixData(from_matrix),
-                                    hypre_StructMatrixData(to_matrix));
+   hypre_InitializeCommunication(comm_pkg,
+                                 hypre_StructMatrixData(from_matrix),
+                                 hypre_StructMatrixData(to_matrix),
+                                 &comm_handle);
    hypre_FinalizeCommunication(comm_handle);
 
    return ierr;

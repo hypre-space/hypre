@@ -45,7 +45,7 @@ This is the box neighbors class.
 //@}
 
 /*==========================================================================*/
-/** @name Communication Routines
+/** @name Communication and Computation Routines
 
 These routines are used to do structured communications.
 
@@ -55,6 +55,8 @@ These routines are used to do structured communications.
 /*//@Include: communication.h*/
 //@Include: communication.c
 //@Include: communication_info.c
+/*//@Include: computation.h*/
+//@Include: computation.c
 //@}
 
 //@}

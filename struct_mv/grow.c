@@ -61,8 +61,8 @@ hypre_GrowBoxByStencil( hypre_Box           *box,
    }
    hypre_FreeBox(shift_box);
 
-   grow_box_array = hypre_UnionBoxArray(shift_box_array);
-   hypre_FreeBoxArray(shift_box_array);
+   hypre_UnionBoxArray(shift_box_array);
+   grow_box_array = shift_box_array;
 
    return grow_box_array;
 }

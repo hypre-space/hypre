@@ -584,6 +584,7 @@ hypre_ClearStructVectorGhostValues( hypre_StructVector *vector )
    hypre_SetIndex(unit_stride, 1, 1, 1);
  
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
+   diff_boxes = hypre_NewBoxArray(0);
    hypre_ForBoxI(i, boxes)
       {
          box        = hypre_BoxArrayBox(boxes, i);
@@ -592,7 +593,7 @@ hypre_ClearStructVectorGhostValues( hypre_StructVector *vector )
             hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
          vp = hypre_StructVectorBoxData(vector, i);
 
-         diff_boxes = hypre_SubtractBoxes(v_data_box, box);
+         hypre_SubtractBoxes(v_data_box, box, diff_boxes);
          hypre_ForBoxI(j, diff_boxes)
             {
                diff_box = hypre_BoxArrayBox(diff_boxes, j);
@@ -605,8 +606,8 @@ hypre_ClearStructVectorGhostValues( hypre_StructVector *vector )
                                  vp[vi] = 0.0;
                               });
             }
-         hypre_FreeBoxArray(diff_boxes);
       }
+   hypre_FreeBoxArray(diff_boxes);
 
    return ierr;
 }
@@ -663,10 +664,10 @@ hypre_GetMigrateStructVectorCommPkg( hypre_StructVector *from_vector,
    num_values = 1;
    hypre_SetIndex(unit_stride, 1, 1, 1);
 
-   hypre_NewCommInfoFromGrids(&send_boxes, &recv_boxes,
-                              &send_processes, &recv_processes,
-                              hypre_StructVectorGrid(from_vector),
-                              hypre_StructVectorGrid(to_vector)   );
+   hypre_NewCommInfoFromGrids(hypre_StructVectorGrid(from_vector),
+                              hypre_StructVectorGrid(to_vector),
+                              &send_boxes, &recv_boxes,
+                              &send_processes, &recv_processes);
 
    comm_pkg = hypre_NewCommPkg(send_boxes, recv_boxes,
                                unit_stride, unit_stride,
@@ -696,10 +697,10 @@ hypre_MigrateStructVector( hypre_CommPkg      *comm_pkg,
     * Migrate the vector data
     *-----------------------------------------------------------------------*/
  
-   comm_handle =
-      hypre_InitializeCommunication(comm_pkg,
-                                    hypre_StructVectorData(from_vector),
-                                    hypre_StructVectorData(to_vector));
+   hypre_InitializeCommunication(comm_pkg,
+                                 hypre_StructVectorData(from_vector),
+                                 hypre_StructVectorData(to_vector),
+                                 &comm_handle);
    hypre_FinalizeCommunication(comm_handle);
 
    return ierr;

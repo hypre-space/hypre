@@ -12,17 +12,39 @@
 
 #include "headers.h"
 
-/*--------------------------------------------------------------------------
- * hypre_NewCommInfoFromStencil:
- *--------------------------------------------------------------------------*/
+/*==========================================================================*/
+/*==========================================================================*/
+/** Return descriptions of communications patterns for a given
+grid-stencil computation.
+
+{\bf Input files:}
+headers.h
+
+@return Error code.
+
+@param grid [IN]
+  computational grid
+@param stencil [IN]
+  computational stencil
+@param send_boxes_ptr [OUT]
+  description of the grid data to be sent to other processors.
+@param recv_boxes_ptr [OUT]
+  description of the grid data to be received from other processors.
+@param send_processes_ptr [OUT]
+  processors that data is to be sent to.
+@param recv_processes_ptr [OUT]
+  processors that data is to be received from.
+
+@see hypre_GetComputeInfo */
+/*--------------------------------------------------------------------------*/
 
 int
-hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
+hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
+                              hypre_StructStencil   *stencil,
+                              hypre_BoxArrayArray  **send_boxes_ptr,
                               hypre_BoxArrayArray  **recv_boxes_ptr,
                               int                 ***send_processes_ptr,
-                              int                 ***recv_processes_ptr,
-                              hypre_StructGrid      *grid,
-                              hypre_StructStencil   *stencil            )
+                              int                 ***recv_processes_ptr )
 {
    int                      ierr = 0;
 
@@ -56,11 +78,11 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
    int                     *cbox_arrays_i;
    int                      num_cbox_arrays;
 
-   int                      i, j, k, m;
+   int                      i, j, k, m, n;
    int                      s, d;
 
    /* temporary work variables */
-   hypre_BoxArray          *box_a0;
+   hypre_BoxArray          *subtract_box_array;
    hypre_Box               *box0;
 
    /*------------------------------------------------------
@@ -82,6 +104,7 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
     *------------------------------------------------------*/
 
    box0 = hypre_NewBox();
+   subtract_box_array = hypre_NewBoxArray(0);
 
    send_boxes = hypre_NewBoxArrayArray(hypre_BoxArraySize(boxes));
    recv_boxes = hypre_NewBoxArrayArray(hypre_BoxArraySize(boxes));
@@ -133,10 +156,8 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
                         cbox_arrays_i[num_cbox_arrays] = j;
                         num_cbox_arrays++;
                      }
-                     box_a0 = hypre_SubtractBoxes(box0, box);
-                     hypre_AppendBoxArray(box_a0, cbox_arrays[j]);
-
-                     hypre_FreeBoxArray(box_a0);
+                     hypre_SubtractBoxes(box0, box, subtract_box_array);
+                     hypre_AppendBoxArray(subtract_box_array, cbox_arrays[j]);
                   }
                }
             hypre_EndBoxNeighborsLoop;
@@ -147,24 +168,24 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
          for (m = 0; m < num_cbox_arrays; m++)
          {
             j = cbox_arrays_i[m];
-            box_a0 = hypre_UnionBoxArray(cbox_arrays[j]);
-            hypre_FreeBoxArray(cbox_arrays[j]);
-            cbox_arrays[j] = box_a0;
-            recv_box_array_size += hypre_BoxArraySize(box_a0);
+            hypre_UnionBoxArray(cbox_arrays[j]);
+            recv_box_array_size += hypre_BoxArraySize(cbox_arrays[j]);
          }
 
          /* create recv_box_array and recv_processes */
          recv_box_array = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
+         hypre_SetBoxArraySize(recv_box_array, recv_box_array_size);
          recv_processes[i] = hypre_CTAlloc(int, recv_box_array_size);
+         n = 0;
          for (m = 0; m < num_cbox_arrays; m++)
          {
             j = cbox_arrays_i[m];
             hypre_ForBoxI(k, cbox_arrays[j])
                {
-                  recv_processes[i][hypre_BoxArraySize(recv_box_array)] =
-                     neighbor_processes[j];
-                  hypre_AppendBox(hypre_BoxArrayBox(cbox_arrays[j], k),
-                                  recv_box_array);
+                  recv_processes[i][n] = neighbor_processes[j];
+                  hypre_CopyBox(hypre_BoxArrayBox(cbox_arrays[j], k),
+                                hypre_BoxArrayBox(recv_box_array, n));
+                  n++;
                }
             hypre_FreeBoxArray(cbox_arrays[j]);
             cbox_arrays[j] = NULL;
@@ -217,10 +238,9 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
                         cbox_arrays_i[num_cbox_arrays] = j;
                         num_cbox_arrays++;
                      }
-                     box_a0 = hypre_SubtractBoxes(box0, neighbor_box);
-                     hypre_AppendBoxArray(box_a0, cbox_arrays[j]);
-
-                     hypre_FreeBoxArray(box_a0);
+                     hypre_SubtractBoxes(box0, neighbor_box,
+                                         subtract_box_array);
+                     hypre_AppendBoxArray(subtract_box_array, cbox_arrays[j]);
                   }
                }
             hypre_EndBoxNeighborsLoop;
@@ -238,24 +258,24 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
          for (m = 0; m < num_cbox_arrays; m++)
          {
             j = cbox_arrays_i[m];
-            box_a0 = hypre_UnionBoxArray(cbox_arrays[j]);
-            hypre_FreeBoxArray(cbox_arrays[j]);
-            cbox_arrays[j] = box_a0;
-            send_box_array_size += hypre_BoxArraySize(box_a0);
+            hypre_UnionBoxArray(cbox_arrays[j]);
+            send_box_array_size += hypre_BoxArraySize(cbox_arrays[j]);
          }
 
          /* create send_box_array and send_processes */
          send_box_array = hypre_BoxArrayArrayBoxArray(send_boxes, i);
+         hypre_SetBoxArraySize(send_box_array, send_box_array_size);
          send_processes[i] = hypre_CTAlloc(int, send_box_array_size);
+         n = 0;
          for (m = 0; m < num_cbox_arrays; m++)
          {
             j = cbox_arrays_i[m];
             hypre_ForBoxI(k, cbox_arrays[j])
                {
-                  send_processes[i][hypre_BoxArraySize(send_box_array)] =
-                     neighbor_processes[j];
-                  hypre_AppendBox(hypre_BoxArrayBox(cbox_arrays[j], k),
-                                  send_box_array);
+                  send_processes[i][n] = neighbor_processes[j];
+                  hypre_CopyBox(hypre_BoxArrayBox(cbox_arrays[j], k),
+                                hypre_BoxArrayBox(send_box_array, n));
+                  n++;
                }
             hypre_FreeBoxArray(cbox_arrays[j]);
             cbox_arrays[j] = NULL;
@@ -267,6 +287,7 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
    hypre_TFree(cbox_arrays);
    hypre_TFree(cbox_arrays_i);
 
+   hypre_FreeBoxArray(subtract_box_array);
    hypre_FreeBox(box0);
 
    /*------------------------------------------------------
@@ -281,17 +302,39 @@ hypre_NewCommInfoFromStencil( hypre_BoxArrayArray  **send_boxes_ptr,
    return ierr;
 }
 
-/*--------------------------------------------------------------------------
- * hypre_NewCommInfoFromGrids:
- *--------------------------------------------------------------------------*/
+/*==========================================================================*/
+/*==========================================================================*/
+/** Return descriptions of communications patterns for migrating data
+from one grid distribution to another.
+
+{\bf Input files:}
+headers.h
+
+@return Error code.
+
+@param from_grid [IN]
+  grid distribution to migrate data from.
+@param to_grid [IN]
+  grid distribution to migrate data to.
+@param send_boxes_ptr [OUT]
+  description of the grid data to be sent to other processors.
+@param recv_boxes_ptr [OUT]
+  description of the grid data to be received from other processors.
+@param send_processes_ptr [OUT]
+  processors that data is to be sent to.
+@param recv_processes_ptr [OUT]
+  processors that data is to be received from.
+
+@see hypre_MigrateStructMatrix, hypre_MigrateStructVector */
+/*--------------------------------------------------------------------------*/
 
 int
-hypre_NewCommInfoFromGrids( hypre_BoxArrayArray  **send_boxes_ptr,
+hypre_NewCommInfoFromGrids( hypre_StructGrid      *from_grid,
+                            hypre_StructGrid      *to_grid,
+                            hypre_BoxArrayArray  **send_boxes_ptr,
                             hypre_BoxArrayArray  **recv_boxes_ptr,
                             int                 ***send_processes_ptr,
-                            int                 ***recv_processes_ptr,
-                            hypre_StructGrid      *from_grid,
-                            hypre_StructGrid      *to_grid            )
+                            int                 ***recv_processes_ptr )
 {
    int                      ierr = 0;
 

@@ -77,18 +77,19 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    grid    = hypre_StructMatrixGrid(A);
    stencil = hypre_StructMatrixStencil(A);
 
-   hypre_GetComputeInfo(&send_boxes, &recv_boxes,
+   hypre_GetComputeInfo(grid, stencil,
+                        &send_boxes, &recv_boxes,
                         &send_processes, &recv_processes,
-                        &indt_boxes, &dept_boxes,
-                        grid, stencil);
+                        &indt_boxes, &dept_boxes);
 
    hypre_SetIndex(unit_stride, 1, 1, 1);
-   compute_pkg = hypre_NewComputePkg(send_boxes, recv_boxes,
-                                     unit_stride, unit_stride,
-                                     send_processes, recv_processes,
-                                     indt_boxes, dept_boxes,
-                                     unit_stride,
-                                     grid, hypre_StructVectorDataSpace(x), 1);
+   hypre_NewComputePkg(send_boxes, recv_boxes,
+                       unit_stride, unit_stride,
+                       send_processes, recv_processes,
+                       indt_boxes, dept_boxes,
+                       unit_stride,
+                       grid, hypre_StructVectorDataSpace(x), 1,
+                       &compute_pkg);
 
    /*----------------------------------------------------------
     * Set up the matvec data structure
@@ -200,7 +201,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
          case 0:
          {
             xp = hypre_StructVectorData(x);
-            comm_handle = hypre_InitializeIndtComputations(compute_pkg, xp);
+            hypre_InitializeIndtComputations(compute_pkg, xp, &comm_handle);
             compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
 
             /*--------------------------------------------------------------

@@ -670,10 +670,13 @@ typedef struct
 
    int             num_requests;
    MPI_Request    *requests;
+   MPI_Status     *status;
 
 #if defined(HYPRE_COMM_SIMPLE)
    double        **send_buffers;
    double        **recv_buffers;
+   int            *send_sizes;
+   int            *recv_sizes;
 #endif
 
 } hypre_CommHandle;
@@ -732,10 +735,12 @@ typedef struct
 #define hypre_CommHandleRecvData(comm_handle)    (comm_handle -> recv_data)
 #define hypre_CommHandleNumRequests(comm_handle) (comm_handle -> num_requests)
 #define hypre_CommHandleRequests(comm_handle)    (comm_handle -> requests)
-#define hypre_CommHandleRequest(comm_handle, i)  (comm_handle -> requests[(i)])
+#define hypre_CommHandleStatus(comm_handle)      (comm_handle -> status)
 #if defined(HYPRE_COMM_SIMPLE)
 #define hypre_CommHandleSendBuffers(comm_handle) (comm_handle -> send_buffers)
 #define hypre_CommHandleRecvBuffers(comm_handle) (comm_handle -> recv_buffers)
+#define hypre_CommHandleSendSizes(comm_handle)   (comm_handle -> send_sizes)
+#define hypre_CommHandleRecvSizes(comm_handle)   (comm_handle -> recv_sizes)
 #endif
 
 #endif
@@ -986,6 +991,7 @@ int HYPRE_FreeCommPkg P((HYPRE_CommPkg comm_pkg ));
 hypre_Box *hypre_NewBox P((void ));
 int hypre_SetBoxExtents P((hypre_Box *box , hypre_Index imin , hypre_Index imax ));
 hypre_BoxArray *hypre_NewBoxArray P((int size ));
+int hypre_SetBoxArraySize P((hypre_BoxArray *box_array , int size ));
 hypre_BoxArrayArray *hypre_NewBoxArrayArray P((int size ));
 int hypre_FreeBox P((hypre_Box *box ));
 int hypre_FreeBoxArray P((hypre_BoxArray *box_array ));
@@ -1001,8 +1007,8 @@ int hypre_GetStrideBoxSize P((hypre_Box *box , hypre_Index stride , hypre_Index 
 
 /* box_algebra.c */
 int hypre_IntersectBoxes P((hypre_Box *box1 , hypre_Box *box2 , hypre_Box *ibox ));
-hypre_BoxArray *hypre_SubtractBoxes P((hypre_Box *box1 , hypre_Box *box2 ));
-hypre_BoxArray *hypre_UnionBoxArray P((hypre_BoxArray *boxes ));
+int hypre_SubtractBoxes P((hypre_Box *box1 , hypre_Box *box2 , hypre_BoxArray *box_array ));
+int hypre_UnionBoxArray P((hypre_BoxArray *boxes ));
 
 /* box_alloc.c */
 int hypre_InitializeBoxMemory P((const int at_a_time ));
@@ -1022,8 +1028,8 @@ int hypre_FreeBoxNeighbors P((hypre_BoxNeighbors *neighbors ));
 /* communication.c */
 hypre_CommPkg *hypre_NewCommPkg P((hypre_BoxArrayArray *send_boxes , hypre_BoxArrayArray *recv_boxes , hypre_Index send_stride , hypre_Index recv_stride , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , int **send_processes , int **recv_processes , int num_values , MPI_Comm comm ));
 int hypre_FreeCommPkg P((hypre_CommPkg *comm_pkg ));
-hypre_CommHandle *hypre_InitializeCommunication P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
-hypre_CommHandle *hypre_InitializeCommunication P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
+int hypre_InitializeCommunication P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data , hypre_CommHandle **comm_handle_ptr ));
+int hypre_InitializeCommunication P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data , hypre_CommHandle **comm_handle_ptr ));
 int hypre_FinalizeCommunication P((hypre_CommHandle *comm_handle ));
 int hypre_FinalizeCommunication P((hypre_CommHandle *comm_handle ));
 int hypre_ExchangeLocalData P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
@@ -1039,14 +1045,14 @@ int hypre_BuildCommMPITypes P((int num_comms , int *comm_procs , hypre_CommType 
 int hypre_BuildCommEntryMPIType P((hypre_CommTypeEntry *comm_entry , MPI_Datatype *comm_entry_mpi_type ));
 
 /* communication_info.c */
-int hypre_NewCommInfoFromStencil P((hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr , hypre_StructGrid *grid , hypre_StructStencil *stencil ));
-int hypre_NewCommInfoFromGrids P((hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr , hypre_StructGrid *from_grid , hypre_StructGrid *to_grid ));
+int hypre_NewCommInfoFromStencil P((hypre_StructGrid *grid , hypre_StructStencil *stencil , hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr ));
+int hypre_NewCommInfoFromGrids P((hypre_StructGrid *from_grid , hypre_StructGrid *to_grid , hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr ));
 
 /* computation.c */
-int hypre_GetComputeInfo P((hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr , hypre_BoxArrayArray **indt_boxes_ptr , hypre_BoxArrayArray **dept_boxes_ptr , hypre_StructGrid *grid , hypre_StructStencil *stencil ));
-hypre_ComputePkg *hypre_NewComputePkg P((hypre_BoxArrayArray *send_boxes , hypre_BoxArrayArray *recv_boxes , hypre_Index send_stride , hypre_Index recv_stride , int **send_processes , int **recv_processes , hypre_BoxArrayArray *indt_boxes , hypre_BoxArrayArray *dept_boxes , hypre_Index stride , hypre_StructGrid *grid , hypre_BoxArray *data_space , int num_values ));
+int hypre_GetComputeInfo P((hypre_StructGrid *grid , hypre_StructStencil *stencil , hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr , hypre_BoxArrayArray **indt_boxes_ptr , hypre_BoxArrayArray **dept_boxes_ptr ));
+int hypre_NewComputePkg P((hypre_BoxArrayArray *send_boxes , hypre_BoxArrayArray *recv_boxes , hypre_Index send_stride , hypre_Index recv_stride , int **send_processes , int **recv_processes , hypre_BoxArrayArray *indt_boxes , hypre_BoxArrayArray *dept_boxes , hypre_Index stride , hypre_StructGrid *grid , hypre_BoxArray *data_space , int num_values , hypre_ComputePkg **compute_pkg_ptr ));
 int hypre_FreeComputePkg P((hypre_ComputePkg *compute_pkg ));
-hypre_CommHandle *hypre_InitializeIndtComputations P((hypre_ComputePkg *compute_pkg , double *data ));
+int hypre_InitializeIndtComputations P((hypre_ComputePkg *compute_pkg , double *data , hypre_CommHandle **comm_handle_ptr ));
 int hypre_FinalizeIndtComputations P((hypre_CommHandle *comm_handle ));
 
 /* create_2d_laplacian.c */

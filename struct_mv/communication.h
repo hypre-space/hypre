@@ -76,10 +76,13 @@ typedef struct
 
    int             num_requests;
    MPI_Request    *requests;
+   MPI_Status     *status;
 
 #if defined(HYPRE_COMM_SIMPLE)
    double        **send_buffers;
    double        **recv_buffers;
+   int            *send_sizes;
+   int            *recv_sizes;
 #endif
 
 } hypre_CommHandle;
@@ -138,10 +141,12 @@ typedef struct
 #define hypre_CommHandleRecvData(comm_handle)    (comm_handle -> recv_data)
 #define hypre_CommHandleNumRequests(comm_handle) (comm_handle -> num_requests)
 #define hypre_CommHandleRequests(comm_handle)    (comm_handle -> requests)
-#define hypre_CommHandleRequest(comm_handle, i)  (comm_handle -> requests[(i)])
+#define hypre_CommHandleStatus(comm_handle)      (comm_handle -> status)
 #if defined(HYPRE_COMM_SIMPLE)
 #define hypre_CommHandleSendBuffers(comm_handle) (comm_handle -> send_buffers)
 #define hypre_CommHandleRecvBuffers(comm_handle) (comm_handle -> recv_buffers)
+#define hypre_CommHandleSendSizes(comm_handle)   (comm_handle -> send_sizes)
+#define hypre_CommHandleRecvSizes(comm_handle)   (comm_handle -> recv_sizes)
 #endif
 
 #endif

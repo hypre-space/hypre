@@ -11,8 +11,7 @@
 
 /*==========================================================================*/
 /*==========================================================================*/
-/**
-Create a communication package.  A grid-based description of a
+/** Create a communication package.  A grid-based description of a
 communication exchange is passed in.  This description is then
 compiled into an intermediate processor-based description of the
 communication.  It may further compiled into a form based on the
@@ -58,8 +57,7 @@ headers.h
 @param comm [IN]
   communicator.
 
-@see hypre_NewCommPkgInfo, hypre_CommitCommPkg, hypre_FreeCommPkg
-*/
+@see hypre_NewCommPkgInfo, hypre_CommitCommPkg, hypre_FreeCommPkg */
 /*--------------------------------------------------------------------------*/
 
 hypre_CommPkg *
@@ -155,19 +153,17 @@ hypre_NewCommPkg( hypre_BoxArrayArray   *send_boxes,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/**
-Destroy a communication package.
+/** Destroy a communication package.
 
 {\bf Input files:}
 headers.h
 
-@return Int.
+@return Error code.
 
-@param comm_pkg [IN]
+@param comm_pkg [IN/OUT]
   communication package.
 
-@see hypre_NewCommPkg
-*/
+@see hypre_NewCommPkg */
 /*--------------------------------------------------------------------------*/
 
 int
@@ -207,12 +203,11 @@ hypre_FreeCommPkg( hypre_CommPkg *comm_pkg )
 
 /*==========================================================================*/
 /*==========================================================================*/
-/**
-Initialize a non-blocking communication exchange.
+/** Initialize a non-blocking communication exchange.
 
 \begin{itemize}
-\item If HYPRE\_COMM\_SIMPLE is defined, the communication buffers
-are created, the send buffer is manually packed, and the communication
+\item If HYPRE\_COMM\_SIMPLE is defined, the communication buffers are
+created, the send buffer is manually packed, and the communication
 requests are posted.  No MPI derived datatypes are used.
 \item Else if HYPRE\_COMM\_VOLATILE is defined, the communication
 package is committed, the communication requests are posted, then
@@ -223,7 +218,7 @@ the communication package is un-committed.
 {\bf Input files:}
 headers.h
 
-@return Communication handle.
+@return Error code.
 
 @param comm_pkg [IN]
   communication package.
@@ -231,30 +226,36 @@ headers.h
   reference pointer for the send data.
 @param recv_data [IN]
   reference pointer for the recv data.
+@param comm_handle [OUT]
+  communication handle.
 
-@see hypre_FinalizeCommunication, hypre_NewCommPkg
-*/
+@see hypre_FinalizeCommunication, hypre_NewCommPkg */
 /*--------------------------------------------------------------------------*/
 
 #if defined(HYPRE_COMM_SIMPLE)
 
-hypre_CommHandle *
-hypre_InitializeCommunication( hypre_CommPkg *comm_pkg,
-                               double        *send_data,
-                               double        *recv_data )
+int
+hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
+                               double            *send_data,
+                               double            *recv_data,
+                               hypre_CommHandle **comm_handle_ptr )
 {
+   int                  ierr = 0;
+                     
+   hypre_CommHandle    *comm_handle;
+                     
    int                  num_sends = hypre_CommPkgNumSends(comm_pkg);
    int                  num_recvs = hypre_CommPkgNumRecvs(comm_pkg);
    MPI_Comm             comm      = hypre_CommPkgComm(comm_pkg);
-
-   hypre_CommHandle    *comm_handle;
+                     
    int                  num_requests;
    MPI_Request         *requests;
+   MPI_Status          *status;
    double             **send_buffers;
    double             **recv_buffers;
-   int                 *send_sizes;
-   int                 *recv_sizes;
-                      
+   int                **send_sizes;
+   int                **recv_sizes;
+
    hypre_CommType      *send_type;
    hypre_CommTypeEntry *send_entry;
    hypre_CommType      *recv_type;
@@ -266,15 +267,24 @@ hypre_InitializeCommunication( hypre_CommPkg *comm_pkg,
    double              *iptr, *jptr, *kptr, *lptr, *bptr;
 
    int                  i, j, k, ii, jj, kk, ll;
-   int                  entry_size;
+   int                  entry_size, total_size;
                       
+   /*--------------------------------------------------------------------
+    * allocate requests and status
+    *--------------------------------------------------------------------*/
+
+   num_requests = num_sends + num_recvs;
+   requests = hypre_SharedCTAlloc(MPI_Request, num_requests);
+   status   = hypre_SharedCTAlloc(MPI_Status, num_requests);
+
    /*--------------------------------------------------------------------
     * allocate buffers
     *--------------------------------------------------------------------*/
 
    /* allocate send buffers */
    send_buffers = hypre_TAlloc(double *, num_sends);
-   send_sizes   = hypre_TAlloc(int, num_sends);
+   send_sizes = hypre_TAlloc(int, num_sends);
+   total_size = 0;
    for (i = 0; i < num_sends; i++)
    {
       send_type = hypre_CommPkgSendType(comm_pkg, i);
@@ -293,12 +303,18 @@ hypre_InitializeCommunication( hypre_CommPkg *comm_pkg,
          send_sizes[i] += entry_size;
       }
 
-      send_buffers[i] = hypre_TAlloc(double, send_sizes[i]);
+      total_size += send_sizes[i];
+   }
+   send_buffers[0] = hypre_SharedTAlloc(double, total_size);
+   for (i = 1; i < num_sends; i++)
+   {
+      send_buffers[i] = send_buffers[i-1] + send_sizes[i-1];
    }
 
    /* allocate recv buffers */
-   recv_buffers = hypre_TAlloc(double *, num_recvs);
-   recv_sizes   = hypre_TAlloc(int, num_recvs);
+   send_buffers = hypre_TAlloc(double *, num_recvs);
+   recv_sizes = hypre_TAlloc(int, num_recvs);
+   total_size = 0;
    for (i = 0; i < num_recvs; i++)
    {
       recv_type = hypre_CommPkgRecvType(comm_pkg, i);
@@ -317,7 +333,12 @@ hypre_InitializeCommunication( hypre_CommPkg *comm_pkg,
          recv_sizes[i] += entry_size;
       }
 
-      recv_buffers[i] = hypre_SharedTAlloc(double, recv_sizes[i]);
+      total_size += recv_sizes[i];
+   }
+   recv_buffers[0] = hypre_SharedTAlloc(double, total_size);
+   for (i = 1; i < num_recvs; i++)
+   {
+      recv_buffers[i] = recv_buffers[i-1] + recv_sizes[i-1];
    }
 
    /*--------------------------------------------------------------------
@@ -371,9 +392,6 @@ hypre_InitializeCommunication( hypre_CommPkg *comm_pkg,
     * post receives and initiate sends
     *--------------------------------------------------------------------*/
 
-   num_requests = num_sends + num_recvs;
-   requests = hypre_SharedCTAlloc(MPI_Request, num_requests);
-
    j = 0;
    for(i = 0; i < num_recvs; i++)
    {
@@ -390,53 +408,63 @@ hypre_InitializeCommunication( hypre_CommPkg *comm_pkg,
 
    hypre_ExchangeLocalData(comm_pkg, send_data, recv_data);
 
-   hypre_TFree(send_sizes);
-   hypre_TFree(recv_sizes);
-
    /*--------------------------------------------------------------------
     * set up comm_handle and return
     *--------------------------------------------------------------------*/
 
-   comm_handle = hypre_CTAlloc(hypre_CommHandle, 1);
+   comm_handle = hypre_TAlloc(hypre_CommHandle, 1);
 
    hypre_CommHandleCommPkg(comm_handle)     = comm_pkg;
    hypre_CommHandleSendData(comm_handle)    = send_data;
    hypre_CommHandleRecvData(comm_handle)    = recv_data;
    hypre_CommHandleNumRequests(comm_handle) = num_requests;
    hypre_CommHandleRequests(comm_handle)    = requests;
+   hypre_CommHandleStatus(comm_handle)      = status;
    hypre_CommHandleSendBuffers(comm_handle) = send_buffers;
    hypre_CommHandleRecvBuffers(comm_handle) = recv_buffers;
+   hypre_CommHandleSendSizes(comm_handle)   = send_sizes;
+   hypre_CommHandleRecvSizes(comm_handle)   = recv_sizes;
 
-   return ( comm_handle );
+   *comm_handle_ptr = comm_handle;
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------*/
 
 #else
 
-hypre_CommHandle *
-hypre_InitializeCommunication( hypre_CommPkg *comm_pkg,
-                               double        *send_data,
-                               double        *recv_data )
+int
+hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
+                               double            *send_data,
+                               double            *recv_data,
+                               hypre_CommHandle **comm_handle_ptr )
 {
+   int                  ierr = 0;
+
+   hypre_CommHandle    *comm_handle;
+
    int                  num_sends  = hypre_CommPkgNumSends(comm_pkg);
    int                  num_recvs  = hypre_CommPkgNumRecvs(comm_pkg);
    MPI_Comm             comm       = hypre_CommPkgComm(comm_pkg);
-   void                *send_vdata = (void *) send_data;
-   void                *recv_vdata = (void *) recv_data;
                       
-   hypre_CommHandle    *comm_handle;
    int                  num_requests;
    MPI_Request         *requests;
-
+   MPI_Status          *status;
+                     
    int                  i, j;
                       
    /*--------------------------------------------------------------------
-    * post receives and initiate sends
+    * allocate requests and status
     *--------------------------------------------------------------------*/
 
    num_requests = num_sends + num_recvs;
    requests = hypre_SharedCTAlloc(MPI_Request, num_requests);
+   status   = hypre_SharedCTAlloc(MPI_Status, num_requests);
+
+   /*--------------------------------------------------------------------
+    * post receives and initiate sends
+    *--------------------------------------------------------------------*/
 
 #if defined(HYPRE_COMM_VOLATILE)
    /* commit the communication package */
@@ -447,14 +475,14 @@ hypre_InitializeCommunication( hypre_CommPkg *comm_pkg,
    j = 0;
    for(i = 0; i < num_recvs; i++)
    {
-      MPI_Irecv(recv_vdata, 1,
+      MPI_Irecv((void *)recv_data, 1,
                 hypre_CommPkgRecvMPIType(comm_pkg, i), 
                 hypre_CommPkgRecvProc(comm_pkg, i), 
 		0, comm, &requests[j++]);
    }
    for(i = 0; i < num_sends; i++)
    {
-      MPI_Isend(send_vdata, 1,
+      MPI_Isend((void *)send_data, 1,
                 hypre_CommPkgSendMPIType(comm_pkg, i), 
                 hypre_CommPkgSendProc(comm_pkg, i), 
 		0, comm, &requests[j++]);
@@ -472,29 +500,30 @@ hypre_InitializeCommunication( hypre_CommPkg *comm_pkg,
     * set up comm_handle and return
     *--------------------------------------------------------------------*/
 
-   comm_handle = hypre_CTAlloc(hypre_CommHandle, 1);
+   comm_handle = hypre_TAlloc(hypre_CommHandle, 1);
 
    hypre_CommHandleCommPkg(comm_handle)     = comm_pkg;
    hypre_CommHandleSendData(comm_handle)    = send_data;
    hypre_CommHandleRecvData(comm_handle)    = recv_data;
    hypre_CommHandleNumRequests(comm_handle) = num_requests;
    hypre_CommHandleRequests(comm_handle)    = requests;
+   hypre_CommHandleStatus(comm_handle)      = status;
 
-   return ( comm_handle );
+   *comm_handle_ptr = comm_handle;
+
+   return ierr;
 }
 
 #endif
 
 /*==========================================================================*/
 /*==========================================================================*/
-/**
-Finalize a communication exchange.  This routine blocks until all of
-the communication requests are completed.
+/** Finalize a communication exchange.  This routine blocks until all
+of the communication requests are completed.
 
 \begin{itemize}
 \item If HYPRE\_COMM\_SIMPLE is defined, the communication requests
-are completed, the receive buffer is manually unpacked, and the
-communication buffers are destroyed.
+are completed, and the receive buffer is manually unpacked.
 \item Else if HYPRE\_COMM\_VOLATILE is defined, the communication requests
 are completed and the communication package is un-committed.
 \item Else the communication requests are completed.
@@ -505,11 +534,10 @@ headers.h
 
 @return Error code.
 
-@param comm_handle [IN]
+@param comm_handle [IN/OUT]
   communication handle.
 
-@see hypre_InitializeCommunication, hypre_NewCommPkg
-*/
+@see hypre_InitializeCommunication, hypre_NewCommPkg */
 /*--------------------------------------------------------------------------*/
 
 #if defined(HYPRE_COMM_SIMPLE)
@@ -518,13 +546,15 @@ int
 hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 {
    
+   int              ierr = 0;
+
    hypre_CommPkg   *comm_pkg     = hypre_CommHandleCommPkg(comm_handle);
    double         **send_buffers = hypre_CommHandleSendBuffers(comm_handle);
    double         **recv_buffers = hypre_CommHandleRecvBuffers(comm_handle);
+   int            **send_sizes   = hypre_CommHandleSendSizes(comm_handle);
+   int            **recv_sizes   = hypre_CommHandleRecvSizes(comm_handle);
    int              num_sends    = hypre_CommPkgNumSends(comm_pkg);
    int              num_recvs    = hypre_CommPkgNumRecvs(comm_pkg);
-
-   MPI_Status          *status;
 
    hypre_CommType      *recv_type;
    hypre_CommTypeEntry *recv_entry;
@@ -535,7 +565,6 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    double              *iptr, *jptr, *kptr, *lptr, *bptr;
 
    int                  i, j, ii, jj, kk, ll;
-   int                  ierr = 0;
 
    /*--------------------------------------------------------------------
     * finish communications
@@ -543,15 +572,9 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    if (hypre_CommHandleNumRequests(comm_handle))
    {
-      status =
-         hypre_SharedCTAlloc(MPI_Status,
-                       hypre_CommHandleNumRequests(comm_handle));
-
       MPI_Waitall(hypre_CommHandleNumRequests(comm_handle),
                   hypre_CommHandleRequests(comm_handle),
-                  status);
-
-      hypre_SharedTFree(status);
+                  hypre_CommHandleStatus(comm_handle));
    }
 
    /*--------------------------------------------------------------------
@@ -603,18 +626,17 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    }
 
    /*--------------------------------------------------------------------
-    * free up comm_handle
+    * Free up communication handle
     *--------------------------------------------------------------------*/
 
-   /* free up send/recv buffers */
-   for (i = 0; i < num_sends; i++)
-      hypre_TFree(send_buffers[i]);
-   for (i = 0; i < num_recvs; i++)
-      hypre_SharedTFree(recv_buffers[i]);
+   hypre_SharedTFree(hypre_CommHandleRequests(comm_handle));
+   hypre_SharedTFree(hypre_CommHandleStatus(comm_handle));
+   hypre_SharedTFree(send_buffers[0]);
+   hypre_SharedTFree(recv_buffers[0]);
    hypre_TFree(send_buffers);
    hypre_TFree(recv_buffers);
-
-   hypre_SharedTFree(hypre_CommHandleRequests(comm_handle));
+   hypre_TFree(send_sizes);
+   hypre_TFree(recv_sizes);
    hypre_TFree(comm_handle);
 
    return ierr;
@@ -625,24 +647,21 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 int
 hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 {
-   MPI_Status *status;
-   int         ierr = 0;
+   int  ierr = 0;
 
    if (hypre_CommHandleNumRequests(comm_handle))
    {
-      status =
-         hypre_SharedCTAlloc(MPI_Status,
-                       hypre_CommHandleNumRequests(comm_handle));
-
       MPI_Waitall(hypre_CommHandleNumRequests(comm_handle),
                   hypre_CommHandleRequests(comm_handle),
-                  status);
-
-      hypre_SharedTFree(status);
+                  hypre_CommHandleStatus(comm_handle));
    }
 
-   /* free up comm_handle */
+   /*--------------------------------------------------------------------
+    * Free up communication handle
+    *--------------------------------------------------------------------*/
+
    hypre_SharedTFree(hypre_CommHandleRequests(comm_handle));
+   hypre_SharedTFree(hypre_CommHandleStatus(comm_handle));
    hypre_TFree(comm_handle);
 
    return ierr;
@@ -652,13 +671,12 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
 /*==========================================================================*/
 /*==========================================================================*/
-/**
-Execute local data exchanges.
+/** Execute local data exchanges.
 
 {\bf Input files:}
 headers.h
 
-@return Error flag.
+@return Error code.
 
 @param comm_pkg [IN]
   communication package.
@@ -667,8 +685,7 @@ headers.h
 @param recv_data [IN]
   reference pointer for the recv data.
 
-@see hypre_InitializeCommunication
-*/
+@see hypre_InitializeCommunication */
 /*--------------------------------------------------------------------------*/
 
 int
@@ -747,8 +764,7 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/**
-Create a communication type.
+/** Create a communication type.
 
 {\bf Input files:}
 headers.h
@@ -760,8 +776,7 @@ headers.h
 @param num_entries [IN]
   number of elements in comm\_entries array.
 
-@see hypre_FreeCommType
-*/
+@see hypre_FreeCommType */
 /*--------------------------------------------------------------------------*/
 
 hypre_CommType *
@@ -780,19 +795,17 @@ hypre_NewCommType( hypre_CommTypeEntry **comm_entries,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/**
-Destroy a communication type.
+/** Destroy a communication type.
 
 {\bf Input files:}
 headers.h
 
-@return Int.
+@return Error code.
 
 @param comm_type [IN]
   communication type.
 
-@see hypre_NewCommType
-*/
+@see hypre_NewCommType */
 /*--------------------------------------------------------------------------*/
 
 int 
@@ -822,8 +835,7 @@ hypre_FreeCommType( hypre_CommType *comm_type )
 
 /*==========================================================================*/
 /*==========================================================================*/
-/**
-Create a communication type entry.
+/** Create a communication type entry.
 
 {\bf Input files:}
 headers.h
@@ -840,8 +852,7 @@ headers.h
   offset from some location in memory of the data associated with the
   imin index of data_box.
 
-@see hypre_FreeCommTypeEntry
-*/
+@see hypre_FreeCommTypeEntry */
 /*--------------------------------------------------------------------------*/
 
 hypre_CommTypeEntry *
@@ -944,19 +955,17 @@ hypre_NewCommTypeEntry( hypre_Box   *box,
  
 /*==========================================================================*/
 /*==========================================================================*/
-/**
-Destroy a communication type entry.
+/** Destroy a communication type entry.
 
 {\bf Input files:}
 headers.h
 
-@return Int.
+@return Error code.
 
-@param comm_entry [IN]
+@param comm_entry [IN/OUT]
   communication type entry.
 
-@see hypre_NewCommTypeEntry
-*/
+@see hypre_NewCommTypeEntry */
 /*--------------------------------------------------------------------------*/
 
 int
@@ -974,8 +983,7 @@ hypre_FreeCommTypeEntry( hypre_CommTypeEntry *comm_entry )
 
 /*==========================================================================*/
 /*==========================================================================*/
-/**
-Compute a processor-based description of a communication from a
+/** Compute a processor-based description of a communication from a
 grid-based one.  Used to construct a communication package.
 
 {\bf Input files:}
@@ -1005,8 +1013,7 @@ ranks involved in the communications.
 @param copy_type_ptr [OUT]
   intra-processor communication type (copies).
 
-@see hypre_NewCommPkg, hypre_SortCommType
-*/
+@see hypre_NewCommPkg, hypre_SortCommType */
 /*--------------------------------------------------------------------------*/
 
 int
@@ -1173,8 +1180,7 @@ hypre_NewCommPkgInfo( hypre_BoxArrayArray   *boxes,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/**
-Sort the entries of a communication type.  This routine is used to
+/** Sort the entries of a communication type.  This routine is used to
 maintain consistency in communications.
 
 {\bf Input files:}
@@ -1190,8 +1196,7 @@ communication type.
 @param comm_type [IN/OUT]
   communication type to be sorted.
 
-@see hypre_NewCommPkgInfo
-*/
+@see hypre_NewCommPkgInfo */
 /*--------------------------------------------------------------------------*/
 
 int
@@ -1307,8 +1312,7 @@ hypre_SortCommType( hypre_CommType  *comm_type )
 
 /*==========================================================================*/
 /*==========================================================================*/
-/**
-Compile a communication package into a form based on the
+/** Compile a communication package into a form based on the
 message-passing layer.
 
 {\bf Input files:}
@@ -1320,8 +1324,7 @@ headers.h
   communication package.
 
 @see hypre_NewCommPkg, hypre_InitializeCommunication,
-  hypre_BuildCommMPITypes, hypre_UnCommitCommPkg
-*/
+  hypre_BuildCommMPITypes, hypre_UnCommitCommPkg */
 /*--------------------------------------------------------------------------*/
 
 int
@@ -1350,8 +1353,8 @@ hypre_CommitCommPkg( hypre_CommPkg *comm_pkg )
 
 /*==========================================================================*/
 /*==========================================================================*/
-/**
-Destroy the message-passing-layer component of the communication package.
+/** Destroy the message-passing-layer component of the communication
+package.
 
 {\bf Input files:}
 headers.h
@@ -1361,8 +1364,7 @@ headers.h
 @param comm_pkg [IN/OUT]
   communication package.
 
-@see hypre_CommitCommPkg
-*/
+@see hypre_CommitCommPkg */
 /*--------------------------------------------------------------------------*/
 
 int
@@ -1396,8 +1398,7 @@ hypre_UnCommitCommPkg( hypre_CommPkg *comm_pkg )
 
 /*==========================================================================*/
 /*==========================================================================*/
-/**
-Create an MPI-based description of a communication from a
+/** Create an MPI-based description of a communication from a
 processor-based one.
 
 {\bf Input files:}
@@ -1414,8 +1415,7 @@ headers.h
 @param comm_mpi_types [OUT]
   MPI derived data-types.
 
-@see hypre_CommitCommPkg, hypre_BuildCommEntryMPIType
-*/
+@see hypre_CommitCommPkg, hypre_BuildCommEntryMPIType */
 /*--------------------------------------------------------------------------*/
 
 int
@@ -1477,8 +1477,7 @@ hypre_BuildCommMPITypes( int               num_comms,
 
 /*==========================================================================*/
 /*==========================================================================*/
-/**
-Create an MPI-based description of a communication entry.
+/** Create an MPI-based description of a communication entry.
 
 {\bf Input files:}
 headers.h
@@ -1490,8 +1489,7 @@ headers.h
 @param comm_entry_mpi_type [OUT]
   MPI derived data-type.
 
-@see hypre_BuildCommMPITypes
-*/
+@see hypre_BuildCommMPITypes */
 /*--------------------------------------------------------------------------*/
 
 int
