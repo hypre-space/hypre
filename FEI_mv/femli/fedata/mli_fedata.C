@@ -3811,7 +3811,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
    else if ( !strcmp("updatefaceElemMatrix",data_key) )
    {
-      MPI_Barrier(MPI_COMM_WORLD);
+      MPI_Barrier(mpiComm_);
 
       int i, j, index, n, pnum, Buf[100];
       int *ncols = (int *) argv[0], **cols = (int **) argv[1];
@@ -3863,7 +3863,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
                if ( sharedFaceProc[i][j] != mypid )
 	       {
                   MPI_Recv( Buf, 100, MPI_INT, MPI_ANY_SOURCE,
-                            MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+                            MPI_ANY_TAG, mpiComm_, &Status);
                   MPI_Get_count( &Status, MPI_INT, &n);
                   k = MLI_Utils_BinarySearch(Status.MPI_TAG,faceList,nFaces);
                   columns = new int[ncols[k]+n];
