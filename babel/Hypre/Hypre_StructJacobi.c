@@ -268,9 +268,9 @@ Hypre_StructJacobi  impl_Hypre_StructJacobi_Constructor(Hypre_MPI_Com comm) {
  * impl_Hypre_StructJacobiGetConstructedObject
  *       insert the library code below
  **********************************************************/
-Hypre_SolverBuilder  impl_Hypre_StructJacobi_GetConstructedObject(Hypre_StructJacobi this) {
+Hypre_Solver  impl_Hypre_StructJacobi_GetConstructedObject(Hypre_StructJacobi this) {
 
-   return (Hypre_SolverBuilder) this;
+   return (Hypre_Solver) this;
 
 } /* end impl_Hypre_StructJacobiGetConstructedObject */
 
