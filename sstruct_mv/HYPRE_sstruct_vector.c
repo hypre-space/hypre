@@ -134,7 +134,6 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 {
   int                      ierr = 0;
   int                      datasize;
-  int                      pdatasize;
   int                      nvars ;
   int                      nparts = hypre_SStructVectorNParts(vector) ;
   int                      var,part  ;
@@ -154,7 +153,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    int                     ilower, iupper;
    hypre_ParVector          *par_vector;
    hypre_Vector             *parlocal_vector;
-   int                      pnum,num,snum;
+   int                      pnum,num;
 
    /* GEC0902 getting the datasizes and indices we need  */
 

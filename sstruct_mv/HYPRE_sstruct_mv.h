@@ -210,6 +210,11 @@ int HYPRE_SStructGridAssemble(HYPRE_SStructGrid grid);
 int HYPRE_SStructGridSetPeriodic(HYPRE_SStructGrid  grid,
                                  int                part,
                                  int               *periodic);
+/**
+ * Setting ghost in the sgrids.
+ **/
+int HYPRE_SStructGridSetNumGhost(HYPRE_SStructGrid grid,
+                                   int             *num_ghost);
 
 /*@}*/
 

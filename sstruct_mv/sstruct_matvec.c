@@ -33,7 +33,7 @@ typedef struct
  * hypre_SStructPMatvecCreate
  *--------------------------------------------------------------------------*/
 
-
+int
 hypre_SStructPMatvecCreate( void **pmatvec_vdata_ptr )
 {
    int ierr = 0;

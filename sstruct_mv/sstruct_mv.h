@@ -841,7 +841,7 @@ int hypre_SStructVariableGetOffset( HYPRE_SStructVariable vartype , int ndim , h
 int hypre_SStructPGridCreate( MPI_Comm comm , int ndim , hypre_SStructPGrid **pgrid_ptr );
 int hypre_SStructPGridDestroy( hypre_SStructPGrid *pgrid );
 int hypre_SStructPGridSetExtents( hypre_SStructPGrid *pgrid , hypre_Index ilower , hypre_Index iupper );
-int hypre_SStructGridSetNumGhosts(hypre_SStructGrid *grid, int *num_ghost);
+int hypre_SStructGridSetNumGhost(hypre_SStructGrid *grid, int *num_ghost);
 int hypre_SStructPGridSetVariables( hypre_SStructPGrid *pgrid , int nvars , HYPRE_SStructVariable *vartypes );
 int hypre_SStructPGridSetPNeighbor( hypre_SStructPGrid *pgrid , hypre_Box *pneighbor_box );
 int hypre_SStructPGridAssemble( hypre_SStructPGrid *pgrid );
@@ -922,6 +922,8 @@ int hypre_SStructVectorConvert( hypre_SStructVector *vector , hypre_ParVector **
 int hypre_SStructVectorRestore( hypre_SStructVector *vector , hypre_ParVector *parvector );
 int hypre_SStructVectorInitializeShell( hypre_SStructVector *vector);
 int hypre_SStructPVectorInitializeShell( hypre_SStructPVector *pvector);
+int hypre_SStructVectorParConvert( hypre_SStructVector *vector , hypre_ParVector **parvector_ptr );
+int hypre_SStructVectorParRestore( hypre_SStructVector *vector , hypre_ParVector *parvector );
 
 
 #ifdef __cplusplus

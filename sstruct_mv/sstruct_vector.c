@@ -532,6 +532,8 @@ hypre_SStructVectorRestore( hypre_SStructVector *vector,
                             hypre_ParVector     *parvector )
 {
    int ierr = 0;
+   
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -672,7 +674,6 @@ hypre_SStructVectorInitializeShell( hypre_SStructVector *vector)
   int                      pdatasize;
   int                      nparts = hypre_SStructVectorNParts(vector); 
   hypre_SStructPVector    *pvector;
-  hypre_StructVector      *svector;
   int                     *dataindices;
 
   datasize = 0;
@@ -683,7 +684,7 @@ hypre_SStructVectorInitializeShell( hypre_SStructVector *vector)
     hypre_SStructPVectorInitializeShell(pvector);
     pdatasize = hypre_SStructPVectorDataSize(pvector);
     dataindices[part] = datasize ;
-    datasize          += pdatasize ;  
+    datasize        += pdatasize ;  
   } 
   hypre_SStructVectorDataIndices(vector) = dataindices;
   hypre_SStructVectorDataSize(vector) = datasize ;

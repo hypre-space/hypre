@@ -24,7 +24,8 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
 {
    int ierr = 0;
 
-   hypre_SStructGrid      *grid     = hypre_SStructGraphGrid(graph);
+   /* GEC1202 grid not needed  */
+   /*  hypre_SStructGrid      *grid     = hypre_SStructGraphGrid(graph); */
    hypre_SStructStencil ***stencils = hypre_SStructGraphStencils(graph);
 
    hypre_SStructMatrix    *matrix;
