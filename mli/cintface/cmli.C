@@ -24,6 +24,7 @@
 #include "../solver/mli_jacobi.h"
 #include "../solver/mli_gs.h"
 #include "../amgs/mli_method.h"
+#include "../amgs/mli_methodAgent.h"
 #include "../fedata/mli_fedata.h"
 #include "../fedata/mli_fedata_utils.h"
 
@@ -768,11 +769,14 @@ extern "C" int MLI_SolverSetParams(CMLI_Solver *solver, char *param_string,
 
 extern "C" CMLI_Method *MLI_MethodCreate(char *name, MPI_Comm comm)
 {
-   int         err=0;
-   MLI_Method  *mli_method;
-   CMLI_Method *cmli_method;
+   int              err=0;
+   MLI_MethodAgent  *mli_methodAgent;
+   MLI_Method       *mli_method;
+   CMLI_Method      *cmli_method;
 
-   mli_method  = new MLI_Method( name, comm );
+   mli_methodAgent = new MLI_MethodAgent( comm );
+   mli_methodAgent->createMethod( name );
+   mli_method = mli_methodAgent->takeMethod();
    cmli_method = (CMLI_Method *) calloc( 1, sizeof(CMLI_Method) );
    if ( mli_method == NULL || cmli_method == NULL ) err = 1;
    else
