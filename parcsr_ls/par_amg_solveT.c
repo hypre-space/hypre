@@ -280,6 +280,7 @@ hypre_ParAMGCycleT( void              *amg_vdata,
 
    hypre_ParCSRMatrix    **A_array;
    hypre_ParCSRMatrix    **P_array;
+   hypre_ParCSRMatrix    **R_array;
    hypre_ParVector    *Vtemp;
 
    int     **CF_marker_array;
@@ -324,6 +325,7 @@ hypre_ParAMGCycleT( void              *amg_vdata,
 
    A_array           = hypre_ParAMGDataAArray(amg_data);
    P_array           = hypre_ParAMGDataPArray(amg_data);
+   R_array           = hypre_ParAMGDataRArray(amg_data);
    CF_marker_array   = hypre_ParAMGDataCFMarkerArray(amg_data);
    unknown_map_array = hypre_ParAMGDataUnknownMapArray(amg_data);
    point_map_array   = hypre_ParAMGDataPointMapArray(amg_data);
@@ -447,7 +449,8 @@ hypre_ParAMGCycleT( void              *amg_vdata,
                                
          /*---------------------------------------------------------------
           * Visit coarser level next.  Compute residual using hypre_ParMatvec.
-          * Perform restriction using hypre_ParMatvecT.
+          * Use interpolation (since transpose i.e. P^TATR instead of
+          * RAP) using hypre_ParMatvecT.
           * Reset counters and cycling parameters for coarse level
           *--------------------------------------------------------------*/
 
@@ -479,7 +482,8 @@ hypre_ParAMGCycleT( void              *amg_vdata,
                             
          /*---------------------------------------------------------------
           * Visit finer level next.
-          * Interpolate and add correction using hypre_ParMatvec.
+          * Use restriction (since transpose i.e. P^TA^TR instead of RAP)
+          * and add correction using hypre_ParMatvec.
           * Reset counters and cycling parameters for finer level.
           *--------------------------------------------------------------*/
 
@@ -488,7 +492,7 @@ hypre_ParAMGCycleT( void              *amg_vdata,
          alpha = 1.0;
          beta = 1.0;
 
-         hypre_ParMatvec(alpha, P_array[fine_grid], U_array[coarse_grid],
+         hypre_ParMatvec(alpha, R_array[fine_grid], U_array[coarse_grid],
                          beta, U_array[fine_grid]);            
  
          --level;
