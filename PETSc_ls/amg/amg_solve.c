@@ -16,31 +16,28 @@
 #include "headers.h"
 
 
-/*--------------------------------------------------------------------------
+/*--------------------------------------------------------------------
  * hypre_AMGSolve
- *--------------------------------------------------------------------------*/
+ *--------------------------------------------------------------------*/
 
-int         hypre_AMGSolve(u, f, tol, data)
-hypre_Vector      *u;
-hypre_Vector      *f;
-double       tol;
-void        *data;
+
+int  hypre_AMGSolve(hypre_AMGData  *amg_data,
+                    hypre_Vector  *f,
+                    hypre_Vector  *u )
+
 {
-
+   
 /* Data Structure variables */
 
    int      amg_ioutdat;
-   int      cycle_control;
-   int     *levv;
    int     *num_coeffs;
    int     *num_variables;
    int      cycle_op_count;
-   int      Vstar_flag;
-   int      Fcycle_flag;
    int      num_levels;
    int      num_unknowns;
+   double   tol;
    char    *file_name;
-   hypre_Matrix **A_array;
+   hypre_CSRMatrix **A_array;
 
 /*  Local variables  */
 
@@ -48,10 +45,7 @@ void        *data;
 
    int      j;
    int      Solve_err_flag;
-   int     *iarr;
-   int      num_digits;
-   int      num_integers;
-   int      num_Vcycles;
+   int      max_iter;
    int      cycle_count;
    int      total_coeffs;
    int      total_variables;
@@ -63,67 +57,58 @@ void        *data;
    double   grid_cmplxty;
    double   conv_factor;
    double   resid_nrm;
-   double   resid_nrm_tmp;
    double   resid_nrm_init;
    double   relative_resid;
    double   rhs_norm;
-   double   energy;
-   double  *tmpvec;
-   double   old_energy;
    double   old_resid;
 
    hypre_Vector **F_array;
    hypre_Vector **U_array;
    hypre_Vector  *Vtemp;
 
-   hypre_AMGData  *amg_data = data;
-
    amg_ioutdat   = hypre_AMGDataIOutDat(amg_data);
-   cycle_control = hypre_AMGDataNCyc(amg_data);
    file_name     = hypre_AMGDataLogFileName(amg_data);
    num_unknowns  = hypre_AMGDataNumUnknowns(amg_data);
    num_levels    = hypre_AMGDataNumLevels(amg_data);
    A_array       = hypre_AMGDataAArray(amg_data);
-   num_coeffs    = hypre_AMGDataNumA(amg_data);
-   num_variables = hypre_AMGDataNumV(amg_data);
-   levv          = hypre_AMGDataLevV(amg_data);
-   
-   iarr = hypre_CTAlloc(int, 10);
 
-   F_array = hypre_TAlloc(hypre_Vector*, num_levels);
-   U_array = hypre_TAlloc(hypre_Vector*, num_levels);
+   tol           = hypre_AMGDataTol(amg_data);
+   max_iter      = hypre_AMGDataMaxIter(amg_data);
+
+   F_array = hypre_CTAlloc(hypre_Vector*, num_levels);
+   U_array = hypre_CTAlloc(hypre_Vector*, num_levels);
+
+   num_coeffs = hypre_CTAlloc(int, num_levels);
+   num_variables = hypre_CTAlloc(int, num_levels);
+   num_coeffs[0]    = hypre_CSRMatrixNumNonzeros(A_array[0]);
+   num_variables[0] = hypre_CSRMatrixNumRows(A_array[0]);
  
    F_array[0] = f;
    U_array[0] = u;
 
-
-   Vtemp = hypre_AMGDataVtemp(amg_data);
-
-   for (j = 1; j < num_levels; j++)
-   {
-       F_array[j] = hypre_NewVector(&(f->data[levv[j]-1]), num_variables[j]);
-       U_array[j] = hypre_NewVector(&(u->data[levv[j]-1]), num_variables[j]);
-   }
-
-/*********  the following does not work at this time 
+   Vtemp = hypre_CreateVector(num_variables[0]);
+   hypre_InitializeVector(Vtemp);
+   hypre_AMGDataVtemp(amg_data) = Vtemp;
 
    for (j = 1; j < num_levels; j++)
    {
-       tmpvec = hypre_CTAlloc(double, num_variables[j]);
-       F_array[j] = hypre_NewVector(tmpvec, num_variables[j]);
+       num_coeffs[j]    = hypre_CSRMatrixNumNonzeros(A_array[j]);
+       num_variables[j] = hypre_CSRMatrixNumRows(A_array[j]);
 
-       tmpvec = hypre_CTAlloc(double, num_variables[j]);
-       U_array[j] = hypre_NewVector(tmpvec, num_variables[j]);
+       F_array[j] = hypre_CreateVector(num_variables[j]);
+       hypre_InitializeVector(F_array[j]);
+
+       U_array[j] = hypre_CreateVector(num_variables[j]);
+       hypre_InitializeVector(U_array[j]);
+
    }
 
-*************/ 
-  
 
 /*--------------------------------------------------------------------------
  *    Write the solver parameters
  *--------------------------------------------------------------------------*/
 
-   hypre_WriteSolverParams(tol, amg_data);
+/*   hypre_WriteSolverParams(tol, amg_data); */
 
 
 /*--------------------------------------------------------------------------
@@ -152,20 +137,6 @@ void        *data;
     }
 
 /*--------------------------------------------------------------------------
- *    Decode cycle_control, load flags into data structure
- *--------------------------------------------------------------------------*/
-    
-    num_integers = 3;
-    idec_(&cycle_control,&num_integers,&num_digits,iarr);
-    Vstar_flag = iarr[0]-1;
-    Fcycle_flag = iarr[1];
-    num_Vcycles = iarr[2];
-
-    hypre_AMGDataFcycleFlag(amg_data) = Fcycle_flag;
-    hypre_AMGDataVstarFlag(amg_data) = Vstar_flag;
-
-
-/*--------------------------------------------------------------------------
  *    Compute initial fine-grid residual and print to logfile
  *--------------------------------------------------------------------------*/
 
@@ -190,15 +161,14 @@ void        *data;
  *    Main V-cycle loop
  *--------------------------------------------------------------------------*/
    
-   while (relative_resid >= tol && cycle_count < num_Vcycles 
+   while (relative_resid >= tol && cycle_count < max_iter 
                                 && Solve_err_flag == 0)
    {
          hypre_AMGDataCycleOpCount(amg_data) = 0;   
                         /* Op count only needed for one cycle */
 
-         Solve_err_flag = hypre_AMGCycle(U_array,F_array,tol,amg_data);
+         Solve_err_flag = hypre_AMGCycle(amg_data, F_array, U_array); 
 
-         old_energy = energy;
          old_resid = resid_nrm;
 
          /*---------------------------------------------------------------
@@ -221,7 +191,7 @@ void        *data;
          }
    }
 
-   if (cycle_count == num_Vcycles) Solve_err_flag = 1;
+   if (cycle_count == max_iter) Solve_err_flag = 1;
 
 /*--------------------------------------------------------------------------
  *    Compute closing statistics
@@ -248,7 +218,7 @@ void        *data;
        {
            fprintf(fp,"\n\n==============================================");
            fprintf(fp,"\n NOTE: Convergence tolerance was not achieved\n");
-           fprintf(fp,"      within the allowed %d V-cycles\n",num_Vcycles);
+           fprintf(fp,"      within the allowed %d V-cycles\n",max_iter);
            fprintf(fp,"==============================================");
        }
        fprintf(fp,"\n\n Average Convergence Factor = %f",conv_factor);
@@ -267,8 +237,6 @@ void        *data;
     { 
        fclose(fp);
     }
-
-   hypre_TFree(iarr);
 
    hypre_TFree(F_array);
    hypre_TFree(U_array);
