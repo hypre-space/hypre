@@ -136,6 +136,7 @@ MLI_ParCSRBooleanMatrix *MLI_ParBooleanMatmul
     *  Allocate C_offd_j arrays.
     *-----------------------------------------------------------------------*/
  
+   last_col_diag_C = first_col_diag_B + num_cols_diag_B - 1;
    C_diag_j    = hypre_CTAlloc(int, C_diag_size);
    if (C_offd_size)
    { 
