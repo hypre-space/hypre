@@ -50,8 +50,7 @@ char     *file_name;
    int     *amg_mu;
    int     *amg_ntrlx;
    int     *amg_iprlx;
-   int     *amg_ierlx;
-   int     *amg_iurlx;
+
 
    /* amg output params */
    int      amg_ioutdat;
@@ -130,13 +129,6 @@ char     *file_name;
    amg_iprlx = ctalloc(int, 4);
    for (i = 0; i < 4; i++)
       fscanf(fp, "%d", &amg_iprlx[i]);
-   amg_ierlx = ctalloc(int, 4);
-   for (i = 0; i < 4; i++)
-      fscanf(fp, "%d", &amg_ierlx[i]);
-   amg_iurlx = ctalloc(int, 4);
-   for (i = 0; i < 4; i++)
-      fscanf(fp, "%d", &amg_iurlx[i]);
-   
    fscanf(fp, "%d", &amg_ioutdat);
 
    /*----------------------------------------------------------
@@ -154,8 +146,6 @@ char     *file_name;
    SolverAMGMU(solver)      = amg_mu;
    SolverAMGNTRLX(solver)   = amg_ntrlx;
    SolverAMGIPRLX(solver)   = amg_iprlx;
-   SolverAMGIERLX(solver)   = amg_ierlx;
-   SolverAMGIURLX(solver)   = amg_iurlx;
 
    SolverAMGIOutDat(solver) = amg_ioutdat;
 
@@ -180,8 +170,6 @@ Solver  *solver;
       tfree(SolverAMGMU(solver));
       tfree(SolverAMGNTRLX(solver));
       tfree(SolverAMGIPRLX(solver));
-      tfree(SolverAMGIERLX(solver));
-      tfree(SolverAMGIURLX(solver));
 
       tfree(solver);
    }
@@ -227,8 +215,6 @@ Solver  *solver;
    int     *amg_mu;
    int     *amg_ntrlx;
    int     *amg_iprlx;
-   int     *amg_ierlx;
-   int     *amg_iurlx;
 
    /* amg output params */
    int      amg_ioutdat;
@@ -263,8 +249,6 @@ Solver  *solver;
    amg_mu      = SolverAMGMU(solver);
    amg_ntrlx   = SolverAMGNTRLX(solver);
    amg_iprlx   = SolverAMGIPRLX(solver);
-   amg_ierlx   = SolverAMGIERLX(solver);
-   amg_iurlx   = SolverAMGIURLX(solver);
 
    amg_ioutdat = SolverAMGIOutDat(solver);
 
@@ -371,10 +355,6 @@ Solver  *solver;
 	      amg_ntrlx[0], amg_ntrlx[1], amg_ntrlx[2], amg_ntrlx[3]);
       fprintf(fp, "       ipr(f,d,u,c): %d  %d  %d  %d \n",
 	      amg_iprlx[0], amg_iprlx[1], amg_iprlx[2], amg_iprlx[3]);
-      fprintf(fp, "       ier(f,d,u,c): %d  %d  %d  %d \n",
-	      amg_ierlx[0], amg_ierlx[1], amg_ierlx[2], amg_ierlx[3]);
-      fprintf(fp, "       iur(f,d,u,c): %d  %d  %d  %d \n",
-	      amg_iurlx[0], amg_iurlx[1], amg_iurlx[2], amg_iurlx[3]);
  
       fprintf(fp, "    Output flag (ioutdat): %d \n", amg_ioutdat);
 

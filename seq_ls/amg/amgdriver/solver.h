@@ -65,8 +65,6 @@ typedef struct
    int     *amg_mu;
    int     *amg_ntrlx;
    int     *amg_iprlx;
-   int     *amg_ierlx;
-   int     *amg_iurlx;
 
    /* amg output params */
    int      amg_ioutdat;
@@ -106,8 +104,6 @@ typedef struct
 #define SolverAMGMU(solver)          ((solver) -> amg_mu)
 #define SolverAMGNTRLX(solver)       ((solver) -> amg_ntrlx)
 #define SolverAMGIPRLX(solver)       ((solver) -> amg_iprlx)
-#define SolverAMGIERLX(solver)       ((solver) -> amg_ierlx)
-#define SolverAMGIURLX(solver)       ((solver) -> amg_iurlx)
 		  
 /* amg output params */
 #define SolverAMGIOutDat(solver)     ((solver) -> amg_ioutdat)
