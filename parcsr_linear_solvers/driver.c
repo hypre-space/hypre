@@ -144,14 +144,14 @@ main( int   argc,
 #endif
 
    b = hypre_CreateParVector(MPI_COMM_WORLD,
-                             hypre_ParCSRMatrixNumRows(A),
+                             hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_SetParVectorPartitioningOwner(b, 0);
    hypre_InitializeParVector(b);
    hypre_SetParVectorConstantValues(b, 0.0);
 
    x = hypre_CreateParVector(MPI_COMM_WORLD,
-                             hypre_ParCSRMatrixNumRows(A),
+                             hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_SetParVectorPartitioningOwner(x, 0);
    hypre_InitializeParVector(x);
