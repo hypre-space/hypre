@@ -56,7 +56,8 @@ int  hypre_AMGRelax( hypre_CSRMatrix *A,
    /*-----------------------------------------------------------------------
     * Switch statement to direct control based on relax_type:
     *     relax_type = 0 -> Jacobi
-    *     relax_type = 1 -> Gauss-Siedel
+    *     relax_type = 1 -> Gauss-Seidel
+    *     relax_type = 2 -> symm. Gauss-Seidel
     *     relax_type = 9 -> Direct Solve
     *-----------------------------------------------------------------------*/
    
@@ -168,6 +169,102 @@ int  hypre_AMGRelax( hypre_CSRMatrix *A,
          else
          {
             for (i = 0; i < n; i++)
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if (cf_marker[i] == relax_points && A_data[A_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_i[i]+1; jj < A_i[i+1]; jj++)
+                  {
+                     ii = A_j[jj];
+                     res -= A_data[jj] * u_data[ii];
+                  }
+                  u_data[i] = res / A_data[A_i[i]];
+               }
+            }     
+         }
+         
+      }
+      break;
+
+      case 2: /* symm. Gauss-Seidel */
+      {
+
+         /*-----------------------------------------------------------------
+          * Relax all points.
+          *-----------------------------------------------------------------*/
+
+         if (relax_points == 0)
+         {
+            for (i = 0; i < n; i++)
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if (A_data[A_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_i[i]+1; jj < A_i[i+1]; jj++)
+                  {
+                     ii = A_j[jj];
+                     res -= A_data[jj] * u_data[ii];
+                  }
+                  u_data[i] = res / A_data[A_i[i]];
+               }
+            }
+            for (i = n-1; i > -1; i--)
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if (A_data[A_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_i[i]+1; jj < A_i[i+1]; jj++)
+                  {
+                     ii = A_j[jj];
+                     res -= A_data[jj] * u_data[ii];
+                  }
+                  u_data[i] = res / A_data[A_i[i]];
+               }
+            }
+         }
+
+         /*-----------------------------------------------------------------
+          * Relax only C or F points as determined by relax_points.
+          *-----------------------------------------------------------------*/
+
+         else
+         {
+            for (i = 0; i < n; i++)
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+             
+               if (cf_marker[i] == relax_points && A_data[A_i[i]] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_i[i]+1; jj < A_i[i+1]; jj++)
+                  {
+                     ii = A_j[jj];
+                     res -= A_data[jj] * u_data[ii];
+                  }
+                  u_data[i] = res / A_data[A_i[i]];
+               }
+            }     
+            for (i = n-1; i > -1; i--)
             {
 
                /*-----------------------------------------------------------
