@@ -27,7 +27,6 @@ int main( int   argc, char *argv[] )
    int                 arg_index;
    int                 print_usage;
    int                 build_matrix_arg_index;
-   int                 debug_flag;
    int                 solver_id;
    int                 ierr,i,j; 
    int                 num_iterations; 
@@ -66,7 +65,6 @@ int main( int   argc, char *argv[] )
     *-----------------------------------------------------------*/
  
    build_matrix_arg_index = argc;
-   debug_flag             = 0;
    solver_id              = 0;
    strong_threshold       = 0.25;
    num_grid_sweeps        = 2;
@@ -90,7 +88,7 @@ int main( int   argc, char *argv[] )
       else if ( strcmp(argv[arg_index], "-dbg") == 0 )
       {
          arg_index++;
-         debug_flag = atoi(argv[arg_index++]);
+         atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
