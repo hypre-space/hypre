@@ -11,7 +11,7 @@
 #include "struct_linear_solvers.h"
 #include "Hypre_StructMatrix.h"
 
-struct Hypre_StructJacobi_private
+struct Hypre_StructJacobi_private_type /* gkk: added "_type" */
 {
    HYPRE_StructSolver * hssolver;
    Hypre_StructMatrix hsmatrix;

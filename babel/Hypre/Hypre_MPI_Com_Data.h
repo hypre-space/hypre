@@ -8,7 +8,7 @@
 #define Hypre_MPI_Com_DataMembers__
 /* JFP ... */
 #include "HYPRE_mv.h"
-struct Hypre_MPI_Com_private
+struct Hypre_MPI_Com_private_type /* gkk: added "_type" */
 {
    MPI_Comm *hcom;
 }

@@ -1,0 +1,19 @@
+
+Babel Interface:
+
+This directory contains the Babel wrappers for Hypre.
+The building instructions here assumes that Babel is 
+already installed on the local system and that the rest 
+of Hypre is already constructed.
+
+1.  Locate where the babel compiler is installed.  If
+    Its already in your path, try `where babel`.
+    It should look like /<some_path>/bin/babel.
+
+2.  Type './configure --with-babeldir=/<some_path>'
+    where <some_path> is the actual path that was determined
+    in step 1.
+
+4.  Type 'make'.  This will build the Hypre/libhypre_class.a.
+
+5.  Type 'make check'.  This will build test/testum. 

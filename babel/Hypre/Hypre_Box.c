@@ -5,9 +5,13 @@
 #********************************************************/
 
 #include "Hypre_Box_Skel.h" 
+#include "Hypre_Box_Data.h" /* gkk: added (fixed in compiler) */
 
-hypre_Box *hypre_BoxCreate(void );
-/* ... without this line, compilers think hypre_BoxCreate returns int */
+/* gkk:  removed 
+ * hypre_Box *hypre_BoxCreate(void );
+ * * ... without this line, compilers think hypre_BoxCreate returns int *
+ */
+
 
 /*#************************************************
 #	Constructor
@@ -25,13 +29,21 @@ typedef struct Hypre_Box_private *Hypre_Box_Private;
 struct Hypre_Box_private { hypre_Box *hbox; }
 */
 
+   this->d_table = (struct Hypre_Box_private_type*) 
+     malloc(sizeof(struct Hypre_Box_private_type));
+   this->d_table->hbox = hypre_BoxCreate();
+
+
+
+  /* gkk: was
+
    struct Hypre_Box_private * HBp;
    HBp = (struct Hypre_Box_private *)
       ( malloc(sizeof(struct Hypre_Box_private)) );
    this->d_table = (Hypre_Box_Private) HBp;
    
    this->d_table->hbox = hypre_BoxCreate();
-
+  */
 }
 
 
@@ -45,6 +57,12 @@ void Hypre_Box_destructor(Hypre_Box this) {
       Delete the Hypre object this object refers to, then delete
       this object's data table. */
 
+   struct Hypre_Box_private_type *Bp = this->d_table;
+   hypre_Box * B = Bp->hbox;
+   hypre_BoxDestroy( B );
+   free(this->d_table);
+
+  /* gkk: was
    Hypre_Box_Private BP = this->d_table;
    struct Hypre_Box_private *Bp = BP;
    hypre_Box *B = Bp->hbox;
@@ -52,16 +70,20 @@ void Hypre_Box_destructor(Hypre_Box this) {
    hypre_BoxDestroy( B );
 
    free(this->d_table);
+  */
 }
 
-int  impl__Hypre_Box_NewBox(Hypre_Box this, array1int lower, array1int upper, int dimension) {
+/* gkk: was impl__Hypre_<yadda, yadda, yadda>() babel-0.3.0 removes all double underscores */
+
+
+int  impl_Hypre_Box_NewBox(Hypre_Box this, array1int lower, array1int upper, int dimension) {
 
 /* JFP: This function initializes the data in a box. */
 
    int i;
-   struct Hypre_Box_object__ BO = *this;
+   struct Hypre_Box_object_ BO = *this; /* gkk: was Hypre_Box_object__ (two underscores) */
    Hypre_Box_Private BP = BO.d_table;
-   struct Hypre_Box_private *Bp = BP;
+   struct Hypre_Box_private_type *Bp = BP; /* gkk: was Hypre_Box_private */
    hypre_Box *B = Bp->hbox;
 
    Bp->dimension = dimension;
@@ -73,7 +95,7 @@ int  impl__Hypre_Box_NewBox(Hypre_Box this, array1int lower, array1int upper, in
    return 0;
 }
 
-void  impl__Hypre_Box_print(Hypre_Box this) {
+void  impl_Hypre_Box_print(Hypre_Box this) {
 /* JFP: This function prints, to stdout, data about the box. */
 
 /* some relevant code segments:
@@ -84,9 +106,9 @@ typedef struct Hypre_Box_private *Hypre_Box_Private;
 struct Hypre_Box_private { hypre_Box *hbox; }
 */
    int i;
-   struct Hypre_Box_object__ BO = *this;
+   struct Hypre_Box_object_ BO = *this;
    Hypre_Box_Private BP = BO.d_table;
-   struct Hypre_Box_private *Bp = BP;
+   struct Hypre_Box_private_type *Bp = BP;
    hypre_Box *B = Bp->hbox;
 
    printf( "Box imin[i],imax[i] = " );

@@ -9,7 +9,7 @@
 /* JFP ... */
 #include "HYPRE_mv.h"
 #include "struct_matrix_vector.h"
-struct Hypre_StructMatrix_private
+struct Hypre_StructMatrix_private_type
 {
    HYPRE_StructMatrix *hsmat;
 }

@@ -5,6 +5,16 @@
 #********************************************************/
 
 #include "Hypre_StructMatrix_Skel.h" 
+#include "Hypre_StructMatrix_Data.h" /*gkk: added. (automatic after 0.3.0) */
+
+#include "Hypre_StructuredGrid_Skel.h" /* gkk: added */
+#include "Hypre_StructuredGrid_Data.h" /* gkk: added */
+#include "Hypre_StructStencil_Skel.h"  /* gkk: added */
+#include "Hypre_StructStencil_Data.h"  /* gkk: added */
+#include "Hypre_StructVector_Skel.h"   /* gkk: added */
+#include "Hypre_StructVector_Data.h"   /* gkk: added */
+#include "Hypre_Box_Skel.h"            /* gkk: added */
+#include "Hypre_Box_Data.h"            /* gkk: added */
 
 
 /*#************************************************
@@ -14,10 +24,8 @@
 void Hypre_StructMatrix_constructor(Hypre_StructMatrix this) {
 
 /* JFP: Allocates Memory */
-   struct Hypre_StructMatrix_private * HSMp;
-   HSMp = (struct Hypre_StructMatrix_private *)
-      malloc( sizeof( struct Hypre_StructMatrix_private ) );
-   this->d_table = (Hypre_StructMatrix_Private) HSMp;
+   this->d_table = (struct Hypre_StructMatrix_private_type *)
+      malloc( sizeof( struct Hypre_StructMatrix_private_type ) );
 
    this->d_table->hsmat = (HYPRE_StructMatrix *)
       malloc( sizeof( HYPRE_StructMatrix ) );
@@ -33,31 +41,25 @@ void Hypre_StructMatrix_destructor(Hypre_StructMatrix this) {
 
    /* JFP: Deallocates memory. */
 
-   Hypre_StructMatrix_Private SMP = this->d_table;
-   struct Hypre_StructMatrix_private *SMp = SMP;
+   struct Hypre_StructMatrix_private_type *SMp = this->d_table;
    HYPRE_StructMatrix *M = SMp->hsmat;
 
    HYPRE_StructMatrixDestroy( *M );
-
    free(this->d_table);
-
 }
 
-Hypre_StructMatrix  impl__Hypre_StructMatrix_NewMatrix(
+Hypre_StructMatrix  impl_Hypre_StructMatrix_NewMatrix(
    Hypre_StructMatrix this, Hypre_StructuredGrid grid,
    Hypre_StructStencil stencil, int symmetric ) {
 
-   Hypre_StructMatrix_Private SMP = this->d_table;
-   struct Hypre_StructMatrix_private *SMp = SMP;
+   struct Hypre_StructMatrix_private_type *SMp = this->d_table;
    HYPRE_StructMatrix *M = SMp->hsmat;
 
-   Hypre_StructuredGrid_Private GP = grid->d_table;
-   struct Hypre_StructuredGrid_private *Gp = GP;
+   struct Hypre_StructuredGrid_private_type *Gp = grid->d_table;
    HYPRE_StructGrid *G = Gp->hsgrid;
    hypre_StructGrid *g = (hypre_StructGrid *) *G;
 
-   Hypre_StructStencil_Private SSP = stencil->d_table;
-   struct Hypre_StructStencil_private *SSp = SSP;
+   struct Hypre_StructStencil_private_type *SSp = stencil->d_table;
    HYPRE_StructStencil *SS = SSp->hsstencil;
 
    MPI_Comm comm = hypre_StructGridComm( g );
@@ -76,13 +78,12 @@ Hypre_StructMatrix  impl__Hypre_StructMatrix_NewMatrix(
    return this;
 }
 
-void  impl__Hypre_StructMatrix_print(Hypre_StructMatrix this) {
+void  impl_Hypre_StructMatrix_print(Hypre_StructMatrix this) {
 
    int boxarray_size;
    FILE * file;
 
-   Hypre_StructMatrix_Private SMP = this->d_table;
-   struct Hypre_StructMatrix_private *SMp = SMP;
+   struct Hypre_StructMatrix_private_type *SMp = this->d_table;
    HYPRE_StructMatrix *M = SMp->hsmat;
    hypre_StructMatrix *m = (hypre_StructMatrix *) *M;
 
@@ -106,7 +107,7 @@ void  impl__Hypre_StructMatrix_print(Hypre_StructMatrix this) {
 
 }
 
-int  impl__Hypre_StructMatrix_SetGrid(Hypre_StructMatrix this, Hypre_StructuredGrid grid) {
+int  impl_Hypre_StructMatrix_SetGrid(Hypre_StructMatrix this, Hypre_StructuredGrid grid) {
 
 /* not implemented; this functionality isn't in Hypre (though doesn't
    look too hard to put in)
@@ -115,7 +116,7 @@ int  impl__Hypre_StructMatrix_SetGrid(Hypre_StructMatrix this, Hypre_StructuredG
 
 }
 
-int  impl__Hypre_StructMatrix_SetStencil(Hypre_StructMatrix this, Hypre_StructStencil stencil) {
+int  impl_Hypre_StructMatrix_SetStencil(Hypre_StructMatrix this, Hypre_StructStencil stencil) {
 
 /* not implemented; this functionality isn't in Hypre (though doesn't
    look too hard to put in)
@@ -124,20 +125,18 @@ int  impl__Hypre_StructMatrix_SetStencil(Hypre_StructMatrix this, Hypre_StructSt
 
 }
 
-int  impl__Hypre_StructMatrix_SetValues(
+int  impl_Hypre_StructMatrix_SetValues(
    Hypre_StructMatrix this, Hypre_Box box,
    array1int stencil_indices, array1double values) {
 
    int i, ssize, lower[3], upper[3];
 
-   Hypre_StructMatrix_Private SMP = this->d_table;
-   struct Hypre_StructMatrix_private *SMp = SMP;
+   struct Hypre_StructMatrix_private_type *SMp = this->d_table;
    HYPRE_StructMatrix *M = SMp->hsmat;
    hypre_StructMatrix *m = (hypre_StructMatrix *) *M;
 
-   struct Hypre_Box_object__ BO = *box;
-   Hypre_Box_Private BP = BO.d_table;
-   struct Hypre_Box_private *Bp = BP;
+   struct Hypre_Box_object_ BO = *box;
+   struct Hypre_Box_private_type *Bp = BO.d_table;
    hypre_Box *B = Bp->hbox;
 
    for ( i=0; i<Bp->dimension; ++i ) {
@@ -164,30 +163,27 @@ int  impl__Hypre_StructMatrix_SetValues(
    HYPRE_StructMatrixAssemble( *M );
 }
 
-int  impl__Hypre_StructMatrix_Setup(
+int  impl_Hypre_StructMatrix_Setup(
    Hypre_StructMatrix this, Hypre_StructuredGrid grid,
    Hypre_StructStencil stencil, int symmetric) {
 
-   impl__Hypre_StructMatrix_NewMatrix( this, grid, stencil, symmetric );
+   impl_Hypre_StructMatrix_NewMatrix( this, grid, stencil, symmetric );
    return 0;
 }
 
-void  impl__Hypre_StructMatrix_Apply(Hypre_StructMatrix this, Hypre_StructVector x, Hypre_StructVector* b) {
+void  impl_Hypre_StructMatrix_Apply(Hypre_StructMatrix this, Hypre_StructVector x, Hypre_StructVector* b) {
 
    /* b = A * x   where this = A  */
 
-   Hypre_StructMatrix_Private SMP = this->d_table;
-   struct Hypre_StructMatrix_private *SMp = SMP;
+   struct Hypre_StructMatrix_private_type *SMp = this->d_table;
    HYPRE_StructMatrix *M = SMp->hsmat;
    hypre_StructMatrix *hA = (hypre_StructMatrix *) *M;
 
-   Hypre_StructVector_Private SVxP = x->d_table;
-   struct Hypre_StructVector_private *SVxp = SVxP;
+   struct Hypre_StructVector_private_type *SVxp = x->d_table;
    HYPRE_StructVector *Vx = SVxp->hsvec;
    hypre_StructVector *hx = (hypre_StructVector *) *Vx;
 
-   Hypre_StructVector_Private SVyP = (*b)->d_table;
-   struct Hypre_StructVector_private *SVyp = SVyP;
+   struct Hypre_StructVector_private_type *SVyp = (*b)->d_table;
    HYPRE_StructVector *Vy = SVyp->hsvec;
    hypre_StructVector *hy = (hypre_StructVector *) *Vy;
 
@@ -195,7 +191,7 @@ void  impl__Hypre_StructMatrix_Apply(Hypre_StructMatrix this, Hypre_StructVector
 
 }
 
-Hypre_StructMatrix  impl__Hypre_StructMatrix_GetConstructedObject(Hypre_StructMatrix this) {
+Hypre_StructMatrix  impl_Hypre_StructMatrix_GetConstructedObject(Hypre_StructMatrix this) {
 
    return this;
 }

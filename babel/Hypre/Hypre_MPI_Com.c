@@ -5,6 +5,12 @@
 #********************************************************/
 
 #include "Hypre_MPI_Com_Skel.h" 
+#include "Hypre_MPI_Com_Data.h" /*gkk: added (automatic in compiler >= 0.3.0) */
+
+/* gkk: 
+   changes to 0.3.0: 
+   1. replaced any "struct <thing>_private" with "struct <thing>_private_type"
+   2. removed any double underscores.
 
 /* JfP:  There's not much to do here.  A Hypre_MPI_Com points to a MPI_Comm.
  A MPI_Comm is either an MPI handle, or else for sequential code it is a pointer
@@ -32,11 +38,9 @@ void Hypre_MPI_Com_constructor(Hypre_MPI_Com this) {
    hypre_MPI_Comm * MC;
 #endif
 
-   struct Hypre_MPI_Com_private * HMCp;
-   HMCp = (struct Hypre_MPI_Com_private *)
-      ( malloc(sizeof(struct Hypre_MPI_Com_private)) );
-   this->d_table = (Hypre_MPI_Com_Private) HMCp;
-   
+   this->d_table = (struct Hypre_MPI_Com_private_type *)
+     malloc(sizeof(struct Hypre_MPI_Com_private_type)) ;
+
    this->d_table->hcom = (MPI_Comm *)
       (malloc(sizeof(MPI_Comm)));
 
@@ -59,9 +63,8 @@ void Hypre_MPI_Com_constructor(Hypre_MPI_Com this) {
 
 void Hypre_MPI_Com_destructor(Hypre_MPI_Com this) {
 
-   Hypre_MPI_Com_Private CP = this->d_table;
-   struct Hypre_MPI_Com_private * HMCp = CP;
-   MPI_Comm *C = CP->hcom;
+   struct Hypre_MPI_Com_private_type * HMCp = this->d_table;
+   MPI_Comm *C = HMCp->hcom; /* gkk: HMCp was CP??? */
 
    free(C);
    free(HMCp);

@@ -5,7 +5,7 @@
 #********************************************************/
 
 #include "Hypre_StructStencil_Skel.h" 
-
+#include "Hypre_StructStencil_Data.h" /*gkk: added*/
 
 /*#************************************************
 #	Constructor
@@ -15,13 +15,11 @@ void Hypre_StructStencil_constructor(Hypre_StructStencil this) {
 
 /* JFP: Allocates Memory */
 
-   struct Hypre_StructStencil_private * HSSp;
-   HSSp = (struct Hypre_StructStencil_private *)
-      ( malloc(sizeof(struct Hypre_StructStencil_private)) );
-   this->d_table = (Hypre_StructStencil_Private) HSSp;
+   this->d_table = (struct Hypre_StructStencil_private_type *)
+     malloc(sizeof(struct Hypre_StructStencil_private_type));
    
    this->d_table->hsstencil = (HYPRE_StructStencil *)
-      (malloc(sizeof(HYPRE_StructStencil)));
+     (malloc(sizeof(HYPRE_StructStencil)));
 
 }
 
@@ -36,8 +34,7 @@ void Hypre_StructStencil_destructor(Hypre_StructStencil this) {
       Delete the Hypre object this object refers to, then delete
       this object's data table. */
 
-   Hypre_StructStencil_Private SSP = this->d_table;
-   struct Hypre_StructStencil_private *SSp = SSP;
+   struct Hypre_StructStencil_private_type *SSp = this->d_table;
    HYPRE_StructStencil *SS = SSp->hsstencil;
 
    HYPRE_StructStencilDestroy( *SS );
@@ -45,27 +42,22 @@ void Hypre_StructStencil_destructor(Hypre_StructStencil this) {
    free(this->d_table);
 }
 
-Hypre_StructStencil  impl__Hypre_StructStencil_NewStencil(Hypre_StructStencil this, int dimension, int size ) {
+Hypre_StructStencil  impl_Hypre_StructStencil_NewStencil(Hypre_StructStencil this, int dimension, int size ) {
 
-   struct Hypre_StructStencil_object__ SSO = *this;
-   Hypre_StructStencil_Private SSP = SSO.d_table;
-   struct Hypre_StructStencil_private *SSp = SSP;
+   struct Hypre_StructStencil_private_type *SSp = this->d_table;
    HYPRE_StructStencil *SS = SSp->hsstencil;
-   hypre_StructStencil *ss2;
 
    HYPRE_StructStencilCreate( dimension, size, SS );
 
    return this;
 }
 
-void  impl__Hypre_StructStencil_print(Hypre_StructStencil this) {
+void  impl_Hypre_StructStencil_print(Hypre_StructStencil this) {
 /* JFP: This function prints, to stdout, data about the stencil. */
 
    int i, j;
 
-   struct Hypre_StructStencil_object__ SSO = *this;
-   Hypre_StructStencil_Private SSP = SSO.d_table;
-   struct Hypre_StructStencil_private *SSp = SSP;
+   struct Hypre_StructStencil_private_type *SSp = this->d_table;
    HYPRE_StructStencil *SS = SSp->hsstencil;
    hypre_StructStencil *ss = (hypre_StructStencil *) *SS;
 
@@ -80,16 +72,14 @@ void  impl__Hypre_StructStencil_print(Hypre_StructStencil this) {
    printf( "\n" );
 }
 
-int  impl__Hypre_StructStencil_SetElement(
+int  impl_Hypre_StructStencil_SetElement(
    Hypre_StructStencil this, int element_index, array1int* element_offset) {
 /* JFP: This function sets a stencil element (element_offset is an array of
    three numbers */
 
    int ierr;
 
-   struct Hypre_StructStencil_object__ SSO = *this;
-   Hypre_StructStencil_Private SSP = SSO.d_table;
-   struct Hypre_StructStencil_private *SSp = SSP;
+   struct Hypre_StructStencil_private_type *SSp = this->d_table;
    HYPRE_StructStencil *SS = SSp->hsstencil;
    hypre_StructStencil *ss = (hypre_StructStencil *) *SS;
    

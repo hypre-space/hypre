@@ -265,7 +265,7 @@ main( int argc, char *argv[] )
    Hypre_StructJacobi_NewSolver( solver, comm );
    Hypre_StructJacobi_SetParameter( solver, "tol", 1.0e-4 );
    Hypre_StructJacobi_SetParameter( solver, "max_iter", 50 );
-   Hypre_StructJacobi_Setup( solver, mat, vecb, vecx, comm );
+   Hypre_StructJacobi_Setup( solver, mat, vecb, vecx ) ; /*gkk , comm ); */
    Hypre_StructJacobi_Apply( solver, vecb, &vecx );
 
 /*  HSJP = solver->d_table;
@@ -286,7 +286,7 @@ main( int argc, char *argv[] )
    Hypre_StructJacobi_NewSolver( solver, comm );
    Hypre_StructJacobi_SetParameter( solver, "tol", 1.0e-4 );
    Hypre_StructJacobi_SetParameter( solver, "max_iter", 500 );
-   Hypre_StructJacobi_Setup( solver, mat, vecb, vecx, comm );
+   Hypre_StructJacobi_Setup( solver, mat, vecb, vecx ); /*gkk ,  comm ); */
    Hypre_StructJacobi_Apply( solver, vecb, &vecx );
 
    Hypre_StructVector_print( vecx );

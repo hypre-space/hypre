@@ -5,6 +5,11 @@
 #********************************************************/
 
 #include "Hypre_StructVector_Skel.h" 
+#include "Hypre_StructVector_Data.h"   /*gkk: added*/
+#include "Hypre_Box_Skel.h"            /*gkk: added*/
+#include "Hypre_Box_Data.h"            /*gkk: added*/
+#include "Hypre_StructuredGrid_Skel.h" /*gkk: added*/
+#include "Hypre_StructuredGrid_Data.h" /*gkk: added*/
 
 
 /*#************************************************
@@ -14,10 +19,8 @@
 void Hypre_StructVector_constructor(Hypre_StructVector this) {
 
 /* JFP: Allocates Memory */
-   struct Hypre_StructVector_private * HSVp;
-   HSVp = (struct Hypre_StructVector_private *)
-      malloc( sizeof( struct Hypre_StructVector_private ) );
-   this->d_table = (Hypre_StructVector_Private) HSVp;
+   this->d_table = (struct Hypre_StructVector_private_type *)
+      malloc( sizeof( struct Hypre_StructVector_private_type ) );
 
    this->d_table->hsvec = (HYPRE_StructVector *)
       malloc( sizeof( HYPRE_StructVector ) );
@@ -32,8 +35,7 @@ void Hypre_StructVector_destructor(Hypre_StructVector this) {
 
    /* JFP: Deallocates memory. */
 
-   Hypre_StructVector_Private SVP = this->d_table;
-   struct Hypre_StructVector_private *SVp = SVP;
+   struct Hypre_StructVector_private_type *SVp = this->d_table;
    HYPRE_StructVector *V = SVp->hsvec;
 
    HYPRE_StructVectorDestroy( *V );
@@ -41,15 +43,13 @@ void Hypre_StructVector_destructor(Hypre_StructVector this) {
    free(this->d_table);
 }
 
-Hypre_StructVector  impl__Hypre_StructVector_NewVector(
+Hypre_StructVector  impl_Hypre_StructVector_NewVector(
    Hypre_StructVector this, Hypre_StructuredGrid grid ) {
 
-   Hypre_StructVector_Private SVP = this->d_table;
-   struct Hypre_StructVector_private *SVp = SVP;
+   struct Hypre_StructVector_private_type *SVp = this->d_table;
    HYPRE_StructVector *V = SVp->hsvec;
 
-   Hypre_StructuredGrid_Private GP = grid->d_table;
-   struct Hypre_StructuredGrid_private *Gp = GP;
+   struct Hypre_StructuredGrid_private_type *Gp = grid->d_table;
    HYPRE_StructGrid *G = Gp->hsgrid;
    hypre_StructGrid *g = (hypre_StructGrid *) *G;
 
@@ -69,13 +69,12 @@ Hypre_StructVector  impl__Hypre_StructVector_NewVector(
    HYPRE_StructVectorAssemble( *V );
 }
 
-void  impl__Hypre_StructVector_print(Hypre_StructVector this) {
+void  impl_Hypre_StructVector_print(Hypre_StructVector this) {
 
    int boxarray_size;
    FILE * file;
 
-   Hypre_StructVector_Private SVP = this->d_table;
-   struct Hypre_StructVector_private *SVp = SVP;
+   struct Hypre_StructVector_private_type *SVp = this->d_table;
    HYPRE_StructVector *V = SVp->hsvec;
    hypre_StructVector *v = (hypre_StructVector *) *V;
 
@@ -98,7 +97,7 @@ void  impl__Hypre_StructVector_print(Hypre_StructVector this) {
 
 }
 
-int  impl__Hypre_StructVector_SetGrid(Hypre_StructVector this, Hypre_StructuredGrid grid) {
+int  impl_Hypre_StructVector_SetGrid(Hypre_StructVector this, Hypre_StructuredGrid grid) {
 
 /* not implemented; this functionality isn't in Hypre (though doesn't
    look too hard to put in)
@@ -106,7 +105,7 @@ int  impl__Hypre_StructVector_SetGrid(Hypre_StructVector this, Hypre_StructuredG
    printf( "unimplemented function, Hypre_StructVector_SetGrid, was called" );
 }
 
-int  impl__Hypre_StructVector_SetStencil(Hypre_StructVector this, Hypre_StructStencil stencil) {
+int  impl_Hypre_StructVector_SetStencil(Hypre_StructVector this, Hypre_StructStencil stencil) {
 
 /* This doesn't make sense for a Vector (it makes sense for a Matrix,
    which has the same interface)
@@ -115,19 +114,16 @@ int  impl__Hypre_StructVector_SetStencil(Hypre_StructVector this, Hypre_StructSt
 
 }
 
-int  impl__Hypre_StructVector_SetValues(
+int  impl_Hypre_StructVector_SetValues(
    Hypre_StructVector this, Hypre_Box box,
    array1int stencil_indices, array1double values) {
 
    int i, ssize, lower[3], upper[3];
 
-   Hypre_StructVector_Private SVP = this->d_table;
-   struct Hypre_StructVector_private *SVp = SVP;
+   struct Hypre_StructVector_private_type *SVp = this->d_table;
    HYPRE_StructVector *V = SVp->hsvec;
 
-   struct Hypre_Box_object__ BO = *box;
-   Hypre_Box_Private BP = BO.d_table;
-   struct Hypre_Box_private *Bp = BP;
+   struct Hypre_Box_private_type *Bp = box->d_table;
    hypre_Box *B = Bp->hbox;
 
    for ( i=0; i<Bp->dimension; ++i ) {
@@ -144,15 +140,15 @@ int  impl__Hypre_StructVector_SetValues(
    HYPRE_StructVectorAssemble( *V );
 }
 
-int  impl__Hypre_StructVector_Setup(
+int  impl_Hypre_StructVector_Setup(
    Hypre_StructVector this, Hypre_StructuredGrid grid,
    Hypre_StructStencil stencil, int symmetric) {
 
-   impl__Hypre_StructVector_NewVector( this, grid );
+   impl_Hypre_StructVector_NewVector( this, grid );
    return 0;
 }
 
-void  impl__Hypre_StructVector_Apply
+void  impl_Hypre_StructVector_Apply
 (Hypre_StructVector this, Hypre_StructVector x, Hypre_StructVector* b) {
 
 /*
@@ -163,7 +159,7 @@ void  impl__Hypre_StructVector_Apply
 
 }
 
-Hypre_StructMatrix  impl__Hypre_StructVector_GetConstructedObject(Hypre_StructVector this) {
+Hypre_StructMatrix  impl_Hypre_StructVector_GetConstructedObject(Hypre_StructVector this) {
 
 /* Next Babel run will have this return a Hypre_StructVector 
    At that time, uncomment the following line: */
