@@ -19,6 +19,7 @@
 
 #include "utilities/utilities.h"
 #include "IJ_mv/IJ_mv.h"
+#include "parcsr_mv/parcsr_mv.h"
 
 // **************************************************************************
 // class definition
@@ -44,6 +45,7 @@ class HYPRE_SlideReduction
    int            *constrBlkSizes_;
    int            *eqnStatuses_;
    double         blockMinNorm_;
+   HYPRE_ParCSRMatrix hypreRAP_;
 
  public:
 
@@ -65,6 +67,10 @@ class HYPRE_SlideReduction
                        { (*auxV) = reducedRvec_; return 0; }
    int    getProcConstraintMap(int **map) 
                        { (*map) = procNConstr_; return 0; }
+   int    getSlaveEqnList(int **slist) 
+                       { (*slist) = slaveEqnList_; return 0; }
+   int    getPerturbationMatrix(HYPRE_ParCSRMatrix *matrix) 
+                       { (*matrix) = hypreRAP_; return 0; }
 
  private:
    int    findConstraints();

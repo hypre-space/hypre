@@ -42,6 +42,33 @@
 #include "HYPRE_LSI_block.h"
 #include "HYPRE_LSI_Uzawa.h"
 #include "HYPRE_SlideReduction.h"
+#ifdef HAVE_LOBPCG
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "../../eigen/lobpcg/lobpcg.h"
+HYPRE_Solver       pcg_solver;
+HYPRE_ParCSRMatrix parcsr_A;
+
+int Funct_Solve(HYPRE_ParVector b,HYPRE_ParVector x)
+{
+   int ierr=0;
+   ierr=HYPRE_ParCSRPCGSolve(pcg_solver,parcsr_A,b,x);assert2(ierr);
+   return 0;
+}
+int Func_A1(HYPRE_ParVector x,HYPRE_ParVector y)
+{
+   int ierr=0;
+   ierr=HYPRE_ParCSRMatrixMatvec(1.0,parcsr_A,x,0.0,y);assert2(ierr);
+   return 0;
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
 
 //***************************************************************************
 // SuperLU includes
@@ -1861,6 +1888,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
          fclose(fp);
          MPI_Barrier(comm_);
       }
+      if ( HYOutputLevel_ & HYFEI_STOPAFTERPRINT ) exit(1);
    }
 
    //-------------------------------------------------------------------
@@ -3277,14 +3305,14 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 {
    int                i, j, numIterations=0, status, ierr, localNRows;
    int                startRow, *procNRows, rowSize, *colInd, nnz, nrows;
-   int                *constrMap, *numSweeps, *relaxType;
+   int                *constrMap, *numSweeps, *relaxType, *constrEqns;
    double             rnorm=0.0, ddata, *colVal, *relaxWt;
    double             stime, etime, ptime, rtime1, rtime2, newnorm;
    char               fname[40];
    FILE               *fp;
    HYPRE_IJMatrix     TempA;
    HYPRE_IJVector     TempX, TempB, TempR;
-   HYPRE_ParCSRMatrix A_csr;
+   HYPRE_ParCSRMatrix A_csr, perturb_csr;
    HYPRE_ParVector    x_csr, b_csr, r_csr;
    HYPRE_SlideReduction *slideObj;
 
@@ -3337,7 +3365,11 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
             HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &procNRows );
             slideObj->getProcConstraintMap(&constrMap);
             HYPRE_LSI_MLIAdjustNodeEqnMap(HYPrecon_, procNRows, constrMap);
+            j = constrMap[mypid_+1] - constrMap[mypid_];
             free(procNRows);
+            slideObj->getSlaveEqnList(&constrEqns);
+            slideObj->getPerturbationMatrix(&perturb_csr);
+            HYPRE_LSI_MLIAdjustNullSpace(HYPrecon_,j,constrEqns,perturb_csr);
          }
 #endif
          slideObj->getReducedMatrix(&currA_);
@@ -3486,6 +3518,42 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
+
+//****************************************************************
+// Keep this part temporarily
+//----------------------------------------------------------------
+#ifdef HAVE_LOBPCG
+int nVectors=7;
+printf("LOBPCG Solve\n");
+HYPRE_LobpcgData lobpcgdata;
+int (*FuncT)(HYPRE_ParVector x,HYPRE_ParVector y);
+double *eigval;
+
+HYPRE_LobpcgCreate(&lobpcgdata);
+HYPRE_LobpcgSetVerbose(lobpcgdata);
+HYPRE_LobpcgSetBlocksize(lobpcgdata, nVectors);
+FuncT = Funct_Solve;
+HYPRE_LobpcgSetSolverFunction(lobpcgdata,FuncT);
+HYPRE_LobpcgSetup(lobpcgdata);
+parcsr_A = A_csr;
+pcg_solver = HYSolver_;
+Matx *X = Mat_Alloc1();
+int  nrows = localEndRow_ - localStartRow_ + 1;
+int  *row_partitioning;
+HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &row_partitioning );
+Mat_Init_Rand(X, row_partitioning[numProcs_],nVectors, HYPRE_VECTORS, 
+              row_partitioning);
+HYPRE_LobpcgSolve(lobpcgdata,Func_A1,X->vsPar,&eigval);
+Mat_Free(X);
+free(X);
+for ( int iE = 0; iE < nVectors; iE++ )
+printf("LOBPCG Eigenvalue %d = %e\n", iE, eigval[iE]);
+exit(1);
+#endif
+//----------------------------------------------------------------
+// end of "Keep this part temporarily"
+//****************************************************************
+
            HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
            HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &numIterations);
            HYPRE_ParVectorCopy( b_csr, r_csr );

@@ -25,6 +25,7 @@
 
 #include "HYPRE.h"
 #include "HYPRE_SlideReduction.h"
+#include "HYPRE_LSI_mli.h"
 #include "../../parcsr_mv/parcsr_mv.h"
 #include "../../parcsr_ls/parcsr_ls.h"
 #include "../../seq_mv/seq_mv.h"
@@ -70,6 +71,7 @@ HYPRE_SlideReduction::HYPRE_SlideReduction(MPI_Comm comm)
    constrBlkSizes_   = NULL;
    eqnStatuses_      = NULL;
    blockMinNorm_     = 1.0e-4;
+   hypreRAP_         = NULL;
 }
 
 //***************************************************************************
@@ -94,6 +96,7 @@ HYPRE_SlideReduction::~HYPRE_SlideReduction()
    if ( reducedBvec_      != NULL ) HYPRE_IJVectorDestroy(reducedBvec_);
    if ( reducedXvec_      != NULL ) HYPRE_IJVectorDestroy(reducedXvec_);
    if ( reducedRvec_      != NULL ) HYPRE_IJVectorDestroy(reducedRvec_);
+   if ( hypreRAP_         != NULL ) HYPRE_ParCSRMatrixDestroy(hypreRAP_);
 }
 
 //***************************************************************************
@@ -1363,8 +1366,8 @@ int HYPRE_SlideReduction::buildReducedMatrix()
    }
    delete [] newColInd;
    delete [] newColVal;
+   hypreRAP_ = RAP_csr;
    free( procNRows );
-   HYPRE_ParCSRMatrixDestroy(RAP_csr);
 
    //------------------------------------------------------------------
    // assemble the reduced matrix
@@ -2038,7 +2041,7 @@ int HYPRE_SlideReduction::buildInvA22Mat()
    int    is, globalNConstr, globalNRows, nConstraints, irow, jcol, rowSize;
    int    *colInd, newEndRow, rowIndex, colIndex, searchIndex, *rowTags;
    int    ig, ir, ic, ierr, index, offset, newRowSize, *newColInd;
-   int    maxBlkSize=HYPRE_SLIDEMAX;
+   int    maxBlkSize=HYPRE_SLIDEMAX, procIndex;
    int    nGroups, *groupIDs, **groupRowNums, *groupSizes, *iTempList, ncnt;
    int     rowCount, *colInd2, rowSize2;
    double *colVal, *colVal2, **Imat, **Imat2, denom, *newColVal;
@@ -2741,8 +2744,10 @@ fclose(fp2);
       assert( !ierr );
       for ( jcol = 0; jcol < rowSize2; jcol++ )
       {
-         newColInd[newRowSize] = colInd2[jcol] + procNConstr_[mypid] +
-                                 nConstraints;
+         colIndex = colInd2[jcol];
+         for ( procIndex = 0; procIndex <= nprocs; procIndex++ )
+            if ( procNConstr_[procIndex] > colIndex ) break;
+         newColInd[newRowSize] = colIndex + procNConstr_[procIndex];
          newColVal[newRowSize++] = colVal2[jcol];
       }
       HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) hypreCBC,rowIndex,

@@ -118,4 +118,10 @@
             - improve slideReduction for intersecting slide surfaces
             - fix resetInitialGuess for Schur reduction
             - take out diagnostic messages in SuperLU
+10/22/02    2.0.0R21
+            - fix a bug in HYPRE_SlideReduction.C
+            - implement null space correction in slide reduction
+            - incorporate LOBPCG for null space correction
+            - take out the last iostream.h from fei-base
+            - major revision of femli
 
