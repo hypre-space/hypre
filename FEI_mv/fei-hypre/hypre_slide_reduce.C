@@ -397,8 +397,8 @@ void HYPRE_LinSysCore::buildSlideReducedSystem()
           selectedList[nSelected++] = searchIndex;
           if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE2 )
           {
-             printf("%4d buildReducedSystem : constraint %4d <=> slave %d\n",
-                    mypid_,i,searchIndex);
+             printf("%4d buildReducedSystem : constraint %4d <=> slave %d (%e)\n",
+                    mypid_,i,searchIndex,searchValue);
           }
        } else 
        {
@@ -1602,7 +1602,6 @@ void HYPRE_LinSysCore::buildSlideReducedSystem()
 
     HYA21_    = A21; 
     HYinvA22_ = invA22; 
-    slideReduction_ = 1;
     selectedList_ = selectedList;
     selectedListAux_ = selectedListAux;
 
@@ -3505,7 +3504,6 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
 
     HYA21_    = A21; 
     HYinvA22_ = invA22; 
-    slideReduction_ = 1;
     selectedList_ = selectedList;
     selectedListAux_ = selectedListAux;
 
