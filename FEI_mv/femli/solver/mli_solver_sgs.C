@@ -30,6 +30,7 @@ MLI_Solver_SGS::MLI_Solver_SGS(char *name) : MLI_Solver(name)
    numColors_        = 1;
    scheme_           = 1;
    printRNorm_       = 0;
+   findOmega_        = 0;
 }
 
 /******************************************************************************
@@ -57,6 +58,7 @@ int MLI_Solver_SGS::setup(MLI_Matrix *mat)
    {
       myColor_   = 0;
       numColors_ = 1;
+      if ( findOmega_ == 1 ) findOmega();   
    }
    else
    {
@@ -341,6 +343,10 @@ int MLI_Solver_SGS::setParams( char *paramString, int argc, char **argv )
    {
       printRNorm_ = 1;
    }
+   else if ( !strcmp(param1, "findOmega") )
+   {
+      findOmega_ = 1;
+   }
    else
    {   
       printf("MLI_Solver_SGS::setParams - parameter not recognized.\n");
@@ -476,7 +482,7 @@ int MLI_Solver_SGS::findOmega()
    double              *ADiagA, *AOffdA, *uData, *fData;
    register int        iStart, iEnd, jj;
    int                 i, j, is, iR, localNRows, extNRows, *tmpJ;
-   int                 iC, index, nprocs, mypid, nSends, start, numInc;
+   int                 index, nprocs, mypid, nSends, start, numInc;
    register double     res;
    double              zero = 0.0, relaxWeight, rnorm, *relNorms;
    double              *vBufData, *tmpData, *vExtData;
@@ -540,13 +546,13 @@ int MLI_Solver_SGS::findOmega()
     * perform SGS sweeps
     *-----------------------------------------------------------------*/
  
-   numInc = 15;
+   numInc = 6;
    relNorms = new double[numInc];
    relNorms[0] = sqrt(hypre_ParVectorInnerProd( hypreF, hypreF ));
 
    for( iR = 1; iR < numInc; iR++ )
    {
-      relaxWeight = 0.1 * iR;
+      relaxWeight = 0.2 * iR;
       hypre_ParVectorSetConstantValues(hypreU, zero);
       for( is = 0; is < nSweeps_; is++ )
       {
@@ -645,7 +651,8 @@ int MLI_Solver_SGS::findOmega()
    }
    if ( mypid == 0 )
       printf("MLI_Solver_SGS::findOmega - optimal omega = %e(%e)\n",
-             0.1*jj,rnorm/relNorms[0]); 
+             0.2*jj,rnorm/relNorms[0]); 
+   for ( i = 0; i < nSweeps_; i++ ) relaxWeights_[i]  = 0.2*jj;
 
    /*-----------------------------------------------------------------
     * clean up and return

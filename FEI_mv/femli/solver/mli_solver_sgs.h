@@ -29,6 +29,7 @@ class MLI_Solver_SGS : public MLI_Solver
    int         numColors_;
    int         scheme_;
    int         printRNorm_;
+   int         findOmega_;
 
 public :
 
