@@ -80,7 +80,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     EndRow   = localEndRow_ - 1;
     nRows    = localEndRow_ - localStartRow_ + 1;
     A_csr    = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(HYA_);
-    if ( HYOutputLevel_ > 1 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 1 )
     {
        printf("%4d buildSchurSystem : StartRow/EndRow = %d %d\n",mypid_,
                                          StartRow,EndRow);
@@ -122,7 +122,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
        if ( diag_found == 0 ) nSchur++;
        HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
     }
-    if ( HYOutputLevel_ > 1 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 1 )
     {
        printf("%4d buildSchurSystem : nSchur = %d\n",mypid_,nSchur);
     }
@@ -179,7 +179,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     delete [] recvCntArray;
     delete [] displArray;
 
-    if ( HYOutputLevel_ > 2 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 2 )
     {
        for ( i = 0; i < nSchur; i++ )
           printf("%4d buildSchurSystem : schurList %d = %d\n",mypid_,
@@ -221,7 +221,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     CGlobalNCols = globalNRows - globalNSchur;
     CStartRow    = ProcNSchur[mypid_];
 
-    if ( HYOutputLevel_ > 1 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 1 )
     {
        printf("%4d buildSchurSystem : CStartRow  = %d\n",mypid_,CStartRow);
        printf("%4d buildSchurSystem : CGlobalDim = %d %d\n", mypid_, 
@@ -330,7 +330,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     C_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(Cmat);
     hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) C_csr);
 
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 3 )
     {
        ncnt = 0;
        MPI_Barrier(MPI_COMM_WORLD);
@@ -370,7 +370,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     MGlobalNRows = globalNRows - globalNSchur;
     MGlobalNCols = globalNRows - globalNSchur;
     MStartRow    = ProcNRows[mypid_] - ProcNSchur[mypid_];
-    if ( HYOutputLevel_ > 1 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 1 )
     {
        printf("%4d buildSchurSystem : MStartRow  = %d\n",mypid_,MStartRow);
        printf("%4d buildSchurSystem : MGlobalDim = %d %d\n", mypid_, 
@@ -439,7 +439,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     ddata = -mindiag;
     MPI_Allreduce(&ddata, &mindiag, 1, MPI_DOUBLE, MPI_MAX, comm_);
     mindiag = - mindiag;
-    if ( HYOutputLevel_ > 1 && mypid_ == 0)
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 1 && mypid_ == 0 )
     {
        printf("buildSchurSystem : max diagonal = %e\n", maxdiag);
        printf("buildSchurSystem : min diagonal = %e\n", mindiag);
@@ -485,7 +485,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     CTGlobalNCols = CGlobalNRows;
     CTStartRow    = ProcNRows[mypid_] - ProcNSchur[mypid_];
 
-    if ( HYOutputLevel_ > 1 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 1 )
     {
        printf("%4d buildSchurSystem : CTStartRow  = %d\n",mypid_,CTStartRow);
        printf("%4d buildSchurSystem : CTGlobalDim = %d %d\n", mypid_, 
@@ -583,7 +583,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     CT_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(CTmat);
     hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) CT_csr);
 
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 3 )
     {
        ncnt = 0;
        MPI_Barrier(MPI_COMM_WORLD);
@@ -614,7 +614,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     // perform the triple matrix product
     //------------------------------------------------------------------
 
-    if ( HYOutputLevel_ > 1 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 1 )
     {
        printf("%4d buildSchurSystem : Triple matrix product starts\n",mypid_);
     }
@@ -622,12 +622,12 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
                                      (hypre_ParCSRMatrix *) M_csr,
                                      (hypre_ParCSRMatrix *) CT_csr,
                                      (hypre_ParCSRMatrix **) &S_csr);
-    if ( HYOutputLevel_ > 1 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 1 )
     {
        printf("%4d buildSchurSystem : Triple matrix product ends\n",mypid_);
     }
 
-    if ( HYOutputLevel_ > 3 )
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 3 )
     {
        MPI_Barrier(MPI_COMM_WORLD);
        ncnt = 0;
@@ -810,7 +810,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
        }
     }
 */
-    if ( HYOutputLevel_ > 0 && mypid_ == 0 ) 
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 0 && mypid_ == 0 )
     {
        printf("buildSchurSystem ends....\n");
     }

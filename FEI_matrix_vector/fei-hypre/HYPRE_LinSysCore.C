@@ -442,16 +442,16 @@ void HYPRE_LinSysCore::parameters(int numParams, char **params)
     }
 
     //-------------------------------------------------------------------
-    // set number of constraints 
+    // perform slide reduction 
     //-------------------------------------------------------------------
 
-    if ( getParam("nConstraints",numParams,params,param) == 1)
+    if ( getParam("slideReduction",numParams,params,param) == 1)
     {
-       sscanf(param,"%d", &nConstraints_);
+       slideReduction_ = 1;
        nParamsFound++;
        if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
        {
-          printf("HYPRE_LinSysCore::parameters - set nConstraints.\n");
+          printf("HYPRE_LinSysCore::parameters - slide reduction enabled.\n");
        }
     }
 
@@ -1247,7 +1247,7 @@ void HYPRE_LinSysCore::sumIntoSystemMatrix(int row, int numValues,
     {
        printf("%4d : HYPRE_LinSysCore::entering sumIntoSystemMatrix.\n",mypid_);
        printf("%4d : row number = %d.\n", mypid_, row);
-       if ( HYOutputLevel_ > 4 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 4 )
        {
           for ( i = 0; i < numValues; i++ )
              printf("  %4d : col = %d, data = %e\n", mypid_, scatterIndices[i], 
@@ -1312,7 +1312,7 @@ void HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%d : HYPRE_LinSysCore::entering sumIntoRHSVector.\n", mypid_);
-       if ( HYOutputLevel_ > 4 )
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 4 )
        {
           for ( i = 0; i < num; i++ )
              printf("%d : sumIntoRHSVector - %d = %e.\n", mypid_, indices[i], 
