@@ -104,8 +104,8 @@ driver: driver.o libHYPRE_ls.a
 
 libHYPRE_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -ru $@ ${OBJS}
-	ranlib $@
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
 
