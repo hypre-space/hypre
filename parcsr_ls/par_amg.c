@@ -63,6 +63,7 @@ hypre_BoomerAMGCreate()
 
    /* output params */
    int      print_level;
+   int      log_level;
    /* int      cycle_op_count; */
    char     log_file_name[256];
    int      debug_flag;
@@ -134,6 +135,7 @@ hypre_BoomerAMGCreate()
 
    /* output params */
    print_level = 0;
+   log_level = 0;
    sprintf(log_file_name, "%s", "amg.out.log");
    /* cycle_op_count = 0; */
    debug_flag = 0;
@@ -179,7 +181,8 @@ hypre_BoomerAMGCreate()
 
    hypre_BoomerAMGSetNumIterations(amg_data, num_iterations);
    hypre_BoomerAMGSetPrintLevel(amg_data, print_level);
-   hypre_BoomerAMGSetLogFileName(amg_data, log_file_name); 
+   hypre_BoomerAMGSetLogLevel(amg_data, log_level);
+   hypre_BoomerAMGSetPrintFileName(amg_data, log_file_name); 
    hypre_BoomerAMGSetDebugFlag(amg_data, debug_flag);
 
    hypre_BoomerAMGSetRestriction(amg_data, 0);
@@ -318,6 +321,10 @@ hypre_BoomerAMGDestroy( void *data )
    {
       hypre_TFree(hypre_ParAMGDataSmoothOption(amg_data));
       hypre_ParAMGDataSmoothOption(amg_data) = NULL;
+   }
+   if ( hypre_ParAMGDataResidual(amg_data) ) {
+      hypre_TFree( hypre_ParAMGDataResidual(amg_data) );
+      hypre_ParAMGDataResidual(amg_data) = NULL;
    }
 
    hypre_TFree(amg_data);
@@ -570,8 +577,26 @@ hypre_BoomerAMGSetSmoothNumSweep( void     *data,
 }
 
 int
+hypre_BoomerAMGSetLogLevel( void     *data,
+                            int       log_level )
+{
+   /* This function should be called before Setup.  Log level changes
+      may require allocation or freeing of arrays, which is presently
+      only done there.
+      It may be possible to support log_level changes at other times,
+      but there is little need.
+   */
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   hypre_ParAMGDataLogLevel(amg_data) = log_level;
+
+   return (ierr);
+}
+
+int
 hypre_BoomerAMGSetPrintLevel( void     *data,
-                        int       print_level )
+                        int print_level )
 {
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
@@ -582,13 +607,13 @@ hypre_BoomerAMGSetPrintLevel( void     *data,
 }
 
 int
-hypre_BoomerAMGSetLogFileName( void       *data,
-                               const char *log_file_name )
+hypre_BoomerAMGSetPrintFileName( void       *data,
+                               const char *print_file_name )
 {
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
 
-   sprintf(hypre_ParAMGDataLogFileName(amg_data), "%s", log_file_name);
+   sprintf(hypre_ParAMGDataLogFileName(amg_data), "%s", print_file_name);
 
    return (ierr);
 }
@@ -602,31 +627,6 @@ hypre_BoomerAMGSetNumIterations( void    *data,
 
    hypre_ParAMGDataNumIterations(amg_data) = num_iterations;
 
-   return (ierr);
-}
-
-int
-hypre_BoomerAMGSetLogging( void       *data,
-                           int         print_level,
-                           const char *log_file_name )
-{
-   int ierr = 0;
-   hypre_ParAMGData  *amg_data = data;
- 
-   /* FILE *fp; */
-
-   hypre_ParAMGDataPrintLevel(amg_data) = print_level;
-/*   if (print_level > 0)
-   {
-      if (*log_file_name == 0)  
-         sprintf(hypre_ParAMGDataLogFileName(amg_data), "%s", "amg.out.log");
-      else
-         sprintf(hypre_ParAMGDataLogFileName(amg_data), "%s", log_file_name); 
-       
-      fp = fopen(hypre_ParAMGDataLogFileName(amg_data),"w");
-      fclose(fp);
-   }
-*/
    return (ierr);
 }
 
@@ -721,6 +721,16 @@ hypre_BoomerAMGGetNumIterations( void     *data,
 
    return (ierr);
 }
+
+int
+hypre_BoomerAMGGetResidual( void * data, hypre_ParVector * resid )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+   resid = hypre_ParAMGDataResidual( amg_data );
+   return ierr;
+}
+                            
 
 int
 hypre_BoomerAMGGetRelResidualNorm( void     *data,

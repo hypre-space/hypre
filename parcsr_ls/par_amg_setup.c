@@ -35,6 +35,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParVector    **U_array;
    hypre_ParVector     *Vtemp;
    hypre_ParCSRMatrix **P_array;
+   hypre_ParVector    *Residual_array;
    int                **CF_marker_array;   
    int                **dof_func_array;   
    int                 *dof_func;
@@ -44,6 +45,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    double               trunc_factor;
 
    int      max_levels; 
+   int      amg_log_level;
    int      amg_print_level;
    int      debug_flag;
 
@@ -93,6 +95,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    old_num_levels = hypre_ParAMGDataNumLevels(amg_data);
    max_levels = hypre_ParAMGDataMaxLevels(amg_data);
+   amg_log_level = hypre_ParAMGDataLogLevel(amg_data);
    amg_print_level = hypre_ParAMGDataPrintLevel(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
@@ -172,7 +175,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       CF_marker_array = hypre_CTAlloc(int*, max_levels-1);
    if (dof_func_array == NULL)
       dof_func_array = hypre_CTAlloc(int*, max_levels);
-
    if (dof_func == NULL)
    {
       first_local_row = hypre_ParCSRMatrixFirstRowIndex(A);
@@ -597,6 +599,17 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    hypre_ParAMGDataFArray(amg_data) = F_array;
    hypre_ParAMGDataUArray(amg_data) = U_array;
+
+   if ( amg_log_level > 2 ) {
+      Residual_array= hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
+                                            hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
+                                            hypre_ParCSRMatrixRowStarts(A_array[0]) );
+      hypre_ParVectorInitialize(Residual_array);
+      hypre_ParVectorSetPartitioningOwner(Residual_array,0);
+      hypre_ParAMGDataResidual(amg_data) = Residual_array;
+   }
+   else
+      hypre_ParAMGDataResidual(amg_data) = NULL;
 
    /*-----------------------------------------------------------------------
     * Print some stuff

@@ -390,37 +390,42 @@ HYPRE_BoomerAMGSetSmoothNumSweep( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetLogLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetLogLevel( HYPRE_Solver solver,
+                            int          log_level  )
+{
+   /* This function should be called before Setup.  Log level changes
+      may require allocation or freeing of arrays, which is presently
+      only done there.
+      It may be possible to support log_level changes at other times,
+      but there is little need.
+   */
+   return( hypre_BoomerAMGSetLogLevel( (void *) solver, log_level ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetPrintLevel
  *--------------------------------------------------------------------------*/
 
 int
 HYPRE_BoomerAMGSetPrintLevel( HYPRE_Solver solver,
-                              int          print_level  )
+                              int        print_level  )
 {
    return( hypre_BoomerAMGSetPrintLevel( (void *) solver, print_level ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetLogFileName
+ * HYPRE_BoomerAMGSetPrintFileName
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_BoomerAMGSetLogFileName( HYPRE_Solver  solver,
-                               const char   *log_file_name  )
+HYPRE_BoomerAMGSetPrintFileName( HYPRE_Solver  solver,
+                               const char   *print_file_name  )
 {
-   return( hypre_BoomerAMGSetLogFileName( (void *) solver, log_file_name ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetLogging
- *--------------------------------------------------------------------------*/
-
-int
-HYPRE_BoomerAMGSetLogging( HYPRE_Solver  solver,
-                           int           print_level,
-                           const char   *log_file_name  )
-{
-   return( hypre_BoomerAMGSetLogging( (void *) solver, print_level, log_file_name ) );
+   return( hypre_BoomerAMGSetPrintFileName( (void *) solver, print_file_name ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -444,6 +449,18 @@ HYPRE_BoomerAMGGetNumIterations( HYPRE_Solver  solver,
 {
    return( hypre_BoomerAMGGetNumIterations( (void *) solver, num_iterations ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGGetResidual
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGGetResidual( HYPRE_Solver solver, HYPRE_ParVector residual )
+{
+   return hypre_BoomerAMGGetResidual( (void *) solver,
+                                      (hypre_ParVector *) residual );
+}
+                            
 
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGGetFinalRelativeResidualNorm

@@ -34,6 +34,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    /* Data Structure variables */
 
    int      amg_print_level;
+   int      amg_log_level;
    int     *num_coeffs;
    int     *num_variables;
    int      cycle_op_count;
@@ -71,11 +72,15 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    double   old_resid;
 
    hypre_ParVector  *Vtemp;
+   hypre_ParVector  *Residual;
 
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
 
-   amg_print_level   = hypre_ParAMGDataPrintLevel(amg_data);
+   amg_print_level = hypre_ParAMGDataPrintLevel(amg_data);
+   amg_log_level   = hypre_ParAMGDataLogLevel(amg_data);
+   if ( amg_log_level>2 )
+      Residual = hypre_ParAMGDataResidual(amg_data);
    file_name     = hypre_ParAMGDataLogFileName(amg_data);
    /* num_unknowns  = hypre_ParAMGDataNumUnknowns(amg_data); */
    num_levels    = hypre_ParAMGDataNumLevels(amg_data);
@@ -148,9 +153,17 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
     *    Compute initial fine-grid residual and print to logfile
     *-----------------------------------------------------------------------*/
 
-   hypre_ParVectorCopy(F_array[0], Vtemp);
-   hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Vtemp);
-   resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+   if ( amg_log_level > 2 ) {
+      hypre_ParVectorCopy(F_array[0], Residual );
+      hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Residual );
+      resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
+   }
+   else {
+      hypre_ParVectorCopy(F_array[0], Vtemp);
+      hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Vtemp);
+      resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+   }
+
 
    resid_nrm_init = resid_nrm;
    rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
@@ -188,9 +201,16 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
 
-      hypre_ParVectorCopy(F_array[0], Vtemp);
-      hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Vtemp);
-      resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+      if ( amg_log_level > 2 ) {
+         hypre_ParVectorCopy(F_array[0], Residual );
+         hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Residual );
+         resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
+      }
+      else {
+         hypre_ParVectorCopy(F_array[0], Vtemp);
+         hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Vtemp);
+         resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+      }
 
       conv_factor = resid_nrm / old_resid;
       relative_resid = 9999;

@@ -370,7 +370,7 @@ hypre_F90_IFACE(hypre_boomeramgsetrelaxweight, HYPRE_BOOMERAMGSETRELAXWEIGHT)( l
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_boomeramgsetprint_level, HYPRE_BOOMERAMGSETIOUTDAT)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetprint_level, HYPRE_BOOMERAMGSETPRINTLEVEL)( long int *solver,
                                          int      *print_level,
                                          int      *ierr     )
 {
@@ -379,31 +379,16 @@ hypre_F90_IFACE(hypre_boomeramgsetprint_level, HYPRE_BOOMERAMGSETIOUTDAT)( long 
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetLogFileName
+ * HYPRE_BoomerAMGSetPrintFileName
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_boomeramgsetlogfilename, HYPRE_BOOMERAMGSETLOGFILENAME)( long int *solver,
-                                             char     *log_file_name,
+hypre_F90_IFACE(hypre_boomeramgsetprintfilename, HYPRE_BOOMERAMGSETPRINTFILENAME)( long int *solver,
+                                             char     *print_file_name,
                                              int      *ierr     )
 {
-   *ierr = (int) ( HYPRE_BoomerAMGSetLogFileName( (HYPRE_Solver) *solver,
-                                               (char *)       log_file_name ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetLogging
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_boomeramgsetlogging, HYPRE_BOOMERAMGSETLOGGING)( long int *solver,
-                                         int      *print_level,
-                                         char     *log_file_name,
-                                         int      *ierr     )
-{
-   *ierr = (int) ( HYPRE_BoomerAMGSetLogging( (HYPRE_Solver) *solver,
-                                           (int)          *print_level,
-                                           (char *)       log_file_name ) );
+   *ierr = (int) ( HYPRE_BoomerAMGSetPrintFileName( (HYPRE_Solver) *solver,
+                                               (char *)       print_file_name ) );
 }
 
 /*--------------------------------------------------------------------------

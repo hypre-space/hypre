@@ -171,12 +171,6 @@ int HYPRE_BoomerAMGSetRelaxWeight(HYPRE_Solver  solver,
 /**
  * (Optional)
  **/
-int HYPRE_BoomerAMGSetPrintLevel(HYPRE_Solver solver,
-                              int          print_level);
-
-/**
- * (Optional)
- **/
 int HYPRE_BoomerAMGSetDebugFlag(HYPRE_Solver solver,
                                 int          debug_flag);
 
@@ -247,17 +241,18 @@ int HYPRE_BoomerAMGSetSmoothNumSweep(HYPRE_Solver  solver,
                                   int       smooth_num_sweep);
 
 /*
- * (Optional)
+ * (Optional) Name of file to which BoomerAMG will print;
+ * cf HYPRE_BoomerAMGSetPrintLevel
  **/
-int HYPRE_BoomerAMGSetLogFileName(HYPRE_Solver  solver,
-                                  const char   *log_file_name);
+int HYPRE_BoomerAMGSetPrintFileName(HYPRE_Solver  solver,
+                                  const char   *print_file_name);
 
 /*
- * (Optional)
+ * (Optional) Requests automatic printing of solver performance and
+ * degugging data; default to 0 for no printing.
  **/
-int HYPRE_BoomerAMGSetLogging(HYPRE_Solver  solver,
-                              int           print_level,
-                              const char   *log_file_name);
+int HYPRE_BoomerAMGSetPrintLevel(HYPRE_Solver  solver,
+                              int           print_level);
 
 /*
  * (Optional) Sets the size of the system of PDEs, if using the systems version.

@@ -717,7 +717,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          hypre_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          hypre_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
          hypre_BoomerAMGSetCycleType(pcg_precond, cycle_type);
-         hypre_BoomerAMGSetLogging(pcg_precond, plogging, NULL);
+         hypre_BoomerAMGSetPrintLevel(pcg_precond, plogging);
          hypre_BoomerAMGSetMaxLevels(pcg_precond,  max_levels);
          hypre_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
    	 if (num_grid_sweeps)

@@ -95,8 +95,10 @@ typedef struct
    char               *tgofilename;
 
    /* log info */
+   int      log_level;
    int      num_iterations;
    double   rel_resid_norm;
+   hypre_ParVector *residual; /* available if log_level>2 */
 
    /* output params */
    int      print_level;
@@ -182,8 +184,10 @@ typedef struct
 /* the others do not have macros yet - these fields may be removed later */
 
 /* log info data */
+#define hypre_ParAMGDataLogLevel(amg_data) ((amg_data)->log_level)
 #define hypre_ParAMGDataNumIterations(amg_data) ((amg_data)->num_iterations)
 #define hypre_ParAMGDataRelativeResidualNorm(amg_data) ((amg_data)->rel_resid_norm)
+#define hypre_ParAMGDataResidual(amg_data) ((amg_data)->residual)
 
 /* output parameters */
 #define hypre_ParAMGDataPrintLevel(amg_data) ((amg_data)->print_level)
