@@ -34,8 +34,6 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
-cat general.h             >> $INTERNAL_HEADER
-		          
 cat box.h                 >> $INTERNAL_HEADER	
 cat box_neighbors.h       >> $INTERNAL_HEADER	
 cat sbox.h	          >> $INTERNAL_HEADER	

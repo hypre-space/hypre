@@ -33,6 +33,8 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
+cat general.h                  >> $INTERNAL_HEADER
+
 echo "#ifdef HYPRE_SEQUENTIAL" >> $INTERNAL_HEADER
 cat mpistubs.h                 >> $INTERNAL_HEADER
 echo "#endif"                  >> $INTERNAL_HEADER

@@ -15,7 +15,6 @@ HEADERS =\
  box_neighbors.h\
  communication.h\
  computation.h\
- general.h\
  headers.h\
  sbox.h\
  struct_grid.h\
