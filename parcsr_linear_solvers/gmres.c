@@ -21,6 +21,7 @@
 typedef struct
 {
    int      k_dim;
+   int      min_iter;
    int      max_iter;
    double   tol;
    double   rel_residual_norm;
@@ -60,6 +61,7 @@ hypre_GMRESCreate( )
    /* set defaults */
    (gmres_data -> k_dim)         = 5;
    (gmres_data -> tol)           = 1.0e-06;
+   (gmres_data -> min_iter)      = 0;
    (gmres_data -> max_iter)      = 1000;
    (gmres_data -> precond)       = hypre_KrylovIdentity;
    (gmres_data -> precond_setup) = hypre_KrylovIdentitySetup;
@@ -172,6 +174,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 {
    hypre_GMRESData  *gmres_data   = gmres_vdata;
    int 		     k_dim        = (gmres_data -> k_dim);
+   int               min_iter     = (gmres_data -> min_iter);
    int 		     max_iter     = (gmres_data -> max_iter);
    double 	     accuracy     = (gmres_data -> tol);
    void             *matvec_data  = (gmres_data -> matvec_data);
@@ -275,7 +278,8 @@ hypre_GMRESSolve(void  *gmres_vdata,
       	t = 1.0 / r_norm;
 	hypre_KrylovScaleVector(t,p[0]);
 	i = 0;
-	while (i < k_dim && r_norm > epsilon && iter < max_iter)
+	while (i < k_dim && (r_norm > epsilon || i < min_iter)
+                         && iter < max_iter)
 	{
 		i++;
 		iter++;
@@ -453,15 +457,31 @@ hypre_GMRESSetTol( void   *gmres_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_GMRESSetMinIter
+ *--------------------------------------------------------------------------*/
+ 
+int
+hypre_GMRESSetMinIter( void *gmres_vdata,
+                       int   min_iter  )
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+   int              ierr = 0;
+ 
+   (gmres_data -> min_iter) = min_iter;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_GMRESSetMaxIter
  *--------------------------------------------------------------------------*/
  
 int
 hypre_GMRESSetMaxIter( void *gmres_vdata,
-                     int   max_iter  )
+                       int   max_iter  )
 {
    hypre_GMRESData *gmres_data = gmres_vdata;
-   int            ierr = 0;
+   int              ierr = 0;
  
    (gmres_data -> max_iter) = max_iter;
  

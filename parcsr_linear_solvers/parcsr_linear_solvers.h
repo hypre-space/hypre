@@ -16,6 +16,13 @@ extern "C" {
 
 # define	P(s) s
 
+/* F90_HYPRE_parcsr_ParaSails.c */
+void hypre_F90_IFACE P((int hypre_parcsrparasailscreate ));
+void hypre_F90_IFACE P((int hypre_parcsrparasailsdestroy ));
+void hypre_F90_IFACE P((int hypre_parcsrparasailssetup ));
+void hypre_F90_IFACE P((int hypre_parcsrparasailssolve ));
+void hypre_F90_IFACE P((int hypre_parcsrparasailssetparams ));
+
 /* F90_HYPRE_parcsr_amg.c */
 void hypre_F90_IFACE P((int hypre_paramgcreate ));
 void hypre_F90_IFACE P((int hypre_paramgdestroy ));
@@ -25,8 +32,10 @@ void hypre_F90_IFACE P((int hypre_paramgsolvet ));
 void hypre_F90_IFACE P((int hypre_paramgsetrestriction ));
 void hypre_F90_IFACE P((int hypre_paramgsetmaxlevels ));
 void hypre_F90_IFACE P((int hypre_paramgsetstrongthreshold ));
+void hypre_F90_IFACE P((int hypre_paramgsetMaxRowSum ));
 void hypre_F90_IFACE P((int hypre_paramgsettruncfactor ));
 void hypre_F90_IFACE P((int hypre_paramgsetinterptype ));
+void hypre_F90_IFACE P((int hypre_paramgsetminiter ));
 void hypre_F90_IFACE P((int hypre_paramgsetmaxiter ));
 void hypre_F90_IFACE P((int hypre_paramgsetcoarsentype ));
 void hypre_F90_IFACE P((int hypre_paramgsetmeasuretype ));
@@ -63,6 +72,7 @@ void hypre_F90_IFACE P((int hypre_parcsrgmressetup ));
 void hypre_F90_IFACE P((int hypre_parcsrgmressolve ));
 void hypre_F90_IFACE P((int hypre_parcsrgmressetkdim ));
 void hypre_F90_IFACE P((int hypre_parcsrgmressettol ));
+void hypre_F90_IFACE P((int hypre_parcsrgmressetminiter ));
 void hypre_F90_IFACE P((int hypre_parcsrgmressetmaxiter ));
 void hypre_F90_IFACE P((int hypre_parcsrgmressetprecond ));
 void hypre_F90_IFACE P((int hypre_parcsrgmressetlogging ));
@@ -97,6 +107,13 @@ void hypre_F90_IFACE P((int hypre_parcsrpilutsetfacrowsize ));
 /* F90_par_laplace.c */
 void hypre_F90_IFACE P((int generatelaplacian ));
 
+/* HYPRE_parcsr_ParaSails.c */
+int HYPRE_ParCSRParaSailsCreate P((MPI_Comm comm , HYPRE_Solver *solver ));
+int HYPRE_ParCSRParaSailsDestroy P((HYPRE_Solver solver ));
+int HYPRE_ParCSRParaSailsSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRParaSailsSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRParaSailsSetParams P((HYPRE_Solver solver , double thresh , int nlevels ));
+
 /* HYPRE_parcsr_amg.c */
 int HYPRE_ParAMGCreate P((HYPRE_Solver *solver ));
 int HYPRE_ParAMGDestroy P((HYPRE_Solver solver ));
@@ -106,8 +123,10 @@ int HYPRE_ParAMGSolveT P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_Par
 int HYPRE_ParAMGSetRestriction P((HYPRE_Solver solver , int restr_par ));
 int HYPRE_ParAMGSetMaxLevels P((HYPRE_Solver solver , int max_levels ));
 int HYPRE_ParAMGSetStrongThreshold P((HYPRE_Solver solver , double strong_threshold ));
+int HYPRE_ParAMGSetMaxRowSum P((HYPRE_Solver solver , double max_row_sum ));
 int HYPRE_ParAMGSetTruncFactor P((HYPRE_Solver solver , double trunc_factor ));
 int HYPRE_ParAMGSetInterpType P((HYPRE_Solver solver , int interp_type ));
+int HYPRE_ParAMGSetMinIter P((HYPRE_Solver solver , int min_iter ));
 int HYPRE_ParAMGSetMaxIter P((HYPRE_Solver solver , int max_iter ));
 int HYPRE_ParAMGSetCoarsenType P((HYPRE_Solver solver , int coarsen_type ));
 int HYPRE_ParAMGSetMeasureType P((HYPRE_Solver solver , int measure_type ));
@@ -144,11 +163,32 @@ int HYPRE_ParCSRGMRESSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE
 int HYPRE_ParCSRGMRESSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParCSRGMRESSetKDim P((HYPRE_Solver solver , int k_dim ));
 int HYPRE_ParCSRGMRESSetTol P((HYPRE_Solver solver , double tol ));
+int HYPRE_ParCSRGMRESSetMinIter P((HYPRE_Solver solver , int min_iter ));
 int HYPRE_ParCSRGMRESSetMaxIter P((HYPRE_Solver solver , int max_iter ));
 int HYPRE_ParCSRGMRESSetPrecond P((HYPRE_Solver solver , int (*precond )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), int (*precond_setup )(HYPRE_Solver sol ,HYPRE_ParCSRMatrix matrix ,HYPRE_ParVector b ,HYPRE_ParVector x ), void *precond_data ));
 int HYPRE_ParCSRGMRESSetLogging P((HYPRE_Solver solver , int logging ));
 int HYPRE_ParCSRGMRESGetNumIterations P((HYPRE_Solver solver , int *num_iterations ));
 int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
+
+/* HYPRE_parcsr_ml.c */
+int MH_Irecv P((void *buf , unsigned int count , int *src , int *mid , MPI_Comm comm , MPI_Request *request ));
+int MH_Wait P((void *buf , unsigned int count , int *src , int *mid , MPI_Comm comm , MPI_Request *request ));
+int MH_Send P((void *buf , unsigned int count , int dest , int mid , MPI_Comm comm ));
+int MH_ExchBdry P((double *vec , void *obj ));
+int MH_MatVec P((void *obj , int leng1 , double p [], int leng2 , double ap []));
+int MH_GetRow P((void *obj , int N_requested_rows , int requested_rows [], int allocated_space , int columns [], double values [], int row_lengths []));
+int HYPRE_ParCSRMLCreate P((MPI_Comm comm , HYPRE_Solver *solver ));
+int HYPRE_ParCSRMLDestroy P((HYPRE_Solver solver ));
+int HYPRE_ParCSRMLSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRMLSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRMLSetStrongThreshold P((HYPRE_Solver solver , double strong_threshold ));
+int HYPRE_ParCSRMLSetNumPreSmoothings P((HYPRE_Solver solver , int num_sweeps ));
+int HYPRE_ParCSRMLSetNumPostSmoothings P((HYPRE_Solver solver , int num_sweeps ));
+int HYPRE_ParCSRMLSetPreSmoother P((HYPRE_Solver solver , int smoother_type ));
+int HYPRE_ParCSRMLSetPostSmoother P((HYPRE_Solver solver , int smoother_type ));
+int HYPRE_ParCSRMLSetDampingFactor P((HYPRE_Solver solver , double factor ));
+int HYPRE_ParCSRMLSetBGSBlockSize P((HYPRE_Solver solver , int size ));
+int HYPRE_ParCSRMLConstructMHMatrix P((HYPRE_ParCSRMatrix A , MH_Matrix *mh_mat , MPI_Comm comm , int *partition , MH_Context *obj ));
 
 /* HYPRE_parcsr_pcg.c */
 int HYPRE_ParCSRPCGCreate P((MPI_Comm comm , HYPRE_Solver *solver ));
@@ -204,6 +244,7 @@ int hypre_GMRESSetup P((void *gmres_vdata , void *A , void *b , void *x ));
 int hypre_GMRESSolve P((void *gmres_vdata , void *A , void *b , void *x ));
 int hypre_GMRESSetKDim P((void *gmres_vdata , int k_dim ));
 int hypre_GMRESSetTol P((void *gmres_vdata , double tol ));
+int hypre_GMRESSetMinIter P((void *gmres_vdata , int min_iter ));
 int hypre_GMRESSetMaxIter P((void *gmres_vdata , int max_iter ));
 int hypre_GMRESSetPrecond P((void *gmres_vdata , int (*precond )(), int (*precond_setup )(), void *precond_data ));
 int hypre_GMRESSetLogging P((void *gmres_vdata , int logging ));
@@ -216,8 +257,10 @@ int hypre_ParAMGDestroy P((void *data ));
 int hypre_ParAMGSetRestriction P((void *data , int restr_par ));
 int hypre_ParAMGSetMaxLevels P((void *data , int max_levels ));
 int hypre_ParAMGSetStrongThreshold P((void *data , double strong_threshold ));
+int hypre_ParAMGSetMaxRowSum P((void *data , double max_row_sum ));
 int hypre_ParAMGSetTruncFactor P((void *data , double trunc_factor ));
 int hypre_ParAMGSetInterpType P((void *data , int interp_type ));
+int hypre_ParAMGSetMinIter P((void *data , int min_iter ));
 int hypre_ParAMGSetMaxIter P((void *data , int max_iter ));
 int hypre_ParAMGSetCoarsenType P((void *data , int coarsen_type ));
 int hypre_ParAMGSetMeasureType P((void *data , int measure_type ));

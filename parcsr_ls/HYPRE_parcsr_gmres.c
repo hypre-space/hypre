@@ -91,12 +91,23 @@ HYPRE_ParCSRGMRESSetTol( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRGMRESSetMinIter
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRGMRESSetMinIter( HYPRE_Solver solver,
+                             int          min_iter )
+{
+   return( hypre_GMRESSetMinIter( (void *) solver, min_iter ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRGMRESSetMaxIter
  *--------------------------------------------------------------------------*/
 
 int
 HYPRE_ParCSRGMRESSetMaxIter( HYPRE_Solver solver,
-                             int                max_iter )
+                             int          max_iter )
 {
    return( hypre_GMRESSetMaxIter( (void *) solver, max_iter ) );
 }

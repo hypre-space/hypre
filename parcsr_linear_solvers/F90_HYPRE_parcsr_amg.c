@@ -171,6 +171,19 @@ hypre_F90_IFACE(hypre_paramgsetinterptype)( long int *solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParAMGSetMinIter
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_paramgsetminiter)( long int *solver,
+                                         int      *min_iter,
+                                         int      *ierr      )
+{
+   *ierr = (int) ( HYPRE_ParAMGSetMinIter( (HYPRE_Solver) *solver,
+                                           (int)          *min_iter ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParAMGSetMaxIter
  *--------------------------------------------------------------------------*/
 

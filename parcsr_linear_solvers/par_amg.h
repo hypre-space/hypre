@@ -91,6 +91,7 @@ typedef struct
 
 /* solve params */
 
+#define hypre_ParAMGDataMinIter(amg_data) ((amg_data)->min_iter)
 #define hypre_ParAMGDataMaxIter(amg_data) ((amg_data)->max_iter)
 #define hypre_ParAMGDataCycleType(amg_data) ((amg_data)->cycle_type)
 #define hypre_ParAMGDataTol(amg_data) ((amg_data)->tol)

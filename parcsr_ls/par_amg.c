@@ -35,6 +35,7 @@ hypre_ParAMGCreate()
    int      measure_type;
 
    /* solve params */
+   int      min_iter;
    int      max_iter;
    int      cycle_type;    
  
@@ -70,6 +71,7 @@ hypre_ParAMGCreate()
    measure_type = 0;
 
    /* solve params */
+   min_iter  = 0;
    max_iter  = 20;
    cycle_type = 1;
    tol = 1.0e-7;
@@ -120,6 +122,7 @@ hypre_ParAMGCreate()
    hypre_ParAMGSetCoarsenType(amg_data, coarsen_type);
    hypre_ParAMGSetMeasureType(amg_data, measure_type);
 
+   hypre_ParAMGSetMinIter(amg_data, min_iter);
    hypre_ParAMGSetMaxIter(amg_data, max_iter);
    hypre_ParAMGSetCycleType(amg_data, cycle_type);
    hypre_ParAMGSetTol(amg_data, tol); 
@@ -271,6 +274,18 @@ hypre_ParAMGSetInterpType( void     *data,
 
    return (ierr);
 }
+
+int
+hypre_ParAMGSetMinIter( void     *data,
+                        int       min_iter )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataMinIter(amg_data) = min_iter;
+
+   return (ierr);
+} 
 
 int
 hypre_ParAMGSetMaxIter( void     *data,

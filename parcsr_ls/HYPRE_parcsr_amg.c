@@ -157,6 +157,17 @@ HYPRE_ParAMGSetInterpType( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParAMGSetMinIter
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParAMGSetMinIter( HYPRE_Solver solver,
+                        int          min_iter  )
+{
+   return( hypre_ParAMGSetMinIter( (void *) solver, min_iter ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParAMGSetMaxIter
  *--------------------------------------------------------------------------*/
 

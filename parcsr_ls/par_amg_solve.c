@@ -49,6 +49,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
 
    int      j;
    int      Solve_err_flag;
+   int      min_iter;
    int      max_iter;
    int      cycle_count;
    int      total_coeffs;
@@ -80,6 +81,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
    U_array       = hypre_ParAMGDataUArray(amg_data);
 
    tol           = hypre_ParAMGDataTol(amg_data);
+   min_iter      = hypre_ParAMGDataMinIter(amg_data);
    max_iter      = hypre_ParAMGDataMaxIter(amg_data);
 
    num_coeffs = hypre_CTAlloc(int, num_levels);
@@ -165,7 +167,8 @@ hypre_ParAMGSolve( void               *amg_vdata,
     *    Main V-cycle loop
     *-----------------------------------------------------------------------*/
    
-   while (relative_resid >= tol && cycle_count < max_iter 
+   while ((relative_resid >= tol || cycle_count < min_iter)
+          && cycle_count < max_iter
           && Solve_err_flag == 0)
    {
       hypre_ParAMGDataCycleOpCount(amg_data) = 0;   

@@ -46,6 +46,7 @@ int HYPRE_ParAMGSetStrongThreshold P((HYPRE_Solver solver , double strong_thresh
 int HYPRE_ParAMGSetMaxRowSum P((HYPRE_Solver solver , double max_row_sum ));
 int HYPRE_ParAMGSetTruncFactor P((HYPRE_Solver solver , double trunc_factor ));
 int HYPRE_ParAMGSetInterpType P((HYPRE_Solver solver , int interp_type ));
+int HYPRE_ParAMGSetMinIter P((HYPRE_Solver solver , int min_iter ));
 int HYPRE_ParAMGSetMaxIter P((HYPRE_Solver solver , int max_iter ));
 int HYPRE_ParAMGSetCoarsenType P((HYPRE_Solver solver , int coarsen_type ));
 int HYPRE_ParAMGSetMeasureType P((HYPRE_Solver solver , int measure_type ));
@@ -67,6 +68,7 @@ int HYPRE_ParCSRGMRESSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE
 int HYPRE_ParCSRGMRESSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParCSRGMRESSetKDim P((HYPRE_Solver solver , int k_dim ));
 int HYPRE_ParCSRGMRESSetTol P((HYPRE_Solver solver , double tol ));
+int HYPRE_ParCSRGMRESSetMinIter P((HYPRE_Solver solver , int min_iter ));
 int HYPRE_ParCSRGMRESSetMaxIter P((HYPRE_Solver solver , int max_iter ));
 int HYPRE_ParCSRGMRESSetPrecond P((HYPRE_Solver solver , int (*precond )(
 HYPRE_Solver sol, HYPRE_ParCSRMatrix matrix, HYPRE_ParVector b, HYPRE_ParVector

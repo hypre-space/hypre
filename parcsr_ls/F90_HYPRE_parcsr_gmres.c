@@ -101,6 +101,19 @@ hypre_F90_IFACE(hypre_parcsrgmressettol)( long int *solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRGMRESSetMinIter
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrgmressetminiter)( long int *solver,
+                                              int      *min_iter,
+                                              int      *ierr      )
+{
+   *ierr = (int) ( HYPRE_ParCSRGMRESSetMinIter( (HYPRE_Solver) *solver,
+                                                (int)          *min_iter ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRGMRESSetMaxIter
  *--------------------------------------------------------------------------*/
 
