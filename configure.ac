@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 # Set VERSION so we only need to edit in one place (i.e., here)
-m4_define(HYPRE_VERSION, 1.8.1b)
+m4_define(HYPRE_VERSION, 1.8.2b)
 m4_define(HYPRE_TOP_SRC_DIR, `pwd`)
 
 # Variable Initialization
