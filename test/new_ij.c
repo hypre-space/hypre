@@ -3551,7 +3551,7 @@ BuildParRotate7pt( int                  argc,
 
    int                 num_procs, myid;
    int                 p, q;
-   double             *values, eps, alpha;
+   double              eps, alpha;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -3671,7 +3671,7 @@ BuildParVarDifConv( int                  argc,
 
    int                 num_procs, myid;
    int                 p, q, r;
-   double             *values, eps;
+   double              eps;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
