@@ -44,20 +44,20 @@ template which contains the names of the source and include files that need to
 be built as well as include file paths and macro flags.  The source file names 
 are added to the \file{FILES} list; include files to be installed are in the 
 \file{include_HEADERS} list; and include paths and macro flags (i.e. -Dxxx) are 
-in the AM_CPPFLAGS list for C and C++ compilers or the AM_FFLAGS list for Fortran
+in the AM\_CPPFLAGS list for C and C++ compilers or the AM\_FFLAGS list for Fortran
 compilers.  These preprocessor flags are global to the build system.  The 
-EXTRA_DIST list is for those files not needed for building \hypre{} but desired 
+EXTRA\_DIST list is for those files not needed for building \hypre{} but desired 
 for its distribution, such as a README file. 
 
 The top level \file{Makefile.am}, i.e. \file{linear_solvers/Makefile.am}, is 
-edited to add the name of the new (highest_level) subdirectory, excluding all of
-its child-subdirectories, to the SUBDIRS, HYPRE_SUBDIR_LIST and possibly 
-DIST_SUBDIRS lists.  The rest of this file is not likely to need changing.
+edited to add the name of the new (highest\_level) subdirectory, excluding all of
+its child-subdirectories, to the SUBDIRS, HYPRE\_SUBDIR\_LIST and possibly 
+DIST\_SUBDIRS lists.  The rest of this file is not likely to need changing.
 
 Whenever changes to a \file{Makefile} are needed, they MUST be made to the \file{Makefile.am}
-files -- NOT to any other \file{Makefile}.
-\linebreak{\file{Makefile.in} and \file{Makefile} are regenerated everytime \file{bootstrap}
-or \file{configure} are run.}
+files---NOT to any other \file{Makefile}.
+\file{Makefile.in} and \file{Makefile} are regenerated everytime \file{bootstrap}
+or \file{configure} are run.
 
 %==========================================================================
 \subsection{Sample Makefile.am with Source Code}
@@ -110,11 +110,11 @@ that are customized for \hypre{}.
 \file{configure.ac} is the template file, located in the \file{config} subdirectory, used 
 by Autoconf to create the \file{configure} script.  It is the file that gets changed
 when new subdirectories are added.  The names of new subdirectories are added to
-the AC_CONFIG_FILES list (near the end of the file).
+the AC\_CONFIG\_FILES list (near the end of the file).
 
 For example, a developer creates subdirectory \file{new_solve} with its own 
 subdirectories of \file{solve_setup} and \file{solve_exec}.  The additions to 
-AC_CONFIG_FILES would be (back slashes indicate continuation lines):
+AC\_CONFIG\_FILES would be (back slashes indicate continuation lines):
 
 \begin{verbatim}
     new_solve/Makefile \
@@ -141,8 +141,8 @@ To run \file{bootstrap} you must be in the top-level directory, which is usually
 \file{linear_solvers} directory.  The execute line is: \file{./config/bootstrap} 
 
 %==========================================================================
-\section{Build & Install}
-\label{Build & Install}
+\section{Build and Install}
+\label{Build and Install}
 
 
 Now that all of the files are created/edited, \hypre{} is ready to be configured
