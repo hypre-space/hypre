@@ -3734,9 +3734,9 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2)
                   {
-                     HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 3);
+                     HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
                   }
                   if ( HYPreconReuse_ == 1 )
@@ -4004,9 +4004,9 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2)
                   {
-                     HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 3);
+                     HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
                   }
                   if ( HYPreconReuse_ == 1 )
@@ -4272,7 +4272,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2)
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
 
                   if ( HYPreconReuse_ == 1 )
@@ -4537,7 +4537,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2)
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 2);
 
                   if ( HYPreconReuse_ == 1 )
@@ -4797,7 +4797,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2)
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 2);
 
                   if ( HYPreconReuse_ == 1 )
@@ -5057,7 +5057,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
+                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2)
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 2);
 
                   if ( HYPreconReuse_ == 1 )
@@ -5352,10 +5352,10 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
        printf("Boomeramg relax type   = %d\n", amgRelaxType_[0]);
        printf("Boomeramg relax weight = %e\n", amgRelaxWeight_[0]);
     }
-    if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0)
+    if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2)
     {
        HYPRE_BoomerAMGSetIOutDat(HYSolver_, 2);
-       HYPRE_BoomerAMGSetDebugFlag(HYSolver_, 3);
+       HYPRE_BoomerAMGSetDebugFlag(HYSolver_, 0);
     }
     HYPRE_BoomerAMGSetMaxIter(HYSolver_, maxIterations_);
     HYPRE_BoomerAMGSetMeasureType(HYSolver_, 0);
