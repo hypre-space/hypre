@@ -67,13 +67,15 @@ typedef struct
 ParaSAILS::ParaSAILS(const HYPRE_DistributedMatrix& mat)
 {
     int ierr;
+    int junk;
 
     A = mat; // store matrix in object
 
     ierr = HYPRE_DistributedMatrixGetDims(A, &n, &n); // assumes square matrix
     assert(!ierr);
     comm = HYPRE_DistributedMatrixGetContext(A);
-    ierr = HYPRE_DistributedMatrixGetLocalRange(A, &my_start_row, &my_end_row);
+    ierr = HYPRE_DistributedMatrixGetLocalRange(A, &my_start_row, &my_end_row,
+        &junk, &junk);
     assert(!ierr);
     my_start_row++; // convert to 1-based indexing
     my_end_row++;
@@ -85,13 +87,13 @@ ParaSAILS::ParaSAILS(const HYPRE_DistributedMatrix& mat)
     MPI_Comm_size(comm, &npes);
     MPI_Comm_rank(comm, &myid);
 
-    ierr = HYPRE_NewIJMatrix(comm, &M, n, n); // store matrix in object
+    ierr = HYPRE_IJMatrixCreate(comm, &M, n, n); // store matrix in object
     assert(!ierr);
-    ierr = HYPRE_SetIJMatrixLocalStorageType(M, HYPRE_PARCSR);
+    ierr = HYPRE_IJMatrixSetLocalStorageType(M, HYPRE_PARCSR);
     assert(!ierr);
-    ierr = HYPRE_SetIJMatrixLocalSize(M, my_end_row-my_start_row+1, n);
+    ierr = HYPRE_IJMatrixSetLocalSize(M, my_end_row-my_start_row+1, n);
     assert(!ierr);
-    ierr = HYPRE_InitializeIJMatrix(M);
+    ierr = HYPRE_IJMatrixInitialize(M);
     assert(!ierr);
 
     // default values
@@ -545,7 +547,7 @@ inline void prune_row(int row, RowRecord *rec, SharedData *shared,
 
 void *server(void *local)
 {
-    int threadid = ((LocalData *)local)->threadid;
+    //int threadid = ((LocalData *)local)->threadid;
     SharedData *shared = ((LocalData *)local)->shared;
 
     MPI_Status  status;
@@ -1155,9 +1157,9 @@ void *worker(void *local)
     row = get_row(shared);
 
     // double time0 = MPI_Wtime();
-    double time_calc = 0.;
+    //double time_calc = 0.;
     double time_ls = 0.;
-    double time1;
+    //double time1;
     int maxnrow = 0;
 
     while (row != -1)
@@ -1211,7 +1213,7 @@ void *worker(void *local)
         }
 #else
         int ierr;
-        ierr = HYPRE_InsertIJMatrixRow(shared->sails->M, len, row,
+        ierr = HYPRE_IJMatrixInsertRow(shared->sails->M, len, row,
 	  (int *) ind, bvec); // kludge
 	assert(!ierr);
 #endif

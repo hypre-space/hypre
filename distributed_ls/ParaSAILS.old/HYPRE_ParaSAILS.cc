@@ -49,7 +49,10 @@ HYPRE_ParaSAILS ParaSAILS_New(
 int HYPRE_ParaSAILS_Free(
   HYPRE_ParaSAILS in_ptr)
 {
+
     hypre_ParaSAILS *solver = (hypre_ParaSAILS *) in_ptr;
+
+    // UNDONE destroy communication package
 
     hypre_TFree(solver);
 
@@ -108,15 +111,15 @@ int HYPRE_ParaSAILS_Setup(
 
     solver->obj->calculate();
 
-    ierr = HYPRE_AssembleIJMatrix(solver->obj->M); // what does this do?
+    ierr = HYPRE_IJMatrixAssemble(solver->obj->M);
     assert(!ierr);
 
     // Extract the underlying ParCSR matrix from the IJ matrix
     solver->par_matrix = (hypre_ParCSRMatrix *) 
-      hypre_GetIJMatrixLocalStorage(solver->obj->M);
+      HYPRE_IJMatrixGetLocalStorage(solver->obj->M);
 
     // Mat-Vec preprocessing
-    hypre_GenerateMatvecCommunicationInfo(solver->par_matrix);
+    hypre_MatvecCommPkgCreate(solver->par_matrix);
 
     return 0;
 }
@@ -133,7 +136,7 @@ int HYPRE_ParaSAILS_Solve(
 {
     hypre_ParaSAILS *solver = (hypre_ParaSAILS *) in_ptr;
 
-    hypre_ParMatvec(1.0, solver->par_matrix, b, 1.0, x);
+    hypre_ParCSRMatrixMatvec(1.0, solver->par_matrix, b, 1.0, x);
 
     return 0;
 }
