@@ -15,7 +15,9 @@
 #include "./distributed_matrix.h"
 
 /* Public headers and prototypes for PETSc matrix library */
+#ifdef PETSC_AVAILABLE
 #include "sles.h"
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_FreeDistributedMatrixPETSc
@@ -25,9 +27,11 @@
 int 
 hypre_FreeDistributedMatrixPETSc( hypre_DistributedMatrix *distributed_matrix )
 {
+#ifdef PETSC_AVAILABLE
    Mat PETSc_matrix = (Mat) hypre_DistributedMatrixLocalStorage(distributed_matrix);
 
    MatDestroy( PETSc_matrix );
+#endif
 
    return(0);
 }
@@ -44,10 +48,13 @@ hypre_FreeDistributedMatrixPETSc( hypre_DistributedMatrix *distributed_matrix )
 int 
 hypre_PrintDistributedMatrixPETSc( hypre_DistributedMatrix *matrix )
 {
+   int  ierr=0;
+#ifdef PETSC_AVAILABLE
    Mat PETSc_matrix = (Mat) hypre_DistributedMatrixLocalStorage(matrix);
-   int  ierr;
 
-   return( MatView( PETSc_matrix, VIEWER_STDOUT_WORLD ) );
+   ierr = MatView( PETSc_matrix, VIEWER_STDOUT_WORLD );
+#endif
+   return(ierr);
 }
 
 /*--------------------------------------------------------------------------
@@ -59,9 +66,10 @@ hypre_GetDistributedMatrixLocalRangePETSc( hypre_DistributedMatrix *matrix,
                              int *start,
                              int *end )
 {
+   int ierr=0;
+#ifdef PETSC_AVAILABLE
    Mat PETSc_matrix = (Mat) hypre_DistributedMatrixLocalStorage(matrix);
    MatType PETScType;
-   int ierr;
 
    if (!PETSc_matrix) return(-1);
 
@@ -70,6 +78,7 @@ hypre_GetDistributedMatrixLocalRangePETSc( hypre_DistributedMatrix *matrix,
    if (PETScType != MATMPIAIJ) return(-1);
 
    ierr = MatGetOwnershipRange( PETSc_matrix, start, end ); CHKERRA(ierr);
+#endif
 
    return(ierr);
 }
@@ -85,9 +94,10 @@ hypre_GetDistributedMatrixRowPETSc( hypre_DistributedMatrix *matrix,
                              int **col_ind,
                              double **values )
 {
+   int ierr;
+#ifdef PETSC_AVAILABLE
    Mat PETSc_matrix = (Mat) hypre_DistributedMatrixLocalStorage(matrix);
    MatType PETScType;
-   int ierr;
 
    if (!PETSc_matrix) return(-1);
 
@@ -96,6 +106,7 @@ hypre_GetDistributedMatrixRowPETSc( hypre_DistributedMatrix *matrix,
    if (PETScType != MATMPIAIJ) return(-1);
 
    ierr = MatGetRow( PETSc_matrix, row, size, col_ind, values); CHKERRA(ierr);
+#endif
 
    return(ierr);
 }
@@ -111,9 +122,10 @@ hypre_RestoreDistributedMatrixRowPETSc( hypre_DistributedMatrix *matrix,
                              int **col_ind,
                              double **values )
 {
+   int ierr;
+#ifdef PETSC_AVAILABLE
    Mat PETSc_matrix = (Mat) hypre_DistributedMatrixLocalStorage(matrix);
    MatType PETScType;
-   int ierr;
 
    if (PETSc_matrix == NULL) return(-1);
 
@@ -122,6 +134,7 @@ hypre_RestoreDistributedMatrixRowPETSc( hypre_DistributedMatrix *matrix,
    if (PETScType != MATMPIAIJ) return(-1);
 
    ierr = MatRestoreRow( PETSc_matrix, row, size, col_ind, values); CHKERRA(ierr);
+#endif
 
    return(ierr);
 }
