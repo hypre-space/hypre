@@ -508,6 +508,9 @@ main( int   argc,
     * Set up matrix
     *-----------------------------------------------------------*/
 
+   time_index = hypre_InitializeTiming("IJ Interface");
+   hypre_BeginTiming(time_index);
+
    if ( build_matrix_type == 0 )
    {
       BuildParFromFile(argc, argv, build_matrix_arg_index, &parcsr_A);
@@ -542,9 +545,6 @@ main( int   argc,
    /*-----------------------------------------------------------
     * Copy the parcsr matrix into the IJMatrix through interface calls
     *-----------------------------------------------------------*/
-
-   time_index = hypre_InitializeTiming("IJ Interface");
-   hypre_BeginTiming(time_index);
 
    ierr = HYPRE_ParCSRMatrixGetComm( parcsr_A, &comm );
    ierr += HYPRE_ParCSRMatrixGetDims( parcsr_A, &M, &N );
