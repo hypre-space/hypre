@@ -25,40 +25,43 @@ ONLINE_OPTS =\
 all: html ps
 
 install: all
-	@cp -fr usr_manual    $$HYPRE_INSTALL_DIR/docs
-	@cp -f  usr_manual.ps $$HYPRE_INSTALL_DIR/docs
-	@cp -fr code_ref_html $$HYPRE_INSTALL_DIR/docs
-	@cp -f  code_ref.ps   $$HYPRE_INSTALL_DIR/docs
+	@cp -fr HYPRE_usr_manual    $$HYPRE_INSTALL_DIR/docs
+	@cp -f  HYPRE_usr_manual.ps $$HYPRE_INSTALL_DIR/docs
+	@cp -fr HYPRE_code_ref      $$HYPRE_INSTALL_DIR/docs
+	@cp -f  HYPRE_code_ref.ps   $$HYPRE_INSTALL_DIR/docs
 
 clean:
 	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
 	@/bin/rm -f *.idx *.ilg *.ind 
+	@/bin/rm -f code_ref.tex version.tex
 
 veryclean: clean
-	@/bin/rm -fr usr_manual
-	@/bin/rm -f  usr_manual.ps
-	@/bin/rm -fr dev_manual
-	@/bin/rm -f  dev_manual.ps
-	@/bin/rm -fr code_ref_html
-	@/bin/rm -f  code_ref.tex code_ref.ps
+	@/bin/rm -fr HYPRE_usr_manual
+	@/bin/rm -f  HYPRE_usr_manual.ps
+	@/bin/rm -fr HYPRE_dev_manual
+	@/bin/rm -f  HYPRE_dev_manual.ps
+	@/bin/rm -fr HYPRE_code_ref
+	@/bin/rm -f  HYPRE_code_ref.tex HYPRE_code_ref.ps
 
 ##################################################################
 # Rules
 ##################################################################
 
-html: usr_html dev_html code_ref_html
+html: usr_html dev_html ref_html
 
-ps: usr_ps dev_ps code_ref.ps
+ps: usr_ps dev_ps ref_ps
 
 usr: usr_html usr_ps
-usr_html: usr_manual/usr_manual.html
-usr_ps: usr_manual.ps
+usr_html: HYPRE_usr_manual/usr_manual.html
+usr_ps: HYPRE_usr_manual.ps
 
 dev: dev_html dev_ps
-dev_html: dev_manual/dev_manual.html
-dev_ps: dev_manual.ps
+dev_html: HYPRE_dev_manual/dev_manual.html
+dev_ps: HYPRE_dev_manual.ps
 
-code_ref: code_ref_html code_ref.ps
+ref: ref_html ref_ps
+ref_html: HYPRE_code_ref/index.html
+ref_ps: HYPRE_code_ref.ps
 
 ##########
 
@@ -66,11 +69,11 @@ USR_FILES =\
  usr_building_code.tex\
  usr_manual.tex
  
-usr_manual/usr_manual.html: usr_manual.dvi
-	latex2html ${ONLINE_OPTS} usr_manual.tex
+HYPRE_usr_manual/usr_manual.html: usr_manual.dvi
+	latex2html ${ONLINE_OPTS} -dir HYPRE_usr_manual usr_manual.tex
 
-usr_manual.ps: usr_manual.dvi
-	dvips -o usr_manual.ps usr_manual
+HYPRE_usr_manual.ps: usr_manual.dvi
+	dvips -o HYPRE_usr_manual.ps usr_manual
 
 usr_manual.dvi: version.tex usr_manual.idx
 	latex usr_manual
@@ -98,11 +101,11 @@ DEV_FILES =\
  dev_repository.tex\
  dev_requirements.tex
 
-dev_manual/dev_manual.html: dev_manual.dvi
-	latex2html ${ONLINE_OPTS} dev_manual.tex
+HYPRE_dev_manual/dev_manual.html: dev_manual.dvi
+	latex2html ${ONLINE_OPTS} -dir HYPRE_dev_manual dev_manual.tex
 
-dev_manual.ps: dev_manual.dvi
-	dvips -o dev_manual.ps dev_manual
+HYPRE_dev_manual.ps: dev_manual.dvi
+	dvips -o HYPRE_dev_manual.ps dev_manual
 
 dev_manual.dvi: version.tex dev_manual.idx
 	latex dev_manual
@@ -115,40 +118,30 @@ dev_manual.idx: ${DEV_FILES}
 
 ##########
 
-INTERFACE_DOCIFIED_FILES =\
+DOCIFIED_FILES=\
  ../struct_linear_solvers/HYPRE_struct_pcg.c
-
-IMPLEMENTATION_DOCIFIED_FILES =
 # ../struct_matrix_vector/communication.c
 
-INTERFACE_DXX =\
- ${INTERFACE_DOCIFIED_FILES:.c=.dxx}
+DXX_FILES =\
+ interface_ref.dxx\
+ implementation_ref.dxx\
+ ${DOCIFIED_FILES:.c=.dxx}
 
-IMPLEMENTATION_DXX =\
- ${IMPLEMENTATION_DOCIFIED_FILES:.c=.dxx}
+HYPRE_code_ref/index.html: code_ref.dxx 
+	doc++ -d HYPRE_code_ref -B hypre_wiw.html code_ref.dxx
+	cp -f hypre_wiw.gif HYPRE_code_ref
 
-${INTERFACE_DXX}: ${INTERFACE_DOCIFIED_FILES}
+HYPRE_code_ref.ps: code_ref.dvi
+	dvips -o HYPRE_code_ref.ps code_ref.dvi 		
 
-${IMPLEMENTATION_DXX}: ${IMPLEMENTATION_DOCIFIED_FILES}
-
-interface_ref.dxx: ${INTERFACE_DXX} 
-
-implementation_ref.dxx: ${IMPLEMENTATION_DXX}
-
-code_ref.dxx: implementation_ref.dxx interface_ref.dxx
-
-code_ref_html: code_ref.dxx
-	doc++ -d code_ref_html code_ref.dxx
+code_ref.dvi: code_ref.tex
+	latex code_ref
+	latex code_ref
 
 code_ref.tex: code_ref.dxx
 	doc++ -t -o code_ref.tex code_ref.dxx
 
-code_ref.dvi: code_ref.tex
-	latex code_ref.tex
-	latex code_ref.tex
-
-code_ref.ps: code_ref.dvi
-	dvips -o code_ref.ps code_ref.dvi 		
+code_ref.dxx: ${DXX_FILES}
 
 ##########
 
