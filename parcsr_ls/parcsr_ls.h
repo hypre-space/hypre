@@ -33,7 +33,7 @@ int HYPRE_ParAMGSetTol P((HYPRE_Solver solver , double tol ));
 int HYPRE_ParAMGSetNumGridSweeps P((HYPRE_Solver solver , int *num_grid_sweeps ));
 int HYPRE_ParAMGSetGridRelaxType P((HYPRE_Solver solver , int *grid_relax_type ));
 int HYPRE_ParAMGSetGridRelaxPoints P((HYPRE_Solver solver , int **grid_relax_points ));
-int HYPRE_ParAMGSetRelaxWeight P((HYPRE_Solver solver , double relax_weight ));
+int HYPRE_ParAMGSetRelaxWeight P((HYPRE_Solver solver , double *relax_weight ));
 int HYPRE_ParAMGSetIOutDat P((HYPRE_Solver solver , int ioutdat ));
 int HYPRE_ParAMGSetLogFileName P((HYPRE_Solver solver , char *log_file_name ));
 int HYPRE_ParAMGSetLogging P((HYPRE_Solver solver , int ioutdat , char *log_file_name ));
@@ -146,7 +146,7 @@ int hypre_ParAMGSetTol P((void *data , double tol ));
 int hypre_ParAMGSetNumGridSweeps P((void *data , int *num_grid_sweeps ));
 int hypre_ParAMGSetGridRelaxType P((void *data , int *grid_relax_type ));
 int hypre_ParAMGSetGridRelaxPoints P((void *data , int **grid_relax_points ));
-int hypre_ParAMGSetRelaxWeight P((void *data , double relax_weight ));
+int hypre_ParAMGSetRelaxWeight P((void *data , double *relax_weight ));
 int hypre_ParAMGSetIOutDat P((void *data , int ioutdat ));
 int hypre_ParAMGSetLogFileName P((void *data , char *log_file_name ));
 int hypre_ParAMGSetLogging P((void *data , int ioutdat , char *log_file_name ));
@@ -208,6 +208,9 @@ hypre_CSRMatrix *hypre_ExchangeRAPData P((hypre_CSRMatrix *RAP_int , hypre_CommP
 int hypre_GetCommPkgRTFromCommPkgA P((hypre_ParCSRMatrix *RT , hypre_ParCSRMatrix *A ));
 hypre_CommPkg *hypre_GenerateSendMapAndCommPkg P((MPI_Comm comm , int num_sends , int num_recvs , int *recv_procs , int *send_procs , int *recv_vec_starts , hypre_ParCSRMatrix *A ));
 int hypre_GenerateRAPCommPkg P((hypre_ParCSRMatrix *RAP , hypre_ParCSRMatrix *A ));
+
+/* par_scaled_matnorm.c */
+double hypre_ParScaledMatNorm P((hypre_ParCSRMatrix *A));
 
 /* par_relax.c */
 int hypre_ParAMGRelax P((hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight , hypre_ParVector *u , hypre_ParVector *Vtemp ));
