@@ -104,7 +104,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
        *--------------------------------------------------------------*/
      
       if (debug_flag) wall_time = time_getWallclockSeconds();
-      if (coarsen_type == -6)
+      if (coarsen_type == 6)
       {
 	 hypre_ParAMGCoarsenFalgout(A_array[level], strong_threshold,
                           debug_flag, &S, &CF_marker, &coarse_size); 
