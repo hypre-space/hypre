@@ -11,7 +11,7 @@ APPENDIX A.  Matrix and Vector formats.
 
 -----------------------------------------------------------------
 
-I. General Description
+I. GENERAL DESCRIPTION
 
 This version of AMG is a C/Fortran code based on the original
 all-Fortran code, AMGS01 (AMG for systems).  Much of the documentation
@@ -65,7 +65,8 @@ needed can be a matter of trial and error.  The following macros
 are defined in `amg.h', and should be used to dimension matrix
 and vector data-space.  If you need to change any of these values,
 you will need to recompile the AMG library, then relink your driver
-routine.
+routine. Here `na' is taken to mean the number of nonzero coefficients 
+in the matrix A.
 
    #define  NDIMU(nv)  (4*nv)
    #define  NDIMP(np)  (4*np)
@@ -90,9 +91,11 @@ For testing, you can overestimate these to avoid error conditions.
 
 -----------------------------------------------------------------
 
-II. Compiling and running the example drivers
+II. COMPILING AND RUNNING THE EXAMPLE DRIVERS
 
-1. Compiling the AMG library
+
+
+1. COMPILING THE AMG LIBRARY
 
 Compiling the library may require some configuration.  First,
 cd into the `src' subdirectory.  The `config.default' file
@@ -123,7 +126,9 @@ of the `amg' directory, and to install the include files in an
 configuration variables may be used to change location of the
 installation.
 
-2. Compiling the example drivers
+
+
+2. COMPILING THE EXAMPLE DRIVERS
 
 The example drivers are in the `examples' subdirectory.  Several
 example makefiles (`Makefile.*') are included as guides for
@@ -138,21 +143,136 @@ Copy one of the `Makefile.*' files to `Makefile'.  Then, say
 Modify the configuration variables in the makefile until the
 drivers compile and link correctly to the AMG library.
 
-3. Running the example drivers
+
+
+3. RUNNING THE EXAMPLE DRIVERS
+
+Two examples of Fortran drivers have been included in the `examples'
+directory.  The compilation of the two drivers, `amg_fdrive' and
+`amg_fdrive2' is described in the previous paragraph.
+
+To run either of the drivers, simply type its name.  For example,
+typing  either `amg_fdrive' or `amg_fdrive2' will produce the 
+on-screen output:
+
+ Setup error flag =   0
+ Solve error flag =   0
+
+which indicates that both the setup and the solve phases of AMG ran
+successfully.  The meaning of the error flag values is discussed below.
+
+In addition, the drivers (as delivered) will create output log files 
+named `AMG.runlog' or `AMG2.runlog', depending on which driver was run. 
+These files contain the user selected parameters for running AMG, the
+matrix statistics of the operators on the various multigrid levels, 
+and the output information, such as the convergence rate and the relative
+residuals after each V-cycle. A few comments are included below about each of 
+the examples.
+
+
+3a)  amg_fdrive.f
+
+The driver `amg_fdrive.f' is designed to illustrate the simplest use of AMG.
+The code reads in a matrix, right-hand side, and an initial guess. The
+matrix supplied is a 500x500 scalar diffusion problem, set on an unstructured
+grid.  The code uses default values for all variables except the stopping
+tolerance (for which there is no default) and the `ioutdat' parameter, which
+is set to `3' by the routine `amg_setlogging' and instructs the code to 
+generate an output log (`AMG.runlog'). The default value for `ioutdat' is 0,
+in which case AMG returns a vector `u' as a solution and the error flag,
+but yields no output logfile. Thus, except for setting the logfile parameter,
+the code `amg_fdrive.f' consists of the bare minimum: the amg_initialize,
+amg_setup, amg_solve, and amg_finalize calls.
+
+A point of interest about amg_fdrive.f: since it was designed to illustrate 
+the most basic use of AMG the default parameters have not been tweaked.  The
+defaults are considered the `best' choices on average.  For the most part, 
+changes in parameters do not yield dramatic differences in performance, but
+occasionally they do.  For example, on the particular problem delivered with
+`amg_fdrive.f', including iterative weight definition by inserting the code
+
+      call amg_setnwt(31111,data)
+
+prior to the amg_Setup call will reduce the overall convergence rate from
+0.44 to 0.19 and the number of V-cycles needed to reach the stopping 
+criterion from 14 to 8.  NOTE: In this simple driver, changing one of the
+parameters in this fashion means adding a `call amg_setXXX' line, which
+necessitates recompiling prior to running the code.
+
+
+3b) amg_fdrive2.f
+
+The driver `amg_fdrive2.f' is designed to illustrate a more complicated 
+situation, both in terms of the problem and in terms of the operation of
+the code.  
+
+The operator is a 915x915 matrix, and represents a coupled system of 3 unknown 
+functions, each defined at each of 305 points on a highly unstructured grid.
+The underlying physics is an elasticity problem. 
+
+In `amg_fdrive2.f' many of the parameters are set, overriding the defaults. 
+The values of these parameters are read in from a control file, 
+`AMG2.in.control' and set via `amg_setXXX' calls prior to calling `amg_setup'. 
+This means that to experiment with altering the parameters, new values 
+need only be placed in the control file, and recompiling the code is not 
+required.
+
+As with `amg_fdrive.f', the matrix, right-hand side, and initial guess are
+read in from a file.  The values of the index arrays `iu', `iv', and `ip',
+necessary because the problem is a system, are set to the default values
+by amg_setup (if some of the unknowns were defined only at some points it
+would be necessary to provide that information using the `amg_setiu',  `amg_setip', and `amg_setiv' commands).
+
+
+3c) The error flag and stopping criterion.
+
+The program `amg_Solve' is built to terminate under two different criteria.
+The first is a stopping tolerance, applied to the relative residual.  That
+is, if 
+
+                      ||f-Au|| / ||f||  < tol
+
+the iteration stops and returns `u' as the solution.  The tolerance `tol'
+is an external argument, and hence there is no `amg_Set' routine for
+adjusting it.  It should be set in the driver and is passed to the solver
+in the calling statement `call amg_Solve(isverr,u,f,nv,tol,data)'. The 
+value of `tol' can be set to zero, in which case the iteration will never
+stop due to the stopping tolerance.  Note that if the right-hand side is 
+zero the relative residual calculation will produce an overflow whenever
+it is calculated. As the relative residual is used only for the stopping
+criterion, this should present no problem on most hardwares.
+
+The second stopping criterion is an iteration limit.  The variable `ncyc' 
+sets a limit on the number of V-cycles AMG is allowed to perform. 
+
+The value of the returned error flags will be `0' if the code has 
+run successfully and if solver is halted by the relative residual stopping
+criterion. If the solver error flag has a value of `1' then the maximum
+iteration count was reached before the relative residual is smaller
+than the stopping tolerance.
+
+Several other values are possible for the error flags on both routines, but 
+should not, in general, occur.  If the setup error flag returns a 1, 2, or 3,
+the parameters `ndima', `ndimb', or `ndimu' (respectively) may need to be 
+increased.  See section I of this guide. Any value of the setup error flag other than 0, 1, 2, or 3, and any value of the solver error flag other than
+0 or 1 should be reported to the supplier of the AMG code.
+
 
 -----------------------------------------------------------------
 
-III. Using AMG
+III. USING AMG
 
 The following C-calls define the basic interface for AMG (see
 Section IV for information on the Fortran interface to AMG).  Here,
-we assume that the matrix A and the vectors u and f have already
-been initialized (see Appendix A below for details on initializing
-these variables).
+we assume that the matrix `A', the vectors `u' and `f', and the stopping
+tolerance `tol' have already been initialized (see Appendix A below for 
+details on initializing these variables).
 
    Matrix  *A;
    Vector  *u, *f;
    void    *data;
+   double   tol
+   int      setup_err_flag, solve_err_flag
 
    .
    .
@@ -162,10 +282,10 @@ these variables).
    data = amg_Initialize(NULL);
 
    /* call the AMG setup phase */
-   amg_Setup(A, data);
+   setup_err_flag = amg_Setup(A, data);
 
    /* call the AMG solver phase */
-   amg_Solve(u, f, tol, data);
+   solve_err_flag = amg_Solve(u, f, tol, data);
 
    /* free up AMG data */
    amg_Finalize(data);
@@ -185,7 +305,7 @@ of the memory allocated by the AMG routines.
 
 The above set of calls make up the minimum number of calls needed to
 to run AMG.  In this situation, AMG is run with a set of "default"
-parameters (see Section ? for a list of the default parameter settings).
+parameters (see Section V for a list of the default parameter settings).
 Many of these parameters can be changed by the user to tailor an AMG
 run to his or her needs.  These parameters are set by making calls to
 one or more `amg_Set' routines between the `amg_Initialize' and
@@ -193,7 +313,7 @@ one or more `amg_Set' routines between the `amg_Initialize' and
 detail in the following sections.
 
 
-1. Changing the setup phase parameters.
+1. CHANGING THE SETUP PHASE PARAMETERS.
 
 The following routines are used to change the input parameters
 associated with the setup phase.
@@ -289,7 +409,7 @@ associated with the setup phase.
      			      by sign of diagonal entry.
 
 
-2. Changing the solver phase parameters.
+2. CHANGING THE SOLVER PHASE PARAMETERS.
 
 The following routines are used to change the input parameters
 associated with the solver phase.
@@ -399,7 +519,7 @@ associated with the solver phase.
  	 iurf= 99  iurd= 99  iuru= 99  iurc= 9
 
 
-3. Getting output from AMG.
+3. GETTING OUTPUT FROM AMG.
 
 The following routine is used to log AMG setup and solve information
 to an output file.
@@ -418,7 +538,7 @@ to an output file.
 
 
 
-4. Changing the problem parameters.
+4. CHANGING THE PROBLEM PARAMETERS.
 
 The following routines are used to change the input parameters
 associated with the problem.
@@ -462,36 +582,163 @@ associated with the problem.
 
 -----------------------------------------------------------------
 
-IV.   Fortran interface
+IV.   FORTRAN INTERFACE
 
 The Fortran interface is the same as the C interface except for
 the following:
 
    1. Names are all lower case.
    2. Type `int' is of type `integer' in Fortran call.
-   3. Type `double' is of type `real' in Fortran call.
+   3. Type `double' is of type `real*8' in Fortran call.
    4. Type `int *' is of type `integer (*)' in Fortran call.
-   5. Type `double *' is of type `real (*)' in Fortran call.
+   5. Type `double *' is of type `real*8 (*)' in Fortran call.
    6. Type `char *' is of type `character*(*)' in Fortran call.
    7. Type `void *' is of type `integer' in Fortran call.
    8. Returned variables are listed first in the Fortran argument list.
 
-Example 1:
+The following fortran-calls define the basic interface for AMG (see
+Section III for information on the C interface to AMG).  Here,
+we assume that the matrix `A', the vectors `u' and `f', the number of
+variables `nv', and the stopping tolerance `tol' have already been 
+initialized (see Appendix A below for details on initializing these 
+variables). Note also that the parameter statement is an example; different
+problem sizes may require larger values for ndima and ndimu.  See section I.
 
-     integer data
-     call amg_initialize(data, 0)
+c---------------------------------------------
+      parameter(ndima=600000,ndimu=250000)
+      dimension A(ndima),JA(ndima),IA(ndimu),U(ndimu),F(ndimu)
+      integer data
+      real*8  tol
+      integer nv
+      integer isterr, isverr 
 
-Example 2:
+c     get default data for an AMG run 
+      call amg_initialize(data,0)
+  
+c     call the AMG setup phase
+      call amg_setup(isterr,a,ia,ja,nv,data)
 
-     integer data
-     call amg_setlogging(1, 'my.log.file', data)
+ 
+c     call the AMG solver phase
+      call amg_solve(isverr,u,f,nv,tol,data)
+ 
+c     free up AMG data
+      call amg_finalize(data)
 
-Example 3:
+c---------------------------------------------
 
-     integer iu(*)
-     integer data
-     call amg_setiu(iu, data)
+1. CHANGING THE SETUP PHASE PARAMETERS.
 
+The setup phase parameters may be shanges through the fortran interface 
+using the calls:
+
+      call amg_setlevmax(levmax, data)
+      call amg_setncg(ncg, data)
+      call amg_setecg(ecg, data)
+      call amg_setnwt(nwt, data)
+      call amg_setewt(ewt, data)
+      call amg_setnstr(nstr, data)
+
+Details as to the meaning of these parameters are given in section III.
+ 
+
+2. CHANGING THE SOLVE PHASE PARAMETERS.
+
+The solve phase parameters may be shanges through the fortran interface 
+using the calls:
+
+      call amg_setncyc(ncyc, data)
+      call amg_setmu(mu, data)
+      call amg_setntrlx(ntrlx, data)
+      call amg_setiprlx(iprlx, data)
+      call amg_setierlx(ierlx, data)
+      call amg_setiurlx(iurlx, data)
+
+Details as to the meaning of these parameters are given in section III.
+ 
+
+3. GETTING OUTPUT FROM AMG.
+
+The following routine is used to log AMG setup and solve information
+to an output file.
+
+      call amg_setlogging(ioutdat, log_file_name, data)
+ 
+
+      The value of ioutdat determines the amount of logging information
+      to print out.  If log_file_name is NULL, the default name is used.
+      otherwise, output is written to log_file_name.
+
+   	 0 = no logging
+   	 1 = log residual and relative residual after each V-cycle, and
+             log average rate of convergence, complexity values
+   	 2 = log matrix and interpolation statistics for each level
+   	 3 = log information for ioutdat = 1 & 2
+
+4. CHANGING THE PROBLEM PARAMETERS.
+
+The following routines are used to change the input parameters
+associated with the problem.
+
+      call amg_setnumunknowns(num_unknowns, data)
+      call amg_setnumpoints(num_points, data)
+      call amg_setiu(iu, data)
+      call amg_setip(ip, data)
+      call amg_setiv(iv, data)
+      call amg_setxp(xp, data)
+      call amg_setyp(yp, data)
+      call amg_setzp(zp, data)
+
+Details as to the meaning of these parameters are given in section III.
+ 
+-----------------------------------------------------------------
+
+V.    DEFAULT PARAMETERS FOR AMG
+
+Below is a list of the default parameters included with the AMG 
+code.  These parameters may be changed in accordance with the 
+instructions in sections III and IV.
+
+1. SETUP PHASE PARAMETER DEFAULTS
+
+
+    Maximum number of levels:            25                    levmax
+    Coarsening controls:                 30012   0.25          ncg, ecg
+    Interpolation controls:              200     0.35          nwt, ewt
+    Strong connection definition:        11                    nstr
+
+
+
+2. SOLVER PHASE PARAMETER DEFAULTS
+
+    Number and type of cycles:           1020                   ncyc
+    W-cycling parameter:                 1 1 1 1 1 1 1 1 1 1    mu
+    Relaxation Parameters:               133  133  133  19      ntr(f,d,u,c)
+                                         31   31   13   2       ipr(f,d,u,c)
+                                         99   99   99   9       ier(f,d,u,c)
+                                         99   99   99   9       iur(f,d,u,c)
+
+    Output flag:                         0                      ioutdat
+
+
+3. PROBLEM PARAMETER DEFAULTS
+
+   Number of unknowns                    1                      num_unknowns
+   Number of points                      nv (# of variables)    num_points
+
+   Pointers: iu, iv, ip                  if automatically set for one unknown:
+                                         (example: 1 unknown, num_points=12)
+                                         iu = {1,1,1,1,1,1,1,1,1,1,1,1}
+                                         ip = {1,2,3,4,5,6,7,8,9,10,11,12}
+                                         iv = {1,2,3,4,5,6,7,8,9,10,11,12}
+
+   Pointers: iu, iv, ip                  if automatically set, m unknowns:
+                                         (example: m=3, num_points=4)
+                                         iu = {1,2,3,1,2,3,1,2,3,1,2,3}
+                                         ip = {1,1,1,2,2,2,3,3,3,4,4,4}
+                                         iv = {1,4,7,10}
+
+   X,Y,Z data: xp, yp, zp                no default   
 
 -----------------------------------------------------------------
 
