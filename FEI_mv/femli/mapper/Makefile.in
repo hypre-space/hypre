@@ -38,7 +38,7 @@ CFLAGS =\
  ${CDEFS}
  
 CXXFLAGS =\
- ${C_COMPILE_FLAGS}\
+ ${CXX_COMPILE_FLAGS}\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../..\
