@@ -14,7 +14,7 @@
 #define hypre_NumThreads 4
 #elif defined(HYPRE_USING_PGCC_SMP)
 #define hypre_NumThreads 2
-#else
+#elif !defined(HYPRE_USE_PTHREADS)
 #define hypre_NumThreads 1
 #endif
 

@@ -193,6 +193,7 @@ hypre_FinalizeTiming( int time_index )
    }
 
 #ifdef HYPRE_USE_PTHREADS
+
    free_global_timing = 1;
    for (i = 0; i <= hypre_NumThreads; i++)
    {  
@@ -209,11 +210,6 @@ hypre_FinalizeTiming( int time_index )
       if(hypre_global_timing)
       {
          for (i = 0; i <= hypre_NumThreads; i++)  
-#else
-   if ((hypre_global_timing -> num_names) == 0)
-   {
-      for (i = 0; i < (hypre_global_timing -> size); i++)
-#endif
 
          {  
             hypre_TFree(hypre_global_timing_ref(i, wall_time));
@@ -226,13 +222,29 @@ hypre_FinalizeTiming( int time_index )
       
          hypre_TFree(hypre_global_timing);
          hypre_global_timing = NULL;
-
-#ifdef HYPRE_USE_PTHREADS
       }
       pthread_mutex_unlock(&time_mtx);
-#endif
-
    }
+
+#else
+
+   if ((hypre_global_timing -> num_names) == 0)
+   {
+      for (i = 0; i < (hypre_global_timing -> size); i++)
+      {  
+         hypre_TFree(hypre_global_timing_ref(i, wall_time));
+         hypre_TFree(hypre_global_timing_ref(i, cpu_time));
+         hypre_TFree(hypre_global_timing_ref(i, flops));
+         hypre_TFree(hypre_global_timing_ref(i, name));
+         hypre_TFree(hypre_global_timing_ref(i, state));
+         hypre_TFree(hypre_global_timing_ref(i, num_regs));
+      }
+      
+      hypre_TFree(hypre_global_timing);
+      hypre_global_timing = NULL;
+   }
+
+#endif
 
    return ierr;
 }
@@ -443,7 +455,6 @@ hypre_PrintTiming( char     *heading,
 #ifdef MPI_Allreduce
 #undef MPI_Allreduce
 #endif
-
 
 int
 hypre_PrintTiming( char     *heading,

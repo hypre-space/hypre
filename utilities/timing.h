@@ -28,15 +28,11 @@ extern "C" {
  * Prototypes for low-level timing routines
  *--------------------------------------------------------------------------*/
 
-# define        P(s) s
-
 /* timer.c */
-double time_getWallclockSeconds P((void ));
-double time_getCPUSeconds P((void ));
-double time_get_wallclock_seconds_ P((void ));
-double time_get_cpu_seconds_ P((void ));
-
-#undef P
+double time_getWallclockSeconds( void );
+double time_getCPUSeconds( void );
+double time_get_wallclock_seconds_( void );
+double time_get_cpu_seconds_( void );
 
 /*--------------------------------------------------------------------------
  * With timing off
@@ -116,18 +112,14 @@ extern hypre_TimingType *hypre_global_timing;
  * Prototypes
  *-------------------------------------------------------*/
 
-# define        P(s) s
-
 /* timing.c */
-int hypre_InitializeTiming P((char *name ));
-int hypre_FinalizeTiming P((int time_index ));
-int hypre_IncFLOPCount P((int inc ));
-int hypre_BeginTiming P((int time_index ));
-int hypre_EndTiming P((int time_index ));
-int hypre_ClearTiming P((void ));
-int hypre_PrintTiming P((char *heading , MPI_Comm comm ));
-
-#undef P
+int hypre_InitializeTiming( char *name );
+int hypre_FinalizeTiming( int time_index );
+int hypre_IncFLOPCount( int inc );
+int hypre_BeginTiming( int time_index );
+int hypre_EndTiming( int time_index );
+int hypre_ClearTiming( void );
+int hypre_PrintTiming( char *heading , MPI_Comm comm );
 
 #endif
 

@@ -98,26 +98,25 @@ extern "C" {
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-# define	P(s) s
-
 /* memory.c */
-int hypre_InitMemoryDebugDML P((int id ));
-int hypre_FinalizeMemoryDebugDML P((void ));
-char *hypre_MAllocDML P((int size , char *file , int line ));
-char *hypre_CAllocDML P((int count , int elt_size , char *file , int line ));
-char *hypre_ReAllocDML P((char *ptr , int size , char *file , int line ));
-void hypre_FreeDML P((char *ptr , char *file , int line ));
-char *hypre_MAlloc P((int size ));
-char *hypre_CAlloc P((int count , int elt_size ));
-char *hypre_ReAlloc P((char *ptr , int size ));
-void hypre_Free P((char *ptr ));
-char *hypre_SharedMAlloc P((int size ));
-char *hypre_SharedCAlloc P((int count , int elt_size ));
-char *hypre_SharedReAlloc P((char *ptr , int size ));
-void hypre_SharedFree P((char *ptr ));
-double *hypre_IncrementSharedDataPtr P((double *ptr , int size ));
+int hypre_OutOfMemory( int size );
+char *hypre_MAlloc( int size );
+char *hypre_CAlloc( int count , int elt_size );
+char *hypre_ReAlloc( char *ptr , int size );
+void hypre_Free( char *ptr );
+char *hypre_SharedMAlloc( int size );
+char *hypre_SharedCAlloc( int count , int elt_size );
+char *hypre_SharedReAlloc( char *ptr , int size );
+void hypre_SharedFree( char *ptr );
+double *hypre_IncrementSharedDataPtr( double *ptr , int size );
 
-#undef P
+/* memory_dmalloc.c */
+int hypre_InitMemoryDebugDML( int id );
+int hypre_FinalizeMemoryDebugDML( void );
+char *hypre_MAllocDML( int size , char *file , int line );
+char *hypre_CAllocDML( int count , int elt_size , char *file , int line );
+char *hypre_ReAllocDML( char *ptr , int size , char *file , int line );
+void hypre_FreeDML( char *ptr , char *file , int line );
 
 #ifdef __cplusplus
 }
