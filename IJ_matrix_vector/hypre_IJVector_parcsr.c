@@ -94,8 +94,8 @@ hypre_SetIJVectorParPartitioning(hypre_IJVector *vector,
 
 int
 hypre_SetIJVectorParLocalPartitioning(hypre_IJVector *vector,
-                                      int             vec_start,
-                                      int             vec_stop   )
+                                      int             vec_start_this_proc,
+                                      int             vec_start_next_proc  )
 {
    int ierr = 0;
    hypre_ParVector *par_vector = hypre_IJVectorLocalStorage(vector);
@@ -106,7 +106,7 @@ hypre_SetIJVectorParLocalPartitioning(hypre_IJVector *vector,
    MPI_Comm_size(comm, &num_procs);
    MPI_Comm_rank(comm, &my_id);
 
-   if (vec_start > vec_stop) ++ierr;
+   if (vec_start_this_proc >= vec_start_next_proc) ++ierr;
 
    if (!ierr)
    {
@@ -115,8 +115,8 @@ hypre_SetIJVectorParLocalPartitioning(hypre_IJVector *vector,
 
       if (partitioning)
       {   
-         partitioning[my_id] = vec_start;
-         partitioning[my_id+1] = vec_stop + 1;
+         partitioning[my_id] = vec_start_this_proc;
+         partitioning[my_id+1] = vec_start_next_proc;
 
          hypre_ParVectorPartitioning(par_vector) = partitioning;
       }

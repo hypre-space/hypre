@@ -67,6 +67,7 @@ int HYPRE_GetIJMatrixColPartitioning P((HYPRE_IJMatrix IJmatrix , const int **co
 int HYPRE_NewIJVector P((MPI_Comm comm, HYPRE_IJVector *in_vector_ptr , int global_n ));
 int HYPRE_FreeIJVector P((HYPRE_IJVector IJvector ));
 int HYPRE_SetIJVectorPartitioning P((HYPRE_IJVector IJvector , const int *partitioning ));
+int HYPRE_SetIJVectorLocalPartitioning P((HYPRE_IJVector IJvector , int vec_start_this_proc, int vec_start_next_proc ));
 int HYPRE_InitializeIJVector P((HYPRE_IJVector IJvector ));
 int HYPRE_DistributeIJVector P((HYPRE_IJVector IJvector , const int *vec_starts ));
 int HYPRE_SetIJVectorLocalStorageType P((HYPRE_IJVector IJvector , int type ));

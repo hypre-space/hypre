@@ -160,9 +160,9 @@ HYPRE_SetIJVectorPartitioning( HYPRE_IJVector  IJvector,
 @return integer error code
 @param HYPRE_IJVector IJvector
 vector for which the local part of the partitioning is to be set
-@param int vec_start [IN]
+@param int vec_start_this_proc [IN]
 integer specifying local index to first data element on calling processor
-@param int vec_stop [IN]
+@param int vec_start_next_proc [IN]
 integer specifying local index to first data element on next processor in
 decomposition
 HYPRE_SetIJVectorLocalStorageType needs to be called before this function.
@@ -171,8 +171,8 @@ HYPRE_SetIJVectorLocalStorageType needs to be called before this function.
 
 int 
 HYPRE_SetIJVectorLocalPartitioning( HYPRE_IJVector IJvector,
-                                    int            vec_start,
-                                    int            vec_stop   )
+                                    int            vec_start_this_proc,
+                                    int            vec_start_next_proc  )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
@@ -182,16 +182,16 @@ HYPRE_SetIJVectorLocalPartitioning( HYPRE_IJVector IJvector,
       if (!hypre_IJVectorLocalStorage(vector)) hypre_NewIJVectorPETSc(vector);
 
       ierr += hypre_SetIJVectorPETScLocalPartitioning(vector,
-                                                      vec_start,
-                                                      vec_stop   );
+                                                      vec_start_this_proc,
+                                                      vec_start_next_proc  );
    }
    else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS )
    {
       if (!hypre_IJVectorLocalStorage(vector)) hypre_NewIJVectorISIS(vector);
 
       ierr += hypre_SetIJVectorISISLocalPartitioning(vector,
-                                                     vec_start,
-                                                     vec_stop   );
+                                                     vec_start_this_proc,
+                                                     vec_start_next_proc  );
    }
    else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR )
    {
@@ -199,8 +199,8 @@ HYPRE_SetIJVectorLocalPartitioning( HYPRE_IJVector IJvector,
 	   hypre_NewIJVectorPar(vector, NULL);
 
       ierr += hypre_SetIJVectorParLocalPartitioning(vector,
-                                                    vec_start,
-                                                    vec_stop   );
+                                                    vec_start_this_proc,
+                                                    vec_start_next_proc  );
    }
    else
       ++ierr;
