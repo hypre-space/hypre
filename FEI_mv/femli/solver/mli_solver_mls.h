@@ -32,6 +32,7 @@ class MLI_Solver_MLS : public MLI_Solver
    double      mlsOm[5];
    double      mlsOm2;
    double      mlsCf[5];
+   int         zeroInitialGuess;
 
 public :
 

@@ -1,4 +1,4 @@
-/*BHEADER**********************************************************************
+/*bhEADER**********************************************************************
  * (c) 2001   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
@@ -29,12 +29,13 @@ MLI_Solver_MLS::MLI_Solver_MLS() : MLI_Solver(MLI_SOLVER_MLS_ID)
    mli_Wtemp = NULL;
    mli_Ytemp = NULL;
    max_eigen = -1.0;
-   mlsDeg    = 2;
+   mlsDeg    = 1;
    mlsBoost  = 1.1;
    mlsOver   = 1.1;
    for ( int i = 0; i < 5; i++ ) mlsOm[i] = 0.0;
    mlsOm2    = 1.8;
    for ( int i = 0; i < 5; i++ ) mlsCf[i] = 0.0;
+   zeroInitialGuess = 0;
 }
 
 /******************************************************************************
@@ -58,7 +59,7 @@ int MLI_Solver_MLS::setup(MLI_Matrix *mat)
 {
    int    i, j, nGrid, MAX_DEG=5, nSamples=20000;
    double cosData0, cosData1, coord;
-   double sample, gridStep, rho, rho2, ddeg;
+   double sample, gridStep, rho, rho2;
    double pi=4.e0 * atan(1.e0); /* 3.141592653589793115998e0; */
 
    /*-----------------------------------------------------------------
@@ -77,12 +78,11 @@ int MLI_Solver_MLS::setup(MLI_Matrix *mat)
     *-----------------------------------------------------------------*/
 
    for ( i = 0; i < MAX_DEG; i++ ) mlsOm[i] = 0.e0;
-   ddeg = (double) mlsDeg;
    rho  = mlsOver * max_eigen;
-   cosData1 = 1.e0 / (2.e0 * ddeg + 1.e0);
+   cosData1 = 1.e0 / (2.e0 * (double) mlsDeg + 1.e0);
    for ( i = 0; i < mlsDeg; i++ ) 
    {
-      cosData0 = 2.e0 * (double)(i+1) * pi;
+      cosData0 = (2.0 * (double) i + 2.0) * pi;
       mlsOm[i] = 2.e0 / (rho * (1.e0 - cos(cosData0 * cosData1)));
    }
    mlsCf[0] = + mlsOm[0] + mlsOm[1] + mlsOm[2] + mlsOm[3] + mlsOm[4];
@@ -113,31 +113,16 @@ int MLI_Solver_MLS::setup(MLI_Matrix *mat)
       {
          coord  = (double)(i+1) * gridStep;
          sample = 1.e0 - mlsOm[0] * coord;
-         for ( j = 1; j < mlsDeg; j++) sample *= sample * coord;
-         if (sample > rho2) rho2 = sample;
-      }
-      /* this original code seems not as good
-      rho2 = 4.0e0/(27.e0 * mlsOm[0]);
-      */
-   }
-   else if ( mlsDeg > 1 )
-   {
-      gridStep = rho / (double) nSamples;
-      nGrid    = (int) min(rint(rho/gridStep)+1, nSamples);
-
-      rho2 = 0.e0;
-      for ( i = 0; i < nGrid; i++ ) 
-      {
-         coord  = (double)(i+1) * gridStep;
-         sample = 1.e0 - mlsOm[0] * coord;
-         for ( j = 1; j < mlsDeg; j++) sample *= sample * coord;
+         for ( j = 1; j < mlsDeg; j++) 
+            sample *= (1.0 - mlsOm[j] * coord);
          sample *= sample * coord;
          if (sample > rho2) rho2 = sample;
       }
    }
+   else rho2 = 4.0 / ( 27.0 * mlsOm[0] );
 
-   if ( mlsDeg < 2) mlsBoost = 1.029e0;
-   else             mlsBoost = 1.025e0;
+   if ( mlsDeg < 2) mlsBoost = 1.5e0;
+   else             mlsBoost = 1.6e0;
    rho2 *= mlsBoost;
    mlsOm2 = 2.e0 / rho2;
 
@@ -213,7 +198,11 @@ int MLI_Solver_MLS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    /* compute  Vtemp = f - A u */
 
    hypre_ParVectorCopy(f,Vtemp); 
-   hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, Vtemp);
+   if ( zeroInitialGuess != 0 )
+   {
+      hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, Vtemp);
+      zeroInitialGuess = 0;
+   }
 
    if ( mlsDeg == 1 )
    {
@@ -230,22 +219,24 @@ int MLI_Solver_MLS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
       hypre_ParVectorCopy(f,Vtemp); 
       hypre_ParCSRMatrixMatvec(1.0, A, u, -1.0, Vtemp);
 
-      /* compute residual Wtemp = (I - omega * A) Vtemp */
+      /* compute residual Wtemp = (I - omega * A)^deg Vtemp */
 
       hypre_ParVectorCopy(Vtemp,Wtemp); 
       for ( deg = 0; deg < mlsDeg; deg++ ) 
       {
          omega = mlsOm[deg];
-         hypre_ParCSRMatrixMatvec(-omega, A, Vtemp, 1.0, Wtemp);
+         hypre_ParCSRMatrixMatvec(1.0, A, Wtemp, 0.0, Vtemp);
+         for (i = 0; i < nrows; i++) Wtemp_data[i] -= (omega * Vtemp_data[i]);
       }
 
-      /* compute residual Vtemp = (I - omega * A) Wtemp */
+      /* compute residual Vtemp = (I - omega * A)^deg Wtemp */
 
       hypre_ParVectorCopy(Wtemp,Vtemp); 
       for ( deg = mlsDeg-1; deg > -1; deg-- ) 
       {
          omega = mlsOm[deg];
-         hypre_ParCSRMatrixMatvec(-omega, A, Wtemp, 1.0, Vtemp);
+         hypre_ParCSRMatrixMatvec(1.0, A, Vtemp, 0.0, Wtemp);
+         for (i = 0; i < nrows; i++) Vtemp_data[i] -= (omega * Wtemp_data[i]);
       }
 
       /* compute u = u - coef * Vtemp */
@@ -271,17 +262,14 @@ int MLI_Solver_MLS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
       for ( deg = 1; deg < deg; deg++ ) 
       {
-         hypre_ParCSRMatrixMatvec(1.0, A, Vtemp, -1.0, Wtemp);
-         coef = mlsCf[deg-1];
+         hypre_ParCSRMatrixMatvec(1.0, A, Vtemp, 0.0, Wtemp);
+         hypre_ParVectorCopy(Wtemp,Vtemp); 
+         coef = mlsCf[deg];
 
 #define HYPRE_SMP_PRIVATE i
 #include "utilities/hypre_smp_forloop.h"
          for (i = 0; i < nrows; i++) 
-         {
-            Vtemp_data[i] = Wtemp_data[i];
             Ytemp_data[i] += ( coef * Wtemp_data[i] );
-         }
-
       }
 
 #define HYPRE_SMP_PRIVATE i
@@ -293,22 +281,24 @@ int MLI_Solver_MLS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
       hypre_ParVectorCopy(f,Vtemp); 
       hypre_ParCSRMatrixMatvec(1.0, A, u, -1.0, Vtemp);
 
-      /* compute residual Wtemp = (I - omega * A) Vtemp */
+      /* compute residual Wtemp = (I - omega * A)^deg Vtemp */
 
       hypre_ParVectorCopy(Vtemp,Wtemp); 
       for ( deg = 0; deg < mlsDeg; deg++ ) 
       {
          omega = mlsOm[deg];
-         hypre_ParCSRMatrixMatvec(-omega, A, Vtemp, 1.0, Wtemp);
+         hypre_ParCSRMatrixMatvec(1.0, A, Wtemp, 0.0, Vtemp);
+         for (i = 0; i < nrows; i++) Wtemp_data[i] -= (omega * Vtemp_data[i]);
       }
 
-      /* compute residual Vtemp = (I - omega * A) Wtemp */
+      /* compute residual Vtemp = (I - omega * A)^deg Wtemp */
 
       hypre_ParVectorCopy(Wtemp,Vtemp); 
       for ( deg = mlsDeg-1; deg > -1; deg-- ) 
       {
          omega = mlsOm[deg];
-         hypre_ParCSRMatrixMatvec(-omega, A, Wtemp, 1.0, Vtemp);
+         hypre_ParCSRMatrixMatvec(1.0, A, Vtemp, 0.0, Wtemp);
+         for (i = 0; i < nrows; i++) Vtemp_data[i] -= (omega * Wtemp_data[i]);
       }
 
       /* compute u = u - coef * Vtemp */
@@ -320,7 +310,6 @@ int MLI_Solver_MLS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
       for (i = 0; i < nrows; i++) u_data[i] -= ( coef * Vtemp_data[i] );
 
    }
-
    return(0); 
 }
 
@@ -332,7 +321,7 @@ int MLI_Solver_MLS::setParams( char *param_string, int argc, char **argv )
 {
    double *weights;
 
-   if ( !strcmp(param_string, "relaxWeight") )
+   if ( !strcasecmp(param_string, "relaxWeight") )
    {
       if ( argc != 2 && argc != 1 ) 
       {
@@ -347,6 +336,10 @@ int MLI_Solver_MLS::setParams( char *param_string, int argc, char **argv )
               << max_eigen << ")\n";
          return 1;
       }
+   }
+   else if ( !strcasecmp(param_string, "zeroInitialGuess") )
+   {
+      zeroInitialGuess = 1;
    }
    return 0;
 }
