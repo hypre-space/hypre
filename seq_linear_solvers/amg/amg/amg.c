@@ -44,6 +44,7 @@ void  *port_data;
 
    /* output params */
    int      ioutdat;
+   int      cycle_op_count;
 
    /* log file name */
    char    *log_file_name;
@@ -91,6 +92,7 @@ void  *port_data;
 
    /* output params */
    ioutdat = 0;
+   cycle_op_count = 0;
 
 
    /*-----------------------------------------------------------------------
@@ -99,7 +101,7 @@ void  *port_data;
 
    amg_data = amg_NewData(levmax, ncg, ecg, nwt, ewt, nstr,
 			  ncyc, mu, ntrlx, iprlx, ierlx, iurlx,
-			  ioutdat, 
+			  ioutdat, cycle_op_count,
 			  "amg.out.log"); 
 
    
