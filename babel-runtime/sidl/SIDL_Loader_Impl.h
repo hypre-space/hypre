@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_Loader_Impl.h
- * Symbol:        SIDL.Loader-v0.7.5
+ * Symbol:        SIDL.Loader-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for SIDL.Loader
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 #ifndef included_SIDL_Loader_Impl_h

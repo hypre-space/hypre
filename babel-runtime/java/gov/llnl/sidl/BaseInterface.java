@@ -51,8 +51,8 @@ public interface BaseInterface {
   abstract public BaseInterface _cast(String name);
 
   /**
-   * The <code>addReference</code> method will be implemented by the SIDL
+   * The <code>addRef</code> method will be implemented by the SIDL
    * base object class.
    */
-  public abstract void addReference();
+  public abstract void addRef();
 }

@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseClass.h
- * Symbol:        SIDL.BaseClass-v0.7.5
+ * Symbol:        SIDL.BaseClass-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for SIDL.BaseClass
@@ -32,14 +32,14 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 #ifndef included_SIDL_BaseClass_h
 #define included_SIDL_BaseClass_h
 
 /**
- * Symbol "SIDL.BaseClass" (version 0.7.5)
+ * Symbol "SIDL.BaseClass" (version 0.8.1)
  * 
  * Every class implicitly inherits from <code>BaseClass</code>.  This
  * class implements the methods in <code>BaseInterface</code>.
@@ -57,6 +57,9 @@ typedef struct SIDL_BaseClass__object* SIDL_BaseClass;
 #endif
 #ifndef included_SIDL_BaseInterface_h
 #include "SIDL_BaseInterface.h"
+#endif
+#ifndef included_SIDL_ClassInfo_h
+#include "SIDL_ClassInfo.h"
 #endif
 
 #ifdef __cplusplus
@@ -84,7 +87,7 @@ SIDL_BaseClass__create(void);
  * </p>
  */
 void
-SIDL_BaseClass_addReference(
+SIDL_BaseClass_addRef(
   SIDL_BaseClass self);
 
 /**
@@ -95,7 +98,7 @@ SIDL_BaseClass_addReference(
  * reference to an object or interface.
  */
 void
-SIDL_BaseClass_deleteReference(
+SIDL_BaseClass_deleteRef(
   SIDL_BaseClass self);
 
 /**
@@ -112,12 +115,12 @@ SIDL_BaseClass_isSame(
  * class.  If the <code>SIDL</code> type name in <code>name</code>
  * is supported, then a reference to that object is returned with the
  * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
+ * calling <code>deleteRef</code> on the returned object.  If
  * the specified type is not supported, then a null reference is
  * returned.
  */
 SIDL_BaseInterface
-SIDL_BaseClass_queryInterface(
+SIDL_BaseClass_queryInt(
   SIDL_BaseClass self,
   const char* name);
 
@@ -128,9 +131,16 @@ SIDL_BaseClass_queryInterface(
  * the string type name would succeed.
  */
 SIDL_bool
-SIDL_BaseClass_isInstanceOf(
+SIDL_BaseClass_isType(
   SIDL_BaseClass self,
   const char* name);
+
+/**
+ * Return the meta-data about the class implementing this interface.
+ */
+SIDL_ClassInfo
+SIDL_BaseClass_getClassInfo(
+  SIDL_BaseClass self);
 
 /**
  * Cast method for interface and class type conversions.
@@ -206,7 +216,7 @@ SIDL_BaseClass__array_create2dRow(int32_t m, int32_t n);
  * source. The initial contents are determined by the
  * data being borrowed.
  * Any time an element in the borrowed array is replaced
- * via a set call, deleteReference will be called on the
+ * via a set call, deleteRef will be called on the
  * value being replaced if it is not NULL.
  */
 struct SIDL_BaseClass__array*
@@ -232,7 +242,7 @@ SIDL_BaseClass__array_smartCopy(struct SIDL_BaseClass__array *array);
  * Increment the array's internal reference count by one.
  */
 void
-SIDL_BaseClass__array_addReference(struct SIDL_BaseClass__array* array);
+SIDL_BaseClass__array_addRef(struct SIDL_BaseClass__array* array);
 
 /**
  * Decrement the array's internal reference count by one.
@@ -241,7 +251,7 @@ SIDL_BaseClass__array_addReference(struct SIDL_BaseClass__array* array);
  * object references held by the array.
  */
 void
-SIDL_BaseClass__array_deleteReference(struct SIDL_BaseClass__array* array);
+SIDL_BaseClass__array_deleteRef(struct SIDL_BaseClass__array* array);
 
 /**
  * Retrieve element i1 of a(n) 1-dimensional array.

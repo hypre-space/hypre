@@ -599,40 +599,6 @@ AC_PROVIDE([$0])dnl
 
 
 
-dnl *** file: config/autoconf-archive-macros/ac_prog_javah.m4
-
-
-dnl *** Downloaded from http://gnu.wwc.edu/software/ac-archive/Java_Support/ac_prog_javah.m4***
-dnl @synopsis AC_PROG_JAVAH
-dnl
-dnl AC_PROG_JAVAH tests the availability of the javah header generator
-dnl and looks for the jni.h header file. If available, JAVAH is set to
-dnl the full path of javah and CPPFLAGS is updated accordingly.
-dnl
-dnl @author Luc Maisonobe
-dnl @version $Id$
-dnl
-AC_DEFUN([AC_PROG_JAVAH],[
-AC_REQUIRE([AC_CANONICAL_SYSTEM])dnl
-AC_REQUIRE([AC_PROG_CPP])dnl
-AC_PATH_PROG(JAVAH,javah)
-if test x"`eval 'echo $ac_cv_path_JAVAH'`" != x ; then
-  AC_TRY_CPP([#include <jni.h>],,[
-    ac_save_CPPFLAGS="$CPPFLAGS"
-changequote(, )dnl
-    ac_dir=`echo $ac_cv_path_JAVAH | sed 's,\(.*\)/[^/]*/[^/]*$,\1/include,'`
-    ac_machdep=`echo $build_os | sed 's,[-0-9].*,,' | sed 's,cygwin,win32,'`
-changequote([, ])dnl
-    CPPFLAGS="$ac_save_CPPFLAGS -I$ac_dir -I$ac_dir/$ac_machdep"
-    AC_TRY_CPP([#include <jni.h>],
-               ac_save_CPPFLAGS="$CPPFLAGS",
-               AC_MSG_WARN([unable to include <jni.h>]))
-    CPPFLAGS="$ac_save_CPPFLAGS"])
-fi])
-
-
-
-
 dnl *** file: config/autoconf-archive-macros/ac_try_compile_java.m4
 
 
@@ -1163,7 +1129,8 @@ dnl languages into a single program or shared library.
 dnl
 dnl @author Gary Kumfert
 AC_DEFUN(LLNL_CXX_LIBRARY_LDFLAGS,
-[AC_LANG_PUSH(C++)dnl
+[AC_REQUIRE([AC_PROG_CXX])
+AC_LANG_PUSH(C++)dnl
 AC_CACHE_CHECK([for C++ libraries],ac_cv_cxx_libs,
 [if test "x$CXXLIBS" != "x"; then
   ac_cv_cxx_libs="$CXXLIBS" # Let the user override the test
@@ -1308,9 +1275,41 @@ sidl_cv_f77_str="str" dnl can also be "struct"
 sidl_cv_f77_str_len="far" dnl can also be "near", only meaningful if $sidl_cv_str="str"
 sidl_cv_f77_str_struct="str_len" dnl can also be "len_str", only meaningful if $sidl_cv_str="struct"
 sidl_cv_f77_char="as_string"
-sidl_cv_f77_true=1
-sidl_cv_f77_false=0
+dnl sidl_cv_f77_true=1
+dnl sidl_cv_f77_false=0
 sidl_cv_f77_str_minsize=512
+
+AC_CACHE_CHECK([the integer value of F77's .true.], sidl_cv_f77_true,[dnl
+AC_LANG_PUSH(Fortran 77)dnl
+dnl should be AC_TRY_RUN, but the macro destroys conftest$ac_exeext too soon
+dnl ignore the warnings this issues from automake: F77 does not use the 1st argument (includes)
+AC_TRY_LINK(,[
+        logical log
+        integer value
+        equivalence (log, value)
+        log = .true.
+        write (*,*) value
+],[
+sidl_cv_f77_true=`./conftest$ac_exeext`
+],[AC_MSG_WARN([Unable to determine integer value of F77 .true.])
+	echo "the program generates"  `./conftest$ac_exeext`])
+AC_LANG_POP(Fortran 77)dnl])
+
+AC_CACHE_CHECK([the integer value of F77's .false.], sidl_cv_f77_false,[dnl
+AC_LANG_PUSH(Fortran 77)dnl
+dnl should be AC_TRY_RUN, but the macro destroys conftest$ac_exeext too soon
+dnl ignore the warnings this issues from automake: F77 does not use the 1st argument (includes)
+AC_TRY_LINK(,[
+        logical log
+        integer value
+        equivalence (log, value)
+        log = .false.
+	write (*,*) value
+],[
+sidl_cv_f77_false=`./conftest$ac_exeext`
+],[AC_MSG_WARN([Unable to determine integer value of F77 .false.])])
+AC_LANG_POP(Fortran 77)dnl
+])
 
 dnl set number of underscores
 if test -z "$sidl_cv_f77_number_underscores"; then
@@ -1470,6 +1469,219 @@ AC_LANG_POP(Fortran 77)dnl
 ])# LLNL_F77_NAME_MANGLING
 
 
+dnl *** file: config/llnl-ac-macros/llnl_f90_c_config.m4
+dnl
+dnl @synopsis LLNL_F90_C_CONFIG
+dnl
+dnl
+dnl @author
+dnl
+dnl Note:  Clone of F77 version.
+
+AC_DEFUN([LLNL_F90_C_CONFIG],[
+AC_REQUIRE([AC_CANONICAL_TARGET])dnl
+AC_REQUIRE([AC_PROG_F90])dnl
+AC_REQUIRE([LLNL_F90_NAME_MANGLING])
+dnl set some resonable defaults
+sidl_cv_f90_str="str" dnl can also be "struct"
+sidl_cv_f90_str_len="far" dnl can also be "near", only meaningful if $sidl_cv_str="str"
+sidl_cv_f90_str_struct="str_len" dnl can also be "len_str", only meaningful if $sidl_cv_str="struct"
+sidl_cv_f90_char="as_string"
+dnl sidl_cv_f90_true=1
+dnl sidl_cv_f90_false=0
+sidl_cv_f90_str_minsize=512
+
+AC_CACHE_CHECK([the integer value of F90's .true.], sidl_cv_f90_true,[dnl
+AC_LANG_PUSH(Fortran 90)dnl
+dnl should be AC_TRY_RUN, but the macro destroys conftest$ac_exeext too soon
+dnl ignore the warnings this issues from automake: F77 does not use the 1st argument (includes)
+AC_TRY_LINK(,[
+  logical log
+  integer value
+  equivalence (log, value)
+  log = .true.
+  write (*,*) value
+],[dnl
+sidl_cv_f90_true=`./conftest$ac_exeext`
+],[AC_MSG_WARN([Unable to determine integer value of F90 .true.])])
+AC_LANG_POP(Fortran 90)dnl])
+
+AC_CACHE_CHECK([the integer value of F90's .false.], sidl_cv_f90_false,[dnl
+AC_LANG_PUSH(Fortran 90)dnl
+dnl should be AC_TRY_RUN, but the macro destroys conftest$ac_exeext too soon
+dnl ignore the warnings this issues from automake: F77 does not use the 1st argument (includes)
+AC_TRY_LINK(,[
+  logical log
+  integer value
+  equivalence (log, value)
+  log = .false.
+  write (*,*) value
+],[dnl
+sidl_cv_f90_false=`./conftest$ac_exeext`
+],[AC_MSG_WARN([Unable to determine integer value of F90 .false.])])
+AC_LANG_POP(Fortran 90)dnl
+])
+
+dnl set number of underscores
+if test -z "$sidl_cv_f90_number_underscores"; then
+   AC_MSG_ERROR([Number of F90 underscores not determined])
+elif test $sidl_cv_f90_number_underscores -eq 2; then
+   AC_DEFINE(SIDL_F90_TWO_UNDERSCORE,,[two underscores after Fortran 90 symbols])
+elif test $sidl_cv_f90_number_underscores -eq 1; then
+   AC_DEFINE(SIDL_F90_ONE_UNDERSCORE,,[one underscore after Fortran 90 symbols])
+else
+  if test $sidl_cv_f90_number_underscores -ne 0; then
+     AC_WARN([number of underscores after Fortran 90 symbols undetermined, assuming zero])
+  fi;
+   AC_DEFINE(SIDL_F90_ZERO_UNDERSCORE,,[no underscores after Fortran 90 symbols])
+fi;
+dnl set case
+if test "$sidl_cv_f90_case" = "mixed"; then
+   AC_DEFINE(SIDL_F90_MIXED_CASE,,[Fortran 90 symbols are mixed case])
+elif test "$sidl_cv_f90_case" = "upper"; then
+   AC_DEFINE(SIDL_F90_UPPER_CASE,,[Fortran 90 symbols are upper case])
+else
+   if test "$sidl_cv_f90_case" != "lower"; then
+      AC_WARN([case of Fortran 90 symbols undetermined, assuming lower case])
+   fi  
+   AC_DEFINE(SIDL_F90_LOWER_CASE,,[Fortran 90 symbols are lower case])
+fi;
+dnl strings
+if test "$sidl_cv_f90_str" = "struct"; then 
+   if test "$sidl_cv_f90_str_struct" = "len_str"; then
+      AC_DEFINE(SIDL_F90_STR_STRUCT_LEN_STR,,[Fortran 90 strings as length-char* structs])
+   else 
+      if test "$sidl_cv_f90_str_struct" != "str_len"; then
+         AC_WARN([string structs as length-charptr or char_ptr/length undetermined, assuming the latter])   
+      fi;
+      AC_DEFINE(SIDL_F90_STR_STRUCT_STR_LEN,,[Fortran 90 strings as char*-length structs])
+   fi;
+else
+   if test "$sidl_cv_f90_str" != "str"; then 
+      AC_WARN([strings passed as structs or char*/length undetermined, assumming the latter])
+   fi;
+   if test "$sidl_cv_f90_str_len" = "near"; then
+      AC_DEFINE(SIDL_F90_STR_LEN_NEAR,,[Fortran 90 strings lengths at end])
+   else
+      if test "$sidl_cv_f90_str_len" != "far"; then
+         AC_WARN([string length immediately following char* or at end undetermined, assuming at end])
+      fi
+      AC_DEFINE(SIDL_F90_STR_LEN_FAR,,[Fortran 90 strings lengths immediately follow string])
+   fi;
+fi;
+if test "$sidl_cv_f90_char" = "as_string"; then
+   AC_DEFINE(SIDL_F90_CHAR_AS_STRING,,[Fortran 90 char args are strings])
+fi; 
+AC_DEFINE_UNQUOTED(SIDL_F90_TRUE,$sidl_cv_f90_true,[Fortran 90 logical true value])
+AC_DEFINE_UNQUOTED(SIDL_F90_FALSE,$sidl_cv_f90_false,[Fortran 90 logical false value])
+AC_DEFINE_UNQUOTED(SIDL_F90_STR_MINSIZE,$sidl_cv_f90_str_minsize,[Minimum size for out strings])
+])
+
+
+dnl *** file: config/llnl-ac-macros/llnl_f90_name_mangling.m4
+
+# LLNL_F90_NAME_MANGLING
+# ---------------------
+# Test for the name mangling scheme used by the Fortran 90 compiler.
+#
+# Sets ac_cv_f90_mangling. The value contains three fields, separated
+# by commas:
+#
+# lower case / upper case:
+#    case translation of the Fortran 90 symbols
+# underscore / no underscore:
+#    whether the compiler appends "_" to symbol names
+# extra underscore / no extra underscore:
+#    whether the compiler appends an extra "_" to symbol names already
+#    containing at least one underscore
+#
+# Note:  Clone of F77 version.
+#
+AC_DEFUN([LLNL_F90_NAME_MANGLING],
+[AC_REQUIRE([AC_F90_LIBRARY_LDFLAGS])dnl
+AC_REQUIRE([AC_F90_DUMMY_MAIN])dnl
+AC_CACHE_CHECK([for Fortran 90 name-mangling scheme],
+               ac_cv_f90_mangling,
+[AC_LANG_PUSH(Fortran 90)dnl
+AC_COMPILE_IFELSE(
+[subroutine Foobar()
+return
+end subroutine Foobar
+subroutine Foo_bar()
+return
+end subroutine Foo_bar],
+[mv conftest.$ac_objext cf90_test.$ac_objext
+
+  AC_LANG_PUSH(C)dnl
+
+  ac_save_LIBS=$LIBS
+  LIBS="cf90_test.$ac_objext $LIBS $F90LIBS"
+
+  ac_success=no
+  for ac_foobar in foobar Foobar FOOBAR; do
+    for ac_underscore in "" "_"; do
+      ac_func="$ac_foobar$ac_underscore"
+      AC_TRY_LINK_FUNC($ac_func,
+         [ac_success=yes; break 2])
+    done
+  done
+
+  if test "$ac_success" = "yes"; then
+     case $ac_foobar in
+        foobar)
+	   sidl_cv_f90_case="lower"
+           ac_foo_bar=foo_bar
+           ;;
+        FOOBAR)
+	   sidl_cv_f90_case="upper"
+           ac_foo_bar=FOO_BAR
+           ;;
+        Foobar)
+	   sidl_cv_f90_case="mixed"
+           ac_foo_bar=Foo_bar
+           ;;
+     esac
+
+     ac_success_extra=no
+     for ac_extra in "" "_"; do
+        ac_func="$ac_foo_bar$ac_underscore$ac_extra"
+        AC_TRY_LINK_FUNC($ac_func,
+        [ac_success_extra=yes; break])
+     done
+
+     if test "$ac_success_extra" = "yes"; then
+	ac_cv_f90_mangling="$sidl_cv_f90_case case"
+        if test -z "$ac_underscore"; then
+           ac_cv_f90_mangling="$ac_cv_f90_mangling, no underscore"
+	   sidl_cv_f90_number_underscores=0
+	else
+           ac_cv_f90_mangling="$ac_cv_f90_mangling, underscore"
+	   sidl_cv_f90_number_underscores=1
+        fi
+        if test -z "$ac_extra"; then
+           ac_cv_f90_mangling="$ac_cv_f90_mangling, no extra underscore"
+	else
+           ac_cv_f90_mangling="$ac_cv_f90_mangling, extra underscore"
+	   sidl_cv_f90_number_underscores=`expr $sidl_cv_f90_number_underscores + 1`
+        fi
+      else
+	ac_cv_f90_mangling="unknown"
+      fi
+  else
+     ac_cv_f90_mangling="unknown"
+  fi
+
+  if test "$ac_cv_f90_mangling" = "unknown"; then
+    AC_MSG_ERROR([Failed to determine how F90 mangles linker symbols.])
+  fi
+  LIBS=$ac_save_LIBS
+  AC_LANG_POP(C)dnl
+  rm -f cf90_test* conftest*])
+AC_LANG_POP(Fortran 90)dnl
+])
+])# LLNL_F90_NAME_MANGLING
+
+
 dnl *** file: config/llnl-ac-macros/llnl_find_32bit_signed_int.m4
 
 dnl @synopsis LLNL_FIND_32BIT_SIGNED_INT
@@ -1524,6 +1736,1292 @@ AC_DEFUN(LLNL_FIND_64BIT_SIGNED_INT,
 ])
 
 
+dnl *** file: config/llnl-ac-macros/llnl_fortran90.m4
+# This file is part of Autoconf.                       -*- Autoconf -*-
+# Programming languages support.
+# Copyright 2000, 2001
+# Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+# 02111-1307, USA.
+#
+# As a special exception, the Free Software Foundation gives unlimited
+# permission to copy, distribute and modify the configure scripts that
+# are the output of Autoconf.  You need not follow the terms of the GNU
+# General Public License when using or distributing such scripts, even
+# though portions of the text of Autoconf appear in them.  The GNU
+# General Public License (GPL) does govern all other use of the material
+# that constitutes the Autoconf program.
+#
+# Certain portions of the Autoconf source text are designed to be copied
+# (in certain cases, depending on the input) into the output of
+# Autoconf.  We call these the "data" portions.  The rest of the Autoconf
+# source text consists of comments plus executable code that decides which
+# of the data portions to output in any given case.  We call these
+# comments and executable code the "non-data" portions.  Autoconf never
+# copies any of the non-data portions into its output.
+#
+# This special exception to the GPL applies to versions of Autoconf
+# released by the Free Software Foundation.  When you make and
+# distribute a modified version of Autoconf, you may extend this special
+# exception to the GPL to apply to your modified version as well, *unless*
+# your modified version has the potential to copy into its output some
+# of the text that was the non-data portion of the version that you started
+# with.  (In other words, unless your change moves or copies text from
+# the non-data portions to the data portions.)  If your modification has
+# such potential, you must delete any notice of this special exception
+# to the GPL from your modified version.
+#
+# Written by Akim Demaille, Christian Marquardt, Martin Wilks (and probably
+# many others). 
+
+
+#
+# *********************************************************************** #
+# NOTE:  This was renamed from aclang-fortran.m4 to llnl_fortran90.m4 for
+# for incorporation into the Babel build since Autoconf/FSF people have
+# chosen not to add it to their distribution (as of November 2002).
+# We have had to make minor fixes, change some macros to be more like their
+# current F77 counterparts, and add a few new F77-like macros (marked "LLNL").
+# To get everthing to work, we had to use the "latest" M4 (an alpha version) 
+# and automake (1.7).  Which means both automake 1.7 and autoconf 2.54 also 
+# had to be rebuilt with the new M4. 
+# *********************************************************************** #
+#
+
+
+# Table of Contents:
+#
+# 1. Language selection
+#    and routines to produce programs in a given language.
+#  a. Fortran 77 (to be moved from aclang.m4)
+#  b. Fortran 90
+#  c. Fortran 95
+#
+# 2. Producing programs in a given language.
+#  a. Fortran 77 (to be moved from aclang.m4)
+#  b. Fortran 90
+#  c. Fortran 95
+#
+# 3. Looking for a compiler
+#    And possibly the associated preprocessor.
+#  a. Fortran 77 (to be moved from aclang.m4)
+#  b. Fortran 90
+#  c. Fortran 95
+#
+# 4. Compilers' characteristics.
+#  a. Fortran 77 (to be moved from aclang.m4)
+#  b. Fortran 90
+#  c. Fortran 95
+
+
+
+## ----------------------- ##
+## 1. Language selection.  ##
+## ----------------------- ##
+
+# ----------------------------- #
+# 1b. The Fortran 90 language.  #
+# ----------------------------- #
+
+# AC_LANG(Fortran 90)
+# -------------------
+m4_define([AC_LANG(Fortran 90)],
+[ac_ext=f90
+ac_compile='$F90 -c $F90FLAGS conftest.$ac_ext >&AS_MESSAGE_LOG_FD'
+ac_link='$F90 -o conftest$ac_exeext $F90FLAGS $LD90FLAGS $LDFLAGS conftest.$ac_ext $LIBS >&AS_MESSAGE_LOG_FD'
+ac_compiler_gnu=$ac_cv_f90_compiler_gnu
+])
+
+##
+##  LLNL:  Added the following to mimic latest for Fortran 77
+##
+# AC_LANG_FORTRAN90
+# -----------------
+AU_DEFUN([AC_LANG_FORTRAN90], [AC_LANG(Fortran 90)])
+
+
+# _AC_LANG_ABBREV(Fortran 90)
+# ---------------------------
+m4_define([_AC_LANG_ABBREV(Fortran 90)], [f90])
+
+
+# ----------------------------- #
+# 1c. The Fortran 95 language.  #
+# ----------------------------- #
+
+# AC_LANG(Fortran 95)
+# -------------------
+m4_define([AC_LANG(Fortran 95)],
+[ac_ext=f95
+ac_compile='$F95 -c $F95FLAGS conftest.$ac_ext >&AS_MESSAGE_LOG_FD'
+ac_link='$F95 -o conftest$ac_exeext $F95FLAGS $LD95FLAGS $LDFLAGS conftest.$ac_ext $LIBS >&AS_MESSAGE_LOG_FD'
+ac_compiler_gnu=$ac_cv_f95_compiler_gnu
+])
+
+
+##
+##  LLNL:  Added the following to mimic latest for Fortran 77
+##
+# AC_LANG_FORTRAN95
+# -----------------
+AU_DEFUN([AC_LANG_FORTRAN95], [AC_LANG(Fortran 95)])
+
+
+# _AC_LANG_ABBREV(Fortran 95)
+# ---------------------------
+m4_define([_AC_LANG_ABBREV(Fortran 95)], [f95])
+
+
+## ---------------------- ##
+## 2.Producing programs.  ##
+## ---------------------- ##
+
+# ------------------------ #
+# 2b. Fortran 90 sources.  #
+# ------------------------ #
+
+# AC_LANG_SOURCE(Fortran 90)(BODY)
+# --------------------------------
+m4_copy([AC_LANG_SOURCE(Fortran 77)], [AC_LANG_SOURCE(Fortran 90)])
+
+
+# AC_LANG_PROGRAM(Fortran 90)([PROLOGUE], [BODY])
+# -----------------------------------------------
+## LLNL - Discarding the PROLOGUE just like F77
+##
+m4_define([AC_LANG_PROGRAM(Fortran 90)], [
+m4_ifval([$1],
+       [m4_warn([syntax], [$0: ignoring PROLOGUE: $1])])dnl
+program main
+$2
+end program main
+])
+
+# AC_LANG_CALL(Fortran 90)(PROLOGUE, FUNCTION)
+# --------------------------------------------
+m4_define([AC_LANG_CALL(Fortran 90)],
+[AC_LANG_PROGRAM([$1],
+[call $2])])
+
+
+# ------------------------ #
+# 2c. Fortran 95 sources.  #
+# ------------------------ #
+
+# AC_LANG_SOURCE(Fortran 95)(BODY)
+# --------------------------------
+m4_copy([AC_LANG_SOURCE(Fortran 90)], [AC_LANG_SOURCE(Fortran 95)])
+
+# AC_LANG_PROGRAM(Fortran 95)([PROLOGUE], [BODY])
+# -----------------------------------------------
+m4_copy([AC_LANG_PROGRAM(Fortran 90)], [AC_LANG_PROGRAM(Fortran 95)])
+
+# AC_LANG_CALL(Fortran 95)(PROLOGUE, FUNCTION)
+# --------------------------------------------
+m4_copy([AC_LANG_CALL(Fortran 90)], [AC_LANG_CALL(Fortran 95)])
+
+
+## -------------------------------------------- ##
+## 3. Looking for Compilers and Preprocessors.  ##
+## -------------------------------------------- ##
+
+# ----------------------------- #
+# 3b. The Fortran 90 compiler.  #
+# ----------------------------- #
+
+
+# AC_LANG_PREPROC(Fortran 90)
+# ---------------------------
+# Find the Fortran 90 preprocessor.  Must be AC_DEFUN'd to be AC_REQUIRE'able.
+AC_DEFUN([AC_LANG_PREPROC(Fortran 90)],
+[m4_warn([syntax],
+         [$0: No preprocessor defined for ]_AC_LANG)])
+
+
+# AC_LANG_COMPILER(Fortran 90)
+# ----------------------------
+# Find the Fortran 90 compiler.  Must be AC_DEFUN'd to be
+# AC_REQUIRE'able.
+AC_DEFUN([AC_LANG_COMPILER(Fortran 90)],
+[AC_REQUIRE([AC_PROG_F90])])
+
+##
+## LLNL:  Adding ac_cv_prog_g90 like Fortran 77
+##
+# ac_cv_prog_g90
+# --------------
+# We used to name the cache variable this way.
+AU_DEFUN([ac_cv_prog_g90],
+[ac_cv_f90_compiler_gnu])
+
+
+# AC_PROG_F90([COMPILERS...])
+# ---------------------------
+# COMPILERS is a space separated list of Fortran 90 compilers to search
+# for.
+#
+# Compilers are ordered by
+#  1. F90, F95
+#  2. Good/tested native compilers, bad/untested native compilers
+#
+# pgf90 is the Portland Group F90 compilers.
+# xlf90/xlf95 are IBM (AIX) F90/F95 compilers.
+# lf95 is the Lahey-Fujitsu compiler.
+# epcf90 is the "Edinburgh Portable Compiler" F90.
+# fort is the Compaq Fortran 90 (now 95) compiler for Tru64 and Linux/Alpha.
+AC_DEFUN([AC_PROG_F90],
+[AC_LANG_PUSH(Fortran 90)dnl
+AC_ARG_VAR([F90],      [Fortran 90 compiler command])dnl
+AC_ARG_VAR([F90FLAGS], [Fortran 90 compiler flags])dnl
+_AC_ARG_VAR_LDFLAGS()dnl
+AC_CHECK_TOOLS(F90,
+      [m4_default([$1],
+                  [f90 xlf90 pgf90 epcf90 f95 xlf95 lf95 fort g95])])
+
+#
+# LLNL:  Added to be consistent with F77
+# Provide some information about the compiler.
+echo "$as_me:__oline__:" \
+     "checking for _AC_LANG compiler version" >&AS_MESSAGE_LOG_FD
+ac_compiler=`set X $ac_compile; echo $[2]`
+_AC_EVAL([$ac_compiler --version </dev/null >&AS_MESSAGE_LOG_FD])
+_AC_EVAL([$ac_compiler -v </dev/null >&AS_MESSAGE_LOG_FD])
+_AC_EVAL([$ac_compiler -V </dev/null >&AS_MESSAGE_LOG_FD])
+
+m4_expand_once([_AC_COMPILER_EXEEXT])[]dnl
+m4_expand_once([_AC_COMPILER_OBJEXT])[]dnl
+# If we don't use `.F90' as extension, the preprocessor is not run on the
+# input file.
+ac_save_ext=$ac_ext
+ac_ext=F90
+_AC_LANG_COMPILER_GNU
+ac_ext=$ac_save_ext
+G90=`test $ac_compiler_gnu = yes && echo yes`
+AC_LANG_POP(Fortran 90)dnl
+])# AC_PROG_F90
+
+
+##
+## LLNL:  Should equiv of F77's AC_PROG_F77_G and AC_PROG_F77_C_O be added
+##  to check the use of '-g' and '-c -o' options?
+
+# ----------------------------- #
+# 3c. The Fortran 95 compiler.  #
+# ----------------------------- #
+
+
+# AC_LANG_PREPROC(Fortran 95)
+# ---------------------------
+# Find the Fortran 95 preprocessor.  Must be AC_DEFUN'd to be AC_REQUIRE'able.
+AC_DEFUN([AC_LANG_PREPROC(Fortran 95)],
+[m4_warn([syntax],
+         [$0: No preprocessor defined for ]_AC_LANG)])
+
+
+# AC_LANG_COMPILER(Fortran 95)
+# ----------------------------
+# Find the Fortran 95 compiler.  Must be AC_DEFUN'd to be
+# AC_REQUIRE'able.
+AC_DEFUN([AC_LANG_COMPILER(Fortran 95)],
+[AC_REQUIRE([AC_PROG_F95])])
+
+##
+## LLNL:  Adding ac_cv_prog_g95 like Fortran 77
+##
+# ac_cv_prog_g95
+# --------------
+# We used to name the cache variable this way.
+AU_DEFUN([ac_cv_prog_g95],
+[ac_cv_f95_compiler_gnu])
+
+
+# AC_PROG_F95([COMPILERS...])
+# ---------------------------
+# COMPILERS is a space separated list of Fortran 95 compilers to search
+# for.
+#
+# Compilers are ordered by
+#  1. Good/tested native compilers, bad/untested native compilers
+#
+# xlf95 is the IBM (AIX) F95 compiler.
+# lf95 is the Lahey-Fujitsu compiler.
+# fort is the Compaq Fortran 90 (now 95) compiler for Tru64 and Linux/Alpha.
+AC_DEFUN([AC_PROG_F95],
+[AC_LANG_PUSH(Fortran 95)dnl
+AC_ARG_VAR([F95],      [Fortran 95 compiler command])dnl
+AC_ARG_VAR([F95FLAGS], [Fortran 95 compiler flags])dnl
+_AC_ARG_VAR_LDFLAGS()dnl
+AC_CHECK_TOOLS(F95,
+      [m4_default([$1],
+                  [f95 xlf95 lf95 fort g95])])
+#
+#  LLNL:  Making consistent with F77
+# Provide some information about the compiler.
+echo "$as_me:__oline__:" \
+     "checking for _AC_LANG compiler version" >&AS_MESSAGE_LOG_FD
+ac_compiler=`set X $ac_compile; echo $[2]`
+_AC_EVAL([$ac_compiler --version </dev/null >&AS_MESSAGE_LOG_FD])
+_AC_EVAL([$ac_compiler -v </dev/null >&AS_MESSAGE_LOG_FD])
+_AC_EVAL([$ac_compiler -V </dev/null >&AS_MESSAGE_LOG_FD])
+
+m4_expand_once([_AC_COMPILER_EXEEXT])[]dnl
+m4_expand_once([_AC_COMPILER_OBJEXT])[]dnl
+# If we don't use `.F95' as extension, the preprocessor is not run on the
+# input file.
+ac_save_ext=$ac_ext
+ac_ext=F95
+_AC_LANG_COMPILER_GNU
+ac_ext=$ac_save_ext
+G95=`test $ac_compiler_gnu = yes && echo yes`
+AC_LANG_POP(Fortran 95)dnl
+])# AC_PROG_F95
+
+
+##
+## LLNL:  Should equiv of F77's AC_PROG_F77_G and AC_PROG_F77_C_O be added
+##  to check the use of '-g' and '-c -o' options?
+
+
+## ------------------------------- ##
+## 4. Compilers' characteristics.  ##
+## ------------------------------- ##
+
+
+# ---------------------------------------- #
+# 4b. Fortan 90 compiler characteristics.  #
+# ---------------------------------------- #
+
+
+# _AC_PROG_F90_V_OUTPUT([FLAG = $ac_cv_prog_f90_v])
+# -------------------------------------------------
+# Link a trivial Fortran program, compiling with a verbose output FLAG
+# (which default value, $ac_cv_prog_f90_v, is computed by
+# _AC_PROG_F90_V), and return the output in $ac_f90_v_output.  This
+# output is processed in the way expected by AC_F90_LIBRARY_LDFLAGS,
+# so that any link flags that are echoed by the compiler appear as
+# space-separated items.
+AC_DEFUN([_AC_PROG_F90_V_OUTPUT],
+[AC_REQUIRE([AC_PROG_F90])dnl
+AC_LANG_PUSH(Fortran 90)dnl
+
+AC_LANG_CONFTEST([AC_LANG_PROGRAM([])])
+
+# Compile and link our simple test program by passing a flag (argument
+# 1 to this macro) to the Fortran 90 compiler in order to get
+# "verbose" output that we can then parse for the Fortran 90 linker
+# flags.
+ac_save_F90FLAGS=$F90FLAGS
+F90FLAGS="$F90FLAGS m4_default([$1], [$ac_cv_prog_f90_v])"
+(eval echo $as_me:__oline__: \"$ac_link\") >&AS_MESSAGE_LOG_FD
+ac_f90_v_output=`eval $ac_link AS_MESSAGE_LOG_FD>&1 2>&1 | grep -v 'Driving:'`
+echo "$ac_f90_v_output" >&AS_MESSAGE_LOG_FD
+F90FLAGS=$ac_save_F90FLAGS
+
+rm -f conftest.*
+AC_LANG_POP(Fortran 90)dnl
+
+# If we are using xlf then replace all the commas with spaces.
+if echo $ac_f90_v_output | grep xlfentry >/dev/null 2>&1; then
+  ac_f90_v_output=`echo $ac_f90_v_output | sed 's/,/ /g'`
+fi
+
+# If we are using Cray Fortran then delete quotes.
+# Use "\"" instead of '"' for font-lock-mode.
+# FIXME: a more general fix for quoted arguments with spaces?
+if echo $ac_f90_v_output | grep cft90 >/dev/null 2>&1; then
+  ac_f90_v_output=`echo $ac_f90_v_output | sed "s/\"//g"`
+fi[]dnl
+])# _AC_PROG_F90_V_OUTPUT
+
+
+# _AC_PROG_F90_V
+# --------------
+#
+# Determine the flag that causes the Fortran 90 compiler to print
+# information of library and object files (normally -v)
+# Needed for AC_F90_LIBRARY_FLAGS
+# Some compilers don't accept -v (Lahey: -verbose, xlf: -V, Fujitsu: -###)
+AC_DEFUN([_AC_PROG_F90_V],
+[AC_CACHE_CHECK([how to get verbose linking output from $F90],
+                [ac_cv_prog_f90_v],
+[AC_LANG_ASSERT(Fortran 90)
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
+[ac_cv_prog_f90_v=
+# Try some options frequently used verbose output
+for ac_verb in -v -verbose --verbose -V -\#\#\#; do
+  _AC_PROG_F90_V_OUTPUT($ac_verb)
+  # look for -l* and *.a constructs in the output
+  for ac_arg in $ac_f90_v_output; do
+     case $ac_arg in
+        [[\\/]]*.a | ?:[[\\/]]*.a | -[[lLRu]]*)
+          ac_cv_prog_f90_v=$ac_verb
+          break 2 ;;
+     esac
+  done
+done
+if test -z "$ac_cv_prog_f90_v"; then
+   AC_MSG_WARN([cannot determine how to obtain linking information from $F90])
+fi],
+                  [AC_MSG_WARN([compilation failed])])
+])])# _AC_PROG_F90_V
+
+
+# AC_F90_LIBRARY_LDFLAGS
+# ----------------------
+#
+# Determine the linker flags (e.g. "-L" and "-l") for the Fortran 90
+# intrinsic and run-time libraries that are required to successfully
+# link a Fortran 90 program or shared library.  The output variable
+# F90LIBS is set to these flags.
+#
+# This macro is intended to be used in those situations when it is
+# necessary to mix, e.g. C++ and Fortran 90, source code into a single
+# program or shared library.
+#
+# For example, if object files from a C++ and Fortran 90 compiler must
+# be linked together, then the C++ compiler/linker must be used for
+# linking (since special C++-ish things need to happen at link time
+# like calling global constructors, instantiating templates, enabling
+# exception support, etc.).
+#
+# However, the Fortran 90 intrinsic and run-time libraries must be
+# linked in as well, but the C++ compiler/linker doesn't know how to
+# add these Fortran 90 libraries.  Hence, the macro
+# "AC_F90_LIBRARY_LDFLAGS" was created to determine these Fortran 90
+# libraries.
+#
+# This macro was copied from the Fortran 77 version by Matthew D. Langston.
+AC_DEFUN([AC_F90_LIBRARY_LDFLAGS],
+[AC_LANG_PUSH(Fortran 90)dnl
+_AC_PROG_F90_V
+AC_CACHE_CHECK([for Fortran 90 libraries], ac_cv_f90libs,
+[if test "x$F90LIBS" != "x"; then
+  ac_cv_f90libs="$F90LIBS" # Let the user override the test.
+else
+
+_AC_PROG_F90_V_OUTPUT
+
+ac_cv_f90libs=
+
+# Save positional arguments (if any)
+ac_save_positional="$[@]"
+
+set X $ac_f90_v_output
+while test $[@%:@] != 1; do
+  shift
+  ac_arg=$[1]
+  case $ac_arg in
+        [[\\/]]*.a | ?:[[\\/]]*.a)
+          _AC_LIST_MEMBER_IF($ac_arg, $ac_cv_f90libs, ,
+              ac_cv_f90libs="$ac_cv_f90libs $ac_arg")
+          ;;
+        -bI:*)
+          _AC_LIST_MEMBER_IF($ac_arg, $ac_cv_f90libs, ,
+             [_AC_LINKER_OPTION([$ac_arg], ac_cv_f90libs)])
+          ;;
+          # Ignore these flags.
+        -lang* | -lcrt0.o | -lc | -lgcc | -LANG:=*)
+          ;;
+        -lkernel32)
+          test x"$CYGWIN" != xyes && ac_cv_f90libs="$ac_cv_f90libs $ac_arg"
+          ;;
+        -[[LRuY]])
+          # These flags, when seen by themselves, take an argument.
+          # We remove the space between option and argument and re-iterate
+          # unless we find an empty arg or a new option (starting with -)
+          case $[2] in
+             "" | -*);;
+             *)
+                ac_arg="$ac_arg$[2]"
+                shift; shift
+                set X $ac_arg "$[@]"
+                ;;
+          esac
+          ;;
+        -YP,*)
+          for ac_j in `echo $ac_arg | sed -e 's/-YP,/-L/;s/:/ -L/g'`; do
+            _AC_LIST_MEMBER_IF($ac_j, $ac_cv_f90libs, ,
+                            [ac_arg="$ac_arg $ac_j"
+                             ac_cv_f90libs="$ac_cv_f90libs $ac_j"])
+          done
+          ;;
+        -[[lLR]]*)
+          _AC_LIST_MEMBER_IF($ac_arg, $ac_cv_f90libs, ,
+                          ac_cv_f90libs="$ac_cv_f90libs $ac_arg")
+          ;;
+          # Ignore everything else.
+  esac
+done
+# restore positional arguments
+set X $ac_save_positional; shift
+
+# We only consider "LD_RUN_PATH" on Solaris systems.  If this is seen,
+# then we insist that the "run path" must be an absolute path (i.e. it
+# must begin with a "/").
+case `(uname -sr) 2>/dev/null` in
+   "SunOS 5"*)
+      ac_ld_run_path=`echo $ac_f90_v_output |
+                        sed -n 's,^.*LD_RUN_PATH *= *\(/[[^ ]]*\).*$,-R\1,p'`
+      test "x$ac_ld_run_path" != x &&
+        _AC_LINKER_OPTION([$ac_ld_run_path], ac_cv_f90libs)
+      ;;
+esac
+fi # test "x$F90LIBS" = "x"
+])
+F90LIBS="$ac_cv_f90libs"
+AC_SUBST(F90LIBS)
+AC_LANG_POP(Fortran 90)dnl
+])# AC_F90_LIBRARY_LDFLAGS
+
+
+##
+##  LLNL:  Added F90 Dummy Main.
+##
+# AC_F90_DUMMY_MAIN([ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND])
+# -----------------------------------------------------------
+#
+# Detect name of dummy main routine required by the Fortran libraries,
+# (if any) and define F90_DUMMY_MAIN to this name (which should be
+# used for a dummy declaration, if it is defined).  On some systems,
+# linking a C program to the Fortran library does not work unless you
+# supply a dummy function called something like MAIN__.
+#
+# Execute ACTION-IF-NOT-FOUND if no way of successfully linking a C
+# program with the F90 libs is found; default to exiting with an error
+# message.  Execute ACTION-IF-FOUND if a dummy routine name is needed
+# and found or if it is not needed (default to defining F90_DUMMY_MAIN
+# when needed).
+#
+# What is technically happening is that the Fortran libraries provide
+# their own main() function, which usually initializes Fortran I/O and
+# similar stuff, and then calls MAIN__, which is the entry point of
+# your program.  Usually, a C program will override this with its own
+# main() routine, but the linker sometimes complain if you don't
+# provide a dummy (never-called) MAIN__ routine anyway.
+#
+# Of course, programs that want to allow Fortran subroutines to do
+# I/O, etcetera, should call their main routine MAIN__() (or whatever)
+# instead of main().  A separate autoconf test (AC_F90_MAIN) checks
+# for the routine to use in this case (since the semantics of the test
+# are slightly different).  To link to e.g. purely numerical
+# libraries, this is normally not necessary, however, and most C/C++
+# programs are reluctant to turn over so much control to Fortran.  =)
+#
+# The name variants we check for are (in order):
+#   MAIN__ (g90, MAIN__ required on some systems; IRIX, MAIN__ optional)
+#   MAIN_, __main (SunOS)
+#   MAIN _MAIN __MAIN main_ main__ _main (we follow DDD and try these too)
+AC_DEFUN([AC_F90_DUMMY_MAIN],
+[AC_REQUIRE([AC_F90_LIBRARY_LDFLAGS])dnl
+m4_define([_AC_LANG_PROGRAM_C_F90_HOOKS],
+[#ifdef F90_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F90_DUMMY_MAIN() { return 1; }
+#endif
+])
+AC_CACHE_CHECK([for dummy main to link with Fortran 90 libraries],
+               ac_cv_f90_dummy_main,
+[AC_LANG_PUSH(C)dnl
+ ac_f90_dm_save_LIBS=$LIBS
+ LIBS="$LIBS $FLIBS"
+
+ # First, try linking without a dummy main:
+ AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])],
+                [ac_cv_f90_dummy_main=none],
+                [ac_cv_f90_dummy_main=unknown])
+
+ if test $ac_cv_f90_dummy_main = unknown; then
+   for ac_func in MAIN__ MAIN_ __main MAIN _MAIN __MAIN main_ main__ _main; do
+     AC_LINK_IFELSE([AC_LANG_PROGRAM([[@%:@define F90_DUMMY_MAIN $ac_func]])],
+                    [ac_cv_f90_dummy_main=$ac_func; break])
+   done
+ fi
+ rm -f conftest*
+ LIBS=$ac_f90_dm_save_LIBS
+ AC_LANG_POP(C)dnl
+])
+F90_DUMMY_MAIN=$ac_cv_f90_dummy_main
+AS_IF([test "$F90_DUMMY_MAIN" != unknown],
+      [m4_default([$1],
+[if test $F90_DUMMY_MAIN != none; then
+  AC_DEFINE_UNQUOTED([F90_DUMMY_MAIN], $F90_DUMMY_MAIN,
+                     [Define to dummy `main' function (if any) required to
+                      link to the Fortran 90 libraries.])
+fi])],
+      [m4_default([$2],
+                [AC_MSG_ERROR([linking to Fortran libraries from C fails])])])
+])# AC_F90_DUMMY_MAIN
+
+
+##
+##  LLNL:  Added F90 Main.
+##
+# AC_F90_MAIN
+# -----------
+# Define F90_MAIN to name of alternate main() function for use with
+# the Fortran libraries.  (Typically, the libraries may define their
+# own main() to initialize I/O, etcetera, that then call your own
+# routine called MAIN__ or whatever.)  See AC_F90_DUMMY_MAIN, above.
+# If no such alternate name is found, just define F90_MAIN to main.
+#
+AC_DEFUN([AC_F90_MAIN],
+[AC_REQUIRE([AC_F90_LIBRARY_LDFLAGS])dnl
+AC_CACHE_CHECK([for alternate main to link with Fortran 90 libraries],
+               ac_cv_f90_main,
+[AC_LANG_PUSH(C)dnl
+ ac_f90_m_save_LIBS=$LIBS
+ LIBS="$LIBS $FLIBS"
+ ac_cv_f90_main="main" # default entry point name
+
+ for ac_func in MAIN__ MAIN_ __main MAIN _MAIN __MAIN main_ main__ _main; do
+   AC_LINK_IFELSE([AC_LANG_PROGRAM([@%:@undef F90_DUMMY_MAIN
+@%:@define main $ac_func])],
+                  [ac_cv_f90_main=$ac_func; break])
+ done
+ rm -f conftest*
+ LIBS=$ac_f90_m_save_LIBS
+ AC_LANG_POP(C)dnl
+])
+AC_DEFINE_UNQUOTED([F90_MAIN], $ac_cv_f90_main,
+                   [Define to alternate name for `main' routine that is
+                    called from a `main' in the Fortran libraries.])
+])# AC_F90_MAIN
+
+
+# _AC_F90_NAME_MANGLING
+# ---------------------
+# Test for the name mangling scheme used by the Fortran 90 compiler.
+#
+# Sets ac_cv_f90_mangling. The value contains three fields, separated
+# by commas:
+#
+# lower case / upper case:
+#    case translation of the Fortan 90 symbols
+# underscore / no underscore:
+#    whether the compiler appends "_" to symbol names
+# extra underscore / no extra underscore:
+#    whether the compiler appends an extra "_" to symbol names already
+#    containing at least one underscore
+#
+AC_DEFUN([_AC_F90_NAME_MANGLING],
+[AC_REQUIRE([AC_F90_LIBRARY_LDFLAGS])dnl
+AC_CACHE_CHECK([for Fortran 90 name-mangling scheme],
+               ac_cv_f90_mangling,
+[AC_LANG_PUSH(Fortran 90)dnl
+AC_COMPILE_IFELSE(
+[subroutine foobar()
+return
+end
+subroutine foo_bar()
+return
+end],
+[mv conftest.$ac_objext cf90_test.$ac_objext
+
+  AC_LANG_PUSH(C)dnl
+
+  ac_save_LIBS=$LIBS
+  LIBS="cf90_test.$ac_objext $F90LIBS $LIBS"
+
+  ac_success=no
+  for ac_foobar in foobar FOOBAR; do
+    for ac_underscore in "" "_"; do
+      ac_func="$ac_foobar$ac_underscore"
+      AC_TRY_LINK_FUNC($ac_func,
+         [ac_success=yes; break 2])
+    done
+  done
+
+  if test "$ac_success" = "yes"; then
+     case $ac_foobar in
+        foobar)
+           ac_case=lower
+           ac_foo_bar=foo_bar
+           ;;
+        FOOBAR)
+           ac_case=upper
+           ac_foo_bar=FOO_BAR
+           ;;
+     esac
+
+     ac_success_extra=no
+     for ac_extra in "" "_"; do
+        ac_func="$ac_foo_bar$ac_underscore$ac_extra"
+        AC_TRY_LINK_FUNC($ac_func,
+        [ac_success_extra=yes; break])
+     done
+
+     if test "$ac_success_extra" = "yes"; then
+        ac_cv_f90_mangling="$ac_case case"
+        if test -z "$ac_underscore"; then
+           ac_cv_f90_mangling="$ac_cv_f90_mangling, no underscore"
+        else
+           ac_cv_f90_mangling="$ac_cv_f90_mangling, underscore"
+        fi
+        if test -z "$ac_extra"; then
+           ac_cv_f90_mangling="$ac_cv_f90_mangling, no extra underscore"
+        else
+           ac_cv_f90_mangling="$ac_cv_f90_mangling, extra underscore"
+        fi
+      else
+        ac_cv_f90_mangling="unknown"
+      fi
+  else
+     ac_cv_f90_mangling="unknown"
+  fi
+
+  LIBS=$ac_save_LIBS
+  AC_LANG_POP(C)dnl
+  rm -f cf90_test* conftest*])
+AC_LANG_POP(Fortran 90)dnl
+])
+])# _AC_F90_NAME_MANGLING
+
+# The replacement is empty.
+AU_DEFUN([AC_F90_NAME_MANGLING], [])
+
+
+# AC_F90_WRAPPERS
+# ---------------
+# Defines C macros F90_FUNC(name,NAME) and F90_FUNC_(name,NAME) to
+# properly mangle the names of C identifiers, and C identifiers with
+# underscores, respectively, so that they match the name mangling
+# scheme used by the Fortran 90 compiler.
+AC_DEFUN([AC_F90_WRAPPERS],
+[AC_REQUIRE([_AC_F90_NAME_MANGLING])dnl
+AH_TEMPLATE([F90_FUNC],
+    [Define to a macro mangling the given C identifier (in lower and upper
+     case), which must not contain underscores, for linking with Fortran 90.])dnl
+AH_TEMPLATE([F90_FUNC_],
+    [As F90_FUNC, but for C identifiers containing underscores.])dnl
+case $ac_cv_f90_mangling in
+  "lower case, no underscore, no extra underscore")
+          AC_DEFINE([F90_FUNC(name,NAME)],  [name])
+          AC_DEFINE([F90_FUNC_(name,NAME)], [name]) ;;
+  "lower case, no underscore, extra underscore")
+          AC_DEFINE([F90_FUNC(name,NAME)],  [name])
+          AC_DEFINE([F90_FUNC_(name,NAME)], [name ## _]) ;;
+  "lower case, underscore, no extra underscore")
+          AC_DEFINE([F90_FUNC(name,NAME)],  [name ## _])
+          AC_DEFINE([F90_FUNC_(name,NAME)], [name ## _]) ;;
+  "lower case, underscore, extra underscore")
+          AC_DEFINE([F90_FUNC(name,NAME)],  [name ## _])
+          AC_DEFINE([F90_FUNC_(name,NAME)], [name ## __]) ;;
+  "upper case, no underscore, no extra underscore")
+          AC_DEFINE([F90_FUNC(name,NAME)],  [NAME])
+          AC_DEFINE([F90_FUNC_(name,NAME)], [NAME]) ;;
+  "upper case, no underscore, extra underscore")
+          AC_DEFINE([F90_FUNC(name,NAME)],  [NAME])
+          AC_DEFINE([F90_FUNC_(name,NAME)], [NAME ## _]) ;;
+  "upper case, underscore, no extra underscore")
+          AC_DEFINE([F90_FUNC(name,NAME)],  [NAME ## _])
+          AC_DEFINE([F90_FUNC_(name,NAME)], [NAME ## _]) ;;
+  "upper case, underscore, extra underscore")
+          AC_DEFINE([F90_FUNC(name,NAME)],  [NAME ## _])
+          AC_DEFINE([F90_FUNC_(name,NAME)], [NAME ## __]) ;;
+  *)
+          AC_MSG_WARN([unknown Fortran 90 name-mangling scheme])
+          ;;
+esac
+])# AC_F90_WRAPPERS
+
+
+# AC_F90_FUNC(NAME, [SHELLVAR = NAME])
+# ------------------------------------
+# For a Fortran subroutine of given NAME, define a shell variable
+# $SHELLVAR to the Fortran 90 mangled name.  If the SHELLVAR
+# argument is not supplied, it defaults to NAME.
+AC_DEFUN([AC_F90_FUNC],
+[AC_REQUIRE([_AC_F90_NAME_MANGLING])dnl
+case $ac_cv_f90_mangling in
+  upper*) ac_val="m4_toupper([$1])" ;;
+  lower*) ac_val="m4_tolower([$1])" ;;
+  *)      ac_val="unknown" ;;
+esac
+case $ac_cv_f90_mangling in *," underscore"*) ac_val="$ac_val"_ ;; esac
+m4_if(m4_index([$1],[_]),-1,[],
+[case $ac_cv_f90_mangling in *," extra underscore"*) ac_val="$ac_val"_ ;; esac
+])
+m4_default([$2],[$1])="$ac_val"
+])# AC_F90_FUNC
+
+
+# ---------------------------------------- #
+# 4c. Fortan 95 compiler characteristics.  #
+# ---------------------------------------- #
+
+
+# _AC_PROG_F95_V_OUTPUT([FLAG = $ac_cv_prog_f95_v])
+# -------------------------------------------------
+# Link a trivial Fortran program, compiling with a verbose output FLAG
+# (which default value, $ac_cv_prog_f95_v, is computed by
+# _AC_PROG_F95_V), and return the output in $ac_f95_v_output.  This
+# output is processed in the way expected by AC_F95_LIBRARY_LDFLAGS,
+# so that any link flags that are echoed by the compiler appear as
+# space-separated items.
+AC_DEFUN([_AC_PROG_F95_V_OUTPUT],
+[AC_REQUIRE([AC_PROG_F95])dnl
+AC_LANG_PUSH(Fortran 95)dnl
+
+AC_LANG_CONFTEST([AC_LANG_PROGRAM([])])
+
+# Compile and link our simple test program by passing a flag (argument
+# 1 to this macro) to the Fortran 95 compiler in order to get
+# "verbose" output that we can then parse for the Fortran 95 linker
+# flags.
+ac_save_F95FLAGS=$F95FLAGS
+F95FLAGS="$F95FLAGS m4_default([$1], [$ac_cv_prog_f95_v])"
+(eval echo $as_me:__oline__: \"$ac_link\") >&AS_MESSAGE_LOG_FD
+ac_f95_v_output=`eval $ac_link AS_MESSAGE_LOG_FD>&1 2>&1 | grep -v 'Driving:'`
+echo "$ac_f95_v_output" >&AS_MESSAGE_LOG_FD
+F95FLAGS=$ac_save_F95FLAGS
+
+rm -f conftest.*
+AC_LANG_POP(Fortran 95)dnl
+
+# If we are using xlf then replace all the commas with spaces.
+if echo $ac_f95_v_output | grep xlfentry >/dev/null 2>&1; then
+  ac_f95_v_output=`echo $ac_f95_v_output | sed 's/,/ /g'`
+fi
+
+# If we are using Cray Fortran then delete quotes.
+# Use "\"" instead of '"' for font-lock-mode.
+# FIXME: a more general fix for quoted arguments with spaces?
+if echo $ac_f95_v_output | grep cft95 >/dev/null 2>&1; then
+  ac_f95_v_output=`echo $ac_f95_v_output | sed "s/\"//g"`
+fi[]dnl
+])# _AC_PROG_F95_V_OUTPUT
+
+
+# _AC_PROG_F95_V
+# --------------
+#
+# Determine the flag that causes the Fortran 95 compiler to print
+# information of library and object files (normally -v)
+# Needed for AC_F95_LIBRARY_FLAGS
+# Some compilers don't accept -v (Lahey: -verbose, xlf: -V, Fujitsu: -###)
+AC_DEFUN([_AC_PROG_F95_V],
+[AC_CACHE_CHECK([how to get verbose linking output from $F95],
+                [ac_cv_prog_f95_v],
+[AC_LANG_ASSERT(Fortran 95)
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
+[ac_cv_prog_f95_v=
+# Try some options frequently used verbose output
+for ac_verb in -v -verbose --verbose -V -\#\#\#; do
+  _AC_PROG_F95_V_OUTPUT($ac_verb)
+  # look for -l* and *.a constructs in the output
+  for ac_arg in $ac_f95_v_output; do
+     case $ac_arg in
+        [[\\/]]*.a | ?:[[\\/]]*.a | -[[lLRu]]*)
+          ac_cv_prog_f95_v=$ac_verb
+          break 2 ;;
+     esac
+  done
+done
+if test -z "$ac_cv_prog_f95_v"; then
+   AC_MSG_WARN([cannot determine how to obtain linking information from $F95])
+fi],
+                  [AC_MSG_WARN([compilation failed])])
+])])# _AC_PROG_F95_V
+
+
+# AC_F95_LIBRARY_LDFLAGS
+# ----------------------
+#
+# Determine the linker flags (e.g. "-L" and "-l") for the Fortran 95
+# intrinsic and run-time libraries that are required to successfully
+# link a Fortran 95 program or shared library.  The output variable
+# F95LIBS is set to these flags.
+#
+# This macro is intended to be used in those situations when it is
+# necessary to mix, e.g. C++ and Fortran 95, source code into a single
+# program or shared library.
+#
+# For example, if object files from a C++ and Fortran 95 compiler must
+# be linked together, then the C++ compiler/linker must be used for
+# linking (since special C++-ish things need to happen at link time
+# like calling global constructors, instantiating templates, enabling
+# exception support, etc.).
+#
+# However, the Fortran 95 intrinsic and run-time libraries must be
+# linked in as well, but the C++ compiler/linker doesn't know how to
+# add these Fortran 95 libraries.  Hence, the macro
+# "AC_F95_LIBRARY_LDFLAGS" was created to determine these Fortran 95
+# libraries.
+#
+# This macro was copied from the Fortran 77 version by Matthew D. Langston.
+AC_DEFUN([AC_F95_LIBRARY_LDFLAGS],
+[AC_LANG_PUSH(Fortran 95)dnl
+_AC_PROG_F95_V
+AC_CACHE_CHECK([for Fortran 95 libraries], ac_cv_flibs,
+[if test "x$F95LIBS" != "x"; then
+  ac_cv_f95libs="$F95LIBS" # Let the user override the test.
+else
+
+_AC_PROG_F95_V_OUTPUT
+
+ac_cv_f95libs=
+
+# Save positional arguments (if any)
+ac_save_positional="$[@]"
+
+set X $ac_f95_v_output
+while test $[@%:@] != 1; do
+  shift
+  ac_arg=$[1]
+  case $ac_arg in
+        [[\\/]]*.a | ?:[[\\/]]*.a)
+          _AC_LIST_MEMBER_IF($ac_arg, $ac_cv_f95libs, ,
+              ac_cv_f95libs="$ac_cv_f95libs $ac_arg")
+          ;;
+        -bI:*)
+          _AC_LIST_MEMBER_IF($ac_arg, $ac_cv_f95libs, ,
+             [_AC_LINKER_OPTION([$ac_arg], ac_cv_f95libs)])
+          ;;
+          # Ignore these flags.
+        -lang* | -lcrt0.o | -lc | -lgcc | -LANG:=*)
+          ;;
+        -lkernel32)
+          test x"$CYGWIN" != xyes && ac_cv_f95libs="$ac_cv_f95libs $ac_arg"
+          ;;
+        -[[LRuY]])
+          # These flags, when seen by themselves, take an argument.
+          # We remove the space between option and argument and re-iterate
+          # unless we find an empty arg or a new option (starting with -)
+          case $[2] in
+             "" | -*);;
+             *)
+                ac_arg="$ac_arg$[2]"
+                shift; shift
+                set X $ac_arg "$[@]"
+                ;;
+          esac
+          ;;
+        -YP,*)
+          for ac_j in `echo $ac_arg | sed -e 's/-YP,/-L/;s/:/ -L/g'`; do
+            _AC_LIST_MEMBER_IF($ac_j, $ac_cv_f95libs, ,
+                            [ac_arg="$ac_arg $ac_j"
+                             ac_cv_f95libs="$ac_cv_f95libs $ac_j"])
+          done
+          ;;
+        -[[lLR]]*)
+          _AC_LIST_MEMBER_IF($ac_arg, $ac_cv_f95libs, ,
+                          ac_cv_f95libs="$ac_cv_f95libs $ac_arg")
+          ;;
+          # Ignore everything else.
+  esac
+done
+# restore positional arguments
+set X $ac_save_positional; shift
+
+# We only consider "LD_RUN_PATH" on Solaris systems.  If this is seen,
+# then we insist that the "run path" must be an absolute path (i.e. it
+# must begin with a "/").
+case `(uname -sr) 2>/dev/null` in
+   "SunOS 5"*)
+      ac_ld_run_path=`echo $ac_f95_v_output |
+                        sed -n 's,^.*LD_RUN_PATH *= *\(/[[^ ]]*\).*$,-R\1,p'`
+      test "x$ac_ld_run_path" != x &&
+        _AC_LINKER_OPTION([$ac_ld_run_path], ac_cv_f95libs)
+      ;;
+esac
+fi # test "x$F95LIBS" = "x"
+])
+F95LIBS="$ac_cv_f95libs"
+AC_SUBST(F95LIBS)
+AC_LANG_POP(Fortran 95)dnl
+])# AC_F95_LIBRARY_LDFLAGS
+
+
+##
+##  LLNL:  Added F95 Dummy Main.
+##
+# AC_F95_DUMMY_MAIN([ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND])
+# -----------------------------------------------------------
+#
+# Detect name of dummy main routine required by the Fortran libraries,
+# (if any) and define F95_DUMMY_MAIN to this name (which should be
+# used for a dummy declaration, if it is defined).  On some systems,
+# linking a C program to the Fortran library does not work unless you
+# supply a dummy function called something like MAIN__.
+#
+# Execute ACTION-IF-NOT-FOUND if no way of successfully linking a C
+# program with the F95 libs is found; default to exiting with an error
+# message.  Execute ACTION-IF-FOUND if a dummy routine name is needed
+# and found or if it is not needed (default to defining F95_DUMMY_MAIN
+# when needed).
+#
+# What is technically happening is that the Fortran libraries provide
+# their own main() function, which usually initializes Fortran I/O and
+# similar stuff, and then calls MAIN__, which is the entry point of
+# your program.  Usually, a C program will override this with its own
+# main() routine, but the linker sometimes complain if you don't
+# provide a dummy (never-called) MAIN__ routine anyway.
+#
+# Of course, programs that want to allow Fortran subroutines to do
+# I/O, etcetera, should call their main routine MAIN__() (or whatever)
+# instead of main().  A separate autoconf test (AC_F95_MAIN) checks
+# for the routine to use in this case (since the semantics of the test
+# are slightly different).  To link to e.g. purely numerical
+# libraries, this is normally not necessary, however, and most C/C++
+# programs are reluctant to turn over so much control to Fortran.  =)
+#
+# The name variants we check for are (in order):
+#   MAIN__ (g95, MAIN__ required on some systems; IRIX, MAIN__ optional)
+#   MAIN_, __main (SunOS)
+#   MAIN _MAIN __MAIN main_ main__ _main (we follow DDD and try these too)
+AC_DEFUN([AC_F95_DUMMY_MAIN],
+[AC_REQUIRE([AC_F95_LIBRARY_LDFLAGS])dnl
+m4_define([_AC_LANG_PROGRAM_C_F95_HOOKS],
+[#ifdef F95_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F95_DUMMY_MAIN() { return 1; }
+#endif
+])
+AC_CACHE_CHECK([for dummy main to link with Fortran 95 libraries],
+               ac_cv_f95_dummy_main,
+[AC_LANG_PUSH(C)dnl
+ ac_f95_dm_save_LIBS=$LIBS
+ LIBS="$LIBS $FLIBS"
+
+ # First, try linking without a dummy main:
+ AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])],
+                [ac_cv_f95_dummy_main=none],
+                [ac_cv_f95_dummy_main=unknown])
+
+ if test $ac_cv_f95_dummy_main = unknown; then
+   for ac_func in MAIN__ MAIN_ __main MAIN _MAIN __MAIN main_ main__ _main; do
+     AC_LINK_IFELSE([AC_LANG_PROGRAM([[@%:@define F95_DUMMY_MAIN $ac_func]])],
+                    [ac_cv_f95_dummy_main=$ac_func; break])
+   done
+ fi
+ rm -f conftest*
+ LIBS=$ac_f95_dm_save_LIBS
+ AC_LANG_POP(C)dnl
+])
+F95_DUMMY_MAIN=$ac_cv_f95_dummy_main
+AS_IF([test "$F95_DUMMY_MAIN" != unknown],
+      [m4_default([$1],
+[if test $F95_DUMMY_MAIN != none; then
+  AC_DEFINE_UNQUOTED([F95_DUMMY_MAIN], $F95_DUMMY_MAIN,
+                     [Define to dummy `main' function (if any) required to
+                      link to the Fortran 95 libraries.])
+fi])],
+      [m4_default([$2],
+                [AC_MSG_ERROR([linking to Fortran libraries from C fails])])])
+])# AC_F95_DUMMY_MAIN
+
+
+##
+##  LLNL:  Added F95 Main.
+##
+# AC_F95_MAIN
+# -----------
+# Define F95_MAIN to name of alternate main() function for use with
+# the Fortran libraries.  (Typically, the libraries may define their
+# own main() to initialize I/O, etcetera, that then call your own
+# routine called MAIN__ or whatever.)  See AC_F95_DUMMY_MAIN, above.
+# If no such alternate name is found, just define F95_MAIN to main.
+#
+AC_DEFUN([AC_F95_MAIN],
+[AC_REQUIRE([AC_F95_LIBRARY_LDFLAGS])dnl
+AC_CACHE_CHECK([for alternate main to link with Fortran 95 libraries],
+               ac_cv_f95_main,
+[AC_LANG_PUSH(C)dnl
+ ac_f95_m_save_LIBS=$LIBS
+ LIBS="$LIBS $FLIBS"
+ ac_cv_f95_main="main" # default entry point name
+
+ for ac_func in MAIN__ MAIN_ __main MAIN _MAIN __MAIN main_ main__ _main; do
+   AC_LINK_IFELSE([AC_LANG_PROGRAM([@%:@undef F95_DUMMY_MAIN
+@%:@define main $ac_func])],
+                  [ac_cv_f95_main=$ac_func; break])
+ done
+ rm -f conftest*
+ LIBS=$ac_f95_m_save_LIBS
+ AC_LANG_POP(C)dnl
+])
+AC_DEFINE_UNQUOTED([F95_MAIN], $ac_cv_f95_main,
+                   [Define to alternate name for `main' routine that is
+                    called from a `main' in the Fortran libraries.])
+])# AC_F95_MAIN
+
+
+
+# _AC_F95_NAME_MANGLING
+# ---------------------
+# Test for the name mangling scheme used by the Fortran 95 compiler.
+#
+# Sets ac_cv_f95_mangling. The value contains three fields, separated
+# by commas:
+#
+# lower case / upper case:
+#    case translation of the Fortan 95 symbols
+# underscore / no underscore:
+#    whether the compiler appends "_" to symbol names
+# extra underscore / no extra underscore:
+#    whether the compiler appends an extra "_" to symbol names already
+#    containing at least one underscore
+#
+AC_DEFUN([_AC_F95_NAME_MANGLING],
+[AC_REQUIRE([AC_F95_LIBRARY_LDFLAGS])dnl
+AC_CACHE_CHECK([for Fortran 95 name-mangling scheme],
+               ac_cv_f95_mangling,
+[AC_LANG_PUSH(Fortran 95)dnl
+AC_COMPILE_IFELSE(
+[subroutine foobar()
+return
+end
+subroutine foo_bar()
+return
+end],
+[mv conftest.$ac_objext cf95_test.$ac_objext
+
+  AC_LANG_PUSH(C)dnl
+
+  ac_save_LIBS=$LIBS
+  LIBS="cf95_test.$ac_objext $F95LIBS $LIBS"
+
+  ac_success=no
+  for ac_foobar in foobar FOOBAR; do
+    for ac_underscore in "" "_"; do
+      ac_func="$ac_foobar$ac_underscore"
+      AC_TRY_LINK_FUNC($ac_func,
+         [ac_success=yes; break 2])
+    done
+  done
+
+  if test "$ac_success" = "yes"; then
+     case $ac_foobar in
+        foobar)
+           ac_case=lower
+           ac_foo_bar=foo_bar
+           ;;
+        FOOBAR)
+           ac_case=upper
+           ac_foo_bar=FOO_BAR
+           ;;
+     esac
+
+     ac_success_extra=no
+     for ac_extra in "" "_"; do
+        ac_func="$ac_foo_bar$ac_underscore$ac_extra"
+        AC_TRY_LINK_FUNC($ac_func,
+        [ac_success_extra=yes; break])
+     done
+
+     if test "$ac_success_extra" = "yes"; then
+        ac_cv_f95_mangling="$ac_case case"
+        if test -z "$ac_underscore"; then
+           ac_cv_f95_mangling="$ac_cv_f95_mangling, no underscore"
+        else
+           ac_cv_f95_mangling="$ac_cv_f95_mangling, underscore"
+        fi
+        if test -z "$ac_extra"; then
+           ac_cv_f95_mangling="$ac_cv_f95_mangling, no extra underscore"
+        else
+           ac_cv_f95_mangling="$ac_cv_f95_mangling, extra underscore"
+        fi
+      else
+        ac_cv_f95_mangling="unknown"
+      fi
+  else
+     ac_cv_f95_mangling="unknown"
+  fi
+
+  LIBS=$ac_save_LIBS
+  AC_LANG_POP(C)dnl
+  rm -f cf95_test* conftest*])
+AC_LANG_POP(Fortran 95)dnl
+])
+])# _AC_F95_NAME_MANGLING
+
+# The replacement is empty.
+AU_DEFUN([AC_F95_NAME_MANGLING], [])
+
+
+# AC_F95_WRAPPERS
+# ---------------
+# Defines C macros F95_FUNC(name,NAME) and F95_FUNC_(name,NAME) to
+# properly mangle the names of C identifiers, and C identifiers with
+# underscores, respectively, so that they match the name mangling
+# scheme used by the Fortran 95 compiler.
+AC_DEFUN([AC_F95_WRAPPERS],
+[AC_REQUIRE([_AC_F95_NAME_MANGLING])dnl
+AH_TEMPLATE([F95_FUNC],
+    [Define to a macro mangling the given C identifier (in lower and upper
+     case), which must not contain underscores, for linking with Fortran 95.])dnl
+AH_TEMPLATE([F95_FUNC_],
+    [As F95_FUNC, but for C identifiers containing underscores.])dnl
+case $ac_cv_f95_mangling in
+  "lower case, no underscore, no extra underscore")
+          AC_DEFINE([F95_FUNC(name,NAME)],  [name])
+          AC_DEFINE([F95_FUNC_(name,NAME)], [name]) ;;
+  "lower case, no underscore, extra underscore")
+          AC_DEFINE([F95_FUNC(name,NAME)],  [name])
+          AC_DEFINE([F95_FUNC_(name,NAME)], [name ## _]) ;;
+  "lower case, underscore, no extra underscore")
+          AC_DEFINE([F95_FUNC(name,NAME)],  [name ## _])
+          AC_DEFINE([F95_FUNC_(name,NAME)], [name ## _]) ;;
+  "lower case, underscore, extra underscore")
+          AC_DEFINE([F95_FUNC(name,NAME)],  [name ## _])
+          AC_DEFINE([F95_FUNC_(name,NAME)], [name ## __]) ;;
+  "upper case, no underscore, no extra underscore")
+          AC_DEFINE([F95_FUNC(name,NAME)],  [NAME])
+          AC_DEFINE([F95_FUNC_(name,NAME)], [NAME]) ;;
+  "upper case, no underscore, extra underscore")
+          AC_DEFINE([F95_FUNC(name,NAME)],  [NAME])
+          AC_DEFINE([F95_FUNC_(name,NAME)], [NAME ## _]) ;;
+  "upper case, underscore, no extra underscore")
+          AC_DEFINE([F95_FUNC(name,NAME)],  [NAME ## _])
+          AC_DEFINE([F95_FUNC_(name,NAME)], [NAME ## _]) ;;
+  "upper case, underscore, extra underscore")
+          AC_DEFINE([F95_FUNC(name,NAME)],  [NAME ## _])
+          AC_DEFINE([F95_FUNC_(name,NAME)], [NAME ## __]) ;;
+  *)
+          AC_MSG_WARN([unknown Fortran 95 name-mangling scheme])
+          ;;
+esac
+])# AC_F95_WRAPPERS
+
+
+# AC_F95_FUNC(NAME, [SHELLVAR = NAME])
+# ------------------------------------
+# For a Fortran subroutine of given NAME, define a shell variable
+# $SHELLVAR to the Fortran 95 mangled name.  If the SHELLVAR
+# argument is not supplied, it defaults to NAME.
+AC_DEFUN([AC_F95_FUNC],
+[AC_REQUIRE([_AC_F95_NAME_MANGLING])dnl
+case $ac_cv_f95_mangling in
+  upper*) ac_val="m4_toupper([$1])" ;;
+  lower*) ac_val="m4_tolower([$1])" ;;
+  *)      ac_val="unknown" ;;
+esac
+case $ac_cv_f95_mangling in *," underscore"*) ac_val="$ac_val"_ ;; esac
+m4_if(m4_index([$1],[_]),-1,[],
+[case $ac_cv_f95_mangling in *," extra underscore"*) ac_val="$ac_val"_ ;; esac
+])
+m4_default([$2],[$1])="$ac_val"
+])# AC_F95_FUNC
+
+
+
 dnl *** file: config/llnl-ac-macros/llnl_func_drand_fortyeight.m4
 
 dnl 
@@ -1561,6 +3059,7 @@ dnl Finds the "main" function if the driver is written in fortran
 dnl
 dnl @version 
 dnl @author Gary Kumfert <kumfert1@llnl.gov>
+dnl
 AC_DEFUN(LLNL_LIB_FMAIN,[
 AC_REQUIRE([AC_PROG_F77])
 AC_CACHE_CHECK(if $CC linker needs a special library for $F77 main, llnl_lib_fmain, [
@@ -1582,7 +3081,7 @@ for arg in $foutput; do
   esac
 done
 llnl_lib_fmain="$fmain"
-if test "$llnl_lib_fmain" != no ; then 
+if test "X$llnl_lib_fmain" != "Xno" ; then 
   FMAIN="$llnl_lib_fmain"
 else
   FMAIN=
@@ -1590,6 +3089,51 @@ fi
 rm -f conftest.f conftest
 ])
 AC_SUBST(FMAIN)
+])
+
+
+dnl *** file: config/llnl-ac-macros/llnl_lib_f90main.m4
+
+dnl 
+dnl @synopsis LLNL_LIB_F90MAIN
+dnl 
+dnl Finds the "main" function if the driver is written in fortran
+dnl
+dnl @version 
+dnl @author 
+dnl
+dnl Note:  Clone of F77 version but tailored to pgf90 needs.
+dnl
+
+AC_DEFUN(LLNL_LIB_F90MAIN,[
+AC_REQUIRE([AC_PROG_F90])
+AC_CACHE_CHECK(if $CC linker needs a special library for $F90 main, llnl_lib_f90main, [
+echo "END" > conftest.f90
+foutput=`${F90} -v -o conftest conftest.f90 2>&1`
+fmain=`echo $foutput | grep f90main`
+if test -n "$fmain"; then
+  foutput=`echo $foutput | sed 's/,/ /g'`
+fi
+f90main=no
+for arg in $foutput; do
+  case "$arg" in
+    *f90main.o)
+      if test -e $arg; then 
+        found=true
+        f90main="$arg"
+      fi
+    ;;
+  esac
+done
+llnl_lib_f90main="$f90main"
+if test "X$llnl_lib_f90main" != "Xno" ; then 
+  F90MAIN="$llnl_lib_f90main"
+else
+  F90MAIN=
+fi
+rm -f conftest.f90 conftest
+])
+AC_SUBST(F90MAIN)
 ])
 
 
@@ -1619,7 +3163,6 @@ dnl @author Gary Kumfert
 AC_DEFUN(LLNL_PREVENT_UNHOLY_GNU_NONGNU_MIX,[
   AC_REQUIRE([AC_CANONICAL_HOST])dnl
   AC_REQUIRE([AC_PROG_CPP])dnl
-echo "host = $host"
 case $host in 
  *linux* | *Linux*) 
 	if test "X$GCC" != "X$GXX"; then
@@ -1667,6 +3210,48 @@ fi
 test "x$JDB" = x && AC_MSG_ERROR([no acceptable jdb program found in \$PATH])
 AC_PROVIDE([$0])dnl
 ])
+
+
+dnl *** file: config/llnl-ac-macros/llnl_prog_javah.m4
+
+
+dnl dnl @synopsis LLNL_PROG_JAVAH
+dnl
+dnl LLNL_PROG_JAVAH tests the availability of the javah header generator
+dnl and looks for the jni.h header file. If available, JAVAH is set to
+dnl the full path of javah.  Unlike Luc's implementation, this doesn't
+dnl update CPPFLAGS.  Instead it defines JNI_INCLUDES.
+dnl
+dnl @author Luc Maisonobe
+dnl @version $Id$
+dnl
+AC_DEFUN([LLNL_PROG_JAVAH],[
+AC_REQUIRE([AC_CANONICAL_HOST])dnl
+AC_REQUIRE([AC_PROG_CPP])dnl
+AC_PATH_PROG(JAVAH,javah)
+if test x"`eval 'echo $ac_cv_path_JAVAH'`" != x ; then
+  ac_save_CPPFLAGS="$CPPFLAGS"
+  if test -n "$JNI_INCLUDES"; then
+    CPPFLAGS="$ac_save_CPPFLAGS $JNI_INCLUDES"
+  fi 
+  AC_TRY_CPP([#include <jni.h>],,[
+changequote(, )dnl
+    ac_dir=`echo $ac_cv_path_JAVAH | sed 's,\(.*\)/[^/]*/[^/]*$,\1/include,'`
+    ac_machdep=`echo $build_os | sed 's,[-0-9].*,,' | sed 's,cygwin,win32,'`
+changequote([, ])dnl
+    JNI_INCLUDES="$JNI_INCLUDES -I$ac_dir -I$ac_dir/$ac_machdep"
+    CPPFLAGS="$ac_save_CPPFLAGS $JNI_INCLUDES"
+    AC_TRY_CPP([#include <jni.h>],,[
+               AC_MSG_WARN([unable to include <jni.h>])
+	       JNI_INCLUDES=])
+    ])
+    CPPFLAGS="$ac_save_CPPFLAGS"
+    AC_SUBST(JNI_INCLUDES)
+fi])
+
+
+
+
 
 
 dnl *** file: config/llnl-ac-macros/llnl_prog_python.m4
@@ -1793,16 +3378,17 @@ dnl *** file: config/llnl-ac-macros/llnl_sort_flibs.m4
 dnl 
 dnl @synopsis LLNL_SORT_FLIBS
 dnl 
-dnl With certain Fortran77 compilers, the FLIBS macro can be out of order, 
+dnl With certain Fortran compilers, the FLIBS macro can be out of order.
 dnl This macros moves all the arguments beginning with "-l" at the end
-dnl but does not alter the relative ordering of "-l" arguments and non-"-l" arguments 
-dnl other wise
-dnl
-dnl If the answer is yes, it defines AR_CXX=$CXX, ARFLAGS_CXX=-xar, and RANLIB_CXX=echo
-dnl otherwise AR_CXX=ar, ARFLAGS_CXX=cuv, RANLIB_CXX=ranlib
+dnl but does not alter the relative ordering of "-l" arguments and non-"-l" 
+dnl arguments; otherwise,
+dnl   If the answer is yes, 
+dnl     it defines AR_CXX=$CXX, ARFLAGS_CXX=-xar, and RANLIB_CXX=echo
+dnl   otherwise AR_CXX=ar, ARFLAGS_CXX=cuv, RANLIB_CXX=ranlib
 dnl
 dnl @version 
 dnl @author Gary Kumfert <kumfert1@llnl.gov>
+dnl
 AC_DEFUN(LLNL_SORT_FLIBS,[
 AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
 flibs1=
@@ -1860,8 +3446,448 @@ AC_SUBST(FLIBS)
 ])
 
 
-dnl *** file: config/llnl-ac-macros/libtool.m4
+dnl *** file: config/llnl-ac-macros/llnl_sort_f90libs.m4
 
+dnl 
+dnl @synopsis LLNL_SORT_F90LIBS
+dnl 
+dnl With certain Fortran compilers, the libs macro can be out of order.
+dnl This macros moves all the arguments beginning with "-l" at the end
+dnl but does not alter the relative ordering of "-l" arguments and non-"-l" 
+dnl arguments; otherwise, 
+dnl   If the answer is yes, 
+dnl     it defines AR_CXX=$CXX, ARFLAGS_CXX=-xar, and RANLIB_CXX=echo
+dnl   otherwise AR_CXX=ar, ARFLAGS_CXX=cuv, RANLIB_CXX=ranlib
+dnl
+dnl @version 
+dnl @author 
+dnl
+dnl Note:  Clone of F77 version.
+dnl
+
+AC_DEFUN(LLNL_SORT_F90LIBS,[
+AC_REQUIRE([AC_F90_LIBRARY_LDFLAGS])
+f90libs1=
+f90libs2=
+for arg in $F90LIBS; do
+  arg1=
+  arg2=
+  case "$arg" in 
+    -l*)
+      arg2=$arg
+      ;;
+    /*.a)
+      arg1=-L`dirname $arg`
+      arg2=`basename $arg .a`
+      arg2=`echo $arg2 | sed 's/^lib/-l'/'`
+      ;;
+    /*.so)
+      arg1=-L`dirname $arg`
+      arg2=`basename $arg .so`
+      arg2=`echo $arg2 | sed 's/^lib/-l'/'`
+      ;;
+    *)
+      arg1=$arg
+      ;;
+  esac; 
+  if test -n "$arg1"; then
+    exists=false
+    for f in $f90libs1; do
+      if test x$arg1 = x$f; then 
+        exists=true
+      fi
+    done
+    if $exists; then
+      :
+    else
+      f90libs1="$f90libs1 $arg1"
+    fi
+  fi
+  if test -n "$arg2"; then
+    exists=false
+    for f in $f90libs2; do
+      if test x$arg2 = x$f; then 
+        exists=true
+      fi
+    done
+    if $exists; then
+      :
+    else
+      f90libs2="$f90libs2 $arg2"
+    fi
+  fi
+done
+F90LIBS="$f90libs1 $f90libs2"
+AC_SUBST(F90LIBS)
+])
+
+
+dnl *** file: config/llnl-ac-macros/llnl_confirm_babel_c_support.m4
+dnl
+dnl @synopsis LLNL_CONFIRM_BABEL_C_SUPPORT
+dnl
+dnl  This is a meta-command that orchestrates a bunch of sub-checks.
+dnl  I made it a separate M4 Macro to make synchronization between 
+dnl  the main configure script and the runtime configure script easier.
+dnl
+dnl  @author Gary Kumfert
+
+AC_DEFUN([LLNL_CONFIRM_BABEL_C_SUPPORT], [
+  ############################################################
+  #
+  # C Compiler
+  #
+  AC_PROG_CC
+  # a. Libraries (existence)
+  # b. Header Files.
+  AC_HEADER_DIRENT
+  AC_HEADER_STDC
+  AC_CHECK_HEADERS([inttypes.h malloc.h memory.h stddef.h stdlib.h string.h strings.h unistd.h ctype.h sys/stat.h sys/types.h])
+  # c. Typedefs, Structs, Compiler Characteristics
+  AC_C_CONST
+  AC_TYPE_SIZE_T
+  AC_CHECK_TYPES([ptrdiff_t])
+  AC_CHECK_SIZEOF(short,2)
+  AC_CHECK_SIZEOF(int,4)
+  AC_CHECK_SIZEOF(long,8)
+  LLNL_CHECK_LONG_LONG
+  AC_CHECK_SIZEOF(long long,8)
+  LLNL_FIND_32BIT_SIGNED_INT
+  LLNL_CHECK_INT32_T
+  LLNL_FIND_64BIT_SIGNED_INT
+  LLNL_CHECK_INT64_T
+  AC_CHECK_SIZEOF(void *,4)
+  ACX_C_RESTRICT
+  # d. Specific Library Functions.
+  # AC_FUNC_MALLOC #define's malloc to rpl_malloc if malloc(0)!=NULL, not all that useful
+	           # and actually makes life tough on AIX.
+  AC_FUNC_STAT
+  AC_CHECK_FUNCS([atexit getcwd memset strchr strdup strrchr])
+])
+
+
+dnl *** file: config/llnl-ac-macros/llnl_confirm_babel_f77_support.m4
+dnl
+dnl @synopsis LLNL_CONFIRM_BABEL_F77_SUPPORT
+dnl
+dnl  This is a meta-command that orchestrates a bunch of sub-checks.
+dnl  I made it a separate M4 Macro to make synchronization between 
+dnl  the main configure script and the runtime configure script easier.
+dnl
+dnl  If Babel support for F77 is enabled:
+dnl     the cpp macro FORTRAN_DISABLED is undefined
+dnl     the automake conditional SUPPORT_FORTRAN is true
+dnl
+dnl  If Babel support for F77 is disabled:
+dnl     the cpp macro FORTRAN_DISABLED is defined as true
+dnl     the automake conditional SUPPORT_FORTRAN is false
+dnl
+dnl  @author Gary Kumfert
+
+AC_DEFUN([LLNL_CONFIRM_BABEL_F77_SUPPORT], [
+  # fortran77 support is enabled by default if $with_fortran77 is not set.
+  if test -z "$with_fortran77"; then
+    with_fortran77="yes";
+  fi
+  # allow fortran77 support to be overridden by the command line.
+  AC_ARG_WITH(fortran77, [  --without-fortran77       disable fortran77 support])
+  if test "X$with_fortran77" != "Xno"; then
+    AC_PROG_F77
+    # 5.a. Libraries (existence)
+    LLNL_LIB_FMAIN
+    AC_F77_LIBRARY_LDFLAGS
+    AC_F77_DUMMY_MAIN
+    LLNL_SORT_FLIBS
+    LLNL_F77_NAME_MANGLING
+    LLNL_F77_C_CONFIG
+  fi
+  AM_CONDITIONAL(SUPPORT_FORTRAN77, test "X$with_fortran77" != "Xno")
+  if test "X$with_fortran77" = "Xno"; then
+    AC_DEFINE(FORTRAN77_DISABLED, 1, [If defined, Fortran support was disabled at configure time])
+    msgs="$msgs
+	  Fortran77 disabled by request";
+  else
+    msgs="$msgs
+	  Fortran77 enabled.";
+  fi 
+])
+
+
+dnl *** file: config/llnl-ac-macros/llnl_confirm_babel_f90_support.m4
+dnl
+dnl @synopsis LLNL_CONFIRM_BABEL_F90_SUPPORT
+dnl
+dnl  This is a meta-command that orchestrates a bunch of sub-checks.
+dnl  I made it a separate M4 Macro to make synchronization between 
+dnl  the main configure script and the runtime configure script easier.
+dnl
+dnl  If Babel support for F90 is enabled:
+dnl     the cpp macro FORTRAN90_DISABLED is undefined
+dnl     the automake conditional SUPPORT_FORTRAN90 is true
+dnl
+dnl  If Babel support for F90 is disabled:
+dnl     the cpp macro FORTRAN90_DISABLED is defined as true
+dnl     the automake conditional SUPPORT_FORTRAN90 is false
+dnl
+dnl  @author 
+dnl
+dnl  Note:  Clone of F77 version.
+
+AC_DEFUN([LLNL_CONFIRM_BABEL_F90_SUPPORT], [
+  # fortran90 support is enabled by default if $with_fortran90 is not set.
+  if test -z "$with_fortran90"; then
+    with_fortran90="yes";
+  fi
+  # allow fortran90 support to be overridden by the command line.
+  AC_ARG_WITH(fortran90, [  --without-fortran90       disable fortran90 support])
+  if test "X$with_fortran90" != "Xno"; then
+    AC_PROG_F90
+    if test -n "$F90"; then 
+        # 5.a. Libraries (existence)
+        LLNL_LIB_F90MAIN
+        AC_F90_LIBRARY_LDFLAGS
+        AC_F90_DUMMY_MAIN
+        LLNL_SORT_F90LIBS
+        LLNL_F90_NAME_MANGLING
+        LLNL_F90_C_CONFIG
+    else
+	AC_WARN([Disabling F90 Support])
+        with_fortran90="broken"	
+    fi
+  fi
+  if test "X$with_fortran90" = "Xno"; then
+    msgs="$msgs
+	  Fortran90 disabled by request.";
+  elif test "X$with_fortran90" = "Xyes"; then
+    msgs="$msgs
+	  Fortran90 enabled.";
+  else
+    msgs="$msgs
+	  Fortran90 disabled against user request: no viable compiler found.";
+  fi 
+  if test "X$with_fortran90" != "Xyes"; then
+    AC_DEFINE(FORTRAN90_DISABLED, 1, [If defined, F90 support was disabled at configure time])
+  fi
+  AM_CONDITIONAL(SUPPORT_FORTRAN90, test "X$with_fortran90" = "Xyes")
+])
+
+
+dnl *** file: config/llnl-ac-macros/llnl_confirm_babel_cxx_support.m4
+dnl
+dnl @synopsis LLNL_CONFIRM_BABEL_CXX_SUPPORT
+dnl
+dnl  This is a meta-command that orchestrates a bunch of sub-checks.
+dnl  I made it a separate M4 Macro to make synchronization between 
+dnl  the main configure script and the runtime configure script easier.
+dnl
+dnl  If Babel support for CXX is enabled:
+dnl     the cpp macro CXX_DISABLED is undefined
+dnl     the automake conditional SUPPORT_CXX is true
+dnl
+dnl  If Babel support for CXX is disabled:
+dnl     the cpp macro CXX_DISABLED is defined as true
+dnl     the automake conditional SUPPORT_CXX is false
+dnl
+dnl  @author Gary Kumfert
+
+dnl this is broken into two tests 'cause ac_cxx_namespaces
+dnl consistently gets placed *before* ac_prog_cxx otherwise.
+dnl We have to prevent this at all costs!
+
+AC_DEFUN([LLNL_CONFIRM_BABEL_CXX_SUPPORT],[
+  if test -z "$CCC"; then
+    CCC="g++ KCC CC xlC"
+  fi
+  # cxx support is enabled by default if $with_cxx is not set.
+  if test -z "$with_cxx"; then
+    with_cxx="yes";
+  fi
+  # allow cxx support to be overridden by the command line.
+  AC_ARG_WITH(cxx,     [  --without-cxx           disable C++ support])
+  if test "X$with_cxx" = "Xno"; then
+    AC_MSG_ERROR([Sorry, this package cannot work without C++ enabled.])
+  fi
+  AC_PROG_CXX
+])
+
+AC_DEFUN([LLNL_CONFIRM_BABEL_CXX_SUPPORT2], [
+  AC_REQUIRE([LLNL_CONFIRM_BABEL_CXX_SUPPORT])
+  if test -n "$CXX"; then
+    # 6.a. Libraries (existence) 
+    LLNL_CXX_LIBRARY_LDFLAGS
+    # 6.b. Header Files
+    LLNL_CXX_OLD_HEADER_SUFFIX
+    AC_CXX_HAVE_STD
+    AC_CXX_HAVE_STL
+    AC_CXX_HAVE_NUMERIC_LIMITS
+    AC_CXX_COMPLEX_MATH_IN_NAMESPACE_STD
+    AC_CXX_HAVE_COMPLEX
+    AC_CXX_HAVE_COMPLEX_MATH1
+    AC_CXX_HAVE_COMPLEX_MATH2
+    AC_CXX_HAVE_IEEE_MATH
+  fi
+  AM_CONDITIONAL(SUPPORT_CXX, test "X$with_cxx" != "Xno")
+  if test "X$with_cxx" = "Xno"; then
+    AC_DEFINE(CXX_DISABLED, 1, [If defined, C++ support was disabled at configure time])
+    msgs="$msgs 
+  	  C++ disabled by request"
+  else
+    msgs="$msgs
+  	  C++ enabled.";
+  fi
+])
+
+
+dnl *** file: config/llnl-ac-macros/llnl_confirm_babel_python_support.m4
+dnl
+dnl @synopsis LLNL_CONFIRM_BABEL_PYTHON_SUPPORT
+dnl
+dnl  This is a meta-command that orchestrates a bunch of sub-checks.
+dnl  I made it a separate M4 Macro to make synchronization between 
+dnl  the main configure script and the runtime configure script easier.
+dnl
+dnl  If Babel support for PYTHON is enabled:
+dnl     the cpp macro PYTHON_DISABLED is undefined
+dnl     the automake conditional SUPPORT_PYTHON is true
+dnl
+dnl  If Babel support for PYTHON is disabled:
+dnl     the cpp macro PYTHON_DISABLED is defined as true
+dnl     the automake conditional SUPPORT_PYTHON is false
+dnl
+dnl  @author Gary Kumfert
+
+AC_DEFUN([LLNL_CONFIRM_BABEL_PYTHON_SUPPORT], [
+  if test -z "$with_python"; then
+    with_python=yes
+  fi
+  AC_ARG_WITH(python,  [  --without-python        disable python support])
+  if test "X$with_python" != "Xno"; then
+    LLNL_PYTHON_LIBRARY
+    LLNL_PYTHON_NUMERIC
+    LLNL_PYTHON_SHARED_LIBRARY
+    if (test "X$llnl_cv_python_numerical" != "Xyes") || (test "X$enable_shared" = "Xno"); then
+       with_python=no;
+       AC_MSG_WARN([Configuration for Python failed.  Support for Python disabled!])
+       msgs="$msgs
+  	  Python support disabled against request, shared libs disabled or NumPy not found."
+    elif test "X$llnl_python_shared_library_found" != "Xyes"; then
+       AC_MSG_WARN([No Python shared library found.  Support for server-side Python disabled!])
+       msgs="$msgs
+  	  Server-side Python support disabled against request, can only do client side when no libpython.so found".
+    else
+       msgs="$msgs
+  	  Python enabled.";
+    fi
+  else
+    msgs="$msgs 
+  	  Python support disabled by request"
+  fi
+  # support python in general?
+  AM_CONDITIONAL(SUPPORT_PYTHON, test "X$with_python" != "Xno")
+  if test "X$with_python" = "Xno"; then
+    AC_DEFINE(PYTHON_DISABLED, 1, [If defined, Python support was disabled at configure time])
+  fi 
+  # support server-side python in particular
+  AM_CONDITIONAL(SERVER_PYTHON, (test "X$with_python" != "Xno") && (test "X$llnl_python_shared_library_found" = "Xyes"))
+  if (test "X$with_python" = "Xno") || (test "X$llnl_python_shared_library_found" != "Xyes"); then
+    AC_DEFINE(PYTHON_SERVER_DISABLED, 1, [If defined, server-side Python support was disabled at configure time])
+  fi;
+])
+
+
+dnl *** file: config/llnl-ac-macros/llnl_confirm_babel_java_support.m4
+dnl
+dnl @synopsis LLNL_CONFIRM_BABEL_JAVA_SUPPORT
+dnl
+dnl  This is a meta-command that orchestrates a bunch of sub-checks.
+dnl  I made it a separate M4 Macro to make synchronization between 
+dnl  the main configure script and the runtime configure script easier.
+dnl
+dnl  If Babel support for JAVA is enabled:
+dnl     the cpp macro JAVA_DISABLED is undefined
+dnl     the automake conditional SUPPORT_JAVA is true
+dnl
+dnl  If Babel support for JAVA is disabled:
+dnl     the cpp macro JAVA_DISABLED is defined as true
+dnl     the automake conditional SUPPORT_JAVA is false
+dnl
+dnl  @author Gary Kumfert
+
+AC_DEFUN([LLNL_CONFIRM_BABEL_JAVA_SUPPORT], [
+  if test -z "$with_java"; then
+    with_java=yes
+  fi
+  AC_ARG_WITH(java,    [  --without-java          disable java support])
+  if test "X$with_java" = "Xno"; then
+    AC_MSG_WARN([Cannot disable Java entirely, only Java support in Babel.])
+    AC_MSG_WARN([This package still needs working Java internally.])
+  fi
+  # for political reasons, AC_PROG_JAVA checks for gcj first.  
+  #These variables override that.
+  JAVA=java
+  JAVAC=javac
+  AC_JAVA_OPTIONS
+  AC_CHECK_CLASSPATH
+  AC_PROG_JAVAC
+  AC_PROG_JAVA
+  AC_PROG_JAR
+  LLNL_PROG_JDB
+  AC_TRY_COMPILE_JAVA
+  if test "X$with_java" != "Xno"; then
+    AC_PROG_JAVADOC
+    LLNL_PROG_JAVAH
+    if test "X$ac_cv_header_jni_h" = "Xno"; then
+      AC_MSG_WARN([Cannot find jni.h, Java support will be disabled])
+      with_java=no
+      msgs="$msgs
+  	  Java support disabled against request (no jni.h found!)"
+    fi;
+  else
+      msgs="$msgs
+  	  Java support disabled by request"
+  fi 
+  AM_CONDITIONAL(SUPPORT_JAVA, test "X$with_java" != "Xno")
+  if test "X$with_java" = "Xno"; then
+    AC_DEFINE(JAVA_DISABLED, 1, [If defined, Java support was disabled at configure time])
+  else
+    msgs="$msgs
+  	  Java enabled.";
+  fi 
+])
+
+
+dnl *** file: config/llnl-ac-macros/llnl_prog_test_ef.m4
+# LLNL_PROG_TEST_EF
+#
+# Some platforms (sun) doesn't have a default program (called "test")
+# that understands the "-ef" option.  test FILE1 -ef FILE2 is true only
+# if both files have the same inode.
+#
+AC_DEFUN([LLNL_PROG_TEST_EF],
+[AC_CACHE_CHECK([for a test program that accepts -ef],llnl_cv_prog_test_ef,
+[echo "" > conftest1
+ln -s conftest1 conftest2
+llnl_cv_prog_test_ef=none
+for t in $TEST test /bin/test /usr/bin/test /usr/local/bin/test /usr/ucb/bin/test ; do
+  if test -x $t; then 
+    if $t conftest1 -ef conftest2; then
+      llnl_cv_prog_test_ef=$t
+      break
+    fi;
+  fi;
+done;
+rm conftest1 conftest2
+])
+if test "$llnl_cv_prog_test_ef" = "none"; then
+  AC_MSG_ERROR([Cannot find "test" program such that "test FILE1 -ef FILE2".\n Set TEST environment variable and rerun configure])
+else
+  TEST_EF=$llnl_cv_prog_test_ef
+  AC_SUBST(TEST_EF)
+fi
+])
+
+
+dnl *** file: config/llnl-ac-macros/libtool.m4
 # libtool.m4 - Configure libtool for the host system. -*-Shell-script-*-
 ## Copyright 1996, 1997, 1998, 1999, 2000, 2001
 ## Free Software Foundation, Inc.
@@ -1887,6 +3913,7 @@ dnl *** file: config/llnl-ac-macros/libtool.m4
 ## the same distribution terms that you use for the rest of that program.
 
 # serial 46 AC_PROG_LIBTOOL
+
 AC_DEFUN([AC_PROG_LIBTOOL],
 [AC_REQUIRE([AC_LIBTOOL_SETUP])dnl
 
@@ -1912,6 +3939,8 @@ AC_REQUIRE([AC_PROG_CC])dnl
 AC_REQUIRE([AC_PROG_LD])dnl
 AC_REQUIRE([AC_PROG_LD_RELOAD_FLAG])dnl
 AC_REQUIRE([AC_PROG_NM])dnl
+AC_REQUIRE([LT_AC_PROG_SED])dnl
+
 AC_REQUIRE([AC_PROG_LN_S])dnl
 AC_REQUIRE([AC_DEPLIBS_CHECK_METHOD])dnl
 AC_REQUIRE([AC_OBJEXT])dnl
@@ -2012,9 +4041,30 @@ _LT_AC_LTCONFIG_HACK
 
 ])
 
+# AC_LIBTOOL_HEADER_ASSERT
+# ------------------------
+AC_DEFUN([AC_LIBTOOL_HEADER_ASSERT],
+[AC_CACHE_CHECK([whether $CC supports assert without backlinking],
+    [lt_cv_func_assert_works],
+    [case $host in
+    *-*-solaris*)
+      if test "$GCC" = yes && test "$with_gnu_ld" != yes; then
+        case `$CC --version 2>/dev/null` in
+        [[12]].*) lt_cv_func_assert_works=no ;;
+        *)        lt_cv_func_assert_works=yes ;;
+        esac
+      fi
+      ;;
+    esac])
+
+if test "x$lt_cv_func_assert_works" = xyes; then
+  AC_CHECK_HEADERS(assert.h)
+fi
+])# AC_LIBTOOL_HEADER_ASSERT
+
 # _LT_AC_CHECK_DLFCN
 # --------------------
-AC_DEFUN(_LT_AC_CHECK_DLFCN,
+AC_DEFUN([_LT_AC_CHECK_DLFCN],
 [AC_CHECK_HEADERS(dlfcn.h)
 ])# _LT_AC_CHECK_DLFCN
 
@@ -2032,10 +4082,10 @@ AC_CACHE_VAL([lt_cv_sys_global_symbol_pipe], [dnl
 # [They come from Ultrix.  What could be older than Ultrix?!! ;)]
 
 # Character class describing NM global symbol codes.
-[symcode='[BCDEGRST]']
+symcode='[[BCDEGRST]]'
 
 # Regexp to match symbols that can be accessed directly from C.
-[sympat='\([_A-Za-z][_A-Za-z0-9]*\)']
+sympat='\([[_A-Za-z]][[_A-Za-z0-9]]*\)'
 
 # Transform the above into a raw symbol and a C symbol.
 symxfrm='\1 \2\3 \3'
@@ -2043,25 +4093,32 @@ symxfrm='\1 \2\3 \3'
 # Transform an extracted symbol line into a proper C declaration
 lt_cv_global_symbol_to_cdecl="sed -n -e 's/^. .* \(.*\)$/extern char \1;/p'"
 
+# Transform an extracted symbol line into symbol name and symbol address
+lt_cv_global_symbol_to_c_name_address="sed -n -e 's/^: \([[^ ]]*\) $/  {\\\"\1\\\", (lt_ptr) 0},/p' -e 's/^$symcode \([[^ ]]*\) \([[^ ]]*\)$/  {\"\2\", (lt_ptr) \&\2},/p'"
+
 # Define system-specific variables.
 case $host_os in
 aix*)
-  [symcode='[BCDT]']
+  symcode='[[BCDT]]'
   ;;
 cygwin* | mingw* | pw32*)
-  [symcode='[ABCDGISTW]']
+  symcode='[[ABCDGISTW]]'
   ;;
 hpux*) # Its linker distinguishes data from code symbols
   lt_cv_global_symbol_to_cdecl="sed -n -e 's/^T .* \(.*\)$/extern char \1();/p' -e 's/^$symcode* .* \(.*\)$/extern char \1;/p'"
+  lt_cv_global_symbol_to_c_name_address="sed -n -e 's/^: \([[^ ]]*\) $/  {\\\"\1\\\", (lt_ptr) 0},/p' -e 's/^$symcode* \([[^ ]]*\) \([[^ ]]*\)$/  {\"\2\", (lt_ptr) \&\2},/p'"
   ;;
-irix*)
-  [symcode='[BCDEGRST]']
+irix* | nonstopux*)
+  symcode='[[BCDEGRST]]'
+  ;;
+osf*)
+  symcode='[[BCDEGQRST]]'
   ;;
 solaris* | sysv5*)
-  [symcode='[BDT]']
+  symcode='[[BDT]]'
   ;;
 sysv4)
-  [symcode='[DFNSTU]']
+  symcode='[[DFNSTU]]'
   ;;
 esac
 
@@ -2075,14 +4132,14 @@ esac
 
 # If we're using GNU nm, then use its standard symbol codes.
 if $NM -V 2>&1 | egrep '(GNU|with BFD)' > /dev/null; then
-  [symcode='[ABCDGISTW]']
+  symcode='[[ABCDGISTW]]'
 fi
 
 # Try without a prefix undercore, then with it.
 for ac_symprfx in "" "_"; do
 
   # Write the raw and C identifiers.
-[lt_cv_sys_global_symbol_pipe="sed -n -e 's/^.*[ 	]\($symcode$symcode*\)[ 	][ 	]*\($ac_symprfx\)$sympat$opt_cr$/$symxfrm/p'"]
+lt_cv_sys_global_symbol_pipe="sed -n -e 's/^.*[[ 	]]\($symcode$symcode*\)[[ 	]][[ 	]]*\($ac_symprfx\)$sympat$opt_cr$/$symxfrm/p'"
 
   # Check to see that the pipe works correctly.
   pipe_works=no
@@ -2124,23 +4181,23 @@ EOF
 
 	  cat <<EOF >> conftest.$ac_ext
 #if defined (__STDC__) && __STDC__
-# define lt_ptr_t void *
+# define lt_ptr void *
 #else
-# define lt_ptr_t char *
+# define lt_ptr char *
 # define const
 #endif
 
 /* The mapping between symbol names and symbols. */
 const struct {
   const char *name;
-  lt_ptr_t address;
+  lt_ptr address;
 }
-[lt_preloaded_symbols[] =]
+lt_preloaded_symbols[[]] =
 {
 EOF
-	  sed "s/^$symcode$symcode* \(.*\) \(.*\)$/  {\"\2\", (lt_ptr_t) \&\2},/" < "$nlist" >> conftest.$ac_ext
+	  sed "s/^$symcode$symcode* \(.*\) \(.*\)$/  {\"\2\", (lt_ptr) \&\2},/" < "$nlist" >> conftest.$ac_ext
 	  cat <<\EOF >> conftest.$ac_ext
-  {0, (lt_ptr_t) 0}
+  {0, (lt_ptr) 0}
 };
 
 #ifdef __cplusplus
@@ -2153,7 +4210,7 @@ EOF
 	  save_CFLAGS="$CFLAGS"
 	  LIBS="conftstm.$ac_objext"
 	  CFLAGS="$CFLAGS$no_builtin_flag"
-	  if AC_TRY_EVAL(ac_link) && test -s conftest; then
+	  if AC_TRY_EVAL(ac_link) && test -s conftest$ac_exeext; then
 	    pipe_works=yes
 	  fi
 	  LIBS="$save_LIBS"
@@ -2184,10 +4241,13 @@ done
 global_symbol_pipe="$lt_cv_sys_global_symbol_pipe"
 if test -z "$lt_cv_sys_global_symbol_pipe"; then
   global_symbol_to_cdecl=
+  global_symbol_to_c_name_address=
 else
   global_symbol_to_cdecl="$lt_cv_global_symbol_to_cdecl"
+  global_symbol_to_c_name_address="$lt_cv_global_symbol_to_c_name_address"
 fi
-if test -z "$global_symbol_pipe$global_symbol_to_cdecl"; then
+if test -z "$global_symbol_pipe$global_symbol_to_cdec$global_symbol_to_c_name_address";
+then
   AC_MSG_RESULT(failed)
 else
   AC_MSG_RESULT(ok)
@@ -2205,16 +4265,17 @@ if test "X${PATH_SEPARATOR+set}" != Xset; then
     *-DOS) lt_cv_sys_path_separator=';' ;;
     *)     lt_cv_sys_path_separator=':' ;;
   esac
+  PATH_SEPARATOR=$lt_cv_sys_path_separator
 fi
 ])# _LT_AC_LIBTOOL_SYS_PATH_SEPARATOR
 
 # _LT_AC_PROG_ECHO_BACKSLASH
 # --------------------------
 # Add some code to the start of the generated configure script which
-# will find an echo command which doesn;t interpret backslashes.
+# will find an echo command which doesn't interpret backslashes.
 AC_DEFUN([_LT_AC_PROG_ECHO_BACKSLASH],
 [ifdef([AC_DIVERSION_NOTICE], [AC_DIVERT_PUSH(AC_DIVERSION_NOTICE)],
-                              [AC_DIVERT_PUSH(NOTICE)])
+			      [AC_DIVERT_PUSH(NOTICE)])
 _LT_AC_LIBTOOL_SYS_PATH_SEPARATOR
 
 # Check that we are running under the correct shell.
@@ -2280,7 +4341,7 @@ else
   #
   # So, first we look for a working echo in the user's PATH.
 
-  IFS="${IFS= 	}"; save_ifs="$IFS"; IFS="${IFS}${PATH_SEPARATOR}"
+  IFS="${IFS= 	}"; save_ifs="$IFS"; IFS=$PATH_SEPARATOR
   for dir in $PATH /usr/ucb; do
     if (test -f $dir/echo || test -f $dir/echo$ac_exeext) &&
        test "X`($dir/echo '\t') 2>/dev/null`" = 'X\t' &&
@@ -2369,7 +4430,7 @@ AC_DIVERT_POP
 # _LT_AC_TRY_DLOPEN_SELF (ACTION-IF-TRUE, ACTION-IF-TRUE-W-USCORE,
 #                           ACTION-IF-FALSE, ACTION-IF-CROSS-COMPILING)
 # ------------------------------------------------------------------
-AC_DEFUN(_LT_AC_TRY_DLOPEN_SELF,
+AC_DEFUN([_LT_AC_TRY_DLOPEN_SELF],
 [if test "$cross_compiling" = yes; then :
   [$4]
 else
@@ -2456,7 +4517,7 @@ rm -fr conftest*
 
 # AC_LIBTOOL_DLOPEN_SELF
 # -------------------
-AC_DEFUN(AC_LIBTOOL_DLOPEN_SELF,
+AC_DEFUN([AC_LIBTOOL_DLOPEN_SELF],
 [if test "x$enable_dlopen" != xyes; then
   enable_dlopen=unknown
   enable_dlopen_self=unknown
@@ -2478,16 +4539,22 @@ else
    ;;
 
   *)
-    AC_CHECK_LIB(dl, dlopen,  [lt_cv_dlopen="dlopen" lt_cv_dlopen_libs="-ldl"],
-      [AC_CHECK_FUNC(dlopen, lt_cv_dlopen="dlopen",
-        [AC_CHECK_FUNC(shl_load, lt_cv_dlopen="shl_load",
-          [AC_CHECK_LIB(svld, dlopen,
-	    [lt_cv_dlopen="dlopen" lt_cv_dlopen_libs="-lsvld"],
-            [AC_CHECK_LIB(dld, shl_load,
-              [lt_cv_dlopen="dld_link" lt_cv_dlopen_libs="-dld"])
+    AC_CHECK_FUNC([shl_load],
+          [lt_cv_dlopen="shl_load"],
+      [AC_CHECK_LIB([dld], [shl_load],
+            [lt_cv_dlopen="shl_load" lt_cv_dlopen_libs="-dld"],
+	[AC_CHECK_FUNC([dlopen],
+	      [lt_cv_dlopen="dlopen"],
+	  [AC_CHECK_LIB([dl], [dlopen],
+	        [lt_cv_dlopen="dlopen" lt_cv_dlopen_libs="-ldl"],
+	    [AC_CHECK_LIB([svld], [dlopen],
+	          [lt_cv_dlopen="dlopen" lt_cv_dlopen_libs="-lsvld"],
+	      [AC_CHECK_LIB([dld], [dld_link],
+	            [lt_cv_dlopen="dld_link" lt_cv_dlopen_libs="-dld"])
+	      ])
 	    ])
-          ])
-        ])
+	  ])
+	])
       ])
     ;;
   esac
@@ -2550,10 +4617,10 @@ AC_DEFUN([_LT_AC_LTCONFIG_HACK],
 # Sed substitution that helps us do robust quoting.  It backslashifies
 # metacharacters that are still active within double-quoted strings.
 Xsed='sed -e s/^X//'
-[sed_quote_subst='s/\([\\"\\`$\\\\]\)/\\\1/g']
+sed_quote_subst='s/\([[\\"\\`$\\\\]]\)/\\\1/g'
 
 # Same as above, but do not quote variable references.
-[double_quote_subst='s/\([\\"\\`\\\\]\)/\\\1/g']
+double_quote_subst='s/\([[\\"\\`\\\\]]\)/\\\1/g'
 
 # Sed substitution to delay expansion of an escaped shell variable in a
 # double_quote_subst'ed string.
@@ -2622,8 +4689,15 @@ old_postinstall_cmds='chmod 644 $oldlib'
 old_postuninstall_cmds=
 
 if test -n "$RANLIB"; then
+  case $host_os in
+  openbsd*)
+    old_postinstall_cmds="\$RANLIB -t \$oldlib~$old_postinstall_cmds"
+    ;;
+  *)
+    old_postinstall_cmds="\$RANLIB \$oldlib~$old_postinstall_cmds"
+    ;;
+  esac
   old_archive_cmds="$old_archive_cmds~\$RANLIB \$oldlib"
-  old_postinstall_cmds="\$RANLIB \$oldlib~$old_postinstall_cmds"
 fi
 
 # Allow CC to be a program name with arguments.
@@ -2649,7 +4723,7 @@ AC_MSG_RESULT($objdir)
 
 ## FIXME: this should be a separate macro
 ##
-AC_ARG_WITH(pic, 
+AC_ARG_WITH(pic,
 [  --with-pic              try to use only PIC/non-PIC objects [default=use both]],
 pic_mode="$withval", pic_mode=default)
 test -z "$pic_mode" && pic_mode=default
@@ -2677,7 +4751,7 @@ AC_CACHE_VAL(lt_cv_prog_cc_pic,
       # libC (AIX C++ library), which obviously doesn't included in libraries
       # list by gcc. This cause undefined symbols with -static flags.
       # This hack allows C programs to be linked with "-static -ldl", but
-      # we not sure about C++ programs.
+      # not sure about C++ programs.
       lt_cv_prog_cc_static="$lt_cv_prog_cc_static ${lt_cv_prog_cc_wl}-lC"
       ;;
     amigaos*)
@@ -2686,7 +4760,7 @@ AC_CACHE_VAL(lt_cv_prog_cc_pic,
       # like `-m68040'.
       lt_cv_prog_cc_pic='-m68020 -resident32 -malways-restore-a4'
       ;;
-    beos* | irix5* | irix6* | osf3* | osf4* | osf5*)
+    beos* | irix5* | irix6* | nonstopux* | osf3* | osf4* | osf5*)
       # PIC is the default for these OSes.
       ;;
     darwin* | rhapsody*)
@@ -2711,14 +4785,23 @@ AC_CACHE_VAL(lt_cv_prog_cc_pic,
   else
     # PORTME Check for PIC flags for the system compiler.
     case $host_os in
-    aix3* | aix4* | aix5*)
+    aix3* | aix4* ) #gkk | aix5*)
+      lt_cv_prog_cc_wl='-Wl,'
       # All AIX code is PIC.
       if test "$host_cpu" = ia64; then
-        # AIX 5 now supports IA64 processor
-        lt_cv_prog_cc_static='-Bstatic'
-        lt_cv_prog_cc_wl='-Wl,'
+	# AIX 5 now supports IA64 processor
+	lt_cv_prog_cc_static='-Bstatic'
       else
-        lt_cv_prog_cc_static='-bnso -bI:/lib/syscalls.exp'
+	lt_cv_prog_cc_static='-bnso -bI:/lib/syscalls.exp'
+      fi
+      ;;
+   aix5*) #gkk I added all this
+      lt_cv_prog_cc_wl='-Wl,'
+      if test "$host_cpu" = ia64; then 
+	lt_cv_prog_cc_static='-Bstatic'
+      else
+        lt_cv_prog_cc_pic='-G'
+	lt_cv_prog_cc_static='-bstatic'
       fi
       ;;
 
@@ -2729,7 +4812,7 @@ AC_CACHE_VAL(lt_cv_prog_cc_pic,
       lt_cv_prog_cc_pic='+Z'
       ;;
 
-    irix5* | irix6*)
+    irix5* | irix6* | nonstopux*)
       lt_cv_prog_cc_wl='-Wl,'
       lt_cv_prog_cc_static='-non_shared'
       # PIC (with -KPIC) is the default.
@@ -2773,11 +4856,7 @@ AC_CACHE_VAL(lt_cv_prog_cc_pic,
     sysv4 | sysv4.2uw2* | sysv4.3* | sysv5*)
       lt_cv_prog_cc_pic='-KPIC'
       lt_cv_prog_cc_static='-Bstatic'
-      if test "x$host_vendor" = xsni; then
-        lt_cv_prog_cc_wl='-LD'
-      else
-        lt_cv_prog_cc_wl='-Wl,'
-      fi
+      lt_cv_prog_cc_wl='-Wl,'
       ;;
 
     uts4*)
@@ -2845,7 +4924,7 @@ fi
 # Check for any special shared library compilation flags.
 if test -n "$lt_cv_prog_cc_shlib"; then
   AC_MSG_WARN([\`$CC' requires \`$lt_cv_prog_cc_shlib' to build shared libraries])
-  if echo "$old_CC $old_CFLAGS " | [egrep -e "[ 	]$lt_cv_prog_cc_shlib[ 	]"] >/dev/null; then :
+  if echo "$old_CC $old_CFLAGS " | egrep -e "[[ 	]]$lt_cv_prog_cc_shlib[[ 	]]" >/dev/null; then :
   else
    AC_MSG_WARN([add \`$lt_cv_prog_cc_shlib' to the CC or CFLAGS env variable and reconfigure])
     lt_cv_prog_cc_can_build_shared=no
@@ -2927,6 +5006,8 @@ if test x"$compiler_c_o" = x"yes"; then
   lt_cv_compiler_o_lo=no
   save_CFLAGS="$CFLAGS"
   CFLAGS="$CFLAGS -c -o conftest.lo"
+  save_objext="$ac_objext"
+  ac_objext=lo
   AC_TRY_COMPILE([], [int some_variable = 0;], [dnl
     # The compiler can only warn and ignore the option if not recognized
     # So say no if there are warnings
@@ -2936,10 +5017,11 @@ if test x"$compiler_c_o" = x"yes"; then
       lt_cv_compiler_o_lo=yes
     fi
   ])
+  ac_objext="$save_objext"
   CFLAGS="$save_CFLAGS"
   ])
   compiler_o_lo=$lt_cv_compiler_o_lo
-  AC_MSG_RESULT([$compiler_c_lo])
+  AC_MSG_RESULT([$compiler_o_lo])
 else
   compiler_o_lo=no
 fi
@@ -3044,7 +5126,7 @@ exclude_expsyms="_GLOBAL_OFFSET_TABLE_"
 extract_expsyms_cmds=
 
 case $host_os in
-cygwin* | mingw* | pw32* )
+cygwin* | mingw* | pw32*)
   # FIXME: the MSVC++ port hasn't been tested in a loooong time
   # When not using gcc, we currently assume that we are using
   # Microsoft Visual C++.
@@ -3052,7 +5134,9 @@ cygwin* | mingw* | pw32* )
     with_gnu_ld=no
   fi
   ;;
-
+openbsd*)
+  with_gnu_ld=no
+  ;;
 esac
 
 ld_shlibs=yes
@@ -3139,7 +5223,7 @@ EOF
     # can override, but on older systems we have to supply one (in ltdll.c)
     if test "x$lt_cv_need_dllmain" = "xyes"; then
       ltdll_obj='$output_objdir/$soname-ltdll.'"$ac_objext "
-      ltdll_cmds='test -f $output_objdir/$soname-ltdll.c || sed -e "/^# \/\* ltdll\.c starts here \*\//,/^# \/\* ltdll.c ends here \*\// { s/^# //; p; }" -e d < [$]0 > $output_objdir/$soname-ltdll.c~
+      ltdll_cmds='test -f $output_objdir/$soname-ltdll.c || sed -e "/^# \/\* ltdll\.c starts here \*\//,/^# \/\* ltdll.c ends here \*\// { s/^# //; p; }" -e d < $''0 > $output_objdir/$soname-ltdll.c~
 	test -f $output_objdir/$soname-ltdll.$ac_objext || (cd $output_objdir && $CC -c $soname-ltdll.c)~'
     else
       ltdll_obj=
@@ -3152,24 +5236,25 @@ EOF
     # Be careful not to strip the DATA tag left be newer dlltools.
     export_symbols_cmds="$ltdll_cmds"'
       $DLLTOOL --export-all --exclude-symbols '$dll_exclude_symbols' --output-def $output_objdir/$soname-def '$ltdll_obj'$libobjs $convenience~
-      [sed -e "1,/EXPORTS/d" -e "s/ @ [0-9]*//" -e "s/ *;.*$//"] < $output_objdir/$soname-def > $export_symbols'
+      sed -e "1,/EXPORTS/d" -e "s/ @ [[0-9]]*//" -e "s/ *;.*$//" < $output_objdir/$soname-def > $export_symbols'
 
     # If the export-symbols file already is a .def file (1st line
     # is EXPORTS), use it as is.
     # If DATA tags from a recent dlltool are present, honour them!
-    archive_expsym_cmds='if test "x`head -1 $export_symbols`" = xEXPORTS; then
-        cp $export_symbols $output_objdir/$soname-def;
+    archive_expsym_cmds='if test "x`sed 1q $export_symbols`" = xEXPORTS; then
+	cp $export_symbols $output_objdir/$soname-def;
       else
-        echo EXPORTS > $output_objdir/$soname-def;
-        _lt_hint=1;
-        cat $export_symbols | while read symbol; do
-         set dummy \$symbol;
-         case \[$]# in
-           2) echo "   \[$]2 @ \$_lt_hint ; " >> $output_objdir/$soname-def;;
-           *) echo "     \[$]2 @ \$_lt_hint \[$]3 ; " >> $output_objdir/$soname-def;;
-         esac;
-         _lt_hint=`expr 1 + \$_lt_hint`;
-        done;
+	echo EXPORTS > $output_objdir/$soname-def;
+	_lt_hint=1;
+	cat $export_symbols | while read symbol; do
+	 set dummy \$symbol;
+	 case \[$]# in
+	   2) echo "   \[$]2 @ \$_lt_hint ; " >> $output_objdir/$soname-def;;
+	   4) echo "   \[$]2 \[$]3 \[$]4 ; " >> $output_objdir/$soname-def; _lt_hint=`expr \$_lt_hint - 1`;;
+	   *) echo "     \[$]2 @ \$_lt_hint \[$]3 ; " >> $output_objdir/$soname-def;;
+	 esac;
+	 _lt_hint=`expr 1 + \$_lt_hint`;
+	done;
       fi~
       '"$ltdll_cmds"'
       $CC -Wl,--base-file,$output_objdir/$soname-base '$lt_cv_cc_dll_switch' -Wl,-e,'$dll_entry' -o $output_objdir/$soname '$ltdll_obj'$libobjs $deplibs $compiler_flags~
@@ -3264,41 +5349,6 @@ else
     ;;
 
   aix4* | aix5*)
-    # When large executables or shared objects are built, AIX ld can
-    # have problems creating the table of contents.  If linking a library
-    # or program results in "error TOC overflow" add -mminimal-toc to
-    # CXXFLAGS/CFLAGS for g++/gcc.  In the cases where that is not
-    # enough to fix the problem, add -Wl,-bbigtoc to LDFLAGS.
-
-    archive_cmds=''
-    hardcode_libdir_separator=':'
-    if test "$GCC" = yes; then
-      collect2name=`${CC} -print-prog-name=collect2`
-      if test -f "$collect2name" && \
-	 strings "$collect2name" | grep resolve_lib_name >/dev/null
-      then
-	# We have reworked collect2
-	hardcode_direct=yes
-      else
-        # We have old collect2
-        hardcode_direct=unsupported
-        # It fails to find uninstalled libraries when the uninstalled
-        # path is not listed in the libpath.  Setting hardcode_minus_L
-        # to unsupported forces relinking
-        hardcode_minus_L=yes
-        hardcode_libdir_flag_spec='-L$libdir'
-        hardcode_libdir_separator=
-      fi
-      shared_flag='-shared'
-    else
-      if test "$host_cpu" = ia64; then
-        shared_flag='-G'
-      else
-        shared_flag='${wl}-bM:SRE'
-      fi
-      hardcode_direct=yes
-    fi
-
     if test "$host_cpu" = ia64; then
       # On IA64, the linker does run time linking by default, so we don't
       # have to do anything special.
@@ -3306,38 +5356,94 @@ else
       exp_sym_flag='-Bexport'
       no_entry_flag=""
     else
-      # Test if we are trying to use run time linking, or normal AIX style linking.
-      # If -brtl is somewhere in LDFLAGS, we need to do run time linking.
       aix_use_runtimelinking=no
-      for ld_flag in $LDFLAGS; do
-        if (test $ld_flag = "-brtl" || test $ld_flag = "-Wl,-brtl" ); then
-          aix_use_runtimelinking=yes
-          break
-        fi
-      done
+
+      # Test if we are trying to use run time linking or normal
+      # AIX style linking. If -brtl is somewhere in LDFLAGS, we
+      # need to do runtime linking.
+      case $host_os in aix4.[[23]]|aix4.[[23]].*|aix5*)
+	for ld_flag in $LDFLAGS; do
+	  case $ld_flag in
+	  *-brtl*)
+	    aix_use_runtimelinking=yes
+	    break
+	  ;;
+	  esac
+	done
+      esac
+
+      aix_use_runtimelinking=yes #gkk I use it always
+      link_static_flag="-bstatic" #gkk added this
       exp_sym_flag='-bexport'
       no_entry_flag='-bnoentry'
     fi
+
+    # When large executables or shared objects are built, AIX ld can
+    # have problems creating the table of contents.  If linking a library
+    # or program results in "error TOC overflow" add -mminimal-toc to
+    # CXXFLAGS/CFLAGS for g++/gcc.  In the cases where that is not
+    # enough to fix the problem, add -Wl,-bbigtoc to LDFLAGS.
+
+    hardcode_direct=yes
+    archive_cmds=''
+    hardcode_libdir_separator=':'
+    if test "$GCC" = yes; then
+      case $host_os in aix4.[[012]]|aix4.[[012]].*)
+	collect2name=`${CC} -print-prog-name=collect2`
+	if test -f "$collect2name" && \
+	  strings "$collect2name" | grep resolve_lib_name >/dev/null
+	then
+	  # We have reworked collect2
+	  hardcode_direct=yes
+	else
+	  # We have old collect2
+	  hardcode_direct=unsupported
+	  # It fails to find uninstalled libraries when the uninstalled
+	  # path is not listed in the libpath.  Setting hardcode_minus_L
+	  # to unsupported forces relinking
+	  hardcode_minus_L=yes
+	  hardcode_libdir_flag_spec='-L$libdir'
+	  hardcode_libdir_separator=
+	fi
+      esac
+
+      shared_flag='-shared'
+    else
+      # not using gcc
+      if test "$host_cpu" = ia64; then
+	shared_flag='${wl}-G'
+      else
+	if test "$aix_use_runtimelinking" = yes; then
+	  shared_flag='${wl}-G'
+	else
+	  shared_flag='${wl}-bM:SRE'
+	fi
+      fi
+    fi
+
     # It seems that -bexpall can do strange things, so it is better to
     # generate a list of symbols to export.
     always_export_symbols=yes
     if test "$aix_use_runtimelinking" = yes; then
+      # Warning - without using the other runtime loading flags (-brtl),
+      # -berok will link without error, but may produce a broken library.
+      allow_undefined_flag='-berok'
       hardcode_libdir_flag_spec='${wl}-blibpath:$libdir:/usr/lib:/lib'
-      allow_undefined_flag=' -Wl,-G'
-      archive_expsym_cmds="\$CC $shared_flag"' -o $output_objdir/$soname $libobjs $deplibs $compiler_flags ${allow_undefined_flag} '"\${wl}$no_entry_flag \${wl}$exp_sym_flag:\$export_symbols"
+      archive_expsym_cmds="\$CC"' -o $output_objdir/$soname $libobjs $deplibs $compiler_flags `if test "x${allow_undefined_flag}" != "x"; then echo "${wl}${allow_undefined_flag}"; else :; fi` '"\${wl}$no_entry_flag \${wl}$exp_sym_flag:\$export_symbols $shared_flag"
     else
       if test "$host_cpu" = ia64; then
-        hardcode_libdir_flag_spec='${wl}-R $libdir:/usr/lib:/lib'
-       allow_undefined_flag="-znodefs"
-        archive_expsym_cmds="\$CC $shared_flag"' -o $output_objdir/$soname ${wl}-h$soname $libobjs $deplibs $compiler_flags ${wl}${allow_undefined_flag} '"\${wl}$no_entry_flag \${wl}$exp_sym_flag:\$export_symbols"
+	hardcode_libdir_flag_spec='${wl}-R $libdir:/usr/lib:/lib'
+	allow_undefined_flag="-z nodefs"
+	archive_expsym_cmds="\$CC $shared_flag"' -o $output_objdir/$soname ${wl}-h$soname $libobjs $deplibs $compiler_flags ${wl}${allow_undefined_flag} '"\${wl}$no_entry_flag \${wl}$exp_sym_flag:\$export_symbols"
       else
-        hardcode_libdir_flag_spec='${wl}-bnolibpath ${wl}-blibpath:$libdir:/usr/lib:/lib'
-        # Warning - without using the other run time loading flags, -berok will
-        #           link without error, but may produce a broken library.
-        allow_undefined_flag='${wl}-berok"
-        # This is a bit strange, but is similar to how AIX traditionally builds
-        # it's shared libraries.
-        archive_expsym_cmds="\$CC $shared_flag"' -o $output_objdir/$soname $libobjs $deplibs $compiler_flags ${allow_undefined_flag} '"\${wl}$no_entry_flag \${wl}$exp_sym_flag:\$export_symbols"' ~$AR -crlo $objdir/$libname$release.a $objdir/$soname'
+        #gkk I added -brtl here
+	hardcode_libdir_flag_spec='${wl}-bnolibpath ${wl}-blibpath:$libdir:/usr/lib:/lib -brtl'
+	# Warning - without using the other run time loading flags,
+	# -berok will link without error, but may produce a broken library.
+	allow_undefined_flag='${wl}-berok'
+	# This is a bit strange, but is similar to how AIX traditionally builds
+	# it's shared libraries.
+	archive_expsym_cmds="\$CC $shared_flag"' -o $output_objdir/$soname $libobjs $deplibs $compiler_flags ${allow_undefined_flag} '"\${wl}$no_entry_flag \${wl}$exp_sym_flag:\$export_symbols"' ~$AR -crlo $objdir/$libname$release.a $objdir/$soname'
       fi
     fi
     ;;
@@ -3369,11 +5475,19 @@ else
     ;;
 
   darwin* | rhapsody*)
-    allow_undefined_flag='-undefined suppress'
+    case "$host_os" in
+    rhapsody* | darwin1.[[012]])
+      allow_undefined_flag='-undefined suppress'
+      ;;
+    *) # Darwin 1.3 on
+      allow_undefined_flag='-flat_namespace -undefined suppress'
+      ;;
+    esac
     # FIXME: Relying on posixy $() will cause problems for
     #        cross-compilation, but unfortunately the echo tests do not
-    #        yet detect zsh echo's removal of \ escapes.
-    archive_cmds='$CC $(test .$module = .yes && echo -bundle || echo -dynamiclib) $allow_undefined_flag -o $lib $libobjs $deplibs$linkopts -install_name $rpath/$soname $(test -n "$verstring" -a x$verstring != x0.0 && echo $verstring)'
+    #        yet detect zsh echo's removal of \ escapes.  Also zsh mangles
+    #	     `"' quotes if we put them in here... so don't!
+    archive_cmds='$CC -r -keep_private_externs -nostdlib -o ${lib}-master.o $libobjs && $CC $(test .$module = .yes && echo -bundle || echo -dynamiclib) $allow_undefined_flag -o $lib ${lib}-master.o $deplibs$linker_flags $(test .$module != .yes && echo -install_name $rpath/$soname $verstring)'
     # We need to add '_' to the symbols in $export_symbols first
     #archive_expsym_cmds="$archive_cmds"' && strip -s $export_symbols'
     hardcode_direct=yes
@@ -3425,13 +5539,14 @@ else
     export_dynamic_flag_spec='${wl}-E'
     ;;
 
-  irix5* | irix6*)
+  irix5* | irix6* | nonstopux*)
     if test "$GCC" = yes; then
       archive_cmds='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname ${wl}$soname `test -n "$verstring" && echo ${wl}-set_version ${wl}$verstring` ${wl}-update_registry ${wl}${output_objdir}/so_locations -o $lib'
+      hardcode_libdir_flag_spec='${wl}-rpath ${wl}$libdir'
     else
       archive_cmds='$LD -shared $libobjs $deplibs $linker_flags -soname $soname `test -n "$verstring" && echo -set_version $verstring` -update_registry ${output_objdir}/so_locations -o $lib'
+      hardcode_libdir_flag_spec='-rpath $libdir'
     fi
-    hardcode_libdir_flag_spec='${wl}-rpath ${wl}$libdir'
     hardcode_libdir_separator=:
     link_all_deplibs=yes
     ;;
@@ -3448,7 +5563,7 @@ else
     ;;
 
   newsos6)
-    archive_cmds='$LD -G -h $soname -o $lib $libobjs $deplibs $linkopts'
+    archive_cmds='$LD -G -h $soname -o $lib $libobjs $deplibs $linker_flags'
     hardcode_direct=yes
     hardcode_libdir_flag_spec='${wl}-rpath ${wl}$libdir'
     hardcode_libdir_separator=:
@@ -3456,10 +5571,24 @@ else
     ;;
 
   openbsd*)
-    archive_cmds='$LD -Bshareable -o $lib $libobjs $deplibs $linker_flags'
-    hardcode_libdir_flag_spec='-R$libdir'
     hardcode_direct=yes
     hardcode_shlibpath_var=no
+    if test -z "`echo __ELF__ | $CC -E - | grep __ELF__`" || test "$host_os-$host_cpu" = "openbsd2.8-powerpc"; then
+      archive_cmds='$CC -shared $pic_flag -o $lib $libobjs $deplibs $compiler_flags'
+      hardcode_libdir_flag_spec='${wl}-rpath,$libdir'
+      export_dynamic_flag_spec='${wl}-E'
+    else
+      case "$host_os" in
+      openbsd[[01]].* | openbsd2.[[0-7]] | openbsd2.[[0-7]].*)
+	archive_cmds='$LD -Bshareable -o $lib $libobjs $deplibs $linker_flags'
+	hardcode_libdir_flag_spec='-R$libdir'
+        ;;
+      *)
+        archive_cmds='$CC -shared $pic_flag -o $lib $libobjs $deplibs $compiler_flags'
+        hardcode_libdir_flag_spec='${wl}-rpath,$libdir'
+        ;;
+      esac
+    fi
     ;;
 
   os2*)
@@ -3504,10 +5633,39 @@ else
     hardcode_shlibpath_var=no
     runpath_var=LD_RUN_PATH
     hardcode_runpath_var=yes
+    export_dynamic_flag_spec='${wl}-Bexport'
     ;;
 
   solaris*)
+    # gcc --version < 3.0 without binutils cannot create self contained
+    # shared libraries reliably, requiring libgcc.a to resolve some of
+    # the object symbols generated in some cases.  Libraries that use
+    # assert need libgcc.a to resolve __eprintf, for example.  Linking
+    # a copy of libgcc.a into every shared library to guarantee resolving
+    # such symbols causes other problems:  According to Tim Van Holder
+    # <tim.van.holder@pandora.be>, C++ libraries end up with a separate
+    # (to the application) exception stack for one thing.
     no_undefined_flag=' -z defs'
+    if test "$GCC" = yes; then
+      case `$CC --version 2>/dev/null` in
+      [[12]].*)
+	cat <<EOF 1>&2
+
+*** Warning: Releases of GCC earlier than version 3.0 cannot reliably
+*** create self contained shared libraries on Solaris systems, without
+*** introducing a dependency on libgcc.a.  Therefore, libtool is disabling
+*** -no-undefined support, which will at least allow you to build shared
+*** libraries.  However, you may find that when you link such libraries
+*** into an application without using GCC, you have to manually add
+*** \`gcc --print-libgcc-file-name\` to the link command.  We urge you to
+*** upgrade to a newer version of GCC.  Another option is to rebuild your
+*** current GCC to use the GNU linker from GNU binutils 2.9.1 or newer.
+
+EOF
+        no_undefined_flag=
+	;;
+      esac
+    fi
     # $CC -shared without GNU ld will not create a library from C++
     # object files and a static libstdc++, better avoid it by now
     archive_cmds='$LD -G${allow_undefined_flag} -h $soname -o $lib $libobjs $deplibs $linker_flags'
@@ -3516,7 +5674,7 @@ else
     hardcode_libdir_flag_spec='-R$libdir'
     hardcode_shlibpath_var=no
     case $host_os in
-    [solaris2.[0-5] | solaris2.[0-5].*]) ;;
+    solaris2.[[0-5]] | solaris2.[[0-5]].*) ;;
     *) # Supported since Solaris 2.6 (maybe 2.5.1?)
       whole_archive_flag_spec='-z allextract$convenience -z defaultextract' ;;
     esac
@@ -3538,13 +5696,23 @@ else
     ;;
 
   sysv4)
-    if test "x$host_vendor" = xsno; then
-      archive_cmds='$LD -G -Bsymbolic -h $soname -o $lib $libobjs $deplibs $linkopts'
-      hardcode_direct=yes # is this really true???
-    else
-      archive_cmds='$LD -G -h $soname -o $lib $libobjs $deplibs $linker_flags'
-      hardcode_direct=no #Motorola manual says yes, but my tests say they lie
-    fi
+    case $host_vendor in
+      sni)
+        archive_cmds='$LD -G -h $soname -o $lib $libobjs $deplibs $linker_flags'
+        hardcode_direct=yes # is this really true???
+        ;;
+      siemens)
+        ## LD is ld it makes a PLAMLIB
+        ## CC just makes a GrossModule.
+        archive_cmds='$LD -G -o $lib $libobjs $deplibs $linker_flags'
+        reload_cmds='$CC -r -o $output$reload_objs'
+        hardcode_direct=no
+        ;;
+      motorola)
+        archive_cmds='$LD -G -h $soname -o $lib $libobjs $deplibs $linker_flags'
+        hardcode_direct=no #Motorola manual says yes, but my tests say they lie
+        ;;
+    esac
     runpath_var='LD_RUN_PATH'
     hardcode_shlibpath_var=no
     ;;
@@ -3697,6 +5865,9 @@ aix3*)
 
 aix4* | aix5*)
   version_type=linux
+  need_lib_prefix=no
+  need_version=no
+  hardcode_into_libs=yes
   if test "$host_cpu" = ia64; then
     # AIX 5 supports IA64
     library_names_spec='${libname}${release}.so$major ${libname}${release}.so$versuffix $libname.so'
@@ -3708,22 +5879,24 @@ aix4* | aix5*)
     # depend on `.', always an invalid library.  This was fixed in
     # development snapshots of GCC prior to 3.0.
     case $host_os in
-      [ aix4 | aix4.[01] | aix4.[01].*)]
-      if { echo '#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 97)'
-           echo ' yes '
-           echo '#endif'; } | ${CC} -E - | grep yes > /dev/null; then
-        :
-      else
-        can_build_shared=no
-      fi
-      ;;
+      aix4 | aix4.[[01]] | aix4.[[01]].*)
+	if { echo '#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 97)'
+	     echo ' yes '
+	     echo '#endif'; } | ${CC} -E - | grep yes > /dev/null; then
+	  :
+	else
+	  can_build_shared=no
+	fi
+	;;
     esac
-    # AIX (on Power*) has no versioning support, so currently we can not hardcode correct
-    # soname into executable. Probably we can add versioning support to
-    # collect2, so additional links can be useful in future.
+    # AIX (on Power*) has no versioning support, so currently we can
+    # not hardcode correct soname into executable. Probably we can
+    # add versioning support to collect2, so additional links can
+    # be useful in future.
     if test "$aix_use_runtimelinking" = yes; then
-      # If using run time linking (on AIX 4.2 or later) use lib<name>.so instead of
-      # lib<name>.a to let people know that these are not typical AIX shared libraries.
+      # If using run time linking (on AIX 4.2 or later) use lib<name>.so
+      # instead of lib<name>.a to let people know that these are not
+      # typical AIX shared libraries.
       library_names_spec='${libname}${release}.so$versuffix ${libname}${release}.so$major $libname.so'
     else
       # We preserve .a as extension for shared libraries through AIX4.2
@@ -3732,14 +5905,14 @@ aix4* | aix5*)
       soname_spec='${libname}${release}.so$major'
     fi
     shlibpath_var=LIBPATH
-    deplibs_check_method=pass_all
   fi
+  hardcode_into_libs=yes
   ;;
 
 amigaos*)
   library_names_spec='$libname.ixlibrary $libname.a'
   # Create ${libname}_ixlibrary.a entries in /sys/libs.
-  finish_eval='for lib in `ls $libdir/*.ixlibrary 2>/dev/null`; do libname=`$echo "X$lib" | [$Xsed -e '\''s%^.*/\([^/]*\)\.ixlibrary$%\1%'\'']`; test $rm /sys/libs/${libname}_ixlibrary.a; $show "(cd /sys/libs && $LN_S $lib ${libname}_ixlibrary.a)"; (cd /sys/libs && $LN_S $lib ${libname}_ixlibrary.a) || exit 1; done'
+  finish_eval='for lib in `ls $libdir/*.ixlibrary 2>/dev/null`; do libname=`$echo "X$lib" | $Xsed -e '\''s%^.*/\([[^/]]*\)\.ixlibrary$%\1%'\''`; test $rm /sys/libs/${libname}_ixlibrary.a; $show "(cd /sys/libs && $LN_S $lib ${libname}_ixlibrary.a)"; (cd /sys/libs && $LN_S $lib ${libname}_ixlibrary.a) || exit 1; done'
   ;;
 
 beos*)
@@ -3770,7 +5943,7 @@ cygwin* | mingw* | pw32*)
   case $GCC,$host_os in
   yes,cygwin*)
     library_names_spec='$libname.dll.a'
-    soname_spec='`echo ${libname} | sed -e 's/^lib/cyg/'``echo ${release} | [sed -e 's/[.]/-/g']`${versuffix}.dll'
+    soname_spec='`echo ${libname} | sed -e 's/^lib/cyg/'``echo ${release} | sed -e 's/[[.]]/-/g'`${versuffix}.dll'
     postinstall_cmds='dlpath=`bash 2>&1 -c '\''. $dir/${file}i;echo \$dlname'\''`~
       dldir=$destdir/`dirname \$dlpath`~
       test -d \$dldir || mkdir -p \$dldir~
@@ -3780,14 +5953,14 @@ cygwin* | mingw* | pw32*)
        $rm \$dlpath'
     ;;
   yes,mingw*)
-    library_names_spec='${libname}`echo ${release} | [sed -e 's/[.]/-/g']`${versuffix}.dll'
-    sys_lib_search_path_spec=`$CC -print-search-dirs | grep "^libraries:" | sed -e "s/^libraries://" -e "s/;/ /g"`
+    library_names_spec='${libname}`echo ${release} | sed -e 's/[[.]]/-/g'`${versuffix}.dll'
+    sys_lib_search_path_spec=`$CC -print-search-dirs | grep "^libraries:" | sed -e "s/^libraries://" -e "s/;/ /g" -e "s,=/,/,g"`
     ;;
   yes,pw32*)
     library_names_spec='`echo ${libname} | sed -e 's/^lib/pw/'``echo ${release} | sed -e 's/[.]/-/g'`${versuffix}.dll'
     ;;
   *)
-    library_names_spec='${libname}`echo ${release} | [sed -e 's/[.]/-/g']`${versuffix}.dll $libname.lib'
+    library_names_spec='${libname}`echo ${release} | sed -e 's/[[.]]/-/g'`${versuffix}.dll $libname.lib'
     ;;
   esac
   dynamic_linker='Win32 ld.exe'
@@ -3864,14 +6037,17 @@ hpux9* | hpux10* | hpux11*)
   postinstall_cmds='chmod 555 $lib'
   ;;
 
-irix5* | irix6*)
-  version_type=irix
+irix5* | irix6* | nonstopux*)
+  case $host_os in
+    nonstopux*) version_type=nonstopux ;;
+    *)          version_type=irix ;;
+  esac
   need_lib_prefix=no
   need_version=no
   soname_spec='${libname}${release}.so$major'
   library_names_spec='${libname}${release}.so$versuffix ${libname}${release}.so$major ${libname}${release}.so $libname.so'
   case $host_os in
-  irix5*)
+  irix5* | nonstopux*)
     libsuff= shlibsuff=
     ;;
   *)
@@ -3945,9 +6121,19 @@ newsos6)
 
 openbsd*)
   version_type=sunos
-  if test "$with_gnu_ld" = yes; then
-    need_lib_prefix=no
-    need_version=no
+  need_lib_prefix=no
+  need_version=no
+  if test -z "`echo __ELF__ | $CC -E - | grep __ELF__`" || test "$host_os-$host_cpu" = "openbsd2.8-powerpc"; then
+    case "$host_os" in
+    openbsd2.[[89]] | openbsd2.[[89]].*)
+      shlibpath_overrides_runpath=no
+      ;;
+    *)
+      shlibpath_overrides_runpath=yes
+      ;;
+    esac
+  else
+    shlibpath_overrides_runpath=yes
   fi
   library_names_spec='${libname}${release}.so$versuffix ${libname}.so$versuffix'
   finish_cmds='PATH="\$PATH:/sbin" ldconfig -m $libdir'
@@ -3965,11 +6151,12 @@ os2*)
 osf3* | osf4* | osf5*)
   version_type=osf
   need_version=no
-  soname_spec='${libname}${release}.so'
-  library_names_spec='${libname}${release}.so$versuffix ${libname}${release}.so $libname.so'
+  soname_spec='${libname}${release}.so$major'
+  library_names_spec='${libname}${release}.so$versuffix ${libname}${release}.so$major $libname.so'
   shlibpath_var=LD_LIBRARY_PATH
   sys_lib_search_path_spec="/usr/shlib /usr/ccs/lib /usr/lib/cmplrs/cc /usr/lib /usr/local/lib /var/shlib"
   sys_lib_dlsearch_path_spec="$sys_lib_search_path_spec"
+  hardcode_into_libs=yes
   ;;
 
 sco3.2v5*)
@@ -4012,6 +6199,12 @@ sysv4 | sysv4.2uw2* | sysv4.3* | sysv5*)
   case $host_vendor in
     sni)
       shlibpath_overrides_runpath=no
+      need_lib_prefix=no
+      export_dynamic_flag_spec='${wl}-Blargedynsym'
+      runpath_var=LD_RUN_PATH
+      ;;
+    siemens)
+      need_lib_prefix=no
       ;;
     motorola)
       need_lib_prefix=no
@@ -4061,6 +6254,41 @@ test "$dynamic_linker" = no && can_build_shared=no
 # Report the final consequences.
 AC_MSG_CHECKING([if libtool supports shared libraries])
 AC_MSG_RESULT([$can_build_shared])
+##
+## END FIXME
+
+## FIXME: this should be a separate macro
+##
+AC_MSG_CHECKING([whether to build shared libraries])
+test "$can_build_shared" = "no" && enable_shared=no
+
+# On AIX, shared libraries and static libraries use the same namespace, and
+# are all built from PIC.
+case "$host_os" in
+aix3*)
+  test "$enable_shared" = yes && enable_static=no
+  if test -n "$RANLIB"; then
+    archive_cmds="$archive_cmds~\$RANLIB \$lib"
+    postinstall_cmds='$RANLIB $lib'
+  fi
+  ;;
+
+aix4*)
+  if test "$host_cpu" != ia64 && test "$aix_use_runtimelinking" = no ; then
+    test "$enable_shared" = yes && enable_static=no
+  fi
+  ;;
+esac
+AC_MSG_RESULT([$enable_shared])
+##
+## END FIXME
+
+## FIXME: this should be a separate macro
+##
+AC_MSG_CHECKING([whether to build static libraries])
+# Make sure either enable_shared or enable_static is yes.
+test "$enable_shared" = yes || enable_static=yes
+AC_MSG_RESULT([$enable_static])
 ##
 ## END FIXME
 
@@ -4151,7 +6379,7 @@ if test -f "$ltmain"; then
   # Now quote all the things that may contain metacharacters while being
   # careful not to overquote the AC_SUBSTed values.  We take copies of the
   # variables and quote the copies for generation of the libtool script.
-  for var in echo old_CC old_CFLAGS \
+  for var in echo old_CC old_CFLAGS SED \
     AR AR_FLAGS CC LD LN_S NM SHELL \
     reload_flag reload_cmds wl \
     pic_flag link_static_flag no_builtin_flag export_dynamic_flag_spec \
@@ -4163,6 +6391,7 @@ if test -f "$ltmain"; then
     old_striplib striplib file_magic_cmd export_symbols_cmds \
     deplibs_check_method allow_undefined_flag no_undefined_flag \
     finish_cmds finish_eval global_symbol_pipe global_symbol_to_cdecl \
+    global_symbol_to_c_name_address \
     hardcode_libdir_flag_spec hardcode_libdir_separator  \
     sys_lib_search_path_spec sys_lib_dlsearch_path_spec \
     compiler_c_o compiler_o_lo need_locks exclude_expsyms include_expsyms; do
@@ -4212,8 +6441,11 @@ if test -f "$ltmain"; then
 # configuration script generated by Autoconf, you may include it under
 # the same distribution terms that you use for the rest of that program.
 
+# A sed that does not truncate output.
+SED=$lt_SED
+
 # Sed that helps us avoid accidentally triggering echo(1) options like -n.
-Xsed="sed -e s/^X//"
+Xsed="${SED} -e s/^X//"
 
 # The HP-UX ksh and POSIX shell print the target directory to stdout
 # if CDPATH is set.
@@ -4229,11 +6461,11 @@ SHELL=$lt_SHELL
 # Whether or not to build shared libraries.
 build_libtool_libs=$enable_shared
 
-# Whether or not to add -lc for building shared libraries.
-build_libtool_need_lc=$need_lc
-
 # Whether or not to build static libraries.
 build_old_libs=$enable_static
+
+# Whether or not to add -lc for building shared libraries.
+build_libtool_need_lc=$need_lc
 
 # Whether or not to optimize for fast installation.
 fast_install=$enable_fast_install
@@ -4400,6 +6632,9 @@ global_symbol_pipe=$lt_global_symbol_pipe
 # Transform the output of nm in a proper C declaration
 global_symbol_to_cdecl=$lt_global_symbol_to_cdecl
 
+# Transform the output of nm in a C name address pair
+global_symbol_to_c_name_address=$lt_global_symbol_to_c_name_address
+
 # This is the shared library runtime path variable.
 runpath_var=$runpath_var
 
@@ -4522,9 +6757,9 @@ EOF
 #   return TRUE;
 # }
 # /* ltdll.c ends here */
-        # This is a source program that is used to create import libraries
-        # on Windows for dlls which lack them. Don't remove nor modify the
-        # starting and closing comments
+	# This is a source program that is used to create import libraries
+	# on Windows for dlls which lack them. Don't remove nor modify the
+	# starting and closing comments
 # /* impgen.c starts here */
 # /*   Copyright (C) 1999-2000 Free Software Foundation, Inc.
 #
@@ -4881,6 +7116,7 @@ test "$withval" = no || with_gnu_ld=yes, with_gnu_ld=no)
 AC_REQUIRE([AC_PROG_CC])dnl
 AC_REQUIRE([AC_CANONICAL_HOST])dnl
 AC_REQUIRE([AC_CANONICAL_BUILD])dnl
+AC_REQUIRE([_LT_AC_LIBTOOL_SYS_PATH_SEPARATOR])dnl
 ac_prog=ld
 if test "$GCC" = yes; then
   # Check if gcc -print-prog-name=ld gives a path.
@@ -4894,8 +7130,8 @@ if test "$GCC" = yes; then
   esac
   case $ac_prog in
     # Accept absolute paths.
-    [[\\/]* | [A-Za-z]:[\\/]*)]
-      [re_direlt='/[^/][^/]*/\.\./']
+    [[\\/]]* | [[A-Za-z]]:[[\\/]]*)
+      re_direlt='/[[^/]][[^/]]*/\.\./'
       # Canonicalize the path of ld
       ac_prog=`echo $ac_prog| sed 's%\\\\%/%g'`
       while echo $ac_prog | grep "$re_direlt" > /dev/null 2>&1; do
@@ -4919,7 +7155,7 @@ else
 fi
 AC_CACHE_VAL(lt_cv_path_LD,
 [if test -z "$LD"; then
-  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}${PATH_SEPARATOR-:}"
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=$PATH_SEPARATOR
   for ac_dir in $PATH; do
     test -z "$ac_dir" && ac_dir=.
     if test -f "$ac_dir/$ac_prog" || test -f "$ac_dir/$ac_prog$ac_exeext"; then
@@ -4972,7 +7208,7 @@ test -n "$reload_flag" && reload_flag=" $reload_flag"
 # AC_DEPLIBS_CHECK_METHOD - how to check for library dependencies
 #  -- PORTME fill in with the dynamic library characteristics
 AC_DEFUN([AC_DEPLIBS_CHECK_METHOD],
-[AC_CACHE_CHECK([how to recognise dependant libraries],
+[AC_CACHE_CHECK([how to recognise dependent libraries],
 lt_cv_deplibs_check_method,
 [lt_cv_file_magic_cmd='$MAGIC_CMD'
 lt_cv_file_magic_test_file=
@@ -4983,7 +7219,7 @@ lt_cv_deplibs_check_method='unknown'
 # `unknown' -- same as none, but documents that we really don't know.
 # 'pass_all' -- all dependencies passed with no checks.
 # 'test_compile' -- check by making test program.
-# ['file_magic [regex]'] -- check by looking for files in library path
+# 'file_magic [[regex]]' -- check by looking for files in library path
 # which responds to the $file_magic_cmd with a given egrep regex.
 # If you have `file' or equivalent on your system and you're not sure
 # whether `pass_all' will *always* work, you probably want this one.
@@ -4998,7 +7234,7 @@ beos*)
   ;;
 
 bsdi4*)
-  [lt_cv_deplibs_check_method='file_magic ELF [0-9][0-9]*-bit [ML]SB (shared object|dynamic lib)']
+  lt_cv_deplibs_check_method='file_magic ELF [[0-9]][[0-9]]*-bit [[ML]]SB (shared object|dynamic lib)'
   lt_cv_file_magic_cmd='/usr/bin/file -L'
   lt_cv_file_magic_test_file=/shlib/libc.so
   ;;
@@ -5012,7 +7248,7 @@ darwin* | rhapsody*)
   lt_cv_deplibs_check_method='file_magic Mach-O dynamically linked shared library'
   lt_cv_file_magic_cmd='/usr/bin/file -L'
   case "$host_os" in
-  rhapsody* | darwin1.[012])
+  rhapsody* | darwin1.[[012]])
     lt_cv_file_magic_test_file=`echo /System/Library/Frameworks/System.framework/Versions/*/System | head -1`
     ;;
   *) # Darwin 1.3 on
@@ -5027,7 +7263,7 @@ freebsd*)
     i*86 )
       # Not sure whether the presence of OpenBSD here was a mistake.
       # Let's accept both of them until this is cleared up.
-      [lt_cv_deplibs_check_method='file_magic (FreeBSD|OpenBSD)/i[3-9]86 (compact )?demand paged shared library']
+      lt_cv_deplibs_check_method='file_magic (FreeBSD|OpenBSD)/i[[3-9]]86 (compact )?demand paged shared library'
       lt_cv_file_magic_cmd=/usr/bin/file
       lt_cv_file_magic_test_file=`echo /usr/lib/libc.so.*`
       ;;
@@ -5042,14 +7278,14 @@ gnu*)
   ;;
 
 hpux10.20*|hpux11*)
-  [lt_cv_deplibs_check_method='file_magic (s[0-9][0-9][0-9]|PA-RISC[0-9].[0-9]) shared library']
+  lt_cv_deplibs_check_method='file_magic (s[[0-9]][[0-9]][[0-9]]|PA-RISC[[0-9]].[[0-9]]) shared library'
   lt_cv_file_magic_cmd=/usr/bin/file
   lt_cv_file_magic_test_file=/usr/lib/libc.sl
   ;;
 
-irix5* | irix6*)
+irix5* | irix6* | nonstopux*)
   case $host_os in
-  irix5*)
+  irix5* | nonstopux*)
     # this will be overridden with pass_all, but let us keep it just in case
     lt_cv_deplibs_check_method="file_magic ELF 32-bit MSB dynamic lib MIPS - version 1"
     ;;
@@ -5061,7 +7297,7 @@ irix5* | irix6*)
     *) libmagic=never-match;;
     esac
     # this will be overridden with pass_all, but let us keep it just in case
-    [lt_cv_deplibs_check_method="file_magic ELF ${libmagic} MSB mips-[1234] dynamic lib MIPS - version 1"]
+    lt_cv_deplibs_check_method="file_magic ELF ${libmagic} MSB mips-[[1234]] dynamic lib MIPS - version 1"
     ;;
   esac
   lt_cv_file_magic_test_file=`echo /lib${libsuff}/libc.so*`
@@ -5071,27 +7307,37 @@ irix5* | irix6*)
 # This must be Linux ELF.
 linux-gnu*)
   case $host_cpu in
-  alpha* | i*86 | powerpc* | sparc* | ia64* )
+  alpha* | hppa* | i*86 | mips | mipsel | powerpc* | sparc* | ia64*)
     lt_cv_deplibs_check_method=pass_all ;;
   *)
     # glibc up to 2.1.1 does not perform some relocations on ARM
-    [lt_cv_deplibs_check_method='file_magic ELF [0-9][0-9]*-bit [LM]SB (shared object|dynamic lib )' ;;]
+    lt_cv_deplibs_check_method='file_magic ELF [[0-9]][[0-9]]*-bit [[LM]]SB (shared object|dynamic lib )' ;;
   esac
   lt_cv_file_magic_test_file=`echo /lib/libc.so* /lib/libc-*.so`
   ;;
 
 netbsd*)
   if echo __ELF__ | $CC -E - | grep __ELF__ > /dev/null; then
-    [lt_cv_deplibs_check_method='match_pattern /lib[^/\.]+\.so\.[0-9]+\.[0-9]+$']
+    lt_cv_deplibs_check_method='match_pattern /lib[[^/\.]]+\.so\.[[0-9]]+\.[[0-9]]+$'
   else
-    [lt_cv_deplibs_check_method='match_pattern /lib[^/\.]+\.so$']
+    lt_cv_deplibs_check_method='match_pattern /lib[[^/\.]]+\.so$'
   fi
   ;;
 
 newos6*)
-  [lt_cv_deplibs_check_method='file_magic ELF [0-9][0-9]*-bit [ML]SB (executable|dynamic lib)']
+  lt_cv_deplibs_check_method='file_magic ELF [[0-9]][[0-9]]*-bit [[ML]]SB (executable|dynamic lib)'
   lt_cv_file_magic_cmd=/usr/bin/file
   lt_cv_file_magic_test_file=/usr/lib/libnls.so
+  ;;
+
+openbsd*)
+  lt_cv_file_magic_cmd=/usr/bin/file
+  lt_cv_file_magic_test_file=`echo /usr/lib/libc.so.*`
+  if test -z "`echo __ELF__ | $CC -E - | grep __ELF__`" || test "$host_os-$host_cpu" = "openbsd2.8-powerpc"; then
+    lt_cv_deplibs_check_method='file_magic ELF [[0-9]][[0-9]]*-bit [[LM]]SB shared object'
+  else
+    lt_cv_deplibs_check_method='file_magic OpenBSD.* shared library'
+  fi
   ;;
 
 osf3* | osf4* | osf5*)
@@ -5110,14 +7356,14 @@ solaris*)
   lt_cv_file_magic_test_file=/lib/libc.so
   ;;
 
-[sysv5uw[78]* | sysv4*uw2*)]
+sysv5uw[[78]]* | sysv4*uw2*)
   lt_cv_deplibs_check_method=pass_all
   ;;
 
 sysv4 | sysv4.2uw2* | sysv4.3* | sysv5*)
   case $host_vendor in
   motorola)
-    [lt_cv_deplibs_check_method='file_magic ELF [0-9][0-9]*-bit [ML]SB (shared object|dynamic lib) M[0-9][0-9]* Version [0-9]']
+    lt_cv_deplibs_check_method='file_magic ELF [[0-9]][[0-9]]*-bit [[ML]]SB (shared object|dynamic lib) M[[0-9]][[0-9]]* Version [[0-9]]'
     lt_cv_file_magic_test_file=`echo /usr/lib/libc.so*`
     ;;
   ncr)
@@ -5125,12 +7371,15 @@ sysv4 | sysv4.2uw2* | sysv4.3* | sysv5*)
     ;;
   sequent)
     lt_cv_file_magic_cmd='/bin/file'
-    [lt_cv_deplibs_check_method='file_magic ELF [0-9][0-9]*-bit [LM]SB (shared object|dynamic lib )']
+    lt_cv_deplibs_check_method='file_magic ELF [[0-9]][[0-9]]*-bit [[LM]]SB (shared object|dynamic lib )'
     ;;
   sni)
     lt_cv_file_magic_cmd='/bin/file'
-    [lt_cv_deplibs_check_method="file_magic ELF [0-9][0-9]*-bit [LM]SB dynamic lib"]
+    lt_cv_deplibs_check_method="file_magic ELF [[0-9]][[0-9]]*-bit [[LM]]SB dynamic lib"
     lt_cv_file_magic_test_file=/lib/libc.so
+    ;;
+  siemens)
+    lt_cv_deplibs_check_method=pass_all
     ;;
   esac
   ;;
@@ -5143,13 +7392,14 @@ deplibs_check_method=$lt_cv_deplibs_check_method
 
 # AC_PROG_NM - find the path to a BSD-compatible name lister
 AC_DEFUN([AC_PROG_NM],
-[AC_MSG_CHECKING([for BSD-compatible nm])
+[AC_REQUIRE([_LT_AC_LIBTOOL_SYS_PATH_SEPARATOR])dnl
+AC_MSG_CHECKING([for BSD-compatible nm])
 AC_CACHE_VAL(lt_cv_path_NM,
 [if test -n "$NM"; then
   # Let the user override the test.
   lt_cv_path_NM="$NM"
 else
-  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}${PATH_SEPARATOR-:}"
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=$PATH_SEPARATOR
   for ac_dir in $PATH /usr/ccs/bin /usr/ucb /bin; do
     test -z "$ac_dir" && ac_dir=.
     tmp_nm=$ac_dir/${ac_tool_prefix}nm
@@ -5195,14 +7445,13 @@ case $host in
 esac
 ])
 
-
 # AC_LIBLTDL_CONVENIENCE[(dir)] - sets LIBLTDL to the link flags for
-# the libltdl convenience library and INCLTDL to the include flags for
+# the libltdl convenience library and LTDLINCL to the include flags for
 # the libltdl header and adds --enable-ltdl-convenience to the
-# configure arguments.  Note that LIBLTDL and INCLTDL are not
+# configure arguments.  Note that LIBLTDL and LTDLINCL are not
 # AC_SUBSTed, nor is AC_CONFIG_SUBDIRS called.  If DIR is not
 # provided, it is assumed to be `libltdl'.  LIBLTDL will be prefixed
-# with '${top_builddir}/' and INCLTDL will be prefixed with
+# with '${top_builddir}/' and LTDLINCL will be prefixed with
 # '${top_srcdir}/' (note the single quotes!).  If your package is not
 # flat and you're not using automake, define top_builddir and
 # top_srcdir appropriately in the Makefiles.
@@ -5214,16 +7463,18 @@ AC_DEFUN([AC_LIBLTDL_CONVENIENCE],
       ac_configure_args="$ac_configure_args --enable-ltdl-convenience" ;;
   esac
   LIBLTDL='${top_builddir}/'ifelse($#,1,[$1],['libltdl'])/libltdlc.la
-  INCLTDL='-I${top_srcdir}/'ifelse($#,1,[$1],['libltdl'])
+  LTDLINCL='-I${top_srcdir}/'ifelse($#,1,[$1],['libltdl'])
+  # For backwards non-gettext consistent compatibility...
+  INCLTDL="$LTDLINCL"
 ])
 
 # AC_LIBLTDL_INSTALLABLE[(dir)] - sets LIBLTDL to the link flags for
-# the libltdl installable library and INCLTDL to the include flags for
+# the libltdl installable library and LTDLINCL to the include flags for
 # the libltdl header and adds --enable-ltdl-install to the configure
-# arguments.  Note that LIBLTDL and INCLTDL are not AC_SUBSTed, nor is
+# arguments.  Note that LIBLTDL and LTDLINCL are not AC_SUBSTed, nor is
 # AC_CONFIG_SUBDIRS called.  If DIR is not provided and an installed
 # libltdl is not found, it is assumed to be `libltdl'.  LIBLTDL will
-# be prefixed with '${top_builddir}/' and INCLTDL will be prefixed
+# be prefixed with '${top_builddir}/' and LTDLINCL will be prefixed
 # with '${top_srcdir}/' (note the single quotes!).  If your package is
 # not flat and you're not using automake, define top_builddir and
 # top_srcdir appropriately in the Makefiles.
@@ -5241,12 +7492,14 @@ AC_DEFUN([AC_LIBLTDL_INSTALLABLE],
   if test x"$enable_ltdl_install" = x"yes"; then
     ac_configure_args="$ac_configure_args --enable-ltdl-install"
     LIBLTDL='${top_builddir}/'ifelse($#,1,[$1],['libltdl'])/libltdl.la
-    INCLTDL='-I${top_srcdir}/'ifelse($#,1,[$1],['libltdl'])
+    LTDLINCL='-I${top_srcdir}/'ifelse($#,1,[$1],['libltdl'])
   else
     ac_configure_args="$ac_configure_args --enable-ltdl-install=no"
     LIBLTDL="-lltdl"
-    INCLTDL=
+    LTDLINCL=
   fi
+  # For backwards non-gettext consistent compatibility...
+  INCLTDL="$LTDLINCL"
 ])
 
 # old names
@@ -5261,10 +7514,99 @@ AC_DEFUN([AM_PROG_NM],        [AC_PROG_NM])
 # This is just to silence aclocal about the macro not being used
 ifelse([AC_DISABLE_FAST_INSTALL])
 
+############################################################
+# NOTE: This macro has been submitted for inclusion into   #
+#  GNU Autoconf as AC_PROG_SED.  When it is available in   #
+#  a released version of Autoconf we should remove this    #
+#  macro and use it instead.                               #
+############################################################
+# LT_AC_PROG_SED
+# --------------
+# Check for a fully-functional sed program, that truncates
+# as few characters as possible.  Prefer GNU sed if found.
+AC_DEFUN([LT_AC_PROG_SED],
+[AC_MSG_CHECKING([for a sed that does not truncate output])
+AC_CACHE_VAL(lt_cv_path_SED,
+[# Loop through the user's path and test for sed and gsed.
+# Then use that list of sed's as ones to test for truncation.
+as_executable_p="test -f"
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_prog in sed gsed; do
+    for ac_exec_ext in '' $ac_executable_extensions; do
+      if $as_executable_p "$as_dir/$ac_prog$ac_exec_ext"; then
+        _sed_list="$_sed_list $as_dir/$ac_prog$ac_exec_ext"
+      fi
+    done
+  done
+done
+
+  # Create a temporary directory, and hook for its removal unless debugging.
+$debug ||
+{
+  trap 'exit_status=$?; rm -rf $tmp && exit $exit_status' 0
+  trap '{ (exit 1); exit 1; }' 1 2 13 15
+}
+
+# Create a (secure) tmp directory for tmp files.
+: ${TMPDIR=/tmp}
+{
+  tmp=`(umask 077 && mktemp -d -q "$TMPDIR/sedXXXXXX") 2>/dev/null` &&
+  test -n "$tmp" && test -d "$tmp"
+}  ||
+{
+  tmp=$TMPDIR/sed$$-$RANDOM
+  (umask 077 && mkdir $tmp)
+} ||
+{
+   echo "$me: cannot create a temporary directory in $TMPDIR" >&2
+   { (exit 1); exit 1; }
+}
+  _max=0
+  _count=0
+  # Add /usr/xpg4/bin/sed as it is typically found on Solaris
+  # along with /bin/sed that truncates output.
+  for _sed in $_sed_list /usr/xpg4/bin/sed; do
+    test ! -f ${_sed} && break
+    cat /dev/null > "$tmp/sed.in"
+    _count=0
+    echo ${ECHO_N-$ac_n} "0123456789${ECHO_C-$ac_c}" >"$tmp/sed.in"
+    # Check for GNU sed and select it if it is found.
+    if "${_sed}" --version 2>&1 < /dev/null | egrep '(GNU)' > /dev/null; then
+      lt_cv_path_SED=${_sed}
+      break
+    fi
+    while true; do
+      cat "$tmp/sed.in" "$tmp/sed.in" >"$tmp/sed.tmp"
+      mv "$tmp/sed.tmp" "$tmp/sed.in"
+      cp "$tmp/sed.in" "$tmp/sed.nl"
+      echo >>"$tmp/sed.nl"
+      ${_sed} -e 's/a$//' < "$tmp/sed.nl" >"$tmp/sed.out" || break
+      cmp -s "$tmp/sed.out" "$tmp/sed.nl" || break
+      # 40000 chars as input seems more than enough
+      test $_count -gt 10 && break
+      _count=`expr $_count + 1`
+      if test $_count -gt $_max; then
+        _max=$_count
+        lt_cv_path_SED=$_sed
+      fi
+    done
+  done
+  rm -rf "$tmp"
+])
+if test "X$SED" != "X"; then
+  lt_cv_path_SED=$SED
+else
+  SED=$lt_cv_path_SED
+fi
+AC_MSG_RESULT([$SED])
+])
+
 
 dnl *** file: config/llnl-ac-macros/ltdl.m4
-
-
 ## ltdl.m4 - Configure ltdl for the target system. -*-Shell-script-*-
 ## Copyright (C) 1999-2000 Free Software Foundation, Inc.
 ##
@@ -5287,42 +7629,94 @@ dnl *** file: config/llnl-ac-macros/ltdl.m4
 ## configuration script generated by Autoconf, you may include it under
 ## the same distribution terms that you use for the rest of that program.
 
-# serial 2 AC_LIB_LTDL
+# serial 5 AC_LIB_LTDL
+
+# AC_WITH_LTDL
+# ------------
+# Clients of libltdl can use this macro to allow the installer to
+# choose between a shipped copy of the ltdl sources or a preinstalled
+# version of the library.
+AC_DEFUN([AC_WITH_LTDL],
+[AC_REQUIRE([AC_LIB_LTDL])
+AC_SUBST([LIBLTDL])
+AC_SUBST([INCLTDL])
+
+# Unless the user asks us to check, assume no installed ltdl exists.
+use_installed_libltdl=no
+
+AC_ARG_WITH([included_ltdl],
+    [  --with-included-ltdl    use the GNU ltdl sources included here])
+
+if test "x$with_included_ltdl" != xyes; then
+  # We are not being forced to use the included libltdl sources, so
+  # decide whether there is a useful installed version we can use.
+  AC_CHECK_HEADER([ltdl.h],
+      [AC_CHECK_LIB([ltdl], [lt_dlcaller_register],
+          [with_included_ltdl=no],
+          [with_included_ltdl=yes])
+  ])
+fi
+
+if test "x$enable_ltdl_install" != xyes; then
+  # If the user did not specify an installable libltdl, then default
+  # to a convenience lib.
+  AC_LIBLTDL_CONVENIENCE
+fi
+
+if test "x$with_included_ltdl" = xno; then
+  # If the included ltdl is not to be used. then Use the
+  # preinstalled libltdl we found.
+  AC_DEFINE([HAVE_LTDL], 1,
+    [Define this if a modern libltdl is already installed])
+  LIBLTDL=-lltdl
+fi
+
+# Report our decision...
+AC_MSG_CHECKING([whether to use included libltdl])
+AC_MSG_RESULT([$with_included_ltdl])
+
+AC_CONFIG_SUBDIRS([libltdl])
+])# AC_WITH_LTDL
+
 
 # AC_LIB_LTDL
 # -----------
-AC_DEFUN(AC_LIB_LTDL,
-[AC_PREREQ(2.13)dnl
-AC_REQUIRE([AC_PROG_CC])dnl
-AC_REQUIRE([AC_C_CONST])dnl
-
 # Perform all the checks necessary for compilation of the ltdl objects
-#  -- including compiler checks (above) and header checks (below).
-AC_REQUIRE([AC_HEADER_STDC])dnl
-AC_REQUIRE([_LT_AC_CHECK_DLFCN])dnl
+#  -- including compiler checks and header checks.
+AC_DEFUN([AC_LIB_LTDL],
+[AC_PREREQ(2.13)
+AC_REQUIRE([AC_PROG_CC])
+AC_REQUIRE([AC_C_CONST])
+AC_REQUIRE([AC_HEADER_STDC])
+AC_REQUIRE([AC_HEADER_DIRENT])
+AC_REQUIRE([AC_LIBTOOL_HEADER_ASSERT])
+AC_REQUIRE([_LT_AC_CHECK_DLFCN])
+AC_REQUIRE([AC_LTDL_ENABLE_INSTALL])
+AC_REQUIRE([AC_LTDL_SHLIBEXT])
+AC_REQUIRE([AC_LTDL_SHLIBPATH])
+AC_REQUIRE([AC_LTDL_SYSSEARCHPATH])
+AC_REQUIRE([AC_LTDL_OBJDIR])
+AC_REQUIRE([AC_LTDL_DLPREOPEN])
+AC_REQUIRE([AC_LTDL_DLLIB])
+AC_REQUIRE([AC_LTDL_SYMBOL_USCORE])
+AC_REQUIRE([AC_LTDL_DLSYM_USCORE])
+AC_REQUIRE([AC_LTDL_SYS_DLOPEN_DEPLIBS])
+AC_REQUIRE([AC_LTDL_FUNC_ARGZ])
 
-AC_CHECK_HEADERS(malloc.h memory.h stdlib.h stdio.h ctype.h dl.h sys/dl.h dld.h)
-AC_CHECK_HEADERS(string.h strings.h, break)
-AC_CHECK_FUNCS(strchr index, break)
-AC_CHECK_FUNCS(strrchr rindex, break)
-AC_CHECK_FUNCS(memcpy bcopy, break)
-AC_CHECK_FUNCS(strcmp)
+AC_CHECK_HEADERS([errno.h malloc.h memory.h stdlib.h stdio.h ctype.h unistd.h])
+AC_CHECK_HEADERS([dl.h sys/dl.h dld.h])
+AC_CHECK_HEADERS([string.h strings.h], break)
 
-AC_REQUIRE([AC_LTDL_ENABLE_INSTALL])dnl
-AC_REQUIRE([AC_LTDL_SHLIBEXT])dnl
-AC_REQUIRE([AC_LTDL_SHLIBPATH])dnl
-AC_REQUIRE([AC_LTDL_SYSSEARCHPATH])dnl
-AC_REQUIRE([AC_LTDL_OBJDIR])dnl
-AC_REQUIRE([AC_LTDL_DLPREOPEN])dnl
-AC_REQUIRE([AC_LTDL_DLLIB])dnl
-AC_REQUIRE([AC_LTDL_SYMBOL_USCORE])dnl
-AC_REQUIRE([AC_LTDL_DLSYM_USCORE])dnl
-AC_REQUIRE([AC_LTDL_SYS_DLOPEN_DEPLIBS])dnl
+AC_CHECK_FUNCS([strchr index], break)
+AC_CHECK_FUNCS([strrchr rindex], break)
+AC_CHECK_FUNCS([memcpy bcopy], break)
+AC_CHECK_FUNCS([memmove strcmp])
+
 ])# AC_LIB_LTDL
 
 # AC_LTDL_ENABLE_INSTALL
 # ----------------------
-AC_DEFUN(AC_LTDL_ENABLE_INSTALL,
+AC_DEFUN([AC_LTDL_ENABLE_INSTALL],
 [AC_ARG_ENABLE(ltdl-install,
 [  --enable-ltdl-install   install libltdl])
 
@@ -5332,17 +7726,23 @@ AM_CONDITIONAL(CONVENIENCE_LTDL, test x"${enable_ltdl_convenience-no}" != xno)
 
 # AC_LTDL_SYS_DLOPEN_DEPLIBS
 # --------------------------
-AC_DEFUN(AC_LTDL_SYS_DLOPEN_DEPLIBS,
+AC_DEFUN([AC_LTDL_SYS_DLOPEN_DEPLIBS],
 [AC_REQUIRE([AC_CANONICAL_HOST])
 AC_CACHE_CHECK([whether deplibs are loaded by dlopen],
 	libltdl_cv_sys_dlopen_deplibs, [dnl
 	# PORTME does your system automatically load deplibs for dlopen()?
 	libltdl_cv_sys_dlopen_deplibs=unknown
 	case "$host_os" in
+        hpux10*|hpux11*)
+          libltdl_cv_sys_dlopen_deplibs=yes
+          ;;
 	linux*)
 	  libltdl_cv_sys_dlopen_deplibs=yes
 	  ;;
 	netbsd*)
+	  libltdl_cv_sys_dlopen_deplibs=yes
+	  ;;
+	openbsd*)
 	  libltdl_cv_sys_dlopen_deplibs=yes
 	  ;;
 	solaris*)
@@ -5358,7 +7758,7 @@ fi
 
 # AC_LTDL_SHLIBEXT
 # ----------------
-AC_DEFUN(AC_LTDL_SHLIBEXT,
+AC_DEFUN([AC_LTDL_SHLIBEXT],
 [AC_REQUIRE([_LT_AC_LTCONFIG_HACK])
 AC_CACHE_CHECK([which extension is used for shared libraries],
   libltdl_cv_shlibext,
@@ -5378,7 +7778,7 @@ fi
 
 # AC_LTDL_SHLIBPATH
 # -----------------
-AC_DEFUN(AC_LTDL_SHLIBPATH,
+AC_DEFUN([AC_LTDL_SHLIBPATH],
 [AC_REQUIRE([_LT_AC_LTCONFIG_HACK])
 AC_CACHE_CHECK([which variable specifies run-time library path],
   libltdl_cv_shlibpath_var, [libltdl_cv_shlibpath_var="$shlibpath_var"])
@@ -5390,7 +7790,7 @@ fi
 
 # AC_LTDL_SYSSEARCHPATH
 # ---------------------
-AC_DEFUN(AC_LTDL_SYSSEARCHPATH,
+AC_DEFUN([AC_LTDL_SYSSEARCHPATH],
 [AC_REQUIRE([_LT_AC_LTCONFIG_HACK])
 AC_CACHE_CHECK([for the default library search path],
   libltdl_cv_sys_search_path, [libltdl_cv_sys_search_path="$sys_lib_dlsearch_path_spec"])
@@ -5414,7 +7814,7 @@ fi
 
 # AC_LTDL_OBJDIR
 # --------------
-AC_DEFUN(AC_LTDL_OBJDIR,
+AC_DEFUN([AC_LTDL_OBJDIR],
 [AC_CACHE_CHECK([for objdir],
   libltdl_cv_objdir, [libltdl_cv_objdir="$objdir"
 if test -n "$objdir"; then
@@ -5436,7 +7836,7 @@ AC_DEFINE_UNQUOTED(LTDL_OBJDIR, "$libltdl_cv_objdir/",
 
 # AC_LTDL_DLPREOPEN
 # -----------------
-AC_DEFUN(AC_LTDL_DLPREOPEN,
+AC_DEFUN([AC_LTDL_DLPREOPEN],
 [AC_REQUIRE([AC_LIBTOOL_SYS_GLOBAL_SYMBOL_PIPE])dnl
 AC_CACHE_CHECK([whether libtool supports -dlopen/-dlpreopen],
        libltdl_cv_preloaded_symbols, [dnl
@@ -5454,26 +7854,42 @@ fi
 
 # AC_LTDL_DLLIB
 # -------------
-AC_DEFUN(AC_LTDL_DLLIB,
+AC_DEFUN([AC_LTDL_DLLIB],
 [LIBADD_DL=
-AC_CHECK_LIB(dl, dlopen, [AC_DEFINE(HAVE_LIBDL, 1,
-   [Define if you have the libdl library or equivalent. ]) LIBADD_DL="-ldl"],
-[AC_CHECK_FUNC(dlopen, [AC_DEFINE(HAVE_LIBDL, 1,
-   [Define if you have the libdl library or equivalent.])],
-[AC_CHECK_LIB(svld, dlopen, [AC_DEFINE(HAVE_LIBDL, 1,
-   [Define if you have the libdl library or equivalent.]) LIBADD_DL="-lsvld"]
-)])])
-AC_CHECK_FUNC(shl_load, [AC_DEFINE(HAVE_SHL_LOAD, 1,
-   [Define if you have the shl_load function.])],
-[AC_CHECK_LIB(dld, shl_load,
-  [AC_DEFINE(HAVE_SHL_LOAD, 1,
-     [Define if you have the shl_load function.])
-   LIBADD_DL="$LIBADD_DL -ldld"])
-])
-AC_CHECK_LIB(dld, dld_link, [AC_DEFINE(HAVE_DLD, 1,
-  [Define if you have the GNU dld library.])dnl
-test "x$ac_cv_lib_dld_shl_load" = yes || LIBADD_DL="$LIBADD_DL -ldld"])
 AC_SUBST(LIBADD_DL)
+
+AC_CHECK_FUNC([shl_load],
+      [AC_DEFINE([HAVE_SHL_LOAD], [1],
+		 [Define if you have the shl_load function.])],
+  [AC_CHECK_LIB([dld], [shl_load],
+	[AC_DEFINE([HAVE_SHL_LOAD], [1],
+		   [Define if you have the shl_load function.])
+	LIBADD_DL="$LIBADD_DL -ldld"],
+    [AC_CHECK_LIB([dl], [dlopen],
+	  [AC_DEFINE([HAVE_LIBDL], [1],
+		     [Define if you have the libdl library or equivalent.])
+	  LIBADD_DL="-ldl"],
+      [AC_TRY_LINK([#if HAVE_DLFCN_H
+#  include <dlfcn.h>
+#endif
+      ],
+	[dlopen(0, 0);],
+	    [AC_DEFINE([HAVE_LIBDL], [1],
+		       [Define if you have the libdl library or equivalent.])],
+	[AC_CHECK_LIB([svld], [dlopen],
+	      [AC_DEFINE([HAVE_LIBDL], [1],
+			 [Define if you have the libdl library or equivalent.])
+	      LIBADD_DL="-lsvld"],
+	  [AC_CHECK_LIB([dld], [dld_link],
+	        [AC_DEFINE([HAVE_DLD], [1],
+			   [Define if you have the GNU dld library.])
+	 	LIBADD_DL="$LIBADD_DL -ldld"
+          ])
+        ])
+      ])
+    ])
+  ])
+])
 
 if test "x$ac_cv_func_dlopen" = xyes || test "x$ac_cv_lib_dl_dlopen" = xyes; then
  LIBS_SAVE="$LIBS"
@@ -5485,7 +7901,7 @@ fi
 
 # AC_LTDL_SYMBOL_USCORE
 # ---------------------
-AC_DEFUN(AC_LTDL_SYMBOL_USCORE,
+AC_DEFUN([AC_LTDL_SYMBOL_USCORE],
 [dnl does the compiler prefix global symbols with an underscore?
 AC_REQUIRE([AC_LIBTOOL_SYS_GLOBAL_SYMBOL_PIPE])dnl
 AC_MSG_CHECKING([for _ prefix in compiled symbols])
@@ -5524,7 +7940,7 @@ AC_MSG_RESULT($ac_cv_sys_symbol_underscore)
 
 # AC_LTDL_DLSYM_USCORE
 # --------------------
-AC_DEFUN(AC_LTDL_DLSYM_USCORE,
+AC_DEFUN([AC_LTDL_DLSYM_USCORE],
 [AC_REQUIRE([AC_LTDL_SYMBOL_USCORE])dnl
 if test x"$ac_cv_sys_symbol_underscore" = xyes; then
   if test x"$ac_cv_func_dlopen" = xyes ||
@@ -5544,294 +7960,45 @@ fi
 
 if test x"$libltdl_cv_need_uscore" = xyes; then
   AC_DEFINE(NEED_USCORE, 1,
-    [Define if dlsym() requires a leading underscode in symbol names. ])
+    [Define if dlsym() requires a leading underscore in symbol names. ])
 fi
 ])# AC_LTDL_DLSYM_USCORE
 
 
-
-dnl *** file: config/llnl-ac-macros/llnl_confirm_babel_c_support.m4
-dnl
-dnl @synopsis LLNL_CONFIRM_BABEL_C_SUPPORT
-dnl
-dnl  This is a meta-command that orchestrates a bunch of sub-checks.
-dnl  I made it a separate M4 Macro to make synchronization between 
-dnl  the main configure script and the runtime configure script easier.
-dnl
-dnl  @author Gary Kumfert
-
-AC_DEFUN([LLNL_CONFIRM_BABEL_C_SUPPORT], [
-  ############################################################
-  #
-  # C Compiler
-  #
-  AC_PROG_CC
-  # a. Libraries (existence)
-  # b. Header Files.
-  AC_HEADER_DIRENT
-  AC_HEADER_STDC
-  AC_CHECK_HEADERS([inttypes.h malloc.h memory.h stddef.h stdlib.h string.h strings.h unistd.h ctype.h sys/stat.h sys/types.h])
-  # c. Typedefs, Structs, Compiler Characteristics
-  AC_C_CONST
-  AC_TYPE_SIZE_T
-  AC_CHECK_TYPES([ptrdiff_t])
-  AC_CHECK_SIZEOF(short,2)
-  AC_CHECK_SIZEOF(int,4)
-  AC_CHECK_SIZEOF(long,8)
-  LLNL_CHECK_LONG_LONG
-  AC_CHECK_SIZEOF(long long,8)
-  LLNL_FIND_32BIT_SIGNED_INT
-  LLNL_CHECK_INT32_T
-  LLNL_FIND_64BIT_SIGNED_INT
-  LLNL_CHECK_INT64_T
-  AC_CHECK_SIZEOF(void *,4)
-  ACX_C_RESTRICT
-  # d. Specific Library Functions.
-  AC_FUNC_MALLOC
-  AC_FUNC_STAT
-  AC_CHECK_FUNCS([atexit getcwd memset strchr strdup strrchr])
-])
-
-
-dnl *** file: config/llnl-ac-macros/llnl_confirm_babel_f77_support.m4
-dnl
-dnl @synopsis LLNL_CONFIRM_BABEL_F77_SUPPORT
-dnl
-dnl  This is a meta-command that orchestrates a bunch of sub-checks.
-dnl  I made it a separate M4 Macro to make synchronization between 
-dnl  the main configure script and the runtime configure script easier.
-dnl
-dnl  If Babel support for F77 is enabled:
-dnl     the cpp macro FORTRAN_DISABLED is undefined
-dnl     the automake conditional SUPPORT_FORTRAN is true
-dnl
-dnl  If Babel support for F77 is disabled:
-dnl     the cpp macro FORTRAN_DISABLED is defined as true
-dnl     the automake conditional SUPPORT_FORTRAN is false
-dnl
-dnl  @author Gary Kumfert
-
-AC_DEFUN([LLNL_CONFIRM_BABEL_F77_SUPPORT], [
-  # fortran77 support is enabled by default if $with_fortran77 is not set.
-  if test -z "$with_fortran77"; then
-    with_fortran77="yes";
-  fi
-  # allow fortran77 support to be overridden by the command line.
-  AC_ARG_WITH(fortran77, [  --without-fortran77       disable fortran77 support])
-  if test "X$with_fortran77" != "Xno"; then
-    AC_PROG_F77
-    # 5.a. Libraries (existence)
-    LLNL_LIB_FMAIN
-    AC_F77_LIBRARY_LDFLAGS
-    AC_F77_DUMMY_MAIN
-    LLNL_SORT_FLIBS
-    LLNL_F77_NAME_MANGLING
-    LLNL_F77_C_CONFIG
-  fi
-  AM_CONDITIONAL(SUPPORT_FORTRAN77, test "X$with_fortran77" != "Xno")
-  if test "X$with_fortran77" = "Xno"; then
-    AC_DEFINE(FORTRAN77_DISABLED, 1, [If defined, Fortran support was disabled at configure time])
-    msgs="$msgs
-	  Fortran77 disabled by request";
+# AC_CHECK_TYPES(TYPES, [ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND],
+#                [INCLUDES])
+# ---------------------------------------------------------------
+# This macro did not exist in Autoconf 2.13, which we do still support
+ifdef([AC_CHECK_TYPES], [],
+[define([AC_CHECK_TYPES],
+  [AC_CACHE_CHECK([for $1], ac_Type,
+    [AC_TRY_LINK([$4],
+	[if (($1 *) 0)
+	  return 0;
+	if (sizeof ($1))
+	  return 0;],
+	[ac_Type=yes],
+	[ac_Type=no])])
+  if test "x$ac_Type" = xyes; then
+    ifelse([$2], [], [:], [$2])
   else
-    msgs="$msgs
-	  Fortran77 enabled.";
-  fi 
-])
+    ifelse([$3], [], [:], [$3])
+  fi])
+])# AC_CHECK_TYPES
 
 
-dnl *** file: config/llnl-ac-macros/llnl_confirm_babel_cxx_support.m4
-dnl
-dnl @synopsis LLNL_CONFIRM_BABEL_CXX_SUPPORT
-dnl
-dnl  This is a meta-command that orchestrates a bunch of sub-checks.
-dnl  I made it a separate M4 Macro to make synchronization between 
-dnl  the main configure script and the runtime configure script easier.
-dnl
-dnl  If Babel support for CXX is enabled:
-dnl     the cpp macro CXX_DISABLED is undefined
-dnl     the automake conditional SUPPORT_CXX is true
-dnl
-dnl  If Babel support for CXX is disabled:
-dnl     the cpp macro CXX_DISABLED is defined as true
-dnl     the automake conditional SUPPORT_CXX is false
-dnl
-dnl  @author Gary Kumfert
+# AC_LTDL_FUNC_ARGZ
+# -----------------
+AC_DEFUN([AC_LTDL_FUNC_ARGZ],
+[AC_CHECK_HEADERS([argz.h])
 
-AC_DEFUN([LLNL_CONFIRM_BABEL_CXX_SUPPORT], [
-  if test -z "$CCC"; then
-    CCC="g++ KCC CC"
-  fi
-  # cxx support is enabled by default if $with_cxx is not set.
-  if test -z "$with_cxx"; then
-    with_cxx="yes";
-  fi
-  # allow cxx support to be overridden by the command line.
-  AC_ARG_WITH(cxx,     [  --without-cxx           disable C++ support])
-  if test "X$with_cxx" != "Xno"; then
-    AC_PROG_CXX
-    # 6.a. Libraries (existence) 
-    LLNL_CXX_LIBRARY_LDFLAGS
-    # 6.b. Header Files
-    LLNL_CXX_OLD_HEADER_SUFFIX
-    AC_CXX_HAVE_STD
-    AC_CXX_HAVE_STL
-    AC_CXX_HAVE_NUMERIC_LIMITS
-    AC_CXX_COMPLEX_MATH_IN_NAMESPACE_STD
-    AC_CXX_HAVE_COMPLEX
-    AC_CXX_HAVE_COMPLEX_MATH1
-    AC_CXX_HAVE_COMPLEX_MATH2
-    AC_CXX_HAVE_IEEE_MATH
-  fi
-  AM_CONDITIONAL(SUPPORT_CXX, test "X$with_cxx" != "Xno")
-  if test "X$with_cxx" = "Xno"; then
-    AC_DEFINE(CXX_DISABLED, 1, [If defined, C++ support was disabled at configure time])
-    msgs="$msgs 
-  	  C++ disabled by request"
-  else
-    msgs="$msgs
-  	  C++ enabled.";
-  fi
-])
+AC_CHECK_TYPES([error_t],
+  [],
+  [AC_DEFINE([error_t], [int],
+    [Define to a type to use for \`error_t' if it is not otherwise available.])],
+  [#if HAVE_ARGZ_H
+#  include <argz.h>
+#endif])
 
-
-dnl *** file: config/llnl-ac-macros/llnl_confirm_babel_python_support.m4
-dnl
-dnl @synopsis LLNL_CONFIRM_BABEL_PYTHON_SUPPORT
-dnl
-dnl  This is a meta-command that orchestrates a bunch of sub-checks.
-dnl  I made it a separate M4 Macro to make synchronization between 
-dnl  the main configure script and the runtime configure script easier.
-dnl
-dnl  If Babel support for PYTHON is enabled:
-dnl     the cpp macro PYTHON_DISABLED is undefined
-dnl     the automake conditional SUPPORT_PYTHON is true
-dnl
-dnl  If Babel support for PYTHON is disabled:
-dnl     the cpp macro PYTHON_DISABLED is defined as true
-dnl     the automake conditional SUPPORT_PYTHON is false
-dnl
-dnl  @author Gary Kumfert
-
-AC_DEFUN([LLNL_CONFIRM_BABEL_PYTHON_SUPPORT], [
-  if test -z "$with_python"; then
-    with_python=yes
-  fi
-  AC_ARG_WITH(python,  [  --without-python        disable python support])
-  if test "X$with_python" != "Xno"; then
-    LLNL_PYTHON_LIBRARY
-    LLNL_PYTHON_NUMERIC
-    LLNL_PYTHON_SHARED_LIBRARY
-    if (test "X$llnl_cv_python_numerical" != "Xyes") || (test "X$enable_shared" = "Xno"); then
-       with_python=no;
-       AC_MSG_WARN([Configuration for Python failed.  Support for Python disabled!])
-       msgs="$msgs
-  	  Python support disabled against request, shared libs disabled or NumPy not found."
-    elif test "X$llnl_python_shared_library_found" != "Xyes"; then
-       AC_MSG_WARN([No Python shared library found.  Support for server-side Python disabled!])
-       msgs="$msgs
-  	  Server-side Python support disabled against request, can only do client side when no libpython.so found".
-    else
-       msgs="$msgs
-  	  Python enabled.";
-    fi
-  else
-    msgs="$msgs 
-  	  Python support disabled by request"
-  fi
-  # support python in general?
-  AM_CONDITIONAL(SUPPORT_PYTHON, test "X$with_python" != "Xno")
-  if test "X$with_python" = "Xno"; then
-    AC_DEFINE(PYTHON_DISABLED, 1, [If defined, Python support was disabled at configure time])
-  fi 
-  # support server-side python in particular
-  AM_CONDITIONAL(SERVER_PYTHON, (test "X$with_python" != "Xno") && (test "X$llnl_python_shared_library_found" = "Xyes"))
-  if (test "X$with_python" = "Xno") || (test "X$llnl_python_shared_library_found" != "Xyes"); then
-    AC_DEFINE(PYTHON_SERVER_DISABLED, 1, [If defined, server-side Python support was disabled at configure time])
-  fi;
-])
-
-
-dnl *** file: config/llnl-ac-macros/llnl_confirm_babel_java_support.m4
-dnl
-dnl @synopsis LLNL_CONFIRM_BABEL_JAVA_SUPPORT
-dnl
-dnl  This is a meta-command that orchestrates a bunch of sub-checks.
-dnl  I made it a separate M4 Macro to make synchronization between 
-dnl  the main configure script and the runtime configure script easier.
-dnl
-dnl  If Babel support for JAVA is enabled:
-dnl     the cpp macro JAVA_DISABLED is undefined
-dnl     the automake conditional SUPPORT_JAVA is true
-dnl
-dnl  If Babel support for JAVA is disabled:
-dnl     the cpp macro JAVA_DISABLED is defined as true
-dnl     the automake conditional SUPPORT_JAVA is false
-dnl
-dnl  @author Gary Kumfert
-
-AC_DEFUN([LLNL_CONFIRM_BABEL_JAVA_SUPPORT], [
-  if test -z "$with_java"; then
-    with_java=yes
-  fi
-  AC_ARG_WITH(java,    [  --without-java          disable java support])
-  if test "X$with_java" != "Xno"; then
-    # for political reasons, AC_PROG_JAVA checks for gcj first.  These variables override that.
-    JAVA=java
-    JAVAC=javac
-    AC_JAVA_OPTIONS
-    AC_CHECK_CLASSPATH
-    AC_PROG_JAVAC
-    AC_PROG_JAVA
-    AC_PROG_JAR
-    LLNL_PROG_JDB
-    AC_PROG_JAVADOC
-    AC_PROG_JAVAH
-    AC_TRY_COMPILE_JAVA
-    AC_CHECK_HEADERS([jni.h])
-    if test "X$ac_cv_header_jni_h" = "Xno"; then
-      AC_MSG_WARN([Cannot find jni.h, Java support will be disabled])
-      with_java=no
-      msgs="$msgs
-  	  Java support disabled against request (no jni.h found!)"
-    fi;
-  else
-      msgs="$msgs
-  	  Java support disabled by request"
-  fi 
-  AM_CONDITIONAL(SUPPORT_JAVA, test "X$with_java" != "Xno")
-  if test "X$with_java" = "Xno"; then
-    AC_DEFINE(JAVA_DISABLED, 1, [If defined, Java support was disabled at configure time])
-  else
-    msgs="$msgs
-  	  Java enabled.";
-  fi 
-])
-
-
-dnl *** file: config/llnl-ac-macros/llnl_prog_test_ef.m4
-# LLNL_PROG_TEST_EF
-#
-# Some platforms (sun) doesn't have a default program (called "test")
-# that understands the "-ef" option.  test FILE1 -ef FILE2 is true only
-# if both files have the same inode.
-#
-AC_DEFUN([LLNL_PROG_TEST_EF],
-[AC_CACHE_CHECK([for a test program that accepts -ef],llnl_cv_prog_test_ef,
-[echo ""> conftest1
-ln -s conftest1 conftest2
-llnl_cv_prog_test_ef=none
-for t in $TEST test /bin/test /usr/bin/test /usr/local/bin/test /usr/ucb/bin/test ; do
-  if (test -e $t) && ($t conftest1 -ef conftest2;) then
-    llnl_cv_prog_test_ef=$t
-  fi;
-done;
-rm conftest1 conftest2
-])
-if test "$llnl_cv_prog_test_ef" == "none"; then
-  AC_MSG_ERROR([Cannot find "test" program such that "test FILE1 -ef FILE2".\n Set TEST environment variable and rerun configure])
-else
-  TEST_EF=$llnl_cv_prog_test_ef
-  AC_SUBST(TEST_EF)
-fi
-])
+AC_CHECK_FUNCS([argz_append argz_create_sep argz_insert argz_next argz_stringify])
+])# AC_LTDL_FUNC_ARGZ

@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_Loader.h
- * Symbol:        SIDL.Loader-v0.7.5
+ * Symbol:        SIDL.Loader-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for SIDL.Loader
@@ -32,16 +32,16 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 #ifndef included_SIDL_Loader_h
 #define included_SIDL_Loader_h
 
 /**
- * Symbol "SIDL.Loader" (version 0.7.5)
+ * Symbol "SIDL.Loader" (version 0.8.1)
  * 
- * Class <code>Loader</code> manages dynamic loading and symbol name
+ * Class <code>Loader</code> manages dyanamic loading and symbol name
  * resolution for the SIDL runtime system.  The <code>Loader</code> class
  * manages a library search path and keeps a record of all libraries
  * loaded through this interface, including the initial "global" symbols
@@ -65,6 +65,9 @@ typedef struct SIDL_Loader__object* SIDL_Loader;
 #endif
 #ifndef included_SIDL_BaseInterface_h
 #include "SIDL_BaseInterface.h"
+#endif
+#ifndef included_SIDL_ClassInfo_h
+#include "SIDL_ClassInfo.h"
 #endif
 #ifndef included_SIDL_DLL_h
 #include "SIDL_DLL.h"
@@ -95,7 +98,7 @@ SIDL_Loader__create(void);
  * </p>
  */
 void
-SIDL_Loader_addReference(
+SIDL_Loader_addRef(
   SIDL_Loader self);
 
 /**
@@ -106,7 +109,7 @@ SIDL_Loader_addReference(
  * reference to an object or interface.
  */
 void
-SIDL_Loader_deleteReference(
+SIDL_Loader_deleteRef(
   SIDL_Loader self);
 
 /**
@@ -123,12 +126,12 @@ SIDL_Loader_isSame(
  * class.  If the <code>SIDL</code> type name in <code>name</code>
  * is supported, then a reference to that object is returned with the
  * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
+ * calling <code>deleteRef</code> on the returned object.  If
  * the specified type is not supported, then a null reference is
  * returned.
  */
 SIDL_BaseInterface
-SIDL_Loader_queryInterface(
+SIDL_Loader_queryInt(
   SIDL_Loader self,
   const char* name);
 
@@ -139,9 +142,16 @@ SIDL_Loader_queryInterface(
  * the string type name would succeed.
  */
 SIDL_bool
-SIDL_Loader_isInstanceOf(
+SIDL_Loader_isType(
   SIDL_Loader self,
   const char* name);
+
+/**
+ * Return the meta-data about the class implementing this interface.
+ */
+SIDL_ClassInfo
+SIDL_Loader_getClassInfo(
+  SIDL_Loader self);
 
 /**
  * Set the search path, which is a semi-colon separated sequence of
@@ -292,7 +302,7 @@ SIDL_Loader__array_create2dRow(int32_t m, int32_t n);
  * source. The initial contents are determined by the
  * data being borrowed.
  * Any time an element in the borrowed array is replaced
- * via a set call, deleteReference will be called on the
+ * via a set call, deleteRef will be called on the
  * value being replaced if it is not NULL.
  */
 struct SIDL_Loader__array*
@@ -318,7 +328,7 @@ SIDL_Loader__array_smartCopy(struct SIDL_Loader__array *array);
  * Increment the array's internal reference count by one.
  */
 void
-SIDL_Loader__array_addReference(struct SIDL_Loader__array* array);
+SIDL_Loader__array_addRef(struct SIDL_Loader__array* array);
 
 /**
  * Decrement the array's internal reference count by one.
@@ -327,7 +337,7 @@ SIDL_Loader__array_addReference(struct SIDL_Loader__array* array);
  * object references held by the array.
  */
 void
-SIDL_Loader__array_deleteReference(struct SIDL_Loader__array* array);
+SIDL_Loader__array_deleteRef(struct SIDL_Loader__array* array);
 
 /**
  * Retrieve element i1 of a(n) 1-dimensional array.

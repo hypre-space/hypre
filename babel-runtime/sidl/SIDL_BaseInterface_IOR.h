@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseInterface_IOR.h
- * Symbol:        SIDL.BaseInterface-v0.7.5
+ * Symbol:        SIDL.BaseInterface-v0.8.1
  * Symbol Type:   interface
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for SIDL.BaseInterface
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 #ifndef included_SIDL_BaseInterface_IOR_h
@@ -46,7 +46,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "SIDL.BaseInterface" (version 0.7.5)
+ * Symbol "SIDL.BaseInterface" (version 0.8.1)
  * 
  * Every interface in <code>SIDL</code> implicitly inherits
  * from <code>BaseInterface</code>, and it is implemented
@@ -70,18 +70,18 @@ struct SIDL_BaseInterface__epv {
     const char* name);
   void (*f__delete)(
     void* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.7.5 */
-  void (*f_addReference)(
+  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  void (*f_addRef)(
     void* self);
-  void (*f_deleteReference)(
+  void (*f_deleteRef)(
     void* self);
   SIDL_bool (*f_isSame)(
     void* self,
     struct SIDL_BaseInterface__object* iobj);
-  struct SIDL_BaseInterface__object* (*f_queryInterface)(
+  struct SIDL_BaseInterface__object* (*f_queryInt)(
     void* self,
     const char* name);
-  SIDL_bool (*f_isInstanceOf)(
+  SIDL_bool (*f_isType)(
     void* self,
     const char* name);
 };

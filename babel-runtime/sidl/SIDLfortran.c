@@ -1,12 +1,11 @@
 /*
  * File:        SIDLfortran.c
- * Copyright:   (c) 2001 The Regents of the University of California
  * Release:     $Name$
  * Revision:    @(#) $Revision$
  * Date:        $Date$
  * Description: Functions for FORTRAN interoperability
  *
- * Copyright (c) 2000-2001, The Regents of the University of Calfornia.
+ * Copyright (c) 2000-2002, The Regents of the University of Calfornia.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the Components Team <components@llnl.gov>
  * UCRL-CODE-2002-054
@@ -40,8 +39,8 @@
  * characters. 
  */
 char *
-SIDL_copy_f77_str(const char * restrict fstr,
-                  int                   flen)
+SIDL_copy_fortran_str(const char * restrict fstr,
+                      int                   flen)
 {
   char *result;
   while ((flen > 0) && (' ' == fstr[flen-1])) {
@@ -89,7 +88,7 @@ SIDL_copy_ior_str(char      **newfstr,
     if (iorLen < newLen) {
       (void)memset(newStr + iorLen, ' ', newLen - iorLen);
     }
-    /* put a nul character after the area that FORTRAN 77 will use */
+    /* put a null character after the area that FORTRAN will use */
     newStr[newLen] = '\0';
     *newfstr = newStr;
     *newflen = newLen;

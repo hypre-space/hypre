@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseException_Impl.c
- * Symbol:        SIDL.BaseException-v0.7.5
+ * Symbol:        SIDL.BaseException-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for SIDL.BaseException
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 /*
@@ -41,7 +41,7 @@
  */
 
 /*
- * Symbol "SIDL.BaseException" (version 0.7.5)
+ * Symbol "SIDL.BaseException" (version 0.8.1)
  * 
  * Every exception inherits from <code>BaseException</code>.  This class
  * provides basic functionality to get and set error messages and stack
@@ -139,13 +139,13 @@ impl_SIDL_BaseException__dtor(
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_SIDL_BaseException_getMessage"
+#define __FUNC__ "impl_SIDL_BaseException_getNote"
 
 char*
-impl_SIDL_BaseException_getMessage(
+impl_SIDL_BaseException_getNote(
   SIDL_BaseException self)
 {
-   /* DO-NOT-DELETE splicer.begin(SIDL.BaseException.getMessage) */
+   /* DO-NOT-DELETE splicer.begin(SIDL.BaseException.getNote) */
   struct SIDL_BaseException__data *data = 
     (self ? SIDL_BaseException__get_data(self) : NULL);
   char *result = 
@@ -154,7 +154,7 @@ impl_SIDL_BaseException_getMessage(
               data->d_message)
      : NULL);
   return result;
-   /* DO-NOT-DELETE splicer.end(SIDL.BaseException.getMessage) */
+   /* DO-NOT-DELETE splicer.end(SIDL.BaseException.getNote) */
 }
 
 /*
@@ -162,13 +162,13 @@ impl_SIDL_BaseException_getMessage(
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_SIDL_BaseException_setMessage"
+#define __FUNC__ "impl_SIDL_BaseException_setNote"
 
 void
-impl_SIDL_BaseException_setMessage(
+impl_SIDL_BaseException_setNote(
   SIDL_BaseException self, const char* message)
 {
-   /* DO-NOT-DELETE splicer.begin(SIDL.BaseException.setMessage) */
+   /* DO-NOT-DELETE splicer.begin(SIDL.BaseException.setNote) */
   struct SIDL_BaseException__data *data = 
     (self ? SIDL_BaseException__get_data(self) : NULL);
   if (data) {
@@ -180,7 +180,7 @@ impl_SIDL_BaseException_setMessage(
        ? strcpy((char *)malloc(strlen(message)+1), message)
        : NULL);
   }
-   /* DO-NOT-DELETE splicer.end(SIDL.BaseException.setMessage) */
+   /* DO-NOT-DELETE splicer.end(SIDL.BaseException.setNote) */
 }
 
 /*
@@ -226,13 +226,13 @@ impl_SIDL_BaseException_getTrace(
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_SIDL_BaseException_addToStackTrace"
+#define __FUNC__ "impl_SIDL_BaseException_addLine"
 
 void
-impl_SIDL_BaseException_addToStackTrace(
+impl_SIDL_BaseException_addLine(
   SIDL_BaseException self, const char* traceline)
 {
-  /* DO-NOT-DELETE splicer.begin(SIDL.BaseException.addToStackTrace) */
+  /* DO-NOT-DELETE splicer.begin(SIDL.BaseException.addLine) */
   struct SIDL_BaseException__data *data = 
     (self ? SIDL_BaseException__get_data(self) : NULL);
 
@@ -266,7 +266,7 @@ impl_SIDL_BaseException_addToStackTrace(
       }
     }
   }
-  /* DO-NOT-DELETE splicer.end(SIDL.BaseException.addToStackTrace) */
+  /* DO-NOT-DELETE splicer.end(SIDL.BaseException.addLine) */
 }
 
 /*
@@ -275,14 +275,14 @@ impl_SIDL_BaseException_addToStackTrace(
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_SIDL_BaseException_addToTrace"
+#define __FUNC__ "impl_SIDL_BaseException_add"
 
 void
-impl_SIDL_BaseException_addToTrace(
+impl_SIDL_BaseException_add(
   SIDL_BaseException self, const char* filename, int32_t lineno,
     const char* methodname)
 {
-  /* DO-NOT-DELETE splicer.begin(SIDL.BaseException.addToTrace) */
+  /* DO-NOT-DELETE splicer.begin(SIDL.BaseException.add) */
   /*
    *  The estimated length of the trace line is the sum of the lengths of
    *  the method name, file name, and hard-coded string contents plus a
@@ -322,8 +322,8 @@ impl_SIDL_BaseException_addToTrace(
 
   if (tmpline) {
     sprintf(tmpline, "in %s at %s:%d", tmpmn, tmpfn, lineno), 
-    SIDL_BaseException_addToStackTrace(self,tmpline); 
+    SIDL_BaseException_addLine(self,tmpline); 
     free((void*)tmpline);
   }
-  /* DO-NOT-DELETE splicer.end(SIDL.BaseException.addToTrace) */
+  /* DO-NOT-DELETE splicer.end(SIDL.BaseException.add) */
 }

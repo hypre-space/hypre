@@ -35,7 +35,7 @@ AUTOMAKE_OPTIONS = foreign no-dependencies no-installinfo	\
 
 configdir = $(exec_prefix)/include
 
-noinst_SCRIPTS  = config.guess config.sub install-sh ltconfig	\
+noinst_SCRIPTS  = config.guess config.sub install-sh	\
 		  ltmain.sh missing mkinstalldirs disabled
 EXTRA_DIST      = disabled
 
@@ -44,4 +44,4 @@ AUTOHEADER = @AUTOHEADER@ \
 	     && @PERL@ -p -i.bak \
 	          -e "s/^\#undef (.*)$$/\#ifndef \1\n\#undef \1\n\#endif/" \
 	          babel_config.h.in \
-             && rm -f babel_config.h.in.bak
+             && $(RM) -f babel_config.h.in.bak

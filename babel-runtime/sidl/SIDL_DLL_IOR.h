@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_DLL_IOR.h
- * Symbol:        SIDL.DLL-v0.7.5
+ * Symbol:        SIDL.DLL-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for SIDL.DLL
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 #ifndef included_SIDL_DLL_IOR_h
@@ -50,7 +50,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "SIDL.DLL" (version 0.7.5)
+ * Symbol "SIDL.DLL" (version 0.8.1)
  * 
  * The <code>DLL</code> class encapsulates access to a single
  * dynamically linked library.  DLLs are loaded at run-time using
@@ -73,6 +73,7 @@ extern void SIDL_DLL__init(
   struct SIDL_DLL__object* self);
 extern void SIDL_DLL__fini(
   struct SIDL_DLL__object* self);
+extern void SIDL_DLL__IOR_version(int32_t *major, int32_t *minor);
 
 /*
  * Forward references for external classes and interfaces.
@@ -80,6 +81,8 @@ extern void SIDL_DLL__fini(
 
 struct SIDL_BaseInterface__array;
 struct SIDL_BaseInterface__object;
+struct SIDL_ClassInfo__array;
+struct SIDL_ClassInfo__object;
 
 /*
  * Declare the method entry point vector.
@@ -96,26 +99,28 @@ struct SIDL_DLL__epv {
     struct SIDL_DLL__object* self);
   void (*f__dtor)(
     struct SIDL_DLL__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.7.5 */
-  void (*f_addReference)(
+  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  void (*f_addRef)(
     struct SIDL_DLL__object* self);
-  void (*f_deleteReference)(
+  void (*f_deleteRef)(
     struct SIDL_DLL__object* self);
   SIDL_bool (*f_isSame)(
     struct SIDL_DLL__object* self,
     struct SIDL_BaseInterface__object* iobj);
-  struct SIDL_BaseInterface__object* (*f_queryInterface)(
+  struct SIDL_BaseInterface__object* (*f_queryInt)(
     struct SIDL_DLL__object* self,
     const char* name);
-  SIDL_bool (*f_isInstanceOf)(
+  SIDL_bool (*f_isType)(
     struct SIDL_DLL__object* self,
     const char* name);
-  /* Methods introduced in SIDL.BaseClass-v0.7.5 */
-  /* Methods introduced in SIDL.DLL-v0.7.5 */
+  /* Methods introduced in SIDL.BaseClass-v0.8.1 */
+  struct SIDL_ClassInfo__object* (*f_getClassInfo)(
+    struct SIDL_DLL__object* self);
+  /* Methods introduced in SIDL.DLL-v0.8.1 */
   SIDL_bool (*f_loadLibrary)(
     struct SIDL_DLL__object* self,
     const char* uri);
-  char* (*f_getLibraryName)(
+  char* (*f_getName)(
     struct SIDL_DLL__object* self);
   void (*f_unloadLibrary)(
     struct SIDL_DLL__object* self);

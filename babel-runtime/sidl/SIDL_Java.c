@@ -226,7 +226,7 @@ void Java_gov_llnl_sidl_BaseClass__1finalize(
    */
   ptr = JLONG_TO_POINTER((*env)->GetLongField(env, obj, s_ior_field));
   if (ptr != NULL) {
-    SIDL_BaseClass_deleteReference((SIDL_BaseClass) ptr);
+    SIDL_BaseClass_deleteRef((SIDL_BaseClass) ptr);
   }
   (*env)->SetLongField(env, obj, s_ior_field, (jlong) NULL);
 }
@@ -1236,7 +1236,7 @@ static void SIDL_Boolean__destroy(
 {
   struct SIDL_bool__array* array = SIDL_Boolean__getptr(env, obj);
   if (array != NULL) {
-    SIDL_bool__array_deleteReference(array);
+    SIDL_bool__array_deleteRef(array);
   }
   SIDL_Boolean__setptr(env, obj, NULL);
 }
@@ -1437,7 +1437,7 @@ static void SIDL_Character__destroy(
 {
   struct SIDL_char__array* array = SIDL_Character__getptr(env, obj);
   if (array != NULL) {
-    SIDL_char__array_deleteReference(array);
+    SIDL_char__array_deleteRef(array);
   }
   SIDL_Character__setptr(env, obj, NULL);
 }
@@ -1640,7 +1640,7 @@ static void SIDL_DoubleComplex__destroy(
 {
   struct SIDL_dcomplex__array* array = SIDL_DoubleComplex__getptr(env, obj);
   if (array != NULL) {
-    SIDL_dcomplex__array_deleteReference(array);
+    SIDL_dcomplex__array_deleteRef(array);
   }
   SIDL_DoubleComplex__setptr(env, obj, NULL);
 }
@@ -1841,7 +1841,7 @@ static void SIDL_Double__destroy(
 {
   struct SIDL_double__array* array = SIDL_Double__getptr(env, obj);
   if (array != NULL) {
-    SIDL_double__array_deleteReference(array);
+    SIDL_double__array_deleteRef(array);
   }
   SIDL_Double__setptr(env, obj, NULL);
 }
@@ -2044,7 +2044,7 @@ static void SIDL_FloatComplex__destroy(
 {
   struct SIDL_fcomplex__array* array = SIDL_FloatComplex__getptr(env, obj);
   if (array != NULL) {
-    SIDL_fcomplex__array_deleteReference(array);
+    SIDL_fcomplex__array_deleteRef(array);
   }
   SIDL_FloatComplex__setptr(env, obj, NULL);
 }
@@ -2245,7 +2245,7 @@ static void SIDL_Float__destroy(
 {
   struct SIDL_float__array* array = SIDL_Float__getptr(env, obj);
   if (array != NULL) {
-    SIDL_float__array_deleteReference(array);
+    SIDL_float__array_deleteRef(array);
   }
   SIDL_Float__setptr(env, obj, NULL);
 }
@@ -2446,7 +2446,7 @@ static void SIDL_Integer__destroy(
 {
   struct SIDL_int__array* array = SIDL_Integer__getptr(env, obj);
   if (array != NULL) {
-    SIDL_int__array_deleteReference(array);
+    SIDL_int__array_deleteRef(array);
   }
   SIDL_Integer__setptr(env, obj, NULL);
 }
@@ -2647,7 +2647,7 @@ static void SIDL_Long__destroy(
 {
   struct SIDL_long__array* array = SIDL_Long__getptr(env, obj);
   if (array != NULL) {
-    SIDL_long__array_deleteReference(array);
+    SIDL_long__array_deleteRef(array);
   }
   SIDL_Long__setptr(env, obj, NULL);
 }
@@ -2848,7 +2848,7 @@ static void SIDL_Opaque__destroy(
 {
   struct SIDL_opaque__array* array = SIDL_Opaque__getptr(env, obj);
   if (array != NULL) {
-    SIDL_opaque__array_deleteReference(array);
+    SIDL_opaque__array_deleteRef(array);
   }
   SIDL_Opaque__setptr(env, obj, NULL);
 }
@@ -3054,7 +3054,7 @@ static void SIDL_String__destroy(
 {
   struct SIDL_string__array* array = SIDL_String__getptr(env, obj);
   if (array != NULL) {
-    SIDL_string__array_deleteReference(array);
+    SIDL_string__array_deleteRef(array);
   }
   SIDL_String__setptr(env, obj, NULL);
 }

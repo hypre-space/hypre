@@ -1,8 +1,8 @@
 /*
  * File:          BaseException_Module.c
- * Symbol:        SIDL.BaseException-v0.7.5
+ * Symbol:        SIDL.BaseException-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a SIDL extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 /*
@@ -47,7 +47,7 @@
 
 
 /**
- * Symbol "SIDL.BaseException" (version 0.7.5)
+ * Symbol "SIDL.BaseException" (version 0.8.1)
  * 
  * Every exception inherits from <code>BaseException</code>.  This class
  * provides basic functionality to get and set error messages and stack
@@ -72,13 +72,14 @@
 #endif
 #include "SIDL_BaseInterface_Module.h"
 #include "SIDL_BaseClass_Module.h"
+#include "SIDL_ClassInfo_Module.h"
 #include <stdlib.h>
 #include <string.h>
 
 static const struct SIDL_BaseException__external *_implEPV = NULL;
 
 static PyObject *
-pStub_BaseException_addReference(PyObject *_self, PyObject *_args,            \
+pStub_BaseException_addRef(PyObject *_self, PyObject *_args,                  \
   PyObject *_kwdict) {
   PyObject *_return_value = NULL;
   struct SIDL_BaseException__object *_self_ior =
@@ -92,7 +93,7 @@ pStub_BaseException_addReference(PyObject *_self, PyObject *_args,            \
       _args, _kwdict, 
       "", _kwlist);
     if (_okay) {
-      (*(_self_ior->d_epv->f_addReference))(_self_ior);
+      (*(_self_ior->d_epv->f_addRef))(_self_ior);
       _return_value = Py_None;
       Py_INCREF(_return_value);
     }
@@ -105,7 +106,7 @@ pStub_BaseException_addReference(PyObject *_self, PyObject *_args,            \
 }
 
 static PyObject *
-pStub_BaseException_deleteReference(PyObject *_self, PyObject *_args,         \
+pStub_BaseException_deleteRef(PyObject *_self, PyObject *_args,               \
   PyObject *_kwdict) {
   PyObject *_return_value = NULL;
   struct SIDL_BaseException__object *_self_ior =
@@ -119,7 +120,7 @@ pStub_BaseException_deleteReference(PyObject *_self, PyObject *_args,         \
       _args, _kwdict, 
       "", _kwlist);
     if (_okay) {
-      (*(_self_ior->d_epv->f_deleteReference))(_self_ior);
+      (*(_self_ior->d_epv->f_deleteRef))(_self_ior);
       _return_value = Py_None;
       Py_INCREF(_return_value);
     }
@@ -167,7 +168,7 @@ pStub_BaseException_isSame(PyObject *_self, PyObject *_args,                  \
 }
 
 static PyObject *
-pStub_BaseException_queryInterface(PyObject *_self, PyObject *_args,          \
+pStub_BaseException_queryInt(PyObject *_self, PyObject *_args,                \
   PyObject *_kwdict) {
   PyObject *_return_value = NULL;
   struct SIDL_BaseException__object *_self_ior =
@@ -185,7 +186,7 @@ pStub_BaseException_queryInterface(PyObject *_self, PyObject *_args,          \
       &name);
     if (_okay) {
       struct SIDL_BaseInterface__object* _return = NULL;
-      _return = (*(_self_ior->d_epv->f_queryInterface))(_self_ior, name);
+      _return = (*(_self_ior->d_epv->f_queryInt))(_self_ior, name);
       _return_value = Py_BuildValue(
         "O&",
         (void *)SIDL_BaseInterface__wrap, _return);
@@ -199,7 +200,7 @@ pStub_BaseException_queryInterface(PyObject *_self, PyObject *_args,          \
 }
 
 static PyObject *
-pStub_BaseException_isInstanceOf(PyObject *_self, PyObject *_args,            \
+pStub_BaseException_isType(PyObject *_self, PyObject *_args,                  \
   PyObject *_kwdict) {
   PyObject *_return_value = NULL;
   struct SIDL_BaseException__object *_self_ior =
@@ -218,7 +219,7 @@ pStub_BaseException_isInstanceOf(PyObject *_self, PyObject *_args,            \
     if (_okay) {
       SIDL_bool _return = (SIDL_bool) 0;
       int _proxy__return;
-      _return = (*(_self_ior->d_epv->f_isInstanceOf))(_self_ior, name);
+      _return = (*(_self_ior->d_epv->f_isType))(_self_ior, name);
       _proxy__return = _return;
       _return_value = Py_BuildValue(
         "i",
@@ -233,7 +234,36 @@ pStub_BaseException_isInstanceOf(PyObject *_self, PyObject *_args,            \
 }
 
 static PyObject *
-pStub_BaseException_getMessage(PyObject *_self, PyObject *_args,              \
+pStub_BaseException_getClassInfo(PyObject *_self, PyObject *_args,            \
+  PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct SIDL_BaseException__object *_self_ior =
+    ((struct SIDL_BaseException__object *)
+     SIDL_Cast(_self, "SIDL.BaseException"));
+  if (_self_ior) {
+    static char *_kwlist[] = {
+      NULL
+    };
+    const int _okay = PyArg_ParseTupleAndKeywords(
+      _args, _kwdict, 
+      "", _kwlist);
+    if (_okay) {
+      struct SIDL_ClassInfo__object* _return = NULL;
+      _return = (*(_self_ior->d_epv->f_getClassInfo))(_self_ior);
+      _return_value = Py_BuildValue(
+        "O&",
+        (void *)SIDL_ClassInfo__wrap, _return);
+    }
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError, 
+      "self pointer is not a SIDL.BaseException");
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_BaseException_getNote(PyObject *_self, PyObject *_args,                 \
   PyObject *_kwdict) {
   PyObject *_return_value = NULL;
   struct SIDL_BaseException__object *_self_ior =
@@ -248,7 +278,7 @@ pStub_BaseException_getMessage(PyObject *_self, PyObject *_args,              \
       "", _kwlist);
     if (_okay) {
       char* _return = NULL;
-      _return = (*(_self_ior->d_epv->f_getMessage))(_self_ior);
+      _return = (*(_self_ior->d_epv->f_getNote))(_self_ior);
       _return_value = Py_BuildValue(
         "z",
         _return);
@@ -263,7 +293,7 @@ pStub_BaseException_getMessage(PyObject *_self, PyObject *_args,              \
 }
 
 static PyObject *
-pStub_BaseException_setMessage(PyObject *_self, PyObject *_args,              \
+pStub_BaseException_setNote(PyObject *_self, PyObject *_args,                 \
   PyObject *_kwdict) {
   PyObject *_return_value = NULL;
   struct SIDL_BaseException__object *_self_ior =
@@ -280,7 +310,7 @@ pStub_BaseException_setMessage(PyObject *_self, PyObject *_args,              \
       "z", _kwlist,
       &message);
     if (_okay) {
-      (*(_self_ior->d_epv->f_setMessage))(_self_ior, message);
+      (*(_self_ior->d_epv->f_setNote))(_self_ior, message);
       _return_value = Py_None;
       Py_INCREF(_return_value);
     }
@@ -323,7 +353,7 @@ pStub_BaseException_getTrace(PyObject *_self, PyObject *_args,                \
 }
 
 static PyObject *
-pStub_BaseException_addToStackTrace(PyObject *_self, PyObject *_args,         \
+pStub_BaseException_addLine(PyObject *_self, PyObject *_args,                 \
   PyObject *_kwdict) {
   PyObject *_return_value = NULL;
   struct SIDL_BaseException__object *_self_ior =
@@ -340,7 +370,7 @@ pStub_BaseException_addToStackTrace(PyObject *_self, PyObject *_args,         \
       "z", _kwlist,
       &traceline);
     if (_okay) {
-      (*(_self_ior->d_epv->f_addToStackTrace))(_self_ior, traceline);
+      (*(_self_ior->d_epv->f_addLine))(_self_ior, traceline);
       _return_value = Py_None;
       Py_INCREF(_return_value);
     }
@@ -353,8 +383,7 @@ pStub_BaseException_addToStackTrace(PyObject *_self, PyObject *_args,         \
 }
 
 static PyObject *
-pStub_BaseException_addToTrace(PyObject *_self, PyObject *_args,              \
-  PyObject *_kwdict) {
+pStub_BaseException_add(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
   PyObject *_return_value = NULL;
   struct SIDL_BaseException__object *_self_ior =
     ((struct SIDL_BaseException__object *)
@@ -378,8 +407,7 @@ pStub_BaseException_addToTrace(PyObject *_self, PyObject *_args,              \
       &methodname);
     if (_okay) {
       lineno = _proxy_lineno;
-      (*(_self_ior->d_epv->f_addToTrace))(_self_ior, filename, lineno,        \
-        methodname);
+      (*(_self_ior->d_epv->f_add))(_self_ior, filename, lineno, methodname);
       _return_value = Py_None;
       Py_INCREF(_return_value);
     }
@@ -398,7 +426,7 @@ _createCast(PyObject *self, PyObject *args) {
     (void *)SIDL_BaseException__convert, &optarg);
   if (_okay) {
     if (optarg) {
-      (*(optarg->d_epv->f_addReference))(optarg);
+      (*(optarg->d_epv->f_addRef))(optarg);
     }
     else {
       optarg = (*(_implEPV->createObject))();
@@ -415,10 +443,33 @@ static PyMethodDef _BaseExceptionModuleMethods[] = {
 };
 
 static PyMethodDef _BaseExceptionObjectMethods[] = {
-  { "addReference", (PyCFunction)pStub_BaseException_addReference,
+  { "add", (PyCFunction)pStub_BaseException_add,
   (METH_VARARGS | METH_KEYWORDS),
 "\
-addReference()\n\
+add(in string filename,\n\
+    in int lineno,\n\
+    in string methodname)\n\
+RETURNS\n\
+    None\n\
+\n\
+\
+Formats and adds an entry to the stack trace based on the \n\
+file name, line number, and method name."
+   },
+  { "addLine", (PyCFunction)pStub_BaseException_addLine,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+addLine(in string traceline)\n\
+RETURNS\n\
+    None\n\
+\n\
+\
+Adds a stringified entry/line to the stack trace."
+   },
+  { "addRef", (PyCFunction)pStub_BaseException_addRef,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+addRef()\n\
 RETURNS\n\
     None\n\
 \n\
@@ -436,33 +487,10 @@ independent type that can refer to an interface or a\n\
 class.\n\
 </p>"
    },
-  { "addToStackTrace", (PyCFunction)pStub_BaseException_addToStackTrace,
+  { "deleteRef", (PyCFunction)pStub_BaseException_deleteRef,
   (METH_VARARGS | METH_KEYWORDS),
 "\
-addToStackTrace(in string traceline)\n\
-RETURNS\n\
-    None\n\
-\n\
-\
-Adds a stringified entry/line to the stack trace."
-   },
-  { "addToTrace", (PyCFunction)pStub_BaseException_addToTrace,
-  (METH_VARARGS | METH_KEYWORDS),
-"\
-addToTrace(in string filename,\n\
-           in int lineno,\n\
-           in string methodname)\n\
-RETURNS\n\
-    None\n\
-\n\
-\
-Formats and adds an entry to the stack trace based on the \n\
-file name, line number, and method name."
-   },
-  { "deleteReference", (PyCFunction)pStub_BaseException_deleteReference,
-  (METH_VARARGS | METH_KEYWORDS),
-"\
-deleteReference()\n\
+deleteRef()\n\
 RETURNS\n\
     None\n\
 \n\
@@ -473,10 +501,20 @@ Objects in <code>SIDL</code> have an intrinsic reference count.\n\
 Clients should call this method whenever they remove a\n\
 reference to an object or interface."
    },
-  { "getMessage", (PyCFunction)pStub_BaseException_getMessage,
+  { "getClassInfo", (PyCFunction)pStub_BaseException_getClassInfo,
   (METH_VARARGS | METH_KEYWORDS),
 "\
-getMessage()\n\
+getClassInfo()\n\
+RETURNS\n\
+   (SIDL.ClassInfo _return)\n\
+\n\
+\
+Return the meta-data about the class implementing this interface."
+   },
+  { "getNote", (PyCFunction)pStub_BaseException_getNote,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+getNote()\n\
 RETURNS\n\
    (string _return)\n\
 \n\
@@ -494,19 +532,6 @@ RETURNS\n\
 Returns formatted string containing the concatenation of all \n\
 tracelines."
    },
-  { "isInstanceOf", (PyCFunction)pStub_BaseException_isInstanceOf,
-  (METH_VARARGS | METH_KEYWORDS),
-"\
-isInstanceOf(in string name)\n\
-RETURNS\n\
-   (bool _return)\n\
-\n\
-\
-Return whether this object is an instance of the specified type.\n\
-The string name must be the <code>SIDL</code> type name.  This\n\
-routine will return <code>true</code> if and only if a cast to\n\
-the string type name would succeed."
-   },
   { "isSame", (PyCFunction)pStub_BaseException_isSame,
   (METH_VARARGS | METH_KEYWORDS),
 "\
@@ -518,10 +543,23 @@ RETURNS\n\
 Return true if and only if <code>obj</code> refers to the same\n\
 object as this object."
    },
-  { "queryInterface", (PyCFunction)pStub_BaseException_queryInterface,
+  { "isType", (PyCFunction)pStub_BaseException_isType,
   (METH_VARARGS | METH_KEYWORDS),
 "\
-queryInterface(in string name)\n\
+isType(in string name)\n\
+RETURNS\n\
+   (bool _return)\n\
+\n\
+\
+Return whether this object is an instance of the specified type.\n\
+The string name must be the <code>SIDL</code> type name.  This\n\
+routine will return <code>true</code> if and only if a cast to\n\
+the string type name would succeed."
+   },
+  { "queryInt", (PyCFunction)pStub_BaseException_queryInt,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+queryInt(in string name)\n\
 RETURNS\n\
    (SIDL.BaseInterface _return)\n\
 \n\
@@ -530,14 +568,14 @@ Check whether the object can support the specified interface or\n\
 class.  If the <code>SIDL</code> type name in <code>name</code>\n\
 is supported, then a reference to that object is returned with the\n\
 reference count incremented.  The callee will be responsible for\n\
-calling <code>deleteReference</code> on the returned object.  If\n\
+calling <code>deleteRef</code> on the returned object.  If\n\
 the specified type is not supported, then a null reference is\n\
 returned."
    },
-  { "setMessage", (PyCFunction)pStub_BaseException_setMessage,
+  { "setNote", (PyCFunction)pStub_BaseException_setNote,
   (METH_VARARGS | METH_KEYWORDS),
 "\
-setMessage(in string message)\n\
+setNote(in string message)\n\
 RETURNS\n\
     None\n\
 \n\
@@ -562,7 +600,7 @@ SIDL_BaseException__weakRef SIDL_BaseException__weakRef_PROTO {
 SIDL_BaseException_deref_RETURN
 SIDL_BaseException_deref SIDL_BaseException_deref_PROTO {
   if (sidlobj) {
-    (*(sidlobj->d_epv->f_deleteReference))(sidlobj);
+    (*(sidlobj->d_epv->f_deleteRef))(sidlobj);
   }
 }
 
@@ -575,7 +613,7 @@ SIDL_BaseException__newRef SIDL_BaseException__newRef_PROTO {
 SIDL_BaseException__addRef_RETURN
 SIDL_BaseException__addRef SIDL_BaseException__addRef_PROTO {
   if (sidlobj) {
-    (*(sidlobj->d_epv->f_addReference))(sidlobj);
+    (*(sidlobj->d_epv->f_addRef))(sidlobj);
   }
 }
 
@@ -583,7 +621,7 @@ SIDL_BaseException__convert_RETURN
 SIDL_BaseException__convert SIDL_BaseException__convert_PROTO {
   *sidlobj = SIDL_Cast(obj, "SIDL.BaseException");
   if (*sidlobj) {
-    (*((*sidlobj)->d_epv->f_addReference))(*sidlobj);
+    (*((*sidlobj)->d_epv->f_addRef))(*sidlobj);
   }
   else if (obj != Py_None) {
     PyErr_SetString(PyExc_TypeError, 
@@ -626,7 +664,7 @@ SIDL_BaseException__convert_python_array                                      \
         result = SIDL_array__convert_python
           (pya, dimen, *sidlarray, _convertPython);
         if (*sidlarray && !result) {
-          SIDL_interface__array_deleteReference(
+          SIDL_interface__array_deleteRef(
             (struct  SIDL_interface__array *)*sidlarray);
           *sidlarray = NULL;
         }
@@ -685,7 +723,7 @@ SIDL_BaseException__destroy_sidl_array_RETURN
 SIDL_BaseException__destroy_sidl_array                                        \
   SIDL_BaseException__destroy_sidl_array_PROTO {
   if (sidlarray) {
-    SIDL_interface__array_deleteReference(
+    SIDL_interface__array_deleteRef(
       (struct SIDL_interface__array *)sidlarray);
   }
 }
@@ -745,4 +783,5 @@ traces."
   }
   SIDL_BaseInterface__import();
   SIDL_BaseClass__import();
+  SIDL_ClassInfo__import();
 }

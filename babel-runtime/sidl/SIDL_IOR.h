@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_IOR.h
- * Symbol:        SIDL-v0.7.5
+ * Symbol:        SIDL-v0.8.1
  * Symbol Type:   package
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for SIDL
@@ -32,14 +32,14 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 #ifndef included_SIDL_IOR_h
 #define included_SIDL_IOR_h
 
 /*
- * Symbol "SIDL" (version 0.7.5)
+ * Symbol "SIDL" (version 0.8.1)
  * 
  * The <code>SIDL</code> package contains the fundamental type and interface
  * definitions for the <code>SIDL</code> interface definition language.  It
@@ -57,6 +57,12 @@
 #endif
 #ifndef included_SIDL_BaseInterface_IOR_h
 #include "SIDL_BaseInterface_IOR.h"
+#endif
+#ifndef included_SIDL_ClassInfo_IOR_h
+#include "SIDL_ClassInfo_IOR.h"
+#endif
+#ifndef included_SIDL_ClassInfoI_IOR_h
+#include "SIDL_ClassInfoI_IOR.h"
 #endif
 #ifndef included_SIDL_DLL_IOR_h
 #include "SIDL_DLL_IOR.h"

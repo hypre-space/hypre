@@ -48,7 +48,7 @@ for i in old_argv:
       
 setup(name="babel",
       author="Tom Epperly",
-      version="0.7.5",
+      version="0.8.0",
       description="Build Python support extension modules for SIDL",
       author_email="components@llnl.gov",
       url="http://www.llnl.gov/CASC/components/",

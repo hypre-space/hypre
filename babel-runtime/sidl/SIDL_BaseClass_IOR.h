@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseClass_IOR.h
- * Symbol:        SIDL.BaseClass-v0.7.5
+ * Symbol:        SIDL.BaseClass-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for SIDL.BaseClass
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 #ifndef included_SIDL_BaseClass_IOR_h
@@ -50,7 +50,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "SIDL.BaseClass" (version 0.7.5)
+ * Symbol "SIDL.BaseClass" (version 0.8.1)
  * 
  * Every class implicitly inherits from <code>BaseClass</code>.  This
  * class implements the methods in <code>BaseInterface</code>.
@@ -69,6 +69,14 @@ extern void SIDL_BaseClass__init(
   struct SIDL_BaseClass__object* self);
 extern void SIDL_BaseClass__fini(
   struct SIDL_BaseClass__object* self);
+extern void SIDL_BaseClass__IOR_version(int32_t *major, int32_t *minor);
+
+/*
+ * Forward references for external classes and interfaces.
+ */
+
+struct SIDL_ClassInfo__array;
+struct SIDL_ClassInfo__object;
 
 /*
  * Declare the method entry point vector.
@@ -85,21 +93,23 @@ struct SIDL_BaseClass__epv {
     struct SIDL_BaseClass__object* self);
   void (*f__dtor)(
     struct SIDL_BaseClass__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.7.5 */
-  void (*f_addReference)(
+  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  void (*f_addRef)(
     struct SIDL_BaseClass__object* self);
-  void (*f_deleteReference)(
+  void (*f_deleteRef)(
     struct SIDL_BaseClass__object* self);
   SIDL_bool (*f_isSame)(
     struct SIDL_BaseClass__object* self,
     struct SIDL_BaseInterface__object* iobj);
-  struct SIDL_BaseInterface__object* (*f_queryInterface)(
+  struct SIDL_BaseInterface__object* (*f_queryInt)(
     struct SIDL_BaseClass__object* self,
     const char* name);
-  SIDL_bool (*f_isInstanceOf)(
+  SIDL_bool (*f_isType)(
     struct SIDL_BaseClass__object* self,
     const char* name);
-  /* Methods introduced in SIDL.BaseClass-v0.7.5 */
+  /* Methods introduced in SIDL.BaseClass-v0.8.1 */
+  struct SIDL_ClassInfo__object* (*f_getClassInfo)(
+    struct SIDL_BaseClass__object* self);
 };
 
 /*

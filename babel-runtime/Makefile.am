@@ -6,7 +6,7 @@
 ## Modified:    $Date$
 ## Description: automake makefile to build the runtime library
 ##
-## Copyright (c) 2000-2001, The Regents of the University of Calfornia.
+## Copyright (c) 2000-2002, The Regents of the University of Calfornia.
 ## Produced at the Lawrence Livermore National Laboratory.
 ## Written by the Components Team <components@llnl.gov>
 ## UCRL-CODE-2002-054
@@ -106,11 +106,14 @@ python/babel-stamp: $(PYTHONISHFILES)
 	  done;								\
 	fi
 	@if test -d python; then					\
+	  abspath=`cd $(srcdir) && pwd`;				\
 	  cd python;							\
 	  echo $(SHELL) ../../bin/babel --suppress-timestamp -!		\
-	    --generate-sidl-stdlib -cpython ../$(srcdir)/sidl/sidl.sidl;\
+	    --generate-sidl-stdlib -cpython				\
+	    $$abspath/sidl/sidl.sidl;					\
 	  $(SHELL) ../../bin/babel --suppress-timestamp	 -!		\
-	    --generate-sidl-stdlib -cpython ../$(srcdir)/sidl/sidl.sidl;\
+	    --generate-sidl-stdlib -cpython  				\
+	    $$abspath/sidl/sidl.sidl;					\
 	  $(PYTHON) sidlsetup.py --library-dirs=../sidl/.libs		\
 	   --include-dirs=../sidl --include-dirs=../config  build_ext   \
 	   --inplace;							\
@@ -148,41 +151,41 @@ python/babel-stamp2:
 clean-local-python1:
 	@if test -d python; then					\
           cd python;                                                    \
-          echo rm -f sedscript Makefile Makefile.pre Makefile.pre.in    \
+          echo $(RM) -f sedscript Makefile Makefile.pre Makefile.pre.in    \
             Setup config.c *setup.installed;                            \
-          rm -f sedscript Makefile Makefile.pre Makefile.pre.in Setup   \
+          $(RM) -f sedscript Makefile Makefile.pre Makefile.pre.in Setup   \
              config.c *setup.installed;         			\
-          echo rm -f babel-stamp *.so *.dll *.a *.o *~;                 \
-	  rm -f babel-stamp *.so *.dll *.a *.o *~;			\
+          echo $(RM) -f babel-stamp *.so *.dll *.a *.o *~;                 \
+	  $(RM) -f babel-stamp *.so *.dll *.a *.o *~;			\
 	  if test -d SIDL; then						\
 	    cd SIDL;							\
-	    echo rm -f config.c *.so *.dll *.a *.o *~ *.c *.h __init__.*;\
-	    rm -f config.c *.so *.dll *.a *.o *~ *.c *.h __init__.*;	\
+	    echo $(RM) -f config.c *.so *.dll *.a *.o *~ *.c *.h __init__.*;\
+	    $(RM) -f config.c *.so *.dll *.a *.o *~ *.c *.h __init__.*;	\
 	  fi;								\
 	fi
 	@-if test "X$(srcdir)" != "X."; then				\
-	  echo rm -rf python;						\
-	  rm -rf python;						\
+	  echo $(RM) -rf python;						\
+	  $(RM) -rf python;						\
 	fi
 
 clean-local-python2:
 	@if test -d python; then					\
           cd python;                                                    \
-          echo rm -f sedscript Makefile Makefile.pre Makefile.pre.in    \
+          echo $(RM) -f sedscript Makefile Makefile.pre Makefile.pre.in    \
             Setup config.c *setup.installed;                            \
-          rm -f sedscript Makefile Makefile.pre Makefile.pre.in Setup   \
+          $(RM) -f sedscript Makefile Makefile.pre Makefile.pre.in Setup   \
              config.c *setup.installed;         			\
-          echo rm -f babel-stamp *.so *.dll *.a *.o *~;                 \
-	  rm -f babel-stamp *.so *.dll *.a *.o *~;			\
+          echo $(RM) -f babel-stamp *.so *.dll *.a *.o *~;                 \
+	  $(RM) -f babel-stamp *.so *.dll *.a *.o *~;			\
 	  if test -d SIDL; then						\
 	    cd SIDL;							\
-	    echo rm -f config.c *.so *.dll *.a *.o *~  ;		\
-	    rm -f config.c *.so *.dll *.a *.o *~;			\
+	    echo $(RM) -f config.c *.so *.dll *.a *.o *~  ;		\
+	    $(RM) -f config.c *.so *.dll *.a *.o *~;			\
 	  fi;								\
 	fi
 	@-if test "X$(srcdir)" != "X."; then				\
-	  echo rm -rf python;						\
-	  rm -rf python;						\
+	  echo $(RM) -rf python;						\
+	  $(RM) -rf python;						\
 	fi
 
 dist-hook-python: all-local-python
@@ -191,16 +194,16 @@ dist-hook-python: all-local-python
 	  test -f $$d							\
 	  || mkdir -p $$d						\
 	  || exit 1;							\
-	  echo cp -p $(srcdir)/$$file $(distdir)/$$file;		\
-	  cp -p $(srcdir)/$$file $(distdir)/$$file;			\
+	  echo cp -p $(srcdir)/$$file $(DESTDIR)$(distdir)/$$file;	\
+	  cp -p $(srcdir)/$$file $(DESTDIR)$(distdir)/$$file;		\
 	done
 	@for file in $(RUNTIME_ONLY_FILES); do				\
 	  d=`dirname $(distdir)/$$file`;				\
 	  test -f $$d							\
 	  || mkdir -p $$d						\
 	  || exit 1;							\
-	  echo cp -p $$file $(distdir)/$$file;		\
-	  cp -p $$file $(distdir)/$$file;			\
+	  echo cp -p $$file $(DESTDIR)$(distdir)/$$file;		\
+	  cp -p $$file $(DESTDIR)$(distdir)/$$file;			\
 	done
 
 install-data-am-python:
@@ -209,11 +212,13 @@ install-data-am-python:
 	cd python ;							\
 	$(PYTHON) sidlsetup.py --library-dirs=../sidl/.libs 		\
 	   --include-dirs=../sidl --include-dirs=../config install 	\
-	   --prefix=$(prefix) --exec-prefix=$(exec_prefix)		\
+	   --prefix=$(DESTDIR)$(prefix) 				\
+	   --exec-prefix=$(DESTDIR)$(exec_prefix)			\
 	   --record=sidlsetup.installed;				\
 	$(PYTHON) setup.py --library-dirs=../sidl/.libs 		\
 	   --include-dirs=../sidl  --include-dirs=../config install  	\
-	   --prefix=$(prefix) --exec-prefix=$(exec_prefix)		\
+	   --prefix=$(DESTDIR)$(prefix) 				\
+	   --exec-prefix=$(DESTDIR)$(exec_prefix)			\
 	   --record=setup.installed
 
 uninstall-data-am-python:

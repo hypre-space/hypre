@@ -29,8 +29,6 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-version SIDL 0.7.5;
-
 /**
  * The <code>SIDL</code> package contains the fundamental type and interface
  * definitions for the <code>SIDL</code> interface definition language.  It
@@ -39,7 +37,7 @@ version SIDL 0.7.5;
  * and every class implicitly inherits from <code>SIDL.BaseClass</code>.
  * 
  */
-package SIDL {
+package SIDL version 0.8.1 {
 
   /**
    * Every interface in <code>SIDL</code> implicitly inherits
@@ -62,7 +60,7 @@ package SIDL {
      * class.
      * </p>
      */
-    void addReference();
+    void addRef();
 
     /**
      * Decrease by one the intrinsic reference count in the underlying
@@ -71,7 +69,7 @@ package SIDL {
      * Clients should call this method whenever they remove a
      * reference to an object or interface.
      */
-    void deleteReference();
+    void deleteRef();
 
     /**
      * Return true if and only if <code>obj</code> refers to the same
@@ -84,11 +82,11 @@ package SIDL {
      * class.  If the <code>SIDL</code> type name in <code>name</code>
      * is supported, then a reference to that object is returned with the
      * reference count incremented.  The callee will be responsible for
-     * calling <code>deleteReference</code> on the returned object.  If
+     * calling <code>deleteRef</code> on the returned object.  If
      * the specified type is not supported, then a null reference is
      * returned.
      */
-    BaseInterface queryInterface(in string name);
+    BaseInterface queryInt(in string name);
 
     /**
      * Return whether this object is an instance of the specified type.
@@ -96,14 +94,68 @@ package SIDL {
      * routine will return <code>true</code> if and only if a cast to
      * the string type name would succeed.
      */
-   bool isInstanceOf(in string name);
+    bool isType(in string name);
   }
 
   /**
    * Every class implicitly inherits from <code>BaseClass</code>.  This
    * class implements the methods in <code>BaseInterface</code>.
    */
-  class BaseClass implements-all BaseInterface {
+  class BaseClass implements BaseInterface {
+    /**
+     * <p>
+     * Add one to the intrinsic reference count in the underlying object.
+     * Object in <code>SIDL</code> have an intrinsic reference count.
+     * Objects continue to exist as long as the reference count is
+     * positive. Clients should call this method whenever they
+     * create another ongoing reference to an object or interface.
+     * </p>
+     * <p>
+     * This does not have a return value because there is no language
+     * independent type that can refer to an interface or a
+     * class.
+     * </p>
+     */
+    final void addRef();
+
+    /**
+     * Decrease by one the intrinsic reference count in the underlying
+     * object, and delete the object if the reference is non-positive.
+     * Objects in <code>SIDL</code> have an intrinsic reference count.
+     * Clients should call this method whenever they remove a
+     * reference to an object or interface.
+     */
+    final void deleteRef();
+
+    /**
+     * Return true if and only if <code>obj</code> refers to the same
+     * object as this object.
+     */
+    final bool isSame(in BaseInterface iobj);
+
+    /**
+     * Check whether the object can support the specified interface or
+     * class.  If the <code>SIDL</code> type name in <code>name</code>
+     * is supported, then a reference to that object is returned with the
+     * reference count incremented.  The callee will be responsible for
+     * calling <code>deleteRef</code> on the returned object.  If
+     * the specified type is not supported, then a null reference is
+     * returned.
+     */
+    BaseInterface queryInt(in string name);
+
+    /**
+     * Return whether this object is an instance of the specified type.
+     * The string name must be the <code>SIDL</code> type name.  This
+     * routine will return <code>true</code> if and only if a cast to
+     * the string type name would succeed.
+     */
+    bool isType(in string name);
+
+    /**
+     * Return the meta-data about the class implementing this interface.
+     */
+    final ClassInfo getClassInfo();
   }
 
   /**
@@ -116,12 +168,12 @@ package SIDL {
     /**
      * Return the message associated with the exception.
      */
-    string getMessage();
+    string getNote();
 
     /**
      * Set the message associated with the exception.
      */
-    void setMessage(in string message);
+    void setNote(in string message);
 
     /**
      * Returns formatted string containing the concatenation of all 
@@ -132,13 +184,13 @@ package SIDL {
     /**
      * Adds a stringified entry/line to the stack trace.
      */
-    void addToStackTrace(in string traceline);
+    void add[Line](in string traceline);
 
     /**
      * Formats and adds an entry to the stack trace based on the 
      * file name, line number, and method name.
      */
-    void addToTrace(in string filename, in int lineno, in string methodname);
+    void add(in string filename, in int lineno, in string methodname);
   }
 
   /**
@@ -174,7 +226,7 @@ package SIDL {
      * library in <code>loadLibrary</code> except that all file names
      * contain the "file:" protocol.
      */
-    string getLibraryName();
+    string getName();
 
     /**
      * Unload the dynamic link library.  The library may no longer
@@ -198,7 +250,7 @@ package SIDL {
   }
 
   /**
-   * Class <code>Loader</code> manages dynamic loading and symbol name
+   * Class <code>Loader</code> manages dyanamic loading and symbol name
    * resolution for the SIDL runtime system.  The <code>Loader</code> class
    * manages a library search path and keeps a record of all libraries
    * loaded through this interface, including the initial "global" symbols
@@ -266,5 +318,39 @@ package SIDL {
      * object is returned if the symbol could not be resolved.
      */
     static BaseClass createClass(in string sidl_name);
+  }
+
+  /**
+   * This provides an interface to the meta-data available on the
+   * class.
+   */
+  interface ClassInfo {
+     /**
+      * Return the name of the class.
+      */
+     string getName();
+
+    /**
+     * Get the version of the intermediate object representation.
+     * This will be in the form of major_version.minor_version.
+     */
+     string getIORVersion();
+  }
+
+  /**
+   * An implementation of the <code>ClassInfo</code> interface. This provides
+   * methods to set all the attributes that are read-only in the
+   * <code>ClassInfo</code> interface.
+   */
+  class ClassInfoI implements-all ClassInfo {
+     /**
+      * Set the name of the class.
+      */
+     final void setName(in string name);
+
+     /**
+      * Set the IOR major and minor version numbers.
+      */
+     final void setIORVersion(in int major, in int minor);
   }
 }

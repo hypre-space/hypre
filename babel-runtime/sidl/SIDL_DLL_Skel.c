@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_DLL_Skel.c
- * Symbol:        SIDL.DLL-v0.7.5
+ * Symbol:        SIDL.DLL-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side glue code for SIDL.DLL
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 #include "SIDL_DLL_IOR.h"
@@ -53,7 +53,7 @@ impl_SIDL_DLL_loadLibrary(
   const char*);
 
 extern char*
-impl_SIDL_DLL_getLibraryName(
+impl_SIDL_DLL_getName(
   SIDL_DLL);
 
 extern void
@@ -76,7 +76,7 @@ SIDL_DLL__set_epv(struct SIDL_DLL__epv *epv)
   epv->f__ctor = impl_SIDL_DLL__ctor;
   epv->f__dtor = impl_SIDL_DLL__dtor;
   epv->f_loadLibrary = impl_SIDL_DLL_loadLibrary;
-  epv->f_getLibraryName = impl_SIDL_DLL_getLibraryName;
+  epv->f_getName = impl_SIDL_DLL_getName;
   epv->f_unloadLibrary = impl_SIDL_DLL_unloadLibrary;
   epv->f_lookupSymbol = impl_SIDL_DLL_lookupSymbol;
   epv->f_createClass = impl_SIDL_DLL_createClass;

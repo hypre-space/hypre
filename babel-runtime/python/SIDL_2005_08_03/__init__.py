@@ -1,8 +1,8 @@
 #
 # File:          __init__.py
-# Symbol:        SIDL-v0.7.5
+# Symbol:        SIDL-v0.8.1
 # Symbol Type:   package
-# Babel Version: 0.7.5
+# Babel Version: 0.8.0
 # Release:       $Name$
 # Revision:      @(#) $Id$
 # Description:   package initialization code
@@ -32,7 +32,7 @@
 # 
 # WARNING: Automatically generated; changes will be lost
 # 
-# babel-version = 0.7.5
+# babel-version = 0.8.0
 #
 
 
@@ -48,5 +48,7 @@ all = [
    "BaseException",
    "BaseInterface",
    "BaseClass",
+   "ClassInfo",
    "DLL",
+   "ClassInfoI",
    "Loader" ]

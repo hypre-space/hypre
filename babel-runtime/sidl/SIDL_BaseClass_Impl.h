@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseClass_Impl.h
- * Symbol:        SIDL.BaseClass-v0.7.5
+ * Symbol:        SIDL.BaseClass-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for SIDL.BaseClass
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 #ifndef included_SIDL_BaseClass_Impl_h
@@ -47,9 +47,12 @@
 #ifndef included_SIDL_BaseClass_h
 #include "SIDL_BaseClass.h"
 #endif
+#ifndef included_SIDL_ClassInfo_h
+#include "SIDL_ClassInfo.h"
+#endif
 
 /* DO-NOT-DELETE splicer.begin(SIDL.BaseClass._includes) */
-/* Put additional include files here... */
+struct SIDL_ClassInfo__object;
 /* DO-NOT-DELETE splicer.end(SIDL.BaseClass._includes) */
 
 /*
@@ -58,7 +61,10 @@
 
 struct SIDL_BaseClass__data {
   /* DO-NOT-DELETE splicer.begin(SIDL.BaseClass._data) */
-  int d_refcount;
+  int                            d_refcount;
+  int32_t                        d_IOR_major_version;
+  int32_t                        d_IOR_minor_version;
+  struct SIDL_ClassInfo__object *d_classinfo;
   /* DO-NOT-DELETE splicer.end(SIDL.BaseClass._data) */
 };
 
@@ -96,11 +102,11 @@ impl_SIDL_BaseClass__dtor(
  */
 
 extern void
-impl_SIDL_BaseClass_addReference(
+impl_SIDL_BaseClass_addRef(
   SIDL_BaseClass);
 
 extern void
-impl_SIDL_BaseClass_deleteReference(
+impl_SIDL_BaseClass_deleteRef(
   SIDL_BaseClass);
 
 extern SIDL_bool
@@ -109,14 +115,18 @@ impl_SIDL_BaseClass_isSame(
   SIDL_BaseInterface);
 
 extern SIDL_BaseInterface
-impl_SIDL_BaseClass_queryInterface(
+impl_SIDL_BaseClass_queryInt(
   SIDL_BaseClass,
   const char*);
 
 extern SIDL_bool
-impl_SIDL_BaseClass_isInstanceOf(
+impl_SIDL_BaseClass_isType(
   SIDL_BaseClass,
   const char*);
+
+extern SIDL_ClassInfo
+impl_SIDL_BaseClass_getClassInfo(
+  SIDL_BaseClass);
 
 #ifdef __cplusplus
 }

@@ -87,8 +87,8 @@
   if (EX_VAR == NULL) {                                                    \
     EX_VAR = (SIDL_BaseException) EX_CLS##__create();                      \
     if (EX_VAR != NULL) {                                                  \
-      SIDL_BaseException_setMessage(EX_VAR, MSG);                          \
-      SIDL_BaseException_addToTrace(EX_VAR, __FILE__, __LINE__, __FUNC__); \
+      SIDL_BaseException_setNote(EX_VAR, MSG);                          \
+      SIDL_BaseException_add(EX_VAR, __FILE__, __LINE__, __FUNC__); \
     }                                                                      \
   }                                                                        \
   goto EXIT;                                                               \
@@ -119,7 +119,7 @@
  */
 #define SIDL_CHECK(EX_VAR) {                                             \
   if (EX_VAR != NULL) {                                                  \
-    SIDL_BaseException_addToTrace(EX_VAR, __FILE__, __LINE__, __FUNC__); \
+    SIDL_BaseException_add(EX_VAR, __FILE__, __LINE__, __FUNC__); \
     goto EXIT;                                                           \
   }                                                                      \
 } 
@@ -142,7 +142,7 @@
  */
 #define SIDL_CLEAR(EX_VAR) {                    \
   if (EX_VAR != NULL) {                         \
-    SIDL_BaseException_deleteReference(EX_VAR); \
+    SIDL_BaseException_deleteRef(EX_VAR);       \
     EX_VAR = NULL;                              \
   }                                             \
 }
@@ -174,6 +174,6 @@
  * }
  */
 #define SIDL_CATCH(EX_VAR,SIDL_NAME) \
-  ((EX_VAR != NULL) && SIDL_BaseException_isInstanceOf(EX_VAR, SIDL_NAME))
+  ((EX_VAR != NULL) && SIDL_BaseException_isType(EX_VAR, SIDL_NAME))
 
 #endif

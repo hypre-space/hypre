@@ -1,8 +1,8 @@
 /*
  * File:          Loader_Module.c
- * Symbol:        SIDL.Loader-v0.7.5
+ * Symbol:        SIDL.Loader-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a SIDL extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 /*
@@ -47,7 +47,7 @@
 
 
 /**
- * Symbol "SIDL.Loader" (version 0.7.5)
+ * Symbol "SIDL.Loader" (version 0.8.1)
  * 
  * Class <code>Loader</code> manages dyanamic loading and symbol name
  * resolution for the SIDL runtime system.  The <code>Loader</code> class
@@ -76,6 +76,7 @@
 #endif
 #include "SIDL_BaseInterface_Module.h"
 #include "SIDL_BaseClass_Module.h"
+#include "SIDL_ClassInfo_Module.h"
 #include "SIDL_DLL_Module.h"
 #include <stdlib.h>
 #include <string.h>
@@ -85,8 +86,7 @@ static struct SIDL_Loader__sepv *_sepv = NULL;
 static const struct SIDL_Loader__external *_implEPV = NULL;
 
 static PyObject *
-pStub_Loader_addReference(PyObject *_self, PyObject *_args,                   \
-  PyObject *_kwdict) {
+pStub_Loader_addRef(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
   PyObject *_return_value = NULL;
   struct SIDL_Loader__object *_self_ior =
     ((struct SIDL_Loader__object *)
@@ -99,7 +99,7 @@ pStub_Loader_addReference(PyObject *_self, PyObject *_args,                   \
       _args, _kwdict, 
       "", _kwlist);
     if (_okay) {
-      (*(_self_ior->d_epv->f_addReference))(_self_ior);
+      (*(_self_ior->d_epv->f_addRef))(_self_ior);
       _return_value = Py_None;
       Py_INCREF(_return_value);
     }
@@ -112,8 +112,7 @@ pStub_Loader_addReference(PyObject *_self, PyObject *_args,                   \
 }
 
 static PyObject *
-pStub_Loader_deleteReference(PyObject *_self, PyObject *_args,                \
-  PyObject *_kwdict) {
+pStub_Loader_deleteRef(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
   PyObject *_return_value = NULL;
   struct SIDL_Loader__object *_self_ior =
     ((struct SIDL_Loader__object *)
@@ -126,7 +125,7 @@ pStub_Loader_deleteReference(PyObject *_self, PyObject *_args,                \
       _args, _kwdict, 
       "", _kwlist);
     if (_okay) {
-      (*(_self_ior->d_epv->f_deleteReference))(_self_ior);
+      (*(_self_ior->d_epv->f_deleteRef))(_self_ior);
       _return_value = Py_None;
       Py_INCREF(_return_value);
     }
@@ -173,8 +172,7 @@ pStub_Loader_isSame(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
 }
 
 static PyObject *
-pStub_Loader_queryInterface(PyObject *_self, PyObject *_args,                 \
-  PyObject *_kwdict) {
+pStub_Loader_queryInt(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
   PyObject *_return_value = NULL;
   struct SIDL_Loader__object *_self_ior =
     ((struct SIDL_Loader__object *)
@@ -191,7 +189,7 @@ pStub_Loader_queryInterface(PyObject *_self, PyObject *_args,                 \
       &name);
     if (_okay) {
       struct SIDL_BaseInterface__object* _return = NULL;
-      _return = (*(_self_ior->d_epv->f_queryInterface))(_self_ior, name);
+      _return = (*(_self_ior->d_epv->f_queryInt))(_self_ior, name);
       _return_value = Py_BuildValue(
         "O&",
         (void *)SIDL_BaseInterface__wrap, _return);
@@ -205,8 +203,7 @@ pStub_Loader_queryInterface(PyObject *_self, PyObject *_args,                 \
 }
 
 static PyObject *
-pStub_Loader_isInstanceOf(PyObject *_self, PyObject *_args,                   \
-  PyObject *_kwdict) {
+pStub_Loader_isType(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
   PyObject *_return_value = NULL;
   struct SIDL_Loader__object *_self_ior =
     ((struct SIDL_Loader__object *)
@@ -224,11 +221,40 @@ pStub_Loader_isInstanceOf(PyObject *_self, PyObject *_args,                   \
     if (_okay) {
       SIDL_bool _return = (SIDL_bool) 0;
       int _proxy__return;
-      _return = (*(_self_ior->d_epv->f_isInstanceOf))(_self_ior, name);
+      _return = (*(_self_ior->d_epv->f_isType))(_self_ior, name);
       _proxy__return = _return;
       _return_value = Py_BuildValue(
         "i",
         _proxy__return);
+    }
+  }
+  else {
+    PyErr_SetString(PyExc_TypeError, 
+      "self pointer is not a SIDL.Loader");
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_Loader_getClassInfo(PyObject *_self, PyObject *_args,                   \
+  PyObject *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct SIDL_Loader__object *_self_ior =
+    ((struct SIDL_Loader__object *)
+     SIDL_Cast(_self, "SIDL.Loader"));
+  if (_self_ior) {
+    static char *_kwlist[] = {
+      NULL
+    };
+    const int _okay = PyArg_ParseTupleAndKeywords(
+      _args, _kwdict, 
+      "", _kwlist);
+    if (_okay) {
+      struct SIDL_ClassInfo__object* _return = NULL;
+      _return = (*(_self_ior->d_epv->f_getClassInfo))(_self_ior);
+      _return_value = Py_BuildValue(
+        "O&",
+        (void *)SIDL_ClassInfo__wrap, _return);
     }
   }
   else {
@@ -418,7 +444,7 @@ _createCast(PyObject *self, PyObject *args) {
     &optarg);
   if (_okay) {
     if (optarg) {
-      (*(optarg->d_epv->f_addReference))(optarg);
+      (*(optarg->d_epv->f_addRef))(optarg);
     }
     else {
       optarg = (*(_implEPV->createObject))();
@@ -534,10 +560,10 @@ system."
 };
 
 static PyMethodDef _LoaderObjectMethods[] = {
-  { "addReference", (PyCFunction)pStub_Loader_addReference,
+  { "addRef", (PyCFunction)pStub_Loader_addRef,
   (METH_VARARGS | METH_KEYWORDS),
 "\
-addReference()\n\
+addRef()\n\
 RETURNS\n\
     None\n\
 \n\
@@ -555,10 +581,10 @@ independent type that can refer to an interface or a\n\
 class.\n\
 </p>"
    },
-  { "deleteReference", (PyCFunction)pStub_Loader_deleteReference,
+  { "deleteRef", (PyCFunction)pStub_Loader_deleteRef,
   (METH_VARARGS | METH_KEYWORDS),
 "\
-deleteReference()\n\
+deleteRef()\n\
 RETURNS\n\
     None\n\
 \n\
@@ -569,18 +595,15 @@ Objects in <code>SIDL</code> have an intrinsic reference count.\n\
 Clients should call this method whenever they remove a\n\
 reference to an object or interface."
    },
-  { "isInstanceOf", (PyCFunction)pStub_Loader_isInstanceOf,
+  { "getClassInfo", (PyCFunction)pStub_Loader_getClassInfo,
   (METH_VARARGS | METH_KEYWORDS),
 "\
-isInstanceOf(in string name)\n\
+getClassInfo()\n\
 RETURNS\n\
-   (bool _return)\n\
+   (SIDL.ClassInfo _return)\n\
 \n\
 \
-Return whether this object is an instance of the specified type.\n\
-The string name must be the <code>SIDL</code> type name.  This\n\
-routine will return <code>true</code> if and only if a cast to\n\
-the string type name would succeed."
+Return the meta-data about the class implementing this interface."
    },
   { "isSame", (PyCFunction)pStub_Loader_isSame,
   (METH_VARARGS | METH_KEYWORDS),
@@ -593,10 +616,23 @@ RETURNS\n\
 Return true if and only if <code>obj</code> refers to the same\n\
 object as this object."
    },
-  { "queryInterface", (PyCFunction)pStub_Loader_queryInterface,
+  { "isType", (PyCFunction)pStub_Loader_isType,
   (METH_VARARGS | METH_KEYWORDS),
 "\
-queryInterface(in string name)\n\
+isType(in string name)\n\
+RETURNS\n\
+   (bool _return)\n\
+\n\
+\
+Return whether this object is an instance of the specified type.\n\
+The string name must be the <code>SIDL</code> type name.  This\n\
+routine will return <code>true</code> if and only if a cast to\n\
+the string type name would succeed."
+   },
+  { "queryInt", (PyCFunction)pStub_Loader_queryInt,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+queryInt(in string name)\n\
 RETURNS\n\
    (SIDL.BaseInterface _return)\n\
 \n\
@@ -605,7 +641,7 @@ Check whether the object can support the specified interface or\n\
 class.  If the <code>SIDL</code> type name in <code>name</code>\n\
 is supported, then a reference to that object is returned with the\n\
 reference count incremented.  The callee will be responsible for\n\
-calling <code>deleteReference</code> on the returned object.  If\n\
+calling <code>deleteRef</code> on the returned object.  If\n\
 the specified type is not supported, then a null reference is\n\
 returned."
    },
@@ -627,7 +663,7 @@ SIDL_Loader__weakRef SIDL_Loader__weakRef_PROTO {
 SIDL_Loader_deref_RETURN
 SIDL_Loader_deref SIDL_Loader_deref_PROTO {
   if (sidlobj) {
-    (*(sidlobj->d_epv->f_deleteReference))(sidlobj);
+    (*(sidlobj->d_epv->f_deleteRef))(sidlobj);
   }
 }
 
@@ -640,7 +676,7 @@ SIDL_Loader__newRef SIDL_Loader__newRef_PROTO {
 SIDL_Loader__addRef_RETURN
 SIDL_Loader__addRef SIDL_Loader__addRef_PROTO {
   if (sidlobj) {
-    (*(sidlobj->d_epv->f_addReference))(sidlobj);
+    (*(sidlobj->d_epv->f_addRef))(sidlobj);
   }
 }
 
@@ -648,7 +684,7 @@ SIDL_Loader__convert_RETURN
 SIDL_Loader__convert SIDL_Loader__convert_PROTO {
   *sidlobj = SIDL_Cast(obj, "SIDL.Loader");
   if (*sidlobj) {
-    (*((*sidlobj)->d_epv->f_addReference))(*sidlobj);
+    (*((*sidlobj)->d_epv->f_addRef))(*sidlobj);
   }
   else if (obj != Py_None) {
     PyErr_SetString(PyExc_TypeError, 
@@ -690,7 +726,7 @@ SIDL_Loader__convert_python_array SIDL_Loader__convert_python_array_PROTO {
         result = SIDL_array__convert_python
           (pya, dimen, *sidlarray, _convertPython);
         if (*sidlarray && !result) {
-          SIDL_interface__array_deleteReference(
+          SIDL_interface__array_deleteRef(
             (struct  SIDL_interface__array *)*sidlarray);
           *sidlarray = NULL;
         }
@@ -747,7 +783,7 @@ SIDL_Loader__convert_sidl_array_RETURN
 SIDL_Loader__destroy_sidl_array_RETURN
 SIDL_Loader__destroy_sidl_array SIDL_Loader__destroy_sidl_array_PROTO {
   if (sidlarray) {
-    SIDL_interface__array_deleteReference(
+    SIDL_interface__array_deleteRef(
       (struct SIDL_interface__array *)sidlarray);
   }
 }
@@ -803,5 +839,6 @@ separated sequence of URIs as described in class <code>DLL</code>."
   }
   SIDL_BaseInterface__import();
   SIDL_BaseClass__import();
+  SIDL_ClassInfo__import();
   SIDL_DLL__import();
 }

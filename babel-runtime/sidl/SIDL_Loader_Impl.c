@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_Loader_Impl.c
- * Symbol:        SIDL.Loader-v0.7.5
+ * Symbol:        SIDL.Loader-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for SIDL.Loader
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 /*
@@ -41,9 +41,9 @@
  */
 
 /*
- * Symbol "SIDL.Loader" (version 0.7.5)
+ * Symbol "SIDL.Loader" (version 0.8.1)
  * 
- * Class <code>Loader</code> manages dynamic loading and symbol name
+ * Class <code>Loader</code> manages dyanamic loading and symbol name
  * resolution for the SIDL runtime system.  The <code>Loader</code> class
  * manages a library search path and keeps a record of all libraries
  * loaded through this interface, including the initial "global" symbols
@@ -113,7 +113,7 @@ static void initialize_dll_list(void)
       item->d_next = NULL;
       s_dll_list = item;
     } else {
-      SIDL_DLL_deleteReference(dll);
+      SIDL_DLL_deleteRef(dll);
     }
   }
 }
@@ -182,7 +182,7 @@ static int already_loaded(const char* uri)
 
   head = s_dll_list;
   while ((head != NULL) && !same) {
-    char* name = SIDL_DLL_getLibraryName(head->d_dll);
+    char* name = SIDL_DLL_getName(head->d_dll);
     same = SIDL_String_equals(uri, name);
     SIDL_String_free(name);
     head = head->d_next;
@@ -205,7 +205,7 @@ static void* try_load_dll(const char* uri, const char* linker_name)
       impl_SIDL_Loader_addDLL(dll);
       symbol = SIDL_DLL_lookupSymbol(dll, linker_name);
     }
-    SIDL_DLL_deleteReference(dll);
+    SIDL_DLL_deleteRef(dll);
   }
 
   return symbol;
@@ -413,7 +413,7 @@ impl_SIDL_Loader_loadLibrary(
   if (ok) {
     impl_SIDL_Loader_addDLL(dll);
   }
-  SIDL_DLL_deleteReference(dll);
+  SIDL_DLL_deleteRef(dll);
 
   return ok;
   /* DO-NOT-DELETE splicer.end(SIDL.Loader.loadLibrary) */
@@ -436,7 +436,7 @@ impl_SIDL_Loader_addDLL(
     DLL_List* item = NULL;
     initialize_dll_list();
     item = (DLL_List*) malloc(sizeof(DLL_List));
-    SIDL_DLL_addReference(dll);
+    SIDL_DLL_addRef(dll);
     item->d_dll = dll;
     item->d_next = s_dll_list;
     s_dll_list = item;
@@ -463,7 +463,7 @@ void)
 
   while (head) {
     DLL_List* next = head->d_next;
-    SIDL_DLL_deleteReference(head->d_dll);
+    SIDL_DLL_deleteRef(head->d_dll);
     free(head);
     head = next;
   }

@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_DLL_Impl.c
- * Symbol:        SIDL.DLL-v0.7.5
+ * Symbol:        SIDL.DLL-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for SIDL.DLL
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 /*
@@ -41,7 +41,7 @@
  */
 
 /*
- * Symbol "SIDL.DLL" (version 0.7.5)
+ * Symbol "SIDL.DLL" (version 0.8.1)
  * 
  * The <code>DLL</code> class encapsulates access to a single
  * dynamically linked library.  DLLs are loaded at run-time using
@@ -108,10 +108,36 @@ static void check_lt_initialized(void)
 {
   static int initialized = FALSE;
   if (!initialized) {
+#ifdef HAVE_LTDL
     (void) lt_dlinit();
+#endif
     initialized = TRUE;
   }
 }
+
+static int s_sidl_debug_init = 0;
+static const char *s_sidl_debug_dlopen = NULL;
+
+static void showLoading(const char *dllname)
+{
+  fprintf(stderr, "Loading %s: ", dllname);
+}
+
+static void showLoadResult(void *handle)
+{
+  if (handle) {
+    fprintf(stderr, "ok\n");
+  }
+  else {
+#ifdef HAVE_LTDL
+    const char *errmsg = lt_dlerror(); 
+#else
+    const char *errmsg = dlerror();
+#endif
+    fprintf(stderr,"ERROR\n%s\n", errmsg);
+  }
+}
+
 /* DO-NOT-DELETE splicer.end(SIDL.DLL._includes) */
 
 /*
@@ -129,6 +155,10 @@ impl_SIDL_DLL__ctor(
   struct SIDL_DLL__data* data =
     (struct SIDL_DLL__data*) malloc(sizeof (struct SIDL_DLL__data));
 
+  if (!s_sidl_debug_init) {
+    s_sidl_debug_dlopen = getenv("SIDL_DEBUG_DLOPEN");
+    s_sidl_debug_init = 1;
+  }
   data->d_library_handle = NULL;
   data->d_library_name   = NULL;
 
@@ -234,12 +264,14 @@ impl_SIDL_DLL_loadLibrary(
     dllname = SIDL_String_concat2("file:", uri);
   }
 
+  if (s_sidl_debug_dlopen) showLoading(dllfile);
 #ifdef HAVE_LTDL
   check_lt_initialized();
   handle = lt_dlopen(dllfile);
 #else
   handle = dlopen(dllfile, RTLD_LAZY | RTLD_LOCAL);
 #endif
+  if (s_sidl_debug_dlopen) showLoadResult((void *)handle);
   SIDL_String_free(dllfile);
 
   if (handle) {
@@ -262,13 +294,13 @@ impl_SIDL_DLL_loadLibrary(
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_SIDL_DLL_getLibraryName"
+#define __FUNC__ "impl_SIDL_DLL_getName"
 
 char*
-impl_SIDL_DLL_getLibraryName(
+impl_SIDL_DLL_getName(
   SIDL_DLL self)
 {
-  /* DO-NOT-DELETE splicer.begin(SIDL.DLL.getLibraryName) */
+  /* DO-NOT-DELETE splicer.begin(SIDL.DLL.getName) */
   struct SIDL_DLL__data *data = SIDL_DLL__get_data(self);
 
   char* name = NULL;
@@ -276,7 +308,7 @@ impl_SIDL_DLL_getLibraryName(
     name = SIDL_String_strdup(data->d_library_name);
   }
   return name;
-  /* DO-NOT-DELETE splicer.end(SIDL.DLL.getLibraryName) */
+  /* DO-NOT-DELETE splicer.end(SIDL.DLL.getName) */
 }
 
 /*

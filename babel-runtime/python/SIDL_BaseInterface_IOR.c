@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseInterface_IOR.c
- * Symbol:        SIDL.BaseInterface-v0.7.5
+ * Symbol:        SIDL.BaseInterface-v0.8.1
  * Symbol Type:   interface
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for SIDL.BaseInterface
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 #include <stdlib.h>
@@ -44,6 +44,12 @@
 #define NULL 0
 #endif
 
+/*
+ * Static variables to hold version of IOR
+ */
+
+static const int32_t s_IOR_MAJOR_VERSION = 0;
+static const int32_t s_IOR_MINOR_VERSION = 8;
 /*
  * Static variables for managing EPV initialization.
  */
@@ -74,21 +80,21 @@ static void remote_SIDL_BaseInterface__delete(
 }
 
 /*
- * REMOTE METHOD STUB:addReference
+ * REMOTE METHOD STUB:addRef
  */
 
 static void
-remote_SIDL_BaseInterface_addReference(
+remote_SIDL_BaseInterface_addRef(
   void* self)
 {
 }
 
 /*
- * REMOTE METHOD STUB:deleteReference
+ * REMOTE METHOD STUB:deleteRef
  */
 
 static void
-remote_SIDL_BaseInterface_deleteReference(
+remote_SIDL_BaseInterface_deleteRef(
   void* self)
 {
 }
@@ -106,11 +112,11 @@ remote_SIDL_BaseInterface_isSame(
 }
 
 /*
- * REMOTE METHOD STUB:queryInterface
+ * REMOTE METHOD STUB:queryInt
  */
 
 static struct SIDL_BaseInterface__object*
-remote_SIDL_BaseInterface_queryInterface(
+remote_SIDL_BaseInterface_queryInt(
   void* self,
   const char* name)
 {
@@ -118,11 +124,11 @@ remote_SIDL_BaseInterface_queryInterface(
 }
 
 /*
- * REMOTE METHOD STUB:isInstanceOf
+ * REMOTE METHOD STUB:isType
  */
 
 static SIDL_bool
-remote_SIDL_BaseInterface_isInstanceOf(
+remote_SIDL_BaseInterface_isType(
   void* self,
   const char* name)
 {
@@ -137,13 +143,13 @@ static void SIDL_BaseInterface__init_remote_epv(void)
 {
   struct SIDL_BaseInterface__epv* epv = &s_rem__sidl_baseinterface;
 
-  epv->f__cast           = remote_SIDL_BaseInterface__cast;
-  epv->f__delete         = remote_SIDL_BaseInterface__delete;
-  epv->f_addReference    = remote_SIDL_BaseInterface_addReference;
-  epv->f_deleteReference = remote_SIDL_BaseInterface_deleteReference;
-  epv->f_isSame          = remote_SIDL_BaseInterface_isSame;
-  epv->f_queryInterface  = remote_SIDL_BaseInterface_queryInterface;
-  epv->f_isInstanceOf    = remote_SIDL_BaseInterface_isInstanceOf;
+  epv->f__cast     = remote_SIDL_BaseInterface__cast;
+  epv->f__delete   = remote_SIDL_BaseInterface__delete;
+  epv->f_addRef    = remote_SIDL_BaseInterface_addRef;
+  epv->f_deleteRef = remote_SIDL_BaseInterface_deleteRef;
+  epv->f_isSame    = remote_SIDL_BaseInterface_isSame;
+  epv->f_queryInt  = remote_SIDL_BaseInterface_queryInt;
+  epv->f_isType    = remote_SIDL_BaseInterface_isType;
   s_remote_initialized = 1;
 }
 

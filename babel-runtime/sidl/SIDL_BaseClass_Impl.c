@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseClass_Impl.c
- * Symbol:        SIDL.BaseClass-v0.7.5
+ * Symbol:        SIDL.BaseClass-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for SIDL.BaseClass
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 /*
@@ -41,7 +41,7 @@
  */
 
 /*
- * Symbol "SIDL.BaseClass" (version 0.7.5)
+ * Symbol "SIDL.BaseClass" (version 0.8.1)
  * 
  * Every class implicitly inherits from <code>BaseClass</code>.  This
  * class implements the methods in <code>BaseInterface</code>.
@@ -79,6 +79,9 @@ impl_SIDL_BaseClass__ctor(
   struct SIDL_BaseClass__data *data = (struct SIDL_BaseClass__data *)
     malloc(sizeof (struct SIDL_BaseClass__data));
   data->d_refcount = 1;
+  data->d_classinfo = NULL;
+  data->d_IOR_major_version = -1;
+  data->d_IOR_minor_version = -1;
   SIDL_BaseClass__set_data(self, data);
   /* DO-NOT-DELETE splicer.end(SIDL.BaseClass._ctor) */
 }
@@ -97,6 +100,10 @@ impl_SIDL_BaseClass__dtor(
   /* DO-NOT-DELETE splicer.begin(SIDL.BaseClass._dtor) */
   struct SIDL_BaseClass__data *data = SIDL_BaseClass__get_data(self);
   if (data) {
+    SIDL_BaseInterface bi = (SIDL_BaseInterface)data->d_classinfo;
+    if (bi) {
+      SIDL_BaseInterface_deleteRef(bi);
+    }
     free((void*) data);
   }
   SIDL_BaseClass__set_data(self, NULL);
@@ -119,18 +126,18 @@ impl_SIDL_BaseClass__dtor(
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_SIDL_BaseClass_addReference"
+#define __FUNC__ "impl_SIDL_BaseClass_addRef"
 
 void
-impl_SIDL_BaseClass_addReference(
+impl_SIDL_BaseClass_addRef(
   SIDL_BaseClass self)
 {
-  /* DO-NOT-DELETE splicer.begin(SIDL.BaseClass.addReference) */
+  /* DO-NOT-DELETE splicer.begin(SIDL.BaseClass.addRef) */
    struct SIDL_BaseClass__data* data = SIDL_BaseClass__get_data(self);
    if (data) {
      ++(data->d_refcount);
    }
-   /* DO-NOT-DELETE splicer.end(SIDL.BaseClass.addReference) */
+   /* DO-NOT-DELETE splicer.end(SIDL.BaseClass.addRef) */
 }
 
 /*
@@ -142,13 +149,13 @@ impl_SIDL_BaseClass_addReference(
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_SIDL_BaseClass_deleteReference"
+#define __FUNC__ "impl_SIDL_BaseClass_deleteRef"
 
 void
-impl_SIDL_BaseClass_deleteReference(
+impl_SIDL_BaseClass_deleteRef(
   SIDL_BaseClass self)
 {
-  /* DO-NOT-DELETE splicer.begin(SIDL.BaseClass.deleteReference) */
+  /* DO-NOT-DELETE splicer.begin(SIDL.BaseClass.deleteRef) */
    struct SIDL_BaseClass__data* data = SIDL_BaseClass__get_data(self);
    int self_destruct = TRUE;
    if (data) {
@@ -157,7 +164,7 @@ impl_SIDL_BaseClass_deleteReference(
    if (self_destruct) {
      SIDL_BaseClass__delete(self);
    }
-   /* DO-NOT-DELETE splicer.end(SIDL.BaseClass.deleteReference) */
+   /* DO-NOT-DELETE splicer.end(SIDL.BaseClass.deleteRef) */
 }
 
 /*
@@ -182,26 +189,26 @@ impl_SIDL_BaseClass_isSame(
  * class.  If the <code>SIDL</code> type name in <code>name</code>
  * is supported, then a reference to that object is returned with the
  * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
+ * calling <code>deleteRef</code> on the returned object.  If
  * the specified type is not supported, then a null reference is
  * returned.
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_SIDL_BaseClass_queryInterface"
+#define __FUNC__ "impl_SIDL_BaseClass_queryInt"
 
 SIDL_BaseInterface
-impl_SIDL_BaseClass_queryInterface(
+impl_SIDL_BaseClass_queryInt(
   SIDL_BaseClass self, const char* name)
 {
-  /* DO-NOT-DELETE splicer.begin(SIDL.BaseClass.queryInterface) */
+  /* DO-NOT-DELETE splicer.begin(SIDL.BaseClass.queryInt) */
   SIDL_BaseInterface result = 
     (SIDL_BaseInterface)SIDL_BaseInterface__cast2(self, name);
   if (result) {
-    SIDL_BaseInterface_addReference(result);
+    SIDL_BaseInterface_addRef(result);
   }
   return result;
-  /* DO-NOT-DELETE splicer.end(SIDL.BaseClass.queryInterface) */
+  /* DO-NOT-DELETE splicer.end(SIDL.BaseClass.queryInt) */
 }
 
 /*
@@ -212,13 +219,37 @@ impl_SIDL_BaseClass_queryInterface(
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_SIDL_BaseClass_isInstanceOf"
+#define __FUNC__ "impl_SIDL_BaseClass_isType"
 
 SIDL_bool
-impl_SIDL_BaseClass_isInstanceOf(
+impl_SIDL_BaseClass_isType(
   SIDL_BaseClass self, const char* name)
 {
-  /* DO-NOT-DELETE splicer.begin(SIDL.BaseClass.isInstanceOf) */
+  /* DO-NOT-DELETE splicer.begin(SIDL.BaseClass.isType) */
   return SIDL_BaseClass__cast2(self, name) ? TRUE : FALSE;
-  /* DO-NOT-DELETE splicer.end(SIDL.BaseClass.isInstanceOf) */
+  /* DO-NOT-DELETE splicer.end(SIDL.BaseClass.isType) */
+}
+
+/*
+ * Return the meta-data about the class implementing this interface.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_SIDL_BaseClass_getClassInfo"
+
+SIDL_ClassInfo
+impl_SIDL_BaseClass_getClassInfo(
+  SIDL_BaseClass self)
+{
+  /* DO-NOT-DELETE splicer.begin(SIDL.BaseClass.getClassInfo) */
+   struct SIDL_BaseClass__data* data = SIDL_BaseClass__get_data(self);
+   if (data) {
+     SIDL_BaseInterface bi = (SIDL_BaseInterface)data->d_classinfo;
+     if (bi) {
+       SIDL_BaseInterface_addRef(bi);
+       return data->d_classinfo;
+     }
+   }
+   return NULL;
+  /* DO-NOT-DELETE splicer.end(SIDL.BaseClass.getClassInfo) */
 }

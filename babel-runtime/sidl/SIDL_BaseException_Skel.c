@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseException_Skel.c
- * Symbol:        SIDL.BaseException-v0.7.5
+ * Symbol:        SIDL.BaseException-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side glue code for SIDL.BaseException
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 #include "SIDL_BaseException_IOR.h"
@@ -48,11 +48,11 @@ impl_SIDL_BaseException__dtor(
   SIDL_BaseException);
 
 extern char*
-impl_SIDL_BaseException_getMessage(
+impl_SIDL_BaseException_getNote(
   SIDL_BaseException);
 
 extern void
-impl_SIDL_BaseException_setMessage(
+impl_SIDL_BaseException_setNote(
   SIDL_BaseException,
   const char*);
 
@@ -61,12 +61,12 @@ impl_SIDL_BaseException_getTrace(
   SIDL_BaseException);
 
 extern void
-impl_SIDL_BaseException_addToStackTrace(
+impl_SIDL_BaseException_addLine(
   SIDL_BaseException,
   const char*);
 
 extern void
-impl_SIDL_BaseException_addToTrace(
+impl_SIDL_BaseException_add(
   SIDL_BaseException,
   const char*,
   int32_t,
@@ -77,11 +77,11 @@ SIDL_BaseException__set_epv(struct SIDL_BaseException__epv *epv)
 {
   epv->f__ctor = impl_SIDL_BaseException__ctor;
   epv->f__dtor = impl_SIDL_BaseException__dtor;
-  epv->f_getMessage = impl_SIDL_BaseException_getMessage;
-  epv->f_setMessage = impl_SIDL_BaseException_setMessage;
+  epv->f_getNote = impl_SIDL_BaseException_getNote;
+  epv->f_setNote = impl_SIDL_BaseException_setNote;
   epv->f_getTrace = impl_SIDL_BaseException_getTrace;
-  epv->f_addToStackTrace = impl_SIDL_BaseException_addToStackTrace;
-  epv->f_addToTrace = impl_SIDL_BaseException_addToTrace;
+  epv->f_addLine = impl_SIDL_BaseException_addLine;
+  epv->f_add = impl_SIDL_BaseException_add;
 }
 
 struct SIDL_BaseException__data*

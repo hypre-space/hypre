@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseClass_Module.h
- * Symbol:        SIDL.BaseClass-v0.7.5
+ * Symbol:        SIDL.BaseClass-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   expose a constructor for the Python wrapper
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 /*

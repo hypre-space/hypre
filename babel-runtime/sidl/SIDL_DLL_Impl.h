@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_DLL_Impl.h
- * Symbol:        SIDL.DLL-v0.7.5
+ * Symbol:        SIDL.DLL-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for SIDL.DLL
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 #ifndef included_SIDL_DLL_Impl_h
@@ -106,7 +106,7 @@ impl_SIDL_DLL_loadLibrary(
   const char*);
 
 extern char*
-impl_SIDL_DLL_getLibraryName(
+impl_SIDL_DLL_getName(
   SIDL_DLL);
 
 extern void

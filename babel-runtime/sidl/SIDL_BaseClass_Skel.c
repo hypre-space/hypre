@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseClass_Skel.c
- * Symbol:        SIDL.BaseClass-v0.7.5
+ * Symbol:        SIDL.BaseClass-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side glue code for SIDL.BaseClass
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 #include "SIDL_BaseClass_IOR.h"
@@ -56,11 +56,11 @@ impl_SIDL_BaseClass__dtor(
   SIDL_BaseClass);
 
 extern void
-impl_SIDL_BaseClass_addReference(
+impl_SIDL_BaseClass_addRef(
   SIDL_BaseClass);
 
 extern void
-impl_SIDL_BaseClass_deleteReference(
+impl_SIDL_BaseClass_deleteRef(
   SIDL_BaseClass);
 
 extern SIDL_bool
@@ -69,25 +69,30 @@ impl_SIDL_BaseClass_isSame(
   SIDL_BaseInterface);
 
 extern SIDL_BaseInterface
-impl_SIDL_BaseClass_queryInterface(
+impl_SIDL_BaseClass_queryInt(
   SIDL_BaseClass,
   const char*);
 
 extern SIDL_bool
-impl_SIDL_BaseClass_isInstanceOf(
+impl_SIDL_BaseClass_isType(
   SIDL_BaseClass,
   const char*);
+
+extern SIDL_ClassInfo
+impl_SIDL_BaseClass_getClassInfo(
+  SIDL_BaseClass);
 
 void
 SIDL_BaseClass__set_epv(struct SIDL_BaseClass__epv *epv)
 {
   epv->f__ctor = impl_SIDL_BaseClass__ctor;
   epv->f__dtor = impl_SIDL_BaseClass__dtor;
-  epv->f_addReference = impl_SIDL_BaseClass_addReference;
-  epv->f_deleteReference = impl_SIDL_BaseClass_deleteReference;
+  epv->f_addRef = impl_SIDL_BaseClass_addRef;
+  epv->f_deleteRef = impl_SIDL_BaseClass_deleteRef;
   epv->f_isSame = impl_SIDL_BaseClass_isSame;
-  epv->f_queryInterface = impl_SIDL_BaseClass_queryInterface;
-  epv->f_isInstanceOf = impl_SIDL_BaseClass_isInstanceOf;
+  epv->f_queryInt = impl_SIDL_BaseClass_queryInt;
+  epv->f_isType = impl_SIDL_BaseClass_isType;
+  epv->f_getClassInfo = impl_SIDL_BaseClass_getClassInfo;
 }
 
 struct SIDL_BaseClass__data*

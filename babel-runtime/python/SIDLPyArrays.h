@@ -109,9 +109,9 @@
  * PyObject *
  * SIDL_x__python_clone_array(struct SIDL_x__array *array);
  *
- * This is a Python wrapper function for SIDL_x__array_deleteReference.
+ * This is a Python wrapper function for SIDL_x__array_deleteRef.
  * void
- * SIDL_x__python_deleteReference_array(struct SIDL_x__array *array);
+ * SIDL_x__python_deleteRef_array(struct SIDL_x__array *array);
  *
  *
  *
@@ -238,9 +238,9 @@ typedef int (*SIDL_array_get_py_elem)(void *, const int32_t *, PyObject **);
 #define SIDL_bool__python_clone_array_PROTO \
   (struct SIDL_bool__array *array)
 
-#define SIDL_bool__python_deleteReference_array_NUM 5
-#define SIDL_bool__python_deleteReference_array_RETURN void
-#define SIDL_bool__python_deleteReference_array_PROTO \
+#define SIDL_bool__python_deleteRef_array_NUM 5
+#define SIDL_bool__python_deleteRef_array_RETURN void
+#define SIDL_bool__python_deleteRef_array_PROTO \
   (struct SIDL_bool__array *array)
 
 
@@ -269,9 +269,9 @@ typedef int (*SIDL_array_get_py_elem)(void *, const int32_t *, PyObject **);
 #define SIDL_char__python_clone_array_PROTO \
   (struct SIDL_char__array *array)
 
-#define SIDL_char__python_deleteReference_array_NUM 11
-#define SIDL_char__python_deleteReference_array_RETURN void
-#define SIDL_char__python_deleteReference_array_PROTO \
+#define SIDL_char__python_deleteRef_array_NUM 11
+#define SIDL_char__python_deleteRef_array_RETURN void
+#define SIDL_char__python_deleteRef_array_PROTO \
   (struct SIDL_char__array *array)
 
 
@@ -300,9 +300,9 @@ typedef int (*SIDL_array_get_py_elem)(void *, const int32_t *, PyObject **);
 #define SIDL_dcomplex__python_clone_array_PROTO \
   (struct SIDL_dcomplex__array *array)
 
-#define SIDL_dcomplex__python_deleteReference_array_NUM 17
-#define SIDL_dcomplex__python_deleteReference_array_RETURN void
-#define SIDL_dcomplex__python_deleteReference_array_PROTO \
+#define SIDL_dcomplex__python_deleteRef_array_NUM 17
+#define SIDL_dcomplex__python_deleteRef_array_RETURN void
+#define SIDL_dcomplex__python_deleteRef_array_PROTO \
   (struct SIDL_dcomplex__array *array)
 
 
@@ -331,9 +331,9 @@ typedef int (*SIDL_array_get_py_elem)(void *, const int32_t *, PyObject **);
 #define SIDL_double__python_clone_array_PROTO \
   (struct SIDL_double__array *array)
 
-#define SIDL_double__python_deleteReference_array_NUM 23
-#define SIDL_double__python_deleteReference_array_RETURN void
-#define SIDL_double__python_deleteReference_array_PROTO \
+#define SIDL_double__python_deleteRef_array_NUM 23
+#define SIDL_double__python_deleteRef_array_RETURN void
+#define SIDL_double__python_deleteRef_array_PROTO \
   (struct SIDL_double__array *array)
 
 
@@ -362,9 +362,9 @@ typedef int (*SIDL_array_get_py_elem)(void *, const int32_t *, PyObject **);
 #define SIDL_fcomplex__python_clone_array_PROTO \
   (struct SIDL_fcomplex__array *array)
 
-#define SIDL_fcomplex__python_deleteReference_array_NUM 29
-#define SIDL_fcomplex__python_deleteReference_array_RETURN void
-#define SIDL_fcomplex__python_deleteReference_array_PROTO \
+#define SIDL_fcomplex__python_deleteRef_array_NUM 29
+#define SIDL_fcomplex__python_deleteRef_array_RETURN void
+#define SIDL_fcomplex__python_deleteRef_array_PROTO \
   (struct SIDL_fcomplex__array *array)
 
 
@@ -393,9 +393,9 @@ typedef int (*SIDL_array_get_py_elem)(void *, const int32_t *, PyObject **);
 #define SIDL_float__python_clone_array_PROTO \
   (struct SIDL_float__array *array)
 
-#define SIDL_float__python_deleteReference_array_NUM 35
-#define SIDL_float__python_deleteReference_array_RETURN void
-#define SIDL_float__python_deleteReference_array_PROTO \
+#define SIDL_float__python_deleteRef_array_NUM 35
+#define SIDL_float__python_deleteRef_array_RETURN void
+#define SIDL_float__python_deleteRef_array_PROTO \
   (struct SIDL_float__array *array)
 
 
@@ -424,9 +424,9 @@ typedef int (*SIDL_array_get_py_elem)(void *, const int32_t *, PyObject **);
 #define SIDL_int__python_clone_array_PROTO \
   (struct SIDL_int__array *array)
 
-#define SIDL_int__python_deleteReference_array_NUM 41
-#define SIDL_int__python_deleteReference_array_RETURN void
-#define SIDL_int__python_deleteReference_array_PROTO \
+#define SIDL_int__python_deleteRef_array_NUM 41
+#define SIDL_int__python_deleteRef_array_RETURN void
+#define SIDL_int__python_deleteRef_array_PROTO \
   (struct SIDL_int__array *array)
 
 
@@ -455,9 +455,9 @@ typedef int (*SIDL_array_get_py_elem)(void *, const int32_t *, PyObject **);
 #define SIDL_long__python_clone_array_PROTO \
   (struct SIDL_long__array *array)
 
-#define SIDL_long__python_deleteReference_array_NUM 47
-#define SIDL_long__python_deleteReference_array_RETURN void
-#define SIDL_long__python_deleteReference_array_PROTO \
+#define SIDL_long__python_deleteRef_array_NUM 47
+#define SIDL_long__python_deleteRef_array_RETURN void
+#define SIDL_long__python_deleteRef_array_PROTO \
   (struct SIDL_long__array *array)
 
 
@@ -486,9 +486,9 @@ typedef int (*SIDL_array_get_py_elem)(void *, const int32_t *, PyObject **);
 #define SIDL_opaque__python_clone_array_PROTO \
   (struct SIDL_opaque__array *array)
 
-#define SIDL_opaque__python_deleteReference_array_NUM 53
-#define SIDL_opaque__python_deleteReference_array_RETURN void
-#define SIDL_opaque__python_deleteReference_array_PROTO \
+#define SIDL_opaque__python_deleteRef_array_NUM 53
+#define SIDL_opaque__python_deleteRef_array_RETURN void
+#define SIDL_opaque__python_deleteRef_array_PROTO \
   (struct SIDL_opaque__array *array)
 
 
@@ -517,9 +517,9 @@ typedef int (*SIDL_array_get_py_elem)(void *, const int32_t *, PyObject **);
 #define SIDL_string__python_clone_array_PROTO \
   (struct SIDL_string__array *array)
 
-#define SIDL_string__python_deleteReference_array_NUM 59
-#define SIDL_string__python_deleteReference_array_RETURN void
-#define SIDL_string__python_deleteReference_array_PROTO \
+#define SIDL_string__python_deleteRef_array_NUM 59
+#define SIDL_string__python_deleteRef_array_RETURN void
+#define SIDL_string__python_deleteRef_array_PROTO \
   (struct SIDL_string__array *array)
 
 #define SIDL_array__convert_python_NUM 60
@@ -738,10 +738,10 @@ static void **SIDLPyArrays_API;
    SIDL_bool__python_clone_array_PROTO) \
  SIDLPyArrays_API[SIDL_bool__python_clone_array_NUM])
 
-#define SIDL_bool__python_deleteReference_array  \
-(*( SIDL_bool__python_deleteReference_array_RETURN (*) \
-   SIDL_bool__python_deleteReference_array_PROTO) \
- SIDLPyArrays_API[SIDL_bool__python_deleteReference_array_NUM])
+#define SIDL_bool__python_deleteRef_array  \
+(*( SIDL_bool__python_deleteRef_array_RETURN (*) \
+   SIDL_bool__python_deleteRef_array_PROTO) \
+ SIDLPyArrays_API[SIDL_bool__python_deleteRef_array_NUM])
 
 #define SIDL_char__borrow_python_array  \
 (*( SIDL_char__borrow_python_array_RETURN (*) \
@@ -768,10 +768,10 @@ static void **SIDLPyArrays_API;
    SIDL_char__python_clone_array_PROTO) \
  SIDLPyArrays_API[SIDL_char__python_clone_array_NUM])
 
-#define SIDL_char__python_deleteReference_array  \
-(*( SIDL_char__python_deleteReference_array_RETURN (*) \
-   SIDL_char__python_deleteReference_array_PROTO) \
- SIDLPyArrays_API[SIDL_char__python_deleteReference_array_NUM])
+#define SIDL_char__python_deleteRef_array  \
+(*( SIDL_char__python_deleteRef_array_RETURN (*) \
+   SIDL_char__python_deleteRef_array_PROTO) \
+ SIDLPyArrays_API[SIDL_char__python_deleteRef_array_NUM])
 
 #define SIDL_dcomplex__borrow_python_array  \
 (*( SIDL_dcomplex__borrow_python_array_RETURN (*) \
@@ -798,10 +798,10 @@ static void **SIDLPyArrays_API;
    SIDL_dcomplex__python_clone_array_PROTO) \
  SIDLPyArrays_API[SIDL_dcomplex__python_clone_array_NUM])
 
-#define SIDL_dcomplex__python_deleteReference_array  \
-(*( SIDL_dcomplex__python_deleteReference_array_RETURN (*) \
-   SIDL_dcomplex__python_deleteReference_array_PROTO) \
- SIDLPyArrays_API[SIDL_dcomplex__python_deleteReference_array_NUM])
+#define SIDL_dcomplex__python_deleteRef_array  \
+(*( SIDL_dcomplex__python_deleteRef_array_RETURN (*) \
+   SIDL_dcomplex__python_deleteRef_array_PROTO) \
+ SIDLPyArrays_API[SIDL_dcomplex__python_deleteRef_array_NUM])
 
 #define SIDL_double__borrow_python_array  \
 (*( SIDL_double__borrow_python_array_RETURN (*) \
@@ -828,10 +828,10 @@ static void **SIDLPyArrays_API;
    SIDL_double__python_clone_array_PROTO) \
  SIDLPyArrays_API[SIDL_double__python_clone_array_NUM])
 
-#define SIDL_double__python_deleteReference_array  \
-(*( SIDL_double__python_deleteReference_array_RETURN (*) \
-   SIDL_double__python_deleteReference_array_PROTO) \
- SIDLPyArrays_API[SIDL_double__python_deleteReference_array_NUM])
+#define SIDL_double__python_deleteRef_array  \
+(*( SIDL_double__python_deleteRef_array_RETURN (*) \
+   SIDL_double__python_deleteRef_array_PROTO) \
+ SIDLPyArrays_API[SIDL_double__python_deleteRef_array_NUM])
 
 #define SIDL_fcomplex__borrow_python_array  \
 (*( SIDL_fcomplex__borrow_python_array_RETURN (*) \
@@ -858,10 +858,10 @@ static void **SIDLPyArrays_API;
    SIDL_fcomplex__python_clone_array_PROTO) \
  SIDLPyArrays_API[SIDL_fcomplex__python_clone_array_NUM])
 
-#define SIDL_fcomplex__python_deleteReference_array  \
-(*( SIDL_fcomplex__python_deleteReference_array_RETURN (*) \
-   SIDL_fcomplex__python_deleteReference_array_PROTO) \
- SIDLPyArrays_API[SIDL_fcomplex__python_deleteReference_array_NUM])
+#define SIDL_fcomplex__python_deleteRef_array  \
+(*( SIDL_fcomplex__python_deleteRef_array_RETURN (*) \
+   SIDL_fcomplex__python_deleteRef_array_PROTO) \
+ SIDLPyArrays_API[SIDL_fcomplex__python_deleteRef_array_NUM])
 
 #define SIDL_float__borrow_python_array  \
 (*( SIDL_float__borrow_python_array_RETURN (*) \
@@ -888,10 +888,10 @@ static void **SIDLPyArrays_API;
    SIDL_float__python_clone_array_PROTO) \
  SIDLPyArrays_API[SIDL_float__python_clone_array_NUM])
 
-#define SIDL_float__python_deleteReference_array  \
-(*( SIDL_float__python_deleteReference_array_RETURN (*) \
-   SIDL_float__python_deleteReference_array_PROTO) \
- SIDLPyArrays_API[SIDL_float__python_deleteReference_array_NUM])
+#define SIDL_float__python_deleteRef_array  \
+(*( SIDL_float__python_deleteRef_array_RETURN (*) \
+   SIDL_float__python_deleteRef_array_PROTO) \
+ SIDLPyArrays_API[SIDL_float__python_deleteRef_array_NUM])
 
 #define SIDL_int__borrow_python_array  \
 (*( SIDL_int__borrow_python_array_RETURN (*) \
@@ -918,10 +918,10 @@ static void **SIDLPyArrays_API;
    SIDL_int__python_clone_array_PROTO) \
  SIDLPyArrays_API[SIDL_int__python_clone_array_NUM])
 
-#define SIDL_int__python_deleteReference_array  \
-(*( SIDL_int__python_deleteReference_array_RETURN (*) \
-   SIDL_int__python_deleteReference_array_PROTO) \
- SIDLPyArrays_API[SIDL_int__python_deleteReference_array_NUM])
+#define SIDL_int__python_deleteRef_array  \
+(*( SIDL_int__python_deleteRef_array_RETURN (*) \
+   SIDL_int__python_deleteRef_array_PROTO) \
+ SIDLPyArrays_API[SIDL_int__python_deleteRef_array_NUM])
 
 #define SIDL_long__borrow_python_array  \
 (*( SIDL_long__borrow_python_array_RETURN (*) \
@@ -948,10 +948,10 @@ static void **SIDLPyArrays_API;
    SIDL_long__python_clone_array_PROTO) \
  SIDLPyArrays_API[SIDL_long__python_clone_array_NUM])
 
-#define SIDL_long__python_deleteReference_array  \
-(*( SIDL_long__python_deleteReference_array_RETURN (*) \
-   SIDL_long__python_deleteReference_array_PROTO) \
- SIDLPyArrays_API[SIDL_long__python_deleteReference_array_NUM])
+#define SIDL_long__python_deleteRef_array  \
+(*( SIDL_long__python_deleteRef_array_RETURN (*) \
+   SIDL_long__python_deleteRef_array_PROTO) \
+ SIDLPyArrays_API[SIDL_long__python_deleteRef_array_NUM])
 
 #define SIDL_opaque__borrow_python_array  \
 (*( SIDL_opaque__borrow_python_array_RETURN (*) \
@@ -978,10 +978,10 @@ static void **SIDLPyArrays_API;
    SIDL_opaque__python_clone_array_PROTO) \
  SIDLPyArrays_API[SIDL_opaque__python_clone_array_NUM])
 
-#define SIDL_opaque__python_deleteReference_array  \
-(*( SIDL_opaque__python_deleteReference_array_RETURN (*) \
-   SIDL_opaque__python_deleteReference_array_PROTO) \
- SIDLPyArrays_API[SIDL_opaque__python_deleteReference_array_NUM])
+#define SIDL_opaque__python_deleteRef_array  \
+(*( SIDL_opaque__python_deleteRef_array_RETURN (*) \
+   SIDL_opaque__python_deleteRef_array_PROTO) \
+ SIDLPyArrays_API[SIDL_opaque__python_deleteRef_array_NUM])
 
 #define SIDL_string__borrow_python_array  \
 (*( SIDL_string__borrow_python_array_RETURN (*) \
@@ -1008,10 +1008,10 @@ static void **SIDLPyArrays_API;
    SIDL_string__python_clone_array_PROTO) \
  SIDLPyArrays_API[SIDL_string__python_clone_array_NUM])
 
-#define SIDL_string__python_deleteReference_array  \
-(*( SIDL_string__python_deleteReference_array_RETURN (*) \
-   SIDL_string__python_deleteReference_array_PROTO) \
- SIDLPyArrays_API[SIDL_string__python_deleteReference_array_NUM])
+#define SIDL_string__python_deleteRef_array  \
+(*( SIDL_string__python_deleteRef_array_RETURN (*) \
+   SIDL_string__python_deleteRef_array_PROTO) \
+ SIDLPyArrays_API[SIDL_string__python_deleteRef_array_NUM])
 
 #define SIDL_array__convert_python  \
 (*( SIDL_array__convert_python_RETURN (*) \

@@ -1,55 +1,59 @@
 # # Process this file with autoconf to produce a configure script.
 
 # Table of contents:
-#  0. Variable initialization
-#  1. Basic startup stuff
-#  2. Additional configure options.
-#  3. Critical applications
-#  4. C Compiler
+#  Variable initialization
+#  Basic startup stuff
+#  Additional configure options.
+#  Critical applications
+#  C Compiler
 #     a.  Libraries (existence)
 #     b.  Header Files
 #     c.  Typedefs, Structs, Compiler Characteristics
 #     d.  Specific Library Functions.
-#  5. F77 Compiler
+#  F77 Compiler
 #     a. Libraries (existence)
-#  6. C++ Compiler
+#  C++ Compiler
 #     a. Libraries (existence)
 #     b. Header Files
-#  7. Java Support
-#  8. Python Support
-#  9. Libtool Options
-# 10. Cygwin conditional Makefile Support
-# 11. Shared/Dynamic Library Details
-# 12. babel_config.h headers and footers
-# 13. File Generation
+#  Java Support
+#  Python Support
+#  F90 Compiler
+#     a. Libraries (existence)
+#  Libtool Options
+#  Cygwin conditional Makefile Support
+#  Shared/Dynamic Library Details
+#  babel_config.h headers and footers
+#  File Generation
 
 ############################################################
 #
-# 1. Basic startup stuff
+# Basic startup stuff
 #
-AC_INIT(babel-runtime, 0.7.5, components@llnl.gov)
+AC_INIT(babel-runtime, 0.8.0, components@llnl.gov)
+AC_CONFIG_SRCDIR([sidl/SIDLArray.h])
 AC_CONFIG_AUX_DIR([config])
 # following line added for hypre...
 AC_PREFIX_DEFAULT(`pwd`/../hypre)
-AC_CANONICAL_SYSTEM
-AM_INIT_AUTOMAKE(babel-runtime, 0.7.5 )
-AC_CONFIG_SRCDIR([sidl/SIDLArray.h])
+AC_CANONICAL_TARGET
+
+AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER([sidl/babel_config.h])
-LLNL_CHECK_AUTOMAKE(1.6)
-LLNL_CHECK_AUTOCONF(2.53)
+
+LLNL_CHECK_AUTOMAKE(1.7.1)
+LLNL_CHECK_AUTOCONF(2.54)
 
 
 ############################################################
 #
-# 0. Variable initialization
+# Variable initialization
 #
-version=0.7.5
 enable_static=yes
 # following two lines changed for hypre...
 enable_shared=no
 disable_shared=yes
 # ... was enable_shared=yes   but hypre uses static
 with_fortran77=yes
+with_fortran90=yes
 with_cxx=yes
 with_python=yes
 with_java=yes
@@ -58,55 +62,60 @@ msgs="
 
 ############################################################
 #
-# 2. Additional configure options. (all "yes" by default)
+# Additional configure options. (all "yes" by default)
 #
 AM_CONDITIONAL(BABEL_RUNTIME_ONLY, ! ((grep UCRL-CODE-2002-054 $srcdir/../COPYRIGHT > /dev/null 2>&1) && (test -e ../bin/babel) ))
 
 ############################################################
 #
-# 3. Critical applications.
+# Critical applications.
 #
 AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_CPP
-AC_PROG_RANLIB
 AC_PROG_LD
 AC_PROG_LN_S
 AC_CHECK_PROGS(PERL, perl /bin/perl /usr/bin/perl /usr/local/bin/perl)
 
 ############################################################
 #
-# 4. C Compiler
+# C Compiler
 #
 LLNL_CONFIRM_BABEL_C_SUPPORT
 
 ############################################################
 #
-# 5. F77 Compiler
+# F77 Compiler
 #
 LLNL_CONFIRM_BABEL_F77_SUPPORT
 
 ############################################################
 #
-# 6. C++ Compiler
+# C++ Compiler
 #
 LLNL_CONFIRM_BABEL_CXX_SUPPORT
+LLNL_CONFIRM_BABEL_CXX_SUPPORT2
 
 ############################################################
 #
-# 7. Java Support
+# Java Support
 #
 LLNL_CONFIRM_BABEL_JAVA_SUPPORT
 
 ############################################################
 #
-# 8. Python Support.
+# Python Support.
 #
 LLNL_CONFIRM_BABEL_PYTHON_SUPPORT
 
 ############################################################
 #
-# 9. Libtool Options
+# F90 Compiler
+#
+LLNL_CONFIRM_BABEL_F90_SUPPORT
+############################################################
+#
+# Libtool Options
 #
 AC_LIBTOOL_WIN32_DLL
 AC_LIBTOOL_DLOPEN
@@ -116,7 +125,7 @@ AC_LIB_LTDL
 
 ############################################################
 #
-# 10. Cygwin conditional Makefile Support.
+# Cygwin conditional Makefile Support.
 #
 case $host_os in
   *cygwin* ) CYGWIN=yes;;
@@ -126,22 +135,22 @@ AM_CONDITIONAL(SUPPORT_CYGWIN, test "X$CYGWIN" = "Xyes")
 
 ############################################################
 #
-# 11. Shared/Dynamic Library Details.
+# Shared/Dynamic Library Details.
 #
 
 AM_CONDITIONAL(SUPPORT_STATIC, test "X$enable_static" != "Xno")
-if test "X$enable_shared" == "Xno"; then
+if test "X$enable_shared" = "Xno"; then
   AC_DEFINE(SIDL_STATIC_LIBRARY, 1, [Define SIDL_STATIC_LIBRARY to force static loading of libraries])
 fi
 
 AM_CONDITIONAL(SUPPORT_SHARED, test "X$enable_shared" != "Xno")
-if test "X$enable_static" == "Xno"; then
+if test "X$enable_static" = "Xno"; then
   AC_DEFINE(SIDL_DYNAMIC_LIBRARY, 1, [Define SIDL_DYNAMIC_LIBRARY to force dynamic loading of libraries])
 fi
 
 ############################################################
 #
-# 12. babel_config.h headers and footers
+# babel_config.h headers and footers
 #
 AH_TOP([
 #ifndef included_babel_config_h
@@ -185,7 +194,7 @@ AH_BOTTOM([
 
 ############################################################
 #
-# 13. File Generation
+# File Generation
 #
 AC_CONFIG_FILES([Makefile
 		 bin/Makefile

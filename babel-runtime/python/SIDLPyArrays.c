@@ -738,7 +738,7 @@ SIDL_opaque__clone_python_array_column SIDL_opaque__clone_python_array_column_PR
         result = SIDL_array__convert_python(pya, dimen, *array,
                                             CopyOpaquePointer);
         if (*array && !result) {
-          SIDL_opaque__array_deleteReference(*array);
+          SIDL_opaque__array_deleteRef(*array);
           *array = NULL;
         }
       }
@@ -766,7 +766,7 @@ SIDL_string__clone_python_array_column SIDL_string__clone_python_array_column_PR
         result = SIDL_array__convert_python(pya, dimen, *array, 
                                             CopyStringPointer);
         if (*array && !result) {
-          SIDL_string__array_deleteReference(*array);
+          SIDL_string__array_deleteRef(*array);
           *array = NULL;
         }
       }
@@ -795,7 +795,7 @@ SIDL_opaque__clone_python_array_row SIDL_opaque__clone_python_array_row_PROTO
         result = SIDL_array__convert_python(pya, dimen, *array,
                                             CopyOpaquePointer);
         if (*array && !result) {
-          SIDL_opaque__array_deleteReference(*array);
+          SIDL_opaque__array_deleteRef(*array);
           *array = NULL;
         }
       }
@@ -823,7 +823,7 @@ SIDL_string__clone_python_array_row SIDL_string__clone_python_array_row_PROTO
         result = SIDL_array__convert_python(pya, dimen, *array, 
                                             CopyStringPointer);
         if (*array && !result) {
-          SIDL_string__array_deleteReference(*array);
+          SIDL_string__array_deleteRef(*array);
           *array = NULL;
         }
       }
@@ -1157,8 +1157,8 @@ initSIDLPyArrays(void)
     (void *)SIDL_bool__python_borrow_array;
   spa_api[SIDL_bool__python_clone_array_NUM] =
     (void *)SIDL_bool__python_clone_array;
-  spa_api[SIDL_bool__python_deleteReference_array_NUM] =
-    (void *)SIDL_bool__array_deleteReference;
+  spa_api[SIDL_bool__python_deleteRef_array_NUM] =
+    (void *)SIDL_bool__array_deleteRef;
   spa_api[SIDL_char__borrow_python_array_NUM] =
     (void *)SIDL_char__borrow_python_array;
   spa_api[SIDL_char__clone_python_array_column_NUM] =
@@ -1169,8 +1169,8 @@ initSIDLPyArrays(void)
     (void *)SIDL_char__python_borrow_array;
   spa_api[SIDL_char__python_clone_array_NUM] =
     (void *)SIDL_char__python_clone_array;
-  spa_api[SIDL_char__python_deleteReference_array_NUM] =
-    (void *)SIDL_char__array_deleteReference;
+  spa_api[SIDL_char__python_deleteRef_array_NUM] =
+    (void *)SIDL_char__array_deleteRef;
   spa_api[SIDL_dcomplex__borrow_python_array_NUM] =
     (void *)SIDL_dcomplex__borrow_python_array;
   spa_api[SIDL_dcomplex__clone_python_array_column_NUM] =
@@ -1181,8 +1181,8 @@ initSIDLPyArrays(void)
     (void *)SIDL_dcomplex__python_borrow_array;
   spa_api[SIDL_dcomplex__python_clone_array_NUM] =
     (void *)SIDL_dcomplex__python_clone_array;
-  spa_api[SIDL_dcomplex__python_deleteReference_array_NUM] =
-    (void *)SIDL_dcomplex__array_deleteReference;
+  spa_api[SIDL_dcomplex__python_deleteRef_array_NUM] =
+    (void *)SIDL_dcomplex__array_deleteRef;
   spa_api[SIDL_double__borrow_python_array_NUM] =
     (void *)SIDL_double__borrow_python_array;
   spa_api[SIDL_double__clone_python_array_column_NUM] =
@@ -1193,8 +1193,8 @@ initSIDLPyArrays(void)
     (void *)SIDL_double__python_borrow_array;
   spa_api[SIDL_double__python_clone_array_NUM] =
     (void *)SIDL_double__python_clone_array;
-  spa_api[SIDL_double__python_deleteReference_array_NUM] =
-    (void *)SIDL_double__array_deleteReference;
+  spa_api[SIDL_double__python_deleteRef_array_NUM] =
+    (void *)SIDL_double__array_deleteRef;
   spa_api[SIDL_fcomplex__borrow_python_array_NUM] =
     (void *)SIDL_fcomplex__borrow_python_array;
   spa_api[SIDL_fcomplex__clone_python_array_column_NUM] =
@@ -1205,8 +1205,8 @@ initSIDLPyArrays(void)
     (void *)SIDL_fcomplex__python_borrow_array;
   spa_api[SIDL_fcomplex__python_clone_array_NUM] =
     (void *)SIDL_fcomplex__python_clone_array;
-  spa_api[SIDL_fcomplex__python_deleteReference_array_NUM] =
-    (void *)SIDL_fcomplex__array_deleteReference;
+  spa_api[SIDL_fcomplex__python_deleteRef_array_NUM] =
+    (void *)SIDL_fcomplex__array_deleteRef;
   spa_api[SIDL_float__borrow_python_array_NUM] =
     (void *)SIDL_float__borrow_python_array;
   spa_api[SIDL_float__clone_python_array_column_NUM] =
@@ -1217,8 +1217,8 @@ initSIDLPyArrays(void)
     (void *)SIDL_float__python_borrow_array;
   spa_api[SIDL_float__python_clone_array_NUM] =
     (void *)SIDL_float__python_clone_array;
-  spa_api[SIDL_float__python_deleteReference_array_NUM] =
-    (void *)SIDL_float__array_deleteReference;
+  spa_api[SIDL_float__python_deleteRef_array_NUM] =
+    (void *)SIDL_float__array_deleteRef;
   spa_api[SIDL_int__borrow_python_array_NUM] =
     (void *)SIDL_int__borrow_python_array;
   spa_api[SIDL_int__clone_python_array_column_NUM] =
@@ -1229,8 +1229,8 @@ initSIDLPyArrays(void)
     (void *)SIDL_int__python_borrow_array;
   spa_api[SIDL_int__python_clone_array_NUM] =
     (void *)SIDL_int__python_clone_array;
-  spa_api[SIDL_int__python_deleteReference_array_NUM] =
-    (void *)SIDL_int__array_deleteReference;
+  spa_api[SIDL_int__python_deleteRef_array_NUM] =
+    (void *)SIDL_int__array_deleteRef;
   spa_api[SIDL_long__borrow_python_array_NUM] =
     (void *)SIDL_long__borrow_python_array;
   spa_api[SIDL_long__clone_python_array_column_NUM] =
@@ -1241,8 +1241,8 @@ initSIDLPyArrays(void)
     (void *)SIDL_long__python_borrow_array;
   spa_api[SIDL_long__python_clone_array_NUM] =
     (void *)SIDL_long__python_clone_array;
-  spa_api[SIDL_long__python_deleteReference_array_NUM] =
-    (void *)SIDL_long__array_deleteReference;
+  spa_api[SIDL_long__python_deleteRef_array_NUM] =
+    (void *)SIDL_long__array_deleteRef;
   spa_api[SIDL_opaque__borrow_python_array_NUM] =
     (void *)SIDL_opaque__borrow_python_array;
   spa_api[SIDL_opaque__clone_python_array_column_NUM] =
@@ -1253,8 +1253,8 @@ initSIDLPyArrays(void)
     (void *)SIDL_opaque__python_borrow_array;
   spa_api[SIDL_opaque__python_clone_array_NUM] =
     (void *)SIDL_opaque__python_clone_array;
-  spa_api[SIDL_opaque__python_deleteReference_array_NUM] =
-    (void *)SIDL_opaque__array_deleteReference;
+  spa_api[SIDL_opaque__python_deleteRef_array_NUM] =
+    (void *)SIDL_opaque__array_deleteRef;
   spa_api[SIDL_string__borrow_python_array_NUM] =
     (void *)SIDL_string__borrow_python_array;
   spa_api[SIDL_string__clone_python_array_column_NUM] =
@@ -1265,8 +1265,8 @@ initSIDLPyArrays(void)
     (void *)SIDL_string__python_borrow_array;
   spa_api[SIDL_string__python_clone_array_NUM] =
     (void *)SIDL_string__python_clone_array;
-  spa_api[SIDL_string__python_deleteReference_array_NUM] =
-    (void *)SIDL_string__array_deleteReference;
+  spa_api[SIDL_string__python_deleteRef_array_NUM] =
+    (void *)SIDL_string__array_deleteRef;
   spa_api[SIDL_array__convert_python_NUM] =
     (void *)SIDL_array__convert_python;
   spa_api[SIDL_array__convert_sidl_NUM] =

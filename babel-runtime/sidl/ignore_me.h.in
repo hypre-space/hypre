@@ -11,8 +11,36 @@
    libraries. */
 #undef F77_DUMMY_MAIN
 
+/* Define to dummy `main' function (if any) required to link to the Fortran 90
+   libraries. */
+#undef F90_DUMMY_MAIN
+
 /* If defined, Fortran support was disabled at configure time */
 #undef FORTRAN77_DISABLED
+
+/* If defined, F90 support was disabled at configure time */
+#undef FORTRAN90_DISABLED
+
+/* Define to 1 if you have the `argz_append' function. */
+#undef HAVE_ARGZ_APPEND
+
+/* Define to 1 if you have the `argz_create_sep' function. */
+#undef HAVE_ARGZ_CREATE_SEP
+
+/* Define to 1 if you have the <argz.h> header file. */
+#undef HAVE_ARGZ_H
+
+/* Define to 1 if you have the `argz_insert' function. */
+#undef HAVE_ARGZ_INSERT
+
+/* Define to 1 if you have the `argz_next' function. */
+#undef HAVE_ARGZ_NEXT
+
+/* Define to 1 if you have the `argz_stringify' function. */
+#undef HAVE_ARGZ_STRINGIFY
+
+/* Define to 1 if you have the <assert.h> header file. */
+#undef HAVE_ASSERT_H
 
 /* Define to 1 if you have the `atexit' function. */
 #undef HAVE_ATEXIT
@@ -54,6 +82,12 @@
 /* Define to 1 if you have the <dl.h> header file. */
 #undef HAVE_DL_H
 
+/* Define to 1 if you have the <errno.h> header file. */
+#undef HAVE_ERRNO_H
+
+/* Define to 1 if the system has the type `error_t'. */
+#undef HAVE_ERROR_T
+
 /* Define to 1 if you have the `getcwd' function. */
 #undef HAVE_GETCWD
 
@@ -66,23 +100,20 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define to 1 if you have the <jni.h> header file. */
-#undef HAVE_JNI_H
-
 /* Define if you have the libdl library or equivalent. */
 #undef HAVE_LIBDL
 
 /* define if long long is a built in type */
 #undef HAVE_LONG_LONG
 
-/* Define to 1 if your system has a working `malloc' function. */
-#undef HAVE_MALLOC
-
 /* Define to 1 if you have the <malloc.h> header file. */
 #undef HAVE_MALLOC_H
 
 /* Define to 1 if you have the `memcpy' function. */
 #undef HAVE_MEMCPY
+
+/* Define to 1 if you have the `memmove' function. */
+#undef HAVE_MEMMOVE
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
@@ -195,7 +226,7 @@
 /* Define to the system default library search path. */
 #undef LTDL_SYSSEARCHPATH
 
-/* Define if dlsym() requires a leading underscode in symbol names. */
+/* Define if dlsym() requires a leading underscore in symbol names. */
 #undef NEED_USCORE
 
 /* Name of package */
@@ -279,6 +310,48 @@
 /* no underscores after F77 symbols */
 #undef SIDL_F77_ZERO_UNDERSCORE
 
+/* Fortran 90 char args are strings */
+#undef SIDL_F90_CHAR_AS_STRING
+
+/* Fortran 90 logical false value */
+#undef SIDL_F90_FALSE
+
+/* Fortran 90 symbols are lower case */
+#undef SIDL_F90_LOWER_CASE
+
+/* Fortran 90 symbols are mixed case */
+#undef SIDL_F90_MIXED_CASE
+
+/* one underscore after Fortran 90 symbols */
+#undef SIDL_F90_ONE_UNDERSCORE
+
+/* Fortran 90 strings lengths immediately follow string */
+#undef SIDL_F90_STR_LEN_FAR
+
+/* Fortran 90 strings lengths at end */
+#undef SIDL_F90_STR_LEN_NEAR
+
+/* Minimum size for out strings */
+#undef SIDL_F90_STR_MINSIZE
+
+/* Fortran 90 strings as length-char* structs */
+#undef SIDL_F90_STR_STRUCT_LEN_STR
+
+/* Fortran 90 strings as char*-length structs */
+#undef SIDL_F90_STR_STRUCT_STR_LEN
+
+/* Fortran 90 logical true value */
+#undef SIDL_F90_TRUE
+
+/* two underscores after Fortran 90 symbols */
+#undef SIDL_F90_TWO_UNDERSCORE
+
+/* Fortran 90 symbols are upper case */
+#undef SIDL_F90_UPPER_CASE
+
+/* no underscores after Fortran 90 symbols */
+#undef SIDL_F90_ZERO_UNDERSCORE
+
 /* Define SIDL_STATIC_LIBRARY to force static loading of libraries */
 #undef SIDL_STATIC_LIBRARY
 
@@ -305,6 +378,9 @@
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
+
+/* Define to a type to use for `error_t' if it is not otherwise available. */
+#undef error_t
 
 /* used when a compiler does not recognize int32_t */
 #undef int32_t

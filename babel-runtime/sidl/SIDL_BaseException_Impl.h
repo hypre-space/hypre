@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_BaseException_Impl.h
- * Symbol:        SIDL.BaseException-v0.7.5
+ * Symbol:        SIDL.BaseException-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for SIDL.BaseException
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 #ifndef included_SIDL_BaseException_Impl_h
@@ -110,11 +110,11 @@ impl_SIDL_BaseException__dtor(
  */
 
 extern char*
-impl_SIDL_BaseException_getMessage(
+impl_SIDL_BaseException_getNote(
   SIDL_BaseException);
 
 extern void
-impl_SIDL_BaseException_setMessage(
+impl_SIDL_BaseException_setNote(
   SIDL_BaseException,
   const char*);
 
@@ -123,12 +123,12 @@ impl_SIDL_BaseException_getTrace(
   SIDL_BaseException);
 
 extern void
-impl_SIDL_BaseException_addToStackTrace(
+impl_SIDL_BaseException_addLine(
   SIDL_BaseException,
   const char*);
 
 extern void
-impl_SIDL_BaseException_addToTrace(
+impl_SIDL_BaseException_add(
   SIDL_BaseException,
   const char*,
   int32_t,

@@ -1,8 +1,8 @@
 /*
  * File:          SIDL.h
- * Symbol:        SIDL-v0.7.5
+ * Symbol:        SIDL-v0.8.1
  * Symbol Type:   package
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for SIDL
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 #ifndef included_SIDL_h
@@ -46,6 +46,12 @@
 #endif
 #ifndef included_SIDL_BaseInterface_h
 #include "SIDL_BaseInterface.h"
+#endif
+#ifndef included_SIDL_ClassInfo_h
+#include "SIDL_ClassInfo.h"
+#endif
+#ifndef included_SIDL_ClassInfoI_h
+#include "SIDL_ClassInfoI.h"
 #endif
 #ifndef included_SIDL_DLL_h
 #include "SIDL_DLL.h"

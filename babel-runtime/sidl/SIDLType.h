@@ -37,10 +37,12 @@
 #ifndef included_babel_config_h
 #include "babel_config.h"
 #endif
+
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
+#else
 #include <sys/types.h>
+#endif
 
 
 /*

@@ -1,8 +1,8 @@
 /*
  * File:          SIDL_Loader_IOR.h
- * Symbol:        SIDL.Loader-v0.7.5
+ * Symbol:        SIDL.Loader-v0.8.1
  * Symbol Type:   class
- * Babel Version: 0.7.5
+ * Babel Version: 0.8.0
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for SIDL.Loader
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.5
+ * babel-version = 0.8.0
  */
 
 #ifndef included_SIDL_Loader_IOR_h
@@ -50,9 +50,9 @@ extern "C" {
 #endif
 
 /*
- * Symbol "SIDL.Loader" (version 0.7.5)
+ * Symbol "SIDL.Loader" (version 0.8.1)
  * 
- * Class <code>Loader</code> manages dynamic loading and symbol name
+ * Class <code>Loader</code> manages dyanamic loading and symbol name
  * resolution for the SIDL runtime system.  The <code>Loader</code> class
  * manages a library search path and keeps a record of all libraries
  * loaded through this interface, including the initial "global" symbols
@@ -78,6 +78,7 @@ extern void SIDL_Loader__init(
   struct SIDL_Loader__object* self);
 extern void SIDL_Loader__fini(
   struct SIDL_Loader__object* self);
+extern void SIDL_Loader__IOR_version(int32_t *major, int32_t *minor);
 
 /*
  * Forward references for external classes and interfaces.
@@ -85,6 +86,8 @@ extern void SIDL_Loader__fini(
 
 struct SIDL_BaseInterface__array;
 struct SIDL_BaseInterface__object;
+struct SIDL_ClassInfo__array;
+struct SIDL_ClassInfo__object;
 struct SIDL_DLL__array;
 struct SIDL_DLL__object;
 
@@ -93,9 +96,9 @@ struct SIDL_DLL__object;
  */
 
 struct SIDL_Loader__sepv {
-  /* Methods introduced in SIDL.BaseInterface-v0.7.5 */
-  /* Methods introduced in SIDL.BaseClass-v0.7.5 */
-  /* Methods introduced in SIDL.Loader-v0.7.5 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in SIDL.BaseClass-v0.8.1 */
+  /* Methods introduced in SIDL.Loader-v0.8.1 */
   void (*f_setSearchPath)(
     const char* path_name);
   char* (*f_getSearchPath)(
@@ -129,22 +132,24 @@ struct SIDL_Loader__epv {
     struct SIDL_Loader__object* self);
   void (*f__dtor)(
     struct SIDL_Loader__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.7.5 */
-  void (*f_addReference)(
+  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  void (*f_addRef)(
     struct SIDL_Loader__object* self);
-  void (*f_deleteReference)(
+  void (*f_deleteRef)(
     struct SIDL_Loader__object* self);
   SIDL_bool (*f_isSame)(
     struct SIDL_Loader__object* self,
     struct SIDL_BaseInterface__object* iobj);
-  struct SIDL_BaseInterface__object* (*f_queryInterface)(
+  struct SIDL_BaseInterface__object* (*f_queryInt)(
     struct SIDL_Loader__object* self,
     const char* name);
-  SIDL_bool (*f_isInstanceOf)(
+  SIDL_bool (*f_isType)(
     struct SIDL_Loader__object* self,
     const char* name);
-  /* Methods introduced in SIDL.BaseClass-v0.7.5 */
-  /* Methods introduced in SIDL.Loader-v0.7.5 */
+  /* Methods introduced in SIDL.BaseClass-v0.8.1 */
+  struct SIDL_ClassInfo__object* (*f_getClassInfo)(
+    struct SIDL_Loader__object* self);
+  /* Methods introduced in SIDL.Loader-v0.8.1 */
 };
 
 /*

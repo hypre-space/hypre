@@ -110,7 +110,7 @@ SIDL_Object_Create SIDL_Object_Create_PROTO {
       if (self){
 	self->d_sidlobj.d_ior = ior;
         if (refType == SIDL_PyNewRef) {
-          (*ior->d_epv->f_addReference)(ior);
+          (*ior->d_epv->f_addRef)(ior);
         }
 	self->d_methods = methods;
 	self->d_getIOR = SIDLPython_Object_getIOR;
@@ -119,7 +119,7 @@ SIDL_Object_Create SIDL_Object_Create_PROTO {
       }
       else {
         if (refType == SIDL_PyStealRef) {
-          (*(ior->d_epv->f_deleteReference))(ior);
+          (*(ior->d_epv->f_deleteRef))(ior);
         }
       }
     }
@@ -179,7 +179,7 @@ SIDL_Interface_Create SIDL_Interface_Create_PROTO {
       if (self){
 	self->d_sidlobj.d_abint = abint;
         if (refType == SIDL_PyNewRef) {
-          (*abint->d_epv->f_addReference)(abint->d_object);
+          (*abint->d_epv->f_addRef)(abint->d_object);
         }
 	self->d_methods = methods;
 	self->d_getIOR = SIDLPython_Interface_getIOR;
@@ -188,7 +188,7 @@ SIDL_Interface_Create SIDL_Interface_Create_PROTO {
       }
       else {
         if (refType == SIDL_PyStealRef) {
-          (*abint->d_epv->f_deleteReference)(abint->d_object);
+          (*abint->d_epv->f_deleteRef)(abint->d_object);
         }
       }
     }
@@ -239,7 +239,7 @@ spoa_self_destruct(struct SIDLPythonObject *self)
   struct SIDL_BaseClass__object *ior = SIDL_Get_IOR((PyObject *)self);
   /* remove Python's reference to this SIDL object */
   if (self->d_refType != SIDL_PyWeakRef) {
-    (*(ior->d_epv->f_deleteReference))(ior);
+    (*(ior->d_epv->f_deleteRef))(ior);
   }
   self->d_sidlobj.d_ior = NULL;
   self->d_sidlobj.d_abint = NULL;

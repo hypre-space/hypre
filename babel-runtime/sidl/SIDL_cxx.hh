@@ -1,26 +1,3 @@
-// Copyright (c) 2000-2001, The Regents of the University of Calfornia.
-// Produced at the Lawrence Livermore National Laboratory.
-// Written by the Components Team <components@llnl.gov>
-// UCRL-CODE-2002-054
-// All rights reserved.
-// 
-// This file is part of Babel. For more information, see
-// http://www.llnl.gov/CASC/components/. Please read the COPYRIGHT file
-// for Our Notice and the LICENSE file for the GNU Lesser General Public
-// License.
-// 
-// This program is free software; you can redistribute it and/or modify it
-// under the terms of the GNU Lesser General Public License (as published by
-// the Free Software Foundation) version 2.1 dated February 1999.
-// 
-// This program is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY; without even the IMPLIED WARRANTY OF
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the terms and
-// conditions of the GNU Lesser General Public License for more details.
-// 
-// You should have recieved a copy of the GNU Lesser General Public License
-// along with this program; if not, write to the Free Software Foundation,
-// Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                    
 /*
  * File:        SIDL_cxx.hh
@@ -40,11 +17,9 @@
 #error C++ headerfile: not meant for C compilers
 #endif
 
-#include "babel_config.h"
-#ifdef CXX_DISABLED
-#error This installation of Babel Runtime was configured without C++ support.
-#endif
 
+// get babel configuration information
+#include "babel_config.h"
 #include <stdlib.h>
 
 // need free()
@@ -153,73 +128,73 @@ namespace SIDL {
     // conversion from ior to C++ class
     array_mixin(array_ior_t* src ) : d_array(src) { 
       if ( d_array != 0 ) { 
-	addReference();
+	addRef();
       }
     }
 
-    void addReference() throw ( NullIORException ) {
+    void addRef() throw ( NullIORException ) {
       if ( d_array == 0 ) {
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array_mixin<>::addReference()'"
+          "Null IOR Pointer in 'array_mixin<>::addRef()'"
         ));
       }
-      SIDL_interface__array_addReference(
-        (struct SIDL_interface__array *) d_array );
+      SIDL_interface__array_addRef(
+        reinterpret_cast<struct SIDL_interface__array *>(d_array) );
     }
 
-    void deleteReference() throw ( NullIORException ) {
+    void deleteRef() throw ( NullIORException ) {
       if ( d_array == 0 ) {
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array_mixin<>::deleteReference()'"
+          "Null IOR Pointer in 'array_mixin<>::deleteRef()'"
         ));
       }
-      SIDL_interface__array_deleteReference(
-        (struct SIDL_interface__array *) d_array );
+      SIDL_interface__array_deleteRef(
+        reinterpret_cast<struct SIDL_interface__array *>(d_array) );
       d_array = 0;
     }
     
     // borrow
     void borrow( item_ior_t * first_element, int32_t dimen,
       const int32_t lower[], const int32_t upper[], const int32_t stride[]) {
-      d_array = (array_ior_t*)
+      d_array = reinterpret_cast<array_ior_t*>(
 	SIDL_interface__array_borrow(first_element, dimen, lower,
-				     upper, stride);
+				     upper, stride));
     }
 
     // isColumnOrder
     bool isColumnOrder() const {
       return SIDL_interface__array_isColumnOrder(
-        (const struct SIDL_interface__array*) d_array ) == TRUE;
+        reinterpret_cast<const struct SIDL_interface__array *>(d_array)) == TRUE;
     }
 
     // isRowOrder
     bool isRowOrder() const {
       return SIDL_interface__array_isRowOrder(
-        (const struct SIDL_interface__array*) d_array ) == TRUE;
+        reinterpret_cast<const struct SIDL_interface__array *>(d_array)) == TRUE;
     }
 
     // get dimension
     int32_t dimen() const { 
       return SIDL_interface__array_dimen
-	((const struct SIDL_interface__array *)d_array);
+	(reinterpret_cast<const struct SIDL_interface__array *>(d_array));
     }
     
     // get lower bound along particular dimension
     int32_t lower( int32_t d ) const {
       return SIDL_interface__array_lower
-	((const struct SIDL_interface__array*)d_array, d);
+	(reinterpret_cast<const struct SIDL_interface__array *>(d_array), d);
     } 
     
     // get upper bound along particular dimension
     int32_t upper( int32_t d ) const {
       return SIDL_interface__array_upper
-	((const struct SIDL_interface__array*)d_array, d);
+	(reinterpret_cast<const struct SIDL_interface__array *>(d_array), d);
     }
     
     // get stride along particular dimension
     int32_t stride( int32_t d ) const {
       return SIDL_interface__array_stride
-	((const struct SIDL_interface__array*)d_array, d);
+	(reinterpret_cast<const struct SIDL_interface__array *>(d_array), d);
     }
     
     // get a const pointer to the actual array ior 
@@ -250,10 +225,10 @@ namespace SIDL {
     item_cxx_wrapper_t get(int32_t i) {
       SIDL_BaseInterface sbi =
         SIDL_interface__array_get1
-        ((const struct SIDL_interface__array*)d_array, i);
-      item_cxx_wrapper_t icwt((item_ior_t)sbi);
+        (reinterpret_cast<const struct SIDL_interface__array *>(d_array), i);
+      item_cxx_wrapper_t icwt(reinterpret_cast<item_ior_t>(sbi));
       if (sbi) {
-        SIDL_BaseInterface_deleteReference(sbi);
+        SIDL_BaseInterface_deleteRef(sbi);
       }
       return icwt;
     }
@@ -262,10 +237,10 @@ namespace SIDL {
     item_cxx_wrapper_t get(int32_t i, int32_t j) {
       SIDL_BaseInterface sbi =
         SIDL_interface__array_get2
-        ((const struct SIDL_interface__array*)d_array, i, j);
-      item_cxx_wrapper_t icwt((item_ior_t)sbi);
+        (reinterpret_cast<const struct SIDL_interface__array *>(d_array), i, j);
+      item_cxx_wrapper_t icwt(reinterpret_cast<item_ior_t>(sbi));
       if (sbi) {
-        SIDL_BaseInterface_deleteReference(sbi);
+        SIDL_BaseInterface_deleteRef(sbi);
       }
       return icwt;
     }
@@ -274,10 +249,10 @@ namespace SIDL {
     item_cxx_wrapper_t get(int32_t i, int32_t j, int32_t k) {
       SIDL_BaseInterface sbi =
         SIDL_interface__array_get3
-        ((const struct SIDL_interface__array*)d_array, i, j, k);
-      item_cxx_wrapper_t icwt((item_ior_t)sbi);
+        (reinterpret_cast<const struct SIDL_interface__array *>(d_array), i, j, k);
+      item_cxx_wrapper_t icwt(reinterpret_cast<item_ior_t>(sbi));
       if (sbi) {
-        SIDL_BaseInterface_deleteReference(sbi);
+        SIDL_BaseInterface_deleteRef(sbi);
       }
       return icwt;
     }
@@ -286,10 +261,10 @@ namespace SIDL {
     item_cxx_wrapper_t get(int32_t i, int32_t j, int32_t k, int32_t l) {
       SIDL_BaseInterface sbi =
         SIDL_interface__array_get4
-        ((const struct SIDL_interface__array*)d_array, i, j, k, l);
-      item_cxx_wrapper_t icwt((item_ior_t)sbi);
+        (reinterpret_cast<const struct SIDL_interface__array *>(d_array), i, j, k, l);
+      item_cxx_wrapper_t icwt(reinterpret_cast<item_ior_t>(sbi));
       if (sbi) {
-        SIDL_BaseInterface_deleteReference(sbi);
+        SIDL_BaseInterface_deleteRef(sbi);
       }
       return icwt;
     }
@@ -299,10 +274,10 @@ namespace SIDL {
     item_cxx_wrapper_t get(const int32_t ind[]) {
       SIDL_BaseInterface sbi =
         SIDL_interface__array_get
-        ((const struct SIDL_interface__array*)d_array, ind);
-      item_cxx_wrapper_t icwt((item_ior_t)sbi);
+        (reinterpret_cast<const struct SIDL_interface__array *>(d_array), ind);
+      item_cxx_wrapper_t icwt(reinterpret_cast<item_ior_t>(sbi));
       if (sbi) {
-        SIDL_BaseInterface_deleteReference(sbi);
+        SIDL_BaseInterface_deleteRef(sbi);
       }
       return icwt;
     }
@@ -310,41 +285,41 @@ namespace SIDL {
     // set
     void set(int32_t i, item_cxx_wrapper_t element) {
       SIDL_interface__array_set1
-	((struct SIDL_interface__array*)d_array, i, 
-	 (struct SIDL_BaseInterface__object *)
-	 element._get_ior());
+	(reinterpret_cast<struct SIDL_interface__array *>(d_array), i, 
+	 reinterpret_cast<struct SIDL_BaseInterface__object *>(
+	 element._get_ior()));
     }
     
     // set
     void set(int32_t i, int32_t j, item_cxx_wrapper_t element) {
       SIDL_interface__array_set2
-	((struct SIDL_interface__array*)d_array, i, j,
-	 (struct SIDL_BaseInterface__object *)
-	 element._get_ior());
+	(reinterpret_cast<struct SIDL_interface__array *>(d_array), i, j,
+	 reinterpret_cast<struct SIDL_BaseInterface__object *>(
+	 element._get_ior()));
     }
     
     // set
     void set(int32_t i, int32_t j, int32_t k, item_cxx_wrapper_t element) {
       SIDL_interface__array_set3
-	((struct SIDL_interface__array*)d_array, i, j, k,
-	 (struct SIDL_BaseInterface__object *)
-	 element._get_ior());
+	(reinterpret_cast<struct SIDL_interface__array *>(d_array), i, j, k,
+	 reinterpret_cast<struct SIDL_BaseInterface__object *>(
+	 element._get_ior()));
     }
     
     // set
     void set(int32_t i, int32_t j, int32_t k, int32_t l, item_cxx_wrapper_t element) {
       SIDL_interface__array_set4
-	((struct SIDL_interface__array*)d_array, i, j, k, l,
-	 (struct SIDL_BaseInterface__object *)
-	 element._get_ior());
+	(reinterpret_cast<struct SIDL_interface__array *>(d_array), i, j, k, l,
+	 reinterpret_cast<struct SIDL_BaseInterface__object *>(
+	 element._get_ior()));
     }
     
     // set
     void set(const int32_t ind[], item_cxx_wrapper_t element) {
       SIDL_interface__array_set
-        ((struct SIDL_interface__array*)d_array, ind, 
-         (struct SIDL_BaseInterface__object *)
-         element._get_ior());
+        (reinterpret_cast<struct SIDL_interface__array *>(d_array), ind, 
+         reinterpret_cast<struct SIDL_BaseInterface__object *>(
+         element._get_ior()));
     }
   };
 
@@ -366,22 +341,22 @@ namespace SIDL {
     // default destructor
     virtual ~array() {
       if ( d_array ) {
-        SIDL_bool__array_deleteReference( d_array );
+        SIDL_bool__array_deleteRef( d_array );
       }
     }
 
     // copy constructor
     array( const array< bool >& original ) { 
       d_array = original.d_array;
-      if ( d_array ) { addReference(); }
+      if ( d_array ) { addRef(); }
     }
 
     // assignment operator
     array< bool >& operator=( const array< bool >& rhs ) { 
       if ( d_array != rhs.d_array ) { 
-	if ( d_array ) { deleteReference(); }
+	if ( d_array ) { deleteRef(); }
 	d_array=rhs.d_array;
-	if ( d_array ) { addReference(); }
+	if ( d_array ) { addRef(); }
       }
       return *this;
     }
@@ -391,22 +366,22 @@ namespace SIDL {
     array( SIDL_bool__array* src ) : array_mixin< struct SIDL_bool__array, SIDL_bool, bool >(src) {}
 
 
-    void addReference() throw ( NullIORException ) {
+    void addRef() throw ( NullIORException ) {
       if ( d_array == 0 ) { 
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< bool >::addReference()'"
+          "Null IOR Pointer in 'array< bool >::addRef()'"
         ));
       }
-      SIDL_bool__array_addReference( d_array );
+      SIDL_bool__array_addRef( d_array );
     }
 
-    void deleteReference() throw ( NullIORException ) {
+    void deleteRef() throw ( NullIORException ) {
       if ( d_array == 0 ) {
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< bool >::deleteReference()'"
+          "Null IOR Pointer in 'array< bool >::deleteRef()'"
         ));
       }
-      SIDL_bool__array_deleteReference( d_array );
+      SIDL_bool__array_deleteRef( d_array );
       d_array = 0;
     }
        
@@ -479,14 +454,14 @@ namespace SIDL {
     // smartCopy
     void smartCopy( ) {
        struct SIDL_bool__array* p = SIDL_bool__array_smartCopy( _get_ior() );
-       if ( _not_nil() ) { deleteReference(); }
+       if ( _not_nil() ) { deleteRef(); }
        _set_ior( p );
     }
     
     // ensure
     void ensure( int32_t dimen, int ordering ) {
       struct SIDL_bool__array* p = SIDL_bool__array_ensure( _get_ior(), dimen, ordering );
-      if ( _not_nil() ) { deleteReference(); }
+      if ( _not_nil() ) { deleteRef(); }
       _set_ior( p );
     }
 
@@ -503,25 +478,25 @@ namespace SIDL {
     // get dimension
     int32_t dimen() const { 
       return SIDL_bool__array_dimen(
-	(const struct SIDL_bool__array *)d_array);
+	reinterpret_cast<const struct SIDL_bool__array *>(d_array));
     }
     
     // get lower bound along particular dimension
     int32_t lower( int32_t d ) const {
       return SIDL_bool__array_lower(
-	(const struct SIDL_bool__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_bool__array *>(d_array), d);
     } 
     
     // get upper bound along particular dimension
     int32_t upper( int32_t d ) const {
       return SIDL_bool__array_upper(
-	(const struct SIDL_bool__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_bool__array *>(d_array), d);
     }
     
     // get stride along particular dimension
     int32_t stride( int32_t d ) const {
       return SIDL_bool__array_stride(
-	(const struct SIDL_bool__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_bool__array *>(d_array), d);
     }
 
     // get
@@ -590,22 +565,22 @@ namespace SIDL {
     // default destructor
     virtual ~array() {
       if ( d_array ) {
-        SIDL_char__array_deleteReference( d_array );
+        SIDL_char__array_deleteRef( d_array );
       }
     }
 
     // copy constructor
     array( const array< char >& original ) { 
       d_array = original.d_array;
-      if ( d_array ) { addReference(); }
+      if ( d_array ) { addRef(); }
     }
 
     // assignment operator
     array< char >& operator=( const array< char >& rhs ) { 
       if ( d_array != rhs.d_array ) { 
-	if ( d_array ) { deleteReference(); }
+	if ( d_array ) { deleteRef(); }
 	d_array=rhs.d_array;
-	if ( d_array ) { addReference(); }
+	if ( d_array ) { addRef(); }
       }
       return *this;
     }
@@ -615,22 +590,22 @@ namespace SIDL {
     array( SIDL_char__array* src ) : array_mixin< struct SIDL_char__array, char, char >(src) {}
 
 
-    void addReference() throw ( NullIORException ) {
+    void addRef() throw ( NullIORException ) {
       if ( d_array == 0 ) { 
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< char >::addReference()'"
+          "Null IOR Pointer in 'array< char >::addRef()'"
         ));
       }
-      SIDL_char__array_addReference( d_array );
+      SIDL_char__array_addRef( d_array );
     }
 
-    void deleteReference() throw ( NullIORException ) {
+    void deleteRef() throw ( NullIORException ) {
       if ( d_array == 0 ) {
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< char >::deleteReference()'"
+          "Null IOR Pointer in 'array< char >::deleteRef()'"
         ));
       }
-      SIDL_char__array_deleteReference( d_array );
+      SIDL_char__array_deleteRef( d_array );
       d_array = 0;
     }
        
@@ -703,14 +678,14 @@ namespace SIDL {
     // smartCopy
     void smartCopy( ) {
        struct SIDL_char__array* p = SIDL_char__array_smartCopy( _get_ior() );
-       if ( _not_nil() ) { deleteReference(); }
+       if ( _not_nil() ) { deleteRef(); }
        _set_ior( p );
     }
     
     // ensure
     void ensure( int32_t dimen, int ordering ) {
       struct SIDL_char__array* p = SIDL_char__array_ensure( _get_ior(), dimen, ordering );
-      if ( _not_nil() ) { deleteReference(); }
+      if ( _not_nil() ) { deleteRef(); }
       _set_ior( p );
     }
 
@@ -727,25 +702,25 @@ namespace SIDL {
     // get dimension
     int32_t dimen() const { 
       return SIDL_char__array_dimen(
-	(const struct SIDL_char__array *)d_array);
+	reinterpret_cast<const struct SIDL_char__array *>(d_array));
     }
     
     // get lower bound along particular dimension
     int32_t lower( int32_t d ) const {
       return SIDL_char__array_lower(
-	(const struct SIDL_char__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_char__array *>(d_array), d);
     } 
     
     // get upper bound along particular dimension
     int32_t upper( int32_t d ) const {
       return SIDL_char__array_upper(
-	(const struct SIDL_char__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_char__array *>(d_array), d);
     }
     
     // get stride along particular dimension
     int32_t stride( int32_t d ) const {
       return SIDL_char__array_stride(
-	(const struct SIDL_char__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_char__array *>(d_array), d);
     }
 
     // get
@@ -809,22 +784,22 @@ namespace SIDL {
     // default destructor
     virtual ~array() {
       if ( d_array ) {
-        SIDL_int__array_deleteReference( d_array );
+        SIDL_int__array_deleteRef( d_array );
       }
     }
 
     // copy constructor
     array( const array< int >& original ) { 
       d_array = original.d_array;
-      if ( d_array ) { addReference(); }
+      if ( d_array ) { addRef(); }
     }
 
     // assignment operator
     array< int >& operator=( const array< int >& rhs ) { 
       if ( d_array != rhs.d_array ) { 
-	if ( d_array ) { deleteReference(); }
+	if ( d_array ) { deleteRef(); }
 	d_array=rhs.d_array;
-	if ( d_array ) { addReference(); }
+	if ( d_array ) { addRef(); }
       }
       return *this;
     }
@@ -834,22 +809,22 @@ namespace SIDL {
     array( SIDL_int__array* src ) : array_mixin< struct SIDL_int__array, int32_t, int32_t >(src) {}
 
 
-    void addReference() throw ( NullIORException ) {
+    void addRef() throw ( NullIORException ) {
       if ( d_array == 0 ) { 
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< int >::addReference()'"
+          "Null IOR Pointer in 'array< int >::addRef()'"
         ));
       }
-      SIDL_int__array_addReference( d_array );
+      SIDL_int__array_addRef( d_array );
     }
 
-    void deleteReference() throw ( NullIORException ) {
+    void deleteRef() throw ( NullIORException ) {
       if ( d_array == 0 ) {
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< int >::deleteReference()'"
+          "Null IOR Pointer in 'array< int >::deleteRef()'"
         ));
       }
-      SIDL_int__array_deleteReference( d_array );
+      SIDL_int__array_deleteRef( d_array );
       d_array = 0;
     }
        
@@ -922,14 +897,14 @@ namespace SIDL {
     // smartCopy
     void smartCopy( ) {
        struct SIDL_int__array* p = SIDL_int__array_smartCopy( _get_ior() );
-       if ( _not_nil() ) { deleteReference(); }
+       if ( _not_nil() ) { deleteRef(); }
        _set_ior( p );
     }
     
     // ensure
     void ensure( int32_t dimen, int ordering ) {
       struct SIDL_int__array* p = SIDL_int__array_ensure( _get_ior(), dimen, ordering );
-      if ( _not_nil() ) { deleteReference(); }
+      if ( _not_nil() ) { deleteRef(); }
       _set_ior( p );
     }
 
@@ -946,25 +921,25 @@ namespace SIDL {
     // get dimension
     int32_t dimen() const { 
       return SIDL_int__array_dimen(
-	(const struct SIDL_int__array *)d_array);
+	reinterpret_cast<const struct SIDL_int__array *>(d_array));
     }
     
     // get lower bound along particular dimension
     int32_t lower( int32_t d ) const {
       return SIDL_int__array_lower(
-	(const struct SIDL_int__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_int__array *>(d_array), d);
     } 
     
     // get upper bound along particular dimension
     int32_t upper( int32_t d ) const {
       return SIDL_int__array_upper(
-	(const struct SIDL_int__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_int__array *>(d_array), d);
     }
     
     // get stride along particular dimension
     int32_t stride( int32_t d ) const {
       return SIDL_int__array_stride(
-	(const struct SIDL_int__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_int__array *>(d_array), d);
     }
 
     // get
@@ -1028,22 +1003,22 @@ namespace SIDL {
     // default destructor
     virtual ~array() {
       if ( d_array ) {
-        SIDL_long__array_deleteReference( d_array );
+        SIDL_long__array_deleteRef( d_array );
       }
     }
 
     // copy constructor
     array( const array< long >& original ) { 
       d_array = original.d_array;
-      if ( d_array ) { addReference(); }
+      if ( d_array ) { addRef(); }
     }
 
     // assignment operator
     array< long >& operator=( const array< long >& rhs ) { 
       if ( d_array != rhs.d_array ) { 
-	if ( d_array ) { deleteReference(); }
+	if ( d_array ) { deleteRef(); }
 	d_array=rhs.d_array;
-	if ( d_array ) { addReference(); }
+	if ( d_array ) { addRef(); }
       }
       return *this;
     }
@@ -1053,22 +1028,22 @@ namespace SIDL {
     array( SIDL_long__array* src ) : array_mixin< struct SIDL_long__array, int64_t, int64_t >(src) {}
 
 
-    void addReference() throw ( NullIORException ) {
+    void addRef() throw ( NullIORException ) {
       if ( d_array == 0 ) { 
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< long >::addReference()'"
+          "Null IOR Pointer in 'array< long >::addRef()'"
         ));
       }
-      SIDL_long__array_addReference( d_array );
+      SIDL_long__array_addRef( d_array );
     }
 
-    void deleteReference() throw ( NullIORException ) {
+    void deleteRef() throw ( NullIORException ) {
       if ( d_array == 0 ) {
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< long >::deleteReference()'"
+          "Null IOR Pointer in 'array< long >::deleteRef()'"
         ));
       }
-      SIDL_long__array_deleteReference( d_array );
+      SIDL_long__array_deleteRef( d_array );
       d_array = 0;
     }
        
@@ -1141,14 +1116,14 @@ namespace SIDL {
     // smartCopy
     void smartCopy( ) {
        struct SIDL_long__array* p = SIDL_long__array_smartCopy( _get_ior() );
-       if ( _not_nil() ) { deleteReference(); }
+       if ( _not_nil() ) { deleteRef(); }
        _set_ior( p );
     }
     
     // ensure
     void ensure( int32_t dimen, int ordering ) {
       struct SIDL_long__array* p = SIDL_long__array_ensure( _get_ior(), dimen, ordering );
-      if ( _not_nil() ) { deleteReference(); }
+      if ( _not_nil() ) { deleteRef(); }
       _set_ior( p );
     }
 
@@ -1165,25 +1140,25 @@ namespace SIDL {
     // get dimension
     int32_t dimen() const { 
       return SIDL_long__array_dimen(
-	(const struct SIDL_long__array *)d_array);
+	reinterpret_cast<const struct SIDL_long__array *>(d_array));
     }
     
     // get lower bound along particular dimension
     int32_t lower( int32_t d ) const {
       return SIDL_long__array_lower(
-	(const struct SIDL_long__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_long__array *>(d_array), d);
     } 
     
     // get upper bound along particular dimension
     int32_t upper( int32_t d ) const {
       return SIDL_long__array_upper(
-	(const struct SIDL_long__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_long__array *>(d_array), d);
     }
     
     // get stride along particular dimension
     int32_t stride( int32_t d ) const {
       return SIDL_long__array_stride(
-	(const struct SIDL_long__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_long__array *>(d_array), d);
     }
 
     // get
@@ -1247,22 +1222,22 @@ namespace SIDL {
     // default destructor
     virtual ~array() {
       if ( d_array ) {
-        SIDL_float__array_deleteReference( d_array );
+        SIDL_float__array_deleteRef( d_array );
       }
     }
 
     // copy constructor
     array( const array< float >& original ) { 
       d_array = original.d_array;
-      if ( d_array ) { addReference(); }
+      if ( d_array ) { addRef(); }
     }
 
     // assignment operator
     array< float >& operator=( const array< float >& rhs ) { 
       if ( d_array != rhs.d_array ) { 
-	if ( d_array ) { deleteReference(); }
+	if ( d_array ) { deleteRef(); }
 	d_array=rhs.d_array;
-	if ( d_array ) { addReference(); }
+	if ( d_array ) { addRef(); }
       }
       return *this;
     }
@@ -1272,22 +1247,22 @@ namespace SIDL {
     array( SIDL_float__array* src ) : array_mixin< struct SIDL_float__array, float, float >(src) {}
 
 
-    void addReference() throw ( NullIORException ) {
+    void addRef() throw ( NullIORException ) {
       if ( d_array == 0 ) { 
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< float >::addReference()'"
+          "Null IOR Pointer in 'array< float >::addRef()'"
         ));
       }
-      SIDL_float__array_addReference( d_array );
+      SIDL_float__array_addRef( d_array );
     }
 
-    void deleteReference() throw ( NullIORException ) {
+    void deleteRef() throw ( NullIORException ) {
       if ( d_array == 0 ) {
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< float >::deleteReference()'"
+          "Null IOR Pointer in 'array< float >::deleteRef()'"
         ));
       }
-      SIDL_float__array_deleteReference( d_array );
+      SIDL_float__array_deleteRef( d_array );
       d_array = 0;
     }
        
@@ -1360,14 +1335,14 @@ namespace SIDL {
     // smartCopy
     void smartCopy( ) {
        struct SIDL_float__array* p = SIDL_float__array_smartCopy( _get_ior() );
-       if ( _not_nil() ) { deleteReference(); }
+       if ( _not_nil() ) { deleteRef(); }
        _set_ior( p );
     }
     
     // ensure
     void ensure( int32_t dimen, int ordering ) {
       struct SIDL_float__array* p = SIDL_float__array_ensure( _get_ior(), dimen, ordering );
-      if ( _not_nil() ) { deleteReference(); }
+      if ( _not_nil() ) { deleteRef(); }
       _set_ior( p );
     }
 
@@ -1384,25 +1359,25 @@ namespace SIDL {
     // get dimension
     int32_t dimen() const { 
       return SIDL_float__array_dimen(
-	(const struct SIDL_float__array *)d_array);
+	reinterpret_cast<const struct SIDL_float__array *>(d_array));
     }
     
     // get lower bound along particular dimension
     int32_t lower( int32_t d ) const {
       return SIDL_float__array_lower(
-	(const struct SIDL_float__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_float__array *>(d_array), d);
     } 
     
     // get upper bound along particular dimension
     int32_t upper( int32_t d ) const {
       return SIDL_float__array_upper(
-	(const struct SIDL_float__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_float__array *>(d_array), d);
     }
     
     // get stride along particular dimension
     int32_t stride( int32_t d ) const {
       return SIDL_float__array_stride(
-	(const struct SIDL_float__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_float__array *>(d_array), d);
     }
 
     // get
@@ -1466,22 +1441,22 @@ namespace SIDL {
     // default destructor
     virtual ~array() {
       if ( d_array ) {
-        SIDL_double__array_deleteReference( d_array );
+        SIDL_double__array_deleteRef( d_array );
       }
     }
 
     // copy constructor
     array( const array< double >& original ) { 
       d_array = original.d_array;
-      if ( d_array ) { addReference(); }
+      if ( d_array ) { addRef(); }
     }
 
     // assignment operator
     array< double >& operator=( const array< double >& rhs ) { 
       if ( d_array != rhs.d_array ) { 
-	if ( d_array ) { deleteReference(); }
+	if ( d_array ) { deleteRef(); }
 	d_array=rhs.d_array;
-	if ( d_array ) { addReference(); }
+	if ( d_array ) { addRef(); }
       }
       return *this;
     }
@@ -1491,22 +1466,22 @@ namespace SIDL {
     array( SIDL_double__array* src ) : array_mixin< struct SIDL_double__array, double, double >(src) {}
 
 
-    void addReference() throw ( NullIORException ) {
+    void addRef() throw ( NullIORException ) {
       if ( d_array == 0 ) { 
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< double >::addReference()'"
+          "Null IOR Pointer in 'array< double >::addRef()'"
         ));
       }
-      SIDL_double__array_addReference( d_array );
+      SIDL_double__array_addRef( d_array );
     }
 
-    void deleteReference() throw ( NullIORException ) {
+    void deleteRef() throw ( NullIORException ) {
       if ( d_array == 0 ) {
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< double >::deleteReference()'"
+          "Null IOR Pointer in 'array< double >::deleteRef()'"
         ));
       }
-      SIDL_double__array_deleteReference( d_array );
+      SIDL_double__array_deleteRef( d_array );
       d_array = 0;
     }
        
@@ -1579,14 +1554,14 @@ namespace SIDL {
     // smartCopy
     void smartCopy( ) {
        struct SIDL_double__array* p = SIDL_double__array_smartCopy( _get_ior() );
-       if ( _not_nil() ) { deleteReference(); }
+       if ( _not_nil() ) { deleteRef(); }
        _set_ior( p );
     }
     
     // ensure
     void ensure( int32_t dimen, int ordering ) {
       struct SIDL_double__array* p = SIDL_double__array_ensure( _get_ior(), dimen, ordering );
-      if ( _not_nil() ) { deleteReference(); }
+      if ( _not_nil() ) { deleteRef(); }
       _set_ior( p );
     }
 
@@ -1603,25 +1578,25 @@ namespace SIDL {
     // get dimension
     int32_t dimen() const { 
       return SIDL_double__array_dimen(
-	(const struct SIDL_double__array *)d_array);
+	reinterpret_cast<const struct SIDL_double__array *>(d_array));
     }
     
     // get lower bound along particular dimension
     int32_t lower( int32_t d ) const {
       return SIDL_double__array_lower(
-	(const struct SIDL_double__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_double__array *>(d_array), d);
     } 
     
     // get upper bound along particular dimension
     int32_t upper( int32_t d ) const {
       return SIDL_double__array_upper(
-	(const struct SIDL_double__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_double__array *>(d_array), d);
     }
     
     // get stride along particular dimension
     int32_t stride( int32_t d ) const {
       return SIDL_double__array_stride(
-	(const struct SIDL_double__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_double__array *>(d_array), d);
     }
 
     // get
@@ -1685,22 +1660,22 @@ namespace SIDL {
     // default destructor
     virtual ~array() {
       if ( d_array ) {
-        SIDL_fcomplex__array_deleteReference( d_array );
+        SIDL_fcomplex__array_deleteRef( d_array );
       }
     }
 
     // copy constructor
     array( const array< fcomplex >& original ) { 
       d_array = original.d_array;
-      if ( d_array ) { addReference(); }
+      if ( d_array ) { addRef(); }
     }
 
     // assignment operator
     array< fcomplex >& operator=( const array< fcomplex >& rhs ) { 
       if ( d_array != rhs.d_array ) { 
-	if ( d_array ) { deleteReference(); }
+	if ( d_array ) { deleteRef(); }
 	d_array=rhs.d_array;
-	if ( d_array ) { addReference(); }
+	if ( d_array ) { addRef(); }
       }
       return *this;
     }
@@ -1710,22 +1685,22 @@ namespace SIDL {
     array( SIDL_fcomplex__array* src ) : array_mixin< struct SIDL_fcomplex__array, struct SIDL_fcomplex, fcomplex >(src) {}
 
 
-    void addReference() throw ( NullIORException ) {
+    void addRef() throw ( NullIORException ) {
       if ( d_array == 0 ) { 
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< fcomplex >::addReference()'"
+          "Null IOR Pointer in 'array< fcomplex >::addRef()'"
         ));
       }
-      SIDL_fcomplex__array_addReference( d_array );
+      SIDL_fcomplex__array_addRef( d_array );
     }
 
-    void deleteReference() throw ( NullIORException ) {
+    void deleteRef() throw ( NullIORException ) {
       if ( d_array == 0 ) {
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< fcomplex >::deleteReference()'"
+          "Null IOR Pointer in 'array< fcomplex >::deleteRef()'"
         ));
       }
-      SIDL_fcomplex__array_deleteReference( d_array );
+      SIDL_fcomplex__array_deleteRef( d_array );
       d_array = 0;
     }
        
@@ -1798,14 +1773,14 @@ namespace SIDL {
     // smartCopy
     void smartCopy( ) {
        struct SIDL_fcomplex__array* p = SIDL_fcomplex__array_smartCopy( _get_ior() );
-       if ( _not_nil() ) { deleteReference(); }
+       if ( _not_nil() ) { deleteRef(); }
        _set_ior( p );
     }
     
     // ensure
     void ensure( int32_t dimen, int ordering ) {
       struct SIDL_fcomplex__array* p = SIDL_fcomplex__array_ensure( _get_ior(), dimen, ordering );
-      if ( _not_nil() ) { deleteReference(); }
+      if ( _not_nil() ) { deleteRef(); }
       _set_ior( p );
     }
 
@@ -1822,25 +1797,25 @@ namespace SIDL {
     // get dimension
     int32_t dimen() const { 
       return SIDL_fcomplex__array_dimen(
-	(const struct SIDL_fcomplex__array *)d_array);
+	reinterpret_cast<const struct SIDL_fcomplex__array *>(d_array));
     }
     
     // get lower bound along particular dimension
     int32_t lower( int32_t d ) const {
       return SIDL_fcomplex__array_lower(
-	(const struct SIDL_fcomplex__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_fcomplex__array *>(d_array), d);
     } 
     
     // get upper bound along particular dimension
     int32_t upper( int32_t d ) const {
       return SIDL_fcomplex__array_upper(
-	(const struct SIDL_fcomplex__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_fcomplex__array *>(d_array), d);
     }
     
     // get stride along particular dimension
     int32_t stride( int32_t d ) const {
       return SIDL_fcomplex__array_stride(
-	(const struct SIDL_fcomplex__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_fcomplex__array *>(d_array), d);
     }
 
     // get
@@ -1919,22 +1894,22 @@ namespace SIDL {
     // default destructor
     virtual ~array() {
       if ( d_array ) {
-        SIDL_dcomplex__array_deleteReference( d_array );
+        SIDL_dcomplex__array_deleteRef( d_array );
       }
     }
 
     // copy constructor
     array( const array< dcomplex >& original ) { 
       d_array = original.d_array;
-      if ( d_array ) { addReference(); }
+      if ( d_array ) { addRef(); }
     }
 
     // assignment operator
     array< dcomplex >& operator=( const array< dcomplex >& rhs ) { 
       if ( d_array != rhs.d_array ) { 
-	if ( d_array ) { deleteReference(); }
+	if ( d_array ) { deleteRef(); }
 	d_array=rhs.d_array;
-	if ( d_array ) { addReference(); }
+	if ( d_array ) { addRef(); }
       }
       return *this;
     }
@@ -1944,22 +1919,22 @@ namespace SIDL {
     array( SIDL_dcomplex__array* src ) : array_mixin< struct SIDL_dcomplex__array, struct SIDL_dcomplex, dcomplex >(src) {}
 
 
-    void addReference() throw ( NullIORException ) {
+    void addRef() throw ( NullIORException ) {
       if ( d_array == 0 ) { 
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< dcomplex >::addReference()'"
+          "Null IOR Pointer in 'array< dcomplex >::addRef()'"
         ));
       }
-      SIDL_dcomplex__array_addReference( d_array );
+      SIDL_dcomplex__array_addRef( d_array );
     }
 
-    void deleteReference() throw ( NullIORException ) {
+    void deleteRef() throw ( NullIORException ) {
       if ( d_array == 0 ) {
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< dcomplex >::deleteReference()'"
+          "Null IOR Pointer in 'array< dcomplex >::deleteRef()'"
         ));
       }
-      SIDL_dcomplex__array_deleteReference( d_array );
+      SIDL_dcomplex__array_deleteRef( d_array );
       d_array = 0;
     }
        
@@ -2032,14 +2007,14 @@ namespace SIDL {
     // smartCopy
     void smartCopy( ) {
        struct SIDL_dcomplex__array* p = SIDL_dcomplex__array_smartCopy( _get_ior() );
-       if ( _not_nil() ) { deleteReference(); }
+       if ( _not_nil() ) { deleteRef(); }
        _set_ior( p );
     }
     
     // ensure
     void ensure( int32_t dimen, int ordering ) {
       struct SIDL_dcomplex__array* p = SIDL_dcomplex__array_ensure( _get_ior(), dimen, ordering );
-      if ( _not_nil() ) { deleteReference(); }
+      if ( _not_nil() ) { deleteRef(); }
       _set_ior( p );
     }
 
@@ -2056,25 +2031,25 @@ namespace SIDL {
     // get dimension
     int32_t dimen() const { 
       return SIDL_dcomplex__array_dimen(
-	(const struct SIDL_dcomplex__array *)d_array);
+	reinterpret_cast<const struct SIDL_dcomplex__array *>(d_array));
     }
     
     // get lower bound along particular dimension
     int32_t lower( int32_t d ) const {
       return SIDL_dcomplex__array_lower(
-	(const struct SIDL_dcomplex__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_dcomplex__array *>(d_array), d);
     } 
     
     // get upper bound along particular dimension
     int32_t upper( int32_t d ) const {
       return SIDL_dcomplex__array_upper(
-	(const struct SIDL_dcomplex__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_dcomplex__array *>(d_array), d);
     }
     
     // get stride along particular dimension
     int32_t stride( int32_t d ) const {
       return SIDL_dcomplex__array_stride(
-	(const struct SIDL_dcomplex__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_dcomplex__array *>(d_array), d);
     }
 
     // get
@@ -2153,22 +2128,22 @@ namespace SIDL {
     // default destructor
     virtual ~array() {
       if ( d_array ) {
-        SIDL_opaque__array_deleteReference( d_array );
+        SIDL_opaque__array_deleteRef( d_array );
       }
     }
 
     // copy constructor
     array( const array< opaque >& original ) { 
       d_array = original.d_array;
-      if ( d_array ) { addReference(); }
+      if ( d_array ) { addRef(); }
     }
 
     // assignment operator
     array< opaque >& operator=( const array< opaque >& rhs ) { 
       if ( d_array != rhs.d_array ) { 
-	if ( d_array ) { deleteReference(); }
+	if ( d_array ) { deleteRef(); }
 	d_array=rhs.d_array;
-	if ( d_array ) { addReference(); }
+	if ( d_array ) { addRef(); }
       }
       return *this;
     }
@@ -2178,22 +2153,22 @@ namespace SIDL {
     array( SIDL_opaque__array* src ) : array_mixin< struct SIDL_opaque__array, void*, void* >(src) {}
 
 
-    void addReference() throw ( NullIORException ) {
+    void addRef() throw ( NullIORException ) {
       if ( d_array == 0 ) { 
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< opaque >::addReference()'"
+          "Null IOR Pointer in 'array< opaque >::addRef()'"
         ));
       }
-      SIDL_opaque__array_addReference( d_array );
+      SIDL_opaque__array_addRef( d_array );
     }
 
-    void deleteReference() throw ( NullIORException ) {
+    void deleteRef() throw ( NullIORException ) {
       if ( d_array == 0 ) {
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< opaque >::deleteReference()'"
+          "Null IOR Pointer in 'array< opaque >::deleteRef()'"
         ));
       }
-      SIDL_opaque__array_deleteReference( d_array );
+      SIDL_opaque__array_deleteRef( d_array );
       d_array = 0;
     }
        
@@ -2266,14 +2241,14 @@ namespace SIDL {
     // smartCopy
     void smartCopy( ) {
        struct SIDL_opaque__array* p = SIDL_opaque__array_smartCopy( _get_ior() );
-       if ( _not_nil() ) { deleteReference(); }
+       if ( _not_nil() ) { deleteRef(); }
        _set_ior( p );
     }
     
     // ensure
     void ensure( int32_t dimen, int ordering ) {
       struct SIDL_opaque__array* p = SIDL_opaque__array_ensure( _get_ior(), dimen, ordering );
-      if ( _not_nil() ) { deleteReference(); }
+      if ( _not_nil() ) { deleteRef(); }
       _set_ior( p );
     }
 
@@ -2290,25 +2265,25 @@ namespace SIDL {
     // get dimension
     int32_t dimen() const { 
       return SIDL_opaque__array_dimen(
-	(const struct SIDL_opaque__array *)d_array);
+	reinterpret_cast<const struct SIDL_opaque__array *>(d_array));
     }
     
     // get lower bound along particular dimension
     int32_t lower( int32_t d ) const {
       return SIDL_opaque__array_lower(
-	(const struct SIDL_opaque__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_opaque__array *>(d_array), d);
     } 
     
     // get upper bound along particular dimension
     int32_t upper( int32_t d ) const {
       return SIDL_opaque__array_upper(
-	(const struct SIDL_opaque__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_opaque__array *>(d_array), d);
     }
     
     // get stride along particular dimension
     int32_t stride( int32_t d ) const {
       return SIDL_opaque__array_stride(
-	(const struct SIDL_opaque__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_opaque__array *>(d_array), d);
     }
 
     // get
@@ -2372,22 +2347,22 @@ namespace SIDL {
     // default destructor
     virtual ~array() {
       if ( d_array ) {
-        SIDL_string__array_deleteReference( d_array );
+        SIDL_string__array_deleteRef( d_array );
       }
     }
 
     // copy constructor
     array( const array< string >& original ) { 
       d_array = original.d_array;
-      if ( d_array ) { addReference(); }
+      if ( d_array ) { addRef(); }
     }
 
     // assignment operator
     array< string >& operator=( const array< string >& rhs ) { 
       if ( d_array != rhs.d_array ) { 
-	if ( d_array ) { deleteReference(); }
+	if ( d_array ) { deleteRef(); }
 	d_array=rhs.d_array;
-	if ( d_array ) { addReference(); }
+	if ( d_array ) { addRef(); }
       }
       return *this;
     }
@@ -2397,22 +2372,22 @@ namespace SIDL {
     array( SIDL_string__array* src ) : array_mixin< struct SIDL_string__array, char*, string >(src) {}
 
 
-    void addReference() throw ( NullIORException ) {
+    void addRef() throw ( NullIORException ) {
       if ( d_array == 0 ) { 
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< string >::addReference()'"
+          "Null IOR Pointer in 'array< string >::addRef()'"
         ));
       }
-      SIDL_string__array_addReference( d_array );
+      SIDL_string__array_addRef( d_array );
     }
 
-    void deleteReference() throw ( NullIORException ) {
+    void deleteRef() throw ( NullIORException ) {
       if ( d_array == 0 ) {
         throw NullIORException( ::std::string(
-          "Null IOR Pointer in 'array< string >::deleteReference()'"
+          "Null IOR Pointer in 'array< string >::deleteRef()'"
         ));
       }
-      SIDL_string__array_deleteReference( d_array );
+      SIDL_string__array_deleteRef( d_array );
       d_array = 0;
     }
        
@@ -2471,6 +2446,16 @@ namespace SIDL {
 					upper, stride);
     }
 
+    /*
+     const char** first() const {
+      return const_cast<const char**>(SIDL_string__array_first( _get_ior() ) );
+    }
+
+    char** first() {
+      return SIDL_string__array_first( _get_ior() );
+    }
+    */
+
     void copy( const array< string >& src ) {
       SIDL_string__array_copy( src._get_ior(), _get_ior() );
     }
@@ -2478,14 +2463,14 @@ namespace SIDL {
     // smartCopy
     void smartCopy( ) {
        struct SIDL_string__array* p = SIDL_string__array_smartCopy( _get_ior() );
-       if ( _not_nil() ) { deleteReference(); }
+       if ( _not_nil() ) { deleteRef(); }
        _set_ior( p );
     }
     
     // ensure
     void ensure( int32_t dimen, int ordering ) {
       struct SIDL_string__array* p = SIDL_string__array_ensure( _get_ior(), dimen, ordering );
-      if ( _not_nil() ) { deleteReference(); }
+      if ( _not_nil() ) { deleteRef(); }
       _set_ior( p );
     }
 
@@ -2502,25 +2487,25 @@ namespace SIDL {
     // get dimension
     int32_t dimen() const { 
       return SIDL_string__array_dimen(
-	(const struct SIDL_string__array *)d_array);
+	reinterpret_cast<const struct SIDL_string__array *>(d_array));
     }
     
     // get lower bound along particular dimension
     int32_t lower( int32_t d ) const {
       return SIDL_string__array_lower(
-	(const struct SIDL_string__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_string__array *>(d_array), d);
     } 
     
     // get upper bound along particular dimension
     int32_t upper( int32_t d ) const {
       return SIDL_string__array_upper(
-	(const struct SIDL_string__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_string__array *>(d_array), d);
     }
     
     // get stride along particular dimension
     int32_t stride( int32_t d ) const {
       return SIDL_string__array_stride(
-	(const struct SIDL_string__array*)d_array, d);
+	reinterpret_cast<const struct SIDL_string__array *>(d_array), d);
     }
 
     // get

@@ -115,7 +115,7 @@ ex.printStackTrace(System.err);
         try {
           Constructor ctor = java_class.getConstructor(sigs);
           cast = (BaseInterface) ctor.newInstance(args);
-          cast.addReference();
+          cast.addRef();
         } catch (Exception ex) {
 ex.printStackTrace(System.err);
           // ignore exception
