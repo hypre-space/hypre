@@ -1409,11 +1409,11 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     }
 
     //******************************************************************
-    // construct the diagonal Mmat
+    // construct the diagonal Mmat and CTmat
     //------------------------------------------------------------------
 
     //------------------------------------------------------------------
-    // calculate the dimension of Mmat
+    // calculate the dimension of Mmat and CTmat
     //------------------------------------------------------------------
 
     MNRows = nRows - nSchur;
@@ -1421,6 +1421,13 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     MGlobalNRows = globalNRows - globalNSchur;
     MGlobalNCols = globalNRows - globalNSchur;
     MStartRow    = ProcNRows[mypid_] - ProcNSchur[mypid_];
+
+    CTNRows = nRows - nSchur;
+    CTNCols = nSchur;
+    CTGlobalNRows = globalNRows - globalNSchur;
+    CTGlobalNCols = globalNSchur;
+    CTStartRow    = ProcNRows[mypid_] - ProcNSchur[mypid_];
+
     if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
     {
        printf("%4d buildSchurSystem : MStartRow  = %d\n",mypid_,MStartRow);
@@ -1431,12 +1438,23 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     }
 
     //------------------------------------------------------------------
-    // create a matrix context for Mmat
+    // create a matrix context for Mmat and CTmat
     //------------------------------------------------------------------
 
     ierr  = HYPRE_IJMatrixCreate(comm_,&Mmat,MGlobalNRows,MGlobalNCols);
     ierr += HYPRE_IJMatrixSetLocalStorageType(Mmat, HYPRE_PARCSR);
     ierr  = HYPRE_IJMatrixSetLocalSize(Mmat, MNRows, MNCols);
+    assert(!ierr);
+
+    ierr  = HYPRE_IJMatrixCreate(comm_,&CTmat,CTGlobalNRows,CTGlobalNCols);
+    ierr += HYPRE_IJMatrixSetLocalStorageType(CTmat, HYPRE_PARCSR);
+    ierr  = HYPRE_IJMatrixSetLocalSize(CTmat, CTNRows, CTNCols);
+    assert(!ierr);
+
+    //------------------------------------------------------------------
+    // compute row sizes for Mmat
+    //------------------------------------------------------------------
+
     MMatSize = new int[MNRows];
     for ( i = 0; i < MNRows; i++ ) MMatSize[i] = 1;
     ierr  = HYPRE_IJMatrixSetRowSizes(Mmat, MMatSize);
@@ -1445,120 +1463,11 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     delete [] MMatSize;
 
     //------------------------------------------------------------------
-    // load Mmat
-    //------------------------------------------------------------------
-
-    maxdiag = -1.0E10;
-    mindiag =  1.0E10;
-    diagonal = new double[MNRows];
-    rowIndex = MStartRow;
-    ierr     = 0;
-    for ( i = StartRow; i <= EndRow-nSchur; i++ ) 
-    {
-       ncnt = 0;
-       HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
-       for (j = 0; j < rowSize; j++) 
-       {
-          colIndex = colInd[j];
-          if ( colIndex == i && colVal[j] != 0.0 ) 
-          { 
-             ddata = 1.0 / colVal[j]; 
-             maxdiag = ( colVal[j] > maxdiag ) ? colVal[j] : maxdiag;
-             mindiag = ( colVal[j] < mindiag ) ? colVal[j] : mindiag;
-             break;
-          }
-          if ( colVal[j] != 0.0 ) ncnt++;
-       }
-       if ( j == rowSize )
-       {
-          if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
-             printf("%4d : buildSchurSystem WARNING : diag[%d] not found.\n",
-                     mypid_, i);
-          ierr = 1;
-       } 
-       else if ( ncnt > 1 ) ierr = 1;
-       diagonal[rowIndex-MStartRow] = ddata;
-       HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
-       HYPRE_IJMatrixInsertRow(Mmat,1,rowIndex,&rowIndex,&ddata);
-       rowIndex++;
-    }
-    darray[0] = maxdiag;
-    darray[1] = - mindiag;
-    MPI_Allreduce(darray, darray2, 2, MPI_DOUBLE, MPI_MAX, comm_);
-    maxdiag = darray2[0];
-    mindiag = - darray2[1];
-    if ( mypid_ == 0 && (HYOutputLevel_ & HYFEI_SCHURREDUCE1))
-    {
-       printf("buildSchurSystem : max diagonal = %e\n", maxdiag);
-       printf("buildSchurSystem : min diagonal = %e\n", mindiag);
-    }
-
-    //------------------------------------------------------------------
-    // finally assemble Mmat
-    //------------------------------------------------------------------
-
-    HYPRE_IJMatrixAssemble(Mmat);
-    M_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(Mmat);
-    hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) M_csr);
-
-    //------------------------------------------------------------------
-    // Error checking
-    //------------------------------------------------------------------
-
-    MPI_Allreduce(&ierr, &ncnt, 1, MPI_INT, MPI_SUM, comm_);
-    if ( ncnt > 0 )
-    {
-       if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
-       {
-          printf("buildSchurSystem WARNING : A11 not diagonal\n");
-          printf("buildSchurSystem WARNING : reduction not performed.\n");
-       }
-       schurReduction_ = 0;
-       delete [] ProcNRows;
-       delete [] ProcNSchur;  
-       HYPRE_IJMatrixDestroy(Cmat);
-       return;
-    }
-
-    //******************************************************************
-    // construct CTmat (transpose of Cmat)
-    //------------------------------------------------------------------
-
-    //------------------------------------------------------------------
-    // calculate the dimension of CTmat
-    //------------------------------------------------------------------
-
-    CTNRows = CNCols;
-    CTNCols = CNRows;
-    CTGlobalNRows = CGlobalNCols;
-    CTGlobalNCols = CGlobalNRows;
-    CTStartRow    = ProcNRows[mypid_] - ProcNSchur[mypid_];
-
-    if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
-    {
-       printf("%4d buildSchurSystem : CTStartRow  = %d\n",mypid_,CTStartRow);
-       printf("%4d buildSchurSystem : CTGlobalDim = %d %d\n", mypid_, 
-                                      CTGlobalNRows, CTGlobalNCols);
-       printf("%4d buildSchurSystem : CTLocalDim  = %d %d\n",mypid_,
-                                      CTNRows, CTNCols);
-    }
-
-    //------------------------------------------------------------------
-    // create a matrix context for CTmat
-    //------------------------------------------------------------------
-
-    ierr  = HYPRE_IJMatrixCreate(comm_,&CTmat,CTGlobalNRows,CTGlobalNCols);
-    ierr += HYPRE_IJMatrixSetLocalStorageType(CTmat, HYPRE_PARCSR);
-    ierr  = HYPRE_IJMatrixSetLocalSize(CTmat, CTNRows, CTNCols);
-    assert(!ierr);
-
-    //------------------------------------------------------------------
-    // compute the number of nonzeros per row in CTmat and call set up
+    // compute row sizes for CTmat
     //------------------------------------------------------------------
 
     maxRowSize = 0;
     CTMatSize = new int[CTNRows];
-
     rowCount = 0;
     for ( i = StartRow; i <= EndRow-nSchur; i++ ) 
     {
@@ -1584,15 +1493,19 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     delete [] CTMatSize;
 
     //------------------------------------------------------------------
-    // load CTmat extracted from A
+    // load Mmat and CTmat
     //------------------------------------------------------------------
 
     newColInd = new int[maxRowSize+1];
     newColVal = new double[maxRowSize+1];
-    rowCount  = CTStartRow;
-
+    maxdiag   = -1.0E10;
+    mindiag   =  1.0E10;
+    diagonal  = new double[MNRows];
+    rowIndex  = MStartRow;
+    ierr      = 0;
     for ( i = StartRow; i <= EndRow-nSchur; i++ ) 
     {
+       ncnt = 0;
        HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
        newRowSize = 0;
        for (j = 0; j < rowSize; j++) 
@@ -1600,7 +1513,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
           colIndex = colInd[j];
           searchIndex = HYPRE_Schur_Search(colIndex, numProcs_, ProcNRows,
                                            ProcNSchur, globalNRows);
-          if (searchIndex >= 0) 
+          if (searchIndex >= 0)
           {
              newColInd[newRowSize] = searchIndex;
              if ( searchIndex >= globalNSchur )
@@ -1608,33 +1521,92 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
                 if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
                 {
                    printf("%4d buildSchurSystem WARNING : CTmat ", mypid_);
-                   printf("out of range %d - %d (%d)\n", rowCount, searchIndex, 
+                   printf("out of range %d - %d (%d)\n", rowIndex, searchIndex,
                            globalNSchur);
-                } 
+                }
              }
              newColVal[newRowSize++] = colVal[j];
           }
+          else if ( colIndex == i && colVal[j] != 0.0 ) 
+          { 
+             ddata = 1.0 / colVal[j]; 
+             ncnt++;
+             maxdiag = ( colVal[j] > maxdiag ) ? colVal[j] : maxdiag;
+             mindiag = ( colVal[j] < mindiag ) ? colVal[j] : mindiag;
+             break;
+          }
        }
+       if ( ncnt == 0 )
+       {
+          if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
+             printf("%4d : buildSchurSystem WARNING : diag[%d] not found.\n",
+                     mypid_, i);
+          ierr = 1;
+       } 
+       else if ( ncnt > 1 ) ierr = 1;
        if ( newRowSize == 0 )
        {
           newColInd[0] = ProcNSchur[mypid_];
           newColVal[0] = 0.0;
           newRowSize = 1;
        }
+       diagonal[rowIndex-MStartRow] = ddata;
        HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
-       HYPRE_IJMatrixInsertRow(CTmat,newRowSize,rowCount,newColInd,newColVal);
-       rowCount++;
+       HYPRE_IJMatrixInsertRow(Mmat,1,rowIndex,&rowIndex,&ddata);
+       HYPRE_IJMatrixInsertRow(CTmat,newRowSize,rowIndex,newColInd,newColVal);
+       rowIndex++;
     }
     delete [] newColInd;
     delete [] newColVal;
 
     //------------------------------------------------------------------
-    // finally assemble the matrix 
+    // output statistics about sizes of diagonal elements
     //------------------------------------------------------------------
 
+    darray[0] = maxdiag;
+    darray[1] = - mindiag;
+    MPI_Allreduce(darray, darray2, 2, MPI_DOUBLE, MPI_MAX, comm_);
+    maxdiag = darray2[0];
+    mindiag = - darray2[1];
+    if ( mypid_ == 0 && (HYOutputLevel_ & HYFEI_SCHURREDUCE1))
+    {
+       printf("buildSchurSystem : max diagonal = %e\n", maxdiag);
+       printf("buildSchurSystem : min diagonal = %e\n", mindiag);
+    }
+
+    //------------------------------------------------------------------
+    // finally assemble Mmat
+    //------------------------------------------------------------------
+
+    HYPRE_IJMatrixAssemble(Mmat);
+    M_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(Mmat);
+    hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) M_csr);
     HYPRE_IJMatrixAssemble(CTmat);
     CT_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(CTmat);
     hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) CT_csr);
+
+    //------------------------------------------------------------------
+    // Error checking
+    //------------------------------------------------------------------
+
+    MPI_Allreduce(&ierr, &ncnt, 1, MPI_INT, MPI_SUM, comm_);
+    if ( ncnt > 0 )
+    {
+       if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
+       {
+          printf("buildSchurSystem WARNING : A11 not diagonal\n");
+          printf("buildSchurSystem WARNING : reduction not performed.\n");
+       }
+       schurReduction_ = 0;
+       delete [] ProcNRows;
+       delete [] ProcNSchur;  
+       HYPRE_IJMatrixDestroy(Cmat);
+       return;
+    }
+
+    //------------------------------------------------------------------
+    // diagnostics (output CTmat)
+    //------------------------------------------------------------------
 
     if ( HYOutputLevel_ & HYFEI_SCHURREDUCE3 )
     {
@@ -1741,7 +1713,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     HYPRE_IJVectorDestroy(f1); 
 
     //------------------------------------------------------------------
-    // form f2 = f2 - f2hat 
+    // form f2 = f2 - f2hat (and negate)
     //------------------------------------------------------------------
 
     HYPRE_IJVectorCreate(comm_, &f2, CGlobalNRows);
@@ -1774,6 +1746,11 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     ierr += HYPRE_IJMatrixSetLocalStorageType(reducedA_, HYPRE_PARCSR);
     ierr  = HYPRE_IJMatrixSetLocalSize(reducedA_, CNRows, CNRows);
     assert(!ierr);
+
+    //------------------------------------------------------------------
+    // compute row sizes for the Schur complement
+    //------------------------------------------------------------------
+
     CMatSize = new int[CNRows];
     maxRowSize = 0;
     for ( i = CStartRow; i < CStartRow+CNRows; i++ ) 
@@ -1818,6 +1795,11 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     ierr += HYPRE_IJMatrixInitialize(reducedA_);
     assert(!ierr);
     delete [] CMatSize;
+
+    //------------------------------------------------------------------
+    // load and assemble the Schur complement matrix
+    //------------------------------------------------------------------
+
     for ( i = CStartRow; i < CStartRow+CNRows; i++ ) 
     {
        HYPRE_ParCSRMatrixGetRow(S_csr,i,&rowSize,&colInd,&colVal);
@@ -1829,7 +1811,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
        for (j = 0; j < rowSize; j++)  
        {
           newColInd[j] = colInd[j];
-          newColVal[j] = - colVal[j];
+          newColVal[j] = colVal[j];
        }
        ncnt = 0;
        for (j = 0; j < rowSize2; j++) 
@@ -1840,7 +1822,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
           if ( searchIndex >= 0 )
           {
              newColInd[rowSize+ncnt] = colInd2[j];
-             newColVal[rowSize+ncnt] = colVal2[j];
+             newColVal[rowSize+ncnt] = - colVal2[j];
              ncnt++;
           }
        }
@@ -1866,6 +1848,10 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
        HYPRE_IJMatrixInsertRow(reducedA_,newRowSize,i,newColInd,newColVal);
     }
     HYPRE_IJMatrixAssemble(reducedA_);
+
+    //------------------------------------------------------------------
+    // create the reduced x, right hand side and r
+    //------------------------------------------------------------------
 
     ierr = HYPRE_IJVectorCreate(comm_, &reducedX_, globalNSchur);
     ierr = HYPRE_IJVectorSetLocalStorageType(reducedX_, HYPRE_PARCSR);
@@ -1929,9 +1915,10 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
 int HYPRE_LinSysCore::HYPRE_Schur_Search(int key, int nprocs, int *Barray, 
                                          int *Sarray, int globalNrows)
 {
-   int  i, index1, index2, search_index;
+   int  i, index1, index2, search_index, out_of_range;
 
    search_index = 0;
+   out_of_range = 0;
 
    for ( i = 0; i < nprocs; i++ )
    {
@@ -1939,6 +1926,7 @@ int HYPRE_LinSysCore::HYPRE_Schur_Search(int key, int nprocs, int *Barray,
       {
          index1 = globalNrows;
          index2 = index1 - Sarray[i];
+         out_of_range += (index1 - index2);
       }
       else
       {
@@ -1950,9 +1938,18 @@ int HYPRE_LinSysCore::HYPRE_Schur_Search(int key, int nprocs, int *Barray,
          search_index += ( key - index2 );
          break;
       }
-      else search_index += Sarray[i];
+      else if ( key >= index1 )
+      {
+         search_index += Sarray[i];
+         out_of_range += (index1 - Barray[i] - Sarray[i]);
+      }
+      else if ( key >= Barray[i] )
+      {
+         out_of_range += (key - Barray[i]);
+         break;
+      }   
    }
-   if ( i == nprocs ) return -1;
-   else               return search_index;
+   if ( i < nprocs ) return search_index;
+   else              return (-out_of_range-1);
 }
 
