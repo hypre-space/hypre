@@ -176,6 +176,20 @@ HYPRE_PCGGetPrecond( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_PCGSetLogging
+ * sets both the print and log level, for backwards compatibility.
+ * Soon the SetPrintLevel call should be deleted.
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_PCGSetLogging( HYPRE_Solver solver,
+                     int          level )
+{
+   return( hypre_PCGSetPrintLevel( (void *) solver, level ) );
+   return( hypre_PCGSetLogLevel( (void *) solver, level ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_PCGSetPrintLevel
  *--------------------------------------------------------------------------*/
 
@@ -188,6 +202,7 @@ HYPRE_PCGSetPrintLevel( HYPRE_Solver solver,
 
 /*--------------------------------------------------------------------------
  * HYPRE_PCGSetLogLevel
+ * soon will not be needed, as SetLogging will be identical
  *--------------------------------------------------------------------------*/
 
 int
@@ -217,6 +232,16 @@ HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                        double             *norm   )
 {
    return( hypre_PCGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PCGGetPreconditionedResidual
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_PCGGetPreconditionedResidual( HYPRE_Solver solver, void **residual )
+{
+   /* returns a pointer to the residual vector */
+   return hypre_PCGGetPreconditionedResidual( (void *) solver, residual );
 }
 
 /*--------------------------------------------------------------------------
