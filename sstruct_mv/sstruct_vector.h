@@ -32,6 +32,10 @@ typedef struct
 
    int                     ref_count;
 
+   int                    *dataindices  /* GEC1002 array for starting index of the 
+                                            svector. pdataindices[varx] */
+   int                     datasize     /* Size of the pvector = sums size of svectors */
+
 } hypre_SStructPVector;
 
 typedef struct hypre_SStructVector_struct
@@ -49,6 +53,13 @@ typedef struct hypre_SStructVector_struct
    /* u-vector info */
    HYPRE_IJVector          ijvector;
    hypre_ParVector        *parvector;
+
+  /* GEC10020902 pointer to big chunk of memory and auxiliary information   */
+
+   double                  *data;        /* GEC1002 pointer to chunk data  */
+   int                     *dataindices; /* GEC1002 dataindices[partx] is the starting index
+                                          of vector data for the part=partx    */
+   int                     datasize    ;  /* GEC1002 size of all data = ghlocalsize */
 
    int                     complex;      /* Is the vector complex */
    int                     global_size;  /* Total number coefficients */
@@ -73,6 +84,10 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructVectorComplex(vec)        ((vec) -> complex)
 #define hypre_SStructVectorGlobalSize(vec)     ((vec) -> global_size)
 #define hypre_SStructVectorRefCount(vec)       ((vec) -> ref_count)
+#define hypre_SStructVectorData(vec)           ((vec) -> data )
+#define hypre_SStructVectorDataIndices(vec)    ((vec) -> dataindices)
+#define hypre_SStructVectorDataSize(vec)       ((vec) -> datasize)
+
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructPVector
@@ -86,6 +101,8 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructPVectorCommPkgs(pvec)    ((pvec) -> comm_pkgs)
 #define hypre_SStructPVectorCommPkg(pvec, v)  ((pvec) -> comm_pkgs[v])
 #define hypre_SStructPVectorComplex(pvec)     ((pvec) -> complex)
-#define hypre_SStructPVectorRefCount(vec)     ((vec) -> ref_count)
+#define hypre_SStructPVectorRefCount(pvec)    ((pvec) -> ref_count)
+#define hypre_SStructPVectorDataIndices(pvec) ((pvec) -> dataindices  )
+#define hypre_SStructPVectorDataSize(pvec)    ((pvec) -> datasize  )
 
 #endif
