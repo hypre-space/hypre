@@ -665,7 +665,7 @@ static void ConstructPatternForEachRow(int symmetric, PrunedRows *pruned_rows,
     {
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
-    printf("%d: nnz: %10d  ********* cost %f\n", mype, nnz, *costp);
+    printf("%d: nnz: %10d  ********* cost %7.1e\n", mype, nnz, *costp);
     fflush(NULL);
     }
 #endif
@@ -1079,7 +1079,7 @@ void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
 
 #ifdef PARASAILS_TIME
     if (mype == 0)
-       printf("ParaSails: thresh %e, level %d\n", mype, thresh, num_levels);
+       printf("ParaSails: thresh %e, level %d\n", thresh, num_levels);
 #endif
 
     if (ps->M)
