@@ -850,12 +850,10 @@ main( int   argc,
         by Babel is also create, albeit with two underscores. This name
         confusion is merely coincidental). AJC 08/01. */
      Hypre_parcsr_A = Hypre_ParCSRMatrix__create();
-
      printf("finished __create\n");
 
      Hypre_ij_A = (Hypre_IJBuildMatrix) Hypre_ParCSRMatrix__cast2
         ( Hypre_parcsr_A, "Hypre.IJBuildMatrix");
-
      printf("finished cast\n");
      if ( Hypre_ij_A == NULL )
      {
@@ -1025,15 +1023,15 @@ main( int   argc,
 
          ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, i, &size,
                                                &col_inds, &values );
+         SIDL_int__array_deleteReference( Hypre_col_inds );
+         SIDL_double__array_deleteReference( Hypre_values );
+
        }
        SIDL_int__array_deleteReference( Hypre_row_sizes );
        SIDL_int__array_deleteReference( Hypre_ncols );
      }
 
      ierr += Hypre_IJBuildMatrix_Assemble( Hypre_ij_A );
-
-     SIDL_int__array_deleteReference( Hypre_col_inds );
-     SIDL_double__array_deleteReference( Hypre_values );
 
    }
 
@@ -1124,12 +1122,12 @@ main( int   argc,
    Hypre_parcsr_A = SIDL_BaseInterface__cast2
       ( SIDL_BaseInterface_queryInterface( Hypre_object, "Hypre.ParCSRMatrix"),
         "Hypre.ParCSRMatrix" );
-
    if ( Hypre_parcsr_A == NULL )
    {
       printf("Cast/QI failed\n");
       return 1;
    }
+
 
    {
    /* Break encapsulation so that the rest of the driver stays the same */
@@ -1233,6 +1231,7 @@ main( int   argc,
         printf("Cast/QI failed\n");
         return 1;
      }
+     SIDL_BaseInterface_deleteReference( Hypre_object );
 
       /* Break encapsulation so that the rest of the driver stays the same */
 
@@ -1277,7 +1276,7 @@ main( int   argc,
         printf("Cast/QI failed\n");
         return 1;
      }
-
+     SIDL_BaseInterface_deleteReference( Hypre_object );
 
       /* Break encapsulation so that the rest of the driver stays the same */
 
@@ -1627,18 +1626,25 @@ main( int   argc,
          ( Hypre_y, "Hypre.IJBuildVector" );
       /* adjust reference counting system for new data type: */
       Hypre_IJBuildVector_addReference( Hypre_ij_y );
-      Hypre_ParCSRVector_deleteReference( Hypre_y );
       ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, (void *)comm );
       ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, (void *)comm,
                                           first_local_col,last_local_col );
       ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y );
       y = Hypre_ParCSRVector__cast2( Hypre_y, "Hypre.Vector" );
+      Hypre_ParCSRVector_deleteReference( Hypre_y );
 
       Hypre_ParCSRMatrix_Apply( Hypre_parcsr_A, Hypre_ParCSRVector__cast2( Hypre_b, "Hypre.Vector" ),
                                 &y );
+
+      Hypre_ParCSRVector_deleteReference( Hypre_b ); /* This gets rid of the extra reference
+                                                        produced by the above cast */
       Hypre_ParCSRMatrix_Print( Hypre_parcsr_A, "test.A" );
       Hypre_ParCSRVector_Print( Hypre_y, "test.apply" );
-      Hypre_IJBuildVector_deleteReference( Hypre_ij_y ); /* delete y */
+      Hypre_IJBuildVector_deleteReference( Hypre_ij_y );
+      Hypre_IJBuildVector_deleteReference( Hypre_ij_y );
+      /* ...It would make sense to delete the reference as y.  I don't know why y's function
+         pointers are messed up at this point so that won't work. */
+
 
       /* SetValues, x=1; result is all 1's */
       dimsl[0] = 0;   dimsu[0] = local_num_cols;
@@ -1657,6 +1663,7 @@ main( int   argc,
       Hypre_Vector_x = (Hypre_Vector)Hypre_ParCSRVector__cast2( Hypre_x, "Hypre.Vector" );
       Hypre_ParCSRVector_Copy( Hypre_b, Hypre_Vector_x );
       Hypre_ParCSRVector_Print( Hypre_b, "test.copy" );
+      Hypre_Vector_deleteReference( Hypre_Vector_x );
 
       /* Clone y=b; result is all 1's */
       Hypre_ParCSRVector_Clone( Hypre_b, &y );
@@ -1742,6 +1749,7 @@ main( int   argc,
       Hypre_Vector_b = (Hypre_Vector)Hypre_ParCSRVector__cast2( Hypre_b, "Hypre.Vector" );
       Hypre_Vector_x = (Hypre_Vector)Hypre_ParCSRVector__cast2( Hypre_x, "Hypre.Vector" );
       Hypre_op_A = (Hypre_Operator) Hypre_ParCSRMatrix__cast2( Hypre_parcsr_A, "Hypre.Operator" );
+
       ierr += Hypre_ParAMG_SetCommunicator( Hypre_AMG, (void *)comm );
       Hypre_ParAMG_SetOperator( Hypre_AMG, Hypre_op_A );
 
@@ -1772,9 +1780,14 @@ main( int   argc,
       Hypre_ParAMG_SetIntParameter( Hypre_AMG, "SmoothNumSweeps", smooth_num_sweep);
         dimsl[0] = 0;   dimsl[1] = 0;   dimsu[0] = 4;   dimsu[1] = 4;
         Hypre_grid_relax_points = SIDL_int__array_createRow( 2, dimsl, dimsu );
-        for ( i=0; i<4; ++i ) for ( j=0; j<4; ++j )
+        for ( i=0; i<4; ++i ) for ( j=0; j<4; ++j ){
+           SIDL_int__array_set2( Hypre_grid_relax_points, i, j, 0 );
+        }
+        for ( i=0; i<4; ++i ) for ( j=0; j<num_grid_sweeps[i]; ++j ){
            SIDL_int__array_set2( Hypre_grid_relax_points, i, j, grid_relax_points[i][j] );
+        }
       Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "GridRelaxPoints", Hypre_grid_relax_points );
+
       Hypre_ParAMG_SetIntParameter( Hypre_AMG, "MaxLevels", max_levels);
       Hypre_ParAMG_SetDoubleParameter( Hypre_AMG, "MaxRowSum", max_row_sum);
       Hypre_ParAMG_SetIntParameter( Hypre_AMG, "DebugFlag", debug_flag);
@@ -1825,7 +1838,10 @@ main( int   argc,
            ierr += Hypre_ParAMG_GetResidual( Hypre_AMG, &y );
            Hypre_ParCSRVector_Print( Hypre_y, "test.residual" );
            Hypre_IJBuildVector_deleteReference( Hypre_ij_y ); /* delete y */
+           Hypre_IJBuildVector_deleteReference( Hypre_ij_y );
       }
+
+      Hypre_ParCSRMatrix_deleteReference( Hypre_parcsr_A );
 
       /* Break encapsulation so that the rest of the driver stays the same */
       temp_vecdata = Hypre_ParCSRVector__get_data( Hypre_x );
@@ -1886,7 +1902,9 @@ main( int   argc,
 #endif
 
       HYPRE_BoomerAMGDestroy(amg_solver);
+
 #endif /* USE_BABEL_INTERFACE*/
+
    }
 
    /*-----------------------------------------------------------
@@ -1896,6 +1914,7 @@ main( int   argc,
    if (solver_id == 1 || solver_id == 2 || solver_id == 8 || 
 	solver_id == 12 || solver_id == 43)
    {
+
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
  
@@ -2613,27 +2632,45 @@ main( int   argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
-   HYPRE_IJMatrixDestroy(ij_A);
-   HYPRE_IJVectorDestroy(ij_b);
-   HYPRE_IJVectorDestroy(ij_x);
-
-   if (num_grid_sweeps)
-      hypre_TFree(num_grid_sweeps);
-
-   /* this is in Hypre_AMG, will be deleted there: if( Hypre_num_grid_sweeps )
-      SIDL_int__array_deleteReference( Hypre_num_grid_sweeps );*/
+   /* Programming note:  some or all of these SIDL array objects, e.g.
+      Hypre_num_grid_sweeps, contain data which have been incorporated into
+      Hypre_AMG (the SIDL objects themselves were just temporary carriers for
+      the data).  It is important that the objects be deleted before Hypre_AMG.
+      If not deleted, there are a few extra bytes leaked.  If deleted
+      afterwards,  there will be a crash because the data inside them is already
+      gone.  */
    if( Hypre_grid_relax_type )
       SIDL_int__array_deleteReference( Hypre_grid_relax_type );
    if( Hypre_relax_weight )
       SIDL_double__array_deleteReference( Hypre_relax_weight );
    if( Hypre_grid_relax_points )
       SIDL_int__array_deleteReference( Hypre_grid_relax_points );
+   if( Hypre_num_grid_sweeps )
+      SIDL_int__array_deleteReference( Hypre_num_grid_sweeps );
    if( Hypre_dof_func )
       SIDL_int__array_deleteReference( Hypre_dof_func );
+
    if( Hypre_AMG )
       Hypre_ParAMG_deleteReference( Hypre_AMG );
-   if( Hypre_values )
-      SIDL_double__array_deleteReference( Hypre_values );
+   if ( Hypre_op_A )
+      Hypre_Operator_deleteReference( Hypre_op_A );
+   if ( Hypre_x)
+      Hypre_ParCSRVector_deleteReference( Hypre_x );
+   if ( Hypre_b)
+      Hypre_ParCSRVector_deleteReference( Hypre_b );
+
+   if (num_grid_sweeps)
+      hypre_TFree(num_grid_sweeps);
+   if (relax_weight)
+      hypre_TFree(relax_weight);
+
+   if ( grid_relax_points ) {
+      for ( i=0; i<4; ++i )
+         if ( grid_relax_points[i] ) hypre_TFree( grid_relax_points[i] );
+      hypre_TFree( grid_relax_points );
+   }
+   if ( grid_relax_type )
+      hypre_TFree( grid_relax_type );
 
 /*
    hypre_FinalizeMemoryDebug();
