@@ -740,9 +740,9 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    }
    P_diag_i[i] = jj_counter; 
 
-   /* Test: Compress P, removing coefficients smaller than 25% of Max */
+   /* Compress P, removing coefficients smaller than trunc_factor * Max */
 
-   if (debug_flag == 2)
+   if (trunc_factor != 0.0)
    {
       next_open = 0;
       now_checking = 0;
@@ -822,60 +822,6 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
       P_offd_i[n_fine] -= num_lost_offd;
    }
 
-   /* End of Compression Test */
-
-
-#if 0
-   /*----------------------------------------------------------------------
-    *  Determine the col_map_offd_P
-    *----------------------------------------------------------------------*/
-if (debug_flag==5)
-{
-   if (debug_flag==4)
-   {
-      wall_time = time_getWallclockSeconds() - wall_time;
-      printf("Proc = %d     Interp: Internal work 2 =     %f\n",
-                    my_id, wall_time);
-      fflush(NULL);
-   }
-
-   if (debug_flag==4) wall_time = time_getWallclockSeconds();
-
-   coarse_counter = 0;
-   for (i = 0; i < n_fine; i++)
-   {
-       if (CF_marker[i] >= 0)
-       {
-          CF_marker_cols[i] = my_first_cpt + coarse_counter++;
-       }
-   } 
-  
-   index = 0;
-   for (i = 0; i < num_sends; i++)
-   {
-	start = hypre_CommPkgSendMapStart(comm_pkg, i);
-	for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
-		int_buf_data[index++] 
-		 = CF_marker_cols[hypre_CommPkgSendMapElmt(comm_pkg,j)];
-   }
-	
-   comm_handle = hypre_InitializeCommunication( 11, comm_pkg, int_buf_data, 
-	CF_marker_offd);
-
-
-   hypre_FinalizeCommunication(comm_handle);   
-
-   if (debug_flag==4)
-   {
-      wall_time = time_getWallclockSeconds() - wall_time;
-      printf("Proc = %d     Interp: Comm 5 CF_mar offd  = %f\n",
-                    my_id, wall_time);
-      fflush(NULL);
-   }
-} /*end of if debug_flag==5 */
-#endif
-
-/* Test begins here */
 
    hypre_TFree(P_marker); 
    P_marker = hypre_CTAlloc(int, total_global_cpts);
@@ -902,7 +848,7 @@ if (debug_flag==5)
 
    for (i=0; i < P_offd_size; i++)
 	P_offd_j[i] = P_marker[P_offd_j[i]];
-/* End of replacement text */ 
+
 
    P = hypre_CreateParCSRMatrix(comm, 
                                 hypre_ParCSRMatrixGlobalNumRows(A), 

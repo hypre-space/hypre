@@ -60,7 +60,7 @@ hypre_ParAMGInitialize()
    /* setup params */
    max_levels = 25;
    strong_threshold = 0.25;
-   trunc_factor = 0.25;
+   trunc_factor = 0.0;
    interp_type = 200;
    coarsen_type = 0;
    measure_type = 0;
@@ -78,7 +78,7 @@ hypre_ParAMGInitialize()
    for (j = 0; j < 3; j++)
    {
       num_grid_sweeps[j] = 2;
-      grid_relax_type[j] = 0; 
+      grid_relax_type[j] = 3; 
       grid_relax_points[j] = hypre_CTAlloc(int,2); 
       grid_relax_points[j][0] = 1;
       grid_relax_points[j][1] = -1;

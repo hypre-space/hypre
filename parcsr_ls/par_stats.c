@@ -112,33 +112,42 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
       printf(" Num levels = %d\n\n",num_levels);
       printf(" Strength Threshhold = %f\n\n", 
                          hypre_ParAMGDataStrongThreshold(amg_data));
-      if (hypre_ParAMGDataDebugFlag(amg_data) == 2)
-	printf(" Truncation Factor = %f\n\n", 
+      if (hypre_ParAMGDataTruncFactor(amg_data) != 0.0)
+	printf(" Interpolation Truncation Factor = %f\n\n", 
                          hypre_ParAMGDataTruncFactor(amg_data));
       if (coarsen_type == 0)
       {
-	printf(" Coarsening Type = Luby-Jones-Plassman\n");
+	printf(" Coarsening Type = Cleary-Luby-Jones-Plassman\n");
       }
-      else if (coarsen_type == 1) 
+      else if (abs(coarsen_type) == 1) 
       {
 	printf(" Coarsening Type = Ruge\n");
       }
-      else if (coarsen_type == 2) 
+      else if (abs(coarsen_type) == 2) 
       {
 	printf(" Coarsening Type = Ruge2B\n");
       }
-      else if (coarsen_type == 3) 
+      else if (abs(coarsen_type) == 3) 
       {
 	printf(" Coarsening Type = Ruge3\n");
       }
-      else if (coarsen_type == 4) 
+      else if (abs(coarsen_type) == 4) 
       {
-	printf(" Coarsening Type = Ruge relax special points\n");
+	printf(" Coarsening Type = Ruge 3c \n");
       }
-      else if (coarsen_type == -6) 
+      else if (abs(coarsen_type) == 5) 
       {
-	printf(" Coarsening Type = local Ruge followed by LJP\n");
+	printf(" Coarsening Type = Ruge relax special points \n");
       }
+      else if (abs(coarsen_type) == 6) 
+      {
+	printf(" Coarsening Type = Falgout-CLJP \n");
+      }
+      if (coarsen_type > 0) 
+      {
+	printf(" Hybrid Coarsening (switch to CLJP when coarsening slows)\n");
+      }
+      
 
       if (coarsen_type)
       	printf(" measures are determined %s\n\n", 

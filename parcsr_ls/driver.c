@@ -2,7 +2,7 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * Test driver for unstructured matrix interface (parcsr storage).
+ * Test driver for unstructured matrix interfoace (parcsr storage).
  * Do `driver -help' for usage info.
  *--------------------------------------------------------------------------*/
  
@@ -74,7 +74,7 @@ main( int   argc,
    build_matrix_arg_index = argc;
    build_rhs_type = 0;
    build_rhs_arg_index = argc;
-   relax_default = 0;
+   relax_default = 3;
    debug_flag = 0;
 
    solver_id = 0;
@@ -221,7 +221,7 @@ main( int   argc,
 
    /* defaults for BoomerAMG */
    strong_threshold = 0.25;
-   trunc_factor = 0.25;
+   trunc_factor = 0.0;
    cycle_type = 1;
    relax_weight = 1.0;
 
