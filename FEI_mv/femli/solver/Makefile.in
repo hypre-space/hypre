@@ -33,11 +33,12 @@ CFLAGS =\
  -I$(srcdir)/../../../utilities\
  -I$(srcdir)/../../../parcsr_mv\
  -I$(srcdir)/../../../seq_mv\
+ -I$(srcdir)/../../../IJ_mv\
  ${CINCLUDES}\
  ${CDEFS}
  
 CXXFLAGS =\
- ${C_COMPILE_FLAGS}\
+ ${CXX_COMPILE_FLAGS}\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../..\
@@ -45,6 +46,7 @@ CXXFLAGS =\
  -I$(srcdir)/../../../utilities\
  -I$(srcdir)/../../../parcsr_mv\
  -I$(srcdir)/../../../seq_mv\
+ -I$(srcdir)/../../../IJ_mv\
  ${CXXINCLUDES}\
  ${CXXDEFS}
  
@@ -56,7 +58,8 @@ HEADERS =\
  mli_solver_parasails.h \
  mli_solver_schwarz.h \
  mli_solver_mls.h \
- mli_solver_superlu.h
+ mli_solver_superlu.h \
+ mli_solver_arpacksuperlu.h
 
 FILES =\
  mli_solver.C \
@@ -66,7 +69,8 @@ FILES =\
  mli_solver_parasails.C \
  mli_solver_schwarz.C \
  mli_solver_mls.C \
- mli_solver_superlu.C
+ mli_solver_superlu.C \
+ mli_solver_arpacksuperlu.C
 
 OBJS = ${FILES:.C=.o}
 
