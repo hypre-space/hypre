@@ -1,0 +1,21 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# IJ_linear_and_eigenvaluesolvers: (-nolobpcg option runs PCG)
+# 3 runs must produce identical results
+#=============================================================================
+
+mpirun -np 4 ./ij_es -laplacian -n 10 10 10 -lobpcg -solver 43 -vin Xin.mtx -pcgitr 2 > default.out.0
+
+mpirun -np 4 ./ij_es -lobpcg -ain laplacian_10_10_10.mtx -solver 43  -vin Xin.mtx -pcgitr 2 > default.out.1
+
+mpirun -np 4 ./ij_es -lobpcg -ain laplacian_10_10_10.mtx -tin laplacian_10_10_10.mtx -solver 43 -vin Xin.mtx -pcgitr 2 > default.out.2
+

@@ -1,0 +1,22 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# IJ_linear_and_eigenvaluesolvers: (-nolobpcg option runs PCG)
+# tests for LOBPCG only
+# same problem and solver with different number of eigenvectors computed
+#    12: Schwarz-PCG
+#=============================================================================
+
+mpirun -np 4 ./ij_es -9pt -lobpcg -solver 12 -pcgitr 2 -vrand 1 > lobpcg.out.0
+mpirun -np 4 ./ij_es -9pt -lobpcg -solver 12 -pcgitr 2 -vrand 2 > lobpcg.out.1
+mpirun -np 4 ./ij_es -9pt -lobpcg -solver 12 -pcgitr 2 -vrand 4 > lobpcg.out.2
+mpirun -np 4 ./ij_es -9pt -lobpcg -solver 12 -pcgitr 2 -vrand 8 > lobpcg.out.3
+
