@@ -33,8 +33,10 @@ BLASLIBFLAGS = @BLASLIBFLAGS@
 
 LFLAGS =\
  -L.\
+ -L../../blas\
  -L../../utilities\
  -L../../distributed_matrix\
+ -lHYPRE_utilities\
  -lHYPRE_ParaSails\
  ${BLASLIBFLAGS}\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
