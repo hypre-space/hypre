@@ -51,6 +51,7 @@ hypre_AMGSetup( void            *amg_vdata,
    int       Setup_err_flag;
    int       coarse_threshold = 9;
    int       j;
+   int	     coarsen_type;
 
    max_levels = hypre_AMGDataMaxLevels(amg_data);
    amg_ioutdat = hypre_AMGDataIOutDat(amg_data);
@@ -75,6 +76,8 @@ hypre_AMGSetup( void            *amg_vdata,
   
    strong_threshold = hypre_AMGDataStrongThreshold(amg_data);
 
+   coarsen_type = hypre_AMGDataCoarsenType(amg_data);
+
    /*-----------------------------------------------------
     *  Enter Coarsening Loop
     *-----------------------------------------------------*/
@@ -88,9 +91,16 @@ hypre_AMGSetup( void            *amg_vdata,
        * for the level.  Returns strength matrix, S  
        *--------------------------------------------------------------*/
 
-      hypre_AMGCoarsen(A_array[level], strong_threshold,
+      if (coarsen_type == 1)
+      {
+	 hypre_AMGCoarsenRuge(A_array[level], strong_threshold,
                        &S, &CF_marker, &coarse_size); 
-
+      }
+      else
+      {
+         hypre_AMGCoarsen(A_array[level], strong_threshold,
+                       &S, &CF_marker, &coarse_size); 
+      }
       /* if no coarse-grid, stop coarsening */
       if (coarse_size == 0)
          break;
@@ -103,7 +113,8 @@ hypre_AMGSetup( void            *amg_vdata,
 
       hypre_AMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
       P_array[level] = P; 
-
+      hypre_DestroyCSRMatrix(S);
+ 
       /*-------------------------------------------------------------
        * Build coarse-grid operator, A_array[level+1] by R*A*P
        *--------------------------------------------------------------*/
