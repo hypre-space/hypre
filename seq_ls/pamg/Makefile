@@ -13,20 +13,21 @@
 
 srcdir = .
  
-CC =  mpicc
+CC =  kcc
 
-C_COMPILE_FLAGS=  -g
-CXX_COMPILE_FLAGS=-DNOFEI  -g
-F77_COMPILE_FLAGS=  -g -silent 
+C_COMPILE_FLAGS= --c --strict --lint --display_error_number --diag_suppress 236,826,1018,1021,1022,1023,1024,1030,1041  
+CXX_COMPILE_FLAGS= --strict --lint --display_error_number  
+F77_COMPILE_FLAGS=   
 CINCLUDES= 
 CDEFS =
 
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
- -I../..\
- -I../../utilities\
- -I../../krylov\
- -I../../seq_matrix_vector\
+ -I$(srcdir)\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../krylov\
+ -I$(srcdir)/../../seq_matrix_vector\
  ${CINCLUDES}\
  ${CDEFS}
  

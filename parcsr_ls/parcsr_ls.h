@@ -122,8 +122,8 @@ int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver , double 
 /* HYPRE_parcsr_pcg.c */
 int HYPRE_ParCSRPCGCreate( MPI_Comm comm , HYPRE_Solver *solver );
 int HYPRE_ParCSRPCGDestroy( HYPRE_Solver solver );
-int HYPRE_ParCSRPCGSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_ParVector b , HYPRE_ParVector x );
-int HYPRE_ParCSRPCGSolve( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParCSRPCGSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_ParCSRPCGSolve( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
 int HYPRE_ParCSRPCGSetTol( HYPRE_Solver solver , double tol );
 int HYPRE_ParCSRPCGSetMaxIter( HYPRE_Solver solver , int max_iter );
 int HYPRE_ParCSRPCGSetStopCrit( HYPRE_Solver solver , int stop_crit );
@@ -134,8 +134,8 @@ int HYPRE_ParCSRPCGGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_
 int HYPRE_ParCSRPCGSetLogging( HYPRE_Solver solver , int logging );
 int HYPRE_ParCSRPCGGetNumIterations( HYPRE_Solver solver , int *num_iterations );
 int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
-int HYPRE_ParCSRDiagScaleSetup( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_ParVector y , HYPRE_ParVector x );
-int HYPRE_ParCSRDiagScale( HYPRE_Solver solver , HYPRE_Matrix HA , HYPRE_ParVector Hy , HYPRE_ParVector Hx );
+int HYPRE_ParCSRDiagScaleSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector y , HYPRE_ParVector x );
+int HYPRE_ParCSRDiagScale( HYPRE_Solver solver , HYPRE_ParCSRMatrix HA , HYPRE_ParVector Hy , HYPRE_ParVector Hx );
 
 /* HYPRE_parcsr_pilut.c */
 int HYPRE_ParCSRPilutCreate( MPI_Comm comm , HYPRE_Solver *solver );
