@@ -21,6 +21,31 @@ include_HEADERS = cfei-hypre.h cfei_hypre.h \
  $(BASE_DIR)/LinearSystemCore.h \
  $(BASE_DIR)/fei_defs.h\
  snl_LinearSystemCore.h
+noinst_HEADERS = \
+ FEI_HYPRE_Impl.h\
+ FEI_HYPRE_include.h\
+ HYPRE_Builder.h\
+ HYPRE_FEI_mv.h\
+ HYPRE_LSI_Dsuperlu.h\
+ HYPRE_LSI_UZAWA.h\
+ HYPRE_LSI_Uzawa_c.h\
+ HYPRE_LSI_blkprec.h\
+ HYPRE_LSI_block.h\
+ HYPRE_LSI_ddict.h\
+ HYPRE_LSI_ddilut.h\
+ HYPRE_LSI_mli.h\
+ HYPRE_LSI_poly.h\
+ HYPRE_LSI_schur.h\
+ HYPRE_LSI_schwarz.h\
+ HYPRE_MHMatrix.h\
+ HYPRE_SlideReduction.h\
+ HYPRE_parcsr_TFQmr.h\
+ HYPRE_parcsr_bicgs.h\
+ HYPRE_parcsr_bicgstabl.h\
+ HYPRE_parcsr_fgmres.h\
+ HYPRE_parcsr_lsicg.h\
+ HYPRE_parcsr_symqmr.h
+dependent_includes = $(include_HEADERS)
 
 AM_CPPFLAGS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED\
  $(CSUPERLUFLAGS)\
@@ -98,34 +123,11 @@ FILES = \
  hypre_lsi_misc.c\
  hypre_schur_reduce.cxx\
  hypre_slide_reduce.cxx\
- lsicg.c\
- FEI_HYPRE_Impl.h\
- FEI_HYPRE_include.h\
- HYPRE_Builder.h\
- HYPRE_FEI_includes.h\
- HYPRE_FEI_mv.h\
- HYPRE_LSI_Dsuperlu.h\
- HYPRE_LSI_UZAWA.h\
- HYPRE_LSI_Uzawa_c.h\
- HYPRE_LSI_blkprec.h\
- HYPRE_LSI_block.h\
- HYPRE_LSI_ddict.h\
- HYPRE_LSI_ddilut.h\
- HYPRE_LSI_mli.h\
- HYPRE_LSI_poly.h\
- HYPRE_LSI_schur.h\
- HYPRE_LSI_schwarz.h\
- HYPRE_LinSysCore.h\
- HYPRE_MHMatrix.h\
- HYPRE_SlideReduction.h\
- HYPRE_parcsr_TFQmr.h\
- HYPRE_parcsr_bicgs.h\
- HYPRE_parcsr_bicgstabl.h\
- HYPRE_parcsr_fgmres.h\
- HYPRE_parcsr_lsicg.h\
- HYPRE_parcsr_symqmr.h\
- cfei-hypre.h\
- cfei_hypre.h
+ lsicg.c
 
 snl_LinearSystemCore.h:
 	test -f $(BASE_DIR)/LinearSystemCore.h && $(INSTALL_DATA) $(BASE_DIR)/LinearSystemCore.h snl_LinearSystemCore.h
+
+$(SOURCES): $(dependent_includes)
+	touch $@
+

@@ -9,6 +9,11 @@ else !STATICONLY
  libHYPRE_lapack_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
+noinst_HEADERS = \
+ f2c.h\
+ hypre_lapack.h
+dependent_includes = $(noinst_HEADERS)
+
 #
 FILES = \
  dbdsqr.c\
@@ -77,6 +82,7 @@ FILES = \
  ilaenv.c\
  lapack_utils.c\
  lsame.c\
- xerbla.c\
- f2c.h\
- hypre_lapack.h
+ xerbla.c
+
+$(SOURCES): $(dependent_includes)
+	touch $@

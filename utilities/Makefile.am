@@ -10,6 +10,18 @@ else !STATICONLY
 endif !STATICONLY
 
 include_HEADERS = utilities.h HYPRE_utilities.h
+noinst_HEADERS = \
+ amg_linklist.h\
+ fortran.h\
+ general.h\
+ hypre_memory.h\
+ hypre_smp_forloop.h\
+ mpistubs.h\
+ thread_mpistubs.h\
+ threading.h\
+ timing.h\
+ umalloc_local.h
+dependent_includes = $(include_HEADERS)
 
 EXTRA_DIST = HYPRE_utilities.h.in
 
@@ -29,17 +41,8 @@ FILES = \
  threading.c\
  timer.c\
  timing.c\
- umalloc_local.c\
- HYPRE_utilities.h\
- amg_linklist.h\
- fortran.h\
- general.h\
- hypre_memory.h\
- hypre_smp_forloop.h\
- mpistubs.h\
- thread_mpistubs.h\
- threading.h\
- timing.h\
- umalloc_local.h\
- utilities.h
+ umalloc_local.c
+
+$(SOURCES): $(dependent_includes)
+	touch $@
 

@@ -9,6 +9,11 @@ else !STATICONLY
  libHYPRE_blas_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
+noinst_HEADERS = \
+ f2c.h\
+ hypre_blas.h
+dependent_includes = $(noinst_HEADERS)
+
 #
 FILES = \
  dasum.c\
@@ -32,6 +37,7 @@ FILES = \
  dtrsm.c\
  dtrsv.c\
  idamax.c\
- blas_utils.c\
- f2c.h\
- hypre_blas.h
+ blas_utils.c
+
+$(SOURCES): $(dependent_includes)
+	touch $@

@@ -10,6 +10,19 @@ else !STATICONLY
 endif !STATICONLY
 
 include_HEADERS = struct_mv.h HYPRE_struct_mv.h
+noinst_HEADERS = \
+ box.h\
+ box_neighbors.h\
+ box_pthreads.h\
+ computation.h\
+ headers.h\
+ hypre_box_smp_forloop.h\
+ struct_communication.h\
+ struct_grid.h\
+ struct_matrix.h\
+ struct_stencil.h\
+ struct_vector.h
+dependent_includes = $(include_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_builddir)/utilities\
@@ -44,17 +57,8 @@ FILES = \
  struct_matvec.c\
  struct_scale.c\
  struct_stencil.c\
- struct_vector.c\
- HYPRE_struct_mv.h\
- box.h\
- box_neighbors.h\
- box_pthreads.h\
- computation.h\
- headers.h\
- hypre_box_smp_forloop.h\
- struct_communication.h\
- struct_grid.h\
- struct_matrix.h\
- struct_mv.h\
- struct_stencil.h\
- struct_vector.h
+ struct_vector.c
+
+$(SOURCES): $(dependent_includes)
+	touch $@
+

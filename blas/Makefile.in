@@ -15,6 +15,7 @@
 @SET_MAKE@
 
 
+
 SOURCES = $(libHYPRE_blas_a_SOURCES) $(libHYPRE_blas_la_SOURCES)
 
 srcdir = @srcdir@
@@ -39,7 +40,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
 subdir = blas
-DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = README $(noinst_HEADERS) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/acinclude.m4 \
 	$(top_srcdir)/config/acx_blas.m4 \
@@ -59,7 +61,7 @@ libHYPRE_blas_a_LIBADD =
 am__libHYPRE_blas_a_SOURCES_DIST = dasum.c daxpy.c dcopy.c ddot.c \
 	dgemm.c dgemv.c dger.c dnrm2.c drot.c dscal.c dswap.c dsymm.c \
 	dsymv.c dsyr2.c dsyr2k.c dsyrk.c dtrmm.c dtrmv.c dtrsm.c \
-	dtrsv.c idamax.c blas_utils.c f2c.h hypre_blas.h
+	dtrsv.c idamax.c blas_utils.c
 am__objects_1 = dasum.$(OBJEXT) daxpy.$(OBJEXT) dcopy.$(OBJEXT) \
 	ddot.$(OBJEXT) dgemm.$(OBJEXT) dgemv.$(OBJEXT) dger.$(OBJEXT) \
 	dnrm2.$(OBJEXT) drot.$(OBJEXT) dscal.$(OBJEXT) dswap.$(OBJEXT) \
@@ -75,7 +77,7 @@ libHYPRE_blas_la_LIBADD =
 am__libHYPRE_blas_la_SOURCES_DIST = dasum.c daxpy.c dcopy.c ddot.c \
 	dgemm.c dgemv.c dger.c dnrm2.c drot.c dscal.c dswap.c dsymm.c \
 	dsymv.c dsyr2.c dsyr2k.c dsyrk.c dtrmm.c dtrmv.c dtrsm.c \
-	dtrsv.c idamax.c blas_utils.c f2c.h hypre_blas.h
+	dtrsv.c idamax.c blas_utils.c
 am__objects_2 = dasum.lo daxpy.lo dcopy.lo ddot.lo dgemm.lo dgemv.lo \
 	dger.lo dnrm2.lo drot.lo dscal.lo dswap.lo dsymm.lo dsymv.lo \
 	dsyr2.lo dsyr2k.lo dsyrk.lo dtrmm.lo dtrmv.lo dtrsm.lo \
@@ -83,31 +85,8 @@ am__objects_2 = dasum.lo daxpy.lo dcopy.lo ddot.lo dgemm.lo dgemv.lo \
 @STATICONLY_FALSE@am_libHYPRE_blas_la_OBJECTS = $(am__objects_2)
 libHYPRE_blas_la_OBJECTS = $(am_libHYPRE_blas_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
-depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/blas_utils.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/blas_utils.Po ./$(DEPDIR)/dasum.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dasum.Po ./$(DEPDIR)/daxpy.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/daxpy.Po ./$(DEPDIR)/dcopy.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dcopy.Po ./$(DEPDIR)/ddot.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/ddot.Po ./$(DEPDIR)/dgemm.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgemm.Po ./$(DEPDIR)/dgemv.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dgemv.Po ./$(DEPDIR)/dger.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dger.Po ./$(DEPDIR)/dnrm2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dnrm2.Po ./$(DEPDIR)/drot.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/drot.Po ./$(DEPDIR)/dscal.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dscal.Po ./$(DEPDIR)/dswap.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dswap.Po ./$(DEPDIR)/dsymm.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsymm.Po ./$(DEPDIR)/dsymv.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsymv.Po ./$(DEPDIR)/dsyr2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsyr2.Po ./$(DEPDIR)/dsyr2k.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsyr2k.Po ./$(DEPDIR)/dsyrk.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dsyrk.Po ./$(DEPDIR)/dtrmm.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dtrmm.Po ./$(DEPDIR)/dtrmv.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dtrmv.Po ./$(DEPDIR)/dtrsm.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dtrsm.Po ./$(DEPDIR)/dtrsv.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dtrsv.Po ./$(DEPDIR)/idamax.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/idamax.Po
+depcomp =
+am__depfiles_maybe =
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) \
@@ -118,12 +97,11 @@ LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 SOURCES = $(libHYPRE_blas_a_SOURCES) $(libHYPRE_blas_la_SOURCES)
 DIST_SOURCES = $(am__libHYPRE_blas_a_SOURCES_DIST) \
 	$(am__libHYPRE_blas_la_SOURCES_DIST)
+HEADERS = $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
-AMDEP_FALSE = @AMDEP_FALSE@
-AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
 AR = @AR@
 AS = @AS@
@@ -140,7 +118,6 @@ BLASNEEDED_FALSE = @BLASNEEDED_FALSE@
 BLASNEEDED_TRUE = @BLASNEEDED_TRUE@
 BLAS_LIBS = @BLAS_LIBS@
 CC = @CC@
-CCDEPMODE = @CCDEPMODE@
 CCLD = @CCLD@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
@@ -148,12 +125,10 @@ CPPFLAGS = @CPPFLAGS@
 CSUPERLUFLAGS = @CSUPERLUFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
-CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
-DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
@@ -228,13 +203,7 @@ ac_ct_F77 = @ac_ct_F77@
 ac_ct_OBJDUMP = @ac_ct_OBJDUMP@
 ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
-am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
-am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
-am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
-am__fastdepCXX_TRUE = @am__fastdepCXX_TRUE@
-am__include = @am__include@
 am__leading_dot = @am__leading_dot@
-am__quote = @am__quote@
 babeldir = @babeldir@
 bindir = @bindir@
 build = @build@
@@ -270,6 +239,11 @@ target_alias = @target_alias@
 @STATICONLY_FALSE@lib_LTLIBRARIES = libHYPRE_blas.la
 @STATICONLY_FALSE@libHYPRE_blas_la_SOURCES = $(FILES)
 @STATICONLY_FALSE@libHYPRE_blas_la_LDFLAGS = -avoid-version
+noinst_HEADERS = \
+ f2c.h\
+ hypre_blas.h
+
+dependent_includes = $(noinst_HEADERS)
 
 #
 FILES = \
@@ -294,9 +268,7 @@ FILES = \
  dtrsm.c\
  dtrsv.c\
  idamax.c\
- blas_utils.c\
- f2c.h\
- hypre_blas.h
+ blas_utils.c
 
 all: all-am
 
@@ -311,9 +283,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  blas/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  --ignore-deps blas/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  blas/Makefile
+	  $(AUTOMAKE) --foreign  --ignore-deps blas/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -400,74 +372,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blas_utils.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blas_utils.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dasum.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dasum.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/daxpy.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/daxpy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dcopy.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dcopy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ddot.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ddot.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgemm.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgemm.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgemv.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgemv.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dger.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dger.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnrm2.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dnrm2.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drot.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drot.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dscal.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dscal.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dswap.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dswap.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsymm.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsymm.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsymv.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsymv.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyr2.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyr2.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyr2k.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyr2k.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyrk.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsyrk.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrmm.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrmm.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrmv.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrmv.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrsm.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrsm.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrsv.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtrsv.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/idamax.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/idamax.Po@am__quote@
-
 .c.o:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+	$(COMPILE) -c $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+	$(LTCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -554,7 +466,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LIBRARIES) $(LTLIBRARIES)
+all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) $(HEADERS)
 installdirs:
 	$(mkdir_p) $(DESTDIR)$(libdir) $(DESTDIR)$(libdir)
 install: install-am
@@ -587,7 +499,6 @@ clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
 	clean-libtool mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-libtool distclean-tags
@@ -613,7 +524,6 @@ install-man:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -646,6 +556,9 @@ uninstall-am: uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 	uninstall-am uninstall-info-am uninstall-libLIBRARIES \
 	uninstall-libLTLIBRARIES
 
+
+$(SOURCES): $(dependent_includes)
+	touch $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

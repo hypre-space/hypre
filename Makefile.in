@@ -56,6 +56,8 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = HYPRE_config.h
 CONFIG_CLEAN_FILES =
+depcomp =
+am__depfiles_maybe =
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -81,8 +83,6 @@ GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
 ACLOCAL = @ACLOCAL@
-AMDEP_FALSE = @AMDEP_FALSE@
-AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
 AR = @AR@
 AS = @AS@
@@ -99,7 +99,6 @@ BLASNEEDED_FALSE = @BLASNEEDED_FALSE@
 BLASNEEDED_TRUE = @BLASNEEDED_TRUE@
 BLAS_LIBS = @BLAS_LIBS@
 CC = @CC@
-CCDEPMODE = @CCDEPMODE@
 CCLD = @CCLD@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
@@ -107,12 +106,10 @@ CPPFLAGS = @CPPFLAGS@
 CSUPERLUFLAGS = @CSUPERLUFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
-CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
-DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
@@ -187,13 +184,7 @@ ac_ct_F77 = @ac_ct_F77@
 ac_ct_OBJDUMP = @ac_ct_OBJDUMP@
 ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
-am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
-am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
-am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
-am__fastdepCXX_TRUE = @am__fastdepCXX_TRUE@
-am__include = @am__include@
 am__leading_dot = @am__leading_dot@
-am__quote = @am__quote@
 babeldir = @babeldir@
 bindir = @bindir@
 build = @build@
@@ -233,7 +224,8 @@ MAINTAINERCLEANFILES = Makefile.in\
 
 
 # this is really ulgy, but there are different directory structures
-# babel seq_ls tools are not in the distribution
+# seq_ls tools are not in the distribution, but could be added
+# by uncommenting herre and in configure.ac
 #if PARCHORDLSDIR
 #PARCHORDLS = "parchord_ls"
 #else !PARCHORDLSDIR
@@ -251,7 +243,7 @@ TOOLS =
 @BLASNEEDED_FALSE@BLASDIR = 
 #endif !TOOLSDIR
 
-#EXTRA_DIRS = $(BABELDIR) $(SEQLS) $(TOOLS) test
+#EXTRA_DIRS = $(SEQLS) $(TOOLS) test
 @BLASNEEDED_TRUE@BLASDIR = blas
 @LAPACKNEEDED_FALSE@LAPACKDIR = 
 @LAPACKNEEDED_TRUE@LAPACKDIR = lapack
@@ -268,15 +260,16 @@ SUBDIRS = . config\
  IJ_mv distributed_ls parcsr_ls parcsr_es\
  FEI_mv $(SEQLS) $(TOOLS) $(BABELDIR) $(LIBDIR)
 
-DIST_SUBDIRS = . config\
+HYPRE_SUBDIR_LIST = config\
  blas lapack utilities\
  krylov\
  struct_mv struct_ls\
  sstruct_mv sstruct_ls\
  seq_mv parcsr_mv distributed_matrix matrix_matrix\
  IJ_mv distributed_ls parcsr_ls parcsr_es\
- FEI_mv test lib docs
+ FEI_mv babel babel-runtime test lib 
 
+DIST_SUBDIRS = . $(HYPRE_SUBDIRS_LIST) docs
 all: HYPRE_config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -287,15 +280,15 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
-	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign '; \
-	      cd $(srcdir) && $(AUTOMAKE) --foreign  \
+	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign  --ignore-deps'; \
+	      cd $(srcdir) && $(AUTOMAKE) --foreign  --ignore-deps \
 		&& exit 0; \
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  --ignore-deps Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  Makefile
+	  $(AUTOMAKE) --foreign  --ignore-deps Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -518,9 +511,6 @@ distdir: $(DISTFILES)
 	      || exit 1; \
 	  fi; \
 	done
-	$(MAKE) $(AM_MAKEFLAGS) \
-	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
-	  dist-hook
 	-find $(distdir) -type d ! -perm -777 -exec chmod a+rwx {} \; -o \
 	  ! -type d ! -perm -444 -links 1 -exec chmod a+r {} \; -o \
 	  ! -type d ! -perm -400 -exec chmod a+r {} \; -o \
@@ -721,7 +711,12 @@ uninstall-info: uninstall-info-recursive
 	tags tags-recursive uninstall uninstall-am \
 	uninstall-includeHEADERS uninstall-info-am
 
-#FEI_mv babel babel-runtime test lib docs
+
+test:
+	@ \
+	$(MAKE) $(AM_MAKEFLAGS) all; \
+	$(MAKE) $(AM_MAKEFLAGS) install; \
+	(cd test && $(MAKE) $(AM_MAKEFLAGS) all)
 
 docs: dvi ps pdf html
 
@@ -762,15 +757,34 @@ nofei:
 	(cd lib && touch libHYPRE.* .libs/libHYPRE.*); \
 	(cd lib && $(MAKE) $(AM_MAKEFLAGS) libHYPRE_LSI.la)
 
-dist-hook:
-	@ \
-	for i in babel babel-runtime; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    cp -fr $$i $(distdir); \
-	  fi; \
-	done
+#dist-hook:
+#	@ \
+#	for i in $(HYPRE_SUBDIR_LIST); \
+#	do \
+#	  if [ -d $$i ]; \
+#	  then \
+#	    cp -fr $$i $(distdir)/src; \
+#	  fi; \
+#	done; \
+#	if [ -d docs ]; \
+#	then \
+#	  cp -fr docs $(distdir); \
+#	fi; \
+#	for i in Makefile.am Makefile.in aclocal.m4 \
+#		configure configure.ac nopoe tarch; \
+#	do \
+#	  if [ -f $$i ]; \
+#	  then \
+#	    cp -f $$i $(distdir); \
+#	  fi; \
+#	done
+#	for i in COPYRIGHT_and_DISCLAIMER CHANGELOG README; \
+#	do \
+#	  if [ -f $$i ]; \
+#	  then \
+#	    cp -f $$i $(distdir); \
+#	  fi; \
+#	done
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

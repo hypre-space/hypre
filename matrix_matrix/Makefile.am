@@ -10,6 +10,7 @@ else !STATICONLY
 endif !STATICONLY
 
 include_HEADERS = HYPRE_matrix_matrix_protos.h
+dependent_includes = $(include_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_srcdir)\
@@ -23,6 +24,7 @@ EXTRA_DIST = HYPRE_BuildIJMatrixFromDistributedMatrix.c internal_protos.h
 #
 FILES = \
  HYPRE_ConvertPETScMatrixToDistributedMatrix.c\
- HYPRE_ConvertParCSRMatrixToDistributedMatrix.c\
- HYPRE_matrix_matrix_protos.h
+ HYPRE_ConvertParCSRMatrixToDistributedMatrix.c
 
+$(SOURCES): $(dependent_includes)
+	touch $@

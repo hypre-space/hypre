@@ -10,6 +10,15 @@ else !STATICONLY
 endif !STATICONLY
 
 include_HEADERS = HYPRE_sstruct_mv.h sstruct_mv.h
+noinst_HEADERS = \
+ box_map.h\
+ headers.h\
+ sstruct_graph.h\
+ sstruct_grid.h\
+ sstruct_matrix.h\
+ sstruct_stencil.h\
+ sstruct_vector.h
+dependent_includes = $(include_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_srcdir)\
@@ -37,14 +46,8 @@ FILES = \
  sstruct_matvec.c\
  sstruct_scale.c\
  sstruct_stencil.c\
- sstruct_vector.c\
- HYPRE_sstruct_mv.h\
- box_map.h\
- headers.h\
- sstruct_graph.h\
- sstruct_grid.h\
- sstruct_matrix.h\
- sstruct_mv.h\
- sstruct_stencil.h\
- sstruct_vector.h
+ sstruct_vector.c
+
+$(SOURCES): $(dependent_includes)
+	touch $@
 

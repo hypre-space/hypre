@@ -10,6 +10,13 @@ else !STATICONLY
 endif !STATICONLY
 
 include_HEADERS = krylov.h
+noinst_HEADERS = \
+ all_krylov.h\
+ bicgstab.h\
+ cgnr.h\
+ gmres.h\
+ pcg.h
+dependent_includes = $(include_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_builddir)/utilities\
@@ -24,11 +31,7 @@ FILES = \
  bicgstab.c\
  cgnr.c\
  gmres.c\
- pcg.c\
- all_krylov.h\
- bicgstab.h\
- cgnr.h\
- gmres.h\
- krylov.h\
- pcg.h
+ pcg.c
 
+$(SOURCES): $(dependent_includes)
+	touch $@

@@ -10,6 +10,9 @@ else !STATICONLY
 endif !STATICONLY
 
 include_HEADERS = HYPRE_lobpcg.h lobpcg.h
+noinst_HEADERS = \
+ mmio.h
+dependent_includes = $(include_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_srcdir)\
@@ -29,7 +32,8 @@ EXTRA_DIST = \
 FILES = \
  lobpcg.c\
  lobpcg_matrix.c\
- lobpcg_utilities.c\
- HYPRE_lobpcg.h\
- lobpcg.h\
- mmio.h
+ lobpcg_utilities.c
+
+$(SOURCES): $(dependent_includes)
+	touch $@
+

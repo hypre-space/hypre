@@ -40,8 +40,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
 subdir = distributed_matrix
-DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+DIST_COMMON = $(include_HEADERS) $(noinst_HEADERS) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/acinclude.m4 \
 	$(top_srcdir)/config/acx_blas.m4 \
@@ -61,10 +61,7 @@ libHYPRE_DistributedMatrix_a_LIBADD =
 am__libHYPRE_DistributedMatrix_a_SOURCES_DIST =  \
 	HYPRE_distributed_matrix.c distributed_matrix.c \
 	distributed_matrix_ISIS.c distributed_matrix_PETSc.c \
-	distributed_matrix_parcsr.c HYPRE_distributed_matrix_mv.h \
-	HYPRE_distributed_matrix_protos.h \
-	HYPRE_distributed_matrix_types.h distributed_matrix.h \
-	internal_protos.h
+	distributed_matrix_parcsr.c
 am__objects_1 = HYPRE_distributed_matrix.$(OBJEXT) \
 	distributed_matrix.$(OBJEXT) distributed_matrix_ISIS.$(OBJEXT) \
 	distributed_matrix_PETSc.$(OBJEXT) \
@@ -79,10 +76,7 @@ libHYPRE_DistributedMatrix_la_LIBADD =
 am__libHYPRE_DistributedMatrix_la_SOURCES_DIST =  \
 	HYPRE_distributed_matrix.c distributed_matrix.c \
 	distributed_matrix_ISIS.c distributed_matrix_PETSc.c \
-	distributed_matrix_parcsr.c HYPRE_distributed_matrix_mv.h \
-	HYPRE_distributed_matrix_protos.h \
-	HYPRE_distributed_matrix_types.h distributed_matrix.h \
-	internal_protos.h
+	distributed_matrix_parcsr.c
 am__objects_2 = HYPRE_distributed_matrix.lo distributed_matrix.lo \
 	distributed_matrix_ISIS.lo distributed_matrix_PETSc.lo \
 	distributed_matrix_parcsr.lo
@@ -91,18 +85,8 @@ am__objects_2 = HYPRE_distributed_matrix.lo distributed_matrix.lo \
 libHYPRE_DistributedMatrix_la_OBJECTS =  \
 	$(am_libHYPRE_DistributedMatrix_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
-depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/HYPRE_distributed_matrix.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_distributed_matrix.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_ISIS.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_ISIS.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_PETSc.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_PETSc.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_parcsr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/distributed_matrix_parcsr.Po
+depcomp =
+am__depfiles_maybe =
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) \
@@ -115,13 +99,11 @@ SOURCES = $(libHYPRE_DistributedMatrix_a_SOURCES) \
 DIST_SOURCES = $(am__libHYPRE_DistributedMatrix_a_SOURCES_DIST) \
 	$(am__libHYPRE_DistributedMatrix_la_SOURCES_DIST)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
-HEADERS = $(include_HEADERS)
+HEADERS = $(include_HEADERS) $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
-AMDEP_FALSE = @AMDEP_FALSE@
-AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
 AR = @AR@
 AS = @AS@
@@ -138,7 +120,6 @@ BLASNEEDED_FALSE = @BLASNEEDED_FALSE@
 BLASNEEDED_TRUE = @BLASNEEDED_TRUE@
 BLAS_LIBS = @BLAS_LIBS@
 CC = @CC@
-CCDEPMODE = @CCDEPMODE@
 CCLD = @CCLD@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
@@ -146,12 +127,10 @@ CPPFLAGS = @CPPFLAGS@
 CSUPERLUFLAGS = @CSUPERLUFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
-CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
-DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
@@ -226,13 +205,7 @@ ac_ct_F77 = @ac_ct_F77@
 ac_ct_OBJDUMP = @ac_ct_OBJDUMP@
 ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
-am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
-am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
-am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
-am__fastdepCXX_TRUE = @am__fastdepCXX_TRUE@
-am__include = @am__include@
 am__leading_dot = @am__leading_dot@
-am__quote = @am__quote@
 babeldir = @babeldir@
 bindir = @bindir@
 build = @build@
@@ -273,6 +246,10 @@ include_HEADERS = distributed_matrix.h \
  HYPRE_distributed_matrix_protos.h \
  HYPRE_distributed_matrix_types.h
 
+noinst_HEADERS = \
+ internal_protos.h
+
+dependent_includes = $(include_HEADERS)
 AM_CPPFLAGS = \
  -I$(top_srcdir)\
  -I$(top_builddir)/utilities\
@@ -287,12 +264,7 @@ FILES = \
  distributed_matrix.c\
  distributed_matrix_ISIS.c\
  distributed_matrix_PETSc.c\
- distributed_matrix_parcsr.c\
- HYPRE_distributed_matrix_mv.h\
- HYPRE_distributed_matrix_protos.h\
- HYPRE_distributed_matrix_types.h\
- distributed_matrix.h\
- internal_protos.h
+ distributed_matrix_parcsr.c
 
 all: all-am
 
@@ -307,9 +279,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  distributed_matrix/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  --ignore-deps distributed_matrix/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  distributed_matrix/Makefile
+	  $(AUTOMAKE) --foreign  --ignore-deps distributed_matrix/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -396,40 +368,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_distributed_matrix.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_distributed_matrix.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_ISIS.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_ISIS.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_PETSc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_PETSc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_parcsr.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distributed_matrix_parcsr.Po@am__quote@
-
 .c.o:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+	$(COMPILE) -c $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+	$(LTCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -566,7 +512,6 @@ clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
 	clean-libtool mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-libtool distclean-tags
@@ -592,7 +537,6 @@ install-man:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -627,6 +571,9 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
 	uninstall-includeHEADERS uninstall-info-am \
 	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
+
+$(SOURCES): $(dependent_includes)
+	touch $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

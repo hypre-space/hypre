@@ -40,8 +40,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
 subdir = IJ_mv
-DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+DIST_COMMON = $(include_HEADERS) $(noinst_HEADERS) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/acinclude.m4 \
 	$(top_srcdir)/config/acx_blas.m4 \
@@ -61,8 +61,7 @@ libHYPRE_IJ_mv_a_LIBADD =
 am__libHYPRE_IJ_mv_a_SOURCES_DIST = F90_HYPRE_IJMatrix.c \
 	F90_HYPRE_IJVector.c F90_IJMatrix.c HYPRE_IJMatrix.c \
 	HYPRE_IJVector.c IJMatrix.c IJMatrix_parcsr.c IJVector.c \
-	IJVector_parcsr.c aux_parcsr_matrix.c HYPRE_IJ_mv.h \
-	IJ_matrix.h IJ_mv.h IJ_vector.h aux_parcsr_matrix.h headers.h
+	IJVector_parcsr.c aux_parcsr_matrix.c
 am__objects_1 = F90_HYPRE_IJMatrix.$(OBJEXT) \
 	F90_HYPRE_IJVector.$(OBJEXT) F90_IJMatrix.$(OBJEXT) \
 	HYPRE_IJMatrix.$(OBJEXT) HYPRE_IJVector.$(OBJEXT) \
@@ -77,8 +76,7 @@ libHYPRE_IJ_mv_la_LIBADD =
 am__libHYPRE_IJ_mv_la_SOURCES_DIST = F90_HYPRE_IJMatrix.c \
 	F90_HYPRE_IJVector.c F90_IJMatrix.c HYPRE_IJMatrix.c \
 	HYPRE_IJVector.c IJMatrix.c IJMatrix_parcsr.c IJVector.c \
-	IJVector_parcsr.c aux_parcsr_matrix.c HYPRE_IJ_mv.h \
-	IJ_matrix.h IJ_mv.h IJ_vector.h aux_parcsr_matrix.h headers.h
+	IJVector_parcsr.c aux_parcsr_matrix.c
 am__objects_2 = F90_HYPRE_IJMatrix.lo F90_HYPRE_IJVector.lo \
 	F90_IJMatrix.lo HYPRE_IJMatrix.lo HYPRE_IJVector.lo \
 	IJMatrix.lo IJMatrix_parcsr.lo IJVector.lo IJVector_parcsr.lo \
@@ -86,26 +84,8 @@ am__objects_2 = F90_HYPRE_IJMatrix.lo F90_HYPRE_IJVector.lo \
 @STATICONLY_FALSE@am_libHYPRE_IJ_mv_la_OBJECTS = $(am__objects_2)
 libHYPRE_IJ_mv_la_OBJECTS = $(am_libHYPRE_IJ_mv_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
-depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/F90_HYPRE_IJMatrix.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_IJMatrix.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_IJVector.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_IJVector.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/F90_IJMatrix.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/F90_IJMatrix.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_IJMatrix.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_IJMatrix.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_IJVector.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_IJVector.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/IJMatrix.Plo ./$(DEPDIR)/IJMatrix.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/IJMatrix_parcsr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/IJMatrix_parcsr.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/IJVector.Plo ./$(DEPDIR)/IJVector.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/IJVector_parcsr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/IJVector_parcsr.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/aux_parcsr_matrix.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/aux_parcsr_matrix.Po
+depcomp =
+am__depfiles_maybe =
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) \
@@ -117,13 +97,11 @@ SOURCES = $(libHYPRE_IJ_mv_a_SOURCES) $(libHYPRE_IJ_mv_la_SOURCES)
 DIST_SOURCES = $(am__libHYPRE_IJ_mv_a_SOURCES_DIST) \
 	$(am__libHYPRE_IJ_mv_la_SOURCES_DIST)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
-HEADERS = $(include_HEADERS)
+HEADERS = $(include_HEADERS) $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
-AMDEP_FALSE = @AMDEP_FALSE@
-AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
 AR = @AR@
 AS = @AS@
@@ -140,7 +118,6 @@ BLASNEEDED_FALSE = @BLASNEEDED_FALSE@
 BLASNEEDED_TRUE = @BLASNEEDED_TRUE@
 BLAS_LIBS = @BLAS_LIBS@
 CC = @CC@
-CCDEPMODE = @CCDEPMODE@
 CCLD = @CCLD@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
@@ -148,12 +125,10 @@ CPPFLAGS = @CPPFLAGS@
 CSUPERLUFLAGS = @CSUPERLUFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
-CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
-DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
@@ -228,13 +203,7 @@ ac_ct_F77 = @ac_ct_F77@
 ac_ct_OBJDUMP = @ac_ct_OBJDUMP@
 ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
-am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
-am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
-am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
-am__fastdepCXX_TRUE = @am__fastdepCXX_TRUE@
-am__include = @am__include@
 am__leading_dot = @am__leading_dot@
-am__quote = @am__quote@
 babeldir = @babeldir@
 bindir = @bindir@
 build = @build@
@@ -271,6 +240,13 @@ target_alias = @target_alias@
 @STATICONLY_FALSE@libHYPRE_IJ_mv_la_SOURCES = $(FILES)
 @STATICONLY_FALSE@libHYPRE_IJ_mv_la_LDFLAGS = -avoid-version
 include_HEADERS = IJ_mv.h HYPRE_IJ_mv.h
+noinst_HEADERS = \
+ IJ_matrix.h\
+ IJ_vector.h\
+ aux_parcsr_matrix.h\
+ headers.h
+
+dependent_includes = $(include_HEADERS)
 AM_CPPFLAGS = \
  -I$(top_builddir)/utilities\
  -I$(top_srcdir)/utilities\
@@ -294,13 +270,7 @@ FILES = \
  IJMatrix_parcsr.c\
  IJVector.c\
  IJVector_parcsr.c\
- aux_parcsr_matrix.c\
- HYPRE_IJ_mv.h\
- IJ_matrix.h\
- IJ_mv.h\
- IJ_vector.h\
- aux_parcsr_matrix.h\
- headers.h
+ aux_parcsr_matrix.c
 
 all: all-am
 
@@ -315,9 +285,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  IJ_mv/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  --ignore-deps IJ_mv/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  IJ_mv/Makefile
+	  $(AUTOMAKE) --foreign  --ignore-deps IJ_mv/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -404,50 +374,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_IJMatrix.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_IJMatrix.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_IJVector.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_IJVector.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_IJMatrix.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_IJMatrix.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_IJMatrix.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_IJMatrix.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_IJVector.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_IJVector.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IJMatrix.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IJMatrix.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IJMatrix_parcsr.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IJMatrix_parcsr.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IJVector.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IJVector.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IJVector_parcsr.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IJVector_parcsr.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aux_parcsr_matrix.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aux_parcsr_matrix.Po@am__quote@
-
 .c.o:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+	$(COMPILE) -c $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+	$(LTCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -584,7 +518,6 @@ clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
 	clean-libtool mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-libtool distclean-tags
@@ -610,7 +543,6 @@ install-man:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -645,6 +577,9 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
 	uninstall-includeHEADERS uninstall-info-am \
 	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
+
+$(SOURCES): $(dependent_includes)
+	touch $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

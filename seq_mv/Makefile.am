@@ -10,6 +10,13 @@ else !STATICONLY
 endif !STATICONLY
 
 include_HEADERS = HYPRE_seq_mv.h seq_mv.h
+noinst_HEADERS = \
+ csr_matrix.h\
+ headers.h\
+ mapped_matrix.h\
+ multiblock_matrix.h\
+ vector.h
+dependent_includes = $(include_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_builddir)/utilities\
@@ -27,12 +34,8 @@ FILES = \
  genpart.c\
  mapped_matrix.c\
  multiblock_matrix.c\
- vector.c\
- HYPRE_seq_mv.h\
- csr_matrix.h\
- headers.h\
- mapped_matrix.h\
- multiblock_matrix.h\
- seq_mv.h\
- vector.h
+ vector.c
+
+$(SOURCES): $(dependent_includes)
+	touch $@
 

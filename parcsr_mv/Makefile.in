@@ -40,8 +40,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
 subdir = parcsr_mv
-DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+DIST_COMMON = $(include_HEADERS) $(noinst_HEADERS) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/acinclude.m4 \
 	$(top_srcdir)/config/acx_blas.m4 \
@@ -63,9 +63,7 @@ am__libHYPRE_parcsr_mv_a_SOURCES_DIST = F90_HYPRE_parcsr_matrix.c \
 	HYPRE_parcsr_matrix.c HYPRE_parcsr_vector.c communicationT.c \
 	numbers.c par_csr_aat.c par_csr_bool_matop.c \
 	par_csr_bool_matrix.c par_csr_communication.c par_csr_matop.c \
-	par_csr_matrix.c par_csr_matvec.c par_vector.c \
-	HYPRE_parcsr_mv.h headers.h numbers.h par_csr_communication.h \
-	par_csr_matrix.h par_vector.h parcsr_mv.h
+	par_csr_matrix.c par_csr_matvec.c par_vector.c
 am__objects_1 = F90_HYPRE_parcsr_matrix.$(OBJEXT) \
 	F90_HYPRE_parcsr_vector.$(OBJEXT) F90_par_vector.$(OBJEXT) \
 	F90_parcsr_matrix.$(OBJEXT) HYPRE_parcsr_matrix.$(OBJEXT) \
@@ -85,9 +83,7 @@ am__libHYPRE_parcsr_mv_la_SOURCES_DIST = F90_HYPRE_parcsr_matrix.c \
 	HYPRE_parcsr_matrix.c HYPRE_parcsr_vector.c communicationT.c \
 	numbers.c par_csr_aat.c par_csr_bool_matop.c \
 	par_csr_bool_matrix.c par_csr_communication.c par_csr_matop.c \
-	par_csr_matrix.c par_csr_matvec.c par_vector.c \
-	HYPRE_parcsr_mv.h headers.h numbers.h par_csr_communication.h \
-	par_csr_matrix.h par_vector.h parcsr_mv.h
+	par_csr_matrix.c par_csr_matvec.c par_vector.c
 am__objects_2 = F90_HYPRE_parcsr_matrix.lo F90_HYPRE_parcsr_vector.lo \
 	F90_par_vector.lo F90_parcsr_matrix.lo HYPRE_parcsr_matrix.lo \
 	HYPRE_parcsr_vector.lo communicationT.lo numbers.lo \
@@ -97,39 +93,8 @@ am__objects_2 = F90_HYPRE_parcsr_matrix.lo F90_HYPRE_parcsr_vector.lo \
 @STATICONLY_FALSE@am_libHYPRE_parcsr_mv_la_OBJECTS = $(am__objects_2)
 libHYPRE_parcsr_mv_la_OBJECTS = $(am_libHYPRE_parcsr_mv_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
-depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/F90_HYPRE_parcsr_matrix.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_matrix.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_vector.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/F90_HYPRE_parcsr_vector.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/F90_par_vector.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/F90_par_vector.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/F90_parcsr_matrix.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/F90_parcsr_matrix.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_matrix.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_matrix.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_vector.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_parcsr_vector.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/communicationT.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/communicationT.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/numbers.Plo ./$(DEPDIR)/numbers.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/par_csr_aat.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_csr_aat.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/par_csr_bool_matop.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_csr_bool_matop.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/par_csr_bool_matrix.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_csr_bool_matrix.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/par_csr_communication.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_csr_communication.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/par_csr_matop.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_csr_matop.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/par_csr_matrix.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_csr_matrix.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/par_csr_matvec.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_csr_matvec.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/par_vector.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/par_vector.Po
+depcomp =
+am__depfiles_maybe =
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) \
@@ -142,13 +107,11 @@ SOURCES = $(libHYPRE_parcsr_mv_a_SOURCES) \
 DIST_SOURCES = $(am__libHYPRE_parcsr_mv_a_SOURCES_DIST) \
 	$(am__libHYPRE_parcsr_mv_la_SOURCES_DIST)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
-HEADERS = $(include_HEADERS)
+HEADERS = $(include_HEADERS) $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
-AMDEP_FALSE = @AMDEP_FALSE@
-AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
 AR = @AR@
 AS = @AS@
@@ -165,7 +128,6 @@ BLASNEEDED_FALSE = @BLASNEEDED_FALSE@
 BLASNEEDED_TRUE = @BLASNEEDED_TRUE@
 BLAS_LIBS = @BLAS_LIBS@
 CC = @CC@
-CCDEPMODE = @CCDEPMODE@
 CCLD = @CCLD@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
@@ -173,12 +135,10 @@ CPPFLAGS = @CPPFLAGS@
 CSUPERLUFLAGS = @CSUPERLUFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
-CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
-DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
@@ -253,13 +213,7 @@ ac_ct_F77 = @ac_ct_F77@
 ac_ct_OBJDUMP = @ac_ct_OBJDUMP@
 ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
-am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
-am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
-am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
-am__fastdepCXX_TRUE = @am__fastdepCXX_TRUE@
-am__include = @am__include@
 am__leading_dot = @am__leading_dot@
-am__quote = @am__quote@
 babeldir = @babeldir@
 bindir = @bindir@
 build = @build@
@@ -296,6 +250,14 @@ target_alias = @target_alias@
 @STATICONLY_FALSE@libHYPRE_parcsr_mv_la_SOURCES = $(FILES)
 @STATICONLY_FALSE@libHYPRE_parcsr_mv_la_LDFLAGS = -avoid-version
 include_HEADERS = parcsr_mv.h HYPRE_parcsr_mv.h
+noinst_HEADERS = \
+ headers.h\
+ numbers.h\
+ par_csr_communication.h\
+ par_csr_matrix.h\
+ par_vector.h
+
+dependent_includes = $(include_HEADERS)
 AM_CPPFLAGS = \
  -I$(top_builddir)/utilities\
  -I$(top_srcdir)/utilities\
@@ -329,14 +291,7 @@ FILES = \
  par_csr_matop.c\
  par_csr_matrix.c\
  par_csr_matvec.c\
- par_vector.c\
- HYPRE_parcsr_mv.h\
- headers.h\
- numbers.h\
- par_csr_communication.h\
- par_csr_matrix.h\
- par_vector.h\
- parcsr_mv.h
+ par_vector.c
 
 all: all-am
 
@@ -351,9 +306,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  parcsr_mv/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  --ignore-deps parcsr_mv/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  parcsr_mv/Makefile
+	  $(AUTOMAKE) --foreign  --ignore-deps parcsr_mv/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -440,62 +395,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_matrix.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_matrix.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_vector.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_HYPRE_parcsr_vector.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_par_vector.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_par_vector.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_parcsr_matrix.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/F90_parcsr_matrix.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_matrix.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_matrix.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_vector.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_parcsr_vector.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/communicationT.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/communicationT.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numbers.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numbers.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_aat.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_aat.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_bool_matop.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_bool_matop.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_bool_matrix.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_bool_matrix.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_communication.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_communication.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_matop.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_matop.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_matrix.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_matrix.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_matvec.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_csr_matvec.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_vector.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/par_vector.Po@am__quote@
-
 .c.o:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+	$(COMPILE) -c $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+	$(LTCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -632,7 +539,6 @@ clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
 	clean-libtool mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-libtool distclean-tags
@@ -658,7 +564,6 @@ install-man:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -693,6 +598,9 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
 	uninstall-includeHEADERS uninstall-info-am \
 	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
+
+$(SOURCES): $(dependent_includes)
+	touch $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

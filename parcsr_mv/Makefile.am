@@ -10,6 +10,13 @@ else !STATICONLY
 endif !STATICONLY
 
 include_HEADERS = parcsr_mv.h HYPRE_parcsr_mv.h
+noinst_HEADERS = \
+ headers.h\
+ numbers.h\
+ par_csr_communication.h\
+ par_csr_matrix.h\
+ par_vector.h
+dependent_includes = $(include_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_builddir)/utilities\
@@ -43,12 +50,7 @@ FILES = \
  par_csr_matop.c\
  par_csr_matrix.c\
  par_csr_matvec.c\
- par_vector.c\
- HYPRE_parcsr_mv.h\
- headers.h\
- numbers.h\
- par_csr_communication.h\
- par_csr_matrix.h\
- par_vector.h\
- parcsr_mv.h
+ par_vector.c
 
+$(SOURCES): $(dependent_includes)
+	touch $@

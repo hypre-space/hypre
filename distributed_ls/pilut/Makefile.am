@@ -11,6 +11,14 @@ endif !STATICONLY
 
 include_HEADERS = HYPRE_DistributedMatrixPilutSolver_protos.h\
  HYPRE_DistributedMatrixPilutSolver_types.h
+noinst_HEADERS = \
+ DistributedMatrixPilutSolver.h\
+ const.h\
+ ilu.h\
+ internal_protos.h\
+ macros.h\
+ struct.h
+dependent_includes = $(include_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_srcdir)\
@@ -33,13 +41,8 @@ FILES = \
  pblas1.c\
  serilut.c\
  trifactor.c\
- util.c\
- DistributedMatrixPilutSolver.h\
- HYPRE_DistributedMatrixPilutSolver_protos.h\
- HYPRE_DistributedMatrixPilutSolver_types.h\
- const.h\
- ilu.h\
- internal_protos.h\
- macros.h\
- struct.h
+ util.c
+
+$(SOURCES): $(dependent_includes)
+	touch $@
 

@@ -22,7 +22,7 @@ BABEL_RUNTIME_DIR=""
 BABELDIR=""
 #casc_using_mli=no   
 
-AC_PREREQ(2.57)
+AC_PREREQ(2.59)
 AC_REVISION($Id$)
 AC_INIT([hypre], HYPRE_VERSION, [http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE], [hypre])
 AC_CONFIG_HEADER([HYPRE_config.h:config/HYPRE_config.h.in])
@@ -42,7 +42,7 @@ AC_DISABLE_SHARED
 AM_CONDITIONAL([STATICONLY],[test "$enable_shared" = no])
 AM_MAINTAINER_MODE
 
-AM_INIT_AUTOMAKE([1.7.5 foreign no-installinfo no-installman no-texinfo.tex])
+AM_INIT_AUTOMAKE([1.8 foreign no-dependencies no-installinfo no-installman no-texinfo.tex])
 dnl Change the default prefix (/usr/local) to ./hypre
 AC_PREFIX_DEFAULT("HYPRE_TOP_SRC_DIR/hypre")
 m4_pattern_allow([HYPRE_[A-Z_]+])

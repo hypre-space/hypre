@@ -9,6 +9,23 @@ else !STATICONLY
  libHYPRE_ParaSails_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
+noinst_HEADERS = \
+ Common.h\
+ ConjGrad.h\
+ DiagScale.h\
+ Hash.h\
+ LoadBal.h\
+ Matrix.h\
+ Mem.h\
+ Numbering.h\
+ OrderStat.h\
+ ParaSails.h\
+ PrunedRows.h\
+ RowPatt.h\
+ StoredRows.h\
+ hypre_ParaSails.h
+dependent_includes = $(noinst_HEADERS)
+
 AM_CPPFLAGS = \
  -I$(top_builddir)/utilities\
  -I$(top_srcdir)/utilities\
@@ -34,19 +51,8 @@ FILES = \
  PrunedRows.c\
  RowPatt.c\
  StoredRows.c\
- hypre_ParaSails.c\
- Common.h\
- ConjGrad.h\
- DiagScale.h\
- Hash.h\
- LoadBal.h\
- Matrix.h\
- Mem.h\
- Numbering.h\
- OrderStat.h\
- ParaSails.h\
- PrunedRows.h\
- RowPatt.h\
- StoredRows.h\
- hypre_ParaSails.h
+ hypre_ParaSails.c
+
+$(SOURCES): $(dependent_includes)
+	touch $@
 

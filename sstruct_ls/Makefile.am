@@ -10,6 +10,10 @@ else !STATICONLY
 endif !STATICONLY
 
 include_HEADERS = HYPRE_sstruct_ls.h sstruct_ls.h
+noinst_HEADERS = \
+ headers.h\
+ sys_pfmg.h
+dependent_includes = $(include_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_srcdir)\
@@ -41,9 +45,8 @@ FILES = \
  sys_pfmg_setup_rap.c\
  sys_pfmg_solve.c\
  sys_semi_interp.c\
- sys_semi_restrict.c\
- HYPRE_sstruct_ls.h\
- headers.h\
- sstruct_ls.h\
- sys_pfmg.h
+ sys_semi_restrict.c
+
+$(SOURCES): $(dependent_includes)
+	touch $@
 

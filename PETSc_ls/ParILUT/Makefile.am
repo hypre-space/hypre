@@ -10,6 +10,8 @@ else !STATICONLY
 endif !STATICONLY
 
 #include_HEADERS = PETScSolverParILUT.h
+noinst_HEADERS = PETScSolverParILUT.h
+dependent_includes = $(noinst_HEADERS)
 
 CPPFLAGS = -I..\
  -I$(top_srcdir)\
@@ -18,5 +20,8 @@ CPPFLAGS = -I..\
 
 #
 FILES = \
- HYPRE_PETScSolverParILUT.c HYPRE_PETScSolverParILUTSetup.c\
- PETScSolverParILUT.h
+ HYPRE_PETScSolverParILUT.c HYPRE_PETScSolverParILUTSetup.c
+
+$(SOURCES): $(dependent_includes)
+	touch $@
+

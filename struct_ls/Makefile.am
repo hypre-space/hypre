@@ -10,6 +10,12 @@ else !STATICONLY
 endif !STATICONLY
 
 include_HEADERS = struct_ls.h HYPRE_struct_ls.h
+noinst_HEADERS = \
+ headers.h\
+ pfmg.h\
+ smg.h\
+ sparse_msg.h
+dependent_includes = $(include_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_builddir)/utilities\
@@ -71,11 +77,8 @@ FILES = \
  sparse_msg_restrict.c\
  sparse_msg_setup.c\
  sparse_msg_setup_rap.c\
- sparse_msg_solve.c\
- HYPRE_struct_ls.h\
- headers.h\
- pfmg.h\
- smg.h\
- sparse_msg.h\
- struct_ls.h
+ sparse_msg_solve.c
+
+$(SOURCES): $(dependent_includes)
+	touch $@
 

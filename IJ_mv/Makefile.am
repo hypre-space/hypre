@@ -10,6 +10,12 @@ else !STATICONLY
 endif !STATICONLY
 
 include_HEADERS = IJ_mv.h HYPRE_IJ_mv.h
+noinst_HEADERS = \
+ IJ_matrix.h\
+ IJ_vector.h\
+ aux_parcsr_matrix.h\
+ headers.h
+dependent_includes = $(include_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_builddir)/utilities\
@@ -33,11 +39,7 @@ FILES = \
  IJMatrix_parcsr.c\
  IJVector.c\
  IJVector_parcsr.c\
- aux_parcsr_matrix.c\
- HYPRE_IJ_mv.h\
- IJ_matrix.h\
- IJ_mv.h\
- IJ_vector.h\
- aux_parcsr_matrix.h\
- headers.h
+ aux_parcsr_matrix.c
 
+$(SOURCES): $(dependent_includes)
+	touch $@

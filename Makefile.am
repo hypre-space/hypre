@@ -14,7 +14,8 @@ MAINTAINERCLEANFILES = Makefile.in\
  configure
 
 # this is really ulgy, but there are different directory structures
-# babel seq_ls tools are not in the distribution
+# seq_ls tools are not in the distribution, but could be added
+# by uncommenting herre and in configure.ac
 #if PARCHORDLSDIR
 #PARCHORDLS = "parchord_ls"
 #else !PARCHORDLSDIR
@@ -31,7 +32,7 @@ SEQLS =
 TOOLS =
 #endif !TOOLSDIR
 
-#EXTRA_DIRS = $(BABELDIR) $(SEQLS) $(TOOLS) test
+#EXTRA_DIRS = $(SEQLS) $(TOOLS) test
 if BLASNEEDED
 BLASDIR = blas
 else !BLASNEEDED
@@ -63,15 +64,22 @@ SUBDIRS = . config\
  IJ_mv distributed_ls parcsr_ls parcsr_es\
  FEI_mv $(SEQLS) $(TOOLS) $(BABELDIR) $(LIBDIR)
 
-DIST_SUBDIRS = . config\
+HYPRE_SUBDIR_LIST = config\
  blas lapack utilities\
  krylov\
  struct_mv struct_ls\
  sstruct_mv sstruct_ls\
  seq_mv parcsr_mv distributed_matrix matrix_matrix\
  IJ_mv distributed_ls parcsr_ls parcsr_es\
- FEI_mv test lib docs
-#FEI_mv babel babel-runtime test lib docs
+ FEI_mv babel babel-runtime test lib 
+
+DIST_SUBDIRS = . $(HYPRE_SUBDIRS_LIST) docs
+
+test:
+	@ \
+	$(MAKE) $(AM_MAKEFLAGS) all; \
+	$(MAKE) $(AM_MAKEFLAGS) install; \
+	(cd test && $(MAKE) $(AM_MAKEFLAGS) all)
 
 docs: dvi ps pdf html
 
@@ -113,12 +121,31 @@ nofei:
 	(cd lib && $(MAKE) $(AM_MAKEFLAGS) libHYPRE_LSI.la)
 
 
-dist-hook:
-	@ \
-	for i in babel babel-runtime; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    cp -fr $$i $(distdir); \
-	  fi; \
-	done
+#dist-hook:
+#	@ \
+#	for i in $(HYPRE_SUBDIR_LIST); \
+#	do \
+#	  if [ -d $$i ]; \
+#	  then \
+#	    cp -fr $$i $(distdir)/src; \
+#	  fi; \
+#	done; \
+#	if [ -d docs ]; \
+#	then \
+#	  cp -fr docs $(distdir); \
+#	fi; \
+#	for i in Makefile.am Makefile.in aclocal.m4 \
+#		configure configure.ac nopoe tarch; \
+#	do \
+#	  if [ -f $$i ]; \
+#	  then \
+#	    cp -f $$i $(distdir); \
+#	  fi; \
+#	done
+#	for i in COPYRIGHT_and_DISCLAIMER CHANGELOG README; \
+#	do \
+#	  if [ -f $$i ]; \
+#	  then \
+#	    cp -f $$i $(distdir); \
+#	  fi; \
+#	done

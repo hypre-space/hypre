@@ -9,6 +9,14 @@ else !STATICONLY
  libHYPRE_superlu_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
+noinst_HEADERS = \
+ Cnames.h\
+ colamd.h\
+ dsp_defs.h\
+ supermatrix.h\
+ superlu_util.h
+dependent_includes = $(noinst_HEADERS)
+
 AM_CPPFLAGS = \
  -I$(top_srcdir)/utilities
 
@@ -48,10 +56,8 @@ FILES = \
  sp_preorder.c\
  superlu_memory.c\
  superlu_timer.c\
- superlu_util.c\
- Cnames.h\
- colamd.h\
- dsp_defs.h\
- supermatrix.h\
- superlu_util.h
+ superlu_util.c
+
+$(SOURCES): $(dependent_includes)
+	touch $@
 

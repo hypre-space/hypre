@@ -40,8 +40,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
 subdir = utilities
-DIST_COMMON = $(include_HEADERS) $(srcdir)/HYPRE_utilities.h.in \
-	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(include_HEADERS) $(noinst_HEADERS) \
+	$(srcdir)/HYPRE_utilities.h.in $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/acinclude.m4 \
 	$(top_srcdir)/config/acx_blas.m4 \
@@ -61,10 +62,7 @@ libHYPRE_utilities_a_LIBADD =
 am__libHYPRE_utilities_a_SOURCES_DIST = amg_linklist.c binsearch.c \
 	hypre_memory.c hypre_qsort.c memory_dmalloc.c mpistubs.c \
 	qsplit.c random.c thread_mpistubs.c threading.c timer.c \
-	timing.c umalloc_local.c HYPRE_utilities.h amg_linklist.h \
-	fortran.h general.h hypre_memory.h hypre_smp_forloop.h \
-	mpistubs.h thread_mpistubs.h threading.h timing.h \
-	umalloc_local.h utilities.h
+	timing.c umalloc_local.c
 am__objects_1 = amg_linklist.$(OBJEXT) binsearch.$(OBJEXT) \
 	hypre_memory.$(OBJEXT) hypre_qsort.$(OBJEXT) \
 	memory_dmalloc.$(OBJEXT) mpistubs.$(OBJEXT) qsplit.$(OBJEXT) \
@@ -78,10 +76,7 @@ libHYPRE_utilities_la_LIBADD =
 am__libHYPRE_utilities_la_SOURCES_DIST = amg_linklist.c binsearch.c \
 	hypre_memory.c hypre_qsort.c memory_dmalloc.c mpistubs.c \
 	qsplit.c random.c thread_mpistubs.c threading.c timer.c \
-	timing.c umalloc_local.c HYPRE_utilities.h amg_linklist.h \
-	fortran.h general.h hypre_memory.h hypre_smp_forloop.h \
-	mpistubs.h thread_mpistubs.h threading.h timing.h \
-	umalloc_local.h utilities.h
+	timing.c umalloc_local.c
 am__objects_2 = amg_linklist.lo binsearch.lo hypre_memory.lo \
 	hypre_qsort.lo memory_dmalloc.lo mpistubs.lo qsplit.lo \
 	random.lo thread_mpistubs.lo threading.lo timer.lo timing.lo \
@@ -89,27 +84,8 @@ am__objects_2 = amg_linklist.lo binsearch.lo hypre_memory.lo \
 @STATICONLY_FALSE@am_libHYPRE_utilities_la_OBJECTS = $(am__objects_2)
 libHYPRE_utilities_la_OBJECTS = $(am_libHYPRE_utilities_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
-depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/amg_linklist.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/amg_linklist.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/binsearch.Plo ./$(DEPDIR)/binsearch.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/hypre_memory.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/hypre_memory.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/hypre_qsort.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/hypre_qsort.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/memory_dmalloc.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/memory_dmalloc.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/mpistubs.Plo ./$(DEPDIR)/mpistubs.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/qsplit.Plo ./$(DEPDIR)/qsplit.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/random.Plo ./$(DEPDIR)/random.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/thread_mpistubs.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/thread_mpistubs.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/threading.Plo ./$(DEPDIR)/threading.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/timer.Plo ./$(DEPDIR)/timer.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/timing.Plo ./$(DEPDIR)/timing.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/umalloc_local.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/umalloc_local.Po
+depcomp =
+am__depfiles_maybe =
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) \
@@ -122,13 +98,11 @@ SOURCES = $(libHYPRE_utilities_a_SOURCES) \
 DIST_SOURCES = $(am__libHYPRE_utilities_a_SOURCES_DIST) \
 	$(am__libHYPRE_utilities_la_SOURCES_DIST)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
-HEADERS = $(include_HEADERS)
+HEADERS = $(include_HEADERS) $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
-AMDEP_FALSE = @AMDEP_FALSE@
-AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
 AR = @AR@
 AS = @AS@
@@ -145,7 +119,6 @@ BLASNEEDED_FALSE = @BLASNEEDED_FALSE@
 BLASNEEDED_TRUE = @BLASNEEDED_TRUE@
 BLAS_LIBS = @BLAS_LIBS@
 CC = @CC@
-CCDEPMODE = @CCDEPMODE@
 CCLD = @CCLD@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
@@ -153,12 +126,10 @@ CPPFLAGS = @CPPFLAGS@
 CSUPERLUFLAGS = @CSUPERLUFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
-CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
-DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
@@ -233,13 +204,7 @@ ac_ct_F77 = @ac_ct_F77@
 ac_ct_OBJDUMP = @ac_ct_OBJDUMP@
 ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
-am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
-am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
-am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
-am__fastdepCXX_TRUE = @am__fastdepCXX_TRUE@
-am__include = @am__include@
 am__leading_dot = @am__leading_dot@
-am__quote = @am__quote@
 babeldir = @babeldir@
 bindir = @bindir@
 build = @build@
@@ -276,6 +241,19 @@ target_alias = @target_alias@
 @STATICONLY_FALSE@libHYPRE_utilities_la_SOURCES = $(FILES)
 @STATICONLY_FALSE@libHYPRE_utilities_la_LDFLAGS = -avoid-version
 include_HEADERS = utilities.h HYPRE_utilities.h
+noinst_HEADERS = \
+ amg_linklist.h\
+ fortran.h\
+ general.h\
+ hypre_memory.h\
+ hypre_smp_forloop.h\
+ mpistubs.h\
+ thread_mpistubs.h\
+ threading.h\
+ timing.h\
+ umalloc_local.h
+
+dependent_includes = $(include_HEADERS)
 EXTRA_DIST = HYPRE_utilities.h.in
 AM_CPPFLAGS = -DHYPRE_TIMING
 
@@ -293,19 +271,7 @@ FILES = \
  threading.c\
  timer.c\
  timing.c\
- umalloc_local.c\
- HYPRE_utilities.h\
- amg_linklist.h\
- fortran.h\
- general.h\
- hypre_memory.h\
- hypre_smp_forloop.h\
- mpistubs.h\
- thread_mpistubs.h\
- threading.h\
- timing.h\
- umalloc_local.h\
- utilities.h
+ umalloc_local.c
 
 all: all-am
 
@@ -320,9 +286,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  utilities/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  --ignore-deps utilities/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  utilities/Makefile
+	  $(AUTOMAKE) --foreign  --ignore-deps utilities/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -411,56 +377,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/amg_linklist.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/amg_linklist.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binsearch.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binsearch.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_memory.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_memory.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_qsort.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hypre_qsort.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory_dmalloc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory_dmalloc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpistubs.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpistubs.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/qsplit.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/qsplit.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/random.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/random.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread_mpistubs.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread_mpistubs.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/threading.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/threading.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timer.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timing.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timing.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umalloc_local.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umalloc_local.Po@am__quote@
-
 .c.o:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+	$(COMPILE) -c $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+	$(LTCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -597,7 +521,6 @@ clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
 	clean-libtool mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-libtool distclean-tags
@@ -623,7 +546,6 @@ install-man:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -658,6 +580,9 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
 	uninstall-includeHEADERS uninstall-info-am \
 	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
+
+$(SOURCES): $(dependent_includes)
+	touch $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

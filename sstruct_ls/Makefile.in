@@ -40,8 +40,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
 subdir = sstruct_ls
-DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+DIST_COMMON = $(include_HEADERS) $(noinst_HEADERS) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/acinclude.m4 \
 	$(top_srcdir)/config/acx_blas.m4 \
@@ -63,8 +63,7 @@ am__libHYPRE_sstruct_ls_a_SOURCES_DIST = HYPRE_sstruct_bicgstab.c \
 	HYPRE_sstruct_split.c HYPRE_sstruct_sys_pfmg.c krylov.c \
 	krylov_sstruct.c node_relax.c sys_pfmg.c sys_pfmg_relax.c \
 	sys_pfmg_setup.c sys_pfmg_setup_interp.c sys_pfmg_setup_rap.c \
-	sys_pfmg_solve.c sys_semi_interp.c sys_semi_restrict.c \
-	HYPRE_sstruct_ls.h headers.h sstruct_ls.h sys_pfmg.h
+	sys_pfmg_solve.c sys_semi_interp.c sys_semi_restrict.c
 am__objects_1 = HYPRE_sstruct_bicgstab.$(OBJEXT) \
 	HYPRE_sstruct_gmres.$(OBJEXT) HYPRE_sstruct_pcg.$(OBJEXT) \
 	HYPRE_sstruct_split.$(OBJEXT) HYPRE_sstruct_sys_pfmg.$(OBJEXT) \
@@ -83,8 +82,7 @@ am__libHYPRE_sstruct_ls_la_SOURCES_DIST = HYPRE_sstruct_bicgstab.c \
 	HYPRE_sstruct_split.c HYPRE_sstruct_sys_pfmg.c krylov.c \
 	krylov_sstruct.c node_relax.c sys_pfmg.c sys_pfmg_relax.c \
 	sys_pfmg_setup.c sys_pfmg_setup_interp.c sys_pfmg_setup_rap.c \
-	sys_pfmg_solve.c sys_semi_interp.c sys_semi_restrict.c \
-	HYPRE_sstruct_ls.h headers.h sstruct_ls.h sys_pfmg.h
+	sys_pfmg_solve.c sys_semi_interp.c sys_semi_restrict.c
 am__objects_2 = HYPRE_sstruct_bicgstab.lo HYPRE_sstruct_gmres.lo \
 	HYPRE_sstruct_pcg.lo HYPRE_sstruct_split.lo \
 	HYPRE_sstruct_sys_pfmg.lo krylov.lo krylov_sstruct.lo \
@@ -95,38 +93,8 @@ am__objects_2 = HYPRE_sstruct_bicgstab.lo HYPRE_sstruct_gmres.lo \
 @STATICONLY_FALSE@	$(am__objects_2)
 libHYPRE_sstruct_ls_la_OBJECTS = $(am_libHYPRE_sstruct_ls_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
-depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/HYPRE_sstruct_bicgstab.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_bicgstab.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_gmres.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_gmres.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_pcg.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_pcg.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_split.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_split.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_sys_pfmg.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/HYPRE_sstruct_sys_pfmg.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/krylov.Plo ./$(DEPDIR)/krylov.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/krylov_sstruct.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/krylov_sstruct.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/node_relax.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/node_relax.Po ./$(DEPDIR)/sys_pfmg.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_relax.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_relax.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_setup.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_setup.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_setup_interp.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_setup_interp.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_setup_rap.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_setup_rap.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_solve.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/sys_pfmg_solve.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sys_semi_interp.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/sys_semi_interp.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sys_semi_restrict.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/sys_semi_restrict.Po
+depcomp =
+am__depfiles_maybe =
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) \
@@ -139,13 +107,11 @@ SOURCES = $(libHYPRE_sstruct_ls_a_SOURCES) \
 DIST_SOURCES = $(am__libHYPRE_sstruct_ls_a_SOURCES_DIST) \
 	$(am__libHYPRE_sstruct_ls_la_SOURCES_DIST)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
-HEADERS = $(include_HEADERS)
+HEADERS = $(include_HEADERS) $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
-AMDEP_FALSE = @AMDEP_FALSE@
-AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
 AR = @AR@
 AS = @AS@
@@ -162,7 +128,6 @@ BLASNEEDED_FALSE = @BLASNEEDED_FALSE@
 BLASNEEDED_TRUE = @BLASNEEDED_TRUE@
 BLAS_LIBS = @BLAS_LIBS@
 CC = @CC@
-CCDEPMODE = @CCDEPMODE@
 CCLD = @CCLD@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
@@ -170,12 +135,10 @@ CPPFLAGS = @CPPFLAGS@
 CSUPERLUFLAGS = @CSUPERLUFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
-CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
-DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
@@ -250,13 +213,7 @@ ac_ct_F77 = @ac_ct_F77@
 ac_ct_OBJDUMP = @ac_ct_OBJDUMP@
 ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
-am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
-am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
-am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
-am__fastdepCXX_TRUE = @am__fastdepCXX_TRUE@
-am__include = @am__include@
 am__leading_dot = @am__leading_dot@
-am__quote = @am__quote@
 babeldir = @babeldir@
 bindir = @bindir@
 build = @build@
@@ -293,6 +250,11 @@ target_alias = @target_alias@
 @STATICONLY_FALSE@libHYPRE_sstruct_ls_la_SOURCES = $(FILES)
 @STATICONLY_FALSE@libHYPRE_sstruct_ls_la_LDFLAGS = -avoid-version
 include_HEADERS = HYPRE_sstruct_ls.h sstruct_ls.h
+noinst_HEADERS = \
+ headers.h\
+ sys_pfmg.h
+
+dependent_includes = $(include_HEADERS)
 AM_CPPFLAGS = \
  -I$(top_srcdir)\
  -I$(top_builddir)/utilities\
@@ -324,11 +286,7 @@ FILES = \
  sys_pfmg_setup_rap.c\
  sys_pfmg_solve.c\
  sys_semi_interp.c\
- sys_semi_restrict.c\
- HYPRE_sstruct_ls.h\
- headers.h\
- sstruct_ls.h\
- sys_pfmg.h
+ sys_semi_restrict.c
 
 all: all-am
 
@@ -343,9 +301,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  sstruct_ls/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  --ignore-deps sstruct_ls/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  sstruct_ls/Makefile
+	  $(AUTOMAKE) --foreign  --ignore-deps sstruct_ls/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -432,62 +390,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_bicgstab.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_bicgstab.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_gmres.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_gmres.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_pcg.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_pcg.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_split.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_split.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_sys_pfmg.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HYPRE_sstruct_sys_pfmg.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/krylov.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/krylov.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/krylov_sstruct.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/krylov_sstruct.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/node_relax.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/node_relax.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_relax.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_relax.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_setup.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_setup.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_setup_interp.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_setup_interp.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_setup_rap.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_setup_rap.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_solve.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_pfmg_solve.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_semi_interp.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_semi_interp.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_semi_restrict.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sys_semi_restrict.Po@am__quote@
-
 .c.o:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+	$(COMPILE) -c $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+	$(LTCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -624,7 +534,6 @@ clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
 	clean-libtool mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-libtool distclean-tags
@@ -650,7 +559,6 @@ install-man:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -685,6 +593,9 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
 	uninstall-includeHEADERS uninstall-info-am \
 	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
+
+$(SOURCES): $(dependent_includes)
+	touch $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -10,6 +10,12 @@ else !STATICONLY
 endif !STATICONLY
 
 include_HEADERS = parcsr_ls.h HYPRE_parcsr_ls.h
+noinst_HEADERS = \
+ Common.h\
+ headers.h\
+ par_amg.h\
+ schwarz.h
+dependent_includes = $(include_HEADERS)
 
 AM_CPPFLAGS = \
  -DHYPRE_MODE -DOPTIMIZED_DH\
@@ -70,11 +76,8 @@ FILES = \
  par_stats.c\
  par_strength.c\
  pcg_par.c\
- schwarz.c\
- Common.h\
- HYPRE_parcsr_ls.h\
- headers.h\
- par_amg.h\
- parcsr_ls.h\
- schwarz.h
+ schwarz.c
+
+$(SOURCES): $(dependent_includes)
+	touch $@
 
