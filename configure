@@ -438,6 +438,7 @@ PACKAGE_BUGREPORT='http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE'
 
 ac_unique_file="HYPRE.h"
 ac_default_prefix="`pwd`/hypre"
+ac_subdirs_all="$ac_subdirs_all babel-runtime"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
@@ -475,8 +476,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os STATICONLY_TRUE STATICONLY_FALSE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot PACKAGE_DATETIME CC CXX F77 babeldir USE_FEI_BASE_DIR_DEFAULT_TRUE USE_FEI_BASE_DIR_DEFAULT_FALSE USE_FEI_LIB_DIR_DEFAULT_TRUE USE_FEI_LIB_DIR_DEFAULT_FALSE USE_FEI_INC_DIR_DEFAULT_TRUE USE_FEI_INC_DIR_DEFAULT_FALSE CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS EGREP ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB DLLTOOL ac_ct_DLLTOOL AS ac_ct_AS OBJDUMP ac_ct_OBJDUMP CXXCPP LIBTOOL LIBTOOL_DEPS LIBOBJS POW_LIB MPILIBS CSUPERLUFLAGS BLAS_LIBS BLASNEEDED_TRUE BLASNEEDED_FALSE BLASLIBFLAGS LAPACK_LIBS LAPACKNEEDED_TRUE LAPACKNEEDED_FALSE LAPACKLIBFLAGS LIBM CCLD CXXLD BABEL_DIR BABEL_HYPRE_INCLUDES BABELLIBFLAGS HYPRE_BABELLIBDIR MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE FEI_BASE_DIR FEI_LIB_DIR FEI_INC_DIR DOCSDIR_TRUE DOCSDIR_FALSE subdirs BABELDIR TOOLSDIR_TRUE TOOLSDIR_FALSE LIBDIRNEEDED_TRUE LIBDIRNEEDED_FALSE LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os STATICONLY_TRUE STATICONLY_FALSE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot PACKAGE_DATETIME CC CXX F77 babeldir subdirs BABELDIR LIBDIRNEEDED_TRUE LIBDIRNEEDED_FALSE USE_FEI_BASE_DIR_DEFAULT_TRUE USE_FEI_BASE_DIR_DEFAULT_FALSE USE_FEI_LIB_DIR_DEFAULT_TRUE USE_FEI_LIB_DIR_DEFAULT_FALSE USE_FEI_INC_DIR_DEFAULT_TRUE USE_FEI_INC_DIR_DEFAULT_FALSE CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS EGREP ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB DLLTOOL ac_ct_DLLTOOL AS ac_ct_AS OBJDUMP ac_ct_OBJDUMP CXXCPP LIBTOOL LIBTOOL_DEPS LIBOBJS POW_LIB MPILIBS CSUPERLUFLAGS BLAS_LIBS BLASNEEDED_TRUE BLASNEEDED_FALSE BLASLIBFLAGS LAPACK_LIBS LAPACKNEEDED_TRUE LAPACKNEEDED_FALSE LAPACKLIBFLAGS LIBM CCLD CXXLD BABEL_DIR BABEL_HYPRE_INCLUDES BABELLIBFLAGS HYPRE_BABELLIBDIR MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE FEI_BASE_DIR FEI_LIB_DIR FEI_INC_DIR DOCSDIR_TRUE DOCSDIR_FALSE TOOLSDIR_TRUE TOOLSDIR_FALSE LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -3307,6 +3307,17 @@ else
   casc_using_babel=no
 
 fi;
+if test "$casc_using_babel" = "yes"; then
+  BABELDIR=babel
+  BABELDIR="$BABELDIR babel-runtime"
+  export CC CXX F77 F90 CPP LD
+  export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS
+
+
+subdirs="$subdirs babel-runtime"
+
+fi
+
 
 
 # Check whether --with-libdir or --without-libdir was given.
@@ -3321,6 +3332,16 @@ else
   casc_using_libdir=yes
 
 fi;
+
+
+if test "$casc_using_libdir" = yes; then
+  LIBDIRNEEDED_TRUE=
+  LIBDIRNEEDED_FALSE='#'
+else
+  LIBDIRNEEDED_TRUE='#'
+  LIBDIRNEEDED_FALSE=
+fi
+
 
 #AC_ARG_WITH(mli,
 #AC_HELP_STRING([--with-mli],[use MLI]),
@@ -6271,7 +6292,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:6274:" \
+echo "$as_me:6295:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -6467,7 +6488,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:6470: \"$ac_link\") >&5
+(eval echo $as_me:6491: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -6545,7 +6566,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:6548: \"$ac_link\") >&5
+(eval echo $as_me:6569: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -7775,7 +7796,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7778 "configure"' > conftest.$ac_ext
+  echo '#line 7799 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9701,11 +9722,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9704: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9725: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9708: \$? = $ac_status" >&5
+   echo "$as_me:9729: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -9933,11 +9954,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9936: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9957: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9940: \$? = $ac_status" >&5
+   echo "$as_me:9961: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -10000,11 +10021,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10003: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10024: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10007: \$? = $ac_status" >&5
+   echo "$as_me:10028: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12190,7 +12211,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12193 "configure"
+#line 12214 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12288,7 +12309,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12291 "configure"
+#line 12312 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14460,11 +14481,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14463: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14484: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14467: \$? = $ac_status" >&5
+   echo "$as_me:14488: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -14527,11 +14548,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14530: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14551: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14534: \$? = $ac_status" >&5
+   echo "$as_me:14555: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15912,7 +15933,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 15915 "configure"
+#line 15936 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16010,7 +16031,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 16013 "configure"
+#line 16034 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16832,11 +16853,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16835: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16856: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16839: \$? = $ac_status" >&5
+   echo "$as_me:16860: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -16899,11 +16920,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16902: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16923: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16906: \$? = $ac_status" >&5
+   echo "$as_me:16927: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18865,11 +18886,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18868: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18889: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18872: \$? = $ac_status" >&5
+   echo "$as_me:18893: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -19097,11 +19118,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19100: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19121: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19104: \$? = $ac_status" >&5
+   echo "$as_me:19125: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -19164,11 +19185,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19167: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19188: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:19171: \$? = $ac_status" >&5
+   echo "$as_me:19192: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -21354,7 +21375,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 21357 "configure"
+#line 21378 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -21452,7 +21473,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 21455 "configure"
+#line 21476 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -27176,9 +27197,12 @@ fi
 
 
 
-# subsitute output variables in these files
+# docs doesn't exist in this location in distribution subtree
 if test -d docs; then
-                                ac_config_files="$ac_config_files docs/bref_manual.dxx docs/ref_manual.dxx docs/Makefile"
+            ac_config_files="$ac_config_files docs/Makefile"
+
+# subsitute output variables in these files
+                      ac_config_files="$ac_config_files docs/bref_manual.dxx docs/ref_manual.dxx"
 
 fi
 
@@ -27192,24 +27216,13 @@ else
 fi
 
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ac_config_files="$ac_config_files Makefile FEI_mv/Makefile FEI_mv/SuperLU/Makefile FEI_mv/fei-base/Makefile FEI_mv/fei-hypre/Makefile FEI_mv/femli/Makefile FEI_mv/femli/amgs/Makefile FEI_mv/femli/base/Makefile FEI_mv/femli/blas/Makefile FEI_mv/femli/cintface/Makefile FEI_mv/femli/fedata/Makefile FEI_mv/femli/lib/Makefile FEI_mv/femli/mapper/Makefile FEI_mv/femli/matrix/Makefile FEI_mv/femli/solver/Makefile FEI_mv/femli/test/Makefile FEI_mv/femli/util/Makefile FEI_mv/femli/vector/Makefile IJ_mv/Makefile blas/Makefile config/Makefile distributed_ls/Makefile distributed_ls/Euclid/Makefile distributed_ls/ParaSails/Makefile distributed_ls/pilut/Makefile distributed_matrix/Makefile krylov/Makefile lapack/Makefile matrix_matrix/Makefile parcsr_es/Makefile parcsr_es/LOBPCG/Makefile parcsr_ls/Makefile parcsr_mv/Makefile seq_mv/Makefile sstruct_ls/Makefile sstruct_mv/Makefile struct_ls/Makefile struct_mv/Makefile test/Makefile test/AUTOTEST/Makefile test/TEST_fei/Makefile test/TEST_ij/Makefile test/TEST_sstruct/Makefile test/TEST_struct/Makefile test/TEST_timing/Makefile utilities/Makefile"
+                                                                                                                                                                                              ac_config_files="$ac_config_files Makefile FEI_mv/Makefile FEI_mv/SuperLU/Makefile FEI_mv/fei-base/Makefile FEI_mv/fei-hypre/Makefile FEI_mv/femli/Makefile FEI_mv/femli/amgs/Makefile FEI_mv/femli/base/Makefile FEI_mv/femli/blas/Makefile FEI_mv/femli/cintface/Makefile FEI_mv/femli/fedata/Makefile FEI_mv/femli/lib/Makefile FEI_mv/femli/mapper/Makefile FEI_mv/femli/matrix/Makefile FEI_mv/femli/solver/Makefile FEI_mv/femli/test/Makefile FEI_mv/femli/util/Makefile FEI_mv/femli/vector/Makefile IJ_mv/Makefile"
 
-if test "$casc_using_babel" = "yes"; then
-  if test -d babel; then
-                                            ac_config_files="$ac_config_files babel/Makefile babel/bHYPRE/Makefile babel/bHYPREClient-C/Makefile babel/bHYPREClient-F/Makefile"
+if test -d babel; then
+                                          ac_config_files="$ac_config_files babel/Makefile babel/bHYPRE/Makefile babel/bHYPREClient-C/Makefile babel/bHYPREClient-F/Makefile"
 
-    BABELDIR=babel
-  fi
-  if test -d babel-runtime; then
-    export CC CXX F77 F90 CPP LD
-    export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS
-
-
-subdirs="$subdirs babel-runtime"
-
-    BABELDIR="$BABELDIR babel-runtime"
-  fi
 fi
+                                                                                                                                                                                                                                                                                        ac_config_files="$ac_config_files blas/Makefile config/Makefile distributed_ls/Makefile distributed_ls/Euclid/Makefile distributed_ls/ParaSails/Makefile distributed_ls/pilut/Makefile distributed_matrix/Makefile krylov/Makefile lapack/Makefile lib/Makefile matrix_matrix/Makefile parcsr_es/Makefile parcsr_es/LOBPCG/Makefile parcsr_ls/Makefile parcsr_mv/Makefile seq_mv/Makefile sstruct_ls/Makefile sstruct_mv/Makefile struct_ls/Makefile struct_mv/Makefile test/Makefile test/AUTOTEST/Makefile test/TEST_fei/Makefile test/TEST_ij/Makefile test/TEST_sstruct/Makefile test/TEST_struct/Makefile test/TEST_timing/Makefile utilities/Makefile"
 
 #if test "$casc_using_mli" = "yes"; then
 #  if test -d mli; then
@@ -27228,6 +27241,7 @@ fi
 #    seq_ls/pamg/Makefile])
 #fi
 #AM_CONDITIONAL(SEQLSDIR, test -d seq_ls)
+# tools doesn't exist in distribution subtree
 if test -d tools; then
             ac_config_files="$ac_config_files tools/Makefile"
 
@@ -27240,22 +27254,6 @@ if test -d tools; then
 else
   TOOLSDIR_TRUE='#'
   TOOLSDIR_FALSE=
-fi
-
-if test "$casc_using_libdir" = "yes"; then
-  if test -d lib; then
-              ac_config_files="$ac_config_files lib/Makefile"
-
-  fi
-fi
-
-
-if test "$casc_using_libdir" = yes; then
-  LIBDIRNEEDED_TRUE=
-  LIBDIRNEEDED_FALSE='#'
-else
-  LIBDIRNEEDED_TRUE='#'
-  LIBDIRNEEDED_FALSE=
 fi
 
 cat >confcache <<\_ACEOF
@@ -27363,6 +27361,13 @@ echo "$as_me: error: conditional \"MAINTAINER_MODE\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${LIBDIRNEEDED_TRUE}" && test -z "${LIBDIRNEEDED_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"LIBDIRNEEDED\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"LIBDIRNEEDED\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${USE_FEI_BASE_DIR_DEFAULT_TRUE}" && test -z "${USE_FEI_BASE_DIR_DEFAULT_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"USE_FEI_BASE_DIR_DEFAULT\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -27409,13 +27414,6 @@ if test -z "${TOOLSDIR_TRUE}" && test -z "${TOOLSDIR_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"TOOLSDIR\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"TOOLSDIR\" was never defined.
-Usually this means the macro was only invoked conditionally." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-if test -z "${LIBDIRNEEDED_TRUE}" && test -z "${LIBDIRNEEDED_FALSE}"; then
-  { { echo "$as_me:$LINENO: error: conditional \"LIBDIRNEEDED\" was never defined.
-Usually this means the macro was only invoked conditionally." >&5
-echo "$as_me: error: conditional \"LIBDIRNEEDED\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -27853,9 +27851,9 @@ for ac_config_target in $ac_config_targets
 do
   case "$ac_config_target" in
   # Handling of arguments.
+  "docs/Makefile" ) CONFIG_FILES="$CONFIG_FILES docs/Makefile" ;;
   "docs/bref_manual.dxx" ) CONFIG_FILES="$CONFIG_FILES docs/bref_manual.dxx" ;;
   "docs/ref_manual.dxx" ) CONFIG_FILES="$CONFIG_FILES docs/ref_manual.dxx" ;;
-  "docs/Makefile" ) CONFIG_FILES="$CONFIG_FILES docs/Makefile" ;;
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "FEI_mv/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/Makefile" ;;
   "FEI_mv/SuperLU/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/SuperLU/Makefile" ;;
@@ -27875,6 +27873,10 @@ do
   "FEI_mv/femli/util/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/femli/util/Makefile" ;;
   "FEI_mv/femli/vector/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/femli/vector/Makefile" ;;
   "IJ_mv/Makefile" ) CONFIG_FILES="$CONFIG_FILES IJ_mv/Makefile" ;;
+  "babel/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/Makefile" ;;
+  "babel/bHYPRE/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPRE/Makefile" ;;
+  "babel/bHYPREClient-C/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPREClient-C/Makefile" ;;
+  "babel/bHYPREClient-F/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPREClient-F/Makefile" ;;
   "blas/Makefile" ) CONFIG_FILES="$CONFIG_FILES blas/Makefile" ;;
   "config/Makefile" ) CONFIG_FILES="$CONFIG_FILES config/Makefile" ;;
   "distributed_ls/Makefile" ) CONFIG_FILES="$CONFIG_FILES distributed_ls/Makefile" ;;
@@ -27884,6 +27886,7 @@ do
   "distributed_matrix/Makefile" ) CONFIG_FILES="$CONFIG_FILES distributed_matrix/Makefile" ;;
   "krylov/Makefile" ) CONFIG_FILES="$CONFIG_FILES krylov/Makefile" ;;
   "lapack/Makefile" ) CONFIG_FILES="$CONFIG_FILES lapack/Makefile" ;;
+  "lib/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
   "matrix_matrix/Makefile" ) CONFIG_FILES="$CONFIG_FILES matrix_matrix/Makefile" ;;
   "parcsr_es/Makefile" ) CONFIG_FILES="$CONFIG_FILES parcsr_es/Makefile" ;;
   "parcsr_es/LOBPCG/Makefile" ) CONFIG_FILES="$CONFIG_FILES parcsr_es/LOBPCG/Makefile" ;;
@@ -27902,12 +27905,7 @@ do
   "test/TEST_struct/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/TEST_struct/Makefile" ;;
   "test/TEST_timing/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/TEST_timing/Makefile" ;;
   "utilities/Makefile" ) CONFIG_FILES="$CONFIG_FILES utilities/Makefile" ;;
-  "babel/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/Makefile" ;;
-  "babel/bHYPRE/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPRE/Makefile" ;;
-  "babel/bHYPREClient-C/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPREClient-C/Makefile" ;;
-  "babel/bHYPREClient-F/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPREClient-F/Makefile" ;;
   "tools/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/Makefile" ;;
-  "lib/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
   "HYPRE_config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS HYPRE_config.h:config/HYPRE_config.h.in" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
@@ -28031,6 +28029,10 @@ s,@CC@,$CC,;t t
 s,@CXX@,$CXX,;t t
 s,@F77@,$F77,;t t
 s,@babeldir@,$babeldir,;t t
+s,@subdirs@,$subdirs,;t t
+s,@BABELDIR@,$BABELDIR,;t t
+s,@LIBDIRNEEDED_TRUE@,$LIBDIRNEEDED_TRUE,;t t
+s,@LIBDIRNEEDED_FALSE@,$LIBDIRNEEDED_FALSE,;t t
 s,@USE_FEI_BASE_DIR_DEFAULT_TRUE@,$USE_FEI_BASE_DIR_DEFAULT_TRUE,;t t
 s,@USE_FEI_BASE_DIR_DEFAULT_FALSE@,$USE_FEI_BASE_DIR_DEFAULT_FALSE,;t t
 s,@USE_FEI_LIB_DIR_DEFAULT_TRUE@,$USE_FEI_LIB_DIR_DEFAULT_TRUE,;t t
@@ -28093,12 +28095,8 @@ s,@FEI_LIB_DIR@,$FEI_LIB_DIR,;t t
 s,@FEI_INC_DIR@,$FEI_INC_DIR,;t t
 s,@DOCSDIR_TRUE@,$DOCSDIR_TRUE,;t t
 s,@DOCSDIR_FALSE@,$DOCSDIR_FALSE,;t t
-s,@subdirs@,$subdirs,;t t
-s,@BABELDIR@,$BABELDIR,;t t
 s,@TOOLSDIR_TRUE@,$TOOLSDIR_TRUE,;t t
 s,@TOOLSDIR_FALSE@,$TOOLSDIR_FALSE,;t t
-s,@LIBDIRNEEDED_TRUE@,$LIBDIRNEEDED_TRUE,;t t
-s,@LIBDIRNEEDED_FALSE@,$LIBDIRNEEDED_FALSE,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF
 

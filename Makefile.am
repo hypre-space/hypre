@@ -13,13 +13,13 @@ MAINTAINERCLEANFILES = Makefile.in\
  aclocal.m4\
  configure
 
-# this is really ulgy, but there are different directory structures
-# seq_ls tools are not in the distribution, but could be added
+# this is really ulgy, but there are different directory structures, i.e.
+# seq_ls, and tools are not in the distribution, but could be added
 # by uncommenting here and in configure.ac. The SUBDIRS controls
 # the build directories, while DIST_SUBDIRS determine the directories
 # in the distribution (make dist).
 if DOCSDIR
-DOCS = tools
+DOCS = docs
 else !DOCSDIR
 DOCS =
 endif !DOCSDIR
@@ -89,27 +89,25 @@ config\
  seq_mv parcsr_mv distributed_matrix matrix_matrix\
  IJ_mv distributed_ls parcsr_ls parcsr_es\
  FEI_mv $(BABELDIR) test lib $(DOCSDIR) .
-# causes problems with "make distclean"
-# FEI_mv babel babel-runtime test lib docs .
 
 test:
 	@ \
 	$(MAKE) $(AM_MAKEFLAGS) install; \
-	(cd test && $(MAKE) $(AM_MAKEFLAGS))
+	(test -d test && cd test && $(MAKE) $(AM_MAKEFLAGS))
 
 docs: dvi ps pdf html
 
 dvi-local:
-	(cd docs && $(MAKE) $(AM_MAKEFLAGS) dvi)
+	(test -d docs && cd docs && $(MAKE) $(AM_MAKEFLAGS) dvi)
 
 ps-local:
-	(cd docs && $(MAKE) $(AM_MAKEFLAGS) ps)
+	(test -d docs && cd docs && $(MAKE) $(AM_MAKEFLAGS) ps)
 
 pdf-local: 
-	(cd docs && $(MAKE) $(AM_MAKEFLAGS) pdf)
+	(test -d docs && cd docs && $(MAKE) $(AM_MAKEFLAGS) pdf)
 
 html-local: 
-	(cd docs && $(MAKE) $(AM_MAKEFLAGS) html)
+	(test -d docs && cd docs && $(MAKE) $(AM_MAKEFLAGS) html)
 
 nofei:
 	@ \

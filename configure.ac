@@ -105,6 +105,14 @@ AC_HELP_STRING([--with-babel],[use babel]),
     BABEL_RUNTIME_DIR="HYPRE_TOP_SRC_DIR/babel-runtime"
   fi], [casc_using_babel=no]
 )
+if test "$casc_using_babel" = "yes"; then
+  BABELDIR=babel
+  BABELDIR="$BABELDIR babel-runtime"
+  export CC CXX F77 F90 CPP LD
+  export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS 
+  AC_CONFIG_SUBDIRS(babel-runtime)
+fi
+AC_SUBST(BABELDIR)
 
 AC_ARG_WITH(libdir,
 AC_HELP_STRING([--with-libdir],[build libHYPRE and libHYPRE_LSI libraries]),
@@ -114,6 +122,7 @@ AC_HELP_STRING([--with-libdir],[build libHYPRE and libHYPRE_LSI libraries]),
     casc_using_libdir=yes
   fi], [casc_using_libdir=yes]
 )
+AM_CONDITIONAL([LIBDIRNEEDED],[test "$casc_using_libdir" = yes])
 
 #AC_ARG_WITH(mli,
 #AC_HELP_STRING([--with-mli],[use MLI]),
@@ -369,12 +378,13 @@ AC_SUBST(FEI_BASE_DIR)
 AC_SUBST(FEI_LIB_DIR)
 AC_SUBST(FEI_INC_DIR)
 
-# subsitute output variables in these files
+# docs doesn't exist in this location in distribution subtree
 if test -d docs; then
+  AC_CONFIG_FILES([docs/Makefile])
+# subsitute output variables in these files
   AC_CONFIG_FILES([
     docs/bref_manual.dxx
-    docs/ref_manual.dxx
-    docs/Makefile])
+    docs/ref_manual.dxx])
 fi
 AM_CONDITIONAL(DOCSDIR, test -d docs)
 
@@ -397,7 +407,15 @@ AC_CONFIG_FILES([
   FEI_mv/femli/test/Makefile
   FEI_mv/femli/util/Makefile
   FEI_mv/femli/vector/Makefile
-  IJ_mv/Makefile
+  IJ_mv/Makefile])
+if test -d babel; then
+  AC_CONFIG_FILES([
+    babel/Makefile
+    babel/bHYPRE/Makefile
+    babel/bHYPREClient-C/Makefile
+    babel/bHYPREClient-F/Makefile])
+fi
+AC_CONFIG_FILES([
   blas/Makefile
   config/Makefile
   distributed_ls/Makefile
@@ -407,6 +425,7 @@ AC_CONFIG_FILES([
   distributed_matrix/Makefile
   krylov/Makefile
   lapack/Makefile
+  lib/Makefile
   matrix_matrix/Makefile
   parcsr_es/Makefile
   parcsr_es/LOBPCG/Makefile
@@ -425,22 +444,6 @@ AC_CONFIG_FILES([
   test/TEST_struct/Makefile
   test/TEST_timing/Makefile
   utilities/Makefile])
-if test "$casc_using_babel" = "yes"; then
-  if test -d babel; then
-    AC_CONFIG_FILES([babel/Makefile
-      babel/bHYPRE/Makefile
-      babel/bHYPREClient-C/Makefile
-      babel/bHYPREClient-F/Makefile])
-    BABELDIR=babel
-  fi
-  if test -d babel-runtime; then
-    export CC CXX F77 F90 CPP LD
-    export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS 
-    AC_CONFIG_SUBDIRS(babel-runtime)
-    BABELDIR="$BABELDIR babel-runtime"
-  fi
-fi
-AC_SUBST(BABELDIR)
 #if test "$casc_using_mli" = "yes"; then
 #  if test -d mli; then
 #    AC_CONFIG_FILES([mli/Makefile
@@ -458,14 +461,9 @@ AC_SUBST(BABELDIR)
 #    seq_ls/pamg/Makefile])
 #fi
 #AM_CONDITIONAL(SEQLSDIR, test -d seq_ls)
+# tools doesn't exist in distribution subtree
 if test -d tools; then
   AC_CONFIG_FILES([tools/Makefile])
 fi
 AM_CONDITIONAL(TOOLSDIR, test -d tools)
-if test "$casc_using_libdir" = "yes"; then
-  if test -d lib; then
-    AC_CONFIG_FILES([lib/Makefile])
-  fi
-fi
-AM_CONDITIONAL([LIBDIRNEEDED],[test "$casc_using_libdir" = yes])
 AC_OUTPUT
