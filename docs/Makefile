@@ -12,8 +12,6 @@ include ../config/Makefile.config
 .SUFFIXES:
 .SUFFIXES: .c .dxx .html .tex
 
-srcdir = .
-
 LATEX = latex -interaction=nonstopmode
 MAKEINDEX = makeindex -q
 DVIPS = dvips -q
@@ -64,16 +62,32 @@ DEV_FILES =\
 all: html ps pdf
 
 install: all
-	@cp -fr HYPRE_usr_manual    ${HYPRE_INSTALL_DIR}/docs/.
-	@cp -f  HYPRE_usr_manual.p* ${HYPRE_INSTALL_DIR}/docs/.
-	@cp -fr HYPRE_ref_manual    ${HYPRE_INSTALL_DIR}/docs/.
-	@cp -f  HYPRE_ref_manual.p* ${HYPRE_INSTALL_DIR}/docs/.
-	@cp -f  V[1-9]* ${HYPRE_INSTALL_DIR}/docs/.
+	@ \
+	test ! -d ${HYPRE_INSTALL_DIR}/docs && \
+	    mkdir -m 755 -p ${HYPRE_INSTALL_DIR}/docs; \
+	for dir in HYPRE_usr_manual HYPRE_ref_manual bHYPRE_ref_manual; do \
+	  if test -d $$dir; then \
+	    test ! -d ${HYPRE_INSTALL_DIR}/docs/$$dir && \
+		mkdir -m 755 -p ${HYPRE_INSTALL_DIR}/docs/$$dir; \
+	    for file in $$dir/*; do \
+	      cp -fp $$file ${HYPRE_INSTALL_DIR}/docs/$$file; \
+	    done; \
+	  fi; \
+	done; \
+	for file in HYPRE_usr_manual.ps HYPRE_usr_manual.pdf \
+		HYPRE_ref_manual.ps HYPRE_ref_manual.pdf \
+		bHYPRE_ref_manual.ps bHYPRE_ref_manual.pdf; do \
+	  test -f $$file && cp -fp $$file ${HYPRE_INSTALL_DIR}/docs/$$file; \
+	done; \
+	test -f V1.5.0b.IJ_transition_info && \
+		test -f ${HYPRE_INSTALL_DIR}/docs/V1.5.0b.IJ_transition_info || \
+		cp -fp V1.5.0b.IJ_transition_info \
+		${HYPRE_INSTALL_DIR}/docs/V1.5.0b.IJ_transition_info
 
 clean:
 	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
 	@/bin/rm -f *.idx *.ilg *.ind 
-	@/bin/rm -f vref_manual.* version.tex
+	@/bin/rm -f vref_manual.* vbref_manual.* version.tex
 
 distclean: clean
 	@/bin/rm -fr HYPRE_usr_manual
@@ -82,16 +96,18 @@ distclean: clean
 	@/bin/rm -f  HYPRE_dev_manual.p*
 	@/bin/rm -fr HYPRE_ref_manual
 	@/bin/rm -f  HYPRE_ref_manual.tex HYPRE_ref_manual.p*
+	@/bin/rm -fr bHYPRE_ref_manual
+	@/bin/rm -f  bHYPRE_ref_manual.tex bHYPRE_ref_manual.p*
 
 ##################################################################
 # Rules
 ##################################################################
 
-html: usr_html dev_html ref_html
+html: usr_html dev_html ref_html bref_html
 
-ps: usr_ps dev_ps ref_ps
+ps: usr_ps dev_ps ref_ps bref_ps
 
-pdf: usr_pdf dev_pdf ref_pdf
+pdf: usr_pdf dev_pdf ref_pdf bref_pdf
 
 usr: usr_html usr_ps usr_pdf
 usr_html: HYPRE_usr_manual/usr_manual.html
@@ -107,6 +123,11 @@ ref: ref_html ref_ps ref_pdf
 ref_html: HYPRE_ref_manual/index.html
 ref_ps: HYPRE_ref_manual.ps
 ref_pdf: HYPRE_ref_manual.pdf
+
+bref: bref_html bref_ps bref_pdf
+bref_html: bHYPRE_ref_manual/index.html
+bref_ps: bHYPRE_ref_manual.ps
+bref_pdf: bHYPRE_ref_manual.pdf
 
 ##########
 
