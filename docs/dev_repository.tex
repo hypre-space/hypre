@@ -22,6 +22,30 @@ directory and all subdirectories.
 \item '\code{cvs log <file>}' - prints revision history for a file.
 \end{itemize}
 
+It is recommended that developers set up a \file{.cvsrc} file in their
+home directory with the following lines in it:
+\begin{verbatim}
+checkout -P
+update -P -d
+remove -f
+\end{verbatim}
+This sets default options for the CVS commands, \code{checkout},
+\code{update}, and \code{remove} that make life much easier.
+\begin{itemize}
+\item The \code{-P} options cause the \code{checkout} and \code{update}
+commands to ``prune'' (remove) directories that are empty.
+
+\item The \code{-d} option will create any directories that exist in the
+repository if they are missing in your working directory.  So, when
+new directories are added to the repository, they will get added to
+your working copy automatically when an \code{update} is done.
+
+\item The \code{-f} option causes the remove command to first remove the
+file from your working directory, then schedule it for removal from
+the repository.  So, if you want to remove a file from the repository,
+all you need to do is \code{cvs remove <file>}.
+\end{itemize}
+
 The main trunk of the repository must always pass the autotest
 procedures outlined in \ref{Autotest Procedures}.  So, developers must
 take extra care that checked-in code does not break autotest.  One
