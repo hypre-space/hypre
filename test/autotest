@@ -1,4 +1,4 @@
-#!/bin/sh
+    #!/bin/sh
 #BHEADER***********************************************************************
 # (c) 1998   The Regents of the University of California
 #
@@ -37,8 +37,6 @@ export PATH
 #==============================================================================
 
 HYPRE_CASC_AUTOTEST_DIR="/home/casc/software/hypre"
-
-HYPRE_AUTOTEST_LOG_FILE="autotest.log"
 
 HYPRE_ARCH=""
 
@@ -79,7 +77,6 @@ fi
 #=============================================================================
 
 cvs checkout -P linear_solvers
-#cd $HYPRE_AUTOTEST_DIR
 
 echo "setting permissions...."
 chmod -fR $HYPRE_AUTOTEST_PERMISSIONS *
@@ -88,11 +85,10 @@ cd linear_solvers
 ./build -$HYPRE_ARCH
 
 #=============================================================================
-# run test drivers and log results
+# run script to test all driver programs 
 #=============================================================================
 
 cd test
-rm -f $HYPRE_AUTOTEST_LOG.FILE
-./struct_linear_solvers >> $HYPRE_AUTOTEST_LOG_FILE
+./test_drivers.sh
 
 
