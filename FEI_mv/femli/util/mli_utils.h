@@ -68,6 +68,9 @@ int    MLI_Utils_HypreBiCGSTABSolve(CMLI *, HYPRE_Matrix, HYPRE_Vector,
                                     HYPRE_Vector);
 int    MLI_Utils_BinarySearch(int, int *, int);
 int    MLI_Utils_IntQSort2(int *, int *, int, int);
+int    MLI_Utils_IntQSort2a(int *, double *, int, int);
+int    MLI_Utils_IntMergeSort(int nlist, int *listLengs, int **lists,
+                              int **list2, int *newNList, int **newList); 
 
 #ifdef __cplusplus
 }

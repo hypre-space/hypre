@@ -21,7 +21,9 @@
 #include "HYPRE.h"
 #include "util/mli_utils.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
+/*
 #include <mpi.h>
+*/
 
 /*--------------------------------------------------------------------------
  * external function 
@@ -35,6 +37,7 @@ extern
 int hypre_BoomerAMGBuildCoarseOperator(hypre_ParCSRMatrix*,hypre_ParCSRMatrix*,
                                     hypre_ParCSRMatrix *,hypre_ParCSRMatrix **);
 void qsort1(int *, double *, int, int);
+int  MLI_Utils_IntTreeUpdate(int treeLeng, int *tree,int *treeInd);
 
 #ifdef __cplusplus
 }
@@ -1057,4 +1060,195 @@ int MLI_Utils_IntQSort2(int *ilist, int *ilist2, int left, int right)
    MLI_Utils_IntQSort2(ilist, ilist2, last+1, right);
    return 0;
 }
+
+/***************************************************************************
+ * quicksort on integers and permute doubles
+ *--------------------------------------------------------------------------*/
+
+int MLI_Utils_IntQSort2a(int *ilist, double *dlist, int left, int right)
+{
+   int    i, last, mid, itemp;
+   double dtemp;
+
+   if (left >= right) return 0;
+   mid          = (left + right) / 2;
+   itemp        = ilist[left];
+   ilist[left]  = ilist[mid];
+   ilist[mid]   = itemp;
+   if ( dlist != NULL )
+   {
+      dtemp       = dlist[left];
+      dlist[left] = dlist[mid];
+      dlist[mid]  = dtemp;
+   }
+   last         = left;
+   for (i = left+1; i <= right; i++)
+   {
+      if (ilist[i] < ilist[left])
+      {
+         last++;
+         itemp        = ilist[last];
+         ilist[last]  = ilist[i];
+         ilist[i]     = itemp;
+         if ( dlist != NULL )
+         {
+            dtemp       = dlist[last];
+            dlist[last] = dlist[i];
+            dlist[i]    = dtemp;
+         }
+      }
+   }
+   itemp        = ilist[left];
+   ilist[left]  = ilist[last];
+   ilist[last]  = itemp;
+   if ( dlist != NULL )
+   {
+      dtemp       = dlist[left];
+      dlist[left] = dlist[last];
+      dlist[last] = dtemp;
+   }
+   MLI_Utils_IntQSort2a(ilist, dlist, left, last-1);
+   MLI_Utils_IntQSort2a(ilist, dlist, last+1, right);
+   return 0;
+}
+
+/***************************************************************************
+ * merge sort on integers 
+ *--------------------------------------------------------------------------*/
+
+int MLI_Utils_IntMergeSort(int nList, int *listLengs, int **lists,
+                           int **lists2, int *newNListOut, int **newListOut)
+{
+   int i, totalLeng, *indices, *newList, parseCnt, newListCnt, minInd;
+   int minVal, sortFlag, *tree, *treeInd;
+
+   totalLeng = 0;
+   for ( i = 0; i < nList; i++ ) totalLeng += listLengs[i];
+   if ( totalLeng <= 0 ) return 1;
+
+#if 0
+   for ( i = 0; i < nList; i++ ) 
+   {
+      sortFlag = 0;
+      for ( j = 1; j < listLengs[i]; j++ ) 
+         if ( lists[i][j] < lists[i][j-1] )
+         {
+            sortFlag = 1;
+            break;
+         } 
+      if ( sortFlag == 1 )
+         MLI_Utils_IntQSort2(lists[i], lists2[i], 0, listLengs[i]-1);
+   }
+#else
+   sortFlag = 0;
+#endif
+
+   newList  = (int *) malloc( totalLeng * sizeof(int) ); 
+   indices  = (int *) malloc( nList * sizeof(int) );
+   tree     = (int *) malloc( nList * sizeof(int) );
+   treeInd  = (int *) malloc( nList * sizeof(int) );
+   for ( i = 0; i < nList; i++ ) indices[i] = 0;
+   for ( i = 0; i < nList; i++ ) 
+   {
+      if ( listLengs[i] > 0 ) 
+      {
+         tree[i] = lists[i][0];
+         treeInd[i] = i;
+      }
+      else
+      {
+         tree[i] = 1 << 31 - 1;
+         treeInd[i] = -1;
+      }
+   }
+   MLI_Utils_IntQSort2(tree, treeInd, 0, nList-1);
+
+   parseCnt = newListCnt = 0;
+   while ( parseCnt < totalLeng )
+   {
+      minInd = treeInd[0];
+      minVal = tree[0];
+      if ( newListCnt == 0 || minVal != newList[newListCnt-1] )
+      {
+         newList[newListCnt] = minVal;
+         lists2[minInd][indices[minInd]++] = newListCnt++;
+      }
+      else if ( minVal == newList[newListCnt-1] )
+      {
+         lists2[minInd][indices[minInd]++] = newListCnt - 1;
+      }
+      if ( indices[minInd] < listLengs[minInd] )
+      {
+         tree[0] = lists[minInd][indices[minInd]];
+         treeInd[0] = minInd;
+      }
+      else
+      {
+         tree[0] = 1 << 31 - 1;
+         treeInd[0] = - 1;
+      }
+      MLI_Utils_IntTreeUpdate(nList, tree, treeInd);
+      parseCnt++;
+   }
+   (*newListOut) = newList;   
+   (*newNListOut) = newListCnt;   
+   free( indices );
+   free( tree );
+   free( treeInd );
+   return 0;
+}
+
+/***************************************************************************
+ * tree sort on integers 
+ *--------------------------------------------------------------------------*/
+
+int MLI_Utils_IntTreeUpdate(int treeLeng, int *tree, int *treeInd)
+{
+   int i, j, mid, itemp, seed, next, nextp1, ndigits, minInd, minVal;
+
+   ndigits = 0;
+   if ( treeLeng > 0 ) ndigits++;
+   itemp = treeLeng;
+   while ( (itemp >>= 1) > 0 ) ndigits++;
+
+   if ( tree[1] < tree[0] )
+   {
+      itemp = tree[0];
+      tree[0] = tree[1];
+      tree[1] = itemp;
+      itemp = treeInd[0];
+      treeInd[0] = treeInd[1];
+      treeInd[1] = itemp;
+   }
+   else return 0;
+
+   seed = 1;
+   for ( i = 0; i < ndigits-1; i++ )
+   {
+      next   = seed * 2;
+      nextp1 = next + 1;
+      minInd = seed;
+      minVal = tree[seed];
+      if ( next < treeLeng && tree[next] < minVal ) 
+      {
+         minInd = next;
+         minVal = tree[next];
+      }
+      if ( nextp1 < treeLeng && tree[nextp1] < minVal ) 
+      {
+         minInd = next + 1;
+         minVal = tree[nextp1];
+      }
+      if ( minInd == seed ) return 0;
+      itemp = tree[minInd];
+      tree[minInd] = tree[seed];
+      tree[seed] = itemp;
+      itemp = treeInd[minInd];
+      treeInd[minInd] = treeInd[seed];
+      treeInd[seed] = itemp;
+      seed = minInd;
+   }
+   return 0;
+}
+
 
