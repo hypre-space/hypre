@@ -9,15 +9,16 @@
 #EHEADER***********************************************************************
 
 #=============================================================================
-# sstruct: Test various blockings and distributions of default problem
+# sstruct: Test SetNeighborBox by comparing one-part problem
+#          against equivalent multi-part problems
 #=============================================================================
 
-tail -3 default2d.out.0 > default2d.testdata
+tail -3 cube.out.0 > cube.testdata
 
-tail -3 default2d.out.1 > default2d.testdata.temp
-diff default2d.testdata default2d.testdata.temp >&2
+tail -3 cube.out.1 > cube.testdata.temp
+diff cube.testdata cube.testdata.temp >&2
 
-tail -3 default2d.out.2 > default2d.testdata.temp
-diff default2d.testdata default2d.testdata.temp >&2
+tail -3 cube.out.2 > cube.testdata.temp
+diff cube.testdata cube.testdata.temp >&2
 
-rm -f default2d.testdata default2d.testdata.temp
+rm -f cube.testdata cube.testdata.temp

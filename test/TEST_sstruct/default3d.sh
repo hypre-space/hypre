@@ -23,5 +23,4 @@ diff default3d.testdata default3d.testdata.temp >&2
 tail -3 default3d.out.3 > default3d.testdata.temp
 diff default3d.testdata default3d.testdata.temp >&2
 
-#rm -f default3d.out.0 default3d.out.1 default3d.out.2 default3d.out.3
-#rm -f default3d.testdata default3d.testdata.temp
+rm -f default3d.testdata default3d.testdata.temp

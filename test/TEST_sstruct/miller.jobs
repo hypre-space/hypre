@@ -1,0 +1,30 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# sstruct: Run all of the solvers
+#=============================================================================
+
+mpirun -np 2 ./sstruct -in sstruct.in.miller_2blk  -r 5 10 1 -P 2 1 1 \
+ -solver 11 > miller.out.0
+mpirun -np 2 ./sstruct -in sstruct.in.miller_2blk  -r 5 10 1 -P 2 1 1 \
+ -solver 20 > miller.out.1
+mpirun -np 2 ./sstruct -in sstruct.in.miller_2blk1 -r 5 10 1 -P 2 1 1 \
+ -solver 11 > miller.out.2
+mpirun -np 2 ./sstruct -in sstruct.in.miller_2blk1 -r 5 10 1 -P 2 1 1 \
+ -solver 20 > miller.out.3
+mpirun -np 2 ./sstruct -in sstruct.in.miller_2stk  -r 5 10 1 -P 2 1 1 \
+ -solver 11 > miller.out.4
+mpirun -np 2 ./sstruct -in sstruct.in.miller_2stk  -r 5 10 1 -P 2 1 1 \
+ -solver 20 > miller.out.5
+mpirun -np 2 ./sstruct -in sstruct.in.miller_3blk  -r 5 10 1 -P 2 1 1 \
+ -solver 11 > miller.out.6
+mpirun -np 2 ./sstruct -in sstruct.in.miller_3blk  -r 5 10 1 -P 2 1 1 \
+ -solver 20 > miller.out.7
