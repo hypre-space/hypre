@@ -149,7 +149,7 @@ int MLI_Solver_HSGS::calcOmega()
    amgData->smooth_num_levels = 0;
    amgData->smooth_type = 0;
    hypre_BoomerAMGCGRelaxWt((void *) amgData,level,numCGSweeps,&relaxOmega_);
-   printf("HYPRE/FEI/MLI HSGS : relaxOmega = %e\n", relaxOmega_);
+   //printf("HYPRE/FEI/MLI HSGS : relaxOmega = %e\n", relaxOmega_);
    delete [] amgData->A_array;
    delete [] amgData->CF_marker_array;
    hypre_TFree(amgData);
