@@ -315,6 +315,8 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
    hypre_BoxArrayArray     *nbor_boxes;
    hypre_BoxArray          *nbor_boxa;
    hypre_Box               *nbor_box;
+   hypre_BoxArray          *sub_boxa;
+   hypre_BoxArray          *tmp_boxa;
    hypre_Box               *map_box;
    hypre_Box               *int_box;
    hypre_BoxMapEntry      **entries;
@@ -396,13 +398,8 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
    /*-------------------------------------------------
     * Set up neighbor info
     *
-    * ZTODO: This only works for cell-centered variables
-    * right now.  To generalize, we need to subtract from
-    * each neighbor box the local boxes.  But, then we need
-    * to be able to find the offset info, etc.  This may
-    * be straightforward.  The ability to use this info to
-    * construct communication packages in the VectorGather
-    * should also be considered when rewriting.
+    * ZTODO: This should work for all variable types,
+    * but it has only been tested for cell-centered.
     *-------------------------------------------------*/
 
    nbor_box = hypre_BoxCreate();
@@ -428,7 +425,6 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
                                         ndim, varoffset);
 
          /* Intersect neighbor boxes with appropriate PGrid */
-         nvneighbors[part][var] = 0;
          for (b = 0; b < nneighbors[part]; b++)
          {
             neighbor  = &neighbors[part][b];
@@ -470,12 +466,32 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
                }
             }
             hypre_TFree(entries);
+         }
+
+         /* Make sure that the neighbor boxes don't overlap */
+         tmp_boxa = hypre_BoxArrayCreate(0);
+         for (b = 0; b < nneighbors[part]; b++)
+         {
+            nbor_boxa = hypre_BoxArrayArrayBoxArray(nbor_boxes, b);
+            for (i = 0; i < b; i++)
+            {
+               sub_boxa = hypre_BoxArrayArrayBoxArray(nbor_boxes, i);
+               hypre_SubtractBoxArrays(nbor_boxa, sub_boxa, tmp_boxa);
+            }
+         }
+         hypre_BoxArrayDestroy(tmp_boxa);
+
+         /* Compute new number of vneighbors, nvneighbors */
+         nvneighbors[part][var] = 0;
+         for (b = 0; b < nneighbors[part]; b++)
+         {
+            nbor_boxa = hypre_BoxArrayArrayBoxArray(nbor_boxes, b);
             nvneighbors[part][var] += hypre_BoxArraySize(nbor_boxa);
          }
 
-         /* Set up nvneighbors */
-         vneighbors[part][var] = hypre_TAlloc(hypre_SStructNeighbor,
-                                              nvneighbors[part][var]);
+         /* Set up vneighbors */
+         vneighbors[part][var] =
+            hypre_TAlloc(hypre_SStructNeighbor, nvneighbors[part][var]);
          vb = 0;
          for (b = 0; b < nneighbors[part]; b++)
          {
