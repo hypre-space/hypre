@@ -27,7 +27,6 @@ main( int   argc,
    int                 max_levels;
    int                 num_functions;
    int                 num_relax_steps;
-   int                 func_type;
    double	       norm;
    int                 i, j, k;
    int		       ierr = 0;
@@ -43,7 +42,7 @@ main( int   argc,
 
    HYPRE_Solver        amg_solver;
 
-   int                 num_procs, myid;
+/*   int                 num_procs, myid;   */
 
 #if 0
    int 		      *global_part;
@@ -63,8 +62,8 @@ main( int   argc,
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
 #endif
 
-   num_procs = 1;
-   myid = 0;
+/*   num_procs = 1; 
+     myid = 0;         */
 /*
    hypre_InitMemoryDebug(myid);
 */
@@ -214,7 +213,7 @@ main( int   argc,
     * Print usage info
     *-----------------------------------------------------------*/
  
-   if ( (print_usage) && (myid == 0) )
+   if (print_usage)
    {
       printf("\n");
       printf("Usage: %s [<options>]\n", argv[0]);
@@ -234,6 +233,9 @@ main( int   argc,
       printf("  -rlx <rlxtype>         : rlxtype = 0 Jacobi relaxation \n");
       printf("                                     1 Gauss-Seidel relaxation \n");
       printf("  -w <rlxweight>         : defines relaxation weight for Jacobi\n");
+      printf("  -ns <val>              : Use <val> sweeps on each level\n");
+      printf("                           (default C/F down, F/C up, F/C fine\n");
+      printf("  -mu <val>              : sets cycle type, 1=V, 2=W, etc\n");
       printf("  -th <threshold>        : defines threshold for coarsenings\n");
       printf("  -maxlev <ml>           : defines max. no. of levels\n");
       printf("    -n <nx> <ny> <nz>    : problem size per processor\n");
@@ -256,11 +258,10 @@ main( int   argc,
     * Print driver parameters
     *-----------------------------------------------------------*/
  
-   if (myid == 0)
-   {
+  
       printf("Running with these driver parameters:\n");
       printf("  solver ID    = %d\n", solver_id);
-   }
+ 
 
    /*-----------------------------------------------------------
     * Set up matrix
@@ -268,16 +269,10 @@ main( int   argc,
 
    if ( build_matrix_type == 0 )
    {
-#if 0
-      BuildParFromFile(argc, argv, build_matrix_arg_index, &A, &global_part);
-#endif
       BuildFromFile(argc, argv, build_matrix_arg_index, &A);
    }
    else if ( build_matrix_type == 1 )
    {
-#if 0
-      BuildParLaplacian(argc, argv, build_matrix_arg_index, &A, &global_part);
-#endif
       BuildLaplacian(argc, argv, build_matrix_arg_index, &A);
    }
    else if ( build_matrix_type == 3 )
@@ -297,22 +292,7 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
 #if 0
-   hypre_PrintParCSRMatrix(A, "driver.out.A");
-#endif
-#if 0
    hypre_CSRMatrixPrint(A, "driver.out.A");
-#endif
-
-#if 0
-   b = hypre_CreateParVector(MPI_COMM_WORLD, volume, global_part[myid],
-	global_part[myid+1]-global_part[myid]);
-   hypre_InitializeParVector(b);
-   hypre_SetParVectorConstantValues(b,1.0);
-
-   x = hypre_CreateParVector(MPI_COMM_WORLD, volume, global_part[myid],
-	global_part[myid+1]-global_part[myid]);
-   hypre_InitializeParVector(x);
-   hypre_SetParVectorConstantValues(x,0.0);
 #endif
 
    if ( build_rhs_type == 1 )
@@ -381,6 +361,7 @@ main( int   argc,
       double   strong_threshold;
       int      cycle_type;
       int      ioutdat;
+      int      num_sweep;
       int     *num_grid_sweeps;  
       int     *grid_relax_type;   
       int    **grid_relax_points; 
@@ -389,6 +370,7 @@ main( int   argc,
       strong_threshold = 0.25;
       cycle_type       = 1;
       ioutdat = 3;
+      num_sweep = 1;
 
       num_grid_sweeps = hypre_CTAlloc(int,4);
       grid_relax_type = hypre_CTAlloc(int,4);
@@ -397,32 +379,10 @@ main( int   argc,
       for (i=0; i < max_levels; i++)
 	 relax_weight[i] = 1.0;
 
-      /* fine grid */
-      num_grid_sweeps[0] = 2;
-      grid_relax_type[0] = relax_default; 
-      grid_relax_points[0] = hypre_CTAlloc(int, 2); 
-      grid_relax_points[0][0] = -1;
-      grid_relax_points[0][1] = 1;
 
-      /* down cycle */
-      num_grid_sweeps[1] = 2;
-      grid_relax_type[1] = relax_default; 
-      grid_relax_points[1] = hypre_CTAlloc(int, 2); 
-      grid_relax_points[1][0] = 1;
-      grid_relax_points[1][1] = -1;
 
-      /* up cycle */
-      num_grid_sweeps[2] = 2;
-      grid_relax_type[2] = relax_default; 
-      grid_relax_points[2] = hypre_CTAlloc(int, 2); 
-      grid_relax_points[2][0] = -1;
-      grid_relax_points[2][1] = 1;
 
-      /* coarsest grid */
-      num_grid_sweeps[3] = 1;
-      grid_relax_type[3] = 9;
-      grid_relax_points[3] = hypre_CTAlloc(int, 1);
-      grid_relax_points[3][0] = 0;
+
 
       arg_index = 0;
       while (arg_index < argc)
@@ -449,11 +409,63 @@ main( int   argc,
             arg_index++;
             cycle_type = atoi(argv[arg_index++]);
          }
+         else if (strcmp(argv[arg_index], "-ns") == 0 )
+         {
+            arg_index++;
+            num_sweep = atoi(argv[arg_index++]);
+         }
          else
          {
             arg_index++;
          }
       }
+
+/*----------------------------------------------------------------
+ *
+ * Option to have numerous relaxation sweeps per level.  In this case
+ * we use C/F relaxation going down, F/C going up, for all sweeps
+ *
+ *----------------------------------------------------------------*/
+
+     
+      /* fine grid */
+      num_grid_sweeps[0] = 2*num_sweep;
+      grid_relax_type[0] = relax_default; 
+      grid_relax_points[0] = hypre_CTAlloc(int, 2*num_sweep); 
+      for (i=0; i<2*num_sweep; i+=2)
+      {
+         grid_relax_points[0][i] = -1;
+         grid_relax_points[0][i+1] = 1;
+      }
+
+      /* down cycle */
+      num_grid_sweeps[1] = 2*num_sweep;
+      grid_relax_type[1] = relax_default; 
+      grid_relax_points[1] = hypre_CTAlloc(int, 2*num_sweep); 
+      for (i=0; i<2*num_sweep; i+=2)
+      {
+         grid_relax_points[1][i] = -1;
+         grid_relax_points[1][i+1] = 1;
+      }
+
+      /* up cycle */
+      num_grid_sweeps[2] = 2*num_sweep;
+      grid_relax_type[2] = relax_default; 
+      grid_relax_points[2] = hypre_CTAlloc(int, 2*num_sweep); 
+      for (i=0; i<2*num_sweep; i+=2)
+      {
+         grid_relax_points[2][i] = -1;
+         grid_relax_points[2][i+1] = 1;
+      }
+
+
+      /* coarsest grid */
+      num_grid_sweeps[3] = 1;
+      grid_relax_type[3] = 9;
+      grid_relax_points[3] = hypre_CTAlloc(int, 1);
+      grid_relax_points[3][0] = 0;
+      
+
 
       time_index = hypre_InitializeTiming("Setup");
       hypre_BeginTiming(time_index);
@@ -526,7 +538,7 @@ main( int   argc,
 #if 0
 #endif
 
-   return (0);
+   return (ierr);
 }
 
 /*----------------------------------------------------------------------
