@@ -189,20 +189,14 @@ ZZZ_PCGSMGPrecond( Vector *x,
   
   b_l = (smg_data -> b_l)[0];
   x_l = (smg_data -> x_l)[0];
-  zzz_InitializeStructVectorData(b_l,
-				 zzz_StructVectorData((zzz_StructVector *) y));
-  zzz_InitializeStructVectorData(x_l, 
-				 zzz_StructVectorData((zzz_StructVector *) x));
+
+  zzz_StructCopy( (zzz_StructVector *)x, x_l );
+  zzz_StructCopy( (zzz_StructVector *)y, b_l );
+
   ierr = zzz_SMGSolve( (void *) smg_data, (zzz_StructMatrix *) A,
 		       b_l, x_l );
-  zzz_InitializeStructVectorData((zzz_StructVector *) x,
-				 zzz_StructVectorData(x_l));
-  /*  (smg_data -> b_l)[0] = y;;
-  (smg_data -> x_l)[0] = x;
-  ierr = zzz_SMGSolve( (void *) smg_data,
-		       (zzz_StructMatrix *) A,
-		       (zzz_StructVector *) y,
-		       (zzz_StructVector *) x ); */
+
+  zzz_StructCopy( x_l, (zzz_StructVector *)x );
 
 #if 0
 {
