@@ -300,9 +300,6 @@ HYPRE_TOP_SRC_DIR=`pwd`
 AC_ARG_WITH(babel, [\
   --with-babel            use babel],
   casc_using_babel=yes
-  HYPRE_BABELDEFS="$HYPRE_BABELDEFS -DBABEL_AVAILABLE"
-  HYPRE_BABELLIBDIRS="$HYPRE_TOP_SRC_DIR/babel/Hypre"
-  HYPRE_BABELLIBS=" -l_hypre_class "
 )
 
 AC_ARG_WITH(petsc, [\
@@ -755,8 +752,19 @@ fi
 if test "$casc_using_babel" = "yes"
 then
 dnl jfp: temporary, until Babel has been installed somewhere:
-  babeldir="$HOME"
-  AC_SUBST(babeldir)
+# jfp still unsatisfactory...
+ BABEL_DIR="${HOME}/babel-0.4.1/source/runtime/"
+ BABEL_HYPRE_INCLUDES="\
+ -I../hypre/include\
+ -I../babel/Hypre\
+ -I../babel\
+ -I../babel/babel_stubs_c\
+ -I${BABEL_DIR}\
+ -I${BABEL_DIR}/babel"
+BABELLIBFLAGS="-L../babel/Hypre -lhypre_class -L${BABEL_DIR}/babel -lbabel"
+
+dnl  babeldir="$HOME"
+dnl  AC_SUBST(babeldir)
 dnl   CASC_FIND_BABEL
 
   AM_INIT_AUTOMAKE()
@@ -869,12 +877,9 @@ AC_SUBST(PREPEND)
 
 dnl *BABEL-related header files, libraries and directories for those
 dnl * libraries
-AC_SUBST(BABELLIBS)
-AC_SUBST(BABELLIBDIRS)
-AC_SUBST(BABELINCLUDE)
-AC_SUBST(HYPRE_BABELDEFS)
-AC_SUBST(HYPRE_BABELLIBS)
-AC_SUBST(HYPRE_BABELLIBDIRS)
+AC_SUBST(BABEL_DIR)
+AC_SUBST(BABEL_HYPRE_INCLUDES)
+AC_SUBST(BABELLIBFLAGS)
 
 dnl *PETSC-related header files, libraries and directories for those
 dnl * libraries
