@@ -52,6 +52,11 @@ hypre_BoomerAMGCreate()
 
    int      variant, overlap, domain_type;
    double   schwarz_rlx_weight;
+   int	    level, sym;
+   double   thresh, filter;
+   double   drop_tol;
+   int	    max_nz_per_row;
+   char    *euclidfile;
 
    /* log info */
    int      num_iterations;
@@ -84,6 +89,14 @@ hypre_BoomerAMGCreate()
    domain_type = 2;
    schwarz_rlx_weight = 1.0;
    smooth_num_sweep = 1;
+
+   level = 1;
+   sym = 0;
+   thresh = 0.1;
+   filter = 0.05;
+   drop_tol = 0.0001;
+   max_nz_per_row = 20;
+   euclidfile = NULL;
 
    /* solve params */
    min_iter  = 0;
@@ -145,6 +158,13 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetOverlap(amg_data, overlap);
    hypre_BoomerAMGSetSchwarzRlxWeight(amg_data, schwarz_rlx_weight);
    hypre_BoomerAMGSetDomainType(amg_data, domain_type);
+   hypre_BoomerAMGSetSym(amg_data, sym);
+   hypre_BoomerAMGSetLevel(amg_data, level);
+   hypre_BoomerAMGSetThreshold(amg_data, thresh);
+   hypre_BoomerAMGSetFilter(amg_data, filter);
+   hypre_BoomerAMGSetDropTol(amg_data, drop_tol);
+   hypre_BoomerAMGSetMaxNzPerRow(amg_data, max_nz_per_row);
+   hypre_BoomerAMGSetEuclidFile(amg_data, euclidfile);
 
    hypre_BoomerAMGSetMinIter(amg_data, min_iter);
    hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
@@ -270,7 +290,11 @@ hypre_BoomerAMGDestroy( void *data )
 	 {
 	    HYPRE_ParCSRParaSailsDestroy(smoother[i]);
          }
-         else if (hypre_ParAMGDataSmoothOption(amg_data)[i] > 2)
+         else if (hypre_ParAMGDataSmoothOption(amg_data)[i] == 9)
+	 {
+	    HYPRE_EuclidDestroy(smoother[i]);
+         }
+         else if (hypre_ParAMGDataSmoothOption(amg_data)[i] == 6)
 	 {
 	    HYPRE_SchwarzDestroy(smoother[i]);
 	    /* hypre_CSRMatrixDestroy(
@@ -754,6 +778,90 @@ hypre_BoomerAMGSetSchwarzRlxWeight( void     *data,
    hypre_ParAMGData  *amg_data = data;
  
    hypre_ParAMGDataSchwarzRlxWeight(amg_data) = schwarz_rlx_weight;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetSym( void     *data,
+                            int       sym)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataSym(amg_data) = sym;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetLevel( void     *data,
+                            int       level)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataLevel(amg_data) = level;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetThreshold( void     *data,
+                             double    thresh)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataThreshold(amg_data) = thresh;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetFilter( void     *data,
+                          double    filter)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataFilter(amg_data) = filter;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetDropTol( void     *data,
+                           double    drop_tol)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataDropTol(amg_data) = drop_tol;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetMaxNzPerRow( void     *data,
+                               int       max_nz_per_row)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataMaxNzPerRow(amg_data) = max_nz_per_row;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetEuclidFile( void     *data,
+                              char     *euclidfile)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataEuclidFile(amg_data) = euclidfile;
 
    return (ierr);
 }

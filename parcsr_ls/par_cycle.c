@@ -213,6 +213,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             beta = 1.0;
             hypre_ParCSRMatrixMatvec(alpha, A_array[level], 
                                 U_array[level], beta, Vtemp);
+            if (smooth_option[level] == 9)
+                HYPRE_EuclidSolve(smoother[level],
+                                 (HYPRE_ParCSRMatrix) A_array[level],
+                                 (HYPRE_ParVector) Vtemp,
+                                 (HYPRE_ParVector) Utemp);
             if (smooth_option[level] == 8)
                HYPRE_ParCSRParaSailsSolve(smoother[level],
                                  (HYPRE_ParCSRMatrix) A_array[level],
@@ -225,34 +230,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                  (HYPRE_ParVector) Utemp);
             hypre_ParVectorAxpy(relax_weight[level],Utemp,U_array[level]);
 	 }
-         else if (smooth_option[level] > 2)
+         else if (smooth_option[level] == 6)
             HYPRE_SchwarzSolve(smoother[level],
                                  (HYPRE_ParCSRMatrix) A_array[level],
                                  (HYPRE_ParVector) F_array[level],
                                  (HYPRE_ParVector) U_array[level]);
-         /* else if (smooth_option[level] == 3 || smooth_option[level] == 5)
-         {
-            Solve_err_flag = hypre_MPSchwarzSolve( A_array[level],
-                        hypre_ParVectorLocalVector(F_array[level]),
-                        hypre_ParAMGDataDomainStructure(amg_data)[level],
-                        U_array[level],
-                        hypre_ParVectorLocalVector(Vtemp));
-	 }
-         else if (smooth_option[level] == 4 || smooth_option[level] == 6)
-         {
-            Solve_err_flag = hypre_AdSchwarzSolve( A_array[level],
-                        F_array[level],
-                        hypre_ParAMGDataDomainStructure(amg_data)[level],
-                        hypre_ParAMGDataScaleArray(amg_data)[level],
-                        U_array[level],
-                        Vtemp);
-            Solve_err_flag = hypre_AdSchwarzSolve( A_array[level],
-                        F_array[level],
-                        hypre_ParAMGDataDomainStructure(amg_data)[level],
-                        hypre_ParAMGDataScaleArray(amg_data)[level],
-                        U_array[level],
-                        Vtemp);
-	 } */
 	 else
 	 {
             Solve_err_flag = hypre_BoomerAMGRelax(A_array[level], 

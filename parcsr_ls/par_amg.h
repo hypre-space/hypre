@@ -37,6 +37,7 @@ typedef struct
    int    **grid_relax_points;
    int      user_coarse_relax_type;   
    double  *relax_weight; 
+   double  *omega;
    double   tol;
 
    /* problem data */
@@ -59,6 +60,8 @@ typedef struct
    int                **dof_point_array;
    int                **point_dof_map_array;
    int                  num_levels;
+
+   /* data for more complex smoothers */
    int                 *smooth_option;
    HYPRE_Solver        *smoother;
    int			smooth_num_sweep;
@@ -66,6 +69,13 @@ typedef struct
    int                  overlap;
    int                  domain_type;
    double		schwarz_rlx_weight;
+   int			sym;
+   int			level;
+   int			max_nz_per_row;
+   double		threshold;
+   double		filter;
+   double		drop_tol;
+   char		       *euclidfile;
 
    /* data generated in the solve phase */
    hypre_ParVector   *Vtemp;
@@ -153,6 +163,13 @@ typedef struct
 #define hypre_ParAMGDataDomainType(amg_data) ((amg_data)->domain_type)	
 #define hypre_ParAMGDataSchwarzRlxWeight(amg_data) \
 ((amg_data)->schwarz_rlx_weight)
+#define hypre_ParAMGDataSym(amg_data) ((amg_data)->sym)	
+#define hypre_ParAMGDataLevel(amg_data) ((amg_data)->level)	
+#define hypre_ParAMGDataMaxNzPerRow(amg_data) ((amg_data)->max_nz_per_row)
+#define hypre_ParAMGDataThreshold(amg_data) ((amg_data)->threshold)	
+#define hypre_ParAMGDataFilter(amg_data) ((amg_data)->filter)	
+#define hypre_ParAMGDataDropTol(amg_data) ((amg_data)->drop_tol)	
+#define hypre_ParAMGDataEuclidFile(amg_data) ((amg_data)->euclidfile)	
 
 /* data generated in the solve phase */
 #define hypre_ParAMGDataVtemp(amg_data) ((amg_data)->Vtemp)

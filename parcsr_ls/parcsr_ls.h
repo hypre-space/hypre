@@ -83,6 +83,13 @@ int HYPRE_BoomerAMGSetVariant( HYPRE_Solver solver , int variant );
 int HYPRE_BoomerAMGSetOverlap( HYPRE_Solver solver , int overlap );
 int HYPRE_BoomerAMGSetDomainType( HYPRE_Solver solver , int domain_type );
 int HYPRE_BoomerAMGSetSchwarzRlxWeight( HYPRE_Solver solver , double schwarz_rlx_weight );
+int HYPRE_BoomerAMGSetSym( HYPRE_Solver solver , int sym );
+int HYPRE_BoomerAMGSetLevel( HYPRE_Solver solver , int level );
+int HYPRE_BoomerAMGSetThreshold( HYPRE_Solver solver , double threshold );
+int HYPRE_BoomerAMGSetFilter( HYPRE_Solver solver , double filter );
+int HYPRE_BoomerAMGSetDropTol( HYPRE_Solver solver , double drop_tol );
+int HYPRE_BoomerAMGSetMaxNzPerRow( HYPRE_Solver solver , int max_nz_per_row );
+int HYPRE_BoomerAMGSetEuclidFile( HYPRE_Solver solver , char *euclidfile );
 int HYPRE_BoomerAMGSetNumFunctions( HYPRE_Solver solver , int num_functions );
 int HYPRE_BoomerAMGSetDofFunc( HYPRE_Solver solver , int *dof_func );
 int HYPRE_BoomerAMGSetGSMG( HYPRE_Solver solver , int gsmg );
@@ -280,6 +287,11 @@ int hypre_BoomerAMGSetVariant( void *data , int variant );
 int hypre_BoomerAMGSetOverlap( void *data , int overlap );
 int hypre_BoomerAMGSetDomainType( void *data , int domain_type );
 int hypre_BoomerAMGSetSchwarzRlxWeight( void *data , double schwarz_rlx_weight );
+int hypre_BoomerAMGSetSym( void *data , int sym );
+int hypre_BoomerAMGSetLevel( void *data , int level );
+int hypre_BoomerAMGSetThreshold( void *data , double thresh );
+int hypre_BoomerAMGSetFilter( void *data , double filter );
+int hypre_BoomerAMGSetDropTol( void *data , double drop_tol );
 
 /* par_amg_setup.c */
 int hypre_BoomerAMGSetup( void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );

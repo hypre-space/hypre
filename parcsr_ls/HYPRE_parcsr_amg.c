@@ -502,6 +502,83 @@ HYPRE_BoomerAMGSetSchwarzRlxWeight( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSym
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetSym( HYPRE_Solver  solver,
+                       int           sym)
+{
+   return( hypre_BoomerAMGSetSym( (void *) solver, sym ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetLevel( HYPRE_Solver  solver,
+                         int           level)
+{
+   return( hypre_BoomerAMGSetLevel( (void *) solver, level ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetThreshold
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetThreshold( HYPRE_Solver  solver,
+                             double        threshold  )
+{
+   return( hypre_BoomerAMGSetThreshold( (void *) solver, threshold ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFilter
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetFilter( HYPRE_Solver  solver,
+                          double        filter  )
+{
+   return( hypre_BoomerAMGSetFilter( (void *) solver, filter ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetDropTol
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetDropTol( HYPRE_Solver  solver,
+                           double        drop_tol  )
+{
+   return( hypre_BoomerAMGSetDropTol( (void *) solver, drop_tol ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetMaxNzPerRow
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetMaxNzPerRow( HYPRE_Solver  solver,
+                              int          max_nz_per_row  )
+{
+   return( hypre_BoomerAMGSetMaxNzPerRow( (void *) solver, max_nz_per_row ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetEuclidFile
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetEuclidFile( HYPRE_Solver  solver,
+                              char         *euclidfile)
+{
+   return( hypre_BoomerAMGSetEuclidFile( (void *) solver, euclidfile ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetNumFunctions
  *--------------------------------------------------------------------------*/
 

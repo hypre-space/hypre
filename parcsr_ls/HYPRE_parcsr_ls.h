@@ -121,49 +121,49 @@ int HYPRE_BoomerAMGSetStrongThreshold(HYPRE_Solver solver,
                                       double       strong_threshold);
 
 /**
- * (Optional)
+ * (Optional) 
  **/
 int HYPRE_BoomerAMGSetMaxRowSum(HYPRE_Solver solver,
                                 double        max_row_sum);
 
 /**
- * (Optional)
+ * (Optional) Defines which parallel coarsening algorithm is used.
  **/
 int HYPRE_BoomerAMGSetCoarsenType(HYPRE_Solver solver,
                                   int          coarsen_type);
 
 /**
- * (Optional)
+ * (Optional) Defines whether local or global measures are used.
  **/
 int HYPRE_BoomerAMGSetMeasureType(HYPRE_Solver solver,
                                   int          measure_type);
 
 /**
- * (Optional)
+ * (Optional) Defines whether to use a V-cycle (default) or a W-cycle.
  **/
 int HYPRE_BoomerAMGSetCycleType(HYPRE_Solver solver,
                                 int          cycle_type);
 
 /**
- * (Optional)
+ * (Optional) Defines the number of sweeps for fine and coarse grid, up and down cycle.
  **/
 int HYPRE_BoomerAMGSetNumGridSweeps(HYPRE_Solver  solver,
                                     int          *num_grid_sweeps);
 
 /**
- * (Optional)
+ * (Optional) Defines which smoother is used on fine and coarse grid, up and down cycle.
  **/
 int HYPRE_BoomerAMGSetGridRelaxType(HYPRE_Solver  solver,
                                     int          *grid_relax_type);
 
 /**
- * (Optional)
+ * (Optional) Defines in which order points are relaxed.
  **/
 int HYPRE_BoomerAMGSetGridRelaxPoints(HYPRE_Solver   solver,
                                       int          **grid_relax_points);
 
 /**
- * (Optional)
+ * (Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR.
  **/
 int HYPRE_BoomerAMGSetRelaxWeight(HYPRE_Solver  solver,
                                   double       *relax_weight);
@@ -181,19 +181,19 @@ int HYPRE_BoomerAMGSetDebugFlag(HYPRE_Solver solver,
                                 int          debug_flag);
 
 /**
- * Return the number of iterations taken.
+ * Returns the number of iterations taken.
  **/
 int HYPRE_BoomerAMGGetNumIterations(HYPRE_Solver  solver,
                                     int          *num_iterations);
 
 /**
- * Return the norm of the final relative residual.
+ * Returns the norm of the final relative residual.
  **/
 int HYPRE_BoomerAMGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                 double       *rel_resid_norm);
 
 /*
- * Solve the transpose system.
+ * Solves the transpose system.
  **/
 int HYPRE_BoomerAMGSolveT(HYPRE_Solver       solver,
                           HYPRE_ParCSRMatrix A,
@@ -207,7 +207,7 @@ int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
                                   int          restr_par);
 
 /*
- * (Optional)
+ * (Optional) Defines a truncation factor for the interpolation.
  **/
 int HYPRE_BoomerAMGSetTruncFactor(HYPRE_Solver solver,
                                   double       trunc_factor);
@@ -235,13 +235,13 @@ int HYPRE_BoomerAMGInitGridRelaxation(int    **num_grid_sweeps_ptr,
                                       int      max_levels);
 
 /*
- * (Optional)
+ * (Optional) Sets more complex smoothers.
  **/
 int HYPRE_BoomerAMGSetSmoothOption(HYPRE_Solver  solver,
                                   int       *smooth_option);
 
 /*
- * (Optional)
+ * (Optional) Sets the number of sweeps for more complex smoothers.
  **/
 int HYPRE_BoomerAMGSetSmoothNumSweep(HYPRE_Solver  solver,
                                   int       smooth_num_sweep);
@@ -260,40 +260,82 @@ int HYPRE_BoomerAMGSetLogging(HYPRE_Solver  solver,
                               const char   *log_file_name);
 
 /*
- * (Optional)
+ * (Optional) Sets the size of the system of PDEs, if using the systems version.
  **/
 int HYPRE_BoomerAMGSetNumFunctions(HYPRE_Solver solver,
                                 int          num_functions);
 
 /*
- * (Optional)
+ * (Optional) Sets mapping that assigns the function to each variable if using the systems version.
  **/
 int HYPRE_BoomerAMGSetDofFunc(HYPRE_Solver solver,
                               int         *dof_func);
 
 /*
- * (Optional)
+ * (Optional) Defines which variant of the Schwarz method is used.
  **/
 int HYPRE_BoomerAMGSetVariant(HYPRE_Solver solver,
                                 int          variant);
 
 /*
- * (Optional)
+ * (Optional) Defines the overlap for the Schwarz method.
  **/
 int HYPRE_BoomerAMGSetOverlap(HYPRE_Solver solver,
                                 int          overlap);
 
 /*
- * (Optional)
+ * (Optional) Defines the type of domain used for the Schwarz method.
  **/
 int HYPRE_BoomerAMGSetDomainType(HYPRE_Solver solver,
                                 int          domain_type);
 
 /*
- * (Optional)
+ * (Optional) Defines a smoothing parameter for the additive Schwarz method.
  **/
 int HYPRE_BoomerAMGSetSchwarzRlxWeight(HYPRE_Solver solver,
                                 double    schwarz_rlx_weight);
+
+/*
+ * (Optional) Defines symmetry for ParaSAILS.
+ **/
+int HYPRE_BoomerAMGSetSym(HYPRE_Solver solver,
+                          int          sym);
+
+/*
+ * (Optional) Defines level for ParaSAILS.
+ **/
+int HYPRE_BoomerAMGSetLevel(HYPRE_Solver solver,
+                            int          level);
+
+/*
+ * (Optional) Defines threshold for ParaSAILS.
+ **/
+int HYPRE_BoomerAMGSetThreshold(HYPRE_Solver solver,
+                                double       threshold);
+
+/*
+ * (Optional) Defines filter for ParaSAILS.
+ **/
+int HYPRE_BoomerAMGSetFilter(HYPRE_Solver solver,
+                             double  	  filter);
+
+/*
+ * (Optional) Defines drop tolerance for PILUT.
+ **/
+int HYPRE_BoomerAMGSetDropTol(HYPRE_Solver solver,
+                              double 	   drop_tol);
+
+/*
+ * (Optional) Defines maximal number of nonzeros for PILUT.
+ **/
+int HYPRE_BoomerAMGSetMaxNzPerRow(HYPRE_Solver solver,
+                          	  int          max_nz_per_row);
+
+/*
+ * (Optional) Defines name of an input file for Euclid parameters.
+ **/
+int HYPRE_BoomerAMGSetEuclidFile(HYPRE_Solver solver,
+                         	 char        *euclidfile); 
 
 /*
  * (Optional)
