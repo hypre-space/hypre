@@ -31,6 +31,7 @@ problem.c
 problem.h
 random.c
 read.c
+relax.f
 rstdf0.f
 setc.f
 setcw.f
