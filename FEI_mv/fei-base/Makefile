@@ -260,7 +260,6 @@ clean.$(FEI_DIR):
 	@cd $(FEI_DIR); touch erase.ii
 	@cd $(FEI_DIR); $(RM) -fr *~ *.o *.mp.o \
 		./ptrepository erase.* *.ii core ii_files/*.ii emake.log
-	@echo "=============> Make $(FEI_DIR) clean complete"
 
 distclean:	clean
 	$(RM) -rf */ii_files make.options
