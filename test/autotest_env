@@ -33,18 +33,18 @@ export HYPRE_AUTOTEST_DIR
 
 HYPRE_DEFAULT_EMAIL="\
  rfalgout@llnl.gov\
- treadway1@llnl.gov"
+ treadway@llnl.gov\
+ painter1@llnl.gov"
 
 HYPRE_CHECKOUT_EMAIL="$HYPRE_DEFAULT_EMAIL"
 
 HYPRE_CONFIGURE_EMAIL="$HYPRE_DEFAULT_EMAIL"
 
 HYPRE_STRUCT_EMAIL="$HYPRE_DEFAULT_EMAIL\
- painter1@llnl.gov\
- jones97@llnl.gov"
+ jones97@llnl.gov\
+ lee123@llnl.gov"
 
 HYPRE_IJ_EMAIL="$HYPRE_DEFAULT_EMAIL\
- painter1@llnl.gov\
  hysom1@llnl.gov\
  jones97@llnl.gov\
  yang11@llnl.gov\
