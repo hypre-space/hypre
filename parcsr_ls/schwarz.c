@@ -808,11 +808,11 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 
   int domain_dof_counter = 0, domain_matrixinverse_counter = 0;
   int nf;
-  int size;
 
   double *AE;
 
 #ifdef ESSL
+  int size;
 #else
   char uplo = 'L';
 #endif
@@ -2416,11 +2416,11 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
   int local_dof_counter, max_local_dof_counter=0; 
 
   int domain_dof_counter = 0, domain_matrixinverse_counter = 0;
-  int size;
 
   double *AE;
 
 #ifdef ESSL
+  int size;
 #else
   char uplo = 'L';
 #endif
