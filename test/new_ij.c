@@ -710,6 +710,7 @@ main( int   argc,
       printf("       45=Euclid-BICGSTAB\n");
       printf("\n");
       printf("  -cljp                 : CLJP coarsening \n");
+      printf("  -pmis                 : PMIS coarsening \n");
       printf("  -ruge                 : Ruge coarsening (local)\n");
       printf("  -ruge3                : third pass on boundary\n");
       printf("  -ruge3c               : third pass on boundary, keep c-points\n");
