@@ -16,9 +16,6 @@
 #define __MLIMETHODAMGSAH__
 
 #include "utilities/utilities.h"
-/*
-#include <mpi.h>
-*/
 #include "parcsr_mv/parcsr_mv.h"
 #include "base/mli.h"
 #include "base/mli_defs.h"
@@ -54,42 +51,43 @@ MLI_AMGSA_DD;
 
 class MLI_Method_AMGSA : public MLI_Method
 {
-   int      max_levels;              /* the finest level is 0            */
-   int      num_levels;              /* number of levels requested       */
-   int      curr_level;              /* current level being processed    */
-   int      output_level;            /* for diagnostics                  */
-   int      node_dofs;               /* equation block size (fixed)      */
-   int      curr_node_dofs;          /* current block size (this stage)  */
-   double   threshold;               /* for creating aggregation graph   */
-   int      nullspace_dim;           /* null space information (changes  */
-   int      nullspace_len;           /* length of nullspace in each dim  */
-   double   *nullspace_vec;          /* as curr_level)                   */
-   double   P_weight;                /* weight for prolongator smoother  */
-   double   drop_tol_for_P;          /* tolerance for sparsifying P      */
-   int      *sa_counts;              /* store aggregation information at */
-   int      **sa_data;               /* each level                       */
-   int      **sa_labels;             /* labels for aggregation           */
-   double   *spectral_norms;         /* computed matrix norms            */
-   int      calc_norm_scheme;        /* method to estimate matrix norm   */
-   int      min_coarse_size;         /* tell when to stop aggregation    */
-   int      coarsen_scheme;          /* different aggregation schemes    */
-   char     pre_smoother[20];        /* denote which pre-smoother to use */
-   char     postsmoother[20];        /* denote which postsmoother to use */
-   int      pre_smoother_num;        /* number of pre-smoother sweeps    */
-   int      postsmoother_num;        /* number of postsmoother sweeps    */
-   double   *pre_smoother_wgt;       /* weight used in pre-smoother      */
-   double   *postsmoother_wgt;       /* weight used in postsmoother      */
-   char     coarse_solver[20];       /* denote which coarse solver to use*/
-   int      coarse_solver_num;       /* number of coarse solver sweeps   */
-   double   *coarse_solver_wgt;      /* weight used in coarse solver     */
-   int      calibration_size;        /* for calibration AMG method       */
+   int      maxLevels_;              /* the finest level is 0            */
+   int      numLevels_;              /* number of levels requested       */
+   int      currLevel_;              /* current level being processed    */
+   int      outputLevel_;            /* for diagnostics                  */
+   int      nodeDofs_;               /* equation block size (fixed)      */
+   int      currNodeDofs_ ;          /* current block size (this stage)  */
+   double   threshold_;              /* for creating aggregation graph   */
+   int      nullspaceDim_;           /* null space information (changes  */
+   int      nullspaceLen_;           /* length of nullspace in each dim  */
+   double   *nullspaceVec_;          /* as curr_level)                   */
+   double   Pweight_;                /* weight for prolongator smoother  */
+   double   dropTolForP_  ;          /* tolerance for sparsifying P      */
+   int      *saCounts_;              /* store aggregation information at */
+   int      **saData_;               /* each level                       */
+   int      **saLabels_;             /* labels for aggregation           */
+   double   *spectralNorms_;         /* computed matrix norms            */
+   int      calcNormScheme_;         /* method to estimate matrix norm   */
+   int      minCoarseSize_;          /* tell when to stop aggregation    */
+   int      coarsenScheme_;          /* different aggregation schemes    */
+   char     preSmoother_[20];        /* denote which pre-smoother to use */
+   char     postSmoother_[20];       /* denote which postsmoother to use */
+   int      preSmootherNum_;         /* number of pre-smoother sweeps    */
+   int      postSmootherNum_;        /* number of postsmoother sweeps    */
+   double   *preSmootherWgt_;        /* weight used in pre-smoother      */
+   double   *postSmootherWgt_;       /* weight used in postsmoother      */
+   char     coarseSolver_[20];       /* denote which coarse solver to use*/
+   int      coarseSolverNum_;        /* number of coarse solver sweeps   */
+   double   *coarseSolverWgt_;       /* weight used in coarse solver     */
+   int      calibrationSize_;        /* for calibration AMG method       */
    int      useSAMGeFlag_;           /* element based method             */
    int      useSAMGDDFlag_;          /* domain decomposition (NN) method */
-   double   RAP_time;
-   double   total_time;
+   double   RAPTime_;
+   double   totalTime_;
    int      ARPACKSuperLUExists_;
-   MLI_AMGSA_DD *ddObj;
+   MLI_AMGSA_DD *ddObj_;
    char     paramFile_[100];
+   int      printNullSpace_;
 
 public :
 

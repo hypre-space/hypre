@@ -91,36 +91,36 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
    A_global_nrows = partition[num_procs];
    A_local_nrows  = A_end_row - A_start_row + 1;
    free( partition );
-   if ( A_global_nrows/curr_node_dofs <= min_coarse_size || 
-        A_global_nrows/curr_node_dofs <= num_procs ) 
+   if ( A_global_nrows/currNodeDofs_ <= minCoarseSize_ || 
+        A_global_nrows/currNodeDofs_ <= num_procs ) 
    {
       (*Pmat_out) = NULL;
       return 0.0;
    }
 
    /*-----------------------------------------------------------------
-    * reduce Amat based on the block size information (if node_dofs > 1)
+    * reduce Amat based on the block size information (if nodeDofs_ > 1)
     *-----------------------------------------------------------------*/
 
    if ( init_aggr == NULL )
    {
-      blk_size = curr_node_dofs;
+      blk_size = currNodeDofs_;
       if (blk_size > 1) 
       {
          MLI_Matrix_Compress(mli_Amat, blk_size, &mli_A2mat);
-         if ( sa_labels != NULL && sa_labels[curr_level] != NULL )
+         if ( saLabels_ != NULL && saLabels_[currLevel_] != NULL )
          {
             local_labels = new int[A_local_nrows/blk_size];
             for ( i = 0; i < A_local_nrows; i+=blk_size )
-               local_labels[i/blk_size] = sa_labels[curr_level][i];
+               local_labels[i/blk_size] = saLabels_[currLevel_][i];
          }
          else local_labels = NULL;
       }
       else 
       {
          mli_A2mat = mli_Amat;
-         if ( sa_labels != NULL && sa_labels[curr_level] != NULL )
-            local_labels = sa_labels[curr_level];
+         if ( saLabels_ != NULL && saLabels_[currLevel_] != NULL )
+            local_labels = saLabels_[currLevel_];
          else
             local_labels = NULL;
       }
@@ -140,7 +140,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
    if ( init_aggr == NULL ) coarsenLocal(Gmat, &naggr, &node2aggr);
    else 
    {
-      blk_size = curr_node_dofs;
+      blk_size = currNodeDofs_;
       naggr = init_count;
       node2aggr = new int[A_local_nrows];
       for ( i = 0; i < A_local_nrows; i++ ) node2aggr[i] = init_aggr[i];
@@ -155,7 +155,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
       if ( blk_size > 1 ) 
       {
          delete mli_A2mat;
-         if ( sa_labels != NULL && sa_labels[curr_level] != NULL )
+         if ( saLabels_ != NULL && saLabels_[currLevel_] != NULL )
             delete [] local_labels;
       }
       ierr = hypre_ParCSRMatrixDestroy(Gmat);
@@ -167,13 +167,13 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
     * If coarse grid size is below a given threshold, stop
     *-----------------------------------------------------------------*/
 
-   P_local_ncols  = naggr * nullspace_dim;
+   P_local_ncols  = naggr * nullspaceDim_;
    MLI_Utils_GenPartition(comm, P_local_ncols, &partition);
    P_start_col    = partition[mypid];
    P_global_ncols = partition[num_procs];
    free( partition );
-   if ( P_global_ncols/nullspace_dim <= min_coarse_size || 
-        P_global_ncols/nullspace_dim <= num_procs ) 
+   if ( P_global_ncols/nullspaceDim_ <= minCoarseSize_ || 
+        P_global_ncols/nullspaceDim_ <= num_procs ) 
    {
       (*Pmat_out) = NULL;
       delete [] node2aggr;
@@ -203,21 +203,27 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
     * construct the next set of labels for the next level
     *-----------------------------------------------------------------*/
 
-   if ( sa_labels != NULL && sa_labels[curr_level] != NULL )
+   if ( saLabels_ != NULL && saLabels_[currLevel_] != NULL )
    {
-      if ( (curr_level+1) < max_levels )
+      if ( (currLevel_+1) < maxLevels_ )
       {
-         if ( sa_labels[curr_level+1] != NULL ) 
-            delete [] sa_labels[curr_level+1];
-         sa_labels[curr_level+1] = new int[P_local_ncols];
+         if ( saLabels_[currLevel_+1] != NULL ) 
+            delete [] saLabels_[currLevel_+1];
+         saLabels_[currLevel_+1] = new int[P_local_ncols];
+         for ( i = 0; i < P_local_ncols; i++ ) saLabels_[currLevel_+1][i] = -1;
          for ( i = 0; i < naggr; i++ )
          {
             for ( j = 0; j < A_local_nrows; j++ )
                if ( eqn2aggr[j] == i ) break;
-            for ( k = 0; k < nullspace_dim; k++ )
-               sa_labels[curr_level+1][i*nullspace_dim+k] = 
-                                              sa_labels[curr_level][j];
+            for ( k = 0; k < nullspaceDim_; k++ )
+               saLabels_[currLevel_+1][i*nullspaceDim_+k] = 
+                                              saLabels_[currLevel_][j];
          }
+         for ( i = 0; i < P_local_ncols; i++ ) 
+            if ( saLabels_[currLevel_+1][i] < 0 ||
+                 saLabels_[currLevel_+1][i] >= naggr ) 
+               printf("saLabels[%d][%d] = %d (%d)\n",currLevel_+1,i,
+                      saLabels_[currLevel_+1][i], naggr);
       }
    }
 
@@ -226,7 +232,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
     *-----------------------------------------------------------------*/
 
 #if 0
-   if ( nullspace_vec != NULL )
+   if ( nullspaceVec_ != NULL )
    {
       for ( irow = 0; irow < A_local_nrows; irow++ )
       {
@@ -234,8 +240,8 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
          hypre_ParCSRMatrixGetRow(Amat,row_num,&row_leng,&cols,NULL);
          if ( row_leng == 1 && cols[0] == row_num )
          {
-            for ( i = 0; i < nullspace_dim; i++ )
-               nullspace_vec[irow+i*A_local_nrows] = 0.0;
+            for ( i = 0; i < nullspaceDim_; i++ )
+               nullspaceVec_[irow+i*A_local_nrows] = 0.0;
             eqn2aggr[irow] = -1;      
          }
          hypre_ParCSRMatrixRestoreRow(Amat,row_num,&row_leng,&cols,NULL);
@@ -247,17 +253,17 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
     * compute smoothing factor for the prolongation smoother
     *-----------------------------------------------------------------*/
 
-// if ( (curr_level > 0 && P_weight != 0.0) 
-   if ( (curr_level >= 0 && P_weight != 0.0) || 
-        !strcmp(pre_smoother, "mls") ||
-        !strcmp(postsmoother, "mls") || init_aggr != NULL )
+// if ( (currLevel_ > 0 && Pweight_ != 0.0) 
+   if ( (currLevel_ >= 0 && Pweight_ != 0.0) || 
+        !strcmp(preSmoother_, "MLS") ||
+        !strcmp(postSmoother_, "MLS") || init_aggr != NULL )
    {
       MLI_Utils_ComputeExtremeRitzValues(Amat, ritzValues, 1);
       max_eigen = ritzValues[0];
-      if ( mypid == 0 && output_level > 1 )
+      if ( mypid == 0 && outputLevel_ > 1 )
          printf("\tEstimated spectral radius of A = %e\n", max_eigen);
       assert ( max_eigen > 0.0 );
-      alpha = P_weight / max_eigen;
+      alpha = Pweight_ / max_eigen;
    }
 
    /*-----------------------------------------------------------------
@@ -265,22 +271,22 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
     * (get ready to perform QR on them)
     *-----------------------------------------------------------------*/
 
-   P_vecs = new double*[nullspace_dim];
+   P_vecs = new double*[nullspaceDim_];
    P_cols = new int[P_local_nrows];
-   for (i = 0; i < nullspace_dim; i++) P_vecs[i] = new double[P_local_nrows];
+   for (i = 0; i < nullspaceDim_; i++) P_vecs[i] = new double[P_local_nrows];
    for ( irow = 0; irow < P_local_nrows; irow++ )
    {
       if ( eqn2aggr[irow] >= 0 )
       {
-         P_cols[irow] = P_start_col + eqn2aggr[irow] * nullspace_dim;
-         if ( nullspace_vec != NULL )
+         P_cols[irow] = P_start_col + eqn2aggr[irow] * nullspaceDim_;
+         if ( nullspaceVec_ != NULL )
          {
-            for ( j = 0; j < nullspace_dim; j++ )
-               P_vecs[j][irow] = nullspace_vec[j*P_local_nrows+irow];
+            for ( j = 0; j < nullspaceDim_; j++ )
+               P_vecs[j][irow] = nullspaceVec_[j*P_local_nrows+irow];
          }
          else
          {
-            for ( j = 0; j < nullspace_dim; j++ )
+            for ( j = 0; j < nullspaceDim_; j++ )
             {
                if ( irow % blk_size == j ) P_vecs[j][irow] = 1.0;
                else                        P_vecs[j][irow] = 0.0;
@@ -290,7 +296,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
       else
       {
          P_cols[irow] = -1;
-         for ( j = 0; j < nullspace_dim; j++ ) P_vecs[j][irow] = 0.0;
+         for ( j = 0; j < nullspaceDim_; j++ ) P_vecs[j][irow] = 0.0;
       }
    }
 
@@ -328,9 +334,9 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
 
       /* ------ allocate storage for QR factorization ------ */
 
-      q_array  = new double[max_agg_size * nullspace_dim];
-      r_array  = new double[nullspace_dim * nullspace_dim];
-      new_null = new double[naggr*nullspace_dim*nullspace_dim]; 
+      q_array  = new double[max_agg_size * nullspaceDim_];
+      r_array  = new double[nullspaceDim_ * nullspaceDim_];
+      new_null = new double[naggr*nullspaceDim_*nullspaceDim_]; 
 
       /* ------ perform QR on each aggregate ------ */
 
@@ -338,7 +344,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
       {
          agg_size = agg_cnt_array[i];
 
-         if ( agg_size < nullspace_dim )
+         if ( agg_size < nullspaceDim_ )
          {
             printf("Aggregation ERROR : underdetermined system in QR.\n");
             printf("            error on Proc %d\n", mypid);
@@ -351,7 +357,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
 
          for ( j = 0; j < agg_size; j++ ) 
          {
-            for ( k = 0; k < nullspace_dim; k++ ) 
+            for ( k = 0; k < nullspaceDim_; k++ ) 
                q_array[agg_size*k+j] = P_vecs[k][agg_ind_array[i][j]]; 
          }
 
@@ -363,23 +369,30 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
             for ( j = 0; j < agg_size; j++ ) 
             {
                printf("%5d : (size=%d)\n", agg_ind_array[i][j], agg_size);
-               for ( k = 0; k < nullspace_dim; k++ ) 
+               for ( k = 0; k < nullspaceDim_; k++ ) 
                   printf("%10.3e ", q_array[agg_size*k+j]);
                printf("\n");
             }
          }
 #endif
-         info = MLI_Utils_QR(q_array, r_array, agg_size, nullspace_dim); 
+         info = MLI_Utils_QR(q_array, r_array, agg_size, nullspaceDim_); 
          if (info != 0)
          {
             printf("%4d : Aggregation WARNING : QR returned a non-zero for\n",
                    mypid);
             printf("  aggregate %d, size = %d, info = %d\n",i,agg_size,info);
-#if 0
+#if 1
+/*
+            for ( j = 0; j < agg_size; j++ ) 
+            {
+               for ( k = 0; k < nullspaceDim_; k++ ) 
+                  q_array[agg_size*k+j] = P_vecs[k][agg_ind_array[i][j]]; 
+            }
+*/
             for ( j = 0; j < agg_size; j++ ) 
             {
                printf("%5d : ", agg_ind_array[i][j]);
-               for ( k = 0; k < nullspace_dim; k++ ) 
+               for ( k = 0; k < nullspaceDim_; k++ ) 
                   printf("%10.3e ", q_array[agg_size*k+j]);
                printf("\n");
             }
@@ -388,16 +401,16 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
 
          /* ------ after QR, put the R into the next null space ------ */
 
-         for ( j = 0; j < nullspace_dim; j++ )
-            for ( k = 0; k < nullspace_dim; k++ )
-               new_null[i*nullspace_dim+j+k*naggr*nullspace_dim] = 
-                         r_array[j+nullspace_dim*k];
+         for ( j = 0; j < nullspaceDim_; j++ )
+            for ( k = 0; k < nullspaceDim_; k++ )
+               new_null[i*nullspaceDim_+j+k*naggr*nullspaceDim_] = 
+                         r_array[j+nullspaceDim_*k];
 
          /* ------ put the P to P_vecs ------ */
 
          for ( j = 0; j < agg_size; j++ )
          {
-            for ( k = 0; k < nullspace_dim; k++ )
+            for ( k = 0; k < nullspaceDim_; k++ )
             {
                index = agg_ind_array[i][j];
                P_vecs[k][index] = q_array[ k*agg_size + j ];
@@ -410,36 +423,23 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
       delete [] q_array;
       delete [] r_array;
    }
-   if ( nullspace_vec != NULL ) delete [] nullspace_vec;
-   nullspace_vec = new_null;
-   curr_node_dofs = nullspace_dim;
-
-#if 0
-   FILE *fp;
-   sprintf(param_string, "null%d.%d", curr_level, mypid);
-   fp = fopen( param_string, "w" );
-   for ( i = 0; i < naggr*nullspace_dim; i++ ) 
-   {
-      for ( j = 0; j < nullspace_dim; j++ ) 
-         fprintf(fp, "%25.16e ", new_null[naggr*nullspace_dim*j+i]);
-      fprintf(fp, "\n");
-   }
-   fclose(fp);
-#endif
+   if ( nullspaceVec_ != NULL ) delete [] nullspaceVec_;
+   nullspaceVec_ = new_null;
+   currNodeDofs_ = nullspaceDim_;
 
    /*-----------------------------------------------------------------
     * if damping factor for prolongator smoother = 0
     *-----------------------------------------------------------------*/
 
-// if ( curr_level == 0 || P_weight == 0.0 )
-   if ( P_weight == 0.0 )
+// if ( currLevel_ == 0 || Pweight_ == 0.0 )
+   if ( Pweight_ == 0.0 )
    {
       /*--------------------------------------------------------------
        * create and initialize Pmat 
        *--------------------------------------------------------------*/
 
       row_lengths = new int[P_local_nrows];
-      for ( i = 0; i < P_local_nrows; i++ ) row_lengths[i] = nullspace_dim;
+      for ( i = 0; i < P_local_nrows; i++ ) row_lengths[i] = nullspaceDim_;
       ierr = HYPRE_IJMatrixSetRowSizes(IJPmat, row_lengths);
       ierr = HYPRE_IJMatrixInitialize(IJPmat);
       assert(!ierr);
@@ -449,14 +449,14 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
        * load and assemble Pmat 
        *-----------------------------------------------------------------*/
 
-      col_ind = new int[nullspace_dim];
-      col_val = new double[nullspace_dim];
+      col_ind = new int[nullspaceDim_];
+      col_val = new double[nullspaceDim_];
       for ( irow = 0; irow < P_local_nrows; irow++ )
       {
          if ( P_cols[irow] >= 0 )
          {
             nzcnt = 0;
-            for ( j = 0; j < nullspace_dim; j++ )
+            for ( j = 0; j < nullspaceDim_; j++ )
             {
                if ( P_vecs[j][irow] != 0.0 )
                {
@@ -491,19 +491,19 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
       MLI_Matrix_FormJacobi(mli_Amat, alpha, &mli_Jmat);
       Jmat = (hypre_ParCSRMatrix *) mli_Jmat->getMatrix();
       row_lengths = new int[P_local_nrows];
-      for ( i = 0; i < P_local_nrows; i++ ) row_lengths[i] = nullspace_dim;
+      for ( i = 0; i < P_local_nrows; i++ ) row_lengths[i] = nullspaceDim_;
       ierr = HYPRE_IJMatrixSetRowSizes(IJPmat, row_lengths);
       ierr = HYPRE_IJMatrixInitialize(IJPmat);
       assert(!ierr);
       delete [] row_lengths;
-      col_ind = new int[nullspace_dim];
-      col_val = new double[nullspace_dim];
+      col_ind = new int[nullspaceDim_];
+      col_val = new double[nullspaceDim_];
       for ( irow = 0; irow < P_local_nrows; irow++ )
       {
          if ( P_cols[irow] >= 0 )
          {
             nzcnt = 0;
-            for ( j = 0; j < nullspace_dim; j++ )
+            for ( j = 0; j < nullspaceDim_; j++ )
             {
                if ( P_vecs[j][irow] != 0.0 )
                {
@@ -538,7 +538,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
    if ( P_cols != NULL ) delete [] P_cols;
    if ( P_vecs != NULL ) 
    {
-      for (i = 0; i < nullspace_dim; i++) 
+      for (i = 0; i < nullspaceDim_; i++) 
          if ( P_vecs[i] != NULL ) delete [] P_vecs[i];
       delete [] P_vecs;
    }
@@ -585,13 +585,13 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
    free( partition );
    local_nrows = end_row - start_row + 1;
    MPI_Allreduce(&local_nrows, &global_nrows, 1, MPI_INT, MPI_SUM, comm);
-   if ( mypid == 0 && output_level > 1 )
+   if ( mypid == 0 && outputLevel_ > 1 )
    {
       printf("\t*** Aggregation(U) : total nodes to aggregate = %d\n",
              global_nrows);
    }
-   if ( nullspace_dim / curr_node_dofs >= min_aggr_size )
-      min_aggr_size = nullspace_dim / curr_node_dofs + 1;
+   if ( nullspaceDim_ / currNodeDofs_ >= min_aggr_size )
+      min_aggr_size = nullspaceDim_ / currNodeDofs_ + 1;
 
    /*-----------------------------------------------------------------
     * this array is used to determine which row has been aggregated
@@ -660,8 +660,8 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
    }
    itmp[0] = naggr;
    itmp[1] = nselected;
-   if (output_level > 1) MPI_Allreduce(itmp, ibuf, 2, MPI_INT, MPI_SUM, comm);
-   if ( mypid == 0 && output_level > 1 )
+   if (outputLevel_ > 1) MPI_Allreduce(itmp, ibuf, 2, MPI_INT, MPI_SUM, comm);
+   if ( mypid == 0 && outputLevel_ > 1 )
    {
       printf("\t*** Aggregation(U) P1 : no. of aggregates     = %d\n",ibuf[0]);
       printf("\t*** Aggregation(U) P1 : no. nodes aggregated  = %d\n",ibuf[1]);
@@ -708,8 +708,8 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
    }
    itmp[0] = naggr;
    itmp[1] = nselected;
-   if (output_level > 1) MPI_Allreduce(itmp,ibuf,2,MPI_INT,MPI_SUM,comm);
-   if ( mypid == 0 && output_level > 1 )
+   if (outputLevel_ > 1) MPI_Allreduce(itmp,ibuf,2,MPI_INT,MPI_SUM,comm);
+   if ( mypid == 0 && outputLevel_ > 1 )
    {
       printf("\t*** Aggregation(U) P2 : no. of aggregates     = %d\n",ibuf[0]);
       printf("\t*** Aggregation(U) P2 : no. nodes aggregated  = %d\n",ibuf[1]);
@@ -736,7 +736,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
                   if ( node_stat[col_num] == MLI_METHOD_AMGSA_READY ) count++;
                }
             }
-            if ( count > 1 && count >= (min_aggr_size-1) ) 
+            if ( count > 1 && count >= min_aggr_size ) 
             {
                node2aggr[irow]  = naggr;
                node_stat[irow]  = MLI_METHOD_AMGSA_SELECTED;
@@ -765,8 +765,8 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
    }
    itmp[0] = naggr;
    itmp[1] = nselected;
-   if (output_level > 1) MPI_Allreduce(itmp,ibuf,2,MPI_INT,MPI_SUM,comm);
-   if ( mypid == 0 && output_level > 1 )
+   if (outputLevel_ > 1) MPI_Allreduce(itmp,ibuf,2,MPI_INT,MPI_SUM,comm);
+   if ( mypid == 0 && outputLevel_ > 1 )
    {
       printf("\t*** Aggregation(U) P3 : no. of aggregates     = %d\n",ibuf[0]);
       printf("\t*** Aggregation(U) P3 : no. nodes aggregated  = %d\n",ibuf[1]);
@@ -795,6 +795,7 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
                      node2aggr[irow] = node2aggr[col_num];
                      node_stat[irow] = MLI_METHOD_AMGSA_SELECTED;
                      aggr_size[node2aggr[col_num]]++;
+                     nselected++;
                      break;
                   }
                }
@@ -806,20 +807,35 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
    }
    itmp[0] = naggr;
    itmp[1] = nselected;
-   if ( output_level > 1 ) MPI_Allreduce(itmp,ibuf,2,MPI_INT,MPI_SUM,comm);
-   if ( mypid == 0 && output_level > 1 )
+   if ( outputLevel_ > 1 ) MPI_Allreduce(itmp,ibuf,2,MPI_INT,MPI_SUM,comm);
+   if ( mypid == 0 && outputLevel_ > 1 )
    {
       printf("\t*** Aggregation(U) P4 : no. of aggregates     = %d\n",ibuf[0]);
       printf("\t*** Aggregation(U) P4 : no. nodes aggregated  = %d\n",ibuf[1]);
    }
    if ( nselected < local_nrows )
    {
-      for ( irow = 0; irow < local_nrows; irow++ )
+      count = (local_nrows - nselected) / min_aggr_size;
+      if ( count == 0 ) count = 1;
+      count += naggr;
+      irow = icol = 0;
+      while ( nselected < local_nrows )
+      {
          if ( node_stat[irow] != MLI_METHOD_AMGSA_SELECTED )
          {
-            node2aggr[irow] = -1;
+            node2aggr[irow] = naggr;
             node_stat[irow] = MLI_METHOD_AMGSA_SELECTED;
+            nselected++;
+            icol++;
+            if ( icol >= min_aggr_size && naggr < count-1 ) 
+            {
+               icol = 0;
+               naggr++;
+            }
          }
+         irow++;
+      }
+      naggr = count;
    }
 
    /*-----------------------------------------------------------------
@@ -907,7 +923,7 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
     * construct the diagonal array (diag_data) 
     *-----------------------------------------------------------------*/
 
-   if ( threshold > 0.0 )
+   if ( threshold_ > 0.0 )
    {
       diag_data = new double[Adiag_nrows];
 
@@ -939,9 +955,9 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
     * find and initialize the length of each row in the graph
     *-----------------------------------------------------------------*/
 
-   epsilon = threshold;
-   for ( i = 0; i < curr_level; i++ ) epsilon *= 0.5;
-   if ( mypid == 0 && output_level > 1 )
+   epsilon = threshold_;
+   for ( i = 0; i < currLevel_; i++ ) epsilon *= 0.5;
+   if ( mypid == 0 && outputLevel_ > 1 )
    {
       printf("\t*** Aggregation(U) : strength threshold       = %8.2e\n",
              epsilon);
@@ -1059,7 +1075,7 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
    (*graph_in) = graph;
    delete [] col_ind;
    delete [] col_val;
-   if ( threshold > 0.0 ) delete [] diag_data;
+   if ( threshold_ > 0.0 ) delete [] diag_data;
    return 0;
 }
 
