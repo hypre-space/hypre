@@ -275,7 +275,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    P_diag_data = hypre_CTAlloc(double, P_diag_size);
 
    P_marker = hypre_CTAlloc(int, n_fine);
-   P_marker_offd = hypre_CTAlloc(int, n_fine);
+   P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
 
    P_offd_size = jj_counter_offd;
 
