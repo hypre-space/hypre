@@ -229,7 +229,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     parasailsReuse_     = 0;    // reuse pattern if nonzero
 
     euclidargc_         = 2;    // parameters information for Euclid
-    euclidargv_         = new char*[euclidargc_];
+    euclidargv_         = new char*[euclidargc_*2];
     for (int j = 0; j < euclidargc_; j++) euclidargv_[j] = new char[50];
     strcpy(euclidargv_[0], "-level");   
     strcpy(euclidargv_[1], "0");   
@@ -424,7 +424,7 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
        delete [] selectedListAux_; 
        selectedListAux_ = NULL;
     }
-    for (i = 0; i < euclidargc_; i++) delete [] euclidargv_[i];
+    for (i = 0; i < euclidargc_*2; i++) delete [] euclidargv_[i];
     delete [] euclidargv_;
     euclidargv_ = NULL;
     
