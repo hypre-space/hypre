@@ -4,10 +4,10 @@
 #          itself.
 #=============================================================================
 
-mpirun -np 1 ./struct -n 12 12 12 -solver 1 -relax 1 -rap 1> struct.out.1
+mpirun -np 1 ./struct -n 12 12 12 -solver 1 -istart -3 -3 -3 -relax 1 -rap 1> struct.out.1
 mpirun -np 1 ./sstruct -in sstruct.in.struct -solver 201 -relax 1 -rap 1> struct.out.201
 
-mpirun -np 1 ./struct -n 12 12 12 -solver 0 -relax 1> struct.out.0
+mpirun -np 1 ./struct -n 12 12 12 -solver 0 -istart -3 -3 -3 -relax 1> struct.out.0
 mpirun -np 1 ./sstruct -in sstruct.in.struct -solver 200 -relax 1> struct.out.200
 
 
