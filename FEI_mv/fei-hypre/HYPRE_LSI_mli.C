@@ -768,8 +768,10 @@ int HYPRE_LSI_MLICreateNodeEqnMap(HYPRE_Solver solver, int nNodes,
       if ( procMapArray[iN] >= 0 ) 
       {
          procIndex = procMapArray[iN];
-         iSendBufs[procIndex][sendLengs[procIndex]++] = nodeNumbers[iN];
-         iSendBufs[procIndex][sendLengs[procIndex]++] = eqnNumbers[iN];
+         for ( iP = 0; iP < nSends; iP++ ) 
+            if ( sendProcs[iP] == procIndex ) break;
+         iSendBufs[iP][sendLengs[iP]++] = nodeNumbers[iN];
+         iSendBufs[iP][sendLengs[iP]++] = eqnNumbers[iN];
       }
    }
    for ( iP = 0; iP < nSends; iP++ ) 
@@ -1226,7 +1228,9 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
       if ( nodeProcMap[iN] >= 0 )
       {
          procIndex = nodeProcMap[iN];
-         iSendBufs[procIndex][sendLengs[procIndex]++] = eqnNumbers[iN];
+         for ( iP = 0; iP < nSends; iP++ )
+            if ( procIndex == sendProcs[iP] ) break;
+         iSendBufs[iP][sendLengs[iP]++] = eqnNumbers[iN];
       }
    }
    for ( iP = 0; iP < nSends; iP++ )
@@ -1256,8 +1260,10 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
       if ( nodeProcMap[iN] >= 0 )
       {
          procIndex = nodeProcMap[iN];
+         for ( iP = 0; iP < nSends; iP++ )
+            if ( procIndex == sendProcs[iP] ) break;
          for ( iD = 0; iD < nodeDOF; iD++ )
-            dSendBufs[procIndex][sendLengs[procIndex]++]=coords[iN*nodeDOF+iD];
+            dSendBufs[iP][sendLengs[iP]++]=coords[iN*nodeDOF+iD];
       }
    }
    for ( iP = 0; iP < nSends; iP++ )
