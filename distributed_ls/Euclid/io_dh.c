@@ -810,6 +810,7 @@ void check_type_lengths()
 }
 
 /* assumes rows are stored contiguously (are ordered within the file) */
+#if 0
 #undef __FUNC__
 #define __FUNC__ "compute_rowstorage_mpi_private"
 void compute_rowstorage_mpi_private(FILE *fpIN, int begRowIN, 
@@ -838,7 +839,7 @@ void compute_rowstorage_mpi_private(FILE *fpIN, int begRowIN,
     nz += len;
 
     /* position pointer to start of next row */
-    fpos += 8+ len*sizeof(int) + len*sizeof(double);
+    fpos += 8 + len*sizeof(int) + len*sizeof(double);
     if (fsetpos(fpIN, &fpos)) {
       SET_V_ERROR("fsetpos failed!");
     }
@@ -847,7 +848,9 @@ void compute_rowstorage_mpi_private(FILE *fpIN, int begRowIN,
   *nzOUT = nz;
   END_FUNC_DH
 }
+#endif
 
+#if 0
 #undef __FUNC__
 #define __FUNC__ "position_fp_at_row_private"
 void position_fp_at_row_private(FILE *fpIN, int begRowIN)
@@ -856,7 +859,7 @@ void position_fp_at_row_private(FILE *fpIN, int begRowIN)
   fpos_t fpos;
   /* bool success = false; */
   int num, row, len, buf[2];
-  int smallEndian = isSmallEndian();
+  bool smallEndian = isSmallEndian();
 
   fpos = HEADER_SIZE_DH*sizeof(int);
   if (fsetpos(fpIN, &fpos)) {
@@ -892,6 +895,7 @@ void position_fp_at_row_private(FILE *fpIN, int begRowIN)
   }
   END_FUNC_DH
 }
+#endif
 
 #undef __FUNC__
 #define __FUNC__ "write_footer_private"
