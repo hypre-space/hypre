@@ -448,7 +448,6 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
    MPI_Comm          comm         = hypre_ParVectorComm(vector);
    int               global_size  = hypre_ParVectorGlobalSize(vector);
    int              *partitioning = hypre_ParVectorPartitioning(vector);
-   hypre_Vector     *local_vector;
    double           *local_data;
    int               myid, num_procs, i, j, part0;
    char              new_filename[255];
@@ -465,7 +464,6 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
       exit(1);
    }
 
-   local_vector = hypre_ParVectorLocalVector(vector);
    local_data = hypre_VectorData(hypre_ParVectorLocalVector(vector));
 
    fprintf(file, "%d \n", global_size);
