@@ -73,7 +73,7 @@ UTILITIES_OBJS = ${UTILITIES_FILES:.c=.o}
 libHYPRE_utilities.a: ${UTILITIES_OBJS}
 	@echo  "Building $@ ... "
 	ar -ru $@ ${UTILITIES_OBJS}
-	ranlib $@
+	${RANLIB} $@
 
 ${UTILITIES_OBJS}: ${UTILITIES_HEADERS}
 
