@@ -36,4 +36,5 @@
             - fix a bug in BC handling (reset values, not take out columns)
             - optimize by taking out zeros in loading matrix to parcsr
             - revert Schur complement reduction to old ways 
+04/12/01    - convert totally to 2.0 
 
