@@ -169,22 +169,7 @@ ES: base
 fei: IJ krylov ES
 	@ \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
-	HYPRE_FEI_BASE_DIR=$$FEI_BASE_DIR; \
-	HYPRE_FEI_LIB_DIR=$$FEI_LIB_DIR; \
-	HYPRE_FEI_INC_DIR=$$FEI_INC_DIR; \
-	if [ ! "$$FEI_BASE_DIR" ]; then \
-	  HYPRE_FEI_BASE_DIR=$(srcdir)/../fei-base; \
-	fi; \
-	if [ ! "$$FEI_LIB_DIR" ]; then \
-	  HYPRE_FEI_LIB_DIR=`pwd`/hypre/lib; \
-	fi; \
-	if [ ! "$$FEI_INC_DIR" ]; then \
-	  HYPRE_FEI_INC_DIR=`pwd`/hypre/include; \
-	fi; \
 	export HYPRE_INSTALL_DIR; \
-	export HYPRE_FEI_BASE_DIR; \
-	export HYPRE_FEI_LIB_DIR; \
-	export HYPRE_FEI_INC_DIR; \
 	for i in ${HYPRE_FEI_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -194,38 +179,26 @@ fei: IJ krylov ES
 	    echo ""; \
 	  fi; \
 	done; \
-	mkdir -p hypre/tmp; \
+	mkdir -p $$HYPRE_INSTALL_DIR/tmp; \
 	for i in ${HYPRE_FEI_LIBFILES}; \
 	do \
-	   (cp hypre/lib/$$i hypre/tmp; cd hypre/tmp; ${AR} x $$i; rm -f ___*;);\
+	   (cp $$HYPRE_INSTALL_DIR/lib/$$i $$HYPRE_INSTALL_DIR/tmp; \
+            cd $$HYPRE_INSTALL_DIR/tmp; \
+            ${AR} x $$i; rm -f ___*;);\
 	   if [ $$i = "libHYPRE_DistributedMatrixPilutSolver.a" ]; then \
-	      (cd hypre/tmp; mv -f qsort.o psort.o;); \
-	      (cd hypre/tmp; mv -f qsort_si.o psort_si.o;); \
+	      (cd $$HYPRE_INSTALL_DIR/tmp; mv -f qsort.o psort.o;); \
+	      (cd $$HYPRE_INSTALL_DIR/tmp; mv -f qsort_si.o psort_si.o;); \
 	   fi; \
 	done; \
-	(cd hypre/tmp; ${AR} rcu $$HYPRE_FEI_LIB_DIR/libHYPRE_LSI.a *.o;); \
-	rm -rf hypre/tmp
+	(cd $$HYPRE_INSTALL_DIR/tmp; \
+            ${AR} rcu $(FEI_LIB_DIR)/libHYPRE_LSI.a *.o;); \
+	rm -rf $$HYPRE_INSTALL_DIR/tmp
 
 # special autotest target
 nofei: IJ krylov ES
 	@ \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
-	HYPRE_FEI_BASE_DIR=$$FEI_BASE_DIR; \
-	HYPRE_FEI_LIB_DIR=$$FEI_LIB_DIR; \
-	HYPRE_FEI_INC_DIR=$$FEI_INC_DIR; \
-	if [ ! "$$FEI_BASE_DIR" ]; then \
-	  HYPRE_FEI_BASE_DIR=$(srcdir)/../fei-base; \
-	fi; \
-	if [ ! "$$FEI_LIB_DIR" ]; then \
-	  HYPRE_FEI_LIB_DIR=`pwd`/hypre/lib; \
-	fi; \
-	if [ ! "$$FEI_INC_DIR" ]; then \
-	  HYPRE_FEI_INC_DIR=`pwd`/hypre/include; \
-	fi; \
 	export HYPRE_INSTALL_DIR; \
-	export HYPRE_FEI_BASE_DIR; \
-	export HYPRE_FEI_LIB_DIR; \
-	export HYPRE_FEI_INC_DIR; \
 	for i in ${HYPRE_FEI_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
@@ -236,17 +209,20 @@ nofei: IJ krylov ES
 	    echo ""; \
 	  fi; \
 	done; \
-	mkdir -p hypre/tmp; \
+	mkdir -p $$HYPRE_INSTALL_DIR/tmp; \
 	for i in ${HYPRE_FEI_LIBFILES}; \
 	do \
-	   (cp hypre/lib/$$i hypre/tmp; cd hypre/tmp; ${AR} x $$i; rm -f ___*;);\
+	   (cp $$HYPRE_INSTALL_DIR/lib/$$i $$HYPRE_INSTALL_DIR/tmp; \
+            cd $$HYPRE_INSTALL_DIR/tmp; \
+            ${AR} x $$i; rm -f ___*;);\
 	   if [ $$i = "libHYPRE_DistributedMatrixPilutSolver.a" ]; then \
-	      (cd hypre/tmp; mv -f qsort.o psort.o;); \
-	      (cd hypre/tmp; mv -f qsort_si.o psort_si.o;); \
+	      (cd $$HYPRE_INSTALL_DIR/tmp; mv -f qsort.o psort.o;); \
+	      (cd $$HYPRE_INSTALL_DIR/tmp; mv -f qsort_si.o psort_si.o;); \
 	   fi; \
 	done; \
-	(cd hypre/tmp; ${AR} rcu $$HYPRE_FEI_LIB_DIR/libHYPRE_LSI.a *.o;); \
-	rm -rf hypre/tmp
+	(cd $$HYPRE_INSTALL_DIR/tmp; \
+            ${AR} rcu $(FEI_LIB_DIR)/libHYPRE_LSI.a *.o;); \
+	rm -rf $$HYPRE_INSTALL_DIR/tmp
 
 seq: base krylov
 	@ \
