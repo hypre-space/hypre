@@ -399,6 +399,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    { 
       measure_array[num_variables + S_offd_j[i]] += 1.0;
    }
+   if (num_procs > 1)
    comm_handle = hypre_ParCSRCommHandleCreate(2, comm_pkg, 
                         &measure_array[num_variables], buf_data);
 
@@ -407,6 +408,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
       measure_array[S_diag_j[i]] += 1.0;
    }
 
+   if (num_procs > 1)
    hypre_ParCSRCommHandleDestroy(comm_handle);
       
    index = 0;
@@ -532,7 +534,9 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
             }
          }
       }
- 
+
+      if (num_procs > 1)
+      { 
       comm_handle = hypre_ParCSRCommHandleCreate(1, comm_pkg, buf_data, 
         &measure_array[num_variables]);
  
@@ -543,7 +547,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 			S_ext_j);
  
       hypre_ParCSRCommHandleDestroy(comm_handle);   
- 
+      } 
       /*------------------------------------------------
        * Set F-pts and update subgraph
        *------------------------------------------------*/
@@ -682,10 +686,13 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
                  = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
  
+      if (num_procs > 1)
+      {
       comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, 
         CF_marker_offd);
  
       hypre_ParCSRCommHandleDestroy(comm_handle);   
+      }
  
       if (debug_flag == 3)
       {
@@ -1706,10 +1713,13 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                  = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
     
+      if (num_procs > 1)
+      {
       comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data,
         CF_marker_offd);
     
       hypre_ParCSRCommHandleDestroy(comm_handle);
+      }
     
       ci_array = hypre_CTAlloc(int,num_cols_offd);
       for (i=0; i < num_cols_offd; i++)
@@ -1943,10 +1953,13 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
               = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
  
+      if (num_procs > 1)
+      {
       comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, 
      		CF_marker_offd);
  
       hypre_ParCSRCommHandleDestroy(comm_handle);   
+      }
 
       ci_array = hypre_CTAlloc(int,num_cols_offd);
       for (i=0; i < num_cols_offd; i++)
@@ -2098,11 +2111,13 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
       /*------------------------------------------------
        * Send boundary data for CF_marker back
        *------------------------------------------------*/
-
+      if (num_procs > 1)
+      {
       comm_handle = hypre_ParCSRCommHandleCreate(12, comm_pkg, CF_marker_offd, 
    			int_buf_data);
     
       hypre_ParCSRCommHandleDestroy(comm_handle);   
+      }
    
       /* only CF_marker entries from larger procs are accepted  
 	if coarsen_type = 4 coarse points are not overwritten  */
@@ -2181,10 +2196,13 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                  = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
     
+      if (num_procs > 1)
+      {
       comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data,
         CF_marker_offd);
     
       hypre_ParCSRCommHandleDestroy(comm_handle);
+      }
     
       ci_array = hypre_CTAlloc(int,num_cols_offd);
       for (i=0; i < num_cols_offd; i++)
@@ -2906,6 +2924,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    { 
       measure_array[num_variables + S_offd_j[i]] += 1.0;
    }
+   if (num_procs > 1)
    comm_handle = hypre_ParCSRCommHandleCreate(2, comm_pkg, 
 			&measure_array[num_variables], buf_data);
 
@@ -2915,7 +2934,8 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    }
 
    hypre_CSRMatrixDestroy(ST);
-
+  
+   if (num_procs > 1)
    hypre_ParCSRCommHandleDestroy(comm_handle);
       
    index = 0;
@@ -3050,6 +3070,8 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
          }
       }
  
+      if (num_procs > 1)
+      {
       comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, buf_data, 
 			&measure_array[num_variables]); 
  
@@ -3059,6 +3081,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 			S_ext_j);
  
       hypre_ParCSRCommHandleDestroy(comm_handle);   
+      }
  
       /*------------------------------------------------
        * Set F-pts and update subgraph
@@ -3199,11 +3222,14 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                 int_buf_data[index++] 
                  = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
- 
+
+      if (num_procs > 1)
+      { 
       comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, 
         CF_marker_offd);
  
       hypre_ParCSRCommHandleDestroy(comm_handle);   
+      } 
  
    if (debug_flag == 3)
    {

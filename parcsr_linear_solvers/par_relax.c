@@ -104,6 +104,8 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
    {            
       case 0: /* Weighted Jacobi */
       {
+	if (num_procs > 1)
+	{
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
    	v_buf_data = hypre_CTAlloc(double, 
@@ -128,7 +130,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
  
    	comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data, 
         	Vext_data);
-
+	}
          /*-----------------------------------------------------------------
           * Copy current approximation into temporary vector.
           *-----------------------------------------------------------------*/
@@ -137,9 +139,11 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
          {
             Vtemp_data[i] = u_data[i];
          }
- 
+	 if (num_procs > 1)
+	 { 
    	 hypre_ParCSRCommHandleDestroy(comm_handle);
          comm_handle = NULL;
+	 } 
 
          /*-----------------------------------------------------------------
           * Relax all points.
@@ -206,8 +210,11 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                }
             }     
          }
+	 if (num_procs > 1)
+         {
 	 hypre_TFree(Vext_data);
 	 hypre_TFree(v_buf_data);
+         }
       }
       break;
 
@@ -245,6 +252,8 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
       case 3: /* Hybrid: Jacobi off-processor, 
                          Gauss-Seidel on-processor       */
       {
+	if (num_procs > 1)
+	{
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
    	v_buf_data = hypre_CTAlloc(double, 
@@ -275,6 +284,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
           *-----------------------------------------------------------------*/
    	 hypre_ParCSRCommHandleDestroy(comm_handle);
          comm_handle = NULL;
+	}
 
          /*-----------------------------------------------------------------
           * Relax all points.
@@ -339,13 +349,18 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                }
             }     
          }
+         if (num_procs > 1)
+         {
 	 hypre_TFree(Vext_data);
 	 hypre_TFree(v_buf_data);
+         }
       }
       break;
 
       case 1: /* Gauss-Seidel VERY SLOW */
       {
+        if (num_procs > 1)
+        {
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    	num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
 
@@ -372,6 +387,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
             Vtemp_data[i] = u_data[i];
          } */
  
+        } 
          /*-----------------------------------------------------------------
           * Relax all points.
           *-----------------------------------------------------------------*/
@@ -398,7 +414,9 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
         }
 	else
         {
-          for (i = 0; i < num_recvs; i++)
+          if (num_procs > 1)
+	  {
+	  for (i = 0; i < num_recvs; i++)
           {
              ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
              vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i);
@@ -407,6 +425,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                         ip, 0, comm, &requests[jr++]);
 	  }
 	  MPI_Waitall(jr,requests,status);
+	  }
           if (relax_points == 0)
           {
             for (i = 0; i < n; i++)	
@@ -466,19 +485,25 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                }
             }     
           }
+	  if (num_procs > 1)
 	  MPI_Barrier(comm);
 	 }
 	}
+	if (num_procs > 1)
+	{
 	hypre_TFree(Vext_data);
 	hypre_TFree(v_buf_data);
 	hypre_TFree(status);
 	hypre_TFree(requests);
+	}
       }
       break;
 
       case 4: /* Gauss-Seidel: relax interior points in parallel, boundary
 				sequentially */
       {
+	if (num_procs > 1)
+	{
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    	num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
 
@@ -494,6 +519,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
 	{
 		A_offd_j = hypre_CSRMatrixJ(A_offd);
 		A_offd_data = hypre_CSRMatrixData(A_offd);
+	}
 	}
  
          /*-----------------------------------------------------------------
@@ -577,6 +603,8 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
         }
 	else
         {
+	  if (num_procs > 1)
+  	  {
           for (i = 0; i < num_recvs; i++)
           {
              ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
@@ -586,6 +614,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                         ip, 0, comm, &requests[jr++]);
 	  }
 	  MPI_Waitall(jr,requests,status);
+	  }
           if (relax_points == 0)
           {
             for (i = 0; i < n; i++)	
@@ -647,13 +676,17 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                }
             }     
           }
+	  if (num_procs > 1)
 	  MPI_Barrier(comm);
 	 }
 	}
+	if (num_procs > 1)
+	{
 	hypre_TFree(Vext_data);
 	hypre_TFree(v_buf_data);
 	hypre_TFree(status);
 	hypre_TFree(requests);
+	}
       }
       break;
 
