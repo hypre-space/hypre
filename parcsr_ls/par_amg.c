@@ -771,6 +771,7 @@ hypre_BoomerAMGSetLevelOuterWt( void    *data,
    return (ierr);
 }
 
+int
 hypre_BoomerAMGSetSmoothType( void     *data,
                               int   smooth_type )
 {
@@ -782,6 +783,7 @@ hypre_BoomerAMGSetSmoothType( void     *data,
    return (ierr);
 }
 
+int
 hypre_BoomerAMGSetSmoothNumLevels( void     *data,
                             int   smooth_num_levels )
 {
@@ -793,6 +795,7 @@ hypre_BoomerAMGSetSmoothNumLevels( void     *data,
    return (ierr);
 }
 
+int
 hypre_BoomerAMGSetSmoothNumSweeps( void     *data,
                             int   smooth_num_sweeps )
 {
