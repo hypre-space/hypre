@@ -179,8 +179,8 @@ package Hypre {
    };
 
    interface IJMatrixBuilder {
-      int Start( in MPI_Com com, in int global_m, in int global_n );
-      int SetLocalSize( in int local_m, in int local_n );
+      int Start( in MPI_Com com, in int m_global, in int n_global );
+      int SetLocalSize( in int m_local, in int n_local );
       int SetRowSizes( in array<int,1> sizes );
       int SetDiagRowSizes( in array<int,1> sizes );
       int SetOffDiagRowSizes( in array<int,1> sizes );
@@ -226,12 +226,12 @@ package Hypre {
                                 in array<int,1> glob_vec_indices,
  			        in array<int,1> value_indices,
                                 in array<double,1> values );
-      int SetLocalComponentsInBlock( in int glob_vec_index_start,
-                                     in int glob_vec_index_stop,
+      int SetLocalComponentsInBlock( in int start_glob_vec_index,
+                                     in int stop_glob_vec_index,
                                      in array<int,1> value_indices,
                                      in array<double,1> values );
-      int AddToLocalComponentsInBlock( in int glob_vec_index_start,
-                                       in int glob_vec_index_stop,
+      int AddToLocalComponentsInBlock( in int start_glob_vec_index,
+                                       in int stop_glob_vec_index,
                                        in array<int,1> value_indices,
                                        in array<double,1> values );
       int Setup();
@@ -328,7 +328,7 @@ package Hypre {
    class StructStencil implements Stencil 
    {
       void print();
-      int SetElement( in int element_index, in array<int,1> element_offset );
+      int SetElement( in int index_element, in array<int,1> offset_element );
       int Start( in int dimension, in int size );
       static StructStencil Constructor( in int dimension, in int size );
       int Setup();
@@ -412,9 +412,9 @@ package Hypre {
          
    class ParCSRMatrixBuilder implements IJMatrixBuilder {
       static ParCSRMatrixBuilder Constructor( in MPI_Com com,
-                                              in int global_m, in int global_n);
-      int Start( in MPI_Com com, in int global_m, in int global_n );
-      int SetLocalSize( in int local_m, in int local_n );
+                                              in int m_global, in int n_global);
+      int Start( in MPI_Com com, in int m_global, in int n_global );
+      int SetLocalSize( in int m_local, in int n_local );
       int SetRowSizes( in array<int,1> sizes );
       int SetDiagRowSizes( in array<int,1> sizes );
       int SetOffDiagRowSizes( in array<int,1> sizes );
@@ -461,12 +461,12 @@ package Hypre {
                                 in array<int,1> glob_vec_indices,
  			        in array<int,1> value_indices,
                                 in array<double,1> values );
-      int SetLocalComponentsInBlock( in int glob_vec_index_start,
-                                     in int glob_vec_index_stop,
+      int SetLocalComponentsInBlock( in int start_glob_vec_index,
+                                     in int stop_glob_vec_index,
                                      in array<int,1> value_indices,
                                      in array<double,1> values );
-      int AddToLocalComponentsInBlock( in int glob_vec_index_start,
-                                       in int glob_vec_index_stop,
+      int AddToLocalComponentsInBlock( in int start_glob_vec_index,
+                                       in int stop_glob_vec_index,
                                        in array<int,1> value_indices,
                                        in array<double,1> values );
       int Setup();
