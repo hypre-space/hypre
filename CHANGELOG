@@ -14,29 +14,34 @@
 #
 #=============================================================================
 
-Version 1.8.4a released, ???????.
+Version 1.9.0a released, 2005/01/18.
 
 - NOTE: link lines may need changing depending on configure options used
 
-- Removed all automake & libtool use from build system.  Autoconf reads 
-  configure.in to create the configure script.  
+- Removed all automake & libtool use from build system, this includes all 
+  Makefile.am and Makefile.in files.  Autoconf reads configure.in to create the
+  configure script. Each directory, except config, has ONLY a Makefile.
 
 - The config sub-directory has a file named Makefile.config.in that contains all
   of the configurable variables.  When the configure script is run, it will replace
   the appropriate variables.  This file is included in all Makefiles in all
   sub-directories.
 
-- Removed all Makefile.am and Makefile.in in each sub-directory as they are no longer 
-  needed due to above noted changes.
+- When the configure.in file is changed; must run ./config/bootstrap from the 
+  linear_solvers directory to create the configure script.  This forces the 
+  required autoconf versions to be used.
 
-- to view the allowed configure options run './configure --help'
+- Configure has many options that allow the user to specify specific libraries
+  and/or directories to use as well as options to disable some searches.  To 
+  view the options run './configure --help'
 
 - shared libraries can NOT be created with this version
 
 - the makefile target nofei has been removed as it is now the default
 
 - internal blas and lapack routines are included in the libHYPRE_utilities.a 
-  file if needed, rather than in separate libraries.
+  file if configure is run --without-blas and/or --without-lapack, rather than 
+  in separate libraries.
 
 ************************
 
