@@ -162,3 +162,6 @@
               right.
             - add diagnostics to SGS smoother
             - change mli test driver to run nonsymmetric problems.
+04/29/03    2.5.1R1
+            - modify putIntoSystemMatrix to support fei-lite
+            - add a few more diagnostics messages (per Kull's problem)
