@@ -81,8 +81,8 @@ HYPRE_FreeIJVector( HYPRE_IJVector IJvector )
             ierr = hypre_FreeIJVectorPETSc( vector );
          else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS_VECTOR )
             ierr = hypre_FreeIJVectorISIS( vector );
-         else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR_VECTOR )
-            ierr = hypre_FreeIJVectorParCSR( vector );
+         else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PAR_VECTOR )
+            ierr = hypre_FreeIJVectorPar( vector );
          else
             ierr = -1;
 
@@ -111,8 +111,8 @@ HYPRE_InitializeIJVector( HYPRE_IJVector IJvector )
       ierr = hypre_InitializeIJVectorPETSc( vector );
    else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS_VECTOR )
       ierr = hypre_InitializeIJVectorISIS( vector );
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR_VECTOR )
-      ierr = hypre_InitializeIJVectorParCSR( vector );
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PAR_VECTOR )
+      ierr = hypre_InitializeIJVectorPar( vector );
    else
       ierr = -1;
 
@@ -136,8 +136,8 @@ HYPRE_AssembleIJVector( HYPRE_IJVector IJvector )
       ierr = hypre_AssembleIJVectorPETSc( vector );
    else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS_VECTOR )
       ierr = hypre_AssembleIJVectorISIS( vector );
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR_VECTOR )
-      ierr = hypre_AssembleIJVectorParCSR( vector );
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PAR_VECTOR )
+      ierr = hypre_AssembleIJVectorPar( vector );
    else
       ierr = -1;
 
@@ -149,13 +149,13 @@ HYPRE_AssembleIJVector( HYPRE_IJVector IJvector )
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_DistributeIJVector( HYPRE_IJVector IJvector, int *row_starts , int *col_starts )
+HYPRE_DistributeIJVector( HYPRE_IJVector IJvector, int *row_starts )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
-   if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR_VECTOR )
-      ierr = hypre_DistributeIJVectorParCSR( vector, row_starts, col_starts );
+   if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PAR_VECTOR )
+      ierr = hypre_DistributeIJVectorPar( vector, row_starts );
    else
       ierr = -1;
 
@@ -208,102 +208,24 @@ Tells "vector" local size
 @return integer error code
 @param HYPRE_IJVector &vector [IN]
  the vector to be operated on. 
-@param int local_m [IN]
- local number of rows
 @param int local_n [IN]
- local number of columns
+ local number of rows
 HYPRE_SetIJVectorLocalStorageType needs to be called before this routine
 */
 
 int 
-HYPRE_SetIJVectorLocalSize( HYPRE_IJVector IJvector, int local_m, int local_n )
+HYPRE_SetIJVectorLocalSize( HYPRE_IJVector IJvector, int local_n )
 {
    int ierr = 0;
    hypre_IJVector *vector = (hypre_IJVector *) IJvector;
 
    /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC_VECTOR )
-      ierr = hypre_SetIJVectorLocalSizePETSC (vector, local_m, local_n);
+      ierr = hypre_SetIJVectorLocalSizePETSC (vector, local_n);
    if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS_VECTOR )
-      ierr = hypre_SetIJVectorLocalSizeISIS (vector, local_m, local_n);
+      ierr = hypre_SetIJVectorLocalSizeISIS (vector, local_n);
       */
-   if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR_VECTOR )
-      ierr = hypre_SetIJVectorLocalSizeParCSR (vector, local_m, local_n);
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_SetIJVectorRowSizes
- *--------------------------------------------------------------------------*/
-
-/**
-* HYPRE_SetIJVectorRowSizes( HYPRE_IJVector IJvector, int *sizes); 
-
-Not collective.
-Tells "vector" how many nonzeros to expect in each row.
-Knowing this quantity apriori may have a significant impact on the time needed for the Assemble phase,
-and this option should always be utilized if the information is available.It is most useful in conjunction
-with the next function.
-@return integer error code
-@param HYPRE_IJVector &vector [IN] 
-the vector to be operated on.
-@param int *sizes [IN]
-a vector of length = local_m giving the estimated sizes for the diagonal parts of
-all local_m rows, in order from lowest globally numbered local row to highest.
-*/
-
-int 
-HYPRE_SetIJVectorRowSizes( HYPRE_IJVector IJvector, int *sizes )
-{
-   int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
-
-   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC_VECTOR )
-      ierr = hypre_SetIJVectorRowSizesPETSc( vector , sizes );
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS_VECTOR )
-      ierr = hypre_SetIJVectorRowSizesISIS( vector , sizes );
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR_VECTOR )
-      ierr = hypre_SetIJVectorRowSizesParCSR( vector , sizes );
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_SetIJVectorTotalSize
- *--------------------------------------------------------------------------*/
-
-/** 
-Tells "vector" how many nonzeros to expect in each row. This option is preferable to using NO
-"SetSizes" commands but it may lead to less efficient Assemble calls than using the two functions
-above.
-
-Not collective.
-@return integer error code
-@param HYPRE_IJVector &vector [IN]
-the vector to be initialized.
-@param int size [IN]
-total number of coefficients expected on this processor.
-
-{\bf note} All sizes given in the SetIJVectorSize routines do not have to be exact, that is, it is not
-an error for them to be incorrect. Incorrect values may degrade performance, however.
-*/
-
-int 
-HYPRE_SetIJVectorTotalSize( HYPRE_IJVector IJvector, int size )
-{
-   int ierr = 0;
-   hypre_IJVector *vector = (hypre_IJVector *) IJvector;
-
-   /* if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PETSC_VECTOR )
-      ierr = hypre_SetIJVectorTotalSizePETSc( vector , size );
-   else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS_VECTOR )
-      ierr = hypre_SetIJVectorTotalSizeISIS( vector , size );
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR_VECTOR )
-      ierr = hypre_SetIJVectorTotalSizeParCSR( vector , size );
+   if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PAR_VECTOR )
+      ierr = hypre_SetIJVectorLocalSizePar (vector, local_n);
    else
       ierr = -1;
 
@@ -393,7 +315,7 @@ HYPRE_InsertIJVectorRows( HYPRE_IJVector IJvector, int n,
       ierr = hypre_InsertIJVectorRowsPETSc( vector, n, rows, values );
    else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS_VECTOR )
       ierr = hypre_InsertIJVectorRowsISIS( vector, n, rows, values );
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR_VECTOR )
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PAR_VECTOR )
       ierr = hypre_InsertIJVectorRowsParCSR( vector, n, rows, values );
    else
       ierr = -1;
@@ -440,8 +362,8 @@ HYPRE_AddRowsToIJVector( HYPRE_IJVector IJvector, int n,
       ierr = hypre_AddRowsToIJVectorPETSc( vector, n, rows, values );
    else if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_ISIS_VECTOR )
       ierr = hypre_AddRowsToIJVectorISIS( vector, n, rows, values );
-   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PARCSR_VECTOR )
-      ierr = hypre_AddRowsToIJVectorParCSR( vector, n, rows, values );
+   else */ if ( hypre_IJVectorLocalStorageType(vector) == HYPRE_PAR_VECTOR )
+      ierr = hypre_AddRowsToIJVectorPar( vector, n, rows, values );
    else
       ierr = -1;
 
