@@ -115,10 +115,12 @@
 % Environment: CopyrightPage
 %---------------------------------------------------------------------
 
-\def\CopyrightPage{\begin{titlepage}%
+\def\CopyrightPage{%
+\clearpage
+\pagestyle{empty}
 \setlength{\parindent}{0in}\vspace*{3.0in}
 }
-\def\endCopyrightPage{\end{titlepage}}
+\def\endCopyrightPage{\clearpage}
 
 %=====================================================================
 %=====================================================================
