@@ -38,13 +38,7 @@ main( int   argc,
    int                 build_matrix_arg_index;
    int                 build_rhs_type;
    int                 build_rhs_arg_index;
-   int                 build_funcs_type;
-   int                 build_funcs_arg_index;
-   int                 ioutdat;
-   int                 debug_flag;
-   int                 ierr,i,j,k; 
-   int                 indx, rest, tms;
-   double              max_row_sum = 1.0;
+   int                 ierr,i,j; 
    double              norm;
    void		      *object;
 
@@ -80,7 +74,6 @@ main( int   argc,
    int first_local_row, last_local_row;
    int first_local_col, last_local_col;
    int size, *col_ind;
-   int local_num_vars;
    double *values;
 
    /*-----------------------------------------------------------
@@ -103,11 +96,6 @@ main( int   argc,
    build_matrix_arg_index = argc;
    build_rhs_type = 0;
    build_rhs_arg_index = argc;
-   build_funcs_type = 0;
-   build_funcs_arg_index = argc;
-   debug_flag = 0;
-
-   ioutdat = 1;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -129,18 +117,6 @@ main( int   argc,
          arg_index++;
          build_matrix_type      = 2;
          build_matrix_arg_index = arg_index;
-      }
-      else if ( strcmp(argv[arg_index], "-funcsfromonefile") == 0 )
-      {
-         arg_index++;
-         build_funcs_type      = 1;
-         build_funcs_arg_index = arg_index;
-      }
-      else if ( strcmp(argv[arg_index], "-funcsfromfile") == 0 )
-      {
-         arg_index++;
-         build_funcs_type      = 2;
-         build_funcs_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-laplacian") == 0 )
       {
@@ -206,33 +182,9 @@ main( int   argc,
          build_rhs_type      = 5;
          build_rhs_arg_index = arg_index;
       }    
-      else if ( strcmp(argv[arg_index], "-dbg") == 0 )
-      {
-         arg_index++;
-         debug_flag = atoi(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          print_usage = 1;
-      }
-      else
-      {
-         arg_index++;
-      }
-   }
-
-   arg_index = 0;
-   while (arg_index < argc)
-   {
-      if ( strcmp(argv[arg_index], "-mxrs") == 0 )
-      {
-         arg_index++;
-         max_row_sum  = atof(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-iout") == 0 )
-      {
-         arg_index++;
-         ioutdat  = atoi(argv[arg_index++]);
       }
       else
       {
@@ -565,7 +517,7 @@ main( int   argc,
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, part_x[myid], part_x[myid+1]-1, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x,ij_vector_object_type );
       HYPRE_IJVectorInitialize(ij_x);
-      hypre_IJVectorZeroValues(ij_x);
+      /* hypre_IJVectorZeroValues(ij_x); */
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
    }
