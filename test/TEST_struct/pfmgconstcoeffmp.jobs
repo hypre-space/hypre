@@ -1,0 +1,18 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 2004   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# struct: Run PFMG on a constant coefficient, variable diagonal matrix
+#=============================================================================
+
+mpirun -np 2 ./struct -n 10 20 20 -solver 4 \
+ > pfmgconstcoeffmp.out.0
+mpirun -np 1 ./struct -n 20 20 20 -solver 4 \
+ > pfmgconstcoeffmp.out.1
