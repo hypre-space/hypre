@@ -65,12 +65,16 @@ FILES =\
  F90_parcsr_matrix.c\
  F90_par_vector.c\
  F90_HYPRE_parcsr_matrix.c\
- F90_HYPRE_parcsr_vector.c
+ F90_HYPRE_parcsr_vector.c\
+ par_csr_aat.c\
+ communicationT.c
+
 
 DRIVER_FILES =\
  driver.c\
  driver_matmul.c\
- driver_matvec.c
+ driver_matvec.c\
+ driver_aat.c
 
 OBJS = ${FILES:.c=.o}
 DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
@@ -92,6 +96,10 @@ driver_matvec: driver_matvec.o libHYPRE_parcsr_mv.a
 driver_matmul: driver_matmul.o libHYPRE_parcsr_mv.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_matmul driver_matmul.o ${LFLAGS} 
+
+driver_aat: driver_aat.o libHYPRE_parcsr_mv.a
+	@echo  "Linking" $@ "... "
+	${CC} -o driver_aat driver_aat.o ${LFLAGS} 
 
 install: all
 	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.

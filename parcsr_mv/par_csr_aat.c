@@ -1,0 +1,876 @@
+/* Will compute A*A^T, A a Boolean matrix or matrix of doubles.
+   based on par_csr_matop.c and mli_pcsr_bool_matop.c */
+
+/*BHEADER**********************************************************************
+ * (c) 2001   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+*********************************************************************EHEADER*/
+
+#include "headers.h"
+
+
+extern hypre_CSRMatrix * 
+hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A, int data);
+
+void hypre_ParAat_RowSizes
+( int ** C_diag_i, int ** C_offd_i, int * B_marker,
+  int * A_diag_i, int * A_diag_j,
+  int * A_offd_i, int * A_offd_j, int * A_col_map_offd,
+  int * A_ext_i, int * A_ext_j,
+  int *C_diag_size, int *C_offd_size,
+  int num_rows_diag_A, int num_cols_offd_A,
+  int num_rows_A_ext,
+  int first_col_diag_A, int first_row_index_A, int first_row_index_A_ext
+   )
+/* computes the sizes of the rows of C = A * A^T.
+   Out: int** C_diag_i, C_offd_i
+   Workspace provided: int * B_marker
+   In: int* A_diag_i, A_diag_j, A_offd_i, A_offd_j, A_ext_i, A_ext_j
+   Out: int* C_diag_size, C_offd_size
+   In: int num_rows_diag_A, num_cols_offd_A, num_rows_offd_A_ext, first_row_index_A
+*/
+   /* This was formerly the first pass of hypre_ParMatmul */
+{
+   /* There are 3 CSRMatrix or CSRBooleanMatrix objects behind the arrays here:
+      A_diag, A_offd, and A_ext.  That's 9 possiable X*Y combinations.
+      Any ext*Y belongs to another processor.  And diag*offd, offd*diag never
+      have any entries because by definition diag and offd have different
+      columns.  So we have to do 4:
+      offd*ext, diag*diag, diag*ext, and offd*offd.
+      We could take advantage of symmetry in A*A^T to get offd*diag counts from
+      the existing diag*offd .  But for a first cut it looks simpler to just
+      do it over again.
+   */
+   int i1, i2, i3, j3, jj2, jj3;
+   int jj_count_diag, jj_count_offd, jj_row_begin_diag, jj_row_begin_offd;
+   int last_col_diag_C;
+   int start_indexing = 0; /* start indexing for C_data at 0 */
+
+   *C_diag_i = hypre_CTAlloc(int, num_rows_diag_A+1);
+   *C_offd_i = hypre_CTAlloc(int, num_rows_diag_A+1);
+
+   last_col_diag_C = first_row_index_A + num_rows_diag_A - 1;
+
+   jj_count_diag = start_indexing;
+   jj_count_offd = start_indexing;
+   for (i1 = 0; i1 < num_rows_diag_A+num_rows_A_ext; i1++)
+   {      
+      B_marker[i1] = -1;
+   }
+
+   /*-----------------------------------------------------------------------
+    *  Loop over rows i1 of A (or C).
+    *-----------------------------------------------------------------------*/
+   
+   for (i1 = 0; i1 < num_rows_diag_A; i1++)
+   {
+      
+      /*--------------------------------------------------------------------
+       *  Set count marker for diagonal entry, C_{i1,i1}. 
+       *--------------------------------------------------------------------*/
+ 
+      B_marker[i1] = jj_count_diag;
+/* was      B_marker[i1+first_row_index_A] = jj_count_diag;*/
+      jj_row_begin_diag = jj_count_diag;
+      jj_row_begin_offd = jj_count_offd;
+      jj_count_diag++;
+
+         /*-----------------------------------------------------------------
+          *  Loop over entries (columns) i2 in row i1 of A_offd.
+          *  For each such column we will find the contributions of
+          *  the corresponding rows i2 of A^T to C=A*A^T - but in A^T we look
+          *  only at the external part of A^T, i.e. with columns (rows of A)
+          *  which live on other processors.
+          *-----------------------------------------------------------------*/
+         
+	 if (num_cols_offd_A)
+	 {
+            for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
+            {
+               i2 = A_col_map_offd[ A_offd_j[jj2] ];
+ 
+               /* offd*ext */
+               /*-----------------------------------------------------------
+                *  Loop over entries (columns) i3 in row i2 of (A_ext)^T
+                *  That is, rows i3 having a column i2 of A_ext.
+                *  For now, for each row i3 of A_ext we crudely check _all_
+                *  columns to see whether one matches i2.
+                *  For each entry (i2,i3) of (A_ext)^T, mark C(i1,i3)
+                *  as a potential nonzero.
+                *-----------------------------------------------------------*/
+
+               for ( i3=0; i3<num_rows_A_ext; i3++ ) {
+                  for ( jj3=A_ext_i[i3]; jj3<A_ext_i[i3+1]; jj3++ ) {
+                     if ( A_ext_j[jj3]==i2 ) {
+                        /* row i3, column i2 of A_ext; or,
+                           row i2, column i3 of (A_ext)^T */
+
+                        /*--------------------------------------------------------
+                         *  Check B_marker to see that C_{i1,i3} has not already
+                         *  been accounted for. If it has not, mark it and increment
+                         *  counter.
+                         *--------------------------------------------------------*/
+
+                        if (i3+first_row_index_A_ext < first_row_index_A ||
+                            i3+first_row_index_A_ext > last_col_diag_C) { /* offd */
+                           if (B_marker[i3+num_rows_diag_A] < jj_row_begin_offd) {
+                              B_marker[i3+num_rows_diag_A] = jj_count_offd;
+                              jj_count_offd++;
+                           }
+                        }
+                        else {                                              /* diag */
+                           if (B_marker[i3+num_rows_diag_A] < jj_row_begin_diag) {
+                              B_marker[i3+num_rows_diag_A] = jj_count_diag;
+                              jj_count_diag++;
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+
+            /* offd*offd */
+            /*-----------------------------------------------------------
+             *  Loop over entries (columns) i3 in row i2 of A^T
+             *  That is, rows i3 having a column i2 of A (local part).
+             *  For now, for each row i3 of A we crudely check _all_
+             *  columns to see whether one matches i2.
+             *  This i3-loop is for the local off-diagonal part of A.
+             *  For each entry (i2,i3) of A^T, mark C(i1,i3)
+             *  as a potential nonzero.
+             *-----------------------------------------------------------*/
+
+            for ( i3=0; i3<num_rows_diag_A; i3++ ) {
+               /* ... note that num_rows_diag_A == num_rows_offd_A */
+               for ( jj3=A_offd_i[i3]; jj3<A_offd_i[i3+1]; jj3++ ) {
+                  if ( A_col_map_offd[ A_offd_j[jj3] ]==i2 ) {
+                     /* row i3, column i2 of A; or,
+                        row i2, column i3 of A^T */
+                     /*--------------------------------------------------------
+                      *  Check B_marker to see that C_{i1,i3} has not already
+                      *  been accounted for. If it has not, mark it and increment
+                      *  counter.
+                      *--------------------------------------------------------*/
+ 
+                     if (B_marker[i3] < jj_row_begin_diag)
+                     {
+                        B_marker[i3] = jj_count_diag;
+                        jj_count_diag++;
+                     }
+                  }
+               }
+            }
+
+         }
+
+         /*-----------------------------------------------------------------
+          *  Loop over entries (columns) i2 in row i1 of A_diag.
+          *  For each such column we will find the contributions of
+          *  the corresponding rows i2 of A^T to C=A*A^T - but in A^T we look
+          *  only at the external part of A^T, i.e. with columns (rows of A)
+          *  which live on other processors.
+          *-----------------------------------------------------------------*/
+         
+            for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
+            {
+               i2 = A_diag_j[jj2] + first_col_diag_A ;
+ 
+               /* diag*ext */
+               /*-----------------------------------------------------------
+                *  Loop over entries (columns) i3 in row i2 of (A_ext)^T
+                *  That is, rows i3 having a column i2 of A_ext.
+                *  For now, for each row i3 of A_ext we crudely check _all_
+                *  columns to see whether one matches i2.
+                *  For each entry (i2,i3) of (A_ext)^T, mark C(i1,i3)
+                *  as a potential nonzero.
+                *-----------------------------------------------------------*/
+
+               for ( i3=0; i3<num_rows_A_ext; i3++ ) {
+                  for ( jj3=A_ext_i[i3]; jj3<A_ext_i[i3+1]; jj3++ ) {
+                     if ( A_ext_j[jj3]==i2 ) {
+                        /* row i3, column i2 of A_ext; or,
+                           row i2, column i3 of (A_ext)^T */
+
+                        /*--------------------------------------------------------
+                         *  Check B_marker to see that C_{i1,i3} has not already
+                         *  been accounted for. If it has not, mark it and increment
+                         *  counter.
+                         *--------------------------------------------------------*/
+                        if (i3+first_row_index_A_ext < first_row_index_A ||
+                            i3+first_row_index_A_ext > last_col_diag_C) { /* offd */
+                           if (B_marker[i3+num_rows_diag_A] < jj_row_begin_offd) {
+                              B_marker[i3+num_rows_diag_A] = jj_count_offd;
+                              jj_count_offd++;
+                           }
+                        }
+                        else {                                              /* diag */
+                           if (B_marker[i3+num_rows_diag_A] < jj_row_begin_diag) {
+                              B_marker[i3+num_rows_diag_A] = jj_count_diag;
+                              jj_count_diag++;
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+
+         /*-----------------------------------------------------------------
+          *  Loop over entries (columns) i2 in row i1 of A_diag.
+          *  For each such column we will find the contributions of the
+          *  corresponding rows i2 of A^T to C=A*A^T .  Now we only look
+          *  at the local part of A^T - with columns (rows of A) living
+          *  on this processor.
+          *-----------------------------------------------------------------*/
+         
+         for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
+         {
+            i2 = A_diag_j[jj2] + first_col_diag_A ;
+ 
+            /* diag*diag */
+            /*-----------------------------------------------------------
+             *  Loop over entries (columns) i3 in row i2 of A^T
+             *  That is, rows i3 having a column i2 of A (local part).
+             *  For now, for each row i3 of A we crudely check _all_
+             *  columns to see whether one matches i2.
+             *  This first i3-loop is for the diagonal part of A.
+             *  For each entry (i2,i3) of A^T, mark C(i1,i3)
+             *  as a potential nonzero.
+             *-----------------------------------------------------------*/
+            for ( i3=0; i3<num_rows_diag_A; i3++ ) {
+               for ( jj3=A_diag_i[i3]; jj3<A_diag_i[i3+1]; jj3++ ) {
+                  if ( A_diag_j[jj3]+first_col_diag_A == i2 ) {
+                     /* row i3, column i2 of A; or,
+                        row i2, column i3 of A^T */
+                     /*--------------------------------------------------------
+                      *  Check B_marker to see that C_{i1,i3} has not already
+                      *  been accounted for. If it has not, mark it and increment
+                      *  counter.
+                      *--------------------------------------------------------*/
+ 
+                     if (B_marker[i3] < jj_row_begin_diag)
+                     {
+                        B_marker[i3] = jj_count_diag;
+                        jj_count_diag++;
+                     }
+                  }
+               }
+            }
+
+         }        /* end of second and last i2 loop */
+            
+      /*--------------------------------------------------------------------
+       * Set C_diag_i and C_offd_i for this row.
+       *--------------------------------------------------------------------*/
+ 
+      (*C_diag_i)[i1] = jj_row_begin_diag;
+      (*C_offd_i)[i1] = jj_row_begin_offd;
+      
+   }              /* end of i1 loop */
+  
+   (*C_diag_i)[num_rows_diag_A] = jj_count_diag;
+   (*C_offd_i)[num_rows_diag_A] = jj_count_offd;
+ 
+   /*-----------------------------------------------------------------------
+    *  Allocate C_diag_data and C_diag_j arrays.
+    *  Allocate C_offd_data and C_offd_j arrays.
+    *-----------------------------------------------------------------------*/
+ 
+   *C_diag_size = jj_count_diag;
+   *C_offd_size = jj_count_offd;
+
+   /* End of First Pass */
+}
+
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRAAt : multiplies ParCSRMatrix A by its transpose, A*A^T
+ * and returns the product in ParCSRMatrix C
+ * Note that C does not own the partitionings
+ *--------------------------------------------------------------------------*/
+/* There are lots of possible optimizations.  There is excess communication
+   going on, and off-diagonal matrix elements are computed twice without
+   taking advantage of symmetry, and probably more things. */
+
+hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
+{
+   MPI_Comm 	   comm = hypre_ParCSRMatrixComm(A);
+
+   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+   
+   double          *A_diag_data = hypre_CSRMatrixData(A_diag);
+   int             *A_diag_i = hypre_CSRMatrixI(A_diag);
+   int             *A_diag_j = hypre_CSRMatrixJ(A_diag);
+
+   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+   
+   double          *A_offd_data = hypre_CSRMatrixData(A_offd);
+   int             *A_offd_i = hypre_CSRMatrixI(A_offd);
+   int             *A_offd_j = hypre_CSRMatrixJ(A_offd);
+   int             *A_col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+
+   int *row_starts_A = hypre_ParCSRMatrixRowStarts(A);
+   int	num_rows_diag_A = hypre_CSRMatrixNumRows(A_diag);
+   int	num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);
+   
+   hypre_ParCSRMatrix *C;
+   int		      *col_map_offd_C;
+
+   hypre_CSRMatrix *C_diag;
+
+   double          *C_diag_data;
+   int             *C_diag_i;
+   int             *C_diag_j;
+
+   hypre_CSRMatrix *C_offd;
+
+   double          *C_offd_data;
+   int             *C_offd_i;
+   int             *C_offd_j;
+
+   int              C_diag_size;
+   int              C_offd_size;
+   int		    last_col_diag_C;
+   int		    num_cols_offd_C;
+   
+   hypre_CSRMatrix *A_ext;
+   
+   double          *A_ext_data;
+   int             *A_ext_i;
+   int             *A_ext_j;
+   int             num_rows_A_ext=0;
+   int             first_row_index_A_ext, first_col_diag_A_ext;
+
+   int	first_row_index_A = hypre_ParCSRMatrixFirstRowIndex(A);
+   int	first_col_diag_A = hypre_ParCSRMatrixFirstColDiag(A);
+   int		   *B_marker;
+
+   int              i, it;
+   int              i1, i2, i3;
+   int              jj2, jj3;
+   
+   int              jj_count_diag, jj_count_offd;
+   int              jj_row_begin_diag, jj_row_begin_offd;
+   int              start_indexing = 0; /* start indexing for C_data at 0 */
+   int		    count;
+   int		    n_rows_A, n_cols_A;
+
+   double           a_entry;
+   double           a_b_product;
+   
+   double           zero = 0.0;
+
+   n_rows_A = hypre_ParCSRMatrixGlobalNumRows(A);
+   n_cols_A = hypre_ParCSRMatrixGlobalNumCols(A);
+
+   if (n_cols_A != n_rows_A)
+   {
+	printf(" Error! Incompatible matrix dimensions!\n");
+	return NULL;
+   }
+   /*-----------------------------------------------------------------------
+    *  Extract A_ext, i.e. portion of A that is stored on neighbor procs
+    *  and needed locally for A^T in the matrix matrix product A*A^T
+    *-----------------------------------------------------------------------*/
+
+   if (num_rows_diag_A != n_rows_A) 
+   {
+       /*---------------------------------------------------------------------
+    	* If there exists no CommPkg for A, a CommPkg is generated using
+    	* equally load balanced partitionings
+    	*--------------------------------------------------------------------*/
+   	if (!hypre_ParCSRMatrixCommPkg(A))
+   	{
+        	hypre_MatTCommPkgCreate(A);
+   	}
+
+   	A_ext = hypre_ParCSRMatrixExtractAExt(A,1);
+   	A_ext_data = hypre_CSRMatrixData(A_ext);
+   	A_ext_i    = hypre_CSRMatrixI(A_ext);
+   	A_ext_j    = hypre_CSRMatrixJ(A_ext);
+        num_rows_A_ext = hypre_CSRMatrixNumRows(A_ext);
+        if ( first_row_index_A==0 ) {
+           first_row_index_A_ext = 2; /* <<<< debugging; this must be computed <<<*/
+           first_col_diag_A_ext = 2; /* <<<< debugging; this must be computed <<<*/
+        }
+        else {
+           first_row_index_A_ext = 0; /* <<<< debugging; this must be computed <<<*/
+           first_col_diag_A_ext = 0; /* <<<< debugging; this must be computed <<<*/
+        }
+   }
+   /*-----------------------------------------------------------------------
+   *  Allocate marker array.
+    *-----------------------------------------------------------------------*/
+
+/* was   B_marker = hypre_CTAlloc(int, num_rows_A_ext); */
+   B_marker = hypre_CTAlloc(int, num_rows_diag_A+num_rows_A_ext );
+
+   /*-----------------------------------------------------------------------
+    *  Initialize some stuff.
+    *-----------------------------------------------------------------------*/
+
+/* was   for (i1 = 0; i1 < num_rows_A_ext; i1++) */
+   for ( i1=0; i1<num_rows_diag_A+num_rows_A_ext; ++i1 )
+   {      
+      B_marker[i1] = -1;
+   }
+
+
+   hypre_ParAat_RowSizes(
+      &C_diag_i, &C_offd_i, B_marker,
+      A_diag_i, A_diag_j,
+      A_offd_i, A_offd_j, A_col_map_offd,
+      A_ext_i, A_ext_j,
+      &C_diag_size, &C_offd_size,
+      num_rows_diag_A, num_cols_offd_A,
+      num_rows_A_ext,
+      first_col_diag_A, first_row_index_A, first_row_index_A_ext
+      );
+
+#if 0
+/* debugging output: */
+   printf("C_diag_i (%i):",C_diag_size);
+   for ( i1=0; i1<=num_rows_diag_A; ++i1 ) printf(" %i",C_diag_i[i1] );
+   printf("\nC_offd_i (%i):",C_offd_size);
+   for ( i1=0; i1<=num_rows_diag_A; ++i1 ) printf(" %i",C_offd_i[i1] );
+   printf("\n");
+#endif
+
+   /*-----------------------------------------------------------------------
+    *  Allocate C_diag_data and C_diag_j arrays.
+    *  Allocate C_offd_data and C_offd_j arrays.
+    *-----------------------------------------------------------------------*/
+ 
+   last_col_diag_C = first_row_index_A + num_rows_diag_A - 1;
+   C_diag_data = hypre_CTAlloc(double, C_diag_size);
+   C_diag_j    = hypre_CTAlloc(int, C_diag_size);
+   if (C_offd_size)
+   { 
+   	C_offd_data = hypre_CTAlloc(double, C_offd_size);
+   	C_offd_j    = hypre_CTAlloc(int, C_offd_size);
+   } 
+
+
+   /*-----------------------------------------------------------------------
+    *  Second Pass: Fill in C_diag_data and C_diag_j.
+    *  Second Pass: Fill in C_offd_data and C_offd_j.
+    *-----------------------------------------------------------------------*/
+
+   /*-----------------------------------------------------------------------
+    *  Initialize some stuff.
+    *-----------------------------------------------------------------------*/
+
+   jj_count_diag = start_indexing;
+   jj_count_offd = start_indexing;
+/* was   for (i1 = 0; i1 < num_rows_A_ext; i1++) */
+   for ( i1=0; i1<num_rows_diag_A+num_rows_A_ext; ++i1 )
+   {      
+      B_marker[i1] = -1;
+   }
+   
+   /*-----------------------------------------------------------------------
+    *  Loop over interior c-points.
+    *-----------------------------------------------------------------------*/
+    
+   for (i1 = 0; i1 < num_rows_diag_A; i1++)
+   {
+      
+      /*--------------------------------------------------------------------
+       *  Create diagonal entry, C_{i1,i1} 
+       *--------------------------------------------------------------------*/
+
+      B_marker[i1] = jj_count_diag;
+/* was      B_marker[i1+first_row_index_A] = jj_count_diag; */
+      jj_row_begin_diag = jj_count_diag;
+      jj_row_begin_offd = jj_count_offd;
+      C_diag_data[jj_count_diag] = zero;
+      C_diag_j[jj_count_diag] = i1;
+      jj_count_diag++;
+
+      /*-----------------------------------------------------------------
+       *  Loop over entries in row i1 of A_offd.
+       *-----------------------------------------------------------------*/
+         
+   /* There are 3 CSRMatrix or CSRBooleanMatrix objects here:
+      A_diag, A_offd, and A_ext.  That's 9 possiable X*Y combinations.  But
+      ext*ext, ext*diag, and ext*offd belong to another processor.
+      diag*offd and offd*diag don't count - never share a column by definition.
+      So we have to do 4 cases:
+      diag*ext, offd*ext, diag*diag, and offd*offd.
+   */
+
+      for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
+      {
+         i2 = A_diag_j[jj2];
+         a_entry = A_diag_data[jj2];
+            
+         /* diag*ext */
+         /*-----------------------------------------------------------
+          *  Loop over entries (columns) i3 in row i2 of (A_ext)^T
+          *  That is, rows i3 having a column i2 of A_ext.
+          *  For now, for each row i3 of A_ext we crudely check _all_
+          *  columns to see whether one matches i2.
+          *  For each entry (i2,i3) of (A_ext)^T, add A(i1,i2)*A(i3,i2)
+          *  to C(i1,i3) .  This contributes to the offd block of C.
+          *-----------------------------------------------------------*/
+
+         for ( i3=0; i3<num_rows_A_ext; i3++ ) {
+            for ( jj3=A_ext_i[i3]; jj3<A_ext_i[i3+1]; jj3++ ) {
+               if ( A_ext_j[jj3]==i2+first_col_diag_A ) {
+                  /* row i3, column i2 of A_ext; or,
+                     row i2, column i3 of (A_ext)^T */
+
+                  a_b_product = a_entry * A_ext_data[jj3];
+
+                  /*--------------------------------------------------------
+                   *  Check B_marker to see that C_{i1,i3} has not already
+                   *  been accounted for. If it has not, create a new entry.
+                   *  If it has, add new contribution.
+                   *--------------------------------------------------------*/
+
+                  if (i3+first_row_index_A_ext < first_row_index_A ||
+                      i3+first_col_diag_A_ext > last_col_diag_C) { /* offd */
+                     if (B_marker[i3+num_rows_diag_A] < jj_row_begin_offd) {
+                        B_marker[i3+num_rows_diag_A] = jj_count_offd;
+                        C_offd_data[jj_count_offd] = a_b_product;
+                        C_offd_j[jj_count_offd] = i3;
+                        jj_count_offd++;
+                     }
+                     else
+                        C_offd_data[B_marker[i3+num_rows_diag_A]] += a_b_product;
+                  }
+                  else {                                              /* diag */
+                     if (B_marker[i3+num_rows_diag_A] < jj_row_begin_diag) {
+                        B_marker[i3+num_rows_diag_A] = jj_count_diag;
+                        C_diag_data[jj_count_diag] = a_b_product;
+                        C_diag_j[jj_count_diag] = i3-first_col_diag_A;
+                        jj_count_diag++;
+                     }
+                     else
+                        C_diag_data[B_marker[i3+num_rows_diag_A]] += a_b_product;
+                  } 
+               }
+            }
+         }
+      }
+
+      if (num_cols_offd_A)
+      {
+         for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
+         {
+            i2 = A_offd_j[jj2];
+            a_entry = A_offd_data[jj2];
+            
+            /* offd * ext */
+            /*-----------------------------------------------------------
+             *  Loop over entries (columns) i3 in row i2 of (A_ext)^T
+             *  That is, rows i3 having a column i2 of A_ext.
+             *  For now, for each row i3 of A_ext we crudely check _all_
+             *  columns to see whether one matches i2.
+             *  For each entry (i2,i3) of (A_ext)^T, add A(i1,i2)*A(i3,i2)
+             *  to C(i1,i3) .  This contributes to the offd block of C.
+             *-----------------------------------------------------------*/
+
+            for ( i3=0; i3<num_rows_A_ext; i3++ ) {
+               for ( jj3=A_ext_i[i3]; jj3<A_ext_i[i3+1]; jj3++ ) {
+                  if ( A_ext_j[jj3]==A_col_map_offd[i2] ) {
+                     /* row i3, column i2 of A_ext; or,
+                        row i2, column i3 of (A_ext)^T */
+
+                     a_b_product = a_entry * A_ext_data[jj3];
+
+                     /*--------------------------------------------------------
+                      *  Check B_marker to see that C_{i1,i3} has not already
+                      *  been accounted for. If it has not, create a new entry.
+                      *  If it has, add new contribution.
+                      *--------------------------------------------------------*/
+
+                     if (i3+first_row_index_A_ext < first_row_index_A ||
+                         i3+first_row_index_A_ext > last_col_diag_C) { /* offd */
+                        if (B_marker[i3+num_rows_diag_A] < jj_row_begin_offd) {
+                           B_marker[i3+num_rows_diag_A] = jj_count_offd;
+                           C_offd_data[jj_count_offd] = a_b_product;
+                           C_offd_j[jj_count_offd] = i3;
+                           jj_count_offd++;
+                        }
+                        else
+                           C_offd_data[B_marker[i3+num_rows_diag_A]] += a_b_product;
+                     }
+                     else {                                              /* diag */
+                        if (B_marker[i3+num_rows_diag_A] < jj_row_begin_diag) {
+                           B_marker[i3+num_rows_diag_A] = jj_count_diag;
+                           C_diag_data[jj_count_diag] = a_b_product;
+                           C_diag_j[jj_count_diag] = i3-first_row_index_A;
+                           jj_count_diag++;
+                        }
+                        else
+                           C_diag_data[B_marker[i3+num_rows_diag_A]] += a_b_product;
+                     } 
+                  }
+               }
+            }
+         }
+      }
+
+      /* diag * diag */
+      /*-----------------------------------------------------------------
+       *  Loop over entries (columns) i2 in row i1 of A_diag.
+       *  For each such column we will find the contributions of the
+       *  corresponding rows i2 of A^T to C=A*A^T .  Now we only look
+       *  at the local part of A^T - with columns (rows of A) living
+       *  on this processor.
+       *-----------------------------------------------------------------*/
+         
+      for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
+      {
+         i2 = A_diag_j[jj2];
+         a_entry = A_diag_data[jj2];
+ 
+         /*-----------------------------------------------------------
+          *  Loop over entries (columns) i3 in row i2 of A^T
+          *  That is, rows i3 having a column i2 of A (local part).
+          *  For now, for each row i3 of A we crudely check _all_
+          *  columns to see whether one matches i2.
+          *  This i3-loop is for the diagonal block of A.
+          *  It contributes to the diagonal block of C.
+          *  For each entry (i2,i3) of A^T,  add A(i1,i2)*A(i3,i2)
+          *  to C(i1,i3)
+          *-----------------------------------------------------------*/
+         for ( i3=0; i3<num_rows_diag_A; i3++ ) {
+            for ( jj3=A_diag_i[i3]; jj3<A_diag_i[i3+1]; jj3++ ) {
+               if ( A_diag_j[jj3]==i2 ) {
+                  /* row i3, column i2 of A; or,
+                     row i2, column i3 of A^T */
+                  a_b_product = a_entry * A_diag_data[jj3];
+
+                  /*--------------------------------------------------------
+                   *  Check B_marker to see that C_{i1,i3} has not already
+                   *  been accounted for. If it has not, mark it and increment
+                   *  counter.
+                   *--------------------------------------------------------*/
+                  if (B_marker[i3] < jj_row_begin_diag)
+                  {
+                     B_marker[i3] = jj_count_diag;
+                     C_diag_data[jj_count_diag] = a_b_product;
+                     C_diag_j[jj_count_diag] = i3;
+                     jj_count_diag++;
+                  }
+                  else
+                  {
+                     C_diag_data[B_marker[i3]] += a_b_product;
+                  }
+               }
+            }
+         } /* end of i3 loop */
+      } /* end of third i2 loop */
+
+
+         /* offd * offd */
+         /*-----------------------------------------------------------
+          *  Loop over offd columns i2 of A in A*A^T.  Then
+          *  loop over offd entries (columns) i3 in row i2 of A^T
+          *  That is, rows i3 having a column i2 of A (local part).
+          *  For now, for each row i3 of A we crudely check _all_
+          *  columns to see whether one matches i2.
+          *  This i3-loop is for the off-diagonal block of A.
+          *  It contributes to the diag block of C.
+          *  For each entry (i2,i3) of A^T, add A*A^T to C
+          *-----------------------------------------------------------*/
+      if (num_cols_offd_A) {
+
+         for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
+         {
+            i2 = A_offd_j[jj2];
+            a_entry = A_offd_data[jj2];
+            
+            for ( i3=0; i3<num_rows_diag_A; i3++ ) {
+               /* ... note that num_rows_diag_A == num_rows_offd_A */
+               for ( jj3=A_offd_i[i3]; jj3<A_offd_i[i3+1]; jj3++ ) {
+                     if ( A_offd_j[jj3]==i2 ) {
+                     /* row i3, column i2 of A; or,
+                        row i2, column i3 of A^T */
+                     a_b_product = a_entry * A_offd_data[jj3];
+
+                     /*--------------------------------------------------------
+                      *  Check B_marker to see that C_{i1,i3} has not already
+                      *  been accounted for. If it has not, create a new entry.
+                      *  If it has, add new contribution
+                      *--------------------------------------------------------*/
+ 
+                     if (B_marker[i3] < jj_row_begin_diag)
+                     {
+                        B_marker[i3] = jj_count_diag;
+                        C_diag_data[jj_count_diag] = a_b_product;
+                        C_diag_j[jj_count_diag] = i3;
+                        jj_count_diag++;
+                     }
+                     else
+                     {
+                        C_diag_data[B_marker[i3]] += a_b_product;
+                     }
+                  }
+               }
+            }  /* end of last i3 loop */
+         }     /* end of if (num_cols_offd_A) */
+
+      }        /* end of fourth and last i2 loop */
+#if 0
+         printf("end of i1 loop: i1=%i jj_count_diag=%i\n", i1, jj_count_diag );
+         printf("  C_diag_j=");
+         for ( jj3=0; jj3<jj_count_diag; ++jj3) printf("%i ",C_diag_j[jj3]);
+         printf("  C_diag_data=");
+         for ( jj3=0; jj3<jj_count_diag; ++jj3) printf("%f ",C_diag_data[jj3]);
+         printf("\n");
+         printf("  C_offd_j=");
+         for ( jj3=0; jj3<jj_count_offd; ++jj3) printf("%i ",C_offd_j[jj3]);
+         printf("  C_offd_data=");
+         for ( jj3=0; jj3<jj_count_offd; ++jj3) printf("%f ",C_offd_data[jj3]);
+         printf("\n");
+         printf( "  B_marker =" );
+         for ( it=0; it<num_rows_diag_A+num_rows_A_ext; ++it )
+            printf(" %i", B_marker[it] );
+         printf( "\n" );
+#endif
+   }           /* end of i1 loop */
+
+   /*-----------------------------------------------------------------------
+    *  Delete 0-columns in C_offd, i.e. generate col_map_offd and reset
+    *  C_offd_j.
+    *-----------------------------------------------------------------------*/
+
+   for (i=0; i < C_offd_size; i++)
+	B_marker[C_offd_j[i]] = -2;
+
+   num_cols_offd_C = 0;
+   for (i=0; i < num_rows_diag_A; i++)
+	if (B_marker[i] == -2) 
+		num_cols_offd_C++;
+
+   if (num_cols_offd_C)
+	col_map_offd_C = hypre_CTAlloc(int,num_cols_offd_C);
+
+   count = 0;
+   for (i=0; i < num_rows_diag_A; i++)
+	if (B_marker[i] == -2) 
+	{
+		col_map_offd_C[count] = i;
+		B_marker[i] = count;
+		count++;
+	}
+
+   for (i=0; i < C_offd_size; i++)
+	C_offd_j[i] = B_marker[C_offd_j[i]];
+
+   C = hypre_ParCSRMatrixCreate(comm, n_rows_A, n_rows_A, row_starts_A,
+	row_starts_A, num_cols_offd_C, C_diag_size, C_offd_size);
+
+/* Note that C does not own the partitionings */
+   hypre_ParCSRMatrixSetRowStartsOwner(C,0);
+   hypre_ParCSRMatrixSetColStartsOwner(C,0);
+
+   C_diag = hypre_ParCSRMatrixDiag(C);
+   hypre_CSRMatrixData(C_diag) = C_diag_data; 
+   hypre_CSRMatrixI(C_diag) = C_diag_i; 
+   hypre_CSRMatrixJ(C_diag) = C_diag_j; 
+
+   if (num_cols_offd_C)
+   {
+      C_offd = hypre_ParCSRMatrixOffd(C);
+      hypre_CSRMatrixData(C_offd) = C_offd_data; 
+      hypre_CSRMatrixI(C_offd) = C_offd_i; 
+      hypre_CSRMatrixJ(C_offd) = C_offd_j; 
+      hypre_ParCSRMatrixOffd(C) = C_offd;
+      hypre_ParCSRMatrixColMapOffd(C) = col_map_offd_C;
+
+   }
+   else
+	hypre_TFree(C_offd_i);
+
+   /*-----------------------------------------------------------------------
+    *  Free B_ext and marker array.
+    *-----------------------------------------------------------------------*/
+
+   if (num_cols_offd_A)
+   {
+      hypre_CSRMatrixDestroy(A_ext);
+      A_ext = NULL;
+   }
+   hypre_TFree(B_marker);   
+
+   return C;
+   
+}            
+
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixExtractAExt : extracts rows from A which are located on other
+ * processors and needed for multiplying A^T with the local part of A. The rows
+ * are returned as CSRMatrix.
+ * >>>>...CommPkgT(A) should identify all rows of A^T needed for A*A^T (that is
+ * generally a bigger set than ...CommPkg(A), the rows of B needed for A*B)
+ *--------------------------------------------------------------------------*/
+
+hypre_CSRMatrix * 
+hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A, int data)
+{
+   /* Note that A's role as the first factor in A*A^T is used only
+      through ...CommPkgT(A), which basically says which rows of A
+      (columns of A^T) are needed.  In all the other places where A
+      serves as an input, it is through its role as A^T, the matrix
+      whose data needs to be passed between processors. */
+   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
+   int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
+   int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+
+   hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkgT(A);
+   int num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+   int *recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+   int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   int *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+   int *send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+ 
+   hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(A);
+
+   int *diag_i = hypre_CSRMatrixI(diag);
+   int *diag_j = hypre_CSRMatrixJ(diag);
+   double *diag_data = hypre_CSRMatrixData(diag);
+
+   hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(A);
+
+   int *offd_i = hypre_CSRMatrixI(offd);
+   int *offd_j = hypre_CSRMatrixJ(offd);
+   double *offd_data = hypre_CSRMatrixData(offd);
+
+   int num_cols_A, num_nonzeros;
+   int num_rows_A_ext;
+
+   hypre_CSRMatrix *A_ext;
+
+   int *A_ext_i;
+   int *A_ext_j;
+   double *A_ext_data;
+ 
+   num_cols_A = hypre_ParCSRMatrixGlobalNumCols(A);
+   num_rows_A_ext = recv_vec_starts[num_recvs];
+
+   hypre_ParCSRMatrixExtractBExt_Arrays
+      ( &A_ext_i, &A_ext_j, &A_ext_data,
+        &num_nonzeros,
+        data, comm, comm_pkg,
+        num_cols_A, num_recvs, num_sends,
+        first_col_diag,
+        recv_vec_starts, send_map_starts, send_map_elmts,
+        diag_i, diag_j, offd_i, offd_j, col_map_offd,
+        diag_data, offd_data
+         );
+
+   A_ext = hypre_CSRMatrixCreate(num_rows_A_ext,num_cols_A,num_nonzeros);
+   hypre_CSRMatrixI(A_ext) = A_ext_i;
+   hypre_CSRMatrixJ(A_ext) = A_ext_j;
+   if (data) hypre_CSRMatrixData(A_ext) = A_ext_data;
+
+   return A_ext;
+}
