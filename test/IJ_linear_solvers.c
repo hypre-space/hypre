@@ -291,7 +291,8 @@ main( int   argc,
    if (solver_id == 5) relax_default = 2;
 
    /* defaults for BoomerAMG */
-   if (solver_id == 0 || solver_id == 1 || solver_id == 3 || solver_id == 5)
+   if (solver_id == 0 || solver_id == 1 || solver_id == 3 || solver_id == 5
+	|| solver_id == 9)
    {
    strong_threshold = 0.25;
    trunc_factor = 0.0;
@@ -457,6 +458,9 @@ main( int   argc,
       printf("       4=DS-GMRES    5=AMG-CGNR      \n");     
       printf("       6=DS-CGNR     7=PILUT-GMRES   \n");     
       printf("       8=ParaSails-PCG \n");     
+      printf("       9=AMG-BiCGSTAB   \n");
+      printf("       10=DS-BiCGSTAB     \n");
+      printf("       11=PILUT-BiCGSTAB     \n");
       printf("\n");
       printf("   -cljp                 : CLJP coarsening \n");
       printf("   -ruge                 : Ruge coarsening (local)\n");
@@ -800,6 +804,7 @@ main( int   argc,
       HYPRE_BoomerAMGSetRelaxWeight(amg_solver, relax_weight);
       HYPRE_BoomerAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
       HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
+      HYPRE_BoomerAMGSetMaxRowSum(amg_solver, 1.0);
       HYPRE_BoomerAMGSetDebugFlag(amg_solver, debug_flag);
 
       HYPRE_BoomerAMGSetup(amg_solver, A, b, x);
@@ -1071,6 +1076,123 @@ main( int   argc,
          printf("\n");
          printf("GMRES Iterations = %d\n", num_iterations);
          printf("Final GMRES Relative Residual Norm = %e\n", final_res_norm);
+         printf("\n");
+      }
+   }
+   /*-----------------------------------------------------------
+    * Solve the system using BiCGSTAB 
+    *-----------------------------------------------------------*/
+
+   if (solver_id == 9 || solver_id == 10 || solver_id == 11)
+   {
+      time_index = hypre_InitializeTiming("BiCGSTAB Setup");
+      hypre_BeginTiming(time_index);
+ 
+      HYPRE_ParCSRBiCGSTABCreate(MPI_COMM_WORLD, &pcg_solver);
+      HYPRE_ParCSRBiCGSTABSetMaxIter(pcg_solver, 100);
+      HYPRE_ParCSRBiCGSTABSetTol(pcg_solver, tol);
+      HYPRE_ParCSRBiCGSTABSetLogging(pcg_solver, 1);
+ 
+      if (solver_id == 9)
+      {
+         /* use BoomerAMG as preconditioner */
+         if (myid == 0) printf("Solver: AMG-BiCGSTAB\n");
+
+         HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+         HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
+         HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
+         HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
+         HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
+         HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
+         HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
+         HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
+         HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
+         HYPRE_ParCSRBiCGSTABSetPrecond(pcg_solver,
+                                     HYPRE_BoomerAMGSolve,
+                                     HYPRE_BoomerAMGSetup,
+                                     pcg_precond);
+      }
+      else if (solver_id == 10)
+      {
+         /* use diagonal scaling as preconditioner */
+         if (myid == 0) printf("Solver: DS-BiCGSTAB\n");
+         pcg_precond = NULL;
+
+         HYPRE_ParCSRBiCGSTABSetPrecond(pcg_solver,
+                                     HYPRE_ParCSRDiagScale,
+                                     HYPRE_ParCSRDiagScaleSetup,
+                                     pcg_precond);
+      }
+      else if (solver_id == 11)
+      {
+         /* use PILUT as preconditioner */
+         if (myid == 0) printf("Solver: Pilut-BiCGSTAB\n");
+
+         ierr = HYPRE_ParCSRPilutCreate( MPI_COMM_WORLD, &pcg_precond ); 
+         if (ierr) {
+	   printf("Error in ParPilutCreate\n");
+         }
+
+         HYPRE_ParCSRBiCGSTABSetPrecond(pcg_solver,
+                                     HYPRE_ParCSRPilutSolve,
+                                     HYPRE_ParCSRPilutSetup,
+                                     pcg_precond);
+
+         if (drop_tol >= 0 )
+            HYPRE_ParCSRPilutSetDropTolerance( pcg_precond,
+               drop_tol );
+
+         if (nonzeros_to_keep >= 0 )
+            HYPRE_ParCSRPilutSetFactorRowSize( pcg_precond,
+               nonzeros_to_keep );
+      }
+ 
+      HYPRE_ParCSRBiCGSTABSetup(pcg_solver, A, b, x);
+ 
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("BiCGSTAB Solve");
+      hypre_BeginTiming(time_index);
+ 
+      HYPRE_ParCSRBiCGSTABSolve(pcg_solver, A, b, x);
+ 
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+ 
+      HYPRE_ParCSRBiCGSTABGetNumIterations(pcg_solver, &num_iterations);
+      HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+#if SECOND_TIME
+      /* run a second time to check for memory leaks */
+      HYPRE_ParVectorSetRandomValues(x, 775);
+      HYPRE_ParCSRBiCGSTABSetup(pcg_solver, A, b, x);
+      HYPRE_ParCSRBiCGSTABSolve(pcg_solver, A, b, x);
+#endif
+
+      HYPRE_ParCSRBiCGSTABDestroy(pcg_solver);
+ 
+      if (solver_id == 9)
+      {
+         HYPRE_BoomerAMGDestroy(pcg_precond);
+      }
+
+      if (solver_id == 11)
+      {
+         HYPRE_ParCSRPilutDestroy(pcg_precond);
+      }
+
+      if (myid == 0)
+      {
+         printf("\n");
+         printf("BiCGSTAB Iterations = %d\n", num_iterations);
+         printf("Final BiCGSTAB Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
    }
