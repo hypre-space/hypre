@@ -1471,11 +1471,11 @@ void ParaSailsStats(ParaSails *ps, Matrix *A)
 	nnza = (nnza - n) / 2 + n;
     }
 
-    MPI_Reduce(&ps->setup_pattern_time, &max_pattern_time, 
-	1, MPI_DOUBLE, MPI_MAX, 0, comm);
-    MPI_Reduce(&ps->setup_values_time, &max_values_time, 
-	1, MPI_DOUBLE, MPI_MAX, 0, comm);
-    MPI_Reduce(&ps->cost, &max_cost, 1, MPI_DOUBLE, MPI_MAX, 0, comm);
+    MPI_Allreduce(&ps->setup_pattern_time, &max_pattern_time, 
+	1, MPI_DOUBLE, MPI_MAX, comm);
+    MPI_Allreduce(&ps->setup_values_time, &max_values_time, 
+	1, MPI_DOUBLE, MPI_MAX, comm);
+    MPI_Allreduce(&ps->cost, &max_cost, 1, MPI_DOUBLE, MPI_MAX, comm);
 
     if (mype)
 	return;
