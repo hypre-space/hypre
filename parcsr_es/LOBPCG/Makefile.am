@@ -27,9 +27,12 @@ AM_CPPFLAGS = \
  -I$(top_srcdir)/krylov
 
 EXTRA_DIST = \
- IJ_eigen_solver.c\
+ blue.1\
+ blue.sh\
  doc.txt\
- readme.txt
+ ij_es.sh\
+ laplacian_10_10_10.mtx\
+ Xin.mtx
 #
 FILES = \
  lobpcg.c\
