@@ -1,6 +1,6 @@
       subroutine mli_computeSpectrum(nm,n,a,w,matz,z,fv1,fv2,ierr)
 c
-      integer n,nm,ierr,matz
+      integer n,nm,ierr,matz,i,j
       double precision a(nm,n),w(n),z(nm,n),fv1(n),fv2(n)
 c
 c     this subroutine calls the recommended sequence of
@@ -47,6 +47,7 @@ c
 c
    10 if (matz .ne. 0) go to 20
 c     .......... find eigenvalues only ..........
+
       call  mli_tred1(nm,n,a,w,fv1,fv2)
 *  tqlrat encounters catastrophic underflow on the Vax
 *     call  mli_tqlrat(n,w,fv2,ierr)
@@ -718,6 +719,11 @@ c
 c     finds dsqrt(a**2+b**2) without overflow or destructive underflow
 c
       double precision p,r,s,t,u
+
+c     Charles Tong (the detailed code does not work for some problems)
+c     mli_pythag = dsqrt(a**2+b**2)
+c     return
+
       p = dmax1(dabs(a),dabs(b))
       if (p .eq. 0.0d0) go to 20
       r = (dmin1(dabs(a),dabs(b))/p)**2

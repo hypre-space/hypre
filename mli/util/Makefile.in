@@ -8,16 +8,18 @@
 #EHEADER***********************************************************************
 
 .SUFFIXES:
-.SUFFIXES: .C .c .o
+.SUFFIXES: .f .C .c .o
 
 srcdir = @srcdir@
 VPATH = @srcdir@
 
 CC = @CC@
 CXX = @CXX@
+F77 = @F77@
 
 C_COMPILE_FLAGS=@CFLAGS@
 CXX_COMPILE_FLAGS=@CXXFLAGS@
+F77_COMPILE_FLAGS=@F77FLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS =
@@ -43,14 +45,18 @@ CXXFLAGS =\
  ${CXXINCLUDES}\
  ${CXXDEFS}
  
+F77FLAGS =\
+ ${F77_COMPILE_FLAGS}
+ 
 HEADERS =\
  mli_utils.h
 
 FILES =\
- mli_utils.c
+ mli_utils.c\
+ mli_utils_fortran.f
 
 TEMP = ${FILES:.c=.o}
-OBJS = ${TEMP:.C=.o}
+OBJS = ${TEMP:.f=.o}
 
 ##################################################################
 # Targets
@@ -81,4 +87,6 @@ ${OBJS}: ${HEADERS}
 	${CC} -o $@ -c ${CFLAGS} $<
 .C.o:
 	${CXX} -o $@ -c ${CXXFLAGS} $<
+.f.o:
+	${F77} -o $@ -c ${F77FLAGS} $<
 
