@@ -27,6 +27,8 @@ EXTRA_PROGRAMS = \
  new_ij\
  sstruct\
  struct\
+ sstruct_es\
+ struct_es\
  f77_ij\
  f77_ij_b\
  f77_ij_mv\
@@ -142,6 +144,88 @@ driver_commpkg_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/parcsr_mv.h
+
+
+# sstruct_es build 
+sstruct_es_SOURCES = sstruct_es.c
+sstruct_es_CPPFLAGS = $(AM_CPPFLAGS)
+sstruct_es_libraries = \
+ -L$(libdir)\
+ -lHYPRE_lobpcg\
+ -lHYPRE_sstruct_ls\
+ -lHYPRE_sstruct_mv\
+ -lHYPRE_struct_ls\
+ -lHYPRE_struct_mv\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_DistributedMatrixPilutSolver\
+ -lHYPRE_ParaSails\
+ -lHYPRE_Euclid\
+ -lHYPRE_MatrixMatrix\
+ -lHYPRE_DistributedMatrix\
+ -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_krylov\
+ -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
+ $(BLASLIBFLAGS)\
+ $(LIBM)
+sstruct_es_LDADD = $(sstruct_es_libraries)
+sstruct_es_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/HYPRE_lobpcg.h\
+ $(includedir)/HYPRE_interpreter.h\
+ $(includedir)/HYPRE_sstruct_ls.h\
+ $(includedir)/lobpcg.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/sstruct_mv.h\
+ $(includedir)/fortran_matrix.h\
+ $(includedir)/krylov.h
+
+
+# struct_es build 
+struct_es_SOURCES = struct_es.c
+struct_es_CPPFLAGS = $(AM_CPPFLAGS)
+struct_es_libraries = \
+ -L$(libdir)\
+ -lHYPRE_lobpcg\
+ -lHYPRE_struct_ls\
+ -lHYPRE_struct_mv\
+ -lHYPRE_struct_ls\
+ -lHYPRE_struct_mv\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_DistributedMatrixPilutSolver\
+ -lHYPRE_ParaSails\
+ -lHYPRE_Euclid\
+ -lHYPRE_MatrixMatrix\
+ -lHYPRE_DistributedMatrix\
+ -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_krylov\
+ -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
+ $(BLASLIBFLAGS)\
+ $(LIBM)
+struct_es_LDADD = $(struct_es_libraries)
+struct_es_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/HYPRE_lobpcg.h\
+ $(includedir)/HYPRE_interpreter.h\
+ $(includedir)/HYPRE_struct_ls.h\
+ $(includedir)/lobpcg.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/struct_mv.h\
+ $(includedir)/fortran_matrix.h\
+ $(includedir)/krylov.h
 
 
 # sstruct, build
@@ -331,6 +415,7 @@ struct_C___CXXFLAGS = $(AM_CXXFLAGS)
 struct_C___LDADD = $(struct_libraries)
 
 all-local: ij$(EXEEXT) ij_es$(EXEEXT) ij_mv$(EXEEXT) new_ij$(EXEEXT) \
+		struct_es$(EXEEXT) sstruct_es$(EXEEXT) \
 		struct$(EXEEXT) sstruct$(EXEEXT)  driver_commpkg$(EXEEXT)
 
 fei++: fei$(EXEEXT)
@@ -349,6 +434,8 @@ $(ij_mv_OBJECTS): $(ij_mv_dependencies)
 $(new_ij_OBJECTS): $(ij_dependencies)
 $(sstruct_OBJECTS): $(sstruct_dependencies)
 $(struct_OBJECTS): $(struct_dependencies)
+$(sstruct_es_OBJECTS): $(sstruct_es_dependencies)
+$(struct_es_OBJECTS): $(struct_es_dependencies)
 $(fei_OBJECTS): $(fei_dependencies)
 $(f77_ij_OBJECTS): $(ij_dependencies)
 $(f77_ij_mv_OBJECTS): $(ij_mv_dependencies)

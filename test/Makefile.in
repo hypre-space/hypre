@@ -17,7 +17,7 @@
 #
 # Makefile.am --- automake input file for Hypre test drivers
 #
-SOURCES = $(driver_commpkg_SOURCES) $(f77_ij_SOURCES) $(f77_ij_b_SOURCES) $(f77_ij_mv_SOURCES) $(f77_struct_SOURCES) $(fei_SOURCES) $(ij_SOURCES) $(nodist_ij_C___SOURCES) $(ij_b_SOURCES) $(ij_es_SOURCES) $(ij_mv_SOURCES) $(nodist_ij_mv_C___SOURCES) $(new_ij_SOURCES) $(nodist_new_ij_C___SOURCES) $(sstruct_SOURCES) $(nodist_sstruct_C___SOURCES) $(struct_SOURCES) $(nodist_struct_C___SOURCES)
+SOURCES = $(driver_commpkg_SOURCES) $(f77_ij_SOURCES) $(f77_ij_b_SOURCES) $(f77_ij_mv_SOURCES) $(f77_struct_SOURCES) $(fei_SOURCES) $(ij_SOURCES) $(nodist_ij_C___SOURCES) $(ij_b_SOURCES) $(ij_es_SOURCES) $(ij_mv_SOURCES) $(nodist_ij_mv_C___SOURCES) $(new_ij_SOURCES) $(nodist_new_ij_C___SOURCES) $(sstruct_SOURCES) $(nodist_sstruct_C___SOURCES) $(sstruct_es_SOURCES) $(struct_SOURCES) $(nodist_struct_C___SOURCES) $(struct_es_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -42,10 +42,11 @@ POST_UNINSTALL = :
 host_triplet = @host@
 EXTRA_PROGRAMS = ij$(EXEEXT) ij_es$(EXEEXT) ij_mv$(EXEEXT) \
 	new_ij$(EXEEXT) sstruct$(EXEEXT) struct$(EXEEXT) \
-	f77_ij$(EXEEXT) f77_ij_b$(EXEEXT) f77_ij_mv$(EXEEXT) \
-	f77_struct$(EXEEXT) fei$(EXEEXT) ij_b$(EXEEXT) ij.C++$(EXEEXT) \
-	new_ij.C++$(EXEEXT) ij_mv.C++$(EXEEXT) struct.C++$(EXEEXT) \
-	sstruct.C++$(EXEEXT) driver_commpkg$(EXEEXT)
+	sstruct_es$(EXEEXT) struct_es$(EXEEXT) f77_ij$(EXEEXT) \
+	f77_ij_b$(EXEEXT) f77_ij_mv$(EXEEXT) f77_struct$(EXEEXT) \
+	fei$(EXEEXT) ij_b$(EXEEXT) ij.C++$(EXEEXT) new_ij.C++$(EXEEXT) \
+	ij_mv.C++$(EXEEXT) struct.C++$(EXEEXT) sstruct.C++$(EXEEXT) \
+	driver_commpkg$(EXEEXT)
 subdir = test
 SUBDIRS =
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -113,12 +114,18 @@ sstruct_DEPENDENCIES = $(am__DEPENDENCIES_2)
 nodist_sstruct_C___OBJECTS = sstruct_C__-sstruct.C++.$(OBJEXT)
 sstruct_C___OBJECTS = $(nodist_sstruct_C___OBJECTS)
 sstruct_C___DEPENDENCIES = $(am__DEPENDENCIES_2)
+am_sstruct_es_OBJECTS = sstruct_es-sstruct_es.$(OBJEXT)
+sstruct_es_OBJECTS = $(am_sstruct_es_OBJECTS)
+sstruct_es_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_struct_OBJECTS = struct-struct.$(OBJEXT)
 struct_OBJECTS = $(am_struct_OBJECTS)
 struct_DEPENDENCIES = $(am__DEPENDENCIES_4)
 nodist_struct_C___OBJECTS = struct_C__-struct.C++.$(OBJEXT)
 struct_C___OBJECTS = $(nodist_struct_C___OBJECTS)
 struct_C___DEPENDENCIES = $(am__DEPENDENCIES_4)
+am_struct_es_OBJECTS = struct_es-struct_es.$(OBJEXT)
+struct_es_OBJECTS = $(am_struct_es_OBJECTS)
+struct_es_DEPENDENCIES = $(am__DEPENDENCIES_2)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp =
 am__depfiles_maybe =
@@ -147,13 +154,14 @@ SOURCES = $(driver_commpkg_SOURCES) $(f77_ij_SOURCES) \
 	$(ij_b_SOURCES) $(ij_es_SOURCES) $(ij_mv_SOURCES) \
 	$(nodist_ij_mv_C___SOURCES) $(new_ij_SOURCES) \
 	$(nodist_new_ij_C___SOURCES) $(sstruct_SOURCES) \
-	$(nodist_sstruct_C___SOURCES) $(struct_SOURCES) \
-	$(nodist_struct_C___SOURCES)
+	$(nodist_sstruct_C___SOURCES) $(sstruct_es_SOURCES) \
+	$(struct_SOURCES) $(nodist_struct_C___SOURCES) \
+	$(struct_es_SOURCES)
 DIST_SOURCES = $(driver_commpkg_SOURCES) $(f77_ij_SOURCES) \
 	$(f77_ij_b_SOURCES) $(f77_ij_mv_SOURCES) $(f77_struct_SOURCES) \
 	$(fei_SOURCES) $(ij_SOURCES) $(ij_b_SOURCES) $(ij_es_SOURCES) \
 	$(ij_mv_SOURCES) $(new_ij_SOURCES) $(sstruct_SOURCES) \
-	$(struct_SOURCES)
+	$(sstruct_es_SOURCES) $(struct_SOURCES) $(struct_es_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -419,6 +427,90 @@ driver_commpkg_dependencies = \
  $(includedir)/utilities.h\
  $(includedir)/HYPRE_parcsr_ls.h\
  $(includedir)/parcsr_mv.h
+
+
+# sstruct_es build 
+sstruct_es_SOURCES = sstruct_es.c
+sstruct_es_CPPFLAGS = $(AM_CPPFLAGS)
+sstruct_es_libraries = \
+ -L$(libdir)\
+ -lHYPRE_lobpcg\
+ -lHYPRE_sstruct_ls\
+ -lHYPRE_sstruct_mv\
+ -lHYPRE_struct_ls\
+ -lHYPRE_struct_mv\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_DistributedMatrixPilutSolver\
+ -lHYPRE_ParaSails\
+ -lHYPRE_Euclid\
+ -lHYPRE_MatrixMatrix\
+ -lHYPRE_DistributedMatrix\
+ -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_krylov\
+ -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
+ $(BLASLIBFLAGS)\
+ $(LIBM)
+
+sstruct_es_LDADD = $(sstruct_es_libraries)
+sstruct_es_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/HYPRE_lobpcg.h\
+ $(includedir)/HYPRE_interpreter.h\
+ $(includedir)/HYPRE_sstruct_ls.h\
+ $(includedir)/lobpcg.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/sstruct_mv.h\
+ $(includedir)/fortran_matrix.h\
+ $(includedir)/krylov.h
+
+
+# struct_es build 
+struct_es_SOURCES = struct_es.c
+struct_es_CPPFLAGS = $(AM_CPPFLAGS)
+struct_es_libraries = \
+ -L$(libdir)\
+ -lHYPRE_lobpcg\
+ -lHYPRE_struct_ls\
+ -lHYPRE_struct_mv\
+ -lHYPRE_struct_ls\
+ -lHYPRE_struct_mv\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_DistributedMatrixPilutSolver\
+ -lHYPRE_ParaSails\
+ -lHYPRE_Euclid\
+ -lHYPRE_MatrixMatrix\
+ -lHYPRE_DistributedMatrix\
+ -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_krylov\
+ -lHYPRE_utilities\
+ $(LAPACKLIBFLAGS)\
+ $(BLASLIBFLAGS)\
+ $(LIBM)
+
+struct_es_LDADD = $(struct_es_libraries)
+struct_es_dependencies = \
+ $(includedir)/utilities.h\
+ $(includedir)/HYPRE.h\
+ $(includedir)/HYPRE_IJ_mv.h\
+ $(includedir)/HYPRE_parcsr_mv.h\
+ $(includedir)/HYPRE_parcsr_ls.h\
+ $(includedir)/HYPRE_lobpcg.h\
+ $(includedir)/HYPRE_interpreter.h\
+ $(includedir)/HYPRE_struct_ls.h\
+ $(includedir)/lobpcg.h\
+ $(includedir)/parcsr_mv.h\
+ $(includedir)/struct_mv.h\
+ $(includedir)/fortran_matrix.h\
+ $(includedir)/krylov.h
 
 
 # sstruct, build
@@ -698,12 +790,18 @@ sstruct$(EXEEXT): $(sstruct_OBJECTS) $(sstruct_DEPENDENCIES)
 sstruct.C++$(EXEEXT): $(sstruct_C___OBJECTS) $(sstruct_C___DEPENDENCIES) 
 	@rm -f sstruct.C++$(EXEEXT)
 	$(CXXLINK) $(sstruct_C___LDFLAGS) $(sstruct_C___OBJECTS) $(sstruct_C___LDADD) $(LIBS)
+sstruct_es$(EXEEXT): $(sstruct_es_OBJECTS) $(sstruct_es_DEPENDENCIES) 
+	@rm -f sstruct_es$(EXEEXT)
+	$(LINK) $(sstruct_es_LDFLAGS) $(sstruct_es_OBJECTS) $(sstruct_es_LDADD) $(LIBS)
 struct$(EXEEXT): $(struct_OBJECTS) $(struct_DEPENDENCIES) 
 	@rm -f struct$(EXEEXT)
 	$(LINK) $(struct_LDFLAGS) $(struct_OBJECTS) $(struct_LDADD) $(LIBS)
 struct.C++$(EXEEXT): $(struct_C___OBJECTS) $(struct_C___DEPENDENCIES) 
 	@rm -f struct.C++$(EXEEXT)
 	$(CXXLINK) $(struct_C___LDFLAGS) $(struct_C___OBJECTS) $(struct_C___LDADD) $(LIBS)
+struct_es$(EXEEXT): $(struct_es_OBJECTS) $(struct_es_DEPENDENCIES) 
+	@rm -f struct_es$(EXEEXT)
+	$(LINK) $(struct_es_LDFLAGS) $(struct_es_OBJECTS) $(struct_es_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -756,6 +854,15 @@ sstruct-sstruct.obj: sstruct.c
 sstruct-sstruct.lo: sstruct.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(sstruct_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sstruct-sstruct.lo `test -f 'sstruct.c' || echo '$(srcdir)/'`sstruct.c
 
+sstruct_es-sstruct_es.o: sstruct_es.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(sstruct_es_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sstruct_es-sstruct_es.o `test -f 'sstruct_es.c' || echo '$(srcdir)/'`sstruct_es.c
+
+sstruct_es-sstruct_es.obj: sstruct_es.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(sstruct_es_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sstruct_es-sstruct_es.obj `if test -f 'sstruct_es.c'; then $(CYGPATH_W) 'sstruct_es.c'; else $(CYGPATH_W) '$(srcdir)/sstruct_es.c'; fi`
+
+sstruct_es-sstruct_es.lo: sstruct_es.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(sstruct_es_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sstruct_es-sstruct_es.lo `test -f 'sstruct_es.c' || echo '$(srcdir)/'`sstruct_es.c
+
 struct-struct.o: struct.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(struct_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o struct-struct.o `test -f 'struct.c' || echo '$(srcdir)/'`struct.c
 
@@ -764,6 +871,15 @@ struct-struct.obj: struct.c
 
 struct-struct.lo: struct.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(struct_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o struct-struct.lo `test -f 'struct.c' || echo '$(srcdir)/'`struct.c
+
+struct_es-struct_es.o: struct_es.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(struct_es_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o struct_es-struct_es.o `test -f 'struct_es.c' || echo '$(srcdir)/'`struct_es.c
+
+struct_es-struct_es.obj: struct_es.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(struct_es_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o struct_es-struct_es.obj `if test -f 'struct_es.c'; then $(CYGPATH_W) 'struct_es.c'; else $(CYGPATH_W) '$(srcdir)/struct_es.c'; fi`
+
+struct_es-struct_es.lo: struct_es.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(struct_es_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o struct_es-struct_es.lo `test -f 'struct_es.c' || echo '$(srcdir)/'`struct_es.c
 
 .cxx.o:
 	$(CXXCOMPILE) -c -o $@ $<
@@ -1138,6 +1254,7 @@ uninstall-info: uninstall-info-recursive
 
 
 all-local: ij$(EXEEXT) ij_es$(EXEEXT) ij_mv$(EXEEXT) new_ij$(EXEEXT) \
+		struct_es$(EXEEXT) sstruct_es$(EXEEXT) \
 		struct$(EXEEXT) sstruct$(EXEEXT)  driver_commpkg$(EXEEXT)
 
 fei++: fei$(EXEEXT)
@@ -1156,6 +1273,8 @@ $(ij_mv_OBJECTS): $(ij_mv_dependencies)
 $(new_ij_OBJECTS): $(ij_dependencies)
 $(sstruct_OBJECTS): $(sstruct_dependencies)
 $(struct_OBJECTS): $(struct_dependencies)
+$(sstruct_es_OBJECTS): $(sstruct_es_dependencies)
+$(struct_es_OBJECTS): $(struct_es_dependencies)
 $(fei_OBJECTS): $(fei_dependencies)
 $(f77_ij_OBJECTS): $(ij_dependencies)
 $(f77_ij_mv_OBJECTS): $(ij_mv_dependencies)
