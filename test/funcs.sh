@@ -185,9 +185,9 @@ function PsubCmdStub
     blue*) PsubCmd="psub -c blue,pbatch -b a_casc -r $RunName"
       PsubCmd="$PsubCmd -ln $NumNodes -g $NumProcs"
       ;;
-    tckk*) PsubCmd="psub -c tc2k,pbatch -b casc -r $RunName -ln $NumProcs"
+    tckk*) PsubCmd="psub -c tc2k,pbatch -b casc -r $RunName -ln $NumNodes"
       ;;
-    peng*) PsubCmd="psub -c pengra,pbatch -b casc -r $RunName -ln $NumProcs"
+    peng*) PsubCmd="psub -c pengra,pbatch -b casc -r $RunName -ln $NumNodes"
       ;;
     gps*) PsubCmd="psub -c gps320 -b casc -r $RunName -cpn $NumProcs"
       ;;
