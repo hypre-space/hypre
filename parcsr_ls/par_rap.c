@@ -1310,7 +1310,7 @@ hypre_GeneratePExt( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *A)
 	   
 	}
 	num_nonzeros = counter - num_nonzeros;
-	BuildCSRJDataType(num_nonzeros, 
+	hypre_BuildCSRJDataType(num_nonzeros, 
 			  &p_int_data[start_index], 
 			  &p_int_j[start_index], 
 			  &send_matrix_types[i]);	
@@ -1347,7 +1347,7 @@ hypre_GeneratePExt( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *A)
    {
 	start_index = p_ext_i[recv_vec_starts[i]];
 	num_nonzeros = p_ext_i[recv_vec_starts[i+1]]-start_index;
-	BuildCSRJDataType(num_nonzeros, 
+	hypre_BuildCSRJDataType(num_nonzeros, 
 			  &p_ext_data[start_index], 
 			  &p_ext_j[start_index], 
 			  &recv_matrix_types[i]);	
@@ -1378,31 +1378,6 @@ hypre_GeneratePExt( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *A)
    hypre_TFree(tmp_comm_pkg);
 
    return P_ext;
-}
-
-int
-BuildCSRJDataType(int num_nonzeros, 
-		  double *a_data, int *a_j, 
-		  MPI_Datatype *csr_jdata_datatype)
-{
-   int		block_lens[2];
-   MPI_Aint	displs[2];
-   MPI_Datatype	types[2];
-   int		ierr = 0;
-
-   block_lens[0] = num_nonzeros;
-   block_lens[1] = num_nonzeros;
-
-   types[0] = MPI_DOUBLE;
-   types[1] = MPI_INT;
-
-   MPI_Address(a_data, &displs[0]);
-   MPI_Address(a_j, &displs[1]);
-
-   MPI_Type_struct(2,block_lens,displs,types,csr_jdata_datatype);
-   MPI_Type_commit(csr_jdata_datatype);
-
-   return ierr;
 }
 
 hypre_CSRMatrix *
@@ -1465,7 +1440,7 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
    {
 	start_index = RAP_int_i[recv_vec_starts[i]];
 	num_nonzeros = RAP_int_i[recv_vec_starts[i+1]]-start_index;
-	BuildCSRJDataType(num_nonzeros, 
+	hypre_BuildCSRJDataType(num_nonzeros, 
 			  &RAP_int_data[start_index], 
 			  &RAP_int_j[start_index], 
 			  &recv_matrix_types[i]);	
@@ -1508,7 +1483,7 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
    {
 	start_index = RAP_ext_i[send_map_starts[i]];
 	num_nonzeros = RAP_ext_i[send_map_starts[i+1]]-start_index;
-	BuildCSRJDataType(num_nonzeros, 
+	hypre_BuildCSRJDataType(num_nonzeros, 
 			  &RAP_ext_data[start_index], 
 			  &RAP_ext_j[start_index], 
 			  &send_matrix_types[i]);	
