@@ -21,7 +21,6 @@ MAKE="make -k"
 #==============================================================================
 
 HYPRE_DEFAULT_EMAIL="\
- dwalker@llnl.gov\
  rfalgout@llnl.gov\
  cleary1@llnl.gov\
  treadway1@llnl.gov"
@@ -271,27 +270,30 @@ scp -r linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
 # compile
 ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
-        cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
-	source test/env.${HYPRE_ARCH};\
+        /usr/bin/sh -c \
+        /usr/bin/cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
+	. test/env.${HYPRE_ARCH};\
         ./configure ;\
-        make -k beta;\
+        /usr/ccs/bin/make -k beta;\
     )"
 
 # run test suite
 ssh ${HYPRE_RUN_MACHINE} "\
     (\
-        cd ${HYPRE_REMOTE_DIR}/linear_solvers/test;\
+        /usr/bin/sh -c \
+        /usr/bin/cd ${HYPRE_REMOTE_DIR}/linear_solvers/test;\
+	. ./env.${HYPRE_ARCH};\
         ./test_drivers.sh -mail\
     )"
 
 ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
-	
-        cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
-	source test/env.${HYPRE_ARCH};\
+        /usr/bin/sh -c \
+        /usr/bin/cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
+	. test/env.${HYPRE_ARCH};\
         ./configure --with-openmp;\
-	make veryclean;\
-        make -k beta;\
+	/usr/ccs/bin/make veryclean;\
+        /usr/ccs/bin/make -k beta;\
     )"
 
 
