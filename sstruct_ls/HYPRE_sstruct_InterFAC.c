@@ -81,11 +81,11 @@ HYPRE_SStructFACSetPLevels( HYPRE_SStructSolver  solver,
 int
 HYPRE_SStructFACSetPRefinements( HYPRE_SStructSolver  solver,
                                  int                  nparts,
-                                 hypre_Index         *rfactors )
+                                 int                (*rfactors)[3] )
 {
    return( hypre_FACSetPRefinements( (void *)         solver,
                                                       nparts,
-                                     (hypre_Index *)  rfactors ) );
+                                                      rfactors ) );
 }
 /*--------------------------------------------------------------------------
  * HYPRE_SStructFACSetMaxLevels
