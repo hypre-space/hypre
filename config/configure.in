@@ -1,0 +1,919 @@
+dnl *********************************************************************
+dnl * File Name: configure.in
+dnl *
+dnl * This file is read when autoconf is run and the configure script is
+dnl * generated. 
+dnl * Configure.in is structured as follows:
+dnl * initialization information
+dnl * determine the current architecture
+dnl * set user specified compilers and any other user specified options
+dnl *
+dnl * For the given the architecture, an optimal compiler is
+dnl * found (if not specified by the user). If the architecture is
+dnl * unknown or none of the preferred compilers are available then
+dnl * default compilers are found.  
+dnl *
+dnl * For each chosen compiler, the appropriate flags are set for 
+dnl * optimization, debugging, MPI and pthreading (as required) and the
+dnl * C preprocessor is checked.
+dnl * 
+dnl * Finally, library flags are added and AC_SUBST is used to export
+dnl * all necessary macro values.  
+dnl *********************************************************************
+
+dnl *********************************************************************
+dnl * Initialization Information
+dnl * Set package information so it only has to be modified in one place
+dnl *********************************************************************
+
+m4_define([HYPRE_NAME], [hypre])
+m4_define([HYPRE_VERSION], [1.8.4a])
+m4_define([HYPRE_DATE], [2004/11/05])
+m4_define([HYPRE_TIME], [10:34:00])
+m4_define([HYPRE_DATETIME], [HYPRE_DATE HYPRE_TIME])
+m4_define([HYPRE_BUGS], [http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE])
+m4_define([HYPRE_TOP_SRC_DIR], [`pwd`])
+
+AC_PREREQ(2.59)
+AC_REVISION($Id$)
+AC_INIT(HYPRE_NAME, HYPRE_VERSION, HYPRE_BUGS, HYPRE_NAME)
+AC_CONFIG_HEADER([HYPRE_config.h:config/HYPRE_config.h.in])
+AC_COPYRIGHT([This work was produced at the University of California,
+Lawrence Livermore National Laboratory (UC LLNL) under contract
+No. W-7405-ENG-48 (Contract 48) between the U.S. Department of Energy
+(DOE) and the Regents of the University of California (University) for
+the operation of UC LLNL.  The rights of the Federal Government are
+reserved under Contract 48 subject to the restrictions agreed upon by
+the DOE and the University as allowed under DOE Acquisition Letter 97-1.])
+AC_CONFIG_AUX_DIR(config)
+AC_CONFIG_SRCDIR([HYPRE.h])
+
+dnl *********************************************************************
+dnl * Determine HOST type
+dnl *********************************************************************
+AC_CANONICAL_HOST
+
+dnl *********************************************************************
+dnl * Change default prefix from /usr/local to ./hypre
+dnl *********************************************************************
+AC_PREFIX_DEFAULT("HYPRE_TOP_SRC_DIR/hypre")
+m4_pattern_allow([HYPRE_[A-Z_]+])
+
+dnl *********************************************************************
+dnl * Initialize Variables
+dnl *********************************************************************
+AC_DEFINE([PACKAGE_DATE], ["HYPRE_DATE"], [Date of release])
+AC_DEFINE([PACKAGE_TIME], ["HYPRE_TIME"], [Time of release])
+AC_DEFINE([PACKAGE_DATETIME], ["HYPRE_DATETIME"], [Date and time of release])
+PACKAGE_DATETIME="HYPRE_DATE HYPRE_TIME"
+AC_SUBST([PACKAGE_DATETIME])
+
+dnl *********************************************************************
+dnl * Define optional features
+dnl *********************************************************************
+AC_ARG_ENABLE(debug,
+  AS_HELP_STRING([  --enable-debug],
+                 [ Set compiler flags for debugging.]),
+[case "${enableval}" in
+        yes) casc_using_debug=yes ;;
+    no | "") casc_using_debug=no ;;
+          *) AC_MSG_ERROR([Bad value ${enableval} for --enable-debug]) ;;
+ esac],
+[casc_using_debug=no]
+)
+
+AC_ARG_ENABLE(shared,
+  AS_HELP_STRING([  --enable-shared],
+                 [ Build shared libraries (default is NO).]),
+[case "${enableval}" in
+        yes) casc_using_shared=yes ;;
+    no | "") casc_using_shared=no ;;
+          *) AC_MSG_ERROR([Bad value ${enableval} for --enable-shared]) ;;
+ esac],
+[casc_using_shared=no]
+)
+
+dnl *********************************************************************
+dnl * If the user has specified a c, c++, or fortran compiler on the 
+dnl * command line, that compiler will be used.  No checks are done
+dnl * to assure this compiler is present or working.  Additionally,
+dnl * if the user indicated any MPI include, library, or directory
+dnl * to use with the chosen compiler those options are identified
+dnl * and the appropriate macros are assigned values.
+dnl *********************************************************************
+casc_user_chose_compilers=no
+casc_user_chose_cflags=no
+casc_user_chose_cxxflags=no
+casc_user_chose_fflags=no
+casc_user_chose_mpi=no
+casc_user_chose_blas=no
+casc_user_chose_lapack=no
+casc_user_chose_fei=no
+
+casc_using_babel=no
+casc_using_openmp=no
+
+
+AC_ARG_WITH(CC,
+  AS_HELP_STRING([  --with-CC=ARG],
+                 [ User can manually set C compiler to ARG.  The
+                   environment variables 'CC' will be overridden by
+                   the configure script.]),
+[case "${withval}" in
+   yes) casc_user_chose_compilers=no ;;
+   no)  casc_user_chose_compilers=no ;;
+   *)   casc_user_chose_compilers=yes
+        CC=$withval ;;
+ esac],
+[casc_user_chose_compilers=no]
+)
+
+AC_ARG_WITH(CXX,
+  AS_HELP_STRING([  --with-CXX=ARG],
+                 [ User can manually set C++ compiler to ARG.  The
+                   environment variables 'CXX' will be overridden by
+                   the configure script.]),
+[case "${withval}" in
+   yes) casc_user_chose_compilers=no ;;
+   no)  casc_user_chose_compilers=no ;;
+   *)   casc_user_chose_compilers=yes
+        CXX=$withval ;;
+ esac]
+)
+
+AC_ARG_WITH(F77,
+  AS_HELP_STRING([  --with-F77=ARG],
+                 [ User can manually set f77 compiler to ARG.  The
+                   environment variable 'F77' will be overridden.]),
+[case "${withval}" in
+   yes) casc_user_chose_compilers=no ;;
+   no)  casc_user_chose_compilers=no ;;
+   *)   casc_user_chose_compilers=yes
+        F77=$withval ;;
+ esac]
+)
+
+AC_ARG_WITH(LD,
+  AS_HELP_STRING([  --with-LD=ARG],
+                 [ User can manually set linker to ARG.  The
+                   environment variable 'LD' will be overridden.]),
+[case "${withval}" in
+   yes) casc_user_chose_compilers=no ;;
+   no)  casc_user_chose_compilers=no ;;
+   *)   casc_user_chose_compilers=yes
+        LD=$withval ;;
+ esac]
+)
+
+AC_ARG_WITH(CFLAGS,
+  AS_HELP_STRING([  --with-CFLAGS=ARG],
+                 [ User can manually set c compiler flags.  The 'CFLAGS'
+                   environment variable will be overridden.]),
+[CFLAGS=$withval
+ casc_user_chose_cflags=yes]
+)
+
+AC_ARG_WITH(CXXFLAGS,
+  AS_HELP_STRING([  --with-CXXFLAGS=ARG],
+                 [ User can manually set c++ compiler flags. The 'CXXFLAGS'
+                   environment variable will be overridden.]),
+[CXXFLAGS=$withval
+ casc_user_chose_cxxflags=yes]
+)
+
+AC_ARG_WITH(F77FLAGS,
+  AS_HELP_STRING([  --with-F77FLAGS=ARG],
+                 [ User can manually set f77 compiler flags. The 'F77FLAGS'
+                   environment variable will be overridden.]),
+[F77FLAGS=$withval
+ casc_user_chose_fflags=yes]
+)
+
+AC_ARG_WITH(LDFLAGS,
+  AS_HELP_STRING([  --with-LDFLAGS=ARG],
+                 [ User can manually set linker flags. The 'LDFLAGS'
+                   environment variable will be overridden.]),
+[LDFLAGS=$withval]
+)
+
+AC_ARG_WITH(extra-incpath,
+  AS_HELP_STRING([  --with-extra-incpath=PATH],
+                 [ Define extra include path, where PATH is a
+                   space-separated list of directories.]),
+[CCFLAGS="${CCFLAGS} -I`echo ${withval}|sed 's/ /\ -I/g'`"]
+)
+
+AC_ARG_WITH(extra-ldpath,
+  AS_HELP_STRING([  --with-extra-ldpath=PATH],
+                 [ Define extra ld path, where PATH is a
+                   space-separated list of directories.]),
+[LDFLAGS="-L`echo ${withval}|sed 's/ /\ -L/g'` ${LDFLAGS}"]
+)
+
+AC_ARG_WITH(insure,
+  AS_HELP_STRING([  --with-insure=FLAGS],
+                 [ FLAGS are options to pass to insure, e.g.
+		   -log-file=struct_ls.insure -append-logfile=yes
+                   will send output to the specified file.  Defines gcc
+                   and g++ as the C and C++ compilers if not already set
+                   by the user and prepends "insure" to compile/link
+                   line-- no checking is done to ensure insure is present
+                   on the machine]),
+[if test "$casc_user_chose_compilers" = "no"
+ then
+   CC=gcc
+   CXX=g++
+   CFLAGS="$CFLAGS -g"
+   CXXFLAGS="$CXXFLAGS -g"
+   casc_user_chose_compilers=yes
+ fi
+ case "${withval}" in
+   yes) PREPEND="insure"
+        casc_using_debug=yes
+        ;;
+   no)  PREPEND="" ;;
+   *)   PREPEND="insure $withval" 
+        casc_using_debug=yes
+        ;;
+ esac],
+[PREPEND=""]
+)
+
+AC_ARG_WITH(insure-to-file,
+  AS_HELP_STRING([  --with-insure-to-file],
+                 [ Direct insure output to the file named insure.log. Defines
+                   gcc and g++ as the C and C++ compilers, unless already set
+                   by the user.]),
+[if test "$casc_user_chose_compilers" = "no"
+ then
+   CC=gcc
+   CXX=g++
+   CFLAGS="$CFLAGS -g"
+   CXXFLAGS="$CXXFLAGS -g"
+   casc_user_chose_compilers=yes
+ fi
+ case "${withval}" in
+   yes) PREPEND="insure -log-file=insure.log -append-logfile=yes -best-effort";;
+   no)  PREPEND="" ;;
+   *)   PREPEND="insure $withval" ;;
+ esac]
+)
+
+AC_ARG_WITH(purify,
+  AS_HELP_STRING([  --with-purify=FLAGS],
+                 [ FLAGS are options to pass to purify, e.g.
+		   -log-file=struct_ls.purify -append-logfile=yes will
+                   send output to the specified file.  Defines gcc and 
+                   g++ as the C and C++ compilers if not already set by
+                   the user and prepends "purify" to compile/link line--
+                   no checking is done to ensure purify is present on
+                   the machine]),
+[if test "$casc_user_chose_compilers" = "no"
+ then
+   CC=gcc
+   CXX=g++
+   CFLAGS="$CFLAGS -g"
+   CXXFLAGS="$CXXFLAGS -g"
+   casc_user_chose_compilers=yes
+ fi
+ case "${withval}" in
+   yes) PREPEND="purify"
+        casc_using_debug=yes
+        casc_using_mpi=no ;;
+   no)  PREPEND="" ;;
+   *)   PREPEND="purify $withval" 
+        casc_using_debug=yes
+        casc_using_mpi=no ;;
+ esac],
+[PREPEND=""]
+)
+
+AC_ARG_WITH(purify-to-file,
+  AS_HELP_STRING([  --with-purify-to-file],
+                 [ Direct purify output to the file named purify.log.  Defines
+                   gcc and g++ as the C and C++ compilers, unless already set
+                   by the user.]),
+[if test "$casc_user_chose_compilers" = "no"
+ then
+   CC=gcc
+   CXX=g++
+   CFLAGS="$CFLAGS -g"
+   CXXFLAGS="$CXXFLAGS -g"
+   casc_user_chose_compilers=yes
+ fi
+ case "${withval}" in
+   yes) PREPEND="purify -log-file=purify.log -append-logfile=yes -best-effort";;
+   no)  PREPEND="" ;;
+   *)   PREPEND="purify $withval" ;;
+ esac]
+)
+
+AC_ARG_WITH(strict-checking,
+  AS_HELP_STRING([  --with-strict-checking],
+                 [ Compiles without MPI ('--without-MPI') and tries to
+                   find a compiler option that warns of as many non-ANSI
+                   features as possible.  --display_error_number --lint
+                   are enabled for lint-type checking. Individual types
+                   of warnings can be suppressed using --diag_suppress
+                   and the error numbers provided by --display_error_number]),
+[ 
+  AC_CHECK_PROGS(CC, icc pgcc xlc gcc kcc KCC)
+  AC_CHECK_PROGS(CXX, icc pgCC xlC g++ gcc KCC)
+  AC_CHECK_PROGS(F77, ifort pgf77 xlf g77)
+  if test "x$GCC" = "xyes"; then
+    CFLAGS="-g -Wall -pedantic"
+    CXXFLAGS="-g -Wall -Wshadow -fno-implicit-templates"
+    CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
+    casc_user_chose_cflags=yes
+    casc_user_chose_cxxflags=yes
+    casc_using_debug=yes
+    casc_using_mpi=no
+  elif test "x$CC" = "xicc"; then
+    CFLAGS="-g -Xc -Wall -x c"
+    CXXFLAGS="-g -Xc -Wall -x c++"
+    casc_user_chose_cflags=yes
+    casc_user_chose_cxxflags=yes
+    casc_using_debug=yes
+    casc_using_mpi=no
+  elif test "x$CC" = "xpgcc"; then
+    CFLAGS="-g -Xa -Minform,inform"
+    CXXFLAGS="-g -A --display_error_number -Minform,inform"
+    casc_user_chose_cflags=yes
+    casc_user_chose_cxxflags=yes
+    casc_using_debug=yes
+    casc_using_mpi=no
+  elif test "x$CC" = "xxlc"; then
+    CFLAGS="-g -qinfo=dcl:eff:pro:rea:ret:use"
+    CXXFLAGS="-g  -qinfo=dcl:eff:obs:pro:rea:ret:use"
+    casc_user_chose_cflags=yes
+    casc_user_chose_cxxflags=yes
+    casc_using_debug=yes
+    casc_using_mpi=no
+  elif test "x$CC" = "xKCC" || test "x$CC" = "xkcc"; then
+    CFLAGS="-g --c --strict --lint --display_error_number"
+    CFLAGS="$CFLAGS --diag_suppress 45,236,450,826"
+    CFLAGS="$CFLAGS,1018,1021,1022,1023,1024,1030,1041"
+    CXXFLAGS="-g --strict --lint --display_error_number"
+    CXXFLAGS="$CXXFLAGS --diag_suppress 381,450,1023,1024"
+    casc_user_chose_cflags=yes
+    casc_user_chose_cxxflags=yes
+    casc_using_debug=yes
+    casc_using_mpi=no
+  else
+    CC=gcc
+    CXX=g++
+    CFLAGS="-g -Wall -pedantic"
+    CXXFLAGS="-g -Wall -Wshadow -fno-implicit-templates"
+    CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
+    casc_user_chose_cflags=yes
+    casc_user_chose_cxxflags=yes
+    casc_user_chose_compilers=yes
+    casc_using_mpi=no
+  fi
+  AC_DEFINE(HYPRE_SEQUENTIAL,1,[No MPI being used.])
+], [])
+
+AC_ARG_WITH(mpi-include,
+  AS_HELP_STRING([  --with-mpi-include=DIR],
+                 [ User specifies that mpi.h is in DIR.  The options
+                   --with-mpi-include --with-mpi-libs and 
+                   --with-mpi-lib-dirs must be used together.]),
+[for mpi_dir in $withval; do
+   MPIINCLUDE="$MPIINCLUDE -I$mpi_dir"
+ done;
+ casc_user_chose_mpi=yes],
+[casc_user_chose_mpi=no]
+)
+
+AC_ARG_WITH(mpi-libs,
+  AS_HELP_STRING([  --with-mpi-libs=LIBS],
+                 [ LIBS is space-separated list of library names
+                   needed for MPI, e.g. <nsl socket mpi>.  The
+                   options --with-mpi-include --with-mpi-libs and
+                   --with-mpi-lib-dirs must be used together.]),
+[for mpi_lib in $withval; do
+   MPILIBS="$MPILIBS -l$mpi_lib"
+ done;
+ casc_user_chose_mpi=yes]
+)
+
+AC_ARG_WITH(mpi-lib-dirs,
+  AS_HELP_STRING([  --with-mpi-lib-dirs=DIRS],
+                 [ DIRS is space-separated list of directories
+                   containing the libraries specified by --with-mpi-libs,
+                   e.g <usr/lib /usr/local/mpi/lib>.  The options
+                   --with-mpi-include --with-mpi-libs and
+                   --with-mpi-lib-dirs must be used together.]),
+[for mpi_lib_dir in $withval; do
+   MPILIBDIRS="-L$mpi_lib_dir $MPILIBDIRS"
+ done;
+ casc_user_chose_mpi=yes]
+)
+
+AC_ARG_WITH(mpi-flags,
+  AS_HELP_STRING([  --with-mpi-flags=FLAGS],
+                 [ FLAGS is a space separated list of whatever flags
+                   other than -l and -L are needed to link with MPI
+                   libraries-- Does not de-activate autosearch for other
+                   MPI information. May be used with the other three mpi
+                   options or alone in conjunction with the automatic
+                   mpi search.]),
+[case "${withval}" in
+   yes) MPIFLAGS="" ;;
+   no)  MPIFLAGS="" ;;
+   *)   MPIFLAGS=$withval ;;
+ esac],
+[MPIFLAGS=""]
+)
+
+AC_ARG_WITH(blas-libs,
+  AS_HELP_STRING([  --with-blas-libs=LIBS],
+                 [ LIBS is space-separated list of libraries needed for
+                   BLAS. The options --with-blas-libs and
+                   --with-blas-lib-dirs must be used together.]),
+[for blas_lib in $withval; do
+   BLASLIBS="$BLASLIBS -l$blas_lib"
+ done;
+ BLASNEEDED="#";
+ casc_user_chose_blas=yes]
+)
+
+AC_ARG_WITH(blas-lib-dirs,
+  AS_HELP_STRING([  --with-blas-lib-dirs=DIRS],
+                 [ DIRS is space-separated list of directories
+                   containing the libraries specified by --with-blas-libs,
+                   e.g <usr/lib /usr/local/blas/lib>.  The options
+                   --with-blas-libs and --with-blas-lib-dirs must be used
+                   together.]),
+[for blas_lib_dir in $withval; do
+   BLASLIBDIRS="-L$blas_lib_dir $BLASLIBDIRS"
+ done;
+ BLASNEEDED="#";
+ casc_user_chose_blas=yes]
+)
+
+AC_ARG_WITH(lapack-libs,
+  AS_HELP_STRING([  --with-lapack-libs=LIBS],
+                 [ LIBS is space-separated list of libraries needed for
+                   LAPACK. The options --with-lapack-libs and
+                   --with-lapack-lib-dirs must be used together.]),
+[for lapack_lib in $withval; do
+   LAPACKLIBS="$LAPACKLIBS -l$lapack_lib"
+ done;
+ LAPACKNEEDED="#";
+ casc_user_chose_lapack=yes]
+)
+
+AC_ARG_WITH(lapack-lib-dirs,
+  AS_HELP_STRING([  --with-lapack-lib-dirs=DIRS],
+                 [ DIRS is space-separated list of directories
+                   containing the libraries specified by --with-lapack-libs,
+                   e.g <usr/lib /usr/local/lapack/lib>.  The options
+                   --with-lapack-libs and --with-lapack-lib-dirs must be used
+                   together.]),
+[for lapack_lib_dir in $withval; do
+   LAPACKLIBDIRS="-L$lapack_lib_dir $LAPACKLIBDIRS"
+ done;
+ LAPACKNEEDED="#";
+ casc_user_chose_lapack=yes]
+)
+
+AC_ARG_WITH(fei-libs,
+  AS_HELP_STRING([  --with-fei-libs=LIBS],
+                 [ LIBS is space-separated list of FEI library names.
+                   The options --with-fei-libs, --with-fei-inc-dir and
+                   --with-fei-lib-dir must be used together.]),
+[for fei_lib in $withval; do
+   FEILIBS="$FEILIBS -l$fei_lib"
+ done;
+ casc_user_chose_fei=yes],
+ [FEILIBS=""]
+)
+
+AC_ARG_WITH(fei-lib-dir,
+  AS_HELP_STRING([  --with-fei-lib-dir=DIRS],
+                 [ DIRS is space-separated list of directories
+                   containing the libraries specified by --with-fei-libs,
+                   e.g <usr/lib /usr/local/fei/lib>.  The options
+                   --with-fei-libs, --with-fei-inc-dir and --with-fei-lib-dir
+                   must be used together.]),
+[for fei_lib_dir in $withval; do
+   FEILIBDIRS="-L$fei_lib_dir $FEILIBDIRS"
+ done;
+ casc_user_chose_fei=yes],
+ [FEILIBDIRS=""]
+)
+
+AC_ARG_WITH(fei-inc-dir,
+  AS_HELP_STRING([  --with-fei-inc-dir=DIRS],
+                 [ DIRS is space-separated list of directories containing the
+                   include files needed by the FEI specified by --with-fei-libs,
+                   e.g <usr/include /usr/fei/include>.  The options
+                   --with-fei-libs, --with-fei-inc-dir and --with-fei-lib-dir
+                   must be used together.]),
+[for fei_inc in $withval; do
+   FEIINCLUDE="$FEIINCLUDE -I$fei_inc"
+ done;
+ casc_user_chose_fei=yes],
+ [FEIINCLUDE=""]
+)
+
+dnl *********************************************************************
+dnl * If the user has specified any other command line options this 
+dnl * section identifies the options and assigns yes or no values to
+dnl * appropriate macros.  These values will be used to determine 
+dnl * compilers, flags and libraries needed.
+dnl *********************************************************************
+AC_ARG_WITH(COMM_SIMPLE,
+  AS_HELP_STRING([  --with-COMM_SIMPLE],
+                 [ Do not use MPI derived data types.  This option is
+                   automatically chosen for IBM,  may also be selected
+                   for other platforms as well.]),
+[if test "$withval" = "yes"
+ then
+   CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
+ fi]
+)
+
+AC_ARG_WITH(timing,
+  AS_HELP_STRING([  --with-timing],
+                 [ Use HYPRE timing routines]),
+[if test "$withval" = "yes"
+ then
+   AC_DEFINE(HYPRE_TIMING,1,[Hypre timing routines being used.])
+ fi]
+)
+
+AC_ARG_WITH(openmp,
+  AS_HELP_STRING([  --with-openmp],
+                 [ Use OpenMP--this may affect which compiler is chosen.
+                   Supported on IBM and DECS, test on Linux.]),
+[case "${withval}" in
+   yes) casc_using_openmp=yes
+        AC_DEFINE([HYPRE_USING_OPENMP],1,[Enable OpenMP support]) ;;
+   no)  casc_using_openmp=no ;;
+ esac],
+[casc_using_openmp=no]
+)
+
+AC_ARG_WITH(babel,
+  AS_HELP_STRING([  --with-babel], [ Use babel]),
+[case "${withval}" in
+   yes) casc_using_babel=yes ;;
+   no)  casc_using_babel=no ;;
+ esac],
+[casc_using_babel=no]
+)
+
+AC_ARG_WITH(mli,
+  AS_HELP_STRING([  --with-mli], [ Use MLI]),
+[case "${withval}" in
+   yes) casc_using_mli=yes ;;
+   no)  casc_using_mli=no ;;
+ esac],
+[casc_using_mli=no]
+)
+
+
+dnl *********************************************************************
+dnl * Select compilers if not already defined by command line options 
+dnl *********************************************************************
+if test "$casc_user_chose_compilers" != "yes"
+then
+   if test "$casc_using_openmp" = "yes"
+   then
+      AC_CHECK_PROGS(CC, mpguidec guidec icc pgcc xlc cc)
+      AC_CHECK_PROGS(CXX, mpguidec++ guidec++ icc pgCC xlC CC)
+      AC_CHECK_PROGS(F77, mpguidef77 guidef77 ifort pgf77 xlf f77)
+   elif test "$casc_using_mpi" = "no"
+   then
+      AC_CHECK_PROGS(CC, icc pgcc xlc cc gcc kcc)
+      AC_CHECK_PROGS(CXX, icc pgCC xlC cxx CC c++ KCC cl g++ gcc)
+      AC_CHECK_PROGS(F77, ifort pgf77 xlf f77 kf77 fort77 fort g77)
+   else
+      AC_CHECK_PROGS(CC, mpcc mpikcc mpicc hcc icc pgcc xlc cc kcc c89 gcc)
+      AC_CHECK_PROGS(CXX, mpCC mpiKCC mpicxx mpiCC hcp icc pgCC xlC cxx CC c++ KCC g++)
+      AC_CHECK_PROGS(F77, mpxlf mpf77 mpikf77 mpif77 ifort pgf77 xlf f77 kf77 fort77 f90 g77)
+   fi
+fi
+
+
+dnl *********************************************************************
+dnl * Check for programs 
+dnl *********************************************************************
+AC_PROG_RANLIB
+AC_PROG_INSTALL
+AC_PROG_AWK
+AC_PROG_CPP
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_F77
+AC_F77_LIBRARY_LDFLAGS
+AC_F77_WRAPPERS
+AC_EXEEXT
+
+AC_PROG_CXXCPP
+CASC_PROG_FPP
+
+
+dnl *********************************************************************
+dnl * Check for header files, typedefs, structs, compiler characteristics
+dnl * and library functions 
+dnl *********************************************************************
+AC_CHECK_HEADERS([float.h limits.h malloc.h memory.h stddef.h stdlib.h string.h strings.h sys/param.h sys/time.h unistd.h])
+
+AC_C_CONST
+AC_TYPE_SIZE_T
+AC_HEADER_TIME
+AC_C_VOLATILE
+AC_CHECK_TYPES([ptrdiff_t])
+AC_TYPE_SIGNAL
+AC_FUNC_STRTOD
+AC_CHECK_FUNCS([bzero floor gethrtime gettimeofday memset pow sqrt strcspn strdup strspn strtol])
+
+dnl *********************************************************************
+dnl * Find system MPI
+dnl * Find paths for mpicc, mpiCC, mpif77 and related programs
+dnl *********************************************************************
+if test "$casc_user_chose_compilers" = "yes" &&
+   test "$casc_using_mpi" = "yes" &&
+   test "$casc_user_chose_mpi" = "no"
+then
+  AC_ARG_WITH(mpi,
+    AS_HELP_STRING([  --with-mpi],
+                   [ DEFAULT: Compile with MPI.  Selecting --without-mpi
+                     may affect which compiler is chosen.]),
+  [case "$withval" in 
+     yes) casc_using_mpi=yes ;;
+      no) casc_using_mpi=no ;;
+       *) casc_using_mpi=yes ;;
+   esac], [casc_using_mpi=yes])
+fi
+
+if test "$casc_using_mpi" = "no"
+then
+   AC_DEFINE(HYPRE_SEQUENTIAL, 1, [Disable MPI, enable serial codes.])
+else
+   ACX_CHECK_MPI([LIBS="$LIBS $MPILIBS"])
+fi
+
+
+BABELDIR=""
+if test "$casc_using_babel" = "yes"
+then
+ BABELDIR="babel-runtime babel"
+ export CC CXX F77 CPP LD
+ export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS
+ AC_CONFIG_SUBDIRS(babel-runtime)
+fi
+AC_SUBST(BABELDIR)
+
+dnl *********************************************************************
+dnl * For MLI, set the following:
+dnl *********************************************************************
+if test "$casc_using_mli" = "yes"
+then
+   MLI_DIR="HYPRE_TOP_SRC_DIR/mli/matrix"
+   MLILIBS="-lHYPRE_mli_mat"
+   MLILIBDIRS="-L $MLI_DIR"
+   MLIINCLUDE="-I $MLI_DIR"
+   MLILIBDIRS="$MLILIBDIRS -L/usr/openwin/lib"
+   MLILIBS="$MLILIBS -lX11"
+fi
+
+dnl *********************************************************************
+dnl * Find BLAS library if not already set by the user 
+dnl * If user specified --without-blas or a system one cannot be found,
+dnl * default to internal HYPRE routines
+dnl *********************************************************************
+if test "$casc_user_chose_blas" = "no"
+then
+   HYPRE_FIND_BLAS
+   if test "$BLASLIBS" = "no"
+   then
+      AC_MSG_WARN([***************************************])
+      AC_MSG_WARN([Cannot find BLAS library])
+      AC_MSG_WARN([  configuring --without-blas])
+      AC_MSG_WARN([***************************************])
+      BLAS_DIR="HYPRE_TOP_SRC_DIR/lib"
+      BLASLIBDIRS="-L $BLAS_DIR"
+      BLASLIBS="-lHYPRE_utilities"
+      BLASNEEDED=
+      AC_DEFINE(HYPRE_USING_HYPRE_BLAS, 1, [Using internal HYPRE routines.])
+   elif test "$BLASLIBS" = "internal"
+   then
+      BLAS_DIR="HYPRE_TOP_SRC_DIR/lib"
+      BLASLIBDIRS="-L $BLAS_DIR"
+      BLASLIBS="-lHYPRE_utilities"
+      BLASNEEDED=
+      AC_DEFINE(HYPRE_USING_HYPRE_BLAS, 1, [Using internal HYPRE routines.])
+   else
+      BLASNEEDED="#"
+      AC_DEFINE(HAVE_BLAS, 1, [BLAS library is system provided.])
+   fi
+fi
+
+dnl * Find LAPACK library if not already set by the user 
+dnl * If user specified --without-lapack or a system one cannot be found,
+dnl * default to internal HYPRE routines
+if test "$casc_user_chose_lapack" = "no"
+then
+   HYPRE_FIND_LAPACK
+   if test "$LAPACKLIBS" = "no"
+   then
+      AC_MSG_WARN([***************************************])
+      AC_MSG_WARN([Cannot find LAPACK library])
+      AC_MSG_WARN([  configuring --without-lapack])
+      AC_MSG_WARN([***************************************])
+      LAPACK_DIR="HYPRE_TOP_SRC_DIR/lib"
+      LAPACKLIBDIRS="-L $LAPACK_DIR"
+      LAPACKLIBS="-lHYPRE_utilities"
+      LAPACKNEEDED=
+      AC_DEFINE(HYPRE_USING_HYPRE_LAPACK, 1, [Using internal HYPRE routines.])
+   elif test "$LAPACKLIBS" = "internal"
+   then
+      LAPACK_DIR="HYPRE_TOP_SRC_DIR/lib"
+      LAPACKLIBDIRS="-L $LAPACK_DIR"
+      LAPACKLIBS="-lHYPRE_utilities"
+      LAPACKNEEDED=
+      AC_DEFINE(HYPRE_USING_HYPRE_LAPACK, 1, [Using internal HYPRE routines.])
+   else
+      LAPACKNEEDED="#"
+      AC_DEFINE(HAVE_LAPACK, 1, [LAPACK library is system provided.])
+   fi
+fi
+
+dnl *********************************************************************
+dnl * Find libm.a
+dnl *********************************************************************
+AC_CHECK_LIBM
+AC_SUBST(LIBM)
+
+dnl *********************************************************************
+dnl * Find g2c library
+dnl *********************************************************************
+AC_CHECK_LIB(g2c, e_wsfe, LIBS="$LIBS -lg2c")
+
+dnl *********************************************************************
+dnl *Set debug/optimization flags  
+dnl *********************************************************************
+if test "$casc_using_debug" = "yes"
+then
+   ACX_DEBUG_FLAGS
+else
+   ACX_OPTIMIZATION_FLAGS
+fi
+
+dnl *********************************************************************
+dnl * AC_SUBST performs the variable substitutions
+dnl * Some macros call AC_SUBST for some variables, but it does no damage
+dnl * to call it again.
+dnl *********************************************************************
+dnl ********************************************************************
+dnl * The following macros are exported and may be used in Makefile.in's
+dnl ********************************************************************
+
+CC="$PREPEND $CC"
+CXX="$PREPEND $CXX"
+
+AC_SUBST(CC)
+AC_SUBST(CXX)
+
+dnl * General purpose header files and libraries and directories for
+dnl * those libraries.  
+AC_SUBST(INCLUDES)
+AC_SUBST(LIBS)
+AC_SUBST(LIBDIRS)
+
+dnl * MPI-related header files and libraries and directories for
+dnl * those libraries
+AC_SUBST(MPIINCLUDE)
+AC_SUBST(MPILIBS)
+AC_SUBST(MPILIBDIRS)
+AC_SUBST(MPIFLAGS)
+
+dnl * macro definitions that should be included on compile line
+AC_SUBST(TIMERDEFS)
+
+dnl *Libraries and their directories that must be used at compile time 
+AC_SUBST(LDLIBS)
+AC_SUBST(LDLIBDIRS)
+
+dnl * contains compiler flags such as optimization or debugging flags
+AC_SUBST(CFLAGS)
+AC_SUBST(CXXFLAGS)
+AC_SUBST(F77FLAGS)
+AC_SUBST(LDFLAGS)
+
+dnl *needed when compiling with another command prior to the compiler command
+dnl * for example: purify cc ....
+AC_SUBST(PREPEND)
+
+dnl *BABEL-related files, libraries and directories
+AC_SUBST(BABELDIR)
+
+dnl * FEI-related files, libraries and directories
+AC_SUBST(FEILIBS)
+AC_SUBST(FEILIBDIRS)
+AC_SUBST(FEIINCLUDE)
+
+dnl *MLI-related header files, libraries and directories for those
+dnl * libraries
+AC_SUBST(MLI_DIR)
+AC_SUBST(MLILIBS)
+AC_SUBST(MLILIBDIRS)
+AC_SUBST(MLIINCLUDE)
+
+dnl * BLAS & LAPACK related information
+AC_SUBST(BLASLIBDIRS)
+AC_SUBST(BLASLIBS)
+AC_SUBST(BLASNEEDED)
+AC_SUBST(LAPACKLIBDIRS)
+AC_SUBST(LAPACKLIBS)
+AC_SUBST(LAPACKNEEDED)
+
+dnl * HYPRE source root directory
+AC_SUBST(HYPRE_TOP_SRC_DIR)
+
+dnl * ranlib substitution
+AC_SUBST(RANLIB)
+dnl *********************************************************************
+dnl * Define the files to be configured and made 
+dnl *********************************************************************
+
+if test -d docs; then
+   AC_DEFINE(DOCSDIR)
+   AC_CONFIG_FILES([docs/Makefile])
+   AC_CONFIG_FILES([
+                    docs/bref_manual.dxx
+                    docs/ref_manual.dxx])
+fi
+
+if test -d babel || test "$casc_using_babel" = "yes"; then
+   AC_CONFIG_FILES([
+                    babel/Makefile
+                    babel/bHYPRE/Makefile
+                    babel/bHYPREClient-C/Makefile
+                    babel/bHYPREClient-F/Makefile])
+fi
+
+if test -d tools; then
+   AC_DEFINE(TOOLSDIR)
+   AC_CONFIG_FILES([tools/Makefile])
+fi
+
+AC_CONFIG_FILES([
+ Makefile
+ FEI_mv/Makefile
+ FEI_mv/SuperLU/Makefile
+ FEI_mv/fei-base/Makefile
+ FEI_mv/fei-hypre/Makefile
+ FEI_mv/femli/Makefile
+ FEI_mv/femli/amgs/Makefile
+ FEI_mv/femli/base/Makefile
+ FEI_mv/femli/blas/Makefile
+ FEI_mv/femli/cintface/Makefile
+ FEI_mv/femli/fedata/Makefile
+ FEI_mv/femli/lib/Makefile
+ FEI_mv/femli/mapper/Makefile
+ FEI_mv/femli/matrix/Makefile
+ FEI_mv/femli/solver/Makefile
+ FEI_mv/femli/test/Makefile
+ FEI_mv/femli/util/Makefile
+ FEI_mv/femli/vector/Makefile
+ blas/Makefile
+ config/Makefile.config
+ distributed_ls/Makefile
+ distributed_ls/Euclid/Makefile
+ distributed_ls/pilut/Makefile
+ distributed_ls/ParaSails/Makefile
+ distributed_matrix/Makefile
+ eigensolvers/Makefile
+ eigensolvers/krylov/Makefile
+ eigensolvers/lib/Makefile
+ eigensolvers/multivector/Makefile
+ eigensolvers/parcsr_ls/Makefile
+ eigensolvers/sstruct_ls/Makefile
+ eigensolvers/struct_ls/Makefile
+ eigensolvers/utilities/Makefile
+ IJ_mv/Makefile
+ krylov/Makefile
+ lapack/Makefile
+ lib/Makefile
+ matrix_matrix/Makefile
+ parcsr_ls/Makefile
+ parcsr_mv/Makefile
+ seq_ls/Makefile
+ seq_ls/pamg/Makefile
+ seq_mv/Makefile
+ sstruct_ls/Makefile
+ sstruct_mv/Makefile
+ struct_ls/Makefile
+ struct_mv/Makefile
+ test/Makefile
+ utilities/Makefile])
+
+AC_OUTPUT
