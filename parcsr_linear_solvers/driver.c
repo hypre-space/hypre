@@ -120,6 +120,12 @@ main( int   argc,
          build_matrix_type      = 4;
          build_matrix_arg_index = arg_index;
       }
+      else if ( strcmp(argv[arg_index], "-difconv") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = 5;
+         build_matrix_arg_index = arg_index;
+      }
       else if ( strcmp(argv[arg_index], "-solver") == 0 )
       {
          arg_index++;
@@ -338,9 +344,11 @@ main( int   argc,
       printf("  -laplacian [<options>] : build laplacian matrix\n");
       printf("  -9pt [<opts>] : build 9pt 2D laplacian matrix\n");
       printf("  -27pt [<opts>] : build 27pt 3D laplacian matrix\n");
+      printf("  -difconv [<opts>]      : build convection-diffusion matrix\n");
       printf("    -n <nx> <ny> <nz>    : problem size per processor\n");
       printf("    -P <Px> <Py> <Pz>    : processor topology\n");
       printf("    -c <cx> <cy> <cz>    : diffusion coefficients\n");
+      printf("    -a <ax> <ay> <az>    : convection coefficients\n");
       printf("\n");
       printf("   -rhsfromfile          : from distributed file (NOT YET)\n");
       printf("   -rhsfromonefile       : from vector file \n");
@@ -418,7 +426,10 @@ main( int   argc,
    {
       BuildParLaplacian27pt(argc, argv, build_matrix_arg_index, &A);
    }
-
+   else if ( build_matrix_type == 5 )
+   {
+      BuildParDifConv(argc, argv, build_matrix_arg_index, &A);
+   }
    /*-----------------------------------------------------------
     * Set up the RHS and initial guess
     *-----------------------------------------------------------*/
@@ -1011,6 +1022,174 @@ BuildParLaplacian( int                  argc,
    }
 
    A = hypre_GenerateLaplacian(MPI_COMM_WORLD,
+                               nx, ny, nz, P, Q, R, p, q, r, values);
+
+   hypre_TFree(values);
+
+   *A_ptr = A;
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
+ * Build standard 7-point convection-diffusion operator 
+ * Parameters given in command line.
+ * Operator:
+ *
+ *  -cx Dxx - cy Dyy - cz Dzz + ax Dx + ay Dy + az Dz = f
+ *
+ *----------------------------------------------------------------------*/
+
+int
+BuildParDifConv( int                  argc,
+                   char                *argv[],
+                   int                  arg_index,
+                   hypre_ParCSRMatrix **A_ptr     )
+{
+   int                 nx, ny, nz;
+   int                 P, Q, R;
+   double              cx, cy, cz;
+   double              ax, ay, az;
+   double              hx,hy,hz;
+
+   hypre_ParCSRMatrix *A;
+
+   int                 num_procs, myid;
+   int                 p, q, r;
+   double             *values;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+ 
+   nx = 10;
+   ny = 10;
+   nz = 10;
+
+   hx = 1.0/(nx+1);
+   hy = 1.0/(ny+1);
+   hz = 1.0/(nz+1);
+
+   P  = 1;
+   Q  = num_procs;
+   R  = 1;
+
+   cx = 1.0;
+   cy = 1.0;
+   cz = 1.0;
+
+   ax = 1.0;
+   ay = 1.0;
+   az = 1.0;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+   arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+         nz = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+         R  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-c") == 0 )
+      {
+         arg_index++;
+         cx = atof(argv[arg_index++]);
+         cy = atof(argv[arg_index++]);
+         cz = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-a") == 0 )
+      {
+         arg_index++;
+         ax = atof(argv[arg_index++]);
+         ay = atof(argv[arg_index++]);
+         az = atof(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Check a few things
+    *-----------------------------------------------------------*/
+
+   if ((P*Q*R) != num_procs)
+   {
+      printf("Error: Invalid number of processors or processor topology \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("  Convection-Diffusion: \n");
+      printf("    -cx Dxx - cy Dyy - cz Dzz + ax Dx + ay Dy + az Dz = f\n");  
+      printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
+      printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
+      printf("    (ax, ay, az) = (%f, %f, %f)\n", ax, ay, az);
+   }
+
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute p,q,r from P,Q,R and myid */
+   p = myid % P;
+   q = (( myid - p)/P) % Q;
+   r = ( myid - p - P*q)/( P*Q );
+
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+ 
+   values = hypre_CTAlloc(double, 7);
+
+   values[1] = -cx/(hx*hx);
+   values[2] = -cy/(hy*hy);
+   values[3] = -cz/(hz*hz);
+   values[4] = -cx/(hx*hx) + ax/hx;
+   values[5] = -cy/(hy*hy) + ay/hy;
+   values[6] = -cz/(hz*hz) + az/hz;
+
+   values[0] = 0.0;
+   if (nx > 1)
+   {
+      values[0] += 2.0*cx/(hx*hx) - 1.0*ax/hx;
+   }
+   if (ny > 1)
+   {
+      values[0] += 2.0*cy/(hy*hy) - 1.0*ay/hy;
+   }
+   if (nz > 1)
+   {
+      values[0] += 2.0*cz/(hz*hz) - 1.0*az/hz;
+   }
+
+   A = hypre_GenerateDifConv(MPI_COMM_WORLD,
                                nx, ny, nz, P, Q, R, p, q, r, values);
 
    hypre_TFree(values);
