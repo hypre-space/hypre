@@ -1540,6 +1540,8 @@ static void Rescale(Matrix *M, StoredRows *stored_rows, int num_ind)
         for (j=0; j<len; j++)
             val[j] *= accum;
     }
+
+    free(w);
 }
 
 /******************************************************************************
