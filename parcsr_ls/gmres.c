@@ -227,8 +227,16 @@ hypre_GMRESSolve(void  *gmres_vdata,
    }
    iter = 0;
 
-/* convergence criterion |r_i| <= accuracy*|r_0| */
-   epsilon = accuracy * r_norm;
+   if (b_norm > 0.0)
+   {
+/* convergence criterion |r_i| <= accuracy*|b| if |b| > 0 */
+     epsilon = accuracy * b_norm;
+   }
+   else
+   {
+/* convergence criterion |r_i| <= accuracy*|r0| if |b| = 0 */
+     epsilon = accuracy * r_norm;
+   };
 
    while (iter < max_iter)
    {
@@ -344,9 +352,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
              printf("% 5d    %e    %f   %e\n", j, norms[j],norms[j]/norms[j-1],
  	             norms[j]/b_norm);
           }
-          printf("\n\n"); };
+          printf("\n\n"); }
 
-      if (b_norm == 0.0)
+      else
          {printf("=============================================\n\n");
           printf("Iters     resid.norm     conv.rate\n");
           printf("-----    ------------    ----------\n");
