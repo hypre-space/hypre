@@ -39,7 +39,6 @@ hypre_CSRMatrixCreate( int num_rows,
 
    return matrix;
 }
-
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixDestroy
  *--------------------------------------------------------------------------*/
@@ -75,11 +74,11 @@ hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
 
    int  ierr=0;
 
-   if ( ! hypre_CSRMatrixData(matrix) )
+   if ( ! hypre_CSRMatrixData(matrix) && num_nonzeros )
       hypre_CSRMatrixData(matrix) = hypre_CTAlloc(double, num_nonzeros);
    if ( ! hypre_CSRMatrixI(matrix) )
       hypre_CSRMatrixI(matrix)    = hypre_CTAlloc(int, num_rows + 1);
-   if ( ! hypre_CSRMatrixJ(matrix) )
+   if ( ! hypre_CSRMatrixJ(matrix) && num_nonzeros )
       hypre_CSRMatrixJ(matrix)    = hypre_CTAlloc(int, num_nonzeros);
 
    return ierr;
