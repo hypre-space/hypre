@@ -84,16 +84,18 @@ hypre_LimitedFreeDistributedMatrix( hypre_DistributedMatrix *matrix )
 int 
 hypre_InitializeDistributedMatrix( hypre_DistributedMatrix *matrix )
 {
-   int ret;
+   int ierr = 0;
 
    if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PETSC )
       return( 0 );
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-      ret = hypre_InitializeDistributedMatrixISIS(matrix);
+      ierr = hypre_InitializeDistributedMatrixISIS(matrix);
    else if ( hypre_DistributedMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-      ret = hypre_InitializeDistributedMatrixParcsr(matrix);
+      ierr = hypre_InitializeDistributedMatrixParcsr(matrix);
    else
-      return(-1);
+      ierr = -1;
+
+   return( ierr );
 }
 
 /*--------------------------------------------------------------------------
