@@ -132,6 +132,8 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   numGlobalRows_(0),
                   localStartRow_(0),
                   localEndRow_(-1),
+                  localStartCol_(-1),
+                  localEndCol_(-1),
                   rowLengths_(NULL),
                   colIndices_(NULL),
                   colValues_(NULL),
@@ -178,9 +180,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   HYPreconReuse_(0), 
                   HYPreconSetup_(0),
                   lookup_(NULL),
-                  haveLookup_(0),
-                  localStartCol_(-1),
-                  localEndCol_(-1)
+                  haveLookup_(0)
 {
    //-------------------------------------------------------------------
    // find my processor ID 
@@ -4968,6 +4968,7 @@ void *HYPRE_LinSysCore::HYPRE_LSC_SetColMap(int start, int end)
 {
    localStartCol_ = start;
    localEndCol_ = end;
+   return (void *) NULL;
 }
 
 //***************************************************************************
