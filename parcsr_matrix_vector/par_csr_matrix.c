@@ -276,9 +276,6 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
    int *col_starts;
  
    int i, j, ind;
-   int no_row_starts = 0;
-   int no_col_starts = 0;
-
 
    row_starts = *row_starts_ptr;
    col_starts = *col_starts_ptr;
@@ -303,7 +300,6 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
 
    if (!row_starts)
    {
-	no_row_starts = 1;
 	row_starts = hypre_CTAlloc(int, num_procs+1);
    	for (i=0; i < num_procs; i++)
    	{
@@ -373,7 +369,6 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
 
    if (!col_starts)
    {
-	no_col_starts = 1;
 	col_starts = hypre_CTAlloc(int,num_procs+1);
 	for (i=0; i < num_procs; i++)
    	{
@@ -401,9 +396,7 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
    hypre_DestroyCSRMatrix(local_A);
    hypre_TFree(local_num_rows);
    hypre_TFree(csr_matrix_datatypes);
-/*   if (no_row_starts) hypre_TFree(row_starts);
-   if (no_col_starts) hypre_TFree(col_starts);
-*/
+
    *row_starts_ptr = row_starts;
    *col_starts_ptr = col_starts;
 
@@ -651,13 +644,21 @@ hypre_ParCSRMatrixToCSRMatrixAll(MPI_Comm comm, hypre_ParCSRMatrix *par_matrix,
    MPI_Comm_size(comm, &num_procs);
    MPI_Comm_rank(comm, &my_id);
 
+   local_num_rows = row_starts[my_id+1] - row_starts[my_id];
+
+/* if my_id contains no data, return NULL */
+ 
+   if (!local_num_rows)
+        return NULL;
+ 
    local_matrix = hypre_MergeDiagAndOffd(par_matrix);
    local_matrix_i = hypre_CSRMatrixI(local_matrix);
    local_matrix_j = hypre_CSRMatrixJ(local_matrix);
    local_matrix_data = hypre_CSRMatrixData(local_matrix);
-   local_num_rows = hypre_CSRMatrixNumRows(local_matrix);
 
    matrix_i = hypre_CTAlloc(int, num_rows+1);
+
+/* determine procs that have vector data and store their ids in used_procs */
 
    num_types = 0;
    for (i=0; i < num_procs; i++)
@@ -674,6 +675,8 @@ hypre_ParCSRMatrixToCSRMatrixAll(MPI_Comm comm, hypre_ParCSRMatrix *par_matrix,
    requests = hypre_CTAlloc(MPI_Request, num_requests);
    status = hypre_CTAlloc(MPI_Status, num_requests);
    data_type = hypre_CTAlloc(MPI_Datatype, num_types+1);
+
+/* exchange contents of local_matrix_i */
 
    j = 0;
    for (i = 0; i < num_types; i++)
@@ -696,7 +699,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(MPI_Comm comm, hypre_ParCSRMatrix *par_matrix,
 
    MPI_Waitall(num_requests, requests, status);
 
-/* generate matrix_i */
+/* generate matrix_i from received data */
 
    offset = matrix_i[row_starts[1]];
    for (i=1; i < num_procs; i++)
@@ -713,6 +716,9 @@ hypre_ParCSRMatrixToCSRMatrixAll(MPI_Comm comm, hypre_ParCSRMatrix *par_matrix,
    hypre_InitializeCSRMatrix(matrix);
    matrix_j = hypre_CSRMatrixJ(matrix);
    matrix_data = hypre_CSRMatrixData(matrix);
+
+/* generate datatypes for further data exchange and exchange remaining
+   data, i.e. column info and actual data */
 
    for (i = 0; i < num_types; i++)
    {
