@@ -1016,6 +1016,7 @@ main( int   argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                                    pcg_precond);
+	 hypre_TFree(smooth_option);
       }
       else if (solver_id == 8)
       {
@@ -1029,6 +1030,7 @@ main( int   argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSolve,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSetup,
                                    pcg_precond);
+	 hypre_TFree(smooth_option);
       }
       else if (solver_id == 43)
       {
@@ -1048,6 +1050,7 @@ main( int   argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSolve,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSetup,
                                    pcg_precond);
+	 hypre_TFree(smooth_option);
       }
  
       HYPRE_PCGGetPrecond(pcg_solver, &pcg_precond_gotten);
@@ -1167,6 +1170,7 @@ main( int   argc,
                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                                pcg_precond);
+	 hypre_TFree(smooth_option);
       }
       else if (solver_id == 7)
       {
@@ -1182,6 +1186,7 @@ main( int   argc,
                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSolve,
                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSetup,
                                pcg_precond);
+	 hypre_TFree(smooth_option);
 
          if (drop_tol >= 0 )
             HYPRE_ParCSRPilutSetDropTolerance( pcg_precond,
@@ -1204,6 +1209,7 @@ main( int   argc,
                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSolve,
                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSetup,
                                pcg_precond);
+	 hypre_TFree(smooth_option);
       }
       else if (solver_id == 44)
       {
@@ -1223,6 +1229,7 @@ main( int   argc,
                                 (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSolve,
                                 (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSetup,
                                 pcg_precond);
+	 hypre_TFree(smooth_option);
       }
  
       HYPRE_GMRESGetPrecond(pcg_solver, &pcg_precond_gotten);
@@ -1344,6 +1351,7 @@ main( int   argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                                   pcg_precond);
+	 hypre_TFree(smooth_option);
       }
       else if (solver_id == 11)
       {
@@ -1359,6 +1367,7 @@ main( int   argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSolve,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSetup,
                                   pcg_precond);
+	 hypre_TFree(smooth_option);
 
          if (drop_tol >= 0 )
             HYPRE_ParCSRPilutSetDropTolerance( pcg_precond,
@@ -1386,6 +1395,7 @@ main( int   argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSolve,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSetup,
                                   pcg_precond);
+	 hypre_TFree(smooth_option);
       }
  
       HYPRE_BiCGSTABSetup(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
@@ -1494,6 +1504,7 @@ main( int   argc,
                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                               pcg_precond);
+	 hypre_TFree(smooth_option);
       }
  
       HYPRE_CGNRGetPrecond(pcg_solver, &pcg_precond_gotten);
