@@ -141,15 +141,12 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    hypre_ParVector    *ones_vector;
    hypre_ParVector    *measure_vector;
    double             *measure_array;
-   double             *measure_tmp;
    int                *graph_array;
    int                 graph_size;
    int                 global_graph_size;
-   int                 new_graph_size;
-   int                 shift;
                       
    double              diag, row_scale;
-   int                 i, j, k, ic, jc, kc, jj, kk, jA, jS, kS, jjS, ig;
+   int                 i, j, k, ic, jc, kc, jj, kk, jA, jS, kS, ig;
    int		       index, start, num_procs;
                       
    int                 ierr = 0;
@@ -351,7 +348,6 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    hypre_SetParVectorConstantValues(ones_vector,-1.0);
 
    measure_array = hypre_CTAlloc(double, num_variables+num_cols_offd);
-   measure_tmp = hypre_CTAlloc(double, num_cols_offd);
    measure_vector = hypre_CreateParVector(comm,global_num_vars,row_starts);
    hypre_SetParVectorPartitioningOwner(measure_vector,0);
    hypre_VectorData(hypre_ParVectorLocalVector(measure_vector))=measure_array;
@@ -375,7 +371,9 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 
    /* initialize measure array and graph array */
 
-   i = 0;
+   for (ig = 0; ig < num_variables+num_cols_offd; ig++)
+      graph_array[ig] = ig;
+/*   i = 0;
    if (num_procs > 1)
    {
       while (i < num_cols_offd && col_map_offd[i] < col_1)
@@ -390,7 +388,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    
    for (ig = i; ig < num_cols_offd; ig++)
       graph_array[ig+num_variables] = ig+num_variables;
- 
+*/ 
 
    /*---------------------------------------------------
     * Initialize the C/F marker array
@@ -399,6 +397,8 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
     *---------------------------------------------------*/
 
    CF_marker = hypre_CTAlloc(int, num_variables+num_cols_offd);
+   for (i=0; i < num_variables+num_cols_offd; i++)
+	CF_marker[i] = 0;
 
    /*---------------------------------------------------
     * Loop until all points are either fine or coarse.
@@ -408,6 +408,88 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    graph_size = num_variables+num_cols_offd;
    while (1)
    {
+      /*------------------------------------------------
+       * Exchange boundary data, i.i. get measures and S_ext
+       *------------------------------------------------*/
+
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+        start = hypre_CommPkgSendMapStart(comm_pkg, i);
+        for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
+                buf_data[index++] 
+                 = measure_array[hypre_CommPkgSendMapElmt(comm_pkg,j)];
+      }
+ 
+      comm_handle = hypre_InitializeCommunication( 1, comm_pkg, buf_data, 
+        &measure_array[num_variables]);
+ 
+      hypre_FinalizeCommunication(comm_handle);   
+ 
+      if (num_procs > 1)
+      {
+         S_ext      = hypre_ExtractBExt(S,A);
+         S_ext_i    = hypre_CSRMatrixI(S_ext);
+         S_ext_j    = hypre_CSRMatrixJ(S_ext);
+         S_ext_data = hypre_CSRMatrixData(S_ext);
+      }
+   
+      /*------------------------------------------------
+       * Set F-pts and update subgraph
+       *------------------------------------------------*/
+ 
+      for (ig = 0; ig < graph_size; ig++)
+      {
+         i = graph_array[ig];
+ 
+         if ( (CF_marker[i] != C_PT) && (measure_array[i] < 1) )
+         {
+            /* set to be an F-pt */
+            CF_marker[i] = F_PT;
+ 
+	    /* make sure all dependencies have been accounted for */
+            if (i < num_variables)
+	    {
+               for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++)
+               {
+                  if (S_diag_data[jS] < 0)
+                  {
+                     CF_marker[i] = 0;
+                  }
+               }
+               for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++)
+               {
+                  if (S_offd_data[jS] < 0)
+                  {
+                     CF_marker[i] = 0;
+                  }
+               }
+            }
+	    else
+	    {
+               ic = i - num_variables;
+               for (jS = S_ext_i[ic]; jS < S_ext_i[ic+1]; jS++)
+               {
+                  if (S_ext_data[jS] < 0)
+                  {
+                     CF_marker[i] = 0;
+                  }
+               }
+            }
+         }
+ 
+         if (CF_marker[i])
+         {
+            measure_array[i] = 0;
+ 
+            /* take point out of the subgraph */
+            graph_size--;
+            graph_array[ig] = graph_array[graph_size];
+            graph_array[graph_size] = i;
+            ig--;
+         }
+      }
+ 
       /*------------------------------------------------
        * Debugging:
        *
@@ -453,87 +535,6 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
          break;
 
       /*------------------------------------------------
-       * Exchange boundary data, i.i. get measures and S_ext
-       *------------------------------------------------*/
-
-      index = 0;
-      for (i = 0; i < num_sends; i++)
-      {
-        start = hypre_CommPkgSendMapStart(comm_pkg, i);
-        for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
-                buf_data[index++] 
-                 = measure_array[hypre_CommPkgSendMapElmt(comm_pkg,j)];
-      }
- 
-      comm_handle = hypre_InitializeCommunication( 1, comm_pkg, buf_data, 
-        measure_tmp);
- 
-      hypre_FinalizeCommunication(comm_handle);   
- 
-      /* check boundary for missed fine points */
-      for (i=0; i < num_cols_offd; i++)
-      {
-         if (measure_array[num_variables+i] != measure_tmp[i] 
-		&& measure_tmp[i] == 0)
-         {
-            for (jS = S_ext_i[i]; jS < S_ext_i[i+1]; jS++)
-            {
-               if (S_ext_data[jS] < 0)
-               {
-                  j = S_ext_j[jS];
-              
-                  /* "remove" edge from S */
-                  S_ext_data[jS] = -S_ext_data[jS];
-
-	          if (j >= col_1 && j < col_n)
-	  	  {
-                     jc = j - col_1;
-		     /* decrement measures of neighbors */
-                     measure_array[jc]--;
-		     if (measure_array[jc] < 1)
-                     {
-			CF_marker[jc] = F_PT;
-               		for (jjS = S_diag_i[jc]; jjS < S_diag_i[jc+1]; jjS++)
-               		{
-                  	   if (S_diag_data[jjS] < 0)
-                  	   {
-                     	      jj = S_diag_j[jjS];
-               
-                     	      /* "remove" edge from S */
-                     	      S_diag_data[jjS] = -S_diag_data[jjS];
-               
-                              /* decrement measures of unmarked neighbors */
-                              if (!CF_marker[jj])
-                     	      {
-                        	 measure_array[jj]--;
-                     	      }
-                     	   }
-               		}
-               		for (jjS = S_offd_i[jc]; jjS < S_offd_i[jc+1]; jjS++)
-               		{
-                  	   if (S_offd_data[jjS] < 0)
-                  	   {
-                              /* "remove" edge from S */
-                     	      S_offd_data[jjS] = -S_offd_data[jjS];
-                  	   }
-                        }
-                     }
-                  }
-               }
-	    }
-	 }
- 	 measure_array[i+num_variables] = measure_tmp[i];
-      }
-
-      if (num_procs > 1)
-      {
-         S_ext      = hypre_ExtractBExt(S,A);
-         S_ext_i    = hypre_CSRMatrixI(S_ext);
-         S_ext_j    = hypre_CSRMatrixJ(S_ext);
-         S_ext_data = hypre_CSRMatrixData(S_ext);
-      }
-   
-      /*------------------------------------------------
        * Pick an independent set of points with
        * maximal measure.
        *------------------------------------------------*/
@@ -560,31 +561,96 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
       hypre_FinalizeCommunication(comm_handle);   
  
       /*------------------------------------------------
-       * Apply heuristics.
+       * Set C_pts and apply heuristics.
        *------------------------------------------------*/
 
-      new_graph_size = graph_size;
       for (ig = 0; ig < graph_size; ig++)
       {
          i = graph_array[ig];
 
          /*---------------------------------------------
-          * Set to be a C-pt
+          * Heuristic: C-pts don't interpolate from
+          * neighbors that influence them.
           *---------------------------------------------*/
 
          if (CF_marker[i] > 0)
-         {
+         {  
+            /* set to be a C-pt */
             CF_marker[i] = C_PT;
-            if (i < num_variables) coarse_size++;
-         }
+            if (i < num_variables) 
+	    {
+	       coarse_size++;
 
-         /*---------------------------------------------
-          * Set to be an F-pt
-          *---------------------------------------------*/
+               for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++)
+               {
+                  if (S_diag_data[jS] < 0)
+                  {
+                     j = S_diag_j[jS];
+               
+                     /* "remove" edge from S */
+                     S_diag_data[jS] = -S_diag_data[jS];
+               
+                     /* decrement measures of unmarked neighbors */
+                     if (!CF_marker[j])
+                     {
+                        measure_array[j]--;
+                     }
+                  }
+               }
+               for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++)
+               {
+                  if (S_offd_data[jS] < 0)
+                  {
+                     j = S_offd_j[jS] + num_variables;
+               
+                     /* "remove" edge from S */
+                     S_offd_data[jS] = -S_offd_data[jS];
+               
+                     /* decrement measures of unmarked neighbors */
+                     if (!CF_marker[j])
+                     {
+                        measure_array[j]--;
+                     }
+                  }
+               }
+            }
+	    else
+	    {
+	       ic = i - num_variables;
 
-         else if (measure_array[i] < 1)
-         {
-            CF_marker[i] = F_PT;
+               for (jS = S_ext_i[ic]; jS < S_ext_i[ic+1]; jS++)
+               {
+                  if (S_ext_data[jS] < 0)
+                  {
+                     j = S_ext_j[jS];
+		     if (j >= col_1 && j < col_n)
+		     {
+			jj = j-col_1;
+		     }
+		     else
+		     {
+			jj = -1;
+			for (jc = 0; jc < num_cols_offd; jc++)
+			{
+			   if (col_map_offd[jc] == j) 
+			   {
+			      jj = jc+num_variables;
+			      break;
+			   }
+			}
+		     }
+               
+                     /* "remove" edge from S */
+                     S_ext_data[jS] = -S_ext_data[jS];
+               
+                     /* decrement measures of unmarked neighbors */
+                     if (jj != -1 && !CF_marker[jj])
+                     {
+                        measure_array[jj]--;
+                     }
+                  }
+               }
+            }
          }
 
          /*---------------------------------------------
@@ -791,248 +857,148 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
                   /* check for common C-pt */
 		  if (j >= col_1 && j < col_n)
 		  {
-		    jc = j - col_1;
-		    break_var = 1;
-                    for (kS = S_diag_i[jc]; kS < S_diag_i[jc+1]; kS++)
-                    {
-                      k = S_diag_j[kS];
+		     jc = j - col_1;
+		     break_var = 1;
+                     for (kS = S_diag_i[jc]; kS < S_diag_i[jc+1]; kS++)
+                     {
+                        k = S_diag_j[kS];
 
-                      /* IMPORTANT: consider all dependencies */
-                      if (S_diag_data[kS])
-                      {
-                        if (CF_marker[k] == COMMON_C_PT)
+                        /* IMPORTANT: consider all dependencies */
+                        if (S_diag_data[kS])
                         {
-                           /* "remove" edge from S and update measure*/
-                           S_ext_data[jS] = -S_ext_data[jS];
-                           measure_array[jc]--;
-                           break_var = 0;
-                           break;
+                           if (CF_marker[k] == COMMON_C_PT)
+                           {
+                              /* "remove" edge from S and update measure*/
+                              S_ext_data[jS] = -S_ext_data[jS];
+                              measure_array[jc]--;
+                              break_var = 0;
+                              break;
+                           }
                         }
-                      }
-                    }
-		    if (break_var)
-                    {
-                       for (kS = S_offd_i[jc]; kS < S_offd_i[jc+1]; kS++)
-                       {
-                          k = S_offd_j[kS];
+                     }
+		     if (break_var)
+                     {
+                        for (kS = S_offd_i[jc]; kS < S_offd_i[jc+1]; kS++)
+                        {
+                           k = S_offd_j[kS];
 
-                          /* IMPORTANT: consider all dependencies */
-                          if (S_offd_data[kS])
-                          {
-                             if (CF_marker[k+num_variables] == COMMON_C_PT)
-                             {
-                                /* "remove" edge from S and update measure*/
-                                S_ext_data[jS] = -S_ext_data[jS];
-                                measure_array[jc]--;
-                                break;
-                             }
-                          }
-                       }
-                    }
+                           /* IMPORTANT: consider all dependencies */
+                           if (S_offd_data[kS])
+                           {
+                              if (CF_marker[k+num_variables] == COMMON_C_PT)
+                              {
+                                 /* "remove" edge from S and update measure*/
+                                 S_ext_data[jS] = -S_ext_data[jS];
+                                 measure_array[jc]--;
+                                 break;
+                              }
+                           }
+                        }
+                     }
                   }
 		  else
 		  {
-		    jc = -1;
-		    for (jj = 0; jj < num_cols_offd; jj++)
-		    {
-		      if (col_map_offd[jj] == j)
-		      {
-			jc = jj;
-			break;
-		      }
-		    }
-		    if (jc > -1 )
-                    {
-		      for (kS = S_ext_i[jc]; kS < S_ext_i[jc+1]; kS++)
-                      {
-                      	k = S_ext_j[kS];
-
-                      	/* IMPORTANT: consider all dependencies */
-                      	if (k >= col_1 && k < col_n && S_ext_data[kS])
-                      	{
-                          if (CF_marker[k-col_1] == COMMON_C_PT)
-                          {
-                             /* "remove" edge from S and update measure*/
-                             S_ext_data[jS] = -S_ext_data[jS];
-                             measure_array[jc+num_variables]--;
-                             break;
-                          }
-                        }
-			else
-			{
-			  kc = -1;
-			  for (kk = 0; kk < num_cols_offd; kk++)
-			  {
-			    if (col_map_offd[kk] == k)
-			    {
-			      kc = kk;
-			      break;
-			    }
-			  }
-			  if (kc > -1 &&
-				CF_marker[kc+num_variables] == COMMON_C_PT)
-			  {
-                              /* "remove" edge from S and update measure*/
-                              S_ext_data[jS] = -S_ext_data[jS];
-                              measure_array[jc+num_variables]--;
-			      break;
-			  }
-                        }
-                      }
-                    }
-                  }
-               }
-             }
- 	  }
-
-          /* reset CF_marker */
-          if (i < num_variables)
-	  {
-	     for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++)
-	     {
-                j = S_diag_j[jS];
-
-                if (CF_marker[j] == COMMON_C_PT)
-                {
-                   CF_marker[j] = C_PT;
-                }
-             }
-             for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++)
-             {
-                j = S_offd_j[jS]+num_variables;
-
-                if (CF_marker[j] == COMMON_C_PT)
-                {
-                   CF_marker[j] = C_PT;
-                }
-             }
-          }
-	  else
-	  {
-	     ic = i - num_variables;
-	     for (jS = S_ext_i[ic]; jS < S_ext_i[ic+1]; jS++)
-	     {
-                j = S_ext_j[jS];
-		if (j >= col_1 && j < col_n &&
-			CF_marker[j - col_1] == COMMON_C_PT)
-                {
-                   CF_marker[j - col_1] = C_PT;
-                }
-		else
-		{
-		   for (jj = 0; jj < num_cols_offd; jj++)
-		   {
-		      if (col_map_offd[jj] == j && 
-			CF_marker[jj + num_variables] == COMMON_C_PT)
-                      {
-                   	 CF_marker[jj + num_variables] = C_PT;
-			 break;
-                      }
-                   }
-                }
-             }
-          }
-
-         /*---------------------------------------------
-          * Heuristic: C-pts don't interpolate from
-          * neighbors that influence them, and F-pts
-          * don't interpolate to neighbors they influence.
-          *---------------------------------------------*/
-
-         if ( (CF_marker[i] == C_PT) || (CF_marker[i] == F_PT) )
-         {
-            measure_array[i] = 0;
-
-	    if (i < num_variables)
-	    {  
-               for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++)
-               {
-                  if (S_diag_data[jS] < 0)
-                  {
-                     j = S_diag_j[jS];
-               
-                     /* "remove" edge from S */
-                     S_diag_data[jS] = -S_diag_data[jS];
-               
-                     /* decrement measures of unmarked neighbors */
-                     if (!CF_marker[j])
-                     {
-                        measure_array[j]--;
-                     }
-                  }
-               }
-               for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++)
-               {
-                  if (S_offd_data[jS] < 0)
-                  {
-                     j = S_offd_j[jS]+num_variables;
-               
-                     /* "remove" edge from S */
-                     S_offd_data[jS] = -S_offd_data[jS];
-               
-                     /* decrement measures of unmarked neighbors */
-                     if (!CF_marker[j])
-                     {
-                        measure_array[j]--;
-                     }
-                  }
-               }
-    	    }
-	    else
-	    {
-	       ic = i - num_variables;
-               for (jS = S_ext_i[ic]; jS < S_ext_i[ic+1]; jS++)
-               {
-                  if (S_ext_data[jS] < 0)
-                  {
-                     j = S_ext_j[jS];
-               
-                     /* "remove" edge from S */
-                     S_ext_data[jS] = -S_ext_data[jS];
-
-		     if (j >= col_1 && j < col_n)
+		     jc = -1;
+		     for (jj = 0; jj < num_cols_offd; jj++)
 		     {
-			jc = j - col_1;
-			               
-                        /* decrement measures of unmarked neighbors */
-                        if (!CF_marker[jc])
+		        if (col_map_offd[jj] == j)
+		        {
+			   jc = jj;
+			   break;
+		        }
+		     }
+		     if (jc > -1 )
+                     {
+		        for (kS = S_ext_i[jc]; kS < S_ext_i[jc+1]; kS++)
                         {
-                           measure_array[jc]--;
-                        }
-                     }
-		     else
-		     {
-			for (jj = 0; jj < num_cols_offd; jj++)
-			{
-			   if (col_map_offd[jj] == j && 
-					!CF_marker[jj + num_variables])
+                      	   k = S_ext_j[kS];
+
+                      	   /* IMPORTANT: consider all dependencies */
+                      	   if (k >= col_1 && k < col_n && S_ext_data[kS])
+                      	   {
+                              if (CF_marker[k-col_1] == COMMON_C_PT)
+                              {
+                                 /* "remove" edge from S and update measure*/
+                                 S_ext_data[jS] = -S_ext_data[jS];
+                                 measure_array[jc+num_variables]--;
+                                 break;
+                              }
+                           }
+			   else
 			   {
-                              /* decrement measures of unmarked neighbors */
-                              measure_array[jj + num_variables]--;
-                              break;
+			      kc = -1;
+			      for (kk = 0; kk < num_cols_offd; kk++)
+			      {
+			         if (col_map_offd[kk] == k)
+			         {
+			            kc = kk;
+			            break;
+			         }
+			      }
+			      if (kc > -1 &&
+				CF_marker[kc+num_variables] == COMMON_C_PT)
+			      {
+                                 /* "remove" edge from S and update measure*/
+                                 S_ext_data[jS] = -S_ext_data[jS];
+                                 measure_array[jc+num_variables]--;
+			         break;
+			      }
                            }
                         }
                      }
                   }
                }
-	    }
+            }
+ 	 }
 
-            /* take point out of the subgraph */
-            graph_array[ig] = -1;
-            new_graph_size--;
+         /* reset CF_marker */
+         if (i < num_variables)
+	 {
+	    for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++)
+	    {
+               j = S_diag_j[jS];
+
+               if (CF_marker[j] == COMMON_C_PT)
+               {
+                  CF_marker[j] = C_PT;
+               }
+            }
+            for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++)
+            {
+               j = S_offd_j[jS]+num_variables;
+
+               if (CF_marker[j] == COMMON_C_PT)
+               {
+                  CF_marker[j] = C_PT;
+               }
+            }
+         }
+	 else
+	 {
+	    ic = i - num_variables;
+	    for (jS = S_ext_i[ic]; jS < S_ext_i[ic+1]; jS++)
+	    {
+               j = S_ext_j[jS];
+	       if (j >= col_1 && j < col_n &&
+			CF_marker[j - col_1] == COMMON_C_PT)
+               {
+                  CF_marker[j - col_1] = C_PT;
+               }
+	       else
+	       {
+	          for (jj = 0; jj < num_cols_offd; jj++)
+		  {
+		     if (col_map_offd[jj] == j && 
+			CF_marker[jj + num_variables] == COMMON_C_PT)
+                     {
+                        CF_marker[jj + num_variables] = C_PT;
+		 	break;
+                     }
+                  }
+               }
+            }
          }
       }
-
-      /* shift graph_array */
-      shift = 0;
-      for (ig = 0; ig < new_graph_size; ig++)
-      {
-         while (graph_array[ig+shift] == -1)
-            shift++;
-         if (shift)
-            graph_array[ig] = graph_array[ig+shift];
-      }
-      graph_size = new_graph_size;
    }
 
    /*---------------------------------------------------
@@ -1043,7 +1009,6 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    hypre_DestroyParVector(measure_vector);
    if (num_procs > 1) hypre_DestroyCSRMatrix(S_ext);
    hypre_TFree(graph_array);
-   hypre_TFree(measure_tmp);
 
    *S_ptr        = S;
    *CF_marker_ptr   = CF_marker;
