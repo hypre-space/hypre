@@ -22,6 +22,10 @@ typedef struct
 {
    hypre_Index  imin;
    hypre_Index  imax;
+
+  /* GEC0902 additional information for ghost calculation in the offset */
+   int   num_ghost[6];
+
    void        *info;
 
 } hypre_BoxMapEntry;
@@ -31,6 +35,10 @@ typedef struct
    int                 max_nentries;
    hypre_Index         global_imin;
    hypre_Index         global_imax;
+
+  /* GEC0902 additional information for ghost calculation in the offset */
+   int                num_ghost[6];
+
    int                 nentries;
    hypre_BoxMapEntry  *entries;
    hypre_BoxMapEntry **table; /* this points into 'entries' array */
@@ -54,6 +62,7 @@ typedef struct
 #define hypre_BoxMapIndexes(map)        ((map) -> indexes)
 #define hypre_BoxMapSize(map)           ((map) -> size)
 #define hypre_BoxMapLastIndex(map)      ((map) -> last_index)
+#define hypre_BoxMapNumGhost(map)       ((map) -> num_ghost)
 
 #define hypre_BoxMapIndexesD(map, d)    hypre_BoxMapIndexes(map)[d]
 #define hypre_BoxMapSizeD(map, d)       hypre_BoxMapSize(map)[d]
@@ -70,5 +79,6 @@ hypre_BoxMapTable(map)[((k*hypre_BoxMapSizeD(map, 1) + j)*\
 #define hypre_BoxMapEntryIMin(entry)  ((entry) -> imin)
 #define hypre_BoxMapEntryIMax(entry)  ((entry) -> imax)
 #define hypre_BoxMapEntryInfo(entry)  ((entry) -> info)
+#define hypre_BoxMapEntryNumGhost(entry) ((entry) -> num_ghost)
 
 #endif
