@@ -14,6 +14,7 @@ pcg.h
 problem.c
 problem.h
 protos
+protos.h
 random.c
 read.c
 solver.c
