@@ -1,6 +1,6 @@
 #!/bin/sh
 set -x
-rm -f aclocal.m4 configure
+rm -Rf aclocal.m4 configure autom4te.cache
 libtoolize --force --copy
 aclocal -I config
 autoheader --force --include=config
