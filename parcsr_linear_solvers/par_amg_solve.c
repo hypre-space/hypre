@@ -40,14 +40,12 @@ hypre_ParAMGSolve( void               *amg_vdata,
    int      num_levels;
    int      num_unknowns;
    double   tol;
-   char    *file_name;
+
    hypre_ParCSRMatrix **A_array;
    hypre_ParVector    **F_array;
    hypre_ParVector    **U_array;
 
    /*  Local variables  */
-
-   FILE    *fp;
 
    int      j;
    int      Solve_err_flag;
@@ -75,7 +73,6 @@ hypre_ParAMGSolve( void               *amg_vdata,
    MPI_Comm_rank(comm,&my_id);
 
    amg_ioutdat   = hypre_ParAMGDataIOutDat(amg_data);
-   file_name     = hypre_ParAMGDataLogFileName(amg_data);
    num_unknowns  = hypre_ParAMGDataNumUnknowns(amg_data);
    num_levels    = hypre_ParAMGDataNumLevels(amg_data);
    A_array       = hypre_ParAMGDataAArray(amg_data);
@@ -130,19 +127,13 @@ hypre_ParAMGSolve( void               *amg_vdata,
    grid_cmplxty = 0;
 
    /*-----------------------------------------------------------------------
-    *     open the log file and write some initial info
+    *     write some initial info
     *-----------------------------------------------------------------------*/
 
-   if (my_id == 0 && amg_ioutdat >= 1)
-   { 
-      fp = fopen(file_name, "a");
-
-      fprintf(fp,"\n\nAMG SOLUTION INFO:\n");
-
-   }
+   if (my_id == 0 && amg_ioutdat >= 1) printf("\n\nAMG SOLUTION INFO:\n");
 
    /*-----------------------------------------------------------------------
-    *    Compute initial fine-grid residual and print to logfile
+    *    Compute initial fine-grid residual and print 
     *-----------------------------------------------------------------------*/
 
    hypre_CopyParVector(F_array[0], Vtemp);
@@ -159,10 +150,10 @@ hypre_ParAMGSolve( void               *amg_vdata,
 
    if (my_id ==0 && (amg_ioutdat > 1))
    {     
-      fprintf(fp,"                                            relative\n");
-      fprintf(fp,"               residual        factor       residual\n");
-      fprintf(fp,"               --------        ------       --------\n");
-      fprintf(fp,"    Initial    %e                 %e\n",resid_nrm_init,
+      printf("                                            relative\n");
+      printf("               residual        factor       residual\n");
+      printf("               --------        ------       --------\n");
+      printf("    Initial    %e                 %e\n",resid_nrm_init,
               relative_resid);
    }
 
@@ -199,7 +190,7 @@ hypre_ParAMGSolve( void               *amg_vdata,
 
       if (my_id == 0 && (amg_ioutdat > 1))
       { 
-         fprintf(fp,"    Cycle %2d   %e    %f     %e \n", cycle_count,
+         printf("    Cycle %2d   %e    %f     %e \n", cycle_count,
                  resid_nrm, conv_factor, relative_resid);
       }
    }
@@ -233,24 +224,15 @@ hypre_ParAMGSolve( void               *amg_vdata,
    {
       if (Solve_err_flag == 1)
       {
-         fprintf(fp,"\n\n==============================================");
-         fprintf(fp,"\n NOTE: Convergence tolerance was not achieved\n");
-         fprintf(fp,"      within the allowed %d V-cycles\n",max_iter);
-         fprintf(fp,"==============================================");
+         printf("\n\n==============================================");
+         printf("\n NOTE: Convergence tolerance was not achieved\n");
+         printf("      within the allowed %d V-cycles\n",max_iter);
+         printf("==============================================");
       }
-      fprintf(fp,"\n\n Average Convergence Factor = %f",conv_factor);
-      fprintf(fp,"\n\n     Complexity:    grid = %f\n",grid_cmplxty);
-      fprintf(fp,"                operator = %f\n",operat_cmplxty);
-      fprintf(fp,"                   cycle = %f\n\n",cycle_cmplxty);
-   }
-
-   /*----------------------------------------------------------
-    * Close the output file (if open)
-    *----------------------------------------------------------*/
-
-   if (my_id == 0 && amg_ioutdat >= 1)
-   { 
-      fclose(fp); 
+      printf("\n\n Average Convergence Factor = %f",conv_factor);
+      printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
+      printf("                operator = %f\n",operat_cmplxty);
+      printf("                   cycle = %f\n\n\n\n",cycle_cmplxty);
    }
 
    hypre_TFree(num_coeffs);
