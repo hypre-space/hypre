@@ -110,6 +110,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
     * Set up coarse grids
     *-----------------------------------------------------*/
 
+      hypre_StructMatrixPrint("zout.A", A, 0);
+
    grid  = hypre_StructMatrixGrid(A);
    dim   = hypre_StructGridDim(grid);
 
@@ -479,16 +481,18 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    hypre_Index           *stencil_shape;
    int                    stencil_size;
 
-   int                   constant_coefficient;
+   int                    constant_coefficient;
                         
    int                    Astenc;
                         
    hypre_Index            loop_size;
    hypre_IndexRef         start;
    hypre_Index            stride;
+   hypre_Index            diag_index;
                         
    int                    i, si, d;
    int                    loopi, loopj, loopk;
+   int                    diag_exists, diag_rank;
 
    int                    ierr = 0;
    double                 cx, cy, cz;
@@ -512,6 +516,11 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    cxyz[2] = 0.0;
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
+   if ( constant_coefficient==2 )
+   {
+      hypre_SetIndex(diag_index, 0, 0, 0);
+      diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
+   }
 
    compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
    hypre_ForBoxI(i, compute_boxes)
@@ -528,7 +537,8 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
          cy = cxyz[1];
          cz = cxyz[2];
 
-         if ( constant_coefficient )
+         if ( constant_coefficient==1 )
+            /* all coefficients constant */
          {
             Ai = hypre_CCBoxIndexRank( A_dbox, start );
 
@@ -566,7 +576,99 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             cy += tcxyz[1];
             cz += tcxyz[2];
          }
+         else if ( constant_coefficient==2 )
+            /* variable diagonal, other coefficients constant */
+         {
+            Ai = hypre_CCBoxIndexRank( A_dbox, start );
+
+            tcxyz[0] = 0.0;
+            tcxyz[1] = 0.0;
+            tcxyz[2] = 0.0;
+
+            diag_exists = 0;
+            for (si = 0; si < stencil_size; si++)
+            {
+               if (si != diag_rank)
+                  /* constant coeff part of matrix, same as constant_coefficient==1 */
+               {
+                  diag_exists == 1;
+                  Ap = hypre_StructMatrixBoxData(A, i, si);
+
+                  /* x-direction */
+                  Astenc = hypre_IndexD(stencil_shape[si], 0);
+                  if (Astenc)
+                  {
+                     tcxyz[0] -= Ap[Ai];
+                  }
+
+                  /* y-direction */
+                  Astenc = hypre_IndexD(stencil_shape[si], 1);
+                  if (Astenc)
+                  {
+                     tcxyz[1] -= Ap[Ai];
+                  }
+
+                  /* z-direction */
+                  Astenc = hypre_IndexD(stencil_shape[si], 2);
+                  if (Astenc)
+                  {
+                     tcxyz[2] -= Ap[Ai];
+                  }
+               }
+            }
+
+            /* variable diagonal part is same as constant_coefficient==0 */
+            if ( diag_exists )
+            {
+               hypre_BoxLoop1Begin(loop_size, A_dbox, start, stride, Ai);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai
+#define HYPRE_SMP_REDUCTION_OP +
+#define HYPRE_SMP_REDUCTION_VARS cx,cy,cz
+#include "hypre_box_smp_forloop.h"
+               hypre_BoxLoop1For(loopi, loopj, loopk, Ai)
+                  {
+                     tcxyz[0] = 0.0;
+                     tcxyz[1] = 0.0;
+                     tcxyz[2] = 0.0;
+
+                     si = diag_rank;
+                     Ap = hypre_StructMatrixBoxData(A, i, si);
+
+                     /* x-direction */
+                     Astenc = hypre_IndexD(stencil_shape[si], 0);
+                     if (Astenc)
+                     {
+                        tcxyz[0] -= Ap[Ai];
+                     }
+
+                     /* y-direction */
+                     Astenc = hypre_IndexD(stencil_shape[si], 1);
+                     if (Astenc)
+                     {
+                        tcxyz[1] -= Ap[Ai];
+                     }
+
+                     /* z-direction */
+                     Astenc = hypre_IndexD(stencil_shape[si], 2);
+                     if (Astenc)
+                     {
+                        tcxyz[2] -= Ap[Ai];
+                     }
+
+                     cx += tcxyz[0];
+                     cy += tcxyz[1];
+                     cz += tcxyz[2];
+                  }
+               hypre_BoxLoop1End(Ai);
+            }
+
+            cx += tcxyz[0];
+            cy += tcxyz[1];
+            cz += tcxyz[2];
+
+         }
          else
+            /* constant_coefficient==0, all coefficients vary with space */
          {
 
             hypre_BoxLoop1Begin(loop_size, A_dbox, start, stride, Ai);

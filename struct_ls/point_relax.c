@@ -495,7 +495,8 @@ hypre_PointRelax( void               *relax_vdata,
                      start  = hypre_BoxIMin(compute_box);
                      hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-                     if ( constant_coefficient )
+                     if ( constant_coefficient==1 )
+                        /* all matrix coefficients are constant */
                      {
                         Ai = hypre_CCBoxIndexRank( A_data_box, start );
                         AAp0 = 1/Ap[Ai];
@@ -511,6 +512,8 @@ hypre_PointRelax( void               *relax_vdata,
                         hypre_BoxLoop2End(bi, xi);
                      }
                      else
+                        /* constant_coefficent 0 (variable) or 2 (variable diagonal
+                           only) are the same for the diagonal */
                      {
                         hypre_BoxLoop3Begin(loop_size,
                                             A_data_box, start, stride, Ai,
@@ -527,12 +530,12 @@ hypre_PointRelax( void               *relax_vdata,
                   }
             }
       }
-
+      
       if (weight != 1.0)
       {
          hypre_StructScale(weight, x);
       }
-
+      
       p    = (p + 1) % num_pointsets;
       iter = iter + (p == 0);
    }
@@ -591,22 +594,46 @@ hypre_PointRelax( void               *relax_vdata,
                      start  = hypre_BoxIMin(compute_box);
                      hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-                     if ( constant_coefficient )
+                     if ( constant_coefficient==1 || constant_coefficient==2 )
                      {
+                        /* The standard (variable coefficient) algorithm initializes
+                           tp=bp.  Do it here, but for constant diagonal, also
+                           divide by the diagonal (and set up AApd for other
+                           division-equivalents.
+                           For a variable diagonal, this diagonal division is done
+                           at the end of the computation. */
                         Ai = hypre_CCBoxIndexRank( A_data_box, start );
-                        Apd = hypre_StructMatrixBoxData(A, i, diag_rank);
-                        AApd = 1/Apd[Ai];
+                        if ( constant_coefficient==1 ) /* constant diagonal */
+                        {
+                           Apd = hypre_StructMatrixBoxData(A, i, diag_rank);
+                           AApd = 1/Apd[Ai];
 
-                        hypre_BoxLoop2Begin(loop_size,
-                                            b_data_box, start, stride, bi,
-                                            t_data_box, start, stride, ti);
+                           hypre_BoxLoop2Begin(loop_size,
+                                               b_data_box, start, stride, bi,
+                                               t_data_box, start, stride, ti);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,bi,ti
 #include "hypre_box_smp_forloop.h"
-                        hypre_BoxLoop2For(loopi, loopj, loopk, bi, ti)
-                           {
-                              tp[ti] = AApd * bp[bi];
-                           }
-                        hypre_BoxLoop2End(bi, ti);
+                           hypre_BoxLoop2For(loopi, loopj, loopk, bi, ti)
+                              {
+                                 tp[ti] = AApd * bp[bi];
+                              }
+                           hypre_BoxLoop2End(bi, ti);
+                        }
+                        else /* constant_coefficient==2, variable diagonal */
+                        {
+                           AApd = 1;
+                           hypre_BoxLoop2Begin(loop_size,
+                                               b_data_box, start, stride, bi,
+                                               t_data_box, start, stride, ti);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,bi,ti
+#include "hypre_box_smp_forloop.h"
+                           hypre_BoxLoop2For(loopi, loopj, loopk, bi, ti)
+                              {
+                                 tp[ti] = bp[bi];
+                              }
+                           hypre_BoxLoop2End(bi, ti);
+
+                        }
 
                         /* unroll up to depth MAX_DEPTH */
                         for (si = 0; si < stencil_size; si += MAX_DEPTH)
@@ -970,6 +997,7 @@ hypre_PointRelax( void               *relax_vdata,
 
                         }
                      }
+
                      else
                      {
                         hypre_BoxLoop2Begin(loop_size,
@@ -1178,7 +1206,8 @@ hypre_PointRelax( void               *relax_vdata,
 
                      Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
 
-                     if ( ! constant_coefficient )
+                     if ( constant_coefficient==0 || constant_coefficient==2 )
+                        /* divide by the variable diagonal */
                      {
                         hypre_BoxLoop2Begin(loop_size,
                                             A_data_box, start, stride, Ai,

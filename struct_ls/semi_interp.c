@@ -136,7 +136,7 @@ hypre_SemiInterp( void               *interp_vdata,
    int                     Pi;
    int                     xci;
    int                     ei;
-   int              constant_coefficient;
+   int                     constant_coefficient;
                          
    double                 *Pp0, *Pp1;
    double                 *xcp;
@@ -168,6 +168,9 @@ hypre_SemiInterp( void               *interp_vdata,
    stencil       = hypre_StructMatrixStencil(P);
    stencil_shape = hypre_StructStencilShape(stencil);
    constant_coefficient = hypre_StructMatrixConstantCoefficient(P);
+   assert( constant_coefficient==0 || constant_coefficient==1 );
+   /* ... constant_coefficient==2 for P shouldn't happen, see
+      hypre_PFMGCreateInterpOp in pfmg_setup_interp.c */
 
    hypre_SetIndex(stridec, 1, 1, 1);
 

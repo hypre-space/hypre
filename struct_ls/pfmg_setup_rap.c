@@ -41,6 +41,7 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
    hypre_StructMatrix    *RAP;
    hypre_StructStencil   *stencil;
    int                    P_stored_as_transpose = 0;
+   int                    constant_coefficient;
 
    stencil = hypre_StructMatrixStencil(A);
 
@@ -77,7 +78,17 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
                                         P_stored_as_transpose);
    }
 
-   hypre_StructMatrixSetConstantCoefficient( RAP, hypre_StructMatrixConstantCoefficient(A) );
+   constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
+   if ( constant_coefficient==2 )
+   {
+      /* A has variable diagonal, so P (and R) is entirely variable coefficient,
+       so RAP will be variable coefficient */
+      hypre_StructMatrixSetConstantCoefficient( RAP, 0 );
+   }
+   else /* constant_coefficient== 0 or 1 */
+   {
+      hypre_StructMatrixSetConstantCoefficient( RAP, constant_coefficient );
+   }
 
    return RAP;
 }

@@ -166,6 +166,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
    hypre_Index           loop_size;
 
    int                   constant_coefficient;
+   int                   constant_coefficient_A;
 
    int                   fi, ci;
    int                   loopi, loopj, loopk;
@@ -177,12 +178,13 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
    double               *pa, *pb;
 
    double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
+   double               a_cw_cc, a_ce_cc, a_cs_cc, a_cn_cc;
 
    double               *rap_cc, *rap_cw, *rap_cs;
    double               *rap_ce, *rap_cn;
    double                west, east;
 
-   int                   iA, iAm1, iAp1;
+   int                   iA, iAm1, iAp1, iA_offd, iA_offd_m1, iA_offd_p1;
    int                   iAc;
    int                   iP, iPm1, iPp1;
                       
@@ -202,17 +204,17 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
    cgrid_ids = hypre_StructGridIDs(cgrid);
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(RAP);
-   if (constant_coefficient)
+   constant_coefficient_A = hypre_StructMatrixConstantCoefficient(A);
+   assert( constant_coefficient==0 || constant_coefficient==1 );
+   assert( hypre_StructMatrixConstantCoefficient(R) == constant_coefficient );
+   assert( hypre_StructMatrixConstantCoefficient(P) == constant_coefficient );
+   if (constant_coefficient==1 )
    {
-      assert( hypre_StructMatrixConstantCoefficient(R) );
-      assert( hypre_StructMatrixConstantCoefficient(A) );
-      assert( hypre_StructMatrixConstantCoefficient(P) );
+      assert( constant_coefficient_A==1 );
    }
    else
    {
-      assert( hypre_StructMatrixConstantCoefficient(R)==0 );
-      assert( hypre_StructMatrixConstantCoefficient(A)==0 );
-      assert( hypre_StructMatrixConstantCoefficient(P)==0 );
+      assert( constant_coefficient_A==0 || constant_coefficient_A==2 );
    }
       
    fi = 0;
@@ -327,8 +329,15 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
          }
          else
          {
-            yOffsetA = hypre_BoxOffsetDistance(A_dbox,index); 
             yOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
+            if ( constant_coefficient_A == 0 )
+            {
+               yOffsetA = hypre_BoxOffsetDistance(A_dbox,index);
+            }
+            else
+            {
+               yOffsetA = hypre_CCBoxOffsetDistance(A_dbox,index); 
+            }
          }
 
          /*--------------------------------------------------------------
@@ -336,7 +345,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
           * symmetric 5-point coarse grid operator. 
           *--------------------------------------------------------------*/
 
-         if ( constant_coefficient )
+         if ( constant_coefficient==1 )
          {
             iP = hypre_CCBoxIndexRank(P_dbox,cstart);
             iA = hypre_CCBoxIndexRank(A_dbox,fstart);
@@ -371,41 +380,86 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
          {
             hypre_BoxGetSize(cgrid_box, loop_size);
 
-            hypre_BoxLoop3Begin(loop_size,
-                                P_dbox, cstart, stridec, iP,
-                                A_dbox, fstart, stridef, iA,
-                                RAP_dbox, cstart, stridec, iAc);
+            if ( constant_coefficient_A == 0 )
+            {
+               hypre_BoxLoop3Begin(loop_size,
+                                   P_dbox, cstart, stridec, iP,
+                                   A_dbox, fstart, stridef, iA,
+                                   RAP_dbox, cstart, stridec, iAc);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iA,iAc,iAm1,iAp1,iPm1,iPp1,\
                               west,east
 #include "hypre_box_smp_forloop.h"
-            hypre_BoxLoop3For(loopi, loopj, loopk, iP, iA, iAc)
-               {
-                  iAm1 = iA - yOffsetA;
-                  iAp1 = iA + yOffsetA;
+               hypre_BoxLoop3For(loopi, loopj, loopk, iP, iA, iAc)
+                  {
+                     iAm1 = iA - yOffsetA;
+                     iAp1 = iA + yOffsetA;
 
-                  iPm1 = iP - yOffsetP;
-                  iPp1 = iP + yOffsetP;
+                     iPm1 = iP - yOffsetP;
+                     iPp1 = iP + yOffsetP;
 
-                  rap_cs[iAc] = a_cs[iA] * pa[iPm1];
-                  rap_cn[iAc] = a_cn[iA] * pb[iPp1];
+                     rap_cs[iAc] = a_cs[iA] * pa[iPm1];
+                     rap_cn[iAc] = a_cn[iA] * pb[iPp1];
 
-                  west = a_cw[iA] + 0.5 * a_cw[iAm1] + 0.5 * a_cw[iAp1];
-                  east = a_ce[iA] + 0.5 * a_ce[iAm1] + 0.5 * a_ce[iAp1];
+                     west = a_cw[iA] + 0.5 * a_cw[iAm1] + 0.5 * a_cw[iAp1];
+                     east = a_ce[iA] + 0.5 * a_ce[iAm1] + 0.5 * a_ce[iAp1];
 
-                  /*-----------------------------------------------------
-                   * Prevent non-zero entries reaching off grid
-                   *-----------------------------------------------------*/
-                  if(a_cw[iA] == 0.0) west = 0.0;
-                  if(a_ce[iA] == 0.0) east = 0.0;
+                     /*-----------------------------------------------------
+                      * Prevent non-zero entries reaching off grid
+                      *-----------------------------------------------------*/
+                     if(a_cw[iA] == 0.0) west = 0.0;
+                     if(a_ce[iA] == 0.0) east = 0.0;
                
-                  rap_cw[iAc] = west;
-                  rap_ce[iAc] = east;
+                     rap_cw[iAc] = west;
+                     rap_ce[iAc] = east;
 
-                  rap_cc[iAc] = a_cc[iA] + a_cw[iA] + a_ce[iA]
-                     + a_cs[iA] * pb[iP] + a_cn[iA] * pa[iP]
-                     - west - east;
-               }
-            hypre_BoxLoop3End(iP, iA, iAc);
+                     rap_cc[iAc] = a_cc[iA] + a_cw[iA] + a_ce[iA]
+                        + a_cs[iA] * pb[iP] + a_cn[iA] * pa[iP]
+                        - west - east;
+                  }
+               hypre_BoxLoop3End(iP, iA, iAc);
+            }
+            else /* constant_coefficient_A==2 */
+            {
+               /* First, deal with the purely off-diagonal parts of A,
+                  which are constant coefficient */
+               iA_offd = hypre_CCBoxIndexRank_noargs();
+               iA_offd_m1 = iA_offd - yOffsetA;
+               iA_offd_p1 = iA_offd + yOffsetA;
+               west = a_cw[iA_offd] + 0.5 * a_cw[iA_offd_m1] + 0.5 * a_cw[iA_offd_p1];
+               east = a_ce[iA_offd] + 0.5 * a_ce[iA_offd_m1] + 0.5 * a_ce[iA_offd_p1];
+               /* Prevent non-zero entries reaching off grid */
+               if(a_cw[iA_offd] == 0.0) west = 0.0;
+               if(a_ce[iA_offd] == 0.0) east = 0.0;
+               /* store array elements in scalars to deal with dumb compilers */
+               a_ce_cc = a_ce[iA_offd];
+               a_cw_cc = a_cw[iA_offd];
+               a_cn_cc = a_cn[iA_offd];
+               a_cs_cc = a_cs[iA_offd];
+
+               hypre_BoxLoop3Begin(loop_size,
+                                   P_dbox, cstart, stridec, iP,
+                                   A_dbox, fstart, stridef, iA,
+                                   RAP_dbox, cstart, stridec, iAc);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iA,iAc,iAm1,iAp1,iPm1,iPp1,\
+                              west,east
+#include "hypre_box_smp_forloop.h"
+               hypre_BoxLoop3For(loopi, loopj, loopk, iP, iA, iAc)
+                  {
+                     iPm1 = iP - yOffsetP;
+                     iPp1 = iP + yOffsetP;
+
+                     rap_cs[iAc] = a_cs[iA] * pa[iPm1];
+                     rap_cn[iAc] = a_cn[iA] * pb[iPp1];
+
+                     rap_cw[iAc] = west;
+                     rap_ce[iAc] = east;
+
+                     rap_cc[iAc] = a_cc[iA] + a_cw_cc + a_ce_cc
+                        + a_cs_cc * pb[iP] + a_cn_cc * pa[iP]
+                        - west - east;
+                  }
+               hypre_BoxLoop3End(iP, iA, iAc);
+            }
          }
 
 

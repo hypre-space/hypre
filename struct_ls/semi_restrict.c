@@ -134,7 +134,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
    int                     Ri;
    int                     ri;
    int                     rci;
-   int              constant_coefficient;
+   int                     constant_coefficient;
 
    double                 *Rp0, *Rp1;
    double                 *rp, *rp0, *rp1;
@@ -165,6 +165,8 @@ hypre_SemiRestrict( void               *restrict_vdata,
    stencil       = hypre_StructMatrixStencil(R);
    stencil_shape = hypre_StructStencilShape(stencil);
    constant_coefficient = hypre_StructMatrixConstantCoefficient(R);
+   assert( constant_coefficient==0 || constant_coefficient==1 );
+   /* ... if A has constant_coefficient==2, R has constant_coefficient==0 */
 
    hypre_SetIndex(stridec, 1, 1, 1);
 
