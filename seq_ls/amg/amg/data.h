@@ -32,8 +32,6 @@ typedef struct
    int     *mu;
    int     *ntrlx;
    int     *iprlx;
-   int     *ierlx;
-   int     *iurlx;
 
    /* output params */
    int      ioutdat;
@@ -110,8 +108,6 @@ typedef struct
 #define AMGDataMU(amg_data)           ((amg_data) -> mu)
 #define AMGDataNTRLX(amg_data)        ((amg_data) -> ntrlx)
 #define AMGDataIPRLX(amg_data)        ((amg_data) -> iprlx)
-#define AMGDataIERLX(amg_data)        ((amg_data) -> ierlx)
-#define AMGDataIURLX(amg_data)        ((amg_data) -> iurlx)
 		  		      
 /* output params */
 #define AMGDataIOutDat(amg_data)      ((amg_data) -> ioutdat)

@@ -178,7 +178,7 @@ double       *S_vec;
      {
          up[j] = b_vec[j];
      }
-     tfree(A_mat);
+     /*    tfree(A_mat); */
      return(relax_error); 
    }
 }

@@ -118,26 +118,6 @@ void     *data;
    AMGDataIPRLX(amg_data) = iprlx;
 }
 
-void      amg_SetIERLX(ierlx, data)
-int      *ierlx;
-void     *data;
-{
-   AMGData  *amg_data = data;
- 
-   tfree(AMGDataIERLX(amg_data));
-   AMGDataIERLX(amg_data) = ierlx;
-}
-
-void      amg_SetIURLX(iurlx, data)
-int      *iurlx;
-void     *data;
-{
-   AMGData  *amg_data = data;
- 
-   tfree(AMGDataIURLX(amg_data));
-   AMGDataIURLX(amg_data) = iurlx;
-}
-
 
 /*--------------------------------------------------------------------------
  * Routine to set up logging 

@@ -94,21 +94,6 @@ int      *data;
 {
    amg_SetIPRLX(iprlx, (void *) *data);
 }
-
-void      NAME_C_FOR_FORTRAN(amg_setierlx)(ierlx, data)
-int      *ierlx;
-int      *data;
-{
-   amg_SetIERLX(ierlx, (void *) *data);
-}
-
-void      NAME_C_FOR_FORTRAN(amg_setiurlx)(iurlx, data)
-int      *iurlx;
-int      *data;
-{
-   amg_SetIURLX(iurlx, (void *) *data);
-}
-
 		  		     
 
 /*--------------------------------------------------------------------------

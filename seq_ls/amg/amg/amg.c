@@ -39,8 +39,6 @@ void  *port_data;
    int     *mu;
    int     *ntrlx;
    int     *iprlx;
-   int     *ierlx;
-   int     *iurlx;
 
    /* output params */
    int      ioutdat;
@@ -79,16 +77,6 @@ void  *port_data;
    iprlx[1] = 31;
    iprlx[2] = 13;
    iprlx[3] = 2;
-   ierlx = ctalloc(int, 4);
-   ierlx[0] = 99;
-   ierlx[1] = 99;
-   ierlx[2] = 99;
-   ierlx[3] = 9;
-   iurlx = ctalloc(int, 4);
-   iurlx[0] = 99;
-   iurlx[1] = 99;
-   iurlx[2] = 99;
-   iurlx[3] = 9;
 
    /* output params */
    ioutdat = 0;
@@ -100,7 +88,7 @@ void  *port_data;
     *-----------------------------------------------------------------------*/
 
    amg_data = amg_NewData(levmax, ncg, ecg, nwt, ewt, nstr,
-			  ncyc, mu, ntrlx, iprlx, ierlx, iurlx,
+			  ncyc, mu, ntrlx, iprlx, 
 			  ioutdat, cycle_op_count,
 			  "amg.out.log"); 
 

@@ -242,8 +242,6 @@ double   tol;
    int     *amg_mu;
    int     *amg_ntrlx;
    int     *amg_iprlx;
-   int     *amg_ierlx;
-   int     *amg_iurlx;
 
    /* amg output params */
    int      amg_ioutdat;
@@ -265,8 +263,6 @@ double   tol;
    amg_mu      = AMGDataMU(amg_data);
    amg_ntrlx   = AMGDataNTRLX(amg_data);
    amg_iprlx   = AMGDataIPRLX(amg_data);
-   amg_ierlx   = AMGDataIERLX(amg_data);
-   amg_iurlx   = AMGDataIURLX(amg_data);
 
    amg_ioutdat = AMGDataIOutDat(amg_data);
 
@@ -299,11 +295,6 @@ double   tol;
 	      amg_ntrlx[0], amg_ntrlx[1], amg_ntrlx[2], amg_ntrlx[3]);
       fprintf(fp, "       ipr(f,d,u,c): %d  %d  %d  %d \n",
 	      amg_iprlx[0], amg_iprlx[1], amg_iprlx[2], amg_iprlx[3]);
-      fprintf(fp, "       ier(f,d,u,c): %d  %d  %d  %d \n",
-	      amg_ierlx[0], amg_ierlx[1], amg_ierlx[2], amg_ierlx[3]);
-      fprintf(fp, "       iur(f,d,u,c): %d  %d  %d  %d \n",
-	      amg_iurlx[0], amg_iurlx[1], amg_iurlx[2], amg_iurlx[3]);
- 
       fprintf(fp, "    Output flag (ioutdat): %d \n", amg_ioutdat);
 
    /*----------------------------------------------------------

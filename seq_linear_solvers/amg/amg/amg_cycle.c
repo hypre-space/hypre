@@ -48,8 +48,6 @@ void        *data;
    int      *mu;
    int      *ntrlx;
    int      *iprlx;
-   int      *ierlx;
-   int      *iurlx;
    int      *num_coeffs;
    int      *numv;
    int      *leva;
@@ -104,8 +102,6 @@ void        *data;
    mu = AMGDataMU(amg_data);
    ntrlx = AMGDataNTRLX(amg_data);
    iprlx = AMGDataIPRLX(amg_data);
-   ierlx = AMGDataIERLX(amg_data);
-   iurlx = AMGDataIURLX(amg_data);
    leva = AMGDataLevA(amg_data);
    levv = AMGDataLevV(amg_data);
    levp = AMGDataLevP(amg_data);
@@ -198,20 +194,6 @@ void        *data;
          {
              if (iarr[k] == 0) num_sweep = num_sweep * 10;
              else ity[ii++] = iarr[k];
-         }
-
-         idec_(&iurlx[cycle_param],&num_integers,&num_digits,iun);
-         if (num_digits < ii)
-         {
-            Solve_err_flag = 7;
-            return(Solve_err_flag);
-         }
-
-         idec_(&ierlx[cycle_param],&num_integers,&num_digits,ieq);
-         if (num_digits < ii)
-         {
-            Solve_err_flag = 7;
-            return(Solve_err_flag);
          }
 
          idec_(&iprlx[cycle_param],&num_integers,&num_digits,ipt);

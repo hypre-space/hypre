@@ -27,8 +27,6 @@ void amg_SetNCyc P((int ncyc , void *data ));
 void amg_SetMU P((int *mu , void *data ));
 void amg_SetNTRLX P((int *ntrlx , void *data ));
 void amg_SetIPRLX P((int *iprlx , void *data ));
-void amg_SetIERLX P((int *ierlx , void *data ));
-void amg_SetIURLX P((int *iurlx , void *data ));
 void amg_SetLogging P((int ioutdat , char *log_file_name , void *data ));
 void amg_SetNumUnknowns P((int num_unknowns , void *data ));
 void amg_SetNumPoints P((int num_points , void *data ));
@@ -52,7 +50,7 @@ int amg_Solve P((Vector *u , Vector *f , double tol , void *data ));
 /* config.cygwin32 */
 
 /* data.c */
-AMGData *amg_NewData P((int levmax , int ncg , double ecg , int nwt , double ewt , int nstr , int ncyc , int *mu , int *ntrlx , int *iprlx , int *ierlx , int *iurlx , int ioutdat , int cycle_op_count , char *log_file_name ));
+AMGData *amg_NewData P((int levmax , int ncg , double ecg , int nwt , double ewt , int nstr , int ncyc , int *mu , int *ntrlx , int *iprlx , int ioutdat , int cycle_op_count , char *log_file_name ));
 void amg_FreeData P((AMGData *amg_data ));
 
 /* matrix.c */

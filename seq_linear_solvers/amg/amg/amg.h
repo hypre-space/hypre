@@ -30,7 +30,7 @@
 
 #define  NDIMU(nv)  (3*nv)
 #define  NDIMP(np)  (3*np)
-#define  NDIMA(na)  (3*na)
+#define  NDIMA(na)  (4*na)
 #define  NDIMB(na)  (3*na)
 
 /*--------------------------------------------------------------------------
@@ -59,8 +59,6 @@ void amg_SetNCyc P((int ncyc , void *data ));
 void amg_SetMU P((int *mu , void *data ));
 void amg_SetNTRLX P((int *ntrlx , void *data ));
 void amg_SetIPRLX P((int *iprlx , void *data ));
-void amg_SetIERLX P((int *ierlx , void *data ));
-void amg_SetIURLX P((int *iurlx , void *data ));
 void amg_SetIOutDat P((int ioutdat , void *data ));
 void amg_SetLogFileName P((char *log_file_name , void *data ));
 void amg_SetNumUnknowns P((int num_unknowns , void *data ));
