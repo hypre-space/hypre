@@ -118,7 +118,6 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
   hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A,
   int num_functions, int *dof_func)
 {
-   MPI_Comm           comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
 
@@ -146,7 +145,9 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
    double *p_ptr;
    double *buf_data;
    double nm;
+#if 0
    double mx = 0., my = 1.e+10;
+#endif
 
    /* normalize each sample vector and divide by number of samples */
    for (k=0; k<nsamples; k++)
@@ -187,6 +188,7 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
 
    if (num_functions > 1)
    {
+      dof_func_offd = hypre_CTAlloc(int, num_cols_offd);
       int_buf_data = hypre_CTAlloc(int,hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                 num_sends));
       index = 0;
@@ -253,7 +255,7 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
            ii = S_offd_j[j];
 
            /* only interpolate between like functions */
-           if (num_functions > 1 && dof_func_offd[i] != dof_func_offd[ii])
+           if (num_functions > 1 && dof_func[i] != dof_func_offd[ii])
            {
                S_offd_data[j] = 0.;
                continue;
@@ -297,6 +299,7 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
 #endif
 
    hypre_TFree(p_ptr);
+   hypre_TFree(dof_func_offd);
 
    return 0;
 }
