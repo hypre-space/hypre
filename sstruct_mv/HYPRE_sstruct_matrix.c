@@ -32,19 +32,15 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    int                     nparts;
    hypre_SStructPMatrix  **pmatrices;
 
-   MPI_Comm                pcomm;
    hypre_SStructPGrid     *pgrid;
-   hypre_SStructStencil  **pstencils;
    int                     nvars;
 
    int                     stencil_size;
-   hypre_Index            *stencil_shape;
    int                    *stencil_vars;
-   int                     pstencil_ndim;
    int                     pstencil_size;
 
    HYPRE_SStructVariable   vitype, vjtype;
-   int                     part, vi, vj, i, j;
+   int                     part, vi, vj, i;
    int                     size;
 
    matrix = hypre_TAlloc(hypre_SStructMatrix, 1);
@@ -53,7 +49,7 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    hypre_SStructMatrixNDim(matrix)  = hypre_SStructGraphNDim(graph);
    hypre_SStructGraphRef(graph, &hypre_SStructMatrixGraph(matrix));
 
-   /* compute S/U-matrix split & pmatrices */
+   /* compute S/U-matrix split */
    nparts = hypre_SStructGraphNParts(graph);
    hypre_SStructMatrixNParts(matrix) = nparts;
    splits = hypre_TAlloc(int **, nparts);
@@ -65,13 +61,10 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
       pgrid = hypre_SStructGraphPGrid(graph, part);
       nvars = hypre_SStructPGridNVars(pgrid);
       splits[part] = hypre_TAlloc(int *, nvars);
-      pstencils = hypre_TAlloc(hypre_SStructStencil *, nvars);
       for (vi = 0; vi < nvars; vi++)
       {
          stencil_size  = hypre_SStructStencilSize(stencils[part][vi]);
-         stencil_shape = hypre_SStructStencilShape(stencils[part][vi]);
          stencil_vars  = hypre_SStructStencilVars(stencils[part][vi]);
-         pstencil_ndim = hypre_SStructStencilNDim(stencils[part][vi]);
          pstencil_size = 0;
          splits[part][vi] = hypre_TAlloc(int, stencil_size);
          for (i = 0; i < stencil_size; i++)
@@ -89,23 +82,7 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
                splits[part][vi][i] = -1;
             }
          }
-         HYPRE_SStructStencilCreate(pstencil_ndim, pstencil_size,
-                                    &pstencils[vi]);
-         for (i = 0; i < stencil_size; i++)
-         {
-            j = splits[part][vi][i];
-            if (j > -1)
-            {
-               HYPRE_SStructStencilSetEntry(pstencils[vi], j,
-                                            stencil_shape[i],
-                                            stencil_vars[i]);
-               j++;
-            }
-         }
       }
-      pcomm = hypre_SStructPGridComm(pgrid);
-      ierr = hypre_SStructPMatrixCreate(pcomm, pgrid, pstencils,
-                                        &pmatrices[part]);
    }
 
    HYPRE_IJMatrixCreate(comm, &hypre_SStructMatrixIJMatrix(matrix),
@@ -191,13 +168,62 @@ int
 HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
 {
    int ierr = 0;
-   int nparts = hypre_SStructMatrixNParts(matrix);
-   int part;
+
+   int                     nparts    = hypre_SStructMatrixNParts(matrix);
+   hypre_SStructGraph     *graph     = hypre_SStructMatrixGraph(matrix);
+   hypre_SStructPMatrix  **pmatrices = hypre_SStructMatrixPMatrices(matrix);
+   hypre_SStructStencil ***stencils  = hypre_SStructGraphStencils(graph);
+   int                    *split;
+
+   MPI_Comm                pcomm;
+   hypre_SStructPGrid     *pgrid;
+   hypre_SStructStencil  **pstencils;
+   int                     nvars;
+
+   int                     stencil_size;
+   hypre_Index            *stencil_shape;
+   int                    *stencil_vars;
+   int                     pstencil_ndim;
+   int                     pstencil_size;
+
+   int                     part, var, i;
 
    /* S-matrix */
    for (part = 0; part < nparts; part++)
    {
-      hypre_SStructPMatrixInitialize(hypre_SStructMatrixPMatrix(matrix, part));
+      pgrid = hypre_SStructGraphPGrid(graph, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      pstencils = hypre_TAlloc(hypre_SStructStencil *, nvars);
+      for (var = 0; var < nvars; var++)
+      {
+         split = hypre_SStructMatrixSplit(matrix, part, var);
+         stencil_size  = hypre_SStructStencilSize(stencils[part][var]);
+         stencil_shape = hypre_SStructStencilShape(stencils[part][var]);
+         stencil_vars  = hypre_SStructStencilVars(stencils[part][var]);
+         pstencil_ndim = hypre_SStructStencilNDim(stencils[part][var]);
+         pstencil_size = 0;
+         for (i = 0; i < stencil_size; i++)
+         {
+            if (split[i] > -1)
+            {
+               pstencil_size++;
+            }
+         }
+         HYPRE_SStructStencilCreate(pstencil_ndim, pstencil_size,
+                                    &pstencils[var]);
+         for (i = 0; i < stencil_size; i++)
+         {
+            if (split[i] > -1)
+            {
+               HYPRE_SStructStencilSetEntry(pstencils[var], split[i],
+                                            stencil_shape[i],
+                                            stencil_vars[i]);
+            }
+         }
+      }
+      pcomm = hypre_SStructPGridComm(pgrid);
+      hypre_SStructPMatrixCreate(pcomm, pgrid, pstencils, &pmatrices[part]);
+      hypre_SStructPMatrixInitialize(pmatrices[part]);
    }
 
    /* U-matrix */

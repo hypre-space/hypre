@@ -112,12 +112,20 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
 
    for (vi = 0; vi < nvars; vi++)
    {
-      /* diagonal block computation */
-      sdata = smatvec_data[vi][vi];
-      sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
-      sx = hypre_SStructPVectorSVector(px, vi);
       sy = hypre_SStructPVectorSVector(py, vi);
-      hypre_StructMatvecCompute(sdata, alpha, sA, sx, beta, sy);
+
+      /* diagonal block computation */
+      if (smatvec_data[vi][vi] != NULL)
+      {
+         sdata = smatvec_data[vi][vi];
+         sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
+         sx = hypre_SStructPVectorSVector(px, vi);
+         hypre_StructMatvecCompute(sdata, alpha, sA, sx, beta, sy);
+      }
+      else
+      {
+         hypre_StructAxpy(beta, sy, sy);
+      }
 
       /* off-diagonal block computation */
       for (vj = 0; vj < nvars; vj++)
