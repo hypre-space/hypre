@@ -37,7 +37,7 @@ GenerateRotate7pt( MPI_Comm comm,
    double *offd_data;
 
    double *value;
-   double ac, bc, cc, s, c, z, pi, x;
+   double ac, bc, cc, s, c, pi, x;
    int *global_part;
    int ix, iy;
    int cnt, o_cnt;

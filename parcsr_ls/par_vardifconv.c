@@ -62,7 +62,7 @@ GenerateVarDifConv( MPI_Comm comm,
    int num_procs, my_id;
    int P_busy, Q_busy, R_busy;
 
-   double hhx, hhy, hhz, hhyx, hhzx;
+   double hhx, hhy, hhz;
    double xx, yy, zz;
    double afp, afm, bfp, bfm, cfp, cfm, df, ef, ff, gf;
 
@@ -381,14 +381,14 @@ double afun(double xx, double yy, double zz)
 {
    double value;
    /* value = 1.0 + 1000.0*fabs(xx-yy); */
-   if (xx < 0.1 && yy < 0.1 && zz < 0.1
-      || xx < 0.1 && yy < 0.1 && zz > 0.9
-      || xx < 0.1 && yy > 0.9 && zz < 0.1
-      || xx > 0.9 && yy < 0.1 && zz < 0.1
-      || xx > 0.9 && yy > 0.9 && zz < 0.1
-      || xx > 0.9 && yy < 0.1 && zz > 0.9
-      || xx < 0.1 && yy > 0.9 && zz > 0.9
-      || xx > 0.9 && yy > 0.9 && zz > 0.9)
+   if ((xx < 0.1 && yy < 0.1 && zz < 0.1)
+      || (xx < 0.1 && yy < 0.1 && zz > 0.9)
+      || (xx < 0.1 && yy > 0.9 && zz < 0.1)
+      || (xx > 0.9 && yy < 0.1 && zz < 0.1)
+      || (xx > 0.9 && yy > 0.9 && zz < 0.1)
+      || (xx > 0.9 && yy < 0.1 && zz > 0.9)
+      || (xx < 0.1 && yy > 0.9 && zz > 0.9)
+      || (xx > 0.9 && yy > 0.9 && zz > 0.9))
       value = 0.01;
    else if (xx >= 0.1 && xx <= 0.9 
 	 && yy >= 0.1 && yy <= 0.9
@@ -406,14 +406,14 @@ double bfun(double xx, double yy, double zz)
 {
    double value;
    /* value = 1.0 + 1000.0*fabs(xx-yy); */
-   if (xx < 0.1 && yy < 0.1 && zz < 0.1
-      || xx < 0.1 && yy < 0.1 && zz > 0.9
-      || xx < 0.1 && yy > 0.9 && zz < 0.1
-      || xx > 0.9 && yy < 0.1 && zz < 0.1
-      || xx > 0.9 && yy > 0.9 && zz < 0.1
-      || xx > 0.9 && yy < 0.1 && zz > 0.9
-      || xx < 0.1 && yy > 0.9 && zz > 0.9
-      || xx > 0.9 && yy > 0.9 && zz > 0.9)
+   if ((xx < 0.1 && yy < 0.1 && zz < 0.1)
+      || (xx < 0.1 && yy < 0.1 && zz > 0.9)
+      || (xx < 0.1 && yy > 0.9 && zz < 0.1)
+      || (xx > 0.9 && yy < 0.1 && zz < 0.1)
+      || (xx > 0.9 && yy > 0.9 && zz < 0.1)
+      || (xx > 0.9 && yy < 0.1 && zz > 0.9)
+      || (xx < 0.1 && yy > 0.9 && zz > 0.9)
+      || (xx > 0.9 && yy > 0.9 && zz > 0.9))
       value = 0.01;
    else if (xx >= 0.1 && xx <= 0.9 
 	 && yy >= 0.1 && yy <= 0.9
@@ -441,14 +441,14 @@ double bfun(double xx, double yy, double zz)
 double cfun(double xx, double yy, double zz)
 {
    double value;
-   if (xx < 0.1 && yy < 0.1 && zz < 0.1
-      || xx < 0.1 && yy < 0.1 && zz > 0.9
-      || xx < 0.1 && yy > 0.9 && zz < 0.1
-      || xx > 0.9 && yy < 0.1 && zz < 0.1
-      || xx > 0.9 && yy > 0.9 && zz < 0.1
-      || xx > 0.9 && yy < 0.1 && zz > 0.9
-      || xx < 0.1 && yy > 0.9 && zz > 0.9
-      || xx > 0.9 && yy > 0.9 && zz > 0.9)
+   if ((xx < 0.1 && yy < 0.1 && zz < 0.1)
+      || (xx < 0.1 && yy < 0.1 && zz > 0.9)
+      || (xx < 0.1 && yy > 0.9 && zz < 0.1)
+      || (xx > 0.9 && yy < 0.1 && zz < 0.1)
+      || (xx > 0.9 && yy > 0.9 && zz < 0.1)
+      || (xx > 0.9 && yy < 0.1 && zz > 0.9)
+      || (xx < 0.1 && yy > 0.9 && zz > 0.9)
+      || (xx > 0.9 && yy > 0.9 && zz > 0.9))
       value = 0.01;
    else if (xx >= 0.1 && xx <= 0.9 
 	 && yy >= 0.1 && yy <= 0.9
@@ -467,8 +467,9 @@ double cfun(double xx, double yy, double zz)
 
 double dfun(double xx, double yy, double zz)
 {
-   double value, pi;
-   /*pi = 4.0 * atan(1.0);
+   double value;
+   /*double pi;
+   pi = 4.0 * atan(1.0);
    value = -sin(pi*xx)*cos(pi*yy);*/
    value = 0;
    return value;
@@ -476,8 +477,9 @@ double dfun(double xx, double yy, double zz)
 
 double efun(double xx, double yy, double zz)
 {
-   double value, pi;
-   /*pi = 4.0 * atan(1.0);
+   double value;
+   /*double pi;
+   pi = 4.0 * atan(1.0);
    value = sin(pi*yy)*cos(pi*xx);*/
    value = 0;
    return value;
@@ -510,8 +512,9 @@ double rfun(double xx, double yy, double zz)
 
 double bndfun(double xx, double yy, double zz)
 {
-   double value, pi;
-   /*pi = 4.0 * atan(1.0);
+   double value;
+   /*double pi;
+   pi = 4.0 * atan(1.0);
    value = sin(pi*xx)+sin(13*pi*xx)+sin(pi*yy)+sin(13*pi*yy);*/
    value = 0.0;
    return value;
