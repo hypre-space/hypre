@@ -127,7 +127,7 @@ parse_arguments () {
     argcur=$arg
     case $arg in
       a) confbuildtest $OPTARG  " "             "default";;
-      b) confbuildtest $OPTARG  "--with-babel --disable-fortran90"  "babel";;
+      b) confbuildtest $OPTARG  "--with-babel"  "babel";;
       c) build $Build "all++"   "all++"         "test";;
       D) DEBUG_MODE="yes";;
       d) build $Build "all"     "docs"          "docs";;
@@ -713,6 +713,10 @@ if [ ${BuildOpt} -ne $Skip ] ; then
     [ -f config.cache ] && rm config.cache
     if [ "$ConfigOption" != " " ]
     then
+      if [ "$ConfigOption" = "--with-babel" ]            ## need to disable Fortran90
+      then                                               ## when building Babel
+         ConfigOption="$ConfigOption --disable-fortran90"
+      fi
       $CONFIGURE "$ConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
 	2> ${Hdr}.${MessageStr}.configure.err
     else
