@@ -310,15 +310,26 @@ hypre_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
                                        double *relative_residual_norm )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = -1;
+
+   int            max_iter        = (smg_data -> max_iter);
    int            num_iterations  = (smg_data -> num_iterations);
-   int            logging   = (smg_data -> logging);
-   double        *rel_norms = (smg_data -> rel_norms);
+   int            logging         = (smg_data -> logging);
+   double        *rel_norms       = (smg_data -> rel_norms);
+
+   int            ierr = -1;
 
    
    if (logging > 0)
    {
-      *relative_residual_norm = rel_norms[num_iterations-1];
+      if (num_iterations == max_iter)
+      {
+         *relative_residual_norm = rel_norms[num_iterations-1];
+      }
+      else
+      {
+         *relative_residual_norm = rel_norms[num_iterations];
+      }
+
       ierr = 0;
    }
    
