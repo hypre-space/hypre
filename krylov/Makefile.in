@@ -49,7 +49,7 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libkrylov.a 
+all: libHYPRE_krylov.a 
 
 install: all
 	@cp -f $(srcdir)/krylov.h $$HYPRE_INSTALL_DIR/include/.
@@ -67,7 +67,7 @@ veryclean: clean
 # Rules
 ##################################################################
 
-libkrylov.a: ${OBJS}
+libHYPRE_krylov.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -rcu $@ ${OBJS}
 	${RANLIB} $@

@@ -58,7 +58,7 @@ LFLAGS =\
  -lHYPRE_IJ_mv\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
- -lkrylov\
+ -lHYPRE_krylov\
  -lHYPRE_utilities\
  ${BLASLIBFLAGS}\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}

@@ -45,7 +45,7 @@ LFLAGS =\
  -lHYPRE_amg_ls\
  -lHYPRE_seq_mv\
  -lHYPRE_utilities\
- -L../../krylov -lkrylov\
+ -L../../krylov -lHYPRE_krylov\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
  
 
