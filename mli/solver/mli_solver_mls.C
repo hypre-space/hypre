@@ -61,6 +61,16 @@ int MLI_Solver_MLS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    MPI_Comm            comm;
 
    /*-----------------------------------------------------------------
+    * check that proper spectral radius is passed in
+    *-----------------------------------------------------------------*/
+
+   if ( max_eigen <= 0.0 )
+   {
+      cout << "Solver_MLS::solver ERROR : max_eig <= 0.\n"; 
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------------
     * fetch machine and smoother parameters
     *-----------------------------------------------------------------*/
 
