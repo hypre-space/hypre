@@ -153,7 +153,7 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond)( long int *solver,
               ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
                                              HYPRE_ParCSRDiagScale,
                                              HYPRE_ParCSRDiagScaleSetup,
-                                             (void *)       *precond_solver ) );
+                                             NULL                         ) );
    }
    else if (*precond_id == 9)
    {
