@@ -6,6 +6,7 @@ libHYPRE_lapack_la_LDFLAGS = -avoid-version
 
 #
 FILES = \
+ dbdsqr.c\
  dgebd2.c\
  dgebrd.c\
  dgelq2.c\
@@ -16,6 +17,7 @@ FILES = \
  dgesvd.c\
  dlabad.c\
  dlabrd.c\
+ dlacpy.c\
  dlae2.c\
  dlaev2.c\
  dlamch.c\
@@ -36,10 +38,13 @@ FILES = \
  dlatrd.c\
  dorg2l.c\
  dorg2r.c\
+ dorgbr.c\
+ dorglq.c\
  dorgql.c\
  dorgqr.c\
  dorgtr.c\
  dorm2r.c\
+ dormbr.c\
  dorml2.c\
  dormlq.c\
  dormqr.c\
@@ -49,6 +54,7 @@ FILES = \
  dsteqr.c\
  dsterf.c\
  dsyev.c\
+ dsygs2.c\
  dsygst.c\
  dsygv.c\
  dsytd2.c\

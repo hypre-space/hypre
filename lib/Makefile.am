@@ -37,6 +37,7 @@ endif !BLASNEEDED
 if LAPACKNEEDED
 LAPACKDIR = lapack
 LAPACKFILES = \
+ $(top_srcdir)/lapack/dbdsqr.c\
  $(top_srcdir)/lapack/dgebd2.c\
  $(top_srcdir)/lapack/dgebrd.c\
  $(top_srcdir)/lapack/dgelq2.c\
@@ -47,6 +48,7 @@ LAPACKFILES = \
  $(top_srcdir)/lapack/dgesvd.c\
  $(top_srcdir)/lapack/dlabad.c\
  $(top_srcdir)/lapack/dlabrd.c\
+ $(top_srcdir)/lapack/dlacpy.c\
  $(top_srcdir)/lapack/dlae2.c\
  $(top_srcdir)/lapack/dlaev2.c\
  $(top_srcdir)/lapack/dlamch.c\
@@ -67,10 +69,13 @@ LAPACKFILES = \
  $(top_srcdir)/lapack/dlatrd.c\
  $(top_srcdir)/lapack/dorg2l.c\
  $(top_srcdir)/lapack/dorg2r.c\
+ $(top_srcdir)/lapack/dorgbr.c\
+ $(top_srcdir)/lapack/dorglq.c\
  $(top_srcdir)/lapack/dorgql.c\
  $(top_srcdir)/lapack/dorgqr.c\
  $(top_srcdir)/lapack/dorgtr.c\
  $(top_srcdir)/lapack/dorm2r.c\
+ $(top_srcdir)/lapack/dormbr.c\
  $(top_srcdir)/lapack/dorml2.c\
  $(top_srcdir)/lapack/dormlq.c\
  $(top_srcdir)/lapack/dormqr.c\
@@ -80,6 +85,7 @@ LAPACKFILES = \
  $(top_srcdir)/lapack/dsteqr.c\
  $(top_srcdir)/lapack/dsterf.c\
  $(top_srcdir)/lapack/dsyev.c\
+ $(top_srcdir)/lapack/dsygs2.c\
  $(top_srcdir)/lapack/dsygst.c\
  $(top_srcdir)/lapack/dsygv.c\
  $(top_srcdir)/lapack/dsytd2.c\
