@@ -180,7 +180,6 @@ hypre_BoomerAMGDestroy( void *data )
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
    int num_levels = hypre_ParAMGDataNumLevels(amg_data);
-   int *smooth_option = hypre_ParAMGDataSmoothOption(amg_data);
    HYPRE_Solver *smoother = hypre_ParAMGDataSmoother(amg_data);
    int i;
 
