@@ -548,12 +548,10 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
             cnt++;
          col_map_offd[i] = cnt++;
       }
-      for (i=0; i < num_recvs; i++)
+      for (i=0; i < num_recvs+1; i++)
       {
-         j = recv_vec_starts[i];
-         recv_vec_starts[i] = col_map_offd[j];
+         recv_vec_starts[i] = num_functions*recv_vec_starts_AN[i];
       }
-      recv_vec_starts[num_recvs] = new_num_cols_offd;
 
       for (i=0; i < num_nonzeros_offd; i++)
       {
@@ -572,6 +570,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    {
       new_send_map_elmts = hypre_CTAlloc(int,new_send_elmts_size);
       cnt = 0;
+      send_map_starts[0] = 0;
       for (i=0; i < num_sends; i++)
       {
          send_map_starts[i+1] = send_map_starts_AN[i+1]*num_functions;
