@@ -134,8 +134,7 @@ main( int   argc,
 
    solver_id = 0;
 
-   ioutdat = 3;
-   if (solver_id == 18) max_levels = 1;
+   ioutdat = 1;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -203,6 +202,12 @@ main( int   argc,
          arg_index++;
          solver_id = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-srcrand") == 0 )
+      {
+         arg_index++;
+         build_src_type      = 0;
+         build_src_arg_index = arg_index;
+      }    
       else if ( strcmp(argv[arg_index], "-srcfromfile") == 0 )
       {
          arg_index++;
@@ -215,7 +220,7 @@ main( int   argc,
          build_src_type      = 2;
          build_src_arg_index = arg_index;
       }      
-      else if ( strcmp(argv[arg_index], "-srcrand") == 0 )
+      else if ( strcmp(argv[arg_index], "-srczero") == 0 )
       {
          arg_index++;
          build_src_type      = 3;
@@ -277,11 +282,6 @@ main( int   argc,
          arg_index++;
          relax_default = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-mxl") == 0 )
-      {
-         arg_index++;
-         max_levels = atoi(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-dbg") == 0 )
       {
          arg_index++;
@@ -315,6 +315,14 @@ main( int   argc,
    { 
      sai_threshold = 0.1;
      sai_filter = 0.1;
+     max_levels = 1;
+   }
+
+   arg_index = 1;
+   if ( strcmp(argv[arg_index], "-mxl") == 0 )
+   {
+      arg_index++;
+      max_levels = atoi(argv[arg_index++]);
    }
 
    /* defaults for BoomerAMG */
@@ -506,9 +514,10 @@ main( int   argc,
       printf("   -storage_low          : allocates not enough storage for aux struct\n");
       printf("   -concrete_parcsr      : use parcsr matrix type as concrete type\n");
       printf("\n");
+      printf("   -srcrand              : src is random vector\n");
+      printf("   -srczero              : src is zero vector\n");
       printf("   -srcfromfile          : from distributed file (NOT YET)\n");
       printf("   -srcfromonefile       : from vector file \n");
-      printf("   -srcrand              : src is random vector\n");
       printf("   -xisone               : solution of all ones\n");
       printf("\n");
       printf("  -solver <ID>           : solver ID\n");
@@ -779,8 +788,8 @@ main( int   argc,
    {
       if (myid == 0)
       {
-        printf("  Source vector is 0 \n");
-        printf("  Initial unknown vector has random components in range 0 - 1\n");
+        printf("  Source vector has random components in range 0 - 1\n");
+        printf("  Initial unknown vector in evolution is 0\n");
       }
 
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_b, global_n);
@@ -791,13 +800,14 @@ main( int   argc,
 
       hypre_SeedRand(myid);
       for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
-         values[i] = hypre_Rand()/dt;
+         values[i] = hypre_Rand();
 
       HYPRE_IJVectorSetLocalComponentsInBlock(ij_b,
                                               part_x[myid],
                                               part_x[myid+1]-1,
                                               NULL,
                                               values);
+      hypre_TFree(values);
 
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_x, global_n);
       HYPRE_IJVectorSetLocalStorageType(ij_x,ij_vector_storage_type );
@@ -805,24 +815,11 @@ main( int   argc,
       HYPRE_IJVectorInitialize(ij_x);
 
 /* For backward Euler the previous backward Euler iterate (assumed
-   random in 0 - 1 here) is usually used as the initial guess */
-      for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
-         values[i] *= dt;
-
-      HYPRE_IJVectorSetLocalComponentsInBlock(ij_x,
-                                              part_x[myid],
-                                              part_x[myid+1]-1,
-                                              NULL,
-                                              values);
-      hypre_TFree(values);
-
-   /*-----------------------------------------------------------
-    * Fetch the resulting underlying vectors out
-    *-----------------------------------------------------------*/
+   0 here) is usually used as the initial guess */
+      HYPRE_IJVectorZeroLocalComponents(ij_x);
 
       b = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_b );
       x = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_x );
-
    }
    else if (build_src_type == 1)
    {
@@ -875,8 +872,8 @@ main( int   argc,
    {
       if (myid == 0)
       {
-        printf("  Source vector has random components in range 0 - 1\n");
-        printf("  Initial unknown vector in evolution is 0\n");
+        printf("  Source vector is 0 \n");
+        printf("  Initial unknown vector has random components in range 0 - 1\n");
       }
 
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_b, global_n);
@@ -887,14 +884,13 @@ main( int   argc,
 
       hypre_SeedRand(myid);
       for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
-         values[i] = hypre_Rand();
+         values[i] = hypre_Rand()/dt;
 
       HYPRE_IJVectorSetLocalComponentsInBlock(ij_b,
                                               part_x[myid],
                                               part_x[myid+1]-1,
                                               NULL,
                                               values);
-      hypre_TFree(values);
 
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_x, global_n);
       HYPRE_IJVectorSetLocalStorageType(ij_x,ij_vector_storage_type );
@@ -902,8 +898,20 @@ main( int   argc,
       HYPRE_IJVectorInitialize(ij_x);
 
 /* For backward Euler the previous backward Euler iterate (assumed
-   0 here) is usually used as the initial guess */
-      HYPRE_IJVectorZeroLocalComponents(ij_x);
+   random in 0 - 1 here) is usually used as the initial guess */
+      for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+         values[i] *= dt;
+
+      HYPRE_IJVectorSetLocalComponentsInBlock(ij_x,
+                                              part_x[myid],
+                                              part_x[myid+1]-1,
+                                              NULL,
+                                              values);
+      hypre_TFree(values);
+
+   /*-----------------------------------------------------------
+    * Fetch the resulting underlying vectors out
+    *-----------------------------------------------------------*/
 
       b = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_b );
       x = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_x );
