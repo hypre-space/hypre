@@ -42,3 +42,82 @@ implementations.
 \section{IJ Matrix Interface}
 
 \section{IJ Vector Interface}
+
+Fortran implementation (temporarily):
+
+      call HYPRE_IJVectorCreate(rad_comm, hypre_b, global_number_pts,
+     &                          ierr)
+
+      call HYPRE_IJVectorSetLocalStorageTy(hypre_b, HYPRE_PARCSR, ierr)
+
+Processors can be informed about distribution of unknowns over processors,
+
+      call HYPRE_IJVectorSetLocalPartition(hypre_b, domain_pt_start,
+     &                                     next_domain_pt_start,
+     &                                     ierr)
+
+and then all processors must agree upon the distribution, ...
+
+      call HYPRE_IJVectorAssemble(hypre_b, ierr)                     .
+
+Memory space is then allocated for the vector components that must
+be handled on the processor, ...
+
+      call HYPRE_IJVectorInitialize(hypre_b, ierr)                   .
+
+      call HYPRE_IJVectorCreate(rad_comm, hypre_x, global_number_pts,
+     &                          ierr)
+
+      call HYPRE_IJVectorSetLocalStorageTy(hypre_x, HYPRE_PARCSR,
+     &                                     ierr)
+
+      call HYPRE_IJVectorSetLocalPartition(hypre_x, domain_pt_start,
+     &                                     next_domain_pt_start,
+     &                                     ierr)
+
+      call HYPRE_IJVectorAssemble(hypre_x, ierr)
+
+      call HYPRE_IJVectorInitialize(hypre_x, ierr)
+
+
+Vector components can be placed into underlying Hypre formats either
+in contiguous subsets, ...
+
+      call HYPRE_IJVectorSetLocalCompsInBl(hypre_b,
+     &                                     domain_pt_start,
+     &                                     next_domain_pt_start-1,
+     &                                     ii,y,ierr)
+
+      call HYPRE_IJVectorSetLocalCompsInBl(hypre_x,
+     &                                     domain_pt_start,
+     &                                     next_domain_pt_start-1,
+     &                                     ii,x,ierr)
+
+or in indexed subsets
+
+      call HYPRE_IJVectorSetLocalComps(hypre_b,
+     &                                 domain_pt_start,
+     &                                 next_domain_pt_start-1,
+     &                                 ii,y,ierr)
+
+      call HYPRE_IJVectorSetLocalComps(hypre_x,
+     &                                 domain_pt_start,
+     &                                 next_domain_pt_start-1,
+     &                                 ii,x,ierr)                   .
+
+After the solver is finished, vector components can be extracted from
+a contiguous subset of components, ...
+
+      call HYPRE_IJVectorGetLocalCompsInBl(hypre_x,
+     &                                     domain_pt_start,
+     &                                     next_domain_pt_start-1,
+     &                                     ii, x, ierr)
+
+or from an indexed subset of components, ...
+
+      call HYPRE_IJVectorGetLocalCompsInBl(hypre_x,
+     &                                     num_values,
+     &                                     ii, x_indices, x, ierr)  .
+
+One can also add to vector components that are already set.
+
