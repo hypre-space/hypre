@@ -35,7 +35,7 @@ c-----------------------------------------------------------------------
 
       integer             hybrid, coarsen_type, measure_type
       integer             debug_flag, ioutdat, cycle_type, k_dim
-      integer             num_rows
+      integer             num_rows, nlevels
 
       integer             zero, one, maxiter, num_iterations
       integer             generate_matrix, generate_rhs
@@ -44,6 +44,7 @@ c-----------------------------------------------------------------------
       double precision    tol, convtol
       double precision    final_res_norm
       double precision    strong_threshold, trunc_factor, drop_tol
+      double precision    threshold
                      
 c     HYPRE_ParCSRMatrix  A
 c     HYPRE_ParVector     b
@@ -153,7 +154,8 @@ c
       endif
 
       write(6,*) 'What solver_id?'
-      write(6,*) '0 AMG, 2 GMRES, 3 AMGGMRES, 4 DSGMRES, 7 PILUTGMRES'
+      write(6,*) '0 AMG, 2 GMRES, 3 AMG-GMRES, 4 DSGMRES'
+      write(6,*) '7 PILUT-GMRES, 8 PARASAILS-GMRES'
       read(5,*) solver_id
 
       if (solver_id .eq. 7) then
@@ -355,7 +357,8 @@ c Set defaults for BoomerAMG
       endif
 
       if (solver_id .eq. 2 .or. solver_id .eq. 3 .or.
-     &    solver_id .eq. 4 .or. solver_id .eq. 7) then
+     &    solver_id .eq. 4 .or. solver_id .eq. 7 .or.
+     &    solver_id .eq. 8) then
 
         maxiter = 100
         k_dim = 5
@@ -421,7 +424,7 @@ c         call HYPRE_ParAMGSetTruncFactor(precond, trunc_factor, ierr)
 
           print *, 'diagonally scaled GMRES'
 
-          precond_id = 8
+          precond_id = 1
 
           call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
      &                                     precond, ierr)
@@ -430,7 +433,7 @@ c         call HYPRE_ParAMGSetTruncFactor(precond, trunc_factor, ierr)
 
           print *, 'PILUT preconditioned GMRES'
 
-          precond_id = 7
+          precond_id = 3
 
           call HYPRE_ParCSRPilutCreate(MPI_COMM_WORLD,
      &                                     precond, ierr) 
@@ -444,6 +447,23 @@ c         call HYPRE_ParAMGSetTruncFactor(precond, trunc_factor, ierr)
      &        call HYPRE_ParCSRPilutSetDropToleran(precond,
      &                                              drop_tol, ierr)
 
+        else if (solver_id .eq. 8) then
+
+           print *, 'ParaSails preconditioned GMRES'
+
+           precond_id = 4
+
+           call HYPRE_ParCSRParaSailsCreate(MPI_COMM_WORLD, precond,
+     &                                      ierr)
+           call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
+     &                                      precond, ierr)
+
+           threshold = 0.1
+           nlevels = 1
+
+           call HYPRE_ParCSRParaSailsSetParams(precond, threshold,
+     &                                         nlevels, ierr)
+
         endif
 
         call HYPRE_ParCSRGMRESSetup(solver, A_storage, b_storage,
@@ -454,7 +474,18 @@ c         call HYPRE_ParAMGSetTruncFactor(precond, trunc_factor, ierr)
      &                                       num_iterations, ierr)
         call HYPRE_ParCSRGMRESGetFinalRelati(solver,
      &                                       final_res_norm, ierr)
+
+        if (solver_id .eq. 3) then
+           call HYPRE_ParAMGDestroy(precond, ierr)
+        else if (solver_id .eq. 7) then
+           call HYPRE_ParCSRPilutDestroy(precond, ierr)
+        else if (solver_id .eq. 8) then
+           call HYPRE_ParCSRParaSailsDestroy(precond, ierr)
+           print *, 'parasails destruction: ',ierr
+        endif
+
         call HYPRE_ParCSRGMRESDestroy(solver, ierr)
+        print *, 'gmres destruction: ',ierr
 
       endif
 
