@@ -32,6 +32,39 @@
 #include "parcsr_mv.h"
 #include "Hypre_IJBuildVector.h"
 #include "IJ_mv.h"
+
+/* following is to help debugging... */
+#include "../babel-runtime/sidl/SIDL_BaseClass_Impl.h"
+int
+SIDL_BaseClass_ReferenceCount(
+  SIDL_BaseClass self)
+{
+  /* DO-NOT-DELETE splicer.begin(SIDL.BaseClass.addReference) */
+   struct SIDL_BaseClass__data* data = SIDL_BaseClass__get_data(self);
+   if (data) {
+     return (data->d_refcount);
+   }
+   else
+      return 0;
+   /* DO-NOT-DELETE splicer.end(SIDL.BaseClass.addReference) */
+}
+
+int
+Hypre_ParCSRVector_ReferenceCount(
+  Hypre_ParCSRVector self)
+{
+  /* DO-NOT-DELETE splicer.begin(SIDL.BaseClass.addReference) */
+   SIDL_BaseClass base = (SIDL_BaseClass) SIDL_BaseClass__cast( self );
+   struct SIDL_BaseClass__data* data = SIDL_BaseClass__get_data(base);
+   if (data) {
+     return (data->d_refcount);
+   }
+   else
+      return 0;
+   /* DO-NOT-DELETE splicer.end(SIDL.BaseClass.addReference) */
+}
+/* ... end of section for debugging aids */
+
 /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector._includes) */
 
 /*
@@ -765,6 +798,8 @@ impl_Hypre_ParCSRVector_Read(
    HYPRE_IJVector ij_b;
    data = Hypre_ParCSRVector__get_data( self );
    ij_b = data->ij_b;
+
+   ierr = HYPRE_IJVectorDestroy( ij_b ); /* HYPRE_IJVectorRead will make a new one */
 
    ierr = HYPRE_IJVectorRead( filename, data->comm,
                               HYPRE_PARCSR, &ij_b );
