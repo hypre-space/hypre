@@ -23,7 +23,7 @@
 
 MLI_Solver *MLI_Solver_Construct( int solver_id )
 {
-   MLI_Solver *solver;
+   MLI_Solver *solver=NULL;
 
    switch ( solver_id )
    {
@@ -51,7 +51,9 @@ MLI_Solver *MLI_Solver_Construct( int solver_id )
            break;
 #endif
       default :
-           cout << "ERROR : Smoother not recognized = " << solver_id << "\n";
+           cout << "ERROR : Solver not recognized = " << solver_id << "\n";
+           cout.flush();
+           exit(1);
    }
    return solver;
 }
