@@ -40,6 +40,14 @@ int hypre_DistributedMatrixGetLocalRange (hypre_DistributedMatrix *matrix , int 
 int hypre_DistributedMatrixGetRow (hypre_DistributedMatrix *matrix , int row , int *size , int **col_ind , double **values );
 int hypre_DistributedMatrixRestoreRow (hypre_DistributedMatrix *matrix , int row , int *size , int **col_ind , double **values );
 
+/* distributed_matrix_ISIS.c */
+int hypre_InitializeDistributedMatrixISIS(hypre_DistributedMatrix *dm);
+int hypre_FreeDistributedMatrixISIS( hypre_DistributedMatrix *dm);
+int hypre_PrintDistributedMatrixISIS( hypre_DistributedMatrix *matrix );
+int hypre_GetDistributedMatrixLocalRangeISIS( hypre_DistributedMatrix *dm, int *start, int *end );
+int hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm, int row, int *size, int **col_ind, double **values );
+int hypre_RestoreDistributedMatrixRowISIS( hypre_DistributedMatrix *dm, int row, int *size, int **col_ind, double **values );
+
 /* distributed_matrix_PETSc.c */
 int hypre_DistributedMatrixDestroyPETSc (hypre_DistributedMatrix *distributed_matrix );
 int hypre_DistributedMatrixPrintPETSc (hypre_DistributedMatrix *matrix );
@@ -47,3 +55,10 @@ int hypre_DistributedMatrixGetLocalRangePETSc (hypre_DistributedMatrix *matrix ,
 int hypre_DistributedMatrixGetRowPETSc (hypre_DistributedMatrix *matrix , int row , int *size , int **col_ind , double **values );
 int hypre_DistributedMatrixRestoreRowPETSc (hypre_DistributedMatrix *matrix , int row , int *size , int **col_ind , double **values );
 
+/* distributed_matrix_parcsr.c */
+int hypre_DistributedMatrixDestroyParCSR ( hypre_DistributedMatrix *distributed_matrix );
+int hypre_DistributedMatrixInitializeParCSR ( hypre_DistributedMatrix *matrix );
+int hypre_DistributedMatrixPrintParCSR ( hypre_DistributedMatrix *matrix );
+int hypre_DistributedMatrixGetLocalRangeParCSR ( hypre_DistributedMatrix *matrix , int *row_start , int *row_end , int *col_start , int *col_end );
+int hypre_DistributedMatrixGetRowParCSR ( hypre_DistributedMatrix *matrix , int row , int *size , int **col_ind , double **values );
+int hypre_DistributedMatrixRestoreRowParCSR ( hypre_DistributedMatrix *matrix , int row , int *size , int **col_ind , double **values );
