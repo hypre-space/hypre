@@ -205,6 +205,25 @@ hypre_SetParVectorConstantValues( hypre_ParVector *v,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SetParVectorRandomValues
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SetParVectorRandomValues( hypre_ParVector *v,
+                                double           seed )
+{
+   int my_id;
+   hypre_Vector *v_local = hypre_ParVectorLocalVector(v);
+
+   MPI_Comm 	comm = hypre_ParVectorComm(v);
+   MPI_Comm_rank(comm,&my_id); 
+
+   seed *= ++my_id;
+           
+   return hypre_SetVectorRandomValues(v_local,seed);
+}
+
+/*--------------------------------------------------------------------------
  * hypre_CopyParVector
  *--------------------------------------------------------------------------*/
 
