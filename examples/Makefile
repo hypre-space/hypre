@@ -14,7 +14,7 @@ CFLAGS    = $(COPTS) $(CINCLUDES) $(CDEFS)
 
 LINKOPTS  = $(COPTS)
 LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -llapack -lblas -lg2c -lm
-LFLAGS    = $(LINKOPTS) $(LIBS)
+LFLAGS    = $(LINKOPTS) $(LIBS) -lstdc++
 
 ########################################################################
 # Rules for compiling the source files
