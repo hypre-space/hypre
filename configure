@@ -25862,7 +25862,8 @@ if test "$casc_using_debug" = "yes" ; then
 then
   if test "x${GCC}" = "xyes"
   then
-        CFLAGS="$CFLAGS -g"
+        CFLAGS="-g"
+    CFLAGS="$CFLAGS -Wall"
 ##  CFLAGS="$CFLAGS -fno-common -Wall -pedantic -Wpointer-arith -Wnested-externs"
 ##  dnl **** check for strength-reduce bug
 ##  ACX_GCC_STRENGTH_REDUCE(CFLAGS="$CFLAGS -fno-strength-reduce")
@@ -25950,7 +25951,7 @@ if test "x${casc_user_chose_cxxflags}" = "xno"
 then
   if test "x${GXX}" = "xyes"
   then
-        CXXFLAGS="-g"
+        CXXFLAGS="-g -Wall"
   else
     case "${CXX}" in
       KCC|mpiKCC)
@@ -26015,7 +26016,7 @@ if test "x${casc_user_chose_fflags}" = "xno"
 then
   if test "x${G77}" = "xyes"
   then
-    FFLAGS="-g"
+    FFLAGS="-g -Wall"
   else
     case "${F77}" in
       kf77|mpikf77)
