@@ -236,7 +236,9 @@ hypre_PrintParCSRMatrix( hypre_ParCSRMatrix *matrix,
 }
 
 hypre_ParCSRMatrix *
-hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A)
+hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
+			       int *row_starts,
+                               int *col_starts )
 {
    int		global_data[2];
    int		global_num_rows;
@@ -244,8 +246,6 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A)
    int		*local_num_rows;
 
    int		num_procs, my_id;
-   int		*row_starts;
-   int		*ends;
    int		*local_num_nonzeros;
    int		num_nonzeros;
 
@@ -268,7 +268,8 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A)
    int 		last_col_diag;
  
    int i, j, ind;
-
+   int no_row_starts = 0;
+   int no_col_starts = 0;
  
    MPI_Comm_rank(comm, &my_id);
    MPI_Comm_size(comm, &num_procs);
@@ -285,25 +286,31 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A)
    global_num_rows = global_data[0];
    global_num_cols = global_data[1];
 
-   row_starts = hypre_CTAlloc(int, num_procs);
-   ends = hypre_CTAlloc(int, num_procs);
    local_num_rows = hypre_CTAlloc(int, num_procs);
    csr_matrix_datatypes = hypre_CTAlloc(MPI_Datatype, num_procs);
 
-   for (i=0; i < num_procs; i++)
+   if (!row_starts)
    {
-	MPE_Decomp1d(global_num_rows, num_procs, i, &row_starts[i], &ends[i]);
-	local_num_rows[i] = ends[i] - row_starts[i] +1;
+	no_row_starts = 1;
+	row_starts = hypre_CTAlloc(int, num_procs+1);
+   	for (i=0; i < num_procs; i++)
+   	{
+	 MPE_Decomp1d(global_num_rows, num_procs, i, &row_starts[i], 
+		&local_num_rows[i]);
+	 row_starts[i]--;
+	 local_num_rows[i] -= row_starts[i];
+   	}
+	row_starts[num_procs] = global_num_rows;
    }
 
    if (my_id == 0)
    {
    	local_num_nonzeros = hypre_CTAlloc(int, num_procs);
    	for (i=0; i < num_procs-1; i++)
-		local_num_nonzeros[i] = a_i[row_starts[i+1]-1] 
-				- a_i[row_starts[i]-1];
+		local_num_nonzeros[i] = a_i[row_starts[i+1]] 
+				- a_i[row_starts[i]];
    	local_num_nonzeros[num_procs-1] = a_i[global_num_rows] 
-				- a_i[row_starts[num_procs-1]-1];
+				- a_i[row_starts[num_procs-1]];
    }
    MPI_Scatter(local_num_nonzeros,1,MPI_INT,&num_nonzeros,1,MPI_INT,0,comm);
 
@@ -318,11 +325,11 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A)
 	j=0;
 	for (i=1; i < num_procs; i++)
 	{
-		ind = a_i[row_starts[i]-1];
+		ind = a_i[row_starts[i]];
 		BuildCSRMatrixMPIDataType(local_num_nonzeros[i], 
 			local_num_rows[i],
 			&a_data[ind],
-			&a_i[row_starts[i]-1],
+			&a_i[row_starts[i]],
 			&a_j[ind],
 			&csr_matrix_datatypes[i]);
 		MPI_Isend(MPI_BOTTOM, 1, csr_matrix_datatypes[i], i, 0, comm,
@@ -351,22 +358,38 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A)
 	MPI_Type_free(csr_matrix_datatypes);
    }
 
-   MPE_Decomp1d(global_num_cols, num_procs, my_id, &first_col_diag, 
+   if (!col_starts)
+   {
+	no_col_starts = 1;
+	col_starts = hypre_CTAlloc(int,num_procs+1);
+	for (i=0; i < num_procs; i++)
+   	{
+    	    MPE_Decomp1d(global_num_cols, num_procs, i, &col_starts[i],
 		&last_col_diag);
+	    col_starts[i]--;
+   	}
+	col_starts[num_procs] = global_num_cols;
+   }
+   
+   {
+	first_col_diag = col_starts[my_id];
+	last_col_diag = col_starts[my_id+1]-1;
+   }
 
    par_matrix = hypre_CreateParCSRMatrix (comm, global_num_rows,
-	global_num_cols,0,0,0,0,0,0,0);
+	global_num_cols,row_starts[my_id],first_col_diag,local_num_rows[my_id],
+	last_col_diag-first_col_diag+1,0,0,0);
    diag = hypre_ParCSRMatrixDiag(par_matrix);
    offd = hypre_ParCSRMatrixOffd(par_matrix);
 
-   GenerateDiagAndOffd(local_A, par_matrix, first_col_diag-1, last_col_diag-1);
+   GenerateDiagAndOffd(local_A, par_matrix, first_col_diag, last_col_diag);
 
 
    hypre_DestroyCSRMatrix(local_A);
-   hypre_TFree(row_starts);
-   hypre_TFree(ends);
    hypre_TFree(local_num_rows);
    hypre_TFree(csr_matrix_datatypes);
+   if (no_row_starts) hypre_TFree(row_starts);
+   if (no_col_starts) hypre_TFree(col_starts);
 
    return par_matrix;
 }
