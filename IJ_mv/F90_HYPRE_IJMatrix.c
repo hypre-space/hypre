@@ -192,12 +192,12 @@ hypre_F90_IFACE(hypre_insertijmatrixblock)( long int *matrix,
                                             double   *values,
                                             int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_InsertIJMatrixBlock( (HYPRE_ParCSRMatrix) *matrix,
-                                              (int)                *m,
-                                              (int)                *n,
-                                              (int *)               rows,
-                                              (int *)               cols,
-                                              (double *)            values  ) );
+   *ierr = (int) ( HYPRE_InsertIJMatrixBlock( (HYPRE_IJMatrix) *matrix,
+                                              (int)            *m,
+                                              (int)            *n,
+                                              (int *)           rows,
+                                              (int *)           cols,
+                                              (double *)        values  ) );
 
 }
 
@@ -214,12 +214,12 @@ hypre_F90_IFACE(hypre_addblocktoijmatrix)( long int *matrix,
                                            double   *values,
                                            int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_AddBlockToIJMatrix( (HYPRE_ParCSRMatrix) *matrix,
-                                             (int)                *m,
-                                             (int)                *n,
-                                             (int *)               rows,
-                                             (int *)               cols,
-                                             (double *)            values  ) );
+   *ierr = (int) ( HYPRE_AddBlockToIJMatrix( (HYPRE_IJMatrix) *matrix,
+                                             (int)            *m,
+                                             (int)            *n,
+                                             (int *)           rows,
+                                             (int *)           cols,
+                                             (double *)        values  ) );
 
 }
 
