@@ -10,7 +10,12 @@
  *
  *****************************************************************************/
 
+/* following should be in a header file */
+
+
 #include "headers.h"
+
+
 
 /*==========================================================================*/
 /*==========================================================================*/
@@ -2212,112 +2217,11 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 /*==========================================================================*/
 /* Ruge's coarsening algorithm with Lists						    */
 /*==========================================================================*/
-#define LIST_HEAD -1
-#define LIST_TAIL -2
+
 #define CPOINT 1
 #define FPOINT -1
-#define UNDECIDED 0
-/*****************************************************************
- * 
- * remove_point:   removes a point from the lists
- *
- ****************************************************************/
-void 
-remove_point(int   measure,
-             int   index, 
-             int   *LoL_head, 
-             int   *LoL_tail, 
-             int   *lists, 
-             int   *where)
-{
-    if (LoL_head[measure] == LoL_tail[measure]) 
-    {
-        LoL_head[measure] = LIST_TAIL;
-        LoL_tail[measure] = LIST_HEAD;
-    }
-    else if (LoL_head[measure] == index)
-    {
-       where[lists[index]] = LIST_HEAD;
-       LoL_head[measure] = lists[index];
-    }
-    else if (LoL_tail[measure] == index)
-    {
-       lists[where[index]] = LIST_TAIL;
-       LoL_tail[measure] = where[index];
-    }
-    else
-    {
-       lists[where[index]] = lists[index];
-       where[lists[index]] = where[index];
-    }
+#define UNDECIDED 0 
 
-    return;
-}
-
-/*****************************************************************
- * 
- * increment   places point in new list
- *
- ****************************************************************/
-void 
-enter_on_lists(int   measure,
-               int   index, 
-               int   *LoL_head, 
-               int   *LoL_tail, 
-               int   *lists, 
-               int   *where)
-{
-   if (LoL_head[measure]==LIST_TAIL)
-   {
-      LoL_head[measure] = index;
-      LoL_tail[measure] = index;
-      lists[index] = LIST_TAIL;
-      where[index] = LIST_HEAD;
-   }
-   else
-   {
-      lists[LoL_tail[measure]] = index;
-      where[index] = LoL_tail[measure];
-      lists[index] = LIST_TAIL;
-      LoL_tail[measure] = index;
-   }
-   return;
-}
-
-   
-/*****************************************************************
- *
- *  Print out the lists, pauses for input
- *
- *****************************************************************/
-void print_lists(int   max_measure,
-                 int   index,
-                 int  *LoL_head,
-                 int  *LoL_tail,
-                 int  *lists,
-                 int  *where)
-
-{
-   char c;
-   int  j;
-
-   for (j = max_measure; j > 0; j--)
-   {
-      if (LoL_head[j] != LIST_TAIL)
-      {
-         printf("List %d:  %d ->", j,LoL_head[j]);
-         index = LoL_head[j];
-         while (lists[index] != LIST_TAIL) 
-         {
-            printf("%d ->", lists[index]);
-            index = lists[index];
-         }
-         printf("EOL\n");
-      }
-   }
-  printf("continue?");
-  c = getchar();
-}
 
 /**************************************************************
  *
@@ -2395,7 +2299,10 @@ hypre_ParAMGCoarsenRugeLoL( hypre_ParCSRMatrix    *A,
    int		    first_col, start;
    int		    col_0, col_n;
 
-   int             *lists, *where, *LoL_head, *LoL_tail;
+   hypre_LinkList   LoL_head;
+   hypre_LinkList   LoL_tail;
+
+   int             *lists, *where;
    int              points_left, new_C;
    int              new_meas, bumps, top_max;
    int              num_left;
@@ -2412,16 +2319,10 @@ hypre_ParAMGCoarsenRugeLoL( hypre_ParCSRMatrix    *A,
     * Initialize the C/F marker, LoL_head, LoL_tail  arrays
     *-------------------------------------------------------*/
 
+   LoL_head = NULL;
+   LoL_tail = NULL;
    lists = hypre_CTAlloc(int, num_variables);
    where = hypre_CTAlloc(int, num_variables);
-   LoL_head = hypre_CTAlloc(int, 2*num_variables);
-   LoL_tail = hypre_CTAlloc(int, 2*num_variables);
-
-   for (i = 0; i < 2*num_variables; i++)
-   {
-      LoL_head[i] = LIST_TAIL;
-      LoL_tail[i] = LIST_HEAD;
-   }
 
    CF_marker = hypre_CTAlloc(int, num_variables);
    for (j = 0; j < num_variables; j++)
@@ -2708,15 +2609,13 @@ hypre_ParAMGCoarsenRugeLoL( hypre_ParCSRMatrix    *A,
 
    num_left = num_variables;
    coarse_size = 0;
-   max_measure = 0;
  
    for (j = 0; j < num_variables; j++) 
    {    
       measure = measure_array[j];
       if (measure > 0) 
       {
-         max_measure = (max_measure < measure) ? measure : max_measure;
-         enter_on_lists(measure, j, LoL_head, LoL_tail, lists, where);
+         enter_on_lists(&LoL_head, &LoL_tail, measure, j, lists, where);
       }
       else
       {
@@ -2743,69 +2642,27 @@ hypre_ParAMGCoarsenRugeLoL( hypre_ParCSRMatrix    *A,
     *
     ****************************************************************/
 
-   top_max = max_measure;
-   bumps = 0;
-
    while (num_left > 0)
    {
-      index = LoL_head[max_measure];
-
-      if (index == LIST_TAIL)
-      {
-         if(LoL_head[max_measure] == LIST_TAIL &&
-            LoL_tail[max_measure] == LIST_HEAD)
-         {
-            start = num_variables-1;
-            max_measure = 0;
-            for (j = top_max+bumps; j >= 0; j--)
-            {
-               if (LoL_head[j] != LIST_TAIL)
-               {
-                  max_measure = (max_measure > j) ? max_measure : j;
-                  break;
-               }
-            }
-            top_max = (max_measure > top_max)? max_measure : top_max;
-         }   
-         index = LoL_head[max_measure];
-      }
-      if (index < 0 || index > num_variables-1) 
-                 printf("index %d, N= %d, max= %d\n",
-                         index, num_variables,max_measure);
+      index = LoL_head -> head;
 
       CF_marker[index] = CPOINT;
       ++coarse_size;
+      measure = measure_array[index];
       measure_array[index] = 0;
       --num_left;
       
-      remove_point(max_measure, index, LoL_head, LoL_tail, lists, where);
-
-      if(LoL_head[max_measure] == LIST_TAIL &&
-         LoL_tail[max_measure] == LIST_HEAD)
-      {
-         start = num_variables-1;
-         max_measure = 0;
-         for (j = top_max+bumps; j >= 0; j--)
-         {
-            if (LoL_head[j] != LIST_TAIL)
-            {
-               max_measure = (max_measure > j) ? max_measure : j;
-               break;
-            }
-         }
-         top_max = (max_measure > top_max)? max_measure : top_max;
-      }      
-   
+      remove_point(&LoL_head, &LoL_tail, measure, index, lists, where);
+  
       for (j = ST_i[index]; j < ST_i[index+1]; j++)
       {
-         bumps = 0;
          nabor = ST_j[j];
          if (CF_marker[nabor] == UNDECIDED)
          {
             CF_marker[nabor] = FPOINT;
             measure = measure_array[nabor];
 
-            remove_point(measure, nabor, LoL_head, LoL_tail, lists, where);
+            remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
             --num_left;
 
             for (k = S_i[nabor]; k < S_i[nabor+1]; k++)
@@ -2814,23 +2671,19 @@ hypre_ParAMGCoarsenRugeLoL( hypre_ParCSRMatrix    *A,
                if (CF_marker[nabor_two] == UNDECIDED)
                {
                   measure = measure_array[nabor_two];
-                  remove_point(measure, nabor_two, LoL_head, 
-                               LoL_tail, lists, where);
+                  remove_point(&LoL_head, &LoL_tail, measure, 
+                               nabor_two, lists, where);
 
                   new_meas = ++(measure_array[nabor_two]);
-                  ++bumps;
-                  enter_on_lists(new_meas,nabor_two,LoL_head,
-                              LoL_tail, lists, where);
-
-                  max_measure = (max_measure < new_meas) ? 
-                                                new_meas : max_measure;
-                  top_max = (max_measure > top_max) ? max_measure : top_max;
+                 
+                  enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                                 nabor_two, lists, where);
                }
             }
          }
       }
 
-   }  
+   }
 
    hypre_TFree(measure_array);
    hypre_DestroyCSRMatrix(ST);
