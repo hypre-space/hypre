@@ -248,11 +248,16 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
        coarse_size = hypre_ParCSRMatrixGlobalNumCols(P_array[level]);
        global_nonzeros = hypre_ParCSRMatrixNumNonzeros(P_array[level]);
 
-       min_weight = P_diag_data[0];
+       min_weight = 0.0;
        max_weight = 0.0;
        max_rowsum = 0.0;
-       min_rowsum = 0.0; 
-
+       min_rowsum = 0.0;
+       min_entries = 0;
+       max_entries = 0;
+ 
+  if (hypre_CSRMatrixNumNonzeros(P_diag))
+  {
+       min_weight = P_diag_data[0];
        for (j = P_diag_i[0]; j < P_diag_i[1]; j++)
        {
             min_weight = min(min_weight, P_diag_data[j]);
@@ -301,6 +306,7 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
            max_rowsum = max(rowsum, max_rowsum);
        }
 
+  }
        avg_entries = ((double) global_nonzeros) / ((double) fine_size);
 
        send_buff[0] = (double) min_entries;
