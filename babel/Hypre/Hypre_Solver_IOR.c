@@ -2,9 +2,9 @@
  * File:          Hypre_Solver_IOR.c
  * Symbol:        Hypre.Solver-v0.1.5
  * Symbol Type:   interface
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:14 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:39 PDT
  * Description:   Intermediate Object Representation for Hypre.Solver
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -502,6 +502,70 @@ remote_Hypre_Solver_SetCommunicator(
 }
 
 /*
+ * REMOTE METHOD STUB:SetDoubleArrayParameter
+ */
+
+static int32_t
+remote_Hypre_Solver_SetDoubleArrayParameter(
+  void* self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetDoubleParameter
+ */
+
+static int32_t
+remote_Hypre_Solver_SetDoubleParameter(
+  void* self,
+  const char* name,
+  double value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetIntArrayParameter
+ */
+
+static int32_t
+remote_Hypre_Solver_SetIntArrayParameter(
+  void* self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetIntParameter
+ */
+
+static int32_t
+remote_Hypre_Solver_SetIntParameter(
+  void* self,
+  const char* name,
+  int32_t value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetLogging
+ */
+
+static int32_t
+remote_Hypre_Solver_SetLogging(
+  void* self,
+  int32_t level)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:SetOperator
  */
 
@@ -514,14 +578,26 @@ remote_Hypre_Solver_SetOperator(
 }
 
 /*
- * REMOTE METHOD STUB:SetParameter
+ * REMOTE METHOD STUB:SetPrintLevel
  */
 
 static int32_t
-remote_Hypre_Solver_SetParameter(
+remote_Hypre_Solver_SetPrintLevel(
+  void* self,
+  int32_t level)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetStringParameter
+ */
+
+static int32_t
+remote_Hypre_Solver_SetStringParameter(
   void* self,
   const char* name,
-  double value)
+  const char* value)
 {
   return 0;
 }
@@ -601,19 +677,25 @@ static void Hypre_Solver__init_remote_epv(void)
 {
   struct Hypre_Solver__epv* epv = &s_rem__hypre_solver;
 
-  epv->f__cast           = remote_Hypre_Solver__cast;
-  epv->f__delete         = remote_Hypre_Solver__delete;
-  epv->f_Apply           = remote_Hypre_Solver_Apply;
-  epv->f_GetResidual     = remote_Hypre_Solver_GetResidual;
-  epv->f_SetCommunicator = remote_Hypre_Solver_SetCommunicator;
-  epv->f_SetOperator     = remote_Hypre_Solver_SetOperator;
-  epv->f_SetParameter    = remote_Hypre_Solver_SetParameter;
-  epv->f_Setup           = remote_Hypre_Solver_Setup;
-  epv->f_addReference    = remote_Hypre_Solver_addReference;
-  epv->f_deleteReference = remote_Hypre_Solver_deleteReference;
-  epv->f_isInstanceOf    = remote_Hypre_Solver_isInstanceOf;
-  epv->f_isSame          = remote_Hypre_Solver_isSame;
-  epv->f_queryInterface  = remote_Hypre_Solver_queryInterface;
+  epv->f__cast                   = remote_Hypre_Solver__cast;
+  epv->f__delete                 = remote_Hypre_Solver__delete;
+  epv->f_Apply                   = remote_Hypre_Solver_Apply;
+  epv->f_GetResidual             = remote_Hypre_Solver_GetResidual;
+  epv->f_SetCommunicator         = remote_Hypre_Solver_SetCommunicator;
+  epv->f_SetDoubleArrayParameter = remote_Hypre_Solver_SetDoubleArrayParameter;
+  epv->f_SetDoubleParameter      = remote_Hypre_Solver_SetDoubleParameter;
+  epv->f_SetIntArrayParameter    = remote_Hypre_Solver_SetIntArrayParameter;
+  epv->f_SetIntParameter         = remote_Hypre_Solver_SetIntParameter;
+  epv->f_SetLogging              = remote_Hypre_Solver_SetLogging;
+  epv->f_SetOperator             = remote_Hypre_Solver_SetOperator;
+  epv->f_SetPrintLevel           = remote_Hypre_Solver_SetPrintLevel;
+  epv->f_SetStringParameter      = remote_Hypre_Solver_SetStringParameter;
+  epv->f_Setup                   = remote_Hypre_Solver_Setup;
+  epv->f_addReference            = remote_Hypre_Solver_addReference;
+  epv->f_deleteReference         = remote_Hypre_Solver_deleteReference;
+  epv->f_isInstanceOf            = remote_Hypre_Solver_isInstanceOf;
+  epv->f_isSame                  = remote_Hypre_Solver_isSame;
+  epv->f_queryInterface          = remote_Hypre_Solver_queryInterface;
   s_remote_initialized = 1;
 }
 

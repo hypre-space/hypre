@@ -2,9 +2,9 @@
  * File:          Hypre_ParCSRVector_Impl.h
  * Symbol:        Hypre.ParCSRVector-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:19 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:45 PDT
  * Description:   Server-side implementation for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -17,22 +17,22 @@
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
 #endif
-#ifndef included_Hypre_ParCSRVector_h
-#include "Hypre_ParCSRVector.h"
+#ifndef included_Hypre_Vector_h
+#include "Hypre_Vector.h"
 #endif
 #ifndef included_SIDL_BaseInterface_h
 #include "SIDL_BaseInterface.h"
 #endif
-#ifndef included_Hypre_Vector_h
-#include "Hypre_Vector.h"
+#ifndef included_Hypre_ParCSRVector_h
+#include "Hypre_ParCSRVector.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector._includes) */
 /* Put additional include files here... */
-/* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector._includes) */
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE.h"
 #include "utilities.h"
+/* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector._includes) */
 
 /*
  * Private data for class Hypre.ParCSRVector

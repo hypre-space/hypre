@@ -2,9 +2,9 @@
  * File:          Hypre_IJBuildVector.h
  * Symbol:        Hypre.IJBuildVector-v0.1.5
  * Symbol Type:   interface
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:18 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:42 PDT
  * Description:   Client-side glue code for Hypre.IJBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -37,6 +37,17 @@ extern "C" {
 #endif
 
 /**
+ * Method:  SetLocalComponents
+ */
+int32_t
+Hypre_IJBuildVector_SetLocalComponents(
+  Hypre_IJBuildVector self,
+  int32_t num_values,
+  struct SIDL_int__array* glob_vec_indices,
+  struct SIDL_int__array* value_indices,
+  struct SIDL_double__array* values);
+
+/**
  * Adds to values in vector.  Usage details are analogous to
  * \Ref{SetValues}.
  * 
@@ -50,75 +61,6 @@ Hypre_IJBuildVector_AddToValues(
   int32_t nvalues,
   struct SIDL_int__array* indices,
   struct SIDL_double__array* values);
-
-/**
- * Method:  AddtoLocalComponents
- */
-int32_t
-Hypre_IJBuildVector_AddtoLocalComponents(
-  Hypre_IJBuildVector self,
-  int32_t num_values,
-  struct SIDL_int__array* glob_vec_indices,
-  struct SIDL_int__array* value_indices,
-  struct SIDL_double__array* values);
-
-/**
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- * 
- */
-int32_t
-Hypre_IJBuildVector_Initialize(
-  Hypre_IJBuildVector self);
-
-/**
- * <p>
- * Add one to the intrinsic reference count in the underlying object.
- * Object in <code>SIDL</code> have an intrinsic reference count.
- * Objects continue to exist as long as the reference count is
- * positive. Clients should call this method whenever they
- * create another ongoing reference to an object or interface.
- * </p>
- * <p>
- * This does not have a return value because there is no language
- * independent type that can refer to an interface or a
- * class.
- * </p>
- */
-void
-Hypre_IJBuildVector_addReference(
-  Hypre_IJBuildVector self);
-
-/**
- * Method:  SetCommunicator
- */
-int32_t
-Hypre_IJBuildVector_SetCommunicator(
-  Hypre_IJBuildVector self,
-  void* mpi_comm);
-
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-SIDL_BaseInterface
-Hypre_IJBuildVector_queryInterface(
-  Hypre_IJBuildVector self,
-  const char* name);
-
-/**
- * Method:  SetPartitioning
- */
-int32_t
-Hypre_IJBuildVector_SetPartitioning(
-  Hypre_IJBuildVector self,
-  struct SIDL_int__array* partitioning);
 
 /**
  * Create a vector object.  Each process owns some unique consecutive
@@ -141,15 +83,20 @@ Hypre_IJBuildVector_Create(
   int32_t jupper);
 
 /**
- * Method:  SetLocalComponents
+ * Method:  SetPartitioning
  */
 int32_t
-Hypre_IJBuildVector_SetLocalComponents(
+Hypre_IJBuildVector_SetPartitioning(
   Hypre_IJBuildVector self,
-  int32_t num_values,
-  struct SIDL_int__array* glob_vec_indices,
-  struct SIDL_int__array* value_indices,
-  struct SIDL_double__array* values);
+  struct SIDL_int__array* partitioning);
+
+/**
+ * Method:  SetCommunicator
+ */
+int32_t
+Hypre_IJBuildVector_SetCommunicator(
+  Hypre_IJBuildVector self,
+  void* mpi_comm);
 
 /**
  * Read the vector from file.  This is mainly for debugging purposes.
@@ -163,10 +110,109 @@ Hypre_IJBuildVector_Read(
   void* comm);
 
 /**
- * Method:  AddToLocalComponentsInBlock
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+SIDL_bool
+Hypre_IJBuildVector_isInstanceOf(
+  Hypre_IJBuildVector self,
+  const char* name);
+
+/**
+ * The problem definition interface is a "builder" that creates an object
+ * that contains the problem definition information, e.g. a matrix. To
+ * perform subsequent operations with that object, it must be returned from
+ * the problem definition object. "GetObject" performs this function.
+ * <note>At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
+ * be used on the returned object to convert it into a known type.</note>
+ * 
+ * 
  */
 int32_t
-Hypre_IJBuildVector_AddToLocalComponentsInBlock(
+Hypre_IJBuildVector_GetObject(
+  Hypre_IJBuildVector self,
+  SIDL_BaseInterface* A);
+
+/**
+ * Finalize the construction of an object before using, either for
+ * the first time or on subsequent uses. "Initialize" and "Assemble"
+ * always appear in a matched set, with Initialize preceding Assemble. Values
+ * can only be set in between a call to Initialize and Assemble.
+ * 
+ * 
+ */
+int32_t
+Hypre_IJBuildVector_Assemble(
+  Hypre_IJBuildVector self);
+
+/**
+ * Check whether the object can support the specified interface or
+ * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * is supported, then a reference to that object is returned with the
+ * reference count incremented.  The callee will be responsible for
+ * calling <code>deleteReference</code> on the returned object.  If
+ * the specified type is not supported, then a null reference is
+ * returned.
+ */
+SIDL_BaseInterface
+Hypre_IJBuildVector_queryInterface(
+  Hypre_IJBuildVector self,
+  const char* name);
+
+/**
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ * 
+ * 
+ */
+int32_t
+Hypre_IJBuildVector_Initialize(
+  Hypre_IJBuildVector self);
+
+/**
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
+ */
+SIDL_bool
+Hypre_IJBuildVector_isSame(
+  Hypre_IJBuildVector self,
+  SIDL_BaseInterface iobj);
+
+/**
+ * Print the vector to file.  This is mainly for debugging purposes.
+ * 
+ */
+int32_t
+Hypre_IJBuildVector_Print(
+  Hypre_IJBuildVector self,
+  const char* filename);
+
+/**
+ * <p>
+ * Add one to the intrinsic reference count in the underlying object.
+ * Object in <code>SIDL</code> have an intrinsic reference count.
+ * Objects continue to exist as long as the reference count is
+ * positive. Clients should call this method whenever they
+ * create another ongoing reference to an object or interface.
+ * </p>
+ * <p>
+ * This does not have a return value because there is no language
+ * independent type that can refer to an interface or a
+ * class.
+ * </p>
+ */
+void
+Hypre_IJBuildVector_addReference(
+  Hypre_IJBuildVector self);
+
+/**
+ * Method:  SetLocalComponentsInBlock
+ */
+int32_t
+Hypre_IJBuildVector_SetLocalComponentsInBlock(
   Hypre_IJBuildVector self,
   int32_t glob_vec_index_start,
   int32_t glob_vec_index_stop,
@@ -182,45 +228,15 @@ Hypre_IJBuildVector_SetGlobalSize(
   int32_t n);
 
 /**
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
- */
-SIDL_bool
-Hypre_IJBuildVector_isSame(
-  Hypre_IJBuildVector self,
-  SIDL_BaseInterface iobj);
-
-/**
- * Method:  SetLocalComponentsInBlock
+ * Method:  AddtoLocalComponents
  */
 int32_t
-Hypre_IJBuildVector_SetLocalComponentsInBlock(
+Hypre_IJBuildVector_AddtoLocalComponents(
   Hypre_IJBuildVector self,
-  int32_t glob_vec_index_start,
-  int32_t glob_vec_index_stop,
+  int32_t num_values,
+  struct SIDL_int__array* glob_vec_indices,
   struct SIDL_int__array* value_indices,
   struct SIDL_double__array* values);
-
-/**
- * Finalize the construction of an object before using, either for
- * the first time or on subsequent uses. "Initialize" and "Assemble"
- * always appear in a matched set, with Initialize preceding Assemble. Values
- * can only be set in between a call to Initialize and Assemble.
- * 
- * 
- */
-int32_t
-Hypre_IJBuildVector_Assemble(
-  Hypre_IJBuildVector self);
-
-/**
- * Print the vector to file.  This is mainly for debugging purposes.
- * 
- */
-int32_t
-Hypre_IJBuildVector_Print(
-  Hypre_IJBuildVector self,
-  const char* filename);
 
 /**
  * Sets values in vector.  The arrays {\tt values} and {\tt indices}
@@ -241,6 +257,17 @@ Hypre_IJBuildVector_SetValues(
   struct SIDL_double__array* values);
 
 /**
+ * Method:  AddToLocalComponentsInBlock
+ */
+int32_t
+Hypre_IJBuildVector_AddToLocalComponentsInBlock(
+  Hypre_IJBuildVector self,
+  int32_t glob_vec_index_start,
+  int32_t glob_vec_index_stop,
+  struct SIDL_int__array* value_indices,
+  struct SIDL_double__array* values);
+
+/**
  * Decrease by one the intrinsic reference count in the underlying
  * object, and delete the object if the reference is non-positive.
  * Objects in <code>SIDL</code> have an intrinsic reference count.
@@ -250,33 +277,6 @@ Hypre_IJBuildVector_SetValues(
 void
 Hypre_IJBuildVector_deleteReference(
   Hypre_IJBuildVector self);
-
-/**
- * The problem definition interface is a "builder" that creates an object
- * that contains the problem definition information, e.g. a matrix. To
- * perform subsequent operations with that object, it must be returned from
- * the problem definition object. "GetObject" performs this function.
- * <note>At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
- * be used on the returned object to convert it into a known type.</note>
- * 
- * 
- */
-int32_t
-Hypre_IJBuildVector_GetObject(
-  Hypre_IJBuildVector self,
-  SIDL_BaseInterface* A);
-
-/**
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
- */
-SIDL_bool
-Hypre_IJBuildVector_isInstanceOf(
-  Hypre_IJBuildVector self,
-  const char* name);
 
 /**
  * Cast method for interface and class type conversions.

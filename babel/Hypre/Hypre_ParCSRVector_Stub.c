@@ -2,9 +2,9 @@
  * File:          Hypre_ParCSRVector_Stub.c
  * Symbol:        Hypre.ParCSRVector-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:18 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:43 PDT
  * Description:   Client-side glue code for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -58,41 +58,18 @@ Hypre_ParCSRVector__create()
 }
 
 /*
- * Adds to values in vector.  Usage details are analogous to
- * \Ref{SetValues}.
- * 
- * Not collective.
- * 
- * 
+ * Method:  SetLocalComponents
  */
 
 int32_t
-Hypre_ParCSRVector_AddToValues(
-  Hypre_ParCSRVector self,
-  int32_t nvalues,
-  struct SIDL_int__array* indices,
-  struct SIDL_double__array* values)
-{
-  return (*self->d_epv->f_AddToValues)(
-    self,
-    nvalues,
-    indices,
-    values);
-}
-
-/*
- * Method:  AddtoLocalComponents
- */
-
-int32_t
-Hypre_ParCSRVector_AddtoLocalComponents(
+Hypre_ParCSRVector_SetLocalComponents(
   Hypre_ParCSRVector self,
   int32_t num_values,
   struct SIDL_int__array* glob_vec_indices,
   struct SIDL_int__array* value_indices,
   struct SIDL_double__array* values)
 {
-  return (*self->d_epv->f_AddtoLocalComponents)(
+  return (*self->d_epv->f_SetLocalComponents)(
     self,
     num_values,
     glob_vec_indices,
@@ -101,19 +78,66 @@ Hypre_ParCSRVector_AddtoLocalComponents(
 }
 
 /*
- * y <- a*x + y
+ * create an x compatible with y
  */
 
 int32_t
-Hypre_ParCSRVector_Axpy(
+Hypre_ParCSRVector_Clone(
   Hypre_ParCSRVector self,
-  double a,
-  Hypre_Vector x)
+  Hypre_Vector* x)
 {
-  return (*self->d_epv->f_Axpy)(
+  return (*self->d_epv->f_Clone)(
     self,
-    a,
     x);
+}
+
+/*
+ * Method:  SetCommunicator
+ */
+
+int32_t
+Hypre_ParCSRVector_SetCommunicator(
+  Hypre_ParCSRVector self,
+  void* mpi_comm)
+{
+  return (*self->d_epv->f_SetCommunicator)(
+    self,
+    mpi_comm);
+}
+
+/*
+ * Read the vector from file.  This is mainly for debugging purposes.
+ * 
+ * 
+ */
+
+int32_t
+Hypre_ParCSRVector_Read(
+  Hypre_ParCSRVector self,
+  const char* filename,
+  void* comm)
+{
+  return (*self->d_epv->f_Read)(
+    self,
+    filename,
+    comm);
+}
+
+/*
+ * Finalize the construction of an object before using, either for
+ * the first time or on subsequent uses. "Initialize" and "Assemble"
+ * always appear in a matched set, with Initialize preceding Assemble. Values
+ * can only be set in between a call to Initialize and Assemble.
+ * 
+ * 
+ */
+
+int32_t
+Hypre_ParCSRVector_Assemble(
+  Hypre_ParCSRVector self)
+{
+  return (*self->d_epv->f_Assemble)(
+    self);
 }
 
 /*
@@ -128,6 +152,33 @@ Hypre_ParCSRVector_Initialize(
   Hypre_ParCSRVector self)
 {
   return (*self->d_epv->f_Initialize)(
+    self);
+}
+
+/*
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
+ */
+
+SIDL_bool
+Hypre_ParCSRVector_isSame(
+  Hypre_ParCSRVector self,
+  SIDL_BaseInterface iobj)
+{
+  return (*self->d_epv->f_isSame)(
+    self,
+    iobj);
+}
+
+/*
+ * y <- 0 (where y=self)
+ */
+
+int32_t
+Hypre_ParCSRVector_Clear(
+  Hypre_ParCSRVector self)
+{
+  return (*self->d_epv->f_Clear)(
     self);
 }
 
@@ -155,71 +206,122 @@ Hypre_ParCSRVector_addReference(
 }
 
 /*
- * Method:  SetCommunicator
+ * y <- a*y 
  */
 
 int32_t
-Hypre_ParCSRVector_SetCommunicator(
+Hypre_ParCSRVector_Scale(
   Hypre_ParCSRVector self,
-  void* mpi_comm)
+  double a)
 {
-  return (*self->d_epv->f_SetCommunicator)(
+  return (*self->d_epv->f_Scale)(
     self,
-    mpi_comm);
+    a);
 }
 
 /*
- * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-
-SIDL_BaseInterface
-Hypre_ParCSRVector_queryInterface(
-  Hypre_ParCSRVector self,
-  const char* name)
-{
-  return (*self->d_epv->f_queryInterface)(
-    self,
-    name);
-}
-
-/*
- * Method:  GetRow
+ * Method:  SetLocalComponentsInBlock
  */
 
 int32_t
-Hypre_ParCSRVector_GetRow(
+Hypre_ParCSRVector_SetLocalComponentsInBlock(
   Hypre_ParCSRVector self,
-  int32_t row,
-  int32_t* size,
-  struct SIDL_int__array** col_ind,
-  struct SIDL_double__array** values)
+  int32_t glob_vec_index_start,
+  int32_t glob_vec_index_stop,
+  struct SIDL_int__array* value_indices,
+  struct SIDL_double__array* values)
 {
-  return (*self->d_epv->f_GetRow)(
+  return (*self->d_epv->f_SetLocalComponentsInBlock)(
     self,
-    row,
-    size,
-    col_ind,
+    glob_vec_index_start,
+    glob_vec_index_stop,
+    value_indices,
     values);
 }
 
 /*
- * Method:  SetPartitioning
+ * d <- (y,x)
  */
 
 int32_t
-Hypre_ParCSRVector_SetPartitioning(
+Hypre_ParCSRVector_Dot(
   Hypre_ParCSRVector self,
-  struct SIDL_int__array* partitioning)
+  Hypre_Vector x,
+  double* d)
 {
-  return (*self->d_epv->f_SetPartitioning)(
+  return (*self->d_epv->f_Dot)(
     self,
-    partitioning);
+    x,
+    d);
+}
+
+/*
+ * Method:  SetGlobalSize
+ */
+
+int32_t
+Hypre_ParCSRVector_SetGlobalSize(
+  Hypre_ParCSRVector self,
+  int32_t n)
+{
+  return (*self->d_epv->f_SetGlobalSize)(
+    self,
+    n);
+}
+
+/*
+ * y <- a*x + y
+ */
+
+int32_t
+Hypre_ParCSRVector_Axpy(
+  Hypre_ParCSRVector self,
+  double a,
+  Hypre_Vector x)
+{
+  return (*self->d_epv->f_Axpy)(
+    self,
+    a,
+    x);
+}
+
+/*
+ * Decrease by one the intrinsic reference count in the underlying
+ * object, and delete the object if the reference is non-positive.
+ * Objects in <code>SIDL</code> have an intrinsic reference count.
+ * Clients should call this method whenever they remove a
+ * reference to an object or interface.
+ */
+
+void
+Hypre_ParCSRVector_deleteReference(
+  Hypre_ParCSRVector self)
+{
+  (*self->d_epv->f_deleteReference)(
+    self);
+}
+
+/*
+ * Adds to values in vector.  Usage details are analogous to
+ * \Ref{SetValues}.
+ * 
+ * Not collective.
+ * 
+ * 
+ */
+
+int32_t
+Hypre_ParCSRVector_AddToValues(
+  Hypre_ParCSRVector self,
+  int32_t nvalues,
+  struct SIDL_int__array* indices,
+  struct SIDL_double__array* values)
+{
+  return (*self->d_epv->f_AddToValues)(
+    self,
+    nvalues,
+    indices,
+    values);
 }
 
 /*
@@ -251,240 +353,34 @@ Hypre_ParCSRVector_Create(
 }
 
 /*
- * Method:  SetLocalComponents
+ * Method:  SetPartitioning
  */
 
 int32_t
-Hypre_ParCSRVector_SetLocalComponents(
+Hypre_ParCSRVector_SetPartitioning(
   Hypre_ParCSRVector self,
-  int32_t num_values,
-  struct SIDL_int__array* glob_vec_indices,
-  struct SIDL_int__array* value_indices,
-  struct SIDL_double__array* values)
+  struct SIDL_int__array* partitioning)
 {
-  return (*self->d_epv->f_SetLocalComponents)(
+  return (*self->d_epv->f_SetPartitioning)(
     self,
-    num_values,
-    glob_vec_indices,
-    value_indices,
-    values);
+    partitioning);
 }
 
 /*
- * Read the vector from file.  This is mainly for debugging purposes.
- * 
- * 
- */
-
-int32_t
-Hypre_ParCSRVector_Read(
-  Hypre_ParCSRVector self,
-  const char* filename,
-  void* comm)
-{
-  return (*self->d_epv->f_Read)(
-    self,
-    filename,
-    comm);
-}
-
-/*
- * Method:  AddToLocalComponentsInBlock
- */
-
-int32_t
-Hypre_ParCSRVector_AddToLocalComponentsInBlock(
-  Hypre_ParCSRVector self,
-  int32_t glob_vec_index_start,
-  int32_t glob_vec_index_stop,
-  struct SIDL_int__array* value_indices,
-  struct SIDL_double__array* values)
-{
-  return (*self->d_epv->f_AddToLocalComponentsInBlock)(
-    self,
-    glob_vec_index_start,
-    glob_vec_index_stop,
-    value_indices,
-    values);
-}
-
-/*
- * Method:  SetGlobalSize
- */
-
-int32_t
-Hypre_ParCSRVector_SetGlobalSize(
-  Hypre_ParCSRVector self,
-  int32_t n)
-{
-  return (*self->d_epv->f_SetGlobalSize)(
-    self,
-    n);
-}
-
-/*
- * create an x compatible with y
- */
-
-int32_t
-Hypre_ParCSRVector_Clone(
-  Hypre_ParCSRVector self,
-  Hypre_Vector* x)
-{
-  return (*self->d_epv->f_Clone)(
-    self,
-    x);
-}
-
-/*
- * y <- 0 (where y=self)
- */
-
-int32_t
-Hypre_ParCSRVector_Clear(
-  Hypre_ParCSRVector self)
-{
-  return (*self->d_epv->f_Clear)(
-    self);
-}
-
-/*
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
  */
 
 SIDL_bool
-Hypre_ParCSRVector_isSame(
+Hypre_ParCSRVector_isInstanceOf(
   Hypre_ParCSRVector self,
-  SIDL_BaseInterface iobj)
+  const char* name)
 {
-  return (*self->d_epv->f_isSame)(
+  return (*self->d_epv->f_isInstanceOf)(
     self,
-    iobj);
-}
-
-/*
- * Method:  SetLocalComponentsInBlock
- */
-
-int32_t
-Hypre_ParCSRVector_SetLocalComponentsInBlock(
-  Hypre_ParCSRVector self,
-  int32_t glob_vec_index_start,
-  int32_t glob_vec_index_stop,
-  struct SIDL_int__array* value_indices,
-  struct SIDL_double__array* values)
-{
-  return (*self->d_epv->f_SetLocalComponentsInBlock)(
-    self,
-    glob_vec_index_start,
-    glob_vec_index_stop,
-    value_indices,
-    values);
-}
-
-/*
- * Finalize the construction of an object before using, either for
- * the first time or on subsequent uses. "Initialize" and "Assemble"
- * always appear in a matched set, with Initialize preceding Assemble. Values
- * can only be set in between a call to Initialize and Assemble.
- * 
- * 
- */
-
-int32_t
-Hypre_ParCSRVector_Assemble(
-  Hypre_ParCSRVector self)
-{
-  return (*self->d_epv->f_Assemble)(
-    self);
-}
-
-/*
- * y <- a*y 
- */
-
-int32_t
-Hypre_ParCSRVector_Scale(
-  Hypre_ParCSRVector self,
-  double a)
-{
-  return (*self->d_epv->f_Scale)(
-    self,
-    a);
-}
-
-/*
- * Print the vector to file.  This is mainly for debugging purposes.
- * 
- */
-
-int32_t
-Hypre_ParCSRVector_Print(
-  Hypre_ParCSRVector self,
-  const char* filename)
-{
-  return (*self->d_epv->f_Print)(
-    self,
-    filename);
-}
-
-/*
- * d <- (y,x)
- */
-
-int32_t
-Hypre_ParCSRVector_Dot(
-  Hypre_ParCSRVector self,
-  Hypre_Vector x,
-  double* d)
-{
-  return (*self->d_epv->f_Dot)(
-    self,
-    x,
-    d);
-}
-
-/*
- * Sets values in vector.  The arrays {\tt values} and {\tt indices}
- * are of dimension {\tt nvalues} and contain the vector values to be
- * set and the corresponding global vector indices, respectively.
- * Erases any previous values at the specified locations and replaces
- * them with new ones.
- * 
- * Not collective.
- * 
- * 
- */
-
-int32_t
-Hypre_ParCSRVector_SetValues(
-  Hypre_ParCSRVector self,
-  int32_t nvalues,
-  struct SIDL_int__array* indices,
-  struct SIDL_double__array* values)
-{
-  return (*self->d_epv->f_SetValues)(
-    self,
-    nvalues,
-    indices,
-    values);
-}
-
-/*
- * Decrease by one the intrinsic reference count in the underlying
- * object, and delete the object if the reference is non-positive.
- * Objects in <code>SIDL</code> have an intrinsic reference count.
- * Clients should call this method whenever they remove a
- * reference to an object or interface.
- */
-
-void
-Hypre_ParCSRVector_deleteReference(
-  Hypre_ParCSRVector self)
-{
-  (*self->d_epv->f_deleteReference)(
-    self);
+    name);
 }
 
 /*
@@ -524,20 +420,124 @@ Hypre_ParCSRVector_Copy(
 }
 
 /*
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
+ * Check whether the object can support the specified interface or
+ * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * is supported, then a reference to that object is returned with the
+ * reference count incremented.  The callee will be responsible for
+ * calling <code>deleteReference</code> on the returned object.  If
+ * the specified type is not supported, then a null reference is
+ * returned.
  */
 
-SIDL_bool
-Hypre_ParCSRVector_isInstanceOf(
+SIDL_BaseInterface
+Hypre_ParCSRVector_queryInterface(
   Hypre_ParCSRVector self,
   const char* name)
 {
-  return (*self->d_epv->f_isInstanceOf)(
+  return (*self->d_epv->f_queryInterface)(
     self,
     name);
+}
+
+/*
+ * Print the vector to file.  This is mainly for debugging purposes.
+ * 
+ */
+
+int32_t
+Hypre_ParCSRVector_Print(
+  Hypre_ParCSRVector self,
+  const char* filename)
+{
+  return (*self->d_epv->f_Print)(
+    self,
+    filename);
+}
+
+/*
+ * Method:  AddtoLocalComponents
+ */
+
+int32_t
+Hypre_ParCSRVector_AddtoLocalComponents(
+  Hypre_ParCSRVector self,
+  int32_t num_values,
+  struct SIDL_int__array* glob_vec_indices,
+  struct SIDL_int__array* value_indices,
+  struct SIDL_double__array* values)
+{
+  return (*self->d_epv->f_AddtoLocalComponents)(
+    self,
+    num_values,
+    glob_vec_indices,
+    value_indices,
+    values);
+}
+
+/*
+ * Method:  GetRow
+ */
+
+int32_t
+Hypre_ParCSRVector_GetRow(
+  Hypre_ParCSRVector self,
+  int32_t row,
+  int32_t* size,
+  struct SIDL_int__array** col_ind,
+  struct SIDL_double__array** values)
+{
+  return (*self->d_epv->f_GetRow)(
+    self,
+    row,
+    size,
+    col_ind,
+    values);
+}
+
+/*
+ * Sets values in vector.  The arrays {\tt values} and {\tt indices}
+ * are of dimension {\tt nvalues} and contain the vector values to be
+ * set and the corresponding global vector indices, respectively.
+ * Erases any previous values at the specified locations and replaces
+ * them with new ones.
+ * 
+ * Not collective.
+ * 
+ * 
+ */
+
+int32_t
+Hypre_ParCSRVector_SetValues(
+  Hypre_ParCSRVector self,
+  int32_t nvalues,
+  struct SIDL_int__array* indices,
+  struct SIDL_double__array* values)
+{
+  return (*self->d_epv->f_SetValues)(
+    self,
+    nvalues,
+    indices,
+    values);
+}
+
+/*
+ * Method:  AddToLocalComponentsInBlock
+ */
+
+int32_t
+Hypre_ParCSRVector_AddToLocalComponentsInBlock(
+  Hypre_ParCSRVector self,
+  int32_t glob_vec_index_start,
+  int32_t glob_vec_index_stop,
+  struct SIDL_int__array* value_indices,
+  struct SIDL_double__array* values)
+{
+  return (*self->d_epv->f_AddToLocalComponentsInBlock)(
+    self,
+    glob_vec_index_start,
+    glob_vec_index_stop,
+    value_indices,
+    values);
 }
 
 /*

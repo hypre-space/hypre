@@ -2,9 +2,9 @@
  * File:          Hypre_StructMatrix_IOR.h
  * Symbol:        Hypre.StructMatrix-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:13 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:39 PDT
  * Description:   Intermediate Object Representation for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -107,10 +107,26 @@ struct Hypre_StructMatrix__epv {
   int32_t (*f_SetCommunicator)(
     struct Hypre_StructMatrix__object* self,
     void* comm);
-  int32_t (*f_SetParameter)(
+  int32_t (*f_SetDoubleArrayParameter)(
+    struct Hypre_StructMatrix__object* self,
+    const char* name,
+    struct SIDL_double__array* value);
+  int32_t (*f_SetDoubleParameter)(
     struct Hypre_StructMatrix__object* self,
     const char* name,
     double value);
+  int32_t (*f_SetIntArrayParameter)(
+    struct Hypre_StructMatrix__object* self,
+    const char* name,
+    struct SIDL_int__array* value);
+  int32_t (*f_SetIntParameter)(
+    struct Hypre_StructMatrix__object* self,
+    const char* name,
+    int32_t value);
+  int32_t (*f_SetStringParameter)(
+    struct Hypre_StructMatrix__object* self,
+    const char* name,
+    const char* value);
   int32_t (*f_Setup)(
     struct Hypre_StructMatrix__object* self);
   /* Methods introduced in SIDL.BaseInterface-v0.5.1 */

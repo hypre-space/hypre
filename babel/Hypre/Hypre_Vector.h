@@ -2,9 +2,9 @@
  * File:          Hypre_Vector.h
  * Symbol:        Hypre.Vector-v0.1.5
  * Symbol Type:   interface
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:07 PST
- * Generated:     20020104 15:27:16 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:33 PDT
+ * Generated:     20020522 13:59:40 PDT
  * Description:   Client-side glue code for Hypre.Vector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -37,13 +37,27 @@ extern "C" {
 #endif
 
 /**
- * y <- a*x + y
+ * create an x compatible with y
  */
 int32_t
-Hypre_Vector_Axpy(
+Hypre_Vector_Clone(
   Hypre_Vector self,
-  double a,
-  Hypre_Vector x);
+  Hypre_Vector* x);
+
+/**
+ * y <- 0 (where y=self)
+ */
+int32_t
+Hypre_Vector_Clear(
+  Hypre_Vector self);
+
+/**
+ * y <- a*y 
+ */
+int32_t
+Hypre_Vector_Scale(
+  Hypre_Vector self,
+  double a);
 
 /**
  * <p>
@@ -64,6 +78,34 @@ Hypre_Vector_addReference(
   Hypre_Vector self);
 
 /**
+ * d <- (y,x)
+ */
+int32_t
+Hypre_Vector_Dot(
+  Hypre_Vector self,
+  Hypre_Vector x,
+  double* d);
+
+/**
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+SIDL_bool
+Hypre_Vector_isInstanceOf(
+  Hypre_Vector self,
+  const char* name);
+
+/**
+ * y <- x 
+ */
+int32_t
+Hypre_Vector_Copy(
+  Hypre_Vector self,
+  Hypre_Vector x);
+
+/**
  * Check whether the object can support the specified interface or
  * class.  If the <code>SIDL</code> type name in <code>name</code>
  * is supported, then a reference to that object is returned with the
@@ -78,19 +120,13 @@ Hypre_Vector_queryInterface(
   const char* name);
 
 /**
- * create an x compatible with y
+ * y <- a*x + y
  */
 int32_t
-Hypre_Vector_Clone(
+Hypre_Vector_Axpy(
   Hypre_Vector self,
-  Hypre_Vector* x);
-
-/**
- * y <- 0 (where y=self)
- */
-int32_t
-Hypre_Vector_Clear(
-  Hypre_Vector self);
+  double a,
+  Hypre_Vector x);
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
@@ -102,23 +138,6 @@ Hypre_Vector_isSame(
   SIDL_BaseInterface iobj);
 
 /**
- * y <- a*y 
- */
-int32_t
-Hypre_Vector_Scale(
-  Hypre_Vector self,
-  double a);
-
-/**
- * d <- (y,x)
- */
-int32_t
-Hypre_Vector_Dot(
-  Hypre_Vector self,
-  Hypre_Vector x,
-  double* d);
-
-/**
  * Decrease by one the intrinsic reference count in the underlying
  * object, and delete the object if the reference is non-positive.
  * Objects in <code>SIDL</code> have an intrinsic reference count.
@@ -128,25 +147,6 @@ Hypre_Vector_Dot(
 void
 Hypre_Vector_deleteReference(
   Hypre_Vector self);
-
-/**
- * y <- x 
- */
-int32_t
-Hypre_Vector_Copy(
-  Hypre_Vector self,
-  Hypre_Vector x);
-
-/**
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
- */
-SIDL_bool
-Hypre_Vector_isInstanceOf(
-  Hypre_Vector self,
-  const char* name);
 
 /**
  * Cast method for interface and class type conversions.

@@ -2,9 +2,9 @@
  * File:          Hypre_GMRES_Impl.h
  * Symbol:        Hypre.GMRES-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:18 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:43 PDT
  * Description:   Server-side implementation for Hypre.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -96,20 +96,54 @@ impl_Hypre_GMRES_SetCommunicator(
   void*);
 
 extern int32_t
-impl_Hypre_GMRES_SetOperator(
+impl_Hypre_GMRES_SetDoubleArrayParameter(
   Hypre_GMRES,
-  Hypre_Operator);
+  const char*,
+  struct SIDL_double__array*);
 
 extern int32_t
-impl_Hypre_GMRES_SetParameter(
+impl_Hypre_GMRES_SetDoubleParameter(
   Hypre_GMRES,
   const char*,
   double);
 
 extern int32_t
+impl_Hypre_GMRES_SetIntArrayParameter(
+  Hypre_GMRES,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_GMRES_SetIntParameter(
+  Hypre_GMRES,
+  const char*,
+  int32_t);
+
+extern int32_t
+impl_Hypre_GMRES_SetLogging(
+  Hypre_GMRES,
+  int32_t);
+
+extern int32_t
+impl_Hypre_GMRES_SetOperator(
+  Hypre_GMRES,
+  Hypre_Operator);
+
+extern int32_t
 impl_Hypre_GMRES_SetPreconditioner(
   Hypre_GMRES,
   Hypre_Solver);
+
+extern int32_t
+impl_Hypre_GMRES_SetPrintLevel(
+  Hypre_GMRES,
+  int32_t);
+
+extern int32_t
+impl_Hypre_GMRES_SetStringParameter(
+  Hypre_GMRES,
+  const char*,
+  const char*);
 
 extern int32_t
 impl_Hypre_GMRES_Setup(

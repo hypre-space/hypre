@@ -2,9 +2,9 @@
  * File:          Hypre_PreconditionedSolver_IOR.h
  * Symbol:        Hypre.PreconditionedSolver-v0.1.5
  * Symbol Type:   interface
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:12 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:40 PDT
  * Description:   Intermediate Object Representation for Hypre.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -77,19 +77,41 @@ struct Hypre_PreconditionedSolver__epv {
   int32_t (*f_SetCommunicator)(
     void* self,
     void* comm);
-  int32_t (*f_SetParameter)(
+  int32_t (*f_SetDoubleArrayParameter)(
+    void* self,
+    const char* name,
+    struct SIDL_double__array* value);
+  int32_t (*f_SetDoubleParameter)(
     void* self,
     const char* name,
     double value);
+  int32_t (*f_SetIntArrayParameter)(
+    void* self,
+    const char* name,
+    struct SIDL_int__array* value);
+  int32_t (*f_SetIntParameter)(
+    void* self,
+    const char* name,
+    int32_t value);
+  int32_t (*f_SetStringParameter)(
+    void* self,
+    const char* name,
+    const char* value);
   int32_t (*f_Setup)(
     void* self);
   /* Methods introduced in Hypre.Solver-v0.1.5 */
   int32_t (*f_GetResidual)(
     void* self,
     struct Hypre_Vector__object** r);
+  int32_t (*f_SetLogging)(
+    void* self,
+    int32_t level);
   int32_t (*f_SetOperator)(
     void* self,
     struct Hypre_Operator__object* A);
+  int32_t (*f_SetPrintLevel)(
+    void* self,
+    int32_t level);
   /* Methods introduced in Hypre.PreconditionedSolver-v0.1.5 */
   int32_t (*f_GetPreconditionedResidual)(
     void* self,

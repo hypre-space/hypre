@@ -2,9 +2,9 @@
  * File:          Hypre_StructStencil.h
  * Symbol:        Hypre.StructStencil-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:16 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:42 PDT
  * Description:   Client-side glue code for Hypre.StructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -47,6 +47,15 @@ Hypre_StructStencil
 Hypre_StructStencil__create(void);
 
 /**
+ * Method:  SetElement
+ */
+int32_t
+Hypre_StructStencil_SetElement(
+  Hypre_StructStencil self,
+  int32_t index,
+  struct SIDL_int__array* offset);
+
+/**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
  * Object in <code>SIDL</code> have an intrinsic reference count.
@@ -65,36 +74,15 @@ Hypre_StructStencil_addReference(
   Hypre_StructStencil self);
 
 /**
- * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-SIDL_BaseInterface
-Hypre_StructStencil_queryInterface(
-  Hypre_StructStencil self,
-  const char* name);
-
-/**
- * Method:  SetElement
- */
-int32_t
-Hypre_StructStencil_SetElement(
-  Hypre_StructStencil self,
-  int32_t index,
-  struct SIDL_int__array* offset);
-
-/**
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
  */
 SIDL_bool
-Hypre_StructStencil_isSame(
+Hypre_StructStencil_isInstanceOf(
   Hypre_StructStencil self,
-  SIDL_BaseInterface iobj);
+  const char* name);
 
 /**
  * Method:  SetDimension
@@ -113,6 +101,20 @@ Hypre_StructStencil_SetSize(
   int32_t size);
 
 /**
+ * Check whether the object can support the specified interface or
+ * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * is supported, then a reference to that object is returned with the
+ * reference count incremented.  The callee will be responsible for
+ * calling <code>deleteReference</code> on the returned object.  If
+ * the specified type is not supported, then a null reference is
+ * returned.
+ */
+SIDL_BaseInterface
+Hypre_StructStencil_queryInterface(
+  Hypre_StructStencil self,
+  const char* name);
+
+/**
  * Decrease by one the intrinsic reference count in the underlying
  * object, and delete the object if the reference is non-positive.
  * Objects in <code>SIDL</code> have an intrinsic reference count.
@@ -124,15 +126,13 @@ Hypre_StructStencil_deleteReference(
   Hypre_StructStencil self);
 
 /**
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
  */
 SIDL_bool
-Hypre_StructStencil_isInstanceOf(
+Hypre_StructStencil_isSame(
   Hypre_StructStencil self,
-  const char* name);
+  SIDL_BaseInterface iobj);
 
 /**
  * Cast method for interface and class type conversions.

@@ -2,9 +2,9 @@
  * File:          Hypre_PCG_Skel.c
  * Symbol:        Hypre.PCG-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:19 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:44 PDT
  * Description:   Server-side glue code for Hypre.PCG
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -45,20 +45,54 @@ impl_Hypre_PCG_SetCommunicator(
   void*);
 
 extern int32_t
-impl_Hypre_PCG_SetOperator(
+impl_Hypre_PCG_SetDoubleArrayParameter(
   Hypre_PCG,
-  Hypre_Operator);
+  const char*,
+  struct SIDL_double__array*);
 
 extern int32_t
-impl_Hypre_PCG_SetParameter(
+impl_Hypre_PCG_SetDoubleParameter(
   Hypre_PCG,
   const char*,
   double);
 
 extern int32_t
+impl_Hypre_PCG_SetIntArrayParameter(
+  Hypre_PCG,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_PCG_SetIntParameter(
+  Hypre_PCG,
+  const char*,
+  int32_t);
+
+extern int32_t
+impl_Hypre_PCG_SetLogging(
+  Hypre_PCG,
+  int32_t);
+
+extern int32_t
+impl_Hypre_PCG_SetOperator(
+  Hypre_PCG,
+  Hypre_Operator);
+
+extern int32_t
 impl_Hypre_PCG_SetPreconditioner(
   Hypre_PCG,
   Hypre_Solver);
+
+extern int32_t
+impl_Hypre_PCG_SetPrintLevel(
+  Hypre_PCG,
+  int32_t);
+
+extern int32_t
+impl_Hypre_PCG_SetStringParameter(
+  Hypre_PCG,
+  const char*,
+  const char*);
 
 extern int32_t
 impl_Hypre_PCG_Setup(
@@ -69,14 +103,20 @@ Hypre_PCG__set_epv(struct Hypre_PCG__epv *epv)
 {
   epv->f__ctor = impl_Hypre_PCG__ctor;
   epv->f__dtor = impl_Hypre_PCG__dtor;
-  epv->f_SetParameter = impl_Hypre_PCG_SetParameter;
-  epv->f_Setup = impl_Hypre_PCG_Setup;
   epv->f_Apply = impl_Hypre_PCG_Apply;
+  epv->f_SetLogging = impl_Hypre_PCG_SetLogging;
+  epv->f_SetIntArrayParameter = impl_Hypre_PCG_SetIntArrayParameter;
+  epv->f_Setup = impl_Hypre_PCG_Setup;
+  epv->f_SetIntParameter = impl_Hypre_PCG_SetIntParameter;
+  epv->f_GetResidual = impl_Hypre_PCG_GetResidual;
+  epv->f_SetPrintLevel = impl_Hypre_PCG_SetPrintLevel;
+  epv->f_SetPreconditioner = impl_Hypre_PCG_SetPreconditioner;
   epv->f_SetCommunicator = impl_Hypre_PCG_SetCommunicator;
   epv->f_SetOperator = impl_Hypre_PCG_SetOperator;
-  epv->f_GetResidual = impl_Hypre_PCG_GetResidual;
+  epv->f_SetDoubleParameter = impl_Hypre_PCG_SetDoubleParameter;
+  epv->f_SetStringParameter = impl_Hypre_PCG_SetStringParameter;
+  epv->f_SetDoubleArrayParameter = impl_Hypre_PCG_SetDoubleArrayParameter;
   epv->f_GetPreconditionedResidual = impl_Hypre_PCG_GetPreconditionedResidual;
-  epv->f_SetPreconditioner = impl_Hypre_PCG_SetPreconditioner;
 }
 
 struct Hypre_PCG__data*

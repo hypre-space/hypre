@@ -2,9 +2,9 @@
  * File:          Hypre_ParCSRMatrix_IOR.c
  * Symbol:        Hypre.ParCSRMatrix-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:15 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:37 PDT
  * Description:   Intermediate Object Representation for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -122,35 +122,41 @@ static void Hypre_ParCSRMatrix__init_epv(
   s_old__sidl_baseinterface = s1->d_sidl_baseinterface.d_epv;
   s_old__sidl_baseclass     = s1->d_epv;
 
-  epv->f__cast            = Hypre_ParCSRMatrix__cast;
-  epv->f__delete          = Hypre_ParCSRMatrix__delete;
-  epv->f__ctor            = NULL;
-  epv->f__dtor            = NULL;
-  epv->f_AddToValues      = NULL;
-  epv->f_Apply            = NULL;
-  epv->f_Assemble         = NULL;
-  epv->f_Create           = NULL;
-  epv->f_GetObject        = NULL;
-  epv->f_GetRow           = NULL;
-  epv->f_Initialize       = NULL;
-  epv->f_Print            = NULL;
-  epv->f_Read             = NULL;
-  epv->f_SetCommunicator  = NULL;
-  epv->f_SetDiagOffdSizes = NULL;
-  epv->f_SetParameter     = NULL;
-  epv->f_SetRowSizes      = NULL;
-  epv->f_SetValues        = NULL;
-  epv->f_Setup            = NULL;
-  epv->f_addReference     = (void (*)(struct Hypre_ParCSRMatrix__object*)) 
-    s1->d_epv->f_addReference;
-  epv->f_deleteReference  = (void (*)(struct Hypre_ParCSRMatrix__object*)) 
-    s1->d_epv->f_deleteReference;
-  epv->f_isInstanceOf     = (SIDL_bool (*)(struct Hypre_ParCSRMatrix__object*,
-    const char*)) s1->d_epv->f_isInstanceOf;
-  epv->f_isSame           = (SIDL_bool (*)(struct Hypre_ParCSRMatrix__object*,
+  epv->f__cast                   = Hypre_ParCSRMatrix__cast;
+  epv->f__delete                 = Hypre_ParCSRMatrix__delete;
+  epv->f__ctor                   = NULL;
+  epv->f__dtor                   = NULL;
+  epv->f_AddToValues             = NULL;
+  epv->f_Apply                   = NULL;
+  epv->f_Assemble                = NULL;
+  epv->f_Create                  = NULL;
+  epv->f_GetObject               = NULL;
+  epv->f_GetRow                  = NULL;
+  epv->f_Initialize              = NULL;
+  epv->f_Print                   = NULL;
+  epv->f_Read                    = NULL;
+  epv->f_SetCommunicator         = NULL;
+  epv->f_SetDiagOffdSizes        = NULL;
+  epv->f_SetDoubleArrayParameter = NULL;
+  epv->f_SetDoubleParameter      = NULL;
+  epv->f_SetIntArrayParameter    = NULL;
+  epv->f_SetIntParameter         = NULL;
+  epv->f_SetRowSizes             = NULL;
+  epv->f_SetStringParameter      = NULL;
+  epv->f_SetValues               = NULL;
+  epv->f_Setup                   = NULL;
+  epv->f_addReference            = (void (*)(struct 
+    Hypre_ParCSRMatrix__object*)) s1->d_epv->f_addReference;
+  epv->f_deleteReference         = (void (*)(struct 
+    Hypre_ParCSRMatrix__object*)) s1->d_epv->f_deleteReference;
+  epv->f_isInstanceOf            = (SIDL_bool (*)(struct 
+    Hypre_ParCSRMatrix__object*,const char*)) s1->d_epv->f_isInstanceOf;
+  epv->f_isSame                  = (SIDL_bool (*)(struct 
+    Hypre_ParCSRMatrix__object*,
     struct SIDL_BaseInterface__object*)) s1->d_epv->f_isSame;
-  epv->f_queryInterface   = (struct SIDL_BaseInterface__object* (*)(struct 
-    Hypre_ParCSRMatrix__object*,const char*)) s1->d_epv->f_queryInterface;
+  epv->f_queryInterface          = (struct SIDL_BaseInterface__object* 
+    (*)(struct Hypre_ParCSRMatrix__object*,
+    const char*)) s1->d_epv->f_queryInterface;
 
   Hypre_ParCSRMatrix__set_epv(epv);
 
@@ -197,21 +203,30 @@ static void Hypre_ParCSRMatrix__init_epv(
   e1->f_queryInterface   = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInterface;
 
-  e2->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
-  e2->f__delete         = (void (*)(void*)) epv->f__delete;
-  e2->f_Apply           = (int32_t (*)(void*,struct Hypre_Vector__object*,
-    struct Hypre_Vector__object**)) epv->f_Apply;
-  e2->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
-  e2->f_SetParameter    = (int32_t (*)(void*,const char*,
-    double)) epv->f_SetParameter;
-  e2->f_Setup           = (int32_t (*)(void*)) epv->f_Setup;
-  e2->f_addReference    = (void (*)(void*)) epv->f_addReference;
-  e2->f_deleteReference = (void (*)(void*)) epv->f_deleteReference;
-  e2->f_isInstanceOf    = (SIDL_bool (*)(void*,
+  e2->f__cast                   = (void* (*)(void*,const char*)) epv->f__cast;
+  e2->f__delete                 = (void (*)(void*)) epv->f__delete;
+  e2->f_Apply                   = (int32_t (*)(void*,
+    struct Hypre_Vector__object*,struct Hypre_Vector__object**)) epv->f_Apply;
+  e2->f_SetCommunicator         = (int32_t (*)(void*,
+    void*)) epv->f_SetCommunicator;
+  e2->f_SetDoubleArrayParameter = (int32_t (*)(void*,const char*,
+    struct SIDL_double__array*)) epv->f_SetDoubleArrayParameter;
+  e2->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
+    double)) epv->f_SetDoubleParameter;
+  e2->f_SetIntArrayParameter    = (int32_t (*)(void*,const char*,
+    struct SIDL_int__array*)) epv->f_SetIntArrayParameter;
+  e2->f_SetIntParameter         = (int32_t (*)(void*,const char*,
+    int32_t)) epv->f_SetIntParameter;
+  e2->f_SetStringParameter      = (int32_t (*)(void*,const char*,
+    const char*)) epv->f_SetStringParameter;
+  e2->f_Setup                   = (int32_t (*)(void*)) epv->f_Setup;
+  e2->f_addReference            = (void (*)(void*)) epv->f_addReference;
+  e2->f_deleteReference         = (void (*)(void*)) epv->f_deleteReference;
+  e2->f_isInstanceOf            = (SIDL_bool (*)(void*,
     const char*)) epv->f_isInstanceOf;
-  e2->f_isSame          = (SIDL_bool (*)(void*,
+  e2->f_isSame                  = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e2->f_queryInterface  = (struct SIDL_BaseInterface__object* (*)(void*,
+  e2->f_queryInterface          = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInterface;
 
   e3->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
@@ -893,7 +908,7 @@ remote_Hypre_ParCSRMatrix_Read(
 static int32_t
 remote_Hypre_ParCSRMatrix_SetCommunicator(
   struct Hypre_ParCSRMatrix__object* self,
-  void* comm)
+  void* mpi_comm)
 {
   return 0;
 }
@@ -912,14 +927,53 @@ remote_Hypre_ParCSRMatrix_SetDiagOffdSizes(
 }
 
 /*
- * REMOTE METHOD STUB:SetParameter
+ * REMOTE METHOD STUB:SetDoubleArrayParameter
  */
 
 static int32_t
-remote_Hypre_ParCSRMatrix_SetParameter(
+remote_Hypre_ParCSRMatrix_SetDoubleArrayParameter(
+  struct Hypre_ParCSRMatrix__object* self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetDoubleParameter
+ */
+
+static int32_t
+remote_Hypre_ParCSRMatrix_SetDoubleParameter(
   struct Hypre_ParCSRMatrix__object* self,
   const char* name,
   double value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetIntArrayParameter
+ */
+
+static int32_t
+remote_Hypre_ParCSRMatrix_SetIntArrayParameter(
+  struct Hypre_ParCSRMatrix__object* self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetIntParameter
+ */
+
+static int32_t
+remote_Hypre_ParCSRMatrix_SetIntParameter(
+  struct Hypre_ParCSRMatrix__object* self,
+  const char* name,
+  int32_t value)
 {
   return 0;
 }
@@ -932,6 +986,19 @@ static int32_t
 remote_Hypre_ParCSRMatrix_SetRowSizes(
   struct Hypre_ParCSRMatrix__object* self,
   struct SIDL_int__array* sizes)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetStringParameter
+ */
+
+static int32_t
+remote_Hypre_ParCSRMatrix_SetStringParameter(
+  struct Hypre_ParCSRMatrix__object* self,
+  const char* name,
+  const char* value)
 {
   return 0;
 }
@@ -1033,30 +1100,36 @@ static void Hypre_ParCSRMatrix__init_remote_epv(void)
   struct SIDL_BaseClass__epv*          e4  = &s_rem__sidl_baseclass;
   struct SIDL_BaseInterface__epv*      e5  = &s_rem__sidl_baseinterface;
 
-  epv->f__cast            = remote_Hypre_ParCSRMatrix__cast;
-  epv->f__delete          = remote_Hypre_ParCSRMatrix__delete;
-  epv->f__ctor            = NULL;
-  epv->f__dtor            = NULL;
-  epv->f_AddToValues      = remote_Hypre_ParCSRMatrix_AddToValues;
-  epv->f_Apply            = remote_Hypre_ParCSRMatrix_Apply;
-  epv->f_Assemble         = remote_Hypre_ParCSRMatrix_Assemble;
-  epv->f_Create           = remote_Hypre_ParCSRMatrix_Create;
-  epv->f_GetObject        = remote_Hypre_ParCSRMatrix_GetObject;
-  epv->f_GetRow           = remote_Hypre_ParCSRMatrix_GetRow;
-  epv->f_Initialize       = remote_Hypre_ParCSRMatrix_Initialize;
-  epv->f_Print            = remote_Hypre_ParCSRMatrix_Print;
-  epv->f_Read             = remote_Hypre_ParCSRMatrix_Read;
-  epv->f_SetCommunicator  = remote_Hypre_ParCSRMatrix_SetCommunicator;
-  epv->f_SetDiagOffdSizes = remote_Hypre_ParCSRMatrix_SetDiagOffdSizes;
-  epv->f_SetParameter     = remote_Hypre_ParCSRMatrix_SetParameter;
-  epv->f_SetRowSizes      = remote_Hypre_ParCSRMatrix_SetRowSizes;
-  epv->f_SetValues        = remote_Hypre_ParCSRMatrix_SetValues;
-  epv->f_Setup            = remote_Hypre_ParCSRMatrix_Setup;
-  epv->f_addReference     = remote_Hypre_ParCSRMatrix_addReference;
-  epv->f_deleteReference  = remote_Hypre_ParCSRMatrix_deleteReference;
-  epv->f_isInstanceOf     = remote_Hypre_ParCSRMatrix_isInstanceOf;
-  epv->f_isSame           = remote_Hypre_ParCSRMatrix_isSame;
-  epv->f_queryInterface   = remote_Hypre_ParCSRMatrix_queryInterface;
+  epv->f__cast                   = remote_Hypre_ParCSRMatrix__cast;
+  epv->f__delete                 = remote_Hypre_ParCSRMatrix__delete;
+  epv->f__ctor                   = NULL;
+  epv->f__dtor                   = NULL;
+  epv->f_AddToValues             = remote_Hypre_ParCSRMatrix_AddToValues;
+  epv->f_Apply                   = remote_Hypre_ParCSRMatrix_Apply;
+  epv->f_Assemble                = remote_Hypre_ParCSRMatrix_Assemble;
+  epv->f_Create                  = remote_Hypre_ParCSRMatrix_Create;
+  epv->f_GetObject               = remote_Hypre_ParCSRMatrix_GetObject;
+  epv->f_GetRow                  = remote_Hypre_ParCSRMatrix_GetRow;
+  epv->f_Initialize              = remote_Hypre_ParCSRMatrix_Initialize;
+  epv->f_Print                   = remote_Hypre_ParCSRMatrix_Print;
+  epv->f_Read                    = remote_Hypre_ParCSRMatrix_Read;
+  epv->f_SetCommunicator         = remote_Hypre_ParCSRMatrix_SetCommunicator;
+  epv->f_SetDiagOffdSizes        = remote_Hypre_ParCSRMatrix_SetDiagOffdSizes;
+  epv->f_SetDoubleArrayParameter = 
+    remote_Hypre_ParCSRMatrix_SetDoubleArrayParameter;
+  epv->f_SetDoubleParameter      = remote_Hypre_ParCSRMatrix_SetDoubleParameter;
+  epv->f_SetIntArrayParameter    = 
+    remote_Hypre_ParCSRMatrix_SetIntArrayParameter;
+  epv->f_SetIntParameter         = remote_Hypre_ParCSRMatrix_SetIntParameter;
+  epv->f_SetRowSizes             = remote_Hypre_ParCSRMatrix_SetRowSizes;
+  epv->f_SetStringParameter      = remote_Hypre_ParCSRMatrix_SetStringParameter;
+  epv->f_SetValues               = remote_Hypre_ParCSRMatrix_SetValues;
+  epv->f_Setup                   = remote_Hypre_ParCSRMatrix_Setup;
+  epv->f_addReference            = remote_Hypre_ParCSRMatrix_addReference;
+  epv->f_deleteReference         = remote_Hypre_ParCSRMatrix_deleteReference;
+  epv->f_isInstanceOf            = remote_Hypre_ParCSRMatrix_isInstanceOf;
+  epv->f_isSame                  = remote_Hypre_ParCSRMatrix_isSame;
+  epv->f_queryInterface          = remote_Hypre_ParCSRMatrix_queryInterface;
 
   e0->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete         = (void (*)(void*)) epv->f__delete;
@@ -1101,21 +1174,30 @@ static void Hypre_ParCSRMatrix__init_remote_epv(void)
   e1->f_queryInterface   = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInterface;
 
-  e2->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
-  e2->f__delete         = (void (*)(void*)) epv->f__delete;
-  e2->f_Apply           = (int32_t (*)(void*,struct Hypre_Vector__object*,
-    struct Hypre_Vector__object**)) epv->f_Apply;
-  e2->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
-  e2->f_SetParameter    = (int32_t (*)(void*,const char*,
-    double)) epv->f_SetParameter;
-  e2->f_Setup           = (int32_t (*)(void*)) epv->f_Setup;
-  e2->f_addReference    = (void (*)(void*)) epv->f_addReference;
-  e2->f_deleteReference = (void (*)(void*)) epv->f_deleteReference;
-  e2->f_isInstanceOf    = (SIDL_bool (*)(void*,
+  e2->f__cast                   = (void* (*)(void*,const char*)) epv->f__cast;
+  e2->f__delete                 = (void (*)(void*)) epv->f__delete;
+  e2->f_Apply                   = (int32_t (*)(void*,
+    struct Hypre_Vector__object*,struct Hypre_Vector__object**)) epv->f_Apply;
+  e2->f_SetCommunicator         = (int32_t (*)(void*,
+    void*)) epv->f_SetCommunicator;
+  e2->f_SetDoubleArrayParameter = (int32_t (*)(void*,const char*,
+    struct SIDL_double__array*)) epv->f_SetDoubleArrayParameter;
+  e2->f_SetDoubleParameter      = (int32_t (*)(void*,const char*,
+    double)) epv->f_SetDoubleParameter;
+  e2->f_SetIntArrayParameter    = (int32_t (*)(void*,const char*,
+    struct SIDL_int__array*)) epv->f_SetIntArrayParameter;
+  e2->f_SetIntParameter         = (int32_t (*)(void*,const char*,
+    int32_t)) epv->f_SetIntParameter;
+  e2->f_SetStringParameter      = (int32_t (*)(void*,const char*,
+    const char*)) epv->f_SetStringParameter;
+  e2->f_Setup                   = (int32_t (*)(void*)) epv->f_Setup;
+  e2->f_addReference            = (void (*)(void*)) epv->f_addReference;
+  e2->f_deleteReference         = (void (*)(void*)) epv->f_deleteReference;
+  e2->f_isInstanceOf            = (SIDL_bool (*)(void*,
     const char*)) epv->f_isInstanceOf;
-  e2->f_isSame          = (SIDL_bool (*)(void*,
+  e2->f_isSame                  = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e2->f_queryInterface  = (struct SIDL_BaseInterface__object* (*)(void*,
+  e2->f_queryInterface          = (struct SIDL_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInterface;
 
   e3->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;

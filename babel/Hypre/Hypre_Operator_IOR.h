@@ -2,9 +2,9 @@
  * File:          Hypre_Operator_IOR.h
  * Symbol:        Hypre.Operator-v0.1.5
  * Symbol Type:   interface
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:14 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:40 PDT
  * Description:   Intermediate Object Representation for Hypre.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -76,10 +76,26 @@ struct Hypre_Operator__epv {
   int32_t (*f_SetCommunicator)(
     void* self,
     void* comm);
-  int32_t (*f_SetParameter)(
+  int32_t (*f_SetDoubleArrayParameter)(
+    void* self,
+    const char* name,
+    struct SIDL_double__array* value);
+  int32_t (*f_SetDoubleParameter)(
     void* self,
     const char* name,
     double value);
+  int32_t (*f_SetIntArrayParameter)(
+    void* self,
+    const char* name,
+    struct SIDL_int__array* value);
+  int32_t (*f_SetIntParameter)(
+    void* self,
+    const char* name,
+    int32_t value);
+  int32_t (*f_SetStringParameter)(
+    void* self,
+    const char* name,
+    const char* value);
   int32_t (*f_Setup)(
     void* self);
 };

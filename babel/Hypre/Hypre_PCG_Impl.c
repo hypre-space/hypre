@@ -2,9 +2,9 @@
  * File:          Hypre_PCG_Impl.c
  * Symbol:        Hypre.PCG-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:19 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:44 PDT
  * Description:   Server-side implementation for Hypre.PCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -129,6 +129,95 @@ impl_Hypre_PCG_SetCommunicator(
 }
 
 /*
+ * Method:  SetDoubleArrayParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_SetDoubleArrayParameter"
+
+int32_t
+impl_Hypre_PCG_SetDoubleArrayParameter(
+  Hypre_PCG self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetDoubleArrayParameter) */
+  /* Insert the implementation of the SetDoubleArrayParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetDoubleArrayParameter) */
+}
+
+/*
+ * Method:  SetDoubleParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_SetDoubleParameter"
+
+int32_t
+impl_Hypre_PCG_SetDoubleParameter(
+  Hypre_PCG self,
+  const char* name,
+  double value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetDoubleParameter) */
+  /* Insert the implementation of the SetDoubleParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetDoubleParameter) */
+}
+
+/*
+ * Method:  SetIntArrayParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_SetIntArrayParameter"
+
+int32_t
+impl_Hypre_PCG_SetIntArrayParameter(
+  Hypre_PCG self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetIntArrayParameter) */
+  /* Insert the implementation of the SetIntArrayParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetIntArrayParameter) */
+}
+
+/*
+ * Method:  SetIntParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_SetIntParameter"
+
+int32_t
+impl_Hypre_PCG_SetIntParameter(
+  Hypre_PCG self,
+  const char* name,
+  int32_t value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetIntParameter) */
+  /* Insert the implementation of the SetIntParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetIntParameter) */
+}
+
+/*
+ * Method:  SetLogging
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_SetLogging"
+
+int32_t
+impl_Hypre_PCG_SetLogging(
+  Hypre_PCG self,
+  int32_t level)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetLogging) */
+  /* Insert the implementation of the SetLogging method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetLogging) */
+}
+
+/*
  * Method:  SetOperator
  */
 
@@ -143,24 +232,6 @@ impl_Hypre_PCG_SetOperator(
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetOperator) */
-}
-
-/*
- * Method:  SetParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_PCG_SetParameter"
-
-int32_t
-impl_Hypre_PCG_SetParameter(
-  Hypre_PCG self,
-  const char* name,
-  double value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetParameter) */
-  /* Insert the implementation of the SetParameter method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetParameter) */
 }
 
 /*
@@ -181,6 +252,41 @@ impl_Hypre_PCG_SetPreconditioner(
 }
 
 /*
+ * Method:  SetPrintLevel
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_SetPrintLevel"
+
+int32_t
+impl_Hypre_PCG_SetPrintLevel(
+  Hypre_PCG self,
+  int32_t level)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetPrintLevel) */
+  /* Insert the implementation of the SetPrintLevel method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetPrintLevel) */
+}
+
+/*
+ * Method:  SetStringParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_SetStringParameter"
+
+int32_t
+impl_Hypre_PCG_SetStringParameter(
+  Hypre_PCG self,
+  const char* name,
+  const char* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetStringParameter) */
+  /* Insert the implementation of the SetStringParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetStringParameter) */
+}
+
+/*
  * Method:  Setup
  */
 
@@ -195,3 +301,6 @@ impl_Hypre_PCG_Setup(
   /* Insert the implementation of the Setup method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.Setup) */
 }
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetParameter) */
+  /* Insert the implementation of the SetParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetParameter) */

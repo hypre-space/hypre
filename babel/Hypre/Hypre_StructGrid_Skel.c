@@ -2,9 +2,9 @@
  * File:          Hypre_StructGrid_Skel.c
  * Symbol:        Hypre.StructGrid-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:18 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:44 PDT
  * Description:   Server-side glue code for Hypre.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -53,11 +53,11 @@ Hypre_StructGrid__set_epv(struct Hypre_StructGrid__epv *epv)
 {
   epv->f__ctor = impl_Hypre_StructGrid__ctor;
   epv->f__dtor = impl_Hypre_StructGrid__dtor;
-  epv->f_SetCommunicator = impl_Hypre_StructGrid_SetCommunicator;
   epv->f_SetPeriodic = impl_Hypre_StructGrid_SetPeriodic;
-  epv->f_Assemble = impl_Hypre_StructGrid_Assemble;
-  epv->f_SetDimension = impl_Hypre_StructGrid_SetDimension;
   epv->f_SetExtents = impl_Hypre_StructGrid_SetExtents;
+  epv->f_SetCommunicator = impl_Hypre_StructGrid_SetCommunicator;
+  epv->f_SetDimension = impl_Hypre_StructGrid_SetDimension;
+  epv->f_Assemble = impl_Hypre_StructGrid_Assemble;
 }
 
 struct Hypre_StructGrid__data*

@@ -2,9 +2,9 @@
  * File:          Hypre_StructMatrix_Stub.c
  * Symbol:        Hypre.StructMatrix-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:16 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:42 PDT
  * Description:   Client-side glue code for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -58,16 +58,16 @@ Hypre_StructMatrix__create()
 }
 
 /*
- * Method:  SetParameter
+ * Method:  SetIntArrayParameter
  */
 
 int32_t
-Hypre_StructMatrix_SetParameter(
+Hypre_StructMatrix_SetIntArrayParameter(
   Hypre_StructMatrix self,
   const char* name,
-  double value)
+  struct SIDL_int__array* value)
 {
-  return (*self->d_epv->f_SetParameter)(
+  return (*self->d_epv->f_SetIntArrayParameter)(
     self,
     name,
     value);
@@ -86,6 +86,187 @@ Hypre_StructMatrix_Setup(
 }
 
 /*
+ * Method:  SetIntParameter
+ */
+
+int32_t
+Hypre_StructMatrix_SetIntParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  int32_t value)
+{
+  return (*self->d_epv->f_SetIntParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Method:  SetStencil
+ */
+
+int32_t
+Hypre_StructMatrix_SetStencil(
+  Hypre_StructMatrix self,
+  Hypre_StructStencil stencil)
+{
+  return (*self->d_epv->f_SetStencil)(
+    self,
+    stencil);
+}
+
+/*
+ * Method:  SetCommunicator
+ */
+
+int32_t
+Hypre_StructMatrix_SetCommunicator(
+  Hypre_StructMatrix self,
+  void* mpi_comm)
+{
+  return (*self->d_epv->f_SetCommunicator)(
+    self,
+    mpi_comm);
+}
+
+/*
+ * Method:  SetDoubleParameter
+ */
+
+int32_t
+Hypre_StructMatrix_SetDoubleParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  double value)
+{
+  return (*self->d_epv->f_SetDoubleParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Method:  SetStringParameter
+ */
+
+int32_t
+Hypre_StructMatrix_SetStringParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  const char* value)
+{
+  return (*self->d_epv->f_SetStringParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+
+SIDL_bool
+Hypre_StructMatrix_isInstanceOf(
+  Hypre_StructMatrix self,
+  const char* name)
+{
+  return (*self->d_epv->f_isInstanceOf)(
+    self,
+    name);
+}
+
+/*
+ * Method:  SetSymmetric
+ */
+
+int32_t
+Hypre_StructMatrix_SetSymmetric(
+  Hypre_StructMatrix self,
+  int32_t symmetric)
+{
+  return (*self->d_epv->f_SetSymmetric)(
+    self,
+    symmetric);
+}
+
+/*
+ * The problem definition interface is a "builder" that creates an object
+ * that contains the problem definition information, e.g. a matrix. To
+ * perform subsequent operations with that object, it must be returned from
+ * the problem definition object. "GetObject" performs this function.
+ * <note>At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
+ * be used on the returned object to convert it into a known type.</note>
+ * 
+ * 
+ */
+
+int32_t
+Hypre_StructMatrix_GetObject(
+  Hypre_StructMatrix self,
+  SIDL_BaseInterface* A)
+{
+  return (*self->d_epv->f_GetObject)(
+    self,
+    A);
+}
+
+/*
+ * Finalize the construction of an object before using, either for
+ * the first time or on subsequent uses. "Initialize" and "Assemble"
+ * always appear in a matched set, with Initialize preceding Assemble. Values
+ * can only be set in between a call to Initialize and Assemble.
+ * 
+ * 
+ */
+
+int32_t
+Hypre_StructMatrix_Assemble(
+  Hypre_StructMatrix self)
+{
+  return (*self->d_epv->f_Assemble)(
+    self);
+}
+
+/*
+ * Check whether the object can support the specified interface or
+ * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * is supported, then a reference to that object is returned with the
+ * reference count incremented.  The callee will be responsible for
+ * calling <code>deleteReference</code> on the returned object.  If
+ * the specified type is not supported, then a null reference is
+ * returned.
+ */
+
+SIDL_BaseInterface
+Hypre_StructMatrix_queryInterface(
+  Hypre_StructMatrix self,
+  const char* name)
+{
+  return (*self->d_epv->f_queryInterface)(
+    self,
+    name);
+}
+
+/*
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
+ */
+
+SIDL_bool
+Hypre_StructMatrix_isSame(
+  Hypre_StructMatrix self,
+  SIDL_BaseInterface iobj)
+{
+  return (*self->d_epv->f_isSame)(
+    self,
+    iobj);
+}
+
+/*
  * Prepare an object for setting coefficient values, whether for
  * the first time or subsequently.
  * 
@@ -98,6 +279,22 @@ Hypre_StructMatrix_Initialize(
 {
   return (*self->d_epv->f_Initialize)(
     self);
+}
+
+/*
+ * Method:  Apply
+ */
+
+int32_t
+Hypre_StructMatrix_Apply(
+  Hypre_StructMatrix self,
+  Hypre_Vector x,
+  Hypre_Vector* y)
+{
+  return (*self->d_epv->f_Apply)(
+    self,
+    x,
+    y);
 }
 
 /*
@@ -115,19 +312,25 @@ Hypre_StructMatrix_SetNumGhost(
 }
 
 /*
- * Method:  Apply
+ * Method:  SetBoxValues
  */
 
 int32_t
-Hypre_StructMatrix_Apply(
+Hypre_StructMatrix_SetBoxValues(
   Hypre_StructMatrix self,
-  Hypre_Vector x,
-  Hypre_Vector* y)
+  struct SIDL_int__array* ilower,
+  struct SIDL_int__array* iupper,
+  int32_t num_stencil_indices,
+  struct SIDL_int__array* stencil_indices,
+  struct SIDL_double__array* values)
 {
-  return (*self->d_epv->f_Apply)(
+  return (*self->d_epv->f_SetBoxValues)(
     self,
-    x,
-    y);
+    ilower,
+    iupper,
+    num_stencil_indices,
+    stencil_indices,
+    values);
 }
 
 /*
@@ -154,119 +357,17 @@ Hypre_StructMatrix_addReference(
 }
 
 /*
- * Method:  SetCommunicator
+ * Method:  SetGrid
  */
 
 int32_t
-Hypre_StructMatrix_SetCommunicator(
+Hypre_StructMatrix_SetGrid(
   Hypre_StructMatrix self,
-  void* mpi_comm)
+  Hypre_StructGrid grid)
 {
-  return (*self->d_epv->f_SetCommunicator)(
+  return (*self->d_epv->f_SetGrid)(
     self,
-    mpi_comm);
-}
-
-/*
- * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-
-SIDL_BaseInterface
-Hypre_StructMatrix_queryInterface(
-  Hypre_StructMatrix self,
-  const char* name)
-{
-  return (*self->d_epv->f_queryInterface)(
-    self,
-    name);
-}
-
-/*
- * Method:  SetStencil
- */
-
-int32_t
-Hypre_StructMatrix_SetStencil(
-  Hypre_StructMatrix self,
-  Hypre_StructStencil stencil)
-{
-  return (*self->d_epv->f_SetStencil)(
-    self,
-    stencil);
-}
-
-/*
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
- */
-
-SIDL_bool
-Hypre_StructMatrix_isSame(
-  Hypre_StructMatrix self,
-  SIDL_BaseInterface iobj)
-{
-  return (*self->d_epv->f_isSame)(
-    self,
-    iobj);
-}
-
-/*
- * Finalize the construction of an object before using, either for
- * the first time or on subsequent uses. "Initialize" and "Assemble"
- * always appear in a matched set, with Initialize preceding Assemble. Values
- * can only be set in between a call to Initialize and Assemble.
- * 
- * 
- */
-
-int32_t
-Hypre_StructMatrix_Assemble(
-  Hypre_StructMatrix self)
-{
-  return (*self->d_epv->f_Assemble)(
-    self);
-}
-
-/*
- * Method:  SetBoxValues
- */
-
-int32_t
-Hypre_StructMatrix_SetBoxValues(
-  Hypre_StructMatrix self,
-  struct SIDL_int__array* ilower,
-  struct SIDL_int__array* iupper,
-  int32_t num_stencil_indices,
-  struct SIDL_int__array* stencil_indices,
-  struct SIDL_double__array* values)
-{
-  return (*self->d_epv->f_SetBoxValues)(
-    self,
-    ilower,
-    iupper,
-    num_stencil_indices,
-    stencil_indices,
-    values);
-}
-
-/*
- * Method:  SetSymmetric
- */
-
-int32_t
-Hypre_StructMatrix_SetSymmetric(
-  Hypre_StructMatrix self,
-  int32_t symmetric)
-{
-  return (*self->d_epv->f_SetSymmetric)(
-    self,
-    symmetric);
+    grid);
 }
 
 /*
@@ -290,6 +391,22 @@ Hypre_StructMatrix_SetValues(
 }
 
 /*
+ * Method:  SetDoubleArrayParameter
+ */
+
+int32_t
+Hypre_StructMatrix_SetDoubleArrayParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  return (*self->d_epv->f_SetDoubleArrayParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
  * Decrease by one the intrinsic reference count in the underlying
  * object, and delete the object if the reference is non-positive.
  * Objects in <code>SIDL</code> have an intrinsic reference count.
@@ -303,59 +420,6 @@ Hypre_StructMatrix_deleteReference(
 {
   (*self->d_epv->f_deleteReference)(
     self);
-}
-
-/*
- * The problem definition interface is a "builder" that creates an object
- * that contains the problem definition information, e.g. a matrix. To
- * perform subsequent operations with that object, it must be returned from
- * the problem definition object. "GetObject" performs this function.
- * <note>At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
- * be used on the returned object to convert it into a known type.</note>
- * 
- * 
- */
-
-int32_t
-Hypre_StructMatrix_GetObject(
-  Hypre_StructMatrix self,
-  SIDL_BaseInterface* A)
-{
-  return (*self->d_epv->f_GetObject)(
-    self,
-    A);
-}
-
-/*
- * Method:  SetGrid
- */
-
-int32_t
-Hypre_StructMatrix_SetGrid(
-  Hypre_StructMatrix self,
-  Hypre_StructGrid grid)
-{
-  return (*self->d_epv->f_SetGrid)(
-    self,
-    grid);
-}
-
-/*
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
- */
-
-SIDL_bool
-Hypre_StructMatrix_isInstanceOf(
-  Hypre_StructMatrix self,
-  const char* name)
-{
-  return (*self->d_epv->f_isInstanceOf)(
-    self,
-    name);
 }
 
 /*

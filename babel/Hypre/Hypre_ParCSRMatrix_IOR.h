@@ -2,9 +2,9 @@
  * File:          Hypre_ParCSRMatrix_IOR.h
  * Symbol:        Hypre.ParCSRMatrix-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:15 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:36 PDT
  * Description:   Intermediate Object Representation for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -158,10 +158,26 @@ struct Hypre_ParCSRMatrix__epv {
     struct Hypre_ParCSRMatrix__object* self,
     struct Hypre_Vector__object* x,
     struct Hypre_Vector__object** y);
-  int32_t (*f_SetParameter)(
+  int32_t (*f_SetDoubleArrayParameter)(
+    struct Hypre_ParCSRMatrix__object* self,
+    const char* name,
+    struct SIDL_double__array* value);
+  int32_t (*f_SetDoubleParameter)(
     struct Hypre_ParCSRMatrix__object* self,
     const char* name,
     double value);
+  int32_t (*f_SetIntArrayParameter)(
+    struct Hypre_ParCSRMatrix__object* self,
+    const char* name,
+    struct SIDL_int__array* value);
+  int32_t (*f_SetIntParameter)(
+    struct Hypre_ParCSRMatrix__object* self,
+    const char* name,
+    int32_t value);
+  int32_t (*f_SetStringParameter)(
+    struct Hypre_ParCSRMatrix__object* self,
+    const char* name,
+    const char* value);
   int32_t (*f_Setup)(
     struct Hypre_ParCSRMatrix__object* self);
   /* Methods introduced in Hypre.ParCSRMatrix-v0.1.5 */

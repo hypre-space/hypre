@@ -2,9 +2,9 @@
  * File:          Hypre_StructGrid.h
  * Symbol:        Hypre.StructGrid-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:17 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:41 PDT
  * Description:   Client-side glue code for Hypre.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -45,6 +45,14 @@ Hypre_StructGrid
 Hypre_StructGrid__create(void);
 
 /**
+ * Method:  SetPeriodic
+ */
+int32_t
+Hypre_StructGrid_SetPeriodic(
+  Hypre_StructGrid self,
+  struct SIDL_int__array* periodic);
+
+/**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
  * Object in <code>SIDL</code> have an intrinsic reference count.
@@ -63,12 +71,47 @@ Hypre_StructGrid_addReference(
   Hypre_StructGrid self);
 
 /**
+ * Method:  SetExtents
+ */
+int32_t
+Hypre_StructGrid_SetExtents(
+  Hypre_StructGrid self,
+  struct SIDL_int__array* ilower,
+  struct SIDL_int__array* iupper);
+
+/**
  * Method:  SetCommunicator
  */
 int32_t
 Hypre_StructGrid_SetCommunicator(
   Hypre_StructGrid self,
   void* MPI_comm);
+
+/**
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+SIDL_bool
+Hypre_StructGrid_isInstanceOf(
+  Hypre_StructGrid self,
+  const char* name);
+
+/**
+ * Method:  SetDimension
+ */
+int32_t
+Hypre_StructGrid_SetDimension(
+  Hypre_StructGrid self,
+  int32_t dim);
+
+/**
+ * Method:  Assemble
+ */
+int32_t
+Hypre_StructGrid_Assemble(
+  Hypre_StructGrid self);
 
 /**
  * Check whether the object can support the specified interface or
@@ -85,47 +128,6 @@ Hypre_StructGrid_queryInterface(
   const char* name);
 
 /**
- * Method:  SetPeriodic
- */
-int32_t
-Hypre_StructGrid_SetPeriodic(
-  Hypre_StructGrid self,
-  struct SIDL_int__array* periodic);
-
-/**
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
- */
-SIDL_bool
-Hypre_StructGrid_isSame(
-  Hypre_StructGrid self,
-  SIDL_BaseInterface iobj);
-
-/**
- * Method:  Assemble
- */
-int32_t
-Hypre_StructGrid_Assemble(
-  Hypre_StructGrid self);
-
-/**
- * Method:  SetDimension
- */
-int32_t
-Hypre_StructGrid_SetDimension(
-  Hypre_StructGrid self,
-  int32_t dim);
-
-/**
- * Method:  SetExtents
- */
-int32_t
-Hypre_StructGrid_SetExtents(
-  Hypre_StructGrid self,
-  struct SIDL_int__array* ilower,
-  struct SIDL_int__array* iupper);
-
-/**
  * Decrease by one the intrinsic reference count in the underlying
  * object, and delete the object if the reference is non-positive.
  * Objects in <code>SIDL</code> have an intrinsic reference count.
@@ -137,15 +139,13 @@ Hypre_StructGrid_deleteReference(
   Hypre_StructGrid self);
 
 /**
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
  */
 SIDL_bool
-Hypre_StructGrid_isInstanceOf(
+Hypre_StructGrid_isSame(
   Hypre_StructGrid self,
-  const char* name);
+  SIDL_BaseInterface iobj);
 
 /**
  * Cast method for interface and class type conversions.

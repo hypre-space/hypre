@@ -2,9 +2,9 @@
  * File:          Hypre_ParCSRVector_Impl.c
  * Symbol:        Hypre.ParCSRVector-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:19 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:45 PDT
  * Description:   Server-side implementation for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -18,9 +18,6 @@
 
 /*
  * Symbol "Hypre.ParCSRVector" (version 0.1.5)
- *
- * This class implements build and operator interfaces for vectors.
- * Thus its <code>GetConstructedObject</code> method returns itself.
  */
 
 #include "Hypre_ParCSRVector_Impl.h"
@@ -97,8 +94,7 @@ impl_Hypre_ParCSRVector_AddToLocalComponentsInBlock(
   /* DO-NOT-DELETE 
     splicer.begin(Hypre.ParCSRVector.AddToLocalComponentsInBlock) */
   /* Insert the implementation of the AddToLocalComponentsInBlock method 
-     here... */
-/* >>> not implemented <<< */
+    here... */
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.AddToLocalComponentsInBlock) 
     */
 }
@@ -182,7 +178,6 @@ impl_Hypre_ParCSRVector_Assemble(
    data = Hypre_ParCSRVector__get_data( self );
    ij_b = data -> ij_b;
 
-   printf( "impl_Hypre_ParCSRVectorAssemble ij_b=%i\n", ij_b );
    ierr = HYPRE_IJVectorAssemble( ij_b );
    return( ierr );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Assemble) */
@@ -235,8 +230,6 @@ impl_Hypre_ParCSRVector_Axpy(
    ierr += HYPRE_IJVectorGetObject( ij_x, &object );
    xx = (HYPRE_ParVector) object;
 
-   printf( "impl_Hypre_ParCSRVector_Axpy\n" );
-
    ierr += hypre_ParVectorAxpy( a, (hypre_ParVector *) xx, (hypre_ParVector *) yy );
 
    return( ierr );
@@ -268,7 +261,6 @@ impl_Hypre_ParCSRVector_Clear(
    ierr += HYPRE_IJVectorGetObject( ij_x, &object );
    xx = (HYPRE_ParVector) object;
    ierr += HYPRE_ParVectorSetConstantValues( xx, 0 );
-   printf( "impl_Hypre_ParCSRVector_Clear\n" );
 
    return( ierr );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Clear) */
@@ -491,7 +483,6 @@ impl_Hypre_ParCSRVector_Dot(
    yy = (HYPRE_ParVector) object;
 
    ierr += HYPRE_ParVectorInnerProd( xx, yy, d );
-   printf( "impl_Hypre_ParCSRVector_Dot\n" );
 
    return( ierr );
 
@@ -605,7 +596,6 @@ impl_Hypre_ParCSRVector_Print(
    data = Hypre_ParCSRVector__get_data( self );
    ij_b = data->ij_b;
 
-   printf("impl_Hypre_ParCSRVector_Print\n");
    ierr = HYPRE_IJVectorPrint( ij_b, filename );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Print) */
 }
@@ -633,7 +623,6 @@ impl_Hypre_ParCSRVector_Read(
    data = Hypre_ParCSRVector__get_data( self );
    ij_b = data->ij_b;
 
-   printf("impl_Hypre_ParCSRVector_Read\n");
    ierr = HYPRE_IJVectorRead( filename, *(data->comm),
                               HYPRE_PARCSR, &ij_b );
    data->ij_b = ij_b;
@@ -669,7 +658,6 @@ impl_Hypre_ParCSRVector_Scale(
    ierr += HYPRE_IJVectorGetObject( ij_x, &object );
    xx = (HYPRE_ParVector) object;
    ierr += HYPRE_ParVectorScale( a, xx );
-   printf( "impl_Hypre_ParCSRVector_Scale\n" );
 
    return( ierr );
 
@@ -692,9 +680,7 @@ impl_Hypre_ParCSRVector_SetCommunicator(
   /* Insert the implementation of the SetCommunicator method here... */
    int ierr = 0;
    struct Hypre_ParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
    data = Hypre_ParCSRVector__get_data( self );
-   ij_b = data -> ij_b;
    data -> comm = (MPI_Comm *) mpi_comm;
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.SetCommunicator) */
 }

@@ -2,9 +2,9 @@
  * File:          Hypre_StructMatrix_Impl.h
  * Symbol:        Hypre.StructMatrix-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:18 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:44 PDT
  * Description:   Server-side implementation for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -17,17 +17,17 @@
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
 #endif
-#ifndef included_Hypre_StructGrid_h
-#include "Hypre_StructGrid.h"
-#endif
-#ifndef included_SIDL_BaseInterface_h
-#include "SIDL_BaseInterface.h"
+#ifndef included_Hypre_Vector_h
+#include "Hypre_Vector.h"
 #endif
 #ifndef included_Hypre_StructStencil_h
 #include "Hypre_StructStencil.h"
 #endif
-#ifndef included_Hypre_Vector_h
-#include "Hypre_Vector.h"
+#ifndef included_SIDL_BaseInterface_h
+#include "SIDL_BaseInterface.h"
+#endif
+#ifndef included_Hypre_StructGrid_h
+#include "Hypre_StructGrid.h"
 #endif
 #ifndef included_Hypre_StructMatrix_h
 #include "Hypre_StructMatrix.h"
@@ -111,9 +111,33 @@ impl_Hypre_StructMatrix_SetCommunicator(
   void*);
 
 extern int32_t
+impl_Hypre_StructMatrix_SetDoubleArrayParameter(
+  Hypre_StructMatrix,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetDoubleParameter(
+  Hypre_StructMatrix,
+  const char*,
+  double);
+
+extern int32_t
 impl_Hypre_StructMatrix_SetGrid(
   Hypre_StructMatrix,
   Hypre_StructGrid);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetIntArrayParameter(
+  Hypre_StructMatrix,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetIntParameter(
+  Hypre_StructMatrix,
+  const char*,
+  int32_t);
 
 extern int32_t
 impl_Hypre_StructMatrix_SetNumGhost(
@@ -121,15 +145,15 @@ impl_Hypre_StructMatrix_SetNumGhost(
   struct SIDL_int__array*);
 
 extern int32_t
-impl_Hypre_StructMatrix_SetParameter(
-  Hypre_StructMatrix,
-  const char*,
-  double);
-
-extern int32_t
 impl_Hypre_StructMatrix_SetStencil(
   Hypre_StructMatrix,
   Hypre_StructStencil);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetStringParameter(
+  Hypre_StructMatrix,
+  const char*,
+  const char*);
 
 extern int32_t
 impl_Hypre_StructMatrix_SetSymmetric(

@@ -2,9 +2,9 @@
  * File:          Hypre_ParCSRMatrix_Impl.h
  * Symbol:        Hypre.ParCSRMatrix-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:19 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:43 PDT
  * Description:   Server-side implementation for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -17,14 +17,14 @@
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
 #endif
+#ifndef included_Hypre_Vector_h
+#include "Hypre_Vector.h"
+#endif
 #ifndef included_Hypre_ParCSRMatrix_h
 #include "Hypre_ParCSRMatrix.h"
 #endif
 #ifndef included_SIDL_BaseInterface_h
 #include "SIDL_BaseInterface.h"
-#endif
-#ifndef included_Hypre_Vector_h
-#include "Hypre_Vector.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix._includes) */
@@ -143,15 +143,39 @@ impl_Hypre_ParCSRMatrix_SetDiagOffdSizes(
   struct SIDL_int__array*);
 
 extern int32_t
-impl_Hypre_ParCSRMatrix_SetParameter(
+impl_Hypre_ParCSRMatrix_SetDoubleArrayParameter(
+  Hypre_ParCSRMatrix,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_ParCSRMatrix_SetDoubleParameter(
   Hypre_ParCSRMatrix,
   const char*,
   double);
 
 extern int32_t
+impl_Hypre_ParCSRMatrix_SetIntArrayParameter(
+  Hypre_ParCSRMatrix,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_ParCSRMatrix_SetIntParameter(
+  Hypre_ParCSRMatrix,
+  const char*,
+  int32_t);
+
+extern int32_t
 impl_Hypre_ParCSRMatrix_SetRowSizes(
   Hypre_ParCSRMatrix,
   struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_ParCSRMatrix_SetStringParameter(
+  Hypre_ParCSRMatrix,
+  const char*,
+  const char*);
 
 extern int32_t
 impl_Hypre_ParCSRMatrix_SetValues(

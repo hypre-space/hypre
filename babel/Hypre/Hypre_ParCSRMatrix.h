@@ -2,9 +2,9 @@
  * File:          Hypre_ParCSRMatrix.h
  * Symbol:        Hypre.ParCSRMatrix-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:17 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:40 PDT
  * Description:   Client-side glue code for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -49,22 +49,6 @@ Hypre_ParCSRMatrix
 Hypre_ParCSRMatrix__create(void);
 
 /**
- * (Optional) Set the max number of nonzeros to expect in each row.
- * The array {\tt sizes} contains estimated sizes for each row on this
- * process.  This call can significantly improve the efficiency of
- * matrix construction, and should always be utilized if possible.
- * 
- * Not collective.
- * 
- * DEVELOPER NOTES: None.
- * 
- */
-int32_t
-Hypre_ParCSRMatrix_SetRowSizes(
-  Hypre_ParCSRMatrix self,
-  struct SIDL_int__array* sizes);
-
-/**
  * Adds to values for {\tt nrows} of the matrix.  Usage details are
  * analogous to \Ref{HYPRE_IJMatrixSetValues}.  Adds to any previous
  * values at the specified locations, or, if there was no value there
@@ -84,13 +68,13 @@ Hypre_ParCSRMatrix_AddToValues(
   struct SIDL_double__array* values);
 
 /**
- * Method:  SetParameter
+ * Method:  SetIntArrayParameter
  */
 int32_t
-Hypre_ParCSRMatrix_SetParameter(
+Hypre_ParCSRMatrix_SetIntArrayParameter(
   Hypre_ParCSRMatrix self,
   const char* name,
-  double value);
+  struct SIDL_int__array* value);
 
 /**
  * Method:  Setup
@@ -100,74 +84,13 @@ Hypre_ParCSRMatrix_Setup(
   Hypre_ParCSRMatrix self);
 
 /**
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- * 
+ * Method:  SetIntParameter
  */
 int32_t
-Hypre_ParCSRMatrix_Initialize(
-  Hypre_ParCSRMatrix self);
-
-/**
- * Method:  Apply
- */
-int32_t
-Hypre_ParCSRMatrix_Apply(
+Hypre_ParCSRMatrix_SetIntParameter(
   Hypre_ParCSRMatrix self,
-  Hypre_Vector x,
-  Hypre_Vector* y);
-
-/**
- * <p>
- * Add one to the intrinsic reference count in the underlying object.
- * Object in <code>SIDL</code> have an intrinsic reference count.
- * Objects continue to exist as long as the reference count is
- * positive. Clients should call this method whenever they
- * create another ongoing reference to an object or interface.
- * </p>
- * <p>
- * This does not have a return value because there is no language
- * independent type that can refer to an interface or a
- * class.
- * </p>
- */
-void
-Hypre_ParCSRMatrix_addReference(
-  Hypre_ParCSRMatrix self);
-
-/**
- * Method:  SetCommunicator
- */
-int32_t
-Hypre_ParCSRMatrix_SetCommunicator(
-  Hypre_ParCSRMatrix self,
-  void* comm);
-
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-SIDL_BaseInterface
-Hypre_ParCSRMatrix_queryInterface(
-  Hypre_ParCSRMatrix self,
-  const char* name);
-
-/**
- * Method:  GetRow
- */
-int32_t
-Hypre_ParCSRMatrix_GetRow(
-  Hypre_ParCSRMatrix self,
-  int32_t row,
-  int32_t* size,
-  struct SIDL_int__array** col_ind,
-  struct SIDL_double__array** values);
+  const char* name,
+  int32_t value);
 
 /**
  * Create a matrix object.  Each process owns some unique consecutive
@@ -200,6 +123,59 @@ Hypre_ParCSRMatrix_Create(
   int32_t jupper);
 
 /**
+ * (Optional) Set the max number of nonzeros to expect in each row.
+ * The array {\tt sizes} contains estimated sizes for each row on this
+ * process.  This call can significantly improve the efficiency of
+ * matrix construction, and should always be utilized if possible.
+ * 
+ * Not collective.
+ * 
+ * DEVELOPER NOTES: None.
+ * 
+ */
+int32_t
+Hypre_ParCSRMatrix_SetRowSizes(
+  Hypre_ParCSRMatrix self,
+  struct SIDL_int__array* sizes);
+
+/**
+ * Method:  SetCommunicator
+ */
+int32_t
+Hypre_ParCSRMatrix_SetCommunicator(
+  Hypre_ParCSRMatrix self,
+  void* mpi_comm);
+
+/**
+ * Method:  SetDoubleParameter
+ */
+int32_t
+Hypre_ParCSRMatrix_SetDoubleParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  double value);
+
+/**
+ * Method:  SetStringParameter
+ */
+int32_t
+Hypre_ParCSRMatrix_SetStringParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  const char* value);
+
+/**
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+SIDL_bool
+Hypre_ParCSRMatrix_isInstanceOf(
+  Hypre_ParCSRMatrix self,
+  const char* name);
+
+/**
  * Read the matrix from file.  This is mainly for debugging purposes.
  * 
  */
@@ -210,13 +186,20 @@ Hypre_ParCSRMatrix_Read(
   void* comm);
 
 /**
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
+ * The problem definition interface is a "builder" that creates an object
+ * that contains the problem definition information, e.g. a matrix. To
+ * perform subsequent operations with that object, it must be returned from
+ * the problem definition object. "GetObject" performs this function.
+ * <note>At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
+ * be used on the returned object to convert it into a known type.</note>
+ * 
+ * 
  */
-SIDL_bool
-Hypre_ParCSRMatrix_isSame(
+int32_t
+Hypre_ParCSRMatrix_GetObject(
   Hypre_ParCSRMatrix self,
-  SIDL_BaseInterface iobj);
+  SIDL_BaseInterface* A);
 
 /**
  * Finalize the construction of an object before using, either for
@@ -231,13 +214,27 @@ Hypre_ParCSRMatrix_Assemble(
   Hypre_ParCSRMatrix self);
 
 /**
- * Print the matrix to file.  This is mainly for debugging purposes.
- * 
+ * Check whether the object can support the specified interface or
+ * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * is supported, then a reference to that object is returned with the
+ * reference count incremented.  The callee will be responsible for
+ * calling <code>deleteReference</code> on the returned object.  If
+ * the specified type is not supported, then a null reference is
+ * returned.
  */
-int32_t
-Hypre_ParCSRMatrix_Print(
+SIDL_BaseInterface
+Hypre_ParCSRMatrix_queryInterface(
   Hypre_ParCSRMatrix self,
-  const char* filename);
+  const char* name);
+
+/**
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
+ */
+SIDL_bool
+Hypre_ParCSRMatrix_isSame(
+  Hypre_ParCSRMatrix self,
+  SIDL_BaseInterface iobj);
 
 /**
  * (Optional) Set the max number of nonzeros to expect in each row of
@@ -258,6 +255,63 @@ Hypre_ParCSRMatrix_SetDiagOffdSizes(
   Hypre_ParCSRMatrix self,
   struct SIDL_int__array* diag_sizes,
   struct SIDL_int__array* offdiag_sizes);
+
+/**
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ * 
+ * 
+ */
+int32_t
+Hypre_ParCSRMatrix_Initialize(
+  Hypre_ParCSRMatrix self);
+
+/**
+ * Method:  Apply
+ */
+int32_t
+Hypre_ParCSRMatrix_Apply(
+  Hypre_ParCSRMatrix self,
+  Hypre_Vector x,
+  Hypre_Vector* y);
+
+/**
+ * Print the matrix to file.  This is mainly for debugging purposes.
+ * 
+ */
+int32_t
+Hypre_ParCSRMatrix_Print(
+  Hypre_ParCSRMatrix self,
+  const char* filename);
+
+/**
+ * <p>
+ * Add one to the intrinsic reference count in the underlying object.
+ * Object in <code>SIDL</code> have an intrinsic reference count.
+ * Objects continue to exist as long as the reference count is
+ * positive. Clients should call this method whenever they
+ * create another ongoing reference to an object or interface.
+ * </p>
+ * <p>
+ * This does not have a return value because there is no language
+ * independent type that can refer to an interface or a
+ * class.
+ * </p>
+ */
+void
+Hypre_ParCSRMatrix_addReference(
+  Hypre_ParCSRMatrix self);
+
+/**
+ * Method:  GetRow
+ */
+int32_t
+Hypre_ParCSRMatrix_GetRow(
+  Hypre_ParCSRMatrix self,
+  int32_t row,
+  int32_t* size,
+  struct SIDL_int__array** col_ind,
+  struct SIDL_double__array** values);
 
 /**
  * Sets values for {\tt nrows} of the matrix.  The arrays {\tt ncols}
@@ -284,6 +338,15 @@ Hypre_ParCSRMatrix_SetValues(
   struct SIDL_double__array* values);
 
 /**
+ * Method:  SetDoubleArrayParameter
+ */
+int32_t
+Hypre_ParCSRMatrix_SetDoubleArrayParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  struct SIDL_double__array* value);
+
+/**
  * Decrease by one the intrinsic reference count in the underlying
  * object, and delete the object if the reference is non-positive.
  * Objects in <code>SIDL</code> have an intrinsic reference count.
@@ -293,33 +356,6 @@ Hypre_ParCSRMatrix_SetValues(
 void
 Hypre_ParCSRMatrix_deleteReference(
   Hypre_ParCSRMatrix self);
-
-/**
- * The problem definition interface is a "builder" that creates an object
- * that contains the problem definition information, e.g. a matrix. To
- * perform subsequent operations with that object, it must be returned from
- * the problem definition object. "GetObject" performs this function.
- * <note>At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
- * be used on the returned object to convert it into a known type.</note>
- * 
- * 
- */
-int32_t
-Hypre_ParCSRMatrix_GetObject(
-  Hypre_ParCSRMatrix self,
-  SIDL_BaseInterface* A);
-
-/**
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
- */
-SIDL_bool
-Hypre_ParCSRMatrix_isInstanceOf(
-  Hypre_ParCSRMatrix self,
-  const char* name);
 
 /**
  * Cast method for interface and class type conversions.

@@ -2,9 +2,9 @@
  * File:          Hypre_StructStencil_Skel.c
  * Symbol:        Hypre.StructStencil-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:18 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:45 PDT
  * Description:   Server-side glue code for Hypre.StructStencil
  * 
  * WARNING: Automatically generated; changes will be lost

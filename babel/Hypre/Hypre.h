@@ -2,9 +2,9 @@
  * File:          Hypre.h
  * Symbol:        Hypre-v0.1.5
  * Symbol Type:   package
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:07 PST
- * Generated:     20020104 15:27:17 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:33 PDT
+ * Generated:     20020522 13:59:42 PDT
  * Description:   Client-side glue code for Hypre
  * 
  * WARNING: Automatically generated; changes will be lost

@@ -2,9 +2,9 @@
  * File:          Hypre_PCG.h
  * Symbol:        Hypre.PCG-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:17 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:41 PDT
  * Description:   Client-side glue code for Hypre.PCG
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -52,20 +52,121 @@ Hypre_PCG
 Hypre_PCG__create(void);
 
 /**
- * Method:  SetParameter
- */
-int32_t
-Hypre_PCG_SetParameter(
-  Hypre_PCG self,
-  const char* name,
-  double value);
-
-/**
  * Method:  Setup
  */
 int32_t
 Hypre_PCG_Setup(
   Hypre_PCG self);
+
+/**
+ * Method:  SetIntArrayParameter
+ */
+int32_t
+Hypre_PCG_SetIntArrayParameter(
+  Hypre_PCG self,
+  const char* name,
+  struct SIDL_int__array* value);
+
+/**
+ * Method:  SetLogging
+ */
+int32_t
+Hypre_PCG_SetLogging(
+  Hypre_PCG self,
+  int32_t level);
+
+/**
+ * Method:  SetIntParameter
+ */
+int32_t
+Hypre_PCG_SetIntParameter(
+  Hypre_PCG self,
+  const char* name,
+  int32_t value);
+
+/**
+ * Method:  GetResidual
+ */
+int32_t
+Hypre_PCG_GetResidual(
+  Hypre_PCG self,
+  Hypre_Vector* r);
+
+/**
+ * Method:  SetPrintLevel
+ */
+int32_t
+Hypre_PCG_SetPrintLevel(
+  Hypre_PCG self,
+  int32_t level);
+
+/**
+ * Method:  SetCommunicator
+ */
+int32_t
+Hypre_PCG_SetCommunicator(
+  Hypre_PCG self,
+  void* comm);
+
+/**
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+SIDL_bool
+Hypre_PCG_isInstanceOf(
+  Hypre_PCG self,
+  const char* name);
+
+/**
+ * Method:  SetStringParameter
+ */
+int32_t
+Hypre_PCG_SetStringParameter(
+  Hypre_PCG self,
+  const char* name,
+  const char* value);
+
+/**
+ * Method:  SetDoubleParameter
+ */
+int32_t
+Hypre_PCG_SetDoubleParameter(
+  Hypre_PCG self,
+  const char* name,
+  double value);
+
+/**
+ * Method:  GetPreconditionedResidual
+ */
+int32_t
+Hypre_PCG_GetPreconditionedResidual(
+  Hypre_PCG self,
+  Hypre_Vector* r);
+
+/**
+ * Check whether the object can support the specified interface or
+ * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * is supported, then a reference to that object is returned with the
+ * reference count incremented.  The callee will be responsible for
+ * calling <code>deleteReference</code> on the returned object.  If
+ * the specified type is not supported, then a null reference is
+ * returned.
+ */
+SIDL_BaseInterface
+Hypre_PCG_queryInterface(
+  Hypre_PCG self,
+  const char* name);
+
+/**
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
+ */
+SIDL_bool
+Hypre_PCG_isSame(
+  Hypre_PCG self,
+  SIDL_BaseInterface iobj);
 
 /**
  * Method:  Apply
@@ -95,26 +196,12 @@ Hypre_PCG_addReference(
   Hypre_PCG self);
 
 /**
- * Method:  SetCommunicator
+ * Method:  SetPreconditioner
  */
 int32_t
-Hypre_PCG_SetCommunicator(
+Hypre_PCG_SetPreconditioner(
   Hypre_PCG self,
-  void* comm);
-
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-SIDL_BaseInterface
-Hypre_PCG_queryInterface(
-  Hypre_PCG self,
-  const char* name);
+  Hypre_Solver s);
 
 /**
  * Method:  SetOperator
@@ -125,29 +212,13 @@ Hypre_PCG_SetOperator(
   Hypre_Operator A);
 
 /**
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
- */
-SIDL_bool
-Hypre_PCG_isSame(
-  Hypre_PCG self,
-  SIDL_BaseInterface iobj);
-
-/**
- * Method:  GetResidual
+ * Method:  SetDoubleArrayParameter
  */
 int32_t
-Hypre_PCG_GetResidual(
+Hypre_PCG_SetDoubleArrayParameter(
   Hypre_PCG self,
-  Hypre_Vector* r);
-
-/**
- * Method:  GetPreconditionedResidual
- */
-int32_t
-Hypre_PCG_GetPreconditionedResidual(
-  Hypre_PCG self,
-  Hypre_Vector* r);
+  const char* name,
+  struct SIDL_double__array* value);
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -159,25 +230,6 @@ Hypre_PCG_GetPreconditionedResidual(
 void
 Hypre_PCG_deleteReference(
   Hypre_PCG self);
-
-/**
- * Method:  SetPreconditioner
- */
-int32_t
-Hypre_PCG_SetPreconditioner(
-  Hypre_PCG self,
-  Hypre_Solver s);
-
-/**
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
- */
-SIDL_bool
-Hypre_PCG_isInstanceOf(
-  Hypre_PCG self,
-  const char* name);
 
 /**
  * Cast method for interface and class type conversions.

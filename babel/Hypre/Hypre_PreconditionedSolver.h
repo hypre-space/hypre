@@ -2,9 +2,9 @@
  * File:          Hypre_PreconditionedSolver.h
  * Symbol:        Hypre.PreconditionedSolver-v0.1.5
  * Symbol Type:   interface
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:16 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:43 PDT
  * Description:   Client-side glue code for Hypre.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -46,20 +46,121 @@ extern "C" {
 #endif
 
 /**
- * Method:  SetParameter
- */
-int32_t
-Hypre_PreconditionedSolver_SetParameter(
-  Hypre_PreconditionedSolver self,
-  const char* name,
-  double value);
-
-/**
  * Method:  Setup
  */
 int32_t
 Hypre_PreconditionedSolver_Setup(
   Hypre_PreconditionedSolver self);
+
+/**
+ * Method:  SetIntArrayParameter
+ */
+int32_t
+Hypre_PreconditionedSolver_SetIntArrayParameter(
+  Hypre_PreconditionedSolver self,
+  const char* name,
+  struct SIDL_int__array* value);
+
+/**
+ * Method:  SetLogging
+ */
+int32_t
+Hypre_PreconditionedSolver_SetLogging(
+  Hypre_PreconditionedSolver self,
+  int32_t level);
+
+/**
+ * Method:  SetIntParameter
+ */
+int32_t
+Hypre_PreconditionedSolver_SetIntParameter(
+  Hypre_PreconditionedSolver self,
+  const char* name,
+  int32_t value);
+
+/**
+ * Method:  GetResidual
+ */
+int32_t
+Hypre_PreconditionedSolver_GetResidual(
+  Hypre_PreconditionedSolver self,
+  Hypre_Vector* r);
+
+/**
+ * Method:  SetPrintLevel
+ */
+int32_t
+Hypre_PreconditionedSolver_SetPrintLevel(
+  Hypre_PreconditionedSolver self,
+  int32_t level);
+
+/**
+ * Method:  SetCommunicator
+ */
+int32_t
+Hypre_PreconditionedSolver_SetCommunicator(
+  Hypre_PreconditionedSolver self,
+  void* comm);
+
+/**
+ * Method:  SetStringParameter
+ */
+int32_t
+Hypre_PreconditionedSolver_SetStringParameter(
+  Hypre_PreconditionedSolver self,
+  const char* name,
+  const char* value);
+
+/**
+ * Method:  SetDoubleParameter
+ */
+int32_t
+Hypre_PreconditionedSolver_SetDoubleParameter(
+  Hypre_PreconditionedSolver self,
+  const char* name,
+  double value);
+
+/**
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+SIDL_bool
+Hypre_PreconditionedSolver_isInstanceOf(
+  Hypre_PreconditionedSolver self,
+  const char* name);
+
+/**
+ * Method:  GetPreconditionedResidual
+ */
+int32_t
+Hypre_PreconditionedSolver_GetPreconditionedResidual(
+  Hypre_PreconditionedSolver self,
+  Hypre_Vector* r);
+
+/**
+ * Check whether the object can support the specified interface or
+ * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * is supported, then a reference to that object is returned with the
+ * reference count incremented.  The callee will be responsible for
+ * calling <code>deleteReference</code> on the returned object.  If
+ * the specified type is not supported, then a null reference is
+ * returned.
+ */
+SIDL_BaseInterface
+Hypre_PreconditionedSolver_queryInterface(
+  Hypre_PreconditionedSolver self,
+  const char* name);
+
+/**
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
+ */
+SIDL_bool
+Hypre_PreconditionedSolver_isSame(
+  Hypre_PreconditionedSolver self,
+  SIDL_BaseInterface iobj);
 
 /**
  * Method:  Apply
@@ -89,26 +190,12 @@ Hypre_PreconditionedSolver_addReference(
   Hypre_PreconditionedSolver self);
 
 /**
- * Method:  SetCommunicator
+ * Method:  SetPreconditioner
  */
 int32_t
-Hypre_PreconditionedSolver_SetCommunicator(
+Hypre_PreconditionedSolver_SetPreconditioner(
   Hypre_PreconditionedSolver self,
-  void* comm);
-
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-SIDL_BaseInterface
-Hypre_PreconditionedSolver_queryInterface(
-  Hypre_PreconditionedSolver self,
-  const char* name);
+  Hypre_Solver s);
 
 /**
  * Method:  SetOperator
@@ -119,29 +206,13 @@ Hypre_PreconditionedSolver_SetOperator(
   Hypre_Operator A);
 
 /**
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
- */
-SIDL_bool
-Hypre_PreconditionedSolver_isSame(
-  Hypre_PreconditionedSolver self,
-  SIDL_BaseInterface iobj);
-
-/**
- * Method:  GetResidual
+ * Method:  SetDoubleArrayParameter
  */
 int32_t
-Hypre_PreconditionedSolver_GetResidual(
+Hypre_PreconditionedSolver_SetDoubleArrayParameter(
   Hypre_PreconditionedSolver self,
-  Hypre_Vector* r);
-
-/**
- * Method:  GetPreconditionedResidual
- */
-int32_t
-Hypre_PreconditionedSolver_GetPreconditionedResidual(
-  Hypre_PreconditionedSolver self,
-  Hypre_Vector* r);
+  const char* name,
+  struct SIDL_double__array* value);
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -153,25 +224,6 @@ Hypre_PreconditionedSolver_GetPreconditionedResidual(
 void
 Hypre_PreconditionedSolver_deleteReference(
   Hypre_PreconditionedSolver self);
-
-/**
- * Method:  SetPreconditioner
- */
-int32_t
-Hypre_PreconditionedSolver_SetPreconditioner(
-  Hypre_PreconditionedSolver self,
-  Hypre_Solver s);
-
-/**
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
- */
-SIDL_bool
-Hypre_PreconditionedSolver_isInstanceOf(
-  Hypre_PreconditionedSolver self,
-  const char* name);
 
 /**
  * Cast method for interface and class type conversions.

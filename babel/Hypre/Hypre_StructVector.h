@@ -2,9 +2,9 @@
  * File:          Hypre_StructVector.h
  * Symbol:        Hypre.StructVector-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:17 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:42 PDT
  * Description:   Client-side glue code for Hypre.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -52,13 +52,98 @@ Hypre_StructVector
 Hypre_StructVector__create(void);
 
 /**
- * y <- a*x + y
+ * create an x compatible with y
  */
 int32_t
-Hypre_StructVector_Axpy(
+Hypre_StructVector_Clone(
   Hypre_StructVector self,
-  double a,
+  Hypre_Vector* x);
+
+/**
+ * Method:  SetStencil
+ */
+int32_t
+Hypre_StructVector_SetStencil(
+  Hypre_StructVector self,
+  Hypre_StructStencil stencil);
+
+/**
+ * Method:  SetCommunicator
+ */
+int32_t
+Hypre_StructVector_SetCommunicator(
+  Hypre_StructVector self,
+  void* mpi_comm);
+
+/**
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+SIDL_bool
+Hypre_StructVector_isInstanceOf(
+  Hypre_StructVector self,
+  const char* name);
+
+/**
+ * y <- x 
+ */
+int32_t
+Hypre_StructVector_Copy(
+  Hypre_StructVector self,
   Hypre_Vector x);
+
+/**
+ * The problem definition interface is a "builder" that creates an object
+ * that contains the problem definition information, e.g. a matrix. To
+ * perform subsequent operations with that object, it must be returned from
+ * the problem definition object. "GetObject" performs this function.
+ * <note>At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
+ * be used on the returned object to convert it into a known type.</note>
+ * 
+ * 
+ */
+int32_t
+Hypre_StructVector_GetObject(
+  Hypre_StructVector self,
+  SIDL_BaseInterface* A);
+
+/**
+ * Finalize the construction of an object before using, either for
+ * the first time or on subsequent uses. "Initialize" and "Assemble"
+ * always appear in a matched set, with Initialize preceding Assemble. Values
+ * can only be set in between a call to Initialize and Assemble.
+ * 
+ * 
+ */
+int32_t
+Hypre_StructVector_Assemble(
+  Hypre_StructVector self);
+
+/**
+ * Check whether the object can support the specified interface or
+ * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * is supported, then a reference to that object is returned with the
+ * reference count incremented.  The callee will be responsible for
+ * calling <code>deleteReference</code> on the returned object.  If
+ * the specified type is not supported, then a null reference is
+ * returned.
+ */
+SIDL_BaseInterface
+Hypre_StructVector_queryInterface(
+  Hypre_StructVector self,
+  const char* name);
+
+/**
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
+ */
+SIDL_bool
+Hypre_StructVector_isSame(
+  Hypre_StructVector self,
+  SIDL_BaseInterface iobj);
 
 /**
  * Prepare an object for setting coefficient values, whether for
@@ -69,6 +154,32 @@ Hypre_StructVector_Axpy(
 int32_t
 Hypre_StructVector_Initialize(
   Hypre_StructVector self);
+
+/**
+ * Method:  SetValue
+ */
+int32_t
+Hypre_StructVector_SetValue(
+  Hypre_StructVector self,
+  struct SIDL_int__array* grid_index,
+  double value);
+
+/**
+ * y <- 0 (where y=self)
+ */
+int32_t
+Hypre_StructVector_Clear(
+  Hypre_StructVector self);
+
+/**
+ * Method:  SetBoxValues
+ */
+int32_t
+Hypre_StructVector_SetBoxValues(
+  Hypre_StructVector self,
+  struct SIDL_int__array* ilower,
+  struct SIDL_int__array* iupper,
+  struct SIDL_double__array* values);
 
 /**
  * <p>
@@ -89,91 +200,6 @@ Hypre_StructVector_addReference(
   Hypre_StructVector self);
 
 /**
- * Method:  SetCommunicator
- */
-int32_t
-Hypre_StructVector_SetCommunicator(
-  Hypre_StructVector self,
-  void* mpi_comm);
-
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-SIDL_BaseInterface
-Hypre_StructVector_queryInterface(
-  Hypre_StructVector self,
-  const char* name);
-
-/**
- * Method:  SetStencil
- */
-int32_t
-Hypre_StructVector_SetStencil(
-  Hypre_StructVector self,
-  Hypre_StructStencil stencil);
-
-/**
- * Method:  SetValue
- */
-int32_t
-Hypre_StructVector_SetValue(
-  Hypre_StructVector self,
-  struct SIDL_int__array* grid_index,
-  double value);
-
-/**
- * create an x compatible with y
- */
-int32_t
-Hypre_StructVector_Clone(
-  Hypre_StructVector self,
-  Hypre_Vector* x);
-
-/**
- * y <- 0 (where y=self)
- */
-int32_t
-Hypre_StructVector_Clear(
-  Hypre_StructVector self);
-
-/**
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
- */
-SIDL_bool
-Hypre_StructVector_isSame(
-  Hypre_StructVector self,
-  SIDL_BaseInterface iobj);
-
-/**
- * Finalize the construction of an object before using, either for
- * the first time or on subsequent uses. "Initialize" and "Assemble"
- * always appear in a matched set, with Initialize preceding Assemble. Values
- * can only be set in between a call to Initialize and Assemble.
- * 
- * 
- */
-int32_t
-Hypre_StructVector_Assemble(
-  Hypre_StructVector self);
-
-/**
- * Method:  SetBoxValues
- */
-int32_t
-Hypre_StructVector_SetBoxValues(
-  Hypre_StructVector self,
-  struct SIDL_int__array* ilower,
-  struct SIDL_int__array* iupper,
-  struct SIDL_double__array* values);
-
-/**
  * y <- a*y 
  */
 int32_t
@@ -191,6 +217,23 @@ Hypre_StructVector_Dot(
   double* d);
 
 /**
+ * Method:  SetGrid
+ */
+int32_t
+Hypre_StructVector_SetGrid(
+  Hypre_StructVector self,
+  Hypre_StructGrid grid);
+
+/**
+ * y <- a*x + y
+ */
+int32_t
+Hypre_StructVector_Axpy(
+  Hypre_StructVector self,
+  double a,
+  Hypre_Vector x);
+
+/**
  * Decrease by one the intrinsic reference count in the underlying
  * object, and delete the object if the reference is non-positive.
  * Objects in <code>SIDL</code> have an intrinsic reference count.
@@ -200,49 +243,6 @@ Hypre_StructVector_Dot(
 void
 Hypre_StructVector_deleteReference(
   Hypre_StructVector self);
-
-/**
- * The problem definition interface is a "builder" that creates an object
- * that contains the problem definition information, e.g. a matrix. To
- * perform subsequent operations with that object, it must be returned from
- * the problem definition object. "GetObject" performs this function.
- * <note>At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
- * be used on the returned object to convert it into a known type.</note>
- * 
- * 
- */
-int32_t
-Hypre_StructVector_GetObject(
-  Hypre_StructVector self,
-  SIDL_BaseInterface* A);
-
-/**
- * y <- x 
- */
-int32_t
-Hypre_StructVector_Copy(
-  Hypre_StructVector self,
-  Hypre_Vector x);
-
-/**
- * Method:  SetGrid
- */
-int32_t
-Hypre_StructVector_SetGrid(
-  Hypre_StructVector self,
-  Hypre_StructGrid grid);
-
-/**
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
- */
-SIDL_bool
-Hypre_StructVector_isInstanceOf(
-  Hypre_StructVector self,
-  const char* name);
 
 /**
  * Cast method for interface and class type conversions.

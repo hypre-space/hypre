@@ -2,9 +2,9 @@
  * File:          Hypre_PreconditionedSolver_IOR.c
  * Symbol:        Hypre.PreconditionedSolver-v0.1.5
  * Symbol Type:   interface
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:12 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:40 PDT
  * Description:   Intermediate Object Representation for Hypre.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -519,6 +519,70 @@ remote_Hypre_PreconditionedSolver_SetCommunicator(
 }
 
 /*
+ * REMOTE METHOD STUB:SetDoubleArrayParameter
+ */
+
+static int32_t
+remote_Hypre_PreconditionedSolver_SetDoubleArrayParameter(
+  void* self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetDoubleParameter
+ */
+
+static int32_t
+remote_Hypre_PreconditionedSolver_SetDoubleParameter(
+  void* self,
+  const char* name,
+  double value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetIntArrayParameter
+ */
+
+static int32_t
+remote_Hypre_PreconditionedSolver_SetIntArrayParameter(
+  void* self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetIntParameter
+ */
+
+static int32_t
+remote_Hypre_PreconditionedSolver_SetIntParameter(
+  void* self,
+  const char* name,
+  int32_t value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetLogging
+ */
+
+static int32_t
+remote_Hypre_PreconditionedSolver_SetLogging(
+  void* self,
+  int32_t level)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:SetOperator
  */
 
@@ -531,19 +595,6 @@ remote_Hypre_PreconditionedSolver_SetOperator(
 }
 
 /*
- * REMOTE METHOD STUB:SetParameter
- */
-
-static int32_t
-remote_Hypre_PreconditionedSolver_SetParameter(
-  void* self,
-  const char* name,
-  double value)
-{
-  return 0;
-}
-
-/*
  * REMOTE METHOD STUB:SetPreconditioner
  */
 
@@ -551,6 +602,31 @@ static int32_t
 remote_Hypre_PreconditionedSolver_SetPreconditioner(
   void* self,
   struct Hypre_Solver__object* s)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetPrintLevel
+ */
+
+static int32_t
+remote_Hypre_PreconditionedSolver_SetPrintLevel(
+  void* self,
+  int32_t level)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:SetStringParameter
+ */
+
+static int32_t
+remote_Hypre_PreconditionedSolver_SetStringParameter(
+  void* self,
+  const char* name,
+  const char* value)
 {
   return 0;
 }
@@ -640,12 +716,24 @@ static void Hypre_PreconditionedSolver__init_remote_epv(void)
     remote_Hypre_PreconditionedSolver_GetResidual;
   epv->f_SetCommunicator           = 
     remote_Hypre_PreconditionedSolver_SetCommunicator;
+  epv->f_SetDoubleArrayParameter   = 
+    remote_Hypre_PreconditionedSolver_SetDoubleArrayParameter;
+  epv->f_SetDoubleParameter        = 
+    remote_Hypre_PreconditionedSolver_SetDoubleParameter;
+  epv->f_SetIntArrayParameter      = 
+    remote_Hypre_PreconditionedSolver_SetIntArrayParameter;
+  epv->f_SetIntParameter           = 
+    remote_Hypre_PreconditionedSolver_SetIntParameter;
+  epv->f_SetLogging                = 
+    remote_Hypre_PreconditionedSolver_SetLogging;
   epv->f_SetOperator               = 
     remote_Hypre_PreconditionedSolver_SetOperator;
-  epv->f_SetParameter              = 
-    remote_Hypre_PreconditionedSolver_SetParameter;
   epv->f_SetPreconditioner         = 
     remote_Hypre_PreconditionedSolver_SetPreconditioner;
+  epv->f_SetPrintLevel             = 
+    remote_Hypre_PreconditionedSolver_SetPrintLevel;
+  epv->f_SetStringParameter        = 
+    remote_Hypre_PreconditionedSolver_SetStringParameter;
   epv->f_Setup                     = remote_Hypre_PreconditionedSolver_Setup;
   epv->f_addReference              = 
     remote_Hypre_PreconditionedSolver_addReference;

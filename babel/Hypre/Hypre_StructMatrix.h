@@ -2,9 +2,9 @@
  * File:          Hypre_StructMatrix.h
  * Symbol:        Hypre.StructMatrix-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:16 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:42 PDT
  * Description:   Client-side glue code for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -55,13 +55,13 @@ Hypre_StructMatrix
 Hypre_StructMatrix__create(void);
 
 /**
- * Method:  SetParameter
+ * Method:  SetIntArrayParameter
  */
 int32_t
-Hypre_StructMatrix_SetParameter(
+Hypre_StructMatrix_SetIntArrayParameter(
   Hypre_StructMatrix self,
   const char* name,
-  double value);
+  struct SIDL_int__array* value);
 
 /**
  * Method:  Setup
@@ -69,6 +69,119 @@ Hypre_StructMatrix_SetParameter(
 int32_t
 Hypre_StructMatrix_Setup(
   Hypre_StructMatrix self);
+
+/**
+ * Method:  SetIntParameter
+ */
+int32_t
+Hypre_StructMatrix_SetIntParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  int32_t value);
+
+/**
+ * Method:  SetStencil
+ */
+int32_t
+Hypre_StructMatrix_SetStencil(
+  Hypre_StructMatrix self,
+  Hypre_StructStencil stencil);
+
+/**
+ * Method:  SetCommunicator
+ */
+int32_t
+Hypre_StructMatrix_SetCommunicator(
+  Hypre_StructMatrix self,
+  void* mpi_comm);
+
+/**
+ * Method:  SetDoubleParameter
+ */
+int32_t
+Hypre_StructMatrix_SetDoubleParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  double value);
+
+/**
+ * Method:  SetStringParameter
+ */
+int32_t
+Hypre_StructMatrix_SetStringParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  const char* value);
+
+/**
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+SIDL_bool
+Hypre_StructMatrix_isInstanceOf(
+  Hypre_StructMatrix self,
+  const char* name);
+
+/**
+ * Method:  SetSymmetric
+ */
+int32_t
+Hypre_StructMatrix_SetSymmetric(
+  Hypre_StructMatrix self,
+  int32_t symmetric);
+
+/**
+ * The problem definition interface is a "builder" that creates an object
+ * that contains the problem definition information, e.g. a matrix. To
+ * perform subsequent operations with that object, it must be returned from
+ * the problem definition object. "GetObject" performs this function.
+ * <note>At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
+ * be used on the returned object to convert it into a known type.</note>
+ * 
+ * 
+ */
+int32_t
+Hypre_StructMatrix_GetObject(
+  Hypre_StructMatrix self,
+  SIDL_BaseInterface* A);
+
+/**
+ * Finalize the construction of an object before using, either for
+ * the first time or on subsequent uses. "Initialize" and "Assemble"
+ * always appear in a matched set, with Initialize preceding Assemble. Values
+ * can only be set in between a call to Initialize and Assemble.
+ * 
+ * 
+ */
+int32_t
+Hypre_StructMatrix_Assemble(
+  Hypre_StructMatrix self);
+
+/**
+ * Check whether the object can support the specified interface or
+ * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * is supported, then a reference to that object is returned with the
+ * reference count incremented.  The callee will be responsible for
+ * calling <code>deleteReference</code> on the returned object.  If
+ * the specified type is not supported, then a null reference is
+ * returned.
+ */
+SIDL_BaseInterface
+Hypre_StructMatrix_queryInterface(
+  Hypre_StructMatrix self,
+  const char* name);
+
+/**
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
+ */
+SIDL_bool
+Hypre_StructMatrix_isSame(
+  Hypre_StructMatrix self,
+  SIDL_BaseInterface iobj);
 
 /**
  * Prepare an object for setting coefficient values, whether for
@@ -81,6 +194,15 @@ Hypre_StructMatrix_Initialize(
   Hypre_StructMatrix self);
 
 /**
+ * Method:  Apply
+ */
+int32_t
+Hypre_StructMatrix_Apply(
+  Hypre_StructMatrix self,
+  Hypre_Vector x,
+  Hypre_Vector* y);
+
+/**
  * Method:  SetNumGhost
  */
 int32_t
@@ -89,13 +211,16 @@ Hypre_StructMatrix_SetNumGhost(
   struct SIDL_int__array* num_ghost);
 
 /**
- * Method:  Apply
+ * Method:  SetBoxValues
  */
 int32_t
-Hypre_StructMatrix_Apply(
+Hypre_StructMatrix_SetBoxValues(
   Hypre_StructMatrix self,
-  Hypre_Vector x,
-  Hypre_Vector* y);
+  struct SIDL_int__array* ilower,
+  struct SIDL_int__array* iupper,
+  int32_t num_stencil_indices,
+  struct SIDL_int__array* stencil_indices,
+  struct SIDL_double__array* values);
 
 /**
  * <p>
@@ -116,75 +241,12 @@ Hypre_StructMatrix_addReference(
   Hypre_StructMatrix self);
 
 /**
- * Method:  SetCommunicator
+ * Method:  SetGrid
  */
 int32_t
-Hypre_StructMatrix_SetCommunicator(
+Hypre_StructMatrix_SetGrid(
   Hypre_StructMatrix self,
-  void* mpi_comm);
-
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-SIDL_BaseInterface
-Hypre_StructMatrix_queryInterface(
-  Hypre_StructMatrix self,
-  const char* name);
-
-/**
- * Method:  SetStencil
- */
-int32_t
-Hypre_StructMatrix_SetStencil(
-  Hypre_StructMatrix self,
-  Hypre_StructStencil stencil);
-
-/**
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
- */
-SIDL_bool
-Hypre_StructMatrix_isSame(
-  Hypre_StructMatrix self,
-  SIDL_BaseInterface iobj);
-
-/**
- * Finalize the construction of an object before using, either for
- * the first time or on subsequent uses. "Initialize" and "Assemble"
- * always appear in a matched set, with Initialize preceding Assemble. Values
- * can only be set in between a call to Initialize and Assemble.
- * 
- * 
- */
-int32_t
-Hypre_StructMatrix_Assemble(
-  Hypre_StructMatrix self);
-
-/**
- * Method:  SetBoxValues
- */
-int32_t
-Hypre_StructMatrix_SetBoxValues(
-  Hypre_StructMatrix self,
-  struct SIDL_int__array* ilower,
-  struct SIDL_int__array* iupper,
-  int32_t num_stencil_indices,
-  struct SIDL_int__array* stencil_indices,
-  struct SIDL_double__array* values);
-
-/**
- * Method:  SetSymmetric
- */
-int32_t
-Hypre_StructMatrix_SetSymmetric(
-  Hypre_StructMatrix self,
-  int32_t symmetric);
+  Hypre_StructGrid grid);
 
 /**
  * Method:  SetValues
@@ -198,6 +260,15 @@ Hypre_StructMatrix_SetValues(
   struct SIDL_double__array* values);
 
 /**
+ * Method:  SetDoubleArrayParameter
+ */
+int32_t
+Hypre_StructMatrix_SetDoubleArrayParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  struct SIDL_double__array* value);
+
+/**
  * Decrease by one the intrinsic reference count in the underlying
  * object, and delete the object if the reference is non-positive.
  * Objects in <code>SIDL</code> have an intrinsic reference count.
@@ -207,41 +278,6 @@ Hypre_StructMatrix_SetValues(
 void
 Hypre_StructMatrix_deleteReference(
   Hypre_StructMatrix self);
-
-/**
- * The problem definition interface is a "builder" that creates an object
- * that contains the problem definition information, e.g. a matrix. To
- * perform subsequent operations with that object, it must be returned from
- * the problem definition object. "GetObject" performs this function.
- * <note>At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
- * be used on the returned object to convert it into a known type.</note>
- * 
- * 
- */
-int32_t
-Hypre_StructMatrix_GetObject(
-  Hypre_StructMatrix self,
-  SIDL_BaseInterface* A);
-
-/**
- * Method:  SetGrid
- */
-int32_t
-Hypre_StructMatrix_SetGrid(
-  Hypre_StructMatrix self,
-  Hypre_StructGrid grid);
-
-/**
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
- */
-SIDL_bool
-Hypre_StructMatrix_isInstanceOf(
-  Hypre_StructMatrix self,
-  const char* name);
 
 /**
  * Cast method for interface and class type conversions.

@@ -2,9 +2,9 @@
  * File:          Hypre_StructSMG_Impl.c
  * Symbol:        Hypre.StructSMG-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:19 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:44 PDT
  * Description:   Server-side implementation for Hypre.StructSMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -111,6 +111,95 @@ impl_Hypre_StructSMG_SetCommunicator(
 }
 
 /*
+ * Method:  SetDoubleArrayParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructSMG_SetDoubleArrayParameter"
+
+int32_t
+impl_Hypre_StructSMG_SetDoubleArrayParameter(
+  Hypre_StructSMG self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetDoubleArrayParameter) */
+  /* Insert the implementation of the SetDoubleArrayParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetDoubleArrayParameter) */
+}
+
+/*
+ * Method:  SetDoubleParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructSMG_SetDoubleParameter"
+
+int32_t
+impl_Hypre_StructSMG_SetDoubleParameter(
+  Hypre_StructSMG self,
+  const char* name,
+  double value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetDoubleParameter) */
+  /* Insert the implementation of the SetDoubleParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetDoubleParameter) */
+}
+
+/*
+ * Method:  SetIntArrayParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructSMG_SetIntArrayParameter"
+
+int32_t
+impl_Hypre_StructSMG_SetIntArrayParameter(
+  Hypre_StructSMG self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetIntArrayParameter) */
+  /* Insert the implementation of the SetIntArrayParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetIntArrayParameter) */
+}
+
+/*
+ * Method:  SetIntParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructSMG_SetIntParameter"
+
+int32_t
+impl_Hypre_StructSMG_SetIntParameter(
+  Hypre_StructSMG self,
+  const char* name,
+  int32_t value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetIntParameter) */
+  /* Insert the implementation of the SetIntParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetIntParameter) */
+}
+
+/*
+ * Method:  SetLogging
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructSMG_SetLogging"
+
+int32_t
+impl_Hypre_StructSMG_SetLogging(
+  Hypre_StructSMG self,
+  int32_t level)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetLogging) */
+  /* Insert the implementation of the SetLogging method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetLogging) */
+}
+
+/*
  * Method:  SetOperator
  */
 
@@ -128,21 +217,38 @@ impl_Hypre_StructSMG_SetOperator(
 }
 
 /*
- * Method:  SetParameter
+ * Method:  SetPrintLevel
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructSMG_SetParameter"
+#define __FUNC__ "impl_Hypre_StructSMG_SetPrintLevel"
 
 int32_t
-impl_Hypre_StructSMG_SetParameter(
+impl_Hypre_StructSMG_SetPrintLevel(
+  Hypre_StructSMG self,
+  int32_t level)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetPrintLevel) */
+  /* Insert the implementation of the SetPrintLevel method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetPrintLevel) */
+}
+
+/*
+ * Method:  SetStringParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructSMG_SetStringParameter"
+
+int32_t
+impl_Hypre_StructSMG_SetStringParameter(
   Hypre_StructSMG self,
   const char* name,
-  double value)
+  const char* value)
 {
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetParameter) */
-  /* Insert the implementation of the SetParameter method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetParameter) */
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetStringParameter) */
+  /* Insert the implementation of the SetStringParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetStringParameter) */
 }
 
 /*
@@ -160,3 +266,6 @@ impl_Hypre_StructSMG_Setup(
   /* Insert the implementation of the Setup method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.Setup) */
 }
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetParameter) */
+  /* Insert the implementation of the SetParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetParameter) */

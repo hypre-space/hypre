@@ -2,9 +2,9 @@
  * File:          Hypre_StructVector_Skel.c
  * Symbol:        Hypre.StructVector-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:18 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:44 PDT
  * Description:   Server-side glue code for Hypre.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -100,20 +100,20 @@ Hypre_StructVector__set_epv(struct Hypre_StructVector__epv *epv)
 {
   epv->f__ctor = impl_Hypre_StructVector__ctor;
   epv->f__dtor = impl_Hypre_StructVector__dtor;
-  epv->f_Axpy = impl_Hypre_StructVector_Axpy;
-  epv->f_Initialize = impl_Hypre_StructVector_Initialize;
-  epv->f_SetCommunicator = impl_Hypre_StructVector_SetCommunicator;
-  epv->f_SetStencil = impl_Hypre_StructVector_SetStencil;
   epv->f_SetValue = impl_Hypre_StructVector_SetValue;
-  epv->f_Clone = impl_Hypre_StructVector_Clone;
   epv->f_Clear = impl_Hypre_StructVector_Clear;
-  epv->f_Assemble = impl_Hypre_StructVector_Assemble;
+  epv->f_Clone = impl_Hypre_StructVector_Clone;
   epv->f_SetBoxValues = impl_Hypre_StructVector_SetBoxValues;
+  epv->f_SetStencil = impl_Hypre_StructVector_SetStencil;
   epv->f_Scale = impl_Hypre_StructVector_Scale;
   epv->f_Dot = impl_Hypre_StructVector_Dot;
+  epv->f_SetGrid = impl_Hypre_StructVector_SetGrid;
+  epv->f_SetCommunicator = impl_Hypre_StructVector_SetCommunicator;
   epv->f_GetObject = impl_Hypre_StructVector_GetObject;
   epv->f_Copy = impl_Hypre_StructVector_Copy;
-  epv->f_SetGrid = impl_Hypre_StructVector_SetGrid;
+  epv->f_Assemble = impl_Hypre_StructVector_Assemble;
+  epv->f_Initialize = impl_Hypre_StructVector_Initialize;
+  epv->f_Axpy = impl_Hypre_StructVector_Axpy;
 }
 
 struct Hypre_StructVector__data*

@@ -2,9 +2,9 @@
  * File:          Hypre_Pilut_Impl.h
  * Symbol:        Hypre.Pilut-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:18 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:44 PDT
  * Description:   Server-side implementation for Hypre.Pilut
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -17,11 +17,11 @@
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
 #endif
-#ifndef included_Hypre_Pilut_h
-#include "Hypre_Pilut.h"
-#endif
 #ifndef included_Hypre_Vector_h
 #include "Hypre_Vector.h"
+#endif
+#ifndef included_Hypre_Pilut_h
+#include "Hypre_Pilut.h"
 #endif
 #ifndef included_Hypre_Operator_h
 #include "Hypre_Operator.h"
@@ -88,15 +88,49 @@ impl_Hypre_Pilut_SetCommunicator(
   void*);
 
 extern int32_t
+impl_Hypre_Pilut_SetDoubleArrayParameter(
+  Hypre_Pilut,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_Pilut_SetDoubleParameter(
+  Hypre_Pilut,
+  const char*,
+  double);
+
+extern int32_t
+impl_Hypre_Pilut_SetIntArrayParameter(
+  Hypre_Pilut,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_Pilut_SetIntParameter(
+  Hypre_Pilut,
+  const char*,
+  int32_t);
+
+extern int32_t
+impl_Hypre_Pilut_SetLogging(
+  Hypre_Pilut,
+  int32_t);
+
+extern int32_t
 impl_Hypre_Pilut_SetOperator(
   Hypre_Pilut,
   Hypre_Operator);
 
 extern int32_t
-impl_Hypre_Pilut_SetParameter(
+impl_Hypre_Pilut_SetPrintLevel(
+  Hypre_Pilut,
+  int32_t);
+
+extern int32_t
+impl_Hypre_Pilut_SetStringParameter(
   Hypre_Pilut,
   const char*,
-  double);
+  const char*);
 
 extern int32_t
 impl_Hypre_Pilut_Setup(

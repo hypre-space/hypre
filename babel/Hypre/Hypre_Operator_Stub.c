@@ -2,9 +2,9 @@
  * File:          Hypre_Operator_Stub.c
  * Symbol:        Hypre.Operator-v0.1.5
  * Symbol Type:   interface
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:17 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:43 PDT
  * Description:   Client-side glue code for Hypre.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -48,19 +48,19 @@ static const struct Hypre_Operator__external* _getIOR(void)
 }
 
 /*
- * Method:  SetParameter
+ * Method:  Apply
  */
 
 int32_t
-Hypre_Operator_SetParameter(
+Hypre_Operator_Apply(
   Hypre_Operator self,
-  const char* name,
-  double value)
+  Hypre_Vector x,
+  Hypre_Vector* y)
 {
-  return (*self->d_epv->f_SetParameter)(
+  return (*self->d_epv->f_Apply)(
     self->d_object,
-    name,
-    value);
+    x,
+    y);
 }
 
 /*
@@ -76,19 +76,35 @@ Hypre_Operator_Setup(
 }
 
 /*
- * Method:  Apply
+ * Method:  SetIntArrayParameter
  */
 
 int32_t
-Hypre_Operator_Apply(
+Hypre_Operator_SetIntArrayParameter(
   Hypre_Operator self,
-  Hypre_Vector x,
-  Hypre_Vector* y)
+  const char* name,
+  struct SIDL_int__array* value)
 {
-  return (*self->d_epv->f_Apply)(
+  return (*self->d_epv->f_SetIntArrayParameter)(
     self->d_object,
-    x,
-    y);
+    name,
+    value);
+}
+
+/*
+ * Method:  SetIntParameter
+ */
+
+int32_t
+Hypre_Operator_SetIntParameter(
+  Hypre_Operator self,
+  const char* name,
+  int32_t value)
+{
+  return (*self->d_epv->f_SetIntParameter)(
+    self->d_object,
+    name,
+    value);
 }
 
 /*
@@ -126,6 +142,71 @@ Hypre_Operator_SetCommunicator(
   return (*self->d_epv->f_SetCommunicator)(
     self->d_object,
     comm);
+}
+
+/*
+ * Method:  SetStringParameter
+ */
+
+int32_t
+Hypre_Operator_SetStringParameter(
+  Hypre_Operator self,
+  const char* name,
+  const char* value)
+{
+  return (*self->d_epv->f_SetStringParameter)(
+    self->d_object,
+    name,
+    value);
+}
+
+/*
+ * Method:  SetDoubleParameter
+ */
+
+int32_t
+Hypre_Operator_SetDoubleParameter(
+  Hypre_Operator self,
+  const char* name,
+  double value)
+{
+  return (*self->d_epv->f_SetDoubleParameter)(
+    self->d_object,
+    name,
+    value);
+}
+
+/*
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+
+SIDL_bool
+Hypre_Operator_isInstanceOf(
+  Hypre_Operator self,
+  const char* name)
+{
+  return (*self->d_epv->f_isInstanceOf)(
+    self->d_object,
+    name);
+}
+
+/*
+ * Method:  SetDoubleArrayParameter
+ */
+
+int32_t
+Hypre_Operator_SetDoubleArrayParameter(
+  Hypre_Operator self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  return (*self->d_epv->f_SetDoubleArrayParameter)(
+    self->d_object,
+    name,
+    value);
 }
 
 /*
@@ -177,23 +258,6 @@ Hypre_Operator_deleteReference(
 {
   (*self->d_epv->f_deleteReference)(
     self->d_object);
-}
-
-/*
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
- */
-
-SIDL_bool
-Hypre_Operator_isInstanceOf(
-  Hypre_Operator self,
-  const char* name)
-{
-  return (*self->d_epv->f_isInstanceOf)(
-    self->d_object,
-    name);
 }
 
 /*

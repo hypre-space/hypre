@@ -2,9 +2,9 @@
  * File:          Hypre_Pilut_Stub.c
  * Symbol:        Hypre.Pilut-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:16 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:41 PDT
  * Description:   Client-side glue code for Hypre.Pilut
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -57,22 +57,6 @@ Hypre_Pilut__create()
 }
 
 /*
- * Method:  SetParameter
- */
-
-int32_t
-Hypre_Pilut_SetParameter(
-  Hypre_Pilut self,
-  const char* name,
-  double value)
-{
-  return (*self->d_epv->f_SetParameter)(
-    self,
-    name,
-    value);
-}
-
-/*
  * Method:  Setup
  */
 
@@ -82,6 +66,178 @@ Hypre_Pilut_Setup(
 {
   return (*self->d_epv->f_Setup)(
     self);
+}
+
+/*
+ * Method:  SetIntArrayParameter
+ */
+
+int32_t
+Hypre_Pilut_SetIntArrayParameter(
+  Hypre_Pilut self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  return (*self->d_epv->f_SetIntArrayParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Method:  SetLogging
+ */
+
+int32_t
+Hypre_Pilut_SetLogging(
+  Hypre_Pilut self,
+  int32_t level)
+{
+  return (*self->d_epv->f_SetLogging)(
+    self,
+    level);
+}
+
+/*
+ * Method:  SetIntParameter
+ */
+
+int32_t
+Hypre_Pilut_SetIntParameter(
+  Hypre_Pilut self,
+  const char* name,
+  int32_t value)
+{
+  return (*self->d_epv->f_SetIntParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Method:  GetResidual
+ */
+
+int32_t
+Hypre_Pilut_GetResidual(
+  Hypre_Pilut self,
+  Hypre_Vector* r)
+{
+  return (*self->d_epv->f_GetResidual)(
+    self,
+    r);
+}
+
+/*
+ * Method:  SetPrintLevel
+ */
+
+int32_t
+Hypre_Pilut_SetPrintLevel(
+  Hypre_Pilut self,
+  int32_t level)
+{
+  return (*self->d_epv->f_SetPrintLevel)(
+    self,
+    level);
+}
+
+/*
+ * Method:  SetCommunicator
+ */
+
+int32_t
+Hypre_Pilut_SetCommunicator(
+  Hypre_Pilut self,
+  void* comm)
+{
+  return (*self->d_epv->f_SetCommunicator)(
+    self,
+    comm);
+}
+
+/*
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+
+SIDL_bool
+Hypre_Pilut_isInstanceOf(
+  Hypre_Pilut self,
+  const char* name)
+{
+  return (*self->d_epv->f_isInstanceOf)(
+    self,
+    name);
+}
+
+/*
+ * Method:  SetStringParameter
+ */
+
+int32_t
+Hypre_Pilut_SetStringParameter(
+  Hypre_Pilut self,
+  const char* name,
+  const char* value)
+{
+  return (*self->d_epv->f_SetStringParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Method:  SetDoubleParameter
+ */
+
+int32_t
+Hypre_Pilut_SetDoubleParameter(
+  Hypre_Pilut self,
+  const char* name,
+  double value)
+{
+  return (*self->d_epv->f_SetDoubleParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Check whether the object can support the specified interface or
+ * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * is supported, then a reference to that object is returned with the
+ * reference count incremented.  The callee will be responsible for
+ * calling <code>deleteReference</code> on the returned object.  If
+ * the specified type is not supported, then a null reference is
+ * returned.
+ */
+
+SIDL_BaseInterface
+Hypre_Pilut_queryInterface(
+  Hypre_Pilut self,
+  const char* name)
+{
+  return (*self->d_epv->f_queryInterface)(
+    self,
+    name);
+}
+
+/*
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
+ */
+
+SIDL_bool
+Hypre_Pilut_isSame(
+  Hypre_Pilut self,
+  SIDL_BaseInterface iobj)
+{
+  return (*self->d_epv->f_isSame)(
+    self,
+    iobj);
 }
 
 /*
@@ -124,40 +280,6 @@ Hypre_Pilut_addReference(
 }
 
 /*
- * Method:  SetCommunicator
- */
-
-int32_t
-Hypre_Pilut_SetCommunicator(
-  Hypre_Pilut self,
-  void* comm)
-{
-  return (*self->d_epv->f_SetCommunicator)(
-    self,
-    comm);
-}
-
-/*
- * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-
-SIDL_BaseInterface
-Hypre_Pilut_queryInterface(
-  Hypre_Pilut self,
-  const char* name)
-{
-  return (*self->d_epv->f_queryInterface)(
-    self,
-    name);
-}
-
-/*
  * Method:  SetOperator
  */
 
@@ -172,32 +294,19 @@ Hypre_Pilut_SetOperator(
 }
 
 /*
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
- */
-
-SIDL_bool
-Hypre_Pilut_isSame(
-  Hypre_Pilut self,
-  SIDL_BaseInterface iobj)
-{
-  return (*self->d_epv->f_isSame)(
-    self,
-    iobj);
-}
-
-/*
- * Method:  GetResidual
+ * Method:  SetDoubleArrayParameter
  */
 
 int32_t
-Hypre_Pilut_GetResidual(
+Hypre_Pilut_SetDoubleArrayParameter(
   Hypre_Pilut self,
-  Hypre_Vector* r)
+  const char* name,
+  struct SIDL_double__array* value)
 {
-  return (*self->d_epv->f_GetResidual)(
+  return (*self->d_epv->f_SetDoubleArrayParameter)(
     self,
-    r);
+    name,
+    value);
 }
 
 /*
@@ -214,23 +323,6 @@ Hypre_Pilut_deleteReference(
 {
   (*self->d_epv->f_deleteReference)(
     self);
-}
-
-/*
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
- */
-
-SIDL_bool
-Hypre_Pilut_isInstanceOf(
-  Hypre_Pilut self,
-  const char* name)
-{
-  return (*self->d_epv->f_isInstanceOf)(
-    self,
-    name);
 }
 
 /*

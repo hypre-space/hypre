@@ -2,9 +2,9 @@
  * File:          Hypre_StructToIJMatrix_Skel.c
  * Symbol:        Hypre.StructToIJMatrix-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:18 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:45 PDT
  * Description:   Server-side glue code for Hypre.StructToIJMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -88,17 +88,17 @@ Hypre_StructToIJMatrix__set_epv(struct Hypre_StructToIJMatrix__epv *epv)
 {
   epv->f__ctor = impl_Hypre_StructToIJMatrix__ctor;
   epv->f__dtor = impl_Hypre_StructToIJMatrix__dtor;
-  epv->f_Initialize = impl_Hypre_StructToIJMatrix_Initialize;
-  epv->f_SetNumGhost = impl_Hypre_StructToIJMatrix_SetNumGhost;
-  epv->f_SetCommunicator = impl_Hypre_StructToIJMatrix_SetCommunicator;
-  epv->f_SetStencil = impl_Hypre_StructToIJMatrix_SetStencil;
-  epv->f_Assemble = impl_Hypre_StructToIJMatrix_Assemble;
   epv->f_SetBoxValues = impl_Hypre_StructToIJMatrix_SetBoxValues;
+  epv->f_SetNumGhost = impl_Hypre_StructToIJMatrix_SetNumGhost;
+  epv->f_SetStencil = impl_Hypre_StructToIJMatrix_SetStencil;
+  epv->f_SetGrid = impl_Hypre_StructToIJMatrix_SetGrid;
+  epv->f_SetCommunicator = impl_Hypre_StructToIJMatrix_SetCommunicator;
+  epv->f_GetObject = impl_Hypre_StructToIJMatrix_GetObject;
   epv->f_SetSymmetric = impl_Hypre_StructToIJMatrix_SetSymmetric;
   epv->f_SetValues = impl_Hypre_StructToIJMatrix_SetValues;
-  epv->f_GetObject = impl_Hypre_StructToIJMatrix_GetObject;
-  epv->f_SetGrid = impl_Hypre_StructToIJMatrix_SetGrid;
   epv->f_SetIJMatrix = impl_Hypre_StructToIJMatrix_SetIJMatrix;
+  epv->f_Assemble = impl_Hypre_StructToIJMatrix_Assemble;
+  epv->f_Initialize = impl_Hypre_StructToIJMatrix_Initialize;
 }
 
 struct Hypre_StructToIJMatrix__data*

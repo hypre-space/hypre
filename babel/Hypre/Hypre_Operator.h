@@ -2,9 +2,9 @@
  * File:          Hypre_Operator.h
  * Symbol:        Hypre.Operator-v0.1.5
  * Symbol Type:   interface
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:17 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:43 PDT
  * Description:   Client-side glue code for Hypre.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -43,13 +43,13 @@ extern "C" {
 #endif
 
 /**
- * Method:  SetParameter
+ * Method:  Apply
  */
 int32_t
-Hypre_Operator_SetParameter(
+Hypre_Operator_Apply(
   Hypre_Operator self,
-  const char* name,
-  double value);
+  Hypre_Vector x,
+  Hypre_Vector* y);
 
 /**
  * Method:  Setup
@@ -59,13 +59,22 @@ Hypre_Operator_Setup(
   Hypre_Operator self);
 
 /**
- * Method:  Apply
+ * Method:  SetIntArrayParameter
  */
 int32_t
-Hypre_Operator_Apply(
+Hypre_Operator_SetIntArrayParameter(
   Hypre_Operator self,
-  Hypre_Vector x,
-  Hypre_Vector* y);
+  const char* name,
+  struct SIDL_int__array* value);
+
+/**
+ * Method:  SetIntParameter
+ */
+int32_t
+Hypre_Operator_SetIntParameter(
+  Hypre_Operator self,
+  const char* name,
+  int32_t value);
 
 /**
  * <p>
@@ -92,6 +101,44 @@ int32_t
 Hypre_Operator_SetCommunicator(
   Hypre_Operator self,
   void* comm);
+
+/**
+ * Method:  SetStringParameter
+ */
+int32_t
+Hypre_Operator_SetStringParameter(
+  Hypre_Operator self,
+  const char* name,
+  const char* value);
+
+/**
+ * Method:  SetDoubleParameter
+ */
+int32_t
+Hypre_Operator_SetDoubleParameter(
+  Hypre_Operator self,
+  const char* name,
+  double value);
+
+/**
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+SIDL_bool
+Hypre_Operator_isInstanceOf(
+  Hypre_Operator self,
+  const char* name);
+
+/**
+ * Method:  SetDoubleArrayParameter
+ */
+int32_t
+Hypre_Operator_SetDoubleArrayParameter(
+  Hypre_Operator self,
+  const char* name,
+  struct SIDL_double__array* value);
 
 /**
  * Check whether the object can support the specified interface or
@@ -126,17 +173,6 @@ Hypre_Operator_isSame(
 void
 Hypre_Operator_deleteReference(
   Hypre_Operator self);
-
-/**
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
- */
-SIDL_bool
-Hypre_Operator_isInstanceOf(
-  Hypre_Operator self,
-  const char* name);
 
 /**
  * Cast method for interface and class type conversions.

@@ -2,9 +2,9 @@
  * File:          Hypre_PreconditionedSolver_Stub.c
  * Symbol:        Hypre.PreconditionedSolver-v0.1.5
  * Symbol Type:   interface
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:16 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:43 PDT
  * Description:   Client-side glue code for Hypre.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -48,22 +48,6 @@ static const struct Hypre_PreconditionedSolver__external* _getIOR(void)
 }
 
 /*
- * Method:  SetParameter
- */
-
-int32_t
-Hypre_PreconditionedSolver_SetParameter(
-  Hypre_PreconditionedSolver self,
-  const char* name,
-  double value)
-{
-  return (*self->d_epv->f_SetParameter)(
-    self->d_object,
-    name,
-    value);
-}
-
-/*
  * Method:  Setup
  */
 
@@ -73,6 +57,192 @@ Hypre_PreconditionedSolver_Setup(
 {
   return (*self->d_epv->f_Setup)(
     self->d_object);
+}
+
+/*
+ * Method:  SetIntArrayParameter
+ */
+
+int32_t
+Hypre_PreconditionedSolver_SetIntArrayParameter(
+  Hypre_PreconditionedSolver self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  return (*self->d_epv->f_SetIntArrayParameter)(
+    self->d_object,
+    name,
+    value);
+}
+
+/*
+ * Method:  SetLogging
+ */
+
+int32_t
+Hypre_PreconditionedSolver_SetLogging(
+  Hypre_PreconditionedSolver self,
+  int32_t level)
+{
+  return (*self->d_epv->f_SetLogging)(
+    self->d_object,
+    level);
+}
+
+/*
+ * Method:  SetIntParameter
+ */
+
+int32_t
+Hypre_PreconditionedSolver_SetIntParameter(
+  Hypre_PreconditionedSolver self,
+  const char* name,
+  int32_t value)
+{
+  return (*self->d_epv->f_SetIntParameter)(
+    self->d_object,
+    name,
+    value);
+}
+
+/*
+ * Method:  GetResidual
+ */
+
+int32_t
+Hypre_PreconditionedSolver_GetResidual(
+  Hypre_PreconditionedSolver self,
+  Hypre_Vector* r)
+{
+  return (*self->d_epv->f_GetResidual)(
+    self->d_object,
+    r);
+}
+
+/*
+ * Method:  SetPrintLevel
+ */
+
+int32_t
+Hypre_PreconditionedSolver_SetPrintLevel(
+  Hypre_PreconditionedSolver self,
+  int32_t level)
+{
+  return (*self->d_epv->f_SetPrintLevel)(
+    self->d_object,
+    level);
+}
+
+/*
+ * Method:  SetCommunicator
+ */
+
+int32_t
+Hypre_PreconditionedSolver_SetCommunicator(
+  Hypre_PreconditionedSolver self,
+  void* comm)
+{
+  return (*self->d_epv->f_SetCommunicator)(
+    self->d_object,
+    comm);
+}
+
+/*
+ * Method:  SetStringParameter
+ */
+
+int32_t
+Hypre_PreconditionedSolver_SetStringParameter(
+  Hypre_PreconditionedSolver self,
+  const char* name,
+  const char* value)
+{
+  return (*self->d_epv->f_SetStringParameter)(
+    self->d_object,
+    name,
+    value);
+}
+
+/*
+ * Method:  SetDoubleParameter
+ */
+
+int32_t
+Hypre_PreconditionedSolver_SetDoubleParameter(
+  Hypre_PreconditionedSolver self,
+  const char* name,
+  double value)
+{
+  return (*self->d_epv->f_SetDoubleParameter)(
+    self->d_object,
+    name,
+    value);
+}
+
+/*
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+
+SIDL_bool
+Hypre_PreconditionedSolver_isInstanceOf(
+  Hypre_PreconditionedSolver self,
+  const char* name)
+{
+  return (*self->d_epv->f_isInstanceOf)(
+    self->d_object,
+    name);
+}
+
+/*
+ * Method:  GetPreconditionedResidual
+ */
+
+int32_t
+Hypre_PreconditionedSolver_GetPreconditionedResidual(
+  Hypre_PreconditionedSolver self,
+  Hypre_Vector* r)
+{
+  return (*self->d_epv->f_GetPreconditionedResidual)(
+    self->d_object,
+    r);
+}
+
+/*
+ * Check whether the object can support the specified interface or
+ * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * is supported, then a reference to that object is returned with the
+ * reference count incremented.  The callee will be responsible for
+ * calling <code>deleteReference</code> on the returned object.  If
+ * the specified type is not supported, then a null reference is
+ * returned.
+ */
+
+SIDL_BaseInterface
+Hypre_PreconditionedSolver_queryInterface(
+  Hypre_PreconditionedSolver self,
+  const char* name)
+{
+  return (*self->d_epv->f_queryInterface)(
+    self->d_object,
+    name);
+}
+
+/*
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
+ */
+
+SIDL_bool
+Hypre_PreconditionedSolver_isSame(
+  Hypre_PreconditionedSolver self,
+  SIDL_BaseInterface iobj)
+{
+  return (*self->d_epv->f_isSame)(
+    self->d_object,
+    iobj);
 }
 
 /*
@@ -115,37 +285,17 @@ Hypre_PreconditionedSolver_addReference(
 }
 
 /*
- * Method:  SetCommunicator
+ * Method:  SetPreconditioner
  */
 
 int32_t
-Hypre_PreconditionedSolver_SetCommunicator(
+Hypre_PreconditionedSolver_SetPreconditioner(
   Hypre_PreconditionedSolver self,
-  void* comm)
+  Hypre_Solver s)
 {
-  return (*self->d_epv->f_SetCommunicator)(
+  return (*self->d_epv->f_SetPreconditioner)(
     self->d_object,
-    comm);
-}
-
-/*
- * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-
-SIDL_BaseInterface
-Hypre_PreconditionedSolver_queryInterface(
-  Hypre_PreconditionedSolver self,
-  const char* name)
-{
-  return (*self->d_epv->f_queryInterface)(
-    self->d_object,
-    name);
+    s);
 }
 
 /*
@@ -163,46 +313,19 @@ Hypre_PreconditionedSolver_SetOperator(
 }
 
 /*
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
- */
-
-SIDL_bool
-Hypre_PreconditionedSolver_isSame(
-  Hypre_PreconditionedSolver self,
-  SIDL_BaseInterface iobj)
-{
-  return (*self->d_epv->f_isSame)(
-    self->d_object,
-    iobj);
-}
-
-/*
- * Method:  GetResidual
+ * Method:  SetDoubleArrayParameter
  */
 
 int32_t
-Hypre_PreconditionedSolver_GetResidual(
+Hypre_PreconditionedSolver_SetDoubleArrayParameter(
   Hypre_PreconditionedSolver self,
-  Hypre_Vector* r)
+  const char* name,
+  struct SIDL_double__array* value)
 {
-  return (*self->d_epv->f_GetResidual)(
+  return (*self->d_epv->f_SetDoubleArrayParameter)(
     self->d_object,
-    r);
-}
-
-/*
- * Method:  GetPreconditionedResidual
- */
-
-int32_t
-Hypre_PreconditionedSolver_GetPreconditionedResidual(
-  Hypre_PreconditionedSolver self,
-  Hypre_Vector* r)
-{
-  return (*self->d_epv->f_GetPreconditionedResidual)(
-    self->d_object,
-    r);
+    name,
+    value);
 }
 
 /*
@@ -219,37 +342,6 @@ Hypre_PreconditionedSolver_deleteReference(
 {
   (*self->d_epv->f_deleteReference)(
     self->d_object);
-}
-
-/*
- * Method:  SetPreconditioner
- */
-
-int32_t
-Hypre_PreconditionedSolver_SetPreconditioner(
-  Hypre_PreconditionedSolver self,
-  Hypre_Solver s)
-{
-  return (*self->d_epv->f_SetPreconditioner)(
-    self->d_object,
-    s);
-}
-
-/*
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
- */
-
-SIDL_bool
-Hypre_PreconditionedSolver_isInstanceOf(
-  Hypre_PreconditionedSolver self,
-  const char* name)
-{
-  return (*self->d_epv->f_isInstanceOf)(
-    self->d_object,
-    name);
 }
 
 /*

@@ -2,9 +2,9 @@
  * File:          Hypre_Pilut_Impl.c
  * Symbol:        Hypre.Pilut-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:18 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:44 PDT
  * Description:   Server-side implementation for Hypre.Pilut
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -111,6 +111,95 @@ impl_Hypre_Pilut_SetCommunicator(
 }
 
 /*
+ * Method:  SetDoubleArrayParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_Pilut_SetDoubleArrayParameter"
+
+int32_t
+impl_Hypre_Pilut_SetDoubleArrayParameter(
+  Hypre_Pilut self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetDoubleArrayParameter) */
+  /* Insert the implementation of the SetDoubleArrayParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetDoubleArrayParameter) */
+}
+
+/*
+ * Method:  SetDoubleParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_Pilut_SetDoubleParameter"
+
+int32_t
+impl_Hypre_Pilut_SetDoubleParameter(
+  Hypre_Pilut self,
+  const char* name,
+  double value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetDoubleParameter) */
+  /* Insert the implementation of the SetDoubleParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetDoubleParameter) */
+}
+
+/*
+ * Method:  SetIntArrayParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_Pilut_SetIntArrayParameter"
+
+int32_t
+impl_Hypre_Pilut_SetIntArrayParameter(
+  Hypre_Pilut self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetIntArrayParameter) */
+  /* Insert the implementation of the SetIntArrayParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetIntArrayParameter) */
+}
+
+/*
+ * Method:  SetIntParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_Pilut_SetIntParameter"
+
+int32_t
+impl_Hypre_Pilut_SetIntParameter(
+  Hypre_Pilut self,
+  const char* name,
+  int32_t value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetIntParameter) */
+  /* Insert the implementation of the SetIntParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetIntParameter) */
+}
+
+/*
+ * Method:  SetLogging
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_Pilut_SetLogging"
+
+int32_t
+impl_Hypre_Pilut_SetLogging(
+  Hypre_Pilut self,
+  int32_t level)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetLogging) */
+  /* Insert the implementation of the SetLogging method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetLogging) */
+}
+
+/*
  * Method:  SetOperator
  */
 
@@ -128,21 +217,38 @@ impl_Hypre_Pilut_SetOperator(
 }
 
 /*
- * Method:  SetParameter
+ * Method:  SetPrintLevel
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_Pilut_SetParameter"
+#define __FUNC__ "impl_Hypre_Pilut_SetPrintLevel"
 
 int32_t
-impl_Hypre_Pilut_SetParameter(
+impl_Hypre_Pilut_SetPrintLevel(
+  Hypre_Pilut self,
+  int32_t level)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetPrintLevel) */
+  /* Insert the implementation of the SetPrintLevel method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetPrintLevel) */
+}
+
+/*
+ * Method:  SetStringParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_Pilut_SetStringParameter"
+
+int32_t
+impl_Hypre_Pilut_SetStringParameter(
   Hypre_Pilut self,
   const char* name,
-  double value)
+  const char* value)
 {
-  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetParameter) */
-  /* Insert the implementation of the SetParameter method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetParameter) */
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetStringParameter) */
+  /* Insert the implementation of the SetStringParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetStringParameter) */
 }
 
 /*
@@ -160,3 +266,6 @@ impl_Hypre_Pilut_Setup(
   /* Insert the implementation of the Setup method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.Setup) */
 }
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.SetParameter) */
+  /* Insert the implementation of the SetParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.SetParameter) */

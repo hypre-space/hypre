@@ -2,9 +2,9 @@
  * File:          Hypre_Vector_Stub.c
  * Symbol:        Hypre.Vector-v0.1.5
  * Symbol Type:   interface
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:07 PST
- * Generated:     20020104 15:27:16 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:33 PDT
+ * Generated:     20020522 13:59:40 PDT
  * Description:   Client-side glue code for Hypre.Vector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -47,65 +47,6 @@ static const struct Hypre_Vector__external* _getIOR(void)
 }
 
 /*
- * y <- a*x + y
- */
-
-int32_t
-Hypre_Vector_Axpy(
-  Hypre_Vector self,
-  double a,
-  Hypre_Vector x)
-{
-  return (*self->d_epv->f_Axpy)(
-    self->d_object,
-    a,
-    x);
-}
-
-/*
- * <p>
- * Add one to the intrinsic reference count in the underlying object.
- * Object in <code>SIDL</code> have an intrinsic reference count.
- * Objects continue to exist as long as the reference count is
- * positive. Clients should call this method whenever they
- * create another ongoing reference to an object or interface.
- * </p>
- * <p>
- * This does not have a return value because there is no language
- * independent type that can refer to an interface or a
- * class.
- * </p>
- */
-
-void
-Hypre_Vector_addReference(
-  Hypre_Vector self)
-{
-  (*self->d_epv->f_addReference)(
-    self->d_object);
-}
-
-/*
- * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-
-SIDL_BaseInterface
-Hypre_Vector_queryInterface(
-  Hypre_Vector self,
-  const char* name)
-{
-  return (*self->d_epv->f_queryInterface)(
-    self->d_object,
-    name);
-}
-
-/*
  * create an x compatible with y
  */
 
@@ -132,21 +73,6 @@ Hypre_Vector_Clear(
 }
 
 /*
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
- */
-
-SIDL_bool
-Hypre_Vector_isSame(
-  Hypre_Vector self,
-  SIDL_BaseInterface iobj)
-{
-  return (*self->d_epv->f_isSame)(
-    self->d_object,
-    iobj);
-}
-
-/*
  * y <- a*y 
  */
 
@@ -158,6 +84,29 @@ Hypre_Vector_Scale(
   return (*self->d_epv->f_Scale)(
     self->d_object,
     a);
+}
+
+/*
+ * <p>
+ * Add one to the intrinsic reference count in the underlying object.
+ * Object in <code>SIDL</code> have an intrinsic reference count.
+ * Objects continue to exist as long as the reference count is
+ * positive. Clients should call this method whenever they
+ * create another ongoing reference to an object or interface.
+ * </p>
+ * <p>
+ * This does not have a return value because there is no language
+ * independent type that can refer to an interface or a
+ * class.
+ * </p>
+ */
+
+void
+Hypre_Vector_addReference(
+  Hypre_Vector self)
+{
+  (*self->d_epv->f_addReference)(
+    self->d_object);
 }
 
 /*
@@ -177,19 +126,20 @@ Hypre_Vector_Dot(
 }
 
 /*
- * Decrease by one the intrinsic reference count in the underlying
- * object, and delete the object if the reference is non-positive.
- * Objects in <code>SIDL</code> have an intrinsic reference count.
- * Clients should call this method whenever they remove a
- * reference to an object or interface.
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
  */
 
-void
-Hypre_Vector_deleteReference(
-  Hypre_Vector self)
+SIDL_bool
+Hypre_Vector_isInstanceOf(
+  Hypre_Vector self,
+  const char* name)
 {
-  (*self->d_epv->f_deleteReference)(
-    self->d_object);
+  return (*self->d_epv->f_isInstanceOf)(
+    self->d_object,
+    name);
 }
 
 /*
@@ -207,20 +157,70 @@ Hypre_Vector_Copy(
 }
 
 /*
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
+ * Check whether the object can support the specified interface or
+ * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * is supported, then a reference to that object is returned with the
+ * reference count incremented.  The callee will be responsible for
+ * calling <code>deleteReference</code> on the returned object.  If
+ * the specified type is not supported, then a null reference is
+ * returned.
  */
 
-SIDL_bool
-Hypre_Vector_isInstanceOf(
+SIDL_BaseInterface
+Hypre_Vector_queryInterface(
   Hypre_Vector self,
   const char* name)
 {
-  return (*self->d_epv->f_isInstanceOf)(
+  return (*self->d_epv->f_queryInterface)(
     self->d_object,
     name);
+}
+
+/*
+ * y <- a*x + y
+ */
+
+int32_t
+Hypre_Vector_Axpy(
+  Hypre_Vector self,
+  double a,
+  Hypre_Vector x)
+{
+  return (*self->d_epv->f_Axpy)(
+    self->d_object,
+    a,
+    x);
+}
+
+/*
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
+ */
+
+SIDL_bool
+Hypre_Vector_isSame(
+  Hypre_Vector self,
+  SIDL_BaseInterface iobj)
+{
+  return (*self->d_epv->f_isSame)(
+    self->d_object,
+    iobj);
+}
+
+/*
+ * Decrease by one the intrinsic reference count in the underlying
+ * object, and delete the object if the reference is non-positive.
+ * Objects in <code>SIDL</code> have an intrinsic reference count.
+ * Clients should call this method whenever they remove a
+ * reference to an object or interface.
+ */
+
+void
+Hypre_Vector_deleteReference(
+  Hypre_Vector self)
+{
+  (*self->d_epv->f_deleteReference)(
+    self->d_object);
 }
 
 /*

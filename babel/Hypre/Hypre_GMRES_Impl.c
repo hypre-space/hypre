@@ -2,9 +2,9 @@
  * File:          Hypre_GMRES_Impl.c
  * Symbol:        Hypre.GMRES-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:18 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:43 PDT
  * Description:   Server-side implementation for Hypre.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -129,6 +129,95 @@ impl_Hypre_GMRES_SetCommunicator(
 }
 
 /*
+ * Method:  SetDoubleArrayParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_GMRES_SetDoubleArrayParameter"
+
+int32_t
+impl_Hypre_GMRES_SetDoubleArrayParameter(
+  Hypre_GMRES self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetDoubleArrayParameter) */
+  /* Insert the implementation of the SetDoubleArrayParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetDoubleArrayParameter) */
+}
+
+/*
+ * Method:  SetDoubleParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_GMRES_SetDoubleParameter"
+
+int32_t
+impl_Hypre_GMRES_SetDoubleParameter(
+  Hypre_GMRES self,
+  const char* name,
+  double value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetDoubleParameter) */
+  /* Insert the implementation of the SetDoubleParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetDoubleParameter) */
+}
+
+/*
+ * Method:  SetIntArrayParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_GMRES_SetIntArrayParameter"
+
+int32_t
+impl_Hypre_GMRES_SetIntArrayParameter(
+  Hypre_GMRES self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetIntArrayParameter) */
+  /* Insert the implementation of the SetIntArrayParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetIntArrayParameter) */
+}
+
+/*
+ * Method:  SetIntParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_GMRES_SetIntParameter"
+
+int32_t
+impl_Hypre_GMRES_SetIntParameter(
+  Hypre_GMRES self,
+  const char* name,
+  int32_t value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetIntParameter) */
+  /* Insert the implementation of the SetIntParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetIntParameter) */
+}
+
+/*
+ * Method:  SetLogging
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_GMRES_SetLogging"
+
+int32_t
+impl_Hypre_GMRES_SetLogging(
+  Hypre_GMRES self,
+  int32_t level)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetLogging) */
+  /* Insert the implementation of the SetLogging method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetLogging) */
+}
+
+/*
  * Method:  SetOperator
  */
 
@@ -143,24 +232,6 @@ impl_Hypre_GMRES_SetOperator(
   /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetOperator) */
-}
-
-/*
- * Method:  SetParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_GMRES_SetParameter"
-
-int32_t
-impl_Hypre_GMRES_SetParameter(
-  Hypre_GMRES self,
-  const char* name,
-  double value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetParameter) */
-  /* Insert the implementation of the SetParameter method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetParameter) */
 }
 
 /*
@@ -181,6 +252,41 @@ impl_Hypre_GMRES_SetPreconditioner(
 }
 
 /*
+ * Method:  SetPrintLevel
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_GMRES_SetPrintLevel"
+
+int32_t
+impl_Hypre_GMRES_SetPrintLevel(
+  Hypre_GMRES self,
+  int32_t level)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetPrintLevel) */
+  /* Insert the implementation of the SetPrintLevel method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetPrintLevel) */
+}
+
+/*
+ * Method:  SetStringParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_GMRES_SetStringParameter"
+
+int32_t
+impl_Hypre_GMRES_SetStringParameter(
+  Hypre_GMRES self,
+  const char* name,
+  const char* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetStringParameter) */
+  /* Insert the implementation of the SetStringParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetStringParameter) */
+}
+
+/*
  * Method:  Setup
  */
 
@@ -195,3 +301,6 @@ impl_Hypre_GMRES_Setup(
   /* Insert the implementation of the Setup method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.GMRES.Setup) */
 }
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetParameter) */
+  /* Insert the implementation of the SetParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetParameter) */

@@ -2,9 +2,9 @@
  * File:          Hypre_CoefficientAccess.h
  * Symbol:        Hypre.CoefficientAccess-v0.1.5
  * Symbol Type:   interface
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:16 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:41 PDT
  * Description:   Client-side glue code for Hypre.CoefficientAccess
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -16,6 +16,11 @@
 
 /**
  * Symbol "Hypre.CoefficientAccess" (version 0.1.5)
+ * 
+ * The GetRow method will allocate space for its two output arrays on
+ * the first call.  The space will be reused on subsequent calls.
+ * Thus the user must not delete them, yet must not depend on the
+ * data from GetRow to persist beyond the next GetRow call.
  */
 struct Hypre_CoefficientAccess__object;
 struct Hypre_CoefficientAccess__array;
@@ -55,16 +60,13 @@ Hypre_CoefficientAccess_addReference(
   Hypre_CoefficientAccess self);
 
 /**
- * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
  */
-SIDL_BaseInterface
-Hypre_CoefficientAccess_queryInterface(
+SIDL_bool
+Hypre_CoefficientAccess_isInstanceOf(
   Hypre_CoefficientAccess self,
   const char* name);
 
@@ -78,6 +80,20 @@ Hypre_CoefficientAccess_GetRow(
   int32_t* size,
   struct SIDL_int__array** col_ind,
   struct SIDL_double__array** values);
+
+/**
+ * Check whether the object can support the specified interface or
+ * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * is supported, then a reference to that object is returned with the
+ * reference count incremented.  The callee will be responsible for
+ * calling <code>deleteReference</code> on the returned object.  If
+ * the specified type is not supported, then a null reference is
+ * returned.
+ */
+SIDL_BaseInterface
+Hypre_CoefficientAccess_queryInterface(
+  Hypre_CoefficientAccess self,
+  const char* name);
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
@@ -98,17 +114,6 @@ Hypre_CoefficientAccess_isSame(
 void
 Hypre_CoefficientAccess_deleteReference(
   Hypre_CoefficientAccess self);
-
-/**
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
- */
-SIDL_bool
-Hypre_CoefficientAccess_isInstanceOf(
-  Hypre_CoefficientAccess self,
-  const char* name);
 
 /**
  * Cast method for interface and class type conversions.

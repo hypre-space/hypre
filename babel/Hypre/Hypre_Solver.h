@@ -2,9 +2,9 @@
  * File:          Hypre_Solver.h
  * Symbol:        Hypre.Solver-v0.1.5
  * Symbol Type:   interface
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:17 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:42 PDT
  * Description:   Client-side glue code for Hypre.Solver
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -43,20 +43,113 @@ extern "C" {
 #endif
 
 /**
- * Method:  SetParameter
- */
-int32_t
-Hypre_Solver_SetParameter(
-  Hypre_Solver self,
-  const char* name,
-  double value);
-
-/**
  * Method:  Setup
  */
 int32_t
 Hypre_Solver_Setup(
   Hypre_Solver self);
+
+/**
+ * Method:  SetIntArrayParameter
+ */
+int32_t
+Hypre_Solver_SetIntArrayParameter(
+  Hypre_Solver self,
+  const char* name,
+  struct SIDL_int__array* value);
+
+/**
+ * Method:  SetLogging
+ */
+int32_t
+Hypre_Solver_SetLogging(
+  Hypre_Solver self,
+  int32_t level);
+
+/**
+ * Method:  SetIntParameter
+ */
+int32_t
+Hypre_Solver_SetIntParameter(
+  Hypre_Solver self,
+  const char* name,
+  int32_t value);
+
+/**
+ * Method:  GetResidual
+ */
+int32_t
+Hypre_Solver_GetResidual(
+  Hypre_Solver self,
+  Hypre_Vector* r);
+
+/**
+ * Method:  SetPrintLevel
+ */
+int32_t
+Hypre_Solver_SetPrintLevel(
+  Hypre_Solver self,
+  int32_t level);
+
+/**
+ * Method:  SetCommunicator
+ */
+int32_t
+Hypre_Solver_SetCommunicator(
+  Hypre_Solver self,
+  void* comm);
+
+/**
+ * Method:  SetStringParameter
+ */
+int32_t
+Hypre_Solver_SetStringParameter(
+  Hypre_Solver self,
+  const char* name,
+  const char* value);
+
+/**
+ * Method:  SetDoubleParameter
+ */
+int32_t
+Hypre_Solver_SetDoubleParameter(
+  Hypre_Solver self,
+  const char* name,
+  double value);
+
+/**
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+SIDL_bool
+Hypre_Solver_isInstanceOf(
+  Hypre_Solver self,
+  const char* name);
+
+/**
+ * Check whether the object can support the specified interface or
+ * class.  If the <code>SIDL</code> type name in <code>name</code>
+ * is supported, then a reference to that object is returned with the
+ * reference count incremented.  The callee will be responsible for
+ * calling <code>deleteReference</code> on the returned object.  If
+ * the specified type is not supported, then a null reference is
+ * returned.
+ */
+SIDL_BaseInterface
+Hypre_Solver_queryInterface(
+  Hypre_Solver self,
+  const char* name);
+
+/**
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
+ */
+SIDL_bool
+Hypre_Solver_isSame(
+  Hypre_Solver self,
+  SIDL_BaseInterface iobj);
 
 /**
  * Method:  Apply
@@ -86,28 +179,6 @@ Hypre_Solver_addReference(
   Hypre_Solver self);
 
 /**
- * Method:  SetCommunicator
- */
-int32_t
-Hypre_Solver_SetCommunicator(
-  Hypre_Solver self,
-  void* comm);
-
-/**
- * Check whether the object can support the specified interface or
- * class.  If the <code>SIDL</code> type name in <code>name</code>
- * is supported, then a reference to that object is returned with the
- * reference count incremented.  The callee will be responsible for
- * calling <code>deleteReference</code> on the returned object.  If
- * the specified type is not supported, then a null reference is
- * returned.
- */
-SIDL_BaseInterface
-Hypre_Solver_queryInterface(
-  Hypre_Solver self,
-  const char* name);
-
-/**
  * Method:  SetOperator
  */
 int32_t
@@ -116,21 +187,13 @@ Hypre_Solver_SetOperator(
   Hypre_Operator A);
 
 /**
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
- */
-SIDL_bool
-Hypre_Solver_isSame(
-  Hypre_Solver self,
-  SIDL_BaseInterface iobj);
-
-/**
- * Method:  GetResidual
+ * Method:  SetDoubleArrayParameter
  */
 int32_t
-Hypre_Solver_GetResidual(
+Hypre_Solver_SetDoubleArrayParameter(
   Hypre_Solver self,
-  Hypre_Vector* r);
+  const char* name,
+  struct SIDL_double__array* value);
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -142,17 +205,6 @@ Hypre_Solver_GetResidual(
 void
 Hypre_Solver_deleteReference(
   Hypre_Solver self);
-
-/**
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
- */
-SIDL_bool
-Hypre_Solver_isInstanceOf(
-  Hypre_Solver self,
-  const char* name);
 
 /**
  * Cast method for interface and class type conversions.

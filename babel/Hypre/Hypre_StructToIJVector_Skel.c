@@ -2,9 +2,9 @@
  * File:          Hypre_StructToIJVector_Skel.c
  * Symbol:        Hypre.StructToIJVector-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:18 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:45 PDT
  * Description:   Server-side glue code for Hypre.StructToIJVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -74,15 +74,15 @@ Hypre_StructToIJVector__set_epv(struct Hypre_StructToIJVector__epv *epv)
 {
   epv->f__ctor = impl_Hypre_StructToIJVector__ctor;
   epv->f__dtor = impl_Hypre_StructToIJVector__dtor;
-  epv->f_Initialize = impl_Hypre_StructToIJVector_Initialize;
-  epv->f_SetCommunicator = impl_Hypre_StructToIJVector_SetCommunicator;
-  epv->f_SetStencil = impl_Hypre_StructToIJVector_SetStencil;
   epv->f_SetValue = impl_Hypre_StructToIJVector_SetValue;
-  epv->f_Assemble = impl_Hypre_StructToIJVector_Assemble;
   epv->f_SetBoxValues = impl_Hypre_StructToIJVector_SetBoxValues;
-  epv->f_GetObject = impl_Hypre_StructToIJVector_GetObject;
-  epv->f_SetIJVector = impl_Hypre_StructToIJVector_SetIJVector;
+  epv->f_SetStencil = impl_Hypre_StructToIJVector_SetStencil;
   epv->f_SetGrid = impl_Hypre_StructToIJVector_SetGrid;
+  epv->f_SetCommunicator = impl_Hypre_StructToIJVector_SetCommunicator;
+  epv->f_SetIJVector = impl_Hypre_StructToIJVector_SetIJVector;
+  epv->f_GetObject = impl_Hypre_StructToIJVector_GetObject;
+  epv->f_Assemble = impl_Hypre_StructToIJVector_Assemble;
+  epv->f_Initialize = impl_Hypre_StructToIJVector_Initialize;
 }
 
 struct Hypre_StructToIJVector__data*

@@ -2,9 +2,9 @@
  * File:          Hypre_StructSMG_Impl.h
  * Symbol:        Hypre.StructSMG-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:19 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:44 PDT
  * Description:   Server-side implementation for Hypre.StructSMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -88,15 +88,49 @@ impl_Hypre_StructSMG_SetCommunicator(
   void*);
 
 extern int32_t
+impl_Hypre_StructSMG_SetDoubleArrayParameter(
+  Hypre_StructSMG,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_StructSMG_SetDoubleParameter(
+  Hypre_StructSMG,
+  const char*,
+  double);
+
+extern int32_t
+impl_Hypre_StructSMG_SetIntArrayParameter(
+  Hypre_StructSMG,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_StructSMG_SetIntParameter(
+  Hypre_StructSMG,
+  const char*,
+  int32_t);
+
+extern int32_t
+impl_Hypre_StructSMG_SetLogging(
+  Hypre_StructSMG,
+  int32_t);
+
+extern int32_t
 impl_Hypre_StructSMG_SetOperator(
   Hypre_StructSMG,
   Hypre_Operator);
 
 extern int32_t
-impl_Hypre_StructSMG_SetParameter(
+impl_Hypre_StructSMG_SetPrintLevel(
+  Hypre_StructSMG,
+  int32_t);
+
+extern int32_t
+impl_Hypre_StructSMG_SetStringParameter(
   Hypre_StructSMG,
   const char*,
-  double);
+  const char*);
 
 extern int32_t
 impl_Hypre_StructSMG_Setup(

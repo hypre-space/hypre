@@ -2,9 +2,9 @@
  * File:          Hypre_StructMatrix_Impl.c
  * Symbol:        Hypre.StructMatrix-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:18 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:45 PDT
  * Description:   Server-side implementation for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -183,6 +183,42 @@ impl_Hypre_StructMatrix_SetCommunicator(
 }
 
 /*
+ * Method:  SetDoubleArrayParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructMatrix_SetDoubleArrayParameter"
+
+int32_t
+impl_Hypre_StructMatrix_SetDoubleArrayParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetDoubleArrayParameter) */
+  /* Insert the implementation of the SetDoubleArrayParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetDoubleArrayParameter) */
+}
+
+/*
+ * Method:  SetDoubleParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructMatrix_SetDoubleParameter"
+
+int32_t
+impl_Hypre_StructMatrix_SetDoubleParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  double value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetDoubleParameter) */
+  /* Insert the implementation of the SetDoubleParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetDoubleParameter) */
+}
+
+/*
  * Method:  SetGrid
  */
 
@@ -197,6 +233,42 @@ impl_Hypre_StructMatrix_SetGrid(
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetGrid) */
   /* Insert the implementation of the SetGrid method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetGrid) */
+}
+
+/*
+ * Method:  SetIntArrayParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructMatrix_SetIntArrayParameter"
+
+int32_t
+impl_Hypre_StructMatrix_SetIntArrayParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetIntArrayParameter) */
+  /* Insert the implementation of the SetIntArrayParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetIntArrayParameter) */
+}
+
+/*
+ * Method:  SetIntParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructMatrix_SetIntParameter"
+
+int32_t
+impl_Hypre_StructMatrix_SetIntParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  int32_t value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetIntParameter) */
+  /* Insert the implementation of the SetIntParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetIntParameter) */
 }
 
 /*
@@ -217,24 +289,6 @@ impl_Hypre_StructMatrix_SetNumGhost(
 }
 
 /*
- * Method:  SetParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructMatrix_SetParameter"
-
-int32_t
-impl_Hypre_StructMatrix_SetParameter(
-  Hypre_StructMatrix self,
-  const char* name,
-  double value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetParameter) */
-  /* Insert the implementation of the SetParameter method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetParameter) */
-}
-
-/*
  * Method:  SetStencil
  */
 
@@ -249,6 +303,24 @@ impl_Hypre_StructMatrix_SetStencil(
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetStencil) */
   /* Insert the implementation of the SetStencil method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetStencil) */
+}
+
+/*
+ * Method:  SetStringParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructMatrix_SetStringParameter"
+
+int32_t
+impl_Hypre_StructMatrix_SetStringParameter(
+  Hypre_StructMatrix self,
+  const char* name,
+  const char* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetStringParameter) */
+  /* Insert the implementation of the SetStringParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetStringParameter) */
 }
 
 /*
@@ -303,3 +375,6 @@ impl_Hypre_StructMatrix_Setup(
   /* Insert the implementation of the Setup method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.Setup) */
 }
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetParameter) */
+  /* Insert the implementation of the SetParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetParameter) */

@@ -2,9 +2,9 @@
  * File:          Hypre_ParAMG_Impl.h
  * Symbol:        Hypre.ParAMG-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:18 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:44 PDT
  * Description:   Server-side implementation for Hypre.ParAMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -20,15 +20,19 @@
 #ifndef included_Hypre_Vector_h
 #include "Hypre_Vector.h"
 #endif
-#ifndef included_Hypre_Operator_h
-#include "Hypre_Operator.h"
-#endif
 #ifndef included_Hypre_ParAMG_h
 #include "Hypre_ParAMG.h"
+#endif
+#ifndef included_Hypre_Operator_h
+#include "Hypre_Operator.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG._includes) */
 /* Put additional include files here... */
+#include "HYPRE_parcsr_ls.h"
+#include "HYPRE.h"
+#include "utilities.h"
+#include "Hypre_ParCSRMatrix.h"
 /* DO-NOT-DELETE splicer.end(Hypre.ParAMG._includes) */
 
 /*
@@ -38,7 +42,9 @@
 struct Hypre_ParAMG__data {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG._data) */
   /* Put private data members here... */
-  int ignore; /* dummy to force non-empty struct; remove if you add data */
+   MPI_Comm * comm;
+   HYPRE_Solver solver;
+   Hypre_ParCSRMatrix matrix;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG._data) */
 };
 
@@ -88,15 +94,49 @@ impl_Hypre_ParAMG_SetCommunicator(
   void*);
 
 extern int32_t
+impl_Hypre_ParAMG_SetDoubleArrayParameter(
+  Hypre_ParAMG,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_ParAMG_SetDoubleParameter(
+  Hypre_ParAMG,
+  const char*,
+  double);
+
+extern int32_t
+impl_Hypre_ParAMG_SetIntArrayParameter(
+  Hypre_ParAMG,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_ParAMG_SetIntParameter(
+  Hypre_ParAMG,
+  const char*,
+  int32_t);
+
+extern int32_t
+impl_Hypre_ParAMG_SetLogging(
+  Hypre_ParAMG,
+  int32_t);
+
+extern int32_t
 impl_Hypre_ParAMG_SetOperator(
   Hypre_ParAMG,
   Hypre_Operator);
 
 extern int32_t
-impl_Hypre_ParAMG_SetParameter(
+impl_Hypre_ParAMG_SetPrintLevel(
+  Hypre_ParAMG,
+  int32_t);
+
+extern int32_t
+impl_Hypre_ParAMG_SetStringParameter(
   Hypre_ParAMG,
   const char*,
-  double);
+  const char*);
 
 extern int32_t
 impl_Hypre_ParAMG_Setup(

@@ -2,9 +2,9 @@
  * File:          Hypre_StructVector_Stub.c
  * Symbol:        Hypre.StructVector-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.1
- * SIDL Created:  20020104 15:27:10 PST
- * Generated:     20020104 15:27:17 PST
+ * Babel Version: 0.6.3
+ * SIDL Created:  20020522 13:59:35 PDT
+ * Generated:     20020522 13:59:42 PDT
  * Description:   Client-side glue code for Hypre.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -58,57 +58,31 @@ Hypre_StructVector__create()
 }
 
 /*
- * y <- a*x + y
+ * create an x compatible with y
  */
 
 int32_t
-Hypre_StructVector_Axpy(
+Hypre_StructVector_Clone(
   Hypre_StructVector self,
-  double a,
-  Hypre_Vector x)
+  Hypre_Vector* x)
 {
-  return (*self->d_epv->f_Axpy)(
+  return (*self->d_epv->f_Clone)(
     self,
-    a,
     x);
 }
 
 /*
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- * 
+ * Method:  SetStencil
  */
 
 int32_t
-Hypre_StructVector_Initialize(
-  Hypre_StructVector self)
+Hypre_StructVector_SetStencil(
+  Hypre_StructVector self,
+  Hypre_StructStencil stencil)
 {
-  return (*self->d_epv->f_Initialize)(
-    self);
-}
-
-/*
- * <p>
- * Add one to the intrinsic reference count in the underlying object.
- * Object in <code>SIDL</code> have an intrinsic reference count.
- * Objects continue to exist as long as the reference count is
- * positive. Clients should call this method whenever they
- * create another ongoing reference to an object or interface.
- * </p>
- * <p>
- * This does not have a return value because there is no language
- * independent type that can refer to an interface or a
- * class.
- * </p>
- */
-
-void
-Hypre_StructVector_addReference(
-  Hypre_StructVector self)
-{
-  (*self->d_epv->f_addReference)(
-    self);
+  return (*self->d_epv->f_SetStencil)(
+    self,
+    stencil);
 }
 
 /*
@@ -123,6 +97,76 @@ Hypre_StructVector_SetCommunicator(
   return (*self->d_epv->f_SetCommunicator)(
     self,
     mpi_comm);
+}
+
+/*
+ * Return whether this object is an instance of the specified type.
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
+ * the string type name would succeed.
+ */
+
+SIDL_bool
+Hypre_StructVector_isInstanceOf(
+  Hypre_StructVector self,
+  const char* name)
+{
+  return (*self->d_epv->f_isInstanceOf)(
+    self,
+    name);
+}
+
+/*
+ * y <- x 
+ */
+
+int32_t
+Hypre_StructVector_Copy(
+  Hypre_StructVector self,
+  Hypre_Vector x)
+{
+  return (*self->d_epv->f_Copy)(
+    self,
+    x);
+}
+
+/*
+ * The problem definition interface is a "builder" that creates an object
+ * that contains the problem definition information, e.g. a matrix. To
+ * perform subsequent operations with that object, it must be returned from
+ * the problem definition object. "GetObject" performs this function.
+ * <note>At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
+ * be used on the returned object to convert it into a known type.</note>
+ * 
+ * 
+ */
+
+int32_t
+Hypre_StructVector_GetObject(
+  Hypre_StructVector self,
+  SIDL_BaseInterface* A)
+{
+  return (*self->d_epv->f_GetObject)(
+    self,
+    A);
+}
+
+/*
+ * Finalize the construction of an object before using, either for
+ * the first time or on subsequent uses. "Initialize" and "Assemble"
+ * always appear in a matched set, with Initialize preceding Assemble. Values
+ * can only be set in between a call to Initialize and Assemble.
+ * 
+ * 
+ */
+
+int32_t
+Hypre_StructVector_Assemble(
+  Hypre_StructVector self)
+{
+  return (*self->d_epv->f_Assemble)(
+    self);
 }
 
 /*
@@ -146,17 +190,33 @@ Hypre_StructVector_queryInterface(
 }
 
 /*
- * Method:  SetStencil
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
+ */
+
+SIDL_bool
+Hypre_StructVector_isSame(
+  Hypre_StructVector self,
+  SIDL_BaseInterface iobj)
+{
+  return (*self->d_epv->f_isSame)(
+    self,
+    iobj);
+}
+
+/*
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ * 
+ * 
  */
 
 int32_t
-Hypre_StructVector_SetStencil(
-  Hypre_StructVector self,
-  Hypre_StructStencil stencil)
+Hypre_StructVector_Initialize(
+  Hypre_StructVector self)
 {
-  return (*self->d_epv->f_SetStencil)(
-    self,
-    stencil);
+  return (*self->d_epv->f_Initialize)(
+    self);
 }
 
 /*
@@ -176,20 +236,6 @@ Hypre_StructVector_SetValue(
 }
 
 /*
- * create an x compatible with y
- */
-
-int32_t
-Hypre_StructVector_Clone(
-  Hypre_StructVector self,
-  Hypre_Vector* x)
-{
-  return (*self->d_epv->f_Clone)(
-    self,
-    x);
-}
-
-/*
  * y <- 0 (where y=self)
  */
 
@@ -198,38 +244,6 @@ Hypre_StructVector_Clear(
   Hypre_StructVector self)
 {
   return (*self->d_epv->f_Clear)(
-    self);
-}
-
-/*
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
- */
-
-SIDL_bool
-Hypre_StructVector_isSame(
-  Hypre_StructVector self,
-  SIDL_BaseInterface iobj)
-{
-  return (*self->d_epv->f_isSame)(
-    self,
-    iobj);
-}
-
-/*
- * Finalize the construction of an object before using, either for
- * the first time or on subsequent uses. "Initialize" and "Assemble"
- * always appear in a matched set, with Initialize preceding Assemble. Values
- * can only be set in between a call to Initialize and Assemble.
- * 
- * 
- */
-
-int32_t
-Hypre_StructVector_Assemble(
-  Hypre_StructVector self)
-{
-  return (*self->d_epv->f_Assemble)(
     self);
 }
 
@@ -249,6 +263,29 @@ Hypre_StructVector_SetBoxValues(
     ilower,
     iupper,
     values);
+}
+
+/*
+ * <p>
+ * Add one to the intrinsic reference count in the underlying object.
+ * Object in <code>SIDL</code> have an intrinsic reference count.
+ * Objects continue to exist as long as the reference count is
+ * positive. Clients should call this method whenever they
+ * create another ongoing reference to an object or interface.
+ * </p>
+ * <p>
+ * This does not have a return value because there is no language
+ * independent type that can refer to an interface or a
+ * class.
+ * </p>
+ */
+
+void
+Hypre_StructVector_addReference(
+  Hypre_StructVector self)
+{
+  (*self->d_epv->f_addReference)(
+    self);
 }
 
 /*
@@ -282,58 +319,6 @@ Hypre_StructVector_Dot(
 }
 
 /*
- * Decrease by one the intrinsic reference count in the underlying
- * object, and delete the object if the reference is non-positive.
- * Objects in <code>SIDL</code> have an intrinsic reference count.
- * Clients should call this method whenever they remove a
- * reference to an object or interface.
- */
-
-void
-Hypre_StructVector_deleteReference(
-  Hypre_StructVector self)
-{
-  (*self->d_epv->f_deleteReference)(
-    self);
-}
-
-/*
- * The problem definition interface is a "builder" that creates an object
- * that contains the problem definition information, e.g. a matrix. To
- * perform subsequent operations with that object, it must be returned from
- * the problem definition object. "GetObject" performs this function.
- * <note>At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
- * be used on the returned object to convert it into a known type.</note>
- * 
- * 
- */
-
-int32_t
-Hypre_StructVector_GetObject(
-  Hypre_StructVector self,
-  SIDL_BaseInterface* A)
-{
-  return (*self->d_epv->f_GetObject)(
-    self,
-    A);
-}
-
-/*
- * y <- x 
- */
-
-int32_t
-Hypre_StructVector_Copy(
-  Hypre_StructVector self,
-  Hypre_Vector x)
-{
-  return (*self->d_epv->f_Copy)(
-    self,
-    x);
-}
-
-/*
  * Method:  SetGrid
  */
 
@@ -348,20 +333,35 @@ Hypre_StructVector_SetGrid(
 }
 
 /*
- * Return whether this object is an instance of the specified type.
- * The string name must be the <code>SIDL</code> type name.  This
- * routine will return <code>true</code> if and only if a cast to
- * the string type name would succeed.
+ * y <- a*x + y
  */
 
-SIDL_bool
-Hypre_StructVector_isInstanceOf(
+int32_t
+Hypre_StructVector_Axpy(
   Hypre_StructVector self,
-  const char* name)
+  double a,
+  Hypre_Vector x)
 {
-  return (*self->d_epv->f_isInstanceOf)(
+  return (*self->d_epv->f_Axpy)(
     self,
-    name);
+    a,
+    x);
+}
+
+/*
+ * Decrease by one the intrinsic reference count in the underlying
+ * object, and delete the object if the reference is non-positive.
+ * Objects in <code>SIDL</code> have an intrinsic reference count.
+ * Clients should call this method whenever they remove a
+ * reference to an object or interface.
+ */
+
+void
+Hypre_StructVector_deleteReference(
+  Hypre_StructVector self)
+{
+  (*self->d_epv->f_deleteReference)(
+    self);
 }
 
 /*
