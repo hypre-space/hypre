@@ -21,6 +21,8 @@ C
       dimension iv(10000)
       dimension xp(10000)
       dimension yp(10000)
+cveh zp added
+      dimension zp(10000)
       dimension ifc(10000)
       common /layerx/  hxl(20),nlx,jlxlo(20),jlxhi(20)
       common /layery/  hyl(20),nly,jlylo(20),jlyhi(20)
@@ -81,6 +83,9 @@ CVEH
       read (8,*) (iu(j), j=1,nv)
       read (8,*) (ip(j), j=1,nv)
       read (8,*) (iv(j), j=1,np+1)
+      read (8,*) (xp(j), j=1,nv)
+      read (8,*) (yp(j), j=1,nv)
+      read (8,*) (zp(j), j=1,nv)
       close (8)
 
 
