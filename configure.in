@@ -524,6 +524,7 @@ AC_PROG_CPP
      CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
    fi,
      CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
+)
   
      if test "$casc_user_chose_compilers" = "no"
      then
